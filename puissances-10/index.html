@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puissances de 10 - Entraînement</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        .zone-card { transition: all 0.3s ease; }
+        .btn-module { transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-module:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        .question-box { animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
+        .correct { animation: correctPulse 0.5s; }
+        @keyframes correctPulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.04);} }
+        .draggable { cursor: move; user-select: none; touch-action: none; }
+        .drop-zone-h { min-height:64px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; transition: all 0.3s; }
+        .drop-zone-h.drag-over { background-color:#dbeafe; border-color:#3b82f6; }
+        .source-items-h { display:flex; flex-wrap:wrap; gap:8px; min-height:64px; }
+        input[type="text"], input[type="number"] { font-size:16px; }
+        .fraction { display:inline-block; text-align:center; vertical-align:middle; margin:0 4px; }
+        .fraction-num { border-bottom:2px solid currentColor; padding:2px 8px; display:block; }
+        .fraction-den { padding:2px 8px; display:block; }
+
+        /* ── Check-box dans les cours ─────────── */
+        .check-box {
+            background: linear-gradient(135deg, #fef9c3, #fde68a);
+            border: 2px solid #f59e0b; border-radius: 12px;
+            padding: 20px; margin-top: 16px;
+        }
+        .check-label { color: #78350f; font-weight: 700; font-size: 1rem; margin-bottom: 8px; }
+        .check-question { color: #451a03; font-size: 1.1rem; margin-bottom: 12px; }
+        .check-input {
+            background: white; border: 2px solid #d97706;
+            border-radius: 8px; padding: 8px 12px;
+            color: #1c1917; font-weight: 700;
+        }
+        .check-btn {
+            background: #d97706; color: white; border: none;
+            border-radius: 8px; padding: 8px 16px; font-weight: 700; cursor: pointer;
+        }
+        .check-btn:hover { background: #b45309; }
+
+        /* ── Affichage 10^[input] (entraînements) */
+        .power-answer-wrap { display: inline-flex; align-items: flex-start; gap: 2px; }
+        .power-answer-wrap .base { font-size: 1.5rem; font-weight: 800; line-height: 1; color: #1e3a8a; }
+        .power-answer-wrap .exp-input {
+            width: 80px; font-size: 0.95rem; font-weight: 700; margin-top: -12px;
+            padding: 4px 8px; border: 2px solid #3b82f6; border-radius: 6px;
+            background: white; color: #1e3a8a;
+        }
+        /* ── Exposant dans les cours (largeur élargie pour le signe -) */
+        .course-exp-input {
+            width: 80px !important; font-size: 0.95rem; font-weight: 700;
+            margin-top: -10px; padding: 4px 8px !important;
+        }
+        sup input { width:80px; font-size:13px; vertical-align: baseline; }
+
+        /* ── Pavé numérique ─────────────────────── */
+        .numpad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 7px; max-width: 220px; margin-top: 8px;
+            background: #e0e7ff; border: 2px solid #6366f1;
+            border-radius: 12px; padding: 10px;
+        }
+        .numpad-grid.np-visible { display: grid; }
+        .numpad-grid button {
+            background: white; border: 1.5px solid #c7d2fe;
+            border-radius: 8px; padding: 11px 6px;
+            font-size: 1.1rem; font-weight: 700; cursor: pointer;
+            color: #1e1b4b; transition: background 0.12s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .numpad-grid button:active { background: #c7d2fe; }
+        .numpad-grid .np-wide { grid-column: span 3; font-size: 0.95rem; }
+        .numpad-grid .np-minus { color: #dc2626; font-weight: 900; }
+        .numpad-grid .np-back { color: #7c3aed; }
+
+        /* ── Masquage global des pavés ──────────── */
+        body.numpad-disabled .np-section { display: none !important; }
+
+        /* ── Barre de préférence pavé ───────────── */
+        .np-pref-bar {
+            display: flex; align-items: center; gap: 12px;
+            background: #f0f4ff; border: 1.5px solid #c7d2fe;
+            border-radius: 10px; padding: 10px 16px; margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .np-pref-label { color: #3730a3; font-weight: 600; font-size: 0.95rem; flex: 1; }
+        /* Toggle switch */
+        .np-switch { position: relative; display: inline-block; width: 52px; height: 28px; flex-shrink: 0; }
+        .np-switch input { opacity: 0; width: 0; height: 0; }
+        .np-slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background: #cbd5e1; border-radius: 28px; transition: 0.25s;
+        }
+        .np-slider::before {
+            content: ''; position: absolute;
+            width: 22px; height: 22px; left: 3px; bottom: 3px;
+            background: white; border-radius: 50%; transition: 0.25s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+        }
+        .np-switch input:checked + .np-slider { background: #6366f1; }
+        .np-switch input:checked + .np-slider::before { transform: translateX(24px); }
+        .np-pref-hint { font-size: 0.8rem; color: #6b7280; width: 100%; margin-top: 2px; }
+
+        /* ── Bandeau en haut ─────────────────────── */
+        #topBar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            height: 52px;
+            background: #1e3a8a;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        #topBarTitle {
+            color: white; font-weight: 700; font-size: 1rem;
+            text-align: right; flex: 1; margin-left: 12px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        #hamburgerBtn {
+            background: none; border: none; cursor: pointer;
+            display: flex; flex-direction: column; gap: 5px;
+            padding: 6px; border-radius: 6px;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        #hamburgerBtn:hover { background: rgba(255,255,255,0.15); }
+        #hamburgerBtn span {
+            display: block; width: 24px; height: 3px;
+            background: white; border-radius: 2px;
+        }
+
+        /* ── Menu latéral ────────────────────────── */
+        #sideMenu {
+            position: fixed; top: 0; left: -320px; bottom: 0; width: 300px; z-index: 2000;
+            background: white;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+            transition: left 0.3s ease;
+            overflow-y: auto;
+        }
+        #sideMenu.open { left: 0; }
+        #sideOverlay {
+            display: none; position: fixed; inset: 0; z-index: 1999;
+            background: rgba(0,0,0,0.4);
+        }
+        #sideOverlay.open { display: block; }
+
+        #sideMenu .side-header {
+            background: #1e3a8a; color: white;
+            padding: 18px 16px; font-size: 1.1rem; font-weight: 800;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        #sideMenu .side-header button {
+            background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer;
+        }
+        #sideMenu .side-section-title {
+            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #6b7280; padding: 14px 16px 4px;
+        }
+        #sideMenu .side-item {
+            display: block; width: 100%; text-align: left;
+            padding: 11px 16px; border: none; background: none;
+            font-size: 0.88rem; color: #1e3a8a; font-weight: 600; cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.15s;
+            line-height: 1.4;
+        }
+        #sideMenu .side-item:hover { background: #eff6ff; }
+        #sideMenu .side-item.home-item {
+            font-size: 0.95rem; color: #1d4ed8; font-weight: 700;
+            border-bottom: 2px solid #bfdbfe;
+            padding: 14px 16px;
+        }
+        #sideMenu .side-item.active-page {
+            background: #e2e8f0 !important;
+            color: #64748b !important;
+            cursor: default !important;
+            pointer-events: none;
+            font-style: italic;
+        }
+        #sideMenu .side-item.active-page::before {
+            content: '▶ ';
+            color: #1e3a8a;
+            font-style: normal;
+            font-weight: 900;
+        }
+
+        /* ── Décalage du contenu pour le bandeau ── */
+        body { padding-top: 52px; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+
+<!-- ═══════ BANDEAU FIXE ═══════ -->
+<div id="topBar">
+    <button id="hamburgerBtn" onclick="toggleMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+    </button>
+    <div id="topBarTitle">Puissances de 10</div>
+</div>
+
+<!-- ═══════ OVERLAY + MENU LATÉRAL ═══════ -->
+<div id="sideOverlay" onclick="closeMenu()"></div>
+<div id="sideMenu">
+    <div class="side-header">
+        <span>Navigation</span>
+        <button onclick="closeMenu()">✕</button>
+    </div>
+    <button class="side-item home-item" data-page="home" onclick="closeMenu(); backToMenu()">Accueil</button>
+
+    <div class="side-section-title">Module 1 — Définitions et écritures</div>
+    <button class="side-item" data-page="course-1" onclick="closeMenu(); showCourse(1)">Module 1 : Définitions et écritures des puissances de 10 — Cours</button>
+    <button class="side-item" data-page="training-1" onclick="closeMenu(); showTraining(1)">Module 1 : Définitions et écritures des puissances de 10 — Entraînement (20 questions)</button>
+
+    <div class="side-section-title">Module 2 — Écriture scientifique</div>
+    <button class="side-item" data-page="course-2" onclick="closeMenu(); showCourse(2)">Module 2 : Écriture scientifique — Cours</button>
+    <button class="side-item" data-page="training-2" onclick="closeMenu(); showTraining(2)">Module 2 : Écriture scientifique — Entraînement (20 questions)</button>
+
+    <div class="side-section-title">Module 3 — Opérations</div>
+    <button class="side-item" data-page="course-3" onclick="closeMenu(); showCourse(3)">Module 3 : Opérations avec les puissances de 10 — Cours</button>
+    <button class="side-item" data-page="training-3" onclick="closeMenu(); showTraining(3)">Module 3 : Opérations avec les puissances de 10 — Entraînement (20 questions)</button>
+
+    <div class="side-section-title">Module 4 — Toutes les notions</div>
+    <button class="side-item" data-page="training-4" onclick="closeMenu(); showTraining(4)">Module 4 : S'entraîner sur toutes les notions — Entraînement (20 questions)</button>
+</div>
+
+<div id="app" class="container mx-auto px-4 py-8 max-w-4xl">
+
+    <header id="mainHeader" class="text-center mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold text-indigo-900 mb-2">Puissances de 10</h1>
+        <p class="text-lg text-indigo-700">Apprends et entraîne-toi !</p>
+    </header>
+
+    <div id="menu" class="space-y-5 mb-8">
+        <div class="zone-card bg-white rounded-xl shadow-lg overflow-hidden border-l-8 border-blue-500">
+            <div class="p-6">
+                <div class="mb-4">
+                    <h2 class="text-xl md:text-2xl font-bold text-blue-900">Définitions et écritures des puissances de 10</h2>
+                    <p class="text-gray-600 mt-1 text-sm md:text-base">Comprendre ce qu'est une puissance de 10 et ses liens avec l'écriture décimale</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="showCourse(1)" class="btn-module bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-bold shadow">Cours</button>
+                    <button onclick="showTraining(1)" class="btn-module bg-blue-100 hover:bg-blue-200 text-blue-900 px-5 py-3 rounded-lg font-bold shadow border-2 border-blue-400">Entraînement (20 questions)</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="zone-card bg-white rounded-xl shadow-lg overflow-hidden border-l-8 border-blue-500">
+            <div class="p-6">
+                <div class="mb-4">
+                    <h2 class="text-xl md:text-2xl font-bold text-blue-900">Écriture scientifique</h2>
+                    <p class="text-gray-600 mt-1 text-sm md:text-base">Écrire un nombre sous la forme a × 10<sup>n</sup> avec 1 ≤ a &lt; 10</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="showCourse(2)" class="btn-module bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-bold shadow">Cours</button>
+                    <button onclick="showTraining(2)" class="btn-module bg-blue-100 hover:bg-blue-200 text-blue-900 px-5 py-3 rounded-lg font-bold shadow border-2 border-blue-400">Entraînement (20 questions)</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="zone-card bg-white rounded-xl shadow-lg overflow-hidden border-l-8 border-blue-500">
+            <div class="p-6">
+                <div class="mb-4">
+                    <h2 class="text-xl md:text-2xl font-bold text-blue-900">Opérations avec les puissances de 10</h2>
+                    <p class="text-gray-600 mt-1 text-sm md:text-base">Multiplier, diviser, calculer l'inverse et les puissances de puissances</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="showCourse(3)" class="btn-module bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-bold shadow">Cours</button>
+                    <button onclick="showTraining(3)" class="btn-module bg-blue-100 hover:bg-blue-200 text-blue-900 px-5 py-3 rounded-lg font-bold shadow border-2 border-blue-400">Entraînement (20 questions)</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="zone-card bg-white rounded-xl shadow-lg overflow-hidden border-l-8 border-blue-500">
+            <div class="p-6">
+                <div class="mb-4">
+                    <h2 class="text-xl md:text-2xl font-bold text-blue-900">S'entraîner sur toutes les notions</h2>
+                    <p class="text-gray-600 mt-1 text-sm md:text-base">Questions avancées qui combinent toutes les notions — Niveau supérieur !</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="showTraining(4)" class="btn-module bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-bold shadow">Entraînement (20 questions)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="moduleContainer"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// MENU LATÉRAL
+// ═══════════════════════════════════════════════════════════════
+function toggleMenu() {
+    document.getElementById('sideMenu').classList.toggle('open');
+    document.getElementById('sideOverlay').classList.toggle('open');
+}
+function closeMenu() {
+    document.getElementById('sideMenu').classList.remove('open');
+    document.getElementById('sideOverlay').classList.remove('open');
+}
+
+let currentPage = 'home'; // 'home' | 'course-1' | 'course-2' | 'course-3' | 'training-1' | 'training-2' | 'training-3' | 'training-4'
+
+function setTopBarTitle(title) {
+    document.getElementById('topBarTitle').textContent = title;
+}
+
+function updateActiveMenuItem() {
+    document.querySelectorAll('#sideMenu .side-item').forEach(btn => {
+        btn.classList.remove('active-page');
+    });
+    const map = {
+        'home':       '[data-page="home"]',
+        'course-1':   '[data-page="course-1"]',
+        'course-2':   '[data-page="course-2"]',
+        'course-3':   '[data-page="course-3"]',
+        'training-1': '[data-page="training-1"]',
+        'training-2': '[data-page="training-2"]',
+        'training-3': '[data-page="training-3"]',
+        'training-4': '[data-page="training-4"]',
+    };
+    const sel = map[currentPage];
+    if (sel) {
+        const el = document.querySelector('#sideMenu ' + sel);
+        if (el) el.classList.add('active-page');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ÉTAT GLOBAL + PAVÉ NUMÉRIQUE
+// ═══════════════════════════════════════════════════════════════
+let currentModule = 0, currentQuestion = 0, score = 0, questions = [];
+let numpadTarget = null;
+let numpadEnabled = true;
+
+function setNumpadPref(checked) {
+    numpadEnabled = checked;
+    if (checked) {
+        document.body.classList.remove('numpad-disabled');
+    } else {
+        document.body.classList.add('numpad-disabled');
+        document.querySelectorAll('.numpad-grid').forEach(g => g.classList.remove('np-visible'));
+    }
+    document.querySelectorAll('.np-pref-toggle').forEach(cb => { cb.checked = checked; });
+}
+
+function numpadToggleBar() {
+    const chk = numpadEnabled ? 'checked' : '';
+    return `<div class="np-pref-bar">
+        <span class="np-pref-label">Pavé numérique</span>
+        <label class="np-switch">
+            <input type="checkbox" class="np-pref-toggle" ${chk} onchange="setNumpadPref(this.checked)">
+            <span class="np-slider"></span>
+        </label>
+        <span class="np-pref-hint">Active ou désactive l'affichage des pavés numériques sur toute la page.</span>
+    </div>`;
+}
+
+function numpadWidget(uid) {
+    return `
+    <div class="np-section">
+        <div class="numpad-grid">
+            <button onclick="numpadKey('7')">7</button>
+            <button onclick="numpadKey('8')">8</button>
+            <button onclick="numpadKey('9')">9</button>
+            <button onclick="numpadKey('4')">4</button>
+            <button onclick="numpadKey('5')">5</button>
+            <button onclick="numpadKey('6')">6</button>
+            <button onclick="numpadKey('1')">1</button>
+            <button onclick="numpadKey('2')">2</button>
+            <button onclick="numpadKey('3')">3</button>
+            <button class="np-minus" onclick="numpadKey('-')">−</button>
+            <button onclick="numpadKey('0')">0</button>
+            <button class="np-back" onclick="numpadKey('⌫')">⌫</button>
+            <button class="np-wide" onclick="numpadKey(',')">virgule &nbsp; ,</button>
+        </div>
+    </div>`;
+}
+
+function numpadFocus(id) { numpadTarget = id; }
+
+function numpadKey(val) {
+    const inp = document.getElementById(numpadTarget);
+    if (!inp) return;
+    const isNum = inp.type === 'number';
+    if (isNum && val === ',') return;
+    if (val === '⌫') {
+        inp.value = inp.value.slice(0, -1);
+    } else if (val === '-') {
+        if (isNum) {
+            if (inp.value === '' || inp.value === '-') {
+                inp.value = inp.value === '-' ? '' : '-';
+            } else {
+                inp.value = inp.value.startsWith('-') ? inp.value.slice(1) : '-' + inp.value;
+            }
+        } else {
+            inp.value = inp.value.startsWith('-') ? inp.value.slice(1) : '-' + inp.value;
+        }
+    } else {
+        inp.value += val;
+    }
+    inp.dispatchEvent(new Event('input'));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+function frac(num, den) {
+    return `<span class="fraction"><span class="fraction-num">${num}</span><span class="fraction-den">${den}</span></span>`;
+}
+function fmt(n) {
+    if (Number.isInteger(n)) return n.toLocaleString('fr-FR');
+    return n.toString().replace('.', ',');
+}
+
+function hideMenu() {
+    document.getElementById('mainHeader').style.display = 'none';
+    document.getElementById('menu').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function backToMenu() {
+    document.getElementById('moduleContainer').innerHTML = '';
+    document.getElementById('mainHeader').style.display = 'block';
+    document.getElementById('menu').style.display = 'block';
+    setTopBarTitle('Puissances de 10');
+    currentPage = 'home';
+    updateActiveMenuItem();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function showCourse(num) {
+    hideMenu();
+    const c = document.getElementById('moduleContainer');
+    if (num === 1) {
+        setTopBarTitle('Module 1 : Définitions et écritures — Cours');
+        c.innerHTML = getCourse1Content();
+    } else if (num === 2) {
+        setTopBarTitle('Module 2 : Écriture scientifique — Cours');
+        c.innerHTML = getCourse2Content();
+    } else if (num === 3) {
+        setTopBarTitle('Module 3 : Opérations avec les puissances de 10 — Cours');
+        c.innerHTML = getCourse3Content();
+    }
+    currentPage = 'course-' + num;
+    updateActiveMenuItem();
+}
+function showTraining(num) {
+    hideMenu();
+    currentModule = num; currentQuestion = 0; score = 0;
+    if (num === 1) {
+        setTopBarTitle('Module 1 : Définitions et écritures — Entraînement');
+        questions = generateTraining1();
+    } else if (num === 2) {
+        setTopBarTitle('Module 2 : Écriture scientifique — Entraînement');
+        questions = generateTraining2();
+    } else if (num === 3) {
+        setTopBarTitle('Module 3 : Opérations avec les puissances de 10 — Entraînement');
+        questions = generateTraining3();
+    } else if (num === 4) {
+        setTopBarTitle('Module 4 : Toutes les notions — Entraînement');
+        questions = generateTraining4();
+    }
+    currentPage = 'training-' + num;
+    updateActiveMenuItem();
+    document.getElementById('moduleContainer').innerHTML = getTrainingHTML(num);
+    showQuestion();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VÉRIFICATIONS DANS LES COURS
+// ═══════════════════════════════════════════════════════════════
+function checkAnswer(inputId, correct, resultId, isDecimal = false) {
+    const input = document.getElementById(inputId);
+    const result = document.getElementById(resultId);
+    let userAnswer = input.value.trim();
+    if (isDecimal) {
+        const ua = parseFloat(userAnswer.replace(',', '.'));
+        const ca = parseFloat(String(correct).replace(',', '.'));
+        if (Math.abs(ua - ca) < 0.000001) {
+            result.innerHTML = '✓ Correct ! 🎉'; result.style.color = '#166534';
+        } else {
+            result.innerHTML = '✗ Incorrect. La réponse est : ' + correct; result.style.color = '#991b1b';
+        }
+    } else {
+        if (parseFloat(userAnswer) === parseFloat(correct)) {
+            result.innerHTML = '✓ Correct ! 🎉'; result.style.color = '#166534';
+        } else {
+            result.innerHTML = '✗ Incorrect. La réponse est : ' + correct; result.style.color = '#991b1b';
+        }
+    }
+}
+function checkSci(idA, idN, correctA, correctN, resultId) {
+    const userA = parseFloat(document.getElementById(idA).value.replace(',', '.'));
+    const userN = parseInt(document.getElementById(idN).value);
+    const result = document.getElementById(resultId);
+    if (Math.abs(userA - correctA) < 0.01 && userN === correctN) {
+        result.innerHTML = '✓ Correct ! 🎉'; result.style.color = '#166534';
+    } else {
+        result.innerHTML = `✗ Incorrect. La réponse est : ${String(correctA).replace('.', ',')} × 10<sup>${correctN}</sup>`;
+        result.style.color = '#991b1b';
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COURS 1 — Définitions & écritures
+// ═══════════════════════════════════════════════════════════════
+function getCourse1Content() {
+    return `
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
+        <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+            <h2 class="text-2xl md:text-3xl font-bold text-blue-900">Cours 1 : Définitions et écritures</h2>
+            <button onclick="backToMenu()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">← Retour</button>
+        </div>
+        ${numpadToggleBar()}
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">1. Puissances positives : 10<sup>n</sup> (n ≥ 1)</h3>
+            <div class="bg-blue-50 rounded-lg p-6 mb-4">
+                <p class="text-lg mb-3">10<sup>n</sup> = 10 × 10 × ... × 10 (n fois). C'est un 1 suivi de n zéros.</p>
+                <div class="bg-white rounded p-4 mb-3">
+                    <p class="font-semibold mb-2">Exemples :</p>
+                    <p>• 10<sup>1</sup> = 10 &nbsp;•&nbsp; 10<sup>2</sup> = 100 &nbsp;•&nbsp; 10<sup>3</sup> = 1 000 &nbsp;•&nbsp; 10<sup>5</sup> = 100 000 &nbsp;•&nbsp; 10<sup>0</sup> = 1</p>
+                </div>
+                <div class="check-box">
+                    <p class="check-label">Vérifie ta compréhension :</p>
+                    <p class="check-question">Combien vaut 10<sup>4</sup> ?</p>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <input type="number" id="c1_1" class="check-input w-28" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        <button class="check-btn" onclick="checkAnswer('c1_1', 10000, 'r1_1')">Vérifier</button>
+                    </div>
+                    ${numpadWidget('c1_1')}
+                    <p id="r1_1" class="mt-2 font-semibold"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">2. Puissances négatives : 10<sup>-n</sup></h3>
+            <div class="bg-red-50 rounded-lg p-6 mb-4">
+                <p class="text-lg mb-3">10<sup>-n</sup> = ${frac('1', '10<sup>n</sup>')} = 0,00...01 (avec n zéros après la virgule)</p>
+                <div class="bg-white rounded p-4 mb-3">
+                    <p class="font-semibold mb-2">Exemples :</p>
+                    <p>• 10<sup>-1</sup> = 0,1 &nbsp;•&nbsp; 10<sup>-2</sup> = 0,01 &nbsp;•&nbsp; 10<sup>-3</sup> = 0,001 &nbsp;•&nbsp; 10<sup>-5</sup> = 0,00001</p>
+                </div>
+                <div class="check-box">
+                    <p class="check-label">Vérifie ta compréhension :</p>
+                    <p class="check-question">Combien vaut 10<sup>-4</sup> ?</p>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <input type="text" id="c1_2" class="check-input w-28" placeholder="0,…" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        <button class="check-btn" onclick="checkAnswer('c1_2', '0,0001', 'r1_2', true)">Vérifier</button>
+                    </div>
+                    ${numpadWidget('c1_2')}
+                    <p id="r1_2" class="mt-2 font-semibold"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">3. Lien avec l'écriture décimale</h3>
+
+            <div class="bg-green-50 rounded-lg p-6 mb-4">
+                <h4 class="text-xl font-semibold text-green-900 mb-3">Multiplier par 10<sup>n</sup> (n &gt; 0) → virgule vers la droite</h4>
+                <div class="bg-white rounded p-4 mb-3">
+                    <p class="font-semibold mb-2">Exemples :</p>
+                    <p>• 3,5 × 10<sup>2</sup> = 350 &nbsp;•&nbsp; 2,7 × 10<sup>4</sup> = 27 000 &nbsp;•&nbsp; 0,45 × 10<sup>3</sup> = 450</p>
+                </div>
+                <div class="check-box">
+                    <p class="check-label">Vérifie ta compréhension :</p>
+                    <p class="check-question">Combien vaut 1,2 × 10<sup>3</sup> ?</p>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <input type="text" id="c1_3" class="check-input w-28" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        <button class="check-btn" onclick="checkAnswer('c1_3', '1200', 'r1_3', true)">Vérifier</button>
+                    </div>
+                    ${numpadWidget('c1_3')}
+                    <p id="r1_3" class="mt-2 font-semibold"></p>
+                </div>
+            </div>
+
+            <div class="bg-orange-50 rounded-lg p-6 mb-4">
+                <h4 class="text-xl font-semibold text-orange-900 mb-3">Multiplier par 10<sup>-n</sup> (n &gt; 0) → virgule vers la gauche</h4>
+                <div class="bg-white rounded p-4 mb-3">
+                    <p class="font-semibold mb-2">Exemples :</p>
+                    <p>• 5,2 × 10<sup>-2</sup> = 0,052 &nbsp;•&nbsp; 8 × 10<sup>-3</sup> = 0,008 &nbsp;•&nbsp; 125 × 10<sup>-4</sup> = 0,0125</p>
+                </div>
+                <div class="check-box">
+                    <p class="check-label">Vérifie ta compréhension :</p>
+                    <p class="check-question">Combien vaut 7 × 10<sup>-2</sup> ?</p>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <input type="text" id="c1_4" class="check-input w-28" placeholder="0,…" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        <button class="check-btn" onclick="checkAnswer('c1_4', '0,07', 'r1_4', true)">Vérifier</button>
+                    </div>
+                    ${numpadWidget('c1_4')}
+                    <p id="r1_4" class="mt-2 font-semibold"></p>
+                </div>
+            </div>
+
+            <div class="bg-purple-50 rounded-lg p-6">
+                <h4 class="text-xl font-semibold text-purple-900 mb-3">De l'écriture décimale vers la puissance de 10</h4>
+                <div class="bg-white rounded p-4 mb-3">
+                    <p class="font-semibold mb-2">On compte combien de rangs on déplace la virgule :</p>
+                    <p>• 3500 = 3,5 × 10<sup>3</sup> &nbsp;•&nbsp; 0,0042 = 4,2 × 10<sup>-3</sup> &nbsp;•&nbsp; 250 000 = 2,5 × 10<sup>5</sup></p>
+                </div>
+                <div class="check-box">
+                    <p class="check-label">Vérifie ta compréhension :</p>
+                    <p class="check-question">6000 = 6 × 10<sup>?</sup> — Quel est l'exposant ?</p>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <div class="flex items-start">
+                            <span class="text-2xl font-bold text-amber-800">10</span>
+                            <input type="number" id="c1_5" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        </div>
+                        <button class="check-btn" onclick="checkAnswer('c1_5', 3, 'r1_5')">Vérifier</button>
+                    </div>
+                    ${numpadWidget('c1_5')}
+                    <p id="r1_5" class="mt-2 font-semibold"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-8">
+            <button onclick="showTraining(1)" class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
+        </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COURS 2 — Écriture scientifique
+// ═══════════════════════════════════════════════════════════════
+function getCourse2Content() {
+    return `
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
+        <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+            <h2 class="text-2xl md:text-3xl font-bold text-purple-900">Cours 2 : Écriture scientifique</h2>
+            <button onclick="backToMenu()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">← Retour</button>
+        </div>
+        ${numpadToggleBar()}
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">1. Définition</h3>
+            <div class="bg-purple-50 rounded-lg p-6 mb-4">
+                <p class="text-lg mb-3">Un nombre est en <strong>écriture scientifique</strong> s'il s'écrit :</p>
+                <div class="bg-purple-200 rounded-lg p-4 text-center text-2xl font-bold mb-4">a × 10<sup>n</sup></div>
+                <ul class="list-disc ml-6 text-lg space-y-1">
+                    <li><strong>a</strong> : un seul chiffre non nul avant la virgule (1 ≤ a &lt; 10)</li>
+                    <li><strong>n</strong> : entier relatif (positif, négatif ou nul)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">2. Exemples et contre-exemples</h3>
+            <div class="grid md:grid-cols-2 gap-4 mb-4">
+                <div class="bg-green-50 rounded-lg p-5">
+                    <p class="font-bold text-green-800 mb-3">✓ Écriture scientifique :</p>
+                    <p>• 3,47 × 10<sup>8</sup></p><p>• 7,25 × 10<sup>-5</sup></p>
+                    <p>• 1,0 × 10<sup>12</sup></p><p>• 9,99 × 10<sup>-3</sup></p>
+                </div>
+                <div class="bg-red-50 rounded-lg p-5">
+                    <p class="font-bold text-red-800 mb-3">✗ Pas en écriture scientifique :</p>
+                    <p>• 35 × 10<sup>7</sup> &nbsp;→ il faut 3,5 × 10<sup>8</sup></p>
+                    <p>• 0,42 × 10<sup>3</sup> → il faut 4,2 × 10<sup>2</sup></p>
+                    <p>• 12,8 × 10<sup>-2</sup> → il faut 1,28 × 10<sup>-1</sup></p>
+                </div>
+            </div>
+            <div class="bg-purple-50 rounded-lg p-5">
+                <div class="check-box">
+                    <p class="check-label">Vérifie ta compréhension :</p>
+                    <p class="check-question">Écris 450 000 en écriture scientifique :</p>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <input type="text" id="c2_1a" class="check-input w-20" placeholder="a" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        <span class="font-bold text-amber-900 text-lg">× 10</span>
+                        <sup><input type="number" id="c2_1b" class="check-input course-exp-input" placeholder="n" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></sup>
+                        <button class="check-btn" onclick="checkSci('c2_1a','c2_1b',4.5,5,'r2_1')">Vérifier</button>
+                    </div>
+                    ${numpadWidget('c2_1')}
+                    <p id="r2_1" class="mt-2 font-semibold"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">3. Comment mettre en écriture scientifique ?</h3>
+            <div class="bg-indigo-50 rounded-lg p-6 mb-4">
+                <ol class="list-decimal ml-6 space-y-2 text-gray-800">
+                    <li>Déplacer la virgule pour avoir <strong>un seul chiffre non nul avant la virgule</strong></li>
+                    <li>Compter le nombre de rangs déplacés → c'est <strong>|n|</strong></li>
+                    <li>Virgule déplacée vers la <strong>gauche</strong> → exposant <strong>positif</strong></li>
+                    <li>Virgule déplacée vers la <strong>droite</strong> → exposant <strong>négatif</strong></li>
+                </ol>
+            </div>
+            <div class="bg-white border-2 border-indigo-200 rounded-lg p-5 mb-4">
+                <p class="font-semibold mb-3">Exemples :</p>
+                <p class="mb-2">• 28 300 = <span class="text-blue-700 font-bold">2,83</span> × 10<sup>4</sup> <span class="text-gray-500 text-sm">(4 rangs vers la gauche)</span></p>
+                <p class="mb-2">• 0,000537 = <span class="text-blue-700 font-bold">5,37</span> × 10<sup>-4</sup> <span class="text-gray-500 text-sm">(4 rangs vers la droite)</span></p>
+            </div>
+            <div class="check-box">
+                <p class="check-label">Vérifie ta compréhension :</p>
+                <p class="check-question">Écris 0,00072 en écriture scientifique :</p>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <input type="text" id="c2_2a" class="check-input w-20" placeholder="a" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                    <span class="font-bold text-amber-900 text-lg">× 10</span>
+                    <sup><input type="number" id="c2_2b" class="check-input course-exp-input" placeholder="n" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></sup>
+                    <button class="check-btn" onclick="checkSci('c2_2a','c2_2b',7.2,-4,'r2_2')">Vérifier</button>
+                </div>
+                ${numpadWidget('c2_2')}
+                <p id="r2_2" class="mt-2 font-semibold"></p>
+            </div>
+            <div class="check-box mt-4">
+                <p class="check-label">Vérifie ta compréhension :</p>
+                <p class="check-question">Écris en écriture décimale : 3,6 × 10<sup>4</sup></p>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <input type="text" id="c2_3" class="check-input w-28" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                    <button class="check-btn" onclick="checkAnswer('c2_3','36000','r2_3',true)">Vérifier</button>
+                </div>
+                ${numpadWidget('c2_3')}
+                <p id="r2_3" class="mt-2 font-semibold"></p>
+            </div>
+        </div>
+
+        <div class="text-center mt-8">
+            <button onclick="showTraining(2)" class="bg-purple-500 hover:bg-purple-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
+        </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COURS 3 — Opérations
+// ═══════════════════════════════════════════════════════════════
+function getCourse3Content() {
+    return `
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
+        <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+            <h2 class="text-2xl md:text-3xl font-bold text-green-900">Cours 3 : Opérations avec les puissances de 10</h2>
+            <button onclick="backToMenu()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">← Retour</button>
+        </div>
+        ${numpadToggleBar()}
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-green-300 pb-2">1. Multiplication : 10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a+b</sup></h3>
+            <div class="bg-green-50 rounded-lg p-6 mb-4">
+                <p class="mb-3 text-lg text-gray-700">On <strong>additionne</strong> les exposants.</p>
+                <div class="bg-white rounded p-4 mb-3">
+                    <p>• 10<sup>3</sup> × 10<sup>2</sup> = 10<sup>5</sup> &nbsp;•&nbsp; 10<sup>7</sup> × 10<sup>-4</sup> = 10<sup>3</sup> &nbsp;•&nbsp; 10<sup>-2</sup> × 10<sup>-3</sup> = 10<sup>-5</sup></p>
+                </div>
+                <div class="check-box">
+                    <p class="check-label">Vérifie ta compréhension :</p>
+                    <p class="check-question">10<sup>5</sup> × 10<sup>3</sup> = 10<sup>?</sup> — Quel est l'exposant ?</p>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <div class="flex items-start">
+                            <span class="text-2xl font-bold text-amber-800">10</span>
+                            <input type="number" id="c3_1" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        </div>
+                        <button class="check-btn" onclick="checkAnswer('c3_1', 8, 'r3_1')">Vérifier</button>
+                    </div>
+                    ${numpadWidget('c3_1')}
+                    <p id="r3_1" class="mt-2 font-semibold"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-green-300 pb-2">2. Division : ${frac('10<sup>a</sup>', '10<sup>b</sup>')} = 10<sup>a−b</sup></h3>
+            <div class="bg-yellow-50 rounded-lg p-6 mb-4">
+                <p class="mb-3 text-lg text-gray-700">On <strong>soustrait</strong> les exposants.</p>
+                <div class="bg-white rounded p-4 mb-3">
+                    <p>• ${frac('10<sup>7</sup>','10<sup>3</sup>')} = 10<sup>4</sup> &nbsp;•&nbsp; ${frac('10<sup>2</sup>','10<sup>5</sup>')} = 10<sup>-3</sup> &nbsp;•&nbsp; ${frac('10<sup>-2</sup>','10<sup>-5</sup>')} = 10<sup>3</sup></p>
+                </div>
+                <div class="check-box">
+                    <p class="check-label">Vérifie ta compréhension :</p>
+                    <p class="check-question">${frac('10<sup>6</sup>', '10<sup>2</sup>')} = 10<sup>?</sup> — Quel est l'exposant ?</p>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <div class="flex items-start">
+                            <span class="text-2xl font-bold text-amber-800">10</span>
+                            <input type="number" id="c3_2" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        </div>
+                        <button class="check-btn" onclick="checkAnswer('c3_2', 4, 'r3_2')">Vérifier</button>
+                    </div>
+                    ${numpadWidget('c3_2')}
+                    <p id="r3_2" class="mt-2 font-semibold"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-green-300 pb-2">3. Inverse : ${frac('1', '10<sup>a</sup>')} = 10<sup>−a</sup></h3>
+            <div class="bg-red-50 rounded-lg p-6 mb-4">
+                <p class="mb-3 text-lg text-gray-700">On <strong>change le signe</strong> de l'exposant.</p>
+                <div class="bg-white rounded p-4 mb-3">
+                    <p>• ${frac('1','10<sup>3</sup>')} = 10<sup>-3</sup> &nbsp;•&nbsp; ${frac('1','10<sup>-5</sup>')} = 10<sup>5</sup></p>
+                </div>
+                <div class="check-box">
+                    <p class="check-label">Vérifie ta compréhension :</p>
+                    <p class="check-question">${frac('1', '10<sup>7</sup>')} = 10<sup>?</sup> — Quel est l'exposant ?</p>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <div class="flex items-start">
+                            <span class="text-2xl font-bold text-amber-800">10</span>
+                            <input type="number" id="c3_3" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        </div>
+                        <button class="check-btn" onclick="checkAnswer('c3_3', -7, 'r3_3')">Vérifier</button>
+                    </div>
+                    ${numpadWidget('c3_3')}
+                    <p id="r3_3" class="mt-2 font-semibold"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-green-300 pb-2">4. Puissance d'une puissance : (10<sup>a</sup>)<sup>b</sup> = 10<sup>a×b</sup></h3>
+            <div class="bg-pink-50 rounded-lg p-6 mb-4">
+                <p class="mb-3 text-lg text-gray-700">On <strong>multiplie</strong> les exposants.</p>
+                <div class="bg-white rounded p-4 mb-3">
+                    <p>• (10<sup>3</sup>)<sup>2</sup> = 10<sup>6</sup> &nbsp;•&nbsp; (10<sup>-2</sup>)<sup>3</sup> = 10<sup>-6</sup> &nbsp;•&nbsp; (10<sup>4</sup>)<sup>-1</sup> = 10<sup>-4</sup> &nbsp;•&nbsp; (10<sup>-3</sup>)<sup>-2</sup> = 10<sup>6</sup></p>
+                </div>
+                <div class="check-box">
+                    <p class="check-label">Vérifie ta compréhension :</p>
+                    <p class="check-question">(10<sup>2</sup>)<sup>5</sup> = 10<sup>?</sup> — Quel est l'exposant ?</p>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <div class="flex items-start">
+                            <span class="text-2xl font-bold text-amber-800">10</span>
+                            <input type="number" id="c3_4" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        </div>
+                        <button class="check-btn" onclick="checkAnswer('c3_4', 10, 'r3_4')">Vérifier</button>
+                    </div>
+                    ${numpadWidget('c3_4')}
+                    <p id="r3_4" class="mt-2 font-semibold"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-5 mb-8">
+            <p class="font-bold text-gray-800 mb-3 text-lg">Récapitulatif des règles :</p>
+            <div class="grid md:grid-cols-2 gap-3 text-gray-700">
+                <div class="bg-white rounded p-3 border border-green-300"><strong>Multiplication :</strong> 10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a+b</sup></div>
+                <div class="bg-white rounded p-3 border border-yellow-300"><strong>Division :</strong> ${frac('10<sup>a</sup>','10<sup>b</sup>')} = 10<sup>a-b</sup></div>
+                <div class="bg-white rounded p-3 border border-red-300"><strong>Inverse :</strong> ${frac('1','10<sup>a</sup>')} = 10<sup>-a</sup></div>
+                <div class="bg-white rounded p-3 border border-pink-300"><strong>Puissance :</strong> (10<sup>a</sup>)<sup>b</sup> = 10<sup>a×b</sup></div>
+            </div>
+        </div>
+
+        <div class="text-center mt-8">
+            <button onclick="showTraining(3)" class="bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
+        </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HTML MODULE D'ENTRAÎNEMENT
+// ═══════════════════════════════════════════════════════════════
+function getTrainingHTML(num) {
+    const themes = {
+        1: { color:'blue',   title:'Définitions et écritures' },
+        2: { color:'purple', title:'Écriture scientifique'    },
+        3: { color:'green',  title:'Opérations'               },
+        4: { color:'orange', title:'Toutes les notions — Niveau avancé' }
+    };
+    const t = themes[num];
+    return `
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
+        <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+            <h2 class="text-xl md:text-2xl font-bold text-${t.color}-900">Entraînement ${num} : ${t.title}</h2>
+            <button onclick="backToMenu()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">← Retour</button>
+        </div>
+        ${numpadToggleBar()}
+        <div class="mb-6 bg-${t.color}-50 rounded-lg p-4">
+            <div class="flex justify-between items-center flex-wrap gap-3">
+                <div class="flex-1">
+                    <span class="text-lg font-semibold">Question <span id="questionNum">1</span> / 20</span>
+                    <div class="w-full bg-gray-300 rounded-full h-2 mt-2">
+                        <div id="progressBar" class="bg-${t.color}-500 h-2 rounded-full transition-all" style="width:5%"></div>
+                    </div>
+                </div>
+                <div class="text-2xl font-bold text-${t.color}-900">Score : <span id="score">0</span> / <span id="total">0</span></div>
+            </div>
+        </div>
+        <div id="questionContainer" class="question-box min-h-[280px]"></div>
+        <div id="feedback" class="mt-6"></div>
+        <div class="mt-6 flex gap-4">
+            <button id="submitBtn" onclick="submitAnswer()" class="bg-${t.color}-500 hover:bg-${t.color}-600 text-white px-6 py-3 rounded-lg font-bold flex-1">Valider ✓</button>
+            <button id="nextBtn" onclick="nextQuestion()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-bold flex-1" style="display:none">Question suivante →</button>
+        </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AFFICHAGE D'UNE QUESTION
+// ═══════════════════════════════════════════════════════════════
+function showQuestion() {
+    const q = questions[currentQuestion];
+    const container = document.getElementById('questionContainer');
+    document.getElementById('questionNum').textContent = currentQuestion + 1;
+    document.getElementById('progressBar').style.width = ((currentQuestion + 1) / 20 * 100) + '%';
+    document.getElementById('feedback').innerHTML = '';
+    document.getElementById('submitBtn').style.display = 'block';
+    document.getElementById('nextBtn').style.display = 'none';
+
+    if (q.type === 'input_exp') {
+        container.innerHTML = `
+            <div class="bg-blue-50 rounded-lg p-6 question-box">
+                <p class="text-xl mb-6 font-medium">${q.question}</p>
+                <div class="flex items-center gap-3 flex-wrap mt-2">
+                    <span class="text-gray-600 font-semibold text-lg">Réponse :</span>
+                    <div class="power-answer-wrap">
+                        <span class="base">10</span>
+                        <input type="number" id="userAnswer" class="exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                    </div>
+                </div>
+                ${numpadWidget('train_exp')}
+            </div>`;
+
+    } else if (q.type === 'input_decimal') {
+        container.innerHTML = `
+            <div class="bg-blue-50 rounded-lg p-6 question-box">
+                <p class="text-xl mb-6 font-medium">${q.question}</p>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <span class="text-gray-600 font-semibold">Réponse :</span>
+                    <input type="text" id="userAnswer" class="border-2 border-blue-400 rounded px-4 py-2 text-lg w-44 bg-white font-bold" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                </div>
+                ${numpadWidget('train_dec')}
+            </div>`;
+
+    } else if (q.type === 'qcm') {
+        container.innerHTML = `
+            <div class="bg-blue-50 rounded-lg p-6 question-box">
+                <p class="text-xl mb-5 font-medium">${q.question}</p>
+                <div class="space-y-3">
+                    ${q.options.map((opt, i) => `
+                        <label class="flex items-center p-4 bg-white rounded-lg cursor-pointer hover:bg-blue-100 border-2 border-transparent transition">
+                            <input type="radio" name="qcm" value="${i}" class="mr-3 w-5 h-5">
+                            <span class="text-lg">${opt}</span>
+                        </label>`).join('')}
+                </div>
+            </div>`;
+
+    } else if (q.type === 'order') {
+        container.innerHTML = `
+            <div class="bg-blue-50 rounded-lg p-6 question-box">
+                <p class="text-xl mb-5 font-medium">${q.question}</p>
+                <div class="mb-4">
+                    <p class="font-semibold mb-2 text-gray-700">Éléments à trier :</p>
+                    <div id="sourceItems" class="source-items-h">
+                        ${q.items.map((item, i) => `
+                            <div class="draggable bg-white px-4 py-2 rounded-lg border-2 border-blue-400 cursor-move" draggable="true" data-index="${i}">${item}</div>`).join('')}
+                    </div>
+                </div>
+                <div>
+                    <p class="font-semibold mb-2 text-gray-700">Ordre croissant (plus petit → plus grand) :</p>
+                    <div id="targetItems" class="drop-zone-h border-2 border-dashed border-blue-400 rounded-lg p-3 bg-blue-50/50"></div>
+                </div>
+                <p class="text-sm text-gray-500 mt-3">Glisse les éléments dans la zone ci-dessus</p>
+            </div>`;
+        initDragAndDrop();
+
+    } else if (q.type === 'scientific') {
+        container.innerHTML = `
+            <div class="bg-blue-50 rounded-lg p-6 question-box">
+                <p class="text-xl mb-6 font-medium">${q.question}</p>
+                <div class="flex items-center gap-2 flex-wrap mt-2">
+                    <span class="text-gray-600 font-semibold">Réponse :</span>
+                    <input type="text" id="answerA" class="border-2 border-blue-400 rounded px-3 py-2 w-24 bg-white font-bold text-lg" placeholder="a" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                    <span class="text-xl font-bold">× 10</span>
+                    <sup><input type="number" id="answerN" style="width:80px; font-size:14px; padding:5px 8px;" class="border-2 border-blue-400 rounded bg-white font-bold" placeholder="n" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></sup>
+                </div>
+                ${numpadWidget('train_sci')}
+            </div>`;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DRAG & DROP
+// ═══════════════════════════════════════════════════════════════
+let draggedEl = null;
+
+function initDragAndDrop() {
+    const dropZone = document.getElementById('targetItems');
+    const sourceZone = document.getElementById('sourceItems');
+    document.querySelectorAll('.draggable').forEach(item => {
+        item.addEventListener('dragstart', e => { draggedEl = item; item.style.opacity = '0.4'; });
+        item.addEventListener('dragend',   e => { item.style.opacity = '1'; });
+        item.addEventListener('touchstart', e => { draggedEl = item; item.style.opacity = '0.4'; }, { passive: true });
+        item.addEventListener('touchend', e => {
+            item.style.opacity = '1';
+            const touch = e.changedTouches[0];
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (target) { const zone = target.closest('#targetItems, #sourceItems'); if (zone && draggedEl) zone.appendChild(draggedEl); }
+        });
+    });
+    [dropZone, sourceZone].forEach(zone => {
+        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+        zone.addEventListener('dragleave', e => zone.classList.remove('drag-over'));
+        zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); if (draggedEl) zone.appendChild(draggedEl); });
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VALIDATION
+// ═══════════════════════════════════════════════════════════════
+function submitAnswer() {
+    const q = questions[currentQuestion];
+    const feedback = document.getElementById('feedback');
+    let isCorrect = false;
+
+    if (q.type === 'input_exp') {
+        const user = parseInt(document.getElementById('userAnswer').value);
+        isCorrect = user === q.answer;
+    } else if (q.type === 'input_decimal') {
+        let user = document.getElementById('userAnswer').value.trim().replace(',', '.').replace(/\s/g, '');
+        let correct = String(q.answer).replace(',', '.').replace(/\s/g, '');
+        isCorrect = Math.abs(parseFloat(user) - parseFloat(correct)) < 0.0000001;
+    } else if (q.type === 'qcm') {
+        const sel = document.querySelector('input[name="qcm"]:checked');
+        if (sel) isCorrect = parseInt(sel.value) === q.answer;
+    } else if (q.type === 'order') {
+        const ordered = Array.from(document.getElementById('targetItems').children).map(el => el.innerHTML.trim());
+        isCorrect = JSON.stringify(ordered) === JSON.stringify(q.answer);
+    } else if (q.type === 'scientific') {
+        const userA = parseFloat(document.getElementById('answerA').value.replace(',', '.'));
+        const userN = parseInt(document.getElementById('answerN').value);
+        isCorrect = Math.abs(userA - q.answerA) < 0.01 && userN === q.answerN;
+    }
+
+    if (isCorrect) {
+        score++;
+        feedback.innerHTML = `<div class="bg-green-100 border-2 border-green-500 rounded-lg p-4 correct">
+            <p class="text-green-800 font-bold text-xl">✓ Correct ! 🎉</p>
+            <p class="text-green-700 mt-2">${q.explanation}</p></div>`;
+    } else {
+        feedback.innerHTML = `<div class="bg-red-100 border-2 border-red-500 rounded-lg p-4">
+            <p class="text-red-800 font-bold text-xl">✗ Incorrect</p>
+            <p class="text-red-700 mt-2">${q.explanation}</p></div>`;
+    }
+
+    document.getElementById('score').textContent = score;
+    document.getElementById('total').textContent = currentQuestion + 1;
+    document.getElementById('submitBtn').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'block';
+}
+
+function nextQuestion() {
+    currentQuestion++;
+    if (currentQuestion < 20) showQuestion();
+    else showResults();
+}
+
+function showResults() {
+    const pct = Math.round(score / 20 * 100);
+    let msg = '', color = '';
+    if (pct >= 90) { msg = 'Excellent ! Tu maîtrises parfaitement ce chapitre ! 🏆'; color = 'green'; }
+    else if (pct >= 70) { msg = 'Très bien ! Continue comme ça ! 👍'; color = 'blue'; }
+    else if (pct >= 50) { msg = 'Pas mal ! Avec un peu plus de travail tu vas y arriver. 💪'; color = 'yellow'; }
+    else { msg = 'Continue à t\'entraîner, tu vas progresser ! 📚'; color = 'orange'; }
+    document.getElementById('questionContainer').innerHTML = `
+        <div class="bg-${color}-50 rounded-lg p-8 text-center">
+            <h3 class="text-3xl font-bold text-${color}-900 mb-4">Entraînement terminé !</h3>
+            <div class="text-6xl font-bold text-${color}-600 mb-4">${score} / 20</div>
+            <div class="text-2xl text-${color}-800 mb-6">${pct}%</div>
+            <p class="text-xl text-${color}-900 mb-8">${msg}</p>
+            <div class="flex gap-4 justify-center flex-wrap">
+                <button onclick="showTraining(${currentModule})" class="bg-${color}-500 hover:bg-${color}-600 text-white px-6 py-3 rounded-lg font-bold">Recommencer</button>
+                <button onclick="backToMenu()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-bold">Menu principal</button>
+            </div>
+        </div>`;
+    document.getElementById('feedback').innerHTML = '';
+    document.getElementById('submitBtn').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 1 — Définitions & écritures
+// ═══════════════════════════════════════════════════════════════
+function generateTraining1() {
+    const qs = [];
+    // Q1-4 : 10^n → décimale (positifs)
+    const posData = shuffle([
+        {n:2, val:'100'}, {n:3, val:'1000'}, {n:4, val:'10000'},
+        {n:5, val:'100000'}, {n:6, val:'1000000'}, {n:1, val:'10'}
+    ]);
+    for (let i = 0; i < 4; i++) {
+        const d = posData[i];
+        qs.push({ type:'input_decimal', question:`Écris en écriture décimale : 10<sup>${d.n}</sup>`,
+            answer: d.val, explanation:`10<sup>${d.n}</sup> = ${d.val} (1 suivi de ${d.n} zéro${d.n>1?'s':''}).` });
+    }
+    // Q5-7 : 10^-n → décimale (négatifs)
+    const negData = shuffle([
+        {n:-1, val:'0,1'}, {n:-2, val:'0,01'}, {n:-3, val:'0,001'}, {n:-4, val:'0,0001'}
+    ]);
+    for (let i = 0; i < 3; i++) {
+        const d = negData[i];
+        qs.push({ type:'input_decimal', question:`Écris en écriture décimale : 10<sup>${d.n}</sup>`,
+            answer: d.val, explanation:`10<sup>${d.n}</sup> = ${frac('1','10<sup>'+ (-d.n) +'</sup>')} = ${d.val}` });
+    }
+    // Q8-10 : décimale → exposant positif
+    const bigNums = shuffle([[100,2],[1000,3],[10000,4],[100000,5],[1000000,6]]);
+    for (let i = 0; i < 3; i++) {
+        const [num, exp] = bigNums[i];
+        qs.push({ type:'input_exp', question:`Complète : ${num.toLocaleString('fr-FR')} = 10<sup>?</sup>`,
+            answer: exp, explanation:`${num.toLocaleString('fr-FR')} = 10<sup>${exp}</sup> (${exp} zéro${exp>1?'s':''}).` });
+    }
+    // Q11-12 : décimale → exposant négatif
+    const smallNums = shuffle([
+        {str:'0,1', exp:-1}, {str:'0,01', exp:-2}, {str:'0,001', exp:-3}, {str:'0,0001', exp:-4}
+    ]);
+    for (let i = 0; i < 2; i++) {
+        const d = smallNums[i];
+        qs.push({ type:'input_exp', question:`Complète : ${d.str} = 10<sup>?</sup>`,
+            answer: d.exp, explanation:`${d.str} = 10<sup>${d.exp}</sup>` });
+    }
+    // Q13 QCM
+    qs.push({ type:'qcm', question:'Combien vaut 10<sup>0</sup> ?',
+        options:['1','0','10','100'], answer:0, explanation:'10<sup>0</sup> = 1 (toute base non nulle à la puissance 0 vaut 1).' });
+    qs.push({ type:'qcm', question:'Lequel est le plus grand ?',
+        options:['10<sup>5</sup>','10<sup>2</sup>','10<sup>-3</sup>','10<sup>0</sup>'], answer:0,
+        explanation:'10<sup>5</sup> = 100 000 est le plus grand.' });
+    qs.push({ type:'qcm', question:'Lequel est le plus petit ?',
+        options:['10<sup>-4</sup>','10<sup>-1</sup>','10<sup>0</sup>','10<sup>3</sup>'], answer:0,
+        explanation:'10<sup>-4</sup> = 0,0001 est le plus petit.' });
+    // Q16-17 : a × 10^n → décimale (n positif)
+    const mulPos = shuffle([
+        {a:3,n:2,val:'300'},{a:7,n:3,val:'7000'},{a:5,n:4,val:'50000'},{a:2,n:5,val:'200000'}
+    ]);
+    for (let i = 0; i < 2; i++) {
+        const d = mulPos[i];
+        qs.push({ type:'input_decimal', question:`Écris en écriture décimale : ${d.a} × 10<sup>${d.n}</sup>`,
+            answer: d.val, explanation:`${d.a} × 10<sup>${d.n}</sup> = ${d.val} (${d.n} rang${d.n>1?'s':''} vers la droite).` });
+    }
+    // Q18-19 : a × 10^-n → décimale
+    const mulNeg = shuffle([
+        {a:7,n:2,val:'0,07'},{a:3,n:3,val:'0,003'},{a:5,n:2,val:'0,05'},{a:9,n:3,val:'0,009'}
+    ]);
+    for (let i = 0; i < 2; i++) {
+        const d = mulNeg[i];
+        qs.push({ type:'input_decimal', question:`Écris en écriture décimale : ${d.a} × 10<sup>-${d.n}</sup>`,
+            answer: d.val, explanation:`${d.a} × 10<sup>-${d.n}</sup> = ${d.val} (${d.n} rang${d.n>1?'s':''} vers la gauche).` });
+    }
+    // Q20 : Ordre
+    const expsOrd = shuffle([-3,-1,0,2,4]);
+    qs.push({ type:'order', question:'Place ces puissances dans l\'ordre croissant :',
+        items: expsOrd.map(n=>`10<sup>${n}</sup>`), answer: [-3,-1,0,2,4].map(n=>`10<sup>${n}</sup>`),
+        explanation:'10<sup>-3</sup> &lt; 10<sup>-1</sup> &lt; 10<sup>0</sup> &lt; 10<sup>2</sup> &lt; 10<sup>4</sup>' });
+    return qs;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 2 — Écriture scientifique
+// ═══════════════════════════════════════════════════════════════
+function generateTraining2() {
+    const qs = [];
+
+    const bigPool = shuffle([
+        { numStr:'3 470',        aStr:'3,47', aVal:3.47, n:3 },
+        { numStr:'27 300',       aStr:'2,73', aVal:2.73, n:4 },
+        { numStr:'583 000',      aStr:'5,83', aVal:5.83, n:5 },
+        { numStr:'1 250 000',    aStr:'1,25', aVal:1.25, n:6 },
+        { numStr:'46 800',       aStr:'4,68', aVal:4.68, n:4 },
+        { numStr:'8 940',        aStr:'8,94', aVal:8.94, n:3 },
+    ]);
+    for (let i = 0; i < 4; i++) {
+        const d = bigPool[i];
+        qs.push({ type:'scientific', question:`Écris ${d.numStr} en écriture scientifique :`,
+            answerA:d.aVal, answerN:d.n,
+            explanation:`${d.numStr} = ${d.aStr} × 10<sup>${d.n}</sup><br>La virgule se déplace de ${d.n} rang${d.n>1?'s':''} vers la gauche.` });
+    }
+
+    const smallPool = shuffle([
+        { numStr:'0,00347',      aStr:'3,47', aVal:3.47, n:-3 },
+        { numStr:'0,000261',     aStr:'2,61', aVal:2.61, n:-4 },
+        { numStr:'0,0517',       aStr:'5,17', aVal:5.17, n:-2 },
+        { numStr:'0,0000942',    aStr:'9,42', aVal:9.42, n:-5 },
+        { numStr:'0,00726',      aStr:'7,26', aVal:7.26, n:-3 },
+        { numStr:'0,0000638',    aStr:'6,38', aVal:6.38, n:-5 },
+    ]);
+    for (let i = 0; i < 4; i++) {
+        const d = smallPool[i];
+        qs.push({ type:'scientific', question:`Écris ${d.numStr} en écriture scientifique :`,
+            answerA:d.aVal, answerN:d.n,
+            explanation:`${d.numStr} = ${d.aStr} × 10<sup>${d.n}</sup><br>La virgule se déplace de ${-d.n} rang${-d.n>1?'s':''} vers la droite.` });
+    }
+
+    const sciToDecPool = shuffle([
+        { aStr:'3,47', aVal:3.47, n:3,  decStr:'3 470',    decVal:'3470'     },
+        { aStr:'7,25', aVal:7.25, n:-4, decStr:'0,000725', decVal:'0.000725' },
+        { aStr:'1,83', aVal:1.83, n:5,  decStr:'183 000',  decVal:'183000'   },
+        { aStr:'6,42', aVal:6.42, n:-2, decStr:'0,0642',   decVal:'0.0642'   },
+        { aStr:'2,81', aVal:2.81, n:4,  decStr:'28 100',   decVal:'28100'    },
+    ]);
+    for (let i = 0; i < 2; i++) {
+        const d = sciToDecPool[i];
+        qs.push({ type:'input_decimal', question:`Écris en écriture décimale : ${d.aStr} × 10<sup>${d.n}</sup>`,
+            answer: d.decVal, explanation:`${d.aStr} × 10<sup>${d.n}</sup> = ${d.decStr}` });
+    }
+
+    qs.push({ type:'qcm', question:'Parmi ces nombres, lequel est en écriture scientifique ?',
+        options:['2,73 × 10<sup>7</sup>','27,3 × 10<sup>6</sup>','0,273 × 10<sup>8</sup>','273 × 10<sup>5</sup>'],
+        answer:0, explanation:'Seul 2,73 × 10<sup>7</sup> est en écriture scientifique car 1 ≤ 2,73 &lt; 10.' });
+
+    qs.push({ type:'qcm', question:'Quelle est l\'écriture scientifique de 0,000514 ?',
+        options:['5,14 × 10<sup>-4</sup>','51,4 × 10<sup>-5</sup>','0,514 × 10<sup>-3</sup>','5,14 × 10<sup>4</sup>'],
+        answer:0, explanation:'0,000514 = 5,14 × 10<sup>-4</sup><br>La virgule se déplace de 4 rangs vers la droite → exposant −4.' });
+
+    const corrPool = shuffle([
+        { wrong:'35 × 10<sup>7</sup>',   correct:'3,5 × 10<sup>8</sup>',
+          opts:['3,5 × 10<sup>7</sup>','35 × 10<sup>6</sup>','350 × 10<sup>6</sup>'],
+          expl:'35 × 10<sup>7</sup> = 3,5 × 10 × 10<sup>7</sup> = 3,5 × 10<sup>8</sup>' },
+        { wrong:'47 × 10<sup>5</sup>',   correct:'4,7 × 10<sup>6</sup>',
+          opts:['4,7 × 10<sup>5</sup>','47 × 10<sup>4</sup>','4,7 × 10<sup>7</sup>'],
+          expl:'47 × 10<sup>5</sup> = 4,7 × 10 × 10<sup>5</sup> = 4,7 × 10<sup>6</sup>' },
+        { wrong:'0,63 × 10<sup>4</sup>', correct:'6,3 × 10<sup>3</sup>',
+          opts:['6,3 × 10<sup>4</sup>','0,63 × 10<sup>5</sup>','6,3 × 10<sup>2</sup>'],
+          expl:'0,63 × 10<sup>4</sup> = 6,3 × 10<sup>-1</sup> × 10<sup>4</sup> = 6,3 × 10<sup>3</sup>' },
+        { wrong:'12,8 × 10<sup>-2</sup>',correct:'1,28 × 10<sup>-1</sup>',
+          opts:['1,28 × 10<sup>-2</sup>','12,8 × 10<sup>-3</sup>','1,28 × 10<sup>-3</sup>'],
+          expl:'12,8 × 10<sup>-2</sup> = 1,28 × 10 × 10<sup>-2</sup> = 1,28 × 10<sup>-1</sup>' },
+    ]);
+    for (let i = 0; i < 3; i++) {
+        const d = corrPool[i];
+        const options = shuffle([d.correct, ...d.opts]);
+        qs.push({ type:'qcm',
+            question:`${d.wrong} n'est pas en écriture scientifique. Quelle est la forme correcte ?`,
+            options, answer: options.indexOf(d.correct), explanation: d.expl });
+    }
+
+    const morePool = shuffle([
+        { numStr:'25 300',    aStr:'2,53', aVal:2.53, n:4 },
+        { numStr:'386 000',   aStr:'3,86', aVal:3.86, n:5 },
+        { numStr:'0,00564',   aStr:'5,64', aVal:5.64, n:-3 },
+        { numStr:'0,000128',  aStr:'1,28', aVal:1.28, n:-4 },
+        { numStr:'72 400 000',aStr:'7,24', aVal:7.24, n:7 },
+    ]);
+    for (let i = 0; i < 2; i++) {
+        const d = morePool[i];
+        qs.push({ type:'scientific', question:`Écris ${d.numStr} en écriture scientifique :`,
+            answerA:d.aVal, answerN:d.n, explanation:`${d.numStr} = ${d.aStr} × 10<sup>${d.n}</sup>` });
+    }
+
+    const sciOrd = [
+        { display:'3,47 × 10<sup>5</sup>', value:347000 },
+        { display:'10<sup>-2</sup>',        value:0.01   },
+        { display:'7,26 × 10<sup>3</sup>', value:7260   },
+        { display:'10<sup>7</sup>',         value:1e7    }
+    ];
+    const sciOrdSh = shuffle([...sciOrd]);
+    const sciOrdSorted = [...sciOrd].sort((a,b) => a.value - b.value);
+    qs.push({ type:'order', question:'Place ces nombres dans l\'ordre croissant :',
+        items: sciOrdSh.map(n=>n.display), answer: sciOrdSorted.map(n=>n.display),
+        explanation:`Ordre croissant : ${sciOrdSorted.map(n=>n.display).join(' &lt; ')}` });
+
+    const findPool = shuffle([
+        { numStr:'46 800',   aStr:'4,68', n:4  },
+        { numStr:'0,00517',  aStr:'5,17', n:-3 },
+        { numStr:'810 000',  aStr:'8,1',  n:5  },
+        { numStr:'0,000192', aStr:'1,92', n:-4 },
+    ]);
+    const fd = findPool[0];
+    qs.push({ type:'input_exp', question:`${fd.numStr} = ${fd.aStr} × 10<sup>?</sup>`,
+        answer: fd.n, explanation:`${fd.numStr} = ${fd.aStr} × 10<sup>${fd.n}</sup>` });
+
+    qs.push({ type:'scientific', question:'Écris 0,000125 en écriture scientifique :',
+        answerA:1.25, answerN:-4,
+        explanation:'0,000125 = 1,25 × 10<sup>-4</sup><br>La virgule se déplace de 4 rangs vers la droite → exposant −4.' });
+
+    return qs;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 3 — Opérations
+// ═══════════════════════════════════════════════════════════════
+function generateTraining3() {
+    const qs = [];
+
+    for (let i = 0; i < 4; i++) {
+        const a = rnd(1,6), b = rnd(1,6);
+        qs.push({ type:'input_exp',
+            question:`Calcule : 10<sup>${a}</sup> × 10<sup>${b}</sup> = 10<sup>?</sup>`,
+            answer: a+b,
+            explanation:`10<sup>${a}</sup> × 10<sup>${b}</sup> = 10<sup>${a}+${b}</sup> = 10<sup>${a+b}</sup><br>On additionne les exposants.` });
+    }
+
+    for (let i = 0; i < 3; i++) {
+        const b = rnd(1,4), a = rnd(b+1, b+5);
+        qs.push({ type:'input_exp',
+            question:`Calcule : ${frac('10<sup>'+a+'</sup>','10<sup>'+b+'</sup>')} = 10<sup>?</sup>`,
+            answer: a-b,
+            explanation:`${frac('10<sup>'+a+'</sup>','10<sup>'+b+'</sup>')} = 10<sup>${a}−${b}</sup> = 10<sup>${a-b}</sup><br>On soustrait les exposants.` });
+    }
+
+    for (let i = 0; i < 3; i++) {
+        const a = rnd(3,7), b = -rnd(1,4);
+        qs.push({ type:'input_exp',
+            question:`Calcule : 10<sup>${a}</sup> × 10<sup>${b}</sup> = 10<sup>?</sup>`,
+            answer: a+b,
+            explanation:`10<sup>${a}</sup> × 10<sup>${b}</sup> = 10<sup>${a}+(${b})</sup> = 10<sup>${a+b}</sup><br>On additionne les exposants.` });
+    }
+
+    const qa = rnd(2,5), qb = rnd(1,3);
+    qs.push({ type:'qcm', question:`Que vaut 10<sup>${qa}</sup> × 10<sup>${qb}</sup> ?`,
+        options:[`10<sup>${qa+qb}</sup>`,`10<sup>${qa*qb}</sup>`,`10<sup>${qa-qb}</sup>`,`${qa+qb}`],
+        answer:0, explanation:`10<sup>${qa}</sup> × 10<sup>${qb}</sup> = 10<sup>${qa+qb}</sup> (on additionne les exposants).` });
+    qs.push({ type:'qcm', question:`Que vaut 10<sup>-3</sup> ?`,
+        options:['0,001','0,01','0,1','-1 000'], answer:0,
+        explanation:`10<sup>-3</sup> = ${frac('1','1 000')} = 0,001` });
+
+    for (let i = 0; i < 2; i++) {
+        const a = rnd(2,8);
+        qs.push({ type:'input_exp',
+            question:`Calcule : ${frac('1','10<sup>'+a+'</sup>')} = 10<sup>?</sup>`,
+            answer: -a,
+            explanation:`${frac('1','10<sup>'+a+'</sup>')} = 10<sup>-${a}</sup><br>L'inverse change le signe de l'exposant.` });
+    }
+
+    const expOrd = shuffle([-3,-1,0,2,4]);
+    qs.push({ type:'order', question:'Place ces puissances dans l\'ordre croissant :',
+        items: expOrd.map(n=>`10<sup>${n}</sup>`), answer: [-3,-1,0,2,4].map(n=>`10<sup>${n}</sup>`),
+        explanation:'10<sup>-3</sup> &lt; 10<sup>-1</sup> &lt; 10<sup>0</sup> &lt; 10<sup>2</sup> &lt; 10<sup>4</sup>' });
+
+    const ppPool = shuffle([
+        { a:-2, b:3  },
+        { a:3,  b:-2 },
+        { a:-4, b:2  },
+        { a:2,  b:-3 },
+        { a:-3, b:-2 },
+        { a:4,  b:-2 },
+        { a:-2, b:-3 },
+        { a:5,  b:2  },
+        { a:-3, b:4  },
+    ]);
+    for (let i = 0; i < 2; i++) {
+        const { a, b } = ppPool[i];
+        const res = a * b;
+        const bDisplay = b < 0 ? `(${b})` : `${b}`;
+        qs.push({ type:'input_exp',
+            question:`Calcule : (10<sup>${a}</sup>)<sup>${b}</sup> = 10<sup>?</sup>`,
+            answer: res,
+            explanation:`(10<sup>${a}</sup>)<sup>${b}</sup> = 10<sup>${a}×${bDisplay}</sup> = 10<sup>${res}</sup><br>On multiplie les exposants.` });
+    }
+
+    for (let i = 0; i < 3; i++) {
+        const a = rnd(2,5), b = -rnd(1,3), c = rnd(1,3), d = -rnd(1,2);
+        const res = a+b-c-d;
+        qs.push({ type:'input_exp',
+            question:`Calcule : ${frac('10<sup>'+a+'</sup> × 10<sup>'+b+'</sup>','10<sup>'+c+'</sup> × 10<sup>'+d+'</sup>')} = 10<sup>?</sup>`,
+            answer: res,
+            explanation:`Numérateur : 10<sup>${a}</sup> × 10<sup>${b}</sup> = 10<sup>${a+b}</sup><br>
+                         Dénominateur : 10<sup>${c}</sup> × 10<sup>${d}</sup> = 10<sup>${c+d}</sup><br>
+                         ${frac('10<sup>'+(a+b)+'</sup>','10<sup>'+(c+d)+'</sup>')} = 10<sup>${a+b}−(${c+d})</sup> = 10<sup>${res}</sup>` });
+    }
+
+    return qs;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 4 — Toutes notions, difficile
+// ═══════════════════════════════════════════════════════════════
+function generateTraining4() {
+    const qs = [];
+
+    for (let i = 0; i < 3; i++) {
+        const a = rnd(3,7), b = -rnd(2,4), c = rnd(1,3);
+        const res = a+b-c;
+        qs.push({ type:'input_exp',
+            question:`Calcule : ${frac('10<sup>'+a+'</sup> × 10<sup>'+b+'</sup>','10<sup>'+c+'</sup>')} = 10<sup>?</sup>`,
+            answer: res,
+            explanation:`${frac('10<sup>'+a+'</sup> × 10<sup>'+b+'</sup>','10<sup>'+c+'</sup>')} = ${frac('10<sup>'+(a+b)+'</sup>','10<sup>'+c+'</sup>')} = 10<sup>${a+b}−${c}</sup> = 10<sup>${res}</sup>` });
+    }
+
+    for (let i = 0; i < 2; i++) {
+        const a = rnd(2,4), b = rnd(2,3), c = -rnd(1,3);
+        const res = a*b+c;
+        const cDisplay = c < 0 ? `(${c})` : `${c}`;
+        qs.push({ type:'input_exp',
+            question:`Calcule : (10<sup>${a}</sup>)<sup>${b}</sup> × 10<sup>${c}</sup> = 10<sup>?</sup>`,
+            answer: res,
+            explanation:`(10<sup>${a}</sup>)<sup>${b}</sup> = 10<sup>${a*b}</sup><br>10<sup>${a*b}</sup> × 10<sup>${c}</sup> = 10<sup>${a*b}+${cDisplay}</sup> = 10<sup>${res}</sup>` });
+    }
+
+    const prodData = shuffle([
+        { text:'3 × 10<sup>4</sup> × 2 × 10<sup>3</sup>',     ra:6, rn:7, expl:'3×2=6 ; 10<sup>4</sup>×10<sup>3</sup>=10<sup>7</sup>' },
+        { text:'4 × 10<sup>5</sup> × 2,5 × 10<sup>2</sup>',   ra:1, rn:8, expl:'4×2,5=10=1×10<sup>1</sup> ; 10<sup>5</sup>×10<sup>2</sup>=10<sup>7</sup> ; total 1×10<sup>8</sup>' },
+        { text:'6 × 10<sup>3</sup> × 5 × 10<sup>-2</sup>',    ra:3, rn:2, expl:'6×5=30=3×10 ; 10<sup>3</sup>×10<sup>-2</sup>=10<sup>1</sup> ; total 3×10<sup>2</sup>' },
+        { text:'2 × 10<sup>6</sup> × 4 × 10<sup>-3</sup>',    ra:8, rn:3, expl:'2×4=8 ; 10<sup>6</sup>×10<sup>-3</sup>=10<sup>3</sup>' }
+    ]);
+    for (let i = 0; i < 3; i++) {
+        const d = prodData[i];
+        qs.push({ type:'scientific',
+            question:`Calcule et donne le résultat en écriture scientifique : ${d.text} =`,
+            answerA:d.ra, answerN:d.rn,
+            explanation:`${d.text} = ${d.ra} × 10<sup>${d.rn}</sup><br>${d.expl}` });
+    }
+
+    const divData = shuffle([
+        { num:'8 × 10<sup>6</sup>',  den:'4 × 10<sup>2</sup>',  ra:2, rn:4,  expl:'8÷4=2 ; 10<sup>6</sup>÷10<sup>2</sup>=10<sup>4</sup>' },
+        { num:'9 × 10<sup>-2</sup>', den:'3 × 10<sup>3</sup>',  ra:3, rn:-5, expl:'9÷3=3 ; 10<sup>-2</sup>÷10<sup>3</sup>=10<sup>-5</sup>' },
+        { num:'6 × 10<sup>5</sup>',  den:'2 × 10<sup>-3</sup>', ra:3, rn:8,  expl:'6÷2=3 ; 10<sup>5</sup>÷10<sup>-3</sup>=10<sup>5-(-3)</sup>=10<sup>8</sup>' }
+    ]);
+    for (let i = 0; i < 2; i++) {
+        const d = divData[i];
+        qs.push({ type:'scientific',
+            question:`Calcule et donne le résultat en écriture scientifique : ${frac(d.num, d.den)} =`,
+            answerA:d.ra, answerN:d.rn,
+            explanation:`${frac(d.num, d.den)} = ${d.ra} × 10<sup>${d.rn}</sup><br>${d.expl}` });
+    }
+
+    qs.push({ type:'qcm', question:`Que vaut (10<sup>3</sup>)<sup>-2</sup> ?`,
+        options:['10<sup>-6</sup>','10<sup>-5</sup>','10<sup>6</sup>','10<sup>1</sup>'], answer:0,
+        explanation:'(10<sup>3</sup>)<sup>-2</sup> = 10<sup>3×(-2)</sup> = 10<sup>-6</sup>' });
+    qs.push({ type:'qcm', question:`Quelle expression est égale à 10<sup>-5</sup> ?`,
+        options:[`${frac('10<sup>2</sup>','10<sup>7</sup>')}`,`${frac('10<sup>3</sup>','10<sup>-2</sup>')}`,
+                 `10<sup>-3</sup> × 10<sup>-3</sup>`,'(10<sup>-1</sup>)<sup>4</sup>'],
+        answer:0,
+        explanation:`${frac('10<sup>2</sup>','10<sup>7</sup>')} = 10<sup>2-7</sup> = 10<sup>-5</sup> ✓<br>Les autres donnent 10<sup>5</sup>, 10<sup>-6</sup>, 10<sup>-4</sup>.` });
+
+    const hardOrder = [
+        { display:'5 × 10<sup>3</sup>', value:5000 },
+        { display:'(10<sup>2</sup>)<sup>3</sup>', value:1000000 },
+        { display:'10<sup>-1</sup>', value:0.1 },
+        { display:'2,5 × 10<sup>4</sup>', value:25000 }
+    ];
+    const hardOrderSh = shuffle([...hardOrder]);
+    const hardOrderSorted = [...hardOrder].sort((a,b) => a.value - b.value);
+    qs.push({ type:'order', question:'Range ces expressions dans l\'ordre croissant (calcule d\'abord chacune) :',
+        items: hardOrderSh.map(n=>n.display), answer: hardOrderSorted.map(n=>n.display),
+        explanation:`10<sup>-1</sup>=0,1 ; 5×10<sup>3</sup>=5 000 ; 2,5×10<sup>4</sup>=25 000 ; (10<sup>2</sup>)<sup>3</sup>=10<sup>6</sup>=1 000 000` });
+
+    qs.push({ type:'scientific', question:'Écris le résultat de 1,5 × 10<sup>3</sup> × 10<sup>2</sup> en écriture scientifique :',
+        answerA:1.5, answerN:5, explanation:'1,5 × 10<sup>3</sup> × 10<sup>2</sup> = 1,5 × 10<sup>5</sup>' });
+    qs.push({ type:'scientific', question:`Écris le résultat de ${frac('3,6 × 10<sup>7</sup>','10<sup>3</sup>')} en écriture scientifique :`,
+        answerA:3.6, answerN:4, explanation:`${frac('3,6 × 10<sup>7</sup>','10<sup>3</sup>')} = 3,6 × 10<sup>7-3</sup> = 3,6 × 10<sup>4</sup>` });
+
+    for (let i = 0; i < 2; i++) {
+        const a = rnd(2,4), b = rnd(2,3), c = -rnd(1,3), d = rnd(1,3), e = -rnd(1,2);
+        const res = a*b+c-d-e;
+        qs.push({ type:'input_exp',
+            question:`Calcule : ${frac('(10<sup>'+a+'</sup>)<sup>'+b+'</sup> × 10<sup>'+c+'</sup>','10<sup>'+d+'</sup> × 10<sup>'+e+'</sup>')} = 10<sup>?</sup>`,
+            answer: res,
+            explanation:`Numérateur : 10<sup>${a*b}</sup> × 10<sup>${c}</sup> = 10<sup>${a*b+c}</sup><br>
+                         Dénominateur : 10<sup>${d}</sup> × 10<sup>${e}</sup> = 10<sup>${d+e}</sup><br>
+                         Résultat : 10<sup>${a*b+c}−(${d+e})</sup> = 10<sup>${res}</sup>` });
+    }
+
+    qs.push({ type:'qcm',
+        question:`2,4 × 10<sup>5</sup> × 5 × 10<sup>3</sup> est égal en écriture scientifique à :`,
+        options:['1,2 × 10<sup>9</sup>','1,2 × 10<sup>8</sup>','12 × 10<sup>8</sup>','1,2 × 10<sup>15</sup>'],
+        answer:0,
+        explanation:'2,4×5=12=1,2×10 ; 10<sup>5</sup>×10<sup>3</sup>=10<sup>8</sup> ; total : 1,2×10×10<sup>8</sup>=1,2×10<sup>9</sup>' });
+    qs.push({ type:'qcm',
+        question:`${frac('6 × 10<sup>8</sup>','3 × 10<sup>-2</sup>')} est égal à :`,
+        options:['2 × 10<sup>10</sup>','2 × 10<sup>6</sup>','2 × 10<sup>-10</sup>','18 × 10<sup>6</sup>'],
+        answer:0,
+        explanation:`6÷3=2 ; ${frac('10<sup>8</sup>','10<sup>-2</sup>')}=10<sup>8-(-2)</sup>=10<sup>10</sup><br>Résultat : 2×10<sup>10</sup>` });
+    qs.push({ type:'qcm',
+        question:`Quel est l'ordre de grandeur (puissance de 10 la plus proche) de 3,7 × 10<sup>5</sup> + 2 × 10<sup>4</sup> ?`,
+        options:['10<sup>5</sup>','10<sup>4</sup>','10<sup>6</sup>','10<sup>9</sup>'], answer:0,
+        explanation:'3,7×10<sup>5</sup>=370 000 domine 2×10<sup>4</sup>=20 000.<br>La somme ≈ 390 000 → ordre de grandeur 10<sup>5</sup>.' });
+
+    return qs;
+}
+
+// ─── Init ───────────────────────────────────────────────────────
+updateActiveMenuItem(); // Accueil grisé au démarrage
+
+// ─── Helpers ────────────────────────────────────────────────────
+function rnd(min, max) { return Math.floor(Math.random()*(max-min+1))+min; }
+function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length-1; i > 0; i--) {
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+}
+</script>
+</body>
+</html>
