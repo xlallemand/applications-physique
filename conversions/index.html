@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conversions – Physique-Chimie</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+  * { box-sizing: border-box; }
+  body { font-family: 'Nunito', sans-serif; background: #ffffff; min-height: 100vh; }
+  sup { font-size: 0.65em; vertical-align: super; line-height: 0; }
+
+  /* Screens */
+  .active-screen { display: block; }
+  .hidden-screen { display: none; }
+
+  /* Prefix table */
+  .prefix-table { border-collapse: collapse; width: 100%; }
+  .prefix-table th { background: #0891b2; color: white; padding: 10px 14px; text-align: center; }
+  .prefix-table td { padding: 9px 14px; text-align: center; border: 1px solid #7dd3fc; }
+  .prefix-table tr:nth-child(even) td { background: #ecfeff; }
+  .prefix-table tr:nth-child(odd) td { background: #cffafe; }
+  .prefix-table .base-row td { background: #fff7ed !important; font-weight: 800; }
+  .prefix-table th { border: 1px solid #0e7490; }
+
+  /* Inputs */
+  .answer-input { border: 2.5px solid #7dd3fc; border-radius: 10px; padding: 10px 12px; font-size: 1.15rem; font-family: 'Nunito', sans-serif; font-weight: 700; text-align: center; outline: none; transition: border 0.2s, background 0.2s; width: 110px; background: white; }
+  .answer-input:focus { border-color: #0891b2; background: #ecfeff; }
+  .power-input { border: 2.5px solid #7dd3fc; border-radius: 10px; padding: 10px 8px; font-size: 1.15rem; font-family: 'Nunito', sans-serif; font-weight: 700; text-align: center; outline: none; transition: border 0.2s, background 0.2s; width: 90px; background: white; }
+  .power-input:focus { border-color: #0891b2; background: #ecfeff; }
+  .input-correct { background: #d1fae5 !important; border-color: #10b981 !important; }
+  .input-incorrect { background: #fee2e2 !important; border-color: #ef4444 !important; }
+
+  /* Progress */
+  .progress-bar { height: 12px; border-radius: 999px; background: #cffafe; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #0891b2, #0284c7); transition: width 0.4s ease; }
+
+  /* Buttons */
+  .btn-primary { background: linear-gradient(135deg, #0891b2, #0284c7); color: white; border: none; border-radius: 12px; padding: 13px 30px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: opacity 0.2s, transform 0.1s; font-family: 'Nunito', sans-serif; }
+  .btn-primary:hover:not(:disabled) { opacity: 0.9; transform: translateY(-2px); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-secondary { background: white; color: #0891b2; border: 2px solid #7dd3fc; border-radius: 12px; padding: 11px 22px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.2s; font-family: 'Nunito', sans-serif; }
+  .btn-secondary:hover { background: #ecfeff; }
+  .btn-small { background: white; color: #0891b2; border: 2px solid #7dd3fc; border-radius: 9px; padding: 7px 16px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: background 0.15s; font-family: 'Nunito', sans-serif; }
+  .btn-small:hover { background: #ecfeff; }
+
+  /* QCM */
+  .qcm-option { border: 2.5px solid #7dd3fc; border-radius: 12px; padding: 12px 18px; background: #ecfeff; cursor: pointer; transition: all 0.15s; font-weight: 700; text-align: center; display: block; width: 100%; font-family: 'Nunito', sans-serif; font-size: 1rem; }
+  .qcm-option:hover:not(:disabled) { background: #cffafe; border-color: #0891b2; transform: translateY(-1px); }
+  .qcm-option.opt-correct { background: #d1fae5 !important; border-color: #10b981 !important; color: #065f46 !important; }
+  .qcm-option.opt-wrong { background: #fee2e2 !important; border-color: #ef4444 !important; color: #991b1b !important; }
+
+  /* Feedback boxes */
+  .feedback-ok { background: #ecfdf5; border-left: 5px solid #10b981; border-radius: 0 14px 14px 0; padding: 16px 20px; margin-top: 16px; }
+  .feedback-ko { background: #fff1f2; border-left: 5px solid #ef4444; border-radius: 0 14px 14px 0; padding: 16px 20px; margin-top: 16px; }
+
+  /* Drag & drop */
+  .drag-item { cursor: grab; user-select: none; transition: box-shadow 0.15s; border: 2.5px solid #7dd3fc; background: #ecfeff; border-radius: 12px; padding: 10px 14px; font-weight: 800; font-family: 'Nunito', sans-serif; display: inline-flex; flex-direction: column; align-items: center; min-width: 72px; }
+  .drag-item:active { cursor: grabbing; box-shadow: 0 6px 20px rgba(8,145,178,0.3); }
+  .drag-item.dragging { opacity: 0.4; }
+  .drop-zone { border: 2.5px dashed #7dd3fc; min-height: 60px; min-width: 72px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s; background: #f0fdff; }
+  .drop-zone.drag-over { background: #ecfeff; border-color: #0891b2; }
+  .drop-zone.filled { border-style: solid; border-color: #0891b2; background: #e0f7fa; }
+
+  /* Example & formula boxes */
+  .example-box { background: linear-gradient(135deg, #ecfeff, #e0f2fe); border: 1.5px solid #7dd3fc; border-radius: 16px; padding: 18px 22px; }
+  .formula-box { background: #0e4f66; color: #bae6fd; border-radius: 14px; padding: 16px 22px; font-weight: 700; font-size: 1.05rem; }
+
+  /* Tags */
+  .tag-unit { display: inline-block; background: #0891b2; color: white; border-radius: 8px; padding: 2px 11px; font-weight: 800; font-size: 0.95rem; }
+  .tag-prefix { display: inline-block; background: #fef9c3; border: 1px solid #fbbf24; border-radius: 6px; padding: 1px 8px; color: #92400e; font-weight: 800; }
+
+  /* Step badge */
+  .step-badge { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; font-weight: 900; font-size: 1rem; flex-shrink: 0; }
+
+  /* Memorization cards */
+  .mem-card { border-radius: 20px; padding: 24px 26px; margin-bottom: 20px; }
+
+  /* ====== NAV SANDWICH ====== */
+  #sandwich-menu { display: none; }
+  #sandwich-menu.open { display: block; }
+
+  /* Entrée de menu active (page courante) */
+  .menu-item-current {
+    color: #9ca3af !important;
+    background: #f3f4f6 !important;
+    cursor: default !important;
+    pointer-events: none;
+    font-style: italic;
+  }
+
+  /* Module list on home */
+  .mod-row {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-left: 5px solid;
+    border-radius: 12px;
+    padding: 12px 18px;
+    cursor: pointer;
+    transition: box-shadow 0.15s, background 0.15s;
+    gap: 14px;
+  }
+  .mod-row:hover { box-shadow: 0 4px 18px rgba(8,145,178,0.13); background: #f0fdff; }
+  .mod-row .mod-num { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; min-width: 80px; }
+  .mod-row .mod-name { font-weight: 800; font-size: 1rem; color: #164e63; flex: 1; }
+  .mod-row .mod-desc { font-size: 0.82rem; color: #6b7280; }
+  .mod-row .mod-arrow { font-weight: 900; color: #7dd3fc; font-size: 1.1rem; }
+
+  /* Active module title bar */
+  #module-title-bar {
+    display: none;
+    position: sticky;
+    top: 52px;
+    z-index: 40;
+    background: #0891b2;
+    color: white;
+    font-weight: 800;
+    font-size: 0.97rem;
+    padding: 7px 20px;
+    text-align: center;
+    letter-spacing: 0.03em;
+  }
+
+  /* Card panels used inside modules */
+  .card-panel {
+    background: #ecfeff;
+    border: 1.5px solid #a5f3fc;
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+  }
+  .card-panel-purple {
+    background: #f5f3ff;
+    border: 1.5px solid #c4b5fd;
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+  }
+  .card-panel-white {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== NAVIGATION SANDWICH ====== -->
+<nav class="bg-white shadow-md sticky top-0 z-50">
+  <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+    <button id="burger-btn" onclick="toggleMenu()" aria-label="Menu" class="flex flex-col gap-[5px] p-2 rounded-lg hover:bg-cyan-50 transition-colors">
+      <span class="block w-6 h-[3px] bg-cyan-700 rounded"></span>
+      <span class="block w-6 h-[3px] bg-cyan-700 rounded"></span>
+      <span class="block w-6 h-[3px] bg-cyan-700 rounded"></span>
+    </button>
+    <button onclick="showHome()" class="font-black text-cyan-700 text-lg hover:text-cyan-500 transition-colors">
+      Conversions SI
+    </button>
+  </div>
+  <!-- Menu déroulant -->
+  <div id="sandwich-menu" class="absolute top-full left-0 w-full bg-white shadow-xl border-t border-cyan-100 z-50">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-col gap-1">
+      <button id="menu-home" onclick="showHome()" class="text-left px-4 py-2 rounded-lg font-bold text-cyan-700 hover:bg-cyan-50 transition-colors">Accueil</button>
+      <div class="h-px bg-cyan-50 my-1"></div>
+      <button id="menu-1" onclick="navTo(1)" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 1 : Cours</button>
+      <button id="menu-2" onclick="navTo(2)" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 2 : Astuces de mémorisation</button>
+      <button id="menu-3" onclick="navTo(3)" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 3 : Apprendre les préfixes</button>
+      <div class="h-px bg-cyan-50 my-1"></div>
+      <button id="menu-5" onclick="navTo(5)" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 4 : Nombres décimaux (Niveau 1)</button>
+      <button id="menu-6" onclick="navTo(6)" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 5 : Puissances de 10 (Niveau 2)</button>
+      <button id="menu-7" onclick="navTo(7)" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 6 : Sans aide (Niveau 3)</button>
+      <button id="menu-8" onclick="navTo(8)" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 7 : Expert (Niveau 4)</button>
+      <div class="h-px bg-cyan-50 my-1"></div>
+      <button id="menu-cours-sq" onclick="navTo('cours-sq')" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 8 : Unités au carré et au cube (Cours)</button>
+      <button id="menu-ex-sq" onclick="navTo('ex-sq')" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 9 : Unités au carré et au cube (Entraînement)</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Barre titre module actif -->
+<div id="module-title-bar"></div>
+
+<!-- ====== ACCUEIL ====== -->
+<div id="screen-home" class="active-screen max-w-3xl mx-auto px-4 py-8">
+  <div class="text-center mb-8">
+    <h1 class="text-3xl font-black text-cyan-800 mb-2">Maîtrise des Conversions</h1>
+    <p class="text-gray-500 text-base max-w-xl mx-auto leading-relaxed">Entraîne-toi aux conversions d'unités avec les préfixes du Système International.</p>
+  </div>
+
+  <!-- Comment progresser en premier -->
+  <div class="bg-cyan-50 rounded-xl border-l-4 border-cyan-400 p-5 mb-7 shadow-sm">
+    <div class="font-bold text-gray-700 mb-1 text-base">Comment progresser ?</div>
+    <div class="text-gray-500 text-sm leading-relaxed">Commence par le <strong>Module 1</strong> pour comprendre la méthode, puis le <strong>Module 2</strong> pour les astuces de mémorisation. Teste-toi avec le <strong>Module 3</strong> avant de passer aux exercices (<strong>Modules 4 à 7</strong>). Tu peux refaire chaque module autant de fois que tu veux ! Les <strong>modules 8 et 9</strong> sont dédiés aux unités au carré et au cube.</div>
+  </div>
+
+  <!-- Liste des modules -->
+  <div class="flex flex-col gap-4">
+
+    <!-- Groupe Cours -->
+    <div class="border border-indigo-200 rounded-2xl p-4 bg-indigo-50 flex flex-col gap-2">
+      <div class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1 px-1">Cours &amp; Mémorisation</div>
+      <!-- Module 1 -->
+      <div class="mod-row" style="border-color:#6366f1" onclick="showModule(1)">
+        <span class="mod-num" style="color:#6366f1">Module 1</span>
+        <div class="flex-1">
+          <div class="mod-name">Cours</div>
+          <div class="mod-desc">Préfixes SI, puissances de 10 et méthode de conversion.</div>
+        </div>
+        <span class="mod-arrow">›</span>
+      </div>
+
+      <!-- Module 2 -->
+      <div class="mod-row" style="border-color:#8b5cf6" onclick="showModule(2)">
+        <span class="mod-num" style="color:#8b5cf6">Module 2</span>
+        <div class="flex-1">
+          <div class="mod-name">Astuces de mémorisation</div>
+          <div class="mod-desc">Des techniques pour retenir les préfixes facilement.</div>
+        </div>
+        <span class="mod-arrow">›</span>
+      </div>
+
+      <!-- Module 3 -->
+      <div class="mod-row" style="border-color:#ec4899" onclick="showModule(3)">
+        <span class="mod-num" style="color:#ec4899">Module 3</span>
+        <div class="flex-1">
+          <div class="mod-name">Apprendre les préfixes</div>
+          <div class="mod-desc">QCM, glisser-déposer… Mémorise les préfixes.</div>
+        </div>
+        <span class="mod-arrow">›</span>
+      </div>
+    </div>
+
+    <!-- Groupe Exercices -->
+    <div class="border border-yellow-200 rounded-2xl p-4 bg-yellow-50 flex flex-col gap-2">
+      <div class="text-xs font-bold text-yellow-500 uppercase tracking-widest mb-1 px-1">Exercices</div>
+
+      <!-- Module 4 -->
+      <div class="mod-row" style="border-color:#eab308" onclick="showModule(5)">
+        <span class="mod-num" style="color:#ca8a04">Module 4 · Niv. 1</span>
+        <div class="flex-1">
+          <div class="mod-name">Nombres décimaux</div>
+          <div class="mod-desc">Vers/depuis l'unité de base. Aide disponible. 10 questions.</div>
+        </div>
+        <span class="mod-arrow">›</span>
+      </div>
+
+      <!-- Module 5 -->
+      <div class="mod-row" style="border-color:#f97316" onclick="showModule(6)">
+        <span class="mod-num" style="color:#ea580c">Module 5 · Niv. 2</span>
+        <div class="flex-1">
+          <div class="mod-name">Avec puissances de 10</div>
+          <div class="mod-desc">Nombres en notation scientifique. Aide disponible. 10 questions.</div>
+        </div>
+        <span class="mod-arrow">›</span>
+      </div>
+
+      <!-- Module 6 -->
+      <div class="mod-row" style="border-color:#ef4444" onclick="showModule(7)">
+        <span class="mod-num" style="color:#dc2626">Module 6 · Niv. 3</span>
+        <div class="flex-1">
+          <div class="mod-name">Sans aide</div>
+          <div class="mod-desc">Comme le module 5, mais de mémoire ! 10 questions.</div>
+        </div>
+        <span class="mod-arrow">›</span>
+      </div>
+
+      <!-- Module 7 -->
+      <div class="mod-row" style="border-color:#be123c" onclick="showModule(8)">
+        <span class="mod-num" style="color:#be123c">Module 7 · Niv. 4</span>
+        <div class="flex-1">
+          <div class="mod-name">Expert</div>
+          <div class="mod-desc">Entre deux préfixes quelconques, avec puissances de 10. 10 questions.</div>
+        </div>
+        <span class="mod-arrow">›</span>
+      </div>
+    </div>
+
+    <!-- Groupe Unités au carré et au cube -->
+    <div class="border border-cyan-200 rounded-2xl p-4 bg-cyan-50 flex flex-col gap-2">
+      <div class="text-xs font-bold text-cyan-500 uppercase tracking-widest mb-1 px-1">Unités au carré et au cube</div>
+
+      <!-- Module 8 -->
+      <div class="mod-row" style="border-color:#0891b2" onclick="showModule('cours-sq')">
+        <span class="mod-num" style="color:#0891b2">Module 8</span>
+        <div class="flex-1">
+          <div class="mod-name">Unités au carré et au cube — Cours</div>
+          <div class="mod-desc">Méthode pour convertir des m², cm³, L, etc.</div>
+        </div>
+        <span class="mod-arrow">›</span>
+      </div>
+
+      <!-- Module 9 -->
+      <div class="mod-row" style="border-color:#0284c7" onclick="showModule('ex-sq')">
+        <span class="mod-num" style="color:#0284c7">Module 9</span>
+        <div class="flex-1">
+          <div class="mod-name">Unités au carré et au cube — Entraînement</div>
+          <div class="mod-desc">10 questions : conversions entre mm², cm³, m², L, mL…</div>
+        </div>
+        <span class="mod-arrow">›</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====== MODULE 1 : COURS ====== -->
+<div id="screen-1" class="hidden-screen max-w-4xl mx-auto px-4 py-8">
+  <div class="mb-8">
+    <div class="text-xs font-bold text-cyan-600 uppercase tracking-widest mb-1">Module 1</div>
+    <h2 class="text-3xl font-black text-cyan-800">Cours : Les Conversions</h2>
+  </div>
+
+  <div class="bg-cyan-100 border border-cyan-300 rounded-2xl p-7 mb-8">
+    <h3 class="font-black text-cyan-800 text-xl mb-3">Qu'est-ce qu'un préfixe ?</h3>
+    <p class="text-gray-700 mb-3 leading-relaxed">Dans le Système International (SI), on ajoute des <strong>préfixes</strong> devant les unités de base (mètre, gramme, seconde, ampère, litre…) pour exprimer des grandeurs très grandes ou très petites, sans écrire de longues suites de zéros.</p>
+    <p class="text-gray-700 leading-relaxed">Chaque préfixe correspond à une <strong>puissance de 10</strong>. Par exemple, le préfixe <strong>k</strong> (kilo) vaut 10<sup>3</sup> = 1&nbsp;000, donc <strong>1 km = 1 000 m</strong>.</p>
+  </div>
+
+  <!-- Tableau des préfixes -->
+  <h3 class="font-black text-cyan-800 text-2xl mb-5">Tableau des préfixes SI</h3>
+  <div class="overflow-x-auto mb-10 rounded-xl shadow-md">
+    <table class="prefix-table rounded-xl overflow-hidden text-sm">
+      <thead>
+        <tr>
+          <th>Préfixe</th>
+          <th>Symbole</th>
+          <th>Puissance de 10</th>
+          <th>Valeur décimale</th>
+          <th>Exemple</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>téra</td><td class="font-black text-cyan-700 text-lg">T</td><td class="font-bold">10<sup>12</sup></td><td>1 000 000 000 000</td><td>1 To (téraoctet)</td></tr>
+        <tr><td>giga</td><td class="font-black text-cyan-700 text-lg">G</td><td class="font-bold">10<sup>9</sup></td><td>1 000 000 000</td><td>1 Go (gigaoctet)</td></tr>
+        <tr><td>méga</td><td class="font-black text-cyan-700 text-lg">M</td><td class="font-bold">10<sup>6</sup></td><td>1 000 000</td><td>1 MHz (mégahertz)</td></tr>
+        <tr><td>kilo</td><td class="font-black text-cyan-700 text-lg">k</td><td class="font-bold">10<sup>3</sup></td><td>1 000</td><td>1 km (kilomètre)</td></tr>
+        <tr><td>hecto</td><td class="font-black text-cyan-700 text-lg">h</td><td class="font-bold">10<sup>2</sup></td><td>100</td><td>1 hPa (hectopascal)</td></tr>
+        <tr><td>déca</td><td class="font-black text-cyan-700 text-lg">da</td><td class="font-bold">10<sup>1</sup></td><td>10</td><td>1 dam (décamètre)</td></tr>
+        <tr class="base-row"><td>— (aucun)</td><td class="font-black text-gray-600 text-lg">—</td><td class="font-bold">10<sup>0</sup> = 1</td><td>1</td><td>1 m (mètre)</td></tr>
+        <tr><td>déci</td><td class="font-black text-cyan-700 text-lg">d</td><td class="font-bold">10<sup>−1</sup></td><td>0,1</td><td>1 dL (décilitre)</td></tr>
+        <tr><td>centi</td><td class="font-black text-cyan-700 text-lg">c</td><td class="font-bold">10<sup>−2</sup></td><td>0,01</td><td>1 cm (centimètre)</td></tr>
+        <tr><td>milli</td><td class="font-black text-cyan-700 text-lg">m</td><td class="font-bold">10<sup>−3</sup></td><td>0,001</td><td>1 mA (milliampère)</td></tr>
+        <tr><td>micro</td><td class="font-black text-cyan-700 text-lg">µ</td><td class="font-bold">10<sup>−6</sup></td><td>0,000 001</td><td>1 µm (micromètre)</td></tr>
+        <tr><td>nano</td><td class="font-black text-cyan-700 text-lg">n</td><td class="font-bold">10<sup>−9</sup></td><td>0,000 000 001</td><td>1 nm (nanomètre)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Méthode -->
+  <div class="bg-gradient-to-br from-cyan-600 to-sky-700 rounded-2xl p-7 mb-10 text-white shadow-lg">
+    <h3 class="font-black text-2xl mb-6">La méthode de conversion</h3>
+    <div class="space-y-5">
+      <div class="flex items-start gap-4">
+        <div class="step-badge bg-white text-cyan-700 text-lg font-black flex-shrink-0">1</div>
+        <div class="text-lg"><strong>Recopier le nombre</strong> (le coefficient) tel quel.</div>
+      </div>
+      <div class="flex items-start gap-4">
+        <div class="step-badge bg-white text-cyan-700 text-lg font-black flex-shrink-0">2</div>
+        <div>
+          <div class="text-lg mb-2"><strong>Multiplier par une puissance de 10</strong> dont l'exposant est :</div>
+          <div class="bg-white rounded-xl px-4 py-3 text-cyan-900 font-black text-lg text-center border-2 border-cyan-200">
+            exposant = (puissance du préfixe de départ) − (puissance du préfixe d'arrivée)
+          </div>
+          <div class="text-cyan-100 text-xl mt-2 font-semibold">Si l'unité n'a pas de préfixe, sa puissance vaut <strong class="text-white">0</strong>.</div>
+        </div>
+      </div>
+      <div class="flex items-start gap-4">
+        <div class="step-badge bg-white text-cyan-700 text-lg font-black flex-shrink-0">3</div>
+        <div class="text-lg"><strong>Simplifier</strong> si possible (mais la notation scientifique est toujours acceptée).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exemples -->
+  <h3 class="font-black text-cyan-800 text-2xl mb-5">Exemples détaillés</h3>
+  <div class="space-y-5 mb-10">
+    <div class="example-box">
+      <div class="font-black text-cyan-700 text-lg mb-3">Exemple 1 : Convertir 5 km en m</div>
+      <div class="text-gray-600 mb-2">Préfixe de départ : <span class="tag-prefix">k</span> (kilo = 10<sup>3</sup>) &nbsp;→&nbsp; Préfixe d'arrivée : <em>aucun</em> (10<sup>0</sup>)</div>
+      <div class="text-gray-600 mb-3">Exposant de conversion : 3 − 0 = <strong>3</strong></div>
+      <div class="formula-box text-lg">5 km = 5 × 10<sup>3</sup> m</div>
+    </div>
+    <div class="example-box">
+      <div class="font-black text-cyan-700 text-lg mb-3">Exemple 2 : Convertir 3,2 m en cm</div>
+      <div class="text-gray-600 mb-2">Préfixe de départ : <em>aucun</em> (10<sup>0</sup>) &nbsp;→&nbsp; Préfixe d'arrivée : <span class="tag-prefix">c</span> (centi = 10<sup>−2</sup>)</div>
+      <div class="text-gray-600 mb-3">Exposant de conversion : 0 − (−2) = <strong>+2</strong></div>
+      <div class="formula-box text-lg">3,2 m = 3,2 × 10<sup>2</sup> cm</div>
+    </div>
+    <div class="example-box">
+      <div class="font-black text-cyan-700 text-lg mb-3">Exemple 3 : Convertir 450 µA en mA</div>
+      <div class="text-gray-600 mb-2">Préfixe de départ : <span class="tag-prefix">µ</span> (micro = 10<sup>−6</sup>) &nbsp;→&nbsp; Préfixe d'arrivée : <span class="tag-prefix">m</span> (milli = 10<sup>−3</sup>)</div>
+      <div class="text-gray-600 mb-3">Exposant de conversion : −6 − (−3) = <strong>−3</strong></div>
+      <div class="formula-box text-lg">450 µA = 450 × 10<sup>−3</sup> mA</div>
+    </div>
+    <div class="example-box">
+      <div class="font-black text-cyan-700 text-lg mb-3">Exemple 4 : Convertir 2,5 × 10<sup>4</sup> mm en m</div>
+      <div class="text-gray-600 mb-2">Préfixe de départ : <span class="tag-prefix">m</span> (milli = 10<sup>−3</sup>) &nbsp;→&nbsp; Préfixe d'arrivée : <em>aucun</em> (10<sup>0</sup>)</div>
+      <div class="text-gray-600 mb-2">Exposant de conversion : −3 − 0 = <strong>−3</strong></div>
+      <div class="text-gray-600 mb-3">On ajoute cet exposant à la puissance de 10 du nombre : 4 + (−3) = <strong>1</strong></div>
+      <div class="formula-box text-lg">2,5 × 10<sup>4</sup> mm = 2,5 × 10<sup>4 + (−3)</sup> m = 2,5 × 10<sup>1</sup> m = <strong>25 m</strong></div>
+    </div>
+  </div>
+
+  <div class="bg-yellow-100 border-l-4 border-yellow-400 rounded-r-2xl p-5 flex items-start gap-4 mb-8">
+    <div class="text-gray-700">
+      <strong class="text-yellow-700">Point de vigilance !</strong> Le signe moins devant les exposants est crucial. Calcule toujours soigneusement la différence <strong>(exposant départ) − (exposant arrivée)</strong> en faisant attention aux signes.
+    </div>
+  </div>
+
+  <div class="text-center">
+    <button class="btn-primary" onclick="showHome()">Retour à l'accueil</button>
+  </div>
+</div>
+
+<!-- ====== MODULE 2 : ASTUCES ====== -->
+<div id="screen-2" class="hidden-screen max-w-4xl mx-auto px-4 py-8">
+  <div class="mb-8">
+    <div class="text-xs font-bold text-purple-400 uppercase tracking-widest mb-1">Module 2</div>
+    <h2 class="text-3xl font-black text-purple-800">Astuces de mémorisation des préfixes</h2>
+  </div>
+
+  <!-- Astuce 1 -->
+  <div class="mem-card bg-purple-100 border-2 border-purple-300">
+    <div class="mb-4">
+      <h3 class="font-black text-purple-800 text-xl">Astuce n°1 — Les préfixes principaux vont de 3 en 3 !</h3>
+    </div>
+    <p class="text-gray-700 mb-5 leading-relaxed">Les préfixes les plus courants en sciences ont des exposants qui sont des <strong>multiples de 3</strong>. Retiens cette chaîne (du plus grand au plus petit) :</p>
+    <div class="overflow-x-auto pb-2">
+      <div class="flex items-center gap-2 min-w-max mx-auto w-fit mb-4">
+        <div class="text-center bg-purple-50 border-2 border-purple-300 rounded-xl p-3 min-w-[72px] shadow-sm">
+          <div class="font-black text-purple-700 text-2xl">T</div>
+          <div class="text-xs text-gray-500 font-semibold">téra</div>
+          <div class="text-sm font-black text-purple-600">10<sup>12</sup></div>
+        </div>
+        <div class="text-purple-400 font-black text-xl">←3</div>
+        <div class="text-center bg-purple-50 border-2 border-purple-300 rounded-xl p-3 min-w-[72px] shadow-sm">
+          <div class="font-black text-purple-700 text-2xl">G</div>
+          <div class="text-xs text-gray-500 font-semibold">giga</div>
+          <div class="text-sm font-black text-purple-600">10<sup>9</sup></div>
+        </div>
+        <div class="text-purple-400 font-black text-xl">←3</div>
+        <div class="text-center bg-purple-50 border-2 border-purple-300 rounded-xl p-3 min-w-[72px] shadow-sm">
+          <div class="font-black text-purple-700 text-2xl">M</div>
+          <div class="text-xs text-gray-500 font-semibold">méga</div>
+          <div class="text-sm font-black text-purple-600">10<sup>6</sup></div>
+        </div>
+        <div class="text-purple-400 font-black text-xl">←3</div>
+        <div class="text-center bg-purple-50 border-2 border-purple-300 rounded-xl p-3 min-w-[72px] shadow-sm">
+          <div class="font-black text-purple-700 text-2xl">k</div>
+          <div class="text-xs text-gray-500 font-semibold">kilo</div>
+          <div class="text-sm font-black text-purple-600">10<sup>3</sup></div>
+        </div>
+        <div class="text-purple-400 font-black text-xl">←3</div>
+        <div class="text-center bg-orange-50 border-2 border-orange-300 rounded-xl p-3 min-w-[72px] shadow-sm ring-2 ring-orange-300">
+          <div class="font-black text-orange-700 text-2xl">—</div>
+          <div class="text-xs text-gray-500 font-semibold">unité</div>
+          <div class="text-sm font-black text-orange-600">10<sup>0</sup></div>
+        </div>
+        <div class="text-purple-400 font-black text-xl">←3</div>
+        <div class="text-center bg-purple-50 border-2 border-purple-300 rounded-xl p-3 min-w-[72px] shadow-sm">
+          <div class="font-black text-purple-700 text-2xl">m</div>
+          <div class="text-xs text-gray-500 font-semibold">milli</div>
+          <div class="text-sm font-black text-purple-600">10<sup>−3</sup></div>
+        </div>
+        <div class="text-purple-400 font-black text-xl">←3</div>
+        <div class="text-center bg-purple-50 border-2 border-purple-300 rounded-xl p-3 min-w-[72px] shadow-sm">
+          <div class="font-black text-purple-700 text-2xl">µ</div>
+          <div class="text-xs text-gray-500 font-semibold">micro</div>
+          <div class="text-sm font-black text-purple-600">10<sup>−6</sup></div>
+        </div>
+        <div class="text-purple-400 font-black text-xl">←3</div>
+        <div class="text-center bg-purple-50 border-2 border-purple-300 rounded-xl p-3 min-w-[72px] shadow-sm">
+          <div class="font-black text-purple-700 text-2xl">n</div>
+          <div class="text-xs text-gray-500 font-semibold">nano</div>
+          <div class="text-sm font-black text-purple-600">10<sup>−9</sup></div>
+        </div>
+      </div>
+    </div>
+    <div class="bg-purple-200 rounded-xl p-4 text-center text-purple-900 font-bold text-lg">
+      Les exposants des préfixes principaux sont : +12, +9, +6, +3, 0, −3, −6, −9…
+    </div>
+  </div>
+
+  <!-- Astuce 2 -->
+  <div class="mem-card bg-blue-100 border-2 border-blue-300">
+    <div class="mb-4">
+      <h3 class="font-black text-blue-800 text-xl">Astuce n°2 — Les grands préfixes : pense aux fichiers informatiques !</h3>
+    </div>
+    <p class="text-gray-700 mb-5 leading-relaxed">Tu connais déjà les grands préfixes grâce aux tailles de fichiers sur ton ordinateur :</p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+      <div class="bg-blue-50 rounded-xl p-5 text-center border-2 border-blue-300 shadow-sm">
+        <div class="font-black text-blue-700 text-2xl">ko</div>
+        <div class="font-bold text-gray-600 text-sm">kilooctet</div>
+        <div class="font-black text-blue-500 mt-1">10<sup>3</sup></div>
+        <div class="text-xs text-gray-400 mt-2">Un petit fichier texte</div>
+      </div>
+      <div class="bg-blue-50 rounded-xl p-5 text-center border-2 border-blue-300 shadow-sm">
+        <div class="font-black text-blue-700 text-2xl">Mo</div>
+        <div class="font-bold text-gray-600 text-sm">mégaoctet</div>
+        <div class="font-black text-blue-500 mt-1">10<sup>6</sup></div>
+        <div class="text-xs text-gray-400 mt-2">Une photo</div>
+      </div>
+      <div class="bg-blue-50 rounded-xl p-5 text-center border-2 border-blue-300 shadow-sm">
+        <div class="font-black text-blue-700 text-2xl">Go</div>
+        <div class="font-bold text-gray-600 text-sm">gigaoctet</div>
+        <div class="font-black text-blue-500 mt-1">10<sup>9</sup></div>
+        <div class="text-xs text-gray-400 mt-2">Un film</div>
+      </div>
+      <div class="bg-blue-50 rounded-xl p-5 text-center border-2 border-blue-300 shadow-sm">
+        <div class="font-black text-blue-700 text-2xl">To</div>
+        <div class="font-bold text-gray-600 text-sm">téraoctet</div>
+        <div class="font-black text-blue-500 mt-1">10<sup>12</sup></div>
+        <div class="text-xs text-gray-400 mt-2">Un disque dur</div>
+      </div>
+    </div>
+    <div class="bg-blue-200 rounded-xl p-4 text-center text-blue-900 font-bold text-lg">
+      k → M → G → T : chaque fois, on multiplie par 1 000 (10<sup>3</sup>) !
+    </div>
+  </div>
+
+  <!-- Astuce 3 -->
+  <div class="mem-card bg-emerald-100 border-2 border-emerald-300">
+    <div class="mb-4">
+      <h3 class="font-black text-emerald-800 text-xl">Astuce n°3 — Les petits préfixes : m, µ, n (… et p, f !)</h3>
+    </div>
+    <p class="text-gray-700 mb-4 leading-relaxed">Pour les préfixes négatifs principaux, apprends-les dans cet ordre :</p>
+    <div class="bg-emerald-50 rounded-xl p-5 border-2 border-emerald-300 mb-4 text-center">
+      <div class="text-3xl font-black text-emerald-700 mb-2">m &nbsp;→&nbsp; µ &nbsp;→&nbsp; n &nbsp;→&nbsp; p &nbsp;→&nbsp; f</div>
+      <div class="text-gray-500">milli &nbsp;→&nbsp; micro &nbsp;→&nbsp; nano &nbsp;→&nbsp; pico &nbsp;→&nbsp; femto</div>
+      <div class="text-emerald-600 font-black mt-3 text-lg">10<sup>−3</sup> &nbsp;→&nbsp; 10<sup>−6</sup> &nbsp;→&nbsp; 10<sup>−9</sup> &nbsp;→&nbsp; 10<sup>−12</sup>  &nbsp;→&nbsp; 10<sup>−15</sup></div>
+    </div>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="bg-emerald-200 rounded-xl p-4 text-emerald-900 font-semibold">
+        <strong>Moyen mnémotechnique :</strong><br>
+        <em>"<strong>M</strong>on <strong>M</strong>icro <strong>N</strong>'a <strong>P</strong>as <strong>F</strong>roid</em><br>
+        <span class="text-sm text-emerald-800">(car il a une bonnette en fourrure)</span>
+      </div>
+      <div class="bg-emerald-50 rounded-xl p-4 border border-emerald-300 text-gray-600 text-sm">
+        Les préfixes après le nano sont le <strong>pico</strong> (p = 10<sup>−12</sup>) et le <strong>femto</strong> (f = 10<sup>−15</sup>), utilisés en physique des particules !
+      </div>
+    </div>
+  </div>
+
+  <!-- Astuce 4 -->
+  <div class="mem-card bg-yellow-100 border-2 border-yellow-300">
+    <div class="mb-4">
+      <h3 class="font-black text-yellow-800 text-xl">Astuce n°4 — centi (c) et déci (d) : la vie quotidienne !</h3>
+    </div>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="bg-yellow-50 rounded-xl p-5 border-2 border-yellow-300 shadow-sm">
+        <div class="font-black text-yellow-700 text-xl mb-3">c = centi = 10<sup>−2</sup></div>
+        <ul class="text-gray-600 text-sm space-y-2">
+          <li>Un <strong>centime</strong> = 1/100 d'euro</li>
+          <li>Un <strong>centimètre</strong> = 1/100 de mètre</li>
+          <li>Un <strong>centilitre</strong> = 1/100 de litre</li>
+        </ul>
+        <div class="mt-3 bg-yellow-200 rounded-lg p-2 text-yellow-900 text-sm font-bold">
+          <strong>cent</strong> = 100 → 1/100 = 10<sup>−2</sup>
+        </div>
+      </div>
+      <div class="bg-yellow-50 rounded-xl p-5 border-2 border-yellow-300 shadow-sm">
+        <div class="font-black text-yellow-700 text-xl mb-3">d = déci = 10<sup>−1</sup></div>
+        <ul class="text-gray-600 text-sm space-y-2">
+          <li>Un <strong>décimètre</strong> = 1/10 de mètre</li>
+          <li>Un <strong>décilitre</strong> = 1/10 de litre</li>
+          <li>Les <strong>décimales</strong> sont les chiffres après la virgule (× 1/10)</li>
+        </ul>
+        <div class="mt-3 bg-yellow-200 rounded-lg p-2 text-yellow-900 text-sm font-bold">
+          <em>decimus</em> (latin) = dixième → 10<sup>−1</sup>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Astuce 5 -->
+  <div class="mem-card bg-red-100 border-2 border-red-300">
+    <div class="mb-4">
+      <h3 class="font-black text-red-800 text-xl">Astuce n°5 — déca (da) et hecto (h) : de 1 et de 2 !</h3>
+    </div>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="bg-red-50 rounded-xl p-5 border-2 border-red-300 shadow-sm">
+        <div class="font-black text-red-700 text-xl mb-3">da = déca = 10<sup>1</sup> = 10</div>
+        <ul class="text-gray-600 text-sm space-y-2">
+          <li>Un <strong>décamètre</strong> = 10 mètres</li>
+          <li>Un <strong>décathlon</strong> = 10 épreuves</li>
+          <li><em>déca</em> vient du grec <em>deka</em> = dix</li>
+        </ul>
+        <div class="mt-3 bg-red-200 rounded-lg p-2 text-red-900 text-sm font-bold">
+          <strong>da</strong> comme <strong>d</strong>ix → 10<sup>1</sup>
+        </div>
+      </div>
+      <div class="bg-red-50 rounded-xl p-5 border-2 border-red-300 shadow-sm">
+        <div class="font-black text-red-700 text-xl mb-3">h = hecto = 10<sup>2</sup> = 100</div>
+        <ul class="text-gray-600 text-sm space-y-2">
+          <li>Un <strong>hectare</strong> = 100 ares (champ agricole)</li>
+          <li>Les <strong>hPa</strong> (hectopascals) sont sur la météo !</li>
+          <li>Mon cousin Hector pèse <strong>100 kg</strong> !!</li>
+        </ul>
+        <div class="mt-3 bg-red-200 rounded-lg p-2 text-red-900 text-sm font-bold">
+          <strong>h</strong>ecto = <strong>h</strong>undred (100 en anglais) → 10<sup>2</sup>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Récap -->
+  <div class="bg-purple-100 border-2 border-purple-300 rounded-2xl p-7 mb-8 shadow-lg">
+    <h3 class="font-black text-2xl mb-5 text-center text-purple-800">Récapitulatif express</h3>
+    <div class="overflow-x-auto">
+      <div class="flex items-center justify-center gap-2 min-w-max mx-auto flex-wrap">
+        <div class="text-center bg-purple-200 border-2 border-purple-300 rounded-xl p-3 min-w-[64px]"><div class="font-black text-lg text-purple-800">T</div><div class="text-xs text-purple-600 font-bold">+12</div></div>
+        <div class="text-center bg-purple-200 border-2 border-purple-300 rounded-xl p-3 min-w-[64px]"><div class="font-black text-lg text-purple-800">G</div><div class="text-xs text-purple-600 font-bold">+9</div></div>
+        <div class="text-center bg-purple-200 border-2 border-purple-300 rounded-xl p-3 min-w-[64px]"><div class="font-black text-lg text-purple-800">M</div><div class="text-xs text-purple-600 font-bold">+6</div></div>
+        <div class="text-center bg-blue-200 border-2 border-blue-300 rounded-xl p-3 min-w-[64px]"><div class="font-black text-lg text-blue-800">k</div><div class="text-xs text-blue-600 font-bold">+3</div></div>
+        <div class="text-center bg-blue-200 border-2 border-blue-300 rounded-xl p-3 min-w-[64px]"><div class="font-black text-lg text-blue-800">h</div><div class="text-xs text-blue-600 font-bold">+2</div></div>
+        <div class="text-center bg-green-200 border-2 border-green-300 rounded-xl p-3 min-w-[64px]"><div class="font-black text-lg text-green-800">da</div><div class="text-xs text-green-600 font-bold">+1</div></div>
+        <div class="text-center bg-orange-200 border-2 border-orange-400 rounded-xl p-3 min-w-[64px] ring-2 ring-orange-300"><div class="font-black text-lg text-orange-800">—</div><div class="text-xs text-orange-700 font-bold">0</div></div>
+        <div class="text-center bg-green-200 border-2 border-green-300 rounded-xl p-3 min-w-[64px]"><div class="font-black text-lg text-green-800">d</div><div class="text-xs text-green-600 font-bold">-1</div></div>
+        <div class="text-center bg-indigo-200 border-2 border-indigo-300 rounded-xl p-3 min-w-[64px]"><div class="font-black text-lg text-indigo-800">c</div><div class="text-xs text-indigo-600 font-bold">-2</div></div>
+        <div class="text-center bg-indigo-200 border-2 border-indigo-300 rounded-xl p-3 min-w-[64px]"><div class="font-black text-lg text-indigo-800">m</div><div class="text-xs text-indigo-600 font-bold">−3</div></div>
+        <div class="text-center bg-indigo-200 border-2 border-indigo-300 rounded-xl p-3 min-w-[64px]"><div class="font-black text-lg text-indigo-800">µ</div><div class="text-xs text-indigo-600 font-bold">−6</div></div>
+        <div class="text-center bg-indigo-200 border-2 border-indigo-300 rounded-xl p-3 min-w-[64px]"><div class="font-black text-lg text-indigo-800">n</div><div class="text-xs text-indigo-600 font-bold">−9</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center">
+    <button class="btn-primary" onclick="showHome()">Retour à l'accueil</button>
+  </div>
+</div>
+
+<!-- ====== MODULE 3 : APPRENDRE ====== -->
+<div id="screen-3" class="hidden-screen max-w-3xl mx-auto px-4 py-8">
+  <div class="mb-7">
+    <div class="text-xs font-bold text-pink-400 uppercase tracking-widest mb-1">Module 3</div>
+    <h2 class="text-3xl font-black text-pink-800">Apprendre les préfixes</h2>
+  </div>
+  <div id="m3-container"></div>
+</div>
+
+<!-- ====== MODULES 4-7 : EXERCICES (screen-ex) ====== -->
+<div id="screen-ex" class="hidden-screen max-w-3xl mx-auto px-4 py-8">
+  <div class="mb-7">
+    <div class="text-xs font-bold uppercase tracking-widest mb-1" id="ex-label">Module 4</div>
+    <h2 class="text-3xl font-black" id="ex-title" style="color:#166534">Exercices niveau 1</h2>
+  </div>
+  <div id="ex-container"></div>
+</div>
+
+<!-- ====== MODULE 8 : COURS UNITÉS AU CARRÉ ET AU CUBE ====== -->
+<div id="screen-cours-sq" class="hidden-screen max-w-4xl mx-auto px-4 py-8">
+  <div class="mb-8">
+    <div class="text-xs font-bold text-cyan-600 uppercase tracking-widest mb-1">Module 8</div>
+    <h2 class="text-3xl font-black text-cyan-800">Unités au carré et au cube — Cours</h2>
+  </div>
+
+  <!-- Principe -->
+  <div class="bg-gradient-to-br from-cyan-600 to-sky-700 rounded-2xl p-7 mb-8 text-white shadow-lg">
+    <h3 class="font-black text-2xl mb-5">Le principe</h3>
+    <p class="text-lg mb-4 leading-relaxed">Quand une unité est <strong>au carré</strong> (ex : m²) ou <strong>au cube</strong> (ex : m³), on applique la même méthode de conversion, mais avec une règle supplémentaire :</p>
+    <div class="bg-white rounded-xl px-5 py-4 text-cyan-900 font-black text-lg text-center mb-4">
+      exposant de conversion = (exposant du préfixe de départ − exposant du préfixe d'arrivée) × <span class="text-cyan-600">puissance de l'unité</span>
+    </div>
+    <ul class="space-y-2 text-lg">
+      <li>→ Si l'unité est <strong>au carré</strong> : on multiplie l'exposant de conversion par <strong>2</strong></li>
+      <li>→ Si l'unité est <strong>au cube</strong> : on multiplie l'exposant de conversion par <strong>3</strong></li>
+    </ul>
+    <div class="bg-white/20 rounded-xl p-4 mt-5 text-base">
+      <strong>Pourquoi ?</strong> Parce que (10<sup>a</sup>)<sup>b</sup> = 10<sup>a×b</sup>. En élevant le facteur de conversion à la puissance de l'unité, l'exposant se multiplie. Par exemple : (10<sup>−2</sup>)<sup>2</sup> = 10<sup>−4</sup>, donc convertir du cm² en m² introduit un facteur 10<sup>−4</sup> et non 10<sup>−2</sup>.
+    </div>
+  </div>
+
+  <!-- Méthode en 3 étapes -->
+  <div class="bg-cyan-100 rounded-2xl shadow p-7 mb-8 border border-cyan-200">
+    <h3 class="font-black text-xl text-cyan-800 mb-5">La méthode en 3 étapes</h3>
+    <div class="space-y-4">
+      <div class="flex items-start gap-4">
+        <div class="step-badge bg-cyan-600 text-white text-lg font-black flex-shrink-0">1</div>
+        <div><strong>Trouver l'exposant du préfixe</strong> de départ et d'arrivée (comme d'habitude).</div>
+      </div>
+      <div class="flex items-start gap-4">
+        <div class="step-badge bg-cyan-600 text-white text-lg font-black flex-shrink-0">2</div>
+        <div><strong>Calculer la différence</strong> (départ − arrivée), puis <strong>multiplier par la puissance de l'unité</strong> (2 si carré, 3 si cube).</div>
+      </div>
+      <div class="flex items-start gap-4">
+        <div class="step-badge bg-cyan-600 text-white text-lg font-black flex-shrink-0">3</div>
+        <div><strong>Multiplier le nombre</strong> par 10 élevé à cet exposant final.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exemples -->
+  <h3 class="font-black text-gray-800 text-2xl mb-5">Exemples détaillés</h3>
+  <div class="space-y-5 mb-10">
+
+    <div class="example-box">
+      <div class="font-black text-cyan-700 text-lg mb-3">Exemple 1 : Convertir 3 cm² en m²</div>
+      <div class="text-gray-600 mb-1">Préfixe de départ : <span class="tag-prefix">c</span> (centi = 10<sup>−2</sup>) &nbsp;→&nbsp; Préfixe d'arrivée : <em>aucun</em> (10<sup>0</sup>)</div>
+      <div class="text-gray-600 mb-1">Différence des exposants : −2 − 0 = −2</div>
+      <div class="text-gray-600 mb-3">Unité au carré → on multiplie par 2 : −2 × 2 = <strong>−4</strong></div>
+      <div class="formula-box text-lg">3 cm² = 3 × 10<sup>−4</sup> m²</div>
+    </div>
+
+    <div class="example-box">
+      <div class="font-black text-cyan-700 text-lg mb-3">Exemple 2 : Convertir 5 km² en m²</div>
+      <div class="text-gray-600 mb-1">Préfixe de départ : <span class="tag-prefix">k</span> (kilo = 10<sup>3</sup>) &nbsp;→&nbsp; Préfixe d'arrivée : <em>aucun</em> (10<sup>0</sup>)</div>
+      <div class="text-gray-600 mb-1">Différence des exposants : 3 − 0 = 3</div>
+      <div class="text-gray-600 mb-3">Unité au carré → on multiplie par 2 : 3 × 2 = <strong>6</strong></div>
+      <div class="formula-box text-lg">5 km² = 5 × 10<sup>6</sup> m²</div>
+    </div>
+
+    <div class="example-box">
+      <div class="font-black text-cyan-700 text-lg mb-3">Exemple 3 : Convertir 2,5 mm³ en cm³</div>
+      <div class="text-gray-600 mb-1">Préfixe de départ : <span class="tag-prefix">m</span> (milli = 10<sup>−3</sup>) &nbsp;→&nbsp; Préfixe d'arrivée : <span class="tag-prefix">c</span> (centi = 10<sup>−2</sup>)</div>
+      <div class="text-gray-600 mb-1">Différence des exposants : −3 − (−2) = −1</div>
+      <div class="text-gray-600 mb-3">Unité au cube → on multiplie par 3 : −1 × 3 = <strong>−3</strong></div>
+      <div class="formula-box text-lg">2,5 mm³ = 2,5 × 10<sup>−3</sup> cm³</div>
+    </div>
+
+    <div class="example-box">
+      <div class="font-black text-cyan-700 text-lg mb-3">Exemple 4 : Convertir 1,2 × 10³ cm³ en m³</div>
+      <div class="text-gray-600 mb-1">Préfixe de départ : <span class="tag-prefix">c</span> (centi = 10<sup>−2</sup>) &nbsp;→&nbsp; Préfixe d'arrivée : <em>aucun</em> (10<sup>0</sup>)</div>
+      <div class="text-gray-600 mb-1">Différence des exposants : −2 − 0 = −2 ; × 3 = <strong>−6</strong></div>
+      <div class="text-gray-600 mb-3">On ajoute cet exposant à la puissance de 10 du nombre : 3 + (−6) = <strong>−3</strong></div>
+      <div class="formula-box text-lg">1,2 × 10<sup>3</sup> cm³ = 1,2 × 10<sup>−3</sup> m³</div>
+    </div>
+  </div>
+
+  <!-- Lien cm³/L -->
+  <div class="bg-amber-100 border-2 border-amber-300 rounded-2xl p-7 mb-8">
+    <h3 class="font-black text-amber-800 text-xl mb-4">Lien entre cm³, dm³, m³ et les litres</h3>
+    <p class="text-gray-700 mb-4 leading-relaxed">Le litre (L) est une unité de volume couramment utilisée. Voici les correspondances à connaître absolument :</p>
+
+    <div class="overflow-x-auto mb-5">
+      <table class="prefix-table text-sm w-full">
+        <thead><tr><th>Volume (m³)</th><th>Volume (L)</th></tr></thead>
+        <tbody>
+          <tr><td class="font-bold">1 m³</td><td class="font-bold">1 000 L</td></tr>
+          <tr><td class="font-bold">1 dm³</td><td class="font-bold">1 L </td></tr>
+          <tr><td class="font-bold">1 cm³</td><td class="font-bold">1 mL </td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="bg-amber-200 border border-amber-400 rounded-xl p-5 mb-4">
+      <div class="font-black text-amber-900 text-base mb-3">Méthode pratique : se ramener à l'une de ces trois correspondances</div>
+      <p class="text-gray-700 text-sm leading-relaxed mb-3">Pour convertir entre des multiples du m³ et des multiples du L, l'idée est simple : on s'arrange pour se ramener à une des équivalence mémorisée. Le choix de l'équivalence choisie n'a pas d'autre importance que de simplifier les calculs.</p>
+      <div class="space-y-3">
+        <div class="bg-white rounded-lg p-3 text-sm border border-amber-200">
+          <strong class="text-amber-700">Exemple A :</strong> Convertir 500 cm³ en L<br>
+          On sait que 1 cm³ = 1 mL, donc 500 cm³ = 500 mL.<br>
+          Puis 500 mL = 500 × 10<sup>-3</sup> L <br>
+          <strong>→ 500 cm³ = 0,5 L</strong>
+        </div>
+        <div class="bg-white rounded-lg p-3 text-sm border border-amber-200">
+          <strong class="text-amber-700">Exemple B :</strong> Convertir 2,5 cL en cm³<br>
+          On sait que 1 cm³ = 1 mL, donc on commence par convertir 2,5 cL en mL.<br>
+          <strong>→ 2,5 cL = 2,5 × 10<sup>−2+3</sup> mL = 2,5 × 10<sup>1</sup> mL = 2,5 × 10<sup>1</sup> cm³</strong>
+        </div>
+        <div class="bg-white rounded-lg p-3 text-sm border border-amber-200">
+          <strong class="text-amber-700">Exemple C :</strong> Convertir 3 mm³ en mL<br>
+		  On passe par les cm³ car 1 cm³ = 1 mL <br>
+          <strong>→ 3 mm³ = 3 × 10<sup>(-3+2)×3</sup> cm³ = 3 × 10<sup>-3</sup> cm³ = 3 × 10<sup>-3</sup> mL </strong>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="text-center">
+    <button class="btn-primary" onclick="showHome()">Retour à l'accueil</button>
+  </div>
+</div>
+
+<!-- ====== MODULE 9 : ENTRAÎNEMENT UNITÉS AU CARRÉ ET AU CUBE ====== -->
+<div id="screen-ex-sq" class="hidden-screen max-w-3xl mx-auto px-4 py-8">
+  <div class="mb-7">
+    <div class="text-xs font-bold text-sky-600 uppercase tracking-widest mb-1">Module 9</div>
+    <h2 class="text-3xl font-black text-sky-800">Unités au carré et au cube — Entraînement</h2>
+  </div>
+  <div id="exsq-container"></div>
+</div>
+
+<!-- ====== JAVASCRIPT ====== -->
+<script>
+// ===== DONNÉES PRÉFIXES =====
+const PREFIXES = [
+  { name:'téra',  sym:'T',  exp:12 },
+  { name:'giga',  sym:'G',  exp:9  },
+  { name:'méga',  sym:'M',  exp:6  },
+  { name:'kilo',  sym:'k',  exp:3  },
+  { name:'hecto', sym:'h',  exp:2  },
+  { name:'déca',  sym:'da', exp:1  },
+  { name:'(aucun)', sym:'', exp:0  },
+  { name:'déci',  sym:'d',  exp:-1 },
+  { name:'centi', sym:'c',  exp:-2 },
+  { name:'milli', sym:'m',  exp:-3 },
+  { name:'micro', sym:'µ',  exp:-6 },
+  { name:'nano',  sym:'n',  exp:-9 },
+];
+const PNOB = PREFIXES.filter(p => p.sym !== '');
+const UNITS = ['m','g','s','A','L','W','Hz','Pa','J','V'];
+
+// ===== UTILITAIRES =====
+function rnd(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+function rndInt(a,b) { return Math.floor(Math.random()*(b-a+1))+a; }
+function shuffle(arr) { return [...arr].sort(()=>Math.random()-0.5); }
+function sup(n) { return '<sup>'+n+'</sup>'; }
+function p10(n) { return '10'+sup(n); }
+function fmtCoeff(v) {
+  if(Number.isInteger(v) || v===Math.round(v)) return String(Math.round(v));
+  return v.toFixed(1).replace('.',',');
+}
+function expToStr(e) { return e>0?'+'+e:String(e); }
+
+// ===== NAVIGATION =====
+let currentScreen = 'home';
+
+// Mapping écran → id du bouton de menu correspondant
+const SCREEN_TO_MENU = {
+  'home':     'menu-home',
+  '1':        'menu-1',
+  '2':        'menu-2',
+  '3':        'menu-3',
+  'ex-5':     'menu-5',
+  'ex-6':     'menu-6',
+  'ex-7':     'menu-7',
+  'ex-8':     'menu-8',
+  'cours-sq': 'menu-cours-sq',
+  'ex-sq':    'menu-ex-sq',
+};
+
+function updateMenuHighlight(screenKey) {
+  // Réinitialiser tous les boutons du menu
+  Object.values(SCREEN_TO_MENU).forEach(btnId => {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.classList.remove('menu-item-current');
+  });
+  // Griser le bouton de la page courante
+  const currentBtnId = SCREEN_TO_MENU[screenKey];
+  if (currentBtnId) {
+    const btn = document.getElementById(currentBtnId);
+    if (btn) btn.classList.add('menu-item-current');
+  }
+}
+
+function closeMenu() {
+  document.getElementById('sandwich-menu').classList.remove('open');
+}
+
+function toggleMenu() {
+  document.getElementById('sandwich-menu').classList.toggle('open');
+}
+
+// Fermer le menu si on clique ailleurs
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('sandwich-menu');
+  const btn = document.getElementById('burger-btn');
+  if (!menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+
+function setModuleTitleBar(text) {
+  const bar = document.getElementById('module-title-bar');
+  if (text) {
+    bar.textContent = text;
+    bar.style.display = 'block';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function showHome() {
+  closeMenu();
+  document.querySelectorAll('[id^="screen-"]').forEach(el => {
+    el.classList.remove('active-screen');
+    el.classList.add('hidden-screen');
+  });
+  document.getElementById('screen-home').classList.replace('hidden-screen','active-screen');
+  setModuleTitleBar('');
+  currentScreen = 'home';
+  updateMenuHighlight('home');
+  window.scrollTo(0,0);
+}
+
+function navTo(n) {
+  closeMenu();
+  showModule(n);
+}
+
+const MODULE_TITLES = {
+  1: 'Module 1 : Cours',
+  2: 'Module 2 : Astuces de mémorisation',
+  3: 'Module 3 : Apprendre les préfixes',
+  5: 'Module 4 : Nombres décimaux',
+  6: 'Module 5 : Avec puissances de 10',
+  7: 'Module 6 : Sans aide',
+  8: 'Module 7 : Expert',
+  'cours-sq': 'Module 8 : Unités au carré et au cube — Cours',
+  'ex-sq': 'Module 9 : Unités au carré et au cube — Entraînement',
+};
+
+function showModule(n) {
+  closeMenu();
+  document.querySelectorAll('[id^="screen-"]').forEach(el => {
+    el.classList.remove('active-screen');
+    el.classList.add('hidden-screen');
+  });
+
+  setModuleTitleBar(MODULE_TITLES[n] || '');
+
+  if (n === 1) {
+    document.getElementById('screen-1').classList.replace('hidden-screen','active-screen');
+    currentScreen = '1';
+    updateMenuHighlight('1');
+  } else if (n === 2) {
+    document.getElementById('screen-2').classList.replace('hidden-screen','active-screen');
+    currentScreen = '2';
+    updateMenuHighlight('2');
+  } else if (n === 3) {
+    document.getElementById('screen-3').classList.replace('hidden-screen','active-screen');
+    currentScreen = '3';
+    updateMenuHighlight('3');
+    startModule3();
+  } else if (n === 'cours-sq') {
+    document.getElementById('screen-cours-sq').classList.replace('hidden-screen','active-screen');
+    currentScreen = 'cours-sq';
+    updateMenuHighlight('cours-sq');
+  } else if (n === 'ex-sq') {
+    document.getElementById('screen-ex-sq').classList.replace('hidden-screen','active-screen');
+    currentScreen = 'ex-sq';
+    updateMenuHighlight('ex-sq');
+    startExSq();
+  } else {
+    document.getElementById('screen-ex').classList.replace('hidden-screen','active-screen');
+    currentScreen = 'ex-' + n;
+    updateMenuHighlight('ex-' + n);
+    startExModule(n);
+  }
+  window.scrollTo(0,0);
+}
+
+// ===== TABLEAU D'AIDE =====
+function buildHelpTable() {
+  let rows = PREFIXES.map(p=>`<tr${p.sym===''?' class="base-row"':''}>
+    <td class="font-black text-cyan-700 text-base">${p.sym||'—'}</td>
+    <td>${p.name}</td>
+    <td class="font-bold">${p10(p.exp)}</td>
+  </tr>`).join('');
+  return `<div id="help-tbl" class="mt-4 bg-cyan-100 border border-cyan-300 rounded-xl p-4 overflow-x-auto" style="display:none">
+    <table class="prefix-table w-full text-sm"><thead><tr><th>Symbole</th><th>Nom</th><th>Puissance de 10</th></tr></thead><tbody>${rows}</tbody></table>
+  </div>`;
+}
+function toggleHelp() {
+  const t = document.getElementById('help-tbl');
+  if(t) t.style.display = t.style.display==='none'?'':'none';
+}
+
+// ===== MODULE 3 =====
+let m3 = {};
+
+function startModule3() {
+  const types=['qcm_sym2exp','qcm_exp2sym','qcm_name2exp','qcm_sym2name','drag_order',
+               'qcm_sym2exp','qcm_exp2sym','qcm_name2exp','qcm_sym2name','drag_order'];
+  const shuffled = shuffle(types);
+  m3 = {q:0, total:10, score:0, questions: shuffled.map(t=>buildM3Q(t))};
+  renderM3();
+}
+
+function buildM3Q(type) {
+  if(type==='qcm_sym2exp') {
+    const p=rnd(PNOB);
+    const opts=shuffle([p,...PNOB.filter(x=>x.sym!==p.sym).sort(()=>Math.random()-0.5).slice(0,3)])
+      .map(x=>({html:p10(x.exp),val:x.exp}));
+    return {type,q:`Quelle est la valeur du préfixe <strong class="text-cyan-700 text-xl">${p.sym}</strong> (${p.name}) ?`,opts,ans:p.exp};
+  }
+  if(type==='qcm_exp2sym') {
+    const p=rnd(PNOB);
+    const opts=shuffle([p,...PNOB.filter(x=>x.sym!==p.sym).sort(()=>Math.random()-0.5).slice(0,3)])
+      .map(x=>({html:`<strong>${x.sym}</strong> — ${x.name}`,val:x.sym}));
+    return {type,q:`Quel préfixe correspond à ${p10(p.exp)} ?`,opts,ans:p.sym};
+  }
+  if(type==='qcm_name2exp') {
+    const p=rnd(PNOB);
+    const opts=shuffle([p,...PNOB.filter(x=>x.name!==p.name).sort(()=>Math.random()-0.5).slice(0,3)])
+      .map(x=>({html:p10(x.exp),val:x.exp}));
+    return {type,q:`Le préfixe <strong>${p.name}</strong> correspond à :`,opts,ans:p.exp};
+  }
+  if(type==='qcm_sym2name') {
+    const p=rnd(PNOB);
+    const opts=shuffle([p,...PNOB.filter(x=>x.sym!==p.sym).sort(()=>Math.random()-0.5).slice(0,3)])
+      .map(x=>({html:x.name,val:x.name}));
+    return {type,q:`Le symbole <strong class="text-cyan-700 text-xl">${p.sym}</strong> est le préfixe :`,opts,ans:p.name};
+  }
+  if(type==='drag_order') {
+    const pool=shuffle([...PREFIXES]).slice(0,5);
+    const sorted=[...pool].sort((a,b)=>a.exp-b.exp);
+    return {type,pool:shuffle(pool),sorted,q:'Classe ces préfixes du plus petit au plus grand (glisse-dépose) :'};
+  }
+  return buildM3Q('qcm_sym2exp');
+}
+
+function renderM3() {
+  const data = m3.questions[m3.q];
+  const prog = Math.round((m3.q/m3.total)*100);
+  let html = `<div class="mb-6">
+    <div class="flex justify-between text-sm font-bold text-gray-500 mb-2">
+      <span>Question ${m3.q+1} / ${m3.total}</span>
+      <span class="text-cyan-600">Score : ${m3.score} / ${m3.q}</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div>
+  </div>
+  <div class="bg-cyan-50 border border-cyan-200 rounded-2xl shadow-lg p-7 mb-4">
+    <div class="text-xl font-bold text-gray-800 mb-7 leading-relaxed">${data.q}</div>`;
+  if(data.type==='drag_order') html+=renderM3Drag(data);
+  else html+=renderM3QCM(data);
+  html+=`</div>`;
+  document.getElementById('m3-container').innerHTML = html;
+  if(data.type==='drag_order') initDrag3();
+}
+
+function renderM3QCM(data) {
+  return `<div class="grid grid-cols-2 gap-4">`+
+    data.opts.map((opt,i)=>`<button class="qcm-option" data-val="${String(opt.val).replace(/"/g,'&quot;')}" onclick="m3Pick(this,'${String(opt.val).replace(/'/g,"\\'")}','${String(data.ans).replace(/'/g,"\\'")}')">
+      ${opt.html}
+    </button>`).join('')+`</div>`;
+}
+
+function m3Pick(btn, val, ans) {
+  document.querySelectorAll('.qcm-option').forEach(b=>b.disabled=true);
+  const ok = String(val)===String(ans);
+  if(ok) { btn.classList.add('opt-correct'); m3.score++; }
+  else {
+    btn.classList.add('opt-wrong');
+    document.querySelectorAll('.qcm-option').forEach(b=>{
+      if(String(b.dataset.val)===String(ans)) b.classList.add('opt-correct');
+    });
+  }
+  const data = m3.questions[m3.q];
+  let correctHtml = String(ans);
+  if(data.type==='qcm_sym2exp'||data.type==='qcm_name2exp') correctHtml = p10(ans);
+  if(data.type==='qcm_exp2sym') {
+    const pf = PREFIXES.find(x=>x.sym===ans);
+    correctHtml = pf?`${pf.sym} — ${pf.name}`:ans;
+  }
+  appendM3Feedback(ok, correctHtml);
+}
+
+let dragActive = null;
+let dragOrder = [];
+
+function renderM3Drag(data) {
+  const items = data.pool.map(p=>`<div class="drag-item" draggable="true" data-sym="${p.sym}" data-exp="${p.exp}">
+    <span class="text-2xl font-black text-cyan-700">${p.sym||'—'}</span>
+    <span class="text-xs text-gray-500 font-semibold">${p.name}</span>
+  </div>`).join('');
+  const zones = data.pool.map((_,i)=>`<div class="drop-zone" data-pos="${i}"
+    ondragover="event.preventDefault();this.classList.add('drag-over')"
+    ondragleave="this.classList.remove('drag-over')"
+    ondrop="dropM3(event,${i})">
+    <span class="text-gray-300 font-black text-lg">${i+1}</span>
+  </div>`).join('');
+  return `<div class="mb-5">
+    <div class="text-sm text-gray-500 mb-3 font-bold">Éléments à classer :</div>
+    <div id="drag-pool" class="flex flex-wrap gap-3 min-h-[60px] mb-6">${items}</div>
+    <div class="text-sm text-gray-500 mb-3 font-bold">Dépose ici du plus petit au plus grand :</div>
+    <div id="drop-zones" class="flex flex-wrap gap-3">${zones}</div>
+  </div>
+  <button class="btn-primary mt-4" onclick="checkDrag3()">Vérifier l'ordre</button>`;
+}
+
+function initDrag3() {
+  dragOrder = new Array(5).fill(null);
+  document.querySelectorAll('.drag-item').forEach(el=>{
+    el.addEventListener('dragstart', e=>{
+      dragActive = el;
+      setTimeout(()=>el.classList.add('dragging'),0);
+    });
+    el.addEventListener('dragend', ()=>{
+      el.classList.remove('dragging');
+      dragActive = null;
+    });
+  });
+}
+
+function dropM3(e, pos) {
+  e.preventDefault();
+  const zone = document.querySelector(`[data-pos="${pos}"]`);
+  zone.classList.remove('drag-over');
+  if(!dragActive) return;
+  const existing = zone.querySelector('.drag-item');
+  if(existing) { document.getElementById('drag-pool').appendChild(existing); }
+  document.querySelectorAll('.drop-zone').forEach(z=>{
+    if(z.contains(dragActive)) {
+      z.innerHTML = `<span class="text-gray-300 font-black text-lg">${parseInt(z.dataset.pos)+1}</span>`;
+      z.classList.remove('filled');
+      dragOrder[parseInt(z.dataset.pos)] = null;
+    }
+  });
+  const pool = document.getElementById('drag-pool');
+  if(pool.contains(dragActive)) pool.removeChild(dragActive);
+  zone.innerHTML = '';
+  zone.appendChild(dragActive);
+  zone.classList.add('filled');
+  dragOrder[pos] = dragActive.dataset.sym;
+}
+
+function checkDrag3() {
+  const data = m3.questions[m3.q];
+  const ok = dragOrder.every((sym,i)=>sym===data.sorted[i].sym);
+  if(ok) m3.score++;
+  const correctStr = data.sorted.map(p=>`${p.sym||'—'} (${p10(p.exp)})`).join(' < ');
+  document.querySelector('#m3-container .btn-primary').disabled = true;
+  appendM3Feedback(ok, correctStr, true);
+}
+
+function appendM3Feedback(ok, correctHtml, isDrag=false) {
+  const box = document.createElement('div');
+  box.className = ok?'feedback-ok':'feedback-ko';
+  box.innerHTML = ok
+    ?`<div class="font-black text-green-700 text-xl mb-1">Bravo !</div>`+
+      (isDrag?`<div class="text-gray-600 text-sm">Bon ordre : ${correctHtml}</div>`:
+              `<div class="text-gray-600">Réponse : ${correctHtml}</div>`)
+    :`<div class="font-black text-red-700 text-xl mb-1">Pas tout à fait…</div>`+
+      `<div class="text-gray-600">La bonne réponse était : <strong>${correctHtml}</strong></div>`;
+  const cont = document.querySelector('#m3-container .bg-cyan-50');
+  cont.appendChild(box);
+  const btnDiv = document.createElement('div');
+  btnDiv.className = 'mt-5 text-center';
+  btnDiv.innerHTML = m3.q<m3.total-1
+    ?`<button class="btn-primary" onclick="m3Next()">Question suivante →</button>`
+    :`<button class="btn-primary" onclick="m3End()">Voir mes résultats</button>`;
+  cont.appendChild(btnDiv);
+}
+
+function m3Next() { m3.q++; renderM3(); window.scrollTo(0,0); }
+
+function m3End() {
+  const s=m3.score, t=m3.total, pct=Math.round(s/t*100);
+  const msg = pct>=80?'Excellent ! Tu maîtrises les préfixes !':pct>=60?'Bien joué ! Continue à t\'entraîner.':'Relis les modules 1 et 2, puis réessaie !';
+  document.getElementById('m3-container').innerHTML=`
+    <div class="bg-cyan-50 border border-cyan-200 rounded-2xl shadow-lg p-10 text-center">
+      <h3 class="text-2xl font-black text-gray-800 mb-3">Résultat final</h3>
+      <div class="text-6xl font-black text-cyan-700 mb-2">${s} / ${t}</div>
+      <div class="text-2xl font-bold text-gray-400 mb-6">${pct}%</div>
+      <p class="text-gray-500 mb-8 text-lg">${msg}</p>
+      <div class="flex justify-center gap-4 flex-wrap">
+        <button class="btn-primary" onclick="startModule3()">Recommencer</button>
+        <button class="btn-secondary" onclick="showHome()">Accueil</button>
+      </div>
+    </div>`;
+}
+
+// ===== MODULES 4-7 =====
+const MOD_CFG = {
+  5:{label:'Module 4 · Niveau 1',title:'Nombres décimaux',titleColor:'#92400e',labelColor:'text-yellow-600',help:true},
+  6:{label:'Module 5 · Niveau 2',title:'Avec puissances de 10',titleColor:'#c2410c',labelColor:'text-orange-500',help:true},
+  7:{label:'Module 6 · Niveau 3',title:'Sans aide',titleColor:'#991b1b',labelColor:'text-red-500',help:false},
+  8:{label:'Module 7 · Niveau 4',title:'Expert',titleColor:'#9f1239',labelColor:'text-rose-600',help:false},
+};
+
+let exM = {};
+
+function startExModule(n) {
+  const cfg = MOD_CFG[n];
+  document.getElementById('ex-label').textContent = cfg.label;
+  document.getElementById('ex-label').className = `text-xs font-bold uppercase tracking-widest mb-1 ${cfg.labelColor}`;
+  document.getElementById('ex-title').textContent = cfg.title;
+  document.getElementById('ex-title').style.color = cfg.titleColor;
+  exM = {n, q:0, total:10, score:0, qs:[]};
+  for(let i=0;i<10;i++) exM.qs.push(genQ(n));
+  renderEx();
+}
+
+function genQ(n) {
+  if(n===5) return genQ5();
+  if(n===6) return genQ6();
+  if(n===7) return genQ6();
+  if(n===8) return genQ8();
+}
+
+function randomBasePair() {
+  const p = rnd(PNOB);
+  const goFrom = Math.random()<0.5;
+  if(goFrom) return {from:{sym:'',name:'(aucun)',exp:0}, to:p};
+  return {from:p, to:{sym:'',name:'(aucun)',exp:0}};
+}
+
+function genQ5() {
+  const {from,to} = randomBasePair();
+  const coeff = rndInt(10,99)/10;
+  const unit = rnd(UNITS);
+  return {coeff, powIn:0, from, to, unit};
+}
+
+function genQ6() {
+  const {from,to} = randomBasePair();
+  const coeff = rndInt(10,99)/10;
+  const powIn = rndInt(-9,9);
+  const unit = rnd(UNITS);
+  return {coeff, powIn, from, to, unit};
+}
+
+function genQ8() {
+  let from, to;
+  do { from=rnd(PREFIXES); to=rnd(PREFIXES); } while(from.sym===to.sym);
+  const coeff = rndInt(10,99)/10;
+  const powIn = rndInt(-9,9);
+  const unit = rnd(UNITS);
+  return {coeff, powIn, from, to, unit};
+}
+
+function unitLabel(pre, unit) { return (pre.sym||'')+unit; }
+
+function computeAns(q) {
+  const expConv = q.from.exp-q.to.exp;
+  return {coeff:q.coeff, exp:q.powIn+expConv};
+}
+
+function renderEx() {
+  const q = exM.qs[exM.q];
+  const cfg = MOD_CFG[exM.n];
+  const prog = Math.round((exM.q/exM.total)*100);
+  const fromU = unitLabel(q.from, q.unit);
+  const toU = unitLabel(q.to, q.unit);
+
+  let numDisplay = '';
+  if(q.powIn===0) {
+    numDisplay = `<span class="font-black text-3xl text-cyan-800">${fmtCoeff(q.coeff)}</span>`;
+  } else {
+    numDisplay = `<span class="font-black text-3xl text-cyan-800">${fmtCoeff(q.coeff)} × ${p10(q.powIn)}</span>`;
+  }
+
+  let helpHTML = '';
+  if(cfg.help) {
+    helpHTML = `<button class="btn-small mb-4" onclick="toggleHelp()">Afficher / masquer le tableau des préfixes</button>${buildHelpTable()}`;
+  }
+
+  const html = `<div class="mb-6">
+    <div class="flex justify-between text-sm font-bold text-gray-500 mb-2">
+      <span>Question ${exM.q+1} / ${exM.total}</span>
+      <span>Score : ${exM.score} / ${exM.q}</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div>
+  </div>
+  ${helpHTML}
+  <div class="bg-cyan-50 border border-cyan-200 rounded-2xl shadow-lg p-7 mb-4">
+    <div class="text-base font-bold text-gray-500 mb-2 uppercase tracking-wide">Convertir en <span class="tag-unit text-sm">${toU}</span></div>
+    <div class="bg-gradient-to-r from-cyan-100 to-sky-100 rounded-2xl p-6 mb-7 text-center flex flex-wrap items-center justify-center gap-3">
+      ${numDisplay}
+      <span class="tag-unit text-xl">${fromU}</span>
+      <span class="text-gray-400 text-2xl font-black">=</span>
+      <span class="text-gray-400 text-xl font-bold">? <span class="tag-unit">${toU}</span></span>
+    </div>
+    <div class="font-bold text-gray-600 mb-4 text-lg">Ta réponse :</div>
+    <div class="flex flex-wrap items-center gap-4 mb-2">
+      <div class="flex flex-col items-center gap-1">
+        <label class="text-xs text-gray-400 font-bold uppercase">Coefficient</label>
+        <input type="text" id="inp-coeff" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" autocomplete="off">
+      </div>
+      <span class="text-2xl font-black text-gray-400 mt-4">× 10</span>
+      <div class="flex flex-col items-center gap-1">
+        <label class="text-xs text-gray-400 font-bold uppercase">Exposant</label>
+        <input type="number" step="1" id="inp-exp" class="power-input" placeholder="ex: −3" inputmode="numeric" autocomplete="off">
+      </div>
+      <div class="flex flex-col items-center gap-1">
+        <label class="text-xs text-gray-400 font-bold uppercase">Unité</label>
+        <span class="tag-unit text-xl mt-1">${toU}</span>
+      </div>
+    </div>
+    <div class="text-xs text-gray-500 mb-6 bg-cyan-100 rounded-lg p-3">
+      <strong>Rappel :</strong> Si le résultat est simplement "5" (sans puissance de 10 visible), écris <strong>5</strong> dans le coefficient et <strong>0</strong> dans l'exposant.
+    </div>
+    <button class="btn-primary" id="verify-btn" onclick="verifyEx()">Vérifier ma réponse</button>
+  </div>`;
+
+  document.getElementById('ex-container').innerHTML = html;
+  document.getElementById('inp-coeff').addEventListener('keydown', e=>{
+    if(e.key==='Enter') document.getElementById('inp-exp').focus();
+  });
+  document.getElementById('inp-exp').addEventListener('keydown', e=>{
+    if(e.key==='Enter') verifyEx();
+  });
+}
+
+function verifyEx() {
+  const q = exM.qs[exM.q];
+  const ans = computeAns(q);
+  const rawC = document.getElementById('inp-coeff').value.trim().replace(',','.').replace('−','-');
+  const rawE = document.getElementById('inp-exp').value.trim().replace(',','.').replace('−','-');
+  if(!rawC || rawE==='') { alert('Merci de remplir les deux cases !'); return; }
+  const uC = parseFloat(rawC);
+  const uE = parseInt(rawE);
+  if(isNaN(uC)||isNaN(uE)) { alert('Valeurs invalides.'); return; }
+  const uVal = uC*Math.pow(10,uE);
+  const cVal = ans.coeff*Math.pow(10,ans.exp);
+  const ok = Math.abs(uVal-cVal)<Math.abs(cVal)*1e-9+1e-30;
+  if(ok) exM.score++;
+  document.getElementById('verify-btn').disabled = true;
+  document.getElementById('inp-coeff').disabled = true;
+  document.getElementById('inp-exp').disabled = true;
+  const coeffEl = document.getElementById('inp-coeff');
+  const expEl = document.getElementById('inp-exp');
+  if(ok) { coeffEl.classList.add('input-correct'); expEl.classList.add('input-correct'); }
+  else { coeffEl.classList.add('input-incorrect'); expEl.classList.add('input-incorrect'); }
+  const fromU = unitLabel(q.from, q.unit);
+  const toU = unitLabel(q.to, q.unit);
+  const expConv = q.from.exp-q.to.exp;
+  showExFeedback(q, ans, ok, fromU, toU, expConv);
+}
+
+function showExFeedback(q, ans, ok, fromU, toU, expConv) {
+  const cont = document.querySelector('#ex-container .bg-cyan-50');
+  const fb = document.createElement('div');
+  fb.className = ok?'feedback-ok':'feedback-ko';
+  let steps = '';
+  steps += `<div class="font-black text-lg mb-4">${ok?'Bonne réponse !':'Pas tout à fait…'}</div>`;
+  steps += `<div class="font-bold text-gray-700 mb-3 text-base">Correction :</div>`;
+  steps += `<div class="bg-white rounded-xl p-4 mb-3 border border-gray-100 text-sm">
+    <span class="font-bold text-cyan-700">① Exposant de conversion</span><br>
+    Départ − Arrivée = ${q.from.exp} − (${q.to.exp}) = <strong class="text-cyan-700">${expConv}</strong>
+  </div>`;
+  const hasPow = q.powIn!==0;
+  if(hasPow && (exM.n===6||exM.n===8)) {
+    steps += `<div class="bg-white rounded-xl p-4 mb-3 border border-gray-100 text-sm">
+      <span class="font-bold text-cyan-700">② Addition des puissances de 10</span><br>
+      La puissance du nombre (${p10(q.powIn)}) + exposant de conversion (${p10(expConv)}) = ${p10(q.powIn+expConv)}
+    </div>`;
+  }
+  let numPart = hasPow?`${fmtCoeff(q.coeff)} × ${p10(q.powIn)}`:`${fmtCoeff(q.coeff)}`;
+  let midPart = hasPow
+    ?`${fmtCoeff(q.coeff)} × ${p10(q.powIn)} × ${p10(expConv)} = ${fmtCoeff(q.coeff)} × ${p10(q.powIn+expConv)}`
+    :`${fmtCoeff(q.coeff)} × ${p10(expConv)}`;
+  steps += `<div class="bg-cyan-100 rounded-xl p-4 border border-cyan-200 font-mono text-sm leading-relaxed">
+    <strong>${numPart} ${fromU}</strong>
+    = ${midPart} ${toU}
+    = <strong class="text-cyan-700 text-base">${fmtCoeff(q.coeff)} × ${p10(ans.exp)} ${toU}</strong>
+  </div>`;
+  fb.innerHTML = steps;
+  cont.appendChild(fb);
+  const btnDiv = document.createElement('div');
+  btnDiv.className = 'mt-5 text-center';
+  btnDiv.innerHTML = exM.q<exM.total-1
+    ?`<button class="btn-primary" onclick="exNext()">Question suivante →</button>`
+    :`<button class="btn-primary" onclick="exEnd()">Voir mes résultats</button>`;
+  cont.appendChild(btnDiv);
+}
+
+function exNext() { exM.q++; renderEx(); window.scrollTo(0,0); }
+
+function exEnd() {
+  const s=exM.score, t=exM.total, pct=Math.round(s/t*100);
+  const msg = pct>=80?'Excellent ! Tu maîtrises ce niveau de conversion.':
+              pct>=60?'Bien joué ! Encore un peu d\'entraînement.':
+              pct>=40?'Continue, tu es sur la bonne voie !':
+              'Relis le cours et les astuces, puis réessaie !';
+  document.getElementById('ex-container').innerHTML=`
+    <div class="bg-cyan-50 border border-cyan-200 rounded-2xl shadow-lg p-10 text-center">
+      <h3 class="text-2xl font-black text-gray-800 mb-3">Résultat final</h3>
+      <div class="text-6xl font-black text-cyan-700 mb-2">${s} / ${t}</div>
+      <div class="text-xl font-bold text-gray-400 mb-6">${pct}%</div>
+      <p class="text-gray-500 mb-8 text-lg max-w-sm mx-auto">${msg}</p>
+      <div class="flex justify-center gap-4 flex-wrap">
+        <button class="btn-primary" onclick="startExModule(${exM.n})">Recommencer</button>
+        <button class="btn-secondary" onclick="showHome()">Accueil</button>
+      </div>
+    </div>`;
+}
+
+// ===== MODULE 9 : ENTRAÎNEMENT UNITÉS AU CARRÉ ET AU CUBE =====
+
+const SQ_UNITS_M2 = [
+  { sym:'mm', exp:-3, pow:2, label:'mm²' },
+  { sym:'cm', exp:-2, pow:2, label:'cm²' },
+  { sym:'m',  exp:0,  pow:2, label:'m²'  },
+  { sym:'km', exp:3,  pow:2, label:'km²' },
+];
+const SQ_UNITS_M3 = [
+  { sym:'mm', exp:-3, pow:3, label:'mm³' },
+  { sym:'cm', exp:-2, pow:3, label:'cm³' },
+  { sym:'dm', exp:-1, pow:3, label:'dm³' },
+  { sym:'m',  exp:0,  pow:3, label:'m³'  },
+];
+const ALL_SQ_UNITS = [...SQ_UNITS_M2, ...SQ_UNITS_M3];
+
+const VOL_M3_TO_L = { 'm³':1000, 'dm³':1, 'cm³':0.001 };
+const L_PREFIXES = [
+  { sym:'k', name:'kilo', exp:3 },
+  { sym:'',  name:'',     exp:0 },
+  { sym:'d', name:'déci', exp:-1 },
+  { sym:'c', name:'centi',exp:-2 },
+  { sym:'m', name:'milli',exp:-3 },
+];
+
+let exSq = {};
+
+function startExSq() {
+  exSq = {q:0, total:10, score:0, qs:[]};
+  for(let i=0;i<6;i++) exSq.qs.push(genQSqPow());
+  for(let i=0;i<4;i++) exSq.qs.push(genQSqVol());
+  exSq.qs = shuffle(exSq.qs);
+  renderExSq();
+}
+
+function genQSqPow() {
+  const pool = Math.random()<0.5 ? SQ_UNITS_M2 : SQ_UNITS_M3;
+  let from, to;
+  do { from=rnd(pool); to=rnd(pool); } while(from.label===to.label);
+  const coeff = rndInt(10,99)/10;
+  const powIn = (Math.random()<0.5) ? 0 : rndInt(-3,3);
+  const expConv = (from.exp - to.exp) * from.pow;
+  return { type:'pow', from, to, coeff, powIn, expConv };
+}
+
+function genQSqVol() {
+  const m3Units = ['m³','dm³','cm³'];
+  const fromM3Unit = rnd(m3Units);
+  const toLUnit = rnd(L_PREFIXES);
+  const toLLabel = toLUnit.sym + 'L';
+  const factorToL = VOL_M3_TO_L[fromM3Unit];
+  const coeff = rndInt(1,99)/10;
+  const valL = coeff * factorToL;
+  const totalExp = Math.round(Math.log10(factorToL)) - toLUnit.exp;
+  return { type:'vol', fromUnit:fromM3Unit, toUnit:toLLabel, coeff, ansCoeff:coeff, ansExp:totalExp, toLExp:toLUnit.exp, factorToL, valL };
+}
+
+function renderExSq() {
+  const q = exSq.qs[exSq.q];
+  const prog = Math.round((exSq.q/exSq.total)*100);
+
+  let questionHTML = '';
+  let fromLabel = '', toLabel = '';
+
+  if(q.type==='pow') {
+    fromLabel = q.from.label;
+    toLabel = q.to.label;
+    let numDisplay = q.powIn===0
+      ? `<span class="font-black text-3xl text-cyan-800">${fmtCoeff(q.coeff)}</span>`
+      : `<span class="font-black text-3xl text-cyan-800">${fmtCoeff(q.coeff)} × ${p10(q.powIn)}</span>`;
+    questionHTML = `
+      <div class="text-base font-bold text-gray-500 mb-2 uppercase tracking-wide">Convertir en <span class="tag-unit text-sm" style="background:#0891b2">${toLabel}</span></div>
+      <div class="bg-gradient-to-r from-cyan-100 to-sky-100 rounded-2xl p-6 mb-7 text-center flex flex-wrap items-center justify-center gap-3">
+        ${numDisplay}
+        <span class="tag-unit text-xl" style="background:#0891b2">${fromLabel}</span>
+        <span class="text-gray-400 text-2xl font-black">=</span>
+        <span class="text-gray-400 text-xl font-bold">? <span class="tag-unit" style="background:#0891b2">${toLabel}</span></span>
+      </div>`;
+  } else {
+    fromLabel = q.fromUnit;
+    toLabel = q.toUnit;
+    questionHTML = `
+      <div class="text-base font-bold text-gray-500 mb-2 uppercase tracking-wide">Convertir en <span class="tag-unit text-sm" style="background:#b45309">${toLabel}</span></div>
+      <div class="bg-gradient-to-r from-amber-100 to-yellow-100 rounded-2xl p-6 mb-7 text-center flex flex-wrap items-center justify-center gap-3">
+        <span class="font-black text-3xl text-amber-800">${fmtCoeff(q.coeff)}</span>
+        <span class="tag-unit text-xl" style="background:#b45309">${fromLabel}</span>
+        <span class="text-gray-400 text-2xl font-black">=</span>
+        <span class="text-gray-400 text-xl font-bold">? <span class="tag-unit" style="background:#b45309">${toLabel}</span></span>
+      </div>`;
+  }
+
+  const html = `<div class="mb-6">
+    <div class="flex justify-between text-sm font-bold text-gray-500 mb-2">
+      <span>Question ${exSq.q+1} / ${exSq.total}</span>
+      <span>Score : ${exSq.score} / ${exSq.q}</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div>
+  </div>
+  <div class="bg-cyan-50 border border-cyan-200 rounded-2xl shadow-lg p-7 mb-4">
+    ${questionHTML}
+    <div class="font-bold text-gray-600 mb-4 text-lg">Ta réponse :</div>
+    <div class="flex flex-wrap items-center gap-4 mb-2">
+      <div class="flex flex-col items-center gap-1">
+        <label class="text-xs text-gray-400 font-bold uppercase">Coefficient</label>
+        <input type="text" id="sq-coeff" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" autocomplete="off">
+      </div>
+      <span class="text-2xl font-black text-gray-400 mt-4">× 10</span>
+      <div class="flex flex-col items-center gap-1">
+        <label class="text-xs text-gray-400 font-bold uppercase">Exposant</label>
+        <input type="number" step="1" id="sq-exp" class="power-input" placeholder="ex: −4" inputmode="numeric" autocomplete="off">
+      </div>
+      <div class="flex flex-col items-center gap-1">
+        <label class="text-xs text-gray-400 font-bold uppercase">Unité</label>
+        <span class="tag-unit text-xl mt-1" style="background:${q.type==='pow'?'#0891b2':'#b45309'}">${toLabel}</span>
+      </div>
+    </div>
+    <div class="text-xs text-gray-500 mb-6 bg-cyan-100 rounded-lg p-3">
+      <strong>Rappel :</strong> Si le résultat est un nombre entier ou décimal simple (ex: "5"), écris <strong>5</strong> dans le coefficient et <strong>0</strong> dans l'exposant.
+    </div>
+    <button class="btn-primary" id="sq-verify-btn" onclick="verifyExSq()">Vérifier ma réponse</button>
+  </div>`;
+
+  document.getElementById('exsq-container').innerHTML = html;
+  document.getElementById('sq-coeff').addEventListener('keydown', e=>{
+    if(e.key==='Enter') document.getElementById('sq-exp').focus();
+  });
+  document.getElementById('sq-exp').addEventListener('keydown', e=>{
+    if(e.key==='Enter') verifyExSq();
+  });
+}
+
+function verifyExSq() {
+  const q = exSq.qs[exSq.q];
+  const rawC = document.getElementById('sq-coeff').value.trim().replace(',','.').replace('−','-');
+  const rawE = document.getElementById('sq-exp').value.trim().replace(',','.').replace('−','-');
+  if(!rawC || rawE==='') { alert('Merci de remplir les deux cases !'); return; }
+  const uC = parseFloat(rawC);
+  const uE = parseInt(rawE);
+  if(isNaN(uC)||isNaN(uE)) { alert('Valeurs invalides.'); return; }
+
+  let cVal, uVal;
+  if(q.type==='pow') {
+    const ansExp = q.powIn + q.expConv;
+    cVal = q.coeff * Math.pow(10, ansExp);
+    uVal = uC * Math.pow(10, uE);
+  } else {
+    cVal = q.ansCoeff * Math.pow(10, q.ansExp);
+    uVal = uC * Math.pow(10, uE);
+  }
+
+  const ok = Math.abs(uVal - cVal) < Math.abs(cVal)*1e-9 + 1e-30;
+  if(ok) exSq.score++;
+
+  document.getElementById('sq-verify-btn').disabled = true;
+  document.getElementById('sq-coeff').disabled = true;
+  document.getElementById('sq-exp').disabled = true;
+
+  if(ok) {
+    document.getElementById('sq-coeff').classList.add('input-correct');
+    document.getElementById('sq-exp').classList.add('input-correct');
+  } else {
+    document.getElementById('sq-coeff').classList.add('input-incorrect');
+    document.getElementById('sq-exp').classList.add('input-incorrect');
+  }
+
+  showExSqFeedback(q, ok, cVal, uVal);
+}
+
+function showExSqFeedback(q, ok, cVal, uVal) {
+  const cont = document.querySelector('#exsq-container .bg-cyan-50');
+  const fb = document.createElement('div');
+  fb.className = ok?'feedback-ok':'feedback-ko';
+  let steps = '';
+  steps += `<div class="font-black text-lg mb-4">${ok?'Bonne réponse !':'Pas tout à fait…'}</div>`;
+  steps += `<div class="font-bold text-gray-700 mb-3 text-base">Correction :</div>`;
+
+  if(q.type==='pow') {
+    const expBase = q.from.exp - q.to.exp;
+    const expConv = expBase * q.from.pow;
+    const ansExp = q.powIn + expConv;
+    steps += `<div class="bg-white rounded-xl p-4 mb-3 border border-gray-100 text-sm">
+      <span class="font-bold text-cyan-700">① Différence des exposants (préfixe)</span><br>
+      Départ (${q.from.label} → préfixe exp = ${q.from.exp}) − Arrivée (${q.to.label} → préfixe exp = ${q.to.exp}) = ${expBase}
+    </div>`;
+    steps += `<div class="bg-white rounded-xl p-4 mb-3 border border-gray-100 text-sm">
+      <span class="font-bold text-cyan-700">② Multiplier par la puissance de l'unité (${q.from.pow})</span><br>
+      Exposant de conversion = ${expBase} × ${q.from.pow} = <strong class="text-cyan-700">${expConv}</strong>
+      <br><span class="text-gray-400 text-xs">(car (10<sup>${expBase}</sup>)<sup>${q.from.pow}</sup> = 10<sup>${expConv}</sup>)</span>
+    </div>`;
+    if(q.powIn!==0) {
+      steps += `<div class="bg-white rounded-xl p-4 mb-3 border border-gray-100 text-sm">
+        <span class="font-bold text-cyan-700">③ Addition des exposants</span><br>
+        Puissance initiale (${q.powIn}) + exposant de conversion (${expConv}) = <strong class="text-cyan-700">${ansExp}</strong>
+      </div>`;
+    }
+    let numPart = q.powIn!==0 ? `${fmtCoeff(q.coeff)} × ${p10(q.powIn)}` : `${fmtCoeff(q.coeff)}`;
+    steps += `<div class="bg-cyan-100 rounded-xl p-4 border border-cyan-200 font-mono text-sm leading-relaxed">
+      <strong>${numPart} ${q.from.label}</strong> = ${fmtCoeff(q.coeff)} × ${p10(ansExp)} ${q.to.label}
+    </div>`;
+  } else {
+    const factExp = Math.round(Math.log10(q.factorToL));
+    const factP10 = p10(factExp);
+    let equivStr;
+    if(factExp === 0) equivStr = '1 L';
+    else equivStr = factP10 + ' L';
+    steps += `<div class="bg-white rounded-xl p-4 mb-3 border border-gray-100 text-sm">
+      <span class="font-bold text-amber-700">① Équivalence mémorisée</span><br>
+      1 ${q.fromUnit} = ${equivStr}
+    </div>`;
+    let valLStr;
+    if(factExp === 0) {
+      valLStr = `${fmtCoeff(q.coeff)} L`;
+    } else {
+      valLStr = `${fmtCoeff(q.coeff)} × ${factP10} L`;
+    }
+    steps += `<div class="bg-white rounded-xl p-4 mb-3 border border-gray-100 text-sm">
+      <span class="font-bold text-amber-700">② Valeur en litres</span><br>
+      ${fmtCoeff(q.coeff)} ${q.fromUnit} = ${fmtCoeff(q.coeff)} × ${equivStr} = <strong>${valLStr}</strong>
+    </div>`;
+    if(q.toLExp !== 0) {
+      const convExp = -q.toLExp;
+      const finalExp = factExp + convExp;
+      steps += `<div class="bg-white rounded-xl p-4 mb-3 border border-gray-100 text-sm">
+        <span class="font-bold text-amber-700">③ Conversion L → ${q.toUnit}</span><br>
+        1 L = ${p10(convExp)} ${q.toUnit} (exposant de conversion : 0 − ${q.toLExp} = ${convExp})<br>
+        ${valLStr} = ${fmtCoeff(q.coeff)} × ${p10(factExp)} × ${p10(convExp)} ${q.toUnit} = <strong>${fmtCoeff(q.coeff)} × ${p10(factExp + convExp)} ${q.toUnit}</strong>
+      </div>`;
+    }
+    steps += `<div class="bg-amber-100 rounded-xl p-4 border border-amber-200 font-mono text-sm leading-relaxed">
+      <strong>${fmtCoeff(q.coeff)} ${q.fromUnit}</strong> = <strong class="text-amber-700">${fmtCoeff(q.ansCoeff)} × ${p10(q.ansExp)} ${q.toUnit}</strong>
+    </div>`;
+  }
+
+  fb.innerHTML = steps;
+  cont.appendChild(fb);
+
+  const btnDiv = document.createElement('div');
+  btnDiv.className = 'mt-5 text-center';
+  btnDiv.innerHTML = exSq.q<exSq.total-1
+    ?`<button class="btn-primary" onclick="exSqNext()">Question suivante →</button>`
+    :`<button class="btn-primary" onclick="exSqEnd()">Voir mes résultats</button>`;
+  cont.appendChild(btnDiv);
+}
+
+function exSqNext() { exSq.q++; renderExSq(); window.scrollTo(0,0); }
+
+function exSqEnd() {
+  const s=exSq.score, t=exSq.total, pct=Math.round(s/t*100);
+  const msg = pct>=80?'Excellent ! Tu maîtrises les conversions de surfaces et volumes.':
+              pct>=60?'Bien joué ! Encore un peu d\'entraînement.':
+              pct>=40?'Continue, tu es sur la bonne voie !':
+              'Relis le module 8 (cours), puis réessaie !';
+  document.getElementById('exsq-container').innerHTML=`
+    <div class="bg-cyan-50 border border-cyan-200 rounded-2xl shadow-lg p-10 text-center">
+      <h3 class="text-2xl font-black text-gray-800 mb-3">Résultat final</h3>
+      <div class="text-6xl font-black text-cyan-700 mb-2">${s} / ${t}</div>
+      <div class="text-xl font-bold text-gray-400 mb-6">${pct}%</div>
+      <p class="text-gray-500 mb-8 text-lg max-w-sm mx-auto">${msg}</p>
+      <div class="flex justify-center gap-4 flex-wrap">
+        <button class="btn-primary" onclick="startExSq()">Recommencer</button>
+        <button class="btn-secondary" onclick="showHome()">Accueil</button>
+      </div>
+    </div>`;
+}
+
+// Init
+showHome();
+</script>
+</body>
+</html>
