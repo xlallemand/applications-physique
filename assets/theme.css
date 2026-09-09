@@ -1,0 +1,207 @@
+/* ============================================================
+   Thème commun à toutes les applications
+   (police, couleurs neutres, boutons, encarts, navigation)
+
+   Chaque application définit sa propre couleur d'accent en
+   surchargeant les variables --app-accent-* avant ou après ce
+   fichier, par ex. :
+     :root{
+       --app-accent-50:#ecfeff; --app-accent-100:#cffafe;
+       --app-accent-200:#a5f3fc; --app-accent-400:#22d3ee;
+       --app-accent-600:#0891b2; --app-accent-700:#0e7490;
+       --app-accent-800:#155e75;
+     }
+   ============================================================ */
+
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  --slate-50:  #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-900: #0f172a;
+
+  --success:      #10b981;
+  --success-bg:   #d1fae5;
+  --success-text: #065f46;
+  --danger:       #ef4444;
+  --danger-bg:    #fee2e2;
+  --danger-text:  #991b1b;
+  --warning-bg:   #fef9c3;
+  --warning-text: #78350f;
+
+  /* Couleur d'accent par défaut : chaque application la personnalise */
+  --app-accent-50:  #ecfeff;
+  --app-accent-100: #cffafe;
+  --app-accent-200: #a5f3fc;
+  --app-accent-400: #22d3ee;
+  --app-accent-600: #0891b2;
+  --app-accent-700: #0e7490;
+  --app-accent-800: #155e75;
+}
+
+body { font-family: var(--font-sans); }
+
+/* ============ BOUTONS COMMUNS ============ */
+.btn-primary {
+  background: linear-gradient(135deg, var(--app-accent-600), var(--app-accent-700));
+  color: #fff; border: none; border-radius: 12px;
+  padding: 13px 30px; font-size: 1rem; font-weight: 800; cursor: pointer;
+  transition: opacity .2s, transform .1s; font-family: var(--font-sans);
+}
+.btn-primary:hover:not(:disabled) { opacity: .9; transform: translateY(-2px); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+.btn-secondary {
+  background: #fff; color: var(--app-accent-700);
+  border: 2px solid var(--app-accent-200); border-radius: 12px;
+  padding: 11px 22px; font-size: .95rem; font-weight: 700; cursor: pointer;
+  transition: background .2s; font-family: var(--font-sans);
+}
+.btn-secondary:hover { background: var(--app-accent-50); }
+
+.btn-small {
+  background: #fff; color: var(--app-accent-700);
+  border: 2px solid var(--app-accent-200); border-radius: 9px;
+  padding: 7px 16px; font-size: .85rem; font-weight: 700; cursor: pointer;
+  transition: background .15s; font-family: var(--font-sans);
+}
+.btn-small:hover { background: var(--app-accent-50); }
+
+/* ============ ENCARTS (remplacent les bordures gauches épaisses) ============ */
+.callout {
+  border: 1.5px solid var(--slate-200); border-radius: 14px;
+  padding: 16px 20px; background: var(--slate-50);
+}
+.callout-accent {
+  border: 1.5px solid var(--app-accent-200); border-radius: 14px;
+  padding: 16px 20px; background: var(--app-accent-50);
+}
+.callout-success {
+  border: 1.5px solid #6ee7b7; border-radius: 14px;
+  padding: 16px 20px; background: var(--success-bg);
+}
+.callout-danger {
+  border: 1.5px solid #fca5a5; border-radius: 14px;
+  padding: 16px 20px; background: var(--danger-bg);
+}
+.callout-warning {
+  border: 1.5px solid #fcd34d; border-radius: 14px;
+  padding: 16px 20px; background: var(--warning-bg);
+}
+
+/* ============ LISTE DE MODULES (page d'accueil de chaque application) ============ */
+.module-list { display: flex; flex-direction: column; gap: 14px; }
+.module-group {
+  border: 1.5px solid var(--slate-200); border-radius: 16px;
+  padding: 14px; background: var(--slate-50);
+}
+.module-group-title {
+  font-size: .72rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--slate-500); padding: 2px 6px 10px;
+}
+.module-card {
+  background: #fff; border: 1.5px solid var(--slate-200); border-radius: 14px;
+  padding: 16px 18px; margin-bottom: 10px;
+  transition: box-shadow .15s, border-color .15s;
+}
+.module-card:last-child { margin-bottom: 0; }
+.module-card.clickable { cursor: pointer; }
+.module-card:hover { box-shadow: 0 6px 20px rgba(15,23,42,.08); border-color: var(--app-accent-200); }
+.module-card-head { display: flex; align-items: center; gap: 14px; }
+.module-badge {
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  min-width: 42px; height: 42px; padding: 0 6px; border-radius: 12px;
+  font-weight: 900; font-size: .85rem;
+  background: var(--app-accent-100); color: var(--app-accent-700);
+}
+.module-card-body { flex: 1; min-width: 0; }
+.module-card-title { font-weight: 800; font-size: 1rem; color: var(--slate-900); }
+.module-card-desc { font-size: .85rem; color: var(--slate-500); margin-top: 2px; line-height: 1.4; }
+.module-card-arrow { flex-shrink: 0; font-weight: 900; color: var(--app-accent-400); font-size: 1.2rem; }
+.module-card-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+
+/* ============ BANDEAU SUPÉRIEUR + MENU BURGER (communs à toutes les applications) ============ */
+.app-topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: 56px;
+  background: #fff; display: flex; align-items: center; gap: 10px;
+  padding: 0 8px; box-shadow: 0 2px 10px rgba(15,23,42,.08);
+  border-bottom: 1px solid var(--slate-200);
+}
+.app-topbar-spacer { height: 56px; }
+
+.app-burger {
+  flex-shrink: 0; display: flex; flex-direction: column; justify-content: center;
+  align-items: center; gap: 5px; width: 40px; height: 40px; padding: 8px;
+  border: none; background: none; border-radius: 10px; cursor: pointer;
+  transition: background .15s;
+}
+.app-burger:hover { background: var(--app-accent-50); }
+.app-burger span { display: block; width: 22px; height: 3px; border-radius: 2px; background: var(--app-accent-700); }
+
+.app-topbar-title {
+  flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 6px;
+  overflow: hidden; white-space: nowrap;
+}
+.app-topbar-title .app-name { font-weight: 900; color: var(--app-accent-700); font-size: 1.05rem; flex-shrink: 0; }
+.app-topbar-title .sep { color: var(--slate-300); flex-shrink: 0; }
+.app-topbar-title .module-name {
+  color: var(--slate-500); font-weight: 700; font-size: .92rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+}
+@media (max-width: 420px) {
+  .app-topbar-title .app-name { font-size: .92rem; }
+  .app-topbar-title .module-name { font-size: .8rem; }
+}
+
+.app-navmenu-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(15,23,42,.4); z-index: 1999;
+}
+.app-navmenu-overlay.open { display: block; }
+
+.app-navmenu {
+  position: fixed; top: 0; left: -320px; bottom: 0; width: min(320px, 86vw); z-index: 2000;
+  background: #fff; box-shadow: 4px 0 24px rgba(15,23,42,.18);
+  transition: left .25s ease; overflow-y: auto;
+}
+.app-navmenu.open { left: 0; }
+
+.app-navmenu-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px; background: var(--app-accent-600); color: #fff;
+  font-weight: 900; font-size: 1.05rem; position: sticky; top: 0;
+}
+.app-navmenu-header button {
+  background: none; border: none; color: #fff; font-size: 1.5rem;
+  line-height: 1; cursor: pointer; padding: 4px;
+}
+
+.app-navmenu-section-title {
+  font-size: .72rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--slate-400); padding: 14px 14px 6px;
+}
+
+.app-nav-item {
+  display: block; width: calc(100% - 20px); margin: 2px 10px; text-align: left;
+  border: none; background: none; border-radius: 10px; padding: 11px 14px;
+  font-family: var(--font-sans); font-size: .9rem; font-weight: 700;
+  color: var(--slate-700); cursor: pointer; transition: background .15s;
+}
+.app-nav-item:hover { background: var(--app-accent-50); }
+
+.app-nav-item.app-nav-portal { color: var(--slate-600); }
+.app-nav-item.app-nav-home {
+  color: var(--app-accent-700); font-size: 1rem; font-weight: 900;
+}
+.app-nav-divider { height: 1px; background: var(--slate-200); margin: 8px 14px; }
+
+.app-nav-item.app-nav-current {
+  background: var(--app-accent-100); color: var(--app-accent-800);
+  cursor: default; pointer-events: none;
+}
+.app-nav-item.app-nav-current::before { content: '● '; color: var(--app-accent-600); }

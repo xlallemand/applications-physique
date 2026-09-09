@@ -5,8 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Puissances de 10 - Entraînement</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="../assets/theme.css">
+    <script src="../assets/nav.js"></script>
     <style>
-        .zone-card { transition: all 0.3s ease; }
+        :root {
+            --app-accent-50:  #eff6ff;
+            --app-accent-100: #dbeafe;
+            --app-accent-200: #bfdbfe;
+            --app-accent-400: #60a5fa;
+            --app-accent-600: #2563eb;
+            --app-accent-700: #1d4ed8;
+            --app-accent-800: #1e3a8a;
+        }
         .btn-module { transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
         .btn-module:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
         .question-box { animation: fadeIn 0.4s; }
@@ -105,126 +115,15 @@
         .np-switch input:checked + .np-slider::before { transform: translateX(24px); }
         .np-pref-hint { font-size: 0.8rem; color: #6b7280; width: 100%; margin-top: 2px; }
 
-        /* ── Bandeau en haut ─────────────────────── */
-        #topBar {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            height: 52px;
-            background: #1e3a8a;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-        #topBarTitle {
-            color: white; font-weight: 700; font-size: 1rem;
-            text-align: right; flex: 1; margin-left: 12px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        #hamburgerBtn {
-            background: none; border: none; cursor: pointer;
-            display: flex; flex-direction: column; gap: 5px;
-            padding: 6px; border-radius: 6px;
-            transition: background 0.2s;
-            flex-shrink: 0;
-        }
-        #hamburgerBtn:hover { background: rgba(255,255,255,0.15); }
-        #hamburgerBtn span {
-            display: block; width: 24px; height: 3px;
-            background: white; border-radius: 2px;
-        }
-
-        /* ── Menu latéral ────────────────────────── */
-        #sideMenu {
-            position: fixed; top: 0; left: -320px; bottom: 0; width: 300px; z-index: 2000;
-            background: white;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.2);
-            transition: left 0.3s ease;
-            overflow-y: auto;
-        }
-        #sideMenu.open { left: 0; }
-        #sideOverlay {
-            display: none; position: fixed; inset: 0; z-index: 1999;
-            background: rgba(0,0,0,0.4);
-        }
-        #sideOverlay.open { display: block; }
-
-        #sideMenu .side-header {
-            background: #1e3a8a; color: white;
-            padding: 18px 16px; font-size: 1.1rem; font-weight: 800;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        #sideMenu .side-header button {
-            background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer;
-        }
-        #sideMenu .side-section-title {
-            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 0.08em; color: #6b7280; padding: 14px 16px 4px;
-        }
-        #sideMenu .side-item {
-            display: block; width: 100%; text-align: left;
-            padding: 11px 16px; border: none; background: none;
-            font-size: 0.88rem; color: #1e3a8a; font-weight: 600; cursor: pointer;
-            border-bottom: 1px solid #f1f5f9;
-            transition: background 0.15s;
-            line-height: 1.4;
-        }
-        #sideMenu .side-item:hover { background: #eff6ff; }
-        #sideMenu .side-item.home-item {
-            font-size: 0.95rem; color: #1d4ed8; font-weight: 700;
-            border-bottom: 2px solid #bfdbfe;
-            padding: 14px 16px;
-        }
-        #sideMenu .side-item.active-page {
-            background: #e2e8f0 !important;
-            color: #64748b !important;
-            cursor: default !important;
-            pointer-events: none;
-            font-style: italic;
-        }
-        #sideMenu .side-item.active-page::before {
-            content: '▶ ';
-            color: #1e3a8a;
-            font-style: normal;
-            font-weight: 900;
-        }
-
-        /* ── Décalage du contenu pour le bandeau ── */
-        body { padding-top: 52px; }
+        /* ── Liste des modules sur l'accueil ─────── */
+        .module-card-actions .btn-primary,
+        .module-card-actions .btn-secondary { font-size: .9rem; padding: 10px 20px; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
 
-<!-- ═══════ BANDEAU FIXE ═══════ -->
-<div id="topBar">
-    <button id="hamburgerBtn" onclick="toggleMenu()" aria-label="Menu">
-        <span></span><span></span><span></span>
-    </button>
-    <div id="topBarTitle">Puissances de 10</div>
-</div>
-
-<!-- ═══════ OVERLAY + MENU LATÉRAL ═══════ -->
-<div id="sideOverlay" onclick="closeMenu()"></div>
-<div id="sideMenu">
-    <div class="side-header">
-        <span>Navigation</span>
-        <button onclick="closeMenu()">✕</button>
-    </div>
-    <button class="side-item home-item" data-page="home" onclick="closeMenu(); backToMenu()">Accueil</button>
-
-    <div class="side-section-title">Module 1 — Définitions et écritures</div>
-    <button class="side-item" data-page="course-1" onclick="closeMenu(); showCourse(1)">Module 1 : Définitions et écritures des puissances de 10 — Cours</button>
-    <button class="side-item" data-page="training-1" onclick="closeMenu(); showTraining(1)">Module 1 : Définitions et écritures des puissances de 10 — Entraînement (20 questions)</button>
-
-    <div class="side-section-title">Module 2 — Écriture scientifique</div>
-    <button class="side-item" data-page="course-2" onclick="closeMenu(); showCourse(2)">Module 2 : Écriture scientifique — Cours</button>
-    <button class="side-item" data-page="training-2" onclick="closeMenu(); showTraining(2)">Module 2 : Écriture scientifique — Entraînement (20 questions)</button>
-
-    <div class="side-section-title">Module 3 — Opérations</div>
-    <button class="side-item" data-page="course-3" onclick="closeMenu(); showCourse(3)">Module 3 : Opérations avec les puissances de 10 — Cours</button>
-    <button class="side-item" data-page="training-3" onclick="closeMenu(); showTraining(3)">Module 3 : Opérations avec les puissances de 10 — Entraînement (20 questions)</button>
-
-    <div class="side-section-title">Module 4 — Toutes les notions</div>
-    <button class="side-item" data-page="training-4" onclick="closeMenu(); showTraining(4)">Module 4 : S'entraîner sur toutes les notions — Entraînement (20 questions)</button>
-</div>
+<!-- ═══════ NAVIGATION ═══════ -->
+<div id="app-nav"></div>
 
 <div id="app" class="container mx-auto px-4 py-8 max-w-4xl">
 
@@ -233,55 +132,59 @@
         <p class="text-lg text-indigo-700">Apprends et entraîne-toi !</p>
     </header>
 
-    <div id="menu" class="space-y-5 mb-8">
-        <div class="zone-card bg-white rounded-xl shadow-lg overflow-hidden border-l-8 border-blue-500">
-            <div class="p-6">
-                <div class="mb-4">
-                    <h2 class="text-xl md:text-2xl font-bold text-blue-900">Définitions et écritures des puissances de 10</h2>
-                    <p class="text-gray-600 mt-1 text-sm md:text-base">Comprendre ce qu'est une puissance de 10 et ses liens avec l'écriture décimale</p>
+    <div id="menu" class="module-list mb-8">
+        <div class="module-card">
+            <div class="module-card-head">
+                <span class="module-badge">Module 1</span>
+                <div class="module-card-body">
+                    <div class="module-card-title">Définitions et écritures des puissances de 10</div>
+                    <div class="module-card-desc">Comprendre ce qu'est une puissance de 10 et ses liens avec l'écriture décimale</div>
                 </div>
-                <div class="flex flex-wrap gap-3">
-                    <button onclick="showCourse(1)" class="btn-module bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-bold shadow">Cours</button>
-                    <button onclick="showTraining(1)" class="btn-module bg-blue-100 hover:bg-blue-200 text-blue-900 px-5 py-3 rounded-lg font-bold shadow border-2 border-blue-400">Entraînement (20 questions)</button>
-                </div>
+            </div>
+            <div class="module-card-actions">
+                <button onclick="showCourse(1)" class="btn-module btn-primary">Cours</button>
+                <button onclick="showTraining(1)" class="btn-module btn-secondary">Entraînement (20 questions)</button>
             </div>
         </div>
 
-        <div class="zone-card bg-white rounded-xl shadow-lg overflow-hidden border-l-8 border-blue-500">
-            <div class="p-6">
-                <div class="mb-4">
-                    <h2 class="text-xl md:text-2xl font-bold text-blue-900">Écriture scientifique</h2>
-                    <p class="text-gray-600 mt-1 text-sm md:text-base">Écrire un nombre sous la forme a × 10<sup>n</sup> avec 1 ≤ a &lt; 10</p>
+        <div class="module-card">
+            <div class="module-card-head">
+                <span class="module-badge">Module 2</span>
+                <div class="module-card-body">
+                    <div class="module-card-title">Écriture scientifique</div>
+                    <div class="module-card-desc">Écrire un nombre sous la forme a × 10<sup>n</sup> avec 1 ≤ a &lt; 10</div>
                 </div>
-                <div class="flex flex-wrap gap-3">
-                    <button onclick="showCourse(2)" class="btn-module bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-bold shadow">Cours</button>
-                    <button onclick="showTraining(2)" class="btn-module bg-blue-100 hover:bg-blue-200 text-blue-900 px-5 py-3 rounded-lg font-bold shadow border-2 border-blue-400">Entraînement (20 questions)</button>
-                </div>
+            </div>
+            <div class="module-card-actions">
+                <button onclick="showCourse(2)" class="btn-module btn-primary">Cours</button>
+                <button onclick="showTraining(2)" class="btn-module btn-secondary">Entraînement (20 questions)</button>
             </div>
         </div>
 
-        <div class="zone-card bg-white rounded-xl shadow-lg overflow-hidden border-l-8 border-blue-500">
-            <div class="p-6">
-                <div class="mb-4">
-                    <h2 class="text-xl md:text-2xl font-bold text-blue-900">Opérations avec les puissances de 10</h2>
-                    <p class="text-gray-600 mt-1 text-sm md:text-base">Multiplier, diviser, calculer l'inverse et les puissances de puissances</p>
+        <div class="module-card">
+            <div class="module-card-head">
+                <span class="module-badge">Module 3</span>
+                <div class="module-card-body">
+                    <div class="module-card-title">Opérations avec les puissances de 10</div>
+                    <div class="module-card-desc">Multiplier, diviser, calculer l'inverse et les puissances de puissances</div>
                 </div>
-                <div class="flex flex-wrap gap-3">
-                    <button onclick="showCourse(3)" class="btn-module bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-bold shadow">Cours</button>
-                    <button onclick="showTraining(3)" class="btn-module bg-blue-100 hover:bg-blue-200 text-blue-900 px-5 py-3 rounded-lg font-bold shadow border-2 border-blue-400">Entraînement (20 questions)</button>
-                </div>
+            </div>
+            <div class="module-card-actions">
+                <button onclick="showCourse(3)" class="btn-module btn-primary">Cours</button>
+                <button onclick="showTraining(3)" class="btn-module btn-secondary">Entraînement (20 questions)</button>
             </div>
         </div>
 
-        <div class="zone-card bg-white rounded-xl shadow-lg overflow-hidden border-l-8 border-blue-500">
-            <div class="p-6">
-                <div class="mb-4">
-                    <h2 class="text-xl md:text-2xl font-bold text-blue-900">S'entraîner sur toutes les notions</h2>
-                    <p class="text-gray-600 mt-1 text-sm md:text-base">Questions avancées qui combinent toutes les notions — Niveau supérieur !</p>
+        <div class="module-card">
+            <div class="module-card-head">
+                <span class="module-badge">Module 4</span>
+                <div class="module-card-body">
+                    <div class="module-card-title">S'entraîner sur toutes les notions</div>
+                    <div class="module-card-desc">Questions avancées qui combinent toutes les notions — Niveau supérieur !</div>
                 </div>
-                <div class="flex flex-wrap gap-3">
-                    <button onclick="showTraining(4)" class="btn-module bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-bold shadow">Entraînement (20 questions)</button>
-                </div>
+            </div>
+            <div class="module-card-actions">
+                <button onclick="showTraining(4)" class="btn-module btn-primary">Entraînement (20 questions)</button>
             </div>
         </div>
     </div>
@@ -291,42 +194,46 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// MENU LATÉRAL
+// NAVIGATION
 // ═══════════════════════════════════════════════════════════════
-function toggleMenu() {
-    document.getElementById('sideMenu').classList.toggle('open');
-    document.getElementById('sideOverlay').classList.toggle('open');
-}
-function closeMenu() {
-    document.getElementById('sideMenu').classList.remove('open');
-    document.getElementById('sideOverlay').classList.remove('open');
-}
+const nav = AppNav.init({
+    appName: 'Puissances de 10',
+    portalHref: '../index.html',
+    portalLabel: 'Toutes les applications',
+    onHome: () => backToMenu(),
+    onNavigate: (key) => {
+        const [type, num] = key.split('-');
+        if (type === 'course') showCourse(Number(num));
+        else showTraining(Number(num));
+    },
+    groups: [
+        { title: 'Module 1 — Définitions et écritures', items: [
+            { key: 'course-1', label: 'Cours' },
+            { key: 'training-1', label: 'Entraînement (20 questions)' },
+        ]},
+        { title: 'Module 2 — Écriture scientifique', items: [
+            { key: 'course-2', label: 'Cours' },
+            { key: 'training-2', label: 'Entraînement (20 questions)' },
+        ]},
+        { title: 'Module 3 — Opérations', items: [
+            { key: 'course-3', label: 'Cours' },
+            { key: 'training-3', label: 'Entraînement (20 questions)' },
+        ]},
+        { title: 'Module 4 — Toutes les notions', items: [
+            { key: 'training-4', label: 'Entraînement (20 questions)' },
+        ]},
+    ],
+});
+nav.setActive(null);
 
 let currentPage = 'home'; // 'home' | 'course-1' | 'course-2' | 'course-3' | 'training-1' | 'training-2' | 'training-3' | 'training-4'
 
 function setTopBarTitle(title) {
-    document.getElementById('topBarTitle').textContent = title;
+    nav.setTitle(title === 'Puissances de 10' ? null : title);
 }
 
 function updateActiveMenuItem() {
-    document.querySelectorAll('#sideMenu .side-item').forEach(btn => {
-        btn.classList.remove('active-page');
-    });
-    const map = {
-        'home':       '[data-page="home"]',
-        'course-1':   '[data-page="course-1"]',
-        'course-2':   '[data-page="course-2"]',
-        'course-3':   '[data-page="course-3"]',
-        'training-1': '[data-page="training-1"]',
-        'training-2': '[data-page="training-2"]',
-        'training-3': '[data-page="training-3"]',
-        'training-4': '[data-page="training-4"]',
-    };
-    const sel = map[currentPage];
-    if (sel) {
-        const el = document.querySelector('#sideMenu ' + sel);
-        if (el) el.classList.add('active-page');
-    }
+    nav.setActive(currentPage === 'home' ? null : currentPage);
 }
 
 // ═══════════════════════════════════════════════════════════════

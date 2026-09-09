@@ -5,10 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Conversions – Physique-Chimie</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="../assets/theme.css">
+<script src="../assets/nav.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+  :root {
+    --app-accent-50:  #ecfeff;
+    --app-accent-100: #cffafe;
+    --app-accent-200: #a5f3fc;
+    --app-accent-400: #22d3ee;
+    --app-accent-600: #0891b2;
+    --app-accent-700: #0e7490;
+    --app-accent-800: #155e75;
+  }
   * { box-sizing: border-box; }
-  body { font-family: 'Nunito', sans-serif; background: #ffffff; min-height: 100vh; }
+  body { background: #ffffff; min-height: 100vh; }
   sup { font-size: 0.65em; vertical-align: super; line-height: 0; }
 
   /* Screens */
@@ -25,9 +35,9 @@
   .prefix-table th { border: 1px solid #0e7490; }
 
   /* Inputs */
-  .answer-input { border: 2.5px solid #7dd3fc; border-radius: 10px; padding: 10px 12px; font-size: 1.15rem; font-family: 'Nunito', sans-serif; font-weight: 700; text-align: center; outline: none; transition: border 0.2s, background 0.2s; width: 110px; background: white; }
+  .answer-input { border: 2.5px solid #7dd3fc; border-radius: 10px; padding: 10px 12px; font-size: 1.15rem; font-family: var(--font-sans); font-weight: 700; text-align: center; outline: none; transition: border 0.2s, background 0.2s; width: 110px; background: white; }
   .answer-input:focus { border-color: #0891b2; background: #ecfeff; }
-  .power-input { border: 2.5px solid #7dd3fc; border-radius: 10px; padding: 10px 8px; font-size: 1.15rem; font-family: 'Nunito', sans-serif; font-weight: 700; text-align: center; outline: none; transition: border 0.2s, background 0.2s; width: 90px; background: white; }
+  .power-input { border: 2.5px solid #7dd3fc; border-radius: 10px; padding: 10px 8px; font-size: 1.15rem; font-family: var(--font-sans); font-weight: 700; text-align: center; outline: none; transition: border 0.2s, background 0.2s; width: 90px; background: white; }
   .power-input:focus { border-color: #0891b2; background: #ecfeff; }
   .input-correct { background: #d1fae5 !important; border-color: #10b981 !important; }
   .input-incorrect { background: #fee2e2 !important; border-color: #ef4444 !important; }
@@ -36,27 +46,14 @@
   .progress-bar { height: 12px; border-radius: 999px; background: #cffafe; overflow: hidden; }
   .progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #0891b2, #0284c7); transition: width 0.4s ease; }
 
-  /* Buttons */
-  .btn-primary { background: linear-gradient(135deg, #0891b2, #0284c7); color: white; border: none; border-radius: 12px; padding: 13px 30px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: opacity 0.2s, transform 0.1s; font-family: 'Nunito', sans-serif; }
-  .btn-primary:hover:not(:disabled) { opacity: 0.9; transform: translateY(-2px); }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-secondary { background: white; color: #0891b2; border: 2px solid #7dd3fc; border-radius: 12px; padding: 11px 22px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.2s; font-family: 'Nunito', sans-serif; }
-  .btn-secondary:hover { background: #ecfeff; }
-  .btn-small { background: white; color: #0891b2; border: 2px solid #7dd3fc; border-radius: 9px; padding: 7px 16px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: background 0.15s; font-family: 'Nunito', sans-serif; }
-  .btn-small:hover { background: #ecfeff; }
-
   /* QCM */
-  .qcm-option { border: 2.5px solid #7dd3fc; border-radius: 12px; padding: 12px 18px; background: #ecfeff; cursor: pointer; transition: all 0.15s; font-weight: 700; text-align: center; display: block; width: 100%; font-family: 'Nunito', sans-serif; font-size: 1rem; }
+  .qcm-option { border: 2.5px solid #7dd3fc; border-radius: 12px; padding: 12px 18px; background: #ecfeff; cursor: pointer; transition: all 0.15s; font-weight: 700; text-align: center; display: block; width: 100%; font-family: var(--font-sans); font-size: 1rem; }
   .qcm-option:hover:not(:disabled) { background: #cffafe; border-color: #0891b2; transform: translateY(-1px); }
   .qcm-option.opt-correct { background: #d1fae5 !important; border-color: #10b981 !important; color: #065f46 !important; }
   .qcm-option.opt-wrong { background: #fee2e2 !important; border-color: #ef4444 !important; color: #991b1b !important; }
 
-  /* Feedback boxes */
-  .feedback-ok { background: #ecfdf5; border-left: 5px solid #10b981; border-radius: 0 14px 14px 0; padding: 16px 20px; margin-top: 16px; }
-  .feedback-ko { background: #fff1f2; border-left: 5px solid #ef4444; border-radius: 0 14px 14px 0; padding: 16px 20px; margin-top: 16px; }
-
   /* Drag & drop */
-  .drag-item { cursor: grab; user-select: none; transition: box-shadow 0.15s; border: 2.5px solid #7dd3fc; background: #ecfeff; border-radius: 12px; padding: 10px 14px; font-weight: 800; font-family: 'Nunito', sans-serif; display: inline-flex; flex-direction: column; align-items: center; min-width: 72px; }
+  .drag-item { cursor: grab; user-select: none; transition: box-shadow 0.15s; border: 2.5px solid #7dd3fc; background: #ecfeff; border-radius: 12px; padding: 10px 14px; font-weight: 800; font-family: var(--font-sans); display: inline-flex; flex-direction: column; align-items: center; min-width: 72px; }
   .drag-item:active { cursor: grabbing; box-shadow: 0 6px 20px rgba(8,145,178,0.3); }
   .drag-item.dragging { opacity: 0.4; }
   .drop-zone { border: 2.5px dashed #7dd3fc; min-height: 60px; min-width: 72px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s; background: #f0fdff; }
@@ -76,52 +73,6 @@
 
   /* Memorization cards */
   .mem-card { border-radius: 20px; padding: 24px 26px; margin-bottom: 20px; }
-
-  /* ====== NAV SANDWICH ====== */
-  #sandwich-menu { display: none; }
-  #sandwich-menu.open { display: block; }
-
-  /* Entrée de menu active (page courante) */
-  .menu-item-current {
-    color: #9ca3af !important;
-    background: #f3f4f6 !important;
-    cursor: default !important;
-    pointer-events: none;
-    font-style: italic;
-  }
-
-  /* Module list on home */
-  .mod-row {
-    display: flex;
-    align-items: center;
-    background: white;
-    border-left: 5px solid;
-    border-radius: 12px;
-    padding: 12px 18px;
-    cursor: pointer;
-    transition: box-shadow 0.15s, background 0.15s;
-    gap: 14px;
-  }
-  .mod-row:hover { box-shadow: 0 4px 18px rgba(8,145,178,0.13); background: #f0fdff; }
-  .mod-row .mod-num { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; min-width: 80px; }
-  .mod-row .mod-name { font-weight: 800; font-size: 1rem; color: #164e63; flex: 1; }
-  .mod-row .mod-desc { font-size: 0.82rem; color: #6b7280; }
-  .mod-row .mod-arrow { font-weight: 900; color: #7dd3fc; font-size: 1.1rem; }
-
-  /* Active module title bar */
-  #module-title-bar {
-    display: none;
-    position: sticky;
-    top: 52px;
-    z-index: 40;
-    background: #0891b2;
-    color: white;
-    font-weight: 800;
-    font-size: 0.97rem;
-    padding: 7px 20px;
-    text-align: center;
-    letter-spacing: 0.03em;
-  }
 
   /* Card panels used inside modules */
   .card-panel {
@@ -150,40 +101,8 @@
 </head>
 <body>
 
-<!-- ====== NAVIGATION SANDWICH ====== -->
-<nav class="bg-white shadow-md sticky top-0 z-50">
-  <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-    <button id="burger-btn" onclick="toggleMenu()" aria-label="Menu" class="flex flex-col gap-[5px] p-2 rounded-lg hover:bg-cyan-50 transition-colors">
-      <span class="block w-6 h-[3px] bg-cyan-700 rounded"></span>
-      <span class="block w-6 h-[3px] bg-cyan-700 rounded"></span>
-      <span class="block w-6 h-[3px] bg-cyan-700 rounded"></span>
-    </button>
-    <button onclick="showHome()" class="font-black text-cyan-700 text-lg hover:text-cyan-500 transition-colors">
-      Conversions SI
-    </button>
-  </div>
-  <!-- Menu déroulant -->
-  <div id="sandwich-menu" class="absolute top-full left-0 w-full bg-white shadow-xl border-t border-cyan-100 z-50">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-col gap-1">
-      <button id="menu-home" onclick="showHome()" class="text-left px-4 py-2 rounded-lg font-bold text-cyan-700 hover:bg-cyan-50 transition-colors">Accueil</button>
-      <div class="h-px bg-cyan-50 my-1"></div>
-      <button id="menu-1" onclick="navTo(1)" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 1 : Cours</button>
-      <button id="menu-2" onclick="navTo(2)" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 2 : Astuces de mémorisation</button>
-      <button id="menu-3" onclick="navTo(3)" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 3 : Apprendre les préfixes</button>
-      <div class="h-px bg-cyan-50 my-1"></div>
-      <button id="menu-5" onclick="navTo(5)" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 4 : Nombres décimaux (Niveau 1)</button>
-      <button id="menu-6" onclick="navTo(6)" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 5 : Puissances de 10 (Niveau 2)</button>
-      <button id="menu-7" onclick="navTo(7)" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 6 : Sans aide (Niveau 3)</button>
-      <button id="menu-8" onclick="navTo(8)" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 7 : Expert (Niveau 4)</button>
-      <div class="h-px bg-cyan-50 my-1"></div>
-      <button id="menu-cours-sq" onclick="navTo('cours-sq')" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 8 : Unités au carré et au cube (Cours)</button>
-      <button id="menu-ex-sq" onclick="navTo('ex-sq')" class="text-left px-4 py-2 rounded-lg font-semibold text-gray-700 hover:bg-cyan-50 transition-colors">Module 9 : Unités au carré et au cube (Entraînement)</button>
-    </div>
-  </div>
-</nav>
-
-<!-- Barre titre module actif -->
-<div id="module-title-bar"></div>
+<!-- ====== NAVIGATION ====== -->
+<div id="app-nav"></div>
 
 <!-- ====== ACCUEIL ====== -->
 <div id="screen-home" class="active-screen max-w-3xl mx-auto px-4 py-8">
@@ -193,115 +112,125 @@
   </div>
 
   <!-- Comment progresser en premier -->
-  <div class="bg-cyan-50 rounded-xl border-l-4 border-cyan-400 p-5 mb-7 shadow-sm">
+  <div class="callout-accent mb-7">
     <div class="font-bold text-gray-700 mb-1 text-base">Comment progresser ?</div>
     <div class="text-gray-500 text-sm leading-relaxed">Commence par le <strong>Module 1</strong> pour comprendre la méthode, puis le <strong>Module 2</strong> pour les astuces de mémorisation. Teste-toi avec le <strong>Module 3</strong> avant de passer aux exercices (<strong>Modules 4 à 7</strong>). Tu peux refaire chaque module autant de fois que tu veux ! Les <strong>modules 8 et 9</strong> sont dédiés aux unités au carré et au cube.</div>
   </div>
 
   <!-- Liste des modules -->
-  <div class="flex flex-col gap-4">
+  <div class="module-list">
 
     <!-- Groupe Cours -->
-    <div class="border border-indigo-200 rounded-2xl p-4 bg-indigo-50 flex flex-col gap-2">
-      <div class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1 px-1">Cours &amp; Mémorisation</div>
-      <!-- Module 1 -->
-      <div class="mod-row" style="border-color:#6366f1" onclick="showModule(1)">
-        <span class="mod-num" style="color:#6366f1">Module 1</span>
-        <div class="flex-1">
-          <div class="mod-name">Cours</div>
-          <div class="mod-desc">Préfixes SI, puissances de 10 et méthode de conversion.</div>
+    <div class="module-group">
+      <div class="module-group-title">Cours &amp; Mémorisation</div>
+
+      <div class="module-card clickable" onclick="showModule(1)">
+        <div class="module-card-head">
+          <span class="module-badge">Module 1</span>
+          <div class="module-card-body">
+            <div class="module-card-title">Cours</div>
+            <div class="module-card-desc">Préfixes SI, puissances de 10 et méthode de conversion.</div>
+          </div>
+          <span class="module-card-arrow">›</span>
         </div>
-        <span class="mod-arrow">›</span>
       </div>
 
-      <!-- Module 2 -->
-      <div class="mod-row" style="border-color:#8b5cf6" onclick="showModule(2)">
-        <span class="mod-num" style="color:#8b5cf6">Module 2</span>
-        <div class="flex-1">
-          <div class="mod-name">Astuces de mémorisation</div>
-          <div class="mod-desc">Des techniques pour retenir les préfixes facilement.</div>
+      <div class="module-card clickable" onclick="showModule(2)">
+        <div class="module-card-head">
+          <span class="module-badge">Module 2</span>
+          <div class="module-card-body">
+            <div class="module-card-title">Astuces de mémorisation</div>
+            <div class="module-card-desc">Des techniques pour retenir les préfixes facilement.</div>
+          </div>
+          <span class="module-card-arrow">›</span>
         </div>
-        <span class="mod-arrow">›</span>
       </div>
 
-      <!-- Module 3 -->
-      <div class="mod-row" style="border-color:#ec4899" onclick="showModule(3)">
-        <span class="mod-num" style="color:#ec4899">Module 3</span>
-        <div class="flex-1">
-          <div class="mod-name">Apprendre les préfixes</div>
-          <div class="mod-desc">QCM, glisser-déposer… Mémorise les préfixes.</div>
+      <div class="module-card clickable" onclick="showModule(3)">
+        <div class="module-card-head">
+          <span class="module-badge">Module 3</span>
+          <div class="module-card-body">
+            <div class="module-card-title">Apprendre les préfixes</div>
+            <div class="module-card-desc">QCM, glisser-déposer… Mémorise les préfixes.</div>
+          </div>
+          <span class="module-card-arrow">›</span>
         </div>
-        <span class="mod-arrow">›</span>
       </div>
     </div>
 
     <!-- Groupe Exercices -->
-    <div class="border border-yellow-200 rounded-2xl p-4 bg-yellow-50 flex flex-col gap-2">
-      <div class="text-xs font-bold text-yellow-500 uppercase tracking-widest mb-1 px-1">Exercices</div>
+    <div class="module-group">
+      <div class="module-group-title">Exercices</div>
 
-      <!-- Module 4 -->
-      <div class="mod-row" style="border-color:#eab308" onclick="showModule(5)">
-        <span class="mod-num" style="color:#ca8a04">Module 4 · Niv. 1</span>
-        <div class="flex-1">
-          <div class="mod-name">Nombres décimaux</div>
-          <div class="mod-desc">Vers/depuis l'unité de base. Aide disponible. 10 questions.</div>
+      <div class="module-card clickable" onclick="showModule(5)">
+        <div class="module-card-head">
+          <span class="module-badge">Module 4 · Niv. 1</span>
+          <div class="module-card-body">
+            <div class="module-card-title">Nombres décimaux</div>
+            <div class="module-card-desc">Vers/depuis l'unité de base. Aide disponible. 10 questions.</div>
+          </div>
+          <span class="module-card-arrow">›</span>
         </div>
-        <span class="mod-arrow">›</span>
       </div>
 
-      <!-- Module 5 -->
-      <div class="mod-row" style="border-color:#f97316" onclick="showModule(6)">
-        <span class="mod-num" style="color:#ea580c">Module 5 · Niv. 2</span>
-        <div class="flex-1">
-          <div class="mod-name">Avec puissances de 10</div>
-          <div class="mod-desc">Nombres en notation scientifique. Aide disponible. 10 questions.</div>
+      <div class="module-card clickable" onclick="showModule(6)">
+        <div class="module-card-head">
+          <span class="module-badge">Module 5 · Niv. 2</span>
+          <div class="module-card-body">
+            <div class="module-card-title">Avec puissances de 10</div>
+            <div class="module-card-desc">Nombres en notation scientifique. Aide disponible. 10 questions.</div>
+          </div>
+          <span class="module-card-arrow">›</span>
         </div>
-        <span class="mod-arrow">›</span>
       </div>
 
-      <!-- Module 6 -->
-      <div class="mod-row" style="border-color:#ef4444" onclick="showModule(7)">
-        <span class="mod-num" style="color:#dc2626">Module 6 · Niv. 3</span>
-        <div class="flex-1">
-          <div class="mod-name">Sans aide</div>
-          <div class="mod-desc">Comme le module 5, mais de mémoire ! 10 questions.</div>
+      <div class="module-card clickable" onclick="showModule(7)">
+        <div class="module-card-head">
+          <span class="module-badge">Module 6 · Niv. 3</span>
+          <div class="module-card-body">
+            <div class="module-card-title">Sans aide</div>
+            <div class="module-card-desc">Comme le module 5, mais de mémoire ! 10 questions.</div>
+          </div>
+          <span class="module-card-arrow">›</span>
         </div>
-        <span class="mod-arrow">›</span>
       </div>
 
-      <!-- Module 7 -->
-      <div class="mod-row" style="border-color:#be123c" onclick="showModule(8)">
-        <span class="mod-num" style="color:#be123c">Module 7 · Niv. 4</span>
-        <div class="flex-1">
-          <div class="mod-name">Expert</div>
-          <div class="mod-desc">Entre deux préfixes quelconques, avec puissances de 10. 10 questions.</div>
+      <div class="module-card clickable" onclick="showModule(8)">
+        <div class="module-card-head">
+          <span class="module-badge">Module 7 · Niv. 4</span>
+          <div class="module-card-body">
+            <div class="module-card-title">Expert</div>
+            <div class="module-card-desc">Entre deux préfixes quelconques, avec puissances de 10. 10 questions.</div>
+          </div>
+          <span class="module-card-arrow">›</span>
         </div>
-        <span class="mod-arrow">›</span>
       </div>
     </div>
 
     <!-- Groupe Unités au carré et au cube -->
-    <div class="border border-cyan-200 rounded-2xl p-4 bg-cyan-50 flex flex-col gap-2">
-      <div class="text-xs font-bold text-cyan-500 uppercase tracking-widest mb-1 px-1">Unités au carré et au cube</div>
+    <div class="module-group">
+      <div class="module-group-title">Unités au carré et au cube</div>
 
-      <!-- Module 8 -->
-      <div class="mod-row" style="border-color:#0891b2" onclick="showModule('cours-sq')">
-        <span class="mod-num" style="color:#0891b2">Module 8</span>
-        <div class="flex-1">
-          <div class="mod-name">Unités au carré et au cube — Cours</div>
-          <div class="mod-desc">Méthode pour convertir des m², cm³, L, etc.</div>
+      <div class="module-card clickable" onclick="showModule('cours-sq')">
+        <div class="module-card-head">
+          <span class="module-badge">Module 8</span>
+          <div class="module-card-body">
+            <div class="module-card-title">Unités au carré et au cube — Cours</div>
+            <div class="module-card-desc">Méthode pour convertir des m², cm³, L, etc.</div>
+          </div>
+          <span class="module-card-arrow">›</span>
         </div>
-        <span class="mod-arrow">›</span>
       </div>
 
-      <!-- Module 9 -->
-      <div class="mod-row" style="border-color:#0284c7" onclick="showModule('ex-sq')">
-        <span class="mod-num" style="color:#0284c7">Module 9</span>
-        <div class="flex-1">
-          <div class="mod-name">Unités au carré et au cube — Entraînement</div>
-          <div class="mod-desc">10 questions : conversions entre mm², cm³, m², L, mL…</div>
+      <div class="module-card clickable" onclick="showModule('ex-sq')">
+        <div class="module-card-head">
+          <span class="module-badge">Module 9</span>
+          <div class="module-card-body">
+            <div class="module-card-title">Unités au carré et au cube — Entraînement</div>
+            <div class="module-card-desc">10 questions : conversions entre mm², cm³, m², L, mL…</div>
+          </div>
+          <span class="module-card-arrow">›</span>
         </div>
-        <span class="mod-arrow">›</span>
       </div>
     </div>
 
@@ -406,7 +335,7 @@
     </div>
   </div>
 
-  <div class="bg-yellow-100 border-l-4 border-yellow-400 rounded-r-2xl p-5 flex items-start gap-4 mb-8">
+  <div class="callout-warning flex items-start gap-4 mb-8">
     <div class="text-gray-700">
       <strong class="text-yellow-700">Point de vigilance !</strong> Le signe moins devant les exposants est crucial. Calcule toujours soigneusement la différence <strong>(exposant départ) − (exposant arrivée)</strong> en faisant attention aux signes.
     </div>
@@ -420,8 +349,8 @@
 <!-- ====== MODULE 2 : ASTUCES ====== -->
 <div id="screen-2" class="hidden-screen max-w-4xl mx-auto px-4 py-8">
   <div class="mb-8">
-    <div class="text-xs font-bold text-purple-400 uppercase tracking-widest mb-1">Module 2</div>
-    <h2 class="text-3xl font-black text-purple-800">Astuces de mémorisation des préfixes</h2>
+    <div class="text-xs font-bold text-cyan-600 uppercase tracking-widest mb-1">Module 2</div>
+    <h2 class="text-3xl font-black text-cyan-800">Astuces de mémorisation des préfixes</h2>
   </div>
 
   <!-- Astuce 1 -->
@@ -637,8 +566,8 @@
 <!-- ====== MODULE 3 : APPRENDRE ====== -->
 <div id="screen-3" class="hidden-screen max-w-3xl mx-auto px-4 py-8">
   <div class="mb-7">
-    <div class="text-xs font-bold text-pink-400 uppercase tracking-widest mb-1">Module 3</div>
-    <h2 class="text-3xl font-black text-pink-800">Apprendre les préfixes</h2>
+    <div class="text-xs font-bold text-cyan-600 uppercase tracking-widest mb-1">Module 3</div>
+    <h2 class="text-3xl font-black text-cyan-800">Apprendre les préfixes</h2>
   </div>
   <div id="m3-container"></div>
 </div>
@@ -780,8 +709,8 @@
 <!-- ====== MODULE 9 : ENTRAÎNEMENT UNITÉS AU CARRÉ ET AU CUBE ====== -->
 <div id="screen-ex-sq" class="hidden-screen max-w-3xl mx-auto px-4 py-8">
   <div class="mb-7">
-    <div class="text-xs font-bold text-sky-600 uppercase tracking-widest mb-1">Module 9</div>
-    <h2 class="text-3xl font-black text-sky-800">Unités au carré et au cube — Entraînement</h2>
+    <div class="text-xs font-bold text-cyan-600 uppercase tracking-widest mb-1">Module 9</div>
+    <h2 class="text-3xl font-black text-cyan-800">Unités au carré et au cube — Entraînement</h2>
   </div>
   <div id="exsq-container"></div>
 </div>
@@ -821,77 +750,47 @@ function expToStr(e) { return e>0?'+'+e:String(e); }
 // ===== NAVIGATION =====
 let currentScreen = 'home';
 
-// Mapping écran → id du bouton de menu correspondant
-const SCREEN_TO_MENU = {
-  'home':     'menu-home',
-  '1':        'menu-1',
-  '2':        'menu-2',
-  '3':        'menu-3',
-  'ex-5':     'menu-5',
-  'ex-6':     'menu-6',
-  'ex-7':     'menu-7',
-  'ex-8':     'menu-8',
-  'cours-sq': 'menu-cours-sq',
-  'ex-sq':    'menu-ex-sq',
-};
-
-function updateMenuHighlight(screenKey) {
-  // Réinitialiser tous les boutons du menu
-  Object.values(SCREEN_TO_MENU).forEach(btnId => {
-    const btn = document.getElementById(btnId);
-    if (!btn) return;
-    btn.classList.remove('menu-item-current');
-  });
-  // Griser le bouton de la page courante
-  const currentBtnId = SCREEN_TO_MENU[screenKey];
-  if (currentBtnId) {
-    const btn = document.getElementById(currentBtnId);
-    if (btn) btn.classList.add('menu-item-current');
-  }
-}
-
-function closeMenu() {
-  document.getElementById('sandwich-menu').classList.remove('open');
-}
-
-function toggleMenu() {
-  document.getElementById('sandwich-menu').classList.toggle('open');
-}
-
-// Fermer le menu si on clique ailleurs
-document.addEventListener('click', function(e) {
-  const menu = document.getElementById('sandwich-menu');
-  const btn = document.getElementById('burger-btn');
-  if (!menu.contains(e.target) && !btn.contains(e.target)) {
-    menu.classList.remove('open');
-  }
+const nav = AppNav.init({
+  appName: 'Conversions',
+  portalHref: '../index.html',
+  portalLabel: 'Toutes les applications',
+  onHome: () => showHome(),
+  onNavigate: (key) => showModule(typeof key === 'string' && /^\d+$/.test(key) ? Number(key) : key),
+  groups: [
+    { title: 'Cours & mémorisation', items: [
+      { key: 1, label: 'Module 1 : Cours' },
+      { key: 2, label: 'Module 2 : Astuces de mémorisation' },
+      { key: 3, label: 'Module 3 : Apprendre les préfixes' },
+    ]},
+    { title: 'Exercices', items: [
+      { key: 5, label: 'Module 4 : Nombres décimaux (Niveau 1)' },
+      { key: 6, label: 'Module 5 : Puissances de 10 (Niveau 2)' },
+      { key: 7, label: 'Module 6 : Sans aide (Niveau 3)' },
+      { key: 8, label: 'Module 7 : Expert (Niveau 4)' },
+    ]},
+    { title: 'Unités au carré et au cube', items: [
+      { key: 'cours-sq', label: 'Module 8 : Cours' },
+      { key: 'ex-sq', label: 'Module 9 : Entraînement' },
+    ]},
+  ],
 });
-
-function setModuleTitleBar(text) {
-  const bar = document.getElementById('module-title-bar');
-  if (text) {
-    bar.textContent = text;
-    bar.style.display = 'block';
-  } else {
-    bar.style.display = 'none';
-  }
-}
+nav.setActive(null);
 
 function showHome() {
-  closeMenu();
+  nav.close();
   document.querySelectorAll('[id^="screen-"]').forEach(el => {
     el.classList.remove('active-screen');
     el.classList.add('hidden-screen');
   });
   document.getElementById('screen-home').classList.replace('hidden-screen','active-screen');
-  setModuleTitleBar('');
+  nav.setTitle(null);
   currentScreen = 'home';
-  updateMenuHighlight('home');
+  nav.setActive(null);
   window.scrollTo(0,0);
 }
 
 function navTo(n) {
-  closeMenu();
+  nav.close();
   showModule(n);
 }
 
@@ -908,40 +807,35 @@ const MODULE_TITLES = {
 };
 
 function showModule(n) {
-  closeMenu();
+  nav.close();
   document.querySelectorAll('[id^="screen-"]').forEach(el => {
     el.classList.remove('active-screen');
     el.classList.add('hidden-screen');
   });
 
-  setModuleTitleBar(MODULE_TITLES[n] || '');
+  nav.setTitle(MODULE_TITLES[n] || null);
+  nav.setActive(n);
 
   if (n === 1) {
     document.getElementById('screen-1').classList.replace('hidden-screen','active-screen');
     currentScreen = '1';
-    updateMenuHighlight('1');
   } else if (n === 2) {
     document.getElementById('screen-2').classList.replace('hidden-screen','active-screen');
     currentScreen = '2';
-    updateMenuHighlight('2');
   } else if (n === 3) {
     document.getElementById('screen-3').classList.replace('hidden-screen','active-screen');
     currentScreen = '3';
-    updateMenuHighlight('3');
     startModule3();
   } else if (n === 'cours-sq') {
     document.getElementById('screen-cours-sq').classList.replace('hidden-screen','active-screen');
     currentScreen = 'cours-sq';
-    updateMenuHighlight('cours-sq');
   } else if (n === 'ex-sq') {
     document.getElementById('screen-ex-sq').classList.replace('hidden-screen','active-screen');
     currentScreen = 'ex-sq';
-    updateMenuHighlight('ex-sq');
     startExSq();
   } else {
     document.getElementById('screen-ex').classList.replace('hidden-screen','active-screen');
     currentScreen = 'ex-' + n;
-    updateMenuHighlight('ex-' + n);
     startExModule(n);
   }
   window.scrollTo(0,0);
@@ -1123,7 +1017,7 @@ function checkDrag3() {
 
 function appendM3Feedback(ok, correctHtml, isDrag=false) {
   const box = document.createElement('div');
-  box.className = ok?'feedback-ok':'feedback-ko';
+  box.className = ok?'callout-success mt-4':'callout-danger mt-4';
   box.innerHTML = ok
     ?`<div class="font-black text-green-700 text-xl mb-1">Bravo !</div>`+
       (isDrag?`<div class="text-gray-600 text-sm">Bon ordre : ${correctHtml}</div>`:
@@ -1319,7 +1213,7 @@ function verifyEx() {
 function showExFeedback(q, ans, ok, fromU, toU, expConv) {
   const cont = document.querySelector('#ex-container .bg-cyan-50');
   const fb = document.createElement('div');
-  fb.className = ok?'feedback-ok':'feedback-ko';
+  fb.className = ok?'callout-success mt-4':'callout-danger mt-4';
   let steps = '';
   steps += `<div class="font-black text-lg mb-4">${ok?'Bonne réponse !':'Pas tout à fait…'}</div>`;
   steps += `<div class="font-bold text-gray-700 mb-3 text-base">Correction :</div>`;
@@ -1545,7 +1439,7 @@ function verifyExSq() {
 function showExSqFeedback(q, ok, cVal, uVal) {
   const cont = document.querySelector('#exsq-container .bg-cyan-50');
   const fb = document.createElement('div');
-  fb.className = ok?'feedback-ok':'feedback-ko';
+  fb.className = ok?'callout-success mt-4':'callout-danger mt-4';
   let steps = '';
   steps += `<div class="font-black text-lg mb-4">${ok?'Bonne réponse !':'Pas tout à fait…'}</div>`;
   steps += `<div class="font-bold text-gray-700 mb-3 text-base">Correction :</div>`;
