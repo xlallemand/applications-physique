@@ -53,11 +53,10 @@
 
         /* ── Affichage 10^[input] (entraînements) */
         .power-answer-wrap { display: inline-flex; align-items: flex-start; gap: 2px; }
-        .power-answer-wrap .base { font-size: 1.5rem; font-weight: 800; line-height: 1; color: #1e3a8a; }
+        .power-answer-wrap .base { font-size: 1.5rem; font-weight: 800; line-height: 1; }
         .power-answer-wrap .exp-input {
             width: 80px; font-size: 0.95rem; font-weight: 700; margin-top: -12px;
-            padding: 4px 8px; border: 2px solid #3b82f6; border-radius: 6px;
-            background: white; color: #1e3a8a;
+            padding: 4px 8px; border-radius: 6px; background: white;
         }
         /* ── Exposant dans les cours (largeur élargie pour le signe -) */
         .course-exp-input {
@@ -235,6 +234,18 @@ function setTopBarTitle(title) {
 function updateActiveMenuItem() {
     nav.setActive(currentPage === 'home' ? null : currentPage);
 }
+
+// ═══════════════════════════════════════════════════════════════
+// COULEUR DE CHAQUE MODULE D'ENTRAÎNEMENT (appliquée à tous les
+// éléments de l'écran : titre, barre de progression, boutons,
+// question, glisser-déposer, écran de résultat)
+// ═══════════════════════════════════════════════════════════════
+const TRAINING_THEMES = {
+    1: { color:'blue',   title:'Définitions et écritures' },
+    2: { color:'purple', title:'Écriture scientifique'    },
+    3: { color:'green',  title:'Opérations'               },
+    4: { color:'orange', title:'Toutes les notions — Niveau avancé' },
+};
 
 // ═══════════════════════════════════════════════════════════════
 // ÉTAT GLOBAL + PAVÉ NUMÉRIQUE
@@ -746,33 +757,23 @@ function getCourse3Content() {
 // HTML MODULE D'ENTRAÎNEMENT
 // ═══════════════════════════════════════════════════════════════
 function getTrainingHTML(num) {
-    const themes = {
-        1: { color:'blue',   title:'Définitions et écritures' },
-        2: { color:'purple', title:'Écriture scientifique'    },
-        3: { color:'green',  title:'Opérations'               },
-        4: { color:'orange', title:'Toutes les notions — Niveau avancé' }
-    };
-    const t = themes[num];
+    const t = TRAINING_THEMES[num];
     return `
-    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-                    <h2 class="text-xl md:text-2xl font-bold text-${t.color}-900 mb-6">Entraînement ${num} : ${t.title}</h2>
-        ${numpadToggleBar()}
-        <div class="mb-6 bg-${t.color}-50 rounded-lg p-4">
-            <div class="flex justify-between items-center flex-wrap gap-3">
-                <div class="flex-1">
-                    <span class="text-lg font-semibold">Question <span id="questionNum">1</span> / 20</span>
-                    <div class="w-full bg-gray-300 rounded-full h-2 mt-2">
-                        <div id="progressBar" class="bg-${t.color}-500 h-2 rounded-full transition-all" style="width:5%"></div>
-                    </div>
-                </div>
-                <div class="text-2xl font-bold text-${t.color}-900">Score : <span id="score">0</span> / <span id="total">0</span></div>
-            </div>
+    <div class="mb-6">
+        <div class="flex justify-between text-sm font-bold text-gray-500 mb-2">
+            <span>Question <span id="questionNum">1</span> / 20</span>
+            <span class="text-${t.color}-600">Score : <span id="score">0</span> / <span id="total">0</span></span>
         </div>
+        <div class="progress-bar bg-${t.color}-100"><div id="progressBar" class="progress-fill bg-gradient-to-r from-${t.color}-600 to-${t.color}-700" style="width:5%"></div></div>
+    </div>
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
+        <h2 class="text-xl md:text-2xl font-bold text-${t.color}-900 mb-6">Entraînement ${num} : ${t.title}</h2>
+        ${numpadToggleBar()}
         <div id="questionContainer" class="question-box min-h-[280px]"></div>
         <div id="feedback" class="mt-6"></div>
         <div class="mt-6 flex gap-4">
             <button id="submitBtn" onclick="submitAnswer()" class="bg-${t.color}-500 hover:bg-${t.color}-600 text-white px-6 py-3 rounded-lg font-bold flex-1">Valider ✓</button>
-            <button id="nextBtn" onclick="nextQuestion()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-bold flex-1" style="display:none">Question suivante →</button>
+            <button id="nextBtn" onclick="nextQuestion()" class="bg-${t.color}-500 hover:bg-${t.color}-600 text-white px-6 py-3 rounded-lg font-bold flex-1" style="display:none">Question suivante →</button>
         </div>
     </div>`;
 }
@@ -782,6 +783,7 @@ function getTrainingHTML(num) {
 // ═══════════════════════════════════════════════════════════════
 function showQuestion() {
     const q = questions[currentQuestion];
+    const color = TRAINING_THEMES[currentModule].color;
     const container = document.getElementById('questionContainer');
     document.getElementById('questionNum').textContent = currentQuestion + 1;
     document.getElementById('progressBar').style.width = ((currentQuestion + 1) / 20 * 100) + '%';
@@ -791,13 +793,13 @@ function showQuestion() {
 
     if (q.type === 'input_exp') {
         container.innerHTML = `
-            <div class="bg-blue-50 rounded-lg p-6 question-box">
+            <div class="bg-${color}-50 rounded-xl p-6 question-box">
                 <p class="text-xl mb-6 font-medium">${q.question}</p>
                 <div class="flex items-center gap-3 flex-wrap mt-2">
                     <span class="text-gray-600 font-semibold text-lg">Réponse :</span>
                     <div class="power-answer-wrap">
-                        <span class="base">10</span>
-                        <input type="number" id="userAnswer" class="exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        <span class="base text-${color}-900">10</span>
+                        <input type="number" id="userAnswer" class="exp-input border-2 border-${color}-500 text-${color}-900" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                     </div>
                 </div>
                 ${numpadWidget('train_exp')}
@@ -805,22 +807,22 @@ function showQuestion() {
 
     } else if (q.type === 'input_decimal') {
         container.innerHTML = `
-            <div class="bg-blue-50 rounded-lg p-6 question-box">
+            <div class="bg-${color}-50 rounded-xl p-6 question-box">
                 <p class="text-xl mb-6 font-medium">${q.question}</p>
                 <div class="flex items-center gap-3 flex-wrap">
                     <span class="text-gray-600 font-semibold">Réponse :</span>
-                    <input type="text" id="userAnswer" class="border-2 border-blue-400 rounded px-4 py-2 text-lg w-44 bg-white font-bold" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                    <input type="text" id="userAnswer" class="border-2 border-${color}-400 rounded px-4 py-2 text-lg w-44 bg-white font-bold" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                 </div>
                 ${numpadWidget('train_dec')}
             </div>`;
 
     } else if (q.type === 'qcm') {
         container.innerHTML = `
-            <div class="bg-blue-50 rounded-lg p-6 question-box">
+            <div class="bg-${color}-50 rounded-xl p-6 question-box">
                 <p class="text-xl mb-5 font-medium">${q.question}</p>
                 <div class="space-y-3">
                     ${q.options.map((opt, i) => `
-                        <label class="flex items-center p-4 bg-white rounded-lg cursor-pointer hover:bg-blue-100 border-2 border-transparent transition">
+                        <label class="qcm-option-label flex items-center p-4 bg-white rounded-xl cursor-pointer hover:bg-${color}-100 border-2 border-${color}-200 transition">
                             <input type="radio" name="qcm" value="${i}" class="mr-3 w-5 h-5">
                             <span class="text-lg">${opt}</span>
                         </label>`).join('')}
@@ -829,18 +831,18 @@ function showQuestion() {
 
     } else if (q.type === 'order') {
         container.innerHTML = `
-            <div class="bg-blue-50 rounded-lg p-6 question-box">
+            <div class="bg-${color}-50 rounded-xl p-6 question-box">
                 <p class="text-xl mb-5 font-medium">${q.question}</p>
                 <div class="mb-4">
                     <p class="font-semibold mb-2 text-gray-700">Éléments à trier :</p>
                     <div id="sourceItems" class="source-items-h">
                         ${q.items.map((item, i) => `
-                            <div class="draggable bg-white px-4 py-2 rounded-lg border-2 border-blue-400 cursor-move" draggable="true" data-index="${i}">${item}</div>`).join('')}
+                            <div class="draggable bg-white px-4 py-2 rounded-xl border-2 border-${color}-400 font-bold cursor-move" draggable="true" data-index="${i}">${item}</div>`).join('')}
                     </div>
                 </div>
                 <div>
                     <p class="font-semibold mb-2 text-gray-700">Ordre croissant (plus petit → plus grand) :</p>
-                    <div id="targetItems" class="drop-zone-h border-2 border-dashed border-blue-400 rounded-lg p-3 bg-blue-50/50"></div>
+                    <div id="targetItems" class="drop-zone-h border-2 border-dashed border-${color}-400 rounded-xl p-3 bg-${color}-50"></div>
                 </div>
                 <p class="text-sm text-gray-500 mt-3">Glisse les éléments dans la zone ci-dessus</p>
             </div>`;
@@ -848,13 +850,13 @@ function showQuestion() {
 
     } else if (q.type === 'scientific') {
         container.innerHTML = `
-            <div class="bg-blue-50 rounded-lg p-6 question-box">
+            <div class="bg-${color}-50 rounded-xl p-6 question-box">
                 <p class="text-xl mb-6 font-medium">${q.question}</p>
                 <div class="flex items-center gap-2 flex-wrap mt-2">
                     <span class="text-gray-600 font-semibold">Réponse :</span>
-                    <input type="text" id="answerA" class="border-2 border-blue-400 rounded px-3 py-2 w-24 bg-white font-bold text-lg" placeholder="a" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                    <input type="text" id="answerA" class="border-2 border-${color}-400 rounded px-3 py-2 w-24 bg-white font-bold text-lg" placeholder="a" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                     <span class="text-xl font-bold">× 10</span>
-                    <sup><input type="number" id="answerN" style="width:80px; font-size:14px; padding:5px 8px;" class="border-2 border-blue-400 rounded bg-white font-bold" placeholder="n" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></sup>
+                    <sup><input type="number" id="answerN" style="width:80px; font-size:14px; padding:5px 8px;" class="border-2 border-${color}-400 rounded bg-white font-bold" placeholder="n" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></sup>
                 </div>
                 ${numpadWidget('train_sci')}
             </div>`;
@@ -905,6 +907,12 @@ function submitAnswer() {
     } else if (q.type === 'qcm') {
         const sel = document.querySelector('input[name="qcm"]:checked');
         if (sel) isCorrect = parseInt(sel.value) === q.answer;
+        document.querySelectorAll('input[name="qcm"]').forEach(radio => {
+            radio.disabled = true;
+            const label = radio.closest('.qcm-option-label');
+            if (parseInt(radio.value) === q.answer) label.classList.add('opt-correct');
+            else if (radio.checked) label.classList.add('opt-wrong');
+        });
     } else if (q.type === 'order') {
         const ordered = Array.from(document.getElementById('targetItems').children).map(el => el.innerHTML.trim());
         isCorrect = JSON.stringify(ordered) === JSON.stringify(q.answer);
@@ -916,11 +924,11 @@ function submitAnswer() {
 
     if (isCorrect) {
         score++;
-        feedback.innerHTML = `<div class="bg-green-100 border-2 border-green-500 rounded-lg p-4 correct">
+        feedback.innerHTML = `<div class="callout-success correct">
             <p class="text-green-800 font-bold text-xl">✓ Correct ! 🎉</p>
             <p class="text-green-700 mt-2">${q.explanation}</p></div>`;
     } else {
-        feedback.innerHTML = `<div class="bg-red-100 border-2 border-red-500 rounded-lg p-4">
+        feedback.innerHTML = `<div class="callout-danger">
             <p class="text-red-800 font-bold text-xl">✗ Incorrect</p>
             <p class="text-red-700 mt-2">${q.explanation}</p></div>`;
     }
@@ -939,17 +947,18 @@ function nextQuestion() {
 
 function showResults() {
     const pct = Math.round(score / 20 * 100);
-    let msg = '', color = '';
-    if (pct >= 90) { msg = 'Excellent ! Tu maîtrises parfaitement ce chapitre ! 🏆'; color = 'green'; }
-    else if (pct >= 70) { msg = 'Très bien ! Continue comme ça ! 👍'; color = 'blue'; }
-    else if (pct >= 50) { msg = 'Pas mal ! Avec un peu plus de travail tu vas y arriver. 💪'; color = 'yellow'; }
-    else { msg = 'Continue à t\'entraîner, tu vas progresser ! 📚'; color = 'orange'; }
+    const color = TRAINING_THEMES[currentModule].color;
+    let msg = '';
+    if (pct >= 90) msg = 'Excellent ! Tu maîtrises parfaitement ce chapitre ! 🏆';
+    else if (pct >= 70) msg = 'Très bien ! Continue comme ça ! 👍';
+    else if (pct >= 50) msg = 'Pas mal ! Avec un peu plus de travail tu vas y arriver. 💪';
+    else msg = 'Continue à t\'entraîner, tu vas progresser ! 📚';
     document.getElementById('questionContainer').innerHTML = `
-        <div class="bg-${color}-50 rounded-lg p-8 text-center">
-            <h3 class="text-3xl font-bold text-${color}-900 mb-4">Entraînement terminé !</h3>
-            <div class="text-6xl font-bold text-${color}-600 mb-4">${score} / 20</div>
-            <div class="text-2xl text-${color}-800 mb-6">${pct}%</div>
-            <p class="text-xl text-${color}-900 mb-8">${msg}</p>
+        <div class="bg-${color}-50 border border-${color}-200 rounded-2xl shadow-lg p-10 text-center">
+            <h3 class="text-2xl font-bold text-gray-800 mb-3">Entraînement terminé !</h3>
+            <div class="text-6xl font-bold text-${color}-700 mb-2">${score} / 20</div>
+            <div class="text-xl font-bold text-gray-400 mb-6">${pct}%</div>
+            <p class="text-gray-500 mb-8 text-lg">${msg}</p>
             <div class="flex gap-4 justify-center flex-wrap">
                 <button onclick="showTraining(${currentModule})" class="bg-${color}-500 hover:bg-${color}-600 text-white px-6 py-3 rounded-lg font-bold">Recommencer</button>
             </div>
