@@ -9,6 +9,7 @@
     <script src="../assets/nav.js"></script>
     <script src="../assets/numpad.js"></script>
     <script src="../assets/dragdrop.js"></script>
+    <script src="../assets/selfcheck.js"></script>
     <style>
         :root {
             --app-accent-50:  #eff6ff;
@@ -35,24 +36,6 @@
         .fraction-num { border-bottom:2px solid currentColor; padding:2px 8px; display:block; }
         .fraction-den { padding:2px 8px; display:block; }
 
-        /* ── Check-box dans les cours ─────────── */
-        .check-box {
-            background: linear-gradient(135deg, #fef9c3, #fde68a);
-            border: 2px solid #f59e0b; border-radius: 12px;
-            padding: 20px; margin-top: 16px;
-        }
-        .check-label { color: #78350f; font-weight: 700; font-size: 1rem; margin-bottom: 8px; }
-        .check-question { color: #451a03; font-size: 1.1rem; margin-bottom: 12px; }
-        .check-input {
-            background: white; border: 2px solid #d97706;
-            border-radius: 8px; padding: 8px 12px;
-            color: #1c1917; font-weight: 700;
-        }
-        .check-btn {
-            background: #d97706; color: white; border: none;
-            border-radius: 8px; padding: 8px 16px; font-weight: 700; cursor: pointer;
-        }
-        .check-btn:hover { background: #b45309; }
 
         /* ── Affichage 10^[input] (entraînements) */
         .power-answer-wrap { display: inline-flex; align-items: flex-start; gap: 2px; }
@@ -268,41 +251,6 @@ function showTraining(num) {
     updateActiveMenuItem();
     document.getElementById('moduleContainer').innerHTML = getTrainingHTML(num);
     showQuestion();
-}
-
-// ═══════════════════════════════════════════════════════════════
-// VÉRIFICATIONS DANS LES COURS
-// ═══════════════════════════════════════════════════════════════
-function checkAnswer(inputId, correct, resultId, isDecimal = false) {
-    const input = document.getElementById(inputId);
-    const result = document.getElementById(resultId);
-    let userAnswer = input.value.trim();
-    if (isDecimal) {
-        const ua = parseFloat(userAnswer.replace(',', '.'));
-        const ca = parseFloat(String(correct).replace(',', '.'));
-        if (Math.abs(ua - ca) < 0.000001) {
-            result.innerHTML = '✓ Correct ! 🎉'; result.style.color = '#166534';
-        } else {
-            result.innerHTML = '✗ Incorrect. La réponse est : ' + correct; result.style.color = '#991b1b';
-        }
-    } else {
-        if (parseFloat(userAnswer) === parseFloat(correct)) {
-            result.innerHTML = '✓ Correct ! 🎉'; result.style.color = '#166534';
-        } else {
-            result.innerHTML = '✗ Incorrect. La réponse est : ' + correct; result.style.color = '#991b1b';
-        }
-    }
-}
-function checkSci(idA, idN, correctA, correctN, resultId) {
-    const userA = parseFloat(document.getElementById(idA).value.replace(',', '.'));
-    const userN = parseInt(document.getElementById(idN).value);
-    const result = document.getElementById(resultId);
-    if (Math.abs(userA - correctA) < 0.01 && userN === correctN) {
-        result.innerHTML = '✓ Correct ! 🎉'; result.style.color = '#166534';
-    } else {
-        result.innerHTML = `✗ Incorrect. La réponse est : ${String(correctA).replace('.', ',')} × 10<sup>${correctN}</sup>`;
-        result.style.color = '#991b1b';
-    }
 }
 
 // ═══════════════════════════════════════════════════════════════
