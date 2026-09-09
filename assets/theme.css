@@ -221,3 +221,51 @@ body { font-family: var(--font-sans); }
   cursor: default; pointer-events: none;
 }
 .app-nav-item.app-nav-current::before { content: '● '; color: var(--app-accent-600); }
+
+/* ============ PAVÉ NUMÉRIQUE (commun à toutes les applications) ============ */
+.numpad-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 7px; max-width: 220px; margin-top: 8px;
+  background: #e0e7ff; border: 2px solid #6366f1;
+  border-radius: 12px; padding: 10px;
+}
+.numpad-grid button {
+  background: white; border: 1.5px solid #c7d2fe;
+  border-radius: 8px; padding: 11px 6px;
+  font-size: 1.1rem; font-weight: 700; cursor: pointer;
+  color: #1e1b4b; transition: background .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.numpad-grid button:active { background: #c7d2fe; }
+.numpad-grid .np-wide { grid-column: span 3; font-size: .95rem; }
+.numpad-grid .np-minus { color: #dc2626; font-weight: 900; }
+.numpad-grid .np-back { color: #7c3aed; }
+
+body.numpad-disabled .np-section { display: none !important; }
+
+.np-pref-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: #f0f4ff; border: 1.5px solid #c7d2fe;
+  border-radius: 10px; padding: 10px 16px; margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.np-pref-label { color: #3730a3; font-weight: 600; font-size: .95rem; flex: 1; }
+.np-switch { position: relative; display: inline-block; width: 52px; height: 28px; flex-shrink: 0; }
+.np-switch input { opacity: 0; width: 0; height: 0; }
+.np-slider { position: absolute; cursor: pointer; inset: 0; background: #cbd5e1; border-radius: 28px; transition: .25s; }
+.np-slider::before {
+  content: ''; position: absolute;
+  width: 22px; height: 22px; left: 3px; bottom: 3px;
+  background: white; border-radius: 50%; transition: .25s;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+}
+.np-switch input:checked + .np-slider { background: #6366f1; }
+.np-switch input:checked + .np-slider::before { transform: translateX(24px); }
+.np-pref-hint { font-size: .8rem; color: #6b7280; width: 100%; margin-top: 2px; }
+
+/* ============ GLISSER-DÉPOSER (fantôme suivant le pointeur) ============ */
+.drag-ghost {
+  z-index: 9999; pointer-events: none; opacity: .92;
+  box-shadow: 0 12px 28px rgba(0,0,0,.28);
+  transform: scale(1.03);
+}

@@ -7,6 +7,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../assets/theme.css">
 <script src="../assets/nav.js"></script>
+<script src="../assets/numpad.js"></script>
+<script src="../assets/dragdrop.js"></script>
 <style>
   :root {
     --app-accent-50:  #ecfeff;
@@ -884,18 +886,14 @@ function m3Pick(btn, val, ans) {
   appendM3Feedback(ok, correctHtml);
 }
 
-let dragActive = null;
 let dragOrder = [];
 
 function renderM3Drag(data) {
-  const items = data.pool.map(p=>`<div class="drag-item" draggable="true" data-sym="${p.sym}" data-exp="${p.exp}">
+  const items = data.pool.map(p=>`<div class="drag-item" data-sym="${p.sym}" data-exp="${p.exp}">
     <span class="text-2xl font-black text-cyan-700">${p.sym||'—'}</span>
     <span class="text-xs text-gray-500 font-semibold">${p.name}</span>
   </div>`).join('');
-  const zones = data.pool.map((_,i)=>`<div class="drop-zone" data-pos="${i}"
-    ondragover="event.preventDefault();this.classList.add('drag-over')"
-    ondragleave="this.classList.remove('drag-over')"
-    ondrop="dropM3(event,${i})">
+  const zones = data.pool.map((_,i)=>`<div class="drop-zone" data-pos="${i}">
     <span class="text-gray-300 font-black text-lg">${i+1}</span>
   </div>`).join('');
   return `<div class="mb-5">
@@ -908,39 +906,33 @@ function renderM3Drag(data) {
 }
 
 function initDrag3() {
-  dragOrder = new Array(5).fill(null);
+  const data = m3.questions[m3.q];
+  dragOrder = new Array(data.pool.length).fill(null);
   document.querySelectorAll('.drag-item').forEach(el=>{
-    el.addEventListener('dragstart', e=>{
-      dragActive = el;
-      setTimeout(()=>el.classList.add('dragging'),0);
-    });
-    el.addEventListener('dragend', ()=>{
-      el.classList.remove('dragging');
-      dragActive = null;
+    DragDrop.enable(el, {
+      zoneSelector: '.drop-zone',
+      onDrop: (item, zone) => { if (zone) dropM3(item, zone); },
     });
   });
 }
 
-function dropM3(e, pos) {
-  e.preventDefault();
-  const zone = document.querySelector(`[data-pos="${pos}"]`);
-  zone.classList.remove('drag-over');
-  if(!dragActive) return;
+function dropM3(item, zone) {
+  const pos = parseInt(zone.dataset.pos);
   const existing = zone.querySelector('.drag-item');
   if(existing) { document.getElementById('drag-pool').appendChild(existing); }
   document.querySelectorAll('.drop-zone').forEach(z=>{
-    if(z.contains(dragActive)) {
+    if(z.contains(item)) {
       z.innerHTML = `<span class="text-gray-300 font-black text-lg">${parseInt(z.dataset.pos)+1}</span>`;
       z.classList.remove('filled');
       dragOrder[parseInt(z.dataset.pos)] = null;
     }
   });
   const pool = document.getElementById('drag-pool');
-  if(pool.contains(dragActive)) pool.removeChild(dragActive);
+  if(pool.contains(item)) pool.removeChild(item);
   zone.innerHTML = '';
-  zone.appendChild(dragActive);
+  zone.appendChild(item);
   zone.classList.add('filled');
-  dragOrder[pos] = dragActive.dataset.sym;
+  dragOrder[pos] = item.dataset.sym;
 }
 
 function checkDrag3() {
@@ -1080,6 +1072,7 @@ function renderEx() {
     </div>
     <div class="progress-bar bg-cyan-100"><div class="progress-fill bg-gradient-to-r from-cyan-600 to-cyan-700" style="width:${prog}%"></div></div>
   </div>
+  ${numpadToggleBar()}
   ${helpHTML}
   <div class="bg-cyan-50 border border-cyan-200 rounded-2xl shadow-lg p-7 mb-4">
     <div class="bg-gradient-to-r from-cyan-100 to-sky-100 rounded-2xl p-6 mb-7 text-center flex flex-wrap items-center justify-center gap-3">
@@ -1092,19 +1085,20 @@ function renderEx() {
     <div class="flex flex-wrap items-center gap-4 mb-2">
       <div class="flex flex-col items-center gap-1">
         <label class="text-xs text-gray-400 font-bold uppercase">Coefficient</label>
-        <input type="text" id="inp-coeff" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" autocomplete="off">
+        <input type="text" id="inp-coeff" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" autocomplete="off" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
       </div>
       <span class="text-2xl font-black text-gray-400 mt-4">× 10</span>
       <div class="flex flex-col items-center gap-1">
         <label class="text-xs text-gray-400 font-bold uppercase">Exposant</label>
-        <input type="number" step="1" id="inp-exp" class="power-input" placeholder="ex: −3" inputmode="numeric" autocomplete="off">
+        <input type="text" id="inp-exp" class="power-input" placeholder="ex: −3" inputmode="numeric" autocomplete="off" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
       </div>
       <div class="flex flex-col items-center gap-1">
         <label class="text-xs text-gray-400 font-bold uppercase">Unité</label>
         <span class="tag-unit text-xl mt-1">${toU}</span>
       </div>
     </div>
-    <div class="text-xs text-gray-500 mb-6 bg-cyan-100 rounded-lg p-3">
+    ${numpadWidget()}
+    <div class="text-xs text-gray-500 mb-6 mt-4 bg-cyan-100 rounded-lg p-3">
       <strong>Rappel :</strong> Si le résultat est simplement "5" (sans puissance de 10 visible), écris <strong>5</strong> dans le coefficient et <strong>0</strong> dans l'exposant.
     </div>
     <button class="btn-primary" id="verify-btn" onclick="verifyEx()">Vérifier ma réponse</button>
@@ -1298,25 +1292,27 @@ function renderExSq() {
     </div>
     <div class="progress-bar bg-cyan-100"><div class="progress-fill bg-gradient-to-r from-cyan-600 to-cyan-700" style="width:${prog}%"></div></div>
   </div>
+  ${numpadToggleBar()}
   <div class="bg-cyan-50 border border-cyan-200 rounded-2xl shadow-lg p-7 mb-4">
     ${questionHTML}
     <div class="font-bold text-gray-600 mb-4 text-lg">Ta réponse :</div>
     <div class="flex flex-wrap items-center gap-4 mb-2">
       <div class="flex flex-col items-center gap-1">
         <label class="text-xs text-gray-400 font-bold uppercase">Coefficient</label>
-        <input type="text" id="sq-coeff" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" autocomplete="off">
+        <input type="text" id="sq-coeff" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" autocomplete="off" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
       </div>
       <span class="text-2xl font-black text-gray-400 mt-4">× 10</span>
       <div class="flex flex-col items-center gap-1">
         <label class="text-xs text-gray-400 font-bold uppercase">Exposant</label>
-        <input type="number" step="1" id="sq-exp" class="power-input" placeholder="ex: −4" inputmode="numeric" autocomplete="off">
+        <input type="text" id="sq-exp" class="power-input" placeholder="ex: −4" inputmode="numeric" autocomplete="off" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
       </div>
       <div class="flex flex-col items-center gap-1">
         <label class="text-xs text-gray-400 font-bold uppercase">Unité</label>
         <span class="tag-unit text-xl mt-1" style="background:${q.type==='pow'?'#0891b2':'#b45309'}">${toLabel}</span>
       </div>
     </div>
-    <div class="text-xs text-gray-500 mb-6 bg-cyan-100 rounded-lg p-3">
+    ${numpadWidget()}
+    <div class="text-xs text-gray-500 mb-6 mt-4 bg-cyan-100 rounded-lg p-3">
       <strong>Rappel :</strong> Si le résultat est un nombre entier ou décimal simple (ex: "5"), écris <strong>5</strong> dans le coefficient et <strong>0</strong> dans l'exposant.
     </div>
     <button class="btn-primary" id="sq-verify-btn" onclick="verifyExSq()">Vérifier ma réponse</button>
