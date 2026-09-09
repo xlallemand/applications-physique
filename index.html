@@ -10,17 +10,9 @@
     * { box-sizing: border-box; }
 
     :root {
-      --cyan-50: #ecfeff;
-      --cyan-100: #cffafe;
-      --cyan-200: #a5f3fc;
-      --cyan-300: #67e8f9;
-      --cyan-500: #06b6d4;
-      --cyan-600: #0891b2;
-      --cyan-700: #0e7490;
       --cyan-800: #155e75;
       --slate-500: #64748b;
       --slate-700: #334155;
-      --slate-900: #0f172a;
     }
 
     body {
@@ -59,30 +51,28 @@
       font-weight: 600;
     }
 
-    section { margin-bottom: 46px; }
+    section { margin-bottom: 28px; }
+
+    /* Cadre de matière : chaque matière a sa propre couleur dominante */
+    .subject-frame {
+      border: 2px solid var(--subj-200);
+      background: var(--subj-50);
+      border-radius: 20px;
+      padding: 24px 24px 26px;
+    }
+    .subject-frame.cyan    { --subj-50:#ecfeff; --subj-100:#cffafe; --subj-200:#a5f3fc; --subj-300:#67e8f9; --subj-600:#0891b2; --subj-700:#0e7490; --subj-800:#155e75; }
+    .subject-frame.indigo  { --subj-50:#eef2ff; --subj-100:#e0e7ff; --subj-200:#c7d2fe; --subj-300:#a5b4fc; --subj-600:#4f46e5; --subj-700:#4338ca; --subj-800:#3730a3; }
+    .subject-frame.emerald { --subj-50:#ecfdf5; --subj-100:#d1fae5; --subj-200:#a7f3d0; --subj-300:#6ee7b7; --subj-600:#059669; --subj-700:#047857; --subj-800:#065f46; }
 
     .section-heading {
-      display: flex;
-      align-items: baseline;
-      gap: 14px;
       margin: 0 0 18px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--cyan-100);
     }
 
     .section-heading h2 {
       margin: 0;
-      color: var(--slate-900);
+      color: var(--subj-800);
       font-size: 1.45rem;
       font-weight: 900;
-    }
-
-    .section-heading span {
-      color: var(--cyan-600);
-      font-size: 0.78rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
     }
 
     .activities {
@@ -94,42 +84,33 @@
     .activity {
       display: flex;
       flex-direction: column;
-      min-height: 190px;
-      padding: 24px 26px 22px;
+      min-height: 150px;
+      padding: 22px 24px 20px;
       color: inherit;
       text-decoration: none;
       background: #fff;
-      border: 1.5px solid var(--cyan-200);
+      border: 1.5px solid var(--subj-200);
       border-radius: 16px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.045);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       transition: transform .15s ease, box-shadow .15s ease,
                   background .15s ease, border-color .15s ease;
     }
 
     .activity:hover {
       transform: translateY(-3px);
-      background: var(--cyan-50);
-      border-color: var(--cyan-300);
-      box-shadow: 0 8px 24px rgba(8, 145, 178, .12);
+      background: var(--subj-50);
+      border-color: var(--subj-300);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .1);
     }
 
     .activity:focus-visible {
-      outline: 3px solid var(--cyan-300);
+      outline: 3px solid var(--subj-300);
       outline-offset: 3px;
-    }
-
-    .activity-label {
-      margin-bottom: 9px;
-      color: var(--cyan-600);
-      font-size: .76rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: .09em;
     }
 
     .activity h3 {
       margin: 0 0 9px;
-      color: var(--cyan-800);
+      color: var(--subj-800);
       font-size: 1.25rem;
       line-height: 1.25;
       font-weight: 900;
@@ -146,9 +127,16 @@
     .activity .arrow {
       margin-top: auto;
       padding-top: 18px;
-      color: var(--cyan-600);
+      color: var(--subj-700);
       font-size: .9rem;
       font-weight: 900;
+    }
+
+    .subject-empty {
+      color: var(--subj-700);
+      font-style: italic;
+      font-weight: 600;
+      font-size: .95rem;
     }
 
     footer {
@@ -164,8 +152,7 @@
       .page { padding-top: 42px; }
       header { margin-bottom: 42px; }
       .activities { grid-template-columns: 1fr; }
-      .activity { min-height: 175px; }
-      .section-heading { gap: 9px; }
+      .subject-frame { padding: 20px 18px 22px; }
     }
   </style>
 </head>
@@ -178,30 +165,40 @@
       <p class="subtitle">Niveau lycée, de la seconde à la terminale</p>
     </header>
 
-    <section aria-labelledby="physique-chimie">
+    <section aria-labelledby="maths-heading" class="subject-frame cyan">
       <div class="section-heading">
-        <span>Section</span>
-        <h2 id="physique-chimie">Outils Mathématiques</h2>
+        <h2 id="maths-heading">Outils Mathématiques</h2>
       </div>
 
       <div class="activities">
 
         <a class="activity" href="./conversions/index.html">
-          <div class="activity-label">Activité</div>
           <h3>Conversions</h3>
           <p>Réaliser facilement des conversions en utilisant les puissances de 10</p>
           <div class="arrow">Accéder à l'activité →</div>
         </a>
 
         <a class="activity" href="./puissances-10/index.html">
-          <div class="activity-label">Activité</div>
           <h3>Puissances de 10</h3>
           <p>S'entraîner à utiliser les puissances de 10.</p>
           <div class="arrow">Accéder à l'activité →</div>
         </a>
 
       </div>
+    </section>
 
+    <section aria-labelledby="physique-heading" class="subject-frame indigo">
+      <div class="section-heading">
+        <h2 id="physique-heading">Physique</h2>
+      </div>
+      <p class="subject-empty">Bientôt disponible.</p>
+    </section>
+
+    <section aria-labelledby="chimie-heading" class="subject-frame emerald">
+      <div class="section-heading">
+        <h2 id="chimie-heading">Chimie</h2>
+      </div>
+      <p class="subject-empty">Bientôt disponible.</p>
     </section>
 
     <footer>
