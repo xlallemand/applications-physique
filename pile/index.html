@@ -7,6 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../assets/theme.css">
 <script src="../assets/nav.js"></script>
+<script src="../assets/dragdrop.js"></script>
 <style>
 * { box-sizing: border-box; }
 body { font-family: var(--font-sans); background: #eef2f7; min-height: 100vh; }
@@ -78,6 +79,13 @@ body { font-family: var(--font-sans); background: #eef2f7; min-height: 100vh; }
 .heq-dz.over { border-color: #3b82f6; background: #dbeafe; }
 .heq-dz.filled { border-style: solid; border-color: #475569; background: #e2e8f0; }
 .heq-dz.correct { border-color: #16a34a; background: #dcfce7; border-style: solid; }
+
+/* ===== DEMI-PILES : 2 colonnes, empilées sur petit écran ===== */
+.lower-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 560px) {
+  .lower-grid { grid-template-columns: 1fr; gap: 16px; }
+  .heq-dz { min-width: 0; }
+}
 .heq-dz.incorrect { border-color: #dc2626; background: #fee2e2; border-style: solid; }
 .heq-dz.given { border-style: solid; border-color: #7c3aed; background: #ede9fe; }
 
@@ -102,29 +110,24 @@ body { font-family: var(--font-sans); background: #eef2f7; min-height: 100vh; }
 .eq-chip {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 5px;
   background: #1e293b;
   color: white;
   border-radius: 5px;
-  padding: 2px 5px;
+  padding: 3px 6px;
   font-size: 12px;
   font-weight: 700;
 }
-.eq-chip button {
-  width: 16px; height: 16px;
-  border: none; cursor: pointer;
-  border-radius: 3px;
-  font-size: 11px;
-  display: flex; align-items: center; justify-content: center;
-  padding: 0; line-height: 1;
-}
 .eq-chip .coeff-disp {
-  min-width: 18px; text-align: center;
+  min-width: 16px; text-align: center;
   font-size: 13px; font-weight: 800;
 }
-.coeff-dec { background: #64748b; color: white; }
-.coeff-inc { background: #0ea5e9; color: white; }
-.chip-del { background: #ef4444; color: white; border-radius: 50% !important; width: 14px !important; height: 14px !important; font-size: 9px !important; margin-left: 2px; }
+/* Stepper des coefficients (mêmes flèches que dans l'application oxydoréduction) */
+.coef-stepper { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.coef-step-btn { width: 26px; height: 18px; padding: 0; line-height: 1; border: 1.5px solid #cbd5e1; border-radius: 4px; background: #f8fafc; color: #1e293b; font-size: .6rem; cursor: pointer; touch-action: manipulation; }
+.coef-step-btn:hover { background: #e2e8f0; }
+.coef-step-btn:active { background: #cbd5e1; }
+.chip-del { background: #ef4444; color: white; border: none; border-radius: 50%; width: 14px; height: 14px; font-size: 9px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; cursor: pointer; margin-left: 2px; }
 
 /* ===== MISC ===== */
 .hint-box { border-radius: 10px; padding: 12px 16px; margin-top: 8px; font-size: 13px; line-height: 1.6; }
@@ -152,7 +155,7 @@ sub { font-size: 0.72em; vertical-align: sub; }
 <div style="background: linear-gradient(135deg,#1e3a8a,#6d28d9); color:white; padding:14px 24px; box-shadow:0 3px 12px rgba(0,0,0,0.3);">
   <div style="max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
     <div>
-      <div style="font-size:22px;font-weight:900;letter-spacing:-0.5px;">⚡ Oxydo-réduction : schéma d'une pile</div>
+      <div style="font-size:22px;font-weight:900;letter-spacing:-0.5px;">Oxydo-réduction : schéma d'une pile</div>
     </div>
     <div style="display:flex;align-items:center;gap:20px;">
       <div style="text-align:center;">
@@ -182,8 +185,8 @@ sub { font-size: 0.72em; vertical-align: sub; }
 
     <!-- CONSIGNES -->
     <div style="background: linear-gradient(135deg, #1e3a8a11, #6d28d911); border: 2px solid #6d28d9; border-radius: 14px; padding: 16px 20px; margin-bottom: 12px;">
-      <div style="font-size:14px;font-weight:900;color:#4c1d95;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
-        <span style="font-size:18px;">📝</span> Consignes
+      <div style="font-size:14px;font-weight:900;color:#4c1d95;margin-bottom:10px;">
+        Consignes
       </div>
       <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;">
         <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#1e1b4b;">
@@ -207,15 +210,15 @@ sub { font-size: 0.72em; vertical-align: sub; }
 
     <!-- DATA -->
     <div style="background:#eff6ff;border:1.5px solid #93c5fd;border-radius:14px;padding:14px;margin-bottom:12px;">
-      <div style="font-size:13px;font-weight:800;color:#1e40af;margin-bottom:8px;">📋 Données</div>
+      <div style="font-size:13px;font-weight:800;color:#1e40af;margin-bottom:8px;">Données</div>
       <div id="data-wrap" style="font-size:13px;color:#1e3a8a;line-height:1.8;"></div>
     </div>
 
     <!-- PILE SCHEMA (bank-schema intégré dedans) -->
     <div style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.08);padding:16px;margin-bottom:12px;">
-      <div style="font-size:14px;font-weight:800;color:#1e3a8a;margin-bottom:8px;">📐 Schéma de la pile</div>
+      <div style="font-size:14px;font-weight:800;color:#1e3a8a;margin-bottom:8px;">Schéma de la pile</div>
       <div style="border-top:1px solid #e2e8f0;padding-top:8px;margin-bottom:10px;">
-        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">🧲 Glisser sur le schéma</div>
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Glisser sur le schéma</div>
         <div id="bank-schema" style="display:flex;flex-wrap:wrap;gap:4px;min-height:36px;"></div>
       </div>
       <div id="schema-wrap" style="overflow-x:auto;"></div>
@@ -223,15 +226,15 @@ sub { font-size: 0.72em; vertical-align: sub; }
 
     <!-- BOUTON VÉRIFICATION SCHÉMA + résultat -->
     <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:8px;">
-      <button class="btn btn-blue" onclick="checkSchema()">✔ Vérifier le schéma</button>
+      <button class="btn btn-blue" onclick="checkSchema()">Vérifier le schéma</button>
     </div>
     <div id="hints-schema" style="margin-bottom:12px;"></div>
 
     <!-- LOWER ZONES (bank-lower intégré dedans) -->
     <div style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.08);padding:16px;margin-bottom:12px;">
-      <div style="font-size:14px;font-weight:800;color:#1e3a8a;margin-bottom:8px;">🔬 Demi-piles</div>
+      <div style="font-size:14px;font-weight:800;color:#1e3a8a;margin-bottom:8px;">Demi-piles</div>
       <div style="border-top:1px solid #e2e8f0;padding-top:8px;margin-bottom:10px;">
-        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">🧲 Glisser sous les demi-piles</div>
+        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Glisser sous les demi-piles</div>
         <div id="bank-lower" style="display:flex;flex-wrap:wrap;gap:4px;min-height:36px;"></div>
       </div>
       <div id="lower-wrap"></div>
@@ -239,13 +242,13 @@ sub { font-size: 0.72em; vertical-align: sub; }
 
     <!-- BOUTON VÉRIFICATION DEMI-PILES + résultat -->
     <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:8px;">
-      <button class="btn btn-blue" onclick="checkDemiPiles()">✔ Vérification des demi-piles</button>
+      <button class="btn btn-blue" onclick="checkDemiPiles()">Vérification des demi-piles</button>
     </div>
     <div id="hints-demipiles" style="margin-bottom:12px;"></div>
 
     <!-- EQUATION (bank d'espèces intégré dedans) -->
     <div style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.08);padding:16px;margin-bottom:12px;">
-      <div style="font-size:13px;font-weight:800;color:#1e3a8a;margin-bottom:8px;">⚗️ Équation de fonctionnement de la pile</div>
+      <div style="font-size:13px;font-weight:800;color:#1e3a8a;margin-bottom:8px;">Équation de fonctionnement de la pile</div>
       <div id="eq-wrap"></div>
     </div>
 
@@ -254,19 +257,18 @@ sub { font-size: 0.72em; vertical-align: sub; }
 
     <!-- BUTTONS -->
     <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
-      <button class="btn btn-blue" onclick="checkAnswer()">✔ Vérifier</button>
-      <button class="btn btn-orange" onclick="showAnswer()">👁 Afficher la réponse (sans gagner de point)</button>
+      <button class="btn btn-blue" onclick="checkAnswer()">Vérifier</button>
+      <button class="btn btn-orange" onclick="showAnswer()">Afficher la réponse (sans gagner de point)</button>
       <button class="btn btn-green" onclick="nextQ()" id="btn-next" style="display:none;">→ Question suivante</button>
     </div>
   </div>
 
   <!-- END SCREEN -->
   <div id="end-screen" style="display:none;background:white;border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,0.12);padding:40px;text-align:center;margin-top:20px;">
-    <div style="font-size:64px;" id="end-emoji">🎉</div>
     <div style="font-size:28px;font-weight:900;color:#1e293b;margin:12px 0 4px;">Résultats finaux</div>
     <div style="font-size:56px;font-weight:900;color:#1d4ed8;" id="end-score"></div>
     <div style="font-size:15px;color:#64748b;margin:10px 0 24px;" id="end-msg"></div>
-    <button class="btn btn-blue" style="font-size:16px;padding:12px 32px;" onclick="restart()">🔄 Recommencer</button>
+    <button class="btn btn-blue" style="font-size:16px;padding:12px 32px;" onclick="restart()">Recommencer</button>
   </div>
 
 </div>
@@ -401,32 +403,32 @@ function genQuestions() {
 }
 
 // =============================================
-// DRAG ENGINE
+// DRAG ENGINE (Pointer Events communes à toutes les applications —
+// voir assets/dragdrop.js — plutôt que l'API HTML5 Drag and Drop
+// native, non prise en charge au toucher sur iOS Safari et peu
+// fiable sur Firefox Android)
 // =============================================
+const dropzoneRegistry = new Map(); // élément de zone -> { accept, onDrop }
+
 function makeDraggable(el, data) {
-  el.setAttribute('draggable', 'true');
-  el.addEventListener('dragstart', e => {
-    dragging = data;
-    el.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'copy';
-    e.dataTransfer.setData('text/plain', data.id);
+  DragDrop.enable(el, {
+    zoneSelector: '.dz, .heq-dz, .eq-side',
+    dragOverClass: 'over',
+    onStart: () => { dragging = data; },
+    onDrop: (item, zone) => {
+      if (zone && !locked) {
+        const handler = dropzoneRegistry.get(zone);
+        if (handler && dragging && handler.accept(dragging)) {
+          handler.onDrop(dragging);
+        }
+      }
+      dragging = null;
+    },
   });
-  el.addEventListener('dragend', () => { el.classList.remove('dragging'); });
 }
 
 function makeDropzone(el, accept, onDrop) {
-  el.addEventListener('dragover', e => {
-    if (dragging && accept(dragging)) { e.preventDefault(); el.classList.add('over'); }
-  });
-  el.addEventListener('dragleave', () => el.classList.remove('over'));
-  el.addEventListener('drop', e => {
-    e.preventDefault();
-    el.classList.remove('over');
-    if (dragging && accept(dragging) && !locked) {
-      onDrop(dragging);
-      dragging = null;
-    }
-  });
+  dropzoneRegistry.set(el, { accept, onDrop });
 }
 
 function clearDZ(el, stateKey) {
@@ -474,6 +476,7 @@ function renderQ() {
   hasError = false;
   locked = false;
   dragging = null;
+  dropzoneRegistry.clear();
 
   document.getElementById('hdr-q').textContent = `${qIdx+1} / 10`;
   document.getElementById('prog-bar').style.width = `${(qIdx+1)*10}%`;
@@ -875,7 +878,7 @@ function renderBankSchema() {
   if (!gIR) items.push({ id:'il-'+rightCouple.id, label: rightCouple.ion,   labelH: rightCouple.ionH,  bg:'#065f46', title:'Ion droit' });
 
   bank.innerHTML = items.map(item => `
-    <div class="drag-item" data-id="${item.id}" draggable="true"
+    <div class="drag-item" data-id="${item.id}"
          style="background:${item.bg || '#1e40af'};${(item.id==='d-plus'||item.id==='d-minus')?'font-size:17px;':''}"
          title="${item.title || ''}">
       ${item.labelH || item.label}
@@ -907,7 +910,7 @@ function renderBankLower() {
   items.push({ id:'d-cathode',label:'Cathode',   bg:'#92400e', title:'Cathode' });
 
   bank.innerHTML = items.map(item => `
-    <div class="drag-item" data-id="${item.id}" draggable="true"
+    <div class="drag-item" data-id="${item.id}"
          style="background:${item.bg || '#1e40af'};${item.type==='heq'?'font-size:12px;':''}"
          title="${item.title || ''}">
       ${item.labelH || item.label}
@@ -927,7 +930,7 @@ function renderLower() {
   const { anode, cathode, hint, anodeSide, leftCouple, rightCouple } = Q;
   const wrap = document.getElementById('lower-wrap');
   wrap.innerHTML = `
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+  <div class="lower-grid">
     <div>
       <div style="font-size:13px;font-weight:800;color:#0369a1;margin-bottom:10px;padding-bottom:4px;border-bottom:2px solid #bae6fd;">Demi-pile gauche</div>
       <div style="margin-bottom:10px;">
@@ -984,21 +987,12 @@ function setupHalfEqZone(dzId, side) {
   if (!el) return;
   if (Q.hint === 'half_eqs_placed') { el.dataset.given='1'; return; }
 
-  el.addEventListener('dragover', e => {
-    if (dragging && ['heq-anode','heq-cathode'].includes(dragging.id)) {
-      e.preventDefault(); el.classList.add('over');
-    }
-  });
-  el.addEventListener('dragleave', () => el.classList.remove('over'));
-  el.addEventListener('drop', e => {
-    e.preventDefault(); el.classList.remove('over');
-    if (!dragging || !['heq-anode','heq-cathode'].includes(dragging.id) || locked) return;
-    const couple = dragging.couple;
+  makeDropzone(el, d => ['heq-anode','heq-cathode'].includes(d.id), d => {
+    const couple = d.couple;
     const prevDragId = el.dataset.dragId;
     if (prevDragId) unmarkUsed(prevDragId);
     fillHalfEqZone(el, couple, 'std', side);
-    markUsed(dragging.id);
-    dragging = null;
+    markUsed(d.id);
   });
 }
 
@@ -1103,9 +1097,9 @@ function renderEq() {
   const wrap = document.getElementById('eq-wrap');
   wrap.innerHTML = `
     <div style="border-top:1px solid #e2e8f0;padding-top:8px;margin-bottom:10px;">
-      <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">🧲 Glisser dans l'équation</div>
+      <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Glisser dans l'équation</div>
       <div id="eq-bank" style="display:flex;flex-wrap:wrap;gap:6px;">
-        ${allSp.map(s=>`<div class="drag-item" data-id="${s.id}" data-type="sp" draggable="true" style="background:#0f766e;font-size:13px;" title="${s.label}">${s.html}</div>`).join('')}
+        ${allSp.map(s=>`<div class="drag-item" data-id="${s.id}" data-type="sp" style="background:#0f766e;font-size:13px;" title="${s.label}">${s.html}</div>`).join('')}
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
@@ -1127,24 +1121,14 @@ function renderEq() {
 
   ['l','r'].forEach(side => {
     const el = document.getElementById('eq-'+side);
-    el.addEventListener('dragover', e => {
-      if (dragging && dragging.type === 'sp') { e.preventDefault(); el.classList.add('over'); }
-    });
-    el.addEventListener('dragleave', () => el.classList.remove('over'));
-    el.addEventListener('drop', e => {
-      e.preventDefault(); el.classList.remove('over');
-      if (!dragging || dragging.type !== 'sp' || locked) return;
+    makeDropzone(el, d => d.type === 'sp', d => {
       const arr = side === 'l' ? eqL : eqR;
       // Vérifier si déjà présent dans l'un ou l'autre côté
-      if (eqL.find(x => x.id === dragging.sp.id) || eqR.find(x => x.id === dragging.sp.id)) {
-        dragging = null;
-        return;
-      }
-      arr.push({ ...dragging.sp, coeff: 1 });
+      if (eqL.find(x => x.id === d.sp.id) || eqR.find(x => x.id === d.sp.id)) return;
+      arr.push({ ...d.sp, coeff: 1 });
       // Masquer l'item dans la banque
-      hideSpItem(dragging.sp.id);
+      hideSpItem(d.sp.id);
       refreshEq(side);
-      dragging = null;
     });
   });
 }
@@ -1158,9 +1142,11 @@ function refreshEq(side) {
   }
   el.innerHTML = arr.map((sp, i) => `
     <div class="eq-chip">
-      <button class="coeff-dec coeff-btn" onclick="chgCoeff('${side}',${i},-1)">−</button>
-      <span class="coeff-disp" id="coeff-${side}-${i}">${sp.coeff}</span>
-      <button class="coeff-inc coeff-btn" onclick="chgCoeff('${side}',${i},1)">+</button>
+      <div class="coef-stepper">
+        <button type="button" class="coef-step-btn" onclick="chgCoeff('${side}',${i},1)" aria-label="Augmenter">▲</button>
+        <span class="coeff-disp" id="coeff-${side}-${i}">${sp.coeff}</span>
+        <button type="button" class="coef-step-btn" onclick="chgCoeff('${side}',${i},-1)" aria-label="Diminuer">▼</button>
+      </div>
       <span style="margin:0 4px;">${sp.html}</span>
       <button class="chip-del" onclick="rmFromEq('${side}',${i})">✕</button>
     </div>
@@ -1196,21 +1182,21 @@ function renderData() {
 
   if (hint === 'meter') {
     const comSideLabel = anodeSide === 'L' ? 'gauche' : 'droite';
-    html += `<p>🔌 Le voltmètre est branché avec la borne <strong>COM côté ${comSideLabel}</strong> (borne négative de la pile). Il indique une valeur <strong>positive</strong>.</p>`;
+    html += `<p>Le voltmètre est branché avec la borne <strong>COM côté ${comSideLabel}</strong> (borne négative de la pile). Il indique une valeur <strong>positive</strong>.</p>`;
   } else if (hint === 'electrons') {
     const fromSide = anodeSide === 'L' ? 'gauche' : 'droite';
     const toSide   = anodeSide === 'L' ? 'droite' : 'gauche';
-    html += `<p>⚡ Les électrons e⁻ sont représentés sur le schéma : ils circulent de la <strong>demi-pile ${fromSide} vers la demi-pile ${toSide}</strong> dans le circuit extérieur.</p>`;
+    html += `<p>Les électrons e⁻ sont représentés sur le schéma : ils circulent de la <strong>demi-pile ${fromSide} vers la demi-pile ${toSide}</strong> dans le circuit extérieur.</p>`;
   } else if (hint === 'current') {
     const fromSide = anodeSide === 'L' ? 'droite' : 'gauche';
     const toSide   = anodeSide === 'L' ? 'gauche' : 'droite';
-    html += `<p>🔁 Le courant I est représenté sur le schéma : il circule de la <strong>demi-pile ${fromSide} vers la demi-pile ${toSide}</strong> dans le circuit extérieur.</p>`;
+    html += `<p>Le courant I est représenté sur le schéma : il circule de la <strong>demi-pile ${fromSide} vers la demi-pile ${toSide}</strong> dans le circuit extérieur.</p>`;
   } else if (hint === 'polarity') {
     const minusSide = anodeSide === 'L' ? 'gauche' : 'droite';
     const plusSide  = anodeSide === 'L' ? 'droite' : 'gauche';
-    html += `<p>🧲 La polarité est représentée sur le schéma : la borne <strong>négative (−)</strong> est côté <strong>${minusSide}</strong>, la borne <strong>positive (+)</strong> est côté <strong>${plusSide}</strong>.</p>`;
+    html += `<p>La polarité est représentée sur le schéma : la borne <strong>négative (−)</strong> est côté <strong>${minusSide}</strong>, la borne <strong>positive (+)</strong> est côté <strong>${plusSide}</strong>.</p>`;
   } else if (hint === 'half_eqs_placed') {
-    html += `<p>📌 Les demi-équations de fonctionnement sont déjà placées dans les zones correspondantes, dans leur sens correct de fonctionnement.</p>`;
+    html += `<p>Les demi-équations de fonctionnement sont déjà placées dans les zones correspondantes, dans leur sens correct de fonctionnement.</p>`;
   }
 
   document.getElementById('data-wrap').innerHTML = html;
@@ -1426,12 +1412,12 @@ function checkAnswer() {
   let boxSchema;
   if (schemaCount === 0) {
     boxSchema = `<div style="background:#f0fdf4;border:2px solid #86efac;border-radius:10px;padding:12px 16px;flex:1;min-width:180px;">
-      <div style="font-weight:800;color:#16a34a;font-size:13px;">📐 Schéma</div>
+      <div style="font-weight:800;color:#16a34a;font-size:13px;">Schéma</div>
       <div style="font-size:12px;color:#166534;margin-top:4px;">✅ Toutes les réponses sont correctes.</div>
     </div>`;
   } else {
     boxSchema = `<div style="background:#fff5f5;border:2px solid #fca5a5;border-radius:10px;padding:12px 16px;flex:1;min-width:180px;">
-      <div style="font-weight:800;color:#dc2626;font-size:13px;">📐 Schéma</div>
+      <div style="font-weight:800;color:#dc2626;font-size:13px;">Schéma</div>
       <div style="font-size:12px;color:#7f1d1d;margin-top:4px;">❌ ${schemaCount} réponse${schemaCount>1?'s':''} incorrecte${schemaCount>1?'s':''} ou manquante${schemaCount>1?'s':''}.</div>
     </div>`;
   }
@@ -1440,12 +1426,12 @@ function checkAnswer() {
   let boxDemi;
   if (otherCount === 0) {
     boxDemi = `<div style="background:#f0fdf4;border:2px solid #86efac;border-radius:10px;padding:12px 16px;flex:1;min-width:180px;">
-      <div style="font-weight:800;color:#16a34a;font-size:13px;">🔬 Demi-piles</div>
+      <div style="font-weight:800;color:#16a34a;font-size:13px;">Demi-piles</div>
       <div style="font-size:12px;color:#166534;margin-top:4px;">✅ Toutes les réponses sont correctes.</div>
     </div>`;
   } else {
     boxDemi = `<div style="background:#fff5f5;border:2px solid #fca5a5;border-radius:10px;padding:12px 16px;flex:1;min-width:180px;">
-      <div style="font-weight:800;color:#dc2626;font-size:13px;">🔬 Demi-piles</div>
+      <div style="font-weight:800;color:#dc2626;font-size:13px;">Demi-piles</div>
       <div style="font-size:12px;color:#7f1d1d;margin-top:4px;">❌ ${otherCount} réponse${otherCount>1?'s':''} incorrecte${otherCount>1?'s':''} ou manquante${otherCount>1?'s':''}.</div>
     </div>`;
   }
@@ -1454,7 +1440,7 @@ function checkAnswer() {
   let boxEq;
   if (eqCheck.correct) {
     boxEq = `<div style="background:#f0fdf4;border:2px solid #86efac;border-radius:10px;padding:12px 16px;flex:1;min-width:200px;">
-      <div style="font-weight:800;color:#16a34a;font-size:13px;">⚗️ Équation de fonctionnement</div>
+      <div style="font-weight:800;color:#16a34a;font-size:13px;">Équation de fonctionnement</div>
       <div style="font-size:12px;color:#166534;margin-top:4px;">✅ L'équation est correcte.</div>
     </div>`;
   } else {
@@ -1480,7 +1466,7 @@ function checkAnswer() {
       eqDetails += `<div style="margin-top:4px;font-size:12px;color:#166534;">✅ Les coefficients sont corrects.</div>`;
     }
     boxEq = `<div style="background:#fff5f5;border:2px solid #fca5a5;border-radius:10px;padding:12px 16px;flex:1;min-width:200px;">
-      <div style="font-weight:800;color:#dc2626;font-size:13px;">⚗️ Équation de fonctionnement</div>
+      <div style="font-weight:800;color:#dc2626;font-size:13px;">Équation de fonctionnement</div>
       ${eqDetails}
     </div>`;
   }
@@ -1649,7 +1635,7 @@ function showAnswer() {
   document.getElementById('eq-r').classList.add('correct');
 
   document.getElementById('hints-wrap').innerHTML = `<div class="hint-box hint-ans">
-    <strong style="color:#92400e;">📖 Réponse affichée — 0 point pour cette question.</strong><br>
+    <strong style="color:#92400e;">Réponse affichée — 0 point pour cette question.</strong><br>
     <span style="color:#78350f;">Analysez bien la correction avant de passer à la question suivante.</span>
   </div>`;
   document.getElementById('btn-next').style.display = 'inline-block';
@@ -1675,14 +1661,13 @@ function showEnd() {
   const s = totalScore;
   document.getElementById('end-score').textContent = `${s} / 20`;
 
-  let emoji, msg;
-  if (s >= 18)      { emoji='🏆'; msg='Parfait ! Vous maîtrisez parfaitement les piles électrochimiques !'; }
-  else if (s >= 14) { emoji='🌟'; msg='Très bien ! Quelques imperfections mais l\'essentiel est maîtrisé.'; }
-  else if (s >= 10) { emoji='👍'; msg='Assez bien. Revoyez les points d\'erreur et continuez à vous entraîner.'; }
-  else if (s >= 6)  { emoji='📚'; msg='Des lacunes à combler. Revoyez le cours sur les piles et l\'oxydo-réduction.'; }
-  else              { emoji='💪'; msg='Courage ! La pratique régulière vous aidera à progresser rapidement.'; }
+  let msg;
+  if (s >= 18)      { msg='Parfait ! Vous maîtrisez parfaitement les piles électrochimiques !'; }
+  else if (s >= 14) { msg='Très bien ! Quelques imperfections mais l\'essentiel est maîtrisé.'; }
+  else if (s >= 10) { msg='Assez bien. Revoyez les points d\'erreur et continuez à vous entraîner.'; }
+  else if (s >= 6)  { msg='Des lacunes à combler. Revoyez le cours sur les piles et l\'oxydo-réduction.'; }
+  else              { msg='Courage ! La pratique régulière vous aidera à progresser rapidement.'; }
 
-  document.getElementById('end-emoji').textContent = emoji;
   document.getElementById('end-msg').textContent = msg;
 }
 
