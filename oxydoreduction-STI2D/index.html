@@ -3,54 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Oxydoréduction - STI2D (v7)</title>
+  <title>Oxydoréduction – Terminale STI2D</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="../assets/theme.css">
+  <script src="../assets/nav.js"></script>
+  <script src="../assets/dragdrop.js"></script>
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f4f8; }
-    .card { background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 2rem; margin: 1rem auto; max-width: 1200px; }
-    .btn-primary { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 0.8rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s; }
-    .btn-primary:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(79, 70, 229, 0.4); }
-    .btn-secondary { background: #eef2ff; color: #4338ca; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #c7d2fe; cursor: pointer; font-weight: 600; }
-    .module-btn { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 1.5rem 2rem; border-radius: 12px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: none; width: 100%; text-align: left; }
-    .module-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
+    :root {
+      --app-accent-50:  #ecfdf5;
+      --app-accent-100: #d1fae5;
+      --app-accent-200: #a7f3d0;
+      --app-accent-400: #34d399;
+      --app-accent-600: #059669;
+      --app-accent-700: #047857;
+      --app-accent-800: #065f46;
+    }
+    .btn-module { transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-module:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
     .sup { font-size: 0.7em; vertical-align: super; }
     .sub { font-size: 0.7em; vertical-align: sub; }
-    .course-block { background-color: #fafbff; border: 2px solid #c7d2fe; border-radius: 14px; padding: 1.5rem; margin-bottom: 2rem; }
-    .course-block h3 { color: #3730a3; border-bottom: 3px solid #6366f1; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+    .course-block { background-color: #fafbff; border: 2px solid #a7f3d0; border-radius: 14px; padding: 1.5rem; margin-bottom: 2rem; }
+    .course-block h3 { color: #065f46; border-bottom: 3px solid #059669; padding-bottom: 0.5rem; margin-bottom: 1rem; }
     .def-box { background-color: #eff6ff; border-left: 6px solid #3b82f6; padding: 1.2rem; margin: 1rem 0; color: #1e3a5f; border-radius: 0 10px 10px 0; }
     .def-box-red { background-color: #fff7ed; border-left: 6px solid #f97316; padding: 1.2rem; margin: 1rem 0; color: #7c2d12; border-radius: 0 10px 10px 0; }
     .def-box h4 { font-weight: bold; color: #1d4ed8; }
     .def-box-red h4 { font-weight: bold; color: #c2410c; }
     .example-box { background-color: #f0f9ff; border: 2px dashed #7dd3fc; padding: 0.9rem 1rem; border-radius: 8px; margin: 0.8rem 0; color: #0c4a6e; font-size: 0.95rem; }
-    .key-equation { background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 60%, #4f46e5 100%); color: white; border-radius: 14px; padding: 1.4rem 2rem; text-align: center; font-size: 1.5rem; font-weight: 800; box-shadow: 0 6px 24px rgba(79,70,229,0.35); border: 3px solid #818cf8; margin: 1rem 0; }
-    .key-equation .eq-label { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.8; display: block; margin-bottom: 0.4rem; color: #c7d2fe; }
-    .method-step { background-color: #ffffff; border: 2px solid #c7d2fe; padding: 1rem; border-radius: 10px; height: 100%; }
-    .method-step .step-number { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 0.75rem; flex-shrink: 0; }
+    .key-equation { background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #059669 100%); color: white; border-radius: 14px; padding: 1.4rem 2rem; text-align: center; font-size: 1.5rem; font-weight: 800; box-shadow: 0 6px 24px rgba(5,150,105,0.35); border: 3px solid #34d399; margin: 1rem 0; }
+    .key-equation .eq-label { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.8; display: block; margin-bottom: 0.4rem; color: #a7f3d0; }
+    .method-step { background-color: #ffffff; border: 2px solid #a7f3d0; padding: 1rem; border-radius: 10px; height: 100%; }
+    .method-step .step-number { background: linear-gradient(135deg, #059669, #047857); color: white; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 0.75rem; flex-shrink: 0; }
     .example-step { background-color: #f0fdf4; border: 2px solid #86efac; padding: 1rem; border-radius: 10px; height: 100%; }
     @media (max-width: 640px) { .method-table-wrapper { grid-template-columns: 1fr !important; } }
     .question-card { background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin: 1rem 0; border: 2px solid #e2e8f0; color: #1f2937; }
     .option-box { padding: 0.75rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
-    .option-box:hover { border-color: #4f46e5; background-color: #eef2ff; }
-    .option-box.selected { border-color: #4f46e5; background-color: #e0e7ff; }
-    .correct { border-color: #10b981 !important; background-color: #d1fae5 !important; }
-    .incorrect { border-color: #ef4444 !important; background-color: #fee2e2 !important; }
-    .progress-bar { background: #e2e8f0; height: 20px; border-radius: 10px; overflow: hidden; margin: 1rem 0; }
-    .progress-fill { background: linear-gradient(90deg, #10b981 0%, #059669 100%); height: 100%; transition: width 0.5s; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.85rem; }
-    .score-display { background: #4f46e5; color: white; padding: 1rem; border-radius: 10px; text-align: center; font-size: 1.3rem; font-weight: bold; margin: 1rem 0; }
+    .option-box:hover { border-color: #059669; background-color: #ecfdf5; }
+    .option-box.selected { border-color: #059669; background-color: #d1fae5; }
     .half-equation { background-color: #f1f5f9; padding: 0.8rem 1.2rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; margin: 0.5rem 0; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
-    .equation-builder { background: white; padding: 1.5rem; border-radius: 10px; border: 3px solid #6366f1; margin: 1.5rem 0; }
+    .equation-builder { background: white; padding: 1.5rem; border-radius: 10px; border: 3px solid #059669; margin: 1.5rem 0; }
     .species-bank { background: #f1f5f9; padding: 1rem; border-radius: 8px; margin-top: 1.5rem; min-height: 80px; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
     .drop-zone { min-width: 100px; height: 50px; border: 2px dashed #cbd5e1; border-radius: 8px; padding: 0.5rem; margin: 0.3rem; display: inline-flex; align-items: center; justify-content: center; background: white; transition: all 0.3s; }
-    .drop-zone.over { border-color: #6366f1; background: #eef2ff; }
+    .drop-zone.over { border-color: #059669; background: #ecfdf5; }
     .drop-zone.filled { border-style: solid; }
-    .draggable { background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%); color: white; padding: 0.6rem 1.2rem; border-radius: 8px; cursor: move; display: inline-block; font-weight: 600; user-select: none; }
-    .draggable.in-zone { cursor: pointer; background: #a78bfa; }
+    .draggable { background: linear-gradient(135deg, #047857 0%, #059669 100%); color: white; padding: 0.6rem 1.2rem; border-radius: 8px; cursor: grab; display: inline-block; font-weight: 600; user-select: none; touch-action: none; }
+    .draggable.in-zone { cursor: grab; background: #6ee7b7; color: #065f46; }
+    .draggable.dragging { opacity: .4; }
     .coefficient-input { width: 50px; text-align: center; padding: 0.4rem; border: 2px solid #cbd5e1; border-radius: 6px; font-weight: bold; font-size: 1.1rem; }
     .multiplier-control { display: flex; align-items: center; background: white; border: 2px solid #d1d5db; border-radius: 8px; overflow: hidden; }
-    .btn-small { width: 35px; height: 35px; border: none; background: #f3f4f6; color: #4b5563; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
-    .btn-small:hover { background-color: #e5e7eb; }
-    .flip-btn { background: #8b5cf6; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
-    .arrow { font-size: 2.5rem; font-weight: bold; color: #6366f1; }
+    .mult-btn { width: 35px; height: 35px; border: none; background: #f3f4f6; color: #4b5563; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
+    .mult-btn:hover { background-color: #e5e7eb; }
+    .flip-btn { background: #059669; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+    .arrow { font-size: 2.5rem; font-weight: bold; color: #059669; }
     /* Feedback */
     #feedback-area { margin-top: 1rem; }
     .fb-ok { background:#dcfce7; color:#166534; border:2px solid #4ade80; padding:1rem 1.25rem; border-radius:10px; font-size:1.2rem; font-weight:bold; text-align:center; }
@@ -76,24 +79,63 @@
     .fb-solution-box .eq { font-size:1.1rem; font-family:monospace; }
   </style>
 </head>
-<body class="bg-gray-100">
-<div class="container mx-auto px-4 py-8">
-  <div class="card">
-    <h1 class="text-4xl font-bold text-center mb-2" style="color:#4f46e5;">&#9883;&#65039; Oxydoréduction</h1>
-    <p class="text-center text-xl text-gray-600 mb-8">Terminale STI2D</p>
+<body class="bg-white min-h-screen">
 
-    <div id="menu">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <button class="module-btn" onclick="showModule('course')">📚 Module 1 : Le Cours</button>
-        <button class="module-btn" onclick="showModule('training')">🎯 Module 2 : Entraînement</button>
-        <button class="module-btn" onclick="showModule('reactions')">⚡ Module 3 : Écrire les réactions</button>
+<!-- ═══════ NAVIGATION ═══════ -->
+<div id="app-nav"></div>
+
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+
+  <header id="mainHeader" class="text-center mb-8">
+    <h1 class="text-4xl md:text-5xl font-bold text-emerald-900 mb-2">&#9883;&#65039; Oxydoréduction</h1>
+    <p class="text-lg text-emerald-700">Terminale STI2D</p>
+  </header>
+
+  <div id="menu" class="module-list mb-8">
+    <div class="module-card">
+      <div class="module-card-head">
+        <span class="module-badge">Module 1</span>
+        <div class="module-card-body">
+          <div class="module-card-title">Le cours</div>
+          <div class="module-card-desc">Oxydants, réducteurs, demi-équations et méthode pour écrire une réaction d'oxydoréduction</div>
+          <div class="module-card-actions">
+            <button onclick="showModule('course')" class="btn-module btn-primary">Cours</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- MODULE 1 -->
-    <div id="module-course" class="hidden">
-      <button class="btn-secondary mb-6" onclick="showMenu()">&#8592; Retour au menu</button>
-      <h2 class="text-3xl font-bold mb-6 text-center" style="color:#4f46e5;">📚 Le Cours : Oxydoréduction</h2>
+    <div class="module-card">
+      <div class="module-card-head">
+        <span class="module-badge">Module 2</span>
+        <div class="module-card-body">
+          <div class="module-card-title">Entraînement</div>
+          <div class="module-card-desc">Vérifie que tu as bien compris le cours avec des questions rapides</div>
+          <div class="module-card-actions">
+            <button onclick="showModule('training')" class="btn-module btn-primary">Entraînement (10 questions)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module-card">
+      <div class="module-card-head">
+        <span class="module-badge">Module 3</span>
+        <div class="module-card-body">
+          <div class="module-card-title">Écrire les réactions d'oxydoréduction</div>
+          <div class="module-card-desc">Construis pas à pas l'équation bilan à partir des demi-équations — l'aide diminue au fil des questions</div>
+          <div class="module-card-actions">
+            <button onclick="showModule('reactions')" class="btn-module btn-primary">Entraînement (20 questions)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 1 -->
+  <div id="module-course" class="hidden">
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
+      <h2 class="text-2xl md:text-3xl font-bold text-emerald-900 mb-6 text-center">📚 Le Cours : Oxydoréduction</h2>
       <div class="course-block">
         <h3 class="text-2xl font-bold">🔬 Oxydants et Réducteurs</h3>
         <div class="grid md:grid-cols-2 gap-4">
@@ -139,7 +181,7 @@
         <h3 class="text-2xl font-bold">✍️ Comment écrire une réaction d'oxydoréduction</h3>
         <p class="text-gray-500 italic mb-4">Les deux demi-équations des couples sont toujours données.</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem 1.5rem;" class="method-table-wrapper">
-          <div class="text-center font-bold text-indigo-700 bg-indigo-50 rounded-lg py-2 px-3 mb-1">📋 Méthode</div>
+          <div class="text-center font-bold text-emerald-700 bg-emerald-50 rounded-lg py-2 px-3 mb-1">📋 Méthode</div>
           <div class="text-center font-bold text-green-700 bg-green-50 rounded-lg py-2 px-3 mb-1">Exemple : Fe<span class="sup">3+</span> + Zn</div>
           <div class="method-step"><div style="display:flex;align-items:flex-start;"><span class="step-number">1</span><span><strong>Identifier les réactifs</strong> et les repérer dans les demi-équations.</span></div></div>
           <div class="example-step">
@@ -170,26 +212,38 @@
         <button class="btn-primary text-xl" onclick="showModule('training')">J'ai compris, aux exercices ! &#8594;</button>
       </div>
     </div>
+  </div>
 
-    <!-- MODULE 2 -->
-    <div id="module-training" class="hidden">
-      <button class="btn-secondary mb-4" onclick="showMenu()">&#8592; Retour au menu</button>
-      <h2 class="text-3xl font-bold mb-6 text-center" style="color:#4f46e5;">🎯 Entraînement</h2>
-      <div class="progress-bar"><div class="progress-fill" id="progress-training" style="width:0%">0/10</div></div>
-      <div class="score-display" id="score-training">Score : 0/10</div>
+  <!-- MODULE 2 -->
+  <div id="module-training" class="hidden">
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
+      <h2 class="text-2xl md:text-3xl font-bold text-emerald-900 mb-6 text-center">🎯 Entraînement</h2>
+      <div class="mb-6">
+        <div class="flex justify-between text-sm font-bold text-gray-500 mb-2">
+          <span>Question <span id="tQuestionNum">1</span> / 10</span>
+          <span>Score : <span id="tScoreNum">0</span> / <span id="tTotalNum">0</span></span>
+        </div>
+        <div class="progress-bar bg-emerald-100"><div id="progress-training" class="progress-fill bg-gradient-to-r from-emerald-600 to-emerald-700" style="width:0%"></div></div>
+      </div>
       <div id="training-question"></div>
       <div class="text-center mt-6">
         <button class="btn-primary" id="btn-check-training" onclick="checkTrainingAnswer()">Vérifier</button>
         <button class="btn-primary hidden" id="btn-next-training" onclick="nextTrainingQuestion()">Question suivante &#8594;</button>
       </div>
     </div>
+  </div>
 
-    <!-- MODULE 3 -->
-    <div id="module-reactions" class="hidden">
-      <button class="btn-secondary mb-4" onclick="showMenu()">&#8592; Retour au menu</button>
-      <h2 class="text-3xl font-bold mb-6 text-center" style="color:#4f46e5;">⚡ Écrire les réactions</h2>
-      <div class="progress-bar"><div class="progress-fill" id="progress-reactions" style="width:0%">0/20</div></div>
-      <div class="score-display" id="score-reactions">Score : 0/20</div>
+  <!-- MODULE 3 -->
+  <div id="module-reactions" class="hidden">
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
+      <h2 class="text-2xl md:text-3xl font-bold text-emerald-900 mb-6 text-center">⚡ Écrire les réactions</h2>
+      <div class="mb-6">
+        <div class="flex justify-between text-sm font-bold text-gray-500 mb-2">
+          <span>Question <span id="rQuestionNum">1</span> / 20</span>
+          <span>Score : <span id="rScoreNum">0</span> / <span id="rTotalNum">0</span></span>
+        </div>
+        <div class="progress-bar bg-emerald-100"><div id="progress-reactions" class="progress-fill bg-gradient-to-r from-emerald-600 to-emerald-700" style="width:0%"></div></div>
+      </div>
       <div id="reaction-question"></div>
       <div id="feedback-area"></div>
       <div class="text-center mt-6">
@@ -197,26 +251,49 @@
         <button class="btn-primary hidden" id="btn-next-reaction" onclick="nextReactionQuestion()">Question suivante &#8594;</button>
       </div>
     </div>
-
   </div>
+
 </div>
 <script>
 // =====================================================================
 // NAVIGATION
 // =====================================================================
+const nav = AppNav.init({
+  appName: 'Oxydoréduction',
+  portalHref: '../index.html',
+  portalLabel: 'Toutes les applications',
+  onHome: () => showMenu(),
+  onNavigate: (key) => showModule(key),
+  groups: [
+    { title: 'Cours', items: [ {key:'course', label:'Le cours'} ] },
+    { title: 'Entraînement', items: [ {key:'training', label:'Entraînement (10 questions)'} ] },
+    { title: 'Réactions', items: [ {key:'reactions', label:"Écrire les réactions (20 questions)"} ] },
+  ],
+});
+nav.setActive(null);
+
+const MODULE_TITLES = { course:'Le cours', training:'Entraînement', reactions:'Écrire les réactions' };
+
 function showMenu() {
-  ['menu','module-course','module-training','module-reactions'].forEach(function(id){
+  ['module-course','module-training','module-reactions'].forEach(function(id){
     document.getElementById(id).classList.add('hidden');
   });
-  document.getElementById('menu').classList.remove('hidden');
-  window.scrollTo(0,0);
+  document.getElementById('mainHeader').style.display = 'block';
+  document.getElementById('menu').style.display = 'block';
+  nav.setTitle(null);
+  nav.setActive(null);
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 function showModule(m) {
-  ['menu','module-course','module-training','module-reactions'].forEach(function(id){
+  document.getElementById('mainHeader').style.display = 'none';
+  document.getElementById('menu').style.display = 'none';
+  ['module-course','module-training','module-reactions'].forEach(function(id){
     document.getElementById(id).classList.add('hidden');
   });
   document.getElementById('module-'+m).classList.remove('hidden');
-  window.scrollTo(0,0);
+  window.scrollTo({top:0, behavior:'smooth'});
+  nav.setTitle(MODULE_TITLES[m] || null);
+  nav.setActive(m);
   if (m==='training') initTraining();
   if (m==='reactions') initReactions();
 }
@@ -228,11 +305,11 @@ var tIdx=0, tScore=0;
 var tQuestions=[
   {type:'qcm',question:"Une oxydation est une transformation qui forme...",options:["L'oxydant","Le réducteur"],correct:0},
   {type:'qcm',question:"Une réduction est une transformation qui forme...",options:["L'oxydant","Le réducteur"],correct:1},
-  {type:'qcm',question:"Transformation : Zn \u2192 Zn<span class='sup'>2+</span> + 2e<span class='sup'>-</span>. Oxydation ou réduction ?",options:['Oxydation','Réduction'],correct:0},
-  {type:'qcm',question:"Transformation : Cu<span class='sup'>2+</span> + 2e<span class='sup'>-</span> \u2192 Cu. Oxydation ou réduction ?",options:['Oxydation','Réduction'],correct:1},
+  {type:'qcm',question:"Transformation : Zn → Zn<span class='sup'>2+</span> + 2e<span class='sup'>-</span>. Oxydation ou réduction ?",options:['Oxydation','Réduction'],correct:0},
+  {type:'qcm',question:"Transformation : Cu<span class='sup'>2+</span> + 2e<span class='sup'>-</span> → Cu. Oxydation ou réduction ?",options:['Oxydation','Réduction'],correct:1},
   {type:'qcm',question:"Dans le couple Ag<span class='sup'>+</span> / Ag, quel est l'oxydant ?",options:["Ag<span class='sup'>+</span>",'Ag'],correct:0},
   {type:'qcm',question:"Dans le couple I<span class='sub'>2</span> / I<span class='sup'>-</span>, quel est le réducteur ?",options:["I<span class='sub'>2</span>","I<span class='sup'>-</span>"],correct:1},
-  {type:'truefalse',question:"Pour une oxydation, on écrit la demi-équation dans le sens Réducteur \u2192 Oxydant.",correct:true},
+  {type:'truefalse',question:"Pour une oxydation, on écrit la demi-équation dans le sens Réducteur → Oxydant.",correct:true},
   {type:'truefalse',question:"Les électrons figurent toujours du côté du réducteur.",correct:false},
   {type:'qcm',question:"Pour écrire une réaction bilan, que faire avec les électrons échangés ?",options:["Les additionner","S'assurer qu'ils sont en nombre égal pour les éliminer","Les ignorer"],correct:1},
   {type:'qcm',question:"Une réaction d'oxydoréduction est un transfert...",options:["de protons","d'atomes","d'électrons"],correct:2}
@@ -241,7 +318,7 @@ function initTraining(){tIdx=0;tScore=0;loadTQ();}
 function loadTQ(){
   if(tIdx>=tQuestions.length){showTResults();return;}
   var q=tQuestions[tIdx];
-  var html='<div class="question-card"><h3 class="text-xl font-bold mb-4">Question '+(tIdx+1)+'/'+tQuestions.length+'</h3><p class="text-lg mb-4">'+q.question+'</p>';
+  var html='<div class="question-card"><p class="text-lg mb-4">'+q.question+'</p>';
   if(q.type==='qcm'){
     html+='<div class="space-y-3">';
     q.options.forEach(function(o,i){html+='<div class="option-box" onclick="selOpt(this,'+i+')"><input type="radio" name="qcm" value="'+i+'" class="hidden"><label class="cursor-pointer text-lg">'+o+'</label></div>';});
@@ -253,8 +330,8 @@ function loadTQ(){
   document.getElementById('training-question').innerHTML=html;
   document.getElementById('btn-check-training').classList.remove('hidden');
   document.getElementById('btn-next-training').classList.add('hidden');
-  var bar=document.getElementById('progress-training');
-  bar.style.width=(tIdx/tQuestions.length*100)+'%'; bar.textContent=tIdx+'/'+tQuestions.length;
+  document.getElementById('tQuestionNum').textContent=tIdx+1;
+  document.getElementById('progress-training').style.width=((tIdx+1)/tQuestions.length*100)+'%';
 }
 function selOpt(el,i){
   el.parentElement.querySelectorAll('.option-box').forEach(function(b){b.classList.remove('selected');});
@@ -264,23 +341,34 @@ function checkTrainingAnswer(){
   var q=tQuestions[tIdx],ok=false;
   if(q.type==='qcm'){
     var s=document.querySelector('input[name="qcm"]:checked');
-    if(s){var a=parseInt(s.value);ok=a===q.correct;document.querySelectorAll('.option-box').forEach(function(b,i){if(i===q.correct)b.classList.add('correct');else if(i===a)b.classList.add('incorrect');});}
+    if(s){var a=parseInt(s.value);ok=a===q.correct;document.querySelectorAll('.option-box').forEach(function(b,i){if(i===q.correct)b.classList.add('opt-correct');else if(i===a)b.classList.add('opt-wrong');});}
   } else {
     var s2=document.querySelector('input[name="tf"]:checked');
-    if(s2){var a2=s2.value==='true';ok=a2===q.correct;var ai=a2?0:1,ci=q.correct?0:1;document.querySelectorAll('.option-box').forEach(function(b,i){if(i===ci)b.classList.add('correct');else if(i===ai)b.classList.add('incorrect');});}
+    if(s2){var a2=s2.value==='true';ok=a2===q.correct;var ai=a2?0:1,ci=q.correct?0:1;document.querySelectorAll('.option-box').forEach(function(b,i){if(i===ci)b.classList.add('opt-correct');else if(i===ai)b.classList.add('opt-wrong');});}
   }
   if(ok)tScore++;
-  document.getElementById('score-training').textContent='Score : '+tScore+'/'+tQuestions.length;
+  document.getElementById('tScoreNum').textContent=tScore;
+  document.getElementById('tTotalNum').textContent=tIdx+1;
   document.getElementById('btn-check-training').classList.add('hidden');
   document.getElementById('btn-next-training').classList.remove('hidden');
 }
 function nextTrainingQuestion(){tIdx++;loadTQ();}
 function showTResults(){
-  document.getElementById('training-question').innerHTML='<div class="text-center py-8"><h3 class="text-3xl font-bold mb-4">Fin de l\'entraînement !</h3><div class="text-6xl font-bold my-4">'+tScore+'/'+tQuestions.length+'</div><button class="btn-primary text-xl" onclick="initTraining()">&#128260; Recommencer</button><button class="btn-primary text-xl ml-4" onclick="showModule(\'reactions\')">Module suivant &#9889;</button></div>';
+  var pct=Math.round(tScore/tQuestions.length*100);
+  var msg=pct>=90?'Excellent ! Tu maîtrises parfaitement ce chapitre ! 🏆':pct>=70?'Très bien ! Continue comme ça ! 👍':pct>=50?'Pas mal ! Avec un peu plus de travail tu vas y arriver. 💪':'Continue à t\'entraîner, tu vas progresser ! 📚';
+  document.getElementById('training-question').innerHTML=
+    '<div class="bg-emerald-50 border border-emerald-200 rounded-2xl shadow-lg p-10 text-center">'+
+    '<h3 class="text-2xl font-bold text-gray-800 mb-3">Entraînement terminé !</h3>'+
+    '<div class="text-6xl font-bold text-emerald-700 mb-2">'+tScore+' / '+tQuestions.length+'</div>'+
+    '<div class="text-xl font-bold text-gray-400 mb-6">'+pct+'%</div>'+
+    '<p class="text-gray-500 mb-8 text-lg">'+msg+'</p>'+
+    '<div class="flex gap-4 justify-center flex-wrap">'+
+    '<button class="btn-primary" onclick="initTraining()">&#128260; Recommencer</button>'+
+    '<button class="btn-secondary" onclick="showModule(\'reactions\')">Module suivant &#9889;</button>'+
+    '</div></div>';
   document.getElementById('btn-check-training').classList.add('hidden');
   document.getElementById('btn-next-training').classList.add('hidden');
-  var bar=document.getElementById('progress-training');
-  bar.style.width='100%'; bar.textContent=tQuestions.length+'/'+tQuestions.length;
+  document.getElementById('progress-training').style.width='100%';
 }
 
 // =====================================================================
@@ -385,20 +473,20 @@ function halfEqUI(num,eq,help){
     '<span style="display:inline-flex;align-items:center;gap:0.25rem;font-weight:700;white-space:nowrap;">'+
     '<span style="font-size:2rem;line-height:1;">&#215;</span> par :</span>'+
     '<div class="multiplier-control">'+
-    '<button class="btn-small" onclick="chgMult('+num+',-1)">&#8722;</button>'+
+    '<button class="mult-btn" onclick="chgMult('+num+',-1)">&#8722;</button>'+
     '<input type="number" id="mult'+num+'" value="1" min="1" class="coefficient-input" style="appearance:textfield;-moz-appearance:textfield;" onchange="updMult('+num+')">'+
-    '<button class="btn-small" onclick="chgMult('+num+',1)">+</button>'+
+    '<button class="mult-btn" onclick="chgMult('+num+',1)">+</button>'+
     '</div></div>';
 }
 function buildBuilder(q){
   var sp=uniqueSpecies(q), nz=Math.max(2,Math.ceil(sp.length/2)), html='';
   for(var i=0;i<nz;i++){
-    html+='<div class="flex items-center"><input type="number" class="coefficient-input" id="coef-r'+i+'" value="1" min="1"><div class="drop-zone ml-1" id="zone-r'+i+'" data-side="reactant" ondrop="dropSp(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)"></div></div>';
+    html+='<div class="flex items-center"><input type="number" class="coefficient-input" id="coef-r'+i+'" value="1" min="1"><div class="drop-zone ml-1" id="zone-r'+i+'" data-side="reactant"></div></div>';
     if(i<nz-1)html+='<span class="text-2xl font-bold mx-1">+</span>';
   }
   html+='<span class="arrow mx-2 sm:mx-4">&#8594;</span>';
   for(var j=0;j<nz;j++){
-    html+='<div class="flex items-center"><input type="number" class="coefficient-input" id="coef-p'+j+'" value="1" min="1"><div class="drop-zone ml-1" id="zone-p'+j+'" data-side="product" ondrop="dropSp(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)"></div></div>';
+    html+='<div class="flex items-center"><input type="number" class="coefficient-input" id="coef-p'+j+'" value="1" min="1"><div class="drop-zone ml-1" id="zone-p'+j+'" data-side="product"></div></div>';
     if(j<nz-1)html+='<span class="text-2xl font-bold mx-1">+</span>';
   }
   document.getElementById('builder-zone').innerHTML=html;
@@ -407,36 +495,40 @@ function buildBank(q){
   var bank=document.getElementById('species-bank'); bank.innerHTML='';
   uniqueSpecies(q).forEach(function(sp){
     var el=document.createElement('span');
-    el.className='draggable';el.draggable=true;el.innerHTML=sp;el.dataset.species=sp;
-    el.ondragstart=dragStart;bank.appendChild(el);
+    el.className='draggable';el.innerHTML=sp;el.dataset.species=sp;
+    bank.appendChild(el);
+    enableSpDrag(el);
   });
 }
 
-// --- Drag & drop ---
-var draggedEl=null;
-function dragStart(e){draggedEl=e.target;}
-function allowDrop(e){e.preventDefault();e.target.closest('.drop-zone').classList.add('over');}
-function dragLeave(e){e.target.closest('.drop-zone').classList.remove('over');}
-function dropSp(e){
-  e.preventDefault();
-  var zone=e.target.closest('.drop-zone');zone.classList.remove('over');
-  if(!draggedEl||!zone)return;
-  var origin=draggedEl.closest('.drop-zone');
-  if(origin){origin.innerHTML='';origin.classList.remove('filled');}else{draggedEl.remove();}
-  if(zone.innerHTML!==''){
-    var old=zone.querySelector('.draggable');old.classList.remove('in-zone');old.onclick=null;
-    document.getElementById('species-bank').appendChild(old);
-  }
-  var ni=draggedEl.cloneNode(true);
-  ni.classList.add('in-zone');ni.draggable=true;ni.ondragstart=dragStart;ni.onclick=retToBank;
-  zone.innerHTML='';zone.appendChild(ni);zone.classList.add('filled');
-  draggedEl=null;
+// --- Glisser-déposer (Pointer Events communs, compatibles tactile) ---
+function enableSpDrag(item){
+  DragDrop.enable(item, {
+    zoneSelector: '.drop-zone, #species-bank',
+    dragOverClass: 'over',
+    onDrop: (dragged, zone) => { if (zone) dropSp(dragged, zone); },
+  });
 }
-function retToBank(e){
-  var item=e.target.closest('.draggable'),zone=item.parentElement;
-  zone.innerHTML='';zone.classList.remove('filled');
-  item.classList.remove('in-zone');item.onclick=null;
-  document.getElementById('species-bank').appendChild(item);
+function dropSp(item, zone){
+  var origin = item.parentElement;
+  if (zone.id === 'species-bank') {
+    item.classList.remove('in-zone');
+    zone.appendChild(item);
+  } else if (zone !== origin) {
+    var occupant = zone.querySelector('.draggable');
+    if (occupant) {
+      occupant.classList.remove('in-zone');
+      document.getElementById('species-bank').appendChild(occupant);
+    }
+    item.classList.add('in-zone');
+    zone.appendChild(item);
+    zone.classList.add('filled');
+  } else {
+    zone.classList.add('filled');
+  }
+  if (origin && origin.classList.contains('drop-zone') && origin !== zone && !origin.querySelector('.draggable')) {
+    origin.classList.remove('filled');
+  }
 }
 
 // --- Chemistry logic ---
@@ -562,10 +654,9 @@ function loadRQ(){
   document.getElementById('reaction-question').innerHTML=
     '<div class="question-card">'+
     '<div class="flex items-center justify-between mb-3">'+
-    '<h3 class="text-xl font-bold">Question '+(rIdx+1)+'/'+RQ.length+'</h3>'+
     '<span class="text-sm font-semibold px-3 py-1 rounded-full bg-gray-200 text-gray-700">'+hl[q.help]+'</span>'+
     '</div>'+
-    '<div class="mb-4 p-3 bg-indigo-50 rounded-lg"><p class="font-bold">Réactifs : <span class="font-normal text-lg">'+q.reactants.join(' et ')+'</span></p></div>'+
+    '<div class="mb-4 p-3 bg-emerald-50 rounded-lg"><p class="font-bold">Réactifs : <span class="font-normal text-lg">'+q.reactants.join(' et ')+'</span></p></div>'+
     '<p class="font-semibold text-gray-600 mb-2">Demi-équations :</p>'+
     '<div class="space-y-2 mb-4">'+halfEqUI(1,q.halfEq1,q.help)+halfEqUI(2,q.halfEq2,q.help)+'</div>'+
     '<div class="equation-builder"><h4 class="font-bold mb-3 text-center text-lg">&#128221; Construisez l\'équation bilan :</h4>'+
@@ -576,8 +667,8 @@ function loadRQ(){
   document.getElementById('feedback-area').innerHTML='';
   document.getElementById('btn-check-reaction').classList.remove('hidden');
   document.getElementById('btn-next-reaction').classList.add('hidden');
-  var bar=document.getElementById('progress-reactions');
-  bar.style.width=(rIdx/RQ.length*100)+'%'; bar.textContent=rIdx+'/'+RQ.length;
+  document.getElementById('rQuestionNum').textContent=rIdx+1;
+  document.getElementById('progress-reactions').style.width=((rIdx+1)/RQ.length*100)+'%';
 }
 
 // --- Check / retry / solution ---
@@ -630,18 +721,21 @@ function showSol(){
   document.getElementById('btn-next-reaction').classList.remove('hidden');
 }
 function nextReactionQuestion(){rIdx++;loadRQ();}
-function updRScore(){document.getElementById('score-reactions').textContent='Score : '+rScore+'/'+RQ.length;}
+function updRScore(){
+  document.getElementById('rScoreNum').textContent=rScore;
+  document.getElementById('rTotalNum').textContent=rIdx+1;
+}
 function showRResults(){
   document.getElementById('reaction-question').innerHTML=
-    '<div class="text-center py-8"><h3 class="text-3xl font-bold mb-4">Bravo, vous avez terminé !</h3>'+
-    '<div class="text-6xl font-bold my-4">'+rScore+'/'+RQ.length+'</div>'+
-    '<button class="btn-primary text-xl" onclick="initReactions()">&#128260; Recommencer</button>'+
-    '<button class="btn-primary text-xl ml-4" onclick="showMenu()">&#127968; Retour au menu</button></div>';
+    '<div class="bg-emerald-50 border border-emerald-200 rounded-2xl shadow-lg p-10 text-center">'+
+    '<h3 class="text-2xl font-bold text-gray-800 mb-3">Bravo, vous avez terminé !</h3>'+
+    '<div class="text-6xl font-bold text-emerald-700 mb-2">'+rScore+' / '+RQ.length+'</div>'+
+    '<div class="flex gap-4 justify-center flex-wrap mt-6">'+
+    '<button class="btn-primary" onclick="initReactions()">&#128260; Recommencer</button></div></div>';
   document.getElementById('feedback-area').innerHTML='';
   document.getElementById('btn-check-reaction').classList.add('hidden');
   document.getElementById('btn-next-reaction').classList.add('hidden');
-  var bar=document.getElementById('progress-reactions');
-  bar.style.width='100%'; bar.textContent=RQ.length+'/'+RQ.length;
+  document.getElementById('progress-reactions').style.width='100%';
 }
 </script>
 </body>
