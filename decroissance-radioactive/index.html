@@ -553,6 +553,23 @@ let states = [], prevStates = [], iteration = 0, chart;
 
 const getLambda = () => parseFloat(document.getElementById('lambda-slider').value) / 100;
 
+// La loi théorique N(t) = N₀ · e^(−λt) est CONTINUE : λ est un taux instantané de
+// désintégration, homogène à l'inverse d'un temps, pas une probabilité par seconde.
+// La simulation, elle, est DISCRÈTE : à chaque itération (Δt = 1 s), on décide pour
+// chaque noyau encore intact s'il se désintègre ou non pendant ce Δt. Utiliser
+// directement λ comme probabilité par pas (comme si p = λ) revient à confondre un
+// taux instantané avec une probabilité sur un intervalle fini, ce qui introduit un
+// biais systématique (la simulation se désintègre trop vite dès que λ n'est plus
+// négligeable devant 1/Δt).
+// La bonne probabilité est celle que le temps d'attente T avant désintégration
+// (de loi exponentielle de paramètre λ) tombe dans l'intervalle [0, Δt] :
+//   p = P(T ≤ Δt) = 1 − e^(−λΔt)
+// Ici Δt = 1 s, donc p = 1 − e^(−λ). Pour λ petit, p ≈ λ (les deux approches
+// coïncident), mais l'écart grandit avec λ : c'est exactement le décalage observé
+// entre la courbe simulée et la courbe théorique. Utiliser p au lieu de λ dans le
+// tirage aléatoire aligne exactement la simulation sur la loi continue.
+const getDecayProbability = () => 1 - Math.exp(-getLambda());
+
 /* ═══════════════════════════════════════════════════
    Légende — valeur de λ affichée à côté de la formule
 ═══════════════════════════════════════════════════ */
@@ -737,8 +754,8 @@ function initSim() {
 ═══════════════════════════════════════════════════ */
 function step() {
   prevStates = [...states];
-  const lam  = getLambda();
-  states = states.map(a => a ? (Math.random() >= lam) : false);
+  const p = getDecayProbability();
+  states = states.map(a => a ? (Math.random() >= p) : false);
   iteration++;
   updateGridClasses(true);
   updateStats();
@@ -750,10 +767,11 @@ function step() {
 ═══════════════════════════════════════════════════ */
 function finishAll() {
   const MAX_ITER = 2000;
+  const p = getDecayProbability();
   const lam = getLambda();
 
   while (states.some(Boolean) && iteration < MAX_ITER) {
-    states = states.map(a => a ? (Math.random() >= lam) : false);
+    states = states.map(a => a ? (Math.random() >= p) : false);
     iteration++;
     const alive = states.filter(Boolean).length;
     chart.data.labels.push(iteration);
