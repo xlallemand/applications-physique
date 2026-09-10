@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oxydoréduction - STI2D (v7)</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f4f8; }
+    .card { background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 2rem; margin: 1rem auto; max-width: 1200px; }
+    .btn-primary { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 0.8rem 1.5rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-primary:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(79, 70, 229, 0.4); }
+    .btn-secondary { background: #eef2ff; color: #4338ca; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #c7d2fe; cursor: pointer; font-weight: 600; }
+    .module-btn { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 1.5rem 2rem; border-radius: 12px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: none; width: 100%; text-align: left; }
+    .module-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
+    .sup { font-size: 0.7em; vertical-align: super; }
+    .sub { font-size: 0.7em; vertical-align: sub; }
+    .course-block { background-color: #fafbff; border: 2px solid #c7d2fe; border-radius: 14px; padding: 1.5rem; margin-bottom: 2rem; }
+    .course-block h3 { color: #3730a3; border-bottom: 3px solid #6366f1; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+    .def-box { background-color: #eff6ff; border-left: 6px solid #3b82f6; padding: 1.2rem; margin: 1rem 0; color: #1e3a5f; border-radius: 0 10px 10px 0; }
+    .def-box-red { background-color: #fff7ed; border-left: 6px solid #f97316; padding: 1.2rem; margin: 1rem 0; color: #7c2d12; border-radius: 0 10px 10px 0; }
+    .def-box h4 { font-weight: bold; color: #1d4ed8; }
+    .def-box-red h4 { font-weight: bold; color: #c2410c; }
+    .example-box { background-color: #f0f9ff; border: 2px dashed #7dd3fc; padding: 0.9rem 1rem; border-radius: 8px; margin: 0.8rem 0; color: #0c4a6e; font-size: 0.95rem; }
+    .key-equation { background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 60%, #4f46e5 100%); color: white; border-radius: 14px; padding: 1.4rem 2rem; text-align: center; font-size: 1.5rem; font-weight: 800; box-shadow: 0 6px 24px rgba(79,70,229,0.35); border: 3px solid #818cf8; margin: 1rem 0; }
+    .key-equation .eq-label { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.8; display: block; margin-bottom: 0.4rem; color: #c7d2fe; }
+    .method-step { background-color: #ffffff; border: 2px solid #c7d2fe; padding: 1rem; border-radius: 10px; height: 100%; }
+    .method-step .step-number { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 0.75rem; flex-shrink: 0; }
+    .example-step { background-color: #f0fdf4; border: 2px solid #86efac; padding: 1rem; border-radius: 10px; height: 100%; }
+    @media (max-width: 640px) { .method-table-wrapper { grid-template-columns: 1fr !important; } }
+    .question-card { background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin: 1rem 0; border: 2px solid #e2e8f0; color: #1f2937; }
+    .option-box { padding: 0.75rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+    .option-box:hover { border-color: #4f46e5; background-color: #eef2ff; }
+    .option-box.selected { border-color: #4f46e5; background-color: #e0e7ff; }
+    .correct { border-color: #10b981 !important; background-color: #d1fae5 !important; }
+    .incorrect { border-color: #ef4444 !important; background-color: #fee2e2 !important; }
+    .progress-bar { background: #e2e8f0; height: 20px; border-radius: 10px; overflow: hidden; margin: 1rem 0; }
+    .progress-fill { background: linear-gradient(90deg, #10b981 0%, #059669 100%); height: 100%; transition: width 0.5s; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.85rem; }
+    .score-display { background: #4f46e5; color: white; padding: 1rem; border-radius: 10px; text-align: center; font-size: 1.3rem; font-weight: bold; margin: 1rem 0; }
+    .half-equation { background-color: #f1f5f9; padding: 0.8rem 1.2rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; margin: 0.5rem 0; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+    .equation-builder { background: white; padding: 1.5rem; border-radius: 10px; border: 3px solid #6366f1; margin: 1.5rem 0; }
+    .species-bank { background: #f1f5f9; padding: 1rem; border-radius: 8px; margin-top: 1.5rem; min-height: 80px; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+    .drop-zone { min-width: 100px; height: 50px; border: 2px dashed #cbd5e1; border-radius: 8px; padding: 0.5rem; margin: 0.3rem; display: inline-flex; align-items: center; justify-content: center; background: white; transition: all 0.3s; }
+    .drop-zone.over { border-color: #6366f1; background: #eef2ff; }
+    .drop-zone.filled { border-style: solid; }
+    .draggable { background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%); color: white; padding: 0.6rem 1.2rem; border-radius: 8px; cursor: move; display: inline-block; font-weight: 600; user-select: none; }
+    .draggable.in-zone { cursor: pointer; background: #a78bfa; }
+    .coefficient-input { width: 50px; text-align: center; padding: 0.4rem; border: 2px solid #cbd5e1; border-radius: 6px; font-weight: bold; font-size: 1.1rem; }
+    .multiplier-control { display: flex; align-items: center; background: white; border: 2px solid #d1d5db; border-radius: 8px; overflow: hidden; }
+    .btn-small { width: 35px; height: 35px; border: none; background: #f3f4f6; color: #4b5563; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
+    .btn-small:hover { background-color: #e5e7eb; }
+    .flip-btn { background: #8b5cf6; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+    .arrow { font-size: 2.5rem; font-weight: bold; color: #6366f1; }
+    /* Feedback */
+    #feedback-area { margin-top: 1rem; }
+    .fb-ok { background:#dcfce7; color:#166534; border:2px solid #4ade80; padding:1rem 1.25rem; border-radius:10px; font-size:1.2rem; font-weight:bold; text-align:center; }
+    .fb-header { background:#fee2e2; color:#991b1b; border:2px solid #f87171; border-bottom:none; padding:0.9rem 1.25rem; border-radius:10px 10px 0 0; font-size:1.1rem; font-weight:bold; text-align:center; }
+    .fb-errors { background:#fff7f7; border:2px solid #f87171; border-top:none; border-bottom:none; padding:1rem 1.25rem; }
+    .fb-errors h4 { color:#b91c1c; font-weight:700; margin-bottom:0.5rem; }
+    .fb-errors ul { list-style:none; padding:0; margin:0; }
+    .fb-errors ul li { padding:0.35rem 0 0.35rem 1.5rem; position:relative; color:#7f1d1d; font-size:0.97rem; border-bottom:1px solid #fee2e2; }
+    .fb-errors ul li:last-child { border-bottom:none; }
+    .fb-errors ul li::before { content:"✖"; position:absolute; left:0; color:#ef4444; top:0.4rem; font-size:0.85rem; }
+    .fb-hints { background:#fffbeb; border:2px solid #fbbf24; border-top:none; border-bottom:none; padding:1rem 1.25rem; }
+    .fb-hints h4 { color:#92400e; font-weight:700; margin-bottom:0.5rem; }
+    .fb-hints ul { list-style:none; padding:0; margin:0; }
+    .fb-hints ul li { padding:0.35rem 0 0.35rem 1.8rem; position:relative; color:#78350f; font-size:0.97rem; }
+    .fb-hints ul li::before { content:"💡"; position:absolute; left:0; top:0.3rem; font-size:0.85rem; }
+    .fb-actions { background:#f8fafc; border:2px solid #f87171; border-top:1px solid #e2e8f0; border-radius:0 0 10px 10px; padding:1rem 1.25rem; display:flex; gap:0.75rem; flex-wrap:wrap; justify-content:center; }
+    .btn-retry { background:linear-gradient(135deg,#0891b2,#0e7490); color:white; padding:0.7rem 1.4rem; border-radius:8px; border:none; cursor:pointer; font-weight:700; font-size:1rem; transition:transform 0.15s; }
+    .btn-retry:hover { transform:scale(1.04); }
+    .btn-solution { background:linear-gradient(135deg,#d97706,#b45309); color:white; padding:0.7rem 1.4rem; border-radius:8px; border:none; cursor:pointer; font-weight:700; font-size:1rem; transition:transform 0.15s; }
+    .btn-solution:hover { transform:scale(1.04); }
+    .fb-solution-box { background:#e0f2fe; border:2px solid #7dd3fc; border-top:1px solid #bae6fd; color:#075985; padding:1rem 1.25rem; border-radius:0 0 10px 10px; }
+    .fb-solution-box .label { font-weight:700; margin-bottom:0.35rem; }
+    .fb-solution-box .eq { font-size:1.1rem; font-family:monospace; }
+  </style>
+</head>
+<body class="bg-gray-100">
+<div class="container mx-auto px-4 py-8">
+  <div class="card">
+    <h1 class="text-4xl font-bold text-center mb-2" style="color:#4f46e5;">&#9883;&#65039; Oxydoréduction</h1>
+    <p class="text-center text-xl text-gray-600 mb-8">Terminale STI2D</p>
+
+    <div id="menu">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <button class="module-btn" onclick="showModule('course')">📚 Module 1 : Le Cours</button>
+        <button class="module-btn" onclick="showModule('training')">🎯 Module 2 : Entraînement</button>
+        <button class="module-btn" onclick="showModule('reactions')">⚡ Module 3 : Écrire les réactions</button>
+      </div>
+    </div>
+
+    <!-- MODULE 1 -->
+    <div id="module-course" class="hidden">
+      <button class="btn-secondary mb-6" onclick="showMenu()">&#8592; Retour au menu</button>
+      <h2 class="text-3xl font-bold mb-6 text-center" style="color:#4f46e5;">📚 Le Cours : Oxydoréduction</h2>
+      <div class="course-block">
+        <h3 class="text-2xl font-bold">🔬 Oxydants et Réducteurs</h3>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="def-box">
+            <h4 class="text-lg">Un <strong>OXYDANT</strong></h4>
+            <p>C'est une espèce chimique qui <strong>CAPTE</strong> des électrons.</p>
+            <div class="example-box mt-2"><strong>Exemples :</strong><br>
+              &bull; Cu<span class="sup">2+</span> peut capter <strong>2 électrons</strong> pour devenir Cu<br>
+              &bull; Fe<span class="sup">3+</span> peut capter <strong>1 électron</strong> pour devenir Fe<span class="sup">2+</span>
+            </div>
+          </div>
+          <div class="def-box-red">
+            <h4 class="text-lg">Un <strong>RÉDUCTEUR</strong></h4>
+            <p>C'est une espèce chimique qui <strong>CÈDE</strong> des électrons.</p>
+            <div class="example-box mt-2"><strong>Exemples :</strong><br>
+              &bull; Cu peut céder <strong>2 électrons</strong> pour devenir Cu<span class="sup">2+</span><br>
+              &bull; Fe<span class="sup">2+</span> peut céder <strong>1 électron</strong> pour devenir Fe<span class="sup">3+</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <h3 class="text-2xl font-bold">🔄 Oxydation et Réduction</h3>
+        <p class="mb-3">Un couple est noté <strong>Oxydant / Réducteur</strong>. A ce couple correspond une demi-équation :</p>
+        <div class="key-equation">
+          <span class="eq-label">&#11088; Demi-équation de référence &#11088;</span>
+          Oxydant &nbsp;+&nbsp; n e<span class="sup" style="font-size:0.6em;">&#8722;</span> &nbsp;=&nbsp; Réducteur
+        </div>
+        <div class="grid md:grid-cols-2 gap-4 mt-4">
+          <div class="def-box-red">
+            <h4 class="text-lg">Une <strong>OXYDATION</strong>&hellip;</h4>
+            <p>&hellip;forme <strong>L'OXYDANT</strong>. On lit la demi-équation <em>à l'envers</em> :</p>
+            <div class="example-box mt-2 text-center font-bold" style="color:#9a3412;">Réducteur &#8594; Oxydant + n e<span class="sup">&#8722;</span></div>
+          </div>
+          <div class="def-box">
+            <h4 class="text-lg">Une <strong>RÉDUCTION</strong>&hellip;</h4>
+            <p>&hellip;forme <strong>LE RÉDUCTEUR</strong>. On lit la demi-équation <em>à l'endroit</em> :</p>
+            <div class="example-box mt-2 text-center font-bold" style="color:#1d4ed8;">Oxydant + n e<span class="sup">&#8722;</span> &#8594; Réducteur</div>
+          </div>
+        </div>
+      </div>
+      <div class="course-block">
+        <h3 class="text-2xl font-bold">✍️ Comment écrire une réaction d'oxydoréduction</h3>
+        <p class="text-gray-500 italic mb-4">Les deux demi-équations des couples sont toujours données.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem 1.5rem;" class="method-table-wrapper">
+          <div class="text-center font-bold text-indigo-700 bg-indigo-50 rounded-lg py-2 px-3 mb-1">📋 Méthode</div>
+          <div class="text-center font-bold text-green-700 bg-green-50 rounded-lg py-2 px-3 mb-1">Exemple : Fe<span class="sup">3+</span> + Zn</div>
+          <div class="method-step"><div style="display:flex;align-items:flex-start;"><span class="step-number">1</span><span><strong>Identifier les réactifs</strong> et les repérer dans les demi-équations.</span></div></div>
+          <div class="example-step">
+            <p class="font-semibold mb-1">Demi-équations données :</p>
+            <p>&bull; <mark>Fe<span class="sup">3+</span></mark> + e<span class="sup">&#8722;</span> = Fe<span class="sup">2+</span></p>
+            <p>&bull; Zn<span class="sup">2+</span> + 2 e<span class="sup">&#8722;</span> = <mark>Zn</mark></p>
+          </div>
+          <div class="method-step"><div style="display:flex;align-items:flex-start;"><span class="step-number">2</span><span><strong>Orienter les équations.</strong> Une des deux demi-équations doit être inversée pour que le réactif entouré soit à gauche. La flèche part du réactif vers le produit.</span></div></div>
+          <div class="example-step">
+            <p style="color:#1d6f42;"><mark>Fe<span class="sup">3+</span></mark> + e<span class="sup">&#8722;</span> &#8594; Fe<span class="sup">2+</span> &nbsp;<strong>(réduction)</strong></p>
+            <p style="color:#b45309;"><mark>Zn</mark> &#8594; Zn<span class="sup">2+</span> + 2 e<span class="sup">&#8722;</span> &nbsp;<strong>(oxydation)</strong></p>
+          </div>
+          <div class="method-step"><div style="display:flex;align-items:flex-start;"><span class="step-number">3</span><span><strong>Égaliser les électrons</strong> — multiplier chaque équation par le bon coefficient.</span></div></div>
+          <div class="example-step">
+            <p class="font-bold" style="color:#1d6f42;"><strong>2 &times;</strong> ( Fe<span class="sup">3+</span> + e<span class="sup">&#8722;</span> &#8594; Fe<span class="sup">2+</span> )</p>
+            <p style="color:#b45309;">1 &times; ( Zn &#8594; Zn<span class="sup">2+</span> + 2 e<span class="sup">&#8722;</span> )</p>
+          </div>
+          <div class="method-step"><div style="display:flex;align-items:flex-start;"><span class="step-number">4</span><span><strong>Additionner</strong> membre à membre. Les électrons s'éliminent.</span></div></div>
+          <div class="example-step">
+            <p style="color:#1d6f42;">2 Fe<span class="sup">3+</span> + <del>2 e<span class="sup">&#8722;</span></del> &#8594; 2 Fe<span class="sup">2+</span></p>
+            <p style="color:#b45309;">Zn &#8594; Zn<span class="sup">2+</span> + <del>2 e<span class="sup">&#8722;</span></del></p>
+            <hr class="my-1">
+            <p class="font-bold text-lg" style="color:#1e40af;">2 Fe<span class="sup">3+</span> + Zn &#8594; 2 Fe<span class="sup">2+</span> + Zn<span class="sup">2+</span></p>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-8">
+        <button class="btn-primary text-xl" onclick="showModule('training')">J'ai compris, aux exercices ! &#8594;</button>
+      </div>
+    </div>
+
+    <!-- MODULE 2 -->
+    <div id="module-training" class="hidden">
+      <button class="btn-secondary mb-4" onclick="showMenu()">&#8592; Retour au menu</button>
+      <h2 class="text-3xl font-bold mb-6 text-center" style="color:#4f46e5;">🎯 Entraînement</h2>
+      <div class="progress-bar"><div class="progress-fill" id="progress-training" style="width:0%">0/10</div></div>
+      <div class="score-display" id="score-training">Score : 0/10</div>
+      <div id="training-question"></div>
+      <div class="text-center mt-6">
+        <button class="btn-primary" id="btn-check-training" onclick="checkTrainingAnswer()">Vérifier</button>
+        <button class="btn-primary hidden" id="btn-next-training" onclick="nextTrainingQuestion()">Question suivante &#8594;</button>
+      </div>
+    </div>
+
+    <!-- MODULE 3 -->
+    <div id="module-reactions" class="hidden">
+      <button class="btn-secondary mb-4" onclick="showMenu()">&#8592; Retour au menu</button>
+      <h2 class="text-3xl font-bold mb-6 text-center" style="color:#4f46e5;">⚡ Écrire les réactions</h2>
+      <div class="progress-bar"><div class="progress-fill" id="progress-reactions" style="width:0%">0/20</div></div>
+      <div class="score-display" id="score-reactions">Score : 0/20</div>
+      <div id="reaction-question"></div>
+      <div id="feedback-area"></div>
+      <div class="text-center mt-6">
+        <button class="btn-primary" id="btn-check-reaction" onclick="checkReactionAnswer()">Vérifier ma réaction</button>
+        <button class="btn-primary hidden" id="btn-next-reaction" onclick="nextReactionQuestion()">Question suivante &#8594;</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script>
+// =====================================================================
+// NAVIGATION
+// =====================================================================
+function showMenu() {
+  ['menu','module-course','module-training','module-reactions'].forEach(function(id){
+    document.getElementById(id).classList.add('hidden');
+  });
+  document.getElementById('menu').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+function showModule(m) {
+  ['menu','module-course','module-training','module-reactions'].forEach(function(id){
+    document.getElementById(id).classList.add('hidden');
+  });
+  document.getElementById('module-'+m).classList.remove('hidden');
+  window.scrollTo(0,0);
+  if (m==='training') initTraining();
+  if (m==='reactions') initReactions();
+}
+
+// =====================================================================
+// MODULE 2 : ENTRAÎNEMENT
+// =====================================================================
+var tIdx=0, tScore=0;
+var tQuestions=[
+  {type:'qcm',question:"Une oxydation est une transformation qui forme...",options:["L'oxydant","Le réducteur"],correct:0},
+  {type:'qcm',question:"Une réduction est une transformation qui forme...",options:["L'oxydant","Le réducteur"],correct:1},
+  {type:'qcm',question:"Transformation : Zn \u2192 Zn<span class='sup'>2+</span> + 2e<span class='sup'>-</span>. Oxydation ou réduction ?",options:['Oxydation','Réduction'],correct:0},
+  {type:'qcm',question:"Transformation : Cu<span class='sup'>2+</span> + 2e<span class='sup'>-</span> \u2192 Cu. Oxydation ou réduction ?",options:['Oxydation','Réduction'],correct:1},
+  {type:'qcm',question:"Dans le couple Ag<span class='sup'>+</span> / Ag, quel est l'oxydant ?",options:["Ag<span class='sup'>+</span>",'Ag'],correct:0},
+  {type:'qcm',question:"Dans le couple I<span class='sub'>2</span> / I<span class='sup'>-</span>, quel est le réducteur ?",options:["I<span class='sub'>2</span>","I<span class='sup'>-</span>"],correct:1},
+  {type:'truefalse',question:"Pour une oxydation, on écrit la demi-équation dans le sens Réducteur \u2192 Oxydant.",correct:true},
+  {type:'truefalse',question:"Les électrons figurent toujours du côté du réducteur.",correct:false},
+  {type:'qcm',question:"Pour écrire une réaction bilan, que faire avec les électrons échangés ?",options:["Les additionner","S'assurer qu'ils sont en nombre égal pour les éliminer","Les ignorer"],correct:1},
+  {type:'qcm',question:"Une réaction d'oxydoréduction est un transfert...",options:["de protons","d'atomes","d'électrons"],correct:2}
+];
+function initTraining(){tIdx=0;tScore=0;loadTQ();}
+function loadTQ(){
+  if(tIdx>=tQuestions.length){showTResults();return;}
+  var q=tQuestions[tIdx];
+  var html='<div class="question-card"><h3 class="text-xl font-bold mb-4">Question '+(tIdx+1)+'/'+tQuestions.length+'</h3><p class="text-lg mb-4">'+q.question+'</p>';
+  if(q.type==='qcm'){
+    html+='<div class="space-y-3">';
+    q.options.forEach(function(o,i){html+='<div class="option-box" onclick="selOpt(this,'+i+')"><input type="radio" name="qcm" value="'+i+'" class="hidden"><label class="cursor-pointer text-lg">'+o+'</label></div>';});
+    html+='</div>';
+  } else {
+    html+='<div class="space-y-3"><div class="option-box" onclick="selOpt(this,0)"><input type="radio" name="tf" value="true" class="hidden"><label class="cursor-pointer text-lg">&#10003; Vrai</label></div><div class="option-box" onclick="selOpt(this,1)"><input type="radio" name="tf" value="false" class="hidden"><label class="cursor-pointer text-lg">&#10007; Faux</label></div></div>';
+  }
+  html+='</div>';
+  document.getElementById('training-question').innerHTML=html;
+  document.getElementById('btn-check-training').classList.remove('hidden');
+  document.getElementById('btn-next-training').classList.add('hidden');
+  var bar=document.getElementById('progress-training');
+  bar.style.width=(tIdx/tQuestions.length*100)+'%'; bar.textContent=tIdx+'/'+tQuestions.length;
+}
+function selOpt(el,i){
+  el.parentElement.querySelectorAll('.option-box').forEach(function(b){b.classList.remove('selected');});
+  el.classList.add('selected'); el.querySelector('input').checked=true;
+}
+function checkTrainingAnswer(){
+  var q=tQuestions[tIdx],ok=false;
+  if(q.type==='qcm'){
+    var s=document.querySelector('input[name="qcm"]:checked');
+    if(s){var a=parseInt(s.value);ok=a===q.correct;document.querySelectorAll('.option-box').forEach(function(b,i){if(i===q.correct)b.classList.add('correct');else if(i===a)b.classList.add('incorrect');});}
+  } else {
+    var s2=document.querySelector('input[name="tf"]:checked');
+    if(s2){var a2=s2.value==='true';ok=a2===q.correct;var ai=a2?0:1,ci=q.correct?0:1;document.querySelectorAll('.option-box').forEach(function(b,i){if(i===ci)b.classList.add('correct');else if(i===ai)b.classList.add('incorrect');});}
+  }
+  if(ok)tScore++;
+  document.getElementById('score-training').textContent='Score : '+tScore+'/'+tQuestions.length;
+  document.getElementById('btn-check-training').classList.add('hidden');
+  document.getElementById('btn-next-training').classList.remove('hidden');
+}
+function nextTrainingQuestion(){tIdx++;loadTQ();}
+function showTResults(){
+  document.getElementById('training-question').innerHTML='<div class="text-center py-8"><h3 class="text-3xl font-bold mb-4">Fin de l\'entraînement !</h3><div class="text-6xl font-bold my-4">'+tScore+'/'+tQuestions.length+'</div><button class="btn-primary text-xl" onclick="initTraining()">&#128260; Recommencer</button><button class="btn-primary text-xl ml-4" onclick="showModule(\'reactions\')">Module suivant &#9889;</button></div>';
+  document.getElementById('btn-check-training').classList.add('hidden');
+  document.getElementById('btn-next-training').classList.add('hidden');
+  var bar=document.getElementById('progress-training');
+  bar.style.width='100%'; bar.textContent=tQuestions.length+'/'+tQuestions.length;
+}
+
+// =====================================================================
+// MODULE 3 : RÉACTIONS
+// =====================================================================
+var rIdx=0, rScore=0, rState={}, rFailed=false;
+var RQ=[
+  {halfEq1:{ox:'Cu<span class="sup">2+</span>',red:'Cu',e:2},halfEq2:{ox:'Ag<span class="sup">+</span>',red:'Ag',e:1},reactants:['Cu','Ag<span class="sup">+</span>'],help:'full'},
+  {halfEq1:{ox:'Fe<span class="sup">3+</span>',red:'Fe<span class="sup">2+</span>',e:1},halfEq2:{ox:'Zn<span class="sup">2+</span>',red:'Zn',e:2},reactants:['Zn','Fe<span class="sup">3+</span>'],help:'full'},
+  {halfEq1:{ox:'Al<span class="sup">3+</span>',red:'Al',e:3},halfEq2:{ox:'Cu<span class="sup">2+</span>',red:'Cu',e:2},reactants:['Al','Cu<span class="sup">2+</span>'],help:'full'},
+  {halfEq1:{ox:'I<span class="sub">2</span>',red:'2I<span class="sup">-</span>',e:2},halfEq2:{ox:'Fe<span class="sup">3+</span>',red:'Fe<span class="sup">2+</span>',e:1},reactants:['I<span class="sup">-</span>','Fe<span class="sup">3+</span>'],help:'full'},
+  {halfEq1:{ox:'Cl<span class="sub">2</span>',red:'2Cl<span class="sup">-</span>',e:2},halfEq2:{ox:'Br<span class="sub">2</span>',red:'2Br<span class="sup">-</span>',e:2},reactants:['Br<span class="sup">-</span>','Cl<span class="sub">2</span>'],help:'full'},
+  {halfEq1:{ox:'Fe<span class="sup">2+</span>',red:'Fe',e:2},halfEq2:{ox:'Ag<span class="sup">+</span>',red:'Ag',e:1},reactants:['Fe','Ag<span class="sup">+</span>'],help:'medium'},
+  {halfEq1:{ox:'Pb<span class="sup">2+</span>',red:'Pb',e:2},halfEq2:{ox:'Zn<span class="sup">2+</span>',red:'Zn',e:2},reactants:['Zn','Pb<span class="sup">2+</span>'],help:'medium'},
+  {halfEq1:{ox:'Sn<span class="sup">4+</span>',red:'Sn<span class="sup">2+</span>',e:2},halfEq2:{ox:'Fe<span class="sup">3+</span>',red:'Fe<span class="sup">2+</span>',e:1},reactants:['Sn<span class="sup">2+</span>','Fe<span class="sup">3+</span>'],help:'medium'},
+  {halfEq1:{ox:'Ni<span class="sup">2+</span>',red:'Ni',e:2},halfEq2:{ox:'Al<span class="sup">3+</span>',red:'Al',e:3},reactants:['Al','Ni<span class="sup">2+</span>'],help:'medium'},
+  {halfEq1:{ox:'2H<span class="sup">+</span>',red:'H<span class="sub">2</span>',e:2},halfEq2:{ox:'Zn<span class="sup">2+</span>',red:'Zn',e:2},reactants:['Zn','H<span class="sup">+</span>'],help:'medium'},
+  {halfEq1:{ox:'Ag<span class="sup">+</span>',red:'Ag',e:1},halfEq2:{ox:'Zn<span class="sup">2+</span>',red:'Zn',e:2},reactants:['Zn','Ag<span class="sup">+</span>'],help:'none'},
+  {halfEq1:{ox:'Cr<span class="sup">3+</span>',red:'Cr',e:3},halfEq2:{ox:'Cu<span class="sup">2+</span>',red:'Cu',e:2},reactants:['Cr','Cu<span class="sup">2+</span>'],help:'none'},
+  {halfEq1:{ox:'Pb<span class="sup">2+</span>',red:'Pb',e:2},halfEq2:{ox:'Ag<span class="sup">+</span>',red:'Ag',e:1},reactants:['Pb','Ag<span class="sup">+</span>'],help:'none'},
+  {halfEq1:{ox:'Sn<span class="sup">4+</span>',red:'Sn<span class="sup">2+</span>',e:2},halfEq2:{ox:'I<span class="sub">2</span>',red:'2I<span class="sup">-</span>',e:2},reactants:['I<span class="sup">-</span>','Sn<span class="sup">4+</span>'],help:'none'},
+  {halfEq1:{ox:'Fe<span class="sup">2+</span>',red:'Fe',e:2},halfEq2:{ox:'2H<span class="sup">+</span>',red:'H<span class="sub">2</span>',e:2},reactants:['Fe','H<span class="sup">+</span>'],help:'none'},
+  {halfEq1:{ox:'Br<span class="sub">2</span>',red:'2Br<span class="sup">-</span>',e:2},halfEq2:{ox:'Sn<span class="sup">4+</span>',red:'Sn<span class="sup">2+</span>',e:2},reactants:['Sn<span class="sup">2+</span>','Br<span class="sub">2</span>'],help:'none'},
+  {halfEq1:{ox:'Ag<span class="sup">+</span>',red:'Ag',e:1},halfEq2:{ox:'Al<span class="sup">3+</span>',red:'Al',e:3},reactants:['Al','Ag<span class="sup">+</span>'],help:'none'},
+  {halfEq1:{ox:'Fe<span class="sup">3+</span>',red:'Fe<span class="sup">2+</span>',e:1},halfEq2:{ox:'Br<span class="sub">2</span>',red:'2Br<span class="sup">-</span>',e:2},reactants:['Br<span class="sup">-</span>','Fe<span class="sup">3+</span>'],help:'none'},
+  {halfEq1:{ox:'Sn<span class="sup">2+</span>',red:'Sn',e:2},halfEq2:{ox:'Cu<span class="sup">2+</span>',red:'Cu',e:2},reactants:['Sn','Cu<span class="sup">2+</span>'],help:'none'},
+  {halfEq1:{ox:'Cr<span class="sup">3+</span>',red:'Cr',e:3},halfEq2:{ox:'Zn<span class="sup">2+</span>',red:'Zn',e:2},reactants:['Zn','Cr<span class="sup">3+</span>'],help:'none'}
+];
+
+// --- Pure helpers ---
+function gcd(a,b){return b===0?a:gcd(b,a%b);}
+function lcm(a,b){return (a*b)/gcd(a,b);}
+function stripTags(s){return s.replace(/<[^>]*>/g,'');}
+
+// Split leading integer from HTML string: "2I<sup>-</sup>" -> {coef:2, rest:"I<sup>-</sup>"}
+function parseLeadingCoef(html){
+  var m=html.match(/^(\d+)(.*)/);
+  return m?{coef:parseInt(m[1]),rest:m[2].trim()}:{coef:1,rest:html};
+}
+
+// Parse plain-text species (possibly "2 I-") into {coef, name}
+function parseSpecies(str){
+  var c=stripTags(str).trim();
+  var m=c.match(/^(\d+)\s+(.+)$/)||c.match(/^(\d+)(.+)$/);
+  return m?{coef:parseInt(m[1]),name:m[2].trim()}:{coef:1,name:c};
+}
+
+// Multiply species HTML string: "2I<sup>-</sup>" * 3 -> "6 I<sup>-</sup>"
+function multiplySpecies(html,mult){
+  var p=parseLeadingCoef(html);
+  var n=p.coef*mult;
+  return n>1?n+' '+p.rest:p.rest;
+}
+
+// Bare HTML for a species name (strips leading numeric coef from data)
+function getBareHTML(name,q){
+  var all=[q.halfEq1.ox,q.halfEq1.red,q.halfEq2.ox,q.halfEq2.red];
+  for(var i=0;i<all.length;i++){
+    if(stripTags(all[i]).replace(/^\d+\s*/,'').trim()===name){
+      return parseLeadingCoef(all[i]).rest;
+    }
+  }
+  return name;
+}
+
+// Unique species (without leading coef) for builder & bank
+function uniqueSpecies(q){
+  var raw=[q.halfEq1.ox,q.halfEq1.red,q.halfEq2.ox,q.halfEq2.red];
+  var seen={},res=[];
+  raw.forEach(function(s){var k=s.replace(/^\d+\s*/,'');if(!seen[k]){seen[k]=true;res.push(k);}});
+  return res;
+}
+
+// --- Display ---
+function fmtHalfEq(eq,flipped,mult,help){
+  var eStr=eq.e+' e<span class="sup">-</span>';
+  if(help==='none') return eq.ox+' + '+eStr+' = '+eq.red;
+  var left =flipped?eq.red         :eq.ox+' + '+eStr;
+  var right=flipped?eq.ox+' + '+eStr:eq.red;
+  if(mult===1) return left+' = '+right;
+  if(help==='full'){
+    function ms(side){return side.split(' + ').map(function(t){return multiplySpecies(t.trim(),mult);}).join(' + ');}
+    return ms(left)+' = '+ms(right);
+  }
+  return mult+' &times; ( '+left+' = '+right+' )';
+}
+function updateDisplays(){
+  var q=RQ[rIdx];
+  document.getElementById('eq1-display').innerHTML=fmtHalfEq(q.halfEq1,rState.f1,rState.m1,q.help);
+  document.getElementById('eq2-display').innerHTML=fmtHalfEq(q.halfEq2,rState.f2,rState.m2,q.help);
+}
+function flipEq(n){rState['f'+n]=!rState['f'+n];updateDisplays();}
+function chgMult(n,d){rState['m'+n]=Math.max(1,rState['m'+n]+d);document.getElementById('mult'+n).value=rState['m'+n];updateDisplays();}
+function updMult(n){rState['m'+n]=Math.max(1,parseInt(document.getElementById('mult'+n).value)||1);updateDisplays();}
+
+// --- Build UI strings ---
+function halfEqUI(num,eq,help){
+  if(help==='none') return '<div class="half-equation"><span id="eq'+num+'-display" class="flex-grow"></span></div>';
+  return '<div class="half-equation">'+
+    '<span id="eq'+num+'-display" class="flex-grow"></span>'+
+    '<button class="flip-btn" onclick="flipEq('+num+')">&#x21C4; Inverser</button>'+
+    '<span style="display:inline-flex;align-items:center;gap:0.25rem;font-weight:700;white-space:nowrap;">'+
+    '<span style="font-size:2rem;line-height:1;">&#215;</span> par :</span>'+
+    '<div class="multiplier-control">'+
+    '<button class="btn-small" onclick="chgMult('+num+',-1)">&#8722;</button>'+
+    '<input type="number" id="mult'+num+'" value="1" min="1" class="coefficient-input" style="appearance:textfield;-moz-appearance:textfield;" onchange="updMult('+num+')">'+
+    '<button class="btn-small" onclick="chgMult('+num+',1)">+</button>'+
+    '</div></div>';
+}
+function buildBuilder(q){
+  var sp=uniqueSpecies(q), nz=Math.max(2,Math.ceil(sp.length/2)), html='';
+  for(var i=0;i<nz;i++){
+    html+='<div class="flex items-center"><input type="number" class="coefficient-input" id="coef-r'+i+'" value="1" min="1"><div class="drop-zone ml-1" id="zone-r'+i+'" data-side="reactant" ondrop="dropSp(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)"></div></div>';
+    if(i<nz-1)html+='<span class="text-2xl font-bold mx-1">+</span>';
+  }
+  html+='<span class="arrow mx-2 sm:mx-4">&#8594;</span>';
+  for(var j=0;j<nz;j++){
+    html+='<div class="flex items-center"><input type="number" class="coefficient-input" id="coef-p'+j+'" value="1" min="1"><div class="drop-zone ml-1" id="zone-p'+j+'" data-side="product" ondrop="dropSp(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)"></div></div>';
+    if(j<nz-1)html+='<span class="text-2xl font-bold mx-1">+</span>';
+  }
+  document.getElementById('builder-zone').innerHTML=html;
+}
+function buildBank(q){
+  var bank=document.getElementById('species-bank'); bank.innerHTML='';
+  uniqueSpecies(q).forEach(function(sp){
+    var el=document.createElement('span');
+    el.className='draggable';el.draggable=true;el.innerHTML=sp;el.dataset.species=sp;
+    el.ondragstart=dragStart;bank.appendChild(el);
+  });
+}
+
+// --- Drag & drop ---
+var draggedEl=null;
+function dragStart(e){draggedEl=e.target;}
+function allowDrop(e){e.preventDefault();e.target.closest('.drop-zone').classList.add('over');}
+function dragLeave(e){e.target.closest('.drop-zone').classList.remove('over');}
+function dropSp(e){
+  e.preventDefault();
+  var zone=e.target.closest('.drop-zone');zone.classList.remove('over');
+  if(!draggedEl||!zone)return;
+  var origin=draggedEl.closest('.drop-zone');
+  if(origin){origin.innerHTML='';origin.classList.remove('filled');}else{draggedEl.remove();}
+  if(zone.innerHTML!==''){
+    var old=zone.querySelector('.draggable');old.classList.remove('in-zone');old.onclick=null;
+    document.getElementById('species-bank').appendChild(old);
+  }
+  var ni=draggedEl.cloneNode(true);
+  ni.classList.add('in-zone');ni.draggable=true;ni.ondragstart=dragStart;ni.onclick=retToBank;
+  zone.innerHTML='';zone.appendChild(ni);zone.classList.add('filled');
+  draggedEl=null;
+}
+function retToBank(e){
+  var item=e.target.closest('.draggable'),zone=item.parentElement;
+  zone.innerHTML='';zone.classList.remove('filled');
+  item.classList.remove('in-zone');item.onclick=null;
+  document.getElementById('species-bank').appendChild(item);
+}
+
+// --- Chemistry logic ---
+function calcExpected(q){
+  var rs={};
+  q.reactants.forEach(function(r){rs[stripTags(r).replace(/^\d+\s*/,'').trim()]=true;});
+  var f1=!!rs[stripTags(q.halfEq1.red).replace(/^\d+\s*/,'').trim()];
+  var f2=!!rs[stripTags(q.halfEq2.red).replace(/^\d+\s*/,'').trim()];
+  var L=lcm(q.halfEq1.e,q.halfEq2.e),m1=L/q.halfEq1.e,m2=L/q.halfEq2.e;
+  var R={},P={};
+  function add(map,sp,m){var p=parseSpecies(sp);map[p.name]=(map[p.name]||0)+p.coef*m;}
+  add(f1?R:P,q.halfEq1.red,m1);add(f1?P:R,q.halfEq1.ox,m1);
+  add(f2?R:P,q.halfEq2.red,m2);add(f2?P:R,q.halfEq2.ox,m2);
+  return {
+    reactants:Object.keys(R).map(function(k){return{name:k,coef:R[k]};}),
+    products: Object.keys(P).map(function(k){return{name:k,coef:P[k]};})
+  };
+}
+function getStudent(){
+  var R={},P={};
+  document.querySelectorAll('.drop-zone.filled').forEach(function(z){
+    var side=z.dataset.side,idx=z.id.slice(-1);
+    var inp=document.getElementById('coef-'+side.charAt(0)+idx);
+    if(!inp)return;
+    var name=stripTags(z.querySelector('.draggable').dataset.species).trim();
+    var coef=parseInt(inp.value)||1;
+    var map=side==='reactant'?R:P;
+    map[name]=(map[name]||0)+coef;
+  });
+  return {
+    reactants:Object.keys(R).map(function(k){return{name:k,coef:R[k]};}),
+    products: Object.keys(P).map(function(k){return{name:k,coef:P[k]};})
+  };
+}
+function normList(list){
+  if(!list.length)return[];
+  var g=list.reduce(function(a,b){return gcd(a,b.coef);},list[0].coef);
+  return list.map(function(s){return{name:s.name,coef:s.coef/g};}).sort(function(a,b){return a.name.localeCompare(b.name);});
+}
+// Normalise l'équation ENTIÈRE (réactifs + produits ensemble) par leur pgcd global,
+// pour éviter qu'une simplification partielle masque un déséquilibre stœchiométrique.
+function normEq(reactants,products){
+  var all=reactants.concat(products);
+  if(!all.length)return{reactants:[],products:[]};
+  var g=all.reduce(function(a,b){return gcd(a,b.coef);},all[0].coef);
+  function sn(list){return list.map(function(s){return{name:s.name,coef:s.coef/g};}).sort(function(a,b){return a.name.localeCompare(b.name);});}
+  return{reactants:sn(reactants),products:sn(products)};
+}
+function rxEqual(exp,stu){
+  var nExp=normEq(exp.reactants,exp.products);
+  var nStu=normEq(stu.reactants,stu.products);
+  return JSON.stringify(nExp.reactants)===JSON.stringify(nStu.reactants)&&
+         JSON.stringify(nExp.products)===JSON.stringify(nStu.products);
+}
+function renderList(list,q){
+  // La liste est déjà normalisée globalement par normEq — on n'appelle plus normList ici
+  return list.map(function(s){
+    return (s.coef>1?s.coef+' ':'')+getBareHTML(s.name,q);
+  }).join(' + ');
+}
+
+// --- Error analysis ---
+function analyzeErrors(exp,stu,q){
+  var errs=[];
+  // Normalisation globale (réactifs + produits ensemble) pour cohérence des coefficients
+  var nE=normEq(exp.reactants,exp.products);
+  var nS=normEq(stu.reactants,stu.products);
+  var nER=nE.reactants,nEP=nE.products;
+  var mR={},mP={};
+  nS.reactants.forEach(function(s){mR[s.name]=s.coef;});
+  nS.products.forEach(function(s){mP[s.name]=s.coef;});
+  if(stu.reactants.length===0&&stu.products.length===0){
+    errs.push("Aucune espèce n'a été placée dans l'équation bilan.");
+    return errs;
+  }
+  nER.forEach(function(e){
+    var h='<strong>'+getBareHTML(e.name,q)+'</strong>';
+    if(mP[e.name]!==undefined) errs.push(h+' est du mauvais côté : c\'est un <em>réactif</em>, pas un produit.');
+    else if(mR[e.name]===undefined) errs.push(h+' est absent &mdash; il doit figurer comme réactif.');
+    else if(mR[e.name]!==e.coef) errs.push('Coefficient de '+h+' incorrect.');
+  });
+  nEP.forEach(function(e){
+    var h='<strong>'+getBareHTML(e.name,q)+'</strong>';
+    if(mR[e.name]!==undefined) errs.push(h+' est du mauvais côté : c\'est un <em>produit</em>, pas un réactif.');
+    else if(mP[e.name]===undefined) errs.push(h+' est absent &mdash; il doit figurer comme produit.');
+    else if(mP[e.name]!==e.coef) errs.push('Coefficient de '+h+' incorrect.');
+  });
+  return errs;
+}
+
+// --- Hints ---
+function generateHints(q){
+  var hints=[];
+  var rs={};
+  q.reactants.forEach(function(r){rs[stripTags(r).replace(/^\d+\s*/,'').trim()]=true;});
+  var f1=!!rs[stripTags(q.halfEq1.red).replace(/^\d+\s*/,'').trim()];
+  var f2=!!rs[stripTags(q.halfEq2.red).replace(/^\d+\s*/,'').trim()];
+  var L=lcm(q.halfEq1.e,q.halfEq2.e),m1=L/q.halfEq1.e,m2=L/q.halfEq2.e;
+  var d1=f1?'une <strong>oxydation</strong> (Réducteur &rarr; Oxydant + e<sup>-</sup>)':'une <strong>réduction</strong> (Oxydant + e<sup>-</sup> &rarr; Réducteur)';
+  var d2=f2?'une <strong>oxydation</strong> (Réducteur &rarr; Oxydant + e<sup>-</sup>)':'une <strong>réduction</strong> (Oxydant + e<sup>-</sup> &rarr; Réducteur)';
+  if(q.help!=='none'){
+    hints.push('La 1<sup>re</sup> demi-équation joue le rôle de '+d1+(f1?' &mdash; cliquez sur &#x21C4; Inverser.':' &mdash; pas besoin de l\'inverser.'));
+    hints.push('La 2<sup>e</sup> demi-équation joue le rôle de '+d2+(f2?' &mdash; cliquez sur &#x21C4; Inverser.':' &mdash; pas besoin de l\'inverser.'));
+    if(m1>1||m2>1) hints.push('Pour égaliser les électrons (PPCM = '+L+' e<sup>-</sup>), réglez : &times;'+m1+' pour la 1<sup>re</sup>, &times;'+m2+' pour la 2<sup>e</sup>.');
+    else hints.push('Les deux demi-équations échangent déjà '+L+' e<sup>-</sup> : aucun multiplicateur n\'est nécessaire.');
+  } else {
+    hints.push('Repérez dans quelle demi-équation figure chaque réactif : c\'est celle qui doit être orientée dans le sens de la transformation.');
+    hints.push('La 1<sup>re</sup> demi-équation intervient comme '+d1+'.');
+    hints.push('La 2<sup>e</sup> demi-équation intervient comme '+d2+'.');
+    if(m1>1||m2>1) hints.push('Multipliez la 1<sup>re</sup> demi-équation par '+m1+' et la 2<sup>e</sup> par '+m2+' (PPCM = '+L+' e<sup>-</sup>), puis additionnez membre à membre.');
+    else hints.push('Les deux demi-équations échangent le même nombre d\'électrons ('+L+' e<sup>-</sup>) : additionnez-les directement.');
+  }
+  return hints;
+}
+
+// --- Load question ---
+function initReactions(){rIdx=0;rScore=0;loadRQ();}
+function loadRQ(){
+  if(rIdx>=RQ.length){showRResults();return;}
+  var q=RQ[rIdx];
+  rState={m1:1,m2:1,f1:false,f2:false}; rFailed=false;  // <-- reset du flag à chaque nouvelle question
+  var hl={full:'&#127834; Niveau 1 &mdash; Aide complète',medium:'&#127835; Niveau 2 &mdash; Aide partielle',none:'&#127836; Niveau 3 &mdash; Sans aide'};
+  document.getElementById('reaction-question').innerHTML=
+    '<div class="question-card">'+
+    '<div class="flex items-center justify-between mb-3">'+
+    '<h3 class="text-xl font-bold">Question '+(rIdx+1)+'/'+RQ.length+'</h3>'+
+    '<span class="text-sm font-semibold px-3 py-1 rounded-full bg-gray-200 text-gray-700">'+hl[q.help]+'</span>'+
+    '</div>'+
+    '<div class="mb-4 p-3 bg-indigo-50 rounded-lg"><p class="font-bold">Réactifs : <span class="font-normal text-lg">'+q.reactants.join(' et ')+'</span></p></div>'+
+    '<p class="font-semibold text-gray-600 mb-2">Demi-équations :</p>'+
+    '<div class="space-y-2 mb-4">'+halfEqUI(1,q.halfEq1,q.help)+halfEqUI(2,q.halfEq2,q.help)+'</div>'+
+    '<div class="equation-builder"><h4 class="font-bold mb-3 text-center text-lg">&#128221; Construisez l\'équation bilan :</h4>'+
+    '<div class="flex items-center justify-center gap-1 sm:gap-2 flex-wrap" id="builder-zone"></div></div>'+
+    '<p class="text-sm text-gray-500 mt-2 text-center">Faites glisser les espèces depuis la banque vers les cases, et indiquez les coefficients.</p>'+
+    '<div class="species-bank" id="species-bank"></div></div>';
+  buildBuilder(q);buildBank(q);updateDisplays();
+  document.getElementById('feedback-area').innerHTML='';
+  document.getElementById('btn-check-reaction').classList.remove('hidden');
+  document.getElementById('btn-next-reaction').classList.add('hidden');
+  var bar=document.getElementById('progress-reactions');
+  bar.style.width=(rIdx/RQ.length*100)+'%'; bar.textContent=rIdx+'/'+RQ.length;
+}
+
+// --- Check / retry / solution ---
+function checkReactionAnswer(){
+  var q=RQ[rIdx];
+  var exp=calcExpected(q),stu=getStudent();
+  var ok=rxEqual(exp,stu);
+  document.getElementById('btn-check-reaction').classList.add('hidden');
+  if(ok){
+    if(!rFailed){rScore++;} updRScore();  // <-- point uniquement si pas d'erreur préalable
+    document.getElementById('feedback-area').innerHTML='<div class="fb-ok">&#10003; Bravo, c\'est correct !</div>';
+    document.getElementById('btn-next-reaction').classList.remove('hidden');
+  } else {
+    rFailed=true; updRScore();  // <-- marquer l'échec, pas de point possible pour cette question
+    var errs=analyzeErrors(exp,stu,q);
+    var hints=generateHints(q);
+    var eH=errs.map(function(e){return '<li>'+e+'</li>';}).join('');
+    var hH=hints.map(function(h){return '<li>'+h+'</li>';}).join('');
+    document.getElementById('feedback-area').innerHTML=
+      '<div class="fb-header">&#10007; Pas tout à fait&hellip; vérifiez les points ci-dessous.</div>'+
+      '<div class="fb-errors"><h4>Erreurs détectées :</h4><ul>'+eH+'</ul></div>'+
+      '<div class="fb-hints"><h4>Indices pour corriger :</h4><ul>'+hH+'</ul></div>'+
+      '<div class="fb-actions">'+
+      '<button class="btn-retry" onclick="retryQ()">&#128260; Réessayer</button>'+
+      '<button class="btn-solution" onclick="showSol()">&#128161; Voir la solution</button>'+
+      '</div>';
+  }
+  window.scrollTo({top:document.getElementById('feedback-area').offsetTop-20,behavior:'smooth'});
+}
+function retryQ(){
+  document.getElementById('feedback-area').innerHTML='';
+  document.getElementById('btn-check-reaction').classList.remove('hidden');
+  document.getElementById('btn-next-reaction').classList.add('hidden');
+}
+function showSol(){
+  var q=RQ[rIdx];
+  var exp=calcExpected(q);
+  // Normalisation globale pour afficher la vraie solution équilibrée
+  var nExp=normEq(exp.reactants,exp.products);
+  var rH=renderList(nExp.reactants,q), pH=renderList(nExp.products,q);
+  var area=document.getElementById('feedback-area');
+  var actDiv=area.querySelector('.fb-actions');
+  if(actDiv){
+    actDiv.outerHTML=
+      '<div class="fb-solution-box">'+
+      '<p class="label">&#10004; Solution :</p>'+
+      '<p class="eq">'+rH+' &rarr; '+pH+'</p>'+
+      '</div>';
+  }
+  document.getElementById('btn-next-reaction').classList.remove('hidden');
+}
+function nextReactionQuestion(){rIdx++;loadRQ();}
+function updRScore(){document.getElementById('score-reactions').textContent='Score : '+rScore+'/'+RQ.length;}
+function showRResults(){
+  document.getElementById('reaction-question').innerHTML=
+    '<div class="text-center py-8"><h3 class="text-3xl font-bold mb-4">Bravo, vous avez terminé !</h3>'+
+    '<div class="text-6xl font-bold my-4">'+rScore+'/'+RQ.length+'</div>'+
+    '<button class="btn-primary text-xl" onclick="initReactions()">&#128260; Recommencer</button>'+
+    '<button class="btn-primary text-xl ml-4" onclick="showMenu()">&#127968; Retour au menu</button></div>';
+  document.getElementById('feedback-area').innerHTML='';
+  document.getElementById('btn-check-reaction').classList.add('hidden');
+  document.getElementById('btn-next-reaction').classList.add('hidden');
+  var bar=document.getElementById('progress-reactions');
+  bar.style.width='100%'; bar.textContent=RQ.length+'/'+RQ.length;
+}
+</script>
+</body>
+</html>
