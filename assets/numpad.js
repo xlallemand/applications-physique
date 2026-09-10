@@ -42,9 +42,10 @@
     </div>`;
   }
 
-  function numpadWidget() {
+  function numpadWidget(forced) {
+    const cls = forced ? 'np-section-forced' : 'np-section';
     return `
-    <div class="np-section">
+    <div class="${cls}">
         <div class="numpad-grid">
             <button type="button" onclick="numpadKey('7')">7</button>
             <button type="button" onclick="numpadKey('8')">8</button>
