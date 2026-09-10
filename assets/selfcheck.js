@@ -49,6 +49,34 @@
     }
   }
 
+  /* Réponse donnée sous forme coefficient × 10^exposant (comme dans les
+     exercices) : accepte toute décomposition mathématiquement équivalente
+     à la valeur attendue, pas seulement le couple (coefficient, exposant)
+     "canonique" passé en argument. */
+  function checkConversion(idCoeff, idExp, correctCoeff, correctExp, resultId) {
+    const result = document.getElementById(resultId);
+    const rawC = document.getElementById(idCoeff).value.trim().replace(',', '.').replace('−', '-');
+    const rawE = document.getElementById(idExp).value.trim().replace(',', '.').replace('−', '-');
+    const uC = parseFloat(rawC);
+    const uE = parseInt(rawE, 10);
+    if (rawC === '' || rawE === '' || isNaN(uC) || isNaN(uE)) {
+      result.innerHTML = 'Merci de remplir les deux cases.';
+      result.style.color = '#991b1b';
+      return;
+    }
+    const uVal = uC * Math.pow(10, uE);
+    const cVal = correctCoeff * Math.pow(10, correctExp);
+    const ok = Math.abs(uVal - cVal) < Math.abs(cVal) * 1e-9 + 1e-30;
+    if (ok) {
+      result.innerHTML = '✓ Correct ! 🎉';
+      result.style.color = '#166534';
+    } else {
+      result.innerHTML = `✗ Incorrect. La réponse est : ${String(correctCoeff).replace('.', ',')} × 10<sup>${correctExp}</sup>`;
+      result.style.color = '#991b1b';
+    }
+  }
+
   window.checkAnswer = checkAnswer;
   window.checkSci = checkSci;
+  window.checkConversion = checkConversion;
 })();
