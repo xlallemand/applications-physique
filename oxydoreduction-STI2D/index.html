@@ -18,8 +18,6 @@
       --app-accent-700: #047857;
       --app-accent-800: #065f46;
     }
-    .btn-module { transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
-    .btn-module:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
     .sup { font-size: 0.7em; vertical-align: super; }
     .sub { font-size: 0.7em; vertical-align: sub; }
     .course-block { background-color: #fafbff; border: 2px solid #a7f3d0; border-radius: 14px; padding: 1.5rem; margin-bottom: 2rem; }
@@ -49,6 +47,10 @@
     .draggable.in-zone { cursor: grab; background: #6ee7b7; color: #065f46; }
     .draggable.dragging { opacity: .4; }
     .coefficient-input { width: 50px; text-align: center; padding: 0.4rem; border: 2px solid #cbd5e1; border-radius: 6px; font-weight: bold; font-size: 1.1rem; }
+    .coef-stepper { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .coef-step-btn { width: 34px; height: 18px; padding: 0; line-height: 1; border: 1.5px solid #cbd5e1; border-radius: 5px; background: #f8fafc; color: #059669; font-size: .6rem; cursor: pointer; touch-action: manipulation; }
+    .coef-step-btn:hover { background: #ecfdf5; border-color: #059669; }
+    .coef-step-btn:active { background: #d1fae5; }
     .multiplier-control { display: flex; align-items: center; background: white; border: 2px solid #d1d5db; border-radius: 8px; overflow: hidden; }
     .mult-btn { width: 35px; height: 35px; border: none; background: #f3f4f6; color: #4b5563; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
     .mult-btn:hover { background-color: #e5e7eb; }
@@ -87,46 +89,49 @@
 <div class="container mx-auto px-4 py-8 max-w-4xl">
 
   <header id="mainHeader" class="text-center mb-8">
-    <h1 class="text-4xl md:text-5xl font-bold text-emerald-900 mb-2">&#9883;&#65039; Oxydoréduction</h1>
+    <h1 class="text-4xl md:text-5xl font-bold text-emerald-900 mb-2">Oxydoréduction</h1>
     <p class="text-lg text-emerald-700">Terminale STI2D</p>
   </header>
 
   <div id="menu" class="module-list mb-8">
-    <div class="module-card">
-      <div class="module-card-head">
-        <span class="module-badge">Module 1</span>
-        <div class="module-card-body">
-          <div class="module-card-title">Le cours</div>
-          <div class="module-card-desc">Oxydants, réducteurs, demi-équations et méthode pour écrire une réaction d'oxydoréduction</div>
-          <div class="module-card-actions">
-            <button onclick="showModule('course')" class="btn-module btn-primary">Cours</button>
+    <div class="module-group">
+      <div class="module-group-title">Cours</div>
+      <div class="module-card clickable" onclick="showModule('course')">
+        <div class="module-card-head">
+          <span class="module-badge">Module 1</span>
+          <div class="module-card-body">
+            <div class="module-card-title">Le cours</div>
+            <div class="module-card-desc">Oxydants, réducteurs, demi-équations et méthode pour écrire une réaction d'oxydoréduction</div>
           </div>
+          <span class="module-card-arrow">›</span>
         </div>
       </div>
     </div>
 
-    <div class="module-card">
-      <div class="module-card-head">
-        <span class="module-badge">Module 2</span>
-        <div class="module-card-body">
-          <div class="module-card-title">Entraînement</div>
-          <div class="module-card-desc">Vérifie que tu as bien compris le cours avec des questions rapides</div>
-          <div class="module-card-actions">
-            <button onclick="showModule('training')" class="btn-module btn-primary">Entraînement (10 questions)</button>
+    <div class="module-group">
+      <div class="module-group-title">Entraînement</div>
+      <div class="module-card clickable" onclick="showModule('training')">
+        <div class="module-card-head">
+          <span class="module-badge">Module 2</span>
+          <div class="module-card-body">
+            <div class="module-card-title">Entraînement</div>
+            <div class="module-card-desc">Vérifie que tu as bien compris le cours avec des questions rapides. 10 questions.</div>
           </div>
+          <span class="module-card-arrow">›</span>
         </div>
       </div>
     </div>
 
-    <div class="module-card">
-      <div class="module-card-head">
-        <span class="module-badge">Module 3</span>
-        <div class="module-card-body">
-          <div class="module-card-title">Écrire les réactions d'oxydoréduction</div>
-          <div class="module-card-desc">Construis pas à pas l'équation bilan à partir des demi-équations — l'aide diminue au fil des questions</div>
-          <div class="module-card-actions">
-            <button onclick="showModule('reactions')" class="btn-module btn-primary">Entraînement (20 questions)</button>
+    <div class="module-group">
+      <div class="module-group-title">Réactions</div>
+      <div class="module-card clickable" onclick="showModule('reactions')">
+        <div class="module-card-head">
+          <span class="module-badge">Module 3</span>
+          <div class="module-card-body">
+            <div class="module-card-title">Écrire les réactions d'oxydoréduction</div>
+            <div class="module-card-desc">Construis pas à pas l'équation bilan à partir des demi-équations — l'aide diminue au fil des questions. 20 questions.</div>
           </div>
+          <span class="module-card-arrow">›</span>
         </div>
       </div>
     </div>
@@ -135,9 +140,9 @@
   <!-- MODULE 1 -->
   <div id="module-course" class="hidden">
     <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-      <h2 class="text-2xl md:text-3xl font-bold text-emerald-900 mb-6 text-center">📚 Le Cours : Oxydoréduction</h2>
+      <h2 class="text-2xl md:text-3xl font-bold text-emerald-900 mb-6 text-center">Le Cours : Oxydoréduction</h2>
       <div class="course-block">
-        <h3 class="text-2xl font-bold">🔬 Oxydants et Réducteurs</h3>
+        <h3 class="text-2xl font-bold">Oxydants et Réducteurs</h3>
         <div class="grid md:grid-cols-2 gap-4">
           <div class="def-box">
             <h4 class="text-lg">Un <strong>OXYDANT</strong></h4>
@@ -158,10 +163,10 @@
         </div>
       </div>
       <div class="course-block">
-        <h3 class="text-2xl font-bold">🔄 Oxydation et Réduction</h3>
+        <h3 class="text-2xl font-bold">Oxydation et Réduction</h3>
         <p class="mb-3">Un couple est noté <strong>Oxydant / Réducteur</strong>. A ce couple correspond une demi-équation :</p>
         <div class="key-equation">
-          <span class="eq-label">&#11088; Demi-équation de référence &#11088;</span>
+          <span class="eq-label">Demi-équation de référence</span>
           Oxydant &nbsp;+&nbsp; n e<span class="sup" style="font-size:0.6em;">&#8722;</span> &nbsp;=&nbsp; Réducteur
         </div>
         <div class="grid md:grid-cols-2 gap-4 mt-4">
@@ -178,10 +183,10 @@
         </div>
       </div>
       <div class="course-block">
-        <h3 class="text-2xl font-bold">✍️ Comment écrire une réaction d'oxydoréduction</h3>
+        <h3 class="text-2xl font-bold">Comment écrire une réaction d'oxydoréduction</h3>
         <p class="text-gray-500 italic mb-4">Les deux demi-équations des couples sont toujours données.</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem 1.5rem;" class="method-table-wrapper">
-          <div class="text-center font-bold text-emerald-700 bg-emerald-50 rounded-lg py-2 px-3 mb-1">📋 Méthode</div>
+          <div class="text-center font-bold text-emerald-700 bg-emerald-50 rounded-lg py-2 px-3 mb-1">Méthode</div>
           <div class="text-center font-bold text-green-700 bg-green-50 rounded-lg py-2 px-3 mb-1">Exemple : Fe<span class="sup">3+</span> + Zn</div>
           <div class="method-step"><div style="display:flex;align-items:flex-start;"><span class="step-number">1</span><span><strong>Identifier les réactifs</strong> et les repérer dans les demi-équations.</span></div></div>
           <div class="example-step">
@@ -217,7 +222,7 @@
   <!-- MODULE 2 -->
   <div id="module-training" class="hidden">
     <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-      <h2 class="text-2xl md:text-3xl font-bold text-emerald-900 mb-6 text-center">🎯 Entraînement</h2>
+      <h2 class="text-2xl md:text-3xl font-bold text-emerald-900 mb-6 text-center">Entraînement</h2>
       <div class="mb-6">
         <div class="flex justify-between text-sm font-bold text-gray-500 mb-2">
           <span>Question <span id="tQuestionNum">1</span> / 10</span>
@@ -236,7 +241,7 @@
   <!-- MODULE 3 -->
   <div id="module-reactions" class="hidden">
     <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-      <h2 class="text-2xl md:text-3xl font-bold text-emerald-900 mb-6 text-center">⚡ Écrire les réactions</h2>
+      <h2 class="text-2xl md:text-3xl font-bold text-emerald-900 mb-6 text-center">Écrire les réactions</h2>
       <div class="mb-6">
         <div class="flex justify-between text-sm font-bold text-gray-500 mb-2">
           <span>Question <span id="rQuestionNum">1</span> / 20</span>
@@ -355,7 +360,7 @@ function checkTrainingAnswer(){
 function nextTrainingQuestion(){tIdx++;loadTQ();}
 function showTResults(){
   var pct=Math.round(tScore/tQuestions.length*100);
-  var msg=pct>=90?'Excellent ! Tu maîtrises parfaitement ce chapitre ! 🏆':pct>=70?'Très bien ! Continue comme ça ! 👍':pct>=50?'Pas mal ! Avec un peu plus de travail tu vas y arriver. 💪':'Continue à t\'entraîner, tu vas progresser ! 📚';
+  var msg=pct>=90?'Excellent ! Tu maîtrises parfaitement ce chapitre !':pct>=70?'Très bien ! Continue comme ça !':pct>=50?'Pas mal ! Avec un peu plus de travail tu vas y arriver.':'Continue à t\'entraîner, tu vas progresser !';
   document.getElementById('training-question').innerHTML=
     '<div class="bg-emerald-50 border border-emerald-200 rounded-2xl shadow-lg p-10 text-center">'+
     '<h3 class="text-2xl font-bold text-gray-800 mb-3">Entraînement terminé !</h3>'+
@@ -363,8 +368,8 @@ function showTResults(){
     '<div class="text-xl font-bold text-gray-400 mb-6">'+pct+'%</div>'+
     '<p class="text-gray-500 mb-8 text-lg">'+msg+'</p>'+
     '<div class="flex gap-4 justify-center flex-wrap">'+
-    '<button class="btn-primary" onclick="initTraining()">&#128260; Recommencer</button>'+
-    '<button class="btn-secondary" onclick="showModule(\'reactions\')">Module suivant &#9889;</button>'+
+    '<button class="btn-primary" onclick="initTraining()">Recommencer</button>'+
+    '<button class="btn-secondary" onclick="showModule(\'reactions\')">Module suivant</button>'+
     '</div></div>';
   document.getElementById('btn-check-training').classList.add('hidden');
   document.getElementById('btn-next-training').classList.add('hidden');
@@ -474,19 +479,32 @@ function halfEqUI(num,eq,help){
     '<span style="font-size:2rem;line-height:1;">&#215;</span> par :</span>'+
     '<div class="multiplier-control">'+
     '<button class="mult-btn" onclick="chgMult('+num+',-1)">&#8722;</button>'+
-    '<input type="number" id="mult'+num+'" value="1" min="1" class="coefficient-input" style="appearance:textfield;-moz-appearance:textfield;" onchange="updMult('+num+')">'+
+    '<input type="text" inputmode="numeric" id="mult'+num+'" value="1" class="coefficient-input" onchange="updMult('+num+')">'+
     '<button class="mult-btn" onclick="chgMult('+num+',1)">+</button>'+
     '</div></div>';
+}
+// Coefficient stœchiométrique avec ses propres boutons +/- (plutôt que les flèches
+// natives de <input type="number">, absentes ou peu fiables au toucher selon le navigateur).
+function coefStepperHTML(id){
+  return '<div class="coef-stepper">'+
+    '<button type="button" class="coef-step-btn" onclick="stepCoef(\''+id+'\',1)" aria-label="Augmenter">&#9650;</button>'+
+    '<input type="text" inputmode="numeric" class="coefficient-input" id="coef-'+id+'" value="1">'+
+    '<button type="button" class="coef-step-btn" onclick="stepCoef(\''+id+'\',-1)" aria-label="Diminuer">&#9660;</button>'+
+    '</div>';
+}
+function stepCoef(id,delta){
+  var inp=document.getElementById('coef-'+id);
+  inp.value=Math.max(1,(parseInt(inp.value)||1)+delta);
 }
 function buildBuilder(q){
   var sp=uniqueSpecies(q), nz=Math.max(2,Math.ceil(sp.length/2)), html='';
   for(var i=0;i<nz;i++){
-    html+='<div class="flex items-center"><input type="number" class="coefficient-input" id="coef-r'+i+'" value="1" min="1"><div class="drop-zone ml-1" id="zone-r'+i+'" data-side="reactant"></div></div>';
+    html+='<div class="flex items-center">'+coefStepperHTML('r'+i)+'<div class="drop-zone ml-1" id="zone-r'+i+'" data-side="reactant"></div></div>';
     if(i<nz-1)html+='<span class="text-2xl font-bold mx-1">+</span>';
   }
   html+='<span class="arrow mx-2 sm:mx-4">&#8594;</span>';
   for(var j=0;j<nz;j++){
-    html+='<div class="flex items-center"><input type="number" class="coefficient-input" id="coef-p'+j+'" value="1" min="1"><div class="drop-zone ml-1" id="zone-p'+j+'" data-side="product"></div></div>';
+    html+='<div class="flex items-center">'+coefStepperHTML('p'+j)+'<div class="drop-zone ml-1" id="zone-p'+j+'" data-side="product"></div></div>';
     if(j<nz-1)html+='<span class="text-2xl font-bold mx-1">+</span>';
   }
   document.getElementById('builder-zone').innerHTML=html;
@@ -650,7 +668,7 @@ function loadRQ(){
   if(rIdx>=RQ.length){showRResults();return;}
   var q=RQ[rIdx];
   rState={m1:1,m2:1,f1:false,f2:false}; rFailed=false;  // <-- reset du flag à chaque nouvelle question
-  var hl={full:'&#127834; Niveau 1 &mdash; Aide complète',medium:'&#127835; Niveau 2 &mdash; Aide partielle',none:'&#127836; Niveau 3 &mdash; Sans aide'};
+  var hl={full:'Niveau 1 &mdash; Aide complète',medium:'Niveau 2 &mdash; Aide partielle',none:'Niveau 3 &mdash; Sans aide'};
   document.getElementById('reaction-question').innerHTML=
     '<div class="question-card">'+
     '<div class="flex items-center justify-between mb-3">'+
@@ -659,7 +677,7 @@ function loadRQ(){
     '<div class="mb-4 p-3 bg-emerald-50 rounded-lg"><p class="font-bold">Réactifs : <span class="font-normal text-lg">'+q.reactants.join(' et ')+'</span></p></div>'+
     '<p class="font-semibold text-gray-600 mb-2">Demi-équations :</p>'+
     '<div class="space-y-2 mb-4">'+halfEqUI(1,q.halfEq1,q.help)+halfEqUI(2,q.halfEq2,q.help)+'</div>'+
-    '<div class="equation-builder"><h4 class="font-bold mb-3 text-center text-lg">&#128221; Construisez l\'équation bilan :</h4>'+
+    '<div class="equation-builder"><h4 class="font-bold mb-3 text-center text-lg">Construisez l\'équation bilan :</h4>'+
     '<div class="flex items-center justify-center gap-1 sm:gap-2 flex-wrap" id="builder-zone"></div></div>'+
     '<p class="text-sm text-gray-500 mt-2 text-center">Faites glisser les espèces depuis la banque vers les cases, et indiquez les coefficients.</p>'+
     '<div class="species-bank" id="species-bank"></div></div>';
@@ -692,7 +710,7 @@ function checkReactionAnswer(){
       '<div class="fb-errors"><h4>Erreurs détectées :</h4><ul>'+eH+'</ul></div>'+
       '<div class="fb-hints"><h4>Indices pour corriger :</h4><ul>'+hH+'</ul></div>'+
       '<div class="fb-actions">'+
-      '<button class="btn-retry" onclick="retryQ()">&#128260; Réessayer</button>'+
+      '<button class="btn-retry" onclick="retryQ()">Réessayer</button>'+
       '<button class="btn-solution" onclick="showSol()">&#128161; Voir la solution</button>'+
       '</div>';
   }
@@ -714,7 +732,7 @@ function showSol(){
   if(actDiv){
     actDiv.outerHTML=
       '<div class="fb-solution-box">'+
-      '<p class="label">&#10004; Solution :</p>'+
+      '<p class="label">Solution :</p>'+
       '<p class="eq">'+rH+' &rarr; '+pH+'</p>'+
       '</div>';
   }
@@ -731,7 +749,7 @@ function showRResults(){
     '<h3 class="text-2xl font-bold text-gray-800 mb-3">Bravo, vous avez terminé !</h3>'+
     '<div class="text-6xl font-bold text-emerald-700 mb-2">'+rScore+' / '+RQ.length+'</div>'+
     '<div class="flex gap-4 justify-center flex-wrap mt-6">'+
-    '<button class="btn-primary" onclick="initReactions()">&#128260; Recommencer</button></div></div>';
+    '<button class="btn-primary" onclick="initReactions()">Recommencer</button></div></div>';
   document.getElementById('feedback-area').innerHTML='';
   document.getElementById('btn-check-reaction').classList.add('hidden');
   document.getElementById('btn-next-reaction').classList.add('hidden');
