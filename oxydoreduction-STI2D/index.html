@@ -39,6 +39,14 @@
     .option-box.selected { border-color: #059669; background-color: #d1fae5; }
     .half-equation { background-color: #f1f5f9; padding: 0.8rem 1.2rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; margin: 0.5rem 0; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
     .equation-builder { background: white; padding: 1.5rem; border-radius: 10px; border: 3px solid #059669; margin: 1.5rem 0; }
+    #builder-zone { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 10px; }
+    #builder-zone > * { flex-shrink: 0; }
+    @media (max-width: 480px) {
+      .drop-zone { min-width: 80px; height: 44px; margin: 0.2rem; }
+      .coefficient-input { width: 38px; font-size: 1rem; padding: 0.3rem; }
+      .coef-step-btn { width: 28px; }
+      .arrow { font-size: 1.8rem; }
+    }
     .species-bank { background: #f1f5f9; padding: 1rem; border-radius: 8px; margin-top: 1.5rem; min-height: 80px; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
     .drop-zone { min-width: 100px; height: 50px; border: 2px dashed #cbd5e1; border-radius: 8px; padding: 0.5rem; margin: 0.3rem; display: inline-flex; align-items: center; justify-content: center; background: white; transition: all 0.3s; }
     .drop-zone.over { border-color: #059669; background: #ecfdf5; }
@@ -678,7 +686,7 @@ function loadRQ(){
     '<p class="font-semibold text-gray-600 mb-2">Demi-équations :</p>'+
     '<div class="space-y-2 mb-4">'+halfEqUI(1,q.halfEq1,q.help)+halfEqUI(2,q.halfEq2,q.help)+'</div>'+
     '<div class="equation-builder"><h4 class="font-bold mb-3 text-center text-lg">Construisez l\'équation bilan :</h4>'+
-    '<div class="flex items-center justify-center gap-1 sm:gap-2 flex-wrap" id="builder-zone"></div></div>'+
+    '<div class="flex items-center flex-nowrap gap-1 sm:gap-2" id="builder-zone"></div></div>'+
     '<p class="text-sm text-gray-500 mt-2 text-center">Faites glisser les espèces depuis la banque vers les cases, et indiquez les coefficients.</p>'+
     '<div class="species-bank" id="species-bank"></div></div>';
   buildBuilder(q);buildBank(q);updateDisplays();
