@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Désintégration Radioactive — Simulation</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="stylesheet" href="../assets/theme.css">
+<script src="../assets/nav.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -20,8 +21,9 @@
     --text: #1a1a18;
     --text-muted: #4e4b47;
     --text-dim: #a8a5a0;
-    --mono: 'Space Mono', monospace;
-    --body: 'DM Sans', sans-serif;
+    /* Police commune au projet (plus de Google Fonts) */
+    --mono: var(--font-sans);
+    --body: var(--font-sans);
   }
 
   html, body {
@@ -404,6 +406,7 @@
 </style>
 </head>
 <body>
+<div id="app-nav"></div>
 <div class="page">
 
   <header>
@@ -530,6 +533,18 @@
 </div>
 
 <script>
+/* ═══════════════════════════════════════════════════
+   Navigation (menu burger commun — un seul lien vers l'accueil du projet)
+═══════════════════════════════════════════════════ */
+const nav = AppNav.init({
+  appName: 'Désintégration Radioactive',
+  portalHref: '../index.html',
+  portalLabel: 'Toutes les applications',
+  onHome: () => {},
+  groups: [],
+});
+nav.setActive(null);
+
 /* ═══════════════════════════════════════════════════
    État global
 ═══════════════════════════════════════════════════ */
