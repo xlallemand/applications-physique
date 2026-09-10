@@ -38,32 +38,32 @@
     .option-box:hover { border-color: #059669; background-color: #ecfdf5; }
     .option-box.selected { border-color: #059669; background-color: #d1fae5; }
     .half-equation { background-color: #f1f5f9; padding: 0.8rem 1.2rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; margin: 0.5rem 0; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
-    .equation-builder { background: white; padding: 1.5rem; border-radius: 10px; border: 3px solid #059669; margin: 1.5rem 0; }
-    #builder-zone { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 10px; }
+    .equation-builder { background: white; padding: 1rem; border-radius: 10px; border: 3px solid #059669; margin: 1rem 0; }
+    #builder-zone { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
     #builder-zone > * { flex-shrink: 0; }
     @media (max-width: 480px) {
-      .drop-zone { min-width: 80px; height: 44px; margin: 0.2rem; }
-      .coefficient-input { width: 38px; font-size: 1rem; padding: 0.3rem; }
-      .coef-step-btn { width: 28px; }
-      .arrow { font-size: 1.8rem; }
+      .drop-zone { min-width: 68px; height: 38px; margin: 0.1rem; padding: 0.2rem; }
+      .coefficient-input { width: 32px; font-size: 0.95rem; padding: 0.15rem; }
+      .coef-step-btn { width: 24px; height: 14px; }
+      .arrow { font-size: 1.4rem; }
     }
-    .species-bank { background: #f1f5f9; padding: 1rem; border-radius: 8px; margin-top: 1.5rem; min-height: 80px; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
-    .drop-zone { min-width: 100px; height: 50px; border: 2px dashed #cbd5e1; border-radius: 8px; padding: 0.5rem; margin: 0.3rem; display: inline-flex; align-items: center; justify-content: center; background: white; transition: all 0.3s; }
+    .species-bank { background: #f1f5f9; padding: 0.75rem; border-radius: 8px; margin-top: 1rem; min-height: 64px; display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+    .drop-zone { min-width: 84px; height: 42px; border: 2px dashed #cbd5e1; border-radius: 8px; padding: 0.3rem; margin: 0.15rem; display: inline-flex; align-items: center; justify-content: center; background: white; transition: all 0.3s; }
     .drop-zone.over { border-color: #059669; background: #ecfdf5; }
     .drop-zone.filled { border-style: solid; }
     .draggable { background: linear-gradient(135deg, #047857 0%, #059669 100%); color: white; padding: 0.6rem 1.2rem; border-radius: 8px; cursor: grab; display: inline-block; font-weight: 600; user-select: none; touch-action: none; }
     .draggable.in-zone { cursor: grab; background: #6ee7b7; color: #065f46; }
     .draggable.dragging { opacity: .4; }
-    .coefficient-input { width: 50px; text-align: center; padding: 0.4rem; border: 2px solid #cbd5e1; border-radius: 6px; font-weight: bold; font-size: 1.1rem; }
-    .coef-stepper { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-    .coef-step-btn { width: 34px; height: 18px; padding: 0; line-height: 1; border: 1.5px solid #cbd5e1; border-radius: 5px; background: #f8fafc; color: #059669; font-size: .6rem; cursor: pointer; touch-action: manipulation; }
+    .coefficient-input { width: 42px; text-align: center; padding: 0.25rem; border: 2px solid #cbd5e1; border-radius: 6px; font-weight: bold; font-size: 1rem; }
+    .coef-stepper { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+    .coef-step-btn { width: 30px; height: 16px; padding: 0; line-height: 1; border: 1.5px solid #cbd5e1; border-radius: 5px; background: #f8fafc; color: #059669; font-size: .6rem; cursor: pointer; touch-action: manipulation; }
     .coef-step-btn:hover { background: #ecfdf5; border-color: #059669; }
     .coef-step-btn:active { background: #d1fae5; }
     .multiplier-control { display: flex; align-items: center; background: white; border: 2px solid #d1d5db; border-radius: 8px; overflow: hidden; }
-    .mult-btn { width: 35px; height: 35px; border: none; background: #f3f4f6; color: #4b5563; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
+    .mult-btn { width: 30px; height: 30px; border: none; background: #f3f4f6; color: #4b5563; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
     .mult-btn:hover { background-color: #e5e7eb; }
     .flip-btn { background: #059669; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
-    .arrow { font-size: 2.5rem; font-weight: bold; color: #059669; }
+    .arrow { font-size: 2rem; font-weight: bold; color: #059669; }
     /* Feedback */
     #feedback-area { margin-top: 1rem; }
     .fb-ok { background:#dcfce7; color:#166534; border:2px solid #4ade80; padding:1rem 1.25rem; border-radius:10px; font-size:1.2rem; font-weight:bold; text-align:center; }
@@ -507,13 +507,13 @@ function stepCoef(id,delta){
 function buildBuilder(q){
   var sp=uniqueSpecies(q), nz=Math.max(2,Math.ceil(sp.length/2)), html='';
   for(var i=0;i<nz;i++){
-    html+='<div class="flex items-center">'+coefStepperHTML('r'+i)+'<div class="drop-zone ml-1" id="zone-r'+i+'" data-side="reactant"></div></div>';
-    if(i<nz-1)html+='<span class="text-2xl font-bold mx-1">+</span>';
+    html+='<div class="flex items-center">'+coefStepperHTML('r'+i)+'<div class="drop-zone ml-0.5" id="zone-r'+i+'" data-side="reactant"></div></div>';
+    if(i<nz-1)html+='<span class="text-2xl font-bold mx-0.5">+</span>';
   }
-  html+='<span class="arrow mx-2 sm:mx-4">&#8594;</span>';
+  html+='<span class="arrow mx-1 sm:mx-2">&#8594;</span>';
   for(var j=0;j<nz;j++){
-    html+='<div class="flex items-center">'+coefStepperHTML('p'+j)+'<div class="drop-zone ml-1" id="zone-p'+j+'" data-side="product"></div></div>';
-    if(j<nz-1)html+='<span class="text-2xl font-bold mx-1">+</span>';
+    html+='<div class="flex items-center">'+coefStepperHTML('p'+j)+'<div class="drop-zone ml-0.5" id="zone-p'+j+'" data-side="product"></div></div>';
+    if(j<nz-1)html+='<span class="text-2xl font-bold mx-0.5">+</span>';
   }
   document.getElementById('builder-zone').innerHTML=html;
 }
@@ -686,7 +686,7 @@ function loadRQ(){
     '<p class="font-semibold text-gray-600 mb-2">Demi-équations :</p>'+
     '<div class="space-y-2 mb-4">'+halfEqUI(1,q.halfEq1,q.help)+halfEqUI(2,q.halfEq2,q.help)+'</div>'+
     '<div class="equation-builder"><h4 class="font-bold mb-3 text-center text-lg">Construisez l\'équation bilan :</h4>'+
-    '<div class="flex items-center flex-nowrap gap-1 sm:gap-2" id="builder-zone"></div></div>'+
+    '<div class="flex items-center flex-nowrap gap-1" id="builder-zone"></div></div>'+
     '<p class="text-sm text-gray-500 mt-2 text-center">Faites glisser les espèces depuis la banque vers les cases, et indiquez les coefficients.</p>'+
     '<div class="species-bank" id="species-bank"></div></div>';
   buildBuilder(q);buildBank(q);updateDisplays();
