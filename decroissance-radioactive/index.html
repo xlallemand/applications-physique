@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Désintégration Radioactive — Simulation</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="stylesheet" href="../assets/theme.css">
+<script src="../assets/nav.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f3ee;
+    --surface: #ffffff;
+    --surface2: #dedad3;
+    --border: rgba(0,0,0,0.09);
+    /* INVERSÉ : alive = vert, dead = rouge */
+    --alive: #1d8c4a;
+    --dead:  #c0392b;
+    --text: #1a1a18;
+    --text-muted: #4e4b47;
+    --text-dim: #a8a5a0;
+    /* Police commune au projet (plus de Google Fonts) */
+    --mono: var(--font-sans);
+    --body: var(--font-sans);
+  }
+
+  html, body {
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.55;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 44px 24px 64px;
+  }
+
+  header { margin-bottom: 40px; }
+
+  .header-tag {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: var(--dead);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .header-tag::before {
+    content: '';
+    display: inline-block;
+    width: 24px; height: 1px;
+    background: var(--dead);
+  }
+
+  h1 {
+    font-size: clamp(2rem, 4.5vw, 3.1rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    color: var(--text);
+    margin-bottom: 12px;
+    font-family: var(--body);
+  }
+  h1 span { color: var(--dead); }
+
+  .subtitle {
+    font-family: var(--body);
+    font-size: 16px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    max-width: 580px;
+  }
+
+  /* ─── Main layout ─── */
+  .sim-layout {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 22px;
+    align-items: stretch;
+  }
+  @media (max-width: 820px) {
+    .sim-layout { grid-template-columns: 1fr; align-items: start; }
+  }
+
+  .left-col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── Panel base ─── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #faf9f6;
+    flex-shrink: 0;
+  }
+  .panel-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .panel-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--dead);
+    animation: blink 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .panel-dot.done { background: var(--alive); animation: none; }
+
+  /* ─── Grid panel ─── */
+  .grid-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .legend-wrap {
+    padding: 10px 18px 6px;
+    flex-shrink: 0;
+  }
+  .legend {
+    display: flex;
+    gap: 20px;
+    font-family: var(--body);
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  .leg { display: flex; align-items: center; gap: 7px; }
+  .leg-dot { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+
+  .grid-wrap {
+    flex: 1;
+    padding: 8px 16px 12px;
+    overflow: hidden;
+    min-height: 120px;
+  }
+
+  #nucleus-grid {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    align-content: center;
+    justify-content: center;
+  }
+
+  .nucleus {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    transition: background 0.25s ease;
+  }
+  .nucleus.alive { background: var(--alive); }
+  .nucleus.dead  { background: var(--dead);  }
+  .nucleus.just-died { animation: pop 0.35s ease; }
+  @keyframes pop { 0%{transform:scale(1.7)} 100%{transform:scale(1)} }
+
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .stat-cell {
+    padding: 12px 16px;
+    border-right: 1px solid var(--border);
+  }
+  .stat-cell:last-child { border-right: none; }
+  .stat-lbl {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .stat-val {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+  .stat-val.alive-color { color: var(--alive); }
+  .stat-val.dead-color  { color: var(--dead);  }
+
+  /* ─── Right column ─── */
+  .right-col { display: flex; flex-direction: column; gap: 18px; }
+
+  .panel-body { padding: 18px 22px; }
+  #chart-wrap { position: relative; width: 100%; height: 230px; }
+
+  /* ─── Légende graphique ─── */
+  .chart-legend {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 26px;
+    margin-bottom: 12px;
+  }
+  .cl-item { display: flex; align-items: center; gap: 9px; }
+  .cl-swatch-solid {
+    display: inline-block;
+    width: 26px; height: 3px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .cl-swatch-dashed {
+    display: inline-block;
+    width: 26px; height: 0;
+    border-top: 3px dashed #16a34a;
+    flex-shrink: 0;
+  }
+  .cl-label {
+    font-family: var(--body);
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+  .cl-formula {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    color: #16a34a;
+    letter-spacing: -0.01em;
+  }
+  .cl-lambda {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: #16a34a;
+    opacity: 0.85;
+  }
+
+  /* ─── Controls ─── */
+  .controls-body {
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .ctrl-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .ctrl-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .ctrl-lbl {
+    font-family: var(--body);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .ctrl-lbl em {
+    font-style: normal;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dead);
+  }
+  .ctrl-sub {
+    font-family: var(--body);
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .ctrl-val {
+    font-family: var(--mono);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dead);
+    min-width: 52px;
+    text-align: right;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  input[type=range] {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--dead);
+    cursor: pointer;
+    transition: transform 0.15s;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
+
+  .divider { height: 1px; background: var(--border); }
+
+  .btns {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .btn-primary {
+    width: 100%;
+    padding: 13px 18px;
+    background: var(--dead);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: var(--body);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn-primary:hover { opacity: 0.86; }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-primary:disabled { opacity: 0.28; cursor: not-allowed; transform: none; }
+
+  .btn-finish {
+    width: 100%;
+    padding: 13px 18px;
+    background: #1a3a2a;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: var(--body);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn-finish:hover { opacity: 0.82; }
+  .btn-finish:active { transform: scale(0.97); }
+  .btn-finish:disabled { opacity: 0.28; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    width: 100%;
+    padding: 11px 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-family: var(--body);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .btn-secondary:hover { border-color: rgba(0,0,0,0.22); color: var(--text); }
+
+  footer {
+    margin-top: 44px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="page">
+
+  <header>
+    <div class="header-tag">Physique nucléaire</div>
+    <h1>Désintégration<br><span>Radioactive</span></h1>
+    <p class="subtitle">
+      Simulation stochastique de la loi de décroissance radioactive.<br>
+      À chaque itération (= 1 seconde), chaque noyau a une probabilité λ de se désintégrer.
+    </p>
+  </header>
+
+  <div class="sim-layout">
+
+    <!-- Colonne gauche : grille -->
+    <div class="left-col">
+      <div class="panel grid-panel">
+        <div class="panel-header">
+          <span class="panel-label" id="grid-header-label">Grille des noyaux</span>
+          <span class="panel-dot" id="panel-dot"></span>
+        </div>
+        <div class="legend-wrap">
+          <div class="legend">
+            <span class="leg">
+              <span class="leg-dot" style="background:var(--alive);"></span>Non désintégré
+            </span>
+            <span class="leg">
+              <span class="leg-dot" style="background:var(--dead);"></span>Désintégré
+            </span>
+          </div>
+        </div>
+        <div class="grid-wrap" id="grid-wrap">
+          <div id="nucleus-grid"></div>
+        </div>
+        <div class="stats-bar">
+          <div class="stat-cell">
+            <div class="stat-lbl">Itération (s)</div>
+            <div class="stat-val" id="s-iter">0</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-lbl">Restants N</div>
+            <div class="stat-val alive-color" id="s-n">200</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-lbl">Désintégrés</div>
+            <div class="stat-val dead-color" id="s-d">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Colonne droite -->
+    <div class="right-col">
+
+      <!-- Graphique -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-label">Évolution de N(t)</span>
+        </div>
+        <div class="panel-body">
+          <div class="chart-legend">
+            <span class="cl-item">
+              <span class="cl-swatch-solid" style="background:#c0392b;"></span>
+              <span class="cl-label">Simulation</span>
+            </span>
+            <span class="cl-item">
+              <span class="cl-swatch-dashed"></span>
+              <span class="cl-formula">N(t) = N₀ · e<sup style="font-size:11px;">−λt</sup></span>
+              <span class="cl-lambda" id="legend-lambda">&nbsp;(λ = 0.10 s⁻¹)</span>
+            </span>
+          </div>
+          <div id="chart-wrap">
+            <canvas id="decay-chart" role="img" aria-label="Nombre de noyaux non désintégrés en fonction du temps"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paramètres -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-label">Paramètres</span>
+        </div>
+        <div class="controls-body">
+
+          <!-- N0 slider -->
+          <div class="ctrl-row">
+            <div class="ctrl-top">
+              <span class="ctrl-lbl">Nombre de noyaux <em>N₀</em></span>
+              <span class="ctrl-val" id="n0-out">200</span>
+            </div>
+            <input type="range" id="n0-slider" min="50" max="5000" value="200" step="50">
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Lambda slider -->
+          <div class="ctrl-row">
+            <div class="ctrl-top">
+              <span class="ctrl-lbl">Constante radioactive <em>λ</em></span>
+              <span class="ctrl-val" id="lambda-out">0.10 s⁻¹</span>
+            </div>
+            <input type="range" id="lambda-slider" min="1" max="50" value="10" step="1">
+            <span class="ctrl-sub">Probabilité de désintégration par seconde &nbsp;·&nbsp; <strong>1 itération = 1 seconde</strong></span>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Boutons -->
+          <div class="btns">
+            <button class="btn-primary"   id="btn-next">Itération suivante →</button>
+            <button class="btn-finish"    id="btn-finish">⚡ Terminer toutes les itérations</button>
+            <button class="btn-secondary" id="btn-reset">↺ Réinitialiser</button>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- fin right-col -->
+  </div><!-- fin sim-layout -->
+
+  <footer>
+    <span>Simulation Monte-Carlo — décroissance radioactive stochastique</span>
+  </footer>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   Navigation (menu burger commun — un seul lien vers l'accueil du projet)
+═══════════════════════════════════════════════════ */
+const nav = AppNav.init({
+  appName: 'Désintégration Radioactive',
+  portalHref: '../index.html',
+  portalLabel: 'Toutes les applications',
+  onHome: () => {},
+  groups: [],
+});
+nav.setActive(null);
+
+/* ═══════════════════════════════════════════════════
+   État global
+═══════════════════════════════════════════════════ */
+let currentN0 = 200;
+let states = [], prevStates = [], iteration = 0, chart;
+
+const getLambda = () => parseFloat(document.getElementById('lambda-slider').value) / 100;
+
+// La loi théorique N(t) = N₀ · e^(−λt) est CONTINUE : λ est un taux instantané de
+// désintégration, homogène à l'inverse d'un temps, pas une probabilité par seconde.
+// La simulation, elle, est DISCRÈTE : à chaque itération (Δt = 1 s), on décide pour
+// chaque noyau encore intact s'il se désintègre ou non pendant ce Δt. Utiliser
+// directement λ comme probabilité par pas (comme si p = λ) revient à confondre un
+// taux instantané avec une probabilité sur un intervalle fini, ce qui introduit un
+// biais systématique (la simulation se désintègre trop vite dès que λ n'est plus
+// négligeable devant 1/Δt).
+// La bonne probabilité est celle que le temps d'attente T avant désintégration
+// (de loi exponentielle de paramètre λ) tombe dans l'intervalle [0, Δt] :
+//   p = P(T ≤ Δt) = 1 − e^(−λΔt)
+// Ici Δt = 1 s, donc p = 1 − e^(−λ). Pour λ petit, p ≈ λ (les deux approches
+// coïncident), mais l'écart grandit avec λ : c'est exactement le décalage observé
+// entre la courbe simulée et la courbe théorique. Utiliser p au lieu de λ dans le
+// tirage aléatoire aligne exactement la simulation sur la loi continue.
+const getDecayProbability = () => 1 - Math.exp(-getLambda());
+
+/* ═══════════════════════════════════════════════════
+   Légende — valeur de λ affichée à côté de la formule
+═══════════════════════════════════════════════════ */
+function updateLegendLambda() {
+  const lam = getLambda();
+  document.getElementById('legend-lambda').textContent = '\u00A0(λ\u00A0=\u00A0' + lam.toFixed(2) + '\u00A0s⁻¹)';
+}
+
+/* ═══════════════════════════════════════════════════
+   Grille — construction
+═══════════════════════════════════════════════════ */
+function computeGridDimensions() {
+  const wrap = document.getElementById('grid-wrap');
+  const w = wrap.clientWidth  - 32;
+  const h = wrap.clientHeight - 20;
+  if (w <= 0 || h <= 0) return { cols: 10, cellSize: 16, gap: 2 };
+
+  const N  = currentN0;
+  const ar = w / h;
+  const cols = Math.max(2, Math.round(Math.sqrt(N * ar)));
+  const rows = Math.ceil(N / cols);
+  const gap  = N > 1000 ? 1 : N > 400 ? 2 : 3;
+  const cellW = (w - gap * (cols - 1)) / cols;
+  const cellH = (h - gap * (rows - 1)) / rows;
+  const cellSize = Math.max(2, Math.min(cellW, cellH));
+
+  return { cols, cellSize: Math.floor(cellSize), gap };
+}
+
+function buildGrid() {
+  const grid = document.getElementById('nucleus-grid');
+  grid.innerHTML = '';
+
+  const { cols, cellSize, gap } = computeGridDimensions();
+
+  grid.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
+  grid.style.gap = `${gap}px`;
+
+  states.forEach((alive, i) => {
+    const d = document.createElement('div');
+    d.className = 'nucleus ' + (alive ? 'alive' : 'dead');
+    d.id = 'n' + i;
+    grid.appendChild(d);
+  });
+
+  document.getElementById('grid-header-label').textContent =
+    'Grille des noyaux — ' + cols + ' × ' + Math.ceil(currentN0 / cols);
+}
+
+function updateGridClasses(animated = true) {
+  states.forEach((alive, i) => {
+    const el = document.getElementById('n' + i);
+    if (!el) return;
+    el.className = 'nucleus ' + (alive ? 'alive' : 'dead');
+    if (animated && prevStates[i] && !alive) {
+      el.classList.add('just-died');
+      setTimeout(() => el.classList.remove('just-died'), 360);
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   Stats
+═══════════════════════════════════════════════════ */
+function updateStats() {
+  const alive    = states.filter(Boolean).length;
+  const finished = alive === 0;
+
+  document.getElementById('s-iter').textContent = iteration;
+  document.getElementById('s-n').textContent    = alive;
+  document.getElementById('s-d').textContent    = currentN0 - alive;
+
+  document.getElementById('btn-next').disabled   = finished;
+  document.getElementById('btn-finish').disabled = finished;
+
+  const dot = document.getElementById('panel-dot');
+  finished ? dot.classList.add('done') : dot.classList.remove('done');
+}
+
+/* ═══════════════════════════════════════════════════
+   Graphique
+═══════════════════════════════════════════════════ */
+function initChart() {
+  const ctx = document.getElementById('decay-chart').getContext('2d');
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [0],
+      datasets: [
+        {
+          label: 'Simulation',
+          data: [currentN0],
+          borderColor: '#c0392b',
+          backgroundColor: 'rgba(192,57,43,0.06)',
+          borderWidth: 2,
+          pointRadius: 2,         /* points simulation réduits */
+          pointBackgroundColor: '#c0392b',
+          fill: true,
+          tension: 0.3
+        },
+        {
+          label: 'Théorique',
+          data: [currentN0],
+          borderColor: '#16a34a',
+          borderWidth: 3,
+          borderDash: [8, 5],     /* pointillés */
+          pointRadius: 0,
+          fill: false,
+          tension: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 180 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#ffffff',
+          borderColor: 'rgba(0,0,0,0.12)',
+          borderWidth: 1,
+          titleColor: '#1a1a18',
+          bodyColor: '#4e4b47',
+          titleFont: { family: 'Space Mono', size: 12 },
+          bodyFont:  { family: 'Space Mono', size: 12 },
+          callbacks: {
+            title: items => 't = ' + items[0].label + ' s',
+            label: c => (c.datasetIndex === 0 ? 'N mesuré    : ' : 'N théorique : ') + Math.round(c.raw)
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: 'Temps t (secondes)', color: '#4e4b47',
+                   font: { family: 'DM Sans', size: 14 } },
+          ticks: { color: '#4e4b47', font: { family: 'Space Mono', size: 11 },
+                   maxTicksLimit: 14, autoSkip: true },
+          grid: { color: 'rgba(0,0,0,0.06)' }
+        },
+        y: {
+          min: 0,
+          title: { display: true, text: 'N (noyaux)', color: '#4e4b47',
+                   font: { family: 'DM Sans', size: 14 } },
+          ticks: { color: '#4e4b47', font: { family: 'Space Mono', size: 11 } },
+          grid: { color: 'rgba(0,0,0,0.06)' }
+        }
+      }
+    }
+  });
+}
+
+function addChartPoint(t) {
+  const lam   = getLambda();
+  const alive = states.filter(Boolean).length;
+  chart.data.labels.push(t);
+  chart.data.datasets[0].data.push(alive);
+  chart.data.datasets[1].data.push(+(currentN0 * Math.exp(-lam * t)).toFixed(2));
+  chart.update();
+}
+
+/* ═══════════════════════════════════════════════════
+   Initialisation
+═══════════════════════════════════════════════════ */
+function initSim() {
+  currentN0  = parseInt(document.getElementById('n0-slider').value, 10);
+  states     = new Array(currentN0).fill(true);
+  prevStates = [...states];
+  iteration  = 0;
+
+  buildGrid();
+  updateStats();
+  initChart();
+  chart.options.scales.y.max = currentN0;
+  chart.update();
+  updateLegendLambda();
+}
+
+/* ═══════════════════════════════════════════════════
+   Pas de simulation
+═══════════════════════════════════════════════════ */
+function step() {
+  prevStates = [...states];
+  const p = getDecayProbability();
+  states = states.map(a => a ? (Math.random() >= p) : false);
+  iteration++;
+  updateGridClasses(true);
+  updateStats();
+  addChartPoint(iteration);
+}
+
+/* ═══════════════════════════════════════════════════
+   Terminer toutes les itérations
+═══════════════════════════════════════════════════ */
+function finishAll() {
+  const MAX_ITER = 2000;
+  const p = getDecayProbability();
+  const lam = getLambda();
+
+  while (states.some(Boolean) && iteration < MAX_ITER) {
+    states = states.map(a => a ? (Math.random() >= p) : false);
+    iteration++;
+    const alive = states.filter(Boolean).length;
+    chart.data.labels.push(iteration);
+    chart.data.datasets[0].data.push(alive);
+    chart.data.datasets[1].data.push(+(currentN0 * Math.exp(-lam * iteration)).toFixed(2));
+  }
+
+  chart.update();
+  updateGridClasses(false);
+  updateStats();
+}
+
+/* ═══════════════════════════════════════════════════
+   Événements
+═══════════════════════════════════════════════════ */
+document.getElementById('btn-next').addEventListener('click', step);
+document.getElementById('btn-finish').addEventListener('click', finishAll);
+document.getElementById('btn-reset').addEventListener('click', initSim);
+
+document.getElementById('lambda-slider').addEventListener('input', function() {
+  const lam = this.value / 100;
+  document.getElementById('lambda-out').textContent = lam.toFixed(2) + ' s⁻¹';
+  updateLegendLambda();
+});
+
+document.getElementById('n0-slider').addEventListener('input', function() {
+  document.getElementById('n0-out').textContent = this.value;
+});
+document.getElementById('n0-slider').addEventListener('change', function() {
+  document.getElementById('n0-out').textContent = this.value;
+  initSim();
+});
+
+/* Redimensionnement de la grille */
+const resizeObs = new ResizeObserver(() => { if (states.length > 0) buildGrid(); });
+resizeObs.observe(document.getElementById('grid-wrap'));
+
+/* Démarrage */
+initSim();
+</script>
+</body>
+</html>

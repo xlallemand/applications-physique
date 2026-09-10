@@ -5,15 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Puissances de 10 - Entraînement</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="../assets/theme.css">
+    <script src="../assets/nav.js"></script>
+    <script src="../assets/numpad.js"></script>
+    <script src="../assets/dragdrop.js"></script>
+    <script src="../assets/selfcheck.js"></script>
     <style>
-        .zone-card { transition: all 0.3s ease; }
+        :root {
+            --app-accent-50:  #eff6ff;
+            --app-accent-100: #dbeafe;
+            --app-accent-200: #bfdbfe;
+            --app-accent-400: #60a5fa;
+            --app-accent-600: #2563eb;
+            --app-accent-700: #1d4ed8;
+            --app-accent-800: #1e3a8a;
+        }
         .btn-module { transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
         .btn-module:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
         .question-box { animation: fadeIn 0.4s; }
         @keyframes fadeIn { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
         .correct { animation: correctPulse 0.5s; }
         @keyframes correctPulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.04);} }
-        .draggable { cursor: move; user-select: none; touch-action: none; }
+        .draggable { cursor: move; user-select: none; touch-action: none; transition: box-shadow .15s; }
+        .draggable.dragging { opacity: .4; }
         .drop-zone-h { min-height:64px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; transition: all 0.3s; }
         .drop-zone-h.drag-over { background-color:#dbeafe; border-color:#3b82f6; }
         .source-items-h { display:flex; flex-wrap:wrap; gap:8px; min-height:64px; }
@@ -22,32 +36,13 @@
         .fraction-num { border-bottom:2px solid currentColor; padding:2px 8px; display:block; }
         .fraction-den { padding:2px 8px; display:block; }
 
-        /* ── Check-box dans les cours ─────────── */
-        .check-box {
-            background: linear-gradient(135deg, #fef9c3, #fde68a);
-            border: 2px solid #f59e0b; border-radius: 12px;
-            padding: 20px; margin-top: 16px;
-        }
-        .check-label { color: #78350f; font-weight: 700; font-size: 1rem; margin-bottom: 8px; }
-        .check-question { color: #451a03; font-size: 1.1rem; margin-bottom: 12px; }
-        .check-input {
-            background: white; border: 2px solid #d97706;
-            border-radius: 8px; padding: 8px 12px;
-            color: #1c1917; font-weight: 700;
-        }
-        .check-btn {
-            background: #d97706; color: white; border: none;
-            border-radius: 8px; padding: 8px 16px; font-weight: 700; cursor: pointer;
-        }
-        .check-btn:hover { background: #b45309; }
 
         /* ── Affichage 10^[input] (entraînements) */
         .power-answer-wrap { display: inline-flex; align-items: flex-start; gap: 2px; }
-        .power-answer-wrap .base { font-size: 1.5rem; font-weight: 800; line-height: 1; color: #1e3a8a; }
+        .power-answer-wrap .base { font-size: 1.5rem; font-weight: 800; line-height: 1; }
         .power-answer-wrap .exp-input {
             width: 80px; font-size: 0.95rem; font-weight: 700; margin-top: -12px;
-            padding: 4px 8px; border: 2px solid #3b82f6; border-radius: 6px;
-            background: white; color: #1e3a8a;
+            padding: 4px 8px; border-radius: 6px; background: white;
         }
         /* ── Exposant dans les cours (largeur élargie pour le signe -) */
         .course-exp-input {
@@ -57,174 +52,15 @@
         sup input { width:80px; font-size:13px; vertical-align: baseline; }
 
         /* ── Pavé numérique ─────────────────────── */
-        .numpad-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 7px; max-width: 220px; margin-top: 8px;
-            background: #e0e7ff; border: 2px solid #6366f1;
-            border-radius: 12px; padding: 10px;
-        }
-        .numpad-grid.np-visible { display: grid; }
-        .numpad-grid button {
-            background: white; border: 1.5px solid #c7d2fe;
-            border-radius: 8px; padding: 11px 6px;
-            font-size: 1.1rem; font-weight: 700; cursor: pointer;
-            color: #1e1b4b; transition: background 0.12s;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .numpad-grid button:active { background: #c7d2fe; }
-        .numpad-grid .np-wide { grid-column: span 3; font-size: 0.95rem; }
-        .numpad-grid .np-minus { color: #dc2626; font-weight: 900; }
-        .numpad-grid .np-back { color: #7c3aed; }
-
-        /* ── Masquage global des pavés ──────────── */
-        body.numpad-disabled .np-section { display: none !important; }
-
-        /* ── Barre de préférence pavé ───────────── */
-        .np-pref-bar {
-            display: flex; align-items: center; gap: 12px;
-            background: #f0f4ff; border: 1.5px solid #c7d2fe;
-            border-radius: 10px; padding: 10px 16px; margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .np-pref-label { color: #3730a3; font-weight: 600; font-size: 0.95rem; flex: 1; }
-        /* Toggle switch */
-        .np-switch { position: relative; display: inline-block; width: 52px; height: 28px; flex-shrink: 0; }
-        .np-switch input { opacity: 0; width: 0; height: 0; }
-        .np-slider {
-            position: absolute; cursor: pointer; inset: 0;
-            background: #cbd5e1; border-radius: 28px; transition: 0.25s;
-        }
-        .np-slider::before {
-            content: ''; position: absolute;
-            width: 22px; height: 22px; left: 3px; bottom: 3px;
-            background: white; border-radius: 50%; transition: 0.25s;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.25);
-        }
-        .np-switch input:checked + .np-slider { background: #6366f1; }
-        .np-switch input:checked + .np-slider::before { transform: translateX(24px); }
-        .np-pref-hint { font-size: 0.8rem; color: #6b7280; width: 100%; margin-top: 2px; }
-
-        /* ── Bandeau en haut ─────────────────────── */
-        #topBar {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            height: 52px;
-            background: #1e3a8a;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-        #topBarTitle {
-            color: white; font-weight: 700; font-size: 1rem;
-            text-align: right; flex: 1; margin-left: 12px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        #hamburgerBtn {
-            background: none; border: none; cursor: pointer;
-            display: flex; flex-direction: column; gap: 5px;
-            padding: 6px; border-radius: 6px;
-            transition: background 0.2s;
-            flex-shrink: 0;
-        }
-        #hamburgerBtn:hover { background: rgba(255,255,255,0.15); }
-        #hamburgerBtn span {
-            display: block; width: 24px; height: 3px;
-            background: white; border-radius: 2px;
-        }
-
-        /* ── Menu latéral ────────────────────────── */
-        #sideMenu {
-            position: fixed; top: 0; left: -320px; bottom: 0; width: 300px; z-index: 2000;
-            background: white;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.2);
-            transition: left 0.3s ease;
-            overflow-y: auto;
-        }
-        #sideMenu.open { left: 0; }
-        #sideOverlay {
-            display: none; position: fixed; inset: 0; z-index: 1999;
-            background: rgba(0,0,0,0.4);
-        }
-        #sideOverlay.open { display: block; }
-
-        #sideMenu .side-header {
-            background: #1e3a8a; color: white;
-            padding: 18px 16px; font-size: 1.1rem; font-weight: 800;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        #sideMenu .side-header button {
-            background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer;
-        }
-        #sideMenu .side-section-title {
-            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 0.08em; color: #6b7280; padding: 14px 16px 4px;
-        }
-        #sideMenu .side-item {
-            display: block; width: 100%; text-align: left;
-            padding: 11px 16px; border: none; background: none;
-            font-size: 0.88rem; color: #1e3a8a; font-weight: 600; cursor: pointer;
-            border-bottom: 1px solid #f1f5f9;
-            transition: background 0.15s;
-            line-height: 1.4;
-        }
-        #sideMenu .side-item:hover { background: #eff6ff; }
-        #sideMenu .side-item.home-item {
-            font-size: 0.95rem; color: #1d4ed8; font-weight: 700;
-            border-bottom: 2px solid #bfdbfe;
-            padding: 14px 16px;
-        }
-        #sideMenu .side-item.active-page {
-            background: #e2e8f0 !important;
-            color: #64748b !important;
-            cursor: default !important;
-            pointer-events: none;
-            font-style: italic;
-        }
-        #sideMenu .side-item.active-page::before {
-            content: '▶ ';
-            color: #1e3a8a;
-            font-style: normal;
-            font-weight: 900;
-        }
-
-        /* ── Décalage du contenu pour le bandeau ── */
-        body { padding-top: 52px; }
+        /* ── Liste des modules sur l'accueil ─────── */
+        .module-card-actions .btn-primary,
+        .module-card-actions .btn-secondary { font-size: .9rem; padding: 10px 20px; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+<body class="bg-white min-h-screen">
 
-<!-- ═══════ BANDEAU FIXE ═══════ -->
-<div id="topBar">
-    <button id="hamburgerBtn" onclick="toggleMenu()" aria-label="Menu">
-        <span></span><span></span><span></span>
-    </button>
-    <div id="topBarTitle">Puissances de 10</div>
-</div>
-
-<!-- ═══════ OVERLAY + MENU LATÉRAL ═══════ -->
-<div id="sideOverlay" onclick="closeMenu()"></div>
-<div id="sideMenu">
-    <div class="side-header">
-        <span>Navigation</span>
-        <button onclick="closeMenu()">✕</button>
-    </div>
-    <button class="side-item home-item" data-page="home" onclick="closeMenu(); backToMenu()">Accueil</button>
-
-    <div class="side-section-title">Module 1 — Définitions et écritures</div>
-    <button class="side-item" data-page="course-1" onclick="closeMenu(); showCourse(1)">Module 1 : Définitions et écritures des puissances de 10 — Cours</button>
-    <button class="side-item" data-page="training-1" onclick="closeMenu(); showTraining(1)">Module 1 : Définitions et écritures des puissances de 10 — Entraînement (20 questions)</button>
-
-    <div class="side-section-title">Module 2 — Écriture scientifique</div>
-    <button class="side-item" data-page="course-2" onclick="closeMenu(); showCourse(2)">Module 2 : Écriture scientifique — Cours</button>
-    <button class="side-item" data-page="training-2" onclick="closeMenu(); showTraining(2)">Module 2 : Écriture scientifique — Entraînement (20 questions)</button>
-
-    <div class="side-section-title">Module 3 — Opérations</div>
-    <button class="side-item" data-page="course-3" onclick="closeMenu(); showCourse(3)">Module 3 : Opérations avec les puissances de 10 — Cours</button>
-    <button class="side-item" data-page="training-3" onclick="closeMenu(); showTraining(3)">Module 3 : Opérations avec les puissances de 10 — Entraînement (20 questions)</button>
-
-    <div class="side-section-title">Module 4 — Toutes les notions</div>
-    <button class="side-item" data-page="training-4" onclick="closeMenu(); showTraining(4)">Module 4 : S'entraîner sur toutes les notions — Entraînement (20 questions)</button>
-</div>
+<!-- ═══════ NAVIGATION ═══════ -->
+<div id="app-nav"></div>
 
 <div id="app" class="container mx-auto px-4 py-8 max-w-4xl">
 
@@ -233,54 +69,58 @@
         <p class="text-lg text-indigo-700">Apprends et entraîne-toi !</p>
     </header>
 
-    <div id="menu" class="space-y-5 mb-8">
-        <div class="zone-card bg-white rounded-xl shadow-lg overflow-hidden border-l-8 border-blue-500">
-            <div class="p-6">
-                <div class="mb-4">
-                    <h2 class="text-xl md:text-2xl font-bold text-blue-900">Définitions et écritures des puissances de 10</h2>
-                    <p class="text-gray-600 mt-1 text-sm md:text-base">Comprendre ce qu'est une puissance de 10 et ses liens avec l'écriture décimale</p>
-                </div>
-                <div class="flex flex-wrap gap-3">
-                    <button onclick="showCourse(1)" class="btn-module bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-bold shadow">Cours</button>
-                    <button onclick="showTraining(1)" class="btn-module bg-blue-100 hover:bg-blue-200 text-blue-900 px-5 py-3 rounded-lg font-bold shadow border-2 border-blue-400">Entraînement (20 questions)</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="zone-card bg-white rounded-xl shadow-lg overflow-hidden border-l-8 border-blue-500">
-            <div class="p-6">
-                <div class="mb-4">
-                    <h2 class="text-xl md:text-2xl font-bold text-blue-900">Écriture scientifique</h2>
-                    <p class="text-gray-600 mt-1 text-sm md:text-base">Écrire un nombre sous la forme a × 10<sup>n</sup> avec 1 ≤ a &lt; 10</p>
-                </div>
-                <div class="flex flex-wrap gap-3">
-                    <button onclick="showCourse(2)" class="btn-module bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-bold shadow">Cours</button>
-                    <button onclick="showTraining(2)" class="btn-module bg-blue-100 hover:bg-blue-200 text-blue-900 px-5 py-3 rounded-lg font-bold shadow border-2 border-blue-400">Entraînement (20 questions)</button>
+    <div id="menu" class="module-list mb-8">
+        <div class="module-card">
+            <div class="module-card-head">
+                <span class="module-badge">Module 1</span>
+                <div class="module-card-body">
+                    <div class="module-card-title">Définitions et écritures des puissances de 10</div>
+                    <div class="module-card-desc">Comprendre ce qu'est une puissance de 10 et ses liens avec l'écriture décimale</div>
+                    <div class="module-card-actions">
+                        <button onclick="showCourse(1)" class="btn-module btn-primary">Cours</button>
+                        <button onclick="showTraining(1)" class="btn-module btn-secondary">Entraînement (20 questions)</button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="zone-card bg-white rounded-xl shadow-lg overflow-hidden border-l-8 border-blue-500">
-            <div class="p-6">
-                <div class="mb-4">
-                    <h2 class="text-xl md:text-2xl font-bold text-blue-900">Opérations avec les puissances de 10</h2>
-                    <p class="text-gray-600 mt-1 text-sm md:text-base">Multiplier, diviser, calculer l'inverse et les puissances de puissances</p>
-                </div>
-                <div class="flex flex-wrap gap-3">
-                    <button onclick="showCourse(3)" class="btn-module bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-bold shadow">Cours</button>
-                    <button onclick="showTraining(3)" class="btn-module bg-blue-100 hover:bg-blue-200 text-blue-900 px-5 py-3 rounded-lg font-bold shadow border-2 border-blue-400">Entraînement (20 questions)</button>
+        <div class="module-card">
+            <div class="module-card-head">
+                <span class="module-badge">Module 2</span>
+                <div class="module-card-body">
+                    <div class="module-card-title">Écriture scientifique</div>
+                    <div class="module-card-desc">Écrire un nombre sous la forme a × 10<sup>n</sup> avec 1 ≤ a &lt; 10</div>
+                    <div class="module-card-actions">
+                        <button onclick="showCourse(2)" class="btn-module btn-primary">Cours</button>
+                        <button onclick="showTraining(2)" class="btn-module btn-secondary">Entraînement (20 questions)</button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="zone-card bg-white rounded-xl shadow-lg overflow-hidden border-l-8 border-blue-500">
-            <div class="p-6">
-                <div class="mb-4">
-                    <h2 class="text-xl md:text-2xl font-bold text-blue-900">S'entraîner sur toutes les notions</h2>
-                    <p class="text-gray-600 mt-1 text-sm md:text-base">Questions avancées qui combinent toutes les notions — Niveau supérieur !</p>
+        <div class="module-card">
+            <div class="module-card-head">
+                <span class="module-badge">Module 3</span>
+                <div class="module-card-body">
+                    <div class="module-card-title">Opérations avec les puissances de 10</div>
+                    <div class="module-card-desc">Multiplier, diviser, calculer l'inverse et les puissances de puissances</div>
+                    <div class="module-card-actions">
+                        <button onclick="showCourse(3)" class="btn-module btn-primary">Cours</button>
+                        <button onclick="showTraining(3)" class="btn-module btn-secondary">Entraînement (20 questions)</button>
+                    </div>
                 </div>
-                <div class="flex flex-wrap gap-3">
-                    <button onclick="showTraining(4)" class="btn-module bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-bold shadow">Entraînement (20 questions)</button>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-card-head">
+                <span class="module-badge">Module 4</span>
+                <div class="module-card-body">
+                    <div class="module-card-title">S'entraîner sur toutes les notions</div>
+                    <div class="module-card-desc">Questions avancées qui combinent toutes les notions — Niveau supérieur !</div>
+                    <div class="module-card-actions">
+                        <button onclick="showTraining(4)" class="btn-module btn-primary">Entraînement (20 questions)</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -291,119 +131,64 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// MENU LATÉRAL
+// NAVIGATION
 // ═══════════════════════════════════════════════════════════════
-function toggleMenu() {
-    document.getElementById('sideMenu').classList.toggle('open');
-    document.getElementById('sideOverlay').classList.toggle('open');
-}
-function closeMenu() {
-    document.getElementById('sideMenu').classList.remove('open');
-    document.getElementById('sideOverlay').classList.remove('open');
-}
+const nav = AppNav.init({
+    appName: 'Puissances de 10',
+    portalHref: '../index.html',
+    portalLabel: 'Toutes les applications',
+    onHome: () => backToMenu(),
+    onNavigate: (key) => {
+        const [type, num] = key.split('-');
+        if (type === 'course') showCourse(Number(num));
+        else showTraining(Number(num));
+    },
+    groups: [
+        { title: 'Module 1 — Définitions et écritures', items: [
+            { key: 'course-1', label: 'Cours' },
+            { key: 'training-1', label: 'Entraînement (20 questions)' },
+        ]},
+        { title: 'Module 2 — Écriture scientifique', items: [
+            { key: 'course-2', label: 'Cours' },
+            { key: 'training-2', label: 'Entraînement (20 questions)' },
+        ]},
+        { title: 'Module 3 — Opérations', items: [
+            { key: 'course-3', label: 'Cours' },
+            { key: 'training-3', label: 'Entraînement (20 questions)' },
+        ]},
+        { title: 'Module 4 — Toutes les notions', items: [
+            { key: 'training-4', label: 'Entraînement (20 questions)' },
+        ]},
+    ],
+});
+nav.setActive(null);
 
 let currentPage = 'home'; // 'home' | 'course-1' | 'course-2' | 'course-3' | 'training-1' | 'training-2' | 'training-3' | 'training-4'
 
 function setTopBarTitle(title) {
-    document.getElementById('topBarTitle').textContent = title;
+    nav.setTitle(title === 'Puissances de 10' ? null : title);
 }
 
 function updateActiveMenuItem() {
-    document.querySelectorAll('#sideMenu .side-item').forEach(btn => {
-        btn.classList.remove('active-page');
-    });
-    const map = {
-        'home':       '[data-page="home"]',
-        'course-1':   '[data-page="course-1"]',
-        'course-2':   '[data-page="course-2"]',
-        'course-3':   '[data-page="course-3"]',
-        'training-1': '[data-page="training-1"]',
-        'training-2': '[data-page="training-2"]',
-        'training-3': '[data-page="training-3"]',
-        'training-4': '[data-page="training-4"]',
-    };
-    const sel = map[currentPage];
-    if (sel) {
-        const el = document.querySelector('#sideMenu ' + sel);
-        if (el) el.classList.add('active-page');
-    }
+    nav.setActive(currentPage === 'home' ? null : currentPage);
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ÉTAT GLOBAL + PAVÉ NUMÉRIQUE
+// COULEUR DE CHAQUE MODULE D'ENTRAÎNEMENT (appliquée à tous les
+// éléments de l'écran : titre, barre de progression, boutons,
+// question, glisser-déposer, écran de résultat)
+// ═══════════════════════════════════════════════════════════════
+const TRAINING_THEMES = {
+    1: { color:'blue',   title:'Définitions et écritures' },
+    2: { color:'purple', title:'Écriture scientifique'    },
+    3: { color:'green',  title:'Opérations'               },
+    4: { color:'orange', title:'Toutes les notions — Niveau avancé' },
+};
+
+// ═══════════════════════════════════════════════════════════════
+// ÉTAT GLOBAL
 // ═══════════════════════════════════════════════════════════════
 let currentModule = 0, currentQuestion = 0, score = 0, questions = [];
-let numpadTarget = null;
-let numpadEnabled = true;
-
-function setNumpadPref(checked) {
-    numpadEnabled = checked;
-    if (checked) {
-        document.body.classList.remove('numpad-disabled');
-    } else {
-        document.body.classList.add('numpad-disabled');
-        document.querySelectorAll('.numpad-grid').forEach(g => g.classList.remove('np-visible'));
-    }
-    document.querySelectorAll('.np-pref-toggle').forEach(cb => { cb.checked = checked; });
-}
-
-function numpadToggleBar() {
-    const chk = numpadEnabled ? 'checked' : '';
-    return `<div class="np-pref-bar">
-        <span class="np-pref-label">Pavé numérique</span>
-        <label class="np-switch">
-            <input type="checkbox" class="np-pref-toggle" ${chk} onchange="setNumpadPref(this.checked)">
-            <span class="np-slider"></span>
-        </label>
-        <span class="np-pref-hint">Active ou désactive l'affichage des pavés numériques sur toute la page.</span>
-    </div>`;
-}
-
-function numpadWidget(uid) {
-    return `
-    <div class="np-section">
-        <div class="numpad-grid">
-            <button onclick="numpadKey('7')">7</button>
-            <button onclick="numpadKey('8')">8</button>
-            <button onclick="numpadKey('9')">9</button>
-            <button onclick="numpadKey('4')">4</button>
-            <button onclick="numpadKey('5')">5</button>
-            <button onclick="numpadKey('6')">6</button>
-            <button onclick="numpadKey('1')">1</button>
-            <button onclick="numpadKey('2')">2</button>
-            <button onclick="numpadKey('3')">3</button>
-            <button class="np-minus" onclick="numpadKey('-')">−</button>
-            <button onclick="numpadKey('0')">0</button>
-            <button class="np-back" onclick="numpadKey('⌫')">⌫</button>
-            <button class="np-wide" onclick="numpadKey(',')">virgule &nbsp; ,</button>
-        </div>
-    </div>`;
-}
-
-function numpadFocus(id) { numpadTarget = id; }
-
-function numpadKey(val) {
-    const inp = document.getElementById(numpadTarget);
-    if (!inp) return;
-    const isNum = inp.type === 'number';
-    if (isNum && val === ',') return;
-    if (val === '⌫') {
-        inp.value = inp.value.slice(0, -1);
-    } else if (val === '-') {
-        if (isNum) {
-            if (inp.value === '' || inp.value === '-') {
-                inp.value = inp.value === '-' ? '' : '-';
-            } else {
-                inp.value = inp.value.startsWith('-') ? inp.value.slice(1) : '-' + inp.value;
-            }
-        } else {
-            inp.value = inp.value.startsWith('-') ? inp.value.slice(1) : '-' + inp.value;
-        }
-    } else {
-        inp.value += val;
-    }
-    inp.dispatchEvent(new Event('input'));
-}
 
 // ═══════════════════════════════════════════════════════════════
 // NAVIGATION
@@ -469,55 +254,16 @@ function showTraining(num) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// VÉRIFICATIONS DANS LES COURS
-// ═══════════════════════════════════════════════════════════════
-function checkAnswer(inputId, correct, resultId, isDecimal = false) {
-    const input = document.getElementById(inputId);
-    const result = document.getElementById(resultId);
-    let userAnswer = input.value.trim();
-    if (isDecimal) {
-        const ua = parseFloat(userAnswer.replace(',', '.'));
-        const ca = parseFloat(String(correct).replace(',', '.'));
-        if (Math.abs(ua - ca) < 0.000001) {
-            result.innerHTML = '✓ Correct ! 🎉'; result.style.color = '#166534';
-        } else {
-            result.innerHTML = '✗ Incorrect. La réponse est : ' + correct; result.style.color = '#991b1b';
-        }
-    } else {
-        if (parseFloat(userAnswer) === parseFloat(correct)) {
-            result.innerHTML = '✓ Correct ! 🎉'; result.style.color = '#166534';
-        } else {
-            result.innerHTML = '✗ Incorrect. La réponse est : ' + correct; result.style.color = '#991b1b';
-        }
-    }
-}
-function checkSci(idA, idN, correctA, correctN, resultId) {
-    const userA = parseFloat(document.getElementById(idA).value.replace(',', '.'));
-    const userN = parseInt(document.getElementById(idN).value);
-    const result = document.getElementById(resultId);
-    if (Math.abs(userA - correctA) < 0.01 && userN === correctN) {
-        result.innerHTML = '✓ Correct ! 🎉'; result.style.color = '#166534';
-    } else {
-        result.innerHTML = `✗ Incorrect. La réponse est : ${String(correctA).replace('.', ',')} × 10<sup>${correctN}</sup>`;
-        result.style.color = '#991b1b';
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════
 // COURS 1 — Définitions & écritures
 // ═══════════════════════════════════════════════════════════════
 function getCourse1Content() {
     return `
     <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-        <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
-            <h2 class="text-2xl md:text-3xl font-bold text-blue-900">Cours 1 : Définitions et écritures</h2>
-            <button onclick="backToMenu()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">← Retour</button>
-        </div>
-        ${numpadToggleBar()}
+                    <h2 class="text-2xl md:text-3xl font-bold text-purple-900 mb-6">Cours 1 : Définitions et écritures</h2>
 
         <div class="mb-8">
-            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">1. Puissances positives : 10<sup>n</sup> (n ≥ 1)</h3>
-            <div class="bg-blue-50 rounded-lg p-6 mb-4">
+            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">1. Puissances positives : 10<sup>n</sup> (n ≥ 1)</h3>
+            <div class="bg-purple-50 rounded-lg p-6 mb-4">
                 <p class="text-lg mb-3">10<sup>n</sup> = 10 × 10 × ... × 10 (n fois). C'est un 1 suivi de n zéros.</p>
                 <div class="bg-white rounded p-4 mb-3">
                     <p class="font-semibold mb-2">Exemples :</p>
@@ -527,18 +273,18 @@ function getCourse1Content() {
                     <p class="check-label">Vérifie ta compréhension :</p>
                     <p class="check-question">Combien vaut 10<sup>4</sup> ?</p>
                     <div class="flex items-center gap-3 flex-wrap">
-                        <input type="number" id="c1_1" class="check-input w-28" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        <input type="text" id="c1_1" inputmode="numeric" class="check-input w-28" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                         <button class="check-btn" onclick="checkAnswer('c1_1', 10000, 'r1_1')">Vérifier</button>
                     </div>
-                    ${numpadWidget('c1_1')}
+                    ${numpadWidget(true)}
                     <p id="r1_1" class="mt-2 font-semibold"></p>
                 </div>
             </div>
         </div>
 
         <div class="mb-8">
-            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">2. Puissances négatives : 10<sup>-n</sup></h3>
-            <div class="bg-red-50 rounded-lg p-6 mb-4">
+            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">2. Puissances négatives : 10<sup>-n</sup></h3>
+            <div class="bg-purple-50 rounded-lg p-6 mb-4">
                 <p class="text-lg mb-3">10<sup>-n</sup> = ${frac('1', '10<sup>n</sup>')} = 0,00...01 (avec n zéros après la virgule)</p>
                 <div class="bg-white rounded p-4 mb-3">
                     <p class="font-semibold mb-2">Exemples :</p>
@@ -548,17 +294,17 @@ function getCourse1Content() {
                     <p class="check-label">Vérifie ta compréhension :</p>
                     <p class="check-question">Combien vaut 10<sup>-4</sup> ?</p>
                     <div class="flex items-center gap-3 flex-wrap">
-                        <input type="text" id="c1_2" class="check-input w-28" placeholder="0,…" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        <input type="text" id="c1_2" inputmode="decimal" class="check-input w-28" placeholder="0,…" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                         <button class="check-btn" onclick="checkAnswer('c1_2', '0,0001', 'r1_2', true)">Vérifier</button>
                     </div>
-                    ${numpadWidget('c1_2')}
+                    ${numpadWidget(true)}
                     <p id="r1_2" class="mt-2 font-semibold"></p>
                 </div>
             </div>
         </div>
 
         <div class="mb-8">
-            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">3. Lien avec l'écriture décimale</h3>
+            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">3. Lien avec l'écriture décimale</h3>
 
             <div class="bg-green-50 rounded-lg p-6 mb-4">
                 <h4 class="text-xl font-semibold text-green-900 mb-3">Multiplier par 10<sup>n</sup> (n &gt; 0) → virgule vers la droite</h4>
@@ -570,10 +316,10 @@ function getCourse1Content() {
                     <p class="check-label">Vérifie ta compréhension :</p>
                     <p class="check-question">Combien vaut 1,2 × 10<sup>3</sup> ?</p>
                     <div class="flex items-center gap-3 flex-wrap">
-                        <input type="text" id="c1_3" class="check-input w-28" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        <input type="text" id="c1_3" inputmode="decimal" class="check-input w-28" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                         <button class="check-btn" onclick="checkAnswer('c1_3', '1200', 'r1_3', true)">Vérifier</button>
                     </div>
-                    ${numpadWidget('c1_3')}
+                    ${numpadWidget(true)}
                     <p id="r1_3" class="mt-2 font-semibold"></p>
                 </div>
             </div>
@@ -588,10 +334,10 @@ function getCourse1Content() {
                     <p class="check-label">Vérifie ta compréhension :</p>
                     <p class="check-question">Combien vaut 7 × 10<sup>-2</sup> ?</p>
                     <div class="flex items-center gap-3 flex-wrap">
-                        <input type="text" id="c1_4" class="check-input w-28" placeholder="0,…" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        <input type="text" id="c1_4" inputmode="decimal" class="check-input w-28" placeholder="0,…" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                         <button class="check-btn" onclick="checkAnswer('c1_4', '0,07', 'r1_4', true)">Vérifier</button>
                     </div>
-                    ${numpadWidget('c1_4')}
+                    ${numpadWidget(true)}
                     <p id="r1_4" class="mt-2 font-semibold"></p>
                 </div>
             </div>
@@ -608,18 +354,18 @@ function getCourse1Content() {
                     <div class="flex items-center gap-3 flex-wrap">
                         <div class="flex items-start">
                             <span class="text-2xl font-bold text-amber-800">10</span>
-                            <input type="number" id="c1_5" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                            <input type="text" id="c1_5" inputmode="numeric" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                         </div>
                         <button class="check-btn" onclick="checkAnswer('c1_5', 3, 'r1_5')">Vérifier</button>
                     </div>
-                    ${numpadWidget('c1_5')}
+                    ${numpadWidget(true)}
                     <p id="r1_5" class="mt-2 font-semibold"></p>
                 </div>
             </div>
         </div>
 
         <div class="text-center mt-8">
-            <button onclick="showTraining(1)" class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
+            <button onclick="showTraining(1)" class="bg-purple-500 hover:bg-purple-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
         </div>
     </div>`;
 }
@@ -630,11 +376,7 @@ function getCourse1Content() {
 function getCourse2Content() {
     return `
     <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-        <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
-            <h2 class="text-2xl md:text-3xl font-bold text-purple-900">Cours 2 : Écriture scientifique</h2>
-            <button onclick="backToMenu()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">← Retour</button>
-        </div>
-        ${numpadToggleBar()}
+                    <h2 class="text-2xl md:text-3xl font-bold text-purple-900 mb-6">Cours 2 : Écriture scientifique</h2>
 
         <div class="mb-8">
             <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">1. Définition</h3>
@@ -668,12 +410,12 @@ function getCourse2Content() {
                     <p class="check-label">Vérifie ta compréhension :</p>
                     <p class="check-question">Écris 450 000 en écriture scientifique :</p>
                     <div class="flex items-center gap-2 flex-wrap">
-                        <input type="text" id="c2_1a" class="check-input w-20" placeholder="a" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        <input type="text" id="c2_1a" inputmode="decimal" class="check-input w-20" placeholder="a" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                         <span class="font-bold text-amber-900 text-lg">× 10</span>
-                        <sup><input type="number" id="c2_1b" class="check-input course-exp-input" placeholder="n" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></sup>
+                        <sup><input type="text" id="c2_1b" inputmode="numeric" class="check-input course-exp-input" placeholder="n" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></sup>
                         <button class="check-btn" onclick="checkSci('c2_1a','c2_1b',4.5,5,'r2_1')">Vérifier</button>
                     </div>
-                    ${numpadWidget('c2_1')}
+                    ${numpadWidget(true)}
                     <p id="r2_1" class="mt-2 font-semibold"></p>
                 </div>
             </div>
@@ -698,22 +440,22 @@ function getCourse2Content() {
                 <p class="check-label">Vérifie ta compréhension :</p>
                 <p class="check-question">Écris 0,00072 en écriture scientifique :</p>
                 <div class="flex items-center gap-2 flex-wrap">
-                    <input type="text" id="c2_2a" class="check-input w-20" placeholder="a" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                    <input type="text" id="c2_2a" inputmode="decimal" class="check-input w-20" placeholder="a" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                     <span class="font-bold text-amber-900 text-lg">× 10</span>
-                    <sup><input type="number" id="c2_2b" class="check-input course-exp-input" placeholder="n" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></sup>
+                    <sup><input type="text" id="c2_2b" inputmode="numeric" class="check-input course-exp-input" placeholder="n" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></sup>
                     <button class="check-btn" onclick="checkSci('c2_2a','c2_2b',7.2,-4,'r2_2')">Vérifier</button>
                 </div>
-                ${numpadWidget('c2_2')}
+                ${numpadWidget(true)}
                 <p id="r2_2" class="mt-2 font-semibold"></p>
             </div>
             <div class="check-box mt-4">
                 <p class="check-label">Vérifie ta compréhension :</p>
                 <p class="check-question">Écris en écriture décimale : 3,6 × 10<sup>4</sup></p>
                 <div class="flex items-center gap-3 flex-wrap">
-                    <input type="text" id="c2_3" class="check-input w-28" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                    <input type="text" id="c2_3" inputmode="decimal" class="check-input w-28" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                     <button class="check-btn" onclick="checkAnswer('c2_3','36000','r2_3',true)">Vérifier</button>
                 </div>
-                ${numpadWidget('c2_3')}
+                ${numpadWidget(true)}
                 <p id="r2_3" class="mt-2 font-semibold"></p>
             </div>
         </div>
@@ -730,14 +472,10 @@ function getCourse2Content() {
 function getCourse3Content() {
     return `
     <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-        <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
-            <h2 class="text-2xl md:text-3xl font-bold text-green-900">Cours 3 : Opérations avec les puissances de 10</h2>
-            <button onclick="backToMenu()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">← Retour</button>
-        </div>
-        ${numpadToggleBar()}
+                    <h2 class="text-2xl md:text-3xl font-bold text-purple-900 mb-6">Cours 3 : Opérations avec les puissances de 10</h2>
 
         <div class="mb-8">
-            <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-green-300 pb-2">1. Multiplication : 10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a+b</sup></h3>
+            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">1. Multiplication : 10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a+b</sup></h3>
             <div class="bg-green-50 rounded-lg p-6 mb-4">
                 <p class="mb-3 text-lg text-gray-700">On <strong>additionne</strong> les exposants.</p>
                 <div class="bg-white rounded p-4 mb-3">
@@ -749,18 +487,18 @@ function getCourse3Content() {
                     <div class="flex items-center gap-3 flex-wrap">
                         <div class="flex items-start">
                             <span class="text-2xl font-bold text-amber-800">10</span>
-                            <input type="number" id="c3_1" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                            <input type="text" id="c3_1" inputmode="numeric" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                         </div>
                         <button class="check-btn" onclick="checkAnswer('c3_1', 8, 'r3_1')">Vérifier</button>
                     </div>
-                    ${numpadWidget('c3_1')}
+                    ${numpadWidget(true)}
                     <p id="r3_1" class="mt-2 font-semibold"></p>
                 </div>
             </div>
         </div>
 
         <div class="mb-8">
-            <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-green-300 pb-2">2. Division : ${frac('10<sup>a</sup>', '10<sup>b</sup>')} = 10<sup>a−b</sup></h3>
+            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">2. Division : ${frac('10<sup>a</sup>', '10<sup>b</sup>')} = 10<sup>a−b</sup></h3>
             <div class="bg-yellow-50 rounded-lg p-6 mb-4">
                 <p class="mb-3 text-lg text-gray-700">On <strong>soustrait</strong> les exposants.</p>
                 <div class="bg-white rounded p-4 mb-3">
@@ -772,18 +510,18 @@ function getCourse3Content() {
                     <div class="flex items-center gap-3 flex-wrap">
                         <div class="flex items-start">
                             <span class="text-2xl font-bold text-amber-800">10</span>
-                            <input type="number" id="c3_2" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                            <input type="text" id="c3_2" inputmode="numeric" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                         </div>
                         <button class="check-btn" onclick="checkAnswer('c3_2', 4, 'r3_2')">Vérifier</button>
                     </div>
-                    ${numpadWidget('c3_2')}
+                    ${numpadWidget(true)}
                     <p id="r3_2" class="mt-2 font-semibold"></p>
                 </div>
             </div>
         </div>
 
         <div class="mb-8">
-            <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-green-300 pb-2">3. Inverse : ${frac('1', '10<sup>a</sup>')} = 10<sup>−a</sup></h3>
+            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">3. Inverse : ${frac('1', '10<sup>a</sup>')} = 10<sup>−a</sup></h3>
             <div class="bg-red-50 rounded-lg p-6 mb-4">
                 <p class="mb-3 text-lg text-gray-700">On <strong>change le signe</strong> de l'exposant.</p>
                 <div class="bg-white rounded p-4 mb-3">
@@ -795,18 +533,18 @@ function getCourse3Content() {
                     <div class="flex items-center gap-3 flex-wrap">
                         <div class="flex items-start">
                             <span class="text-2xl font-bold text-amber-800">10</span>
-                            <input type="number" id="c3_3" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                            <input type="text" id="c3_3" inputmode="numeric" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                         </div>
                         <button class="check-btn" onclick="checkAnswer('c3_3', -7, 'r3_3')">Vérifier</button>
                     </div>
-                    ${numpadWidget('c3_3')}
+                    ${numpadWidget(true)}
                     <p id="r3_3" class="mt-2 font-semibold"></p>
                 </div>
             </div>
         </div>
 
         <div class="mb-8">
-            <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-green-300 pb-2">4. Puissance d'une puissance : (10<sup>a</sup>)<sup>b</sup> = 10<sup>a×b</sup></h3>
+            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">4. Puissance d'une puissance : (10<sup>a</sup>)<sup>b</sup> = 10<sup>a×b</sup></h3>
             <div class="bg-pink-50 rounded-lg p-6 mb-4">
                 <p class="mb-3 text-lg text-gray-700">On <strong>multiplie</strong> les exposants.</p>
                 <div class="bg-white rounded p-4 mb-3">
@@ -818,11 +556,11 @@ function getCourse3Content() {
                     <div class="flex items-center gap-3 flex-wrap">
                         <div class="flex items-start">
                             <span class="text-2xl font-bold text-amber-800">10</span>
-                            <input type="number" id="c3_4" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                            <input type="text" id="c3_4" inputmode="numeric" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                         </div>
                         <button class="check-btn" onclick="checkAnswer('c3_4', 10, 'r3_4')">Vérifier</button>
                     </div>
-                    ${numpadWidget('c3_4')}
+                    ${numpadWidget(true)}
                     <p id="r3_4" class="mt-2 font-semibold"></p>
                 </div>
             </div>
@@ -839,7 +577,7 @@ function getCourse3Content() {
         </div>
 
         <div class="text-center mt-8">
-            <button onclick="showTraining(3)" class="bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
+            <button onclick="showTraining(3)" class="bg-purple-500 hover:bg-purple-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
         </div>
     </div>`;
 }
@@ -848,36 +586,23 @@ function getCourse3Content() {
 // HTML MODULE D'ENTRAÎNEMENT
 // ═══════════════════════════════════════════════════════════════
 function getTrainingHTML(num) {
-    const themes = {
-        1: { color:'blue',   title:'Définitions et écritures' },
-        2: { color:'purple', title:'Écriture scientifique'    },
-        3: { color:'green',  title:'Opérations'               },
-        4: { color:'orange', title:'Toutes les notions — Niveau avancé' }
-    };
-    const t = themes[num];
+    const t = TRAINING_THEMES[num];
     return `
+    <div class="mb-6">
+        <div class="flex justify-between text-sm font-bold text-gray-500 mb-2">
+            <span>Question <span id="questionNum">1</span> / 20</span>
+            <span class="text-${t.color}-600">Score : <span id="score">0</span> / <span id="total">0</span></span>
+        </div>
+        <div class="progress-bar bg-${t.color}-100"><div id="progressBar" class="progress-fill bg-gradient-to-r from-${t.color}-600 to-${t.color}-700" style="width:5%"></div></div>
+    </div>
     <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-        <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
-            <h2 class="text-xl md:text-2xl font-bold text-${t.color}-900">Entraînement ${num} : ${t.title}</h2>
-            <button onclick="backToMenu()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">← Retour</button>
-        </div>
+        <h2 class="text-xl md:text-2xl font-bold text-${t.color}-900 mb-6">Entraînement ${num} : ${t.title}</h2>
         ${numpadToggleBar()}
-        <div class="mb-6 bg-${t.color}-50 rounded-lg p-4">
-            <div class="flex justify-between items-center flex-wrap gap-3">
-                <div class="flex-1">
-                    <span class="text-lg font-semibold">Question <span id="questionNum">1</span> / 20</span>
-                    <div class="w-full bg-gray-300 rounded-full h-2 mt-2">
-                        <div id="progressBar" class="bg-${t.color}-500 h-2 rounded-full transition-all" style="width:5%"></div>
-                    </div>
-                </div>
-                <div class="text-2xl font-bold text-${t.color}-900">Score : <span id="score">0</span> / <span id="total">0</span></div>
-            </div>
-        </div>
         <div id="questionContainer" class="question-box min-h-[280px]"></div>
         <div id="feedback" class="mt-6"></div>
         <div class="mt-6 flex gap-4">
             <button id="submitBtn" onclick="submitAnswer()" class="bg-${t.color}-500 hover:bg-${t.color}-600 text-white px-6 py-3 rounded-lg font-bold flex-1">Valider ✓</button>
-            <button id="nextBtn" onclick="nextQuestion()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-bold flex-1" style="display:none">Question suivante →</button>
+            <button id="nextBtn" onclick="nextQuestion()" class="bg-${t.color}-500 hover:bg-${t.color}-600 text-white px-6 py-3 rounded-lg font-bold flex-1" style="display:none">Question suivante →</button>
         </div>
     </div>`;
 }
@@ -887,6 +612,7 @@ function getTrainingHTML(num) {
 // ═══════════════════════════════════════════════════════════════
 function showQuestion() {
     const q = questions[currentQuestion];
+    const color = TRAINING_THEMES[currentModule].color;
     const container = document.getElementById('questionContainer');
     document.getElementById('questionNum').textContent = currentQuestion + 1;
     document.getElementById('progressBar').style.width = ((currentQuestion + 1) / 20 * 100) + '%';
@@ -896,36 +622,36 @@ function showQuestion() {
 
     if (q.type === 'input_exp') {
         container.innerHTML = `
-            <div class="bg-blue-50 rounded-lg p-6 question-box">
+            <div class="bg-${color}-50 rounded-xl p-6 question-box">
                 <p class="text-xl mb-6 font-medium">${q.question}</p>
                 <div class="flex items-center gap-3 flex-wrap mt-2">
                     <span class="text-gray-600 font-semibold text-lg">Réponse :</span>
                     <div class="power-answer-wrap">
-                        <span class="base">10</span>
-                        <input type="number" id="userAnswer" class="exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                        <span class="base text-${color}-900">10</span>
+                        <input type="text" id="userAnswer" inputmode="numeric" class="exp-input border-2 border-${color}-500 text-${color}-900" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                     </div>
                 </div>
-                ${numpadWidget('train_exp')}
+                ${numpadWidget()}
             </div>`;
 
     } else if (q.type === 'input_decimal') {
         container.innerHTML = `
-            <div class="bg-blue-50 rounded-lg p-6 question-box">
+            <div class="bg-${color}-50 rounded-xl p-6 question-box">
                 <p class="text-xl mb-6 font-medium">${q.question}</p>
                 <div class="flex items-center gap-3 flex-wrap">
                     <span class="text-gray-600 font-semibold">Réponse :</span>
-                    <input type="text" id="userAnswer" class="border-2 border-blue-400 rounded px-4 py-2 text-lg w-44 bg-white font-bold" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                    <input type="text" id="userAnswer" inputmode="decimal" class="border-2 border-${color}-400 rounded px-4 py-2 text-lg w-44 bg-white font-bold" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                 </div>
-                ${numpadWidget('train_dec')}
+                ${numpadWidget()}
             </div>`;
 
     } else if (q.type === 'qcm') {
         container.innerHTML = `
-            <div class="bg-blue-50 rounded-lg p-6 question-box">
+            <div class="bg-${color}-50 rounded-xl p-6 question-box">
                 <p class="text-xl mb-5 font-medium">${q.question}</p>
                 <div class="space-y-3">
                     ${q.options.map((opt, i) => `
-                        <label class="flex items-center p-4 bg-white rounded-lg cursor-pointer hover:bg-blue-100 border-2 border-transparent transition">
+                        <label class="qcm-option-label flex items-center p-4 bg-white rounded-xl cursor-pointer hover:bg-${color}-100 border-2 border-${color}-200 transition">
                             <input type="radio" name="qcm" value="${i}" class="mr-3 w-5 h-5">
                             <span class="text-lg">${opt}</span>
                         </label>`).join('')}
@@ -934,18 +660,18 @@ function showQuestion() {
 
     } else if (q.type === 'order') {
         container.innerHTML = `
-            <div class="bg-blue-50 rounded-lg p-6 question-box">
+            <div class="bg-${color}-50 rounded-xl p-6 question-box">
                 <p class="text-xl mb-5 font-medium">${q.question}</p>
                 <div class="mb-4">
                     <p class="font-semibold mb-2 text-gray-700">Éléments à trier :</p>
                     <div id="sourceItems" class="source-items-h">
                         ${q.items.map((item, i) => `
-                            <div class="draggable bg-white px-4 py-2 rounded-lg border-2 border-blue-400 cursor-move" draggable="true" data-index="${i}">${item}</div>`).join('')}
+                            <div class="draggable bg-white px-4 py-2 rounded-xl border-2 border-${color}-400 font-bold cursor-move" data-index="${i}">${item}</div>`).join('')}
                     </div>
                 </div>
                 <div>
                     <p class="font-semibold mb-2 text-gray-700">Ordre croissant (plus petit → plus grand) :</p>
-                    <div id="targetItems" class="drop-zone-h border-2 border-dashed border-blue-400 rounded-lg p-3 bg-blue-50/50"></div>
+                    <div id="targetItems" class="drop-zone-h border-2 border-dashed border-${color}-400 rounded-xl p-3 bg-${color}-50"></div>
                 </div>
                 <p class="text-sm text-gray-500 mt-3">Glisse les éléments dans la zone ci-dessus</p>
             </div>`;
@@ -953,15 +679,15 @@ function showQuestion() {
 
     } else if (q.type === 'scientific') {
         container.innerHTML = `
-            <div class="bg-blue-50 rounded-lg p-6 question-box">
+            <div class="bg-${color}-50 rounded-xl p-6 question-box">
                 <p class="text-xl mb-6 font-medium">${q.question}</p>
                 <div class="flex items-center gap-2 flex-wrap mt-2">
                     <span class="text-gray-600 font-semibold">Réponse :</span>
-                    <input type="text" id="answerA" class="border-2 border-blue-400 rounded px-3 py-2 w-24 bg-white font-bold text-lg" placeholder="a" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                    <input type="text" id="answerA" inputmode="decimal" class="border-2 border-${color}-400 rounded px-3 py-2 w-24 bg-white font-bold text-lg" placeholder="a" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
                     <span class="text-xl font-bold">× 10</span>
-                    <sup><input type="number" id="answerN" style="width:80px; font-size:14px; padding:5px 8px;" class="border-2 border-blue-400 rounded bg-white font-bold" placeholder="n" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></sup>
+                    <sup><input type="text" id="answerN" inputmode="numeric" style="width:80px; font-size:14px; padding:5px 8px;" class="border-2 border-${color}-400 rounded bg-white font-bold" placeholder="n" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></sup>
                 </div>
-                ${numpadWidget('train_sci')}
+                ${numpadWidget()}
             </div>`;
     }
 }
@@ -969,26 +695,12 @@ function showQuestion() {
 // ═══════════════════════════════════════════════════════════════
 // DRAG & DROP
 // ═══════════════════════════════════════════════════════════════
-let draggedEl = null;
-
 function initDragAndDrop() {
-    const dropZone = document.getElementById('targetItems');
-    const sourceZone = document.getElementById('sourceItems');
     document.querySelectorAll('.draggable').forEach(item => {
-        item.addEventListener('dragstart', e => { draggedEl = item; item.style.opacity = '0.4'; });
-        item.addEventListener('dragend',   e => { item.style.opacity = '1'; });
-        item.addEventListener('touchstart', e => { draggedEl = item; item.style.opacity = '0.4'; }, { passive: true });
-        item.addEventListener('touchend', e => {
-            item.style.opacity = '1';
-            const touch = e.changedTouches[0];
-            const target = document.elementFromPoint(touch.clientX, touch.clientY);
-            if (target) { const zone = target.closest('#targetItems, #sourceItems'); if (zone && draggedEl) zone.appendChild(draggedEl); }
+        DragDrop.enable(item, {
+            zoneSelector: '#targetItems, #sourceItems',
+            onDrop: (dragged, zone) => { if (zone) zone.appendChild(dragged); },
         });
-    });
-    [dropZone, sourceZone].forEach(zone => {
-        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-        zone.addEventListener('dragleave', e => zone.classList.remove('drag-over'));
-        zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); if (draggedEl) zone.appendChild(draggedEl); });
     });
 }
 
@@ -1010,6 +722,12 @@ function submitAnswer() {
     } else if (q.type === 'qcm') {
         const sel = document.querySelector('input[name="qcm"]:checked');
         if (sel) isCorrect = parseInt(sel.value) === q.answer;
+        document.querySelectorAll('input[name="qcm"]').forEach(radio => {
+            radio.disabled = true;
+            const label = radio.closest('.qcm-option-label');
+            if (parseInt(radio.value) === q.answer) label.classList.add('opt-correct');
+            else if (radio.checked) label.classList.add('opt-wrong');
+        });
     } else if (q.type === 'order') {
         const ordered = Array.from(document.getElementById('targetItems').children).map(el => el.innerHTML.trim());
         isCorrect = JSON.stringify(ordered) === JSON.stringify(q.answer);
@@ -1021,11 +739,11 @@ function submitAnswer() {
 
     if (isCorrect) {
         score++;
-        feedback.innerHTML = `<div class="bg-green-100 border-2 border-green-500 rounded-lg p-4 correct">
+        feedback.innerHTML = `<div class="callout-success correct">
             <p class="text-green-800 font-bold text-xl">✓ Correct ! 🎉</p>
             <p class="text-green-700 mt-2">${q.explanation}</p></div>`;
     } else {
-        feedback.innerHTML = `<div class="bg-red-100 border-2 border-red-500 rounded-lg p-4">
+        feedback.innerHTML = `<div class="callout-danger">
             <p class="text-red-800 font-bold text-xl">✗ Incorrect</p>
             <p class="text-red-700 mt-2">${q.explanation}</p></div>`;
     }
@@ -1044,20 +762,20 @@ function nextQuestion() {
 
 function showResults() {
     const pct = Math.round(score / 20 * 100);
-    let msg = '', color = '';
-    if (pct >= 90) { msg = 'Excellent ! Tu maîtrises parfaitement ce chapitre ! 🏆'; color = 'green'; }
-    else if (pct >= 70) { msg = 'Très bien ! Continue comme ça ! 👍'; color = 'blue'; }
-    else if (pct >= 50) { msg = 'Pas mal ! Avec un peu plus de travail tu vas y arriver. 💪'; color = 'yellow'; }
-    else { msg = 'Continue à t\'entraîner, tu vas progresser ! 📚'; color = 'orange'; }
+    const color = TRAINING_THEMES[currentModule].color;
+    let msg = '';
+    if (pct >= 90) msg = 'Excellent ! Tu maîtrises parfaitement ce chapitre ! 🏆';
+    else if (pct >= 70) msg = 'Très bien ! Continue comme ça ! 👍';
+    else if (pct >= 50) msg = 'Pas mal ! Avec un peu plus de travail tu vas y arriver. 💪';
+    else msg = 'Continue à t\'entraîner, tu vas progresser ! 📚';
     document.getElementById('questionContainer').innerHTML = `
-        <div class="bg-${color}-50 rounded-lg p-8 text-center">
-            <h3 class="text-3xl font-bold text-${color}-900 mb-4">Entraînement terminé !</h3>
-            <div class="text-6xl font-bold text-${color}-600 mb-4">${score} / 20</div>
-            <div class="text-2xl text-${color}-800 mb-6">${pct}%</div>
-            <p class="text-xl text-${color}-900 mb-8">${msg}</p>
+        <div class="bg-${color}-50 border border-${color}-200 rounded-2xl shadow-lg p-10 text-center">
+            <h3 class="text-2xl font-bold text-gray-800 mb-3">Entraînement terminé !</h3>
+            <div class="text-6xl font-bold text-${color}-700 mb-2">${score} / 20</div>
+            <div class="text-xl font-bold text-gray-400 mb-6">${pct}%</div>
+            <p class="text-gray-500 mb-8 text-lg">${msg}</p>
             <div class="flex gap-4 justify-center flex-wrap">
                 <button onclick="showTraining(${currentModule})" class="bg-${color}-500 hover:bg-${color}-600 text-white px-6 py-3 rounded-lg font-bold">Recommencer</button>
-                <button onclick="backToMenu()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-bold">Menu principal</button>
             </div>
         </div>`;
     document.getElementById('feedback').innerHTML = '';

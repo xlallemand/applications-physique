@@ -1,0 +1,292 @@
+/* ============================================================
+   Thème commun à toutes les applications
+   (police, couleurs neutres, boutons, encarts, navigation)
+
+   Chaque application définit sa propre couleur d'accent en
+   surchargeant les variables --app-accent-* avant ou après ce
+   fichier, par ex. :
+     :root{
+       --app-accent-50:#ecfeff; --app-accent-100:#cffafe;
+       --app-accent-200:#a5f3fc; --app-accent-400:#22d3ee;
+       --app-accent-600:#0891b2; --app-accent-700:#0e7490;
+       --app-accent-800:#155e75;
+     }
+   ============================================================ */
+
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  --slate-50:  #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-900: #0f172a;
+
+  --success:      #10b981;
+  --success-bg:   #d1fae5;
+  --success-text: #065f46;
+  --danger:       #ef4444;
+  --danger-bg:    #fee2e2;
+  --danger-text:  #991b1b;
+  --warning-bg:   #fef9c3;
+  --warning-text: #78350f;
+
+  /* Couleur d'accent par défaut : chaque application la personnalise */
+  --app-accent-50:  #ecfeff;
+  --app-accent-100: #cffafe;
+  --app-accent-200: #a5f3fc;
+  --app-accent-400: #22d3ee;
+  --app-accent-600: #0891b2;
+  --app-accent-700: #0e7490;
+  --app-accent-800: #155e75;
+}
+
+body { font-family: var(--font-sans); }
+
+/* ============ BOUTONS COMMUNS ============ */
+.btn-primary {
+  background: linear-gradient(135deg, var(--app-accent-600), var(--app-accent-700));
+  color: #fff; border: none; border-radius: 12px;
+  padding: 13px 30px; font-size: 1rem; font-weight: 800; cursor: pointer;
+  transition: opacity .2s, transform .1s; font-family: var(--font-sans);
+}
+.btn-primary:hover:not(:disabled) { opacity: .9; transform: translateY(-2px); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+.btn-secondary {
+  background: var(--app-accent-100); color: var(--app-accent-800);
+  border: 2px solid var(--app-accent-200); border-radius: 12px;
+  padding: 11px 22px; font-size: .95rem; font-weight: 700; cursor: pointer;
+  transition: background .2s; font-family: var(--font-sans);
+}
+.btn-secondary:hover { background: var(--app-accent-200); }
+
+.btn-small {
+  background: #fff; color: var(--app-accent-700);
+  border: 2px solid var(--app-accent-200); border-radius: 9px;
+  padding: 7px 16px; font-size: .85rem; font-weight: 700; cursor: pointer;
+  transition: background .15s; font-family: var(--font-sans);
+}
+.btn-small:hover { background: var(--app-accent-50); }
+
+/* ============ ENCARTS (remplacent les bordures gauches épaisses) ============ */
+.callout {
+  border: 1.5px solid var(--slate-200); border-radius: 14px;
+  padding: 16px 20px; background: var(--slate-50);
+}
+.callout-accent {
+  border: 2px solid var(--app-accent-200); border-radius: 14px;
+  padding: 16px 20px; background: var(--app-accent-100);
+}
+.callout-success {
+  border: 1.5px solid #6ee7b7; border-radius: 14px;
+  padding: 16px 20px; background: var(--success-bg);
+}
+.callout-danger {
+  border: 1.5px solid #fca5a5; border-radius: 14px;
+  padding: 16px 20px; background: var(--danger-bg);
+}
+.callout-warning {
+  border: 1.5px solid #fcd34d; border-radius: 14px;
+  padding: 16px 20px; background: var(--warning-bg);
+}
+
+/* ============ QCM : révèle la bonne/mauvaise réponse sur l'option choisie ============ */
+.opt-correct { background: var(--success-bg) !important; border-color: var(--success) !important; }
+.opt-wrong { background: var(--danger-bg) !important; border-color: var(--danger) !important; }
+
+/* ============ BARRE DE PROGRESSION (couleur fournie par l'appelant) ============ */
+.progress-bar { height: 12px; border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 999px; transition: width .4s ease; }
+
+/* ============ LISTE DE MODULES (page d'accueil de chaque application) ============ */
+.module-list { display: flex; flex-direction: column; gap: 14px; }
+.module-group {
+  border: 2px solid var(--app-accent-200); border-radius: 16px;
+  padding: 14px; background: var(--app-accent-50);
+}
+.module-group-title {
+  font-size: .72rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--app-accent-700); padding: 2px 6px 10px;
+}
+.module-card {
+  background: #fff; border: 1.5px solid var(--slate-200); border-radius: 14px;
+  padding: 16px 18px; margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(15,23,42,.05);
+  transition: box-shadow .15s, border-color .15s;
+}
+.module-card:last-child { margin-bottom: 0; }
+.module-card.clickable { cursor: pointer; }
+.module-card:hover { box-shadow: 0 6px 20px rgba(15,23,42,.1); border-color: var(--app-accent-200); }
+
+/* Cartes de module isolées (sans regroupement) : teintées pour ressortir sur la page */
+.module-list > .module-card {
+  background: var(--app-accent-50); border-color: var(--app-accent-200);
+}
+.module-list > .module-card:hover { border-color: var(--app-accent-400); }
+
+.module-card-head { display: flex; align-items: center; gap: 14px; }
+.module-badge {
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  min-width: 42px; height: 42px; padding: 0 6px; border-radius: 12px;
+  font-weight: 900; font-size: .85rem;
+  background: var(--app-accent-100); color: var(--app-accent-700);
+}
+.module-card-body { flex: 1; min-width: 0; }
+.module-card-title { font-weight: 800; font-size: 1rem; color: var(--slate-900); }
+.module-card-desc { font-size: .85rem; color: var(--slate-500); margin-top: 2px; line-height: 1.4; }
+.module-card-arrow { flex-shrink: 0; font-weight: 900; color: var(--app-accent-400); font-size: 1.2rem; }
+.module-card-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+
+/* ============ BANDEAU SUPÉRIEUR + MENU BURGER (communs à toutes les applications) ============ */
+.app-topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: 56px;
+  background: #fff; display: flex; align-items: center; gap: 10px;
+  padding: 0 8px; box-shadow: 0 2px 10px rgba(15,23,42,.08);
+  border-bottom: 1px solid var(--slate-200);
+}
+.app-topbar-spacer { height: 56px; }
+
+.app-burger {
+  flex-shrink: 0; display: flex; flex-direction: column; justify-content: center;
+  align-items: center; gap: 5px; width: 40px; height: 40px; padding: 8px;
+  border: none; background: none; border-radius: 10px; cursor: pointer;
+  transition: background .15s;
+}
+.app-burger:hover { background: var(--app-accent-50); }
+.app-burger span { display: block; width: 22px; height: 3px; border-radius: 2px; background: var(--app-accent-700); }
+
+.app-topbar-title {
+  flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 6px;
+  overflow: hidden; white-space: nowrap;
+}
+.app-topbar-title .app-name { font-weight: 900; color: var(--app-accent-700); font-size: 1.05rem; flex-shrink: 0; }
+.app-topbar-title .sep { color: var(--slate-300); flex-shrink: 0; }
+.app-topbar-title .module-name {
+  color: var(--slate-500); font-weight: 700; font-size: .92rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+}
+@media (max-width: 420px) {
+  .app-topbar-title .app-name { font-size: .92rem; }
+  .app-topbar-title .module-name { font-size: .8rem; }
+}
+
+.app-navmenu-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(15,23,42,.4); z-index: 1999;
+}
+.app-navmenu-overlay.open { display: block; }
+
+.app-navmenu {
+  position: fixed; top: 0; left: -320px; bottom: 0; width: min(320px, 86vw); z-index: 2000;
+  background: #fff; box-shadow: 4px 0 24px rgba(15,23,42,.18);
+  transition: left .25s ease; overflow-y: auto;
+}
+.app-navmenu.open { left: 0; }
+
+.app-navmenu-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px; background: var(--app-accent-600); color: #fff;
+  font-weight: 900; font-size: 1.05rem; position: sticky; top: 0;
+}
+.app-navmenu-header button {
+  background: none; border: none; color: #fff; font-size: 1.5rem;
+  line-height: 1; cursor: pointer; padding: 4px;
+}
+
+.app-navmenu-section-title {
+  font-size: .72rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--slate-400); padding: 14px 14px 6px;
+}
+
+.app-nav-item {
+  display: block; width: calc(100% - 20px); margin: 2px 10px; text-align: left;
+  border: none; background: none; border-radius: 10px; padding: 11px 14px;
+  font-family: var(--font-sans); font-size: .9rem; font-weight: 700;
+  color: var(--slate-700); cursor: pointer; transition: background .15s;
+}
+.app-nav-item:hover { background: var(--app-accent-50); }
+
+.app-nav-item.app-nav-portal { color: var(--slate-600); }
+.app-nav-item.app-nav-home {
+  color: var(--app-accent-700); font-size: 1rem; font-weight: 900;
+}
+.app-nav-divider { height: 1px; background: var(--slate-200); margin: 8px 14px; }
+
+.app-nav-item.app-nav-current {
+  background: var(--app-accent-100); color: var(--app-accent-800);
+  cursor: default; pointer-events: none;
+}
+.app-nav-item.app-nav-current::before { content: '● '; color: var(--app-accent-600); }
+
+/* ============ PAVÉ NUMÉRIQUE (commun à toutes les applications) ============ */
+.numpad-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 7px; max-width: 220px; margin-top: 8px;
+  background: #e0e7ff; border: 2px solid #6366f1;
+  border-radius: 12px; padding: 10px;
+}
+.numpad-grid button {
+  background: white; border: 1.5px solid #c7d2fe;
+  border-radius: 8px; padding: 11px 6px;
+  font-size: 1.1rem; font-weight: 700; cursor: pointer;
+  color: #1e1b4b; transition: background .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.numpad-grid button:active { background: #c7d2fe; }
+.numpad-grid .np-wide { grid-column: span 3; font-size: .95rem; }
+.numpad-grid .np-minus { color: #dc2626; font-weight: 900; }
+.numpad-grid .np-back { color: #7c3aed; }
+
+body.numpad-disabled .np-section { display: none !important; }
+
+.np-pref-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: #f0f4ff; border: 1.5px solid #c7d2fe;
+  border-radius: 10px; padding: 10px 16px; margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.np-pref-label { color: #3730a3; font-weight: 600; font-size: .95rem; flex: 1; }
+.np-switch { position: relative; display: inline-block; width: 52px; height: 28px; flex-shrink: 0; }
+.np-switch input { opacity: 0; width: 0; height: 0; }
+.np-slider { position: absolute; cursor: pointer; inset: 0; background: #cbd5e1; border-radius: 28px; transition: .25s; }
+.np-slider::before {
+  content: ''; position: absolute;
+  width: 22px; height: 22px; left: 3px; bottom: 3px;
+  background: white; border-radius: 50%; transition: .25s;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+}
+.np-switch input:checked + .np-slider { background: #6366f1; }
+.np-switch input:checked + .np-slider::before { transform: translateX(24px); }
+.np-pref-hint { font-size: .8rem; color: #6b7280; width: 100%; margin-top: 2px; }
+
+/* ============ GLISSER-DÉPOSER (fantôme suivant le pointeur) ============ */
+.drag-ghost {
+  z-index: 9999; pointer-events: none; opacity: .92;
+  box-shadow: 0 12px 28px rgba(0,0,0,.28);
+  transform: scale(1.03);
+}
+
+/* ============ "VÉRIFIE TA COMPRÉHENSION" (encart après un exemple, dans les cours) ============ */
+.check-box {
+  background: linear-gradient(135deg, #fef9c3, #fde68a);
+  border: 2px solid #f59e0b; border-radius: 12px;
+  padding: 20px; margin-top: 16px;
+}
+.check-label { color: #78350f; font-weight: 700; font-size: 1rem; margin-bottom: 8px; }
+.check-question { color: #451a03; font-size: 1.1rem; margin-bottom: 12px; }
+.check-hint { color: #78350f; font-size: .9rem; margin-bottom: 12px; }
+.check-input {
+  background: white; border: 2px solid #d97706;
+  border-radius: 8px; padding: 8px 12px;
+  color: #1c1917; font-weight: 700; font-family: var(--font-sans);
+}
+.check-btn {
+  background: #d97706; color: white; border: none;
+  border-radius: 8px; padding: 8px 16px; font-weight: 700; cursor: pointer;
+  font-family: var(--font-sans);
+}
+.check-btn:hover { background: #b45309; }
