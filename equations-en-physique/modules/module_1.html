@@ -143,13 +143,14 @@ const nav = AppNav.init({
     onHome: () => { window.location.href = '../index.html'; },
     onNavigate: (key) => { window.location.href = key + '.html'; },
     groups: [
-        { title: 'Cours', items: [
+        { title: 'Principe', items: [
             { key: 'module_1', label: 'Module 1 : Méthode' },
             { key: 'module_2', label: "Module 2 : Exemple d'application" },
+            { key: 'module_3', label: 'Module 3 : Entraînement' },
         ]},
-        { title: 'Entraînement', items: [
-            { key: 'module_3', label: 'Module 3 : Entraînement 1' },
-            { key: 'module_4', label: 'Module 4 : Entraînement 2' },
+        { title: 'Gestion des fractions', items: [
+            { key: 'module_4', label: 'Module 4 : Méthode' },
+            { key: 'module_5', label: 'Module 5 : Entraînement' },
         ]},
     ],
 });
@@ -424,15 +425,14 @@ function addFracPaletteTile() {
     pal.appendChild(el);
 }
 
+// un élément déjà placé dans l'équation ne doit jamais apparaître en même
+// temps dans la palette ; il y réapparaît dès qu'il est retiré de l'équation
 function buildPalette() {
     const pal = document.getElementById('palette');
     if (!pal || !currentExercise) return;
     pal.innerHTML = '';
-    const grandeursToShow = stepOneValidated
-        ? currentExercise.tiles.filter(t => countIdAnywhere(t.id) === 0)
-        : currentExercise.tiles;
-    [...grandeursToShow, {id:'one',label:'1'}, {id:'times',label:'×'}, {id:'plus',label:'+'}, {id:'minus',label:'−'}]
-        .forEach(addPaletteTile);
+    const allTiles = [...currentExercise.tiles, {id:'one',label:'1'}, {id:'times',label:'×'}, {id:'plus',label:'+'}, {id:'minus',label:'−'}];
+    allTiles.filter(t => countIdAnywhere(t.id) === 0).forEach(addPaletteTile);
     addFracPaletteTile();
 }
 function buildDrillPalette() {
@@ -440,7 +440,7 @@ function buildDrillPalette() {
     if (!pal) return;
     pal.innerHTML = '';
     addFracPaletteTile();
-    (currentDrillExtraTiles || []).forEach(addPaletteTile);
+    (currentDrillExtraTiles || []).filter(t => countIdAnywhere(t.id) === 0).forEach(addPaletteTile);
 }
 
 // ═══════════════════════════════════════════════════════════════
