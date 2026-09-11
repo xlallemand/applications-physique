@@ -418,13 +418,15 @@ function addFracPaletteTile() {
 }
 
 // un élément déjà placé dans l'équation ne doit jamais apparaître en même
-// temps dans la palette ; il y réapparaît dès qu'il est retiré de l'équation
+// temps dans la palette (il y réapparaît dès qu'il est retiré de l'équation) —
+// sauf le 1, le × et le + (et le −), réutilisables autant de fois que besoin
+const REUSABLE_TILE_IDS = new Set(['one', 'times', 'plus', 'minus']);
 function buildPalette() {
     const pal = document.getElementById('palette');
     if (!pal || !currentExercise) return;
     pal.innerHTML = '';
     const allTiles = [...currentExercise.tiles, {id:'one',label:'1'}, {id:'times',label:'×'}, {id:'plus',label:'+'}, {id:'minus',label:'−'}];
-    allTiles.filter(t => countIdAnywhere(t.id) === 0).forEach(addPaletteTile);
+    allTiles.filter(t => REUSABLE_TILE_IDS.has(t.id) || countIdAnywhere(t.id) === 0).forEach(addPaletteTile);
     addFracPaletteTile();
 }
 function buildDrillPalette() {
@@ -432,7 +434,7 @@ function buildDrillPalette() {
     if (!pal) return;
     pal.innerHTML = '';
     addFracPaletteTile();
-    (currentDrillExtraTiles || []).filter(t => countIdAnywhere(t.id) === 0).forEach(addPaletteTile);
+    (currentDrillExtraTiles || []).filter(t => REUSABLE_TILE_IDS.has(t.id) || countIdAnywhere(t.id) === 0).forEach(addPaletteTile);
 }
 
 // ═══════════════════════════════════════════════════════════════

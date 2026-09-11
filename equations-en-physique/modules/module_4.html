@@ -130,6 +130,14 @@
     .sqrt-wrap { display:inline-flex; align-items:flex-end; margin:0 6px; flex-shrink:0; }
     .sqrt-symbol { font-size:1.5rem; font-weight:700; color:#1e293b; margin-right:2px; align-self:center; }
     .sqrt-inner { display:inline-flex; align-items:center; padding:0 4px 2px 4px; border-top:3px solid #1e293b; }
+
+    /* pendant le glisser de l'outil racine carrée, les deux membres de
+       l'équation (gauche et droite) se signalent comme zones de dépose */
+    body.sqrt-dragging .eq-side {
+        outline: 3px dashed #8b5cf6; outline-offset: 5px; border-radius: 10px;
+        background: rgba(139,92,246,.06);
+    }
+    .eq-side.drag-over { background: rgba(139,92,246,.16); border-radius: 10px; }
 </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
@@ -365,10 +373,11 @@ function pruneEmptySlot(path) {
         side.slots.splice(idx, 1);
     }
 }
-// numérateur/dénominateur vidé (à l'intérieur d'une fraction)
+// numérateur/dénominateur vidé (à l'intérieur d'une fraction) — le numérateur
+// reste vide (l'élève doit y glisser lui-même un 1 si besoin) ; le dénominateur,
+// lui, reçoit automatiquement un 1 (sinon la fraction perdrait tout son sens)
 function applyEmptinessRuleFrac(path, removedId) {
     if (path.endsWith('.num')) {
-        setNode(path, simple([{ id:'one', label:'1' }]));
         return;
     }
     if (path.endsWith('.den')) {
@@ -410,9 +419,6 @@ function processDrop(path, data) {
             if (src.items.length === 0) handleEmptied(data.from, removedId);
         }
     }
-    // un "1" seul dans la zone n'est qu'un espace réservé : il disparaît dès
-    // qu'on y dépose un élément réel, au lieu de s'accumuler avec lui
-    if (node.items.length === 1 && node.items[0].id === 'one') node.items = [];
     node.items.push({ id: data.id, label: data.label });
     refreshView();
 }
@@ -459,7 +465,9 @@ function enableTileDrag(el, data, onTap) {
     DragDrop.enable(el, {
         zoneSelector: '.eq-tile, .slot-simple, .insert-zone, .eq-side',
         dragOverClass: 'drag-over',
+        onStart: () => { if (data.type === 'sqrt') document.body.classList.add('sqrt-dragging'); },
         onDrop: (item, zone, evt) => {
+            if (data.type === 'sqrt') document.body.classList.remove('sqrt-dragging');
             const moved = Math.hypot(evt.clientX - startX, evt.clientY - startY) > 8;
             if (onTap && !moved) { onTap(); return; }
             if (zone) handleZoneDrop(data, zone);
@@ -468,12 +476,13 @@ function enableTileDrag(el, data, onTap) {
 }
 
 // détermine le traitement à appliquer selon le type de zone survolée :
-// une tuile équivaut à sa zone englobante, sauf pour la racine carrée qui
-// cible précisément la tuile ; les zones d'insertion et le membre entier
-// (pour une racine posée sur une grandeur déjà isolée) sont des cas à part
+// une tuile équivaut à sa zone englobante ; les zones d'insertion sont un
+// cas à part ; la racine carrée, elle, cible toujours le membre entier
+// (gauche ou droite), jamais une tuile précise
 function handleZoneDrop(data, zone) {
-    if (zone.matches('.eq-tile') && data.type === 'sqrt') {
-        processSqrtOnTile(zone.dataset.path, parseInt(zone.dataset.idx, 10));
+    if (data.type === 'sqrt') {
+        const side = zone.closest('.eq-side');
+        if (side) processSqrtDrop(side.dataset.path);
         return;
     }
     if (zone.matches('.insert-zone')) {
@@ -509,35 +518,32 @@ function isIsolatedSeq(node, targetId) {
         && s.den.items.length === 1 && s.den.items[0].id === 'one';
     return false;
 }
-function processSqrtOnTile(path, idx) {
-    const ex = currentExercise;
-    if (!ex || !ex.hasSqrt) return;
-    const node = getNode(path);
-    const it = node && node.items && node.items[idx];
-    if (!it || it.id !== ex.sqrtTargetId) return;
-    const parts = path.split('.');
-    const isTopSlot = parts.length === 2 && parts[1] === '0';
-    const side = isTopSlot ? getNode(parts[0]) : null;
-    const isolated = isTopSlot && side && side.kind === 'seq' && side.slots.length === 1 && node.items.length === 1;
-    if (!isolated) {
-        showFeedback(`✕ Il est trop tôt pour enlever le carré. Il faut le faire après avoir isolé ${ex.sqrtTargetLabel}.`, false);
-        return;
-    }
-    node.items[0] = { id: ex.sqrtPlainId, label: ex.sqrtPlainLabel };
-    refreshView();
-}
+// dépose de la racine carrée sur un membre entier (gauche ou droite) : si ce
+// membre est exactement la grandeur au carré déjà isolée, elle se simplifie
+// directement (√(v²) devient v) ; sinon la racine s'affiche sur tout le membre
+// (par exemple sur toute une fraction). Il faut faire cette opération sur les
+// DEUX membres pour que l'équation reste valable.
 function processSqrtDrop(path) {
     if (path !== 'left' && path !== 'right') return;
     const ex = currentExercise;
     if (!ex || !ex.hasSqrt) return;
-    const already = isFullyIsolatedSeq(state.left, ex.sqrtPlainId) || isFullyIsolatedSeq(state.right, ex.sqrtPlainId);
-    if (!already) {
-        showFeedback(`✕ Il est trop tôt pour enlever le carré. Il faut le faire après avoir isolé ${ex.sqrtTargetLabel}.`, false);
+    const node = getNode(path);
+    if (!node) return;
+    if (node.kind === 'sqrt' || isFullyIsolatedSeq(node, ex.sqrtPlainId)) { refreshView(); return; }
+    // prêt si la grandeur au carré est isolée quelque part, OU si elle l'était
+    // déjà et a été convertie sur l'autre membre (elle a alors disparu de
+    // l'équation, remplacée par sa racine — d'où ce second test)
+    const ready = isFullyIsolatedSeq(state.left, ex.sqrtTargetId) || isFullyIsolatedSeq(state.right, ex.sqrtTargetId)
+               || isFullyIsolatedSeq(state.left, ex.sqrtPlainId) || isFullyIsolatedSeq(state.right, ex.sqrtPlainId);
+    if (!ready) {
+        showFeedback(`✕ Il est trop tôt pour enlever le carré. Il faut d'abord isoler ${ex.sqrtTargetLabel}.`, false);
         return;
     }
-    const node = getNode(path);
-    if (node.kind === 'sqrt' || isFullyIsolatedSeq(node, ex.sqrtPlainId)) { refreshView(); return; }
-    state[path] = sqrtNode(node);
+    if (isFullyIsolatedSeq(node, ex.sqrtTargetId)) {
+        node.slots[0].items[0] = { id: ex.sqrtPlainId, label: ex.sqrtPlainLabel };
+    } else {
+        state[path] = sqrtNode(node);
+    }
     refreshView();
 }
 
@@ -581,13 +587,15 @@ function addSqrtPaletteTile() {
     pal.appendChild(el);
 }
 // un élément déjà placé dans l'équation ne doit jamais apparaître en même
-// temps dans la palette ; il y réapparaît dès qu'il est retiré de l'équation
+// temps dans la palette (il y réapparaît dès qu'il est retiré de l'équation) —
+// sauf le 1, le × et le + (et le −), réutilisables autant de fois que besoin
+const REUSABLE_TILE_IDS = new Set(['one', 'times', 'plus', 'minus']);
 function buildPalette() {
     const pal = document.getElementById('palette');
     if (!pal || !currentExercise) return;
     pal.innerHTML = '';
     const allTiles = [...currentExercise.tiles, {id:'one',label:'1'}, {id:'times',label:'×'}, {id:'plus',label:'+'}, {id:'minus',label:'−'}];
-    allTiles.filter(t => countIdAnywhere(t.id) === 0).forEach(addPaletteTile);
+    allTiles.filter(t => REUSABLE_TILE_IDS.has(t.id) || countIdAnywhere(t.id) === 0).forEach(addPaletteTile);
     addFracPaletteTile();
     if (currentExercise.hasSqrt) addSqrtPaletteTile();
 }
@@ -596,11 +604,11 @@ function buildDrillPalette() {
     if (!pal) return;
     pal.innerHTML = '';
     (currentDrillCfg && currentDrillCfg.tiles || [])
-        .filter(t => countIdAnywhere(t.id) === 0)
+        .filter(t => REUSABLE_TILE_IDS.has(t.id) || countIdAnywhere(t.id) === 0)
         .forEach(addPaletteTile);
     addFracPaletteTile();
     (currentDrillCfg && currentDrillCfg.paletteTiles || [])
-        .filter(t => countIdAnywhere(t.id) === 0)
+        .filter(t => REUSABLE_TILE_IDS.has(t.id) || countIdAnywhere(t.id) === 0)
         .forEach(addPaletteTile);
 }
 
@@ -802,7 +810,7 @@ function checkDrill() {
 // ═══════════════════════════════════════════════════════════════
 // QUESTIONS 1 À 4 — DÉCOUVERTE GUIDÉE (non notées)
 // ═══════════════════════════════════════════════════════════════
-const TUTORIAL_EXPLAIN = "Dans ce module, une équation peut comporter plus de deux zones : un terme peut être multiplié par une fraction entière. Or, placer un terme au numérateur d'une fraction (au-dessus de la barre) ou le placer juste à côté d'elle (avant ou après) revient exactement au même, puisque tout est multiplié. Dès que tu commences à glisser un élément, une petite zone de dépose apparaît à côté de la fraction pour t'y déposer un terme.";
+const TUTORIAL_EXPLAIN = "Dans ce module, une équation peut comporter plus de deux zones : un terme peut être multiplié par une fraction. Or, placer un terme au numérateur d'une fraction (au-dessus de la barre) ou le placer juste à côté d'elle (avant ou après) revient exactement au même, puisque tout est multiplié. Dès que tu commences à glisser un élément, une petite zone de dépose apparaît à côté de la fraction pour t'y déposer un terme.";
 
 // point de départ commun aux deux premières questions : Ec = 1/2 · m · v²,
 // avec m et v² écrits à côté de la fraction 1/2
@@ -816,9 +824,15 @@ const module4Tutorial = [
         instruction: "L'équation E<sub>c</sub> = 1/2 · m · v² est écrite avec m et v² à côté de la fraction. Déplace-les <b>dans</b> la fraction, au numérateur.",
         left:  m4TutStart.left,
         right: m4TutStart.right,
-        check: (st) => st.right.kind === 'seq' && st.right.slots.length === 1 && st.right.slots[0].kind === 'frac'
-                    && setEq(idsOf(st.right.slots[0].num.items), ['m','v2'])
-                    && setEq(idsOf(st.right.slots[0].den.items), ['two'])
+        check: (st) => {
+            if (st.right.kind !== 'seq' || st.right.slots.length !== 1 || st.right.slots[0].kind !== 'frac') return false;
+            if (!setEq(idsOf(st.right.slots[0].den.items), ['two'])) return false;
+            const num = idsOf(st.right.slots[0].num.items);
+            if (setEq(num, ['m','v2'])) return true;
+            if (setEq(num, ['one','m','v2'])) return 'partial';
+            return false;
+        },
+        partialMessage: "Le 1 qui était déjà là ne disparaît pas tout seul : il ne reste plus qu'à le retirer toi-même (clique sur sa croix)."
     },
     {
         instruction: "Repartons de la même équation. Cette fois, garde m et v² à côté de la fraction, mais fais l'inverse : utilise l'outil fraction (les pointillés ···) pour créer une nouvelle fraction avec m et v² au numérateur, puis fais glisser le 2 pour qu'il devienne le dénominateur de cette nouvelle fraction. Termine en supprimant les restes de l'ancienne fraction 1/2.",
@@ -826,15 +840,22 @@ const module4Tutorial = [
         right: m4TutStart.right,
         showPalette: true,
         tiles: [],
-        check: (st) => st.right.kind === 'seq' && st.right.slots.length === 1
-                    && st.right.slots[0].kind === 'frac'
-                    && setEq(idsOf(st.right.slots[0].num.items), ['m','v2'])
-                    && setEq(idsOf(st.right.slots[0].den.items), ['two'])
+        check: (st) => {
+            if (st.right.kind !== 'seq' || st.right.slots.length !== 1 || st.right.slots[0].kind !== 'frac') return false;
+            if (!setEq(idsOf(st.right.slots[0].num.items), ['m','v2'])) return false;
+            const den = idsOf(st.right.slots[0].den.items);
+            if (setEq(den, ['two'])) return true;
+            if (setEq(den, ['one','two'])) return 'partial';
+            return false;
+        },
+        partialMessage: "Il ne reste plus qu'à retirer le 1 devenu inutile au dénominateur de la nouvelle fraction (clique sur sa croix, sur la tuile)."
     },
     {
-        instruction: "Cette fois, m et v² sont au numérateur de la fraction. Déplace-les <b>à droite</b> de la fraction (hors de la barre).",
+        instruction: "Cette fois, m et v² sont au numérateur de la fraction. Déplace-les <b>à droite</b> de la fraction (hors de la barre). Le numérateur laissé vide ne se remplit pas tout seul : va chercher un 1 dans la palette et glisse-le toi-même.",
         left:  () => seq([simple([tile('Ec','E<sub>c</sub>')])]),
         right: () => seq([frac([tile('m','m'), tile('v2','v²')], [tile('two','2')])]),
+        showPalette: true,
+        tiles: [tile('one','1')],
         check: (st) => st.right.kind === 'seq' && st.right.slots.length === 2
                     && st.right.slots[0].kind === 'frac' && setEq(idsOf(st.right.slots[0].num.items), ['one']) && setEq(idsOf(st.right.slots[0].den.items), ['two'])
                     && st.right.slots[1].kind === 'simple' && setEq(idsOf(st.right.slots[1].items), ['m','v2'])
@@ -857,9 +878,11 @@ const module4Tutorial = [
         }
     },
     {
-        instruction: "Ici encore, m et v² sont au numérateur de la fraction. Déplace-les <b>à gauche</b> de la fraction, cette fois.",
+        instruction: "Ici encore, m et v² sont au numérateur de la fraction. Déplace-les <b>à gauche</b> de la fraction, cette fois. Là encore, le numérateur laissé vide ne se remplit pas tout seul : glisse toi-même un 1 depuis la palette.",
         left:  () => seq([simple([tile('Ec','E<sub>c</sub>')])]),
         right: () => seq([frac([tile('m','m'), tile('v2','v²')], [tile('two','2')])]),
+        showPalette: true,
+        tiles: [tile('one','1')],
         check: (st) => st.right.kind === 'seq' && st.right.slots.length === 2
                     && st.right.slots[0].kind === 'simple' && setEq(idsOf(st.right.slots[0].items), ['m','v2'])
                     && st.right.slots[1].kind === 'frac' && setEq(idsOf(st.right.slots[1].num.items), ['one']) && setEq(idsOf(st.right.slots[1].den.items), ['two'])
