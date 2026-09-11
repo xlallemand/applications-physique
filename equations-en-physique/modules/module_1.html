@@ -5,8 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 1 : Méthode</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/dragdrop.js"></script>
 <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; }
+    :root {
+        --app-accent-50:  #eef2ff;
+        --app-accent-100: #e0e7ff;
+        --app-accent-200: #c7d2fe;
+        --app-accent-400: #818cf8;
+        --app-accent-600: #4f46e5;
+        --app-accent-700: #4338ca;
+        --app-accent-800: #3730a3;
+    }
+    body { font-family: var(--font-sans); }
 
     .frac-wrap-static { display:inline-flex; flex-direction:column; align-items:center; margin:0 6px; vertical-align:middle; }
     .frac-num-static, .frac-den-static { padding:0 6px; }
@@ -105,52 +117,10 @@
     @keyframes confetti-fall {
         to { top:110vh; transform:translateY(0) rotate(720deg); }
     }
-    /* ── Barre supérieure et menu sandwich ─────────── */
-    .topbar {
-        position:sticky; top:0; z-index:900; display:flex; align-items:center; justify-content:space-between;
-        padding:12px 16px; background:#fff; border-bottom:2px solid #e2e8f0; box-shadow:0 1px 4px rgba(0,0,0,.05);
-    }
-    .topbar-menu-btn {
-        width:40px; height:40px; border-radius:10px; background:#eef2ff; border:2px solid #c7d2fe;
-        color:#4338ca; font-size:1.2rem; font-weight:800; cursor:pointer; flex-shrink:0;
-    }
-    .topbar-title { font-weight:800; color:#312e81; font-size:1.05rem; text-align:right; }
-
-    .menu-overlay { position:fixed; inset:0; background:rgba(15,23,42,.4); z-index:998; }
-    .menu-overlay.hidden { display:none; }
-    .side-menu {
-        position:fixed; top:0; left:0; bottom:0; width:270px; max-width:80vw; background:#fff; z-index:999;
-        box-shadow:2px 0 16px rgba(0,0,0,.18); padding:18px; overflow-y:auto;
-    }
-    .side-menu.hidden { display:none; }
-    .side-menu-title { font-weight:800; color:#312e81; font-size:1.05rem; margin-bottom:14px; }
-    .side-menu-link {
-        display:block; padding:11px 14px; border-radius:10px; color:#334155; font-weight:700;
-        text-decoration:none; margin-bottom:4px;
-    }
-    .side-menu-link:hover { background:#eef2ff; }
-    .side-menu-link.disabled { color:#94a3b8; background:#f1f5f9; cursor:default; pointer-events:none; }
-    .side-menu-sep { height:1px; background:#e2e8f0; margin:10px 0 14px; }
-
 </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-
-<div class="topbar">
-    <button class="topbar-menu-btn" onclick="toggleMenu()">☰</button>
-    <span class="topbar-title">Module 1 : Méthode</span>
-</div>
-<div id="menuOverlay" class="menu-overlay hidden" onclick="toggleMenu()"></div>
-<nav id="sideMenu" class="side-menu hidden">
-    <div class="side-menu-title">Menu</div>
-    <a href="../equations_en_physique.html" class="side-menu-link">🏠 Accueil</a>
-        <div class="side-menu-sep"></div>
-        <!-- Pour ajouter un module : dupliquer une ligne ci-dessous (et faire de même dans les autres fichiers) -->
-        <span class="side-menu-link disabled">Module 1 : Méthode</span>
-        <a href="module_2.html" class="side-menu-link">Module 2 : Exemple d'application</a>
-        <a href="module_3.html" class="side-menu-link">Module 3 : Entraînement 1</a>
-        <a href="module_4.html" class="side-menu-link">Module 4 : Entraînement 2</a>
-</nav>
+<div id="app-nav"></div>
 
 <div class="container mx-auto px-4 py-8 max-w-3xl">
     <div id="app"></div>
@@ -158,10 +128,25 @@
 
 <script>
 
-function toggleMenu() {
-    document.getElementById('menuOverlay').classList.toggle('hidden');
-    document.getElementById('sideMenu').classList.toggle('hidden');
-}
+const nav = AppNav.init({
+    appName: 'Équations en Physique',
+    portalHref: '../../index.html',
+    portalLabel: 'Toutes les applications',
+    onHome: () => { window.location.href = '../index.html'; },
+    onNavigate: (key) => { window.location.href = key + '.html'; },
+    groups: [
+        { title: 'Cours', items: [
+            { key: 'module_1', label: 'Module 1 : Méthode' },
+            { key: 'module_2', label: "Module 2 : Exemple d'application" },
+        ]},
+        { title: 'Entraînement', items: [
+            { key: 'module_3', label: 'Module 3 : Entraînement 1' },
+            { key: 'module_4', label: 'Module 4 : Entraînement 2' },
+        ]},
+    ],
+});
+nav.setActive("module_1");
+nav.setTitle("Module 1 : M\u00e9thode");
 
 // ═══════════════════════════════════════════════════════════════
 // OUTILS DE CONSTRUCTION DE NŒUDS
@@ -216,21 +201,13 @@ function renderNode(node, path) {
         const items = node.items.map((it, idx) => {
             const hl = (activeHighlightId && it.id === activeHighlightId) ? ' tile-highlight' : '';
             const sep = (idx > 0 && !isOperatorTile(node.items[idx-1]) && !isOperatorTile(it)) ? '<span class="mult-sign">×</span>' : '';
-            return sep + `<span class="eq-tile${hl}" draggable="true"
-                   onclick="deleteItem('${path}',${idx})"
-                   ondragstart="dragMoveStart(event,'${path}',${idx})"
-                   ondragend="this.classList.remove('dragging')"
-                   ontouchstart="touchMoveStart(event,'${path}',${idx})">
+            return sep + `<span class="eq-tile${hl}" data-idx="${idx}">
                 ${it.label}<span class="tile-del"
-                    onclick="event.stopPropagation();deleteItem('${path}',${idx})"
-                    ontouchstart="event.stopPropagation()"
-                    ontouchend="event.stopPropagation();event.preventDefault();deleteItem('${path}',${idx})">✕</span>
+                    onpointerdown="event.stopPropagation()"
+                    onclick="event.stopPropagation();deleteItem('${path}',${idx})">✕</span>
             </span>`;
         }).join('');
-        return `<div class="slot-simple" data-path="${path}"
-                     ondragover="allowDrop(event)"
-                     ondragleave="this.classList.remove('drag-over')"
-                     ondrop="handleDrop(event,'${path}')">
+        return `<div class="slot-simple" data-path="${path}">
                     ${items || '<span class="slot-placeholder">…</span>'}
                 </div>`;
     }
@@ -272,6 +249,23 @@ function renderEquationZone() {
         `<div class="eq-sign">=</div>` +
         `<div class="eq-side">${renderNode(state.right,'right')}</div>` +
         `<button class="flip-btn" onclick="flipEquation()" title="Inverser le sens de l'équation">⇄</button>`;
+    attachEqTileHandlers(zone);
+}
+
+// associe le glisser-déposer tactile commun (assets/dragdrop.js) à chaque
+// tuile fraîchement rendue (le contenu de la zone est régénéré via innerHTML
+// à chaque changement d'état, il faut donc réattacher les gestionnaires)
+function attachEqTileHandlers(zone) {
+    zone.querySelectorAll('.eq-tile').forEach(el => {
+        const slot = el.closest('.slot-simple');
+        if (!slot) return;
+        const path = slot.dataset.path;
+        const idx = parseInt(el.dataset.idx, 10);
+        const node = getNode(path);
+        const it = node && node.items[idx];
+        if (!it) return;
+        enableTileDrag(el, { type:'move', from:path, idx, id:it.id, label:it.label }, () => deleteItem(path, idx));
+    });
 }
 
 function renderHistory() {
@@ -309,19 +303,27 @@ function showFeedback(msg, ok) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// GLISSER-DÉPOSER
+// GLISSER-DÉPOSER (Pointer Events communes à toutes les applications —
+// voir assets/dragdrop.js — plutôt que l'API HTML5 Drag and Drop
+// native, sans prise en charge tactile fiable sur iOS Safari et
+// Firefox Android)
 // ═══════════════════════════════════════════════════════════════
-let draggedData = null;
 
-function allowDrop(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
-
-function handleDrop(e, path) {
-    e.preventDefault();
-    e.currentTarget.classList.remove('drag-over');
-    if (!draggedData) return;
-    processDrop(path, draggedData);
-    draggedData = null;
-    document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+// active le glisser-déposer sur une tuile ; si `onTap` est fourni, un
+// tap/clic sans déplacement (distance < 8px) déclenche `onTap` au lieu
+// d'un dépôt (utilisé pour supprimer une tuile déjà placée)
+function enableTileDrag(el, data, onTap) {
+    let startX = 0, startY = 0;
+    el.addEventListener('pointerdown', e => { startX = e.clientX; startY = e.clientY; });
+    DragDrop.enable(el, {
+        zoneSelector: '.slot-simple',
+        dragOverClass: 'drag-over',
+        onDrop: (item, zone, evt) => {
+            const moved = Math.hypot(evt.clientX - startX, evt.clientY - startY) > 8;
+            if (onTap && !moved) { onTap(); return; }
+            if (zone) processDrop(zone.dataset.path, data);
+        },
+    });
 }
 
 function applyEmptinessRule(path, removedId) {
@@ -380,47 +382,6 @@ function deleteItem(path, idx) {
     refreshView();
 }
 
-function dragMoveStart(e, path, idx) {
-    const node = getNode(path);
-    const it = node && node.items[idx];
-    if (!it) return;
-    draggedData = { type:'move', from:path, idx:idx, id:it.id, label:it.label };
-    e.dataTransfer.setData('text/plain', 'x');
-    e.currentTarget.classList.add('dragging');
-}
-function touchMoveStart(e, path, idx) {
-    const node = getNode(path);
-    const it = node && node.items[idx];
-    if (!it) return;
-    e.currentTarget.classList.add('dragging');
-    startTouchDrag(e, { type:'move', from:path, idx:idx, id:it.id, label:it.label }, `<span class="eq-tile">${it.label}</span>`);
-}
-
-// ── élément visuel qui suit le doigt pendant un glisser tactile (nécessaire sous Firefox mobile) ──
-let dragGhostEl = null;
-function createDragGhost(html, x, y) {
-    removeDragGhost();
-    const el = document.createElement('div');
-    el.className = 'drag-ghost';
-    el.innerHTML = html;
-    el.style.left = x + 'px';
-    el.style.top = y + 'px';
-    document.body.appendChild(el);
-    dragGhostEl = el;
-}
-function moveDragGhost(x, y) {
-    if (dragGhostEl) { dragGhostEl.style.left = x + 'px'; dragGhostEl.style.top = y + 'px'; }
-}
-function removeDragGhost() {
-    if (dragGhostEl) { dragGhostEl.remove(); dragGhostEl = null; }
-}
-function startTouchDrag(e, data, ghostHtml) {
-    draggedData = data;
-    const t = e.touches[0];
-    touchStartPos = { x: t.clientX, y: t.clientY };
-    createDragGhost(ghostHtml, t.clientX, t.clientY);
-}
-
 function flipEquation() {
     if (resolved) return;
     const tmp = state.left;
@@ -428,38 +389,6 @@ function flipEquation() {
     state.right = tmp;
     refreshView();
 }
-
-let touchStartPos = null;
-document.addEventListener('touchmove', e => {
-    if (!draggedData || !dragGhostEl) return;
-    const t = e.touches[0];
-    moveDragGhost(t.clientX, t.clientY);
-    // survol : éclaircit la zone de dépose comme le fait le glisser-déposer natif à la souris
-    const el = document.elementFromPoint(t.clientX, t.clientY);
-    const slot = el && el.closest('.slot-simple');
-    document.querySelectorAll('.slot-simple.drag-over').forEach(s => { if (s !== slot) s.classList.remove('drag-over'); });
-    if (slot) slot.classList.add('drag-over');
-}, { passive: true });
-
-document.addEventListener('touchend', e => {
-    if (!draggedData) return;
-    const t = e.changedTouches[0];
-    const moved = touchStartPos && (Math.hypot(t.clientX - touchStartPos.x, t.clientY - touchStartPos.y) > 8);
-    removeDragGhost();
-    document.querySelectorAll('.slot-simple.drag-over').forEach(s => s.classList.remove('drag-over'));
-    if (draggedData.type === 'move' && !moved) {
-        // tap sans déplacement sur une tuile déjà placée : équivaut à cliquer sa croix -> suppression
-        e.preventDefault();
-        deleteItem(draggedData.from, draggedData.idx);
-    } else {
-        const el = document.elementFromPoint(t.clientX, t.clientY);
-        const slot = el && el.closest('.slot-simple');
-        if (slot) processDrop(slot.dataset.path, draggedData);
-    }
-    draggedData = null;
-    touchStartPos = null;
-    document.querySelectorAll('.dragging').forEach(d => d.classList.remove('dragging'));
-});
 
 // ═══════════════════════════════════════════════════════════════
 // PALETTE
@@ -473,11 +402,8 @@ function addPaletteTile(t) {
     const pal = document.getElementById('palette');
     const el = document.createElement('div');
     el.className = 'palette-tile';
-    el.draggable = true;
     el.innerHTML = t.label;
-    el.addEventListener('dragstart', e => { draggedData = { type:'tile', id:t.id, label:t.label }; e.dataTransfer.setData('text/plain','x'); el.classList.add('dragging'); });
-    el.addEventListener('dragend', () => el.classList.remove('dragging'));
-    el.addEventListener('touchstart', e => { el.classList.add('dragging'); startTouchDrag(e, { type:'tile', id:t.id, label:t.label }, `<span class="eq-tile">${t.label}</span>`); }, { passive:true });
+    enableTileDrag(el, { type:'tile', id:t.id, label:t.label });
     pal.appendChild(el);
 }
 function addFracPaletteTile() {
@@ -485,11 +411,8 @@ function addFracPaletteTile() {
     if (!pal) return;
     const el = document.createElement('div');
     el.className = 'palette-tile palette-frac';
-    el.draggable = true;
     el.innerHTML = '<span class="dots">···</span><span class="frac-line"></span><span class="dots">···</span>';
-    el.addEventListener('dragstart', e => { draggedData = { type:'frac' }; e.dataTransfer.setData('text/plain','x'); el.classList.add('dragging'); });
-    el.addEventListener('dragend', () => el.classList.remove('dragging'));
-    el.addEventListener('touchstart', e => { el.classList.add('dragging'); startTouchDrag(e, { type:'frac' }, '<span class="palette-tile palette-frac"><span class="dots">···</span><span class="frac-line"></span><span class="dots">···</span></span>'); }, { passive:true });
+    enableTileDrag(el, { type:'frac' });
     pal.appendChild(el);
 }
 

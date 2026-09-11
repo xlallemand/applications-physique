@@ -5,8 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 4 : Entraînement 2</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../assets/nav.js"></script>
 <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; }
+    :root {
+        --app-accent-50:  #eef2ff;
+        --app-accent-100: #e0e7ff;
+        --app-accent-200: #c7d2fe;
+        --app-accent-400: #818cf8;
+        --app-accent-600: #4f46e5;
+        --app-accent-700: #4338ca;
+        --app-accent-800: #3730a3;
+    }
+    body { font-family: var(--font-sans); }
 
     .frac-wrap-static { display:inline-flex; flex-direction:column; align-items:center; margin:0 6px; vertical-align:middle; }
     .frac-num-static, .frac-den-static { padding:0 6px; }
@@ -105,34 +116,6 @@
     @keyframes confetti-fall {
         to { top:110vh; transform:translateY(0) rotate(720deg); }
     }
-    /* ── Barre supérieure et menu sandwich ─────────── */
-    .topbar {
-        position:sticky; top:0; z-index:900; display:flex; align-items:center; justify-content:space-between;
-        padding:12px 16px; background:#fff; border-bottom:2px solid #e2e8f0; box-shadow:0 1px 4px rgba(0,0,0,.05);
-    }
-    .topbar-menu-btn {
-        width:40px; height:40px; border-radius:10px; background:#eef2ff; border:2px solid #c7d2fe;
-        color:#4338ca; font-size:1.2rem; font-weight:800; cursor:pointer; flex-shrink:0;
-    }
-    .topbar-title { font-weight:800; color:#312e81; font-size:1.05rem; text-align:right; }
-
-    .menu-overlay { position:fixed; inset:0; background:rgba(15,23,42,.4); z-index:998; }
-    .menu-overlay.hidden { display:none; }
-    .side-menu {
-        position:fixed; top:0; left:0; bottom:0; width:270px; max-width:80vw; background:#fff; z-index:999;
-        box-shadow:2px 0 16px rgba(0,0,0,.18); padding:18px; overflow-y:auto;
-    }
-    .side-menu.hidden { display:none; }
-    .side-menu-title { font-weight:800; color:#312e81; font-size:1.05rem; margin-bottom:14px; }
-    .side-menu-link {
-        display:block; padding:11px 14px; border-radius:10px; color:#334155; font-weight:700;
-        text-decoration:none; margin-bottom:4px;
-    }
-    .side-menu-link:hover { background:#eef2ff; }
-    .side-menu-link.disabled { color:#94a3b8; background:#f1f5f9; cursor:default; pointer-events:none; }
-    .side-menu-sep { height:1px; background:#e2e8f0; margin:10px 0 14px; }
-
-
     /* ── Zones d'insertion à côté d'une fraction (module 4) ─────────── */
     .insert-zone {
         width:26px; min-height:56px; border:2px dashed #94a3b8; border-radius:8px;
@@ -148,28 +131,34 @@
 </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-
-<div class="topbar">
-    <button class="topbar-menu-btn" onclick="toggleMenu()">☰</button>
-    <span class="topbar-title">Module 4 : Entraînement 2</span>
-</div>
-<div id="menuOverlay" class="menu-overlay hidden" onclick="toggleMenu()"></div>
-<nav id="sideMenu" class="side-menu hidden">
-    <div class="side-menu-title">Menu</div>
-    <a href="../equations_en_physique.html" class="side-menu-link">🏠 Accueil</a>
-        <div class="side-menu-sep"></div>
-        <!-- Pour ajouter un module : dupliquer une ligne ci-dessous (et faire de même dans les autres fichiers) -->
-        <a href="module_1.html" class="side-menu-link">Module 1 : Méthode</a>
-        <a href="module_2.html" class="side-menu-link">Module 2 : Exemple d'application</a>
-        <a href="module_3.html" class="side-menu-link">Module 3 : Entraînement 1</a>
-        <span class="side-menu-link disabled">Module 4 : Entraînement 2</span>
-</nav>
+<div id="app-nav"></div>
 
 <div class="container mx-auto px-4 py-8 max-w-3xl">
     <div id="app"></div>
 </div>
 
 <script>
+
+const nav = AppNav.init({
+    appName: 'Équations en Physique',
+    portalHref: '../../index.html',
+    portalLabel: 'Toutes les applications',
+    onHome: () => { window.location.href = '../index.html'; },
+    onNavigate: (key) => { window.location.href = key + '.html'; },
+    groups: [
+        { title: 'Cours', items: [
+            { key: 'module_1', label: 'Module 1 : Méthode' },
+            { key: 'module_2', label: "Module 2 : Exemple d'application" },
+        ]},
+        { title: 'Entraînement', items: [
+            { key: 'module_3', label: 'Module 3 : Entraînement 1' },
+            { key: 'module_4', label: 'Module 4 : Entraînement 2' },
+        ]},
+    ],
+});
+nav.setActive('module_4');
+nav.setTitle('Module 4 : Entraînement 2');
+
 // ═══════════════════════════════════════════════════════════════
 // OUTILS DE CONSTRUCTION DE NŒUDS
 // une équation (membre gauche/droit) est une séquence de "zones" (slots)

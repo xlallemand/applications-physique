@@ -5,8 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Equations en Physique</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="../assets/theme.css">
+<script src="../assets/nav.js"></script>
 <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; }
+    :root {
+        --app-accent-50:  #eef2ff;
+        --app-accent-100: #e0e7ff;
+        --app-accent-200: #c7d2fe;
+        --app-accent-400: #818cf8;
+        --app-accent-600: #4f46e5;
+        --app-accent-700: #4338ca;
+        --app-accent-800: #3730a3;
+    }
+    body { font-family: var(--font-sans); }
 
     .frac-wrap-static { display:inline-flex; flex-direction:column; align-items:center; margin:0 6px; vertical-align:middle; }
     .frac-num-static, .frac-den-static { padding:0 6px; }
@@ -105,92 +116,90 @@
     @keyframes confetti-fall {
         to { top:110vh; transform:translateY(0) rotate(720deg); }
     }
-    /* ── Barre supérieure et menu sandwich ─────────── */
-    .topbar {
-        position:sticky; top:0; z-index:900; display:flex; align-items:center; justify-content:space-between;
-        padding:12px 16px; background:#fff; border-bottom:2px solid #e2e8f0; box-shadow:0 1px 4px rgba(0,0,0,.05);
-    }
-    .topbar-menu-btn {
-        width:40px; height:40px; border-radius:10px; background:#eef2ff; border:2px solid #c7d2fe;
-        color:#4338ca; font-size:1.2rem; font-weight:800; cursor:pointer; flex-shrink:0;
-    }
-    .topbar-title { font-weight:800; color:#312e81; font-size:1.05rem; text-align:right; }
-
-    .menu-overlay { position:fixed; inset:0; background:rgba(15,23,42,.4); z-index:998; }
-    .menu-overlay.hidden { display:none; }
-    .side-menu {
-        position:fixed; top:0; left:0; bottom:0; width:270px; max-width:80vw; background:#fff; z-index:999;
-        box-shadow:2px 0 16px rgba(0,0,0,.18); padding:18px; overflow-y:auto;
-    }
-    .side-menu.hidden { display:none; }
-    .side-menu-title { font-weight:800; color:#312e81; font-size:1.05rem; margin-bottom:14px; }
-    .side-menu-link {
-        display:block; padding:11px 14px; border-radius:10px; color:#334155; font-weight:700;
-        text-decoration:none; margin-bottom:4px;
-    }
-    .side-menu-link:hover { background:#eef2ff; }
-    .side-menu-link.disabled { color:#94a3b8; background:#f1f5f9; cursor:default; pointer-events:none; }
-    .side-menu-sep { height:1px; background:#e2e8f0; margin:10px 0 14px; }
-
-    .module-link {
-        display:block; background:#fff; border:2px solid #e2e8f0; border-radius:14px; padding:18px 20px;
-        margin-bottom:14px; text-decoration:none; box-shadow:0 2px 6px rgba(0,0,0,.05);
-    }
-    .module-link:hover { border-color:#818cf8; box-shadow:0 4px 10px rgba(79,70,229,.15); }
-    .module-link .mlabel { font-weight:800; color:#4f46e5; font-size:.8rem; text-transform:uppercase; letter-spacing:.05em; }
-    .module-link .mtitle { font-weight:800; color:#1e293b; font-size:1.15rem; margin-top:2px; }
 </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-
-<div class="topbar">
-    <button class="topbar-menu-btn" onclick="toggleMenu()">☰</button>
-    <span class="topbar-title">Accueil</span>
-</div>
-<div id="menuOverlay" class="menu-overlay hidden" onclick="toggleMenu()"></div>
-<nav id="sideMenu" class="side-menu hidden">
-    <div class="side-menu-title">Menu</div>
-    <span class="side-menu-link disabled">🏠 Accueil</span>
-        <div class="side-menu-sep"></div>
-        <!-- Pour ajouter un module : dupliquer une ligne ci-dessous (et faire de même dans les autres fichiers) -->
-        <a href="modules/module_1.html" class="side-menu-link">Module 1 : Méthode</a>
-        <a href="modules/module_2.html" class="side-menu-link">Module 2 : Exemple d'application</a>
-        <a href="modules/module_3.html" class="side-menu-link">Module 3 : Entraînement 1</a>
-        <a href="modules/module_4.html" class="side-menu-link">Module 4 : Entraînement 2</a>
-</nav>
+<div id="app-nav"></div>
 
 <div class="container mx-auto px-4 py-8 max-w-3xl">
     <header class="text-center mb-8">
-        <h1 class="text-3xl md:text-4xl font-bold text-indigo-900 mb-2">Equations en Physique</h1>
+        <h1 class="text-3xl md:text-4xl font-bold text-indigo-900 mb-2">Équations en Physique</h1>
         <p class="text-indigo-700">Comment exprimer une grandeur en fonction des autres</p>
     </header>
 
-    <!-- Pour ajouter un module : dupliquer un bloc <a class="module-link"> ci-dessous,
-         ET ajouter l'entrée correspondante dans le menu sandwich de CE fichier ET de chaque module_x.html -->
-    <a href="modules/module_1.html" class="module-link">
-        <div class="mlabel">Module 1</div>
-        <div class="mtitle">Méthode pour utiliser une équation</div>
-    </a>
-    <a href="modules/module_2.html" class="module-link">
-        <div class="mlabel">Module 2</div>
-        <div class="mtitle">Exemple d'application</div>
-    </a>
-    <a href="modules/module_3.html" class="module-link">
-        <div class="mlabel">Module 3</div>
-        <div class="mtitle">Entraînement 1</div>
-    </a>
-    <a href="modules/module_4.html" class="module-link">
-        <div class="mlabel">Module 4</div>
-        <div class="mtitle">Entraînement 2</div>
-    </a>
+    <!-- Pour ajouter un module : dupliquer un bloc <div class="module-card"> ci-dessous,
+         ET ajouter l'entrée correspondante dans les groupes AppNav de CE fichier ET de chaque module_x.html -->
+    <div class="module-list">
+        <div class="module-group">
+            <div class="module-group-title">Cours</div>
+            <div class="module-card clickable" onclick="location.href='modules/module_1.html'">
+                <div class="module-card-head">
+                    <span class="module-badge">Module 1</span>
+                    <div class="module-card-body">
+                        <div class="module-card-title">Méthode pour utiliser une équation</div>
+                        <div class="module-card-desc">Apprendre les règles de base pour isoler une grandeur, à l'aide de manipulations guidées.</div>
+                    </div>
+                    <span class="module-card-arrow">›</span>
+                </div>
+            </div>
+            <div class="module-card clickable" onclick="location.href='modules/module_2.html'">
+                <div class="module-card-head">
+                    <span class="module-badge">Module 2</span>
+                    <div class="module-card-body">
+                        <div class="module-card-title">Exemple d'application</div>
+                        <div class="module-card-desc">Résoudre une équation complète en appliquant la méthode du module 1.</div>
+                    </div>
+                    <span class="module-card-arrow">›</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="module-group">
+            <div class="module-group-title">Entraînement</div>
+            <div class="module-card clickable" onclick="location.href='modules/module_3.html'">
+                <div class="module-card-head">
+                    <span class="module-badge">Module 3</span>
+                    <div class="module-card-body">
+                        <div class="module-card-title">Entraînement 1</div>
+                        <div class="module-card-desc">S'entraîner à isoler une grandeur dans différentes équations.</div>
+                    </div>
+                    <span class="module-card-arrow">›</span>
+                </div>
+            </div>
+            <div class="module-card clickable" onclick="location.href='modules/module_4.html'">
+                <div class="module-card-head">
+                    <span class="module-badge">Module 4</span>
+                    <div class="module-card-body">
+                        <div class="module-card-title">Entraînement 2</div>
+                        <div class="module-card-desc">Aller plus loin avec des équations plus complexes.</div>
+                    </div>
+                    <span class="module-card-arrow">›</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
 
-function toggleMenu() {
-    document.getElementById('menuOverlay').classList.toggle('hidden');
-    document.getElementById('sideMenu').classList.toggle('hidden');
-}
+const nav = AppNav.init({
+    appName: 'Équations en Physique',
+    portalHref: '../index.html',
+    portalLabel: 'Toutes les applications',
+    onHome: () => {},
+    onNavigate: (key) => { window.location.href = 'modules/' + key + '.html'; },
+    groups: [
+        { title: 'Cours', items: [
+            { key: 'module_1', label: 'Module 1 : Méthode' },
+            { key: 'module_2', label: "Module 2 : Exemple d'application" },
+        ]},
+        { title: 'Entraînement', items: [
+            { key: 'module_3', label: 'Module 3 : Entraînement 1' },
+            { key: 'module_4', label: 'Module 4 : Entraînement 2' },
+        ]},
+    ],
+});
+nav.setActive(null);
 
 </script>
 </body>
