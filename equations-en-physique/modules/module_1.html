@@ -96,6 +96,14 @@
     .rule-card { background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; padding:16px; }
     .rule-card .rule-title { font-weight:800; color:#312e81; margin-bottom:6px; }
 
+    /* Encadré "À retenir" : couleur vive qui change à chaque nouvelle règle pour bien se remarquer */
+    .retenir-box { border:3px solid; border-radius:12px; padding:16px; }
+    .retenir-box .rule-title { font-weight:800; margin-bottom:6px; }
+    .retenir-0 { background:#fef3c7; border-color:#f59e0b; } .retenir-0 .rule-title { color:#92400e; }
+    .retenir-1 { background:#ffe4e6; border-color:#f43f5e; } .retenir-1 .rule-title { color:#9f1239; }
+    .retenir-2 { background:#ccfbf1; border-color:#14b8a6; } .retenir-2 .rule-title { color:#115e59; }
+    .retenir-3 { background:#ede9fe; border-color:#8b5cf6; } .retenir-3 .rule-title { color:#5b21b6; }
+
     .progress-bar-outer { background:#e2e8f0; border-radius:999px; height:10px; overflow:hidden; }
     .progress-bar-inner { background:#4f46e5; height:100%; transition:width .3s; }
 
@@ -780,7 +788,7 @@ function renderModule1() {
         <p class="text-xs text-gray-400 uppercase font-bold mb-4">${step.title} — manipulation ${m1DrillIdx+1}/${step.drills.length}</p>
         ${rulesHtml ? `<div class="mb-4">${rulesHtml}</div>` : ''}
       </div>
-      <div class="rule-card mb-6"><div class="rule-title">À retenir : règle ${ruleNumber}</div><p class="text-sm text-gray-700">${step.explain}</p></div>
+      <div class="retenir-box retenir-${m1StepIdx % 4} mb-6"><div class="rule-title">À retenir : règle ${ruleNumber}</div><p class="text-sm text-gray-700">${step.explain}</p></div>
       <div id="drillCard" class="bg-white rounded-xl shadow-lg p-6"></div>`;
     mountDrill(document.getElementById('drillCard'), { ...drill, onSuccess: advanceModule1 });
 }
