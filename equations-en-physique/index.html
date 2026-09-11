@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Equations en Physique</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="../assets/theme.css">
+<script src="../assets/nav.js"></script>
+<style>
+    :root {
+        --app-accent-50:  #eef2ff;
+        --app-accent-100: #e0e7ff;
+        --app-accent-200: #c7d2fe;
+        --app-accent-400: #818cf8;
+        --app-accent-600: #4f46e5;
+        --app-accent-700: #4338ca;
+        --app-accent-800: #3730a3;
+    }
+    body { font-family: var(--font-sans); }
+
+    .frac-wrap-static { display:inline-flex; flex-direction:column; align-items:center; margin:0 6px; vertical-align:middle; }
+    .frac-num-static, .frac-den-static { padding:0 6px; }
+    .frac-line-static { width:100%; height:2px; background:#1e293b; border-radius:2px; }
+    .eq-tile-static { font-weight:700; color:#1e293b; margin:0 4px; }
+
+    .eq-row { display:flex; align-items:center; justify-content:center; flex-wrap:nowrap; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px; }
+    .eq-row::-webkit-scrollbar { height:4px; }
+    .eq-side { display:flex; align-items:center; flex-shrink:0; }
+    .eq-sign { font-size:1.8rem; font-weight:800; color:#1e3a8a; margin:0 16px; flex-shrink:0; }
+    .eq-line-static { display:flex; align-items:center; justify-content:center; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+    @media (max-width:480px) {
+        .eq-tile, .eq-tile-frozen { font-size:.85rem; padding:5px 8px; }
+        .eq-sign { font-size:1.4rem; margin:0 8px; }
+        .eq-tile-static { font-size:.9rem; }
+        .flip-btn { width:36px; height:36px; font-size:1rem; margin-left:8px; }
+    }
+
+    .slot-simple {
+        display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center;
+        min-width:70px; min-height:56px; padding:8px 12px;
+        border:2px dashed #94a3b8; border-radius:10px; background:#fff; transition:all .2s;
+    }
+    .slot-simple.drag-over { background:#dbeafe; border-color:#3b82f6; }
+    .slot-placeholder { color:#94a3b8; font-weight:700; font-size:1.1rem; }
+
+    .eq-tile {
+        display:inline-flex; align-items:center; gap:6px; position:relative;
+        background:#dbeafe; border:2px solid #60a5fa; border-radius:8px;
+        padding:6px 10px; font-weight:700; color:#1e3a8a; cursor:grab; touch-action:none;
+    }
+    .eq-tile.dragging { opacity:.4; }
+    .eq-tile.tile-highlight { background:#fee2e2; border-color:#ef4444; color:#991b1b; box-shadow:0 0 0 3px rgba(239,68,68,.25); }
+    .mult-sign { display:inline-block; font-weight:800; color:#64748b; margin:0 3px; font-size:1rem; flex-shrink:0; }
+    .tile-del {
+        width:16px; height:16px; border-radius:50%; background:#ef4444; color:#fff;
+        font-size:10px; line-height:16px; text-align:center; cursor:pointer;
+    }
+
+    .frac-wrap { display:inline-flex; flex-direction:column; align-items:center; gap:4px; position:relative; margin:0 8px; flex-shrink:0; }
+    .frac-num-wrap, .frac-den-wrap { position:relative; }
+    .frac-line { width:100%; height:3px; background:#1e293b; border-radius:2px; }
+    .frac-del {
+        position:absolute; top:-9px; right:-9px; width:20px; height:20px; border-radius:50%;
+        background:#ef4444; color:#fff; font-size:11px; line-height:16px; text-align:center;
+        cursor:pointer; border:2px solid #fff; z-index:1;
+    }
+
+    .flip-btn {
+        width:44px; height:44px; border-radius:50%; background:#eef2ff; border:2px solid #818cf8;
+        color:#312e81; font-size:1.3rem; font-weight:800; margin-left:12px; flex-shrink:0;
+    }
+    .flip-btn:hover { background:#e0e7ff; }
+
+    .eq-tile-frozen { display:inline-flex; align-items:center; background:#f1f5f9; border:2px solid #cbd5e1; border-radius:8px; padding:6px 10px; font-weight:700; color:#334155; margin:0 3px; }
+    .step-row { border-bottom:1px dashed #e2e8f0; }
+
+    .palette-tile {
+        display:inline-flex; align-items:center; justify-content:center;
+        min-width:56px; min-height:44px; padding:8px 14px;
+        background:#eef2ff; border:2px solid #818cf8; border-radius:10px;
+        font-weight:700; color:#312e81; cursor:grab; touch-action:none; user-select:none;
+    }
+    .palette-tile.dragging { opacity:.4; }
+    .drag-ghost { position:fixed; z-index:9999; pointer-events:none; transform:translate(-50%,-50%); opacity:.9; }
+    .palette-frac { display:inline-flex; flex-direction:column; align-items:center; padding:6px 12px; }
+    .palette-frac .dots { font-size:.8rem; letter-spacing:2px; color:#312e81; }
+    .palette-frac .frac-line { width:28px; height:2px; margin:2px 0; background:#312e81; }
+
+    .rule-card { background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; padding:16px; }
+    .rule-card .rule-title { font-weight:800; color:#312e81; margin-bottom:6px; }
+
+    .progress-bar-outer { background:#e2e8f0; border-radius:999px; height:10px; overflow:hidden; }
+    .progress-bar-inner { background:#4f46e5; height:100%; transition:width .3s; }
+
+    .mcq-btn { display:block; width:100%; text-align:left; padding:10px 14px; border:2px solid #c7d2fe; border-radius:10px; margin-bottom:8px; background:#fff; font-weight:700; color:#312e81; }
+    .mcq-btn.correct { background:#dcfce7; border-color:#22c55e; }
+    .mcq-btn.wrong { background:#fee2e2; border-color:#ef4444; }
+
+    .unit-legend { font-size:.85rem; color:#64748b; margin-top:6px; }
+    .score-badge { font-weight:800; color:#4f46e5; }
+
+    .recap-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(52px,1fr)); gap:6px; }
+    .recap-item { background:#f1f5f9; border-radius:8px; padding:5px 2px; text-align:center; font-size:.7rem; line-height:1.3; color:#334155; }
+    .recap-item b { display:block; font-size:.85rem; }
+
+    .confetti-piece {
+        position:fixed; top:-20px; width:9px; height:14px; z-index:9999; pointer-events:none;
+        animation:confetti-fall linear forwards;
+    }
+    @keyframes confetti-fall {
+        to { top:110vh; transform:translateY(0) rotate(720deg); }
+    }
+</style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+<div id="app-nav"></div>
+
+<div class="container mx-auto px-4 py-8 max-w-3xl">
+    <header class="text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-indigo-900 mb-2">Équations en Physique</h1>
+        <p class="text-indigo-700">Comment exprimer une grandeur en fonction des autres</p>
+    </header>
+
+    <!-- Pour ajouter un module : dupliquer un bloc <div class="module-card"> ci-dessous,
+         ET ajouter l'entrée correspondante dans les groupes AppNav de CE fichier ET de chaque module_x.html -->
+    <div class="module-list">
+        <div class="module-group">
+            <div class="module-group-title">Principe</div>
+            <div class="module-card clickable" onclick="location.href='modules/module_1.html'">
+                <div class="module-card-head">
+                    <span class="module-badge">Module 1</span>
+                    <div class="module-card-body">
+                        <div class="module-card-title">Méthode pour utiliser une équation</div>
+                        <div class="module-card-desc">Apprendre les règles de base pour isoler une grandeur, à l'aide de manipulations guidées.</div>
+                    </div>
+                    <span class="module-card-arrow">›</span>
+                </div>
+            </div>
+            <div class="module-card clickable" onclick="location.href='modules/module_2.html'">
+                <div class="module-card-head">
+                    <span class="module-badge">Module 2</span>
+                    <div class="module-card-body">
+                        <div class="module-card-title">Exemple d'application</div>
+                        <div class="module-card-desc">Résoudre une équation complète en appliquant la méthode du module 1.</div>
+                    </div>
+                    <span class="module-card-arrow">›</span>
+                </div>
+            </div>
+            <div class="module-card clickable" onclick="location.href='modules/module_3.html'">
+                <div class="module-card-head">
+                    <span class="module-badge">Module 3</span>
+                    <div class="module-card-body">
+                        <div class="module-card-title">Entraînement</div>
+                        <div class="module-card-desc">S'entraîner à isoler une grandeur dans différentes équations.</div>
+                    </div>
+                    <span class="module-card-arrow">›</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="module-group">
+            <div class="module-group-title">Gestion des fractions</div>
+            <div class="module-card clickable" onclick="location.href='modules/module_4.html'">
+                <div class="module-card-head">
+                    <span class="module-badge">Module 4</span>
+                    <div class="module-card-body">
+                        <div class="module-card-title">Méthode</div>
+                        <div class="module-card-desc">Gérer des équations à plusieurs zones, avec une fraction multipliée par un autre terme.</div>
+                    </div>
+                    <span class="module-card-arrow">›</span>
+                </div>
+            </div>
+            <div class="module-card clickable" onclick="location.href='modules/module_5.html'">
+                <div class="module-card-head">
+                    <span class="module-badge">Module 5</span>
+                    <div class="module-card-body">
+                        <div class="module-card-title">Entraînement</div>
+                        <div class="module-card-desc">Aller plus loin avec des équations plus complexes.</div>
+                    </div>
+                    <span class="module-card-arrow">›</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+const nav = AppNav.init({
+    appName: 'Équations en Physique',
+    portalHref: '../index.html',
+    portalLabel: 'Toutes les applications',
+    onHome: () => {},
+    onNavigate: (key) => { window.location.href = 'modules/' + key + '.html'; },
+    groups: [
+        { title: 'Principe', items: [
+            { key: 'module_1', label: 'Module 1 : Méthode' },
+            { key: 'module_2', label: "Module 2 : Exemple d'application" },
+            { key: 'module_3', label: 'Module 3 : Entraînement' },
+        ]},
+        { title: 'Gestion des fractions', items: [
+            { key: 'module_4', label: 'Module 4 : Méthode' },
+            { key: 'module_5', label: 'Module 5 : Entraînement' },
+        ]},
+    ],
+});
+nav.setActive(null);
+
+</script>
+</body>
+</html>
