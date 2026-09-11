@@ -127,9 +127,21 @@
     body.dnd-active .insert-zone { opacity:.55; }
 
     /* ── Racine carrée ─────────── */
-    .sqrt-wrap { display:inline-flex; align-items:flex-end; margin:0 6px; flex-shrink:0; }
-    .sqrt-symbol { font-size:1.5rem; font-weight:700; color:#1e293b; margin-right:2px; align-self:center; }
-    .sqrt-inner { display:inline-flex; align-items:center; padding:0 4px 2px 4px; border-top:3px solid #1e293b; }
+    .sqrt-wrap { display:inline-flex; align-items:stretch; margin:0 6px; flex-shrink:0; }
+    .sqrt-hook { position:relative; width:13px; flex-shrink:0; }
+    .sqrt-hook::before {
+        content:''; position:absolute; left:0; bottom:0;
+        width:5px; height:12px;
+        border-left:3px solid #1e293b; border-bottom:3px solid #1e293b;
+        border-radius: 0 0 0 2px;
+    }
+    .sqrt-hook::after {
+        content:''; position:absolute; left:4px; bottom:9px; top:0;
+        width:3px; background:#1e293b;
+        transform-origin: bottom left;
+        transform: skewX(-13deg);
+    }
+    .sqrt-inner { display:inline-flex; align-items:center; padding:4px 6px 2px 6px; border-top:3px solid #1e293b; }
 
     /* pendant le glisser de l'outil racine carrée, les deux membres de
        l'équation (gauche et droite) se signalent comme zones de dépose */
@@ -137,7 +149,7 @@
         outline: 3px dashed #8b5cf6; outline-offset: 5px; border-radius: 10px;
         background: rgba(139,92,246,.06);
     }
-    .eq-side.drag-over { background: rgba(139,92,246,.16); border-radius: 10px; }
+    body.sqrt-dragging .eq-side.drag-over { background: rgba(139,92,246,.16); border-radius: 10px; }
 </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
@@ -264,7 +276,7 @@ function renderNode(node, path) {
         </div>`;
     }
     if (node.kind === 'sqrt') {
-        return `<div class="sqrt-wrap"><span class="sqrt-symbol">√</span><div class="sqrt-inner">${renderNode(node.inner, path + '.inner')}</div></div>`;
+        return `<div class="sqrt-wrap"><div class="sqrt-hook"></div><div class="sqrt-inner">${renderNode(node.inner, path + '.inner')}</div></div>`;
     }
     // seq
     let html = '';
@@ -294,7 +306,7 @@ function renderStatic(node) {
         </div>`;
     }
     if (node.kind === 'sqrt') {
-        return `<div class="sqrt-wrap"><span class="sqrt-symbol">√</span><div class="sqrt-inner">${renderStatic(node.inner)}</div></div>`;
+        return `<div class="sqrt-wrap"><div class="sqrt-hook"></div><div class="sqrt-inner">${renderStatic(node.inner)}</div></div>`;
     }
     return `<div class="eq-side">${node.slots.map((s,i) => (i>0?'<span class="mult-sign">×</span>':'') + renderStatic(s)).join('')}</div>`;
 }
