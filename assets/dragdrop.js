@@ -68,6 +68,7 @@
       if (ghost) { ghost.remove(); ghost = null; }
       setZoneHighlight(null);
       item.classList.remove('dragging');
+      document.body.classList.remove('dnd-active');
       pointerId = null;
     }
 
@@ -80,6 +81,7 @@
       pointerId = e.pointerId;
       try { item.setPointerCapture(pointerId); } catch (err) { /* ignore */ }
       item.classList.add('dragging');
+      document.body.classList.add('dnd-active');
       createGhost(e.clientX, e.clientY);
       if (onStart) onStart(item);
       e.preventDefault();
