@@ -89,7 +89,7 @@
     .palette-frac .dots { font-size:.8rem; letter-spacing:2px; color:#312e81; }
     .palette-frac .frac-line { width:28px; height:2px; margin:2px 0; background:#312e81; }
 
-    .module-badge {
+    .content-module-badge {
         display:inline-block; background:#4f46e5; color:#fff; font-size:.75rem; font-weight:800;
         padding:4px 12px; border-radius:999px; letter-spacing:.05em; margin-bottom:8px;
     }
@@ -574,7 +574,7 @@ function verifyStep() {
             msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur (qui vaut 1) pour le supprimer. Retire les 1 inutiles.";
         } else if (leftLoose) {
             msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur (qui vaut 1) pour le supprimer.";
-        } else if (onesElsewhere > 0) {
+        } else if (leftFull && onesElsewhere > 0) {
             msg = "✓ Retire les 1 inutiles.";
         } else {
             msg = "✓ Étape correcte, continue !";
@@ -768,8 +768,8 @@ let m3Idx = 0, m3Score = 0, m3Answers = [];
 
 function renderModule3Intro() {
     document.getElementById('app').innerHTML = `
-      <div class="bg-white rounded-xl shadow-lg p-6 border-l-8 border-purple-500">
-        <span class="module-badge">MODULE 3</span>
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <span class="content-module-badge">MODULE 3</span>
         <h2 class="text-2xl font-bold text-indigo-900 mb-3">Entraînement 1</h2>
         <p class="text-gray-700 mb-2">Tu vas résoudre une série d'équations issues de situations physiques et chimiques variées.</p>
         <p class="text-gray-700 mb-2"><b>Notation :</b> 2 points si l'équation est résolue en plusieurs étapes sans aucune erreur, 1 point s'il y a eu au moins une erreur avant d'y arriver, 0 point en cas d'abandon. La note finale est donnée en pourcentage.</p>
@@ -785,8 +785,8 @@ function renderModule3() {
     const app = document.getElementById('app');
     const progressPct = Math.round(m3Idx / module3Bank.length * 100);
     const head = `
-      <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border-l-8 border-purple-500">
-        <span class="module-badge">MODULE 3</span>
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <span class="content-module-badge">MODULE 3</span>
         <h2 class="text-2xl font-bold text-indigo-900 mb-1">Entraînement 1</h2>
         <p class="text-xs text-gray-400 uppercase font-bold mb-2">Question ${m3Idx+1}/${module3Bank.length} · Score : <span class="score-badge">${m3Score} pt${m3Score>1?'s':''}</span></p>
         <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${progressPct}%"></div></div>
@@ -794,7 +794,7 @@ function renderModule3() {
 
     if (q.type === 'mcq') {
         app.innerHTML = head + `
-          <div class="bg-white rounded-xl shadow-lg p-6 border-l-8 border-blue-500">
+          <div class="bg-white rounded-xl shadow-lg p-6">
             <p class="text-gray-700 text-lg mb-4">${q.question}</p>
             <div>${q.options.map(o => `<button class="mcq-btn" onclick="answerMcq('${o}')">${o}</button>`).join('')}</div>
             <div id="feedback" class="text-center mt-4 font-semibold text-lg"></div>
@@ -803,14 +803,14 @@ function renderModule3() {
     }
 
     app.innerHTML = head + `
-      <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border-l-8 border-blue-500">
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
         <p class="text-gray-700 text-lg mb-2">${q.intro}</p>
         <p class="unit-legend mb-2">${q.legend}</p>
         <div class="eq-line-static text-lg md:text-2xl my-4">${q.staticEqHtml}</div>
         <p class="font-bold text-indigo-900">Exprimer ${q.tiles.find(t=>t.id===q.target).label}.</p>
         <div class="text-right mt-2"><button onclick="abandonQuestion()" class="text-xs font-bold text-red-500 hover:text-red-700">Abandonner cette question →</button></div>
       </div>
-      <div class="bg-white rounded-xl shadow-lg p-6 border-l-8 border-indigo-500">${solveEditorHTML()}</div>`;
+      <div class="bg-white rounded-xl shadow-lg p-6">${solveEditorHTML()}</div>`;
     startSolveExercise({
         tiles: q.tiles, sample: q.sample, targetId: q.target,
         onSolved: (dm) => {
@@ -846,7 +846,7 @@ function finishModule3() {
     const isMax = m3Score >= m3TrueMaxScore;
     const recapHtml = m3Answers.map(a => `<div class="recap-item">Q${a.num}<br><b>${a.pts}/${a.max}</b></div>`).join('');
     document.getElementById('app').innerHTML = `
-      <div class="bg-white rounded-xl shadow-lg p-8 text-center border-l-8 border-green-500">
+      <div class="bg-white rounded-xl shadow-lg p-8 text-center">
         <h2 class="text-2xl font-bold text-indigo-900 mb-2">Entraînement 1 terminé !</h2>
         ${isMax ? `<p class="text-lg font-bold text-amber-600 mb-2">🏆 Score maximal ! Bravo, c'est un sans-faute parfait !</p>` : ''}
         <p class="text-lg text-gray-700 mb-4">Score : ${m3Score} / ${m3MaxScore} points (${pct}%)</p>

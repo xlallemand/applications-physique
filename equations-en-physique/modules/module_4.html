@@ -88,7 +88,7 @@
     .palette-frac .dots { font-size:.8rem; letter-spacing:2px; color:#312e81; }
     .palette-frac .frac-line { width:28px; height:2px; margin:2px 0; background:#312e81; }
 
-    .module-badge {
+    .content-module-badge {
         display:inline-block; background:#4f46e5; color:#fff; font-size:.75rem; font-weight:800;
         padding:4px 12px; border-radius:999px; letter-spacing:.05em; margin-bottom:8px;
     }
@@ -822,7 +822,7 @@ function verifyStep() {
             msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur (qui vaut 1) pour le supprimer. Retire les 1 inutiles.";
         } else if (leftLoose) {
             msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur (qui vaut 1) pour le supprimer.";
-        } else if (onesElsewhere > 0) {
+        } else if (leftFull && onesElsewhere > 0) {
             msg = "✓ Retire les 1 inutiles.";
         } else {
             msg = "✓ Étape correcte, continue !";
@@ -938,13 +938,13 @@ function renderTutorial() {
     const drill = module4Tutorial[m4TutIdx];
     const app = document.getElementById('app');
     app.innerHTML = `
-      <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border-l-8 border-purple-500">
-        <span class="module-badge">MODULE 4</span>
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <span class="content-module-badge">MODULE 4</span>
         <h2 class="text-2xl font-bold text-indigo-900 mb-1">Entraînement 2 — Découverte</h2>
         <p class="text-xs text-gray-400 uppercase font-bold mb-4">Question ${m4TutIdx+1}/20</p>
         <div class="rule-card"><p class="text-sm text-gray-700">${TUTORIAL_EXPLAIN}</p></div>
       </div>
-      <div id="drillCard" class="bg-white rounded-xl shadow-lg p-6 border-l-8 border-indigo-500"></div>`;
+      <div id="drillCard" class="bg-white rounded-xl shadow-lg p-6"></div>`;
     mountDrill(document.getElementById('drillCard'), { ...drill, onSuccess: advanceTutorial });
 }
 function advanceTutorial() {
@@ -1067,8 +1067,8 @@ let m4Idx = 0, m4Score = 0, m4Answers = [];
 
 function renderModule4Intro() {
     document.getElementById('app').innerHTML = `
-      <div class="bg-white rounded-xl shadow-lg p-6 border-l-8 border-purple-500">
-        <span class="module-badge">MODULE 4</span>
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <span class="content-module-badge">MODULE 4</span>
         <h2 class="text-2xl font-bold text-indigo-900 mb-3">Entraînement 2</h2>
         <p class="text-gray-700 mb-2">Tu vas maintenant résoudre des équations plus complexes, comportant parfois plus de deux zones (un terme multiplié par une fraction entière).</p>
         <p class="text-gray-700 mb-2"><b>Notation :</b> 2 points si l'équation est résolue en plusieurs étapes sans aucune erreur, 1 point s'il y a eu au moins une erreur avant d'y arriver, 0 point en cas d'abandon. La note finale est donnée en pourcentage.</p>
@@ -1085,20 +1085,20 @@ function renderModule4Question() {
     const displayNum = m4Idx + 5;
     const progressPct = Math.round(m4Idx / module4Bank.length * 100);
     app.innerHTML = `
-      <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border-l-8 border-purple-500">
-        <span class="module-badge">MODULE 4</span>
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <span class="content-module-badge">MODULE 4</span>
         <h2 class="text-2xl font-bold text-indigo-900 mb-1">Entraînement 2</h2>
         <p class="text-xs text-gray-400 uppercase font-bold mb-2">Question ${displayNum}/20 · Score : <span class="score-badge">${m4Score} pt${m4Score>1?'s':''}</span></p>
         <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${progressPct}%"></div></div>
       </div>
-      <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border-l-8 border-blue-500">
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
         <p class="text-gray-700 text-lg mb-2">${q.intro}</p>
         <p class="unit-legend mb-2">${q.legend}</p>
         <div class="eq-line-static text-lg md:text-2xl my-4">${q.staticEqHtml}</div>
         <p class="font-bold text-indigo-900">Exprimer ${q.tiles.find(t=>t.id===q.target).label}.</p>
         <div class="text-right mt-2"><button onclick="abandonQuestion4()" class="text-xs font-bold text-red-500 hover:text-red-700">Abandonner cette question →</button></div>
       </div>
-      <div class="bg-white rounded-xl shadow-lg p-6 border-l-8 border-indigo-500">${solveEditorHTML()}</div>`;
+      <div class="bg-white rounded-xl shadow-lg p-6">${solveEditorHTML()}</div>`;
     startSolveExercise({
         tiles: q.tiles, sample: q.sample, targetId: q.target,
         hasSqrt: q.hasSqrt, sqrtTargetId: q.sqrtTargetId, sqrtTargetLabel: q.sqrtTargetLabel, sqrtPlainId: q.sqrtPlainId, sqrtPlainLabel: q.sqrtPlainLabel,
@@ -1120,7 +1120,7 @@ function finishModule4() {
     const isMax = m4Score >= m4TrueMaxScore;
     const recapHtml = m4Answers.map(a => `<div class="recap-item">Q${a.num}<br><b>${a.pts}/${a.max}</b></div>`).join('');
     document.getElementById('app').innerHTML = `
-      <div class="bg-white rounded-xl shadow-lg p-8 text-center border-l-8 border-green-500">
+      <div class="bg-white rounded-xl shadow-lg p-8 text-center">
         <h2 class="text-2xl font-bold text-indigo-900 mb-2">Entraînement 2 terminé !</h2>
         ${isMax ? `<p class="text-lg font-bold text-amber-600 mb-2">🏆 Score maximal ! Bravo, c'est un sans-faute parfait !</p>` : ''}
         <p class="text-lg text-gray-700 mb-4">Score : ${m4Score} / ${m4MaxScore} points (${pct}%)</p>
