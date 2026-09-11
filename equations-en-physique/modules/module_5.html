@@ -128,19 +128,7 @@
 
     /* ── Racine carrée ─────────── */
     .sqrt-wrap { display:inline-flex; align-items:stretch; margin:0 6px; flex-shrink:0; }
-    .sqrt-hook { position:relative; width:14px; flex-shrink:0; }
-    .sqrt-hook::before {
-        content:''; position:absolute; left:0; bottom:0;
-        width:6px; height:13px;
-        border-left:3px solid #1e293b; border-bottom:3px solid #1e293b;
-        border-radius: 0 0 0 2px;
-        transform: rotate(-10deg);
-        transform-origin: bottom left;
-    }
-    .sqrt-hook::after {
-        content:''; position:absolute; left:5.5px; bottom:11px; top:0;
-        width:3px; background:#1e293b;
-    }
+    .sqrt-hook { flex-shrink:0; display:block; }
     .sqrt-inner { display:inline-flex; align-items:center; padding:4px 6px 2px 6px; border-top:3px solid #1e293b; }
 
     /* pendant le glisser de l'outil racine carrée, les deux membres de
@@ -276,7 +264,7 @@ function renderNode(node, path) {
         </div>`;
     }
     if (node.kind === 'sqrt') {
-        return `<div class="sqrt-wrap"><div class="sqrt-hook"></div><div class="sqrt-inner">${renderNode(node.inner, path + '.inner')}</div></div>`;
+        return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderNode(node.inner, path + '.inner')}</div></div>`;
     }
     // seq
     let html = '';
@@ -306,7 +294,7 @@ function renderStatic(node) {
         </div>`;
     }
     if (node.kind === 'sqrt') {
-        return `<div class="sqrt-wrap"><div class="sqrt-hook"></div><div class="sqrt-inner">${renderStatic(node.inner)}</div></div>`;
+        return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderStatic(node.inner)}</div></div>`;
     }
     return `<div class="eq-side">${node.slots.map((s,i) => (i>0?'<span class="mult-sign">×</span>':'') + renderStatic(s)).join('')}</div>`;
 }
@@ -320,6 +308,28 @@ function renderEquationZone() {
         renderNode(state.right, 'right') +
         `<button class="flip-btn" onclick="flipEquation()" title="Inverser le sens de l'équation">⇄</button>`;
     attachEqTileHandlers(zone);
+    sizeSqrtHooks(zone);
+}
+
+// dessine le crochet de chaque racine carrée en un seul tracé continu,
+// dimensionné en JS à la hauteur réelle du contenu qu'il enveloppe (une
+// simple tuile, une fraction, une somme...) : en utilisant des coordonnées
+// exprimées directement en pixels (1 unité de viewBox = 1 pixel), le
+// crochet garde une taille raisonnable et se raccorde exactement à la
+// barre du haut, sans discontinuité ni déformation, quelle que soit la
+// hauteur enveloppée
+function sizeSqrtHooks(container) {
+    container.querySelectorAll('.sqrt-hook').forEach(svg => {
+        const inner = svg.nextElementSibling;
+        if (!inner) return;
+        const h = Math.max(inner.offsetHeight, 24);
+        const hookH = Math.min(16, h - 6);
+        const d = `M0,${(h - hookH * 0.55).toFixed(1)} L${(hookH * 0.4).toFixed(1)},${(h - 2).toFixed(1)} L13,2`;
+        svg.setAttribute('viewBox', `0 0 14 ${h}`);
+        svg.setAttribute('width', '14');
+        svg.setAttribute('height', String(h));
+        svg.innerHTML = `<path d="${d}" fill="none" stroke="#1e293b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+    });
 }
 
 // associe le glisser-déposer tactile commun (assets/dragdrop.js) à chaque
@@ -346,6 +356,7 @@ function renderHistory() {
             ${renderStatic(st.right)}
             <span class="text-green-600 font-bold ml-2">✓</span>
         </div>`).join('');
+    sizeSqrtHooks(el);
 }
 function updateHint() {
     const h = document.getElementById('stepHint');
