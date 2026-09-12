@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 6 : Méthode</title>
+<title>Module 7 : Entraînement</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../../assets/theme.css">
 <script src="../../assets/nav.js"></script>
@@ -118,7 +118,6 @@
     @keyframes confetti-fall {
         to { top:110vh; transform:translateY(0) rotate(720deg); }
     }
-    /* ── Zones d'insertion à côté d'une fraction ou d'une somme ─────────── */
     .insert-zone {
         width:34px; min-height:56px; border:2px dashed #94a3b8; border-radius:8px;
         opacity:0; transition:opacity .15s; flex-shrink:0;
@@ -126,7 +125,6 @@
     .insert-zone.drag-over { background:#dbeafe; border-color:#3b82f6; opacity:1; }
     body.dnd-active .insert-zone { opacity:.55; }
 
-    /* ── Somme / différence de termes (module 6) ─────────── */
     .sum-wrap { display:inline-flex; align-items:center; gap:2px; flex-shrink:0; }
     .sum-parens { font-size:1.5rem; font-weight:800; color:#64748b; }
     .sum-term { display:inline-flex; align-items:center; gap:4px; border-radius:10px; padding:2px; touch-action:none; }
@@ -140,23 +138,11 @@
         100% { transform:rotateY(0deg) scale(1); }
     }
     .sum-sign.just-flipped { animation: signFlip 0.9s ease; }
-
-    /* pendant le glisser d'un terme additif, les deux membres de l'équation
-       se signalent comme zones de dépose (comme pour la racine carrée) */
     body.sumterm-dragging .eq-side {
         outline: 3px dashed #f59e0b; outline-offset: 5px; border-radius: 10px;
         background: rgba(245,158,11,.06);
     }
     body.sumterm-dragging .eq-side.drag-over { background: rgba(245,158,11,.16); border-radius: 10px; }
-
-    /* ── Diagramme "on applique la même operation aux deux cotes" ── */
-    .op-diagram { text-align:center; }
-    .op-diagram-arrows { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:0 2%; margin:2px 0 6px; }
-    .op-arrow-row { display:flex; align-items:center; gap:8px; }
-    .op-arrow-row-right { text-align:right; }
-    .op-arrow-svg { width:56px; height:44px; display:block; flex-shrink:0; }
-    .op-arrow-label { font-weight:800; color:#4f46e5; font-size:1.1rem; line-height:1.25; }
-    .op-arrow-note { display:block; font-weight:600; font-size:.72rem; color:#4338ca; white-space:nowrap; }
 </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
@@ -194,17 +180,11 @@ const nav = AppNav.init({
         ]},
     ],
 });
-nav.setActive('module_6');
-nav.setTitle('Module 6 : Méthode');
+nav.setActive('module_7');
+nav.setTitle('Module 7 : Entraînement');
 
 // ═══════════════════════════════════════════════════════════════
-// OUTILS DE CONSTRUCTION DE NŒUDS
-// une équation (membre gauche/droit) est une séquence de "zones" (slots)
-// multipliées entre elles : {kind:'seq', slots:[...]}
-// chaque zone est simple {kind:'simple', items:[...]}, une fraction
-// {kind:'frac', num, den}, ou une somme/différence de termes signés
-// {kind:'sum', terms:[{sign:1|-1, node:seq}, ...]} — chaque terme est
-// lui-même un produit (seq), ce qui permet des termes comme "½gt²"
+// OUTILS DE CONSTRUCTION DE NŒUDS (identique au module 6)
 // ═══════════════════════════════════════════════════════════════
 function tile(id,label){ return {id,label}; }
 function simple(items){ return { kind:'simple', items: items.map(t => ({...t})) }; }
@@ -215,19 +195,27 @@ function term1(sign, slots){ return { sign, node: seq(slots) }; }
 function sumNode(terms){ return { kind:'sum', terms: terms.map(t => ({ sign:t.sign, node:t.node })) }; }
 function idsOf(items){ return items.map(i => i.id); }
 function setEq(a,b){ if (a.length !== b.length) return false; const sa=[...a].sort(), sb=[...b].sort(); return sa.every((v,i)=>v===sb[i]); }
+function staticFracHtml(num, den) {
+    return `<span class="frac-wrap-static"><span class="frac-num-static">${num}</span><span class="frac-line-static"></span><span class="frac-den-static">${den}</span></span>`;
+}
+// affichage statique d'une somme de termes (pour l'énoncé figé, hors éditeur)
+function staticSumHtml(parts) {
+    // parts: [{sign, html}], le tout premier '+' est omis
+    return parts.map((p,i) => (i>0 || p.sign==='−' ? `<span class="eq-tile-static">${p.sign}</span>` : '') + p.html).join('');
+}
 
 // ═══════════════════════════════════════════════════════════════
 // ÉTAT GLOBAL
 // ═══════════════════════════════════════════════════════════════
 let state = { left: emptySeq(), right: emptySeq() };
+let history = [];
 let resolved = false;
+let stepOneValidated = false;
 let currentExercise = null;
-let viewMode = 'drill';
+let hadError = false;
+let viewMode = 'solve';
 let activeHighlightId = null;
-let currentDrill = null;
-let currentDrillOnSuccess = null;
-let currentDrillCfg = null;
-let lastMovedTerm = null; // {sidePath, termIdx} pour l'animation de bascule du signe
+let lastMovedTerm = null;
 
 function getNode(path) {
     const parts = path.split('.');
@@ -252,22 +240,17 @@ function setNode(path, newNode) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// AFFICHAGE
+// AFFICHAGE (identique au module 6)
 // ═══════════════════════════════════════════════════════════════
 function isOperatorTile(it) { return it.id === 'plus' || it.id === 'minus' || it.id === 'times'; }
-
 function renderInsertZone(sidePath, where) {
     return `<div class="insert-zone" data-side="${sidePath}" data-where="${where}"></div>`;
 }
-
-// une somme n'est déplaçable terme par terme que si elle n'est multipliée par
-// rien d'autre dans son "seq" parent (sinon il faut d'abord l'isoler)
 function isSumIsolated(sumPath) {
     const parentPath = sumPath.split('.').slice(0, -1).join('.');
     const parent = getNode(parentPath);
     return !!(parent && parent.kind === 'seq' && parent.slots.length === 1);
 }
-
 function renderNode(node, path) {
     if (node.kind === 'simple') {
         const items = node.items.map((it, idx) => {
@@ -312,7 +295,6 @@ function renderNode(node, path) {
     if (node.kind === 'sqrt') {
         return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderNode(node.inner, path + '.inner')}</div></div>`;
     }
-    // seq
     let html = '';
     const n = node.slots.length;
     const needsInsertBefore = node.slots[0].kind === 'frac' || node.slots[0].kind === 'sum';
@@ -326,7 +308,6 @@ function renderNode(node, path) {
     if (needsInsertAfter) html += renderInsertZone(path, 'end');
     return `<div class="eq-side" data-path="${path}">${html}</div>`;
 }
-
 function renderStatic(node) {
     if (node.kind === 'simple') {
         if (node.items.length === 0) return '<span class="slot-placeholder">…</span>';
@@ -353,12 +334,8 @@ function renderStatic(node) {
     if (node.kind === 'sqrt') {
         return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderStatic(node.inner)}</div></div>`;
     }
-    return `<div class="eq-side">${node.slots.map((s,i) => {
-        if (i === 0) return renderStatic(s);
-        return '<span class="mult-sign">×</span>' + renderStatic(s);
-    }).join('')}</div>`;
+    return `<div class="eq-side">${node.slots.map((s,i) => (i===0?'':'<span class="mult-sign">×</span>') + renderStatic(s)).join('')}</div>`;
 }
-
 function renderEquationZone() {
     const zone = document.getElementById('currentStepZone');
     if (!zone) return;
@@ -371,14 +348,10 @@ function renderEquationZone() {
     sizeSqrtHooks(zone);
     if (lastMovedTerm) {
         const el = zone.querySelector(`.sum-sign[data-sum-path="${lastMovedTerm.sidePath}"][data-term-idx="${lastMovedTerm.termIdx}"]`);
-        if (el) {
-            el.classList.add('just-flipped');
-            setTimeout(() => el.classList.remove('just-flipped'), 900);
-        }
+        if (el) { el.classList.add('just-flipped'); setTimeout(() => el.classList.remove('just-flipped'), 900); }
         lastMovedTerm = null;
     }
 }
-
 function sizeSqrtHooks(container) {
     container.querySelectorAll('.sqrt-hook').forEach(svg => {
         const inner = svg.nextElementSibling;
@@ -392,9 +365,6 @@ function sizeSqrtHooks(container) {
         svg.innerHTML = `<path d="${d}" fill="none" stroke="#1e293b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
     });
 }
-
-// associe le glisser-déposer tactile commun (assets/dragdrop.js) à chaque
-// tuile et à chaque terme additif fraîchement rendus
 function attachEqTileHandlers(zone) {
     zone.querySelectorAll('.eq-tile').forEach(el => {
         const path = el.dataset.path;
@@ -413,11 +383,30 @@ function attachEqTileHandlers(zone) {
         enableTileDrag(el, { type:'sumterm', from:sumPath, termIdx, sign:t.sign });
     });
 }
-function renderHistory() {}
-function updateHint() {}
+function renderHistory() {
+    const el = document.getElementById('stepsHistory');
+    if (!el) return;
+    el.innerHTML = history.map((st, i) => `
+        <div class="step-row eq-row py-3">
+            <span class="text-xs font-bold text-gray-400 mr-1">Étape ${i + 1}</span>
+            ${renderStatic(st.left)}
+            <span class="eq-sign" style="font-size:1.4rem;margin:0 12px;">=</span>
+            ${renderStatic(st.right)}
+            <span class="text-green-600 font-bold ml-2">✓</span>
+        </div>`).join('');
+    sizeSqrtHooks(el);
+}
+function updateHint() {
+    const h = document.getElementById('stepHint');
+    if (!h) return;
+    h.textContent = stepOneValidated
+        ? "Déplace les termes pour isoler la grandeur demandée à gauche, ou utilise ⇄ pour inverser le sens de l'équation."
+        : "L'équation est déjà recopiée : déplace directement les éléments pour isoler la grandeur demandée.";
+}
 function refreshView() {
     renderEquationZone();
-    if (viewMode === 'drill' && currentDrillCfg && currentDrillCfg.showPalette) buildDrillPalette();
+    buildPalette();
+    updateHint();
 }
 function showFeedback(msg, ok) {
     const f = document.getElementById('feedback');
@@ -427,7 +416,7 @@ function showFeedback(msg, ok) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// GLISSER-DÉPOSER
+// GLISSER-DÉPOSER (identique au module 6)
 // ═══════════════════════════════════════════════════════════════
 function pruneEmptySlot(path) {
     const parts = path.split('.');
@@ -460,14 +449,21 @@ function handleEmptied(path, removedId) {
     if (parts.length === 2) pruneEmptySlot(path);
     else applyEmptinessRuleFrac(path, removedId);
 }
-
 function processDrop(path, data) {
     if (data.type === 'frac') {
         const node = getNode(path);
-        if (!node || node.kind !== 'simple') return;
-        const f = frac(node.items, []);
-        f.forceDenCross = true;
-        setNode(path, f);
+        if (!node) return;
+        if (node.kind === 'simple') {
+            const f = frac(node.items, []);
+            f.forceDenCross = true;
+            setNode(path, f);
+        } else if (node.kind === 'sum') {
+            setNode(path, { kind:'frac', num: node, den: simple([]), forceDenCross:true });
+        } else if (node.kind === 'seq' && node.slots.length === 1) {
+            setNode(path + '.0', { kind:'frac', num: node.slots[0], den: simple([]), forceDenCross:true });
+        } else {
+            return;
+        }
         refreshView();
         return;
     }
@@ -485,7 +481,6 @@ function processDrop(path, data) {
     node.items.push({ id: data.id, label: data.label });
     refreshView();
 }
-
 function handleInsertDropAt(sidePath, where, data) {
     if (!data || data.type === 'frac' || data.type === 'sqrt' || data.type === 'sumterm') return;
     const side = getNode(sidePath);
@@ -502,7 +497,6 @@ function handleInsertDropAt(sidePath, where, data) {
     if (where === 'start') side.slots.unshift(newSlot); else side.slots.push(newSlot);
     refreshView();
 }
-
 function deleteItem(path, idx) {
     const node = getNode(path);
     if (!node || node.kind !== 'simple') return;
@@ -512,37 +506,23 @@ function deleteItem(path, idx) {
     if (node.items.length === 0) handleEmptied(path, removed.id);
     refreshView();
 }
-
 function enableTileDrag(el, data, onTap) {
     let startX = 0, startY = 0;
     el.addEventListener('pointerdown', e => { startX = e.clientX; startY = e.clientY; });
     DragDrop.enable(el, {
         zoneSelector: '.eq-tile, .slot-simple, .insert-zone, .eq-side, .sum-term',
         dragOverClass: 'drag-over',
-        onStart: () => {
-            if (data.type === 'sqrt') document.body.classList.add('sqrt-dragging');
-            if (data.type === 'sumterm') document.body.classList.add('sumterm-dragging');
-        },
+        onStart: () => { if (data.type === 'sumterm') document.body.classList.add('sumterm-dragging'); },
         onDrop: (item, zone, evt) => {
-            if (data.type === 'sqrt') document.body.classList.remove('sqrt-dragging');
             if (data.type === 'sumterm') document.body.classList.remove('sumterm-dragging');
             const moved = Math.hypot(evt.clientX - startX, evt.clientY - startY) > 8;
             if (onTap && !moved) { onTap(); return; }
             if (zone) handleZoneDrop(data, zone);
         },
-        onCancel: () => {
-            if (data.type === 'sqrt') document.body.classList.remove('sqrt-dragging');
-            if (data.type === 'sumterm') document.body.classList.remove('sumterm-dragging');
-        },
+        onCancel: () => { if (data.type === 'sumterm') document.body.classList.remove('sumterm-dragging'); },
     });
 }
-
 function handleZoneDrop(data, zone) {
-    if (data.type === 'sqrt') {
-        const side = zone.closest('.eq-side');
-        if (side) processSqrtDrop(side.dataset.path);
-        return;
-    }
     if (data.type === 'sumterm') {
         const side = zone.closest('.eq-side');
         if (side) processSumTermDrop(side.dataset.path, data);
@@ -554,7 +534,6 @@ function handleZoneDrop(data, zone) {
     }
     processDrop(zone.dataset.path, data);
 }
-
 function flipEquation() {
     if (resolved) return;
     const tmp = state.left;
@@ -562,20 +541,10 @@ function flipEquation() {
     state.right = tmp;
     refreshView();
 }
-
-// ═══════════════════════════════════════════════════════════════
-// TERMES ADDITIFS (+ / -)
-// ═══════════════════════════════════════════════════════════════
-// retire un terme d'une somme ; si la somme d'origine ne contient plus
-// aucun terme (cas normalement impossible ici, un terme se déplace
-// toujours vers l'autre côté) la zone est laissée vide
 function removeSumTerm(sumPath, termIdx) {
     const sum = getNode(sumPath);
     if (!sum || sum.kind !== 'sum') return null;
     const [removed] = sum.terms.splice(termIdx, 1);
-    // un seul terme positif restant : la parenthèse n'a plus de sens, on
-    // déballe la somme pour retrouver un produit ordinaire (nécessaire pour
-    // que l'isolement final soit reconnu comme complet)
     if (sum.terms.length === 1 && sum.terms[0].sign === 1) {
         let repl = sum.terms[0].node;
         while (repl.kind === 'seq' && repl.slots.length === 1) repl = repl.slots[0];
@@ -583,10 +552,6 @@ function removeSumTerm(sumPath, termIdx) {
     }
     return removed;
 }
-// dépose d'un terme additif sur le membre entier de l'autre côté : le terme
-// rejoint (ou crée) la somme de ce côté, avec son signe inversé — la cible ne
-// doit jamais être une zone multiplicative ni l'intérieur d'une fraction,
-// d'où le ciblage sur l'ensemble du membre (comme pour la racine carrée)
 function processSumTermDrop(sidePath, data) {
     if (sidePath !== 'left' && sidePath !== 'right') return;
     if (data.from === sidePath) { refreshView(); return; }
@@ -606,53 +571,11 @@ function processSumTermDrop(sidePath, data) {
     lastMovedTerm = { sidePath: sidePath + '.0', termIdx: destTermIdx };
     refreshView();
 }
-
-// ═══════════════════════════════════════════════════════════════
-// RACINE CARRÉE (héritée des modules 4/5, non utilisée par défaut ici)
-// ═══════════════════════════════════════════════════════════════
-// retrouve le signe effectif (cumulé à travers les sommes imbriquées) avec
-// lequel une tuile isolée apparaît dans un membre, ou null si absente /
-// non isolée seule dans sa zone — sert aux vérifications des manipulations
-function findTermSign(node, id) {
-    function walk(n, mult) {
-        if (!n) return null;
-        if (n.kind === 'simple') return (n.items.length === 1 && n.items[0].id === id) ? mult : null;
-        if (n.kind === 'seq') { for (const s of n.slots) { const r = walk(s, mult); if (r !== null) return r; } return null; }
-        if (n.kind === 'frac') { const rn = walk(n.num, mult); return rn !== null ? rn : walk(n.den, mult); }
-        if (n.kind === 'sum') { for (const t of n.terms) { const r = walk(t.node, mult * t.sign); if (r !== null) return r; } return null; }
-        return null;
-    }
-    return walk(node, 1);
-}
-// simple test de présence (sans notion de signe ni d'isolement), utilisé pour
-// vérifier qu'un terme multiplicatif n'a pas bougé pendant la manipulation
-function existsInTree(node, id) {
-    if (!node) return false;
-    if (node.kind === 'simple') return node.items.some(i => i.id === id);
-    if (node.kind === 'seq') return node.slots.some(s => existsInTree(s, id));
-    if (node.kind === 'frac') return existsInTree(node.num, id) || existsInTree(node.den, id);
-    if (node.kind === 'sum') return node.terms.some(t => existsInTree(t.node, id));
-    return false;
-}
-
-function isFullyIsolatedSeq(node, targetId) {
-    return node && node.kind === 'seq' && node.slots.length === 1
-        && node.slots[0].kind === 'simple' && node.slots[0].items.length === 1
-        && node.slots[0].items[0].id === targetId;
-}
 function processSqrtDrop() {}
 
 // ═══════════════════════════════════════════════════════════════
 // PALETTE
 // ═══════════════════════════════════════════════════════════════
-function addPaletteTile(t) {
-    const pal = document.getElementById('palette');
-    const el = document.createElement('div');
-    el.className = 'palette-tile';
-    el.innerHTML = t.label;
-    enableTileDrag(el, { type:'tile', id:t.id, label:t.label });
-    pal.appendChild(el);
-}
 function countIdAnywhere(id) {
     function c(node) {
         if (!node) return 0;
@@ -664,14 +587,32 @@ function countIdAnywhere(id) {
     }
     return c(state.left) + c(state.right);
 }
-const REUSABLE_TILE_IDS = new Set(['one', 'times', 'plus', 'minus']);
-function buildDrillPalette() {
+function addPaletteTile(t) {
+    const pal = document.getElementById('palette');
+    const el = document.createElement('div');
+    el.className = 'palette-tile';
+    el.innerHTML = t.label;
+    enableTileDrag(el, { type:'tile', id:t.id, label:t.label });
+    pal.appendChild(el);
+}
+function addFracPaletteTile() {
     const pal = document.getElementById('palette');
     if (!pal) return;
+    const el = document.createElement('div');
+    el.className = 'palette-tile palette-frac';
+    el.innerHTML = '<span class="dots">···</span><span class="frac-line"></span><span class="dots">···</span>';
+    enableTileDrag(el, { type:'frac' });
+    pal.appendChild(el);
+}
+const REUSABLE_TILE_IDS = new Set(['one', 'times', 'plus', 'minus']);
+function buildPalette() {
+    const pal = document.getElementById('palette');
+    if (!pal || !currentExercise) return;
     pal.innerHTML = '';
-    (currentDrillCfg && currentDrillCfg.paletteTiles || [])
+    (currentExercise.tiles || [])
         .filter(t => REUSABLE_TILE_IDS.has(t.id) || countIdAnywhere(t.id) === 0)
         .forEach(addPaletteTile);
+    addFracPaletteTile();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -704,174 +645,330 @@ function isSlotEmpty(node) {
     if (node.kind === 'sum') return node.terms.some(t => isSlotEmpty(t.node));
     return node.slots.some(isSlotEmpty);
 }
+function countOnesIn(node) {
+    if (node.kind === 'simple') return node.items.filter(i => i.id === 'one').length;
+    if (node.kind === 'sqrt') return countOnesIn(node.inner);
+    if (node.kind === 'frac') return countOnesIn(node.num) + countOnesIn(node.den);
+    if (node.kind === 'sum') return node.terms.reduce((s, t) => s + countOnesIn(t.node), 0);
+    return node.slots.reduce((s, sl) => s + countOnesIn(sl), 0);
+}
+function isFullyIsolatedSeq(node, targetId) {
+    return node && node.kind === 'seq' && node.slots.length === 1
+        && node.slots[0].kind === 'simple' && node.slots[0].items.length === 1
+        && node.slots[0].items[0].id === targetId;
+}
+function isIsolatedSeq(node, targetId) {
+    if (!node || node.kind !== 'seq' || node.slots.length !== 1) return false;
+    const s = node.slots[0];
+    if (s.kind === 'simple') return s.items.length === 1 && s.items[0].id === targetId;
+    if (s.kind === 'frac') return s.num.kind === 'simple' && s.num.items.length === 1 && s.num.items[0].id === targetId
+        && s.den.kind === 'simple' && s.den.items.length === 1 && s.den.items[0].id === 'one';
+    return false;
+}
 
 // ═══════════════════════════════════════════════════════════════
-// MOTEUR DE DRILL (manipulations guidées)
+// ÉDITEUR DE RÉSOLUTION (questions notées)
 // ═══════════════════════════════════════════════════════════════
-function mountDrill(container, drillCfg, explainHtml) {
-    currentDrillCfg = drillCfg;
-    viewMode = 'drill';
-    state = { left: drillCfg.left(), right: drillCfg.right() };
-    activeHighlightId = drillCfg.highlight || null;
-    currentDrill = { check: drillCfg.check, partialMessage: drillCfg.partialMessage };
-    currentDrillOnSuccess = drillCfg.onSuccess;
-    container.innerHTML = `
-        <div class="flex items-center justify-end mb-2">
-            <button onclick="resetDrill()" class="text-xs font-bold text-red-500 hover:text-red-700">↺ Recommencer</button>
-        </div>
-        <p class="text-gray-700 mb-4">${drillCfg.instruction}</p>
-        ${drillCfg.opDiagram ? `
-        <div class="op-diagram mb-2">
-            <div class="eq-line-static text-lg md:text-xl">${renderStatic(drillCfg.left())}<span class="eq-sign" style="font-size:1.4rem;margin:0 10px;">=</span>${renderStatic(drillCfg.right())}</div>
-            <div class="op-diagram-arrows">
-                <div class="op-arrow-row op-arrow-row-left">
-                    <span class="op-arrow-label">${drillCfg.opDiagram.label}${drillCfg.opDiagram.noteLeft ? `<span class="op-arrow-note">${drillCfg.opDiagram.noteLeft}</span>` : ''}</span>
-                    <svg viewBox="0 0 60 46" class="op-arrow-svg"><path d="M46,4 Q12,10 16,38" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round"/><path d="M16,38 L7,26 M16,38 L25,29" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </div>
-                <div class="op-arrow-row op-arrow-row-right">
-                    <svg viewBox="0 0 60 46" class="op-arrow-svg" style="transform:scaleX(-1)"><path d="M46,4 Q12,10 16,38" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round"/><path d="M16,38 L7,26 M16,38 L25,29" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    <span class="op-arrow-label">${drillCfg.opDiagram.label}${drillCfg.opDiagram.noteRight ? `<span class="op-arrow-note">${drillCfg.opDiagram.noteRight}</span>` : ''}</span>
-                </div>
-            </div>
-        </div>` : ''}
+function solveEditorHTML() {
+    return `
+    <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold text-gray-400 uppercase">Résolution</span>
+        <button onclick="resetSolveExercise()" class="text-xs font-bold text-red-500 hover:text-red-700">↺ Recommencer</button>
+    </div>
+    <div id="stepsHistory" class="mb-2"></div>
+    <div id="workZone">
+        <div id="stepHint" class="text-center text-sm text-indigo-700 font-semibold mb-3"></div>
         <div id="currentStepZone" class="eq-row py-8 border-2 border-dashed border-indigo-300 rounded-lg bg-indigo-50" style="min-height:110px;"></div>
-        ${drillCfg.showPalette ? `<div class="mt-4"><div class="text-xs font-bold text-gray-500 uppercase mb-2">Glisse les éléments nécessaires</div><div id="palette" class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200"></div></div>` : ''}
-        ${explainHtml || ''}
-        <div class="text-center mt-2">
-            <button id="verifyDrillBtn" onclick="checkDrill()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">✓ Valider</button>
-            <button id="nextDrillBtn" onclick="currentDrillOnSuccess()" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">Suivant →</button>
+        <div class="mt-6">
+            <div class="text-xs font-bold text-gray-500 uppercase mb-2">Glisse les éléments dans l'équation</div>
+            <div id="palette" class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200"></div>
         </div>
-        <div class="text-center mt-2">
-            <button id="skipDrillBtn" onclick="currentDrillOnSuccess()" class="text-xs font-semibold text-gray-400 hover:text-gray-600">Passer à la suite quand même →</button>
+        <div class="text-center mt-6">
+            <button onclick="verifyStep()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">✓ Vérifier l'étape</button>
         </div>
-        <div id="feedback" class="text-center mt-4 font-semibold text-lg"></div>`;
-    refreshView();
+    </div>
+    <div id="doneMsg" class="hidden text-center text-xl font-bold text-green-600 py-6"></div>
+    <div id="feedback" class="text-center mt-4 font-semibold text-lg"></div>`;
 }
-function resetDrill() {
-    if (!currentDrillCfg) return;
-    viewMode = 'drill';
-    state = { left: currentDrillCfg.left(), right: currentDrillCfg.right() };
-    activeHighlightId = currentDrillCfg.highlight || null;
-    const vBtn = document.getElementById('verifyDrillBtn');
-    const nBtn = document.getElementById('nextDrillBtn');
-    const sBtn = document.getElementById('skipDrillBtn');
-    if (vBtn) vBtn.classList.remove('hidden');
-    if (nBtn) nBtn.classList.add('hidden');
-    if (sBtn) sBtn.classList.remove('hidden');
+function startSolveExercise(cfg) {
+    currentExercise = cfg;
+    viewMode = 'solve';
+    state = { left: cfg.initialLeft(), right: cfg.initialRight() };
+    history = [];
+    stepOneValidated = true;
+    resolved = false;
+    hadError = false;
+    activeHighlightId = null;
+    refreshView();
+    renderHistory();
+}
+function resetSolveExercise() {
+    if (!currentExercise) return;
+    state = { left: currentExercise.initialLeft(), right: currentExercise.initialRight() };
+    history = [];
+    stepOneValidated = true;
+    resolved = false;
+    activeHighlightId = null;
+    refreshView();
+    renderHistory();
     showFeedback('', false);
-    refreshView();
 }
-function checkDrill() {
-    if (!currentDrill) return;
-    const result = currentDrill.check(state);
-    const partialMessage = typeof currentDrill.partialMessage === 'function' ? currentDrill.partialMessage(state) : currentDrill.partialMessage;
-    if (result === true) {
-        showFeedback("✓ Bravo, c'est exactement ça !", true);
-        document.getElementById('verifyDrillBtn').classList.add('hidden');
-        document.getElementById('nextDrillBtn').classList.remove('hidden');
-        const sBtn = document.getElementById('skipDrillBtn');
-        if (sBtn) sBtn.classList.add('hidden');
-    } else if (result === 'partial') {
-        showFeedback("✓ " + (partialMessage || "C'est bon, mais ce n'est pas encore complet."), true);
+function verifyStep() {
+    if (isSlotEmpty(state.left) || isSlotEmpty(state.right)) {
+        showFeedback("✕ Complète les deux membres de l'équation avant de vérifier.", false);
+        hadError = true;
+        return;
+    }
+    let equationTrue = true;
+    for (let i = 0; i < 5 && equationTrue; i++) {
+        const v = currentExercise.sample();
+        const l = evaluateNode(state.left, v);
+        const r = evaluateNode(state.right, v);
+        if (!isFinite(l) || !isFinite(r) || Math.abs(l - r) > 1e-6 * Math.max(1, Math.abs(r))) equationTrue = false;
+    }
+    if (!equationTrue) {
+        showFeedback("✕ Cette équation n'est pas correcte : vérifie tes calculs.", false);
+        hadError = true;
+        return;
+    }
+    history.push(JSON.parse(JSON.stringify(state)));
+    renderHistory();
+    stepOneValidated = true;
+
+    const target = currentExercise.targetId;
+    const leftFull  = isFullyIsolatedSeq(state.left, target);
+    const rightFull = !leftFull && isFullyIsolatedSeq(state.right, target);
+    const leftLoose  = !leftFull && isIsolatedSeq(state.left, target);
+    const rightLoose = !rightFull && !leftLoose && isIsolatedSeq(state.right, target);
+
+    const onesTotal = countOnesIn(state.left) + countOnesIn(state.right);
+    const onesElsewhere = onesTotal - (leftLoose ? 1 : 0) - (rightLoose ? 1 : 0);
+    const complete = leftFull && onesElsewhere === 0;
+
+    if (complete) {
+        resolved = true;
+        document.getElementById('workZone').classList.add('hidden');
+        const dm = document.getElementById('doneMsg');
+        dm.classList.remove('hidden');
+        showFeedback('', true);
+        if (currentExercise.onSolved) currentExercise.onSolved(dm);
+        else dm.innerHTML = '🎉 Équation résolue !';
     } else {
-        showFeedback("✕ Ce n'est pas encore ça, réessaie.", false);
+        let msg;
+        if (rightFull) {
+            msg = "✓ Étape correcte ! Il ne reste plus qu'à inverser le sens de l'équation avec ⇄.";
+        } else if (rightLoose) {
+            msg = "✓ Étape correcte ! Inverse le sens de l'équation avec ⇄, puis retire le dénominateur qui vaut 1.";
+        } else if (leftLoose && onesElsewhere > 0) {
+            msg = "✓ Étape correcte ! Retire les 1 inutiles.";
+        } else if (leftLoose) {
+            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur pour le supprimer.";
+        } else if (leftFull && onesElsewhere > 0) {
+            msg = "✓ Retire les 1 inutiles.";
+        } else {
+            msg = "✓ Étape correcte, continue !";
+        }
+        showFeedback(msg, true);
+        state = JSON.parse(JSON.stringify(state));
+        refreshView();
     }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// MODULE 6 — GÉRER LES + ET LES - (méthode)
-// équation utilisée pour tous les exemples : P2 - P1 = ρ×g×(z1-z2)
-// (différence de pression entre deux points dans un liquide)
+// MODULE 7 — ENTRAÎNEMENT (gérer les + et les -)
 // ═══════════════════════════════════════════════════════════════
-const TUTORIAL_EXPLAIN = "Dans une équation, un terme additif (relié aux autres par un + ou un −) peut lui aussi passer de l'autre côté du signe =. Contrairement à un terme multiplicatif, il ne change pas de position (haut/bas) : il change de <b>signe</b>.";
-
-const m6Start = {
-    left:  () => seq([sumNode([term1(1,[simple([tile('P2','P<sub>2</sub>')])]), term1(-1,[simple([tile('P1','P<sub>1</sub>')])])])]),
-    right: () => seq([simple([tile('rho','ρ'), tile('g','g')]), sumNode([term1(1,[simple([tile('z1','z<sub>1</sub>')])]), term1(-1,[simple([tile('z2','z<sub>2</sub>')])])])]),
+// P2 - P1 = ρ×g×(z1-z2)
+const m7StartPressure = {
+    initialLeft:  () => seq([sumNode([term1(1,[simple([tile('P2','P<sub>2</sub>')])]), term1(-1,[simple([tile('P1','P<sub>1</sub>')])])])]),
+    initialRight: () => seq([simple([tile('rho','ρ'), tile('g','g')]), sumNode([term1(1,[simple([tile('z1','z<sub>1</sub>')])]), term1(-1,[simple([tile('z2','z<sub>2</sub>')])])])]),
 };
+function samplePressure() {
+    const rho = 800 + Math.random()*400, g = 9.8, z1 = 1+Math.random()*9, z2 = Math.random()*z1, P1 = 1e5+Math.random()*1e4;
+    return { P1, P2: P1 + rho*g*(z1-z2), rho, g, z1, z2 };
+}
+const pressureLegend = "P<sub>2</sub>, P<sub>1</sub> : pressions (Pa) · ρ : masse volumique (kg/m³) · g : intensité de pesanteur (N/kg) · z<sub>1</sub>, z<sub>2</sub> : altitudes (m)";
+const pressureIntro = "On étudie la différence de pression entre deux points d'un liquide.";
+const pressureStaticEq = `<span class="eq-tile-static">P<sub>2</sub></span>${staticSumHtml([{sign:'−',html:'<span class="eq-tile-static">P<sub>1</sub></span>'}])}<span class="eq-sign">=</span><span class="eq-tile-static">ρ</span><span class="eq-tile-static">g</span><span class="sum-parens">(</span>${staticSumHtml([{sign:'+',html:'<span class="eq-tile-static">z<sub>1</sub></span>'},{sign:'−',html:'<span class="eq-tile-static">z<sub>2</sub></span>'}])}<span class="sum-parens">)</span>`;
+const pressureTiles = [tile('P1','P<sub>1</sub>'), tile('P2','P<sub>2</sub>'), tile('rho','ρ'), tile('g','g'), tile('z1','z<sub>1</sub>'), tile('z2','z<sub>2</sub>')];
 
-const module6Tutorial = [
-    {
-        instruction: "Voici l'équation P<sub>2</sub> − P<sub>1</sub> = ρ×g×(z<sub>1</sub>−z<sub>2</sub>). Glisse <b>P<sub>2</sub></b> (positif, à gauche) vers l'autre côté.",
-        left: m6Start.left, right: m6Start.right,
-        opDiagram: { label: '−P₂', noteLeft: '(retire le +P₂)', noteRight: '(ajoute un −P₂)' },
-        check: (st) => {
-            if (findTermSign(st.left, 'P2') !== null) return false;
-            if (findTermSign(st.right, 'P2') !== -1) return false;
-            if (findTermSign(st.left, 'P1') !== -1) return false;
-            if (findTermSign(st.right, 'z1') !== 1 || findTermSign(st.right, 'z2') !== -1) return false;
-            if (!existsInTree(st.right, 'rho') || !existsInTree(st.right, 'g')) return false;
-            return true;
-        },
-        partialMessage: "Vérifie que P₂ est bien devenu négatif de l'autre côté."
-    },
-    {
-        instruction: "Repartons de la même équation. Cette fois, glisse <b>P<sub>1</sub></b> (négatif, à gauche) vers l'autre côté.",
-        left: m6Start.left, right: m6Start.right,
-        opDiagram: { label: '+P₁', noteLeft: '(retire le −P₁)', noteRight: '(ajoute un +P₁)' },
-        check: (st) => {
-            if (findTermSign(st.left, 'P1') !== null) return false;
-            if (findTermSign(st.right, 'P1') !== 1) return false;
-            if (findTermSign(st.left, 'P2') !== 1) return false;
-            if (findTermSign(st.right, 'z1') !== 1 || findTermSign(st.right, 'z2') !== -1) return false;
-            if (!existsInTree(st.right, 'rho') || !existsInTree(st.right, 'g')) return false;
-            return true;
-        },
-        partialMessage: "Vérifie que P₁ est bien devenu positif de l'autre côté."
-    },
-    {
-        instruction: "À droite, (z<sub>1</sub>−z<sub>2</sub>) est multiplié par ρ et g : impossible de déplacer z<sub>1</sub> ou z<sub>2</sub> directement. Isole d'abord la parenthèse en passant <b>ρ</b> et <b>g</b> de l'autre côté (comme un terme multiplicatif ordinaire).",
-        left:  () => seq([simple([tile('P2','P<sub>2</sub>')])]),
-        right: () => seq([simple([tile('rho','ρ'), tile('g','g')]), sumNode([term1(1,[simple([tile('z1','z<sub>1</sub>')])]), term1(-1,[simple([tile('z2','z<sub>2</sub>')])])])]),
-        check: (st) => {
-            if (st.right.kind !== 'seq' || st.right.slots.length !== 1 || st.right.slots[0].kind !== 'sum') return false;
-            return st.left.kind === 'seq' && st.left.slots.length === 1 && st.left.slots[0].kind === 'simple'
-                && setEq(idsOf(st.left.slots[0].items), ['P2','rho','g']);
-        }
-    },
-    {
-        instruction: "La somme est maintenant isolée : plus rien ne la multiplie. Tu peux déplacer <b>z<sub>1</sub></b> ou <b>z<sub>2</sub></b> librement, comme n'importe quel terme additif. Glisse <b>z<sub>2</sub></b> à gauche.",
-        left:  () => seq([simple([tile('P2','P<sub>2</sub>'), tile('rho','ρ'), tile('g','g')])]),
-        right: () => seq([sumNode([term1(1,[simple([tile('z1','z<sub>1</sub>')])]), term1(-1,[simple([tile('z2','z<sub>2</sub>')])])])]),
-        highlight: 'z2',
-        check: (st) => {
-            if (findTermSign(st.right, 'z2') !== null) return false;
-            if (findTermSign(st.left, 'z2') !== 1) return false;
-            if (findTermSign(st.right, 'z1') !== 1) return false;
-            if (!existsInTree(st.left, 'P2') || !existsInTree(st.left, 'rho') || !existsInTree(st.left, 'g')) return false;
-            return true;
-        }
-    }
+// Q = m·c·(Tf-Ti)
+const m7StartHeat = {
+    initialLeft:  () => seq([simple([tile('Q','Q')])]),
+    initialRight: () => seq([simple([tile('m','m'), tile('c','c')]), sumNode([term1(1,[simple([tile('Tf','T<sub>f</sub>')])]), term1(-1,[simple([tile('Ti','T<sub>i</sub>')])])])]),
+};
+function sampleHeat() {
+    const m = 0.1+Math.random()*9.9, c = 1000+Math.random()*3000, Ti = 10+Math.random()*20, Tf = Ti+1+Math.random()*79;
+    return { Q: m*c*(Tf-Ti), m, c, Ti, Tf };
+}
+const heatLegend = "Q : énergie thermique reçue (J) · m : masse (kg) · c : capacité thermique massique (J/(kg·K)) · T<sub>f</sub>, T<sub>i</sub> : températures finale et initiale (K)";
+const heatIntro = "Une masse m d'eau passe de la température T<sub>i</sub> à la température T<sub>f</sub>.";
+const heatStaticEq = `<span class="eq-tile-static">Q</span><span class="eq-sign">=</span><span class="eq-tile-static">m</span><span class="eq-tile-static">c</span><span class="sum-parens">(</span>${staticSumHtml([{sign:'+',html:'<span class="eq-tile-static">T<sub>f</sub></span>'},{sign:'−',html:'<span class="eq-tile-static">T<sub>i</sub></span>'}])}<span class="sum-parens">)</span>`;
+const heatTiles = [tile('Q','Q'), tile('m','m'), tile('c','c'), tile('Tf','T<sub>f</sub>'), tile('Ti','T<sub>i</sub>')];
+
+// Ep = m·g·(z-z0)
+const m7StartEp = {
+    initialLeft:  () => seq([simple([tile('Ep','E<sub>p</sub>')])]),
+    initialRight: () => seq([simple([tile('m','m'), tile('g','g')]), sumNode([term1(1,[simple([tile('z','z')])]), term1(-1,[simple([tile('z0','z<sub>0</sub>')])])])]),
+};
+function sampleEp() {
+    const m = 0.1+Math.random()*99.9, g = 9.8, z = 1+Math.random()*99, z0 = Math.random()*z;
+    return { Ep: m*g*(z-z0), m, g, z, z0 };
+}
+const epLegend = "E<sub>p</sub> : énergie potentielle de pesanteur (J) · m : masse (kg) · g : intensité de pesanteur (N/kg) · z, z<sub>0</sub> : altitudes (m)";
+const epIntro = "On étudie l'énergie potentielle de pesanteur d'un objet, en prenant l'altitude z<sub>0</sub> comme référence.";
+const epStaticEq = `<span class="eq-tile-static">E<sub>p</sub></span><span class="eq-sign">=</span><span class="eq-tile-static">m</span><span class="eq-tile-static">g</span><span class="sum-parens">(</span>${staticSumHtml([{sign:'+',html:'<span class="eq-tile-static">z</span>'},{sign:'−',html:'<span class="eq-tile-static">z<sub>0</sub></span>'}])}<span class="sum-parens">)</span>`;
+const epTiles = [tile('Ep','E<sub>p</sub>'), tile('m','m'), tile('g','g'), tile('z','z'), tile('z0','z<sub>0</sub>')];
+
+// Em = 1/2·m·v² + m·g·z
+const m7StartEm = {
+    initialLeft:  () => seq([simple([tile('Em','E<sub>m</sub>')])]),
+    initialRight: () => seq([sumNode([
+        term1(1, [simple([tile('half','1/2'), tile('m','m'), tile('v2','v²')])]),
+        term1(1, [simple([tile('mB','m'), tile('g','g'), tile('z','z')])])
+    ])]),
+};
+function sampleEm() {
+    const m = 0.1+Math.random()*99.9, v = 1+Math.random()*49, g = 9.8, z = 1+Math.random()*99;
+    return { Em: 0.5*m*v*v + m*g*z, half:0.5, m, mB:m, v2:v*v, g, z };
+}
+const emLegend = "E<sub>m</sub> : énergie mécanique (J) · m : masse (kg) · v : vitesse (m/s) · g : intensité de pesanteur (N/kg) · z : altitude (m)";
+const emIntro = "On étudie l'énergie mécanique d'un objet, somme de son énergie cinétique et de son énergie potentielle de pesanteur.";
+const emStaticEq = `<span class="eq-tile-static">E<sub>m</sub></span><span class="eq-sign">=</span>${staticFracHtml('1','2')}<span class="eq-tile-static">m</span><span class="eq-tile-static">v²</span>${staticSumHtml([{sign:'+',html:'<span class="eq-tile-static">m</span><span class="eq-tile-static">g</span><span class="eq-tile-static">z</span>'}])}`;
+const emTiles = [tile('Em','E<sub>m</sub>'), tile('half','1/2'), tile('m','m'), tile('v2','v²'), tile('mB','m'), tile('g','g'), tile('z','z')];
+
+// y = y0 + v0·t - 1/2·g·t²
+const m7StartFall = {
+    initialLeft:  () => seq([simple([tile('y','y')])]),
+    initialRight: () => seq([sumNode([
+        term1(1, [simple([tile('y0','y<sub>0</sub>')])]),
+        term1(1, [simple([tile('v0','v<sub>0</sub>'), tile('t','t')])]),
+        term1(-1, [simple([tile('half','1/2'), tile('g','g'), tile('t2','t²')])])
+    ])]),
+};
+function sampleFall() {
+    const y0 = 1+Math.random()*9, v0 = 1+Math.random()*29, t = 0.5+Math.random()*9.5, g = 9.8;
+    return { y: y0 + v0*t - 0.5*g*t*t, y0, v0, t, half:0.5, g, t2:t*t };
+}
+const fallLegend = "y : altitude (m) · y<sub>0</sub> : altitude initiale (m) · v<sub>0</sub> : vitesse initiale (m/s) · t : durée (s) · g : intensité de pesanteur (N/kg)";
+const fallIntro = "On étudie l'altitude d'un objet lancé verticalement vers le haut avec la vitesse initiale v<sub>0</sub>, depuis l'altitude y<sub>0</sub>.";
+const fallStaticEq = `<span class="eq-tile-static">y</span><span class="eq-sign">=</span>${staticSumHtml([{sign:'+',html:'<span class="eq-tile-static">y<sub>0</sub></span>'},{sign:'+',html:'<span class="eq-tile-static">v<sub>0</sub></span><span class="eq-tile-static">t</span>'},{sign:'−',html:staticFracHtml('1','2')+'<span class="eq-tile-static">g</span><span class="eq-tile-static">t²</span>'}])}`;
+const fallTiles = [tile('y','y'), tile('y0','y<sub>0</sub>'), tile('v0','v<sub>0</sub>'), tile('t','t'), tile('half','1/2'), tile('g','g'), tile('t2','t²')];
+
+const module7Bank = [
+    { legend: pressureLegend, intro: pressureIntro, staticEqHtml: pressureStaticEq, tiles: pressureTiles, target:'P2', ...m7StartPressure, sample: samplePressure },
+    { legend: pressureLegend, intro: "On souhaite maintenant exprimer P<sub>1</sub>.", staticEqHtml: pressureStaticEq, tiles: pressureTiles, target:'P1', ...m7StartPressure, sample: samplePressure },
+    { legend: pressureLegend, intro: "On souhaite maintenant exprimer z<sub>1</sub>.", staticEqHtml: pressureStaticEq, tiles: pressureTiles, target:'z1', ...m7StartPressure, sample: samplePressure },
+    { legend: pressureLegend, intro: "On souhaite maintenant exprimer z<sub>2</sub>.", staticEqHtml: pressureStaticEq, tiles: pressureTiles, target:'z2', ...m7StartPressure, sample: samplePressure },
+
+    { legend: heatLegend, intro: heatIntro, staticEqHtml: heatStaticEq, tiles: heatTiles, target:'Tf', ...m7StartHeat, sample: sampleHeat },
+    { legend: heatLegend, intro: "On souhaite maintenant exprimer T<sub>i</sub>.", staticEqHtml: heatStaticEq, tiles: heatTiles, target:'Ti', ...m7StartHeat, sample: sampleHeat },
+
+    { legend: epLegend, intro: epIntro, staticEqHtml: epStaticEq, tiles: epTiles, target:'z', ...m7StartEp, sample: sampleEp },
+    { legend: epLegend, intro: "On souhaite maintenant exprimer z<sub>0</sub>.", staticEqHtml: epStaticEq, tiles: epTiles, target:'z0', ...m7StartEp, sample: sampleEp },
+
+    { legend: emLegend, intro: emIntro, staticEqHtml: emStaticEq, tiles: emTiles, target:'z', ...m7StartEm, sample: sampleEm },
+    { legend: emLegend, intro: "On souhaite maintenant exprimer v² (le carré de la vitesse).", staticEqHtml: emStaticEq, tiles: emTiles, target:'v2', ...m7StartEm, sample: sampleEm },
+    { legend: emLegend, intro: "On souhaite maintenant exprimer g.", staticEqHtml: emStaticEq, tiles: emTiles, target:'g', ...m7StartEm, sample: sampleEm },
+
+    { legend: fallLegend, intro: fallIntro, staticEqHtml: fallStaticEq, tiles: fallTiles, target:'y0', ...m7StartFall, sample: sampleFall },
+    { legend: fallLegend, intro: "On souhaite maintenant exprimer v<sub>0</sub>.", staticEqHtml: fallStaticEq, tiles: fallTiles, target:'v0', ...m7StartFall, sample: sampleFall },
 ];
-let m6TutIdx = 0;
+const m7MaxScore = module7Bank.length * 2;
+const m7TrueMaxScore = module7Bank.length * 3;
+let m7Idx = 0, m7Score = 0, m7Answers = [];
 
-function renderTutorial() {
-    const drill = module6Tutorial[m6TutIdx];
-    const app = document.getElementById('app');
-    app.innerHTML = `
-      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <span class="content-module-badge">MODULE 6</span>
-        <h2 class="text-2xl font-bold text-indigo-900 mb-1">Gérer les + et les −</h2>
-        <p class="text-xs text-gray-400 uppercase font-bold mb-4">Question ${m6TutIdx+1}/${module6Tutorial.length}</p>
-        <div class="rule-card"><p class="text-sm text-gray-700">${TUTORIAL_EXPLAIN}</p></div>
-      </div>
-      <div id="drillCard" class="bg-white rounded-xl shadow-lg p-6"></div>`;
-    mountDrill(document.getElementById('drillCard'), { ...drill, onSuccess: advanceTutorial });
+function targetLabel(q) {
+    const t = q.tiles.find(x => x.id === q.target);
+    return t ? t.label : q.target;
 }
-function advanceTutorial() {
-    if (m6TutIdx < module6Tutorial.length - 1) { m6TutIdx++; renderTutorial(); }
-    else finishModule6();
-}
-function finishModule6() {
+
+function renderModule7Intro() {
     document.getElementById('app').innerHTML = `
-      <div class="bg-white rounded-xl shadow-lg p-8 text-center">
-        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Module 6 terminé !</h2>
-        <p class="text-gray-700 mb-4">Tu sais maintenant déplacer des termes additifs d'un côté à l'autre d'une équation.</p>
-        <a href="module_7.html" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">Passer au module 7 →</a>
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <span class="content-module-badge">MODULE 7</span>
+        <h2 class="text-2xl font-bold text-indigo-900 mb-3">Entraînement</h2>
+        <p class="text-gray-700 mb-2">Tu vas résoudre des équations comportant des termes additifs (+ et −), issues de situations physiques variées. Les équations sont déjà écrites : il ne reste qu'à déplacer les éléments pour isoler la grandeur demandée.</p>
+        <p class="text-gray-700 mb-2"><b>Notation :</b> 2 points si l'équation est résolue en plusieurs étapes sans aucune erreur, 1 point s'il y a eu au moins une erreur avant d'y arriver, 0 point en cas d'abandon. La note finale est donnée en pourcentage.</p>
+        <p class="text-gray-700 mb-2"><b>Bonus ultime :</b> si l'équation est résolue en une seule étape, de tête, vous remportez 3 points. La note finale peut alors dépasser 100% !</p>
+        <button onclick="startModule7Graded()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow mt-2">Commencer →</button>
       </div>`;
 }
+function startModule7Graded(){ m7Idx = 0; m7Score = 0; m7Answers = []; renderModule7Question(); }
+function renderModule7Question() {
+    if (m7Idx >= module7Bank.length) { finishModule7(); return; }
+    const q = module7Bank[m7Idx];
+    const app = document.getElementById('app');
+    const displayNum = m7Idx + 1;
+    const progressPct = Math.round(m7Idx / module7Bank.length * 100);
+    app.innerHTML = `
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <span class="content-module-badge">MODULE 7</span>
+        <h2 class="text-2xl font-bold text-indigo-900 mb-1">Entraînement</h2>
+        <p class="text-xs text-gray-400 uppercase font-bold mb-2">Question ${displayNum}/${module7Bank.length} · Score : <span class="score-badge">${m7Score} pt${m7Score>1?'s':''}</span></p>
+        <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${progressPct}%"></div></div>
+      </div>
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <p class="text-gray-700 text-lg mb-2">${q.intro}</p>
+        <p class="unit-legend mb-2">${q.legend}</p>
+        <div class="eq-line-static text-lg md:text-2xl my-4">${q.staticEqHtml}</div>
+        <p class="font-bold text-indigo-900">Exprimer ${targetLabel(q)}.</p>
+        <div class="text-right mt-2"><button onclick="abandonQuestion7()" class="text-xs font-bold text-red-500 hover:text-red-700">Abandonner cette question →</button></div>
+      </div>
+      <div class="bg-white rounded-xl shadow-lg p-6">${solveEditorHTML()}</div>`;
+    startSolveExercise({
+        tiles: q.tiles, sample: q.sample, targetId: q.target,
+        initialLeft: q.initialLeft, initialRight: q.initialRight,
+        onSolved: (dm) => {
+            const pts = hadError ? 1 : (history.length === 1 ? 3 : 2);
+            m7Score += pts;
+            m7Answers.push({ num: displayNum, pts, max: 2 });
+            dm.innerHTML = `🎉 Équation résolue ! (+${pts} pt${pts>1?'s':''})<div class="mt-4"><button onclick="nextModule7Question()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">Suivant →</button></div>`;
+        }
+    });
+}
+function nextModule7Question(){ m7Idx++; renderModule7Question(); }
+function abandonQuestion7(){
+    m7Answers.push({ num: m7Idx+1, pts: 0, max: 2 });
+    m7Idx++; renderModule7Question();
+}
+function finishModule7() {
+    const pct = Math.round(m7Score / m7MaxScore * 100);
+    const isMax = m7Score >= m7TrueMaxScore;
+    const recapHtml = m7Answers.map(a => `<div class="recap-item">Q${a.num}<br><b>${a.pts}/${a.max}</b></div>`).join('');
+    document.getElementById('app').innerHTML = `
+      <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Entraînement terminé !</h2>
+        ${isMax ? `<p class="text-lg font-bold text-amber-600 mb-2">🏆 Score maximal ! Bravo, c'est un sans-faute parfait !</p>` : ''}
+        <p class="text-lg text-gray-700 mb-4">Score : ${m7Score} / ${m7MaxScore} points (${pct}%)</p>
+        <button onclick="startModule7Graded()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">↺ Recommencer l'entraînement</button>
+        <a href="module_8.html" class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow ml-2">Passer au module 8 →</a>
+        <div class="text-sm font-bold text-gray-500 mt-6 mb-2 text-left">Détail des points</div>
+        <div class="recap-grid">${recapHtml}</div>
+      </div>`;
+    if (isMax) launchConfetti();
+}
+let confettiInterval = null;
+function launchConfetti() {
+    if (confettiInterval) return;
+    spawnConfettiBurst();
+    confettiInterval = setInterval(spawnConfettiBurst, 700);
+}
+function spawnConfettiBurst() {
+    const colors = ['#4f46e5','#22c55e','#f59e0b','#ef4444','#06b6d4'];
+    for (let i = 0; i < 24; i++) {
+        const el = document.createElement('div');
+        el.className = 'confetti-piece';
+        el.style.left = (Math.random()*100) + 'vw';
+        el.style.background = colors[Math.floor(Math.random()*colors.length)];
+        el.style.animationDuration = (2.5 + Math.random()*1.5) + 's';
+        el.style.animationDelay = (Math.random()*0.4) + 's';
+        el.style.transform = `rotate(${Math.random()*360}deg)`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 4500);
+    }
+}
 
-renderTutorial();
+renderModule7Intro();
 </script>
 </body>
 </html>
