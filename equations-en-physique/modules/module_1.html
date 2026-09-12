@@ -128,10 +128,12 @@
 
     /* ── Diagramme "on divise/multiplie les deux côtés par..." (règles 2 et 3) ── */
     .op-diagram { text-align:center; }
-    .op-diagram-arrows { display:flex; justify-content:space-between; padding:0 14%; margin:0 0 4px; }
-    .op-arrow-col { display:flex; flex-direction:column; align-items:center; }
-    .op-arrow-svg { width:40px; height:32px; display:block; }
-    .op-arrow-label { font-weight:800; color:#4f46e5; font-size:.95rem; margin-top:-2px; }
+    .op-diagram-arrows { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:0 2%; margin:2px 0 6px; }
+    .op-arrow-row { display:flex; align-items:center; gap:8px; }
+    .op-arrow-row-right { flex-direction:row-reverse; text-align:right; }
+    .op-arrow-svg { width:56px; height:44px; display:block; flex-shrink:0; }
+    .op-arrow-label { font-weight:800; color:#4f46e5; font-size:1.1rem; line-height:1.25; }
+    .op-arrow-note { display:block; font-weight:600; font-size:.72rem; color:#4338ca; white-space:nowrap; }
 </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
@@ -661,13 +663,13 @@ function mountDrill(container, drillCfg, explainHtml) {
         <div class="op-diagram mb-2">
             <div class="eq-line-static text-lg md:text-xl">${renderStatic(drillCfg.left())}<span class="eq-sign" style="font-size:1.4rem;margin:0 10px;">=</span>${renderStatic(drillCfg.right())}</div>
             <div class="op-diagram-arrows">
-                <div class="op-arrow-col">
-                    <svg viewBox="0 0 60 46" class="op-arrow-svg"><path d="M48,4 Q14,10 16,38" fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round"/><path d="M16,38 L9,28 M16,38 L23,30" fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    <span class="op-arrow-label">${drillCfg.opDiagram.label}</span>
+                <div class="op-arrow-row op-arrow-row-left">
+                    <span class="op-arrow-label">${drillCfg.opDiagram.label}${drillCfg.opDiagram.noteLeft ? `<span class="op-arrow-note">${drillCfg.opDiagram.noteLeft}</span>` : ''}</span>
+                    <svg viewBox="0 0 60 46" class="op-arrow-svg"><path d="M46,4 Q12,10 16,38" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round"/><path d="M16,38 L7,26 M16,38 L25,29" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>
-                <div class="op-arrow-col">
-                    <svg viewBox="0 0 60 46" class="op-arrow-svg" style="transform:scaleX(-1)"><path d="M48,4 Q14,10 16,38" fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round"/><path d="M16,38 L9,28 M16,38 L23,30" fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    <span class="op-arrow-label">${drillCfg.opDiagram.label}</span>
+                <div class="op-arrow-row op-arrow-row-right">
+                    <svg viewBox="0 0 60 46" class="op-arrow-svg" style="transform:scaleX(-1)"><path d="M46,4 Q12,10 16,38" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round"/><path d="M16,38 L7,26 M16,38 L25,29" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="op-arrow-label">${drillCfg.opDiagram.label}${drillCfg.opDiagram.noteRight ? `<span class="op-arrow-note">${drillCfg.opDiagram.noteRight}</span>` : ''}</span>
                 </div>
             </div>
         </div>` : ''}
@@ -736,7 +738,7 @@ const module1Steps = [
                 left:  () => frac([tile('v','v')], [tile('one','1')]),
                 right: () => frac([tile('d','d')], [tile('t','t')]),
                 highlight: 'v',
-                opDiagram: { label: '÷v' },
+                opDiagram: { label: '÷v', noteLeft: '(supprime le v en haut)', noteRight: '(ajoute un v en bas)' },
                 suppressOneCross: true,
                 check: (st) => setEq(idsOf(st.left.num.items), ['one']) && setEq(idsOf(st.left.den.items), ['one'])
                             && setEq(idsOf(st.right.num.items), ['d']) && setEq(idsOf(st.right.den.items), ['t','v'])
@@ -746,7 +748,7 @@ const module1Steps = [
                 left:  () => frac([tile('v','v')], [tile('one','1')]),
                 right: () => frac([tile('d','d')], [tile('t','t')]),
                 highlight: 'd',
-                opDiagram: { label: '÷d' },
+                opDiagram: { label: '÷d', noteLeft: '(ajoute un d en bas)', noteRight: '(supprime le d en haut)' },
                 suppressOneCross: true,
                 check: (st) => setEq(idsOf(st.right.num.items), ['one']) && setEq(idsOf(st.right.den.items), ['t'])
                             && setEq(idsOf(st.left.num.items), ['v']) && setEq(idsOf(st.left.den.items), ['one','d'])
@@ -763,7 +765,7 @@ const module1Steps = [
                 left:  () => frac([tile('v','v')], [tile('one','1')]),
                 right: () => frac([tile('d','d')], [tile('t','t')]),
                 highlight: 't',
-                opDiagram: { label: '×t' },
+                opDiagram: { label: '×t', noteLeft: '(ajoute un t en haut)', noteRight: '(supprime le t en bas)' },
                 suppressOneCross: true,
                 check: (st) => st.right.kind === 'simple' && setEq(idsOf(st.right.items), ['d'])
                             && st.left.kind === 'frac' && setEq(idsOf(st.left.num.items), ['v','t']) && setEq(idsOf(st.left.den.items), ['one'])
