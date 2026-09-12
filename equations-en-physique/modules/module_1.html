@@ -130,7 +130,7 @@
     .op-diagram { text-align:center; }
     .op-diagram-arrows { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:0 2%; margin:2px 0 6px; }
     .op-arrow-row { display:flex; align-items:center; gap:8px; }
-    .op-arrow-row-right { flex-direction:row-reverse; text-align:right; }
+    .op-arrow-row-right { text-align:right; }
     .op-arrow-svg { width:56px; height:44px; display:block; flex-shrink:0; }
     .op-arrow-label { font-weight:800; color:#4f46e5; font-size:1.1rem; line-height:1.25; }
     .op-arrow-note { display:block; font-weight:600; font-size:.72rem; color:#4338ca; white-space:nowrap; }
@@ -680,6 +680,9 @@ function mountDrill(container, drillCfg, explainHtml) {
             <button id="verifyDrillBtn" onclick="checkDrill()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">✓ Valider</button>
             <button id="nextDrillBtn" onclick="currentDrillOnSuccess()" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">Suivant →</button>
         </div>
+        <div class="text-center mt-2">
+            <button id="skipDrillBtn" onclick="currentDrillOnSuccess()" class="text-xs font-semibold text-gray-400 hover:text-gray-600">Passer à la suite quand même →</button>
+        </div>
         <div id="feedback" class="text-center mt-4 font-semibold text-lg"></div>`;
     refreshView();
 }
@@ -697,8 +700,10 @@ function resetDrill() {
     activeHighlightId = currentDrillCfg.highlight || null;
     const vBtn = document.getElementById('verifyDrillBtn');
     const nBtn = document.getElementById('nextDrillBtn');
+    const sBtn = document.getElementById('skipDrillBtn');
     if (vBtn) vBtn.classList.remove('hidden');
     if (nBtn) nBtn.classList.add('hidden');
+    if (sBtn) sBtn.classList.remove('hidden');
     showFeedback('', false);
     refreshView();
 }
@@ -717,6 +722,8 @@ function checkDrill() {
         showFeedback("✓ Bravo, c'est exactement ça !", true);
         document.getElementById('verifyDrillBtn').classList.add('hidden');
         document.getElementById('nextDrillBtn').classList.remove('hidden');
+        const sBtn = document.getElementById('skipDrillBtn');
+        if (sBtn) sBtn.classList.add('hidden');
     } else if (result === 'partial') {
         showFeedback("✓ " + (partialMessage || "C'est bon, mais ce n'est pas encore complet."), true);
     } else {
@@ -775,7 +782,7 @@ const module1Steps = [
                 left:  () => frac([tile('d','d')], [tile('t','t')]),
                 right: () => frac([tile('v','v')], [tile('one','1')]),
                 highlight: 't',
-                opDiagram: { label: '×t' },
+                opDiagram: { label: '×t', noteLeft: '(supprime le t en bas)', noteRight: '(ajoute un t en haut)' },
                 suppressOneCross: true,
                 check: (st) => st.left.kind === 'simple' && setEq(idsOf(st.left.items), ['d'])
                             && st.right.kind === 'frac' && setEq(idsOf(st.right.num.items), ['v','t']) && setEq(idsOf(st.right.den.items), ['one'])
@@ -793,6 +800,8 @@ const module1Steps = [
                 right: () => frac([tile('d','d')], [tile('t','t')]),
                 highlight: 'v',
                 noNumAutoOne: true,
+                showPalette: true,
+                paletteTiles: [{id:'one', label:'1'}],
                 check: (st) => {
                     if (!(st.right.kind === 'frac' && setEq(idsOf(st.right.num.items), ['d']) && setEq(idsOf(st.right.den.items), ['t','v']))) return false;
                     if (st.left.kind !== 'frac') return false;
