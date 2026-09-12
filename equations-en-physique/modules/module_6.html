@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 6 : Méthode</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<style>
+    :root {
+        --app-accent-50:  #eef2ff;
+        --app-accent-100: #e0e7ff;
+        --app-accent-200: #c7d2fe;
+        --app-accent-400: #818cf8;
+        --app-accent-600: #4f46e5;
+        --app-accent-700: #4338ca;
+        --app-accent-800: #3730a3;
+    }
+    body { font-family: var(--font-sans); }
+
+    .frac-wrap-static { display:inline-flex; flex-direction:column; align-items:center; margin:0 6px; vertical-align:middle; }
+    .frac-num-static, .frac-den-static { padding:0 6px; }
+    .frac-line-static { width:100%; height:2px; background:#1e293b; border-radius:2px; }
+    .eq-tile-static { font-weight:700; color:#1e293b; margin:0 4px; }
+
+    .eq-row { display:flex; align-items:center; justify-content:center; justify-content:safe center; flex-wrap:nowrap; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px; }
+    .eq-row::-webkit-scrollbar { height:4px; }
+    .eq-side { display:flex; align-items:center; flex-shrink:0; }
+    .eq-sign { font-size:1.8rem; font-weight:800; color:#1e3a8a; margin:0 16px; flex-shrink:0; }
+    .eq-line-static { display:flex; align-items:center; justify-content:center; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+    @media (max-width:480px) {
+        .eq-tile, .eq-tile-frozen { font-size:.85rem; padding:7px 10px; }
+        .eq-tile { min-height:36px; }
+        .eq-sign { font-size:1.4rem; margin:0 8px; }
+        .eq-tile-static { font-size:.9rem; }
+        .flip-btn { width:36px; height:36px; font-size:1rem; margin-left:8px; }
+    }
+
+    .slot-simple {
+        display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center;
+        min-width:70px; min-height:56px; padding:8px 12px; position:relative;
+        border:2px dashed #94a3b8; border-radius:10px; background:#fff; transition:all .2s;
+    }
+    .slot-simple.drag-over { background:#dbeafe; border-color:#3b82f6; }
+    .slot-placeholder { color:#94a3b8; font-weight:700; font-size:1.1rem; }
+
+    .eq-tile {
+        display:inline-flex; align-items:center; gap:6px; position:relative;
+        background:#dbeafe; border:2px solid #60a5fa; border-radius:8px;
+        padding:9px 13px; min-height:40px; font-weight:700; color:#1e3a8a; cursor:grab; touch-action:none;
+    }
+    .eq-tile.dragging { opacity:.4; }
+    .eq-tile.tile-highlight { background:#fee2e2; border-color:#ef4444; color:#991b1b; box-shadow:0 0 0 3px rgba(239,68,68,.25); }
+    .eq-tile.drag-over { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.35); }
+    .mult-sign { display:inline-block; font-weight:800; color:#64748b; margin:0 3px; font-size:1rem; flex-shrink:0; }
+    .tile-del {
+        width:16px; height:16px; border-radius:50%; background:#ef4444; color:#fff;
+        font-size:10px; line-height:16px; text-align:center; cursor:pointer;
+    }
+
+    .frac-wrap { display:inline-flex; flex-direction:column; align-items:center; gap:4px; position:relative; margin:0 8px; flex-shrink:0; }
+    .frac-num-wrap, .frac-den-wrap { position:relative; }
+    .frac-line { width:100%; height:3px; background:#1e293b; border-radius:2px; }
+    .frac-del {
+        position:absolute; top:-9px; right:-9px; width:20px; height:20px; border-radius:50%;
+        background:#ef4444; color:#fff; font-size:11px; line-height:16px; text-align:center;
+        cursor:pointer; border:2px solid #fff; z-index:1;
+    }
+
+    .flip-btn {
+        width:44px; height:44px; border-radius:50%; background:#eef2ff; border:2px solid #818cf8;
+        color:#312e81; font-size:1.3rem; font-weight:800; margin-left:12px; flex-shrink:0;
+    }
+    .flip-btn:hover { background:#e0e7ff; }
+
+    .eq-tile-frozen { display:inline-flex; align-items:center; background:#f1f5f9; border:2px solid #cbd5e1; border-radius:8px; padding:6px 10px; font-weight:700; color:#334155; margin:0 3px; }
+    .step-row { border-bottom:1px dashed #e2e8f0; }
+
+    .palette-tile {
+        display:inline-flex; align-items:center; justify-content:center;
+        min-width:56px; min-height:44px; padding:8px 14px;
+        background:#eef2ff; border:2px solid #818cf8; border-radius:10px;
+        font-weight:700; color:#312e81; cursor:grab; touch-action:none; user-select:none;
+    }
+    .palette-tile.dragging { opacity:.4; }
+    .palette-frac { display:inline-flex; flex-direction:column; align-items:center; padding:6px 12px; }
+    .palette-frac .dots { font-size:.8rem; letter-spacing:2px; color:#312e81; }
+    .palette-frac .frac-line { width:28px; height:2px; margin:2px 0; background:#312e81; }
+
+    .content-module-badge {
+        display:inline-block; background:#4f46e5; color:#fff; font-size:.75rem; font-weight:800;
+        padding:4px 12px; border-radius:999px; letter-spacing:.05em; margin-bottom:8px;
+    }
+    .rule-card { background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; padding:16px; }
+    .rule-card .rule-title { font-weight:800; color:#312e81; margin-bottom:6px; }
+
+    .progress-bar-outer { background:#e2e8f0; border-radius:999px; height:10px; overflow:hidden; }
+    .progress-bar-inner { background:#4f46e5; height:100%; transition:width .3s; }
+
+    .mcq-btn { display:block; width:100%; text-align:left; padding:10px 14px; border:2px solid #c7d2fe; border-radius:10px; margin-bottom:8px; background:#fff; font-weight:700; color:#312e81; }
+    .mcq-btn.correct { background:#dcfce7; border-color:#22c55e; }
+    .mcq-btn.wrong { background:#fee2e2; border-color:#ef4444; }
+
+    .unit-legend { font-size:.85rem; color:#64748b; margin-top:6px; }
+    .score-badge { font-weight:800; color:#4f46e5; }
+
+    .recap-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(52px,1fr)); gap:6px; }
+    .recap-item { background:#f1f5f9; border-radius:8px; padding:5px 2px; text-align:center; font-size:.7rem; line-height:1.3; color:#334155; }
+    .recap-item b { display:block; font-size:.85rem; }
+
+    .confetti-piece {
+        position:fixed; top:-20px; width:9px; height:14px; z-index:9999; pointer-events:none;
+        animation:confetti-fall linear forwards;
+    }
+    @keyframes confetti-fall {
+        to { top:110vh; transform:translateY(0) rotate(720deg); }
+    }
+    /* ── Zones d'insertion à côté d'une fraction ou d'une somme ─────────── */
+    .insert-zone {
+        width:34px; min-height:56px; border:2px dashed #94a3b8; border-radius:8px;
+        opacity:0; transition:opacity .15s; flex-shrink:0;
+    }
+    .insert-zone.drag-over { background:#dbeafe; border-color:#3b82f6; opacity:1; }
+    body.dnd-active .insert-zone { opacity:.55; }
+
+    /* ── Somme / différence de termes (module 6) ─────────── */
+    .sum-wrap { display:inline-flex; align-items:center; gap:2px; flex-shrink:0; }
+    .sum-parens { font-size:1.5rem; font-weight:800; color:#64748b; }
+    .sum-term { display:inline-flex; align-items:center; gap:4px; border-radius:10px; padding:2px; touch-action:none; }
+    .sum-term.term-draggable { cursor:grab; }
+    .sum-term.term-draggable:hover { background:rgba(79,70,229,.08); }
+    .sum-term.dragging { opacity:.4; }
+    .sum-sign { font-weight:800; color:#1e3a8a; font-size:1.2rem; display:inline-block; }
+    @keyframes signFlip {
+        0%   { transform:rotateY(-170deg) scale(1.3); color:#ef4444; }
+        55%  { transform:rotateY(-90deg) scale(1.3); color:#ef4444; }
+        100% { transform:rotateY(0deg) scale(1); }
+    }
+    .sum-sign.just-flipped { animation: signFlip 0.9s ease; }
+
+    /* pendant le glisser d'un terme additif, les deux membres de l'équation
+       se signalent comme zones de dépose (comme pour la racine carrée) */
+    body.sumterm-dragging .eq-side {
+        outline: 3px dashed #f59e0b; outline-offset: 5px; border-radius: 10px;
+        background: rgba(245,158,11,.06);
+    }
+    body.sumterm-dragging .eq-side.drag-over { background: rgba(245,158,11,.16); border-radius: 10px; }
+
+    /* ── Diagramme "on applique la même operation aux deux cotes" ── */
+    .op-diagram { text-align:center; }
+    .op-diagram-arrows { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:0 2%; margin:2px 0 6px; }
+    .op-arrow-row { display:flex; align-items:center; gap:8px; }
+    .op-arrow-row-right { text-align:right; }
+    .op-arrow-svg { width:56px; height:44px; display:block; flex-shrink:0; }
+    .op-arrow-label { font-weight:800; color:#4f46e5; font-size:1.1rem; line-height:1.25; }
+    .op-arrow-note { display:block; font-weight:600; font-size:.72rem; color:#4338ca; white-space:nowrap; }
+</style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+<div id="app-nav"></div>
+
+<div class="container mx-auto px-4 py-8 max-w-3xl">
+    <div id="app"></div>
+</div>
+
+<script>
+
+const nav = AppNav.init({
+    appName: 'Équations en Physique',
+    portalHref: '../../index.html',
+    portalLabel: 'Toutes les applications',
+    onHome: () => { window.location.href = '../index.html'; },
+    onNavigate: (key) => { window.location.href = key + '.html'; },
+    groups: [
+        { title: 'Principe', items: [
+            { key: 'module_1', label: 'Module 1 : Méthode' },
+            { key: 'module_2', label: "Module 2 : Exemple d'application" },
+            { key: 'module_3', label: 'Module 3 : Entraînement' },
+        ]},
+        { title: 'Gestion des fractions', items: [
+            { key: 'module_4', label: 'Module 4 : Méthode' },
+            { key: 'module_5', label: 'Module 5 : Entraînement' },
+        ]},
+        { title: 'Gérer les + et les -', items: [
+            { key: 'module_6', label: 'Module 6 : Méthode' },
+            { key: 'module_7', label: 'Module 7 : Entraînement' },
+        ]},
+        { title: 'Gérer les fonctions réciproques', items: [
+            { key: 'module_8', label: 'Module 8 : Méthode' },
+            { key: 'module_9', label: 'Module 9 : Entraînement' },
+        ]},
+    ],
+});
+nav.setActive('module_6');
+nav.setTitle('Module 6 : Méthode');
+
+// ═══════════════════════════════════════════════════════════════
+// OUTILS DE CONSTRUCTION DE NŒUDS
+// une équation (membre gauche/droit) est une séquence de "zones" (slots)
+// multipliées entre elles : {kind:'seq', slots:[...]}
+// chaque zone est simple {kind:'simple', items:[...]}, une fraction
+// {kind:'frac', num, den}, ou une somme/différence de termes signés
+// {kind:'sum', terms:[{sign:1|-1, node:seq}, ...]} — chaque terme est
+// lui-même un produit (seq), ce qui permet des termes comme "½gt²"
+// ═══════════════════════════════════════════════════════════════
+function tile(id,label){ return {id,label}; }
+function simple(items){ return { kind:'simple', items: items.map(t => ({...t})) }; }
+function frac(numItems, denItems){ return { kind:'frac', num: simple(numItems), den: simple(denItems) }; }
+function seq(slots){ return { kind:'seq', slots }; }
+function emptySeq(){ return seq([simple([])]); }
+function term1(sign, slots){ return { sign, node: seq(slots) }; }
+function sumNode(terms){ return { kind:'sum', terms: terms.map(t => ({ sign:t.sign, node:t.node })) }; }
+function idsOf(items){ return items.map(i => i.id); }
+function setEq(a,b){ if (a.length !== b.length) return false; const sa=[...a].sort(), sb=[...b].sort(); return sa.every((v,i)=>v===sb[i]); }
+
+// ═══════════════════════════════════════════════════════════════
+// ÉTAT GLOBAL
+// ═══════════════════════════════════════════════════════════════
+let state = { left: emptySeq(), right: emptySeq() };
+let resolved = false;
+let currentExercise = null;
+let viewMode = 'drill';
+let activeHighlightId = null;
+let currentDrill = null;
+let currentDrillOnSuccess = null;
+let currentDrillCfg = null;
+let lastMovedTerm = null; // {sidePath, termIdx} pour l'animation de bascule du signe
+
+function getNode(path) {
+    const parts = path.split('.');
+    let cur = parts[0] === 'left' ? state.left : state.right;
+    for (let i = 1; i < parts.length; i++) {
+        if (!cur) return null;
+        const p = parts[i];
+        if (/^term\d+$/.test(p)) cur = cur.terms[+p.slice(4)].node;
+        else if (/^\d+$/.test(p)) cur = cur.slots ? cur.slots[+p] : undefined;
+        else cur = cur[p];
+    }
+    return cur || null;
+}
+function setNode(path, newNode) {
+    const parts = path.split('.');
+    if (parts.length === 1) { state[parts[0]] = newNode; return; }
+    const parent = getNode(parts.slice(0, -1).join('.'));
+    const last = parts[parts.length - 1];
+    if (/^term\d+$/.test(last)) parent.terms[+last.slice(4)].node = newNode;
+    else if (/^\d+$/.test(last)) parent.slots[+last] = newNode;
+    else parent[last] = newNode;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AFFICHAGE
+// ═══════════════════════════════════════════════════════════════
+function isOperatorTile(it) { return it.id === 'plus' || it.id === 'minus' || it.id === 'times'; }
+
+function renderInsertZone(sidePath, where) {
+    return `<div class="insert-zone" data-side="${sidePath}" data-where="${where}"></div>`;
+}
+
+// une somme n'est déplaçable terme par terme que si elle n'est multipliée par
+// rien d'autre dans son "seq" parent (sinon il faut d'abord l'isoler)
+function isSumIsolated(sumPath) {
+    const parentPath = sumPath.split('.').slice(0, -1).join('.');
+    const parent = getNode(parentPath);
+    return !!(parent && parent.kind === 'seq' && parent.slots.length === 1);
+}
+
+function renderNode(node, path) {
+    if (node.kind === 'simple') {
+        const items = node.items.map((it, idx) => {
+            const hl = (activeHighlightId && it.id === activeHighlightId) ? ' tile-highlight' : '';
+            const sep = (idx > 0 && !isOperatorTile(node.items[idx-1]) && !isOperatorTile(it)) ? '<span class="mult-sign">×</span>' : '';
+            return sep + `<span class="eq-tile${hl}" data-path="${path}" data-idx="${idx}">
+                ${it.label}<span class="tile-del"
+                    onpointerdown="event.stopPropagation()"
+                    onclick="event.stopPropagation();deleteItem('${path}',${idx})">✕</span>
+            </span>`;
+        }).join('');
+        return `<div class="slot-simple" data-path="${path}">
+                    ${items || '<span class="slot-placeholder">…</span>'}
+                </div>`;
+    }
+    if (node.kind === 'frac') {
+        const showDenCross = (node.den.items.length === 1 && node.den.items[0].id === 'one')
+            || (node.den.items.length === 0 && node.forceDenCross);
+        return `<div class="frac-wrap">
+            <div class="frac-num-wrap">${renderNode(node.num, path + '.num')}</div>
+            <div class="frac-line"></div>
+            <div class="frac-den-wrap">
+                ${showDenCross ? `<span class="frac-del"
+                    onclick="deleteDen('${path}')"
+                    ontouchstart="event.stopPropagation()"
+                    ontouchend="event.stopPropagation();event.preventDefault();deleteDen('${path}')"
+                    title="Supprimer le dénominateur">✕</span>` : ''}
+                ${renderNode(node.den, path + '.den')}
+            </div>
+        </div>`;
+    }
+    if (node.kind === 'sum') {
+        const isolated = isSumIsolated(path);
+        const inner = node.terms.map((t, i) => {
+            const showSign = i > 0 || t.sign === -1;
+            const signChar = t.sign === -1 ? '−' : '+';
+            const signHtml = showSign ? `<span class="sum-sign" data-sum-path="${path}" data-term-idx="${i}">${signChar}</span>` : '';
+            return `<span class="sum-term${isolated ? ' term-draggable' : ''}" data-path="${path}" data-term-idx="${i}">${signHtml}${renderNode(t.node, path + '.term' + i)}</span>`;
+        }).join('');
+        return `<span class="sum-wrap" data-path="${path}">${inner}</span>`;
+    }
+    if (node.kind === 'sqrt') {
+        return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderNode(node.inner, path + '.inner')}</div></div>`;
+    }
+    // seq
+    let html = '';
+    const n = node.slots.length;
+    const needsInsertBefore = node.slots[0].kind === 'frac' || node.slots[0].kind === 'sum';
+    const needsInsertAfter  = node.slots[n-1].kind === 'frac' || node.slots[n-1].kind === 'sum';
+    if (needsInsertBefore) html += renderInsertZone(path, 'start');
+    node.slots.forEach((slot, i) => {
+        if (i > 0) html += '<span class="mult-sign">×</span>';
+        const parens = slot.kind === 'sum' && slot.terms.length > 1 && n > 1;
+        html += parens ? `<span class="sum-parens">(</span>${renderNode(slot, path + '.' + i)}<span class="sum-parens">)</span>` : renderNode(slot, path + '.' + i);
+    });
+    if (needsInsertAfter) html += renderInsertZone(path, 'end');
+    return `<div class="eq-side" data-path="${path}">${html}</div>`;
+}
+
+function renderStatic(node) {
+    if (node.kind === 'simple') {
+        if (node.items.length === 0) return '<span class="slot-placeholder">…</span>';
+        return node.items.map((it, idx) => {
+            const sep = (idx > 0 && !isOperatorTile(node.items[idx-1]) && !isOperatorTile(it)) ? '<span class="mult-sign">×</span>' : '';
+            return sep + `<span class="eq-tile-frozen">${it.label}</span>`;
+        }).join('');
+    }
+    if (node.kind === 'frac') {
+        return `<div class="frac-wrap">
+            <div class="frac-num-wrap">${renderStatic(node.num)}</div>
+            <div class="frac-line"></div>
+            <div class="frac-den-wrap">${renderStatic(node.den)}</div>
+        </div>`;
+    }
+    if (node.kind === 'sum') {
+        const inner = node.terms.map((t, i) => {
+            const showSign = i > 0 || t.sign === -1;
+            const signChar = t.sign === -1 ? '−' : '+';
+            return (showSign ? `<span class="sum-sign">${signChar}</span>` : '') + renderStatic(t.node);
+        }).join('');
+        return `<span class="sum-wrap">${inner}</span>`;
+    }
+    if (node.kind === 'sqrt') {
+        return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderStatic(node.inner)}</div></div>`;
+    }
+    return `<div class="eq-side">${node.slots.map((s,i) => {
+        if (i === 0) return renderStatic(s);
+        return '<span class="mult-sign">×</span>' + renderStatic(s);
+    }).join('')}</div>`;
+}
+
+function renderEquationZone() {
+    const zone = document.getElementById('currentStepZone');
+    if (!zone) return;
+    zone.innerHTML =
+        renderNode(state.left, 'left') +
+        `<div class="eq-sign">=</div>` +
+        renderNode(state.right, 'right') +
+        `<button class="flip-btn" onclick="flipEquation()" title="Inverser le sens de l'équation">⇄</button>`;
+    attachEqTileHandlers(zone);
+    sizeSqrtHooks(zone);
+    if (lastMovedTerm) {
+        const el = zone.querySelector(`.sum-sign[data-sum-path="${lastMovedTerm.sidePath}"][data-term-idx="${lastMovedTerm.termIdx}"]`);
+        if (el) {
+            el.classList.add('just-flipped');
+            setTimeout(() => el.classList.remove('just-flipped'), 900);
+        }
+        lastMovedTerm = null;
+    }
+}
+
+function sizeSqrtHooks(container) {
+    container.querySelectorAll('.sqrt-hook').forEach(svg => {
+        const inner = svg.nextElementSibling;
+        if (!inner) return;
+        const h = Math.max(inner.offsetHeight, 24);
+        const hookH = Math.min(16, h - 6);
+        const d = `M0,${(h - hookH * 0.55).toFixed(1)} L${(hookH * 0.4).toFixed(1)},${(h - 2).toFixed(1)} L13,2`;
+        svg.setAttribute('viewBox', `0 0 14 ${h}`);
+        svg.setAttribute('width', '14');
+        svg.setAttribute('height', String(h));
+        svg.innerHTML = `<path d="${d}" fill="none" stroke="#1e293b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+    });
+}
+
+// associe le glisser-déposer tactile commun (assets/dragdrop.js) à chaque
+// tuile et à chaque terme additif fraîchement rendus
+function attachEqTileHandlers(zone) {
+    zone.querySelectorAll('.eq-tile').forEach(el => {
+        const path = el.dataset.path;
+        const idx = parseInt(el.dataset.idx, 10);
+        const node = getNode(path);
+        const it = node && node.items[idx];
+        if (!it) return;
+        enableTileDrag(el, { type:'move', from:path, idx, id:it.id, label:it.label }, () => deleteItem(path, idx));
+    });
+    zone.querySelectorAll('.sum-term.term-draggable').forEach(el => {
+        const sumPath = el.dataset.path;
+        const termIdx = parseInt(el.dataset.termIdx, 10);
+        const sum = getNode(sumPath);
+        const t = sum && sum.terms[termIdx];
+        if (!t) return;
+        enableTileDrag(el, { type:'sumterm', from:sumPath, termIdx, sign:t.sign });
+    });
+}
+function renderHistory() {}
+function updateHint() {}
+function refreshView() {
+    renderEquationZone();
+    if (viewMode === 'drill' && currentDrillCfg && currentDrillCfg.showPalette) buildDrillPalette();
+}
+function showFeedback(msg, ok) {
+    const f = document.getElementById('feedback');
+    if (!f) return;
+    f.innerHTML = msg;
+    f.className = 'text-center mt-4 font-semibold text-lg ' + (ok ? 'text-green-600' : 'text-red-600');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GLISSER-DÉPOSER
+// ═══════════════════════════════════════════════════════════════
+function pruneEmptySlot(path) {
+    const parts = path.split('.');
+    if (parts.length !== 2) return;
+    const side = getNode(parts[0]);
+    const idx = +parts[1];
+    const slot = side.slots[idx];
+    if (slot && slot.kind === 'simple' && slot.items.length === 0 && side.slots.length > 1) {
+        side.slots.splice(idx, 1);
+    }
+}
+function applyEmptinessRuleFrac(path, removedId) {
+    if (path.endsWith('.num')) return;
+    if (path.endsWith('.den')) {
+        const fracPath = path.slice(0, -4);
+        const fracNode = getNode(fracPath);
+        if (removedId === 'one') setNode(fracPath, fracNode.num);
+        else fracNode.forceDenCross = true;
+    }
+}
+function deleteDen(fracPath) {
+    const fracNode = getNode(fracPath);
+    if (!fracNode || fracNode.kind !== 'frac') return;
+    if (fracNode.den.items.length !== 0 && !fracNode.forceDenCross) return;
+    setNode(fracPath, fracNode.num);
+    refreshView();
+}
+function handleEmptied(path, removedId) {
+    const parts = path.split('.');
+    if (parts.length === 2) pruneEmptySlot(path);
+    else applyEmptinessRuleFrac(path, removedId);
+}
+
+function processDrop(path, data) {
+    if (data.type === 'frac') {
+        const node = getNode(path);
+        if (!node || node.kind !== 'simple') return;
+        const f = frac(node.items, []);
+        f.forceDenCross = true;
+        setNode(path, f);
+        refreshView();
+        return;
+    }
+    const node = getNode(path);
+    if (!node || node.kind !== 'simple') return;
+    if (data.type === 'move') {
+        if (data.from === path) { refreshView(); return; }
+        const src = getNode(data.from);
+        if (src && src.items[data.idx] && src.items[data.idx].id === data.id) {
+            const removedId = src.items[data.idx].id;
+            src.items.splice(data.idx, 1);
+            if (src.items.length === 0) handleEmptied(data.from, removedId);
+        }
+    }
+    node.items.push({ id: data.id, label: data.label });
+    refreshView();
+}
+
+function handleInsertDropAt(sidePath, where, data) {
+    if (!data || data.type === 'frac' || data.type === 'sqrt' || data.type === 'sumterm') return;
+    const side = getNode(sidePath);
+    if (!side || side.kind !== 'seq') return;
+    if (data.type === 'move') {
+        const src = getNode(data.from);
+        if (src && src.items[data.idx] && src.items[data.idx].id === data.id) {
+            const removedId = src.items[data.idx].id;
+            src.items.splice(data.idx, 1);
+            if (src.items.length === 0) handleEmptied(data.from, removedId);
+        }
+    }
+    const newSlot = simple([{ id: data.id, label: data.label }]);
+    if (where === 'start') side.slots.unshift(newSlot); else side.slots.push(newSlot);
+    refreshView();
+}
+
+function deleteItem(path, idx) {
+    const node = getNode(path);
+    if (!node || node.kind !== 'simple') return;
+    const removed = node.items[idx];
+    if (!removed) return;
+    node.items.splice(idx, 1);
+    if (node.items.length === 0) handleEmptied(path, removed.id);
+    refreshView();
+}
+
+function enableTileDrag(el, data, onTap) {
+    let startX = 0, startY = 0;
+    el.addEventListener('pointerdown', e => { startX = e.clientX; startY = e.clientY; });
+    DragDrop.enable(el, {
+        zoneSelector: '.eq-tile, .slot-simple, .insert-zone, .eq-side, .sum-term',
+        dragOverClass: 'drag-over',
+        onStart: () => {
+            if (data.type === 'sqrt') document.body.classList.add('sqrt-dragging');
+            if (data.type === 'sumterm') document.body.classList.add('sumterm-dragging');
+        },
+        onDrop: (item, zone, evt) => {
+            if (data.type === 'sqrt') document.body.classList.remove('sqrt-dragging');
+            if (data.type === 'sumterm') document.body.classList.remove('sumterm-dragging');
+            const moved = Math.hypot(evt.clientX - startX, evt.clientY - startY) > 8;
+            if (onTap && !moved) { onTap(); return; }
+            if (zone) handleZoneDrop(data, zone);
+        },
+        onCancel: () => {
+            if (data.type === 'sqrt') document.body.classList.remove('sqrt-dragging');
+            if (data.type === 'sumterm') document.body.classList.remove('sumterm-dragging');
+        },
+    });
+}
+
+function handleZoneDrop(data, zone) {
+    if (data.type === 'sqrt') {
+        const side = zone.closest('.eq-side');
+        if (side) processSqrtDrop(side.dataset.path);
+        return;
+    }
+    if (data.type === 'sumterm') {
+        const side = zone.closest('.eq-side');
+        if (side) processSumTermDrop(side.dataset.path, data);
+        return;
+    }
+    if (zone.matches('.insert-zone')) {
+        handleInsertDropAt(zone.dataset.side, zone.dataset.where, data);
+        return;
+    }
+    processDrop(zone.dataset.path, data);
+}
+
+function flipEquation() {
+    if (resolved) return;
+    const tmp = state.left;
+    state.left = state.right;
+    state.right = tmp;
+    refreshView();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TERMES ADDITIFS (+ / -)
+// ═══════════════════════════════════════════════════════════════
+// retire un terme d'une somme ; si la somme d'origine ne contient plus
+// aucun terme (cas normalement impossible ici, un terme se déplace
+// toujours vers l'autre côté) la zone est laissée vide
+function removeSumTerm(sumPath, termIdx) {
+    const sum = getNode(sumPath);
+    if (!sum || sum.kind !== 'sum') return null;
+    const [removed] = sum.terms.splice(termIdx, 1);
+    return removed;
+}
+// dépose d'un terme additif sur le membre entier de l'autre côté : le terme
+// rejoint (ou crée) la somme de ce côté, avec son signe inversé — la cible ne
+// doit jamais être une zone multiplicative ni l'intérieur d'une fraction,
+// d'où le ciblage sur l'ensemble du membre (comme pour la racine carrée)
+function processSumTermDrop(sidePath, data) {
+    if (sidePath !== 'left' && sidePath !== 'right') return;
+    if (data.from === sidePath) { refreshView(); return; }
+    const removed = removeSumTerm(data.from, data.termIdx);
+    if (!removed) return;
+    const flipped = { sign: -removed.sign, node: removed.node };
+    const destSide = getNode(sidePath);
+    let destTermIdx;
+    if (destSide.slots.length === 1 && destSide.slots[0].kind === 'sum') {
+        destSide.slots[0].terms.push(flipped);
+        destTermIdx = destSide.slots[0].terms.length - 1;
+    } else {
+        const wrapped = sumNode([{ sign:1, node: seq(destSide.slots) }, flipped]);
+        destSide.slots = [wrapped];
+        destTermIdx = 1;
+    }
+    lastMovedTerm = { sidePath: sidePath + '.0', termIdx: destTermIdx };
+    refreshView();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RACINE CARRÉE (héritée des modules 4/5, non utilisée par défaut ici)
+// ═══════════════════════════════════════════════════════════════
+// retrouve le signe effectif (cumulé à travers les sommes imbriquées) avec
+// lequel une tuile isolée apparaît dans un membre, ou null si absente /
+// non isolée seule dans sa zone — sert aux vérifications des manipulations
+function findTermSign(node, id) {
+    function walk(n, mult) {
+        if (!n) return null;
+        if (n.kind === 'simple') return (n.items.length === 1 && n.items[0].id === id) ? mult : null;
+        if (n.kind === 'seq') { for (const s of n.slots) { const r = walk(s, mult); if (r !== null) return r; } return null; }
+        if (n.kind === 'frac') { const rn = walk(n.num, mult); return rn !== null ? rn : walk(n.den, mult); }
+        if (n.kind === 'sum') { for (const t of n.terms) { const r = walk(t.node, mult * t.sign); if (r !== null) return r; } return null; }
+        return null;
+    }
+    return walk(node, 1);
+}
+// simple test de présence (sans notion de signe ni d'isolement), utilisé pour
+// vérifier qu'un terme multiplicatif n'a pas bougé pendant la manipulation
+function existsInTree(node, id) {
+    if (!node) return false;
+    if (node.kind === 'simple') return node.items.some(i => i.id === id);
+    if (node.kind === 'seq') return node.slots.some(s => existsInTree(s, id));
+    if (node.kind === 'frac') return existsInTree(node.num, id) || existsInTree(node.den, id);
+    if (node.kind === 'sum') return node.terms.some(t => existsInTree(t.node, id));
+    return false;
+}
+
+function isFullyIsolatedSeq(node, targetId) {
+    return node && node.kind === 'seq' && node.slots.length === 1
+        && node.slots[0].kind === 'simple' && node.slots[0].items.length === 1
+        && node.slots[0].items[0].id === targetId;
+}
+function processSqrtDrop() {}
+
+// ═══════════════════════════════════════════════════════════════
+// PALETTE
+// ═══════════════════════════════════════════════════════════════
+function addPaletteTile(t) {
+    const pal = document.getElementById('palette');
+    const el = document.createElement('div');
+    el.className = 'palette-tile';
+    el.innerHTML = t.label;
+    enableTileDrag(el, { type:'tile', id:t.id, label:t.label });
+    pal.appendChild(el);
+}
+function countIdAnywhere(id) {
+    function c(node) {
+        if (!node) return 0;
+        if (node.kind === 'simple') return node.items.filter(i => i.id === id).length;
+        if (node.kind === 'sqrt') return c(node.inner);
+        if (node.kind === 'frac') return c(node.num) + c(node.den);
+        if (node.kind === 'sum') return node.terms.reduce((s, t) => s + c(t.node), 0);
+        return node.slots.reduce((s, sl) => s + c(sl), 0);
+    }
+    return c(state.left) + c(state.right);
+}
+const REUSABLE_TILE_IDS = new Set(['one', 'times', 'plus', 'minus']);
+function buildDrillPalette() {
+    const pal = document.getElementById('palette');
+    if (!pal) return;
+    pal.innerHTML = '';
+    (currentDrillCfg && currentDrillCfg.paletteTiles || [])
+        .filter(t => REUSABLE_TILE_IDS.has(t.id) || countIdAnywhere(t.id) === 0)
+        .forEach(addPaletteTile);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ÉVALUATION ALGÉBRIQUE
+// ═══════════════════════════════════════════════════════════════
+function tokenValue(id, v) {
+    if (id === 'one') return 1;
+    return (v && id in v) ? v[id] : NaN;
+}
+function evaluateNode(node, v) {
+    if (node.kind === 'sqrt') return Math.sqrt(evaluateNode(node.inner, v));
+    if (node.kind === 'seq') return node.slots.reduce((p, s) => p * evaluateNode(s, v), 1);
+    if (node.kind === 'frac') return evaluateNode(node.num, v) / evaluateNode(node.den, v);
+    if (node.kind === 'sum') return node.terms.reduce((s, t) => s + t.sign * evaluateNode(t.node, v), 0);
+    if (node.items.length === 0) return NaN;
+    let terms = [], termValue = 1, sign = 1;
+    node.items.forEach(it => {
+        if (it.id === 'plus')       { terms.push(sign * termValue); termValue = 1; sign = 1; }
+        else if (it.id === 'minus') { terms.push(sign * termValue); termValue = 1; sign = -1; }
+        else if (it.id === 'times') { /* juxtaposition = produit */ }
+        else termValue *= tokenValue(it.id, v);
+    });
+    terms.push(sign * termValue);
+    return terms.reduce((s, t) => s + t, 0);
+}
+function isSlotEmpty(node) {
+    if (node.kind === 'simple') return node.items.length === 0;
+    if (node.kind === 'sqrt') return isSlotEmpty(node.inner);
+    if (node.kind === 'frac') return isSlotEmpty(node.num) || isSlotEmpty(node.den);
+    if (node.kind === 'sum') return node.terms.some(t => isSlotEmpty(t.node));
+    return node.slots.some(isSlotEmpty);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MOTEUR DE DRILL (manipulations guidées)
+// ═══════════════════════════════════════════════════════════════
+function mountDrill(container, drillCfg, explainHtml) {
+    currentDrillCfg = drillCfg;
+    viewMode = 'drill';
+    state = { left: drillCfg.left(), right: drillCfg.right() };
+    activeHighlightId = drillCfg.highlight || null;
+    currentDrill = { check: drillCfg.check, partialMessage: drillCfg.partialMessage };
+    currentDrillOnSuccess = drillCfg.onSuccess;
+    container.innerHTML = `
+        <div class="flex items-center justify-end mb-2">
+            <button onclick="resetDrill()" class="text-xs font-bold text-red-500 hover:text-red-700">↺ Recommencer</button>
+        </div>
+        <p class="text-gray-700 mb-4">${drillCfg.instruction}</p>
+        ${drillCfg.opDiagram ? `
+        <div class="op-diagram mb-2">
+            <div class="eq-line-static text-lg md:text-xl">${renderStatic(drillCfg.left())}<span class="eq-sign" style="font-size:1.4rem;margin:0 10px;">=</span>${renderStatic(drillCfg.right())}</div>
+            <div class="op-diagram-arrows">
+                <div class="op-arrow-row op-arrow-row-left">
+                    <span class="op-arrow-label">${drillCfg.opDiagram.label}${drillCfg.opDiagram.noteLeft ? `<span class="op-arrow-note">${drillCfg.opDiagram.noteLeft}</span>` : ''}</span>
+                    <svg viewBox="0 0 60 46" class="op-arrow-svg"><path d="M46,4 Q12,10 16,38" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round"/><path d="M16,38 L7,26 M16,38 L25,29" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="op-arrow-row op-arrow-row-right">
+                    <svg viewBox="0 0 60 46" class="op-arrow-svg" style="transform:scaleX(-1)"><path d="M46,4 Q12,10 16,38" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round"/><path d="M16,38 L7,26 M16,38 L25,29" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="op-arrow-label">${drillCfg.opDiagram.label}${drillCfg.opDiagram.noteRight ? `<span class="op-arrow-note">${drillCfg.opDiagram.noteRight}</span>` : ''}</span>
+                </div>
+            </div>
+        </div>` : ''}
+        <div id="currentStepZone" class="eq-row py-8 border-2 border-dashed border-indigo-300 rounded-lg bg-indigo-50" style="min-height:110px;"></div>
+        ${drillCfg.showPalette ? `<div class="mt-4"><div class="text-xs font-bold text-gray-500 uppercase mb-2">Glisse les éléments nécessaires</div><div id="palette" class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200"></div></div>` : ''}
+        ${explainHtml || ''}
+        <div class="text-center mt-2">
+            <button id="verifyDrillBtn" onclick="checkDrill()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">✓ Valider</button>
+            <button id="nextDrillBtn" onclick="currentDrillOnSuccess()" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">Suivant →</button>
+        </div>
+        <div class="text-center mt-2">
+            <button id="skipDrillBtn" onclick="currentDrillOnSuccess()" class="text-xs font-semibold text-gray-400 hover:text-gray-600">Passer à la suite quand même →</button>
+        </div>
+        <div id="feedback" class="text-center mt-4 font-semibold text-lg"></div>`;
+    refreshView();
+}
+function resetDrill() {
+    if (!currentDrillCfg) return;
+    viewMode = 'drill';
+    state = { left: currentDrillCfg.left(), right: currentDrillCfg.right() };
+    activeHighlightId = currentDrillCfg.highlight || null;
+    const vBtn = document.getElementById('verifyDrillBtn');
+    const nBtn = document.getElementById('nextDrillBtn');
+    const sBtn = document.getElementById('skipDrillBtn');
+    if (vBtn) vBtn.classList.remove('hidden');
+    if (nBtn) nBtn.classList.add('hidden');
+    if (sBtn) sBtn.classList.remove('hidden');
+    showFeedback('', false);
+    refreshView();
+}
+function checkDrill() {
+    if (!currentDrill) return;
+    const result = currentDrill.check(state);
+    const partialMessage = typeof currentDrill.partialMessage === 'function' ? currentDrill.partialMessage(state) : currentDrill.partialMessage;
+    if (result === true) {
+        showFeedback("✓ Bravo, c'est exactement ça !", true);
+        document.getElementById('verifyDrillBtn').classList.add('hidden');
+        document.getElementById('nextDrillBtn').classList.remove('hidden');
+        const sBtn = document.getElementById('skipDrillBtn');
+        if (sBtn) sBtn.classList.add('hidden');
+    } else if (result === 'partial') {
+        showFeedback("✓ " + (partialMessage || "C'est bon, mais ce n'est pas encore complet."), true);
+    } else {
+        showFeedback("✕ Ce n'est pas encore ça, réessaie.", false);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 6 — GÉRER LES + ET LES - (méthode)
+// équation utilisée pour tous les exemples : P2 - P1 = ρ×g×(z1-z2)
+// (différence de pression entre deux points dans un liquide)
+// ═══════════════════════════════════════════════════════════════
+const TUTORIAL_EXPLAIN = "Dans une équation, un terme additif (relié aux autres par un + ou un −) peut lui aussi passer de l'autre côté du signe =. Contrairement à un terme multiplicatif, il ne change pas de position (haut/bas) : il change de <b>signe</b>.";
+
+const m6Start = {
+    left:  () => seq([sumNode([term1(1,[simple([tile('P2','P<sub>2</sub>')])]), term1(-1,[simple([tile('P1','P<sub>1</sub>')])])])]),
+    right: () => seq([simple([tile('rho','ρ'), tile('g','g')]), sumNode([term1(1,[simple([tile('z1','z<sub>1</sub>')])]), term1(-1,[simple([tile('z2','z<sub>2</sub>')])])])]),
+};
+
+const module6Tutorial = [
+    {
+        instruction: "Voici l'équation P<sub>2</sub> − P<sub>1</sub> = ρ×g×(z<sub>1</sub>−z<sub>2</sub>). Glisse <b>P<sub>2</sub></b> (positif, à gauche) vers l'autre côté.",
+        left: m6Start.left, right: m6Start.right,
+        opDiagram: { label: '−P₂', noteLeft: '(retire le +P₂)', noteRight: '(ajoute un −P₂)' },
+        check: (st) => {
+            if (findTermSign(st.left, 'P2') !== null) return false;
+            if (findTermSign(st.right, 'P2') !== -1) return false;
+            if (findTermSign(st.left, 'P1') !== -1) return false;
+            if (findTermSign(st.right, 'z1') !== 1 || findTermSign(st.right, 'z2') !== -1) return false;
+            if (!existsInTree(st.right, 'rho') || !existsInTree(st.right, 'g')) return false;
+            return true;
+        },
+        partialMessage: "Vérifie que P₂ est bien devenu négatif de l'autre côté."
+    },
+    {
+        instruction: "Repartons de la même équation. Cette fois, glisse <b>P<sub>1</sub></b> (négatif, à gauche) vers l'autre côté.",
+        left: m6Start.left, right: m6Start.right,
+        opDiagram: { label: '+P₁', noteLeft: '(retire le −P₁)', noteRight: '(ajoute un +P₁)' },
+        check: (st) => {
+            if (findTermSign(st.left, 'P1') !== null) return false;
+            if (findTermSign(st.right, 'P1') !== 1) return false;
+            if (findTermSign(st.left, 'P2') !== 1) return false;
+            if (findTermSign(st.right, 'z1') !== 1 || findTermSign(st.right, 'z2') !== -1) return false;
+            if (!existsInTree(st.right, 'rho') || !existsInTree(st.right, 'g')) return false;
+            return true;
+        },
+        partialMessage: "Vérifie que P₁ est bien devenu positif de l'autre côté."
+    },
+    {
+        instruction: "À droite, (z<sub>1</sub>−z<sub>2</sub>) est multiplié par ρ et g : impossible de déplacer z<sub>1</sub> ou z<sub>2</sub> directement. Isole d'abord la parenthèse en passant <b>ρ</b> et <b>g</b> de l'autre côté (comme un terme multiplicatif ordinaire).",
+        left:  () => seq([simple([tile('P2','P<sub>2</sub>')])]),
+        right: () => seq([simple([tile('rho','ρ'), tile('g','g')]), sumNode([term1(1,[simple([tile('z1','z<sub>1</sub>')])]), term1(-1,[simple([tile('z2','z<sub>2</sub>')])])])]),
+        check: (st) => {
+            if (st.right.kind !== 'seq' || st.right.slots.length !== 1 || st.right.slots[0].kind !== 'sum') return false;
+            return st.left.kind === 'seq' && st.left.slots.length === 1 && st.left.slots[0].kind === 'simple'
+                && setEq(idsOf(st.left.slots[0].items), ['P2','rho','g']);
+        }
+    },
+    {
+        instruction: "La somme est maintenant isolée : plus rien ne la multiplie. Tu peux déplacer <b>z<sub>1</sub></b> ou <b>z<sub>2</sub></b> librement, comme n'importe quel terme additif. Glisse <b>z<sub>2</sub></b> à gauche.",
+        left:  () => seq([simple([tile('P2','P<sub>2</sub>'), tile('rho','ρ'), tile('g','g')])]),
+        right: () => seq([sumNode([term1(1,[simple([tile('z1','z<sub>1</sub>')])]), term1(-1,[simple([tile('z2','z<sub>2</sub>')])])])]),
+        highlight: 'z2',
+        check: (st) => {
+            if (findTermSign(st.right, 'z2') !== null) return false;
+            if (findTermSign(st.left, 'z2') !== 1) return false;
+            if (findTermSign(st.right, 'z1') !== 1) return false;
+            if (!existsInTree(st.left, 'P2') || !existsInTree(st.left, 'rho') || !existsInTree(st.left, 'g')) return false;
+            return true;
+        }
+    }
+];
+let m6TutIdx = 0;
+
+function renderTutorial() {
+    const drill = module6Tutorial[m6TutIdx];
+    const app = document.getElementById('app');
+    app.innerHTML = `
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <span class="content-module-badge">MODULE 6</span>
+        <h2 class="text-2xl font-bold text-indigo-900 mb-1">Gérer les + et les −</h2>
+        <p class="text-xs text-gray-400 uppercase font-bold mb-4">Question ${m6TutIdx+1}/${module6Tutorial.length}</p>
+        <div class="rule-card"><p class="text-sm text-gray-700">${TUTORIAL_EXPLAIN}</p></div>
+      </div>
+      <div id="drillCard" class="bg-white rounded-xl shadow-lg p-6"></div>`;
+    mountDrill(document.getElementById('drillCard'), { ...drill, onSuccess: advanceTutorial });
+}
+function advanceTutorial() {
+    if (m6TutIdx < module6Tutorial.length - 1) { m6TutIdx++; renderTutorial(); }
+    else finishModule6();
+}
+function finishModule6() {
+    document.getElementById('app').innerHTML = `
+      <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Module 6 terminé !</h2>
+        <p class="text-gray-700 mb-4">Tu sais maintenant déplacer des termes additifs d'un côté à l'autre d'une équation.</p>
+        <a href="module_7.html" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">Passer au module 7 →</a>
+      </div>`;
+}
+
+renderTutorial();
+</script>
+</body>
+</html>
