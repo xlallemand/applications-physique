@@ -125,6 +125,13 @@
     @keyframes confetti-fall {
         to { top:110vh; transform:translateY(0) rotate(720deg); }
     }
+
+    /* ── Diagramme "on divise/multiplie les deux côtés par..." (règles 2 et 3) ── */
+    .op-diagram { text-align:center; }
+    .op-diagram-arrows { display:flex; justify-content:space-between; padding:0 14%; margin:0 0 4px; }
+    .op-arrow-col { display:flex; flex-direction:column; align-items:center; }
+    .op-arrow-svg { width:40px; height:32px; display:block; }
+    .op-arrow-label { font-weight:800; color:#4f46e5; font-size:.95rem; margin-top:-2px; }
 </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
@@ -222,9 +229,13 @@ function renderNode(node, path) {
     }
     // la croix apparaît sur un dénominateur qui vaut 1 (cas historique de ce
     // module) ou sur un dénominateur vide dont la croix a été révélée
-    // explicitement (voir revealDenCrossOnValidate / checkDrill)
-    const showDenCross = (node.den.items.length === 1 && node.den.items[0].id === 'one')
-        || (node.den.items.length === 0 && node.forceDenCross);
+    // explicitement (voir revealDenCrossOnValidate / checkDrill) — certains
+    // exemples désactivent volontairement cette croix (drillSuppressOneCross)
+    // pour ne pas inviter à simplifier un 1 qui n'est là que pour illustrer
+    // l'opération réalisée sur les deux côtés de l'équation
+    const showDenCross = !drillSuppressOneCross && (
+        (node.den.items.length === 1 && node.den.items[0].id === 'one')
+        || (node.den.items.length === 0 && node.forceDenCross));
     return `<div class="frac-wrap">
         <div class="frac-num-wrap">${renderNode(node.num, path + '.num')}</div>
         <div class="frac-line"></div>
@@ -346,6 +357,7 @@ function enableTileDrag(el, data, onTap) {
 // particulier sans changer le comportement par défaut des autres exemples
 let drillNoNumAutoOne = false;
 let drillNoDenAutoCollapse = false;
+let drillSuppressOneCross = false;
 let m1DenCrossRevealed = false;
 
 function applyEmptinessRule(path, removedId) {
@@ -633,6 +645,7 @@ function mountDrill(container, drillCfg, explainHtml) {
     drillFracAutoOne = !!drillCfg.fracAutoOne;
     drillNoNumAutoOne = !!drillCfg.noNumAutoOne;
     drillNoDenAutoCollapse = !!drillCfg.noDenAutoCollapse;
+    drillSuppressOneCross = !!drillCfg.suppressOneCross;
     m1DenCrossRevealed = false;
     currentDrillExtraTiles = drillCfg.paletteTiles || [];
     state = { left: drillCfg.left(), right: drillCfg.right() };
@@ -644,6 +657,20 @@ function mountDrill(container, drillCfg, explainHtml) {
             <button onclick="resetDrill()" class="text-xs font-bold text-red-500 hover:text-red-700">↺ Recommencer</button>
         </div>
         <p class="text-gray-700 mb-4">${drillCfg.instruction}</p>
+        ${drillCfg.opDiagram ? `
+        <div class="op-diagram mb-2">
+            <div class="eq-line-static text-lg md:text-xl">${renderStatic(drillCfg.left())}<span class="eq-sign" style="font-size:1.4rem;margin:0 10px;">=</span>${renderStatic(drillCfg.right())}</div>
+            <div class="op-diagram-arrows">
+                <div class="op-arrow-col">
+                    <svg viewBox="0 0 60 46" class="op-arrow-svg"><path d="M48,4 Q14,10 16,38" fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round"/><path d="M16,38 L9,28 M16,38 L23,30" fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="op-arrow-label">${drillCfg.opDiagram.label}</span>
+                </div>
+                <div class="op-arrow-col">
+                    <svg viewBox="0 0 60 46" class="op-arrow-svg" style="transform:scaleX(-1)"><path d="M48,4 Q14,10 16,38" fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round"/><path d="M16,38 L9,28 M16,38 L23,30" fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="op-arrow-label">${drillCfg.opDiagram.label}</span>
+                </div>
+            </div>
+        </div>` : ''}
         <div id="currentStepZone" class="eq-row py-8 border-2 border-dashed border-indigo-300 rounded-lg bg-indigo-50" style="min-height:110px;"></div>
         ${drillCfg.showPalette ? `<div class="mt-4"><div class="text-xs font-bold text-gray-500 uppercase mb-2">Glisse les éléments nécessaires</div><div id="palette" class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200"></div></div>` : ''}
         ${explainHtml || ''}
@@ -661,6 +688,7 @@ function resetDrill() {
     drillFracAutoOne = !!currentDrillCfg.fracAutoOne;
     drillNoNumAutoOne = !!currentDrillCfg.noNumAutoOne;
     drillNoDenAutoCollapse = !!currentDrillCfg.noDenAutoCollapse;
+    drillSuppressOneCross = !!currentDrillCfg.suppressOneCross;
     m1DenCrossRevealed = false;
     currentDrillExtraTiles = currentDrillCfg.paletteTiles || [];
     state = { left: currentDrillCfg.left(), right: currentDrillCfg.right() };
@@ -708,6 +736,8 @@ const module1Steps = [
                 left:  () => frac([tile('v','v')], [tile('one','1')]),
                 right: () => frac([tile('d','d')], [tile('t','t')]),
                 highlight: 'v',
+                opDiagram: { label: '÷v' },
+                suppressOneCross: true,
                 check: (st) => setEq(idsOf(st.left.num.items), ['one']) && setEq(idsOf(st.left.den.items), ['one'])
                             && setEq(idsOf(st.right.num.items), ['d']) && setEq(idsOf(st.right.den.items), ['t','v'])
             },
@@ -716,6 +746,8 @@ const module1Steps = [
                 left:  () => frac([tile('v','v')], [tile('one','1')]),
                 right: () => frac([tile('d','d')], [tile('t','t')]),
                 highlight: 'd',
+                opDiagram: { label: '÷d' },
+                suppressOneCross: true,
                 check: (st) => setEq(idsOf(st.right.num.items), ['one']) && setEq(idsOf(st.right.den.items), ['t'])
                             && setEq(idsOf(st.left.num.items), ['v']) && setEq(idsOf(st.left.den.items), ['one','d'])
             }
@@ -731,6 +763,8 @@ const module1Steps = [
                 left:  () => frac([tile('v','v')], [tile('one','1')]),
                 right: () => frac([tile('d','d')], [tile('t','t')]),
                 highlight: 't',
+                opDiagram: { label: '×t' },
+                suppressOneCross: true,
                 check: (st) => st.right.kind === 'simple' && setEq(idsOf(st.right.items), ['d'])
                             && st.left.kind === 'frac' && setEq(idsOf(st.left.num.items), ['v','t']) && setEq(idsOf(st.left.den.items), ['one'])
             },
@@ -739,6 +773,8 @@ const module1Steps = [
                 left:  () => frac([tile('d','d')], [tile('t','t')]),
                 right: () => frac([tile('v','v')], [tile('one','1')]),
                 highlight: 't',
+                opDiagram: { label: '×t' },
+                suppressOneCross: true,
                 check: (st) => st.left.kind === 'simple' && setEq(idsOf(st.left.items), ['d'])
                             && st.right.kind === 'frac' && setEq(idsOf(st.right.num.items), ['v','t']) && setEq(idsOf(st.right.den.items), ['one'])
             }
