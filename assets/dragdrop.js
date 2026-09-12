@@ -11,7 +11,8 @@
      DragDrop.enable(itemEl, {
        zoneSelector: '.drop-zone',       // sélecteur des zones de dépôt valides
        dragOverClass: 'drag-over',       // classe ajoutée à la zone survolée (optionnel)
-       onDrop: (item, zone, evt) => { ... }  // zone est null si déposé hors zone valide
+       onDrop: (item, zone, evt) => { ... },  // zone est null si déposé hors zone valide
+       onCancel: (item) => { ... }        // geste interrompu (pointercancel), sans dépôt
      });
 
    Pendant le glisser, un "fantôme" (clone de l'élément) suit le
@@ -26,6 +27,7 @@
     const dragOverClass = options.dragOverClass || 'drag-over';
     const onDrop = options.onDrop;
     const onStart = options.onStart;
+    const onCancel = options.onCancel;
 
     let ghost = null;
     let currentZone = null;
@@ -101,7 +103,11 @@
     }
 
     item.addEventListener('pointerup', finish);
-    item.addEventListener('pointercancel', function () { cleanup(); });
+    item.addEventListener('pointercancel', function (e) {
+      if (e.pointerId !== pointerId) return;
+      cleanup();
+      if (onCancel) onCancel(item);
+    });
   }
 
   window.DragDrop = { enable: enable };

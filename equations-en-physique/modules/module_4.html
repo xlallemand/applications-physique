@@ -32,7 +32,8 @@
     .eq-line-static { display:flex; align-items:center; justify-content:center; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
     @media (max-width:480px) {
-        .eq-tile, .eq-tile-frozen { font-size:.85rem; padding:5px 8px; }
+        .eq-tile, .eq-tile-frozen { font-size:.85rem; padding:7px 10px; }
+        .eq-tile { min-height:36px; }
         .eq-sign { font-size:1.4rem; margin:0 8px; }
         .eq-tile-static { font-size:.9rem; }
         .flip-btn { width:36px; height:36px; font-size:1rem; margin-left:8px; }
@@ -49,7 +50,7 @@
     .eq-tile {
         display:inline-flex; align-items:center; gap:6px; position:relative;
         background:#dbeafe; border:2px solid #60a5fa; border-radius:8px;
-        padding:6px 10px; font-weight:700; color:#1e3a8a; cursor:grab; touch-action:none;
+        padding:9px 13px; min-height:40px; font-weight:700; color:#1e3a8a; cursor:grab; touch-action:none;
     }
     .eq-tile.dragging { opacity:.4; }
     .eq-tile.tile-highlight { background:#fee2e2; border-color:#ef4444; color:#991b1b; box-shadow:0 0 0 3px rgba(239,68,68,.25); }
@@ -85,7 +86,6 @@
         font-weight:700; color:#312e81; cursor:grab; touch-action:none; user-select:none;
     }
     .palette-tile.dragging { opacity:.4; }
-    .drag-ghost { position:fixed; z-index:9999; pointer-events:none; transform:translate(-50%,-50%); opacity:.9; }
     .palette-frac { display:inline-flex; flex-direction:column; align-items:center; padding:6px 12px; }
     .palette-frac .dots { font-size:.8rem; letter-spacing:2px; color:#312e81; }
     .palette-frac .frac-line { width:28px; height:2px; margin:2px 0; background:#312e81; }
@@ -120,7 +120,7 @@
     }
     /* ── Zones d'insertion à côté d'une fraction (module 4) ─────────── */
     .insert-zone {
-        width:26px; min-height:56px; border:2px dashed #94a3b8; border-radius:8px;
+        width:34px; min-height:56px; border:2px dashed #94a3b8; border-radius:8px;
         opacity:0; transition:opacity .15s; flex-shrink:0;
     }
     .insert-zone.drag-over { background:#dbeafe; border-color:#3b82f6; opacity:1; }
@@ -495,6 +495,7 @@ function enableTileDrag(el, data, onTap) {
             if (onTap && !moved) { onTap(); return; }
             if (zone) handleZoneDrop(data, zone);
         },
+        onCancel: () => { if (data.type === 'sqrt') document.body.classList.remove('sqrt-dragging'); },
     });
 }
 
@@ -801,6 +802,9 @@ function mountDrill(container, drillCfg, explainHtml) {
             <button id="verifyDrillBtn" onclick="checkDrill()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">✓ Valider</button>
             <button id="nextDrillBtn" onclick="currentDrillOnSuccess()" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">Suivant →</button>
         </div>
+        <div class="text-center mt-2">
+            <button id="skipDrillBtn" onclick="currentDrillOnSuccess()" class="text-xs font-semibold text-gray-400 hover:text-gray-600">Passer à la suite quand même →</button>
+        </div>
         <div id="feedback" class="text-center mt-4 font-semibold text-lg"></div>`;
     refreshView();
 }
@@ -811,8 +815,10 @@ function resetDrill() {
     activeHighlightId = currentDrillCfg.highlight || null;
     const vBtn = document.getElementById('verifyDrillBtn');
     const nBtn = document.getElementById('nextDrillBtn');
+    const sBtn = document.getElementById('skipDrillBtn');
     if (vBtn) vBtn.classList.remove('hidden');
     if (nBtn) nBtn.classList.add('hidden');
+    if (sBtn) sBtn.classList.remove('hidden');
     showFeedback('', false);
     refreshView();
 }
@@ -823,6 +829,8 @@ function checkDrill() {
         showFeedback("✓ Bravo, c'est exactement ça !", true);
         document.getElementById('verifyDrillBtn').classList.add('hidden');
         document.getElementById('nextDrillBtn').classList.remove('hidden');
+        const sBtn = document.getElementById('skipDrillBtn');
+        if (sBtn) sBtn.classList.add('hidden');
     } else if (result === 'partial') {
         showFeedback("✓ " + (currentDrill.partialMessage || "C'est bon, mais ce n'est pas encore complet."), true);
     } else {

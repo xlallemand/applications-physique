@@ -32,7 +32,8 @@
     .eq-line-static { display:flex; align-items:center; justify-content:center; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
     @media (max-width:480px) {
-        .eq-tile, .eq-tile-frozen { font-size:.85rem; padding:5px 8px; }
+        .eq-tile, .eq-tile-frozen { font-size:.85rem; padding:7px 10px; }
+        .eq-tile { min-height:36px; }
         .eq-sign { font-size:1.4rem; margin:0 8px; }
         .eq-tile-static { font-size:.9rem; }
         .flip-btn { width:36px; height:36px; font-size:1rem; margin-left:8px; }
@@ -49,7 +50,7 @@
     .eq-tile {
         display:inline-flex; align-items:center; gap:6px; position:relative;
         background:#dbeafe; border:2px solid #60a5fa; border-radius:8px;
-        padding:6px 10px; font-weight:700; color:#1e3a8a; cursor:grab; touch-action:none;
+        padding:9px 13px; min-height:40px; font-weight:700; color:#1e3a8a; cursor:grab; touch-action:none;
     }
     .eq-tile.dragging { opacity:.4; }
     .eq-tile.tile-highlight { background:#fee2e2; border-color:#ef4444; color:#991b1b; box-shadow:0 0 0 3px rgba(239,68,68,.25); }
@@ -84,7 +85,6 @@
         font-weight:700; color:#312e81; cursor:grab; touch-action:none; user-select:none;
     }
     .palette-tile.dragging { opacity:.4; }
-    .drag-ghost { position:fixed; z-index:9999; pointer-events:none; transform:translate(-50%,-50%); opacity:.9; }
     .palette-frac { display:inline-flex; flex-direction:column; align-items:center; padding:6px 12px; }
     .palette-frac .dots { font-size:.8rem; letter-spacing:2px; color:#312e81; }
     .palette-frac .frac-line { width:28px; height:2px; margin:2px 0; background:#312e81; }
@@ -155,7 +155,14 @@ nav.setTitle("Module 3 : Entra\u00eenement");
 function tile(id,label){ return {id,label}; }
 function simple(items){ return { kind:'simple', items: items.map(t => ({...t})) }; }
 function frac(numItems, denItems){ return { kind:'frac', num: simple(numItems), den: simple(denItems) }; }
-function emptyFrac(){ return frac([],[]); }
+// un dénominateur vide "pristine" (jamais rempli) ne montre pas encore sa
+// croix de suppression : l'élève doit d'abord y déposer quelque chose avant
+// de pouvoir le supprimer (voir showDenCross / processDrop, qui retire ce
+// marqueur dès qu'un élément y est déposé)
+function emptyFrac(){ const f = frac([],[]); f.den.pristine = true; return f; }
+// dénominateur vide mais déjà muni de sa croix dès le départ (pas besoin d'y
+// déposer quoi que ce soit avant de pouvoir le supprimer)
+function forcedFrac(){ const f = emptyFrac(); f.forceDenCross = true; return f; }
 function idsOf(items){ return items.map(i => i.id); }
 function setEq(a,b){ if (a.length !== b.length) return false; const sa=[...a].sort(), sb=[...b].sort(); return sa.every((v,i)=>v===sb[i]); }
 function staticFracHtml(num, den) {
@@ -212,15 +219,15 @@ function renderNode(node, path) {
                     ${items || '<span class="slot-placeholder">…</span>'}
                 </div>`;
     }
-    const denIsLoneOne = node.den.items.length === 1 && node.den.items[0].id === 'one';
+    const showDenCross = (node.den.items.length === 0 && !node.den.pristine) || node.forceDenCross;
     return `<div class="frac-wrap">
         <div class="frac-num-wrap">${renderNode(node.num, path + '.num')}</div>
         <div class="frac-line"></div>
         <div class="frac-den-wrap">
-            ${denIsLoneOne ? `<span class="frac-del"
-                onclick="deleteItem('${path}.den',0)"
+            ${showDenCross ? `<span class="frac-del"
+                onclick="deleteDen('${path}')"
                 ontouchstart="event.stopPropagation()"
-                ontouchend="event.stopPropagation();event.preventDefault();deleteItem('${path}.den',0)"
+                ontouchend="event.stopPropagation();event.preventDefault();deleteDen('${path}')"
                 title="Supprimer le dénominateur">✕</span>` : ''}
             ${renderNode(node.den, path + '.den')}
         </div>
@@ -285,9 +292,10 @@ function renderHistory() {
 function updateHint() {
     const h = document.getElementById('stepHint');
     if (!h) return;
+    const defaultInitialHint = "Recopie l'équation ci-dessus sous forme de deux fractions égales. Aucun numérateur ni dénominateur ne doit rester vide (ajoute un 1 si besoin).";
     h.textContent = stepOneValidated
         ? "Déplace les termes pour isoler la grandeur demandée à gauche, ou utilise ⇄ pour inverser le sens de l'équation."
-        : "Recopie l'équation ci-dessus sous forme de deux fractions égales. Aucun numérateur ni dénominateur ne doit rester vide (ajoute un 1 si besoin).";
+        : (currentExercise && currentExercise.initialHint !== undefined ? currentExercise.initialHint : defaultInitialHint);
 }
 
 function refreshView() {
@@ -327,25 +335,17 @@ function enableTileDrag(el, data, onTap) {
     });
 }
 
-function applyEmptinessRule(path, removedId) {
-    if (!(path.endsWith('.num') || path.endsWith('.den'))) return;
-    const node = getNode(path);
-    if (!node || node.kind !== 'simple' || node.items.length > 0) return;
-    if (path.endsWith('.num')) {
-        node.items = [{ id:'one', label:'1' }];
-        return;
-    }
-    // dénominateur vidé : en mode tutoriel, la fraction disparaît toujours ;
-    // en résolution libre, elle ne disparaît que si c'est le "1" lui-même qu'on retire
-    // (un vrai terme retiré fait d'abord apparaître un 1, à retirer ensuite explicitement)
-    const shouldCollapse = (viewMode !== 'solve') || removedId === 'one';
-    if (shouldCollapse) {
-        const fracPath = path.slice(0, -4);
-        const fracNode = getNode(fracPath);
-        setNode(fracPath, fracNode.num);
-    } else {
-        node.items = [{ id:'one', label:'1' }];
-    }
+// un numérateur ou un dénominateur vidé reste vide : l'élève doit lui-même y
+// glisser un 1, ou (pour le dénominateur) supprimer la fraction via la croix
+// qui apparaît sur la zone vide (voir renderNode / deleteDen)
+function applyEmptinessRule(path, removedId) {}
+
+function deleteDen(fracPath) {
+    const fracNode = getNode(fracPath);
+    if (!fracNode || fracNode.kind !== 'frac') return;
+    if (fracNode.den.items.length !== 0 && !fracNode.forceDenCross) return;
+    setNode(fracPath, fracNode.num);
+    refreshView();
 }
 
 function processDrop(path, data) {
@@ -369,6 +369,7 @@ function processDrop(path, data) {
             applyEmptinessRule(data.from, removedId);
         }
     }
+    delete node.pristine;
     node.items.push({ id: data.id, label: data.label });
     refreshView();
 }
@@ -498,10 +499,15 @@ function solveEditorHTML() {
     <div id="feedback" class="text-center mt-4 font-semibold text-lg"></div>`;
 }
 
+// certaines questions démarrent avec l'équation déjà recopiée (voir module3Bank) ;
+// les autres démarrent vides, comme avant, et l'élève construit tout lui-même
+function startingState(cfg) {
+    return cfg.initial ? cfg.initial() : { left: emptyFrac(), right: emptyFrac() };
+}
 function startSolveExercise(cfg) {
     currentExercise = cfg;
     viewMode = 'solve';
-    state = { left: emptyFrac(), right: emptyFrac() };
+    state = startingState(cfg);
     history = [];
     stepOneValidated = false;
     resolved = false;
@@ -514,7 +520,7 @@ function startSolveExercise(cfg) {
 }
 function resetSolveExercise() {
     if (!currentExercise) return;
-    state = { left: emptyFrac(), right: emptyFrac() };
+    state = startingState(currentExercise);
     history = [];
     stepOneValidated = false;
     resolved = false;
@@ -650,6 +656,8 @@ function checkDrill() {
 // MODULE 3 — ENTRAÎNEMENT
 // ═══════════════════════════════════════════════════════════════
 const module3Bank = [
+    // ── Questions 1 à 9 : deux fractions vides au départ ; leur dénominateur
+    // n'a pas de croix tant qu'on n'y a rien déposé ──────────────────────
     { legend:"v<sub>c</sub> : vitesse (m/s) · d<sub>c</sub> : distance parcourue (m) · Δt<sub>c</sub> : durée du trajet (s)",
       intro:"Un cycliste roule à vitesse constante (la lettre grecque Δ se lit « delta »).",
       staticEqHtml:`<span class="eq-tile-static">v<sub>c</sub></span><span class="eq-sign">=</span>${staticFracHtml('d<sub>c</sub>','Δt<sub>c</sub>')}`,
@@ -676,14 +684,14 @@ const module3Bank = [
 
     { legend:"U<sub>1</sub> : tension (V) · R<sub>1</sub> : résistance (Ω, se lit « ohm ») · I<sub>1</sub> : intensité (A)",
       intro:"On étudie un premier circuit électrique (loi d'Ohm). La lettre grecque Ω se lit « oméga ».",
-      staticEqHtml:`<span class="eq-tile-static">U<sub>1</sub></span><span class="eq-sign">=</span><span class="eq-tile-static">R<sub>1</sub></span><span class="eq-tile-static">I<sub>1</sub></span>`,
-      tiles:[tile('U','U<sub>1</sub>'), tile('R','R<sub>1</sub>'), tile('I','I<sub>1</sub>')], target:'R',
+      staticEqHtml:`<span class="eq-tile-static">R<sub>1</sub></span><span class="eq-sign">=</span>${staticFracHtml('U<sub>1</sub>','I<sub>1</sub>')}`,
+      tiles:[tile('U','U<sub>1</sub>'), tile('R','R<sub>1</sub>'), tile('I','I<sub>1</sub>')], target:'I',
       sample:()=>{ const I=0.1+Math.random()*4.9, R=10+Math.random()*990; return {U:R*I,R,I}; } },
 
     { legend:"U<sub>2</sub> : tension (V) · R<sub>2</sub> : résistance (Ω, se lit « ohm ») · I<sub>2</sub> : intensité (A)",
       intro:"On étudie un second circuit électrique. La lettre grecque Ω se lit « oméga ».",
-      staticEqHtml:`<span class="eq-tile-static">U<sub>2</sub></span><span class="eq-sign">=</span><span class="eq-tile-static">R<sub>2</sub></span><span class="eq-tile-static">I<sub>2</sub></span>`,
-      tiles:[tile('U','U<sub>2</sub>'), tile('R','R<sub>2</sub>'), tile('I','I<sub>2</sub>')], target:'I',
+      staticEqHtml:`<span class="eq-tile-static">R<sub>2</sub></span><span class="eq-sign">=</span>${staticFracHtml('U<sub>2</sub>','I<sub>2</sub>')}`,
+      tiles:[tile('U','U<sub>2</sub>'), tile('R','R<sub>2</sub>'), tile('I','I<sub>2</sub>')], target:'U',
       sample:()=>{ const I=0.1+Math.random()*4.9, R=10+Math.random()*990; return {U:R*I,R,I}; } },
 
     { type:'mcq', question:"Comment se lit la lettre grecque Ω ?", options:["oméga","gamma","delta","sigma"], correct:"oméga" },
@@ -700,17 +708,23 @@ const module3Bank = [
       tiles:[tile('P','P<sub>r</sub>'), tile('U','U<sub>r</sub>'), tile('I','I<sub>r</sub>')], target:'P',
       sample:()=>{ const U=220, I=0.5+Math.random()*9.5; return {P:U*I,U,I}; } },
 
+    // ── Questions 10 à 16 : deux fractions vides au départ, mais leur
+    // dénominateur a déjà sa croix de suppression dès le début ──────────
     { legend:"E<sub>ce</sub> : énergie (J) · P<sub>ce</sub> : puissance (W) · Δt<sub>ce</sub> : durée (s)",
       intro:"On étudie l'énergie consommée par un chauffe-eau (la lettre grecque Δ se lit « delta »).",
-      staticEqHtml:`<span class="eq-tile-static">E<sub>ce</sub></span><span class="eq-sign">=</span><span class="eq-tile-static">P<sub>ce</sub></span><span class="eq-tile-static">Δt<sub>ce</sub></span>`,
-      tiles:[tile('E','E<sub>ce</sub>'), tile('P','P<sub>ce</sub>'), tile('t','Δt<sub>ce</sub>')], target:'t',
-      sample:()=>{ const P=500+Math.random()*2500, t=60+Math.random()*3540; return {E:P*t,P,t}; } },
+      staticEqHtml:`${staticFracHtml('E<sub>ce</sub>','Δt<sub>ce</sub>')}<span class="eq-sign">=</span><span class="eq-tile-static">P<sub>ce</sub></span>`,
+      tiles:[tile('E','E<sub>ce</sub>'), tile('P','P<sub>ce</sub>'), tile('t','Δt<sub>ce</sub>')], target:'E',
+      sample:()=>{ const P=500+Math.random()*2500, t=60+Math.random()*3540; return {E:P*t,P,t}; },
+      initial:()=>({ left: forcedFrac(), right: forcedFrac() }),
+      initialHint: "Recopie l'équation ci-dessus. Tu peux supprimer directement les dénominateurs inutiles." },
 
     { legend:"E<sub>f</sub> : énergie (J) · P<sub>f</sub> : puissance (W) · Δt<sub>f</sub> : durée (s)",
       intro:"Cette fois, l'équation de l'énergie consommée par un four est donnée sous une autre forme (la lettre grecque Δ se lit « delta »).",
       staticEqHtml:`${staticFracHtml('E<sub>f</sub>','Δt<sub>f</sub>')}<span class="eq-sign">=</span><span class="eq-tile-static">P<sub>f</sub></span>`,
-      tiles:[tile('E','E<sub>f</sub>'), tile('P','P<sub>f</sub>'), tile('t','Δt<sub>f</sub>')], target:'E',
-      sample:()=>{ const P=500+Math.random()*2500, t=60+Math.random()*3540; return {E:P*t,P,t}; } },
+      tiles:[tile('E','E<sub>f</sub>'), tile('P','P<sub>f</sub>'), tile('t','Δt<sub>f</sub>')], target:'t',
+      sample:()=>{ const P=500+Math.random()*2500, t=60+Math.random()*3540; return {E:P*t,P,t}; },
+      initial:()=>({ left: forcedFrac(), right: forcedFrac() }),
+      initialHint: "Recopie l'équation ci-dessus. Tu peux supprimer directement les dénominateurs inutiles." },
 
     { type:'mcq', question:"Comment se prononce la lettre grecque Δ ?", options:["delta","gamma","sigma","oméga"], correct:"delta" },
 
@@ -718,7 +732,9 @@ const module3Bank = [
       intro:"On étudie un échantillon de bois (le symbole ρ, utilisé pour la masse volumique, se lit « rho »).",
       staticEqHtml:`<span class="eq-tile-static">ρ<sub>b</sub></span><span class="eq-sign">=</span>${staticFracHtml('m<sub>b</sub>','V<sub>b</sub>')}`,
       tiles:[tile('rho','ρ<sub>b</sub>'), tile('m','m<sub>b</sub>'), tile('V','V<sub>b</sub>')], target:'m',
-      sample:()=>{ const V=0.001+Math.random()*0.099, rho=200+Math.random()*800; return {rho,m:rho*V,V}; } },
+      sample:()=>{ const V=0.001+Math.random()*0.099, rho=200+Math.random()*800; return {rho,m:rho*V,V}; },
+      initial:()=>({ left: forcedFrac(), right: forcedFrac() }),
+      initialHint: "Recopie l'équation ci-dessus. Tu peux supprimer directement les dénominateurs inutiles." },
 
     { type:'mcq', question:"Comment se prononce le symbole ρ, utilisé pour la masse volumique ?", options:["rho","ro","phi","tau"], correct:"rho" },
 
@@ -726,43 +742,59 @@ const module3Bank = [
       intro:"Cette fois, l'équation de la masse volumique d'une huile est donnée sous une autre forme.",
       staticEqHtml:`<span class="eq-tile-static">m<sub>h</sub></span><span class="eq-sign">=</span><span class="eq-tile-static">ρ<sub>h</sub></span><span class="eq-tile-static">V<sub>h</sub></span>`,
       tiles:[tile('rho','ρ<sub>h</sub>'), tile('m','m<sub>h</sub>'), tile('V','V<sub>h</sub>')], target:'rho',
-      sample:()=>{ const V=0.0005+Math.random()*0.0995, rho=700+Math.random()*300; return {rho,m:rho*V,V}; } },
+      sample:()=>{ const V=0.0005+Math.random()*0.0995, rho=700+Math.random()*300; return {rho,m:rho*V,V}; },
+      initial:()=>({ left: forcedFrac(), right: forcedFrac() }),
+      initialHint: "Recopie l'équation ci-dessus. Tu peux supprimer directement les dénominateurs inutiles." },
 
     { legend:"c<sub>massique,suc</sub> : concentration massique (g/L) · m<sub>suc</sub> : masse de sucre (g) · V<sub>sol</sub> : volume de la solution (L)",
       intro:"On étudie une solution de sucre.",
-      staticEqHtml:`<span class="eq-tile-static">c<sub>massique,suc</sub></span><span class="eq-sign">=</span>${staticFracHtml('m<sub>suc</sub>','V<sub>sol</sub>')}`,
-      tiles:[tile('cm','c<sub>massique,suc</sub>'), tile('m','m<sub>suc</sub>'), tile('V','V<sub>sol</sub>')], target:'m',
-      sample:()=>{ const V=0.0002+Math.random()*0.0198, cm=1000+Math.random()*7000; return {cm,m:cm*V,V}; } },
+      staticEqHtml:`${staticFracHtml('m<sub>suc</sub>','V<sub>sol</sub>')}<span class="eq-sign">=</span><span class="eq-tile-static">c<sub>massique,suc</sub></span>`,
+      tiles:[tile('cm','c<sub>massique,suc</sub>'), tile('m','m<sub>suc</sub>'), tile('V','V<sub>sol</sub>')], target:'V',
+      sample:()=>{ const V=0.0002+Math.random()*0.0198, cm=1000+Math.random()*7000; return {cm,m:cm*V,V}; },
+      initial:()=>({ left: forcedFrac(), right: forcedFrac() }),
+      initialHint: "Recopie l'équation ci-dessus. Tu peux supprimer directement les dénominateurs inutiles." },
 
+    // ── Questions 17 à 21 : pas de fraction au départ ; l'élève en ajoute
+    // une lui-même (outil ···/···) si l'équation en a besoin ──────────────
     { legend:"c<sub>m,sucre</sub> : concentration massique en sucre (g/L) · m<sub>sucre</sub> : masse de sucre (g) · V<sub>café</sub> : volume de la solution (L)",
       intro:"Cette fois, l'équation est donnée sous une autre forme, pour la concentration massique en sucre dans un café.",
       staticEqHtml:`<span class="eq-tile-static">m<sub>sucre</sub></span><span class="eq-sign">=</span><span class="eq-tile-static">c<sub>m,sucre</sub></span><span class="eq-tile-static">V<sub>café</sub></span>`,
       tiles:[tile('cm','c<sub>m,sucre</sub>'), tile('m','m<sub>sucre</sub>'), tile('V','V<sub>café</sub>')], target:'cm',
-      sample:()=>{ const V=0.0002+Math.random()*0.0198, cm=1000+Math.random()*7000; return {cm,m:cm*V,V}; } },
+      sample:()=>{ const V=0.0002+Math.random()*0.0198, cm=1000+Math.random()*7000; return {cm,m:cm*V,V}; },
+      initial:()=>({ left: simple([]), right: simple([]) }),
+      initialHint: "Ajoute toi-même les fractions si nécessaire." },
 
     { legend:"c<sub>1</sub> : concentration molaire (mol/L) · n<sub>1</sub> : quantité de matière (mol) · V<sub>1</sub> : volume (L)",
       intro:"On prépare une première solution.",
       staticEqHtml:`<span class="eq-tile-static">c<sub>1</sub></span><span class="eq-sign">=</span>${staticFracHtml('n<sub>1</sub>','V<sub>1</sub>')}`,
       tiles:[tile('c','c<sub>1</sub>'), tile('n','n<sub>1</sub>'), tile('V','V<sub>1</sub>')], target:'V',
-      sample:()=>{ const V=0.05+Math.random()*0.95, c=0.1+Math.random()*2; return {c,n:c*V,V}; } },
+      sample:()=>{ const V=0.05+Math.random()*0.95, c=0.1+Math.random()*2; return {c,n:c*V,V}; },
+      initial:()=>({ left: simple([]), right: simple([]) }),
+      initialHint: "Ajoute toi-même les fractions si nécessaire." },
 
     { legend:"c<sub>2</sub> : concentration molaire (mol/L) · n<sub>2</sub> : quantité de matière (mol) · V<sub>2</sub> : volume (L)",
       intro:"Cette fois, l'équation de concentration d'une seconde solution est donnée sous une autre forme.",
-      staticEqHtml:`<span class="eq-tile-static">n<sub>2</sub></span><span class="eq-sign">=</span><span class="eq-tile-static">c<sub>2</sub></span><span class="eq-tile-static">V<sub>2</sub></span>`,
-      tiles:[tile('c','c<sub>2</sub>'), tile('n','n<sub>2</sub>'), tile('V','V<sub>2</sub>')], target:'V',
-      sample:()=>{ const V=0.05+Math.random()*0.95, c=0.1+Math.random()*2; return {c,n:c*V,V}; } },
+      staticEqHtml:`<span class="eq-tile-static">c<sub>2</sub></span><span class="eq-sign">=</span>${staticFracHtml('n<sub>2</sub>','V<sub>2</sub>')}`,
+      tiles:[tile('c','c<sub>2</sub>'), tile('n','n<sub>2</sub>'), tile('V','V<sub>2</sub>')], target:'n',
+      sample:()=>{ const V=0.05+Math.random()*0.95, c=0.1+Math.random()*2; return {c,n:c*V,V}; },
+      initial:()=>({ left: simple([]), right: simple([]) }),
+      initialHint: "Ajoute toi-même les fractions si nécessaire." },
 
     { legend:"n<sub>s</sub> : quantité de matière (mol) · m<sub>s</sub> : masse (g) · M<sub>s</sub> : masse molaire (g/mol)",
       intro:"On pèse une masse m<sub>s</sub> de sel.",
       staticEqHtml:`<span class="eq-tile-static">n<sub>s</sub></span><span class="eq-sign">=</span>${staticFracHtml('m<sub>s</sub>','M<sub>s</sub>')}`,
       tiles:[tile('n','n<sub>s</sub>'), tile('m','m<sub>s</sub>'), tile('M','M<sub>s</sub>')], target:'m',
-      sample:()=>{ const M=20+Math.random()*80, n=0.01+Math.random()*0.99; return {n,m:n*M,M}; } },
+      sample:()=>{ const M=20+Math.random()*80, n=0.01+Math.random()*0.99; return {n,m:n*M,M}; },
+      initial:()=>({ left: simple([]), right: simple([]) }),
+      initialHint: "Ajoute toi-même les fractions si nécessaire." },
 
     { legend:"n<sub>su</sub> : quantité de matière (mol) · m<sub>su</sub> : masse (g) · M<sub>su</sub> : masse molaire (g/mol)",
       intro:"Cette fois, l'équation de quantité de matière du sucre est donnée sous une autre forme.",
       staticEqHtml:`<span class="eq-tile-static">m<sub>su</sub></span><span class="eq-sign">=</span><span class="eq-tile-static">n<sub>su</sub></span><span class="eq-tile-static">M<sub>su</sub></span>`,
       tiles:[tile('n','n<sub>su</sub>'), tile('m','m<sub>su</sub>'), tile('M','M<sub>su</sub>')], target:'M',
-      sample:()=>{ const M=20+Math.random()*80, n=0.01+Math.random()*0.99; return {n,m:n*M,M}; } }
+      sample:()=>{ const M=20+Math.random()*80, n=0.01+Math.random()*0.99; return {n,m:n*M,M}; },
+      initial:()=>({ left: simple([]), right: simple([]) }),
+      initialHint: "Ajoute toi-même les fractions si nécessaire." }
 ];
 const m3MaxScore = module3Bank.reduce((s,q) => s + (q.type==='mcq' ? 1 : 2), 0);
 const m3TrueMaxScore = module3Bank.reduce((s,q) => s + (q.type==='mcq' ? 1 : 3), 0);
@@ -815,6 +847,7 @@ function renderModule3() {
       <div class="bg-white rounded-xl shadow-lg p-6">${solveEditorHTML()}</div>`;
     startSolveExercise({
         tiles: q.tiles, sample: q.sample, targetId: q.target,
+        initial: q.initial, initialHint: q.initialHint,
         onSolved: (dm) => {
             const pts = hadError ? 1 : (history.length === 1 ? 3 : 2);
             m3Score += pts;

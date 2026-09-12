@@ -32,7 +32,8 @@
     .eq-line-static { display:flex; align-items:center; justify-content:center; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
     @media (max-width:480px) {
-        .eq-tile, .eq-tile-frozen { font-size:.85rem; padding:5px 8px; }
+        .eq-tile, .eq-tile-frozen { font-size:.85rem; padding:7px 10px; }
+        .eq-tile { min-height:36px; }
         .eq-sign { font-size:1.4rem; margin:0 8px; }
         .eq-tile-static { font-size:.9rem; }
         .flip-btn { width:36px; height:36px; font-size:1rem; margin-left:8px; }
@@ -49,7 +50,7 @@
     .eq-tile {
         display:inline-flex; align-items:center; gap:6px; position:relative;
         background:#dbeafe; border:2px solid #60a5fa; border-radius:8px;
-        padding:6px 10px; font-weight:700; color:#1e3a8a; cursor:grab; touch-action:none;
+        padding:9px 13px; min-height:40px; font-weight:700; color:#1e3a8a; cursor:grab; touch-action:none;
     }
     .eq-tile.dragging { opacity:.4; }
     .eq-tile.tile-highlight { background:#fee2e2; border-color:#ef4444; color:#991b1b; box-shadow:0 0 0 3px rgba(239,68,68,.25); }
@@ -84,7 +85,6 @@
         font-weight:700; color:#312e81; cursor:grab; touch-action:none; user-select:none;
     }
     .palette-tile.dragging { opacity:.4; }
-    .drag-ghost { position:fixed; z-index:9999; pointer-events:none; transform:translate(-50%,-50%); opacity:.9; }
     .palette-frac { display:inline-flex; flex-direction:column; align-items:center; padding:6px 12px; }
     .palette-frac .dots { font-size:.8rem; letter-spacing:2px; color:#312e81; }
     .palette-frac .frac-line { width:28px; height:2px; margin:2px 0; background:#312e81; }
@@ -125,6 +125,15 @@
     @keyframes confetti-fall {
         to { top:110vh; transform:translateY(0) rotate(720deg); }
     }
+
+    /* ── Diagramme "on divise/multiplie les deux côtés par..." (règles 2 et 3) ── */
+    .op-diagram { text-align:center; }
+    .op-diagram-arrows { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:0 2%; margin:2px 0 6px; }
+    .op-arrow-row { display:flex; align-items:center; gap:8px; }
+    .op-arrow-row-right { text-align:right; }
+    .op-arrow-svg { width:56px; height:44px; display:block; flex-shrink:0; }
+    .op-arrow-label { font-weight:800; color:#4f46e5; font-size:1.1rem; line-height:1.25; }
+    .op-arrow-note { display:block; font-weight:600; font-size:.72rem; color:#4338ca; white-space:nowrap; }
 </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
@@ -220,15 +229,23 @@ function renderNode(node, path) {
                     ${items || '<span class="slot-placeholder">…</span>'}
                 </div>`;
     }
-    const denIsLoneOne = node.den.items.length === 1 && node.den.items[0].id === 'one';
+    // la croix apparaît sur un dénominateur qui vaut 1 (cas historique de ce
+    // module) ou sur un dénominateur vide dont la croix a été révélée
+    // explicitement (voir revealDenCrossOnValidate / checkDrill) — certains
+    // exemples désactivent volontairement cette croix (drillSuppressOneCross)
+    // pour ne pas inviter à simplifier un 1 qui n'est là que pour illustrer
+    // l'opération réalisée sur les deux côtés de l'équation
+    const showDenCross = !drillSuppressOneCross && (
+        (node.den.items.length === 1 && node.den.items[0].id === 'one')
+        || (node.den.items.length === 0 && node.forceDenCross));
     return `<div class="frac-wrap">
         <div class="frac-num-wrap">${renderNode(node.num, path + '.num')}</div>
         <div class="frac-line"></div>
         <div class="frac-den-wrap">
-            ${denIsLoneOne ? `<span class="frac-del"
-                onclick="deleteItem('${path}.den',0)"
+            ${showDenCross ? `<span class="frac-del"
+                onclick="deleteDen('${path}')"
                 ontouchstart="event.stopPropagation()"
-                ontouchend="event.stopPropagation();event.preventDefault();deleteItem('${path}.den',0)"
+                ontouchend="event.stopPropagation();event.preventDefault();deleteDen('${path}')"
                 title="Supprimer le dénominateur">✕</span>` : ''}
             ${renderNode(node.den, path + '.den')}
         </div>
@@ -335,25 +352,48 @@ function enableTileDrag(el, data, onTap) {
     });
 }
 
+// certains exemples du module 1 démontrent volontairement le comportement
+// "commun" aux autres modules (zone vide, pas de 1 automatique) plutôt que le
+// comportement historique de ce module ; ces deux drapeaux, positionnés par
+// mountDrill/resetDrill selon la config du drill en cours, permettent ce cas
+// particulier sans changer le comportement par défaut des autres exemples
+let drillNoNumAutoOne = false;
+let drillNoDenAutoCollapse = false;
+let drillSuppressOneCross = false;
+let m1DenCrossRevealed = false;
+
 function applyEmptinessRule(path, removedId) {
     if (!(path.endsWith('.num') || path.endsWith('.den'))) return;
     const node = getNode(path);
     if (!node || node.kind !== 'simple' || node.items.length > 0) return;
     if (path.endsWith('.num')) {
-        node.items = [{ id:'one', label:'1' }];
+        if (!drillNoNumAutoOne) node.items = [{ id:'one', label:'1' }];
         return;
     }
     // dénominateur vidé : en mode tutoriel, la fraction disparaît toujours ;
     // en résolution libre, elle ne disparaît que si c'est le "1" lui-même qu'on retire
-    // (un vrai terme retiré fait d'abord apparaître un 1, à retirer ensuite explicitement)
-    const shouldCollapse = (viewMode !== 'solve') || removedId === 'one';
+    // (un vrai terme retiré fait d'abord apparaître un 1, à retirer ensuite explicitement) —
+    // retirer le "1" lui-même fait toujours disparaître la fraction, même quand
+    // drillNoDenAutoCollapse empêche la disparition automatique sur un vrai terme
+    const shouldCollapse = removedId === 'one' || (!drillNoDenAutoCollapse && (viewMode !== 'solve'));
     if (shouldCollapse) {
         const fracPath = path.slice(0, -4);
         const fracNode = getNode(fracPath);
         setNode(fracPath, fracNode.num);
-    } else {
+    } else if (!drillNoDenAutoCollapse) {
         node.items = [{ id:'one', label:'1' }];
     }
+}
+
+function deleteDen(fracPath) {
+    const fracNode = getNode(fracPath);
+    if (!fracNode || fracNode.kind !== 'frac') return;
+    const den = fracNode.den;
+    const isLoneOne = den.items.length === 1 && den.items[0].id === 'one';
+    const isEmptyRevealed = den.items.length === 0 && fracNode.forceDenCross;
+    if (!isLoneOne && !isEmptyRevealed) return;
+    setNode(fracPath, fracNode.num);
+    refreshView();
 }
 
 function processDrop(path, data) {
@@ -605,6 +645,10 @@ function mountDrill(container, drillCfg, explainHtml) {
     viewMode = 'drill';
     currentDrillShowsPalette = !!drillCfg.showPalette;
     drillFracAutoOne = !!drillCfg.fracAutoOne;
+    drillNoNumAutoOne = !!drillCfg.noNumAutoOne;
+    drillNoDenAutoCollapse = !!drillCfg.noDenAutoCollapse;
+    drillSuppressOneCross = !!drillCfg.suppressOneCross;
+    m1DenCrossRevealed = false;
     currentDrillExtraTiles = drillCfg.paletteTiles || [];
     state = { left: drillCfg.left(), right: drillCfg.right() };
     activeHighlightId = drillCfg.highlight || null;
@@ -615,12 +659,29 @@ function mountDrill(container, drillCfg, explainHtml) {
             <button onclick="resetDrill()" class="text-xs font-bold text-red-500 hover:text-red-700">↺ Recommencer</button>
         </div>
         <p class="text-gray-700 mb-4">${drillCfg.instruction}</p>
+        ${drillCfg.opDiagram ? `
+        <div class="op-diagram mb-2">
+            <div class="eq-line-static text-lg md:text-xl">${renderStatic(drillCfg.left())}<span class="eq-sign" style="font-size:1.4rem;margin:0 10px;">=</span>${renderStatic(drillCfg.right())}</div>
+            <div class="op-diagram-arrows">
+                <div class="op-arrow-row op-arrow-row-left">
+                    <span class="op-arrow-label">${drillCfg.opDiagram.label}${drillCfg.opDiagram.noteLeft ? `<span class="op-arrow-note">${drillCfg.opDiagram.noteLeft}</span>` : ''}</span>
+                    <svg viewBox="0 0 60 46" class="op-arrow-svg"><path d="M46,4 Q12,10 16,38" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round"/><path d="M16,38 L7,26 M16,38 L25,29" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="op-arrow-row op-arrow-row-right">
+                    <svg viewBox="0 0 60 46" class="op-arrow-svg" style="transform:scaleX(-1)"><path d="M46,4 Q12,10 16,38" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round"/><path d="M16,38 L7,26 M16,38 L25,29" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="op-arrow-label">${drillCfg.opDiagram.label}${drillCfg.opDiagram.noteRight ? `<span class="op-arrow-note">${drillCfg.opDiagram.noteRight}</span>` : ''}</span>
+                </div>
+            </div>
+        </div>` : ''}
         <div id="currentStepZone" class="eq-row py-8 border-2 border-dashed border-indigo-300 rounded-lg bg-indigo-50" style="min-height:110px;"></div>
         ${drillCfg.showPalette ? `<div class="mt-4"><div class="text-xs font-bold text-gray-500 uppercase mb-2">Glisse les éléments nécessaires</div><div id="palette" class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200"></div></div>` : ''}
         ${explainHtml || ''}
         <div class="text-center mt-2">
             <button id="verifyDrillBtn" onclick="checkDrill()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">✓ Valider</button>
             <button id="nextDrillBtn" onclick="currentDrillOnSuccess()" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">Suivant →</button>
+        </div>
+        <div class="text-center mt-2">
+            <button id="skipDrillBtn" onclick="currentDrillOnSuccess()" class="text-xs font-semibold text-gray-400 hover:text-gray-600">Passer à la suite quand même →</button>
         </div>
         <div id="feedback" class="text-center mt-4 font-semibold text-lg"></div>`;
     refreshView();
@@ -630,25 +691,41 @@ function resetDrill() {
     viewMode = 'drill';
     currentDrillShowsPalette = !!currentDrillCfg.showPalette;
     drillFracAutoOne = !!currentDrillCfg.fracAutoOne;
+    drillNoNumAutoOne = !!currentDrillCfg.noNumAutoOne;
+    drillNoDenAutoCollapse = !!currentDrillCfg.noDenAutoCollapse;
+    drillSuppressOneCross = !!currentDrillCfg.suppressOneCross;
+    m1DenCrossRevealed = false;
     currentDrillExtraTiles = currentDrillCfg.paletteTiles || [];
     state = { left: currentDrillCfg.left(), right: currentDrillCfg.right() };
     activeHighlightId = currentDrillCfg.highlight || null;
     const vBtn = document.getElementById('verifyDrillBtn');
     const nBtn = document.getElementById('nextDrillBtn');
+    const sBtn = document.getElementById('skipDrillBtn');
     if (vBtn) vBtn.classList.remove('hidden');
     if (nBtn) nBtn.classList.add('hidden');
+    if (sBtn) sBtn.classList.remove('hidden');
     showFeedback('', false);
     refreshView();
 }
 function checkDrill() {
     if (!currentDrill) return;
+    // certains exemples révèlent la croix d'un dénominateur vide dès la
+    // première validation, pour montrer qu'on peut le supprimer directement
+    if (currentDrillCfg && currentDrillCfg.revealDenCrossOnValidate && !m1DenCrossRevealed) {
+        m1DenCrossRevealed = true;
+        [state.left, state.right].forEach(n => { if (n.kind === 'frac' && n.den.items.length === 0) n.forceDenCross = true; });
+        refreshView();
+    }
     const result = currentDrill.check(state);
+    const partialMessage = typeof currentDrill.partialMessage === 'function' ? currentDrill.partialMessage(state) : currentDrill.partialMessage;
     if (result === true) {
         showFeedback("✓ Bravo, c'est exactement ça !", true);
         document.getElementById('verifyDrillBtn').classList.add('hidden');
         document.getElementById('nextDrillBtn').classList.remove('hidden');
+        const sBtn = document.getElementById('skipDrillBtn');
+        if (sBtn) sBtn.classList.add('hidden');
     } else if (result === 'partial') {
-        showFeedback("✓ " + (currentDrill.partialMessage || "C'est bon, mais ce n'est pas encore complet."), true);
+        showFeedback("✓ " + (partialMessage || "C'est bon, mais ce n'est pas encore complet."), true);
     } else {
         showFeedback("✕ Ce n'est pas encore ça, réessaie.", false);
     }
@@ -660,14 +737,16 @@ function checkDrill() {
 const module1Steps = [
     {
         title: "Étape 1 — Terme multiplicatif au numérateur",
-        explain: "Pour enlever un terme multiplicatif qui est au <b>numérateur (en haut)</b>, il faut le faire passer de l'autre côté, au <b>dénominateur (en bas)</b>.",
-        rule: "Un terme multiplicatif au numérateur (en haut) passe au dénominateur (en bas) de l'autre côté.",
+        explain: "Pour enlever un terme multiplicatif qui est au <b>numérateur (en haut)</b>, il faut le faire passer de l'autre côté, au <b>dénominateur (en bas)</b>. On fait cela car cela correspond à diviser par ce terme les deux côtés de l'équation.",
+        rule: "Un terme multiplicatif au numérateur (en haut) passe au dénominateur (en bas) de l'autre côté (cela revient à diviser les deux côtés de l'équation par ce terme).",
         drills: [
             {
                 instruction: "Voici l'équation v/1 = d/t. Déplace <b>v</b> de l'autre côté : il doit rejoindre le dénominateur (en bas), à droite.",
                 left:  () => frac([tile('v','v')], [tile('one','1')]),
                 right: () => frac([tile('d','d')], [tile('t','t')]),
                 highlight: 'v',
+                opDiagram: { label: '÷v', noteLeft: '(supprime le v en haut)', noteRight: '(ajoute un v en bas)' },
+                suppressOneCross: true,
                 check: (st) => setEq(idsOf(st.left.num.items), ['one']) && setEq(idsOf(st.left.den.items), ['one'])
                             && setEq(idsOf(st.right.num.items), ['d']) && setEq(idsOf(st.right.den.items), ['t','v'])
             },
@@ -676,6 +755,8 @@ const module1Steps = [
                 left:  () => frac([tile('v','v')], [tile('one','1')]),
                 right: () => frac([tile('d','d')], [tile('t','t')]),
                 highlight: 'd',
+                opDiagram: { label: '÷d', noteLeft: '(ajoute un d en bas)', noteRight: '(supprime le d en haut)' },
+                suppressOneCross: true,
                 check: (st) => setEq(idsOf(st.right.num.items), ['one']) && setEq(idsOf(st.right.den.items), ['t'])
                             && setEq(idsOf(st.left.num.items), ['v']) && setEq(idsOf(st.left.den.items), ['one','d'])
             }
@@ -683,14 +764,16 @@ const module1Steps = [
     },
     {
         title: "Étape 2 — Terme multiplicatif au dénominateur",
-        explain: "Symétriquement, un terme multiplicatif qui est au <b>dénominateur (en bas)</b> passe au <b>numérateur (en haut)</b> de l'autre côté.",
-        rule: "Un terme multiplicatif au dénominateur (en bas) passe au numérateur (en haut) de l'autre côté.",
+        explain: "Symétriquement, un terme multiplicatif qui est au <b>dénominateur (en bas)</b> passe au <b>numérateur (en haut)</b> de l'autre côté. On fait cela car cela correspond à multiplier par ce terme les deux côtés de l'équation.",
+        rule: "Un terme multiplicatif au dénominateur (en bas) passe au numérateur (en haut) de l'autre côté (cela revient à multiplier les deux côtés de l'équation par ce terme).",
         drills: [
             {
                 instruction: "Équation v/1 = d/t. Déplace <b>t</b> de l'autre côté : il doit rejoindre le numérateur (en haut), à gauche.",
                 left:  () => frac([tile('v','v')], [tile('one','1')]),
                 right: () => frac([tile('d','d')], [tile('t','t')]),
                 highlight: 't',
+                opDiagram: { label: '×t', noteLeft: '(ajoute un t en haut)', noteRight: '(supprime le t en bas)' },
+                suppressOneCross: true,
                 check: (st) => st.right.kind === 'simple' && setEq(idsOf(st.right.items), ['d'])
                             && st.left.kind === 'frac' && setEq(idsOf(st.left.num.items), ['v','t']) && setEq(idsOf(st.left.den.items), ['one'])
             },
@@ -699,6 +782,8 @@ const module1Steps = [
                 left:  () => frac([tile('d','d')], [tile('t','t')]),
                 right: () => frac([tile('v','v')], [tile('one','1')]),
                 highlight: 't',
+                opDiagram: { label: '×t', noteLeft: '(supprime le t en bas)', noteRight: '(ajoute un t en haut)' },
+                suppressOneCross: true,
                 check: (st) => st.left.kind === 'simple' && setEq(idsOf(st.left.items), ['d'])
                             && st.right.kind === 'frac' && setEq(idsOf(st.right.num.items), ['v','t']) && setEq(idsOf(st.right.den.items), ['one'])
             }
@@ -710,18 +795,53 @@ const module1Steps = [
         rule: "Numérateur vidé → on écrit 1. Dénominateur vidé → la fraction disparaît. On peut toujours transformer un terme en fraction avec l'icône « ··· / ··· » de la palette.",
         drills: [
             {
-                instruction: "Supprime le v au numérateur à gauche : clique sur sa croix ✕. Regarde ce qu'il se passe au numérateur.",
+                instruction: "Repartons de l'équation v/1 = d/t. Passe <b>v</b> de l'autre côté : il doit rejoindre le dénominateur (en bas), à droite.",
                 left:  () => frac([tile('v','v')], [tile('one','1')]),
-                right: () => frac([tile('d','d')], [tile('t','t'), tile('vR','v')]),
+                right: () => frac([tile('d','d')], [tile('t','t')]),
                 highlight: 'v',
-                check: (st) => st.left.num.items.length === 1 && st.left.num.items[0].id === 'one'
+                noNumAutoOne: true,
+                showPalette: true,
+                paletteTiles: [{id:'one', label:'1'}],
+                check: (st) => {
+                    if (!(st.right.kind === 'frac' && setEq(idsOf(st.right.num.items), ['d']) && setEq(idsOf(st.right.den.items), ['t','v']))) return false;
+                    if (st.left.kind !== 'frac') return false;
+                    if (st.left.num.items.length === 0) return 'partial';
+                    return setEq(idsOf(st.left.num.items), ['one']) && setEq(idsOf(st.left.den.items), ['one']);
+                },
+                partialMessage: "Ajoute un 1 dans l'espace vide pour pouvoir valider."
             },
             {
-                instruction: "Supprime <b>d</b> au dénominateur, à gauche. Que devient la fraction ?",
-                left:  () => frac([tile('v','v')], [tile('d','d')]),
-                right: () => frac([tile('dR','d')], [tile('t','t')]),
-                highlight: 'd',
-                check: (st) => st.left.kind === 'simple' && setEq(idsOf(st.left.items), ['v'])
+                instruction: "Repartons encore de v/1 = d/t. Cette fois, passe <b>t</b> de l'autre côté : il doit rejoindre le numérateur (en haut), à gauche.",
+                left:  () => frac([tile('v','v')], [tile('one','1')]),
+                right: () => frac([tile('d','d')], [tile('t','t')]),
+                highlight: 't',
+                noDenAutoCollapse: true,
+                showPalette: true,
+                paletteTiles: [{id:'one', label:'1'}],
+                check: (st) => {
+                    const leftOk = st.left.kind === 'frac' && setEq(idsOf(st.left.num.items), ['v','t']) && setEq(idsOf(st.left.den.items), ['one']);
+                    if (!leftOk) return false;
+                    if (st.right.kind === 'frac') return 'partial';
+                    return st.right.kind === 'simple' && setEq(idsOf(st.right.items), ['d']);
+                },
+                partialMessage: (st) => (st.right.kind === 'frac' && isSlotEmpty(st.right))
+                    ? "Ajoute un 1 dans l'espace vide."
+                    : "Clique sur la croix du dénominateur pour le supprimer."
+            },
+            {
+                instruction: "Repartons une dernière fois de v/1 = d/t. Passe <b>t</b> de l'autre côté, comme dans l'exemple précédent.",
+                left:  () => frac([tile('v','v')], [tile('one','1')]),
+                right: () => frac([tile('d','d')], [tile('t','t')]),
+                highlight: 't',
+                noDenAutoCollapse: true,
+                revealDenCrossOnValidate: true,
+                check: (st) => {
+                    const leftOk = st.left.kind === 'frac' && setEq(idsOf(st.left.num.items), ['v','t']) && setEq(idsOf(st.left.den.items), ['one']);
+                    if (!leftOk) return false;
+                    if (st.right.kind === 'frac') return 'partial';
+                    return st.right.kind === 'simple' && setEq(idsOf(st.right.items), ['d']);
+                },
+                partialMessage: "On peut directement supprimer un dénominateur vide, sans passer par le 1 : clique sur sa croix."
             },
             {
                 instruction: "Utilise l'icône fraction de la palette et glisse-la sur <b>v</b> (à gauche) pour le transformer en fraction. Un 1 apparaît automatiquement au dénominateur.",
