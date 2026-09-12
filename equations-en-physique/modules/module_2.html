@@ -212,15 +212,15 @@ function renderNode(node, path) {
                     ${items || '<span class="slot-placeholder">…</span>'}
                 </div>`;
     }
-    const denEmpty = node.den.items.length === 0;
+    const showDenCross = node.den.items.length === 0 || node.forceDenCross;
     return `<div class="frac-wrap">
         <div class="frac-num-wrap">${renderNode(node.num, path + '.num')}</div>
         <div class="frac-line"></div>
         <div class="frac-den-wrap">
-            ${denEmpty ? `<span class="frac-del"
-                onclick="deleteEmptyDen('${path}')"
+            ${showDenCross ? `<span class="frac-del"
+                onclick="deleteDen('${path}')"
                 ontouchstart="event.stopPropagation()"
-                ontouchend="event.stopPropagation();event.preventDefault();deleteEmptyDen('${path}')"
+                ontouchend="event.stopPropagation();event.preventDefault();deleteDen('${path}')"
                 title="Supprimer le dénominateur">✕</span>` : ''}
             ${renderNode(node.den, path + '.den')}
         </div>
@@ -332,9 +332,10 @@ function enableTileDrag(el, data, onTap) {
 // qui apparaît sur la zone vide (voir renderNode / deleteEmptyDen)
 function applyEmptinessRule(path, removedId) {}
 
-function deleteEmptyDen(fracPath) {
+function deleteDen(fracPath) {
     const fracNode = getNode(fracPath);
-    if (!fracNode || fracNode.kind !== 'frac' || fracNode.den.items.length !== 0) return;
+    if (!fracNode || fracNode.kind !== 'frac') return;
+    if (fracNode.den.items.length !== 0 && !fracNode.forceDenCross) return;
     setNode(fracPath, fracNode.num);
     refreshView();
 }
