@@ -573,6 +573,12 @@ function removeSumTerm(sumPath, termIdx) {
     const sum = getNode(sumPath);
     if (!sum || sum.kind !== 'sum') return null;
     const [removed] = sum.terms.splice(termIdx, 1);
+    // un seul terme positif restant : la parenthèse n'a plus de sens, on
+    // déballe la somme pour retrouver un produit ordinaire (nécessaire pour
+    // que l'isolement final soit reconnu comme complet)
+    if (sum.terms.length === 1 && sum.terms[0].sign === 1) {
+        setNode(sumPath, sum.terms[0].node);
+    }
     return removed;
 }
 // dépose d'un terme additif sur le membre entier de l'autre côté : le terme
