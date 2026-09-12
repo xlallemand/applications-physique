@@ -287,12 +287,12 @@ function updateHint() {
     if (!h) return;
     h.textContent = stepOneValidated
         ? "Déplace les termes pour isoler la grandeur demandée à gauche, ou utilise ⇄ pour inverser le sens de l'équation."
-        : "Recopie l'équation ci-dessus sous forme de deux fractions égales. Aucun numérateur ni dénominateur ne doit rester vide (ajoute un 1 si besoin).";
+        : "Suis les étapes indiquées ci-dessus.";
 }
 
 function refreshView() {
     renderEquationZone();
-    if (viewMode === 'solve') { buildPalette(); updateHint(); }
+    if (viewMode === 'solve') { buildPalette(); updateHint(); updateStepIndicator(); }
     else if (viewMode === 'drill' && currentDrillShowsPalette) { buildDrillPalette(); }
 }
 
@@ -474,7 +474,7 @@ function solveEditorHTML() {
         <span class="text-xs font-bold text-gray-400 uppercase">Résolution</span>
         <button onclick="resetSolveExercise()" class="text-xs font-bold text-red-500 hover:text-red-700">↺ Recommencer</button>
     </div>
-    <div id="solveInstructions" class="text-sm text-gray-600 mb-3"></div>
+    <div id="solveInstructions" class="text-base text-indigo-700 font-semibold mb-3"></div>
     <div id="stepsHistory" class="mb-2"></div>
     <div id="workZone">
         <div id="stepHint" class="text-center text-sm text-indigo-700 font-semibold mb-3"></div>
@@ -483,7 +483,8 @@ function solveEditorHTML() {
             <div class="text-xs font-bold text-gray-500 uppercase mb-2">Glisse les éléments dans l'équation</div>
             <div id="palette" class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200"></div>
         </div>
-        <div class="text-center mt-6">
+        <div id="currentStepIndicator" class="text-center text-sm font-bold text-indigo-800 mt-6 mb-2"></div>
+        <div class="text-center">
             <button onclick="verifyStep()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">✓ Vérifier l'étape</button>
         </div>
     </div>
@@ -491,10 +492,13 @@ function solveEditorHTML() {
     <div id="feedback" class="text-center mt-4 font-semibold text-lg"></div>`;
 }
 
+function startingState(cfg) {
+    return cfg.initial ? cfg.initial() : { left: emptyFrac(), right: emptyFrac() };
+}
 function startSolveExercise(cfg) {
     currentExercise = cfg;
     viewMode = 'solve';
-    state = { left: emptyFrac(), right: emptyFrac() };
+    state = startingState(cfg);
     history = [];
     stepOneValidated = false;
     resolved = false;
@@ -503,13 +507,15 @@ function startSolveExercise(cfg) {
     drillFracAutoOne = false;
     currentDrillExtraTiles = [];
     const instr = document.getElementById('solveInstructions');
-    if (instr) instr.innerHTML = cfg.detailedInstructions || '';
+    if (instr) instr.innerHTML = (cfg.steps && cfg.steps.length)
+        ? '<ol class="list-decimal list-inside space-y-1">' + cfg.steps.map(s => `<li>${s}</li>`).join('') + '</ol>'
+        : '';
     refreshView();
     renderHistory();
 }
 function resetSolveExercise() {
     if (!currentExercise) return;
-    state = { left: emptyFrac(), right: emptyFrac() };
+    state = startingState(currentExercise);
     history = [];
     stepOneValidated = false;
     resolved = false;
@@ -517,6 +523,14 @@ function resetSolveExercise() {
     refreshView();
     renderHistory();
     showFeedback('', false);
+}
+function updateStepIndicator() {
+    const el = document.getElementById('currentStepIndicator');
+    if (!el) return;
+    const steps = currentExercise && currentExercise.steps;
+    if (!steps || !steps.length || resolved) { el.textContent = ''; return; }
+    const idx = Math.min(history.length, steps.length - 1);
+    el.textContent = `Étape à réaliser : ${steps[idx]}`;
 }
 
 function finishSolveExercise() {
@@ -662,6 +676,10 @@ function checkDrill() {
 // ═══════════════════════════════════════════════════════════════
 // MODULE 2 — EXEMPLE D'APPLICATION
 // ═══════════════════════════════════════════════════════════════
+// les trois questions partent de la même équation, déjà recopiée sous
+// forme de deux fractions égales (v/1 = d/Δt)
+const m2Initial = () => ({ left: frac([tile('v','v')], [tile('one','1')]), right: frac([tile('d','d')], [tile('dt','Δt')]) });
+
 const module2Questions = [
     {
         target: 'dt',
@@ -669,7 +687,8 @@ const module2Questions = [
         staticEqHtml: `<span class="eq-tile-static">v</span><span class="eq-sign">=</span>${staticFracHtml('d','Δt')}`,
         tiles: [tile('v','v'), tile('d','d'), tile('dt','Δt')],
         sample: () => { const d = 10 + Math.random()*490; const dt = 1 + Math.random()*59; return { v: d/dt, d, dt }; },
-        detailedInstructions: "1. Recopie l'équation ci-dessus sous forme de deux fractions égales. Aucun numérateur ni dénominateur ne doit rester vide (ajoute un 1 si besoin).<br>2. Passe Δt en haut à gauche.<br>3. Passe v en bas à droite."
+        initial: m2Initial,
+        steps: ["Passe Δt en haut à gauche.", "Passe v en bas à droite."]
     },
     {
         target: 'd',
@@ -677,7 +696,8 @@ const module2Questions = [
         staticEqHtml: `<span class="eq-tile-static">v</span><span class="eq-sign">=</span>${staticFracHtml('d','Δt')}`,
         tiles: [tile('v','v'), tile('d','d'), tile('dt','Δt')],
         sample: () => { const d = 10 + Math.random()*490; const dt = 1 + Math.random()*59; return { v: d/dt, d, dt }; },
-        detailedInstructions: "2. Inverse le sens de l'équation pour avoir d à gauche.<br>3. Passe Δt de l'autre côté en haut.<br>4. Supprime le dénominateur."
+        initial: m2Initial,
+        steps: ["Inverse le sens de l'équation pour avoir d à gauche.", "Passe Δt de l'autre côté en haut.", "Supprime le dénominateur."]
     },
     {
         target: null,
@@ -686,11 +706,14 @@ const module2Questions = [
         staticEqHtml: `<span class="eq-tile-static">v</span><span class="eq-sign">=</span>${staticFracHtml('d','Δt')}`,
         tiles: [tile('v','v'), tile('d','d'), tile('dt','Δt')],
         sample: () => { const d = 10 + Math.random()*490; const dt = 1 + Math.random()*59; return { v: d/dt, d, dt }; },
-        detailedInstructions: "1. Recopie l'équation ci-dessus sous forme de deux fractions égales. Aucun numérateur ni dénominateur ne doit rester vide (ajoute un 1 si besoin).<br>2. Passe le d en bas à gauche.<br>3. Place un 1 dans la zone vide.",
+        initial: m2Initial,
+        steps: ["Passe le d en bas à gauche.", "Retire le 1 inutile au dénominateur de gauche.", "Place un 1 dans la zone vide à droite."],
         customComplete: (st) => st.left.kind === 'frac' && setEq(idsOf(st.left.num.items), ['v']) && setEq(idsOf(st.left.den.items), ['d'])
                               && st.right.kind === 'frac' && setEq(idsOf(st.right.num.items), ['one']) && setEq(idsOf(st.right.den.items), ['dt']),
-        customEmptyMessage: (st) => (st.left.kind === 'frac' && setEq(idsOf(st.left.den.items), ['d']))
-            ? "✕ Place un 1 dans la zone vide." : null
+        customEmptyMessage: () => "✕ Place un 1 dans la zone vide.",
+        customProgressMessage: (st) => (st.left.kind === 'frac' && st.left.den.items.length > 1)
+            ? "✓ Étape correcte ! Retire le 1 inutile au dénominateur de gauche."
+            : "✓ Étape correcte, continue !"
     }
 ];
 let m2Idx = 0;
@@ -713,8 +736,8 @@ function renderModule2() {
       <div class="bg-white rounded-xl shadow-lg p-6">${solveEditorHTML()}</div>`;
     startSolveExercise({
         tiles: q.tiles, sample: q.sample, targetId: q.target,
-        detailedInstructions: q.detailedInstructions,
-        customComplete: q.customComplete, customEmptyMessage: q.customEmptyMessage,
+        initial: q.initial, steps: q.steps,
+        customComplete: q.customComplete, customEmptyMessage: q.customEmptyMessage, customProgressMessage: q.customProgressMessage,
         onSolved: (dm) => {
             const isLast = m2Idx === module2Questions.length - 1;
             dm.innerHTML = `🎉 Équation résolue !<div class="mt-4"><button onclick="${isLast ? 'finishModule2()' : 'nextModule2Question()'}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">${isLast ? 'Terminer le module' : 'Suivant →'}</button></div>`;
