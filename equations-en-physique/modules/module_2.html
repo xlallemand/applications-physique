@@ -212,15 +212,15 @@ function renderNode(node, path) {
                     ${items || '<span class="slot-placeholder">…</span>'}
                 </div>`;
     }
-    const denIsLoneOne = node.den.items.length === 1 && node.den.items[0].id === 'one';
+    const denEmpty = node.den.items.length === 0;
     return `<div class="frac-wrap">
         <div class="frac-num-wrap">${renderNode(node.num, path + '.num')}</div>
         <div class="frac-line"></div>
         <div class="frac-den-wrap">
-            ${denIsLoneOne ? `<span class="frac-del"
-                onclick="deleteItem('${path}.den',0)"
+            ${denEmpty ? `<span class="frac-del"
+                onclick="deleteEmptyDen('${path}')"
                 ontouchstart="event.stopPropagation()"
-                ontouchend="event.stopPropagation();event.preventDefault();deleteItem('${path}.den',0)"
+                ontouchend="event.stopPropagation();event.preventDefault();deleteEmptyDen('${path}')"
                 title="Supprimer le dénominateur">✕</span>` : ''}
             ${renderNode(node.den, path + '.den')}
         </div>
@@ -327,25 +327,16 @@ function enableTileDrag(el, data, onTap) {
     });
 }
 
-function applyEmptinessRule(path, removedId) {
-    if (!(path.endsWith('.num') || path.endsWith('.den'))) return;
-    const node = getNode(path);
-    if (!node || node.kind !== 'simple' || node.items.length > 0) return;
-    if (path.endsWith('.num')) {
-        node.items = [{ id:'one', label:'1' }];
-        return;
-    }
-    // dénominateur vidé : en mode tutoriel, la fraction disparaît toujours ;
-    // en résolution libre, elle ne disparaît que si c'est le "1" lui-même qu'on retire
-    // (un vrai terme retiré fait d'abord apparaître un 1, à retirer ensuite explicitement)
-    const shouldCollapse = (viewMode !== 'solve') || removedId === 'one';
-    if (shouldCollapse) {
-        const fracPath = path.slice(0, -4);
-        const fracNode = getNode(fracPath);
-        setNode(fracPath, fracNode.num);
-    } else {
-        node.items = [{ id:'one', label:'1' }];
-    }
+// un numérateur ou un dénominateur vidé reste vide : l'élève doit lui-même y
+// glisser un 1, ou (pour le dénominateur) supprimer la fraction via la croix
+// qui apparaît sur la zone vide (voir renderNode / deleteEmptyDen)
+function applyEmptinessRule(path, removedId) {}
+
+function deleteEmptyDen(fracPath) {
+    const fracNode = getNode(fracPath);
+    if (!fracNode || fracNode.kind !== 'frac' || fracNode.den.items.length !== 0) return;
+    setNode(fracPath, fracNode.num);
+    refreshView();
 }
 
 function processDrop(path, data) {
@@ -482,6 +473,7 @@ function solveEditorHTML() {
         <span class="text-xs font-bold text-gray-400 uppercase">Résolution</span>
         <button onclick="resetSolveExercise()" class="text-xs font-bold text-red-500 hover:text-red-700">↺ Recommencer</button>
     </div>
+    <div id="solveInstructions" class="text-sm text-gray-600 mb-3"></div>
     <div id="stepsHistory" class="mb-2"></div>
     <div id="workZone">
         <div id="stepHint" class="text-center text-sm text-indigo-700 font-semibold mb-3"></div>
@@ -509,6 +501,8 @@ function startSolveExercise(cfg) {
     activeHighlightId = null;
     drillFracAutoOne = false;
     currentDrillExtraTiles = [];
+    const instr = document.getElementById('solveInstructions');
+    if (instr) instr.innerHTML = cfg.detailedInstructions || '';
     refreshView();
     renderHistory();
 }
@@ -524,9 +518,20 @@ function resetSolveExercise() {
     showFeedback('', false);
 }
 
+function finishSolveExercise() {
+    resolved = true;
+    document.getElementById('workZone').classList.add('hidden');
+    const dm = document.getElementById('doneMsg');
+    dm.classList.remove('hidden');
+    showFeedback('', true);
+    if (currentExercise.onSolved) currentExercise.onSolved(dm);
+    else dm.innerHTML = '🎉 Équation résolue !';
+}
+
 function verifyStep() {
     if (isSlotEmpty(state.left) || isSlotEmpty(state.right)) {
-        showFeedback("✕ Complète les deux membres de l'équation avant de vérifier.", false);
+        const msg = currentExercise.customEmptyMessage ? currentExercise.customEmptyMessage(state) : null;
+        showFeedback(msg || "✕ Complète les deux membres de l'équation avant de vérifier.", false);
         hadError = true;
         return;
     }
@@ -546,6 +551,19 @@ function verifyStep() {
     renderHistory();
     stepOneValidated = true;
 
+    // certains exercices isolent un rapport de deux grandeurs (ex: v/d) plutôt
+    // qu'une grandeur seule : ils fournissent leur propre critère de réussite
+    if (currentExercise.customComplete) {
+        if (currentExercise.customComplete(state)) {
+            finishSolveExercise();
+        } else {
+            showFeedback(currentExercise.customProgressMessage ? currentExercise.customProgressMessage(state) : "✓ Étape correcte, continue !", true);
+            state = JSON.parse(JSON.stringify(state));
+            refreshView();
+        }
+        return;
+    }
+
     const target = currentExercise.targetId;
     const leftFull  = isFullyIsolated(state.left, target);
     const rightFull = !leftFull && isFullyIsolated(state.right, target);
@@ -559,13 +577,7 @@ function verifyStep() {
     const complete = leftFull && onesElsewhere === 0;
 
     if (complete) {
-        resolved = true;
-        document.getElementById('workZone').classList.add('hidden');
-        const dm = document.getElementById('doneMsg');
-        dm.classList.remove('hidden');
-        showFeedback('', true);
-        if (currentExercise.onSolved) currentExercise.onSolved(dm);
-        else dm.innerHTML = '🎉 Équation résolue !';
+        finishSolveExercise();
     } else {
         let msg;
         if (rightFull) {
@@ -655,14 +667,29 @@ const module2Questions = [
         intro: "On souhaite exprimer la durée du trajet Δt (la lettre grecque Δ se lit « delta »).",
         staticEqHtml: `<span class="eq-tile-static">v</span><span class="eq-sign">=</span>${staticFracHtml('d','Δt')}`,
         tiles: [tile('v','v'), tile('d','d'), tile('dt','Δt')],
-        sample: () => { const d = 10 + Math.random()*490; const dt = 1 + Math.random()*59; return { v: d/dt, d, dt }; }
+        sample: () => { const d = 10 + Math.random()*490; const dt = 1 + Math.random()*59; return { v: d/dt, d, dt }; },
+        detailedInstructions: "1. Recopie l'équation ci-dessus sous forme de deux fractions égales. Aucun numérateur ni dénominateur ne doit rester vide (ajoute un 1 si besoin).<br>2. Passe Δt en haut à gauche.<br>3. Passe v en bas à droite."
     },
     {
         target: 'd',
         intro: "On souhaite maintenant exprimer la distance parcourue d.",
         staticEqHtml: `<span class="eq-tile-static">v</span><span class="eq-sign">=</span>${staticFracHtml('d','Δt')}`,
         tiles: [tile('v','v'), tile('d','d'), tile('dt','Δt')],
-        sample: () => { const d = 10 + Math.random()*490; const dt = 1 + Math.random()*59; return { v: d/dt, d, dt }; }
+        sample: () => { const d = 10 + Math.random()*490; const dt = 1 + Math.random()*59; return { v: d/dt, d, dt }; },
+        detailedInstructions: "2. Inverse le sens de l'équation pour avoir d à gauche.<br>3. Passe Δt de l'autre côté en haut.<br>4. Supprime le dénominateur."
+    },
+    {
+        target: null,
+        targetLabel: 'v/d',
+        intro: "Reprenons la même formule. Cette fois, on souhaite exprimer directement le rapport v/d.",
+        staticEqHtml: `<span class="eq-tile-static">v</span><span class="eq-sign">=</span>${staticFracHtml('d','Δt')}`,
+        tiles: [tile('v','v'), tile('d','d'), tile('dt','Δt')],
+        sample: () => { const d = 10 + Math.random()*490; const dt = 1 + Math.random()*59; return { v: d/dt, d, dt }; },
+        detailedInstructions: "1. Recopie l'équation ci-dessus sous forme de deux fractions égales. Aucun numérateur ni dénominateur ne doit rester vide (ajoute un 1 si besoin).<br>2. Passe le d en bas à gauche.<br>3. Place un 1 dans la zone vide.",
+        customComplete: (st) => st.left.kind === 'frac' && setEq(idsOf(st.left.num.items), ['v']) && setEq(idsOf(st.left.den.items), ['d'])
+                              && st.right.kind === 'frac' && setEq(idsOf(st.right.num.items), ['one']) && setEq(idsOf(st.right.den.items), ['dt']),
+        customEmptyMessage: (st) => (st.left.kind === 'frac' && setEq(idsOf(st.left.den.items), ['d']))
+            ? "✕ Place un 1 dans la zone vide." : null
     }
 ];
 let m2Idx = 0;
@@ -680,11 +707,13 @@ function renderModule2() {
         <p class="text-gray-700 text-lg mb-2">${q.intro}</p>
         <p class="text-gray-700">Sachant que :</p>
         <div class="eq-line-static text-lg md:text-2xl my-4">${q.staticEqHtml}</div>
-        <p class="font-bold text-indigo-900">Exprimer ${q.tiles.find(t=>t.id===q.target).label}.</p>
+        <p class="font-bold text-indigo-900">Exprimer ${q.targetLabel || q.tiles.find(t=>t.id===q.target).label}.</p>
       </div>
       <div class="bg-white rounded-xl shadow-lg p-6">${solveEditorHTML()}</div>`;
     startSolveExercise({
         tiles: q.tiles, sample: q.sample, targetId: q.target,
+        detailedInstructions: q.detailedInstructions,
+        customComplete: q.customComplete, customEmptyMessage: q.customEmptyMessage,
         onSolved: (dm) => {
             const isLast = m2Idx === module2Questions.length - 1;
             dm.innerHTML = `🎉 Équation résolue !<div class="mt-4"><button onclick="${isLast ? 'finishModule2()' : 'nextModule2Question()'}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">${isLast ? 'Terminer le module' : 'Suivant →'}</button></div>`;
