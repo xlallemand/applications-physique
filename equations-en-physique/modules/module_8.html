@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 8 : Méthode</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="../../assets/theme.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<style>
+    :root {
+        --app-accent-50:  #eef2ff;
+        --app-accent-100: #e0e7ff;
+        --app-accent-200: #c7d2fe;
+        --app-accent-400: #818cf8;
+        --app-accent-600: #4f46e5;
+        --app-accent-700: #4338ca;
+        --app-accent-800: #3730a3;
+    }
+    body { font-family: var(--font-sans); }
+
+    .eq-row { display:flex; align-items:center; justify-content:center; justify-content:safe center; flex-wrap:nowrap; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px; }
+    .eq-row::-webkit-scrollbar { height:4px; }
+    .eq-sign { font-size:1.8rem; font-weight:800; color:#1e3a8a; margin:0 16px; flex-shrink:0; }
+    .eq-line-static { display:flex; align-items:center; justify-content:center; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+    @media (max-width:480px) {
+        .eq-tile-frozen { font-size:.9rem; padding:6px 9px; }
+        .eq-sign { font-size:1.4rem; margin:0 8px; }
+    }
+
+    .eq-tile-frozen { display:inline-flex; align-items:center; background:#f1f5f9; border:2px solid #cbd5e1; border-radius:8px; padding:6px 10px; font-weight:700; color:#334155; margin:0 3px; }
+
+    .sqrt-wrap { display:inline-flex; align-items:flex-end; margin:0 6px; }
+    .sqrt-hook { display:block; flex-shrink:0; }
+    .sqrt-inner { border-top:3px solid #1e293b; padding:2px 6px 0; display:inline-flex; align-items:center; }
+
+    .func-wrap { display:inline-flex; align-items:center; margin:0 6px; }
+    .func-name { font-weight:800; color:#1e293b; margin-right:2px; }
+    .func-exp { font-weight:800; color:#1e293b; font-size:.75em; margin-left:1px; }
+
+    #currentStepZone.func-target { transition: all .15s; }
+    #currentStepZone.func-target.drag-over { background:#dbeafe !important; border-color:#3b82f6 !important; }
+
+    .palette-tile {
+        display:inline-flex; align-items:center; justify-content:center;
+        min-width:56px; min-height:44px; padding:8px 14px;
+        background:#eef2ff; border:2px solid #818cf8; border-radius:10px;
+        font-weight:700; color:#312e81; cursor:grab; touch-action:none; user-select:none;
+    }
+    .palette-tile.dragging { opacity:.4; }
+
+    .content-module-badge {
+        display:inline-block; background:#4f46e5; color:#fff; font-size:.75rem; font-weight:800;
+        padding:4px 12px; border-radius:999px; letter-spacing:.05em; margin-bottom:8px;
+    }
+    .rule-card { background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; padding:16px; }
+
+    /* ── Diagramme "on applique la même operation aux deux cotes" ── */
+    .op-diagram { text-align:center; }
+    .op-diagram-arrows { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:0 2%; margin:2px 0 6px; }
+    .op-arrow-row { display:flex; align-items:center; gap:8px; }
+    .op-arrow-row-right { text-align:right; }
+    .op-arrow-svg { width:56px; height:44px; display:block; flex-shrink:0; }
+    .op-arrow-label { font-weight:800; color:#4f46e5; font-size:1.1rem; line-height:1.25; }
+    .op-arrow-note { display:block; font-weight:600; font-size:.72rem; color:#4338ca; white-space:nowrap; }
+</style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+<div id="app-nav"></div>
+
+<div class="container mx-auto px-4 py-8 max-w-3xl">
+    <div id="app"></div>
+</div>
+
+<script>
+
+const nav = AppNav.init({
+    appName: 'Équations en Physique',
+    portalHref: '../../index.html',
+    portalLabel: 'Toutes les applications',
+    onHome: () => { window.location.href = '../index.html'; },
+    onNavigate: (key) => { window.location.href = key + '.html'; },
+    groups: [
+        { title: 'Principe', items: [
+            { key: 'module_1', label: 'Module 1 : Méthode' },
+            { key: 'module_2', label: "Module 2 : Exemple d'application" },
+            { key: 'module_3', label: 'Module 3 : Entraînement' },
+        ]},
+        { title: 'Gestion des fractions', items: [
+            { key: 'module_4', label: 'Module 4 : Méthode' },
+            { key: 'module_5', label: 'Module 5 : Entraînement' },
+        ]},
+        { title: 'Gérer les + et les -', items: [
+            { key: 'module_6', label: 'Module 6 : Méthode' },
+            { key: 'module_7', label: 'Module 7 : Entraînement' },
+        ]},
+        { title: 'Gérer les fonctions réciproques', items: [
+            { key: 'module_8', label: 'Module 8 : Méthode' },
+            { key: 'module_9', label: 'Module 9 : Entraînement' },
+        ]},
+    ],
+});
+nav.setActive('module_8');
+nav.setTitle('Module 8 : Méthode');
+
+// ═══════════════════════════════════════════════════════════════
+// OUTILS DE CONSTRUCTION DE NŒUDS
+// un membre d'équation est soit une grandeur simple {kind:'simple',
+// items:[tile]}, soit une fonction appliquée à un membre
+// {kind:'func', fn:'sqrt'|'sq'|'sin'|'asin', inner}
+// ═══════════════════════════════════════════════════════════════
+function tile(id, label) { return { id, label }; }
+function simple(items) { return { kind:'simple', items: items.map(t => ({...t})) }; }
+function func(fn, inner) { return { kind:'func', fn, inner }; }
+
+const RECIPROCAL = { sqrt:'sq', sq:'sqrt', sin:'asin', asin:'sin' };
+const FUNC_TOOL_LABEL = { sqrt:'√', sq:'x²', sin:'sin', asin:'sin<sup>−1</sup>' };
+
+function nodeEq(a, b) {
+    if (!a || !b || a.kind !== b.kind) return false;
+    if (a.kind === 'simple') {
+        return a.items.length === b.items.length && a.items.every((it, i) => it.id === b.items[i].id);
+    }
+    if (a.kind === 'func') return a.fn === b.fn && nodeEq(a.inner, b.inner);
+    return false;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ÉTAT GLOBAL
+// ═══════════════════════════════════════════════════════════════
+let state = { left: simple([]), right: simple([]) };
+let currentDrill = null;
+let currentDrillOnSuccess = null;
+let currentDrillCfg = null;
+
+// ═══════════════════════════════════════════════════════════════
+// AFFICHAGE (les tuiles ne sont pas manipulables individuellement :
+// seule l'application de l'outil réciproque agit sur l'équation)
+// ═══════════════════════════════════════════════════════════════
+function renderStatic(node) {
+    if (node.kind === 'simple') {
+        if (node.items.length === 0) return '<span class="eq-tile-frozen">…</span>';
+        return node.items.map(it => `<span class="eq-tile-frozen">${it.label}</span>`).join('');
+    }
+    if (node.kind === 'sqrt') {
+        return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderStatic(node.inner)}</div></div>`;
+    }
+    if (node.kind === 'func') {
+        if (node.fn === 'sqrt') {
+            return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderStatic(node.inner)}</div></div>`;
+        }
+        if (node.fn === 'sq') {
+            return `<span class="func-wrap">${renderStatic(node.inner)}<sup class="func-exp">2</sup></span>`;
+        }
+        const label = node.fn === 'sin' ? 'sin' : 'sin<sup>−1</sup>';
+        return `<span class="func-wrap"><span class="func-name">${label}</span>(${renderStatic(node.inner)})</span>`;
+    }
+    return '';
+}
+function sizeSqrtHooks(container) {
+    container.querySelectorAll('.sqrt-hook').forEach(svg => {
+        const inner = svg.nextElementSibling;
+        if (!inner) return;
+        const h = Math.max(inner.offsetHeight, 24);
+        const hookH = Math.min(16, h - 6);
+        const d = `M0,${(h - hookH * 0.55).toFixed(1)} L${(hookH * 0.4).toFixed(1)},${(h - 2).toFixed(1)} L13,2`;
+        svg.setAttribute('viewBox', `0 0 14 ${h}`);
+        svg.setAttribute('width', '14');
+        svg.setAttribute('height', String(h));
+        svg.innerHTML = `<path d="${d}" fill="none" stroke="#1e293b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+    });
+}
+function renderEquationZone() {
+    const zone = document.getElementById('currentStepZone');
+    if (!zone) return;
+    zone.innerHTML = renderStatic(state.left) + `<div class="eq-sign">=</div>` + renderStatic(state.right);
+    sizeSqrtHooks(zone);
+}
+function refreshView() {
+    renderEquationZone();
+    if (currentDrillCfg) buildToolPalette(currentDrillCfg.toolFn);
+}
+function showFeedback(msg, ok) {
+    const f = document.getElementById('feedback');
+    if (!f) return;
+    f.innerHTML = msg;
+    f.className = 'text-center mt-4 font-semibold text-lg ' + (ok ? 'text-green-600' : 'text-red-600');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// APPLICATION DE LA FONCTION RÉCIPROQUE AUX DEUX MEMBRES
+// ═══════════════════════════════════════════════════════════════
+function applyFuncTool(toolFn) {
+    const inverse = RECIPROCAL[toolFn];
+    ['left', 'right'].forEach(side => {
+        const cur = state[side];
+        if (cur.kind === 'func' && cur.fn === inverse) {
+            state[side] = cur.inner;
+        } else {
+            state[side] = func(toolFn, cur);
+        }
+    });
+    refreshView();
+}
+function buildToolPalette(toolFn) {
+    const pal = document.getElementById('palette');
+    if (!pal) return;
+    pal.innerHTML = '';
+    const el = document.createElement('div');
+    el.className = 'palette-tile';
+    el.innerHTML = FUNC_TOOL_LABEL[toolFn];
+    DragDrop.enable(el, {
+        zoneSelector: '.func-target',
+        dragOverClass: 'drag-over',
+        onDrop: (item, zone) => { if (zone) applyFuncTool(toolFn); },
+    });
+    pal.appendChild(el);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MOTEUR DE DRILL (manipulations guidées, identique dans l'esprit au module 6)
+// ═══════════════════════════════════════════════════════════════
+function mountDrill(container, drillCfg, explainHtml) {
+    currentDrillCfg = drillCfg;
+    state = { left: drillCfg.left(), right: drillCfg.right() };
+    currentDrill = { check: drillCfg.check };
+    currentDrillOnSuccess = drillCfg.onSuccess;
+    container.innerHTML = `
+        <div class="flex items-center justify-end mb-2">
+            <button onclick="resetDrill()" class="text-xs font-bold text-red-500 hover:text-red-700">↺ Recommencer</button>
+        </div>
+        <p class="text-gray-700 mb-4">${drillCfg.instruction}</p>
+        ${drillCfg.opDiagram ? `
+        <div class="op-diagram mb-2">
+            <div class="eq-line-static text-lg md:text-xl">${renderStatic(drillCfg.left())}<span class="eq-sign" style="font-size:1.4rem;margin:0 10px;">=</span>${renderStatic(drillCfg.right())}</div>
+            <div class="op-diagram-arrows">
+                <div class="op-arrow-row op-arrow-row-left">
+                    <span class="op-arrow-label">${drillCfg.opDiagram.label}${drillCfg.opDiagram.noteLeft ? `<span class="op-arrow-note">${drillCfg.opDiagram.noteLeft}</span>` : ''}</span>
+                    <svg viewBox="0 0 60 46" class="op-arrow-svg"><path d="M46,4 Q12,10 16,38" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round"/><path d="M16,38 L7,26 M16,38 L25,29" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="op-arrow-row op-arrow-row-right">
+                    <svg viewBox="0 0 60 46" class="op-arrow-svg" style="transform:scaleX(-1)"><path d="M46,4 Q12,10 16,38" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round"/><path d="M16,38 L7,26 M16,38 L25,29" fill="none" stroke="#4f46e5" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="op-arrow-label">${drillCfg.opDiagram.label}${drillCfg.opDiagram.noteRight ? `<span class="op-arrow-note">${drillCfg.opDiagram.noteRight}</span>` : ''}</span>
+                </div>
+            </div>
+        </div>` : ''}
+        <div id="currentStepZone" class="eq-row func-target py-8 border-2 border-dashed border-indigo-300 rounded-lg bg-indigo-50" style="min-height:110px;"></div>
+        <div class="mt-4"><div class="text-xs font-bold text-gray-500 uppercase mb-2">Glisse l'outil sur l'équation</div><div id="palette" class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200"></div></div>
+        ${explainHtml || ''}
+        <div class="text-center mt-2">
+            <button id="verifyDrillBtn" onclick="checkDrill()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">✓ Valider</button>
+            <button id="nextDrillBtn" onclick="currentDrillOnSuccess()" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">Suivant →</button>
+        </div>
+        <div class="text-center mt-2">
+            <button id="skipDrillBtn" onclick="currentDrillOnSuccess()" class="text-xs font-semibold text-gray-400 hover:text-gray-600">Passer à la suite quand même →</button>
+        </div>
+        <div id="feedback" class="text-center mt-4 font-semibold text-lg"></div>`;
+    refreshView();
+}
+function resetDrill() {
+    if (!currentDrillCfg) return;
+    state = { left: currentDrillCfg.left(), right: currentDrillCfg.right() };
+    const vBtn = document.getElementById('verifyDrillBtn');
+    const nBtn = document.getElementById('nextDrillBtn');
+    const sBtn = document.getElementById('skipDrillBtn');
+    if (vBtn) vBtn.classList.remove('hidden');
+    if (nBtn) nBtn.classList.add('hidden');
+    if (sBtn) sBtn.classList.remove('hidden');
+    showFeedback('', false);
+    refreshView();
+}
+function checkDrill() {
+    if (!currentDrill) return;
+    if (currentDrill.check(state)) {
+        showFeedback("✓ Bravo, c'est exactement ça !", true);
+        document.getElementById('verifyDrillBtn').classList.add('hidden');
+        document.getElementById('nextDrillBtn').classList.remove('hidden');
+        const sBtn = document.getElementById('skipDrillBtn');
+        if (sBtn) sBtn.classList.add('hidden');
+    } else {
+        showFeedback("✕ Ce n'est pas encore ça, réessaie.", false);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 8 — GÉRER LES FONCTIONS RÉCIPROQUES (méthode)
+// ═══════════════════════════════════════════════════════════════
+const TUTORIAL_EXPLAIN = "Certaines équations utilisent des fonctions mathématiques (racine carrée, carré, sinus...) appliquées à une grandeur. Pour supprimer une fonction, il faut appliquer sa <b>fonction réciproque</b> aux deux membres de l'équation : elle annule la fonction du côté où elle s'applique, et apparaît de l'autre côté.";
+
+const module8Tutorial = [
+    {
+        instruction: "Voici l'équation v = √(2gh) simplifiée en x = √(y) : la racine carrée s'applique à y, à droite. Pour la supprimer, glisse l'outil <b>x²</b> (le carré, réciproque de la racine carrée) sur l'équation : il s'applique aux deux membres à la fois.",
+        left: () => simple([tile('x','x')]),
+        right: () => func('sqrt', simple([tile('y','y')])),
+        toolFn: 'sq',
+        opDiagram: { label: 'x²', noteLeft:'(applique le carré)', noteRight:'(applique le carré)' },
+        check: (st) => nodeEq(st.left, func('sq', simple([tile('x','x')]))) && nodeEq(st.right, simple([tile('y','y')])),
+    },
+    {
+        instruction: "Repartons d'une équation avec un carré : x² = y. Pour supprimer le carré, glisse l'outil <b>√</b> (la racine carrée, réciproque du carré) sur l'équation.",
+        left: () => func('sq', simple([tile('x','x')])),
+        right: () => simple([tile('y','y')]),
+        toolFn: 'sqrt',
+        opDiagram: { label: '√', noteLeft:'(applique la racine)', noteRight:'(applique la racine)' },
+        check: (st) => nodeEq(st.left, simple([tile('x','x')])) && nodeEq(st.right, func('sqrt', simple([tile('y','y')]))),
+    },
+    {
+        instruction: "Le sinus a lui aussi une fonction réciproque, notée <b>sin<sup>−1</sup></b> (on dit aussi « arcsinus »). Si sin(θ) = y, alors θ = sin<sup>−1</sup>(y). Glisse l'outil <b>sin<sup>−1</sup></b> sur l'équation pour supprimer le sinus.",
+        left: () => func('sin', simple([tile('theta','θ')])),
+        right: () => simple([tile('y','y')]),
+        toolFn: 'asin',
+        opDiagram: { label: 'sin<sup>−1</sup>', noteLeft:'(applique sin<sup>−1</sup>)', noteRight:'(applique sin<sup>−1</sup>)' },
+        check: (st) => nodeEq(st.left, simple([tile('theta','θ')])) && nodeEq(st.right, func('asin', simple([tile('y','y')]))),
+    },
+    {
+        instruction: "Et dans l'autre sens : si l'équation contient déjà un sin<sup>−1</sup>, quelle fonction faut-il appliquer pour l'enlever ? Glisse l'outil <b>sin</b> sur l'équation.",
+        left: () => func('asin', simple([tile('x','x')])),
+        right: () => simple([tile('theta','θ')]),
+        toolFn: 'sin',
+        opDiagram: { label: 'sin', noteLeft:'(applique sin)', noteRight:'(applique sin)' },
+        check: (st) => nodeEq(st.left, simple([tile('x','x')])) && nodeEq(st.right, func('sin', simple([tile('theta','θ')]))),
+    },
+];
+let m8TutIdx = 0;
+
+function renderTutorial() {
+    const drill = module8Tutorial[m8TutIdx];
+    const app = document.getElementById('app');
+    app.innerHTML = `
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <span class="content-module-badge">MODULE 8</span>
+        <h2 class="text-2xl font-bold text-indigo-900 mb-1">Gérer les fonctions réciproques</h2>
+        <p class="text-xs text-gray-400 uppercase font-bold mb-4">Question ${m8TutIdx+1}/${module8Tutorial.length}</p>
+        <div class="rule-card"><p class="text-sm text-gray-700">${TUTORIAL_EXPLAIN}</p></div>
+      </div>
+      <div id="drillCard" class="bg-white rounded-xl shadow-lg p-6"></div>`;
+    mountDrill(document.getElementById('drillCard'), { ...drill, onSuccess: advanceTutorial });
+}
+function advanceTutorial() {
+    if (m8TutIdx < module8Tutorial.length - 1) { m8TutIdx++; renderTutorial(); }
+    else finishModule8();
+}
+function finishModule8() {
+    document.getElementById('app').innerHTML = `
+      <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Module 8 terminé !</h2>
+        <p class="text-gray-700 mb-4">Tu sais maintenant supprimer une fonction d'une équation en appliquant sa fonction réciproque aux deux membres.</p>
+        <a href="module_9.html" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">Passer au module 9 →</a>
+      </div>`;
+}
+
+renderTutorial();
+</script>
+</body>
+</html>
