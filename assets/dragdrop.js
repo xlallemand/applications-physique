@@ -30,10 +30,6 @@
     let ghost = null;
     let currentZone = null;
     let pointerId = null;
-    // au doigt, le fantôme est décalé au-dessus du point de contact : sinon
-    // il se superpose exactement au doigt et cache la zone de dépose visée
-    // (gênant surtout pour les petites zones, ex. equations-en-physique)
-    let ghostOffsetY = 0;
 
     function findZoneAt(x, y) {
       if (ghost) ghost.style.display = 'none';
@@ -42,14 +38,13 @@
       return el ? el.closest(zoneSelector) : null;
     }
 
-    function createGhost(x, y, pointerType) {
+    function createGhost(x, y) {
       const rect = item.getBoundingClientRect();
-      ghostOffsetY = pointerType === 'touch' ? -(rect.height / 2 + 40) : 0;
       ghost = item.cloneNode(true);
       ghost.classList.add('drag-ghost');
       ghost.style.position = 'fixed';
       ghost.style.left = (x - rect.width / 2) + 'px';
-      ghost.style.top = (y - rect.height / 2 + ghostOffsetY) + 'px';
+      ghost.style.top = (y - rect.height / 2) + 'px';
       ghost.style.width = rect.width + 'px';
       ghost.style.height = rect.height + 'px';
       ghost.style.margin = '0';
@@ -59,7 +54,7 @@
     function moveGhost(x, y) {
       if (!ghost) return;
       ghost.style.left = (x - ghost.offsetWidth / 2) + 'px';
-      ghost.style.top = (y - ghost.offsetHeight / 2 + ghostOffsetY) + 'px';
+      ghost.style.top = (y - ghost.offsetHeight / 2) + 'px';
     }
 
     function setZoneHighlight(zone) {
@@ -87,7 +82,7 @@
       try { item.setPointerCapture(pointerId); } catch (err) { /* ignore */ }
       item.classList.add('dragging');
       document.body.classList.add('dnd-active');
-      createGhost(e.clientX, e.clientY, e.pointerType);
+      createGhost(e.clientX, e.clientY);
       if (onStart) onStart(item);
       e.preventDefault();
     });
