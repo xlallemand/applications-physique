@@ -131,6 +131,9 @@
     /* ── Somme / différence de termes (module 6) ─────────── */
     .sum-wrap { display:inline-flex; align-items:center; gap:2px; flex-shrink:0; }
     .sum-parens { font-size:1.5rem; font-weight:800; color:#64748b; }
+    .paren-wrap { display:inline-flex; align-items:center; }
+    .paren-bracket { font-weight:800; color:#64748b; font-size:1.3rem; display:inline-block; line-height:1; }
+    .paren-content { display:inline-flex; align-items:center; }
     .sum-term { display:inline-flex; align-items:center; gap:4px; border-radius:10px; padding:2px; touch-action:none; }
     .sum-term.term-draggable { cursor:grab; }
     .sum-term.term-draggable:hover { background:rgba(79,70,229,.08); }
@@ -166,7 +169,7 @@
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
 <div id="app-nav"></div>
 
-<div class="container mx-auto px-4 py-8 max-w-3xl">
+<div class="container mx-auto px-4 py-8 max-w-7xl">
     <div id="app"></div>
 </div>
 
@@ -259,7 +262,20 @@ function setNode(path, newNode) {
 // AFFICHAGE
 // ═══════════════════════════════════════════════════════════════
 function isOperatorTile(it) { return it.id === 'plus' || it.id === 'minus' || it.id === 'times'; }
-
+// parenthèses qui s'étirent en hauteur pour englober tout leur contenu
+// (voir sizeParens, appelée après chaque rendu comme pour la racine carrée)
+function wrapParens(innerHtml) {
+    return `<span class="paren-wrap"><span class="paren-bracket paren-open">(</span><span class="paren-content">${innerHtml}</span><span class="paren-bracket paren-close">)</span></span>`;
+}
+function sizeParens(container) {
+    container.querySelectorAll('.paren-wrap').forEach(wrap => {
+        const content = wrap.querySelector('.paren-content');
+        if (!content) return;
+        const h = content.offsetHeight || 24;
+        const scale = Math.max(1, h / 22);
+        wrap.querySelectorAll('.paren-bracket').forEach(b => { b.style.transform = `scaleY(${scale.toFixed(2)})`; });
+    });
+}
 function renderInsertZone(sidePath, where) {
     return `<div class="insert-zone" data-side="${sidePath}" data-where="${where}"></div>`;
 }
@@ -269,7 +285,9 @@ function renderInsertZone(sidePath, where) {
 function isSumIsolated(sumPath) {
     const parentPath = sumPath.split('.').slice(0, -1).join('.');
     const parent = getNode(parentPath);
-    return !!(parent && parent.kind === 'seq' && parent.slots.length === 1);
+    if (!parent || parent.kind !== 'seq' || parent.slots.length !== 1) return false;
+    if (parent.parenthesized) return false;
+    return true;
 }
 
 function renderNode(node, path) {
@@ -322,13 +340,13 @@ function renderNode(node, path) {
     const needsInsertBefore = node.slots[0].kind === 'frac' || node.slots[0].kind === 'sum';
     const needsInsertAfter  = node.slots[n-1].kind === 'frac' || node.slots[n-1].kind === 'sum';
     if (needsInsertBefore) html += renderInsertZone(path, 'start');
-    if (node.parenthesized) html += '<span class="sum-parens">(</span>';
+    let inner = '';
     node.slots.forEach((slot, i) => {
-        if (i > 0) html += '<span class="mult-sign">×</span>';
+        if (i > 0) inner += '<span class="mult-sign">×</span>';
         const parens = !node.parenthesized && slot.kind === 'sum' && slot.terms.length > 1 && n > 1;
-        html += parens ? `<span class="sum-parens">(</span>${renderNode(slot, path + '.' + i)}<span class="sum-parens">)</span>` : renderNode(slot, path + '.' + i);
+        inner += parens ? wrapParens(renderNode(slot, path + '.' + i)) : renderNode(slot, path + '.' + i);
     });
-    if (node.parenthesized) html += '<span class="sum-parens">)</span>';
+    html += node.parenthesized ? wrapParens(inner) : inner;
     if (needsInsertAfter) html += renderInsertZone(path, 'end');
     return `<div class="eq-side" data-path="${path}">${html}</div>`;
 }
@@ -375,6 +393,7 @@ function renderEquationZone() {
         `<button class="flip-btn" onclick="flipEquation()" title="Inverser le sens de l'équation">⇄</button>`;
     attachEqTileHandlers(zone);
     sizeSqrtHooks(zone);
+    sizeParens(zone);
     if (lastMovedTerm) {
         const el = zone.querySelector(`.sum-sign[data-sum-path="${lastMovedTerm.sidePath}"][data-term-idx="${lastMovedTerm.termIdx}"]`);
         if (el) {
@@ -629,13 +648,26 @@ function processSumTermDrop(sidePath, data) {
     const flipped = { sign: -removed.sign, node: removed.node };
     const destSide = getNode(sidePath);
     let destTermIdx;
+    // le terme qui arrive se place au plus près du signe = : en tête pour le
+    // membre de droite (juste après le =), en fin pour le membre de gauche
+    // (juste avant le =)
     if (destSide.slots.length === 1 && destSide.slots[0].kind === 'sum') {
-        destSide.slots[0].terms.push(flipped);
-        destTermIdx = destSide.slots[0].terms.length - 1;
+        if (sidePath === 'right') {
+            destSide.slots[0].terms.unshift(flipped);
+            destTermIdx = 0;
+        } else {
+            destSide.slots[0].terms.push(flipped);
+            destTermIdx = destSide.slots[0].terms.length - 1;
+        }
     } else {
-        const wrapped = sumNode([{ sign:1, node: seq(destSide.slots) }, flipped]);
-        destSide.slots = [wrapped];
-        destTermIdx = 1;
+        const existing = { sign:1, node: seq(destSide.slots) };
+        if (sidePath === 'right') {
+            destSide.slots = [ sumNode([flipped, existing]) ];
+            destTermIdx = 0;
+        } else {
+            destSide.slots = [ sumNode([existing, flipped]) ];
+            destTermIdx = 1;
+        }
     }
     lastMovedTerm = { sidePath: sidePath + '.0', termIdx: destTermIdx };
     refreshView();
@@ -656,20 +688,24 @@ function processParenDrop(sidePath) {
 // ═══════════════════════════════════════════════════════════════
 // MULTIPLIER LES DEUX MEMBRES PAR -1 (change le signe d'une grandeur isolée)
 // ═══════════════════════════════════════════════════════════════
-function negateBothSides() {
-    ['left', 'right'].forEach(sidePath => {
-        const s = getNode(sidePath);
-        if (s.slots.length === 1 && s.slots[0].kind === 'sum') {
-            s.slots[0].terms.forEach(t => { t.sign = -t.sign; });
-            if (s.slots[0].terms.length === 1 && s.slots[0].terms[0].sign === 1) {
-                let repl = s.slots[0].terms[0].node;
-                while (repl.kind === 'seq' && repl.slots.length === 1) repl = repl.slots[0];
-                s.slots[0] = repl;
-            }
-        } else {
-            s.slots.push(simple([{ id: 'm1', label: '−1' }]));
+// multiplie UN membre par -1 : par distributivité, chaque terme additif
+// change de signe ; aucune tuile "-1" n'apparaît jamais, seul le signe change
+// (un membre qui n'est pas une somme devient un terme négatif unique, ce qui
+// s'affiche simplement comme "-contenu")
+function negateSide(sidePath) {
+    if (sidePath !== 'left' && sidePath !== 'right') return;
+    const s = getNode(sidePath);
+    if (s.slots.length === 1 && s.slots[0].kind === 'sum') {
+        s.slots[0].terms.forEach(t => { t.sign = -t.sign; });
+        if (s.slots[0].terms.length === 1 && s.slots[0].terms[0].sign === 1) {
+            let repl = s.slots[0].terms[0].node;
+            while (repl.kind === 'seq' && repl.slots.length === 1) repl = repl.slots[0];
+            s.slots[0] = repl;
         }
-    });
+    } else {
+        const innerSeq = s.slots.length === 1 ? seq([s.slots[0]]) : seq(s.slots.slice());
+        s.slots = [ sumNode([{ sign: -1, node: innerSeq }]) ];
+    }
     refreshView();
 }
 
@@ -744,9 +780,12 @@ function addNegPaletteTile() {
     el.className = 'palette-tile func-tool';
     el.innerHTML = '×(−1)';
     DragDrop.enable(el, {
-        zoneSelector: '#currentStepZone',
+        zoneSelector: '.eq-side',
         dragOverClass: 'drag-over',
-        onDrop: (item, zone) => { if (zone) negateBothSides(); },
+        onDrop: (item, zone) => {
+            const side = zone.closest('.eq-side[data-path="left"], .eq-side[data-path="right"]');
+            if (side) negateSide(side.dataset.path);
+        },
     });
     pal.appendChild(el);
 }
@@ -908,7 +947,7 @@ const module6Tutorial = [
         partialMessage: "Vérifie que P₂ est bien devenu négatif de l'autre côté."
     },
     {
-        instruction: "Repartons de la même équation. Cette fois, glisse <b>P<sub>1</sub></b> (négatif, à gauche) vers l'autre côté.",
+        instruction: "Repartons de la même équation. Cette fois, glisse <b>−P<sub>1</sub></b> vers l'autre côté.",
         left: m6Start.left, right: m6Start.right,
         opDiagram: { label: '+P₁', noteLeft: '(retire le −P₁)', noteRight: '(ajoute un +P₁)' },
         check: (st) => {
@@ -938,7 +977,7 @@ const module6Tutorial = [
         partialMessage: "Utilise l'outil fraction (···/···) sur P₂, puis fais glisser ρ et g dans le dénominateur."
     },
     {
-        instruction: "La somme est maintenant isolée à droite : plus rien ne la multiplie. Tu peux déplacer <b>z<sub>1</sub></b> ou <b>z<sub>2</sub></b> librement, comme n'importe quel terme additif. Glisse <b>z<sub>2</sub></b> à gauche.",
+        instruction: "La somme est maintenant isolée à droite : plus rien ne la multiplie. Tu peux déplacer <b>z<sub>1</sub></b> ou <b>z<sub>2</sub></b> librement, comme n'importe quel terme additif. Glisse <b>−z<sub>2</sub></b> à gauche.",
         left:  () => seq([frac([tile('P2','P<sub>2</sub>')], [tile('rho','ρ'), tile('g','g')])]),
         right: () => seq([sumNode([term1(1,[simple([tile('z1','z<sub>1</sub>')])]), term1(-1,[simple([tile('z2','z<sub>2</sub>')])])])]),
         highlight: 'z2',
@@ -951,12 +990,18 @@ const module6Tutorial = [
         }
     },
     {
-        instruction: "Si on repart de P<sub>2</sub> − P<sub>1</sub> = ρ×g×(z<sub>1</sub>−z<sub>2</sub>) et qu'on déplace P<sub>2</sub> vers la droite (comme à la question 1), on obtient <b>−P<sub>1</sub> = ρ×g×(z<sub>1</sub>−z<sub>2</sub>) − P<sub>2</sub></b>. La grandeur isolée à gauche est négative : pour obtenir +P<sub>1</sub>, il faut multiplier les <b>deux membres</b> de l'équation par −1.",
+        instruction: "Si on repart de P<sub>2</sub> − P<sub>1</sub> = ρ×g×(z<sub>1</sub>−z<sub>2</sub>) et qu'on déplace P<sub>2</sub> vers la droite (comme à la question 1), on obtient <b>−P<sub>1</sub> = ρ×g×(z<sub>1</sub>−z<sub>2</sub>) − P<sub>2</sub></b>. La grandeur isolée à gauche est négative : pour obtenir +P<sub>1</sub>, il faut multiplier les <b>deux membres</b> de l'équation par −1. Glisse l'outil ×(−1) une fois à gauche, puis une fois à droite.",
         left:  () => seq([sumNode([term1(-1,[simple([tile('P1','P<sub>1</sub>')])])])]),
         right: () => seq([simple([tile('rho','ρ'), tile('g','g')]), sumNode([term1(1,[simple([tile('z1','z<sub>1</sub>')])]), term1(-1,[simple([tile('z2','z<sub>2</sub>')])])])]),
         showNegTool: true,
-        check: (st) => isFullyIsolatedSeq(st.left, 'P1'),
-        partialMessage: "Glisse l'outil ×(−1) sur l'équation : il s'applique aux deux membres à la fois."
+        check: (st) => {
+            if (!isFullyIsolatedSeq(st.left, 'P1')) return false;
+            const r = st.right;
+            if (r.kind !== 'seq' || r.slots.length !== 1 || r.slots[0].kind !== 'sum') return false;
+            if (r.slots[0].terms.length !== 1 || r.slots[0].terms[0].sign !== -1) return false;
+            return existsInTree(r, 'rho') && existsInTree(r, 'g') && existsInTree(r, 'z1') && existsInTree(r, 'z2');
+        },
+        partialMessage: "Glisse l'outil ×(−1) une fois à gauche, puis une fois à droite : il faut multiplier les DEUX membres."
     },
     {
         instruction: "On veut maintenant diviser l'équation P<sub>2</sub> − P<sub>1</sub> = ρ×g×(z<sub>1</sub>−z<sub>2</sub>) par ρ×g. Mais (P<sub>2</sub> − P<sub>1</sub>) n'est pas une seule grandeur, c'est une somme : impossible de la glisser directement dans une fraction. Glisse d'abord l'outil <b>( )</b> sur le côté gauche pour en faire un seul bloc, PUIS glisse l'outil fraction dessus.",
