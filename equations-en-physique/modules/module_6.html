@@ -89,6 +89,8 @@
     .palette-frac { display:inline-flex; flex-direction:column; align-items:center; padding:6px 12px; }
     .palette-frac .dots { font-size:.8rem; letter-spacing:2px; color:#312e81; }
     .palette-frac .frac-line { width:28px; height:2px; margin:2px 0; background:#312e81; }
+    .palette-tile.func-tool { background:#fef3c7; border-color:#f59e0b; color:#78350f; }
+    #currentStepZone.drag-over { background:#dbeafe !important; border-color:#3b82f6 !important; }
 
     .content-module-badge {
         display:inline-block; background:#4f46e5; color:#fff; font-size:.75rem; font-weight:800;
@@ -143,11 +145,13 @@
 
     /* pendant le glisser d'un terme additif, les deux membres de l'équation
        se signalent comme zones de dépose (comme pour la racine carrée) */
-    body.sumterm-dragging .eq-side {
+    body.sumterm-dragging .eq-side[data-path="left"], body.sumterm-dragging .eq-side[data-path="right"] {
         outline: 3px dashed #f59e0b; outline-offset: 5px; border-radius: 10px;
-        background: rgba(245,158,11,.06);
+        background: rgba(245,158,11,.06); padding: 10px 20px;
     }
     body.sumterm-dragging .eq-side.drag-over { background: rgba(245,158,11,.16); border-radius: 10px; }
+    /* le membre d'où part le terme ne doit pas apparaître comme zone de dépose */
+    .eq-side.sumterm-source { outline:none !important; background:none !important; }
 
     /* ── Diagramme "on applique la même operation aux deux cotes" ── */
     .op-diagram { text-align:center; }
@@ -318,11 +322,13 @@ function renderNode(node, path) {
     const needsInsertBefore = node.slots[0].kind === 'frac' || node.slots[0].kind === 'sum';
     const needsInsertAfter  = node.slots[n-1].kind === 'frac' || node.slots[n-1].kind === 'sum';
     if (needsInsertBefore) html += renderInsertZone(path, 'start');
+    if (node.parenthesized) html += '<span class="sum-parens">(</span>';
     node.slots.forEach((slot, i) => {
         if (i > 0) html += '<span class="mult-sign">×</span>';
-        const parens = slot.kind === 'sum' && slot.terms.length > 1 && n > 1;
+        const parens = !node.parenthesized && slot.kind === 'sum' && slot.terms.length > 1 && n > 1;
         html += parens ? `<span class="sum-parens">(</span>${renderNode(slot, path + '.' + i)}<span class="sum-parens">)</span>` : renderNode(slot, path + '.' + i);
     });
+    if (node.parenthesized) html += '<span class="sum-parens">)</span>';
     if (needsInsertAfter) html += renderInsertZone(path, 'end');
     return `<div class="eq-side" data-path="${path}">${html}</div>`;
 }
@@ -397,6 +403,11 @@ function sizeSqrtHooks(container) {
 // tuile et à chaque terme additif fraîchement rendus
 function attachEqTileHandlers(zone) {
     zone.querySelectorAll('.eq-tile').forEach(el => {
+        // une tuile a l'interieur d'un terme additif isole (deja glissable en
+        // bloc via .sum-term.term-draggable) ne doit pas AUSSI etre glissable
+        // individuellement : un seul pointerdown declencherait alors les deux
+        // glisser-deposer en meme temps (capture ecrasee, fantome bloque)
+        if (el.closest('.sum-term.term-draggable')) return;
         const path = el.dataset.path;
         const idx = parseInt(el.dataset.idx, 10);
         const node = getNode(path);
@@ -417,7 +428,7 @@ function renderHistory() {}
 function updateHint() {}
 function refreshView() {
     renderEquationZone();
-    if (viewMode === 'drill' && currentDrillCfg && currentDrillCfg.showPalette) buildDrillPalette();
+    if (viewMode === 'drill' && currentDrillCfg && (currentDrillCfg.showPalette || currentDrillCfg.showFracTool || currentDrillCfg.showParenTool || currentDrillCfg.showNegTool)) buildDrillPalette();
 }
 function showFeedback(msg, ok) {
     const f = document.getElementById('feedback');
@@ -464,10 +475,17 @@ function handleEmptied(path, removedId) {
 function processDrop(path, data) {
     if (data.type === 'frac') {
         const node = getNode(path);
-        if (!node || node.kind !== 'simple') return;
-        const f = frac(node.items, []);
-        f.forceDenCross = true;
-        setNode(path, f);
+        if (!node) return;
+        if (node.kind === 'simple') {
+            const f = frac(node.items, []);
+            f.forceDenCross = true;
+            setNode(path, f);
+        } else if (node.kind === 'seq' && node.parenthesized) {
+            const inner = node.slots.length === 1 ? node.slots[0] : seq(node.slots.slice());
+            node.slots = [ { kind:'frac', num: inner, den: simple([]), forceDenCross:true } ];
+        } else {
+            return;
+        }
         refreshView();
         return;
     }
@@ -521,18 +539,29 @@ function enableTileDrag(el, data, onTap) {
         dragOverClass: 'drag-over',
         onStart: () => {
             if (data.type === 'sqrt') document.body.classList.add('sqrt-dragging');
-            if (data.type === 'sumterm') document.body.classList.add('sumterm-dragging');
+            if (data.type === 'sumterm') {
+                document.body.classList.add('sumterm-dragging');
+                const fromSide = data.from.split('.')[0];
+                const src = document.querySelector(`.eq-side[data-path="${fromSide}"]`);
+                if (src) src.classList.add('sumterm-source');
+            }
         },
         onDrop: (item, zone, evt) => {
             if (data.type === 'sqrt') document.body.classList.remove('sqrt-dragging');
-            if (data.type === 'sumterm') document.body.classList.remove('sumterm-dragging');
+            if (data.type === 'sumterm') {
+                document.body.classList.remove('sumterm-dragging');
+                document.querySelectorAll('.eq-side.sumterm-source').forEach(e => e.classList.remove('sumterm-source'));
+            }
             const moved = Math.hypot(evt.clientX - startX, evt.clientY - startY) > 8;
             if (onTap && !moved) { onTap(); return; }
             if (zone) handleZoneDrop(data, zone);
         },
         onCancel: () => {
             if (data.type === 'sqrt') document.body.classList.remove('sqrt-dragging');
-            if (data.type === 'sumterm') document.body.classList.remove('sumterm-dragging');
+            if (data.type === 'sumterm') {
+                document.body.classList.remove('sumterm-dragging');
+                document.querySelectorAll('.eq-side.sumterm-source').forEach(e => e.classList.remove('sumterm-source'));
+            }
         },
     });
 }
@@ -546,6 +575,11 @@ function handleZoneDrop(data, zone) {
     if (data.type === 'sumterm') {
         const side = zone.closest('.eq-side');
         if (side) processSumTermDrop(side.dataset.path, data);
+        return;
+    }
+    if (data.type === 'paren') {
+        const side = zone.closest('.eq-side');
+        if (side) processParenDrop(side.dataset.path);
         return;
     }
     if (zone.matches('.insert-zone')) {
@@ -608,6 +642,38 @@ function processSumTermDrop(sidePath, data) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// PARENTHÈSE : traite tout le contenu d'un membre comme un seul bloc,
+// ce qui permet ensuite de le mettre au numérateur d'une fraction
+// ═══════════════════════════════════════════════════════════════
+function processParenDrop(sidePath) {
+    if (sidePath !== 'left' && sidePath !== 'right') return;
+    const side = getNode(sidePath);
+    if (!side || side.kind !== 'seq') return;
+    side.parenthesized = true;
+    refreshView();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MULTIPLIER LES DEUX MEMBRES PAR -1 (change le signe d'une grandeur isolée)
+// ═══════════════════════════════════════════════════════════════
+function negateBothSides() {
+    ['left', 'right'].forEach(sidePath => {
+        const s = getNode(sidePath);
+        if (s.slots.length === 1 && s.slots[0].kind === 'sum') {
+            s.slots[0].terms.forEach(t => { t.sign = -t.sign; });
+            if (s.slots[0].terms.length === 1 && s.slots[0].terms[0].sign === 1) {
+                let repl = s.slots[0].terms[0].node;
+                while (repl.kind === 'seq' && repl.slots.length === 1) repl = repl.slots[0];
+                s.slots[0] = repl;
+            }
+        } else {
+            s.slots.push(simple([{ id: 'm1', label: '−1' }]));
+        }
+    });
+    refreshView();
+}
+
+// ═══════════════════════════════════════════════════════════════
 // RACINE CARRÉE (héritée des modules 4/5, non utilisée par défaut ici)
 // ═══════════════════════════════════════════════════════════════
 // retrouve le signe effectif (cumulé à travers les sommes imbriquées) avec
@@ -653,6 +719,37 @@ function addPaletteTile(t) {
     enableTileDrag(el, { type:'tile', id:t.id, label:t.label });
     pal.appendChild(el);
 }
+function addFracPaletteTile() {
+    const pal = document.getElementById('palette');
+    if (!pal) return;
+    const el = document.createElement('div');
+    el.className = 'palette-tile palette-frac';
+    el.innerHTML = '<span class="dots">···</span><span class="frac-line"></span><span class="dots">···</span>';
+    enableTileDrag(el, { type:'frac' });
+    pal.appendChild(el);
+}
+function addParenPaletteTile() {
+    const pal = document.getElementById('palette');
+    if (!pal) return;
+    const el = document.createElement('div');
+    el.className = 'palette-tile func-tool';
+    el.innerHTML = '( )';
+    enableTileDrag(el, { type:'paren' });
+    pal.appendChild(el);
+}
+function addNegPaletteTile() {
+    const pal = document.getElementById('palette');
+    if (!pal) return;
+    const el = document.createElement('div');
+    el.className = 'palette-tile func-tool';
+    el.innerHTML = '×(−1)';
+    DragDrop.enable(el, {
+        zoneSelector: '#currentStepZone',
+        dragOverClass: 'drag-over',
+        onDrop: (item, zone) => { if (zone) negateBothSides(); },
+    });
+    pal.appendChild(el);
+}
 function countIdAnywhere(id) {
     function c(node) {
         if (!node) return 0;
@@ -672,6 +769,9 @@ function buildDrillPalette() {
     (currentDrillCfg && currentDrillCfg.paletteTiles || [])
         .filter(t => REUSABLE_TILE_IDS.has(t.id) || countIdAnywhere(t.id) === 0)
         .forEach(addPaletteTile);
+    if (currentDrillCfg && currentDrillCfg.showFracTool) addFracPaletteTile();
+    if (currentDrillCfg && currentDrillCfg.showParenTool) addParenPaletteTile();
+    if (currentDrillCfg && currentDrillCfg.showNegTool) addNegPaletteTile();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -709,6 +809,7 @@ function isSlotEmpty(node) {
 // MOTEUR DE DRILL (manipulations guidées)
 // ═══════════════════════════════════════════════════════════════
 function mountDrill(container, drillCfg, explainHtml) {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     currentDrillCfg = drillCfg;
     viewMode = 'drill';
     state = { left: drillCfg.left(), right: drillCfg.right() };
@@ -735,7 +836,7 @@ function mountDrill(container, drillCfg, explainHtml) {
             </div>
         </div>` : ''}
         <div id="currentStepZone" class="eq-row py-8 border-2 border-dashed border-indigo-300 rounded-lg bg-indigo-50" style="min-height:110px;"></div>
-        ${drillCfg.showPalette ? `<div class="mt-4"><div class="text-xs font-bold text-gray-500 uppercase mb-2">Glisse les éléments nécessaires</div><div id="palette" class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200"></div></div>` : ''}
+        ${(drillCfg.showPalette || drillCfg.showFracTool || drillCfg.showParenTool || drillCfg.showNegTool) ? `<div class="mt-4"><div class="text-xs font-bold text-gray-500 uppercase mb-2">Glisse les éléments nécessaires</div><div id="palette" class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200"></div></div>` : ''}
         ${explainHtml || ''}
         <div class="text-center mt-2">
             <button id="verifyDrillBtn" onclick="checkDrill()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">✓ Valider</button>
@@ -748,6 +849,7 @@ function mountDrill(container, drillCfg, explainHtml) {
     refreshView();
 }
 function resetDrill() {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     if (!currentDrillCfg) return;
     viewMode = 'drill';
     state = { left: currentDrillCfg.left(), right: currentDrillCfg.right() };
@@ -820,18 +922,24 @@ const module6Tutorial = [
         partialMessage: "Vérifie que P₁ est bien devenu positif de l'autre côté."
     },
     {
-        instruction: "À droite, (z<sub>1</sub>−z<sub>2</sub>) est multiplié par ρ et g : impossible de déplacer z<sub>1</sub> ou z<sub>2</sub> directement. Isole d'abord la parenthèse en passant <b>ρ</b> et <b>g</b> de l'autre côté (comme un terme multiplicatif ordinaire).",
+        instruction: "À droite, (z<sub>1</sub>−z<sub>2</sub>) est multiplié par ρ et g : impossible de déplacer z<sub>1</sub> ou z<sub>2</sub> directement. Pour diviser par ρ et g, glisse d'abord l'outil fraction sur <b>P<sub>2</sub></b> (à gauche), puis glisse <b>ρ</b> et <b>g</b> dans le dénominateur de cette fraction.",
         left:  () => seq([simple([tile('P2','P<sub>2</sub>')])]),
         right: () => seq([simple([tile('rho','ρ'), tile('g','g')]), sumNode([term1(1,[simple([tile('z1','z<sub>1</sub>')])]), term1(-1,[simple([tile('z2','z<sub>2</sub>')])])])]),
+        showFracTool: true,
         check: (st) => {
             if (st.right.kind !== 'seq' || st.right.slots.length !== 1 || st.right.slots[0].kind !== 'sum') return false;
-            return st.left.kind === 'seq' && st.left.slots.length === 1 && st.left.slots[0].kind === 'simple'
-                && setEq(idsOf(st.left.slots[0].items), ['P2','rho','g']);
-        }
+            const l = st.left;
+            if (l.kind !== 'seq' || l.slots.length !== 1 || l.slots[0].kind !== 'frac') return false;
+            const f = l.slots[0];
+            if (findTermSign(f.num, 'P2') !== 1) return false;
+            if (!existsInTree(f.den, 'rho') || !existsInTree(f.den, 'g')) return false;
+            return true;
+        },
+        partialMessage: "Utilise l'outil fraction (···/···) sur P₂, puis fais glisser ρ et g dans le dénominateur."
     },
     {
-        instruction: "La somme est maintenant isolée : plus rien ne la multiplie. Tu peux déplacer <b>z<sub>1</sub></b> ou <b>z<sub>2</sub></b> librement, comme n'importe quel terme additif. Glisse <b>z<sub>2</sub></b> à gauche.",
-        left:  () => seq([simple([tile('P2','P<sub>2</sub>'), tile('rho','ρ'), tile('g','g')])]),
+        instruction: "La somme est maintenant isolée à droite : plus rien ne la multiplie. Tu peux déplacer <b>z<sub>1</sub></b> ou <b>z<sub>2</sub></b> librement, comme n'importe quel terme additif. Glisse <b>z<sub>2</sub></b> à gauche.",
+        left:  () => seq([frac([tile('P2','P<sub>2</sub>')], [tile('rho','ρ'), tile('g','g')])]),
         right: () => seq([sumNode([term1(1,[simple([tile('z1','z<sub>1</sub>')])]), term1(-1,[simple([tile('z2','z<sub>2</sub>')])])])]),
         highlight: 'z2',
         check: (st) => {
@@ -841,6 +949,27 @@ const module6Tutorial = [
             if (!existsInTree(st.left, 'P2') || !existsInTree(st.left, 'rho') || !existsInTree(st.left, 'g')) return false;
             return true;
         }
+    },
+    {
+        instruction: "Si on repart de P<sub>2</sub> − P<sub>1</sub> = ρ×g×(z<sub>1</sub>−z<sub>2</sub>) et qu'on déplace P<sub>2</sub> vers la droite (comme à la question 1), on obtient <b>−P<sub>1</sub> = ρ×g×(z<sub>1</sub>−z<sub>2</sub>) − P<sub>2</sub></b>. La grandeur isolée à gauche est négative : pour obtenir +P<sub>1</sub>, il faut multiplier les <b>deux membres</b> de l'équation par −1.",
+        left:  () => seq([sumNode([term1(-1,[simple([tile('P1','P<sub>1</sub>')])])])]),
+        right: () => seq([simple([tile('rho','ρ'), tile('g','g')]), sumNode([term1(1,[simple([tile('z1','z<sub>1</sub>')])]), term1(-1,[simple([tile('z2','z<sub>2</sub>')])])])]),
+        showNegTool: true,
+        check: (st) => isFullyIsolatedSeq(st.left, 'P1'),
+        partialMessage: "Glisse l'outil ×(−1) sur l'équation : il s'applique aux deux membres à la fois."
+    },
+    {
+        instruction: "On veut maintenant diviser l'équation P<sub>2</sub> − P<sub>1</sub> = ρ×g×(z<sub>1</sub>−z<sub>2</sub>) par ρ×g. Mais (P<sub>2</sub> − P<sub>1</sub>) n'est pas une seule grandeur, c'est une somme : impossible de la glisser directement dans une fraction. Glisse d'abord l'outil <b>( )</b> sur le côté gauche pour en faire un seul bloc, PUIS glisse l'outil fraction dessus.",
+        left: m6Start.left, right: m6Start.right,
+        showParenTool: true, showFracTool: true,
+        check: (st) => {
+            const l = st.left;
+            if (l.kind !== 'seq' || l.slots.length !== 1 || l.slots[0].kind !== 'frac') return false;
+            const num = l.slots[0].num;
+            if (findTermSign(num, 'P2') !== 1 || findTermSign(num, 'P1') !== -1) return false;
+            return true;
+        },
+        partialMessage: "Glisse d'abord l'outil ( ) sur le côté gauche pour en faire un seul bloc, puis glisse l'outil fraction dessus."
     }
 ];
 let m6TutIdx = 0;

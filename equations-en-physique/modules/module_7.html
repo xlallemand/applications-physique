@@ -89,6 +89,8 @@
     .palette-frac { display:inline-flex; flex-direction:column; align-items:center; padding:6px 12px; }
     .palette-frac .dots { font-size:.8rem; letter-spacing:2px; color:#312e81; }
     .palette-frac .frac-line { width:28px; height:2px; margin:2px 0; background:#312e81; }
+    .palette-tile.func-tool { background:#fef3c7; border-color:#f59e0b; color:#78350f; }
+    #currentStepZone.drag-over { background:#dbeafe !important; border-color:#3b82f6 !important; }
 
     .content-module-badge {
         display:inline-block; background:#4f46e5; color:#fff; font-size:.75rem; font-weight:800;
@@ -138,11 +140,12 @@
         100% { transform:rotateY(0deg) scale(1); }
     }
     .sum-sign.just-flipped { animation: signFlip 0.9s ease; }
-    body.sumterm-dragging .eq-side {
+    body.sumterm-dragging .eq-side[data-path="left"], body.sumterm-dragging .eq-side[data-path="right"] {
         outline: 3px dashed #f59e0b; outline-offset: 5px; border-radius: 10px;
-        background: rgba(245,158,11,.06);
+        background: rgba(245,158,11,.06); padding: 10px 20px;
     }
     body.sumterm-dragging .eq-side.drag-over { background: rgba(245,158,11,.16); border-radius: 10px; }
+    .eq-side.sumterm-source { outline:none !important; background:none !important; }
 </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
@@ -300,11 +303,13 @@ function renderNode(node, path) {
     const needsInsertBefore = node.slots[0].kind === 'frac' || node.slots[0].kind === 'sum';
     const needsInsertAfter  = node.slots[n-1].kind === 'frac' || node.slots[n-1].kind === 'sum';
     if (needsInsertBefore) html += renderInsertZone(path, 'start');
+    if (node.parenthesized) html += '<span class="sum-parens">(</span>';
     node.slots.forEach((slot, i) => {
         if (i > 0) html += '<span class="mult-sign">×</span>';
-        const parens = slot.kind === 'sum' && slot.terms.length > 1 && n > 1;
+        const parens = !node.parenthesized && slot.kind === 'sum' && slot.terms.length > 1 && n > 1;
         html += parens ? `<span class="sum-parens">(</span>${renderNode(slot, path + '.' + i)}<span class="sum-parens">)</span>` : renderNode(slot, path + '.' + i);
     });
+    if (node.parenthesized) html += '<span class="sum-parens">)</span>';
     if (needsInsertAfter) html += renderInsertZone(path, 'end');
     return `<div class="eq-side" data-path="${path}">${html}</div>`;
 }
@@ -367,6 +372,11 @@ function sizeSqrtHooks(container) {
 }
 function attachEqTileHandlers(zone) {
     zone.querySelectorAll('.eq-tile').forEach(el => {
+        // une tuile a l'interieur d'un terme additif isole (deja glissable en
+        // bloc via .sum-term.term-draggable) ne doit pas AUSSI etre glissable
+        // individuellement : un seul pointerdown declencherait alors les deux
+        // glisser-deposer en meme temps (capture ecrasee, fantome bloque)
+        if (el.closest('.sum-term.term-draggable')) return;
         const path = el.dataset.path;
         const idx = parseInt(el.dataset.idx, 10);
         const node = getNode(path);
@@ -457,10 +467,9 @@ function processDrop(path, data) {
             const f = frac(node.items, []);
             f.forceDenCross = true;
             setNode(path, f);
-        } else if (node.kind === 'sum') {
-            setNode(path, { kind:'frac', num: node, den: simple([]), forceDenCross:true });
-        } else if (node.kind === 'seq' && node.slots.length === 1) {
-            setNode(path + '.0', { kind:'frac', num: node.slots[0], den: simple([]), forceDenCross:true });
+        } else if (node.kind === 'seq' && node.parenthesized) {
+            const inner = node.slots.length === 1 ? node.slots[0] : seq(node.slots.slice());
+            node.slots = [ { kind:'frac', num: inner, den: simple([]), forceDenCross:true } ];
         } else {
             return;
         }
@@ -512,20 +521,40 @@ function enableTileDrag(el, data, onTap) {
     DragDrop.enable(el, {
         zoneSelector: '.eq-tile, .slot-simple, .insert-zone, .eq-side, .sum-term',
         dragOverClass: 'drag-over',
-        onStart: () => { if (data.type === 'sumterm') document.body.classList.add('sumterm-dragging'); },
+        onStart: () => {
+            if (data.type === 'sumterm') {
+                document.body.classList.add('sumterm-dragging');
+                const fromSide = data.from.split('.')[0];
+                const src = document.querySelector(`.eq-side[data-path="${fromSide}"]`);
+                if (src) src.classList.add('sumterm-source');
+            }
+        },
         onDrop: (item, zone, evt) => {
-            if (data.type === 'sumterm') document.body.classList.remove('sumterm-dragging');
+            if (data.type === 'sumterm') {
+                document.body.classList.remove('sumterm-dragging');
+                document.querySelectorAll('.eq-side.sumterm-source').forEach(e => e.classList.remove('sumterm-source'));
+            }
             const moved = Math.hypot(evt.clientX - startX, evt.clientY - startY) > 8;
             if (onTap && !moved) { onTap(); return; }
             if (zone) handleZoneDrop(data, zone);
         },
-        onCancel: () => { if (data.type === 'sumterm') document.body.classList.remove('sumterm-dragging'); },
+        onCancel: () => {
+            if (data.type === 'sumterm') {
+                document.body.classList.remove('sumterm-dragging');
+                document.querySelectorAll('.eq-side.sumterm-source').forEach(e => e.classList.remove('sumterm-source'));
+            }
+        },
     });
 }
 function handleZoneDrop(data, zone) {
     if (data.type === 'sumterm') {
         const side = zone.closest('.eq-side');
         if (side) processSumTermDrop(side.dataset.path, data);
+        return;
+    }
+    if (data.type === 'paren') {
+        const side = zone.closest('.eq-side');
+        if (side) processParenDrop(side.dataset.path);
         return;
     }
     if (zone.matches('.insert-zone')) {
@@ -571,6 +600,32 @@ function processSumTermDrop(sidePath, data) {
     lastMovedTerm = { sidePath: sidePath + '.0', termIdx: destTermIdx };
     refreshView();
 }
+// traite tout le contenu d'un membre comme un seul bloc (nécessaire avant de
+// pouvoir le glisser dans une fraction quand ce n'est pas une simple grandeur)
+function processParenDrop(sidePath) {
+    if (sidePath !== 'left' && sidePath !== 'right') return;
+    const side = getNode(sidePath);
+    if (!side || side.kind !== 'seq') return;
+    side.parenthesized = true;
+    refreshView();
+}
+// multiplie les deux membres par -1 (change le signe d'une grandeur isolée)
+function negateBothSides() {
+    ['left', 'right'].forEach(sidePath => {
+        const s = getNode(sidePath);
+        if (s.slots.length === 1 && s.slots[0].kind === 'sum') {
+            s.slots[0].terms.forEach(t => { t.sign = -t.sign; });
+            if (s.slots[0].terms.length === 1 && s.slots[0].terms[0].sign === 1) {
+                let repl = s.slots[0].terms[0].node;
+                while (repl.kind === 'seq' && repl.slots.length === 1) repl = repl.slots[0];
+                s.slots[0] = repl;
+            }
+        } else {
+            s.slots.push(simple([{ id: 'm1', label: '−1' }]));
+        }
+    });
+    refreshView();
+}
 function processSqrtDrop() {}
 
 // ═══════════════════════════════════════════════════════════════
@@ -604,6 +659,28 @@ function addFracPaletteTile() {
     enableTileDrag(el, { type:'frac' });
     pal.appendChild(el);
 }
+function addParenPaletteTile() {
+    const pal = document.getElementById('palette');
+    if (!pal) return;
+    const el = document.createElement('div');
+    el.className = 'palette-tile func-tool';
+    el.innerHTML = '( )';
+    enableTileDrag(el, { type:'paren' });
+    pal.appendChild(el);
+}
+function addNegPaletteTile() {
+    const pal = document.getElementById('palette');
+    if (!pal) return;
+    const el = document.createElement('div');
+    el.className = 'palette-tile func-tool';
+    el.innerHTML = '×(−1)';
+    DragDrop.enable(el, {
+        zoneSelector: '#currentStepZone',
+        dragOverClass: 'drag-over',
+        onDrop: (item, zone) => { if (zone) negateBothSides(); },
+    });
+    pal.appendChild(el);
+}
 const REUSABLE_TILE_IDS = new Set(['one', 'times', 'plus', 'minus']);
 function buildPalette() {
     const pal = document.getElementById('palette');
@@ -613,6 +690,8 @@ function buildPalette() {
         .filter(t => REUSABLE_TILE_IDS.has(t.id) || countIdAnywhere(t.id) === 0)
         .forEach(addPaletteTile);
     addFracPaletteTile();
+    if (currentExercise.needsParenTool) addParenPaletteTile();
+    if (currentExercise.needsNegTool) addNegPaletteTile();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -691,6 +770,7 @@ function solveEditorHTML() {
     <div id="feedback" class="text-center mt-4 font-semibold text-lg"></div>`;
 }
 function startSolveExercise(cfg) {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     currentExercise = cfg;
     viewMode = 'solve';
     state = { left: cfg.initialLeft(), right: cfg.initialRight() };
@@ -703,6 +783,7 @@ function startSolveExercise(cfg) {
     renderHistory();
 }
 function resetSolveExercise() {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     if (!currentExercise) return;
     state = { left: currentExercise.initialLeft(), right: currentExercise.initialRight() };
     history = [];
@@ -798,7 +879,7 @@ const m7StartHeat = {
 };
 function sampleHeat() {
     const m = 0.1+Math.random()*9.9, c = 1000+Math.random()*3000, Ti = 10+Math.random()*20, Tf = Ti+1+Math.random()*79;
-    return { Q: m*c*(Tf-Ti), m, c, Ti, Tf };
+    return { Q: m*c*(Tf-Ti), m, c, Ti, Tf, m1: -1 };
 }
 const heatLegend = "Q : énergie thermique reçue (J) · m : masse (kg) · c : capacité thermique massique (J/(kg·K)) · T<sub>f</sub>, T<sub>i</sub> : températures finale et initiale (K)";
 const heatIntro = "Une masse m d'eau passe de la température T<sub>i</sub> à la température T<sub>f</sub>.";
@@ -812,7 +893,7 @@ const m7StartEp = {
 };
 function sampleEp() {
     const m = 0.1+Math.random()*99.9, g = 9.8, z = 1+Math.random()*99, z0 = Math.random()*z;
-    return { Ep: m*g*(z-z0), m, g, z, z0 };
+    return { Ep: m*g*(z-z0), m, g, z, z0, m1: -1 };
 }
 const epLegend = "E<sub>p</sub> : énergie potentielle de pesanteur (J) · m : masse (kg) · g : intensité de pesanteur (N/kg) · z, z<sub>0</sub> : altitudes (m)";
 const epIntro = "On étudie l'énergie potentielle de pesanteur d'un objet, en prenant l'altitude z<sub>0</sub> comme référence.";
@@ -833,7 +914,7 @@ function sampleEm() {
 }
 const emLegend = "E<sub>m</sub> : énergie mécanique (J) · m : masse (kg) · v : vitesse (m/s) · g : intensité de pesanteur (N/kg) · z : altitude (m)";
 const emIntro = "On étudie l'énergie mécanique d'un objet, somme de son énergie cinétique et de son énergie potentielle de pesanteur.";
-const emStaticEq = `<span class="eq-tile-static">E<sub>m</sub></span><span class="eq-sign">=</span>${staticFracHtml('1','2')}<span class="eq-tile-static">m</span><span class="eq-tile-static">v²</span>${staticSumHtml([{sign:'+',html:'<span class="eq-tile-static">m</span><span class="eq-tile-static">g</span><span class="eq-tile-static">z</span>'}])}`;
+const emStaticEq = `<span class="eq-tile-static">E<sub>m</sub></span><span class="eq-sign">=</span>${staticFracHtml('1','2')}<span class="eq-tile-static">m</span><span class="eq-tile-static">v²</span><span class="eq-tile-static">+</span><span class="eq-tile-static">m</span><span class="eq-tile-static">g</span><span class="eq-tile-static">z</span>`;
 const emTiles = [tile('Em','E<sub>m</sub>'), tile('half','1/2'), tile('m','m'), tile('v2','v²'), tile('mB','m'), tile('g','g'), tile('z','z')];
 
 // y = y0 + v0·t - 1/2·g·t²
@@ -856,22 +937,22 @@ const fallTiles = [tile('y','y'), tile('y0','y<sub>0</sub>'), tile('v0','v<sub>0
 
 const module7Bank = [
     { legend: pressureLegend, intro: pressureIntro, staticEqHtml: pressureStaticEq, tiles: pressureTiles, target:'P2', ...m7StartPressure, sample: samplePressure },
-    { legend: pressureLegend, intro: "On souhaite maintenant exprimer P<sub>1</sub>.", staticEqHtml: pressureStaticEq, tiles: pressureTiles, target:'P1', ...m7StartPressure, sample: samplePressure },
-    { legend: pressureLegend, intro: "On souhaite maintenant exprimer z<sub>1</sub>.", staticEqHtml: pressureStaticEq, tiles: pressureTiles, target:'z1', ...m7StartPressure, sample: samplePressure },
-    { legend: pressureLegend, intro: "On souhaite maintenant exprimer z<sub>2</sub>.", staticEqHtml: pressureStaticEq, tiles: pressureTiles, target:'z2', ...m7StartPressure, sample: samplePressure },
+    { legend: pressureLegend, intro: "On souhaite maintenant exprimer P<sub>1</sub>.", staticEqHtml: pressureStaticEq, tiles: pressureTiles, target:'P1', ...m7StartPressure, sample: samplePressure, needsNegTool: true },
+    { legend: pressureLegend, intro: "On souhaite maintenant exprimer z<sub>1</sub>.", staticEqHtml: pressureStaticEq, tiles: pressureTiles, target:'z1', ...m7StartPressure, sample: samplePressure, needsParenTool: true },
+    { legend: pressureLegend, intro: "On souhaite maintenant exprimer z<sub>2</sub>.", staticEqHtml: pressureStaticEq, tiles: pressureTiles, target:'z2', ...m7StartPressure, sample: samplePressure, needsParenTool: true, needsNegTool: true },
 
     { legend: heatLegend, intro: heatIntro, staticEqHtml: heatStaticEq, tiles: heatTiles, target:'Tf', ...m7StartHeat, sample: sampleHeat },
-    { legend: heatLegend, intro: "On souhaite maintenant exprimer T<sub>i</sub>.", staticEqHtml: heatStaticEq, tiles: heatTiles, target:'Ti', ...m7StartHeat, sample: sampleHeat },
+    { legend: heatLegend, intro: "On souhaite maintenant exprimer T<sub>i</sub>.", staticEqHtml: heatStaticEq, tiles: heatTiles, target:'Ti', ...m7StartHeat, sample: sampleHeat, needsNegTool: true },
 
     { legend: epLegend, intro: epIntro, staticEqHtml: epStaticEq, tiles: epTiles, target:'z', ...m7StartEp, sample: sampleEp },
-    { legend: epLegend, intro: "On souhaite maintenant exprimer z<sub>0</sub>.", staticEqHtml: epStaticEq, tiles: epTiles, target:'z0', ...m7StartEp, sample: sampleEp },
+    { legend: epLegend, intro: "On souhaite maintenant exprimer z<sub>0</sub>.", staticEqHtml: epStaticEq, tiles: epTiles, target:'z0', ...m7StartEp, sample: sampleEp, needsNegTool: true },
 
-    { legend: emLegend, intro: emIntro, staticEqHtml: emStaticEq, tiles: emTiles, target:'z', ...m7StartEm, sample: sampleEm },
-    { legend: emLegend, intro: "On souhaite maintenant exprimer v² (le carré de la vitesse).", staticEqHtml: emStaticEq, tiles: emTiles, target:'v2', ...m7StartEm, sample: sampleEm },
-    { legend: emLegend, intro: "On souhaite maintenant exprimer g.", staticEqHtml: emStaticEq, tiles: emTiles, target:'g', ...m7StartEm, sample: sampleEm },
+    { legend: emLegend, intro: emIntro, staticEqHtml: emStaticEq, tiles: emTiles, target:'z', ...m7StartEm, sample: sampleEm, needsParenTool: true },
+    { legend: emLegend, intro: "On souhaite maintenant exprimer v² (le carré de la vitesse).", staticEqHtml: emStaticEq, tiles: emTiles, target:'v2', ...m7StartEm, sample: sampleEm, needsParenTool: true },
+    { legend: emLegend, intro: "On souhaite maintenant exprimer g.", staticEqHtml: emStaticEq, tiles: emTiles, target:'g', ...m7StartEm, sample: sampleEm, needsParenTool: true },
 
     { legend: fallLegend, intro: fallIntro, staticEqHtml: fallStaticEq, tiles: fallTiles, target:'y0', ...m7StartFall, sample: sampleFall },
-    { legend: fallLegend, intro: "On souhaite maintenant exprimer v<sub>0</sub>.", staticEqHtml: fallStaticEq, tiles: fallTiles, target:'v0', ...m7StartFall, sample: sampleFall },
+    { legend: fallLegend, intro: "On souhaite maintenant exprimer v<sub>0</sub>.", staticEqHtml: fallStaticEq, tiles: fallTiles, target:'v0', ...m7StartFall, sample: sampleFall, needsParenTool: true },
 ];
 const m7MaxScore = module7Bank.length * 2;
 const m7TrueMaxScore = module7Bank.length * 3;
@@ -883,6 +964,7 @@ function targetLabel(q) {
 }
 
 function renderModule7Intro() {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     document.getElementById('app').innerHTML = `
       <div class="bg-white rounded-xl shadow-lg p-6">
         <span class="content-module-badge">MODULE 7</span>
@@ -895,6 +977,7 @@ function renderModule7Intro() {
 }
 function startModule7Graded(){ m7Idx = 0; m7Score = 0; m7Answers = []; renderModule7Question(); }
 function renderModule7Question() {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     if (m7Idx >= module7Bank.length) { finishModule7(); return; }
     const q = module7Bank[m7Idx];
     const app = document.getElementById('app');
@@ -918,6 +1001,7 @@ function renderModule7Question() {
     startSolveExercise({
         tiles: q.tiles, sample: q.sample, targetId: q.target,
         initialLeft: q.initialLeft, initialRight: q.initialRight,
+        needsParenTool: q.needsParenTool, needsNegTool: q.needsNegTool,
         onSolved: (dm) => {
             const pts = hadError ? 1 : (history.length === 1 ? 3 : 2);
             m7Score += pts;

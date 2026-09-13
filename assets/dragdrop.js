@@ -41,6 +41,7 @@
     }
 
     function createGhost(x, y) {
+      if (ghost) { ghost.remove(); ghost = null; }
       const rect = item.getBoundingClientRect();
       ghost = item.cloneNode(true);
       ghost.classList.add('drag-ghost');
@@ -80,6 +81,7 @@
 
     item.addEventListener('pointerdown', function (e) {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (pointerId !== null) return; // un glisser est déjà en cours sur cet élément
       pointerId = e.pointerId;
       try { item.setPointerCapture(pointerId); } catch (err) { /* ignore */ }
       item.classList.add('dragging');
@@ -110,5 +112,12 @@
     });
   }
 
-  window.DragDrop = { enable: enable };
+  // Filet de sécurité : supprime tout fantôme resté orphelin dans le DOM
+  // (ex. si l'écran a été redessiné pendant qu'un glisser était en cours).
+  // À appeler au début du rendu de chaque nouvel écran / nouvelle question.
+  function cleanupGhosts() {
+    document.querySelectorAll('.drag-ghost').forEach(function (g) { g.remove(); });
+  }
+
+  window.DragDrop = { enable: enable, cleanupGhosts: cleanupGhosts };
 })();

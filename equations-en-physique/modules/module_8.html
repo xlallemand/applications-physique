@@ -40,8 +40,9 @@
     .func-name { font-weight:800; color:#1e293b; margin-right:2px; }
     .func-exp { font-weight:800; color:#1e293b; font-size:.75em; margin-left:1px; }
 
-    #currentStepZone.func-target { transition: all .15s; }
-    #currentStepZone.func-target.drag-over { background:#dbeafe !important; border-color:#3b82f6 !important; }
+    .eq-side-static { display:inline-flex; align-items:center; }
+    .func-target { transition: all .15s; border-radius:10px; padding:6px 14px; }
+    .func-target.drag-over { background:#dbeafe !important; }
 
     .palette-tile {
         display:inline-flex; align-items:center; justify-content:center;
@@ -175,7 +176,9 @@ function sizeSqrtHooks(container) {
 function renderEquationZone() {
     const zone = document.getElementById('currentStepZone');
     if (!zone) return;
-    zone.innerHTML = renderStatic(state.left) + `<div class="eq-sign">=</div>` + renderStatic(state.right);
+    zone.innerHTML = `<div class="eq-side-static func-target" data-path="left">${renderStatic(state.left)}</div>` +
+        `<div class="eq-sign">=</div>` +
+        `<div class="eq-side-static func-target" data-path="right">${renderStatic(state.right)}</div>`;
     sizeSqrtHooks(zone);
 }
 function refreshView() {
@@ -192,16 +195,15 @@ function showFeedback(msg, ok) {
 // ═══════════════════════════════════════════════════════════════
 // APPLICATION DE LA FONCTION RÉCIPROQUE AUX DEUX MEMBRES
 // ═══════════════════════════════════════════════════════════════
-function applyFuncTool(toolFn) {
+function applyFuncTool(toolFn, side) {
+    if (side !== 'left' && side !== 'right') return;
     const inverse = RECIPROCAL[toolFn];
-    ['left', 'right'].forEach(side => {
-        const cur = state[side];
-        if (cur.kind === 'func' && cur.fn === inverse) {
-            state[side] = cur.inner;
-        } else {
-            state[side] = func(toolFn, cur);
-        }
-    });
+    const cur = state[side];
+    if (cur.kind === 'func' && cur.fn === inverse) {
+        state[side] = cur.inner;
+    } else {
+        state[side] = func(toolFn, cur);
+    }
     refreshView();
 }
 function buildToolPalette(toolFn) {
@@ -214,7 +216,7 @@ function buildToolPalette(toolFn) {
     DragDrop.enable(el, {
         zoneSelector: '.func-target',
         dragOverClass: 'drag-over',
-        onDrop: (item, zone) => { if (zone) applyFuncTool(toolFn); },
+        onDrop: (item, zone) => { if (zone) applyFuncTool(toolFn, zone.dataset.path); },
     });
     pal.appendChild(el);
 }
@@ -223,6 +225,7 @@ function buildToolPalette(toolFn) {
 // MOTEUR DE DRILL (manipulations guidées, identique dans l'esprit au module 6)
 // ═══════════════════════════════════════════════════════════════
 function mountDrill(container, drillCfg, explainHtml) {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     currentDrillCfg = drillCfg;
     state = { left: drillCfg.left(), right: drillCfg.right() };
     currentDrill = { check: drillCfg.check };
@@ -246,7 +249,7 @@ function mountDrill(container, drillCfg, explainHtml) {
                 </div>
             </div>
         </div>` : ''}
-        <div id="currentStepZone" class="eq-row func-target py-8 border-2 border-dashed border-indigo-300 rounded-lg bg-indigo-50" style="min-height:110px;"></div>
+        <div id="currentStepZone" class="eq-row py-8 border-2 border-dashed border-indigo-300 rounded-lg bg-indigo-50" style="min-height:110px;"></div>
         <div class="mt-4"><div class="text-xs font-bold text-gray-500 uppercase mb-2">Glisse l'outil sur l'équation</div><div id="palette" class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200"></div></div>
         ${explainHtml || ''}
         <div class="text-center mt-2">
@@ -257,9 +260,11 @@ function mountDrill(container, drillCfg, explainHtml) {
             <button id="skipDrillBtn" onclick="currentDrillOnSuccess()" class="text-xs font-semibold text-gray-400 hover:text-gray-600">Passer à la suite quand même →</button>
         </div>
         <div id="feedback" class="text-center mt-4 font-semibold text-lg"></div>`;
+    sizeSqrtHooks(container);
     refreshView();
 }
 function resetDrill() {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     if (!currentDrillCfg) return;
     state = { left: currentDrillCfg.left(), right: currentDrillCfg.right() };
     const vBtn = document.getElementById('verifyDrillBtn');
@@ -287,11 +292,11 @@ function checkDrill() {
 // ═══════════════════════════════════════════════════════════════
 // MODULE 8 — GÉRER LES FONCTIONS RÉCIPROQUES (méthode)
 // ═══════════════════════════════════════════════════════════════
-const TUTORIAL_EXPLAIN = "Certaines équations utilisent des fonctions mathématiques (racine carrée, carré, sinus...) appliquées à une grandeur. Pour supprimer une fonction, il faut appliquer sa <b>fonction réciproque</b> aux deux membres de l'équation : elle annule la fonction du côté où elle s'applique, et apparaît de l'autre côté.";
+const TUTORIAL_EXPLAIN = "Certaines équations utilisent des fonctions mathématiques (racine carrée, carré, sinus...) appliquées à une grandeur. Pour supprimer une fonction, il faut appliquer sa <b>fonction réciproque</b> aux deux membres de l'équation : elle annule la fonction du côté où elle s'applique, et apparaît de l'autre côté. Glisse l'outil sur un côté à la fois : il faut le faire une fois à gauche, puis une fois à droite.";
 
 const module8Tutorial = [
     {
-        instruction: "Voici l'équation v = √(2gh) simplifiée en x = √(y) : la racine carrée s'applique à y, à droite. Pour la supprimer, glisse l'outil <b>x²</b> (le carré, réciproque de la racine carrée) sur l'équation : il s'applique aux deux membres à la fois.",
+        instruction: "Voici l'équation v = √(2gh) simplifiée en x = √(y) : la racine carrée s'applique à y, à droite. Pour la supprimer, glisse l'outil <b>x²</b> (le carré, réciproque de la racine carrée) sur le côté gauche, PUIS sur le côté droit.",
         left: () => simple([tile('x','x')]),
         right: () => func('sqrt', simple([tile('y','y')])),
         toolFn: 'sq',
@@ -299,7 +304,7 @@ const module8Tutorial = [
         check: (st) => nodeEq(st.left, func('sq', simple([tile('x','x')]))) && nodeEq(st.right, simple([tile('y','y')])),
     },
     {
-        instruction: "Repartons d'une équation avec un carré : x² = y. Pour supprimer le carré, glisse l'outil <b>√</b> (la racine carrée, réciproque du carré) sur l'équation.",
+        instruction: "Repartons d'une équation avec un carré : x² = y. Pour supprimer le carré, glisse l'outil <b>√</b> (la racine carrée, réciproque du carré) sur le côté gauche, PUIS sur le côté droit.",
         left: () => func('sq', simple([tile('x','x')])),
         right: () => simple([tile('y','y')]),
         toolFn: 'sqrt',
@@ -307,7 +312,7 @@ const module8Tutorial = [
         check: (st) => nodeEq(st.left, simple([tile('x','x')])) && nodeEq(st.right, func('sqrt', simple([tile('y','y')]))),
     },
     {
-        instruction: "Le sinus a lui aussi une fonction réciproque, notée <b>sin<sup>−1</sup></b> (on dit aussi « arcsinus »). Si sin(θ) = y, alors θ = sin<sup>−1</sup>(y). Glisse l'outil <b>sin<sup>−1</sup></b> sur l'équation pour supprimer le sinus.",
+        instruction: "Le sinus a lui aussi une fonction réciproque, notée <b>sin<sup>−1</sup></b> (on dit aussi « arcsinus »). Si sin(θ) = y, alors θ = sin<sup>−1</sup>(y). Glisse l'outil <b>sin<sup>−1</sup></b> sur le côté gauche, PUIS sur le côté droit, pour supprimer le sinus.",
         left: () => func('sin', simple([tile('theta','θ')])),
         right: () => simple([tile('y','y')]),
         toolFn: 'asin',
@@ -315,7 +320,7 @@ const module8Tutorial = [
         check: (st) => nodeEq(st.left, simple([tile('theta','θ')])) && nodeEq(st.right, func('asin', simple([tile('y','y')]))),
     },
     {
-        instruction: "Et dans l'autre sens : si l'équation contient déjà un sin<sup>−1</sup>, quelle fonction faut-il appliquer pour l'enlever ? Glisse l'outil <b>sin</b> sur l'équation.",
+        instruction: "Et dans l'autre sens : si l'équation contient déjà un sin<sup>−1</sup>, quelle fonction faut-il appliquer pour l'enlever ? Glisse l'outil <b>sin</b> sur le côté gauche, PUIS sur le côté droit.",
         left: () => func('asin', simple([tile('x','x')])),
         right: () => simple([tile('theta','θ')]),
         toolFn: 'sin',

@@ -93,6 +93,7 @@
     .palette-frac .dots { font-size:.8rem; letter-spacing:2px; color:#312e81; }
     .palette-frac .frac-line { width:28px; height:2px; margin:2px 0; background:#312e81; }
     .palette-tile.func-tool { background:#fef3c7; border-color:#f59e0b; color:#78350f; }
+    #currentStepZone.drag-over { background:#dbeafe !important; border-color:#3b82f6 !important; }
 
     .content-module-badge {
         display:inline-block; background:#4f46e5; color:#fff; font-size:.75rem; font-weight:800;
@@ -137,23 +138,28 @@
         100% { transform:rotateY(0deg) scale(1); }
     }
     .sum-sign.just-flipped { animation: signFlip 0.9s ease; }
-    body.sumterm-dragging .eq-side, body.fracden-dragging .eq-side {
+    body.sumterm-dragging .eq-side[data-path="left"], body.sumterm-dragging .eq-side[data-path="right"],
+    body.fracden-dragging .eq-side[data-path="left"], body.fracden-dragging .eq-side[data-path="right"] {
         outline: 3px dashed #f59e0b; outline-offset: 5px; border-radius: 10px;
-        background: rgba(245,158,11,.06);
+        background: rgba(245,158,11,.06); padding: 10px 20px;
     }
     body.sumterm-dragging .eq-side.drag-over, body.fracden-dragging .eq-side.drag-over { background: rgba(245,158,11,.16); border-radius: 10px; }
+    .eq-side.sumterm-source { outline:none !important; background:none !important; }
 
     /* ── Fonctions et leur réciproque ── */
     .func-wrap { display:inline-flex; align-items:center; margin:0 6px; }
     .func-name { font-weight:800; color:#1e293b; margin-right:2px; }
-    .func-exp { font-weight:800; color:#1e293b; font-size:.75em; margin-left:1px; }
-    .pow-base { font-weight:800; color:#1e293b; }
-    .func-exp-inner { font-size:.72em; vertical-align:super; display:inline-flex; }
+    .func-exp { font-weight:800; color:#1e293b; font-size:.75em; margin-left:1px; align-self:flex-start; }
+    .pow-base { font-weight:800; color:#1e293b; font-size:1.15em; }
+    .func-wrap.pow-wrap { align-items:flex-start; }
+    .func-exp-inner { font-size:.72em; display:inline-flex; margin-top:-6px; }
     .func-exp-inner .slot-simple { min-height:36px; padding:5px 8px; }
-    .func-exp-inner .eq-tile { padding:6px 9px; min-height:32px; }
+    .func-exp-inner .eq-tile, .func-exp-inner .eq-tile-frozen { padding:6px 9px; min-height:32px; }
     .sqrt-wrap { display:inline-flex; align-items:flex-end; margin:0 6px; }
     .sqrt-hook { display:block; flex-shrink:0; }
     .sqrt-inner { border-top:3px solid #1e293b; padding:2px 6px 0; display:inline-flex; align-items:center; }
+    .inline-frac { display:inline-flex; align-items:center; gap:3px; }
+    .inline-frac-slash { font-weight:800; color:#1e293b; margin:0 1px; }
 </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
@@ -271,6 +277,37 @@ function denHasRealContent(node) {
     if (node.den.kind === 'simple' && node.den.items.length === 1 && node.den.items[0].id === 'one') return false;
     return true;
 }
+// contenu d'une fonction (racine, carré, log...) : toujours figé (une seule
+// entité, non démontable tant que la fonction n'est pas retirée) ; une
+// fraction s'y affiche en ligne (num/den, à n'importe quelle profondeur) pour
+// tenir sur une seule ligne, et une somme à plusieurs termes reçoit des
+// parenthèses quand demandé
+function renderInlineNode(node) {
+    if (node.kind === 'frac') {
+        return `<span class="inline-frac">${renderInlineNode(node.num)}<span class="inline-frac-slash">/</span>${renderInlineNode(node.den)}</span>`;
+    }
+    if (node.kind === 'sum') {
+        const inner = node.terms.map((t, i) => {
+            const showSign = i > 0 || t.sign === -1;
+            const signChar = t.sign === -1 ? '−' : '+';
+            return (showSign ? `<span class="sum-sign">${signChar}</span>` : '') + renderInlineNode(t.node);
+        }).join('');
+        return `<span class="sum-wrap">${inner}</span>`;
+    }
+    if (node.kind === 'seq') {
+        return node.slots.map((s, i) => (i === 0 ? '' : '<span class="mult-sign">×</span>') + renderInlineNode(s)).join('');
+    }
+    return renderStatic(node);
+}
+function renderFuncInner(inner, parensIfSum) {
+    let n = inner;
+    while (n.kind === 'seq' && n.slots.length === 1) n = n.slots[0];
+    const html = renderInlineNode(n);
+    if (parensIfSum && n.kind === 'sum' && n.terms.length > 1) {
+        return `<span class="sum-parens">(</span>${html}<span class="sum-parens">)</span>`;
+    }
+    return html;
+}
 function renderNode(node, path) {
     if (node.kind === 'simple') {
         const items = node.items.map((it, idx) => {
@@ -314,14 +351,14 @@ function renderNode(node, path) {
         return `<span class="sum-wrap" data-path="${path}">${inner}</span>`;
     }
     if (node.kind === 'func') {
-        if (node.fn === 'sqrt') return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderNode(node.inner, path + '.inner')}</div></div>`;
-        if (node.fn === 'sq')   return `<span class="func-wrap">${renderNode(node.inner, path + '.inner')}<sup class="func-exp">2</sup></span>`;
-        if (node.fn === 'cube') return `<span class="func-wrap">${renderNode(node.inner, path + '.inner')}<sup class="func-exp">3</sup></span>`;
-        if (node.fn === 'cbrt') return `<span class="func-wrap"><span class="func-name">∛</span>(${renderNode(node.inner, path + '.inner')})</span>`;
-        if (node.fn === 'pow10') return `<span class="func-wrap"><span class="pow-base">10</span><sup class="func-exp-inner">${renderNode(node.inner, path + '.inner')}</sup></span>`;
-        if (node.fn === 'exp')   return `<span class="func-wrap"><span class="pow-base">e</span><sup class="func-exp-inner">${renderNode(node.inner, path + '.inner')}</sup></span>`;
+        if (node.fn === 'sqrt') return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false)}</div></div>`;
+        if (node.fn === 'sq')   return `<span class="func-wrap">${renderFuncInner(node.inner, true)}<sup class="func-exp">2</sup></span>`;
+        if (node.fn === 'cube') return `<span class="func-wrap">${renderFuncInner(node.inner, true)}<sup class="func-exp">3</sup></span>`;
+        if (node.fn === 'cbrt') return `<span class="func-wrap"><span class="func-name">∛</span>(${renderFuncInner(node.inner, false)})</span>`;
+        if (node.fn === 'pow10') return `<span class="func-wrap pow-wrap"><span class="pow-base">10</span><sup class="func-exp-inner">${renderFuncInner(node.inner, true)}</sup></span>`;
+        if (node.fn === 'exp')   return `<span class="func-wrap pow-wrap"><span class="pow-base">e</span><sup class="func-exp-inner">${renderFuncInner(node.inner, true)}</sup></span>`;
         const label = { log:'log', ln:'ln', sin:'sin', asin:'sin<sup>−1</sup>' }[node.fn];
-        return `<span class="func-wrap"><span class="func-name">${label}</span>(${renderNode(node.inner, path + '.inner')})</span>`;
+        return `<span class="func-wrap"><span class="func-name">${label}</span>(${renderFuncInner(node.inner, false)})</span>`;
     }
     // seq
     let html = '';
@@ -329,11 +366,13 @@ function renderNode(node, path) {
     const needsInsertBefore = node.slots[0].kind === 'frac' || node.slots[0].kind === 'sum';
     const needsInsertAfter  = node.slots[n-1].kind === 'frac' || node.slots[n-1].kind === 'sum';
     if (needsInsertBefore) html += renderInsertZone(path, 'start');
+    if (node.parenthesized) html += '<span class="sum-parens">(</span>';
     node.slots.forEach((slot, i) => {
         if (i > 0) html += '<span class="mult-sign">×</span>';
-        const parens = slot.kind === 'sum' && slot.terms.length > 1 && n > 1;
+        const parens = !node.parenthesized && slot.kind === 'sum' && slot.terms.length > 1 && n > 1;
         html += parens ? `<span class="sum-parens">(</span>${renderNode(slot, path + '.' + i)}<span class="sum-parens">)</span>` : renderNode(slot, path + '.' + i);
     });
+    if (node.parenthesized) html += '<span class="sum-parens">)</span>';
     if (needsInsertAfter) html += renderInsertZone(path, 'end');
     return `<div class="eq-side" data-path="${path}">${html}</div>`;
 }
@@ -361,14 +400,14 @@ function renderStatic(node) {
         return `<span class="sum-wrap">${inner}</span>`;
     }
     if (node.kind === 'func') {
-        if (node.fn === 'sqrt') return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderStatic(node.inner)}</div></div>`;
-        if (node.fn === 'sq')   return `<span class="func-wrap">${renderStatic(node.inner)}<sup class="func-exp">2</sup></span>`;
-        if (node.fn === 'cube') return `<span class="func-wrap">${renderStatic(node.inner)}<sup class="func-exp">3</sup></span>`;
-        if (node.fn === 'cbrt') return `<span class="func-wrap"><span class="func-name">∛</span>(${renderStatic(node.inner)})</span>`;
-        if (node.fn === 'pow10') return `<span class="func-wrap"><span class="pow-base">10</span><sup class="func-exp-inner">${renderStatic(node.inner)}</sup></span>`;
-        if (node.fn === 'exp')   return `<span class="func-wrap"><span class="pow-base">e</span><sup class="func-exp-inner">${renderStatic(node.inner)}</sup></span>`;
+        if (node.fn === 'sqrt') return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false)}</div></div>`;
+        if (node.fn === 'sq')   return `<span class="func-wrap">${renderFuncInner(node.inner, true)}<sup class="func-exp">2</sup></span>`;
+        if (node.fn === 'cube') return `<span class="func-wrap">${renderFuncInner(node.inner, true)}<sup class="func-exp">3</sup></span>`;
+        if (node.fn === 'cbrt') return `<span class="func-wrap"><span class="func-name">∛</span>(${renderFuncInner(node.inner, false)})</span>`;
+        if (node.fn === 'pow10') return `<span class="func-wrap pow-wrap"><span class="pow-base">10</span><sup class="func-exp-inner">${renderFuncInner(node.inner, true)}</sup></span>`;
+        if (node.fn === 'exp')   return `<span class="func-wrap pow-wrap"><span class="pow-base">e</span><sup class="func-exp-inner">${renderFuncInner(node.inner, true)}</sup></span>`;
         const label = { log:'log', ln:'ln', sin:'sin', asin:'sin<sup>−1</sup>' }[node.fn];
-        return `<span class="func-wrap"><span class="func-name">${label}</span>(${renderStatic(node.inner)})</span>`;
+        return `<span class="func-wrap"><span class="func-name">${label}</span>(${renderFuncInner(node.inner, false)})</span>`;
     }
     return `<div class="eq-side">${node.slots.map((s,i) => (i===0?'':'<span class="mult-sign">×</span>') + renderStatic(s)).join('')}</div>`;
 }
@@ -403,6 +442,12 @@ function sizeSqrtHooks(container) {
 }
 function attachEqTileHandlers(zone) {
     zone.querySelectorAll('.eq-tile').forEach(el => {
+        // une tuile a l'interieur d'un terme additif isole (deja glissable en
+        // bloc via .sum-term.term-draggable) ne doit pas AUSSI etre glissable
+        // individuellement : un seul pointerdown declencherait alors les deux
+        // glisser-deposer en meme temps (capture ecrasee, fantome bloque)
+        if (el.closest('.sum-term.term-draggable')) return;
+        if (el.closest('.frac-den-wrap.den-draggable')) return;
         const path = el.dataset.path;
         const idx = parseInt(el.dataset.idx, 10);
         const node = getNode(path);
@@ -495,9 +540,7 @@ function processDrop(path, data) {
             const f = frac(node.items, []);
             f.forceDenCross = true;
             setNode(path, f);
-        } else if (node.kind === 'sum' || node.kind === 'func') {
-            setNode(path, { kind:'frac', num: node, den: simple([]), forceDenCross:true });
-        } else if (node.kind === 'seq') {
+        } else if (node.kind === 'seq' && node.parenthesized) {
             const inner = node.slots.length === 1 ? node.slots[0] : seq(node.slots.slice());
             node.slots = [ { kind:'frac', num: inner, den: simple([]), forceDenCross:true } ];
         } else {
@@ -550,19 +593,29 @@ function enableTileDrag(el, data, onTap) {
         zoneSelector: '.eq-tile, .slot-simple, .insert-zone, .eq-side, .sum-term',
         dragOverClass: 'drag-over',
         onStart: () => {
-            if (data.type === 'sumterm') document.body.classList.add('sumterm-dragging');
-            if (data.type === 'fracden') document.body.classList.add('fracden-dragging');
+            if (data.type === 'sumterm' || data.type === 'fracden') {
+                document.body.classList.add(data.type === 'sumterm' ? 'sumterm-dragging' : 'fracden-dragging');
+                const fromSide = data.from.split('.')[0];
+                const src = document.querySelector(`.eq-side[data-path="${fromSide}"]`);
+                if (src) src.classList.add('sumterm-source');
+            }
         },
         onDrop: (item, zone, evt) => {
-            if (data.type === 'sumterm') document.body.classList.remove('sumterm-dragging');
-            if (data.type === 'fracden') document.body.classList.remove('fracden-dragging');
+            if (data.type === 'sumterm' || data.type === 'fracden') {
+                document.body.classList.remove('sumterm-dragging');
+                document.body.classList.remove('fracden-dragging');
+                document.querySelectorAll('.eq-side.sumterm-source').forEach(e => e.classList.remove('sumterm-source'));
+            }
             const moved = Math.hypot(evt.clientX - startX, evt.clientY - startY) > 8;
             if (onTap && !moved) { onTap(); return; }
             if (zone) handleZoneDrop(data, zone);
         },
         onCancel: () => {
-            if (data.type === 'sumterm') document.body.classList.remove('sumterm-dragging');
-            if (data.type === 'fracden') document.body.classList.remove('fracden-dragging');
+            if (data.type === 'sumterm' || data.type === 'fracden') {
+                document.body.classList.remove('sumterm-dragging');
+                document.body.classList.remove('fracden-dragging');
+                document.querySelectorAll('.eq-side.sumterm-source').forEach(e => e.classList.remove('sumterm-source'));
+            }
         },
     });
 }
@@ -575,6 +628,11 @@ function handleZoneDrop(data, zone) {
     if (data.type === 'fracden') {
         const side = zone.closest('.eq-side');
         if (side) processFracDenDrop(data.from, side.dataset.path);
+        return;
+    }
+    if (data.type === 'paren') {
+        const side = zone.closest('.eq-side');
+        if (side) processParenDrop(side.dataset.path);
         return;
     }
     if (zone.matches('.insert-zone')) {
@@ -628,10 +686,40 @@ function processFracDenDrop(fracPath, destSidePath) {
     const fracNode = getNode(fracPath);
     if (!fracNode || fracNode.kind !== 'frac' || !denHasRealContent(fracNode)) return;
     const denContent = fracNode.den;
-    setNode(fracPath, fracNode.num);
+    // le dénominateur reste affiché, vide, avec une croix : il n'est pas
+    // supprimé automatiquement (l'élève clique la croix s'il veut la fraction
+    // en moins, comme partout ailleurs dans l'application)
+    fracNode.den = simple([]);
+    fracNode.forceDenCross = true;
     const dest = getNode(destSidePath);
     const newSlot = denContent.kind === 'seq' ? (denContent.slots.length === 1 ? denContent.slots[0] : seq(denContent.slots.slice())) : denContent;
     dest.slots.push(newSlot);
+    refreshView();
+}
+// traite tout le contenu d'un membre comme un seul bloc (nécessaire avant de
+// pouvoir le glisser dans une fraction quand ce n'est pas une simple grandeur)
+function processParenDrop(sidePath) {
+    if (sidePath !== 'left' && sidePath !== 'right') return;
+    const side = getNode(sidePath);
+    if (!side || side.kind !== 'seq') return;
+    side.parenthesized = true;
+    refreshView();
+}
+// multiplie les deux membres par -1 (change le signe d'une grandeur isolée)
+function negateBothSides() {
+    ['left', 'right'].forEach(sidePath => {
+        const s = getNode(sidePath);
+        if (s.slots.length === 1 && s.slots[0].kind === 'sum') {
+            s.slots[0].terms.forEach(t => { t.sign = -t.sign; });
+            if (s.slots[0].terms.length === 1 && s.slots[0].terms[0].sign === 1) {
+                let repl = s.slots[0].terms[0].node;
+                while (repl.kind === 'seq' && repl.slots.length === 1) repl = repl.slots[0];
+                s.slots[0] = repl;
+            }
+        } else {
+            s.slots.push(simple([{ id: 'm1', label: '−1' }]));
+        }
+    });
     refreshView();
 }
 // applique l'outil (fonction réciproque) aux deux membres : le côté qui
@@ -646,16 +734,15 @@ function wrapSideInFunc(side, fn) {
     const inner = s.slots.length === 1 ? s.slots[0] : seq(s.slots.slice());
     s.slots = [ func(fn, inner) ];
 }
-function applyFuncTool(toolFn) {
+function applyFuncTool(toolFn, side) {
+    if (side !== 'left' && side !== 'right') return;
     const inverse = RECIPROCAL[toolFn];
-    ['left', 'right'].forEach(side => {
-        const s = getNode(side);
-        if (s.slots.length === 1 && s.slots[0].kind === 'func' && s.slots[0].fn === inverse) {
-            unwrapSideFunc(side);
-        } else {
-            wrapSideInFunc(side, toolFn);
-        }
-    });
+    const s = getNode(side);
+    if (s.slots.length === 1 && s.slots[0].kind === 'func' && s.slots[0].fn === inverse) {
+        unwrapSideFunc(side);
+    } else {
+        wrapSideInFunc(side, toolFn);
+    }
     refreshView();
 }
 function processSqrtDrop() {}
@@ -698,9 +785,34 @@ function addFuncToolTile(fn) {
     el.className = 'palette-tile func-tool';
     el.innerHTML = FUNC_TOOL_LABEL[fn];
     DragDrop.enable(el, {
+        zoneSelector: '.eq-side',
+        dragOverClass: 'drag-over',
+        onDrop: (item, zone) => {
+            const side = zone.closest('.eq-side[data-path="left"], .eq-side[data-path="right"]');
+            if (side) applyFuncTool(fn, side.dataset.path);
+        },
+    });
+    pal.appendChild(el);
+}
+function addParenPaletteTile() {
+    const pal = document.getElementById('palette');
+    if (!pal) return;
+    const el = document.createElement('div');
+    el.className = 'palette-tile func-tool';
+    el.innerHTML = '( )';
+    enableTileDrag(el, { type:'paren' });
+    pal.appendChild(el);
+}
+function addNegPaletteTile() {
+    const pal = document.getElementById('palette');
+    if (!pal) return;
+    const el = document.createElement('div');
+    el.className = 'palette-tile func-tool';
+    el.innerHTML = '×(−1)';
+    DragDrop.enable(el, {
         zoneSelector: '#currentStepZone',
         dragOverClass: 'drag-over',
-        onDrop: (item, zone) => { if (zone) applyFuncTool(fn); },
+        onDrop: (item, zone) => { if (zone) negateBothSides(); },
     });
     pal.appendChild(el);
 }
@@ -714,6 +826,8 @@ function buildPalette() {
         .forEach(addPaletteTile);
     addFracPaletteTile();
     (currentExercise.funcTools || []).forEach(addFuncToolTile);
+    if (currentExercise.needsParenTool) addParenPaletteTile();
+    if (currentExercise.needsNegTool) addNegPaletteTile();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -807,6 +921,7 @@ function solveEditorHTML() {
     <div id="feedback" class="text-center mt-4 font-semibold text-lg"></div>`;
 }
 function startSolveExercise(cfg) {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     currentExercise = cfg;
     state = { left: cfg.initialLeft(), right: cfg.initialRight() };
     history = [];
@@ -818,6 +933,7 @@ function startSolveExercise(cfg) {
     renderHistory();
 }
 function resetSolveExercise() {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     if (!currentExercise) return;
     state = { left: currentExercise.initialLeft(), right: currentExercise.initialRight() };
     history = [];
@@ -892,47 +1008,48 @@ function verifyStep() {
 // ═══════════════════════════════════════════════════════════════
 // MODULE 9 — ENTRAÎNEMENT (fonctions réciproques)
 // ═══════════════════════════════════════════════════════════════
-// pH = −1 × log(C)
+// pH = −log(C/C0)   (C0 = 1 mol/L, concentration de référence)
 const m9StartPh = {
     initialLeft:  () => seq([simple([tile('pH','pH')])]),
-    initialRight: () => seq([simple([tile('m1','−1')]), func('log', simple([tile('C','C')]))]),
+    initialRight: () => seq([sumNode([term1(-1, [func('log', frac([tile('C','C')], [tile('C0','C<sub>0</sub>')]))])])]),
 };
 function samplePh() {
+    const C0 = 1;
     const C = Math.pow(10, -(1 + Math.random() * 12));
-    return { pH: -Math.log10(C), m1: -1, C };
+    return { pH: -Math.log10(C / C0), C, C0, m1: -1 };
 }
-const phLegend = "pH : potentiel hydrogène (sans unité) · C : concentration en ions H<sub>3</sub>O<sup>+</sup> (mol/L)";
+const phLegend = "pH : potentiel hydrogène (sans unité) · C : concentration en ions H<sub>3</sub>O<sup>+</sup> (mol/L) · C<sub>0</sub> : concentration de référence (C<sub>0</sub> = 1 mol/L)";
 const phIntro = "Le pH d'une solution est défini à partir de la concentration en ions oxonium.";
-const phStaticEq = `<span class="eq-tile-static">pH</span><span class="eq-sign">=</span><span class="eq-tile-static">−1</span><span class="func-wrap"><span class="func-name">log</span>(<span class="eq-tile-static">C</span>)</span>`;
-const phTiles = [tile('pH','pH'), tile('m1','−1'), tile('C','C')];
+const phStaticEq = `<span class="eq-tile-static">pH</span><span class="eq-sign">=</span><span class="eq-tile-static">−</span><span class="func-wrap"><span class="func-name">log</span>(${staticFracHtml('C','C<sub>0</sub>')})</span>`;
+const phTiles = [tile('pH','pH'), tile('C','C'), tile('C0','C<sub>0</sub>')];
 
-// N = N0 × exp(−1×λ×t)  (décroissance radioactive)
+// N = N0 × exp(−λt)  (décroissance radioactive)
 const m9StartDecay = {
     initialLeft:  () => seq([simple([tile('N','N')])]),
-    initialRight: () => seq([simple([tile('N0','N<sub>0</sub>')]), func('exp', seq([simple([tile('m1','−1')]), simple([tile('lambda','λ'), tile('t','t')])]))]),
+    initialRight: () => seq([simple([tile('N0','N<sub>0</sub>')]), func('exp', sumNode([term1(-1, [simple([tile('lambda','λ'), tile('t','t')])])]))]),
 };
 function sampleDecay() {
     const lambda = 0.01 + Math.random() * 0.5, t = Math.random() * 10, N0 = 100 + Math.random() * 900;
-    return { N: N0 * Math.exp(-lambda * t), N0, m1: -1, lambda, t };
+    return { N: N0 * Math.exp(-lambda * t), N0, lambda, t, m1: -1 };
 }
 const decayLegend = "N : nombre de noyaux radioactifs restants · N<sub>0</sub> : nombre initial de noyaux · λ : constante radioactive (s<sup>−1</sup>) · t : durée (s)";
 const decayIntro = "La décroissance radioactive suit une loi exponentielle.";
-const decayStaticEq = `<span class="eq-tile-static">N</span><span class="eq-sign">=</span><span class="eq-tile-static">N<sub>0</sub></span><span class="func-wrap"><span class="pow-base">e</span><sup class="func-exp-inner"><span class="eq-tile-static">−1</span><span class="eq-tile-static">λ</span><span class="eq-tile-static">t</span></sup></span>`;
-const decayTiles = [tile('N','N'), tile('N0','N<sub>0</sub>'), tile('m1','−1'), tile('lambda','λ'), tile('t','t')];
+const decayStaticEq = `<span class="eq-tile-static">N</span><span class="eq-sign">=</span><span class="eq-tile-static">N<sub>0</sub></span><span class="func-wrap pow-wrap"><span class="pow-base">e</span><sup class="func-exp-inner"><span class="eq-tile-static">−</span><span class="eq-tile-static">λ</span><span class="eq-tile-static">t</span></sup></span>`;
+const decayTiles = [tile('N','N'), tile('N0','N<sub>0</sub>'), tile('lambda','λ'), tile('t','t')];
 
-// uc = E × exp(−1×t×invtau)   (décharge d'un condensateur, τ regroupé comme constante)
+// uc = E × exp(−t/τ)   (décharge d'un condensateur)
 const m9StartCap = {
     initialLeft:  () => seq([simple([tile('uc','u<sub>C</sub>')])]),
-    initialRight: () => seq([simple([tile('E','E')]), func('exp', seq([simple([tile('m1','−1')]), simple([tile('t','t'), tile('invtau','1/τ')])]))]),
+    initialRight: () => seq([simple([tile('E','E')]), func('exp', sumNode([term1(-1, [frac([tile('t','t')], [tile('tau','τ')])])]))]),
 };
 function sampleCap() {
-    const invtau = 0.05 + Math.random() * 2, t = Math.random() * 10, E = 1 + Math.random() * 11;
-    return { uc: E * Math.exp(-t * invtau), E, m1: -1, t, invtau };
+    const tau = 0.2 + Math.random() * 5, t = Math.random() * 10, E = 1 + Math.random() * 11;
+    return { uc: E * Math.exp(-t / tau), E, t, tau, m1: -1 };
 }
-const capLegend = "u<sub>C</sub> : tension aux bornes du condensateur (V) · E : tension initiale (V) · t : durée (s) · 1/τ : inverse de la constante de temps (s<sup>−1</sup>)";
+const capLegend = "u<sub>C</sub> : tension aux bornes du condensateur (V) · E : tension initiale (V) · t : durée (s) · τ : constante de temps (s)";
 const capIntro = "Lors de la décharge d'un condensateur, la tension à ses bornes décroît exponentiellement.";
-const capStaticEq = `<span class="eq-tile-static">u<sub>C</sub></span><span class="eq-sign">=</span><span class="eq-tile-static">E</span><span class="func-wrap"><span class="pow-base">e</span><sup class="func-exp-inner"><span class="eq-tile-static">−1</span><span class="eq-tile-static">t</span><span class="eq-tile-static">1/τ</span></sup></span>`;
-const capTiles = [tile('uc','u<sub>C</sub>'), tile('E','E'), tile('m1','−1'), tile('t','t'), tile('invtau','1/τ')];
+const capStaticEq = `<span class="eq-tile-static">u<sub>C</sub></span><span class="eq-sign">=</span><span class="eq-tile-static">E</span><span class="func-wrap pow-wrap"><span class="pow-base">e</span><sup class="func-exp-inner"><span class="eq-tile-static">−</span>${staticFracHtml('t','τ')}</sup></span>`;
+const capTiles = [tile('uc','u<sub>C</sub>'), tile('E','E'), tile('t','t'), tile('tau','τ')];
 
 // n1×sin(i1) = n2×sin(i2)  (loi de Descartes, un seul sens demandé)
 const m9StartDescartes = {
@@ -982,17 +1099,17 @@ const satStaticEq = `<span class="eq-tile-static">F</span><span class="eq-sign">
 const satTiles = [tile('F','F'), tile('G','G'), tile('MT','M<sub>T</sub>'), tile('MS','M<sub>S</sub>'), tile('RT','R<sub>T</sub>'), tile('h','h')];
 
 const module9Bank = [
-    { legend: phLegend, intro: phIntro, staticEqHtml: phStaticEq, tiles: phTiles, target:'C', funcTools:['pow10'], ...m9StartPh, sample: samplePh },
+    { legend: phLegend, intro: phIntro, staticEqHtml: phStaticEq, tiles: phTiles, target:'C', funcTools:['pow10'], needsNegTool: true, ...m9StartPh, sample: samplePh },
 
-    { legend: decayLegend, intro: decayIntro, staticEqHtml: decayStaticEq, tiles: decayTiles, target:'t', funcTools:['ln'], ...m9StartDecay, sample: sampleDecay },
-    { legend: decayLegend, intro: "On souhaite maintenant exprimer λ.", staticEqHtml: decayStaticEq, tiles: decayTiles, target:'lambda', funcTools:['ln'], ...m9StartDecay, sample: sampleDecay },
+    { legend: decayLegend, intro: decayIntro, staticEqHtml: decayStaticEq, tiles: decayTiles, target:'t', funcTools:['ln'], needsNegTool: true, needsParenTool: true, ...m9StartDecay, sample: sampleDecay },
+    { legend: decayLegend, intro: "On souhaite maintenant exprimer λ.", staticEqHtml: decayStaticEq, tiles: decayTiles, target:'lambda', funcTools:['ln'], needsNegTool: true, needsParenTool: true, ...m9StartDecay, sample: sampleDecay },
 
-    { legend: capLegend, intro: capIntro, staticEqHtml: capStaticEq, tiles: capTiles, target:'t', funcTools:['ln'], ...m9StartCap, sample: sampleCap },
+    { legend: capLegend, intro: capIntro, staticEqHtml: capStaticEq, tiles: capTiles, target:'t', funcTools:['ln'], needsNegTool: true, ...m9StartCap, sample: sampleCap },
 
-    { legend: descartesLegend, intro: descartesIntro, staticEqHtml: descartesStaticEq, tiles: descartesTiles, target:'i1', funcTools:['asin'], ...m9StartDescartes, sample: sampleDescartes },
+    { legend: descartesLegend, intro: descartesIntro, staticEqHtml: descartesStaticEq, tiles: descartesTiles, target:'i1', funcTools:['asin'], needsParenTool: true, ...m9StartDescartes, sample: sampleDescartes },
 
     { legend: keplerLegend, intro: keplerIntro, staticEqHtml: keplerStaticEq, tiles: keplerTiles, target:'T', funcTools:['sqrt'], ...m9StartKepler, sample: sampleKepler },
-    { legend: keplerLegend, intro: "On souhaite maintenant exprimer a.", staticEqHtml: keplerStaticEq, tiles: keplerTiles, target:'a', funcTools:['cbrt'], ...m9StartKepler, sample: sampleKepler },
+    { legend: keplerLegend, intro: "On souhaite maintenant exprimer a.", staticEqHtml: keplerStaticEq, tiles: keplerTiles, target:'a', funcTools:['cbrt'], needsParenTool: true, ...m9StartKepler, sample: sampleKepler },
 
     { legend: satLegend, intro: satIntro, staticEqHtml: satStaticEq, tiles: satTiles, target:'h', funcTools:['sqrt'], ...m9StartSat, sample: sampleSat },
 ];
@@ -1006,6 +1123,7 @@ function targetLabel(q) {
 }
 
 function renderModule9Intro() {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     document.getElementById('app').innerHTML = `
       <div class="bg-white rounded-xl shadow-lg p-6">
         <span class="content-module-badge">MODULE 9</span>
@@ -1018,6 +1136,7 @@ function renderModule9Intro() {
 }
 function startModule9Graded(){ m9Idx = 0; m9Score = 0; m9Answers = []; renderModule9Question(); }
 function renderModule9Question() {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     if (m9Idx >= module9Bank.length) { finishModule9(); return; }
     const q = module9Bank[m9Idx];
     const app = document.getElementById('app');
@@ -1040,6 +1159,7 @@ function renderModule9Question() {
       <div class="bg-white rounded-xl shadow-lg p-6">${solveEditorHTML()}</div>`;
     startSolveExercise({
         tiles: q.tiles, sample: q.sample, targetId: q.target, funcTools: q.funcTools,
+        needsParenTool: q.needsParenTool, needsNegTool: q.needsNegTool,
         initialLeft: q.initialLeft, initialRight: q.initialRight,
         onSolved: (dm) => {
             const pts = hadError ? 1 : (history.length === 1 ? 3 : 2);

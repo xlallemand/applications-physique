@@ -504,6 +504,7 @@ function startingState(cfg) {
     return cfg.initial ? cfg.initial() : { left: emptyFrac(), right: emptyFrac() };
 }
 function startSolveExercise(cfg) {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     currentExercise = cfg;
     viewMode = 'solve';
     state = startingState(cfg);
@@ -522,6 +523,7 @@ function startSolveExercise(cfg) {
     renderHistory();
 }
 function resetSolveExercise() {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     if (!currentExercise) return;
     state = startingState(currentExercise);
     history = [];
@@ -628,6 +630,7 @@ function verifyStep() {
 let currentDrillCfg = null;
 
 function mountDrill(container, drillCfg, explainHtml) {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     currentDrillCfg = drillCfg;
     viewMode = 'drill';
     currentDrillShowsPalette = !!drillCfg.showPalette;
@@ -653,6 +656,7 @@ function mountDrill(container, drillCfg, explainHtml) {
     refreshView();
 }
 function resetDrill() {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     if (!currentDrillCfg) return;
     viewMode = 'drill';
     currentDrillShowsPalette = !!currentDrillCfg.showPalette;
