@@ -145,6 +145,13 @@
         100% { transform:rotateY(0deg) scale(1); background:rgba(239,68,68,0); }
     }
     .sum-sign.just-flipped { animation: signFlip 1.3s ease; border-radius:6px; display:inline-block; }
+    /* meme si le signe n'est pas affiche (premier terme positif implicite),
+       le terme entier doit clignoter pour signaler le changement de signe */
+    @keyframes termFlash {
+        0%   { background:rgba(239,68,68,.35); box-shadow:0 0 0 3px rgba(239,68,68,.35); }
+        100% { background:rgba(239,68,68,0); box-shadow:0 0 0 3px rgba(239,68,68,0); }
+    }
+    .sum-term.term-flash, .sum-wrap.term-flash, .eq-side.term-flash { animation: termFlash 1.3s ease; border-radius:10px; }
     body.sumterm-dragging .eq-side[data-path="left"], body.sumterm-dragging .eq-side[data-path="right"],
     body.fracden-dragging .eq-side[data-path="left"], body.fracden-dragging .eq-side[data-path="right"] {
         outline: 3px dashed #f59e0b; outline-offset: 5px; border-radius: 10px;
@@ -173,6 +180,9 @@
     .sqrt-wrap { display:inline-flex; align-items:flex-end; margin:0 6px; }
     .sqrt-hook { display:block; flex-shrink:0; }
     .sqrt-inner { border-top:3px solid #1e293b; padding:2px 6px 0; display:inline-flex; align-items:center; }
+    /* racine cubique : meme dessin que la racine carree (crochet + trait),
+       avec un petit "3" en indice au-dessus du crochet */
+    .cbrt-index { font-size:.65em; font-weight:800; color:#1e293b; align-self:flex-start; margin:0 -3px 0 2px; line-height:1.4; }
     .inline-frac { display:inline-flex; align-items:center; gap:3px; }
     .inline-frac-slash { font-weight:800; color:#1e293b; margin:0 1px; }
 </style>
@@ -317,46 +327,50 @@ function denHasRealContent(node) {
 // fraction s'y affiche en ligne (num/den, à n'importe quelle profondeur) pour
 // tenir sur une seule ligne, et une somme à plusieurs termes reçoit des
 // parenthèses quand demandé
-function renderInlineNode(node) {
+function renderInlineNode(node, staticMode) {
     if (node.kind === 'frac') {
-        return `<span class="inline-frac">${renderInlineNode(node.num)}<span class="inline-frac-slash">/</span>${renderInlineNode(node.den)}</span>`;
+        return `<span class="inline-frac">${renderInlineNode(node.num, staticMode)}<span class="inline-frac-slash">/</span>${renderInlineNode(node.den, staticMode)}</span>`;
     }
     if (node.kind === 'sum') {
         const inner = node.terms.map((t, i) => {
             const showSign = i > 0 || t.sign === -1;
             const signChar = t.sign === -1 ? '−' : '+';
-            return (showSign ? `<span class="sum-sign">${signChar}</span>` : '') + renderInlineNode(t.node);
+            return (showSign ? `<span class="sum-sign">${signChar}</span>` : '') + renderInlineNode(t.node, staticMode);
         }).join('');
         return `<span class="sum-wrap">${inner}</span>`;
     }
     if (node.kind === 'seq') {
-        return node.slots.map((s, i) => (i === 0 ? '' : '<span class="mult-sign">×</span>') + renderInlineNode(s)).join('');
+        return node.slots.map((s, i) => (i === 0 ? '' : '<span class="mult-sign">×</span>') + renderInlineNode(s, staticMode)).join('');
     }
     if (node.kind === 'simple') {
-        // meme apparence qu'une tuile normale (pas de gris "desactive") meme si
-        // elle n'est pas manipulable tant que la fonction englobante est la
+        // dans l'editeur actif : meme apparence qu'une tuile normale (pas de
+        // gris "desactive") meme si elle n'est pas manipulable tant que la
+        // fonction englobante est la ; dans un texte statique (intro,
+        // historique) : texte noir simple, sans encadre, comme le reste de
+        // l'equation figee
         if (node.items.length === 0) return '<span class="slot-placeholder">…</span>';
+        const tileClass = staticMode ? 'eq-tile-static' : 'eq-tile-locked';
         return node.items.map((it, idx) => {
             const sep = (idx > 0 && !isOperatorTile(node.items[idx - 1]) && !isOperatorTile(it)) ? '<span class="mult-sign">×</span>' : '';
-            return sep + `<span class="eq-tile-locked">${it.label}</span>`;
+            return sep + `<span class="${tileClass}">${it.label}</span>`;
         }).join('');
     }
     if (node.kind === 'func') {
-        if (node.fn === 'sqrt') return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false)}</div></div>`;
-        if (node.fn === 'sq')   return `<span class="func-wrap">${renderFuncInner(node.inner, true)}<sup class="func-exp">2</sup></span>`;
-        if (node.fn === 'cube') return `<span class="func-wrap">${renderFuncInner(node.inner, true)}<sup class="func-exp">3</sup></span>`;
-        if (node.fn === 'cbrt') return `<span class="func-wrap"><span class="func-name">∛</span>(${renderFuncInner(node.inner, false)})</span>`;
-        if (node.fn === 'pow10') return `<span class="func-wrap pow-wrap"><span class="pow-base">10</span><sup class="func-exp-inner">${renderFuncInner(node.inner, true)}</sup></span>`;
-        if (node.fn === 'exp')   return `<span class="func-wrap pow-wrap"><span class="pow-base">e</span><sup class="func-exp-inner">${renderFuncInner(node.inner, true)}</sup></span>`;
+        if (node.fn === 'sqrt') return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false, staticMode)}</div></div>`;
+        if (node.fn === 'sq')   return `<span class="func-wrap">${renderFuncInner(node.inner, true, staticMode)}<sup class="func-exp">2</sup></span>`;
+        if (node.fn === 'cube') return `<span class="func-wrap">${renderFuncInner(node.inner, true, staticMode)}<sup class="func-exp">3</sup></span>`;
+        if (node.fn === 'cbrt') return `<div class="sqrt-wrap"><span class="cbrt-index">3</span><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false, staticMode)}</div></div>`;
+        if (node.fn === 'pow10') return `<span class="func-wrap pow-wrap"><span class="pow-base">10</span><sup class="func-exp-inner">${renderFuncInner(node.inner, true, staticMode)}</sup></span>`;
+        if (node.fn === 'exp')   return `<span class="func-wrap pow-wrap"><span class="pow-base">e</span><sup class="func-exp-inner">${renderFuncInner(node.inner, true, staticMode)}</sup></span>`;
         const label = { log:'log', ln:'ln', sin:'sin', asin:'sin<sup>−1</sup>' }[node.fn];
-        return `<span class="func-wrap"><span class="func-name">${label}</span>(${renderFuncInner(node.inner, false)})</span>`;
+        return `<span class="func-wrap"><span class="func-name">${label}</span>(${renderFuncInner(node.inner, false, staticMode)})</span>`;
     }
     return renderStatic(node);
 }
-function renderFuncInner(inner, parensIfSum) {
+function renderFuncInner(inner, parensIfSum, staticMode) {
     let n = inner;
     while (n.kind === 'seq' && n.slots.length === 1) n = n.slots[0];
-    const html = renderInlineNode(n);
+    const html = renderInlineNode(n, staticMode);
     if (parensIfSum && n.kind === 'sum' && n.terms.length > 1) {
         return wrapParens(html);
     }
@@ -411,7 +425,13 @@ function renderNode(node, path) {
             const signHtml = t.sign === -1
                 ? `<span class="sum-sign sum-sign-drag" data-sum-path="${path}" data-term-idx="0">−</span>`
                 : '';
-            return `<span class="sum-wrap" data-path="${path}">${signHtml}${renderNode(t.node, path + '.term0')}</span>`;
+            // si le terme se reduit a une seule grandeur (pas un produit de
+            // plusieurs facteurs), la glisser doit deplacer le terme additif
+            // (signe inverse), pas l'extraire comme un facteur multiplicatif
+            let flat = t.node;
+            while (flat.kind === 'seq' && flat.slots.length === 1) flat = flat.slots[0];
+            const singleTile = flat.kind === 'simple' && flat.items.length === 1;
+            return `<span class="sum-wrap${singleTile ? ' sum-term-single' : ''}" data-path="${path}" data-term-idx="0">${signHtml}${renderNode(t.node, path + '.term0')}</span>`;
         }
         const isolated = isSumIsolated(path);
         const inner = node.terms.map((t, i) => {
@@ -426,7 +446,7 @@ function renderNode(node, path) {
         if (node.fn === 'sqrt') return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false)}</div></div>`;
         if (node.fn === 'sq')   return `<span class="func-wrap">${renderFuncInner(node.inner, true)}<sup class="func-exp">2</sup></span>`;
         if (node.fn === 'cube') return `<span class="func-wrap">${renderFuncInner(node.inner, true)}<sup class="func-exp">3</sup></span>`;
-        if (node.fn === 'cbrt') return `<span class="func-wrap"><span class="func-name">∛</span>(${renderFuncInner(node.inner, false)})</span>`;
+        if (node.fn === 'cbrt') return `<div class="sqrt-wrap"><span class="cbrt-index">3</span><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false)}</div></div>`;
         if (node.fn === 'pow10') return `<span class="func-wrap pow-wrap"><span class="pow-base">10</span><sup class="func-exp-inner">${renderFuncInner(node.inner, true)}</sup></span>`;
         if (node.fn === 'exp')   return `<span class="func-wrap pow-wrap"><span class="pow-base">e</span><sup class="func-exp-inner">${renderFuncInner(node.inner, true)}</sup></span>`;
         const label = { log:'log', ln:'ln', sin:'sin', asin:'sin<sup>−1</sup>' }[node.fn];
@@ -453,7 +473,7 @@ function renderStatic(node) {
         if (node.items.length === 0) return '<span class="slot-placeholder">…</span>';
         return node.items.map((it, idx) => {
             const sep = (idx > 0 && !isOperatorTile(node.items[idx-1]) && !isOperatorTile(it)) ? '<span class="mult-sign">×</span>' : '';
-            return sep + `<span class="eq-tile-frozen">${it.label}</span>`;
+            return sep + `<span class="eq-tile-static">${it.label}</span>`;
         }).join('');
     }
     if (node.kind === 'frac') {
@@ -473,14 +493,14 @@ function renderStatic(node) {
         return `<span class="sum-wrap">${inner}</span>`;
     }
     if (node.kind === 'func') {
-        if (node.fn === 'sqrt') return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false)}</div></div>`;
-        if (node.fn === 'sq')   return `<span class="func-wrap">${renderFuncInner(node.inner, true)}<sup class="func-exp">2</sup></span>`;
-        if (node.fn === 'cube') return `<span class="func-wrap">${renderFuncInner(node.inner, true)}<sup class="func-exp">3</sup></span>`;
-        if (node.fn === 'cbrt') return `<span class="func-wrap"><span class="func-name">∛</span>(${renderFuncInner(node.inner, false)})</span>`;
-        if (node.fn === 'pow10') return `<span class="func-wrap pow-wrap"><span class="pow-base">10</span><sup class="func-exp-inner">${renderFuncInner(node.inner, true)}</sup></span>`;
-        if (node.fn === 'exp')   return `<span class="func-wrap pow-wrap"><span class="pow-base">e</span><sup class="func-exp-inner">${renderFuncInner(node.inner, true)}</sup></span>`;
+        if (node.fn === 'sqrt') return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false, true)}</div></div>`;
+        if (node.fn === 'sq')   return `<span class="func-wrap">${renderFuncInner(node.inner, true, true)}<sup class="func-exp">2</sup></span>`;
+        if (node.fn === 'cube') return `<span class="func-wrap">${renderFuncInner(node.inner, true, true)}<sup class="func-exp">3</sup></span>`;
+        if (node.fn === 'cbrt') return `<div class="sqrt-wrap"><span class="cbrt-index">3</span><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false, true)}</div></div>`;
+        if (node.fn === 'pow10') return `<span class="func-wrap pow-wrap"><span class="pow-base">10</span><sup class="func-exp-inner">${renderFuncInner(node.inner, true, true)}</sup></span>`;
+        if (node.fn === 'exp')   return `<span class="func-wrap pow-wrap"><span class="pow-base">e</span><sup class="func-exp-inner">${renderFuncInner(node.inner, true, true)}</sup></span>`;
         const label = { log:'log', ln:'ln', sin:'sin', asin:'sin<sup>−1</sup>' }[node.fn];
-        return `<span class="func-wrap"><span class="func-name">${label}</span>(${renderFuncInner(node.inner, false)})</span>`;
+        return `<span class="func-wrap"><span class="func-name">${label}</span>(${renderFuncInner(node.inner, false, true)})</span>`;
     }
     return `<div class="eq-side">${node.slots.map((s,i) => (i===0?'':'<span class="mult-sign">×</span>') + renderStatic(s)).join('')}</div>`;
 }
@@ -499,6 +519,16 @@ function renderEquationZone() {
         signsToFlash.forEach(({ sidePath, termIdx }) => {
             const el = zone.querySelector(`.sum-sign[data-sum-path="${sidePath}"][data-term-idx="${termIdx}"]`);
             if (el) { el.classList.add('just-flipped'); setTimeout(() => el.classList.remove('just-flipped'), 1300); }
+            let termEl = zone.querySelector(`.sum-term[data-path="${sidePath}"][data-term-idx="${termIdx}"]`);
+            if (!termEl && termIdx === 0) termEl = zone.querySelector(`.sum-wrap[data-path="${sidePath}"]`);
+            if (!termEl) {
+                // la structure a change (ex. simplification automatique une fois
+                // le signe redevenu positif) : impossible de cibler precisement
+                // le terme, on fait clignoter tout le membre pour que le
+                // changement de signe reste toujours visible
+                termEl = zone.querySelector(`.eq-side[data-path="${sidePath.split('.')[0]}"]`);
+            }
+            if (termEl) { termEl.classList.add('term-flash'); setTimeout(() => termEl.classList.remove('term-flash'), 1300); }
         });
         signsToFlash = [];
     }
@@ -524,6 +554,20 @@ function attachEqTileHandlers(zone) {
         // .sum-term.term-draggable une fois isole), jamais facteur par facteur
         if (el.closest('.sum-term')) return;
         if (el.closest('.frac-den-wrap.den-draggable')) return;
+        // une somme reduite a un seul terme qui n'est lui-meme qu'une seule
+        // grandeur (pas un produit de plusieurs facteurs) : la glisser doit
+        // deplacer le terme additif entier (signe inverse), exactement comme
+        // la poignee de signe, et non l'extraire comme un simple facteur
+        const singleTermWrap = el.closest('.sum-wrap.sum-term-single');
+        if (singleTermWrap) {
+            const sumPath = singleTermWrap.dataset.path;
+            const termIdx = parseInt(singleTermWrap.dataset.termIdx, 10);
+            const sum = getNode(sumPath);
+            const t = sum && sum.terms[termIdx];
+            if (!t) return;
+            enableTileDrag(el, { type:'sumterm', from:sumPath, termIdx, sign:t.sign });
+            return;
+        }
         const path = el.dataset.path;
         const idx = parseInt(el.dataset.idx, 10);
         const node = getNode(path);
@@ -635,6 +679,13 @@ function processDrop(path, data) {
             // fraction regroupe deja visuellement ce numerateur, un parenthesage
             // supplementaire autour de toute la fraction serait redondant
             node.parenthesized = false;
+        } else if (node.kind === 'seq' && node.slots.length === 1 && node.slots[0].kind === 'func') {
+            // une fonction (racine, log, sin...) est deja une entite autonome et
+            // visuellement delimitee par ses propres parentheses : elle peut
+            // directement devenir un numerateur, sans etape de parenthesage
+            // prealable (contrairement a une somme, qui doit d'abord etre
+            // explicitement parenthesee pour eviter toute ambiguite)
+            node.slots = [ { kind:'frac', num: node.slots[0], den: simple([]), forceDenCross:true } ];
         } else {
             return;
         }
@@ -851,7 +902,6 @@ function negateSide(sidePath) {
             let repl = s.slots[0].terms[0].node;
             while (repl.kind === 'seq' && repl.slots.length === 1) repl = repl.slots[0];
             s.slots[0] = repl;
-            signsToFlash = signsToFlash.filter(f => f.sidePath !== sidePath + '.0');
         }
     } else {
         const innerSeq = s.slots.length === 1 ? seq([s.slots[0]]) : seq(s.slots.slice());
@@ -872,6 +922,36 @@ function wrapSideInFunc(side, fn) {
     const inner = s.slots.length === 1 ? s.slots[0] : seq(s.slots.slice());
     s.slots = [ func(fn, inner) ];
 }
+// aplatit les seq a une seule zone pour retrouver le "vrai" noeud
+function flattenSeq(n) {
+    while (n.kind === 'seq' && n.slots.length === 1) n = n.slots[0];
+    return n;
+}
+// une fonction reciproque n'annule QUE sa fonction exacte, isolee seule de ce
+// cote de l'equation : si cette fonction precise est presente mais multipliee
+// / divisee par autre chose, ou precedee d'un signe -, l'utiliser directement
+// serait ambigu (annuler la fonction, ou l'envelopper avec le reste ?). Ce
+// controle est generique (base uniquement sur RECIPROCAL/le noeud 'func'),
+// donc valable pour n'importe quelle fonction/reciproque ajoutee plus tard.
+function findNonIsolatedReciprocalMatch(side, inverseFn) {
+    const isTargetFunc = n => { n = flattenSeq(n); return n.kind === 'func' && n.fn === inverseFn; };
+    // precedee d'un signe - (somme reduite a un seul terme negatif)
+    if (side.slots.length === 1 && side.slots[0].kind === 'sum' && side.slots[0].terms.length === 1
+        && side.slots[0].terms[0].sign === -1 && isTargetFunc(side.slots[0].terms[0].node)) {
+        return 'sign';
+    }
+    // multipliee par un ou plusieurs autres facteurs (plusieurs zones dans la sequence)
+    if (side.slots.length > 1 && side.slots.some(isTargetFunc)) {
+        return 'factor';
+    }
+    // divisee par quelque chose, ou diviseur de quelque chose (fraction dont
+    // le numerateur ou le denominateur est exactement la fonction)
+    if (side.slots.length === 1 && side.slots[0].kind === 'frac'
+        && (isTargetFunc(side.slots[0].num) || isTargetFunc(side.slots[0].den))) {
+        return 'frac';
+    }
+    return null;
+}
 function applyFuncTool(toolFn, side) {
     if (side !== 'left' && side !== 'right') return;
     const inverse = RECIPROCAL[toolFn];
@@ -881,15 +961,9 @@ function applyFuncTool(toolFn, side) {
         refreshView();
         return;
     }
-    // une fonction réciproque n'annule QUE la fonction exacte : si elle est
-    // cachée derrière un signe -, il faut d'abord le retirer avec ×(−1)
-    if (s.slots.length === 1 && s.slots[0].kind === 'sum' && s.slots[0].terms.length === 1) {
-        let inner = s.slots[0].terms[0].node;
-        while (inner.kind === 'seq' && inner.slots.length === 1) inner = inner.slots[0];
-        if (inner.kind === 'func') {
-            showFeedback("✕ Impossible : il y a un signe − devant la fonction. Retire-le d'abord avec l'outil ×(−1) avant d'utiliser une fonction réciproque.", false);
-            return;
-        }
+    if (findNonIsolatedReciprocalMatch(s, inverse)) {
+        showFeedback("✕ Impossible : pour rester simple, une fonction réciproque ne s'utilise que sur la fonction seule, sans rien d'autre autour (pas de signe −, pas de multiplication ni de division). Isole d'abord la fonction.", false);
+        return;
     }
     wrapSideInFunc(side, toolFn);
     refreshView();
@@ -1222,10 +1296,10 @@ const descartesIntro = "La loi de Descartes (réfraction de la lumière) relie l
 const descartesStaticEq = buildStaticEq(m9StartDescartes);
 const descartesTiles = [tile('n1','n<sub>1</sub>'), tile('i1','i<sub>1</sub>'), tile('n2','n<sub>2</sub>'), tile('i2','i<sub>2</sub>')];
 
-// T² = k × a³  (troisième loi de Kepler, k regroupe 4π²/(GM))
+// T²/a³ = k  (troisième loi de Kepler, k regroupe 4π²/(GM))
 const m9StartKepler = {
-    initialLeft:  () => seq([func('sq', simple([tile('T','T')]))]),
-    initialRight: () => seq([simple([tile('k','k')]), func('cube', simple([tile('a','a')]))]),
+    initialLeft:  () => seq([ frac(func('sq', simple([tile('T','T')])), func('cube', simple([tile('a','a')]))) ]),
+    initialRight: () => seq([simple([tile('k','k')])]),
 };
 function sampleKepler() {
     const k = 0.5 + Math.random() * 2, a = 1 + Math.random() * 9;
@@ -1236,13 +1310,17 @@ const keplerIntro = "La troisième loi de Kepler relie la période de révolutio
 const keplerStaticEq = buildStaticEq(m9StartKepler);
 const keplerTiles = [tile('T','T'), tile('k','k'), tile('a','a')];
 
-// F = G×MT×MS / (RT+h)²   (force de gravitation, question finale combinée)
+// F = G × MT×MS / (RT+h)²   (force de gravitation, question finale combinée ;
+// G reste un facteur multiplicatif a part, comme au module 5 question 15)
 const m9StartSat = {
     initialLeft:  () => seq([simple([tile('F','F')])]),
-    initialRight: () => seq([frac(
-        simple([tile('G','G'), tile('MT','M<sub>T</sub>'), tile('MS','M<sub>S</sub>')]),
-        func('sq', seq([sumNode([term1(1,[simple([tile('RT','R<sub>T</sub>')])]), term1(1,[simple([tile('h','h')])])])]))
-    )]),
+    initialRight: () => seq([
+        simple([tile('G','G')]),
+        frac(
+            simple([tile('MT','M<sub>T</sub>'), tile('MS','M<sub>S</sub>')]),
+            func('sq', seq([sumNode([term1(1,[simple([tile('RT','R<sub>T</sub>')])]), term1(1,[simple([tile('h','h')])])])]))
+        ),
+    ]),
 };
 function sampleSat() {
     const G = 6.674e-11, MT = 5.97e24, MS = 400 + Math.random() * 5000, RT = 6.371e6, h = 3e5 + Math.random() * 3e6;
@@ -1266,7 +1344,7 @@ const module9Bank = [
     { legend: keplerLegend, intro: keplerIntro, staticEqHtml: keplerStaticEq, tiles: keplerTiles, target:'T', funcTools:['sqrt'], ...m9StartKepler, sample: sampleKepler },
     { legend: keplerLegend, intro: "On souhaite maintenant exprimer a.", staticEqHtml: keplerStaticEq, tiles: keplerTiles, target:'a', funcTools:['cbrt'], needsParenTool: true, ...m9StartKepler, sample: sampleKepler },
 
-    { legend: satLegend, intro: satIntro, staticEqHtml: satStaticEq, tiles: satTiles, target:'h', funcTools:['sqrt'], ...m9StartSat, sample: sampleSat },
+    { legend: satLegend, intro: satIntro, staticEqHtml: satStaticEq, tiles: satTiles, target:'h', funcTools:['sqrt'], needsParenTool: true, ...m9StartSat, sample: sampleSat },
 ];
 const m9MaxScore = module9Bank.length * 2;
 const m9TrueMaxScore = module9Bank.length * 3;
