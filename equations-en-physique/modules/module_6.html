@@ -789,9 +789,30 @@ function processParenDrop(sidePath) {
 // change de signe ; aucune tuile "-1" n'apparaît jamais, seul le signe change
 // (un membre qui n'est pas une somme devient un terme négatif unique, ce qui
 // s'affiche simplement comme "-contenu")
+// quand un signe "−" affiche va disparaitre completement (la somme se
+// simplifie en un contenu positif implicite, sans qu'aucun "+" ne le
+// remplace visuellement), le repli habituel (flasher un element du rendu
+// final) ne peut rien animer puisque ce signe n'existe plus apres coup : on
+// capture sa position AVANT la mutation pour pouvoir quand meme le faire
+// tourner, exactement comme les autres signes, avant qu'il ne s'efface
+function captureVanishingSignRect(sidePath) {
+    const s = getNode(sidePath);
+    if (!(s.slots.length === 1 && s.slots[0].kind === 'sum' && s.slots[0].terms.length === 1 && s.slots[0].terms[0].sign === -1)) return null;
+    const el = document.querySelector(`.sum-sign[data-sum-path="${sidePath}.0"][data-term-idx="0"]`);
+    return el ? el.getBoundingClientRect() : null;
+}
+function flashVanishingSign(rect) {
+    const ghost = document.createElement('span');
+    ghost.textContent = '−';
+    ghost.className = 'sum-sign just-flipped sign-vanish-ghost';
+    ghost.style.cssText = `position:fixed; left:${rect.left}px; top:${rect.top}px; width:${rect.width}px; height:${rect.height}px; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:9999;`;
+    document.body.appendChild(ghost);
+    setTimeout(() => ghost.remove(), 1300);
+}
 function negateSide(sidePath) {
     if (sidePath !== 'left' && sidePath !== 'right') return;
     const s = getNode(sidePath);
+    const vanishRect = captureVanishingSignRect(sidePath);
     if (s.slots.length === 1 && s.slots[0].kind === 'sum') {
         s.slots[0].terms.forEach((t, i) => {
             t.sign = -t.sign;
@@ -808,6 +829,7 @@ function negateSide(sidePath) {
         signsToFlash.push({ sidePath: sidePath + '.0', termIdx: 0 });
     }
     refreshView();
+    if (vanishRect) flashVanishingSign(vanishRect);
 }
 
 // ═══════════════════════════════════════════════════════════════

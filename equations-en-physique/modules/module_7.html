@@ -515,12 +515,24 @@ function showFeedback(msg, ok) {
 // ═══════════════════════════════════════════════════════════════
 function pruneEmptySlot(path) {
     const parts = path.split('.');
-    if (parts.length !== 2) return;
-    const side = getNode(parts[0]);
-    const idx = +parts[1];
-    const slot = side.slots[idx];
-    if (slot && slot.kind === 'simple' && slot.items.length === 0 && side.slots.length > 1) {
-        side.slots.splice(idx, 1);
+    if (parts.length < 2) return;
+    const parentPath = parts.slice(0, -1).join('.');
+    const parent = getNode(parentPath);
+    const idx = +parts[parts.length - 1];
+    if (!parent || !parent.slots || isNaN(idx)) return;
+    const slot = parent.slots[idx];
+    if (slot && slot.kind === 'simple' && slot.items.length === 0 && parent.slots.length > 1) {
+        parent.slots.splice(idx, 1);
+        // si le seq parent (lui-meme imbrique dans un autre seq, ex. un terme
+        // qui multipliait plusieurs facteurs comme 1/2 × m × v²) se retrouve
+        // reduit a un seul slot restant, on l'aplatit : les verifications de
+        // grandeur isolee inspectent la structure brute et ne reconnaissent
+        // pas un seq a un seul slot imbrique comme une grandeur isolee
+        if (parent.slots.length === 1 && parentPath.includes('.')) {
+            let flat = parent;
+            while (flat.kind === 'seq' && flat.slots.length === 1) flat = flat.slots[0];
+            setNode(parentPath, flat);
+        }
     }
 }
 function applyEmptinessRuleFrac(path, removedId) {
@@ -541,7 +553,8 @@ function deleteDen(fracPath) {
 }
 function handleEmptied(path, removedId) {
     const parts = path.split('.');
-    if (parts.length === 2) pruneEmptySlot(path);
+    const last = parts[parts.length - 1];
+    if (/^\d+$/.test(last)) pruneEmptySlot(path);
     else applyEmptinessRuleFrac(path, removedId);
 }
 function processDrop(path, data) {
@@ -740,9 +753,30 @@ function processParenDrop(sidePath) {
 // multiplie les deux membres par -1 (change le signe d'une grandeur isolée)
 // multiplie UN membre par -1 : par distributivité, chaque terme additif
 // change de signe ; aucune tuile "-1" n'apparaît jamais, seul le signe change
+// quand un signe "−" affiche va disparaitre completement (la somme se
+// simplifie en un contenu positif implicite, sans qu'aucun "+" ne le
+// remplace visuellement), le repli habituel (flasher un element du rendu
+// final) ne peut rien animer puisque ce signe n'existe plus apres coup : on
+// capture sa position AVANT la mutation pour pouvoir quand meme le faire
+// tourner, exactement comme les autres signes, avant qu'il ne s'efface
+function captureVanishingSignRect(sidePath) {
+    const s = getNode(sidePath);
+    if (!(s.slots.length === 1 && s.slots[0].kind === 'sum' && s.slots[0].terms.length === 1 && s.slots[0].terms[0].sign === -1)) return null;
+    const el = document.querySelector(`.sum-sign[data-sum-path="${sidePath}.0"][data-term-idx="0"]`);
+    return el ? el.getBoundingClientRect() : null;
+}
+function flashVanishingSign(rect) {
+    const ghost = document.createElement('span');
+    ghost.textContent = '−';
+    ghost.className = 'sum-sign just-flipped sign-vanish-ghost';
+    ghost.style.cssText = `position:fixed; left:${rect.left}px; top:${rect.top}px; width:${rect.width}px; height:${rect.height}px; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:9999;`;
+    document.body.appendChild(ghost);
+    setTimeout(() => ghost.remove(), 1300);
+}
 function negateSide(sidePath) {
     if (sidePath !== 'left' && sidePath !== 'right') return;
     const s = getNode(sidePath);
+    const vanishRect = captureVanishingSignRect(sidePath);
     if (s.slots.length === 1 && s.slots[0].kind === 'sum') {
         s.slots[0].terms.forEach((t, i) => {
             t.sign = -t.sign;
@@ -759,6 +793,7 @@ function negateSide(sidePath) {
         signsToFlash.push({ sidePath: sidePath + '.0', termIdx: 0 });
     }
     refreshView();
+    if (vanishRect) flashVanishingSign(vanishRect);
 }
 function processSqrtDrop() {}
 
@@ -871,6 +906,21 @@ function countOnesIn(node) {
     if (node.kind === 'sum') return node.terms.reduce((s, t) => s + countOnesIn(t.node), 0);
     return node.slots.reduce((s, sl) => s + countOnesIn(sl), 0);
 }
+// compte les "1" residuels d'une fraction du type 1/2 dont le denominateur a
+// ete extrait/supprime : tant que le "1" reste au numerateur d'une fraction
+// intacte (meme en attente de suppression de son denominateur vide), il n'est
+// jamais signale ; il ne devient un residu a retirer qu'une fois la fraction
+// elle-meme effacee, le laissant nu a multiplier un terme
+function countNakedHalfNumIn(node) {
+    if (node.kind === 'simple') return node.items.filter(i => i.id === 'halfNum').length;
+    if (node.kind === 'sqrt') return countNakedHalfNumIn(node.inner);
+    if (node.kind === 'frac') {
+        const numIsIntactHalfNum = node.num.kind === 'simple' && node.num.items.length === 1 && node.num.items[0].id === 'halfNum';
+        return (numIsIntactHalfNum ? 0 : countNakedHalfNumIn(node.num)) + countNakedHalfNumIn(node.den);
+    }
+    if (node.kind === 'sum') return node.terms.reduce((s, t) => s + countNakedHalfNumIn(t.node), 0);
+    return node.slots.reduce((s, sl) => s + countNakedHalfNumIn(sl), 0);
+}
 function isFullyIsolatedSeq(node, targetId) {
     return node && node.kind === 'seq' && node.slots.length === 1
         && node.slots[0].kind === 'simple' && node.slots[0].items.length === 1
@@ -964,7 +1014,9 @@ function verifyStep() {
 
     const onesTotal = countOnesIn(state.left) + countOnesIn(state.right);
     const onesElsewhere = onesTotal - (leftLoose ? 1 : 0) - (rightLoose ? 1 : 0);
-    const complete = leftFull && onesElsewhere === 0;
+    const nakedHalfNum = countNakedHalfNumIn(state.left) + countNakedHalfNumIn(state.right);
+    const residual = onesElsewhere + nakedHalfNum;
+    const complete = leftFull && residual === 0;
 
     if (complete) {
         resolved = true;
@@ -980,12 +1032,18 @@ function verifyStep() {
             msg = "✓ Étape correcte ! Il ne reste plus qu'à inverser le sens de l'équation avec ⇄.";
         } else if (rightLoose) {
             msg = "✓ Étape correcte ! Inverse le sens de l'équation avec ⇄, puis retire le dénominateur qui vaut 1.";
-        } else if (leftLoose && onesElsewhere > 0) {
+        } else if (leftLoose && residual > 0) {
             msg = "✓ Étape correcte ! Retire les 1 inutiles.";
         } else if (leftLoose) {
             msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur pour le supprimer.";
-        } else if (leftFull && onesElsewhere > 0) {
+        } else if (leftFull && residual > 0) {
             msg = "✓ Retire les 1 inutiles.";
+        } else if (residual > 0) {
+            // cas general (ex. le "1" residuel d'une fraction 1/2 dont le
+            // denominateur 2 a ete extrait) : meme sans correspondre a un motif
+            // "grandeur isolee" precis, un 1 qui multiplie encore quelque chose
+            // doit etre retire
+            msg = "✓ Étape correcte ! Retire le 1 inutile qui multiplie encore un terme.";
         } else {
             msg = "✓ Étape correcte, continue !";
         }
@@ -1043,19 +1101,23 @@ const epTiles = [tile('Ep','E<sub>p</sub>'), tile('m','m'), tile('g','g'), tile(
 // Em = 1/2·m·v² + m·g·z
 const m7StartEm = {
     initialLeft:  () => seq([simple([tile('Em','E<sub>m</sub>')])]),
+    // 1/2 est une vraie fraction (et non une seule tuile opaque) : son
+    // denominateur (le "2") peut ainsi etre glisse comme n'importe quel autre
+    // denominateur (multiplie les deux membres), au lieu de disparaitre d'un
+    // coup avec m
     initialRight: () => seq([sumNode([
-        term1(1, [simple([tile('half','1/2'), tile('m','m'), tile('v2','v²')])]),
+        term1(1, [ frac([tile('halfNum','1')], [tile('two','2')]), simple([tile('m','m'), tile('v2','v²')]) ]),
         term1(1, [simple([tile('mB','m'), tile('g','g'), tile('z','z')])])
     ])]),
 };
 function sampleEm() {
     const m = 0.1+Math.random()*99.9, v = 1+Math.random()*49, g = 9.8, z = 1+Math.random()*99;
-    return { Em: 0.5*m*v*v + m*g*z, half:0.5, m, mB:m, v2:v*v, g, z };
+    return { Em: 0.5*m*v*v + m*g*z, m, mB:m, v2:v*v, g, z, two:2, halfNum:1 };
 }
 const emLegend = "E<sub>m</sub> : énergie mécanique (J) · m : masse (kg) · v : vitesse (m/s) · g : intensité de pesanteur (N/kg) · z : altitude (m)";
 const emIntro = "On étudie l'énergie mécanique d'un objet, somme de son énergie cinétique et de son énergie potentielle de pesanteur.";
 const emStaticEq = `<span class="eq-tile-static">E<sub>m</sub></span><span class="eq-sign">=</span>${staticFracHtml('1','2')}<span class="eq-tile-static">m</span><span class="eq-tile-static">v²</span><span class="eq-tile-static">+</span><span class="eq-tile-static">m</span><span class="eq-tile-static">g</span><span class="eq-tile-static">z</span>`;
-const emTiles = [tile('Em','E<sub>m</sub>'), tile('half','1/2'), tile('m','m'), tile('v2','v²'), tile('mB','m'), tile('g','g'), tile('z','z')];
+const emTiles = [tile('Em','E<sub>m</sub>'), tile('halfNum','1'), tile('two','2'), tile('m','m'), tile('v2','v²'), tile('mB','m'), tile('g','g'), tile('z','z')];
 
 // y = y0 + v0·t - 1/2·g·t²
 const m7StartFall = {
