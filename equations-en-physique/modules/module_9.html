@@ -134,13 +134,17 @@
     .sum-term.term-draggable { cursor:grab; }
     .sum-term.term-draggable:hover { background:rgba(79,70,229,.08); }
     .sum-term.dragging { opacity:.4; }
+    .sum-zero { font-weight:800; color:#1e3a8a; font-size:1.2rem; padding:0 6px; }
     .sum-sign { font-weight:800; color:#1e3a8a; font-size:1.2rem; display:inline-block; }
+    .sum-sign.sum-sign-drag { cursor:grab; touch-action:none; border-radius:8px; padding:2px 5px; }
+    .sum-sign.sum-sign-drag:hover { background:rgba(79,70,229,.08); }
+    .sum-sign.sum-sign-drag.dragging { opacity:.4; }
     @keyframes signFlip {
-        0%   { transform:rotateY(-170deg) scale(1.3); color:#ef4444; }
-        55%  { transform:rotateY(-90deg) scale(1.3); color:#ef4444; }
-        100% { transform:rotateY(0deg) scale(1); }
+        0%   { transform:rotateY(-170deg) scale(1.8); color:#ef4444; background:rgba(239,68,68,.25); }
+        55%  { transform:rotateY(-90deg) scale(1.8); color:#ef4444; background:rgba(239,68,68,.25); }
+        100% { transform:rotateY(0deg) scale(1); background:rgba(239,68,68,0); }
     }
-    .sum-sign.just-flipped { animation: signFlip 0.9s ease; }
+    .sum-sign.just-flipped { animation: signFlip 1.3s ease; border-radius:6px; display:inline-block; }
     body.sumterm-dragging .eq-side[data-path="left"], body.sumterm-dragging .eq-side[data-path="right"],
     body.fracden-dragging .eq-side[data-path="left"], body.fracden-dragging .eq-side[data-path="right"] {
         outline: 3px dashed #f59e0b; outline-offset: 5px; border-radius: 10px;
@@ -157,7 +161,15 @@
     .func-wrap.pow-wrap { align-items:flex-start; }
     .func-exp-inner { font-size:.72em; display:inline-flex; margin-top:-6px; }
     .func-exp-inner .slot-simple { min-height:36px; padding:5px 8px; }
-    .func-exp-inner .eq-tile, .func-exp-inner .eq-tile-frozen { padding:6px 9px; min-height:32px; }
+    .func-exp-inner .eq-tile, .func-exp-inner .eq-tile-frozen, .func-exp-inner .eq-tile-locked { padding:6px 9px; min-height:32px; }
+    /* tuile a l'interieur d'une fonction : meme apparence qu'une tuile normale
+       (pas de gris "desactive"), mais non manipulable tant que la fonction
+       n'est pas retiree */
+    .eq-tile-locked {
+        display:inline-flex; align-items:center; gap:6px;
+        background:#dbeafe; border:2px solid #60a5fa; border-radius:8px;
+        padding:9px 13px; min-height:40px; font-weight:700; color:#1e3a8a; margin:0 3px;
+    }
     .sqrt-wrap { display:inline-flex; align-items:flex-end; margin:0 6px; }
     .sqrt-hook { display:block; flex-shrink:0; }
     .sqrt-inner { border-top:3px solid #1e293b; padding:2px 6px 0; display:inline-flex; align-items:center; }
@@ -245,7 +257,7 @@ let stepOneValidated = false;
 let currentExercise = null;
 let hadError = false;
 let activeHighlightId = null;
-let lastMovedTerm = null;
+let signsToFlash = [];
 
 function getNode(path) {
     const parts = path.split('.');
@@ -320,6 +332,25 @@ function renderInlineNode(node) {
     if (node.kind === 'seq') {
         return node.slots.map((s, i) => (i === 0 ? '' : '<span class="mult-sign">×</span>') + renderInlineNode(s)).join('');
     }
+    if (node.kind === 'simple') {
+        // meme apparence qu'une tuile normale (pas de gris "desactive") meme si
+        // elle n'est pas manipulable tant que la fonction englobante est la
+        if (node.items.length === 0) return '<span class="slot-placeholder">…</span>';
+        return node.items.map((it, idx) => {
+            const sep = (idx > 0 && !isOperatorTile(node.items[idx - 1]) && !isOperatorTile(it)) ? '<span class="mult-sign">×</span>' : '';
+            return sep + `<span class="eq-tile-locked">${it.label}</span>`;
+        }).join('');
+    }
+    if (node.kind === 'func') {
+        if (node.fn === 'sqrt') return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false)}</div></div>`;
+        if (node.fn === 'sq')   return `<span class="func-wrap">${renderFuncInner(node.inner, true)}<sup class="func-exp">2</sup></span>`;
+        if (node.fn === 'cube') return `<span class="func-wrap">${renderFuncInner(node.inner, true)}<sup class="func-exp">3</sup></span>`;
+        if (node.fn === 'cbrt') return `<span class="func-wrap"><span class="func-name">∛</span>(${renderFuncInner(node.inner, false)})</span>`;
+        if (node.fn === 'pow10') return `<span class="func-wrap pow-wrap"><span class="pow-base">10</span><sup class="func-exp-inner">${renderFuncInner(node.inner, true)}</sup></span>`;
+        if (node.fn === 'exp')   return `<span class="func-wrap pow-wrap"><span class="pow-base">e</span><sup class="func-exp-inner">${renderFuncInner(node.inner, true)}</sup></span>`;
+        const label = { log:'log', ln:'ln', sin:'sin', asin:'sin<sup>−1</sup>' }[node.fn];
+        return `<span class="func-wrap"><span class="func-name">${label}</span>(${renderFuncInner(node.inner, false)})</span>`;
+    }
     return renderStatic(node);
 }
 function renderFuncInner(inner, parensIfSum) {
@@ -364,6 +395,24 @@ function renderNode(node, path) {
         </div>`;
     }
     if (node.kind === 'sum') {
+        // aucun terme restant (tous deplaces de l'autre cote) : on l'affiche
+        // explicitement au lieu de laisser un vide
+        if (node.terms.length === 0) {
+            return `<span class="sum-wrap sum-zero" data-path="${path}">0</span>`;
+        }
+        // un seul terme : ce n'est plus une somme a proprement parler mais un
+        // simple signe devant un contenu multiplicatif ; chaque facteur a
+        // l'interieur doit rester individuellement manipulable (ex. -λ×t), donc
+        // pas de bloc .sum-term qui bloquerait le glisser-deposer des tuiles.
+        // Seul le signe (s'il est negatif) reste saisissable pour deplacer le
+        // terme entier de l'autre cote.
+        if (node.terms.length === 1) {
+            const t = node.terms[0];
+            const signHtml = t.sign === -1
+                ? `<span class="sum-sign sum-sign-drag" data-sum-path="${path}" data-term-idx="0">−</span>`
+                : '';
+            return `<span class="sum-wrap" data-path="${path}">${signHtml}${renderNode(t.node, path + '.term0')}</span>`;
+        }
         const isolated = isSumIsolated(path);
         const inner = node.terms.map((t, i) => {
             const showSign = i > 0 || t.sign === -1;
@@ -415,6 +464,7 @@ function renderStatic(node) {
         </div>`;
     }
     if (node.kind === 'sum') {
+        if (node.terms.length === 0) return `<span class="sum-wrap sum-zero">0</span>`;
         const inner = node.terms.map((t, i) => {
             const showSign = i > 0 || t.sign === -1;
             const signChar = t.sign === -1 ? '−' : '+';
@@ -445,10 +495,12 @@ function renderEquationZone() {
     attachEqTileHandlers(zone);
     sizeSqrtHooks(zone);
     sizeParens(zone);
-    if (lastMovedTerm) {
-        const el = zone.querySelector(`.sum-sign[data-sum-path="${lastMovedTerm.sidePath}"][data-term-idx="${lastMovedTerm.termIdx}"]`);
-        if (el) { el.classList.add('just-flipped'); setTimeout(() => el.classList.remove('just-flipped'), 900); }
-        lastMovedTerm = null;
+    if (signsToFlash.length) {
+        signsToFlash.forEach(({ sidePath, termIdx }) => {
+            const el = zone.querySelector(`.sum-sign[data-sum-path="${sidePath}"][data-term-idx="${termIdx}"]`);
+            if (el) { el.classList.add('just-flipped'); setTimeout(() => el.classList.remove('just-flipped'), 1300); }
+        });
+        signsToFlash = [];
     }
 }
 function sizeSqrtHooks(container) {
@@ -466,11 +518,11 @@ function sizeSqrtHooks(container) {
 }
 function attachEqTileHandlers(zone) {
     zone.querySelectorAll('.eq-tile').forEach(el => {
-        // une tuile a l'interieur d'un terme additif isole (deja glissable en
-        // bloc via .sum-term.term-draggable) ne doit pas AUSSI etre glissable
-        // individuellement : un seul pointerdown declencherait alors les deux
-        // glisser-deposer en meme temps (capture ecrasee, fantome bloque)
-        if (el.closest('.sum-term.term-draggable')) return;
+        // une tuile a l'interieur d'un terme additif d'une somme a plusieurs
+        // termes (.sum-term, isolee ou non) ne doit jamais etre glissable
+        // individuellement : ce genre de terme ne se deplace qu'en bloc (via
+        // .sum-term.term-draggable une fois isole), jamais facteur par facteur
+        if (el.closest('.sum-term')) return;
         if (el.closest('.frac-den-wrap.den-draggable')) return;
         const path = el.dataset.path;
         const idx = parseInt(el.dataset.idx, 10);
@@ -481,6 +533,17 @@ function attachEqTileHandlers(zone) {
     });
     zone.querySelectorAll('.sum-term.term-draggable').forEach(el => {
         const sumPath = el.dataset.path;
+        const termIdx = parseInt(el.dataset.termIdx, 10);
+        const sum = getNode(sumPath);
+        const t = sum && sum.terms[termIdx];
+        if (!t) return;
+        enableTileDrag(el, { type:'sumterm', from:sumPath, termIdx, sign:t.sign });
+    });
+    // signe d'une somme reduite a un seul terme negatif : sert de poignee pour
+    // deplacer tout le terme (tous ses facteurs) de l'autre cote, sans bloquer
+    // le glisser-deposer individuel des facteurs eux-memes (cf. ci-dessus)
+    zone.querySelectorAll('.sum-sign-drag').forEach(el => {
+        const sumPath = el.dataset.sumPath;
         const termIdx = parseInt(el.dataset.termIdx, 10);
         const sum = getNode(sumPath);
         const t = sum && sum.terms[termIdx];
@@ -567,6 +630,11 @@ function processDrop(path, data) {
         } else if (node.kind === 'seq' && node.parenthesized) {
             const inner = node.slots.length === 1 ? node.slots[0] : seq(node.slots.slice());
             node.slots = [ { kind:'frac', num: inner, den: simple([]), forceDenCross:true } ];
+            // la parenthese n'a servi qu'a figer temporairement le contenu en un
+            // bloc unique pour pouvoir le mettre au numerateur : la barre de
+            // fraction regroupe deja visuellement ce numerateur, un parenthesage
+            // supplementaire autour de toute la fraction serait redondant
+            node.parenthesized = false;
         } else {
             return;
         }
@@ -643,24 +711,50 @@ function enableTileDrag(el, data, onTap) {
         },
     });
 }
+// le point exact ou l'on relache un outil peut tomber sur n'importe quel
+// descendant (une tuile precise, un terme d'une somme...) : pour les outils
+// qui agissent sur un membre ENTIER, on ne se fie pas au DOM (closest() peut
+// remonter vers un .eq-side interne, celui d'un terme ou d'un numerateur) mais
+// au chemin lui-meme, qui commence toujours par 'left' ou 'right'
+function resolveSidePath(zone) {
+    const raw = zone.dataset.path || zone.dataset.side;
+    return raw ? raw.split('.')[0] : null;
+}
+// pour l'outil fraction : si le point de depot tombe a l'interieur d'un
+// groupe explicitement parenthese, on remonte jusqu'a ce groupe (il doit etre
+// traite comme un bloc unique, jamais decompose au moment de le mettre au
+// numerateur)
+function resolveLockedAncestorPath(rawPath) {
+    const parts = rawPath.split('.');
+    for (let i = parts.length; i >= 1; i--) {
+        const p = parts.slice(0, i).join('.');
+        const n = getNode(p);
+        if (n && n.kind === 'seq' && n.parenthesized) return p;
+    }
+    return rawPath;
+}
 function handleZoneDrop(data, zone) {
     if (data.type === 'sumterm') {
-        const side = zone.closest('.eq-side');
-        if (side) processSumTermDrop(side.dataset.path, data);
+        const side = resolveSidePath(zone);
+        if (side === 'left' || side === 'right') processSumTermDrop(side, data);
         return;
     }
     if (data.type === 'fracden') {
-        const side = zone.closest('.eq-side');
-        if (side) processFracDenDrop(data.from, side.dataset.path);
+        const side = resolveSidePath(zone);
+        if (side === 'left' || side === 'right') processFracDenDrop(data.from, side);
         return;
     }
     if (data.type === 'paren') {
-        const side = zone.closest('.eq-side');
-        if (side) processParenDrop(side.dataset.path);
+        const side = resolveSidePath(zone);
+        if (side === 'left' || side === 'right') processParenDrop(side);
         return;
     }
     if (zone.matches('.insert-zone')) {
         handleInsertDropAt(zone.dataset.side, zone.dataset.where, data);
+        return;
+    }
+    if (data.type === 'frac') {
+        processDrop(resolveLockedAncestorPath(zone.dataset.path), data);
         return;
     }
     processDrop(zone.dataset.path, data);
@@ -712,7 +806,7 @@ function processSumTermDrop(sidePath, data) {
             destTermIdx = 1;
         }
     }
-    lastMovedTerm = { sidePath: sidePath + '.0', termIdx: destTermIdx };
+    signsToFlash.push({ sidePath: sidePath + '.0', termIdx: destTermIdx });
     refreshView();
 }
 // "multiplie les deux côtés par le dénominateur" : on retire le dénominateur
@@ -749,15 +843,20 @@ function negateSide(sidePath) {
     if (sidePath !== 'left' && sidePath !== 'right') return;
     const s = getNode(sidePath);
     if (s.slots.length === 1 && s.slots[0].kind === 'sum') {
-        s.slots[0].terms.forEach(t => { t.sign = -t.sign; });
+        s.slots[0].terms.forEach((t, i) => {
+            t.sign = -t.sign;
+            signsToFlash.push({ sidePath: sidePath + '.0', termIdx: i });
+        });
         if (s.slots[0].terms.length === 1 && s.slots[0].terms[0].sign === 1) {
             let repl = s.slots[0].terms[0].node;
             while (repl.kind === 'seq' && repl.slots.length === 1) repl = repl.slots[0];
             s.slots[0] = repl;
+            signsToFlash = signsToFlash.filter(f => f.sidePath !== sidePath + '.0');
         }
     } else {
         const innerSeq = s.slots.length === 1 ? seq([s.slots[0]]) : seq(s.slots.slice());
         s.slots = [ sumNode([{ sign: -1, node: innerSeq }]) ];
+        signsToFlash.push({ sidePath: sidePath + '.0', termIdx: 0 });
     }
     refreshView();
 }
@@ -838,7 +937,7 @@ function addFuncToolTile(fn) {
         zoneSelector: '.eq-side',
         dragOverClass: 'drag-over',
         onDrop: (item, zone) => {
-            const side = zone.closest('.eq-side[data-path="left"], .eq-side[data-path="right"]');
+            const side = zone && zone.closest('.eq-side[data-path="left"], .eq-side[data-path="right"]');
             if (side) applyFuncTool(fn, side.dataset.path);
         },
     });
@@ -863,7 +962,7 @@ function addNegPaletteTile() {
         zoneSelector: '.eq-side',
         dragOverClass: 'drag-over',
         onDrop: (item, zone) => {
-            const side = zone.closest('.eq-side[data-path="left"], .eq-side[data-path="right"]');
+            const side = zone && zone.closest('.eq-side[data-path="left"], .eq-side[data-path="right"]');
             if (side) negateSide(side.dataset.path);
         },
     });
@@ -880,7 +979,10 @@ function buildPalette() {
     addFracPaletteTile();
     (currentExercise.funcTools || []).forEach(addFuncToolTile);
     if (currentExercise.needsParenTool) addParenPaletteTile();
-    if (currentExercise.needsNegTool) addNegPaletteTile();
+    // l'outil ×(-1) reste toujours disponible : il ne fait jamais de mal a
+    // utiliser (il ne fait que changer un signe) et son absence occasionnelle
+    // empechait de corriger une erreur de signe sur certaines questions
+    addNegPaletteTile();
 }
 
 // ═══════════════════════════════════════════════════════════════
