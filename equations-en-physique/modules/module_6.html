@@ -149,6 +149,18 @@
         100% { transform:rotateY(0deg) scale(1); background:rgba(239,68,68,0); }
     }
     .sum-sign.just-flipped { animation: signFlip 1.3s ease; border-radius:6px; display:inline-block; }
+    /* le fantome d'un signe qui disparait completement (voir
+       flashVanishingSign) monte et s'estompe en tournant, plutot que de
+       rester immobile a une position figee : la ligne d'equation etant
+       centree, un changement de cote fait bouger tout ce qui suit le signe
+       "=" et une position figee finit facilement collee contre un element
+       qui n'a rien a voir (le terme qui vient d'arriver, le bouton ⇄...) */
+    @keyframes signVanish {
+        0%   { transform:translateY(0) rotateY(-170deg) scale(1.8); color:#ef4444; background:rgba(239,68,68,.25); opacity:1; }
+        55%  { transform:translateY(-6px) rotateY(-90deg) scale(1.6); color:#ef4444; background:rgba(239,68,68,.2); opacity:1; }
+        100% { transform:translateY(-28px) rotateY(0deg) scale(.8); background:rgba(239,68,68,0); opacity:0; }
+    }
+    .sign-vanish-ghost { animation: signVanish 1.3s ease forwards; border-radius:6px; }
     /* meme si le signe n'est pas affiche (premier terme positif implicite),
        le terme entier doit clignoter pour signaler le changement de signe */
     @keyframes termFlash {
@@ -748,12 +760,23 @@ function captureRemovedTermSignRect(sumPath, termIdx, sign) {
     const el = document.querySelector(`.sum-sign[data-sum-path="${sumPath}"][data-term-idx="${termIdx}"], .sum-sign-drag[data-sum-path="${sumPath}"][data-term-idx="${termIdx}"]`);
     return el ? el.getBoundingClientRect() : null;
 }
+// le signe "=" sert de reference stable pour corriger la position du
+// fantome apres coup : quand un terme change de cote, le cote qui grossit
+// repousse le "=" (et tout ce qui le suit) du meme nombre de pixels que
+// l'autre cote a retreci — sans cette correction, le fantome reste a une
+// position absolue figee qui finit collee contre le contenu qui vient
+// d'arriver de l'autre cote, comme s'il lui appartenait
+function captureEqSignRect() {
+    const el = document.querySelector('#currentStepZone .eq-sign');
+    return el ? el.getBoundingClientRect() : null;
+}
 function processSumTermDrop(sidePath, data) {
     if (sidePath !== 'left' && sidePath !== 'right') return;
     if (data.from === sidePath) { refreshView(); return; }
     const srcSum = getNode(data.from);
     const srcTerm = srcSum && srcSum.kind === 'sum' ? srcSum.terms[data.termIdx] : null;
     const vanishRect = srcTerm ? captureRemovedTermSignRect(data.from, data.termIdx, srcTerm.sign) : null;
+    const eqBefore = vanishRect ? captureEqSignRect() : null;
     const removed = removeSumTerm(data.from, data.termIdx);
     if (!removed) return;
     const flipped = { sign: -removed.sign, node: removed.node };
@@ -782,7 +805,7 @@ function processSumTermDrop(sidePath, data) {
     }
     signsToFlash.push({ sidePath: sidePath + '.0', termIdx: destTermIdx });
     refreshView();
-    if (vanishRect) flashVanishingSign(vanishRect);
+    if (vanishRect) flashVanishingSign(vanishRect, eqBefore);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -816,10 +839,21 @@ function captureVanishingSignRect(sidePath) {
     const el = document.querySelector(`.sum-sign[data-sum-path="${sidePath}.0"][data-term-idx="0"]`);
     return el ? el.getBoundingClientRect() : null;
 }
-function flashVanishingSign(rect) {
+function flashVanishingSign(rect, eqBefore) {
+    if (eqBefore) {
+        const eqAfterEl = document.querySelector('#currentStepZone .eq-sign');
+        if (eqAfterEl) {
+            const eqAfter = eqAfterEl.getBoundingClientRect();
+            rect = {
+                left: rect.left + (eqAfter.left - eqBefore.left),
+                top: rect.top + (eqAfter.top - eqBefore.top),
+                width: rect.width, height: rect.height,
+            };
+        }
+    }
     const ghost = document.createElement('span');
     ghost.textContent = '−';
-    ghost.className = 'sum-sign just-flipped sign-vanish-ghost';
+    ghost.className = 'sum-sign sign-vanish-ghost';
     ghost.style.cssText = `position:fixed; left:${rect.left}px; top:${rect.top}px; width:${rect.width}px; height:${rect.height}px; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:9999;`;
     document.body.appendChild(ghost);
     setTimeout(() => ghost.remove(), 1300);
@@ -828,6 +862,7 @@ function negateSide(sidePath) {
     if (sidePath !== 'left' && sidePath !== 'right') return;
     const s = getNode(sidePath);
     const vanishRect = captureVanishingSignRect(sidePath);
+    const eqBefore = vanishRect ? captureEqSignRect() : null;
     if (s.slots.length === 1 && s.slots[0].kind === 'sum') {
         s.slots[0].terms.forEach((t, i) => {
             t.sign = -t.sign;
@@ -844,7 +879,7 @@ function negateSide(sidePath) {
         signsToFlash.push({ sidePath: sidePath + '.0', termIdx: 0 });
     }
     refreshView();
-    if (vanishRect) flashVanishingSign(vanishRect);
+    if (vanishRect) flashVanishingSign(vanishRect, eqBefore);
 }
 
 // ═══════════════════════════════════════════════════════════════
