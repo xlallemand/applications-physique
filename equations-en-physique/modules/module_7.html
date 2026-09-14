@@ -721,17 +721,6 @@ function removeSumTerm(sumPath, termIdx) {
     }
     return removed;
 }
-// avant de retirer le terme, on capture la position de son signe s'il est
-// negatif : le terme entier (avec son signe) va disparaitre de ce cote pour
-// rejoindre l'autre membre, et rien ne le remplace visuellement a cet
-// endroit precis (contrairement au signe qui apparait a l'arrivee, deja pris
-// en charge par signsToFlash) — sans ce fantome, un "−" qui s'en va semble
-// juste s'effacer sans raison
-function captureRemovedTermSignRect(sumPath, termIdx, sign) {
-    if (sign !== -1) return null;
-    const el = document.querySelector(`.sum-sign[data-sum-path="${sumPath}"][data-term-idx="${termIdx}"], .sum-sign-drag[data-sum-path="${sumPath}"][data-term-idx="${termIdx}"]`);
-    return el ? el.getBoundingClientRect() : null;
-}
 // le signe "=" sert de reference stable pour corriger la position du
 // fantome apres coup : quand un terme change de cote, le cote qui grossit
 // repousse le "=" (et tout ce qui le suit) du meme nombre de pixels que
@@ -747,8 +736,7 @@ function processSumTermDrop(sidePath, data) {
     if (data.from === sidePath) { refreshView(); return; }
     const srcSum = getNode(data.from);
     const srcTerm = srcSum && srcSum.kind === 'sum' ? srcSum.terms[data.termIdx] : null;
-    const vanishRect = srcTerm ? captureRemovedTermSignRect(data.from, data.termIdx, srcTerm.sign) : null;
-    const eqBefore = vanishRect ? captureEqSignRect() : null;
+    const showVanishGhost = !!(srcTerm && srcTerm.sign === -1);
     const removed = removeSumTerm(data.from, data.termIdx);
     if (!removed) return;
     const flipped = { sign: -removed.sign, node: removed.node };
@@ -777,7 +765,12 @@ function processSumTermDrop(sidePath, data) {
     }
     signsToFlash.push({ sidePath: sidePath + '.0', termIdx: destTermIdx });
     refreshView();
-    if (vanishRect) flashVanishingSign(vanishRect, eqBefore);
+    // le "-" qui disparaissait a la source (le terme entier a change de
+    // cote) est mime a l'endroit ou le terme vient d'arriver, la ou
+    // l'attention de l'eleve se trouve deja juste apres avoir depose
+    // l'element — jamais a l'ancien emplacement, que la ligne (centree)
+    // peut avoir totalement redistribue par ailleurs
+    if (showVanishGhost) flashVanishingSignAtArrival(sidePath, destTermIdx);
 }
 // traite tout le contenu d'un membre comme un seul bloc (nécessaire avant de
 // pouvoir le glisser dans une fraction quand ce n'est pas une simple grandeur)
@@ -803,6 +796,14 @@ function captureVanishingSignRect(sidePath) {
     const el = document.querySelector(`.sum-sign[data-sum-path="${sidePath}.0"][data-term-idx="0"]`);
     return el ? el.getBoundingClientRect() : null;
 }
+function spawnVanishGhost(rect) {
+    const ghost = document.createElement('span');
+    ghost.textContent = '−';
+    ghost.className = 'sum-sign sign-vanish-ghost';
+    ghost.style.cssText = `position:fixed; left:${rect.left}px; top:${rect.top}px; width:${rect.width}px; height:${rect.height}px; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:9999;`;
+    document.body.appendChild(ghost);
+    setTimeout(() => ghost.remove(), 1300);
+}
 function flashVanishingSign(rect, eqBefore) {
     if (eqBefore) {
         const eqAfterEl = document.querySelector('#currentStepZone .eq-sign');
@@ -815,12 +816,23 @@ function flashVanishingSign(rect, eqBefore) {
             };
         }
     }
-    const ghost = document.createElement('span');
-    ghost.textContent = '−';
-    ghost.className = 'sum-sign sign-vanish-ghost';
-    ghost.style.cssText = `position:fixed; left:${rect.left}px; top:${rect.top}px; width:${rect.width}px; height:${rect.height}px; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:9999;`;
-    document.body.appendChild(ghost);
-    setTimeout(() => ghost.remove(), 1300);
+    spawnVanishGhost(rect);
+}
+// place le fantome exactement a l'endroit ou le terme deplace vient
+// d'arriver (apres le rendu) : sur le signe qui y est desormais affiche s'il
+// y en a un, sinon juste avant le terme lui-meme (cas d'un premier terme
+// positif implicite, sans aucun signe affiche)
+function flashVanishingSignAtArrival(sidePath, termIdx) {
+    const sumPath = sidePath + '.0';
+    const signEl = document.querySelector(`.sum-sign[data-sum-path="${sumPath}"][data-term-idx="${termIdx}"], .sum-sign-drag[data-sum-path="${sumPath}"][data-term-idx="${termIdx}"]`);
+    if (signEl) {
+        spawnVanishGhost(signEl.getBoundingClientRect());
+        return;
+    }
+    const termEl = document.querySelector(`.sum-term[data-path="${sumPath}"][data-term-idx="${termIdx}"]`) || document.querySelector(`.eq-side[data-path="${sidePath}"]`);
+    if (!termEl) return;
+    const r = termEl.getBoundingClientRect();
+    spawnVanishGhost({ left: r.left - 20, top: r.top, width: 20, height: r.height });
 }
 function negateSide(sidePath) {
     if (sidePath !== 'left' && sidePath !== 'right') return;
