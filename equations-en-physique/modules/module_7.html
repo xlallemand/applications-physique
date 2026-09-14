@@ -709,9 +709,23 @@ function removeSumTerm(sumPath, termIdx) {
     }
     return removed;
 }
+// avant de retirer le terme, on capture la position de son signe s'il est
+// negatif : le terme entier (avec son signe) va disparaitre de ce cote pour
+// rejoindre l'autre membre, et rien ne le remplace visuellement a cet
+// endroit precis (contrairement au signe qui apparait a l'arrivee, deja pris
+// en charge par signsToFlash) — sans ce fantome, un "−" qui s'en va semble
+// juste s'effacer sans raison
+function captureRemovedTermSignRect(sumPath, termIdx, sign) {
+    if (sign !== -1) return null;
+    const el = document.querySelector(`.sum-sign[data-sum-path="${sumPath}"][data-term-idx="${termIdx}"], .sum-sign-drag[data-sum-path="${sumPath}"][data-term-idx="${termIdx}"]`);
+    return el ? el.getBoundingClientRect() : null;
+}
 function processSumTermDrop(sidePath, data) {
     if (sidePath !== 'left' && sidePath !== 'right') return;
     if (data.from === sidePath) { refreshView(); return; }
+    const srcSum = getNode(data.from);
+    const srcTerm = srcSum && srcSum.kind === 'sum' ? srcSum.terms[data.termIdx] : null;
+    const vanishRect = srcTerm ? captureRemovedTermSignRect(data.from, data.termIdx, srcTerm.sign) : null;
     const removed = removeSumTerm(data.from, data.termIdx);
     if (!removed) return;
     const flipped = { sign: -removed.sign, node: removed.node };
@@ -740,6 +754,7 @@ function processSumTermDrop(sidePath, data) {
     }
     signsToFlash.push({ sidePath: sidePath + '.0', termIdx: destTermIdx });
     refreshView();
+    if (vanishRect) flashVanishingSign(vanishRect);
 }
 // traite tout le contenu d'un membre comme un seul bloc (nécessaire avant de
 // pouvoir le glisser dans une fraction quand ce n'est pas une simple grandeur)
