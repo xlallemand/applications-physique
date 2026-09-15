@@ -572,7 +572,7 @@ function handleEmptied(path, removedId) {
 }
 function processDrop(path, data) {
     if (data.type === 'frac') {
-        if (!AideRules.isLegalFracTool(path)) { showFeedback(AideRules.MSG_FRAC, false); return; }
+        if (!AideRules.isLegalFracTool(path)) { hadError = true; showFeedback(AideRules.MSG_FRAC, false); return; }
         const node = getNode(path);
         if (!node) return;
         if (node.kind === 'simple') {
@@ -595,7 +595,7 @@ function processDrop(path, data) {
     const node = getNode(path);
     if (!node || node.kind !== 'simple') return;
     if (data.type === 'move') {
-        if (!AideRules.isLegalMove(data.from, path)) { showFeedback(AideRules.MSG_MOVE_FRAC, false); return; }
+        if (!AideRules.isLegalMove(data.from, path)) { hadError = true; showFeedback(AideRules.MSG_MOVE_FRAC, false); return; }
         if (data.from === path) { refreshView(); return; }
         const src = getNode(data.from);
         if (src && src.items[data.idx] && src.items[data.idx].id === data.id) {
@@ -612,7 +612,7 @@ function handleInsertDropAt(sidePath, where, data) {
     const side = getNode(sidePath);
     if (!side || side.kind !== 'seq') return;
     if (data.type === 'move' && !AideRules.isLegalInsert(data.from, sidePath)) {
-        showFeedback(AideRules.MSG_INSERT, false);
+        hadError = true; showFeedback(AideRules.MSG_INSERT, false);
         return;
     }
     if (data.type === 'move') {
@@ -741,7 +741,7 @@ function captureEqSignRect() {
 function processSumTermDrop(sidePath, data) {
     if (sidePath !== 'left' && sidePath !== 'right') return;
     if (data.from === sidePath) { refreshView(); return; }
-    if (!AideRules.isLegalSumTerm(data.from, sidePath)) { showFeedback(AideRules.MSG_SUMTERM, false); return; }
+    if (!AideRules.isLegalSumTerm(data.from, sidePath)) { hadError = true; showFeedback(AideRules.MSG_SUMTERM, false); return; }
     const srcSum = getNode(data.from);
     const srcTerm = srcSum && srcSum.kind === 'sum' ? srcSum.terms[data.termIdx] : null;
     const showVanishGhost = !!(srcTerm && srcTerm.sign === -1);
