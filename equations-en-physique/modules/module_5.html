@@ -165,6 +165,14 @@ const nav = AppNav.init({
             { key: 'module_4', label: 'Module 4 : Méthode' },
             { key: 'module_5', label: 'Module 5 : Entraînement' },
         ]},
+        { title: 'Gérer les + et les -', items: [
+            { key: 'module_6', label: 'Module 6 : Méthode' },
+            { key: 'module_7', label: 'Module 7 : Entraînement' },
+        ]},
+        { title: 'Gérer les fonctions réciproques', items: [
+            { key: 'module_8', label: 'Module 8 : Méthode' },
+            { key: 'module_9', label: 'Module 9 : Entraînement' },
+        ]},
     ],
 });
 nav.setActive('module_5');
@@ -735,6 +743,7 @@ function startingState(cfg) {
     return { left: emptySeq(), right: emptySeq(), prefilled: false };
 }
 function startSolveExercise(cfg) {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     currentExercise = cfg;
     viewMode = 'solve';
     const start = startingState(cfg);
@@ -748,6 +757,7 @@ function startSolveExercise(cfg) {
     renderHistory();
 }
 function resetSolveExercise() {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     if (!currentExercise) return;
     const start = startingState(currentExercise);
     state = { left: start.left, right: start.right };
@@ -827,6 +837,7 @@ function verifyStep() {
 // MOTEUR DE DRILL (questions 1 à 4 : découverte guidée)
 // ═══════════════════════════════════════════════════════════════
 function mountDrill(container, drillCfg, explainHtml) {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     currentDrillCfg = drillCfg;
     viewMode = 'drill';
     state = { left: drillCfg.left(), right: drillCfg.right() };
@@ -849,6 +860,7 @@ function mountDrill(container, drillCfg, explainHtml) {
     refreshView();
 }
 function resetDrill() {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     if (!currentDrillCfg) return;
     viewMode = 'drill';
     state = { left: currentDrillCfg.left(), right: currentDrillCfg.right() };
@@ -1024,6 +1036,7 @@ function targetLabel(q) {
 }
 
 function renderModule4Intro() {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     document.getElementById('app').innerHTML = `
       <div class="bg-white rounded-xl shadow-lg p-6">
         <span class="content-module-badge">MODULE 5</span>
@@ -1037,6 +1050,7 @@ function renderModule4Intro() {
 function startModule4Graded(){ m4Idx = 0; m4Score = 0; m4Answers = []; renderModule4Question(); }
 
 function renderModule4Question() {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     if (m4Idx >= module4Bank.length) { finishModule4(); return; }
     const q = module4Bank[m4Idx];
     const app = document.getElementById('app');

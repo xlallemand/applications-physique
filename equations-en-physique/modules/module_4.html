@@ -165,6 +165,14 @@ const nav = AppNav.init({
             { key: 'module_4', label: 'Module 4 : Méthode' },
             { key: 'module_5', label: 'Module 5 : Entraînement' },
         ]},
+        { title: 'Gérer les + et les -', items: [
+            { key: 'module_6', label: 'Module 6 : Méthode' },
+            { key: 'module_7', label: 'Module 7 : Entraînement' },
+        ]},
+        { title: 'Gérer les fonctions réciproques', items: [
+            { key: 'module_8', label: 'Module 8 : Méthode' },
+            { key: 'module_9', label: 'Module 9 : Entraînement' },
+        ]},
     ],
 });
 nav.setActive('module_4');
@@ -696,6 +704,7 @@ function solveEditorHTML() {
     <div id="feedback" class="text-center mt-4 font-semibold text-lg"></div>`;
 }
 function startSolveExercise(cfg) {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     currentExercise = cfg;
     viewMode = 'solve';
     state = { left: emptySeq(), right: emptySeq() };
@@ -708,6 +717,7 @@ function startSolveExercise(cfg) {
     renderHistory();
 }
 function resetSolveExercise() {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     if (!currentExercise) return;
     state = { left: emptySeq(), right: emptySeq() };
     history = [];
@@ -784,6 +794,7 @@ function verifyStep() {
 // MOTEUR DE DRILL (questions 1 à 4 : découverte guidée)
 // ═══════════════════════════════════════════════════════════════
 function mountDrill(container, drillCfg, explainHtml) {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     currentDrillCfg = drillCfg;
     viewMode = 'drill';
     state = { left: drillCfg.left(), right: drillCfg.right() };
@@ -809,6 +820,7 @@ function mountDrill(container, drillCfg, explainHtml) {
     refreshView();
 }
 function resetDrill() {
+    if (window.DragDrop) DragDrop.cleanupGhosts();
     if (!currentDrillCfg) return;
     viewMode = 'drill';
     state = { left: currentDrillCfg.left(), right: currentDrillCfg.right() };
