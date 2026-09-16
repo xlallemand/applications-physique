@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : Trois méthodes pour calculer</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="ptools.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/numpad.js"></script>
+<script src="ptools.js"></script>
+<style>
+  .ex-card { border:1.5px solid #e2e8f0; border-radius:14px; padding:16px 18px; margin:14px 0; background:#fff; }
+  .ex-card.direct { background:#fafaf9; }
+  .qtype-tag { display:inline-block; font-size:.7rem; font-weight:800; padding:3px 10px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px; background:var(--app-accent-100); color:var(--app-accent-800); }
+</style>
+</head>
+<body class="bg-gradient-to-br from-violet-50 to-purple-100 min-h-screen">
+<div id="app-nav"></div>
+
+<div class="container mx-auto px-4 py-8 max-w-3xl">
+  <div class="bg-white rounded-xl shadow-lg p-6">
+    <span class="content-module-badge">MODULE 4</span>
+    <h2 class="text-2xl font-bold text-[var(--app-accent-800)] mb-3">Utiliser la proportionnalité : trois méthodes</h2>
+    <p class="text-gray-700">Une fois qu'on a reconnu une proportionnalité directe entre deux grandeurs A et B, on veut calculer une valeur inconnue. Voici trois méthodes équivalentes : choisis celle que tu préfères !</p>
+  </div>
+
+  <!-- ================= Méthode 1 : tableau + produit en croix ================= -->
+  <div class="method-card mt-6">
+    <span class="qtype-tag">Méthode 1 — la plus utilisée</span>
+    <h3 class="text-xl font-bold mb-2">Le tableau de proportionnalité et le produit en croix</h3>
+    <p class="text-gray-700 mb-2">On place les deux grandeurs dans un tableau à deux colonnes, <b>avec les unités</b> — c'est essentiel ! Une ligne contient les deux valeurs connues, l'autre une valeur connue et l'inconnue.</p>
+    <div class="table-wrap"><table class="w-full text-sm">
+      <thead><tr class="bg-[var(--app-accent-600)] text-white"><th class="p-2">Grandeur A</th><th class="p-2">Grandeur B</th></tr></thead>
+      <tbody>
+        <tr class="bg-[var(--app-accent-50)]"><td class="p-2 text-center font-mono">a</td><td class="p-2 text-center font-mono">b</td></tr>
+        <tr><td class="p-2 text-center font-mono">c</td><td class="p-2 text-center font-mono">?</td></tr>
+      </tbody>
+    </table></div>
+    <p class="text-gray-700 mt-2">Le <b>produit en croix</b> donne : a &times; ? = c &times; b, donc :</p>
+    <div class="formula-box">? = (c &times; b) / a</div>
+
+    <div class="ex-card direct">
+      <span class="qtype-tag qtype-directe" style="background:#dcfce7;color:#14532d">Exemple direct</span>
+      <p class="text-gray-700 mb-2"><b>Une voiture roule à 25 km/h. Combien de temps met-elle pour parcourir 52 m ?</b></p>
+      <p class="text-gray-700 mb-2">Avant de remplir le tableau, on convertit pour avoir des unités cohérentes : 25 km/h &nbsp;=&nbsp; 25 km <b>par</b> 1 h &nbsp;=&nbsp; 25&times;10&sup3; m <b>par</b> 3600 s.</p>
+      <div class="table-wrap"><table class="pt-table">
+        <thead><tr><th>d (m)</th><th>t (s)</th></tr></thead>
+        <tbody>
+          <tr><td>25 km = 25&times;10&sup3; m</td><td>1 h = 3600 s</td></tr>
+          <tr><td>52 m</td><td>?</td></tr>
+        </tbody>
+      </table></div>
+      <p class="text-gray-700">Produit en croix : 25&times;10&sup3; &times; ? = 52 &times; 3600, donc :</p>
+      <div class="formula-box" style="font-size:1rem">? = (3600 &times; 52) / 25&thinsp;000 &asymp; 7,49 s</div>
+    </div>
+
+    <div class="ex-card">
+      <span class="qtype-tag">À toi de vérifier</span>
+      <p class="text-gray-700 mb-2">Un cycliste roule à 18 km/h. Convertis d'abord sa vitesse en m/s, puis calcule la durée (en s) qu'il met pour parcourir 75 m.</p>
+      <p class="text-gray-700 mb-1 text-sm">Aide : 18 km/h = 18&times;10&sup3; m / 3600 s = 5 m/s.</p>
+      <div class="flex items-center gap-3 flex-wrap">
+        <input type="text" id="q1" inputmode="decimal" class="check-input w-28" placeholder="t en s" onfocus="numpadFocus('q1')" ontouchstart="numpadFocus('q1')">
+        <button class="check-btn" onclick="checkQ('q1', 15, 'r1')">Vérifier</button>
+      </div>
+      <div id="np1"></div>
+      <p id="r1" class="mt-2 font-semibold"></p>
+    </div>
+  </div>
+
+  <!-- ================= Méthode 2 : coefficient ================= -->
+  <div class="method-card">
+    <span class="qtype-tag">Méthode 2</span>
+    <h3 class="text-xl font-bold mb-2">Le coefficient de proportionnalité</h3>
+    <p class="text-gray-700 mb-2">On calcule d'abord le coefficient k avec la ligne connue, puis on l'utilise pour trouver l'inconnue :</p>
+    <div class="formula-box">k = b / a &nbsp;&nbsp;&nbsp;puis&nbsp;&nbsp;&nbsp; ? = k &times; c</div>
+
+    <div class="ex-card direct">
+      <span class="qtype-tag qtype-directe" style="background:#dcfce7;color:#14532d">Exemple direct</span>
+      <p class="text-gray-700 mb-2"><b>On dissout 15 g de sel dans 0,5 L d'eau. Quelle masse faut-il dissoudre dans 1,2 L pour obtenir la même concentration ?</b></p>
+      <p class="text-gray-700">Coefficient (ici, la concentration) : k = 15 / 0,5 = 30 g/L.</p>
+      <div class="formula-box" style="font-size:1rem">m = 30 &times; 1,2 = 36 g</div>
+    </div>
+
+    <div class="ex-card">
+      <span class="qtype-tag">À toi de vérifier</span>
+      <p class="text-gray-700 mb-2">Une résistance chauffante dissipe une énergie de 120 J en 4 s. Calcule d'abord le coefficient (la puissance, en W), puis l'énergie dissipée en 15 s.</p>
+      <div class="flex items-center gap-3 flex-wrap">
+        <input type="text" id="q2" inputmode="decimal" class="check-input w-28" placeholder="E en J" onfocus="numpadFocus('q2')" ontouchstart="numpadFocus('q2')">
+        <button class="check-btn" onclick="checkQ('q2', 450, 'r2')">Vérifier</button>
+      </div>
+      <div id="np2"></div>
+      <p id="r2" class="mt-2 font-semibold"></p>
+    </div>
+  </div>
+
+  <!-- ================= Méthode 3 : retour à l'unité ================= -->
+  <div class="method-card">
+    <span class="qtype-tag">Méthode 3</span>
+    <h3 class="text-xl font-bold mb-2">Le retour à l'unité (« règle de trois »)</h3>
+    <p class="text-gray-700 mb-2">On calcule la valeur de B correspondant à <b>1 unité</b> de A, puis on multiplie par la valeur de A qui nous intéresse :</p>
+    <div class="formula-box">1 unité de A &rarr; b / a &nbsp;&nbsp;&nbsp;puis&nbsp;&nbsp;&nbsp; ? = (b / a) &times; c</div>
+
+    <div class="ex-card direct">
+      <span class="qtype-tag qtype-directe" style="background:#dcfce7;color:#14532d">Exemple direct</span>
+      <p class="text-gray-700 mb-2"><b>Un devoir est noté sur 36 points. Un élève obtient 25 points. Quelle est sa note ramenée sur 20 ?</b></p>
+      <p class="text-gray-700">On ramène d'abord à 1 point du barème : 25 / 36 &asymp; 0,694 point sur 20 par point de barème.</p>
+      <div class="formula-box" style="font-size:1rem">note = 0,694 &times; 20 &asymp; 13,9 / 20</div>
+    </div>
+
+    <div class="ex-card">
+      <span class="qtype-tag">À toi de vérifier</span>
+      <p class="text-gray-700 mb-2">Une pile alimente un circuit dans lequel 3 lampes identiques montées en série se répartissent 9 V à parts égales. Quelle serait la tension totale nécessaire pour alimenter de la même façon 5 lampes identiques en série ?</p>
+      <div class="flex items-center gap-3 flex-wrap">
+        <input type="text" id="q3" inputmode="decimal" class="check-input w-28" placeholder="U en V" onfocus="numpadFocus('q3')" ontouchstart="numpadFocus('q3')">
+        <button class="check-btn" onclick="checkQ('q3', 15, 'r3')">Vérifier</button>
+      </div>
+      <div id="np3"></div>
+      <p id="r3" class="mt-2 font-semibold"></p>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-lg p-6 callout-accent">
+    <p class="text-gray-700"><b>Les trois méthodes donnent toujours le même résultat.</b> Le tableau de proportionnalité est en général le plus facile à utiliser (et le plus visuel), surtout quand il faut convertir des unités — mais rien ne t'empêche de préférer le coefficient ou le retour à l'unité selon la situation.</p>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-lg p-6 mt-6 text-center">
+    <p class="text-gray-700 mb-3">Prêt à t'entraîner ?</p>
+    <a href="module_5.html" class="btn-primary inline-block no-underline">Module 5 : Vérification des connaissances →</a>
+  </div>
+</div>
+
+<script>
+['np1','np2','np3'].forEach(id => { document.getElementById(id).innerHTML = numpadWidget(); });
+
+function checkQ(id, correct, resultId) {
+  const input = document.getElementById(id);
+  const result = document.getElementById(resultId);
+  if (ptNumOk(input.value, correct, 3)) {
+    result.innerHTML = '✓ Correct ! 🎉';
+    result.style.color = '#166534';
+  } else {
+    result.innerHTML = '✗ Incorrect. La réponse est : ' + ptFmt(correct, 2);
+    result.style.color = '#991b1b';
+  }
+}
+
+const nav = AppNav.init({
+  appName: 'Proportionnalité', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
+  onHome: () => { window.location.href = '../index.html'; },
+  onNavigate: (key) => { window.location.href = key + '.html'; },
+  groups: [
+    { title: 'Reconnaître', items: [
+      { key: 'module_1', label: 'Module 1 : Cours' }, { key: 'module_2', label: 'Module 2 : Vérification' }, { key: 'module_3', label: 'Module 3 : Entraînement' },
+    ]},
+    { title: 'Utiliser', items: [
+      { key: 'module_4', label: 'Module 4 : Cours' }, { key: 'module_5', label: 'Module 5 : Vérification' }, { key: 'module_6', label: 'Module 6 : Entraînement' },
+    ]},
+    { title: 'Graphique', items: [
+      { key: 'module_7', label: 'Module 7 : Cours' }, { key: 'module_8', label: 'Module 8 : Vérification' }, { key: 'module_9', label: 'Module 9 : Entraînement' },
+    ]},
+  ],
+});
+nav.setActive('module_4');
+nav.setTitle('Module 4 : Cours');
+</script>
+</body>
+</html>

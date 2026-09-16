@@ -1,0 +1,127 @@
+/* ============================================================
+   Styles communs aux modules de "Proportionnalité" (couleur
+   d'accent violette + composants ré-utilisés : badges, quiz,
+   glisser-déposer, graphiques, sélecteur de méthode).
+   ============================================================ */
+
+:root {
+  --app-accent-50:  #f5f3ff;
+  --app-accent-100: #ede9fe;
+  --app-accent-200: #ddd6fe;
+  --app-accent-400: #a78bfa;
+  --app-accent-600: #7c3aed;
+  --app-accent-700: #6d28d9;
+  --app-accent-800: #5b21b6;
+}
+body { font-family: var(--font-sans); }
+
+.content-module-badge {
+  display: inline-block; background: var(--app-accent-600); color: #fff;
+  font-size: .75rem; font-weight: 800; padding: 4px 12px; border-radius: 999px;
+  letter-spacing: .05em; margin-bottom: 8px;
+}
+
+.progress-bar-outer { background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; }
+.progress-bar-inner { background: var(--app-accent-600); height: 100%; transition: width .3s; }
+.score-badge { font-weight: 800; color: var(--app-accent-600); }
+
+.mcq-btn {
+  display: block; width: 100%; text-align: left; padding: 12px 16px;
+  border: 2px solid var(--app-accent-200); border-radius: 10px; margin-bottom: 8px;
+  background: #fff; font-weight: 700; color: var(--app-accent-800);
+  font-family: var(--font-sans); font-size: .95rem; cursor: pointer;
+}
+.mcq-btn:hover:not(:disabled) { background: var(--app-accent-50); }
+.mcq-btn:disabled { cursor: default; }
+.mcq-btn.correct { background: #dcfce7; border-color: #22c55e; color: #14532d; }
+.mcq-btn.wrong { background: #fee2e2; border-color: #ef4444; color: #7f1d1d; }
+
+.recap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px,1fr)); gap: 6px; }
+.recap-item { background: #f1f5f9; border-radius: 8px; padding: 5px 2px; text-align: center; font-size: .7rem; line-height: 1.3; color: #334155; }
+.recap-item b { display: block; font-size: .85rem; }
+
+.confetti-piece { position: fixed; top: -20px; width: 9px; height: 14px; z-index: 9999; pointer-events: none; animation: confetti-fall linear forwards; }
+@keyframes confetti-fall { to { top: 110vh; transform: translateY(0) rotate(720deg); } }
+
+/* ---------- Étiquettes / cases à glisser-déposer ---------- */
+.pt-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 42px; padding: 8px 14px; margin: 3px;
+  background: var(--app-accent-50); border: 2px solid var(--app-accent-400);
+  border-radius: 10px; font-weight: 700; color: var(--app-accent-800);
+  cursor: grab; touch-action: none; user-select: none; font-family: var(--font-sans); font-size: .92rem;
+}
+.pt-chip.dragging { opacity: .4; }
+.pt-palette { display: flex; flex-wrap: wrap; gap: 4px; padding: 10px; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px; margin-bottom: 16px; }
+
+.pt-slot {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 74px; min-height: 42px; padding: 6px 10px; margin: 0 4px;
+  border: 2px dashed #94a3b8; border-radius: 10px; background: #fff;
+  vertical-align: middle; transition: all .15s;
+}
+.pt-slot-ph { color: #94a3b8; font-weight: 700; }
+.pt-slot-over { background: var(--app-accent-100); border-color: var(--app-accent-600); }
+.pt-slot.filled { border-style: solid; border-color: #22c55e; background: #f0fdf4; }
+.pt-slot-wrong { animation: pt-shake .4s ease; border-color: #ef4444 !important; background: #fee2e2 !important; }
+@keyframes pt-shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 60%{transform:translateX(6px)} }
+
+/* ---------- Tableau de proportionnalité ---------- */
+.pt-table { border-collapse: separate; border-spacing: 0; margin: 16px auto; width: 100%; max-width: 420px; }
+.pt-table th, .pt-table td { border: 1.5px solid var(--app-accent-200); padding: 10px; text-align: center; }
+.pt-table th { background: var(--app-accent-600); color: #fff; font-weight: 800; border-color: var(--app-accent-600); }
+.pt-table td:first-child, .pt-table th:first-child { border-left: none; }
+.pt-table tr:first-child th { border-top: none; }
+.pt-table { border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(15,23,42,.08); }
+
+/* ---------- Sélecteur de méthode ---------- */
+.method-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.method-btn {
+  flex: 1; min-width: 130px; padding: 12px 10px; border-radius: 12px;
+  border: 2px solid var(--app-accent-200); background: #fff; color: var(--app-accent-700);
+  font-weight: 800; font-size: .88rem; cursor: pointer; font-family: var(--font-sans);
+  transition: all .15s;
+}
+.method-btn:hover { background: var(--app-accent-50); }
+.method-btn.active { background: var(--app-accent-600); border-color: var(--app-accent-600); color: #fff; }
+
+/* ---------- Panneau de données (repliable, utile sur mobile) ---------- */
+.data-panel { border: 1.5px solid var(--app-accent-200); border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+.data-panel summary {
+  cursor: pointer; padding: 10px 14px; font-weight: 800; color: var(--app-accent-700);
+  background: var(--app-accent-50); list-style: none; display: flex; align-items: center; gap: 8px;
+}
+.data-panel summary::-webkit-details-marker { display: none; }
+.data-panel summary::before { content: '▸'; transition: transform .15s; }
+.data-panel[open] summary::before { transform: rotate(90deg); }
+.data-panel-body { padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+.data-pill { background: #fff; border: 1.5px solid var(--app-accent-200); border-radius: 999px; padding: 6px 14px; font-weight: 700; color: var(--app-accent-800); font-size: .88rem; }
+
+/* ---------- Paniers de tri (glisser-déposer) ---------- */
+.basket-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+@media (max-width: 640px) { .basket-grid { grid-template-columns: 1fr; } }
+.basket {
+  border: 2.5px dashed var(--app-accent-200); border-radius: 14px; padding: 10px;
+  min-height: 90px; background: var(--app-accent-50);
+}
+.basket-title { font-weight: 800; color: var(--app-accent-700); font-size: .82rem; text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .03em; }
+.basket-card {
+  display: block; width: 100%; text-align: left; padding: 10px 12px; margin-bottom: 6px;
+  background: #fff; border: 2px solid var(--app-accent-200); border-radius: 10px;
+  font-weight: 600; color: #334155; font-size: .85rem; cursor: grab; touch-action: none; user-select: none;
+}
+.basket-card.dragging { opacity: .4; }
+.basket-card.placed-ok { border-color: #22c55e; background: #f0fdf4; }
+.basket-card.placed-wrong { border-color: #ef4444; background: #fef2f2; }
+
+/* ---------- Graphique SVG ---------- */
+.pt-graph { width: 100%; max-width: 320px; height: auto; display: block; margin: 12px auto; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px; }
+
+/* ---------- Cours ---------- */
+.formula-box {
+  background: linear-gradient(135deg, var(--app-accent-50), #fff);
+  border: 2px solid var(--app-accent-200); border-radius: 14px;
+  padding: 16px 20px; margin: 14px 0; text-align: center; font-size: 1.15rem; font-weight: 800; color: var(--app-accent-800);
+}
+.method-card { border: 2px solid var(--app-accent-200); border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; background: #fff; }
+.method-card h3 { color: var(--app-accent-700); }

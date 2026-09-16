@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : Reconnaître une proportionnalité</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="ptools.css">
+<script src="../../assets/nav.js"></script>
+<style>
+  .qtype-tag { display:inline-block; font-size:.7rem; font-weight:800; padding:3px 10px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px; }
+  .qtype-directe { background:#dcfce7; color:#14532d; }
+  .qtype-inverse { background:#fee2e2; color:#7f1d1d; }
+  .qtype-aucune { background:#e2e8f0; color:#334155; }
+  .ex-card { border:1.5px solid #e2e8f0; border-radius:14px; padding:16px 18px; margin:14px 0; background:#fff; }
+  .ex-card.direct { background:#fafaf9; }
+  .check3 { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .check3 button { flex:1; min-width:150px; }
+</style>
+</head>
+<body class="bg-gradient-to-br from-violet-50 to-purple-100 min-h-screen">
+<div id="app-nav"></div>
+
+<div class="container mx-auto px-4 py-8 max-w-3xl" id="app">
+  <div class="bg-white rounded-xl shadow-lg p-6">
+    <span class="content-module-badge">MODULE 1</span>
+    <h2 class="text-2xl font-bold text-[var(--app-accent-800)] mb-3">Reconnaître une situation de proportionnalité</h2>
+    <p class="text-gray-700 mb-2">Avant de calculer quoi que ce soit, il faut savoir reconnaître le <b>type</b> de relation entre deux grandeurs : proportionnalité directe, proportionnalité inverse, ou aucune des deux.</p>
+  </div>
+
+  <!-- ================= Notion 1 : proportionnalité directe ================= -->
+  <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
+    <h3 class="text-xl font-bold text-[var(--app-accent-700)] mb-2">1. La proportionnalité directe</h3>
+    <p class="text-gray-700 mb-2">Deux grandeurs <b>x</b> et <b>y</b> sont <b>directement proportionnelles</b> si leur <b>rapport</b> reste constant :</p>
+    <div class="formula-box">y = k &times; x &nbsp;&nbsp;(k constant)</div>
+    <p class="text-gray-700">Autrement dit : quand x double, y double ; quand x est divisé par 3, y est divisé par 3 ; etc. Dans un tableau de valeurs, tous les rapports y/x sont égaux.</p>
+
+    <div class="ex-card direct">
+      <span class="qtype-tag qtype-directe">Exemple direct</span>
+      <p class="text-gray-700">Une voiture roule à vitesse constante v = 90 km/h. La distance parcourue d et la durée du trajet t vérifient d = v &times; t : d est <b>directement proportionnelle</b> à t (le coefficient est la vitesse v, qui reste constante).</p>
+    </div>
+
+    <div class="ex-card">
+      <span class="qtype-tag qtype-directe">À toi de vérifier</span>
+      <p class="text-gray-700 mb-1">Une solution a une concentration molaire c fixée. On y dissout une quantité de matière n dans un volume V, avec n = c &times; V.</p>
+      <p class="font-semibold text-gray-800">Quelle est la relation entre n et V ?</p>
+      <div class="check3" id="chk1"></div>
+      <div id="chk1-fb" class="mt-2 font-semibold"></div>
+    </div>
+  </div>
+
+  <!-- ================= Notion 2 : proportionnalité inverse ================= -->
+  <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
+    <h3 class="text-xl font-bold text-[var(--app-accent-700)] mb-2">2. La proportionnalité inverse</h3>
+    <p class="text-gray-700 mb-2">Deux grandeurs x et y sont <b>inversement proportionnelles</b> si leur <b>produit</b> reste constant :</p>
+    <div class="formula-box">x &times; y = k &nbsp;&nbsp;soit&nbsp;&nbsp; y = k / x</div>
+    <p class="text-gray-700">Quand x double, y est divisé par 2 ; quand x est multiplié par 3, y est divisé par 3. <b>Attention</b> : ce n'est pas la même chose que "les deux grandeurs varient en sens contraire" — il faut que le produit soit exactement constant.</p>
+
+    <div class="ex-card direct">
+      <span class="qtype-tag qtype-inverse">Exemple direct</span>
+      <p class="text-gray-700">Loi de Boyle-Mariotte : à température constante, la pression P et le volume V d'un gaz vérifient P &times; V = cste. Si on comprime le gaz (V diminue), la pression P augmente dans les mêmes proportions : P et V sont <b>inversement proportionnelles</b>.</p>
+    </div>
+
+    <div class="ex-card">
+      <span class="qtype-tag qtype-inverse">À toi de vérifier</span>
+      <p class="text-gray-700 mb-1">Un conducteur ohmique est soumis à une tension U fixée. La loi d'Ohm donne U = R &times; I, où R est sa résistance et I l'intensité qui le traverse.</p>
+      <p class="font-semibold text-gray-800">Quelle est la relation entre I et R (à U fixée) ?</p>
+      <div class="check3" id="chk2"></div>
+      <div id="chk2-fb" class="mt-2 font-semibold"></div>
+    </div>
+  </div>
+
+  <!-- ================= Notion 3 : le réflexe "grandeur par grandeur" ================= -->
+  <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
+    <h3 class="text-xl font-bold text-[var(--app-accent-700)] mb-2">3. Le réflexe à avoir : une unité "quelque chose par quelque chose"</h3>
+    <p class="text-gray-700 mb-2">En physique-chimie, dès qu'une grandeur s'exprime avec une unité de la forme <b>"A par B"</b> (un quotient), elle relie deux grandeurs par une proportionnalité — à condition qu'un troisième facteur reste fixé.</p>
+    <div class="table-wrap mb-3">
+      <table class="w-full text-sm">
+        <thead><tr class="bg-[var(--app-accent-600)] text-white"><th class="p-2 text-left">Grandeur</th><th class="p-2 text-left">Unité</th><th class="p-2 text-left">Relation</th></tr></thead>
+        <tbody class="[&>tr:nth-child(even)]:bg-[var(--app-accent-50)]">
+          <tr><td class="p-2">Vitesse v</td><td class="p-2 font-mono">m/s</td><td class="p-2">distance &prop; durée (à v fixée)</td></tr>
+          <tr><td class="p-2">Masse volumique &rho;</td><td class="p-2 font-mono">kg/m&sup3;</td><td class="p-2">masse &prop; volume (à &rho; fixée)</td></tr>
+          <tr><td class="p-2">Concentration t</td><td class="p-2 font-mono">g/L</td><td class="p-2">masse dissoute &prop; volume (à t fixée)</td></tr>
+          <tr><td class="p-2">Éclairement E</td><td class="p-2 font-mono">W/m&sup2;</td><td class="p-2">puissance reçue &prop; surface (à E fixée)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="text-gray-700">Ce quotient est justement le <b>coefficient de proportionnalité</b> ! On y reviendra dans le module suivant.</p>
+
+    <div class="ex-card direct">
+      <span class="qtype-tag qtype-directe">Exemple direct</span>
+      <p class="text-gray-700">Un panneau solaire reçoit un éclairement E constant (en W/m&sup2;). La puissance P reçue par le panneau et sa surface S vérifient P = E &times; S : P est <b>directement proportionnelle</b> à S.</p>
+    </div>
+
+    <div class="ex-card">
+      <span class="qtype-tag qtype-directe">À toi de vérifier</span>
+      <p class="text-gray-700 mb-1">Une pièce métallique a une masse volumique &rho; fixée. Sa masse m et son volume V vérifient &rho; = m / V.</p>
+      <p class="font-semibold text-gray-800">Quelle est la relation entre m et V ?</p>
+      <div class="check3" id="chk3"></div>
+      <div id="chk3-fb" class="mt-2 font-semibold"></div>
+    </div>
+  </div>
+
+  <!-- ================= Notion 4 : les pièges ================= -->
+  <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
+    <h3 class="text-xl font-bold text-[var(--app-accent-700)] mb-2">4. Attention aux pièges : ce n'est pas toujours proportionnel !</h3>
+    <p class="text-gray-700 mb-2">Deux grandeurs qui varient "dans le même sens" ne sont pas forcément proportionnelles. Deux pièges classiques :</p>
+    <ul class="list-disc pl-6 text-gray-700 mb-2 space-y-1">
+      <li><b>La situation affine</b> : y = a &times; x + b avec b &ne; 0 (une valeur de départ non nulle). Le rapport y/x n'est alors pas constant.</li>
+      <li><b>La situation non linéaire</b> : y dépend de x&sup2;, de &radic;x, etc. Le rapport y/x n'est pas constant non plus.</li>
+    </ul>
+
+    <div class="ex-card direct">
+      <span class="qtype-tag qtype-aucune">Exemple direct</span>
+      <p class="text-gray-700">Une course de taxi coûte 2,50&nbsp;€ de prise en charge, puis 1,20&nbsp;€ par km parcouru : prix = 2,50 + 1,20 &times; d. Si d double, le prix ne double pas (à cause des 2,50&nbsp;€ fixes) : ce <b>n'est pas</b> une situation de proportionnalité.</p>
+    </div>
+
+    <div class="ex-card">
+      <span class="qtype-tag qtype-aucune">À toi de vérifier</span>
+      <p class="text-gray-700 mb-1">L'énergie cinétique d'un objet de masse m fixée vérifie E<sub>c</sub> = &frac12; m v&sup2;, où v est sa vitesse.</p>
+      <p class="font-semibold text-gray-800">Quelle est la relation entre E<sub>c</sub> et v ?</p>
+      <div class="check3" id="chk4"></div>
+      <div id="chk4-fb" class="mt-2 font-semibold"></div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-lg p-6 mt-6 text-center">
+    <p class="text-gray-700 mb-3">Prêt à t'entraîner à reconnaître ces situations ?</p>
+    <a href="module_2.html" class="btn-primary inline-block no-underline">Module 2 : Vérification des connaissances →</a>
+  </div>
+</div>
+
+<script>
+function renderCheck3(id, correct) {
+  const opts = ['Proportionnalité directe', 'Proportionnalité inverse', 'Aucune des deux'];
+  const box = document.getElementById(id);
+  box.innerHTML = opts.map(o => `<button class="mcq-btn" onclick="answerCheck3('${id}','${o}','${correct}')">${o}</button>`).join('');
+}
+function answerCheck3(id, choice, correct) {
+  const box = document.getElementById(id);
+  const fb = document.getElementById(id + '-fb');
+  const ok = choice === correct;
+  box.querySelectorAll('.mcq-btn').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add('correct');
+    else if (b.textContent === choice) b.classList.add('wrong');
+  });
+  fb.textContent = ok ? '✓ Exact !' : `✕ La bonne réponse était : « ${correct} ».`;
+  fb.style.color = ok ? '#166534' : '#991b1b';
+}
+renderCheck3('chk1', 'Proportionnalité directe');
+renderCheck3('chk2', 'Proportionnalité inverse');
+renderCheck3('chk3', 'Proportionnalité directe');
+renderCheck3('chk4', 'Aucune des deux');
+
+const nav = AppNav.init({
+  appName: 'Proportionnalité',
+  portalHref: '../../index.html',
+  portalLabel: 'Toutes les applications',
+  onHome: () => { window.location.href = '../index.html'; },
+  onNavigate: (key) => { window.location.href = key + '.html'; },
+  groups: [
+    { title: 'Reconnaître', items: [
+      { key: 'module_1', label: 'Module 1 : Cours' },
+      { key: 'module_2', label: 'Module 2 : Vérification' },
+      { key: 'module_3', label: 'Module 3 : Entraînement' },
+    ]},
+    { title: 'Utiliser', items: [
+      { key: 'module_4', label: 'Module 4 : Cours' },
+      { key: 'module_5', label: 'Module 5 : Vérification' },
+      { key: 'module_6', label: 'Module 6 : Entraînement' },
+    ]},
+    { title: 'Graphique', items: [
+      { key: 'module_7', label: 'Module 7 : Cours' },
+      { key: 'module_8', label: 'Module 8 : Vérification' },
+      { key: 'module_9', label: 'Module 9 : Entraînement' },
+    ]},
+  ],
+});
+nav.setActive('module_1');
+nav.setTitle('Module 1 : Cours');
+</script>
+</body>
+</html>
