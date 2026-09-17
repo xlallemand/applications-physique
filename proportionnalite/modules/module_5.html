@@ -23,12 +23,10 @@ const bank = [
   { type: 'qcm', text: "On veut calculer le coefficient de proportionnalité k reliant y (grandeur B) à x (grandeur A), avec y = k &times; x. Quelle formule donne k ?",
     options: ['k = y / x', 'k = x / y', 'k = y &times; x', 'k = y + x'], correct: 0 },
 
-  { type: 'drag', text: "Un sirop se prépare avec une dose D proportionnelle au volume d'eau V. On sait que D = 40 mL correspond à V = 200 mL. Place les grandeurs pour construire le calcul du volume V correspondant à D = 100 mL.",
-    chips: [
-      { id: 'a1', label: '40 mL' }, { id: 'b1', label: '200 mL' }, { id: 'a2', label: '100 mL' },
-      { id: 'x1', label: '0,4 L' }, { id: 'x2', label: '500 mL' },
-    ],
-    lines: [ { tokens: ['?', '=', '(', 'slot:a2', '&times;', 'slot:b1', ')', '/', 'slot:a1'] } ],
+  { type: 'tableauflow', text: "Un sirop se prépare avec une dose D proportionnelle au volume d'eau V. On sait que D = 40 mL correspond à V = 200 mL. Place les grandeurs dans le tableau, puis reporte-les dans la formule, pour préparer le calcul du volume V correspondant à D = 100 mL.",
+    labelA: 'D', unitA: 'mL', labelB: 'V', unitB: 'mL',
+    a1: { label: '40 mL', value: 40 }, b1: { label: '200 mL', value: 200 }, a2: { label: '100 mL', value: 100 },
+    distractors: [{ id: 'x1', label: '0,4 L' }, { id: 'x2', label: '500 mL' }],
   },
 
   { type: 'qcm', text: "Que calcule-t-on en premier lorsqu'on utilise la méthode du « retour à l'unité » ?",
@@ -77,12 +75,11 @@ const bank = [
       'Cela dépend, il n\'y a pas de règle',
     ], correct: 0 },
 
-  { type: 'drag', text: "À température fixée, un gaz occupe 5 L sous une pression de 4 bar. Place les grandeurs pour construire le calcul (proportionnalité inverse) du volume sous une pression de 10 bar.",
-    chips: [
-      { id: 'a1', label: '4 bar' }, { id: 'b1', label: '5 L' }, { id: 'a2', label: '10 bar' },
-      { id: 'x1', label: '10 L' }, { id: 'x2', label: '4 L' },
-    ],
-    lines: [ { tokens: ['?', '=', '(', 'slot:a1', '&times;', 'slot:b1', ')', '/', 'slot:a2'] } ],
+  { type: 'tableauflow', text: "À température fixée, un gaz occupe 5 L sous une pression de 4 bar. Place les grandeurs dans le tableau, puis dans la formule (proportionnalité inverse), pour préparer le calcul du volume sous une pression de 10 bar.",
+    labelA: 'P', unitA: 'bar', labelB: 'V', unitB: 'L',
+    a1: { label: '4 bar', value: 4 }, b1: { label: '5 L', value: 5 }, a2: { label: '10 bar', value: 10 },
+    distractors: [{ id: 'x1', label: '10 L' }, { id: 'x2', label: '4 L' }],
+    inverse: true,
   },
 
   { type: 'qcm', text: "On a calculé k = 15 (g/L) pour une solution, à partir de m = 15 g dissous dans V = 1 L. Que représente ce nombre 15 ?",
@@ -93,8 +90,8 @@ const bank = [
       'Un simple hasard de calcul, sans signification physique',
     ], correct: 0 },
 ];
-let idx = 0, score = 0, answers = [];
-function maxScore() { return bank.reduce((s,q) => s + (q.type==='qcm' ? 1 : countSlots(q)), 0); }
+let idx = 0, score = 0, answers = [], questionDone = false;
+function maxScore() { return bank.reduce((s,q) => s + (q.type==='qcm' ? 1 : q.type==='tableauflow' ? 3 : countSlots(q)), 0); }
 function countSlots(q) { return q.lines.reduce((s,l) => s + l.tokens.filter(t => t.startsWith('slot:')).length, 0); }
 
 function renderIntro() {
@@ -119,6 +116,7 @@ function render() {
   const q = bank[idx];
   const app = document.getElementById('app');
   const head = ptHeader({ badge: 'MODULE 5', title: 'Vérification des connaissances', idx, total: bank.length, score });
+  questionDone = false;
 
   if (q.type === 'qcm') {
     app.innerHTML = head + `
@@ -127,6 +125,30 @@ function render() {
         <div id="opts">${q.options.map((o,i) => `<button class="mcq-btn" onclick="answerQcm(${i})">${o}</button>`).join('')}</div>
         <div class="text-right mt-2">${ptSkipBtn('skipQ()')}</div>
       </div>`;
+    return;
+  }
+
+  if (q.type === 'tableauflow') {
+    app.innerHTML = head + `
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <p class="text-gray-700 text-lg mb-3">${q.text}</p>
+        <div id="tflow"></div>
+        <div class="text-right mt-3" id="skipRow">${ptSkipBtn('skipQ()')}</div>
+      </div>`;
+    ptTableauFlow(document.getElementById('tflow'), {
+      labelA: q.labelA, unitA: q.unitA, labelB: q.labelB, unitB: q.unitB,
+      a1: q.a1, b1: q.b1, a2: q.a2, distractors: q.distractors, inverse: q.inverse,
+      onDone: () => {
+        if (questionDone) return;
+        questionDone = true;
+        score += 3;
+        answers.push({ num: idx+1, pts: 3, max: 3 });
+        document.querySelector('.score-badge').textContent = score + ' pt' + (score>1?'s':'');
+        document.getElementById('skipRow').style.display = 'none';
+        document.getElementById('tflow').insertAdjacentHTML('afterend',
+          `<div class="text-center mt-2"><button onclick="nextQ()" class="btn-primary">Suite →</button></div>`);
+      },
+    });
     return;
   }
 
@@ -143,7 +165,7 @@ function render() {
       <p class="text-gray-700 text-lg mb-3">${q.text}</p>
       <div class="pt-palette">${q.chips.map(c => ptChip(c.id, c.label, c.value)).join('')}</div>
       ${linesHtml}
-      <div class="flex items-center justify-between mt-4">
+      <div class="flex items-center justify-between mt-4" id="actionRow">
         ${ptSkipBtn('skipQ()')}
         <button class="btn-primary" onclick="verifyDrag()">Vérifier</button>
       </div>
@@ -154,15 +176,18 @@ function render() {
 }
 
 function verifyDrag() {
+  if (questionDone) return;
   const q = bank[idx];
   const r = engine.verify();
   const msg = document.getElementById('dragMsg');
   if (r.correct === r.total) {
+    questionDone = true;
     score += r.total;
     answers.push({ num: idx+1, pts: r.total, max: r.total });
     document.querySelector('.score-badge').textContent = score + ' pt' + (score>1?'s':'');
     msg.style.color = '#166534';
     msg.innerHTML = '✓ Bien placé !';
+    document.getElementById('actionRow').style.display = 'none';
     document.getElementById('dragMsg').insertAdjacentHTML('afterend',
       `<div class="text-center mt-2"><button onclick="nextQ()" class="btn-primary">Suite →</button></div>`);
   } else {
@@ -186,8 +211,9 @@ function answerQcm(i) {
 }
 function nextQ() { idx++; render(); }
 function skipQ() {
+  if (questionDone) return;
   const q = bank[idx];
-  answers.push({ num: idx+1, pts: 0, max: q.type==='qcm' ? 1 : countSlots(q) });
+  answers.push({ num: idx+1, pts: 0, max: q.type==='qcm' ? 1 : q.type==='tableauflow' ? 3 : countSlots(q) });
   idx++; render();
 }
 

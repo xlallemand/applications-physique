@@ -72,7 +72,7 @@ const bank = [
     distractors: [{id:'x1', label:'18 min'}, {id:'x2', label:'40 km'}] },
 ];
 
-let idx = 0, score = 0, answers = [], currentMethod = null, engine = null;
+let idx = 0, score = 0, answers = [], currentMethod = null, engine = null, questionDone = false;
 
 function maxScore() { return bank.length * 3; }
 
@@ -99,7 +99,7 @@ function render() {
       <p class="text-gray-700 text-lg mb-3">${q.text}</p>
       <div id="methodZone"></div>
       <div id="calcArea"></div>
-      <div class="text-right mt-3">${ptSkipBtn('skipQ()')}</div>
+      <div class="text-right mt-3" id="skipBtnRow">${ptSkipBtn('skipQ()')}</div>
     </div>`;
 
   renderMethodZone(q);
@@ -128,7 +128,19 @@ function chooseMethod(m) {
 
 function renderCalcArea(q, method) {
   const area = document.getElementById('calcArea');
+  questionDone = false;
   if (!method) { area.innerHTML = '<p class="text-gray-500 italic">Choisis une méthode ci-dessus pour commencer.</p>'; return; }
+
+  if (method === 'tableau') {
+    area.innerHTML = '';
+    ptTableauFlow(area, {
+      labelA: q.labelA, unitA: q.unitA, labelB: q.labelB, unitB: q.unitB,
+      a1: { label: q.a1txt, value: q.a1val }, b1: { label: q.b1txt, value: q.b1val }, a2: { label: q.a2txt },
+      distractors: q.distractors, inverse: q.inverse,
+      onDone: () => { onCalcSuccess(3); },
+    });
+    return;
+  }
 
   const chips = [
     { id: 'a1', label: q.a1txt, value: q.a1val }, { id: 'b1', label: q.b1txt, value: q.b1val }, { id: 'a2', label: q.a2txt },
@@ -136,15 +148,7 @@ function renderCalcArea(q, method) {
   const paletteHtml = `<div class="pt-palette">${chips.map(c => ptChip(c.id, c.label, c.value)).join('')}</div>`;
 
   let linesHtml = '', liveGroups = [];
-  if (method === 'tableau') {
-    linesHtml = `<table class="pt-table">
-      <thead><tr><th>${q.labelA} (${q.unitA})</th><th>${q.labelB} (${q.unitB})</th></tr></thead>
-      <tbody>
-        <tr><td>${ptSlot('a1')}</td><td>${ptSlot('b1')}</td></tr>
-        <tr><td>${ptSlot('a2')}</td><td>?</td></tr>
-      </tbody>
-    </table>`;
-  } else if (method === 'coef') {
+  if (method === 'coef') {
     linesHtml = `
       <div class="text-sm font-bold text-gray-500 mb-1">Coefficient :</div>
       <div class="formula-line">k = ${ptFraction('b1', 'a1', 'liveCalc')}</div>
@@ -161,7 +165,7 @@ function renderCalcArea(q, method) {
   }
 
   area.innerHTML = paletteHtml + `<div id="calcLines">${linesHtml}</div>
-    <div class="text-center mt-4">
+    <div class="text-center mt-4" id="verifyRow">
       <button class="btn-primary" onclick="verifyCalc()">Vérifier</button>
     </div>
     <p id="calcMsg" class="mt-2 font-semibold"></p>`;
@@ -169,24 +173,34 @@ function renderCalcArea(q, method) {
 }
 
 function verifyCalc() {
+  if (questionDone) return;
   const r = engine.verify();
   const msg = document.getElementById('calcMsg');
   if (r.correct === r.total) {
-    score += r.total;
-    answers.push({ num: idx+1, pts: r.total, max: r.total });
-    document.querySelector('.score-badge').textContent = score + ' pt' + (score>1?'s':'');
     msg.style.color = '#166534';
     msg.innerHTML = '✓ Calcul correctement construit !';
-    msg.insertAdjacentHTML('afterend', `<div class="text-center mt-2"><button onclick="nextQ()" class="btn-primary">Suite →</button></div>`);
-    document.querySelectorAll('.method-btn').forEach(b => b.disabled = true);
+    document.getElementById('verifyRow').style.display = 'none';
+    onCalcSuccess(r.total);
   } else {
     msg.style.color = '#991b1b';
     msg.textContent = `${r.correct}/${r.total} cases correctes — corrige les cases rouges et re-vérifie.`;
   }
 }
 
+function onCalcSuccess(pts) {
+  if (questionDone) return;
+  questionDone = true;
+  score += pts;
+  answers.push({ num: idx+1, pts, max: pts });
+  document.querySelector('.score-badge').textContent = score + ' pt' + (score>1?'s':'');
+  document.getElementById('calcArea').insertAdjacentHTML('afterend',
+    `<div class="text-center mt-2"><button onclick="nextQ()" class="btn-primary">Suite →</button></div>`);
+  document.querySelectorAll('.method-btn').forEach(b => b.disabled = true);
+  const skip = document.getElementById('skipBtnRow'); if (skip) skip.style.display = 'none';
+}
+
 function nextQ() { idx++; render(); }
-function skipQ() { answers.push({ num: idx+1, pts: 0, max: 3 }); idx++; render(); }
+function skipQ() { if (questionDone) return; answers.push({ num: idx+1, pts: 0, max: 3 }); idx++; render(); }
 
 function finish() {
   document.getElementById('app').innerHTML = ptFinish({

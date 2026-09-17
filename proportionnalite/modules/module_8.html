@@ -82,7 +82,7 @@ const bank = [
       'Ce n\'est qu\'une habitude, un seul point suffirait',
     ], correct: 0 },
 ];
-let idx = 0, score = 0, answers = [], engine = null;
+let idx = 0, score = 0, answers = [], engine = null, questionDone = false;
 function maxScore() { return bank.reduce((s,q) => s + (q.type==='qcm' ? 1 : q.type==='fracdrag' ? 2 : q.items.length), 0); }
 
 function renderIntro() {
@@ -102,6 +102,7 @@ function render() {
   const app = document.getElementById('app');
   const head = ptHeader({ badge: 'MODULE 8', title: 'Vérification des connaissances', idx, total: bank.length, score });
   const graphHtml = q.graph ? `<div class="graph-row"><div class="graph-item">${ptGraphSvg(q.graph)}</div></div>` : '';
+  questionDone = false;
 
   if (q.type === 'qcm') {
     app.innerHTML = head + `
@@ -121,12 +122,13 @@ function render() {
         ${graphHtml}
         <div class="pt-palette">${q.chips.map(c => ptChip(c.id, c.label, c.value)).join('')}</div>
         <div class="formula-line">k = ${ptFraction('num', 'den', 'liveFD', q.suffix)}</div>
-        <div class="flex items-center justify-between mt-4">
+        <div class="flex items-center justify-between mt-4" id="actionRow">
           ${ptSkipBtn('skipQ()')}
           <button class="btn-primary" onclick="verifyFracdrag()">Vérifier</button>
         </div>
         <p id="dragMsg" class="mt-2 font-semibold"></p>
       </div>`;
+    questionDone = false;
     engine = ptSlotEngine(document.getElementById('qCard'), {
       liveGroups: [{ slots: ['num','den'], op: 'div', target: '#liveFD', decimals: q.decimals, suffix: q.suffix }],
     });
@@ -178,14 +180,17 @@ function wireSort(q) {
 }
 
 function verifyFracdrag() {
+  if (questionDone) return;
   const r = engine.verify();
   const msg = document.getElementById('dragMsg');
   if (r.correct === r.total) {
+    questionDone = true;
     score += r.total;
     document.querySelector('.score-badge').textContent = score + ' pt' + (score>1?'s':'');
     answers.push({ num: idx+1, pts: r.total, max: r.total });
     msg.style.color = '#166534';
     msg.innerHTML = '✓ Bien placé !';
+    document.getElementById('actionRow').style.display = 'none';
     msg.insertAdjacentHTML('afterend', `<div class="text-center mt-2"><button onclick="nextQ()" class="btn-primary">Suite →</button></div>`);
   } else {
     msg.style.color = '#991b1b';
@@ -208,6 +213,7 @@ function answerQcm(i) {
 }
 function nextQ() { idx++; render(); }
 function skipQ() {
+  if (questionDone) return;
   const q = bank[idx];
   answers.push({ num: idx+1, pts: 0, max: q.type==='qcm' ? 1 : q.type==='fracdrag' ? 2 : q.items.length });
   idx++; render();

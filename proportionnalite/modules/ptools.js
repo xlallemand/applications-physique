@@ -301,12 +301,97 @@
     </svg>`;
   }
 
+  /* ---------- Flux en deux étapes "Tableau puis formule" ----------
+     Étape 1 : on place a, b, c dans le tableau de proportionnalité.
+     Une fois validé, le tableau reste affiché et une formule vide
+     ? = (... × ...) / ... apparaît juste dessous, avec un nouveau
+     jeu des mêmes étiquettes à reporter dedans (glisser les données
+     du tableau vers la formule). onDone() est appelé une fois la
+     formule validée à son tour.
+     opts: { labelA, unitA, labelB, unitB, a1:{label,value},
+     b1:{label,value}, a2:{label,value}, distractors:[{id,label}],
+     inverse (bool), onDone } */
+  function ptTableauFlow(root, opts) {
+    const distractors = opts.distractors || [];
+    function chipsHtml(suffix) {
+      return [
+        ptChip('a1' + suffix, opts.a1.label, opts.a1.value),
+        ptChip('b1' + suffix, opts.b1.label, opts.b1.value),
+        ptChip('a2' + suffix, opts.a2.label, opts.a2.value),
+      ].concat(distractors.map(d => ptChip(d.id + suffix, d.label))).join('');
+    }
+
+    function renderPhase1() {
+      root.innerHTML = `
+        <div class="pt-palette">${chipsHtml('_t')}</div>
+        <table class="pt-table">
+          <thead><tr><th>${opts.labelA} (${opts.unitA})</th><th>${opts.labelB} (${opts.unitB})</th></tr></thead>
+          <tbody>
+            <tr><td>${ptSlot('a1_t')}</td><td>${ptSlot('b1_t')}</td></tr>
+            <tr><td>${ptSlot('a2_t')}</td><td>?</td></tr>
+          </tbody>
+        </table>
+        <div class="text-center mt-3"><button type="button" class="btn-primary" id="ptfBtn1">Vérifier le tableau</button></div>
+        <p id="ptfMsg1" class="verif-msg"></p>`;
+      const eng = ptSlotEngine(root);
+      let done1 = false;
+      root.querySelector('#ptfBtn1').addEventListener('click', () => {
+        if (done1) return;
+        const r = eng.verify();
+        const msg = root.querySelector('#ptfMsg1');
+        if (r.correct === r.total) {
+          done1 = true;
+          msg.style.color = '#166534';
+          msg.innerHTML = '✓ Tableau correct ! Reporte maintenant ces mêmes grandeurs dans la formule ci-dessous.';
+          root.querySelector('#ptfBtn1').disabled = true;
+          renderPhase2();
+        } else {
+          msg.style.color = '#991b1b';
+          msg.textContent = `${r.correct}/${r.total} cases correctes.`;
+        }
+      });
+    }
+
+    function renderPhase2() {
+      const c = opts.inverse ? { n1: 'a1', n2: 'b1', d: 'a2' } : { n1: 'a2', n2: 'b1', d: 'a1' };
+      const div = document.createElement('div');
+      div.className = 'pt-formula-phase';
+      div.innerHTML = `
+        <p class="text-sm font-bold text-gray-500 mb-2 mt-4">Reporte les grandeurs dans la formule :</p>
+        <div class="pt-palette">${chipsHtml('_f')}</div>
+        <div class="formula-line">? = ( ${ptSlot(c.n1 + '_f')} &times; ${ptSlot(c.n2 + '_f')} ) / ${ptSlot(c.d + '_f')}</div>
+        <div class="text-center mt-3"><button type="button" class="btn-primary" id="ptfBtn2">Vérifier la formule</button></div>
+        <p id="ptfMsg2" class="verif-msg"></p>`;
+      root.appendChild(div);
+      const eng2 = ptSlotEngine(div);
+      let done2 = false;
+      div.querySelector('#ptfBtn2').addEventListener('click', () => {
+        if (done2) return;
+        const r = eng2.verify();
+        const msg = div.querySelector('#ptfMsg2');
+        if (r.correct === r.total) {
+          done2 = true;
+          msg.style.color = '#166534';
+          msg.textContent = '✓ Formule correcte !';
+          div.querySelector('#ptfBtn2').disabled = true;
+          if (opts.onDone) opts.onDone();
+        } else {
+          msg.style.color = '#991b1b';
+          msg.textContent = `${r.correct}/${r.total} cases correctes.`;
+        }
+      });
+    }
+
+    renderPhase1();
+  }
+
   window.ptFmt = ptFmt;
   window.ptHeader = ptHeader;
   window.ptSkipBtn = ptSkipBtn;
   window.ptFinish = ptFinish;
   window.ptConfetti = ptConfetti;
   window.ptSlotEngine = ptSlotEngine;
+  window.ptTableauFlow = ptTableauFlow;
   window.ptChip = ptChip;
   window.ptSlot = ptSlot;
   window.ptFraction = ptFraction;
