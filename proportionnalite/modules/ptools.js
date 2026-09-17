@@ -169,7 +169,8 @@
       root.querySelectorAll('.pt-slot[data-accept]').forEach(slot => {
         total++;
         const chip = slot.querySelector('.pt-chip');
-        const ok = !!(chip && chip.dataset.chipId === slot.dataset.accept);
+        const acceptable = slot.dataset.accept.split(',');
+        const ok = !!(chip && acceptable.includes(chip.dataset.chipId));
         slot.classList.toggle('pt-slot-ok', ok);
         slot.classList.toggle('pt-slot-bad', !ok);
         if (ok) correct++;
@@ -188,7 +189,8 @@
     return `<button type="button" class="pt-chip" data-chip-id="${id}" data-value="${v}">${label}</button>`;
   }
   function ptSlot(accept) {
-    return `<span class="pt-slot" data-accept="${accept}"><span class="pt-slot-ph">?</span></span>`;
+    const acceptStr = Array.isArray(accept) ? accept.join(',') : accept;
+    return `<span class="pt-slot" data-accept="${acceptStr}"><span class="pt-slot-ph">?</span></span>`;
   }
   /* Fraction glisser-déposer : case numérateur / case dénominateur,
      avec le résultat calculé et affiché en direct (id = liveId). */
@@ -275,7 +277,7 @@
       <rect x="130" y="90" width="120" height="45" fill="#fff" stroke="#ddd6fe"/>
       <text x="70" y="118" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">c</text>
       <text x="190" y="118" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">?</text>
-      <path d="M 190 68 C 150 100, 230 95, 190 112" fill="none" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#ptArrow)"/>
+      <path d="M 190,87 L 70,104 L 70,87 L 176,104 L 189,116" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ptArrow)"/>
       <defs><marker id="ptArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#f59e0b"/></marker></defs>
     </svg>`;
   }
@@ -353,13 +355,14 @@
     }
 
     function renderPhase2() {
-      const c = opts.inverse ? { n1: 'a1', n2: 'b1', d: 'a2' } : { n1: 'a2', n2: 'b1', d: 'a1' };
+      const nIds = (opts.inverse ? ['a1', 'b1'] : ['a2', 'b1']).map(x => x + '_f');
+      const dId = (opts.inverse ? 'a2' : 'a1') + '_f';
       const div = document.createElement('div');
       div.className = 'pt-formula-phase';
       div.innerHTML = `
-        <p class="text-sm font-bold text-gray-500 mb-2 mt-4">Reporte les grandeurs dans la formule :</p>
+        <p class="text-sm font-bold text-gray-500 mb-2 mt-4">Reporte les grandeurs dans la formule (les deux grandeurs du numérateur peuvent être posées dans n'importe quel ordre) :</p>
         <div class="pt-palette">${chipsHtml('_f')}</div>
-        <div class="formula-line">? = ( ${ptSlot(c.n1 + '_f')} &times; ${ptSlot(c.n2 + '_f')} ) / ${ptSlot(c.d + '_f')}</div>
+        <div class="formula-line">? = ( ${ptSlot(nIds)} &times; ${ptSlot(nIds)} ) / ${ptSlot(dId)}</div>
         <div class="text-center mt-3"><button type="button" class="btn-primary" id="ptfBtn2">Vérifier la formule</button></div>
         <p id="ptfMsg2" class="verif-msg"></p>`;
       root.appendChild(div);
