@@ -30,7 +30,7 @@ const G = {
   courbe1: {xMax:10,yMax:8,xLabel:'x',yLabel:'y',curved:true,curveFn:(x)=>2*Math.sqrt(x),showPoints:false},
   courbe2: {xMax:10,yMax:9,xLabel:'v (m/s)',yLabel:'Ec (J)',curved:true,curveFn:(x)=>0.09*x*x,showPoints:false},
   coefA: {xMax:10,yMax:9,nx:5,ny:3,xLabel:'n (mol)',yLabel:'m (g)',k:0.6,intercept:0,showPoints:true,pointA:[0,0],pointB:[10,6]},
-  coefA2: {xMax:10,yMax:6,nx:5,ny:5,xLabel:'n (mol)',yLabel:'m (g)',k:0.6,intercept:0,showPoints:true,pointA:[2,1.2],pointB:[8,4.8]},
+  coefA2: {xMin:2,xMax:10,yMin:1.2,yMax:6,nx:4,ny:4,xLabel:'n (mol)',yLabel:'m (g)',k:0.6,intercept:0,showPoints:true,pointA:[4,2.4],pointB:[10,6]},
   coefB: {xMax:8,yMax:16,nx:4,ny:4,xLabel:'I (A)',yLabel:'U (V)',k:1.5,intercept:0,showPoints:true,pointA:[0,0],pointB:[8,12]},
 };
 
@@ -57,19 +57,19 @@ const bank = [
   ]},
 
   { type: 'fracdrag', text: "Quantité de matière n (mol) et masse m (g) d'une espèce chimique. Le premier point est à l'origine : place les coordonnées du point B dans le calcul du coefficient (la masse molaire).", graph: G.coefA,
-    chips: [ {id:'num', label:'6 g', value:6}, {id:'den', label:'10 mol', value:10}, {id:'x1', label:'10 g', value:10}, {id:'x2', label:'6 mol', value:6} ],
-    suffix: ' g/mol', decimals: 2 },
+    chips: [ {id:'num', label:'6 g', value:6, unit:'g'}, {id:'den', label:'10 mol', value:10, unit:'mol'}, {id:'x1', label:'10 g', value:10, unit:'g'}, {id:'x2', label:'6 mol', value:6, unit:'mol'} ],
+    decimals: 2 },
 
   { type: 'qcm', text: "Quelle est l'unité du coefficient directeur du graphique précédent (masse en fonction de la quantité de matière) ?",
     options: ['g/mol', 'mol/g', 'g', 'mol'], correct: 0 },
 
-  { type: 'fracdrag', text: "Même grandeur, mais cette fois l'origine n'est pas utilisée : place les variations (et non les valeurs brutes) dans le calcul du coefficient à l'aide des points A et B.", graph: G.coefA2,
-    chips: [ {id:'num', label:'&Delta;m = 3,6 g', value:3.6}, {id:'den', label:'&Delta;n = 6 mol', value:6}, {id:'x1', label:'4,8 g', value:4.8}, {id:'x2', label:'8 mol', value:8} ],
-    suffix: ' g/mol', decimals: 2 },
+  { type: 'fracdrag', text: "Même grandeur, mais cette fois l'origine n'est pas visible sur le graphique : place les variations (et non les valeurs brutes) dans le calcul du coefficient à l'aide des points A et B.", graph: G.coefA2,
+    chips: [ {id:'num', label:'&Delta;m = 3,6 g', value:3.6, unit:'g'}, {id:'den', label:'&Delta;n = 6 mol', value:6, unit:'mol'}, {id:'x1', label:'6 g', value:6, unit:'g'}, {id:'x2', label:'10 mol', value:10, unit:'mol'} ],
+    decimals: 2 },
 
   { type: 'fracdrag', text: "Loi d'Ohm : tension U (V) en fonction de l'intensité I (A). Place les coordonnées du point B dans le calcul de la résistance.", graph: G.coefB,
-    chips: [ {id:'num', label:'12 V', value:12}, {id:'den', label:'8 A', value:8}, {id:'x1', label:'8 V', value:8}, {id:'x2', label:'12 A', value:12} ],
-    suffix: ' &Omega;', decimals: 2 },
+    chips: [ {id:'num', label:'12 V', value:12, unit:'V'}, {id:'den', label:'8 A', value:8, unit:'A'}, {id:'x1', label:'8 V', value:8, unit:'V'}, {id:'x2', label:'12 A', value:12, unit:'A'} ],
+    decimals: 2 },
 
   { type: 'qcm', text: "Quelle est l'unité du coefficient directeur du graphique précédent (tension en fonction de l'intensité) ?",
     options: ['&Omega; (V/A)', 'A/V', 'V', 'A'], correct: 0 },
@@ -120,8 +120,8 @@ function render() {
       <div class="bg-white rounded-xl shadow-lg p-6" id="qCard">
         <p class="text-gray-700 text-lg mb-3">${q.text}</p>
         ${graphHtml}
-        <div class="pt-palette">${q.chips.map(c => ptChip(c.id, c.label, c.value)).join('')}</div>
-        <div class="formula-line">k = ${ptFraction('num', 'den', 'liveFD', q.suffix)}</div>
+        <div class="pt-palette">${q.chips.map(c => ptChip(c.id, c.label, c.value, c.unit)).join('')}</div>
+        <div class="formula-line">k = ${ptFraction('num', 'den', 'liveFD')}</div>
         <div class="flex items-center justify-between mt-4" id="actionRow">
           ${ptSkipBtn('skipQ()')}
           <button class="btn-primary" onclick="verifyFracdrag()">Vérifier</button>
@@ -130,7 +130,7 @@ function render() {
       </div>`;
     questionDone = false;
     engine = ptSlotEngine(document.getElementById('qCard'), {
-      liveGroups: [{ slots: ['num','den'], op: 'div', target: '#liveFD', decimals: q.decimals, suffix: q.suffix }],
+      liveGroups: [{ slots: ['num','den'], op: 'div', target: '#liveFD', decimals: q.decimals, dynamicUnit: true }],
     });
     return;
   }

@@ -155,7 +155,12 @@
         if (chips.every(c => c)) {
           const vals = chips.map(c => parseFloat(c.dataset.value));
           const result = g.op === 'mul' ? vals[0] * vals[1] : vals[0] / vals[1];
-          target.textContent = ptFmt(result, g.decimals === undefined ? 3 : g.decimals) + (g.suffix || '');
+          let unitStr = (g.suffix || '').trim();
+          if (g.dynamicUnit) {
+            const uNum = chips[0].dataset.unit, uDen = chips[1].dataset.unit;
+            unitStr = uNum && uDen ? (uNum + '/' + uDen) : (uNum || uDen || '');
+          }
+          target.textContent = ptFmt(result, g.decimals === undefined ? 3 : g.decimals) + (unitStr ? ' ' + unitStr : '');
           target.classList.add('pt-live-filled');
         } else {
           target.textContent = '?';
@@ -184,44 +189,51 @@
     return { verify: verify, updateLive: updateLive };
   }
 
-  function ptChip(id, label, value) {
+  function ptChip(id, label, value, unit) {
     const v = value === undefined ? '' : value;
-    return `<button type="button" class="pt-chip" data-chip-id="${id}" data-value="${v}">${label}</button>`;
+    const u = unit === undefined ? '' : unit;
+    return `<button type="button" class="pt-chip" data-chip-id="${id}" data-value="${v}" data-unit="${u}">${label}</button>`;
   }
   function ptSlot(accept) {
     const acceptStr = Array.isArray(accept) ? accept.join(',') : accept;
     return `<span class="pt-slot" data-accept="${acceptStr}"><span class="pt-slot-ph">?</span></span>`;
   }
   /* Fraction glisser-déposer : case numérateur / case dénominateur,
-     avec le résultat calculé et affiché en direct (id = liveId). */
-  function ptFraction(numAccept, denAccept, liveId, liveSuffix) {
+     avec le résultat calculé et affiché en direct (id = liveId). L'unité
+     n'est pas fixée à l'avance : elle est déduite automatiquement des
+     étiquettes réellement posées (voir ptSlotEngine, liveGroups.dynamicUnit). */
+  function ptFraction(numAccept, denAccept, liveId) {
     return `<span class="pt-frac">
         <span class="pt-frac-num">${ptSlot(numAccept)}</span>
         <span class="pt-frac-line"></span>
         <span class="pt-frac-den">${ptSlot(denAccept)}</span>
       </span>
-      <span class="pt-frac-eq">= <span id="${liveId}" class="pt-live">?</span>${liveSuffix ? ' ' + liveSuffix : ''}</span>`;
+      <span class="pt-frac-eq">= <span id="${liveId}" class="pt-live">?</span></span>`;
   }
 
   /* ---------- Petit graphique SVG (droite + 2 points repérés) ----------
-     opts: { xMax, yMax, xLabel, yLabel, k, intercept, curved, curveFn,
-     pointA:[x,y], pointB:[x,y], showPoints, nx, ny (nb de graduations) } */
+     opts: { xMax, yMax, xMin, yMin (def. 0 : mettre >0 pour ne pas
+     montrer l'origine), xLabel, yLabel, k, intercept, curved, curveFn,
+     pointA:[x,y], pointB:[x,y], showPoints, nx, ny (nb de graduations) }
+     La droite est toujours tracée avec la vraie pente k, rognée aux
+     bords visibles (jamais déformée même si xMin/yMin > 0). */
   function ptGraphSvg(opts) {
     const W = 300, H = 230, padL = 46, padB = 34, padT = 14, padR = 14;
     const plotW = W - padL - padR, plotH = H - padT - padB;
     const xMax = opts.xMax, yMax = opts.yMax;
+    const xMin = opts.xMin || 0, yMin = opts.yMin || 0;
     const nx = opts.nx || 4, ny = opts.ny || 4;
-    const sx = x => padL + (x / xMax) * plotW;
-    const sy = y => padT + plotH - (y / yMax) * plotH;
+    const sx = x => padL + ((x - xMin) / (xMax - xMin)) * plotW;
+    const sy = y => padT + plotH - ((y - yMin) / (yMax - yMin)) * plotH;
 
     let gridLines = '';
     for (let i = 0; i <= nx; i++) {
-      const x = (xMax / nx) * i;
+      const x = xMin + ((xMax - xMin) / nx) * i;
       gridLines += `<line x1="${sx(x)}" y1="${padT}" x2="${sx(x)}" y2="${padT + plotH}" stroke="#e2e8f0" stroke-width="1"/>`;
       gridLines += `<text x="${sx(x)}" y="${padT + plotH + 16}" font-size="9" fill="#64748b" text-anchor="middle">${ptFmt(x, 2)}</text>`;
     }
     for (let i = 0; i <= ny; i++) {
-      const y = (yMax / ny) * i;
+      const y = yMin + ((yMax - yMin) / ny) * i;
       gridLines += `<line x1="${padL}" y1="${sy(y)}" x2="${padL + plotW}" y2="${sy(y)}" stroke="#e2e8f0" stroke-width="1"/>`;
       gridLines += `<text x="${padL - 6}" y="${sy(y) + 3}" font-size="9" fill="#64748b" text-anchor="end">${ptFmt(y, 2)}</text>`;
     }
@@ -231,15 +243,21 @@
       let d = '';
       const n = 40;
       for (let i = 0; i <= n; i++) {
-        const x = (xMax * i) / n;
+        const x = xMin + ((xMax - xMin) * i) / n;
         const y = opts.curveFn(x);
         d += (i === 0 ? 'M' : 'L') + sx(x) + ',' + sy(Math.min(y, yMax));
       }
       curve = `<path d="${d}" fill="none" stroke="#7c3aed" stroke-width="2.5"/>`;
     } else {
       const b = opts.intercept || 0;
-      const y0 = b, y1 = opts.k * xMax + b;
-      curve = `<line x1="${sx(0)}" y1="${sy(Math.max(0,Math.min(y0,yMax)))}" x2="${sx(xMax)}" y2="${sy(Math.max(0,Math.min(y1,yMax)))}" stroke="#7c3aed" stroke-width="2.5"/>`;
+      const yAt = x => opts.k * x + b;
+      const xAt = y => (y - b) / opts.k;
+      let x0 = xMin, x1 = xMax;
+      if (opts.k !== 0) {
+        if (yAt(x0) < yMin) x0 = xAt(yMin); else if (yAt(x0) > yMax) x0 = xAt(yMax);
+        if (yAt(x1) < yMin) x1 = xAt(yMin); else if (yAt(x1) > yMax) x1 = xAt(yMax);
+      }
+      curve = `<line x1="${sx(x0)}" y1="${sy(yAt(x0))}" x2="${sx(x1)}" y2="${sy(yAt(x1))}" stroke="#7c3aed" stroke-width="2.5"/>`;
     }
 
     let pts = '';
@@ -277,7 +295,7 @@
       <rect x="130" y="90" width="120" height="45" fill="#fff" stroke="#ddd6fe"/>
       <text x="70" y="118" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">c</text>
       <text x="190" y="118" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">?</text>
-      <path d="M 190,87 L 70,104 L 70,87 L 176,104 L 189,116" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ptArrow)"/>
+      <path d="M 190,87 L 70,104 L 70,87 L 176,104 L 182,109" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ptArrow)"/>
       <defs><marker id="ptArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#f59e0b"/></marker></defs>
     </svg>`;
   }
