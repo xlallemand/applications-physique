@@ -1,17 +1,21 @@
 /* ============================================================
    Outils communs à l'application "Proportionnalité" (partagés par
-   les modules de vérification des connaissances et d'entraînement
-   de ce dossier uniquement — pas mutualisés avec les autres
-   applications).
+   les modules de cours, de vérification des connaissances et
+   d'entraînement de ce dossier uniquement — pas mutualisés avec
+   les autres applications).
 
    Fournit :
    - l'en-tête de quiz (badge, titre, barre de progression, score)
    - l'écran de fin (score, détail, confettis si sans-faute)
-   - un vérificateur de réponse numérique tolérant aux arrondis
-   - un moteur générique de glisser-déposer "étiquette → case"
-     (utilisé pour les tableaux de proportionnalité et les formules
-     à trous)
+   - un moteur de glisser-déposer "étiquette → case" à repositionnement
+     libre : les étiquettes peuvent être déplacées dans n'importe
+     quelle case (ou remises dans la palette), la correction ne se
+     déclenche qu'au clic sur "Vérifier". Quand les deux étiquettes
+     d'un calcul (division) sont posées, le résultat est calculé et
+     affiché automatiquement, en direct.
    - un générateur de petits graphiques SVG (droites, points A/B)
+   - deux schémas illustratifs (tableau de proportionnalité directe
+     / inverse) pour le cours
    ============================================================ */
 
 (function () {
@@ -28,18 +32,6 @@
     return s.replace('.', ',');
   }
 
-  function ptParseNum(str) {
-    if (str === null || str === undefined) return NaN;
-    return parseFloat(String(str).trim().replace(',', '.').replace('−', '-'));
-  }
-
-  function ptNumOk(userStr, correct, tolerancePct) {
-    const u = ptParseNum(userStr);
-    if (isNaN(u)) return false;
-    const tol = (tolerancePct === undefined ? 2 : tolerancePct) / 100;
-    return Math.abs(u - correct) <= Math.max(Math.abs(correct) * tol, 1e-9);
-  }
-
   /* ---------- En-tête de quiz ---------- */
   function ptHeader(opts) {
     const pct = Math.round((opts.idx / opts.total) * 100);
@@ -50,6 +42,11 @@
         <p class="text-xs text-gray-400 uppercase font-bold mb-2">Question ${opts.idx + 1}/${opts.total} &middot; Score : <span class="score-badge">${opts.score} pt${opts.score > 1 ? 's' : ''}</span></p>
         <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${pct}%"></div></div>
       </div>`;
+  }
+
+  /* Bouton "Passer" commun (permet de passer une question sans répondre) */
+  function ptSkipBtn(fn) {
+    return `<button type="button" class="btn-skip" onclick="${fn}">Passer →</button>`;
   }
 
   /* ---------- Écran de fin ---------- */
@@ -95,76 +92,136 @@
     setTimeout(() => { clearInterval(confettiInterval); confettiInterval = null; }, 2200);
   }
 
-  /* ---------- Glisser-déposer "étiquette → case" ----------
-     chips : [{id, label, group}]  — group optionnel pour restreindre
-             une étiquette à un sous-ensemble de cases (non utilisé
-             par défaut : toutes les cases acceptent toutes les
-             étiquettes tant que l'id ne correspond pas)
-     Chaque case porte data-accept="<id attendu>".
-     Après un dépôt correct, l'étiquette est déplacée physiquement
-     dans la case (et retirée de la palette). */
-  function ptWireSlots(root, onAllFilled) {
-    if (window.DragDrop) DragDrop.cleanupGhosts();
-    const chips = root.querySelectorAll('.pt-chip');
-    function checkAllFilled() {
-      const slots = root.querySelectorAll('.pt-slot');
-      const done = Array.from(slots).every(s => s.classList.contains('filled'));
-      if (done && onAllFilled) onAllFilled();
-    }
-    chips.forEach(chip => {
+  /* ---------- Étiquettes / cases à glisser-déposer (repositionnement libre) ----------
+     ptChip(id, label, value) : étiquette. value est un nombre, utilisé
+       pour le calcul automatique en direct quand la case fait partie
+       d'un groupe "live".
+     ptSlot(accept) : case attendant l'étiquette d'id `accept`.
+
+     ptSlotEngine(root, config) crée le comportement :
+     - une étiquette peut être déposée dans n'importe quelle case (elle
+       en évince alors l'occupante, qui retourne dans la palette), ou
+       ramenée dans la palette (élément .pt-palette).
+     - aucune couleur n'apparaît au dépôt : la correction n'est calculée
+       qu'à l'appel de engine.verify().
+     - config.liveGroups: [{ slots:['id1','id2'], op:'div'|'mul',
+       target:'#selecteur', decimals, suffix }] : quand les deux cases
+       du groupe sont remplies, affiche automatiquement value(slot1)
+       [op] value(slot2) dans l'élément cible (mis à jour à chaque
+       changement). */
+  function ptSlotEngine(root, config) {
+    config = config || {};
+
+    function wireChip(chip) {
       if (chip.dataset.wired === '1') return;
       chip.dataset.wired = '1';
       DragDrop.enable(chip, {
-        zoneSelector: '.pt-slot:not(.filled)',
+        zoneSelector: '.pt-slot, .pt-palette',
         dragOverClass: 'pt-slot-over',
         onDrop: (item, zone) => {
-          if (!zone) return;
-          if (zone.dataset.accept === item.dataset.chipId) {
-            zone.classList.add('filled');
-            zone.innerHTML = '';
-            item.classList.remove('dragging');
-            item.setAttribute('draggable', 'false');
-            item.style.cursor = 'default';
-            zone.appendChild(item);
-            checkAllFilled();
-          } else {
-            zone.classList.add('pt-slot-wrong');
-            setTimeout(() => zone.classList.remove('pt-slot-wrong'), 450);
+          if (!zone || !root.contains(zone)) return;
+          const oldParent = item.parentElement;
+          if (zone === oldParent) return;
+          if (zone.classList.contains('pt-slot')) {
+            const existing = zone.querySelector('.pt-chip');
+            if (existing && existing !== item) {
+              const palette = root.querySelector('.pt-palette');
+              if (palette) palette.appendChild(existing);
+            }
+            const ph = zone.querySelector('.pt-slot-ph');
+            if (ph) ph.remove();
           }
+          zone.appendChild(item);
+          if (oldParent && oldParent.classList.contains('pt-slot') && !oldParent.querySelector('.pt-chip') && !oldParent.querySelector('.pt-slot-ph')) {
+            oldParent.insertAdjacentHTML('afterbegin', '<span class="pt-slot-ph">?</span>');
+          }
+          clearVerifyStyles();
+          updateLive();
+          if (config.onChange) config.onChange();
         },
       });
-    });
+    }
+
+    function clearVerifyStyles() {
+      root.querySelectorAll('.pt-slot').forEach(s => s.classList.remove('pt-slot-ok', 'pt-slot-bad'));
+    }
+
+    function updateLive() {
+      (config.liveGroups || []).forEach(g => {
+        const slots = g.slots.map(id => root.querySelector(`.pt-slot[data-accept="${id}"]`));
+        const chips = slots.map(s => s && s.querySelector('.pt-chip'));
+        const target = root.querySelector(g.target);
+        if (!target) return;
+        if (chips.every(c => c)) {
+          const vals = chips.map(c => parseFloat(c.dataset.value));
+          const result = g.op === 'mul' ? vals[0] * vals[1] : vals[0] / vals[1];
+          target.textContent = ptFmt(result, g.decimals === undefined ? 3 : g.decimals) + (g.suffix || '');
+          target.classList.add('pt-live-filled');
+        } else {
+          target.textContent = '?';
+          target.classList.remove('pt-live-filled');
+        }
+      });
+    }
+
+    function verify() {
+      let correct = 0, total = 0;
+      root.querySelectorAll('.pt-slot[data-accept]').forEach(slot => {
+        total++;
+        const chip = slot.querySelector('.pt-chip');
+        const ok = !!(chip && chip.dataset.chipId === slot.dataset.accept);
+        slot.classList.toggle('pt-slot-ok', ok);
+        slot.classList.toggle('pt-slot-bad', !ok);
+        if (ok) correct++;
+      });
+      return { correct, total };
+    }
+
+    if (window.DragDrop) DragDrop.cleanupGhosts();
+    root.querySelectorAll('.pt-chip').forEach(wireChip);
+    updateLive();
+    return { verify: verify, updateLive: updateLive };
   }
 
-  function ptChip(id, label) {
-    return `<button type="button" class="pt-chip" data-chip-id="${id}">${label}</button>`;
+  function ptChip(id, label, value) {
+    const v = value === undefined ? '' : value;
+    return `<button type="button" class="pt-chip" data-chip-id="${id}" data-value="${v}">${label}</button>`;
   }
-  function ptSlot(accept, placeholder) {
-    return `<span class="pt-slot" data-accept="${accept}"><span class="pt-slot-ph">${placeholder || '?'}</span></span>`;
+  function ptSlot(accept) {
+    return `<span class="pt-slot" data-accept="${accept}"><span class="pt-slot-ph">?</span></span>`;
+  }
+  /* Fraction glisser-déposer : case numérateur / case dénominateur,
+     avec le résultat calculé et affiché en direct (id = liveId). */
+  function ptFraction(numAccept, denAccept, liveId, liveSuffix) {
+    return `<span class="pt-frac">
+        <span class="pt-frac-num">${ptSlot(numAccept)}</span>
+        <span class="pt-frac-line"></span>
+        <span class="pt-frac-den">${ptSlot(denAccept)}</span>
+      </span>
+      <span class="pt-frac-eq">= <span id="${liveId}" class="pt-live">?</span>${liveSuffix ? ' ' + liveSuffix : ''}</span>`;
   }
 
   /* ---------- Petit graphique SVG (droite + 2 points repérés) ----------
-     opts: { xMax, yMax, xLabel, yLabel, k (coefficient, null si pas
-     proportionnel), intercept (ordonnée à l'origine, def 0),
-     curved (bool), pointA:[x,y], pointB:[x,y], showPoints (bool) } */
+     opts: { xMax, yMax, xLabel, yLabel, k, intercept, curved, curveFn,
+     pointA:[x,y], pointB:[x,y], showPoints, nx, ny (nb de graduations) } */
   function ptGraphSvg(opts) {
     const W = 300, H = 230, padL = 46, padB = 34, padT = 14, padR = 14;
     const plotW = W - padL - padR, plotH = H - padT - padB;
     const xMax = opts.xMax, yMax = opts.yMax;
+    const nx = opts.nx || 4, ny = opts.ny || 4;
     const sx = x => padL + (x / xMax) * plotW;
     const sy = y => padT + plotH - (y / yMax) * plotH;
 
     let gridLines = '';
-    const nx = 4, ny = 4;
     for (let i = 0; i <= nx; i++) {
       const x = (xMax / nx) * i;
       gridLines += `<line x1="${sx(x)}" y1="${padT}" x2="${sx(x)}" y2="${padT + plotH}" stroke="#e2e8f0" stroke-width="1"/>`;
-      gridLines += `<text x="${sx(x)}" y="${padT + plotH + 16}" font-size="9" fill="#64748b" text-anchor="middle">${ptFmt(x, 1)}</text>`;
+      gridLines += `<text x="${sx(x)}" y="${padT + plotH + 16}" font-size="9" fill="#64748b" text-anchor="middle">${ptFmt(x, 2)}</text>`;
     }
     for (let i = 0; i <= ny; i++) {
       const y = (yMax / ny) * i;
       gridLines += `<line x1="${padL}" y1="${sy(y)}" x2="${padL + plotW}" y2="${sy(y)}" stroke="#e2e8f0" stroke-width="1"/>`;
-      gridLines += `<text x="${padL - 6}" y="${sy(y) + 3}" font-size="9" fill="#64748b" text-anchor="end">${ptFmt(y, 1)}</text>`;
+      gridLines += `<text x="${padL - 6}" y="${sy(y) + 3}" font-size="9" fill="#64748b" text-anchor="end">${ptFmt(y, 2)}</text>`;
     }
 
     let curve = '';
@@ -203,14 +260,57 @@
     </svg>`;
   }
 
+  /* ---------- Schémas illustratifs du cours (tableau direct / inverse) ---------- */
+  function ptCrossDiagramSvg() {
+    return `<svg viewBox="0 0 260 150" class="pt-diagram">
+      <rect x="10" y="10" width="120" height="35" fill="#7c3aed"/>
+      <rect x="130" y="10" width="120" height="35" fill="#7c3aed"/>
+      <text x="70" y="32" text-anchor="middle" fill="#fff" font-weight="700" font-size="14">Grandeur A</text>
+      <text x="190" y="32" text-anchor="middle" fill="#fff" font-weight="700" font-size="14">Grandeur B</text>
+      <rect x="10" y="45" width="120" height="45" fill="#f5f3ff" stroke="#ddd6fe"/>
+      <rect x="130" y="45" width="120" height="45" fill="#f5f3ff" stroke="#ddd6fe"/>
+      <text x="70" y="73" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">a</text>
+      <text x="190" y="73" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">b</text>
+      <rect x="10" y="90" width="120" height="45" fill="#fff" stroke="#ddd6fe"/>
+      <rect x="130" y="90" width="120" height="45" fill="#fff" stroke="#ddd6fe"/>
+      <text x="70" y="118" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">c</text>
+      <text x="190" y="118" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">?</text>
+      <path d="M 190 68 C 150 100, 230 95, 190 112" fill="none" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#ptArrow)"/>
+      <defs><marker id="ptArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#f59e0b"/></marker></defs>
+    </svg>`;
+  }
+  function ptCrossDiagramInverseSvg() {
+    return `<svg viewBox="0 0 260 150" class="pt-diagram">
+      <rect x="10" y="10" width="120" height="35" fill="#7c3aed"/>
+      <rect x="130" y="10" width="120" height="35" fill="#7c3aed"/>
+      <text x="70" y="32" text-anchor="middle" fill="#fff" font-weight="700" font-size="14">Grandeur A</text>
+      <text x="190" y="32" text-anchor="middle" fill="#fff" font-weight="700" font-size="14">Grandeur B</text>
+      <rect x="10" y="45" width="120" height="45" fill="#f5f3ff" stroke="#ddd6fe"/>
+      <rect x="130" y="45" width="120" height="45" fill="#f5f3ff" stroke="#ddd6fe"/>
+      <text x="70" y="73" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">a</text>
+      <text x="190" y="73" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">b</text>
+      <rect x="10" y="90" width="120" height="45" fill="#fff" stroke="#ddd6fe"/>
+      <rect x="130" y="90" width="120" height="45" fill="#fff" stroke="#ddd6fe"/>
+      <text x="70" y="118" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">c</text>
+      <text x="190" y="118" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">?</text>
+      <path d="M 70 68 L 190 68" fill="none" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#ptArrow2)"/>
+      <text x="130" y="60" text-anchor="middle" fill="#b45309" font-weight="800" font-size="13">&times;</text>
+      <path d="M 190 90 C 230 105, 150 118, 190 112" fill="none" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#ptArrow2)"/>
+      <text x="238" y="103" text-anchor="start" fill="#b45309" font-weight="800" font-size="13">&divide; c</text>
+      <defs><marker id="ptArrow2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#f59e0b"/></marker></defs>
+    </svg>`;
+  }
+
   window.ptFmt = ptFmt;
-  window.ptParseNum = ptParseNum;
-  window.ptNumOk = ptNumOk;
   window.ptHeader = ptHeader;
+  window.ptSkipBtn = ptSkipBtn;
   window.ptFinish = ptFinish;
   window.ptConfetti = ptConfetti;
-  window.ptWireSlots = ptWireSlots;
+  window.ptSlotEngine = ptSlotEngine;
   window.ptChip = ptChip;
   window.ptSlot = ptSlot;
+  window.ptFraction = ptFraction;
   window.ptGraphSvg = ptGraphSvg;
+  window.ptCrossDiagramSvg = ptCrossDiagramSvg;
+  window.ptCrossDiagramInverseSvg = ptCrossDiagramInverseSvg;
 })();

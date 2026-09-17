@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="ptools.css">
 <script src="../../assets/nav.js"></script>
-<script src="../../assets/numpad.js"></script>
+<script src="../../assets/dragdrop.js"></script>
 <script src="ptools.js"></script>
 <style>
   .ex-card { border:1.5px solid #e2e8f0; border-radius:14px; padding:16px 18px; margin:14px 0; background:#fff; }
@@ -19,6 +19,7 @@
   .graph-item p { font-size:.82rem; font-weight:700; margin-top:4px; }
   .check3 { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
   .check3 button { flex:1; min-width:150px; }
+  .formula-line { font-size:1.05rem; font-weight:700; color:var(--app-accent-800); text-align:center; margin:10px 0; }
   .note-box { display:flex; gap:10px; border-radius:12px; border:1.5px solid; padding:12px 16px; margin:14px 0; }
   .note-box.info { background:#eff6ff; border-color:#bfdbfe; }
   .note-box-icon { flex-shrink:0; }
@@ -60,30 +61,31 @@
   <!-- ============ Notion 2 : lire le coefficient ============ -->
   <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
     <h3 class="text-xl font-bold text-[var(--app-accent-700)] mb-2">2. Déterminer le coefficient à l'aide de la droite</h3>
-    <p class="text-gray-700 mb-2">On choisit deux points A et B bien lisibles sur la droite (sur des croisements de quadrillage si possible), puis on calcule :</p>
-    <div class="formula-box">k = variation de la grandeur en ordonnée / variation de la grandeur en abscisse</div>
-    <p class="text-gray-700 mb-3">Cette variation se lit directement sur le graphique : de combien "monte" la courbe (&Delta;y) quand on avance de &Delta;x sur l'axe horizontal.</p>
-    <div class="note-box info"><span class="note-box-icon">ℹ</span><p><b>Remarque mathématique :</b> ce calcul est exactement le <b>coefficient directeur</b> d'une droite, k = (y<sub>B</sub> &minus; y<sub>A</sub>) / (x<sub>B</sub> &minus; x<sub>A</sub>). En physique, on préfère parler de rapport de variations, car les grandeurs ont des unités.</p></div>
+    <p class="text-gray-700 mb-2">Comme la droite passe par l'origine, le <b>premier point peut toujours être pris à l'origine</b> (0 ; 0) : il suffit alors de lire les coordonnées d'<b>un seul autre point B</b> sur le quadrillage.</p>
+    <div class="formula-box">k = y<sub>B</sub> / x<sub>B</sub></div>
 
     <div class="ex-card direct">
       <span class="qtype-tag">Exemple direct</span>
       <p class="text-gray-700 mb-2">Masse m (kg) d'une huile en fonction du volume V (L) :</p>
       <div class="graph-row"><div class="graph-item" id="g2"></div></div>
-      <p class="text-gray-700">Entre A (2 ; 1,5) et B (8 ; 6) : &Delta;m = 6 &minus; 1,5 = 4,5 kg, &Delta;V = 8 &minus; 2 = 6 L.</p>
-      <div class="formula-box" style="font-size:1rem">&rho; = 4,5 / 6 = 0,75 kg/L</div>
+      <p class="text-gray-700">Le point B a pour coordonnées (8 ; 6).</p>
+      <div class="formula-box" style="font-size:1rem">&rho; = 6 / 8 = 0,75 kg/L</div>
     </div>
 
-    <div class="ex-card">
+    <div class="note-box info">
+      <span class="note-box-icon">ℹ</span>
+      <p><b>Remarque :</b> si l'origine n'est pas visible sur le graphique (ou si on préfère utiliser deux points quelconques A et B), on calcule le rapport des <b>variations</b> : k = (y<sub>B</sub> &minus; y<sub>A</sub>) / (x<sub>B</sub> &minus; x<sub>A</sub>) — c'est exactement le <b>coefficient directeur</b> d'une droite, en mathématiques. Sur la même droite ci-dessus, avec A (2 ; 1,5) et B (8 ; 6) : k = (6 &minus; 1,5) / (8 &minus; 2) = 4,5 / 6 = 0,75 kg/L : on retrouve le même résultat.</p>
+    </div>
+
+    <div class="ex-card" id="checkG">
       <span class="qtype-tag">À toi de vérifier</span>
       <p class="text-gray-700 mb-2">Distance parcourue d (m) en fonction de la durée t (s), lors d'un mouvement à vitesse constante :</p>
       <div class="graph-row"><div class="graph-item" id="g3"></div></div>
-      <p class="text-gray-700 mb-2">Lis les coordonnées de A et B sur le graphique, puis calcule la vitesse (coefficient directeur, en m/s).</p>
-      <div class="flex items-center gap-3 flex-wrap">
-        <input type="text" id="q1" inputmode="decimal" class="check-input w-28" placeholder="v en m/s" onfocus="numpadFocus('q1')" ontouchstart="numpadFocus('q1')">
-        <button class="check-btn" onclick="checkQ('q1', 2.5, 'r1')">Vérifier</button>
-      </div>
-      <div id="np1"></div>
-      <p id="r1" class="mt-2 font-semibold"></p>
+      <p class="text-gray-700 mb-2">Place les coordonnées du point B dans le calcul de la vitesse (coefficient) — le résultat s'affichera automatiquement.</p>
+      <div class="pt-palette" id="palG"></div>
+      <div class="formula-line" id="formulaG"></div>
+      <div class="text-center mt-3"><button class="check-btn" onclick="verifyG()">Vérifier</button></div>
+      <p id="msgG" class="verif-msg mt-2 font-semibold"></p>
     </div>
   </div>
 
@@ -94,7 +96,6 @@
 </div>
 
 <script>
-document.getElementById('np1').innerHTML = numpadWidget();
 document.getElementById('g1').innerHTML = `
   <div class="graph-item">${ptGraphSvg({xMax:10,yMax:8,xLabel:'x',yLabel:'y',k:0.7,intercept:0,showPoints:false})}<p style="color:#166534">Proportionnelle</p></div>
   <div class="graph-item">${ptGraphSvg({xMax:10,yMax:8,xLabel:'x',yLabel:'y',k:0.5,intercept:2,showPoints:false})}<p style="color:#991b1b">Affine, non proportionnelle</p></div>
@@ -102,8 +103,22 @@ document.getElementById('g1').innerHTML = `
 
 document.getElementById('gCheck1').innerHTML = ptGraphSvg({xMax:10,yMax:9,xLabel:'d (km)',yLabel:'prix (€)',k:0.6,intercept:2.5,showPoints:false});
 
-document.getElementById('g2').innerHTML = ptGraphSvg({xMax:10,yMax:8,xLabel:'V (L)',yLabel:'m (kg)',k:0.75,intercept:0,showPoints:true,pointA:[2,1.5],pointB:[8,6]});
-document.getElementById('g3').innerHTML = ptGraphSvg({xMax:8,yMax:20,xLabel:'t (s)',yLabel:'d (m)',k:2.5,intercept:0,showPoints:true,pointA:[2,5],pointB:[6,15]});
+document.getElementById('g2').innerHTML = ptGraphSvg({xMax:8,yMax:8,nx:4,ny:4,xLabel:'V (L)',yLabel:'m (kg)',k:0.75,intercept:0,showPoints:true,pointA:[0,0],pointB:[8,6]});
+document.getElementById('g3').innerHTML = ptGraphSvg({xMax:8,yMax:20,nx:4,ny:4,xLabel:'t (s)',yLabel:'d (m)',k:2.5,intercept:0,showPoints:true,pointA:[0,0],pointB:[6,15]});
+
+document.getElementById('palG').innerHTML =
+  ptChip('numG', '15 m', 15) + ptChip('denG', '6 s', 6) +
+  ptChip('x1', '8 s', 8) + ptChip('x2', '20 m', 20);
+document.getElementById('formulaG').innerHTML = 'v = ' + ptFraction('numG', 'denG', 'liveG', 'm/s');
+const engG = ptSlotEngine(document.getElementById('checkG'), {
+  liveGroups: [{ slots: ['numG','denG'], op: 'div', target: '#liveG', decimals: 2, suffix: ' m/s' }],
+});
+function verifyG() {
+  const r = engG.verify();
+  const msg = document.getElementById('msgG');
+  if (r.correct === r.total) { msg.style.color = '#166534'; msg.textContent = '✓ Bien placé !'; }
+  else { msg.style.color = '#991b1b'; msg.textContent = `${r.correct}/${r.total} cases correctes.`; }
+}
 
 function renderCheck3(id, correct) {
   const opts = ['Oui, proportionnalité', 'Non, situation affine', 'Non, autre situation'];
@@ -121,12 +136,6 @@ function answerCheck3(id, choice, correct) {
   fb.style.color = ok ? '#166534' : '#991b1b';
 }
 renderCheck3('chk1', 'Non, situation affine');
-
-function checkQ(id, correct, resultId) {
-  const input = document.getElementById(id), result = document.getElementById(resultId);
-  if (ptNumOk(input.value, correct, 3)) { result.innerHTML = '✓ Correct ! 🎉'; result.style.color = '#166534'; }
-  else { result.innerHTML = '✗ Incorrect. La réponse est : ' + ptFmt(correct, 2) + ' m/s'; result.style.color = '#991b1b'; }
-}
 
 const nav = AppNav.init({
   appName: 'Proportionnalité', portalHref: '../../index.html', portalLabel: 'Toutes les applications',

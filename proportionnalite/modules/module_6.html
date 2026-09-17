@@ -9,7 +9,6 @@
 <link rel="stylesheet" href="ptools.css">
 <script src="../../assets/nav.js"></script>
 <script src="../../assets/dragdrop.js"></script>
-<script src="../../assets/numpad.js"></script>
 <script src="ptools.js"></script>
 <style>
   .formula-line { font-size:1.05rem; font-weight:700; color:var(--app-accent-800); text-align:center; margin:10px 0; }
@@ -24,78 +23,65 @@
 const METHOD_LABEL = { tableau: 'Tableau', coef: 'Coefficient', unite: "Retour à l'unité" };
 
 const bank = [
-  { text: "Une voiture roule à 25 km/h. Combien de temps met-elle pour parcourir 52 m ?",
+  { text: "Une voiture roule à 25 km/h. Place les grandeurs pour préparer le calcul de la durée nécessaire pour parcourir 52 m.",
     labelA:'d', unitA:'m', labelB:'t', unitB:'s',
-    a1txt:'25 km = 25 000 m', b1txt:'1 h = 3 600 s', a2txt:'52 m',
-    answer: 3600*52/25000, decimals: 2,
-    forcedMethod: 'tableau', prefilled: true, askResult: true },
+    a1txt:'25 km = 25 000 m', a1val:25000, b1txt:'1 h = 3 600 s', b1val:3600, a2txt:'52 m',
+    distractors: [{id:'x1', label:'25 s'}, {id:'x2', label:'52 s'}],
+    forcedMethod: 'tableau' },
 
-  { text: "Un robinet a un débit constant : il remplit 8 L en 3 min. Combien de temps faudra-t-il pour remplir 20 L ? Choisis ta méthode et construis le calcul (le résultat ne sera pas demandé pour cette question).",
+  { text: "Une baignoire se remplit à débit constant : elle contient 8 L après 3 min. Choisis ta méthode et place les grandeurs pour préparer le calcul de la durée nécessaire pour atteindre 20 L.",
     labelA:'V', unitA:'L', labelB:'t', unitB:'min',
-    a1txt:'8 L', b1txt:'3 min', a2txt:'20 L',
-    distractors: [{id:'x1', label:'8 min'}, {id:'x2', label:'24 L'}],
-    answer: 3*20/8, decimals: 2, askResult: false },
+    a1txt:'8 L', a1val:8, b1txt:'3 min', b1val:3, a2txt:'20 L',
+    distractors: [{id:'x1', label:'8 min'}, {id:'x2', label:'20 min'}] },
 
-  { text: "Une recette de crêpes utilise 250 g de farine pour 500 mL de lait. Quelle quantité de lait faut-il pour 400 g de farine ? Construis le calcul (sans donner le résultat pour l'instant).",
-    labelA:'m farine', unitA:'g', labelB:'V lait', unitB:'mL',
-    a1txt:'250 g', b1txt:'500 mL', a2txt:'400 g',
-    distractors: [{id:'x1', label:'250 mL'}, {id:'x2', label:'0,25 kg'}],
-    answer: 500*400/250, decimals: 0, askResult: false },
+  { text: "Un radiateur électrique de puissance constante consomme une énergie de 3 kWh en 2 h. Place les grandeurs pour préparer le calcul de l'énergie consommée en 5 h.",
+    labelA:'t', unitA:'h', labelB:'E', unitB:'kWh',
+    a1txt:'2 h', a1val:2, b1txt:'3 kWh', b1val:3, a2txt:'5 h',
+    distractors: [{id:'x1', label:'2 kWh'}, {id:'x2', label:'5 kWh'}] },
 
-  { text: "On dissout 12 g de sucre dans 0,4 L d'eau pour préparer un sirop. Quelle masse de sucre faut-il dissoudre dans 0,9 L pour garder la même concentration ?",
-    labelA:'V', unitA:'L', labelB:'m', unitB:'g',
-    a1txt:'0,4 L', b1txt:'12 g', a2txt:'0,9 L',
-    distractors: [{id:'x1', label:'12 L'}, {id:'x2', label:'0,4 g'}],
-    answer: 12*0.9/0.4, decimals: 1, askResult: true },
+  { text: "Un fil électrique a une résistance proportionnelle à sa longueur : 2 m de ce fil ont une résistance de 0,8 &Omega;. Place les grandeurs pour préparer le calcul de la résistance de 4,5 m de ce même fil.",
+    labelA:'L', unitA:'m', labelB:'R', unitB:'&Omega;',
+    a1txt:'2 m', a1val:2, b1txt:'0,8 &Omega;', b1val:0.8, a2txt:'4,5 m',
+    distractors: [{id:'x1', label:'2 &Omega;'}, {id:'x2', label:'0,8 m'}] },
 
-  { text: "Un conducteur ohmique de résistance fixée est traversé par un courant. On mesure U = 6 V pour I = 0,5 A. Quelle tension observera-t-on pour I = 1,3 A ? Utilise la méthode du coefficient (ici, le coefficient est la résistance R).",
+  { text: "Un conducteur ohmique de résistance fixée est traversé par un courant. On mesure U = 6 V pour I = 0,5 A. Utilise la méthode du coefficient (ici, la résistance) pour préparer le calcul de U pour I = 1,3 A.",
     labelA:'I', unitA:'A', labelB:'U', unitB:'V',
-    a1txt:'0,5 A', b1txt:'6 V', a2txt:'1,3 A',
+    a1txt:'0,5 A', a1val:0.5, b1txt:'6 V', b1val:6, a2txt:'1,3 A',
     distractors: [{id:'x1', label:'0,5 V'}, {id:'x2', label:'6 A'}],
-    answer: 6*1.3/0.5, decimals: 1,
-    forcedMethod: 'coef', askResult: true },
+    forcedMethod: 'coef' },
 
-  { text: "Une balance affiche une masse m = 34,5 g pour un volume V = 12 mL d'un liquide. Quelle masse correspond à un volume de 45 mL de ce même liquide ?",
+  { text: "Une balance affiche une masse m = 34,5 g pour un volume V = 12 mL d'un liquide. Place les grandeurs pour préparer le calcul de la masse correspondant à un volume de 45 mL.",
     labelA:'V', unitA:'mL', labelB:'m', unitB:'g',
-    a1txt:'12 mL', b1txt:'34,5 g', a2txt:'45 mL',
-    distractors: [{id:'x1', label:'34,5 mL'}, {id:'x2', label:'12 g'}],
-    answer: 34.5*45/12, decimals: 1, askResult: true },
+    a1txt:'12 mL', a1val:12, b1txt:'34,5 g', b1val:34.5, a2txt:'45 mL',
+    distractors: [{id:'x1', label:'34,5 mL'}, {id:'x2', label:'12 g'}] },
 
-  { text: "Une imprimante 3D dépose 2,4 g de matière en 6 minutes, à vitesse constante. Quelle masse aura-t-elle déposée après 25 minutes ? Utilise la méthode du retour à l'unité.",
+  { text: "Une imprimante 3D dépose 2,4 g de matière en 6 minutes, à vitesse constante. Utilise la méthode du retour à l'unité pour préparer le calcul de la masse déposée après 25 minutes.",
     labelA:'t', unitA:'min', labelB:'m', unitB:'g',
-    a1txt:'6 min', b1txt:'2,4 g', a2txt:'25 min',
+    a1txt:'6 min', a1val:6, b1txt:'2,4 g', b1val:2.4, a2txt:'25 min',
     distractors: [{id:'x1', label:'6 g'}, {id:'x2', label:'2,4 min'}],
-    answer: 2.4*25/6, decimals: 1,
-    forcedMethod: 'unite', askResult: true },
+    forcedMethod: 'unite' },
 
-  { text: "Un gaz a une masse volumique ρ = 1,2 kg/m³, soit 1 200 g par m³. Quelle est la masse (en g) de gaz contenue dans un volume de 750 cm³ ? Attention à l'unité : 750 cm³ = 7,5×10⁻⁴ m³.",
+  { text: "Un gaz a une masse volumique &rho; = 1,2 kg/m&sup3;, soit 1 200 g par m&sup3;. Place les grandeurs pour préparer le calcul de la masse (en g) de gaz contenue dans un volume de 750 cm&sup3; = 7,5&times;10&#8315;&#8308; m&sup3;.",
     labelA:'V', unitA:'m³', labelB:'m', unitB:'g',
-    a1txt:'1 m³', b1txt:'1 200 g', a2txt:'7,5×10⁻⁴ m³',
-    distractors: [{id:'x1', label:'750 m³'}, {id:'x2', label:'1,2 g'}],
-    answer: 1200*7.5e-4/1, decimals: 2, askResult: true },
+    a1txt:'1 m³', a1val:1, b1txt:'1 200 g', b1val:1200, a2txt:'7,5×10⁻⁴ m³',
+    distractors: [{id:'x1', label:'750 m³'}, {id:'x2', label:'1,2 g'}] },
 
-  { text: "Un cycliste parcourt 18 km en 40 min à allure constante. Combien de temps (en min) lui faudra-t-il pour parcourir 27 km ?",
+  { text: "Un cycliste parcourt 18 km en 40 min à allure constante. Place les grandeurs pour préparer le calcul de la durée nécessaire pour parcourir 27 km.",
     labelA:'d', unitA:'km', labelB:'t', unitB:'min',
-    a1txt:'18 km', b1txt:'40 min', a2txt:'27 km',
-    distractors: [{id:'x1', label:'18 min'}, {id:'x2', label:'40 km'}],
-    answer: 40*27/18, decimals: 0, askResult: true },
+    a1txt:'18 km', a1val:18, b1txt:'40 min', b1val:40, a2txt:'27 km',
+    distractors: [{id:'x1', label:'18 min'}, {id:'x2', label:'40 km'}] },
 ];
 
-let idx = 0, score = 0, answers = [], currentMethod = null, calcDone = false;
+let idx = 0, score = 0, answers = [], currentMethod = null, engine = null;
 
-function maxScore() {
-  return bank.reduce((s,q) => {
-    if (q.prefilled) return s + 2;
-    return s + 3 + (q.askResult ? 2 : 0);
-  }, 0);
-}
+function maxScore() { return bank.length * 3; }
 
 function renderIntro() {
   document.getElementById('app').innerHTML = `
     <div class="bg-white rounded-xl shadow-lg p-6">
       <span class="content-module-badge">MODULE 6</span>
       <h2 class="text-2xl font-bold text-[var(--app-accent-800)] mb-3">Entraînement</h2>
-      <p class="text-gray-700 mb-2">Pour chaque situation, choisis ta méthode préférée (tableau, coefficient ou retour à l'unité) — sauf quand elle est imposée — puis construis le calcul en glissant les valeurs au bon endroit, avant de donner le résultat.</p>
+      <p class="text-gray-700 mb-2">Pour chaque situation, choisis ta méthode préférée (tableau, coefficient ou retour à l'unité) — sauf quand elle est imposée — puis place les grandeurs au bon endroit pour construire le calcul. Aucun résultat numérique n'est demandé : c'est la construction du calcul qui compte !</p>
       <button onclick="start()" class="btn-primary mt-2">Commencer →</button>
     </div>`;
 }
@@ -105,44 +91,23 @@ function render() {
   if (idx >= bank.length) return finish();
   const q = bank[idx];
   currentMethod = q.forcedMethod || null;
-  calcDone = false;
   const app = document.getElementById('app');
   const head = ptHeader({ badge: 'MODULE 6', title: 'Entraînement', idx, total: bank.length, score });
-
-  const dataPanel = `
-    <details class="data-panel">
-      <summary>Données de l'énoncé</summary>
-      <div class="data-panel-body">
-        <span class="data-pill">${q.labelA} : ${q.a1txt}</span>
-        <span class="data-pill">${q.labelB} : ${q.b1txt}</span>
-        <span class="data-pill">${q.labelA} : ${q.a2txt}</span>
-        <span class="data-pill">${q.labelB} : ?</span>
-      </div>
-    </details>`;
 
   app.innerHTML = head + `
     <div class="bg-white rounded-xl shadow-lg p-6">
       <p class="text-gray-700 text-lg mb-3">${q.text}</p>
-      ${dataPanel}
-      ${numpadToggleBar()}
       <div id="methodZone"></div>
       <div id="calcArea"></div>
+      <div class="text-right mt-3">${ptSkipBtn('skipQ()')}</div>
     </div>`;
 
   renderMethodZone(q);
-  if (q.prefilled) {
-    renderPrefilled(q);
-  } else {
-    renderCalcArea(q, currentMethod);
-  }
+  renderCalcArea(q, currentMethod);
 }
 
 function renderMethodZone(q) {
   const zone = document.getElementById('methodZone');
-  if (q.prefilled) {
-    zone.innerHTML = `<span class="method-note">Méthode imposée : ${METHOD_LABEL[q.forcedMethod]} (tableau déjà complété)</span>`;
-    return;
-  }
   if (q.forcedMethod) {
     zone.innerHTML = `<span class="method-note">Méthode imposée : ${METHOD_LABEL[q.forcedMethod]}</span>`;
     return;
@@ -156,35 +121,21 @@ function updateMethodButtons() {
   document.querySelectorAll('.method-btn').forEach(b => b.classList.toggle('active', b.dataset.method === currentMethod));
 }
 function chooseMethod(m) {
-  if (calcDone) return;
   currentMethod = m;
   updateMethodButtons();
   renderCalcArea(bank[idx], m);
 }
 
-function renderPrefilled(q) {
-  const area = document.getElementById('calcArea');
-  area.innerHTML = `
-    <table class="pt-table">
-      <thead><tr><th>${q.labelA} (${q.unitA})</th><th>${q.labelB} (${q.unitB})</th></tr></thead>
-      <tbody>
-        <tr><td>${q.a1txt}</td><td>${q.b1txt}</td></tr>
-        <tr><td>${q.a2txt}</td><td>?</td></tr>
-      </tbody>
-    </table>
-    <p class="text-gray-700">Produit en croix : ${q.a1txt} &times; ? = ${q.a2txt} &times; ${q.b1txt}</p>
-    <div class="formula-box" style="font-size:1rem">? = (${q.a2txt} &times; ${q.b1txt}) / ${q.a1txt}</div>
-    ${resultFormHtml(q)}`;
-}
-
 function renderCalcArea(q, method) {
-  if (!method) { document.getElementById('calcArea').innerHTML = '<p class="text-gray-500 italic">Choisis une méthode ci-dessus pour commencer.</p>'; return; }
-  const chips = [
-    { id: 'a1', label: q.a1txt }, { id: 'b1', label: q.b1txt }, { id: 'a2', label: q.a2txt },
-  ].concat(q.distractors || []);
-  const paletteHtml = `<div class="pt-palette">${chips.map(c => ptChip(c.id, c.label)).join('')}</div>`;
+  const area = document.getElementById('calcArea');
+  if (!method) { area.innerHTML = '<p class="text-gray-500 italic">Choisis une méthode ci-dessus pour commencer.</p>'; return; }
 
-  let linesHtml = '';
+  const chips = [
+    { id: 'a1', label: q.a1txt, value: q.a1val }, { id: 'b1', label: q.b1txt, value: q.b1val }, { id: 'a2', label: q.a2txt },
+  ].concat(q.distractors || []);
+  const paletteHtml = `<div class="pt-palette">${chips.map(c => ptChip(c.id, c.label, c.value)).join('')}</div>`;
+
+  let linesHtml = '', liveGroups = [];
   if (method === 'tableau') {
     linesHtml = `<table class="pt-table">
       <thead><tr><th>${q.labelA} (${q.unitA})</th><th>${q.labelB} (${q.unitB})</th></tr></thead>
@@ -196,71 +147,46 @@ function renderCalcArea(q, method) {
   } else if (method === 'coef') {
     linesHtml = `
       <div class="text-sm font-bold text-gray-500 mb-1">Coefficient :</div>
-      <div class="formula-line">k = ${ptSlot('b1')} / ${ptSlot('a1')}</div>
+      <div class="formula-line">k = ${ptFraction('b1', 'a1', 'liveCalc')}</div>
       <div class="text-sm font-bold text-gray-500 mb-1 mt-3">Valeur recherchée :</div>
       <div class="formula-line">? = k &times; ${ptSlot('a2')}</div>`;
+    liveGroups = [{ slots: ['b1','a1'], op: 'div', target: '#liveCalc', decimals: 3 }];
   } else {
     linesHtml = `
       <div class="text-sm font-bold text-gray-500 mb-1">Valeur pour 1 ${q.unitA} :</div>
-      <div class="formula-line">1 ${q.unitA} &rarr; ${ptSlot('b1')} / ${ptSlot('a1')}</div>
+      <div class="formula-line">1 ${q.unitA} &rarr; ${ptFraction('b1', 'a1', 'liveCalc')}</div>
       <div class="text-sm font-bold text-gray-500 mb-1 mt-3">Valeur recherchée :</div>
       <div class="formula-line">? = (valeur pour 1 ${q.unitA}) &times; ${ptSlot('a2')}</div>`;
+    liveGroups = [{ slots: ['b1','a1'], op: 'div', target: '#liveCalc', decimals: 3 }];
   }
 
-  document.getElementById('calcArea').innerHTML = paletteHtml + linesHtml + `<div id="afterCalc"></div>`;
-  ptWireSlots(document.getElementById('calcArea'), () => onCalcComplete(q));
+  area.innerHTML = paletteHtml + `<div id="calcLines">${linesHtml}</div>
+    <div class="text-center mt-4">
+      <button class="btn-primary" onclick="verifyCalc()">Vérifier</button>
+    </div>
+    <p id="calcMsg" class="mt-2 font-semibold"></p>`;
+  engine = ptSlotEngine(area, { liveGroups });
 }
 
-function onCalcComplete(q) {
-  if (calcDone) return;
-  calcDone = true;
-  score += 3;
-  const after = document.getElementById('afterCalc');
-  if (q.askResult) {
-    after.innerHTML = `<div class="callout-success mt-3 mb-1">✓ Calcul correct !</div>` + resultFormHtml(q);
+function verifyCalc() {
+  const r = engine.verify();
+  const msg = document.getElementById('calcMsg');
+  if (r.correct === r.total) {
+    score += r.total;
+    answers.push({ num: idx+1, pts: r.total, max: r.total });
+    document.querySelector('.score-badge').textContent = score + ' pt' + (score>1?'s':'');
+    msg.style.color = '#166534';
+    msg.innerHTML = '✓ Calcul correctement construit !';
+    msg.insertAdjacentHTML('afterend', `<div class="text-center mt-2"><button onclick="nextQ()" class="btn-primary">Suite →</button></div>`);
+    document.querySelectorAll('.method-btn').forEach(b => b.disabled = true);
   } else {
-    answers.push({ num: idx+1, pts: 3, max: 3 });
-    after.innerHTML = `<div class="callout-success mt-3">✓ Calcul correct !</div>
-      <div class="text-center mt-4"><button class="btn-primary" onclick="nextQ()">Suite →</button></div>`;
+    msg.style.color = '#991b1b';
+    msg.textContent = `${r.correct}/${r.total} cases correctes — corrige les cases rouges et re-vérifie.`;
   }
-}
-
-function resultFormHtml(q) {
-  return `
-    <div class="mt-4">
-      <div class="font-bold text-gray-700 mb-2">Résultat : ${q.labelB} = ?</div>
-      <div class="flex items-center gap-3 flex-wrap">
-        <input type="text" id="ansInput" inputmode="decimal" class="check-input w-32" placeholder="Valeur" onfocus="numpadFocus('ansInput')" ontouchstart="numpadFocus('ansInput')">
-        <span class="text-gray-600 font-semibold">${q.unitB}</span>
-        <button class="check-btn" onclick="checkResult()">Vérifier</button>
-      </div>
-      ${numpadWidget()}
-      <p id="ansFb" class="mt-2 font-semibold"></p>
-    </div>`;
-}
-
-function checkResult() {
-  const q = bank[idx];
-  const input = document.getElementById('ansInput');
-  const fb = document.getElementById('ansFb');
-  const ok = ptNumOk(input.value, q.answer, 3);
-  const pts = 2;
-  if (ok) {
-    fb.innerHTML = '✓ Correct ! 🎉';
-    fb.style.color = '#166534';
-    score += pts;
-  } else {
-    fb.innerHTML = `✗ Incorrect. La réponse est : ${ptFmt(q.answer, q.decimals)} ${q.unitB}`;
-    fb.style.color = '#991b1b';
-  }
-  const basePts = q.prefilled ? 0 : 3;
-  answers.push({ num: idx+1, pts: basePts + (ok ? pts : 0), max: basePts + 2 });
-  document.getElementById('ansInput').disabled = true;
-  document.querySelector('.check-btn').disabled = true;
-  fb.insertAdjacentHTML('afterend', `<div class="text-center mt-3"><button class="btn-primary" onclick="nextQ()">Suite →</button></div>`);
 }
 
 function nextQ() { idx++; render(); }
+function skipQ() { answers.push({ num: idx+1, pts: 0, max: 3 }); idx++; render(); }
 
 function finish() {
   document.getElementById('app').innerHTML = ptFinish({

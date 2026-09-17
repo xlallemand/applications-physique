@@ -17,25 +17,25 @@
 
 <script>
 const bank = [
-  { type: 'qcm3', text: "Une voiture roule à vitesse constante. On regarde la distance parcourue d et la durée du trajet t.", correct: 'Proportionnalité directe' },
-  { type: 'qcm3', text: "À masse fixée, on regarde la masse volumique &rho; d'un objet et son volume V (&rho; = m / V).", correct: 'Proportionnalité inverse' },
+  { type: 'qcm3', text: "Une voiture roule à vitesse constante. On regarde la distance parcourue et la durée du trajet.", correct: 'Proportionnalité directe' },
+  { type: 'qcm3', text: "Un objet a une masse fixée. On regarde sa masse volumique et son volume.", correct: 'Proportionnalité inverse' },
   { type: 'sort', text: "Range chaque situation dans le bon panier.", items: [
-      { text: "À concentration c fixée : quantité de matière n et volume V (n = cV)", type: 'directe' },
-      { text: "À tension U fixée : intensité I et résistance R (loi d'Ohm U = RI)", type: 'inverse' },
-      { text: "Prix d'une course de taxi (prise en charge + prix au km) et distance parcourue", type: 'aucune' },
+      { text: "Une baignoire se remplit à débit constant : volume d'eau versé et durée de remplissage", type: 'directe' },
+      { text: "À tension fixée aux bornes d'un conducteur ohmique : intensité qui le traverse et sa résistance", type: 'inverse' },
+      { text: "Prix d'une course de taxi (prise en charge fixe + prix au km) et distance parcourue", type: 'aucune' },
       { text: "À vitesse constante : distance parcourue et durée du trajet", type: 'directe' },
   ]},
-  { type: 'qcm3', text: "Le poids P d'un objet et sa masse m, à un endroit donné (P = mg avec g fixé).", correct: 'Proportionnalité directe' },
-  { type: 'qcm3', text: "À température et quantité de matière fixées, la pression P d'un gaz parfait et son volume V (loi de Boyle-Mariotte, PV = cste).", correct: 'Proportionnalité inverse' },
+  { type: 'qcm3', text: "Le poids d'un objet et sa masse, à un endroit donné (l'intensité de la pesanteur y est fixée).", correct: 'Proportionnalité directe' },
+  { type: 'qcm3', text: "À température fixée, pour une quantité de gaz donnée, la pression et le volume (loi de Boyle-Mariotte).", correct: 'Proportionnalité inverse' },
   { type: 'qcm3', text: "L'aire d'un carré et la longueur de son côté.", correct: 'Aucune des deux' },
   { type: 'sort', text: "Range chaque situation dans le bon panier.", items: [
-      { text: "À pression fixée : volume V d'un gaz parfait et quantité de matière n (V = nRT/P)", type: 'directe' },
-      { text: "Durée d'un mur peint par plusieurs peintres travaillant ensemble, et nombre de peintres", type: 'inverse' },
-      { text: "Période T d'un pendule et sa longueur L (T proportionnel à &radic;L)", type: 'aucune' },
-      { text: "Quantité d'ingrédients d'une recette et nombre de personnes à nourrir", type: 'directe' },
+      { text: "À pression et température fixées : volume occupé par un gaz et la quantité de gaz", type: 'directe' },
+      { text: "Durée pour vider un réservoir et nombre de pompes identiques utilisées en même temps", type: 'inverse' },
+      { text: "Si on double la longueur d'un pendule, sa période est multipliée par &radic;2 &asymp; 1,41 (et non par 2)", type: 'aucune' },
+      { text: "Énergie totale disponible (en Wh) pour plusieurs piles identiques utilisées ensemble, et le nombre de piles", type: 'directe' },
   ]},
-  { type: 'qcm3', text: "L'énergie cinétique E<sub>c</sub> d'un objet de masse fixée et sa vitesse v (E<sub>c</sub> = &frac12;mv&sup2;).", correct: 'Aucune des deux' },
-  { type: 'qcm3', text: "À longueur d'onde fixée, l'énergie E d'un photon et la fréquence &nu; (relation de Planck E = h&nu;).", correct: 'Proportionnalité directe' },
+  { type: 'qcm3', text: "L'énergie cinétique d'un objet de masse fixée et sa vitesse.", correct: 'Aucune des deux' },
+  { type: 'qcm3', text: "À longueur d'onde fixée, l'énergie d'un photon et la fréquence de l'onde (relation de Planck).", correct: 'Proportionnalité directe' },
 ];
 let idx = 0, score = 0, answers = [];
 function maxScore() { return bank.reduce((s,q) => s + (q.type==='qcm3' ? 1 : q.items.length), 0); }
@@ -63,6 +63,7 @@ function render() {
       <div class="bg-white rounded-xl shadow-lg p-6">
         <p class="text-gray-700 text-lg mb-4">${q.text}</p>
         <div id="opts"></div>
+        <div class="text-right mt-2">${ptSkipBtn('skipQ()')}</div>
       </div>`;
     const opts = ['Proportionnalité directe', 'Proportionnalité inverse', 'Aucune des deux'];
     document.getElementById('opts').innerHTML = opts.map(o => `<button class="mcq-btn" onclick="answerQcm('${o}')">${o}</button>`).join('');
@@ -82,7 +83,10 @@ function render() {
         <div class="basket" data-basket-type="inverse"><div class="basket-title">Inverse</div></div>
         <div class="basket" data-basket-type="aucune"><div class="basket-title">Aucune</div></div>
       </div>
-      <div class="text-center mt-4"><button id="sortNext" class="btn-primary" style="display:none" onclick="nextQ()">Suite →</button></div>
+      <div class="flex items-center justify-between mt-4">
+        ${ptSkipBtn('skipQ()')}
+        <button id="sortNext" class="btn-primary" style="display:none" onclick="nextQ()">Suite →</button>
+      </div>
     </div>`;
   wireSort(q);
 }
@@ -105,6 +109,7 @@ function wireSort(q) {
         placed++; if (ok) correctCount++;
         if (placed === q.items.length) {
           score += correctCount;
+          document.querySelector('.score-badge').textContent = score + ' pt' + (score>1?'s':'');
           answers.push({ num: idx+1, pts: correctCount, max: q.items.length });
           document.getElementById('sortNext').style.display = 'inline-block';
         }
@@ -122,12 +127,17 @@ function answerQcm(choice) {
     if (b.textContent === q.correct) b.classList.add('correct');
     else if (b.textContent === choice) b.classList.add('wrong');
   });
-  if (ok) score += 1;
+  if (ok) { score += 1; document.querySelector('.score-badge').textContent = score + ' pt' + (score>1?'s':''); }
   answers.push({ num: idx+1, pts: ok?1:0, max: 1 });
   document.getElementById('opts').insertAdjacentHTML('beforeend',
     `<div class="text-center mt-4"><button onclick="nextQ()" class="btn-primary">Suite →</button></div>`);
 }
 function nextQ() { idx++; render(); }
+function skipQ() {
+  const q = bank[idx];
+  answers.push({ num: idx+1, pts: 0, max: q.type==='qcm3' ? 1 : q.items.length });
+  idx++; render();
+}
 
 function finish() {
   document.getElementById('app').innerHTML = ptFinish({
