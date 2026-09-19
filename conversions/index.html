@@ -1886,8 +1886,7 @@ function exSqEnd() {
 const COMP_BASE = L_PREFIXES.find(p => p.sym === '');
 const COMP_NUM_UNITS_L = ['g','mol'];
 
-function genCompQuestion(numUnit, denUnit, denPow) {
-  const subtype = rnd(['num','den','both']);
+function genCompQuestion(numUnit, denUnit, denPow, subtype) {
   let numFrom, numTo, denFrom, denTo;
   if (subtype === 'num') {
     denFrom = denTo = COMP_BASE;
@@ -1895,23 +1894,27 @@ function genCompQuestion(numUnit, denUnit, denPow) {
   } else if (subtype === 'den') {
     numFrom = numTo = COMP_BASE;
     do { denFrom = rnd(L_PREFIXES); denTo = rnd(L_PREFIXES); } while (denFrom.sym === denTo.sym);
+  } else if (subtype === 'none') {
+    numFrom = numTo = rnd(L_PREFIXES);
+    denFrom = denTo = rnd(L_PREFIXES);
   } else {
     do { numFrom = rnd(L_PREFIXES); numTo = rnd(L_PREFIXES); } while (numFrom.sym === numTo.sym);
     do { denFrom = rnd(L_PREFIXES); denTo = rnd(L_PREFIXES); } while (denFrom.sym === denTo.sym);
   }
   const coeff = rndInt(10,99)/10;
-  const powIn = Math.random()<0.5 ? 0 : rndInt(-3,3);
+  // Quand rien ne change, on impose une puissance de 10 non nulle : sinon la question serait un pur copier-coller.
+  const powIn = subtype === 'none' ? rnd([-3,-2,-1,1,2,3]) : (Math.random()<0.5 ? 0 : rndInt(-3,3));
   const expNumPart = numFrom.exp - numTo.exp;
   const expDenPart = (denFrom.exp - denTo.exp) * denPow;
   const expConv = expNumPart + expDenPart;
   return { numUnit, denUnit, denPow, numFrom, numTo, denFrom, denTo, coeff, powIn, expConv, expNumPart, expDenPart };
 }
 
-function genQCompSimple() {
-  return genCompQuestion(rnd(COMP_NUM_UNITS_L), 'L', -1);
+function genQCompSimple(subtype) {
+  return genCompQuestion(rnd(COMP_NUM_UNITS_L), 'L', -1, subtype);
 }
-function genQCompDensity() {
-  return genCompQuestion('g', 'm', rnd([-2,-3]));
+function genQCompDensity(subtype) {
+  return genCompQuestion('g', 'm', rnd([-2,-3]), subtype);
 }
 
 function compLabelHTML(numPrefix, numUnit, denPrefix, denUnit, denPow) {
@@ -1921,9 +1924,12 @@ function compLabelHTML(numPrefix, numUnit, denPrefix, denUnit, denPow) {
 let exComp = {};
 
 function startExComp() {
-  exComp = {q:0, total:10, score:0, qs:[]};
-  for(let i=0;i<7;i++) exComp.qs.push(genQCompSimple());
-  for(let i=0;i<3;i++) exComp.qs.push(genQCompDensity());
+  exComp = {q:0, total:10, score:0, qs:[
+    genQCompSimple('num'), genQCompSimple('num'),
+    genQCompSimple('den'), genQCompSimple('den'),
+    genQCompSimple('both'), genQCompSimple('both'), genQCompSimple('both'),
+    genQCompDensity('none'), genQCompDensity('none'), genQCompDensity('none'),
+  ]};
   renderExComp();
 }
 
