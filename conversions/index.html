@@ -1883,38 +1883,64 @@ function exSqEnd() {
 }
 
 // ===== MODULE 11 : ENTRAÎNEMENT UNITÉS COMPOSÉES =====
-const COMP_BASE = L_PREFIXES.find(p => p.sym === '');
-const COMP_NUM_UNITS_L = ['g','mol'];
+// On se limite volontairement à des unités classiquement rencontrées en physique-chimie.
+function pfx(sym) { return PREFIXES.find(p => p.sym === sym); }
+const P_NONE = pfx('');
+const P_K = pfx('k');
+const P_M = pfx('m');
+const P_C = pfx('c');
 
-function genCompQuestion(numUnit, denUnit, denPow, subtype) {
-  let numFrom, numTo, denFrom, denTo;
-  if (subtype === 'num') {
-    denFrom = denTo = COMP_BASE;
-    do { numFrom = rnd(L_PREFIXES); numTo = rnd(L_PREFIXES); } while (numFrom.sym === numTo.sym);
-  } else if (subtype === 'den') {
-    numFrom = numTo = COMP_BASE;
-    do { denFrom = rnd(L_PREFIXES); denTo = rnd(L_PREFIXES); } while (denFrom.sym === denTo.sym);
-  } else if (subtype === 'none') {
-    numFrom = numTo = rnd(L_PREFIXES);
-    denFrom = denTo = rnd(L_PREFIXES);
-  } else {
-    do { numFrom = rnd(L_PREFIXES); numTo = rnd(L_PREFIXES); } while (numFrom.sym === numTo.sym);
-    do { denFrom = rnd(L_PREFIXES); denTo = rnd(L_PREFIXES); } while (denFrom.sym === denTo.sym);
-  }
-  const coeff = rndInt(10,99)/10;
-  // Quand rien ne change, on impose une puissance de 10 non nulle : sinon la question serait un pur copier-coller.
-  const powIn = subtype === 'none' ? rnd([-3,-2,-1,1,2,3]) : (Math.random()<0.5 ? 0 : rndInt(-3,3));
-  const expNumPart = numFrom.exp - numTo.exp;
-  const expDenPart = (denFrom.exp - denTo.exp) * denPow;
-  const expConv = expNumPart + expDenPart;
-  return { numUnit, denUnit, denPow, numFrom, numTo, denFrom, denTo, coeff, powIn, expConv, expNumPart, expDenPart };
+// Questions 1 à 7 : concentrations, avec g, kg, mol, mmol au numérateur et L, mL, cL au dénominateur.
+const COMP_MASS_PREFIXES = [P_NONE, P_K];   // g, kg
+const COMP_MOL_PREFIXES  = [P_NONE, P_M];   // mol, mmol
+const COMP_VOL_PREFIXES  = [P_NONE, P_M, P_C]; // L, mL, cL
+
+function pickTwoDistinct(arr) {
+  const a = rnd(arr);
+  let b;
+  do { b = rnd(arr); } while (b.sym === a.sym);
+  return [a, b];
 }
 
 function genQCompSimple(subtype) {
-  return genCompQuestion(rnd(COMP_NUM_UNITS_L), 'L', -1, subtype);
+  const numUnit = rnd(['g','mol']);
+  const numPool = numUnit === 'g' ? COMP_MASS_PREFIXES : COMP_MOL_PREFIXES;
+  let numFrom, numTo, denFrom, denTo;
+  if (subtype === 'num') {
+    denFrom = denTo = P_NONE;
+    [numFrom, numTo] = shuffle(numPool);
+  } else if (subtype === 'den') {
+    numFrom = numTo = P_NONE;
+    [denFrom, denTo] = pickTwoDistinct(COMP_VOL_PREFIXES);
+  } else {
+    [numFrom, numTo] = shuffle(numPool);
+    [denFrom, denTo] = pickTwoDistinct(COMP_VOL_PREFIXES);
+  }
+  const coeff = rndInt(10,99)/10;
+  const powIn = Math.random()<0.5 ? 0 : rndInt(-3,3);
+  const expNumPart = numFrom.exp - numTo.exp;
+  const expDenPart = (denFrom.exp - denTo.exp) * (-1);
+  const expConv = expNumPart + expDenPart;
+  return { numUnit, denUnit:'L', denPow:-1, numFrom, numTo, denFrom, denTo, coeff, powIn, expConv, expNumPart, expDenPart };
 }
-function genQCompDensity(subtype) {
-  return genCompQuestion('g', 'm', rnd([-2,-3]), subtype);
+
+// Questions 8 à 10 : grandeurs surfaciques/volumiques classiques, en puissance -2 ou -3.
+const FAM_IRR  = [ { num:P_NONE, den:P_C }, { num:P_NONE, den:P_NONE }, { num:P_NONE, den:P_M } ]; // W.cm-2, W.m-2, W.mm-2
+const FAM_DENS = [ { num:P_NONE, den:P_NONE }, { num:P_K, den:P_NONE }, { num:P_NONE, den:P_C }, { num:P_K, den:P_C } ]; // g.m-3, kg.m-3, g.cm-3, kg.cm-3
+
+function genQCompLast() {
+  const useIrr = Math.random() < 0.5;
+  const family = useIrr ? FAM_IRR : FAM_DENS;
+  const numUnit = useIrr ? 'W' : 'g';
+  const denPow = useIrr ? -2 : -3;
+  let a, b;
+  do { a = rnd(family); b = rnd(family); } while (a.num.sym === b.num.sym && a.den.sym === b.den.sym);
+  const coeff = rndInt(10,99)/10;
+  const powIn = Math.random()<0.5 ? 0 : rndInt(-3,3);
+  const expNumPart = a.num.exp - b.num.exp;
+  const expDenPart = (a.den.exp - b.den.exp) * denPow;
+  const expConv = expNumPart + expDenPart;
+  return { numUnit, denUnit:'m', denPow, numFrom:a.num, numTo:b.num, denFrom:a.den, denTo:b.den, coeff, powIn, expConv, expNumPart, expDenPart };
 }
 
 function compLabelHTML(numPrefix, numUnit, denPrefix, denUnit, denPow) {
@@ -1928,7 +1954,7 @@ function startExComp() {
     genQCompSimple('num'), genQCompSimple('num'),
     genQCompSimple('den'), genQCompSimple('den'),
     genQCompSimple('both'), genQCompSimple('both'), genQCompSimple('both'),
-    genQCompDensity('none'), genQCompDensity('none'), genQCompDensity('none'),
+    genQCompLast(), genQCompLast(), genQCompLast(),
   ]};
   renderExComp();
 }
