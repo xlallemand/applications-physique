@@ -1917,30 +1917,25 @@ function genQCompSimple(subtype) {
     [denFrom, denTo] = pickTwoDistinct(COMP_VOL_PREFIXES);
   }
   const coeff = rndInt(10,99)/10;
-  const powIn = Math.random()<0.5 ? 0 : rndInt(-3,3);
   const expNumPart = numFrom.exp - numTo.exp;
   const expDenPart = (denFrom.exp - denTo.exp) * (-1);
   const expConv = expNumPart + expDenPart;
-  return { numUnit, denUnit:'L', denPow:-1, numFrom, numTo, denFrom, denTo, coeff, powIn, expConv, expNumPart, expDenPart };
+  return { numUnit, denUnit:'L', denPow:-1, numFrom, numTo, denFrom, denTo, coeff, powIn:0, expConv, expNumPart, expDenPart };
 }
 
 // Questions 8 à 10 : grandeurs surfaciques/volumiques classiques, en puissance -2 ou -3.
-const FAM_IRR  = [ { num:P_NONE, den:P_C }, { num:P_NONE, den:P_NONE }, { num:P_NONE, den:P_M } ]; // W.cm-2, W.m-2, W.mm-2
-const FAM_DENS = [ { num:P_NONE, den:P_NONE }, { num:P_K, den:P_NONE }, { num:P_NONE, den:P_C }, { num:P_K, den:P_C } ]; // g.m-3, kg.m-3, g.cm-3, kg.cm-3
-
+// Seule l'unité à la puissance négative (le dénominateur) change ; le numérateur reste fixe.
 function genQCompLast() {
   const useIrr = Math.random() < 0.5;
-  const family = useIrr ? FAM_IRR : FAM_DENS;
   const numUnit = useIrr ? 'W' : 'g';
   const denPow = useIrr ? -2 : -3;
-  let a, b;
-  do { a = rnd(family); b = rnd(family); } while (a.num.sym === b.num.sym && a.den.sym === b.den.sym);
+  const numPrefix = useIrr ? P_NONE : rnd([P_NONE, P_K]); // W.cm-2, W.m-2, W.mm-2 ; g ou kg au numérateur, fixe
+  const denPool = useIrr ? [P_C, P_NONE, P_M] : [P_C, P_NONE]; // cm, m, mm ; ou cm, m
+  const [denFrom, denTo] = pickTwoDistinct(denPool);
   const coeff = rndInt(10,99)/10;
-  const powIn = Math.random()<0.5 ? 0 : rndInt(-3,3);
-  const expNumPart = a.num.exp - b.num.exp;
-  const expDenPart = (a.den.exp - b.den.exp) * denPow;
-  const expConv = expNumPart + expDenPart;
-  return { numUnit, denUnit:'m', denPow, numFrom:a.num, numTo:b.num, denFrom:a.den, denTo:b.den, coeff, powIn, expConv, expNumPart, expDenPart };
+  const expDenPart = (denFrom.exp - denTo.exp) * denPow;
+  const expConv = expDenPart;
+  return { numUnit, denUnit:'m', denPow, numFrom:numPrefix, numTo:numPrefix, denFrom, denTo, coeff, powIn:0, expConv, expNumPart:0, expDenPart };
 }
 
 function compLabelHTML(numPrefix, numUnit, denPrefix, denUnit, denPow) {
