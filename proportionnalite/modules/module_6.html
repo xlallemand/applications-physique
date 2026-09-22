@@ -22,54 +22,58 @@
 <script>
 const METHOD_LABEL = { tableau: 'Tableau', coef: 'Coefficient', unite: "Retour à l'unité" };
 
+/* Point de départ de chaque question : une grandeur d'unité "unité1/unité2"
+   (vitesse, masse volumique, résistance...), donnée directement comme un
+   coefficient — donc une ligne de tableau (valeur ; 1). On connaît en plus
+   une valeur pour l'une des deux unités, et on cherche l'autre. */
 const bank = [
-  { text: "Une voiture roule à 25 km/h. Place les grandeurs pour préparer le calcul de la durée nécessaire pour parcourir 52 m.",
+  { text: "Un cycliste roule à vitesse constante de 8 m/s, soit 8 m parcourus en 1 s. Place les grandeurs pour préparer le calcul de la durée nécessaire pour parcourir 40 m.",
     labelA:'d', unitA:'m', labelB:'t', unitB:'s',
-    a1txt:'25 km = 25 000 m', a1val:25000, b1txt:'1 h = 3 600 s', b1val:3600, a2txt:'52 m',
-    distractors: [{id:'x1', label:'25 s'}, {id:'x2', label:'52 s'}],
+    a1txt:'8 m', a1val:8, b1txt:'1 s', b1val:1, a2txt:'40 m',
+    distractors: [{id:'x1', label:'8 s'}, {id:'x2', label:'40 s'}],
     forcedMethod: 'tableau' },
 
-  { text: "Une baignoire se remplit à débit constant : elle contient 8 L après 3 min. Choisis ta méthode et place les grandeurs pour préparer le calcul de la durée nécessaire pour atteindre 20 L.",
-    labelA:'V', unitA:'L', labelB:'t', unitB:'min',
-    a1txt:'8 L', a1val:8, b1txt:'3 min', b1val:3, a2txt:'20 L',
-    distractors: [{id:'x1', label:'8 min'}, {id:'x2', label:'20 min'}] },
-
-  { text: "Un radiateur électrique de puissance constante consomme une énergie de 3 kWh en 2 h. Place les grandeurs pour préparer le calcul de l'énergie consommée en 5 h.",
-    labelA:'t', unitA:'h', labelB:'E', unitB:'kWh',
-    a1txt:'2 h', a1val:2, b1txt:'3 kWh', b1val:3, a2txt:'5 h',
-    distractors: [{id:'x1', label:'2 kWh'}, {id:'x2', label:'5 kWh'}] },
-
-  { text: "Un fil électrique a une résistance proportionnelle à sa longueur : 2 m de ce fil ont une résistance de 0,8 &Omega;. Place les grandeurs pour préparer le calcul de la résistance de 4,5 m de ce même fil.",
-    labelA:'L', unitA:'m', labelB:'R', unitB:'&Omega;',
-    a1txt:'2 m', a1val:2, b1txt:'0,8 &Omega;', b1val:0.8, a2txt:'4,5 m',
-    distractors: [{id:'x1', label:'2 &Omega;'}, {id:'x2', label:'0,8 m'}] },
-
-  { text: "Un conducteur ohmique de résistance fixée est traversé par un courant. On mesure U = 6 V pour I = 0,5 A. Utilise la méthode du coefficient (ici, la résistance) pour préparer le calcul de U pour I = 1,3 A.",
+  { text: "Un conducteur ohmique a une résistance de 5 &Omega;, soit 5 V pour 1 A. Place les grandeurs pour préparer le calcul de la tension à ses bornes pour une intensité de 0,8 A.",
     labelA:'I', unitA:'A', labelB:'U', unitB:'V',
-    a1txt:'0,5 A', a1val:0.5, b1txt:'6 V', b1val:6, a2txt:'1,3 A',
-    distractors: [{id:'x1', label:'0,5 V'}, {id:'x2', label:'6 A'}],
-    forcedMethod: 'coef' },
+    a1txt:'1 A', a1val:1, b1txt:'5 V', b1val:5, a2txt:'0,8 A',
+    distractors: [{id:'x1', label:'1 V'}, {id:'x2', label:'5 A'}] },
 
-  { text: "Une balance affiche une masse m = 34,5 g pour un volume V = 12 mL d'un liquide. Place les grandeurs pour préparer le calcul de la masse correspondant à un volume de 45 mL.",
-    labelA:'V', unitA:'mL', labelB:'m', unitB:'g',
-    a1txt:'12 mL', a1val:12, b1txt:'34,5 g', b1val:34.5, a2txt:'45 mL',
-    distractors: [{id:'x1', label:'34,5 mL'}, {id:'x2', label:'12 g'}] },
-
-  { text: "Une imprimante 3D dépose 2,4 g de matière en 6 minutes, à vitesse constante. Utilise la méthode du retour à l'unité pour préparer le calcul de la masse déposée après 25 minutes.",
-    labelA:'t', unitA:'min', labelB:'m', unitB:'g',
-    a1txt:'6 min', a1val:6, b1txt:'2,4 g', b1val:2.4, a2txt:'25 min',
-    distractors: [{id:'x1', label:'6 g'}, {id:'x2', label:'2,4 min'}],
+  { text: "Une batterie a une énergie massique de 150 Wh/kg, soit 150 Wh pour 1 kg. Utilise la méthode du retour à l'unité pour préparer le calcul de l'énergie stockée par une batterie de 0,4 kg.",
+    labelA:'m', unitA:'kg', labelB:'E', unitB:'Wh',
+    a1txt:'1 kg', a1val:1, b1txt:'150 Wh', b1val:150, a2txt:'0,4 kg',
+    distractors: [{id:'x1', label:'1 Wh'}, {id:'x2', label:'0,4 Wh'}],
     forcedMethod: 'unite' },
 
-  { text: "Un gaz a une masse volumique &rho; = 1,2 kg/m&sup3;, soit 1 200 g par m&sup3;. Place les grandeurs pour préparer le calcul de la masse (en g) de gaz contenue dans un volume de 750 cm&sup3; = 7,5&times;10&#8315;&#8308; m&sup3;.",
+  { text: "Une solution a une concentration massique de 15 g/L, soit 15 g de soluté pour 1 L de solution. Place les grandeurs pour préparer le calcul du volume de solution contenant 45 g de soluté.",
+    labelA:'m', unitA:'g', labelB:'V', unitB:'L',
+    a1txt:'15 g', a1val:15, b1txt:'1 L', b1val:1, a2txt:'45 g',
+    distractors: [{id:'x1', label:'15 L'}, {id:'x2', label:'45 L'}] },
+
+  { text: "Une espèce chimique a une masse molaire de 40 g/mol, soit 40 g pour 1 mol. Place les grandeurs pour préparer le calcul de la quantité de matière correspondant à une masse de 500 mg, soit 0,5 g.",
+    labelA:'m', unitA:'g', labelB:'n', unitB:'mol',
+    a1txt:'40 g', a1val:40, b1txt:'1 mol', b1val:1, a2txt:'0,5 g',
+    distractors: [{id:'x1', label:'40 mol'}, {id:'x2', label:'0,5 mol'}] },
+
+  { text: "Un ressort a une raideur de 25 N/m, soit 25 N pour 1 m d'allongement. Place les grandeurs pour préparer le calcul de la force exercée pour un allongement de 12 cm, soit 0,12 m.",
+    labelA:'x', unitA:'m', labelB:'F', unitB:'N',
+    a1txt:'1 m', a1val:1, b1txt:'25 N', b1val:25, a2txt:'0,12 m',
+    distractors: [{id:'x1', label:'1 N'}, {id:'x2', label:'0,12 N'}] },
+
+  { text: "Un gaz a une masse volumique &rho; = 1,2 kg/m&sup3;, soit 1 200 g pour 1 m&sup3;. Place les grandeurs pour préparer le calcul de la masse (en g) de gaz contenue dans un volume de 750 cm&sup3;, soit 7,5&times;10&#8315;&#8308; m&sup3;.",
     labelA:'V', unitA:'m³', labelB:'m', unitB:'g',
     a1txt:'1 m³', a1val:1, b1txt:'1 200 g', b1val:1200, a2txt:'7,5×10⁻⁴ m³',
     distractors: [{id:'x1', label:'750 m³'}, {id:'x2', label:'1,2 g'}] },
 
-  { text: "Un cycliste parcourt 18 km en 40 min à allure constante. Place les grandeurs pour préparer le calcul de la durée nécessaire pour parcourir 27 km.",
-    labelA:'d', unitA:'km', labelB:'t', unitB:'min',
-    a1txt:'18 km', a1val:18, b1txt:'40 min', b1val:40, a2txt:'27 km',
-    distractors: [{id:'x1', label:'18 min'}, {id:'x2', label:'40 km'}] },
+  { text: "Un radiateur électrique a une puissance de 1 200 W, soit 1 200 J consommés en 1 s. Place les grandeurs pour préparer le calcul de l'énergie consommée en 3 min, soit 180 s.",
+    labelA:'t', unitA:'s', labelB:'E', unitB:'J',
+    a1txt:'1 s', a1val:1, b1txt:'1 200 J', b1val:1200, a2txt:'180 s',
+    distractors: [{id:'x1', label:'1 J'}, {id:'x2', label:'180 J'}] },
+
+  { text: "Un panneau solaire reçoit un éclairement de 750 W/m&sup2;, soit 750 W pour 1 m&sup2;. Place les grandeurs pour préparer le calcul de la puissance reçue par une surface de 3 000 cm&sup2;, soit 0,3 m&sup2;.",
+    labelA:'S', unitA:'m²', labelB:'P', unitB:'W',
+    a1txt:'1 m²', a1val:1, b1txt:'750 W', b1val:750, a2txt:'0,3 m²',
+    distractors: [{id:'x1', label:'1 W'}, {id:'x2', label:'0,3 W'}],
+    forcedMethod: 'coef' },
 ];
 
 let idx = 0, score = 0, answers = [], currentMethod = null, engine = null, questionDone = false;
