@@ -58,18 +58,18 @@ const bank = [
 
   { type: 'fracdrag', text: "Quantité de matière n (mol) et masse m (g) d'une espèce chimique. Le premier point est à l'origine : place les coordonnées du point B dans le calcul du coefficient (la masse molaire).", graph: G.coefA,
     chips: [ {id:'num', label:'6 g', value:6, unit:'g'}, {id:'den', label:'10 mol', value:10, unit:'mol'}, {id:'x1', label:'10 g', value:10, unit:'g'}, {id:'x2', label:'6 mol', value:6, unit:'mol'} ],
-    decimals: 2 },
+    decimals: 2, name: 'la masse molaire M = m/n' },
 
   { type: 'qcm', text: "Quelle est l'unité du coefficient directeur du graphique précédent (masse en fonction de la quantité de matière) ?",
     options: ['g/mol', 'mol/g', 'g', 'mol'], correct: 0 },
 
-  { type: 'fracdrag', text: "Même grandeur, mais cette fois l'origine n'est pas visible sur le graphique : place les variations (et non les valeurs brutes) dans le calcul du coefficient à l'aide des points A et B.", graph: G.coefA2,
+  { type: 'fracdrag', text: "Même grandeur (donc encore la masse molaire), mais cette fois l'origine n'est pas visible sur le graphique : place les variations (et non les valeurs brutes) dans le calcul du coefficient à l'aide des points A et B.", graph: G.coefA2,
     chips: [ {id:'num', label:'&Delta;m = 3,6 g', value:3.6, unit:'g'}, {id:'den', label:'&Delta;n = 6 mol', value:6, unit:'mol'}, {id:'x1', label:'6 g', value:6, unit:'g'}, {id:'x2', label:'10 mol', value:10, unit:'mol'} ],
-    decimals: 2 },
+    decimals: 2, name: 'la masse molaire M = &Delta;m/&Delta;n' },
 
   { type: 'fracdrag', text: "Loi d'Ohm : tension U (V) en fonction de l'intensité I (A). Place les coordonnées du point B dans le calcul de la résistance.", graph: G.coefB,
     chips: [ {id:'num', label:'12 V', value:12, unit:'V'}, {id:'den', label:'8 A', value:8, unit:'A'}, {id:'x1', label:'8 V', value:8, unit:'V'}, {id:'x2', label:'12 A', value:12, unit:'A'} ],
-    decimals: 2 },
+    decimals: 2, name: 'la résistance R = U/I' },
 
   { type: 'qcm', text: "Quelle est l'unité du coefficient directeur du graphique précédent (tension en fonction de l'intensité) ?",
     options: ['&Omega; (V/A)', 'A/V', 'V', 'A'], correct: 0 },
@@ -189,7 +189,8 @@ function verifyFracdrag() {
     document.querySelector('.score-badge').textContent = score + ' pt' + (score>1?'s':'');
     answers.push({ num: idx+1, pts: r.total, max: r.total });
     msg.style.color = '#166534';
-    msg.innerHTML = '✓ Bien placé !';
+    const q = bank[idx];
+    msg.innerHTML = '✓ Bien placé !' + (q.name ? ` Ce coefficient, c'est <b>${q.name}</b>.` : '');
     document.getElementById('actionRow').style.display = 'none';
     msg.insertAdjacentHTML('afterend', `<div class="text-center mt-2"><button onclick="nextQ()" class="btn-primary">Suite →</button></div>`);
   } else {
