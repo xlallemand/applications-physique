@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fractions - Entraînement</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="../assets/theme.css">
+    <script src="../assets/nav.js"></script>
+    <script src="../assets/numpad.js"></script>
+    <style>
+        :root {
+            --app-accent-50:  #fff1f2;
+            --app-accent-100: #ffe4e6;
+            --app-accent-200: #fecdd3;
+            --app-accent-400: #fb7185;
+            --app-accent-600: #e11d48;
+            --app-accent-700: #be123c;
+            --app-accent-800: #9f1239;
+        }
+        .btn-module { transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-module:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        .question-box { animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
+        .correct { animation: correctPulse 0.5s; }
+        @keyframes correctPulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.04);} }
+        input[type="text"], input[type="number"] { font-size:16px; }
+
+        /* ── Fractions ─────────────────────────────── */
+        .frac {
+            display: inline-flex; flex-direction: column; align-items: center;
+            vertical-align: middle; margin: 0 4px; font-weight: 700; line-height: 1.1;
+        }
+        .frac .num { border-bottom: 2.5px solid currentColor; padding: 1px 6px 2px 6px; display: block; text-align: center; }
+        .frac .den { padding: 2px 6px 1px 6px; display: block; text-align: center; }
+
+        /* ── Saisie d'une fraction (numérateur / dénominateur) ── */
+        .frac-input-wrap {
+            display: inline-flex; flex-direction: column; align-items: center;
+            vertical-align: middle; margin: 0 4px;
+        }
+        .frac-input-wrap input { width: 72px; text-align: center; font-weight: 700; padding: 5px 4px; }
+        .frac-input-wrap .frac-bar { border-bottom: 2.5px solid currentColor; width: 100%; margin: 3px 0; }
+
+        /* ── Liste des modules sur l'accueil ─────── */
+        .module-card-actions .btn-primary,
+        .module-card-actions .btn-secondary { font-size: .9rem; padding: 10px 20px; }
+    </style>
+</head>
+<body class="bg-white min-h-screen">
+
+<!-- ═══════ NAVIGATION ═══════ -->
+<div id="app-nav"></div>
+
+<div id="app" class="container mx-auto px-4 py-8 max-w-4xl">
+
+    <header id="mainHeader" class="text-center mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold text-rose-900 mb-2">Les Fractions</h1>
+        <p class="text-lg text-rose-700">Apprends et entraîne-toi !</p>
+    </header>
+
+    <div id="menu" class="module-list mb-8">
+        <div class="module-card">
+            <div class="module-card-head">
+                <span class="module-badge">Module 1</span>
+                <div class="module-card-body">
+                    <div class="module-card-title">Simplification d'une fraction</div>
+                    <div class="module-card-desc">Trouver la forme irréductible d'une fraction en divisant par le PGCD</div>
+                    <div class="module-card-actions">
+                        <button onclick="showCourse(1)" class="btn-module btn-primary">Cours</button>
+                        <button onclick="showTraining(1)" class="btn-module btn-secondary">Entraînement (15 questions)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-card-head">
+                <span class="module-badge">Module 2</span>
+                <div class="module-card-body">
+                    <div class="module-card-title">Multiplication, inverse et division</div>
+                    <div class="module-card-desc">Multiplier deux fractions, calculer l'inverse, diviser deux fractions</div>
+                    <div class="module-card-actions">
+                        <button onclick="showCourse(2)" class="btn-module btn-primary">Cours</button>
+                        <button onclick="showTraining(2)" class="btn-module btn-secondary">Entraînement (15 questions)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-card-head">
+                <span class="module-badge">Module 3</span>
+                <div class="module-card-body">
+                    <div class="module-card-title">Addition et soustraction (même dénominateur)</div>
+                    <div class="module-card-desc">Additionner et soustraire des fractions qui ont le même dénominateur</div>
+                    <div class="module-card-actions">
+                        <button onclick="showCourse(3)" class="btn-module btn-primary">Cours</button>
+                        <button onclick="showTraining(3)" class="btn-module btn-secondary">Entraînement (15 questions)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-card-head">
+                <span class="module-badge">Module 4</span>
+                <div class="module-card-body">
+                    <div class="module-card-title">Addition et soustraction (dénominateurs différents)</div>
+                    <div class="module-card-desc">Trouver le dénominateur commun et calculer la somme ou la différence</div>
+                    <div class="module-card-actions">
+                        <button onclick="showCourse(4)" class="btn-module btn-primary">Cours</button>
+                        <button onclick="showTraining(4)" class="btn-module btn-secondary">Entraînement (15 questions)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-card-head">
+                <span class="module-badge">Module 5</span>
+                <div class="module-card-body">
+                    <div class="module-card-title">S'entraîner sur toutes les notions</div>
+                    <div class="module-card-desc">Questions qui combinent tous les modules — Niveau supérieur !</div>
+                    <div class="module-card-actions">
+                        <button onclick="showTraining(5)" class="btn-module btn-primary">Entraînement (20 questions)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="moduleContainer"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+const nav = AppNav.init({
+    appName: 'Fractions',
+    portalHref: '../index.html',
+    portalLabel: 'Toutes les applications',
+    onHome: () => backToMenu(),
+    onNavigate: (key) => {
+        const [type, num] = key.split('-');
+        if (type === 'course') showCourse(Number(num));
+        else showTraining(Number(num));
+    },
+    groups: [
+        { title: 'Module 1 — Simplification', items: [
+            { key: 'course-1', label: 'Cours' },
+            { key: 'training-1', label: 'Entraînement (15 questions)' },
+        ]},
+        { title: 'Module 2 — Multiplication, inverse, division', items: [
+            { key: 'course-2', label: 'Cours' },
+            { key: 'training-2', label: 'Entraînement (15 questions)' },
+        ]},
+        { title: 'Module 3 — Addition et soustraction (même dénominateur)', items: [
+            { key: 'course-3', label: 'Cours' },
+            { key: 'training-3', label: 'Entraînement (15 questions)' },
+        ]},
+        { title: 'Module 4 — Addition et soustraction (dénominateurs différents)', items: [
+            { key: 'course-4', label: 'Cours' },
+            { key: 'training-4', label: 'Entraînement (15 questions)' },
+        ]},
+        { title: 'Module 5 — Toutes les notions', items: [
+            { key: 'training-5', label: 'Entraînement (20 questions)' },
+        ]},
+    ],
+});
+nav.setActive(null);
+
+let currentPage = 'home'; // 'home' | 'course-1' … 'course-4' | 'training-1' … 'training-5'
+
+// ═══════════════════════════════════════════════════════════════
+// COULEUR ET TITRE DE CHAQUE MODULE (cours et entraînement)
+// ═══════════════════════════════════════════════════════════════
+const MODULE_THEMES = {
+    1: { color:'blue',   title:'Simplification',                                total:15 },
+    2: { color:'purple', title:'Multiplication, inverse et division',           total:15 },
+    3: { color:'green',  title:'Addition et soustraction (même dénominateur)',  total:15 },
+    4: { color:'orange', title:'Addition et soustraction (dénominateurs différents)', total:15 },
+    5: { color:'rose',   title:'Toutes les notions',                            total:20 },
+};
+
+// ═══════════════════════════════════════════════════════════════
+// ÉTAT GLOBAL
+// ═══════════════════════════════════════════════════════════════
+let currentModule = 0, currentQuestion = 0, score = 0, questions = [];
+
+// Pavé numérique commun, sans touche virgule (les fractions n'utilisent que des entiers)
+function fracNumpad() { return numpadWidget(false, { decimal: false }); }
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS FRACTIONS
+// ═══════════════════════════════════════════════════════════════
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a; }
+function lcm(a, b) { return Math.abs(a * b) / gcd(a, b); }
+
+// Affiche une fraction HTML (inline)
+function F(num, den) {
+    return `<span class="frac"><span class="num">${num}</span><span class="den">${den}</span></span>`;
+}
+// Fraction simplifiée retournée comme objet {n, d}
+function simplify(n, d) {
+    const g = gcd(Math.abs(n), Math.abs(d));
+    let sn = n / g, sd = d / g;
+    if (sd < 0) { sn = -sn; sd = -sd; }
+    return { n: sn, d: sd };
+}
+
+// Lit une fraction saisie par l'élève (numérateur, dénominateur) SANS la simplifier :
+// seul le signe est ramené au numérateur. Renvoie null si la saisie est invalide.
+function readFrac(numId, denId) {
+    const n = parseInt(document.getElementById(numId).value.replace('−', '-'), 10);
+    const d = parseInt(document.getElementById(denId).value.replace('−', '-'), 10);
+    if (isNaN(n) || isNaN(d) || d === 0) return null;
+    return d < 0 ? { n: -n, d: -d } : { n, d };
+}
+
+// Compare la fraction saisie au résultat attendu, sans simplification automatique :
+// 'ok' = forme irréductible attendue, 'equiv' = égale mais non simplifiée, 'ko' = fausse
+function compareFrac(user, correctN, correctD) {
+    const c = simplify(correctN, correctD);
+    if (user.n === c.n && user.d === c.d) return 'ok';
+    if (user.n * c.d === c.n * user.d) return 'equiv';
+    return 'ko';
+}
+
+// Champ de saisie d'une fraction (numérateur au-dessus, dénominateur en dessous)
+function fracInput(numId, denId, cls) {
+    return `<div class="frac-input-wrap">
+        <input type="text" inputmode="numeric" id="${numId}" class="${cls}" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+        <div class="frac-bar"></div>
+        <input type="text" inputmode="numeric" id="${denId}" class="${cls}" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+function setTopBarTitle(title) { nav.setTitle(title); }
+function updateActiveMenuItem() { nav.setActive(currentPage === 'home' ? null : currentPage); }
+
+function hideMenu() {
+    document.getElementById('mainHeader').style.display = 'none';
+    document.getElementById('menu').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function backToMenu() {
+    document.getElementById('moduleContainer').innerHTML = '';
+    document.getElementById('mainHeader').style.display = 'block';
+    document.getElementById('menu').style.display = '';
+    setTopBarTitle(null);
+    currentPage = 'home';
+    updateActiveMenuItem();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function showCourse(num) {
+    hideMenu();
+    const c = document.getElementById('moduleContainer');
+    if (num === 1) c.innerHTML = getCourse1();
+    else if (num === 2) c.innerHTML = getCourse2();
+    else if (num === 3) c.innerHTML = getCourse3();
+    else if (num === 4) c.innerHTML = getCourse4();
+    setTopBarTitle(`Module ${num} : ${MODULE_THEMES[num].title} — Cours`);
+    currentPage = 'course-' + num;
+    updateActiveMenuItem();
+}
+function showTraining(num) {
+    hideMenu();
+    currentModule = num; currentQuestion = 0; score = 0;
+    if (num === 1) questions = generateT1();
+    else if (num === 2) questions = generateT2();
+    else if (num === 3) questions = generateT3();
+    else if (num === 4) questions = generateT4();
+    else if (num === 5) questions = generateT5();
+    setTopBarTitle(`Module ${num} : ${MODULE_THEMES[num].title} — Entraînement`);
+    currentPage = 'training-' + num;
+    updateActiveMenuItem();
+    document.getElementById('moduleContainer').innerHTML = getTrainingHTML(num);
+    showQuestion();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VÉRIFICATION DANS LES COURS
+// ═══════════════════════════════════════════════════════════════
+function checkFrac(numId, denId, correctN, correctD, resultId) {
+    const result = document.getElementById(resultId);
+    const user = readFrac(numId, denId);
+    const cs = simplify(correctN, correctD);
+    if (!user) {
+        result.innerHTML = '✗ Vérifie ta saisie.'; result.style.color = '#991b1b';
+        return;
+    }
+    const res = compareFrac(user, correctN, correctD);
+    if (res === 'ok') {
+        result.innerHTML = '✓ Correct ! 🎉'; result.style.color = '#166534';
+    } else if (res === 'equiv') {
+        result.innerHTML = `✗ Ta fraction est égale au résultat mais elle n'est pas irréductible : ${F(user.n, user.d)} = ${F(cs.n, cs.d)}`;
+        result.style.color = '#991b1b';
+    } else {
+        result.innerHTML = `✗ Incorrect. La réponse est : ${F(cs.n, cs.d)}`; result.style.color = '#991b1b';
+    }
+}
+
+function checkInt(inputId, correct, resultId) {
+    const val = parseInt(document.getElementById(inputId).value);
+    const result = document.getElementById(resultId);
+    if (val === correct) {
+        result.innerHTML = '✓ Correct ! 🎉'; result.style.color = '#166534';
+    } else {
+        result.innerHTML = `✗ Incorrect. La réponse est : ${correct}`; result.style.color = '#991b1b';
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COURS 1 — Simplification
+// ═══════════════════════════════════════════════════════════════
+function getCourse1() {
+    return `
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
+        <h2 class="text-2xl md:text-3xl font-bold text-blue-900 mb-6">Cours 1 : Simplification d'une fraction</h2>
+        ${numpadToggleBar()}
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">1. Qu'est-ce qu'une fraction irréductible ?</h3>
+            <div class="bg-blue-50 rounded-lg p-6 mb-4">
+                <p class="text-lg mb-3">Une fraction ${F('a','b')} est <strong>irréductible</strong> quand le numérateur <strong>a</strong> et le dénominateur <strong>b</strong> n'ont <strong>aucun diviseur commun autre que 1</strong>.</p>
+                <p class="text-lg mb-3">Pour simplifier une fraction, on divise le numérateur et le dénominateur par leur <strong>PGCD</strong> (Plus Grand Commun Diviseur).</p>
+                <div class="bg-blue-200 rounded-lg p-4 text-center text-xl font-bold mb-2">
+                    ${F('a','b')} = ${F('a ÷ PGCD(a,b)','b ÷ PGCD(a,b)')}
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">2. Exemples</h3>
+            <div class="bg-white border-2 border-blue-200 rounded-lg p-5 mb-4 space-y-4">
+                <div class="bg-blue-50 rounded p-4">
+                    <p class="font-semibold text-blue-900 mb-1">Exemple 1 :</p>
+                    <p>Simplifier ${F(6,9)}.</p>
+                    <p>PGCD(6, 9) = 3</p>
+                    <p>${F(6,9)} = ${F('6 ÷ 3','9 ÷ 3')} = ${F(2,3)} &nbsp; ✓ irréductible</p>
+                </div>
+                <div class="bg-blue-50 rounded p-4">
+                    <p class="font-semibold text-blue-900 mb-1">Exemple 2 :</p>
+                    <p>Simplifier ${F(18,24)}.</p>
+                    <p>PGCD(18, 24) = 6</p>
+                    <p>${F(18,24)} = ${F('18 ÷ 6','24 ÷ 6')} = ${F(3,4)} &nbsp; ✓ irréductible</p>
+                </div>
+                <div class="bg-blue-50 rounded p-4">
+                    <p class="font-semibold text-blue-900 mb-1">Exemple 3 :</p>
+                    <p>Simplifier ${F(15,25)}.</p>
+                    <p>PGCD(15, 25) = 5</p>
+                    <p>${F(15,25)} = ${F('15 ÷ 5','25 ÷ 5')} = ${F(3,5)} &nbsp; ✓ irréductible</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">3. Comment trouver le PGCD ?</h3>
+            <div class="bg-indigo-50 rounded-lg p-6 mb-4">
+                <p class="mb-3"><strong>Méthode des diviseurs communs :</strong> lister les diviseurs de chaque nombre, puis prendre le plus grand commun.</p>
+                <div class="bg-white rounded p-4 mb-3">
+                    <p>Diviseurs de 12 : 1, 2, 3, <strong>4</strong>, 6, 12</p>
+                    <p>Diviseurs de 8 : 1, 2, <strong>4</strong>, 8</p>
+                    <p>PGCD(12, 8) = <strong>4</strong></p>
+                    <p class="mt-2">${F(12,8)} = ${F('12 ÷ 4','8 ÷ 4')} = ${F(3,2)}</p>
+                </div>
+            </div>
+            <div class="check-box">
+                <p class="check-label">Vérifie ta compréhension :</p>
+                <p class="check-question">Simplifie ${F(10,15)} — donne la fraction irréductible :</p>
+                <div class="flex items-center gap-3 flex-wrap">
+                    ${fracInput('c1_n1', 'c1_d1', 'check-input')}
+                    <button class="check-btn" onclick="checkFrac('c1_n1','c1_d1',2,3,'r1_1')">Vérifier</button>
+                </div>
+                ${fracNumpad()}
+                <p id="r1_1" class="mt-2 font-semibold"></p>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">4. Cas particuliers</h3>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="bg-green-50 rounded-lg p-5">
+                    <p class="font-bold text-green-900 mb-2">Fraction déjà irréductible :</p>
+                    <p>${F(3,7)} → PGCD(3,7) = 1 → déjà irréductible ✓</p>
+                </div>
+                <div class="bg-yellow-50 rounded-lg p-5">
+                    <p class="font-bold text-yellow-900 mb-2">Numérateur ou dénominateur = 1 :</p>
+                    <p>${F(7,7)} = 1 &nbsp;•&nbsp; ${F(0,5)} = 0</p>
+                </div>
+            </div>
+            <div class="check-box mt-4">
+                <p class="check-label">Vérifie ta compréhension :</p>
+                <p class="check-question">Simplifie ${F(36,48)} — donne la fraction irréductible :</p>
+                <div class="flex items-center gap-3 flex-wrap">
+                    ${fracInput('c1_n2', 'c1_d2', 'check-input')}
+                    <button class="check-btn" onclick="checkFrac('c1_n2','c1_d2',3,4,'r1_2')">Vérifier</button>
+                </div>
+                ${fracNumpad()}
+                <p id="r1_2" class="mt-2 font-semibold"></p>
+            </div>
+        </div>
+
+        <div class="text-center mt-8">
+            <button onclick="showTraining(1)" class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
+        </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COURS 2 — Multiplication, inverse, division
+// ═══════════════════════════════════════════════════════════════
+function getCourse2() {
+    return `
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
+        <h2 class="text-2xl md:text-3xl font-bold text-purple-900 mb-6">Cours 2 : Multiplication, inverse et division</h2>
+        ${numpadToggleBar()}
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">1. Multiplication de deux fractions</h3>
+            <div class="bg-purple-50 rounded-lg p-6 mb-4">
+                <p class="text-lg mb-3">On multiplie <strong>numérateur × numérateur</strong> et <strong>dénominateur × dénominateur</strong> :</p>
+                <div class="bg-purple-200 rounded-lg p-4 text-center text-xl font-bold mb-4">
+                    ${F('a','b')} × ${F('c','d')} = ${F('a × c','b × d')}
+                </div>
+                <div class="bg-white rounded p-4 space-y-3">
+                    <p class="font-semibold">Exemples :</p>
+                    <p>${F(2,3)} × ${F(4,5)} = ${F('2 × 4','3 × 5')} = ${F(8,15)}</p>
+                    <p>${F(3,4)} × ${F(8,9)} = ${F('3 × 8','4 × 9')} = ${F(24,36)} = ${F(2,3)} <span class="text-gray-500 text-sm">(après simplification)</span></p>
+                    <p>${F(5,7)} × ${F(7,5)} = ${F('5 × 7','7 × 5')} = ${F(35,35)} = 1 <span class="text-gray-500 text-sm">(fractions inverses !)</span></p>
+                </div>
+                <div class="check-box">
+                    <p class="check-label">Vérifie ta compréhension :</p>
+                    <p class="check-question">Calcule ${F(3,5)} × ${F(2,7)} (donne la réponse irréductible) :</p>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        ${fracInput('c2_n1', 'c2_d1', 'check-input')}
+                        <button class="check-btn" onclick="checkFrac('c2_n1','c2_d1',6,35,'r2_1')">Vérifier</button>
+                    </div>
+                    ${fracNumpad()}
+                    <p id="r2_1" class="mt-2 font-semibold"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">2. L'inverse d'une fraction</h3>
+            <div class="bg-pink-50 rounded-lg p-6 mb-4">
+                <p class="text-lg mb-3">L'inverse de ${F('a','b')} est ${F('b','a')} — on <strong>retourne</strong> la fraction !</p>
+                <div class="bg-pink-200 rounded-lg p-4 text-center text-xl font-bold mb-4">
+                    Inverse de ${F('a','b')} = ${F('b','a')}
+                </div>
+                <div class="bg-white rounded p-4 space-y-2">
+                    <p class="font-semibold">Exemples :</p>
+                    <p>Inverse de ${F(3,4)} = ${F(4,3)}</p>
+                    <p>Inverse de ${F(5,1)} = ${F(1,5)} <span class="text-gray-500 text-sm">(5 entier = ${F(5,1)})</span></p>
+                    <p>Inverse de ${F(2,7)} = ${F(7,2)}</p>
+                </div>
+                <div class="check-box">
+                    <p class="check-label">Vérifie ta compréhension :</p>
+                    <p class="check-question">Quel est l'inverse de ${F(5,8)} ?</p>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        ${fracInput('c2_n2', 'c2_d2', 'check-input')}
+                        <button class="check-btn" onclick="checkFrac('c2_n2','c2_d2',8,5,'r2_2')">Vérifier</button>
+                    </div>
+                    ${fracNumpad()}
+                    <p id="r2_2" class="mt-2 font-semibold"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">3. Division de deux fractions</h3>
+            <div class="bg-violet-50 rounded-lg p-6 mb-4">
+                <p class="text-lg mb-3">Diviser par une fraction, c'est <strong>multiplier par son inverse</strong> :</p>
+                <div class="bg-violet-200 rounded-lg p-4 text-center text-xl font-bold mb-4">
+                    ${F('a','b')} ÷ ${F('c','d')} = ${F('a','b')} × ${F('d','c')} = ${F('a × d','b × c')}
+                </div>
+                <div class="bg-white rounded p-4 space-y-3">
+                    <p class="font-semibold">Exemples :</p>
+                    <p>${F(3,4)} ÷ ${F(2,5)} = ${F(3,4)} × ${F(5,2)} = ${F('3×5','4×2')} = ${F(15,8)}</p>
+                    <p>${F(6,7)} ÷ ${F(3,7)} = ${F(6,7)} × ${F(7,3)} = ${F('6×7','7×3')} = ${F(42,21)} = 2</p>
+                </div>
+                <div class="check-box">
+                    <p class="check-label">Vérifie ta compréhension :</p>
+                    <p class="check-question">Calcule ${F(4,5)} ÷ ${F(2,3)} (donne la réponse irréductible) :</p>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        ${fracInput('c2_n3', 'c2_d3', 'check-input')}
+                        <button class="check-btn" onclick="checkFrac('c2_n3','c2_d3',6,5,'r2_3')">Vérifier</button>
+                    </div>
+                    ${fracNumpad()}
+                    <p id="r2_3" class="mt-2 font-semibold"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-5 mb-8">
+            <p class="font-bold text-gray-800 mb-3 text-lg">Récapitulatif :</p>
+            <div class="grid md:grid-cols-3 gap-3 text-gray-700">
+                <div class="bg-white rounded p-3 border border-purple-300"><strong>Multiplication :</strong><br>${F('a','b')} × ${F('c','d')} = ${F('a×c','b×d')}</div>
+                <div class="bg-white rounded p-3 border border-pink-300"><strong>Inverse :</strong><br>Inverse de ${F('a','b')} = ${F('b','a')}</div>
+                <div class="bg-white rounded p-3 border border-violet-300"><strong>Division :</strong><br>${F('a','b')} ÷ ${F('c','d')} = ${F('a×d','b×c')}</div>
+            </div>
+        </div>
+
+        <div class="text-center mt-8">
+            <button onclick="showTraining(2)" class="bg-purple-500 hover:bg-purple-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
+        </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COURS 3 — Addition/soustraction même dénominateur
+// ═══════════════════════════════════════════════════════════════
+function getCourse3() {
+    return `
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
+        <h2 class="text-2xl md:text-3xl font-bold text-green-900 mb-6">Cours 3 : Addition et soustraction (même dénominateur)</h2>
+        ${numpadToggleBar()}
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-green-300 pb-2">1. La règle</h3>
+            <div class="bg-green-50 rounded-lg p-6 mb-4">
+                <p class="text-lg mb-3">Quand deux fractions ont <strong>le même dénominateur</strong>, on additionne (ou soustrait) <strong>uniquement les numérateurs</strong> et on <strong>garde le dénominateur</strong> :</p>
+                <div class="bg-green-200 rounded-lg p-4 text-center text-xl font-bold mb-4">
+                    ${F('a','d')} + ${F('b','d')} = ${F('a + b','d')} &nbsp;&nbsp; et &nbsp;&nbsp; ${F('a','d')} − ${F('b','d')} = ${F('a − b','d')}
+                </div>
+                <div class="bg-white rounded p-4 text-gray-700">
+                    <p>💡 <strong>Astuce :</strong> Pense à des parts de pizza ! Si la pizza est coupée en 8 parts, ajouter 3 parts et 2 parts donne bien 5 parts sur 8.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-green-300 pb-2">2. Exemples d'addition</h3>
+            <div class="bg-white border-2 border-green-200 rounded-lg p-5 space-y-4">
+                <div class="bg-green-50 rounded p-4">
+                    <p>${F(3,8)} + ${F(2,8)} = ${F('3 + 2','8')} = ${F(5,8)}</p>
+                </div>
+                <div class="bg-green-50 rounded p-4">
+                    <p>${F(1,5)} + ${F(3,5)} = ${F('1 + 3','5')} = ${F(4,5)}</p>
+                </div>
+                <div class="bg-green-50 rounded p-4">
+                    <p>${F(5,6)} + ${F(1,6)} = ${F('5 + 1','6')} = ${F(6,6)} = 1 <span class="text-gray-500 text-sm">(on simplifie !)</span></p>
+                </div>
+            </div>
+            <div class="check-box mt-4">
+                <p class="check-label">Vérifie ta compréhension :</p>
+                <p class="check-question">Calcule ${F(4,9)} + ${F(2,9)} (simplifie si possible) :</p>
+                <div class="flex items-center gap-3 flex-wrap">
+                    ${fracInput('c3_n1', 'c3_d1', 'check-input')}
+                    <button class="check-btn" onclick="checkFrac('c3_n1','c3_d1',6,9,'r3_1')">Vérifier</button>
+                </div>
+                ${fracNumpad()}
+                <p id="r3_1" class="mt-2 font-semibold"></p>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-green-300 pb-2">3. Exemples de soustraction</h3>
+            <div class="bg-white border-2 border-green-200 rounded-lg p-5 space-y-4">
+                <div class="bg-teal-50 rounded p-4">
+                    <p>${F(7,10)} − ${F(3,10)} = ${F('7 − 3','10')} = ${F(4,10)} = ${F(2,5)} <span class="text-gray-500 text-sm">(simplification par 2)</span></p>
+                </div>
+                <div class="bg-teal-50 rounded p-4">
+                    <p>${F(5,7)} − ${F(2,7)} = ${F('5 − 2','7')} = ${F(3,7)}</p>
+                </div>
+                <div class="bg-teal-50 rounded p-4">
+                    <p>${F(9,12)} − ${F(3,12)} = ${F('9 − 3','12')} = ${F(6,12)} = ${F(1,2)} <span class="text-gray-500 text-sm">(simplification par 6)</span></p>
+                </div>
+            </div>
+            <div class="check-box mt-4">
+                <p class="check-label">Vérifie ta compréhension :</p>
+                <p class="check-question">Calcule ${F(11,15)} − ${F(4,15)} (simplifie si possible) :</p>
+                <div class="flex items-center gap-3 flex-wrap">
+                    ${fracInput('c3_n2', 'c3_d2', 'check-input')}
+                    <button class="check-btn" onclick="checkFrac('c3_n2','c3_d2',7,15,'r3_2')">Vérifier</button>
+                </div>
+                ${fracNumpad()}
+                <p id="r3_2" class="mt-2 font-semibold"></p>
+            </div>
+        </div>
+
+        <div class="text-center mt-8">
+            <button onclick="showTraining(3)" class="bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
+        </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COURS 4 — Addition/soustraction dénominateurs différents
+// ═══════════════════════════════════════════════════════════════
+function getCourse4() {
+    return `
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
+        <h2 class="text-2xl md:text-3xl font-bold text-orange-900 mb-6">Cours 4 : Addition et soustraction (dénominateurs différents)</h2>
+        ${numpadToggleBar()}
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-orange-800 mb-4 border-b-2 border-orange-300 pb-2">1. Le principe : trouver un dénominateur commun</h3>
+            <div class="bg-orange-50 rounded-lg p-6 mb-4">
+                <p class="text-lg mb-3">Pour additionner ou soustraire des fractions avec des dénominateurs <strong>différents</strong>, on doit d'abord les mettre <strong>au même dénominateur</strong>.</p>
+                <ol class="list-decimal ml-6 space-y-2 text-gray-800">
+                    <li>Trouver le <strong>dénominateur commun</strong> (souvent le PPCM des deux dénominateurs)</li>
+                    <li>Transformer chaque fraction en fraction équivalente avec ce dénominateur commun</li>
+                    <li>Additionner ou soustraire les numérateurs</li>
+                    <li>Simplifier si possible</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-orange-800 mb-4 border-b-2 border-orange-300 pb-2">2. Cas simple : un dénominateur est multiple de l'autre</h3>
+            <div class="bg-white border-2 border-orange-200 rounded-lg p-5 space-y-4">
+                <div class="bg-orange-50 rounded p-4">
+                    <p class="font-semibold text-orange-900 mb-2">Exemple :</p>
+                    <p>${F(1,3)} + ${F(1,6)}</p>
+                    <p>6 est multiple de 3 → on met tout au dénominateur 6</p>
+                    <p>${F(1,3)} = ${F('1 × 2','3 × 2')} = ${F(2,6)}</p>
+                    <p>Donc : ${F(2,6)} + ${F(1,6)} = ${F('2 + 1','6')} = ${F(3,6)} = ${F(1,2)}</p>
+                </div>
+                <div class="bg-orange-50 rounded p-4">
+                    <p class="font-semibold text-orange-900 mb-2">Exemple :</p>
+                    <p>${F(3,4)} − ${F(1,8)}</p>
+                    <p>8 est multiple de 4 → dénominateur commun = 8</p>
+                    <p>${F(3,4)} = ${F('3 × 2','4 × 2')} = ${F(6,8)}</p>
+                    <p>Donc : ${F(6,8)} − ${F(1,8)} = ${F('6 − 1','8')} = ${F(5,8)}</p>
+                </div>
+            </div>
+            <div class="check-box mt-4">
+                <p class="check-label">Vérifie ta compréhension :</p>
+                <p class="check-question">Calcule ${F(1,2)} + ${F(1,4)} :</p>
+                <div class="flex items-center gap-3 flex-wrap">
+                    ${fracInput('c4_n1', 'c4_d1', 'check-input')}
+                    <button class="check-btn" onclick="checkFrac('c4_n1','c4_d1',3,4,'r4_1')">Vérifier</button>
+                </div>
+                ${fracNumpad()}
+                <p id="r4_1" class="mt-2 font-semibold"></p>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-2xl font-bold text-orange-800 mb-4 border-b-2 border-orange-300 pb-2">3. Cas général : utiliser le PPCM</h3>
+            <div class="bg-amber-50 rounded-lg p-6 mb-4">
+                <p class="mb-3">Le <strong>PPCM</strong> (Plus Petit Commun Multiple) est le plus petit entier divisible par les deux dénominateurs.</p>
+                <div class="bg-white rounded p-4 space-y-4">
+                    <div>
+                        <p class="font-semibold text-amber-900 mb-2">Exemple : ${F(2,3)} + ${F(3,4)}</p>
+                        <p>PPCM(3, 4) = 12</p>
+                        <p>${F(2,3)} = ${F('2 × 4','3 × 4')} = ${F(8,12)}</p>
+                        <p>${F(3,4)} = ${F('3 × 3','4 × 3')} = ${F(9,12)}</p>
+                        <p>Donc : ${F(8,12)} + ${F(9,12)} = ${F('8 + 9','12')} = ${F(17,12)}</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-amber-900 mb-2">Exemple : ${F(5,6)} − ${F(1,4)}</p>
+                        <p>PPCM(6, 4) = 12</p>
+                        <p>${F(5,6)} = ${F('5 × 2','6 × 2')} = ${F(10,12)}</p>
+                        <p>${F(1,4)} = ${F('1 × 3','4 × 3')} = ${F(3,12)}</p>
+                        <p>Donc : ${F(10,12)} − ${F(3,12)} = ${F('10 − 3','12')} = ${F(7,12)}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="check-box">
+                <p class="check-label">Vérifie ta compréhension :</p>
+                <p class="check-question">Calcule ${F(1,3)} + ${F(1,4)} :</p>
+                <div class="flex items-center gap-3 flex-wrap">
+                    ${fracInput('c4_n2', 'c4_d2', 'check-input')}
+                    <button class="check-btn" onclick="checkFrac('c4_n2','c4_d2',7,12,'r4_2')">Vérifier</button>
+                </div>
+                ${fracNumpad()}
+                <p id="r4_2" class="mt-2 font-semibold"></p>
+            </div>
+        </div>
+
+        <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-5 mb-8">
+            <p class="font-bold text-gray-800 mb-3 text-lg">Récapitulatif :</p>
+            <div class="grid md:grid-cols-2 gap-3 text-gray-700">
+                <div class="bg-white rounded p-3 border border-orange-300"><strong>Même dénominateur :</strong><br>${F('a','d')} ± ${F('b','d')} = ${F('a ± b','d')}</div>
+                <div class="bg-white rounded p-3 border border-amber-300"><strong>Dénominateurs différents :</strong><br>On met au dénominateur PPCM, puis on ± les numérateurs</div>
+            </div>
+        </div>
+
+        <div class="text-center mt-8">
+            <button onclick="showTraining(4)" class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
+        </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HTML MODULE D'ENTRAÎNEMENT
+// ═══════════════════════════════════════════════════════════════
+function getTrainingHTML(num) {
+    const t = MODULE_THEMES[num];
+    return `
+    <div class="mb-6">
+        <div class="flex justify-between text-sm font-bold text-gray-500 mb-2">
+            <span>Question <span id="questionNum">1</span> / ${t.total}</span>
+            <span class="text-${t.color}-600">Score : <span id="score">0</span> / <span id="total">0</span></span>
+        </div>
+        <div class="progress-bar bg-${t.color}-100"><div id="progressBar" class="progress-fill bg-gradient-to-r from-${t.color}-600 to-${t.color}-700" style="width:${Math.round(100 / t.total)}%"></div></div>
+    </div>
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
+        <h2 class="text-xl md:text-2xl font-bold text-${t.color}-900 mb-6">Entraînement ${num} : ${t.title}</h2>
+        ${numpadToggleBar()}
+        <div id="questionContainer" class="question-box min-h-[280px]"></div>
+        <div id="feedback" class="mt-6"></div>
+        <div class="mt-6 flex gap-4">
+            <button id="submitBtn" onclick="submitAnswer()" class="bg-${t.color}-500 hover:bg-${t.color}-600 text-white px-6 py-3 rounded-lg font-bold flex-1">Valider ✓</button>
+            <button id="nextBtn" onclick="nextQuestion()" class="bg-${t.color}-500 hover:bg-${t.color}-600 text-white px-6 py-3 rounded-lg font-bold flex-1" style="display:none">Question suivante →</button>
+        </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AFFICHAGE D'UNE QUESTION
+// ═══════════════════════════════════════════════════════════════
+function showQuestion() {
+    const q = questions[currentQuestion];
+    const color = MODULE_THEMES[currentModule].color;
+    const container = document.getElementById('questionContainer');
+    const total = questions.length;
+    document.getElementById('questionNum').textContent = currentQuestion + 1;
+    document.getElementById('progressBar').style.width = ((currentQuestion + 1) / total * 100) + '%';
+    document.getElementById('feedback').innerHTML = '';
+    document.getElementById('submitBtn').style.display = 'block';
+    document.getElementById('nextBtn').style.display = 'none';
+
+    if (q.type === 'frac_input') {
+        // Réponse = fraction à saisir (numérateur + dénominateur)
+        container.innerHTML = `
+            <div class="bg-${color}-50 rounded-xl p-6 question-box">
+                <p class="text-xl mb-6 font-medium">${q.question}</p>
+                <div class="flex items-center gap-4 flex-wrap mt-2 text-${color}-900">
+                    <span class="text-gray-600 font-semibold text-lg">Réponse :</span>
+                    ${fracInput('answerN', 'answerD', `border-2 border-${color}-400 rounded bg-white text-lg`)}
+                </div>
+                ${fracNumpad()}
+                <p class="text-sm text-gray-500 mt-3">Saisis le numérateur (haut) et le dénominateur (bas). Simplifie si possible.</p>
+            </div>`;
+
+    } else if (q.type === 'int_input' || q.type === 'pgcd_input') {
+        // Réponse = entier (PGCD ou autre)
+        container.innerHTML = `
+            <div class="bg-${color}-50 rounded-xl p-6 question-box">
+                <p class="text-xl mb-6 font-medium">${q.question}</p>
+                <div class="flex items-center gap-4 flex-wrap mt-2">
+                    <span class="text-gray-600 font-semibold text-lg">${q.type === 'pgcd_input' ? 'PGCD =' : 'Réponse :'}</span>
+                    <input type="text" inputmode="numeric" id="answerN" class="border-2 border-${color}-400 rounded px-4 py-2 text-lg w-32 bg-white font-bold" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+                </div>
+                ${fracNumpad()}
+            </div>`;
+
+    } else if (q.type === 'qcm') {
+        container.innerHTML = `
+            <div class="bg-${color}-50 rounded-xl p-6 question-box">
+                <p class="text-xl mb-5 font-medium">${q.question}</p>
+                <div class="space-y-3">
+                    ${q.options.map((opt, i) => `
+                        <label class="qcm-option-label flex items-center p-4 bg-white rounded-xl cursor-pointer hover:bg-${color}-100 border-2 border-${color}-200 transition">
+                            <input type="radio" name="qcm" value="${i}" class="mr-3 w-5 h-5">
+                            <span class="text-lg">${opt}</span>
+                        </label>`).join('')}
+                </div>
+            </div>`;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VALIDATION
+// ═══════════════════════════════════════════════════════════════
+function submitAnswer() {
+    const q = questions[currentQuestion];
+    const feedback = document.getElementById('feedback');
+    let isCorrect = false;
+    let remark = '';
+
+    if (q.type === 'frac_input') {
+        // Pas de simplification automatique : la fraction saisie doit être la forme irréductible
+        const user = readFrac('answerN', 'answerD');
+        if (user) {
+            const res = compareFrac(user, q.answerN, q.answerD);
+            isCorrect = res === 'ok';
+            if (res === 'equiv') remark = `Ta fraction ${F(user.n, user.d)} est égale au résultat, mais elle n'est pas irréductible : il fallait la simplifier.`;
+        }
+    } else if (q.type === 'int_input' || q.type === 'pgcd_input') {
+        const val = parseInt(document.getElementById('answerN').value, 10);
+        isCorrect = (val === q.answer);
+    } else if (q.type === 'qcm') {
+        const sel = document.querySelector('input[name="qcm"]:checked');
+        if (sel) isCorrect = parseInt(sel.value) === q.answer;
+        document.querySelectorAll('input[name="qcm"]').forEach(radio => {
+            radio.disabled = true;
+            const label = radio.closest('.qcm-option-label');
+            if (parseInt(radio.value) === q.answer) label.classList.add('opt-correct');
+            else if (radio.checked) label.classList.add('opt-wrong');
+        });
+    }
+
+    if (isCorrect) {
+        score++;
+        feedback.innerHTML = `<div class="callout-success correct">
+            <p class="text-green-800 font-bold text-xl">✓ Correct ! 🎉</p>
+            <p class="text-green-700 mt-2">${q.explanation}</p></div>`;
+    } else {
+        feedback.innerHTML = `<div class="callout-danger">
+            <p class="text-red-800 font-bold text-xl">✗ Incorrect</p>
+            ${remark ? `<p class="text-red-800 font-semibold mt-2">${remark}</p>` : ''}
+            <p class="text-red-700 mt-2">${q.explanation}</p></div>`;
+    }
+
+    document.getElementById('score').textContent = score;
+    document.getElementById('total').textContent = currentQuestion + 1;
+    document.getElementById('submitBtn').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'block';
+}
+
+function nextQuestion() {
+    currentQuestion++;
+    if (currentQuestion < questions.length) showQuestion();
+    else showResults();
+}
+
+function showResults() {
+    const total = questions.length;
+    const pct = Math.round(score / total * 100);
+    const color = MODULE_THEMES[currentModule].color;
+    let msg = '';
+    if (pct >= 90) msg = 'Excellent ! Tu maîtrises parfaitement les fractions ! 🏆';
+    else if (pct >= 70) msg = 'Très bien ! Continue comme ça ! 👍';
+    else if (pct >= 50) msg = 'Pas mal ! Avec un peu plus de travail tu vas y arriver. 💪';
+    else msg = 'Continue à t\'entraîner, tu vas progresser ! 📚';
+    document.getElementById('questionContainer').innerHTML = `
+        <div class="bg-${color}-50 border border-${color}-200 rounded-2xl shadow-lg p-10 text-center">
+            <h3 class="text-2xl font-bold text-gray-800 mb-3">Entraînement terminé !</h3>
+            <div class="text-6xl font-bold text-${color}-700 mb-2">${score} / ${total}</div>
+            <div class="text-xl font-bold text-gray-400 mb-6">${pct}%</div>
+            <p class="text-gray-500 mb-8 text-lg">${msg}</p>
+            <div class="flex gap-4 justify-center flex-wrap">
+                <button onclick="showTraining(${currentModule})" class="bg-${color}-500 hover:bg-${color}-600 text-white px-6 py-3 rounded-lg font-bold">Recommencer</button>
+            </div>
+        </div>`;
+    document.getElementById('feedback').innerHTML = '';
+    document.getElementById('submitBtn').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 1 — Simplification
+// ═══════════════════════════════════════════════════════════════
+function generateT1() {
+    const qs = [];
+
+    // Paires (num, den, pgcd, simplified)
+    const pool = shuffle([
+        [6,9,3,{n:2,d:3}], [4,8,4,{n:1,d:2}], [6,10,2,{n:3,d:5}],
+        [8,12,4,{n:2,d:3}], [9,15,3,{n:3,d:5}], [10,15,5,{n:2,d:3}],
+        [12,16,4,{n:3,d:4}], [14,21,7,{n:2,d:3}], [15,25,5,{n:3,d:5}],
+        [18,24,6,{n:3,d:4}], [20,30,10,{n:2,d:3}], [16,24,8,{n:2,d:3}],
+        [6,14,2,{n:3,d:7}], [9,12,3,{n:3,d:4}], [10,25,5,{n:2,d:5}],
+        [12,18,6,{n:2,d:3}], [15,20,5,{n:3,d:4}], [21,28,7,{n:3,d:4}],
+        [24,36,12,{n:2,d:3}], [30,45,15,{n:2,d:3}]
+    ]);
+
+    // Q1-10 : Simplifier une fraction → résultat
+    for (let i = 0; i < 10; i++) {
+        const [n, d, g, s] = pool[i];
+        qs.push({
+            type: 'frac_input',
+            question: `Simplifie la fraction ${F(n,d)} — donne la fraction irréductible :`,
+            answerN: s.n, answerD: s.d,
+            explanation: `PGCD(${n}, ${d}) = ${g} → ${F(n,d)} = ${F(n+'÷'+g, d+'÷'+g)} = ${F(s.n, s.d)}`
+        });
+    }
+
+    // Q11-12 : Trouver le PGCD
+    const pgcdPool = shuffle([
+        [12,18,6], [15,25,5], [8,20,4], [14,21,7], [16,24,8], [9,27,9]
+    ]);
+    for (let i = 0; i < 2; i++) {
+        const [a, b, g] = pgcdPool[i];
+        qs.push({
+            type: 'pgcd_input',
+            question: `Quel est le PGCD de ${a} et ${b} ?`,
+            answer: g,
+            explanation: `PGCD(${a}, ${b}) = ${g}. Diviseurs de ${a} : ${divisors(a).join(', ')}. Diviseurs de ${b} : ${divisors(b).join(', ')}.`
+        });
+    }
+
+    // Q13-14 : QCM — fraction irréductible ?
+    const qcmPool = shuffle([
+        { frac: F(4,6), opts: [F(2,3)+'  ✓ (irréductible)', F(4,6)+' (pas encore simplifiée)', F(1,2), F(3,4)], a:0,
+          expl: `${F(4,6)} = ${F(2,3)} car PGCD(4,6) = 2.` },
+        { frac: F(9,12), opts: [F(3,4)+'  ✓', F(9,12), F(6,8), F(1,4)], a:0,
+          expl: `${F(9,12)} = ${F(3,4)} car PGCD(9,12) = 3.` },
+        { frac: F(15,20), opts: [F(3,4)+'  ✓', F(15,20), F(5,6), F(2,3)], a:0,
+          expl: `${F(15,20)} = ${F(3,4)} car PGCD(15,20) = 5.` }
+    ]);
+    for (let i = 0; i < 2; i++) {
+        const d = qcmPool[i];
+        qs.push({
+            type: 'qcm',
+            question: `Quelle est la forme irréductible de ${d.frac} ?`,
+            options: d.opts, answer: d.a, explanation: d.expl
+        });
+    }
+
+    // Q15 : QCM — déjà irréductible ?
+    qs.push({
+        type: 'qcm',
+        question: `Laquelle de ces fractions est déjà irréductible ?`,
+        options: [F(5,7)+' (irréductible)', F(4,6), F(9,12), F(6,10)],
+        answer: 0,
+        explanation: `${F(5,7)} est irréductible car PGCD(5,7) = 1. Les autres peuvent être simplifiées.`
+    });
+
+    return qs;
+}
+
+function divisors(n) {
+    const d = [];
+    for (let i = 1; i <= n; i++) { if (n % i === 0) d.push(i); }
+    return d;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 2 — Multiplication, inverse, division
+// ═══════════════════════════════════════════════════════════════
+function generateT2() {
+    const qs = [];
+
+    // Q1-5 : Multiplication simple
+    const mulPool = shuffle([
+        [2,3,4,5], [3,4,2,7], [1,3,2,5], [5,6,3,4], [2,5,3,8],
+        [3,7,2,9], [4,5,1,3], [2,3,5,7], [1,4,3,5], [5,8,2,3]
+    ]);
+    for (let i = 0; i < 5; i++) {
+        const [a,b,c,d] = mulPool[i];
+        const rn = a*c, rd = b*d;
+        const s = simplify(rn, rd);
+        qs.push({
+            type: 'frac_input',
+            question: `Calcule ${F(a,b)} × ${F(c,d)} — donne la réponse sous forme irréductible :`,
+            answerN: s.n, answerD: s.d,
+            explanation: `${F(a,b)} × ${F(c,d)} = ${F(a+'×'+c, b+'×'+d)} = ${F(rn,rd)}${rn!==s.n||rd!==s.d?' = '+F(s.n,s.d):''}`
+        });
+    }
+
+    // Q6-8 : Inverse
+    const invPool = shuffle([
+        [3,4], [2,7], [5,8], [1,3], [4,9], [3,5], [7,2]
+    ]);
+    for (let i = 0; i < 3; i++) {
+        const [a,b] = invPool[i];
+        qs.push({
+            type: 'frac_input',
+            question: `Donne l'inverse de ${F(a,b)} :`,
+            answerN: b, answerD: a,
+            explanation: `L'inverse de ${F(a,b)} est ${F(b,a)} — on retourne la fraction.`
+        });
+    }
+
+    // Q9-12 : Division
+    const divPool = shuffle([
+        [3,4,2,5], [5,6,1,3], [2,3,4,9], [3,5,6,7], [1,2,3,4],
+        [4,7,2,3], [5,8,5,4], [3,4,9,8], [2,5,4,3], [7,9,7,3]
+    ]);
+    for (let i = 0; i < 4; i++) {
+        const [a,b,c,d] = divPool[i];
+        const rn = a*d, rd = b*c;
+        const s = simplify(rn, rd);
+        qs.push({
+            type: 'frac_input',
+            question: `Calcule ${F(a,b)} ÷ ${F(c,d)} — donne la réponse irréductible :`,
+            answerN: s.n, answerD: s.d,
+            explanation: `${F(a,b)} ÷ ${F(c,d)} = ${F(a,b)} × ${F(d,c)} = ${F(a+'×'+d, b+'×'+c)} = ${F(rn,rd)}${rn!==s.n||rd!==s.d?' = '+F(s.n,s.d):''}`
+        });
+    }
+
+    // Q13 : QCM — règle de multiplication
+    qs.push({
+        type: 'qcm',
+        question: `Comment calcule-t-on ${F('a','b')} × ${F('c','d')} ?`,
+        options: [F('a×c','b×d'), F('a+c','b+d'), F('a×d','b×c'), F('a+c','b×d')],
+        answer: 0,
+        explanation: `On multiplie numérateur × numérateur et dénominateur × dénominateur : ${F('a','b')} × ${F('c','d')} = ${F('a×c','b×d')}`
+    });
+
+    // Q14 : QCM — division
+    qs.push({
+        type: 'qcm',
+        question: `${F(3,4)} ÷ ${F(3,4)} est égal à :`,
+        options: ['1', F(9,16), '0', F(3,2)],
+        answer: 0,
+        explanation: `${F(3,4)} ÷ ${F(3,4)} = ${F(3,4)} × ${F(4,3)} = ${F('3×4','4×3')} = ${F(12,12)} = 1`
+    });
+
+    // Q15 : QCM — inverse
+    qs.push({
+        type: 'qcm',
+        question: `Quel est l'inverse de 5 ?`,
+        options: [F(1,5), F(5,1)+' (= 5)', '-5', '0'],
+        answer: 0,
+        explanation: `5 = ${F(5,1)}, donc son inverse est ${F(1,5)}.`
+    });
+
+    return qs;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 3 — Addition/soustraction même dénominateur
+// ═══════════════════════════════════════════════════════════════
+function generateT3() {
+    const qs = [];
+
+    // Additions
+    const addPool = shuffle([
+        [1,7,3,7], [2,9,4,9], [3,11,5,11], [1,8,5,8],
+        [2,13,6,13], [3,10,4,10], [5,12,1,12], [4,15,6,15],
+        [1,6,3,6], [2,7,3,7]
+    ]);
+    for (let i = 0; i < 6; i++) {
+        const [a,b,c,d] = addPool[i];
+        // b === d (même dénominateur)
+        const rn = a + c, rd = b;
+        const s = simplify(rn, rd);
+        qs.push({
+            type: 'frac_input',
+            question: `Calcule ${F(a,b)} + ${F(c,d)} — simplifie si possible :`,
+            answerN: s.n, answerD: s.d,
+            explanation: `${F(a,b)} + ${F(c,d)} = ${F(a+'+'+c, b)} = ${F(rn,rd)}${rn!==s.n||rd!==s.d?' = '+F(s.n,s.d):''}`
+        });
+    }
+
+    // Soustractions
+    const subPool = shuffle([
+        [5,7,2,7], [7,9,4,9], [8,11,3,11], [6,8,2,8],
+        [9,13,3,13], [7,10,3,10], [11,12,5,12], [9,15,3,15]
+    ]);
+    for (let i = 0; i < 6; i++) {
+        const [a,b,c,d] = subPool[i];
+        const rn = a - c, rd = b;
+        const s = simplify(rn, rd);
+        qs.push({
+            type: 'frac_input',
+            question: `Calcule ${F(a,b)} − ${F(c,d)} — simplifie si possible :`,
+            answerN: s.n, answerD: s.d,
+            explanation: `${F(a,b)} − ${F(c,d)} = ${F(a+'−'+c, b)} = ${F(rn,rd)}${rn!==s.n||rd!==s.d?' = '+F(s.n,s.d):''}`
+        });
+    }
+
+    // Q13 : QCM
+    qs.push({
+        type: 'qcm',
+        question: `Que vaut ${F(5,8)} + ${F(3,8)} ?`,
+        options: ['1', F(8,16), F(8,8)+' (non simplifié)', F(2,8)],
+        answer: 0,
+        explanation: `${F(5,8)} + ${F(3,8)} = ${F('5+3',8)} = ${F(8,8)} = 1`
+    });
+
+    // Q14 : QCM
+    qs.push({
+        type: 'qcm',
+        question: `Que vaut ${F(7,12)} − ${F(3,12)} ?`,
+        options: [F(1,3), F(4,12)+' (non simplifié)', F(4,0), F(10,12)],
+        answer: 0,
+        explanation: `${F(7,12)} − ${F(3,12)} = ${F('7−3',12)} = ${F(4,12)} = ${F(1,3)} (PGCD(4,12) = 4)`
+    });
+
+    // Q15 : QCM
+    qs.push({
+        type: 'qcm',
+        question: `Comment calcule-t-on ${F('a','d')} + ${F('b','d')} quand les dénominateurs sont égaux ?`,
+        options: [F('a+b','d'), F('a+b','2d'), F('a','b+d'), F('2a','d')],
+        answer: 0,
+        explanation: `On additionne les numérateurs et on garde le même dénominateur : ${F('a+b','d')}`
+    });
+
+    return qs;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 4 — Addition/soustraction dénominateurs différents
+// ═══════════════════════════════════════════════════════════════
+function generateT4() {
+    const qs = [];
+
+    // Paires avec dénominateurs différents (un est multiple de l'autre)
+    const easyPool = shuffle([
+        [1,2,1,4], [1,3,1,6], [3,4,1,8], [2,3,1,9],
+        [1,2,1,6], [5,6,1,12], [2,5,1,10], [3,4,1,12],
+        [1,3,2,9], [5,8,1,16]
+    ]);
+    // Additions faciles
+    for (let i = 0; i < 4; i++) {
+        const [a,b,c,d] = easyPool[i];
+        const L = lcm(b,d);
+        const rn = a*(L/b) + c*(L/d);
+        const s = simplify(rn, L);
+        qs.push({
+            type: 'frac_input',
+            question: `Calcule ${F(a,b)} + ${F(c,d)} — simplifie si possible :`,
+            answerN: s.n, answerD: s.d,
+            explanation: `Dénominateur commun = ${L}.<br>${F(a,b)} = ${F(a*(L/b),L)} et ${F(c,d)} = ${F(c*(L/d),L)}<br>= ${F(rn,L)}${rn!==s.n||L!==s.d?' = '+F(s.n,s.d):''}`
+        });
+    }
+
+    // Soustractions faciles
+    const easySub = shuffle([
+        [3,4,1,8], [5,6,1,12], [2,3,1,6], [7,8,1,4], [4,5,1,10]
+    ]);
+    for (let i = 0; i < 3; i++) {
+        const [a,b,c,d] = easySub[i];
+        const L = lcm(b,d);
+        const rn = a*(L/b) - c*(L/d);
+        const s = simplify(rn, L);
+        qs.push({
+            type: 'frac_input',
+            question: `Calcule ${F(a,b)} − ${F(c,d)} — simplifie si possible :`,
+            answerN: s.n, answerD: s.d,
+            explanation: `Dénominateur commun = ${L}.<br>${F(a,b)} = ${F(a*(L/b),L)} et ${F(c,d)} = ${F(c*(L/d),L)}<br>= ${F(rn,L)}${rn!==s.n||L!==s.d?' = '+F(s.n,s.d):''}`
+        });
+    }
+
+    // Additions avec PPCM général
+    const hardAdd = shuffle([
+        [1,3,1,4], [2,3,3,4], [1,4,2,5], [3,5,1,3], [2,5,3,7],
+        [1,6,2,5], [3,7,1,4], [2,9,1,6]
+    ]);
+    for (let i = 0; i < 3; i++) {
+        const [a,b,c,d] = hardAdd[i];
+        const L = lcm(b,d);
+        const rn = a*(L/b) + c*(L/d);
+        const s = simplify(rn, L);
+        qs.push({
+            type: 'frac_input',
+            question: `Calcule ${F(a,b)} + ${F(c,d)} — simplifie si possible :`,
+            answerN: s.n, answerD: s.d,
+            explanation: `PPCM(${b}, ${d}) = ${L}.<br>${F(a,b)} = ${F(a*(L/b),L)} ; ${F(c,d)} = ${F(c*(L/d),L)}<br>= ${F(rn,L)}${rn!==s.n||L!==s.d?' = '+F(s.n,s.d):''}`
+        });
+    }
+
+    // Soustractions avec PPCM général
+    const hardSub = shuffle([
+        [3,4,1,3], [5,6,2,5], [3,5,1,4], [7,8,2,3]
+    ]);
+    for (let i = 0; i < 2; i++) {
+        const [a,b,c,d] = hardSub[i];
+        const L = lcm(b,d);
+        const rn = a*(L/b) - c*(L/d);
+        const s = simplify(rn, L);
+        qs.push({
+            type: 'frac_input',
+            question: `Calcule ${F(a,b)} − ${F(c,d)} — simplifie si possible :`,
+            answerN: s.n, answerD: s.d,
+            explanation: `PPCM(${b}, ${d}) = ${L}.<br>${F(a,b)} = ${F(a*(L/b),L)} ; ${F(c,d)} = ${F(c*(L/d),L)}<br>= ${F(rn,L)}${rn!==s.n||L!==s.d?' = '+F(s.n,s.d):''}`
+        });
+    }
+
+    // Q14 QCM
+    qs.push({
+        type: 'qcm',
+        question: `Pour calculer ${F(1,3)} + ${F(1,4)}, quel dénominateur commun utilise-t-on ?`,
+        options: ['12', '7', '3', '4'],
+        answer: 0,
+        explanation: `PPCM(3, 4) = 12. On convertit : ${F(1,3)} = ${F(4,12)} et ${F(1,4)} = ${F(3,12)}, donc ${F(4,12)} + ${F(3,12)} = ${F(7,12)}.`
+    });
+
+    // Q15 QCM
+    qs.push({
+        type: 'qcm',
+        question: `Que vaut ${F(1,2)} + ${F(1,3)} ?`,
+        options: [F(5,6), F(2,5), F(1,6), F(2,6)],
+        answer: 0,
+        explanation: `PPCM(2,3) = 6. ${F(1,2)} = ${F(3,6)}, ${F(1,3)} = ${F(2,6)}. Donc ${F(3,6)} + ${F(2,6)} = ${F(5,6)}.`
+    });
+
+    return qs;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE 5 — Défi toutes notions (20 questions)
+// ═══════════════════════════════════════════════════════════════
+function generateT5() {
+    const qs = [];
+
+    // 5 simplifications
+    const sPool = shuffle([
+        [12,18,{n:2,d:3},'PGCD(12,18)=6'], [15,20,{n:3,d:4},'PGCD(15,20)=5'],
+        [8,12,{n:2,d:3},'PGCD(8,12)=4'], [21,28,{n:3,d:4},'PGCD(21,28)=7'],
+        [24,36,{n:2,d:3},'PGCD(24,36)=12'], [10,25,{n:2,d:5},'PGCD(10,25)=5']
+    ]);
+    for (let i = 0; i < 5; i++) {
+        const [n,d,s,g] = sPool[i];
+        qs.push({ type:'frac_input', question:`Simplifie ${F(n,d)} :`, answerN:s.n, answerD:s.d,
+            explanation:`${g} → ${F(n,d)} = ${F(s.n,s.d)}` });
+    }
+
+    // 4 multiplications / divisions
+    const mdPool = shuffle([
+        { q:`${F(2,3)} × ${F(9,4)}`, an:3, ad:2, expl:`${F(2,3)} × ${F(9,4)} = ${F(18,12)} = ${F(3,2)}` },
+        { q:`${F(5,6)} × ${F(3,10)}`, an:1, ad:4, expl:`${F(5,6)} × ${F(3,10)} = ${F(15,60)} = ${F(1,4)}` },
+        { q:`${F(3,4)} ÷ ${F(9,8)}`, an:2, ad:3, expl:`${F(3,4)} ÷ ${F(9,8)} = ${F(3,4)} × ${F(8,9)} = ${F(24,36)} = ${F(2,3)}` },
+        { q:`${F(5,7)} ÷ ${F(10,14)}`, an:1, ad:1, expl:`${F(5,7)} ÷ ${F(10,14)} = ${F(5,7)} × ${F(14,10)} = ${F(70,70)} = 1` },
+        { q:`${F(4,5)} × ${F(15,8)}`, an:3, ad:2, expl:`${F(4,5)} × ${F(15,8)} = ${F(60,40)} = ${F(3,2)}` }
+    ]);
+    for (let i = 0; i < 4; i++) {
+        const d = mdPool[i];
+        qs.push({ type:'frac_input', question:`Calcule ${d.q} — simplifie :`, answerN:d.an, answerD:d.ad, explanation:d.expl });
+    }
+
+    // 3 additions même dénominateur
+    const s3Pool = shuffle([
+        [3,8,5,8], [4,11,5,11], [7,15,4,15]
+    ]);
+    for (let i = 0; i < 3; i++) {
+        const [a,b,c,d] = s3Pool[i];
+        const rn = a+c, rd = b;
+        const s = simplify(rn,rd);
+        qs.push({ type:'frac_input', question:`Calcule ${F(a,b)} + ${F(c,d)} :`, answerN:s.n, answerD:s.d,
+            explanation:`${F(a,b)} + ${F(c,d)} = ${F(rn,rd)}${rn!==s.n?' = '+F(s.n,s.d):''}` });
+    }
+
+    // 3 additions/soustractions dénominateurs différents
+    const s4Pool = shuffle([
+        { a:1,b:3,c:1,d:4, op:'+' }, { a:5,b:6,c:1,d:4, op:'-' },
+        { a:2,b:5,c:1,d:3, op:'+' }, { a:3,b:4,c:2,d:6, op:'-' }
+    ]);
+    for (let i = 0; i < 3; i++) {
+        const {a,b,c,d,op} = s4Pool[i];
+        const L = lcm(b,d);
+        const rn = op==='+' ? a*(L/b)+c*(L/d) : a*(L/b)-c*(L/d);
+        const s = simplify(rn,L);
+        qs.push({ type:'frac_input', question:`Calcule ${F(a,b)} ${op} ${F(c,d)} — simplifie :`, answerN:s.n, answerD:s.d,
+            explanation:`PPCM(${b},${d})=${L}. ${F(a*(L/b),L)} ${op} ${F(c*(L/d),L)} = ${F(rn,L)}${rn!==s.n?' = '+F(s.n,s.d):''}` });
+    }
+
+    // 3 QCM variés
+    qs.push({
+        type:'qcm',
+        question:`Quelle opération permet de diviser ${F('a','b')} par ${F('c','d')} ?`,
+        options:[`Multiplier ${F('a','b')} par ${F('d','c')}`, `Multiplier ${F('a','b')} par ${F('c','d')}`,
+                 `Additionner numérateurs et dénominateurs`, `Soustraire les dénominateurs`],
+        answer:0, explanation:`Diviser par une fraction revient à multiplier par son inverse : ${F('a','b')} ÷ ${F('c','d')} = ${F('a','b')} × ${F('d','c')}`
+    });
+    qs.push({
+        type:'qcm',
+        question:`Laquelle de ces fractions est égale à ${F(6,9)} ?`,
+        options:[F(2,3), F(3,6), F(6,9)+' (non simplifiée)', F(4,9)],
+        answer:0, explanation:`${F(6,9)} = ${F(2,3)} car PGCD(6,9) = 3.`
+    });
+    qs.push({
+        type:'qcm',
+        question:`Que vaut ${F(2,3)} + ${F(3,5)} ?`,
+        options:[F(19,15), F(5,8), F(5,15), F(6,15)],
+        answer:0, explanation:`PPCM(3,5)=15. ${F(2,3)}=${F(10,15)}, ${F(3,5)}=${F(9,15)}. Somme = ${F(19,15)}.`
+    });
+
+    // 2 questions inverses
+    const invP = shuffle([[7,3],[5,4],[9,2]]);
+    for (let i = 0; i < 2; i++) {
+        const [a,b] = invP[i];
+        qs.push({ type:'frac_input', question:`Donne l'inverse de ${F(a,b)} :`, answerN:b, answerD:a,
+            explanation:`L'inverse de ${F(a,b)} est ${F(b,a)}.` });
+    }
+
+    return shuffle(qs).slice(0, 20);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+function rnd(min, max) { return Math.floor(Math.random()*(max-min+1))+min; }
+function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length-1; i > 0; i--) {
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+}
+</script>
+</body>
+</html>
