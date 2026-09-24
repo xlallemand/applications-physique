@@ -62,8 +62,8 @@ window.graine = function (seed) {
      un champ magnétique (dessinées en points, comme sur les
      clichés de chambre à bulles). L'image descend moins vite que
      la page, puis une feuille blanche vient la recouvrir.
-     Chaque matière a ensuite son propre bandeau illustré, lui
-     aussi en parallaxe.
+     Entre les sections, des bannières illustrées (une par
+     matière) défilent elles aussi en parallaxe.
      ============================================================ */
   :root {
     --paper: #f3f1ec;
@@ -78,7 +78,7 @@ window.graine = function (seed) {
     --physique: #5a3fc4;
     --college: #c2570c;
 
-    /* Fond (papier teinté) de chaque section */
+    /* Fond (papier teinté) des bannières de chaque matière */
     --maths-bg: #eaeef8;
     --chimie-bg: #e7f1eb;
     --physique-bg: #eeebf7;
@@ -121,51 +121,42 @@ window.graine = function (seed) {
   /* ---------- Feuille de contenu qui recouvre l'image ---------- */
   .sheet { position: relative; z-index: 2; background: var(--sheet); border-radius: 28px 28px 0 0; margin-top: -28px; padding-top: clamp(40px, 7vw, 80px); }
 
-  /* Chaque matière est un bandeau arrondi avec sa propre image de fond en parallaxe.
-     overflow: clip (et non hidden) pour que le titre puisse rester collé (sticky). */
-  .subject-band { margin: 0 16px 16px; border-radius: 28px; background: var(--cbg); overflow: hidden; overflow: clip; }
-  .subject-band::before {
-    /* voile : image bien visible à droite, atténuée derrière le titre */
-    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
-    background: linear-gradient(90deg,
-      color-mix(in srgb, var(--cbg) 88%, transparent) 0%,
-      color-mix(in srgb, var(--cbg) 55%, transparent) 30%,
-      color-mix(in srgb, var(--cbg) 0%, transparent) 60%);
-  }
-  .subject { position: relative; z-index: 2; display: grid; grid-template-columns: 300px 1fr; gap: 32px; padding-top: clamp(40px, 6vw, 72px); padding-bottom: clamp(40px, 6vw, 72px); }
+  .subject { display: grid; grid-template-columns: 300px 1fr; gap: 32px; padding-top: clamp(40px, 6vw, 72px); padding-bottom: clamp(40px, 6vw, 72px); }
+  #subjects > .subject:first-child { padding-top: 0; }
   .subject-side { position: sticky; top: 24px; align-self: start; }
   .subject-side .idx { font-size: .85rem; font-weight: 600; color: var(--c); font-variant-numeric: tabular-nums; }
   .subject-side h2 { margin: 6px 0 6px; font-size: clamp(1.6rem, 3.4vw, 2.3rem); line-height: 1.05; letter-spacing: -.035em; font-weight: 800; }
   .subject-side .count { color: var(--ink-3); font-size: .95rem; }
   @media (max-width: 820px) {
     .subject { grid-template-columns: 1fr; gap: 18px; }
-    .subject-band { margin: 0 8px 8px; border-radius: 22px; }
-    .subject-band::before { background: linear-gradient(180deg, color-mix(in srgb, var(--cbg) 85%, transparent) 0%, color-mix(in srgb, var(--cbg) 0%, transparent) 180px); }
     .subject-side { position: static; }
   }
 
   .list { display: flex; flex-direction: column; gap: 10px; }
   .item {
     display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 20px;
-    padding: 22px 24px; border-radius: 20px; background: var(--sheet);
-    box-shadow: 0 1px 2px rgba(22,24,29,.05), 0 8px 24px -12px rgba(22,24,29,.12);
-    text-decoration: none; color: inherit; transition: background .2s, transform .2s;
+    padding: 22px 24px; border-radius: 20px; background: var(--paper);
+    text-decoration: none; color: inherit; transition: background .2s;
   }
-  .item:hover { background: color-mix(in srgb, var(--c) 5%, var(--sheet)); transform: translateY(-2px); }
+  .item:hover { background: color-mix(in srgb, var(--c) 8%, var(--paper)); }
   .item:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; }
   .item h3 { margin: 0; font-size: clamp(1.15rem, 2.2vw, 1.4rem); letter-spacing: -.02em; font-weight: 700; line-height: 1.2; }
   .item p { margin: 6px 0 0; color: var(--ink-2); font-size: .98rem; max-width: 56ch; }
   .item .tag { display: inline-block; margin-left: 8px; vertical-align: 3px; font-size: .72rem; font-weight: 700; letter-spacing: .02em; color: var(--c); border: 1px solid color-mix(in srgb, var(--c) 35%, white); padding: 2px 8px; border-radius: 999px; }
   .rond {
     width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
-    background: color-mix(in srgb, var(--c) 9%, var(--sheet)); color: var(--c); transition: background .2s, color .2s, transform .2s;
+    background: var(--sheet); color: var(--ink); transition: background .2s, color .2s, transform .2s;
   }
   .rond svg { width: 18px; height: 18px; }
   .item:hover .rond { background: var(--c); color: #fff; transform: rotate(-45deg); }
   @media (max-width: 520px) { .item { padding: 18px; gap: 12px; } .rond { width: 38px; height: 38px; } }
 
-  /* ---------- Second bandeau d'image ---------- */
-  .band { height: clamp(260px, 42vw, 440px); margin-top: 24px; }
+  /* ---------- Bannières illustrées entre les sections ---------- */
+  .banniere { height: clamp(200px, 30vw, 380px); background: var(--cbg); }
+  .banniere .legende { background: rgba(255,255,255,.88); color: var(--ink-2); padding: 4px 12px; border-radius: 999px; }
+
+  /* ---------- Bandeau « Dans une application » ---------- */
+  .band { height: clamp(260px, 42vw, 440px); }
   .band .wrap { position: relative; z-index: 1; height: 100%; display: flex; align-items: flex-end; padding-bottom: 28px; }
   .band::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(243,241,236,.95), rgba(243,241,236,0) 55%); }
   .band h2 { margin: 0; font-size: clamp(1.8rem, 5vw, 3.4rem); letter-spacing: -.04em; font-weight: 800; line-height: 1; }
@@ -287,10 +278,21 @@ window.graine = function (seed) {
 <script>
   /* ---------- Construction du portail ---------- */
   const fleche = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  // Légende de la bannière de chaque matière
+  const legendes = {
+    maths: 'Courbes usuelles et points de mesure',
+    chimie: 'Formules topologiques de molécules aromatiques',
+    physique: 'Désintégration de noyaux radioactifs et courbe N(t)',
+    college: 'Fractions : disques et barres partagés'
+  };
+  // Une bannière illustrée avant chaque matière (sauf la première, qui suit l'en-tête)
   document.getElementById('subjects').innerHTML = MATIERES.map((m, i) => `
-    <section class="subject-band plx" id="${m.id}" data-dessin="${m.id}" style="--c: var(--${m.couleur}); --cbg: var(--${m.couleur}-bg)">
+    ${i > 0 ? `
+    <div class="banniere plx" data-dessin="${m.id}" style="--c: var(--${m.couleur}); --cbg: var(--${m.couleur}-bg)">
       <canvas aria-hidden="true"></canvas>
-      <div class="wrap subject">
+      <p class="legende">${legendes[m.id]}</p>
+    </div>` : ''}
+    <section class="wrap subject" id="${m.id}" style="--c: var(--${m.couleur})">
       <div class="subject-side">
         <div class="idx">${String(i + 1).padStart(2, '0')}</div>
         <h2>${m.nom}</h2>
@@ -305,7 +307,6 @@ window.graine = function (seed) {
             </div>
             <span class="rond">${fleche}</span>
           </a>`).join('')}
-      </div>
       </div>
     </section>`).join('');
   document.getElementById('nav').insertAdjacentHTML('beforeend',
@@ -396,7 +397,7 @@ window.graine = function (seed) {
   }
 
   /* ============================================================
-     IMAGES DES SECTIONS (une par matière, dans la couleur de la matière)
+     IMAGES DES BANNIÈRES (une par matière, dans la couleur de la matière)
      ============================================================ */
   const dessins = {
 
@@ -443,7 +444,7 @@ window.graine = function (seed) {
       const etiquettes = ['OH', 'O', 'NH₂', 'Cl', '', 'COOH', '', 'Br'];
       const pasX = 230 * E, pasY = 210 * E;
       for (let gy = 0; gy * pasY < h + pasY; gy++) for (let gx = 0; gx * pasX < w + pasX; gx++) {
-        if (rnd() < .22) continue;
+        if (rnd() < .12) continue;
         const cx = gx * pasX + (gy % 2) * pasX / 2 + (rnd() - .5) * 60 * E, cy = gy * pasY + (rnd() - .5) * 50 * E;
         const p = hexagone(cx, cy, rnd() < .75);
         if (rnd() < .5) {                          // second cycle accolé
@@ -515,7 +516,7 @@ window.graine = function (seed) {
     const { ctx, w, h } = preparer(canvas);
     const st = getComputedStyle(section);
     ctx.fillStyle = st.getPropertyValue('--cbg').trim(); ctx.fillRect(0, 0, w, h);
-    const E = Math.min(Math.max(w / 1400, .6), 1.1);    // échelle des motifs
+    const E = Math.min(Math.max(w / 1400, .5), 1.1);    // échelle des motifs
     dessins[id](ctx, w, h, st.getPropertyValue('--c').trim(), graine(id.length * 97 + 3), E);
     ctx.globalAlpha = 1;
   }
