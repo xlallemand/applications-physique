@@ -122,7 +122,6 @@ window.graine = function (seed) {
   .sheet { position: relative; z-index: 2; background: var(--sheet); border-radius: 28px 28px 0 0; margin-top: -28px; padding-top: clamp(40px, 7vw, 80px); }
 
   .subject { display: grid; grid-template-columns: 300px 1fr; gap: 32px; padding-top: clamp(40px, 6vw, 72px); padding-bottom: clamp(40px, 6vw, 72px); }
-  #subjects > .subject:first-child { padding-top: 0; }
   .subject-side { position: sticky; top: 24px; align-self: start; }
   .subject-side .idx { font-size: .85rem; font-weight: 600; color: var(--c); font-variant-numeric: tabular-nums; }
   .subject-side h2 { margin: 6px 0 6px; font-size: clamp(1.6rem, 3.4vw, 2.3rem); line-height: 1.05; letter-spacing: -.035em; font-weight: 800; }
@@ -152,8 +151,8 @@ window.graine = function (seed) {
   @media (max-width: 520px) { .item { padding: 18px; gap: 12px; } .rond { width: 38px; height: 38px; } }
 
   /* ---------- Bannières illustrées entre les sections ---------- */
-  .banniere { height: clamp(200px, 30vw, 380px); background: var(--cbg); }
-  .banniere .legende { background: rgba(255,255,255,.88); color: var(--ink-2); padding: 4px 12px; border-radius: 999px; }
+  .banniere { height: clamp(84px, 9vw, 120px); background: var(--cbg); }
+  .banniere .legende { bottom: 50%; transform: translateY(50%); margin: 0; background: rgba(255,255,255,.88); color: var(--ink-2); padding: 4px 12px; border-radius: 999px; }
 
   /* ---------- Bandeau « Dans une application » ---------- */
   .band { height: clamp(260px, 42vw, 440px); }
@@ -285,13 +284,12 @@ window.graine = function (seed) {
     physique: 'Désintégration de noyaux radioactifs et courbe N(t)',
     college: 'Fractions : disques et barres partagés'
   };
-  // Une bannière illustrée avant chaque matière (sauf la première, qui suit l'en-tête)
+  // Une bannière illustrée avant chaque matière
   document.getElementById('subjects').innerHTML = MATIERES.map((m, i) => `
-    ${i > 0 ? `
     <div class="banniere plx" data-dessin="${m.id}" style="--c: var(--${m.couleur}); --cbg: var(--${m.couleur}-bg)">
       <canvas aria-hidden="true"></canvas>
       <p class="legende">${legendes[m.id]}</p>
-    </div>` : ''}
+    </div>
     <section class="wrap subject" id="${m.id}" style="--c: var(--${m.couleur})">
       <div class="subject-side">
         <div class="idx">${String(i + 1).padStart(2, '0')}</div>
@@ -516,7 +514,7 @@ window.graine = function (seed) {
     const { ctx, w, h } = preparer(canvas);
     const st = getComputedStyle(section);
     ctx.fillStyle = st.getPropertyValue('--cbg').trim(); ctx.fillRect(0, 0, w, h);
-    const E = Math.min(Math.max(w / 1400, .5), 1.1);    // échelle des motifs
+    const E = .7 * Math.min(Math.max(w / 1400, .5), 1.1);    // échelle des motifs (réduite : bannières fines)
     dessins[id](ctx, w, h, st.getPropertyValue('--c').trim(), graine(id.length * 97 + 3), E);
     ctx.globalAlpha = 1;
   }
@@ -532,7 +530,9 @@ window.graine = function (seed) {
       const hb = b.offsetHeight;
       const hautMax = Math.min(b.getBoundingClientRect().top + scrollY, innerHeight);   // position la plus basse où la boîte est visible
       const f = reduit ? 0 : F;
-      cv.style.top = (-f * hautMax) + 'px';
+      // l'image descend de f × (hautMax + hb) pendant la traversée de l'écran :
+      // on la décale d'autant vers le haut au départ pour qu'elle couvre toujours la boîte
+      cv.style.top = (-f * hb) + 'px';
       cv.style.height = (hb + f * (hautMax + hb)) + 'px';
       if (b.dataset.dessin) dessinerMatiere(cv, b.dataset.dessin, b);
       else chambre(cv, +b.dataset.graine);
