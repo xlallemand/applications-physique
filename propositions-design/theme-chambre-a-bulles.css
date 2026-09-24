@@ -1,0 +1,197 @@
+/* ============================================================
+   Thème « Chambre à bulles » pour les applications
+   À charger APRÈS assets/theme.css et après le <style> de l'appli.
+
+   Principe : on ne réécrit pas les applications. Cette feuille
+   (hors @layer) l'emporte sur les classes Tailwind v4 (placées
+   dans des @layer) et sur le thème commun :
+   - les couleurs décoratives de Tailwind (purple, indigo, blue…)
+     sont ramenées à une palette sobre : papier, encre, un accent ;
+   - vert et rouge restent réservés au juste / faux ;
+   - bandeau, menu, cartes, boutons, encarts et pavé numérique
+     reprennent le style du portail.
+   ============================================================ */
+
+:root {
+  --paper: #f3f1ec;
+  --paper-2: #ebe8e1;
+  --paper-3: #dfdbd2;
+  --sheet: #ffffff;
+  --ink: #16181d;
+  --ink-2: #55585f;
+  --ink-3: #8d8f94;
+  --line: #ebe8e2;
+
+  /* Accent de l'application (bleu des outils mathématiques) */
+  --accent: #2952c8;
+  --accent-soft: #e6ecf9;
+
+  --font-sans: 'Hanken Grotesk', system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+  /* Thème commun (assets/theme.css) */
+  --app-accent-50: var(--paper);
+  --app-accent-100: var(--paper-2);
+  --app-accent-200: var(--paper-3);
+  --app-accent-400: var(--accent);
+  --app-accent-600: var(--accent);
+  --app-accent-700: var(--accent);
+  --app-accent-800: var(--ink);
+
+  /* ---------- Couleurs décoratives de Tailwind → papier / encre / accent ---------- */
+  --color-blue-50: var(--paper);    --color-purple-50: var(--paper);    --color-indigo-50: var(--paper);
+  --color-blue-100: var(--paper-2); --color-purple-100: var(--paper-2); --color-indigo-100: var(--paper-2);
+  --color-blue-200: var(--paper-3); --color-purple-200: var(--paper-3); --color-indigo-200: var(--paper-3);
+  --color-blue-300: var(--paper-3); --color-purple-300: var(--line);    --color-indigo-300: var(--paper-3);
+  --color-blue-400: #c9c4b9;        --color-purple-400: #c9c4b9;        --color-indigo-400: #c9c4b9;
+  --color-blue-500: var(--accent);  --color-purple-500: var(--accent);  --color-indigo-500: var(--accent);
+  --color-blue-600: var(--accent);  --color-purple-600: var(--accent);  --color-indigo-600: var(--accent);
+  --color-blue-700: var(--accent);  --color-purple-700: var(--accent);  --color-indigo-700: var(--accent);
+  --color-blue-800: var(--ink);     --color-purple-800: var(--ink);     --color-indigo-800: var(--ink);
+  --color-blue-900: var(--ink);     --color-purple-900: var(--ink);     --color-indigo-900: var(--ink);
+
+  --color-pink-50: var(--paper);    --color-orange-50: var(--paper);    --color-yellow-50: var(--paper);
+  --color-pink-300: var(--line);    --color-orange-900: var(--ink);     --color-yellow-300: var(--line);
+  --color-amber-800: var(--ink);    --color-amber-900: var(--ink);
+  --color-gray-50: var(--paper);    --color-gray-300: var(--line);
+
+  /* Vert / rouge : conservés, un peu adoucis */
+  --color-green-50: #e7f3ed;  --color-green-300: #b7dcc9;  --color-green-700: #0a6b4b;  --color-green-800: #075c40;  --color-green-900: #064a34;
+  --color-red-50: #fbecea;    --color-red-300: #efbdb7;    --color-red-700: #a8322a;    --color-red-800: #8f2821;
+}
+
+body { font-family: var(--font-sans); color: var(--ink); background: var(--sheet); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4 { letter-spacing: -.02em; }
+
+/* ============ EN-TÊTE ILLUSTRÉ (accueil de l'appli) ============ */
+.app-hero { position: relative; overflow: hidden; height: clamp(260px, 42vh, 400px); background: var(--paper); }
+.app-hero canvas { position: absolute; left: 0; top: 0; width: 100%; display: block; will-change: transform; }
+.app-hero::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(243,241,236,.96) 0%, rgba(243,241,236,.8) 35%, rgba(243,241,236,0) 75%),
+    linear-gradient(0deg, rgba(243,241,236,.85) 0%, rgba(243,241,236,0) 40%);
+}
+.app-hero-in {
+  position: relative; z-index: 1; max-width: 56rem; height: 100%; margin: 0 auto;
+  padding: 0 16px 56px; display: flex; flex-direction: column; justify-content: flex-end;
+}
+.app-hero-kicker { margin: 0 0 10px; font-size: .9rem; font-weight: 600; color: var(--accent); }
+.app-hero h1 { margin: 0; font-size: clamp(2.6rem, 8vw, 5rem); line-height: .95; letter-spacing: -.05em; font-weight: 800; color: var(--ink); }
+.app-hero-lead { margin: 14px 0 0; font-size: clamp(1rem, 2vw, 1.2rem); color: var(--ink-2); }
+/* bord arrondi de la feuille blanche qui recouvre l'image */
+.app-hero-edge { position: absolute; left: 0; right: 0; bottom: -1px; height: 28px; z-index: 2; background: var(--sheet); border-radius: 28px 28px 0 0; }
+
+/* ============ BANDEAU SUPÉRIEUR + MENU ============ */
+.app-topbar {
+  height: 60px; padding: 0 12px; gap: 12px;
+  background: rgba(255,255,255,.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: none; border-bottom: 1px solid var(--line);
+}
+.app-topbar-spacer { height: 60px; }
+.app-burger { width: 40px; height: 40px; border-radius: 50%; background: var(--paper); gap: 4px; }
+.app-burger:hover { background: var(--paper-2); }
+.app-burger span { width: 16px; height: 2px; background: var(--ink); }
+.app-burger span:nth-child(2) { display: none; }
+.app-topbar-title .app-name { color: var(--ink); font-weight: 800; letter-spacing: -.02em; }
+.app-topbar-title .sep { color: var(--ink-3); }
+.app-topbar-title .module-name { color: var(--ink-3); font-weight: 500; }
+
+.app-navmenu { box-shadow: none; }
+.app-navmenu.open { box-shadow: 0 0 60px rgba(22,24,29,.18); }
+.app-navmenu-header { background: var(--sheet); color: var(--ink); border-bottom: 1px solid var(--line); font-weight: 800; letter-spacing: -.02em; }
+.app-navmenu-header button { color: var(--ink); }
+.app-navmenu-section-title { color: var(--ink-3); letter-spacing: .02em; text-transform: none; font-size: .8rem; font-weight: 600; }
+.app-nav-item { font-family: var(--font-sans); font-weight: 500; color: var(--ink-2); border-radius: 999px; }
+.app-nav-item:hover { background: var(--paper); color: var(--ink); }
+.app-nav-item.app-nav-home { color: var(--ink); font-weight: 800; }
+.app-nav-item.app-nav-current { background: var(--paper); color: var(--ink); font-weight: 700; }
+.app-nav-item.app-nav-current::before { color: var(--accent); }
+.app-navmenu-overlay { background: rgba(22,24,29,.35); }
+
+/* ============ LISTE DES MODULES ============ */
+.module-list > .module-card + .module-card { margin-top: 10px; }
+.module-card, .module-list > .module-card {
+  background: var(--paper); border: none; border-radius: 22px; padding: 24px 26px;
+  box-shadow: none; margin: 0; transition: background .2s;
+}
+.module-card:hover, .module-list > .module-card:hover { background: var(--paper-2); box-shadow: none; }
+.module-card-head { flex-direction: column; align-items: flex-start; gap: 6px; }
+.module-badge { background: none; color: var(--accent); min-width: 0; height: auto; padding: 0; border-radius: 0; font-size: .88rem; font-weight: 700; }
+.module-card-title { font-size: clamp(1.2rem, 2.4vw, 1.45rem); font-weight: 800; letter-spacing: -.025em; color: var(--ink); line-height: 1.2; }
+.module-card-desc { font-size: .98rem; color: var(--ink-2); margin-top: 6px; }
+.module-card-actions { margin-top: 18px; }
+
+/* ============ BOUTONS : pilules encre / blanches ============ */
+.btn-primary,
+button[class*="bg-"][class*="-500"] {
+  background: var(--ink); color: #fff; border: none; border-radius: 999px;
+  font-family: var(--font-sans); font-weight: 700; box-shadow: none;
+  transition: background .15s, transform .1s;
+}
+.btn-primary:hover:not(:disabled),
+button[class*="bg-"][class*="-500"]:hover { background: #2b2e36; opacity: 1; transform: none; }
+.btn-primary:active, button[class*="bg-"][class*="-500"]:active { transform: scale(.98); }
+.btn-secondary {
+  background: var(--sheet); color: var(--ink); border: none; border-radius: 999px;
+  font-family: var(--font-sans); font-weight: 700;
+}
+.btn-secondary:hover { background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--ink); }
+.btn-module:hover { transform: none; box-shadow: none; }
+.module-card-actions .btn-primary,
+.module-card-actions .btn-secondary { padding: 12px 22px; font-size: .95rem; }
+#moduleContainer .text-center > button { padding: 16px 30px; font-size: 1.05rem; }
+
+/* ============ CARTES DE CONTENU (cours, entraînement) ============ */
+#moduleContainer .shadow-2xl, #moduleContainer .shadow-lg { box-shadow: none; }
+#moduleContainer > .bg-white { border: 1px solid var(--line); border-radius: 28px; }
+#moduleContainer .rounded-lg, #moduleContainer .rounded-xl { border-radius: 20px; }
+#moduleContainer .rounded { border-radius: 12px; }
+#moduleContainer h2 { font-weight: 800; letter-spacing: -.035em; }
+#moduleContainer h3 { font-weight: 800; letter-spacing: -.025em; border-bottom-width: 1px; }
+#moduleContainer h4 { font-weight: 700; letter-spacing: -.02em; }
+#moduleContainer input[type="text"] { border-radius: 999px; outline: none; }
+#moduleContainer input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+/* Barre de progression fine */
+.progress-bar { height: 6px; background: var(--paper); }
+.progress-fill { background: var(--accent); }
+
+/* Options de QCM */
+.qcm-option-label { background: var(--sheet); border: 1.5px solid var(--paper-3); border-radius: 16px; }
+.qcm-option-label:hover { background: var(--sheet); border-color: var(--ink-3); }
+.qcm-option-label input { accent-color: var(--accent); }
+
+/* Éléments à glisser */
+.draggable { border-radius: 999px; border-width: 1.5px; }
+.drop-zone-h { background: var(--sheet); border-width: 1.5px; border-radius: 20px; }
+.drop-zone-h.drag-over { background: var(--accent-soft); border-color: var(--accent); }
+
+/* ============ ENCARTS ============ */
+.callout-success, .callout-danger, .callout-warning, .callout, .callout-accent { border: none; border-radius: 18px; padding: 16px 20px; }
+.callout-success { background: #e7f3ed; }
+.callout-danger { background: #fbecea; }
+
+/* « Vérifie ta compréhension » */
+.check-box { background: var(--sheet); border: 1.5px solid var(--paper-3); border-radius: 20px; padding: 20px 22px; }
+.check-label { color: var(--accent); font-size: .88rem; font-weight: 700; }
+.check-question { color: var(--ink); font-weight: 600; }
+.check-hint { color: var(--ink-2); }
+.check-input { border: 1.5px solid var(--paper-3); border-radius: 999px; padding: 10px 16px; color: var(--ink); font-family: var(--font-sans); }
+.check-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); outline: none; }
+.check-btn { background: var(--ink); border-radius: 999px; padding: 10px 20px; font-family: var(--font-sans); }
+.check-btn:hover { background: #2b2e36; }
+
+/* ============ PAVÉ NUMÉRIQUE ============ */
+.numpad-grid { background: var(--paper); border: none; border-radius: 20px; padding: 10px; gap: 6px; }
+.numpad-grid button { background: var(--sheet); border: none; border-radius: 12px; color: var(--ink); font-family: var(--font-sans); box-shadow: 0 1px 0 rgba(22,24,29,.06); }
+.numpad-grid button:active { background: var(--paper-2); }
+.numpad-grid .np-minus { color: var(--accent); }
+.numpad-grid .np-back { color: var(--ink-2); }
+.np-pref-bar { background: var(--paper); border: none; border-radius: 18px; }
+.np-pref-label { color: var(--ink); font-weight: 600; }
+.np-pref-hint { color: var(--ink-3); }
+.np-switch input:checked + .np-slider { background: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .app-hero canvas { transform: none !important; }
+}
