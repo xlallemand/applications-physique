@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Équations du 1er degré - Entraînement</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="../assets/theme.css">
+<script src="../assets/nav.js"></script>
+<script src="../assets/numpad.js"></script>
+<style>
+    :root {
+        --app-accent-50:  #ecfdf5;
+        --app-accent-100: #d1fae5;
+        --app-accent-200: #a7f3d0;
+        --app-accent-400: #34d399;
+        --app-accent-600: #059669;
+        --app-accent-700: #047857;
+        --app-accent-800: #065f46;
+    }
+    input[type="text"] { font-size:16px; }
+    .question-box { animation: fadeIn 0.4s; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ── Liste des modules sur l'accueil ─────── */
+    .module-card-actions .btn-primary,
+    .module-card-actions .btn-secondary { font-size: .9rem; padding: 10px 20px; }
+    .module-score { font-size: .8rem; font-weight: 700; color: var(--slate-500); margin-top: 8px; }
+    .module-score-bar { height: 6px; border-radius: 999px; background: var(--slate-100); overflow: hidden; margin-top: 4px; max-width: 260px; }
+    .module-score-fill { height: 100%; border-radius: 999px; background: var(--app-accent-600); }
+    .module-done { font-size: .72rem; font-weight: 800; color: var(--success-text); background: var(--success-bg);
+        border: 1px solid #6ee7b7; border-radius: 999px; padding: 2px 9px; margin-left: 8px; vertical-align: middle; }
+
+    /* ── Affichage des équations ─────────────── */
+    .eq-display { font-size: 1.25rem; font-weight: 700; color: var(--slate-900); line-height: 1.5; }
+    .eq-display .frac { display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; margin:0 2px; font-size:.85em; line-height:1.1; }
+    .eq-display .frac-num { border-bottom:2px solid currentColor; padding:0 4px; text-align:center; }
+    .eq-display .frac-den { padding:0 4px; text-align:center; }
+    .eq-big { font-size: 1.6rem; }
+
+    /* ── Étapes de résolution ───────────────── */
+    .steps-container { display:flex; flex-direction:column; gap:10px; }
+    .step-row { display:flex; align-items:flex-start; gap:12px; }
+    .step-num { min-width:64px; font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em;
+        color: var(--slate-400); padding-top:12px; flex-shrink:0; }
+    .step-content { flex:1; min-width:0; }
+    .step-fixed { display:flex; align-items:center; justify-content:space-between; gap:12px;
+        background: var(--slate-50); border:1.5px solid var(--slate-200); border-radius:12px; padding:8px 16px; }
+    .step-fixed.is-start { background: var(--app-accent-50); border-color: var(--app-accent-200); }
+    .step-fixed.is-final { background: var(--success-bg); border-color: var(--success); }
+    .step-icon { font-weight:900; color: var(--app-accent-600); }
+    .step-fixed.is-final .step-icon { color: var(--success-text); }
+    .step-input-row { display:flex; gap:8px; align-items:center; }
+    .step-input { flex:1; min-width:0; height:46px; padding:0 14px; font-size:1.05rem; font-weight:700;
+        font-family: var(--font-sans); color: var(--slate-900); background:#fff;
+        border:2px solid var(--app-accent-400); border-radius:10px; outline:none; transition: border-color .15s, box-shadow .15s; }
+    .step-input:focus { border-color: var(--app-accent-600); box-shadow: 0 0 0 3px rgba(5,150,105,.15); }
+    .step-input.is-ko { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(239,68,68,.15); animation: shake .3s; }
+    .step-validate { height:46px; padding:0 18px; }
+    .step-feedback { margin-top:8px; font-size:.9rem; line-height:1.5; padding:10px 14px; border-radius:10px; }
+    .step-feedback.ko { background: var(--danger-bg); color: var(--danger-text); border:1.5px solid #fca5a5; }
+    .step-feedback.info { background: var(--warning-bg); color: var(--warning-text); border:1.5px solid #fcd34d; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+
+    /* ── Pavé de saisie (variante du pavé numérique commun, avec opérateurs) ── */
+    .numpad-grid.kb-grid { grid-template-columns: repeat(5, 1fr); max-width: 340px; }
+    .numpad-grid.kb-grid button { padding: 9px 4px; font-size: 1.05rem; }
+    .numpad-grid.kb-grid .kb-op { color: #047857; }
+    .numpad-grid.kb-grid .kb-x { color: #1d4ed8; font-style: italic; }
+    .numpad-grid.kb-grid .kb-frac { color: #047857; font-size: .9rem; }
+    .numpad-grid.kb-grid .kb-del { color: #7c3aed; }
+
+    /* ── Fenêtre de saisie d'une fraction ────── */
+    .modal-overlay { position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:3000;
+        display:flex; align-items:center; justify-content:center; padding:16px; }
+    .modal-overlay.hidden { display:none; }
+    .modal-box { background:#fff; border-radius:16px; box-shadow:0 20px 50px rgba(15,23,42,.25);
+        width:100%; max-width:360px; padding:22px 24px; }
+    .frac-input-row { display:flex; flex-direction:column; align-items:center; gap:6px; margin:18px 0; }
+    .frac-input-field { width:110px; height:48px; text-align:center; font-size:1.2rem; font-weight:800;
+        font-family: var(--font-sans); border:2px solid var(--app-accent-400); border-radius:10px; outline:none; }
+    .frac-input-field:focus { border-color: var(--app-accent-600); }
+    .frac-input-bar { width:130px; height:3px; border-radius:2px; background: var(--slate-900); }
+
+    /* ── Badges de score par question ────────── */
+    .q-badge { display:inline-flex; align-items:center; font-size:.72rem; font-weight:800; padding:2px 8px;
+        border-radius:999px; border:1px solid; white-space:nowrap; }
+    .q-badge.ok   { background: var(--success-bg); border-color:#6ee7b7; color: var(--success-text); }
+    .q-badge.mid  { background: var(--warning-bg); border-color:#fcd34d; color: var(--warning-text); }
+    .q-badge.ko   { background: var(--danger-bg);  border-color:#fca5a5; color: var(--danger-text); }
+    .q-timer { font-weight:800; font-variant-numeric: tabular-nums; color: var(--slate-500); }
+    .q-timer.fast { color: var(--app-accent-600); }
+
+    /* ── Messages flottants et confettis ─────── */
+    .toast-zone { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:2500;
+        display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; width:90%; max-width:360px; }
+    .toast { background: var(--slate-900); color:#fff; padding:8px 20px; border-radius:999px; font-weight:700;
+        font-size:.9rem; box-shadow:0 10px 30px rgba(15,23,42,.25); animation: toastIn .25s ease; }
+    .toast.ok { background: var(--success); }
+    .toast.ko { background: var(--danger); }
+    .toast.xp { background: var(--app-accent-600); }
+    .toast.out { animation: toastOut .25s ease forwards; }
+    .xp-float { position:absolute; pointer-events:none; font-weight:900; font-size:1.1rem; color: var(--app-accent-600);
+        z-index:2500; animation: floatUp 1.1s ease-out forwards; }
+    .confetti { position:fixed; pointer-events:none; z-index:9999; border-radius:2px; animation: fall linear forwards; }
+    @keyframes toastIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes toastOut { from{opacity:1} to{opacity:0;transform:translateY(-8px)} }
+    @keyframes floatUp { 0%{opacity:1;transform:translate(-50%,0)} 100%{opacity:0;transform:translate(-50%,-60px)} }
+    @keyframes fall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(540deg);opacity:0} }
+    @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; } }
+
+    @media (max-width:480px) {
+        .step-num { min-width:48px; font-size:.62rem; }
+        .eq-big { font-size: 1.3rem; }
+        .eq-display { font-size: 1.1rem; }
+    }
+</style>
+</head>
+<body class="bg-white min-h-screen">
+
+<!-- ═══════ NAVIGATION ═══════ -->
+<div id="app-nav"></div>
+
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <div id="appMain"></div>
+</div>
+
+<!-- Fenêtre de saisie d'une fraction -->
+<div id="fracPickerOverlay" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h3 class="text-xl font-bold text-emerald-900 text-center">Saisir une fraction</h3>
+        <p class="text-sm text-gray-500 text-center mt-1">Numérateur en haut, dénominateur en bas</p>
+        <div class="frac-input-row">
+            <input id="fracNum" type="text" inputmode="numeric" class="frac-input-field" placeholder="3" autocomplete="off">
+            <div class="frac-input-bar"></div>
+            <input id="fracDen" type="text" inputmode="numeric" class="frac-input-field" placeholder="4" autocomplete="off">
+        </div>
+        <div class="flex gap-3">
+            <button type="button" class="btn-secondary flex-1" onclick="closeFracPicker()">Annuler</button>
+            <button type="button" class="btn-primary flex-1" style="padding:11px 16px" onclick="confirmFraction()">Insérer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Zone des messages flottants -->
+<div id="toastZone" class="toast-zone"></div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════
+//  CONSTANTES ET DÉFINITION DES MODULES
+// ═══════════════════════════════════════════════════════
+
+const MODULES = [
+  { id:0, emoji:'➕', title:'Termes additifs',       desc:'x + a = b  ·  Changer le signe en passant un terme', skills:['signe'],            optSteps:1, maxSteps:2 },
+  { id:1, emoji:'✖️', title:'Termes multiplicatifs',  desc:'ax = b  ·  La multiplication devient division',     skills:['mult'],             optSteps:1, maxSteps:2 },
+  { id:2, emoji:'📐', title:'Deux opérations',        desc:'ax + b = c  ·  Combiner les deux règles',           skills:['signe','mult'],      optSteps:2, maxSteps:3 },
+  { id:3, emoji:'⚖️', title:'x des deux côtés',       desc:'ax + b = cx + d  ·  Regrouper les x',               skills:['signe','mult','2x'], optSteps:3, maxSteps:4 },
+  { id:4, emoji:'½',  title:'Résultats fractionnaires',desc:'Exprimer la solution en fraction irréductible',     skills:['frac'],             optSteps:2, maxSteps:3 },
+  { id:5, emoji:'📦', title:'Développement simple',   desc:'a(x + b) = c  ·  Développer les parenthèses',      skills:['dev'],              optSteps:2, maxSteps:4 },
+  { id:6, emoji:'➖', title:'Facteurs négatifs',       desc:'−(ax + b) = cx + d  ·  Signes et double négation',  skills:['signe','dev'],      optSteps:3, maxSteps:5 },
+  { id:7, emoji:'🔥', title:'Tout combiné',            desc:'Équations complexes — toutes les compétences',      skills:['all'],              optSteps:4, maxSteps:6 },
+];
+
+const SPEED_THRESHOLDS = [40,40,60,75,60,90,100,120]; // secondes par module pour le bonus de rapidité maximal
+const Q_PER_MODULE = 10;
+
+// ═══════════════════════════════════════════════════════
+//  OUTILS
+// ═══════════════════════════════════════════════════════
+
+function rand(min, max) { return Math.floor(Math.random()*(max-min+1))+min; }
+function choice(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+function randNZ(min, max) { let v; do { v = rand(min, max); } while(v===0); return v; }
+function gcd(a, b) { a=Math.abs(a); b=Math.abs(b); while(b){[a,b]=[b,a%b];} return a||1; }
+function reduceFrac(n, d) {
+  if(d<0){n=-n;d=-d;}
+  const g=gcd(Math.abs(n),d);
+  return {n:n/g, d:d/g};
+}
+function fracToStr(n, d) {
+  const r=reduceFrac(n,d);
+  return r.d===1 ? String(r.n) : `(${r.n}/${r.d})`;
+}
+// Vrai si toutes les fractions a/b (ou (a/b)) écrites dans la ligne sont irréductibles
+// (dénominateur positif différent de 1, numérateur et dénominateur premiers entre eux)
+function fractionsIrreductibles(str) {
+  const re=/(-?\d+)\s*\/\s*(-?\d+)/g;
+  let m;
+  while((m=re.exec(str))){
+    const n=parseInt(m[1]), d=parseInt(m[2]);
+    if(d<=1||gcd(n,d)!==1) return false;
+  }
+  return true;
+}
+
+// ═══════════════════════════════════════════════════════
+//  EXPRESSION AFFINE : ax + b
+// ═══════════════════════════════════════════════════════
+
+class LinExpr {
+  constructor(a=0,b=0){ this.a=a; this.b=b; }
+  add(e){ return new LinExpr(this.a+e.a, this.b+e.b); }
+  sub(e){ return new LinExpr(this.a-e.a, this.b-e.b); }
+  neg()  { return new LinExpr(-this.a, -this.b); }
+  mul(e){
+    if(this.a!==0&&e.a!==0) throw new Error('Quadratique');
+    if(this.a!==0) return new LinExpr(this.a*e.b, this.b*e.b);
+    return new LinExpr(this.b*e.a, this.b*e.b);
+  }
+  div(e){
+    if(Math.abs(e.a)>1e-9) throw new Error('Division par x');
+    if(Math.abs(e.b)<1e-9) throw new Error('Division par zéro');
+    return new LinExpr(this.a/e.b, this.b/e.b);
+  }
+  static num(n){ return new LinExpr(0,n); }
+  static x()   { return new LinExpr(1,0); }
+}
+
+// ═══════════════════════════════════════════════════════
+//  DÉCOUPAGE EN SYMBOLES
+// ═══════════════════════════════════════════════════════
+
+function tokenize(s) {
+  s = s.replace(/\s+/g,'').replace(/,/g,'.').replace(/×/g,'*').replace(/÷/g,'/')
+        .replace(/−/g,'-').replace(/－/g,'-').replace(/＝/g,'=').replace(/，/g,'.');
+  const tokens = [];
+  let i = 0;
+  while(i<s.length){
+    if(/[0-9.]/.test(s[i])){
+      let n=''; while(i<s.length&&/[0-9.]/.test(s[i])) n+=s[i++];
+      tokens.push({type:'num', val:parseFloat(n)});
+    } else if(s[i]==='x'||s[i]==='X'){
+      tokens.push({type:'x'}); i++;
+    } else if('+-*/()='.includes(s[i])){
+      tokens.push({type:'op', val:s[i]}); i++;
+    } else {
+      i++; // caractère inconnu ignoré
+    }
+  }
+  return tokens;
+}
+
+// ═══════════════════════════════════════════════════════
+//  ANALYSEUR SYNTAXIQUE (descente récursive)  →  LinExpr
+// ═══════════════════════════════════════════════════════
+
+class Parser {
+  constructor(tokens){ this.t=tokens; this.p=0; }
+  peek(){ return this.p<this.t.length?this.t[this.p]:null; }
+  consume(){ return this.t[this.p++]; }
+
+  parseExpr(){ return this.parseAddSub(); }
+
+  parseAddSub(){
+    let r=this.parseMulDiv();
+    while(this.peek()&&this.peek().type==='op'&&(this.peek().val==='+'||this.peek().val==='-')){
+      const op=this.consume().val;
+      const right=this.parseMulDiv();
+      r=op==='+'?r.add(right):r.sub(right);
+    }
+    return r;
+  }
+
+  parseMulDiv(){
+    let r=this.parseUnary();
+    while(this.peek()&&this.peek().type==='op'&&(this.peek().val==='*'||this.peek().val==='/')){
+      const op=this.consume().val;
+      const right=this.parseUnary();
+      r=op==='*'?r.mul(right):r.div(right);
+    }
+    return r;
+  }
+
+  parseUnary(){
+    const pk=this.peek();
+    if(pk&&pk.type==='op'&&pk.val==='-'){ this.consume(); return this.parsePrimary().neg(); }
+    if(pk&&pk.type==='op'&&pk.val==='+'){ this.consume(); return this.parsePrimary(); }
+    return this.parsePrimary();
+  }
+
+  parsePrimary(){
+    const pk=this.peek();
+    if(!pk) throw new Error('Inattendu fin');
+    if(pk.type==='op'&&pk.val==='('){
+      this.consume();
+      const inner=this.parseExpr();
+      if(this.peek()&&this.peek().type==='op'&&this.peek().val===')') this.consume();
+      // multiplication implicite après )
+      const next=this.peek();
+      if(next&&(next.type==='num'||next.type==='x'||(next.type==='op'&&next.val==='('))){
+        const right=this.parsePrimary();
+        return inner.mul(right);
+      }
+      return inner;
+    }
+    if(pk.type==='x'){
+      this.consume();
+      return LinExpr.x();
+    }
+    if(pk.type==='num'){
+      this.consume();
+      const n=pk.val;
+      const next=this.peek();
+      // multiplication implicite : 2x ou 2(
+      if(next&&next.type==='x'){ this.consume(); return new LinExpr(n,0); }
+      if(next&&next.type==='op'&&next.val==='('){
+        this.consume();
+        const inner=this.parseExpr();
+        if(this.peek()&&this.peek().type==='op'&&this.peek().val===')') this.consume();
+        return LinExpr.num(n).mul(inner);
+      }
+      return LinExpr.num(n);
+    }
+    throw new Error('Token inattendu');
+  }
+}
+
+function parseSide(str){
+  const tokens=tokenize(str);
+  const p=new Parser(tokens);
+  const r=p.parseExpr();
+  return r;
+}
+
+function parseEquation(equStr){
+  // Renvoie {lhs, rhs, solution} ou null
+  const idx=equStr.indexOf('=');
+  if(idx<0) return null;
+  const lStr=equStr.substring(0,idx).trim();
+  const rStr=equStr.substring(idx+1).trim();
+  if(!lStr||!rStr) return null;
+  try {
+    const lhs=parseSide(lStr);
+    const rhs=parseSide(rStr);
+    // (lhs.a - rhs.a)*x = rhs.b - lhs.b
+    const ca=lhs.a-rhs.a;
+    const cb=rhs.b-lhs.b;
+    let solution;
+    if(Math.abs(ca)<1e-9){
+      solution=Math.abs(cb)<1e-9?'all':'none';
+    } else {
+      solution=cb/ca;
+    }
+    return {lhs,rhs,solution};
+  } catch(e){
+    return null;
+  }
+}
+
+function equivCheck(eq1, eq2){
+  const r1=parseEquation(eq1);
+  const r2=parseEquation(eq2);
+  if(!r1||!r2) return false;
+  if(r1.solution==='all'&&r2.solution==='all') return true;
+  if(r1.solution==='none'&&r2.solution==='none') return true;
+  if(typeof r1.solution==='number'&&typeof r2.solution==='number'){
+    return Math.abs(r1.solution-r2.solution)<1e-6;
+  }
+  return false;
+}
+
+function isFinalForm(equStr){
+  // x = N ou N = x
+  const r=parseEquation(equStr);
+  if(!r||typeof r.solution!=='number') return false;
+  const {lhs,rhs}=r;
+  const lxOnly=(Math.abs(lhs.a-1)<1e-9&&Math.abs(lhs.b)<1e-9);
+  const rxOnly=(Math.abs(rhs.a-1)<1e-9&&Math.abs(rhs.b)<1e-9);
+  const lNum=(Math.abs(lhs.a)<1e-9);
+  const rNum=(Math.abs(rhs.a)<1e-9);
+  // on accepte aussi -x = N (solution correcte)
+  const lxNeg=(Math.abs(lhs.a+1)<1e-9&&Math.abs(lhs.b)<1e-9);
+  const rxNeg=(Math.abs(rhs.a+1)<1e-9&&Math.abs(rhs.b)<1e-9);
+  return (lxOnly&&rNum)||(rxOnly&&lNum)||(lxNeg&&rNum)||(rxNeg&&lNum);
+}
+
+// ═══════════════════════════════════════════════════════
+//  MISE EN FORME DES ÉQUATIONS
+// ═══════════════════════════════════════════════════════
+
+function fmtCoeff(a, forceSign=false) {
+  if(a===1) return forceSign?'+':'' ;
+  if(a===-1) return '-';
+  return (forceSign&&a>0?'+':'')+a;
+}
+
+function fmtLinear(a, b) {
+  // Écrit ax + b sous forme de texte
+  let s='';
+  if(Math.abs(a)>1e-9){
+    if(a===1) s='x';
+    else if(a===-1) s='-x';
+    else s=a+'x';
+  }
+  if(Math.abs(b)>1e-9||Math.abs(a)<1e-9){
+    if(Math.abs(a)>1e-9){
+      s+=b>0?' + '+b:' - '+Math.abs(b);
+    } else {
+      s=String(b);
+    }
+  }
+  return s||'0';
+}
+
+function fmtLinearFrac(a, b_n, b_d) {
+  // ax + b_n/b_d
+  let s='';
+  if(Math.abs(a)>1e-9){
+    s=a===1?'x':a===-1?'-x':a+'x';
+  }
+  const rf=reduceFrac(b_n,b_d);
+  if(rf.n!==0){
+    const fs=rf.d===1?String(rf.n):fracToStr(rf.n,rf.d);
+    if(Math.abs(a)>1e-9) s+=rf.n>0?' + '+fs:' - '+fs.replace('-','');
+    else s=fs;
+  } else if(Math.abs(a)<1e-9) s='0';
+  return s;
+}
+
+function renderEqHTML(str) {
+  // Affiche (a/b) en fraction HTML (telle qu'elle a été écrite, sans simplification) et * en ×
+  return str
+    .replace(/\((-?\d+)\/(-?\d+)\)/g, (_,n,d)=>
+      `<span class="frac"><span class="frac-num">${n}</span><span class="frac-den">${d}</span></span>`)
+    .replace(/\*/g,'×')
+    .replace(/ - /g,' − ')
+    .replace(/^-/,'−');
+}
+
+// ═══════════════════════════════════════════════════════
+//  GÉNÉRATEURS D'ÉQUATIONS
+// ═══════════════════════════════════════════════════════
+
+function genM0() {
+  // x + a = b  (terme additif seul)
+  const sol=rand(-12,12);
+  const a=randNZ(-15,15);
+  const b=sol+a;
+  return { eq:fmtLinear(1,a)+' = '+b, sol };
+}
+
+function genM1() {
+  // ax = b  (coefficient multiplicatif, solution entière)
+  let sol, a;
+  do { sol=randNZ(-8,8); a=randNZ(-9,9); } while(Math.abs(a)===1);
+  return { eq:fmtLinear(a,0)+' = '+(a*sol), sol };
+}
+
+function genM2() {
+  // ax + b = c
+  let sol,a,b;
+  do {
+    sol=rand(-8,8); a=randNZ(-6,6);
+  } while(Math.abs(a)===1);
+  b=randNZ(-12,12);
+  return { eq:fmtLinear(a,b)+' = '+(a*sol+b), sol };
+}
+
+function genM3() {
+  // ax + b = cx + d
+  let sol,a,c,b;
+  do { sol=rand(-8,8); a=randNZ(-6,6); c=randNZ(-6,6); b=randNZ(-10,10); }
+  while(a===c);
+  const d=(a-c)*sol+b;
+  return { eq:fmtLinear(a,b)+' = '+fmtLinear(c,d), sol };
+}
+
+function genM4() {
+  // ax + b = c avec solution fractionnaire p/q (q dans {2,3,4,5,6})
+  let a, b, q, p, c;
+  do {
+    q=choice([2,3,4,5,6]);
+    p=randNZ(-9,9);
+    // p/q doit être irréductible et non entier
+    const g=gcd(Math.abs(p),q);
+    if(g>1&&p/g===Math.round(p/g)){ continue; }
+    // a multiple de q pour que a*(p/q) soit entier
+    const k=randNZ(-4,4);
+    a=k*q;
+    b=randNZ(-8,8);
+    c=k*p+b;
+  } while(Math.abs(a)===0||Math.abs(a)===1||Math.abs(p)===q||gcd(Math.abs(p),q)>1);
+  const sol=p/q;
+  return {
+    eq:fmtLinear(a,b)+' = '+c,
+    sol,
+    solFrac:reduceFrac(p,q)
+  };
+}
+
+function genM5() {
+  // a(x + b) = c  (développement simple)
+  let sol,a,b;
+  do { sol=rand(-8,8); a=randNZ(2,7); b=randNZ(-8,8); } while(Math.abs(a)===1);
+  const c=a*(sol+b);
+  const inner=fmtLinear(1,b);
+  const lhs=a+'('+inner+')';
+  return { eq:lhs+' = '+c, sol };
+}
+
+function genM6() {
+  // -(ax + b) = cx + d  (facteur négatif)
+  let sol,a,b,c;
+  do {
+    sol=rand(-6,6);
+    a=rand(1,4);
+    b=randNZ(-6,6);
+    c=rand(-3,3);
+  } while(c===-a);
+  // membre de gauche : -(ax+b) = -ax-b
+  // membre de droite : cx+d avec d = (-a-c)*sol - b
+  const d=(-a-c)*sol-b;
+  const inner=fmtLinear(a,b);
+  return { eq:'-('+inner+') = '+fmtLinear(c,d), sol };
+}
+
+function genM7() {
+  // a(bx + c) + dx = e(x + f) + g  (tout combiné)
+  let sol,a,b,ci,d,e,f,g;
+  let attempts=0;
+  do {
+    sol=rand(-5,5);
+    a=rand(2,4); b=rand(1,3); ci=randNZ(-4,4); d=randNZ(-4,4);
+    e=randNZ(-3,3); f=randNZ(-4,4);
+    // coefficient de x à gauche : a*b+d
+    // constante à gauche : a*ci
+    // coefficient de x à droite : e
+    // constante à droite : e*f + g
+    // Solution: (a*b+d)*sol + a*ci = e*sol + e*f + g
+    // g = (a*b+d)*sol + a*ci - e*sol - e*f
+    g=(a*b+d)*sol+a*ci-e*sol-e*f;
+    attempts++;
+  } while((a*b+d===e)||Math.abs(g)>30);
+
+  const lhsInner=fmtLinear(b,ci);
+  let lhsParts=[a+'('+lhsInner+')'];
+  if(d>0) lhsParts.push('+ '+d+'x');
+  else lhsParts.push('- '+Math.abs(d)+'x');
+  const lhs=lhsParts.join(' ');
+
+  const rhsInner=fmtLinear(1,f);
+  let rhs=e+'('+rhsInner+')';
+  if(g>0) rhs+=' + '+g;
+  else if(g<0) rhs+=' - '+Math.abs(g);
+
+  return { eq:lhs+' = '+rhs, sol };
+}
+
+const GENERATORS=[genM0,genM1,genM2,genM3,genM4,genM5,genM6,genM7];
+
+function generateQuestion(moduleId) {
+  const gen=GENERATORS[moduleId];
+  const mod=MODULES[moduleId];
+  const data=gen();
+  return {
+    eq: data.eq,
+    sol: data.sol,
+    solFrac: data.solFrac||null,
+    optSteps: mod.optSteps,
+    maxSteps: mod.maxSteps,
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+//  INDICES
+// ═══════════════════════════════════════════════════════
+
+const HINTS = {
+  signe: "💡 Rappelle-toi : quand on fait passer un terme <strong>additif (+/−)</strong> de l'autre côté du signe =, son signe change : + devient − et − devient +.",
+  mult:  "💡 Rappelle-toi : quand on fait passer un <strong>coefficient multiplicatif</strong> de l'autre côté, × devient ÷ et inversement.",
+  dev:   "💡 Vérifie ton <strong>développement</strong> : chaque terme entre les parenthèses doit être multiplié par le facteur extérieur.",
+  neg:   "💡 Attention aux <strong>signes</strong> : (−) × (−) = (+). Deux facteurs négatifs donnent un résultat positif !",
+  frac:  "💡 La solution est une fraction. Exprime-la sous la forme (numérateur/dénominateur) en la réduisant au maximum.",
+  gen:   "💡 Cette ligne n'est pas équivalente à la précédente. Refais l'opération en vérifiant chaque terme.",
+  parse: "⚠️ La ligne que tu as écrite n'est pas une équation valide. Vérifie qu'elle contient bien un signe =.",
+};
+
+function getHint(prevEq, wrongEq, moduleId) {
+  const r1=parseEquation(prevEq);
+  const r2=parseEquation(wrongEq);
+  if(!r2) return HINTS.parse;
+
+  // détection d'une erreur de signe : solution exactement opposée
+  if(r1&&typeof r1.solution==='number'&&typeof r2.solution==='number'){
+    if(Math.abs(r2.solution+r1.solution)<1e-6&&Math.abs(r1.solution)>0.1){
+      return HINTS.signe;
+    }
+  }
+
+  // indice selon le module
+  if(moduleId===0) return HINTS.signe;
+  if(moduleId===1) return HINTS.mult;
+  if(moduleId===2) return Math.random()<0.5?HINTS.signe:HINTS.mult;
+  if(moduleId===4) return HINTS.frac;
+  if(moduleId===5) return HINTS.dev;
+  if(moduleId===6) return Math.random()<0.6?HINTS.neg:HINTS.dev;
+  return HINTS.gen;
+}
+
+// ═══════════════════════════════════════════════════════
+//  CALCUL DES XP
+// ═══════════════════════════════════════════════════════
+
+function calcXP(moduleId, errors, solved, seconds, stepsUsed, optSteps, maxSteps) {
+  if(!solved) return 0;
+  let xp=10;                                    // XP de base pour une résolution
+  if(errors===0) xp+=10;                        // bonus sans erreur
+  // bonus de rapidité (0–20)
+  const thr=SPEED_THRESHOLDS[moduleId];
+  if(seconds<thr) xp+=20;
+  else if(seconds<thr*2.5) xp+=Math.round(20*(1-(seconds-thr)/(thr*1.5)));
+  // bonus d'économie d'étapes (0–30)
+  if(stepsUsed<=optSteps) xp+=30;
+  else if(stepsUsed<maxSteps) xp+=Math.round(30*(maxSteps-stepsUsed)/(maxSteps-optSteps));
+  return xp;
+}
+
+function xpLevel(totalXP) {
+  // Renvoie {level, title, progress (0-1), xpToNext}
+  const levels=[
+    {min:0,    title:'Débutant'},
+    {min:100,  title:'Initié'},
+    {min:300,  title:'Apprenti'},
+    {min:600,  title:'Confirmé'},
+    {min:1000, title:'Expert'},
+    {min:1500, title:'Maître'},
+    {min:2500, title:'Légende'},
+  ];
+  let lvl=0;
+  for(let i=0;i<levels.length;i++) if(totalXP>=levels[i].min) lvl=i;
+  const cur=levels[lvl].min;
+  const nxt=lvl<levels.length-1?levels[lvl+1].min:cur+1000;
+  return {
+    level:lvl+1,
+    title:levels[lvl].title,
+    progress:(totalXP-cur)/(nxt-cur),
+    xpToNext:nxt-totalXP,
+    cur,nxt
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+//  SAUVEGARDE DE LA PROGRESSION (localStorage)
+// ═══════════════════════════════════════════════════════
+
+const DB_KEY='equamath_v2';
+let db;
+
+function loadDB(){
+  try {
+    const raw=localStorage.getItem(DB_KEY);
+    if(raw) db=JSON.parse(raw);
+    else db={};
+  } catch(e){ db={}; }
+  db.xp      = db.xp||0;
+  db.results = db.results||{};  // {moduleId: {score, xp, attempts, bestScore}}
+  db.showKb  = db.showKb!==undefined?db.showKb:true;  // pavé de saisie affiché ou non
+  return db;
+}
+
+function saveDB(){ try{localStorage.setItem(DB_KEY,JSON.stringify(db));}catch(e){} }
+
+
+// ═══════════════════════════════════════════════════════
+//  ÉTAT
+// ═══════════════════════════════════════════════════════
+
+let state = {
+  view:'home',      // 'home' | 'module' | 'results' | 'stats'
+  moduleId:null,
+  questions:[],
+  currentQ:0,
+  // question en cours
+  steps:[],         // [{text, isStart, isFinal}]
+  errors:0,
+  solved:false,
+  qStartTime:null,
+  qSeconds:0,
+  timerInterval:null,
+  // module en cours
+  qScores:[],       // points par question (0, 1 ou 2)
+  qXP:[],
+};
+
+// ═══════════════════════════════════════════════════════
+//  NAVIGATION (menu commun)
+// ═══════════════════════════════════════════════════════
+
+const APP_NAME='Équations du 1er degré';
+
+const nav = AppNav.init({
+  appName: APP_NAME,
+  portalHref: '../index.html',
+  portalLabel: 'Toutes les applications',
+  onHome: () => { if(canLeaveModule()) navigate('home'); },
+  onNavigate: (key) => {
+    if(!canLeaveModule()) return;
+    if(key==='stats') navigate('stats');
+    else startModule(Number(key.split('-')[1]));
+  },
+  groups: [
+    { title: 'Entraînement', items: MODULES.map((m,i)=>({ key:'module-'+i, label:'Module '+(i+1)+' : '+m.title })) },
+    { title: 'Suivi', items: [ { key:'stats', label:'Ma progression' } ] },
+  ],
+});
+
+// Demande confirmation avant de quitter un module commencé
+function canLeaveModule(){
+  if(state.view!=='module') return true;
+  if(state.currentQ===0&&state.steps.length<=1) return true;
+  return confirm('Quitter ce module ? Ta progression sur cette série sera perdue.');
+}
+
+function navigate(view){
+  if(view!=='module') stopTimer();
+  state.view=view;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════════════════
+//  PAVÉ DE SAISIE
+//  L'affichage est piloté par l'interrupteur commun (numpad.js) :
+//  il s'applique à toutes les pages et le choix est sauvegardé.
+// ═══════════════════════════════════════════════════════
+
+const baseSetNumpadPref=window.setNumpadPref;
+window.setNumpadPref=function(checked){
+  baseSetNumpadPref(checked);
+  db.showKb=checked;
+  saveDB();
+};
+
+function keypadWidget(){
+  const k=(label,action,cls='')=>
+    `<button type="button" class="${cls}" onpointerdown="event.preventDefault()" onclick="${action}">${label}</button>`;
+  return `
+  <div class="np-section">
+    <div class="numpad-grid kb-grid">
+      ${k('7',"kbInsert('7')")}${k('8',"kbInsert('8')")}${k('9',"kbInsert('9')")}${k('+',"kbInsert('+')",'kb-op')}${k('−',"kbInsert('-')",'kb-op')}
+      ${k('4',"kbInsert('4')")}${k('5',"kbInsert('5')")}${k('6',"kbInsert('6')")}${k('×',"kbInsert('*')",'kb-op')}${k('a/b','openFracPicker()','kb-frac')}
+      ${k('1',"kbInsert('1')")}${k('2',"kbInsert('2')")}${k('3',"kbInsert('3')")}${k('x',"kbInsert('x')",'kb-x')}${k('=',"kbInsert('=')",'kb-op')}
+      ${k('0',"kbInsert('0')")}${k(',',"kbInsert(',')")}${k('(',"kbInsert('(')",'kb-op')}${k(')',"kbInsert(')')",'kb-op')}${k('⌫','kbDelete()','kb-del')}
+    </div>
+  </div>`;
+}
+
+function activeInput(){ return document.getElementById('activeStepInput'); }
+
+// Insère un caractère à la position du curseur
+function kbInsert(char){
+  const inp=activeInput();
+  if(!inp) return;
+  const s=inp.selectionStart??inp.value.length, e=inp.selectionEnd??s, v=inp.value;
+  inp.value=v.substring(0,s)+char+v.substring(e);
+  inp.selectionStart=inp.selectionEnd=s+char.length;
+}
+
+function kbDelete(){
+  const inp=activeInput();
+  if(!inp) return;
+  const s=inp.selectionStart??inp.value.length, e=inp.selectionEnd??s, v=inp.value;
+  if(s===e&&s>0){ inp.value=v.substring(0,s-1)+v.substring(s); inp.selectionStart=inp.selectionEnd=s-1; }
+  else { inp.value=v.substring(0,s)+v.substring(e); inp.selectionStart=inp.selectionEnd=s; }
+}
+
+// ═══════════════════════════════════════════════════════
+//  SAISIE D'UNE FRACTION
+//  La fraction est insérée telle qu'elle est saisie :
+//  aucune simplification automatique.
+// ═══════════════════════════════════════════════════════
+
+function openFracPicker(){
+  document.getElementById('fracNum').value='';
+  document.getElementById('fracDen').value='';
+  document.getElementById('fracPickerOverlay').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('fracNum').focus(),50);
+}
+function closeFracPicker(){
+  document.getElementById('fracPickerOverlay').classList.add('hidden');
+}
+function confirmFraction(){
+  const n=parseInt(document.getElementById('fracNum').value.replace('−','-'),10);
+  const d=parseInt(document.getElementById('fracDen').value.replace('−','-'),10);
+  if(isNaN(n)||isNaN(d)){ showToast('Entre le numérateur et le dénominateur !','ko'); return; }
+  if(d===0){ showToast('Le dénominateur ne peut pas être 0 !','ko'); return; }
+  closeFracPicker();
+  kbInsert(`(${n}/${d})`);
+}
+document.getElementById('fracDen').addEventListener('keydown',e=>{ if(e.key==='Enter') confirmFraction(); });
+document.getElementById('fracNum').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('fracDen').focus(); });
+
+// ═══════════════════════════════════════════════════════
+//  EFFETS (messages, XP, confettis)
+// ═══════════════════════════════════════════════════════
+
+function showToast(msg, cls=''){
+  const zone=document.getElementById('toastZone');
+  const t=document.createElement('div');
+  t.className='toast '+cls;
+  t.innerHTML=msg;
+  zone.appendChild(t);
+  setTimeout(()=>{ t.classList.add('out'); setTimeout(()=>t.remove(),300); },2400);
+}
+
+function showXPFloat(xp){
+  const d=document.createElement('div');
+  d.className='xp-float';
+  d.textContent='+'+xp+' XP';
+  d.style.left='50%';
+  d.style.top=(window.scrollY+120)+'px';
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),1200);
+}
+
+function doConfetti(){
+  const cols=['#10b981','#f59e0b','#3b82f6','#ef4444','#8b5cf6'];
+  for(let i=0;i<60;i++){
+    setTimeout(()=>{
+      const p=document.createElement('div');
+      p.className='confetti';
+      p.style.cssText=`left:${Math.random()*100}vw;top:-16px;background:${cols[Math.floor(Math.random()*cols.length)]};width:${5+Math.random()*7}px;height:${5+Math.random()*7}px;border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${1.4+Math.random()*1.8}s;animation-delay:${Math.random()*.4}s;`;
+      document.body.appendChild(p);
+      setTimeout(()=>p.remove(),3500);
+    },i*20);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  CHRONOMÈTRE
+// ═══════════════════════════════════════════════════════
+
+function startTimer(){
+  clearInterval(state.timerInterval);
+  state.qStartTime=Date.now();
+  state.qSeconds=0;
+  state.timerInterval=setInterval(()=>{
+    state.qSeconds=Math.floor((Date.now()-state.qStartTime)/1000);
+    const el=document.getElementById('qTimer');
+    if(el){
+      const m=Math.floor(state.qSeconds/60), s=state.qSeconds%60;
+      el.textContent=(m?m+' min ':'')+s+' s';
+      el.className='q-timer'+(state.qSeconds<SPEED_THRESHOLDS[state.moduleId]?' fast':'');
+    }
+  },1000);
+}
+function stopTimer(){ clearInterval(state.timerInterval); }
+
+// ═══════════════════════════════════════════════════════
+//  DÉROULEMENT D'UN MODULE
+// ═══════════════════════════════════════════════════════
+
+function startModule(moduleId){
+  state.moduleId=moduleId;
+  state.questions=[];
+  for(let i=0;i<Q_PER_MODULE;i++) state.questions.push(generateQuestion(moduleId));
+  state.currentQ=0;
+  state.qScores=[];
+  state.qXP=[];
+  initQuestion();
+  navigate('module');
+}
+
+function initQuestion(){
+  const q=state.questions[state.currentQ];
+  state.steps=[{text:q.eq, isStart:true}];
+  state.errors=0;
+  state.solved=false;
+  startTimer();
+}
+
+function markInputError(inp){
+  inp.classList.add('is-ko');
+  setTimeout(()=>inp.classList.remove('is-ko'),600);
+}
+
+function showStepFeedback(html, cls){
+  const fb=document.getElementById('stepFeedback');
+  if(!fb) return;
+  fb.innerHTML=html;
+  fb.className='step-feedback '+cls;
+}
+
+function validateStep(){
+  const inp=activeInput();
+  if(!inp) return;
+  const raw=inp.value.trim();
+  if(!raw){ showToast('Écris une équation !','ko'); return; }
+
+  const q=state.questions[state.currentQ];
+  const prevEq=state.steps[state.steps.length-1].text;
+
+  // Ligne illisible
+  if(!parseEquation(raw)){
+    state.errors++;
+    showStepFeedback(HINTS.parse,'ko');
+    markInputError(inp);
+    return;
+  }
+
+  // Ligne non équivalente à la précédente
+  if(!equivCheck(prevEq, raw)){
+    state.errors++;
+    showStepFeedback(getHint(prevEq, raw, state.moduleId),'ko');
+    markInputError(inp);
+    showToast('Erreur — un indice est affiché','ko');
+    return;
+  }
+
+  // Ligne correcte : est-ce la forme finale x = … avec une fraction simplifiée ?
+  const finalForm=isFinalForm(raw);
+  const final=finalForm&&fractionsIrreductibles(raw);
+  state.steps.push({text:raw, isFinal:final});
+
+  if(final){
+    stopTimer();
+    state.solved=true;
+    const pts=state.errors===0?2:1;
+    const xp=calcXP(state.moduleId, state.errors, true, state.qSeconds,
+                    state.steps.length-1, q.optSteps, q.maxSteps);
+    state.qScores.push(pts);
+    state.qXP.push(xp);
+    db.xp+=xp;
+    saveDB();
+    renderQuestion();
+    setTimeout(()=>{
+      showXPFloat(xp);
+      if(pts===2) doConfetti();
+      showToast(pts===2?'Parfait ! +2 pts':'Bien joué ! +1 pt', pts===2?'ok':'xp');
+    },300);
+  } else {
+    renderQuestion();
+    // Étape juste mais fraction à simplifier : on le signale
+    if(finalForm) showStepFeedback('Ta ligne est juste, mais la fraction n\'est pas irréductible : simplifie-la à l\'étape suivante.','info');
+  }
+}
+
+function nextQuestion(){
+  if(state.currentQ<Q_PER_MODULE-1){
+    state.currentQ++;
+    initQuestion();
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    finishModule();
+  }
+}
+
+function finishModule(){
+  stopTimer();
+  const totalScore=state.qScores.reduce((a,b)=>a+b,0);
+  const totalXP=state.qXP.reduce((a,b)=>a+b,0);
+  const mid=state.moduleId;
+
+  // Sauvegarde du résultat
+  const existing=db.results[mid];
+  const attempts=(existing?existing.attempts:0)+1;
+  const bestScore=existing?Math.max(existing.bestScore,totalScore):totalScore;
+  db.results[mid]={ score:totalScore, bestScore, xp:totalXP, attempts };
+  saveDB();
+
+  navigate('results');
+  if(totalScore>=18) doConfetti();
+}
+
+// ═══════════════════════════════════════════════════════
+//  AFFICHAGE — ACCUEIL
+// ═══════════════════════════════════════════════════════
+
+function levelCard(){
+  const lv=xpLevel(db.xp);
+  const doneMods=Object.keys(db.results).length;
+  return `
+    <div class="callout-accent mb-6">
+      <div class="flex justify-between items-start gap-4 flex-wrap">
+        <div>
+          <div class="text-xl font-bold text-emerald-900">${lv.title} <span class="text-sm font-bold text-emerald-700">· Niveau ${lv.level}</span></div>
+          <div class="text-sm font-semibold text-gray-500">${db.xp} XP au total</div>
+        </div>
+        <div class="text-right">
+          <div class="text-xl font-bold text-emerald-700">${doneMods} / ${MODULES.length}</div>
+          <div class="text-sm font-semibold text-gray-500">modules terminés</div>
+        </div>
+      </div>
+      <div class="progress-bar bg-white mt-3"><div class="progress-fill bg-gradient-to-r from-emerald-500 to-emerald-700" style="width:${Math.round(lv.progress*100)}%"></div></div>
+      <div class="flex justify-between text-xs font-bold text-gray-500 mt-1">
+        <span>${lv.cur} XP</span><span>encore ${lv.xpToNext} XP</span><span>${lv.nxt} XP</span>
+      </div>
+    </div>`;
+}
+
+function renderHome(){
+  document.getElementById('appMain').innerHTML=`
+    <header class="text-center mb-8">
+      <h1 class="text-4xl md:text-5xl font-bold text-emerald-900 mb-2">Équations du 1<sup>er</sup> degré</h1>
+      <p class="text-lg text-emerald-700">Résous des équations étape par étape !</p>
+    </header>
+
+    ${levelCard()}
+
+    <div class="module-list mb-8">
+      ${MODULES.map((mod,i)=>{
+        const res=db.results[i];
+        return `
+        <div class="module-card">
+          <div class="module-card-head">
+            <span class="module-badge">Module ${i+1}</span>
+            <div class="module-card-body">
+              <div class="module-card-title">${mod.title}${res?`<span class="module-done">${res.bestScore}/20</span>`:''}</div>
+              <div class="module-card-desc">${mod.desc}</div>
+              ${res?`
+                <div class="module-score">Meilleur score : ${res.bestScore}/20 · ${res.attempts} tentative${res.attempts>1?'s':''}</div>
+                <div class="module-score-bar"><div class="module-score-fill" style="width:${Math.round(res.bestScore/20*100)}%"></div></div>
+              `:''}
+              <div class="module-card-actions">
+                <button onclick="startModule(${i})" class="btn-module ${res?'btn-secondary':'btn-primary'}">${res?'Refaire':'Commencer'} (${Q_PER_MODULE} équations)</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
+      <h2 class="text-2xl font-bold text-emerald-900 mb-4">Points clés à maîtriser</h2>
+      <div class="flex flex-col gap-3">
+        ${[
+          {icon:'±', txt:'Quand on passe un terme <b>additif</b> de l\'autre côté du =, on <b>change son signe</b>'},
+          {icon:'×÷', txt:'Quand on passe un terme <b>multiplicatif</b>, × devient ÷ et inversement'},
+          {icon:'( )', txt:'Pour <b>développer</b>, on multiplie chaque terme par le facteur extérieur. Un facteur négatif inverse les signes'},
+          {icon:'−−', txt:'<b>Deux facteurs négatifs</b> qui se multiplient donnent un résultat positif : (−)×(−) = (+)'},
+          {icon:'a/b', txt:'Utiliser la notation <b>fraction</b> (pas le signe ÷). Toujours réduire la fraction au maximum'},
+        ].map(k=>`
+          <div class="flex gap-3 items-start">
+            <span class="module-badge" style="min-width:42px">${k.icon}</span>
+            <p class="text-gray-700 pt-2">${k.txt}</p>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  AFFICHAGE — QUESTION
+// ═══════════════════════════════════════════════════════
+
+function scoreBadge(s, label){
+  return `<span class="q-badge ${s===2?'ok':s===1?'mid':'ko'}">${label}</span>`;
+}
+
+function renderQuestion(){
+  const main=document.getElementById('appMain');
+  const q=state.questions[state.currentQ];
+  const mod=MODULES[state.moduleId];
+  const totalPts=state.qScores.reduce((a,b)=>a+b,0);
+
+  const stepsHTML=state.steps.map((step,i)=>`
+      <div class="step-row">
+        <div class="step-num">${step.isStart?'Départ':'Étape '+i}</div>
+        <div class="step-content">
+          <div class="step-fixed ${step.isStart?'is-start':step.isFinal?'is-final':''}">
+            <div class="eq-display">${renderEqHTML(step.text)}</div>
+            <span class="step-icon">${step.isStart?'':'✓'}</span>
+          </div>
+        </div>
+      </div>`).join('');
+
+  const inputHTML=state.solved?`
+    <div class="callout-success mt-4">
+      <p class="text-green-800 font-bold text-xl">✓ Équation résolue ! 🎉</p>
+      <p class="text-green-700 mt-2">
+        ${state.errors===0?'Résolution parfaite, aucune erreur !':'Résolu avec '+state.errors+' erreur'+(state.errors>1?'s':'')+'.'}
+        Points : <b>${state.qScores[state.qScores.length-1]} pt${state.qScores[state.qScores.length-1]>1?'s':''}</b> · XP : <b>+${state.qXP[state.qXP.length-1]}</b>
+      </p>
+    </div>
+    <button class="w-full mt-4 bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-lg font-bold" onclick="nextQuestion()">
+      ${state.currentQ<Q_PER_MODULE-1?'Question suivante →':'Voir les résultats →'}
+    </button>
+  `:`
+    <div class="step-row">
+      <div class="step-num">Étape ${state.steps.length}</div>
+      <div class="step-content">
+        <div class="step-input-row">
+          <input type="text" id="activeStepInput" class="step-input" placeholder="Ex : 3x = 9" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+            onkeydown="if(event.key==='Enter')validateStep()">
+          <button type="button" class="bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-bold step-validate" onclick="validateStep()">Valider ✓</button>
+        </div>
+        <div id="stepFeedback" class="step-feedback hidden"></div>
+        ${keypadWidget()}
+      </div>
+    </div>
+  `;
+
+  main.innerHTML=`
+    <div class="mb-6">
+      <div class="flex justify-between text-sm font-bold text-gray-500 mb-2 gap-3 flex-wrap">
+        <span>Question ${state.currentQ+1} / ${Q_PER_MODULE}</span>
+        <span id="qTimer" class="q-timer">0 s</span>
+        <span class="text-emerald-600">Score : ${totalPts} / ${state.qScores.length*2} · ${db.xp} XP</span>
+      </div>
+      <div class="progress-bar bg-emerald-100"><div class="progress-fill bg-gradient-to-r from-emerald-600 to-emerald-700" style="width:${Math.round((state.currentQ+1)/Q_PER_MODULE*100)}%"></div></div>
+      ${state.qScores.length?`<div class="flex gap-2 flex-wrap mt-3">${state.qScores.map((s,i)=>scoreBadge(s,'Q'+(i+1)+' : '+s+' pt'+(s>1?'s':''))).join('')}</div>`:''}
+    </div>
+
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10 question-box">
+      <h2 class="text-xl md:text-2xl font-bold text-emerald-900 mb-6">Module ${state.moduleId+1} : ${mod.title}</h2>
+      ${numpadToggleBar()}
+
+      <div class="callout-accent mb-5">
+        <p class="text-sm font-bold text-emerald-800 uppercase tracking-wide mb-1">Résous l'équation</p>
+        <div class="eq-display eq-big text-emerald-900">${renderEqHTML(q.eq)}</div>
+        ${q.solFrac?`<p class="text-sm text-emerald-800 mt-2">La solution est une fraction : utilise la notation (a/b) et donne-la sous forme irréductible.</p>`:''}
+      </div>
+
+      <div class="callout-warning mb-5 text-sm" style="padding:10px 16px">
+        <b>Méthode :</b> ${getModuleTip(state.moduleId)}
+      </div>
+
+      <div class="steps-container">
+        ${stepsHTML}
+        ${inputHTML}
+      </div>
+
+      <div class="flex justify-between flex-wrap gap-2 text-xs font-semibold text-gray-400 mt-5">
+        <span>Étapes : ${state.steps.length-1} effectuée${state.steps.length>2?'s':''}</span>
+        <span>Optimal : ${q.optSteps} · Maximum conseillé : ${q.maxSteps}</span>
+      </div>
+    </div>`;
+
+  nav.setTitle('Module '+(state.moduleId+1)+' : '+mod.title);
+  nav.setActive('module-'+state.moduleId);
+
+  // Mise au point du champ de saisie
+  if(!state.solved){
+    setTimeout(()=>{ const inp=activeInput(); if(inp) inp.focus(); },100);
+  }
+}
+
+function getModuleTip(moduleId){
+  const tips=[
+    'Passe le terme numérique de l\'autre côté du = en <strong>changeant son signe</strong>.',
+    'Divise les deux membres par le <strong>coefficient de x</strong> pour isoler x.',
+    'D\'abord, <strong>passe les nombres</strong> d\'un côté (change le signe), puis <strong>divise</strong> par le coefficient de x.',
+    'Regroupe les termes en x d\'un côté et les nombres de l\'autre. N\'oublie pas de changer les signes !',
+    'Exprime la solution sous forme de <strong>fraction irréductible</strong> (a/b). Utilise la touche a/b du pavé.',
+    '<strong>Développe</strong> les parenthèses en multipliant chaque terme par le facteur extérieur, puis résous.',
+    'Attention au facteur <strong>négatif</strong> : il inverse le signe de chaque terme entre les parenthèses.',
+    'Développe, regroupe, puis résous. Procède <strong>étape par étape</strong>, sans brûler les étapes.',
+  ];
+  return tips[moduleId]||tips[7];
+}
+
+// ═══════════════════════════════════════════════════════
+//  AFFICHAGE — RÉSULTATS D'UN MODULE
+// ═══════════════════════════════════════════════════════
+
+function renderResults(){
+  const score=state.qScores.reduce((a,b)=>a+b,0);
+  const xp=state.qXP.reduce((a,b)=>a+b,0);
+  const pct=Math.round(score/20*100);
+  const stars=score>=18?3:score>=14?2:score>=8?1:0;
+  let msg='';
+  if(pct>=90) msg='Excellent ! Tu maîtrises parfaitement ce module ! 🏆';
+  else if(pct>=70) msg='Très bien ! Continue comme ça ! 👍';
+  else if(pct>=50) msg='Pas mal ! Avec un peu plus de travail tu vas y arriver. 💪';
+  else msg='Continue à t\'entraîner, tu vas progresser ! 📚';
+
+  document.getElementById('appMain').innerHTML=`
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
+      <h2 class="text-xl md:text-2xl font-bold text-emerald-900 mb-6">Module ${state.moduleId+1} : ${MODULES[state.moduleId].title}</h2>
+      <div class="bg-emerald-50 border border-emerald-200 rounded-2xl shadow-lg p-8 text-center">
+        <h3 class="text-2xl font-bold text-gray-800 mb-3">Module terminé !</h3>
+        <div class="text-6xl font-bold text-emerald-700 mb-2">${score} / 20</div>
+        <div class="text-2xl mb-2">${[1,2,3].map(i=>`<span style="${i<=stars?'':'filter:grayscale(1);opacity:.35'}">⭐</span>`).join(' ')}</div>
+        <div class="text-lg font-bold text-emerald-600 mb-4">+${xp} XP gagnés</div>
+        <p class="text-gray-500 mb-6 text-lg">${msg}</p>
+        <div class="flex gap-2 justify-center flex-wrap mb-8">
+          ${state.qScores.map((s,i)=>scoreBadge(s,'Q'+(i+1)+' : '+(s===2?'parfait':s===1?'résolu':'non résolu')+' · +'+state.qXP[i]+' XP')).join('')}
+        </div>
+        <div class="flex gap-4 justify-center flex-wrap">
+          <button onclick="startModule(${state.moduleId})" class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-lg font-bold">Recommencer</button>
+          <button onclick="navigate('home')" class="btn-secondary">Choisir un autre module</button>
+        </div>
+      </div>
+    </div>`;
+  nav.setTitle('Module '+(state.moduleId+1)+' : '+MODULES[state.moduleId].title);
+  nav.setActive('module-'+state.moduleId);
+}
+
+// ═══════════════════════════════════════════════════════
+//  AFFICHAGE — MA PROGRESSION
+// ═══════════════════════════════════════════════════════
+
+function renderStats(){
+  const lv=xpLevel(db.xp);
+  const totalAttempts=Object.values(db.results).reduce((a,r)=>a+r.attempts,0);
+  const totalModsDone=Object.keys(db.results).length;
+  const statTile=(val,label)=>`
+    <div class="callout text-center">
+      <div class="text-3xl font-bold text-emerald-700">${val}</div>
+      <div class="text-xs font-bold text-gray-500 uppercase tracking-wide mt-1">${label}</div>
+    </div>`;
+
+  document.getElementById('appMain').innerHTML=`
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
+      <h2 class="text-2xl md:text-3xl font-bold text-emerald-900 mb-6">Ma progression</h2>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        ${statTile(db.xp,'XP au total')}
+        ${statTile(lv.level,'Niveau · '+lv.title)}
+        ${statTile(totalModsDone+' / '+MODULES.length,'Modules terminés')}
+        ${statTile(totalAttempts,'Tentatives')}
+      </div>
+
+      <h3 class="text-xl font-bold text-emerald-800 mb-3 border-b-2 border-emerald-200 pb-2">Résultats par module</h3>
+      <div class="flex flex-col gap-2 mb-8">
+        ${MODULES.map((mod,i)=>{
+          const res=db.results[i];
+          return `
+          <div class="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3">
+            <span class="module-badge">${i+1}</span>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-gray-900">${mod.title}</div>
+              <div class="text-sm text-gray-500">${res?`${res.attempts} tentative${res.attempts>1?'s':''} · dernière note ${res.score}/20 · +${res.xp} XP`:'Non commencé'}</div>
+            </div>
+            <div class="text-lg font-bold ${res?'text-emerald-700':'text-gray-300'}">${res?res.bestScore+'/20':'—'}</div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <h3 class="text-xl font-bold text-emerald-800 mb-3 border-b-2 border-emerald-200 pb-2">Comment gagner des XP</h3>
+      <div class="callout-accent mb-8">
+        <div class="progress-bar bg-white mb-1"><div class="progress-fill bg-gradient-to-r from-emerald-500 to-emerald-700" style="width:${Math.round(lv.progress*100)}%"></div></div>
+        <p class="text-sm font-semibold text-gray-600 mb-3">${lv.xpToNext} XP avant le niveau ${lv.level+1}</p>
+        <ul class="text-gray-700 space-y-1">
+          <li><b>10 XP</b> : résoudre une équation</li>
+          <li><b>+10 XP</b> : résolution sans erreur</li>
+          <li><b>0 à 20 XP</b> : bonus de rapidité</li>
+          <li><b>0 à 30 XP</b> : bonus d'économie d'étapes</li>
+        </ul>
+      </div>
+
+      <button class="btn-small" style="color:var(--danger);border-color:#fca5a5" onclick="confirmReset()">Réinitialiser la progression</button>
+    </div>`;
+  nav.setTitle('Ma progression');
+  nav.setActive('stats');
+}
+
+function confirmReset(){
+  if(confirm('Réinitialiser TOUTE ta progression (XP, scores) ? Cette action est irréversible.')){
+    db={xp:0,results:{},showKb:db.showKb};
+    saveDB();
+    navigate('home');
+    showToast('Progression réinitialisée','ko');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  AFFICHAGE PRINCIPAL
+// ═══════════════════════════════════════════════════════
+
+function render(){
+  switch(state.view){
+    case 'module':  renderQuestion(); break;
+    case 'results': renderResults(); break;
+    case 'stats':   renderStats(); break;
+    default:
+      renderHome();
+      nav.setTitle(null);
+      nav.setActive(null);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  DÉMARRAGE
+// ═══════════════════════════════════════════════════════
+
+loadDB();
+baseSetNumpadPref(db.showKb);
+render();
+
+</script>
+</body>
+</html>

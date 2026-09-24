@@ -8,6 +8,7 @@
      ${numpadToggleBar()}                 // une fois par écran, en haut
      <input type="text" id="rep" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
      ${numpadWidget()}                    // une fois par question, près des champs
+     ${numpadWidget(false, {decimal:false})} // variante sans touche virgule (entiers)
 
    L'état (pavé activé/désactivé) est conservé dans une variable de
    module tant que la page n'est pas rechargée : il reste donc
@@ -42,8 +43,10 @@
     </div>`;
   }
 
-  function numpadWidget(forced) {
+  // options.decimal === false : pas de touche virgule (saisie d'entiers)
+  function numpadWidget(forced, options) {
     const cls = forced ? 'np-section-forced' : 'np-section';
+    const decimal = !(options && options.decimal === false);
     return `
     <div class="${cls}">
         <div class="numpad-grid">
@@ -59,7 +62,7 @@
             <button type="button" class="np-minus" onclick="numpadKey('-')">−</button>
             <button type="button" onclick="numpadKey('0')">0</button>
             <button type="button" class="np-back" onclick="numpadKey('⌫')">⌫</button>
-            <button type="button" class="np-wide" onclick="numpadKey(',')">virgule &nbsp; ,</button>
+            ${decimal ? `<button type="button" class="np-wide" onclick="numpadKey(',')">virgule &nbsp; ,</button>` : ''}
         </div>
     </div>`;
   }
