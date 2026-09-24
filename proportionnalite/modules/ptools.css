@@ -5,13 +5,13 @@
    ============================================================ */
 
 :root {
-  --app-accent-50:  #f5f3ff;
-  --app-accent-100: #ede9fe;
-  --app-accent-200: #ddd6fe;
-  --app-accent-400: #a78bfa;
-  --app-accent-600: #7c3aed;
-  --app-accent-700: #6d28d9;
-  --app-accent-800: #5b21b6;
+  --app-accent-50:  var(--paper);
+  --app-accent-100: var(--paper-2);
+  --app-accent-200: var(--cle-bg);
+  --app-accent-400: var(--line-strong);
+  --app-accent-600: var(--accent);
+  --app-accent-700: var(--accent);
+  --app-accent-800: var(--accent-ink);
 }
 body { font-family: var(--font-sans); }
 
@@ -21,7 +21,7 @@ body { font-family: var(--font-sans); }
   letter-spacing: .05em; margin-bottom: 8px;
 }
 
-.progress-bar-outer { background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; }
+.progress-bar-outer { background: var(--line); border-radius: 999px; height: 10px; overflow: hidden; }
 .progress-bar-inner { background: var(--app-accent-600); height: 100%; transition: width .3s; }
 .score-badge { font-weight: 800; color: var(--app-accent-600); }
 
@@ -37,7 +37,7 @@ body { font-family: var(--font-sans); }
 .mcq-btn.wrong { background: #fee2e2; border-color: #ef4444; color: #7f1d1d; }
 
 .recap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px,1fr)); gap: 6px; }
-.recap-item { background: #f1f5f9; border-radius: 8px; padding: 5px 2px; text-align: center; font-size: .7rem; line-height: 1.3; color: #334155; }
+.recap-item { background: var(--paper-2); border-radius: 8px; padding: 5px 2px; text-align: center; font-size: .7rem; line-height: 1.3; color: var(--ink-2); }
 .recap-item b { display: block; font-size: .85rem; }
 
 .confetti-piece { position: fixed; top: -20px; width: 9px; height: 14px; z-index: 9999; pointer-events: none; animation: confetti-fall linear forwards; }
@@ -52,15 +52,15 @@ body { font-family: var(--font-sans); }
   cursor: grab; touch-action: none; user-select: none; font-family: var(--font-sans); font-size: .92rem;
 }
 .pt-chip.dragging { opacity: .4; }
-.pt-palette { display: flex; flex-wrap: wrap; gap: 4px; padding: 10px; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px; margin-bottom: 16px; }
+.pt-palette { display: flex; flex-wrap: wrap; gap: 4px; padding: 10px; background: var(--paper); border: 1.5px dashed var(--line-strong); border-radius: 12px; margin-bottom: 16px; }
 
 .pt-slot {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 74px; min-height: 42px; padding: 6px 10px; margin: 0 4px;
-  border: 2px dashed #94a3b8; border-radius: 10px; background: #fff;
+  border: 2px dashed var(--ink-3); border-radius: 10px; background: #fff;
   vertical-align: middle; transition: all .15s;
 }
-.pt-slot-ph { color: #94a3b8; font-weight: 700; }
+.pt-slot-ph { color: var(--ink-3); font-weight: 700; }
 .pt-slot-over { background: var(--app-accent-100); border-color: var(--app-accent-600); }
 .pt-slot:has(.pt-chip) { border-style: solid; border-color: var(--app-accent-400); background: var(--app-accent-50); padding: 3px; }
 .pt-slot-ok { border-color: #22c55e !important; background: #f0fdf4 !important; }
@@ -70,7 +70,7 @@ body { font-family: var(--font-sans); }
 
 /* ---------- Fraction glisser-déposer (lecture de graphique, coefficient) ---------- */
 .pt-frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 4px 8px; }
-.pt-frac-line { width: 100%; height: 2px; background: #334155; margin: 4px 0; }
+.pt-frac-line { width: 100%; height: 2px; background: var(--ink-2); margin: 4px 0; }
 .pt-frac-eq { font-weight: 800; color: var(--app-accent-800); font-size: 1.05rem; vertical-align: middle; }
 .pt-live { color: var(--app-accent-700); }
 .pt-live.pt-live-filled { color: #166534; }
@@ -131,20 +131,20 @@ body { font-family: var(--font-sans); }
 .basket-card {
   display: block; width: 100%; text-align: left; padding: 10px 12px; margin-bottom: 6px;
   background: #fff; border: 2px solid var(--app-accent-200); border-radius: 10px;
-  font-weight: 600; color: #334155; font-size: .85rem; cursor: grab; touch-action: none; user-select: none;
+  font-weight: 600; color: var(--ink-2); font-size: .85rem; cursor: grab; touch-action: none; user-select: none;
 }
 .basket-card.dragging { opacity: .4; }
 .basket-card.placed-ok { border-color: #22c55e; background: #f0fdf4; }
 .basket-card.placed-wrong { border-color: #ef4444; background: #fef2f2; }
 
 /* ---------- Graphique SVG ---------- */
-.pt-graph { width: 100%; max-width: 320px; height: auto; display: block; margin: 12px auto; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px; }
+.pt-graph { width: 100%; max-width: 320px; height: auto; display: block; margin: 12px auto; background: #fff; border: 1.5px solid var(--line); border-radius: 12px; }
 
 /* ---------- Cours ---------- */
+/* Formule à retenir : partie importante, fond teinté de la couleur de la matière */
 .formula-box {
-  background: linear-gradient(135deg, var(--app-accent-50), #fff);
-  border: 2px solid var(--app-accent-200); border-radius: 14px;
-  padding: 16px 20px; margin: 14px 0; text-align: center; font-size: 1.15rem; font-weight: 800; color: var(--app-accent-800);
+  background: var(--cle-bg); border: none; border-radius: 18px;
+  padding: 16px 20px; margin: 14px 0; text-align: center; font-size: 1.15rem; font-weight: 800; color: var(--ink);
 }
-.method-card { border: 2px solid var(--app-accent-200); border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; background: #fff; }
+.method-card { border: 1px solid var(--line); border-radius: 20px; padding: 16px 18px; margin-bottom: 16px; background: #fff; }
 .method-card h3 { color: var(--app-accent-700); }

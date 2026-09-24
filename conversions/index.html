@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-matiere="maths">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,15 +10,16 @@
 <script src="../assets/numpad.js"></script>
 <script src="../assets/dragdrop.js"></script>
 <script src="../assets/selfcheck.js"></script>
+<script src="../assets/hero.js"></script>
 <style>
   :root {
-    --app-accent-50:  #ecfeff;
-    --app-accent-100: #cffafe;
-    --app-accent-200: #a5f3fc;
-    --app-accent-400: #22d3ee;
-    --app-accent-600: #0891b2;
-    --app-accent-700: #0e7490;
-    --app-accent-800: #155e75;
+    --app-accent-50:  var(--paper);
+    --app-accent-100: var(--paper-2);
+    --app-accent-200: var(--cle-bg);
+    --app-accent-400: var(--line-strong);
+    --app-accent-600: var(--accent);
+    --app-accent-700: var(--accent);
+    --app-accent-800: var(--accent-ink);
   }
   * { box-sizing: border-box; }
   body { background: #ffffff; min-height: 100vh; }
@@ -30,38 +31,38 @@
 
   /* Prefix table */
   .prefix-table { border-collapse: collapse; width: 100%; }
-  .prefix-table th { background: #0891b2; color: white; padding: 10px 14px; text-align: center; }
-  .prefix-table td { padding: 9px 14px; text-align: center; border: 1px solid #7dd3fc; }
-  .prefix-table tr:nth-child(even) td { background: #ecfeff; }
-  .prefix-table tr:nth-child(odd) td { background: #cffafe; }
-  .prefix-table .base-row td { background: #fff7ed !important; font-weight: 800; }
-  .prefix-table th { border: 1px solid #0e7490; }
+  .prefix-table th { background: var(--accent); color: white; padding: 10px 14px; text-align: center; }
+  .prefix-table td { padding: 9px 14px; text-align: center; border: 1px solid var(--paper-3); }
+  .prefix-table tr:nth-child(even) td { background: var(--paper); }
+  .prefix-table tr:nth-child(odd) td { background: var(--paper-2); }
+  .prefix-table .base-row td { background: var(--paper) !important; font-weight: 800; }
+  .prefix-table th { border: 1px solid var(--accent); }
 
   /* Inputs */
-  .answer-input { border: 2.5px solid #7dd3fc; border-radius: 10px; padding: 10px 12px; font-size: 1.15rem; font-family: var(--font-sans); font-weight: 700; text-align: center; outline: none; transition: border 0.2s, background 0.2s; width: 110px; background: white; }
-  .answer-input:focus { border-color: #0891b2; background: #ecfeff; }
-  .power-input { border: 2.5px solid #7dd3fc; border-radius: 10px; padding: 10px 8px; font-size: 1.15rem; font-family: var(--font-sans); font-weight: 700; text-align: center; outline: none; transition: border 0.2s, background 0.2s; width: 90px; background: white; }
-  .power-input:focus { border-color: #0891b2; background: #ecfeff; }
-  .input-correct { background: #d1fae5 !important; border-color: #10b981 !important; }
+  .answer-input { border: 2.5px solid var(--paper-3); border-radius: 10px; padding: 10px 12px; font-size: 1.15rem; font-family: var(--font-sans); font-weight: 700; text-align: center; outline: none; transition: border 0.2s, background 0.2s; width: 110px; background: white; }
+  .answer-input:focus { border-color: var(--accent); background: var(--paper); }
+  .power-input { border: 2.5px solid var(--paper-3); border-radius: 10px; padding: 10px 8px; font-size: 1.15rem; font-family: var(--font-sans); font-weight: 700; text-align: center; outline: none; transition: border 0.2s, background 0.2s; width: 90px; background: white; }
+  .power-input:focus { border-color: var(--accent); background: var(--paper); }
+  .input-correct { background: var(--paper-2) !important; border-color: var(--accent) !important; }
   .input-incorrect { background: #fee2e2 !important; border-color: #ef4444 !important; }
 
   /* QCM */
-  .qcm-option { border: 2.5px solid #7dd3fc; border-radius: 12px; padding: 12px 18px; background: #ecfeff; cursor: pointer; transition: all 0.15s; font-weight: 700; text-align: center; display: block; width: 100%; font-family: var(--font-sans); font-size: 1rem; }
-  .qcm-option:hover:not(:disabled) { background: #cffafe; border-color: #0891b2; transform: translateY(-1px); }
-  .qcm-option.opt-correct { background: #d1fae5 !important; border-color: #10b981 !important; color: #065f46 !important; }
+  .qcm-option { border: 2.5px solid var(--paper-3); border-radius: 12px; padding: 12px 18px; background: var(--paper); cursor: pointer; transition: all 0.15s; font-weight: 700; text-align: center; display: block; width: 100%; font-family: var(--font-sans); font-size: 1rem; }
+  .qcm-option:hover:not(:disabled) { background: var(--paper-2); border-color: var(--accent); transform: translateY(-1px); }
+  .qcm-option.opt-correct { background: var(--paper-2) !important; border-color: var(--accent) !important; color: var(--accent-ink) !important; }
   .qcm-option.opt-wrong { background: #fee2e2 !important; border-color: #ef4444 !important; color: #991b1b !important; }
 
   /* Drag & drop */
-  .drag-item { cursor: grab; user-select: none; transition: box-shadow 0.15s; border: 2.5px solid #7dd3fc; background: #ecfeff; border-radius: 12px; padding: 10px 14px; font-weight: 800; font-family: var(--font-sans); display: inline-flex; flex-direction: column; align-items: center; min-width: 72px; }
+  .drag-item { cursor: grab; user-select: none; transition: box-shadow 0.15s; border: 2.5px solid var(--paper-3); background: var(--paper); border-radius: 12px; padding: 10px 14px; font-weight: 800; font-family: var(--font-sans); display: inline-flex; flex-direction: column; align-items: center; min-width: 72px; }
   .drag-item:active { cursor: grabbing; box-shadow: 0 6px 20px rgba(8,145,178,0.3); }
   .drag-item.dragging { opacity: 0.4; }
-  .drop-zone { border: 2.5px dashed #7dd3fc; min-height: 60px; min-width: 72px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s; background: #f0fdff; }
-  .drop-zone.drag-over { background: #ecfeff; border-color: #0891b2; }
-  .drop-zone.filled { border-style: solid; border-color: #0891b2; background: #e0f7fa; }
+  .drop-zone { border: 2.5px dashed var(--paper-3); min-height: 60px; min-width: 72px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s; background: #f0fdff; }
+  .drop-zone.drag-over { background: var(--paper); border-color: var(--accent); }
+  .drop-zone.filled { border-style: solid; border-color: var(--accent); background: #e0f7fa; }
 
   /* Tags */
-  .tag-unit { display: inline-block; background: #0891b2; color: white; border-radius: 8px; padding: 2px 11px; font-weight: 800; font-size: 0.95rem; }
-  .tag-prefix { display: inline-block; background: #fef9c3; border: 1px solid #fbbf24; border-radius: 6px; padding: 1px 8px; color: #92400e; font-weight: 800; }
+  .tag-unit { display: inline-block; background: var(--accent); color: white; border-radius: 8px; padding: 2px 11px; font-weight: 800; font-size: 0.95rem; }
+  .tag-prefix { display: inline-block; background: var(--paper-2); border: 1px solid var(--line-strong); border-radius: 6px; padding: 1px 8px; color: var(--accent-ink); font-weight: 800; }
 
   /* Memorization cards */
   .mem-card { border-radius: 20px; padding: 24px 26px; margin-bottom: 20px; }
@@ -74,10 +75,16 @@
 
 <!-- ====== ACCUEIL ====== -->
 <div id="screen-home" class="active-screen max-w-3xl mx-auto px-4 py-8">
-  <div class="text-center mb-8">
-    <h1 class="text-4xl md:text-5xl font-bold text-cyan-800 mb-2">Maîtrise des Conversions</h1>
-    <p class="text-lg text-cyan-700">Entraîne-toi aux conversions d'unités avec les préfixes du Système International.</p>
-  </div>
+  <!-- En-tête illustré (image en parallaxe, voir assets/hero.js) -->
+  <header class="app-hero" data-dessin="regle" style="margin-top:-2rem">
+    <canvas aria-hidden="true"></canvas>
+    <div class="app-hero-in">
+      <p class="app-hero-kicker">Outils mathématiques</p>
+      <h1>Maîtrise des conversions</h1>
+      <p class="app-hero-lead">Entraîne-toi aux conversions d'unités avec les préfixes du Système International.</p>
+    </div>
+    <div class="app-hero-edge"></div>
+  </header>
 
   <!-- Comment progresser en premier -->
   <div class="callout-accent mb-7">
@@ -1404,10 +1411,10 @@ function m3End() {
 
 // ===== MODULES 4-7 =====
 const MOD_CFG = {
-  5:{label:'Module 4 · Niveau 1',title:'Nombres décimaux',titleColor:'#92400e',labelColor:'text-yellow-600',help:true},
-  6:{label:'Module 5 · Niveau 2',title:'Avec puissances de 10',titleColor:'#c2410c',labelColor:'text-orange-500',help:true},
-  7:{label:'Module 6 · Niveau 3',title:'Sans aide',titleColor:'#991b1b',labelColor:'text-red-500',help:false},
-  8:{label:'Module 7 · Niveau 4',title:'Expert',titleColor:'#9f1239',labelColor:'text-rose-600',help:false},
+  5:{label:'Module 4 · Niveau 1',title:'Nombres décimaux',titleColor:'var(--ink)',labelColor:'text-yellow-600',help:true},
+  6:{label:'Module 5 · Niveau 2',title:'Avec puissances de 10',titleColor:'var(--ink)',labelColor:'text-orange-500',help:true},
+  7:{label:'Module 6 · Niveau 3',title:'Sans aide',titleColor:'var(--ink)',labelColor:'text-rose-600',help:false},
+  8:{label:'Module 7 · Niveau 4',title:'Expert',titleColor:'var(--ink)',labelColor:'text-rose-600',help:false},
 };
 
 let exM = {};
@@ -1691,9 +1698,9 @@ function renderExSq() {
     questionHTML = `
       <div class="bg-gradient-to-r from-cyan-100 to-sky-100 rounded-2xl p-6 mb-7 text-center flex flex-wrap items-center justify-center gap-3">
         ${numDisplay}
-        <span class="tag-unit text-xl" style="background:#0891b2">${fromLabel}</span>
+        <span class="tag-unit text-xl" style="background:var(--accent)">${fromLabel}</span>
         <span class="text-gray-400 text-2xl font-black">=</span>
-        <span class="text-gray-400 text-xl font-bold">? <span class="tag-unit" style="background:#0891b2">${toLabel}</span></span>
+        <span class="text-gray-400 text-xl font-bold">? <span class="tag-unit" style="background:var(--accent)">${toLabel}</span></span>
       </div>`;
   } else {
     fromLabel = q.fromUnit;
@@ -1701,9 +1708,9 @@ function renderExSq() {
     questionHTML = `
       <div class="bg-gradient-to-r from-amber-100 to-yellow-100 rounded-2xl p-6 mb-7 text-center flex flex-wrap items-center justify-center gap-3">
         <span class="font-black text-3xl text-amber-800">${fmtCoeff(q.coeff)}</span>
-        <span class="tag-unit text-xl" style="background:#b45309">${fromLabel}</span>
+        <span class="tag-unit text-xl" style="background:var(--accent)">${fromLabel}</span>
         <span class="text-gray-400 text-2xl font-black">=</span>
-        <span class="text-gray-400 text-xl font-bold">? <span class="tag-unit" style="background:#b45309">${toLabel}</span></span>
+        <span class="text-gray-400 text-xl font-bold">? <span class="tag-unit" style="background:var(--accent)">${toLabel}</span></span>
       </div>`;
   }
 
@@ -1730,7 +1737,7 @@ function renderExSq() {
       </div>
       <div class="flex flex-col items-center gap-1">
         <label class="text-xs text-gray-400 font-bold uppercase">Unité</label>
-        <span class="tag-unit text-xl mt-1" style="background:${q.type==='pow'?'#0891b2':'#b45309'}">${toLabel}</span>
+        <span class="tag-unit text-xl mt-1" style="background:${q.type==='pow'?'var(--accent)':'var(--accent)'}">${toLabel}</span>
       </div>
     </div>
     ${numpadWidget()}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-matiere="college">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,16 +7,17 @@
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../assets/theme.css">
 <script src="../assets/nav.js"></script>
+<script src="../assets/hero.js"></script>
 <script src="../assets/numpad.js"></script>
 <style>
     :root {
-        --app-accent-50:  #ecfdf5;
-        --app-accent-100: #d1fae5;
-        --app-accent-200: #a7f3d0;
-        --app-accent-400: #34d399;
-        --app-accent-600: #059669;
-        --app-accent-700: #047857;
-        --app-accent-800: #065f46;
+        --app-accent-50:  var(--paper);
+        --app-accent-100: var(--paper-2);
+        --app-accent-200: var(--cle-bg);
+        --app-accent-400: var(--line-strong);
+        --app-accent-600: var(--accent);
+        --app-accent-700: var(--accent);
+        --app-accent-800: var(--accent-ink);
     }
     input[type="text"] { font-size:16px; }
     .question-box { animation: fadeIn 0.4s; }
@@ -29,7 +30,7 @@
     .module-score-bar { height: 6px; border-radius: 999px; background: var(--slate-100); overflow: hidden; margin-top: 4px; max-width: 260px; }
     .module-score-fill { height: 100%; border-radius: 999px; background: var(--app-accent-600); }
     .module-done { font-size: .72rem; font-weight: 800; color: var(--success-text); background: var(--success-bg);
-        border: 1px solid #6ee7b7; border-radius: 999px; padding: 2px 9px; margin-left: 8px; vertical-align: middle; }
+        border: 1px solid var(--paper-3); border-radius: 999px; padding: 2px 9px; margin-left: 8px; vertical-align: middle; }
 
     /* ── Affichage des équations ─────────────── */
     .eq-display { font-size: 1.25rem; font-weight: 700; color: var(--slate-900); line-height: 1.5; }
@@ -59,16 +60,16 @@
     .step-validate { height:46px; padding:0 18px; }
     .step-feedback { margin-top:8px; font-size:.9rem; line-height:1.5; padding:10px 14px; border-radius:10px; }
     .step-feedback.ko { background: var(--danger-bg); color: var(--danger-text); border:1.5px solid #fca5a5; }
-    .step-feedback.info { background: var(--warning-bg); color: var(--warning-text); border:1.5px solid #fcd34d; }
+    .step-feedback.info { background: var(--warning-bg); color: var(--warning-text); border:1.5px solid var(--paper-3); }
     @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
 
     /* ── Pavé de saisie (variante du pavé numérique commun, avec opérateurs) ── */
     .numpad-grid.kb-grid { grid-template-columns: repeat(5, 1fr); max-width: 340px; }
     .numpad-grid.kb-grid button { padding: 9px 4px; font-size: 1.05rem; }
-    .numpad-grid.kb-grid .kb-op { color: #047857; }
-    .numpad-grid.kb-grid .kb-x { color: #1d4ed8; font-style: italic; }
-    .numpad-grid.kb-grid .kb-frac { color: #047857; font-size: .9rem; }
-    .numpad-grid.kb-grid .kb-del { color: #7c3aed; }
+    .numpad-grid.kb-grid .kb-op { color: var(--accent); }
+    .numpad-grid.kb-grid .kb-x { color: var(--accent); font-style: italic; }
+    .numpad-grid.kb-grid .kb-frac { color: var(--accent); font-size: .9rem; }
+    .numpad-grid.kb-grid .kb-del { color: var(--accent); }
 
     /* ── Fenêtre de saisie d'une fraction ────── */
     .modal-overlay { position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:3000;
@@ -85,8 +86,8 @@
     /* ── Badges de score par question ────────── */
     .q-badge { display:inline-flex; align-items:center; font-size:.72rem; font-weight:800; padding:2px 8px;
         border-radius:999px; border:1px solid; white-space:nowrap; }
-    .q-badge.ok   { background: var(--success-bg); border-color:#6ee7b7; color: var(--success-text); }
-    .q-badge.mid  { background: var(--warning-bg); border-color:#fcd34d; color: var(--warning-text); }
+    .q-badge.ok   { background: var(--success-bg); border-color:var(--paper-3); color: var(--success-text); }
+    .q-badge.mid  { background: var(--warning-bg); border-color:var(--paper-3); color: var(--warning-text); }
     .q-badge.ko   { background: var(--danger-bg);  border-color:#fca5a5; color: var(--danger-text); }
     .q-timer { font-weight:800; font-variant-numeric: tabular-nums; color: var(--slate-500); }
     .q-timer.fast { color: var(--app-accent-600); }
@@ -993,9 +994,15 @@ function levelCard(){
 
 function renderHome(){
   document.getElementById('appMain').innerHTML=`
-    <header class="text-center mb-8">
-      <h1 class="text-4xl md:text-5xl font-bold text-emerald-900 mb-2">Équations du 1<sup>er</sup> degré</h1>
-      <p class="text-lg text-emerald-700">Résous des équations étape par étape !</p>
+    <!-- En-tête illustré (image en parallaxe, voir assets/hero.js) -->
+    <header class="app-hero" data-dessin="formules:algebre" style="margin-top:-2rem">
+      <canvas aria-hidden="true"></canvas>
+      <div class="app-hero-in">
+        <p class="app-hero-kicker">Collège</p>
+        <h1>Équations du 1<sup>er</sup> degré</h1>
+        <p class="app-hero-lead">Résous des équations étape par étape !</p>
+      </div>
+      <div class="app-hero-edge"></div>
     </header>
 
     ${levelCard()}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-matiere="chimie">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,38 +7,39 @@
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="../assets/theme.css">
   <script src="../assets/nav.js"></script>
+<script src="../assets/hero.js"></script>
   <script src="../assets/dragdrop.js"></script>
   <style>
     :root {
-      --app-accent-50:  #ecfdf5;
-      --app-accent-100: #d1fae5;
-      --app-accent-200: #a7f3d0;
-      --app-accent-400: #34d399;
-      --app-accent-600: #059669;
-      --app-accent-700: #047857;
-      --app-accent-800: #065f46;
+      --app-accent-50:  var(--paper);
+      --app-accent-100: var(--paper-2);
+      --app-accent-200: var(--cle-bg);
+      --app-accent-400: var(--line-strong);
+      --app-accent-600: var(--accent);
+      --app-accent-700: var(--accent);
+      --app-accent-800: var(--accent-ink);
     }
     .sup { font-size: 0.7em; vertical-align: super; }
     .sub { font-size: 0.7em; vertical-align: sub; }
-    .course-block { background-color: #fafbff; border: 2px solid #a7f3d0; border-radius: 14px; padding: 1.5rem; margin-bottom: 2rem; }
-    .course-block h3 { color: #065f46; border-bottom: 3px solid #059669; padding-bottom: 0.5rem; margin-bottom: 1rem; }
-    .def-box { background-color: #eff6ff; border-left: 6px solid #3b82f6; padding: 1.2rem; margin: 1rem 0; color: #1e3a5f; border-radius: 0 10px 10px 0; }
-    .def-box-red { background-color: #fff7ed; border-left: 6px solid #f97316; padding: 1.2rem; margin: 1rem 0; color: #7c2d12; border-radius: 0 10px 10px 0; }
-    .def-box h4 { font-weight: bold; color: #1d4ed8; }
-    .def-box-red h4 { font-weight: bold; color: #c2410c; }
-    .example-box { background-color: #f0f9ff; border: 2px dashed #7dd3fc; padding: 0.9rem 1rem; border-radius: 8px; margin: 0.8rem 0; color: #0c4a6e; font-size: 0.95rem; }
-    .key-equation { background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #059669 100%); color: white; border-radius: 14px; padding: 1.4rem 2rem; text-align: center; font-size: 1.5rem; font-weight: 800; box-shadow: 0 6px 24px rgba(5,150,105,0.35); border: 3px solid #34d399; margin: 1rem 0; }
-    .key-equation .eq-label { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.8; display: block; margin-bottom: 0.4rem; color: #a7f3d0; }
-    .method-step { background-color: #ffffff; border: 2px solid #a7f3d0; padding: 1rem; border-radius: 10px; height: 100%; }
-    .method-step .step-number { background: linear-gradient(135deg, #059669, #047857); color: white; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 0.75rem; flex-shrink: 0; }
-    .example-step { background-color: #f0fdf4; border: 2px solid #86efac; padding: 1rem; border-radius: 10px; height: 100%; }
+    .course-block { background:#fff; border:1px solid var(--line); border-radius:24px; padding:1.5rem; margin-bottom:2rem; }
+    .course-block h3 { color:var(--ink); font-weight:800; letter-spacing:-.02em; border-bottom:1px solid var(--line); padding-bottom:0.5rem; margin-bottom:1rem; }
+    .def-box { background:var(--cle-bg); border:none; padding:1.2rem 1.4rem; margin:1rem 0; color:var(--ink); border-radius:18px; }
+    .def-box-red { background:var(--cle-bg); border:none; padding:1.2rem 1.4rem; margin:1rem 0; color:var(--ink); border-radius:18px; }
+    .def-box h4 { font-weight:800; color:var(--accent-ink); }
+    .def-box-red h4 { font-weight:800; color:var(--accent-ink); }
+    .example-box { background:#fff; border:1.5px dashed var(--line-strong); padding:0.9rem 1rem; border-radius:14px; margin:0.8rem 0; color:var(--ink); font-size:0.95rem; }
+    .key-equation { background:var(--cle-bg); color:var(--ink); border-radius:20px; padding:1.4rem 2rem; text-align:center; font-size:1.5rem; font-weight:800; margin:1.2rem 0; }
+    .key-equation .eq-label { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; display: block; margin-bottom: 0.4rem; color: var(--accent-ink); }
+    .method-step { background:#fff; border:1px solid var(--line); padding:1rem; border-radius:18px; height:100%; }
+    .method-step .step-number { background: linear-gradient(135deg, var(--accent), var(--accent)); color: white; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 0.75rem; flex-shrink: 0; }
+    .example-step { background:var(--paper); border:none; padding:1rem; border-radius:18px; height:100%; }
     @media (max-width: 640px) { .method-table-wrapper { grid-template-columns: 1fr !important; } }
-    .question-card { background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin: 1rem 0; border: 2px solid #e2e8f0; color: #1f2937; }
-    .option-box { padding: 0.75rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
-    .option-box:hover { border-color: #059669; background-color: #ecfdf5; }
-    .option-box.selected { border-color: #059669; background-color: #d1fae5; }
-    .half-equation { background-color: #f1f5f9; padding: 0.8rem 1.2rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; margin: 0.5rem 0; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
-    .equation-builder { background: white; padding: 1rem; border-radius: 10px; border: 3px solid #059669; margin: 1rem 0; }
+    .question-card { background:var(--paper); padding:1.5rem; border-radius:20px; margin:1rem 0; border:none; color:var(--ink); }
+    .option-box { padding:0.75rem 1.25rem; border:1.5px solid var(--paper-3); background:#fff; border-radius:14px; cursor:pointer; transition:all 0.2s; }
+    .option-box:hover { border-color: var(--accent); background-color: var(--paper); }
+    .option-box.selected { border-color: var(--accent); background-color: var(--paper-2); }
+    .half-equation { background-color: var(--paper-2); padding: 0.8rem 1.2rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; margin: 0.5rem 0; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+    .equation-builder { background:white; padding:1rem; border-radius:20px; border:1.5px solid var(--line-strong); margin:1rem 0; }
     #builder-zone { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
     #builder-zone > * { flex-shrink: 0; }
     @media (max-width: 480px) {
@@ -47,23 +48,23 @@
       .coef-step-btn { width: 28px; height: 22px; }
       .arrow { font-size: 1.4rem; }
     }
-    .species-bank { background: #f1f5f9; padding: 0.75rem; border-radius: 8px; margin-top: 1rem; min-height: 64px; display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
-    .drop-zone { min-width: 58px; height: 38px; border: 2px dashed #cbd5e1; border-radius: 8px; padding: 0.2rem; margin: 0.15rem; display: inline-flex; align-items: center; justify-content: center; background: white; transition: all 0.3s; }
-    .drop-zone.over { border-color: #059669; background: #ecfdf5; }
+    .species-bank { background: var(--paper-2); padding: 0.75rem; border-radius: 8px; margin-top: 1rem; min-height: 64px; display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+    .drop-zone { min-width: 58px; height: 38px; border: 2px dashed var(--line-strong); border-radius: 8px; padding: 0.2rem; margin: 0.15rem; display: inline-flex; align-items: center; justify-content: center; background: white; transition: all 0.3s; }
+    .drop-zone.over { border-color: var(--accent); background: var(--paper); }
     .drop-zone.filled { border-style: solid; }
-    .draggable { background: linear-gradient(135deg, #047857 0%, #059669 100%); color: white; padding: 0.25rem 0.4rem; border-radius: 8px; cursor: grab; display: inline-block; font-weight: 600; font-size: .9rem; user-select: none; touch-action: none; }
-    .draggable.in-zone { cursor: grab; background: #6ee7b7; color: #065f46; }
+    .draggable { background: linear-gradient(135deg, var(--accent) 0%, var(--accent) 100%); color: white; padding: 0.25rem 0.4rem; border-radius: 8px; cursor: grab; display: inline-block; font-weight: 600; font-size: .9rem; user-select: none; touch-action: none; }
+    .draggable.in-zone { cursor: grab; background: var(--paper-3); color: var(--accent-ink); }
     .draggable.dragging { opacity: .4; }
-    .coefficient-input { width: 42px; text-align: center; padding: 0.25rem; border: 2px solid #cbd5e1; border-radius: 6px; font-weight: bold; font-size: 1rem; }
+    .coefficient-input { width: 42px; text-align: center; padding: 0.25rem; border: 2px solid var(--line-strong); border-radius: 6px; font-weight: bold; font-size: 1rem; }
     .coef-stepper { display: flex; flex-direction: column; align-items: center; gap: 1px; }
-    .coef-step-btn { width: 34px; height: 24px; padding: 0; line-height: 1; border: 1.5px solid #cbd5e1; border-radius: 5px; background: #f8fafc; color: #059669; font-size: .7rem; cursor: pointer; touch-action: manipulation; }
-    .coef-step-btn:hover { background: #ecfdf5; border-color: #059669; }
-    .coef-step-btn:active { background: #d1fae5; }
-    .multiplier-control { display: flex; align-items: center; background: white; border: 2px solid #d1d5db; border-radius: 8px; overflow: hidden; }
-    .mult-btn { width: 30px; height: 30px; border: none; background: #f3f4f6; color: #4b5563; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
-    .mult-btn:hover { background-color: #e5e7eb; }
-    .flip-btn { background: #059669; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
-    .arrow { font-size: 2rem; font-weight: bold; color: #059669; }
+    .coef-step-btn { width: 34px; height: 24px; padding: 0; line-height: 1; border: 1.5px solid var(--line-strong); border-radius: 5px; background: var(--paper); color: var(--accent); font-size: .7rem; cursor: pointer; touch-action: manipulation; }
+    .coef-step-btn:hover { background: var(--paper); border-color: var(--accent); }
+    .coef-step-btn:active { background: var(--paper-2); }
+    .multiplier-control { display: flex; align-items: center; background: white; border: 2px solid var(--line-strong); border-radius: 8px; overflow: hidden; }
+    .mult-btn { width: 30px; height: 30px; border: none; background: var(--paper-2); color: var(--ink-2); font-weight: bold; font-size: 1.1rem; cursor: pointer; }
+    .mult-btn:hover { background-color: var(--line); }
+    .flip-btn { border-radius:999px; border:none; background:var(--ink); color:#fff; font-weight:700; cursor:pointer; font-family:var(--font-sans); padding:0.4rem 0.9rem; font-size:0.9rem; }
+    .arrow { font-size: 2rem; font-weight: bold; color: var(--accent); }
     /* Feedback */
     #feedback-area { margin-top: 1rem; }
     .fb-ok { background:#dcfce7; color:#166534; border:2px solid #4ade80; padding:1rem 1.25rem; border-radius:10px; font-size:1.2rem; font-weight:bold; text-align:center; }
@@ -74,17 +75,17 @@
     .fb-errors ul li { padding:0.35rem 0 0.35rem 1.5rem; position:relative; color:#7f1d1d; font-size:0.97rem; border-bottom:1px solid #fee2e2; }
     .fb-errors ul li:last-child { border-bottom:none; }
     .fb-errors ul li::before { content:"✖"; position:absolute; left:0; color:#ef4444; top:0.4rem; font-size:0.85rem; }
-    .fb-hints { background:#fffbeb; border:2px solid #fbbf24; border-top:none; border-bottom:none; padding:1rem 1.25rem; }
-    .fb-hints h4 { color:#92400e; font-weight:700; margin-bottom:0.5rem; }
+    .fb-hints { background:var(--paper); border:2px solid var(--line-strong); border-top:none; border-bottom:none; padding:1rem 1.25rem; }
+    .fb-hints h4 { color:var(--accent-ink); font-weight:700; margin-bottom:0.5rem; }
     .fb-hints ul { list-style:none; padding:0; margin:0; }
-    .fb-hints ul li { padding:0.35rem 0 0.35rem 1.8rem; position:relative; color:#78350f; font-size:0.97rem; }
+    .fb-hints ul li { padding:0.35rem 0 0.35rem 1.8rem; position:relative; color:var(--ink); font-size:0.97rem; }
     .fb-hints ul li::before { content:"💡"; position:absolute; left:0; top:0.3rem; font-size:0.85rem; }
-    .fb-actions { background:#f8fafc; border:2px solid #f87171; border-top:1px solid #e2e8f0; border-radius:0 0 10px 10px; padding:1rem 1.25rem; display:flex; gap:0.75rem; flex-wrap:wrap; justify-content:center; }
-    .btn-retry { background:linear-gradient(135deg,#0891b2,#0e7490); color:white; padding:0.7rem 1.4rem; border-radius:8px; border:none; cursor:pointer; font-weight:700; font-size:1rem; transition:transform 0.15s; }
-    .btn-retry:hover { transform:scale(1.04); }
-    .btn-solution { background:linear-gradient(135deg,#d97706,#b45309); color:white; padding:0.7rem 1.4rem; border-radius:8px; border:none; cursor:pointer; font-weight:700; font-size:1rem; transition:transform 0.15s; }
-    .btn-solution:hover { transform:scale(1.04); }
-    .fb-solution-box { background:#e0f2fe; border:2px solid #7dd3fc; border-top:1px solid #bae6fd; color:#075985; padding:1rem 1.25rem; border-radius:0 0 10px 10px; }
+    .fb-actions { background:var(--paper); border:2px solid #f87171; border-top:1px solid var(--line); border-radius:0 0 10px 10px; padding:1rem 1.25rem; display:flex; gap:0.75rem; flex-wrap:wrap; justify-content:center; }
+    .btn-retry { border-radius:999px; border:none; background:var(--ink); color:#fff; font-weight:700; cursor:pointer; font-family:var(--font-sans); padding:0.7rem 1.4rem; font-size:1rem; }
+    .btn-retry:hover { background:#2b2e36; }
+    .btn-solution { background:#fff; color:var(--ink); box-shadow:inset 0 0 0 1.5px var(--ink); border-radius:999px; border:none; padding:0.7rem 1.4rem; cursor:pointer; font-weight:700; font-size:1rem; }
+    .btn-solution:hover { background:var(--paper); }
+    .fb-solution-box { background:var(--paper-2); border:2px solid var(--paper-3); border-top:1px solid var(--cle-bg); color:var(--accent-ink); padding:1rem 1.25rem; border-radius:0 0 10px 10px; }
     .fb-solution-box .label { font-weight:700; margin-bottom:0.35rem; }
     .fb-solution-box .eq { font-size:1.1rem; font-family:monospace; }
   </style>
@@ -94,12 +95,18 @@
 <!-- ═══════ NAVIGATION ═══════ -->
 <div id="app-nav"></div>
 
-<div class="container mx-auto px-4 py-8 max-w-4xl">
+<!-- En-tête illustré (image en parallaxe, voir assets/hero.js) -->
+<header id="mainHeader" class="app-hero" data-dessin="formules:redox">
+  <canvas aria-hidden="true"></canvas>
+  <div class="app-hero-in">
+    <p class="app-hero-kicker">Chimie</p>
+    <h1>Oxydoréduction</h1>
+    <p class="app-hero-lead">Terminale STI2D</p>
+  </div>
+  <div class="app-hero-edge"></div>
+</header>
 
-  <header id="mainHeader" class="text-center mb-8">
-    <h1 class="text-4xl md:text-5xl font-bold text-emerald-900 mb-2">Oxydoréduction</h1>
-    <p class="text-lg text-emerald-700">Terminale STI2D</p>
-  </header>
+<div class="container mx-auto px-4 py-8 max-w-4xl">
 
   <div id="menu" class="module-list mb-8">
     <div class="module-group">
@@ -181,12 +188,12 @@
           <div class="def-box-red">
             <h4 class="text-lg">Une <strong>OXYDATION</strong>&hellip;</h4>
             <p>&hellip;forme <strong>L'OXYDANT</strong>. On lit la demi-équation <em>à l'envers</em> :</p>
-            <div class="example-box mt-2 text-center font-bold" style="color:#9a3412;">Réducteur &#8594; Oxydant + n e<span class="sup">&#8722;</span></div>
+            <div class="example-box mt-2 text-center font-bold" style="color:var(--accent-ink);">Réducteur &#8594; Oxydant + n e<span class="sup">&#8722;</span></div>
           </div>
           <div class="def-box">
             <h4 class="text-lg">Une <strong>RÉDUCTION</strong>&hellip;</h4>
             <p>&hellip;forme <strong>LE RÉDUCTEUR</strong>. On lit la demi-équation <em>à l'endroit</em> :</p>
-            <div class="example-box mt-2 text-center font-bold" style="color:#1d4ed8;">Oxydant + n e<span class="sup">&#8722;</span> &#8594; Réducteur</div>
+            <div class="example-box mt-2 text-center font-bold" style="color:var(--accent);">Oxydant + n e<span class="sup">&#8722;</span> &#8594; Réducteur</div>
           </div>
         </div>
       </div>
@@ -205,19 +212,19 @@
           <div class="method-step"><div style="display:flex;align-items:flex-start;"><span class="step-number">2</span><span><strong>Orienter les équations.</strong> Une des deux demi-équations doit être inversée pour que le réactif entouré soit à gauche. La flèche part du réactif vers le produit.</span></div></div>
           <div class="example-step">
             <p style="color:#1d6f42;"><mark>Fe<span class="sup">3+</span></mark> + e<span class="sup">&#8722;</span> &#8594; Fe<span class="sup">2+</span> &nbsp;<strong>(réduction)</strong></p>
-            <p style="color:#b45309;"><mark>Zn</mark> &#8594; Zn<span class="sup">2+</span> + 2 e<span class="sup">&#8722;</span> &nbsp;<strong>(oxydation)</strong></p>
+            <p style="color:var(--accent);"><mark>Zn</mark> &#8594; Zn<span class="sup">2+</span> + 2 e<span class="sup">&#8722;</span> &nbsp;<strong>(oxydation)</strong></p>
           </div>
           <div class="method-step"><div style="display:flex;align-items:flex-start;"><span class="step-number">3</span><span><strong>Égaliser les électrons</strong> — multiplier chaque équation par le bon coefficient.</span></div></div>
           <div class="example-step">
             <p class="font-bold" style="color:#1d6f42;"><strong>2 &times;</strong> ( Fe<span class="sup">3+</span> + e<span class="sup">&#8722;</span> &#8594; Fe<span class="sup">2+</span> )</p>
-            <p style="color:#b45309;">1 &times; ( Zn &#8594; Zn<span class="sup">2+</span> + 2 e<span class="sup">&#8722;</span> )</p>
+            <p style="color:var(--accent);">1 &times; ( Zn &#8594; Zn<span class="sup">2+</span> + 2 e<span class="sup">&#8722;</span> )</p>
           </div>
           <div class="method-step"><div style="display:flex;align-items:flex-start;"><span class="step-number">4</span><span><strong>Additionner</strong> membre à membre. Les électrons s'éliminent.</span></div></div>
           <div class="example-step">
             <p style="color:#1d6f42;">2 Fe<span class="sup">3+</span> + <del>2 e<span class="sup">&#8722;</span></del> &#8594; 2 Fe<span class="sup">2+</span></p>
-            <p style="color:#b45309;">Zn &#8594; Zn<span class="sup">2+</span> + <del>2 e<span class="sup">&#8722;</span></del></p>
+            <p style="color:var(--accent);">Zn &#8594; Zn<span class="sup">2+</span> + <del>2 e<span class="sup">&#8722;</span></del></p>
             <hr class="my-1">
-            <p class="font-bold text-lg" style="color:#1e40af;">2 Fe<span class="sup">3+</span> + Zn &#8594; 2 Fe<span class="sup">2+</span> + Zn<span class="sup">2+</span></p>
+            <p class="font-bold text-lg" style="color:var(--accent-ink);">2 Fe<span class="sup">3+</span> + Zn &#8594; 2 Fe<span class="sup">2+</span> + Zn<span class="sup">2+</span></p>
           </div>
         </div>
       </div>

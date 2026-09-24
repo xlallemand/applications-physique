@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-matiere="college">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,16 +7,17 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="../assets/theme.css">
     <script src="../assets/nav.js"></script>
+<script src="../assets/hero.js"></script>
     <script src="../assets/numpad.js"></script>
     <style>
         :root {
-            --app-accent-50:  #fff1f2;
-            --app-accent-100: #ffe4e6;
-            --app-accent-200: #fecdd3;
-            --app-accent-400: #fb7185;
-            --app-accent-600: #e11d48;
-            --app-accent-700: #be123c;
-            --app-accent-800: #9f1239;
+            --app-accent-50:  var(--paper);
+            --app-accent-100: var(--paper-2);
+            --app-accent-200: var(--cle-bg);
+            --app-accent-400: var(--line-strong);
+            --app-accent-600: var(--accent);
+            --app-accent-700: var(--accent);
+            --app-accent-800: var(--accent-ink);
         }
         .btn-module { transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
         .btn-module:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
@@ -54,9 +55,15 @@
 
 <div id="app" class="container mx-auto px-4 py-8 max-w-4xl">
 
-    <header id="mainHeader" class="text-center mb-8">
-        <h1 class="text-4xl md:text-5xl font-bold text-rose-900 mb-2">Les Fractions</h1>
-        <p class="text-lg text-rose-700">Apprends et entraîne-toi !</p>
+    <!-- En-tête illustré (image en parallaxe, voir assets/hero.js) -->
+    <header id="mainHeader" class="app-hero" data-dessin="fractions" style="margin-top:-2rem">
+      <canvas aria-hidden="true"></canvas>
+      <div class="app-hero-in">
+        <p class="app-hero-kicker">Collège</p>
+        <h1>Les fractions</h1>
+        <p class="app-hero-lead">Apprends et entraîne-toi !</p>
+      </div>
+      <div class="app-hero-edge"></div>
     </header>
 
     <div id="menu" class="module-list mb-8">
@@ -179,7 +186,7 @@ let currentPage = 'home'; // 'home' | 'course-1' … 'course-4' | 'training-1' �
 const MODULE_THEMES = {
     1: { color:'blue',   title:'Simplification',                                total:15 },
     2: { color:'purple', title:'Multiplication, inverse et division',           total:15 },
-    3: { color:'green',  title:'Addition et soustraction (même dénominateur)',  total:15 },
+    3: { color:'blue',   title:'Addition et soustraction (même dénominateur)',  total:15 },
     4: { color:'orange', title:'Addition et soustraction (dénominateurs différents)', total:15 },
     5: { color:'rose',   title:'Toutes les notions',                            total:20 },
 };

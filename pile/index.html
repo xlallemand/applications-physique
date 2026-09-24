@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-matiere="chimie">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,16 +7,17 @@
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../assets/theme.css">
 <script src="../assets/nav.js"></script>
+<script src="../assets/hero.js"></script>
 <script src="../assets/dragdrop.js"></script>
 <style>
 * { box-sizing: border-box; }
-body { font-family: var(--font-sans); background: #eef2f7; min-height: 100vh; }
+body { font-family: var(--font-sans); background: var(--sheet); min-height: 100vh; }
 
 /* ===== DROP ZONES ===== */
 .dz {
-  border: 2px dashed #94a3b8;
+  border: 2px dashed var(--ink-3);
   border-radius: 6px;
-  background: #f8fafc;
+  background: var(--paper);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -27,14 +28,14 @@ body { font-family: var(--font-sans); background: #eef2f7; min-height: 100vh; }
   position: relative;
   user-select: none;
 }
-.dz.over { border-color: #3b82f6 !important; background: #dbeafe !important; transform: scale(1.04); }
+.dz.over { border-color: var(--accent) !important; background: var(--paper-2) !important; transform: scale(1.04); }
 .dz.correct { border-color: #16a34a !important; background: #dcfce7 !important; color: #14532d !important; border-style: solid !important; }
 .dz.incorrect { border-color: #dc2626 !important; background: #fee2e2 !important; color: #7f1d1d !important; border-style: solid !important; }
-.dz.filled { border-style: solid; border-color: #475569; background: #e2e8f0; }
-.dz.given { border-style: solid !important; border-color: #7c3aed !important; background: #ede9fe !important; color: #3b0764 !important; }
-.dz.dz-blue { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; }
-.dz.dz-red  { border-color: #b91c1c; background: #fff1f2; color: #b91c1c; }
-.dz.dz-teal { border-color: #0d9488; background: #f0fdfa; color: #0f766e; }
+.dz.filled { border-style: solid; border-color: var(--ink-2); background: var(--line); }
+.dz.given { border-style: solid !important; border-color: var(--accent) !important; background: var(--paper-2) !important; color: var(--ink) !important; }
+.dz.dz-blue { border-color: var(--accent); background: var(--paper); color: var(--accent); }
+.dz.dz-red  { border-color: #b91c1c; background: var(--paper); color: #b91c1c; }
+.dz.dz-teal { border-color: var(--accent); background: var(--paper); color: var(--accent); }
 
 /* ===== DRAG ITEMS ===== */
 .drag-item {
@@ -42,7 +43,7 @@ body { font-family: var(--font-sans); background: #eef2f7; min-height: 100vh; }
   align-items: center;
   justify-content: center;
   padding: 5px 12px;
-  background: #1e40af;
+  background: var(--accent-ink);
   color: white;
   border-radius: 8px;
   font-size: 13px;
@@ -62,7 +63,7 @@ body { font-family: var(--font-sans); background: #eef2f7; min-height: 100vh; }
 
 /* ===== HALF-EQ DROP ZONES ===== */
 .heq-dz {
-  border: 2px dashed #94a3b8;
+  border: 2px dashed var(--ink-3);
   border-radius: 8px;
   min-height: 38px;
   min-width: 220px;
@@ -70,14 +71,14 @@ body { font-family: var(--font-sans); background: #eef2f7; min-height: 100vh; }
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #f8fafc;
+  background: var(--paper);
   font-size: 13px;
   font-weight: 600;
   transition: all 0.15s;
   cursor: default;
 }
-.heq-dz.over { border-color: #3b82f6; background: #dbeafe; }
-.heq-dz.filled { border-style: solid; border-color: #475569; background: #e2e8f0; }
+.heq-dz.over { border-color: var(--accent); background: var(--paper-2); }
+.heq-dz.filled { border-style: solid; border-color: var(--ink-2); background: var(--line); }
 .heq-dz.correct { border-color: #16a34a; background: #dcfce7; border-style: solid; }
 
 /* ===== DEMI-PILES : 2 colonnes, empilées sur petit écran ===== */
@@ -87,11 +88,11 @@ body { font-family: var(--font-sans); background: #eef2f7; min-height: 100vh; }
   .heq-dz { min-width: 0; }
 }
 .heq-dz.incorrect { border-color: #dc2626; background: #fee2e2; border-style: solid; }
-.heq-dz.given { border-style: solid; border-color: #7c3aed; background: #ede9fe; }
+.heq-dz.given { border-style: solid; border-color: var(--accent); background: var(--paper-2); }
 
 /* ===== EQUATION BUILDER ===== */
 .eq-side {
-  border: 2px dashed #94a3b8;
+  border: 2px dashed var(--ink-3);
   border-radius: 8px;
   min-height: 42px;
   min-width: 160px;
@@ -100,10 +101,10 @@ body { font-family: var(--font-sans); background: #eef2f7; min-height: 100vh; }
   align-items: center;
   flex-wrap: wrap;
   gap: 4px;
-  background: #f8fafc;
+  background: var(--paper);
   transition: all 0.15s;
 }
-.eq-side.over { border-color: #3b82f6; background: #dbeafe; }
+.eq-side.over { border-color: var(--accent); background: var(--paper-2); }
 .eq-side.correct { border-color: #16a34a; background: #dcfce7; border-style: solid; }
 .eq-side.incorrect { border-color: #dc2626; background: #fee2e2; border-style: solid; }
 
@@ -111,7 +112,7 @@ body { font-family: var(--font-sans); background: #eef2f7; min-height: 100vh; }
   display: flex;
   align-items: center;
   gap: 5px;
-  background: #1e293b;
+  background: var(--ink);
   color: white;
   border-radius: 5px;
   padding: 3px 6px;
@@ -124,24 +125,24 @@ body { font-family: var(--font-sans); background: #eef2f7; min-height: 100vh; }
 }
 /* Stepper des coefficients (mêmes flèches que dans l'application oxydoréduction) */
 .coef-stepper { display: flex; flex-direction: column; align-items: center; gap: 1px; }
-.coef-step-btn { width: 26px; height: 18px; padding: 0; line-height: 1; border: 1.5px solid #cbd5e1; border-radius: 4px; background: #f8fafc; color: #1e293b; font-size: .6rem; cursor: pointer; touch-action: manipulation; }
-.coef-step-btn:hover { background: #e2e8f0; }
-.coef-step-btn:active { background: #cbd5e1; }
+.coef-step-btn { width: 26px; height: 18px; padding: 0; line-height: 1; border: 1.5px solid var(--line-strong); border-radius: 4px; background: var(--paper); color: var(--ink); font-size: .6rem; cursor: pointer; touch-action: manipulation; }
+.coef-step-btn:hover { background: var(--line); }
+.coef-step-btn:active { background: var(--line-strong); }
 .chip-del { background: #ef4444; color: white; border: none; border-radius: 50%; width: 14px; height: 14px; font-size: 9px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; cursor: pointer; margin-left: 2px; }
 
 /* ===== MISC ===== */
-.hint-box { border-radius: 10px; padding: 12px 16px; margin-top: 8px; font-size: 13px; line-height: 1.6; }
+.hint-box { border-radius: 16px; padding: 12px 16px; margin-top: 8px; font-size: 13px; line-height: 1.6; }
 .hint-ok { background: #dcfce7; border: 1.5px solid #16a34a; }
-.hint-err { background: #fff7ed; border: 1.5px solid #f97316; }
-.hint-ans { background: #fef9c3; border: 1.5px solid #ca8a04; }
+.hint-err { background: var(--paper); border: none; }
+.hint-ans { background: var(--cle-bg); border: none; }
 
-.btn { padding: 9px 22px; border-radius: 9px; font-weight: 700; font-size: 14px; border: none; cursor: pointer; transition: all 0.15s; }
-.btn:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-.btn-blue { background: #1d4ed8; color: white; }
-.btn-orange { background: #ea580c; color: white; }
-.btn-gray { background: #475569; color: white; }
+.btn { padding: 10px 22px; border-radius: 999px; font-weight: 700; font-size: 14px; border: none; cursor: pointer; transition: background .15s; }
+.btn:hover { filter: brightness(1.15); }
+.btn-blue { background: var(--ink); color: white; }
+.btn-orange { background: var(--ink); color: white; }
+.btn-gray { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line-strong); }
 .btn-green { background: #16a34a; color: white; }
-.btn-flip { background: #7c3aed; color: white; padding: 2px 8px; border-radius: 5px; font-size: 11px; border: none; cursor: pointer; }
+.btn-flip { background: var(--accent); color: white; padding: 2px 8px; border-radius: 5px; font-size: 11px; border: none; cursor: pointer; }
 .btn-rm { background: #ef4444; color: white; padding: 1px 6px; border-radius: 4px; font-size: 10px; border: none; cursor: pointer; }
 
 sup { font-size: 0.72em; vertical-align: super; }
@@ -151,29 +152,27 @@ sub { font-size: 0.72em; vertical-align: sub; }
 <body>
 <div id="app-nav"></div>
 
-<!-- HEADER -->
-<div style="background: linear-gradient(135deg,#1e3a8a,#6d28d9); color:white; padding:14px 24px; box-shadow:0 3px 12px rgba(0,0,0,0.3);">
-  <div style="max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
-    <div>
-      <div style="font-size:22px;font-weight:900;letter-spacing:-0.5px;">Oxydo-réduction : schéma d'une pile</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:20px;">
-      <div style="text-align:center;">
-        <div style="font-size:11px;opacity:0.7;">Question</div>
-        <div style="font-size:20px;font-weight:900;" id="hdr-q">1 / 10</div>
-      </div>
-      <div style="text-align:center;">
-        <div style="font-size:11px;opacity:0.7;">Score</div>
-        <div style="background:rgba(255,255,255,0.15);border-radius:50%;width:64px;height:64px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;border:2px solid rgba(255,255,255,0.3);" id="hdr-score">0 / 20</div>
+<!-- En-tête illustré (image en parallaxe, voir assets/hero.js) -->
+<header class="app-hero app-hero-compact" data-dessin="formules:pile">
+  <canvas aria-hidden="true"></canvas>
+  <div class="app-hero-in" style="max-width:1000px">
+    <p class="app-hero-kicker">Chimie</p>
+    <div class="app-hero-row">
+      <h1>Schéma d'une pile</h1>
+      <!-- Question et score -->
+      <div class="app-hero-stats">
+        <div><span>Question</span><strong id="hdr-q">1 / 10</strong></div>
+        <div><span>Score</span><strong id="hdr-score">0 / 20</strong></div>
       </div>
     </div>
   </div>
-</div>
+  <div class="app-hero-edge"></div>
+</header>
 
 <!-- PROGRESS -->
 <div style="max-width:1000px;margin:8px auto;padding:0 16px;">
-  <div style="background:#cbd5e1;border-radius:999px;height:6px;">
-    <div id="prog-bar" style="background:linear-gradient(90deg,#3b82f6,#8b5cf6);height:6px;border-radius:999px;width:10%;transition:width 0.4s;"></div>
+  <div style="background:var(--line-strong);border-radius:999px;height:6px;">
+    <div id="prog-bar" style="background:linear-gradient(90deg,var(--accent),var(--accent));height:6px;border-radius:999px;width:10%;transition:width 0.4s;"></div>
   </div>
 </div>
 
@@ -184,41 +183,41 @@ sub { font-size: 0.72em; vertical-align: sub; }
   <div id="q-screen">
 
     <!-- CONSIGNES -->
-    <div style="background: linear-gradient(135deg, #1e3a8a11, #6d28d911); border: 2px solid #6d28d9; border-radius: 14px; padding: 16px 20px; margin-bottom: 12px;">
-      <div style="font-size:14px;font-weight:900;color:#4c1d95;margin-bottom:10px;">
+    <div class="cle" style="margin-bottom: 12px;">
+      <div style="font-size:14px;font-weight:900;color:var(--ink);margin-bottom:10px;">
         Consignes
       </div>
       <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;">
-        <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#1e1b4b;">
-          <span style="background:#6d28d9;color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;margin-top:1px;">1</span>
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink);">
+          <span style="background:var(--accent);color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;margin-top:1px;">1</span>
           <span><strong>Schéma de la pile :</strong> glissez les entités chimiques (métaux, ions, polarités, sens des électrons et du courant, ions du pont salin…) aux bons emplacements sur le schéma.</span>
         </li>
-        <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#1e1b4b;">
-          <span style="background:#6d28d9;color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;margin-top:1px;">2</span>
-          <span><strong>Demi-piles :</strong> déposez la demi-équation dans chaque demi-pile, puis utilisez le bouton <span style="background:#7c3aed;color:white;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;">⇌</span> pour l'orienter dans le <strong style="color:#7c3aed;">bon sens de fonctionnement</strong>. Indiquez également le type de réaction et le nom de l'électrode.</span>
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink);">
+          <span style="background:var(--accent);color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;margin-top:1px;">2</span>
+          <span><strong>Demi-piles :</strong> déposez la demi-équation dans chaque demi-pile, puis utilisez le bouton <span style="background:var(--accent);color:white;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700;">⇌</span> pour l'orienter dans le <strong style="color:var(--accent);">bon sens de fonctionnement</strong>. Indiquez également le type de réaction et le nom de l'électrode.</span>
         </li>
-        <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#1e1b4b;">
-          <span style="background:#6d28d9;color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;margin-top:1px;">3</span>
-          <span><strong>Équation de fonctionnement :</strong> construisez l'équation bilan de la pile en glissant les espèces chimiques dans les zones Réactifs et Produits. Veillez à ce que l'équation soit correctement <strong style="color:#0f766e;">équilibrée</strong> (ajustez les coefficients stœchiométriques avec les boutons + et −).</span>
+        <li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink);">
+          <span style="background:var(--accent);color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;margin-top:1px;">3</span>
+          <span><strong>Équation de fonctionnement :</strong> construisez l'équation bilan de la pile en glissant les espèces chimiques dans les zones Réactifs et Produits. Veillez à ce que l'équation soit correctement <strong style="color:var(--accent);">équilibrée</strong> (ajustez les coefficients stœchiométriques avec les boutons + et −).</span>
         </li>
-		<li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#1e1b4b;">
-          <span style="background:#6d28d9;color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;margin-top:1px;">4</span>
+		<li style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink);">
+          <span style="background:var(--accent);color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;margin-top:1px;">4</span>
           <span><strong>Vérification :</strong> Vous pouvez vérifier, apporter des corrections à vos réponses et vérifier encore autant de fois que vous voulez. Si tout est bon dès la première vérification, vous gagnez 2 points. Sinon, vous gagnez 1 point. Si vous affichez la réponse, vous ne gagnez pas de points.</span>
         </li>
       </ul>
     </div>
 
     <!-- DATA -->
-    <div style="background:#eff6ff;border:1.5px solid #93c5fd;border-radius:14px;padding:14px;margin-bottom:12px;">
-      <div style="font-size:13px;font-weight:800;color:#1e40af;margin-bottom:8px;">Données</div>
-      <div id="data-wrap" style="font-size:13px;color:#1e3a8a;line-height:1.8;"></div>
+    <div style="background:var(--paper);border-radius:20px;padding:16px 18px;margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:800;color:var(--accent-ink);margin-bottom:8px;">Données</div>
+      <div id="data-wrap" style="font-size:13px;color:var(--ink);line-height:1.8;"></div>
     </div>
 
     <!-- PILE SCHEMA (bank-schema intégré dedans) -->
-    <div style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.08);padding:16px;margin-bottom:12px;">
-      <div style="font-size:14px;font-weight:800;color:#1e3a8a;margin-bottom:8px;">Schéma de la pile</div>
-      <div style="border-top:1px solid #e2e8f0;padding-top:8px;margin-bottom:10px;">
-        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Glisser sur le schéma</div>
+    <div style="background:white;border-radius:22px;border:1px solid var(--line);padding:18px;margin-bottom:12px;">
+      <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:8px;">Schéma de la pile</div>
+      <div style="border-top:1px solid var(--line);padding-top:8px;margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Glisser sur le schéma</div>
         <div id="bank-schema" style="display:flex;flex-wrap:wrap;gap:4px;min-height:36px;"></div>
       </div>
       <div id="schema-wrap" style="overflow-x:auto;"></div>
@@ -231,10 +230,10 @@ sub { font-size: 0.72em; vertical-align: sub; }
     <div id="hints-schema" style="margin-bottom:12px;"></div>
 
     <!-- LOWER ZONES (bank-lower intégré dedans) -->
-    <div style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.08);padding:16px;margin-bottom:12px;">
-      <div style="font-size:14px;font-weight:800;color:#1e3a8a;margin-bottom:8px;">Demi-piles</div>
-      <div style="border-top:1px solid #e2e8f0;padding-top:8px;margin-bottom:10px;">
-        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Glisser sous les demi-piles</div>
+    <div style="background:white;border-radius:22px;border:1px solid var(--line);padding:18px;margin-bottom:12px;">
+      <div style="font-size:14px;font-weight:800;color:var(--ink);margin-bottom:8px;">Demi-piles</div>
+      <div style="border-top:1px solid var(--line);padding-top:8px;margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Glisser sous les demi-piles</div>
         <div id="bank-lower" style="display:flex;flex-wrap:wrap;gap:4px;min-height:36px;"></div>
       </div>
       <div id="lower-wrap"></div>
@@ -247,8 +246,8 @@ sub { font-size: 0.72em; vertical-align: sub; }
     <div id="hints-demipiles" style="margin-bottom:12px;"></div>
 
     <!-- EQUATION (bank d'espèces intégré dedans) -->
-    <div style="background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.08);padding:16px;margin-bottom:12px;">
-      <div style="font-size:13px;font-weight:800;color:#1e3a8a;margin-bottom:8px;">Équation de fonctionnement de la pile</div>
+    <div style="background:white;border-radius:22px;border:1px solid var(--line);padding:18px;margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:8px;">Équation de fonctionnement de la pile</div>
       <div id="eq-wrap"></div>
     </div>
 
@@ -264,10 +263,10 @@ sub { font-size: 0.72em; vertical-align: sub; }
   </div>
 
   <!-- END SCREEN -->
-  <div id="end-screen" style="display:none;background:white;border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,0.12);padding:40px;text-align:center;margin-top:20px;">
-    <div style="font-size:28px;font-weight:900;color:#1e293b;margin:12px 0 4px;">Résultats finaux</div>
-    <div style="font-size:56px;font-weight:900;color:#1d4ed8;" id="end-score"></div>
-    <div style="font-size:15px;color:#64748b;margin:10px 0 24px;" id="end-msg"></div>
+  <div id="end-screen" style="display:none;background:white;border-radius:24px;border:1px solid var(--line);padding:40px;text-align:center;margin-top:20px;">
+    <div style="font-size:28px;font-weight:900;color:var(--ink);margin:12px 0 4px;">Résultats finaux</div>
+    <div style="font-size:56px;font-weight:900;color:var(--accent);" id="end-score"></div>
+    <div style="font-size:15px;color:var(--ink-3);margin:10px 0 24px;" id="end-msg"></div>
     <button class="btn btn-blue" style="font-size:16px;padding:12px 32px;" onclick="restart()">Recommencer</button>
   </div>
 
@@ -879,7 +878,7 @@ function renderBankSchema() {
 
   bank.innerHTML = items.map(item => `
     <div class="drag-item" data-id="${item.id}"
-         style="background:${item.bg || '#1e40af'};${(item.id==='d-plus'||item.id==='d-minus')?'font-size:17px;':''}"
+         style="background:${item.bg || 'var(--accent-ink)'};${(item.id==='d-plus'||item.id==='d-minus')?'font-size:17px;':''}"
          title="${item.title || ''}">
       ${item.labelH || item.label}
     </div>`).join('');
@@ -911,7 +910,7 @@ function renderBankLower() {
 
   bank.innerHTML = items.map(item => `
     <div class="drag-item" data-id="${item.id}"
-         style="background:${item.bg || '#1e40af'};${item.type==='heq'?'font-size:12px;':''}"
+         style="background:${item.bg || 'var(--accent-ink)'};${item.type==='heq'?'font-size:12px;':''}"
          title="${item.title || ''}">
       ${item.labelH || item.label}
     </div>`).join('');
@@ -932,33 +931,33 @@ function renderLower() {
   wrap.innerHTML = `
   <div class="lower-grid">
     <div>
-      <div style="font-size:13px;font-weight:800;color:#0369a1;margin-bottom:10px;padding-bottom:4px;border-bottom:2px solid #bae6fd;">Demi-pile gauche</div>
+      <div style="font-size:13px;font-weight:800;color:var(--accent);margin-bottom:10px;padding-bottom:4px;border-bottom:2px solid var(--cle-bg);">Demi-pile gauche</div>
       <div style="margin-bottom:10px;">
-        <div style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Demi-équation</div>
-        <div id="dz-heq-l" class="heq-dz"><span style="color:#94a3b8;font-size:12px;">Déposer la demi-équation ici…</span></div>
+        <div style="font-size:11px;color:var(--ink-3);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Demi-équation</div>
+        <div id="dz-heq-l" class="heq-dz"><span style="color:var(--ink-3);font-size:12px;">Déposer la demi-équation ici…</span></div>
       </div>
       <div style="margin-bottom:10px;">
-        <div style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Type de réaction</div>
-        <div id="dz-oxred-l" class="dz" style="min-width:120px;min-height:32px;"><span style="color:#94a3b8;font-size:12px;">Oxydation / Réduction ?</span></div>
+        <div style="font-size:11px;color:var(--ink-3);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Type de réaction</div>
+        <div id="dz-oxred-l" class="dz" style="min-width:120px;min-height:32px;"><span style="color:var(--ink-3);font-size:12px;">Oxydation / Réduction ?</span></div>
       </div>
       <div>
-        <div style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Électrode</div>
-        <div id="dz-elec-l" class="dz" style="min-width:120px;min-height:32px;"><span style="color:#94a3b8;font-size:12px;">Anode / Cathode ?</span></div>
+        <div style="font-size:11px;color:var(--ink-3);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Électrode</div>
+        <div id="dz-elec-l" class="dz" style="min-width:120px;min-height:32px;"><span style="color:var(--ink-3);font-size:12px;">Anode / Cathode ?</span></div>
       </div>
     </div>
     <div>
-      <div style="font-size:13px;font-weight:800;color:#d97706;margin-bottom:10px;padding-bottom:4px;border-bottom:2px solid #fde68a;">Demi-pile droite</div>
+      <div style="font-size:13px;font-weight:800;color:var(--accent);margin-bottom:10px;padding-bottom:4px;border-bottom:2px solid var(--cle-bg);">Demi-pile droite</div>
       <div style="margin-bottom:10px;">
-        <div style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Demi-équation</div>
-        <div id="dz-heq-r" class="heq-dz"><span style="color:#94a3b8;font-size:12px;">Déposer la demi-équation ici…</span></div>
+        <div style="font-size:11px;color:var(--ink-3);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Demi-équation</div>
+        <div id="dz-heq-r" class="heq-dz"><span style="color:var(--ink-3);font-size:12px;">Déposer la demi-équation ici…</span></div>
       </div>
       <div style="margin-bottom:10px;">
-        <div style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Type de réaction</div>
-        <div id="dz-oxred-r" class="dz" style="min-width:120px;min-height:32px;"><span style="color:#94a3b8;font-size:12px;">Oxydation / Réduction ?</span></div>
+        <div style="font-size:11px;color:var(--ink-3);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Type de réaction</div>
+        <div id="dz-oxred-r" class="dz" style="min-width:120px;min-height:32px;"><span style="color:var(--ink-3);font-size:12px;">Oxydation / Réduction ?</span></div>
       </div>
       <div>
-        <div style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Électrode</div>
-        <div id="dz-elec-r" class="dz" style="min-width:120px;min-height:32px;"><span style="color:#94a3b8;font-size:12px;">Anode / Cathode ?</span></div>
+        <div style="font-size:11px;color:var(--ink-3);font-weight:600;text-transform:uppercase;margin-bottom:4px;">Électrode</div>
+        <div id="dz-elec-r" class="dz" style="min-width:120px;min-height:32px;"><span style="color:var(--ink-3);font-size:12px;">Anode / Cathode ?</span></div>
       </div>
     </div>
   </div>`;
@@ -1016,7 +1015,7 @@ function placeHalfEqGiven(dzId, couple, dir) {
   const el = document.getElementById(dzId);
   if (!el) return;
   const eqH = dir === 'ox' ? couple.eqOxH : couple.eqRedH;
-  el.innerHTML = `<span style="font-size:13px;font-weight:600;color:#3b0764;">${eqH}</span>`;
+  el.innerHTML = `<span style="font-size:13px;font-weight:600;color:var(--ink);">${eqH}</span>`;
   el.classList.add('given');
   el.dataset.given='1'; el.dataset.filled='1';
   el.dataset.coupleId = couple.id; el.dataset.dir = dir;
@@ -1049,7 +1048,7 @@ function rmHEQ(side) {
   const el = document.getElementById('dz-heq-'+side);
   if (!el || el.dataset.given) return;
   const did = el.dataset.dragId;
-  el.innerHTML = `<span style="color:#94a3b8;font-size:12px;">Déposer la demi-équation ici…</span>`;
+  el.innerHTML = `<span style="color:var(--ink-3);font-size:12px;">Déposer la demi-équation ici…</span>`;
   el.classList.remove('filled','correct','incorrect');
   delete el.dataset.filled; delete el.dataset.coupleId; delete el.dataset.dir; delete el.dataset.dragId;
   F['heq_'+side] = null;
@@ -1070,8 +1069,8 @@ function setupSimpleLowerZone(dzId, fkey, acceptIds, mkHtml) {
     if (!locked && el.dataset.filled && !el.dataset.given) {
       if (el.dataset.dragId) unmarkUsed(el.dataset.dragId);
       el.innerHTML = el.id.includes('oxred')
-        ? `<span style="color:#94a3b8;font-size:12px;">Oxydation / Réduction ?</span>`
-        : `<span style="color:#94a3b8;font-size:12px;">Anode / Cathode ?</span>`;
+        ? `<span style="color:var(--ink-3);font-size:12px;">Oxydation / Réduction ?</span>`
+        : `<span style="color:var(--ink-3);font-size:12px;">Anode / Cathode ?</span>`;
       el.classList.remove('filled','correct','incorrect');
       delete el.dataset.filled; delete el.dataset.dragId;
       F[fkey] = null;
@@ -1096,21 +1095,21 @@ function renderEq() {
 
   const wrap = document.getElementById('eq-wrap');
   wrap.innerHTML = `
-    <div style="border-top:1px solid #e2e8f0;padding-top:8px;margin-bottom:10px;">
-      <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Glisser dans l'équation</div>
+    <div style="border-top:1px solid var(--line);padding-top:8px;margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Glisser dans l'équation</div>
       <div id="eq-bank" style="display:flex;flex-wrap:wrap;gap:6px;">
-        ${allSp.map(s=>`<div class="drag-item" data-id="${s.id}" data-type="sp" style="background:#0f766e;font-size:13px;" title="${s.label}">${s.html}</div>`).join('')}
+        ${allSp.map(s=>`<div class="drag-item" data-id="${s.id}" data-type="sp" style="background:var(--accent);font-size:13px;" title="${s.label}">${s.html}</div>`).join('')}
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
       <div>
-        <div style="font-size:11px;color:#94a3b8;margin-bottom:4px;font-weight:600;text-transform:uppercase;">Réactifs</div>
-        <div id="eq-l" class="eq-side"><span style="color:#94a3b8;font-size:12px;">Glisser ici…</span></div>
+        <div style="font-size:11px;color:var(--ink-3);margin-bottom:4px;font-weight:600;text-transform:uppercase;">Réactifs</div>
+        <div id="eq-l" class="eq-side"><span style="color:var(--ink-3);font-size:12px;">Glisser ici…</span></div>
       </div>
-      <div style="font-size:28px;font-weight:900;color:#64748b;">→</div>
+      <div style="font-size:28px;font-weight:900;color:var(--ink-3);">→</div>
       <div>
-        <div style="font-size:11px;color:#94a3b8;margin-bottom:4px;font-weight:600;text-transform:uppercase;">Produits</div>
-        <div id="eq-r" class="eq-side"><span style="color:#94a3b8;font-size:12px;">Glisser ici…</span></div>
+        <div style="font-size:11px;color:var(--ink-3);margin-bottom:4px;font-weight:600;text-transform:uppercase;">Produits</div>
+        <div id="eq-r" class="eq-side"><span style="color:var(--ink-3);font-size:12px;">Glisser ici…</span></div>
       </div>
     </div>`;
 
@@ -1137,7 +1136,7 @@ function refreshEq(side) {
   const el = document.getElementById('eq-'+side);
   const arr = side === 'l' ? eqL : eqR;
   if (arr.length === 0) {
-    el.innerHTML = `<span style="color:#94a3b8;font-size:12px;">Glisser ici…</span>`;
+    el.innerHTML = `<span style="color:var(--ink-3);font-size:12px;">Glisser ici…</span>`;
     return;
   }
   el.innerHTML = arr.map((sp, i) => `
@@ -1150,7 +1149,7 @@ function refreshEq(side) {
       <span style="margin:0 4px;">${sp.html}</span>
       <button class="chip-del" onclick="rmFromEq('${side}',${i})">✕</button>
     </div>
-    ${i < arr.length-1 ? '<span style="font-weight:700;color:#64748b;font-size:16px;">+</span>' : ''}`).join('');
+    ${i < arr.length-1 ? '<span style="font-weight:700;color:var(--ink-3);font-size:16px;">+</span>' : ''}`).join('');
 }
 
 function chgCoeff(side, idx, delta) {
@@ -1248,7 +1247,7 @@ function checkSchema() {
     hasError = true;
     const lines = schemaErrors.map(e => `<li>${e}</li>`).join('');
     hw.innerHTML = `<div class="hint-box hint-err">
-      <strong style="color:#c2410c;">⚠ ${schemaErrors.length} réponse${schemaErrors.length>1?'s':''} incorrecte${schemaErrors.length>1?'s':''} ou manquante${schemaErrors.length>1?'s':''} dans le schéma :</strong>
+      <strong style="color:var(--accent);">⚠ ${schemaErrors.length} réponse${schemaErrors.length>1?'s':''} incorrecte${schemaErrors.length>1?'s':''} ou manquante${schemaErrors.length>1?'s':''} dans le schéma :</strong>
       <ul style="padding-left:18px;list-style:disc;margin:6px 0 0;font-size:13px;color:#7f1d1d;">${lines}</ul>
     </div>`;
   }
@@ -1303,7 +1302,7 @@ function checkDemiPiles() {
     hasError = true;
     const lines = otherErrors.map(e => `<li>${e}</li>`).join('');
     hw.innerHTML = `<div class="hint-box hint-err">
-      <strong style="color:#c2410c;">⚠ ${otherErrors.length} réponse${otherErrors.length>1?'s':''} incorrecte${otherErrors.length>1?'s':''} ou manquante${otherErrors.length>1?'s':''} dans les demi-piles :</strong>
+      <strong style="color:var(--accent);">⚠ ${otherErrors.length} réponse${otherErrors.length>1?'s':''} incorrecte${otherErrors.length>1?'s':''} ou manquante${otherErrors.length>1?'s':''} dans les demi-piles :</strong>
       <ul style="padding-left:18px;list-style:disc;margin:6px 0 0;font-size:13px;color:#7f1d1d;">${lines}</ul>
     </div>`;
   }
@@ -1472,7 +1471,7 @@ function checkAnswer() {
   }
 
   let html = `<div class="hint-box hint-err" style="padding:14px 16px;">
-    <strong style="color:#c2410c;font-size:14px;">⚠ Réponses incorrectes ou incomplètes — corrigez et vérifiez à nouveau.</strong>
+    <strong style="color:var(--accent);font-size:14px;">⚠ Réponses incorrectes ou incomplètes — corrigez et vérifiez à nouveau.</strong>
     <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap;">
       ${boxSchema}
       ${boxDemi}
@@ -1635,8 +1634,8 @@ function showAnswer() {
   document.getElementById('eq-r').classList.add('correct');
 
   document.getElementById('hints-wrap').innerHTML = `<div class="hint-box hint-ans">
-    <strong style="color:#92400e;">Réponse affichée — 0 point pour cette question.</strong><br>
-    <span style="color:#78350f;">Analysez bien la correction avant de passer à la question suivante.</span>
+    <strong style="color:var(--accent-ink);">Réponse affichée — 0 point pour cette question.</strong><br>
+    <span style="color:var(--ink);">Analysez bien la correction avant de passer à la question suivante.</span>
   </div>`;
   document.getElementById('btn-next').style.display = 'inline-block';
 }
