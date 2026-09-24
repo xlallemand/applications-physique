@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 7 : Représentation graphique</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="ptools.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="ptools.js"></script>
+<style>
+  .ex-card { border:1.5px solid #e2e8f0; border-radius:14px; padding:16px 18px; margin:14px 0; background:#fff; }
+  .ex-card.direct { background:#fafaf9; }
+  .qtype-tag { display:inline-block; font-size:.7rem; font-weight:800; padding:3px 10px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px; background:var(--app-accent-100); color:var(--app-accent-800); }
+  .graph-row { display:flex; flex-wrap:wrap; gap:14px; justify-content:center; }
+  .graph-item { text-align:center; flex:1; min-width:220px; max-width:280px; }
+  .graph-item p { font-size:.82rem; font-weight:700; margin-top:4px; }
+  .check3 { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .check3 button { flex:1; min-width:150px; }
+  .formula-line { font-size:1.05rem; font-weight:700; color:var(--app-accent-800); text-align:center; margin:10px 0; }
+  .note-box { display:flex; gap:10px; border-radius:12px; border:1.5px solid; padding:12px 16px; margin:14px 0; }
+  .note-box.info { background:#eff6ff; border-color:#bfdbfe; }
+  .note-box-icon { flex-shrink:0; }
+  .note-box p { margin:0; color:#1e3a8a; font-size:.9rem; }
+</style>
+</head>
+<body class="bg-gradient-to-br from-violet-50 to-purple-100 min-h-screen">
+<div id="app-nav"></div>
+
+<div class="container mx-auto px-4 py-8 max-w-3xl" id="app">
+  <div class="bg-white rounded-xl shadow-lg p-6">
+    <span class="content-module-badge">MODULE 7</span>
+    <h2 class="text-2xl font-bold text-[var(--app-accent-800)] mb-3">La proportionnalité sur un graphique</h2>
+    <p class="text-gray-700">Un graphique permet de visualiser d'un coup d'œil si deux grandeurs sont proportionnelles, et de déterminer le coefficient de proportionnalité sans calcul compliqué.</p>
+  </div>
+
+  <!-- ============ Notion 1 : reconnaître sur un graphique ============ -->
+  <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
+    <h3 class="text-xl font-bold text-[var(--app-accent-700)] mb-2">1. Une droite... qui passe par l'origine</h3>
+    <p class="text-gray-700 mb-3">Un graphique y = f(x) représente une situation de proportionnalité directe <b>si et seulement si</b> c'est une <b>droite qui passe par l'origine</b> (0 ; 0).</p>
+    <div class="graph-row" id="g1"></div>
+    <p class="text-gray-700 mt-3">Une droite qui ne passe pas par l'origine correspond à une situation <b>affine</b> (y = ax + b, avec b &ne; 0) : ce n'est <b>pas</b> une proportionnalité. Une courbe non plus, même si elle part de l'origine.</p>
+
+    <div class="ex-card direct">
+      <span class="qtype-tag">Exemple direct</span>
+      <p class="text-gray-700">La masse m d'un volume V d'huile donne une droite passant par l'origine : m et V sont directement proportionnelles (coefficient = masse volumique de l'huile).</p>
+    </div>
+
+    <div class="ex-card">
+      <span class="qtype-tag">À toi de vérifier</span>
+      <p class="text-gray-700 mb-2">Voici le graphique du prix d'une course de VTC en fonction de la distance parcourue (prise en charge + prix au km) :</p>
+      <div class="graph-row"><div class="graph-item" id="gCheck1"></div></div>
+      <p class="font-semibold text-gray-800 mt-2">Ce graphique correspond-il à une situation de proportionnalité ?</p>
+      <div class="check3" id="chk1"></div>
+      <div id="chk1-fb" class="mt-2 font-semibold"></div>
+    </div>
+  </div>
+
+  <!-- ============ Notion 2 : lire le coefficient ============ -->
+  <div class="bg-white rounded-xl shadow-lg p-6 mt-6">
+    <h3 class="text-xl font-bold text-[var(--app-accent-700)] mb-2">2. Déterminer le coefficient à l'aide de la droite</h3>
+    <p class="text-gray-700 mb-2">Comme la droite passe par l'origine, le <b>premier point peut toujours être pris à l'origine</b> (0 ; 0) : il suffit alors de lire les coordonnées d'<b>un seul autre point B</b> sur le quadrillage.</p>
+    <div class="formula-box">k = y<sub>B</sub> / x<sub>B</sub></div>
+
+    <div class="ex-card direct">
+      <span class="qtype-tag">Exemple direct</span>
+      <p class="text-gray-700 mb-2">Masse m (kg) d'une huile en fonction du volume V (L) :</p>
+      <div class="graph-row"><div class="graph-item" id="g2"></div></div>
+      <p class="text-gray-700">Le point B a pour coordonnées (8 ; 6).</p>
+      <div class="formula-box" style="font-size:1rem">&rho; = 6 / 8 = 0,75 kg/L</div>
+    </div>
+
+    <div class="note-box info">
+      <span class="note-box-icon">ℹ</span>
+      <p><b>Remarque :</b> si l'origine n'est pas visible sur le graphique (ou si on préfère utiliser deux points quelconques A et B), on calcule le rapport des <b>variations</b> : k = (y<sub>B</sub> &minus; y<sub>A</sub>) / (x<sub>B</sub> &minus; x<sub>A</sub>) — c'est exactement le <b>coefficient directeur</b> d'une droite, en mathématiques. Sur la même droite ci-dessus, avec A (2 ; 1,5) et B (8 ; 6) : k = (6 &minus; 1,5) / (8 &minus; 2) = 4,5 / 6 = 0,75 kg/L : on retrouve le même résultat.</p>
+    </div>
+
+    <div class="note-box info">
+      <span class="note-box-icon">ℹ</span>
+      <p><b>Le lien avec les formules que tu connais :</b> le coefficient directeur k n'est presque jamais un nombre "brut" : c'est en général une grandeur physique bien précise, dont l'unité te met sur la piste (voir module 1) — masse volumique &rho; (kg/L), vitesse v (m/s), résistance R (V/A = &Omega;), masse molaire M (g/mol)... Lire un coefficient directeur sur un graphique, c'est donc souvent calculer la valeur d'une grandeur physique connue !</p>
+    </div>
+
+    <div class="ex-card" id="checkG">
+      <span class="qtype-tag">À toi de vérifier</span>
+      <p class="text-gray-700 mb-2">Distance parcourue d (m) en fonction de la durée t (s), lors d'un mouvement à vitesse constante :</p>
+      <div class="graph-row"><div class="graph-item" id="g3"></div></div>
+      <p class="text-gray-700 mb-2">Place les coordonnées du point B dans le calcul de la vitesse (coefficient) — le résultat s'affichera automatiquement.</p>
+      <div class="pt-palette" id="palG"></div>
+      <div class="formula-line" id="formulaG"></div>
+      <div class="text-center mt-3"><button class="check-btn" onclick="verifyG()">Vérifier</button></div>
+      <p id="msgG" class="verif-msg mt-2 font-semibold"></p>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-lg p-6 mt-6 text-center">
+    <p class="text-gray-700 mb-3">Prêt à t'entraîner à lire des graphiques ?</p>
+    <a href="module_8.html" class="btn-primary inline-block no-underline">Module 8 : Vérification des connaissances →</a>
+  </div>
+</div>
+
+<script>
+document.getElementById('g1').innerHTML = `
+  <div class="graph-item">${ptGraphSvg({xMax:10,yMax:8,xLabel:'x',yLabel:'y',k:0.7,intercept:0,showPoints:false})}<p style="color:#166534">Proportionnelle</p></div>
+  <div class="graph-item">${ptGraphSvg({xMax:10,yMax:8,xLabel:'x',yLabel:'y',k:0.5,intercept:2,showPoints:false})}<p style="color:#991b1b">Affine, non proportionnelle</p></div>
+  <div class="graph-item">${ptGraphSvg({xMax:10,yMax:8,xLabel:'x',yLabel:'y',curved:true,curveFn:(x)=>2*Math.sqrt(x),showPoints:false})}<p style="color:#991b1b">Courbe, non proportionnelle</p></div>`;
+
+document.getElementById('gCheck1').innerHTML = ptGraphSvg({xMax:10,yMax:9,xLabel:'d (km)',yLabel:'prix (€)',k:0.6,intercept:2.5,showPoints:false});
+
+document.getElementById('g2').innerHTML = ptGraphSvg({xMax:8,yMax:8,nx:4,ny:4,xLabel:'V (L)',yLabel:'m (kg)',k:0.75,intercept:0,showPoints:true,pointA:[0,0],pointB:[8,6]});
+document.getElementById('g3').innerHTML = ptGraphSvg({xMax:8,yMax:20,nx:4,ny:4,xLabel:'t (s)',yLabel:'d (m)',k:2.5,intercept:0,showPoints:true,pointA:[0,0],pointB:[6,15]});
+
+document.getElementById('palG').innerHTML =
+  ptChip('numG', '15 m', 15) + ptChip('denG', '6 s', 6) +
+  ptChip('x1', '8 s', 8) + ptChip('x2', '20 m', 20);
+document.getElementById('formulaG').innerHTML = 'v = ' + ptFraction('numG', 'denG', 'liveG');
+const engG = ptSlotEngine(document.getElementById('checkG'), {
+  liveGroups: [{ slots: ['numG','denG'], op: 'div', target: '#liveG', decimals: 2, suffix: ' m/s' }],
+});
+function verifyG() {
+  const r = engG.verify();
+  const msg = document.getElementById('msgG');
+  if (r.correct === r.total) { msg.style.color = '#166534'; msg.textContent = '✓ Bien placé !'; }
+  else { msg.style.color = '#991b1b'; msg.textContent = `${r.correct}/${r.total} cases correctes.`; }
+}
+
+function renderCheck3(id, correct) {
+  const opts = ['Oui, proportionnalité', 'Non, situation affine', 'Non, autre situation'];
+  document.getElementById(id).innerHTML = opts.map(o => `<button class="mcq-btn" onclick="answerCheck3('${id}','${o}','${correct}')">${o}</button>`).join('');
+}
+function answerCheck3(id, choice, correct) {
+  const box = document.getElementById(id), fb = document.getElementById(id + '-fb');
+  const ok = choice === correct;
+  box.querySelectorAll('.mcq-btn').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add('correct');
+    else if (b.textContent === choice) b.classList.add('wrong');
+  });
+  fb.textContent = ok ? '✓ Exact !' : `✕ La bonne réponse était : « ${correct} ».`;
+  fb.style.color = ok ? '#166534' : '#991b1b';
+}
+renderCheck3('chk1', 'Non, situation affine');
+
+const nav = AppNav.init({
+  appName: 'Proportionnalité', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
+  onHome: () => { window.location.href = '../index.html'; },
+  onNavigate: (key) => { window.location.href = key + '.html'; },
+  groups: [
+    { title: 'Reconnaître', items: [
+      { key: 'module_1', label: 'Module 1 : Cours' }, { key: 'module_2', label: 'Module 2 : Vérification' }, { key: 'module_3', label: 'Module 3 : Entraînement' },
+    ]},
+    { title: 'Utiliser', items: [
+      { key: 'module_4', label: 'Module 4 : Cours' }, { key: 'module_5', label: 'Module 5 : Vérification' }, { key: 'module_6', label: 'Module 6 : Entraînement' },
+    ]},
+    { title: 'Graphique', items: [
+      { key: 'module_7', label: 'Module 7 : Cours' }, { key: 'module_8', label: 'Module 8 : Vérification' }, { key: 'module_9', label: 'Module 9 : Entraînement' },
+    ]},
+  ],
+});
+nav.setActive('module_7');
+nav.setTitle('Module 7 : Cours');
+</script>
+</body>
+</html>

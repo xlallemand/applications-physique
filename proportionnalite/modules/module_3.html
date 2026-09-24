@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : Entraînement — Reconnaître</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="ptools.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="ptools.js"></script>
+</head>
+<body class="bg-gradient-to-br from-violet-50 to-purple-100 min-h-screen">
+<div id="app-nav"></div>
+<div class="container mx-auto px-4 py-8 max-w-3xl" id="app"></div>
+
+<script>
+const bank = [
+  { type: 'qcm3', text: "À vitesse de rotation constante, le nombre de tours effectués par une roue et la durée écoulée.", correct: 'Proportionnalité directe' },
+  { type: 'qcm3', text: "Le prix total d'une facture d'électricité (abonnement fixe + prix au kWh) et l'énergie consommée.", correct: 'Aucune des deux' },
+  { type: 'qcm3', text: "À intensité fixée traversant un conducteur ohmique, la tension à ses bornes et sa résistance (loi d'Ohm : U = R &times; I).", correct: 'Proportionnalité directe' },
+  { type: 'sort', text: "Range chaque situation dans le bon panier.", items: [
+      { text: "À aire fixée, la force appliquée sur une surface et la pression qu'elle produit", type: 'directe' },
+      { text: "La masse d'un échantillon d'une substance pure et sa quantité de matière, à masse molaire fixée", type: 'directe' },
+      { text: "L'échelle d'une carte : distance réelle et distance mesurée sur la carte", type: 'directe' },
+      { text: "À distance fixée, le temps de trajet en fonction de la vitesse moyenne", type: 'inverse' },
+      { text: "La distance de freinage d'une voiture et sa vitesse initiale", type: 'aucune' },
+  ]},
+  { type: 'qcm3', text: "À énergie totale fixée, l'énergie cinétique et l'énergie potentielle d'un système.", correct: 'Aucune des deux',
+    explain: "E<sub>tot</sub> = Ec + Ep : c'est leur somme qui est fixée, pas leur rapport ni leur produit — c'est une relation affine, pas une proportionnalité." },
+  { type: 'sort', text: "Range chaque situation dans le bon panier.", items: [
+      { text: "La quantité de chaleur reçue par un corps et sa variation de température, à masse et matériau fixés", type: 'directe' },
+      { text: "À puissance fixée d'un appareil électrique, la durée de fonctionnement et l'énergie consommée (en Wh)", type: 'directe' },
+      { text: "À débit fixé, le temps de remplissage d'un réservoir et son volume", type: 'directe' },
+      { text: "La fréquence d'une onde et sa longueur d'onde, à célérité fixée", type: 'inverse' },
+  ]},
+  { type: 'qcm3', text: "À champ magnétique fixé, la force de Laplace subie par un fil et l'intensité qui le traverse (F = B &times; I &times; L).", correct: 'Proportionnalité directe' },
+  { type: 'qcm3', text: "La durée d'une chute libre depuis une hauteur et cette hauteur (h = &frac12; &times; g &times; t&sup2;).", correct: 'Aucune des deux' },
+  { type: 'qcm3', text: "L'intensité lumineuse incidente qui arrive sur un panneau photovoltaïque se mesure en W/m&sup2;. Quelle est la relation entre la puissance reçue (en W) et la surface du panneau ?", correct: 'Proportionnalité directe' },
+  { type: 'sort', text: "Dernier panier : range chaque situation.", items: [
+      { text: "Le nombre de noyaux radioactifs restants et le temps écoulé (N = N&#8320; &times; e<sup>-&lambda;t</sup>, décroissance radioactive)", type: 'aucune' },
+      { text: "À nombre fixé de résistances identiques montées en parallèle, l'intensité totale et l'intensité dans une branche (I = n &times; I<sub>branche</sub>)", type: 'directe' },
+      { text: "Le temps mis pour vider une piscine à débit fixé et le volume restant à évacuer (t = V / D)", type: 'directe' },
+      { text: "À distance parcourue fixée, le travail fourni par une force et l'intensité de cette force (W = F &times; d)", type: 'directe' },
+  ]},
+];
+let idx = 0, score = 0, answers = [];
+function maxScore() { return bank.reduce((s,q) => s + (q.type==='qcm3' ? 1 : q.items.length), 0); }
+
+function renderIntro() {
+  document.getElementById('app').innerHTML = `
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <span class="content-module-badge">MODULE 3</span>
+      <h2 class="text-2xl font-bold text-[var(--app-accent-800)] mb-3">Entraînement</h2>
+      <p class="text-gray-700 mb-2">Des situations physiques plus variées et quelques pièges classiques (situations affines, non linéaires...). Repère à chaque fois s'il s'agit d'une proportionnalité directe, inverse, ou d'aucune des deux.</p>
+      <button onclick="start()" class="btn-primary mt-2">Commencer →</button>
+    </div>`;
+}
+function start() { idx = 0; score = 0; answers = []; render(); }
+
+function render() {
+  if (idx >= bank.length) return finish();
+  const q = bank[idx];
+  const app = document.getElementById('app');
+  const head = ptHeader({ badge: 'MODULE 3', title: 'Entraînement', idx, total: bank.length, score });
+
+  if (q.type === 'qcm3') {
+    app.innerHTML = head + `
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <p class="text-gray-700 text-lg mb-4">${q.text}</p>
+        <div id="opts"></div>
+        <div class="text-right mt-2">${ptSkipBtn('skipQ()')}</div>
+      </div>`;
+    const opts = ['Proportionnalité directe', 'Proportionnalité inverse', 'Aucune des deux'];
+    document.getElementById('opts').innerHTML = opts.map(o => `<button class="mcq-btn" onclick="answerQcm('${o}')">${o}</button>`).join('');
+    return;
+  }
+
+  DragDrop.cleanupGhosts();
+  app.innerHTML = head + `
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <p class="text-gray-700 text-lg mb-2">${q.text}</p>
+      <div class="pt-palette" id="sortPalette">
+        ${q.items.map((it, i) => `<div class="basket-card" draggable="true" data-idx="${i}" data-type="${it.type}">${it.text}</div>`).join('')}
+      </div>
+      <div class="basket-grid">
+        <div class="basket" data-basket-type="directe"><div class="basket-title">Directe</div></div>
+        <div class="basket" data-basket-type="inverse"><div class="basket-title">Inverse</div></div>
+        <div class="basket" data-basket-type="aucune"><div class="basket-title">Aucune</div></div>
+      </div>
+      <div class="flex items-center justify-between mt-4">
+        ${ptSkipBtn('skipQ()')}
+        <button id="sortNext" class="btn-primary" style="display:none" onclick="nextQ()">Suite →</button>
+      </div>
+    </div>`;
+  wireSort(q);
+}
+
+function wireSort(q) {
+  let placed = 0, correctCount = 0;
+  document.querySelectorAll('.basket-card').forEach(card => {
+    DragDrop.enable(card, {
+      zoneSelector: '.basket',
+      dragOverClass: 'pt-slot-over',
+      onDrop: (item, zone) => {
+        if (!zone || item.dataset.locked === '1') return;
+        item.dataset.locked = '1';
+        item.setAttribute('draggable', 'false');
+        item.style.cursor = 'default';
+        const ok = item.dataset.type === zone.dataset.basketType;
+        item.classList.add(ok ? 'placed-ok' : 'placed-wrong');
+        if (!ok) item.innerHTML += `<br><span style="font-size:.75rem;font-weight:800">→ en réalité : ${labelFor(item.dataset.type)}</span>`;
+        zone.appendChild(item);
+        placed++; if (ok) correctCount++;
+        if (placed === q.items.length) {
+          score += correctCount;
+          document.querySelector('.score-badge').textContent = score + ' pt' + (score>1?'s':'');
+          answers.push({ num: idx+1, pts: correctCount, max: q.items.length });
+          document.getElementById('sortNext').style.display = 'inline-block';
+        }
+      },
+    });
+  });
+}
+function labelFor(t) { return t==='directe' ? 'proportionnalité directe' : t==='inverse' ? 'proportionnalité inverse' : 'aucune des deux'; }
+
+function answerQcm(choice) {
+  const q = bank[idx];
+  const ok = choice === q.correct;
+  document.querySelectorAll('#opts .mcq-btn').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === q.correct) b.classList.add('correct');
+    else if (b.textContent === choice) b.classList.add('wrong');
+  });
+  if (ok) { score += 1; document.querySelector('.score-badge').textContent = score + ' pt' + (score>1?'s':''); }
+  answers.push({ num: idx+1, pts: ok?1:0, max: 1 });
+  const explainHtml = q.explain ? `<p class="mt-3 text-gray-700 italic">${q.explain}</p>` : '';
+  document.getElementById('opts').insertAdjacentHTML('beforeend',
+    explainHtml + `<div class="text-center mt-4"><button onclick="nextQ()" class="btn-primary">Suite →</button></div>`);
+}
+function nextQ() { idx++; render(); }
+function skipQ() {
+  const q = bank[idx];
+  answers.push({ num: idx+1, pts: 0, max: q.type==='qcm3' ? 1 : q.items.length });
+  idx++; render();
+}
+
+function finish() {
+  document.getElementById('app').innerHTML = ptFinish({
+    score, max: maxScore(), trueMax: maxScore(),
+    title: 'Entraînement terminé !', recap: answers,
+    restartFn: 'start()', nextHref: 'module_4.html', nextLabel: 'Module 4 : Utiliser la proportionnalité →',
+  });
+}
+
+renderIntro();
+
+const nav = AppNav.init({
+  appName: 'Proportionnalité', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
+  onHome: () => { window.location.href = '../index.html'; },
+  onNavigate: (key) => { window.location.href = key + '.html'; },
+  groups: [
+    { title: 'Reconnaître', items: [
+      { key: 'module_1', label: 'Module 1 : Cours' }, { key: 'module_2', label: 'Module 2 : Vérification' }, { key: 'module_3', label: 'Module 3 : Entraînement' },
+    ]},
+    { title: 'Utiliser', items: [
+      { key: 'module_4', label: 'Module 4 : Cours' }, { key: 'module_5', label: 'Module 5 : Vérification' }, { key: 'module_6', label: 'Module 6 : Entraînement' },
+    ]},
+    { title: 'Graphique', items: [
+      { key: 'module_7', label: 'Module 7 : Cours' }, { key: 'module_8', label: 'Module 8 : Vérification' }, { key: 'module_9', label: 'Module 9 : Entraînement' },
+    ]},
+  ],
+});
+nav.setActive('module_3');
+nav.setTitle('Module 3 : Entraînement');
+</script>
+</body>
+</html>

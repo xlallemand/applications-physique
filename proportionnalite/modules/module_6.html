@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 6 : Entraînement — Calculer</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="ptools.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="ptools.js"></script>
+<style>
+  .formula-line { font-size:1.05rem; font-weight:700; color:var(--app-accent-800); text-align:center; margin:10px 0; }
+  .method-note { display:inline-block; background:var(--app-accent-100); color:var(--app-accent-800); font-weight:800; font-size:.8rem; padding:5px 12px; border-radius:999px; margin-bottom:12px; }
+</style>
+</head>
+<body class="bg-gradient-to-br from-violet-50 to-purple-100 min-h-screen">
+<div id="app-nav"></div>
+<div class="container mx-auto px-4 py-8 max-w-3xl" id="app"></div>
+
+<script>
+const METHOD_LABEL = { tableau: 'Tableau', coef: 'Coefficient', unite: "Retour à l'unité" };
+
+/* Point de départ de chaque question : une grandeur d'unité "unité1/unité2"
+   (vitesse, masse volumique, résistance...), donnée directement comme un
+   coefficient — donc une ligne de tableau (valeur ; 1). On connaît en plus
+   une valeur pour l'une des deux unités, et on cherche l'autre. */
+const bank = [
+  { text: "Un cycliste roule à vitesse constante de 8 m/s, soit 8 m parcourus en 1 s. Place les grandeurs pour préparer le calcul de la durée nécessaire pour parcourir 40 m.",
+    labelA:'d', unitA:'m', labelB:'t', unitB:'s',
+    a1txt:'8 m', a1val:8, b1txt:'1 s', b1val:1, a2txt:'40 m',
+    distractors: [{id:'x1', label:'8 s'}, {id:'x2', label:'40 s'}],
+    forcedMethod: 'tableau' },
+
+  { text: "Un conducteur ohmique a une résistance de 5 &Omega;, soit 5 V pour 1 A : U et I sont proportionnels car U = R &times; I. Place les grandeurs pour préparer le calcul de la tension à ses bornes pour une intensité de 0,8 A.",
+    labelA:'I', unitA:'A', labelB:'U', unitB:'V',
+    a1txt:'1 A', a1val:1, b1txt:'5 V', b1val:5, a2txt:'0,8 A',
+    distractors: [{id:'x1', label:'1 V'}, {id:'x2', label:'5 A'}] },
+
+  { text: "Une batterie a une énergie massique de 150 Wh/kg, soit 150 Wh pour 1 kg. Utilise la méthode du retour à l'unité pour préparer le calcul de l'énergie stockée par une batterie de 0,4 kg.",
+    labelA:'m', unitA:'kg', labelB:'E', unitB:'Wh',
+    a1txt:'1 kg', a1val:1, b1txt:'150 Wh', b1val:150, a2txt:'0,4 kg',
+    distractors: [{id:'x1', label:'1 Wh'}, {id:'x2', label:'0,4 Wh'}],
+    forcedMethod: 'unite' },
+
+  { text: "Une solution a une concentration massique de 15 g/L, soit 15 g de soluté pour 1 L de solution. Place les grandeurs pour préparer le calcul du volume de solution contenant 45 g de soluté.",
+    labelA:'m', unitA:'g', labelB:'V', unitB:'L',
+    a1txt:'15 g', a1val:15, b1txt:'1 L', b1val:1, a2txt:'45 g',
+    distractors: [{id:'x1', label:'15 L'}, {id:'x2', label:'45 L'}] },
+
+  { text: "Une espèce chimique a une masse molaire de 40 g/mol. Place les grandeurs pour préparer le calcul de la quantité de matière correspondant à une masse de 500 mg, soit 0,5 g.",
+    labelA:'m', unitA:'g', labelB:'n', unitB:'mol',
+    a1txt:'40 g', a1val:40, b1txt:'1 mol', b1val:1, a2txt:'0,5 g',
+    distractors: [{id:'x1', label:'40 mol'}, {id:'x2', label:'0,5 mol'}] },
+
+  { text: "Un ressort a une raideur de 25 N/m. Place les grandeurs pour préparer le calcul de la force exercée pour un allongement de 12 cm, soit 0,12 m.",
+    labelA:'x', unitA:'m', labelB:'F', unitB:'N',
+    a1txt:'1 m', a1val:1, b1txt:'25 N', b1val:25, a2txt:'0,12 m',
+    distractors: [{id:'x1', label:'1 N'}, {id:'x2', label:'0,12 N'}] },
+
+  { text: "Un gaz a une masse volumique &rho; = 1,2 kg/m&sup3;. Place les grandeurs pour préparer le calcul de la masse (en g) de gaz contenue dans un volume de 750 cm&sup3;, soit 7,5&times;10&#8315;&#8308; m&sup3;.",
+    labelA:'V', unitA:'m³', labelB:'m', unitB:'g',
+    a1txt:'1 m³', a1val:1, b1txt:'1 200 g', b1val:1200, a2txt:'7,5×10⁻⁴ m³',
+    distractors: [{id:'x1', label:'750 m³'}, {id:'x2', label:'1,2 g'}] },
+
+  { text: "Un radiateur électrique a une puissance de 1 200 W (1 200 W = 1 200 J/s). Place les grandeurs pour préparer le calcul de l'énergie consommée en 3 min, soit 180 s.",
+    labelA:'t', unitA:'s', labelB:'E', unitB:'J',
+    a1txt:'1 s', a1val:1, b1txt:'1 200 J', b1val:1200, a2txt:'180 s',
+    distractors: [{id:'x1', label:'1 J'}, {id:'x2', label:'180 J'}] },
+
+  { text: "Un panneau solaire reçoit un éclairement de 750 W/m&sup2;. Place les grandeurs pour préparer le calcul de la puissance reçue par une surface de 3 000 cm&sup2;, soit 0,3 m&sup2;.",
+    labelA:'S', unitA:'m²', labelB:'P', unitB:'W',
+    a1txt:'1 m²', a1val:1, b1txt:'750 W', b1val:750, a2txt:'0,3 m²',
+    distractors: [{id:'x1', label:'1 W'}, {id:'x2', label:'0,3 W'}],
+    forcedMethod: 'coef' },
+];
+
+let idx = 0, score = 0, answers = [], currentMethod = null, engine = null, questionDone = false;
+
+function maxScore() { return bank.length * 3; }
+
+function renderIntro() {
+  document.getElementById('app').innerHTML = `
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <span class="content-module-badge">MODULE 6</span>
+      <h2 class="text-2xl font-bold text-[var(--app-accent-800)] mb-3">Entraînement</h2>
+      <p class="text-gray-700 mb-2">Pour chaque situation, choisis ta méthode préférée (tableau, coefficient ou retour à l'unité) — sauf quand elle est imposée — puis place les grandeurs au bon endroit pour construire le calcul. Aucun résultat numérique n'est demandé : c'est la construction du calcul qui compte !</p>
+      <button onclick="start()" class="btn-primary mt-2">Commencer →</button>
+    </div>`;
+}
+function start() { idx = 0; score = 0; answers = []; render(); }
+
+function render() {
+  if (idx >= bank.length) return finish();
+  const q = bank[idx];
+  currentMethod = q.forcedMethod || null;
+  const app = document.getElementById('app');
+  const head = ptHeader({ badge: 'MODULE 6', title: 'Entraînement', idx, total: bank.length, score });
+
+  app.innerHTML = head + `
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <p class="text-gray-700 text-lg mb-3">${q.text}</p>
+      <div id="methodZone"></div>
+      <div id="calcArea"></div>
+      <div class="text-right mt-3" id="skipBtnRow">${ptSkipBtn('skipQ()')}</div>
+    </div>`;
+
+  renderMethodZone(q);
+  renderCalcArea(q, currentMethod);
+}
+
+function renderMethodZone(q) {
+  const zone = document.getElementById('methodZone');
+  if (q.forcedMethod) {
+    zone.innerHTML = `<span class="method-note">Méthode imposée : ${METHOD_LABEL[q.forcedMethod]}</span>`;
+    return;
+  }
+  zone.innerHTML = `<div class="method-selector">
+    ${['tableau','coef','unite'].map(m => `<button class="method-btn" data-method="${m}" onclick="chooseMethod('${m}')">${METHOD_LABEL[m]}</button>`).join('')}
+  </div>`;
+  updateMethodButtons();
+}
+function updateMethodButtons() {
+  document.querySelectorAll('.method-btn').forEach(b => b.classList.toggle('active', b.dataset.method === currentMethod));
+}
+function chooseMethod(m) {
+  currentMethod = m;
+  updateMethodButtons();
+  renderCalcArea(bank[idx], m);
+}
+
+function renderCalcArea(q, method) {
+  const area = document.getElementById('calcArea');
+  questionDone = false;
+  if (!method) { area.innerHTML = '<p class="text-gray-500 italic">Choisis une méthode ci-dessus pour commencer.</p>'; return; }
+
+  if (method === 'tableau') {
+    area.innerHTML = '';
+    ptTableauFlow(area, {
+      labelA: q.labelA, unitA: q.unitA, labelB: q.labelB, unitB: q.unitB,
+      a1: { label: q.a1txt, value: q.a1val }, b1: { label: q.b1txt, value: q.b1val }, a2: { label: q.a2txt },
+      distractors: q.distractors, inverse: q.inverse,
+      onDone: () => { onCalcSuccess(3); },
+    });
+    return;
+  }
+
+  const chips = [
+    { id: 'a1', label: q.a1txt, value: q.a1val }, { id: 'b1', label: q.b1txt, value: q.b1val }, { id: 'a2', label: q.a2txt },
+  ].concat(q.distractors || []);
+  const paletteHtml = `<div class="pt-palette">${chips.map(c => ptChip(c.id, c.label, c.value)).join('')}</div>`;
+
+  let linesHtml = '', liveGroups = [];
+  if (method === 'coef') {
+    linesHtml = `
+      <div class="text-sm font-bold text-gray-500 mb-1">Coefficient :</div>
+      <div class="formula-line">k = ${ptFraction('b1', 'a1', 'liveCalc')}</div>
+      <div class="text-sm font-bold text-gray-500 mb-1 mt-3">Valeur recherchée :</div>
+      <div class="formula-line">? = k &times; ${ptSlot('a2')}</div>`;
+    liveGroups = [{ slots: ['b1','a1'], op: 'div', target: '#liveCalc', decimals: 3 }];
+  } else {
+    linesHtml = `
+      <div class="text-sm font-bold text-gray-500 mb-1">Valeur pour 1 ${q.unitA} :</div>
+      <div class="formula-line">1 ${q.unitA} &rarr; ${ptFraction('b1', 'a1', 'liveCalc')}</div>
+      <div class="text-sm font-bold text-gray-500 mb-1 mt-3">Valeur recherchée :</div>
+      <div class="formula-line">? = (valeur pour 1 ${q.unitA}) &times; ${ptSlot('a2')}</div>`;
+    liveGroups = [{ slots: ['b1','a1'], op: 'div', target: '#liveCalc', decimals: 3 }];
+  }
+
+  area.innerHTML = paletteHtml + `<div id="calcLines">${linesHtml}</div>
+    <div class="text-center mt-4" id="verifyRow">
+      <button class="btn-primary" onclick="verifyCalc()">Vérifier</button>
+    </div>
+    <p id="calcMsg" class="mt-2 font-semibold"></p>`;
+  engine = ptSlotEngine(area, { liveGroups });
+}
+
+function verifyCalc() {
+  if (questionDone) return;
+  const r = engine.verify();
+  const msg = document.getElementById('calcMsg');
+  if (r.correct === r.total) {
+    msg.style.color = '#166534';
+    msg.innerHTML = '✓ Calcul correctement construit !';
+    document.getElementById('verifyRow').style.display = 'none';
+    onCalcSuccess(r.total);
+  } else {
+    msg.style.color = '#991b1b';
+    msg.textContent = `${r.correct}/${r.total} cases correctes — corrige les cases rouges et re-vérifie.`;
+  }
+}
+
+function onCalcSuccess(pts) {
+  if (questionDone) return;
+  questionDone = true;
+  score += pts;
+  answers.push({ num: idx+1, pts, max: pts });
+  document.querySelector('.score-badge').textContent = score + ' pt' + (score>1?'s':'');
+  document.getElementById('calcArea').insertAdjacentHTML('afterend',
+    `<div class="text-center mt-2"><button onclick="nextQ()" class="btn-primary">Suite →</button></div>`);
+  document.querySelectorAll('.method-btn').forEach(b => b.disabled = true);
+  const skip = document.getElementById('skipBtnRow'); if (skip) skip.style.display = 'none';
+}
+
+function nextQ() { idx++; render(); }
+function skipQ() { if (questionDone) return; answers.push({ num: idx+1, pts: 0, max: 3 }); idx++; render(); }
+
+function finish() {
+  document.getElementById('app').innerHTML = ptFinish({
+    score, max: maxScore(), trueMax: maxScore(),
+    title: 'Entraînement terminé !', recap: answers,
+    restartFn: 'start()', nextHref: 'module_7.html', nextLabel: 'Module 7 : Représentation graphique →',
+  });
+}
+
+renderIntro();
+
+const nav = AppNav.init({
+  appName: 'Proportionnalité', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
+  onHome: () => { window.location.href = '../index.html'; },
+  onNavigate: (key) => { window.location.href = key + '.html'; },
+  groups: [
+    { title: 'Reconnaître', items: [
+      { key: 'module_1', label: 'Module 1 : Cours' }, { key: 'module_2', label: 'Module 2 : Vérification' }, { key: 'module_3', label: 'Module 3 : Entraînement' },
+    ]},
+    { title: 'Utiliser', items: [
+      { key: 'module_4', label: 'Module 4 : Cours' }, { key: 'module_5', label: 'Module 5 : Vérification' }, { key: 'module_6', label: 'Module 6 : Entraînement' },
+    ]},
+    { title: 'Graphique', items: [
+      { key: 'module_7', label: 'Module 7 : Cours' }, { key: 'module_8', label: 'Module 8 : Vérification' }, { key: 'module_9', label: 'Module 9 : Entraînement' },
+    ]},
+  ],
+});
+nav.setActive('module_6');
+nav.setTitle('Module 6 : Entraînement');
+</script>
+</body>
+</html>

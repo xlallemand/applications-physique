@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 : Vérification — Méthodes</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="ptools.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="ptools.js"></script>
+<style>
+  .formula-line { font-size:1.05rem; font-weight:700; color:var(--app-accent-800); text-align:center; margin:10px 0; }
+</style>
+</head>
+<body class="bg-gradient-to-br from-violet-50 to-purple-100 min-h-screen">
+<div id="app-nav"></div>
+<div class="container mx-auto px-4 py-8 max-w-3xl" id="app"></div>
+
+<script>
+const bank = [
+  { type: 'qcm', text: "On veut calculer le coefficient de proportionnalité k reliant y (grandeur B) à x (grandeur A), avec y = k &times; x. Quelle formule donne k ?",
+    options: ['k = y / x', 'k = x / y', 'k = y &times; x', 'k = y + x'], correct: 0 },
+
+  { type: 'tableauflow', text: "Un sirop se prépare avec une dose D proportionnelle au volume d'eau V. On sait que D = 40 mL correspond à V = 200 mL. Place les grandeurs dans le tableau, puis reporte-les dans la formule, pour préparer le calcul du volume V correspondant à D = 100 mL.",
+    labelA: 'D', unitA: 'mL', labelB: 'V', unitB: 'mL',
+    a1: { label: '40 mL', value: 40 }, b1: { label: '200 mL', value: 200 }, a2: { label: '100 mL', value: 100 },
+    distractors: [{ id: 'x1', label: '0,4 L' }, { id: 'x2', label: '500 mL' }],
+  },
+
+  { type: 'qcm', text: "Que calcule-t-on en premier lorsqu'on utilise la méthode du « retour à l'unité » ?",
+    options: [
+      'La valeur de la grandeur B correspondant à 1 unité de la grandeur A',
+      'Le produit des quatre valeurs du tableau',
+      'La somme des deux grandeurs',
+      'La moyenne des deux grandeurs',
+    ], correct: 0 },
+
+  { type: 'drag', text: "Une résistance chauffante dissipe une énergie E proportionnelle à la durée t de fonctionnement. On sait : t = 4 s &rarr; E = 120 J. Place les grandeurs pour construire le calcul du coefficient k (la puissance), puis celui de l'énergie dissipée en 15 s.",
+    chips: [
+      { id: 'e1', label: '120 J', value: 120 }, { id: 't1', label: '4 s', value: 4 }, { id: 't2', label: '15 s', value: 15 },
+      { id: 'x1', label: '120 s', value: 120 }, { id: 'x2', label: '4 J', value: 4 },
+    ],
+    lines: [
+      { label: 'Coefficient (puissance) :', tokens: ['k', '=', 'slot:e1', '/', 'slot:t1'], live: { slots: ['e1','t1'], target: 'live1', suffix: ' W' } },
+      { label: 'Énergie recherchée :', tokens: ['E', '=', 'k', '&times;', 'slot:t2'] },
+    ],
+  },
+
+  { type: 'qcm', text: "Dans un tableau de proportionnalité, pourquoi est-il indispensable d'indiquer les unités de chaque grandeur ?",
+    options: [
+      'Pour repérer si une conversion est nécessaire avant de calculer',
+      'Uniquement pour que le tableau soit plus joli',
+      'Les unités n\'ont aucune importance dans un calcul',
+      'Pour remplacer les nombres',
+    ], correct: 0 },
+
+  { type: 'drag', text: "Une pile alimente un circuit où 3 lampes identiques en série se répartissent 9 V à parts égales. Place les grandeurs pour construire le calcul, par retour à l'unité, de la tension nécessaire pour 5 lampes identiques.",
+    chips: [
+      { id: 'u1', label: '9 V', value: 9 }, { id: 'n1', label: '3', value: 3 }, { id: 'n2', label: '5', value: 5 },
+      { id: 'x1', label: '9 lampes', value: 9 }, { id: 'x2', label: '3 V', value: 3 },
+    ],
+    lines: [
+      { label: '1 lampe :', tokens: ['slot:u1', '/', 'slot:n1'], live: { slots: ['u1','n1'], target: 'live2', suffix: ' V' } },
+      { label: '5 lampes :', tokens: ['U', '=', '(valeur pour 1)', '&times;', 'slot:n2'] },
+    ],
+  },
+
+  { type: 'qcm', text: "Pour une proportionnalité inverse, que vaut le produit a &times; b des deux grandeurs d'une ligne complète du tableau ?",
+    options: [
+      'Toujours la même valeur (une constante)',
+      'Toujours nul',
+      'Toujours égal à 1',
+      'Cela dépend, il n\'y a pas de règle',
+    ], correct: 0 },
+
+  { type: 'tableauflow', text: "Une solution a une concentration massique fixée : 300 mL de cette solution contiennent 12 g de soluté dissous. Place les grandeurs dans le tableau, puis dans la formule, pour préparer le calcul de la masse de soluté dissous dans 500 mL de cette même solution.",
+    labelA: 'V', unitA: 'mL', labelB: 'm', unitB: 'g',
+    a1: { label: '300 mL', value: 300 }, b1: { label: '12 g', value: 12 }, a2: { label: '500 mL', value: 500 },
+    distractors: [{ id: 'x1', label: '300 g' }, { id: 'x2', label: '12 mL' }],
+  },
+
+  { type: 'qcm', text: "On a calculé k = 15 (g/L) pour une solution, à partir de m = 15 g dissous dans V = 1 L. Que représente ce nombre 15 ?",
+    options: [
+      'La masse (en g) dissoute dans 1 L de solution',
+      'Le volume (en L) contenant 1 g de soluté',
+      'La masse totale de solution, quel que soit le volume',
+      'Un simple hasard de calcul, sans signification physique',
+    ], correct: 0 },
+];
+let idx = 0, score = 0, answers = [], questionDone = false;
+function maxScore() { return bank.reduce((s,q) => s + (q.type==='qcm' ? 1 : q.type==='tableauflow' ? 3 : countSlots(q)), 0); }
+function countSlots(q) { return q.lines.reduce((s,l) => s + l.tokens.filter(t => t.startsWith('slot:')).length, 0); }
+
+function renderIntro() {
+  document.getElementById('app').innerHTML = `
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <span class="content-module-badge">MODULE 5</span>
+      <h2 class="text-2xl font-bold text-[var(--app-accent-800)] mb-3">Vérification des connaissances</h2>
+      <p class="text-gray-700 mb-2">QCM et glisser-déposer sur les trois méthodes de calcul (tableau, coefficient, retour à l'unité). Il ne s'agit ici que de <b>placer les grandeurs au bon endroit</b>, pas de donner un résultat numérique.</p>
+      <button onclick="start()" class="btn-primary mt-2">Commencer →</button>
+    </div>`;
+}
+function start() { idx = 0; score = 0; answers = []; render(); }
+
+function tokenHtml(tok) {
+  if (tok.startsWith('slot:')) return ptSlot(tok.slice(5));
+  return `<span>${tok}</span>`;
+}
+
+let engine = null;
+function render() {
+  if (idx >= bank.length) return finish();
+  const q = bank[idx];
+  const app = document.getElementById('app');
+  const head = ptHeader({ badge: 'MODULE 5', title: 'Vérification des connaissances', idx, total: bank.length, score });
+  questionDone = false;
+
+  if (q.type === 'qcm') {
+    app.innerHTML = head + `
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <p class="text-gray-700 text-lg mb-4">${q.text}</p>
+        <div id="opts">${q.options.map((o,i) => `<button class="mcq-btn" onclick="answerQcm(${i})">${o}</button>`).join('')}</div>
+        <div class="text-right mt-2">${ptSkipBtn('skipQ()')}</div>
+      </div>`;
+    return;
+  }
+
+  if (q.type === 'tableauflow') {
+    app.innerHTML = head + `
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <p class="text-gray-700 text-lg mb-3">${q.text}</p>
+        <div id="tflow"></div>
+        <div class="text-right mt-3" id="skipRow">${ptSkipBtn('skipQ()')}</div>
+      </div>`;
+    ptTableauFlow(document.getElementById('tflow'), {
+      labelA: q.labelA, unitA: q.unitA, labelB: q.labelB, unitB: q.unitB,
+      a1: q.a1, b1: q.b1, a2: q.a2, distractors: q.distractors, inverse: q.inverse,
+      onDone: () => {
+        if (questionDone) return;
+        questionDone = true;
+        score += 3;
+        answers.push({ num: idx+1, pts: 3, max: 3 });
+        document.querySelector('.score-badge').textContent = score + ' pt' + (score>1?'s':'');
+        document.getElementById('skipRow').style.display = 'none';
+        document.getElementById('tflow').insertAdjacentHTML('afterend',
+          `<div class="text-center mt-2"><button onclick="nextQ()" class="btn-primary">Suite →</button></div>`);
+      },
+    });
+    return;
+  }
+
+  // type === 'drag'
+  const linesHtml = q.lines.map(l => `
+    <div class="mb-2">
+      ${l.label ? `<div class="text-sm font-bold text-gray-500 mb-1">${l.label}</div>` : ''}
+      <div class="formula-line">${l.tokens.map(t => tokenHtml(t)).join(' ')}
+        ${l.live ? ` = <span id="${l.live.target}" class="pt-live">?</span>` : ''}
+      </div>
+    </div>`).join('');
+  app.innerHTML = head + `
+    <div class="bg-white rounded-xl shadow-lg p-6" id="qCard">
+      <p class="text-gray-700 text-lg mb-3">${q.text}</p>
+      <div class="pt-palette">${q.chips.map(c => ptChip(c.id, c.label, c.value)).join('')}</div>
+      ${linesHtml}
+      <div class="flex items-center justify-between mt-4" id="actionRow">
+        ${ptSkipBtn('skipQ()')}
+        <button class="btn-primary" onclick="verifyDrag()">Vérifier</button>
+      </div>
+      <p id="dragMsg" class="mt-2 font-semibold"></p>
+    </div>`;
+  const liveGroups = (q.lines || []).filter(l => l.live).map(l => ({ slots: l.live.slots, op: 'div', target: '#' + l.live.target, decimals: 2, suffix: l.live.suffix || '' }));
+  engine = ptSlotEngine(document.getElementById('qCard'), { liveGroups });
+}
+
+function verifyDrag() {
+  if (questionDone) return;
+  const q = bank[idx];
+  const r = engine.verify();
+  const msg = document.getElementById('dragMsg');
+  if (r.correct === r.total) {
+    questionDone = true;
+    score += r.total;
+    answers.push({ num: idx+1, pts: r.total, max: r.total });
+    document.querySelector('.score-badge').textContent = score + ' pt' + (score>1?'s':'');
+    msg.style.color = '#166534';
+    msg.innerHTML = '✓ Bien placé !';
+    document.getElementById('actionRow').style.display = 'none';
+    document.getElementById('dragMsg').insertAdjacentHTML('afterend',
+      `<div class="text-center mt-2"><button onclick="nextQ()" class="btn-primary">Suite →</button></div>`);
+  } else {
+    msg.style.color = '#991b1b';
+    msg.textContent = `${r.correct}/${r.total} cases correctes — corrige les cases rouges et re-vérifie.`;
+  }
+}
+
+function answerQcm(i) {
+  const q = bank[idx];
+  const ok = i === q.correct;
+  document.querySelectorAll('#opts .mcq-btn').forEach((b,bi) => {
+    b.disabled = true;
+    if (bi === q.correct) b.classList.add('correct');
+    else if (bi === i) b.classList.add('wrong');
+  });
+  if (ok) { score += 1; document.querySelector('.score-badge').textContent = score + ' pt' + (score>1?'s':''); }
+  answers.push({ num: idx+1, pts: ok?1:0, max: 1 });
+  document.getElementById('opts').insertAdjacentHTML('afterend',
+    `<div class="text-center mt-4"><button onclick="nextQ()" class="btn-primary">Suite →</button></div>`);
+}
+function nextQ() { idx++; render(); }
+function skipQ() {
+  if (questionDone) return;
+  const q = bank[idx];
+  answers.push({ num: idx+1, pts: 0, max: q.type==='qcm' ? 1 : q.type==='tableauflow' ? 3 : countSlots(q) });
+  idx++; render();
+}
+
+function finish() {
+  document.getElementById('app').innerHTML = ptFinish({
+    score, max: maxScore(), trueMax: maxScore(),
+    title: 'Vérification terminée !', recap: answers,
+    restartFn: 'start()', nextHref: 'module_6.html', nextLabel: 'Module 6 : Entraînement →',
+  });
+}
+
+renderIntro();
+
+const nav = AppNav.init({
+  appName: 'Proportionnalité', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
+  onHome: () => { window.location.href = '../index.html'; },
+  onNavigate: (key) => { window.location.href = key + '.html'; },
+  groups: [
+    { title: 'Reconnaître', items: [
+      { key: 'module_1', label: 'Module 1 : Cours' }, { key: 'module_2', label: 'Module 2 : Vérification' }, { key: 'module_3', label: 'Module 3 : Entraînement' },
+    ]},
+    { title: 'Utiliser', items: [
+      { key: 'module_4', label: 'Module 4 : Cours' }, { key: 'module_5', label: 'Module 5 : Vérification' }, { key: 'module_6', label: 'Module 6 : Entraînement' },
+    ]},
+    { title: 'Graphique', items: [
+      { key: 'module_7', label: 'Module 7 : Cours' }, { key: 'module_8', label: 'Module 8 : Vérification' }, { key: 'module_9', label: 'Module 9 : Entraînement' },
+    ]},
+  ],
+});
+nav.setActive('module_5');
+nav.setTitle('Module 5 : Vérification');
+</script>
+</body>
+</html>
