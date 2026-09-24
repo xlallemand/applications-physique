@@ -313,10 +313,10 @@
       <rect x="130" y="90" width="120" height="45" fill="#fff" stroke="#ddd6fe"/>
       <text x="70" y="118" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">c</text>
       <text x="190" y="118" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">?</text>
-      <path d="M 70 68 L 190 68" fill="none" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#ptArrow2)"/>
+      <path d="M 88 68 L 174 68" fill="none" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#ptArrow2)"/>
       <text x="130" y="60" text-anchor="middle" fill="#b45309" font-weight="800" font-size="13">&times;</text>
-      <path d="M 190 90 C 230 105, 150 118, 190 112" fill="none" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#ptArrow2)"/>
-      <text x="238" y="103" text-anchor="start" fill="#b45309" font-weight="800" font-size="13">&divide; c</text>
+      <path d="M 205 90 C 245 105, 165 118, 205 112" fill="none" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#ptArrow2)"/>
+      <text x="240" y="103" text-anchor="start" fill="#b45309" font-weight="800" font-size="13">&divide; c</text>
       <defs><marker id="ptArrow2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#f59e0b"/></marker></defs>
     </svg>`;
   }
