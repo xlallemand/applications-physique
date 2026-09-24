@@ -234,13 +234,29 @@ h1, h2, h3, h4 { letter-spacing: -.02em; }
 }
 .app-navmenu.open { left: 0; box-shadow: 0 0 60px rgba(22,24,29,.18); }
 
-.app-navmenu-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 18px; background: var(--sheet); color: var(--ink);
-  border-bottom: 1px solid var(--line);
-  font-weight: 800; font-size: 1.05rem; letter-spacing: -.02em; position: sticky; top: 0;
+/* Niveau 1 : bandeau sombre « Toutes les applications » (quitte l'application) */
+.app-navmenu-portal {
+  display: flex; align-items: stretch; position: sticky; top: 0; z-index: 1;
+  background: var(--ink); color: #fff;
 }
-.app-navmenu-header button { background: none; border: none; color: var(--ink); font-size: 1.5rem; line-height: 1; cursor: pointer; padding: 4px; }
+.app-nav-portal {
+  flex: 1; display: flex; align-items: center; gap: 12px; padding: 16px 18px;
+  border: none; background: none; color: #fff; text-align: left; cursor: pointer;
+  font: 700 .95rem/1.25 var(--font-sans);
+}
+.app-nav-portal small { display: block; font-weight: 500; font-size: .75rem; color: rgba(255,255,255,.6); margin-top: 2px; }
+.app-nav-portal-fleche { font-size: 1.1rem; transition: transform .15s; }
+.app-nav-portal:hover .app-nav-portal-fleche { transform: translateX(-3px); }
+.app-nav-close {
+  flex-shrink: 0; width: 52px; border: none; background: none; color: #fff;
+  font-size: 1.5rem; line-height: 1; cursor: pointer; opacity: .7;
+}
+.app-nav-close:hover { opacity: 1; }
+
+/* Niveau 2 : l'application en cours */
+.app-navmenu-app { padding: 20px 18px 8px; }
+.app-navmenu-matiere { font-size: .75rem; font-weight: 600; color: var(--accent); }
+.app-navmenu-nom { font-size: 1.35rem; font-weight: 800; letter-spacing: -.03em; line-height: 1.15; color: var(--ink); }
 
 .app-navmenu-section-title { font-size: .8rem; font-weight: 600; color: var(--ink-3); padding: 14px 16px 6px; }
 
@@ -251,9 +267,6 @@ h1, h2, h3, h4 { letter-spacing: -.02em; }
   color: var(--ink-2); cursor: pointer; transition: background .15s;
 }
 .app-nav-item:hover { background: var(--paper); color: var(--ink); }
-.app-nav-item.app-nav-portal { color: var(--ink-2); }
-.app-nav-item.app-nav-home { color: var(--ink); font-size: 1rem; font-weight: 800; }
-.app-nav-divider { height: 1px; background: var(--line); margin: 8px 14px; }
 .app-nav-item.app-nav-current { background: var(--paper); color: var(--ink); font-weight: 700; cursor: default; pointer-events: none; }
 .app-nav-item.app-nav-current::before { content: '● '; color: var(--accent); }
 

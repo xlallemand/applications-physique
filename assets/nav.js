@@ -11,6 +11,7 @@
          appName: 'Conversions',
          portalHref: '../index.html',
          portalLabel: 'Toutes les applications',
+         matiere: 'Outils mathématiques',   // facultatif : sinon déduit de data-matiere de <html>
          onHome: () => showHome(),
          onNavigate: (key) => showModule(key),
          groups: [
@@ -36,6 +37,9 @@
     if (html !== undefined) e.innerHTML = html;
     return e;
   }
+
+  // Nom affiché au-dessus du nom de l'application, selon data-matiere de <html>
+  const MATIERES = { maths: 'Outils mathématiques', chimie: 'Chimie', physique: 'Physique', college: 'Collège' };
 
   window.AppNav = {
     init: function (config) {
@@ -82,28 +86,33 @@
       // ----- Menu latéral -----
       menuEl = el('div', { class: 'app-navmenu' });
 
-      const header = el('div', { class: 'app-navmenu-header' });
-      header.appendChild(el('span', null, 'Navigation'));
-      const closeBtn = el('button', { type: 'button', 'aria-label': 'Fermer le menu' }, '&times;');
-      closeBtn.addEventListener('click', close);
-      header.appendChild(closeBtn);
-      menuEl.appendChild(header);
-
-      const portalItem = el('button', { type: 'button', class: 'app-nav-item app-nav-portal' },
-        config.portalLabel || 'Toutes les applications');
+      // Niveau 1 : bandeau sombre pour quitter l'application (retour au portail)
+      const band = el('div', { class: 'app-navmenu-portal' });
+      const portalItem = el('button', { type: 'button', class: 'app-nav-portal' },
+        '<span class="app-nav-portal-fleche" aria-hidden="true">&larr;</span>' +
+        '<span>' + (config.portalLabel || 'Toutes les applications') +
+        '<small>Quitter ' + config.appName + '</small></span>');
       portalItem.addEventListener('click', function () {
         close();
         window.location.href = config.portalHref;
       });
-      menuEl.appendChild(portalItem);
+      band.appendChild(portalItem);
+      const closeBtn = el('button', { type: 'button', class: 'app-nav-close', 'aria-label': 'Fermer le menu' }, '&times;');
+      closeBtn.addEventListener('click', close);
+      band.appendChild(closeBtn);
+      menuEl.appendChild(band);
+
+      // Niveau 2 : l'application (matière + nom), puis ses modules
+      const matiere = config.matiere || MATIERES[document.documentElement.getAttribute('data-matiere')] || '';
+      menuEl.appendChild(el('div', { class: 'app-navmenu-app' },
+        (matiere ? '<div class="app-navmenu-matiere">' + matiere + '</div>' : '') +
+        '<div class="app-navmenu-nom">' + config.appName + '</div>'));
 
       const homeItem = el('button', {
-        type: 'button', class: 'app-nav-item app-nav-home', 'data-nav-key': '__home__',
-      }, config.appName);
+        type: 'button', class: 'app-nav-item', 'data-nav-key': '__home__',
+      }, "Accueil de l'application");
       homeItem.addEventListener('click', function () { close(); config.onHome(); });
       menuEl.appendChild(homeItem);
-
-      menuEl.appendChild(el('div', { class: 'app-nav-divider' }));
 
       (config.groups || []).forEach(function (group) {
         if (group.title) {
