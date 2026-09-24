@@ -342,13 +342,22 @@
     }
 
     function renderPhase1() {
+      // reverseCols : n'affecte que l'ordre visuel des colonnes (pour
+      // rester cohérent avec l'exemple qui précède), sans changer le rôle
+      // de chaque grandeur dans le calcul (a1/b1/a2 gardent le même sens).
+      const headL = opts.reverseCols ? `${opts.labelB} (${opts.unitB})` : `${opts.labelA} (${opts.unitA})`;
+      const headR = opts.reverseCols ? `${opts.labelA} (${opts.unitA})` : `${opts.labelB} (${opts.unitB})`;
+      const row1L = opts.reverseCols ? ptSlot('b1_t') : ptSlot('a1_t');
+      const row1R = opts.reverseCols ? ptSlot('a1_t') : ptSlot('b1_t');
+      const row2L = opts.reverseCols ? '?' : ptSlot('a2_t');
+      const row2R = opts.reverseCols ? ptSlot('a2_t') : '?';
       root.innerHTML = `
         <div class="pt-palette">${chipsHtml('_t')}</div>
         <table class="pt-table">
-          <thead><tr><th>${opts.labelA} (${opts.unitA})</th><th>${opts.labelB} (${opts.unitB})</th></tr></thead>
+          <thead><tr><th>${headL}</th><th>${headR}</th></tr></thead>
           <tbody>
-            <tr><td>${ptSlot('a1_t')}</td><td>${ptSlot('b1_t')}</td></tr>
-            <tr><td>${ptSlot('a2_t')}</td><td>?</td></tr>
+            <tr><td>${row1L}</td><td>${row1R}</td></tr>
+            <tr><td>${row2L}</td><td>${row2R}</td></tr>
           </tbody>
         </table>
         <div class="text-center mt-3"><button type="button" class="btn-primary" id="ptfBtn1">Vérifier le tableau</button></div>
