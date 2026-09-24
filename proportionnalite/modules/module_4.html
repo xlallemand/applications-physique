@@ -51,13 +51,19 @@
       <div class="formula-box" style="font-size:1rem">? = (3600 &times; 52) / 25&thinsp;000 &asymp; 7,49 s</div>
     </div>
 
+    <div class="ex-card">
+      <span class="qtype-tag">À toi de vérifier — cas direct</span>
+      <p class="text-gray-700 mb-2">Un cycliste roule à 18 km/h. Place les grandeurs (déjà converties) au bon endroit dans le tableau, puis reporte-les dans la formule, pour préparer le calcul de la distance parcourue en 600 s (soit 10 min).</p>
+      <div id="flow1"></div>
+    </div>
+
     <div class="callout-accent mb-4">
       <p class="text-gray-700 mb-2"><b>Et pour une proportionnalité inverse ?</b> On construit le même genre de tableau, mais cette fois le produit d'une ligne complète est constant.</p>
       <div id="diagInverse"></div>
       <div class="formula-box">? = (a &times; b) / c</div>
       <div class="ex-card direct mt-3">
         <span class="qtype-tag qtype-inverse" style="background:#fee2e2;color:#7f1d1d">Exemple direct</span>
-        <p class="text-gray-700 mb-2"><b>À température fixée, un gaz occupe un volume de 2 L sous une pression de 6 bar. Quel volume occupe-t-il sous une pression de 4 bar ?</b></p>
+        <p class="text-gray-700 mb-2"><b>À température fixée, la pression d'un gaz et le volume qu'il occupe sont inversement proportionnels (si on le compresse en divisant son volume par 2, sa pression est multipliée par 2).</b></p>
         <div class="table-wrap"><table class="pt-table">
           <thead><tr><th>P (bar)</th><th>V (L)</th></tr></thead>
           <tbody>
@@ -70,14 +76,8 @@
     </div>
 
     <div class="ex-card">
-      <span class="qtype-tag">À toi de vérifier — cas direct</span>
-      <p class="text-gray-700 mb-2">Un cycliste roule à 18 km/h. Place les grandeurs (déjà converties) au bon endroit dans le tableau, puis reporte-les dans la formule, pour préparer le calcul de la durée nécessaire pour parcourir 75 m.</p>
-      <div id="flow1"></div>
-    </div>
-
-    <div class="ex-card">
       <span class="qtype-tag">À toi de vérifier — cas inverse</span>
-      <p class="text-gray-700 mb-2">Un gaz occupe 3 L sous une pression de 8 bar (à température fixée). Place les grandeurs dans le tableau, puis dans la formule, pour préparer le calcul du volume sous une pression de 12 bar.</p>
+      <p class="text-gray-700 mb-2">Un gaz occupe 3 L sous une pression de 8 bar (à température fixée). Place les grandeurs dans le tableau, puis dans la formule, pour préparer le calcul de la pression lorsque le volume vaut 4 L.</p>
       <div id="flow2"></div>
     </div>
   </div>
@@ -92,9 +92,16 @@
 
     <div class="ex-card direct">
       <span class="qtype-tag qtype-directe" style="background:#dcfce7;color:#14532d">Exemple direct</span>
-      <p class="text-gray-700 mb-2"><b>Une batterie a une énergie massique fixée : elle stocke 45 Wh pour une masse de 0,3 kg. Quelle masse de batterie faut-il pour stocker 150 Wh ?</b></p>
-      <p class="text-gray-700">Coefficient (énergie massique) : k = 45 / 0,3 = 150 Wh/kg.</p>
-      <div class="formula-box" style="font-size:1rem">m = 150 / 150 = 1 kg</div>
+      <p class="text-gray-700 mb-2"><b>Une batterie a une énergie massique fixée : elle stocke 60 Wh pour une masse de 0,4 kg. Quelle énergie peut stocker une batterie de 1,4 kg ?</b></p>
+      <div class="table-wrap"><table class="pt-table">
+        <thead><tr><th>m (kg)</th><th>E (Wh)</th></tr></thead>
+        <tbody>
+          <tr><td>0,4</td><td>60</td></tr>
+          <tr><td>1,4</td><td>?</td></tr>
+        </tbody>
+      </table></div>
+      <div class="formula-box" style="font-size:1rem">k = 60 / 0,4 = 150 Wh/kg</div>
+      <div class="formula-box" style="font-size:1rem">E = k &times; 1,4 = 150 &times; 1,4 = 210 Wh</div>
     </div>
 
     <div class="ex-card">
@@ -157,15 +164,15 @@ document.getElementById('diagInverse').innerHTML = ptCrossDiagramInverseSvg();
 
 /* ---- Check 1 : tableau, cas direct (cycliste) ---- */
 ptTableauFlow(document.getElementById('flow1'), {
-  labelA: 'd', unitA: 'm', labelB: 't', unitB: 's',
-  a1: { label: '18 000 m', value: 18000 }, b1: { label: '3 600 s', value: 3600 }, a2: { label: '75 m', value: 75 },
-  distractors: [{ id: 'x1', label: '18 m' }, { id: 'x2', label: '3 600 m' }],
+  labelA: 't', unitA: 's', labelB: 'd', unitB: 'm',
+  a1: { label: '3 600 s', value: 3600 }, b1: { label: '18 000 m', value: 18000 }, a2: { label: '600 s', value: 600 },
+  distractors: [{ id: 'x1', label: '3 600 m' }, { id: 'x2', label: '18 000 s' }],
 });
 
 /* ---- Check 2 : tableau, cas inverse (gaz) ---- */
 ptTableauFlow(document.getElementById('flow2'), {
-  labelA: 'P', unitA: 'bar', labelB: 'V', unitB: 'L',
-  a1: { label: '8 bar', value: 8 }, b1: { label: '3 L', value: 3 }, a2: { label: '12 bar', value: 12 },
+  labelA: 'V', unitA: 'L', labelB: 'P', unitB: 'bar',
+  a1: { label: '3 L', value: 3 }, b1: { label: '8 bar', value: 8 }, a2: { label: '4 L', value: 4 },
   distractors: [{ id: 'x1', label: '3 bar' }, { id: 'x2', label: '8 L' }],
   inverse: true,
 });
