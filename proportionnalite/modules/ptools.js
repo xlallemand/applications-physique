@@ -229,13 +229,13 @@
     let gridLines = '';
     for (let i = 0; i <= nx; i++) {
       const x = xMin + ((xMax - xMin) / nx) * i;
-      gridLines += `<line x1="${sx(x)}" y1="${padT}" x2="${sx(x)}" y2="${padT + plotH}" stroke="#e2e8f0" stroke-width="1"/>`;
-      gridLines += `<text x="${sx(x)}" y="${padT + plotH + 16}" font-size="9" fill="#64748b" text-anchor="middle">${ptFmt(x, 2)}</text>`;
+      gridLines += `<line x1="${sx(x)}" y1="${padT}" x2="${sx(x)}" y2="${padT + plotH}" stroke="var(--line)" stroke-width="1"/>`;
+      gridLines += `<text x="${sx(x)}" y="${padT + plotH + 16}" font-size="9" fill="var(--ink-3)" text-anchor="middle">${ptFmt(x, 2)}</text>`;
     }
     for (let i = 0; i <= ny; i++) {
       const y = yMin + ((yMax - yMin) / ny) * i;
-      gridLines += `<line x1="${padL}" y1="${sy(y)}" x2="${padL + plotW}" y2="${sy(y)}" stroke="#e2e8f0" stroke-width="1"/>`;
-      gridLines += `<text x="${padL - 6}" y="${sy(y) + 3}" font-size="9" fill="#64748b" text-anchor="end">${ptFmt(y, 2)}</text>`;
+      gridLines += `<line x1="${padL}" y1="${sy(y)}" x2="${padL + plotW}" y2="${sy(y)}" stroke="var(--line)" stroke-width="1"/>`;
+      gridLines += `<text x="${padL - 6}" y="${sy(y) + 3}" font-size="9" fill="var(--ink-3)" text-anchor="end">${ptFmt(y, 2)}</text>`;
     }
 
     let curve = '';
@@ -247,7 +247,7 @@
         const y = opts.curveFn(x);
         d += (i === 0 ? 'M' : 'L') + sx(x) + ',' + sy(Math.min(y, yMax));
       }
-      curve = `<path d="${d}" fill="none" stroke="#7c3aed" stroke-width="2.5"/>`;
+      curve = `<path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>`;
     } else {
       const b = opts.intercept || 0;
       const yAt = x => opts.k * x + b;
@@ -257,7 +257,7 @@
         if (yAt(x0) < yMin) x0 = xAt(yMin); else if (yAt(x0) > yMax) x0 = xAt(yMax);
         if (yAt(x1) < yMin) x1 = xAt(yMin); else if (yAt(x1) > yMax) x1 = xAt(yMax);
       }
-      curve = `<line x1="${sx(x0)}" y1="${sy(yAt(x0))}" x2="${sx(x1)}" y2="${sy(yAt(x1))}" stroke="#7c3aed" stroke-width="2.5"/>`;
+      curve = `<line x1="${sx(x0)}" y1="${sy(yAt(x0))}" x2="${sx(x1)}" y2="${sy(yAt(x1))}" stroke="var(--accent)" stroke-width="2.5"/>`;
     }
 
     let pts = '';
@@ -265,54 +265,54 @@
       const [ax, ay] = opts.pointA, [bx, by] = opts.pointB;
       pts += `<line x1="${sx(ax)}" y1="${sy(ay)}" x2="${sx(bx)}" y2="${sy(ay)}" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,3"/>`;
       pts += `<line x1="${sx(bx)}" y1="${sy(ay)}" x2="${sx(bx)}" y2="${sy(by)}" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,3"/>`;
-      pts += `<circle cx="${sx(ax)}" cy="${sy(ay)}" r="4.5" fill="#7c3aed"/><text x="${sx(ax)-9}" y="${sy(ay)-8}" font-size="11" font-weight="700" fill="#5b21b6">A</text>`;
-      pts += `<circle cx="${sx(bx)}" cy="${sy(by)}" r="4.5" fill="#7c3aed"/><text x="${sx(bx)+7}" y="${sy(by)-8}" font-size="11" font-weight="700" fill="#5b21b6">B</text>`;
+      pts += `<circle cx="${sx(ax)}" cy="${sy(ay)}" r="4.5" fill="var(--accent)"/><text x="${sx(ax)-9}" y="${sy(ay)-8}" font-size="11" font-weight="700" fill="var(--accent-ink)">A</text>`;
+      pts += `<circle cx="${sx(bx)}" cy="${sy(by)}" r="4.5" fill="var(--accent)"/><text x="${sx(bx)+7}" y="${sy(by)-8}" font-size="11" font-weight="700" fill="var(--accent-ink)">B</text>`;
     }
 
     return `<svg viewBox="0 0 ${W} ${H}" class="pt-graph">
       ${gridLines}
-      <line x1="${padL}" y1="${padT + plotH}" x2="${padL + plotW}" y2="${padT + plotH}" stroke="#334155" stroke-width="1.5"/>
-      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + plotH}" stroke="#334155" stroke-width="1.5"/>
+      <line x1="${padL}" y1="${padT + plotH}" x2="${padL + plotW}" y2="${padT + plotH}" stroke="var(--ink)" stroke-width="1.5"/>
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + plotH}" stroke="var(--ink)" stroke-width="1.5"/>
       ${curve}
       ${pts}
-      <text x="${padL + plotW}" y="${padT + plotH + 28}" font-size="10" fill="#334155" text-anchor="end" font-weight="700">${opts.xLabel}</text>
-      <text x="${padL - 34}" y="${padT + 8}" font-size="10" fill="#334155" text-anchor="start" font-weight="700">${opts.yLabel}</text>
+      <text x="${padL + plotW}" y="${padT + plotH + 28}" font-size="10" fill="var(--ink)" text-anchor="end" font-weight="700">${opts.xLabel}</text>
+      <text x="${padL - 34}" y="${padT + 8}" font-size="10" fill="var(--ink)" text-anchor="start" font-weight="700">${opts.yLabel}</text>
     </svg>`;
   }
 
   /* ---------- Schémas illustratifs du cours (tableau direct / inverse) ---------- */
   function ptCrossDiagramSvg() {
     return `<svg viewBox="0 0 260 150" class="pt-diagram">
-      <rect x="10" y="10" width="120" height="35" fill="#7c3aed"/>
-      <rect x="130" y="10" width="120" height="35" fill="#7c3aed"/>
+      <rect x="10" y="10" width="120" height="35" fill="var(--accent)"/>
+      <rect x="130" y="10" width="120" height="35" fill="var(--accent)"/>
       <text x="70" y="32" text-anchor="middle" fill="#fff" font-weight="700" font-size="14">Grandeur A</text>
       <text x="190" y="32" text-anchor="middle" fill="#fff" font-weight="700" font-size="14">Grandeur B</text>
-      <rect x="10" y="45" width="120" height="45" fill="#f5f3ff" stroke="#ddd6fe"/>
-      <rect x="130" y="45" width="120" height="45" fill="#f5f3ff" stroke="#ddd6fe"/>
-      <text x="70" y="73" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">a</text>
-      <text x="190" y="73" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">b</text>
-      <rect x="10" y="90" width="120" height="45" fill="#fff" stroke="#ddd6fe"/>
-      <rect x="130" y="90" width="120" height="45" fill="#fff" stroke="#ddd6fe"/>
-      <text x="70" y="118" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">c</text>
-      <text x="190" y="118" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">?</text>
+      <rect x="10" y="45" width="120" height="45" fill="var(--paper)" stroke="var(--line-strong)"/>
+      <rect x="130" y="45" width="120" height="45" fill="var(--paper)" stroke="var(--line-strong)"/>
+      <text x="70" y="73" text-anchor="middle" fill="var(--accent-ink)" font-weight="800" font-size="16">a</text>
+      <text x="190" y="73" text-anchor="middle" fill="var(--accent-ink)" font-weight="800" font-size="16">b</text>
+      <rect x="10" y="90" width="120" height="45" fill="#fff" stroke="var(--line-strong)"/>
+      <rect x="130" y="90" width="120" height="45" fill="#fff" stroke="var(--line-strong)"/>
+      <text x="70" y="118" text-anchor="middle" fill="var(--accent-ink)" font-weight="800" font-size="16">c</text>
+      <text x="190" y="118" text-anchor="middle" fill="var(--accent-ink)" font-weight="800" font-size="16">?</text>
       <path d="M 190,87 L 70,104 L 70,87 L 176,104 L 182,109" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ptArrow)"/>
       <defs><marker id="ptArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#f59e0b"/></marker></defs>
     </svg>`;
   }
   function ptCrossDiagramInverseSvg() {
     return `<svg viewBox="0 0 260 150" class="pt-diagram">
-      <rect x="10" y="10" width="120" height="35" fill="#7c3aed"/>
-      <rect x="130" y="10" width="120" height="35" fill="#7c3aed"/>
+      <rect x="10" y="10" width="120" height="35" fill="var(--accent)"/>
+      <rect x="130" y="10" width="120" height="35" fill="var(--accent)"/>
       <text x="70" y="32" text-anchor="middle" fill="#fff" font-weight="700" font-size="14">Grandeur A</text>
       <text x="190" y="32" text-anchor="middle" fill="#fff" font-weight="700" font-size="14">Grandeur B</text>
-      <rect x="10" y="45" width="120" height="45" fill="#f5f3ff" stroke="#ddd6fe"/>
-      <rect x="130" y="45" width="120" height="45" fill="#f5f3ff" stroke="#ddd6fe"/>
-      <text x="70" y="73" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">a</text>
-      <text x="190" y="73" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">b</text>
-      <rect x="10" y="90" width="120" height="45" fill="#fff" stroke="#ddd6fe"/>
-      <rect x="130" y="90" width="120" height="45" fill="#fff" stroke="#ddd6fe"/>
-      <text x="70" y="118" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">c</text>
-      <text x="190" y="118" text-anchor="middle" fill="#5b21b6" font-weight="800" font-size="16">?</text>
+      <rect x="10" y="45" width="120" height="45" fill="var(--paper)" stroke="var(--line-strong)"/>
+      <rect x="130" y="45" width="120" height="45" fill="var(--paper)" stroke="var(--line-strong)"/>
+      <text x="70" y="73" text-anchor="middle" fill="var(--accent-ink)" font-weight="800" font-size="16">a</text>
+      <text x="190" y="73" text-anchor="middle" fill="var(--accent-ink)" font-weight="800" font-size="16">b</text>
+      <rect x="10" y="90" width="120" height="45" fill="#fff" stroke="var(--line-strong)"/>
+      <rect x="130" y="90" width="120" height="45" fill="#fff" stroke="var(--line-strong)"/>
+      <text x="70" y="118" text-anchor="middle" fill="var(--accent-ink)" font-weight="800" font-size="16">c</text>
+      <text x="190" y="118" text-anchor="middle" fill="var(--accent-ink)" font-weight="800" font-size="16">?</text>
       <path d="M 88 68 L 174 68" fill="none" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#ptArrow2)"/>
       <text x="130" y="60" text-anchor="middle" fill="#b45309" font-weight="800" font-size="13">&times;</text>
       <path d="M 205 90 C 245 105, 165 118, 205 112" fill="none" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#ptArrow2)"/>
