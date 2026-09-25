@@ -1,0 +1,135 @@
+/* ============================================================
+   Styles de l'application « Lecture graphique » (graphique, règle
+   virtuelle, étiquettes à glisser, tableau de proportionnalité).
+   Complète le thème commun assets/theme.css.
+   ============================================================ */
+
+body { font-family: var(--font-sans); }
+.lg-page { max-width: 56rem; margin: 0 auto; padding: 24px 16px 64px; }
+@media (max-width: 480px) { .lg-page { padding: 16px 12px 56px; } }
+
+.lg-card { background: var(--sheet); border: 1px solid var(--line); border-radius: 22px; padding: 22px; margin-bottom: 16px; }
+@media (max-width: 480px) { .lg-card { padding: 14px; border-radius: 18px; } }
+
+/* ---------- En-tête de quiz ---------- */
+.lg-badge {
+  display: inline-block; background: var(--cle-bg); color: var(--accent-ink);
+  font-size: .75rem; font-weight: 800; padding: 4px 12px; border-radius: 999px; letter-spacing: .04em; margin-bottom: 8px;
+}
+.lg-titre { font-size: 1.5rem; font-weight: 800; letter-spacing: -.02em; margin: 0 0 4px; color: var(--ink); }
+.lg-meta { font-size: .8rem; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+.lg-meta b { color: var(--accent); }
+
+/* ---------- Énoncé ---------- */
+.lg-contexte { color: var(--ink); font-size: 1.02rem; line-height: 1.55; margin: 0 0 10px; }
+.lg-cible {
+  display: flex; gap: 10px; align-items: flex-start; background: #fff4e3; border-radius: 16px;
+  padding: 12px 14px; margin: 0 0 12px; color: var(--ink); font-size: .95rem; line-height: 1.45;
+}
+.lg-cible-icone { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: #e8890c; color: #fff; display: grid; place-items: center; font-weight: 800; font-size: .85rem; }
+.lg-cible b { color: #9a5305; }
+
+/* ---------- Graphique + règle ---------- */
+.lg-graph-box { border: 1.5px solid var(--line); border-radius: 14px; overflow: hidden; background: #fff; }
+.lg-graph-box svg { display: block; width: 100%; height: auto; -webkit-user-select: none; user-select: none; }
+.lg-grip { cursor: grab; touch-action: none; }
+.lg-grip:active { cursor: grabbing; }
+.lg-paysage { display: none; font-size: .82rem; color: var(--ink-3); margin: 6px 2px 0; }
+@media (max-width: 560px) and (orientation: portrait) { .lg-paysage { display: block; } }
+
+.lg-outils { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+.lg-outils .btn-small { min-height: 40px; }
+.lg-outils .lg-fin { min-width: 44px; font-size: 1rem; }
+.lg-lecture { margin-left: auto; font-weight: 800; color: var(--accent-ink); font-size: 1.05rem; }
+.lg-aide-regle { font-size: .85rem; color: var(--ink-2); margin: 8px 2px 0; line-height: 1.45; }
+
+/* ---------- Étapes ---------- */
+.lg-etape { border-top: 2px dashed var(--paper-3); margin-top: 18px; padding-top: 14px; }
+.lg-etape-titre { font-size: 1.05rem; font-weight: 800; color: var(--accent-ink); margin: 0 0 6px; }
+.lg-etape p { color: var(--ink-2); font-size: .92rem; margin: 0 0 8px; line-height: 1.45; }
+
+.lg-saisie { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 0 4px; }
+.lg-saisie label { font-weight: 700; font-size: .9rem; color: var(--ink); }
+.lg-input {
+  width: 110px; height: 42px; border: 1.5px solid var(--paper-3); border-radius: 10px; padding: 0 10px;
+  font: inherit; font-weight: 700; font-size: 1rem; color: var(--ink); background: #fff;
+}
+.lg-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--cle-bg); }
+
+/* ---------- Étiquettes et palettes ---------- */
+.lg-palettes { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 10px 0; }
+.lg-palette {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 52px; padding: 8px;
+  background: var(--paper); border: 1.5px dashed var(--line-strong); border-radius: 12px;
+}
+.lg-palette-titre { width: 100%; font-size: .75rem; font-weight: 700; color: var(--ink-3); }
+.lg-palette-vide { font-size: .82rem; color: var(--ink-3); font-style: italic; }
+.lg-chip {
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  min-height: 40px; padding: 6px 12px; background: #fff; border: 2px solid var(--accent);
+  border-radius: 10px; font-weight: 800; color: var(--accent-ink); font-family: var(--font-sans); font-size: .95rem;
+  cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none;
+}
+.lg-chip.dragging { opacity: .35; }
+.lg-chip-mesure::before { content: '📏'; font-size: .8rem; }
+.lg-chip-unite { border-color: var(--ink-2); color: var(--ink); background: #fff; }
+
+.lg-slot {
+  display: inline-flex; align-items: center; justify-content: center; vertical-align: middle;
+  min-width: 70px; min-height: 42px; padding: 3px; margin: 0 2px;
+  border: 2px dashed var(--ink-3); border-radius: 10px; background: #fff; transition: background .15s, border-color .15s;
+}
+.lg-slot-unite { min-width: 58px; }
+.lg-slot-ph { color: var(--ink-3); font-weight: 700; padding: 0 6px; }
+.lg-slot-over { background: var(--cle-bg); border-color: var(--accent); }
+.lg-slot:has(.lg-chip) { border-style: solid; border-color: var(--paper-3); }
+.lg-slot .lg-chip { margin: 0; }
+.lg-slot-ok { border-color: var(--success) !important; background: var(--success-bg) !important; }
+.lg-slot-bad { border-color: var(--danger) !important; background: var(--danger-bg) !important; animation: lg-shake .4s ease; }
+@keyframes lg-shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 60%{transform:translateX(6px)} }
+
+/* ---------- Tableau de proportionnalité ---------- */
+.lg-table-wrap { margin: 12px 0; }
+.lg-table { width: 100%; max-width: 460px; table-layout: fixed; border-collapse: separate; border-spacing: 0; margin: 0 auto; border-radius: 12px; overflow: hidden; border: 1.5px solid var(--paper-3); }
+.lg-table col.lg-col-titre { width: 26%; }
+.lg-table th, .lg-table td { padding: 8px 6px; text-align: center; border-bottom: 1.5px solid var(--paper-3); border-left: 1.5px solid var(--paper-3); }
+.lg-table tr:last-child td, .lg-table tr:last-child th { border-bottom: none; }
+.lg-table th:first-child, .lg-table td:first-child { border-left: none; }
+.lg-table thead th { background: var(--accent); color: #fff; font-weight: 800; font-size: .88rem; line-height: 1.2; }
+.lg-table thead th .lg-slot { background: rgba(255,255,255,.95); margin-top: 4px; }
+.lg-table tbody th { background: var(--paper); font-size: .8rem; font-weight: 700; color: var(--ink-2); text-align: left; overflow-wrap: anywhere; }
+.lg-table td.lg-inconnue { font-weight: 800; font-size: 1.2rem; color: var(--accent-ink); }
+@media (max-width: 480px) {
+  .lg-table th, .lg-table td { padding: 6px 3px; }
+  .lg-table tbody th { font-size: .72rem; }
+  .lg-slot { min-width: 56px; }
+  .lg-graph-box { margin: 0 -6px; }
+}
+
+/* ---------- Formules ---------- */
+.lg-formule { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; font-size: 1.15rem; font-weight: 800; color: var(--ink); margin: 12px 0; }
+.lg-frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 4px; }
+.lg-frac-ligne { width: 100%; min-width: 150px; height: 2px; background: var(--ink-2); margin: 4px 0; }
+.lg-frac-haut { display: flex; align-items: center; gap: 2px; }
+.lg-egal { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+.lg-live { color: var(--ink-3); min-width: 40px; text-align: center; }
+.lg-live.ok { color: var(--accent-ink); }
+
+/* ---------- Messages ---------- */
+.lg-msg { margin-top: 10px; font-weight: 700; font-size: .95rem; }
+.lg-msg ul { margin: 6px 0 0 18px; padding: 0; list-style: disc; font-weight: 500; }
+.lg-msg-ok { color: var(--success-text); }
+.lg-msg-ko { color: var(--danger-text); }
+.lg-info { display: flex; gap: 10px; background: var(--cle-bg); border-radius: 16px; padding: 12px 14px; margin-top: 10px; color: var(--ink); font-size: .92rem; line-height: 1.45; }
+.lg-info-icone { flex-shrink: 0; font-size: 1.05rem; }
+.lg-resultat { background: var(--success-bg); border-radius: 16px; padding: 14px 16px; margin-top: 12px; color: var(--ink); }
+.lg-resultat-valeur { font-size: 1.3rem; font-weight: 800; color: var(--success-text); }
+.lg-actions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-top: 14px; }
+.lg-actions .btn-primary { margin-left: auto; }
+
+/* ---------- Écran de fin ---------- */
+.lg-recap { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 6px; margin-top: 10px; }
+.lg-recap div { background: var(--paper); border-radius: 8px; padding: 5px 2px; text-align: center; font-size: .72rem; color: var(--ink-2); }
+.lg-recap b { display: block; font-size: .9rem; color: var(--ink); }
+.lg-confetti { position: fixed; top: -20px; width: 9px; height: 14px; z-index: 9999; pointer-events: none; animation: lg-chute linear forwards; }
+@keyframes lg-chute { to { top: 110vh; transform: rotate(720deg); } }

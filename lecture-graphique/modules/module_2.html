@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="maths">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : Entraînement — Lecture graphique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="lgtools.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/numpad.js"></script>
+<script src="lgtools.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="lg-page" id="app"></div>
+
+<script>
+/* ---------- Banque de questions ---------- */
+const bank = [
+  { type: 'periode',
+    contexte: "Un générateur basse fréquence (GBF) alimente un haut-parleur. On visualise la tension u à ses bornes en fonction du temps t.",
+    cible: "À déterminer : la <b>période T</b> de la tension, c'est-à-dire la durée d'un motif qui se répète (repérée en <b>orange</b> sur le graphique, entre deux maximums).",
+    grandeur: { symbole: 'T', ligne: 'Période(s)',
+      erreurMesure: "Ta mesure de la grandeur ne correspond pas à une ou plusieurs périodes : place le 0 de la règle et le curseur sur deux points équivalents du signal (par exemple deux maximums)." },
+    axeX: { min: 0, max: 40, pas: 5, nom: 't', unite: 'ms', libelle: 'Durée' },
+    axeY: { min: -5, max: 5, pas: 1, nom: 'u', unite: 'V' },
+    signal: { forme: 'sinus', periode: 11.6, ampl: 3.2, phase: 1.3 },
+    valeurExacte: 11.6,
+    unites: ['cm', 'mm', 'ms', 's', 'V'] },
+];
+
+let idx = 0, score = 0, recap = [], question = null;
+const MAX_Q = 3;
+
+function entete() {
+  const pct = Math.round(idx / bank.length * 100);
+  return `<div class="lg-card">
+      <span class="lg-badge">MODULE 2</span>
+      <h2 class="lg-titre">Entraînement</h2>
+      <p class="lg-meta">Question ${idx + 1}/${bank.length} · Score : <b>${score} pt${score > 1 ? 's' : ''}</b></p>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>`;
+}
+
+function intro() {
+  document.getElementById('app').innerHTML = `<div class="lg-card">
+      <span class="lg-badge">MODULE 2</span>
+      <h2 class="lg-titre">Entraînement</h2>
+      <p class="lg-contexte">Pour chaque graphique : mesure l'échelle et la grandeur recherchée avec la règle, remplis le tableau de proportionnalité, puis construis le calcul. Chaque question rapporte 3 points (tableau, calcul, unité) si tout est juste du premier coup.</p>
+      <button class="btn-primary" onclick="demarrer()">Commencer →</button>
+    </div>`;
+}
+function demarrer() { idx = 0; score = 0; recap = []; afficher(); }
+
+function afficher() {
+  if (question) { question.detruire(); question = null; }
+  if (idx >= bank.length) return fin();
+  document.getElementById('app').innerHTML = entete() + `<div class="lg-card" id="qCard"></div>`;
+  window.scrollTo(0, 0);
+  question = LG.poserQuestion(document.getElementById('qCard'), bank[idx], {
+    onFini: (p, m) => { score += p; recap.push({ n: idx + 1, p: p, m: m }); document.querySelector('.lg-meta b').textContent = score + ' pt' + (score > 1 ? 's' : ''); },
+    onSuivant: () => { idx++; afficher(); },
+    onPasser: () => { recap.push({ n: idx + 1, p: 0, m: MAX_Q }); idx++; afficher(); },
+  });
+}
+
+function fin() {
+  const max = bank.length * MAX_Q, pct = Math.round(score / max * 100);
+  if (score === max) LG.confettis();
+  document.getElementById('app').innerHTML = `<div class="lg-card" style="text-align:center">
+      <h2 class="lg-titre">Entraînement terminé !</h2>
+      ${score === max ? '<p style="font-weight:800;color:var(--accent-ink)">🏆 Sans-faute !</p>' : ''}
+      <p class="lg-contexte">Score : ${score} / ${max} points (${pct} %)</p>
+      <button class="btn-primary" onclick="demarrer()">↺ Recommencer</button>
+      <div class="lg-recap">${recap.map(r => `<div>Q${r.n}<b>${r.p}/${r.m}</b></div>`).join('')}</div>
+    </div>`;
+}
+
+// pavé numérique masqué par défaut
+setNumpadPref(false);
+intro();
+
+const nav = AppNav.init({
+  appName: 'Lecture graphique', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
+  onHome: () => { window.location.href = '../index.html'; },
+  onNavigate: (key) => { window.location.href = key + '.html'; },
+  groups: [
+    { title: 'Modules', items: [
+      { key: 'module_1', label: 'Module 1 : La méthode' },
+      { key: 'module_2', label: 'Module 2 : Entraînement' },
+      { key: 'module_3', label: 'Module 3 : Entraînement +' },
+    ]},
+  ],
+});
+nav.setActive('module_2');
+nav.setTitle('Module 2 : Entraînement');
+</script>
+</body>
+</html>
