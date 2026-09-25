@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-matiere="college">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,16 +7,17 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="../assets/theme.css">
     <script src="../assets/nav.js"></script>
+<script src="../assets/hero.js"></script>
     <script src="../assets/numpad.js"></script>
     <style>
         :root {
-            --app-accent-50:  #fff1f2;
-            --app-accent-100: #ffe4e6;
-            --app-accent-200: #fecdd3;
-            --app-accent-400: #fb7185;
-            --app-accent-600: #e11d48;
-            --app-accent-700: #be123c;
-            --app-accent-800: #9f1239;
+            --app-accent-50:  var(--paper);
+            --app-accent-100: var(--paper-2);
+            --app-accent-200: var(--cle-bg);
+            --app-accent-400: var(--line-strong);
+            --app-accent-600: var(--accent);
+            --app-accent-700: var(--accent);
+            --app-accent-800: var(--accent-ink);
         }
         .btn-module { transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
         .btn-module:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
@@ -42,6 +43,9 @@
         .frac-input-wrap input { width: 72px; text-align: center; font-weight: 700; padding: 5px 4px; }
         .frac-input-wrap .frac-bar { border-bottom: 2.5px solid currentColor; width: 100%; margin: 3px 0; }
 
+        /* ── Toutes les zones de saisie (cours et entraînements) : même arrondi que dans Conversions */
+        #moduleContainer input[type="text"] { border-radius: 10px; }
+
         /* ── Liste des modules sur l'accueil ─────── */
         .module-card-actions .btn-primary,
         .module-card-actions .btn-secondary { font-size: .9rem; padding: 10px 20px; }
@@ -54,9 +58,15 @@
 
 <div id="app" class="container mx-auto px-4 py-8 max-w-4xl">
 
-    <header id="mainHeader" class="text-center mb-8">
-        <h1 class="text-4xl md:text-5xl font-bold text-rose-900 mb-2">Les Fractions</h1>
-        <p class="text-lg text-rose-700">Apprends et entraîne-toi !</p>
+    <!-- En-tête illustré (image en parallaxe, voir assets/hero.js) -->
+    <header id="mainHeader" class="app-hero" data-dessin="fractions" style="margin-top:-2rem">
+      <canvas aria-hidden="true"></canvas>
+      <div class="app-hero-in">
+        <p class="app-hero-kicker">Collège</p>
+        <h1>Les fractions</h1>
+        <p class="app-hero-lead">Apprends et entraîne-toi !</p>
+      </div>
+      <div class="app-hero-edge"></div>
     </header>
 
     <div id="menu" class="module-list mb-8">
@@ -179,7 +189,7 @@ let currentPage = 'home'; // 'home' | 'course-1' … 'course-4' | 'training-1' �
 const MODULE_THEMES = {
     1: { color:'blue',   title:'Simplification',                                total:15 },
     2: { color:'purple', title:'Multiplication, inverse et division',           total:15 },
-    3: { color:'green',  title:'Addition et soustraction (même dénominateur)',  total:15 },
+    3: { color:'blue',   title:'Addition et soustraction (même dénominateur)',  total:15 },
     4: { color:'orange', title:'Addition et soustraction (dénominateurs différents)', total:15 },
     5: { color:'rose',   title:'Toutes les notions',                            total:20 },
 };
@@ -250,7 +260,7 @@ function hideMenu() {
 }
 function backToMenu() {
     document.getElementById('moduleContainer').innerHTML = '';
-    document.getElementById('mainHeader').style.display = 'block';
+    document.getElementById('mainHeader').style.display = '';
     document.getElementById('menu').style.display = '';
     setTopBarTitle(null);
     currentPage = 'home';
@@ -328,7 +338,7 @@ function getCourse1() {
         <div class="mb-8">
             <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">1. Qu'est-ce qu'une fraction irréductible ?</h3>
             <div class="bg-blue-50 rounded-lg p-6 mb-4">
-                <p class="text-lg mb-3">Une fraction ${F('a','b')} est <strong>irréductible</strong> quand le numérateur <strong>a</strong> et le dénominateur <strong>b</strong> n'ont <strong>aucun diviseur commun autre que 1</strong>.</p>
+                <p class="cle text-lg mb-3">Une fraction ${F('a','b')} est <strong>irréductible</strong> quand le numérateur <strong>a</strong> et le dénominateur <strong>b</strong> n'ont <strong>aucun diviseur commun autre que 1</strong>.</p>
                 <p class="text-lg mb-3">Pour simplifier une fraction, on divise le numérateur et le dénominateur par leur <strong>PGCD</strong> (Plus Grand Commun Diviseur).</p>
                 <div class="bg-blue-200 rounded-lg p-4 text-center text-xl font-bold mb-2">
                     ${F('a','b')} = ${F('a ÷ PGCD(a,b)','b ÷ PGCD(a,b)')}
@@ -338,20 +348,20 @@ function getCourse1() {
 
         <div class="mb-8">
             <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">2. Exemples</h3>
-            <div class="bg-white border-2 border-blue-200 rounded-lg p-5 mb-4 space-y-4">
-                <div class="bg-blue-50 rounded p-4">
+            <div class="bg-blue-50 rounded-lg p-6 mb-4 space-y-4">
+                <div class="bg-white rounded p-4">
                     <p class="font-semibold text-blue-900 mb-1">Exemple 1 :</p>
                     <p>Simplifier ${F(6,9)}.</p>
                     <p>PGCD(6, 9) = 3</p>
                     <p>${F(6,9)} = ${F('6 ÷ 3','9 ÷ 3')} = ${F(2,3)} &nbsp; ✓ irréductible</p>
                 </div>
-                <div class="bg-blue-50 rounded p-4">
+                <div class="bg-white rounded p-4">
                     <p class="font-semibold text-blue-900 mb-1">Exemple 2 :</p>
                     <p>Simplifier ${F(18,24)}.</p>
                     <p>PGCD(18, 24) = 6</p>
                     <p>${F(18,24)} = ${F('18 ÷ 6','24 ÷ 6')} = ${F(3,4)} &nbsp; ✓ irréductible</p>
                 </div>
-                <div class="bg-blue-50 rounded p-4">
+                <div class="bg-white rounded p-4">
                     <p class="font-semibold text-blue-900 mb-1">Exemple 3 :</p>
                     <p>Simplifier ${F(15,25)}.</p>
                     <p>PGCD(15, 25) = 5</p>
@@ -363,7 +373,7 @@ function getCourse1() {
         <div class="mb-8">
             <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">3. Comment trouver le PGCD ?</h3>
             <div class="bg-indigo-50 rounded-lg p-6 mb-4">
-                <p class="mb-3"><strong>Méthode des diviseurs communs :</strong> lister les diviseurs de chaque nombre, puis prendre le plus grand commun.</p>
+                <p class="cle mb-3"><strong>Méthode des diviseurs communs :</strong> lister les diviseurs de chaque nombre, puis prendre le plus grand commun.</p>
                 <div class="bg-white rounded p-4 mb-3">
                     <p>Diviseurs de 12 : 1, 2, 3, <strong>4</strong>, 6, 12</p>
                     <p>Diviseurs de 8 : 1, 2, <strong>4</strong>, 8</p>
@@ -499,12 +509,12 @@ function getCourse2() {
             </div>
         </div>
 
-        <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-5 mb-8">
-            <p class="font-bold text-gray-800 mb-3 text-lg">Récapitulatif :</p>
+        <div class="cle mb-8">
+            <p class="cle-titre mb-3 text-lg">Récapitulatif :</p>
             <div class="grid md:grid-cols-3 gap-3 text-gray-700">
-                <div class="bg-white rounded p-3 border border-purple-300"><strong>Multiplication :</strong><br>${F('a','b')} × ${F('c','d')} = ${F('a×c','b×d')}</div>
-                <div class="bg-white rounded p-3 border border-pink-300"><strong>Inverse :</strong><br>Inverse de ${F('a','b')} = ${F('b','a')}</div>
-                <div class="bg-white rounded p-3 border border-violet-300"><strong>Division :</strong><br>${F('a','b')} ÷ ${F('c','d')} = ${F('a×d','b×c')}</div>
+                <div class="bg-white rounded p-3"><strong>Multiplication :</strong><br>${F('a','b')} × ${F('c','d')} = ${F('a×c','b×d')}</div>
+                <div class="bg-white rounded p-3"><strong>Inverse :</strong><br>Inverse de ${F('a','b')} = ${F('b','a')}</div>
+                <div class="bg-white rounded p-3"><strong>Division :</strong><br>${F('a','b')} ÷ ${F('c','d')} = ${F('a×d','b×c')}</div>
             </div>
         </div>
 
@@ -538,14 +548,14 @@ function getCourse3() {
 
         <div class="mb-8">
             <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-green-300 pb-2">2. Exemples d'addition</h3>
-            <div class="bg-white border-2 border-green-200 rounded-lg p-5 space-y-4">
-                <div class="bg-green-50 rounded p-4">
+            <div class="bg-blue-50 rounded-lg p-6 space-y-4">
+                <div class="bg-white rounded p-4">
                     <p>${F(3,8)} + ${F(2,8)} = ${F('3 + 2','8')} = ${F(5,8)}</p>
                 </div>
-                <div class="bg-green-50 rounded p-4">
+                <div class="bg-white rounded p-4">
                     <p>${F(1,5)} + ${F(3,5)} = ${F('1 + 3','5')} = ${F(4,5)}</p>
                 </div>
-                <div class="bg-green-50 rounded p-4">
+                <div class="bg-white rounded p-4">
                     <p>${F(5,6)} + ${F(1,6)} = ${F('5 + 1','6')} = ${F(6,6)} = 1 <span class="text-gray-500 text-sm">(on simplifie !)</span></p>
                 </div>
             </div>
@@ -563,14 +573,14 @@ function getCourse3() {
 
         <div class="mb-8">
             <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-green-300 pb-2">3. Exemples de soustraction</h3>
-            <div class="bg-white border-2 border-green-200 rounded-lg p-5 space-y-4">
-                <div class="bg-teal-50 rounded p-4">
+            <div class="bg-blue-50 rounded-lg p-6 space-y-4">
+                <div class="bg-white rounded p-4">
                     <p>${F(7,10)} − ${F(3,10)} = ${F('7 − 3','10')} = ${F(4,10)} = ${F(2,5)} <span class="text-gray-500 text-sm">(simplification par 2)</span></p>
                 </div>
-                <div class="bg-teal-50 rounded p-4">
+                <div class="bg-white rounded p-4">
                     <p>${F(5,7)} − ${F(2,7)} = ${F('5 − 2','7')} = ${F(3,7)}</p>
                 </div>
-                <div class="bg-teal-50 rounded p-4">
+                <div class="bg-white rounded p-4">
                     <p>${F(9,12)} − ${F(3,12)} = ${F('9 − 3','12')} = ${F(6,12)} = ${F(1,2)} <span class="text-gray-500 text-sm">(simplification par 6)</span></p>
                 </div>
             </div>
@@ -605,26 +615,26 @@ function getCourse4() {
             <h3 class="text-2xl font-bold text-orange-800 mb-4 border-b-2 border-orange-300 pb-2">1. Le principe : trouver un dénominateur commun</h3>
             <div class="bg-orange-50 rounded-lg p-6 mb-4">
                 <p class="text-lg mb-3">Pour additionner ou soustraire des fractions avec des dénominateurs <strong>différents</strong>, on doit d'abord les mettre <strong>au même dénominateur</strong>.</p>
-                <ol class="list-decimal ml-6 space-y-2 text-gray-800">
+                <div class="cle"><ol class="list-decimal ml-6 space-y-2">
                     <li>Trouver le <strong>dénominateur commun</strong> (souvent le PPCM des deux dénominateurs)</li>
                     <li>Transformer chaque fraction en fraction équivalente avec ce dénominateur commun</li>
                     <li>Additionner ou soustraire les numérateurs</li>
                     <li>Simplifier si possible</li>
-                </ol>
+                </ol></div>
             </div>
         </div>
 
         <div class="mb-8">
             <h3 class="text-2xl font-bold text-orange-800 mb-4 border-b-2 border-orange-300 pb-2">2. Cas simple : un dénominateur est multiple de l'autre</h3>
-            <div class="bg-white border-2 border-orange-200 rounded-lg p-5 space-y-4">
-                <div class="bg-orange-50 rounded p-4">
+            <div class="bg-blue-50 rounded-lg p-6 space-y-4">
+                <div class="bg-white rounded p-4">
                     <p class="font-semibold text-orange-900 mb-2">Exemple :</p>
                     <p>${F(1,3)} + ${F(1,6)}</p>
                     <p>6 est multiple de 3 → on met tout au dénominateur 6</p>
                     <p>${F(1,3)} = ${F('1 × 2','3 × 2')} = ${F(2,6)}</p>
                     <p>Donc : ${F(2,6)} + ${F(1,6)} = ${F('2 + 1','6')} = ${F(3,6)} = ${F(1,2)}</p>
                 </div>
-                <div class="bg-orange-50 rounded p-4">
+                <div class="bg-white rounded p-4">
                     <p class="font-semibold text-orange-900 mb-2">Exemple :</p>
                     <p>${F(3,4)} − ${F(1,8)}</p>
                     <p>8 est multiple de 4 → dénominateur commun = 8</p>
@@ -647,7 +657,7 @@ function getCourse4() {
         <div class="mb-8">
             <h3 class="text-2xl font-bold text-orange-800 mb-4 border-b-2 border-orange-300 pb-2">3. Cas général : utiliser le PPCM</h3>
             <div class="bg-amber-50 rounded-lg p-6 mb-4">
-                <p class="mb-3">Le <strong>PPCM</strong> (Plus Petit Commun Multiple) est le plus petit entier divisible par les deux dénominateurs.</p>
+                <p class="cle mb-3">Le <strong>PPCM</strong> (Plus Petit Commun Multiple) est le plus petit entier divisible par les deux dénominateurs.</p>
                 <div class="bg-white rounded p-4 space-y-4">
                     <div>
                         <p class="font-semibold text-amber-900 mb-2">Exemple : ${F(2,3)} + ${F(3,4)}</p>
@@ -677,11 +687,11 @@ function getCourse4() {
             </div>
         </div>
 
-        <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-5 mb-8">
-            <p class="font-bold text-gray-800 mb-3 text-lg">Récapitulatif :</p>
+        <div class="cle mb-8">
+            <p class="cle-titre mb-3 text-lg">Récapitulatif :</p>
             <div class="grid md:grid-cols-2 gap-3 text-gray-700">
-                <div class="bg-white rounded p-3 border border-orange-300"><strong>Même dénominateur :</strong><br>${F('a','d')} ± ${F('b','d')} = ${F('a ± b','d')}</div>
-                <div class="bg-white rounded p-3 border border-amber-300"><strong>Dénominateurs différents :</strong><br>On met au dénominateur PPCM, puis on ± les numérateurs</div>
+                <div class="bg-white rounded p-3"><strong>Même dénominateur :</strong><br>${F('a','d')} ± ${F('b','d')} = ${F('a ± b','d')}</div>
+                <div class="bg-white rounded p-3"><strong>Dénominateurs différents :</strong><br>On met au dénominateur PPCM, puis on ± les numérateurs</div>
             </div>
         </div>
 

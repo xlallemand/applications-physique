@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-matiere="maths">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,15 +10,16 @@
     <script src="../assets/numpad.js"></script>
     <script src="../assets/dragdrop.js"></script>
     <script src="../assets/selfcheck.js"></script>
+    <script src="../assets/hero.js"></script>
     <style>
         :root {
-            --app-accent-50:  #eff6ff;
-            --app-accent-100: #dbeafe;
-            --app-accent-200: #bfdbfe;
-            --app-accent-400: #60a5fa;
-            --app-accent-600: #2563eb;
-            --app-accent-700: #1d4ed8;
-            --app-accent-800: #1e3a8a;
+            --app-accent-50:  var(--paper);
+            --app-accent-100: var(--paper-2);
+            --app-accent-200: var(--cle-bg);
+            --app-accent-400: var(--line-strong);
+            --app-accent-600: var(--accent);
+            --app-accent-700: var(--accent);
+            --app-accent-800: var(--ink);
         }
         .btn-module { transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
         .btn-module:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
@@ -29,7 +30,7 @@
         .draggable { cursor: move; user-select: none; touch-action: none; transition: box-shadow .15s; }
         .draggable.dragging { opacity: .4; }
         .drop-zone-h { min-height:64px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; transition: all 0.3s; }
-        .drop-zone-h.drag-over { background-color:#dbeafe; border-color:#3b82f6; }
+        .drop-zone-h.drag-over { background-color:var(--paper-2); border-color:var(--accent); }
         .source-items-h { display:flex; flex-wrap:wrap; gap:8px; min-height:64px; }
         input[type="text"], input[type="number"] { font-size:16px; }
         .fraction { display:inline-block; text-align:center; vertical-align:middle; margin:0 4px; }
@@ -50,6 +51,8 @@
             margin-top: -10px; padding: 4px 8px !important;
         }
         sup input { width:80px; font-size:13px; vertical-align: baseline; }
+        /* ── Toutes les zones de saisie (cours et entraînements) : même arrondi que dans Conversions */
+        #moduleContainer input[type="text"] { border-radius: 10px; }
 
         /* ── Pavé numérique ─────────────────────── */
         /* ── Liste des modules sur l'accueil ─────── */
@@ -62,12 +65,18 @@
 <!-- ═══════ NAVIGATION ═══════ -->
 <div id="app-nav"></div>
 
-<div id="app" class="container mx-auto px-4 py-8 max-w-4xl">
+<!-- En-tête illustré (papier logarithmique en parallaxe, voir assets/hero.js) -->
+<header id="mainHeader" class="app-hero" data-dessin="log">
+    <canvas aria-hidden="true"></canvas>
+    <div class="app-hero-in">
+        <p class="app-hero-kicker">Outils mathématiques</p>
+        <h1>Puissances de 10</h1>
+        <p class="app-hero-lead">Apprends et entraîne-toi !</p>
+    </div>
+    <div class="app-hero-edge"></div>
+</header>
 
-    <header id="mainHeader" class="text-center mb-8">
-        <h1 class="text-4xl md:text-5xl font-bold text-indigo-900 mb-2">Puissances de 10</h1>
-        <p class="text-lg text-indigo-700">Apprends et entraîne-toi !</p>
-    </header>
+<div id="app" class="container mx-auto px-4 py-8 max-w-4xl">
 
     <div id="menu" class="module-list mb-8">
         <div class="module-card">
@@ -179,10 +188,10 @@ function updateActiveMenuItem() {
 // question, glisser-déposer, écran de résultat)
 // ═══════════════════════════════════════════════════════════════
 const TRAINING_THEMES = {
-    1: { color:'blue',   title:'Définitions et écritures' },
-    2: { color:'purple', title:'Écriture scientifique'    },
-    3: { color:'green',  title:'Opérations'               },
-    4: { color:'orange', title:'Toutes les notions — Niveau avancé' },
+    1: { color:'blue', title:'Définitions et écritures' },
+    2: { color:'blue', title:'Écriture scientifique'    },
+    3: { color:'blue', title:'Opérations'               },
+    4: { color:'blue', title:'Toutes les notions — Niveau avancé' },
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -208,8 +217,8 @@ function hideMenu() {
 }
 function backToMenu() {
     document.getElementById('moduleContainer').innerHTML = '';
-    document.getElementById('mainHeader').style.display = 'block';
-    document.getElementById('menu').style.display = 'block';
+    document.getElementById('mainHeader').style.display = '';
+    document.getElementById('menu').style.display = '';
     setTopBarTitle('Puissances de 10');
     currentPage = 'home';
     updateActiveMenuItem();
@@ -264,7 +273,7 @@ function getCourse1Content() {
         <div class="mb-8">
             <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">1. Puissances positives : 10<sup>n</sup> (n ≥ 1)</h3>
             <div class="bg-purple-50 rounded-lg p-6 mb-4">
-                <p class="text-lg mb-3">10<sup>n</sup> = 10 × 10 × ... × 10 (n fois). C'est un 1 suivi de n zéros.</p>
+                <p class="cle text-lg mb-3">10<sup>n</sup> = 10 × 10 × ... × 10 (n fois). C'est un 1 suivi de n zéros.</p>
                 <div class="bg-white rounded p-4 mb-3">
                     <p class="font-semibold mb-2">Exemples :</p>
                     <p>• 10<sup>1</sup> = 10 &nbsp;•&nbsp; 10<sup>2</sup> = 100 &nbsp;•&nbsp; 10<sup>3</sup> = 1 000 &nbsp;•&nbsp; 10<sup>5</sup> = 100 000 &nbsp;•&nbsp; 10<sup>0</sup> = 1</p>
@@ -285,7 +294,7 @@ function getCourse1Content() {
         <div class="mb-8">
             <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">2. Puissances négatives : 10<sup>-n</sup></h3>
             <div class="bg-purple-50 rounded-lg p-6 mb-4">
-                <p class="text-lg mb-3">10<sup>-n</sup> = ${frac('1', '10<sup>n</sup>')} = 0,00...01 (avec n zéros après la virgule)</p>
+                <p class="cle text-lg mb-3">10<sup>-n</sup> = ${frac('1', '10<sup>n</sup>')} = 0,00...01 (avec n zéros après la virgule)</p>
                 <div class="bg-white rounded p-4 mb-3">
                     <p class="font-semibold mb-2">Exemples :</p>
                     <p>• 10<sup>-1</sup> = 0,1 &nbsp;•&nbsp; 10<sup>-2</sup> = 0,01 &nbsp;•&nbsp; 10<sup>-3</sup> = 0,001 &nbsp;•&nbsp; 10<sup>-5</sup> = 0,00001</p>
@@ -307,7 +316,7 @@ function getCourse1Content() {
             <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">3. Lien avec l'écriture décimale</h3>
 
             <div class="bg-green-50 rounded-lg p-6 mb-4">
-                <h4 class="text-xl font-semibold text-green-900 mb-3">Multiplier par 10<sup>n</sup> (n &gt; 0) → virgule vers la droite</h4>
+                <h4 class="cle text-xl font-semibold mb-3">Multiplier par 10<sup>n</sup> (n &gt; 0) → virgule vers la droite</h4>
                 <div class="bg-white rounded p-4 mb-3">
                     <p class="font-semibold mb-2">Exemples :</p>
                     <p>• 3,5 × 10<sup>2</sup> = 350 &nbsp;•&nbsp; 2,7 × 10<sup>4</sup> = 27 000 &nbsp;•&nbsp; 0,45 × 10<sup>3</sup> = 450</p>
@@ -325,7 +334,7 @@ function getCourse1Content() {
             </div>
 
             <div class="bg-orange-50 rounded-lg p-6 mb-4">
-                <h4 class="text-xl font-semibold text-orange-900 mb-3">Multiplier par 10<sup>-n</sup> (n &gt; 0) → virgule vers la gauche</h4>
+                <h4 class="cle text-xl font-semibold mb-3">Multiplier par 10<sup>-n</sup> (n &gt; 0) → virgule vers la gauche</h4>
                 <div class="bg-white rounded p-4 mb-3">
                     <p class="font-semibold mb-2">Exemples :</p>
                     <p>• 5,2 × 10<sup>-2</sup> = 0,052 &nbsp;•&nbsp; 8 × 10<sup>-3</sup> = 0,008 &nbsp;•&nbsp; 125 × 10<sup>-4</sup> = 0,0125</p>
@@ -343,7 +352,7 @@ function getCourse1Content() {
             </div>
 
             <div class="bg-purple-50 rounded-lg p-6">
-                <h4 class="text-xl font-semibold text-purple-900 mb-3">De l'écriture décimale vers la puissance de 10</h4>
+                <h4 class="cle text-xl font-semibold mb-3">De l'écriture décimale vers la puissance de 10</h4>
                 <div class="bg-white rounded p-4 mb-3">
                     <p class="font-semibold mb-2">On compte combien de rangs on déplace la virgule :</p>
                     <p>• 3500 = 3,5 × 10<sup>3</sup> &nbsp;•&nbsp; 0,0042 = 4,2 × 10<sup>-3</sup> &nbsp;•&nbsp; 250 000 = 2,5 × 10<sup>5</sup></p>
@@ -380,9 +389,9 @@ function getCourse2Content() {
 
         <div class="mb-8">
             <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">1. Définition</h3>
-            <div class="bg-purple-50 rounded-lg p-6 mb-4">
+            <div class="cle mb-4">
                 <p class="text-lg mb-3">Un nombre est en <strong>écriture scientifique</strong> s'il s'écrit :</p>
-                <div class="bg-purple-200 rounded-lg p-4 text-center text-2xl font-bold mb-4">a × 10<sup>n</sup></div>
+                <div class="bg-white rounded-lg p-4 text-center text-2xl font-bold mb-4">a × 10<sup>n</sup></div>
                 <ul class="list-disc ml-6 text-lg space-y-1">
                     <li><strong>a</strong> : un seul chiffre non nul avant la virgule (1 ≤ a &lt; 10)</li>
                     <li><strong>n</strong> : entier relatif (positif, négatif ou nul)</li>
@@ -423,7 +432,7 @@ function getCourse2Content() {
 
         <div class="mb-8">
             <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">3. Comment mettre en écriture scientifique ?</h3>
-            <div class="bg-indigo-50 rounded-lg p-6 mb-4">
+            <div class="cle mb-4">
                 <ol class="list-decimal ml-6 space-y-2 text-gray-800">
                     <li>Déplacer la virgule pour avoir <strong>un seul chiffre non nul avant la virgule</strong></li>
                     <li>Compter le nombre de rangs déplacés → c'est <strong>|n|</strong></li>
@@ -477,7 +486,7 @@ function getCourse3Content() {
         <div class="mb-8">
             <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">1. Multiplication : 10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a+b</sup></h3>
             <div class="bg-green-50 rounded-lg p-6 mb-4">
-                <p class="mb-3 text-lg text-gray-700">On <strong>additionne</strong> les exposants.</p>
+                <p class="cle mb-3 text-lg">On <strong>additionne</strong> les exposants.</p>
                 <div class="bg-white rounded p-4 mb-3">
                     <p>• 10<sup>3</sup> × 10<sup>2</sup> = 10<sup>5</sup> &nbsp;•&nbsp; 10<sup>7</sup> × 10<sup>-4</sup> = 10<sup>3</sup> &nbsp;•&nbsp; 10<sup>-2</sup> × 10<sup>-3</sup> = 10<sup>-5</sup></p>
                 </div>
@@ -500,7 +509,7 @@ function getCourse3Content() {
         <div class="mb-8">
             <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">2. Division : ${frac('10<sup>a</sup>', '10<sup>b</sup>')} = 10<sup>a−b</sup></h3>
             <div class="bg-yellow-50 rounded-lg p-6 mb-4">
-                <p class="mb-3 text-lg text-gray-700">On <strong>soustrait</strong> les exposants.</p>
+                <p class="cle mb-3 text-lg">On <strong>soustrait</strong> les exposants.</p>
                 <div class="bg-white rounded p-4 mb-3">
                     <p>• ${frac('10<sup>7</sup>','10<sup>3</sup>')} = 10<sup>4</sup> &nbsp;•&nbsp; ${frac('10<sup>2</sup>','10<sup>5</sup>')} = 10<sup>-3</sup> &nbsp;•&nbsp; ${frac('10<sup>-2</sup>','10<sup>-5</sup>')} = 10<sup>3</sup></p>
                 </div>
@@ -523,7 +532,7 @@ function getCourse3Content() {
         <div class="mb-8">
             <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">3. Inverse : ${frac('1', '10<sup>a</sup>')} = 10<sup>−a</sup></h3>
             <div class="bg-red-50 rounded-lg p-6 mb-4">
-                <p class="mb-3 text-lg text-gray-700">On <strong>change le signe</strong> de l'exposant.</p>
+                <p class="cle mb-3 text-lg">On <strong>change le signe</strong> de l'exposant.</p>
                 <div class="bg-white rounded p-4 mb-3">
                     <p>• ${frac('1','10<sup>3</sup>')} = 10<sup>-3</sup> &nbsp;•&nbsp; ${frac('1','10<sup>-5</sup>')} = 10<sup>5</sup></p>
                 </div>
@@ -546,7 +555,7 @@ function getCourse3Content() {
         <div class="mb-8">
             <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">4. Puissance d'une puissance : (10<sup>a</sup>)<sup>b</sup> = 10<sup>a×b</sup></h3>
             <div class="bg-pink-50 rounded-lg p-6 mb-4">
-                <p class="mb-3 text-lg text-gray-700">On <strong>multiplie</strong> les exposants.</p>
+                <p class="cle mb-3 text-lg">On <strong>multiplie</strong> les exposants.</p>
                 <div class="bg-white rounded p-4 mb-3">
                     <p>• (10<sup>3</sup>)<sup>2</sup> = 10<sup>6</sup> &nbsp;•&nbsp; (10<sup>-2</sup>)<sup>3</sup> = 10<sup>-6</sup> &nbsp;•&nbsp; (10<sup>4</sup>)<sup>-1</sup> = 10<sup>-4</sup> &nbsp;•&nbsp; (10<sup>-3</sup>)<sup>-2</sup> = 10<sup>6</sup></p>
                 </div>
@@ -566,13 +575,13 @@ function getCourse3Content() {
             </div>
         </div>
 
-        <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-5 mb-8">
-            <p class="font-bold text-gray-800 mb-3 text-lg">Récapitulatif des règles :</p>
+        <div class="cle mb-8">
+            <p class="cle-titre mb-3 text-lg">Récapitulatif des règles :</p>
             <div class="grid md:grid-cols-2 gap-3 text-gray-700">
-                <div class="bg-white rounded p-3 border border-green-300"><strong>Multiplication :</strong> 10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a+b</sup></div>
-                <div class="bg-white rounded p-3 border border-yellow-300"><strong>Division :</strong> ${frac('10<sup>a</sup>','10<sup>b</sup>')} = 10<sup>a-b</sup></div>
-                <div class="bg-white rounded p-3 border border-red-300"><strong>Inverse :</strong> ${frac('1','10<sup>a</sup>')} = 10<sup>-a</sup></div>
-                <div class="bg-white rounded p-3 border border-pink-300"><strong>Puissance :</strong> (10<sup>a</sup>)<sup>b</sup> = 10<sup>a×b</sup></div>
+                <div class="bg-white rounded p-3"><strong>Multiplication :</strong> 10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a+b</sup></div>
+                <div class="bg-white rounded p-3"><strong>Division :</strong> ${frac('10<sup>a</sup>','10<sup>b</sup>')} = 10<sup>a-b</sup></div>
+                <div class="bg-white rounded p-3"><strong>Inverse :</strong> ${frac('1','10<sup>a</sup>')} = 10<sup>-a</sup></div>
+                <div class="bg-white rounded p-3"><strong>Puissance :</strong> (10<sup>a</sup>)<sup>b</sup> = 10<sup>a×b</sup></div>
             </div>
         </div>
 

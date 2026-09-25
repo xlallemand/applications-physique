@@ -1,276 +1,319 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Des applications pour s'entraîner en Physique-Chimie</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Des applications pour s'entraîner en Physique-Chimie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+/* ============================================================
+   Données communes aux trois propositions de design :
+   liste des matières et des applications du portail.
+   ============================================================ */
+window.MATIERES = [
+  {
+    id: 'maths', nom: 'Outils mathématiques', couleur: 'maths',
+    apps: [
+      { titre: 'Puissances de 10', desc: "S'entraîner à utiliser les puissances de 10, indispensables pour les conversions.", dossier: 'puissances-10' },
+      { titre: 'Conversions', desc: 'Réaliser facilement des conversions en utilisant les puissances de 10.', dossier: 'conversions' },
+      { titre: 'Équations en physique', desc: 'Manipuler les équations pour exprimer une grandeur en fonction des autres.', dossier: 'equations-en-physique' },
+      { titre: 'Équations en physique (avec aide)', desc: 'Même entraînement, avec blocage et explication de la règle en cas de déplacement incorrect.', dossier: 'equations-en-physique-avec-aide' },
+      { titre: 'Proportionnalité', desc: 'Reconnaître une situation de proportionnalité, la calculer et la lire sur un graphique.', dossier: 'proportionnalite' }
+    ]
+  },
+  {
+    id: 'chimie', nom: 'Chimie', couleur: 'chimie',
+    apps: [
+      { titre: 'Oxydoréduction', desc: "Apprendre à écrire les réactions d'oxydoréduction.", dossier: 'oxydoreduction-STI2D', niveau: 'Terminale STI2D' },
+      { titre: "Schéma d'une pile", desc: "Compléter le schéma et le fonctionnement d'une pile électrochimique.", dossier: 'pile' }
+    ]
+  },
+  {
+    id: 'physique', nom: 'Physique', couleur: 'physique',
+    apps: [
+      { titre: 'Désintégration radioactive', desc: 'Simulation interactive de la loi de décroissance radioactive.', dossier: 'decroissance-radioactive' }
+    ]
+  },
+  {
+    id: 'college', nom: 'Collège', couleur: 'college',
+    apps: [
+      { titre: 'Équations du 1er degré', desc: 'Résoudre des équations étape par étape, avec progression sauvegardée.', dossier: 'equations-college' },
+      { titre: 'Fractions', desc: 'Simplifier, multiplier, diviser, additionner et soustraire des fractions.', dossier: 'fractions-college' }
+    ]
+  }
+];
 
-  <link rel="stylesheet" href="./assets/theme.css">
-  <style>
-    * { box-sizing: border-box; }
+/* Générateur pseudo-aléatoire reproductible (mêmes images à chaque chargement) */
+window.graine = function (seed) {
+  return function () {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+};
+</script>
+<style>
+  /* ============================================================
+     PORTAIL — design « Chambre à bulles »
+     Grand bandeau d'accueil : traces de particules chargées dans
+     un champ magnétique (dessinées en points, comme sur les
+     clichés de chambre à bulles). L'image descend moins vite que
+     la page, puis une feuille blanche vient la recouvrir.
+     ============================================================ */
+  :root {
+    --paper: #f3f1ec;
+    --sheet: #ffffff;
+    --ink: #16181d;
+    --ink-2: #55585f;
+    --ink-3: #8d8f94;
+    --line: #ebe8e2;
 
-    :root {
-      --cyan-800: #155e75;
-      --slate-500: #64748b;
-      --slate-700: #334155;
-    }
+    --maths: #2952c8;
+    --chimie: #0a7d57;
+    --physique: #5a3fc4;
+    --college: #c2570c;
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: #fff;
-      color: var(--slate-700);
-    }
+    --font: 'Hanken Grotesk', system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  }
 
-    .page {
-      width: min(960px, calc(100% - 32px));
-      margin: 0 auto;
-      padding: 64px 0 80px;
-    }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; font-family: var(--font); color: var(--ink); background: var(--paper); line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding-left: 16px; padding-right: 16px; }
 
-    header {
-      text-align: center;
-      margin-bottom: 58px;
-    }
+  /* ---------- Boîte à parallaxe générique ---------- */
+  .plx { position: relative; overflow: hidden; }
+  .plx canvas { position: absolute; left: 0; width: 100%; display: block; will-change: transform; }
 
-    h1 {
-      margin: 0 auto 12px;
-      max-width: 780px;
-      color: var(--cyan-800);
-      font-size: clamp(2rem, 5vw, 3rem);
-      line-height: 1.12;
-      font-weight: 900;
-      letter-spacing: -0.025em;
-    }
+  /* ---------- Bandeau d'accueil ---------- */
+  .hero { height: clamp(560px, 92vh, 880px); display: flex; flex-direction: column; }
+  /* Sur smartphone : image moins haute pour que la suite de la page arrive plus vite */
+  @media (max-width: 760px) { .hero { height: clamp(400px, 60svh, 520px); } .hero-text { padding-bottom: 48px; } }
+  .hero::after {
+    /* voile pour garantir la lisibilité du titre */
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background:
+      linear-gradient(90deg, rgba(243,241,236,.97) 0%, rgba(243,241,236,.85) 32%, rgba(243,241,236,0) 68%),
+      linear-gradient(0deg, rgba(243,241,236,.9) 0%, rgba(243,241,236,0) 30%);
+  }
+  .hero > .wrap { position: relative; z-index: 1; width: 100%; }
+  .nav { display: flex; align-items: center; height: 72px; gap: 8px; }
+  .brand { font-weight: 800; letter-spacing: -.02em; font-size: 1.05rem; color: var(--ink); text-decoration: none; margin-right: auto; }
+  .nav a.lien { color: var(--ink-2); text-decoration: none; font-weight: 500; font-size: .95rem; padding: 8px 12px; border-radius: 999px; transition: background .15s; }
+  .nav a.lien:hover { background: rgba(22,24,29,.06); color: var(--ink); }
+  @media (max-width: 760px) { .nav a.lien { display: none; } }
 
-    .subtitle {
-      margin: 0 auto;
-      color: var(--slate-500);
-      font-size: 1.12rem;
-      line-height: 1.6;
-      font-weight: 600;
-    }
+  .hero-text { margin-top: auto; padding-bottom: clamp(56px, 9vh, 96px); }
+  .hero h1 { margin: 0; font-size: clamp(3rem, 10vw, 7.5rem); line-height: .92; letter-spacing: -.05em; font-weight: 800; }
+  .hero .lead { margin: 22px 0 0; font-size: clamp(1.05rem, 2vw, 1.3rem); color: var(--ink-2); max-width: 32ch; }
+  .legende { position: absolute; z-index: 1; right: 16px; bottom: 16px; font-size: .78rem; color: var(--ink-3); max-width: 60%; text-align: right; }
+  @media (max-width: 760px) { .legende { display: none; } }
 
-    section { margin-bottom: 28px; }
+  /* ---------- Feuille de contenu qui recouvre l'image ---------- */
+  .sheet { position: relative; z-index: 2; background: var(--sheet); border-radius: 28px 28px 0 0; margin-top: -28px; padding-top: clamp(40px, 7vw, 80px); }
 
-    /* Cadre de matière : chaque matière a sa propre couleur dominante */
-    .subject-frame {
-      border: 2px solid var(--subj-200);
-      background: var(--subj-50);
-      border-radius: 20px;
-      padding: 24px 24px 26px;
-    }
-    .subject-frame.cyan    { --subj-50:#ecfeff; --subj-100:#cffafe; --subj-200:#a5f3fc; --subj-300:#67e8f9; --subj-600:#0891b2; --subj-700:#0e7490; --subj-800:#155e75; }
-    .subject-frame.indigo  { --subj-50:#eef2ff; --subj-100:#e0e7ff; --subj-200:#c7d2fe; --subj-300:#a5b4fc; --subj-600:#4f46e5; --subj-700:#4338ca; --subj-800:#3730a3; }
-    .subject-frame.emerald { --subj-50:#ecfdf5; --subj-100:#d1fae5; --subj-200:#a7f3d0; --subj-300:#6ee7b7; --subj-600:#059669; --subj-700:#047857; --subj-800:#065f46; }
-    .subject-frame.amber   { --subj-50:#fffbeb; --subj-100:#fef3c7; --subj-200:#fde68a; --subj-300:#fcd34d; --subj-600:#d97706; --subj-700:#b45309; --subj-800:#92400e; }
+  .subject { display: grid; grid-template-columns: 300px 1fr; gap: 32px; padding: 40px 0; border-top: 1px solid var(--line); }
+  .subject:first-child { border-top: none; padding-top: 0; }
+  .subject-side { position: sticky; top: 24px; align-self: start; }
+  .subject-side .idx { font-size: .85rem; font-weight: 600; color: var(--c); font-variant-numeric: tabular-nums; }
+  .subject-side h2 { margin: 6px 0 6px; font-size: clamp(1.6rem, 3.4vw, 2.3rem); line-height: 1.05; letter-spacing: -.035em; font-weight: 800; }
+  .subject-side .count { color: var(--ink-3); font-size: .95rem; }
+  @media (max-width: 820px) {
+    .subject { grid-template-columns: 1fr; gap: 18px; padding: 32px 0; }
+    .subject-side { position: static; }
+  }
 
-    .section-heading {
-      margin: 0 0 18px;
-    }
+  .list { display: flex; flex-direction: column; gap: 10px; }
+  .item {
+    display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 20px;
+    padding: 22px 24px; border-radius: 20px; background: var(--paper);
+    text-decoration: none; color: inherit; transition: background .2s;
+  }
+  .item:hover { background: color-mix(in srgb, var(--c) 8%, var(--paper)); }
+  .item:focus-visible { outline: 2px solid var(--c); outline-offset: 3px; }
+  .item h3 { margin: 0; font-size: clamp(1.15rem, 2.2vw, 1.4rem); letter-spacing: -.02em; font-weight: 700; line-height: 1.2; }
+  .item p { margin: 6px 0 0; color: var(--ink-2); font-size: .98rem; max-width: 56ch; }
+  .item .tag { display: inline-block; margin-left: 8px; vertical-align: 3px; font-size: .72rem; font-weight: 700; letter-spacing: .02em; color: var(--c); border: 1px solid color-mix(in srgb, var(--c) 35%, white); padding: 2px 8px; border-radius: 999px; }
+  .rond {
+    width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--sheet); color: var(--ink); transition: background .2s, color .2s, transform .2s;
+  }
+  .rond svg { width: 18px; height: 18px; }
+  .item:hover .rond { background: var(--c); color: #fff; transform: rotate(-45deg); }
+  @media (max-width: 520px) { .item { padding: 18px; gap: 12px; } .rond { width: 38px; height: 38px; } }
 
-    .section-heading h2 {
-      margin: 0;
-      color: var(--subj-800);
-      font-size: 1.45rem;
-      font-weight: 900;
-    }
 
-    .activities {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .activity {
-      display: flex;
-      flex-direction: column;
-      min-height: 150px;
-      padding: 22px 24px 20px;
-      color: inherit;
-      text-decoration: none;
-      background: #fff;
-      border: 1.5px solid var(--subj-200);
-      border-radius: 16px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      transition: transform .15s ease, box-shadow .15s ease,
-                  background .15s ease, border-color .15s ease;
-    }
-
-    .activity:hover {
-      transform: translateY(-3px);
-      background: var(--subj-50);
-      border-color: var(--subj-300);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, .1);
-    }
-
-    .activity:focus-visible {
-      outline: 3px solid var(--subj-300);
-      outline-offset: 3px;
-    }
-
-    .activity h3 {
-      margin: 0 0 9px;
-      color: var(--subj-800);
-      font-size: 1.25rem;
-      line-height: 1.25;
-      font-weight: 900;
-    }
-
-    .activity p {
-      margin: 0;
-      color: var(--slate-500);
-      font-size: .94rem;
-      line-height: 1.55;
-      font-weight: 600;
-    }
-
-    .activity .arrow {
-      margin-top: auto;
-      padding-top: 18px;
-      color: var(--subj-700);
-      font-size: .9rem;
-      font-weight: 900;
-    }
-
-    .subject-empty {
-      color: var(--subj-700);
-      font-style: italic;
-      font-weight: 600;
-      font-size: .95rem;
-    }
-
-    footer {
-      margin-top: 58px;
-      padding-top: 20px;
-      border-top: 1px solid #e2e8f0;
-      text-align: center;
-      color: #94a3b8;
-      font-size: .82rem;
-    }
-
-    @media (max-width: 680px) {
-      .page { padding-top: 42px; }
-      header { margin-bottom: 42px; }
-      .activities { grid-template-columns: 1fr; }
-      .subject-frame { padding: 20px 18px 22px; }
-    }
-  </style>
+  footer { background: var(--sheet); color: var(--ink-3); font-size: .88rem; padding: 0 0 48px; }
+  footer .foot { border-top: 1px solid var(--line); padding-top: 20px; }
+</style>
 </head>
-
 <body>
-  <main class="page">
 
-    <header>
-      <h1>Des applications pour s'entraîner en Physique-Chimie</h1>
-      <p class="subtitle">Niveau lycée, de la seconde à la terminale</p>
-    </header>
+<!-- ====== Bandeau d'accueil avec image en parallaxe ====== -->
+<header class="hero plx" data-graine="7">
+  <canvas aria-hidden="true"></canvas>
+  <div class="wrap">
+    <nav class="nav" id="nav"><a class="brand" href="#">Physique-Chimie</a></nav>
+  </div>
+  <div class="wrap hero-text">
+    <h1>Physique<br>Chimie</h1>
+    <p class="lead">Applications d'entraînement, niveau lycée, de la seconde à la terminale.</p>
+  </div>
+  <p class="legende">Traces de particules chargées dans une chambre à bulles.</p>
+</header>
 
-    <section aria-labelledby="maths-heading" class="subject-frame cyan">
-      <div class="section-heading">
-        <h2 id="maths-heading">Outils Mathématiques</h2>
+<!-- ====== Feuille de contenu ====== -->
+<main class="sheet">
+  <div class="wrap" id="subjects"></div>
+
+</main>
+
+<footer><div class="wrap"><div class="foot">Applications d'entraînement en Physique-Chimie · Niveau lycée</div></div></footer>
+
+<script>
+  /* ---------- Construction du portail ---------- */
+  const fleche = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  document.getElementById('subjects').innerHTML = MATIERES.map((m, i) => `
+    <section class="subject" id="${m.id}" style="--c: var(--${m.couleur})">
+      <div class="subject-side">
+        <div class="idx">${String(i + 1).padStart(2, '0')}</div>
+        <h2>${m.nom}</h2>
+        <div class="count">${m.apps.length} activité${m.apps.length > 1 ? 's' : ''}</div>
       </div>
-
-      <div class="activities">
-
-        <a class="activity" href="./puissances-10/index.html">
-          <h3>Puissances de 10</h3>
-          <p>S'entraîner à utiliser les puissances de 10.<br> Indipensable pour les conversions.</p>
-          <div class="arrow">Accéder à l'activité →</div>
-        </a>
-
-
-        <a class="activity" href="./conversions/index.html">
-          <h3>Conversions</h3>
-          <p>Réaliser facilement des conversions en utilisant les puissances de 10</p>
-          <div class="arrow">Accéder à l'activité →</div>
-        </a>
-
-        <a class="activity" href="./equations-en-physique/index.html">
-          <h3>Équations en Physique</h3>
-          <p>Apprendre à manipuler les équations pour exprimer une grandeur en fonction des autres</p>
-          <div class="arrow">Accéder à l'activité →</div>
-        </a>
-
-        <a class="activity" href="./equations-en-physique-avec-aide/index.html">
-          <h3>Équations en Physique (avec aide)</h3>
-          <p>Même entraînement, avec un blocage et une explication de la règle en cas de déplacement incorrect</p>
-          <div class="arrow">Accéder à l'activité →</div>
-        </a>
-
-        <a class="activity" href="./proportionnalite/index.html">
-          <h3>Proportionnalité</h3>
-          <p>Reconnaître une situation de proportionnalité, la calculer (tableau, coefficient, retour à l'unité) et la lire sur un graphique</p>
-          <div class="arrow">Accéder à l'activité →</div>
-        </a>
-
+      <div class="list">
+        ${m.apps.map(a => `
+          <a class="item" href="./${a.dossier}/index.html">
+            <div>
+              <h3>${a.titre}${a.niveau ? `<span class="tag">${a.niveau}</span>` : ''}</h3>
+              <p>${a.desc}</p>
+            </div>
+            <span class="rond">${fleche}</span>
+          </a>`).join('')}
       </div>
-    </section>
+    </section>`).join('');
+  document.getElementById('nav').insertAdjacentHTML('beforeend',
+    MATIERES.map(m => `<a class="lien" href="#${m.id}">${m.nom}</a>`).join(''));
 
-    <section aria-labelledby="chimie-heading" class="subject-frame emerald">
-      <div class="section-heading">
-        <h2 id="chimie-heading">Chimie</h2>
-      </div>
+  /* ---------- Image : cliché de chambre à bulles ----------
+     Chaque trace est une suite de petites bulles. Une particule chargée
+     décrit un arc de cercle ; en perdant de l'énergie son rayon diminue,
+     d'où les spirales (électrons). */
+  function chambre(canvas, seed) {
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    const rnd = graine(seed);
+    const E = Math.max(w, h) / 1400;           // échelle des motifs
 
-      <div class="activities">
+    ctx.fillStyle = '#f3f1ec'; ctx.fillRect(0, 0, w, h);
 
-        <a class="activity" href="./oxydoreduction-STI2D/index.html">
-          <h3>Oxydoréduction</h3>
-          <p>Apprendre à écrire les réactions d'oxydoréduction — Terminale STI2D</p>
-          <div class="arrow">Accéder à l'activité →</div>
-        </a>
+    // Repères (croix) gravés sur la fenêtre de la chambre
+    ctx.strokeStyle = 'rgba(22,24,29,.12)'; ctx.lineWidth = 1;
+    const pasCroix = 190 * E;
+    for (let x = pasCroix / 2; x < w; x += pasCroix) for (let y = pasCroix / 2; y < h; y += pasCroix) {
+      ctx.beginPath(); ctx.moveTo(x - 5, y); ctx.lineTo(x + 5, y); ctx.moveTo(x, y - 5); ctx.lineTo(x, y + 5); ctx.stroke();
+    }
 
-        <a class="activity" href="./pile/index.html">
-          <h3>Schéma d'une pile</h3>
-          <p>S'entraîner à compléter le schéma et le fonctionnement d'une pile électrochimique</p>
-          <div class="arrow">Accéder à l'activité →</div>
-        </a>
+    // Trace d'une particule : k = courbure (rad/px), perte = croissance de k à chaque pas
+    function trace(x, y, a, k, perte, longueur, taille, alpha) {
+      const pas = 2.1 * E;
+      ctx.fillStyle = `rgba(22,24,29,${alpha})`;
+      for (let s = 0; s < longueur; s += pas) {
+        x += Math.cos(a) * pas; y += Math.sin(a) * pas;
+        a += k * pas; k *= perte;
+        if (rnd() < .6) {
+          ctx.beginPath();
+          ctx.arc(x + (rnd() - .5) * .9, y + (rnd() - .5) * .9, taille * (.55 + rnd() * .7), 0, 7);
+          ctx.fill();
+        }
+        if (Math.abs(k) > .5 / E || x < -300 || x > w + 300 || y < -300 || y > h + 300) break;
+      }
+      return { x, y, a };
+    }
+    const signe = () => (rnd() < .5 ? -1 : 1);
 
-      </div>
-    </section>
+    // Faisceau incident : traces presque rectilignes venant de la gauche
+    const nFaisceau = 9;
+    for (let i = 0; i < nFaisceau; i++) {
+      const y0 = h * (.08 + .86 * (i + rnd() * .6) / nFaisceau);
+      const a0 = (rnd() - .5) * .04;
+      const k0 = signe() * 2e-5 / E;
+      const interaction = rnd() < .6;
+      const L = interaction ? w * (.35 + rnd() * .55) : w * 1.3;
+      const fin = trace(-40, y0, a0, k0, 1, L, 1.05 * E + .35, .55);
 
-    <section aria-labelledby="physique-heading" class="subject-frame indigo">
-      <div class="section-heading">
-        <h2 id="physique-heading">Physique</h2>
-      </div>
+      if (interaction) {
+        // Vertex d'interaction : gerbe de particules secondaires
+        const n = 2 + Math.floor(rnd() * 4);
+        for (let j = 0; j < n; j++) {
+          trace(fin.x, fin.y, fin.a + (rnd() - .5) * 1.6, signe() * (4e-4 + rnd() * 2.2e-3) / E,
+                1 + rnd() * .0025, (300 + rnd() * 900) * E, .95 * E + .35, .5);
+        }
+      }
+      // Électrons arrachés (rayons delta) : petites spirales serrées
+      if (rnd() < .7) {
+        const px = w * (.1 + rnd() * .7), py = y0 + Math.tan(a0) * px;
+        trace(px, py, rnd() * 6.28, signe() * (.01 + rnd() * .02) / E, 1.006, 700 * E, .8 * E + .3, .45);
+      }
+    }
 
-      <div class="activities">
+    // Désintégrations « en V » d'une particule neutre (aucune trace incidente)
+    for (let i = 0; i < 3; i++) {
+      const vx = w * (.45 + rnd() * .5), vy = h * (.15 + rnd() * .7), a = (rnd() - .5) * .8;
+      trace(vx, vy, a - .25, 1.2e-3 / E, 1.001, 700 * E, .95 * E + .35, .5);
+      trace(vx, vy, a + .25, -1.4e-3 / E, 1.001, 650 * E, .95 * E + .35, .5);
+    }
 
-        <a class="activity" href="./decroissance-radioactive/index.html">
-          <h3>Désintégration radioactive</h3>
-          <p>Simulation interactive de la loi de décroissance radioactive</p>
-          <div class="arrow">Accéder à l'activité →</div>
-        </a>
+    // Quelques grandes spirales isolées
+    for (let i = 0; i < 4; i++) {
+      trace(w * (.3 + rnd() * .7), h * rnd(), rnd() * 6.28, signe() * (.003 + rnd() * .004) / E,
+            1.0035, 2600 * E, .85 * E + .3, .42);
+    }
+  }
 
-      </div>
-    </section>
+  /* ---------- Parallaxe : l'image descend à 60 % de la vitesse du scroll ---------- */
+  const F = 0.4;                                   // retard de l'image
+  const reduit = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const boites = [...document.querySelectorAll('.plx')];
 
-    <section aria-labelledby="college-heading" class="subject-frame amber">
-      <div class="section-heading">
-        <h2 id="college-heading">Outils mathématiques pour le collège</h2>
-      </div>
+  function dimensionner() {
+    boites.forEach(b => {
+      const cv = b.querySelector('canvas');
+      const hb = b.offsetHeight;
+      const hautMax = Math.min(b.getBoundingClientRect().top + scrollY, innerHeight);   // position la plus basse où la boîte est visible
+      const f = reduit ? 0 : F;
+      cv.style.top = (-f * hautMax) + 'px';
+      cv.style.height = (hb + f * (hautMax + hb)) + 'px';
+      chambre(cv, +b.dataset.graine);
+    });
+    deplacer();
+  }
+  function deplacer() {
+    if (reduit) return;
+    boites.forEach(b => {
+      const r = b.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > innerHeight) return;       // hors écran : rien à faire
+      b.querySelector('canvas').style.transform = `translate3d(0, ${-r.top * F}px, 0)`;
+    });
+  }
 
-      <div class="activities">
-
-        <a class="activity" href="./equations-college/index.html">
-          <h3>Équations du 1er degré</h3>
-          <p>Résoudre des équations étape par étape, avec progression sauvegardée</p>
-          <div class="arrow">Accéder à l'activité →</div>
-        </a>
-
-        <a class="activity" href="./fractions-college/index.html">
-          <h3>Fractions</h3>
-          <p>Simplifier, multiplier, diviser, additionner et soustraire des fractions</p>
-          <div class="arrow">Accéder à l'activité →</div>
-        </a>
-
-      </div>
-    </section>
-
-    <footer>
-      Applications d'entraînement en Physique-Chimie · Niveau lycée
-    </footer>
-
-  </main>
+  dimensionner();
+  let attente = false;
+  addEventListener('scroll', () => {
+    if (!attente) { attente = true; requestAnimationFrame(() => { deplacer(); attente = false; }); }
+  }, { passive: true });
+  let minuterie, largeur = innerWidth;
+  addEventListener('resize', () => {
+    clearTimeout(minuterie);
+    // sur mobile, la barre d'adresse change la hauteur : on ne redessine que si la largeur change
+    minuterie = setTimeout(() => { if (innerWidth !== largeur) { largeur = innerWidth; dimensionner(); } else deplacer(); }, 200);
+  });
+  document.fonts && document.fonts.ready.then(dimensionner);
+</script>
 </body>
 </html>

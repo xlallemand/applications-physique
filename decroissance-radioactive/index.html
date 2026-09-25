@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-matiere="physique">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,20 +7,21 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link rel="stylesheet" href="../assets/theme.css">
 <script src="../assets/nav.js"></script>
+<script src="../assets/hero.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #f5f3ee;
+    --bg: var(--sheet);
     --surface: #ffffff;
-    --surface2: #dedad3;
-    --border: rgba(0,0,0,0.09);
+    --surface2: var(--paper-3);
+    --border: var(--line);
     /* INVERSÉ : alive = vert, dead = rouge */
     --alive: #1d8c4a;
     --dead:  #c0392b;
-    --text: #1a1a18;
-    --text-muted: #4e4b47;
-    --text-dim: #a8a5a0;
+    --text: var(--ink);
+    --text-muted: var(--ink-2);
+    --text-dim: var(--ink-3);
     /* Police commune au projet (plus de Google Fonts) */
     --mono: var(--font-sans);
     --body: var(--font-sans);
@@ -36,24 +37,13 @@
     overflow-x: hidden;
   }
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
 
   .page {
     position: relative;
     z-index: 1;
     max-width: 1160px;
     margin: 0 auto;
-    padding: 44px 24px 64px;
+    padding: 0 16px 64px;
   }
 
   header { margin-bottom: 40px; }
@@ -115,7 +105,7 @@
   .panel {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 22px;
     overflow: hidden;
   }
   .panel-header {
@@ -124,7 +114,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: #faf9f6;
+    background: var(--paper);
     flex-shrink: 0;
   }
   .panel-label {
@@ -328,7 +318,7 @@
     -webkit-appearance: none;
     width: 18px; height: 18px;
     border-radius: 50%;
-    background: var(--dead);
+    background: var(--accent);
     cursor: pointer;
     transition: transform 0.15s;
     box-shadow: 0 1px 5px rgba(0,0,0,0.2);
@@ -345,9 +335,9 @@
   .btn-primary {
     width: 100%;
     padding: 13px 18px;
-    background: var(--dead);
+    background: var(--ink);
     border: none;
-    border-radius: 8px;
+    border-radius: 999px;
     color: #fff;
     font-family: var(--body);
     font-size: 15px;
@@ -362,9 +352,9 @@
   .btn-finish {
     width: 100%;
     padding: 13px 18px;
-    background: #1a3a2a;
+    background: var(--accent);
     border: none;
-    border-radius: 8px;
+    border-radius: 999px;
     color: #fff;
     font-family: var(--body);
     font-size: 15px;
@@ -380,9 +370,9 @@
     width: 100%;
     padding: 11px 16px;
     background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text-muted);
+    border: 1.5px solid var(--line-strong);
+    border-radius: 999px;
+    color: var(--ink);
     font-family: var(--body);
     font-size: 15px;
     font-weight: 500;
@@ -409,13 +399,16 @@
 <div id="app-nav"></div>
 <div class="page">
 
-  <header>
-    <div class="header-tag">Physique nucléaire</div>
-    <h1>Désintégration<br><span>Radioactive</span></h1>
-    <p class="subtitle">
-      Simulation stochastique de la loi de décroissance radioactive.<br>
-      À chaque itération (= 1 seconde), chaque noyau a une probabilité λ de se désintégrer.
-    </p>
+  <!-- En-tête illustré (image en parallaxe, voir assets/hero.js) -->
+  <header class="app-hero" data-dessin="noyaux" style="margin-bottom:24px">
+    <canvas aria-hidden="true"></canvas>
+    <div class="app-hero-in">
+      <p class="app-hero-kicker">Physique</p>
+      <h1>Désintégration radioactive</h1>
+      <p class="app-hero-lead">Simulation stochastique de la loi de décroissance radioactive.</p>
+      <p class="app-hero-lead">À chaque itération (= 1 seconde), chaque noyau a une probabilité λ de se désintégrer.</p>
+    </div>
+    <div class="app-hero-edge"></div>
   </header>
 
   <div class="sim-layout">
@@ -654,6 +647,8 @@ function updateStats() {
 function initChart() {
   const ctx = document.getElementById('decay-chart').getContext('2d');
   if (chart) chart.destroy();
+  // Police du thème pour les textes du graphique
+  Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
   chart = new Chart(ctx, {
     type: 'line',
     data: {
