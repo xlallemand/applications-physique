@@ -29,6 +29,11 @@
     .module-score { font-size: .8rem; font-weight: 700; color: var(--slate-500); margin-top: 8px; }
     .module-score-bar { height: 6px; border-radius: 999px; background: var(--slate-100); overflow: hidden; margin-top: 4px; max-width: 260px; }
     .module-score-fill { height: 100%; border-radius: 999px; background: var(--app-accent-600); }
+    /* Point clé en tête de chaque groupe de modules */
+    .point-cle { display: flex; gap: 14px; align-items: flex-start; background: var(--cle-bg); border-radius: 18px; padding: 16px 18px; margin-bottom: 6px; }
+    .point-cle-icone { flex-shrink: 0; min-width: 42px; height: 42px; padding: 0 8px; border-radius: 999px; display: grid; place-items: center; background: var(--sheet); color: var(--accent-ink); font-weight: 800; }
+    .point-cle-titre { font-size: .75rem; font-weight: 700; color: var(--accent-ink); margin-bottom: 2px; }
+    .point-cle p { margin: 0; color: var(--ink); }
     .module-done { font-size: .72rem; font-weight: 800; color: var(--success-text); background: var(--success-bg);
         border: 1px solid var(--paper-3); border-radius: 999px; padding: 2px 9px; margin-left: 8px; vertical-align: middle; }
 
@@ -1008,9 +1013,32 @@ function renderHome(){
     ${levelCard()}
 
     <div class="module-list mb-8">
-      ${MODULES.map((mod,i)=>{
-        const res=db.results[i];
-        return `
+      ${GROUPES_ACCUEIL.map(g=>`
+        <div class="module-group">
+          ${g.icon?`
+          <div class="point-cle">
+            <span class="point-cle-icone">${g.icon}</span>
+            <div><div class="point-cle-titre">Point clé</div><p>${g.txt}</p></div>
+          </div>`:`<div class="module-group-title">${g.titre}</div>`}
+          ${g.modules.map(moduleCardHTML).join('')}
+        </div>`).join('')}
+    </div>`;
+}
+
+// Points clés : chacun est affiché juste avant le ou les modules qui le travaillent
+const GROUPES_ACCUEIL=[
+  {icon:'±',   txt:'Quand on passe un terme <b>additif</b> de l\'autre côté du =, on <b>change son signe</b>', modules:[0]},
+  {icon:'×÷',  txt:'Quand on passe un terme <b>multiplicatif</b>, × devient ÷ et inversement', modules:[1,2,3]},
+  {icon:'a/b', txt:'Utiliser la notation <b>fraction</b> (pas le signe ÷). Toujours réduire la fraction au maximum', modules:[4]},
+  {icon:'( )', txt:'Pour <b>développer</b>, on multiplie chaque terme par le facteur extérieur. Un facteur négatif inverse les signes', modules:[5]},
+  {icon:'−−',  txt:'<b>Deux facteurs négatifs</b> qui se multiplient donnent un résultat positif : (−)×(−) = (+)', modules:[6]},
+  {titre:'Pour finir : toutes les règles ensemble', modules:[7]},
+];
+
+// Carte d'un module sur l'accueil
+function moduleCardHTML(i){
+  const mod=MODULES[i], res=db.results[i];
+  return `
         <div class="module-card">
           <div class="module-card-head">
             <span class="module-badge">Module ${i+1}</span>
@@ -1027,25 +1055,6 @@ function renderHome(){
             </div>
           </div>
         </div>`;
-      }).join('')}
-    </div>
-
-    <div class="cle">
-      <h2 class="cle-titre text-2xl mb-4">Points clés à maîtriser</h2>
-      <div class="flex flex-col gap-3">
-        ${[
-          {icon:'±', txt:'Quand on passe un terme <b>additif</b> de l\'autre côté du =, on <b>change son signe</b>'},
-          {icon:'×÷', txt:'Quand on passe un terme <b>multiplicatif</b>, × devient ÷ et inversement'},
-          {icon:'( )', txt:'Pour <b>développer</b>, on multiplie chaque terme par le facteur extérieur. Un facteur négatif inverse les signes'},
-          {icon:'−−', txt:'<b>Deux facteurs négatifs</b> qui se multiplient donnent un résultat positif : (−)×(−) = (+)'},
-          {icon:'a/b', txt:'Utiliser la notation <b>fraction</b> (pas le signe ÷). Toujours réduire la fraction au maximum'},
-        ].map(k=>`
-          <div class="flex gap-3 items-start">
-            <span class="module-badge" style="min-width:42px">${k.icon}</span>
-            <p class="text-gray-700 pt-2">${k.txt}</p>
-          </div>`).join('')}
-      </div>
-    </div>`;
 }
 
 // ═══════════════════════════════════════════════════════
