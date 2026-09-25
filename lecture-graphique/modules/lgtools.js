@@ -40,6 +40,10 @@
     return parseFloat(t);
   }
 
+  /* Symbole avec indice : « U_max » → U<sub>max</sub> (HTML) ou tspan (SVG) */
+  function symH(s) { const i = s.indexOf('_'); return i < 0 ? s : s.slice(0, i) + '<sub>' + s.slice(i + 1) + '</sub>'; }
+  function symS(s) { const i = s.indexOf('_'); return i < 0 ? s : s.slice(0, i) + `<tspan dy="1.2" font-size="3.2">${s.slice(i + 1)}</tspan>`; }
+
   /* ============================================================
      GRAPHIQUE
      ============================================================ */
@@ -55,21 +59,121 @@
     };
   }
 
-  /* Formes de signaux périodiques (valeur entre -1 et 1, phase u en périodes) */
+  /* Formes de signaux périodiques (u : temps en nombre de périodes ;
+     valeur entre -1 et 1) */
+  const frac = u => u - Math.floor(u);
+  const gauss = (v, c, l) => Math.exp(-Math.pow((v - c) / l, 2));
   const FORMES = {
-    sinus: function (u) { return Math.sin(2 * Math.PI * u); },
+    sinus: u => Math.sin(2 * Math.PI * u),
+    triangle: u => 4 * Math.abs(frac(u - 0.25) - 0.5) - 1,
+    carre: (u, s) => frac(u) < ((s && s.rc) || 0.5) ? 1 : -1,     // rc : rapport cyclique
+    dent: u => 2 * frac(u) - 1,
+    // son d'instrument : fondamental + harmoniques
+    complexe: u => (Math.sin(2 * Math.PI * u) + 0.55 * Math.sin(4 * Math.PI * u + 0.9) + 0.3 * Math.sin(6 * Math.PI * u + 2.1)) / 1.45,
+    // électrocardiogramme : ondes P, QRS et T
+    ecg: u => { const v = frac(u); return 0.12 * gauss(v, 0.1, 0.03) - 0.12 * gauss(v, 0.265, 0.01) + gauss(v, 0.3, 0.013) - 0.2 * gauss(v, 0.335, 0.012) + 0.25 * gauss(v, 0.55, 0.05); },
   };
-  function fonctionSignal(s) {
-    const f = FORMES[s.forme] || FORMES.sinus;
-    return function (t) { return (s.decal || 0) + s.ampl * f((t - (s.phase || 0)) / s.periode); };
+  /* Fonction tracée : signal périodique (def.signal) ou courbe quelconque (def.f) */
+  function fonction(def) {
+    if (def.f) return def.f;
+    const s = def.signal, g = FORMES[s.forme] || FORMES.sinus;
+    return t => (s.decal || 0) + s.ampl * g((t - (s.phase || 0)) / s.periode, s);
+  }
+  // extremums sur la zone visible (échantillonnage fin)
+  function extremums(def, f) {
+    const ax = def.axeX;
+    let mx = -Infinity, mn = Infinity, tMx = ax.min;
+    for (let i = 0; i <= 4000; i++) {
+      const t = ax.min + (ax.max - ax.min) * i / 4000, v = f(t);
+      if (v > mx) { mx = v; tMx = t; }
+      if (v < mn) mn = v;
+    }
+    return { max: mx, min: mn, tMax: tMx };
+  }
+  // abscisse où la courbe (monotone) atteint y0, par dichotomie
+  function abscissePour(def, f, y0) {
+    let a = def.axeX.min, b = def.axeX.max;
+    const croiss = f(b) > f(a);
+    for (let i = 0; i < 60; i++) {
+      const m = (a + b) / 2;
+      if ((f(m) < y0) === croiss) a = m; else b = m;
+    }
+    return (a + b) / 2;
+  }
+  // position (en fraction de période) du premier maximum (signe = 1) ou
+  // minimum (signe = -1) d'un motif : points faciles à repérer
+  function phaseMax(def, signe) {
+    const g = FORMES[def.signal.forme] || FORMES.sinus, k = signe || 1;
+    let best = -Infinity, uB = 0;
+    for (let i = 0; i < 1000; i++) { const v = k * g(i / 1000, def.signal); if (v > best + 1e-9) { best = v; uB = i / 1000; } }
+    return uB;
+  }
+  // première date ≥ min où se trouve ce point remarquable
+  function premierPoint(def, u) {
+    const s = def.signal;
+    let t = (s.phase || 0) + u * s.periode;
+    while (t - s.periode >= def.axeX.min) t -= s.periode;
+    while (t < def.axeX.min + s.periode * 0.03) t += s.periode;
+    return t;
   }
 
-  function dessinerGraphe(def, R) {
+  /* ---------- Analyse de la question : axe mesuré, distances attendues ---------- */
+  function analyser(def, R) {
+    const f = fonction(def), g = def.grandeur;
+    const A = { f: f, type: def.type };
+    if (def.type === 'periode') {
+      const T = def.signal.periode, Tmm = T * R.mmX;
+      const dispo = Math.min(L, (def.axeX.max - def.axeX.min) * R.mmX);
+      A.axe = def.axeX; A.mm = R.mmX; A.exact = T;
+      // toutes les mesures de n périodes tenant sous la règle sont acceptées
+      const nLim = Math.max(1, Math.floor((dispo - 1) / Tmm));
+      A.liste = [];
+      for (let n = 1; n <= nLim; n++) A.liste.push({ n: n, mm: n * Tmm });
+      // nombre conseillé : le plus grand, entre deux maximums ou deux minimums
+      A.nMax = 1;
+      [1, -1].forEach(k => {
+        const t0 = premierPoint(def, phaseMax(def, k));
+        const n = Math.min(nLim, Math.floor((def.axeX.max - t0) / T + 1e-9));
+        if (n > A.nMax) { A.nMax = n; A.tDepart = t0; }
+      });
+      if (!A.tDepart) A.tDepart = premierPoint(def, phaseMax(def, 1));
+    } else if (def.type === 'max') {
+      const e = extremums(def, f);
+      A.axe = def.axeY; A.mm = R.mmY; A.exact = e.max; A.tMax = e.tMax;
+      A.liste = [{ n: 1, mm: e.max * R.mmY }]; A.nMax = 1;
+    } else if (def.type === 'amplitude') {
+      const e = extremums(def, f), amp = (e.max - e.min) / 2;
+      A.axe = def.axeY; A.mm = R.mmY; A.exact = amp; A.moy = (e.max + e.min) / 2; A.tMax = e.tMax; A.min = e.min;
+      A.liste = [{ n: 1, mm: amp * R.mmY }, { n: 2, mm: 2 * amp * R.mmY }]; A.nMax = 2;
+    } else if (def.type === 'lectureY') {
+      A.axe = def.axeY; A.mm = R.mmY; A.exact = f(def.x0);
+      A.liste = [{ n: 1, mm: A.exact * R.mmY }]; A.nMax = 1;
+    } else if (def.type === 'lectureX') {
+      A.axe = def.axeX; A.mm = R.mmX; A.exact = abscissePour(def, f, def.y0);
+      A.liste = [{ n: 1, mm: (A.exact - def.axeX.min) * R.mmX }]; A.nMax = 1;
+    }
+    // textes par défaut selon le type de question
+    const D = {
+      periode: { ligne: cap(g.noms || 'périodes').replace(/s$/, '(s)').replace(/s d'/, "(s) d'"),
+        erreur: `Ta mesure ne correspond pas à une ou plusieurs ${g.noms || 'périodes'} : place le 0 de la règle et le curseur sur deux points équivalents du signal (par exemple deux maximums).` },
+      max: { ligne: 'Maximum', erreur: "Ta mesure ne correspond pas à la valeur maximale : mesure verticalement la distance entre l'axe des abscisses (valeur 0) et le point le plus haut de la courbe." },
+      amplitude: { ligne: 'Amplitude', erreur: "Ta mesure ne correspond pas à l'amplitude : mesure verticalement l'écart entre le minimum et le maximum du signal (crête à crête), ou entre la valeur moyenne et le maximum." },
+      lectureY: { ligne: 'Point', erreur: "Ta mesure ne correspond pas au point repéré : mesure verticalement la distance entre l'axe des abscisses (valeur 0) et le point." },
+      lectureX: { ligne: 'Point', erreur: "Ta mesure ne correspond pas au point repéré : mesure horizontalement la distance entre l'axe des ordonnées (valeur 0) et le point." },
+    }[def.type];
+    A.ligne = g.ligne || D.ligne;
+    A.erreur = g.erreurMesure || D.erreur;
+    return A;
+  }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  function dessinerGraphe(def, R, A) {
     const P = R.P, ax = def.axeX, ay = def.axeY;
+    const nX = Math.round((ax.max - ax.min) / ax.pas), nY = Math.round((ay.max - ay.min) / ay.pas);
     let h = '';
     // quadrillage aux graduations
-    for (let v = ax.min; v <= ax.max + 1e-9; v += ax.pas) h += `<line x1="${R.sx(v)}" y1="${P.yTop}" x2="${R.sx(v)}" y2="${P.yBot}" stroke="#e6e3dc" stroke-width=".3"/>`;
-    for (let v = ay.min; v <= ay.max + 1e-9; v += ay.pas) h += `<line x1="${P.x0}" y1="${R.sy(v)}" x2="${P.x1}" y2="${R.sy(v)}" stroke="#e6e3dc" stroke-width=".3"/>`;
+    for (let i = 0; i <= nX; i++) { const x = R.sx(ax.min + i * ax.pas); h += `<line x1="${x}" y1="${P.yTop}" x2="${x}" y2="${P.yBot}" stroke="#e6e3dc" stroke-width=".3"/>`; }
+    for (let i = 0; i <= nY; i++) { const y = R.sy(ay.min + i * ay.pas); h += `<line x1="${P.x0}" y1="${y}" x2="${P.x1}" y2="${y}" stroke="#e6e3dc" stroke-width=".3"/>`; }
     // axes (l'axe des abscisses passe par 0 s'il est visible)
     const yAxe = (ay.min <= 0 && ay.max >= 0) ? R.sy(0) : P.yBot;
     h += `<line x1="${P.x0}" y1="${yAxe}" x2="${P.x1 + 5}" y2="${yAxe}" stroke="#16181d" stroke-width=".5"/>`;
@@ -77,98 +181,116 @@
     h += `<line x1="${P.x0}" y1="${P.yBot}" x2="${P.x0}" y2="${P.yTop - 5}" stroke="#16181d" stroke-width=".5"/>`;
     h += `<path d="M${P.x0},${P.yTop - 6} l-1.2,2.4 h2.4z" fill="#16181d"/>`;
     // graduations et valeurs
-    for (let v = ax.min; v <= ax.max + 1e-9; v += ax.pas) {
-      h += `<line x1="${R.sx(v)}" y1="${yAxe - 1.2}" x2="${R.sx(v)}" y2="${yAxe + 1.2}" stroke="#16181d" stroke-width=".4"/>`;
-      h += `<text x="${R.sx(v)}" y="${P.yBot + 5.5}" font-size="3.8" text-anchor="middle" fill="#55585f">${fmt(v, 3)}</text>`;
+    for (let i = 0; i <= nX; i++) {
+      const v = ax.min + i * ax.pas, x = R.sx(v);
+      h += `<line x1="${x}" y1="${yAxe - 1.2}" x2="${x}" y2="${yAxe + 1.2}" stroke="#16181d" stroke-width=".4"/>`;
+      h += `<text x="${x}" y="${P.yBot + 5.5}" font-size="3.8" text-anchor="middle" fill="#55585f">${fmt(v, 4)}</text>`;
     }
-    for (let v = ay.min; v <= ay.max + 1e-9; v += ay.pas) {
-      h += `<line x1="${P.x0 - 1.2}" y1="${R.sy(v)}" x2="${P.x0 + 1.2}" y2="${R.sy(v)}" stroke="#16181d" stroke-width=".4"/>`;
-      h += `<text x="${P.x0 - 2}" y="${R.sy(v) + 1.3}" font-size="3.8" text-anchor="end" fill="#55585f">${fmt(v, 3)}</text>`;
+    for (let i = 0; i <= nY; i++) {
+      const v = ay.min + i * ay.pas, y = R.sy(v);
+      h += `<line x1="${P.x0 - 1.2}" y1="${y}" x2="${P.x0 + 1.2}" y2="${y}" stroke="#16181d" stroke-width=".4"/>`;
+      h += `<text x="${P.x0 - 2}" y="${y + 1.3}" font-size="3.8" text-anchor="end" fill="#55585f">${fmt(v, 4)}</text>`;
     }
     h += `<text x="${P.x1 + 6}" y="${P.yBot + 11}" font-size="4" text-anchor="end" font-weight="700" fill="#16181d">${ax.nom} (${ax.unite})</text>`;
     h += `<text x="${P.x0 + 2.5}" y="${P.yTop - 3}" font-size="4" font-weight="700" fill="#16181d">${ay.nom} (${ay.unite})</text>`;
-    // courbe
-    const f = fonctionSignal(def.signal);
+    // courbe (rognée au cadre)
+    const f = A.f;
     let d = '';
-    for (let i = 0; i <= 800; i++) {
-      const t = ax.min + (ax.max - ax.min) * i / 800;
-      d += (i ? 'L' : 'M') + R.sx(t).toFixed(2) + ',' + R.sy(f(t)).toFixed(2);
+    for (let i = 0; i <= 1000; i++) {
+      const t = ax.min + (ax.max - ax.min) * i / 1000;
+      const y = Math.max(P.yTop - 4, Math.min(P.yBot, R.sy(f(t))));
+      d += (i ? 'L' : 'M') + R.sx(t).toFixed(2) + ',' + y.toFixed(2);
     }
     h += `<path d="${d}" fill="none" stroke="var(--accent)" stroke-width=".75" stroke-linejoin="round"/>`;
-    h += reperageCible(def, R, f);
+    h += reperageCible(def, R, A);
     return h;
   }
 
-  /* Repère orange de la grandeur à mesurer */
-  function reperageCible(def, R, f) {
-    const s = def.signal;
+  /* ---------- Repère orange de la grandeur à mesurer ---------- */
+  function fleche(x1, y1, x2, y2) {
+    // double flèche orange entre deux points
+    const lg = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / lg, uy = (y2 - y1) / lg, px = -uy, py = ux;
+    const pointe = (x, y, s) => `M${x},${y} l${s * 2.2 * ux + 1.2 * px},${s * 2.2 * uy + 1.2 * py} l${-2.4 * px},${-2.4 * py}z`;
+    return `<line x1="${x1 + ux * 1.5}" y1="${y1 + uy * 1.5}" x2="${x2 - ux * 1.5}" y2="${y2 - uy * 1.5}" stroke="${ORANGE}" stroke-width=".7"/>
+      <path d="${pointe(x1, y1, 1)} ${pointe(x2, y2, -1)}" fill="${ORANGE}"/>`;
+  }
+  const tirets = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${ORANGE}" stroke-width=".35" stroke-dasharray="1,.8"/>`;
+  function etiq(x, y, txt, ancre) {
+    const w = Math.max(6, txt.replace(/<[^>]+>/g, '').length * 2.6 + 2.4);
+    const x0 = ancre === 'start' ? x : (ancre === 'end' ? x - w : x - w / 2);
+    return `<rect x="${x0}" y="${y - 3.9}" width="${w}" height="5" rx="1" fill="#fff" opacity=".9"/>
+      <text x="${x0 + w / 2}" y="${y}" font-size="4.2" font-weight="800" text-anchor="middle" fill="#9a5305">${txt}</text>`;
+  }
+  function reperageCible(def, R, A) {
+    const P = R.P, f = A.f, sym = symS(def.grandeur.symbole);
+    let h = '';
     if (def.type === 'periode') {
-      // premier maximum dans la zone visible, puis le suivant
-      let tA = (s.phase || 0) + s.periode / 4;
-      while (tA - s.periode >= def.axeX.min) tA -= s.periode;
-      while (tA < def.axeX.min + s.periode * 0.05) tA += s.periode;
-      const tB = tA + s.periode;
-      const yMax = R.sy(f(tA)), yF = yMax - 5;
+      const s = def.signal;
+      // premier motif entier visible, repéré entre deux points équivalents
+      const tA = premierPoint(def, phaseMax(def)), tB = tA + s.periode;
+      const yRef = R.sy(f(tA + 1e-6)), yF = Math.max(P.yTop - 2, yRef - 5);
       const xA = R.sx(tA), xB = R.sx(tB);
-      return `<g pointer-events="none">
-        <line x1="${xA}" y1="${yMax}" x2="${xA}" y2="${yF - 2}" stroke="${ORANGE}" stroke-width=".35" stroke-dasharray="1,.8"/>
-        <line x1="${xB}" y1="${yMax}" x2="${xB}" y2="${yF - 2}" stroke="${ORANGE}" stroke-width=".35" stroke-dasharray="1,.8"/>
-        <line x1="${xA + 1.5}" y1="${yF}" x2="${xB - 1.5}" y2="${yF}" stroke="${ORANGE}" stroke-width=".7"/>
-        <path d="M${xA},${yF} l2.2,-1.2 v2.4z M${xB},${yF} l-2.2,-1.2 v2.4z" fill="${ORANGE}"/>
-        <rect x="${(xA + xB) / 2 - 3}" y="${yF - 5.4}" width="6" height="4.6" rx="1" fill="#fff"/>
-        <text x="${(xA + xB) / 2}" y="${yF - 1.6}" font-size="4.4" font-weight="800" text-anchor="middle" fill="#9a5305">${def.grandeur.symbole}</text>
-      </g>`;
+      h += tirets(xA, yRef, xA, yF - 2) + tirets(xB, yRef, xB, yF - 2) + fleche(xA, yF, xB, yF);
+      h += etiq((xA + xB) / 2, yF - 1.4, sym);
+    } else if (def.type === 'max') {
+      const x = R.sx(A.tMax), y0 = R.sy(0), y1 = R.sy(A.exact);
+      h += tirets(P.x0, y1, x, y1) + fleche(x, y0, x, y1) + etiq(x + 2, (y0 + y1) / 2 + 1.5, sym, 'start');
+    } else if (def.type === 'amplitude') {
+      const x = R.sx(A.tMax), ym = R.sy(A.moy), y1 = R.sy(A.moy + A.exact);
+      h += `<line x1="${P.x0}" y1="${ym}" x2="${P.x1}" y2="${ym}" stroke="${ORANGE}" stroke-width=".35" stroke-dasharray="2.5,1.5"/>`;
+      // niveaux du maximum et du minimum, pour mesurer l'écart crête à crête
+      h += tirets(P.x0, y1, P.x1, y1) + tirets(P.x0, R.sy(A.min), P.x1, R.sy(A.min));
+      h += `<text x="${P.x1}" y="${ym - 1.2}" font-size="3" text-anchor="end" fill="#9a5305">valeur moyenne</text>`;
+      h += fleche(x, ym, x, y1) + etiq(x + 2, (ym + y1) / 2 + 1.5, sym, 'start');
+    } else if (def.type === 'lectureY') {
+      const x = R.sx(def.x0), y0 = R.sy(0), y1 = R.sy(A.exact);
+      h += tirets(x, y0, x, y1) + tirets(x, y1, P.x0, y1);
+      h += `<circle cx="${x}" cy="${y1}" r="1.3" fill="${ORANGE}" stroke="#fff" stroke-width=".4"/>`;
+      h += etiq(P.x0 + 1.5, y1 - 1.4, sym + ' = ?', 'start');
+    } else if (def.type === 'lectureX') {
+      const x = R.sx(A.exact), y = R.sy(def.y0), yAxe = (def.axeY.min <= 0) ? R.sy(0) : P.yBot;
+      h += tirets(P.x0, y, x, y) + tirets(x, y, x, yAxe);
+      h += `<circle cx="${x}" cy="${y}" r="1.3" fill="${ORANGE}" stroke="#fff" stroke-width=".4"/>`;
+      h += etiq(x + 1.5, yAxe - 1.6, sym + ' = ?', 'start');
     }
-    return '';
+    return `<g pointer-events="none">${h}</g>`;
   }
 
-  /* Distances attendues pour la mesure de la grandeur (en mm papier) */
-  function ciblesMesure(def, R) {
-    if (def.type === 'periode') {
-      const Tmm = def.signal.periode * R.mmX;
-      const dispo = Math.min(L, (def.axeX.max - def.axeX.min) * R.mmX);
-      const nMax = Math.max(1, Math.floor((dispo - 1) / Tmm));
-      const liste = [];
-      for (let n = 1; n <= nMax; n++) liste.push({ n: n, mm: n * Tmm });
-      return { liste: liste, nMax: nMax, mmParUnite: R.mmX, unite: def.axeX.unite };
-    }
-    return null;
-  }
-
-  /* Plus grande distance d'échelle mesurable (graduations extrêmes tenant sous la règle) */
-  function echelleMax(def, R) {
-    const ax = def.axeX;
-    const nPas = Math.round((ax.max - ax.min) / ax.pas);
-    let k = nPas;
-    while (k > 1 && k * ax.pas * R.mmX > L) k--;
-    return { mm: k * ax.pas * R.mmX, de: ax.min, a: ax.min + k * ax.pas };
+  /* Plus grande distance d'échelle mesurable sur l'axe utilisé */
+  function echelleMax(axe, mm) {
+    let k = Math.round((axe.max - axe.min) / axe.pas);
+    while (k > 1 && k * axe.pas * mm > L) k--;
+    return { mm: k * axe.pas * mm, de: axe.min, a: axe.min + k * axe.pas };
   }
 
   /* ============================================================
      RÈGLE VIRTUELLE
      ============================================================ */
+  function corpsRegle() {
+    let c = `<rect x="-4" y="0" width="${L + 8}" height="13" rx="1.2" fill="rgba(255,236,150,.6)" stroke="#b8a55a" stroke-width=".3"/>`;
+    for (let mm = 0; mm <= L; mm++) {
+      const l = mm % 10 === 0 ? 4.5 : (mm % 5 === 0 ? 3.2 : 2);
+      c += `<line x1="${mm}" y1="0" x2="${mm}" y2="${l}" stroke="#3a3522" stroke-width="${mm % 10 ? .15 : .25}"/>`;
+      if (mm % 10 === 0) c += `<text x="${mm}" y="8.4" font-size="3" text-anchor="middle" fill="#3a3522">${mm / 10}</text>`;
+    }
+    return c + `<text x="${L + 2}" y="11.8" font-size="2.2" text-anchor="end" fill="#8a7b3a">cm</text>`;
+  }
+
   function creerRegle(svg, onChange) {
     const st = { ox: 22, oy: 74, rot: 0, cur: 50, sel: 'regle', drag: null };
     const outil = svg.querySelector('.lg-outil');
     const loupeG = svg.querySelector('.lg-loupe');
 
-    // corps de la règle (construit une seule fois)
-    let corps = `<rect x="-4" y="0" width="${L + 8}" height="13" rx="1.2" fill="rgba(255,236,150,.6)" stroke="#b8a55a" stroke-width=".3"/>`;
-    for (let mm = 0; mm <= L; mm++) {
-      const l = mm % 10 === 0 ? 4.5 : (mm % 5 === 0 ? 3.2 : 2);
-      corps += `<line x1="${mm}" y1="0" x2="${mm}" y2="${l}" stroke="#3a3522" stroke-width="${mm % 10 ? .15 : .25}"/>`;
-      if (mm % 10 === 0) corps += `<text x="${mm}" y="8.4" font-size="3" text-anchor="middle" fill="#3a3522">${mm / 10}</text>`;
-    }
-    corps += `<text x="${L + 2}" y="11.8" font-size="2.2" text-anchor="end" fill="#8a7b3a">cm</text>`;
+    const corps = corpsRegle();                       // construit une seule fois
 
     outil.innerHTML = `<g class="lg-r">
         <rect class="lg-r-bande" x="0" y="-1.8" width="0" height="1.8" fill="${ROSE}" opacity=".7"/>
         <g class="lg-r-corps lg-grip">${corps}<rect class="lg-r-sel" x="-4" y="0" width="${L + 8}" height="13" rx="1.2" fill="none" stroke="var(--accent)" stroke-width=".6"/></g>
         <g class="lg-r-cur lg-grip">
-          <rect x="-5" y="-7" width="10" height="29" fill="transparent"/>
+          <rect x="-5" y="-7" width="10" height="21" fill="transparent"/>
           <line x1="0" y1="-5" x2="0" y2="13" stroke="#16181d" stroke-width=".35"/>
           <path d="M0,-1.8 l-1.6,-2.6 h3.2z" fill="#16181d"/>
-          <circle class="lg-r-bouton" cx="0" cy="17" r="2.8" fill="#16181d" stroke="#fff" stroke-width=".5"/>
+          <circle class="lg-r-bouton" cx="0" cy="10.2" r="2.4" fill="#16181d" stroke="#fff" stroke-width=".5"/>
         </g>
         <g class="lg-r-etiq" pointer-events="none"><rect x="-8" y="-3.2" width="16" height="4.8" rx="1" fill="#fff" stroke="${ROSE}" stroke-width=".35"/>
           <text x="0" y=".4" font-size="3.3" font-weight="800" text-anchor="middle" fill="${ROSE}"></text></g>
@@ -306,14 +428,58 @@
     return { st: st, tourner: tourner, pas: pas, lecture: () => st.cur, detruire: detruire, vertical: () => st.rot !== 0 };
   }
 
-  function svgGraphique(def, R) {
+  function svgGraphique(def, R, A) {
     return `<svg class="lg-svg" viewBox="0 0 ${W} ${H}" xmlns="${NS}" xmlns:xlink="http://www.w3.org/1999/xlink">
       <defs><clipPath id="lgClipLoupe"><circle cx="0" cy="0" r="16"/></clipPath></defs>
       <g id="lgScene"><rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/>
-        <g class="lg-graphe">${dessinerGraphe(def, R)}</g>
+        <g class="lg-graphe">${dessinerGraphe(def, R, A)}</g>
         <g class="lg-outil"></g></g>
       <g class="lg-loupe" pointer-events="none"></g>
     </svg>`;
+  }
+
+  /* Barre de contrôle + graphique avec règle interactive (questions et bac à sable) */
+  function htmlOutils() {
+    return `<p class="lg-aide-regle">Fais glisser la <b>règle</b> (partie jaune) pour placer son <b>0</b> sur un repère, puis le <b>curseur</b> (●) jusqu'au second. ◀ ▶ (ou les flèches du clavier) affinent la position du dernier élément touché.<span class="lg-paysage"> 📱 Tourne ton téléphone pour agrandir le graphique.</span></p>
+      <div class="lg-outils">
+        <button type="button" class="btn-small" data-a="tourner">↻ Tourner</button>
+        <button type="button" class="btn-small lg-fin" data-a="moins" aria-label="Reculer">◀</button>
+        <button type="button" class="btn-small lg-fin" data-a="plus" aria-label="Avancer">▶</button>
+        <span class="lg-lecture">Lecture : <span data-a="lecture"></span></span>
+      </div>`;
+  }
+  function brancherOutils(root) {
+    const $ = a => root.querySelector(`[data-a="${a}"]`);
+    const regle = creerRegle(root.querySelector('.lg-svg'), cur => { $('lecture').textContent = fmt(cur / 10, 1) + ' cm'; });
+    const moins = $('moins'), plus = $('plus');
+    $('tourner').onclick = () => {
+      regle.tourner();
+      moins.textContent = regle.vertical() ? '▼' : '◀'; plus.textContent = regle.vertical() ? '▲' : '▶';
+    };
+    moins.onclick = () => regle.pas(-1);
+    plus.onclick = () => regle.pas(1);
+    return regle;
+  }
+
+  /* Bac à sable (cours) : graphique + règle, sans tableau */
+  function bacASable(root, def) {
+    const R = repere(def), A = analyser(def, R);
+    root.innerHTML = htmlOutils() + `<div class="lg-graph-box">${svgGraphique(def, R, A)}</div>`;
+    return brancherOutils(root);
+  }
+
+  /* Figure statique (cours) : graphique et règle(s) déjà placée(s).
+     regles : [{ ox, oy, rot, cur }] en mm papier */
+  function figure(def, regles, sansCible) {
+    const R = repere(def), A = analyser(def, R);
+    const graphe = sansCible ? dessinerGraphe(Object.assign({}, def, { type: '_' }), R, A) : dessinerGraphe(def, R, A);
+    const rg = (regles || []).map(r => `<g transform="translate(${r.ox},${r.oy}) rotate(${r.rot || 0})">
+        <rect x="0" y="-1.8" width="${r.cur}" height="1.8" fill="${ROSE}" opacity=".7"/>${corpsRegle()}
+        <line x1="${r.cur}" y1="-5" x2="${r.cur}" y2="13" stroke="#16181d" stroke-width=".35"/>
+        <path d="M${r.cur},-1.8 l-1.6,-2.6 h3.2z" fill="#16181d"/><circle cx="${r.cur}" cy="10.2" r="2.4" fill="#16181d" stroke="#fff" stroke-width=".5"/>
+        <g transform="translate(${Math.max(8, r.cur / 2)},-4.2) rotate(${-(r.rot || 0)})"><rect x="-8" y="-3.2" width="16" height="4.8" rx="1" fill="#fff" stroke="${ROSE}" stroke-width=".35"/>
+        <text x="0" y=".4" font-size="3.3" font-weight="800" text-anchor="middle" fill="${ROSE}">${fmt(r.cur / 10, 1)} cm</text></g></g>`).join('');
+    return `<div class="lg-graph-box lg-figure"><svg viewBox="0 0 ${W} ${H}" xmlns="${NS}"><rect width="${W}" height="${H}" fill="#fff"/>${graphe}${rg}</svg></div>`;
   }
 
   /* ============================================================
@@ -418,9 +584,9 @@
   function poserQuestion(root, def, opts) {
     opts = opts || {};
     const R = repere(def);
-    const cibles = ciblesMesure(def, R);
-    const ax = def.axeX;
-    const unitesAxe = def.unites || ['cm', 'mm', ax.unite, def.axeY.unite];
+    const A = analyser(def, R);
+    const ax = A.axe, g = def.grandeur, sym = symH(g.symbole);
+    const unitesAxe = def.unites || ['cm', 'mm', def.axeX.unite, def.axeY.unite].filter((u, i, t) => t.indexOf(u) === i);
     const pts = { tableau: 1, calcul: 1, unite: 1 };
     let res = {};                                     // résultats des étapes
 
@@ -430,14 +596,8 @@
     root.innerHTML = `
       <p class="lg-contexte">${def.contexte}</p>
       <div class="lg-cible"><span class="lg-cible-icone">?</span><div>${def.cible}</div></div>
-      <p class="lg-aide-regle">Fais glisser la <b>règle</b> (partie jaune) pour placer son <b>0</b> sur un repère, puis le <b>curseur</b> (●) jusqu'au second. ◀ ▶ (ou les flèches du clavier) affinent la position du dernier élément touché.<span class="lg-paysage"> 📱 Tourne ton téléphone pour agrandir le graphique.</span></p>
-      <div class="lg-outils">
-        <button type="button" class="btn-small" data-a="tourner">↻ Tourner</button>
-        <button type="button" class="btn-small lg-fin" data-a="moins" aria-label="Reculer">◀</button>
-        <button type="button" class="btn-small lg-fin" data-a="plus" aria-label="Avancer">▶</button>
-        <span class="lg-lecture">Lecture : <span data-a="lecture"></span></span>
-      </div>
-      <div class="lg-graph-box">${svgGraphique(def, R)}</div>
+      ${htmlOutils()}
+      <div class="lg-graph-box">${svgGraphique(def, R, A)}</div>
 
       <div class="lg-etape" data-etape="1">
         <h3 class="lg-etape-titre">Étape 1 · Tableau de proportionnalité</h3>
@@ -447,7 +607,7 @@
           <thead><tr><th></th><th>Distance<br>${caseVide('uD', 'lg-slot-unite')}</th><th>${ax.libelle}<br>${caseVide('uV', 'lg-slot-unite')}</th></tr></thead>
           <tbody>
             <tr><th>Échelle</th><td>${saisie('lgED', 'mesure')}</td><td>${saisie('lgEV', 'valeur')}</td></tr>
-            <tr><th>${def.grandeur.ligne}</th><td>${saisie('lgMD', 'mesure')}</td><td class="lg-inconnue">?</td></tr>
+            <tr><th>${A.ligne}</th><td>${saisie('lgMD', 'mesure')}</td><td class="lg-inconnue">?</td></tr>
           </tbody>
         </table></div>
         ${window.numpadWidget ? numpadWidget() : ''}
@@ -460,13 +620,7 @@
       <div data-a="suite"></div>`;
 
     const $ = a => root.querySelector(`[data-a="${a}"]`);
-    const svg = root.querySelector('.lg-svg');
-    const regle = creerRegle(svg, cur => { $('lecture').textContent = fmt(cur / 10, 1) + ' cm'; });
-    const moins = $('moins'), plus = $('plus');
-    function majFleches() { moins.textContent = regle.vertical() ? '▼' : '◀'; plus.textContent = regle.vertical() ? '▲' : '▶'; }
-    $('tourner').onclick = () => { regle.tourner(); majFleches(); };
-    moins.onclick = () => regle.pas(-1);
-    plus.onclick = () => regle.pas(1);
+    const regle = brancherOutils(root);
 
     const eng1 = moteurEtiquettes(root.querySelector('[data-etape="1"]'));
     const cases = { eD: root.querySelector('#lgED'), eV: root.querySelector('#lgEV'), mD: root.querySelector('#lgMD') };
@@ -495,7 +649,7 @@
       let okED = v.eD > 0, okEV = v.eV > 0;
       if (!okED) err.push('Échelle, distance : écris la distance lue sur la règle, en cm (par exemple 12,5).');
       if (!okEV) err.push("Échelle, valeur : écris l'écart entre les deux graduations où tu as placé le 0 et le curseur.");
-      if (okED && okEV && Math.abs(v.eD * 10 - v.eV * R.mmX) > TOL) {
+      if (okED && okEV && Math.abs(v.eD * 10 - v.eV * A.mm) > TOL) {
         okED = okEV = false;
         const p = ax.pas;
         err.push(`La distance et la valeur de l'échelle ne correspondent pas. Le 0 de la règle et le curseur doivent être sur deux graduations de l'axe, et la valeur est l'écart entre ces graduations (par exemple, de ${fmt(ax.min + p, 3)} à ${fmt(ax.min + 5 * p, 3)} ${ax.unite}, l'écart est ${fmt(4 * p, 3)} ${ax.unite}).`);
@@ -505,9 +659,9 @@
       // mesure de la grandeur
       let okMD = v.mD > 0, trouve = null;
       if (okMD) {
-        trouve = cibles.liste.find(x => Math.abs(v.mD * 10 - x.mm) <= TOL) || null;
-        if (!trouve) { okMD = false; err.push(def.grandeur.erreurMesure); }
-      } else err.push('Ligne « ' + def.grandeur.ligne + ' » : écris la distance mesurée pour la grandeur recherchée, en cm.');
+        trouve = A.liste.find(x => Math.abs(v.mD * 10 - x.mm) <= TOL) || null;
+        if (!trouve) { okMD = false; err.push(A.erreur); }
+      } else err.push('Ligne « ' + A.ligne + ' » : écris la distance mesurée pour la grandeur recherchée, en cm.');
       marquerCase('mD', okMD);
 
       const msg = $('msg1');
@@ -528,20 +682,24 @@
     /* Conseils de précision (informatifs, non bloquants) */
     function conseils(eMm, n) {
       const out = [];
-      const em = echelleMax(def, R);
+      const em = echelleMax(ax, A.mm);
       if (eMm < 0.6 * em.mm) {
         out.push(`Pour l'échelle, tu as mesuré ${fmt(eMm / 10, 1)} cm. Tu pouvais mesurer jusqu'à ${fmt(em.mm / 10, 1)} cm (de ${fmt(em.de, 3)} à ${fmt(em.a, 3)} ${ax.unite}) : plus la distance mesurée est grande, moins l'erreur de lecture (environ 1 mm) compte.`);
       }
-      if (def.type === 'periode' && n < cibles.nMax) {
-        out.push(`Tu as mesuré ${n} période${n > 1 ? 's' : ''}. On peut en mesurer jusqu'à ${cibles.nMax} sur ce graphique : en mesurant plusieurs périodes puis en divisant par leur nombre, l'erreur de lecture est divisée d'autant.`);
+      if (def.type === 'periode' && n < A.nMax) {
+        const nom = g.nom || 'période', noms = g.noms || 'périodes';
+        out.push(`Tu as mesuré ${n === 1 ? 'une seule ' + nom : n + ' ' + noms}. On peut en mesurer jusqu'à ${A.nMax} sur ce graphique : en mesurant plusieurs ${noms} puis en divisant par leur nombre, l'erreur de lecture est divisée d'autant.`);
+      }
+      if (def.type === 'amplitude' && n === 1) {
+        out.push("Mesure plutôt l'écart entre le minimum et le maximum (crête à crête), puis divise par 2 : la distance mesurée est deux fois plus grande, l'erreur de lecture compte deux fois moins.");
       }
       return out.map(t => `<div class="lg-info"><span class="lg-info-icone">💡</span><div><b>Pour être plus précis :</b> ${t}</div></div>`).join('');
     }
 
     /* ----- Étape 2 : le calcul ----- */
     function etape2() {
-      const sym = def.grandeur.symbole, n = res.n;
-      const nom = (def.type === 'periode' && n > 1) ? `${n}${sym}` : sym;
+      const n = res.n;
+      const nom = n > 1 ? `${n}${sym}` : sym;
       const u2 = def.unitesCalcul || ['cm', ax.unite, `${ax.unite}/cm`, `cm/${ax.unite}`];
       const div = document.createElement('div');
       div.className = 'lg-etape';
@@ -592,18 +750,24 @@
         div.querySelector('[data-a="verif2"]').disabled = true;
         res.r2 = res.c * res.b / res.a;
         msg.innerHTML = `<div class="lg-msg lg-msg-ok">✓ Calcul correct : ${nom} = ${fmtSig(res.r2, 3)} ${ax.unite}</div>`;
-        if (def.type === 'periode' && res.n > 1) etape3(); else finir(res.r2);
+        if (res.n > 1) etape3(); else finir(res.r2);
       };
     }
 
     /* ----- Étape 3 : diviser par le nombre de périodes (saisi au pavé) ----- */
     function etape3() {
-      const sym = def.grandeur.symbole, n = res.n;
+      const n = res.n;
+      const amp = def.type === 'amplitude';
+      const T3 = amp
+        ? { titre: "Étape 3 · L'amplitude", texte: `Tu as mesuré l'écart entre le minimum et le maximum (crête à crête). Combien de fois contient-il l'amplitude ${sym} ? Divise par ce nombre.`,
+            erreur: "Pas encore : l'écart crête à crête va du minimum au maximum, soit une amplitude sous la valeur moyenne et une au-dessus." }
+        : { titre: `Étape 3 · Une seule ${g.nom || 'période'}`, texte: `Tu as mesuré plusieurs ${g.noms || 'périodes'}. Pour trouver ${sym}, divise par le nombre de ${g.noms || 'périodes'} mesurées.`,
+            erreur: `Pas encore : combien de ${g.noms || 'périodes'} y a-t-il entre le 0 de ta règle et le curseur ?` };
       const div = document.createElement('div');
       div.className = 'lg-etape';
       div.innerHTML = `
-        <h3 class="lg-etape-titre">Étape 3 · Une seule période</h3>
-        <p>Tu as mesuré la durée de plusieurs périodes. Pour trouver ${sym}, divise par le nombre de périodes mesurées.</p>
+        <h3 class="lg-etape-titre">${T3.titre}</h3>
+        <p>${T3.texte}</p>
         <div class="lg-formule"><span>${sym} =</span>
           <span class="lg-frac"><span class="lg-frac-val">${fmtSig(res.r2, 3)} ${ax.unite}</span><span class="lg-frac-ligne" style="min-width:90px"></span>
             <input type="text" id="lgN" class="lg-input lg-cell" inputmode="numeric" autocomplete="off" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></span>
@@ -627,7 +791,7 @@
         const msg = div.querySelector('[data-a="msg3"]');
         if (!ok) {
           pts.calcul = 0;
-          msg.innerHTML = `<div class="lg-msg lg-msg-ko">Pas encore : combien de périodes y a-t-il entre le 0 de ta règle et le curseur ?</div>`;
+          msg.innerHTML = `<div class="lg-msg lg-msg-ko">${T3.erreur}</div>`;
           return;
         }
         fait3 = true;
@@ -644,12 +808,12 @@
     /* ----- Résultat final ----- */
     function finir(val) {
       regle.detruire();
-      const exact = def.valeurExacte;
+      const exact = A.exact;
       const ecart = Math.abs(val - exact) / exact * 100;
       const total = pts.tableau + pts.calcul + pts.unite;
       const div = document.createElement('div');
       div.className = 'lg-resultat';
-      div.innerHTML = `<div>Résultat : <span class="lg-resultat-valeur">${def.grandeur.symbole} ≈ ${fmtSig(val, 3)} ${ax.unite}</span></div>
+      div.innerHTML = `<div>Résultat : <span class="lg-resultat-valeur">${sym} ≈ ${fmtSig(val, 3)} ${ax.unite}</span></div>
         <div style="margin-top:4px;color:var(--ink-2);font-size:.92rem">Valeur utilisée pour tracer le graphique : ${fmtSig(exact, 3)} ${ax.unite} (écart : ${fmt(ecart, 1)} %).</div>
         <div style="margin-top:4px;font-weight:700">Points : ${total} / 3</div>`;
       $('suite').appendChild(div);
@@ -662,6 +826,64 @@
     }
 
     return { detruire: () => regle.detruire() };
+  }
+
+  /* ============================================================
+     ENTRAÎNEMENT : enchaînement des questions, score, écran de fin
+     opts : { app, badge, titre, intro, bank, suite: { href, label } }
+     ============================================================ */
+  function lancerQuiz(opts) {
+    const app = opts.app, bank = opts.bank, MAXQ = 3;
+    let idx = 0, score = 0, recap = [], question = null;
+    function entete() {
+      const pct = Math.round(idx / bank.length * 100);
+      return `<div class="lg-card">
+          <span class="lg-badge">${opts.badge}</span>
+          <h2 class="lg-titre">${opts.titre}</h2>
+          <p class="lg-meta">Question ${idx + 1}/${bank.length} · Score : <b>${score} pt${score > 1 ? 's' : ''}</b></p>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div style="margin-top:12px">${window.numpadToggleBar ? numpadToggleBar() : ''}</div>
+        </div>`;
+    }
+    function intro() {
+      app.innerHTML = `<div class="lg-card">
+          <span class="lg-badge">${opts.badge}</span>
+          <h2 class="lg-titre">${opts.titre}</h2>
+          ${opts.intro}
+          <p class="lg-contexte">Chaque question rapporte <b>3 points</b> (tableau, calcul, unité) si tout est juste du premier coup.</p>
+          <button type="button" class="btn-primary" data-a="go">Commencer →</button>
+        </div>`;
+      app.querySelector('[data-a="go"]').onclick = demarrer;
+    }
+    function demarrer() { idx = 0; score = 0; recap = []; afficher(); }
+    function afficher() {
+      if (question) { question.detruire(); question = null; }
+      if (idx >= bank.length) return fin();
+      app.innerHTML = entete() + `<div class="lg-card" data-a="q"></div>`;
+      window.scrollTo(0, 0);
+      question = poserQuestion(app.querySelector('[data-a="q"]'), bank[idx], {
+        onFini: p => { score += p; recap.push({ n: idx + 1, p: p }); app.querySelector('.lg-meta b').textContent = score + ' pt' + (score > 1 ? 's' : ''); },
+        onSuivant: () => { idx++; afficher(); },
+        onPasser: () => { recap.push({ n: idx + 1, p: 0 }); idx++; afficher(); },
+      });
+    }
+    function fin() {
+      const max = bank.length * MAXQ, pct = Math.round(score / max * 100);
+      if (score === max) confettis();
+      app.innerHTML = `<div class="lg-card" style="text-align:center">
+          <h2 class="lg-titre">Entraînement terminé !</h2>
+          ${score === max ? '<p style="font-weight:800;color:var(--accent-ink)">🏆 Sans-faute !</p>' : ''}
+          <p class="lg-contexte">Score : ${score} / ${max} points (${pct} %)</p>
+          <div class="lg-actions" style="justify-content:center">
+            <button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
+            ${opts.suite ? `<a class="btn-primary" style="text-decoration:none;margin-left:0" href="${opts.suite.href}">${opts.suite.label}</a>` : ''}
+          </div>
+          <div class="lg-recap">${recap.map(r => `<div>Q${r.n}<b>${r.p}/${MAXQ}</b></div>`).join('')}</div>
+        </div>`;
+      app.querySelector('[data-a="re"]').onclick = demarrer;
+      window.scrollTo(0, 0);
+    }
+    intro();
   }
 
   /* ---------- Confettis (sans-faute) ---------- */
@@ -679,5 +901,8 @@
     }
   }
 
-  window.LG = { fmt: fmt, fmtSig: fmtSig, poserQuestion: poserQuestion, confettis: confettis, repere: repere, ciblesMesure: ciblesMesure };
+  window.LG = {
+    fmt: fmt, fmtSig: fmtSig, lireNombre: lireNombre, repere: repere, analyser: analyser,
+    poserQuestion: poserQuestion, lancerQuiz: lancerQuiz, bacASable: bacASable, figure: figure, confettis: confettis,
+  };
 })();

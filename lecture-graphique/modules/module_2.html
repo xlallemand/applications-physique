@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 2 : Entraînement — Lecture graphique</title>
+<title>Module 2 : Entraînement 1 — Lecture graphique</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="lgtools.css">
 <script src="../../assets/nav.js"></script>
@@ -16,71 +16,123 @@
 <div class="lg-page" id="app"></div>
 
 <script>
-/* ---------- Banque de questions ---------- */
+/* ============================================================
+   Banque de questions — Entraînement 1 (difficulté progressive)
+   Types : periode (T ou λ), max, amplitude, lectureY, lectureX.
+   Les signaux périodiques sont décrits par « signal », les autres
+   courbes par une fonction « f ».
+   ============================================================ */
 const bank = [
+  // 1. Période d'un signal sinusoïdal (3 périodes visibles)
   { type: 'periode',
     contexte: "Un générateur basse fréquence (GBF) alimente un haut-parleur. On visualise la tension u à ses bornes en fonction du temps t.",
-    cible: "À déterminer : la <b>période T</b> de la tension, c'est-à-dire la durée d'un motif qui se répète (repérée en <b>orange</b> sur le graphique, entre deux maximums).",
-    grandeur: { symbole: 'T', ligne: 'Période(s)',
-      erreurMesure: "Ta mesure de la grandeur ne correspond pas à une ou plusieurs périodes : place le 0 de la règle et le curseur sur deux points équivalents du signal (par exemple deux maximums)." },
+    cible: "À déterminer : la <b>période T</b> de la tension, c'est-à-dire la durée d'un motif qui se répète (repérée en <b>orange</b>, entre deux maximums).",
+    grandeur: { symbole: 'T', nom: 'période', noms: 'périodes' },
     axeX: { min: 0, max: 40, pas: 5, nom: 't', unite: 'ms', libelle: 'Durée' },
     axeY: { min: -5, max: 5, pas: 1, nom: 'u', unite: 'V' },
     signal: { forme: 'sinus', periode: 11.6, ampl: 3.2, phase: 1.3 },
-    valeurExacte: 11.6,
     unites: ['cm', 'mm', 'ms', 's', 'V'] },
+
+  // 2. Lecture d'une ordonnée
+  { type: 'lectureY',
+    contexte: "On relève la température θ d'une tasse de thé posée sur une table, en fonction du temps t.",
+    cible: "À déterminer : la <b>température θ</b> du thé à la date <b>t = 15 min</b> (point repéré en <b>orange</b>). Mesure verticalement, depuis l'axe des abscisses (0 °C) jusqu'au point.",
+    grandeur: { symbole: 'θ' },
+    axeX: { min: 0, max: 40, pas: 5, nom: 't', unite: 'min', libelle: 'Durée' },
+    axeY: { min: 0, max: 100, pas: 10, nom: 'θ', unite: '°C', libelle: 'Température' },
+    f: t => 20 + 65 * Math.exp(-t / 9), x0: 15,
+    unites: ['cm', 'mm', 'min', '°C', 's'] },
+
+  // 3. Période : son d'un diapason (4 périodes visibles)
+  { type: 'periode',
+    contexte: "Un microphone capte le son émis par un diapason. On visualise la tension u délivrée par le microphone en fonction du temps t.",
+    cible: "À déterminer : la <b>période T</b> du son (repérée en <b>orange</b>, entre deux maximums).",
+    grandeur: { symbole: 'T', nom: 'période', noms: 'périodes' },
+    axeX: { min: 0, max: 10, pas: 2, nom: 't', unite: 'ms', libelle: 'Durée' },
+    axeY: { min: -30, max: 30, pas: 10, nom: 'u', unite: 'mV' },
+    signal: { forme: 'sinus', periode: 2.27, ampl: 21, phase: 0.4 },
+    unites: ['cm', 'mm', 'ms', 's', 'mV'] },
+
+  // 4. Valeur maximale d'une tension
+  { type: 'max',
+    contexte: "On visualise à l'oscilloscope la tension alternative u délivrée par un alternateur de vélo.",
+    cible: "À déterminer : la <b>valeur maximale U<sub>max</sub></b> de la tension (repérée en <b>orange</b>). Mesure verticalement, depuis l'axe des abscisses (0 V) jusqu'au maximum.",
+    grandeur: { symbole: 'U_max' },
+    axeX: { min: 0, max: 30, pas: 5, nom: 't', unite: 'ms', libelle: 'Durée' },
+    axeY: { min: -6, max: 6, pas: 2, nom: 'u', unite: 'V', libelle: 'Tension' },
+    signal: { forme: 'sinus', periode: 8.2, ampl: 4.3, phase: 0.9 },
+    unites: ['cm', 'mm', 'ms', 'V', 'mV'] },
+
+  // 5. Période d'un signal triangulaire
+  { type: 'periode',
+    contexte: "Un GBF délivre une tension triangulaire. On visualise cette tension u en fonction du temps t.",
+    cible: "À déterminer : la <b>période T</b> du signal (repérée en <b>orange</b>, entre deux sommets).",
+    grandeur: { symbole: 'T', nom: 'période', noms: 'périodes' },
+    axeX: { min: 0, max: 2, pas: 0.25, nom: 't', unite: 'ms', libelle: 'Durée' },
+    axeY: { min: -4, max: 4, pas: 1, nom: 'u', unite: 'V' },
+    signal: { forme: 'triangle', periode: 0.46, ampl: 2.5, phase: 0.05 },
+    unites: ['cm', 'mm', 'ms', 's', 'V'] },
+
+  // 6. Lecture d'une abscisse
+  { type: 'lectureX',
+    contexte: "Un condensateur se charge à travers une résistance. On enregistre la tension u à ses bornes en fonction du temps t.",
+    cible: "À déterminer : la <b>date t<sub>1</sub></b> à laquelle la tension atteint <b>4 V</b> (point repéré en <b>orange</b>). Mesure horizontalement, depuis l'axe des ordonnées (t = 0) jusqu'au point.",
+    grandeur: { symbole: 't_1' },
+    axeX: { min: 0, max: 4, pas: 0.5, nom: 't', unite: 's', libelle: 'Durée' },
+    axeY: { min: 0, max: 7, pas: 1, nom: 'u', unite: 'V', libelle: 'Tension' },
+    f: t => 6 * (1 - Math.exp(-t / 0.8)), y0: 4,
+    unites: ['cm', 'mm', 's', 'ms', 'V'] },
+
+  // 7. Période d'un signal carré
+  { type: 'periode',
+    contexte: "Un capteur délivre un signal carré dont la fréquence dépend de la vitesse de rotation d'une roue. On visualise la tension u en fonction du temps t.",
+    cible: "À déterminer : la <b>période T</b> du signal (repérée en <b>orange</b>, entre deux fronts montants).",
+    grandeur: { symbole: 'T', nom: 'période', noms: 'périodes' },
+    axeX: { min: 0, max: 16, pas: 2, nom: 't', unite: 'ms', libelle: 'Durée' },
+    axeY: { min: -1, max: 6, pas: 1, nom: 'u', unite: 'V' },
+    signal: { forme: 'carre', periode: 3.4, ampl: 2.5, decal: 2.5, phase: 0.7 },
+    unites: ['cm', 'mm', 'ms', 's', 'V'] },
+
+  // 8. Longueur d'onde (période spatiale)
+  { type: 'periode',
+    contexte: "Une onde se propage le long d'une corde. Une photographie permet de tracer l'élongation y de la corde en fonction de la position x, à un instant donné.",
+    cible: "À déterminer : la <b>longueur d'onde λ</b>, c'est-à-dire la distance entre deux points de la corde dans le même état (repérée en <b>orange</b>, entre deux maximums).",
+    grandeur: { symbole: 'λ', nom: "longueur d'onde", noms: "longueurs d'onde" },
+    axeX: { min: 0, max: 3, pas: 0.5, nom: 'x', unite: 'm', libelle: 'Position' },
+    axeY: { min: -30, max: 30, pas: 10, nom: 'y', unite: 'mm' },
+    signal: { forme: 'sinus', periode: 0.72, ampl: 18, phase: 0.1 },
+    unites: ['cm', 'mm', 'm', 's'] },
+
+  // 9. Amplitude d'une tension
+  { type: 'amplitude',
+    contexte: "Un microphone capte un son pur. On visualise la tension u qu'il délivre en fonction du temps t.",
+    cible: "À déterminer : l'<b>amplitude U<sub>m</sub></b> de la tension, c'est-à-dire l'écart entre sa valeur moyenne et son maximum (repérée en <b>orange</b>).",
+    grandeur: { symbole: 'U_m' },
+    axeX: { min: 0, max: 5, pas: 1, nom: 't', unite: 'ms', libelle: 'Durée' },
+    axeY: { min: -40, max: 40, pas: 10, nom: 'u', unite: 'mV', libelle: 'Tension' },
+    signal: { forme: 'sinus', periode: 1.3, ampl: 23, phase: 0.2 },
+    unites: ['cm', 'mm', 'ms', 'mV', 'V'] },
+
+  // 10. Période d'un son complexe
+  { type: 'periode',
+    contexte: "Un microphone capte le son d'une flûte. La tension u qu'il délivre n'est pas sinusoïdale, mais elle est périodique.",
+    cible: "À déterminer : la <b>période T</b> du son, c'est-à-dire la durée du motif qui se répète (repérée en <b>orange</b>, entre deux pics les plus hauts).",
+    grandeur: { symbole: 'T', nom: 'période', noms: 'périodes' },
+    axeX: { min: 0, max: 12, pas: 2, nom: 't', unite: 'ms', libelle: 'Durée' },
+    axeY: { min: -4, max: 4, pas: 1, nom: 'u', unite: 'mV' },
+    signal: { forme: 'complexe', periode: 2.9, ampl: 3, phase: 0.3 },
+    unites: ['cm', 'mm', 'ms', 's', 'mV'] },
 ];
-
-let idx = 0, score = 0, recap = [], question = null;
-const MAX_Q = 3;
-
-function entete() {
-  const pct = Math.round(idx / bank.length * 100);
-  return `<div class="lg-card">
-      <span class="lg-badge">MODULE 2</span>
-      <h2 class="lg-titre">Entraînement</h2>
-      <p class="lg-meta">Question ${idx + 1}/${bank.length} · Score : <b>${score} pt${score > 1 ? 's' : ''}</b></p>
-      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-      <div style="margin-top:12px">${numpadToggleBar()}</div>
-    </div>`;
-}
-
-function intro() {
-  document.getElementById('app').innerHTML = `<div class="lg-card">
-      <span class="lg-badge">MODULE 2</span>
-      <h2 class="lg-titre">Entraînement</h2>
-      <p class="lg-contexte">Pour chaque graphique : mesure l'échelle et la grandeur recherchée avec la règle, remplis le tableau de proportionnalité, puis construis le calcul. Chaque question rapporte 3 points (tableau, calcul, unité) si tout est juste du premier coup.</p>
-      <button class="btn-primary" onclick="demarrer()">Commencer →</button>
-    </div>`;
-}
-function demarrer() { idx = 0; score = 0; recap = []; afficher(); }
-
-function afficher() {
-  if (question) { question.detruire(); question = null; }
-  if (idx >= bank.length) return fin();
-  document.getElementById('app').innerHTML = entete() + `<div class="lg-card" id="qCard"></div>`;
-  window.scrollTo(0, 0);
-  question = LG.poserQuestion(document.getElementById('qCard'), bank[idx], {
-    onFini: (p, m) => { score += p; recap.push({ n: idx + 1, p: p, m: m }); document.querySelector('.lg-meta b').textContent = score + ' pt' + (score > 1 ? 's' : ''); },
-    onSuivant: () => { idx++; afficher(); },
-    onPasser: () => { recap.push({ n: idx + 1, p: 0, m: MAX_Q }); idx++; afficher(); },
-  });
-}
-
-function fin() {
-  const max = bank.length * MAX_Q, pct = Math.round(score / max * 100);
-  if (score === max) LG.confettis();
-  document.getElementById('app').innerHTML = `<div class="lg-card" style="text-align:center">
-      <h2 class="lg-titre">Entraînement terminé !</h2>
-      ${score === max ? '<p style="font-weight:800;color:var(--accent-ink)">🏆 Sans-faute !</p>' : ''}
-      <p class="lg-contexte">Score : ${score} / ${max} points (${pct} %)</p>
-      <button class="btn-primary" onclick="demarrer()">↺ Recommencer</button>
-      <div class="lg-recap">${recap.map(r => `<div>Q${r.n}<b>${r.p}/${r.m}</b></div>`).join('')}</div>
-    </div>`;
-}
 
 // pavé numérique masqué par défaut
 setNumpadPref(false);
-intro();
+LG.lancerQuiz({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2', titre: 'Entraînement 1',
+  intro: `<p class="lg-contexte">Pour chaque graphique : mesure l'échelle et la grandeur recherchée avec la règle, complète le tableau de proportionnalité, puis construis le calcul. Les graphiques représentent des situations variées : périodes, longueur d'onde, valeur maximale, amplitude, lecture d'un point.</p>`,
+  bank: bank,
+  suite: { href: 'module_3.html', label: 'Entraînement 2 →' },
+});
 
 const nav = AppNav.init({
   appName: 'Lecture graphique', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
@@ -89,13 +141,13 @@ const nav = AppNav.init({
   groups: [
     { title: 'Modules', items: [
       { key: 'module_1', label: 'Module 1 : La méthode' },
-      { key: 'module_2', label: 'Module 2 : Entraînement' },
-      { key: 'module_3', label: 'Module 3 : Entraînement +' },
+      { key: 'module_2', label: 'Module 2 : Entraînement 1' },
+      { key: 'module_3', label: 'Module 3 : Entraînement 2' },
     ]},
   ],
 });
 nav.setActive('module_2');
-nav.setTitle('Module 2 : Entraînement');
+nav.setTitle('Module 2 : Entraînement 1');
 </script>
 </body>
 </html>
