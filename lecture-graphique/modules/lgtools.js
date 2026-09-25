@@ -16,7 +16,7 @@
   'use strict';
 
   const NS = 'http://www.w3.org/2000/svg';
-  const W = 180, H = 118;                 // taille du graphique (mm papier)
+  const W = 180, H = 112;                 // taille du graphique (mm papier)
   const L = 160;                          // longueur graduée de la règle (mm)
   const TOL = 1.5;                        // tolérance de mesure (mm)
   const ORANGE = '#e8890c', ROSE = '#d61f69';
@@ -85,7 +85,7 @@
       h += `<line x1="${P.x0 - 1.2}" y1="${R.sy(v)}" x2="${P.x0 + 1.2}" y2="${R.sy(v)}" stroke="#16181d" stroke-width=".4"/>`;
       h += `<text x="${P.x0 - 2}" y="${R.sy(v) + 1.3}" font-size="3.8" text-anchor="end" fill="#55585f">${fmt(v, 3)}</text>`;
     }
-    h += `<text x="${P.x1 + 6}" y="${P.yBot + 12}" font-size="4" text-anchor="end" font-weight="700" fill="#16181d">${ax.nom} (${ax.unite})</text>`;
+    h += `<text x="${P.x1 + 6}" y="${P.yBot + 11}" font-size="4" text-anchor="end" font-weight="700" fill="#16181d">${ax.nom} (${ax.unite})</text>`;
     h += `<text x="${P.x0 + 2.5}" y="${P.yTop - 3}" font-size="4" font-weight="700" fill="#16181d">${ay.nom} (${ay.unite})</text>`;
     // courbe
     const f = fonctionSignal(def.signal);
@@ -424,43 +424,33 @@
     const pts = { tableau: 1, calcul: 1, unite: 1 };
     let res = {};                                     // résultats des étapes
 
+    // case du tableau : saisie au clavier ou au pavé numérique
+    const saisie = (id, ph) => `<input type="text" id="${id}" class="lg-input lg-cell" inputmode="decimal" autocomplete="off" placeholder="${ph}" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">`;
+
     root.innerHTML = `
       <p class="lg-contexte">${def.contexte}</p>
       <div class="lg-cible"><span class="lg-cible-icone">?</span><div>${def.cible}</div></div>
-      <div class="lg-graph-box">${svgGraphique(def, R)}</div>
-      <p class="lg-paysage">📱 Tourne ton téléphone à l'horizontale pour agrandir le graphique.</p>
+      <p class="lg-aide-regle">Fais glisser la <b>règle</b> (partie jaune) pour placer son <b>0</b> sur un repère, puis le <b>curseur</b> (●) jusqu'au second. ◀ ▶ (ou les flèches du clavier) affinent la position du dernier élément touché.<span class="lg-paysage"> 📱 Tourne ton téléphone pour agrandir le graphique.</span></p>
       <div class="lg-outils">
-        <button type="button" class="btn-small" data-a="tourner">↻ Tourner la règle</button>
+        <button type="button" class="btn-small" data-a="tourner">↻ Tourner</button>
         <button type="button" class="btn-small lg-fin" data-a="moins" aria-label="Reculer">◀</button>
         <button type="button" class="btn-small lg-fin" data-a="plus" aria-label="Avancer">▶</button>
-        <button type="button" class="btn-small" data-a="garder">📌 Garder la mesure</button>
-        <span class="lg-lecture" data-a="lecture"></span>
+        <span class="lg-lecture">Lecture : <span data-a="lecture"></span></span>
       </div>
-      <p class="lg-aide-regle">Fais glisser la <b>règle</b> (partie jaune) pour placer son <b>0</b> sur un repère, puis le <b>curseur</b> (●) jusqu'au second repère. Les boutons ◀ ▶ (ou les flèches du clavier) affinent la position du dernier élément touché.</p>
+      <div class="lg-graph-box">${svgGraphique(def, R)}</div>
 
       <div class="lg-etape" data-etape="1">
-        <h3 class="lg-etape-titre">Étape 1 · Le tableau de proportionnalité</h3>
-        <p>Fais <b>deux mesures</b> à la règle : l'échelle (entre deux graduations de l'axe, le plus loin possible l'une de l'autre) et la grandeur recherchée. Chaque mesure gardée devient une étiquette. Indique aussi la valeur qui correspond à ta mesure d'échelle, puis glisse les étiquettes et les unités dans le tableau.</p>
-        ${window.numpadToggleBar ? numpadToggleBar() : ''}
-        <div class="lg-saisie">
-          <label for="lgValeur">Valeur entre les deux graduations :</label>
-          <input type="text" id="lgValeur" class="lg-input" inputmode="decimal" autocomplete="off" placeholder="ex : 30" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-          <button type="button" class="btn-small" data-a="ajouter">Créer l'étiquette</button>
-        </div>
-        ${window.numpadWidget ? numpadWidget() : ''}
-        <p class="lg-msg lg-msg-ko" data-a="msgValeur" style="display:none"></p>
-        <div class="lg-palettes">
-          <div class="lg-palette" id="lgPalMes"><span class="lg-palette-titre">Tes mesures et valeurs</span><span class="lg-palette-vide">Garde une mesure ou crée une étiquette de valeur : elle apparaîtra ici.</span></div>
-          <div class="lg-palette" id="lgPalUni"><span class="lg-palette-titre">Unités</span>${unitesAxe.map(u => etiquette(u, { type: 'unite', u: u, home: 'lgPalUni' }, 'lg-chip-unite')).join('')}</div>
-        </div>
+        <h3 class="lg-etape-titre">Étape 1 · Tableau de proportionnalité</h3>
+        <div class="lg-palette lg-palette-ligne" id="lgPalUni"><span class="lg-palette-titre">Unités :</span>${unitesAxe.map(u => etiquette(u, { type: 'unite', u: u, home: 'lgPalUni' }, 'lg-chip-unite')).join('')}</div>
         <div class="lg-table-wrap"><table class="lg-table">
           <colgroup><col class="lg-col-titre"><col><col></colgroup>
           <thead><tr><th></th><th>Distance<br>${caseVide('uD', 'lg-slot-unite')}</th><th>${ax.libelle}<br>${caseVide('uV', 'lg-slot-unite')}</th></tr></thead>
           <tbody>
-            <tr><th>Échelle</th><td>${caseVide('eD')}</td><td>${caseVide('eV')}</td></tr>
-            <tr><th>${def.grandeur.ligne}</th><td>${caseVide('mD')}</td><td class="lg-inconnue">?</td></tr>
+            <tr><th>Échelle</th><td>${saisie('lgED', 'mesure')}</td><td>${saisie('lgEV', 'valeur')}</td></tr>
+            <tr><th>${def.grandeur.ligne}</th><td>${saisie('lgMD', 'mesure')}</td><td class="lg-inconnue">?</td></tr>
           </tbody>
         </table></div>
+        ${window.numpadWidget ? numpadWidget() : ''}
         <div class="lg-actions">
           <button type="button" class="btn-small" data-a="passer">Passer →</button>
           <button type="button" class="btn-primary" data-a="verif1">Vérifier le tableau</button>
@@ -479,62 +469,46 @@
     plus.onclick = () => regle.pas(1);
 
     const eng1 = moteurEtiquettes(root.querySelector('[data-etape="1"]'));
-    const palMes = root.querySelector('#lgPalMes');
-    $('garder').onclick = () => {
-      const mm = regle.lecture();
-      if (!mm) return;
-      palMes.insertAdjacentHTML('beforeend', etiquette(fmt(mm / 10, 1), { type: 'mesure', mm: mm, home: 'lgPalMes' }, 'lg-chip-mesure'));
-      eng1.ajouter();
-    };
-    const inp = root.querySelector('#lgValeur');
-    function ajouterValeur() {
-      const v = lireNombre(inp.value), m = $('msgValeur');
-      if (!(v > 0)) { m.textContent = 'Écris un nombre positif (par exemple 30 ou 2,5).'; m.style.display = ''; return; }
-      m.style.display = 'none';
-      palMes.insertAdjacentHTML('beforeend', etiquette(fmt(v, 4), { type: 'valeur', v: v, home: 'lgPalMes' }));
-      inp.value = '';
-      eng1.ajouter();
-    }
-    $('ajouter').onclick = ajouterValeur;
-    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ajouterValeur(); } });
+    const cases = { eD: root.querySelector('#lgED'), eV: root.querySelector('#lgEV'), mD: root.querySelector('#lgMD') };
+    Object.keys(cases).forEach(k => {
+      cases[k].addEventListener('input', () => cases[k].classList.remove('is-ok', 'is-ko'));
+      cases[k].addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('verif1').click(); } });
+    });
+    function marquerCase(k, ok) { cases[k].classList.toggle('is-ok', ok); cases[k].classList.toggle('is-ko', !ok); }
     $('passer').onclick = () => { regle.detruire(); if (opts.onPasser) opts.onPasser(); };
 
     /* ----- Vérification du tableau ----- */
     let fait1 = false;
     $('verif1').onclick = () => {
       if (fait1) return;
-      const c = { uD: eng1.dans('uD'), uV: eng1.dans('uV'), eD: eng1.dans('eD'), eV: eng1.dans('eV'), mD: eng1.dans('mD') };
-      const t = n => c[n] && c[n].dataset.type;
+      const u = { uD: eng1.dans('uD'), uV: eng1.dans('uV') };
+      const v = { eD: lireNombre(cases.eD.value), eV: lireNombre(cases.eV.value), mD: lireNombre(cases.mD.value) };
       const err = [];
-      const okUD = t('uD') === 'unite' && c.uD.dataset.u === 'cm';
+      const okUD = !!(u.uD && u.uD.dataset.u === 'cm');
       eng1.marquer('uD', okUD);
       if (!okUD) err.push('Unité des distances : dans quelle unité est graduée ta règle ?');
-      const okUV = t('uV') === 'unite' && c.uV.dataset.u === ax.unite;
+      const okUV = !!(u.uV && u.uV.dataset.u === ax.unite);
       eng1.marquer('uV', okUV);
       if (!okUV) err.push(`Unité de la 2<sup>e</sup> colonne : regarde l'unité indiquée au bout de l'axe « ${ax.nom} ».`);
 
-      // échelle : la distance et la valeur doivent se correspondre
-      let okED = t('eD') === 'mesure', okEV = t('eV') === 'valeur';
-      if (!okED) err.push('Échelle, distance : place une mesure faite à la règle (étiquette 📏).');
-      if (!okEV) err.push('Échelle, valeur : place l\'étiquette de la valeur entre tes deux graduations.');
-      if (okED && okEV) {
-        const dmm = +c.eD.dataset.mm, v = +c.eV.dataset.v;
-        if (Math.abs(dmm - v * R.mmX) > TOL) {
-          okED = okEV = false;
-          const p = ax.pas;
-          err.push(`La distance et la valeur de l'échelle ne correspondent pas. Le 0 de la règle et le curseur doivent être sur deux graduations de l'axe, et la valeur est l'écart entre ces graduations (par exemple, de ${fmt(ax.min + p, 3)} à ${fmt(ax.min + 5 * p, 3)} ${ax.unite}, l'écart est ${fmt(4 * p, 3)} ${ax.unite}).`);
-        }
+      // échelle : la distance (cm) et la valeur doivent se correspondre
+      let okED = v.eD > 0, okEV = v.eV > 0;
+      if (!okED) err.push('Échelle, distance : écris la distance lue sur la règle, en cm (par exemple 12,5).');
+      if (!okEV) err.push("Échelle, valeur : écris l'écart entre les deux graduations où tu as placé le 0 et le curseur.");
+      if (okED && okEV && Math.abs(v.eD * 10 - v.eV * R.mmX) > TOL) {
+        okED = okEV = false;
+        const p = ax.pas;
+        err.push(`La distance et la valeur de l'échelle ne correspondent pas. Le 0 de la règle et le curseur doivent être sur deux graduations de l'axe, et la valeur est l'écart entre ces graduations (par exemple, de ${fmt(ax.min + p, 3)} à ${fmt(ax.min + 5 * p, 3)} ${ax.unite}, l'écart est ${fmt(4 * p, 3)} ${ax.unite}).`);
       }
-      eng1.marquer('eD', okED); eng1.marquer('eV', okEV);
+      marquerCase('eD', okED); marquerCase('eV', okEV);
 
       // mesure de la grandeur
-      let okMD = t('mD') === 'mesure', trouve = null;
+      let okMD = v.mD > 0, trouve = null;
       if (okMD) {
-        const dmm = +c.mD.dataset.mm;
-        trouve = cibles.liste.find(x => Math.abs(dmm - x.mm) <= TOL) || null;
+        trouve = cibles.liste.find(x => Math.abs(v.mD * 10 - x.mm) <= TOL) || null;
         if (!trouve) { okMD = false; err.push(def.grandeur.erreurMesure); }
-      } else err.push('Ligne « ' + def.grandeur.ligne + ' » : place ta mesure de la grandeur recherchée (étiquette 📏).');
-      eng1.marquer('mD', okMD);
+      } else err.push('Ligne « ' + def.grandeur.ligne + ' » : écris la distance mesurée pour la grandeur recherchée, en cm.');
+      marquerCase('mD', okMD);
 
       const msg = $('msg1');
       if (err.length) {
@@ -544,8 +518,10 @@
       }
       fait1 = true;
       $('verif1').disabled = true; $('passer').style.display = 'none';
-      res = { a: +c.eD.dataset.mm / 10, b: +c.eV.dataset.v, c: +c.mD.dataset.mm / 10, n: trouve.n };
-      msg.innerHTML = `<div class="lg-msg lg-msg-ok">✓ Tableau correct !</div>` + conseils(+c.eD.dataset.mm, trouve.n);
+      Object.keys(cases).forEach(k => { cases[k].readOnly = true; });
+      root.querySelectorAll('[data-etape="1"] .np-section').forEach(n => n.remove());
+      res = { a: v.eD, b: v.eV, c: v.mD, n: trouve.n };
+      msg.innerHTML = `<div class="lg-msg lg-msg-ok">✓ Tableau correct !</div>` + conseils(v.eD * 10, trouve.n);
       etape2();
     };
 
@@ -574,9 +550,9 @@
         <p>Glisse les valeurs du tableau dans le produit en croix. Le résultat s'affiche automatiquement : choisis ensuite son unité.</p>
         <div class="lg-palettes">
           <div class="lg-palette" id="lgPal2"><span class="lg-palette-titre">Valeurs du tableau</span>
-            ${etiquette(fmt(res.a, 1) + ' cm', { id: 'a', v: res.a, home: 'lgPal2' })}
+            ${etiquette(fmt(res.a, 2) + ' cm', { id: 'a', v: res.a, home: 'lgPal2' })}
             ${etiquette(fmt(res.b, 4) + ' ' + ax.unite, { id: 'b', v: res.b, home: 'lgPal2' })}
-            ${etiquette(fmt(res.c, 1) + ' cm', { id: 'c', v: res.c, home: 'lgPal2' })}</div>
+            ${etiquette(fmt(res.c, 2) + ' cm', { id: 'c', v: res.c, home: 'lgPal2' })}</div>
           <div class="lg-palette" id="lgPal2u"><span class="lg-palette-titre">Unités</span>
             ${u2.map(u => etiquette(u, { type: 'unite', u: u, home: 'lgPal2u' }, 'lg-chip-unite')).join('')}</div>
         </div>
@@ -620,47 +596,49 @@
       };
     }
 
-    /* ----- Étape 3 : diviser par le nombre de périodes ----- */
+    /* ----- Étape 3 : diviser par le nombre de périodes (saisi au pavé) ----- */
     function etape3() {
       const sym = def.grandeur.symbole, n = res.n;
-      const nbs = [];
-      for (let i = 1; i <= Math.max(5, cibles.nMax); i++) nbs.push(i);
       const div = document.createElement('div');
       div.className = 'lg-etape';
       div.innerHTML = `
         <h3 class="lg-etape-titre">Étape 3 · Une seule période</h3>
         <p>Tu as mesuré la durée de plusieurs périodes. Pour trouver ${sym}, divise par le nombre de périodes mesurées.</p>
-        <div class="lg-palette" id="lgPal3"><span class="lg-palette-titre">Étiquettes</span>
-          ${etiquette(fmtSig(res.r2, 3) + ' ' + ax.unite, { id: 'r', v: res.r2, home: 'lgPal3' })}
-          ${nbs.map(i => etiquette(String(i), { id: 'n' + i, v: i, home: 'lgPal3' })).join('')}</div>
         <div class="lg-formule"><span>${sym} =</span>
-          <span class="lg-frac">${caseVide('h')}<span class="lg-frac-ligne" style="min-width:90px"></span>${caseVide('b')}</span>
+          <span class="lg-frac"><span class="lg-frac-val">${fmtSig(res.r2, 3)} ${ax.unite}</span><span class="lg-frac-ligne" style="min-width:90px"></span>
+            <input type="text" id="lgN" class="lg-input lg-cell" inputmode="numeric" autocomplete="off" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></span>
           <span class="lg-egal">= <span class="lg-live" data-a="live3">?</span> ${ax.unite}</span></div>
+        ${window.numpadWidget ? numpadWidget(false, { decimal: false }) : ''}
         <div class="lg-actions"><button type="button" class="btn-primary" data-a="verif3">Vérifier</button></div>
         <div data-a="msg3"></div>`;
       $('suite').appendChild(div);
-      const eng3 = moteurEtiquettes(div, () => {
-        const h = eng3.dans('h'), b = eng3.dans('b'), live = div.querySelector('[data-a="live3"]');
-        if (h && b) { live.textContent = fmtSig(+h.dataset.v / +b.dataset.v, 3); live.classList.add('ok'); }
+      const inN = div.querySelector('#lgN'), live = div.querySelector('[data-a="live3"]');
+      inN.addEventListener('input', () => {
+        inN.classList.remove('is-ok', 'is-ko');
+        const k = lireNombre(inN.value);
+        if (k > 0) { live.textContent = fmtSig(res.r2 / k, 3); live.classList.add('ok'); }
         else { live.textContent = '?'; live.classList.remove('ok'); }
       });
       let fait3 = false;
-      div.querySelector('[data-a="verif3"]').onclick = () => {
+      function verifier3() {
         if (fait3) return;
-        const h = eng3.dans('h'), b = eng3.dans('b');
-        const okH = !!(h && h.dataset.id === 'r'), okB = !!(b && b.dataset.id === 'n' + n);
-        eng3.marquer('h', okH); eng3.marquer('b', okB);
+        const ok = lireNombre(inN.value) === n;
+        inN.classList.toggle('is-ok', ok); inN.classList.toggle('is-ko', !ok);
         const msg = div.querySelector('[data-a="msg3"]');
-        if (!okH || !okB) {
+        if (!ok) {
           pts.calcul = 0;
-          msg.innerHTML = `<div class="lg-msg lg-msg-ko">Pas encore : on divise la durée trouvée à l'étape 2 par le nombre de périodes que tu as mesurées${okH ? '' : ' (la durée va au numérateur)'}.</div>`;
+          msg.innerHTML = `<div class="lg-msg lg-msg-ko">Pas encore : combien de périodes y a-t-il entre le 0 de ta règle et le curseur ?</div>`;
           return;
         }
         fait3 = true;
+        inN.readOnly = true;
+        div.querySelectorAll('.np-section').forEach(x => x.remove());
         msg.innerHTML = `<div class="lg-msg lg-msg-ok">✓ Division correcte !</div>`;
         div.querySelector('[data-a="verif3"]').disabled = true;
         finir(res.r2 / n);
-      };
+      }
+      div.querySelector('[data-a="verif3"]').onclick = verifier3;
+      inN.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); verifier3(); } });
     }
 
     /* ----- Résultat final ----- */
