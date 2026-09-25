@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="maths">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : La méthode — Lecture graphique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="lgtools.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/numpad.js"></script>
+<script src="lgtools.js"></script>
+<style>
+  .cours-bloc p { margin: 0 0 10px; line-height: 1.55; }
+  .cours-bloc ol, .cours-bloc ul { margin: 6px 0 10px 22px; padding: 0; line-height: 1.55; }
+  .cours-bloc ol { list-style: decimal; }
+  .cours-bloc ul { list-style: disc; }
+  .cours-bloc li { margin-bottom: 4px; }
+  .cle { margin: 12px 0; }
+  .calcul { font-weight: 700; text-align: center; margin: 8px 0; font-size: 1.05rem; }
+  .precision { width: 100%; max-width: 420px; }
+  .check-choix { display: flex; flex-direction: column; gap: 8px; }
+  .check-choix button { text-align: left; }
+  .check-reponse { margin-top: 10px; font-weight: 700; }
+</style>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="lg-page">
+  <div class="lg-card">
+    <span class="lg-badge">MODULE 1</span>
+    <h2 class="lg-titre">La méthode</h2>
+    <p class="lg-contexte">Sur un graphique, la valeur que l'on cherche tombe rarement sur une graduation. Pour la lire précisément, on mesure des distances à la règle et on utilise la <b>proportionnalité</b>.</p>
+  </div>
+
+  <!-- ================= 1. Le problème ================= -->
+  <h3 class="cours-titre">1. Le problème</h3>
+  <div class="cours-bloc">
+    <p>On cherche la période T de cette tension. Les maximums ne tombent pas sur des graduations : à l'œil, on peut seulement dire que T est « entre 10 et 15 ms ».</p>
+    <div id="figProbleme"></div>
+    <div class="cle">
+      <p><b class="cle-titre">L'idée :</b> sur un axe gradué régulièrement, la <b>distance</b> mesurée sur le papier est <b>proportionnelle</b> à l'<b>écart de valeurs</b>. Si on connaît la distance qui correspond à une valeur connue (l'échelle), un <b>tableau de proportionnalité</b> donne la valeur qui correspond à n'importe quelle autre distance.</p>
+    </div>
+  </div>
+
+  <!-- ================= 2. La méthode ================= -->
+  <h3 class="cours-titre">2. La méthode en quatre étapes</h3>
+  <div class="cours-bloc">
+    <div class="cle">
+      <ol>
+        <li><b>Mesurer l'échelle</b> : la distance (en cm) entre deux graduations de l'axe, et l'écart de valeurs entre ces deux graduations.</li>
+        <li><b>Mesurer la grandeur</b> : la distance (en cm) qui correspond à la grandeur recherchée, <b>le long du même axe</b>.</li>
+        <li><b>Remplir le tableau de proportionnalité</b>, sans oublier les unités.</li>
+        <li><b>Calculer</b> la valeur recherchée par un produit en croix.</li>
+      </ol>
+    </div>
+
+    <div class="cours-exemple">
+      <p><b>Étape 1 · L'échelle.</b> On place le 0 de la règle sur la graduation 0 ms, et on lit la distance jusqu'à la graduation 40 ms : <b>15,4 cm</b> pour <b>40 ms</b>.</p>
+      <div id="figEchelle"></div>
+      <p style="margin-top:12px"><b>Étape 2 · La grandeur.</b> On place le 0 de la règle sur un maximum et on lit la distance jusqu'au maximum situé <b>3 périodes</b> plus loin : <b>13,4 cm</b> pour une durée de 3T.</p>
+      <div id="figPeriodes"></div>
+      <p style="margin-top:12px"><b>Étape 3 · Le tableau.</b></p>
+      <div class="lg-table-wrap"><table class="lg-table">
+        <colgroup><col class="lg-col-titre"><col><col></colgroup>
+        <thead><tr><th></th><th>Distance (cm)</th><th>Durée (ms)</th></tr></thead>
+        <tbody>
+          <tr><th>Échelle</th><td>15,4</td><td>40</td></tr>
+          <tr><th>3 périodes</th><td>13,4</td><td class="lg-inconnue">3T</td></tr>
+        </tbody>
+      </table></div>
+      <p><b>Étape 4 · Le calcul</b> (produit en croix) :</p>
+      <p class="calcul">3T = (13,4 × 40) / 15,4 = 34,8 ms &nbsp;&nbsp;donc&nbsp;&nbsp; T = 34,8 / 3 = 11,6 ms</p>
+    </div>
+  </div>
+
+  <!-- ================= 3. Précision ================= -->
+  <h3 class="cours-titre">3. Mesurer grand pour être précis</h3>
+  <div class="cours-bloc">
+    <p>Une règle se lit au millimètre près : chaque mesure comporte une erreur d'environ <b>1 mm</b>. Cette erreur compte d'autant moins que la distance mesurée est grande :</p>
+    <div class="lg-table-wrap"><table class="lg-table precision">
+      <thead><tr><th>Distance mesurée</th><th>Erreur de 1 mm</th></tr></thead>
+      <tbody>
+        <tr><td>3,9 cm</td><td>≈ 2,6 %</td></tr>
+        <tr><td>4,5 cm</td><td>≈ 2,2 %</td></tr>
+        <tr><td>13,4 cm</td><td>≈ 0,7 %</td></tr>
+        <tr><td>15,4 cm</td><td>≈ 0,6 %</td></tr>
+      </tbody>
+    </table></div>
+    <div class="cle">
+      <p><b class="cle-titre">Les valeurs mesurées doivent être les plus grandes possible :</b></p>
+      <ul>
+        <li><b>Échelle</b> : choisir les deux graduations les plus éloignées (de 0 à 40 ms : 15,4 cm, plutôt que de 5 à 15 ms : 3,9 cm).</li>
+        <li><b>Période</b> (ou longueur d'onde) : mesurer <b>plusieurs périodes</b>, puis diviser le résultat par leur nombre.</li>
+        <li><b>Amplitude</b> : mesurer l'écart entre le minimum et le maximum (crête à crête), puis diviser par 2.</li>
+      </ul>
+    </div>
+    <div class="check-box">
+      <p class="check-label">Vérifie ta compréhension :</p>
+      <p class="check-question">Pour mesurer une période le plus précisément possible, on mesure :</p>
+      <div class="check-choix" id="qcm">
+        <button type="button" class="btn-secondary" data-ok="0">une seule période, entre deux maximums voisins</button>
+        <button type="button" class="btn-secondary" data-ok="1">le plus grand nombre de périodes possible, puis on divise par ce nombre</button>
+        <button type="button" class="btn-secondary" data-ok="0">une demi-période, puis on multiplie par 2</button>
+      </div>
+      <p class="check-reponse" id="qcmRep"></p>
+    </div>
+  </div>
+
+  <!-- ================= 4. Autres lectures ================= -->
+  <h3 class="cours-titre">4. Lire la valeur d'un point</h3>
+  <div class="cours-bloc">
+    <p>Pour lire l'<b>ordonnée</b> d'un point (ou une <b>valeur maximale</b>), on tourne la règle à la verticale : l'échelle se mesure sur l'<b>axe vertical</b>, et la grandeur se mesure depuis l'axe des abscisses (valeur 0) jusqu'au point.</p>
+    <div class="cours-exemple">
+      <p>Température du thé à t = 15 min : l'échelle vaut <b>8,6 cm</b> pour <b>100 °C</b> (de 0 à 100 °C), et le point est à <b>2,8 cm</b> de l'axe des abscisses.</p>
+      <div id="figPoint"></div>
+      <p class="calcul">θ = (2,8 × 100) / 8,6 ≈ 32,6 °C</p>
+    </div>
+    <p>Pour lire l'<b>abscisse</b> d'un point, c'est la même méthode, à l'horizontale : échelle sur l'axe horizontal, distance mesurée depuis l'axe des ordonnées.</p>
+    <div class="note-box" style="display:flex;gap:10px;background:#fff;border-radius:16px;padding:12px 16px;margin-top:10px">
+      <span style="font-weight:800;color:var(--accent)">⚠</span>
+      <p style="margin:0">L'échelle et la grandeur doivent être mesurées le long du <b>même axe</b> : une durée avec l'axe des temps, une tension avec l'axe des tensions.</p>
+    </div>
+  </div>
+
+  <!-- ================= 5. Prise en main ================= -->
+  <h3 class="cours-titre">5. Prends en main la règle</h3>
+  <div class="cours-bloc">
+    <p>Fais glisser la règle par sa partie jaune, puis le curseur (●). Une loupe apparaît pendant le déplacement, et les boutons ◀ ▶ permettent d'affiner.</p>
+    <div class="lg-card" style="margin:0" id="bac"></div>
+    <div class="check-box">
+      <p class="check-label">Vérifie ta compréhension :</p>
+      <p class="check-question">Mesure la distance entre les graduations 0 ms et 40 ms de l'axe des temps. Combien lis-tu sur la règle (en cm) ?</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+        <input type="text" id="mesBac" inputmode="decimal" class="check-input" style="width:120px" placeholder="en cm" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
+        <button type="button" class="check-btn" id="verifBac">Vérifier</button>
+      </div>
+      <p class="check-reponse" id="repBac"></p>
+    </div>
+  </div>
+
+  <div class="lg-actions" style="justify-content:center;margin-top:24px">
+    <a href="module_2.html" class="btn-primary" style="text-decoration:none;margin:0">Commencer l'entraînement →</a>
+  </div>
+</div>
+
+<script>
+/* Exemple suivi dans tout le cours : tension sinusoïdale, T = 11,6 ms */
+const exemple = {
+  type: 'periode', grandeur: { symbole: 'T', nom: 'période', noms: 'périodes' },
+  axeX: { min: 0, max: 40, pas: 5, nom: 't', unite: 'ms', libelle: 'Durée' },
+  axeY: { min: -5, max: 5, pas: 1, nom: 'u', unite: 'V' },
+  signal: { forme: 'sinus', periode: 11.6, ampl: 3.2, phase: 1.3 },
+};
+const R = LG.repere(exemple), A = LG.analyser(exemple, R);
+document.getElementById('figProbleme').innerHTML = LG.figure(exemple, []);
+// règle posée sur l'axe des temps, de 0 à 40 ms
+document.getElementById('figEchelle').innerHTML = LG.figure(exemple, [{ ox: R.sx(0), oy: R.sy(0), rot: 0, cur: Math.round(40 * R.mmX) }], true);
+// règle posée sur un maximum, curseur 3 périodes plus loin
+document.getElementById('figPeriodes').innerHTML = LG.figure(exemple, [{ ox: R.sx(A.tDepart), oy: R.sy(A.f(A.tDepart)), rot: 0, cur: Math.round(3 * 11.6 * R.mmX) }]);
+
+/* Lecture d'un point : refroidissement d'une tasse de thé */
+const the = {
+  type: 'lectureY', grandeur: { symbole: 'θ' },
+  axeX: { min: 0, max: 40, pas: 5, nom: 't', unite: 'min', libelle: 'Durée' },
+  axeY: { min: 0, max: 100, pas: 10, nom: 'θ', unite: '°C', libelle: 'Température' },
+  f: t => 20 + 65 * Math.exp(-t / 9), x0: 15,
+};
+const R2 = LG.repere(the), A2 = LG.analyser(the, R2);
+document.getElementById('figPoint').innerHTML = LG.figure(the, [
+  { ox: R2.P.x0, oy: R2.sy(0), rot: -90, cur: Math.round(100 * R2.mmY) },
+  { ox: R2.sx(15), oy: R2.sy(0), rot: -90, cur: Math.round(A2.exact * R2.mmY) },
+]);
+
+/* QCM de compréhension */
+document.querySelectorAll('#qcm button').forEach(b => b.onclick = () => {
+  const ok = b.dataset.ok === '1', rep = document.getElementById('qcmRep');
+  document.querySelectorAll('#qcm button').forEach(x => { x.classList.remove('opt-correct', 'opt-wrong'); });
+  b.classList.add(ok ? 'opt-correct' : 'opt-wrong');
+  rep.style.color = ok ? 'var(--success-text)' : 'var(--danger-text)';
+  rep.textContent = ok ? '✓ Oui : la distance mesurée est plus grande, et l\'erreur de lecture est divisée par le nombre de périodes.'
+                       : '✕ Non : plus la distance mesurée est petite, plus l\'erreur de 1 mm compte. Essaie encore.';
+});
+
+/* Bac à sable : mesure de l'échelle 0 → 40 ms (15,4 cm attendus) */
+setNumpadPref(false);
+LG.bacASable(document.getElementById('bac'), exemple);
+document.getElementById('verifBac').onclick = () => {
+  const v = LG.lireNombre(document.getElementById('mesBac').value), rep = document.getElementById('repBac');
+  const juste = Math.round(40 * R.mmX) / 10;
+  if (Math.abs(v - juste) <= 0.15) { rep.style.color = 'var(--success-text)'; rep.textContent = `✓ Bien mesuré : ${LG.fmt(juste, 1)} cm pour 40 ms.`; }
+  else if (v > 0) { rep.style.color = 'var(--danger-text)'; rep.textContent = '✕ Vérifie que le 0 de la règle est sur la graduation 0 ms et le curseur sur la graduation 40 ms.'; }
+  else { rep.style.color = 'var(--danger-text)'; rep.textContent = 'Écris la distance lue, en cm (par exemple 12,5).'; }
+};
+
+const nav = AppNav.init({
+  appName: 'Lecture graphique', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
+  onHome: () => { window.location.href = '../index.html'; },
+  onNavigate: (key) => { window.location.href = key + '.html'; },
+  groups: [
+    { title: 'Modules', items: [
+      { key: 'module_1', label: 'Module 1 : La méthode' },
+      { key: 'module_2', label: 'Module 2 : Entraînement 1' },
+      { key: 'module_3', label: 'Module 3 : Entraînement 2' },
+    ]},
+  ],
+});
+nav.setActive('module_1');
+nav.setTitle('Module 1 : La méthode');
+</script>
+</body>
+</html>
