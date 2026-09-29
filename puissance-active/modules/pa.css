@@ -10,6 +10,7 @@ body { font-family: var(--font-sans); }
 .pa-page.pa-large { max-width: 76rem; }
 @media (max-width: 480px) { .pa-page { padding: 14px 10px 56px; } }
 .pa-page p { margin: 0; }
+.pa-page button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .hidden { display: none !important; }
 
 /* Couleurs des grandeurs (reprises par pa.js) */
@@ -37,7 +38,7 @@ body { font-family: var(--font-sans); }
 .pa-grid > * { min-width: 0; }
 @media (min-width: 980px) {
   .pa-grid { grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 20px; }
-  .pa-graphs { position: sticky; top: 72px; }
+  .pa-collant { position: sticky; top: 72px; }   /* la question reste visible quand on descend vers p(t) */
 }
 /* Module 2 : choix du circuit et questions à droite, graphiques à gauche */
 @media (min-width: 980px) {
@@ -95,7 +96,7 @@ body { font-family: var(--font-sans); }
 .pa-outil .btn-small { min-height: 40px; }
 
 /* ---------- Curseurs (input range) ---------- */
-.pa-range { -webkit-appearance: none; appearance: none; width: 100%; height: 36px; background: transparent; margin: 0; touch-action: manipulation; cursor: pointer; }
+.pa-range { -webkit-appearance: none; appearance: none; width: 100%; height: 36px; background: transparent; margin: 0; touch-action: none; cursor: pointer; }
 .pa-range:focus { outline: none; }
 .pa-range::-webkit-slider-runnable-track { height: 8px; border-radius: 999px; background: var(--paper-3); }
 .pa-range::-moz-range-track { height: 8px; border-radius: 999px; background: var(--paper-3); }
@@ -105,12 +106,17 @@ body { font-family: var(--font-sans); }
 }
 .pa-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--ink); border: 4px solid #fff; box-shadow: 0 1px 6px rgba(22,24,29,.35); }
 .pa-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px var(--cle-line); }
+.pa-range-ligne { display: flex; align-items: center; gap: 8px; }
+.pa-range-ligne .pa-range { flex: 1; min-width: 0; }
+.pa-fin { min-width: 44px; min-height: 40px; padding: 6px 10px; font-size: .9rem; flex-shrink: 0; }
+.pa-range-ligne + .pa-range-bornes { padding: 0 52px; }
+@media (max-width: 480px) { .pa-range-bornes .pa-long { display: none; } }
 .pa-range-bornes { display: flex; justify-content: space-between; font-size: .78rem; font-weight: 600; color: var(--ink-3); margin-top: -2px; }
 
 /* ---------- Sélecteur de circuit (module 2) ---------- */
 .pa-circuits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .pa-circuit {
-  display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 4px; text-align: center;
   background: var(--paper); border: 2px solid transparent; border-radius: 18px; padding: 10px 8px 12px;
   cursor: pointer; font-family: var(--font-sans); color: var(--ink); transition: background .15s, border-color .15s;
   -webkit-tap-highlight-color: transparent;
@@ -179,6 +185,9 @@ body { font-family: var(--font-sans); }
 .pa-bilan .cle { margin: 10px 0; }
 .pa-bilan .cle p + p { margin-top: 8px; }
 .pa-formule { text-align: center; font-size: 1.25rem; font-weight: 800; margin: 10px 0; color: var(--ink); letter-spacing: -.01em; }
+.pa-formule { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px .35em; }
+.pa-formule > span { white-space: nowrap; }
+@media (max-width: 480px) { .pa-formule { font-size: 1.1rem; } }
 .pa-bilan-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
 .pa-bilan-actions a { text-decoration: none; }
 

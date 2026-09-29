@@ -56,7 +56,11 @@
         <!-- Outil 2 : droite horizontale P (rectangle de même aire) -->
         <div class="pa-outil hidden" id="outilDroite">
           <div class="pa-outil-titre">Hauteur de la droite : <b id="valP">2300 W</b></div>
-          <input type="range" class="pa-range" id="rangeP" min="0" max="2500" step="10" value="2300" aria-label="Hauteur de la droite P, en watts">
+          <div class="pa-range-ligne">
+            <button type="button" class="btn-small pa-fin" id="pMoins" aria-label="Descendre la droite de 10 W">▼</button>
+            <input type="range" class="pa-range" id="rangeP" min="0" max="2500" step="10" value="2300" aria-label="Hauteur de la droite P, en watts">
+            <button type="button" class="btn-small pa-fin" id="pPlus" aria-label="Monter la droite de 10 W">▲</button>
+          </div>
           <div class="pa-mesures">
             <div class="pa-mesure accent"><span>Aire sous la courbe</span><strong id="valAireC">46,0 J</strong></div>
             <div class="pa-mesure"><span>Aire du rectangle</span><strong id="valAireR">92,0 J</strong></div>
@@ -66,19 +70,19 @@
     </div>
 
     <!-- ============ Questions ============ -->
-    <div>
+    <div class="pa-zone-quiz pa-collant">
       <div id="quiz"></div>
       <div id="bilan" class="pa-card pa-bilan hidden">
         <span class="pa-badge">BILAN</span>
         <h3 class="pa-titre" style="font-size:1.25rem">À retenir</h3>
         <div class="cle">
           <p><b class="cle-titre">Valeurs efficaces.</b> Pour une tension et une intensité sinusoïdales :</p>
-          <p class="pa-formule">U<sub>eff</sub> = U<sub>max</sub> / √2 &nbsp;&nbsp; I<sub>eff</sub> = I<sub>max</sub> / √2</p>
+          <p class="pa-formule"><span>U<sub>eff</sub> = U<sub>max</sub> / √2 ;</span> <span>I<sub>eff</sub> = I<sub>max</sub> / √2</span></p>
           <p>La valeur efficace est la valeur de la grandeur <b>continue</b> qui fournirait la <b>même puissance</b> au même appareil. C'est elle qu'indiquent les appareils (230 V) et que mesurent voltmètre et ampèremètre en mode alternatif (AC).</p>
         </div>
         <div class="cle">
           <p><b class="cle-titre">Puissance d'un appareil résistif.</b> La puissance instantanée p = u × i varie sans cesse entre 0 et U<sub>max</sub> × I<sub>max</sub>. La puissance moyenne reçue vaut la moitié du maximum :</p>
-          <p class="pa-formule">P = U<sub>max</sub> × I<sub>max</sub> / 2 = U<sub>eff</sub> × I<sub>eff</sub></p>
+          <p class="pa-formule"><span>P = U<sub>max</sub> × I<sub>max</sub> / 2</span> <span>= U<sub>eff</sub> × I<sub>eff</sub></span></p>
           <p>L'énergie reçue pendant Δt est l'aire sous la courbe p(t) : E = P × Δt.</p>
         </div>
         <div class="pa-bilan-actions">
@@ -184,7 +188,10 @@ function majDroite(v) {
   document.getElementById('valAireR').textContent = fmt(etat.droite * TMAX / 1000, 1) + ' J';
   gP.dessiner();
 }
+PA.curseurTactile(rangeP);
 rangeP.addEventListener('input', () => { droiteBougee = true; majDroite(+rangeP.value); });
+document.getElementById('pMoins').addEventListener('click', () => { droiteBougee = true; majDroite(etat.droite - 10); });
+document.getElementById('pPlus').addEventListener('click', () => { droiteBougee = true; majDroite(etat.droite + 10); });
 
 // Poignée posée sur la droite, à faire glisser à la souris ou au doigt
 const poignee = document.createElement('div');

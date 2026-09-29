@@ -47,8 +47,12 @@
           <b>Déphasage φ = <span id="valPhi" style="color:inherit;font-size:inherit">0°</span></b>
           <span id="txtPhi">u et i en phase</span>
         </div>
-        <input type="range" class="pa-range" id="rangePhi" min="-90" max="90" step="1" value="0" aria-label="Déphasage de i par rapport à u, en degrés">
-        <div class="pa-range-bornes"><span>−90° · i en avance</span><span>0°</span><span>i en retard · +90°</span></div>
+        <div class="pa-range-ligne">
+          <button type="button" class="btn-small pa-fin" id="phiMoins" aria-label="Diminuer le déphasage de 1°">◀</button>
+          <input type="range" class="pa-range" id="rangePhi" min="-90" max="90" step="1" value="0" aria-label="Déphasage de i par rapport à u, en degrés">
+          <button type="button" class="btn-small pa-fin" id="phiPlus" aria-label="Augmenter le déphasage de 1°">▶</button>
+        </div>
+        <div class="pa-range-bornes"><span>−90°<span class="pa-long"> · i en avance</span></span><span>0°</span><span><span class="pa-long">i en retard · </span>+90°</span></div>
       </div>
 
     </div>
@@ -95,12 +99,12 @@
         </div>
         <div class="cle">
           <p><b class="cle-titre">Puissance active.</b> C'est la puissance moyenne réellement consommée, en watts (W) :</p>
-          <p class="pa-formule">P = U<sub>eff</sub> × I<sub>eff</sub> × cos φ</p>
+          <p class="pa-formule"><span>P = U<sub>eff</sub> × I<sub>eff</sub> × cos φ</span></p>
           <p>Le produit S = U<sub>eff</sub> × I<sub>eff</sub> est la <b>puissance apparente</b>, en voltampères (VA). On a toujours P ≤ S.</p>
         </div>
         <div class="cle">
           <p><b class="cle-titre">Facteur de puissance.</b></p>
-          <p class="pa-formule">k = P / (U<sub>eff</sub> × I<sub>eff</sub>) = cos φ</p>
+          <p class="pa-formule"><span>k = P / (U<sub>eff</sub> × I<sub>eff</sub>)</span> <span>= cos φ</span></p>
           <p>k = 1 pour un circuit résistif ; k &lt; 1 dès que i est déphasé (en avance ou en retard). Un facteur de puissance faible impose un courant plus intense pour la même puissance, donc plus de pertes dans les câbles.</p>
         </div>
         <div class="pa-bilan-actions">
@@ -186,7 +190,11 @@ function majPhi(v) {
   document.getElementById('valK').textContent = fmt(Math.cos(rad()), 2);
   gUI.dessiner(); gP.dessiner();
 }
+PA.curseurTactile(rangePhi);
 rangePhi.addEventListener('input', () => majPhi(+rangePhi.value));
+// réglage fin, degré par degré (plus précis au doigt que le curseur)
+document.getElementById('phiMoins').addEventListener('click', () => majPhi(Math.max(-90, phi - 1)));
+document.getElementById('phiPlus').addEventListener('click', () => majPhi(Math.min(90, phi + 1)));
 circuits.forEach(b => b.addEventListener('click', () => { circuitChoisi = b.dataset.type; majPhi(+b.dataset.phi); }));
 majPhi(0);
 
@@ -228,6 +236,7 @@ const questions = [
   },
   {
     texte: 'Pendant les instants où p est négative, u et i sont :',
+    prealable: () => phi !== 0 ? null : 'choisis un circuit où i est décalé par rapport à u (inductif ou capacitif).',
     consigne: 'Repère un de ces instants sur le graphique de p, puis regarde u et i au même instant.',
     choix: [
       { t: 'de même signe', pourquoi: 'Le produit de deux nombres de même signe est positif. Or ici p = u × i est négatif.' },
@@ -238,6 +247,7 @@ const questions = [
   },
   {
     texte: 'p est la puissance <b>reçue</b> par le moteur. Que signifie p &lt; 0 ?',
+    prealable: () => phi !== 0 ? null : 'choisis un circuit où i est décalé par rapport à u (inductif ou capacitif).',
     choix: [
       { t: 'Le moteur ne reçoit aucune énergie', pourquoi: 'Si le moteur ne recevait rien, on aurait p = 0, pas p &lt; 0.' },
       { t: 'Le moteur rend de l\'énergie au réseau', ok: true },
@@ -248,6 +258,7 @@ const questions = [
   },
   {
     texte: 'Conséquence : la puissance moyenne P réellement consommée par le moteur est…',
+    prealable: () => phi !== 0 ? null : 'choisis un circuit où i est décalé par rapport à u (inductif ou capacitif).',
     choix: [
       { t: 'égale à U<sub>eff</sub> × I<sub>eff</sub> = 1150 W', pourquoi: 'Lis la valeur de P affichée sous le graphique de p.' },
       { t: 'inférieure à U<sub>eff</sub> × I<sub>eff</sub>', ok: true },
@@ -269,7 +280,7 @@ const questions = [
   },
   {
     texte: 'Place le curseur sur <b>φ = 60°</b>. Calcule le rapport P / (U<sub>eff</sub> × I<sub>eff</sub>) = P / 1150.',
-    prealable: () => phi === 60 ? null : 'place le curseur du déphasage sur φ = 60°.',
+    prealable: () => phi === 60 ? null : 'place le curseur du déphasage sur φ = 60° (les boutons ◀ ▶ règlent degré par degré).',
     choix: [
       { t: '0,50', ok: true },
       { t: '0,87', pourquoi: () => `Avec φ = 60°, P = ${fmt(Pmoy())} W. Calcule ${fmt(Pmoy())} / 1150.` },
@@ -291,7 +302,7 @@ const questions = [
   },
   {
     texte: 'Pour le circuit <b>capacitif</b>, i est en avance sur u. Place le curseur sur <b>φ = −60°</b>. Que vaut P ?',
-    prealable: () => phi === -60 ? null : 'place le curseur du déphasage sur φ = −60°.',
+    prealable: () => phi === -60 ? null : 'place le curseur du déphasage sur φ = −60° (les boutons ◀ ▶ règlent degré par degré).',
     choix: [
       { t: '575 W', ok: true },
       { t: '−575 W', pourquoi: 'Lis la valeur de P affichée : les aires violettes restent plus grandes que les aires bleu-vert.' },

@@ -53,7 +53,7 @@
     const W = this.el.clientWidth;
     if (!W) return;
     const c = this.cfg, petit = W < 520, ax = c.axes, deux = ax.length > 1;
-    const H = Math.round(Math.min(c.hMax || 260, Math.max(c.hMin || 170, W * (c.ratio || 0.42))));
+    const H = Math.round(Math.min(c.hMax || 245, Math.max(c.hMin || 170, W * (c.ratio || 0.38))));
     const m = { g: petit ? 44 : 54, d: deux ? (petit ? 42 : 52) : (petit ? 12 : 18), h: 26, b: 26 };
     const x0 = m.g, x1 = W - m.d, y0 = m.h, y1 = H - m.b;
     const X = t => x0 + t / c.tmax * (x1 - x0);
@@ -208,6 +208,7 @@
         b.classList.add('choisi');
         choisi = +b.dataset.k;
         valider.disabled = false;
+        retour.innerHTML = '';                            // efface la consigne ou l'erreur précédente
       }));
 
       valider.addEventListener('click', () => {
@@ -340,5 +341,41 @@
     })()
   };
 
-  window.PA = { COUL, OMEGA, fmt, Graphe, svg, quiz, dessins };
+  /* ============================================================
+     CURSEUR AU DOIGT
+     Sur écran tactile (iOS en particulier), un appui sur la piste d'un
+     <input type="range"> ne déplace pas le bouton : on gère nous-mêmes
+     l'appui et le glissement n'importe où sur la piste.
+     ============================================================ */
+  function curseurTactile(range) {
+    const pouce = 30;                                   // diamètre du bouton (pa.css)
+    function placer(ev) {
+      const r = range.getBoundingClientRect();
+      const min = +range.min, max = +range.max, pas = +range.step || 1;
+      const k = Math.max(0, Math.min(1, (ev.clientX - r.left - pouce / 2) / (r.width - pouce)));
+      const v = Math.round((min + k * (max - min)) / pas) * pas;
+      if (+range.value !== v) {
+        range.value = v;
+        range.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
+    // on bloque le comportement natif au doigt (sinon double gestion)
+    range.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+    range.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'mouse') return;            // souris : comportement natif
+      range.setPointerCapture(e.pointerId);
+      placer(e);
+      const bouger = ev => placer(ev);
+      const fin = () => {
+        range.removeEventListener('pointermove', bouger);
+        range.removeEventListener('pointerup', fin);
+        range.removeEventListener('pointercancel', fin);
+      };
+      range.addEventListener('pointermove', bouger);
+      range.addEventListener('pointerup', fin);
+      range.addEventListener('pointercancel', fin);
+    });
+  }
+
+  window.PA = { COUL, OMEGA, fmt, Graphe, svg, quiz, dessins, curseurTactile };
 })();
