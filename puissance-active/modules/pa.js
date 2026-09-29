@@ -54,7 +54,9 @@
     if (!W) return;
     const c = this.cfg, petit = W < 520, ax = c.axes, deux = ax.length > 1;
     const H = Math.round(Math.min(c.hMax || 245, Math.max(c.hMin || 170, W * (c.ratio || 0.38))));
-    const m = { g: petit ? 44 : 54, d: deux ? (petit ? 42 : 52) : (petit ? 12 : 18), h: 26, b: 26 };
+    // marge droite identique avec ou sans axe de droite : l'axe des temps a la même longueur
+    // sur tous les graphiques, qui restent alignés l'un sous l'autre
+    const m = { g: petit ? 44 : 54, d: petit ? 42 : 52, h: 26, b: 26 };
     const x0 = m.g, x1 = W - m.d, y0 = m.h, y1 = H - m.b;
     const X = t => x0 + t / c.tmax * (x1 - x0);
     const Y = (v, k) => { const a = ax[k || 0]; return y0 + (a.max - v) / (a.max - a.min) * (y1 - y0); };
