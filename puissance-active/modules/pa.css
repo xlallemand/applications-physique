@@ -1,0 +1,194 @@
+/* ============================================================
+   Styles de l'application « Puissance active » (graphiques u, i, p,
+   sélecteur de circuit, curseurs, questions progressives).
+   Complète le thème commun assets/theme.css.
+   ============================================================ */
+
+body { font-family: var(--font-sans); }
+.pa-page *, .pa-page *::before, .pa-page *::after { box-sizing: border-box; }
+.pa-page { max-width: 56rem; margin: 0 auto; padding: 24px 16px 64px; }
+.pa-page.pa-large { max-width: 76rem; }
+@media (max-width: 480px) { .pa-page { padding: 14px 10px 56px; } }
+.pa-page p { margin: 0; }
+.pa-page button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.hidden { display: none !important; }
+
+/* Couleurs des grandeurs (reprises par pa.js) */
+.pa-page {
+  --c-u: #2952c8;
+  --c-i: #d9730d;
+  --c-p: #5a3fc4;
+  --c-neg: #0e97a6;
+}
+
+.pa-card { background: var(--sheet); border: 1px solid var(--line); border-radius: 22px; padding: 20px 22px; margin-bottom: 16px; }
+@media (max-width: 480px) { .pa-card { padding: 14px 12px; border-radius: 18px; margin-bottom: 12px; } }
+
+/* ---------- En-tête de module ---------- */
+.pa-badge {
+  display: inline-block; background: var(--cle-bg); color: var(--accent-ink);
+  font-size: .75rem; font-weight: 800; padding: 4px 12px; border-radius: 999px; letter-spacing: .04em; margin-bottom: 8px;
+}
+.pa-titre { font-size: 1.5rem; font-weight: 800; letter-spacing: -.02em; margin: 0 0 6px; color: var(--ink); line-height: 1.2; }
+.pa-contexte { color: var(--ink-2); font-size: 1rem; line-height: 1.55; }
+.pa-contexte b { color: var(--ink); }
+
+/* ---------- Mise en page : graphiques à gauche, questions à droite ---------- */
+.pa-grid { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
+.pa-grid > * { min-width: 0; }
+@media (min-width: 980px) {
+  .pa-grid { grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 20px; }
+  .pa-collant { position: sticky; top: 72px; }   /* la question reste visible quand on descend vers p(t) */
+}
+/* Module 2 : choix du circuit et questions à droite, graphiques à gauche */
+@media (min-width: 980px) {
+  .pa-grid-m2 { grid-template-areas: "g c" "g q"; grid-template-rows: auto 1fr; row-gap: 0; }
+  .pa-grid-m2 .pa-graphs { grid-area: g; }
+  .pa-grid-m2 .pa-zone-circuit { grid-area: c; }
+  .pa-grid-m2 .pa-zone-quiz { grid-area: q; }
+}
+.pa-zone-circuit .pa-card { margin-bottom: 16px; }
+@media (max-width: 979px) { .pa-grid-m2 .pa-zone-circuit .pa-card { margin-bottom: 0; } }
+.pa-graphs .pa-card { margin-bottom: 12px; }
+.pa-graphs .pa-card:last-child { margin-bottom: 0; }
+
+/* ---------- Graphiques ---------- */
+.pa-graph-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 6px 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.pa-graph-titre { font-size: 1rem; font-weight: 800; color: var(--ink); margin: 0; letter-spacing: -.01em; }
+.pa-legende { display: flex; gap: 4px 14px; flex-wrap: wrap; font-size: .85rem; font-weight: 700; color: var(--ink-2); }
+.pa-leg { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.pa-leg i { display: inline-block; width: 18px; height: 3px; border-radius: 2px; }
+.pa-leg i.aire { height: 12px; border-radius: 3px; opacity: .45; }
+.pa-leg i.tirets { height: 0; border-top: 2.5px dashed currentColor; background: none !important; }
+.pa-graph { position: relative; width: 100%; background: #fff; border: 1.5px solid var(--line); border-radius: 14px; overflow: hidden; }
+.pa-graph svg { display: block; width: 100%; height: auto; -webkit-user-select: none; user-select: none; font-family: var(--font-sans); }
+.pa-graph text { font-family: var(--font-sans); }
+
+/* Poignée à faire glisser (droite de puissance moyenne) */
+.pa-poignee {
+  position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%;
+  display: grid; place-items: center; cursor: ns-resize; touch-action: none; z-index: 2;
+  -webkit-tap-highlight-color: transparent;
+}
+.pa-poignee::before {
+  content: '↕'; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--ink); color: #fff; font-size: 16px; font-weight: 800;
+  box-shadow: 0 2px 10px rgba(22,24,29,.3); transition: transform .12s;
+}
+.pa-poignee:hover::before, .pa-poignee.actif::before { transform: scale(1.12); }
+
+/* ---------- Valeurs affichées ---------- */
+.pa-mesures { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.pa-mesure {
+  background: var(--paper); border-radius: 14px; padding: 6px 12px; min-width: 96px;
+  display: flex; flex-direction: column; line-height: 1.25;
+}
+.pa-mesure span { font-size: .75rem; font-weight: 600; color: var(--ink-3); }
+.pa-mesure strong { font-size: 1.05rem; font-weight: 800; color: var(--ink); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.pa-mesure.accent { background: var(--cle-bg); }
+.pa-mesure.accent strong { color: var(--accent-ink); }
+@media (max-width: 480px) { .pa-mesure { min-width: 0; flex: 1 1 30%; padding: 5px 9px; } .pa-mesure strong { font-size: .95rem; } }
+
+/* ---------- Outils (remplir l'aire, droite P) ---------- */
+.pa-outil { margin-top: 12px; padding: 12px 14px; background: var(--paper); border-radius: 16px; }
+.pa-outil-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.pa-outil-titre { font-size: .85rem; font-weight: 700; color: var(--ink-2); margin-bottom: 6px; }
+.pa-outil .btn-small { min-height: 40px; }
+
+/* ---------- Curseurs (input range) ---------- */
+.pa-range { -webkit-appearance: none; appearance: none; width: 100%; height: 36px; background: transparent; margin: 0; touch-action: none; cursor: pointer; }
+.pa-range:focus { outline: none; }
+.pa-range::-webkit-slider-runnable-track { height: 8px; border-radius: 999px; background: var(--paper-3); }
+.pa-range::-moz-range-track { height: 8px; border-radius: 999px; background: var(--paper-3); }
+.pa-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 30px; height: 30px; margin-top: -11px; border-radius: 50%;
+  background: var(--ink); border: 4px solid #fff; box-shadow: 0 1px 6px rgba(22,24,29,.35);
+}
+.pa-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--ink); border: 4px solid #fff; box-shadow: 0 1px 6px rgba(22,24,29,.35); }
+.pa-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px var(--cle-line); }
+.pa-range-ligne { display: flex; align-items: center; gap: 8px; }
+.pa-range-ligne .pa-range { flex: 1; min-width: 0; }
+.pa-fin { min-width: 44px; min-height: 40px; padding: 6px 10px; font-size: .9rem; flex-shrink: 0; }
+.pa-range-ligne + .pa-range-bornes { padding: 0 52px; }
+@media (max-width: 480px) { .pa-range-bornes .pa-long { display: none; } }
+.pa-range-bornes { display: flex; justify-content: space-between; font-size: .78rem; font-weight: 600; color: var(--ink-3); margin-top: -2px; }
+
+/* ---------- Sélecteur de circuit (module 2) ---------- */
+.pa-circuits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.pa-circuit {
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 4px; text-align: center;
+  background: var(--paper); border: 2px solid transparent; border-radius: 18px; padding: 10px 8px 12px;
+  cursor: pointer; font-family: var(--font-sans); color: var(--ink); transition: background .15s, border-color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.pa-circuit:hover { background: var(--paper-2); }
+.pa-circuit.actif { background: var(--cle-bg); border-color: var(--accent); }
+.pa-circuit svg { width: 100%; max-width: 132px; height: auto; }
+.pa-circuit-nom { font-weight: 800; font-size: .95rem; letter-spacing: -.01em; line-height: 1.2; }
+.pa-circuit-ex { font-size: .8rem; color: var(--ink-2); line-height: 1.3; }
+.pa-circuit-phase { font-size: .78rem; font-weight: 700; color: var(--accent-ink); }
+@media (max-width: 560px) {
+  .pa-circuits { gap: 6px; }
+  .pa-circuit { padding: 8px 4px 10px; border-radius: 14px; }
+  .pa-circuit-nom { font-size: .82rem; }
+  .pa-circuit-ex { font-size: .72rem; }
+  .pa-circuit-phase { font-size: .7rem; }
+}
+.pa-phase-titre { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin: 14px 0 0; }
+.pa-phase-titre b { font-size: 1rem; }
+.pa-phase-titre span { font-size: .9rem; font-weight: 700; color: var(--accent-ink); }
+
+/* ---------- Questions ---------- */
+.pa-quiz-tete { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.pa-quiz-num { font-size: .8rem; font-weight: 800; color: var(--accent); white-space: nowrap; }
+.pa-quiz-tete .progress-bar { flex: 1; }
+.pa-question { font-size: 1.08rem; font-weight: 600; color: var(--ink); line-height: 1.45; margin-bottom: 12px; }
+.pa-question b { font-weight: 800; }
+.pa-consigne {
+  display: flex; gap: 10px; align-items: flex-start; background: var(--cle-bg); border-radius: 14px;
+  padding: 10px 12px; margin-bottom: 12px; font-size: .92rem; line-height: 1.45; color: var(--ink);
+}
+.pa-consigne::before { content: '☛'; color: var(--accent); font-weight: 800; flex-shrink: 0; }
+.pa-choix { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.pa-choix button {
+  text-align: left; width: 100%; min-height: 48px; line-height: 1.35; border-radius: 16px;
+  padding: 11px 16px; font-size: .98rem; -webkit-tap-highlight-color: transparent;
+}
+.pa-choix button.choisi { box-shadow: inset 0 0 0 2px var(--accent); background: var(--cle-bg); }
+.pa-choix button.opt-wrong, .pa-choix button.opt-correct { box-shadow: none; border: 2px solid; }
+.pa-choix button:disabled { cursor: default; }
+.pa-choix button.opt-wrong:disabled { opacity: .75; }
+.pa-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pa-actions .btn-primary { padding: 12px 24px; }
+.pa-retour { margin-top: 12px; font-size: .95rem; line-height: 1.5; color: var(--ink); animation: pa-apparait .25s ease; }
+.pa-retour b.pa-ok { color: var(--success-text); }
+.pa-retour b.pa-ko { color: var(--danger-text); }
+.pa-retour p + p { margin-top: 6px; }
+@keyframes pa-apparait { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes pa-secoue { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.pa-secoue { animation: pa-secoue .35s ease; }
+
+/* Parcours : questions déjà réussies */
+.pa-parcours { margin-top: 4px; }
+.pa-parcours summary {
+  cursor: pointer; font-weight: 700; font-size: .92rem; color: var(--ink-2); padding: 6px 2px; list-style: none;
+}
+.pa-parcours summary::-webkit-details-marker { display: none; }
+.pa-parcours summary::before { content: '▸ '; color: var(--accent); }
+.pa-parcours[open] summary::before { content: '▾ '; }
+.pa-parcours ol { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pa-parcours li { background: var(--paper); border-radius: 14px; padding: 10px 12px; font-size: .88rem; line-height: 1.45; color: var(--ink-2); }
+.pa-parcours li .q { color: var(--ink); font-weight: 600; }
+.pa-parcours li .r { color: var(--success-text); font-weight: 800; }
+
+/* Bilan final */
+.pa-bilan .cle { margin: 10px 0; }
+.pa-bilan .cle p + p { margin-top: 8px; }
+.pa-formule { text-align: center; font-size: 1.25rem; font-weight: 800; margin: 10px 0; color: var(--ink); letter-spacing: -.01em; }
+.pa-formule { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px .35em; }
+.pa-formule > span { white-space: nowrap; }
+@media (max-width: 480px) { .pa-formule { font-size: 1.1rem; } }
+.pa-bilan-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.pa-bilan-actions a { text-decoration: none; }
+
+sub { font-size: .72em; }

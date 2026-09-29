@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : Puissance active et facteur de puissance — Puissance active</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="pa.css">
+<script src="../../assets/nav.js"></script>
+<script src="pa.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="pa-page pa-large">
+  <div class="pa-card">
+    <span class="pa-badge">MODULE 2</span>
+    <h2 class="pa-titre">Puissance active et facteur de puissance</h2>
+    <p class="pa-contexte">Trois appareils sont branchés sur le secteur (U<sub>eff</sub> = 230 V) et parcourus par le même courant (I<sub>eff</sub> = 5,0 A). Selon le circuit, l'intensité i peut être <b>décalée</b> (déphasée) par rapport à la tension u. Quelle puissance chaque appareil consomme-t-il vraiment ?</p>
+  </div>
+
+  <div class="pa-grid pa-grid-m2">
+    <!-- ============ Choix du circuit et déphasage ============ -->
+    <div class="pa-zone-circuit">
+      <div class="pa-card">
+        <div class="pa-circuits" id="circuits">
+          <button type="button" class="pa-circuit" data-type="resistif" data-phi="0">
+            <span class="pa-circuit-img" data-dessin="resistif"></span>
+            <span class="pa-circuit-nom">Circuit résistif</span>
+            <span class="pa-circuit-ex">radiateur, grille-pain</span>
+            <span class="pa-circuit-phase">u et i en phase</span>
+          </button>
+          <button type="button" class="pa-circuit" data-type="capacitif" data-phi="-40">
+            <span class="pa-circuit-img" data-dessin="capacitif"></span>
+            <span class="pa-circuit-nom">Circuit capacitif</span>
+            <span class="pa-circuit-ex">condensateur</span>
+            <span class="pa-circuit-phase">i en avance sur u</span>
+          </button>
+          <button type="button" class="pa-circuit" data-type="inductif" data-phi="40">
+            <span class="pa-circuit-img" data-dessin="inductif"></span>
+            <span class="pa-circuit-nom">Circuit inductif</span>
+            <span class="pa-circuit-ex">moteur (bobinages)</span>
+            <span class="pa-circuit-phase">i en retard sur u</span>
+          </button>
+        </div>
+
+        <div class="pa-phase-titre">
+          <b>Déphasage φ = <span id="valPhi" style="color:inherit;font-size:inherit">0°</span></b>
+          <span id="txtPhi">u et i en phase</span>
+        </div>
+        <div class="pa-range-ligne">
+          <button type="button" class="btn-small pa-fin" id="phiMoins" aria-label="Diminuer le déphasage de 1°">◀</button>
+          <input type="range" class="pa-range" id="rangePhi" min="-90" max="90" step="1" value="0" aria-label="Déphasage de i par rapport à u, en degrés">
+          <button type="button" class="btn-small pa-fin" id="phiPlus" aria-label="Augmenter le déphasage de 1°">▶</button>
+        </div>
+        <div class="pa-range-bornes"><span>−90°<span class="pa-long"> · i en avance</span></span><span>0°</span><span><span class="pa-long">i en retard · </span>+90°</span></div>
+      </div>
+
+    </div>
+
+    <!-- ============ Graphiques ============ -->
+    <div class="pa-graphs">
+      <div class="pa-card">
+        <div class="pa-graph-tete">
+          <h3 class="pa-graph-titre">Tension et intensité</h3>
+          <div class="pa-legende">
+            <span class="pa-leg" style="color:var(--c-u)"><i style="background:var(--c-u)"></i>u (V)</span>
+            <span class="pa-leg" style="color:var(--c-i)"><i style="background:var(--c-i)"></i>i (A)</span>
+          </div>
+        </div>
+        <div class="pa-graph" id="gUI"></div>
+      </div>
+
+      <div class="pa-card">
+        <div class="pa-graph-tete">
+          <h3 class="pa-graph-titre">Puissance reçue p = u × i</h3>
+          <div class="pa-legende">
+            <span class="pa-leg" style="color:var(--c-p)"><i class="aire" style="background:var(--c-p)"></i>p &gt; 0 : reçue</span>
+            <span class="pa-leg" style="color:var(--c-neg)"><i class="aire" style="background:var(--c-neg)"></i>p &lt; 0 : restituée</span>
+            <span class="pa-leg" style="color:var(--ink)"><i class="tirets"></i>moyenne P</span>
+          </div>
+        </div>
+        <div class="pa-graph" id="gP"></div>
+        <div class="pa-mesures">
+          <div class="pa-mesure"><span>U<sub>eff</sub> × I<sub>eff</sub></span><strong>1150 VA</strong></div>
+          <div class="pa-mesure accent"><span>Puissance moyenne P</span><strong id="valPm">1150 W</strong></div>
+          <div class="pa-mesure hidden" id="mesureK"><span>cos φ</span><strong id="valK">1,00</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ Questions ============ -->
+    <div class="pa-zone-quiz">
+      <div id="quiz"></div>
+      <div id="bilan" class="pa-card pa-bilan hidden">
+        <span class="pa-badge">BILAN</span>
+        <h3 class="pa-titre" style="font-size:1.25rem">À retenir</h3>
+        <div class="cle">
+          <p><b class="cle-titre">Puissance instantanée négative.</b> Quand i est déphasé par rapport à u, p = u × i est parfois négative : le récepteur <b>restitue</b> au réseau une partie de l'énergie qu'il a reçue (stockée dans la bobine ou le condensateur).</p>
+        </div>
+        <div class="cle">
+          <p><b class="cle-titre">Puissance active.</b> C'est la puissance moyenne réellement consommée, en watts (W) :</p>
+          <p class="pa-formule"><span>P = U<sub>eff</sub> × I<sub>eff</sub> × cos φ</span></p>
+          <p>Le produit S = U<sub>eff</sub> × I<sub>eff</sub> est la <b>puissance apparente</b>, en voltampères (VA). On a toujours P ≤ S.</p>
+        </div>
+        <div class="cle">
+          <p><b class="cle-titre">Facteur de puissance.</b></p>
+          <p class="pa-formule"><span>k = P / (U<sub>eff</sub> × I<sub>eff</sub>)</span> <span>= cos φ</span></p>
+          <p>k = 1 pour un circuit résistif ; k &lt; 1 dès que i est déphasé (en avance ou en retard). Un facteur de puissance faible impose un courant plus intense pour la même puissance, donc plus de pertes dans les câbles.</p>
+        </div>
+        <div class="pa-bilan-actions">
+          <a href="../index.html" class="btn-primary">Retour à l'accueil</a>
+          <button type="button" class="btn-secondary" onclick="location.reload()">↻ Recommencer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- Grandeurs : Ueff = 230 V, Ieff = 5 A, déphasage φ variable ---------- */
+const UEFF = 230, IEFF = 5;
+const UMAX = UEFF * Math.SQRT2, IMAX = IEFF * Math.SQRT2;
+const W = PA.OMEGA, C = PA.COUL, fmt = PA.fmt, TMAX = 40;
+let phi = 0;                                   // en degrés ; φ > 0 : i en retard sur u
+const rad = () => phi * Math.PI / 180;
+const u = t => UMAX * Math.sin(W * t);
+const i = t => IMAX * Math.sin(W * t - rad());
+const p = t => u(t) * i(t);
+const Pmoy = () => UEFF * IEFF * Math.cos(rad());
+
+/* ---------- Illustrations des circuits ---------- */
+document.querySelectorAll('.pa-circuit-img').forEach(s => { s.innerHTML = PA.dessins[s.dataset.dessin]; });
+
+/* ---------- Graphiques ---------- */
+const gUI = new PA.Graphe(document.getElementById('gUI'), {
+  titre: 'tension u et intensité i en fonction du temps',
+  tmax: TMAX, pasT: 5,
+  axes: [
+    { min: -400, max: 400, pas: 100, nom: 'u', unite: 'V', couleur: C.u },
+    { min: -10, max: 10, pas: 2.5, nom: 'i', unite: 'A', couleur: C.i, decimales: 1 },
+  ],
+  courbes: [
+    { f: u, axe: 0, couleur: C.u, largeur: 2.8 },
+    { f: i, axe: 1, couleur: C.i, largeur: 2.8 },
+  ],
+  calques: g => {
+    // décalage entre le maximum de u (t = 5 ms) et le maximum de i le plus proche
+    if (phi === 0) return '';
+    const dt = phi / 360 * 20, tu = 5, ti = tu + dt, y = g.Y(IMAX, 1) - 10;
+    const xa = g.X(tu), xb = g.X(ti);
+    let s = `<line x1="${xa}" y1="${g.Y(UMAX)}" x2="${xa}" y2="${y - 6}" stroke="${C.u}" stroke-width="1.2" stroke-dasharray="3 3"/>`;
+    s += `<line x1="${xb}" y1="${g.Y(IMAX, 1)}" x2="${xb}" y2="${y - 6}" stroke="${C.i}" stroke-width="1.2" stroke-dasharray="3 3"/>`;
+    s += `<line x1="${xa}" y1="${y - 2}" x2="${xb}" y2="${y - 2}" stroke="${C.ink}" stroke-width="1.6"/>`;
+    const sens = xb > xa ? 1 : -1;
+    s += `<path d="M${xb},${y - 2}l${-6 * sens},-4v8z" fill="${C.ink}"/>`;
+    const txt = `${fmt(Math.abs(dt), 1)} ms`;
+    s += PA.svg.etiquette(Math.max(xa, xb) + 6, y + 2, txt, C.ink, 'start', g.petit);
+    return s;
+  },
+});
+
+const gP = new PA.Graphe(document.getElementById('gP'), {
+  titre: 'puissance instantanée p en fonction du temps',
+  tmax: TMAX, pasT: 5,
+  axes: [{ min: -1500, max: 2500, pas: 500, nom: 'p', unite: 'W', couleur: C.p }],
+  courbes: [{ f: p, axe: 0, couleur: C.p, largeur: 2.8, aires: { pos: C.p, neg: C.neg, opacite: .3 } }],
+  calques: g => {
+    const y = g.Y(Pmoy());
+    return `<line x1="${g.x0}" y1="${y}" x2="${g.x1}" y2="${y}" stroke="${C.ink}" stroke-width="2" stroke-dasharray="7 5"/>` +
+      PA.svg.etiquette(g.x1 - 6, y - 7, `P = ${fmt(Pmoy())} W`, C.ink, 'end', g.petit);
+  },
+});
+
+/* ---------- Réglage du déphasage ---------- */
+const rangePhi = document.getElementById('rangePhi');
+const circuits = document.querySelectorAll('.pa-circuit');
+let circuitChoisi = 'resistif';
+
+function type() { return phi === 0 ? 'resistif' : phi < 0 ? 'capacitif' : 'inductif'; }
+
+function majPhi(v) {
+  phi = Math.round(v);
+  rangePhi.value = phi;
+  document.getElementById('valPhi').textContent = fmt(phi) + '°';
+  const dt = fmt(Math.abs(phi) / 360 * 20, 1);
+  document.getElementById('txtPhi').textContent =
+    phi === 0 ? 'u et i en phase' : phi > 0 ? `i en retard de ${dt} ms` : `i en avance de ${dt} ms`;
+  circuits.forEach(b => b.classList.toggle('actif', b.dataset.type === type()));
+  document.getElementById('valPm').textContent = fmt(Pmoy()) + ' W';
+  document.getElementById('valK').textContent = fmt(Math.cos(rad()), 2);
+  gUI.dessiner(); gP.dessiner();
+}
+PA.curseurTactile(rangePhi);
+rangePhi.addEventListener('input', () => majPhi(+rangePhi.value));
+// réglage fin, degré par degré (plus précis au doigt que le curseur)
+document.getElementById('phiMoins').addEventListener('click', () => majPhi(Math.max(-90, phi - 1)));
+document.getElementById('phiPlus').addEventListener('click', () => majPhi(Math.min(90, phi + 1)));
+circuits.forEach(b => b.addEventListener('click', () => { circuitChoisi = b.dataset.type; majPhi(+b.dataset.phi); }));
+majPhi(0);
+
+/* ---------- Questions ---------- */
+const questions = [
+  {
+    texte: 'Le circuit <b>résistif</b> (radiateur) est sélectionné : u et i sont en phase. Comme dans le module 1, sa puissance moyenne vaut P = U<sub>eff</sub> × I<sub>eff</sub> = 230 × 5,0 =',
+    avant: () => majPhi(0),
+    prealable: () => phi === 0 ? null : 'clique sur « Circuit résistif » (φ = 0°).',
+    choix: [
+      { t: '1150 W', ok: true },
+      { t: '2300 W', pourquoi: '2300 W est la puissance maximale U<sub>max</sub> × I<sub>max</sub>. Calcule 230 × 5,0.' },
+      { t: '235 W', pourquoi: 'Il faut multiplier U<sub>eff</sub> par I<sub>eff</sub>, pas les additionner.' },
+    ],
+    bravo: 'P = 1150 W. La droite en pointillés, sur le graphique de p, indique cette puissance moyenne. Toute la courbe de p est au-dessus de l\'axe : le radiateur reçoit de l\'énergie en permanence.',
+    resume: 'Circuit résistif : P = U<sub>eff</sub> × I<sub>eff</sub> = 1150 W',
+  },
+  {
+    texte: 'Clique maintenant sur le circuit <b>inductif</b> (moteur). Compare les courbes de u et de i : ',
+    consigne: 'Un moteur contient des bobinages : de longs fils de cuivre enroulés (les bobines).',
+    prealable: () => type() === 'inductif' ? null : 'clique sur « Circuit inductif » (moteur).',
+    choix: [
+      { t: 'i atteint son maximum après u : i est en retard', ok: true },
+      { t: 'i atteint son maximum avant u : i est en avance', pourquoi: 'Repère le premier sommet de la courbe bleue (u) puis celui de la courbe orange (i) : lequel arrive en premier ?' },
+      { t: 'u et i atteignent leur maximum en même temps', pourquoi: 'Regarde les pointillés verticaux au sommet des deux courbes : ils ne sont pas au même instant.' },
+    ],
+    bravo: 'Dans une bobine, le courant est <b>en retard</b> sur la tension. Ce décalage s\'appelle le <b>déphasage φ</b> ; il se mesure en degrés (une période complète correspond à 360°).',
+    resume: 'Circuit inductif : i est en retard sur u (déphasage φ)',
+  },
+  {
+    texte: 'Observe la courbe de la puissance p = u × i reçue par le moteur.',
+    prealable: () => type() === 'inductif' ? null : 'garde le circuit inductif (moteur) sélectionné.',
+    choix: [
+      { t: 'p est toujours positive', pourquoi: 'Regarde les zones colorées en bleu-vert : la courbe violette passe sous l\'axe des temps.' },
+      { t: 'p est parfois négative', ok: true },
+    ],
+    bravo: 'Des zones où <b>p &lt; 0</b> apparaissent (en bleu-vert). Ce n\'était jamais le cas pour le radiateur.',
+    resume: 'Avec un déphasage, p est parfois négative',
+  },
+  {
+    texte: 'Pendant les instants où p est négative, u et i sont :',
+    prealable: () => phi !== 0 ? null : 'choisis un circuit où i est décalé par rapport à u (inductif ou capacitif).',
+    consigne: 'Repère un de ces instants sur le graphique de p, puis regarde u et i au même instant.',
+    choix: [
+      { t: 'de même signe', pourquoi: 'Le produit de deux nombres de même signe est positif. Or ici p = u × i est négatif.' },
+      { t: 'de signes contraires', ok: true },
+    ],
+    bravo: 'p = u × i est négative quand u et i sont de signes contraires. Cela n\'arrive que parce que i est <b>décalée</b> par rapport à u.',
+    resume: 'p &lt; 0 quand u et i sont de signes contraires',
+  },
+  {
+    texte: 'p est la puissance <b>reçue</b> par le moteur. Que signifie p &lt; 0 ?',
+    prealable: () => phi !== 0 ? null : 'choisis un circuit où i est décalé par rapport à u (inductif ou capacitif).',
+    choix: [
+      { t: 'Le moteur ne reçoit aucune énergie', pourquoi: 'Si le moteur ne recevait rien, on aurait p = 0, pas p &lt; 0.' },
+      { t: 'Le moteur rend de l\'énergie au réseau', ok: true },
+      { t: 'Le moteur est en panne', pourquoi: 'Non, c\'est son fonctionnement normal : tous les moteurs ont ce comportement.' },
+    ],
+    bravo: 'Une puissance reçue négative est une puissance <b>restituée</b> : la bobine rend au réseau l\'énergie qu\'elle avait stockée (dans son champ magnétique) un instant plus tôt. Cette énergie fait des allers-retours entre le réseau et le moteur sans être consommée.',
+    resume: 'p &lt; 0 : le récepteur restitue de l\'énergie au réseau',
+  },
+  {
+    texte: 'Conséquence : la puissance moyenne P réellement consommée par le moteur est…',
+    prealable: () => phi !== 0 ? null : 'choisis un circuit où i est décalé par rapport à u (inductif ou capacitif).',
+    choix: [
+      { t: 'égale à U<sub>eff</sub> × I<sub>eff</sub> = 1150 W', pourquoi: 'Lis la valeur de P affichée sous le graphique de p.' },
+      { t: 'inférieure à U<sub>eff</sub> × I<sub>eff</sub>', ok: true },
+      { t: 'supérieure à U<sub>eff</sub> × I<sub>eff</sub>', pourquoi: 'Lis la valeur de P affichée sous le graphique de p, et compare-la à 1150.' },
+    ],
+    bravo: () => `L'énergie restituée (aires bleu-vert) se retranche de l'énergie reçue (aires violettes). Ici, P = ${fmt(Pmoy())} W seulement, alors que U<sub>eff</sub> × I<sub>eff</sub> = 1150 VA : <b>P &lt; U<sub>eff</sub> × I<sub>eff</sub></b>.`,
+    resume: 'Avec un déphasage : P &lt; U<sub>eff</sub> × I<sub>eff</sub>',
+  },
+  {
+    texte: 'Augmente le déphasage jusqu\'à <b>φ = 90°</b> (curseur tout à droite). Que vaut alors la puissance moyenne P ?',
+    prealable: () => phi === 90 ? null : 'place le curseur du déphasage sur φ = 90° (tout à droite).',
+    choix: [
+      { t: '1150 W', pourquoi: 'Lis la valeur de P affichée : elle a beaucoup diminué.' },
+      { t: '575 W', pourquoi: 'Lis la valeur de P affichée avec φ = 90°.' },
+      { t: '0 W', ok: true },
+    ],
+    bravo: 'Les aires positives et négatives sont égales : toute l\'énergie reçue est restituée. Le composant ne consomme <b>rien</b> en moyenne, alors qu\'il est parcouru par un courant de 5,0 A !',
+    resume: 'φ = 90° : P = 0 W, toute l\'énergie est restituée',
+  },
+  {
+    texte: 'Place le curseur sur <b>φ = 60°</b>. Calcule le rapport P / (U<sub>eff</sub> × I<sub>eff</sub>) = P / 1150.',
+    prealable: () => phi === 60 ? null : 'place le curseur du déphasage sur φ = 60° (les boutons ◀ ▶ règlent degré par degré).',
+    choix: [
+      { t: '0,50', ok: true },
+      { t: '0,87', pourquoi: () => `Avec φ = 60°, P = ${fmt(Pmoy())} W. Calcule ${fmt(Pmoy())} / 1150.` },
+      { t: '2,0', pourquoi: 'C\'est le rapport inverse : calcule P / 1150, et non 1150 / P.' },
+    ],
+    bravo: 'P / (U<sub>eff</sub> × I<sub>eff</sub>) = 575 / 1150 = 0,50. Ce rapport s\'appelle le <b>facteur de puissance</b> k.',
+    resume: 'Facteur de puissance : k = P / (U<sub>eff</sub> × I<sub>eff</sub>)',
+  },
+  {
+    texte: 'Calcule <b>cos 60°</b> à la calculatrice (en mode degrés).',
+    choix: [
+      { t: '0,50', ok: true },
+      { t: '0,87', pourquoi: '0,87 est sin 60°. Vérifie que tu utilises bien la touche cos.' },
+      { t: '−0,95', pourquoi: 'Ta calculatrice est en mode radians : passe-la en mode degrés.' },
+    ],
+    bravo: 'Le facteur de puissance est égal à <b>cos φ</b> ! Pour des signaux sinusoïdaux : <b>P = U<sub>eff</sub> × I<sub>eff</sub> × cos φ</b>. La valeur de cos φ est maintenant affichée sous le graphique : vérifie-le pour d\'autres déphasages.',
+    resume: 'k = cos φ et P = U<sub>eff</sub> × I<sub>eff</sub> × cos φ',
+    apres: () => { document.getElementById('mesureK').classList.remove('hidden'); },
+  },
+  {
+    texte: 'Pour le circuit <b>capacitif</b>, i est en avance sur u. Place le curseur sur <b>φ = −60°</b>. Que vaut P ?',
+    prealable: () => phi === -60 ? null : 'place le curseur du déphasage sur φ = −60° (les boutons ◀ ▶ règlent degré par degré).',
+    choix: [
+      { t: '575 W', ok: true },
+      { t: '−575 W', pourquoi: 'Lis la valeur de P affichée : les aires violettes restent plus grandes que les aires bleu-vert.' },
+      { t: '0 W', pourquoi: 'Lis la valeur de P affichée : elle n\'est pas nulle.' },
+    ],
+    bravo: 'Même puissance qu\'à +60°, car cos(−60°) = cos(60°) = 0,50. Seul l\'écart entre u et i compte, pas le sens du décalage : un condensateur stocke lui aussi de l\'énergie (dans son champ électrique) puis la restitue.',
+    resume: 'Circuit capacitif, φ = −60° : P = 575 W (même cos φ)',
+  },
+  {
+    texte: 'Un atelier a besoin d\'une puissance P donnée. Si le facteur de puissance de ses machines est faible, il faut…',
+    choix: [
+      { t: 'un courant plus intense dans les câbles', ok: true },
+      { t: 'une tension plus élevée', pourquoi: 'La tension du réseau est fixée (230 V). Regarde plutôt la formule I<sub>eff</sub> = P / (U<sub>eff</sub> × cos φ).' },
+      { t: 'rien de particulier', pourquoi: 'Utilise P = U<sub>eff</sub> × I<sub>eff</sub> × cos φ : si cos φ diminue à P et U<sub>eff</sub> fixés, que devient I<sub>eff</sub> ?' },
+    ],
+    bravo: 'I<sub>eff</sub> = P / (U<sub>eff</sub> × cos φ) : plus cos φ est petit, plus le courant est intense et plus les câbles chauffent (pertes par effet Joule). C\'est pourquoi le fournisseur d\'électricité facture les installations dont le facteur de puissance est trop faible, et qu\'on leur ajoute des condensateurs pour le relever.',
+    resume: 'Facteur de puissance faible : courant plus intense, plus de pertes',
+  },
+];
+
+// Les explications sous forme de fonction sont évaluées au moment de l'affichage
+questions.forEach(q => (q.choix || []).forEach(c => {
+  if (typeof c.pourquoi === 'function') { const f = c.pourquoi; Object.defineProperty(c, 'pourquoi', { get: f }); }
+}));
+
+PA.quiz(document.getElementById('quiz'), questions, {
+  fin: () => {
+    const b = document.getElementById('bilan');
+    b.classList.remove('hidden');
+    document.getElementById('mesureK').classList.remove('hidden');
+    scrollTo({ top: scrollY + b.getBoundingClientRect().top - 76, behavior: 'smooth' });
+  },
+});
+
+/* ---------- Navigation ---------- */
+const nav = AppNav.init({
+  appName: 'Puissance active', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
+  onHome: () => { window.location.href = '../index.html'; },
+  onNavigate: (key) => { window.location.href = key + '.html'; },
+  groups: [
+    { title: 'Modules', items: [
+      { key: 'module_1', label: 'Module 1 : La valeur efficace' },
+      { key: 'module_2', label: 'Module 2 : Puissance active et facteur de puissance' },
+    ]},
+  ],
+});
+nav.setActive('module_2');
+nav.setTitle('Module 2 : Puissance active');
+</script>
+</body>
+</html>

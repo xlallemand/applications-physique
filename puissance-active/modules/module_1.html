@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : La valeur efficace — Puissance active</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="pa.css">
+<script src="../../assets/nav.js"></script>
+<script src="pa.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="pa-page pa-large">
+  <div class="pa-card">
+    <span class="pa-badge">MODULE 1</span>
+    <h2 class="pa-titre">La valeur efficace</h2>
+    <p class="pa-contexte">Un <b>radiateur électrique</b> (une simple résistance chauffante) est branché sur une prise du secteur, marquée <b>« 230 V – 50 Hz »</b>. La tension u et l'intensité i sont sinusoïdales. Quelle puissance le radiateur reçoit-il vraiment ?</p>
+  </div>
+
+  <div class="pa-grid">
+    <!-- ============ Graphiques ============ -->
+    <div class="pa-graphs">
+      <div class="pa-card">
+        <div class="pa-graph-tete">
+          <h3 class="pa-graph-titre">Tension et intensité</h3>
+          <div class="pa-legende">
+            <span class="pa-leg" style="color:var(--c-u)"><i style="background:var(--c-u)"></i>u (V)</span>
+            <span class="pa-leg" style="color:var(--c-i)"><i style="background:var(--c-i)"></i>i (A)</span>
+          </div>
+        </div>
+        <div class="pa-graph" id="gUI"></div>
+      </div>
+
+      <div class="pa-card">
+        <div class="pa-graph-tete">
+          <h3 class="pa-graph-titre">Puissance reçue p = u × i</h3>
+          <div class="pa-legende">
+            <span class="pa-leg" style="color:var(--c-p)"><i style="background:var(--c-p)"></i>p (W)</span>
+          </div>
+        </div>
+        <div class="pa-graph" id="gP"></div>
+
+        <!-- Outil 1 : remplir l'aire sous la courbe (énergie) -->
+        <div class="pa-outil hidden" id="outilAire">
+          <div class="pa-outil-ligne">
+            <button type="button" class="btn-small" id="btnRemplir">▶ Remplir l'aire</button>
+            <button type="button" class="btn-small" id="btnEffacer">Effacer</button>
+            <div class="pa-mesures" style="margin:0">
+              <div class="pa-mesure accent"><span>Énergie reçue E</span><strong id="valE">0,0 J</strong></div>
+              <div class="pa-mesure"><span>Durée Δt</span><strong id="valT">0 ms</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Outil 2 : droite horizontale P (rectangle de même aire) -->
+        <div class="pa-outil hidden" id="outilDroite">
+          <div class="pa-outil-titre">Hauteur de la droite : <b id="valP">2300 W</b></div>
+          <div class="pa-range-ligne">
+            <button type="button" class="btn-small pa-fin" id="pMoins" aria-label="Descendre la droite de 10 W">▼</button>
+            <input type="range" class="pa-range" id="rangeP" min="0" max="2500" step="10" value="2300" aria-label="Hauteur de la droite P, en watts">
+            <button type="button" class="btn-small pa-fin" id="pPlus" aria-label="Monter la droite de 10 W">▲</button>
+          </div>
+          <div class="pa-mesures">
+            <div class="pa-mesure accent"><span>Aire sous la courbe</span><strong id="valAireC">46,0 J</strong></div>
+            <div class="pa-mesure"><span>Aire du rectangle</span><strong id="valAireR">92,0 J</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ Questions ============ -->
+    <div class="pa-zone-quiz pa-collant">
+      <div id="quiz"></div>
+      <div id="bilan" class="pa-card pa-bilan hidden">
+        <span class="pa-badge">BILAN</span>
+        <h3 class="pa-titre" style="font-size:1.25rem">À retenir</h3>
+        <div class="cle">
+          <p><b class="cle-titre">Valeurs efficaces.</b> Pour une tension et une intensité sinusoïdales :</p>
+          <p class="pa-formule"><span>U<sub>eff</sub> = U<sub>max</sub> / √2 ;</span> <span>I<sub>eff</sub> = I<sub>max</sub> / √2</span></p>
+          <p>La valeur efficace est la valeur de la grandeur <b>continue</b> qui fournirait la <b>même puissance</b> au même appareil. C'est elle qu'indiquent les appareils (230 V) et que mesurent voltmètre et ampèremètre en mode alternatif (AC).</p>
+        </div>
+        <div class="cle">
+          <p><b class="cle-titre">Puissance d'un appareil résistif.</b> La puissance instantanée p = u × i varie sans cesse entre 0 et U<sub>max</sub> × I<sub>max</sub>. La puissance moyenne reçue vaut la moitié du maximum :</p>
+          <p class="pa-formule"><span>P = U<sub>max</sub> × I<sub>max</sub> / 2</span> <span>= U<sub>eff</sub> × I<sub>eff</sub></span></p>
+          <p>L'énergie reçue pendant Δt est l'aire sous la courbe p(t) : E = P × Δt.</p>
+        </div>
+        <div class="pa-bilan-actions">
+          <a href="module_2.html" class="btn-primary">Module 2 : le facteur de puissance →</a>
+          <button type="button" class="btn-secondary" onclick="location.reload()">↻ Recommencer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- Grandeurs du radiateur (230 V, 5 A) ---------- */
+const UEFF = 230, IEFF = 5;
+const UMAX = UEFF * Math.SQRT2, IMAX = IEFF * Math.SQRT2;     // 325 V et 7,07 A
+const W = PA.OMEGA, C = PA.COUL, fmt = PA.fmt, TMAX = 40;
+const u = t => UMAX * Math.sin(W * t);
+const i = t => IMAX * Math.sin(W * t);
+const p = t => u(t) * i(t);
+// énergie reçue entre 0 et t (t en ms, E en J)
+const energie = t => UEFF * IEFF * (t - Math.sin(2 * W * t) / (2 * W)) / 1000;
+
+/* ---------- État des annotations (révélées au fil des questions) ---------- */
+const etat = { umax: false, imax: false, pmax: false, remplir: 0, droite: null, droiteOk: false };
+
+/* ---------- Graphique u(t), i(t) ---------- */
+const gUI = new PA.Graphe(document.getElementById('gUI'), {
+  titre: 'tension u et intensité i en fonction du temps',
+  tmax: TMAX, pasT: 5,
+  axes: [
+    { min: -400, max: 400, pas: 100, nom: 'u', unite: 'V', couleur: C.u },
+    { min: -10, max: 10, pas: 2.5, nom: 'i', unite: 'A', couleur: C.i, decimales: 1 },
+  ],
+  courbes: [
+    { f: u, axe: 0, couleur: C.u, largeur: 2.8 },
+    { f: i, axe: 1, couleur: C.i, largeur: 2.8 },
+  ],
+  calques: g => {
+    let s = '';
+    if (etat.umax) s += PA.svg.niveau(g, g.Y(UMAX, 0), C.u, 'Umax ≈ 325 V', 'g');
+    if (etat.imax) s += PA.svg.niveau(g, g.Y(IMAX, 1), C.i, 'Imax ≈ 7,1 A', 'd');
+    return s;
+  },
+});
+
+/* ---------- Graphique p(t) ---------- */
+const gP = new PA.Graphe(document.getElementById('gP'), {
+  titre: 'puissance instantanée p en fonction du temps',
+  tmax: TMAX, pasT: 5,
+  axes: [{ min: -500, max: 2500, pas: 500, nom: 'p', unite: 'W', couleur: C.p }],
+  courbes: [{ f: p, axe: 0, couleur: C.p, largeur: 2.8, aires: null }],
+  calquesDessous: g => {
+    // rectangle de hauteur P (même durée que la courbe)
+    if (etat.droite === null) return '';
+    const y = g.Y(etat.droite);
+    return `<rect x="${g.x0}" y="${Math.min(y, g.Y(0))}" width="${g.x1 - g.x0}" height="${Math.abs(g.Y(0) - y)}" fill="${C.ink}" fill-opacity=".08"/>`;
+  },
+  calques: g => {
+    let s = '';
+    if (etat.pmax) s += PA.svg.niveau(g, g.Y(2 * UEFF * IEFF), C.p, 'Pmax ≈ 2300 W', 'g');
+    if (etat.droite !== null) {
+      const y = g.Y(etat.droite);
+      s += `<line x1="${g.x0}" y1="${y}" x2="${g.x1}" y2="${y}" stroke="${C.ink}" stroke-width="2.2"/>`;
+      s += PA.svg.etiquette(g.x0 + 6, y - 7, `P = ${fmt(etat.droite)} W`, C.ink, 'start', g.petit);
+    }
+    return s;
+  },
+});
+
+/* Aire remplie : de 0 à etat.remplir (ms) */
+function majAire() {
+  gP.cfg.courbes[0].aires = etat.remplir > 0 ? { pos: C.p, neg: C.neg, de: 0, a: etat.remplir, opacite: .3 } : null;
+  gP.dessiner();
+  document.getElementById('valE').textContent = fmt(energie(etat.remplir), 1) + ' J';
+  document.getElementById('valT').textContent = fmt(etat.remplir) + ' ms';
+}
+
+/* ---------- Outil 1 : remplissage animé de l'aire ---------- */
+let animation = null, rempli = false;
+document.getElementById('btnRemplir').addEventListener('click', () => {
+  cancelAnimationFrame(animation);
+  const debut = performance.now(), duree = 2600;
+  const pas = now => {
+    const k = Math.min(1, (now - debut) / duree);
+    etat.remplir = TMAX * k;
+    majAire();
+    if (k < 1) animation = requestAnimationFrame(pas); else rempli = true;
+  };
+  animation = requestAnimationFrame(pas);
+});
+document.getElementById('btnEffacer').addEventListener('click', () => {
+  cancelAnimationFrame(animation); etat.remplir = 0; majAire();
+});
+
+/* ---------- Outil 2 : droite horizontale P ---------- */
+const rangeP = document.getElementById('rangeP');
+let droiteBougee = false;
+function majDroite(v) {
+  etat.droite = Math.max(0, Math.min(2500, Math.round(v / 10) * 10));
+  rangeP.value = etat.droite;
+  document.getElementById('valP').textContent = fmt(etat.droite) + ' W';
+  document.getElementById('valAireC').textContent = fmt(energie(TMAX), 1) + ' J';
+  document.getElementById('valAireR').textContent = fmt(etat.droite * TMAX / 1000, 1) + ' J';
+  gP.dessiner();
+}
+PA.curseurTactile(rangeP);
+rangeP.addEventListener('input', () => { droiteBougee = true; majDroite(+rangeP.value); });
+document.getElementById('pMoins').addEventListener('click', () => { droiteBougee = true; majDroite(etat.droite - 10); });
+document.getElementById('pPlus').addEventListener('click', () => { droiteBougee = true; majDroite(etat.droite + 10); });
+
+// Poignée posée sur la droite, à faire glisser à la souris ou au doigt
+const poignee = document.createElement('div');
+poignee.className = 'pa-poignee hidden';
+poignee.setAttribute('aria-hidden', 'true');
+document.getElementById('gP').appendChild(poignee);
+gP.apresDessin = g => {
+  if (etat.droite === null || etat.droiteOk) { poignee.classList.add('hidden'); return; }
+  poignee.classList.remove('hidden');
+  poignee.style.left = (g.x1 - 30) + 'px';
+  poignee.style.top = g.Y(etat.droite) + 'px';
+};
+gP.dessiner();
+poignee.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  poignee.setPointerCapture(e.pointerId);
+  poignee.classList.add('actif');
+  const bouger = ev => {
+    const g = gP.g, r = document.getElementById('gP').getBoundingClientRect();
+    const y = ev.clientY - r.top - 1.5;                   // 1,5 px : bordure du cadre
+    const a = gP.cfg.axes[0];
+    droiteBougee = true;
+    majDroite(a.max - (y - g.y0) / (g.y1 - g.y0) * (a.max - a.min));
+  };
+  const lacher = () => {
+    poignee.classList.remove('actif');
+    poignee.removeEventListener('pointermove', bouger);
+    poignee.removeEventListener('pointerup', lacher);
+    poignee.removeEventListener('pointercancel', lacher);
+  };
+  poignee.addEventListener('pointermove', bouger);
+  poignee.addEventListener('pointerup', lacher);
+  poignee.addEventListener('pointercancel', lacher);
+});
+
+/* ---------- Questions ---------- */
+const questions = [
+  {
+    texte: 'La prise est marquée « 230 V ». Lis sur le graphique la <b>valeur maximale</b> de la tension u (courbe bleue, axe de gauche).',
+    choix: [
+      { t: '230 V', pourquoi: '230 V est la valeur écrite sur la prise, mais regarde bien le sommet de la courbe bleue : il est plus haut que la graduation 200 V et même que 300 V.' },
+      { t: 'Environ 325 V', ok: true },
+      { t: '400 V', pourquoi: '400 V est le haut de l\'axe. Le sommet de la courbe bleue est un peu en dessous.' },
+    ],
+    bravo: 'La tension atteint U<sub>max</sub> ≈ 325 V. La valeur 230 V écrite sur la prise n\'est donc <b>pas</b> la valeur maximale : on va découvrir ce qu\'elle représente.',
+    resume: 'U<sub>max</sub> ≈ 325 V',
+    apres: () => { etat.umax = true; gUI.dessiner(); },
+  },
+  {
+    texte: 'Lis de même la <b>valeur maximale</b> de l\'intensité i (courbe orange, axe de droite).',
+    choix: [
+      { t: '5,0 A', pourquoi: 'Le sommet de la courbe orange dépasse la graduation 5,0 A de l\'axe de droite.' },
+      { t: 'Environ 7,1 A', ok: true },
+      { t: '10 A', pourquoi: '10 A est le haut de l\'axe de droite. Le sommet de la courbe orange est plus bas.' },
+    ],
+    bravo: 'L\'intensité atteint I<sub>max</sub> ≈ 7,1 A. Attention : u et i n\'ont pas la même échelle, chacune se lit sur son propre axe.',
+    resume: 'I<sub>max</sub> ≈ 7,1 A',
+    apres: () => { etat.imax = true; gUI.dessiner(); },
+  },
+  {
+    texte: 'Observe la courbe de la puissance reçue p = u × i. Cette puissance est :',
+    choix: [
+      { t: 'toujours positive (ou nulle)', ok: true },
+      { t: 'tantôt positive, tantôt négative', pourquoi: 'Regarde la courbe violette : descend-elle un jour sous l\'axe des temps (p = 0) ?' },
+      { t: 'constante', pourquoi: 'La courbe violette monte et descend sans cesse : p n\'est pas constante.' },
+    ],
+    bravo: 'Quand u est négative, i l\'est aussi : le produit de deux nombres négatifs est positif. Le radiateur <b>reçoit</b> de l\'énergie à chaque instant.',
+    resume: 'p = u × i est toujours positive',
+  },
+  {
+    texte: 'Quelle est la <b>valeur maximale</b> de la puissance p ?',
+    choix: [
+      { t: '1150 W', pourquoi: 'Lis le sommet de la courbe violette sur l\'axe de gauche : il est bien au-dessus de 1000 W.' },
+      { t: 'Environ 2300 W', ok: true },
+      { t: 'Environ 3250 W', pourquoi: 'L\'axe s\'arrête à 2500 W et la courbe reste en dessous. Calcule plutôt U<sub>max</sub> × I<sub>max</sub>.' },
+    ],
+    bravo: 'P<sub>max</sub> = U<sub>max</sub> × I<sub>max</sub> = 325 × 7,07 ≈ 2300 W.',
+    resume: 'P<sub>max</sub> = U<sub>max</sub> × I<sub>max</sub> ≈ 2300 W',
+    apres: () => { etat.pmax = true; gP.dessiner(); },
+  },
+  {
+    texte: 'Le radiateur reçoit-il ces 2300 W <b>en permanence</b> ?',
+    choix: [
+      { t: 'Oui, p reste égale à 2300 W', pourquoi: 'Regarde la courbe violette : elle ne reste pas en haut, elle redescend régulièrement.' },
+      { t: 'Non, p varie sans cesse entre 0 et 2300 W', ok: true },
+    ],
+    bravo: 'p passe par 0 deux fois par période, soit 100 fois par seconde ! La puissance <b>moyenne</b> reçue, celle qui chauffe vraiment la pièce, est donc plus petite que 2300 W. Mais de combien ?',
+    resume: 'p varie entre 0 et 2300 W : sa moyenne est plus petite',
+  },
+  {
+    texte: 'L\'<b>énergie</b> reçue pendant une durée Δt est égale à l\'<b>aire sous la courbe</b> p(t). Quelle énergie le radiateur reçoit-il en 40 ms ?',
+    consigne: 'Clique sur « ▶ Remplir l\'aire », sous le graphique de p, et lis l\'énergie E.',
+    avant: () => { document.getElementById('outilAire').classList.remove('hidden'); },
+    prealable: () => rempli ? null : 'clique sur « ▶ Remplir l\'aire » sous le graphique de p et attends la fin du remplissage.',
+    choix: [
+      { t: '23 J', pourquoi: '23 J est l\'énergie reçue en 20 ms seulement (une période). Le remplissage va jusqu\'à 40 ms.' },
+      { t: '46 J', ok: true },
+      { t: '92 J', pourquoi: '92 J correspondrait à 2300 W pendant 40 ms : ce serait vrai si p restait toujours à son maximum. Lis la valeur de E affichée.' },
+    ],
+    bravo: 'E = 46 J en 40 ms. Si la puissance était constante et égale à P, l\'énergie serait E = P × Δt : l\'aire d\'un <b>rectangle</b> de hauteur P.',
+    resume: 'E = aire sous la courbe = 46 J en 40 ms',
+  },
+  {
+    texte: 'Cherche la puissance <b>constante</b> P qui donnerait la même énergie : le rectangle doit avoir la <b>même aire</b> que la surface sous la courbe.',
+    consigne: 'Déplace la droite horizontale (avec le curseur sous le graphique, ou en faisant glisser la poignée ↕) jusqu\'à ce que les deux aires soient égales.',
+    avant: () => {
+      document.getElementById('outilAire').classList.add('hidden');
+      etat.remplir = TMAX; majAire();
+      document.getElementById('outilDroite').classList.remove('hidden');
+      majDroite(2300);
+    },
+    verif: () => {
+      if (!droiteBougee) return { ok: false, msg: 'Déplace d\'abord la droite avec le curseur ou la poignée ↕.' };
+      if (Math.abs(etat.droite - 1150) <= 20) return { ok: true };
+      return etat.droite > 1150
+        ? { ok: false, msg: 'L\'aire du rectangle est plus grande que l\'aire sous la courbe : descends la droite.' }
+        : { ok: false, msg: 'L\'aire du rectangle est plus petite que l\'aire sous la courbe : monte la droite.' };
+    },
+    bravo: 'Avec P = 1150 W, le rectangle a la même aire que la surface sous la courbe : les « bosses » au-dessus de la droite comblent exactement les « creux » en dessous. La <b>puissance moyenne</b> reçue par le radiateur est <b>P = 1150 W</b>.',
+    resume: 'Puissance moyenne : P = 1150 W',
+    apres: () => { etat.droiteOk = true; majDroite(1150); document.getElementById('outilDroite').classList.add('hidden'); },
+  },
+  {
+    texte: 'Compare la puissance moyenne P = 1150 W à la puissance maximale P<sub>max</sub> = 2300 W.',
+    choix: [
+      { t: 'P = P<sub>max</sub> / 2', ok: true },
+      { t: 'P = P<sub>max</sub> / 3', pourquoi: 'Calcule 2300 / 1150.' },
+      { t: 'P = P<sub>max</sub>', pourquoi: 'La droite P est bien plus basse que le sommet de la courbe.' },
+    ],
+    bravo: 'P = P<sub>max</sub> / 2 = U<sub>max</sub> × I<sub>max</sub> / 2. C\'est vrai pour toute tension sinusoïdale : la courbe p(t) oscille symétriquement autour de sa moyenne.',
+    resume: 'P = P<sub>max</sub> / 2 = U<sub>max</sub> × I<sub>max</sub> / 2',
+  },
+  {
+    texte: 'On peut écrire : P = U<sub>max</sub> × I<sub>max</sub> / 2 = (U<sub>max</sub> / √2) × (I<sub>max</sub> / √2). Calcule U<sub>max</sub> / √2 = 325 / √2.',
+    choix: [
+      { t: '163 V', pourquoi: '163 V = 325 / 2. Il faut diviser par √2 ≈ 1,41, et non par 2.' },
+      { t: '230 V', ok: true },
+      { t: '460 V', pourquoi: '460 V = 325 × √2. Il faut diviser par √2, pas multiplier.' },
+    ],
+    bravo: 'On retrouve <b>230 V</b>, la valeur écrite sur la prise ! C\'est la <b>tension efficace</b> : U<sub>eff</sub> = U<sub>max</sub> / √2. C\'est elle que mesure un voltmètre en mode alternatif (AC).',
+    resume: 'U<sub>eff</sub> = U<sub>max</sub> / √2 = 230 V',
+  },
+  {
+    texte: 'De même, calcule l\'<b>intensité efficace</b> I<sub>eff</sub> = I<sub>max</sub> / √2 = 7,07 / √2.',
+    choix: [
+      { t: '3,5 A', pourquoi: '3,5 A = 7,07 / 2. Il faut diviser par √2 ≈ 1,41.' },
+      { t: '5,0 A', ok: true },
+      { t: '10 A', pourquoi: '10 A = 7,07 × √2. Il faut diviser par √2, pas multiplier.' },
+    ],
+    bravo: 'I<sub>eff</sub> = 5,0 A. Et donc P = U<sub>eff</sub> × I<sub>eff</sub> = 230 × 5,0 = 1150 W : on retrouve la puissance moyenne !',
+    resume: 'I<sub>eff</sub> = I<sub>max</sub> / √2 = 5,0 A et P = U<sub>eff</sub> × I<sub>eff</sub>',
+  },
+  {
+    texte: 'Alimenté par une tension <b>continue</b> de 230 V, ce radiateur serait traversé par un courant continu de 5,0 A. Quelle puissance recevrait-il ?',
+    choix: [
+      { t: '1150 W', ok: true },
+      { t: '2300 W', pourquoi: 'En continu, u et i sont constants : P = U × I = 230 × 5,0.' },
+      { t: '575 W', pourquoi: 'En continu, u et i sont constants : P = U × I = 230 × 5,0.' },
+    ],
+    bravo: 'Exactement la <b>même puissance</b> qu\'en alternatif ! C\'est le sens de la valeur efficace : c\'est la valeur de la tension continue qui fournirait la même puissance (le même échauffement) au radiateur.',
+    resume: 'En continu, 230 V et 5,0 A donnent aussi 1150 W',
+  },
+];
+
+PA.quiz(document.getElementById('quiz'), questions, {
+  fin: () => {
+    const b = document.getElementById('bilan');
+    b.classList.remove('hidden');
+    scrollTo({ top: scrollY + b.getBoundingClientRect().top - 76, behavior: 'smooth' });
+  },
+});
+
+/* ---------- Navigation ---------- */
+const nav = AppNav.init({
+  appName: 'Puissance active', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
+  onHome: () => { window.location.href = '../index.html'; },
+  onNavigate: (key) => { window.location.href = key + '.html'; },
+  groups: [
+    { title: 'Modules', items: [
+      { key: 'module_1', label: 'Module 1 : La valeur efficace' },
+      { key: 'module_2', label: 'Module 2 : Puissance active et facteur de puissance' },
+    ]},
+  ],
+});
+nav.setActive('module_1');
+nav.setTitle('Module 1 : La valeur efficace');
+</script>
+</body>
+</html>
