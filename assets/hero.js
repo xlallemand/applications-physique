@@ -11,6 +11,7 @@
      regle      règles graduées avec préfixes (conversions)
      graphique  papier millimétré, droites et points de mesure
      noyaux     noyaux radioactifs et courbe N(t)
+     puissance  tension et intensité déphasées, puissance instantanée
      fractions  disques et barres partagés
      formules:physique | formules:redox | formules:pile | formules:algebre
    ============================================================ */
@@ -125,6 +126,29 @@
       const N = x => h * .06 + h * .6 * (1 - Math.exp(-x / tau));
       ctx.globalAlpha = .85; ctx.strokeStyle = '#fff'; ctx.lineWidth = 9; courbe(ctx, N, 0, w);
       ctx.globalAlpha = 1; ctx.strokeStyle = c; ctx.lineWidth = 3; courbe(ctx, N, 0, w);
+    },
+
+    // Tension et intensité déphasées (en haut), puissance instantanée p = u × i (en bas)
+    puissance(ctx, w, h, c) {
+      const p = 22;
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineWidth = 1;
+      for (let i = 0, x = 0; x <= w; x += p, i++) { ctx.globalAlpha = i % 5 ? .06 : .14; trait(ctx, x, 0, x, h); }
+      for (let i = 0, y = 0; y <= h; y += p, i++) { ctx.globalAlpha = i % 5 ? .06 : .14; trait(ctx, 0, y, w, y); }
+      const per = Math.max(240, w / 4.5), om = 2 * Math.PI / per, phi = .9;
+      // u et i autour de la ligne yu
+      const yu = h * .3, A = h * .17;
+      ctx.globalAlpha = .35; ctx.lineWidth = 1.5; trait(ctx, 0, yu, w, yu);
+      ctx.globalAlpha = .75; ctx.lineWidth = 2.5; courbe(ctx, x => yu - A * Math.sin(om * x), 0, w);
+      ctx.globalAlpha = .4; courbe(ctx, x => yu - A * .6 * Math.sin(om * x - phi), 0, w);
+      // p = u × i : aires positives (foncées) et négatives (claires)
+      const yp = h * .74, B = h * .2, f = x => Math.sin(om * x) * Math.sin(om * x - phi);
+      ctx.globalAlpha = .35; ctx.lineWidth = 1.5; trait(ctx, 0, yp, w, yp);
+      [[v => Math.max(v, 0), .22], [v => Math.min(v, 0), .09]].forEach(([g, a]) => {
+        ctx.beginPath(); ctx.moveTo(0, yp);
+        for (let x = 0; x <= w; x += 3) ctx.lineTo(x, yp - B * g(f(x)));
+        ctx.lineTo(w, yp); ctx.closePath(); ctx.globalAlpha = a; ctx.fill();
+      });
+      ctx.globalAlpha = .7; ctx.lineWidth = 2.5; courbe(ctx, x => yp - B * f(x), 0, w);
     },
 
     // Disques et barres partagés en fractions
