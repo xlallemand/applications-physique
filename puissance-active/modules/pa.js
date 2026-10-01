@@ -299,46 +299,43 @@
       <path d="M26 82v8M114 82v8" stroke="#55585f" stroke-width="4" stroke-linecap="round"/>
     </svg>`,
 
-    // Condensateur (électrochimique) sur sa carte électronique
+    // Éclairage LED (gymnase) : panneau de LED, son alimentation électronique à condensateurs, cône de lumière
     capacitif: `<svg viewBox="0 0 140 96" aria-hidden="true">
-      <rect x="12" y="74" width="116" height="14" rx="3" fill="#2f7d5b"/>
-      <g fill="#d6c38a"><circle cx="24" cy="81" r="2.5"/><circle cx="116" cy="81" r="2.5"/><circle cx="36" cy="81" r="2"/><circle cx="104" cy="81" r="2"/></g>
-      <path d="M36 81h14M90 81h14" stroke="#d6c38a" stroke-width="2"/>
-      <line x1="60" y1="66" x2="60" y2="80" stroke="#8d8f94" stroke-width="3"/><line x1="80" y1="66" x2="80" y2="80" stroke="#8d8f94" stroke-width="3"/>
-      <rect x="46" y="12" width="48" height="58" rx="8" fill="#3552a8"/>
-      <rect x="46" y="12" width="14" height="58" rx="6" fill="#a9b7df"/>
-      <rect x="54" y="12" width="6" height="58" fill="#a9b7df"/>
-      <g fill="#3552a8" font-family="sans-serif" font-weight="800" font-size="11"><text x="49.5" y="32">−</text><text x="49.5" y="48">−</text><text x="49.5" y="64">−</text></g>
-      <ellipse cx="70" cy="13" rx="24" ry="5" fill="#c7cbd3" stroke="#8d8f94" stroke-width="1.2"/>
-      <path d="M62 11l16 4M78 11l-16 4" stroke="#8d8f94" stroke-width="1.4"/>
-      <text x="79" y="46" text-anchor="middle" fill="#fff" font-family="sans-serif" font-weight="700" font-size="8.5">470 µF</text>
-      <path d="M100 30h14M100 38h14" stroke="#16181d" stroke-width="3"/><path d="M107 16v14M107 38v14" stroke="#16181d" stroke-width="2"/>
+      <line x1="4" y1="4" x2="136" y2="4" stroke="#8d8f94" stroke-width="2"/>
+      <path d="M34 4v16M106 4v16" stroke="#8d8f94" stroke-width="1.5"/>
+      <polygon points="22,30 118,30 136,94 4,94" fill="#fde68a" opacity=".45"/>
+      <rect x="18" y="20" width="104" height="10" rx="3" fill="#fff" stroke="#55585f" stroke-width="2"/>
+      <g fill="#f5b400">
+        <circle cx="28" cy="27" r="2.2"/><circle cx="40" cy="27" r="2.2"/><circle cx="52" cy="27" r="2.2"/><circle cx="64" cy="27" r="2.2"/>
+        <circle cx="76" cy="27" r="2.2"/><circle cx="88" cy="27" r="2.2"/><circle cx="100" cy="27" r="2.2"/><circle cx="112" cy="27" r="2.2"/>
+      </g>
+      <rect x="54" y="6" width="32" height="12" rx="2" fill="#3552a8"/>
+      <path d="M65 12h6M75 12h6M71 8.5v7M75 8.5v7" stroke="#fff" stroke-width="1.6"/>
+      <g stroke="#e0a400" stroke-width="1.6" stroke-linecap="round" opacity=".8">
+        <line x1="40" y1="40" x2="34" y2="58"/><line x1="70" y1="40" x2="70" y2="60"/><line x1="100" y1="40" x2="106" y2="58"/>
+      </g>
     </svg>`,
 
-    // Moteur électrique vu en coupe : bobinages en cuivre autour des dents du stator
+    // Plaque à induction vue en coupe : casserole, vitre, bobine de cuivre (inducteur) et lignes de champ
     inductif: (function () {
-      const cx = 70, cy = 48;
-      let bob = '';
-      for (let k = 0; k < 6; k++) {
-        const a = k * 60;
-        // une dent du stator entourée de son bobinage (spires en cuivre)
-        let spires = '';
-        for (let j = 0; j < 6; j++) spires += `<line x1="${-8}" y1="${-31 + j * 3.2}" x2="${8}" y2="${-31 + j * 3.2}" stroke="#8a4510" stroke-width="1"/>`;
-        bob += `<g transform="rotate(${a} ${cx} ${cy}) translate(${cx} ${cy})">
-          <rect x="-4" y="-36" width="8" height="20" fill="#9aa0a8"/>
-          <rect x="-9" y="-33" width="18" height="15" rx="3" fill="#cf7a2b" stroke="#8a4510" stroke-width="1.2"/>
-          ${spires}
-        </g>`;
+      let spires = '';
+      for (let k = 0; k < 5; k++) {
+        spires += `<circle cx="${27 + k * 7.5}" cy="70" r="3.3" fill="#cf7a2b" stroke="#8a4510" stroke-width="1"/>`;
+        spires += `<circle cx="${83 + k * 7.5}" cy="70" r="3.3" fill="#cf7a2b" stroke="#8a4510" stroke-width="1"/>`;
       }
       return `<svg viewBox="0 0 140 96" aria-hidden="true">
-        <rect x="116" y="44" width="22" height="8" rx="2" fill="#8d8f94"/>
-        <circle cx="${cx}" cy="${cy}" r="46" fill="#dfdbd2" stroke="#55585f" stroke-width="2"/>
-        <circle cx="${cx}" cy="${cy}" r="41" fill="#b7bcc4" stroke="#8d8f94" stroke-width="1.5"/>
-        <circle cx="${cx}" cy="${cy}" r="35" fill="#fff" stroke="#8d8f94" stroke-width="1"/>
-        ${bob}
-        <circle cx="${cx}" cy="${cy}" r="12.5" fill="#9aa0a8" stroke="#55585f" stroke-width="1.5"/>
-        <path d="M${cx - 12} ${cy}h24M${cx} ${cy - 12}v24" stroke="#7d838b" stroke-width="1"/>
-        <circle cx="${cx}" cy="${cy}" r="4" fill="#55585f"/>
+        <g fill="none" stroke="#e07a10" stroke-width="2.2" stroke-linecap="round" opacity=".75">
+          <path d="M56 18c-4-4 4-7 0-11"/><path d="M70 18c-4-4 4-7 0-11"/><path d="M84 18c-4-4 4-7 0-11"/>
+        </g>
+        <rect x="100" y="27" width="34" height="6" rx="3" fill="#55585f"/>
+        <rect x="40" y="22" width="60" height="26" rx="4" fill="#b7bcc4" stroke="#55585f" stroke-width="2"/>
+        <rect x="6" y="48" width="128" height="7" rx="3" fill="#2b3040"/>
+        <rect x="12" y="56" width="116" height="34" rx="4" fill="#f3f1ec" stroke="#8d8f94" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <g fill="none" stroke="#5a3fc4" stroke-width="1.4" stroke-dasharray="3 3">
+          <path d="M45 70C45 36 95 36 95 70"/><path d="M34 70C34 26 106 26 106 70"/>
+        </g>
+        ${spires}
+        <rect x="22" y="78" width="96" height="5" rx="2" fill="#55585f"/>
       </svg>`;
     })()
   };
@@ -379,5 +376,15 @@
     });
   }
 
-  window.PA = { COUL, OMEGA, fmt, Graphe, svg, quiz, dessins, curseurTactile };
+  /* Déphasage écrit en degrés et en radians : « 45° = π/4 rad ≈ 0,79 rad » */
+  const FRACTIONS_PI = { 15: 'π/12', 30: 'π/6', 45: 'π/4', 60: 'π/3', 90: 'π/2' };
+  function radians(deg, court) {
+    const a = Math.abs(deg), signe = deg < 0 ? '−' : '';
+    if (a === 0) return '0 rad';
+    const approx = fmt(a * Math.PI / 180, 2);
+    if (FRACTIONS_PI[a]) return court ? `${signe}${FRACTIONS_PI[a]} rad` : `${signe}${FRACTIONS_PI[a]} rad ≈ ${signe}${approx} rad`;
+    return `≈ ${signe}${approx} rad`;
+  }
+
+  window.PA = { COUL, OMEGA, fmt, radians, Graphe, svg, quiz, dessins, curseurTactile };
 })();
