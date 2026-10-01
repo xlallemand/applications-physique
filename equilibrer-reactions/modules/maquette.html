@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maquette d'une question — Équilibrer une réaction</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="er.css">
+<script src="../../assets/nav.js"></script>
+<script src="er.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3</span>
+    <h2 class="er-titre">Entraînement : réactions faciles</h2>
+    <p class="er-meta">Question 3/10 · Score : <b>4 pts</b></p>
+    <div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div>
+  </div>
+
+  <div class="er-card">
+    <p class="er-consigne">Équilibre la réaction en ajustant les nombres stœchiométriques.</p>
+    <label class="er-switch-bar">
+      <span class="np-pref-label">Afficher les molécules et les atomes</span>
+      <span class="np-switch"><input type="checkbox" id="chkDessins" checked><span class="np-slider"></span></span>
+    </label>
+    <div id="reaction"></div>
+    <div class="er-actions">
+      <button type="button" class="btn-primary">Valider</button>
+      <button type="button" class="btn-secondary">Afficher la réponse</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Maquette : combustion du méthane, en cours d'équilibrage
+const r = new ER.Reaction(document.getElementById('reaction'), {
+  reactifs: ['CH4', 'O2'], produits: ['CO2', 'H2O'], coefs: [1, 2, 1, 1], dessins: true,
+});
+document.getElementById('chkDessins').addEventListener('change', e => r.options({ dessins: e.target.checked }));
+
+const nav = AppNav.init({
+  appName: 'Équilibrer une réaction', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
+  onHome: () => {}, onNavigate: () => {},
+  groups: [{ title: 'Modules', items: [
+    { key: 'module_1', label: 'Module 1 : Comment équilibrer' },
+    { key: 'module_2', label: 'Module 2 : Compter les atomes' },
+    { key: 'module_3', label: 'Module 3 : Réactions faciles' },
+    { key: 'module_4', label: 'Module 4 : Réactions moins faciles' },
+  ]}],
+});
+nav.setActive('module_3');
+nav.setTitle('Module 3 : Réactions faciles');
+</script>
+</body>
+</html>
