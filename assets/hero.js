@@ -47,6 +47,8 @@
                'MnO₄⁻ + 8H⁺ + 5e⁻ = Mn²⁺ + 4H₂O', 'I₂ + 2e⁻ = 2I⁻', 'Al = Al³⁺ + 3e⁻', 'O₂ + 4H⁺ + 4e⁻ = 2H₂O'],
     pile:     ['Zn | Zn²⁺ ‖ Cu²⁺ | Cu', 'Zn = Zn²⁺ + 2e⁻', 'Cu²⁺ + 2e⁻ = Cu', 'anode (−)', 'cathode (+)', 'pont salin',
                'e⁻ →', 'I', 'COM', 'Zn + Cu²⁺ → Zn²⁺ + Cu', 'oxydation', 'réduction'],
+    combustion: ['CH₄ + 2 O₂ → CO₂ + 2 H₂O', 'n = m / M', 'm = n × M', 'E = PC × m', 'C₃H₈ + 5 O₂ → 3 CO₂ + 4 H₂O',
+               'M(CO₂) = 44 g/mol', 'n / a = n / b', 'PC en MJ/kg', 'C₂H₆O + 3 O₂ → 2 CO₂ + 3 H₂O', 'M(H₂O) = 18 g/mol'],
     algebre:  ['2x + 3 = 7', 'x = 2', '3(x − 1) = 12', '5x = 20', 'x − 4 = 9', '7 = 2x − 5', '4x + 1 = 3x + 6',
                'x / 3 = 5', '−2x = 8', 'x = −4', 'ax + b = 0', 'x = −b / a']
   };
