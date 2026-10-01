@@ -20,7 +20,6 @@ window.BANQUE = {
       { r: ['Mg', 'HCl'], p: ['MgCl2', 'H2'], c: [1, 2, 1, 1], nom: "Action de l'acide chlorhydrique sur le magnésium" },
       { r: ['C', 'H2'], p: ['CH4'], c: [1, 2, 1], nom: 'Synthèse du méthane' },
       { r: ['C', 'CO2'], p: ['CO'], c: [1, 1, 2], nom: 'Formation de monoxyde de carbone' },
-      { r: ['CaCO3', 'HCl'], p: ['CaCl2', 'CO2', 'H2O'], c: [1, 2, 1, 1, 1], nom: "Action de l'acide chlorhydrique sur le calcaire" },
     ]},
     { titre: 'Deux nombres stœchiométriques égaux à 2', tirage: 4, reactions: [
       { r: ['H2', 'O2'], p: ['H2O'], c: [2, 1, 2], nom: "Synthèse de l'eau" },
@@ -80,6 +79,7 @@ window.BANQUE = {
       { r: ['FeS2', 'O2'], p: ['Fe2O3', 'SO2'], c: [4, 11, 2, 8], nom: 'Grillage de la pyrite' },
       { r: ['Ca(OH)2', 'H3PO4'], p: ['Ca3(PO4)2', 'H2O'], c: [3, 2, 1, 6], nom: 'Formation du phosphate de calcium' },
       { r: ['Al2(SO4)3', 'NaOH'], p: ['Al(OH)3', 'Na2SO4'], c: [1, 6, 2, 3], nom: "Précipitation de l'hydroxyde d'aluminium" },
+      { r: ['CaCO3', 'HCl'], p: ['CaCl2', 'CO2', 'H2O'], c: [1, 2, 1, 1, 1], nom: "Action de l'acide chlorhydrique sur le calcaire" },
     ]},
   ],
 };

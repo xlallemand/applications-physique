@@ -118,7 +118,7 @@
     KNO3: 'KON(O)O', AgNO3: 'AgON(O)O', HNO3: 'HON(O)O',
     Fe2O3: 'Fe(O)OFeO', Al2O3: 'Al(O)OAlO', Na2O: 'NaONa', Li2O: 'LiOLi', FeS2: 'SFeS',
     'CH2=C(CH3)2': 'C(H)(H)C(C(H)(H)H)C(H)(H)H',
-    'CH3-CH(CH3)-CH3': 'C(H)(H)(H)C(H)(C(H)(H)H)C(H)(H)H',
+    'CH3-C(CH3)2-CH3': 'C(C(H)(H)H)(C(H)(H)H)(C(H)(H)H)C(H)(H)H',
     'CH3-CH2-OH': 'C(H)(H)(H)C(H)(H)O(H)',
   };
   const COUDES = ['O', 'S', 'N'];                 // atome à deux voisins : molécule coudée (H2O, SO2…)
