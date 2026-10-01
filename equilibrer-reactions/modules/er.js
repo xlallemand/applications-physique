@@ -39,6 +39,7 @@
     Zn: { c: '#748ffc', r: 12, t: '#ffffff' },
     Ag: { c: '#ced4da', r: 12, t: '#16181d' },
     Pb: { c: '#495057', r: 13, t: '#ffffff' },
+    Hg: { c: '#b8bcc8', r: 13, t: '#16181d' },
     P:  { c: '#f76707', r: 12, t: '#ffffff' },
     Si: { c: '#d2b48c', r: 12, t: '#16181d' },
     Br: { c: '#a61e4d', r: 12, t: '#ffffff' },

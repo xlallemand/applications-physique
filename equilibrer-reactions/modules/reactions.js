@@ -2,7 +2,8 @@
    Banque de réactions des entraînements (modules 3 et 4)
 
    Deux groupes de difficulté, chacun divisé en trois sous-groupes
-   de difficulté croissante. Pour chaque entraînement, on pioche
+   de difficulté croissante. Avant le dernier sous-groupe, aucune
+   réaction n'a plus de 2 réactifs ou plus de 2 produits. Pour chaque entraînement, on pioche
    3 réactions dans le 1er sous-groupe, 4 dans le 2e et 3 dans le 3e.
 
    r : réactifs, p : produits, c : nombres stœchiométriques
@@ -33,7 +34,22 @@ window.BANQUE = {
       { r: ['SO2', 'O2'], p: ['SO3'], c: [2, 1, 2], nom: 'Formation du trioxyde de soufre' },
       { r: ['CuO', 'C'], p: ['Cu', 'CO2'], c: [2, 1, 2, 1], nom: "Réduction de l'oxyde de cuivre par le carbone" },
     ]},
-    { titre: 'Un nombre égal à 3, ou des parenthèses', tirage: 3, reactions: [
+    { titre: 'Encore des nombres égaux à 2', tirage: 3, reactions: [
+      { r: ['H2O'], p: ['H2', 'O2'], c: [2, 2, 1], nom: "Électrolyse de l'eau" },
+      { r: ['HgO'], p: ['Hg', 'O2'], c: [2, 2, 1], nom: "Décomposition de l'oxyde de mercure" },
+      { r: ['NaCl'], p: ['Na', 'Cl2'], c: [2, 2, 1], nom: 'Électrolyse du chlorure de sodium fondu' },
+      { r: ['Ca', 'O2'], p: ['CaO'], c: [2, 1, 2], nom: 'Combustion du calcium' },
+      { r: ['Fe', 'O2'], p: ['FeO'], c: [2, 1, 2], nom: "Formation d'oxyde de fer II" },
+      { r: ['NO', 'O2'], p: ['NO2'], c: [2, 1, 2], nom: "Formation du dioxyde d'azote" },
+      { r: ['Cl2', 'NaBr'], p: ['NaCl', 'Br2'], c: [1, 2, 2, 1], nom: 'Action du dichlore sur le bromure de sodium' },
+      { r: ['Na', 'HCl'], p: ['NaCl', 'H2'], c: [2, 2, 2, 1], nom: "Action de l'acide chlorhydrique sur le sodium" },
+      { r: ['H2S', 'O2'], p: ['S', 'H2O'], c: [2, 1, 2, 2], nom: "Combustion incomplète du sulfure d'hydrogène" },
+    ]},
+  ],
+
+  /* ---------- Module 4 : réactions moins faciles à équilibrer ---------- */
+  moinsFaciles: [
+    { titre: "Nombres stœchiométriques jusqu'à 4", tirage: 3, reactions: [
       { r: ['N2', 'H2'], p: ['NH3'], c: [1, 3, 2], nom: "Synthèse de l'ammoniac" },
       { r: ['Na', 'H2O'], p: ['NaOH', 'H2'], c: [2, 2, 2, 1], nom: "Action de l'eau sur le sodium" },
       { r: ['Ca', 'H2O'], p: ['Ca(OH)2', 'H2'], c: [1, 2, 1, 1], nom: "Action de l'eau sur le calcium" },
@@ -43,19 +59,12 @@ window.BANQUE = {
       { r: ['CuCl2', 'NaOH'], p: ['Cu(OH)2', 'NaCl'], c: [1, 2, 1, 2], nom: "Test des ions cuivre avec la soude" },
       { r: ['FeCl3', 'NaOH'], p: ['Fe(OH)3', 'NaCl'], c: [1, 3, 1, 3], nom: 'Test des ions fer III avec la soude' },
       { r: ['NaOH', 'H2SO4'], p: ['Na2SO4', 'H2O'], c: [2, 1, 1, 2], nom: "Réaction entre la soude et l'acide sulfurique" },
-    ]},
-  ],
-
-  /* ---------- Module 4 : réactions moins faciles à équilibrer ---------- */
-  moinsFaciles: [
-    { titre: "Nombres stœchiométriques jusqu'à 4", tirage: 3, reactions: [
       { r: ['Al', 'O2'], p: ['Al2O3'], c: [4, 3, 2], nom: "Oxydation de l'aluminium" },
       { r: ['Fe', 'O2'], p: ['Fe2O3'], c: [4, 3, 2], nom: 'Formation de la rouille' },
       { r: ['Na', 'O2'], p: ['Na2O'], c: [4, 1, 2], nom: 'Oxydation du sodium' },
       { r: ['Al', 'Cl2'], p: ['AlCl3'], c: [2, 3, 2], nom: "Combustion de l'aluminium dans le dichlore" },
       { r: ['Fe2O3', 'CO'], p: ['Fe', 'CO2'], c: [1, 3, 2, 3], nom: 'Réaction dans un haut fourneau' },
       { r: ['KClO3'], p: ['KCl', 'O2'], c: [2, 2, 3], nom: 'Décomposition du chlorate de potassium' },
-      { r: ['NaHCO3'], p: ['Na2CO3', 'CO2', 'H2O'], c: [2, 1, 1, 1], nom: "Décomposition de l'hydrogénocarbonate de sodium" },
       { r: ['H2S', 'O2'], p: ['SO2', 'H2O'], c: [2, 3, 2, 2], nom: "Combustion du sulfure d'hydrogène" },
     ]},
     { titre: 'Combustions et nombres plus grands', tirage: 4, reactions: [
@@ -80,6 +89,7 @@ window.BANQUE = {
       { r: ['Ca(OH)2', 'H3PO4'], p: ['Ca3(PO4)2', 'H2O'], c: [3, 2, 1, 6], nom: 'Formation du phosphate de calcium' },
       { r: ['Al2(SO4)3', 'NaOH'], p: ['Al(OH)3', 'Na2SO4'], c: [1, 6, 2, 3], nom: "Précipitation de l'hydroxyde d'aluminium" },
       { r: ['CaCO3', 'HCl'], p: ['CaCl2', 'CO2', 'H2O'], c: [1, 2, 1, 1, 1], nom: "Action de l'acide chlorhydrique sur le calcaire" },
+      { r: ['NaHCO3'], p: ['Na2CO3', 'CO2', 'H2O'], c: [2, 1, 1, 1], nom: "Décomposition de l'hydrogénocarbonate de sodium" },
     ]},
   ],
 };
