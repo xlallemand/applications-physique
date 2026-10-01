@@ -68,8 +68,8 @@ function etape1() {
         <div class="cle"><p><b class="cle-titre">Réactif limitant et x<sub>max</sub> sans tableau</b> : pour chaque réactif, on calcule</p>
           <p class="av-formule-cle">n<sub>initial</sub> ÷ nombre stœchiométrique</p>
           <p>Le réactif qui donne la <b>plus petite</b> valeur est le réactif limitant, et cette valeur est x<sub>max</sub>.</p></div>
-        <div class="cle"><p><b class="cle-titre">Quantités à l'état final</b> (ν : nombre stœchiométrique)</p>
-          <p class="av-formule-cle">réactif : n<sub>final</sub> = n<sub>initial</sub> − ν × x<sub>max</sub><br>produit : n<sub>final</sub> = n<sub>initial</sub> + ν × x<sub>max</sub></p>
+        <div class="cle"><p><b class="cle-titre">Quantités à l'état final</b></p>
+          <p class="av-formule-cle">réactif : n<sub>final</sub> = n<sub>initial</sub> − nombre stœchiométrique × x<sub>max</sub><br>produit : n<sub>final</sub> = n<sub>initial</sub> + nombre stœchiométrique × x<sub>max</sub></p>
           <p>Ici : n(CH<sub>4</sub>) = 3 − 1 × 2 = 1 mol ; n(O<sub>2</sub>) = 4 − 2 × 2 = 0 mol ; n(CO<sub>2</sub>) = 0 + 1 × 2 = 2 mol ; n(H<sub>2</sub>O) = 0 + 2 × 2 = 4 mol.</p></div>`;
       continuer(c, etape2);
     });
@@ -110,7 +110,9 @@ function etape4() {
       intro: '<p class="er-contexte">Pour chaque réaction, calcule n<sub>initial</sub> ÷ nombre stœchiométrique pour chaque réactif, trouve le réactif limitant et x<sub>max</sub>, puis les quantités à l\'état final.</p>',
       enonce: q => `On mélange ${q.r.map((f, k) => `${AV.fmt(q.n0[k], 'puissance')} mol de ${fH(f)}`).join(' et ')}. Trouve le réactif limitant sans tableau.`,
       questions: BANQUE.premiere,
-      exercice: { sansTableau: true, etapes: ['ratio', 'concl', 'final'] },
+      // à partir de la 6e question, la formule de x_max n'est plus rappelée
+      exercice: i => ({ sansTableau: true, sansFormule: i >= 5, etapes: ['ratio', 'concl', 'final'] }),
+      note: i => (i === 5 ? 'À partir de cette question, la formule pour calculer x<sub>max</sub> n\'est plus rappelée.' : ''),
       suite: { href: '../index.html', label: "Retour à l'accueil" },
     });
   };

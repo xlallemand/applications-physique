@@ -127,12 +127,23 @@ sub, sup { font-size: .7em; line-height: 0; }
 .av-tab .brouillon { color: var(--ink-2); }
 .av-tab .fige { color: var(--ink); }
 .av-tab .vide { color: var(--ink-3); }
+/* En-tête : l'équation de la réaction, sans bordure entre les espèces, avec + et → */
+.av-tab thead th.av-esp { position: relative; }
+.av-tab thead th.av-esp:not(:last-child) { border-right-color: transparent; }
+.av-tab thead th.av-op::before {
+  position: absolute; left: 0; bottom: 8px; transform: translateX(-50%);
+  font-weight: 800; font-size: 1.05em; color: var(--ink); background: var(--paper); padding: 0 2px; line-height: 1.2;
+}
+.av-tab thead th.av-op-plus::before { content: '+'; }
+.av-tab thead th.av-op-fleche::before { content: '→'; }
+.av-tab thead th.av-esp + th.av-esp { border-left: none; }
 .av-tete-mol { display: flex; justify-content: center; margin-bottom: 4px; --er-k: .95; }
 .av-tab-unite { font-size: .85rem; color: var(--ink-3); margin-top: 4px !important; text-align: right; }
 .av-court { display: none; }
 @media (max-width: 560px) {
   .av-tab { font-size: .82rem; }
   .av-tab th, .av-tab td { padding: 6px 5px; white-space: normal; }
+  .av-tab thead th.av-esp { padding-left: 9px; padding-right: 9px; }
   .av-tete-mol { --er-k: .7; }
   .av-long { display: none; }
   .av-court { display: inline; }
@@ -220,3 +231,14 @@ sub, sup { font-size: .7em; line-height: 0; }
 .er-recap b { display: block; font-size: .9rem; color: var(--ink); }
 .er-confetti { position: fixed; top: -20px; width: 9px; height: 14px; z-index: 9999; pointer-events: none; animation: er-chute linear forwards; }
 @keyframes er-chute { to { top: 110vh; transform: rotate(720deg); } }
+
+/* ---------- Quantités au départ sous l'équation (module 1) ---------- */
+.av-depart { background: var(--paper); border-radius: 18px; padding: 10px 8px 12px; margin-bottom: 12px; }
+.av-depart-titre { font-size: .85rem; font-weight: 700; color: var(--ink-3); text-align: center; margin-bottom: 6px !important; }
+.av-depart-eq { display: flex; justify-content: center; align-items: flex-start; flex-wrap: wrap; gap: 6px 4px; }
+.av-depart-col { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 64px; }
+.av-depart-f { font-size: 1.4rem; font-weight: 800; white-space: nowrap; line-height: 1.6; }
+.av-depart-op { font-size: 1.4rem; font-weight: 800; line-height: 1.6; padding: 0 4px; }
+.av-depart-n { display: flex; justify-content: center; align-items: center; min-height: 44px; font-size: 1.5rem; font-weight: 800; color: var(--ink-3); }
+.av-depart-n .er-sel button { background: var(--sheet); }
+@media (max-width: 480px) { .av-depart-f, .av-depart-op { font-size: 1.15rem; } .av-depart-col { min-width: 52px; } }

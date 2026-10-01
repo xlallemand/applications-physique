@@ -147,10 +147,9 @@ function etape3() {
     { nom: 'Eau', r: ['H2', 'O2'], p: ['H2O'], c: [2, 1, 2], n0: [5, 3, 0] },
   ];
   const c = carte(`<h3 class="cours-titre">3. À toi de choisir les quantités</h3>
-    <p class="er-contexte">Choisis une réaction et le nombre de molécules de chaque réactif, puis fais-la avancer. Essaie de prévoir le réactif limitant avant de lancer.</p>
+    <p class="er-contexte">Choisis une réaction et le nombre de molécules de chaque réactif au départ, puis fais-la avancer. Essaie de prévoir le réactif limitant avant de lancer. Peux-tu trouver des quantités pour lesquelles les deux réactifs sont épuisés en même temps ?</p>
     <div class="av-onglets" data-x="onglets" style="margin-top:12px"></div>
-    <p class="av-equation" data-x="eq"></p>
-    <div class="av-bac" data-x="bac"></div>
+    <div class="av-depart" data-x="depart"></div>
     <div data-x="sim"></div>`);
   let reac = REACS[0], sim = null;
   const onglets = c.querySelector('[data-x="onglets"]');
@@ -159,19 +158,20 @@ function etape3() {
     onglets.querySelectorAll('button').forEach(x => x.classList.toggle('actif', x === b));
     choisir(REACS[+b.dataset.i]);
   });
+  // Équation, avec sous chaque réactif le nombre de molécules au départ (comme la ligne « initial »
+  // d'un tableau d'avancement) : ces nombres ne se confondent pas avec les nombres stœchiométriques
   function choisir(r) {
     reac = r;
-    c.querySelector('[data-x="eq"]').innerHTML = AV.equationHTML(r);
-    const bac = c.querySelector('[data-x="bac"]');
-    bac.innerHTML = '';
+    const dep = c.querySelector('[data-x="depart"]');
+    const esp = r.r.concat(r.p), nR = r.r.length;
+    dep.innerHTML = `<p class="av-depart-titre">Nombre de molécules au départ :</p><div class="av-depart-eq">` + esp.map((f, k) =>
+      (k === 0 ? '' : `<span class="av-depart-op">${k === nR ? '→' : '+'}</span>`) +
+      `<div class="av-depart-col"><span class="av-depart-f">${(r.c[k] > 1 ? `<span class="av-c">${r.c[k]}</span>&nbsp;` : '') + fH(f)}</span>` +
+      `<span class="av-depart-n" data-k="${k}">${k < nR ? '' : '0'}</span></div>`).join('') + '</div>';
     r.r.forEach((f, k) => {
-      const d = document.createElement('div');
-      d.className = 'av-bac-q';
-      const s = MOL.selecteur({ valeur: r.n0[k], min: 1, max: 9, label: 'le nombre de molécules de ' + f,
+      const s = MOL.selecteur({ valeur: r.n0[k], min: 1, max: 9, label: 'le nombre de molécules de ' + f + ' au départ',
         onChange: v => { r.n0[k] = v; sim.recommencer(r.n0); } });
-      d.appendChild(s.el);
-      d.insertAdjacentHTML('beforeend', `<b>${fH(f)}</b>`);
-      bac.appendChild(d);
+      dep.querySelector(`.av-depart-n[data-k="${k}"]`).appendChild(s.el);
     });
     if (sim) sim.changer(r);
     else sim = new AV.Simulation(c.querySelector('[data-x="sim"]'), Object.assign({}, r, { n0: r.n0.slice(), compteur: fois }));

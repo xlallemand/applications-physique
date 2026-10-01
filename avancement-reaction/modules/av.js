@@ -268,11 +268,16 @@
     const msg = $('.av-sim-msg');
     if (this.verrou) msg.innerHTML = '';
     else if (fin) {
-      const k0 = c.r.findIndex((_, k) => this.n(k) < c.c[k]);
-      const reste = this.n(k0);
-      msg.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">La réaction s'arrête.</b> ` +
-        (reste === 0 ? `Il n'y a plus de ${fH(c.r[k0])}.` : `Pour qu'elle ait lieu encore une fois, il faudrait ${c.c[k0]} ${fH(c.r[k0])} : il n'en reste que ${reste}.`) +
-        `</p><p><b>${fH(c.r[k0])}</b> est le <b>réactif limitant</b>. La réaction a eu lieu ${this.x} fois.</p></div>`;
+      // réactifs qui manquent pour que la réaction ait lieu une fois de plus
+      const lim = c.r.map((_, k) => k).filter(k => this.n(k) < c.c[k]);
+      const manque = k => (this.n(k) === 0 ? `il n'y a plus de ${fH(c.r[k])}` : `il faudrait ${c.c[k]} ${fH(c.r[k])}, il n'en reste que ${this.n(k)}`);
+      const noms = lim.map(k => `<b>${fH(c.r[k])}</b>`);
+      const tousNuls = c.r.every((_, k) => this.n(k) === 0);
+      msg.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">La réaction s'arrête</b> : ${lim.map(manque).join(' et ')}.</p>` +
+        (lim.length > 1
+          ? `<p>${noms.slice(0, -1).join(', ')} et ${noms[noms.length - 1]} sont épuisés en même temps : ${lim.length > 2 ? 'ils sont tous' : 'les deux sont'} <b>réactifs limitants</b>. La réaction a eu lieu ${this.x} fois.</p>` +
+            (tousNuls ? `<p>Il ne reste aucun réactif : on dit que les réactifs ont été introduits dans les <b>proportions stœchiométriques</b>.</p>` : '')
+          : `<p>${noms[0]} est le <b>réactif limitant</b>. La réaction a eu lieu ${this.x} fois.</p>`) + '</div>';
     } else if (this.x > 0) {
       msg.innerHTML = `<p class="av-guide">À chaque fois : ${c.r.map((f, k) => `<b>−${c.c[k]}</b> ${fH(f)}`).join(', ')} ; ${c.p.map((f, j) => `<b>+${c.c[j + nR]}</b> ${fH(f)}`).join(', ')}.</p>`;
     } else msg.innerHTML = '';
@@ -413,7 +418,8 @@
       aide: () => "Si ce réactif est limitant, il est épuisé : n initial − nombre stœchiométrique × x<sub>max</sub> = 0, donc x<sub>max</sub> = n initial ÷ nombre stœchiométrique.",
     },
     ratio: {
-      titre: 'Pour chaque réactif : n<sub>i</sub> ÷ nombre stœchiométrique',
+      // sansFormule : la formule n'est plus rappelée (fin de l'entraînement du module 7)
+      titre: ex => (ex.cfg.sansFormule ? 'Pour chaque réactif : valeur de x pour laquelle il serait épuisé' : 'Pour chaque réactif : n<sub>i</sub> ÷ nombre stœchiométrique'),
       consigne: g => g ? 'Calcule, pour chaque réactif, sa quantité initiale divisée par son nombre stœchiométrique.' : 'Rapports n<sub>i</sub> ÷ nombre stœchiométrique',
       saisies(ex) {
         return ex.cfg.r.map((f, k) => ({ lab: fH(f), w: champ(ex.cfg.mode, { label: 'rapport pour ' + f }), ratio: true }));
@@ -479,13 +485,18 @@
     this.dessinerTableau();
   };
 
+  Exercice.prototype.titre = function (id) {
+    const t = this.ETAPES[id].titre;
+    return typeof t === 'function' ? t(this) : t;
+  };
+
   // Ouvre une étape : titre, consigne, saisies, et en mode guidé le bouton « Vérifier »
   Exercice.prototype.ouvrirEtape = function (i) {
     const moi = this, c = this.cfg, id = c.etapes[i], E = this.ETAPES[id];
     const z = document.createElement('section');
     z.className = 'av-etape';
     z.dataset.etape = id;
-    z.innerHTML = `<h4 class="av-etape-titre"><span class="av-etape-num">${i + 1}</span><span>${E.titre}</span></h4>
+    z.innerHTML = `<h4 class="av-etape-titre"><span class="av-etape-num">${i + 1}</span><span>${this.titre(id)}</span></h4>
       ${c.guide ? `<p class="av-consigne">${E.consigne(true)}</p>` : ''}
       <div class="av-saisies" data-x="saisies"></div><div data-x="frise"></div><div data-x="retour"></div><div class="er-actions" data-x="actions"></div>`;
     this.el.querySelector('[data-x="etapes"]').appendChild(z);
@@ -502,8 +513,8 @@
           (c.guide ? `<p class="av-hyp-calc">${n0} − ${coefX(c.c[k])}x<sub>max</sub> = 0</p>` : '') +
           `<p class="av-hyp-r"><span>x<sub>max</sub> =</span><span data-x="w"></span>${c.unite === 'mol' ? '<span>mol</span>' : ''}</p>`;
       } else if (s.ratio) {
-        l.innerHTML = `<p class="av-hyp-q">${s.lab}</p><p class="av-hyp-r"><span>n<sub>i</sub> ÷ ${c.c[k]} = ` +
-          (c.guide ? `${fmt(c.n0[k], c.mode)} ÷ ${c.c[k]} = ` : '') + `</span><span data-x="w"></span>${c.unite === 'mol' ? '<span>mol</span>' : ''}</p>`;
+        l.innerHTML = `<p class="av-hyp-q">${s.lab}</p><p class="av-hyp-r"><span>${c.sansFormule ? 'x =' : `n<sub>i</sub> ÷ ${c.c[k]} = ` +
+          (c.guide ? `${fmt(c.n0[k], c.mode)} ÷ ${c.c[k]} = ` : '')}</span><span data-x="w"></span>${c.unite === 'mol' ? '<span>mol</span>' : ''}</p>`;
       } else if (s.final && c.guide) {
         const k2 = k, sg = this.k.signe(k2);
         l.innerHTML = `<span class="av-lab">${s.lab}</span><span class="av-calc">${fmt(c.n0[k2], c.mode)} ${sg} ${c.c[k2] > 1 ? c.c[k2] + ' × ' : ''}${fmt(this.k.xmax, c.mode)} =</span><span data-x="w"></span>`;
@@ -620,7 +631,7 @@
         return;
       }
       moi.erreurs++;
-      ret.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">Pas encore.</b> À corriger : ${liste(faux.map(id => moi.ETAPES[id].titre.toLowerCase()))}.</p>` +
+      ret.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">Pas encore.</b> À corriger : ${liste(faux.map(id => moi.titre(id).toLowerCase()))}.</p>` +
         faux.map(id => `<p>• ${moi.ETAPES[id].aide(moi)}</p>`).join('') + '</div>';
     };
     bas.querySelector('[data-x="voir"]').onclick = () => {
@@ -660,7 +671,7 @@
       if (!this.saisies[ligne]) return '';
       return v ? `<span class="${v.fige ? 'fige' : 'brouillon'}">${v.t}</span>` : '<span class="vide">…</span>';
     };
-    const tete = `<tr><th>État</th><th><span class="av-long">Avancement</span><span class="av-court">Av.</span></th>${esp.map((f, j) => `<th>${c.molecules ? `<div class="av-tete-mol">${molecule(f)}</div>` : ''}${(c.c[j] > 1 ? c.c[j] + ' ' : '') + fH(f)}</th>`).join('')}</tr>`;
+    const tete = `<tr><th>État</th><th><span class="av-long">Avancement</span><span class="av-court">Av.</span></th>${enteteEspeces(c, c.molecules)}</tr>`;
     let corps = `<tr><td class="etat">initial</td><td class="x">0</td>${esp.map((_, j) => `<td>${cas('initial', j, fmt(c.n0[j], c.mode))}</td>`).join('')}</tr>`;
     if (c.etapes.includes('pont') && ouvert('pont')) {
       corps += `<tr class="pont"><td class="etat">à chaque fois</td><td class="x">+1</td>${esp.map((_, j) => `<td>${cas('pont', j, '')}</td>`).join('')}</tr>`;
@@ -674,9 +685,20 @@
       `<p class="av-tab-unite">en ${c.unite === 'mol' ? 'mol' : 'nombre de molécules'}</p>`;
   };
 
+  // En-tête du tableau : l'équation de la réaction, avec « + » et « → » entre les colonnes
+  function enteteEspeces(q, molecules) {
+    const esp = q.r.concat(q.p), nR = q.r.length;
+    return esp.map((f, j) => {
+      const op = j === 0 ? '' : j === nR ? 'av-op av-op-fleche' : 'av-op av-op-plus';
+      return `<th class="av-esp ${op}">${molecules ? `<div class="av-tete-mol">${molecule(f)}</div>` : ''}<span class="av-esp-f">${(q.c[j] > 1 ? q.c[j] + '&nbsp;' : '') + fH(f)}</span></th>`;
+    }).join('');
+  }
+
   /* ============================================================
      ENTRAÎNEMENT NOTÉ : 10 questions, 2 points chacune
-     opts = { app, badge, titre, intro, questions: () => [q…], exercice: {…options AV.Exercice}, suite: { href, label } }
+     opts = { app, badge, titre, intro, questions: () => [q…], suite: { href, label },
+              exercice: {…options AV.Exercice} ou fonction (n° de question) → options,
+              note: n° → texte affiché au-dessus de la question (facultatif) }
      chaque q = { nom, r, p, c, n0, mode }
      ============================================================ */
   function entrainement(opts) {
@@ -702,10 +724,12 @@
       app.innerHTML = entete() + `<div class="er-card">
         <p class="er-q-nom">${q.nom}</p>
         <p class="av-equation">${equationHTML(q)}</p>
+        ${opts.note && opts.note(idx) ? `<p class="av-guide">${opts.note(idx)}</p>` : ''}
         <p class="er-consigne">${opts.enonce ? opts.enonce(q) : enonce(q)}</p>
         <div data-a="ex"></div><div class="er-actions" data-a="suite"></div></div>`;
       window.scrollTo(0, 0);
-      new Exercice(app.querySelector('[data-a="ex"]'), Object.assign({}, opts.exercice, {
+      const options = typeof opts.exercice === 'function' ? opts.exercice(idx) : opts.exercice;
+      new Exercice(app.querySelector('[data-a="ex"]'), Object.assign({}, options, {
         r: q.r, p: q.p, c: q.c, n0: q.n0, mode: q.mode, unite: 'mol', guide: false,
         onFini: (erreurs, vue, ret) => {
           const p = vue ? 0 : erreurs ? 1 : 2;
@@ -793,7 +817,7 @@
   }
 
   window.AV = {
-    fmt, lire, egal, puissance, champ, expression, calculer, equationHTML, frise, animerFrise, texteUni,
+    fmt, lire, egal, puissance, champ, expression, calculer, equationHTML, enteteEspeces, frise, animerFrise, texteUni,
     Simulation, Exercice, entrainement, confettis, menu, melanger, COUL,
   };
 })();

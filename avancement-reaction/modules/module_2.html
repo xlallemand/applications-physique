@@ -59,7 +59,7 @@ function etape1() {
     const esp = q.r.concat(q.p), nR = q.r.length;
     const sg = k => (k < nR ? '−' : '+');
     const val = k => q.n0[k] + (k < nR ? -1 : 1) * q.c[k] * x;
-    tab.innerHTML = `<table class="av-tab"><thead><tr><th>État</th><th><span class="av-long">Avancement</span><span class="av-court">Av.</span></th>${esp.map((f, k) => `<th><div class="av-tete-mol">${MOL.molecule(f)}</div>${(q.c[k] > 1 ? q.c[k] + ' ' : '') + fH(f)}</th>`).join('')}</tr></thead><tbody>
+    tab.innerHTML = `<table class="av-tab"><thead><tr><th>État</th><th><span class="av-long">Avancement</span><span class="av-court">Av.</span></th>${AV.enteteEspeces(q, true)}</tr></thead><tbody>
       <tr><td class="etat">initial</td><td class="x">0</td>${esp.map((_, k) => `<td>${q.n0[k]}</td>`).join('')}</tr>
       <tr class="pont"><td class="etat">à chaque fois</td><td class="x">+1</td>${esp.map((f, k) => `<td>${sg(k)}${q.c[k]} ${fH(f)}</td>`).join('')}</tr>
       <tr><td class="etat">en cours</td><td class="x">x = ${x}</td>${esp.map((_, k) => `<td>${q.n0[k]} ${sg(k)} ${q.c[k] > 1 ? q.c[k] + ' × ' : ''}${x} = <b>${val(k)}</b></td>`).join('')}</tr>
