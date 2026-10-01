@@ -43,7 +43,7 @@ body { font-family: var(--font-sans); }
 /* Module 2 : choix du circuit et questions à droite, graphiques à gauche */
 @media (min-width: 980px) {
   .pa-grid-m2 { grid-template-areas: "g c" "g q"; grid-template-rows: auto 1fr; row-gap: 0; }
-  .pa-grid-m2 .pa-graphs { grid-area: g; }
+  .pa-grid-m2 .pa-graphs { grid-area: g; position: sticky; top: 72px; }   /* graphiques visibles pendant la lecture de la question */
   .pa-grid-m2 .pa-zone-circuit { grid-area: c; }
   .pa-grid-m2 .pa-zone-quiz { grid-area: q; }
 }
@@ -110,6 +110,9 @@ body { font-family: var(--font-sans); }
 .pa-range-ligne .pa-range { flex: 1; min-width: 0; }
 .pa-fin { min-width: 44px; min-height: 40px; padding: 6px 10px; font-size: .9rem; flex-shrink: 0; }
 .pa-range-ligne + .pa-range-bornes { padding: 0 52px; }
+.pa-range-bornes span { text-align: center; line-height: 1.25; }
+.pa-range-bornes span:first-child { text-align: left; }
+.pa-range-bornes span:last-child { text-align: right; }
 @media (max-width: 480px) { .pa-range-bornes .pa-long { display: none; } }
 .pa-range-bornes { display: flex; justify-content: space-between; font-size: .78rem; font-weight: 600; color: var(--ink-3); margin-top: -2px; }
 
@@ -192,3 +195,26 @@ body { font-family: var(--font-sans); }
 .pa-bilan-actions a { text-decoration: none; }
 
 sub { font-size: .72em; }
+
+/* ---------- Note sous le curseur de déphasage ---------- */
+.pa-note { font-size: .82rem; color: var(--ink-2); line-height: 1.4; margin-top: 8px; background: var(--paper); border-radius: 12px; padding: 7px 11px; }
+
+/* ---------- Jauges des grandeurs efficaces (module 2) ---------- */
+.pa-jauges-mode { font-size: .85rem; font-weight: 700; color: var(--accent-ink); }
+.pa-jauges { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 18px; }
+@media (min-width: 980px) { .pa-jauges { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 380px) { .pa-jauges { grid-template-columns: 1fr; } }
+.pa-jauge.avec-repere { padding-bottom: 14px; }
+.pa-jauge-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
+.pa-jauge-nom { font-weight: 800; font-size: .95rem; color: var(--ink); white-space: nowrap; }
+.pa-jauge-val { font-weight: 800; font-size: 1.02rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pa-jauge-sous { font-size: .74rem; font-weight: 600; color: var(--ink-3); margin: 1px 0 6px; line-height: 1.3; min-height: 1.3em; }
+.pa-fixe { font-size: .66rem; font-weight: 800; color: var(--ink-2); background: var(--paper-2); border-radius: 999px; padding: 1px 7px; margin-left: 2px; white-space: nowrap; }
+.pa-jauge-piste { position: relative; height: 12px; background: var(--paper-2); border-radius: 999px; }
+.pa-jauge-rempli { height: 100%; border-radius: 999px; transition: width .2s ease; }
+.pa-jauge-repere { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--ink); }
+.pa-jauge-repere span { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 1px; font-size: .68rem; font-weight: 700; color: var(--ink-3); white-space: nowrap; }
+.pa-jauge.flash { animation: pa-flash 1.4s ease; border-radius: 10px; }
+@keyframes pa-flash { 0%, 60% { background: var(--cle-bg); box-shadow: 0 0 0 6px var(--cle-bg); } 100% { background: transparent; box-shadow: 0 0 0 6px transparent; } }
+.pa-cosphi { margin-top: 8px; font-size: .9rem; color: var(--ink-2); }
+.pa-cosphi b { color: var(--accent-ink); font-size: 1rem; }
