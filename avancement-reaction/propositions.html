@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Propositions — Avancement d'une réaction</title>
+<link rel="stylesheet" href="../assets/theme.css">
+<link rel="stylesheet" href="../equilibrer-reactions/modules/er.css">
+<script src="../assets/nav.js"></script>
+<script src="../equilibrer-reactions/modules/er.js"></script>
+<style>
+  /* ============ Maquette : styles propres aux propositions ============ */
+  .pr-page { max-width: 60rem; margin: 0 auto; padding: 24px 16px 80px; }
+  @media (max-width: 480px) { .pr-page { padding: 14px 10px 64px; } }
+  .pr-page p { margin: 0; }
+  .pr-page p + p { margin-top: 8px; }
+  .pr-choix { display: inline-block; background: var(--ink); color: #fff; font-weight: 800; font-size: .78rem; padding: 4px 12px; border-radius: 999px; margin-bottom: 8px; letter-spacing: .03em; }
+  .pr-h { font-size: 1.15rem; font-weight: 800; margin: 0 0 6px; letter-spacing: -.01em; }
+  .pr-note { font-size: .9rem; color: var(--ink-2); line-height: 1.5; }
+  .pr-grille2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 760px) { .pr-grille2 { grid-template-columns: 1fr; } }
+  .pr-modules { counter-reset: m; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .pr-modules > div { background: var(--paper); border-radius: 16px; padding: 12px 14px 12px 56px; position: relative; }
+  .pr-modules > div::before { counter-increment: m; content: counter(m); position: absolute; left: 12px; top: 12px; width: 32px; height: 32px; border-radius: 50%; background: var(--cle-bg); color: var(--accent-ink); font-weight: 800; display: grid; place-items: center; }
+  .pr-modules b { display: block; color: var(--ink); }
+  .pr-modules span { font-size: .9rem; color: var(--ink-2); line-height: 1.45; }
+
+  /* ----- Équation et commandes de la simulation ----- */
+  .sim-eq { text-align: center; font-size: 1.5rem; font-weight: 800; margin: 4px 0 12px !important; }
+  .sim-eq .c { color: var(--accent-ink); }
+  .sim-cmd { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; margin: 12px 0 4px; }
+  .sim-x { font-weight: 800; font-size: 1.1rem; background: var(--cle-bg); color: var(--accent-ink); border-radius: 999px; padding: 8px 16px; }
+  .sim-msg { margin-top: 10px; }
+  .sim-choix { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
+  .sim-choix button.actif { box-shadow: inset 0 0 0 2px var(--accent); background: var(--cle-bg); }
+
+  /* ----- A : réacteur ----- */
+  .rea { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: stretch; }
+  .rea-zone { background: var(--paper); border-radius: 18px; padding: 10px; min-height: 170px; }
+  .rea-titre { font-size: .78rem; font-weight: 700; color: var(--ink-3); text-align: center; margin-bottom: 6px !important; }
+  .rea-mols { display: flex; flex-wrap: wrap; gap: 8px 10px; justify-content: center; align-items: center; --er-k: 1.3; }
+  .rea-fleche { align-self: center; font-size: 2rem; font-weight: 700; }
+  .rea-mol { display: inline-block; border-radius: 12px; padding: 2px; transition: opacity .35s, transform .35s, box-shadow .2s; }
+  .rea-mol.choisie { box-shadow: 0 0 0 3px var(--accent); background: var(--cle-bg); }
+  .rea-mol.partie { opacity: 0; transform: scale(.3); }
+  .rea-mol.arrive { animation: pop .45s ease; box-shadow: 0 0 0 3px var(--success); background: var(--success-bg); }
+  @keyframes pop { from { transform: scale(.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .rea-cpt { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 8px; }
+  .rea-cpt span { background: var(--sheet); border-radius: 999px; padding: 3px 10px; font-weight: 700; font-size: .95rem; }
+  .rea-cpt span.zero { background: var(--danger-bg); color: var(--danger-text); }
+  @media (max-width: 560px) { .rea { grid-template-columns: 1fr; } .rea-fleche { transform: rotate(90deg); justify-self: center; } .rea-mols { --er-k: 1.1; } }
+
+  /* ----- B : histogramme ----- */
+  .histo { display: flex; justify-content: center; align-items: flex-end; gap: 14px; height: 220px; padding: 0 6px; border-bottom: 2px solid var(--ink); position: relative; }
+  .histo-col { width: 58px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .histo-val { font-weight: 800; font-size: 1.05rem; margin-bottom: 4px; transition: color .2s; }
+  .histo-barre { width: 100%; border-radius: 8px 8px 0 0; transition: height .45s ease;
+    background-image: repeating-linear-gradient(to top, transparent 0, transparent calc(var(--u) - 2px), rgba(255,255,255,.55) calc(var(--u) - 2px), rgba(255,255,255,.55) var(--u)); }
+  .histo-col.zero .histo-val { color: var(--danger); }
+  .histo-noms { display: flex; justify-content: center; gap: 14px; padding: 6px 6px 0; }
+  .histo-noms span { width: 58px; text-align: center; font-weight: 800; }
+  .histo-sep { width: 2px; align-self: stretch; background: var(--paper-3); margin: 0 4px; }
+  @media (max-width: 420px) { .histo, .histo-noms { gap: 8px; } .histo-col, .histo-noms span { width: 50px; } }
+
+  /* ----- C : courbes ----- */
+  .courbe svg { width: 100%; height: auto; display: block; font-family: var(--font-sans); }
+  .leg { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: center; font-size: .88rem; font-weight: 700; margin-top: 6px; }
+  .leg i { display: inline-block; width: 16px; height: 4px; border-radius: 2px; margin-right: 5px; vertical-align: middle; }
+
+  /* ----- Tableau d'avancement ----- */
+  .tab-wrap { overflow-x: auto; }
+  .tab { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 520px; font-size: 1rem; }
+  .tab th, .tab td { border: 1.5px solid var(--paper-3); padding: 8px 10px; text-align: center; white-space: nowrap; }
+  .tab thead th { background: var(--paper); font-weight: 800; }
+  .tab td.etat { font-weight: 700; text-align: left; background: var(--paper); }
+  .tab td.x { font-weight: 800; color: var(--accent-ink); }
+  .tab tr.pont td { background: var(--cle-bg); color: var(--accent-ink); font-weight: 700; font-size: .92rem; }
+  .tab tr.final td { background: #fbfaf7; }
+  .tab .mol-tete { display: flex; flex-direction: column; align-items: center; gap: 4px; --er-k: 1; }
+  .tab td.saisie { background: var(--sheet); }
+  .tab-unite { font-size: .85rem; color: var(--ink-3); margin-top: 4px !important; text-align: right; }
+  .expr { display: inline-flex; align-items: center; gap: 6px; }
+  .expr .signe { width: 40px; height: 40px; border-radius: 12px; border: none; background: var(--paper-2); font-size: 1.3rem; font-weight: 800; cursor: pointer; }
+  .expr .er-sel button { width: 40px; height: 32px; border-radius: 10px; }
+  .expr .er-sel-val { font-size: 1.25rem; min-width: 40px; }
+
+  /* ----- Réactif limitant ----- */
+  .hyp { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 560px) { .hyp { grid-template-columns: 1fr; } }
+  .hyp > div { border-radius: 18px; padding: 14px 16px; background: var(--paper); border: 2px solid transparent; }
+  .hyp > div.gagne { border-color: var(--accent); background: var(--cle-bg); }
+  .hyp-t { font-size: .8rem; font-weight: 800; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; }
+  .hyp-q { font-weight: 800; margin: 2px 0 8px !important; }
+  .hyp-calc { font-size: 1.1rem; line-height: 1.7; font-variant-numeric: tabular-nums; }
+  .hyp-res { display: inline-block; margin-top: 6px; background: var(--sheet); border-radius: 999px; padding: 4px 12px; font-weight: 800; }
+  .concl { margin-top: 10px; border-radius: 18px; padding: 14px 16px; background: var(--ink); color: #fff; }
+  .concl p { color: #fff; }
+  .concl b { color: #9be7c4; }
+  .frise svg { width: 100%; height: auto; display: block; font-family: var(--font-sans); }
+
+  /* ----- Aller plus loin ----- */
+  .ratio { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .ratio-l { display: grid; grid-template-columns: 230px 1fr; gap: 10px; align-items: center; }
+  .ratio-l b { font-variant-numeric: tabular-nums; }
+  .ratio-b { height: 26px; border-radius: 8px; background: var(--paper-3); position: relative; }
+  .ratio-b.min { background: var(--accent); }
+  @media (max-width: 480px) { .ratio-l { grid-template-columns: 1fr; gap: 2px; } }
+</style>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="pr-page">
+
+  <div class="er-card">
+    <span class="er-badge">PROPOSITIONS À VALIDER</span>
+    <h2 class="er-titre">Avancement d'une réaction</h2>
+    <p class="er-contexte">Cette page regroupe mes propositions : progression des modules, visualisations de la réaction pas à pas (A, B, C), présentation du tableau d'avancement, recherche du réactif limitant et module « aller plus loin ». Les simulations fonctionnent : tu peux les essayer.</p>
+  </div>
+
+  <!-- ===================== 1. PROGRESSION ===================== -->
+  <div class="er-card">
+    <span class="pr-choix">1 · PROGRESSION PROPOSÉE</span>
+    <div class="pr-modules">
+      <div><b>Les nombres stœchiométriques en action</b><span>Quelques molécules dessinées. La réaction a lieu une fois, deux fois… : à chaque fois, 1 CH<sub>4</sub> et 2 O<sub>2</sub> disparaissent, 1 CO<sub>2</sub> et 2 H<sub>2</sub>O apparaissent. L'élève prédit le réactif qui va manquer, puis vérifie. La réaction s'arrête quand un réactif est épuisé : <b style="display:inline">réactif limitant</b>. Réaction 1 : CH<sub>4</sub> + 2 O<sub>2</sub> (coefficients 1 et 2), réaction 2 : N<sub>2</sub> + 3 H<sub>2</sub> → 2 NH<sub>3</sub>.</span></div>
+      <div><b>Le tableau d'avancement (avec des molécules)</b><span>L'avancement x = nombre de fois que la réaction a eu lieu. On construit le tableau ligne par ligne (initial, en cours, final) avec les mêmes molécules, puis on cherche x<sub>max</sub> avec les deux hypothèses. Nombres entiers simples.</span></div>
+      <div><b>Des molécules aux moles</b><span>On ne peut pas dessiner 6,02 × 10<sup>23</sup> molécules : on compte par « paquets » (moles), comme les œufs par douzaines. Même tableau, unité mol : entiers, puis décimaux, puis puissances de 10, jusqu'au niveau du document fourni (Pb<sup>2+</sup> + 2 I<sup>−</sup> → PbI<sub>2</sub>).</span></div>
+      <div><b>Entraînement 1 : nombres simples</b><span>10 questions notées sur 20 (banque de réactions, difficulté croissante) : compléter le tableau, trouver le réactif limitant et x<sub>max</sub>, l'état final.</span></div>
+      <div><b>Entraînement 2 : puissances de 10</b><span>Même chose avec des quantités comme 6,0 × 10<sup>−3</sup> mol.</span></div>
+      <div><b>Aller plus loin : sans tableau</b><span>Comparer n<sub>i</sub> / nombre stœchiométrique pour chaque réactif : le plus petit rapport donne le réactif limitant et x<sub>max</sub>.</span></div>
+    </div>
+  </div>
+
+  <!-- ===================== 2. SIMULATION ===================== -->
+  <div class="er-card">
+    <span class="pr-choix">2 · VISUALISER LA RÉACTION PAS À PAS</span>
+    <p class="pr-note">Trois visualisations pilotées par les mêmes boutons. On peut garder A seule, A + B, A + C ou les trois. Essaie : clique sur « La réaction a lieu une fois » jusqu'à ce qu'elle s'arrête.</p>
+    <div class="sim-choix" id="simChoix" style="margin-top:12px"></div>
+    <p class="sim-eq" id="simEq"></p>
+    <div class="sim-cmd">
+      <button type="button" class="btn-secondary" id="simMoins">◀ Revenir</button>
+      <span class="sim-x" id="simX">x = 0</span>
+      <button type="button" class="btn-primary" id="simPlus">La réaction a lieu une fois ▶</button>
+      <button type="button" class="btn-small" id="simRaz">↺</button>
+    </div>
+    <div id="simMsg" class="sim-msg"></div>
+  </div>
+
+  <div class="er-card">
+    <span class="er-badge">PROPOSITION A</span>
+    <h3 class="pr-h">Le réacteur : les molécules disparaissent et apparaissent</h3>
+    <p class="pr-note" style="margin-bottom:10px">Les molécules qui vont réagir sont entourées, puis disparaissent ; les nouvelles apparaissent côté produits (entourées en vert). Le compteur sous chaque zone se met à jour.</p>
+    <div class="rea">
+      <div class="rea-zone"><p class="rea-titre">RÉACTIFS</p><div class="rea-mols" id="reaR"></div><div class="rea-cpt" id="cptR"></div></div>
+      <div class="rea-fleche">→</div>
+      <div class="rea-zone"><p class="rea-titre">PRODUITS</p><div class="rea-mols" id="reaP"></div><div class="rea-cpt" id="cptP"></div></div>
+    </div>
+  </div>
+
+  <div class="pr-grille2">
+    <div class="er-card">
+      <span class="er-badge">PROPOSITION B</span>
+      <h3 class="pr-h">Histogramme en direct</h3>
+      <p class="pr-note" style="margin-bottom:12px">Une barre par espèce, graduée molécule par molécule. Une barre de réactif qui arrive à 0 passe en rouge : la réaction s'arrête.</p>
+      <div class="histo" id="histo"></div>
+      <div class="histo-noms" id="histoNoms"></div>
+    </div>
+    <div class="er-card">
+      <span class="er-badge">PROPOSITION C</span>
+      <h3 class="pr-h">Courbes n = f(x) qui se construisent</h3>
+      <p class="pr-note" style="margin-bottom:8px">Un point par espèce à chaque étape. À la fin, x<sub>max</sub> est marqué ; au-delà, un réactif aurait une quantité négative : impossible.</p>
+      <div class="courbe" id="courbe"></div>
+      <div class="leg" id="leg"></div>
+    </div>
+  </div>
+
+  <!-- ===================== 3. TABLEAU ===================== -->
+  <div class="er-card">
+    <span class="pr-choix">3 · LE TABLEAU D'AVANCEMENT</span>
+    <p class="pr-note">Même disposition que ton document (État, Avancement, une colonne par espèce, unité en dessous). Deux variantes pour les débuts.</p>
+  </div>
+
+  <div class="er-card">
+    <span class="er-badge">VARIANTE 1</span>
+    <h3 class="pr-h">Le tableau classique</h3>
+    <p class="pr-note" style="margin-bottom:10px">L'élève complète la ligne « en cours » en choisissant le signe (− pour un réactif, + pour un produit) et le nombre devant x avec les flèches. Essaie sur la case O<sub>2</sub>.</p>
+    <div class="tab-wrap" id="tab1"></div>
+  </div>
+
+  <div class="er-card">
+    <span class="er-badge">VARIANTE 2</span>
+    <h3 class="pr-h">Avec une ligne « à chaque fois » et les molécules</h3>
+    <p class="pr-note" style="margin-bottom:10px">Une ligne d'aide rappelle ce qui disparaît et apparaît à chaque fois que la réaction a lieu (les nombres stœchiométriques). Elle sert de pont entre la simulation et la ligne « en cours », puis disparaît dans les modules suivants.</p>
+    <div class="tab-wrap" id="tab2"></div>
+  </div>
+
+  <!-- ===================== 4. RÉACTIF LIMITANT ===================== -->
+  <div class="er-card">
+    <span class="pr-choix">4 · TROUVER LE RÉACTIF LIMITANT ET x<sub>max</sub></span>
+    <p class="pr-note">Les deux hypothèses côte à côte (l'une sous l'autre sur téléphone), puis la conclusion bien séparée. Une frise optionnelle montre que la réaction s'arrête au premier « mur » rencontré.</p>
+  </div>
+
+  <div class="er-card">
+    <span class="er-badge">VARIANTE 1</span>
+    <h3 class="pr-h">Deux hypothèses et une conclusion</h3>
+    <div id="hyp1"></div>
+  </div>
+
+  <div class="er-card">
+    <span class="er-badge">VARIANTE 2</span>
+    <h3 class="pr-h">Les mêmes cartes, avec la frise de l'avancement</h3>
+    <p class="pr-note" style="margin-bottom:10px">Chaque réactif dresse un mur à la valeur de x où il serait épuisé. L'avancement part de 0 et s'arrête au premier mur : c'est x<sub>max</sub>.</p>
+    <div class="frise" id="frise"></div>
+    <div class="sim-cmd"><button type="button" class="btn-primary" id="friseGo">Faire avancer la réaction ▶</button></div>
+  </div>
+
+  <div class="er-card">
+    <span class="er-badge">NIVEAU FINAL</span>
+    <h3 class="pr-h">Le même affichage avec les nombres de ton document</h3>
+    <div class="tab-wrap" id="tab3"></div>
+    <div id="hyp3" style="margin-top:14px"></div>
+  </div>
+
+  <!-- ===================== 5. ALLER PLUS LOIN ===================== -->
+  <div class="er-card">
+    <span class="pr-choix">5 · ALLER PLUS LOIN : SANS TABLEAU</span>
+    <p class="pr-note">Pour chaque réactif, on calcule n<sub>initial</sub> / nombre stœchiométrique. Le plus petit rapport désigne le réactif limitant, et ce rapport est x<sub>max</sub>. Les barres rendent la comparaison visible.</p>
+    <div class="ratio" id="ratio"></div>
+    <div class="concl"><p><b>O<sub>2</sub></b> a le plus petit rapport : c'est le réactif limitant, et x<sub>max</sub> = 2 mol.</p></div>
+  </div>
+
+  <!-- ===================== 6. SAISIE ===================== -->
+  <div class="er-card">
+    <span class="pr-choix">6 · SAISIE DES RÉPONSES</span>
+    <p class="pr-note">Nombres entiers (molécules, nombres stœchiométriques) : les flèches ▲▼ de l'application précédente. Expressions de la ligne « en cours » : signe + flèches (voir variante 1). Valeurs décimales et puissances de 10 : le pavé numérique commun des autres applications, avec une case pour la mantisse et une pour l'exposant (6,0 × 10<sup>[−3]</sup>).</p>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Simulation : la réaction a lieu x fois
+   ============================================================ */
+const REACTIONS = [
+  { nom: 'Combustion du méthane', r: ['CH4', 'O2'], p: ['CO2', 'H2O'], c: [1, 2, 1, 2], n0: [3, 4, 0, 0] },
+  { nom: "Synthèse de l'ammoniac", r: ['N2', 'H2'], p: ['NH3'], c: [1, 3, 2], n0: [3, 6, 0] },
+];
+const COUL = ['#2952c8', '#d9730d', '#0a7d57', '#5a3fc4'];
+let R = REACTIONS[0], x = 0, occupe = false;
+const esp = () => R.r.concat(R.p);
+const nR = () => R.r.length;
+const n = (k, xx) => R.n0[k] + (k < nR() ? -1 : 1) * R.c[k] * xx;
+const xmaxEntier = () => Math.min(...R.r.map((_, k) => Math.floor(R.n0[k] / R.c[k])));
+const $ = id => document.getElementById(id);
+const eqHTML = () => esp().map((f, k) => (R.c[k] > 1 ? `<span class="c">${R.c[k]}</span>&nbsp;` : '') + ER.formuleHTML(f))
+  .reduce((s, t, k) => s + (k === 0 ? '' : k === nR() ? ' → ' : ' + ') + t, '');
+
+$('simChoix').innerHTML = REACTIONS.map((r, i) => `<button type="button" class="btn-small${i ? '' : ' actif'}" data-i="${i}">${r.nom}</button>`).join('');
+$('simChoix').querySelectorAll('button').forEach(b => b.onclick = () => {
+  $('simChoix').querySelectorAll('button').forEach(z => z.classList.toggle('actif', z === b));
+  R = REACTIONS[+b.dataset.i]; demarrer();
+});
+
+// ----- A : réacteur -----
+function molHTML(k, cls) { return `<span class="rea-mol ${cls || ''}" data-k="${k}">${ER.molecule(esp()[k])}</span>`; }
+function dessinerReacteur() {
+  $('reaR').innerHTML = R.r.map((f, k) => molHTML(k).repeat(n(k, x))).join('');
+  $('reaP').innerHTML = R.p.map((f, j) => molHTML(j + nR()).repeat(n(j + nR(), x))).join('');
+  compteurs();
+}
+function compteurs() {
+  const c = k => `<span class="${k < nR() && n(k, x) === 0 ? 'zero' : ''}">${n(k, x)} ${ER.formuleHTML(esp()[k])}</span>`;
+  $('cptR').innerHTML = R.r.map((_, k) => c(k)).join('');
+  $('cptP').innerHTML = R.p.map((_, j) => c(j + nR())).join('');
+}
+function animerUnPas(fin) {
+  // molécules de réactifs qui vont réagir : les dernières de chaque espèce
+  const choisies = [];
+  R.r.forEach((_, k) => {
+    const l = [...$('reaR').querySelectorAll(`.rea-mol[data-k="${k}"]`)];
+    l.slice(-R.c[k]).forEach(m => { m.classList.add('choisie'); choisies.push(m); });
+  });
+  setTimeout(() => {
+    choisies.forEach(m => m.classList.add('partie'));
+    setTimeout(() => {
+      choisies.forEach(m => m.remove());
+      $('reaP').querySelectorAll('.arrive').forEach(m => m.classList.remove('arrive'));
+      R.p.forEach((_, j) => {
+        const k = j + nR();
+        const der = [...$('reaP').querySelectorAll(`.rea-mol[data-k="${k}"]`)].pop();
+        const html = molHTML(k, 'arrive').repeat(R.c[k]);
+        if (der) der.insertAdjacentHTML('afterend', html);
+        else $('reaP').insertAdjacentHTML(j === 0 ? 'afterbegin' : 'beforeend', html);
+      });
+      fin();
+    }, 350);
+  }, 550);
+}
+
+// ----- B : histogramme -----
+function dessinerHisto() {
+  const max = Math.max(...esp().map((_, k) => Math.max(n(k, 0), n(k, xmaxEntier()))));
+  const H = 190, u = H / max;
+  let s = '';
+  esp().forEach((f, k) => {
+    if (k === nR()) s += '<div class="histo-sep"></div>';
+    const v = n(k, x), zero = k < nR() && v === 0;
+    s += `<div class="histo-col${zero ? ' zero' : ''}"><span class="histo-val">${v}${zero ? ' !' : ''}</span>
+      <div class="histo-barre" style="height:${v * u}px;background-color:${COUL[k]};--u:${u}px"></div></div>`;
+  });
+  $('histo').innerHTML = s;
+  $('histoNoms').innerHTML = esp().map((f, k) => (k === nR() ? '<span style="width:2px"></span>' : '') + `<span style="color:${COUL[k]}">${ER.formuleHTML(f)}</span>`).join('');
+}
+
+// ----- C : courbes -----
+function dessinerCourbes() {
+  const xm = Math.min(...R.r.map((_, k) => R.n0[k] / R.c[k]));
+  const XM = Math.ceil(xm) + 1;
+  const max = Math.max(...esp().map((_, k) => Math.max(n(k, 0), n(k, XM))));
+  const W = 420, Hh = 250, g = 38, d = 14, h = 14, b = 32;
+  const X = v => g + v / XM * (W - g - d), Y = v => Hh - b - v / max * (Hh - b - h);
+  let s = '';
+  for (let v = 0; v <= max; v++) s += `<line x1="${g}" x2="${W - d}" y1="${Y(v)}" y2="${Y(v)}" stroke="#eceae4"/><text x="${g - 6}" y="${Y(v) + 4}" font-size="11" text-anchor="end" fill="#8d8f94">${v}</text>`;
+  for (let v = 0; v <= XM; v++) s += `<line x1="${X(v)}" x2="${X(v)}" y1="${h}" y2="${Hh - b}" stroke="#eceae4"/><text x="${X(v)}" y="${Hh - b + 16}" font-size="11" text-anchor="middle" fill="#8d8f94">${v}</text>`;
+  s += `<text x="${W - d}" y="${Hh - 4}" font-size="12" font-weight="700" text-anchor="end">x (nombre de fois)</text>`;
+  s += `<text x="4" y="${h - 2}" font-size="12" font-weight="700">n</text>`;
+  const fini = x === xmaxEntier();
+  if (fini) {
+    const xx = X(xmaxEntier());
+    s += `<defs><pattern id="hach" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#dc2626" stroke-opacity=".25" stroke-width="3"/></pattern></defs>`;
+    s += `<rect x="${xx}" y="${h}" width="${W - d - xx}" height="${Hh - b - h}" fill="url(#hach)"/>`;
+    s += `<line x1="${xx}" x2="${xx}" y1="${h}" y2="${Hh - b}" stroke="#16181d" stroke-width="2" stroke-dasharray="6 4"/>`;
+    s += `<text x="${xx + 6}" y="${h + 14}" font-size="12" font-weight="800">x<tspan font-size="9" dy="3">max</tspan><tspan dy="-3"> = ${xmaxEntier()}</tspan></text>`;
+    s += `<text x="${(xx + W - d) / 2}" y="${h + 34}" font-size="11" font-weight="700" fill="#8f2821" text-anchor="middle">impossible</text>`;
+  }
+  esp().forEach((f, k) => {
+    let pts = [];
+    for (let v = 0; v <= x; v++) pts.push(`${X(v)},${Y(n(k, v))}`);
+    s += `<polyline points="${pts.join(' ')}" fill="none" stroke="${COUL[k]}" stroke-width="3" stroke-linejoin="round"/>`;
+    for (let v = 0; v <= x; v++) s += `<circle cx="${X(v)}" cy="${Y(n(k, v))}" r="4.5" fill="${COUL[k]}" stroke="#fff" stroke-width="1.5"/>`;
+  });
+  $('courbe').innerHTML = `<svg viewBox="0 0 ${W} ${Hh}">${s}</svg>`;
+  $('leg').innerHTML = esp().map((f, k) => `<span style="color:${COUL[k]}"><i style="background:${COUL[k]}"></i>${ER.formuleHTML(f)}</span>`).join('');
+}
+
+function maj() {
+  $('simX').textContent = `x = ${x}`;
+  $('simMoins').disabled = x === 0 || occupe;
+  $('simPlus').disabled = x >= xmaxEntier() || occupe;
+  dessinerHisto(); dessinerCourbes(); compteurs();
+  if (x >= xmaxEntier()) {
+    const lim = R.r.filter((_, k) => n(k, x) < R.c[k]).map(f => ER.formuleHTML(f)).join(' et ');
+    const k0 = R.r.findIndex((_, k) => n(k, x) < R.c[k]);
+    $('simMsg').innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">La réaction s'arrête.</b> Pour qu'elle ait lieu encore une fois, il faudrait ${R.c[k0]} ${ER.formuleHTML(R.r[k0])} : il n'en reste plus que ${n(k0, x)}.</p><p><b>${lim}</b> est le <b>réactif limitant</b>. L'avancement maximal est x<sub>max</sub> = ${x}.</p></div>`;
+  } else if (x > 0) {
+    $('simMsg').innerHTML = `<p class="er-guide">À chaque fois : ${R.r.map((f, k) => `−${R.c[k]} ${ER.formuleHTML(f)}`).join(', ')}, ${R.p.map((f, j) => `+${R.c[j + nR()]} ${ER.formuleHTML(f)}`).join(', ')}. Ce sont les nombres stœchiométriques.</p>`;
+  } else $('simMsg').innerHTML = '';
+}
+function demarrer() { x = 0; occupe = false; $('simEq').innerHTML = eqHTML(); dessinerReacteur(); maj(); }
+$('simPlus').onclick = () => {
+  if (occupe || x >= xmaxEntier()) return;
+  occupe = true; maj();
+  animerUnPas(() => { x++; occupe = false; maj(); });
+  // l'histogramme et les courbes avancent en même temps que les molécules
+  setTimeout(() => { x++; dessinerHisto(); dessinerCourbes(); x--; }, 600);
+};
+$('simMoins').onclick = () => { if (occupe || !x) return; x--; dessinerReacteur(); maj(); };
+$('simRaz').onclick = demarrer;
+demarrer();
+
+/* ============================================================
+   Tableaux d'avancement (variante 1 et 2)
+   ============================================================ */
+const T = REACTIONS[0];
+const fH = ER.formuleHTML;
+function tableau(opts) {
+  const e = T.r.concat(T.p), nr = T.r.length;
+  const tete = `<tr><th>État</th><th>Avancement</th>${e.map((f, k) => `<th>${opts.mol ? `<div class="mol-tete">${ER.molecule(f)}<span>${(T.c[k] > 1 ? T.c[k] + ' ' : '') + fH(f)}</span></div>` : (T.c[k] > 1 ? T.c[k] + ' ' : '') + fH(f)}</th>`).join('')}</tr>`;
+  const sg = k => (k < nr ? '−' : '+');
+  const ini = `<tr><td class="etat">initial</td><td class="x">0</td>${e.map((_, k) => `<td>${T.n0[k]}</td>`).join('')}</tr>`;
+  const pont = opts.pont ? `<tr class="pont"><td class="etat" style="background:var(--cle-bg)">à chaque fois</td><td class="x">+1</td>${e.map((f, k) => `<td>${sg(k)}${T.c[k]} ${fH(f)}</td>`).join('')}</tr>` : '';
+  const enCours = `<tr><td class="etat">en cours</td><td class="x">x</td>${e.map((_, k) => k === 1 && opts.saisie
+    ? `<td class="saisie"><span class="expr">${T.n0[k]} <button type="button" class="signe" data-signe>+</button><span data-sel></span> x</span></td>`
+    : `<td>${T.n0[k] ? T.n0[k] + ' ' : ''}${T.n0[k] || k < nr ? sg(k) + ' ' : ''}${T.c[k] > 1 ? T.c[k] : ''}x</td>`).join('')}</tr>`;
+  const fin = `<tr class="final"><td class="etat">final</td><td class="x">x<sub>max</sub> = 2</td>${e.map((_, k) => `<td>${!T.n0[k] && T.c[k] === 1 ? `<b>${n2(k)}</b>` : `${T.n0[k] ? T.n0[k] + ' ' : ''}${T.n0[k] ? sg(k) + ' ' : ''}${T.c[k] > 1 ? T.c[k] + ' × ' : ''}2 = <b>${n2(k)}</b>`}</td>`).join('')}</tr>`;
+  return `<table class="tab"><thead>${tete}</thead><tbody>${ini}${pont}${enCours}${fin}</tbody></table><p class="tab-unite">en nombre de molécules</p>`;
+}
+const n2 = k => T.n0[k] + (k < T.r.length ? -1 : 1) * T.c[k] * 2;
+$('tab1').innerHTML = tableau({ saisie: true });
+$('tab2').innerHTML = tableau({ pont: true, mol: true });
+// case interactive : signe et nombre devant x
+const sgBtn = $('tab1').querySelector('[data-signe]');
+sgBtn.onclick = () => { sgBtn.textContent = sgBtn.textContent === '+' ? '−' : '+'; };
+$('tab1').querySelector('[data-sel]').replaceWith(ER.selecteur({ valeur: 1, min: 1, max: 9 }).el);
+
+/* ============================================================
+   Réactif limitant : hypothèses, conclusion, frise
+   ============================================================ */
+function hypotheses(h, concl) {
+  return `<div class="hyp">${h.map(c => `<div class="${c.gagne ? 'gagne' : ''}">
+      <div class="hyp-t">Hypothèse ${c.i}</div>
+      <p class="hyp-q">Si ${c.esp} est le réactif limitant :</p>
+      <div class="hyp-calc">${c.calc}</div>
+      <span class="hyp-res">x<sub>max</sub> = ${c.res}</span>
+    </div>`).join('')}</div>
+    <div class="concl"><p>${concl}</p></div>`;
+}
+$('hyp1').innerHTML = hypotheses([
+  { i: 1, esp: 'CH<sub>4</sub>', calc: '3 − x<sub>max</sub> = 0<br>x<sub>max</sub> = 3', res: '3' },
+  { i: 2, esp: 'O<sub>2</sub>', calc: '4 − 2 x<sub>max</sub> = 0<br>x<sub>max</sub> = 4 / 2 = 2', res: '2', gagne: true },
+], `On garde la <b>plus petite</b> valeur : la réaction s'arrête dès qu'un réactif est épuisé.<br>Le réactif limitant est <b>O<sub>2</sub></b> et <b>x<sub>max</sub> = 2</b>.`);
+
+// frise : deux murs, l'avancement s'arrête au premier
+function frise(xx) {
+  const W = 520, H = 120, g = 24, d = 24, XM = 4, X = v => g + v / XM * (W - g - d), y = 70;
+  let s = `<line x1="${g}" x2="${W - d}" y1="${y}" y2="${y}" stroke="#16181d" stroke-width="2"/>`;
+  for (let v = 0; v <= XM; v++) s += `<line x1="${X(v)}" x2="${X(v)}" y1="${y - 5}" y2="${y + 5}" stroke="#16181d" stroke-width="2"/><text x="${X(v)}" y="${y + 22}" font-size="13" text-anchor="middle">${v}</text>`;
+  s += `<text x="${W - d}" y="${y + 40}" font-size="12" font-weight="700" text-anchor="end">avancement x</text>`;
+  [[3, 'CH₄ épuisé', '#2952c8'], [2, 'O₂ épuisé', '#d9730d']].forEach(([v, t, c]) => {
+    s += `<rect x="${X(v) - 4}" y="${y - 46}" width="8" height="46" rx="3" fill="${c}"/><text x="${X(v)}" y="${y - 52}" font-size="12" font-weight="800" fill="${c}" text-anchor="middle">${t}</text>`;
+  });
+  s += `<rect x="${g}" y="${y - 7}" width="${X(xx) - g}" height="14" rx="7" fill="#0a7d57" opacity=".85"/>`;
+  s += `<circle cx="${X(xx)}" cy="${y}" r="9" fill="#0a7d57" stroke="#fff" stroke-width="3"/>`;
+  if (xx >= 2) s += `<text x="${X(2)}" y="${y + 58}" font-size="13" font-weight="800" text-anchor="middle" fill="#075c40">x<tspan font-size="10" dy="3">max</tspan><tspan dy="-3"> = 2</tspan></text>`;
+  $('frise').innerHTML = `<svg viewBox="0 0 ${W} ${H + 20}">${s}</svg>`;
+}
+frise(0);
+$('friseGo').onclick = () => {
+  let v = 0;
+  const t = setInterval(() => { v = Math.min(2, v + .05); frise(v); if (v >= 2) clearInterval(t); }, 30);
+};
+
+// niveau final : exemple du document
+$('tab3').innerHTML = `<table class="tab"><thead><tr><th>État</th><th>Avancement</th><th>Pb<sup>2+</sup></th><th>2 I<sup>−</sup></th><th>PbI<sub>2</sub></th></tr></thead><tbody>
+  <tr><td class="etat">initial</td><td class="x">0</td><td>6,0 × 10<sup>−3</sup></td><td>1,0 × 10<sup>−2</sup></td><td>0</td></tr>
+  <tr><td class="etat">en cours</td><td class="x">x</td><td>6,0 × 10<sup>−3</sup> − x</td><td>1,0 × 10<sup>−2</sup> − 2x</td><td>x</td></tr>
+  <tr class="final"><td class="etat">final</td><td class="x">x<sub>max</sub></td><td>6,0 × 10<sup>−3</sup> − x<sub>max</sub></td><td>1,0 × 10<sup>−2</sup> − 2x<sub>max</sub></td><td>x<sub>max</sub></td></tr>
+  </tbody></table><p class="tab-unite">en mol</p>`;
+$('hyp3').innerHTML = hypotheses([
+  { i: 1, esp: 'Pb<sup>2+</sup>', calc: '6,0 × 10<sup>−3</sup> − x<sub>max</sub> = 0<br>x<sub>max</sub> = 6,0 × 10<sup>−3</sup> mol', res: '6,0 × 10<sup>−3</sup> mol' },
+  { i: 2, esp: 'I<sup>−</sup>', calc: '1,0 × 10<sup>−2</sup> − 2 x<sub>max</sub> = 0<br>x<sub>max</sub> = 5,0 × 10<sup>−3</sup> mol', res: '5,0 × 10<sup>−3</sup> mol', gagne: true },
+], `5,0 × 10<sup>−3</sup> &lt; 6,0 × 10<sup>−3</sup> : le réactif limitant est <b>I<sup>−</sup></b> et <b>x<sub>max</sub> = 5,0 × 10<sup>−3</sup> mol</b>.<br>État final : n(Pb<sup>2+</sup>) = 1,0 × 10<sup>−3</sup> mol ; n(I<sup>−</sup>) = 0 mol ; n(PbI<sub>2</sub>) = 5,0 × 10<sup>−3</sup> mol.`);
+
+// aller plus loin : rapports n / nombre stœchiométrique
+$('ratio').innerHTML = [['CH<sub>4</sub>', '3 / 1', 3, false], ['O<sub>2</sub>', '4 / 2', 2, true]].map(([f, c, v, m]) =>
+  `<div class="ratio-l"><span>${f} : n / ν = ${c} = <b>${v}</b></span><div class="ratio-b${m ? ' min' : ''}" style="width:${v / 3 * 100}%"></div></div>`).join('');
+
+AppNav.init({ appName: 'Avancement d\'une réaction', portalHref: '../index.html', portalLabel: 'Toutes les applications', onHome: () => {}, onNavigate: () => {}, groups: [] });
+</script>
+</body>
+</html>
