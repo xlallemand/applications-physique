@@ -1,6 +1,6 @@
 /* ============================================================
    Banque de questions — application « Spectres et étoiles »
-   BANQUE.module1() … BANQUE.module4() : 10 questions tirées au hasard,
+   BANQUE.module1() : 20 questions ; BANQUE.module2() … module4() : 10 questions, tirées au hasard,
    de difficulté croissante (voir assets du moteur : exo.js).
    ============================================================ */
 (function () {
@@ -90,7 +90,7 @@
     },
     coulRappel: {
       id: 'coul-rappel', titre: 'couleur et température',
-      html: '<p>La couleur d\'une étoile dépend de sa température de surface. Du moins chaud au plus chaud : <b>rouge → orange → jaune → blanche → bleue</b>. Une étoile rouge émet surtout du rouge ; une étoile bleue est si chaude que son spectre est riche en bleu et en violet.</p>',
+      html: '<p>La couleur d\'une étoile dépend de sa température de surface. Du moins chaud au plus chaud : <b>rouge → orange → jaune → blanche → bleue</b>. Le Soleil (environ 5 500 °C) est une étoile blanche. Une étoile rouge émet surtout du rouge ; une étoile bleue est si chaude que son spectre est riche en bleu et en violet.</p>',
     },
     compRappel: {
       id: 'comp-rappel', titre: 'méthode',
@@ -111,7 +111,7 @@
     elRappel: {
       id: 'el-rappel', titre: 'rappel',
       html: `<p>Un élément chimique absorbe exactement les radiations qu'il émet. Il est <b>présent</b> dans l'étoile si <b>chacune</b> de ses raies d'émission se retrouve, à la même longueur d'onde, sous forme de raie noire dans le spectre de l'étoile. S'il manque une seule de ses raies, il n'est pas présent.</p>
-        <p>Coche un élément pour prolonger ses raies jusqu'au spectre de l'étoile, et utilise la règle pour comparer les longueurs d'onde.</p>`,
+`,
     },
     elVisuel: {
       id: 'el-visuel', titre: 'raies noires repérées', action: 'marquer',
@@ -188,34 +188,26 @@
     };
   }
 
-  function module1() {
-    const qs = [];
-    // 1 et 2 : émission ou absorption (un de chaque)
-    const e = choisir(['emr', 'emc']), a = choisir(['abr', 'abb']);
-    melanger([e, a]).forEach(t => qs.push(qEA(t)));
-    // 3 : situation
-    const s = choisir(SITU_EA);
-    qs.push({
+  function qSituEA(s) {
+    return {
       type: 'choix', theme: 'Émission ou absorption ?',
       consigne: `${s[0]} Obtient-on un spectre d'émission ou un spectre d'absorption ?`,
       options: [{ id: 'emission', label: 'Spectre d\'émission' }, { id: 'absorption', label: 'Spectre d\'absorption' }],
       bonne: s[1], explication: s[2],
       aides: [A.eaRappel, A.eaVisuel('La lumière arrive-t-elle directement de la source (émission), ou a-t-elle traversé une substance qui en absorbe une partie (absorption) ?')],
-    });
-    // 4 et 5 : continu ou de raies
-    const c = choisir(['emc', 'abb']), r = choisir(['emr', 'abr']);
-    melanger([c, r]).forEach(t => qs.push(qCR(t)));
-    // 6 : situation
-    const s2 = choisir(SITU_CR);
-    qs.push({
+    };
+  }
+  function qSituCR(s) {
+    return {
       type: 'choix', theme: 'Continu ou de raies ?',
-      consigne: `${s2[0]} Son spectre est-il continu ou de raies ?`,
+      consigne: `${s[0]} Son spectre est-il continu ou de raies ?`,
       options: [{ id: 'continu', label: 'Spectre continu' }, { id: 'raies', label: 'Spectre de raies' }],
-      bonne: s2[1], explication: s2[2],
+      bonne: s[1], explication: s[2],
       aides: [A.crRappel, A.crVisuel('Un corps chauffé émet toutes les couleurs ; un gaz (qui émet ou qui absorbe) ne concerne que quelques couleurs bien précises.')],
-    });
-    // 7 et 8 : les quatre types
-    melanger(Object.keys(TYPES)).slice(0, 2).forEach(t => qs.push({
+    };
+  }
+  function q4Types(t) {
+    return {
       type: 'choix', theme: 'Les quatre types de spectres',
       consigne: 'Quel est le type de ce spectre ?',
       spectres: [{ nom: '', o: spectreType(t) }],
@@ -223,36 +215,60 @@
       bonne: t,
       explication: `${capital(DESCRIPTION[t])}. C'est un spectre d'${TYPES[t].label.toLowerCase().replace('émission, ', 'émission ').replace('absorption, ', 'absorption ')}.`,
       aides: [A.t4Rappel, A.t4Visuel],
-    }));
-    // 9 : une source → son spectre
-    const el = choisir(['Na', 'Hg', 'H', 'He', 'Li']);
+    };
+  }
+  // une source → son spectre (4 spectres proposés)
+  function qSource(cible, el) {
     const sources = {
       emc: `la lumière d'un corps chauffé à ${deg(6000)}`,
       emr: `la lumière d'une lampe spectrale à vapeur de ${nomMin(el)}`,
       abr: `la lumière blanche après la traversée d'une vapeur froide de ${nomMin(el)}`,
       abb: 'la lumière blanche après la traversée d\'une solution colorée',
     };
-    const cible = choisir(Object.keys(TYPES)), ordre = melanger(Object.keys(TYPES));
-    qs.push({
+    const ordre = melanger(Object.keys(TYPES));
+    return {
       type: 'choix', theme: 'Les quatre types de spectres',
       consigne: `Quel spectre obtient-on en observant ${sources[cible]} ?`,
       options: ordre.map((t, k) => ({ id: t, label: `Spectre ${LETTRES[k]}`, spectre: t === 'emc' ? S.emc(6000) : spectreType(t, el) })),
       bonne: cible,
       explication: `Pour ${sources[cible]}, on obtient un spectre d'${TYPES[cible].label.toLowerCase().replace(', ', ' ')} (${DESCRIPTION[cible].split(' : ')[0]}).`,
       aides: [A.srcRappel, A.t4Visuel],
-    });
-    // 10 : spectre d'absorption correspondant à un spectre d'émission
-    const els = melanger(['H', 'He', 'Na', 'Hg', 'Li', 'Ba', 'Ca']).slice(0, 3);
+    };
+  }
+  // spectre d'absorption correspondant à un spectre d'émission
+  function qCorr(el) {
+    const els = [el].concat(melanger(['H', 'He', 'Na', 'Hg', 'Li', 'Ba', 'Ca'].filter(x => x !== el)).slice(0, 2));
     const opts = melanger(els);
-    qs.push({
+    return {
       type: 'choix', theme: 'Les quatre types de spectres',
       consigne: 'Voici le spectre d\'émission d\'un élément chimique. Quel est le spectre d\'absorption de ce même élément ?',
-      spectres: [{ nom: 'Émission', o: S.emr(els[0]) }],
+      spectres: [{ nom: 'Émission', o: S.emr(el) }],
       options: opts.map((x, k) => ({ id: x, label: `Spectre ${LETTRES[k]}`, spectre: S.abr(x) })),
-      bonne: els[0],
-      explication: `Le spectre ${LETTRES[opts.indexOf(els[0])]} a ses raies noires exactement aux mêmes longueurs d'onde que les raies colorées du spectre d'émission (c'est le ${nomMin(els[0])}) : un élément absorbe les radiations qu'il est capable d'émettre.`,
+      bonne: el,
+      explication: `Le spectre ${LETTRES[opts.indexOf(el)]} a ses raies noires exactement aux mêmes longueurs d'onde que les raies colorées du spectre d'émission (c'est le ${nomMin(el)}) : un élément absorbe les radiations qu'il est capable d'émettre.`,
       aides: [A.corrRappel, A.corrVisuel],
-    });
+    };
+  }
+
+  // 20 questions : 6 émission/absorption, 6 continu/raies, 4 types, 2 sources, 2 correspondances
+  function module1() {
+    const qs = [];
+    const types = () => melanger(Object.keys(TYPES));
+    // 1 à 6 : émission ou absorption (chaque type de spectre une fois, et deux situations)
+    const ea = types(), sEA = melanger(SITU_EA);
+    ea.slice(0, 2).forEach(t => qs.push(qEA(t))); qs.push(qSituEA(sEA[0]));
+    ea.slice(2).forEach(t => qs.push(qEA(t))); qs.push(qSituEA(sEA[1]));
+    // 7 à 12 : continu ou de raies
+    const cr = types(), sCR = melanger(SITU_CR);
+    cr.slice(0, 2).forEach(t => qs.push(qCR(t))); qs.push(qSituCR(sCR[0]));
+    cr.slice(2).forEach(t => qs.push(qCR(t))); qs.push(qSituCR(sCR[1]));
+    // 13 à 16 : les quatre types
+    types().forEach(t => qs.push(q4Types(t)));
+    // 17 et 18 : une source → son spectre
+    const els = melanger(['Na', 'Hg', 'H', 'He', 'Li']);
+    types().slice(0, 2).forEach((t, k) => qs.push(qSource(t, els[k])));
+    // 19 et 20 : spectre d'absorption correspondant
+    melanger(['H', 'He', 'Na', 'Hg', 'Li', 'Ba', 'Ca']).slice(0, 2).forEach(el => qs.push(qCorr(el)));
     return qs;
   }
 
@@ -261,10 +277,10 @@
      ============================================================ */
   const ECHELLE = [900, 1300, 1800, 2500, 3500, 5000, 7500, 12000];
   const COULEURS = [
-    { id: 'rouge', label: 'Étoile rouge', T: 3000 },
-    { id: 'orange', label: 'Étoile orange', T: 4200 },
-    { id: 'jaune', label: 'Étoile jaune', T: 5600 },
-    { id: 'blanche', label: 'Étoile blanche', T: 9500 },
+    { id: 'rouge', label: 'Étoile rouge', T: 2800 },
+    { id: 'orange', label: 'Étoile orange', T: 3800 },
+    { id: 'jaune', label: 'Étoile jaune', T: 4700 },
+    { id: 'blanche', label: 'Étoile blanche', T: 7500 },
     { id: 'bleue', label: 'Étoile bleue', T: 22000 },
   ];
   // indices croissants, espacés d'au moins « ecart » dans ECHELLE
@@ -346,7 +362,7 @@
       options: trio.map(x => ({ id: x.id, label: x.label, etoile: x.T })),
       bonne: c.id,
       explication: c.id === 'rouge' ? 'Le spectre est surtout rouge : le violet et le bleu sont très faibles. C\'est une étoile peu chaude, rouge.'
-        : c.id === 'jaune' ? 'Toutes les couleurs sont présentes avec une intensité voisine, le jaune est intense : c\'est une étoile jaune, comme le Soleil.'
+        : c.id === 'jaune' ? 'Toutes les couleurs sont présentes, mais le bleu et le violet sont plus faibles que le jaune et le rouge : c\'est une étoile jaune, un peu moins chaude que le Soleil (qui est une étoile blanche).'
           : 'Le bleu et le violet sont intenses et le rouge est plus faible : c\'est une étoile très chaude, bleue.',
       aides: [A.tRappel, A.coulRappel],
     });
@@ -382,10 +398,10 @@
     }
     throw new Error('composition impossible');
   }
-  function qElements(c, theme, consigne, nom) {
+  function qElements(c, theme, consigne, nom, outil) {
     const noms = c.presents.map(id => c.refs.find(r => r.id === id).nom.toLowerCase());
     return {
-      type: 'elements', theme, consigne, o: c.o, refs: c.refs, presents: c.presents,
+      type: 'elements', theme, consigne, o: c.o, refs: c.refs, presents: c.presents, outil: outil || 'B',
       explication: `${nom ? `${capital(nom)} contient` : 'L\'étoile contient'} : ${noms.join(', ')}. Toutes leurs raies se retrouvent en raies noires dans le spectre${c.refs.length > c.presents.length ? ' ; chacun des autres éléments a au moins une raie absente du spectre de l\'étoile' : ''}.`,
       aides: [A.elRappel, A.elVisuel],
     };
@@ -410,17 +426,19 @@
     const qs = [];
     const Tq = () => choisir([4500, 5000, 5500, 6000, 6500, 7000, 8000]);
     // 1 : un élément parmi deux
-    qs.push(qElements(composition(1, 2, Tq()), 'Un élément parmi deux',
-      'Les couches superficielles de cette étoile ne contiennent qu\'un seul des deux éléments proposés. Coche celui qui est présent.'));
+    // méthodes alternées : A (règle) et B (raies prolongées), toujours B pour les plus difficiles
+    qs.push(qElements(composition(1, 2, Tq()), 'Un élément parmi deux · méthode de la règle',
+      'Les couches superficielles de cette étoile ne contiennent qu\'un seul des deux éléments proposés. Coche celui qui est présent.', null, 'A'));
     // 2 : X ou Y (comme dans le TP)
     const xy = elementsXY(), pres = choisir(['X', 'Y']);
     const px = Object.assign({}, xy.find(r => r.id === pres), { ab: 1 });
-    qs.push(qElements({ presents: [pres], refs: xy, o: S.etoile(Tq(), [px]) }, 'Un élément parmi deux',
-      'On sait que la couche superficielle de cette étoile n\'est constituée que d\'un seul élément, X ou Y. Coche celui qui est présent.'));
+    qs.push(qElements({ presents: [pres], refs: xy, o: S.etoile(Tq(), [px]) }, 'Un élément parmi deux · méthode des raies prolongées',
+      'On sait que la couche superficielle de cette étoile n\'est constituée que d\'un seul élément, X ou Y. Coche celui qui est présent.', null, 'B'));
     // 3 à 5 : deux éléments parmi quatre
-    for (let i = 0; i < 3; i++) qs.push(qElements(composition(2, 4, Tq()), 'Deux éléments parmi quatre', 'Coche les éléments présents dans les couches superficielles de cette étoile.'));
+    ['A', 'B', 'A'].forEach(o => qs.push(qElements(composition(2, 4, Tq()), `Deux éléments parmi quatre · méthode ${o === 'A' ? 'de la règle' : 'des raies prolongées'}`,
+      'Coche les éléments présents dans les couches superficielles de cette étoile.', null, o)));
     // 6 à 8 : trois éléments parmi six
-    for (let i = 0; i < 3; i++) qs.push(qElements(composition(3, 6, Tq()), 'Trois éléments parmi six', 'Coche les éléments présents dans les couches superficielles de cette étoile (il y en a peut-être trois).'));
+    for (let i = 0; i < 3; i++) qs.push(qElements(composition(3, 6, Tq()), 'Trois éléments parmi six · méthode des raies prolongées', 'Coche les éléments présents dans les couches superficielles de cette étoile.', null, 'B'));
     // 9 : élément le plus abondant
     const c = composition(2, 2, Tq());
     const plus = c.p.slice().sort((a, b) => b.ab - a.ab)[0].id;
@@ -434,7 +452,7 @@
       aides: [A.abRappel],
     });
     // 10 : trois parmi six
-    qs.push(qElements(composition(3, 6, Tq()), 'Trois éléments parmi six', 'Coche les éléments présents dans les couches superficielles de cette étoile.'));
+    qs.push(qElements(composition(3, 6, Tq()), 'Trois éléments parmi six · méthode des raies prolongées', 'Coche les éléments présents dans les couches superficielles de cette étoile.', null, 'B'));
     return qs;
   }
 
