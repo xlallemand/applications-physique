@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : Des molécules aux moles — Avancement d'une réaction</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="av.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="av.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="av-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · SECONDE</span>
+    <h2 class="er-titre">Des molécules aux moles</h2>
+    <p class="er-contexte">Dans la réalité, les quantités sont énormes : on ne compte pas les molécules une par une, mais par paquets, les moles. Le tableau d'avancement reste le même.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   1. Compter par paquets (la mole)
+   2. Tableau en mol, nombres entiers
+   3. Tableau en mol, nombres décimaux
+   4. Des nombres stœchiométriques plus grands
+   5. À retenir
+   ============================================================ */
+const zone = document.getElementById('etapes');
+const fH = MOL.formuleHTML;
+
+function carte(html) {
+  const c = document.createElement('section');
+  c.className = 'er-card';
+  c.innerHTML = html;
+  zone.appendChild(c);
+  return c;
+}
+function continuer(parent, suivante, texte) {
+  parent.insertAdjacentHTML('beforeend', `<div class="av-suite"><button type="button" class="btn-primary">${texte || 'Continuer →'}</button></div>`);
+  const b = parent.querySelector('.av-suite:last-child button');
+  b.onclick = () => { b.parentNode.remove(); const c = suivante(); c.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+}
+
+/* ---------- 1. Compter par paquets ---------- */
+function etape1() {
+  const paquet = (f, n) => `<div class="av-paquet"><span class="av-paquet-nom">1 mol de ${fH(f)}</span>${MOL.molecule(f).repeat(n)}</div>`;
+  const c = carte(`<h3 class="cours-titre">1. Compter par paquets : la mole</h3>
+    <p class="er-contexte">Une goutte d'eau contient environ 1,7 × 10<sup>21</sup> molécules : impossible de les compter une par une. Comme on compte les œufs par douzaines, les chimistes comptent les molécules par paquets.</p>
+    <div class="cle"><p><b class="cle-titre">La mole</b> est un paquet de 6,02 × 10<sup>23</sup> entités (molécules, atomes ou ions). La quantité de matière n s'exprime en moles (mol).</p></div>
+    <div class="av-paquets">${paquet('CH4', 5)}${paquet('O2', 6)}${paquet('O2', 6)}</div>
+    <p class="er-contexte">Si 1 molécule de CH<sub>4</sub> réagit avec 2 molécules de O<sub>2</sub>, alors 1 paquet (1 mol) de CH<sub>4</sub> réagit avec 2 paquets (2 mol) de O<sub>2</sub>.</p>
+    <div class="cle"><p class="av-formule-cle">CH<sub>4</sub> + <span class="av-c">2</span> O<sub>2</sub> → CO<sub>2</sub> + <span class="av-c">2</span> H<sub>2</sub>O</p>
+      <p style="text-align:center">1 molécule + 2 molécules → 1 molécule + 2 molécules<br><b>1 mol + 2 mol → 1 mol + 2 mol</b></p></div>
+    <p class="er-contexte">Le tableau d'avancement se construit donc exactement de la même façon, avec des quantités de matière en mol. L'avancement x est lui aussi en mol, et il peut être décimal : le réactif limitant est alors <b>entièrement</b> consommé.</p>`);
+  continuer(c, etape2);
+  return c;
+}
+
+/* ---------- 2., 3. et 4. Tableaux en mol ---------- */
+function exercice(titre, q, texte, suivante) {
+  const c = carte(`<h3 class="cours-titre">${titre}</h3>
+    <p class="av-equation">${AV.equationHTML(q)}</p>
+    <p class="er-contexte">${texte}</p><div data-x="ex" style="margin-top:12px"></div>`);
+  new AV.Exercice(c.querySelector('[data-x="ex"]'), Object.assign({}, q, {
+    unite: 'mol', mode: 'decimal', guide: true,
+    etapes: ['initial', 'cours', 'hyp', 'concl', 'final'],
+    onFini: () => continuer(c, suivante),
+  }));
+  return c;
+}
+const etape2 = () => exercice("2. Un tableau en mol : synthèse de l'eau",
+  { r: ['H2', 'O2'], p: ['H2O'], c: [2, 1, 2], n0: [4, 3, 0] },
+  'On fait réagir 4 mol de dihydrogène H<sub>2</sub> avec 3 mol de dioxygène O<sub>2</sub>. Écris les quantités avec le clavier (la virgule est acceptée).', etape3);
+const etape3 = () => exercice('3. Avec des nombres décimaux : combustion du méthane',
+  { r: ['CH4', 'O2'], p: ['CO2', 'H2O'], c: [1, 2, 1, 2], n0: [0.6, 1.0, 0, 0] },
+  'On fait brûler 0,6 mol de méthane CH<sub>4</sub> dans 1,0 mol de dioxygène O<sub>2</sub>.', etape4);
+const etape4 = () => exercice('4. Des nombres stœchiométriques plus grands : combustion du propane',
+  { r: ['C3H8', 'O2'], p: ['CO2', 'H2O'], c: [1, 5, 3, 4], n0: [0.3, 1.0, 0, 0] },
+  'On fait brûler 0,30 mol de propane C<sub>3</sub>H<sub>8</sub> dans 1,0 mol de dioxygène O<sub>2</sub>.', etape5);
+
+/* ---------- 5. À retenir ---------- */
+function etape5() {
+  return carte(`<h3 class="cours-titre">À retenir</h3>
+    <div class="cle"><p><b class="cle-titre">Les nombres stœchiométriques</b> donnent les proportions dans lesquelles les réactifs disparaissent et les produits apparaissent, en molécules comme en moles.</p></div>
+    <div class="cle"><p><b class="cle-titre">Le tableau d'avancement</b> se construit de la même façon : quantités initiales, ligne « en cours » (n<sub>initial</sub> − ν × x pour un réactif, n<sub>initial</sub> + ν × x pour un produit, ν étant le nombre stœchiométrique), deux hypothèses, conclusion (plus petite valeur de x<sub>max</sub>), état final.</p></div>
+    <div class="cle"><p><b class="cle-titre">En mol</b>, le réactif limitant est entièrement consommé : sa quantité finale est 0 mol.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4.html">Module 4 : s'entraîner →</a></div>`);
+}
+
+etape1();
+AV.menu('module_3');
+</script>
+</body>
+</html>

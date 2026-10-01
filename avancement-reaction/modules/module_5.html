@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 : Avec des puissances de 10 — Avancement d'une réaction</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="av.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="av.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="av-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 5 · PREMIÈRE</span>
+    <h2 class="er-titre">Avec des puissances de 10</h2>
+    <p class="er-contexte">En classe, les quantités de matière sont souvent petites : quelques millimoles. On les écrit en écriture scientifique. La méthode du tableau d'avancement ne change pas.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   1. Écriture scientifique et saisie
+   2. Iodure de plomb (exemple de référence)
+   3. Hydroxyde de cuivre
+   4. À retenir
+   ============================================================ */
+const zone = document.getElementById("etapes");
+const fH = MOL.formuleHTML;
+function carte(html) {
+  const c = document.createElement("section");
+  c.className = "er-card";
+  c.innerHTML = html;
+  zone.appendChild(c);
+  return c;
+}
+function continuer(parent, suivante, texte) {
+  parent.insertAdjacentHTML("beforeend", `<div class="av-suite"><button type="button" class="btn-primary">${texte || "Continuer →"}</button></div>`);
+  const b = parent.querySelector(".av-suite:last-child button");
+  b.onclick = () => { b.parentNode.remove(); const c = suivante(); c.scrollIntoView({ behavior: "smooth", block: "start" }); };
+}
+
+/* ---------- 1. Écriture scientifique ---------- */
+function etape1() {
+  const c = carte(`<h3 class="cours-titre">1. Écrire et saisir une quantité</h3>
+    <p class="er-contexte">0,0060 mol s'écrit <b>6,0 × 10<sup>−3</sup> mol</b> : un nombre entre 1 et 10, multiplié par une puissance de 10.</p>
+    <div class="cle"><p><b class="cle-titre">Pour saisir une valeur</b> : écris le nombre devant au clavier (6,0), puis règle l'exposant de 10 avec les flèches (−3).</p></div>
+    <p class="er-consigne">Essaie : saisis 6,0 × 10<sup>−3</sup>.</p>
+    <div class="av-saisie" style="display:inline-flex" data-x="demo"></div>
+    <div class="er-actions"><button type="button" class="btn-primary" data-x="ok">Vérifier</button></div><div data-x="retour"></div>`);
+  const ch = AV.champ('puissance', { label: 'essai' });
+  c.querySelector('[data-x="demo"]').appendChild(ch.el);
+  let fait = false;
+  c.querySelector('[data-x="ok"]').onclick = () => {
+    const ok = AV.egal(ch.valeur(), 6e-3);
+    ch.marquer(ok);
+    c.querySelector('[data-x="retour"]').innerHTML = ok
+      ? '<div class="callout-success er-retour"><p><b class="er-ok">C\'est juste !</b> Tu peux aussi écrire 60 × 10<sup>−4</sup> ou 0,006 × 10<sup>0</sup> : seule la valeur compte.</p></div>'
+      : '<div class="callout-danger er-retour"><p><b class="er-ko">Pas tout à fait.</b> Écris 6,0 dans la case, puis appuie 3 fois sur la flèche du bas pour obtenir −3.</p></div>';
+    if (ok && !fait) { fait = true; continuer(c, etape2); }
+  };
+  return c;
+}
+
+/* ---------- 2. et 3. Tableaux avec des puissances de 10 ---------- */
+function exercice(titre, q, texte, suivante) {
+  const c = carte(`<h3 class="cours-titre">${titre}</h3>
+    <p class="av-equation">${AV.equationHTML(q)}</p>
+    <p class="er-contexte">${texte}</p><div data-x="ex" style="margin-top:12px"></div>`);
+  new AV.Exercice(c.querySelector('[data-x="ex"]'), Object.assign({}, q, {
+    unite: 'mol', mode: 'puissance', guide: true,
+    etapes: ['initial', 'cours', 'hyp', 'concl', 'final'],
+    onFini: () => continuer(c, suivante),
+  }));
+  return c;
+}
+const etape2 = () => exercice("2. Précipitation de l'iodure de plomb",
+  { r: ['Pb2+', 'I-'], p: ['PbI2'], c: [1, 2, 1], n0: [6.0e-3, 1.0e-2, 0] },
+  'On mélange une solution contenant 6,0 × 10<sup>−3</sup> mol d\'ions plomb Pb<sup>2+</sup> et une solution contenant 1,0 × 10<sup>−2</sup> mol d\'ions iodure I<sup>−</sup>. Il se forme un précipité jaune d\'iodure de plomb PbI<sub>2</sub>.', etape3);
+const etape3 = () => exercice("3. Précipitation de l'hydroxyde de cuivre",
+  { r: ['Cu2+', 'HO-'], p: ['Cu(OH)2'], c: [1, 2, 1], n0: [2.0e-3, 5.0e-3, 0] },
+  'On mélange 2,0 × 10<sup>−3</sup> mol d\'ions cuivre Cu<sup>2+</sup> et 5,0 × 10<sup>−3</sup> mol d\'ions hydroxyde HO<sup>−</sup>. Il se forme un précipité bleu d\'hydroxyde de cuivre Cu(OH)<sub>2</sub>.', etape4);
+
+/* ---------- 4. À retenir ---------- */
+function etape4() {
+  return carte(`<h3 class="cours-titre">À retenir</h3>
+    <div class="cle"><p>La méthode est la même qu'avec des nombres simples. Pour comparer les deux valeurs de x<sub>max</sub>, regarde d'abord les exposants : 5,0 × 10<sup>−3</sup> &lt; 6,0 × 10<sup>−3</sup>, et 9,0 × 10<sup>−4</sup> &lt; 1,0 × 10<sup>−3</sup>.</p></div>
+    <div class="cle"><p>Pour calculer l'état final, écris les deux quantités avec le même exposant : 6,0 × 10<sup>−3</sup> − 5,0 × 10<sup>−3</sup> = 1,0 × 10<sup>−3</sup> mol.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_6.html">Module 6 : s'entraîner →</a></div>`);
+}
+
+etape1();
+AV.menu('module_5');
+</script>
+</body>
+</html>

@@ -306,7 +306,7 @@
       `<button type="button" class="er-sel-moins" aria-label="Diminuer${opts.label ? ' ' + opts.label : ''} de 1">${CHEVRON_BAS}</button>`;
     const bPlus = el.querySelector('.er-sel-plus'), bMoins = el.querySelector('.er-sel-moins'), out = el.querySelector('output');
     function afficher() {
-      out.textContent = v;
+      out.textContent = String(v).replace('-', '−');
       bPlus.disabled = !actif || v >= max;
       bMoins.disabled = !actif || v <= min;
     }
