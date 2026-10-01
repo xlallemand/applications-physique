@@ -97,6 +97,12 @@
       ctx.restore();
     });
 
+    // aide visuelle : début du spectre côté violet (trait blanc en pointillés)
+    if (o.repere && o.repere > L0 + 2) {
+      ctx.save(); ctx.setLineDash([4, 3]); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(X(o.repere), 2); ctx.lineTo(X(o.repere), h - 2); ctx.stroke(); ctx.restore();
+    }
+
     // cadre
     ctx.strokeStyle = 'rgba(22,24,29,.35)'; ctx.lineWidth = 1;
     ctx.strokeRect(PAD - .5, .5, lw + 1, h - 1);
@@ -114,7 +120,19 @@
           ctx.fillText(t, l === L1 ? w - 1 : x, h + 8);
         }
       }
+      // aide visuelle : triangles sous les raies noires
+      ctx.fillStyle = '#5a3fc4';
+      (o.marques || []).forEach(l => {
+        const x = X(l);
+        ctx.beginPath(); ctx.moveTo(x, h + 1); ctx.lineTo(x - 4, h + 8); ctx.lineTo(x + 4, h + 8); ctx.fill();
+      });
     }
+  }
+
+  // longueur d'onde à partir de laquelle le spectre d'un corps chauffé devient visible côté violet
+  function debutVisible(T) {
+    for (let l = L0; l <= L1; l++) if (continu(l, T) >= .3) return l;
+    return L1;
   }
 
   function spectre(el, o) {
@@ -197,7 +215,7 @@
       ctx.fillStyle = '#3f2a93'; ctx.font = `800 10px ${f}`; ctx.textAlign = 'left';
       ctx.fillText('TEMPÉRATURE (°C) SI LE MAXIMUM EST ICI', g, ye - 13);
       ctx.strokeStyle = '#5a3fc4'; ctx.lineWidth = 2;
-      const grad = etroit ? [2000, 3000, 4000, 6000] : [2000, 2500, 3000, 4000, 5000, 6000, 8000, 10000];
+      const grad = etroit ? [2000, 2500, 3000, 4000, 6000] : [2000, 2500, 3000, 4000, 5000, 6000, 8000, 10000];
       ctx.beginPath(); ctx.moveTo(X(WIEN / (grad[grad.length - 1] + K)), ye); ctx.lineTo(g + lw, ye); ctx.stroke();
       ctx.font = `700 11px ${f}`; ctx.fillStyle = '#3f2a93';
       grad.forEach(t => {
@@ -266,5 +284,5 @@
     Ne: { nom: 'Néon', raies: [[585.2, .8], [588.2, .4], [603.0, .4], [607.4, .5], [614.3, .7], [616.4, .4], [621.7, .4], [626.6, .5], [633.4, .6], [638.3, .6], [640.2, 1], [650.7, .7], [659.9, .5], [692.9, .6], [703.2, .8]] },
   };
 
-  window.SP = { L0, L1, PAD, rgb, continu, spectre, profil, couleurEtoile, ELEMENTS, WIEN, K };
+  window.SP = { L0, L1, PAD, rgb, continu, debutVisible, spectre, profil, couleurEtoile, ELEMENTS, WIEN, K };
 })();

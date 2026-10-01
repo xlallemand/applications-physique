@@ -201,6 +201,28 @@
       }
     },
 
+    // Spectres de raies (bandes traversées de raies) et étoiles
+    spectres(ctx, w, h, c, rnd) {
+      ctx.fillStyle = c; ctx.strokeStyle = c;
+      for (let y = 22, ligne = 0; y < h; y += 62, ligne++) {
+        const x0 = -rnd() * 120, larg = w + 160;
+        ctx.globalAlpha = .07; ctx.fillRect(x0, y, larg, 26);
+        ctx.globalAlpha = .35; ctx.lineWidth = 1; ctx.strokeRect(x0 + .5, y + .5, larg, 26);
+        for (let x = x0 + 10 + rnd() * 40; x < w; x += 12 + rnd() * 70) {
+          ctx.globalAlpha = .2 + rnd() * .5;
+          ctx.fillRect(x, y, 2 + Math.floor(rnd() * 2), 26);
+        }
+      }
+      // étoiles à quatre branches
+      for (let i = 0; i < Math.round(w / 90); i++) {
+        const x = rnd() * w, y = rnd() * h, r = 4 + rnd() * 7;
+        ctx.globalAlpha = .35 + rnd() * .4;
+        ctx.beginPath();
+        ctx.moveTo(x, y - r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.quadraticCurveTo(x, y, x, y + r);
+        ctx.quadraticCurveTo(x, y, x - r, y); ctx.quadraticCurveTo(x, y, x, y - r); ctx.fill();
+      }
+    },
+
     // Formules écrites en quinconce, plus ou moins marquées
     formules(ctx, w, h, c, rnd, liste) {
       const f = FORMULES[liste] || FORMULES.physique;
