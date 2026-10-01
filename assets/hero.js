@@ -13,6 +13,7 @@
      noyaux     noyaux radioactifs et courbe N(t)
      puissance  tension et intensité déphasées, puissance instantanée
      fractions  disques et barres partagés
+     molecules  modèles moléculaires en boules
      formules:physique | formules:redox | formules:pile | formules:algebre
    ============================================================ */
 (function () {
@@ -172,6 +173,30 @@
             if (i < k) { ctx.globalAlpha = .25; ctx.fill(); }
             ctx.globalAlpha = .55; ctx.stroke();
           }
+        }
+      }
+    },
+
+    // Modèles moléculaires en boules (eau, dioxyde de carbone, méthane, dioxygène, ammoniac)
+    molecules(ctx, w, h, c, rnd) {
+      const modeles = [
+        [[0, 0, 15], [-17, 12, 10], [17, 12, 10]],                                   // H2O
+        [[-24, 0, 14], [0, 0, 14], [24, 0, 14]],                                     // CO2
+        [[0, 0, 15], [0, -21, 10], [21, 0, 10], [0, 21, 10], [-21, 0, 10]],          // CH4
+        [[-11, 0, 14], [11, 0, 14]],                                                  // O2
+        [[0, 0, 15], [-19, 11, 10], [19, 11, 10], [0, -21, 10]],                      // NH3
+      ];
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineWidth = 1.5;
+      for (let ligne = 0, y = 45; y < h + 50; y += 100, ligne++) {
+        for (let x = 40 + (ligne % 2) * 70 - rnd() * 30; x < w + 50; x += 135 + rnd() * 30) {
+          const m = modeles[Math.floor(rnd() * modeles.length)], a = rnd() * 6.28, k = .85 + rnd() * .45;
+          const ca = Math.cos(a), sa = Math.sin(a), alpha = .5 + rnd() * .5;
+          // petites boules d'abord : les grosses passent devant
+          m.slice().sort((p, q) => p[2] - q[2]).forEach(([mx, my, r]) => {
+            ctx.beginPath(); ctx.arc(x + k * (mx * ca - my * sa), y + k * (mx * sa + my * ca), r * k, 0, 7);
+            ctx.globalAlpha = (r > 12 ? .26 : .12) * alpha; ctx.fill();
+            ctx.globalAlpha = .55 * alpha; ctx.stroke();
+          });
         }
       }
     },
