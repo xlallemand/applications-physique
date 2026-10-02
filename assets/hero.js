@@ -13,6 +13,7 @@
      noyaux     noyaux radioactifs et courbe N(t)
      puissance  tension et intensité déphasées, puissance instantanée
      fractions  disques et barres partagés
+     molecules  modèles moléculaires en boules
      formules:physique | formules:redox | formules:pile | formules:algebre
    ============================================================ */
 (function () {
@@ -46,6 +47,8 @@
                'MnO₄⁻ + 8H⁺ + 5e⁻ = Mn²⁺ + 4H₂O', 'I₂ + 2e⁻ = 2I⁻', 'Al = Al³⁺ + 3e⁻', 'O₂ + 4H⁺ + 4e⁻ = 2H₂O'],
     pile:     ['Zn | Zn²⁺ ‖ Cu²⁺ | Cu', 'Zn = Zn²⁺ + 2e⁻', 'Cu²⁺ + 2e⁻ = Cu', 'anode (−)', 'cathode (+)', 'pont salin',
                'e⁻ →', 'I', 'COM', 'Zn + Cu²⁺ → Zn²⁺ + Cu', 'oxydation', 'réduction'],
+    combustion: ['CH₄ + 2 O₂ → CO₂ + 2 H₂O', 'n = m / M', 'm = n × M', 'E = PC × m', 'C₃H₈ + 5 O₂ → 3 CO₂ + 4 H₂O',
+               'M(CO₂) = 44 g/mol', 'n / a = n / b', 'PC en MJ/kg', 'C₂H₆O + 3 O₂ → 2 CO₂ + 3 H₂O', 'M(H₂O) = 18 g/mol'],
     algebre:  ['2x + 3 = 7', 'x = 2', '3(x − 1) = 12', '5x = 20', 'x − 4 = 9', '7 = 2x − 5', '4x + 1 = 3x + 6',
                'x / 3 = 5', '−2x = 8', 'x = −4', 'ax + b = 0', 'x = −b / a']
   };
@@ -173,6 +176,52 @@
             ctx.globalAlpha = .55; ctx.stroke();
           }
         }
+      }
+    },
+
+    // Modèles moléculaires en boules (eau, dioxyde de carbone, méthane, dioxygène, ammoniac)
+    molecules(ctx, w, h, c, rnd) {
+      const modeles = [
+        [[0, 0, 15], [-17, 12, 10], [17, 12, 10]],                                   // H2O
+        [[-24, 0, 14], [0, 0, 14], [24, 0, 14]],                                     // CO2
+        [[0, 0, 15], [0, -21, 10], [21, 0, 10], [0, 21, 10], [-21, 0, 10]],          // CH4
+        [[-11, 0, 14], [11, 0, 14]],                                                  // O2
+        [[0, 0, 15], [-19, 11, 10], [19, 11, 10], [0, -21, 10]],                      // NH3
+      ];
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineWidth = 1.5;
+      for (let ligne = 0, y = 45; y < h + 50; y += 100, ligne++) {
+        for (let x = 40 + (ligne % 2) * 70 - rnd() * 30; x < w + 50; x += 135 + rnd() * 30) {
+          const m = modeles[Math.floor(rnd() * modeles.length)], a = rnd() * 6.28, k = .85 + rnd() * .45;
+          const ca = Math.cos(a), sa = Math.sin(a), alpha = .5 + rnd() * .5;
+          // petites boules d'abord : les grosses passent devant
+          m.slice().sort((p, q) => p[2] - q[2]).forEach(([mx, my, r]) => {
+            ctx.beginPath(); ctx.arc(x + k * (mx * ca - my * sa), y + k * (mx * sa + my * ca), r * k, 0, 7);
+            ctx.globalAlpha = (r > 12 ? .26 : .12) * alpha; ctx.fill();
+            ctx.globalAlpha = .55 * alpha; ctx.stroke();
+          });
+        }
+      }
+    },
+
+    // Spectres de raies (bandes traversées de raies) et étoiles
+    spectres(ctx, w, h, c, rnd) {
+      ctx.fillStyle = c; ctx.strokeStyle = c;
+      for (let y = 22, ligne = 0; y < h; y += 62, ligne++) {
+        const x0 = -rnd() * 120, larg = w + 160;
+        ctx.globalAlpha = .07; ctx.fillRect(x0, y, larg, 26);
+        ctx.globalAlpha = .35; ctx.lineWidth = 1; ctx.strokeRect(x0 + .5, y + .5, larg, 26);
+        for (let x = x0 + 10 + rnd() * 40; x < w; x += 12 + rnd() * 70) {
+          ctx.globalAlpha = .2 + rnd() * .5;
+          ctx.fillRect(x, y, 2 + Math.floor(rnd() * 2), 26);
+        }
+      }
+      // étoiles à quatre branches
+      for (let i = 0; i < Math.round(w / 90); i++) {
+        const x = rnd() * w, y = rnd() * h, r = 4 + rnd() * 7;
+        ctx.globalAlpha = .35 + rnd() * .4;
+        ctx.beginPath();
+        ctx.moveTo(x, y - r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.quadraticCurveTo(x, y, x, y + r);
+        ctx.quadraticCurveTo(x, y, x - r, y); ctx.quadraticCurveTo(x, y, x, y - r); ctx.fill();
       }
     },
 

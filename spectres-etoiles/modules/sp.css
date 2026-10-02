@@ -1,0 +1,194 @@
+/* ============================================================
+   Styles de l'application « Spectres et étoiles »
+   Complète assets/theme.css. Les classes « er-… » des cartes et
+   questions sont les mêmes que dans les autres applications.
+   ============================================================ */
+
+body { font-family: var(--font-sans); }
+.sp-page *, .sp-page *::before, .sp-page *::after { box-sizing: border-box; }
+.sp-page { max-width: 60rem; margin: 0 auto; padding: 24px 16px 64px; }
+@media (max-width: 480px) { .sp-page { padding: 14px 10px 56px; } }
+.sp-page p { margin: 0; }
+.sp-page button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.hidden { display: none !important; }
+sub, sup { font-size: .7em; line-height: 0; }
+
+/* ---------- Cartes ---------- */
+.er-card { background: var(--sheet); border: 1px solid var(--line); border-radius: 22px; padding: 20px 22px; margin-bottom: 16px; scroll-margin-top: 76px; }
+@media (max-width: 480px) { .er-card { padding: 14px 12px; border-radius: 18px; margin-bottom: 12px; } }
+.er-badge {
+  display: inline-block; background: var(--cle-bg); color: var(--accent-ink);
+  font-size: .75rem; font-weight: 800; padding: 4px 12px; border-radius: 999px; letter-spacing: .04em; margin-bottom: 8px;
+}
+.er-titre { font-size: 1.5rem; font-weight: 800; letter-spacing: -.02em; margin: 0 0 6px; color: var(--ink); line-height: 1.2; }
+.er-contexte { color: var(--ink-2); font-size: 1rem; line-height: 1.55; }
+.er-contexte b { color: var(--ink); }
+.er-contexte + .er-contexte { margin-top: 8px; }
+.er-consigne { font-size: 1.05rem; font-weight: 600; color: var(--ink); line-height: 1.45; margin: 10px 0 12px !important; }
+.er-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 14px; }
+.er-actions:empty { display: none; }
+.er-actions .btn-primary { padding: 12px 24px; }
+.er-retour { margin-top: 12px; font-size: .98rem; line-height: 1.5; color: var(--ink); animation: er-apparait .25s ease; }
+.er-retour b.er-ok { color: var(--success-text); }
+.er-retour b.er-ko { color: var(--danger-text); }
+.er-retour p + p { margin-top: 6px; }
+@keyframes er-apparait { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.cle { margin: 12px 0; }
+.cle p + p { margin-top: 6px; }
+
+/* ---------- Spectres ---------- */
+.sp-canvas { display: block; width: 100%; }
+.sp-ligne { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 8px; align-items: start; }
+.sp-ligne + .sp-ligne { margin-top: 6px; }
+.sp-nom { font-weight: 800; font-size: .9rem; color: var(--ink); padding-top: 14px; line-height: 1.2; }
+.sp-nom small { display: block; font-weight: 600; color: var(--ink-3); font-size: .78rem; }
+@media (max-width: 480px) {
+  .sp-ligne { grid-template-columns: 1fr; gap: 2px; }
+  .sp-nom { padding: 0 0 0 16px; }
+}
+
+/* ---------- En-tête de question, fin de série ---------- */
+.er-meta { font-size: .9rem; font-weight: 700; color: var(--ink-2); margin: 4px 0 8px !important; }
+.er-meta b { color: var(--accent-ink); }
+.er-q-nom { font-size: .85rem; font-weight: 700; color: var(--accent); margin-bottom: 4px !important; }
+.er-liste { margin: 6px 0 0; padding-left: 20px; line-height: 1.6; }
+@keyframes er-secoue { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.er-secoue { animation: er-secoue .35s ease; }
+.er-fin { text-align: center; }
+.er-trophee { font-weight: 800; color: var(--accent-ink); font-size: 1.1rem; margin-top: 4px !important; }
+.er-score { font-size: 3.6rem; font-weight: 900; color: var(--accent); letter-spacing: -.03em; line-height: 1.1; margin-top: 8px; }
+.er-score-pct { font-size: 1.1rem; font-weight: 700; color: var(--ink-3); margin-bottom: 10px !important; }
+.er-recap { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 6px; margin: 16px 0 4px; }
+.er-recap div { background: var(--paper); border-radius: 10px; padding: 5px 2px; font-size: .72rem; color: var(--ink-2); }
+.er-recap div.ok { background: var(--success-bg); }
+.er-recap div.ko { background: var(--danger-bg); }
+.er-recap b { display: block; font-size: .9rem; color: var(--ink); }
+.er-confetti { position: fixed; top: -20px; width: 9px; height: 14px; z-index: 9999; pointer-events: none; animation: er-chute linear forwards; }
+@keyframes er-chute { to { top: 110vh; transform: rotate(720deg); } }
+
+/* ---------- Spectres alignés ---------- */
+.sp-zone { position: relative; min-width: 0; }
+.sp-ligne-seule { grid-template-columns: minmax(0, 1fr); }
+.sp-ligne-seule .sp-nom { display: none; }
+.sp-question .sp-ligne { margin-bottom: 8px; }
+.sp-mini { margin-top: 8px; }
+.sp-mini .sp-ligne { grid-template-columns: 130px minmax(0, 1fr); }
+.sp-mini .sp-nom { padding-top: 5px; font-size: .82rem; }
+@media (max-width: 480px) { .sp-mini .sp-ligne { grid-template-columns: 1fr; } .sp-mini .sp-nom { padding: 4px 0 0 16px; } }
+
+/* Choix : boutons de texte */
+.sp-choix { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.sp-choix button { min-height: 46px; text-align: left; line-height: 1.3; }
+.sp-choix button:disabled { cursor: default; opacity: 1; }
+.sp-choix button.juste, .sp-carte.juste, .sp-etoile.juste { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); color: var(--success-text); }
+.sp-choix button.faux, .sp-carte.faux, .sp-etoile.faux { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+
+/* Choix : cartes avec un spectre */
+.sp-cartes { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.sp-carte {
+  display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; gap: 6px; align-items: center; width: 100%;
+  background: var(--sheet); border: none; border-radius: 16px; padding: 6px 4px 6px 0; cursor: pointer;
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font-family: inherit; color: var(--ink); text-align: left; transition: box-shadow .15s, background .15s;
+}
+.sp-carte:hover:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.sp-carte:disabled { cursor: default; }
+.sp-carte-nom { padding-left: 12px; font-size: .95rem; }
+.sp-carte-sp { display: block; min-width: 0; }
+.sp-carte .sp-ciel { grid-column: 3; }
+@media (max-width: 480px) {
+  .sp-carte { grid-template-columns: minmax(0, 1fr) auto; padding: 6px 4px 4px 0; }
+  .sp-carte-nom { grid-column: 1 / -1; }
+  .sp-carte .sp-carte-sp { grid-column: 1; }
+  .sp-carte .sp-ciel { grid-column: 2; }
+}
+
+/* Choix : étoiles */
+.sp-etoiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; margin-top: 6px; }
+.sp-etoile {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative;
+  background: var(--sheet); border: none; border-radius: 18px; padding: 10px 6px; cursor: pointer; font-family: inherit; color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); transition: box-shadow .15s, background .15s;
+}
+.sp-etoile:hover:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.sp-etoile:disabled { cursor: default; }
+.sp-etoile b { font-size: .9rem; }
+
+/* Classement : numéro d'ordre */
+.sp-rang:empty { display: none; }
+.sp-rang {
+  position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: .95rem;
+}
+.sp-carte.sp-ordre { position: relative; padding-right: 40px; }
+.sp-carte.sp-ordre .sp-rang { top: 50%; transform: translateY(-50%); }
+.sp-ordre.choisi { box-shadow: inset 0 0 0 2px var(--accent); background: var(--cle-bg); }
+.sp-ordre.choisi.juste { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); color: var(--success-text); }
+.sp-ordre.juste .sp-rang { background: var(--success); }
+@media (max-width: 480px) { .sp-carte.sp-ordre .sp-rang { top: 6px; transform: none; } }
+
+/* Étoile dessinée sur fond de ciel */
+.sp-ciel { width: 88px; height: 88px; border-radius: 18px; background: radial-gradient(circle at 30% 20%, #1d2240, #07091a); display: grid; place-items: center; flex: none; }
+.sp-astre { width: 34px; height: 34px; border-radius: 50%; transition: background .2s, box-shadow .2s; }
+.sp-ciel-petit { width: 44px; height: 44px; border-radius: 12px; }
+.sp-ciel-petit .sp-astre { width: 16px; height: 16px; }
+
+/* Curseur de température (comparateur) */
+.sp-curseur-T { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 12px 0 4px; }
+.sp-curseur-T input[type=range] { flex: 1; min-width: 180px; accent-color: var(--accent); height: 36px; touch-action: pan-y; }
+.sp-T { font-weight: 800; font-size: 1.15rem; background: var(--cle-bg); color: var(--accent-ink); border-radius: 999px; padding: 6px 14px; min-width: 120px; text-align: center; font-variant-numeric: tabular-nums; }
+.sp-guide { margin-top: 8px !important; padding: 10px 14px; border-radius: 14px; background: var(--cle-bg); font-size: .95rem; line-height: 1.45; }
+
+/* Profil d'intensité et saisie de la température */
+.sp-profil { margin: 4px 0 10px; }
+.sp-saisie { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.sp-saisie label { font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sp-nowrap { white-space: nowrap; }
+.sp-saisie input {
+  width: 120px; font: inherit; font-size: 1.15rem; font-weight: 800; text-align: center; padding: 9px 10px;
+  border: none; border-radius: 12px; box-shadow: inset 0 0 0 1.5px var(--paper-3); background: var(--sheet); color: var(--ink);
+}
+.sp-saisie input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+
+/* Composition : règle et projection des raies */
+.sp-outils { font-size: .92rem; color: var(--ink-2); line-height: 1.5; margin-bottom: 44px !important; }
+.sp-outils-court { margin-bottom: 12px !important; }
+.sp-groupe { position: relative; }
+.sp-lc { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 8px; align-items: start; }
+.sp-lc + .sp-lc { margin-top: 6px; }
+.sp-lc-nom .sp-nom { display: block; padding-top: 16px; }
+.sp-zone-clic { cursor: crosshair; }
+.sp-case { position: relative; z-index: 4; -webkit-tap-highlight-color: transparent; display: flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer; font-weight: 700; font-size: .9rem; line-height: 1.15; user-select: none; -webkit-user-select: none; }
+.sp-case input { width: 22px; height: 22px; margin: 0; accent-color: var(--c, var(--accent)); flex: none; cursor: pointer; }
+.sp-case span { border-bottom: 3px solid transparent; }
+.sp-case input:checked + span { border-bottom-color: var(--c, var(--accent)); }
+.sp-regle { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px solid var(--accent); pointer-events: none; z-index: 3; }
+.sp-poignee {
+  position: absolute; top: -36px; left: 0; transform: translateX(-50%); background: var(--accent); color: #fff; font-weight: 800; font-size: .85rem;
+  border-radius: 999px; padding: 6px 12px; white-space: nowrap; pointer-events: auto; touch-action: none; cursor: ew-resize;
+  user-select: none; -webkit-user-select: none; font-variant-numeric: tabular-nums;
+}
+.sp-poignee::before { content: '◂ '; opacity: .7; }
+.sp-poignee::after { content: ' ▸'; opacity: .7; }
+.sp-poignee:focus-visible { outline: 3px solid var(--cle-line); }
+.sp-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; overflow: visible; }
+@media (max-width: 480px) {
+  .sp-lc { grid-template-columns: 1fr; gap: 0; }
+  .sp-lc-nom { padding-left: 16px; }
+  .sp-case { display: inline-flex; background: var(--sheet); padding-right: 8px; border-radius: 0 10px 10px 0; }
+  .sp-lc-nom .sp-nom { padding: 4px 0 2px; }
+  .sp-lc + .sp-lc { margin-top: 4px; }
+}
+
+/* Aides */
+.sp-aides { margin-top: 14px; }
+.sp-aides-btn { display: flex; flex-wrap: wrap; gap: 8px; }
+.sp-aide-b { min-height: 40px; }
+.sp-aide-b:disabled { opacity: .45; cursor: default; }
+.sp-aide-b.vue { opacity: 1; background: var(--paper); box-shadow: none; }
+.sp-tag { display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 999px; font-size: .75rem; background: var(--success-bg); color: var(--success-text); }
+.sp-aide-b.payante .sp-tag { background: var(--danger-bg); color: var(--danger-text); }
+.sp-aide-b.vue:not(.payante) .sp-tag { background: var(--sheet); color: var(--ink-3); }
+.sp-aide-txt { margin-top: 10px; padding: 12px 14px; border-radius: 14px; background: var(--paper); font-size: .95rem; line-height: 1.5; animation: er-apparait .25s ease; }
+.sp-aide-txt p + p { margin-top: 6px; }
+.sp-aide-titre { font-weight: 800; color: var(--accent-ink); margin-bottom: 4px !important; }
+.sp-aide-titre span { font-weight: 600; color: var(--danger-text); font-size: .85rem; }

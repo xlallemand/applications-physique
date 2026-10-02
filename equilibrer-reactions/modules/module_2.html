@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : Compter les atomes — Équilibrer une réaction</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="er.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="er.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div id="retourBar"></div>
+  <div id="app"></div>
+</div>
+
+<script>
+/* ============================================================
+   Quatre parties, dans l'ordre. Chacune commence par une question
+   avec aide (règle énoncée), puis deux questions de vérification
+   tirées au hasard (une moyenne, une plus difficile).
+   ============================================================ */
+const PARTIES = [
+  {
+    titre: 'Une molécule, avec des indices',
+    regle: `<b class="cle-titre">L'indice</b>, écrit en petit en bas à droite, donne le nombre d'atomes de l'élément <b>juste avant lui</b>. Un élément sans indice compte pour <b>1 atome</b>.`,
+    aide: { f: 'H2O', c: 1, texte: `Dans H<sub>2</sub>O, l'indice 2 est juste après H : il porte sur H. Le O n'a pas d'indice : il compte pour 1 atome.` },
+    questions: [['CH4', 'NH3', 'CO2', 'H2O2'], ['C6H12O6', 'C2H6O', 'H2SO4', 'C3H8']].map(l => l.map(f => ({ f, c: 1 }))),
+  },
+  {
+    titre: 'Plusieurs molécules : le nombre stœchiométrique',
+    regle: `<b class="cle-titre">Le nombre stœchiométrique</b>, écrit devant la formule, donne le nombre de molécules. Il multiplie <b>toute</b> la molécule :<br><b>nombre d'atomes = nombre stœchiométrique × indice</b>.`,
+    aide: { f: 'H2O', c: 3, texte: `3 H<sub>2</sub>O, ce sont 3 molécules H<sub>2</sub>O. Chacune contient 2 H et 1 O : on multiplie par 3. Affiche les dessins pour voir les 3 groupes d'atomes.` },
+    questions: [
+      [{ f: 'CH4', c: 2 }, { f: 'NH3', c: 4 }, { f: 'CO2', c: 3 }, { f: 'O2', c: 5 }],
+      [{ f: 'C6H12O6', c: 2 }, { f: 'C2H6O', c: 3 }, { f: 'H2SO4', c: 2 }, { f: 'C3H8', c: 4 }],
+    ],
+  },
+  {
+    titre: 'Des parenthèses',
+    regle: `<b class="cle-titre">Un indice porte sur ce qu'il y a juste avant lui.</b> Si c'est une <b>parenthèse</b>, il porte sur <b>tout ce qu'elle contient</b>.<br>Cu(OH)<sub>2</sub> contient 2 fois le groupe OH : (OH)<sub>2</sub> = OH + OH, donc 2 O et 2 H.`,
+    aide: { f: 'Cu(OH)2', c: 1, texte: `L'indice 2 est juste après la parenthèse : il porte sur O et sur H. Le Cu n'a pas d'indice : 1 atome.` },
+    questions: [
+      [{ f: 'Al(OH)3', c: 1 }, { f: 'Fe(OH)3', c: 1 }, { f: 'Ca(OH)2', c: 1 }, { f: 'Mg(NO3)2', c: 1 }],
+      [{ f: 'CH2=C(CH3)2', c: 1 }, { f: 'Ca3(PO4)2', c: 1 }, { f: 'CH3-C(CH3)2-CH3', c: 1 }, { f: 'Al2(SO4)3', c: 1 }],
+    ],
+  },
+  {
+    titre: 'Parenthèses et nombre stœchiométrique',
+    regle: `On combine les deux règles : on compte d'abord les atomes d'<b>une</b> molécule (indices et parenthèses), puis on multiplie par le <b>nombre stœchiométrique</b>.`,
+    aide: { f: 'Cu(OH)2', c: 2, texte: `Une molécule Cu(OH)<sub>2</sub> contient 1 Cu, 2 O et 2 H. Le nombre 2 devant indique 2 molécules : on multiplie par 2.` },
+    questions: [
+      [{ f: 'Ca(OH)2', c: 3 }, { f: 'Al(OH)3', c: 2 }, { f: 'Fe(OH)3', c: 2 }],
+      [{ f: 'Mg(NO3)2', c: 3 }, { f: 'CH2=C(CH3)2', c: 2 }, { f: 'Ca3(PO4)2', c: 2 }],
+    ],
+  },
+];
+
+const app = document.getElementById('app');
+const hasard = l => l[Math.floor(Math.random() * l.length)];
+let partie = 0, num = 0, serie = [], dessins = false;
+
+/* ---------- Retour au module 1, là où l'élève en était ---------- */
+const retour = new URLSearchParams(location.search).get('retour');
+// seule une adresse vers le module 1 est acceptée
+const retourOk = retour && /^module_1\.html(#[\w=&.,%-]*)?$/.test(retour);
+if (retourOk) {
+  document.getElementById('retourBar').innerHTML = `<div class="er-retour-bar">
+      <p>Tu viens du module 1.</p>
+      <a href="${retour}">← Revenir où j'en étais</a>
+    </div>`;
+}
+
+function entete() {
+  const fait = partie * 3 + num;
+  return `<div class="er-card">
+      <span class="er-badge">MODULE 2</span>
+      <h2 class="er-titre">Compter les atomes</h2>
+      <p class="er-meta">Partie ${partie + 1}/4 : ${PARTIES[partie].titre} · Question ${num + 1}/3</p>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(fait / 12 * 100)}%"></div></div>
+    </div>`;
+}
+
+function accueil() {
+  app.innerHTML = `<div class="er-card">
+      <span class="er-badge">MODULE 2</span>
+      <h2 class="er-titre">Compter les atomes</h2>
+      <p class="er-contexte">Pour équilibrer une réaction, il faut savoir compter les atomes dans une molécule. Entraîne-toi en quatre parties, dans l'ordre. Chaque partie commence par une question avec la règle, puis deux questions pour vérifier que c'est compris.</p>
+      <div class="module-list" style="margin-top:14px">
+        ${PARTIES.map((p, i) => `<div class="module-card clickable" data-p="${i}" role="button" tabindex="0">
+            <div class="module-card-head">
+              <span class="module-badge">${i + 1}</span>
+              <div class="module-card-body"><div class="module-card-title">${p.titre}</div></div>
+              <span class="module-card-arrow">›</span>
+            </div>
+          </div>`).join('')}
+      </div>
+      <div class="er-actions"><button type="button" class="btn-primary" data-a="go">Commencer par la partie 1 →</button></div>
+    </div>`;
+  app.querySelectorAll('[data-p]').forEach(c => {
+    c.onclick = () => commencer(+c.dataset.p);
+    c.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); commencer(+c.dataset.p); } };
+  });
+  app.querySelector('[data-a="go"]').onclick = () => commencer(0);
+}
+
+function commencer(p) {
+  partie = p; num = 0;
+  const P = PARTIES[p];
+  serie = [P.aide, hasard(P.questions[0]), hasard(P.questions[1])];
+  question();
+}
+
+function question() {
+  const P = PARTIES[partie], q = serie[num], avecAide = num === 0;
+  const fHTML = (q.c > 1 ? q.c + ' ' : '') + ER.formuleHTML(q.f);
+  app.innerHTML = entete() + `<div class="er-card">
+      ${avecAide ? `<div class="cle" style="margin:0 0 14px"><p>${P.regle}</p></div>` : ''}
+      <p class="er-consigne">Combien y a-t-il d'atomes de chaque élément dans <b>${fHTML}</b> ?</p>
+      ${avecAide ? `<p class="er-guide" style="margin-bottom:12px">${q.texte}</p>` : ''}
+      <div data-a="cpt"></div>
+    </div>`;
+  window.scrollTo(0, 0);
+  new ER.Comptage(app.querySelector('[data-a="cpt"]'), {
+    formule: q.f, coef: q.c,
+    dessins: avecAide || dessins,
+    regle: P.regle.replace(/<br>.*$/, ''),
+    onReussi: () => {
+      const der = num === 2, fin = der && partie === PARTIES.length - 1;
+      const actions = app.querySelector('[data-c="actions"]');
+      actions.innerHTML = `<button type="button" class="btn-primary" data-a="suivant" disabled>${fin ? 'Terminer →' : der ? `Partie ${partie + 2} →` : 'Question suivante →'}</button>`;
+      const b = actions.querySelector('button');
+      // court délai : un double-clic sur « Vérifier » ne fait pas passer la question sans la lire
+      setTimeout(() => { b.disabled = false; }, 450);
+      b.onclick = () => {
+        if (fin) return bilan();
+        if (der) return commencer(partie + 1);
+        num++; question();
+      };
+    },
+  });
+  // l'état de l'interrupteur est conservé d'une question à l'autre (sauf questions avec aide : dessins affichés)
+  app.querySelector('.er-switch-bar input').addEventListener('change', e => { if (!avecAide) dessins = e.target.checked; });
+}
+
+function bilan() {
+  app.innerHTML = `<div class="er-card">
+      <span class="er-badge">MODULE 2</span>
+      <h2 class="er-titre">Bravo, tu sais compter les atomes !</h2>
+      ${PARTIES.map(p => `<div class="cle" style="margin:10px 0"><p>${p.regle}</p></div>`).join('')}
+      <div class="er-actions">
+        ${retourOk ? `<a class="btn-primary" style="text-decoration:none" href="${retour}">← Revenir au module 1, où j'en étais</a>`
+                   : `<a class="btn-primary" style="text-decoration:none" href="module_3.html">Module 3 : réactions faciles →</a>`}
+        <button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
+      </div>
+    </div>`;
+  app.querySelector('[data-a="re"]').onclick = accueil;
+  window.scrollTo(0, 0);
+}
+
+accueil();
+ER.menu('module_2');
+</script>
+</body>
+</html>

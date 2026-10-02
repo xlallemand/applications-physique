@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 6 : L'exemple du cours, pas à pas — Combustions</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="co.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="../../equilibrer-reactions/modules/er.js"></script>
+<script src="co.js"></script>
+<script src="banque.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 6</span>
+    <h2 class="er-titre">L'exemple du cours, pas à pas</h2>
+    <p class="er-contexte">On résout l'exercice type du cours en suivant la méthode du module 1. Tu fais les calculs ; si tu bloques, tu peux afficher la réponse (ce module n'est pas noté). Un deuxième exemple suit.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   1. L'exercice type     2. Équation     3. Masse de CO2 en 3 étapes
+   4. Le schéma complet   5. Énergie      6. Deuxième exemple (à ton tour)
+   ============================================================ */
+const zone = document.getElementById('etapes');
+const fH = CO.fH, B = BANQUE;
+
+function carte(html) {
+  const c = document.createElement('section');
+  c.className = 'er-card';
+  c.innerHTML = html;
+  zone.appendChild(c);
+  return c;
+}
+function continuer(parent, suivante, texte) {
+  parent.insertAdjacentHTML('beforeend', `<div class="co-suite"><button type="button" class="btn-primary">${texte || 'Continuer →'}</button></div>`);
+  const b = parent.querySelector('.co-suite:last-child button');
+  b.onclick = () => { b.parentNode.remove(); const c = suivante(); c.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+}
+// question non notée : parties successives, puis « Continuer »
+// (fin : fonction appelée à la fin au lieu du bouton « Continuer »)
+function exercer(c, parties, suivante, fin) {
+  const d = document.createElement('div');
+  c.appendChild(d);
+  CO.question(d, { parties }, { fin: () => { if (fin) fin(); else if (suivante) continuer(c, suivante); } });
+}
+
+/* Les deux exercices : l'exercice type du cours, puis « à toi » */
+const TYPE = { f: 'C2H6O', m: 23 };
+const TOI = { f: 'CH4', m: 32 };
+
+/* ---------- 1. L'exercice type ---------- */
+function etape1() {
+  const c = carte(`<h3 class="cours-titre">L'exercice type</h3>
+    <div class="cle"><ol class="er-liste" style="margin:0">
+      <li>Écrire la réaction de combustion de l'éthanol C<sub>2</sub>H<sub>6</sub>O.</li>
+      <li>Calculer la masse de dioxyde de carbone formé lors de la combustion de 23 g de C<sub>2</sub>H<sub>6</sub>O.<br><span class="co-legende">Données : M(C) = 12 g/mol ; M(H) = 1 g/mol ; M(O) = 16 g/mol.</span></li>
+      <li>Calculer l'énergie libérée par la réaction. <span class="co-legende">PC(éthanol) = 28,8 MJ/kg.</span></li>
+    </ol></div>
+    <p class="er-contexte">Question 1 : l'équation (module 2). Question 2 : n(combustible), puis n(CO<sub>2</sub>), puis m(CO<sub>2</sub>) (modules 3 et 4). Question 3 : avec le pouvoir calorifique (module 5).</p>`);
+  continuer(c, etape2, 'Commencer →');
+  return c;
+}
+
+/* ---------- 2. Question 1 : l'équation ---------- */
+function etape2() {
+  const c = carte(`<h3 class="cours-titre">Question 1 : l'équation de la combustion</h3>
+    <p class="er-contexte">Combustible + dioxygène → dioxyde de carbone + eau, puis on équilibre : C, puis H, puis O.</p>`);
+  exercer(c, [
+    { type: 'especes', comb: TYPE.f, q: 'Complète l\'équation.' },
+    { type: 'equilibrer', comb: TYPE.f, q: 'Équilibre-la.', solution: `<span class="er-eq">${CO.equation(TYPE.f)}</span>` },
+  ], etape3);
+  return c;
+}
+
+/* ---------- 3. Question 2 : masse de CO2 en 3 étapes ---------- */
+function etape3() {
+  const n = TYPE.m / CO.M(TYPE.f);
+  const c = carte(`<h3 class="cours-titre">Question 2 : la masse de CO<sub>2</sub> formé</h3>
+    <p class="co-eq">${CO.equation(TYPE.f)}</p>
+    <p class="er-contexte">On ne peut pas passer directement de la masse d'éthanol à la masse de CO<sub>2</sub> : il faut passer par les <b>quantités de matière</b>, car l'équation donne les proportions en moles.</p>
+    <div class="co-flux">
+      <div class="co-flux-etape" data-e="1"><p class="co-flux-t">Étape 1 · De la masse à la quantité de matière du combustible</p>
+        <p class="co-legende">m(C<sub>2</sub>H<sub>6</sub>O) = 23 g. On utilise <b>n = m / M</b> : il faut d'abord la masse molaire.</p></div>
+    </div>`);
+  const flux = c.querySelector('.co-flux');
+  const bloc = (t, txt) => {
+    flux.insertAdjacentHTML('beforeend', `<div class="co-flux-fl">↓</div><div class="co-flux-etape"><p class="co-flux-t">${t}</p><p class="co-legende">${txt}</p></div>`);
+    return flux.lastElementChild;
+  };
+  const sous = (b, parties, fin) => { const d = document.createElement('div'); b.appendChild(d); CO.question(d, { parties }, { fin }); };
+  sous(flux.querySelector('[data-e="1"]'), [B.pM(TYPE.f), B.pN(TYPE.f, TYPE.m)], () => {
+    const b2 = bloc('Étape 2 · La relation stœchiométrique', `Les quantités de matière sont proportionnelles aux nombres stœchiométriques : ${B.relation(TYPE.f)}`);
+    sous(b2, [B.pRelation(TYPE.f, 0, n, 2)], () => {
+      const b3 = bloc('Étape 3 · De la quantité de matière à la masse de CO<sub>2</sub>', 'On utilise <b>m = n × M</b> avec la masse molaire du CO<sub>2</sub>.');
+      sous(b3, [B.pM('CO2'), B.pMasse('CO2', 2 * n)], () => continuer(c, etape4));
+    });
+  });
+  return c;
+}
+
+/* ---------- 4. Le schéma complet ---------- */
+function etape4() {
+  const c = carte(`<h3 class="cours-titre">Le schéma de la méthode</h3>
+    ${CO.schema(TYPE.f, TYPE.m, true)}
+    <p class="er-contexte">Les flèches pleines donnent la masse de CO<sub>2</sub>. Avec la même relation, on peut aussi calculer la quantité de dioxygène <b>consommé</b> et d'eau <b>formée</b> (flèches en pointillés) : n(O<sub>2</sub>) = 3 × 0,5 = 1,5 mol et n(H<sub>2</sub>O) = 3 × 0,5 = 1,5 mol.</p>`);
+  continuer(c, etape5);
+  return c;
+}
+
+/* ---------- 5. Question 3 : l'énergie ---------- */
+function etape5() {
+  const c = carte(`<h3 class="cours-titre">Question 3 : l'énergie libérée</h3>
+    <div class="cle"><p><b class="cle-titre">Pouvoir calorifique</b> · C'est l'énergie fournie par la combustion de <b>1 kg</b> de combustible. PC(éthanol) = 28,8 MJ/kg : 1 kg d'éthanol libère 28,8 MJ.</p>
+      <p class="co-legende">L'énergie est proportionnelle à la masse brûlée : E = PC × m, avec m en kg.</p></div>`);
+  exercer(c, [B.pConv(23), B.pE('C2H6O', 0.023)], null, () => continuer(c, etape6, 'Deuxième exemple →'));
+  return c;
+}
+
+/* ---------- 6. Deuxième exemple : à ton tour ---------- */
+function etape6() {
+  const n = TOI.m / CO.M(TOI.f);
+  const c = carte(`<h3 class="cours-titre">Deuxième exemple : à ton tour</h3>
+    <p class="er-contexte">Une gazinière brûle <b>32 g de méthane</b> CH<sub>4</sub>. Calcule la masse de CO<sub>2</sub> formé, puis l'énergie libérée.</p>
+    <p class="co-donnees">Données : M(C) = 12 g/mol ; M(H) = 1 g/mol ; M(O) = 16 g/mol ; PC(méthane) = 50 MJ/kg.</p>`);
+  exercer(c, [
+    { type: 'equilibrer', comb: TOI.f, q: '1. Équilibre la combustion du méthane.', solution: `<span class="er-eq">${CO.equation(TOI.f)}</span>` },
+    Object.assign(B.pM(TOI.f), { q: '2. Masse molaire du méthane.' }),
+    Object.assign(B.pN(TOI.f, TOI.m), { q: '3. Quantité de matière de méthane brûlé.' }),
+    Object.assign(B.pRelation(TOI.f, 0, n, 2), { q: '4. Quantité de matière de CO<sub>2</sub> formé.' }),
+    Object.assign(B.pMasse('CO2', n), { q: '5. Masse de CO<sub>2</sub> formé (M(CO<sub>2</sub>) = 44 g/mol).' }),
+    Object.assign(B.pConv(TOI.m), { q: '6. Masse de méthane en kg.' }),
+    Object.assign(B.pE(TOI.f, TOI.m / 1000), { q: '7. Énergie libérée.' }),
+  ], null, () => {
+    c.insertAdjacentHTML('beforeend', `<div class="callout-success er-retour" style="margin-top:14px"><p><b class="er-ok">Exercice terminé !</b></p>${CO.schema(TOI.f, TOI.m, false)}<p>E = 50 × 0,032 = 1,6 MJ.</p></div>
+      <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_7.html">Module 7 : exercices complets →</a></div>`);
+  });
+  return c;
+}
+
+etape1();
+CO.menu('module_6');
+</script>
+</body>
+</html>
