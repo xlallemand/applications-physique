@@ -31,9 +31,9 @@ sub, sup { font-size: .7em; line-height: 0; }
 
 /* Tableau de proportionnalité */
 .co-prop { border-collapse: separate; border-spacing: 0; margin: 10px auto; font-size: 1.05rem; }
-.co-prop td { border: 1.5px solid var(--paper-3); padding: 8px 16px; text-align: center; min-width: 90px; }
-.co-prop td:first-child { font-weight: 700; background: var(--paper); text-align: left; white-space: nowrap; }
-@media (max-width: 480px) { .co-prop td { padding: 6px 10px; min-width: 60px; } }
+.co-prop th, .co-prop td { border: 1.5px solid var(--paper-3); padding: 8px 16px; text-align: center; min-width: 110px; }
+.co-prop th { font-weight: 700; background: var(--paper); white-space: nowrap; }
+@media (max-width: 480px) { .co-prop th, .co-prop td { padding: 6px 10px; min-width: 90px; } }
 .co-prop .x { color: var(--accent-ink); font-weight: 800; }
 
 /* ---------- Méthode : étapes reliées par des flèches ---------- */
@@ -121,23 +121,57 @@ sub, sup { font-size: .7em; line-height: 0; }
 .co-choix .co-frac { font-size: .95em; }
 
 /* Schéma de la méthode (une colonne par espèce) */
-.co-schema { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px 6px; align-items: center; margin: 8px 0; text-align: center; }
+.co-schema { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px 20px; align-items: center; margin: 8px 0; text-align: center; }
+.co-sch-c { position: relative; }
+.co-sch-c[data-op]::before {
+  content: attr(data-op); position: absolute; left: -10px; top: 50%; transform: translate(-50%, -50%);
+  font-weight: 800; color: var(--ink-2);
+}
 .co-sch-eq { font-size: 1.2rem; font-weight: 800; white-space: nowrap; padding-bottom: 2px; }
+/* la formule est centrée dans sa colonne, le nombre stœchiométrique est placé à sa gauche */
+.co-sch-f { position: relative; display: inline-block; }
+.co-sch-f .er-eq-c { position: absolute; right: 100%; padding-right: .22em; }
 .co-sch-fl { font-size: 1.3rem; font-weight: 800; color: var(--accent); line-height: 1.2; }
 .co-sch-fl.pointille { color: var(--ink-3); font-weight: 400; }
 .co-sch-v { background: var(--cle-bg); border-radius: 12px; padding: 5px 4px; line-height: 1.25; }
 .co-sch-v.pointille { background: none; border: 1.5px dashed var(--line-strong); }
 .co-sch-v b { display: block; font-size: 1rem; }
 .co-sch-lab { display: block; font-size: .78rem; color: var(--ink-2); font-weight: 600; }
-.co-sch-rel { grid-column: 1 / -1; background: var(--paper); border-radius: 12px; padding: 6px; font-size: 1rem; font-weight: 700; }
+.co-sch-rel { background: var(--paper); border-radius: 12px; padding: 6px 2px; font-size: 1rem; font-weight: 700; }
 @media (max-width: 480px) {
-  .co-schema { gap: 2px 3px; }
-  .co-sch-eq { font-size: .92rem; }
-  .co-sch-rel { font-size: .82rem; }
-  .co-sch-v b { font-size: .88rem; }
-  .co-sch-lab { font-size: .68rem; }
+  .co-schema { gap: 2px 12px; }
+  .co-sch-c[data-op]::before { left: -6px; font-size: .85rem; }
+  .co-sch-eq { font-size: .9rem; }
+  .co-sch-rel { font-size: .74rem; padding: 5px 0; }
+  .co-sch-v b { font-size: .86rem; }
+  .co-sch-lab { font-size: .66rem; }
+}
+@media (max-width: 360px) {
+  .co-schema { gap: 2px 10px; }
+  .co-sch-c[data-op]::before { left: -5px; }
+  .co-sch-rel { font-size: .64rem; }
+  .co-sch-eq { font-size: .84rem; }
 }
 
 /* Tests de compétences : pas de dessins (on vérifie le calcul) */
 .co-test .er-switch-bar { display: none; }
 .er-retour a { color: var(--accent-ink); font-weight: 700; }
+
+/* Module 1 : pourquoi passer par les moles, étapes de la méthode */
+.co-pourquoi { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; background: var(--paper); border-radius: 18px; padding: 12px; margin: 12px 0; }
+.co-pourquoi > div:not(.co-pq-fl) { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 120px; }
+.co-pourquoi b { font-size: 1.1rem; }
+.co-pourquoi span { font-size: .85rem; color: var(--ink-2); }
+.co-pq-mol { display: flex; gap: 8px; align-items: center; justify-content: center; min-height: 56px; --er-k: 1.1; }
+.co-pq-fl { font-size: 2rem; font-weight: 800; }
+@media (max-width: 560px) { .co-pourquoi { flex-direction: column; gap: 6px; } .co-pq-fl { transform: rotate(90deg); line-height: 1; } }
+.co-methode { counter-reset: e; list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-direction: column; gap: 8px; }
+.co-methode li { counter-increment: e; position: relative; background: var(--paper); border-radius: 16px; padding: 12px 14px 12px 56px; line-height: 1.45; }
+.co-methode li::before { content: counter(e); position: absolute; left: 12px; top: 12px; width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; display: grid; place-items: center; }
+.co-methode li.co-methode-e { background: var(--cle-bg); }
+.co-methode li.co-methode-e::before { content: '+'; background: var(--accent-ink); }
+.co-methode b { display: block; color: var(--ink); }
+.co-methode span { display: block; font-size: .93rem; color: var(--ink-2); }
+.co-lien { display: inline-block; margin-top: 6px; font-size: .88rem; font-weight: 700; color: var(--accent-ink); text-decoration: none; background: var(--sheet); border-radius: 12px; padding: 6px 12px; box-shadow: inset 0 0 0 1.5px var(--cle-line); }
+.co-lien:hover { box-shadow: inset 0 0 0 1.5px var(--accent); }
+.co-lien-txt { color: var(--accent-ink); font-weight: 700; }

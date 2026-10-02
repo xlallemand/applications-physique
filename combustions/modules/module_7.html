@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 7 : Exercices complets — Combustions</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="co.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="../../equilibrer-reactions/modules/er.js"></script>
+<script src="co.js"></script>
+<script src="banque.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   Un exercice complet à la fois, parmi 10 exercices différents.
+   Les exercices déjà faits sont mémorisés dans le navigateur
+   (si c'est possible) pour proposer d'abord ceux qui restent.
+   ============================================================ */
+const CLE = 'combustions-exercices-faits';
+function lireFaits() { try { return JSON.parse(localStorage.getItem(CLE)) || []; } catch (e) { return []; } }
+function ecrireFaits(t) { try { localStorage.setItem(CLE, JSON.stringify(t)); } catch (e) { /* stockage indisponible */ } }
+let faits = lireFaits(), exo = null, numero = 0;
+function prochain() {
+  let libres = BANQUE.EXERCICES.map((_, i) => i).filter(i => !faits.includes(i));
+  if (!libres.length) { faits = []; libres = BANQUE.EXERCICES.map((_, i) => i); }
+  numero = CO.hasard(libres);
+  faits.push(numero);
+  ecrireFaits(faits);
+  return BANQUE.EXERCICES[numero];
+}
+const donnees = e => `Données : M(C) = 12 g/mol ; M(H) = 1 g/mol ; M(O) = 16 g/mol ; pouvoir calorifique PC(${CO.COMB[e.f].nom}) = ${CO.fmt(CO.COMB[e.f].PC)} MJ/kg.`;
+
+CO.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 7',
+  titre: 'Exercice complet',
+  nombre: 7,
+  direct: true,
+  bareme: 'un exercice en 5 ou 6 étapes, chacune notée sur 2 points',
+  etiquette: 'Étape', recapNom: 'É', finTitre: 'Exercice terminé !', recommencer: '↺ Nouvel exercice',
+  intro: `<p class="er-contexte">Un exercice complet, étape par étape : équation de la combustion, masse de dioxyde de carbone formé, énergie libérée (ou masse de combustible à brûler). Il y a <b>10 exercices différents</b> : recommence le module pour en faire un nouveau.</p>`,
+  questions: () => { exo = prochain(); return BANQUE.exercice(exo); },
+  contexte: (q, idx) => `<p class="er-q-nom">Exercice ${numero + 1} sur 10 · ${exo.titre}</p>
+    <p class="er-contexte">${exo.texte} ${exo.E ? `On veut ensuite savoir quelle masse de combustible brûler pour obtenir ${CO.fmt(exo.E)} MJ.` : ''}</p>
+    <p class="co-donnees">${donnees(exo)}</p>
+    ${idx > 0 ? `<p class="co-eq">${CO.equation(exo.f)}</p>` : ''}`,
+  suite: { href: '../index.html', label: 'Retour aux modules' },
+});
+CO.menu('module_7');
+</script>
+</body>
+</html>

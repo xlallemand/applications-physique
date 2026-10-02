@@ -388,15 +388,18 @@
 
   /* ---------- Bandeau et menu communs aux modules ---------- */
   const GROUPES = [
-    { title: 'Équation de combustion', items: [
-      { key: 'module_1', label: 'Module 1 : Équilibrer une combustion' },
+    { title: 'La méthode', items: [
+      { key: 'module_1', label: "Module 1 : L'exercice type et la méthode" },
     ]},
-    { title: 'Masse de CO₂ et énergie', items: [
-      { key: 'module_2', label: 'Module 2 : La méthode sur un exercice type' },
+    { title: "S'entraîner étape par étape", items: [
+      { key: 'module_2', label: 'Module 2 : Équilibrer une combustion' },
       { key: 'module_3', label: 'Module 3 : Masse, quantité de matière, masse molaire' },
       { key: 'module_4', label: 'Module 4 : Les relations stœchiométriques' },
       { key: 'module_5', label: "Module 5 : L'énergie libérée" },
-      { key: 'module_6', label: 'Module 6 : Exercices complets' },
+    ]},
+    { title: 'Exercices complets', items: [
+      { key: 'module_6', label: "Module 6 : L'exemple du cours, pas à pas" },
+      { key: 'module_7', label: 'Module 7 : Exercices complets' },
     ]},
   ];
   function menu(cle) {
@@ -428,14 +431,16 @@
     const fl = (ks, pointilles) => ks.slice().sort().map(k => cell(k, '↓', 'co-sch-fl' + (pointilles && pointilles.includes(k) ? ' pointille' : ''))).join('');
     const autresK = autres ? [1, 3] : [];
     const frac = (a, b) => `<span class="co-frac"><span>${a}</span><span>${b}</span></span>`;
+    // signe placé entre deux colonnes (« + », « → » ou « = »), pour que chaque espèce reste centrée dans sa colonne
+    const op = k => (k === 0 ? '' : ` data-op="${k === 2 ? '→' : '+'}"`);
     return `<div class="co-schema">
-      ${esp.map((e, k) => cell(k, `${k === 1 || k === 3 ? '+ ' : k === 2 ? '→ ' : ''}${c[k] > 1 ? `<span class="er-eq-c">${c[k]}</span>&nbsp;` : ''}${fH(e)}`, 'co-sch-eq')).join('')}
+      ${esp.map((e, k) => `<div class="co-sch-c co-sch-eq" style="grid-column:${k + 1}"${op(k)}><span class="co-sch-f">${c[k] > 1 ? `<span class="er-eq-c">${c[k]}</span>` : ''}${fH(e)}</span></div>`).join('')}
       ${fl([0])}
       ${cell(0, val(`m(${fH(f)})`, `${fmt(m)} g`), 'co-sch-v')}
       ${fl([0])}
       ${cell(0, val(`n = m / M`, `${fmt(n)} mol`), 'co-sch-v')}
       ${fl([0].concat(autresK, [2]), autresK)}
-      <div class="co-sch-rel">${esp.map((e, k) => frac(`n(${fH(e)})`, c[k])).join(' = ')}</div>
+      ${esp.map((e, k) => `<div class="co-sch-c co-sch-rel" style="grid-column:${k + 1}"${k ? ' data-op="="' : ''}>${frac(`n(${fH(e)})`, c[k])}</div>`).join('')}
       ${fl([2].concat(autresK), autresK)}
       ${[2].concat(autresK).sort().map(k => cell(k, val(`n(${fH(esp[k])})`, `${fmt(ns[k])} mol`), 'co-sch-v' + (k === 2 ? '' : ' pointille'))).join('')}
       ${fl([2])}
