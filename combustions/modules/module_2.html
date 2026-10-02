@@ -53,14 +53,15 @@ function continuer(parent, suivante, texte) {
 }
 const secouer = e => { e.classList.remove('er-secoue'); void e.offsetWidth; e.classList.add('er-secoue'); };
 
-/* Réactions simples (test de départ et test d'équilibrage) */
-const SIMPLES = CO.melanger([
+/* Test de départ : toujours la combustion du propane.
+   Test d'équilibrage (bilan) : une réaction simple tirée au hasard. */
+const PROPANE = { r: ['C3H8', 'O2'], p: ['CO2', 'H2O'], c: [1, 5, 3, 4], nom: 'Combustion du propane' };
+const SIMPLES = [PROPANE].concat(CO.melanger([
   { r: ['H2', 'O2'], p: ['H2O'], c: [2, 1, 2], nom: 'Synthèse de l\'eau' },
   { r: ['N2', 'H2'], p: ['NH3'], c: [1, 3, 2], nom: 'Synthèse de l\'ammoniac' },
-  { r: ['C3H8', 'O2'], p: ['CO2', 'H2O'], c: [1, 5, 3, 4], nom: 'Combustion du propane' },
   { r: ['CO', 'O2'], p: ['CO2'], c: [2, 1, 2], nom: 'Combustion du monoxyde de carbone' },
   { r: ['Mg', 'O2'], p: ['MgO'], c: [2, 1, 2], nom: 'Combustion du magnésium' },
-]);
+]));
 
 /* ---------- A. Test de départ ---------- */
 function partieA() {
