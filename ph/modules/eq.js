@@ -629,7 +629,7 @@
     this.fini = true;
     if (window.DragDrop) window.DragDrop.cleanupGhosts();
     this.el.travail.classList.add('hidden');
-    this.el.raz.classList.add('hidden');
+    this.zone.querySelector('.eq-ed-haut').classList.add('hidden');
     this.el.hist.classList.add('hidden');
     this.el.fin.classList.remove('hidden');
     this.el.fin.innerHTML = '';

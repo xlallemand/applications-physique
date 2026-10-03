@@ -32,7 +32,7 @@
     const c = Math.pow(10, -ph);
     return Object.assign({ type: 'sci', q, label: `${H3O} =`, unite: UNITE, valeur: c, diag: v => diagC(v, c, ph),
       indice: `${H3O} = c° × 10<sup>${M}pH</sup>, avec c° = 1 ${UNITE}.`,
-      correction: `<p class="ph-calc">${H3O} = c° × 10<sup>${M}pH</sup> = 1 × 10<sup>${M}${fmt(ph, ph % 1 ? 1 : 0)}</sup> = <span class="c">${sci(c, 2)} ${UNITE}</span></p>` }, opts);
+      correction: `<p class="ph-calc">${H3O} = c° × 10<sup>${M}pH</sup> = 1 × 10<sup>${M}${fmt(ph)}</sup> = <span class="c">${sci(c, 2)} ${UNITE}</span></p>` }, opts);
   }
   const nombre = (q, label, valeur, correction, opts) => Object.assign({ type: 'nombre', q, label, valeur, tol: 1e-9, entier: Number.isInteger(valeur), correction }, opts);
   const choix = (q, options, bonne, correction, opts) => Object.assign({ type: 'choix', q, options, bonne, correction, colonne: true }, opts);
