@@ -171,23 +171,23 @@ const G3 = [
   function calcLog() {
     const k = hasard([2, 3, 5, 1.5, 4.2, 6.3, 7.9]), n = hasard([-9, -7, -5, -3, -2, 2, 4]);
     const v = Math.log10(k * Math.pow(10, n));
-    return { theme: 'Calculatrice', consigne: 'Donne une valeur approchée avec trois chiffres significatifs.', parties: [{ type: 'nombre', label: `log(${fmt(k)} × ${e10(n)}) ≈`, valeur: v, tol: .006,
-      solution: `À la calculatrice : log(${fmt(k)} × ${e10(n)}) ≈ ${fmt(v, 2)} (= log ${fmt(k)} + log(${e10(n)}) ≈ ${fmt(Math.log10(k), 2)} ${n < 0 ? '−' : '+'} ${Math.abs(n)}).`,
+    return { theme: 'Calculatrice', consigne: 'Calcule à la calculatrice, puis donne une valeur approchée avec trois chiffres significatifs.', parties: [{ type: 'nombre', label: `log(${fmt(k)} × ${e10(n)}) ≈`, valeur: v, tol: Math.abs(v) < 1 ? .0006 : .006, cs: 3,
+      solution: `À la calculatrice : log(${fmt(k)} × ${e10(n)}) ≈ ${PH.cs(v, 3)} (= log ${fmt(k)} + log(${e10(n)}) ≈ ${PH.cs(Math.log10(k), 3)} ${n < 0 ? '−' : '+'} ${Math.abs(n)}).`,
       indice: `Tape log(${fmt(k)}×10^(${n})) avec des parenthèses. Vérification : log(${fmt(k)} × ${e10(n)}) = log ${fmt(k)} + ${fmt(n)}.`,
       diag: w => (Math.abs(w - Math.log(k * Math.pow(10, n))) < .01 ? 'Tu as utilisé la touche <b>ln</b> : il faut la touche <b>log</b>.' : null) }] };
   },
   function calcPuissance() {
     const x = hasard([-0.1, 0.5, 1.3, -0.7, 2.6, -1.2, 0.25]);
     const v = Math.pow(10, x);
-    return { theme: 'Calculatrice', consigne: 'Donne une valeur approchée avec trois chiffres significatifs.', parties: [{ type: 'nombre', label: `10<sup>${fmt(x)}</sup> ≈`, valeur: v, rel: .006,
-      solution: `À la calculatrice (touche 10<sup>x</sup>) : 10<sup>${fmt(x)}</sup> ≈ ${fmt(+v.toPrecision(3))}.`,
+    return { theme: 'Calculatrice', consigne: 'Calcule à la calculatrice, puis donne une valeur approchée avec trois chiffres significatifs.', parties: [{ type: 'nombre', label: `10<sup>${fmt(x)}</sup> ≈`, valeur: v, rel: .006, cs: 3,
+      solution: `À la calculatrice (touche 10<sup>x</sup>) : 10<sup>${fmt(x)}</sup> ≈ ${PH.cs(v, 3)}.`,
       indice: 'Utilise la touche 10<sup>x</sup> (souvent « 2nde » puis « log »), pas la touche e<sup>x</sup>.',
       diag: w => (PH.proche(w, Math.exp(x), .01) ? 'Tu as utilisé la touche e<sup>x</sup> : il faut la touche 10<sup>x</sup>.' : null) }] };
   },
   function calcSci() {
     const k = hasard([5, 2, 3, 4]), x = hasard([-7.2, -4.6, -9.3, -3.4]);
     const v = k * Math.pow(10, x);
-    return { theme: 'Calculatrice', consigne: 'Calcule et donne le résultat en écriture scientifique avec trois chiffres significatifs.', parties: [{ type: 'sci', label: `${k} × 10<sup>${fmt(x)}</sup> ≈`, valeur: v, rel: .006, cs: 3,
+    return { theme: 'Calculatrice', consigne: 'Calcule à la calculatrice, puis donne le résultat en écriture scientifique avec trois chiffres significatifs.', parties: [{ type: 'sci', label: `${k} × 10<sup>${fmt(x)}</sup> ≈`, valeur: v, rel: .006, cs: 3,
       solution: `${k} × 10<sup>${fmt(x)}</sup> ≈ ${PH.sci(v, 3)}`, indice: 'Tape ' + k + '×10^(' + fmt(x).replace(M, '-') + ') à la calculatrice.',
       diag: w => (PH.proche(w, k * Math.exp(x), .01) ? 'Tu as utilisé la touche e<sup>x</sup> : il faut la touche 10<sup>x</sup>.' : null) }] };
   },
@@ -199,8 +199,8 @@ const G3 = [
       ['4 log(3) − log(2)', 4 * Math.log10(3) - Math.log10(2)],
     ];
     const [e, v] = hasard(L);
-    return { theme: 'Calculatrice', consigne: 'Donne une valeur approchée avec trois chiffres significatifs.', parties: [{ type: 'nombre', label: `${e} ≈`, valeur: v, rel: .006,
-      solution: `À la calculatrice : ${e} ≈ ${fmt(+v.toPrecision(3))}.`, indice: 'Calcule chaque log à la calculatrice, puis fais l\'opération (ou tape toute l\'expression).' }] };
+    return { theme: 'Calculatrice', consigne: 'Calcule à la calculatrice, puis donne une valeur approchée avec trois chiffres significatifs.', parties: [{ type: 'nombre', label: `${e} ≈`, valeur: v, rel: .006, cs: 3,
+      solution: `À la calculatrice : ${e} ≈ ${PH.cs(v, 3)}.`, indice: 'Calcule chaque log à la calculatrice, puis fais l\'opération (ou tape toute l\'expression).' }] };
   },
   function equation() {
     const k = hasard([10, 100, 1000, 2, 5]), m = hasard([-3, -2, -1, 1, 2]);

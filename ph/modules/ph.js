@@ -37,6 +37,10 @@
     let s = (Math.abs(v) < Math.pow(10, -dec) / 2 ? 0 : v).toFixed(dec);
     return s.replace('-', MOINS).replace('.', ',');
   }
+  // nombre écrit avec n chiffres significatifs, zéros finaux gardés : 4,70 ; −0,107
+  function cs(v, n) {
+    return v.toPrecision(n).replace('-', MOINS).replace('.', ',');
+  }
   // mantisse et exposant avec cs chiffres significatifs
   function decomposer(v, cs) {
     if (v === 0) return { m: 0, e: 0 };
@@ -191,8 +195,17 @@
     }
     bVal.onclick = valider;
     return {
-      montrer() { ch.input.value = p.affiche || fmt(p.valeur, p.dec); ch.desactiver(true); bVal.fermer(); },
+      montrer() { ch.input.value = affichage(p); ch.desactiver(true); bVal.fermer(); },
     };
+  }
+
+  // Réponse affichée dans le champ (« Afficher la réponse ») : arrondie comme la réponse attendue
+  function affichage(p) {
+    if (p.affiche) return p.affiche;
+    if (p.cs) return cs(p.valeur, p.cs);
+    if (p.dec != null) return fmt(p.valeur, p.dec);
+    if (p.tol != null && p.tol >= 1e-4) return fmt(p.valeur, Math.max(0, Math.ceil(-Math.log10(2 * p.tol) - 1e-9)));
+    return fmt(p.valeur);
   }
 
   // Écriture scientifique a × 10ⁿ : p.label, p.valeur, p.unite, p.rel (écart relatif, 3 % par défaut),
@@ -236,7 +249,8 @@
       const r = s.valeur();
       if (r.err) {
         secouer(d);
-        api.message(r.err === 'mantisse' ? 'Écris le nombre devant la puissance de 10.' : 'Écris l\'exposant de la puissance de 10 (un nombre entier, avec le bouton ± s\'il est négatif).');
+        const calc = p.sansCalculatrice ? '' : ' Utilise la calculatrice : elle donne le résultat en écriture scientifique (par exemple 3,2E−3 signifie 3,2 × 10<sup>−3</sup>).';
+        api.message((r.err === 'mantisse' ? 'Écris le nombre devant la puissance de 10.' : 'Écris l\'exposant de la puissance de 10 (un nombre entier, avec le bouton ± s\'il est négatif).') + calc);
         return;
       }
       if (proche(r.v, p.valeur, p.rel == null ? .03 : p.rel)) { s.desactiver(true); bVal.fermer(); api.reussi(); return; }
@@ -604,7 +618,7 @@
   }
 
   window.PH = Object.assign(window.PH || {}, {
-    fmt, sci, p10, lire, proche, decomposer, H3O, C0, UNITE, MOINS, diagPH, diagC,
+    fmt, cs, sci, p10, lire, proche, decomposer, H3O, C0, UNITE, MOINS, diagPH, diagC,
     el, secouer, melanger, hasard, entre, champ, champsSci, PARTIES, question, serie, aToi, Cours, menu, GROUPES, confettis,
     repere, courbeLog,
   });

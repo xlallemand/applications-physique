@@ -46,6 +46,7 @@ const choix = (q, options, bonne, opts) => ({ parties: [Object.assign({ type: 'c
 const LIEN_EQ = `<div class="ph-lien-app"><p>Besoin d'un rappel sur la manipulation des équations ?</p>
   <span class="er-actions" style="margin:0"><a class="btn-small" href="../../equations-en-physique/modules/module_1.html" target="_blank" rel="noopener">Équations en physique : la méthode ↗</a>
   <a class="btn-small" href="../../equations-en-physique/modules/module_8.html" target="_blank" rel="noopener">Les fonctions réciproques ↗</a></span></div>`;
+const GAGNER = `<p class="eq-consigne"><b>Pour gagner du temps ici</b>, tu peux faire toutes les manipulations à la suite, puis cliquer une seule fois sur « Vérifier l'étape ».</p>`;
 const MODE_EMPLOI = `<p class="eq-consigne"><b>Comment faire :</b> glisse un outil (×(−1), 10<sup>x</sup>, log) sur <b>un membre</b> de l'équation, puis sur l'autre membre : une opération se fait toujours des deux côtés. Glisse la barre de fraction ··· / ··· sur une case pour créer une fraction. Glisse une grandeur pour la déplacer, touche-la pour la supprimer. Un dénominateur se glisse de l'autre côté du signe =. ⇄ inverse les deux membres. Après chaque étape : « Vérifier l'étape ».</p>`;
 
 // étapes de la démonstration : du pH vers [H3O+]
@@ -72,6 +73,9 @@ new PH.Cours(document.getElementById('etapes'), [
   (cours) => {
     const c = cours.carte('1. La définition du pH');
     cours.ajouter(c, `<div class="cours-bloc">
+        <p>Jusqu'ici, le pH a été présenté comme une <b>échelle d'acidité</b>, sans savoir à quoi l'acidité était due. L'acidité est en fait liée à la présence des <b>ions oxonium H<sub>3</sub>O<sup>+</sup></b>. C'est cohérent avec ce que fait un acide AH dans l'eau : il réagit en formant des ions H<sub>3</sub>O<sup>+</sup>.</p>
+        <p class="ph-formule" style="font-size:1.1rem">AH + H<sub>2</sub>O → A<sup>${M}</sup> + H<sub>3</sub>O<sup>+</sup></p>
+        <p style="margin-bottom:12px">Le pH représente la concentration des ions H<sub>3</sub>O<sup>+</sup> dans la solution.</p>
         <div class="cle">
           <p>Le pH d'une solution est une grandeur <b>sans dimension</b> définie par :</p>
           <p class="ph-formule grand">pH = ${PH.EQ.statique(P(FN('log', fracH()), true))}</p>
@@ -136,9 +140,32 @@ new PH.Cours(document.getElementById('etapes'), [
     return c;
   },
 
-  // ---------- 3. La réciproque : exprimer [H3O+] ----------
+  // ---------- 3. La concentration c d'un acide ----------
   (cours) => {
-    const c = cours.carte('3. Exprimer ' + H3O + ' en fonction du pH');
+    const c = cours.carte('3. La concentration c d\'un acide');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Dans les exercices, on note souvent <b>c</b> la concentration d'un acide (concentration en acide apporté). Ici, chaque molécule d'acide AH réagit avec l'eau en libérant <b>un</b> ion H<sub>3</sub>O<sup>+</sup> :</p>
+        <p class="ph-formule" style="font-size:1.1rem">AH + H<sub>2</sub>O → A<sup>${M}</sup> + H<sub>3</sub>O<sup>+</sup></p>
+        <div class="cle"><p>Dans ce cas, <b>${H3O} = c</b>, et donc pH = ${M}log(c / c°). C'est le cas dans l'exercice 14 (chlorure d'hydrogène) ou l'exercice 17 (acide iodhydrique).</p></div>
+        <div class="callout" style="margin-top:12px"><p><b>Le seul contre-exemple</b> de nos exercices est l'acide sulfurique H<sub>2</sub>SO<sub>4</sub> (exercice 16) : il libère <b>deux</b> ions H<sub>3</sub>O<sup>+</sup> à la fois, 2 H<sub>2</sub>O + H<sub>2</sub>SO<sub>4</sub> → 2 H<sub>3</sub>O<sup>+</sup> + SO<sub>4</sub><sup>2${M}</sup>, donc ${H3O} = 2c.</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <p class="ph-calc">Acide nitrique de concentration c = 5,0 × 10<sup>${M}2</sup> ${UNITE} : ${H3O} = c, donc<br>pH = ${M}log(c / c°) = ${M}log(5,0 × 10<sup>${M}2</sup>) = <span class="c">1,3</span></p>
+      </div>`);
+    const acide = (nom, cTxt, cv) => ({ parties: [{ type: 'nombre', q: `Solution d'${nom} de concentration c = ${cTxt} ${UNITE}. Calcule son pH.`, label: 'pH =', valeur: -Math.log10(cv), tol: .051,
+      diag: v => diagPH(v, -Math.log10(cv), cv), indice: `Ici ${H3O} = c : pH = ${M}log(c / c°).`,
+      solution: `${H3O} = c = ${cTxt} ${UNITE}, donc pH = ${M}log(${cTxt} / 1) = ${fmt(-Math.log10(cv), 1)}` }] });
+    aToi(c, [
+      acide('acide chlorhydrique', `2,5 × 10<sup>${M}3</sup>`, 2.5e-3),
+      acide('acide bromhydrique', `4,0 × 10<sup>${M}4</sup>`, 4e-4),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 4. La réciproque : exprimer [H3O+] ----------
+  (cours) => {
+    const c = cours.carte('4. Exprimer ' + H3O + ' en fonction du pH');
     cours.ajouter(c, `<div class="cours-bloc">
         <p>Pour calculer ${H3O} quand on connaît le pH, il faut <b>isoler</b> ${H3O} dans la définition. On utilise la fonction réciproque de log, la fonction 10<sup>x</sup>, et les règles de manipulation des équations : <b>la même opération sur les deux membres</b>.</p>
       </div>
@@ -152,7 +179,7 @@ new PH.Cours(document.getElementById('etapes'), [
           ${LIEN_EQ}`;
         // on peut aussi passer à la suite sans réussir (lien sous l'éditeur)
         const ex = cours.ajouter(c, `<div class="ph-atoi"><p class="ph-atoi-t">À toi</p>
-            <p class="er-consigne">Refais la manipulation : exprime ${H3O} à partir de la définition du pH.</p>${MODE_EMPLOI}<div data-x="ed"></div></div>`);
+            <p class="er-consigne">Refais la manipulation : exprime ${H3O} à partir de la définition du pH.</p>${MODE_EMPLOI}${GAGNER}<div data-x="ed"></div></div>`);
         let fini = false, passer = null;
         const suite = () => { if (!fini) { fini = true; if (passer) passer.remove(); cours.continuer(c); } };
         new PH.Editeur(ex.querySelector('[data-x="ed"]'), {
@@ -173,15 +200,15 @@ new PH.Cours(document.getElementById('etapes'), [
     return c;
   },
 
-  // ---------- 4. Dans l'autre sens ----------
+  // ---------- 5. Dans l'autre sens ----------
   (cours) => {
-    const c = cours.carte('4. Et dans l\'autre sens : exprimer le pH');
+    const c = cours.carte('5. Et dans l\'autre sens : exprimer le pH');
     cours.ajouter(c, `<div class="cours-bloc"><p>Ce n'est pas demandé dans les exercices, mais c'est un bon entraînement : partir de ${H3O} = c° × 10<sup>${M}pH</sup> et retrouver la définition du pH. Cette fois, c'est la fonction <b>log</b> qui annule 10<sup>x</sup>.</p></div>`);
     PH.demo(c.appendChild(document.createElement('div')), {
       etapes: DEMO_PH,
       onFini: () => {
         const ex = cours.ajouter(c, `<div class="ph-atoi"><p class="ph-atoi-t">À toi</p>
-            <p class="er-consigne">Exprime le pH à partir de ${H3O} = c° × 10<sup>${M}pH</sup>.</p><div data-x="ed"></div></div>`);
+            <p class="er-consigne">Exprime le pH à partir de ${H3O} = c° × 10<sup>${M}pH</sup>.</p>${GAGNER}<div data-x="ed"></div></div>`);
         let fini = false, passer = null;
         const suite = () => { if (!fini) { fini = true; if (passer) passer.remove(); cours.continuer(c); } };
         new PH.Editeur(ex.querySelector('[data-x="ed"]'), {
@@ -202,9 +229,9 @@ new PH.Cours(document.getElementById('etapes'), [
     return c;
   },
 
-  // ---------- 5. Calculer [H3O+] ----------
+  // ---------- 6. Calculer [H3O+] ----------
   (cours) => {
-    const c = cours.carte('5. Calculer ' + H3O + ' à partir du pH');
+    const c = cours.carte('6. Calculer ' + H3O + ' à partir du pH');
     cours.ajouter(c, `<div class="cours-bloc">
         <div class="cle"><p><b class="cle-titre">Méthode.</b> ${H3O} = c° × 10<sup>${M}pH</sup> avec c° = 1 ${UNITE}. À la calculatrice : touche <b>10<sup>x</sup></b>, puis ${M}pH. On donne le résultat en ${UNITE}, en écriture scientifique avec <b>deux chiffres significatifs</b>.</p></div>
       </div>
@@ -218,7 +245,7 @@ new PH.Cours(document.getElementById('etapes'), [
       diag: v => diagC(v, Math.pow(10, -ph), ph),
       solution: `${H3O} = c° × 10<sup>${M}${fmt(ph, 1)}</sup> = ${sci(Math.pow(10, -ph), 2)} ${UNITE}` }, opts)] });
     aToi(c, [
-      conc(4, { titre: 'Sans calculatrice', indice: `10<sup>${M}4</sup> = 1,0 × 10<sup>${M}4</sup>.` }),
+      conc(4, { titre: 'Sans calculatrice', sansCalculatrice: true, indice: `10<sup>${M}4</sup> = 1,0 × 10<sup>${M}4</sup>.` }),
       conc(2.5),
       conc(9.3),
       conc(12.4),
@@ -226,9 +253,9 @@ new PH.Cours(document.getElementById('etapes'), [
     return c;
   },
 
-  // ---------- 6. Limite de validité ----------
+  // ---------- 7. Limite de validité ----------
   (cours) => {
-    const c = cours.carte('6. Limite de validité de cette relation');
+    const c = cours.carte('7. Limite de validité de cette relation');
     cours.ajouter(c, `<div class="cours-bloc">
         <p>Cette relation est valable dans un certain domaine de concentration en ions H<sub>3</sub>O<sup>+</sup> : elle n'est <b>pas valable pour les concentrations trop élevées</b> ou <b>trop faibles</b>.</p>
         <div class="ph-defile"><table class="ph-tableau">
@@ -268,6 +295,7 @@ new PH.Cours(document.getElementById('etapes'), [
   (cours) => {
     const c = cours.carte('À retenir');
     cours.ajouter(c, `<div class="cle"><p><b class="cle-titre">Définition.</b> pH = ${M}log(${H3O} / c°), sans unité, avec ${H3O} en ${UNITE} et c° = 1 ${UNITE}, la concentration standard.</p></div>
+      <div class="cle"><p><b class="cle-titre">Concentration c d'un acide.</b> En général ${H3O} = c, donc pH = ${M}log(c / c°) ; contre-exemple : l'acide sulfurique, ${H3O} = 2c.</p></div>
       <div class="cle"><p><b class="cle-titre">Réciproque.</b> ${H3O} = c° × 10<sup>${M}pH</sup> : on l'obtient en appliquant 10<sup>x</sup> aux deux membres.</p></div>
       <div class="cle"><p><b class="cle-titre">Calculs.</b> pH avec une décimale ; ${H3O} en écriture scientifique avec deux chiffres significatifs. Plus ${H3O} est grande, plus le pH est petit.</p></div>
       <div class="cle"><p><b class="cle-titre">Validité.</b> La relation n'est pas valable pour des concentrations trop élevées ou trop faibles ; dans les exercices, on la considère toujours valable.</p></div>
