@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur la fonction log — pH</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ph.css">
+<script src="../../assets/nav.js"></script>
+<script src="ph.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : 3 sur la définition et la
+   courbe, 4 sur les propriétés, 3 avec la calculatrice.
+   Chaque fabrique renvoie une question différente à chaque appel.
+   ============================================================ */
+const { fmt, hasard, entre, melanger } = PH;
+const M = PH.MOINS;
+const e10 = n => `10<sup>${fmt(n)}</sup>`;
+// écriture décimale d'une puissance de 10 (0,001 ; 10 000)
+const dec10 = n => fmt(Math.pow(10, n)).replace(/^0,0+/, s => s);
+const entier = (label, valeur, solution, indice) => ({ type: 'nombre', label, valeur, tol: 1e-9, entier: true, solution, indice });
+
+// Mini-graphes pour reconnaître la courbe de log
+function mini(f, x0, x1, y0, y1) {
+  const W = 150, H = 100, px = x => (x - x0) / (x1 - x0) * W, py = y => H - (y - y0) / (y1 - y0) * H;
+  let d = '';
+  for (let i = 0; i <= 120; i++) {
+    const x = x0 + (x1 - x0) * i / 120, y = f(x);
+    if (isFinite(y)) d += (d ? 'L' : 'M') + px(x).toFixed(1) + ',' + Math.max(-20, Math.min(H + 20, py(y))).toFixed(1);
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" class="ph-mini-graphe" aria-hidden="true">
+    <clipPath id="c${x0}${y0}${f.name}"><rect width="${W}" height="${H}"/></clipPath>
+    <line x1="0" y1="${py(0)}" x2="${W}" y2="${py(0)}" stroke="#16181d" stroke-width="1.5"/>
+    <line x1="${px(0)}" y1="0" x2="${px(0)}" y2="${H}" stroke="#16181d" stroke-width="1.5"/>
+    <text x="${px(1) - 3}" y="${py(0) + 13}" font-size="11" fill="#55585f">1</text>
+    <line x1="${px(1)}" y1="${py(0) - 3}" x2="${px(1)}" y2="${py(0) + 3}" stroke="#16181d"/>
+    <path d="${d}" fill="none" stroke="#0a7d57" stroke-width="3" clip-path="url(#c${x0}${y0}${f.name})"/></svg>`;
+}
+
+/* ---------- Groupe 1 : définition et courbe ---------- */
+const G1 = [
+  function logPuissance() {
+    const n = hasard([-6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7]);
+    const ecrit = Math.abs(n) <= 4 ? dec10(n) : e10(n);
+    return { theme: 'Définition', consigne: 'Calcule sans calculatrice.', parties: [entier(`log(${ecrit}) =`, n,
+      `${Math.abs(n) <= 4 ? `${ecrit} = ${e10(n)}, donc ` : ''}log(${ecrit}) = log(${e10(n)}) = ${fmt(n)}, car log(10<sup>a</sup>) = a.`,
+      `Écris ${ecrit} sous forme d'une puissance de 10.`)] };
+  },
+  function resoudre() {
+    const n = hasard([-4, -3, -2, -1, 2, 3, 4, 5]);
+    return { theme: 'Définition', consigne: `Résous l'équation 10<sup>h</sup> = ${dec10(n)}.`, parties: [entier('h =', n,
+      `y = log(x) ⇔ x = 10<sup>y</sup>, donc h = log(${dec10(n)}) = log(${e10(n)}) = ${fmt(n)}.`,
+      `h est l'exposant qu'il faut donner à 10 pour obtenir ${dec10(n)} : h = log(${dec10(n)}).`)] };
+  },
+  function reciproque() {
+    const a = hasard([-4.6, -3.7, -2.3, -1.5, 2.4, 3.8, 5.1, 6.2]);
+    if (Math.random() < .5) {
+      return { theme: 'Fonction réciproque', consigne: 'Calcule sans calculatrice.', parties: [{ type: 'nombre', label: `log(${e10(a)}) =`, valeur: a, tol: 1e-6,
+        solution: `log(10<sup>a</sup>) = a : log(${e10(a)}) = ${fmt(a)}.`, indice: 'log et 10<sup>x</sup> sont deux fonctions réciproques : l\'une annule l\'autre.' }] };
+    }
+    const b = Math.abs(a);
+    return { theme: 'Fonction réciproque', consigne: 'Calcule sans calculatrice.', parties: [{ type: 'nombre', label: `10<sup>log ${fmt(b)}</sup> =`, valeur: b, tol: 1e-6,
+      solution: `10<sup>log a</sup> = a : 10<sup>log ${fmt(b)}</sup> = ${fmt(b)}.`, indice: 'log et 10<sup>x</sup> sont deux fonctions réciproques : l\'une annule l\'autre.' }] };
+  },
+  function signe() {
+    const x = hasard([0.05, 0.2, 0.35, 0.5, 0.8, 0.99, 1, 1.5, 3, 25, 0.004]);
+    const bon = x < 1 ? 'n' : x > 1 ? 'p' : 'z';
+    return { theme: 'Courbe', parties: [{ type: 'choix', q: `Le nombre log(${fmt(x)}) est :`, melanger: false,
+      options: [{ id: 'p', label: 'positif' }, { id: 'n', label: 'négatif' }, { id: 'z', label: 'nul' }], bonne: bon,
+      indice: 'log 1 = 0 et la fonction log est croissante.',
+      solution: x === 1 ? 'log 1 = log(10<sup>0</sup>) = 0.' : `${fmt(x)} ${x < 1 ? 'est compris entre 0 et 1' : 'est plus grand que 1'}, donc log(${fmt(x)}) ${x < 1 ? '&lt;' : '&gt;'} 0 (log ${fmt(x)} ≈ ${fmt(Math.log10(x), 2)}).` }] };
+  },
+  function limite() {
+    const zero = Math.random() < .5;
+    const opts = [{ id: 'm', label: `tend vers ${M}∞` }, { id: 'p', label: 'tend vers +∞' }, { id: '0', label: 'se rapproche de 0' }, { id: '1', label: 'se rapproche de 1' }];
+    return { theme: 'Limites', parties: [{ type: 'choix', q: zero ? 'Quand x se rapproche de 0 en restant positif, log(x) :' : 'Quand x devient de plus en plus grand (x → +∞), log(x) :',
+      options: opts, bonne: zero ? 'm' : 'p', melanger: false,
+      indice: zero ? 'log(0,1) = −1, log(0,01) = −2, log(0,001) = −3…' : 'log(10) = 1, log(1 000) = 3, log(10<sup>6</sup>) = 6…',
+      solution: zero ? `log x → ${M}∞ quand x → 0<sup>+</sup>.` : 'log x → +∞ quand x → +∞ (lentement : log(10<sup>6</sup>) = 6 seulement).' }] };
+  },
+  function courbe() {
+    const log = function log(x) { return Math.log10(x); }, pow = function pow(x) { return Math.pow(10, x); }, inv = function inv(x) { return -Math.log10(x); };
+    return { theme: 'Courbe', parties: [{ type: 'choix', q: 'Laquelle de ces courbes est celle de la fonction log ?',
+      options: [{ id: 'log', label: mini(log, -1, 11, -2.2, 1.6) }, { id: 'pow', label: mini(pow, -2, 1.3, -1.3, 6) }, { id: 'inv', label: mini(inv, -1, 11, -1.6, 2.2) }], bonne: 'log',
+      indice: 'log 1 = 0, log est croissante, et log x → −∞ quand x → 0.',
+      solution: 'La courbe de log passe par le point (1 ; 0), elle est croissante et plonge vers −∞ près de 0.' }] };
+  },
+  function existe() {
+    const x = hasard([-2, -0.5, 0, -10]);
+    return { theme: 'Définition', parties: [{ type: 'choix', q: `Que vaut log(${fmt(x)}) ?`,
+      options: [{ id: 'x', label: 'il n\'existe pas' }, { id: 'a', label: '0' }, { id: 'b', label: `${M}1` }, { id: 'c', label: x === 0 ? '1' : fmt(Math.log10(-x), 2) }], bonne: 'x',
+      indice: '10<sup>y</sup> est toujours strictement positif.',
+      solution: 'La fonction log n\'est définie que pour x &gt; 0 (10<sup>y</sup> est toujours positif).' }] };
+  },
+  function zeroUn() {
+    const un = Math.random() < .5;
+    return { theme: 'Courbe', parties: [{ type: 'choix', q: `Pour quelle valeur de x a-t-on log(x) = ${un ? 1 : 0} ?`, melanger: false,
+      options: [{ id: '0', label: 'x = 0' }, { id: '1', label: 'x = 1' }, { id: '10', label: 'x = 10' }, { id: 'e', label: 'x = 100' }], bonne: un ? '10' : '1',
+      indice: 'log(x) = y ⇔ x = 10<sup>y</sup>.', solution: un ? 'log(x) = 1 ⇔ x = 10<sup>1</sup> = 10.' : 'log(x) = 0 ⇔ x = 10<sup>0</sup> = 1.' }] };
+  },
+];
+
+/* ---------- Groupe 2 : propriétés ---------- */
+const G2 = [
+  function produit() {
+    const a = entre(-8, 8) || 3, b = entre(-8, 8) || -2;
+    return { theme: 'log(a × b)', consigne: 'Calcule sans calculatrice.', parties: [entier(`log(${e10(a)} × ${e10(b)}) =`, a + b,
+      `log(${e10(a)} × ${e10(b)}) = log(${e10(a)}) + log(${e10(b)}) = ${fmt(a)} + ${b < 0 ? `(${fmt(b)})` : b} = ${fmt(a + b)}`,
+      'log(a × b) = log(a) + log(b).')] };
+  },
+  function quotient() {
+    const a = entre(-8, 8) || 4, b = entre(-8, 8) || 6;
+    return { theme: 'log(a / b)', consigne: 'Calcule sans calculatrice.', parties: [entier(`log(${e10(a)} / ${e10(b)}) =`, a - b,
+      `log(${e10(a)} / ${e10(b)}) = log(${e10(a)}) − log(${e10(b)}) = ${fmt(a)} − ${b < 0 ? `(${fmt(b)})` : b} = ${fmt(a - b)}`,
+      'log(a / b) = log(a) − log(b).')] };
+  },
+  function puissance() {
+    const base = hasard([[100, 2], [1000, 3], [10, 1], [0.01, -2], [0.1, -1]]), n = entre(2, 5);
+    return { theme: 'log(a<sup>n</sup>)', consigne: 'Calcule sans calculatrice.', parties: [entier(`log(${fmt(base[0])}<sup>${n}</sup>) =`, n * base[1],
+      `log(${fmt(base[0])}<sup>${n}</sup>) = ${n} × log(${fmt(base[0])}) = ${n} × ${base[1] < 0 ? `(${fmt(base[1])})` : base[1]} = ${fmt(n * base[1])}`,
+      'log(a<sup>n</sup>) = n × log(a).')] };
+  },
+  function avecLog2() {
+    const L = [
+      ['log(4)', 0.6, 'log(4) = log(2<sup>2</sup>) = 2 × log 2 ≈ 2 × 0,30 = 0,60'],
+      ['log(8)', 0.9, 'log(8) = log(2<sup>3</sup>) = 3 × log 2 ≈ 3 × 0,30 = 0,90'],
+      ['log(5)', 0.7, 'log(5) = log(10 / 2) = log 10 − log 2 ≈ 1 − 0,30 = 0,70'],
+      ['log(0,5)', -0.3, `log(0,5) = log(1 / 2) = log 1 − log 2 ≈ 0 − 0,30 = ${M}0,30`],
+      ['log(20)', 1.3, 'log(20) = log(2 × 10) = log 2 + log 10 ≈ 0,30 + 1 = 1,30'],
+      [`log(2 × 10<sup>${M}3</sup>)`, -2.7, `log(2 × 10<sup>${M}3</sup>) = log 2 + log(10<sup>${M}3</sup>) ≈ 0,30 − 3 = ${M}2,70`],
+      [`log(2 × 10<sup>${M}5</sup>)`, -4.7, `log(2 × 10<sup>${M}5</sup>) = log 2 + log(10<sup>${M}5</sup>) ≈ 0,30 − 5 = ${M}4,70`],
+      [`log(5 × 10<sup>${M}4</sup>)`, -3.3, `log(5 × 10<sup>${M}4</sup>) = log(10<sup>${M}3</sup> / 2) = ${M}3 − log 2 ≈ ${M}3 − 0,30 = ${M}3,30`],
+    ];
+    const [e, v, sol] = hasard(L);
+    return { theme: 'Propriétés', consigne: 'On donne log 2 ≈ 0,30. Calcule sans calculatrice.', parties: [{ type: 'nombre', label: `${e} ≈`, valeur: v, tol: .006,
+      solution: sol, indice: 'Décompose le nombre en produit ou quotient de 2 et de puissances de 10.' }] };
+  },
+  function formule() {
+    const vraies = [['p', 'log(a × b) = log a + log b'], ['q', 'log(a / b) = log a − log b'], ['n', 'log(a<sup>n</sup>) = n log a']];
+    const fausses = [['f1', 'log(a + b) = log a + log b'], ['f2', 'log(a × b) = log a × log b'], ['f3', 'log(a / b) = log a / log b'], ['f4', 'log(a − b) = log a − log b'], ['f5', 'log(a<sup>n</sup>) = (log a)<sup>n</sup>']];
+    const v = hasard(vraies), f = melanger(fausses).slice(0, 3);
+    return { theme: 'Propriétés', parties: [{ type: 'choix', q: 'Quelle égalité est vraie pour tous nombres a &gt; 0 et b &gt; 0 ?', colonne: true,
+      options: [{ id: v[0], label: v[1] }].concat(f.map(x => ({ id: x[0], label: x[1] }))), bonne: v[0],
+      indice: 'Le log transforme un produit en somme, un quotient en différence, une puissance en produit.',
+      solution: `${v[1]}. Attention : il n'y a pas de formule pour log(a + b) ou log(a − b).` }] };
+  },
+  function combiner() {
+    const L = [
+      ['log(2) + log(5)', 1, 'log(2) + log(5) = log(2 × 5) = log(10) = 1'],
+      ['log(4) + log(25)', 2, 'log(4) + log(25) = log(4 × 25) = log(100) = 2'],
+      ['log(50) − log(5)', 1, 'log(50) − log(5) = log(50 / 5) = log(10) = 1'],
+      ['log(200) − log(2)', 2, 'log(200) − log(2) = log(200 / 2) = log(100) = 2'],
+      ['2 log(5) + 2 log(2)', 2, '2 log(5) + 2 log(2) = log(5<sup>2</sup>) + log(2<sup>2</sup>) = log(25 × 4) = log(100) = 2'],
+      ['log(0,5) + log(2)', 0, 'log(0,5) + log(2) = log(0,5 × 2) = log(1) = 0'],
+      ['log(3) − log(3 000)', -3, `log(3) − log(3 000) = log(3 / 3 000) = log(10<sup>${M}3</sup>) = ${M}3`],
+    ];
+    const [e, v, sol] = hasard(L);
+    return { theme: 'Propriétés', consigne: 'Calcule sans calculatrice, en regroupant en un seul log.', parties: [entier(`${e} =`, v, sol, 'log a + log b = log(a × b) et log a − log b = log(a / b).')] };
+  },
+];
+
+/* ---------- Groupe 3 : calculatrice et équations ---------- */
+const G3 = [
+  function calcLog() {
+    const k = hasard([2, 3, 5, 1.5, 4.2, 6.3, 7.9]), n = hasard([-9, -7, -5, -3, -2, 2, 4]);
+    const v = Math.log10(k * Math.pow(10, n));
+    return { theme: 'Calculatrice', consigne: 'Calcule à la calculatrice, puis donne une valeur approchée avec trois chiffres significatifs.', parties: [{ type: 'nombre', label: `log(${fmt(k)} × ${e10(n)}) ≈`, valeur: v, tol: Math.abs(v) < 1 ? .0006 : .006, cs: 3,
+      solution: `À la calculatrice : log(${fmt(k)} × ${e10(n)}) ≈ ${PH.cs(v, 3)} (= log ${fmt(k)} + log(${e10(n)}) ≈ ${PH.cs(Math.log10(k), 3)} ${n < 0 ? '−' : '+'} ${Math.abs(n)}).`,
+      indice: `Tape log(${fmt(k)}×10^(${n})) avec des parenthèses. Vérification : log(${fmt(k)} × ${e10(n)}) = log ${fmt(k)} + ${fmt(n)}.`,
+      diag: w => (Math.abs(w - Math.log(k * Math.pow(10, n))) < .01 ? 'Tu as utilisé la touche <b>ln</b> : il faut la touche <b>log</b>.' : null) }] };
+  },
+  function calcPuissance() {
+    const x = hasard([-0.1, 0.5, 1.3, -0.7, 2.6, -1.2, 0.25]);
+    const v = Math.pow(10, x);
+    return { theme: 'Calculatrice', consigne: 'Calcule à la calculatrice, puis donne une valeur approchée avec trois chiffres significatifs.', parties: [{ type: 'nombre', label: `10<sup>${fmt(x)}</sup> ≈`, valeur: v, rel: .006, cs: 3,
+      solution: `À la calculatrice (touche 10<sup>x</sup>) : 10<sup>${fmt(x)}</sup> ≈ ${PH.cs(v, 3)}.`,
+      indice: 'Utilise la touche 10<sup>x</sup> (souvent « 2nde » puis « log »), pas la touche e<sup>x</sup>.',
+      diag: w => (PH.proche(w, Math.exp(x), .01) ? 'Tu as utilisé la touche e<sup>x</sup> : il faut la touche 10<sup>x</sup>.' : null) }] };
+  },
+  function calcSci() {
+    const k = hasard([5, 2, 3, 4]), x = hasard([-7.2, -4.6, -9.3, -3.4]);
+    const v = k * Math.pow(10, x);
+    return { theme: 'Calculatrice', consigne: 'Calcule à la calculatrice, puis donne le résultat en écriture scientifique avec trois chiffres significatifs.', parties: [{ type: 'sci', label: `${k} × 10<sup>${fmt(x)}</sup> ≈`, valeur: v, rel: .006, cs: 3,
+      solution: `${k} × 10<sup>${fmt(x)}</sup> ≈ ${PH.sci(v, 3)}`, indice: 'Tape ' + k + '×10^(' + fmt(x).replace(M, '-') + ') à la calculatrice.',
+      diag: w => (PH.proche(w, k * Math.exp(x), .01) ? 'Tu as utilisé la touche e<sup>x</sup> : il faut la touche 10<sup>x</sup>.' : null) }] };
+  },
+  function expression() {
+    const L = [
+      ['2 log(5) − 5 log(2)', 2 * Math.log10(5) - 5 * Math.log10(2)],
+      ['3 log(2) + log(5)', 3 * Math.log10(2) + Math.log10(5)],
+      ['log(3) − 2 log(6)', Math.log10(3) - 2 * Math.log10(6)],
+      ['4 log(3) − log(2)', 4 * Math.log10(3) - Math.log10(2)],
+    ];
+    const [e, v] = hasard(L);
+    return { theme: 'Calculatrice', consigne: 'Calcule à la calculatrice, puis donne une valeur approchée avec trois chiffres significatifs.', parties: [{ type: 'nombre', label: `${e} ≈`, valeur: v, rel: .006, cs: 3,
+      solution: `À la calculatrice : ${e} ≈ ${PH.cs(v, 3)}.`, indice: 'Calcule chaque log à la calculatrice, puis fais l\'opération (ou tape toute l\'expression).' }] };
+  },
+  function equation() {
+    const k = hasard([10, 100, 1000, 2, 5]), m = hasard([-3, -2, -1, 1, 2]);
+    const g = k * Math.pow(10, m);
+    return { theme: 'Équation', consigne: `Résous l'équation log(G / ${fmt(k)}) = ${fmt(m)}.`, parties: [{ type: 'nombre', label: 'G =', valeur: g, rel: 1e-6,
+      solution: `log(G / ${fmt(k)}) = ${fmt(m)} ⇔ G / ${fmt(k)} = 10<sup>${fmt(m)}</sup> ⇔ G = ${fmt(k)} × 10<sup>${fmt(m)}</sup> = ${fmt(g)}`,
+      indice: `Applique la fonction 10<sup>x</sup> aux deux membres : G / ${fmt(k)} = 10<sup>${fmt(m)}</sup>.` }] };
+  },
+];
+
+// tirage : 3 + 4 + 3 questions, sans répétition dans un groupe
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  return pris(G1, 3).concat(pris(G2, 4), pris(G3, 3));
+}
+
+PH.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'La fonction logarithme décimal',
+  intro: `<p class="er-contexte">10 questions tirées au hasard pour vérifier que tu as compris le cours et t'aider à le retenir : définition, courbe, propriétés, puis quelques calculs à la <b>calculatrice</b> (garde-la à portée de main).</p>`,
+  questions: tirage,
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2_cours.html', label: 'Module 2 : définition du pH →' },
+});
+PH.menu('module_1_questions');
+</script>
+</body>
+</html>
