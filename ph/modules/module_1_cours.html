@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : la fonction logarithme décimal — pH</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ph.css">
+<script src="../../assets/nav.js"></script>
+<script src="ph.js"></script>
+<style>
+  /* accolade « n fois » sous un calcul */
+  .ph-accolade { display: inline-flex; flex-direction: column; align-items: center; vertical-align: top; }
+  .ph-accolade > span:first-child { border-bottom: 2px solid var(--accent); border-radius: 0 0 10px 10px; padding: 0 6px 4px; }
+  .ph-accolade > small { font-size: .78rem; font-weight: 700; color: var(--accent-ink); line-height: 1.6; }
+</style>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">La fonction logarithme décimal</h2>
+    <p class="er-contexte">Le pH se calcule avec la fonction <b>log</b>. Avant de l'utiliser en chimie, voici ce qu'il faut savoir sur cette fonction : sa définition, sa courbe et ses propriétés. Après chaque notion, un exemple, puis à toi de jouer.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes : chaque notion est présentée, illustrée par
+   un exemple, puis l'élève fait des exemples semblables
+   (« À toi ») ; le bouton « Continuer » apparaît ensuite.
+   ============================================================ */
+const { fmt, p10, aToi } = PH;
+const M = PH.MOINS;
+
+// petites fabriques de parties « À toi »
+const nombre = (label, valeur, opts) => ({ parties: [Object.assign({ type: 'nombre', label, valeur, tol: 1e-9, entier: Number.isInteger(valeur) }, opts)] });
+const choix = (q, options, bonne, opts) => ({ parties: [Object.assign({ type: 'choix', q, options, bonne }, opts)] });
+
+new PH.Cours(document.getElementById('etapes'), [
+
+  // ---------- 1. Définition ----------
+  (cours) => {
+    const c = cours.carte('1. Le logarithme décimal, réciproque de 10<sup>x</sup>');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Tu connais les puissances de 10 : 10<sup>2</sup> = 100, 10<sup>3</sup> = 1 000, 10<sup>${M}2</sup> = 0,01… La fonction <b>logarithme décimal</b>, notée <b>log</b>, fait le chemin inverse : à partir du nombre, elle redonne l'<b>exposant</b>.</p>
+        <div class="ph-machine" aria-hidden="true">
+          <span class="val">3</span><span class="fct"><span>10<sup>x</sup></span><span>→</span></span>
+          <span class="val">1 000</span><span class="fct"><span>log</span><span>→</span></span>
+          <span class="val">3</span>
+        </div>
+        <div class="cle">
+          <p><b class="cle-titre">Définition.</b> log est la fonction réciproque de la fonction 10<sup>x</sup> :</p>
+          <p class="ph-formule">y = log(x) &nbsp;⇔&nbsp; x = 10<sup>y</sup></p>
+          <p>Donc, pour tout nombre a :</p>
+          <p class="ph-formule">log(10<sup>a</sup>) = a &nbsp; et &nbsp; 10<sup>log a</sup> = a</p>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemples</p>
+        <p class="ph-calc">log(1 000) = log(10<sup>3</sup>) = <span class="c">3</span><br>
+          log(0,01) = log(10<sup>${M}2</sup>) = <span class="c">${M}2</span><br>
+          log(10<sup>4,7</sup>) = <span class="c">4,7</span> &nbsp;·&nbsp; 10<sup>log 7</sup> = <span class="c">7</span></p>
+        <p class="er-petit">À la calculatrice : touche <b>log</b>. La fonction 10<sup>x</sup> est souvent sur la même touche (« 2nde » ou « shift », puis « log »).</p>
+      </div>`);
+    aToi(c, [
+      nombre('log(100) =', 2, { indice: '100 = 10<sup>2</sup>, et log(10<sup>a</sup>) = a.', solution: 'log(100) = log(10<sup>2</sup>) = 2' }),
+      nombre('log(0,001) =', -3, { indice: `0,001 = 10<sup>${M}3</sup>. Utilise le bouton ± pour un nombre négatif.`, solution: `log(0,001) = log(10<sup>${M}3</sup>) = ${M}3` }),
+      nombre(`log(10<sup>${M}5,2</sup>) =`, -5.2, { tol: 1e-6, indice: 'log(10<sup>a</sup>) = a, même si a n\'est pas un nombre entier.', solution: `log(10<sup>${M}5,2</sup>) = ${M}5,2` }),
+      nombre('10<sup>log 2,5</sup> =', 2.5, { tol: 1e-6, indice: '10<sup>log a</sup> = a : les deux fonctions s\'annulent.', solution: '10<sup>log 2,5</sup> = 2,5' }),
+      nombre('h =', 6, { q: 'Résoudre l\'équation 10<sup>h</sup> = 1 000 000.', indice: 'y = log(x) ⇔ x = 10<sup>y</sup> : ici h = log(1 000 000), et 1 000 000 = 10<sup>6</sup>.', solution: '10<sup>h</sup> = 1 000 000 ⇔ h = log(1 000 000) = log(10<sup>6</sup>) = 6' }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 2. Courbe, valeur en 1, limites ----------
+  (cours) => {
+    const c = cours.carte('2. La courbe de la fonction log');
+    // repère plus « haut » sur smartphone pour garder des graduations lisibles
+    const g = PH.courbeLog(innerWidth < 560 ? { reperes: true, w: 380, h: 300 } : { reperes: true });
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>10<sup>y</sup> est toujours positif : la fonction log n'est donc définie que pour <b>x &gt; 0</b>. Déplace le curseur pour parcourir la courbe.</p>
+        <div data-x="graphe">${g.svg}</div>
+        <div class="ph-curseur"><input type="range" min="0" max="1000" value="620" aria-label="Valeur de x"><span class="ph-lecture-txt" data-x="lecture"></span></div>
+        <div class="cle">
+          <p><b class="cle-titre">À retenir sur la courbe</b></p>
+          <ul class="er-liste">
+            <li>log 1 = log(10<sup>0</sup>) = <b>0</b> &nbsp;et&nbsp; log 10 = <b>1</b></li>
+            <li>la fonction log est <b>croissante</b> ; log x &lt; 0 si 0 &lt; x &lt; 1, et log x &gt; 0 si x &gt; 1</li>
+            <li>log x → <b>${M}∞</b> quand x → 0<sup>+</sup> (x se rapproche de 0 en restant positif)</li>
+            <li>log x → <b>+∞</b> quand x → +∞ (lentement), on écrit lim<sub>x→+∞</sub> log x = +∞</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple : les limites avec les puissances de 10</p>
+        <div class="ph-defile"><table class="ph-tableau">
+          <tr><th>x</th><td>10<sup>${M}6</sup></td><td>0,001</td><td>0,01</td><td>0,1</td><td>1</td><td>10</td><td>100</td><td>1 000</td><td>10<sup>6</sup></td></tr>
+          <tr><th>log x</th><td>${M}6</td><td>${M}3</td><td>${M}2</td><td>${M}1</td><td>0</td><td>1</td><td>2</td><td>3</td><td>6</td></tr>
+        </table></div>
+        <p>Plus x se rapproche de 0, plus log x est négatif, aussi négatif qu'on veut : log x tend vers ${M}∞. Vers la droite, log x augmente sans fin, mais très lentement (il faut x = 10<sup>6</sup> pour atteindre 6) : il tend vers +∞.</p>
+      </div>`);
+    // point mobile sur la courbe
+    const dyn = c.querySelector('[data-x="dyn"]'), lect = c.querySelector('[data-x="lecture"]'), curseur = c.querySelector('input[type="range"]');
+    const tmin = -2, tmax = Math.log10(11);
+    function lire() {
+      const t = tmin + (tmax - tmin) * curseur.value / 1000, x = Math.pow(10, t), y = Math.log10(x);
+      dyn.innerHTML = `<line x1="${g.px(x)}" y1="${g.py(y)}" x2="${g.px(x)}" y2="${g.py(0)}" class="ph-lecture"/>
+        <line x1="${g.px(x)}" y1="${g.py(y)}" x2="${g.px(0)}" y2="${g.py(y)}" class="ph-lecture"/>
+        <circle cx="${g.px(x)}" cy="${g.py(y)}" r="7" class="ph-point-mobile"/>`;
+      const xs = x < 1 ? fmt(+x.toPrecision(2)) : fmt(Math.round(x * 100) / 100);
+      lect.innerHTML = `x = ${xs} &nbsp;→&nbsp; log(x) = ${fmt(y, 2)}<br><span class="er-petit">car 10<sup>${fmt(y, 2)}</sup> ≈ ${xs}</span>`;
+    }
+    curseur.addEventListener('input', lire);
+    lire();
+    aToi(c, [
+      choix('log(1) = ?', [{ id: '0', label: '0' }, { id: '1', label: '1' }, { id: '10', label: '10' }, { id: 'x', label: 'n\'existe pas' }], '0',
+        { melanger: false, indice: '1 = 10<sup>0</sup>.', solution: 'log 1 = log(10<sup>0</sup>) = 0 : la courbe coupe l\'axe des abscisses en x = 1.' }),
+      choix('Le nombre log(0,2) est :', [{ id: 'p', label: 'positif' }, { id: 'n', label: 'négatif' }, { id: 'z', label: 'nul' }], 'n',
+        { melanger: false, indice: 'Regarde la courbe : que vaut log x quand x est entre 0 et 1 ?', solution: '0,2 est compris entre 0 et 1, donc log(0,2) &lt; 0 (à la calculatrice : log(0,2) ≈ −0,70).' }),
+      choix('Quand x se rapproche de 0 (en restant positif), log(x) :', [
+        { id: 'moins', label: `devient de plus en plus négatif : il tend vers ${M}∞` },
+        { id: 'zero', label: 'se rapproche de 0' },
+        { id: 'un', label: 'se rapproche de 1' },
+        { id: 'plus', label: 'tend vers +∞' }], 'moins',
+        { colonne: true, indice: 'Pense au tableau : log(0,1) = −1, log(0,01) = −2, log(0,001) = −3…', solution: `log x → ${M}∞ quand x → 0<sup>+</sup>.` }),
+      choix(`Que vaut log(${M}3) ?`, [
+        { id: 'x', label: 'il n\'existe pas' }, { id: 'a', label: `${M}0,48` }, { id: 'b', label: '0' }], 'x',
+        { indice: '10<sup>y</sup> est toujours positif : peut-on avoir 10<sup>y</sup> = −3 ?', solution: 'log n\'est défini que pour x &gt; 0 : log(−3) n\'existe pas (la calculatrice affiche une erreur).' }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 3. log(a × b) ----------
+  (cours) => {
+    const c = cours.carte('3. Le logarithme d\'un produit');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Quand on multiplie des puissances de 10, on additionne les exposants : 10<sup>3</sup> × 10<sup>2</sup> = 10<sup>5</sup>. Le log transforme donc un <b>produit</b> en <b>somme</b>.</p>
+        <div class="cle"><p><b class="cle-titre">Propriété.</b> Pour a &gt; 0 et b &gt; 0 :</p><p class="ph-formule">log(a × b) = log(a) + log(b)</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple du cours</p>
+        <p class="ph-calc">log(10<sup>5</sup>) = <span class="c">5</span><br>
+          log(10<sup>3</sup> × 10<sup>2</sup>) = log(10<sup>3</sup>) + log(10<sup>2</sup>) = 3 + 2 = <span class="c">5</span></p>
+        <p>On trouve bien la même chose, car 10<sup>3</sup> × 10<sup>2</sup> = 10<sup>5</sup>.</p>
+        <p class="cours-exemple-t" style="margin-top:12px !important">Exemple utile pour le pH</p>
+        <p>Une concentration s'écrit souvent a × 10<sup>n</sup>. Avec log 2 ≈ 0,30 :</p>
+        <p class="ph-calc">log(2 × 10<sup>${M}3</sup>) = log 2 + log(10<sup>${M}3</sup>) ≈ 0,30 + (${M}3) = <span class="c">${M}2,70</span></p>
+        <p class="er-petit">Vérifie à la calculatrice : log(2 × 10<sup>${M}3</sup>) ≈ ${M}2,699.</p>
+      </div>
+      <div class="callout"><p><b>Attention :</b> log(a <b>+</b> b) n'est pas égal à log(a) + log(b). Par exemple log(10 + 10) = log 20 ≈ 1,30, alors que log 10 + log 10 = 2.</p></div>`);
+    aToi(c, [
+      nombre('log(10<sup>4</sup> × 10<sup>3</sup>) =', 7, { indice: 'log(a × b) = log(a) + log(b), et log(10<sup>a</sup>) = a.', solution: 'log(10<sup>4</sup> × 10<sup>3</sup>) = log(10<sup>4</sup>) + log(10<sup>3</sup>) = 4 + 3 = 7' }),
+      nombre(`log(10<sup>${M}5</sup> × 10<sup>2</sup>) =`, -3, { indice: `log(10<sup>${M}5</sup>) + log(10<sup>2</sup>) = ${M}5 + 2`, solution: `log(10<sup>${M}5</sup> × 10<sup>2</sup>) = ${M}5 + 2 = ${M}3` }),
+      nombre(`log(3 × 10<sup>${M}4</sup>) ≈`, -3.52, { q: `On donne log 3 ≈ 0,48. Calculer log(3 × 10<sup>${M}4</sup>) sans calculatrice.`, tol: .006, indice: `log(3 × 10<sup>${M}4</sup>) = log 3 + log(10<sup>${M}4</sup>) = 0,48 + (${M}4).`, solution: `log(3 × 10<sup>${M}4</sup>) = log 3 + log(10<sup>${M}4</sup>) ≈ 0,48 − 4 = ${M}3,52` }),
+      nombre('log(2) + log(5) =', 1, { indice: 'log(2) + log(5) = log(2 × 5).', solution: 'log(2) + log(5) = log(2 × 5) = log(10) = 1' }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 4. log(a / b) ----------
+  (cours) => {
+    const c = cours.carte('4. Le logarithme d\'un quotient');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Quand on divise des puissances de 10, on soustrait les exposants : 10<sup>5</sup> / 10<sup>2</sup> = 10<sup>3</sup>. Le log transforme un <b>quotient</b> en <b>différence</b>.</p>
+        <div class="cle"><p><b class="cle-titre">Propriété.</b> Pour a &gt; 0 et b &gt; 0 :</p><p class="ph-formule">log(a / b) = log(a) − log(b)</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemples</p>
+        <p class="ph-calc">log(10<sup>5</sup> / 10<sup>2</sup>) = log(10<sup>5</sup>) − log(10<sup>2</sup>) = 5 − 2 = <span class="c">3</span> &nbsp;(= log(10<sup>3</sup>))<br>
+          log(1 / 2) = log 1 − log 2 ≈ 0 − 0,30 = <span class="c">${M}0,30</span></p>
+        <p class="cours-exemple-t" style="margin-top:12px !important">Lien avec le pH (module 2)</p>
+        <p>Le pH utilise log([H<sub>3</sub>O<sup>+</sup>] / c°) avec c° = 1 mol·L<sup>−1</sup> : log([H<sub>3</sub>O<sup>+</sup>] / c°) = log[H<sub>3</sub>O<sup>+</sup>] − log 1 = log[H<sub>3</sub>O<sup>+</sup>] − 0. Diviser par c° ne change pas la valeur.</p>
+      </div>`);
+    aToi(c, [
+      nombre('log(10<sup>3</sup> / 10<sup>7</sup>) =', -4, { indice: 'log(a / b) = log(a) − log(b).', solution: `log(10<sup>3</sup> / 10<sup>7</sup>) = 3 − 7 = ${M}4` }),
+      nombre('log(5) ≈', 0.7, { q: 'On donne log 2 ≈ 0,30. Calculer log(5) sans calculatrice, en écrivant 5 = 10 / 2.', tol: .006, indice: 'log(10 / 2) = log(10) − log(2) = 1 − 0,30.', solution: 'log(5) = log(10 / 2) = log 10 − log 2 ≈ 1 − 0,30 = 0,70' }),
+      nombre('log(50) − log(5) =', 1, { indice: 'log(a) − log(b) = log(a / b).', solution: 'log(50) − log(5) = log(50 / 5) = log(10) = 1' }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 5. log(aⁿ) ----------
+  (cours) => {
+    const c = cours.carte('5. Le logarithme d\'une puissance');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <div class="cle"><p><b class="cle-titre">Propriété.</b> Pour a &gt; 0 et n entier :</p><p class="ph-formule">log(a<sup>n</sup>) = n × log(a)</p></div>
+        <p style="margin-top:12px"><b>Justification</b> (avec la propriété du produit) :</p>
+        <p class="ph-calc">log(a<sup>n</sup>) = log(<span class="ph-accolade"><span>a × a × … × a</span><small>n fois</small></span>)
+          = <span class="ph-accolade"><span>log a + log a + … + log a</span><small>n fois</small></span> = <span class="c">n log a</span></p>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemples</p>
+        <p class="ph-calc">log(10<sup>5</sup>) = 5 × log 10 = 5 × 1 = <span class="c">5</span><br>
+          log(8) = log(2<sup>3</sup>) = 3 × log 2 ≈ 3 × 0,30 = <span class="c">0,90</span></p>
+      </div>`);
+    aToi(c, [
+      nombre('log(1 000<sup>2</sup>) =', 6, { indice: 'log(a<sup>n</sup>) = n × log(a), et log(1 000) = 3.', solution: 'log(1 000<sup>2</sup>) = 2 × log(1 000) = 2 × 3 = 6' }),
+      nombre('log(16) ≈', 1.2, { q: 'On donne log 2 ≈ 0,30. Calculer log(16) = log(2<sup>4</sup>) sans calculatrice.', tol: .006, indice: 'log(2<sup>4</sup>) = 4 × log 2.', solution: 'log(16) = log(2<sup>4</sup>) = 4 × log 2 ≈ 4 × 0,30 = 1,20' }),
+      choix('log(a<sup>2</sup>) est égal à :', [{ id: 'b', label: '2 × log(a)' }, { id: 'c', label: '(log a)<sup>2</sup>' }, { id: 'd', label: 'log(2) × log(a)' }, { id: 'e', label: 'log(2a)' }], 'b',
+        { indice: 'log(a<sup>2</sup>) = log(a × a) = log a + log a.', solution: 'log(a<sup>2</sup>) = log(a × a) = log a + log a = 2 log a' }),
+    ], () => cours.continuer(c, 'Ce qu\'il faut retenir →'));
+    return c;
+  },
+
+  // ---------- À retenir ----------
+  (cours) => {
+    const c = cours.carte('À retenir');
+    cours.ajouter(c, `<div class="cle"><p><b class="cle-titre">Définition.</b> log est la réciproque de 10<sup>x</sup> : y = log(x) ⇔ x = 10<sup>y</sup>, donc log(10<sup>a</sup>) = a et 10<sup>log a</sup> = a.</p></div>
+      <div class="cle"><p><b class="cle-titre">Courbe.</b> log est définie pour x &gt; 0, croissante ; log 1 = 0, log 10 = 1 ; log x → ${M}∞ quand x → 0<sup>+</sup> et log x → +∞ quand x → +∞.</p></div>
+      <div class="cle"><p><b class="cle-titre">Propriétés.</b></p>
+        <p class="ph-formule">log(a × b) = log a + log b</p>
+        <p class="ph-formule">log(a / b) = log a − log b</p>
+        <p class="ph-formule">log(a<sup>n</sup>) = n log a</p></div>
+      <div class="er-actions">
+        <a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur la fonction log →</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_2_cours.html">Module 2 : définition du pH</a>
+      </div>`);
+    return c;
+  },
+]);
+
+PH.menu('module_1_cours');
+</script>
+</body>
+</html>

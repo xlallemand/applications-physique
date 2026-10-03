@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : définition du pH — pH</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ph.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="ph.js"></script>
+<script src="eq.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Définition du pH</h2>
+    <p class="er-contexte">Le pH d'une solution se calcule à partir de la concentration en ions oxonium H<sub>3</sub>O<sup>+</sup>, avec la fonction log du module 1. Tu vas apprendre les deux formules, passer de l'une à l'autre, et les utiliser.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes : notion → exemple → « À toi ».
+   Les manipulations de la relation sont montrées étape par étape
+   (PH.demo), puis faites par l'élève au glisser-déposer
+   (PH.Editeur), comme dans l'application « Équations en physique ».
+   ============================================================ */
+const { fmt, sci, H3O, UNITE, aToi, diagPH, diagC } = PH;
+const M = PH.MOINS;
+const { T, S, P, F, FN } = PH.EQ;
+
+// grandeurs de la relation
+const tH = T('c', H3O), t0 = T('c0', 'c°'), tp = T('pH', 'pH');
+const fracH = () => F(S(tH), S(t0));
+// valeurs de test : c° varie pour vérifier qu'il est à la bonne place
+function valeursPH() {
+  const c0 = .5 + Math.random() * 2.5, c = Math.pow(10, -1 - Math.random() * 11);
+  return { c, c0, pH: -Math.log10(c / c0) };
+}
+const choix = (q, options, bonne, opts) => ({ parties: [Object.assign({ type: 'choix', q, options, bonne }, opts)] });
+const LIEN_EQ = `<div class="ph-lien-app"><p>Besoin d'un rappel sur la manipulation des équations ?</p>
+  <span class="er-actions" style="margin:0"><a class="btn-small" href="../../equations-en-physique/modules/module_1.html" target="_blank" rel="noopener">Équations en physique : la méthode ↗</a>
+  <a class="btn-small" href="../../equations-en-physique/modules/module_8.html" target="_blank" rel="noopener">Les fonctions réciproques ↗</a></span></div>`;
+const MODE_EMPLOI = `<p class="eq-consigne"><b>Comment faire :</b> glisse un outil (×(−1), 10<sup>x</sup>, log) sur <b>un membre</b> de l'équation, puis sur l'autre membre : une opération se fait toujours des deux côtés. Glisse la barre de fraction ··· / ··· sur une case pour créer une fraction. Glisse une grandeur pour la déplacer, touche-la pour la supprimer. Un dénominateur se glisse de l'autre côté du signe =. ⇄ inverse les deux membres. Après chaque étape : « Vérifier l'étape ».</p>`;
+
+// étapes de la démonstration : du pH vers [H3O+]
+const DEMO_H = [
+  { L: P(S(tp)), R: P(FN('log', fracH()), true) },
+  { op: '×(−1)', L: P(S(tp), true), R: P(FN('log', fracH())), texte: 'On multiplie les deux membres par (−1) : le signe − devant log disparaît.' },
+  { centre: '⇄', L: P(FN('log', fracH())), R: P(S(tp), true), texte: 'On inverse le sens de l\'égalité : c\'est la ligne écrite dans le cours.' },
+  { op: '10<sup>x</sup>', L: P(FN('p10', P(FN('log', fracH())))), R: P(FN('p10', P(S(tp), true))), texte: 'On applique aux deux membres la fonction 10<sup>x</sup>, réciproque de log.' },
+  { centre: 'car 10<sup>log a</sup> = a', L: P(fracH()), R: P(FN('p10', P(S(tp), true))), texte: '10<sup>x</sup> annule log.' },
+  { op: '× c°', L: P(S(tH)), R: P([S(t0), FN('p10', P(S(tp), true))]), final: true, texte: 'On multiplie les deux membres par c° : c° qui divisait passe de l\'autre côté en multipliant.' },
+];
+// et dans l'autre sens : de [H3O+] vers le pH
+const DEMO_PH = [
+  { L: P(S(tH)), R: P([S(t0), FN('p10', P(S(tp), true))]) },
+  { op: '÷ c°', L: P(fracH()), R: P(FN('p10', P(S(tp), true))), texte: 'On divise les deux membres par c° : c° qui multipliait passe de l\'autre côté en divisant.' },
+  { op: 'log', L: P(FN('log', fracH())), R: P(S(tp), true), texte: 'On applique log aux deux membres : log(10<sup>a</sup>) = a.' },
+  { op: '×(−1)', L: P(FN('log', fracH()), true), R: P(S(tp)), texte: 'On multiplie les deux membres par (−1).' },
+  { centre: '⇄', L: P(S(tp)), R: P(FN('log', fracH()), true), final: true, texte: 'On inverse le sens de l\'égalité : on retrouve la définition du pH.' },
+];
+
+new PH.Cours(document.getElementById('etapes'), [
+
+  // ---------- 1. Définition ----------
+  (cours) => {
+    const c = cours.carte('1. La définition du pH');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <div class="cle">
+          <p>Le pH d'une solution est une grandeur <b>sans dimension</b> définie par :</p>
+          <p class="ph-formule grand">pH = ${PH.EQ.statique(P(FN('log', fracH()), true))}</p>
+          <p>avec &nbsp;<b>${H3O}</b> la concentration en <b>ions oxonium</b>, en ${UNITE} ;<br>
+            &nbsp;<b>c° = 1 ${UNITE}</b> la <b>concentration standard</b>.</p>
+        </div>
+        <p style="margin-top:12px"><b>Pourquoi diviser par c° ?</b> On ne peut calculer le log que d'un <b>nombre sans unité</b>. ${H3O} a une unité, le ${UNITE}. En la divisant par c° = 1 ${UNITE}, l'unité disparaît et la valeur ne change pas : c'est pour cela que le pH n'a pas d'unité.</p>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <p class="ph-calc">${H3O} = 5,0 × 10<sup>${M}3</sup> ${UNITE} &nbsp;donne&nbsp;
+          <span class="m-frac" style="font-size:.95em"><span class="m-num">${H3O}</span><span class="m-den">c°</span></span> =
+          <span class="m-frac" style="font-size:.95em"><span class="m-num">5,0 × 10<sup>${M}3</sup> ${UNITE}</span><span class="m-den">1 ${UNITE}</span></span> = <span class="c">5,0 × 10<sup>${M}3</sup></span> (sans unité)</p>
+      </div>
+      <div class="callout"><p><b>Remarque.</b> On peut voir écrit pH = ${M}log[H<sub>3</sub>O<sup>+</sup>] : c'est une simplification où on n'écrit pas la division par c° = 1. D'après le module 1 : log(${H3O} / c°) = log${H3O} − log 1 = log${H3O} − 0.</p></div>`);
+    aToi(c, [
+      choix('Quelle est l\'unité du pH ?', [{ id: 's', label: 'le pH n\'a pas d\'unité' }, { id: 'm', label: UNITE }, { id: 'mol', label: 'mol' }, { id: 'l', label: 'L' }], 's',
+        { melanger: false, indice: 'On calcule le log d\'un nombre sans unité.', solution: 'Le pH est une grandeur sans dimension : il n\'a pas d\'unité.' }),
+      choix('Que vaut la concentration standard c° ?', [{ id: '1', label: `1 ${UNITE}` }, { id: 'mol', label: '1 mol' }, { id: '7', label: `10<sup>${M}7</sup> ${UNITE}` }, { id: 'd', label: 'cela dépend de la solution' }], '1',
+        { indice: 'C\'est une valeur fixe, la même pour toutes les solutions.', solution: `c° = 1 ${UNITE}, pour toutes les solutions.` }),
+      choix(`Pourquoi divise-t-on ${H3O} par c° dans la définition du pH ?`, [
+        { id: 'u', label: 'pour obtenir un nombre sans unité : on ne calcule le log que d\'un nombre sans unité' },
+        { id: 'v', label: 'pour changer la valeur de la concentration' },
+        { id: 'c', label: 'pour convertir la concentration en mmol·L<sup>−1</sup>' }], 'u',
+        { colonne: true, indice: 'c° = 1 mol·L<sup>−1</sup> : diviser par 1 ne change pas la valeur…', solution: 'Diviser par c° = 1 mol·L<sup>−1</sup> enlève l\'unité sans changer la valeur.' }),
+      choix(`L'écriture pH = ${M}log[H<sub>3</sub>O<sup>+</sup>] :`, [
+        { id: 's', label: 'est une écriture simplifiée qui donne la même valeur, car c° = 1 mol·L<sup>−1</sup>' },
+        { id: 'f', label: 'est fausse et donne une autre valeur' },
+        { id: 'a', label: 'ne s\'utilise que pour les solutions acides' }], 's',
+        { colonne: true, indice: 'log(a / 1) = log a − log 1 = log a.', solution: 'On n\'écrit pas la division par c° = 1 : la valeur est la même.' }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 2. Calculer un pH ----------
+  (cours) => {
+    const c = cours.carte('2. Calculer un pH à partir de ' + H3O);
+    cours.ajouter(c, `<div class="cours-bloc">
+        <div class="cle"><p><b class="cle-titre">Méthode.</b> On écrit pH = ${M}log(${H3O} / c°) avec la concentration en <b>${UNITE}</b>, et c° = 1 ${UNITE}. À la calculatrice : <b>${M}log(</b>valeur<b>)</b>. On donne le pH avec <b>une décimale</b>.</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemples du cours</p>
+        <p class="ph-calc">${H3O} = 5,0 × 10<sup>${M}3</sup> ${UNITE} : pH = ${M}log(5,0 × 10<sup>${M}3</sup> / 1) = <span class="c">2,3</span><br>
+          ${H3O} = 10<sup>${M}3</sup> ${UNITE} : pH = ${M}log(10<sup>${M}3</sup>) = <span class="c">3</span><br>
+          ${H3O} = 10<sup>${M}2</sup> ${UNITE} : pH = ${M}log(10<sup>${M}2</sup>) = <span class="c">2</span></p>
+        <p>Pour une puissance de 10, pas besoin de calculatrice : pH = ${M}log(10<sup>${M}n</sup>) = n.</p>
+        <p>Remarque : la concentration la plus grande (10<sup>${M}2</sup>) donne le pH le plus petit (2). <b>Plus ${H3O} est grande, plus le pH est petit.</b></p>
+      </div>`);
+    const pHde = v => -Math.log10(v);
+    const calcul = (cTxt, cv, opts) => ({ parties: [Object.assign({ type: 'nombre', q: `${H3O} = ${cTxt}`, label: 'pH =', valeur: pHde(cv), tol: .051,
+      diag: v => diagPH(v, pHde(cv), cv),
+      solution: `pH = ${M}log(${cTxt.replace(' ' + UNITE, '')} / 1) = ${fmt(pHde(cv), 1)}` }, opts)] });
+    aToi(c, [
+      calcul(`1,0 × 10<sup>${M}4</sup> ${UNITE}`, 1e-4, { titre: 'Sans calculatrice', solution: `pH = ${M}log(10<sup>${M}4</sup>) = 4,0`, indice: `${M}log(10<sup>${M}n</sup>) = n.` }),
+      calcul(`2,0 × 10<sup>${M}3</sup> ${UNITE}`, 2e-3),
+      calcul(`6,3 × 10<sup>${M}9</sup> ${UNITE}`, 6.3e-9),
+      { parties: [{ type: 'nombre', q: `${H3O} = 4,0 mmol·L<sup>−1</sup> (attention à l'unité)`, label: 'pH =', valeur: pHde(4e-3), tol: .051,
+        diag: v => (Math.abs(v - pHde(4)) < .06 ? `La concentration doit être en ${UNITE} : 4,0 mmol·L<sup>−1</sup> = 4,0 × 10<sup>${M}3</sup> ${UNITE}.` : diagPH(v, pHde(4e-3), 4e-3)),
+        indice: `1 mmol = 10<sup>${M}3</sup> mol.`,
+        solution: `4,0 mmol·L<sup>−1</sup> = 4,0 × 10<sup>${M}3</sup> ${UNITE}, donc pH = ${M}log(4,0 × 10<sup>${M}3</sup>) = 2,4` }] },
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 3. La réciproque : exprimer [H3O+] ----------
+  (cours) => {
+    const c = cours.carte('3. Exprimer ' + H3O + ' en fonction du pH');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Pour calculer ${H3O} quand on connaît le pH, il faut <b>isoler</b> ${H3O} dans la définition. On utilise la fonction réciproque de log, la fonction 10<sup>x</sup>, et les règles de manipulation des équations : <b>la même opération sur les deux membres</b>.</p>
+      </div>
+      <p class="er-consigne">Suis la démonstration, étape par étape.</p>`);
+    const fin = cours.ajouter(c, '');
+    PH.demo(c.insertBefore(document.createElement('div'), fin), {
+      etapes: DEMO_H,
+      onFini: () => {
+        fin.innerHTML = `<div class="cle"><p><b class="cle-titre">À retenir : les deux formules</b></p>
+            <p class="ph-formule">pH = ${M}log(${H3O} / c°) &nbsp;⇔&nbsp; ${H3O} = c° × 10<sup>${M}pH</sup></p></div>
+          ${LIEN_EQ}`;
+        // on peut aussi passer à la suite sans réussir (lien sous l'éditeur)
+        const ex = cours.ajouter(c, `<div class="ph-atoi"><p class="ph-atoi-t">À toi</p>
+            <p class="er-consigne">Refais la manipulation : exprime ${H3O} à partir de la définition du pH.</p>${MODE_EMPLOI}<div data-x="ed"></div></div>`);
+        let fini = false, passer = null;
+        const suite = () => { if (!fini) { fini = true; if (passer) passer.remove(); cours.continuer(c); } };
+        new PH.Editeur(ex.querySelector('[data-x="ed"]'), {
+          tuiles: [tp, tH, t0], cible: 'c', cibleNom: H3O, valeurs: valeursPH,
+          gauche: () => P(S(tp)), droite: () => P(FN('log', fracH()), true),
+          aides: [
+            'Commence par enlever le signe − devant log : glisse l\'outil ×(−1) sur le membre de gauche, puis sur celui de droite, et vérifie l\'étape.',
+            'Applique aux deux membres la fonction réciproque de log : glisse l\'outil 10<sup>x</sup> à gauche, puis à droite.',
+            'c° divise ' + H3O + ' : glisse le dénominateur c° de l\'autre côté du signe =, il multipliera.',
+            'Inverse le sens de l\'équation avec ⇄ pour avoir ' + H3O + ' à gauche.',
+          ],
+          solution: DEMO_H, onResolu: suite,
+        });
+        passer = cours.ajouter(c, '<p class="er-petit" style="text-align:right;margin-top:8px"><button type="button" class="ph-retour-liste">Passer à la suite quand même →</button></p>');
+        passer.querySelector('button').onclick = suite;
+      },
+    });
+    return c;
+  },
+
+  // ---------- 4. Dans l'autre sens ----------
+  (cours) => {
+    const c = cours.carte('4. Et dans l\'autre sens : exprimer le pH');
+    cours.ajouter(c, `<div class="cours-bloc"><p>Ce n'est pas demandé dans les exercices, mais c'est un bon entraînement : partir de ${H3O} = c° × 10<sup>${M}pH</sup> et retrouver la définition du pH. Cette fois, c'est la fonction <b>log</b> qui annule 10<sup>x</sup>.</p></div>`);
+    PH.demo(c.appendChild(document.createElement('div')), {
+      etapes: DEMO_PH,
+      onFini: () => {
+        const ex = cours.ajouter(c, `<div class="ph-atoi"><p class="ph-atoi-t">À toi</p>
+            <p class="er-consigne">Exprime le pH à partir de ${H3O} = c° × 10<sup>${M}pH</sup>.</p><div data-x="ed"></div></div>`);
+        let fini = false, passer = null;
+        const suite = () => { if (!fini) { fini = true; if (passer) passer.remove(); cours.continuer(c); } };
+        new PH.Editeur(ex.querySelector('[data-x="ed"]'), {
+          tuiles: [tp, tH, t0], cible: 'pH', cibleNom: 'le pH', valeurs: valeursPH,
+          gauche: () => P(S(tH)), droite: () => P([S(t0), FN('p10', P(S(tp), true))]),
+          aides: [
+            'c° multiplie 10<sup>−pH</sup> : il doit passer à gauche en divisant. Glisse la barre de fraction sur ' + H3O + ', puis glisse c° dans le dénominateur.',
+            'Applique log, la réciproque de 10<sup>x</sup>, aux deux membres.',
+            'Enlève le signe − devant pH avec l\'outil ×(−1), sur les deux membres.',
+            'Inverse le sens de l\'équation avec ⇄.',
+          ],
+          solution: DEMO_PH, onResolu: suite,
+        });
+        passer = cours.ajouter(c, '<p class="er-petit" style="text-align:right;margin-top:8px"><button type="button" class="ph-retour-liste">Passer à la suite quand même →</button></p>');
+        passer.querySelector('button').onclick = suite;
+      },
+    });
+    return c;
+  },
+
+  // ---------- 5. Calculer [H3O+] ----------
+  (cours) => {
+    const c = cours.carte('5. Calculer ' + H3O + ' à partir du pH');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <div class="cle"><p><b class="cle-titre">Méthode.</b> ${H3O} = c° × 10<sup>${M}pH</sup> avec c° = 1 ${UNITE}. À la calculatrice : touche <b>10<sup>x</sup></b>, puis ${M}pH. On donne le résultat en ${UNITE}, en écriture scientifique avec <b>deux chiffres significatifs</b>.</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemples du cours</p>
+        <p class="ph-calc">pH = 10,8 : ${H3O} = c° × 10<sup>${M}10,8</sup> = 1 × 10<sup>${M}10,8</sup> = <span class="c">1,6 × 10<sup>${M}11</sup> ${UNITE}</span><br>
+          pH = 3 : ${H3O} = 10<sup>${M}3</sup> ${UNITE} (sans calculatrice)<br>
+          pH = 5,2 : ${H3O} = 10<sup>${M}5,2</sup> = <span class="c">6,3 × 10<sup>${M}6</sup> ${UNITE}</span></p>
+      </div>`);
+    const conc = (ph, opts) => ({ parties: [Object.assign({ type: 'sci', q: `pH = ${fmt(ph, 1)}`, label: `${H3O} =`, unite: UNITE, valeur: Math.pow(10, -ph),
+      diag: v => diagC(v, Math.pow(10, -ph), ph),
+      solution: `${H3O} = c° × 10<sup>${M}${fmt(ph, 1)}</sup> = ${sci(Math.pow(10, -ph), 2)} ${UNITE}` }, opts)] });
+    aToi(c, [
+      conc(4, { titre: 'Sans calculatrice', indice: `10<sup>${M}4</sup> = 1,0 × 10<sup>${M}4</sup>.` }),
+      conc(2.5),
+      conc(9.3),
+      conc(12.4),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 6. Limite de validité ----------
+  (cours) => {
+    const c = cours.carte('6. Limite de validité de cette relation');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Cette relation est valable dans un certain domaine de concentration en ions H<sub>3</sub>O<sup>+</sup> : elle n'est <b>pas valable pour les concentrations trop élevées</b> ou <b>trop faibles</b>.</p>
+        <div class="ph-defile"><table class="ph-tableau">
+          <tr><th></th><th>S<sub>0</sub></th><th>S<sub>1</sub></th><th>S<sub>2</sub></th><th>S<sub>3</sub></th><th>S<sub>4</sub></th><th>S<sub>5</sub></th></tr>
+          <tr><th>${H3O} en ${UNITE}</th><td>1,0</td><td>1,0 × 10<sup>${M}1</sup></td><td>1,0 × 10<sup>${M}2</sup></td><td>1,0 × 10<sup>${M}3</sup></td><td>1,0 × 10<sup>${M}4</sup></td><td>1,0 × 10<sup>${M}5</sup></td></tr>
+        </table></div>
+        <div data-x="graphe"></div>
+        <p>Pour les solutions les plus concentrées (zone rouge), le pH mesuré au pH-mètre s'écarte du pH calculé avec la formule.</p>
+        <div class="cle"><p><b class="cle-titre">Dans les exercices</b>, on considère toujours que la relation pH = ${M}log(${H3O} / c°) est valable.</p></div>
+      </div>`);
+    // pH mesuré et pH théorique en fonction de −log([H3O+]/c°)
+    const o = PH.repere({ xmin: 0, xmax: 5.6, ymin: 0, ymax: 7, w: 560, h: 330, m: { g: 40, d: 24, h: 40, b: 46 } });
+    const { px, py } = o;
+    let s = `<rect x="${px(0)}" y="${py(7)}" width="${px(1) - px(0)}" height="${py(0) - py(7)}" class="ph-zone-rouge"/>`;
+    for (let x = 1; x <= 5; x++) s += `<line x1="${px(x)}" y1="${py(0)}" x2="${px(x)}" y2="${py(7)}" class="ph-grille"/><text x="${px(x)}" y="${py(0) + 18}" text-anchor="middle" class="ph-graduation">${x}</text>`;
+    for (let y = 1; y <= 7; y++) s += `<line x1="${px(0)}" y1="${py(y)}" x2="${px(5.6)}" y2="${py(y)}" class="ph-grille"/><text x="${px(0) - 8}" y="${py(y) + 4}" text-anchor="end" class="ph-graduation">${y}</text>`;
+    s += `<text x="${px(0) - 8}" y="${py(0) + 4}" text-anchor="end" class="ph-graduation">0</text>`;
+    s += `<line x1="${px(0)}" y1="${py(0)}" x2="${px(5.6) + 6}" y2="${py(0)}" class="ph-axe"/><line x1="${px(0)}" y1="${py(0)}" x2="${px(0)}" y2="${py(7) - 10}" class="ph-axe"/>`;
+    s += `<line x1="${px(0)}" y1="${py(0)}" x2="${px(5.5)}" y2="${py(5.5)}" class="ph-theo"/>`;
+    s += `<path d="M${px(0)},${py(.32)} Q${px(.55)},${py(.55)} ${px(1)},${py(1)} L${px(5.5)},${py(5.5)}" class="ph-mesure"/>`;
+    [[0, .32], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5]].forEach(([x, y]) => {
+      s += `<path d="M${px(x) - 6},${py(y) - 6} L${px(x) + 6},${py(y) + 6} M${px(x) - 6},${py(y) + 6} L${px(x) + 6},${py(y) - 6}" class="ph-croix"/>`;
+    });
+    s += `<text x="${px(0)}" y="${py(7) - 22}" class="ph-txt-bleu">pH mesuré (×)</text><text x="${px(2.3)}" y="${py(7) - 22}" class="ph-txt-rouge">pH théorique (- - -)</text>`;
+    s += `<text x="${px(5.6)}" y="${py(0) + 38}" text-anchor="end" class="ph-axe-nom">${M}log([H₃O⁺] / c°)</text>`;
+    s += `<text x="${(px(0) + px(1)) / 2}" y="${py(6.4)}" text-anchor="middle" class="ph-txt-rouge" style="font-size:11px">non</text><text x="${(px(0) + px(1)) / 2}" y="${py(6.4) + 13}" text-anchor="middle" class="ph-txt-rouge" style="font-size:11px">valable</text>`;
+    c.querySelector('[data-x="graphe"]').innerHTML = `<svg viewBox="0 0 ${o.w} ${o.h}" class="ph-graphe" role="img" aria-label="pH mesuré et pH théorique">${s}</svg>`;
+    aToi(c, [
+      choix('Pour quelle solution la relation pH = −log([H<sub>3</sub>O<sup>+</sup>] / c°) risque-t-elle de ne pas être valable ?', [
+        { id: 'a', label: `${H3O} = 2,0 ${UNITE}` }, { id: 'b', label: `${H3O} = 1,0 × 10<sup>${M}3</sup> ${UNITE}` }, { id: 'c', label: `${H3O} = 3,0 × 10<sup>${M}5</sup> ${UNITE}` }], 'a',
+        { indice: 'Regarde la zone rouge : quelles concentrations ?', solution: `2,0 ${UNITE} est une concentration trop élevée : −log(2,0) ≈ −0,3, en dehors du domaine de validité.` }),
+    ], () => cours.continuer(c, 'Ce qu\'il faut retenir →'));
+    return c;
+  },
+
+  // ---------- À retenir ----------
+  (cours) => {
+    const c = cours.carte('À retenir');
+    cours.ajouter(c, `<div class="cle"><p><b class="cle-titre">Définition.</b> pH = ${M}log(${H3O} / c°), sans unité, avec ${H3O} en ${UNITE} et c° = 1 ${UNITE}, la concentration standard.</p></div>
+      <div class="cle"><p><b class="cle-titre">Réciproque.</b> ${H3O} = c° × 10<sup>${M}pH</sup> : on l'obtient en appliquant 10<sup>x</sup> aux deux membres.</p></div>
+      <div class="cle"><p><b class="cle-titre">Calculs.</b> pH avec une décimale ; ${H3O} en écriture scientifique avec deux chiffres significatifs. Plus ${H3O} est grande, plus le pH est petit.</p></div>
+      <div class="cle"><p><b class="cle-titre">Validité.</b> La relation n'est pas valable pour des concentrations trop élevées ou trop faibles ; dans les exercices, on la considère toujours valable.</p></div>
+      <div class="er-actions">
+        <a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur le pH →</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_3.html">Module 3 : exercices</a>
+      </div>`);
+    return c;
+  },
+]);
+
+PH.menu('module_2_cours');
+</script>
+</body>
+</html>

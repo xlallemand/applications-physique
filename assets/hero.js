@@ -14,7 +14,7 @@
      puissance  tension et intensité déphasées, puissance instantanée
      fractions  disques et barres partagés
      molecules  modèles moléculaires en boules
-     formules:physique | formules:redox | formules:pile | formules:algebre
+     formules:physique | formules:redox | formules:pile | formules:combustion | formules:ph | formules:algebre
    ============================================================ */
 (function () {
   'use strict';
@@ -49,6 +49,8 @@
                'e⁻ →', 'I', 'COM', 'Zn + Cu²⁺ → Zn²⁺ + Cu', 'oxydation', 'réduction'],
     combustion: ['CH₄ + 2 O₂ → CO₂ + 2 H₂O', 'n = m / M', 'm = n × M', 'E = PC × m', 'C₃H₈ + 5 O₂ → 3 CO₂ + 4 H₂O',
                'M(CO₂) = 44 g/mol', 'n / a = n / b', 'PC en MJ/kg', 'C₂H₆O + 3 O₂ → 2 CO₂ + 3 H₂O', 'M(H₂O) = 18 g/mol'],
+    ph:       ['pH = −log([H₃O⁺] / c°)', '[H₃O⁺] = c° × 10⁻ᵖᴴ', 'log(10ᵃ) = a', '10ˡᵒᵍ ᵃ = a', 'log(a × b) = log a + log b',
+               'log(a / b) = log a − log b', 'log(aⁿ) = n log a', 'c° = 1 mol·L⁻¹', 'log 1 = 0', 'pH = 2,3', 'pH = 7,0', 'log 10 = 1'],
     algebre:  ['2x + 3 = 7', 'x = 2', '3(x − 1) = 12', '5x = 20', 'x − 4 = 9', '7 = 2x − 5', '4x + 1 = 3x + 6',
                'x / 3 = 5', '−2x = 8', 'x = −4', 'ax + b = 0', 'x = −b / a']
   };
