@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : dérivation en physique — Cinématique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cin.css">
+<script src="../../assets/nav.js"></script>
+<script src="vecteurs.js"></script>
+<script src="cin.js"></script>
+<script src="figures.js"></script>
+<style>
+  .cin-tab td.encours { box-shadow: inset 0 0 0 2px var(--accent); background: var(--cle-bg); font-weight: 800; }
+  .ph-choix .fr { font-size: 1em; }
+</style>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS</span>
+    <h2 class="er-titre">Dérivation en physique</h2>
+    <p class="er-contexte">En cinématique, on dérive sans arrêt : la vitesse est la dérivée de la position, l'accélération la dérivée de la vitesse. Les physiciens utilisent une <b>notation différente</b> de celle des mathématiques. C'est la première fois que tu la rencontres : prends le temps de bien la comprendre.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes : notion, exemple, puis exemples semblables
+   faits par l'élève (« À toi »).
+   ============================================================ */
+const { nomHTML: N, colHTML: col } = VEC;
+const { fmt } = CIN;
+const M = CIN.MOINS;
+const o = (id, label) => ({ id, label });
+// fraction d/dt : fr('df', 'dt')
+const fr = (h, b) => `<span class="fr"><span>${h}</span><span>${b}</span></span>`;
+const d = (f, v) => fr('d' + f, 'd' + (v || 't'));
+const choix = (q, options, bonne, opts) => ({ parties: [Object.assign({ type: 'choix', q, options, bonne }, opts)] });
+// polynôme a t² + b t + c écrit proprement
+function poly(c, v) {
+  v = v || 't';
+  const t = [[c[0], `${v}²`], [c[1], v], [c[2], '']].filter(x => x[0]);
+  if (!t.length) return '0';
+  return t.map(([k, p], i) => {
+    const s = k < 0 ? (i ? ` ${M} ` : M) : (i ? ' + ' : '');
+    const a = Math.abs(k);
+    return s + (a === 1 && p ? '' : fmt(a)) + p;
+  }).join('');
+}
+// dérivée d'un polynôme de degré 2 au plus : coefficients [2a, b]
+const derive = c => [2 * c[0], c[1]];
+// partie « expression à trous » pour une dérivée
+function gabaritDerivee(nomF, c, opts) {
+  opts = opts || {};
+  const v = opts.v || 't', dv = derive(c);
+  const morceaux = c[0] ? [{ v: dv[0], aria: `coefficient de ${v}` }, ` ${v} + `, { v: dv[1], aria: 'terme constant' }] : [{ v: dv[1], aria: 'valeur de la dérivée' }];
+  return Object.assign({ type: 'gabarit', label: `${d(nomF, v)} =`, morceaux,
+    diag: vals => {
+      if (c[0] && vals[0] === c[0] && dv[0] !== c[0]) return `La dérivée de ${fmt(c[0])}${v}² est ${fmt(2 * c[0])}${v} : n'oublie pas de multiplier par 2.`;
+      if (c[0] && vals[1] === c[2] && c[2] !== dv[1]) return 'Le terme constant de la fonction disparaît : la dérivée d\'une constante est 0.';
+      if (!c[0] && vals[0] === c[2] && c[2]) return 'La dérivée d\'une constante est 0 : seul le terme en t compte.';
+      return null;
+    },
+    indice: 'Dérive terme à terme : at² → 2at ; at → a ; constante → 0.',
+    solution: `${d(nomF, v)} = ${poly([0, dv[0], dv[1]], v)}` }, opts);
+}
+
+new CIN.Cours(document.getElementById('etapes'), [
+
+  // ---------- 1. Notations ----------
+  (cours) => {
+    const c = cours.carte('1. Notations : mathématiques et physique');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>En mathématiques, la variable s'appelle x et la dérivée de la fonction f(x) par rapport à x se note f'(x).</p>
+        <div class="cle">
+          <p><b class="cle-titre">En physique.</b></p>
+          <ul class="er-liste">
+            <li>on note f'(x) = ${d('f', 'x')} &nbsp;(on lit « d f sur d x ») : en haut la <b>fonction</b> que l'on dérive, en bas la <b>variable</b> par rapport à laquelle on dérive ;</li>
+            <li>la variable n'est en général pas x, mais le <b>temps t</b>. La dérivée par rapport à t d'une fonction f(t) se note ${d('f')}.</li>
+          </ul>
+        </div>
+        <div class="callout" style="margin-top:12px"><p><b>Attention :</b> en physique, x est souvent une <b>fonction</b> du temps (l'abscisse x(t) d'un point), pas la variable. ${d('x')} est la dérivée de la position x par rapport au temps.</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemples</p>
+        <div class="cin-defile"><table class="cin-tab">
+          <tr><th>Fonction</th><th>Notation des maths</th><th>Notation de la physique</th></tr>
+          <tr><td>f(x)</td><td>f'(x)</td><td>${d('f', 'x')}</td></tr>
+          <tr><td>f(t)</td><td>f'(t)</td><td>${d('f')}</td></tr>
+          <tr><td>g(t)</td><td>g'(t)</td><td>${d('g')}</td></tr>
+          <tr><td>x(t)</td><td>x'(t)</td><td>${d('x')}</td></tr>
+          <tr><td>v<sub>x</sub>(t)</td><td>v<sub>x</sub>'(t)</td><td>${d('v<sub>x</sub>')}</td></tr>
+        </table></div>
+      </div>`);
+    const notation = (q, bonne, faux, sol) => choix(q, [o('ok', bonne)].concat(faux.map((f, i) => o('f' + i, f))), 'ok', { indice: 'En haut : d + la fonction que l\'on dérive. En bas : d + la variable.', solution: sol });
+    CIN.aToi(c, [
+      notation('La dérivée de y(t) par rapport à t se note :', d('y'), [fr('dt', 'dy'), fr('y', 't'), 'dy × dt'], `y'(t) = ${d('y')}`),
+      notation('La dérivée de z(t) par rapport à t se note :', d('z'), [fr('dt', 'dz'), fr('dz', 'dx'), fr('z', 't')], `z'(t) = ${d('z')}`),
+      notation('La dérivée de v<sub>y</sub>(t) par rapport à t se note :', d('v<sub>y</sub>'), [fr('dt', 'dv<sub>y</sub>'), fr('dv', 'dy'), fr('v<sub>y</sub>', 't')], `v<sub>y</sub>'(t) = ${d('v<sub>y</sub>')}`),
+      notation('En physique, g\'(t) s\'écrit :', d('g'), [fr('dt', 'dg'), fr('g', 't'), fr('dg', 'dx')], `g'(t) = ${d('g')}`),
+      notation('La dérivée de la fonction h(u) par rapport à la variable u se note :', d('h', 'u'), [fr('dh', 'dt'), fr('du', 'dh'), fr('h', 'u')], `h'(u) = ${d('h', 'u')} : en bas, toujours la variable (ici u).`),
+      choix(`${d('x')} est :`, [o('ok', 'la dérivée de x par rapport à t'), o('a', 'la dérivée de t par rapport à x'), o('b', 'x divisé par t'), o('c', 'd multiplié par x, divisé par d multiplié par t')], 'ok',
+        { colonne: true, indice: 'En haut la fonction, en bas la variable.', solution: `${d('x')} = x'(t) : la dérivée de la fonction x(t) par rapport au temps.` }),
+      choix(`${d('E')} est :`, [o('ok', 'la dérivée de E par rapport à t'), o('a', 'E divisé par t'), o('b', 'la dérivée de t par rapport à E'), o('c', 'la valeur de E à la date t')], 'ok',
+        { colonne: true, indice: 'Même lecture, quelle que soit la lettre.', solution: `${d('E')} = E'(t), la dérivée de E par rapport au temps.` }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 2. Origine de la notation ----------
+  (cours) => {
+    const c = cours.carte(`2. D'où vient la notation ${d('f', 'x')} ?`);
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Le nombre dérivé de la fonction f en a est défini par :</p>
+        <p class="ph-formule">f'(a) = lim<sub>h→0</sub> ${fr('f(a + h) − f(a)', 'h')}</p>
+        <p>C'est le coefficient directeur de la tangente à la courbe en a. Prenons deux points de la courbe : A d'abscisse a et B d'abscisse a + h. Le coefficient directeur de la droite (AB) est :</p>
+        <p class="ph-formule">${fr('y<sub>B</sub> − y<sub>A</sub>', 'x<sub>B</sub> − x<sub>A</sub>')} = ${fr('f(a + h) − f(a)', '(a + h) − a')} = ${fr('Δf', 'Δx')}</p>
+        <p>Δf est la variation de f, Δx = h la variation de x. Déplace le curseur pour faire tendre h vers 0.</p>
+        <div data-x="graphe"></div>
+        <div class="cin-curseur"><label for="h">h</label><input type="range" id="h" min="0" max="1000" value="0" aria-label="Valeur de h"></div>
+        <p class="cin-lecture" data-x="lect"></p>
+        <div class="cle" style="margin-top:12px"><p><b class="cle-titre">À retenir.</b> Quand h tend vers 0, B se rapproche de A et la droite (AB) devient la tangente. Les variations Δf et Δx deviennent infiniment petites : on remplace Δ par d.</p>
+          <p class="ph-formule">f'(x) = ${fr('petite variation de f', 'petite variation de x')} = ${d('f', 'x')}</p></div>
+      </div>`);
+    // f(x) = 0,3 x² + 1, a = 2 : f'(2) = 1,2
+    const f = x => .3 * x * x + 1, a = 2, fa = f(a), fp = .6 * a;
+    const G = CIN.graphe({ xmin: 0, xmax: 6.5, ymin: 0, ymax: 13, w: 600, h: 340, pasX: 1, pasY: 1, gradPasY: 2, nomX: 'x', nomY: 'f(x)', h: 352, m: { g: 34, d: 22, h: 22, b: 40 } });
+    const A = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(), Ai = getComputedStyle(document.documentElement).getPropertyValue('--accent-ink').trim();
+    const zone = c.querySelector('[data-x="graphe"]'), lect = c.querySelector('[data-x="lect"]'), cur = c.querySelector('#h');
+    const { px, py } = G, T = VEC.texte;
+    function dessiner() {
+      const h = 3.5 - (3.5 - .02) * Math.pow(+cur.value / 1000, .7), b = a + h, fb = f(b), k = (fb - fa) / h;
+      let s = `<clipPath id="cl"><rect x="${px(0)}" y="${py(13)}" width="${px(6.5) - px(0)}" height="${py(0) - py(13)}"/></clipPath>`;
+      s += `<g clip-path="url(#cl)">${G.courbe(f, 0, 6.5, A, 3)}`;
+      // tangente en A (pointillés) et droite (AB)
+      s += `<line x1="${px(0)}" y1="${py(fa - fp * a)}" x2="${px(6.5)}" y2="${py(fa + fp * (6.5 - a))}" stroke="#8d8f94" stroke-width="1.5" stroke-dasharray="6 5"/>`;
+      s += `<line x1="${px(0)}" y1="${py(fa - k * a)}" x2="${px(6.5)}" y2="${py(fa + k * (6.5 - a))}" stroke="#dc2626" stroke-width="2.5"/></g>`;
+      // Δx et Δf
+      s += VEC.pointille(px(a), py(fa), px(b), py(fa), '#0a7d57', 2) + VEC.pointille(px(b), py(fa), px(b), py(fb), '#c2570c', 2);
+      if (h > .35) { s += T((px(a) + px(b)) / 2, py(fa) + 18, 'Δx = h', 14, '#0a7d57'); s += T(px(b) + 8, (py(fa) + py(fb)) / 2 + 5, 'Δf', 14, '#c2570c', 'start'); }
+      s += VEC.pointille(px(a), py(fa), px(a), py(0), '#c9c4b9', 1.2) + T(px(a), py(0) + 30, 'a', 13, Ai);
+      s += `<circle cx="${px(a)}" cy="${py(fa)}" r="6" fill="${Ai}"/><circle cx="${px(b)}" cy="${py(fb)}" r="6" fill="#dc2626"/>`;
+      s += T(px(a) - 10, py(fa) - 9, 'A', 15, Ai, 'end') + T(px(b) - 10, py(fb) - 6, 'B', 15, '#dc2626', 'end');
+      s += T(px(.2), py(12.2), 'droite (AB)', 13, '#dc2626', 'start') + T(px(.2), py(11.2), 'tangente en A', 13, '#8d8f94', 'start');
+      zone.innerHTML = G.svg(s, 'Courbe de f, droite (AB) et tangente en A');
+      lect.innerHTML = `h = Δx = ${fmt(h, 2)} &nbsp;;&nbsp; Δf = f(a + h) − f(a) = ${fmt(fb - fa, 3)} &nbsp;;&nbsp; <span style="color:#dc2626">${fr('Δf', 'Δx')} = ${fmt(k, 3)}</span> &nbsp;→ tangente : f'(a) = ${fmt(fp, 1)}`;
+    }
+    cur.addEventListener('input', dessiner);
+    dessiner();
+    CIN.aToi(c, [
+      choix('Quand h tend vers 0, la droite (AB) se rapproche de :', [o('ok', 'la tangente à la courbe en A'), o('a', 'l\'axe des abscisses'), o('b', 'la courbe elle-même'), o('c', 'une droite verticale')], 'ok',
+        { colonne: true, indice: 'Fais glisser le curseur jusqu\'au bout et regarde la droite rouge.', solution: 'B se rapproche de A : la droite (AB) devient la tangente en A.' }),
+      { parties: [{ type: 'nombre', q: 'Pousse le curseur jusqu\'au bout. Vers quelle valeur tend Δf / Δx ?', label: `${fr('Δf', 'Δx')} →`, valeur: 1.2, tol: .051, dec: 1,
+        indice: 'Lis la valeur de Δf / Δx quand h est très petit.', solution: 'Δf / Δx tend vers 1,2 : c\'est f\'(2), le coefficient directeur de la tangente en A.' }] },
+      choix(`Que signifie ${d('f', 'x')} ?`, [o('ok', 'une très petite variation de f divisée par la très petite variation de x correspondante'), o('a', 'f divisé par x'), o('b', 'la valeur de f quand x = d'), o('c', 'une grande variation de f')], 'ok',
+        { colonne: true, indice: 'd remplace Δ quand la variation devient infiniment petite.', solution: `${d('f', 'x')} = (petite variation de f) / (petite variation de x) : c'est le nombre dérivé f'(x).` }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 3. Ce n'est pas une division ! ----------
+  (cours) => {
+    const c = cours.carte('3. Attention : ce n\'est pas une division !');
+    cours.ajouter(c, `<div class="cin-attention">
+        <p><b class="cle-titre">Erreur fréquente.</b> ${d('f')} ressemble à une fraction, mais pour la calculer, on <b>dérive</b> f (comme f' en mathématiques). On ne divise pas f par t !</p>
+        <p class="ph-formule">f(t) = 3t² + 2 &nbsp;⇒&nbsp; ${d('f')} = 6t &nbsp; ✓ &nbsp;&nbsp;&nbsp; et non &nbsp; ${fr('3t² + 2', 't')} &nbsp; ✗</p>
+      </div>
+      <div class="cours-bloc">
+        <div class="cle"><p><b class="cle-titre">À quoi sert l'écriture en « fraction » ?</b> Seulement à deux choses :</p>
+          <ul class="er-liste">
+            <li>donner un <b>sens physique</b> à la dérivée : c'est la variation de f quand t varie un tout petit peu (la vitesse, c'est la variation de la position au cours du temps) ;</li>
+            <li>trouver facilement les <b>unités</b> : si x est en m et t en s, ${d('x')} est en m/s, c'est-à-dire en m·s<sup>${M}1</sup>.</li>
+          </ul></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple : les unités</p>
+        <p class="ph-calc">v = ${d('x')} → ${fr('m', 's')} = m·s<sup>${M}1</sup> &nbsp;&nbsp;&nbsp; a = ${d('v')} → ${fr('m·s<sup>−1</sup>', 's')} = m·s<sup>${M}2</sup></p>
+      </div>`);
+    const div = 'Tu as divisé par t : pour calculer la dérivée, on dérive (on ne divise pas).';
+    CIN.aToi(c, [
+      choix(`y(t) = 5t + 3. Que vaut ${d('y')} ?`, [o('ok', '5'), o('div', fr('5t + 3', 't')), o('a', '5t + 3'), o('b', '8')], 'ok', { indices: { div }, indice: 'at → a et la dérivée d\'une constante est 0.', solution: `${d('y')} = 5 (dérivée de 5t + 3).` }),
+      choix(`x(t) = 4t². Que vaut ${d('x')} ?`, [o('ok', '8t'), o('div', '4t'), o('a', '4t²'), o('b', '8')], 'ok', { indices: { div: div + ' (4t² / t = 4t)' }, indice: 'at² → 2at.', solution: `${d('x')} = 2 × 4t = 8t.` }),
+      choix(`f(t) = 7. Que vaut ${d('f')} ?`, [o('ok', '0'), o('div', fr('7', 't')), o('a', '7'), o('b', '7t')], 'ok', { indices: { div }, indice: 'f est une constante.', solution: `La dérivée d'une constante est nulle : ${d('f')} = 0.` }),
+      choix(`x est en mètres (m) et t en secondes (s). ${d('x')} s'exprime en :`, [o('ok', `m·s<sup>${M}1</sup>`), o('a', 'm·s'), o('b', `s·m<sup>${M}1</sup>`), o('c', 'm')], 'ok',
+        { indice: 'Utilise l\'écriture en fraction : m / s.', solution: `${d('x')} → m / s = m·s<sup>${M}1</sup> : c'est l'unité d'une vitesse.` }),
+      choix(`v est en m·s<sup>${M}1</sup> et t en s. ${d('v')} s'exprime en :`, [o('ok', `m·s<sup>${M}2</sup>`), o('a', `m·s<sup>${M}1</sup>`), o('b', 'm'), o('c', 'm·s')], 'ok',
+        { indice: '(m·s⁻¹) / s.', solution: `${d('v')} → (m·s<sup>${M}1</sup>) / s = m·s<sup>${M}2</sup> : c'est l'unité d'une accélération.` }),
+      choix(`Une énergie E est en joules (J) et t en s. ${d('E')} s'exprime en :`, [o('ok', `J·s<sup>${M}1</sup> (des watts)`), o('a', 'J·s'), o('b', 'J'), o('c', `s·J<sup>${M}1</sup>`)], 'ok',
+        { indice: 'J / s.', solution: `${d('E')} → J / s = J·s<sup>${M}1</sup> = W : c'est une puissance.` }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 4. Tableau des dérivées ----------
+  (cours) => {
+    const c = cours.carte('4. Le tableau des dérivées (rappel de mathématiques)');
+    const LIGNES = [
+      { f: 'cste (constante)', d: '0', opts: ['0', '1', 'cste', 'x'] },
+      { f: 'ax', d: 'a', opts: ['a', 'ax', 'x', '0'] },
+      { f: 'ax²', d: '2ax', opts: ['2ax', 'ax', '2a', 'a x²/2'] },
+      { f: fr('1', 'x'), d: `${M}${fr('1', 'x²')}`, opts: [`${M}${fr('1', 'x²')}`, fr('1', 'x²'), '1', `${M}${fr('1', 'x')}`] },
+      { f: fr('u', 'v'), d: fr("u'v − uv'", 'v²'), opts: [fr("u'v − uv'", 'v²'), fr("u'", "v'"), fr("u'v + uv'", 'v²'), fr("uv' − u'v", 'v²')] },
+      { f: 'x<sup>n</sup>', d: 'n x<sup>n − 1</sup>', opts: ['n x<sup>n − 1</sup>', 'x<sup>n − 1</sup>', 'n x<sup>n</sup>', 'n x<sup>n + 1</sup>'] },
+    ];
+    const table = k => `<div class="cin-defile"><table class="cin-tab"><tr><th>f(x)</th><th>f'(x)</th></tr>
+      ${LIGNES.map((l, i) => `<tr><td>${l.f}</td><td class="${i < k ? 'trouve' : i === k ? 'encours' : 'vide'}">${i < k ? l.d : i === k ? '?' : ''}</td></tr>`).join('')}</table></div>`;
+    cours.ajouter(c, `<div class="cours-bloc"><p>Tu connais ces dérivées depuis la première. Retrouve-les toi-même, ligne par ligne.</p></div>`);
+    CIN.aToi(c, LIGNES.map((l, k) => ({ figure: z => { z.innerHTML = table(k); }, parties: [{ type: 'choix', q: `Dérivée de f(x) = ${l.f} :`, options: l.opts.map((x, i) => o(i ? 'f' + i : 'ok', x)), bonne: 'ok',
+      indice: k === 2 ? 'x² se dérive en 2x.' : k === 5 ? 'x³ se dérive en 3x².' : k === 3 ? 'La fonction inverse décroît : sa dérivée est négative.' : k === 4 ? 'Dérivée d\'un quotient : « u prime v moins u v prime, sur v au carré ».' : 'Pense au coefficient directeur de la droite.',
+      solution: `(${l.f})' = ${l.d}` }] })), () => {
+      cours.ajouter(c, `<div class="cle" style="margin-top:14px"><p><b class="cle-titre">Le tableau complet.</b></p>${table(6)}
+          <p>Dans ce chapitre, on n'utilisera que les <b>trois premières lignes</b> : constante, ax et ax². On utilise aussi : <b>la dérivée d'une somme est la somme des dérivées</b>.</p></div>
+        <div class="cle"><p><b class="cle-titre">Les dérivées à connaître, en notation mathématique et en notation physique</b> (x devient t, ' devient ${fr('d', 'dt')}) :</p>
+          <div class="cin-defile"><table class="cin-tab">
+            <tr><th colspan="2">Mathématiques</th><th colspan="2">Physique</th></tr>
+            <tr><th>f(x)</th><th>f'(x)</th><th>f(t)</th><th>${d('f')}</th></tr>
+            <tr><td>cste</td><td>0</td><td>cste</td><td>0</td></tr>
+            <tr><td>ax</td><td>a</td><td>at</td><td>a</td></tr>
+            <tr><td>ax²</td><td>2ax</td><td>at²</td><td>2at</td></tr>
+            <tr><td>ax² + bx + c</td><td>2ax + b</td><td>at² + bt + c</td><td>2at + b</td></tr>
+          </table></div></div>`);
+      cours.continuer(c);
+    }, 'À toi : retrouve les dérivées');
+    return c;
+  },
+
+  // ---------- 5. Exemples ----------
+  (cours) => {
+    const c = cours.carte('5. Dériver en physique : exemples');
+    cours.ajouter(c, `<div class="cours-bloc"><p>On dérive terme à terme, avec le tableau. Le nom de la fonction (f, g, x, v<sub>x</sub>…) ne change rien au calcul : il change seulement l'écriture de la dérivée.</p></div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemples du cours</p>
+        <p class="ph-calc">f(x) = 3x² + 2 : la dérivée par rapport à x est ${d('f', 'x')} = <span class="c">6x</span><br>
+          f(t) = 3t² + 2 : la dérivée par rapport à t est ${d('f')} = <span class="c">6t</span></p>
+        <p>C'est le même calcul : seul le nom de la variable a changé.</p>
+      </div>
+      <p class="er-petit" style="margin-top:10px">Pour répondre, complète les cases (au besoin avec le bouton ± pour un nombre négatif).</p>`);
+    const item = (enonce, nomF, coefs) => ({ parties: [Object.assign(gabaritDerivee(nomF, coefs), { q: enonce })] });
+    CIN.aToi(c, [
+      item(`f(t) = ${poly([1, 5, -3])}. Calcule sa dérivée.`, 'f', [1, 5, -3]),
+      item(`g(t) = ${poly([1, 5, -3])}. Calcule sa dérivée.`, 'g', [1, 5, -3]),
+      item(`x(t) = ${poly([1, 5, -3])}. Calcule sa dérivée.`, 'x', [1, 5, -3]),
+      item('Calcule la dérivée de 8t² par rapport à t.', '', [8, 0, 0]),
+      item(`y(t) = ${poly([0, 8, 8])}. Calcule sa dérivée.`, 'y', [0, 8, 8]),
+      item(`v<sub>x</sub>(t) = ${poly([0, 8, 8])}. Calcule sa dérivée.`, 'v<sub>x</sub>', [0, 8, 8]),
+      item(`z(t) = ${poly([-5, 4, 6])}. Calcule sa dérivée.`, 'z', [-5, 4, 6]),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 6. On peut dériver n'importe quoi ----------
+  (cours) => {
+    const c = cours.carte('6. On peut dériver n\'importe quoi');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>On dérive de la même façon un nombre, une fonction ou un <b>vecteur</b>.</p>
+        <div class="cle"><p><b class="cle-titre">Dériver un vecteur.</b> On dérive chaque coordonnée. Les vecteurs unitaires ${N('i')}, ${N('j')}, ${N('k')} sont constants : ils se comportent comme un coefficient constant.</p>
+          <p class="ph-formule">${N('OM')}(t) = x(t)${N('i')} + y(t)${N('j')} &nbsp;⇒&nbsp; ${d(N('OM'))} = ${d('x')}${N('i')} + ${d('y')}${N('j')}</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemples</p>
+        <p class="ph-calc">Un nombre : la dérivée de 7 est <span class="c">0</span><br>
+          Une fonction : la dérivée de 9t² est <span class="c">18t</span><br>
+          Un vecteur : la dérivée de 9t²${N('i')} (avec ${N('i')} constant) est <span class="c">18t${N('i')}</span><br>
+          ${N('OM')}(t) = 4t²${N('i')} + 3t${N('j')} &nbsp;⇒&nbsp; ${d(N('OM'))} = <span class="c">8t${N('i')} + 3${N('j')}</span></p>
+      </div>`);
+    const I = N('i'), J = N('j');
+    CIN.aToi(c, [
+      { parties: [{ type: 'gabarit', q: `Dérive 5t²${I} par rapport à t (${I} est constant).`, label: `${fr('d', 'dt')}(5t²${I}) =`, morceaux: [{ v: 10 }, ` t${I}`], indice: 'Dérive 5t², et garde i⃗.', solution: `${fr('d', 'dt')}(5t²${I}) = 10t${I}`,
+        diag: v => (v[0] === 5 ? 'La dérivée de 5t² est 2 × 5t = 10t.' : null) }] },
+      { parties: [{ type: 'gabarit', q: `${N('v')}(t) = 2t${I} + 7${J}. Calcule ${d(N('v'))}.`, label: `${d(N('v'))} =`, morceaux: [{ v: 2 }, ` ${I} + `, { v: 0 }, ` ${J}`], indice: 'Dérive chaque coordonnée : 2t → 2 et 7 → 0.', solution: `${d(N('v'))} = 2${I} + 0${J} = 2${I}`,
+        diag: v => (v[1] === 7 ? 'La dérivée de la constante 7 est 0.' : null) }] },
+      { parties: [{ type: 'gabarit', q: `${N('OM')}(t) = (t² + 1)${I} + 4t${J}. Calcule ${d(N('OM'))}.`, label: `${d(N('OM'))} =`, morceaux: ['(', { v: 2 }, ' t + ', { v: 0 }, `) ${I} + `, { v: 4 }, ` ${J}`],
+        indice: 'Dérive x(t) = t² + 1, puis y(t) = 4t.', solution: `${d(N('OM'))} = 2t${I} + 4${J}` }] },
+      { parties: [{ type: 'choix', q: `Que vaut la dérivée du vecteur constant ${N('u')} = 5${I} ${M} 2${J} ?`, options: [o('ok', `${N('0')} (le vecteur nul)`), o('a', `5${I} ${M} 2${J}`), o('b', `5${I}`), o('c', '0 (le nombre)')], bonne: 'ok',
+        indice: 'Les coordonnées 5 et −2 sont des constantes.', solution: `Chaque coordonnée a une dérivée nulle : la dérivée est le vecteur nul ${N('0')}.` }] },
+    ], () => cours.continuer(c, 'Ce qu\'il faut retenir →'));
+    return c;
+  },
+
+  // ---------- À retenir ----------
+  (cours) => {
+    const c = cours.carte('À retenir');
+    cours.ajouter(c, `<div class="cle"><p><b class="cle-titre">Notation.</b> f'(x) = ${d('f', 'x')} ; en physique, la variable est le temps : ${d('f')}, ${d('x')}, ${d('v<sub>x</sub>')}… En haut la fonction, en bas la variable.</p></div>
+      <div class="cle"><p><b class="cle-titre">Origine.</b> ${d('f', 'x')} = (très petite variation de f) / (très petite variation de x) : coefficient directeur de la tangente.</p></div>
+      <div class="cin-attention"><p><b class="cle-titre">Pas de division !</b> Pour calculer ${d('f')}, on dérive f. L'écriture en fraction sert seulement au sens physique et aux unités.</p></div>
+      <div class="cle"><p><b class="cle-titre">Dérivées à connaître.</b> cste → 0 ; at → a ; at² → 2at ; somme → somme des dérivées. Un vecteur se dérive coordonnée par coordonnée.</p></div>
+      <div class="er-actions">
+        <a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur la dérivation →</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Module 4 : position, vitesse, accélération</a>
+      </div>`);
+    return c;
+  },
+]);
+
+CIN.menu('module_3_cours');
+</script>
+</body>
+</html>

@@ -65,6 +65,17 @@
   // signe d'un nombre dans une somme : « + 3 », « − 3 »
   const sgn = (v, txt) => (v < 0 ? ` ${MOINS} ` : ' + ') + (txt == null ? fmt(Math.abs(v)) : txt);
 
+  // écritures de la dérivation : fraction, d/dt, polynôme a t² + b t + c
+  const fr = (h, b) => `<span class="fr"><span>${h}</span><span>${b}</span></span>`;
+  const dd = (f, v) => fr('d' + f, 'd' + (v || 't'));
+  function poly(c, v) {
+    v = v || 't';
+    const deg = c.length - 1;
+    const t = c.map((k, i) => [k, deg - i === 0 ? '' : deg - i === 1 ? v : `${v}${deg - i === 2 ? '²' : deg - i === 3 ? '³' : '<sup>' + (deg - i) + '</sup>'}`]).filter(x => x[0]);
+    if (!t.length) return '0';
+    return t.map(([k, p], i) => (k < 0 ? (i ? ` ${MOINS} ` : MOINS) : (i ? ' + ' : '')) + (Math.abs(k) === 1 && p ? '' : fmt(Math.abs(k))) + p).join('');
+  }
+
   /* ============================================================
      OUTILS
      ============================================================ */
@@ -716,7 +727,7 @@
   }
 
   window.CIN = Object.assign(window.CIN || {}, {
-    MOINS, fmt, cs, sci, lire, proche, sgn, el, secouer, melanger, hasard, entre, champ, PARTIES, analyserIJ,
+    MOINS, fmt, cs, sci, lire, proche, sgn, fr, dd, poly, el, secouer, melanger, hasard, entre, champ, PARTIES, analyserIJ,
     question, serie, aToi, Cours, graphe, menu, GROUPES, confettis,
   });
 })();

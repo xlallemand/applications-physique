@@ -152,6 +152,12 @@
       mode: 'mixte', vecteurs: [], points: [], largeurMax: 560, uMax: 44, uMin: 14 }, opts);
     this.vs = this.o.vecteurs.map(v => Object.assign({ fin: null, etat: null, bloque: false }, v));
     this.sel = this.vs.findIndex(v => !v.fixe);
+    // contrôle : un vecteur à tracer doit pouvoir être tracé entièrement dans le quadrillage
+    this.vs.forEach(v => {
+      if (v.fixe) return;
+      const f = [v.dep[0] + v.coord[0], v.dep[1] + v.coord[1]], o = this.o;
+      if ([v.dep, f].some(p => p[0] < o.xmin || p[0] > o.xmax || p[1] < o.ymin || p[1] > o.ymax)) console.error('VEC : vecteur ' + v.nom + ' hors du quadrillage');
+    });
     this.drag = null;
     this.verrou = this.o.mode === 'aucun';
     this.couleurs = accent();
