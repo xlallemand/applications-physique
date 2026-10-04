@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 : fiche récapitulative — Cinématique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cin.css">
+<script src="../../assets/nav.js"></script>
+<script src="vecteurs.js"></script>
+<script src="cin.js"></script>
+<script src="figures.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page cin-fiche" id="fiche"></div>
+
+<script>
+/* ============================================================
+   Fiche récapitulative du module 5 : repère de Frenet, vitesse,
+   accélération, mouvement circulaire uniforme.
+   ============================================================ */
+const { nomHTML: N, colHTML: col } = VEC;
+const { fr, dd } = CIN;
+const M = CIN.MOINS;
+const UT = N('u_t'), UN = N('u_n');
+const R = h => `<span class="racine">√<span>${h}</span></span>`;
+
+document.getElementById('fiche').innerHTML = `
+  <div class="er-card">
+    <span class="er-badge">MODULE 5 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Le repère de Frenet</h2>
+  </div>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Le repère de Frenet</h3>
+    <div class="cle"><p>Repère attaché au point M (il se déplace avec lui), formé de deux vecteurs unitaires :</p>
+      <ul class="er-liste"><li>${UT} : tangent à la trajectoire, dans le <b>sens du mouvement</b> ;</li><li>${UN} : normal à la trajectoire, orienté <b>vers le centre</b>.</li></ul>
+      <p class="ph-formule">${N('OM')} ${col(0, '−r')} &nbsp; c'est-à-dire &nbsp; ${N('OM')} = ${M}r${UN}</p></div>
+    <div class="cin-fiche-figs deux">
+      <div>${FIG.frenet({ theta: 50, om: true })}<p>Repère de Frenet et vecteur ${N('OM')}</p></div>
+      <div>${FIG.frenet({ theta: 15, v: 80, at: 38, an: 58 })}<p>${N('v')} porté par ${UT} ; ${N('a')} = a<sub>t</sub>${UT} + a<sub>n</sub>${UN}</p></div>
+    </div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Vitesse et accélération</h3>
+    <div class="cle"><p class="ph-formule">${N('v')} = v${UT} &nbsp; ; &nbsp; ${N('v')} ${col('v', 0)}</p>
+      <p>Le vecteur vitesse n'est pas constant, même si v est constante : sa direction change.</p>
+      <p class="ph-formule">${N('a')} = a<sub>t</sub>${UT} + a<sub>n</sub>${UN} &nbsp; avec &nbsp; a<sub>t</sub> = ${dd('v')} &nbsp; et &nbsp; a<sub>n</sub> = ${fr('v²', 'r')}</p>
+      <p>a<sub>t</sub> (tangentielle) : variation de la valeur de la vitesse ; a<sub>n</sub> (normale) : changement de direction. Valeur : <span style="white-space:nowrap">a = ${R('a<sub>t</sub>² + a<sub>n</sub>²')}</span>.</p></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Mouvement circulaire uniforme</h3>
+    <div class="cle"><p>v constante, donc a<sub>t</sub> = ${dd('v')} = 0 :</p>
+      <p class="ph-formule">${N('a')} = ${fr('v²', 'r')}${UN} &nbsp; ; &nbsp; a = ${fr('v²', 'r')} &nbsp; ; &nbsp; v = ${fr('2πr', 'T')}</p>
+      <p>L'accélération est normale à la trajectoire, dirigée <b>vers le centre</b> (centripète). T : période (durée d'un tour).</p></div>
+    ${FIG.frenet({ theta: 60, v: 78, an: 62, ut: false, un: false, traces: 6 })}
+  </section>
+
+  <div class="er-actions cin-fiche-liens">
+    <a class="btn-secondary" style="text-decoration:none" href="module_5_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" style="text-decoration:none" href="module_5_questions.html">Questions sur le repère de Frenet</a>
+  </div>`;
+CIN.menu('fiche_5');
+</script>
+</body>
+</html>

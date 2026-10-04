@@ -5,6 +5,9 @@
    FIG.referentiels()      Soleil, Terre et les trois référentiels
    FIG.train(n)            balle lâchée dans un train, vue dans les deux référentiels
    FIG.velo()              valve d'une roue de vélo dans les deux référentiels
+   FIG.trigo(opts)         vecteur, angle et triangle rectangle (trigonométrie)
+   FIG.frenet(opts)        mouvement circulaire et repère de Frenet
+   FIG.ballon(zone, opts)  ballon lancé : vecteur position (et vitesse), animé
    ============================================================ */
 (function () {
   'use strict';
@@ -242,6 +245,42 @@
     return svg(o.W, o.H, s, 'Mouvement circulaire et repère de Frenet');
   }
 
+  /* ---------- Ballon lancé : x = 2t, y = −t² + 4t (module 4) ----------
+     figure animée (curseur t) : trajectoire, point M, vecteur position et projections ;
+     opts.vitesse : vecteur vitesse (tangent : il ne rejoint jamais un autre point de la trajectoire) */
+  function ballon(zone, opts) {
+    opts = opts || {};
+    const X = t => 2 * t, Y = t => -t * t + 4 * t, VX = () => 2, VY = t => -2 * t + 4;
+    const fmt = window.CIN.fmt, M = window.CIN.MOINS, I = V.nomHTML('i'), J = V.nomHTML('j'), MS = `m·s<sup>${M}1</sup>`;
+    const G = window.CIN.graphe({ xmin: 0, xmax: 9, ymin: 0, ymax: 5, w: 600, h: 360, nomX: 'x (m)', nomY: 'y (m)', m: { g: 34, d: 40, h: 26, b: 30 } });
+    const A = getComputedStyle(document.documentElement).getPropertyValue('--accent-ink').trim() || '#3f2a93';
+    const id = 'bt' + Math.random().toString(36).slice(2, 7);
+    zone.innerHTML = opts.fixe != null ? '<div data-f></div>' : `<div data-f></div><div class="cin-curseur"><label for="${id}">t</label><input type="range" id="${id}" min="0" max="40" value="10" aria-label="Date t"></div><p class="cin-lecture" data-l></p>`;
+    const f = zone.querySelector('[data-f]'), l = zone.querySelector('[data-l]'), cur = zone.querySelector('input');
+    let traj = '';
+    for (let k = 0; k <= 40; k++) traj += `<circle cx="${G.px(X(k / 10))}" cy="${G.py(Y(k / 10))}" r="2" fill="#c9c4b9"/>`;
+    function maj() {
+      const t = cur ? +cur.value / 10 : opts.fixe, x = X(t), y = Y(t), px = G.px(x), py = G.py(y);
+      let s = traj;
+      s += V.pointille(px, py, px, G.py(0), C.vert, 1.6) + V.pointille(px, py, G.px(0), py, C.orange, 1.6);
+      s += V.texte(px, G.py(0) + 28, 'x(t)', 13, C.vert) + V.texte(G.px(0) + 4, py - 6, 'y(t)', 13, C.orange, 'start');
+      s += V.fleche(G.px(0), G.py(0), px, py, A, 3, 12);
+      if (x > .6) s += V.nomSVG('OM', (G.px(0) + px) / 2 - 14, (G.py(0) + py) / 2 - 4, 15, A);
+      if (opts.vitesse) {
+        // assez long pour que la pointe s'écarte nettement de la trajectoire
+        const k = 36, vx = VX(t) * k, vy = VY(t) * k;
+        s += V.fleche(px, py, px + vx, py - vy, '#dc2626', 3, 12);
+        s += V.nomSVG('v', px + vx + 12, py - vy - 4, 15, '#dc2626');
+      }
+      s += `<circle cx="${px}" cy="${py}" r="5.5" fill="${C.encre}"/>` + V.texte(px + 10, py + 18, 'M', 14, C.encre, 'start');
+      f.innerHTML = G.svg(s, 'Trajectoire du point M, vecteur position' + (opts.vitesse ? ' et vecteur vitesse' : ''));
+      if (l) l.innerHTML = `t = ${fmt(t, 1)} s : x = ${fmt(x, 1)} m ; y = ${fmt(y, 1)} m ; ${V.nomHTML('OM')} = ${fmt(x, 1)} ${I} + ${fmt(y, 1)} ${J}` +
+        (opts.vitesse ? `<br><span style="color:#dc2626">v<sub>x</sub> = ${fmt(VX(t), 1)} ${MS} ; v<sub>y</sub> = ${fmt(VY(t), 1)} ${MS}</span>` : '');
+    }
+    if (cur) cur.addEventListener('input', maj);
+    maj();
+  }
+
   /* ============================================================
      FIGURES DES EXERCICES (module 6)
      ============================================================ */
@@ -321,5 +360,5 @@
     return svg(W, H, s, 'Positions successives d\'une nacelle de grande roue');
   }
 
-  window.FIG = { svg, point, chrono, referentiels, train, velo, decomp, directions, trigoCoord, diagTrigo, trigo, frenet, miniGraphe, skieur, ex12, parachute, grandeRoue };
+  window.FIG = { svg, point, chrono, referentiels, train, velo, decomp, directions, trigoCoord, diagTrigo, trigo, frenet, ballon, miniGraphe, skieur, ex12, parachute, grandeRoue };
 })();

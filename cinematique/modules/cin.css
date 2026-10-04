@@ -38,9 +38,18 @@ sub, sup { font-size: .7em; line-height: 0; }
 .ph-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 @media (max-width: 480px) { .ph-tableau th, .ph-tableau td { padding: 5px 7px; font-size: .9rem; } }
 
+/* lien vers la fiche récapitulative du module */
+.cin-lien-fiche { margin-top: 10px !important; font-size: .92rem; font-weight: 700; }
+.cin-lien-fiche a { color: var(--accent-ink); text-decoration: none; }
+.cin-lien-fiche a:hover { text-decoration: underline; }
+
 /* ---------- « À toi » ---------- */
 .ph-atoi { margin-top: 16px; border: 1.5px solid var(--paper-3); border-radius: 20px; padding: 14px 16px 16px; }
-.ph-atoi-t { color: var(--accent); font-weight: 800; font-size: .85rem; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 4px !important; }
+.ph-atoi-tete { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 10px; margin-bottom: 4px; }
+.ph-atoi-t { color: var(--accent); font-weight: 800; font-size: .85rem; letter-spacing: .04em; text-transform: uppercase; }
+/* « Afficher tout le cours » */
+.cin-tout { color: var(--ink-2); }
+.cin-tout:disabled { opacity: .6; cursor: default; }
 .ph-atoi-q + .ph-atoi-q { border-top: 1.5px dashed var(--paper-3); margin-top: 14px; padding-top: 12px; }
 .ph-atoi-titre { font-weight: 800; color: var(--accent-ink); margin-bottom: 6px !important; }
 @media (max-width: 480px) { .ph-atoi { padding: 10px 8px 12px; border-radius: 16px; } }
@@ -192,14 +201,11 @@ sub, sup { font-size: .7em; line-height: 0; }
 @keyframes vec-pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.6); opacity: .3; } }
 @media (prefers-reduced-motion: reduce) { .vec-anneau { animation: none; } }
 
-/* loupe au-dessus du doigt (mode glisser, écran tactile) */
-.vec-loupe {
-  position: absolute; width: 124px; height: 124px; border-radius: 50%; overflow: hidden; z-index: 20;
-  background: #fff; pointer-events: none; box-shadow: 0 0 0 3px var(--accent), 0 10px 26px rgba(22,24,29,.25);
-}
-.vec-loupe svg { display: block; width: 100%; height: 100%; font-family: var(--font-sans); }
+/* valeur représentée par le vecteur en cours de tracé */
+.vec-valeur { margin: 0 0 8px !important; text-align: center; font-size: 1.02rem; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.vec-valeur b { color: var(--accent-ink); font-weight: 800; }
 
-/* flèches pour déplacer la pointe d'un carreau (mode toucher) */
+/* flèches pour déplacer la pointe d'un carreau */
 .vec-pad { display: grid; grid-template-columns: repeat(3, 58px); grid-template-rows: repeat(2, 50px); gap: 6px; justify-content: center; margin-top: 10px; }
 .vec-pad button {
   border: none; border-radius: 14px; background: var(--paper); color: var(--ink); cursor: pointer;
@@ -256,6 +262,8 @@ sub, sup { font-size: .7em; line-height: 0; }
 @media (max-width: 360px) { .cin-ij-clavier { grid-template-columns: repeat(4, 52px); } }
 
 /* graphiques et figures */
+.cin-image { margin: 4px 0 12px; }
+.cin-image img { display: block; width: 100%; max-width: 640px; height: auto; margin: 0 auto; border-radius: 14px; }
 .cin-graphe { display: block; width: 100%; height: auto; max-width: 640px; margin: 8px auto; touch-action: pan-y; }
 .cin-fig { display: block; width: 100%; height: auto; margin: 8px auto; }
 .cin-fig text { font-family: var(--font-sans); }
@@ -267,12 +275,24 @@ sub, sup { font-size: .7em; line-height: 0; }
 .cin-attention { background: var(--danger-bg); border-radius: 18px; padding: 14px 18px; margin: 12px 0; }
 .cin-attention .cle-titre { color: var(--danger-text); }
 
+/* système de coordonnées avec une accolade (CIN.sys) : l'accolade suit la hauteur des lignes */
+.cin-sys { display: inline-flex; align-items: stretch; vertical-align: middle; gap: .3em; margin: .15em 0; }
+.cin-acc { display: flex; flex-direction: column; width: .55em; flex-shrink: 0; }
+.cin-acc svg { display: block; width: 100%; height: auto; overflow: visible; }
+.cin-acc path { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.cin-acc i { flex: 1; margin-left: calc(50% - .8px); border-left: 1.6px solid currentColor; }
+.cin-sys-l { display: flex; flex-direction: column; justify-content: center; gap: 2px; text-align: left; }
+/* « complète ton cours » (exemples du cours trouvés par l'élève) */
+.cin-complete { margin-top: 8px !important; padding: 8px 12px; border-radius: 12px; background: var(--sheet); font-weight: 600; }
+.cin-complete b:first-child { color: var(--accent-ink); }
+
 /* fractions (notations d/dt) */
 .fr { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.15; margin: 0 .12em; font-size: .92em; }
 .fr > span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 .2em .05em; }
 .fr > span:last-child { padding: .05em .2em 0; }
 .ph-formule .fr, .ph-calc .fr { font-size: .85em; }
 .racine { white-space: nowrap; }
+.cin-nobr { white-space: nowrap; display: inline-block; }
 .racine > span { border-top: 1.5px solid currentColor; padding: 0 .15em; margin-left: .05em; }
 
 /* tableau de dérivées et tableaux du cours */
@@ -294,3 +314,14 @@ sub, sup { font-size: .7em; line-height: 0; }
 .cin-choix-fig .ph-choix button { padding: 8px; }
 .cin-choix-fig .ph-choix svg { width: 130px; }
 
+
+/* ---------- Fiches récapitulatives ---------- */
+.cin-fiche .er-card { margin-bottom: 14px; }
+.cin-fiche-figs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+.cin-fiche-figs.deux { grid-template-columns: repeat(2, 1fr); }
+.cin-fiche-figs > div { min-width: 0; text-align: center; }
+.cin-fiche-figs > div > p, .cin-fiche-leg { font-size: .88rem; font-weight: 600; color: var(--ink-2); line-height: 1.45; text-align: center; }
+.cin-fiche-leg { margin-top: 4px !important; }
+.cin-fiche-figs .cin-tab { margin: 6px auto; }
+.cin-fiche-liens { justify-content: center; }
+@media (max-width: 640px) { .cin-fiche-figs, .cin-fiche-figs.deux { grid-template-columns: 1fr; } }

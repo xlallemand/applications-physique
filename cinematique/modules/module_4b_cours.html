@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : le vecteur vitesse — Cinématique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cin.css">
+<script src="../../assets/nav.js"></script>
+<script src="vecteurs.js"></script>
+<script src="cin.js"></script>
+<script src="figures.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 2/4</span>
+    <h2 class="er-titre">Le vecteur vitesse</h2>
+    <p class="er-contexte">Le vecteur vitesse indique dans quelle direction et à quelle vitesse se déplace le point. On l'obtient en dérivant le vecteur position (module 3). On travaille dans le repère (O, <span class="vec-nom">i</span>, <span class="vec-nom">j</span>) ; un seul exemple est en trois dimensions.</p>
+    <p class="cin-lien-fiche"><a href="fiche_4.html">Fiche récapitulative du module 4 →</a></p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes : notion, exemple, puis exemples semblables
+   faits par l'élève (« À toi »).
+   ============================================================ */
+const { nomHTML: N, colHTML: col } = VEC;
+const { fmt, fr, dd, poly, sys } = CIN;
+const M = CIN.MOINS;
+const o = (id, label) => ({ id, label });
+const I = N('i'), J = N('j'), K = N('k');
+const MS = `m·s<sup>${M}1</sup>`;
+const R = h => `<span class="racine">√<span>${h}</span></span>`;
+// réponse d'un exemple du cours : l'élève la recopie dans son cours
+const aCompleter = h => `<p class="cin-complete"><b>✍ Complète ton cours :</b> ${h}</p>`;
+
+new CIN.Cours(document.getElementById('etapes'), [
+
+  // ---------- 1. Définition ----------
+  (cours) => {
+    const c = cours.carte('1. Le vecteur vitesse');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <div class="cle">
+          <p><b class="cle-titre">Définition.</b> Le vecteur vitesse est la dérivée par rapport au temps du vecteur position :</p>
+          <p class="ph-formule">${N('v')}(t) = ${dd(N('OM') + '(t)')} &nbsp; ou simplement &nbsp; ${N('v')} = ${dd(N('OM'))} &nbsp; (en pratique : ${N('v')} = ${N('OM')}')</p>
+          <p>Il est <b>tangent à la trajectoire</b> et dirigé dans le <b>sens du mouvement</b>.</p>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Le ballon : vecteur vitesse tangent à la trajectoire</p>
+        <p>Fais varier t : le vecteur vitesse (en rouge) reste tangent à la trajectoire, dans le sens du mouvement. Sa longueur change : le ballon ralentit en montant, puis accélère en descendant.</p>
+        <div data-x="anim"></div>
+      </div>`);
+    FIG.ballon(c.querySelector('[data-x="anim"]'), { vitesse: true });
+    CIN.aToi(c, [
+      { parties: [{ type: 'choix', q: 'Le vecteur vitesse d\'un point est toujours :', colonne: true, options: [o('ok', 'tangent à la trajectoire, dans le sens du mouvement'), o('a', 'dirigé vers l\'origine O du repère'), o('b', 'perpendiculaire à la trajectoire'), o('c', 'vertical')], bonne: 'ok',
+        indice: 'Regarde la flèche rouge sur l\'animation.', solution: 'Le vecteur vitesse est tangent à la trajectoire et dirigé dans le sens du mouvement.' }] },
+      { parties: [{ type: 'choix', q: 'Le vecteur vitesse est :', colonne: true, options: [o('ok', `la dérivée du vecteur position par rapport au temps : ${N('v')} = ${dd(N('OM'))}`), o('a', `le vecteur position divisé par le temps : ${N('v')} = ${N('OM')} / t`), o('b', 'la dérivée du temps par rapport à la position'), o('c', `égal au vecteur position ${N('OM')}`)], bonne: 'ok',
+        indice: 'On dérive, on ne divise pas (module 3).', solution: `${N('v')} = ${dd(N('OM'))} : c'est une dérivée, pas une division.` }] },
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 2. Coordonnées et valeur ----------
+  (cours) => {
+    const c = cours.carte('2. Coordonnées et valeur de la vitesse');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <div class="cle">
+          <p><b class="cle-titre">Coordonnées.</b> Ce sont les dérivées des coordonnées du vecteur position :</p>
+          <p class="ph-formule">${N('v')}(t) ${col(`v<sub>x</sub>(t) = ${dd('x')}`, `v<sub>y</sub>(t) = ${dd('y')}`)} &nbsp; (en pratique : x' et y')</p>
+          <p><b class="cle-titre">Unité.</b> v<sub>x</sub> et v<sub>y</sub> en ${MS} : ${dd(N('OM'))} donne bien des m divisés par des s.</p>
+          <p><b class="cle-titre">Valeur de la vitesse</b> (module du vecteur vitesse) : <span style="white-space:nowrap">v = ${R('v<sub>x</sub>² + v<sub>y</sub>²')}</span>, en ${MS}.</p>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple : le ballon</p>
+        <p class="ph-calc">x(t) = 2t &nbsp;⇒&nbsp; v<sub>x</sub> = ${dd('x')} = 2 &nbsp;;&nbsp; y(t) = ${poly([-1, 4, 0])} &nbsp;⇒&nbsp; v<sub>y</sub> = ${dd('y')} = ${poly([-2, 4])}<br>
+          ${N('v')}(t) = 2${I} + (${poly([-2, 4])})${J}<br>
+          À t = 1 s : v<sub>x</sub> = 2 ${MS} ; v<sub>y</sub> = ${M}2 × 1 + 4 = 2 ${MS} ; v = ${R('2² + 2²')} = ${R('8')} ≈ <span class="c">2,8 ${MS}</span></p>
+      </div>`);
+    CIN.aToi(c, [
+      { titre: `Un point M a pour coordonnées x(t) = ${poly([2, -3, 0])} et y(t) = ${poly([5, 1])} (en m, t en s).`, parties: [
+        { type: 'gabarit', q: 'Calcule v<sub>x</sub>(t).', label: `v<sub>x</sub> = ${dd('x')} =`, morceaux: [{ v: 4 }, ' t + ', { v: -3 }], indice: 'Dérive x(t) : 2t² → 4t ; −3t → −3.', solution: `v<sub>x</sub> = ${poly([4, -3])}`,
+          diag: v => (v[0] === 2 ? 'La dérivée de 2t² est 4t.' : null) },
+        { type: 'gabarit', q: 'Calcule v<sub>y</sub>(t).', label: `v<sub>y</sub> = ${dd('y')} =`, morceaux: [{ v: 5 }], indice: 'Dérive y(t) = 5t + 1.', solution: 'v<sub>y</sub> = 5' },
+        { type: 'gabarit', q: `Écris le vecteur vitesse ${N('v')}(t) avec ${I} et ${J}.`, label: `${N('v')}(t) =`, morceaux: ['(', { v: 4 }, ' t + ', { v: -3 }, `) ${I} + `, { v: 5 }, ` ${J}`], indice: `${N('v')} = v<sub>x</sub>${I} + v<sub>y</sub>${J}.`, solution: `${N('v')}(t) = (${poly([4, -3])})${I} + 5${J}` },
+        { type: 'nombre', q: 'Calcule la valeur de la vitesse à t = 2 s, arrondie au dixième.', label: 'v(2) ≈', valeur: Math.sqrt(50), tol: .051, dec: 1, unite: MS,
+          diag: v => (Math.abs(v - 10) < .06 ? 'On n\'additionne pas les coordonnées : v = √(vx² + vy²).' : Math.abs(v - 50) < .1 ? 'Tu as oublié la racine carrée.' : null),
+          indice: 'Calcule d\'abord vx(2) et vy(2), puis v = √(vx² + vy²).', solution: `v<sub>x</sub>(2) = 4 × 2 − 3 = 5 ${MS} ; v<sub>y</sub>(2) = 5 ${MS} ; v = ${R('5² + 5²')} = ${R('50')} ≈ 7,1 ${MS}` }] },
+      { parties: [{ type: 'choix', q: `x est en m et t en s. v<sub>x</sub> = ${dd('x')} s'exprime en :`, options: [o('ok', MS), o('a', 'm'), o('b', `m·s<sup>${M}2</sup>`), o('c', 'm·s')], bonne: 'ok',
+        indice: 'Utilise l\'écriture en fraction : m / s.', solution: `${dd('x')} → m / s = ${MS}.` }] },
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 3. Exemple du cours en 3D, trouvé par l'élève ----------
+  (cours) => {
+    const c = cours.carte('3. Exemple du cours (en trois dimensions)');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>En trois dimensions, la méthode est la même : on dérive aussi z(t), et la valeur de la vitesse est v = √(v<sub>x</sub>² + v<sub>y</sub>² + v<sub>z</sub>²).</p>
+        <p>À toi de trouver les résultats de l'exemple du cours, puis complète ton cours.</p>
+      </div>`);
+    const enonce = `<p>Dans une base (O, ${I}, ${J}, ${K}), le point M a pour coordonnées ${sys('x(t) = 3t + 2', 'y(t) = 0', 'z(t) = 5t² + 4t + 6')}</p>`;
+    CIN.aToi(c, [
+      { enonce, parties: [
+        { type: 'gabarit', q: 'Calcule v<sub>x</sub>.', label: `v<sub>x</sub> = ${dd('x')} =`, morceaux: [{ v: 3 }], indice: 'Dérive x(t) = 3t + 2.', diag: v => (v[0] === 5 ? 'La dérivée de la constante 2 est 0.' : null),
+          solution: aCompleter(`v<sub>x</sub> = ${dd('x')} = 3`) },
+        { type: 'gabarit', q: 'Calcule v<sub>y</sub>.', label: `v<sub>y</sub> = ${dd('y')} =`, morceaux: [{ v: 0 }], indice: 'y(t) = 0 est une constante.',
+          solution: aCompleter(`v<sub>y</sub> = ${dd('y')} = 0`) },
+        { type: 'gabarit', q: 'Calcule v<sub>z</sub>.', label: `v<sub>z</sub> = ${dd('z')} =`, morceaux: [{ v: 10 }, ' t + ', { v: 4 }], indice: 'Dérive terme à terme : 5t² → 10t ; 4t → 4 ; 6 → 0.',
+          diag: v => (v[0] === 5 ? 'La dérivée de 5t² est 10t.' : v[1] === 10 || v[1] === 6 ? 'La dérivée de 4t est 4, celle de la constante 6 est 0.' : null),
+          solution: aCompleter(`v<sub>z</sub> = ${dd('z')} = 10t + 4`) },
+        { type: 'gabarit', q: `Écris le vecteur vitesse ${N('v')} avec ${I}, ${J} et ${K}.`, label: `${N('v')} =`, morceaux: [{ v: 3 }, ` ${I} + `, { v: 0 }, ` ${J} + (`, { v: 10 }, ' t + ', { v: 4 }, `) ${K}`], indice: `${N('v')} = v<sub>x</sub>${I} + v<sub>y</sub>${J} + v<sub>z</sub>${K}.`,
+          solution: aCompleter(`${N('OM')} = (3t + 2)${I} + (5t² + 4t + 6)${K} &nbsp;;&nbsp; ${N('v')} = 3${I} + (10t + 4)${K}`) }] },
+    ], () => cours.continuer(c, 'Ce qu\'il faut retenir →'));
+    return c;
+  },
+
+  // ---------- À retenir ----------
+  (cours) => {
+    const c = cours.carte('À retenir');
+    cours.ajouter(c, `<div class="cle"><p><b class="cle-titre">Vecteur vitesse.</b> ${N('v')} = ${dd(N('OM'))} : tangent à la trajectoire, dans le sens du mouvement.</p></div>
+      <div class="cle"><p><b class="cle-titre">Coordonnées.</b> v<sub>x</sub> = ${dd('x')}, v<sub>y</sub> = ${dd('y')} (et v<sub>z</sub> = ${dd('z')} en 3D), en ${MS}.</p></div>
+      <div class="cle"><p><b class="cle-titre">Valeur.</b> v = √(v<sub>x</sub>² + v<sub>y</sub>²), en ${MS}.</p></div>
+      <div class="er-actions">
+        <a class="btn-primary" style="text-decoration:none" href="module_4b_questions.html">Questions sur le vecteur vitesse →</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_4c_cours.html">Cours : le vecteur accélération</a>
+        <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a>
+      </div>`);
+    return c;
+  },
+]);
+
+CIN.menu('module_4b_cours');
+</script>
+</body>
+</html>

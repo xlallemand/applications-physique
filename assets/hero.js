@@ -244,12 +244,14 @@
       }
       // projectiles : x = v0x t, y = v0y t − g t² / 2
       [[w * .5, h * .92, 95, -150, .55, 1], [w * .6, h * .95, 120, -110, .32, .8]].forEach(([x0, y0, vx, vy, a, k]) => {
-        const g = 60, dt = .28 * k, n = Math.ceil((2 * -vy / g) / dt) + 2;
+        const g = 60, dt = .5 * k, n = Math.ceil((2 * -vy / g) / dt) + 2;
         for (let i = 0; i < n; i++) {
           const t = i * dt, x = x0 + vx * t * k * 1.6, y = y0 + (vy * t + g * t * t / 2) * k * 1.6;
           if (x > w + 10) break;
           ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(x, y, 3.2, 0, 7); ctx.fill();
-          if (i === 2 || i === Math.floor(n / 2) || i === n - 3) fleche(x, y, vx * .45, (vy + g * t) * .45, a * .9);
+          // vecteur vitesse tangent, long d'un demi-intervalle : il ne rejoint pas la position suivante
+          const e = dt * k * 1.6 * .5;
+          if (i === 2 || i === Math.floor(n / 2) || i === n - 3) fleche(x, y, vx * e, (vy + g * t) * e, a * .9);
         }
       });
       // mouvement circulaire : vecteur vitesse tangent, accélération vers le centre

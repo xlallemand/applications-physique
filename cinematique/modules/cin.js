@@ -76,6 +76,11 @@
     return t.map(([k, p], i) => (k < 0 ? (i ? ` ${MOINS} ` : MOINS) : (i ? ' + ' : '')) + (Math.abs(k) === 1 && p ? '' : fmt(Math.abs(k))) + p).join('');
   }
 
+  // système de coordonnées avec une accolade à sa hauteur : sys('x(t) = 3t + 2', 'y(t) = 0', …)
+  const ACC = '<span class="cin-acc" aria-hidden="true"><svg viewBox="0 0 10 8"><path d="M10,1 Q5,1 5,8"/></svg><i></i>' +
+    '<svg viewBox="0 0 10 14"><path d="M5,0 Q5,7 0,7 Q5,7 5,14"/></svg><i></i><svg viewBox="0 0 10 8"><path d="M5,0 Q5,7 10,7"/></svg></span>';
+  const sys = (...l) => `<span class="cin-sys">${ACC}<span class="cin-sys-l">${l.map(x => `<span>${x}</span>`).join('')}</span></span>`;
+
   /* ============================================================
      OUTILS
      ============================================================ */
@@ -415,7 +420,7 @@
     };
   }
 
-  // Vecteurs à tracer : p.repere = options de VEC.Repere (vecteurs à tracer avec leurs coordonnées)
+  // Vecteurs à tracer : p.repere = options de VEC.Repere (vecteurs à tracer avec leurs coordonnées), p.diag(v, code)
   function pTracer(zone, p, api) {
     const d = el('div', 'cin-tracer');
     zone.appendChild(d);
@@ -431,7 +436,9 @@
         return;
       }
       const maj = t => t.charAt(0).toUpperCase() + t.slice(1);
-      api.erreur(faux.map(x => (res.length > 1 ? `<b>${V.nomHTML(x.v.nom)}</b> : ${V.message(x.code, r.o.unitaires || p.unites)}` : maj(V.message(x.code, r.o.unitaires || p.unites)))).join('<br>') +
+      // p.diag(vecteur, code) : message propre à la question (ou rien : message général)
+      const msg = x => (p.diag && p.diag(x.v, x.code)) || V.message(x.code, r.o.unitaires || p.unites);
+      api.erreur(faux.map(x => (res.length > 1 ? `<b>${V.nomHTML(x.v.nom)}</b> : ${msg(x)}` : maj(msg(x)))).join('<br>') +
         (vides.length ? `<br>Il reste aussi à tracer : ${vides.map(x => V.nomHTML(x.v.nom)).join(', ')}.` : '') +
         (res.length > 1 && res.some(x => x.code === 'ok') ? '<br><span class="er-petit">Les vecteurs justes (en vert) sont bloqués.</span>' : ''));
       secouer(d);
@@ -478,26 +485,48 @@
   const PARTIES = { choix: pChoix, nombre: pNombre, coord: pCoord, ij: pIJ, gabarit: pGabarit, tracer: pTracer, sci: pSci };
 
   /* ============================================================
+     « AFFICHER TOUT LE COURS »
+     Les questions et les « À toi » en cours s'inscrivent ici. Quand
+     l'élève demande tout le cours, chacun « se déplie » : toutes ses
+     parties sont affichées d'un coup, avec le bouton « Afficher la
+     réponse » disponible tout de suite. CIN.tout reste vrai ensuite :
+     les nouvelles questions s'affichent directement dépliées.
+     ============================================================ */
+  const vivants = new Set();
+
+  /* ============================================================
      UNE QUESTION : parties successives
      q = { parties: [p] } ; p = { type, q (texte), figure(zone), solution (HTML affiché après), … }
      mode : 'serie'    bouton « Afficher la réponse » (0 point pour la question)
             'exercice' bouton « Voir la correction » toujours disponible
             'cours'    « Afficher la réponse » proposé après une erreur
+                       (ou tout de suite quand tout le cours est affiché)
      cb.fin(points) : 2 sans erreur, 1 après au moins une erreur, 0 si une réponse est affichée
      ============================================================ */
   function question(zone, q, cb, mode) {
     mode = mode || 'serie';
     const etat = { erreurs: 0, vue: false, fini: false, details: [] };
-    let k = 0;
+    const n = q.parties.length, aides = [];
+    let rendues = 0, finies = 0, deplie = false;
     const libAide = mode === 'exercice' ? 'Voir la correction' : 'Afficher la réponse';
+    // « Afficher tout le cours » : les parties restantes apparaissent d'un coup
+    const inst = {
+      deplier() {
+        if (deplie) return;
+        deplie = true;
+        aides.forEach(a => a.classList.remove('hidden'));
+        while (rendues < n) partie();
+      },
+    };
     function partie() {
-      const p = q.parties[k];
+      const p = q.parties[rendues++];
       window.CIN.partieEnCours = p;          // partie en cours (utile pour vérifier l'application)
       const d = el('div', 'ph-partie', `${p.q ? `<div class="ph-partie-q">${p.q}</div>` : ''}<div class="ph-partie-fig"></div><div class="ph-partie-zone"></div><div class="ph-partie-retour"></div>
-        <div class="ph-partie-aide${mode === 'cours' ? ' hidden' : ''}"><button type="button" class="btn-small">${libAide}</button></div>`);
+        <div class="ph-partie-aide${mode === 'cours' && !deplie ? ' hidden' : ''}"><button type="button" class="btn-small">${libAide}</button></div>`);
       zone.appendChild(d);
       if (p.figure) p.figure(d.querySelector('.ph-partie-fig'));
       const ret = d.querySelector('.ph-partie-retour'), aide = d.querySelector('.ph-partie-aide'), bRep = aide.querySelector('button');
+      aides.push(aide);
       let finie = false, erreursIci = 0;
       const api = {
         fini: () => finie || etat.fini,
@@ -524,15 +553,24 @@
         } else if (!silencieux) {
           ret.innerHTML = '<p class="ph-ok">✓ Juste</p>';
         } else ret.innerHTML = '';
-        k++;
-        if (k < q.parties.length) {
-          partie();
-          const n = zone.lastElementChild;
-          setTimeout(() => n.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
-        } else { etat.fini = true; cb.fin(etat.vue ? 0 : etat.erreurs ? 1 : 2, etat); }
+        finies++;
+        if (finies < n) {
+          // partie suivante (déjà affichée si tout le cours est déplié)
+          if (!deplie && rendues < n) {
+            partie();
+            const s = zone.lastElementChild;
+            setTimeout(() => s.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+          }
+        } else {
+          etat.fini = true;
+          vivants.delete(inst);
+          cb.fin(etat.vue ? 0 : etat.erreurs ? 1 : 2, etat);
+        }
       }
     }
+    if (mode === 'cours') vivants.add(inst);
     partie();
+    if (mode === 'cours' && window.CIN.tout) inst.deplier();
   }
 
   /* ============================================================
@@ -618,19 +656,39 @@
      ============================================================ */
   function aToi(zone, items, onFini, titre) {
     const box = el('div', 'ph-atoi');
-    box.innerHTML = `<p class="ph-atoi-t">${titre || 'À toi'}</p>`;
+    box.innerHTML = `<div class="ph-atoi-tete"><p class="ph-atoi-t">${titre || 'À toi'}</p></div>`;
     zone.appendChild(box);
-    let i = 0;
-    function suivant() {
-      if (i >= items.length) { if (onFini) onFini(); return; }
-      const it = items[i];
+    let i = 0, deplie = false, termine = false;
+    // « Afficher tout le cours » : toutes les questions restantes, puis la suite du cours
+    const inst = {
+      deplier() {
+        if (deplie) return;
+        deplie = true;
+        while (i < items.length) rendre(i++);
+        finir();
+      },
+    };
+    function finir() {
+      if (termine) return;
+      termine = true;
+      vivants.delete(inst);
+      if (onFini) onFini();
+    }
+    function rendre(k) {
+      const it = items[k];
       const d = el('div', 'ph-atoi-q', `${it.titre ? `<p class="ph-atoi-titre">${it.titre}</p>` : ''}${it.enonce ? `<div class="ph-enonce">${it.enonce}</div>` : ''}<div class="ph-atoi-fig"></div><div></div>`);
       box.appendChild(d);
       if (it.figure) it.figure(d.querySelector('.ph-atoi-fig'));
-      question(d.lastElementChild, it, { fin() { i++; suivant(); } }, 'cours');
-      if (i > 0) setTimeout(() => d.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+      question(d.lastElementChild, it, { fin() { if (!deplie) suivant(); } }, 'cours');
+      if (k > 0 && !deplie) setTimeout(() => d.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
     }
+    function suivant() {
+      if (i >= items.length) { finir(); return; }
+      rendre(i++);
+    }
+    vivants.add(inst);
     suivant();
+    if (window.CIN.tout) inst.deplier();
     return box;
   }
 
@@ -642,8 +700,10 @@
      cours.continuer(carte) pour proposer l'étape suivante.
      ============================================================ */
   function Cours(zone, etapes) {
-    this.zone = zone; this.etapes = etapes; this.n = 0;
+    this.zone = zone; this.etapes = etapes; this.n = 0; this.attente = null; this.bouton = null;
+    vivants.add(this);
     this.lancer(0);
+    this.boutonTout();
   }
   Cours.prototype.carte = function (titre) {
     const c = el('section', 'er-card er-etape');
@@ -658,20 +718,60 @@
   };
   Cours.prototype.lancer = function (n) {
     this.n = n;
-    return this.etapes[n](this);
+    const c = this.etapes[n](this);
+    if (n === this.etapes.length - 1) this.toutEstAffiche();
+    return c;
   };
   // bouton « Continuer » : affiche l'étape suivante et la fait défiler à l'écran
+  // (quand tout le cours est affiché, l'étape suivante apparaît directement)
   Cours.prototype.continuer = function (parent, texte) {
-    const moi = this;
     if (this.n + 1 >= this.etapes.length) return;
+    if (window.CIN.tout) { this.lancer(this.n + 1); return; }
     const d = this.ajouter(parent, `<div class="er-suite"><button type="button" class="btn-primary">${texte || 'Continuer →'}</button></div>`);
-    d.querySelector('button').onclick = () => {
-      d.remove();
-      moi.zone.style.pointerEvents = 'none';
-      setTimeout(() => { moi.zone.style.pointerEvents = ''; }, 400);
-      const c = moi.lancer(moi.n + 1);
-      if (c) setTimeout(() => c.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
-    };
+    this.attente = d;
+    d.querySelector('button').onclick = () => this.suivante(true);
+  };
+  Cours.prototype.suivante = function (defiler) {
+    const d = this.attente;
+    if (!d) return;
+    this.attente = null;
+    d.remove();
+    if (defiler) {
+      // évite qu'un double appui sur « Continuer » réponde à l'étape suivante
+      this.zone.style.pointerEvents = 'none';
+      setTimeout(() => { this.zone.style.pointerEvents = ''; }, 400);
+    }
+    const c = this.lancer(this.n + 1);
+    if (c && defiler) setTimeout(() => c.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
+  };
+  Cours.prototype.deplier = function () { this.suivante(false); };
+
+  // bouton « Afficher tout le cours », dans le premier « À toi », près de la première question
+  Cours.prototype.boutonTout = function () {
+    const tete = this.zone.querySelector('.ph-atoi-tete');
+    if (!tete) return;
+    const b = el('button', 'btn-small cin-tout', 'Afficher tout le cours');
+    b.type = 'button';
+    b.title = 'Affiche toutes les parties du cours sans avoir à répondre aux questions (tu peux toujours y répondre)';
+    tete.appendChild(b);
+    this.bouton = b;
+    if (this.n === this.etapes.length - 1) this.toutEstAffiche();
+    b.onclick = () => this.toutAfficher();
+  };
+  Cours.prototype.toutAfficher = function () {
+    const b = this.bouton;
+    if (!b || b.disabled) return;
+    // la position de la page ne bouge pas : on garde le bouton au même endroit à l'écran
+    const avant = b.getBoundingClientRect().top;
+    window.CIN.tout = true;
+    Array.from(vivants).forEach(x => x.deplier());
+    this.toutEstAffiche();
+    window.scrollBy(0, b.getBoundingClientRect().top - avant);
+  };
+  Cours.prototype.toutEstAffiche = function () {
+    if (!this.bouton) return;
+    this.bouton.disabled = true;
+    this.bouton.textContent = 'Tout le cours est affiché';
   };
 
   /* ============================================================
@@ -719,24 +819,35 @@
     { title: 'Module 1 · Référentiel', items: [
       { key: 'module_1_cours', label: 'Cours : référentiel et trajectoire' },
       { key: 'module_1_questions', label: 'Questions sur le référentiel' },
+      { key: 'fiche_1', label: 'Fiche récapitulative' },
     ]},
     { title: 'Module 2 · Les vecteurs', items: [
       { key: 'module_2_cours', label: 'Cours : coordonnées d\'un vecteur' },
       { key: 'module_2_questions', label: 'Questions : lire et tracer' },
       { key: 'module_2b_cours', label: 'Cours : module et trigonométrie' },
       { key: 'module_2b_questions', label: 'Questions : module et trigonométrie' },
+      { key: 'fiche_2', label: 'Fiche récapitulative' },
     ]},
     { title: 'Module 3 · Dérivation en physique', items: [
       { key: 'module_3_cours', label: 'Cours : dériver en physique' },
       { key: 'module_3_questions', label: 'Questions sur la dérivation' },
+      { key: 'fiche_3', label: 'Fiche récapitulative' },
     ]},
     { title: 'Module 4 · Position, vitesse, accélération', items: [
-      { key: 'module_4_cours', label: 'Cours : position, vitesse, accélération' },
-      { key: 'module_4_questions', label: 'Questions : vitesse et accélération' },
+      { key: 'module_4a_cours', label: 'Cours : le vecteur position' },
+      { key: 'module_4a_questions', label: 'Questions sur le vecteur position' },
+      { key: 'module_4b_cours', label: 'Cours : le vecteur vitesse' },
+      { key: 'module_4b_questions', label: 'Questions sur le vecteur vitesse' },
+      { key: 'module_4c_cours', label: 'Cours : le vecteur accélération' },
+      { key: 'module_4c_questions', label: 'Questions sur le vecteur accélération' },
+      { key: 'module_4d_cours', label: 'Cours : détermination expérimentale de <span class="vec-nom">v</span> et de <span class="vec-nom">a</span>' },
+      { key: 'module_4d_questions', label: 'Questions : détermination expérimentale' },
+      { key: 'fiche_4', label: 'Fiche récapitulative' },
     ]},
     { title: 'Module 5 · Repère de Frenet', items: [
       { key: 'module_5_cours', label: 'Cours : le repère de Frenet' },
       { key: 'module_5_questions', label: 'Questions sur le repère de Frenet' },
+      { key: 'fiche_5', label: 'Fiche récapitulative' },
     ]},
     { title: 'Module 6 · Exercices', items: [
       { key: 'module_6', label: 'Exercices du cours' },
@@ -772,7 +883,7 @@
   }
 
   window.CIN = Object.assign(window.CIN || {}, {
-    MOINS, fmt, cs, sci, lire, proche, sgn, fr, dd, poly, el, secouer, melanger, hasard, entre, champ, PARTIES, analyserIJ,
+    MOINS, fmt, cs, sci, lire, proche, sgn, fr, dd, poly, sys, el, secouer, melanger, hasard, entre, champ, PARTIES, analyserIJ,
     question, serie, aToi, Cours, graphe, menu, GROUPES, confettis,
   });
 })();

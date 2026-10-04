@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : le vecteur accélération — Cinématique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cin.css">
+<script src="../../assets/nav.js"></script>
+<script src="vecteurs.js"></script>
+<script src="cin.js"></script>
+<script src="figures.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 3/4</span>
+    <h2 class="er-titre">Le vecteur accélération</h2>
+    <p class="er-contexte">Le vecteur accélération décrit comment varie le vecteur vitesse. On l'obtient en dérivant le vecteur vitesse. On travaille dans le repère (O, <span class="vec-nom">i</span>, <span class="vec-nom">j</span>) ; un seul exemple est en trois dimensions.</p>
+    <p class="cin-lien-fiche"><a href="fiche_4.html">Fiche récapitulative du module 4 →</a></p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes : notion, exemple, puis exemples semblables
+   faits par l'élève (« À toi »).
+   ============================================================ */
+const { nomHTML: N, colHTML: col } = VEC;
+const { fmt, fr, dd, poly, sys } = CIN;
+const M = CIN.MOINS;
+const o = (id, label) => ({ id, label });
+const I = N('i'), J = N('j'), K = N('k');
+const MS = `m·s<sup>${M}1</sup>`, MS2 = `m·s<sup>${M}2</sup>`;
+const R = h => `<span class="racine">√<span>${h}</span></span>`;
+// réponse d'un exemple du cours : l'élève la recopie dans son cours
+const aCompleter = h => `<p class="cin-complete"><b>✍ Complète ton cours :</b> ${h}</p>`;
+
+new CIN.Cours(document.getElementById('etapes'), [
+
+  // ---------- 1. Définition ----------
+  (cours) => {
+    const c = cours.carte('1. Le vecteur accélération');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <div class="cle">
+          <p><b class="cle-titre">Définition.</b> Le vecteur accélération est la dérivée par rapport au temps du vecteur vitesse :</p>
+          <p class="ph-formule">${N('a')}(t) = ${dd(N('v') + '(t)')} &nbsp; ou &nbsp; ${N('a')} = ${dd(N('v'))} &nbsp; (en pratique : ${N('a')} = ${N('v')}')</p>
+          <p>L'accélération représente la <b>variation du vecteur vitesse</b> : variation de sa valeur, ou de sa direction.</p>
+          <p><b class="cle-titre">Coordonnées.</b> ${N('a')}(t) ${col(`a<sub>x</sub> = ${dd('v<sub>x</sub>')}`, `a<sub>y</sub> = ${dd('v<sub>y</sub>')}`)}</p>
+          <p><b class="cle-titre">Unité.</b> a<sub>x</sub> et a<sub>y</sub> en ${MS2} : ${dd('v<sub>x</sub>')} donne des m·s<sup>${M}1</sup> divisés par des s.</p>
+          <p><b class="cle-titre">Valeur de l'accélération.</b> <span style="white-space:nowrap">a = ${R('a<sub>x</sub>² + a<sub>y</sub>²')}</span>, en ${MS2}.</p>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple : le ballon</p>
+        <p class="ph-calc">v<sub>x</sub> = 2 ⇒ a<sub>x</sub> = 0 &nbsp;;&nbsp; v<sub>y</sub> = ${poly([-2, 4])} ⇒ a<sub>y</sub> = ${M}2 &nbsp;;&nbsp; ${N('a')} = <span class="c">${M}2${J}</span></p>
+        <p>L'accélération du ballon est verticale, vers le bas, et constante : a = 2 ${MS2}.</p>
+      </div>`);
+    CIN.aToi(c, [
+      { titre: `La vitesse d'un point a pour coordonnées v<sub>x</sub>(t) = ${poly([6, -1])} et v<sub>y</sub>(t) = ${M}4 (en ${MS}).`, parties: [
+        { type: 'gabarit', q: 'Calcule a<sub>x</sub>.', label: `a<sub>x</sub> = ${dd('v<sub>x</sub>')} =`, morceaux: [{ v: 6 }], indice: 'Dérive vx(t) = 6t − 1.', solution: 'a<sub>x</sub> = 6' },
+        { type: 'gabarit', q: 'Calcule a<sub>y</sub>.', label: `a<sub>y</sub> = ${dd('v<sub>y</sub>')} =`, morceaux: [{ v: 0 }], indice: 'vy est une constante.', solution: 'a<sub>y</sub> = 0', diag: v => (v[0] === -4 ? 'La dérivée d\'une constante est 0.' : null) },
+        { type: 'nombre', q: 'Calcule la valeur a de l\'accélération.', label: 'a =', valeur: 6, tol: 1e-9, unite: MS2, indice: 'a = √(ax² + ay²).', solution: `a = ${R('6² + 0²')} = 6 ${MS2}` }] },
+      { parties: [{ type: 'choix', q: `v<sub>x</sub> est en ${MS} et t en s. a<sub>x</sub> = ${dd('v<sub>x</sub>')} s'exprime en :`, options: [o('ok', MS2), o('a', MS), o('b', 'm'), o('c', 'm·s')], bonne: 'ok',
+        indice: '(m·s⁻¹) / s.', solution: `(m·s<sup>${M}1</sup>) / s = ${MS2}.` }] },
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 2. De la position à l'accélération ----------
+  (cours) => {
+    const c = cours.carte('2. De la position à l\'accélération');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <div class="cle"><p><b class="cle-titre">On dérive deux fois.</b> Le vecteur position donne le vecteur vitesse, qui donne le vecteur accélération :</p>
+          <p class="ph-formule">${N('OM')} &nbsp;→ dérivée →&nbsp; ${N('v')} &nbsp;→ dérivée →&nbsp; ${N('a')}</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <p class="ph-calc">${N('OM')}(t) = (t² + 3t)${I} + (${poly([-4, 1])})${J}<br>
+          ${N('v')}(t) = (2t + 3)${I} ${M} 4${J}<br>
+          ${N('a')}(t) = <span class="c">2${I}</span> &nbsp;(a = 2 ${MS2})</p>
+      </div>`);
+    CIN.aToi(c, [
+      { titre: `Un point a pour coordonnées x(t) = 3t² et y(t) = 2t (en m).`, parties: [
+        { type: 'gabarit', q: `Calcule le vecteur vitesse.`, label: `${N('v')}(t) =`, morceaux: [{ v: 6 }, ` t ${I} + `, { v: 2 }, ` ${J}`], indice: 'Dérive x(t), puis y(t).', solution: `${N('v')}(t) = 6t${I} + 2${J}` },
+        { type: 'gabarit', q: `Calcule le vecteur accélération.`, label: `${N('a')}(t) =`, morceaux: [{ v: 6 }, ` ${I} + `, { v: 0 }, ` ${J}`], indice: 'Dérive vx(t) = 6t, puis vy(t) = 2.', solution: `${N('a')}(t) = 6${I}` }] },
+      { titre: `Un point a pour coordonnées x(t) = ${poly([-2, 5, 1])} et y(t) = ${poly([1, 0, -3])} (en m).`, parties: [
+        { type: 'coord', q: `Donne les coordonnées du vecteur accélération.`, label: N('a'), valeurs: [-4, 2], unite: MS2,
+          diag: v => (v[0] === -2 || v[1] === 1 ? 'La dérivée de at² est 2at, puis celle de 2at est 2a.' : null),
+          indice: 'Dérive deux fois : vx = −4t + 5, puis ax.', solution: `v<sub>x</sub> = ${poly([-4, 5])} ⇒ a<sub>x</sub> = ${M}4 ; v<sub>y</sub> = 2t ⇒ a<sub>y</sub> = 2 (en ${MS2})` }] },
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 3. Exemple du cours en 3D, trouvé par l'élève ----------
+  (cours) => {
+    const c = cours.carte('3. Exemple du cours (en trois dimensions)');
+    cours.ajouter(c, `<div class="cours-bloc"><p>À toi de trouver les résultats de l'exemple du cours, puis complète ton cours.</p></div>`);
+    const enonce = `<p>Dans une base (O, ${I}, ${J}, ${K}), la vitesse du point M a pour coordonnées ${sys('v<sub>x</sub>(t) = 2', 'v<sub>y</sub>(t) = 5t + 8', `v<sub>z</sub>(t) = ${fr('4t²', '2')} + ${fr('4', '3')}`)}</p>`;
+    CIN.aToi(c, [
+      { enonce, parties: [
+        { type: 'gabarit', q: 'Calcule a<sub>x</sub>.', label: `a<sub>x</sub> = ${dd('v<sub>x</sub>')} =`, morceaux: [{ v: 0 }], indice: 'vx = 2 est une constante.', diag: v => (v[0] === 2 ? 'La dérivée d\'une constante est 0.' : null),
+          solution: aCompleter(`a<sub>x</sub> = ${dd('v<sub>x</sub>')} = 0`) },
+        { type: 'gabarit', q: 'Calcule a<sub>y</sub>.', label: `a<sub>y</sub> = ${dd('v<sub>y</sub>')} =`, morceaux: [{ v: 5 }], indice: 'Dérive 5t + 8.', diag: v => (v[0] === 13 ? 'La dérivée de la constante 8 est 0.' : null),
+          solution: aCompleter(`a<sub>y</sub> = ${dd('v<sub>y</sub>')} = 5`) },
+        { type: 'gabarit', q: 'Calcule a<sub>z</sub>.', label: `a<sub>z</sub> = ${dd('v<sub>z</sub>')} =`, morceaux: [{ v: 4 }, ' t'], indice: `${fr('4t²', '2')} = 2t², dont la dérivée est 4t ; ${fr('4', '3')} est une constante.`,
+          diag: v => (v[0] === 8 ? `${fr('4t²', '2')} = 2t² : sa dérivée est 2 × 2t = 4t.` : v[0] === 2 ? 'La dérivée de 2t² est 4t.' : null),
+          solution: aCompleter(`a<sub>z</sub> = ${dd('v<sub>z</sub>')} = 4t`) },
+        { type: 'gabarit', q: `Écris le vecteur accélération ${N('a')} avec ${I}, ${J} et ${K}.`, label: `${N('a')} =`, morceaux: [{ v: 0 }, ` ${I} + `, { v: 5 }, ` ${J} + `, { v: 4 }, ` t ${K}`], indice: `${N('a')} = a<sub>x</sub>${I} + a<sub>y</sub>${J} + a<sub>z</sub>${K}.`,
+          solution: aCompleter(`${N('v')} = 2${I} + (5t + 8)${J} + (${fr('4t²', '2')} + ${fr('4', '3')})${K} &nbsp;;&nbsp; ${N('a')} = 5${J} + 4t${K}`) }] },
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 4. Le volant, un accélérateur ? ----------
+  (cours) => {
+    const c = cours.carte('4. Le volant, un accélérateur ?');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <figure class="cin-image"><img src="images/volant.jpg" alt="Deux photos du même poste de conduite. À gauche, « pour tout le monde » : frein, accélérateur et volant. À droite, « pour les physiciens » : trois accélérateurs." loading="lazy"></figure>
+        <p>Pour un physicien, dans une voiture, il y a trois accélérateurs : la pédale d'accélérateur (la valeur de la vitesse augmente), la pédale de frein (la valeur de la vitesse diminue) et le volant ! En tournant, on change la direction du vecteur vitesse : le vecteur vitesse varie, il y a donc une accélération.</p>
+      </div>`);
+    CIN.aToi(c, [
+      { parties: [{ type: 'choix', q: 'Une voiture prend un virage à vitesse constante (l\'aiguille du compteur ne bouge pas). Son accélération est :', colonne: true,
+        options: [o('ok', 'non nulle, car la direction du vecteur vitesse change'), o('a', 'nulle, car la valeur de la vitesse est constante'), o('b', 'nulle, car la voiture ne freine pas'), o('c', 'impossible à connaître')], bonne: 'ok',
+        indice: 'L\'accélération est la variation du vecteur vitesse, pas seulement de sa valeur.', solution: 'Le vecteur vitesse change de direction : il varie, donc l\'accélération n\'est pas nulle.' }] },
+    ], () => cours.continuer(c, 'Ce qu\'il faut retenir →'));
+    return c;
+  },
+
+  // ---------- À retenir ----------
+  (cours) => {
+    const c = cours.carte('À retenir');
+    cours.ajouter(c, `<div class="cle"><p><b class="cle-titre">Vecteur accélération.</b> ${N('a')} = ${dd(N('v'))} : variation du vecteur vitesse (de sa valeur ou de sa direction).</p></div>
+      <div class="cle"><p><b class="cle-titre">Coordonnées.</b> a<sub>x</sub> = ${dd('v<sub>x</sub>')}, a<sub>y</sub> = ${dd('v<sub>y</sub>')}, en ${MS2} ; a = √(a<sub>x</sub>² + a<sub>y</sub>²).</p></div>
+      <div class="cle"><p><b class="cle-titre">On dérive deux fois.</b> ${N('OM')} → ${N('v')} → ${N('a')}.</p></div>
+      <div class="er-actions">
+        <a class="btn-primary" style="text-decoration:none" href="module_4c_questions.html">Questions sur le vecteur accélération →</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_4d_cours.html">Cours : détermination expérimentale</a>
+        <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a>
+      </div>`);
+    return c;
+  },
+]);
+
+CIN.menu('module_4c_cours');
+</script>
+</body>
+</html>

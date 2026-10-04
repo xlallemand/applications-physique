@@ -15,7 +15,9 @@
                               les boutons fléchés l'ajustent d'un carreau
            'glisser' | 'toucher' | 'aucun' (dessin seul)
      vecteurs: [{ nom, dep: [x, y], coord: [a, b], etiquette (HTML de la liste),
-                  fixe (vecteur seulement affiché), coul, pointille, nomPos: [dx, dy] }]
+                  fixe (vecteur seulement affiché), coul, pointille, nomPos: [dx, dy],
+                  valeur: { k, unite, dec } (affiche pendant le tracé la valeur
+                  représentée : longueur en carreaux × k, par exemple en m·s⁻¹) }]
      points: [{ nom, x, y }]  points nommés (petite croix)
      extra(g), dessus(g)      dessins SVG supplémentaires, sous / sur les vecteurs
      onChange()               appelé quand un vecteur change
@@ -32,7 +34,7 @@
   const nb = n => (n < 0 ? MOINS : '') + String(+Math.abs(n).toFixed(6)).replace('.', ',');
   const egal = (a, b) => !!a && !!b && a[0] === b[0] && a[1] === b[1];
 
-  // couleurs (attributs de présentation : le même dessin sert à la loupe)
+  // couleurs (attributs de présentation, indépendants de la feuille de style)
   const C = { encre: '#16181d', encre2: '#55585f', encre3: '#8d8f94', grille: '#dcd7e8', ok: '#16a34a', ko: '#dc2626', vert: '#0a7d57', orange: '#c2570c', bleu: '#2952c8' };
   function accent() {
     const s = getComputedStyle(document.documentElement);
@@ -165,11 +167,12 @@
     const aTracer = this.vs.filter(v => !v.fixe).length;
     const actif = this.o.mode !== 'aucun' && aTracer > 0;
     const pad = actif && (this.o.mode === 'toucher' || this.o.mode === 'mixte');
+    const avecValeur = actif && this.vs.some(v => !v.fixe && v.valeur);
     const b = document.createElement('div');
     b.className = 'vec-bloc' + (actif ? '' : ' vec-fixe');
     b.innerHTML = `${actif && (aTracer > 1 || this.o.liste) ? '<div class="vec-chips" role="group" aria-label="Vecteur à tracer"></div>' : ''}
-      <div class="vec-cadre"><svg class="vec-svg mode-${this.o.mode}"${actif ? ' tabindex="0"' : ''} role="img" aria-label="${this.o.aria || 'Repère quadrillé'}"></svg>
-        ${actif ? '<div class="vec-loupe hidden" aria-hidden="true"><svg></svg></div>' : ''}</div>
+      ${avecValeur ? '<p class="vec-valeur" aria-live="polite"></p>' : ''}
+      <div class="vec-cadre"><svg class="vec-svg mode-${this.o.mode}"${actif ? ' tabindex="0"' : ''} role="img" aria-label="${this.o.aria || 'Repère quadrillé'}"></svg></div>
       ${pad ? `<div class="vec-pad" role="group" aria-label="Déplacer la pointe d'un carreau">
         <button type="button" data-d="h" aria-label="Pointe un carreau vers le haut">↑</button>
         <button type="button" data-d="g" aria-label="Pointe un carreau vers la gauche">←</button>
@@ -180,7 +183,7 @@
     this.bloc = b;
     this.cadre = b.querySelector('.vec-cadre');
     this.svg = b.querySelector('.vec-svg');
-    this.loupeEl = b.querySelector('.vec-loupe');
+    this.valeurEl = b.querySelector('.vec-valeur');
     this.astuce = b.querySelector('.vec-astuce');
     this.chips = b.querySelector('.vec-chips');
 
@@ -231,7 +234,7 @@
     return i === this.sel && !this.verrou ? this.couleurs.ai : C.encre2;
   };
 
-  /* ---------- Dessin complet (sans les poignées : il sert aussi à la loupe) ---------- */
+  /* ---------- Dessin complet (sans les poignées) ---------- */
   Repere.prototype.scene = function () {
     const o = this.o, g = this.g, { u, W, H, px, py } = g;
     const ac = this.couleurs;
@@ -314,12 +317,18 @@
     return s;
   };
 
-  // première position (centre du nom) qui ne chevauche pas les graduations des axes
+  // première position (centre du nom) qui ne chevauche ni les graduations des axes, ni les noms des points
   Repere.prototype.placeNom = function (x0, y0, cands, w, t) {
     const g = this.g, o = this.o, wg = largeur('−6', g.tg);
+    // étiquettes des points nommés (rectangles)
+    const etiquettes = (o.points || []).filter(p => p.nom).map(p => {
+      const cx = g.px(p.x) + (p.dx == null ? -10 : p.dx), cy = g.py(p.y) + (p.dy == null ? -8 : p.dy), lw = largeur(p.nom, g.tn);
+      return [cx - lw / 2, cy - g.tn * .8, cx + lw / 2, cy + g.tn * .2];
+    });
     const libre = (cx, cy) => {
-      if (!o.axes || !o.graduations) return true;
       const x1 = cx - w / 2 - 2, x2 = cx + w / 2 + 2, y1 = cy - t * .95, y2 = cy + t * .55;
+      if (etiquettes.some(e => x2 > e[0] && x1 < e[2] && y2 > e[1] && y1 < e[3])) return false;
+      if (!o.axes || !o.graduations) return true;
       const bandeX = y2 > g.Y0 + 2 && y1 < g.Y0 + g.tg + 5 && x2 > g.px(o.xmin) - 8 && x1 < g.px(o.xmax) + 8;
       const bandeY = x2 > g.X0 - 5 - wg && x1 < g.X0 - 1 && y2 > g.py(o.ymax) - 8 && y1 < g.py(o.ymin) + 8;
       return !bandeX && !bandeY;
@@ -361,6 +370,7 @@
     this.gScene.innerHTML = this.sceneTxt;
     if (!this.drag) this.gPrises.innerHTML = this.poignees();
     this.majChips();
+    this.majValeur();
     const pad = this.bloc.querySelector('.vec-pad');
     if (pad) pad.querySelectorAll('button').forEach(bt => { bt.disabled = this.verrou; });
   };
@@ -375,6 +385,19 @@
       c.classList.toggle('ko', v.etat === 'ko');
       c.setAttribute('aria-pressed', i === this.sel ? 'true' : 'false');
     });
+  };
+
+  // valeur représentée par le vecteur en cours de tracé (longueur × échelle)
+  Repere.prototype.majValeur = function () {
+    if (!this.valeurEl) return;
+    const v = this.vs[this.sel];
+    if (!v || !v.valeur) { this.valeurEl.innerHTML = ''; return; }
+    const L = v.fin ? Math.hypot(v.fin[0] - v.dep[0], v.fin[1] - v.dep[1]) : 0;
+    const val = L * (v.valeur.k || 1), dec = v.valeur.dec == null ? 1 : v.valeur.dec;
+    const [p, s] = String(v.nom).split('_');
+    // nombre à « dec » décimales, écrit à la française
+    const txt = val.toFixed(dec).replace('.', ',');
+    this.valeurEl.innerHTML = `Valeur représentée : <b>${p}${s ? `<sub>${s}</sub>` : ''} = ${txt}${v.valeur.unite ? ' ' + v.valeur.unite : ''}</b>`;
   };
 
   Repere.prototype.dire = function (h) { if (this.astuce) this.astuce.innerHTML = h || ''; };
@@ -427,13 +450,11 @@
       svg.classList.add('glisse');
       this.dire('');
       this.dessiner();
-      if (e.pointerType !== 'mouse') this.montrerLoupe(e);
     });
     svg.addEventListener('pointermove', e => {
       if (!this.drag || e.pointerId !== this.drag.id) return;
       e.preventDefault();
       this.poser(this.noeud(this.point(e)));
-      if (this.drag.type !== 'mouse') this.montrerLoupe(e);
     });
     // appui hors des poignées (sans glisser) : on rappelle le geste
     this.finGlisse = 0;
@@ -448,30 +469,11 @@
       this.drag = null;
       this.finGlisse = Date.now();
       svg.classList.remove('glisse');
-      this.loupeEl.classList.add('hidden');
       this.dessiner();
     };
     ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => svg.addEventListener(t, fin));
   };
 
-  // loupe au-dessus du doigt : le doigt cache la pointe sur un écran tactile
-  Repere.prototype.montrerLoupe = function (e) {
-    const v = this.vs[this.sel], g = this.g, L = this.loupeEl, T = 124;
-    const b = v.fin || v.dep, cx = g.px(b[0]), cy = g.py(b[1]), z = Math.max(62, g.u * 2.8);
-    const s = L.querySelector('svg');
-    s.setAttribute('viewBox', `${cx - z / 2} ${cy - z / 2} ${z} ${z}`);
-    if (this.loupeTxt !== this.sceneTxt) { s.innerHTML = this.sceneTxt; this.loupeTxt = this.sceneTxt; }
-    const r = this.cadre.getBoundingClientRect();
-    let x = e.clientX - T / 2, y = e.clientY - T - 44;
-    if (y < 64) {                                       // pas de place au-dessus : à côté du doigt
-      y = e.clientY - T / 2;
-      x = e.clientX < innerWidth / 2 ? e.clientX + 48 : e.clientX - 48 - T;
-    }
-    x = Math.max(4, Math.min(innerWidth - T - 4, x));
-    L.style.left = (x - r.left) + 'px';
-    L.style.top = (y - r.top) + 'px';
-    L.classList.remove('hidden');
-  };
 
   /* ---------- Toucher le nœud d'arrivée ---------- */
   Repere.prototype.activerToucher = function () {
