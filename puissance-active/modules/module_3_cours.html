@@ -118,7 +118,7 @@ new PH.Cours(document.getElementById('etapes'), [
         { melanger: false, indice: 'Repère un sommet de u et le sommet de i le plus proche : lequel est le plus à gauche ?', solution: 'u atteint son sommet 3 ms avant i : u est en avance sur i (i est en retard sur u).' }),
       choixFig('Sur ce graphique :', PA.figPhi({ T: 16, dt: 4, tu: 10, Um: 1.5, Im: 2.5, tmax: 40, pasT: 5, ymax: 3 }), AVANCE, 'i',
         { melanger: false, indice: 'Repère un sommet de i et le sommet de u le plus proche : lequel est le plus à gauche ?', solution: 'i atteint son sommet 4 ms avant u : i est en avance sur u.' }),
-      choixFig('Sur ce graphique (attention au piège) :', PA.figPhi({ T: 20, dt: 5, tu: 2, Um: 2.5, Im: 1.5, tmax: 40, pasT: 5, ymax: 3 }), AVANCE, 'i',
+      choixFig('Sur ce graphique :', PA.figPhi({ T: 20, dt: 5, tu: 2, Um: 2.5, Im: 1.5, tmax: 40, pasT: 5, ymax: 3 }), AVANCE, 'i',
         { melanger: false, indice: 'Le premier sommet de u (2 ms) et le premier sommet de i (17 ms) ne sont pas voisins. Compare le sommet de i à 17 ms avec le sommet de u le plus proche.',
           indices: { u: 'Le premier sommet de u (2 ms) et le premier sommet de i (17 ms) sont éloignés de 15 ms : ce ne sont pas des sommets voisins. Compare le sommet de i à 17 ms avec le sommet de u le plus proche (22 ms).' },
           solution: 'i atteint son sommet à 17 ms et u à 22 ms (sommets voisins, 5 ms d\'écart) : i est en avance sur u.' }),
@@ -156,6 +156,18 @@ new PH.Cours(document.getElementById('etapes'), [
   // ---------- 4. Calculer φ par proportionnalité ----------
   (cours) => {
     const c = cours.carte('4. Calculer le déphasage par proportionnalité');
+    // graphique de l'exemple : T repérée entre deux sommets de u et entre deux sommets de i, Δt entre deux sommets voisins
+    const ex = Object.assign({}, EX, {
+      ymax: 4, noms: { u: 10, i: 5 },
+      annoter: R => {
+        const yTu = R.sy(3.7), yTi = R.sy(3.2), yDt = R.sy(2.8);
+        return PA.tirets(R.sx(10), R.sy(2.5), yTu, '#2952c8') + PA.tirets(R.sx(30), R.sy(2.5), yTu, '#2952c8') +
+          PA.flecheH(R.sx(10), R.sx(30), yTu, '#2952c8', 'T = 20 ms') +
+          PA.tirets(R.sx(5), R.sy(1.6), yTi, '#d9730d') + PA.tirets(R.sx(25), R.sy(1.6), yTi, '#d9730d') +
+          PA.flecheH(R.sx(5), R.sx(25), yTi, '#d9730d', 'T = 20 ms') +
+          PA.flecheH(R.sx(25), R.sx(30), yDt, '#16181d') + PA.texte(R.sx(25) - 1.2, yDt + 1.3, 'Δt = 5 ms', '#16181d', 'end', 3.8);
+      },
+    });
     cours.ajouter(c, `<div class="cours-bloc">
         <p>Le déphasage <b>φ</b> est l'<b>angle</b> qui correspond au décalage <b>Δt</b> entre les deux courbes. Pour un déphasage de 2π rad, on retrouve la même valeur : cela correspond à une durée T. D'où le tableau de proportionnalité :</p>
         ${PA.tabProp({ unite: 's', T: 'T', dt: 'Δt' })}
@@ -164,10 +176,11 @@ new PH.Cours(document.getElementById('etapes'), [
           <p class="ph-formule grand">φ = 2π × Δt / T</p>
           <p>φ en radians (rad) ; T et Δt dans la <b>même unité</b> (s, ms…).</p>
         </div>
+        <div style="margin-top:12px">${PA.figPhi(ex)}</div>
       </div>
       <div class="cours-exemple">
         <p class="cours-exemple-t">Exemple du cours</p>
-        <p>Sur le graphique de l'étape 2, T = 20 ms et Δt = 5 ms. Par proportionnalité :</p>
+        <p>Sur le graphique ci-dessus, T = 20 ms et Δt = 5 ms. Par proportionnalité :</p>
         ${PA.tabProp({ unite: 'ms', T: 'T = 20', dt: 'Δt = 5' })}
         <p class="ph-calc pa-centre">φ = 2π × Δt / T = 2π × 5 / 20 = <span class="c">1,57 rad</span></p>
         <p>C'est π/2 rad : Δt est un quart de période. Ici, ${I} est en avance sur ${U} (il arrive au sommet en premier) : <b>i est en avance de 1,57 rad sur u</b>.</p>
