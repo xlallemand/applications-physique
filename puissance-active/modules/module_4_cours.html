@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : la puissance active en exercices — Puissance active</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="pa.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../ph/modules/ph.css">
+<link rel="stylesheet" href="../../lecture-graphique/modules/lgtools.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../ph/modules/ph.js"></script>
+<script src="../../lecture-graphique/modules/lgtools.js"></script>
+<script src="pa.js"></script>
+<script src="pa-outils.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS</span>
+    <h2 class="er-titre">La puissance active en exercices</h2>
+    <p class="er-contexte">Dans un exercice, on te donne quelques valeurs (souvent lues sur l'appareil) et on te demande d'autres puissances. Le <b>schéma de conversion d'énergie</b> permet de placer chaque donnée au bon endroit et de choisir la bonne relation. Après chaque notion, un exemple, puis à toi de jouer.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (moteur PH.Cours de l'application « pH ») :
+   chaque notion est présentée, illustrée par un exemple, puis
+   l'élève fait des exemples semblables (« À toi »).
+   ============================================================ */
+const { fmt, aToi } = PH;
+const choix = (q, options, bonne, opts) => ({ parties: [Object.assign({ type: 'choix', q, options, bonne }, opts)] });
+const nombre = (q, label, valeur, unite, opts) => ({ parties: [Object.assign({ type: 'nombre', q, label, valeur, unite }, opts)] });
+
+const NOMS = PA.ETIQ_NOMS, RELATIONS = PA.ETIQ_RELATIONS;
+
+new PH.Cours(document.getElementById('etapes'), [
+
+  // ---------- 1. Le schéma de conversion ----------
+  (cours) => {
+    const c = cours.carte('1. Le schéma de conversion d\'énergie');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Un appareil reçoit de l'énergie électrique du réseau, à travers le compteur, et la convertit : une partie est <b>utile</b> (mouvement d'un moteur, chaleur d'un radiateur, lumière d'une lampe…), le reste est <b>perdu</b> (le plus souvent en chaleur). À chaque endroit du schéma correspond une puissance :</p>
+        ${PA.schema(PA.SCHEMA_COURS)}
+        <ul class="er-liste">
+          <li>avant le compteur, côté réseau : la <b>puissance apparente S</b> (c'est la puissance maximale, elle sera importante pour calculer les pertes) ;</li>
+          <li>entre le compteur et l'appareil : la <b>puissance active P</b>, reçue par l'appareil, facturée par le fournisseur d'électricité (EDF) ;</li>
+          <li>à la sortie de l'appareil : la <b>puissance utile P<sub>u</sub></b> et la <b>puissance perdue P<sub>perdue</sub></b> ; η est le rendement de l'appareil.</li>
+        </ul>
+        <div class="cle">
+          <p><b class="cle-titre">Méthode.</b> Dans un exercice, commence <b>toujours</b> par faire ce schéma, puis places-y les données de l'énoncé. Tu vois alors quelle relation relie ce que tu cherches à ce que tu connais.</p>
+        </div>
+      </div>`);
+    aToi(c, [
+      { titre: 'Place chaque étiquette à son endroit sur le schéma.', parties: [{ type: 'schema', contenus: PA.SCHEMA_POSITIONS, etiquettes: NOMS,
+        solution: 'S avant le compteur ; P et k entre le compteur et l\'appareil ; P<sub>u</sub> et P<sub>perdue</sub> à la sortie de l\'appareil.' }] },
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 2. La puissance apparente ----------
+  (cours) => {
+    const c = cours.carte('2. La puissance apparente S');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <div class="cle">
+          <p class="ph-formule">S = U<sub>eff</sub> × I<sub>eff</sub></p>
+          <p>S : puissance apparente en W (on écrit aussi parfois VA, « volt-ampère ») ; U<sub>eff</sub> en V ; I<sub>eff</sub> en A.</p>
+        </div>
+        <p style="margin-top:10px">C'est la puissance maximale que pourrait recevoir l'appareil avec ces valeurs de U<sub>eff</sub> et I<sub>eff</sub> (s'il n'y avait pas de déphasage).</p>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <p>Une perceuse branchée sur le secteur (U<sub>eff</sub> = 230 V) est traversée par un courant d'intensité I<sub>eff</sub> = 3,0 A.</p>
+        <p class="ph-calc">S = U<sub>eff</sub> × I<sub>eff</sub> = 230 × 3,0 = <span class="c">690 W</span> (ou 690 VA)</p>
+      </div>`);
+    aToi(c, [
+      nombre('Un moteur est alimenté sous U<sub>eff</sub> = 230 V et absorbe I<sub>eff</sub> = 6,5 A. Calcule sa puissance apparente.', 'S =', 230 * 6.5, 'W',
+        { indice: 'S = U<sub>eff</sub> × I<sub>eff</sub>.', solution: 'S = 230 × 6,5 = 1 495 W' }),
+      choix('U<sub>eff</sub> = 230 V et I<sub>eff</sub> = 2,0 A. La puissance apparente vaut :', [
+        { id: 'ok', label: '460 W' }, { id: 'a', label: '232 W' }, { id: 'b', label: '115 W' }, { id: 'c', label: '650 W' }], 'ok',
+        { indice: 'Multiplie U<sub>eff</sub> par I<sub>eff</sub>.', solution: 'S = 230 × 2,0 = 460 W' }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 3. La puissance active ----------
+  (cours) => {
+    const c = cours.carte('3. La puissance active P : celle qui est marquée sur les appareils');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <div class="cle">
+          <p class="ph-formule">P = U<sub>eff</sub> × I<sub>eff</sub> × cos φ</p>
+          <p>P : puissance active en W ; φ : déphasage entre u et i (module 3).</p>
+        </div>
+        <p style="margin-top:10px">C'est la puissance <b>réellement consommée</b> par l'appareil (la puissance moyenne du module 2). C'est elle que facture le fournisseur d'électricité.</p>
+        <div class="cle">
+          <p><b class="cle-titre">Très important.</b> Les valeurs écrites sur un appareil (plaque signalétique, notice, emballage) sont :</p>
+          <ul class="er-liste">
+            <li>la puissance <b>active P</b> ;</li>
+            <li>la tension <b>efficace</b> U<sub>eff</sub> et l'intensité <b>efficace</b> I<sub>eff</sub>.</li>
+          </ul>
+          <p>Le mot « efficace » n'est <b>jamais écrit</b> : « 230 V » signifie U<sub>eff</sub> = 230 V, « 4,3 A » signifie I<sub>eff</sub> = 4,3 A.</p>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemples</p>
+        <div class="pa-plaques">
+          ${PA.plaque('Aspirateur', ['230 V ~ 50 Hz', '1200 W'])}
+          ${PA.plaque('Moteur', ['230 V ~ 50 Hz', '4,3 A', '750 W', 'cos φ 0,76'])}
+        </div>
+        <p>Aspirateur : U<sub>eff</sub> = 230 V et P = 1 200 W (puissance active).</p>
+        <p>Moteur : U<sub>eff</sub> = 230 V, I<sub>eff</sub> = 4,3 A, P = 750 W et cos φ = 0,76. On vérifie :</p>
+        <p class="ph-calc">P = U<sub>eff</sub> × I<sub>eff</sub> × cos φ = 230 × 4,3 × 0,76 ≈ <span class="c">750 W</span></p>
+      </div>`);
+    aToi(c, [
+      choix('Un sèche-cheveux porte l\'indication « 230 V – 2000 W ». Les 2000 W sont :', [
+        { id: 'P', label: 'la puissance active P' }, { id: 'S', label: 'la puissance apparente S' }, { id: 'Pu', label: 'la puissance utile P<sub>u</sub>' }, { id: 'max', label: 'la puissance maximale U<sub>max</sub> × I<sub>max</sub>' }], 'P',
+        { colonne: true, indice: 'La puissance écrite sur un appareil est toujours la même puissance : laquelle ?', solution: 'La puissance marquée sur un appareil est sa puissance active P.' }),
+      choix('Sur ce sèche-cheveux, « 230 V » est :', [
+        { id: 'eff', label: 'la tension efficace U<sub>eff</sub>' }, { id: 'max', label: 'la tension maximale U<sub>max</sub>' }, { id: 'moy', label: 'la tension moyenne' }], 'eff',
+        { colonne: true, indice: 'Les tensions et les intensités écrites sur les appareils sont des valeurs efficaces, même si ce n\'est pas écrit.', solution: '« 230 V » signifie U<sub>eff</sub> = 230 V (la tension maximale vaut 230 × √2 ≈ 325 V).' }),
+      nombre('Un moteur est alimenté sous 230 V ; il absorbe 5,0 A avec cos φ = 0,80. Calcule sa puissance active.', 'P =', 230 * 5 * .8, 'W',
+        { indice: 'P = U<sub>eff</sub> × I<sub>eff</sub> × cos φ.', diag: v => Math.abs(v - 1150) < 1 ? 'Tu as calculé la puissance apparente S : il faut multiplier par cos φ.' : null,
+          solution: 'P = 230 × 5,0 × 0,80 = 920 W' }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 4. Le facteur de puissance ----------
+  (cours) => {
+    const c = cours.carte('4. Le facteur de puissance k = cos φ');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <div class="cle">
+          <p class="ph-formule">k = cos φ = P / S</p>
+          <p>k : facteur de puissance, <b>sans unité</b> (compris entre 0 et 1). On en déduit :</p>
+          <p class="ph-formule">P = S × k</p>
+        </div>
+        <p style="margin-top:10px">Si on connaît le déphasage φ (en rad), on calcule k = cos φ avec la calculatrice <b>en mode radians</b>.</p>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemples</p>
+        <p>Le moteur de l'étape 3 : S = 230 × 4,3 ≈ 989 W et P = 750 W.</p>
+        <p class="ph-calc">k = P / S = 750 / 989 ≈ <span class="c">0,76</span></p>
+        <p>Un appareil dont le déphasage vaut φ = 0,64 rad :</p>
+        <p class="ph-calc">k = cos φ = cos(0,64) ≈ <span class="c">0,80</span> &nbsp;<span class="er-petit">(calculatrice en mode radians)</span></p>
+      </div>`);
+    aToi(c, [
+      nombre('Un appareil a une puissance active P = 1 500 W et une puissance apparente S = 1 875 W. Calcule son facteur de puissance.', 'k =', 1500 / 1875, '',
+        { tol: .006, indice: 'k = P / S.', diag: v => Math.abs(v - 1.25) < .01 ? 'Tu as calculé S / P : le facteur de puissance est k = P / S (il est inférieur à 1).' : null,
+          solution: 'k = P / S = 1 500 / 1 875 = 0,80' }),
+      nombre('Le déphasage entre u et i vaut φ = 0,52 rad. Calcule k = cos φ (au centième).', 'k =', Math.cos(.52), '',
+        { tol: .006, indice: 'Calculatrice en mode radians : cos(0,52).', diag: v => v > .999 && v <= 1 ? 'Ta calculatrice est en mode <b>degrés</b> : passe-la en mode radians.' : null,
+          solution: 'k = cos(0,52) ≈ 0,87' }),
+      choix('Un appareil a une puissance apparente S = 2 000 W et un facteur de puissance k = 0,90. Sa puissance active vaut :', [
+        { id: 'ok', label: '1 800 W' }, { id: 'a', label: '2 222 W' }, { id: 'b', label: '2 000 W' }], 'ok',
+        { indice: 'P = S × k.', solution: 'P = S × k = 2 000 × 0,90 = 1 800 W' }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 5. Puissance utile, puissance perdue ----------
+  (cours) => {
+    const c = cours.carte('5. Puissance utile et puissance perdue');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <div class="cle">
+          <p class="ph-formule">P<sub>u</sub> = η × P</p>
+          <p class="ph-formule">P<sub>perdue</sub> = P − P<sub>u</sub></p>
+          <p>η : rendement de l'appareil, sans unité, inférieur à 1. Il est souvent donné en % : η = 80 % = 0,80.</p>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <p>Le moteur de l'étape 3 (P = 750 W) a un rendement de 80 %.</p>
+        <p class="ph-calc">P<sub>u</sub> = η × P = 0,80 × 750 = <span class="c">600 W</span><br>
+          P<sub>perdue</sub> = P − P<sub>u</sub> = 750 − 600 = <span class="c">150 W</span></p>
+      </div>`);
+    aToi(c, [
+      nombre('Un moteur de puissance active P = 1 200 W a un rendement de 70 %. Calcule sa puissance utile.', 'P<sub>u</sub> =', 840, 'W',
+        { indice: 'P<sub>u</sub> = η × P, avec η = 0,70.', diag: v => Math.abs(v - 84000) < 1 ? 'Le rendement 70 % s\'écrit 0,70 dans le calcul.' : Math.abs(v - 1714.3) < 1 ? 'Tu as divisé : P<sub>u</sub> = η × P.' : null,
+          solution: 'P<sub>u</sub> = 0,70 × 1 200 = 840 W' }),
+      nombre('Calcule la puissance perdue par ce moteur.', 'P<sub>perdue</sub> =', 360, 'W',
+        { indice: 'P<sub>perdue</sub> = P − P<sub>u</sub>.', solution: 'P<sub>perdue</sub> = 1 200 − 840 = 360 W' }),
+      { titre: 'Place chaque relation à son endroit sur le schéma.', parties: [{ type: 'schema', contenus: PA.SCHEMA_POSITIONS, etiquettes: RELATIONS, titrePalette: 'Relations à placer',
+        solution: 'S = U<sub>eff</sub> × I<sub>eff</sub> ; P = U<sub>eff</sub> × I<sub>eff</sub> × cos φ ; k = P / S ; P<sub>u</sub> = η × P ; P<sub>perdue</sub> = P − P<sub>u</sub>.' }] },
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 6. Méthode : placer les données ----------
+  (cours) => {
+    const c = cours.carte('6. Méthode : placer les données sur le schéma');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <ol class="er-liste">
+          <li>Fais le <b>schéma de conversion</b>.</li>
+          <li>Places-y les <b>données</b> de l'énoncé. La puissance écrite sur l'appareil est P ; la tension et l'intensité sont des valeurs efficaces.</li>
+          <li>Repère la grandeur <b>cherchée</b> et la relation qui la relie aux données.</li>
+        </ol>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <div class="pa-enonce">Un moteur de pompe porte les indications <b>230 V ; 3,0 A ; 550 W</b>. Son rendement est de <b>75 %</b>. Calculer la puissance utile du moteur, puis son facteur de puissance.</div>
+        ${PA.schemaValeurs({ U: '230 V', I: '3,0 A', S: '?', P: '550 W', k: '?', eta: '0,75', Pu: '?' })}
+        <p class="ph-calc">P<sub>u</sub> = η × P = 0,75 × 550 ≈ <span class="c">413 W</span><br>
+          S = U<sub>eff</sub> × I<sub>eff</sub> = 230 × 3,0 = 690 W, &nbsp;donc&nbsp; k = P / S = 550 / 690 ≈ <span class="c">0,80</span></p>
+      </div>`);
+    aToi(c, [
+      { titre: 'Un ventilateur porte les indications 230 V ; 2,0 A ; 368 W. Le rendement de son moteur est de 60 %.', parties: [
+        { type: 'schema', q: 'Place les données de l\'énoncé sur le schéma (les cases vides sont les grandeurs inconnues).', contenus: PA.SCHEMA_DONNEES, titrePalette: 'Données de l\'énoncé',
+          etiquettes: [
+            { id: 'u', label: '230 V', cible: 'U', indice: '230 V est une tension : la tension efficace U<sub>eff</sub>.' },
+            { id: 'i', label: '2,0 A', cible: 'I', indice: '2,0 A est une intensité : l\'intensité efficace I<sub>eff</sub>.' },
+            { id: 'p', label: '368 W', cible: 'P', indice: 'La puissance écrite sur l\'appareil est la puissance active P.' },
+            { id: 'e', label: '60 %', cible: 'eta', indice: '60 % est le rendement η du moteur.' },
+          ],
+          solution: 'U<sub>eff</sub> = 230 V, I<sub>eff</sub> = 2,0 A, P = 368 W (puissance indiquée sur l\'appareil) et η = 0,60.' },
+        { type: 'nombre', q: 'Calcule la puissance apparente.', label: 'S =', valeur: 460, unite: 'W', indice: 'S = U<sub>eff</sub> × I<sub>eff</sub>.', solution: 'S = 230 × 2,0 = 460 W' },
+        { type: 'nombre', q: 'Calcule le facteur de puissance.', label: 'k =', valeur: .8, tol: .006, indice: 'k = P / S.',
+          diag: v => Math.abs(v - 1.25) < .01 ? 'Tu as calculé S / P : k = P / S.' : null, solution: 'k = P / S = 368 / 460 = 0,80' },
+        { type: 'nombre', q: 'Calcule la puissance utile.', label: 'P<sub>u</sub> =', valeur: 220.8, rel: .01, unite: 'W', indice: 'P<sub>u</sub> = η × P, avec η = 0,60.',
+          diag: v => Math.abs(v - 276) < 1 ? 'Le rendement s\'applique à la puissance active P (368 W), pas à S.' : null, solution: 'P<sub>u</sub> = 0,60 × 368 ≈ 221 W' },
+        { type: 'nombre', q: 'Calcule la puissance perdue.', label: 'P<sub>perdue</sub> =', valeur: 147.2, rel: .01, unite: 'W', indice: 'P<sub>perdue</sub> = P − P<sub>u</sub>.', solution: 'P<sub>perdue</sub> = 368 − 220,8 ≈ 147 W' },
+      ] },
+    ], () => cours.continuer(c, 'Ce qu\'il faut retenir →'));
+    return c;
+  },
+
+  // ---------- À retenir ----------
+  (cours) => {
+    const c = cours.carte('À retenir');
+    cours.ajouter(c, `${PA.schema(PA.SCHEMA_COURS)}
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> Toujours faire le schéma de conversion et y placer les données de l'énoncé.</p></div>
+      <div class="cle"><p><b class="cle-titre">Sur les appareils</b>, la puissance indiquée est la puissance active P ; la tension et l'intensité sont des valeurs efficaces (même si ce n'est pas écrit).</p></div>
+      <div class="cle"><p><b class="cle-titre">Relations.</b></p>
+        <p class="ph-formule">S = U<sub>eff</sub> × I<sub>eff</sub> &nbsp;;&nbsp; P = U<sub>eff</sub> × I<sub>eff</sub> × cos φ</p>
+        <p class="ph-formule">k = cos φ = P / S &nbsp;;&nbsp; P = S × k</p>
+        <p class="ph-formule">P<sub>u</sub> = η × P &nbsp;;&nbsp; P<sub>perdue</sub> = P − P<sub>u</sub></p>
+        <p>P, S, P<sub>u</sub>, P<sub>perdue</sub> en W (S aussi en VA) ; k et η sans unité.</p></div>
+      <div class="er-actions">
+        <a class="btn-primary" style="text-decoration:none" href="module_4_exercices.html">Exercices d'application →</a>
+        <a class="btn-secondary" style="text-decoration:none" href="../index.html">Accueil de l'application</a>
+      </div>`);
+    return c;
+  },
+]);
+
+PA.menu('module_4_cours');
+</script>
+</body>
+</html>

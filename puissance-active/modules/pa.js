@@ -386,5 +386,42 @@
     return `≈ ${signe}${approx} rad`;
   }
 
-  window.PA = { COUL, OMEGA, fmt, radians, Graphe, svg, quiz, dessins, curseurTactile };
+  /* ============================================================
+     BANDEAU ET MENU COMMUNS AUX MODULES
+     ============================================================ */
+  const GROUPES = [
+    { title: 'Module 1 · La valeur efficace', items: [
+      { key: 'module_1', label: 'La valeur efficace' },
+    ]},
+    { title: 'Module 2 · La puissance active', items: [
+      { key: 'module_2', label: 'Comprendre à quoi correspond la puissance active' },
+    ]},
+    { title: 'Module 3 · Mesurer un déphasage', items: [
+      { key: 'module_3_cours', label: 'Cours : mesurer un déphasage' },
+      { key: 'module_3_questions', label: 'Questions sur le déphasage' },
+    ]},
+    { title: 'Module 4 · La puissance active en exercices', items: [
+      { key: 'module_4_cours', label: 'Cours : les puissances et le schéma de conversion' },
+      { key: 'module_4_exercices', label: "Exercices d'application" },
+    ]},
+  ];
+  // cle : clé du module affiché (null sur la page d'accueil) ; dossier : chemin vers les modules
+  function menu(cle, dossier) {
+    const d = dossier === undefined ? '' : dossier;
+    const n = window.AppNav.init({
+      appName: 'Puissance active',
+      portalHref: (cle ? '../' : '') + '../index.html',
+      portalLabel: 'Toutes les applications',
+      onHome: () => { if (cle) window.location.href = '../index.html'; },
+      onNavigate: key => { window.location.href = d + key + '.html'; },
+      groups: GROUPES,
+    });
+    n.setActive(cle);
+    const g = GROUPES.find(x => x.items.some(m => m.key === cle));
+    const item = g && g.items.find(m => m.key === cle);
+    n.setTitle(item ? `${g.title.split(' · ')[0]} · ${item.label}` : null);
+    return n;
+  }
+
+  window.PA = { COUL, OMEGA, fmt, radians, Graphe, svg, quiz, dessins, curseurTactile, GROUPES, menu };
 })();

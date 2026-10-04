@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions sur le déphasage — Puissance active</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="pa.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../ph/modules/ph.css">
+<link rel="stylesheet" href="../../lecture-graphique/modules/lgtools.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../ph/modules/ph.js"></script>
+<script src="../../lecture-graphique/modules/lgtools.js"></script>
+<script src="pa.js"></script>
+<script src="pa-outils.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard (série notée sur 20, PH.serie) :
+   3 sur les notions, 3 sur le calcul de φ, 2 lectures sur des
+   graduations, puis 2 mesures à la règle (les deux dernières).
+   Chaque fabrique renvoie une question différente à chaque appel.
+   ============================================================ */
+const { fmt, hasard, melanger } = PH;
+const alea = (a, b) => a + Math.random() * (b - a);
+const arr = (x, d) => Math.round(x * Math.pow(10, d)) / Math.pow(10, d);
+const AVANCE = [
+  { id: 'i', label: 'i est en avance sur u' },
+  { id: 'u', label: 'u est en avance sur i' },
+  { id: '0', label: 'u et i sont en phase' },
+];
+const avanceTxt = o => o.dt > 0 ? 'i atteint son sommet avant u : i est en avance sur u.' : 'u atteint son sommet avant i : u est en avance sur i.';
+// options de QCM numériques : la bonne réponse et des erreurs fréquentes, toutes différentes
+function optionsNum(bonne, fausses, unite) {
+  const vues = new Set([bonne]);
+  const L = [{ id: 'ok', label: `${bonne} ${unite}` }];
+  fausses.forEach((f, k) => { if (!vues.has(f)) { vues.add(f); L.push({ id: 'f' + k, label: `${f} ${unite}` }); } });
+  return L;
+}
+// amplitudes de u et de i assez différentes pour que les courbes se distinguent bien
+const AMPLIS = [[2.5, 1.5], [2.6, 1.4], [1.5, 2.5], [2.3, 1.3], [1.4, 2.4]];
+
+/* ---------- Graphique aléatoire ----------
+   graduations : true → sommets sur des graduations (lecture directe)
+   sinon : sommets entre les graduations (mesure à la règle)       */
+function grapheAlea(graduations) {
+  const [Um, Im] = hasard(AMPLIS);
+  if (graduations) {
+    // axe de 0 à 40 ms, une graduation toutes les 2 ms
+    const T = hasard([16, 20]), d = hasard(T === 16 ? [2, 4, 6] : [2, 4, 6, 8]), signe = Math.random() < .5 ? 1 : -1;
+    const tu = hasard([2, 4, 6, 8, 10, 12]);
+    return { T, dt: signe * d, tu, Um, Im, tmax: 40, pasT: 2, ymax: 3 };
+  }
+  const tmax = hasard([30, 35, 40, 45, 50]), mmX = 154 / tmax;
+  const T = arr(alea(55, 74) / mmX, 1);
+  const d = arr(T * alea(.08, .21), 1), signe = Math.random() < .5 ? 1 : -1;
+  // premier sommet de u loin des graduations (tous les 5 ms)
+  let tu;
+  do { tu = arr(alea(.1, .95) * T, 1); } while (Math.abs(tu / 5 - Math.round(tu / 5)) * 5 < .8);
+  return { T, dt: signe * d, tu, Um, Im, tmax, pasT: 5, ymax: 3 };
+}
+
+/* ---------- Groupe 1 : les notions ---------- */
+const G1 = [
+  function appareil() {
+    const resistifs = ['un radiateur électrique', 'un grille-pain', 'un fer à repasser', 'une bouilloire électrique', 'un chauffe-eau'];
+    const moteurs = ['une perceuse (moteur)', 'un ventilateur (moteur)', 'une machine à laver (moteur)', 'un aspirateur (moteur)', 'un réfrigérateur (moteur du compresseur)'];
+    const sans = Math.random() < .5;
+    const bon = hasard(sans ? resistifs : moteurs), autres = melanger(sans ? moteurs : resistifs).slice(0, 3);
+    return { theme: 'Le déphasage', parties: [{ type: 'choix', q: sans ? 'Lequel de ces appareils ne crée <b>pas</b> de déphasage entre u et i ?' : 'Lequel de ces appareils crée un déphasage entre u et i ?',
+      options: [{ id: 'ok', label: bon }].concat(autres.map((a, k) => ({ id: 'f' + k, label: a }))), bonne: 'ok', colonne: true,
+      indice: 'Avec uniquement des résistances : pas de déphasage. Avec des bobines (moteur) ou des condensateurs : déphasage.',
+      solution: sans ? `${bon[0].toUpperCase() + bon.slice(1)} ne contient qu'une résistance chauffante : pas de déphasage. Les moteurs contiennent des bobines : ils créent un déphasage.`
+        : `${bon[0].toUpperCase() + bon.slice(1)} contient des bobines : il y a un déphasage. Les appareils de chauffage ne contiennent que des résistances.` }] };
+  },
+  function quiAvance() {
+    const o = grapheAlea(true);
+    return { theme: 'Qui est en avance ?', parties: [{ type: 'choixFig', q: 'Sur ce graphique :', figure: PA.figPhi(o), options: AVANCE, bonne: o.dt > 0 ? 'i' : 'u', melanger: false,
+      indice: 'Compare deux sommets voisins, un de chaque courbe : lequel arrive en premier (le plus à gauche) ?', solution: avanceTxt(o) }] };
+  },
+  function piege() {
+    // le premier sommet visible n'est pas le bon : il faut comparer des sommets voisins
+    const T = 20, d = hasard([4, 5, 6]), iAv = Math.random() < .5, t1 = hasard([1, 2, 3]);
+    const [Um, Im] = hasard(AMPLIS);
+    // le premier sommet visible (en t1) est celui de la courbe en retard ; le sommet voisin
+    // de la courbe en avance est juste avant t = 0, hors du graphique
+    const o = Object.assign(iAv ? { dt: d, tu: t1 } : { dt: -d, tu: t1 - d + T }, { T, Um, Im, tmax: 40, pasT: 5, ymax: 3 });
+    return { theme: 'Qui est en avance ?', parties: [{ type: 'choixFig', q: 'Sur ce graphique :', figure: PA.figPhi(o), options: AVANCE, bonne: iAv ? 'i' : 'u', melanger: false,
+      indice: 'Le premier sommet visible n\'est pas forcément le bon : compare deux sommets <b>voisins</b> (les plus proches), un de chaque courbe.', solution: avanceTxt(o) }] };
+  },
+  function tour() {
+    const L = [['T', '2π'], ['T/2', 'π'], ['T/4', 'π/2'], ['2T', '4π'], ['3T/4', '3π/2'], ['T/8', 'π/4']];
+    const [duree, angle] = hasard(L);
+    const autres = melanger(L.map(x => x[1]).filter(a => a !== angle)).slice(0, 3);
+    return { theme: 'Période et tour complet', parties: [{ type: 'choix', q: `Pour un signal sinusoïdal de période T, une durée égale à <b>${duree}</b> correspond à un angle de :`,
+      options: [{ id: 'ok', label: angle + ' rad' }].concat(autres.map((a, k) => ({ id: 'f' + k, label: a + ' rad' }))), bonne: 'ok',
+      indice: 'Une période T correspond à un tour complet, 2π rad. La durée et l\'angle sont proportionnels.',
+      solution: `T correspond à 2π rad, donc ${duree} correspond à ${angle} rad.` }] };
+  },
+  function ouMesurer() {
+    const dt = Math.random() < .5;
+    return { theme: 'Lire sur le graphique', parties: dt ? [{ type: 'choix', q: 'Pour mesurer le décalage Δt entre u et i, on mesure l\'écart entre :', colonne: true,
+      options: [{ id: 'ok', label: 'un sommet de i et le sommet de u le plus proche' }, { id: 'a', label: 'deux sommets voisins de u' },
+        { id: 'b', label: 'un sommet de i et un creux de u' }, { id: 'c', label: 'l\'origine (t = 0) et le premier sommet de i' }], bonne: 'ok',
+      indice: 'Δt est le décalage entre les deux courbes : on compare des points équivalents des deux courbes, voisins.',
+      solution: 'Δt : entre un sommet de i et le sommet de u le plus proche (ou deux passages par zéro dans le même sens). Deux sommets voisins de u donnent T.' }]
+      : [{ type: 'choix', q: 'Pour mesurer la période T, on mesure l\'écart entre :', colonne: true,
+      options: [{ id: 'ok', label: 'deux sommets voisins de la même courbe' }, { id: 'a', label: 'un sommet de i et le sommet de u le plus proche' },
+        { id: 'b', label: 'un sommet et le creux suivant de la même courbe' }, { id: 'c', label: 'l\'origine (t = 0) et la fin de l\'axe des temps' }], bonne: 'ok',
+      indice: 'Au bout d\'une période, on revient au même point de la même courbe.',
+      solution: 'T : entre deux sommets (ou deux creux) voisins de la même courbe. Un sommet et le creux suivant donnent T/2.' }] };
+  },
+];
+
+/* ---------- Groupe 2 : le calcul de φ ---------- */
+const G2 = [
+  function formule() {
+    return { theme: 'Calcul du déphasage', parties: [{ type: 'choix', q: 'Quelle relation donne le déphasage φ, en radians ?', colonne: true,
+      options: [{ id: 'ok', label: 'φ = 2π × Δt / T' }, { id: 'a', label: 'φ = 2π × T / Δt' }, { id: 'b', label: 'φ = Δt / (2π × T)' }, { id: 'c', label: 'φ = T × Δt / 2π' }], bonne: 'ok',
+      indice: 'Tableau de proportionnalité : T correspond à 2π, Δt correspond à φ. Fais le produit en croix.',
+      solution: 'T ↔ 2π et Δt ↔ φ, donc par produit en croix : φ = 2π × Δt / T.' }] };
+  },
+  function fraction() {
+    const L = [[2, 'π'], [3, '2π/3'], [4, 'π/2'], [6, 'π/3'], [8, 'π/4'], [12, 'π/6']];
+    const [n, ang] = hasard(L);
+    const autres = melanger(L.filter(x => x[0] !== n).map(x => x[1])).slice(0, 3);
+    return { theme: 'Calcul du déphasage', parties: [{ type: 'choix', q: `Le décalage entre u et i vaut <b>Δt = T/${n}</b>. Le déphasage vaut :`,
+      options: [{ id: 'ok', label: `φ = ${ang} rad` }].concat(autres.map((a, k) => ({ id: 'f' + k, label: `φ = ${a} rad` }))), bonne: 'ok',
+      indice: `φ = 2π × Δt / T = 2π × (T/${n}) / T = 2π / ${n}.`,
+      solution: `φ = 2π × Δt / T = 2π / ${n} = ${ang} rad.` }] };
+  },
+  function calculQcm() {
+    const T = hasard([20, 20, 10, 16]), dt = hasard(T === 10 ? [1, 1.5, 2, 3] : [1, 1.5, 2, 3, 3.5, 6, 7]);
+    const phi = 2 * Math.PI * dt / T;
+    return { theme: 'Calcul du déphasage', parties: [{ type: 'choix', q: `T = ${fmt(T)} ms et Δt = ${fmt(dt)} ms. Le déphasage vaut :`,
+      options: optionsNum(fmt(phi, 2), [fmt(dt / T, 2), fmt(360 * dt / T, 0), fmt(2 * Math.PI * T / dt, 1)], 'rad'), bonne: 'ok',
+      indice: 'φ = 2π × Δt / T, en radians.',
+      solution: `φ = 2π × Δt / T = 2π × ${fmt(dt)} / ${fmt(T)} ≈ ${fmt(phi, 2)} rad.` }] };
+  },
+  function calculNombre() {
+    const T = hasard([20, 16, 12.5, 10]), dt = arr(T * hasard([.075, .1, .125, .15, .175, .2, .225]), 2);
+    const phi = 2 * Math.PI * dt / T;
+    return { theme: 'Calcul du déphasage', parties: [{ type: 'nombre', q: `T = ${fmt(T)} ms et Δt = ${fmt(dt)} ms. Calcule le déphasage φ (au centième).`,
+      label: 'φ ≈', valeur: phi, tol: .006, unite: 'rad', dec: 2,
+      diag: v => Math.abs(v - 360 * dt / T) < .6 ? 'Tu as calculé en <b>degrés</b> : en radians, une période correspond à 2π rad.'
+        : Math.abs(v - dt / T) < .006 ? 'Tu as oublié de multiplier par 2π.' : Math.abs(v - 2 * Math.PI * T / dt) < .1 ? 'Tu as inversé T et Δt.' : null,
+      indice: 'φ = 2π × Δt / T.', solution: `φ = 2π × ${fmt(dt)} / ${fmt(T)} ≈ ${fmt(phi, 2)} rad.` }] };
+  },
+  function unites() {
+    const T = hasard([20, 10]), dtMs = hasard([2, 3, 4]), dtS = dtMs / 1000;
+    const phi = 2 * Math.PI * dtMs / T;
+    return { theme: 'Calcul du déphasage', parties: [{ type: 'choix', q: `T = ${fmt(T)} ms et Δt = ${fmt(dtS)} s. Le déphasage vaut :`,
+      options: optionsNum(fmt(phi, 2), [PH.cs(2 * Math.PI * dtS / T, 2), fmt(2 * Math.PI * dtMs / T * 1000, 0)], 'rad'), bonne: 'ok',
+      indice: 'T et Δt doivent être exprimés dans la même unité.',
+      solution: `Δt = ${fmt(dtS)} s = ${fmt(dtMs)} ms, donc φ = 2π × ${fmt(dtMs)} / ${fmt(T)} ≈ ${fmt(phi, 2)} rad.` }] };
+  },
+];
+
+/* ---------- Groupe 3 : lecture sur les graduations ---------- */
+const G3 = [
+  function lectureT() {
+    const o = grapheAlea(true);
+    const fausses = [o.T / 2, Math.abs(o.dt), o.tu].filter(x => x !== o.T);
+    return { theme: 'Lire sur le graphique', consigne: 'Lis la période sur le graphique (une graduation toutes les 2 ms).', parties: [
+      { type: 'choixFig', figure: PA.figPhi(o), q: 'La période T vaut :', options: optionsNum(fmt(o.T), fausses.map(x => fmt(x)), 'ms'), bonne: 'ok',
+        indice: 'Lis les dates de deux sommets voisins de la même courbe, puis fais la différence.',
+        solution: `Deux sommets voisins de u : ${fmt(o.tu)} ms et ${fmt(o.tu + o.T)} ms, donc T = ${fmt(o.T)} ms.` }] };
+  },
+  function lectureDt() {
+    const o = grapheAlea(true), d = Math.abs(o.dt), phi = 2 * Math.PI * d / o.T;
+    const ti = o.tu - o.dt;
+    const [t1, t2] = o.dt > 0 ? [ti, o.tu] : [o.tu, ti];
+    return { theme: 'Lire sur le graphique', consigne: 'Lis le décalage sur le graphique (une graduation toutes les 2 ms), puis calcule le déphasage.', parties: [
+      { type: 'choixFig', figure: PA.figPhi(o), q: 'Le décalage Δt entre u et i vaut :', options: optionsNum(fmt(d), [fmt(o.T - d), fmt(o.T), fmt(d / 2)].filter(x => x !== fmt(d)), 'ms'), bonne: 'ok',
+        indice: 'Lis la date d\'un sommet de i et celle du sommet de u le plus proche.',
+        solution: `Sommets voisins : ${fmt(t1)} ms et ${fmt(t2)} ms, donc Δt = ${fmt(d)} ms (T = ${fmt(o.T)} ms).` },
+      { type: 'nombre', q: `Calcule φ (au centième), avec T = ${fmt(o.T)} ms.`, label: 'φ ≈', valeur: phi, tol: .006, unite: 'rad', dec: 2,
+        indice: 'φ = 2π × Δt / T.', solution: `φ = 2π × ${fmt(d)} / ${fmt(o.T)} ≈ ${fmt(phi, 2)} rad.` }] };
+  },
+  function lectureAvance() {
+    const o = grapheAlea(true), d = Math.abs(o.dt);
+    return { theme: 'Lire sur le graphique', consigne: 'Une graduation toutes les 2 ms.', parties: [
+      { type: 'choixFig', figure: PA.figPhi(o), q: 'Quelle grandeur est en avance ?', options: AVANCE, bonne: o.dt > 0 ? 'i' : 'u', melanger: false,
+        indice: 'Compare deux sommets voisins : lequel arrive en premier ?', solution: avanceTxt(o) },
+      { type: 'choix', q: 'De quelle durée ?', options: optionsNum(fmt(d), [fmt(o.T - d), fmt(o.T), fmt(o.T / 2)].filter(x => x !== fmt(d)), 'ms'), bonne: 'ok',
+        indice: 'Δt est l\'écart entre deux sommets voisins, un de chaque courbe.', solution: `Δt = ${fmt(d)} ms.` }] };
+  },
+];
+
+/* ---------- Groupe 4 : mesures à la règle (les deux dernières) ---------- */
+function mesure() {
+  const o = grapheAlea(false);
+  return { theme: 'Mesure à la règle', consigne: 'Les sommets ne tombent pas sur les graduations : mesure T et Δt à la règle (en cm), puis calcule φ.', parties: [
+    { type: 'mesurePhi', o, solution: PA.solutionPhi(o) },
+    { type: 'choix', q: 'Qui est en avance ?', options: AVANCE.slice(0, 2), bonne: o.dt > 0 ? 'i' : 'u', melanger: false,
+      indice: 'Quelle courbe arrive à son sommet en premier ?', solution: avanceTxt(o) }] };
+}
+
+// tirage : 3 + 3 + 2 questions sans répétition dans un groupe, puis les 2 mesures
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  return pris(G1, 3).concat(pris(G2, 3), pris(G3, 2), [mesure(), mesure()]);
+}
+
+PH.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Mesurer un déphasage',
+  intro: `<p class="er-contexte">10 questions tirées au hasard pour vérifier que tu as compris le cours et t'aider à le retenir : déphasage, avance et retard, calcul de φ. Les <b>deux dernières</b> sont des mesures de déphasage à la règle sur un graphique. Garde ta calculatrice à portée de main.</p>`,
+  questions: tirage,
+  revoir: { href: 'module_3_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4_cours.html', label: 'Module 4 : la puissance active en exercices →' },
+});
+PA.menu('module_3_questions');
+</script>
+</body>
+</html>
