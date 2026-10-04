@@ -209,5 +209,38 @@
     return svg(W, H, s, 'Vecteur partant de O, angle α avec un axe');
   }
 
-  window.FIG = { svg, point, chrono, referentiels, train, velo, decomp, directions, trigoCoord, diagTrigo, trigo };
+  /* ---------- Mouvement circulaire et repère de Frenet ----------
+     opts = { theta (degrés), sens: 1 (sens trigonométrique) ou −1, r (px),
+              ut, un, om, rayon (booléens), v (longueur en px), at, an (px), traces (positions) } */
+  function frenet(o) {
+    o = Object.assign({ theta: 40, sens: 1, r: 110, ut: true, un: true, om: false, rayon: true, v: 0, at: 0, an: 0, traces: 0, W: 360, H: 340, U: 50 }, o);
+    const cx = o.W / 2, cy = o.H / 2, A = acc(), Ai = getComputedStyle(document.documentElement).getPropertyValue('--accent-ink').trim() || '#3f2a93';
+    const th = o.theta * Math.PI / 180, mx = cx + o.r * Math.cos(th), my = cy - o.r * Math.sin(th);
+    const tx = -Math.sin(th) * o.sens, ty = -Math.cos(th) * o.sens;      // tangente (écran), sens du mouvement
+    const nx = -Math.cos(th), ny = Math.sin(th);                         // normale vers le centre (écran)
+    let s = `<circle cx="${cx}" cy="${cy}" r="${o.r}" fill="none" stroke="#c9c4b9" stroke-width="2"/>`;
+    for (let k = 1; k <= o.traces; k++) {                                // positions précédentes (chronophotographie)
+      const a = th - o.sens * k * .32; s += point(cx + o.r * Math.cos(a), cy - o.r * Math.sin(a), 3, '#8d8f94');
+    }
+    s += point(cx, cy, 3.5, C.encre) + V.texte(cx - 9, cy + 16, 'O', 13, C.encre, 'end');
+    if (o.rayon && !o.om) s += V.pointille(cx, cy, mx, my, C.encre3, 1.4) + V.texte((cx + mx) / 2 - tx * 12, (cy + my) / 2 - ty * 12 + 5, 'r', 14, C.encre2);
+    // sens du mouvement sur le cercle
+    const af = th + o.sens * 2.2, ax = cx + (o.r + 12) * Math.cos(af), ay = cy - (o.r + 12) * Math.sin(af);
+    s += V.fleche(ax, ay, ax - Math.sin(af) * o.sens * 16, ay - Math.cos(af) * o.sens * 16, C.encre3, 2, 7);
+    if (o.om) s += V.fleche(cx, cy, mx, my, C.encre, 2.5, 11) + V.nomSVG('OM', (cx + mx) / 2 - tx * 20, (cy + my) / 2 - ty * 20 + 6, 14, C.encre);
+    if (o.an || o.at) {
+      const ex = mx + tx * o.at + nx * o.an, ey = my + ty * o.at + ny * o.an;
+      if (o.at && o.an) s += V.pointille(mx, my, mx + tx * o.at, my + ty * o.at, C.vert, 1.5) + V.pointille(mx + tx * o.at, my + ty * o.at, ex, ey, C.vert, 1.5) + V.pointille(mx, my, mx + nx * o.an, my + ny * o.an, C.vert, 1.5) + V.pointille(mx + nx * o.an, my + ny * o.an, ex, ey, C.vert, 1.5);
+      s += V.fleche(mx, my, ex, ey, C.vert, 3, 12) + V.nomSVG('a', ex + (ex - mx) / Math.hypot(ex - mx, ey - my) * 13, ey + (ey - my) / Math.hypot(ex - mx, ey - my) * 13 + 5, 15, C.vert);
+    }
+    if (o.v) s += V.fleche(mx, my, mx + tx * o.v, my + ty * o.v, '#dc2626', 3, 12) + V.nomSVG('v', mx + tx * (o.v + 13) - nx * 4, my + ty * (o.v + 13) - ny * 4 + 5, 15, '#dc2626');
+    if (o.ut) s += V.fleche(mx, my, mx + tx * o.U, my + ty * o.U, Ai, 2.6, 9) + V.nomSVG('u_t', mx + tx * (o.U + 10) - nx * 14, my + ty * (o.U + 10) - ny * 14 + 5, 14, Ai);
+    if (o.un) s += V.fleche(mx, my, mx + nx * o.U, my + ny * o.U, Ai, 2.6, 9) + V.nomSVG('u_n', mx + nx * o.U + tx * 16, my + ny * o.U + ty * 16 + 5, 14, Ai);
+    // angle droit entre les deux vecteurs unitaires
+    if (o.ut && o.un) { const k = 9; s += `<path d="M${mx + tx * k},${my + ty * k} L${mx + tx * k + nx * k},${my + ty * k + ny * k} L${mx + nx * k},${my + ny * k}" fill="none" stroke="${Ai}" stroke-width="1.2"/>`; }
+    s += point(mx, my, 5, C.encre) + V.texte(mx - nx * 14 - tx * 8, my - ny * 14 - ty * 8 + 5, 'M', 14, C.encre);
+    return svg(o.W, o.H, s, 'Mouvement circulaire et repère de Frenet');
+  }
+
+  window.FIG = { svg, point, chrono, referentiels, train, velo, decomp, directions, trigoCoord, diagTrigo, trigo, frenet };
 })();

@@ -310,8 +310,9 @@
     }
     clav.querySelectorAll('button').forEach(b => { b.onclick = () => taper(b.dataset.t); });
     ch.addEventListener('keydown', e => {
-      const k = e.key, x = { '+': '+', '-': '−', '−': '−', ',': ',', '.': ',', i: 'u0', j: 'u1', Backspace: 'del' }[k] ||
-        (/^[0-9]$/.test(k) ? k : null) || (u[0] === 'u_x' && k === 'x' ? 'u0' : null) || (u[1] === 'u_y' && k === 'y' ? 'u1' : null);
+      // touche du vecteur unitaire : sa lettre (i, j) ou son indice (x, y pour u⃗ₓ, u⃗ᵧ ; t, n pour u⃗ₜ, u⃗ₙ)
+      const k = e.key, x = { '+': '+', '-': '−', '−': '−', ',': ',', '.': ',', Backspace: 'del' }[k] ||
+        (/^[0-9]$/.test(k) ? k : null) || (k === u[0].split('_').pop() ? 'u0' : null) || (k === u[1].split('_').pop() ? 'u1' : null);
       if (k === 'Enter') { e.preventDefault(); valider(); return; }
       if (x) { e.preventDefault(); taper(x); }
     });

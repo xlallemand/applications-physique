@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 : questions sur le repère de Frenet — Cinématique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cin.css">
+<script src="../../assets/nav.js"></script>
+<script src="vecteurs.js"></script>
+<script src="cin.js"></script>
+<script src="figures.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : repère de Frenet (2), vecteur
+   position (1), vecteur vitesse (1), accélération normale (2),
+   vecteur accélération (1), mouvement circulaire uniforme (2),
+   question de cours (1).
+   ============================================================ */
+const { hasard, melanger, entre, fmt, fr, dd, cs } = CIN;
+const { nomHTML: N, colHTML: col } = VEC;
+const M = CIN.MOINS;
+const o = (id, label) => ({ id, label });
+const UT = N('u_t'), UN = N('u_n'), F = ['u_t', 'u_n'];
+const MS = `m·s<sup>${M}1</sup>`, MS2 = `m·s<sup>${M}2</sup>`;
+const R = h => `<span class="racine">√<span>${h}</span></span>`;
+const choix = (theme, q, options, bonne, solution, indice, opts) => ({ theme, parties: [Object.assign({ type: 'choix', q, options, bonne, solution, indice, colonne: true }, opts)] });
+const diagAn = (v, r) => w => (CIN.proche(w, v / r, .02) ? 'Il faut élever la vitesse au carré : a<sub>n</sub> = v² / r.' : CIN.proche(w, v * v * r, .02) ? 'On divise par le rayon : a<sub>n</sub> = v² / r.' : CIN.proche(w, r * r / v, .02) ? 'C\'est v² / r, et non r² / v.' : null);
+// figure : point sur un cercle, avec le repère de Frenet
+const fig = opts => z => { z.innerHTML = FIG.frenet(Object.assign({ theta: entre(0, 359), sens: hasard([1, -1]) }, opts)); };
+
+/* ---------- Repère de Frenet ---------- */
+function repere() {
+  return hasard([
+    () => choix('Repère de Frenet', `Le vecteur ${UN} est :`, [o('ok', 'normal à la trajectoire, orienté vers le centre'), o('a', 'tangent à la trajectoire'), o('b', 'normal à la trajectoire, orienté vers l\'extérieur'), o('c', 'toujours vertical')], 'ok', `${UN} est normal à la trajectoire et orienté vers le centre.`, '« n » comme normal.'),
+    () => choix('Repère de Frenet', `Le vecteur ${UT} est :`, [o('ok', 'tangent à la trajectoire, dans le sens du mouvement'), o('a', 'orienté vers le centre'), o('b', 'tangent à la trajectoire, dans le sens contraire du mouvement'), o('c', 'toujours horizontal')], 'ok', `${UT} est tangent à la trajectoire, dans le sens du mouvement.`, '« t » comme tangent.'),
+    () => choix('Repère de Frenet', `Les vecteurs ${UT} et ${UN} ont pour longueur :`, [o('ok', '1 (ce sont des vecteurs unitaires)'), o('a', 'le rayon r'), o('b', 'la vitesse v'), o('c', 'v² / r')], 'ok', 'Ce sont des vecteurs unitaires : leur longueur vaut 1.', 'Comme i⃗ et j⃗.'),
+    () => choix('Repère de Frenet', 'Le repère de Frenet est attaché :', [o('ok', 'au point M en mouvement'), o('a', 'au centre O du cercle'), o('b', 'au sol'), o('c', 'au Soleil')], 'ok', 'Le repère de Frenet est attaché au point M : il se déplace et tourne avec lui.', 'Il suit le point.'),
+    () => {
+      const ok = hasard(['ut', 'un']);
+      return { theme: 'Repère de Frenet', consigne: `Sur la figure, quel vecteur est ${ok === 'ut' ? UT : UN} ?`, figure: z => {
+        const th = entre(0, 359), sens = hasard([1, -1]);
+        z.innerHTML = FIG.frenet({ theta: th, sens, ut: false, un: false, v: 0, rayon: true }).replace('</svg>', (() => {
+          // deux flèches anonymes A et B à la place de u⃗t et u⃗n
+          const W = 360, H = 340, r = 110, cx = W / 2, cy = H / 2, t = th * Math.PI / 180, mx = cx + r * Math.cos(t), my = cy - r * Math.sin(t);
+          const tx = -Math.sin(t) * sens, ty = -Math.cos(t) * sens, nx = -Math.cos(t), ny = Math.sin(t), U = 50;
+          const AA = melange ? [tx, ty] : [nx, ny], BB = melange ? [nx, ny] : [tx, ty];
+          return VEC.fleche(mx, my, mx + AA[0] * U, my + AA[1] * U, '#2952c8', 2.6, 9) + VEC.texte(mx + AA[0] * (U + 14), my + AA[1] * (U + 14) + 5, '1', 15, '#2952c8') +
+            VEC.fleche(mx, my, mx + BB[0] * U, my + BB[1] * U, '#c2570c', 2.6, 9) + VEC.texte(mx + BB[0] * (U + 14), my + BB[1] * (U + 14) + 5, '2', 15, '#c2570c') + '</svg>';
+        })());
+      }, parties: [{ type: 'choix', options: [o('1', 'la flèche 1'), o('2', 'la flèche 2')], melanger: false, bonne: (ok === 'ut') === melange ? '1' : '2',
+        indice: `${UT} est tangent (dans le sens du mouvement, indiqué par la petite flèche grise) ; ${UN} va vers le centre.`, solution: `${UT} est tangent à la trajectoire, ${UN} est dirigé vers le centre O.` }] };
+    },
+  ])();
+}
+let melange = Math.random() < .5;
+
+/* ---------- Vecteur position ---------- */
+function position() {
+  const r = hasard([2, 3, 4, 5, 6, 8, 10, 12]);
+  return { theme: 'Vecteur position', consigne: `Un point M décrit un cercle de centre O et de rayon r = ${r} m. Donne les coordonnées de ${N('OM')} dans le repère de Frenet (${UT} en haut, ${UN} en bas).`,
+    figure: fig({ om: true, rayon: false }),
+    parties: [{ type: 'coord', label: N('OM'), valeurs: [0, -r], unite: 'm',
+      diag: v => (v[1] === r ? `${N('OM')} va du centre vers M, dans le sens contraire de ${UN} : la coordonnée est négative.` : v[0] ? `${N('OM')} est perpendiculaire à la trajectoire : sa coordonnée selon ${UT} est nulle.` : null),
+      indice: `${N('OM')} = 0${UT} ${M} r${UN}.`, solution: `${N('OM')} ${col(0, -r)} = ${M}${r}${UN}` }] };
+}
+
+/* ---------- Vecteur vitesse ---------- */
+function vitesse() {
+  const v = hasard([2, 3, 4, 5, 6, 8, 12, 15, 20]);
+  if (Math.random() < .5) return { theme: 'Vecteur vitesse', consigne: `Un point tourne sur un cercle à la vitesse v = ${v} ${MS}. Écris ${N('v')} dans le repère de Frenet.`,
+    parties: [{ type: 'ij', label: `${N('v')} =`, valeurs: [v, 0], unites: F, lecture: false, diag: c => (c[1] === v && !c[0] ? `Le vecteur vitesse est tangent : il est porté par ${UT}.` : null), indice: `${N('v')} = v${UT}.`, solution: `${N('v')} = ${v}${UT}` }] };
+  return { theme: 'Vecteur vitesse', consigne: `Un point tourne sur un cercle à la vitesse v = ${v} ${MS}. Donne les coordonnées de ${N('v')} dans le repère de Frenet.`,
+    parties: [{ type: 'coord', label: N('v'), valeurs: [v, 0], unite: MS, diag: c => (c[1] === v ? `Le vecteur vitesse est tangent : sa coordonnée selon ${UN} est nulle.` : null), indice: `${N('v')} = v${UT} : ${col('v', 0)}.`, solution: `${N('v')} ${col(v, 0)}` }] };
+}
+
+/* ---------- Accélération normale ---------- */
+function normale() {
+  const v = hasard([2, 3, 4, 5, 6, 8, 10, 12, 15, 20]), r = hasard([2, 4, 5, 8, 10, 20, 25, 50]), an = v * v / r;
+  return { theme: 'Accélération normale', consigne: `Un point décrit un cercle de rayon r = ${r} m ; à un instant, sa vitesse vaut v = ${v} ${MS}. Calcule a<sub>n</sub>.`,
+    parties: [{ type: 'nombre', label: 'a<sub>n</sub> =', valeur: an, rel: .01, cs: 3, unite: MS2, diag: diagAn(v, r), indice: 'a<sub>n</sub> = v² / r.', solution: `a<sub>n</sub> = ${fr(`${v}²`, r)} = ${fmt(+an.toPrecision(3))} ${MS2}` }] };
+}
+/* ---------- Vecteur accélération ---------- */
+function acceleration() {
+  const v = hasard([4, 6, 8, 10, 12]), r = hasard([4, 8, 16]), at = hasard([1, 2, 3, 4, 5]), an = v * v / r, a = Math.hypot(at, an);
+  return { theme: 'Vecteur accélération', consigne: `Un point décrit un cercle de rayon r = ${r} m. À un instant, v = ${v} ${MS} et ${dd('v')} = ${at} ${MS2}.`,
+    figure: fig({ v: 80, at: 28, an: 55, ut: true, un: true }),
+    parties: [
+      { type: 'ij', q: `Écris ${N('a')} dans le repère de Frenet.`, label: `${N('a')} =`, valeurs: [at, an], unites: F, lecture: false,
+        diag: c => (c[0] === an && c[1] === at ? `a<sub>t</sub> va devant ${UT}, a<sub>n</sub> devant ${UN}.` : c[0] === at && CIN.proche(c[1], v / r, .02) ? 'a<sub>n</sub> = v² / r : il faut élever la vitesse au carré.' : null),
+        indice: `${N('a')} = a<sub>t</sub>${UT} + a<sub>n</sub>${UN}, avec a<sub>t</sub> = ${dd('v')} et a<sub>n</sub> = v² / r.`, solution: `a<sub>t</sub> = ${at} ${MS2} ; a<sub>n</sub> = ${fr(`${v}²`, r)} = ${fmt(an)} ${MS2} : ${N('a')} = ${at}${UT} + ${fmt(an)}${UN}` },
+      { type: 'nombre', q: 'Calcule la valeur a de l\'accélération, arrondie au dixième.', label: 'a ≈', valeur: a, tol: .051, dec: 1, unite: MS2,
+        diag: w => (Math.abs(w - (at + an)) < .06 ? 'On n\'additionne pas : a = √(at² + an²).' : null), indice: 'a = √(at² + an²).', solution: `a = ${R(`${at}² + ${fmt(an)}²`)} ≈ ${fmt(a, 1)} ${MS2}` }] };
+}
+
+/* ---------- Mouvement circulaire uniforme ---------- */
+function mcu() {
+  if (Math.random() < .5) {
+    const r = hasard([.2, .5, 1.5, 2, 5, 8, 10, 20]), T = hasard([.5, 2, 4, 5, 10, 12, 20, 30]), v = 2 * Math.PI * r / T;
+    return { theme: 'Mouvement circulaire uniforme', consigne: `Un point décrit un cercle de rayon r = ${fmt(r)} m à vitesse constante ; il fait un tour en T = ${fmt(T)} s. Calcule sa vitesse v (trois chiffres significatifs).`,
+      parties: [{ type: 'nombre', label: 'v ≈', valeur: v, rel: .006, cs: 3, unite: MS,
+        diag: w => (CIN.proche(w, r / T, .02) ? 'En un tour, le point parcourt le périmètre 2πr : v = 2πr / T.' : CIN.proche(w, Math.PI * r / T, .02) ? 'Le périmètre est 2πr (et non πr).' : CIN.proche(w, 2 * Math.PI * T / r, .02) ? 'C\'est v = 2πr / T (distance divisée par durée).' : null),
+        indice: 'Distance parcourue en un tour : 2πr, en une durée T.', solution: `v = ${fr(`2π × ${fmt(r)}`, fmt(T))} ≈ ${cs(v, 3)} ${MS}` }] };
+  }
+  const v = hasard([2, 3, 5, 8, 10, 12, 15, 20, 25]), r = hasard([1, 2, 5, 10, 15, 20, 50, 100]), a = v * v / r;
+  return { theme: 'Mouvement circulaire uniforme', consigne: `Un véhicule parcourt un virage circulaire de rayon r = ${r} m à la vitesse constante v = ${v} ${MS}. Calcule la valeur de son accélération (trois chiffres significatifs).`,
+    parties: [{ type: 'nombre', label: 'a ≈', valeur: a, rel: .006, cs: 3, unite: MS2, diag: diagAn(v, r), indice: 'Mouvement circulaire uniforme : a = v² / r.', solution: `a = ${fr(`${v}²`, r)} ≈ ${cs(a, 3)} ${MS2}` }] };
+}
+
+/* ---------- Questions de cours ---------- */
+function cours() {
+  return hasard([
+    () => choix('Question de cours', 'Dans un mouvement circulaire uniforme, le vecteur accélération est :', [o('ok', 'dirigé vers le centre, de valeur v² / r'), o('a', 'nul'), o('b', 'tangent à la trajectoire'), o('c', 'dirigé vers l\'extérieur')], 'ok', `${N('a')} = (v²/r)${UN} : centripète, de valeur v²/r.`, 'a⃗ = at u⃗t + an u⃗n, avec at = dv/dt = 0.'),
+    () => choix('Question de cours', 'Dans un mouvement circulaire uniforme, a<sub>t</sub> vaut :', [o('ok', '0'), o('a', 'v² / r'), o('b', 'v'), o('c', '1')], 'ok', 'v est constante, donc a<sub>t</sub> = dv/dt = 0.', 'a<sub>t</sub> = dv/dt.', { colonne: false }),
+    () => choix('Question de cours', `Dans le repère de Frenet, le vecteur vitesse s'écrit :`, [o('ok', `v${UT}`), o('a', `v${UN}`), o('b', `v${UT} + v${UN}`), o('c', `${fr('v²', 'r')}${UN}`)], 'ok', `${N('v')} = v${UT} : il est tangent à la trajectoire.`, 'Le vecteur vitesse est tangent.', { colonne: false }),
+    () => choix('Question de cours', 'Un point tourne à vitesse constante sur un cercle. Son vecteur vitesse est :', [o('ok', 'non constant, car sa direction change'), o('a', 'constant'), o('b', 'nul'), o('c', 'dirigé vers le centre')], 'ok', 'Sa valeur est constante, mais pas sa direction : le vecteur vitesse n\'est pas constant.', 'Un vecteur constant garde la même valeur, la même direction et le même sens.'),
+  ])();
+}
+
+function tirage() {
+  melange = Math.random() < .5;
+  return [repere(), position(), vitesse(), normale(), acceleration(), mcu(), repere(), normale(), mcu(), cours()];
+}
+
+CIN.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 5 · QUESTIONS', titre: 'Le repère de Frenet',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : le repère de Frenet, les vecteurs position, vitesse et accélération dans ce repère, le mouvement circulaire uniforme. Garde ta calculatrice à portée de main.</p>',
+  questions: tirage,
+  revoir: { href: 'module_5_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_6.html', label: 'Module 6 : exercices du cours →' },
+});
+CIN.menu('module_5_questions');
+</script>
+</body>
+</html>
