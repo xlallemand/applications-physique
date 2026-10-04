@@ -374,11 +374,16 @@
   function pGabarit(zone, p, api) {
     const d = el('div', 'ph-valeur cin-gabarit');
     if (p.label) d.appendChild(el('span', 'ph-lab', p.label));
+    // chaque case forme un groupe insécable avec le texte qui la suit (et le texte d'ouverture
+    // avec la première case) : sur un petit écran, la ligne ne se coupe qu'entre deux groupes
     const champs = [];
+    let grp = el('span', 'cin-g-grp');
+    d.appendChild(grp);
     p.morceaux.forEach(m => {
-      if (typeof m === 'string') { d.appendChild(el('span', 'cin-g-txt', m)); return; }
+      if (typeof m === 'string') { grp.appendChild(el('span', 'cin-g-txt', m)); return; }
+      if (champs.length) { grp = el('span', 'cin-g-grp'); d.appendChild(grp); }
       const c = champ({ petit: true, aria: m.aria || 'Nombre à compléter' });
-      c.m = m; champs.push(c); d.appendChild(c.el);
+      c.m = m; champs.push(c); grp.appendChild(c.el);
     });
     zone.appendChild(d);
     const bVal = boutonValider(zone);
@@ -425,7 +430,8 @@
         api.message(vides.length === res.length ? `Trace ${res.length > 1 ? 'les vecteurs' : 'le vecteur'} avant de valider.` : `Il reste à tracer : ${vides.map(x => V.nomHTML(x.v.nom)).join(', ')}.`);
         return;
       }
-      api.erreur(faux.map(x => `${res.length > 1 ? `<b>${V.nomHTML(x.v.nom)}</b> : ` : ''}${V.message(x.code, r.o.unitaires || p.unites)}`).join('<br>') +
+      const maj = t => t.charAt(0).toUpperCase() + t.slice(1);
+      api.erreur(faux.map(x => (res.length > 1 ? `<b>${V.nomHTML(x.v.nom)}</b> : ${V.message(x.code, r.o.unitaires || p.unites)}` : maj(V.message(x.code, r.o.unitaires || p.unites)))).join('<br>') +
         (vides.length ? `<br>Il reste aussi à tracer : ${vides.map(x => V.nomHTML(x.v.nom)).join(', ')}.` : '') +
         (res.length > 1 && res.some(x => x.code === 'ok') ? '<br><span class="er-petit">Les vecteurs justes (en vert) sont bloqués.</span>' : ''));
       secouer(d);
@@ -661,6 +667,8 @@
     const d = this.ajouter(parent, `<div class="er-suite"><button type="button" class="btn-primary">${texte || 'Continuer →'}</button></div>`);
     d.querySelector('button').onclick = () => {
       d.remove();
+      moi.zone.style.pointerEvents = 'none';
+      setTimeout(() => { moi.zone.style.pointerEvents = ''; }, 400);
       const c = moi.lancer(moi.n + 1);
       if (c) setTimeout(() => c.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
     };

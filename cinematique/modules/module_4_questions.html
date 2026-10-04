@@ -97,14 +97,19 @@ function acceleration() {
 }
 
 /* ---------- Questions de cours ---------- */
+let deja = [];
 function cours() {
-  return hasard([
+  const liste = [
     () => choix('Question de cours', 'Le vecteur vitesse d\'un point est :', [o('ok', 'tangent à la trajectoire, dans le sens du mouvement'), o('a', 'dirigé vers l\'origine du repère'), o('b', 'perpendiculaire à la trajectoire'), o('c', 'toujours horizontal')], 'ok', 'Le vecteur vitesse est tangent à la trajectoire, dans le sens du mouvement.', 'Pense à l\'animation du ballon.'),
     () => choix('Question de cours', `${N('a')} = ${dd(N('v'))}. Le vecteur accélération représente :`, [o('ok', 'la variation du vecteur vitesse'), o('a', 'la variation de la position'), o('b', 'la vitesse moyenne'), o('c', 'la distance parcourue')], 'ok', 'L\'accélération est la variation (la dérivée) du vecteur vitesse.', 'Lis la définition : dérivée de quoi ?'),
     () => choix('Question de cours', 'Un point décrit un cercle à vitesse de valeur constante. Son accélération :', [o('ok', 'n\'est pas nulle, car la direction du vecteur vitesse change'), o('a', 'est nulle, car la valeur de la vitesse est constante'), o('b', 'est nulle, car le mouvement est circulaire'), o('c', 'est égale à la vitesse')], 'ok', 'Le vecteur vitesse change de direction : il varie, l\'accélération n\'est pas nulle.', 'Pense au volant, « troisième accélérateur ».'),
     () => choix('Question de cours', `Les coordonnées du vecteur accélération s'expriment en :`, [o('ok', MS2), o('a', MS), o('b', 'm'), o('c', 'm·s')], 'ok', `a<sub>x</sub> = ${dd('v<sub>x</sub>')} → (m·s<sup>${M}1</sup>) / s = ${MS2}.`, 'Écris l\'unité du haut divisée par l\'unité du bas.', { colonne: false }),
     () => choix('Question de cours', `La coordonnée v<sub>y</sub> du vecteur vitesse est :`, [o('ok', dd('y')), o('a', fr('y', 't')), o('b', dd('t', 'y')), o('c', dd('v'))], 'ok', `v<sub>y</sub> = ${dd('y')} = y'(t).`, 'C\'est la dérivée d\'une coordonnée de la position.', { colonne: false }),
-  ])();
+  ];
+  if (deja.length >= liste.length) deja = [];
+  const k = hasard(liste.map((_, i) => i).filter(i => !deja.includes(i)));
+  deja.push(k);
+  return liste[k]();
 }
 
 /* ---------- Calcul approché ---------- */
@@ -147,14 +152,50 @@ function trace() {
       solution: `Δ${N('v')} = ${col(`${v2[0]} − ${v1[0]}`, `${fmt(v2[1])} − ${v1[1] < 0 ? `(${fmt(v1[1])})` : v1[1]}`)} = ${col(dv[0], dv[1])}` }] };
 }
 
+/* ---------- QCM ---------- */
+// options mélangées sans doublon (la bonne réponse en premier)
+const opts = (bonne, autres) => { const vus = new Set([bonne]); return [o('ok', bonne)].concat(autres.filter(x => !vus.has(x) && vus.add(x)).slice(0, 3).map((x, i) => o('f' + i, x))); };
+function positionQCM() {
+  const x = fonction(), y = fonction();
+  if (Math.random() < .5) return choix('Vecteur position', `x(t) = ${poly(x)} et y(t) = ${poly(y)}. Le vecteur position s'écrit :`,
+    opts(`${N('OM')}(t) = ${par(x)}${I} + ${par(y)}${J}`, [`${N('OM')}(t) = ${par(y)}${I} + ${par(x)}${J}`, `${N('OM')}(t) = ${poly(x)} + ${poly(y)}`, `${N('OM')}(t) = (${poly(x)} + ${poly(y)})${I}`]), 'ok',
+    `${N('OM')}(t) = x(t)${I} + y(t)${J}.`, 'x(t) va devant i⃗, y(t) devant j⃗.');
+  return choix('Vecteur position', `x(t) = ${poly(x)} et y(t) = ${poly(y)} (en m). À l'instant initial, le point M a pour coordonnées :`,
+    opts(col(x[2], y[2]), [col(x[0] || x[1], y[0] || y[1]), col(0, 0), col(y[2], x[2]) ]), 'ok', `On remplace t par 0 : x(0) = ${fmt(x[2])} m et y(0) = ${fmt(y[2])} m.`, 'Remplace t par 0.', { colonne: false });
+}
+function vitesseQCM() {
+  const f = hasard(['x', 'y']), c = [nz(5), nz(), nz()];
+  return choix('Vecteur vitesse', `${f}(t) = ${poly(c)}. La coordonnée v<sub>${f}</sub> du vecteur vitesse est :`,
+    opts(`v<sub>${f}</sub> = ${poly([2 * c[0], c[1]])}`, [`v<sub>${f}</sub> = ${poly([c[0], c[1]])}`, `v<sub>${f}</sub> = ${poly([2 * c[0], c[1], c[2]])}`, `v<sub>${f}</sub> = ${fr(poly(c), 't')}`]), 'ok',
+    `v<sub>${f}</sub> = ${dd(f)} = ${poly([2 * c[0], c[1]])}.`, 'Dérive : at² → 2at ; bt → b ; constante → 0.', { colonne: false, indices: { f2: 'Tu as divisé par t : on dérive, on ne divise pas.' } });
+}
+function accelerationQCM() {
+  const x = [nz(5), nz(), nz()], y = [0, nz(), nz()];
+  return choix('Vecteur accélération', `x(t) = ${poly(x)} et y(t) = ${poly(y)} (en m). Le vecteur accélération est :`,
+    opts(`${N('a')} = ${fmt(2 * x[0])}${I}`, [`${N('a')} = ${par([2 * x[0], x[1]])}${I} + ${fmt(y[1])}${J}`, `${N('a')} = ${fmt(2 * x[0])}${I} + ${fmt(y[1])}${J}`, `${N('a')} = ${fmt(x[0])}${I}`]), 'ok',
+    `${N('v')} = ${par([2 * x[0], x[1]])}${I} + ${fmt(y[1])}${J}, puis ${N('a')} = ${dd(N('v'))} = ${fmt(2 * x[0])}${I}.`, 'Dérive deux fois : la position donne la vitesse, la vitesse donne l\'accélération.');
+}
+function approcheQCM() {
+  return hasard([
+    () => choix('Calcul approché', 'Sur une chronophotographie, la valeur de la vitesse au point M<sub>i</sub> est :', [o('ok', `v<sub>i</sub> = ${fr('M<sub>i</sub>M<sub>i+1</sub>', 'τ')}`), o('a', `v<sub>i</sub> = M<sub>i</sub>M<sub>i+1</sub> × τ`), o('b', `v<sub>i</sub> = ${fr('τ', 'M<sub>i</sub>M<sub>i+1</sub>')}`), o('c', `v<sub>i</sub> = ${fr('OM<sub>i</sub>', 'τ')}`)], 'ok',
+      'On approche la vitesse instantanée par la vitesse moyenne entre M<sub>i</sub> et M<sub>i+1</sub> : distance divisée par la durée τ.', 'Une vitesse est une distance divisée par une durée.', { colonne: false }),
+    () => choix('Calcul approché', 'Dans un tableur, la coordonnée v<sub>x,i</sub> de la vitesse se calcule par :', [o('ok', fr('x<sub>i+1</sub> − x<sub>i</sub>', 't<sub>i+1</sub> − t<sub>i</sub>')), o('a', fr('x<sub>i</sub>', 't<sub>i</sub>')), o('b', 'x<sub>i+1</sub> − x<sub>i</sub>'), o('c', fr('t<sub>i+1</sub> − t<sub>i</sub>', 'x<sub>i+1</sub> − x<sub>i</sub>'))], 'ok',
+      `v<sub>x,i</sub> = (x<sub>i+1</sub> − x<sub>i</sub>) / (t<sub>i+1</sub> − t<sub>i</sub>) : petite variation de x divisée par la petite variation de t, comme ${dd('x')}.`, 'C\'est l\'équivalent de dx/dt avec de petites variations.', { colonne: false }),
+    () => choix('Calcul approché', 'Le vecteur accélération au point M<sub>i</sub> a la même direction et le même sens que :', [o('ok', `${N('v')}<sub>i+1</sub> ${M} ${N('v')}<sub>i</sub>`), o('a', `${N('v')}<sub>i</sub>`), o('b', `${N('v')}<sub>i</sub> + ${N('v')}<sub>i+1</sub>`), o('c', `${N('OM')}<sub>i</sub>`)], 'ok',
+      `${N('a')}<sub>i</sub> a la direction et le sens de Δ${N('v')}<sub>i</sub> = ${N('v')}<sub>i+1</sub> ${M} ${N('v')}<sub>i</sub>, et a<sub>i</sub> = Δv<sub>i</sub> / τ.`, 'L\'accélération est la variation du vecteur vitesse.', { colonne: false }),
+  ])();
+}
+
+// 6 QCM et 4 questions à calcul ou à tracé
 function tirage() {
-  return [position(), vitesse(), cours(), valeurVitesse(), acceleration(), approche(), position(), trace(), vitesse(), acceleration()];
+  const cs2 = melanger([cours, cours]).map(f => f());
+  return [positionQCM(), vitesseQCM(), position(), cs2[0], vitesse(), accelerationQCM(), valeurVitesse(), approcheQCM(), trace(), cs2[1]];
 }
 
 CIN.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 4 · QUESTIONS', titre: 'Position, vitesse et accélération',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : vecteur position, vecteur vitesse et sa valeur, vecteur accélération, calcul approché à partir d\'une chronophotographie ou d\'un tableur, tracés.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard, surtout des QCM : vecteur position, vecteur vitesse et sa valeur, vecteur accélération, calcul approché à partir d\'une chronophotographie ou d\'un tableur, un tracé.</p>',
   questions: tirage,
   revoir: { href: 'module_4_cours.html', label: 'Revoir le cours' },
   suite: { href: 'module_5_cours.html', label: 'Module 5 : le repère de Frenet →' },

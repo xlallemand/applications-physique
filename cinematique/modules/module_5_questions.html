@@ -36,8 +36,9 @@ const diagAn = (v, r) => w => (CIN.proche(w, v / r, .02) ? 'Il faut élever la v
 const fig = opts => z => { z.innerHTML = FIG.frenet(Object.assign({ theta: entre(0, 359), sens: hasard([1, -1]) }, opts)); };
 
 /* ---------- Repère de Frenet ---------- */
+let dejaR = [];
 function repere() {
-  return hasard([
+  const liste = [
     () => choix('Repère de Frenet', `Le vecteur ${UN} est :`, [o('ok', 'normal à la trajectoire, orienté vers le centre'), o('a', 'tangent à la trajectoire'), o('b', 'normal à la trajectoire, orienté vers l\'extérieur'), o('c', 'toujours vertical')], 'ok', `${UN} est normal à la trajectoire et orienté vers le centre.`, '« n » comme normal.'),
     () => choix('Repère de Frenet', `Le vecteur ${UT} est :`, [o('ok', 'tangent à la trajectoire, dans le sens du mouvement'), o('a', 'orienté vers le centre'), o('b', 'tangent à la trajectoire, dans le sens contraire du mouvement'), o('c', 'toujours horizontal')], 'ok', `${UT} est tangent à la trajectoire, dans le sens du mouvement.`, '« t » comme tangent.'),
     () => choix('Repère de Frenet', `Les vecteurs ${UT} et ${UN} ont pour longueur :`, [o('ok', '1 (ce sont des vecteurs unitaires)'), o('a', 'le rayon r'), o('b', 'la vitesse v'), o('c', 'v² / r')], 'ok', 'Ce sont des vecteurs unitaires : leur longueur vaut 1.', 'Comme i⃗ et j⃗.'),
@@ -57,7 +58,11 @@ function repere() {
       }, parties: [{ type: 'choix', options: [o('1', 'la flèche 1'), o('2', 'la flèche 2')], melanger: false, bonne: (ok === 'ut') === melange ? '1' : '2',
         indice: `${UT} est tangent (dans le sens du mouvement, indiqué par la petite flèche grise) ; ${UN} va vers le centre.`, solution: `${UT} est tangent à la trajectoire, ${UN} est dirigé vers le centre O.` }] };
     },
-  ])();
+  ];
+  if (dejaR.length >= liste.length) dejaR = [];
+  const k = hasard(liste.map((_, n) => n).filter(n => !dejaR.includes(n)));
+  dejaR.push(k);
+  return liste[k]();
 }
 let melange = Math.random() < .5;
 
@@ -114,24 +119,52 @@ function mcu() {
 }
 
 /* ---------- Questions de cours ---------- */
+let dejaC = [];
 function cours() {
-  return hasard([
+  const liste = [
     () => choix('Question de cours', 'Dans un mouvement circulaire uniforme, le vecteur accélération est :', [o('ok', 'dirigé vers le centre, de valeur v² / r'), o('a', 'nul'), o('b', 'tangent à la trajectoire'), o('c', 'dirigé vers l\'extérieur')], 'ok', `${N('a')} = (v²/r)${UN} : centripète, de valeur v²/r.`, 'a⃗ = at u⃗t + an u⃗n, avec at = dv/dt = 0.'),
     () => choix('Question de cours', 'Dans un mouvement circulaire uniforme, a<sub>t</sub> vaut :', [o('ok', '0'), o('a', 'v² / r'), o('b', 'v'), o('c', '1')], 'ok', 'v est constante, donc a<sub>t</sub> = dv/dt = 0.', 'a<sub>t</sub> = dv/dt.', { colonne: false }),
     () => choix('Question de cours', `Dans le repère de Frenet, le vecteur vitesse s'écrit :`, [o('ok', `v${UT}`), o('a', `v${UN}`), o('b', `v${UT} + v${UN}`), o('c', `${fr('v²', 'r')}${UN}`)], 'ok', `${N('v')} = v${UT} : il est tangent à la trajectoire.`, 'Le vecteur vitesse est tangent.', { colonne: false }),
     () => choix('Question de cours', 'Un point tourne à vitesse constante sur un cercle. Son vecteur vitesse est :', [o('ok', 'non constant, car sa direction change'), o('a', 'constant'), o('b', 'nul'), o('c', 'dirigé vers le centre')], 'ok', 'Sa valeur est constante, mais pas sa direction : le vecteur vitesse n\'est pas constant.', 'Un vecteur constant garde la même valeur, la même direction et le même sens.'),
+  ];
+  if (dejaC.length >= liste.length) dejaC = [];
+  const k = hasard(liste.map((_, i) => i).filter(i => !dejaC.includes(i)));
+  dejaC.push(k);
+  return liste[k]();
+}
+
+/* ---------- QCM de calcul ---------- */
+function accelerationQCM() {
+  let v, r, at, an;
+  do { v = hasard([4, 6, 8, 10, 12]); r = hasard([4, 8, 16]); at = hasard([1, 2, 3, 4, 5]); an = v * v / r; } while (an === at);
+  const f = x => fmt(x);
+  const opts = [o('ok', `${N('a')} = ${at}${UT} + ${f(an)}${UN}`), o('inv', `${N('a')} = ${f(an)}${UT} + ${at}${UN}`), o('sq', `${N('a')} = ${at}${UT} + ${f(v / r)}${UN}`), o('nul', `${N('a')} = ${f(an)}${UN}`)];
+  return choix('Vecteur accélération', `Un point décrit un cercle de rayon r = ${r} m. À un instant, v = ${v} ${MS} et ${dd('v')} = ${at} ${MS2}. Le vecteur accélération est :`, opts, 'ok',
+    `a<sub>t</sub> = ${dd('v')} = ${at} ${MS2} et a<sub>n</sub> = ${fr(`${v}²`, r)} = ${f(an)} ${MS2}.`, `${N('a')} = a<sub>t</sub>${UT} + a<sub>n</sub>${UN}, avec a<sub>n</sub> = v² / r.`,
+    { colonne: false, indices: { inv: `a<sub>t</sub> = dv/dt va devant ${UT}, a<sub>n</sub> = v²/r devant ${UN}.`, sq: 'a<sub>n</sub> = v² / r : il faut élever la vitesse au carré.', nul: 'Ici la vitesse varie (dv/dt ≠ 0) : a<sub>t</sub> n\'est pas nul.' } });
+}
+function mcuQCM() {
+  return hasard([
+    () => { const v = hasard([3, 4, 5, 6, 10]), r = hasard([2, 5, 10]);
+      return choix('Mouvement circulaire uniforme', `Mouvement circulaire uniforme de rayon r = ${r} m, à v = ${v} ${MS}. L'accélération vaut :`, [o('ok', `${fmt(v * v / r)} ${MS2}, vers le centre`), o('a', `${fmt(v / r)} ${MS2}, vers le centre`), o('b', '0, car la vitesse est constante'), o('c', `${fmt(v * v / r)} ${MS2}, tangente à la trajectoire`)], 'ok',
+        `a = v² / r = ${fr(`${v}²`, r)} = ${fmt(v * v / r)} ${MS2}, dirigée vers le centre.`, 'a⃗ = (v²/r) u⃗n.'); },
+    () => choix('Mouvement circulaire uniforme', 'Un point fait un tour de cercle de rayon r en une durée T, à vitesse constante. Sa vitesse est :', [o('ok', `v = ${fr('2πr', 'T')}`), o('a', `v = ${fr('r', 'T')}`), o('b', `v = ${fr('πr', 'T')}`), o('c', `v = ${fr('T', '2πr')}`)], 'ok',
+      'En une période T, le point parcourt le périmètre 2πr : v = 2πr / T.', 'Distance parcourue en un tour, divisée par la durée d\'un tour.', { colonne: false }),
+    () => choix('Mouvement circulaire uniforme', 'Si la vitesse d\'un point en mouvement circulaire uniforme double, son accélération :', [o('ok', 'est multipliée par 4'), o('a', 'double'), o('b', 'ne change pas'), o('c', 'est divisée par 2')], 'ok',
+      'a = v² / r : si v est multipliée par 2, v² est multipliée par 4.', 'a = v² / r.', { colonne: false }),
   ])();
 }
 
+// 6 QCM et 4 questions à calcul
 function tirage() {
   melange = Math.random() < .5;
-  return [repere(), position(), vitesse(), normale(), acceleration(), mcu(), repere(), normale(), mcu(), cours()];
+  return [repere(), position(), cours(), vitesse(), accelerationQCM(), normale(), repere(), mcuQCM(), mcu(), cours()];
 }
 
 CIN.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 5 · QUESTIONS', titre: 'Le repère de Frenet',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : le repère de Frenet, les vecteurs position, vitesse et accélération dans ce repère, le mouvement circulaire uniforme. Garde ta calculatrice à portée de main.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard, surtout des QCM : le repère de Frenet, les vecteurs position, vitesse et accélération dans ce repère, le mouvement circulaire uniforme. Garde ta calculatrice à portée de main.</p>',
   questions: tirage,
   revoir: { href: 'module_5_cours.html', label: 'Revoir le cours' },
   suite: { href: 'module_6.html', label: 'Module 6 : exercices du cours →' },

@@ -81,7 +81,7 @@ function convertir() {
 function tracer(n) {
   const u = unites(), noms = melanger(NOMS).slice(0, n), pris = [];
   const vecteurs = noms.map(nom => { const c = coordAlea(); const dep = depart(c, pris); pris.push(dep, [dep[0] + c[0], dep[1] + c[1]]); return { nom, dep, coord: c, etiquette: ecrit(nom, c, u) }; });
-  const txt = vecteurs.map(v => `${v.etiquette} à partir du point (${CIN.fmt(v.dep[0])} ; ${CIN.fmt(v.dep[1])})`);
+  const txt = vecteurs.map(v => `${v.etiquette} à partir du point (${CIN.fmt(v.dep[0])}&nbsp;;&nbsp;${CIN.fmt(v.dep[1])})`);
   return { theme: 'Tracer un vecteur', consigne: n === 1 ? `Trace ${txt[0]}.` : `Trace les vecteurs à partir de leur point de départ : ${txt.join(' ; ')}.`,
     enonce: n > 1 ? '<p class="er-petit">Choisis le vecteur dans la liste, puis trace-le.</p>' : '',
     parties: [{ type: 'tracer', repere: { unitaires: u, vecteurs }, solution: vecteurs.map(v => `${N(v.nom)} ${col(v.coord[0], v.coord[1])}`).join(' ; ') }] };

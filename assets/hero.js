@@ -243,7 +243,7 @@
         ctx.lineTo(x + dx - ux * t + uy * t * .45, y + dy - uy * t - ux * t * .45); ctx.closePath(); ctx.fill();
       }
       // projectiles : x = v0x t, y = v0y t − g t² / 2
-      [[w * .38, h * .92, 95, -150, .55, 1], [w * .5, h * .95, 120, -110, .32, .8]].forEach(([x0, y0, vx, vy, a, k]) => {
+      [[w * .5, h * .92, 95, -150, .55, 1], [w * .6, h * .95, 120, -110, .32, .8]].forEach(([x0, y0, vx, vy, a, k]) => {
         const g = 60, dt = .28 * k, n = Math.ceil((2 * -vy / g) / dt) + 2;
         for (let i = 0; i < n; i++) {
           const t = i * dt, x = x0 + vx * t * k * 1.6, y = y0 + (vy * t + g * t * t / 2) * k * 1.6;
