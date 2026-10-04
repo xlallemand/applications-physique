@@ -156,7 +156,8 @@ new PH.Cours(document.getElementById('etapes'), [
   // ---------- 4. Calculer φ par proportionnalité ----------
   (cours) => {
     const c = cours.carte('4. Calculer le déphasage par proportionnalité');
-    // graphique de l'exemple : T repérée entre deux sommets de u et entre deux sommets de i, Δt entre deux sommets voisins
+    // graphique de l'exemple : T repérée entre deux sommets de u et entre deux sommets de i,
+    // Δt entre deux sommets voisins et entre deux passages par zéro
     const ex = Object.assign({}, EX, {
       ymax: 4, noms: { u: 10, i: 5 },
       annoter: R => {
@@ -165,7 +166,10 @@ new PH.Cours(document.getElementById('etapes'), [
           PA.flecheH(R.sx(10), R.sx(30), yTu, '#2952c8', 'T = 20 ms') +
           PA.tirets(R.sx(5), R.sy(1.6), yTi, '#d9730d') + PA.tirets(R.sx(25), R.sy(1.6), yTi, '#d9730d') +
           PA.flecheH(R.sx(5), R.sx(25), yTi, '#d9730d', 'T = 20 ms') +
-          PA.flecheH(R.sx(25), R.sx(30), yDt, '#16181d') + PA.texte(R.sx(25) - 1.2, yDt + 1.3, 'Δt = 5 ms', '#16181d', 'end', 3.8);
+          PA.flecheH(R.sx(25), R.sx(30), yDt, '#16181d') + PA.texte(R.sx(25) - 1.2, yDt + 1.3, 'Δt = 5 ms', '#16181d', 'end', 3.8) +
+          // Δt aussi entre deux passages par zéro (en descendant) : i à 10 ms, u à 15 ms
+          `<circle cx="${R.sx(10)}" cy="${R.sy(0)}" r=".9" fill="#d9730d"/><circle cx="${R.sx(15)}" cy="${R.sy(0)}" r=".9" fill="#2952c8"/>` +
+          PA.flecheH(R.sx(10), R.sx(15), R.sy(0), '#3f2a93', 'Δt', true);
       },
     });
     cours.ajouter(c, `<div class="cours-bloc">
