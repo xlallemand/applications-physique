@@ -9,11 +9,15 @@
 
    opts = {
      xmin, xmax, ymin, ymax   étendue du repère (−6 à 6 par défaut)
+     axes, graduations, grille (true par défaut)
      unitaires: ['i', 'j']    noms des vecteurs unitaires dessinés en O (false : aucun)
-     mode: 'glisser'          on glisse la pointe depuis le point de départ
-           'toucher'          on touche le nœud d'arrivée, les flèches ajustent la pointe
+     mode: 'mixte'            on glisse la pointe depuis le point de départ,
+                              les boutons fléchés l'ajustent d'un carreau
+           'glisser' | 'toucher' | 'aucun' (dessin seul)
      vecteurs: [{ nom, dep: [x, y], coord: [a, b], etiquette (HTML de la liste),
-                  fixe (vecteur seulement affiché), fin: [x, y] (pointe déjà placée) }]
+                  fixe (vecteur seulement affiché), coul, pointille, nomPos: [dx, dy] }]
+     points: [{ nom, x, y }]  points nommés (petite croix)
+     extra(g), dessus(g)      dessins SVG supplémentaires, sous / sur les vecteurs
      onChange()               appelé quand un vecteur change
    }
 
@@ -25,11 +29,11 @@
   'use strict';
 
   const MOINS = '−';
-  const nb = n => (n < 0 ? MOINS : '') + String(Math.abs(n)).replace('.', ',');
+  const nb = n => (n < 0 ? MOINS : '') + String(+Math.abs(n).toFixed(6)).replace('.', ',');
   const egal = (a, b) => !!a && !!b && a[0] === b[0] && a[1] === b[1];
 
   // couleurs (attributs de présentation : le même dessin sert à la loupe)
-  const C = { encre: '#16181d', encre2: '#55585f', encre3: '#8d8f94', grille: '#dcd7e8', ok: '#16a34a', ko: '#dc2626' };
+  const C = { encre: '#16181d', encre2: '#55585f', encre3: '#8d8f94', grille: '#dcd7e8', ok: '#16a34a', ko: '#dc2626', vert: '#0a7d57', orange: '#c2570c', bleu: '#2952c8' };
   function accent() {
     const s = getComputedStyle(document.documentElement);
     return { a: s.getPropertyValue('--accent').trim() || '#5a3fc4', ai: s.getPropertyValue('--accent-ink').trim() || '#3f2a93' };
@@ -52,7 +56,7 @@
     function terme(c, n, premier) {
       if (c === 0) return '';
       const signe = c < 0 ? (premier ? MOINS : ` ${MOINS} `) : (premier ? '' : ' + ');
-      return signe + (Math.abs(c) === 1 ? '' : nb(Math.abs(c))) + nomHTML(n);
+      return signe + (Math.abs(c) === 1 ? '' : nb(Math.abs(c)) + '\u202f') + nomHTML(n);
     }
     if (!a && !b) return nomHTML('0');
     const t1 = terme(a, u[0], true);
@@ -65,23 +69,26 @@
   function trait(x1, y1, x2, y2, coul, ep, extra) {
     return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${coul}" stroke-width="${ep}"${extra || ''}/>`;
   }
+  function pointille(x1, y1, x2, y2, coul, ep) {
+    return trait(x1, y1, x2, y2, coul || C.encre2, ep || 1.5, ' stroke-dasharray="5 4"');
+  }
   // flèche de (x1, y1) à (x2, y2), pointe triangulaire
-  function fleche(x1, y1, x2, y2, coul, ep, lt) {
+  function fleche(x1, y1, x2, y2, coul, ep, lt, tirets) {
     const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy);
     if (L < 1) return '';
     const ux = dx / L, uy = dy / L;
     lt = Math.min(lt || 13, L * .55);
     const lw = lt * .42, bx = x2 - ux * lt, by = y2 - uy * lt;
-    return trait(x1, y1, bx + ux * 2, by + uy * 2, coul, ep, ' stroke-linecap="round"') +
+    return trait(x1, y1, bx + ux * 2, by + uy * 2, coul, ep, ` stroke-linecap="round"${tirets ? ' stroke-dasharray="6 4"' : ''}`) +
       `<path d="M${x2},${y2} L${bx - uy * lw},${by + ux * lw} L${bx + uy * lw},${by - ux * lw} Z" fill="${coul}" stroke="${coul}" stroke-width="1" stroke-linejoin="round"/>`;
   }
   // largeur approchée d'un texte (police sans empattement)
   function largeur(txt, t) {
     let w = 0;
-    for (const ch of txt) w += (/[ijlI1]/.test(ch) ? .3 : /[a-z]/.test(ch) ? .55 : .64) * t;
+    for (const ch of String(txt)) w += (/[ijlI1,. ]/.test(ch) ? .3 : /[a-z]/.test(ch) ? .55 : .64) * t;
     return w;
   }
-  // nom de vecteur en SVG, centré en (x, y) (y = ligne de base), flèche au-dessus
+  // nom de vecteur en SVG, centré en x, y = ligne de base, flèche au-dessus
   function nomSVG(nom, x, y, t, coul) {
     const [p, s] = String(nom).split('_');
     const wp = largeur(p, t), ws = s ? largeur(s, t * .7) : 0;
@@ -90,10 +97,26 @@
     return `<text x="${x0}" y="${y}" font-size="${t}" font-weight="700" fill="${coul}" stroke="#fff" stroke-width="3" paint-order="stroke">${p}${s ? `<tspan font-size="${t * .7}" dy="${t * .28}">${s}</tspan>` : ''}</text>` +
       `<path d="M${x1},${ya} H${x2} M${x2 - h},${ya - h * .8} L${x2},${ya} L${x2 - h},${ya + h * .8}" fill="none" stroke="${coul}" stroke-width="${Math.max(1.3, t * .09)}" stroke-linecap="round" stroke-linejoin="round"/>`;
   }
+  // texte avec un liseré blanc (lisible sur le quadrillage)
+  function texte(x, y, txt, t, coul, ancre, gras) {
+    return `<text x="${x}" y="${y}" font-size="${t}" font-weight="${gras || 700}" fill="${coul}" text-anchor="${ancre || 'middle'}" stroke="#fff" stroke-width="3.5" paint-order="stroke">${txt}</text>`;
+  }
+  // arc d'angle de centre (cx, cy), rayon r (px), de a1 à a2 (degrés, sens trigonométrique)
+  function arc(cx, cy, r, a1, a2, coul, label, t) {
+    const rad = a => a * Math.PI / 180;
+    const p = a => [cx + r * Math.cos(rad(a)), cy - r * Math.sin(rad(a))];
+    const [x1, y1] = p(a1), [x2, y2] = p(a2), grand = Math.abs(a2 - a1) > 180 ? 1 : 0, sens = a2 > a1 ? 0 : 1;
+    let s = `<path d="M${x1},${y1} A${r},${r} 0 ${grand} ${sens} ${x2},${y2}" fill="none" stroke="${coul}" stroke-width="2"/>`;
+    if (label) {
+      const am = (a1 + a2) / 2, rl = r + (t || 14) * .9;
+      s += texte(cx + rl * Math.cos(rad(am)), cy - rl * Math.sin(rad(am)) + (t || 14) * .35, label, t || 14, coul);
+    }
+    return s;
+  }
 
   /* ============================================================
-     DIAGNOSTIC D'UN TRACÉ
-     d : coordonnées tracées, a : coordonnées attendues
+     DIAGNOSTIC D'UN TRACÉ OU D'UNE LECTURE
+     d : coordonnées données par l'élève, a : coordonnées attendues
      ============================================================ */
   function diagnostic(d, a) {
     if (!d) return 'vide';
@@ -125,25 +148,28 @@
      REPÈRE
      ============================================================ */
   function Repere(zone, opts) {
-    this.o = Object.assign({ xmin: -6, xmax: 6, ymin: -6, ymax: 6, unitaires: ['i', 'j'], mode: 'toucher', vecteurs: [], largeurMax: 560, uMax: 44 }, opts);
+    this.o = Object.assign({ xmin: -6, xmax: 6, ymin: -6, ymax: 6, axes: true, graduations: true, grille: true, unitaires: ['i', 'j'],
+      mode: 'mixte', vecteurs: [], points: [], largeurMax: 560, uMax: 44, uMin: 14 }, opts);
     this.vs = this.o.vecteurs.map(v => Object.assign({ fin: null, etat: null, bloque: false }, v));
     this.sel = this.vs.findIndex(v => !v.fixe);
     this.drag = null;
-    this.verrou = false;
+    this.verrou = this.o.mode === 'aucun';
     this.couleurs = accent();
 
     const aTracer = this.vs.filter(v => !v.fixe).length;
+    const actif = this.o.mode !== 'aucun' && aTracer > 0;
+    const pad = actif && (this.o.mode === 'toucher' || this.o.mode === 'mixte');
     const b = document.createElement('div');
-    b.className = 'vec-bloc';
-    b.innerHTML = `${aTracer > 1 || this.o.liste ? '<div class="vec-chips" role="group" aria-label="Vecteur à tracer"></div>' : ''}
-      <div class="vec-cadre"><svg class="vec-svg mode-${this.o.mode}" tabindex="0" role="img" aria-label="Repère quadrillé"></svg>
-        <div class="vec-loupe hidden" aria-hidden="true"><svg></svg></div></div>
-      ${this.o.mode === 'toucher' && aTracer ? `<div class="vec-pad" role="group" aria-label="Déplacer la pointe d'un carreau">
+    b.className = 'vec-bloc' + (actif ? '' : ' vec-fixe');
+    b.innerHTML = `${actif && (aTracer > 1 || this.o.liste) ? '<div class="vec-chips" role="group" aria-label="Vecteur à tracer"></div>' : ''}
+      <div class="vec-cadre"><svg class="vec-svg mode-${this.o.mode}"${actif ? ' tabindex="0"' : ''} role="img" aria-label="${this.o.aria || 'Repère quadrillé'}"></svg>
+        ${actif ? '<div class="vec-loupe hidden" aria-hidden="true"><svg></svg></div>' : ''}</div>
+      ${pad ? `<div class="vec-pad" role="group" aria-label="Déplacer la pointe d'un carreau">
         <button type="button" data-d="h" aria-label="Pointe un carreau vers le haut">↑</button>
         <button type="button" data-d="g" aria-label="Pointe un carreau vers la gauche">←</button>
         <button type="button" data-d="b" aria-label="Pointe un carreau vers le bas">↓</button>
         <button type="button" data-d="d" aria-label="Pointe un carreau vers la droite">→</button></div>` : ''}
-      <p class="vec-astuce" aria-live="polite"></p>`;
+      ${actif ? '<p class="vec-astuce" aria-live="polite"></p>' : ''}`;
     zone.appendChild(b);
     this.bloc = b;
     this.cadre = b.querySelector('.vec-cadre');
@@ -160,15 +186,18 @@
         c.className = 'vec-chip';
         c.dataset.i = i;
         c.innerHTML = `<span>${v.etiquette || nomHTML(v.nom)}</span>`;
-        c.onclick = () => { if (this.vs[i].bloque) return; this.sel = i; this.dire(''); this.dessiner(); };
+        c.onclick = () => { if (this.vs[i].bloque || this.verrou) return; this.sel = i; this.dire(''); this.dessiner(); };
         this.chips.appendChild(c);
       });
     }
-    if (this.o.mode === 'glisser') this.activerGlisser(); else this.activerToucher();
-    this.activerClavier();
+    if (actif) {
+      if (this.o.mode === 'glisser' || this.o.mode === 'mixte') this.activerGlisser();
+      if (this.o.mode === 'toucher') this.activerToucher();
+      if (pad) this.activerPad();
+      this.activerClavier();
+    }
 
     // nouveau dessin quand la largeur disponible change (rotation de l'écran…)
-    this.largeurVue = 0;
     const redim = () => {
       const w = this.cadre.clientWidth;
       if (w && w !== this.largeurVue && !this.drag) { this.largeurVue = w; this.dessiner(); }
@@ -182,9 +211,9 @@
   /* ---------- Géométrie : taille des carreaux selon la largeur ---------- */
   Repere.prototype.geo = function () {
     const o = this.o, nx = o.xmax - o.xmin, ny = o.ymax - o.ymin;
-    const m = { g: 10, d: 22, h: 24, b: 10 };
+    const m = o.axes ? { g: 10, d: 22, h: 24, b: 10 } : { g: 8, d: 8, h: 8, b: 8 };
     const dispo = Math.min(this.cadre.clientWidth || 320, o.largeurMax);
-    const u = Math.max(14, Math.min(o.uMax, Math.floor((dispo - m.g - m.d) / nx)));
+    const u = Math.max(o.uMin, Math.min(o.uMax, Math.floor((dispo - m.g - m.d) / nx)));
     const W = m.g + m.d + u * nx, H = m.h + m.b + u * ny;
     return { u, W, H, m, px: x => m.g + (x - o.xmin) * u, py: y => m.h + (o.ymax - y) * u };
   };
@@ -202,23 +231,28 @@
     const ac = this.couleurs;
     let s = `<rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/>`;
     // quadrillage
-    for (let x = o.xmin; x <= o.xmax; x++) s += trait(px(x), py(o.ymin), px(x), py(o.ymax), C.grille, 1);
-    for (let y = o.ymin; y <= o.ymax; y++) s += trait(px(o.xmin), py(y), px(o.xmax), py(y), C.grille, 1);
+    if (o.grille) {
+      for (let x = o.xmin; x <= o.xmax; x++) s += trait(px(x), py(o.ymin), px(x), py(o.ymax), C.grille, 1);
+      for (let y = o.ymin; y <= o.ymax; y++) s += trait(px(o.xmin), py(y), px(o.xmax), py(y), C.grille, 1);
+    }
     // axes (placés en 0, ou sur le bord si 0 n'est pas dans le repère)
     const X0 = px(Math.min(Math.max(0, o.xmin), o.xmax)), Y0 = py(Math.min(Math.max(0, o.ymin), o.ymax));
-    s += fleche(px(o.xmin), Y0, px(o.xmax) + 16, Y0, C.encre, 1.6, 9);
-    s += fleche(X0, py(o.ymin), X0, py(o.ymax) - 16, C.encre, 1.6, 9);
     const tg = Math.max(10, Math.min(13, Math.round(u * .45)));
-    Object.assign(g, { X0, Y0, tg });
-    const grad = (x, y, txt, ancre) => `<text x="${x}" y="${y}" font-size="${tg}" font-weight="600" fill="${C.encre2}" text-anchor="${ancre}" stroke="#fff" stroke-width="3" paint-order="stroke">${txt}</text>`;
-    for (let x = o.xmin; x <= o.xmax; x++) if (x) s += grad(px(x), Y0 + tg + 2, nb(x), 'middle');
-    for (let y = o.ymin; y <= o.ymax; y++) if (y) s += grad(X0 - 4, py(y) + tg * .36, nb(y), 'end');
-    s += grad(X0 - 4, Y0 + tg + 2, 'O', 'end');
-    s += `<text x="${px(o.xmax) + 14}" y="${Y0 - 8}" font-size="${tg + 2}" font-weight="700" fill="${C.encre}" text-anchor="end">x</text>`;
-    s += `<text x="${X0 + 8}" y="${py(o.ymax) - 10}" font-size="${tg + 2}" font-weight="700" fill="${C.encre}">y</text>`;
-    // vecteurs unitaires en O
     const tn = Math.max(12, Math.min(16, Math.round(u * .55)));
-    g.tn = tn;
+    Object.assign(g, { X0, Y0, tg, tn });
+    if (o.axes) {
+      s += fleche(px(o.xmin), Y0, px(o.xmax) + 16, Y0, C.encre, 1.6, 9);
+      s += fleche(X0, py(o.ymin), X0, py(o.ymax) - 16, C.encre, 1.6, 9);
+      if (o.graduations) {
+        const grad = (x, y, txt, ancre) => `<text x="${x}" y="${y}" font-size="${tg}" font-weight="600" fill="${C.encre2}" text-anchor="${ancre}" stroke="#fff" stroke-width="3" paint-order="stroke">${txt}</text>`;
+        for (let x = o.xmin; x <= o.xmax; x++) if (x) s += grad(px(x), Y0 + tg + 2, nb(x), 'middle');
+        for (let y = o.ymin; y <= o.ymax; y++) if (y) s += grad(X0 - 4, py(y) + tg * .36, nb(y), 'end');
+      }
+      s += `<text x="${X0 - 4}" y="${Y0 + tg + 2}" font-size="${tg}" font-weight="600" fill="${C.encre2}" text-anchor="end">O</text>`;
+      s += `<text x="${px(o.xmax) + 14}" y="${Y0 - 8}" font-size="${tg + 2}" font-weight="700" fill="${C.encre}" text-anchor="end">${o.nomX || 'x'}</text>`;
+      s += `<text x="${X0 + 8}" y="${py(o.ymax) - 10}" font-size="${tg + 2}" font-weight="700" fill="${C.encre}">${o.nomY || 'y'}</text>`;
+    }
+    // vecteurs unitaires en O
     if (o.unitaires) {
       const tu = u < 30 ? 12 : tn;
       s += fleche(px(0), py(0), px(1), py(0), ac.a, 3, Math.min(10, u * .4));
@@ -227,17 +261,27 @@
       s += nomSVG(o.unitaires[0], px(.45), py(0) + tu * 1.15 + 2, tu, ac.a);
       s += nomSVG(o.unitaires[1], px(0) + 6 + largeur(o.unitaires[1].replace('_', ''), tu) / 2, py(.5) + tu * .45, tu, ac.a);
     }
-    if (o.extra) s += o.extra(g);
+    if (o.extra) s += o.extra(g, this);
+    // points nommés
+    (o.points || []).forEach(p => {
+      const x = px(p.x), y = py(p.y), k = 5;
+      s += trait(x - k, y - k, x + k, y + k, p.coul || C.encre, 2) + trait(x - k, y + k, x + k, y - k, p.coul || C.encre, 2);
+      if (p.nom) s += texte(x + (p.dx == null ? -10 : p.dx), y + (p.dy == null ? -8 : p.dy), p.nom, tn, p.coul || C.encre);
+    });
     // vecteurs
     const ep = Math.max(2.5, Math.min(3.5, u * .1)), lt = Math.max(9, Math.min(14, u * .5));
+    g.ep = ep; g.lt = lt;
     this.vs.forEach((v, i) => {
       const coul = this.couleur(v, i);
       if (v.fixe) {
         const x1 = px(v.dep[0]), y1 = py(v.dep[1]), x2 = px(v.dep[0] + v.coord[0]), y2 = py(v.dep[1] + v.coord[1]);
-        s += fleche(x1, y1, x2, y2, coul, ep, lt);
-        // nom à gauche du milieu de la flèche
-        const L = Math.hypot(x2 - x1, y2 - y1) || 1, nx = (y2 - y1) / L, ny = -(x2 - x1) / L;
-        s += nomSVG(v.nom, (x1 + x2) / 2 + nx * 14, (y1 + y2) / 2 + ny * 14 + tn * .4, tn, coul);
+        s += fleche(x1, y1, x2, y2, coul, ep, lt, v.pointille);
+        if (v.nom) {
+          // nom à gauche du milieu de la flèche (ou à la position demandée)
+          const L = Math.hypot(x2 - x1, y2 - y1) || 1, nx = (y2 - y1) / L, ny = -(x2 - x1) / L;
+          const d = v.nomPos ? [v.nomPos[0] * u, -v.nomPos[1] * u] : [nx * 14, ny * 14];
+          s += nomSVG(v.nom, (x1 + x2) / 2 + d[0], (y1 + y2) / 2 + d[1] + tn * .4, tn, coul);
+        }
         return;
       }
       const x0 = px(v.dep[0]), y0 = py(v.dep[1]);
@@ -249,15 +293,18 @@
       }
       if (place) s += fleche(x0, y0, px(v.fin[0]), py(v.fin[1]), coul, ep, lt);
       s += `<circle cx="${x0}" cy="${y0}" r="${place ? 3.5 : 4.5}" fill="${coul}"/>`;
-      // nom près du point de départ, du côté opposé à la flèche, hors des graduations
-      let cands = [[-11, -10], [11, -10], [-11, 12], [11, 12]];
-      if (place) {
-        const dx = px(v.fin[0]) - x0, dy = py(v.fin[1]) - y0, L = Math.hypot(dx, dy), a = dx / L, b = dy / L, k = 15;
-        cands = [[-a * k, -b * k], [(-a - b) * k * .75, (-b + a) * k * .75], [(-a + b) * k * .75, (-b - a) * k * .75], [-b * k, a * k], [b * k, -a * k]];
+      if (v.nom) {
+        // nom près du point de départ, du côté opposé à la flèche, hors des graduations
+        let cands = [[-11, -10], [11, -10], [-11, 12], [11, 12]];
+        if (place) {
+          const dx = px(v.fin[0]) - x0, dy = py(v.fin[1]) - y0, L = Math.hypot(dx, dy), a = dx / L, b = dy / L, k = 15;
+          cands = [[-a * k, -b * k], [(-a - b) * k * .75, (-b + a) * k * .75], [(-a + b) * k * .75, (-b - a) * k * .75], [-b * k, a * k], [b * k, -a * k]];
+        }
+        const [lx, ly] = this.placeNom(x0, y0, cands, largeur(v.nom.replace('_', ''), tn), tn);
+        s += nomSVG(v.nom, lx, ly + tn * .38, tn, coul);
       }
-      const [lx, ly] = this.placeNom(x0, y0, cands, largeur(v.nom.replace('_', ''), tn), tn);
-      s += nomSVG(v.nom, lx, ly + tn * .38, tn, coul);
     });
+    if (o.dessus) s += o.dessus(g, this);
     return s;
   };
 
@@ -265,6 +312,7 @@
   Repere.prototype.placeNom = function (x0, y0, cands, w, t) {
     const g = this.g, o = this.o, wg = largeur('−6', g.tg);
     const libre = (cx, cy) => {
+      if (!o.axes || !o.graduations) return true;
       const x1 = cx - w / 2 - 2, x2 = cx + w / 2 + 2, y1 = cy - t * .95, y2 = cy + t * .55;
       const bandeX = y2 > g.Y0 + 2 && y1 < g.Y0 + g.tg + 5 && x2 > g.px(o.xmin) - 8 && x1 < g.px(o.xmax) + 8;
       const bandeY = x2 > g.X0 - 5 - wg && x1 < g.X0 - 1 && y2 > g.py(o.ymax) - 8 && y1 < g.py(o.ymin) + 8;
@@ -274,9 +322,9 @@
     return [x0 + c[0], y0 + c[1]];
   };
 
-  // poignées (mode glisser) : zones de prise invisibles au départ et à la pointe
+  // poignées (glisser) : zones de prise invisibles au départ et à la pointe
   Repere.prototype.poignees = function () {
-    if (this.o.mode !== 'glisser' || this.verrou) return '';
+    if ((this.o.mode !== 'glisser' && this.o.mode !== 'mixte') || this.verrou) return '';
     const { u, px, py } = this.g, R = Math.max(20, u * .8);
     let s = '';
     this.vs.forEach((v, i) => {
@@ -307,6 +355,8 @@
     this.gScene.innerHTML = this.sceneTxt;
     if (!this.drag) this.gPrises.innerHTML = this.poignees();
     this.majChips();
+    const pad = this.bloc.querySelector('.vec-pad');
+    if (pad) pad.querySelectorAll('button').forEach(bt => { bt.disabled = this.verrou; });
   };
 
   Repere.prototype.majChips = function () {
@@ -321,7 +371,7 @@
     });
   };
 
-  Repere.prototype.dire = function (h) { this.astuce.innerHTML = h || ''; };
+  Repere.prototype.dire = function (h) { if (this.astuce) this.astuce.innerHTML = h || ''; };
 
   /* ---------- Conversions pointeur → repère ---------- */
   Repere.prototype.point = function (e) {
@@ -336,7 +386,7 @@
   // nouvelle pointe du vecteur en cours (vecteur nul = pas tracé)
   Repere.prototype.poser = function (n) {
     const v = this.vs[this.sel];
-    if (!v || v.bloque || this.verrou) return;
+    if (!v || v.bloque || this.verrou) return false;
     const f = egal(n, v.dep) ? null : n;
     if (egal(f, v.fin) || (!f && !v.fin)) return false;
     v.fin = f; v.etat = null;
@@ -345,7 +395,7 @@
     return true;
   };
 
-  /* ---------- Mode A : glisser la pointe ---------- */
+  /* ---------- Glisser la pointe ---------- */
   Repere.prototype.activerGlisser = function () {
     const svg = this.svg;
     // iOS : empêche le défilement de la page quand le geste commence sur une poignée
@@ -380,13 +430,13 @@
       if (this.drag.type !== 'mouse') this.montrerLoupe(e);
     });
     // appui hors des poignées (sans glisser) : on rappelle le geste
+    this.finGlisse = 0;
     svg.addEventListener('click', e => {
       if (this.verrou || Date.now() - this.finGlisse < 500) return;
       if (e.target.closest && e.target.closest('.vec-poignee')) return;
       const v = this.vs[this.sel];
-      if (v && !v.bloque) this.dire(`Pour tracer ${nomHTML(v.nom)}, pose le doigt (ou la souris) sur son point de départ, puis glisse jusqu'à l'arrivée.`);
+      if (v && !v.bloque) this.dire(`Pour tracer ${nomHTML(v.nom)}, pose le doigt (ou la souris) sur son point de départ et glisse jusqu'à l'arrivée${this.o.mode === 'mixte' ? ', ou utilise les flèches' : ''}.`);
     });
-    this.finGlisse = 0;
     const fin = e => {
       if (!this.drag || e.pointerId !== this.drag.id) return;
       this.drag = null;
@@ -417,7 +467,7 @@
     L.classList.remove('hidden');
   };
 
-  /* ---------- Mode B : toucher le nœud d'arrivée, flèches pour ajuster ---------- */
+  /* ---------- Toucher le nœud d'arrivée ---------- */
   Repere.prototype.activerToucher = function () {
     this.svg.addEventListener('click', e => {
       if (this.verrou) return;
@@ -428,8 +478,10 @@
       this.poser(this.noeud(this.point(e)));
       if (matchMedia('(hover: hover)').matches) this.svg.focus({ preventScroll: true });
     });
-    const pad = this.bloc.querySelector('.vec-pad');
-    if (pad) pad.querySelectorAll('button').forEach(bt => {
+  };
+  /* ---------- Boutons fléchés : la pointe avance d'un carreau ---------- */
+  Repere.prototype.activerPad = function () {
+    this.bloc.querySelectorAll('.vec-pad button').forEach(bt => {
       bt.onclick = () => { const d = { h: [0, 1], b: [0, -1], g: [-1, 0], d: [1, 0] }[bt.dataset.d]; this.deplacer(d[0], d[1]); };
     });
   };
@@ -439,7 +491,7 @@
     if (v.bloque) { this.dire('Ce vecteur est juste. Choisis un autre vecteur dans la liste.'); return; }
     const b = v.fin || v.dep, o = this.o;
     const n = [b[0] + dx, b[1] + dy];
-    if (n[0] < o.xmin || n[0] > o.xmax || n[1] < o.ymin || n[1] > o.ymax) { this.dire('La pointe est au bord du repère.'); return; }
+    if (n[0] < o.xmin || n[0] > o.xmax || n[1] < o.ymin || n[1] > o.ymax) { this.dire('La pointe est au bord du quadrillage.'); return; }
     this.dire('');
     this.poser(n);
   };
@@ -447,7 +499,7 @@
   Repere.prototype.activerClavier = function () {
     this.svg.addEventListener('keydown', e => {
       const d = { ArrowUp: [0, 1], ArrowDown: [0, -1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] }[e.key];
-      if (!d || this.sel < 0) return;
+      if (!d || this.sel < 0 || this.verrou) return;
       e.preventDefault();
       this.deplacer(d[0], d[1]);
     });
@@ -460,27 +512,34 @@
     this.vs.forEach((v, i) => {
       if (v.fixe) return;
       const code = diagnostic(v.fin && [v.fin[0] - v.dep[0], v.fin[1] - v.dep[1]], v.coord);
-      if (code !== 'vide') v.etat = code === 'ok' ? 'ok' : 'ko';
+      v.etat = code === 'vide' ? null : code === 'ok' ? 'ok' : 'ko';
       if (code === 'ok') v.bloque = true;
       res.push({ i, v, code });
     });
     if (res.every(r => r.code === 'ok')) this.verrou = true;
-    else {
-      // vecteur suivant à corriger
-      const k = res.find(r => r.code !== 'ok');
-      this.sel = k.i;
-    }
+    else this.sel = res.find(r => r.code !== 'ok').i;       // vecteur suivant à corriger
     this.dire('');
     this.dessiner();
     return res;
   };
+  // affiche la bonne réponse et bloque le repère
+  Repere.prototype.montrer = function () {
+    this.vs.forEach(v => {
+      if (v.fixe) return;
+      if (v.etat !== 'ok') { v.fin = [v.dep[0] + v.coord[0], v.dep[1] + v.coord[1]]; v.etat = null; }
+      v.bloque = true;
+    });
+    this.verrou = true;
+    this.dire('');
+    this.dessiner();
+  };
   Repere.prototype.recommencer = function () {
     this.vs.forEach(v => { if (!v.fixe) { v.fin = null; v.etat = null; v.bloque = false; } });
-    this.verrou = false;
+    this.verrou = this.o.mode === 'aucun';
     this.sel = this.vs.findIndex(v => !v.fixe);
     this.dire('');
     this.dessiner();
   };
 
-  window.VEC = { nomHTML, colHTML, ijHTML, nb, Repere, diagnostic, message, fleche, nomSVG, trait, C };
+  window.VEC = { nomHTML, colHTML, ijHTML, nb, egal, Repere, diagnostic, message, fleche, pointille, nomSVG, texte, arc, trait, largeur, C };
 })();
