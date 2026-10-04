@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : exercices d'application — Puissance active</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="pa.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../ph/modules/ph.css">
+<link rel="stylesheet" href="../../lecture-graphique/modules/lgtools.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../ph/modules/ph.js"></script>
+<script src="../../lecture-graphique/modules/lgtools.js"></script>
+<script src="pa.js"></script>
+<script src="pa-outils.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 exercices d'application directe tirés au hasard (série notée
+   sur 20, PH.serie) : 3 QCM sur les notions, un glisser-déposer
+   des puissances sur le schéma, 3 calculs en QCM, un glisser-
+   déposer des données d'un énoncé, puis 2 exercices complets
+   (placer les données sur le schéma, puis calculer).
+   ============================================================ */
+const { fmt, hasard, melanger } = PH;
+// valeur arrondie à 3 chiffres significatifs, écrite à la française
+const n3 = v => fmt(+v.toPrecision(3));
+// options de QCM numériques : la bonne réponse et des erreurs fréquentes, toutes différentes
+function optionsNum(bonne, fausses, unite) {
+  const vues = new Set([bonne]);
+  const L = [{ id: 'ok', label: `${bonne}${unite ? ' ' + unite : ''}` }];
+  fausses.forEach((f, k) => { if (!vues.has(f)) { vues.add(f); L.push({ id: 'f' + k, label: `${f}${unite ? ' ' + unite : ''}` }); } });
+  return L;
+}
+const sub = (x, i) => `${x}<sub>${i}</sub>`;
+const UEFF = sub('U', 'eff'), IEFF = sub('I', 'eff'), PU = sub('P', 'u'), PP = sub('P', 'perdue');
+const NOMS_P = [
+  { id: 'S', label: 'la puissance apparente S' }, { id: 'P', label: 'la puissance active P' },
+  { id: 'Pu', label: `la puissance utile ${PU}` }, { id: 'Pp', label: `la puissance perdue ${PP}` },
+];
+
+/* ---------- Données d'un moteur (valeurs réalistes, cohérentes) ---------- */
+const MOTEURS = ['Le moteur d\'une pompe', 'Le moteur d\'une perceuse', 'Le moteur d\'un ventilateur', 'Le moteur d\'une tondeuse', 'Le moteur d\'un compresseur', 'Le moteur d\'une scie circulaire'];
+function moteur() {
+  const U = 230, I = hasard([2, 2.5, 3, 3.5, 4, 4.5, 5]), k = hasard([.7, .75, .8, .85, .9]), eta = hasard([60, 65, 70, 75, 80, 85]);
+  const S = U * I, P = Math.round(S * k), Pu = Math.round(P * eta / 100);
+  return { nom: hasard(MOTEURS), U, I, k, eta, S, P, Pu, Pp: P - Pu };
+}
+
+/* ---------- Groupe 1 : les notions (QCM) ---------- */
+const G1 = [
+  function plaque() {
+    const [app, P] = hasard([['un aspirateur', 1200], ['un sèche-cheveux', 2000], ['une bouilloire', 2200], ['un four à micro-ondes', 800], ['une perceuse', 750], ['un radiateur', 1500]]);
+    return { theme: 'Les valeurs écrites sur un appareil', parties: [{ type: 'choix', q: `La plaque signalétique d'${app} indique « 230 V – ${fmt(P)} W ». Les ${fmt(P)} W sont :`,
+      options: NOMS_P.slice(0, 3).concat([{ id: 'max', label: `la puissance maximale ${sub('U', 'max')} × ${sub('I', 'max')}` }]), bonne: 'P', colonne: true,
+      indice: 'La puissance écrite sur un appareil est toujours la même puissance : celle que facture le fournisseur d\'électricité.',
+      solution: `La puissance marquée sur un appareil est sa puissance active : P = ${fmt(P)} W.` }] };
+  },
+  function efficace() {
+    const tension = Math.random() < .5;
+    return { theme: 'Les valeurs écrites sur un appareil', parties: tension
+      ? [{ type: 'choix', q: 'La tension « 230 V » écrite sur un appareil est :', colonne: true,
+        options: [{ id: 'ok', label: `la tension efficace ${UEFF}` }, { id: 'a', label: `la tension maximale ${sub('U', 'max')}` }, { id: 'b', label: 'la tension moyenne' }, { id: 'c', label: 'la tension instantanée u' }], bonne: 'ok',
+        indice: 'Les tensions et intensités écrites sur les appareils sont des valeurs efficaces, même si ce n\'est pas écrit.',
+        solution: `« 230 V » signifie ${UEFF} = 230 V (la tension maximale vaut 230 × √2 ≈ 325 V).` }]
+      : [{ type: 'choix', q: 'Une multiprise porte l\'indication « 16 A ». Il s\'agit :', colonne: true,
+        options: [{ id: 'ok', label: `de l'intensité efficace ${IEFF} maximale admissible` }, { id: 'a', label: `de l'intensité maximale ${sub('I', 'max')} d'un courant sinusoïdal` }, { id: 'b', label: 'de l\'intensité moyenne' }, { id: 'c', label: 'de l\'intensité instantanée i' }], bonne: 'ok',
+        indice: 'Les tensions et intensités écrites sur les appareils sont des valeurs efficaces, même si ce n\'est pas écrit.',
+        solution: `« 16 A » est une valeur efficace : ${IEFF} = 16 A au plus.` }] };
+  },
+  function facture() {
+    return { theme: 'La puissance active', parties: [{ type: 'choix', q: 'Le fournisseur d\'électricité facture l\'énergie correspondant à :', colonne: true,
+      options: NOMS_P, bonne: 'P', indice: 'C\'est la puissance réellement consommée par l\'appareil, mesurée par le compteur.',
+      solution: 'Le fournisseur d\'électricité facture l\'énergie correspondant à la puissance active P, réellement consommée.' }] };
+  },
+  function emplacement() {
+    const pos = hasard(['A', 'B', 'D', 'E']), bonne = { A: 'S', B: 'P', D: 'Pu', E: 'Pp' }[pos];
+    return { theme: 'Le schéma de conversion', parties: [{ type: 'choixFig', q: 'Sur ce schéma de conversion, quelle puissance se trouve à l\'emplacement marqué « ? » ?', figure: PA.schemaQuestion(pos),
+      options: NOMS_P, bonne, colonne: true, melanger: false,
+      indice: 'Avant le compteur : S ; entre le compteur et l\'appareil : P ; à la sortie de l\'appareil : P<sub>u</sub> et P<sub>perdue</sub>.',
+      solution: `À cet endroit se trouve ${NOMS_P.find(n => n.id === bonne).label}.` }] };
+  },
+  function relation() {
+    const vraies = [['S', `S = ${UEFF} × ${IEFF}`], ['P', `P = ${UEFF} × ${IEFF} × cos φ`], ['k', 'k = cos φ = P / S'], ['PS', 'P = S × k'], ['Pu', `${PU} = η × P`], ['Pp', `${PP} = P − ${PU}`]];
+    const fausses = ['k = S / P', `${PU} = P / η`, 'P = S / k', `${PP} = P + ${PU}`, `S = ${UEFF} × ${IEFF} × cos φ`, `P = ${UEFF} × ${IEFF} / cos φ`, `η = P / ${PU}`];
+    const v = hasard(vraies), f = melanger(fausses).slice(0, 3);
+    return { theme: 'Les relations', parties: [{ type: 'choix', q: 'Laquelle de ces relations est juste ?', colonne: true,
+      options: [{ id: 'ok', label: v[1] }].concat(f.map((x, k) => ({ id: 'f' + k, label: x }))), bonne: 'ok',
+      indice: 'Pense au schéma de conversion : S, puis P = S × k, puis P<sub>u</sub> = η × P et P<sub>perdue</sub> = P − P<sub>u</sub>.',
+      solution: `${v[1]} est juste. Les relations du cours : S = ${UEFF} × ${IEFF} ; P = ${UEFF} × ${IEFF} × cos φ ; k = cos φ = P / S ; ${PU} = η × P ; ${PP} = P − ${PU}.` }] };
+  },
+  function unite() {
+    const L = [
+      ['le facteur de puissance k', 'sans unité', ['W', 'rad', 'V']],
+      ['le rendement η', 'sans unité (souvent donné en %)', ['W', 'rad', 'A']],
+      ['la puissance apparente S', 'en W (ou en VA)', ['en V', 'en A', 'sans unité']],
+      ['le déphasage φ', 'en rad', ['en W', 'en s', 'sans unité']],
+    ];
+    const [g, ok, f] = hasard(L);
+    return { theme: 'Les unités', parties: [{ type: 'choix', q: `Dans les relations du cours, ${g} s'exprime :`,
+      options: [{ id: 'ok', label: ok }].concat(f.map((x, k) => ({ id: 'f' + k, label: x }))), bonne: 'ok',
+      indice: 'k et η sont des rapports de deux puissances ; φ est un angle.', solution: `${g[0].toUpperCase() + g.slice(1)} s'exprime ${ok}.` }] };
+  },
+];
+
+/* ---------- Glisser-déposer sur le schéma ---------- */
+function positions() {
+  const noms = Math.random() < .5;
+  return { theme: 'Le schéma de conversion', parties: [{ type: 'schema', q: noms ? 'Place chaque étiquette à son endroit sur le schéma de conversion.' : 'Place chaque relation à son endroit sur le schéma de conversion.',
+    contenus: PA.SCHEMA_POSITIONS, etiquettes: noms ? PA.ETIQ_NOMS : PA.ETIQ_RELATIONS, titrePalette: noms ? 'Étiquettes à placer' : 'Relations à placer',
+    solution: noms ? 'S avant le compteur ; P et k entre le compteur et l\'appareil ; P<sub>u</sub> et P<sub>perdue</sub> à la sortie de l\'appareil.'
+      : `S = ${UEFF} × ${IEFF} ; P = ${UEFF} × ${IEFF} × cos φ ; k = P / S ; ${PU} = η × P ; ${PP} = P − ${PU}.` }] };
+}
+
+/* Énoncés : texte, étiquettes (données → cases du schéma) et calculs possibles */
+const E_U = m => ({ id: 'u', label: `${m.U} V`, cible: 'U', indice: 'Une tension écrite dans un énoncé ou sur un appareil est une valeur efficace.' });
+const E_I = m => ({ id: 'i', label: `${fmt(m.I, 1)} A`, cible: 'I', indice: 'Une intensité écrite dans un énoncé ou sur un appareil est une valeur efficace.' });
+const E_P = (m, ind) => ({ id: 'p', label: `${fmt(m.P)} W`, cible: 'P', indice: ind || 'La puissance indiquée par le fabricant (sur la plaque) : laquelle des puissances est-ce ?' });
+const E_eta = m => ({ id: 'e', label: `${m.eta} %`, cible: 'eta', indice: 'Un pourcentage qui compare ce que fournit l\'appareil à ce qu\'il reçoit.' });
+const E_k = m => ({ id: 'k', label: fmt(m.k, 2), cible: 'k', indice: 'Un nombre sans unité, inférieur à 1, lié au déphasage entre u et i.' });
+const E_Pu = m => ({ id: 'pu', label: `${fmt(m.Pu)} W`, cible: 'Pu', indice: '« Puissance fournie » ou « mécanique » : c\'est ce que l\'appareil produit d\'utile.' });
+const E_Pp = m => ({ id: 'pp', label: `${fmt(m.Pp)} W`, cible: 'Pp', indice: 'Les pertes : où partent-elles sur le schéma ?' });
+
+// calculs : { q, label, valeur, unite, tol | rel, indice, solution, diag }
+const C = {
+  S: m => ({ q: 'Calcule la puissance apparente S.', label: 'S =', valeur: m.S, unite: 'W', rel: .01, indice: `S = ${UEFF} × ${IEFF}.`, solution: `S = ${m.U} × ${fmt(m.I, 1)} = ${n3(m.S)} W` }),
+  SdeP: m => ({ q: 'Calcule la puissance apparente S.', label: 'S =', valeur: m.P / m.k, unite: 'W', rel: .01, indice: 'P = S × k, donc S = P / k.',
+    diag: v => Math.abs(v - m.P * m.k) < 1 ? 'P = S × k, donc S = P / k : il faut diviser par k.' : null, solution: `S = P / k = ${fmt(m.P)} / ${fmt(m.k, 2)} ≈ ${n3(m.P / m.k)} W` }),
+  k: m => ({ q: 'Calcule le facteur de puissance k.', label: 'k =', valeur: m.P / m.S, tol: .006, indice: 'k = P / S.',
+    diag: v => Math.abs(v - m.S / m.P) < .01 ? 'Tu as calculé S / P : k = P / S (il est inférieur à 1).' : null, solution: `k = P / S = ${fmt(m.P)} / ${n3(m.S)} ≈ ${fmt(m.P / m.S, 2)}` }),
+  Pu: m => ({ q: `Calcule la puissance utile ${PU}.`, label: `${PU} =`, valeur: m.P * m.eta / 100, unite: 'W', rel: .01, indice: `${PU} = η × P, avec η = ${fmt(m.eta / 100, 2)}.`,
+    diag: v => Math.abs(v - m.P * m.eta) < 1 ? `Le rendement ${m.eta} % s'écrit ${fmt(m.eta / 100, 2)} dans le calcul.` : null, solution: `${PU} = η × P = ${fmt(m.eta / 100, 2)} × ${fmt(m.P)} ≈ ${n3(m.P * m.eta / 100)} W` }),
+  Pp: m => ({ q: `Calcule la puissance perdue ${PP}.`, label: `${PP} =`, valeur: m.P - m.P * m.eta / 100, unite: 'W', rel: .01, indice: `${PP} = P − ${PU}.`,
+    solution: `${PP} = P − ${PU} ≈ ${fmt(m.P)} − ${n3(m.P * m.eta / 100)} ≈ ${n3(m.P - m.P * m.eta / 100)} W` }),
+  eta: m => ({ q: 'Calcule le rendement η (sous forme décimale).', label: 'η =', valeur: m.Pu / m.P, tol: .006, indice: `${PU} = η × P, donc η = ${PU} / P.`,
+    diag: v => Math.abs(v - 100 * m.Pu / m.P) < 1 ? `Donne η sous forme décimale : par exemple 0,75 (et non 75).` : Math.abs(v - m.P / m.Pu) < .01 ? `Tu as calculé P / ${PU} : η = ${PU} / P (il est inférieur à 1).` : null,
+    solution: `η = ${PU} / P = ${fmt(m.Pu)} / ${fmt(m.P)} ≈ ${fmt(m.Pu / m.P, 2)}` }),
+  PuDePp: m => ({ q: `Calcule la puissance utile ${PU}.`, label: `${PU} =`, valeur: m.Pu, unite: 'W', rel: .01, indice: `${PP} = P − ${PU}, donc ${PU} = P − ${PP}.`,
+    diag: v => Math.abs(v - (m.P + m.Pp)) < 1 ? `Les pertes se retranchent : ${PU} = P − ${PP}.` : null, solution: `${PU} = P − ${PP} = ${fmt(m.P)} − ${fmt(m.Pp)} = ${fmt(m.Pu)} W` }),
+  PpDirect: m => ({ q: `Calcule la puissance perdue ${PP}.`, label: `${PP} =`, valeur: m.Pp, unite: 'W', rel: .01, indice: `${PP} = P − ${PU}.`, solution: `${PP} = ${fmt(m.P)} − ${fmt(m.Pu)} = ${fmt(m.Pp)} W` }),
+  I: m => ({ q: `Calcule l'intensité efficace ${IEFF}.`, label: `${IEFF} =`, valeur: m.P / m.k / m.U, unite: 'A', rel: .01, indice: `S = ${UEFF} × ${IEFF}, donc ${IEFF} = S / ${UEFF}.`,
+    solution: `${IEFF} = S / ${UEFF} = ${n3(m.P / m.k)} / ${m.U} ≈ ${n3(m.P / m.k / m.U)} A` }),
+};
+const ENONCES = [
+  m => ({ texte: `${m.nom} porte les indications : <b>${m.U} V ; ${fmt(m.I, 1)} A ; ${fmt(m.P)} W</b>. Son rendement est de <b>${m.eta} %</b>.`,
+    etiquettes: [E_U(m), E_I(m), E_P(m), E_eta(m)], calculs: hasard([['S', 'k'], ['Pu', 'Pp']]) }),
+  m => ({ texte: `${m.nom}, de puissance <b>${fmt(m.P)} W</b>, est branché sur le secteur (<b>${m.U} V</b>). Son facteur de puissance vaut <b>${fmt(m.k, 2)}</b> et son rendement <b>${m.eta} %</b>.`,
+    etiquettes: [E_P(m), E_U(m), E_k(m), E_eta(m)], calculs: hasard([['Pu', 'Pp'], ['SdeP', 'I']]) }),
+  m => ({ texte: `${m.nom} est alimenté sous <b>${m.U} V</b> et absorbe un courant d'intensité <b>${fmt(m.I, 1)} A</b>. Sa puissance active vaut <b>${fmt(m.P)} W</b> et il fournit une puissance mécanique de <b>${fmt(m.Pu)} W</b>.`,
+    etiquettes: [E_U(m), E_I(m), E_P(m, 'Relis l\'énoncé : de quelle puissance s\'agit-il ?'), E_Pu(m)], calculs: hasard([['eta', 'PpDirect'], ['S', 'k']]) }),
+  m => ({ texte: `Sur la plaque signalétique d'un moteur, on lit : <b>${m.U} V ; ${fmt(m.P)} W ; cos φ = ${fmt(m.k, 2)}</b>. Ce moteur fournit une puissance utile de <b>${fmt(m.Pu)} W</b>.`,
+    etiquettes: [E_U(m), E_P(m), E_k(m), E_Pu(m)], calculs: hasard([['eta', 'PpDirect'], ['SdeP', 'I']]) }),
+  m => ({ texte: `${m.nom} reçoit une puissance active de <b>${fmt(m.P)} W</b>. Ses pertes valent <b>${fmt(m.Pp)} W</b> et son facteur de puissance vaut <b>${fmt(m.k, 2)}</b>.`,
+    etiquettes: [E_P(m, 'Relis l\'énoncé : de quelle puissance s\'agit-il ?'), E_Pp(m), E_k(m)], calculs: hasard([['PuDePp', 'eta'], ['SdeP', 'I']]) }),
+];
+
+// correction d'un placement : « 230 V → U_eff ; … »
+const NOM_CASE = { U: UEFF, I: IEFF, P: 'P (puissance active)', eta: 'η (rendement)', k: 'k = cos φ', Pu: `${PU} (puissance utile)`, Pp: `${PP} (puissance perdue)` };
+// espaces insécables : « 1 035 W » ne se coupe pas en fin de ligne
+const insecable = t => t.replace(/(\d) (?=[\dWVA%])/g, '$1&nbsp;');
+const placement = e => e.etiquettes.map(x => `${x.label} → ${NOM_CASE[x.cible]}`).join(' ; ');
+
+// placer les données d'un énoncé sur le schéma (sans calcul)
+function donnees(n) {
+  const m = moteur(), e = ENONCES[n](m);
+  return { theme: 'Placer les données', enonce: `<div class="pa-enonce">${insecable(e.texte)}</div>`, parties: [
+    { type: 'schema', q: 'Place les données de l\'énoncé sur le schéma de conversion (les cases vides sont les grandeurs inconnues).', contenus: PA.SCHEMA_DONNEES,
+      etiquettes: e.etiquettes, titrePalette: 'Données de l\'énoncé', solution: placement(e) }] };
+}
+// exercice complet : données sur le schéma, puis deux calculs
+function exercice(n) {
+  const m = moteur(), e = ENONCES[n](m);
+  return { theme: 'Exercice', enonce: `<div class="pa-enonce">${insecable(e.texte)}</div>`, consigne: 'Place d\'abord les données sur le schéma, puis fais les calculs (résultats à trois chiffres significatifs).', parties: [
+    { type: 'schema', q: 'Place les données de l\'énoncé sur le schéma.', contenus: PA.SCHEMA_DONNEES, etiquettes: e.etiquettes, titrePalette: 'Données de l\'énoncé',
+      solution: placement(e) },
+  ].concat(e.calculs.map(c => Object.assign({ type: 'nombre' }, C[c](m)))) };
+}
+
+/* ---------- Groupe 3 : calculs (QCM) ---------- */
+const G3 = [
+  function calcS() {
+    const I = hasard([1.5, 2.5, 3.2, 4.5, 6.5, 8]), S = 230 * I;
+    return { theme: 'Calcul', parties: [{ type: 'choix', q: `Un appareil est alimenté sous 230 V et absorbe ${fmt(I)} A. Sa puissance apparente vaut :`,
+      options: optionsNum(n3(S), [n3(230 + I), n3(S * Math.SQRT2), n3(S / Math.SQRT2)], 'W'), bonne: 'ok',
+      indice: `S = ${UEFF} × ${IEFF}.`, solution: `S = 230 × ${fmt(I)} = ${n3(S)} W (ou VA)` }] };
+  },
+  function calcP() {
+    const m = moteur(), P = m.S * m.k;
+    return { theme: 'Calcul', parties: [{ type: 'choix', q: `Un moteur alimenté sous 230 V absorbe ${fmt(m.I, 1)} A, avec un facteur de puissance cos φ = ${fmt(m.k, 2)}. Sa puissance active vaut :`,
+      options: optionsNum(n3(P), [n3(m.S), n3(m.S / m.k), n3(230 * m.k)], 'W'), bonne: 'ok',
+      indice: `P = ${UEFF} × ${IEFF} × cos φ.`, solution: `P = 230 × ${fmt(m.I, 1)} × ${fmt(m.k, 2)} ≈ ${n3(P)} W` }] };
+  },
+  function calcK() {
+    const m = moteur();
+    return { theme: 'Calcul', parties: [{ type: 'choix', q: `Un appareil a une puissance apparente S = ${fmt(m.S)} W et une puissance active P = ${fmt(m.P)} W. Son facteur de puissance vaut :`,
+      options: optionsNum(fmt(m.P / m.S, 2), [fmt(m.S / m.P, 2), fmt(1 - m.P / m.S, 2)], ''), bonne: 'ok',
+      indice: 'k = P / S (il est inférieur à 1).', solution: `k = P / S = ${fmt(m.P)} / ${fmt(m.S)} ≈ ${fmt(m.P / m.S, 2)}` }] };
+  },
+  function calcPu() {
+    const m = moteur(), Pu = m.P * m.eta / 100;
+    return { theme: 'Calcul', parties: [{ type: 'choix', q: `Un moteur reçoit une puissance active de ${fmt(m.P)} W. Son rendement est de ${m.eta} %. Sa puissance utile vaut :`,
+      options: optionsNum(n3(Pu), [n3(m.P / (m.eta / 100)), n3(m.P - Pu), n3(m.P - m.eta)], 'W'), bonne: 'ok',
+      indice: `${PU} = η × P, avec η = ${fmt(m.eta / 100, 2)}.`, solution: `${PU} = ${fmt(m.eta / 100, 2)} × ${fmt(m.P)} ≈ ${n3(Pu)} W` }] };
+  },
+  function calcPp() {
+    const m = moteur(), Pu = m.P * m.eta / 100;
+    return { theme: 'Calcul', parties: [{ type: 'choix', q: `Un moteur reçoit une puissance active de ${fmt(m.P)} W. Son rendement est de ${m.eta} %. La puissance perdue vaut :`,
+      options: optionsNum(n3(m.P - Pu), [n3(Pu), n3(m.P + Pu), n3(m.S - m.P)], 'W'), bonne: 'ok',
+      indice: `Calcule d'abord ${PU} = η × P, puis ${PP} = P − ${PU}.`, solution: `${PU} = ${fmt(m.eta / 100, 2)} × ${fmt(m.P)} ≈ ${n3(Pu)} W, donc ${PP} = P − ${PU} ≈ ${n3(m.P - Pu)} W` }] };
+  },
+  function calcI() {
+    const m = moteur(), I = m.P / (m.U * m.k);
+    return { theme: 'Calcul', parties: [{ type: 'choix', q: `Un moteur de puissance ${fmt(m.P)} W est alimenté sous 230 V, avec un facteur de puissance de ${fmt(m.k, 2)}. L'intensité efficace du courant vaut :`,
+      options: optionsNum(n3(I), [n3(m.P / m.U), n3(m.P * m.k / m.U), n3(I * Math.SQRT2)], 'A'), bonne: 'ok',
+      indice: `P = ${UEFF} × ${IEFF} × cos φ, donc ${IEFF} = P / (${UEFF} × cos φ).`, solution: `${IEFF} = P / (${UEFF} × cos φ) = ${fmt(m.P)} / (230 × ${fmt(m.k, 2)}) ≈ ${n3(I)} A` }] };
+  },
+];
+
+// tirage : 3 notions, le schéma, 3 calculs, les données d'un énoncé, 2 exercices complets
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  const enonces = melanger([0, 1, 2, 3, 4]);
+  return pris(G1, 3).concat([positions()], pris(G3, 3), [donnees(enonces[0]), exercice(enonces[1]), exercice(enonces[2])]);
+}
+
+PH.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 4 · EXERCICES', titre: 'La puissance active en exercices',
+  intro: `<p class="er-contexte">10 exercices d'application directe, tirés au hasard : ce qu'indiquent les appareils, le schéma de conversion, les relations entre les puissances. Certains se font par <b>glisser-déposer</b> sur le schéma de conversion : c'est ainsi qu'on place les données d'un exercice. Garde ta calculatrice à portée de main.</p>`,
+  questions: tirage,
+  revoir: { href: 'module_4_cours.html', label: 'Revoir le cours' },
+  suite: { href: '../index.html', label: 'Accueil de l\'application →' },
+});
+PA.menu('module_4_exercices');
+</script>
+</body>
+</html>

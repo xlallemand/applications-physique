@@ -76,6 +76,8 @@
   /* Fonction tracée : signal périodique (def.signal) ou courbe quelconque (def.f) */
   function fonction(def) {
     if (def.f) return def.f;
+    // plusieurs courbes (def.courbes) sans courbe principale : la première sert de référence
+    if (!def.signal) return def.courbes && def.courbes.length ? def.courbes[0].f : () => 0;
     const s = def.signal, g = FORMES[s.forme] || FORMES.sinus;
     return t => (s.decal || 0) + s.ampl * g((t - (s.phase || 0)) / s.periode, s);
   }
@@ -119,7 +121,7 @@
 
   /* ---------- Analyse de la question : axe mesuré, distances attendues ---------- */
   function analyser(def, R) {
-    const f = fonction(def), g = def.grandeur;
+    const f = fonction(def), g = def.grandeur || {};
     const A = { f: f, type: def.type };
     if (def.type === 'periode') {
       const T = def.signal.periode, Tmm = T * R.mmX;
@@ -160,7 +162,7 @@
       amplitude: { ligne: 'Amplitude', erreur: "Ta mesure ne correspond pas à l'amplitude : mesure verticalement l'écart entre le minimum et le maximum du signal (crête à crête), ou entre la valeur moyenne et le maximum." },
       lectureY: { ligne: 'Point', erreur: "Ta mesure ne correspond pas au point repéré : mesure verticalement la distance entre l'axe des abscisses (valeur 0) et le point." },
       lectureX: { ligne: 'Point', erreur: "Ta mesure ne correspond pas au point repéré : mesure horizontalement la distance entre l'axe des ordonnées (valeur 0) et le point." },
-    }[def.type];
+    }[def.type] || { ligne: '', erreur: '' };     // type 'libre' : graphique seul, sans grandeur repérée
     A.ligne = g.ligne || D.ligne;
     A.erreur = g.erreurMesure || D.erreur;
     return A;
@@ -192,16 +194,22 @@
       h += `<text x="${P.x0 - 2}" y="${y + 1.3}" font-size="3.8" text-anchor="end" fill="#55585f">${fmt(v, 4)}</text>`;
     }
     h += `<text x="${P.x1 + 6}" y="${P.yBot + 11}" font-size="4" text-anchor="end" font-weight="700" fill="#16181d">${ax.nom} (${ax.unite})</text>`;
-    h += `<text x="${P.x0 + 2.5}" y="${P.yTop - 3}" font-size="4" font-weight="700" fill="#16181d">${ay.nom} (${ay.unite})</text>`;
-    // courbe (rognée au cadre)
-    const f = A.f;
-    let d = '';
-    for (let i = 0; i <= 1000; i++) {
-      const t = ax.min + (ax.max - ax.min) * i / 1000;
-      const y = Math.max(P.yTop - 4, Math.min(P.yBot, R.sy(f(t))));
-      d += (i ? 'L' : 'M') + R.sx(t).toFixed(2) + ',' + y.toFixed(2);
-    }
-    h += `<path d="${d}" fill="none" stroke="var(--accent)" stroke-width=".75" stroke-linejoin="round"/>`;
+    // nom de l'axe vertical (def.titreY : texte SVG libre, par exemple deux grandeurs de couleurs différentes)
+    h += `<text x="${P.x0 + 2.5}" y="${P.yTop - 3}" font-size="4" font-weight="700" fill="#16181d">${def.titreY || `${ay.nom} (${ay.unite})`}</text>`;
+    // courbe(s) rognée(s) au cadre : courbe principale, ou def.courbes [{ f, couleur, largeur }]
+    const trace = (f, couleur, largeur) => {
+      let d = '';
+      for (let i = 0; i <= 1000; i++) {
+        const t = ax.min + (ax.max - ax.min) * i / 1000;
+        const y = Math.max(P.yTop - 4, Math.min(P.yBot, R.sy(f(t))));
+        d += (i ? 'L' : 'M') + R.sx(t).toFixed(2) + ',' + y.toFixed(2);
+      }
+      return `<path d="${d}" fill="none" stroke="${couleur}" stroke-width="${largeur || .75}" stroke-linejoin="round"/>`;
+    };
+    if (def.courbes) def.courbes.forEach(c => { h += trace(c.f, c.couleur || 'var(--accent)', c.largeur); });
+    else h += trace(A.f, 'var(--accent)');
+    // annotations propres à l'application (noms des courbes, repères…), en mm papier
+    if (def.annotations) h += `<g pointer-events="none">${def.annotations(R, A)}</g>`;
     h += reperageCible(def, R, A);
     return h;
   }
@@ -222,7 +230,7 @@
       <text x="${x0 + w / 2}" y="${y}" font-size="4.2" font-weight="800" text-anchor="middle" fill="#9a5305">${txt}</text>`;
   }
   function reperageCible(def, R, A) {
-    const P = R.P, f = A.f, sym = symS(def.grandeur.symbole);
+    const P = R.P, f = A.f, sym = symS((def.grandeur && def.grandeur.symbole) || '');
     let h = '';
     if (def.type === 'periode') {
       const s = def.signal;
@@ -276,8 +284,15 @@
     return c + `<text x="${L + 2}" y="11.8" font-size="2.2" text-anchor="end" fill="#8a7b3a">cm</text>`;
   }
 
-  function creerRegle(svg, onChange) {
-    const st = { ox: 22, oy: 74, rot: 0, cur: 50, sel: 'regle', drag: null };
+  // règle touchée en dernier : la seule que déplacent les flèches du clavier
+  // (utile quand plusieurs graphiques avec règle sont sur la même page)
+  let regleActive = null;
+
+  function creerRegle(svg, onChange, depart) {
+    const st = Object.assign({ ox: 22, oy: 74, rot: 0, cur: 50 }, depart || {}, { sel: 'regle', drag: null });
+    regleActive = st;
+    // identifiants propres à ce graphique (scène reprise par la loupe, découpe de la loupe)
+    const idScene = svg.querySelector('.lg-scene').id, idClip = svg.querySelector('.lg-clip-loupe').id;
     const outil = svg.querySelector('.lg-outil');
     const loupeG = svg.querySelector('.lg-loupe');
 
@@ -302,9 +317,9 @@
 
     // loupe (×3) : réutilise la scène avec <use>
     const K = 3, RL = 16;
-    loupeG.innerHTML = `<g class="lg-l-pos"><g clip-path="url(#lgClipLoupe)">
+    loupeG.innerHTML = `<g class="lg-l-pos"><g clip-path="url(#${idClip})">
         <rect x="${-RL}" y="${-RL}" width="${2 * RL}" height="${2 * RL}" fill="#fff"/>
-        <use class="lg-l-use" href="#lgScene" xlink:href="#lgScene"/></g>
+        <use class="lg-l-use" href="#${idScene}" xlink:href="#${idScene}"/></g>
         <circle r="${RL}" fill="none" stroke="#16181d" stroke-width=".6"/>
         <line x1="-2" y1="0" x2="2" y2="0" stroke="${ROSE}" stroke-width=".2"/><line x1="0" y1="-2" x2="0" y2="2" stroke="${ROSE}" stroke-width=".2"/></g>`;
     const lPos = loupeG.querySelector('.lg-l-pos'), lUse = loupeG.querySelector('.lg-l-use');
@@ -346,6 +361,7 @@
     function debut(e, quoi) {
       if (st.drag || (e.pointerType === 'mouse' && e.button !== 0)) return;
       e.preventDefault();
+      regleActive = st;
       const p = versSvg(e);
       st.sel = quoi;
       st.drag = { quoi: quoi, pid: e.pointerId, dx: p.x - st.ox, dy: p.y - st.oy };
@@ -385,6 +401,7 @@
 
     // réglage fin : la règle avance de 0,2 mm, le curseur de 1 mm
     function ajuster(dx, dy) {
+      regleActive = st;
       if (st.sel === 'curseur') {
         const s = st.rot === 0 ? dx : -dy;
         st.cur = Math.max(0, Math.min(L, st.cur + s));
@@ -395,7 +412,7 @@
     }
     function clavier(e) {
       const tag = (e.target && e.target.tagName) || '';
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || !document.body.contains(svg)) return;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || !document.body.contains(svg) || regleActive !== st) return;
       const dir = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
       if (!dir) return;
       // flèches actives seulement quand le graphique est visible à l'écran
@@ -428,10 +445,12 @@
     return { st: st, tourner: tourner, pas: pas, lecture: () => st.cur, detruire: detruire, vertical: () => st.rot !== 0 };
   }
 
+  let nGraphe = 0;
   function svgGraphique(def, R, A) {
+    const k = ++nGraphe;
     return `<svg class="lg-svg" viewBox="0 0 ${W} ${H}" xmlns="${NS}" xmlns:xlink="http://www.w3.org/1999/xlink">
-      <defs><clipPath id="lgClipLoupe"><circle cx="0" cy="0" r="16"/></clipPath></defs>
-      <g id="lgScene"><rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/>
+      <defs><clipPath id="lgClipLoupe${k}" class="lg-clip-loupe"><circle cx="0" cy="0" r="16"/></clipPath></defs>
+      <g id="lgScene${k}" class="lg-scene"><rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/>
         <g class="lg-graphe">${dessinerGraphe(def, R, A)}</g>
         <g class="lg-outil"></g></g>
       <g class="lg-loupe" pointer-events="none"></g>
@@ -448,9 +467,9 @@
         <span class="lg-lecture">Lecture : <span data-a="lecture"></span></span>
       </div>`;
   }
-  function brancherOutils(root) {
+  function brancherOutils(root, depart) {
     const $ = a => root.querySelector(`[data-a="${a}"]`);
-    const regle = creerRegle(root.querySelector('.lg-svg'), cur => { $('lecture').textContent = fmt(cur / 10, 1) + ' cm'; });
+    const regle = creerRegle(root.querySelector('.lg-svg'), cur => { $('lecture').textContent = fmt(cur / 10, 1) + ' cm'; }, depart);
     const moins = $('moins'), plus = $('plus');
     $('tourner').onclick = () => {
       regle.tourner();
@@ -461,11 +480,12 @@
     return regle;
   }
 
-  /* Bac à sable (cours) : graphique + règle, sans tableau */
+  /* Bac à sable (cours) : graphique + règle, sans tableau.
+     def.regle : position de départ de la règle { ox, oy, rot, cur } (mm papier), facultative */
   function bacASable(root, def) {
     const R = repere(def), A = analyser(def, R);
     root.innerHTML = htmlOutils() + `<div class="lg-graph-box">${svgGraphique(def, R, A)}</div>`;
-    return brancherOutils(root);
+    return brancherOutils(root, def.regle);
   }
 
   /* Figure statique (cours) : graphique et règle(s) déjà placée(s).

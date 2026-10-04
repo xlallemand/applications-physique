@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : mesurer un déphasage — Puissance active</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="pa.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../ph/modules/ph.css">
+<link rel="stylesheet" href="../../lecture-graphique/modules/lgtools.css">
+<script src="../../assets/nav.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../ph/modules/ph.js"></script>
+<script src="../../lecture-graphique/modules/lgtools.js"></script>
+<script src="pa.js"></script>
+<script src="pa-outils.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS</span>
+    <h2 class="er-titre">Mesurer un déphasage</h2>
+    <p class="er-contexte">Dans un appareil électrique, l'intensité i n'atteint pas toujours son maximum en même temps que la tension u : elles sont <b>déphasées</b>. Ce déphasage φ intervient dans le calcul de la puissance active. Voici comment le mesurer sur un graphique. Après chaque notion, un exemple, puis à toi de jouer.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (moteur PH.Cours de l'application « pH ») :
+   chaque notion est présentée, illustrée par un exemple, puis
+   l'élève fait des exemples semblables (« À toi »).
+   ============================================================ */
+const { fmt, aToi } = PH;
+const U = '<span class="c-u">u</span>', I = '<span class="c-i">i</span>';
+
+// petites fabriques de questions « À toi »
+const choix = (q, options, bonne, opts) => ({ parties: [Object.assign({ type: 'choix', q, options, bonne }, opts)] });
+const choixFig = (q, figure, options, bonne, opts) => ({ parties: [Object.assign({ type: 'choixFig', q, figure, options, bonne }, opts)] });
+const AVANCE = [
+  { id: 'i', label: 'i est en avance sur u' },
+  { id: 'u', label: 'u est en avance sur i' },
+  { id: '0', label: 'u et i sont en phase' },
+];
+// erreurs fréquentes dans le calcul de φ = 2π × Δt / T
+const diagPhi = (T, dt) => v => {
+  if (Math.abs(v - 360 * dt / T) < .6) return 'Tu as calculé en <b>degrés</b>. En radians, une période correspond à 2π rad : φ = 2π × Δt / T.';
+  if (Math.abs(v - dt / T) < .006) return 'Tu as oublié de multiplier par 2π : φ = 2π × Δt / T.';
+  if (Math.abs(v - 2 * Math.PI * T / dt) < .1) return 'Tu as inversé T et Δt : φ = 2π × Δt / T.';
+  return null;
+};
+
+// graphique du cours : T = 20 ms, i en avance de 5 ms sur u
+const EX = { T: 20, dt: 5, tu: 10, Um: 2.5, Im: 1.6, tmax: 40, pasT: 5, ymax: 3, pasY: 1 };
+
+new PH.Cours(document.getElementById('etapes'), [
+
+  // ---------- 1. Le déphasage ----------
+  (cours) => {
+    const c = cours.carte('1. Le déphasage entre u et i');
+    const radiateur = { T: 20, dt: 0, tu: 5, Um: 2.5, Im: 1.5, tmax: 40, pasT: 5, ymax: 3 };
+    const moteur = { T: 20, dt: -4, tu: 5, Um: 2.5, Im: 1.5, tmax: 40, pasT: 5, ymax: 3 };
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>En courant alternatif, la tension ${U} et l'intensité ${I} sont sinusoïdales, avec la <b>même période T</b>. Mais elles n'atteignent pas forcément leur sommet au même instant : les deux courbes peuvent être <b>décalées</b>. Ce décalage s'appelle le <b>déphasage</b>, noté <b>φ</b> (« phi »).</p>
+        <div class="cle">
+          <ul class="er-liste">
+            <li>Avec uniquement des <b>résistances</b> (exemple : radiateur électrique) → <b>pas de déphasage</b> : u et i sont <b>en phase</b>.</li>
+            <li>Avec des <b>condensateurs</b> (capacités) et des <b>bobines</b> (exemple : moteur) → <b>déphasage</b>.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemples</p>
+        <div class="pa-figs2">
+          <div>${PA.figPhi(radiateur)}<p>Radiateur : u et i en phase<br><span class="er-petit">les sommets sont au même instant</span></p></div>
+          <div>${PA.figPhi(moteur)}<p>Moteur : u et i déphasées<br><span class="er-petit">les sommets sont décalés</span></p></div>
+        </div>
+      </div>`);
+    aToi(c, [
+      choix('Un grille-pain ne contient qu\'une résistance chauffante. Entre u et i, il y a :', [
+        { id: 'non', label: 'pas de déphasage : u et i sont en phase' }, { id: 'oui', label: 'un déphasage' }], 'non',
+        { melanger: false, indice: 'Un appareil qui ne contient que des résistances ne crée pas de déphasage.', solution: 'Le grille-pain ne contient qu\'une résistance : u et i sont en phase (pas de déphasage).' }),
+      choix('Une perceuse contient un moteur (avec des bobines). Entre u et i, il y a :', [
+        { id: 'non', label: 'pas de déphasage : u et i sont en phase' }, { id: 'oui', label: 'un déphasage' }], 'oui',
+        { melanger: false, indice: 'Les bobines (et les condensateurs) créent un déphasage.', solution: 'Le moteur contient des bobines : u et i sont déphasées.' }),
+      choixFig('Sur ce graphique, u et i sont :', PA.figPhi({ T: 16, dt: 0, tu: 7, Um: 1.4, Im: 2.4, tmax: 40, pasT: 5, ymax: 3 }), [
+        { id: 'p', label: 'en phase' }, { id: 'd', label: 'déphasées' }], 'p',
+        { melanger: false, indice: 'Regarde si les sommets de u et de i sont au même instant.', solution: 'Les sommets de u et de i sont au même instant : u et i sont en phase. Cet appareil ne contient que des résistances.' }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 2. Qui est en avance ? ----------
+  (cours) => {
+    const c = cours.carte('2. Qui est en avance ?');
+    const ex = Object.assign({}, EX, {
+      noms: { u: 30, i: 25 },
+      // tirets verticaux aux deux sommets comparés (i à 5 ms, u à 10 ms)
+      annoter: R => PA.tirets(R.sx(5), R.sy(1.6), R.sy(0), '#d9730d') + PA.tirets(R.sx(10), R.sy(2.5), R.sy(0), '#2952c8') +
+        PA.flecheH(R.sx(5), R.sx(10), R.sy(2.8), '#16181d') + PA.texte(R.sx(10) + 2, R.sy(2.8) + 1.4, 'i arrive en premier', '#16181d', 'start', 3.8),
+    });
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Sur le graphique, le temps s'écoule de gauche à droite. On compare <b>deux sommets voisins</b>, un de chaque courbe.</p>
+        <div class="cle">
+          <p>La grandeur qui arrive à son sommet <b>en premier</b> (la plus à gauche) est <b>en avance</b> sur l'autre. L'autre est <b>en retard</b>.</p>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple du cours</p>
+        ${PA.figPhi(ex)}
+        <p style="margin-top:8px">${I} atteint son sommet à t = 5 ms, ${U} à t = 10 ms. Ici, <b>${I} est en avance sur ${U}</b> car il arrive au sommet en premier.</p>
+      </div>
+      <div class="callout"><p><b>Attention :</b> compare des sommets <b>voisins</b>, les plus proches l'un de l'autre. Le premier sommet visible sur le graphique n'est pas forcément le bon (voir la 3<sup>e</sup> question).</p></div>`);
+    aToi(c, [
+      choixFig('Sur ce graphique :', PA.figPhi({ T: 20, dt: -3, tu: 8, Um: 2.5, Im: 1.5, tmax: 40, pasT: 5, ymax: 3 }), AVANCE, 'u',
+        { melanger: false, indice: 'Repère un sommet de u et le sommet de i le plus proche : lequel est le plus à gauche ?', solution: 'u atteint son sommet 3 ms avant i : u est en avance sur i (i est en retard sur u).' }),
+      choixFig('Sur ce graphique :', PA.figPhi({ T: 16, dt: 4, tu: 10, Um: 1.5, Im: 2.5, tmax: 40, pasT: 5, ymax: 3 }), AVANCE, 'i',
+        { melanger: false, indice: 'Repère un sommet de i et le sommet de u le plus proche : lequel est le plus à gauche ?', solution: 'i atteint son sommet 4 ms avant u : i est en avance sur u.' }),
+      choixFig('Sur ce graphique :', PA.figPhi({ T: 20, dt: 5, tu: 2, Um: 2.5, Im: 1.5, tmax: 40, pasT: 5, ymax: 3 }), AVANCE, 'i',
+        { melanger: false, indice: 'Le premier sommet de u (2 ms) et le premier sommet de i (17 ms) ne sont pas voisins. Compare le sommet de i à 17 ms avec le sommet de u le plus proche.',
+          indices: { u: 'Le premier sommet de u (2 ms) et le premier sommet de i (17 ms) sont éloignés de 15 ms : ce ne sont pas des sommets voisins. Compare le sommet de i à 17 ms avec le sommet de u le plus proche (22 ms).' },
+          solution: 'i atteint son sommet à 17 ms et u à 22 ms (sommets voisins, 5 ms d\'écart) : i est en avance sur u.' }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 3. Une période = un tour complet ----------
+  (cours) => {
+    const c = cours.carte('3. Une période correspond à un tour complet : 2π rad');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Un signal sinusoïdal se répète : au bout d'une période T, on revient au <b>même point</b> de la courbe. C'est comme un point qui tourne sur un <b>cercle trigonométrique</b> : après un <b>tour complet</b>, il revient au même endroit. Un tour complet correspond à un angle de <b>2π rad</b>.</p>
+        <p class="er-petit">Fais tourner le point avec le curseur (ou ▶) et observe la courbe qui se trace.</p>
+        <div data-x="cercle"></div>
+        <div class="cle">
+          <p>Une durée <b>T</b> (une période) correspond à un angle de <b>2π rad</b> (un tour complet).</p>
+          <p>La durée et l'angle sont <b>proportionnels</b> : T/2 correspond à π rad (un demi-tour), T/4 à π/2 rad (un quart de tour)…</p>
+        </div>
+      </div>`);
+    PA.cercle(c.querySelector('[data-x="cercle"]'));
+    aToi(c, [
+      choix('Au bout d\'une demi-période (T/2), le point a tourné d\'un angle de :', [
+        { id: 'pi', label: 'π rad' }, { id: '2pi', label: '2π rad' }, { id: 'pi2', label: 'π/2 rad' }, { id: '180', label: '180 rad' }], 'pi',
+        { indice: 'Une période complète correspond à 2π rad ; une demi-période, à la moitié.', solution: 'T/2 correspond à la moitié de 2π, soit π rad (un demi-tour).' }),
+      choix('Une durée égale à T/4 correspond à un angle de :', [
+        { id: 'pi2', label: 'π/2 rad' }, { id: 'pi4', label: 'π/4 rad' }, { id: '2pi', label: '2π rad' }, { id: '4pi', label: '4π rad' }], 'pi2',
+        { indice: 'Un quart de période correspond à un quart de tour : 2π / 4.', solution: 'T/4 correspond à 2π / 4 = π/2 rad (un quart de tour).' }),
+      choix('Une durée égale à 2T (deux périodes) correspond à un angle de :', [
+        { id: '4pi', label: '4π rad' }, { id: '2pi', label: '2π rad' }, { id: 'pi', label: 'π rad' }], '4pi',
+        { indice: 'Chaque période correspond à un tour complet (2π rad).', solution: '2T correspond à deux tours : 2 × 2π = 4π rad.' }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 4. Calculer φ par proportionnalité ----------
+  (cours) => {
+    const c = cours.carte('4. Calculer le déphasage par proportionnalité');
+    // graphique de l'exemple : T repérée entre deux sommets de u et entre deux sommets de i,
+    // Δt entre deux sommets voisins et entre deux passages par zéro
+    const ex = Object.assign({}, EX, {
+      ymax: 4, noms: { u: 10, i: 5 },
+      annoter: R => {
+        const yTu = R.sy(3.7), yTi = R.sy(3.2), yDt = R.sy(2.8);
+        return PA.tirets(R.sx(10), R.sy(2.5), yTu, '#2952c8') + PA.tirets(R.sx(30), R.sy(2.5), yTu, '#2952c8') +
+          PA.flecheH(R.sx(10), R.sx(30), yTu, '#2952c8', 'T = 20 ms') +
+          PA.tirets(R.sx(5), R.sy(1.6), yTi, '#d9730d') + PA.tirets(R.sx(25), R.sy(1.6), yTi, '#d9730d') +
+          PA.flecheH(R.sx(5), R.sx(25), yTi, '#d9730d', 'T = 20 ms') +
+          PA.flecheH(R.sx(25), R.sx(30), yDt, '#16181d') + PA.texte(R.sx(25) - 1.2, yDt + 1.3, 'Δt = 5 ms', '#16181d', 'end', 3.8) +
+          // Δt aussi entre deux passages par zéro (en descendant) : i à 10 ms, u à 15 ms
+          `<circle cx="${R.sx(10)}" cy="${R.sy(0)}" r=".9" fill="#d9730d"/><circle cx="${R.sx(15)}" cy="${R.sy(0)}" r=".9" fill="#2952c8"/>` +
+          PA.flecheH(R.sx(10), R.sx(15), R.sy(0), '#3f2a93', 'Δt', true);
+      },
+    });
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Le déphasage <b>φ</b> est l'<b>angle</b> qui correspond au décalage <b>Δt</b> entre les deux courbes. Pour un déphasage de 2π rad, on retrouve la même valeur : cela correspond à une durée T. D'où le tableau de proportionnalité :</p>
+        ${PA.tabProp({ unite: 's', T: 'T', dt: 'Δt' })}
+        <div class="cle">
+          <p>Par produit en croix :</p>
+          <p class="ph-formule grand">φ = 2π × Δt / T</p>
+          <p>φ en radians (rad) ; T et Δt dans la <b>même unité</b> (s, ms…).</p>
+        </div>
+        <div style="margin-top:12px">${PA.figPhi(ex)}</div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple du cours</p>
+        <p>Sur le graphique ci-dessus, T = 20 ms et Δt = 5 ms. Par proportionnalité :</p>
+        ${PA.tabProp({ unite: 'ms', T: 'T = 20', dt: 'Δt = 5' })}
+        <p class="ph-calc pa-centre">φ = 2π × Δt / T = 2π × 5 / 20 = <span class="c">1,57 rad</span></p>
+        <p>C'est π/2 rad : Δt est un quart de période. Ici, ${I} est en avance sur ${U} (il arrive au sommet en premier) : <b>i est en avance de 1,57 rad sur u</b>.</p>
+      </div>`);
+    aToi(c, [
+      { parties: [{ type: 'nombre', q: 'T = 20 ms et Δt = 2,5 ms. Calcule le déphasage φ (au centième).', label: 'φ ≈', valeur: 2 * Math.PI * 2.5 / 20, tol: .006, unite: 'rad',
+        diag: diagPhi(20, 2.5), indice: 'φ = 2π × Δt / T = 2π × 2,5 / 20.', solution: 'φ = 2π × Δt / T = 2π × 2,5 / 20 ≈ 0,79 rad' }] },
+      { parties: [{ type: 'nombre', q: 'T = 10 ms et Δt = 3 ms. Calcule φ (au centième).', label: 'φ ≈', valeur: 2 * Math.PI * 3 / 10, tol: .006, unite: 'rad',
+        diag: diagPhi(10, 3), indice: 'φ = 2π × Δt / T = 2π × 3 / 10.', solution: 'φ = 2π × Δt / T = 2π × 3 / 10 ≈ 1,88 rad' }] },
+      choix('T = 20 ms et Δt = 0,004 s. Le déphasage vaut :', [
+        { id: 'ok', label: 'φ ≈ 1,26 rad' }, { id: 'a', label: 'φ ≈ 0,0013 rad' }, { id: 'b', label: 'φ ≈ 1 257 rad' }], 'ok',
+        { indice: 'T et Δt doivent être dans la même unité : convertis 0,004 s en ms.', solution: 'Δt = 0,004 s = 4 ms, donc φ = 2π × 4 / 20 ≈ 1,26 rad.' }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 5. Lire T et Δt sur un graphique ----------
+  (cours) => {
+    const c = cours.carte('5. Lire T et Δt sur le graphique');
+    const ex = Object.assign({}, EX, {
+      noms: { u: 10, i: 5 },
+      annoter: R => {
+        // T entre deux creux de u (0 et 20 ms), Δt entre deux sommets voisins (25 et 30 ms)
+        const yb = R.sy(-2.8), yh = R.sy(2.8);
+        return PA.tirets(R.sx(0), R.sy(-2.5), yb) + PA.tirets(R.sx(20), R.sy(-2.5), yb) + PA.flecheH(R.sx(0), R.sx(20), yb, '#3f2a93', 'T (pour 2π)') +
+          PA.tirets(R.sx(25), R.sy(1.6), yh) + PA.tirets(R.sx(30), R.sy(2.5), yh) + PA.flecheH(R.sx(25), R.sx(30), yh, '#3f2a93', 'Δt (pour φ)');
+      },
+    });
+    cours.ajouter(c, `<div class="cours-bloc">
+        <ul class="er-liste">
+          <li><b>T</b> : écart entre deux sommets (ou deux creux) voisins de la <b>même</b> courbe.</li>
+          <li><b>Δt</b> : écart entre un sommet de ${I} et le sommet de ${U} <b>le plus proche</b>. On peut aussi utiliser deux passages par zéro dans le même sens.</li>
+        </ul>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple du cours</p>
+        ${PA.figPhi(ex)}
+        <p style="margin-top:8px">T = 20 − 0 = <b>20 ms</b> (deux creux de u) et Δt = 30 − 25 = <b>5 ms</b> (sommet de i, puis sommet de u).</p>
+      </div>`);
+    // graphique aux sommets placés sur les graduations (une tous les 2 ms)
+    const o = { T: 20, dt: -4, tu: 6, Um: 2.6, Im: 1.5, tmax: 40, pasT: 2, ymax: 3 };
+    aToi(c, [
+      { titre: 'Lis T et Δt sur ce graphique, puis calcule φ.', parties: [
+        { type: 'choixFig', figure: PA.figPhi(o), q: 'Que vaut la période T ?', options: [
+          { id: '20', label: '20 ms' }, { id: '10', label: '10 ms' }, { id: '40', label: '40 ms' }, { id: '6', label: '6 ms' }], bonne: '20', melanger: false,
+          indice: 'Lis les dates de deux sommets voisins de u (ou de i) et fais la différence.', solution: 'Deux sommets voisins de u : 6 ms et 26 ms, donc T = 26 − 6 = 20 ms.' },
+        { type: 'choix', q: 'Que vaut le décalage Δt ?', options: [
+          { id: '4', label: '4 ms' }, { id: '16', label: '16 ms' }, { id: '10', label: '10 ms' }, { id: '6', label: '6 ms' }], bonne: '4', melanger: false,
+          indice: 'Lis la date d\'un sommet de u, puis celle du sommet de i le plus proche.', indices: { 16: 'Ces deux sommets ne sont pas voisins : prends le sommet de i le plus proche du sommet de u.' },
+          solution: 'Sommet de u à 6 ms, sommet de i le plus proche à 10 ms : Δt = 10 − 6 = 4 ms.' },
+        { type: 'nombre', q: 'Calcule φ (au centième).', label: 'φ ≈', valeur: 2 * Math.PI * 4 / 20, tol: .006, unite: 'rad', diag: diagPhi(20, 4),
+          indice: 'φ = 2π × Δt / T = 2π × 4 / 20.', solution: 'φ = 2π × 4 / 20 ≈ 1,26 rad' },
+        { type: 'choix', q: 'Qui est en avance ?', options: AVANCE.slice(0, 2), bonne: 'u', melanger: false,
+          indice: 'Quelle courbe arrive à son sommet en premier ?', solution: 'u atteint son sommet (6 ms) avant i (10 ms) : u est en avance de 1,26 rad sur i.' },
+      ] },
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 6. Mesurer à la règle ----------
+  (cours) => {
+    const c = cours.carte('6. Mesurer T et Δt à la règle');
+    const ex = { T: 15, dt: 2.5, tu: 7.3, Um: 2.4, Im: 1.4, tmax: 35, pasT: 5, ymax: 3 };
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Souvent, les sommets ne tombent pas sur des graduations. On mesure alors T et Δt <b>à la règle</b>, directement en <b>cm</b>.</p>
+        <div class="cle">
+          <p>Sur l'axe des temps, la distance est proportionnelle à la durée : le rapport Δt / T est le même en cm et en ms. On peut donc remplir le tableau avec les <b>distances mesurées</b> (en cm), sans les convertir en durées.</p>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <div class="pa-figs1">
+          <div>${PA.figPhi(ex, { regles: ['T'] })}<p>T : entre deux sommets voisins de u → 6,6 cm</p></div>
+          <div>${PA.figPhi(ex, { regles: ['dt'] })}<p>Δt : sommet de i, puis sommet de u le plus proche → 1,1 cm</p></div>
+        </div>
+        ${PA.tabProp({ unite: 'cm', T: '6,6', dt: '1,1' })}
+        <p class="ph-calc pa-centre">φ = 2π × Δt / T = 2π × 1,1 / 6,6 ≈ <span class="c">1,05 rad</span></p>
+        <p>${I} atteint son sommet avant ${U} : i est en avance de 1,05 rad sur u.</p>
+      </div>
+      <div class="callout"><p><b>Pour être précis :</b> une loupe apparaît quand tu fais glisser la règle ou son curseur, et les boutons ◀ ▶ déplacent le dernier élément touché.</p></div>`);
+    const o = { T: 20, dt: -3.2, tu: 9.1, Um: 2.5, Im: 1.7, tmax: 45, pasT: 5, ymax: 3 };
+    aToi(c, [
+      { titre: 'À toi de mesurer : fais glisser la règle et son curseur.', parties: [
+        { type: 'mesurePhi', o, solution: PA.solutionPhi(o) },
+        { type: 'choix', q: 'Qui est en avance ?', options: AVANCE.slice(0, 2), bonne: 'u', melanger: false,
+          indice: 'Quelle courbe arrive à son sommet en premier ?', solution: 'u atteint son sommet avant i : u est en avance sur i.' },
+      ] },
+    ], () => cours.continuer(c, 'Ce qu\'il faut retenir →'));
+    return c;
+  },
+
+  // ---------- À retenir ----------
+  (cours) => {
+    const c = cours.carte('À retenir');
+    cours.ajouter(c, `<div class="cle"><p><b class="cle-titre">Déphasage.</b> Avec uniquement des résistances (radiateur) : pas de déphasage. Avec des condensateurs et des bobines (moteur) : u et i sont déphasées.</p></div>
+      <div class="cle"><p><b class="cle-titre">Avance.</b> En comparant deux sommets voisins, la grandeur qui arrive à son sommet en premier est en avance sur l'autre.</p></div>
+      <div class="cle"><p><b class="cle-titre">Calcul.</b> Une période T correspond à un tour complet, 2π rad. Par proportionnalité :</p>
+        ${PA.tabProp({ unite: 's', T: 'T', dt: 'Δt' })}
+        <p class="ph-formule">φ = 2π × Δt / T</p>
+        <p>φ en rad ; T et Δt dans la même unité (ou en cm, mesurés à la règle sur le graphique).</p></div>
+      <div class="er-actions">
+        <a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur le déphasage →</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Module 4 : la puissance active en exercices</a>
+      </div>`);
+    return c;
+  },
+]);
+
+PA.menu('module_3_cours');
+</script>
+</body>
+</html>
