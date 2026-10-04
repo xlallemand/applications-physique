@@ -242,5 +242,84 @@
     return svg(o.W, o.H, s, 'Mouvement circulaire et repère de Frenet');
   }
 
-  window.FIG = { svg, point, chrono, referentiels, train, velo, decomp, directions, trigoCoord, diagTrigo, trigo, frenet };
+  /* ============================================================
+     FIGURES DES EXERCICES (module 6)
+     ============================================================ */
+  // petit graphique d'une grandeur en fonction du temps (exercice 9)
+  function miniGraphe(type, nomY) {
+    const W = 170, H = 120, x0 = 26, y0 = type === 'a-negatif' ? 40 : 100, A = acc();
+    let s = V.fleche(x0, H - 8, x0, 8, C.encre, 1.5, 7) + V.fleche(x0 - 4, y0, W - 6, y0, C.encre, 1.5, 7);
+    s += V.texte(x0 + 6, 16, nomY, 11, C.encre, 'start') + V.texte(W - 8, y0 + (type === 'a-negatif' ? -6 : 14), 't (s)', 11, C.encre, 'end');
+    const ligne = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${A}" stroke-width="3" stroke-linecap="round"/>`;
+    if (type === 'v-croissant' || type === 'x-droite') s += ligne(x0, y0, W - 30, 24);
+    if (type === 'v-constant') s += ligne(x0, 56, W - 20, 56);
+    if (type === 'v-decroissant') s += ligne(x0, 30, W - 26, 92);
+    if (type === 'a-negatif') s += ligne(x0, 80, W - 20, 80);
+    if (type === 'x-courbe') { let d = ''; for (let i = 0; i <= 30; i++) { const t = i / 30; d += (i ? 'L' : 'M') + (x0 + t * 70).toFixed(1) + ',' + (y0 - 85 * t * t).toFixed(1); } s += `<path d="${d}" fill="none" stroke="${A}" stroke-width="3" stroke-linecap="round"/>`; }
+    return svg(W, H, s, 'Graphique en fonction du temps', 'cin-fig');
+  }
+
+  // piste de saut à ski (exercice 10) ; correction : vecteurs accélération
+  function skieur(correction) {
+    const cx = 300, cy = 128, r = 72, b = 45 * Math.PI / 180;
+    const T = [cx - r * Math.sin(b), cy + r * Math.cos(b)], u = [Math.cos(b), Math.sin(b)];
+    const P = k => [T[0] - u[0] * k, T[1] - u[1] * k];
+    const A = P(210), B = P(140), Cc = P(60), D = [cx, cy + r], E = [cx + r * Math.sin(.6), cy + r * Math.cos(.6)];
+    let s = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#8d8f94" stroke-width="1.3"/>` + point(cx, cy, 3, C.encre2) + V.trait(cx, cy, cx - r * .8, cy - r * .55, '#8d8f94', 1.3);
+    let d = `M${A[0] - u[0] * 20},${A[1] - u[1] * 20} L${T[0]},${T[1]} A${r},${r} 0 0 0 ${E[0] + 12},${E[1] - 8}`;
+    s += `<path d="${d}" fill="none" stroke="#e8b923" stroke-width="3"/>`;
+    [[A, 'A'], [B, 'B'], [Cc, 'C'], [D, 'D'], [E, 'E']].forEach(([p, n]) => { s += point(p[0], p[1], 4.5, C.encre) + V.texte(p[0] + (n === 'E' ? 12 : -12), p[1] + (n === 'D' || n === 'E' ? 20 : 16), n, 14, C.encre); });
+    if (correction) {
+      [A, B, Cc].forEach(p => { s += V.fleche(p[0], p[1], p[0] + u[0] * 30, p[1] + u[1] * 30, '#dc2626', 2.6, 9); });
+      [D, E].forEach(p => { const L = Math.hypot(cx - p[0], cy - p[1]); s += V.fleche(p[0], p[1], p[0] + (cx - p[0]) / L * 34, p[1] + (cy - p[1]) / L * 34, '#dc2626', 2.6, 9); });
+    }
+    return svg(400, 226, s, 'Piste de saut à ski : partie rectiligne puis portion de cercle');
+  }
+
+  // exercice 12 : trajectoire, vecteur vitesse (rouge) et accélération (vert)
+  function ex12(l) {
+    const W = 230, H = 92, rouge = '#dc2626', vert = '#16a34a';
+    let s = '', P;
+    const arc = () => { s += `<path d="M20,70 Q115,-10 210,70" fill="none" stroke="${C.encre}" stroke-width="1.6"/>`; P = [115, 30]; };
+    const droite = () => { s += V.trait(10, 50, 220, 50, C.encre, 1.6); P = [115, 50]; };
+    const vec = (dx, dy, coul, nom) => V.fleche(P[0], P[1], P[0] + dx, P[1] + dy, coul, 2.6, 9) + V.nomSVG(nom, P[0] + dx * 1.18 + (dx >= 0 ? 6 : -6), P[1] + dy * 1.18 + 5, 13, coul);
+    if (l === 'A') { arc(); s += vec(36, 48, rouge, 'v') + vec(-52, 34, vert, 'a'); }
+    if (l === 'B') { arc(); s += vec(60, 0, rouge, 'v') + vec(-44, -24, vert, 'a'); }
+    if (l === 'C') { droite(); s += vec(52, 0, rouge, 'v') + vec(-56, 0, vert, 'a'); }
+    if (l === 'D') { droite(); s += vec(60, 0, rouge, 'v') + vec(-14, 34, vert, 'a'); }
+    if (l === 'E') { arc(); s += vec(64, 0, rouge, 'v') + vec(-18, 42, vert, 'a'); }
+    if (l === 'F') { arc(); s += V.fleche(P[0], P[1], P[0] + 64, P[1], rouge, 2.6, 9) + V.nomSVG('v', P[0] + 80, P[1] + 5, 13, rouge) + V.fleche(P[0], P[1], P[0] + 36, P[1], vert, 3.2, 9) + V.nomSVG('a', P[0] + 30, P[1] - 10, 13, vert); }
+    s += point(P[0], P[1], 4, C.encre);
+    return svg(W, H, s, 'Trajectoire, vecteur vitesse et vecteur accélération');
+  }
+
+  // exercice 15 : vitesse de chute d'un parachutiste
+  function parachute() {
+    const G = window.CIN.graphe({ xmin: 0, xmax: 400, ymin: 0, ymax: 60, w: 600, h: 300, pasX: 50, pasY: 10, nomX: 't (s)', nomY: 'v (m·s⁻¹)', m: { g: 40, d: 30, h: 26, b: 30 }, taille: 12 });
+    const pts = [[0, 0], [4, 50], [50, 50], [55, 6], [345, 6], [356, 0]];
+    const d = pts.map((p, i) => (i ? 'L' : 'M') + G.px(p[0]).toFixed(1) + ',' + G.py(p[1]).toFixed(1)).join('');
+    return G.svg(`<path d="${d}" fill="none" stroke="#e8b923" stroke-width="3" stroke-linejoin="round"/>`, 'Vitesse du parachutiste en fonction du temps');
+  }
+
+  // exercice 16 : positions successives d'une nacelle de grande roue
+  function grandeRoue(correction) {
+    const W = 340, H = 320, cx = 160, cy = 165, R = 110, n = 11, pas = 2 * Math.PI / n, cm = R / 4.1;
+    let s = '';
+    const P = k => [cx + R * Math.cos(k * pas), cy - R * Math.sin(k * pas)];
+    for (let k = 0; k < n; k++) {
+      const [x, y] = P(k);
+      s += V.trait(x - 9, y, x + 9, y, C.encre, 1.2) + V.trait(x, y - 9, x, y + 9, C.encre, 1.2) + point(x, y, 2.6, C.encre);
+      if (k < 3) s += V.texte(x + 14, y + (k ? -6 : 5), `A${k + 1}`, 13, C.encre, 'start');
+    }
+    s += V.trait(W - 20 - 5 * cm / 5, H - 22, W - 20, H - 22, C.encre, 2) + point(W - 20 - cm, H - 22, 2.5, C.encre) + point(W - 20, H - 22, 2.5, C.encre) + V.texte(W - 20 - cm / 2, H - 30, '5 m', 12, C.encre);
+    if (correction) {
+      const vt = k => [-Math.sin(k * pas), -Math.cos(k * pas)], L = 1.15 * cm;   // échelle 1 cm ↔ 1 m/s
+      [1, 2].forEach(k => { const [x, y] = P(k), t = vt(k); s += V.fleche(x, y, x + t[0] * L, y + t[1] * L, '#dc2626', 2.4, 8) + V.nomSVG(`v_${k + 1}`, x + t[0] * L - 2, y + t[1] * L - 12, 13, '#dc2626'); });
+      const [x2, y2] = P(1), t2 = vt(1), t3 = vt(2), dv = [t3[0] - t2[0], t3[1] - t2[1]];
+      s += V.fleche(x2, y2, x2 + dv[0] * L, y2 + dv[1] * L, '#2952c8', 2.4, 8) + V.texte(x2 + dv[0] * L - 6, y2 + dv[1] * L + 16, 'Δv', 12, '#2952c8', 'end');
+    }
+    return svg(W, H, s, 'Positions successives d\'une nacelle de grande roue');
+  }
+
+  window.FIG = { svg, point, chrono, referentiels, train, velo, decomp, directions, trigoCoord, diagTrigo, trigo, frenet, miniGraphe, skieur, ex12, parachute, grandeRoue };
 })();

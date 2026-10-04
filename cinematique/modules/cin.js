@@ -433,7 +433,43 @@
     return { montrer() { r.montrer(); bVal.fermer(); }, repere: r };
   }
 
-  const PARTIES = { choix: pChoix, nombre: pNombre, coord: pCoord, ij: pIJ, gabarit: pGabarit, tracer: pTracer };
+  // Écriture scientifique a × 10ⁿ : p.label, p.valeur, p.unite, p.rel (écart relatif, 3 % par défaut), p.cs, p.diag(v)
+  function pSci(zone, p, api) {
+    const d = el('div', 'ph-valeur');
+    if (p.label) d.appendChild(el('span', 'ph-lab', p.label));
+    const s = el('span', 'ph-sci'), a = champ({ petit: true, aria: 'Nombre devant la puissance de 10' }), n = champ({ petit: true, aria: 'Exposant de la puissance de 10' });
+    n.el.classList.add('ph-exposant');
+    s.appendChild(a.el); s.appendChild(el('span', 'ph-x10', '× 10')); s.appendChild(n.el);
+    d.appendChild(s);
+    if (p.unite) d.appendChild(el('span', 'ph-unite', p.unite));
+    zone.appendChild(d);
+    const bVal = boutonValider(zone);
+    [a, n].forEach(c => {
+      c.input.addEventListener('input', () => api.effacer());
+      c.input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); valider(); } });
+    });
+    function valider() {
+      if (api.fini()) return;
+      const va = lire(a.input.value), vn = lire(n.input.value);
+      if (isNaN(va)) { secouer(d); api.message('Écris le nombre devant la puissance de 10.'); return; }
+      if (isNaN(vn) || !Number.isInteger(vn)) { secouer(d); api.message('Écris l\'exposant de la puissance de 10 (un nombre entier).'); return; }
+      const v = va * Math.pow(10, vn);
+      if (proche(v, p.valeur, p.rel == null ? .03 : p.rel)) { a.desactiver(true); n.desactiver(true); bVal.fermer(); api.reussi(); return; }
+      api.erreur((p.diag && p.diag(v)) || p.indice || 'Vérifie ton calcul.');
+      secouer(d);
+    }
+    bVal.onclick = valider;
+    return {
+      montrer() {
+        let e = Math.floor(Math.log10(Math.abs(p.valeur)) + 1e-12), m = +(p.valeur / Math.pow(10, e)).toFixed((p.cs || 2) - 1);
+        if (Math.abs(m) >= 10) { m /= 10; e++; }
+        a.input.value = fmt(m, (p.cs || 2) - 1); n.input.value = String(e).replace('-', MOINS);
+        a.desactiver(true); n.desactiver(true); bVal.fermer();
+      },
+    };
+  }
+
+  const PARTIES = { choix: pChoix, nombre: pNombre, coord: pCoord, ij: pIJ, gabarit: pGabarit, tracer: pTracer, sci: pSci };
 
   /* ============================================================
      UNE QUESTION : parties successives
