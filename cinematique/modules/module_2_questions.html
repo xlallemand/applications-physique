@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : lire et tracer des vecteurs — Cinématique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cin.css">
+<script src="vecteurs.js"></script>
+<script src="cin.js"></script>
+<script src="figures.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard, surtout des lectures et des
+   tracés : lire en colonne (2), lire avec les vecteurs unitaires (2),
+   passer d'une écriture à l'autre (1), tracer (3), somme ou
+   différence (1), question de cours (1).
+   Vecteurs, points de départ et noms des vecteurs unitaires
+   changent à chaque série.
+   ============================================================ */
+const { hasard, melanger, entre } = CIN;
+const { nomHTML: N, colHTML: col, ijHTML: ij } = VEC;
+const M = CIN.MOINS;
+const o = (id, label) => ({ id, label });
+const NOMS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'K', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'W'];
+const unites = () => (Math.random() < .65 ? ['i', 'j'] : ['u_x', 'u_y']);
+const fixe = (nom, dep, coord, extra) => Object.assign({ nom, dep, coord, fixe: true }, extra);
+const figure = opts => z => new VEC.Repere(z, Object.assign({ mode: 'aucun' }, opts));
+
+// coordonnées au hasard (entre −5 et 5), une coordonnée nulle de temps en temps
+function coordAlea(max) {
+  max = max || 5;
+  let a, b;
+  do { a = entre(-max, max); b = entre(-max, max); } while ((!a && !b) || (!a && Math.random() < .7) || (!b && Math.random() < .7) || (Math.abs(a) + Math.abs(b) < 2));
+  return [a, b];
+}
+// point de départ tel que le vecteur reste dans le repère, loin des autres départs
+function depart(c, pris) {
+  const ok = [];
+  for (let x = -6; x <= 6; x++) for (let y = -6; y <= 6; y++) {
+    const fx = x + c[0], fy = y + c[1];
+    if (fx < -6 || fx > 6 || fy < -6 || fy > 6 || (x === 0 && y === 0) || (fx === 0 && fy === 0)) continue;
+    if ((pris || []).some(p => Math.abs(p[0] - x) + Math.abs(p[1] - y) < 3)) continue;
+    ok.push([x, y]);
+  }
+  return hasard(ok);
+}
+const ecrit = (nom, c, u) => (Math.random() < .5 ? `${N(nom)} ${col(c[0], c[1])}` : `${N(nom)} = ${ij(c[0], c[1], u)}`);
+
+/* ---------- Lire ---------- */
+function lireCol() {
+  const c = coordAlea(), u = unites(), nom = hasard(NOMS), dep = depart(c);
+  return { theme: 'Lire les coordonnées', consigne: `Écris les coordonnées de ${N(nom)} en colonne.`,
+    figure: figure({ unitaires: u, vecteurs: [fixe(nom, dep, c)] }),
+    parties: [{ type: 'coord', label: N(nom), valeurs: c, lecture: true, unites: u,
+      indice: 'De l\'origine à la pointe : déplacement horizontal en haut, déplacement vertical en bas.', solution: `${N(nom)} ${col(c[0], c[1])}` }] };
+}
+function lireIJ() {
+  const c = coordAlea(), u = unites(), nom = hasard(NOMS), dep = depart(c);
+  return { theme: 'Lire les coordonnées', consigne: `Écris ${N(nom)} avec les vecteurs unitaires ${N(u[0])} et ${N(u[1])}.`,
+    figure: figure({ unitaires: u, vecteurs: [fixe(nom, dep, c)] }),
+    parties: [{ type: 'ij', label: `${N(nom)} =`, valeurs: c, unites: u,
+      indice: `Le nombre devant ${N(u[0])} est le déplacement horizontal, le nombre devant ${N(u[1])} le déplacement vertical.`, solution: `${N(nom)} = ${ij(c[0], c[1], u)}` }] };
+}
+function convertir() {
+  const c = coordAlea(), u = unites(), nom = hasard(NOMS);
+  if (Math.random() < .5) return { theme: 'Passer d\'une écriture à l\'autre', consigne: `${N(nom)} ${col(c[0], c[1])}. Écris ${N(nom)} avec ${N(u[0])} et ${N(u[1])}.`,
+    parties: [{ type: 'ij', label: `${N(nom)} =`, valeurs: c, unites: u, indice: `La 1<sup>re</sup> coordonnée est le nombre devant ${N(u[0])}, la 2<sup>de</sup> le nombre devant ${N(u[1])}.`, solution: `${N(nom)} = ${ij(c[0], c[1], u)}` }] };
+  return { theme: 'Passer d\'une écriture à l\'autre', consigne: `${N(nom)} = ${ij(c[0], c[1], u)}. Écris les coordonnées de ${N(nom)} en colonne.`,
+    parties: [{ type: 'coord', label: N(nom), valeurs: c, indice: `Le nombre devant ${N(u[0])} va en haut, celui devant ${N(u[1])} en bas ; un terme absent vaut 0.`, solution: `${N(nom)} ${col(c[0], c[1])}` }] };
+}
+
+/* ---------- Tracer ---------- */
+function tracer(n) {
+  const u = unites(), noms = melanger(NOMS).slice(0, n), pris = [];
+  const vecteurs = noms.map(nom => { const c = coordAlea(); const dep = depart(c, pris); pris.push(dep, [dep[0] + c[0], dep[1] + c[1]]); return { nom, dep, coord: c, etiquette: ecrit(nom, c, u) }; });
+  const txt = vecteurs.map(v => `${v.etiquette} à partir du point (${CIN.fmt(v.dep[0])}&nbsp;;&nbsp;${CIN.fmt(v.dep[1])})`);
+  return { theme: 'Tracer un vecteur', consigne: n === 1 ? `Trace ${txt[0]}.` : `Trace les vecteurs à partir de leur point de départ : ${txt.join(' ; ')}.`,
+    enonce: n > 1 ? '<p class="er-petit">Choisis le vecteur dans la liste, puis trace-le.</p>' : '',
+    parties: [{ type: 'tracer', repere: { unitaires: u, vecteurs }, solution: vecteurs.map(v => `${N(v.nom)} ${col(v.coord[0], v.coord[1])}`).join(' ; ') }] };
+}
+
+/* ---------- Somme, différence ---------- */
+function somme() {
+  const a = coordAlea(4), b = coordAlea(4), moins = Math.random() < .5, r = moins ? [a[0] - b[0], a[1] - b[1]] : [a[0] + b[0], a[1] + b[1]];
+  const op = moins ? M : '+';
+  if (Math.random() < .5 || Math.abs(r[0]) > 7 || (!r[0] && !r[1])) {
+    const u = unites();
+    const t = c => `${col(c[0], c[1])}`;
+    const fa = Math.random() < .5 ? `${N('u')} ${t(a)}` : `${N('u')} = ${ij(a[0], a[1], u)}`, fb = Math.random() < .5 ? `${N('v')} ${t(b)}` : `${N('v')} = ${ij(b[0], b[1], u)}`;
+    const sg = v => (v < 0 ? `(${CIN.fmt(v)})` : CIN.fmt(v));
+    return { theme: moins ? 'Différence de deux vecteurs' : 'Somme de deux vecteurs', consigne: `${fa} et ${fb}. Calcule les coordonnées de ${N('u')} ${op} ${N('v')}.`,
+      parties: [{ type: 'coord', label: `${N('u')} ${op} ${N('v')}`, valeurs: r, indice: 'Coordonnée par coordonnée : en haut avec en haut, en bas avec en bas. Attention aux signes.',
+        diag: v => (moins && VEC.egal(v, [a[0] + b[0], a[1] + b[1]]) ? 'Tu as fait une somme : il fallait soustraire.' : !moins && VEC.egal(v, [a[0] - b[0], a[1] - b[1]]) ? 'Tu as fait une différence : il fallait additionner.' : null),
+        solution: `${N('u')} ${op} ${N('v')} = ${col(`${CIN.fmt(a[0])} ${op} ${sg(b[0])}`, `${CIN.fmt(a[1])} ${op} ${sg(b[1])}`)} = ${col(r[0], r[1])}` }] };
+  }
+  // tracé sur un quadrillage sans axes : u en haut à gauche, v en bas à gauche, A à droite
+  const dans = (a, b, d) => { const t = []; for (let x = a; x <= b; x++) if (x + d >= a && x + d <= b) t.push(x); return t; };
+  const du = [hasard(dans(0, 6, a[0])), hasard(dans(5, 9, a[1]))], dv = [hasard(dans(0, 6, b[0])), hasard(dans(0, 4, b[1]))];
+  const xA = hasard(dans(7, 14, r[0])), yA = hasard(dans(0, 9, r[1]));
+  return { theme: moins ? 'Différence de deux vecteurs' : 'Somme de deux vecteurs', consigne: `Trace ${N('AB')} = ${N('u')} ${op} ${N('v')} à partir du point A.`,
+    enonce: `<p class="er-petit">${moins ? `${N('u')} ${M} ${N('v')} = ${N('u')} + (${M}${N('v')}) : mets ${N('u')} et l'opposé de ${N('v')} bout à bout.` : `Mets ${N('u')} et ${N('v')} bout à bout.`} Tu peux aussi calculer d'abord les coordonnées.</p>`,
+    parties: [{ type: 'tracer', repere: { xmin: 0, xmax: 14, ymin: 0, ymax: 9, axes: false, unitaires: false, points: [{ x: xA, y: yA, nom: 'A' }],
+      vecteurs: [fixe('u', du, a), fixe('v', dv, b), { nom: 'AB', dep: [xA, yA], coord: r }] },
+      solution: `${N('u')} ${col(a[0], a[1])} ${op} ${N('v')} ${col(b[0], b[1])} = ${col(r[0], r[1])}` }] };
+}
+
+/* ---------- Question de cours ---------- */
+function cours() {
+  const u = unites();
+  return hasard([
+    () => ({ theme: 'Question de cours', parties: [{ type: 'choix', q: `Le vecteur ${col(0, -3)} s'écrit :`, options: [o('ok', ij(0, -3, u)), o('a', ij(-3, 0, u)), o('b', ij(0, 3, u)), o('c', `${M}3`)], bonne: 'ok',
+      indice: `La 1<sup>re</sup> coordonnée (0) est devant ${N(u[0])}, la 2<sup>de</sup> (${M}3) devant ${N(u[1])}.`, solution: `${col(0, -3)} = 0${N(u[0])} ${M} 3${N(u[1])} = ${ij(0, -3, u)}` }] }),
+    () => ({ theme: 'Question de cours', parties: [{ type: 'choix', q: `Le vecteur ${ij(4, -1, u)} a pour coordonnées :`, options: [o('ok', col(4, -1)), o('a', col(-1, 4)), o('b', col(4, 1)), o('c', col(4, 0))], bonne: 'ok',
+      indice: `${M}${N(u[1])} signifie ${M}1 fois ${N(u[1])}.`, solution: `${ij(4, -1, u)} = 4${N(u[0])} + (${M}1)${N(u[1])}, donc ${col(4, -1)}.` }] }),
+    () => ({ theme: 'Question de cours', parties: [{ type: 'choix', q: 'Deux flèches parallèles, de même sens et de même longueur, dessinées à deux endroits différents :', colonne: true,
+      options: [o('ok', 'représentent le même vecteur (mêmes coordonnées)'), o('a', 'représentent deux vecteurs différents'), o('b', 'ont des coordonnées opposées'), o('c', 'ont des coordonnées qui dépendent de leur position')], bonne: 'ok',
+      indice: 'Les coordonnées comptent les carreaux de l\'origine à la pointe de la flèche, où qu\'elle soit.', solution: 'Elles représentent le même vecteur : les coordonnées ne dépendent pas de l\'endroit où la flèche est dessinée.' }] }),
+    () => ({ theme: 'Question de cours', parties: [{ type: 'choix', q: 'La 2<sup>de</sup> coordonnée d\'un vecteur est :', colonne: true,
+      options: [o('ok', 'le déplacement vertical, positif vers le haut'), o('a', 'le déplacement horizontal, positif vers la droite'), o('b', 'le déplacement vertical, positif vers le bas'), o('c', 'la longueur de la flèche')], bonne: 'ok',
+      indice: `La 2<sup>de</sup> coordonnée est le nombre devant ${N(u[1])}.`, solution: 'La 2<sup>de</sup> coordonnée est le déplacement vertical (selon le 2<sup>e</sup> vecteur unitaire), positif vers le haut.' }] }),
+    () => ({ theme: 'Question de cours', parties: [{ type: 'choix', q: `Le vecteur ${M}${N('v')}, opposé de ${N('v')} :`, colonne: true,
+      options: [o('ok', `a la même direction et la même longueur que ${N('v')}, mais le sens contraire`), o('a', `est perpendiculaire à ${N('v')}`), o('b', `est deux fois plus court que ${N('v')}`), o('c', `a les mêmes coordonnées que ${N('v')}`)], bonne: 'ok',
+      indice: `${N('v')} + (${M}${N('v')}) = ${N('0')}.`, solution: `${M}${N('v')} a la même direction, la même longueur et le sens contraire : ses coordonnées sont opposées à celles de ${N('v')}.` }] }),
+  ])();
+}
+
+function tirage() {
+  return [lireCol(), lireIJ(), tracer(1), lireCol(), convertir(), tracer(2), lireIJ(), somme(), tracer(2), cours()];
+}
+
+CIN.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Lire et tracer des vecteurs',
+  intro: `<p class="er-contexte">10 questions tirées au hasard : lire les coordonnées d'un vecteur (en colonne et avec les vecteurs unitaires), passer d'une écriture à l'autre, tracer des vecteurs, additionner. Les vecteurs changent à chaque série : recommence autant de fois que nécessaire.</p>`,
+  questions: tirage,
+  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2b_cours.html', label: 'Cours : module et trigonométrie →' },
+});
+CIN.menu('module_2_questions');
+</script>
+</body>
+</html>

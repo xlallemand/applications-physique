@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur le référentiel — Cinématique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cin.css">
+<script src="vecteurs.js"></script>
+<script src="cin.js"></script>
+<script src="figures.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : définition (2), la trajectoire
+   dépend du référentiel (2), choix du référentiel (2), les trois
+   référentiels (1), décrire un mouvement (3).
+   Chaque fabrique renvoie une question différente à chaque appel.
+   ============================================================ */
+const { hasard, melanger } = CIN;
+const o = (id, label) => ({ id, label });
+const TRAJ = [o('rect', 'rectiligne'), o('circ', 'circulaire'), o('para', 'parabolique'), o('curv', 'curviligne')];
+const VIT = [o('unif', 'uniforme'), o('acc', 'accéléré'), o('ral', 'ralenti')];
+const R = [o('helio', 'héliocentrique'), o('geo', 'géocentrique'), o('terre', 'terrestre')];
+const choix = (theme, q, options, bonne, solution, indice, opts) => ({ theme, parties: [Object.assign({ type: 'choix', q, options, bonne, solution, indice, colonne: options.some(x => x.label.length > 30) }, opts)] });
+
+/* ---------- Groupe 1 : définition ---------- */
+const G1 = [
+  () => choix('Définition', 'Un référentiel est :', [o('ok', 'un solide de référence par rapport auquel on étudie un mouvement'), o('a', 'l\'objet dont on étudie le mouvement'), o('b', 'l\'ensemble des positions occupées par l\'objet'), o('c', 'une horloge')], 'ok',
+    'Un référentiel est un solide de référence par rapport auquel on étudie un mouvement.', 'On étudie le mouvement « par rapport » au référentiel.'),
+  () => choix('Définition', 'À un référentiel, on associe :', [o('ok', 'un repère d\'espace et un repère de temps'), o('a', 'un repère d\'espace seulement'), o('b', 'une trajectoire'), o('c', 'une vitesse et une accélération')], 'ok',
+    'Un repère d\'espace (position, coordonnées) et un repère de temps (horloge, dates).', 'Il faut savoir où est le point, et à quelle date.'),
+  () => choix('Définition', 'Le repère de temps associé à un référentiel permet :', [o('ok', 'de mesurer les dates'), o('a', 'de donner la position du point'), o('b', 'de connaître la trajectoire'), o('c', 'de choisir l\'origine du repère d\'espace')], 'ok',
+    'Le repère de temps est une horloge : il permet de mesurer les dates.', 'Le repère de temps est une horloge.'),
+  () => choix('Définition', 'La trajectoire d\'un point est :', [o('ok', 'l\'ensemble des positions occupées par le point au cours du temps'), o('a', 'la distance parcourue par le point'), o('b', 'la vitesse du point'), o('c', 'le solide de référence')], 'ok',
+    'La trajectoire est l\'ensemble des positions successives du point.', 'Pense à une chronophotographie.'),
+  () => choix('Définition', 'Pourquoi faut-il toujours préciser le référentiel d\'étude ?', [o('ok', 'parce que la trajectoire dépend du référentiel'), o('a', 'parce que la trajectoire est la même dans tous les référentiels'), o('b', 'parce que l\'unité de vitesse en dépend'), o('c', 'ce n\'est pas nécessaire')], 'ok',
+    'La trajectoire d\'un objet dépend du référentiel : il faut toujours préciser lequel on utilise.', 'Souviens-toi de la balle lâchée dans le train.'),
+];
+
+/* ---------- Groupe 2 : la trajectoire dépend du référentiel ---------- */
+const SITUATIONS = [
+  ['Un passager lâche une balle dans un train qui roule à vitesse constante. Dans le référentiel du train, la trajectoire de la balle est :', TRAJ.slice(0, 3), 'rect', 'Pour le passager, la balle tombe à la verticale : trajectoire rectiligne.'],
+  ['Un passager lâche une balle dans un train qui roule à vitesse constante. Dans le référentiel terrestre, la trajectoire de la balle est :', TRAJ.slice(0, 3), 'para', 'Depuis le sol, la balle avance avec le train tout en tombant : trajectoire parabolique.'],
+  ['Un cycliste roule en ligne droite. Dans le référentiel du vélo, la trajectoire de la valve d\'une roue est :', TRAJ, 'circ', 'Par rapport au cadre du vélo, la valve tourne autour du moyeu : trajectoire circulaire.'],
+  ['Un cycliste roule en ligne droite. Dans le référentiel terrestre, la trajectoire de la valve d\'une roue est :', TRAJ, 'curv', 'La valve tourne autour du moyeu qui avance : une courbe en arches, trajectoire curviligne.'],
+  ['Un enfant est assis sur un manège qui tourne. Dans le référentiel du manège, l\'enfant est :', [o('imm', 'immobile'), o('rect', 'en mouvement rectiligne'), o('circ', 'en mouvement circulaire')], 'imm', 'Par rapport au manège, l\'enfant reste à la même place : il est immobile.'],
+  ['Un enfant est assis sur un manège qui tourne. Dans le référentiel terrestre, l\'enfant est :', [o('imm', 'immobile'), o('rect', 'en mouvement rectiligne'), o('circ', 'en mouvement circulaire')], 'circ', 'Pour ses parents restés au sol, l\'enfant tourne : mouvement circulaire.'],
+  ['Un passager est assis dans un bus qui roule en ligne droite. Dans le référentiel du bus, il est :', [o('imm', 'immobile'), o('rect', 'en mouvement rectiligne'), o('circ', 'en mouvement circulaire')], 'imm', 'Il reste à la même place par rapport au bus : immobile.'],
+  ['Un passager est assis dans un bus qui roule en ligne droite. Dans le référentiel terrestre, il est :', [o('imm', 'immobile'), o('rect', 'en mouvement rectiligne'), o('circ', 'en mouvement circulaire')], 'rect', 'Pour un piéton, il se déplace avec le bus : mouvement rectiligne.'],
+];
+const G2 = SITUATIONS.map(([q, opts, bonne, sol]) => () => choix('Trajectoire et référentiel', q, opts, bonne, sol, 'Imagine ce que voit un observateur immobile dans ce référentiel.', { melanger: false }));
+
+/* ---------- Groupe 3 : choisir un référentiel ---------- */
+const CAS = [
+  ['le mouvement de la Terre autour du Soleil', 'helio', 'la Terre est une planète qui tourne autour du Soleil'],
+  ['le mouvement de Jupiter autour du Soleil', 'helio', 'Jupiter est une planète qui tourne autour du Soleil'],
+  ['le mouvement d\'une comète autour du Soleil', 'helio', 'la comète tourne autour du Soleil'],
+  ['le mouvement de la Station spatiale internationale', 'geo', 'la station est un satellite de la Terre'],
+  ['le mouvement de la Lune autour de la Terre', 'geo', 'la Lune est un satellite naturel de la Terre'],
+  ['le mouvement d\'un satellite météorologique', 'geo', 'un satellite tourne autour de la Terre'],
+  ['le mouvement d\'un skieur sur une piste', 'terre', 'le skieur se déplace sur Terre'],
+  ['la chute d\'une goutte de pluie', 'terre', 'la goutte tombe sur Terre'],
+  ['le mouvement d\'un ballon de basket lancé vers le panier', 'terre', 'le ballon se déplace sur Terre'],
+  ['le mouvement d\'un train entre Paris et Lyon', 'terre', 'le train se déplace sur Terre'],
+];
+const G3 = CAS.map(([sit, bonne, raison]) => () => choix('Choisir un référentiel', `Quel référentiel est le plus adapté pour étudier ${sit} ?`, R, bonne,
+  `${R.find(x => x.id === bonne).label[0].toUpperCase() + R.find(x => x.id === bonne).label.slice(1)} : ${raison}.`, 'Autour de quoi l\'objet tourne-t-il ? Se déplace-t-il sur Terre ?', { melanger: false }));
+
+/* ---------- Groupe 4 : les trois référentiels ---------- */
+const G4 = [
+  () => choix('Les trois référentiels', 'Le centre du référentiel géocentrique est :', [o('ok', 'le centre de la Terre'), o('a', 'le centre du Soleil'), o('b', 'un point de la surface de la Terre'), o('c', 'une étoile fixe')], 'ok',
+    'Référentiel géocentrique : centre de la Terre, axes dirigés vers des étoiles fixes.', '« géo » signifie Terre.'),
+  () => choix('Les trois référentiels', 'Le centre du référentiel héliocentrique est :', [o('ok', 'le centre du Soleil'), o('a', 'le centre de la Terre'), o('b', 'un point de la surface de la Terre'), o('c', 'une étoile fixe')], 'ok',
+    'Référentiel héliocentrique : centre du Soleil, axes dirigés vers des étoiles fixes.', '« hélio » signifie Soleil.'),
+  () => choix('Les trois référentiels', 'Les axes des référentiels héliocentrique et géocentrique sont dirigés :', [o('ok', 'vers des étoiles fixes'), o('a', 'vers le Soleil'), o('b', 'vers le centre de la Terre'), o('c', 'selon les points cardinaux')], 'ok',
+    'Les trois axes de ces deux référentiels sont dirigés vers des étoiles fixes (très lointaines).', 'Les étoiles très lointaines semblent fixes.'),
+  () => choix('Les trois référentiels', 'Le référentiel terrestre est :', [o('ok', 'fixe par rapport à la Terre'), o('a', 'centré sur le Soleil'), o('b', 'centré sur la Terre, avec des axes dirigés vers des étoiles fixes'), o('c', 'lié à l\'objet étudié')], 'ok',
+    'Le référentiel terrestre est fixe par rapport à la Terre (le sol, un bâtiment…).', 'On l\'utilise pour les objets qui se déplacent sur Terre.'),
+];
+
+/* ---------- Groupe 5 : décrire un mouvement (chronophotographie) ---------- */
+const nomT = { droite: 'rect', oblique: 'rect', cercle: 'circ', courbe: 'curv', parabole: 'para' };
+function chronoQ() {
+  const forme = hasard(['droite', 'oblique', 'cercle', 'courbe', 'parabole']);
+  const vitesse = forme === 'parabole' ? null : hasard(['uniforme', 'accelere', 'ralenti']);
+  const sens = forme === 'droite' ? hasard([1, -1]) : 1;
+  const fig = FIG.chrono({ forme, vitesse: vitesse || 'uniforme', n: forme === 'cercle' || forme === 'courbe' ? 10 : 8, sens });
+  const t = nomT[forme], labT = TRAJ.find(x => x.id === t).label;
+  const parties = [{ type: 'choix', q: 'Trajectoire :', options: TRAJ, bonne: t, melanger: false, indice: 'Regarde la forme de la ligne formée par les positions.', solution: `Trajectoire ${labT}.` }];
+  if (vitesse) {
+    const v = { uniforme: 'unif', accelere: 'acc', ralenti: 'ral' }[vitesse];
+    parties.push({ type: 'choix', q: 'Vitesse :', options: VIT, bonne: v, melanger: false,
+      indice: 'Les positions sont repérées à intervalles de temps égaux : regarde l\'évolution de la distance entre deux positions, dans le sens du mouvement.',
+      solution: { unif: 'Les positions sont régulièrement espacées : uniforme.', acc: 'Dans le sens du mouvement, les positions sont de plus en plus espacées : accéléré.', ral: 'Dans le sens du mouvement, les positions sont de plus en plus rapprochées : ralenti.' }[v] });
+  }
+  return { theme: 'Décrire un mouvement', consigne: 'Les positions d\'un point sont repérées à intervalles de temps égaux. Décris son mouvement.', figure: z => { z.innerHTML = fig; }, parties };
+}
+function vocabulaire() {
+  return hasard([
+    () => choix('Décrire un mouvement', 'Un mouvement dont la vitesse augmente est dit :', VIT, 'acc', 'Accéléré : la vitesse augmente.', 'Pense à la pédale d\'accélérateur.', { melanger: false }),
+    () => choix('Décrire un mouvement', 'Un mouvement dont la vitesse reste constante est dit :', VIT, 'unif', 'Uniforme : la vitesse est constante.', '« uni » : une seule valeur de la vitesse.', { melanger: false }),
+    () => choix('Décrire un mouvement', 'Un mouvement dont la trajectoire est une droite est dit :', TRAJ, 'rect', 'Rectiligne : la trajectoire est une droite.', 'Une droite, une ligne « recte »…', { melanger: false }),
+    () => choix('Décrire un mouvement', 'Sur une chronophotographie, les positions sont de plus en plus rapprochées. Le mouvement est :', VIT, 'ral', 'Ralenti : en des durées égales, le point parcourt des distances de plus en plus petites.', 'Les positions sont repérées à intervalles de temps égaux.', { melanger: false }),
+  ])();
+}
+
+// tirage : 2 + 2 + 2 + 1 + 3 questions, sans répétition dans un groupe
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  return pris(G1, 2).concat(pris(G2, 2), pris(G3, 2), pris(G4, 1), [chronoQ(), chronoQ(), Math.random() < .5 ? chronoQ() : vocabulaire()]);
+}
+
+CIN.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Référentiel et trajectoire',
+  intro: '<p class="er-contexte">10 questions tirées au hasard pour vérifier que tu as compris le cours et t\'aider à le retenir : définition d\'un référentiel, trajectoire, choix du référentiel, description d\'un mouvement.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2_cours.html', label: 'Module 2 : les vecteurs →' },
+});
+CIN.menu('module_1_questions');
+</script>
+</body>
+</html>

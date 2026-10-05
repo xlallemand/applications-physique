@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : coordonnées d'un vecteur — Cinématique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cin.css">
+<script src="vecteurs.js"></script>
+<script src="cin.js"></script>
+<script src="figures.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Les coordonnées d'un vecteur</h2>
+    <p class="er-contexte">En cinématique, la position, la vitesse et l'accélération sont représentées par des <b>vecteurs</b>. Il faut savoir lire leurs coordonnées, les écrire de deux façons, tracer un vecteur et additionner des vecteurs. Prends le temps de bien t'entraîner : tout le reste du chapitre s'appuie sur ce module.</p>
+    <p class="cin-lien-fiche"><a href="fiche_2.html">Fiche récapitulative du module 2 →</a></p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes : chaque notion est présentée, illustrée par
+   un exemple, puis l'élève fait des exemples semblables
+   (« À toi ») ; le bouton « Continuer » apparaît ensuite.
+   ============================================================ */
+const { nomHTML: N, colHTML: col, ijHTML: ij } = VEC;
+const UX = ['u_x', 'u_y'];
+const o = (id, label) => ({ id, label });
+// repère en lecture seule placé dans une zone
+const figure = opts => z => new VEC.Repere(z, Object.assign({ mode: 'aucun' }, opts));
+const fixe = (nom, dep, coord, extra) => Object.assign({ nom, dep, coord, fixe: true }, extra);
+// lire les coordonnées d'un vecteur dessiné
+const lireCol = (nom, dep, c, opts) => ({ figure: figure(Object.assign({ vecteurs: [fixe(nom, dep, c)] }, opts)), parties: [
+  { type: 'coord', q: `Écris les coordonnées de ${N(nom)} en colonne.`, label: N(nom), valeurs: c, lecture: true, unites: opts && opts.unitaires,
+    indice: 'Compte les carreaux de l\'origine du vecteur jusqu\'à la pointe : d\'abord horizontalement (en haut), puis verticalement (en bas).',
+    solution: `${N(nom)} ${col(c[0], c[1])}` }] });
+
+new CIN.Cours(document.getElementById('etapes'), [
+
+  // ---------- 1. Lire les coordonnées ----------
+  (cours) => {
+    const c = cours.carte('1. Lire les coordonnées d\'un vecteur');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Un vecteur représente un <b>déplacement</b> : de son origine (le point de départ) jusqu'à sa pointe. Dans un repère (O, ${N('i')}, ${N('j')}), le vecteur ${N('i')} représente un déplacement d'un carreau vers la droite, le vecteur ${N('j')} un déplacement d'un carreau vers le haut.</p>
+        <div class="cle">
+          <p><b class="cle-titre">Coordonnées d'un vecteur.</b> Pour aller de l'origine à la pointe du vecteur :</p>
+          <ul class="er-liste">
+            <li>la <b>1<sup>re</sup> coordonnée</b> est le déplacement <b>horizontal</b> (selon ${N('i')}) : positive vers la droite, négative vers la gauche ;</li>
+            <li>la <b>2<sup>de</sup> coordonnée</b> est le déplacement <b>vertical</b> (selon ${N('j')}) : positive vers le haut, négative vers le bas.</li>
+          </ul>
+          <p>On les écrit en colonne, entre parenthèses : ${N('A')} ${col('x', 'y')}, la 1<sup>re</sup> en haut.</p>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <div data-x="ex1"></div>
+        <p>Pour ${N('A')} : 2 carreaux vers la droite, puis 1 vers le haut, donc ${N('A')} ${col(2, 1)}.<br>
+          Pour ${N('B')} : 2 carreaux vers la droite, puis 3 vers le bas, donc ${N('B')} ${col(2, -3)}.<br>
+          Pour ${N('C')} : 3 carreaux vers la gauche, sans déplacement vertical, donc ${N('C')} ${col(-3, 0)}.</p>
+        <p class="er-petit">Les coordonnées ne dépendent pas de l'endroit où le vecteur est dessiné : deux flèches parallèles, de même sens et de même longueur représentent le même vecteur.</p>
+      </div>`);
+    new VEC.Repere(c.querySelector('[data-x="ex1"]'), { mode: 'aucun', vecteurs: [fixe('A', [-5, 2], [2, 1]), fixe('B', [2, 5], [2, -3]), fixe('C', [5, -3], [-3, 0])],
+      extra: g => FIG.decomp([-5, 2], [2, 1])(g) + FIG.decomp([2, 5], [2, -3])(g) + FIG.decomp([5, -3], [-3, 0])(g) });
+    CIN.aToi(c, [
+      lireCol('D', [-4, -1], [3, 2]),
+      lireCol('E', [3, 1], [-1, -4]),
+      lireCol('F', [-2, 5], [-4, -1]),
+      lireCol('G', [1, -2], [0, -3]),
+      lireCol('H', [-5, -4], [4, 3], { unitaires: UX }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 2. Écrire avec les vecteurs unitaires ----------
+  (cours) => {
+    const c = cours.carte('2. Écrire un vecteur avec les vecteurs unitaires');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Se déplacer de 2 carreaux vers la droite puis de 1 vers le haut, c'est faire 2 fois le déplacement ${N('i')} puis 1 fois le déplacement ${N('j')} : on écrit ${N('A')} = 2${N('i')} + 1${N('j')}.</p>
+        <div class="cle">
+          <p><b class="cle-titre">Deux écritures équivalentes.</b></p>
+          <p class="ph-formule">${N('A')} ${col('x', 'y')} &nbsp;⇔&nbsp; ${N('A')} = x${N('i')} + y${N('j')}</p>
+          <ul class="er-liste">
+            <li>le coefficient 1 ne s'écrit pas : 1${N('j')} s'écrit ${N('j')}, et ${MOINS1()} s'écrit ${MOINS_J()} ;</li>
+            <li>un terme nul ne s'écrit pas : 3${N('i')} + 0${N('j')} s'écrit 3${N('i')} ;</li>
+            <li>un coefficient négatif donne un signe ${CIN.MOINS} : 2${N('i')} + (${CIN.MOINS}3)${N('j')} s'écrit 2${N('i')} ${CIN.MOINS} 3${N('j')}.</li>
+          </ul>
+          <p>Les vecteurs unitaires peuvent avoir d'autres noms, par exemple ${N('u_x')} et ${N('u_y')} : dans le repère (O, ${N('u_x')}, ${N('u_y')}), ${N('A')} = 2${N('u_x')} + ${N('u_y')}.</p>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemples du cours</p>
+        <div class="cin-defile"><table class="cin-tab">
+          <tr><th>En colonne</th><th>Avec ${N('i')} et ${N('j')}</th></tr>
+          <tr><td>${N('A')} ${col(2, 1)}</td><td>${N('A')} = ${ij(2, 1)}</td></tr>
+          <tr><td>${N('B')} ${col(2, -3)}</td><td>${N('B')} = ${ij(2, -3)}</td></tr>
+          <tr><td>${N('F')} ${col(3, 0)}</td><td>${N('F')} = ${ij(3, 0)}</td></tr>
+          <tr><td>${N('G')} ${col(-3, 0)}</td><td>${N('G')} = ${ij(-3, 0)}</td></tr>
+          <tr><td>${N('H')} ${col(-1, -4)}</td><td>${N('H')} = ${ij(-1, -4)}</td></tr>
+          <tr><td>${N('J')} ${col(0, -3)}</td><td>${N('J')} = ${ij(0, -3)}</td></tr>
+        </table></div>
+        <p class="er-petit">Pour écrire avec ${N('i')} et ${N('j')}, utilise le clavier sous la réponse (au clavier de l'ordinateur : touches i et j).</p>
+      </div>`);
+    const versIJ = (nom, c, u) => ({ parties: [{ type: 'ij', q: `${N(nom)} ${col(c[0], c[1])}. Écris ${N(nom)} avec ${N((u || ['i'])[0])} et ${N((u || ['i', 'j'])[1])}.`, label: `${N(nom)} =`, valeurs: c, unites: u,
+      indice: `La 1<sup>re</sup> coordonnée est le nombre devant ${N((u || ['i'])[0])}, la 2<sup>de</sup> le nombre devant ${N((u || ['i', 'j'])[1])}.`, solution: `${N(nom)} = ${ij(c[0], c[1], u)}` }] });
+    const versCol = (nom, c, u) => ({ parties: [{ type: 'coord', q: `${N(nom)} = ${ij(c[0], c[1], u)}. Écris les coordonnées de ${N(nom)} en colonne.`, label: N(nom), valeurs: c,
+      indice: `Le nombre devant ${N((u || ['i'])[0])} va en haut, le nombre devant ${N((u || ['i', 'j'])[1])} en bas. Un terme absent vaut 0.`, solution: `${N(nom)} ${col(c[0], c[1])}` }] });
+    CIN.aToi(c, [
+      versIJ('E', [4, 2]),
+      versIJ('K', [-1, 3]),
+      versIJ('L', [0, -2]),
+      versIJ('M', [3, -1], UX),
+      versCol('P', [-2, 5]),
+      versCol('Q', [5, 0]),
+      versCol('R', [-1, -1], UX),
+      { titre: 'Lis, puis écris avec les vecteurs unitaires.', figure: figure({ unitaires: UX, vecteurs: [fixe('S', [-3, 4], [5, -2])] }), parties: [
+        { type: 'ij', label: `${N('S')} =`, valeurs: [5, -2], unites: UX, indice: 'Compte les carreaux horizontalement (nombre devant u⃗ₓ), puis verticalement (nombre devant u⃗ᵧ).', solution: `${N('S')} = ${ij(5, -2, UX)}` }] },
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 3. Tracer un vecteur ----------
+  (cours) => {
+    const c = cours.carte('3. Tracer un vecteur connaissant ses coordonnées');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <div class="cle">
+          <p><b class="cle-titre">Méthode.</b> En partant du point de départ :</p>
+          <ul class="er-liste">
+            <li>on se déplace <b>horizontalement</b> du nombre de carreaux donné par la 1<sup>re</sup> coordonnée (vers la droite si elle est positive, vers la gauche si elle est négative) ;</li>
+            <li>puis <b>verticalement</b> du nombre de carreaux donné par la 2<sup>de</sup> coordonnée (vers le haut si positive, vers le bas si négative) ;</li>
+            <li>on trace la flèche du point de départ jusqu'au point atteint.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple : tracer ${N('D')} = ${ij(1, 2)} à partir du point (3&nbsp;;&nbsp;2)</p>
+        <div data-x="ex"></div>
+        <p data-x="etape" style="min-height:3em"></p>
+        <div class="er-actions" style="margin-top:4px"><button type="button" class="btn-secondary" data-x="suiv">Étape suivante →</button></div>
+      </div>
+      <div class="callout" style="margin-top:12px"><p><b>Pour tracer dans l'application :</b> pose le doigt (ou la souris) sur le point de départ et glisse jusqu'à l'arrivée. Pour ajuster, glisse la pointe ou utilise les flèches sous le quadrillage (une flèche = un carreau). Quand plusieurs vecteurs sont à tracer, choisis le vecteur dans la liste au-dessus du quadrillage.</p></div>`);
+    const r = new VEC.Repere(c.querySelector('[data-x="ex"]'), { mode: 'aucun', vecteurs: [], points: [{ x: 3, y: 2, nom: '' }] });
+    const TXT = ['Le point de départ est (3&nbsp;;&nbsp;2).', `1<sup>re</sup> coordonnée : +1, donc 1 carreau vers la droite.`, `2<sup>de</sup> coordonnée : +2, donc 2 carreaux vers le haut.`, `On trace la flèche : voici ${N('D')} = ${ij(1, 2)}.`];
+    let e = 0;
+    const etape = () => {
+      r.o.extra = e === 1 ? FIG.decomp([3, 2], [1, 2], 1) : e >= 2 ? FIG.decomp([3, 2], [1, 2]) : null;
+      r.vs = e === 3 ? [Object.assign(fixe('D', [3, 2], [1, 2]), { fin: null, coul: VEC.C.encre })] : [];
+      r.o.points = e === 3 ? [] : [{ x: 3, y: 2, nom: '' }];
+      r.dessiner();
+      c.querySelector('[data-x="etape"]').innerHTML = TXT[e];
+      c.querySelector('[data-x="suiv"]').textContent = e === 3 ? '↺ Revoir' : 'Étape suivante →';
+    };
+    c.querySelector('[data-x="suiv"]').onclick = () => { e = (e + 1) % 4; etape(); };
+    etape();
+    const T = (nom, dep, coord, etiquette) => ({ nom, dep, coord, etiquette });
+    CIN.aToi(c, [
+      { titre: `Trace ${N('A')} ${col(1, 2)} à partir du point (−4&nbsp;;&nbsp;4).`, parties: [{ type: 'tracer', repere: { vecteurs: [T('A', [-4, 4], [1, 2])] } }] },
+      { titre: `Trace ${N('I')} = ${ij(-2, 0)} à partir du point (−3&nbsp;;&nbsp;2).`, parties: [{ type: 'tracer', repere: { vecteurs: [T('I', [-3, 2], [-2, 0])] } }] },
+      { titre: 'Trace les quatre vecteurs à partir de leur point de départ.', enonce: '<p class="er-petit">Choisis le vecteur dans la liste, puis trace-le.</p>', parties: [{ type: 'tracer', repere: { vecteurs: [
+        T('B', [-1, 1], [-3, 0], `${N('B')} ${col(-3, 0)}`), T('C', [1, 5], [0, -2], `${N('C')} ${col(0, -2)}`),
+        T('E', [4, -3], [2, -1], `${N('E')} = ${ij(2, -1)}`), T('F', [2, -5], [-1, 3], `${N('F')} ${col(-1, 3)}`)] } }] },
+      { titre: `Même chose dans le repère (O, ${N('u_x')}, ${N('u_y')}).`, parties: [{ type: 'tracer', repere: { unitaires: UX, vecteurs: [
+        T('G', [-2, -5], [2, 5], `${N('G')} = ${ij(2, 5, UX)}`), T('H', [-5, -1], [0, -3], `${N('H')} = ${ij(0, -3, UX)}`), T('K', [3, 4], [-4, -1], `${N('K')} = ${ij(-4, -1, UX)}`)] } }] },
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 4. Somme et différence ----------
+  (cours) => {
+    const c = cours.carte('4. Somme et différence de deux vecteurs');
+    const U = [3, 1], Vv = [2, -3];
+    cours.ajouter(c, `<div class="cours-bloc">
+        <div class="cle">
+          <p><b class="cle-titre">Par le calcul.</b> On additionne (ou on soustrait) les coordonnées une à une :</p>
+          <p class="ph-formule">${N('u')} ${col('a', 'b')} et ${N('v')} ${col('c', 'd')} &nbsp;⇒&nbsp; ${N('u')} + ${N('v')} ${col('a + c', 'b + d')} &nbsp; et &nbsp; ${N('u')} ${CIN.MOINS} ${N('v')} ${col('a − c', 'b − d')}</p>
+          <p><b class="cle-titre">Par le dessin.</b> Pour tracer ${N('u')} + ${N('v')}, on met les flèches <b>bout à bout</b> : on dessine ${N('u')}, puis ${N('v')} à partir de la pointe de ${N('u')}. La somme va de l'origine de ${N('u')} à la pointe de ${N('v')}.</p>
+          <p>${N('u')} ${CIN.MOINS} ${N('v')} = ${N('u')} + (${CIN.MOINS}${N('v')}) : le vecteur ${CIN.MOINS}${N('v')}, opposé de ${N('v')}, a la même longueur et la même direction, mais le sens contraire.</p>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemples du cours (vecteurs du 1.)</p>
+        <p class="ph-calc">${N('D')} ${col(2, 1)} + ${N('C')} ${col(2, 1)} = ${col('2 + 2', '1 + 1')} = <span class="c">${col(4, 2)}</span><br>
+          ${N('F')} ${col(3, 0)} + ${N('G')} ${col(-3, 0)} = <span class="c">${col(0, 0)}</span> = ${N('0')} &nbsp;(vecteur nul)<br>
+          ${N('E')} ${col(4, 2)} ${CIN.MOINS} ${N('C')} ${col(2, 1)} = ${col('4 − 2', '2 − 1')} = <span class="c">${col(2, 1)}</span><br>
+          ${N('F')} ${col(3, 0)} ${CIN.MOINS} ${N('G')} ${col(-3, 0)} = ${col('3 − (−3)', '0 − 0')} = <span class="c">${col(6, 0)}</span></p>
+        <p class="cours-exemple-t" style="margin-top:12px !important">Par le dessin : ${N('AD')} = ${N('u')} + ${N('v')}</p>
+        <div data-x="ex"></div>
+        <p>On trace ${N('u')} à partir de A (en pointillés), puis ${N('v')} à partir de sa pointe : on arrive en D. ${N('AD')} ${col(5, -2)}, et on vérifie : ${col(3, 1)} + ${col(2, -3)} = ${col(5, -2)}.</p>
+      </div>`);
+    new VEC.Repere(c.querySelector('[data-x="ex"]'), { mode: 'aucun', xmin: 0, xmax: 14, ymin: 0, ymax: 8, axes: false, unitaires: false,
+      points: [{ x: 7, y: 5, nom: 'A', dx: -10, dy: -8 }, { x: 12, y: 3, nom: 'D', dx: 12, dy: 4 }],
+      vecteurs: [fixe('u', [1, 6], U), fixe('v', [2, 3], Vv), fixe('', [7, 5], U, { pointille: true, coul: '#8d8f94' }), fixe('', [10, 6], Vv, { pointille: true, coul: '#8d8f94' }),
+        fixe('AD', [7, 5], [5, -2], { coul: getComputedStyle(document.documentElement).getPropertyValue('--accent-ink').trim(), nomPos: [0, -.7] })] });
+    const somme = (q, valeurs, sol, ind) => ({ parties: [{ type: 'coord', q, label: '', valeurs, indice: ind || 'Additionne (ou soustrais) les coordonnées une à une : en haut avec en haut, en bas avec en bas.', solution: sol }] });
+    const T = (nom, dep, coord) => ({ nom, dep, coord });
+    const grille = (vecteurs, points, a) => Object.assign({ xmin: 0, xmax: 14, ymin: 0, ymax: 8, axes: false, unitaires: false, vecteurs, points }, a);
+    CIN.aToi(c, [
+      somme(`${N('u')} ${col(3, -2)} et ${N('v')} ${col(1, 4)}. Calcule les coordonnées de ${N('u')} + ${N('v')}.`, [4, 2], `${N('u')} + ${N('v')} = ${col('3 + 1', '−2 + 4')} = ${col(4, 2)}`),
+      somme(`${N('u')} ${col(-2, 5)} et ${N('v')} ${col(1, 3)}. Calcule les coordonnées de ${N('u')} ${CIN.MOINS} ${N('v')}.`, [-3, 2], `${N('u')} ${CIN.MOINS} ${N('v')} = ${col('−2 − 1', '5 − 3')} = ${col(-3, 2)}`),
+      somme(`${N('w')} = ${ij(4, -1)} et ${N('z')} = ${ij(-1, -2)}. Calcule les coordonnées de ${N('w')} ${CIN.MOINS} ${N('z')}.`, [5, 1], `${N('w')} ${CIN.MOINS} ${N('z')} = ${col('4 − (−1)', '−1 − (−2)')} = ${col(5, 1)} : ${N('w')} ${CIN.MOINS} ${N('z')} = ${ij(5, 1)}`, 'Écris d\'abord les coordonnées de chaque vecteur en colonne. Attention aux signes : soustraire −1, c\'est ajouter 1.'),
+      { titre: `Trace ${N('BE')} = ${N('w')} + ${N('x')} à partir du point B.`, enonce: `<p class="er-petit">Mets ${N('w')} et ${N('x')} bout à bout dans ta tête, ou calcule d'abord les coordonnées de la somme.</p>`, parties: [{ type: 'tracer', repere: grille(
+        [fixe('w', [1, 7], [-1, -3]), fixe('x', [3, 5], [4, 1]), T('BE', [9, 3], [3, -2])], [{ x: 9, y: 3, nom: 'B' }]),
+        solution: `${N('w')} ${col(-1, -3)} + ${N('x')} ${col(4, 1)} = ${col(3, -2)}` }] },
+      { titre: `Trace ${N('CF')} = ${N('u')} ${CIN.MOINS} ${N('v')} à partir du point C.`, enonce: `<p class="er-petit">${N('u')} ${CIN.MOINS} ${N('v')} = ${N('u')} + (${CIN.MOINS}${N('v')}) : mets ${N('u')} puis l'opposé de ${N('v')} bout à bout.</p>`, parties: [{ type: 'tracer', repere: grille(
+        [fixe('u', [1, 7], [3, -1]), fixe('v', [1, 3], [2, 2]), T('CF', [9, 5], [1, -3])], [{ x: 9, y: 5, nom: 'C' }]),
+        solution: `${N('u')} ${col(3, -1)} ${CIN.MOINS} ${N('v')} ${col(2, 2)} = ${col(1, -3)}` }] },
+    ], () => cours.continuer(c, 'Ce qu\'il faut retenir →'));
+    return c;
+  },
+
+  // ---------- À retenir ----------
+  (cours) => {
+    const c = cours.carte('À retenir');
+    cours.ajouter(c, `<div class="cle"><p><b class="cle-titre">Coordonnées.</b> De l'origine à la pointe du vecteur : 1<sup>re</sup> coordonnée = déplacement horizontal (selon ${N('i')}), 2<sup>de</sup> = déplacement vertical (selon ${N('j')}). Positif vers la droite et vers le haut.</p></div>
+      <div class="cle"><p><b class="cle-titre">Deux écritures.</b> ${N('A')} ${col('x', 'y')} ⇔ ${N('A')} = x${N('i')} + y${N('j')}. Exemple : ${N('B')} ${col(2, -3)} = ${ij(2, -3)} ; ${N('F')} ${col(3, 0)} = ${ij(3, 0)}.</p></div>
+      <div class="cle"><p><b class="cle-titre">Tracer.</b> Depuis le point de départ : horizontalement de la 1<sup>re</sup> coordonnée, puis verticalement de la 2<sup>de</sup>.</p></div>
+      <div class="cle"><p><b class="cle-titre">Somme, différence.</b> Coordonnée par coordonnée ; au dessin, flèches bout à bout. ${N('u')} ${CIN.MOINS} ${N('v')} = ${N('u')} + (${CIN.MOINS}${N('v')}).</p></div>
+      <div class="er-actions">
+        <a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions : lire et tracer →</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_2b_cours.html">Cours : module et trigonométrie</a>
+        <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a>
+      </div>`);
+    return c;
+  },
+]);
+
+function MOINS1() { return `${CIN.MOINS}1${N('j')}`; }
+function MOINS_J() { return `${CIN.MOINS}${N('j')}`; }
+CIN.menu('module_2_cours');
+</script>
+</body>
+</html>

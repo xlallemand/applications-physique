@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : module et trigonométrie — Cinématique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cin.css">
+<script src="vecteurs.js"></script>
+<script src="cin.js"></script>
+<script src="figures.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : module à partir des coordonnées (2),
+   module lu sur un quadrillage (1), valeur d'une grandeur (2),
+   coordonnées par la trigonométrie (4), question de cours (1).
+   ============================================================ */
+const { hasard, melanger, entre, fmt } = CIN;
+const { nomHTML: N, colHTML: col, ijHTML: ij } = VEC;
+const M = CIN.MOINS;
+const o = (id, label) => ({ id, label });
+const R = h => `<span class="racine">√<span>${h}</span></span>`;
+const sq = v => (v < 0 ? `(${fmt(v)})²` : `${fmt(v)}²`);
+const signe = () => (Math.random() < .5 ? -1 : 1);
+const MS = `m·s<sup>${M}1</sup>`, MS2 = `m·s<sup>${M}2</sup>`;
+const TRIPLES = [[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 6, 10], [4, 3, 5], [12, 5, 13], [9, 12, 15], [0, 7, 7], [6, 0, 6]];
+const diagModule = (a, b, k) => v => (Math.abs(v - (a * a + b * b) * (k || 1)) < .01 * Math.max(1, v) ? 'Tu as oublié la racine carrée.'
+  : Math.abs(v - (Math.abs(a) + Math.abs(b)) * (k || 1)) < .01 || Math.abs(v - (a + b) * (k || 1)) < .01 ? 'On n\'additionne pas les coordonnées : utilise le théorème de Pythagore, √(a² + b²).' : null);
+// coordonnées : triplet pythagoricien (résultat entier) ou quelconques (résultat arrondi au dixième)
+function coordModule(max) {
+  if (Math.random() < .55) { const t = hasard(TRIPLES); return [t[0] * signe(), t[1] * signe()]; }
+  let a, b;
+  do { a = entre(-max, max); b = entre(-max, max); } while (!a || !b || Number.isInteger(Math.hypot(a, b)));
+  return [a, b];
+}
+const reponseModule = (a, b) => { const m = Math.hypot(a, b), ent = Number.isInteger(m); return { m, ent, tol: ent ? 1e-9 : .051, txt: ent ? fmt(m) : fmt(m, 1) }; };
+
+/* ---------- Module à partir des coordonnées ---------- */
+function moduleCoord() {
+  const [a, b] = coordModule(9), r = reponseModule(a, b), nom = hasard(['A', 'B', 'u', 'w', 'C', 'D']), u = Math.random() < .7 ? ['i', 'j'] : ['u_x', 'u_y'];
+  const enonce = Math.random() < .5 ? `${N(nom)} ${col(a, b)}` : `${N(nom)} = ${ij(a, b, u)}`;
+  return { theme: 'Module d\'un vecteur', consigne: `${enonce}. Calcule ‖${N(nom)}‖${r.ent ? '' : ', arrondi au dixième'}.`,
+    parties: [{ type: 'nombre', label: `‖${N(nom)}‖ ${r.ent ? '=' : '≈'}`, valeur: r.m, tol: r.tol, dec: r.ent ? 0 : 1, diag: diagModule(a, b), indice: '‖u⃗‖ = √(a² + b²) ; un terme absent vaut 0.',
+      solution: `‖${N(nom)}‖ = ${R(`${sq(a)} + ${sq(b)}`)} = ${R(fmt(a * a + b * b))} ${r.ent ? '=' : '≈'} ${r.txt}` }] };
+}
+/* ---------- Module lu sur un quadrillage ---------- */
+function moduleFigure() {
+  let c;
+  do { c = coordModule(5); } while (Math.abs(c[0]) > 5 || Math.abs(c[1]) > 5);
+  const r = reponseModule(c[0], c[1]), nom = hasard(['A', 'B', 'C', 'D', 'E']);
+  const xs = [], ys = [];
+  for (let x = -6; x <= 6; x++) if (x + c[0] >= -6 && x + c[0] <= 6) xs.push(x);
+  for (let y = -6; y <= 6; y++) if (y + c[1] >= -6 && y + c[1] <= 6) ys.push(y);
+  const dep = [hasard(xs), hasard(ys)];
+  return { theme: 'Module d\'un vecteur', consigne: `Lis les coordonnées de ${N(nom)}, puis calcule son module${r.ent ? '' : ' (arrondi au dixième)'}.`,
+    figure: z => new VEC.Repere(z, { mode: 'aucun', vecteurs: [{ nom, dep, coord: c, fixe: true }] }),
+    parties: [
+      { type: 'coord', label: N(nom), valeurs: c, lecture: true, indice: 'De l\'origine à la pointe : horizontalement, puis verticalement.', solution: `${N(nom)} ${col(c[0], c[1])}` },
+      { type: 'nombre', label: `‖${N(nom)}‖ ${r.ent ? '=' : '≈'}`, valeur: r.m, tol: r.tol, dec: r.ent ? 0 : 1, diag: diagModule(c[0], c[1]), indice: '√(a² + b²).', solution: `‖${N(nom)}‖ = ${R(`${sq(c[0])} + ${sq(c[1])}`)} ${r.ent ? '=' : '≈'} ${r.txt}` }] };
+}
+/* ---------- Valeur d'une grandeur ---------- */
+function grandeur() {
+  const [a, b] = coordModule(9), r = reponseModule(a, b);
+  const G = hasard([
+    { nom: 'v', quoi: 'Le vecteur vitesse d\'un ballon', val: 'la valeur v de sa vitesse', u: MS },
+    { nom: 'a', quoi: 'Le vecteur accélération d\'une voiture', val: 'la valeur a de son accélération', u: MS2 },
+    { nom: 'F', quoi: 'Une force', val: 'sa valeur F', u: 'N' },
+  ]);
+  return { theme: 'Valeur d\'une grandeur', consigne: `${G.quoi} a pour coordonnées ${col(`${fmt(a)}`, `${fmt(b)}`)} (en ${G.u}). Calcule ${G.val}${r.ent ? '' : ', arrondie au dixième'}.`,
+    parties: [{ type: 'nombre', label: `${G.nom} ${r.ent ? '=' : '≈'}`, valeur: r.m, tol: r.tol, dec: r.ent ? 0 : 1, unite: G.u, diag: diagModule(a, b),
+      indice: `La valeur de la grandeur est le module du vecteur : ${G.nom} = √(${G.nom}x² + ${G.nom}y²).`,
+      solution: `${G.nom} = ‖${N(G.nom)}‖ = ${R(`${sq(a)} + ${sq(b)}`)} ${r.ent ? '=' : '≈'} ${r.txt} ${G.u}` }] };
+}
+function echelle() {
+  const t = hasard(TRIPLES.filter(x => x[0] && x[1] && x[2] <= 10)), k = hasard([2, 5, 10, 0.5]), v = t[2] * k;
+  return { theme: 'Valeur d\'une grandeur', consigne: `Sur un schéma, 1 carreau représente ${fmt(k)} ${MS}. La flèche du vecteur vitesse fait ${t[0]} carreaux horizontalement et ${t[1]} carreaux verticalement. Calcule la valeur v de la vitesse.`,
+    parties: [{ type: 'nombre', label: 'v =', valeur: v, tol: 1e-9, unite: MS,
+      diag: x => (Math.abs(x - t[2]) < .01 ? `La flèche mesure bien ${t[2]} carreaux, mais il faut utiliser l'échelle (1 carreau ↔ ${fmt(k)} m·s⁻¹).` : diagModule(t[0], t[1], k)(x)),
+      indice: 'Longueur de la flèche en carreaux (Pythagore), puis échelle.', solution: `Longueur : ${R(`${t[0]}² + ${t[1]}²`)} = ${t[2]} carreaux, donc v = ${t[2]} × ${fmt(k)} = ${fmt(v)} ${MS}.` }] };
+}
+/* ---------- Trigonométrie ---------- */
+function trigo() {
+  const G = hasard([{ nom: 'v', u: MS }, { nom: 'F', u: 'N' }, { nom: 'a', u: MS2 }]);
+  const V = hasard([4, 5, 6, 8, 10, 12, 15, 20]), ang = hasard([15, 20, 25, 30, 35, 40, 50, 55, 60, 65, 70]), axe = Math.random() < .6 ? 'x' : 'y', quad = entre(1, 4);
+  const xy = FIG.trigoCoord(V, ang, axe, quad), r = xy.map(x => Math.round(x * 10) / 10), cA = axe === 'x' ? 0 : 1;
+  const Vtxt = V < 10 ? fmt(V, 1) : fmt(V);
+  const lig = k => `${G.nom}<sub>${k ? 'y' : 'x'}</sub> = ${xy[k] < 0 ? M : '+'}${Vtxt} × ${k === cA ? 'cos' : 'sin'} ${ang}° ≈ ${fmt(xy[k], 1)} ${G.u}`;
+  return { theme: 'Coordonnées par la trigonométrie', consigne: `Calcule les coordonnées de ${N(G.nom)}, arrondies au dixième (calculatrice en degrés).`,
+    figure: z => { z.innerHTML = FIG.trigo({ V, ang, axe, quad, nom: G.nom, unite: G.u, Vtxt, cotes: null }); },
+    parties: [{ type: 'coord', label: N(G.nom), valeurs: xy, affiche: r.map(x => fmt(x, 1)), tol: .06, unite: G.u, diag: v => FIG.diagTrigo(v, V, ang, axe, quad),
+      indice: `L'angle est mesuré à partir de l'axe des ${axe} : le côté adjacent est sur cet axe et vaut V × cos α ; l'autre vaut V × sin α. Puis les signes, selon le sens du vecteur.`,
+      solution: `<p class="ph-calc">${lig(0)}<br>${lig(1)}</p>` }] };
+}
+/* ---------- Question de cours ---------- */
+function cours() {
+  return hasard([
+    () => ({ theme: 'Question de cours', parties: [{ type: 'choix', q: 'Un vecteur de module V fait un angle α avec un axe. Le côté du triangle rectangle adjacent à α vaut :', options: [o('ok', 'V × cos α'), o('a', 'V × sin α'), o('b', 'V / cos α'), o('c', 'cos α / V')], bonne: 'ok',
+      indice: 'cos α = adjacent / hypoténuse.', solution: 'cos α = adjacent / V, donc adjacent = V × cos α.' }] }),
+    () => ({ theme: 'Question de cours', parties: [{ type: 'choix', q: 'Le module d\'un vecteur peut-il être négatif ?', colonne: true, options: [o('ok', 'non, c\'est une longueur'), o('a', 'oui, si ses deux coordonnées sont négatives'), o('b', 'oui, si le vecteur pointe vers la gauche'), o('c', 'oui, si le vecteur pointe vers le bas')], bonne: 'ok',
+      indice: 'Le module est la longueur de la flèche.', solution: 'Non : √(a² + b²) est toujours positif (ou nul pour le vecteur nul). Ce sont les coordonnées qui peuvent être négatives.' }] }),
+    () => ({ theme: 'Question de cours', parties: [{ type: 'choix', q: `La valeur v de la vitesse d'un objet est :`, colonne: true, options: [o('ok', `le module du vecteur vitesse : v = ‖${N('v')}‖`), o('a', 'la 1<sup>re</sup> coordonnée du vecteur vitesse'), o('b', 'la somme des coordonnées du vecteur vitesse'), o('c', 'le produit des coordonnées du vecteur vitesse')], bonne: 'ok',
+      indice: 'Valeur de la grandeur = module du vecteur.', solution: `v = ‖${N('v')}‖ = √(v<sub>x</sub>² + v<sub>y</sub>²).` }] }),
+    () => ({ theme: 'Question de cours', parties: [{ type: 'choix', q: 'Un vecteur pointe vers la gauche et vers le bas. Ses coordonnées sont :', options: [o('ok', 'toutes les deux négatives'), o('a', 'toutes les deux positives'), o('b', 'x positive, y négative'), o('c', 'x négative, y positive')], bonne: 'ok',
+      indice: 'Vers la gauche : x négatif ; vers le bas : y négatif.', solution: 'Vers la gauche, x < 0 ; vers le bas, y < 0.' }] }),
+  ])();
+}
+
+function tirage() {
+  return [moduleCoord(), grandeur(), trigo(), moduleFigure(), trigo(), echelle(), moduleCoord(), trigo(), cours(), trigo()];
+}
+
+CIN.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Module d\'un vecteur et trigonométrie',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : calculer le module d\'un vecteur, la valeur d\'une grandeur (vitesse, accélération, force), les coordonnées d\'un vecteur avec cos et sin. Garde ta calculatrice à portée de main, <b>en mode degrés</b>.</p>',
+  questions: tirage,
+  revoir: { href: 'module_2b_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3_cours.html', label: 'Module 3 : dérivation en physique →' },
+});
+CIN.menu('module_2b_questions');
+</script>
+</body>
+</html>

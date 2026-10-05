@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : fiche récapitulative — Cinématique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cin.css">
+<script src="vecteurs.js"></script>
+<script src="cin.js"></script>
+<script src="figures.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page cin-fiche" id="fiche"></div>
+
+<script>
+/* ============================================================
+   Fiche récapitulative du module 3 : notation, origine de df/dx,
+   tableau des dérivées, pas de division, dériver un vecteur.
+   ============================================================ */
+const { nomHTML: N } = VEC;
+const { fr, dd: d } = CIN;
+const M = CIN.MOINS;
+
+// courbe, sécante (AB) et tangente en A (figure fixe du cours, h = 1,5)
+function figureTangente() {
+  const f = x => .3 * x * x + 1, a = 2, h = 1.5, fa = f(a), fb = f(a + h), k = (fb - fa) / h, fp = .6 * a;
+  const G = CIN.graphe({ xmin: 0, xmax: 6.5, ymin: 0, ymax: 13, w: 600, h: 352, gradPasY: 2, nomX: 'x', nomY: 'f(x)', m: { g: 34, d: 22, h: 22, b: 40 } });
+  const A = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(), Ai = getComputedStyle(document.documentElement).getPropertyValue('--accent-ink').trim();
+  const { px, py } = G, T = VEC.texte, b = a + h;
+  let s = `<clipPath id="clf"><rect x="${px(0)}" y="${py(13)}" width="${px(6.5) - px(0)}" height="${py(0) - py(13)}"/></clipPath><g clip-path="url(#clf)">${G.courbe(f, 0, 6.5, A, 3)}`;
+  s += `<line x1="${px(0)}" y1="${py(fa - fp * a)}" x2="${px(6.5)}" y2="${py(fa + fp * (6.5 - a))}" stroke="#8d8f94" stroke-width="1.5" stroke-dasharray="6 5"/>`;
+  s += `<line x1="${px(0)}" y1="${py(fa - k * a)}" x2="${px(6.5)}" y2="${py(fa + k * (6.5 - a))}" stroke="#dc2626" stroke-width="2.5"/></g>`;
+  s += VEC.pointille(px(a), py(fa), px(b), py(fa), '#0a7d57', 2) + VEC.pointille(px(b), py(fa), px(b), py(fb), '#c2570c', 2);
+  s += T((px(a) + px(b)) / 2, py(fa) + 18, 'Δx = h', 14, '#0a7d57') + T(px(b) + 8, (py(fa) + py(fb)) / 2 + 5, 'Δf', 14, '#c2570c', 'start');
+  s += `<circle cx="${px(a)}" cy="${py(fa)}" r="6" fill="${Ai}"/><circle cx="${px(b)}" cy="${py(fb)}" r="6" fill="#dc2626"/>`;
+  s += T(px(a) - 10, py(fa) - 9, 'A', 15, Ai, 'end') + T(px(b) - 10, py(fb) - 6, 'B', 15, '#dc2626', 'end');
+  s += T(px(.2), py(12.2), 'droite (AB)', 13, '#dc2626', 'start') + T(px(.2), py(11.2), 'tangente en A', 13, '#8d8f94', 'start');
+  return G.svg(s, 'Courbe de f, droite (AB) et tangente en A');
+}
+
+document.getElementById('fiche').innerHTML = `
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Dérivation en physique</h2>
+  </div>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Notation</h3>
+    <div class="cle"><p>f'(x) = ${d('f', 'x')} (« d f sur d x ») : en haut la <b>fonction</b> que l'on dérive, en bas la <b>variable</b>. En physique, la variable est en général le temps t.</p>
+      <div class="cin-defile"><table class="cin-tab">
+        <tr><th>Fonction</th><th>Maths</th><th>Physique</th></tr>
+        <tr><td>f(x)</td><td>f'(x)</td><td>${d('f', 'x')}</td></tr>
+        <tr><td>f(t)</td><td>f'(t)</td><td>${d('f')}</td></tr>
+        <tr><td>x(t)</td><td>x'(t)</td><td>${d('x')}</td></tr>
+        <tr><td>v<sub>x</sub>(t)</td><td>v<sub>x</sub>'(t)</td><td>${d('v<sub>x</sub>')}</td></tr>
+      </table></div>
+      <p class="er-petit">En physique, x est souvent une fonction du temps (l'abscisse x(t)), pas la variable.</p></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">D'où vient la notation ${d('f', 'x')} ?</h3>
+    <div class="cle"><p class="ph-formule">f'(a) = lim<sub>h→0</sub> ${fr('f(a + h) − f(a)', 'h')} = lim<sub>h→0</sub> ${fr('Δf', 'Δx')}</p>
+      <p>Quand h tend vers 0, la droite (AB) devient la tangente en A ; les variations deviennent infiniment petites : Δ devient d.</p>
+      <p class="ph-formule">${d('f', 'x')} = ${fr('petite variation de f', 'petite variation de x')}</p></div>
+    ${figureTangente()}
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Tableau des dérivées</h3>
+    <div class="cin-fiche-figs deux">
+      <div><div class="cin-defile"><table class="cin-tab"><tr><th>f(x)</th><th>f'(x)</th></tr>
+        <tr><td>cste</td><td>0</td></tr><tr><td>ax</td><td>a</td></tr><tr><td>ax²</td><td>2ax</td></tr>
+        <tr class="inutile"><td>${fr('1', 'x')}</td><td>${M}${fr('1', 'x²')}</td></tr><tr class="inutile"><td>${fr('u', 'v')}</td><td>${fr("u'v − uv'", 'v²')}</td></tr><tr class="inutile"><td>x<sup>n</sup></td><td>n x<sup>n − 1</sup></td></tr>
+      </table></div><p>Dans ce chapitre : seulement les trois premières lignes</p></div>
+      <div><div class="cin-defile"><table class="cin-tab">
+        <tr><th colspan="2">Maths</th><th colspan="2">Physique</th></tr>
+        <tr><th>f(x)</th><th>f'(x)</th><th>f(t)</th><th>${d('f')}</th></tr>
+        <tr><td>cste</td><td>0</td><td>cste</td><td>0</td></tr>
+        <tr><td>ax</td><td>a</td><td>at</td><td>a</td></tr>
+        <tr><td>ax²</td><td>2ax</td><td>at²</td><td>2at</td></tr>
+        <tr><td>ax² + bx + c</td><td>2ax + b</td><td>at² + bt + c</td><td>2at + b</td></tr>
+      </table></div><p>La dérivée d'une somme est la somme des dérivées</p></div>
+    </div>
+    <p class="ph-calc" style="text-align:center">f(t) = 3t² + 2 &nbsp;⇒&nbsp; ${d('f')} = 6t</p>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Ce n'est pas une division !</h3>
+    <div class="cin-attention"><p>Pour calculer ${d('f')}, on <b>dérive</b> f : ${d('f')} = 6t pour f(t) = 3t² + 2, et non ${fr('3t² + 2', 't')}.</p></div>
+    <div class="cle"><p>L'écriture en fraction sert seulement à donner le <b>sens physique</b> (variation de f quand t varie un tout petit peu) et à trouver les <b>unités</b> :</p>
+      <p class="ph-calc" style="text-align:center">v = ${d('x')} → ${fr('m', 's')} = m·s<sup>${M}1</sup> &nbsp;&nbsp; a = ${d('v')} → ${fr('m·s<sup>−1</sup>', 's')} = m·s<sup>${M}2</sup></p></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">On peut dériver n'importe quoi</h3>
+    <div class="cle"><p>Un nombre (dérivée nulle), une fonction, un <b>vecteur</b> : on dérive chaque coordonnée, les vecteurs unitaires sont constants.</p>
+      <p class="ph-formule">${N('OM')}(t) = x(t)${N('i')} + y(t)${N('j')} &nbsp;⇒&nbsp; ${d(N('OM'))} = ${d('x')}${N('i')} + ${d('y')}${N('j')}</p>
+      <p class="er-petit">Exemple : ${N('OM')}(t) = 4t²${N('i')} + 3t${N('j')} ⇒ ${d(N('OM'))} = 8t${N('i')} + 3${N('j')}.</p></div>
+  </section>
+
+  <div class="er-actions cin-fiche-liens">
+    <a class="btn-secondary" style="text-decoration:none" href="module_3_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" style="text-decoration:none" href="module_3_questions.html">Questions sur la dérivation</a>
+  </div>`;
+CIN.menu('fiche_3');
+</script>
+</body>
+</html>

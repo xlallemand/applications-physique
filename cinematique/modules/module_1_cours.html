@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : référentiel — Cinématique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cin.css">
+<script src="vecteurs.js"></script>
+<script src="cin.js"></script>
+<script src="figures.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">Référentiel et trajectoire</h2>
+    <p class="er-contexte">La cinématique est l'étude des mouvements. Avant de décrire un mouvement, il faut dire <b>par rapport à quoi</b> on l'observe. Après chaque notion, un exemple, puis à toi de jouer.</p>
+    <p class="cin-lien-fiche"><a href="fiche_1.html">Fiche récapitulative du module 1 →</a></p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes : chaque notion est présentée, illustrée par
+   un exemple, puis l'élève fait des exemples semblables
+   (« À toi ») ; le bouton « Continuer » apparaît ensuite.
+   ============================================================ */
+const choix = (q, options, bonne, opts) => ({ parties: [Object.assign({ type: 'choix', q, options, bonne }, opts)] });
+const o = (id, label) => ({ id, label });
+const TRAJ = [o('rect', 'rectiligne'), o('circ', 'circulaire'), o('para', 'parabolique'), o('curv', 'curviligne')];
+const VIT = [o('unif', 'uniforme'), o('acc', 'accéléré'), o('ral', 'ralenti')];
+
+new CIN.Cours(document.getElementById('etapes'), [
+
+  // ---------- 1. Définition ----------
+  (cours) => {
+    const c = cours.carte('1. Qu\'est-ce qu\'un référentiel ?');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Un objet peut être immobile pour un observateur et en mouvement pour un autre : un passager assis dans un train est immobile par rapport à son siège, mais il se déplace par rapport au quai. Pour décrire un mouvement, on choisit donc un objet de référence.</p>
+        <div class="cle">
+          <p><b class="cle-titre">Définition.</b> Un <b>référentiel</b> est un solide de référence par rapport auquel on étudie un mouvement.</p>
+          <p>À un référentiel sont associés :</p>
+          <ul class="er-liste">
+            <li>un <b>repère d'espace</b>, qui donne la position du point (ses coordonnées) ;</li>
+            <li>un <b>repère de temps</b>, c'est-à-dire une horloge qui permet de mesurer les dates.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <p>Pour étudier le mouvement d'un ballon de football, on peut choisir comme référentiel le terrain. Repère d'espace : une origine au point de corner et deux axes le long des lignes du terrain. Repère de temps : un chronomètre déclenché au coup de pied.</p>
+      </div>`);
+    CIN.aToi(c, [
+      choix('Un référentiel, c\'est :', [o('ok', 'un solide de référence par rapport auquel on étudie un mouvement'), o('a', 'l\'objet dont on étudie le mouvement'), o('b', 'la trajectoire de l\'objet'), o('c', 'une horloge')], 'ok',
+        { colonne: true, indice: 'On étudie le mouvement « par rapport » à ce solide.', solution: 'Le référentiel est l\'objet de référence ; l\'objet étudié se déplace par rapport à lui.' }),
+      choix('À un référentiel, on associe :', [o('ok', 'un repère d\'espace et un repère de temps'), o('a', 'un repère d\'espace seulement'), o('b', 'un repère de temps seulement'), o('c', 'une trajectoire et une vitesse')], 'ok',
+        { colonne: true, indice: 'Il faut pouvoir dire où est le point, et à quelle date.', solution: 'Un repère d\'espace (la position) et un repère de temps (une horloge, pour les dates).' }),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 2. La trajectoire dépend du référentiel ----------
+  (cours) => {
+    const c = cours.carte('2. La trajectoire dépend du référentiel');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>La <b>trajectoire</b> d'un point est l'ensemble des positions qu'il occupe au cours du temps. Elle n'est pas la même pour tous les observateurs.</p>
+        <div class="cle"><p><b class="cle-titre">À retenir.</b> La trajectoire d'un objet dépend du référentiel d'étude. Il faut donc <b>toujours préciser</b> dans quel référentiel on étudie le mouvement.</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple du cours : chute d'une balle dans un train</p>
+        <p>Un passager lâche une balle dans un train qui roule à vitesse constante. On repère la position de la balle à intervalles de temps égaux, dans le référentiel du train et dans le référentiel terrestre (une vache regarde passer le train).</p>
+        <div data-x="train"></div>
+        <div class="er-actions" style="margin-top:6px"><button type="button" class="btn-secondary" data-x="lacher">▶ Lâcher la balle</button></div>
+        <p data-x="bilan" class="hidden" style="margin-top:8px">Dans le référentiel du train, la balle tombe <b>en ligne droite</b> et de plus en plus vite : mouvement rectiligne accéléré. Pour la vache, la balle avance avec le train en tombant : sa trajectoire est une <b>parabole</b>.</p>
+      </div>`);
+    const zone = c.querySelector('[data-x="train"]'), bouton = c.querySelector('[data-x="lacher"]');
+    zone.innerHTML = FIG.train(1);
+    let minuterie = null;
+    bouton.onclick = () => {
+      clearInterval(minuterie);
+      let n = 1;
+      zone.innerHTML = FIG.train(1);
+      minuterie = setInterval(() => {
+        n++;
+        zone.innerHTML = FIG.train(n);
+        if (n >= 7) { clearInterval(minuterie); c.querySelector('[data-x="bilan"]').classList.remove('hidden'); bouton.textContent = '↺ Recommencer'; }
+      }, 380);
+    };
+    CIN.aToi(c, [
+      choix('Dans le référentiel du train, la trajectoire de la balle est :', TRAJ.slice(0, 3), 'rect',
+        { melanger: false, indice: 'Pour le passager, la balle tombe à la verticale.', solution: 'Rectiligne : les positions sont alignées sur une verticale.' }),
+      choix('Dans le référentiel terrestre, la trajectoire de la balle est :', TRAJ.slice(0, 3), 'para',
+        { melanger: false, indice: 'Pour la vache, la balle avance avec le train tout en tombant.', solution: 'Parabolique : la balle avance horizontalement avec le train et tombe en même temps.' }),
+      { titre: 'Un autre exemple : un passager dans un bus', parties: [
+        { type: 'choix', q: 'Un passager est assis dans un bus qui roule en ligne droite. Dans le référentiel du bus, le passager est :', options: [o('imm', 'immobile'), o('rect', 'en mouvement rectiligne'), o('circ', 'en mouvement circulaire')], bonne: 'imm', melanger: false,
+          indice: 'Sa position change-t-elle par rapport aux sièges du bus ?', solution: 'Immobile : il reste à la même place par rapport au bus.' },
+        { type: 'choix', q: 'Dans le référentiel terrestre (lié à la route), le passager est :', options: [o('imm', 'immobile'), o('rect', 'en mouvement rectiligne'), o('circ', 'en mouvement circulaire')], bonne: 'rect', melanger: false,
+          indice: 'Pour un piéton sur le trottoir, le passager se déplace avec le bus.', solution: 'En mouvement rectiligne, comme le bus.' },
+      ] },
+      { titre: 'Un autre exemple : la valve d\'une roue de vélo', parties: [
+        { type: 'choix', q: 'Un cycliste roule en ligne droite. Dans le référentiel du vélo (lié au cadre), la trajectoire de la valve de la roue avant est :', options: TRAJ, bonne: 'circ', melanger: false,
+          indice: 'Par rapport au cadre, la roue tourne autour de son axe.', solution: 'Circulaire : la valve tourne autour du moyeu de la roue.' },
+        { type: 'choix', q: 'Dans le référentiel terrestre, la trajectoire de la valve est :', options: TRAJ, bonne: 'curv', melanger: false,
+          indice: 'La valve tourne autour du moyeu, et le moyeu avance avec le vélo.', solution: 'Curviligne : une courbe en arches (voir la figure). La même valve, deux trajectoires différentes : il faut toujours préciser le référentiel.' },
+      ] },
+    ], () => {
+      cours.ajouter(c, `<div class="cours-exemple" style="margin-top:12px"><p class="cours-exemple-t">La valve, vue dans les deux référentiels</p>${FIG.velo()}</div>`);
+      cours.continuer(c);
+    });
+    return c;
+  },
+
+  // ---------- 3. Vocabulaire ----------
+  (cours) => {
+    const c = cours.carte('3. Vocabulaire pour décrire un mouvement');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>En général, on utilise <b>un mot pour la trajectoire</b>, suivi d'<b>un mot pour l'évolution de la vitesse</b>.</p>
+        <div class="cle">
+          <div class="cin-defile"><table class="cin-tab">
+            <tr><th>Trajectoire</th><th>Vitesse</th></tr>
+            <tr><td>rectiligne (droite)</td><td>uniforme (constante)</td></tr>
+            <tr><td>circulaire (cercle)</td><td>accéléré (augmente)</td></tr>
+            <tr><td>parabolique (parabole)</td><td>ralenti (diminue)</td></tr>
+            <tr><td>curviligne (autre courbe)</td><td></td></tr>
+          </table></div>
+          <p>Sur une <b>chronophotographie</b>, les positions sont repérées à intervalles de temps égaux : si la distance entre deux positions est constante, le mouvement est uniforme ; si elle augmente, il est accéléré ; si elle diminue, il est ralenti.</p>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemples</p>
+        ${FIG.chrono({ forme: 'droite', vitesse: 'uniforme' })}
+        <p>Positions alignées et régulièrement espacées : mouvement <b>rectiligne uniforme</b>.</p>
+        ${FIG.chrono({ forme: 'cercle', vitesse: 'accelere', n: 9 })}
+        <p>Positions sur un cercle, de plus en plus espacées : mouvement <b>circulaire accéléré</b>.</p>
+      </div>`);
+    const deux = (titre, fig, traj, vit, solT, solV) => ({ titre, figure: z => { z.innerHTML = fig; }, parties: [
+      { type: 'choix', q: 'Trajectoire :', options: TRAJ, bonne: traj, melanger: false, indice: 'Regarde la forme de la ligne formée par les positions.', solution: solT },
+      { type: 'choix', q: 'Vitesse :', options: VIT, bonne: vit, melanger: false, indice: 'Les positions sont repérées à intervalles de temps égaux : regarde comment évolue la distance entre deux positions, dans le sens du mouvement.', solution: solV },
+    ] });
+    CIN.aToi(c, [
+      deux('Décris ce mouvement.', FIG.chrono({ forme: 'oblique', vitesse: 'ralenti' }), 'rect', 'ral', 'Les positions sont alignées : rectiligne.', 'Les positions sont de plus en plus rapprochées : ralenti.'),
+      deux('Décris ce mouvement.', FIG.chrono({ forme: 'cercle', vitesse: 'uniforme', n: 10 }), 'circ', 'unif', 'Les positions sont sur un cercle : circulaire.', 'Les positions sont régulièrement espacées : uniforme.'),
+      deux('Décris ce mouvement.', FIG.chrono({ forme: 'droite', vitesse: 'accelere', sens: -1 }), 'rect', 'acc', 'Les positions sont alignées : rectiligne.', 'Dans le sens du mouvement (vers la gauche), les positions sont de plus en plus espacées : accéléré.'),
+      deux('Décris ce mouvement.', FIG.chrono({ forme: 'courbe', vitesse: 'uniforme', n: 10 }), 'curv', 'unif', 'Ni une droite, ni un cercle, ni une parabole : curviligne.', 'Les positions sont régulièrement espacées : uniforme.'),
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 4. Référentiels héliocentrique, géocentrique, terrestre ----------
+  (cours) => {
+    const c = cours.carte('4. Trois référentiels à connaître');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <div class="cle">
+          <p><b class="cle-titre">Référentiel héliocentrique.</b> Son centre est le centre du Soleil, ses trois axes sont dirigés vers des étoiles fixes. Il est adapté pour étudier le mouvement des <b>planètes</b> autour du Soleil.</p>
+          <p><b class="cle-titre">Référentiel géocentrique.</b> Son centre est le centre de la Terre, ses trois axes sont dirigés vers des étoiles fixes. Il est adapté pour étudier le mouvement des <b>satellites</b> autour de la Terre.</p>
+          <p><b class="cle-titre">Référentiel terrestre.</b> Il est fixe par rapport à la Terre (le sol, un bâtiment…). On choisit un repère pratique pour étudier le mouvement. Il est adapté pour étudier le mouvement de <b>tout objet sur Terre</b>.</p>
+        </div>
+        ${FIG.referentiels()}
+        <p class="er-petit">Le référentiel géocentrique se déplace avec la Terre autour du Soleil, mais ses axes restent parallèles à ceux du référentiel héliocentrique. Le référentiel terrestre, lui, tourne avec la Terre.</p>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <p>Pour étudier le mouvement de Vénus autour du Soleil, on choisit le référentiel <b>héliocentrique</b> : Vénus est une planète qui tourne autour du Soleil.</p>
+      </div>`);
+    const R = [o('helio', 'héliocentrique'), o('geo', 'géocentrique'), o('terre', 'terrestre')];
+    const ref = (situation, bonne, sol) => choix(`Quel référentiel choisir pour étudier ${situation} ?`, R, bonne, { melanger: false, indice: 'Autour de quoi l\'objet tourne-t-il ? Ou bien se déplace-t-il sur Terre ?', solution: sol });
+    CIN.aToi(c, [
+      ref('le mouvement de la Lune autour de la Terre', 'geo', 'Géocentrique : la Lune est un satellite (naturel) de la Terre.'),
+      ref('le mouvement d\'une voiture sur l\'autoroute', 'terre', 'Terrestre : la voiture se déplace sur Terre.'),
+      ref('le mouvement de Mars autour du Soleil', 'helio', 'Héliocentrique : Mars est une planète qui tourne autour du Soleil.'),
+      ref('le mouvement d\'un satellite GPS', 'geo', 'Géocentrique : un satellite GPS tourne autour de la Terre.'),
+      ref('la chute d\'une pomme', 'terre', 'Terrestre : la pomme tombe sur Terre.'),
+    ], () => cours.continuer(c, 'Ce qu\'il faut retenir →'));
+    return c;
+  },
+
+  // ---------- À retenir ----------
+  (cours) => {
+    const c = cours.carte('À retenir');
+    cours.ajouter(c, `<div class="cle"><p><b class="cle-titre">Référentiel.</b> Solide de référence par rapport auquel on étudie un mouvement ; on lui associe un repère d'espace et un repère de temps (horloge).</p></div>
+      <div class="cle"><p><b class="cle-titre">Trajectoire.</b> Elle dépend du référentiel : il faut toujours préciser le référentiel d'étude.</p></div>
+      <div class="cle"><p><b class="cle-titre">Vocabulaire.</b> Trajectoire : rectiligne, circulaire, parabolique, curviligne. Vitesse : uniforme, accéléré, ralenti.</p></div>
+      <div class="cle"><p><b class="cle-titre">Trois référentiels.</b> Héliocentrique (planètes), géocentrique (satellites de la Terre), terrestre (objets sur Terre).</p></div>
+      <div class="er-actions">
+        <a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur le référentiel →</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_2_cours.html">Module 2 : les vecteurs</a>
+        <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a>
+      </div>`);
+    return c;
+  },
+]);
+
+CIN.menu('module_1_cours');
+</script>
+</body>
+</html>

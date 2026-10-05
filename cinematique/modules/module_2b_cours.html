@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : module d'un vecteur et trigonométrie — Cinématique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cin.css">
+<script src="vecteurs.js"></script>
+<script src="cin.js"></script>
+<script src="figures.js"></script>
+<style>
+  .cin-legende-trigo { display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: center; font-size: .9rem; font-weight: 700; }
+  .cin-legende-trigo span::before { content: ''; display: inline-block; width: 16px; height: 5px; border-radius: 3px; margin-right: 6px; vertical-align: middle; background: currentColor; }
+</style>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Module d'un vecteur et trigonométrie</h2>
+    <p class="er-contexte">Deux compétences très utiles en physique : calculer le <b>module</b> d'un vecteur (c'est la valeur de la grandeur qu'il représente : une vitesse, une force…) et trouver ses <b>coordonnées</b> quand on connaît son module et un angle.</p>
+    <p class="cin-lien-fiche"><a href="fiche_2.html">Fiche récapitulative du module 2 →</a></p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes : notion, exemple, puis exemples semblables
+   faits par l'élève (« À toi »).
+   ============================================================ */
+const { nomHTML: N, colHTML: col, ijHTML: ij } = VEC;
+const { fmt } = CIN;
+const M = CIN.MOINS;
+const o = (id, label) => ({ id, label });
+const R = (h) => `<span class="racine">√<span>${h}</span></span>`;
+const fixe = (nom, dep, coord, extra) => Object.assign({ nom, dep, coord, fixe: true }, extra);
+const nombre = (q, label, valeur, opts) => ({ parties: [Object.assign({ type: 'nombre', q, label, valeur, tol: 1e-9 }, opts)] });
+// erreurs fréquentes sur un module
+const diagModule = (a, b) => v => (Math.abs(v - (a * a + b * b)) < .01 ? 'Tu as oublié la racine carrée.' : Math.abs(v - (Math.abs(a) + Math.abs(b))) < .01 || Math.abs(v - (a + b)) < .01 ? 'On n\'additionne pas les coordonnées : utilise le théorème de Pythagore, √(a² + b²).' : null);
+const sq = v => (v < 0 ? `(${fmt(v)})²` : `${fmt(v)}²`);
+
+new CIN.Cours(document.getElementById('etapes'), [
+
+  // ---------- 1. Le module d'un vecteur ----------
+  (cours) => {
+    const c = cours.carte('1. Le module d\'un vecteur');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Le <b>module</b> (ou la norme) d'un vecteur est la <b>longueur de sa flèche</b>. On le note ‖${N('u')}‖, ou simplement u (sans flèche).</p>
+        <p>Les deux coordonnées a et b sont les côtés d'un triangle rectangle dont le vecteur est l'hypoténuse : on calcule sa longueur avec le théorème de Pythagore.</p>
+        <div class="cle"><p><b class="cle-titre">Module d'un vecteur.</b> Pour ${N('u')} ${col('a', 'b')} :</p><p class="ph-formule">‖${N('u')}‖ = ${R('a² + b²')}</p>
+          <p class="er-petit">Une coordonnée négative au carré donne un nombre positif : (${M}3)² = 9.</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <div data-x="ex"></div>
+        <p class="ph-calc">${N('u')} ${col(3, 4)} : ‖${N('u')}‖ = ${R('3² + 4²')} = ${R('9 + 16')} = ${R('25')} = <span class="c">5</span><br>
+          ${N('w')} ${col(-6, -2)} : ‖${N('w')}‖ = ${R('(−6)² + (−2)²')} = ${R('36 + 4')} = ${R('40')} ≈ <span class="c">6,3</span></p>
+        <p class="er-petit">Sur le quadrillage, la flèche de ${N('u')} mesure bien 5 carreaux.</p>
+      </div>`);
+    new VEC.Repere(c.querySelector('[data-x="ex"]'), { mode: 'aucun', vecteurs: [fixe('u', [1, 1], [3, 4]), fixe('w', [1, -1], [-6, -2], { nomPos: [.3, -.6] })], extra: g => FIG.decomp([1, 1], [3, 4])(g) });
+    CIN.aToi(c, [
+      nombre(`${N('A')} ${col(4, 3)}. Calcule ‖${N('A')}‖.`, `‖${N('A')}‖ =`, 5, { diag: diagModule(4, 3), indice: '‖A⃗‖ = √(a² + b²).', solution: `‖${N('A')}‖ = ${R('4² + 3²')} = ${R('25')} = 5` }),
+      nombre(`${N('B')} ${col(-5, 12)}. Calcule ‖${N('B')}‖.`, `‖${N('B')}‖ =`, 13, { diag: diagModule(-5, 12), indice: '(−5)² = 25 : le carré d\'un nombre négatif est positif.', solution: `‖${N('B')}‖ = ${R('(−5)² + 12²')} = ${R('25 + 144')} = ${R('169')} = 13` }),
+      nombre(`${N('C')} = ${ij(0, -7)}. Calcule ‖${N('C')}‖.`, `‖${N('C')}‖ =`, 7, { diag: diagModule(0, -7), indice: `${N('C')} ${col(0, -7)} : une flèche verticale de 7 carreaux.`, solution: `‖${N('C')}‖ = ${R('0² + (−7)²')} = ${R('49')} = 7` }),
+      nombre(`${N('D')} = ${ij(2, 5)}. Calcule ‖${N('D')}‖, arrondi au dixième.`, `‖${N('D')}‖ ≈`, Math.sqrt(29), { tol: .051, dec: 1, diag: diagModule(2, 5), indice: 'Calcule 2² + 5², puis prends la racine carrée à la calculatrice.', solution: `‖${N('D')}‖ = ${R('2² + 5²')} = ${R('29')} ≈ 5,4` }),
+      { titre: 'Lis les coordonnées, puis calcule le module.', figure: z => new VEC.Repere(z, { mode: 'aucun', vecteurs: [fixe('E', [2, 3], [-3, -4])] }), parties: [
+        { type: 'coord', label: N('E'), valeurs: [-3, -4], lecture: true, indice: 'De l\'origine à la pointe : horizontalement, puis verticalement.', solution: `${N('E')} ${col(-3, -4)}` },
+        { type: 'nombre', label: `‖${N('E')}‖ =`, valeur: 5, tol: 1e-9, diag: diagModule(-3, -4), indice: '√(a² + b²), avec a = −3 et b = −4.', solution: `‖${N('E')}‖ = ${R('(−3)² + (−4)²')} = ${R('25')} = 5` }] },
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 2. Module = valeur de la grandeur ----------
+  (cours) => {
+    const c = cours.carte('2. Le module, c\'est la valeur de la grandeur');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>En physique, un vecteur représente une grandeur : une vitesse, une accélération, une force… Sa direction et son sens indiquent où « va » la grandeur, et sa longueur indique combien elle vaut.</p>
+        <div class="cle"><p><b class="cle-titre">À retenir.</b> Le <b>module</b> du vecteur est la <b>valeur</b> de la grandeur qu'il représente, avec son unité. On la note avec la même lettre, sans flèche :</p>
+          <p class="ph-formule">v = ‖${N('v')}‖ &nbsp; (valeur de la vitesse) &nbsp; ; &nbsp; F = ‖${N('F')}‖ &nbsp; (valeur de la force)</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemples</p>
+        <p>Le vecteur vitesse d'une balle est ${N('v')} = ${ij(3, 4)}, coordonnées en m·s<sup>${M}1</sup>. La valeur de sa vitesse est :</p>
+        <p class="ph-calc">v = ‖${N('v')}‖ = ${R('3² + 4²')} = <span class="c">5 m·s<sup>${M}1</sup></span></p>
+        <p>Une force ${N('F')} a pour coordonnées ${col('6 N', '−8 N')}. Sa valeur est F = ${R('6² + (−8)²')} = ${R('100')} = <b>10 N</b>.</p>
+        <p class="er-petit">Sur un schéma à l'échelle, on mesure la longueur de la flèche, puis on utilise l'échelle : si 1 carreau représente 2 m·s<sup>${M}1</sup>, une flèche de 5 carreaux représente une vitesse de 10 m·s<sup>${M}1</sup>.</p>
+      </div>`);
+    const MS = `m·s<sup>${M}1</sup>`;
+    CIN.aToi(c, [
+      nombre(`Le vecteur vitesse d'un drone est ${N('v')} = ${ij(6, 8)}, coordonnées en ${MS}. Calcule la valeur v de sa vitesse.`, 'v =', 10, { unite: MS, diag: diagModule(6, 8), indice: 'v = ‖v⃗‖ = √(vx² + vy²).', solution: `v = ${R('6² + 8²')} = ${R('100')} = 10 ${MS}` }),
+      nombre(`Une force a pour coordonnées ${col('−9 N', '12 N')}. Calcule sa valeur F.`, 'F =', 15, { unite: 'N', diag: diagModule(-9, 12), indice: 'F = √(Fx² + Fy²).', solution: `F = ${R('(−9)² + 12²')} = ${R('81 + 144')} = ${R('225')} = 15 N` }),
+      nombre(`Sur un schéma, 1 carreau représente 2 ${MS}. La flèche de ${N('v')} fait 3 carreaux horizontalement et 4 carreaux verticalement. Calcule v.`, 'v =', 10, { unite: MS,
+        diag: v => (Math.abs(v - 5) < .01 ? 'La flèche mesure bien 5 carreaux, mais il faut utiliser l\'échelle : 1 carreau représente 2 m·s⁻¹.' : null), indice: 'Longueur de la flèche (Pythagore), puis échelle.', solution: `Longueur : ${R('3² + 4²')} = 5 carreaux, donc v = 5 × 2 = 10 ${MS}.` }),
+      { parties: [{ type: 'choix', q: 'La valeur a de l\'accélération d\'un objet est :', colonne: true, options: [o('ok', `le module du vecteur accélération : a = ‖${N('a')}‖`), o('b', 'la 1<sup>re</sup> coordonnée du vecteur accélération'), o('c', 'la somme des coordonnées du vecteur accélération'), o('d', 'toujours égale à la valeur de la vitesse')], bonne: 'ok',
+        indice: 'Valeur de la grandeur = module du vecteur.', solution: `a = ‖${N('a')}‖ : la valeur d'une grandeur vectorielle est le module de son vecteur.` }] },
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 3. Trigonométrie : côté adjacent, côté opposé ----------
+  (cours) => {
+    const c = cours.carte('3. Trigonométrie : retrouver la méthode');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>On connaît souvent le module V d'un vecteur et l'angle α qu'il fait avec un axe, et on veut ses coordonnées. Le vecteur est l'<b>hypoténuse</b> d'un triangle rectangle dont les deux autres côtés sont sur les axes.</p>
+        <div data-x="fig0"></div>
+        <div class="cin-legende-trigo"><span style="color:#0a7d57">côté adjacent à α</span><span style="color:#c2570c">côté opposé à α</span></div>
+        <p style="margin-top:8px">Rappel du collège : dans un triangle rectangle, <b>cos α = côté adjacent / hypoténuse</b> et <b>sin α = côté opposé / hypoténuse</b>. À toi d'en déduire la méthode.</p>
+      </div>`);
+    c.querySelector('[data-x="fig0"]').innerHTML = FIG.trigo({ V: 5, ang: 35, nom: 'v', cotes: 'noms', legende: false });
+    CIN.aToi(c, [
+      { parties: [{ type: 'choix', q: 'cos α = côté adjacent / hypoténuse. Le côté adjacent est donc égal à :', options: [o('ok', 'hypoténuse × cos α'), o('a', 'hypoténuse / cos α'), o('b', 'cos α / hypoténuse'), o('c', 'hypoténuse + cos α')], bonne: 'ok',
+        indice: 'Multiplie les deux membres de l\'égalité par l\'hypoténuse.', solution: 'cos α = adjacent / hypoténuse ⇔ adjacent = hypoténuse × cos α.' }] },
+      { parties: [{ type: 'choix', q: 'De même, sin α = côté opposé / hypoténuse. Le côté opposé est égal à :', options: [o('ok', 'hypoténuse × sin α'), o('a', 'hypoténuse / sin α'), o('b', 'sin α / hypoténuse'), o('c', 'hypoténuse × cos α')], bonne: 'ok',
+        indice: 'Même raisonnement qu\'avec le cosinus.', solution: 'sin α = opposé / hypoténuse ⇔ opposé = hypoténuse × sin α.' }] },
+      { parties: [{ type: 'choix', q: 'Ici, l\'hypoténuse du triangle est :', options: [o('ok', 'le module V du vecteur'), o('a', 'le côté sur l\'axe des abscisses'), o('b', 'le côté vertical'), o('c', 'l\'angle α')], bonne: 'ok',
+        indice: 'L\'hypoténuse est le côté opposé à l\'angle droit : c\'est la flèche.', solution: 'L\'hypoténuse est la flèche elle-même : sa longueur est le module V.' }] },
+    ], () => {
+      cours.ajouter(c, `<div class="cle" style="margin-top:14px"><p><b class="cle-titre">Méthode.</b> Pour un vecteur de module V faisant un angle α avec un axe :</p>
+          <p class="ph-formule">côté adjacent à α = V × cos α</p><p class="ph-formule">côté opposé à α = V × sin α</p></div>
+        <div class="cours-exemple">
+          <p class="cours-exemple-t">Vérifie avec le curseur</p>
+          <p>Ici V = 5 carreaux. Fais varier l'angle : les longueurs calculées correspondent aux côtés du triangle.</p>
+          <div data-x="fig1"></div>
+          <div class="cin-curseur"><label for="ang">α</label><input type="range" id="ang" min="5" max="85" value="30" aria-label="Angle α en degrés"></div>
+          <p class="cin-lecture" data-x="lect"></p>
+        </div>`);
+      const fig = c.querySelector('[data-x="fig1"]'), lect = c.querySelector('[data-x="lect"]'), cur = c.querySelector('#ang');
+      const maj = () => {
+        const a = +cur.value, ca = 5 * Math.cos(a * Math.PI / 180), sa = 5 * Math.sin(a * Math.PI / 180);
+        fig.innerHTML = FIG.trigo({ V: 5, ang: a, nom: 'v', cotes: 'valeurs', valAdj: `${fmt(ca, 2)}`, valOpp: `${fmt(sa, 2)}`, L: 20.8 * 5, legende: false });
+        lect.innerHTML = `α = ${a}° : adjacent = 5 × cos ${a}° = <b style="color:#0a7d57">${fmt(ca, 2)}</b> ; opposé = 5 × sin ${a}° = <b style="color:#c2570c">${fmt(sa, 2)}</b>`;
+      };
+      cur.addEventListener('input', maj);
+      maj();
+      CIN.aToi(c, [
+        nombre('V = 5 et α = 30°. Calcule le côté adjacent, arrondi au dixième (calculatrice en mode degrés).', 'adjacent ≈', 5 * Math.cos(Math.PI / 6), { tol: .051, dec: 1,
+          diag: v => (Math.abs(v - 5 * Math.cos(30)) < .06 ? 'Ta calculatrice est en mode radians : passe-la en mode degrés.' : Math.abs(v - 2.5) < .06 ? 'C\'est le côté opposé (V × sin α). Le côté adjacent vaut V × cos α.' : null),
+          indice: 'adjacent = V × cos α.', solution: 'adjacent = 5 × cos 30° ≈ 4,3' }),
+        nombre('V = 5 et α = 30°. Calcule le côté opposé.', 'opposé =', 2.5, { tol: .051, dec: 1,
+          diag: v => (Math.abs(v - 5 * Math.sin(30)) < .06 ? 'Ta calculatrice est en mode radians : passe-la en mode degrés.' : Math.abs(v - 4.33) < .06 ? 'C\'est le côté adjacent. Le côté opposé vaut V × sin α.' : null),
+          indice: 'opposé = V × sin α.', solution: 'opposé = 5 × sin 30° = 2,5' }),
+      ], () => cours.continuer(c), 'À toi');
+    });
+    return c;
+  },
+
+  // ---------- 4. Coordonnées dans les quatre quadrants ----------
+  (cours) => {
+    const c = cours.carte('4. Coordonnées d\'un vecteur par la trigonométrie');
+    const f = (a, d) => fmt(a, d == null ? 1 : d);
+    const ex1 = FIG.trigoCoord(10, 40, 'x', 2), ex2 = FIG.trigoCoord(6, 25, 'y', 4);
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Les formules donnent des <b>longueurs</b> (toujours positives). Les <b>signes</b> des coordonnées viennent du sens du vecteur : vers la gauche, x est négatif ; vers le bas, y est négatif.</p>
+        <div class="cle"><p><b class="cle-titre">Méthode.</b></p>
+          <ol class="er-liste">
+            <li>Repérer l'angle α et le triangle rectangle : le <b>côté adjacent</b> est sur l'axe à partir duquel α est mesuré.</li>
+            <li>Calculer : côté adjacent = V × cos α ; côté opposé = V × sin α.</li>
+            <li>Mettre les signes selon le sens du vecteur.</li>
+          </ol></div>
+        <div class="callout" style="margin-top:10px"><p><b>Calculatrice en mode degrés !</b> En mode radians, cos 40 ≈ ${f(Math.cos(40), 2)} au lieu de cos 40° ≈ ${f(Math.cos(40 * Math.PI / 180), 2)}.</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple 1 : angle mesuré à partir de l'axe des x</p>
+        ${FIG.trigo({ V: 10, ang: 40, axe: 'x', quad: 2, nom: 'v', unite: `m·s<sup>${M}1</sup>`, Vtxt: '10', cotes: 'formules' })}
+        <p>α est mesuré à partir de l'axe des x : le côté adjacent est horizontal. Le vecteur pointe vers la gauche (x &lt; 0) et vers le haut (y &gt; 0) :</p>
+        <p class="ph-calc">v<sub>x</sub> = ${M}10 × cos 40° ≈ <span class="c">${f(ex1[0])} m·s<sup>${M}1</sup></span> &nbsp; ; &nbsp; v<sub>y</sub> = +10 × sin 40° ≈ <span class="c">${f(ex1[1])} m·s<sup>${M}1</sup></span></p>
+        <p class="cours-exemple-t" style="margin-top:12px !important">Exemple 2 : angle mesuré à partir de l'axe des y</p>
+        ${FIG.trigo({ V: 6, ang: 25, axe: 'y', quad: 4, nom: 'F', unite: 'N', Vtxt: '6,0', cotes: 'formules' })}
+        <p>α est mesuré à partir de l'axe des y : cette fois, le côté adjacent est <b>vertical</b>. Le vecteur pointe vers la droite (x &gt; 0) et vers le bas (y &lt; 0) :</p>
+        <p class="ph-calc">F<sub>x</sub> = +6,0 × sin 25° ≈ <span class="c">${f(ex2[0])} N</span> &nbsp; ; &nbsp; F<sub>y</sub> = ${M}6,0 × cos 25° ≈ <span class="c">${f(ex2[1])} N</span></p>
+        <p class="er-petit">Ne retiens donc pas « x = V cos α » : retiens « côté adjacent = V cos α ».</p>
+      </div>`);
+    const item = (V, ang, axe, quad, nom, unite, Vtxt) => {
+      const xy = FIG.trigoCoord(V, ang, axe, quad), r = xy.map(v => Math.round(v * 10) / 10);
+      const cA = axe === 'x' ? 0 : 1;
+      const lig = k => `${k === 0 ? 'x' : 'y'} = ${xy[k] < 0 ? M : '+'}${Vtxt} × ${k === cA ? 'cos' : 'sin'} ${ang}° ≈ ${f(xy[k])}`;
+      return { titre: `Calcule les coordonnées de ${N(nom)}, arrondies au dixième.`, figure: z => { z.innerHTML = FIG.trigo({ V, ang, axe, quad, nom, unite, Vtxt, cotes: null }); },
+        parties: [{ type: 'coord', label: N(nom), valeurs: xy, affiche: r.map(x => fmt(x, 1)), tol: .06, unite, diag: v => FIG.diagTrigo(v, V, ang, axe, quad),
+          indice: `L'angle est mesuré à partir de l'axe des ${axe} : le côté adjacent est sur cet axe (V × cos α), l'autre côté vaut V × sin α. Puis les signes.`,
+          solution: `<p class="ph-calc">${lig(0)}<br>${lig(1)}</p>` }] };
+    };
+    CIN.aToi(c, [
+      item(8, 30, 'x', 1, 'F', 'N', '8,0'),
+      item(12, 50, 'x', 3, 'v', `m·s<sup>${M}1</sup>`, '12'),
+      item(5, 20, 'y', 2, 'a', `m·s<sup>${M}2</sup>`, '5,0'),
+      item(9, 65, 'x', 4, 'F', 'N', '9,0'),
+    ], () => cours.continuer(c, 'Ce qu\'il faut retenir →'));
+    return c;
+  },
+
+  // ---------- À retenir ----------
+  (cours) => {
+    const c = cours.carte('À retenir');
+    cours.ajouter(c, `<div class="cle"><p><b class="cle-titre">Module.</b> ${N('u')} ${col('a', 'b')} : ‖${N('u')}‖ = ${R('a² + b²')} (longueur de la flèche).</p></div>
+      <div class="cle"><p><b class="cle-titre">Valeur d'une grandeur.</b> Le module du vecteur est la valeur de la grandeur : v = ‖${N('v')}‖, F = ‖${N('F')}‖, avec l'unité.</p></div>
+      <div class="cle"><p><b class="cle-titre">Trigonométrie.</b> Côté adjacent à α = V × cos α ; côté opposé = V × sin α ; puis les signes selon le sens du vecteur. Calculatrice en degrés.</p></div>
+      <div class="er-actions">
+        <a class="btn-primary" style="text-decoration:none" href="module_2b_questions.html">Questions : module et trigonométrie →</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_3_cours.html">Module 3 : dérivation en physique</a>
+        <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a>
+      </div>`);
+    return c;
+  },
+]);
+
+CIN.menu('module_2b_cours');
+</script>
+</body>
+</html>

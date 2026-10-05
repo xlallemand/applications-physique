@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : questions sur le vecteur vitesse — Cinématique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cin.css">
+<script src="vecteurs.js"></script>
+<script src="cin.js"></script>
+<style>.ph-choix .fr { font-size: 1em; }</style>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard sur le vecteur vitesse :
+   6 QCM et 4 questions à saisie.
+   ============================================================ */
+const { hasard, melanger, entre, fmt, fr, dd, poly } = CIN;
+const { nomHTML: N, colHTML: col, ijHTML: ij } = VEC;
+const M = CIN.MOINS;
+const o = (id, label) => ({ id, label });
+const I = N('i'), J = N('j');
+const MS = `m·s<sup>${M}1</sup>`;
+const R = h => `<span class="racine">√<span>${h}</span></span>`;
+const nz = (a) => { let k; do { k = entre(-(a || 9), a || 9); } while (!k); return k; };
+const val = (c, t) => c[0] * t * t + c[1] * t + c[2];
+const par = (c) => (c.filter(Boolean).length > 1 ? `(${poly(c)})` : poly(c));
+const fonction = () => (Math.random() < .6 ? [nz(5), entre(-9, 9), entre(-9, 9)] : [0, nz(), entre(-9, 9)]);
+const derivee = c => [0, 2 * c[0], c[1]];
+const sq = v => (v < 0 ? `(${fmt(v)})²` : `${fmt(v)}²`);
+const choix = (theme, q, options, bonne, solution, indice, opts) => ({ theme, parties: [Object.assign({ type: 'choix', q, options, bonne, solution, indice, colonne: true }, opts)] });
+const opts = (bonne, autres) => { const vus = new Set([bonne]); return [o('ok', bonne)].concat(autres.filter(x => !vus.has(x) && vus.add(x)).slice(0, 3).map((x, i) => o('f' + i, x))); };
+
+/* ---------- QCM ---------- */
+function coordQCM() {
+  const f = hasard(['x', 'y']), c = [nz(5), nz(), nz()];
+  return choix('Coordonnée de la vitesse', `${f}(t) = ${poly(c)}. La coordonnée v<sub>${f}</sub> du vecteur vitesse est :`,
+    opts(`v<sub>${f}</sub> = ${poly([2 * c[0], c[1]])}`, [`v<sub>${f}</sub> = ${poly([c[0], c[1]])}`, `v<sub>${f}</sub> = ${poly([2 * c[0], c[1] + c[2]])}`, `v<sub>${f}</sub> = ${fr(poly(c), 't')}`]), 'ok',
+    `v<sub>${f}</sub> = ${dd(f)} = ${poly([2 * c[0], c[1]])}.`, 'Dérive : at² → 2at ; bt → b ; constante → 0.', { colonne: false, indices: { f2: 'Tu as divisé par t : on dérive, on ne divise pas.' } });
+}
+function vecteurQCM() {
+  const x = [nz(4), nz(), nz()], y = [0, nz(), nz()];
+  return choix('Vecteur vitesse', `x(t) = ${poly(x)} et y(t) = ${poly(y)} (en m). Le vecteur vitesse est :`,
+    opts(`${N('v')}(t) = ${par(derivee(x))}${I} + ${fmt(y[1])}${J}`, [`${N('v')}(t) = ${fmt(y[1])}${I} + ${par(derivee(x))}${J}`, `${N('v')}(t) = ${par([0, x[0], x[1]])}${I} + ${fmt(y[1])}${J}`, `${N('v')}(t) = ${par(derivee(x))}${I} + ${par(y)}${J}`]), 'ok',
+    `v<sub>x</sub> = ${dd('x')} = ${poly(derivee(x))} et v<sub>y</sub> = ${dd('y')} = ${fmt(y[1])}.`, 'Dérive x(t), puis y(t).');
+}
+function valeurQCM() {
+  let vx, vy;
+  do { vx = nz(8); vy = nz(8); } while (Math.abs(vx) === Math.abs(vy));
+  const v = Math.hypot(vx, vy), r = x => (Number.isInteger(x) ? '= ' + fmt(x) : '≈ ' + fmt(x, 1));
+  return choix('Valeur de la vitesse', `À un instant, v<sub>x</sub> = ${fmt(vx)} ${MS} et v<sub>y</sub> = ${fmt(vy)} ${MS}. La valeur de la vitesse est :`,
+    opts(`v ${r(v)} ${MS}`, [`v = ${fmt(Math.abs(vx + vy))} ${MS}`, `v = ${fmt(vx * vx + vy * vy)} ${MS}`, `v = ${fmt(Math.abs(vx) + Math.abs(vy))} ${MS}`, `v ${r(Math.sqrt(Math.abs(vx * vx - vy * vy)))} ${MS}`]), 'ok',
+    `v = ${R(`${sq(vx)} + ${sq(vy)}`)} ${Number.isInteger(v) ? '=' : '≈'} ${Number.isInteger(v) ? fmt(v) : fmt(v, 1)} ${MS}.`, 'v = √(vx² + vy²).', { colonne: false });
+}
+let deja = [];
+function cours() {
+  const liste = [
+    () => choix('Question de cours', 'Le vecteur vitesse d\'un point est :', [o('ok', 'tangent à la trajectoire, dans le sens du mouvement'), o('a', 'dirigé vers l\'origine du repère'), o('b', 'perpendiculaire à la trajectoire'), o('c', 'toujours horizontal')], 'ok', 'Le vecteur vitesse est tangent à la trajectoire, dans le sens du mouvement.', 'Pense à l\'animation du ballon.'),
+    () => choix('Question de cours', `Les coordonnées du vecteur vitesse s'expriment en :`, [o('ok', MS), o('a', 'm'), o('b', `m·s<sup>${M}2</sup>`), o('c', 'm·s')], 'ok', `v<sub>x</sub> = ${dd('x')} → m / s = ${MS}.`, 'Écris l\'unité du haut divisée par l\'unité du bas.', { colonne: false }),
+    () => choix('Question de cours', `La coordonnée v<sub>y</sub> du vecteur vitesse est :`, [o('ok', dd('y')), o('a', fr('y', 't')), o('b', dd('t', 'y')), o('c', dd('v'))], 'ok', `v<sub>y</sub> = ${dd('y')} = y'(t).`, 'C\'est la dérivée d\'une coordonnée de la position.', { colonne: false }),
+    () => choix('Question de cours', 'Le vecteur vitesse est :', [o('ok', `la dérivée du vecteur position : ${N('v')} = ${dd(N('OM'))}`), o('a', `le vecteur position divisé par t : ${N('v')} = ${N('OM')} / t`), o('b', 'la dérivée du vecteur accélération'), o('c', 'égal au vecteur position')], 'ok', `${N('v')} = ${dd(N('OM'))} : on dérive le vecteur position.`, 'Dérivée de quoi ?'),
+    () => choix('Question de cours', 'En trois dimensions, la valeur de la vitesse est :', [o('ok', 'v = √(v<sub>x</sub>² + v<sub>y</sub>² + v<sub>z</sub>²)'), o('a', 'v = v<sub>x</sub> + v<sub>y</sub> + v<sub>z</sub>'), o('b', 'v = √(v<sub>x</sub>² + v<sub>y</sub>²)'), o('c', 'v = v<sub>x</sub>² + v<sub>y</sub>² + v<sub>z</sub>²')], 'ok', 'On ajoute le carré de la troisième coordonnée sous la racine.', 'Comme en 2D, avec une coordonnée de plus.'),
+  ];
+  if (deja.length >= liste.length) deja = [];
+  const k = hasard(liste.map((_, i) => i).filter(i => !deja.includes(i)));
+  deja.push(k);
+  return liste[k]();
+}
+
+/* ---------- Questions à saisie ---------- */
+function vitesse() {
+  const x = fonction(), y = fonction();
+  const vx = [2 * x[0], x[1]], vy = [2 * y[0], y[1]];
+  const g = (c) => (c[0] ? [{ v: c[0] }, ' t + ', { v: c[1] }] : [{ v: c[1] }]);
+  return { theme: 'Vecteur vitesse', consigne: `Un point M a pour coordonnées x(t) = ${poly(x)} et y(t) = ${poly(y)} (en m, t en s). Écris le vecteur vitesse ${N('v')}(t).`,
+    parties: [{ type: 'gabarit', label: `${N('v')}(t) =`, morceaux: ['('].concat(g(vx), [`) ${I} + (`], g(vy), [`) ${J}`]),
+      diag: v => (x[0] && v[0] === x[0] && vx[0] !== x[0] ? 'La dérivée de at² est 2at.' : null),
+      indice: `v<sub>x</sub> = ${dd('x')} et v<sub>y</sub> = ${dd('y')} : dérive chaque coordonnée.`, solution: `v<sub>x</sub> = ${poly(vx)} et v<sub>y</sub> = ${poly(vy)} : ${N('v')}(t) = ${par(vx)}${I} + ${par(vy)}${J}` }] };
+}
+function vitesseDate() {
+  const x = [nz(4), entre(-6, 6), entre(-6, 6)], y = fonction(), t = entre(1, 3);
+  const vx = 2 * x[0] * t + x[1], vy = 2 * y[0] * t + y[1];
+  return { theme: 'Vitesse à une date', consigne: `Un point M a pour coordonnées x(t) = ${poly(x)} et y(t) = ${poly(y)} (en m, t en s). Donne les coordonnées du vecteur vitesse à t = ${t} s.`,
+    parties: [{ type: 'coord', label: `${N('v')}(${t})`, valeurs: [vx, vy], unite: MS,
+      diag: v => (v[0] === val(x, t) ? `Tu as calculé x(${t}) : il faut d'abord dériver x(t).` : null),
+      indice: `Dérive x(t) et y(t), puis remplace t par ${t}.`, solution: `v<sub>x</sub> = ${poly([2 * x[0], x[1]])} ⇒ v<sub>x</sub>(${t}) = ${fmt(vx)} ${MS} ; v<sub>y</sub> = ${poly([2 * y[0], y[1]])} ⇒ v<sub>y</sub>(${t}) = ${fmt(vy)} ${MS}` }] };
+}
+function ecritureIJ() {
+  const x = [nz(4), entre(-6, 6), entre(-6, 6)], y = [0, nz(8), entre(-6, 6)], t = entre(1, 3);
+  const vx = 2 * x[0] * t + x[1], vy = y[1];
+  return { theme: 'Vecteur vitesse', consigne: `Un point M a pour coordonnées x(t) = ${poly(x)} et y(t) = ${poly(y)} (en m, t en s). Écris le vecteur vitesse à t = ${t} s avec ${I} et ${J}.`,
+    parties: [{ type: 'ij', label: `${N('v')}(${t}) =`, valeurs: [vx, vy], lecture: false, indice: `Dérive x(t) et y(t), remplace t par ${t}, puis écris v<sub>x</sub>${I} + v<sub>y</sub>${J}.`,
+      solution: `v<sub>x</sub>(${t}) = ${fmt(vx)} ${MS} ; v<sub>y</sub> = ${fmt(vy)} ${MS} : ${N('v')}(${t}) = ${ij(vx, vy)}` }] };
+}
+function valeurVitesse() {
+  const t = entre(1, 3), x = fonction(), y = fonction();
+  const vx = 2 * x[0] * t + x[1], vy = 2 * y[0] * t + y[1], v = Math.hypot(vx, vy), ent = Number.isInteger(v);
+  return { theme: 'Valeur de la vitesse', consigne: `Un point M a pour coordonnées x(t) = ${poly(x)} et y(t) = ${poly(y)} (en m, t en s). Calcule la valeur de sa vitesse à t = ${t} s${ent ? '' : ', arrondie au dixième'}.`,
+    parties: [{ type: 'nombre', label: `v(${t}) ${ent ? '=' : '≈'}`, valeur: v, tol: ent ? 1e-9 : .051, dec: ent ? 0 : 1, unite: MS,
+      diag: w => (Math.abs(w - Math.hypot(val(x, t), val(y, t))) < .06 ? 'Tu as calculé la distance OM : il faut d\'abord dériver pour avoir vx et vy.' : Math.abs(w - (Math.abs(vx) + Math.abs(vy))) < .01 ? 'On n\'additionne pas : v = √(vx² + vy²).' : null),
+      indice: `Dérive x(t) et y(t), calcule v<sub>x</sub>(${t}) et v<sub>y</sub>(${t}), puis v = √(v<sub>x</sub>² + v<sub>y</sub>²).`,
+      solution: `v<sub>x</sub> = ${poly([2 * x[0], x[1]])} ⇒ v<sub>x</sub>(${t}) = ${fmt(vx)} ${MS} ; v<sub>y</sub> = ${poly([2 * y[0], y[1]])} ⇒ v<sub>y</sub>(${t}) = ${fmt(vy)} ${MS}<br>v = ${R(`${sq(vx)} + ${sq(vy)}`)} ${ent ? '=' : '≈'} ${ent ? fmt(v) : fmt(v, 1)} ${MS}` }] };
+}
+
+// 6 QCM et 4 questions à saisie
+function tirage() {
+  const c3 = [cours(), cours(), cours()];
+  return [coordQCM(), c3[0], vitesse(), vecteurQCM(), vitesseDate(), c3[1], valeurQCM(), ecritureIJ(), c3[2], valeurVitesse()];
+}
+
+CIN.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 4 · QUESTIONS 2/4', titre: 'Le vecteur vitesse',
+  intro: '<p class="er-contexte">10 questions tirées au hasard, surtout des QCM : coordonnées du vecteur vitesse, vitesse à une date donnée, valeur de la vitesse, questions de cours.</p>',
+  questions: tirage,
+  revoir: { href: 'module_4b_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4c_cours.html', label: 'Cours : le vecteur accélération →' },
+});
+CIN.menu('module_4b_questions');
+</script>
+</body>
+</html>

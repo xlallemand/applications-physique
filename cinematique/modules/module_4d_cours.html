@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : détermination expérimentale de v et de a — Cinématique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cin.css">
+<script src="vecteurs.js"></script>
+<script src="cin.js"></script>
+<script src="figures.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 4/4</span>
+    <h2 class="er-titre">Détermination expérimentale de <span class="vec-nom">v</span> et de <span class="vec-nom">a</span></h2>
+    <p class="er-contexte">En TP, on ne connaît pas les équations du mouvement : on enregistre les positions successives du point (chronophotographie, vidéo), puis on en déduit les vecteurs vitesse et accélération, à la main ou avec un tableur.</p>
+    <p class="cin-lien-fiche"><a href="fiche_4.html">Fiche récapitulative du module 4 →</a></p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes : notion, exemple, puis exemples semblables
+   faits par l'élève (« À toi »).
+   Les vecteurs vitesse dessinés ne relient jamais deux positions :
+   avec les échelles choisies, la flèche s'arrête au milieu du
+   segment MiMi+1, sur un nœud du quadrillage.
+   ============================================================ */
+const { nomHTML: N, colHTML: col } = VEC;
+const { fmt, fr } = CIN;
+const M = CIN.MOINS;
+const MS = `m·s<sup>${M}1</sup>`, MS2 = `m·s<sup>${M}2</sup>`;
+const R = h => `<span class="racine">√<span>${h}</span></span>`;
+const nombre = (q, label, valeur, opts) => ({ parties: [Object.assign({ type: 'nombre', q, label, valeur, tol: 1e-9 }, opts)] });
+const points = pts => pts.map((p, i) => ({ x: p[0], y: p[1], nom: `M${i + 1}`, dx: -16, dy: 6 }));
+// diagnostic d'un vecteur vitesse tracé en M_i : direction de M_iM_i+1, longueur selon l'échelle
+const diagVitesse = (i, valTxt) => (v) => {
+  const d = [v.fin[0] - v.dep[0], v.fin[1] - v.dep[1]], a = v.coord;
+  const vect = d[0] * a[1] - d[1] * a[0], scal = d[0] * a[0] + d[1] * a[1];
+  if (!vect && scal > 0) return `La direction et le sens sont justes, mais pas la longueur : arrête la flèche quand la valeur affichée vaut ${valTxt}.`;
+  if (!vect) return `La direction est juste, mais pas le sens : le vecteur vitesse est dans le sens du mouvement, de M<sub>${i}</sub> vers M<sub>${i + 1}</sub>.`;
+  return `Le vecteur vitesse en M<sub>${i}</sub> a la direction du segment M<sub>${i}</sub>M<sub>${i + 1}</sub> : la flèche part de M<sub>${i}</sub> et longe ce segment.`;
+};
+
+new CIN.Cours(document.getElementById('etapes'), [
+
+  // ---------- 1. Calcul approché de la vitesse ----------
+  (cours) => {
+    const c = cours.carte('1. Calcul approché d\'une vitesse (TP)');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <p>Sur une chronophotographie ou une vidéo, on repère les positions M<sub>1</sub>, M<sub>2</sub>, M<sub>3</sub>… à intervalles de temps égaux τ. On fait l'approximation que la vitesse instantanée en M<sub>i</sub> est égale à la vitesse moyenne entre M<sub>i</sub> et M<sub>i+1</sub>.</p>
+        <div class="cle"><p><b class="cle-titre">Vecteur vitesse au point M<sub>i</sub>.</b></p>
+          <ul class="er-liste">
+            <li>origine : le point M<sub>i</sub> ;</li>
+            <li>direction : celle du segment M<sub>i</sub>M<sub>i+1</sub>, et sens du mouvement ;</li>
+            <li>valeur : <span style="white-space:nowrap">v<sub>i</sub> = ${fr('M<sub>i</sub>M<sub>i+1</sub>', 'τ')}</span> (τ : durée entre deux positions).</li>
+          </ul>
+          <p>Plus τ est petit (positions rapprochées), plus cette mesure est précise. Pour dessiner le vecteur, on choisit une <b>échelle</b>, par exemple 1 cm ↔ 0,5 ${MS}.</p>
+          <p><b class="cle-titre">Avec un tableur ou un programme Python</b>, à partir des coordonnées x<sub>i</sub> et y<sub>i</sub> des points :</p>
+          <p class="ph-formule"><span class="cin-nobr">v<sub>x,i</sub> = ${fr('x<sub>i+1</sub> − x<sub>i</sub>', 't<sub>i+1</sub> − t<sub>i</sub>')}</span> &nbsp;&nbsp; <span class="cin-nobr">v<sub>y,i</sub> = ${fr('y<sub>i+1</sub> − y<sub>i</sub>', 't<sub>i+1</sub> − t<sub>i</sub>')}</span></p>
+          <p class="er-petit">t<sub>i+1</sub> − t<sub>i</sub> se note aussi τ ou Δt.</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <p>Positions d'une balle lancée, toutes les τ = 0,10 s ; 1 carreau représente 5 cm. Entre M<sub>1</sub> et M<sub>2</sub>, la balle se déplace de 2 carreaux horizontalement et de 4 verticalement : M<sub>1</sub>M<sub>2</sub> = ${R('2² + 4²')} ≈ 4,47 carreaux, soit 4,47 × 5 ≈ 22 cm = 0,22 m.</p>
+        <p class="ph-calc">v<sub>1</sub> = ${fr('M<sub>1</sub>M<sub>2</sub>', 'τ')} = ${fr('0,22', '0,10')} = <span class="c">2,2 ${MS}</span></p>
+        <div data-x="chrono"></div>
+        <p>Avec l'échelle 1 carreau ↔ 1 ${MS}, ${N('v')}<sub>1</sub> est une flèche de 2,2 carreaux, partant de M<sub>1</sub>, dans la direction de M<sub>1</sub>M<sub>2</sub>.</p>
+        <p class="er-petit">Le vecteur vitesse ne relie pas deux positions : sa longueur dépend de l'échelle des vitesses choisie.</p>
+      </div>`);
+    new VEC.Repere(c.querySelector('[data-x="chrono"]'), { mode: 'aucun', xmin: 0, xmax: 12, ymin: 0, ymax: 8, axes: false, unitaires: false,
+      points: points([[1, 1], [3, 5], [5, 7], [7, 7], [9, 5], [11, 1]]), vecteurs: [{ nom: 'v_1', dep: [1, 1], coord: [1, 2], fixe: true, coul: '#dc2626', nomPos: [.75, -.1] }] });
+    CIN.aToi(c, [
+      nombre('Sur une chronophotographie, M<sub>5</sub>M<sub>6</sub> = 24 cm et τ = 40 ms. Calcule v<sub>5</sub>.', 'v<sub>5</sub> =', 6, { tol: .051, unite: MS,
+        diag: v => (Math.abs(v - 600) < 1 ? 'Convertis la distance en mètres : 24 cm = 0,24 m.' : Math.abs(v - .006) < .0005 ? 'Convertis la durée en secondes : 40 ms = 0,040 s.' : Math.abs(v - .6) < .01 ? 'Convertis en mètres et en secondes : 0,24 m et 0,040 s.' : null),
+        indice: 'v₅ = M₅M₆ / τ, avec M₅M₆ en m et τ en s.', solution: `v<sub>5</sub> = ${fr('0,24', '0,040')} = 6,0 ${MS}` }),
+      nombre('Dans un tableur : x<sub>3</sub> = 1,20 m, x<sub>4</sub> = 1,45 m et t<sub>4</sub> − t<sub>3</sub> = 0,050 s. Calcule v<sub>x,3</sub>.', 'v<sub>x,3</sub> =', 5, { tol: .051, unite: MS,
+        diag: v => (Math.abs(v - .25) < .01 ? 'Tu as calculé x₄ − x₃ : il faut encore diviser par la durée.' : null), indice: 'vx,3 = (x₄ − x₃) / (t₄ − t₃).', solution: `v<sub>x,3</sub> = ${fr('1,45 − 1,20', '0,050')} = ${fr('0,25', '0,050')} = 5,0 ${MS}` }),
+      { titre: `Trace ${N('v')}<sub>2</sub>, le vecteur vitesse au point M<sub>2</sub>.`, enonce: `<p>Positions d'un palet toutes les τ = 40 ms ; 1 carreau représente 2 cm. On a calculé <b>v<sub>2</sub> = ${fr('M<sub>2</sub>M<sub>3</sub>', 'τ')} = 2,2 ${MS}</b>. Échelle des vitesses : <b>1 carreau ↔ 1 ${MS}</b>.</p>`,
+        parties: [{ type: 'tracer', q: `${N('v')}<sub>2</sub> part de M<sub>2</sub>, dans la direction de M<sub>2</sub>M<sub>3</sub>. Arrête la flèche quand la valeur affichée vaut 2,2 ${MS}.`,
+          repere: { xmin: 0, xmax: 14, ymin: 0, ymax: 8, axes: false, unitaires: false, points: points([[1, 1], [7, 1], [11, 3], [13, 5], [13, 7]]), vecteurs: [{ nom: 'v_2', dep: [7, 1], coord: [2, 1], valeur: { k: 1, unite: MS, dec: 1 } }] },
+          diag: diagVitesse(2, `2,2 ${MS}`),
+          solution: `${N('v')}<sub>2</sub> part de M<sub>2</sub> et suit le segment M<sub>2</sub>M<sub>3</sub> (2 carreaux à droite pour 1 vers le haut). Sa longueur est ${R('2² + 1²')} ≈ 2,2 carreaux, c'est-à-dire 2,2 ${MS} avec l'échelle : la flèche s'arrête au milieu du segment M<sub>2</sub>M<sub>3</sub>.` }] },
+    ], () => cours.continuer(c));
+    return c;
+  },
+
+  // ---------- 2. Accélération : tracé expérimental ----------
+  (cours) => {
+    const c = cours.carte('2. Tracé expérimental du vecteur accélération (TP)');
+    cours.ajouter(c, `<div class="cours-bloc">
+        <div class="cle"><p><b class="cle-titre">Vecteur accélération au point M<sub>i</sub>.</b></p>
+          <ul class="er-liste">
+            <li>origine : le point M<sub>i</sub> ;</li>
+            <li>même direction et même sens que le vecteur <span style="white-space:nowrap">Δ${N('v')}<sub>i</sub> = ${N('v')}<sub>i+1</sub> ${M} ${N('v')}<sub>i</sub></span> (différence de deux vecteurs, module 2) ;</li>
+            <li>valeur : <span style="white-space:nowrap">a<sub>i</sub> = ${fr('Δv<sub>i</sub>', 'τ')}</span>, avec τ la durée entre deux positions ;</li>
+            <li>pour le dessiner, on choisit une échelle.</li>
+          </ul>
+          <p><b class="cle-titre">Avec un tableur ou Python</b>, à partir des coordonnées de la vitesse :</p>
+          <p class="ph-formule"><span class="cin-nobr">a<sub>x,i</sub> = ${fr('v<sub>x,i+1</sub> − v<sub>x,i</sub>', 't<sub>i+1</sub> − t<sub>i</sub>')}</span> &nbsp;&nbsp; <span class="cin-nobr">a<sub>y,i</sub> = ${fr('v<sub>y,i+1</sub> − v<sub>y,i</sub>', 't<sub>i+1</sub> − t<sub>i</sub>')}</span></p>
+          <p class="er-petit">On peut aussi utiliser les points avant et après M<sub>i</sub> : a<sub>x,i</sub> = (v<sub>x,i+1</sub> − v<sub>x,i−1</sub>) / (t<sub>i+1</sub> − t<sub>i−1</sub>).</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <p>En M<sub>4</sub>, ${N('v')}<sub>4</sub> ${col(3, 1)} ; en M<sub>5</sub>, ${N('v')}<sub>5</sub> ${col(3, -1)} (en ${MS}, 1 carreau ↔ 1 ${MS}). On trace ${N('v')}<sub>5</sub> ${M} ${N('v')}<sub>4</sub> en mettant bout à bout ${N('v')}<sub>5</sub> et ${M}${N('v')}<sub>4</sub> :</p>
+        <div data-x="ex"></div>
+        <p class="ph-calc">Δ${N('v')}<sub>4</sub> = ${col('3 − 3', '−1 − 1')} = ${col(0, -2)} : Δv<sub>4</sub> = 2 ${MS}. Avec τ = 0,20 s : a<sub>4</sub> = ${fr('2', '0,20')} = <span class="c">10 ${MS2}</span>, vers le bas.</p>
+      </div>`);
+    new VEC.Repere(c.querySelector('[data-x="ex"]'), { mode: 'aucun', xmin: 0, xmax: 12, ymin: 0, ymax: 7, axes: false, unitaires: false,
+      vecteurs: [{ nom: 'v_4', dep: [1, 4], coord: [3, 1], fixe: true }, { nom: 'v_5', dep: [6, 5], coord: [3, -1], fixe: true },
+        { nom: '', dep: [9, 4], coord: [-3, -1], fixe: true, pointille: true, coul: '#8d8f94' }, { nom: 'Δv_4', dep: [6, 5], coord: [0, -2], fixe: true, coul: '#dc2626', nomPos: [-.9, 0] }] });
+    CIN.aToi(c, [
+      nombre(`Dans un tableur : v<sub>x,2</sub> = 2,0 ${MS}, v<sub>x,3</sub> = 2,6 ${MS} et t<sub>3</sub> − t<sub>2</sub> = 0,10 s. Calcule a<sub>x,2</sub>.`, 'a<sub>x,2</sub> =', 6, { tol: .051, unite: MS2,
+        diag: v => (Math.abs(v - .6) < .01 ? 'Tu as calculé la variation de vitesse : il faut encore diviser par la durée.' : null), indice: 'ax,2 = (vx,3 − vx,2) / (t₃ − t₂).', solution: `a<sub>x,2</sub> = ${fr('2,6 − 2,0', '0,10')} = 6,0 ${MS2}` }),
+      { titre: `Trace Δ${N('v')} = ${N('v')}<sub>3</sub> ${M} ${N('v')}<sub>2</sub> à partir du point M<sub>2</sub>.`, enonce: `<p class="er-petit">Mets bout à bout ${N('v')}<sub>3</sub> et l'opposé de ${N('v')}<sub>2</sub>, ou calcule d'abord les coordonnées.</p>`,
+        parties: [{ type: 'tracer', repere: { xmin: 0, xmax: 12, ymin: 0, ymax: 7, axes: false, unitaires: false, points: [{ x: 8, y: 4, nom: 'M2', dx: -18, dy: 4 }],
+          vecteurs: [{ nom: 'v_2', dep: [1, 4], coord: [2, 2], fixe: true }, { nom: 'v_3', dep: [4, 6], coord: [3, -1], fixe: true }, { nom: 'Δv', dep: [8, 4], coord: [1, -3] }] },
+          solution: `Δ${N('v')} = ${col('3 − 2', '−1 − 2')} = ${col(1, -3)}` }] },
+    ], () => cours.continuer(c, 'Ce qu\'il faut retenir →'));
+    return c;
+  },
+
+  // ---------- À retenir ----------
+  (cours) => {
+    const c = cours.carte('À retenir');
+    cours.ajouter(c, `<div class="cle"><p><b class="cle-titre">Vitesse en M<sub>i</sub>.</b> Direction de M<sub>i</sub>M<sub>i+1</sub>, sens du mouvement ; v<sub>i</sub> = M<sub>i</sub>M<sub>i+1</sub> / τ ; tableur : v<sub>x,i</sub> = (x<sub>i+1</sub> − x<sub>i</sub>) / (t<sub>i+1</sub> − t<sub>i</sub>).</p></div>
+      <div class="cle"><p><b class="cle-titre">Accélération en M<sub>i</sub>.</b> Direction et sens de Δ${N('v')}<sub>i</sub> = ${N('v')}<sub>i+1</sub> ${M} ${N('v')}<sub>i</sub> ; a<sub>i</sub> = Δv<sub>i</sub> / τ ; tableur : a<sub>x,i</sub> = (v<sub>x,i+1</sub> − v<sub>x,i</sub>) / (t<sub>i+1</sub> − t<sub>i</sub>).</p></div>
+      <div class="cle"><p><b class="cle-titre">Tracé.</b> La longueur des flèches dépend de l'échelle choisie : un vecteur vitesse ne relie pas deux positions.</p></div>
+      <div class="er-actions">
+        <a class="btn-primary" style="text-decoration:none" href="module_4d_questions.html">Questions : détermination expérimentale →</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_5_cours.html">Module 5 : le repère de Frenet</a>
+        <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a>
+      </div>`);
+    return c;
+  },
+]);
+
+CIN.menu('module_4d_cours');
+</script>
+</body>
+</html>

@@ -12,6 +12,7 @@
      graphique  papier millimétré, droites et points de mesure
      noyaux     noyaux radioactifs et courbe N(t)
      puissance  tension et intensité déphasées, puissance instantanée
+     cinematique  chronophotographies (positions successives) et vecteurs vitesse
      fractions  disques et barres partagés
      molecules  modèles moléculaires en boules
      formules:physique | formules:redox | formules:pile | formules:combustion | formules:ph | formules:algebre
@@ -225,6 +226,44 @@
         ctx.moveTo(x, y - r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.quadraticCurveTo(x, y, x, y + r);
         ctx.quadraticCurveTo(x, y, x - r, y); ctx.quadraticCurveTo(x, y, x, y - r); ctx.fill();
       }
+    },
+
+    // Chronophotographies : positions successives d'un projectile et d'un point
+    // en mouvement circulaire, avec quelques vecteurs vitesse tangents
+    cinematique(ctx, w, h, c) {
+      const p = 26;
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineWidth = 1;
+      for (let x = 0, i = 0; x <= w; x += p, i++) { ctx.globalAlpha = i % 5 ? .06 : .13; trait(ctx, x, 0, x, h); }
+      for (let y = 0, i = 0; y <= h; y += p, i++) { ctx.globalAlpha = i % 5 ? .06 : .13; trait(ctx, 0, y, w, y); }
+      function fleche(x, y, dx, dy, a) {
+        const L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, t = 10;
+        ctx.globalAlpha = a; ctx.lineWidth = 2.5; trait(ctx, x, y, x + dx - ux * 4, y + dy - uy * 4);
+        ctx.beginPath(); ctx.moveTo(x + dx, y + dy);
+        ctx.lineTo(x + dx - ux * t - uy * t * .45, y + dy - uy * t + ux * t * .45);
+        ctx.lineTo(x + dx - ux * t + uy * t * .45, y + dy - uy * t - ux * t * .45); ctx.closePath(); ctx.fill();
+      }
+      // projectiles : x = v0x t, y = v0y t − g t² / 2
+      [[w * .5, h * .92, 95, -150, .55, 1], [w * .6, h * .95, 120, -110, .32, .8]].forEach(([x0, y0, vx, vy, a, k]) => {
+        const g = 60, dt = .5 * k, n = Math.ceil((2 * -vy / g) / dt) + 2;
+        for (let i = 0; i < n; i++) {
+          const t = i * dt, x = x0 + vx * t * k * 1.6, y = y0 + (vy * t + g * t * t / 2) * k * 1.6;
+          if (x > w + 10) break;
+          ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(x, y, 3.2, 0, 7); ctx.fill();
+          // vecteur vitesse tangent, long d'un demi-intervalle : il ne rejoint pas la position suivante
+          const e = dt * k * 1.6 * .5;
+          if (i === 2 || i === Math.floor(n / 2) || i === n - 3) fleche(x, y, vx * e, (vy + g * t) * e, a * .9);
+        }
+      });
+      // mouvement circulaire : vecteur vitesse tangent, accélération vers le centre
+      const cx = w * .84, cy = h * .32, r = Math.min(110, h * .24);
+      for (let i = 0; i < 16; i++) {
+        const a = i * Math.PI / 8, x = cx + r * Math.cos(a), y = cy + r * Math.sin(a);
+        ctx.globalAlpha = .4; ctx.beginPath(); ctx.arc(x, y, 3, 0, 7); ctx.fill();
+      }
+      const a0 = -Math.PI / 4, xm = cx + r * Math.cos(a0), ym = cy + r * Math.sin(a0);
+      fleche(xm, ym, 60 * Math.sin(a0), -60 * Math.cos(a0), .6);
+      fleche(xm, ym, -r * .5 * Math.cos(a0), -r * .5 * Math.sin(a0), .45);
+      ctx.globalAlpha = .35; ctx.beginPath(); ctx.arc(cx, cy, 3, 0, 7); ctx.fill();
     },
 
     // Formules écrites en quinconce, plus ou moins marquées

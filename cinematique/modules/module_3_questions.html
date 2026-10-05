@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions sur la dérivation — Cinématique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cin.css">
+<script src="vecteurs.js"></script>
+<script src="cin.js"></script>
+<style>.ph-choix .fr { font-size: 1em; }</style>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : notation (2), sens de la
+   notation (1), ce n'est pas une division (2), unités (1),
+   dériver une fonction (3), dériver un vecteur (1).
+   ============================================================ */
+const { hasard, melanger, entre, fmt, fr, dd, poly } = CIN;
+const N = VEC.nomHTML;
+const M = CIN.MOINS;
+const o = (id, label) => ({ id, label });
+const choix = (theme, q, options, bonne, solution, indice, opts) => ({ theme, parties: [Object.assign({ type: 'choix', q, options, bonne, solution, indice }, opts)] });
+const FONCTIONS = ['x', 'y', 'z', 'f', 'g', 'h', 'v<sub>x</sub>', 'v<sub>y</sub>', 'v<sub>z</sub>', 'E', 'p'];
+const nz = () => { let k; do { k = entre(-9, 9); } while (!k); return k; };
+
+/* ---------- Notation ---------- */
+function notation() {
+  const f = hasard(FONCTIONS), v = Math.random() < .8 ? 't' : hasard(['x', 'u', 's']);
+  if (Math.random() < .5) return choix('Notation', `La dérivée de ${f}(${v}) par rapport à ${v} se note :`,
+    [o('ok', dd(f, v)), o('a', fr('d' + v, 'd' + f)), o('b', fr(f, v)), o('c', fr('d' + f, 'd' + (v === 't' ? 'x' : 't')))], 'ok',
+    `${f}'(${v}) = ${dd(f, v)} : en haut la fonction, en bas la variable.`, 'En haut : d + la fonction. En bas : d + la variable.');
+  return choix('Notation', `${dd(f, v)} est :`, [o('ok', `la dérivée de ${f} par rapport à ${v}`), o('a', `la dérivée de ${v} par rapport à ${f}`), o('b', `${f} divisé par ${v}`), o('c', `la valeur de ${f} pour ${v} = d`)], 'ok',
+    `${dd(f, v)} = ${f}'(${v}).`, 'En haut la fonction, en bas la variable.', { colonne: true });
+}
+function sens() {
+  return hasard([
+    () => choix('Origine de la notation', `${dd('f', 'x')} représente :`, [o('ok', 'le rapport d\'une très petite variation de f et de la très petite variation de x correspondante'), o('a', 'le quotient de f par x'), o('b', 'une grande variation de f'), o('c', 'l\'aire sous la courbe de f')], 'ok',
+      `${dd('f', 'x')} = (petite variation de f) / (petite variation de x) : c'est le coefficient directeur de la tangente.`, 'd remplace Δ quand la variation devient infiniment petite.', { colonne: true }),
+    () => choix('Origine de la notation', 'Quand h tend vers 0, la droite qui passe par les points d\'abscisses a et a + h de la courbe devient :', [o('ok', 'la tangente à la courbe en a'), o('a', 'horizontale'), o('b', 'verticale'), o('c', 'la courbe elle-même')], 'ok',
+      'Les deux points se rapprochent : la sécante devient la tangente en a.', 'Souviens-toi du curseur h du cours.', { colonne: true }),
+    () => choix('Origine de la notation', 'Le nombre dérivé f\'(a) est :', [o('ok', 'le coefficient directeur de la tangente à la courbe en a'), o('a', 'la valeur de f en a'), o('b', 'l\'ordonnée à l\'origine de la tangente'), o('c', 'le quotient f(a) / a')], 'ok',
+      'f\'(a) = lim (f(a + h) − f(a)) / h : coefficient directeur de la tangente en a.', 'Pense à la tangente.', { colonne: true }),
+  ])();
+}
+
+/* ---------- Ce n'est pas une division ---------- */
+function division() {
+  const f = hasard(['x', 'y', 'z', 'f', 'g']);
+  const cas = hasard([
+    () => { const a = nz(); return { expr: poly([a, 0, 0]), bon: poly([2 * a, 0]), div: poly([a, 0]), autres: [poly([a, 0, 0]), poly([0, 2 * a, 0]).replace(/t$/, '')] }; },
+    () => { const a = nz(), b = nz(); return { expr: poly([a, b]), bon: fmt(a), div: fr(poly([a, b]), 't'), autres: [poly([a, b]), fmt(a + b)] }; },
+    () => { const c = nz(); return { expr: fmt(c), bon: '0', div: fr(fmt(c), 't'), autres: [fmt(c), poly([c, 0])] }; },
+    () => { const a = nz(), b = nz(); return { expr: poly([a, b, 0]), bon: poly([2 * a, b]), div: poly([a, b]), autres: [poly([a, b, 0]), poly([2 * a, 0])] }; },
+  ])();
+  const opts = [o('ok', cas.bon), o('div', cas.div)].concat(cas.autres.filter(x => x !== cas.bon && x !== cas.div).slice(0, 2).map((x, i) => o('f' + i, x)));
+  return choix('Dériver, pas diviser', `${f}(t) = ${cas.expr}. Que vaut ${dd(f)} ?`, opts, 'ok', `${dd(f)} = ${cas.bon} (on dérive ${f}(t)).`, 'Dérive terme à terme : at² → 2at ; at → a ; constante → 0.',
+    { indices: { div: 'Tu as divisé par t : pour calculer la dérivée, on dérive, on ne divise pas.' } });
+}
+function unites() {
+  return hasard([
+    () => choix('Unités', `x est en m et t en s. ${dd('x')} s'exprime en :`, [o('ok', `m·s<sup>${M}1</sup>`), o('a', 'm·s'), o('b', 'm'), o('c', `s·m<sup>${M}1</sup>`)], 'ok', `${dd('x')} → m / s = m·s<sup>${M}1</sup>.`, 'Écris l\'unité du haut divisée par l\'unité du bas.'),
+    () => choix('Unités', `v est en m·s<sup>${M}1</sup> et t en s. ${dd('v')} s'exprime en :`, [o('ok', `m·s<sup>${M}2</sup>`), o('a', `m·s<sup>${M}1</sup>`), o('b', 'm·s'), o('c', 'm')], 'ok', `${dd('v')} → (m·s<sup>${M}1</sup>) / s = m·s<sup>${M}2</sup>.`, 'Écris l\'unité du haut divisée par l\'unité du bas.'),
+    () => choix('Unités', `Un volume V est en m³ et t en s. ${dd('V')} (débit) s'exprime en :`, [o('ok', `m³·s<sup>${M}1</sup>`), o('a', 'm³·s'), o('b', 'm³'), o('c', `m·s<sup>${M}1</sup>`)], 'ok', `${dd('V')} → m³ / s = m³·s<sup>${M}1</sup>.`, 'Écris l\'unité du haut divisée par l\'unité du bas.'),
+    () => choix('Unités', `Une énergie E est en J et t en s. ${dd('E')} s'exprime en :`, [o('ok', `J·s<sup>${M}1</sup>, c'est-à-dire en watts`), o('a', 'J·s'), o('b', 'J'), o('c', `s·J<sup>${M}1</sup>`)], 'ok', `${dd('E')} → J / s = W : c'est une puissance.`, 'Écris l\'unité du haut divisée par l\'unité du bas.'),
+  ])();
+}
+
+/* ---------- Dériver une fonction (cases à compléter) ---------- */
+function deriver() {
+  const f = hasard(FONCTIONS.slice(0, 9)), deg2 = Math.random() < .75;
+  const c = deg2 ? [nz(), entre(-9, 9), entre(-9, 9)] : [0, nz(), entre(-9, 9)];
+  const dv = [2 * c[0], c[1]];
+  const morceaux = deg2 ? [{ v: dv[0], aria: 'coefficient de t' }, ' t + ', { v: dv[1], aria: 'terme constant' }] : [{ v: dv[1], aria: 'valeur de la dérivée' }];
+  return { theme: 'Dériver une fonction', consigne: `${f}(t) = ${poly(c)}. Calcule ${dd(f)}.`, enonce: deg2 ? '<p class="er-petit">Écris 0 si un terme n\'existe pas, et utilise ± pour un nombre négatif.</p>' : '',
+    parties: [{ type: 'gabarit', label: `${dd(f)} =`, morceaux,
+      diag: v => (deg2 && v[0] === c[0] && c[0] !== dv[0] ? `La dérivée de ${poly([c[0], 0, 0])} est ${poly([dv[0], 0])} : n'oublie pas de multiplier par 2.` : deg2 && c[2] && v[1] === c[2] && c[2] !== dv[1] ? 'La dérivée du terme constant est 0.' : !deg2 && c[2] && v[0] === c[2] ? 'La dérivée d\'une constante est 0 : seul le terme en t compte.' : null),
+      indice: 'Dérive terme à terme : at² → 2at ; at → a ; constante → 0.', solution: `${dd(f)} = ${poly(deg2 ? dv : [dv[1]])}` }] };
+}
+
+/* ---------- Dériver un vecteur ---------- */
+function vecteur() {
+  const I = N('i'), J = N('j');
+  const a = nz(), b = nz(), c = entre(-9, 9);
+  const nom = hasard(['OM', 'OG', 'v']);
+  return { theme: 'Dériver un vecteur', consigne: `${N(nom)}(t) = (${poly([a, 0, c])})${I} + ${poly([b, 0]).replace(/^−/, '(−') + (b < 0 ? ')' : '')}${J}. Calcule ${dd(N(nom))}.`,
+    enonce: '<p class="er-petit">On dérive chaque coordonnée ; les vecteurs unitaires sont constants.</p>',
+    parties: [{ type: 'gabarit', label: `${dd(N(nom))} =`, morceaux: [{ v: 2 * a, aria: `coefficient de t devant i` }, ` t${I} + `, { v: b, aria: 'coefficient devant j' }, ` ${J}`],
+      diag: v => (v[0] === a ? `La dérivée de ${poly([a, 0, 0])} est ${poly([2 * a, 0])}.` : null),
+      indice: `Dérive ${poly([a, 0, c])} (coordonnée selon i⃗), puis ${poly([b, 0])} (coordonnée selon j⃗).`,
+      solution: `${dd(N(nom))} = ${poly([2 * a, 0])}${I} ${b < 0 ? M : '+'} ${Math.abs(b) === 1 ? '' : fmt(Math.abs(b))}${J}` }] };
+}
+
+function tirage() {
+  return [notation(), division(), deriver(), notation(), sens(), deriver(), division(), unites(), deriver(), vecteur()];
+}
+
+CIN.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Dérivation en physique',
+  intro: `<p class="er-contexte">10 questions tirées au hasard : la notation ${dd('f')}, son origine, le piège de la division, les unités, dériver une fonction et un vecteur.</p>`,
+  questions: tirage,
+  revoir: { href: 'module_3_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4a_cours.html', label: 'Module 4 : le vecteur position →' },
+});
+CIN.menu('module_3_questions');
+</script>
+</body>
+</html>

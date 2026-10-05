@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : fiche récapitulative — Cinématique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="cin.css">
+<script src="vecteurs.js"></script>
+<script src="cin.js"></script>
+<script src="figures.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page cin-fiche" id="fiche"></div>
+
+<script>
+/* ============================================================
+   Fiche récapitulative du module 2 : coordonnées, écritures,
+   tracé, somme, module, trigonométrie.
+   ============================================================ */
+const { nomHTML: N, colHTML: col, ijHTML: ij } = VEC;
+const M = CIN.MOINS;
+const R = h => `<span class="racine">√<span>${h}</span></span>`;
+const fixe = (nom, dep, coord, extra) => Object.assign({ nom, dep, coord, fixe: true }, extra);
+
+document.getElementById('fiche').innerHTML = `
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Les vecteurs</h2>
+  </div>
+
+  <section class="er-card" id="coordonnees">
+    <h3 class="cours-titre">Coordonnées d'un vecteur</h3>
+    <div class="cle"><p>De l'origine à la pointe du vecteur :</p>
+      <ul class="er-liste">
+        <li><b>1<sup>re</sup> coordonnée</b> = déplacement <b>horizontal</b> (selon ${N('i')}) : positive vers la droite, négative vers la gauche ;</li>
+        <li><b>2<sup>de</sup> coordonnée</b> = déplacement <b>vertical</b> (selon ${N('j')}) : positive vers le haut, négative vers le bas.</li>
+      </ul></div>
+    <div data-f="lire"></div>
+    <p class="cin-fiche-leg">${N('A')} ${col(2, 1)} ; ${N('B')} ${col(2, -3)} ; ${N('C')} ${col(-3, 0)}</p>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Deux écritures équivalentes</h3>
+    <div class="cle"><p class="ph-formule">${N('A')} ${col('x', 'y')} &nbsp;⇔&nbsp; ${N('A')} = x${N('i')} + y${N('j')}</p>
+      <ul class="er-liste">
+        <li>le coefficient 1 ne s'écrit pas : 1${N('j')} s'écrit ${N('j')} ;</li>
+        <li>un terme nul ne s'écrit pas : 3${N('i')} + 0${N('j')} s'écrit 3${N('i')} ;</li>
+        <li>un coefficient négatif donne un signe ${M} : ${N('B')} = ${ij(2, -3)}.</li>
+      </ul>
+      <p>Les vecteurs unitaires peuvent avoir d'autres noms : ${N('u_x')} et ${N('u_y')}, ${N('u_t')} et ${N('u_n')}…</p></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Tracer, additionner, soustraire</h3>
+    <div class="cle"><p><b class="cle-titre">Tracer.</b> Depuis le point de départ : horizontalement de la 1<sup>re</sup> coordonnée, puis verticalement de la 2<sup>de</sup>.</p>
+      <p><b class="cle-titre">Somme, différence.</b> Coordonnée par coordonnée :</p>
+      <p class="ph-formule">${N('u')} ${col('a', 'b')} et ${N('v')} ${col('c', 'd')} &nbsp;⇒&nbsp; ${N('u')} + ${N('v')} ${col('a + c', 'b + d')} &nbsp; ; &nbsp; ${N('u')} ${M} ${N('v')} ${col('a − c', 'b − d')}</p>
+      <p>Au dessin : flèches <b>bout à bout</b> ; ${N('u')} ${M} ${N('v')} = ${N('u')} + (${M}${N('v')}).</p></div>
+    <div data-f="somme"></div>
+    <p class="cin-fiche-leg">${N('AD')} = ${N('u')} + ${N('v')} : ${col(3, 1)} + ${col(2, -3)} = ${col(5, -2)}</p>
+  </section>
+
+  <section class="er-card" id="module">
+    <h3 class="cours-titre">Module d'un vecteur</h3>
+    <div class="cle"><p>Longueur de la flèche (théorème de Pythagore). Pour ${N('u')} ${col('a', 'b')} :</p>
+      <p class="ph-formule">‖${N('u')}‖ = ${R('a² + b²')}</p>
+      <p>Le module est la <b>valeur de la grandeur</b> représentée, avec son unité : v = ‖${N('v')}‖, F = ‖${N('F')}‖.</p>
+      <p class="er-petit">Exemple : ${N('v')} = ${ij(3, 4)} (en m·s<sup>${M}1</sup>) ⇒ v = ${R('3² + 4²')} = 5 m·s<sup>${M}1</sup>.</p></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Coordonnées par la trigonométrie</h3>
+    <div class="cle"><p>Vecteur de module V faisant un angle α avec un axe :</p>
+      <p class="ph-formule">côté adjacent à α = V × cos α &nbsp; ; &nbsp; côté opposé à α = V × sin α</p>
+      <ol class="er-liste">
+        <li>repérer l'angle α : le côté adjacent est sur l'axe à partir duquel α est mesuré ;</li>
+        <li>calculer les deux longueurs ;</li>
+        <li>mettre les signes selon le sens du vecteur (vers la gauche : x &lt; 0 ; vers le bas : y &lt; 0).</li>
+      </ol>
+      <p><b>Calculatrice en mode degrés.</b> Ne retiens pas « x = V cos α » : le côté adjacent n'est pas toujours horizontal.</p></div>
+    <div class="cin-fiche-figs deux">
+      <div>${FIG.trigo({ V: 10, ang: 40, axe: 'x', quad: 2, nom: 'v', unite: `m·s<sup>${M}1</sup>`, Vtxt: '10', cotes: 'formules' })}<p>α mesuré depuis l'axe des x : v<sub>x</sub> = ${M}10 cos 40°, v<sub>y</sub> = 10 sin 40°</p></div>
+      <div>${FIG.trigo({ V: 6, ang: 25, axe: 'y', quad: 4, nom: 'F', unite: 'N', Vtxt: '6,0', cotes: 'formules' })}<p>α mesuré depuis l'axe des y : F<sub>x</sub> = 6,0 sin 25°, F<sub>y</sub> = ${M}6,0 cos 25°</p></div>
+    </div>
+  </section>
+
+  <div class="er-actions cin-fiche-liens">
+    <a class="btn-secondary" style="text-decoration:none" href="module_2_cours.html">Cours : coordonnées</a>
+    <a class="btn-secondary" style="text-decoration:none" href="module_2b_cours.html">Cours : module et trigonométrie</a>
+  </div>`;
+
+new VEC.Repere(document.querySelector('[data-f="lire"]'), { mode: 'aucun', vecteurs: [fixe('A', [-5, 2], [2, 1]), fixe('B', [2, 5], [2, -3]), fixe('C', [5, -3], [-3, 0])],
+  extra: g => FIG.decomp([-5, 2], [2, 1])(g) + FIG.decomp([2, 5], [2, -3])(g) + FIG.decomp([5, -3], [-3, 0])(g) });
+new VEC.Repere(document.querySelector('[data-f="somme"]'), { mode: 'aucun', xmin: 0, xmax: 14, ymin: 0, ymax: 8, axes: false, unitaires: false,
+  points: [{ x: 7, y: 5, nom: 'A', dx: -10, dy: -8 }, { x: 12, y: 3, nom: 'D', dx: 12, dy: 4 }],
+  vecteurs: [fixe('u', [1, 6], [3, 1]), fixe('v', [2, 3], [2, -3]), fixe('', [7, 5], [3, 1], { pointille: true, coul: '#8d8f94' }), fixe('', [10, 6], [2, -3], { pointille: true, coul: '#8d8f94' }),
+    fixe('AD', [7, 5], [5, -2], { coul: getComputedStyle(document.documentElement).getPropertyValue('--accent-ink').trim(), nomPos: [0, -.7] })] });
+CIN.menu('fiche_2');
+</script>
+</body>
+</html>
