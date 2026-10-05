@@ -7,11 +7,10 @@
 .er-page button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .er-page p { margin: 0; }
 sub, sup { font-size: .7em; line-height: 0; }
-/* hauteur du bandeau fixe (60 px, plus 48 px de pastilles sur téléphone) : les défilements s'arrêtent dessous */
-html { --cin-haut: 60px; --cin-col1: 120px; --cin-rail: 72px; scroll-padding-top: calc(var(--cin-haut) + 12px); }
-html.cin-nav { scroll-padding-bottom: 84px; }
-html.cin-multi { --cin-haut: 108px; }
-@media (min-width: 900px) { html.cin-multi { --cin-haut: 60px; } }
+/* les défilements s'arrêtent sous le bandeau fixe (60 px à l'accueil, 54 px sur téléphone dans les modules) */
+html { scroll-padding-top: 72px; }
+html.cin-nav { scroll-padding-top: 66px; }
+@media (min-width: 900px) { html.cin-nav { scroll-padding-top: 16px; } }
 /* (le décalage vient de scroll-padding-top : un scroll-margin s'y ajouterait) */
 
 /* (blocs communs avec l'application « pH » : cours, « À toi », questions, graphiques, exercices) */
@@ -329,9 +328,9 @@ html.cin-multi { --cin-haut: 108px; }
 @media (max-width: 640px) { .cin-fiche-figs, .cin-fiche-figs.deux { grid-template-columns: 1fr; } }
 
 /* ============================================================
-   Navigation (CIN.menu) : bandeau, parties (1er niveau), onglets (2e niveau)
-   Téléphone (moins de 900 px) : pastilles des parties sous le bandeau, onglets dans une barre en bas.
-   Ordinateur : colonne des parties, puis colonne étroite des onglets, à gauche du cours.
+   Navigation (CIN.menu) : le sommaire de toute l'application
+   Ordinateur (900 px et plus) : sommaire toujours ouvert dans une colonne à gauche, pas de bandeau.
+   Téléphone : bandeau « où suis-je » ; un appui déroule le même sommaire sous le bandeau.
    ============================================================ */
 .cin-pilule {
   flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px; border-radius: 999px;
@@ -339,68 +338,92 @@ html.cin-multi { --cin-haut: 108px; }
   transition: background .15s;
 }
 .cin-pilule:hover { background: var(--paper-2); }
-.cin-pilule:focus-visible, .cin-pastille:focus-visible, .cin-onglet:focus-visible, .cin-bt:focus-visible, .cin-ligne:focus-visible, .cin-reprendre:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cin-pilule:focus-visible, .cin-ou:focus-visible, .cin-sligne:focus-visible, .cin-spt:focus-visible, .cin-page:focus-visible,
+.cin-bt:focus-visible, .cin-ligne:focus-visible, .cin-reprendre:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .cin-court { display: none; }
 @media (max-width: 520px) { .cin-court { display: inline; } .cin-long { display: none; } }
-/* sur téléphone, l'accueil est dans la barre du bas */
-@media (max-width: 899px) { html.cin-nav .cin-pilule-accueil { display: none; } }
 
-/* pastilles des parties */
-.cin-pastille {
-  flex-shrink: 0; display: inline-flex; align-items: center; padding: 7px 13px; border-radius: 999px; background: var(--paper);
-  color: var(--ink-2); font: 700 .82rem/1.2 var(--font-sans); text-decoration: none; white-space: nowrap; transition: background .15s;
+/* ---------- bandeau du téléphone : où suis-je ? ---------- */
+.cin-barre, .cin-barre-esp, .cin-voile { display: none; }
+.cin-barre {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: 54px; align-items: center; padding: 0 10px;
+  background: rgba(255,255,255,.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line);
 }
-.cin-pastille:hover { background: var(--paper-2); color: var(--ink); }
-.cin-pastille.ici { background: var(--cle-bg); color: var(--accent-ink); box-shadow: inset 0 0 0 1.5px var(--accent); }
-.cin-pastille.ok::before { content: '✓\00a0'; color: var(--success); }
+.cin-ou {
+  flex: 1; min-width: 0; height: 42px; display: flex; align-items: center; gap: 9px; border: none; border-radius: 999px;
+  background: var(--cle-bg); padding: 0 14px 0 5px; cursor: pointer; font: inherit; color: var(--ink); text-align: left;
+}
+.cin-ou[aria-expanded="true"] { box-shadow: inset 0 0 0 1.5px var(--accent); }
+.cin-ou .cin-snum { width: 32px; height: 32px; font-size: .85rem; }
+.cin-ou-t { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.2; }
+.cin-ou-t small { font-size: .7rem; font-weight: 700; color: var(--accent-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cin-ou-t b { font-size: .92rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cin-ou-chev { flex-shrink: 0; font-weight: 800; color: var(--accent-ink); }
 
-/* onglets : Cours, Questions, Fiche */
-.cin-onglet { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; color: var(--ink-2); font: 700 .68rem/1.2 var(--font-sans); text-decoration: none; }
-.cin-onglet .ic { width: 38px; height: 26px; border-radius: 999px; display: grid; place-items: center; font-size: .92rem; font-weight: 800; color: var(--ink-2); transition: background .15s; }
-.cin-onglet:hover .ic { background: var(--paper); }
-.cin-onglet.ici { color: var(--accent-ink); }
-.cin-onglet.ici .ic { background: var(--cle-bg); color: var(--accent-ink); }
+/* ---------- sommaire ---------- */
+.cin-som, .cin-som * { box-sizing: border-box; }
+.cin-som { display: none; flex-direction: column; gap: 10px; background: var(--sheet); font-family: var(--font-sans); }
+.cin-som-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 4px; }
+.cin-som-app { font-weight: 800; font-size: 1.12rem; letter-spacing: -.02em; color: var(--ink); text-decoration: none; }
+.cin-som-tete .cin-pilule { padding: 7px 12px; font-size: .8rem; }
+.cin-som-lab { margin: 0; padding: 0 6px; font-size: .66rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); }
+.cin-som-arbre { display: flex; flex-direction: column; gap: 2px; }
+.cin-smod { border-radius: 14px; }
+.cin-smod.ici { background: var(--cle-bg); }
+.cin-sligne {
+  width: 100%; display: flex; align-items: center; gap: 9px; padding: 7px 8px; border: none; background: none; border-radius: 14px;
+  cursor: pointer; font: inherit; color: var(--ink); text-align: left; transition: background .15s;
+}
+.cin-sligne:hover { background: var(--paper); }
+.cin-smod.ici .cin-sligne:hover { background: rgba(255,255,255,.5); }
+.cin-snum { flex-shrink: 0; width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; font-size: .75rem; font-weight: 800; background: var(--cle-bg); color: var(--accent-ink); }
+.cin-snum.fait { background: var(--success-bg); color: var(--success-text); }
+.cin-smod.ici .cin-snum:not(.fait), .cin-ou .cin-snum { background: var(--accent); color: #fff; }
+.cin-st { flex: 1; min-width: 0; font-size: .86rem; font-weight: 700; line-height: 1.2; }
+.cin-smod.ici .cin-st { color: var(--accent-ink); font-weight: 800; }
+.cin-sn { font-size: .7rem; font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cin-sligne[aria-expanded="true"] .cin-chev, .cin-spt[aria-expanded="true"] .cin-chev { transform: rotate(90deg); }
+.cin-senf { margin: 0 8px 6px 20px; padding-left: 12px; border-left: 2px solid var(--cle-line); display: flex; flex-direction: column; gap: 1px; }
+.cin-senf[hidden], .cin-spages[hidden] { display: none; }
+.cin-spt {
+  width: 100%; display: flex; align-items: center; gap: 6px; padding: 5px 6px; border: none; background: none; border-radius: 10px;
+  cursor: pointer; font: 600 .82rem/1.25 var(--font-sans); color: var(--ink-2); text-align: left;
+}
+.cin-spt:hover { background: rgba(255,255,255,.6); }
+.cin-spt.ici { color: var(--ink); font-weight: 800; }
+.cin-spt .cin-chev { margin-left: auto; font-size: .9rem; }
+.cin-v { color: var(--success); }
+.cin-spages { margin: 1px 0 4px 6px; display: flex; flex-direction: column; gap: 1px; }
+.cin-senf > .cin-spages { margin-left: 0; }
+.cin-page { display: flex; align-items: center; gap: 8px; padding: 4px 9px; border-radius: 999px; font-size: .8rem; font-weight: 600; color: var(--ink-2); text-decoration: none; }
+.cin-page:hover { background: rgba(255,255,255,.75); color: var(--ink); }
+.cin-smod:not(.ici) .cin-page:hover { background: var(--paper); }
+.cin-page .ic { flex-shrink: 0; width: 22px; height: 19px; border-radius: 999px; display: grid; place-items: center; font-size: .68rem; font-weight: 800; background: var(--paper); color: var(--ink-2); }
+.cin-smod.ici .cin-page .ic { background: rgba(255,255,255,.75); }
+.cin-page em { margin-left: auto; font-style: normal; font-size: .7rem; font-weight: 800; color: var(--success-text); font-variant-numeric: tabular-nums; }
+.cin-page.ici { background: var(--sheet); color: var(--accent-ink); font-weight: 800; box-shadow: inset 0 0 0 1.5px var(--accent); }
+.cin-smod .cin-page.ici .ic { background: var(--cle-bg); color: var(--accent-ink); }
+.cin-page.ici em { color: var(--accent); }
 
-.cin-haut, .cin-haut-spacer, .cin-bas, .cin-lateral { display: none; }
-
-/* téléphone */
+/* téléphone : bandeau, sommaire déroulé sous le bandeau */
 @media (max-width: 899px) {
-  html.cin-multi .cin-haut {
-    position: fixed; top: 60px; left: 0; right: 0; z-index: 990; height: 48px; display: flex; align-items: center; gap: 6px; padding: 0 12px;
-    background: rgba(255,255,255,.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  html.cin-nav .cin-barre { display: flex; }
+  html.cin-nav .cin-barre-esp { display: block; height: 54px; }
+  html.cin-som-ouvert .cin-voile { display: block; position: fixed; inset: 54px 0 0; z-index: 990; background: rgba(22,24,29,.38); }
+  html.cin-som-ouvert .cin-som {
+    display: flex; position: fixed; top: 54px; left: 0; right: 0; z-index: 995; max-height: calc(100vh - 54px - 40px); max-height: calc(100dvh - 54px - 40px);
+    overflow-y: auto; overscroll-behavior: contain; padding: 12px 10px 14px; border-radius: 0 0 22px 22px;
   }
-  html.cin-multi .cin-haut::-webkit-scrollbar { display: none; }
-  html.cin-multi .cin-haut-spacer { display: block; height: 48px; }
-  html.cin-nav .cin-bas {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 990; display: grid; grid-template-columns: repeat(4, 1fr);
-    background: rgba(255,255,255,.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid var(--line); padding: 6px 4px calc(8px + env(safe-area-inset-bottom, 0px));
-  }
-  html.cin-nav body { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
-  /* clavier ouvert : la barre du bas s'efface */
-  html.cin-saisie .cin-bas { display: none; }
+  .cin-som-lab { display: none; }
 }
-
-/* ordinateur */
+/* ordinateur : sommaire toujours ouvert à gauche */
 @media (min-width: 900px) {
-  html.cin-nav .cin-lateral { position: fixed; top: 60px; bottom: 0; left: 0; z-index: 980; display: flex; }
-  html.cin-nav body { padding-left: var(--cin-rail); }
-  html.cin-multi body { padding-left: calc(var(--cin-col1) + var(--cin-rail)); }
+  html.cin-nav .cin-som {
+    display: flex; position: fixed; top: 0; bottom: 0; left: 0; z-index: 980; width: 264px;
+    padding: 18px 12px; border-right: 1px solid var(--line); overflow-y: auto;
+  }
+  html.cin-nav body { padding-left: 264px; }
 }
-.cin-col-t { margin: 0 0 4px 8px; font-size: .64rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
-.cin-lateral, .cin-lateral *, .cin-haut, .cin-bas { box-sizing: border-box; }
-.cin-col1 { width: var(--cin-col1); flex-shrink: 0; background: var(--sheet); padding: 16px 0 16px 6px; display: flex; flex-direction: column; gap: 5px; overflow-y: auto; }
-/* colonne la plus étroite possible : les noms longs passent à la ligne (largeur réglée sur le mot le plus long, « expérimentale ») */
-.cin-col1 .cin-pastille { display: block; white-space: normal; padding: 8px; margin-right: 6px; border-radius: 14px; font-size: .78rem; hyphens: auto; overflow-wrap: break-word; }
-/* la partie choisie se prolonge dans la colonne des onglets : on voit que les onglets lui appartiennent */
-.cin-col1 .cin-pastille.ici { margin-right: 0; border-radius: 14px 0 0 14px; box-shadow: none; }
-.cin-rail { width: var(--cin-rail); flex-shrink: 0; background: var(--cle-bg); border-right: 1px solid var(--cle-line); padding: 16px 0; display: flex; flex-direction: column; align-items: center; gap: 10px; overflow-y: auto; }
-.cin-rail .cin-col-t { margin: 0 0 2px; text-align: center; }
-.cin-rail .cin-onglet { width: 100%; font-size: .7rem; }
-.cin-rail .cin-onglet .ic { width: 44px; height: 32px; font-size: 1rem; background: rgba(255,255,255,.6); }
-.cin-rail .cin-onglet:hover .ic { background: var(--sheet); }
-.cin-rail .cin-onglet.ici .ic { background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--accent); }
 
 /* ---------- Accueil : une ligne dépliable par module ---------- */
 .cin-accueil { max-width: 48rem; margin: 20px auto 0; display: flex; flex-direction: column; gap: 12px; }

@@ -15,7 +15,7 @@
    CIN.aToi(zone, items, fin)    « À toi » dans les cours : il faut réussir pour continuer
    CIN.Cours                     cours par étapes (une étape réussie fait apparaître la suivante)
    CIN.graphe(opts)              repère pour tracer des courbes (SVG)
-   CIN.menu(cle)                 bandeau, parties et onglets d'une page (navigation à deux niveaux)
+   CIN.menu(cle)                 sommaire de toute l'application (navigation d'une page)
    CIN.accueil(zone)             accueil : une ligne dépliable par module
 
    Les styles des cartes, boutons et écrans de fin viennent de
@@ -819,14 +819,13 @@
   /* ============================================================
      PLAN DE L'APPLICATION, PROGRESSION ET NAVIGATION
 
-     Deux niveaux :
-       1. la partie du module  (colonne de gauche sur ordinateur, pastilles en haut sur téléphone)
-       2. l'onglet de la partie : Cours, Questions, Fiche
-                               (colonne étroite sur ordinateur, barre du bas sur téléphone)
-     L'accueil est dans le bandeau (ordinateur) ou dans la barre du bas (téléphone).
-     Les parties et onglets sont des liens ordinaires : changer de partie garde l'onglet,
-     changer d'onglet garde la partie. La fiche d'un module s'ouvre à la partie choisie
+     Sommaire de toute l'application : modules → parties → pages (Cours, Questions, Fiche).
+     Le module et la partie de la page en cours sont dépliés, la page en cours est encadrée.
+     Un clic sur un module ou une partie le déplie sur place (sans changer de page) ;
+     les pages sont des liens ordinaires. La fiche d'un module s'ouvre à la partie choisie
      (ancre #slug dans la page de la fiche).
+       ordinateur : sommaire toujours ouvert dans une colonne à gauche (pas de bandeau) ;
+       téléphone  : bandeau « où suis-je » ; un appui déroule le sommaire sous le bandeau.
      ============================================================ */
   const PLAN = [
     { n: 1, titre: 'Référentiel', desc: 'Définition, trajectoire, vocabulaire, trois référentiels', fiche: 'fiche_1',
@@ -896,69 +895,105 @@
     return s.m.parties.length > 1 && s.onglet !== 'fiche' ? `Module ${s.m.n} · ${s.p.nom} · ${quoi}` : `Module ${s.m.n} · ${quoi}`;
   }
 
-  /* ---------- Bandeau, parties et onglets d'une page ---------- */
-  const ONGLETS = [['cours', 'C', 'Cours'], ['questions', 'Q', 'Questions'], ['fiche', '≡', 'Fiche']];
+  /* ---------- Avancement d'un module (sommaire et accueil) ---------- */
+  const totalModule = m => (m.exercices ? 16 : m.parties.length * 2);
+  const faitModule = (m, pages, ex) => (m.exercices ? Math.min(16, Object.keys(ex).length)
+    : m.parties.reduce((n, pt) => n + (pages[pt.cours] && pages[pt.cours].fait ? 1 : 0) + (pages[pt.questions] && pages[pt.questions].note != null ? 1 : 0), 0));
+
+  /* ---------- Sommaire de toute l'application ---------- */
+  const NOMS_PAGES = { cours: 'Cours', questions: 'Questions', fiche: 'Fiche récapitulative', exercices: 'Exercices' };
+  const chev = '<span class="cin-chev" aria-hidden="true">›</span>';
+  const feuille = (href, ic, lib, etat, ici) =>
+    `<a class="cin-page${ici ? ' ici' : ''}" href="${href}"${ici ? ' aria-current="page"' : ''}><span class="ic" aria-hidden="true">${ic}</span>${lib}${etat ? `<em>${etat}</em>` : ''}</a>`;
+  // les trois pages d'une partie : Cours (✓), Questions (meilleure note), Fiche
+  function feuilles(m, p, s, pages) {
+    const ici = o => s.m === m && s.p === p && s.onglet === o;
+    const c = pages[p.cours] || {}, q = pages[p.questions] || {};
+    return feuille(lien(m, p, 'cours'), 'C', 'Cours', c.fait ? '✓' : '', ici('cours')) +
+      feuille(lien(m, p, 'questions'), 'Q', 'Questions', q.note != null ? fmt(q.note) + '/20' : '', ici('questions')) +
+      feuille(lien(m, p, 'fiche'), '≡', 'Fiche', '', ici('fiche'));
+  }
+  function sommaire(s, pages, ex) {
+    return PLAN.map(m => {
+      const ici = s.m === m, n = faitModule(m, pages, ex), t = totalModule(m), fini = n === t;
+      let enfants;
+      if (m.exercices) enfants = `<div class="cin-spages">${feuille(m.exercices + '.html', '#', 'Exercices 1 à 16', '', s.onglet === 'exercices')}</div>`;
+      else if (m.parties.length === 1) enfants = `<div class="cin-spages">${feuilles(m, m.parties[0], s, pages)}</div>`;
+      else enfants = m.parties.map((p, i) => {
+        const pici = ici && s.p === p, id = `cin-s${m.n}-${i}`;
+        return `<button type="button" class="cin-spt${pici ? ' ici' : ''}" aria-expanded="${pici}" aria-controls="${id}">${partieFaite(p, pages) ? '<span class="cin-v" aria-label="terminé">✓</span>' : ''}${p.nom}${chev}</button>` +
+          `<div class="cin-spages" id="${id}"${pici ? '' : ' hidden'}>${feuilles(m, p, s, pages)}</div>`;
+      }).join('');
+      return `<div class="cin-smod${ici ? ' ici' : ''}"><button type="button" class="cin-sligne" aria-expanded="${ici}" aria-controls="cin-s${m.n}">` +
+        `<span class="cin-snum${fini ? ' fait' : ''}">${fini ? '✓' : m.n}</span><span class="cin-st">${m.titre}</span><span class="cin-sn">${n}/${t}</span>${chev}</button>` +
+        `<div class="cin-senf" id="cin-s${m.n}"${ici ? '' : ' hidden'}>${enfants}</div></div>`;
+    }).join('');
+  }
+
+  /* ---------- Navigation d'une page ---------- */
   function menu(cle) {
     const racine = document.getElementById('app-nav');
     if (!racine) return;
-    const accueil = cle === 'accueil', s = accueil ? null : situer(cle), html = document.documentElement;
-    const prog = lireProg(), pages = prog.pages || {};
-    if (s) { prog.derniere = cle; ecrireProg(prog); }          // pour « Reprendre » sur l'accueil
-    const titre = s ? `Module ${s.m.n} · ${s.m.titre}` : '';
-    // bandeau : lien vers le portail (accueil) ou vers l'accueil de l'application (modules)
-    let h = '<div class="app-topbar">' + (accueil
-      ? '<a class="cin-pilule" href="../index.html"><span aria-hidden="true">←</span><span class="cin-court">Applications</span><span class="cin-long">Toutes les applications</span></a>'
-      : '<a class="cin-pilule cin-pilule-accueil" href="../index.html"><span aria-hidden="true">⌂</span>Accueil</a>') +
-      `<div class="app-topbar-title"><span class="app-name">Cinématique</span>${titre ? `<span class="sep">·</span><span class="module-name">${titre}</span>` : ''}</div></div><div class="app-topbar-spacer"></div>`;
-    if (s && s.onglet !== 'exercices') {
-      const multi = s.m.parties.length > 1;
-      html.classList.add('cin-nav');
-      if (multi) html.classList.add('cin-multi');
-      const pastilles = s.m.parties.map((pt, i) =>
-        `<a class="cin-pastille${i === s.i ? ' ici' : ''}${partieFaite(pt, pages) ? ' ok' : ''}" data-i="${i}" href="${lien(s.m, pt, s.onglet)}"${i === s.i ? ' aria-current="page"' : ''}>${pt.nom}</a>`).join('');
-      const onglets = ONGLETS.map(([o, ic, lib]) =>
-        `<a class="cin-onglet${o === s.onglet ? ' ici' : ''}" href="${lien(s.m, s.p, o)}" data-o="${o}"${o === s.onglet ? ' aria-current="page"' : ''}><span class="ic" aria-hidden="true">${ic}</span>${lib}</a>`).join('');
-      // téléphone : pastilles sous le bandeau, onglets en bas
-      if (multi) h += `<nav class="cin-haut" aria-label="Parties du module">${pastilles}</nav><div class="cin-haut-spacer"></div>`;
-      h += `<nav class="cin-bas" aria-label="Sections"><a class="cin-onglet" href="../index.html"><span class="ic" aria-hidden="true">⌂</span>Accueil</a>${onglets}</nav>`;
-      // ordinateur : colonne des parties, puis colonne des onglets (le plus étroit possible)
-      h += `<aside class="cin-lateral" aria-label="Navigation du module">${multi ? `<nav class="cin-col1" aria-label="Parties du module"><p class="cin-col-t">Module ${s.m.n}</p>${pastilles}</nav>` : ''}` +
-        `<nav class="cin-rail" aria-label="Sections">${multi ? '' : `<p class="cin-col-t">Module ${s.m.n}</p>`}${onglets}</nav></aside>`;
+    const html = document.documentElement;
+    // accueil de l'application : bandeau avec le lien vers le portail des applications
+    if (cle === 'accueil') {
+      racine.innerHTML = '<div class="app-topbar"><a class="cin-pilule" href="../index.html"><span aria-hidden="true">←</span><span class="cin-court">Applications</span><span class="cin-long">Toutes les applications</span></a>' +
+        '<div class="app-topbar-title"><span class="app-name">Cinématique</span></div></div><div class="app-topbar-spacer"></div>';
+      return;
     }
-    racine.innerHTML = h;
-    if (!s || s.onglet === 'exercices') return;
-    // pastille de la partie en cours visible dans la rangée défilante du téléphone
-    const haut = racine.querySelector('.cin-haut'), ici = haut && haut.querySelector('.ici');
-    if (ici) haut.scrollLeft = ici.offsetLeft - (haut.clientWidth - ici.offsetWidth) / 2;
+    if (!situer(cle)) return;
+    const prog = lireProg();
+    prog.derniere = cle; ecrireProg(prog);                       // pour « Reprendre » sur l'accueil
+    html.classList.add('cin-nav');
+    const ouvrir = oui => {
+      html.classList.toggle('cin-som-ouvert', oui);
+      const b = racine.querySelector('.cin-ou');
+      if (b) { b.setAttribute('aria-expanded', oui); b.querySelector('.cin-ou-chev').textContent = oui ? '▴' : '▾'; }
+    };
+    // (re)construit le bandeau et le sommaire ; sur une fiche, la partie dépend de l'ancre
+    function rendre() {
+      const s = situer(cle), pages = lireProg().pages || {}, ex = lireExercices();
+      const multi = s.m.parties && s.m.parties.length > 1;
+      const ou = s.onglet === 'exercices' || s.onglet === 'fiche' || !multi ? NOMS_PAGES[s.onglet] : `${s.p.nom} · ${NOMS_PAGES[s.onglet]}`;
+      racine.innerHTML =
+        `<div class="cin-barre"><button type="button" class="cin-ou" aria-expanded="false" aria-controls="cin-som" aria-label="Sommaire : module ${s.m.n}, ${ou}">` +
+        `<span class="cin-snum">${s.m.n}</span><span class="cin-ou-t"><small>${s.m.titre}</small><b>${ou}</b></span><span class="cin-ou-chev" aria-hidden="true">▾</span></button></div>` +
+        '<div class="cin-barre-esp"></div><div class="cin-voile"></div>' +
+        `<aside class="cin-som" id="cin-som" aria-label="Sommaire"><div class="cin-som-tete"><a class="cin-som-app" href="../index.html">Cinématique</a>` +
+        '<a class="cin-pilule" href="../index.html"><span aria-hidden="true">⌂</span>Accueil</a></div>' +
+        `<p class="cin-som-lab">Sommaire</p><nav class="cin-som-arbre" aria-label="Modules">${sommaire(s, pages, ex)}</nav></aside>`;
+      // déplier / replier un module ou une partie sur place
+      racine.querySelectorAll('.cin-sligne, .cin-spt').forEach(b => b.addEventListener('click', () => {
+        const oui = b.getAttribute('aria-expanded') !== 'true';
+        b.setAttribute('aria-expanded', oui);
+        document.getElementById(b.getAttribute('aria-controls')).hidden = !oui;
+      }));
+      racine.querySelector('.cin-ou').addEventListener('click', () => ouvrir(!html.classList.contains('cin-som-ouvert')));
+      racine.querySelector('.cin-voile').addEventListener('click', () => ouvrir(false));
+      // un lien vers une autre partie de la même fiche ne recharge pas la page : on referme
+      racine.querySelectorAll('.cin-page').forEach(a => a.addEventListener('click', () => ouvrir(false)));
+      // ordinateur : la page en cours visible dans la colonne
+      const ici = racine.querySelector('.cin-page.ici'), col = racine.querySelector('.cin-som');
+      if (ici && col.scrollHeight > col.clientHeight) col.scrollTop = ici.offsetTop - col.clientHeight / 2;
+    }
+    rendre();
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && html.classList.contains('cin-som-ouvert')) ouvrir(false); });
+    const s = situer(cle);
+    if (s.onglet !== 'fiche') return;
     // fiche : la partie choisie est donnée par l'ancre de la page (#vitesse…)
     // (les figures de la fiche se dessinent après le premier défilement : on recale la page sur l'ancre)
-    if (s.onglet === 'fiche' && location.hash.length > 1) {
+    if (location.hash.length > 1) {
       const aller = () => { const e = document.getElementById(location.hash.slice(1)); if (e) e.scrollIntoView(); };
       addEventListener('load', () => { aller(); setTimeout(aller, 250); });
     }
-    if (s.onglet === 'fiche' && s.m.parties.length > 1) {
-      addEventListener('hashchange', () => {
-        const i = Math.max(0, s.m.parties.findIndex(p => p.slug === location.hash.slice(1)));
-        racine.querySelectorAll('.cin-pastille').forEach(e => {
-          const on = +e.dataset.i === i;
-          e.classList.toggle('ici', on);
-          if (on) e.setAttribute('aria-current', 'page'); else e.removeAttribute('aria-current');
-        });
-        racine.querySelectorAll('.cin-onglet[data-o="fiche"]').forEach(e => { e.href = lien(s.m, s.m.parties[i], 'fiche'); });
-      });
-    }
-    // clavier du téléphone ouvert : la barre du bas s'efface (elle gênerait la saisie)
-    document.addEventListener('focusin', e => { if (e.target.classList && e.target.classList.contains('ph-champ')) html.classList.add('cin-saisie'); });
-    document.addEventListener('focusout', () => html.classList.remove('cin-saisie'));
+    addEventListener('hashchange', () => { rendre(); ouvrir(false); });
   }
 
   /* ---------- Accueil : une ligne dépliable par module ---------- */
   function accueil(zone) {
     const prog = lireProg(), pages = prog.pages || {}, ex = lireExercices();
     const derniere = prog.derniere && situer(prog.derniere) ? prog.derniere : null;
-    const total = m => (m.exercices ? 16 : m.parties.length * 2);
-    const fait = m => (m.exercices ? Math.min(16, Object.keys(ex).length)
-      : m.parties.reduce((n, pt) => n + (pages[pt.cours] && pages[pt.cours].fait ? 1 : 0) + (pages[pt.questions] && pages[pt.questions].note != null ? 1 : 0), 0));
+    const total = totalModule, fait = m => faitModule(m, pages, ex);
     const ouvert = derniere ? situer(derniere).m.n : (PLAN.find(m => fait(m) < total(m)) || PLAN[0]).n;
     const bt = (cle, txt, cls) => `<a class="cin-bt${cls ? ' ' + cls : ''}" href="modules/${cle}.html">${txt}</a>`;
     const btCours = pt => { const a = pages[pt.cours] || {}; return bt(pt.cours, 'Cours' + (a.fait ? ' ✓' : ''), (a.fait ? 'fait ' : '') + (derniere === pt.cours ? 'ici' : '')); };

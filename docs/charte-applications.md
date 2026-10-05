@@ -92,7 +92,7 @@ Tout vient de `assets/theme.css`. N'écris **aucune couleur en dur** dans les CS
 
 ### Accueil de l'application (`index.html`)
 
-1. Bandeau supérieur fixe (voir §5) avec le lien vers le portail.
+1. Bandeau supérieur fixe avec le lien vers le portail (voir §5).
 2. **En-tête illustré** : `<header class="app-hero" data-dessin="…" style="margin-top:-24px">` avec `canvas`, `.app-hero-in` (kicker « Physique · Terminale », `h1`, `app-hero-lead`) et `.app-hero-edge`. Dessin animé par `assets/hero.js` (parallaxe).
 3. Liste des modules en **lignes dépliables** (voir §5), carte « Reprendre ».
 
@@ -124,7 +124,7 @@ Cours **par étapes** (`new CIN.Cours(zone, [étape, étape…])`). Chaque étap
 
 Dernière étape : carte **« À retenir »** (une `.cle` par notion), puis `.er-actions` : bouton principal vers les questions du module, boutons secondaires vers le cours suivant et vers la fiche récapitulative.
 
-Pas de lien « Fiche récapitulative » en haut du cours (la fiche est dans les onglets).
+Pas de lien « Fiche récapitulative » en haut du cours (la fiche est dans le sommaire).
 
 ### Série de questions (`CIN.serie`)
 
@@ -138,44 +138,43 @@ Pas de lien « Fiche récapitulative » en haut du cours (la fiche est dans les 
 
 - Liste groupée par thème (`ph-ex-groupe` + `ph-ex-carte` avec pastille numérotée qui devient ✓ et « Meilleur score : x / y »). **Même numérotation que le support papier du cours.**
 - Un exercice : carte d'en-tête (badge « MODULE 6 · EXERCICE k » + « ← Liste des exercices »), carte contexte (`ph-contexte`, fond `--cle-bg`) avec énoncé et figure, carte des questions. **Correction détaillée toujours disponible** (« Voir la correction », 0 point pour la partie). Fin : « Exercice terminé : x / y points », boutons Refaire / Exercice suivant / Liste.
-- Pas de navigation latérale sur cette page (bandeau seul avec « ⌂ Accueil »).
+- Le sommaire est présent comme sur les autres pages (page « Exercices 1 à 16 » encadrée).
 
 ### Fiche récapitulative (une par module)
 
 - Page `fiche_N.html`, classe `cin-fiche`, badge « MODULE N · FICHE RÉCAPITULATIVE ».
 - Une carte par notion : `cours-titre`, `.cle` (définitions, formules), figures importantes (`cin-fiche-figs`, 2 ou 3 colonnes, 1 colonne sous 640 px), tableaux. **Que du contenu à retenir : aucune question.**
-- Une ancre `id="<slug>"` sur la première section de chaque partie du module, pour que l'onglet Fiche ouvre la fiche à la bonne partie.
+- Une ancre `id="<slug>"` sur la première section de chaque partie du module, pour que le lien Fiche du sommaire ouvre la fiche à la bonne partie.
 - Bas de page : `.er-actions.cin-fiche-liens` avec « Revoir le cours » et « Questions sur… ».
 
 ## 5. Navigation
 
-Deux niveaux, jamais de menu burger. Le plan est déclaré une fois dans `PLAN` (`cin.js`) : modules → parties → pages (cours, questions), plus la fiche du module et éventuellement une page d'exercices.
+Un **sommaire de toute l'application**, comme la table des matières d'un cahier : modules → parties → pages (**Cours**, **Questions**, **Fiche**, icônes `C`, `Q`, `≡`). Le plan est déclaré une fois dans `PLAN` (`cin.js`), construit par `CIN.menu(cle)`. Jamais de menu burger anonyme.
 
-- **Niveau 1 : les parties** du module (pastilles). Un module à une seule partie n'a pas ce niveau.
-- **Niveau 2 : les onglets** de la partie : **Cours**, **Questions**, **Fiche** (icônes `C`, `Q`, `≡`).
-- **Changer de partie garde l'onglet ; changer d'onglet garde la partie.** Ce sont de simples liens `<a>` (retour arrière du navigateur correct). L'onglet Fiche ouvre `fiche_N.html#<slug-de-la-partie>`.
+- **On voit toujours où on est**, sans changer de page : le module et la partie de la page en cours sont dépliés et la page en cours est encadrée (`aria-current="page"`).
+- **On va dans n'importe quel module sans repasser par l'accueil** : un clic sur un module ou une partie le **déplie sur place** (la page ne change pas) ; un clic sur une page y va. Plusieurs modules peuvent être dépliés en même temps.
+- Chaque ligne de module : pastille (numéro, ✓ si tout est fait), titre, compteur `n/m`, chevron. Les pages affichent leur état : Cours ✓, Questions avec la meilleure note `16/20`.
+- Module à une seule partie : ses trois pages directement sous le module. Module d'exercices : une page « Exercices 1 à 16 ».
+- Les pages sont de simples liens `<a>` (retour arrière du navigateur correct). La Fiche d'une partie ouvre `fiche_N.html#<slug-de-la-partie>` ; sur la fiche, le sommaire suit l'ancre (`hashchange`).
 - Tout est accessible à tout moment : aucun verrouillage entre modules ou parties.
 - Seuil téléphone / ordinateur : **900 px** de large.
 
-### Bandeau supérieur (`.app-topbar`, fixe, 60 px)
+### Ordinateur (≥ 900 px) : le sommaire toujours ouvert à gauche
 
-- À gauche : pilule `.cin-pilule` — sur l'accueil « ← Toutes les applications » (« ← Applications » sous 520 px) qui renvoie au **portail** (`../index.html`, racine du dépôt) ; sur une page de module « ⌂ Accueil » (accueil de l'application).
-- Titre : « **Nom de l'application** · Module n · Titre du module » (le module en gris, tronqué avec …).
-- Sur téléphone, la pilule « ⌂ Accueil » est masquée sur les pages à barre du bas (l'accueil est alors dans cette barre).
+- Colonne fixe de **264 px**, sur toute la hauteur, fond blanc, bordure fine à droite. **Pas de bandeau en haut** sur les pages de module : toute la navigation est à gauche.
+- En tête de colonne : le nom de l'application (lien vers son accueil) et la pilule « ⌂ Accueil » ; puis l'étiquette « Sommaire » et l'arbre.
+- Le module en cours a un fond `--cle-bg`, sa pastille est pleine (accent) ; les parties sont reliées par un filet vertical `--cle-line`.
+- Le corps de page reçoit `padding-left: 264px`. Si le sommaire dépasse la hauteur de l'écran, il défile seul, la page en cours y est ramenée au centre.
 
-### Ordinateur (≥ 900 px) : barre latérale fixe, la plus étroite possible
+### Téléphone (< 900 px) : un bandeau « où suis-je », le sommaire à la demande
 
-- Colonne 1, **120 px** : les parties (pastilles à bords arrondis 14 px, nom sur deux lignes si besoin), avec le titre « MODULE n » en petites capitales couleur d'accent.
-- Colonne 2, **72 px** (« rail »), fond `--cle-bg` : les trois onglets Cours / Questions / Fiche (icône + libellé), tous visibles, **pas de bouton « Suite »**.
-- La partie sélectionnée **se prolonge dans le rail** (même couleur, coin droit carré) : on voit que les onglets appartiennent à cette partie.
-- Module à une seule partie : seulement le rail (72 px), avec le titre « MODULE n ».
-- Le corps de page reçoit `padding-left` égal à la largeur de la barre.
+- **Une seule barre fixe en haut, 54 px** : un grand bouton pilule (`--cle-bg`) avec la pastille du module, le titre du module (petit, accent) et la page en gras (« Vitesse · Cours », « Questions », « Fiche récapitulative »), puis un chevron ▾. Pas de pastilles, pas de barre du bas.
+- Un appui **déroule le même sommaire** sous le bandeau (feuille blanche aux coins bas arrondis, voile sombre derrière), ouvert à la page en cours. Il se referme par le bandeau, le voile, la touche Échap ou un lien.
+- La page réserve la place du bandeau (`scroll-padding-top`) : un défilement vers une ancre ne finit jamais sous le bandeau. Utiliser `scroll-padding`, pas `scroll-margin` (les deux s'additionneraient).
 
-### Téléphone (< 900 px)
+### Accueil de l'application
 
-- Sous le bandeau : barre de **pastilles des parties** (48 px, défilement horizontal, la partie en cours est centrée) — seulement pour les modules à plusieurs parties.
-- **Barre du bas** à 4 entrées : Accueil, Cours, Questions, Fiche. Elle se **masque quand un champ de saisie a le focus** (clavier ouvert), via une classe sur `<html>`.
-- La page réserve la place des barres (`padding-bottom`, `scroll-padding-top` / `scroll-padding-bottom`) : un défilement vers une ancre ne finit jamais sous une barre. Utiliser `scroll-padding`, pas `scroll-margin` (les deux s'additionneraient).
+- Bandeau `app-topbar` avec la pilule « ← Toutes les applications » (« ← Applications » sous 520 px) qui renvoie au **portail** (`../index.html`, racine du dépôt). Pas de sommaire sur l'accueil : la liste des modules en tient lieu.
 
 ### Accueil : une ligne dépliable par module
 
@@ -259,7 +258,7 @@ Variantes de l'exemple trouvé par l'élève : quand l'exemple est donné sous f
 
 ## 9. Accessibilité
 
-- Liens et boutons réels (`<a>`, `<button type="button">`), `aria-label` sur les boutons-icônes et les champs, `aria-current="page"` sur la partie et l'onglet actifs, `aria-expanded` / `aria-controls` sur les lignes dépliables, `role="img"` + `aria-label` sur les figures SVG.
+- Liens et boutons réels (`<a>`, `<button type="button">`), `aria-label` sur les boutons-icônes et les champs, `aria-current="page"` sur la page en cours dans le sommaire, `aria-expanded` / `aria-controls` sur les lignes dépliables, `role="img"` + `aria-label` sur les figures SVG.
 - Focus visible : `outline: 2px solid var(--accent); outline-offset: 2px` sur tous les éléments de navigation.
 - Jamais d'information portée par la seule couleur : juste / faux accompagnés d'un texte (« Juste ! », « Ce n'est pas ça. ») et d'un symbole (✓).
 - Contraste : texte inactif en `--ink-2` au minimum sur les fonds colorés (pas `--ink-3`).
@@ -273,7 +272,7 @@ Avec Playwright / Chromium (déjà installé, ne pas relancer `playwright instal
 2. Parcourir **chaque série** (10 questions, note sur 20) et **chaque exercice**.
 3. Mode « Afficher tout le cours » : tout se déplie, la position du bouton ne bouge pas, les réponses ne sont pas affichées.
 4. Aucune erreur dans la console, aucun défilement horizontal de la page.
-5. Navigation : partie ↔ onglet (chacun garde l'autre), ancres de fiche, bouton Reprendre, ✓ et notes sur l'accueil (profil persistant), lien vers le portail, barre du bas masquée pendant la saisie.
+5. Navigation : la page en cours est encadrée dans le sommaire, déplier un autre module ne change pas de page, chaque lien du sommaire mène à la bonne page, ancres de fiche, sommaire du téléphone (ouverture, fermeture, voile), bouton Reprendre, ✓ et notes (profil persistant), lien vers le portail.
 6. Tous les liens internes pointent vers des pages existantes.
 7. Tracés de vecteurs : glisser à la souris, au doigt (CDP), flèches ; valeur affichée en direct.
 
@@ -283,7 +282,7 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 
 À faire dans cet ordre, application par application, sans toucher au contenu scientifique ni perdre de fonctionnalité :
 
-1. **Navigation** : retirer `assets/nav.js` (menu burger `AppNav`) et `<div id="app-nav">` qui l'utilisait ; ajouter `PLAN`, `menu()` et `accueil()` selon §5 ; bandeau avec lien vers le portail.
+1. **Navigation** : retirer `assets/nav.js` (menu burger `AppNav`) ; ajouter `PLAN`, `menu()` (sommaire) et `accueil()` selon §5 ; bandeau avec lien vers le portail sur l'accueil.
 2. **Accueil** : en-tête illustré `app-hero` conservé, liste des modules en lignes dépliables, « Reprendre », compteurs et notes (§4, §5).
 3. **Découpage** : chaque module → une page de cours, une série de questions notée sur 20, une fiche récapitulative ; plusieurs parties si le module est long.
 4. **Cours** : passer en cours par étapes avec notion → exemple → « À toi » et bouton « Afficher tout le cours » (§6).
@@ -298,8 +297,8 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 |---|---|
 | Variables, boutons, encarts, bandeau, en-tête illustré | `assets/theme.css` |
 | Cartes, écrans de fin, confettis | `equilibrer-reactions/modules/er.css` |
-| Cours, « À toi », questions, graphiques, exercices, fiches, navigation, accueil | `cinematique/modules/cin.css` |
-| Moteur de questions, séries, cours par étapes, `PLAN`, `menu`, `accueil`, progression | `cinematique/modules/cin.js` |
+| Cours, « À toi », questions, graphiques, exercices, fiches, sommaire, accueil | `cinematique/modules/cin.css` |
+| Moteur de questions, séries, cours par étapes, `PLAN`, `menu` (sommaire), `accueil`, progression | `cinematique/modules/cin.js` |
 | Repère et tracé de vecteurs, écritures vectorielles | `cinematique/modules/vecteurs.js` |
 | Figures SVG | `cinematique/modules/figures.js` |
 | Exercices (format des données) | `cinematique/modules/exercices.js`, `module_6.html` |
