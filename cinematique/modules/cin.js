@@ -15,7 +15,8 @@
    CIN.aToi(zone, items, fin)    « À toi » dans les cours : il faut réussir pour continuer
    CIN.Cours                     cours par étapes (une étape réussie fait apparaître la suivante)
    CIN.graphe(opts)              repère pour tracer des courbes (SVG)
-   CIN.menu(cle)                 bandeau et menu communs aux modules
+   CIN.menu(cle)                 bandeau, parties et onglets d'une page (navigation à deux niveaux)
+   CIN.accueil(zone)             accueil : une ligne dépliable par module
 
    Les styles des cartes, boutons et écrans de fin viennent de
    equilibrer-reactions/modules/er.css (même présentation).
@@ -632,6 +633,7 @@
 
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
+      marquer({ note });
       const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
         : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
       app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
@@ -719,7 +721,7 @@
   Cours.prototype.lancer = function (n) {
     this.n = n;
     const c = this.etapes[n](this);
-    if (n === this.etapes.length - 1) this.toutEstAffiche();
+    if (n === this.etapes.length - 1) { this.toutEstAffiche(); marquer({ fait: true }); }
     return c;
   };
   // bouton « Continuer » : affiche l'étape suivante et la fait défiler à l'écran
@@ -814,57 +816,183 @@
     return Object.assign(o, { px, py, fond: g, courbe, svg, X0, Y0 });
   }
 
-  /* ---------- Bandeau et menu communs aux modules ---------- */
-  const GROUPES = [
-    { title: 'Module 1 · Référentiel', items: [
-      { key: 'module_1_cours', label: 'Cours : référentiel et trajectoire' },
-      { key: 'module_1_questions', label: 'Questions sur le référentiel' },
-      { key: 'fiche_1', label: 'Fiche récapitulative' },
-    ]},
-    { title: 'Module 2 · Les vecteurs', items: [
-      { key: 'module_2_cours', label: 'Cours : coordonnées d\'un vecteur' },
-      { key: 'module_2_questions', label: 'Questions : lire et tracer' },
-      { key: 'module_2b_cours', label: 'Cours : module et trigonométrie' },
-      { key: 'module_2b_questions', label: 'Questions : module et trigonométrie' },
-      { key: 'fiche_2', label: 'Fiche récapitulative' },
-    ]},
-    { title: 'Module 3 · Dérivation en physique', items: [
-      { key: 'module_3_cours', label: 'Cours : dériver en physique' },
-      { key: 'module_3_questions', label: 'Questions sur la dérivation' },
-      { key: 'fiche_3', label: 'Fiche récapitulative' },
-    ]},
-    { title: 'Module 4 · Position, vitesse, accélération', items: [
-      { key: 'module_4a_cours', label: 'Cours : le vecteur position' },
-      { key: 'module_4a_questions', label: 'Questions sur le vecteur position' },
-      { key: 'module_4b_cours', label: 'Cours : le vecteur vitesse' },
-      { key: 'module_4b_questions', label: 'Questions sur le vecteur vitesse' },
-      { key: 'module_4c_cours', label: 'Cours : le vecteur accélération' },
-      { key: 'module_4c_questions', label: 'Questions sur le vecteur accélération' },
-      { key: 'module_4d_cours', label: 'Cours : détermination expérimentale de <span class="vec-nom">v</span> et de <span class="vec-nom">a</span>' },
-      { key: 'module_4d_questions', label: 'Questions : détermination expérimentale' },
-      { key: 'fiche_4', label: 'Fiche récapitulative' },
-    ]},
-    { title: 'Module 5 · Repère de Frenet', items: [
-      { key: 'module_5_cours', label: 'Cours : le repère de Frenet' },
-      { key: 'module_5_questions', label: 'Questions sur le repère de Frenet' },
-      { key: 'fiche_5', label: 'Fiche récapitulative' },
-    ]},
-    { title: 'Module 6 · Exercices', items: [
-      { key: 'module_6', label: 'Exercices du cours' },
-    ]},
+  /* ============================================================
+     PLAN DE L'APPLICATION, PROGRESSION ET NAVIGATION
+
+     Deux niveaux :
+       1. la partie du module  (colonne de gauche sur ordinateur, pastilles en haut sur téléphone)
+       2. l'onglet de la partie : Cours, Questions, Fiche
+                               (colonne étroite sur ordinateur, barre du bas sur téléphone)
+     L'accueil est dans le bandeau (ordinateur) ou dans la barre du bas (téléphone).
+     Les parties et onglets sont des liens ordinaires : changer de partie garde l'onglet,
+     changer d'onglet garde la partie. La fiche d'un module s'ouvre à la partie choisie
+     (ancre #slug dans la page de la fiche).
+     ============================================================ */
+  const PLAN = [
+    { n: 1, titre: 'Référentiel', desc: 'Définition, trajectoire, vocabulaire, trois référentiels', fiche: 'fiche_1',
+      parties: [{ nom: 'Référentiel', cours: 'module_1_cours', questions: 'module_1_questions' }] },
+    { n: 2, titre: 'Les vecteurs', desc: 'Coordonnées, tracé, somme, module, trigonométrie', fiche: 'fiche_2',
+      parties: [
+        { nom: 'Coordonnées', slug: 'coordonnees', cours: 'module_2_cours', questions: 'module_2_questions' },
+        { nom: 'Module et trigonométrie', slug: 'module', cours: 'module_2b_cours', questions: 'module_2b_questions' },
+      ] },
+    { n: 3, titre: 'Dérivation en physique', desc: 'Notation d/dt, tableau des dérivées, dériver un vecteur', fiche: 'fiche_3',
+      parties: [{ nom: 'Dérivation en physique', cours: 'module_3_cours', questions: 'module_3_questions' }] },
+    { n: 4, titre: 'Position, vitesse, accélération', desc: 'Les trois vecteurs du mouvement, détermination expérimentale', fiche: 'fiche_4',
+      parties: [
+        { nom: 'Position', slug: 'position', cours: 'module_4a_cours', questions: 'module_4a_questions' },
+        { nom: 'Vitesse', slug: 'vitesse', cours: 'module_4b_cours', questions: 'module_4b_questions' },
+        { nom: 'Accélération', slug: 'acceleration', cours: 'module_4c_cours', questions: 'module_4c_questions' },
+        { nom: 'Détermination expérimentale', slug: 'experimental', cours: 'module_4d_cours', questions: 'module_4d_questions' },
+      ] },
+    { n: 5, titre: 'Repère de Frenet', desc: 'Vitesse et accélération, mouvement circulaire uniforme', fiche: 'fiche_5',
+      parties: [{ nom: 'Repère de Frenet', cours: 'module_5_cours', questions: 'module_5_questions' }] },
+    { n: 6, titre: 'Exercices du cours', desc: 'Les exercices 1 à 16 du chapitre', exercices: 'module_6' },
   ];
+
+  /* ---------- Progression (gardée dans le navigateur) ---------- */
+  const CLE_PROG = 'cinematique-progression', CLE_EX = 'cinematique-exercices';
+  function lireProg() { try { return JSON.parse(localStorage.getItem(CLE_PROG)) || {}; } catch (e) { return {}; } }
+  function ecrireProg(p) { try { localStorage.setItem(CLE_PROG, JSON.stringify(p)); } catch (e) { /* stockage indisponible : rien à faire */ } }
+  function lireExercices() { try { return JSON.parse(localStorage.getItem(CLE_EX)) || {}; } catch (e) { return {}; } }
+  const cleDePage = () => (location.pathname.split('/').pop() || '').replace(/\.html$/, '');
+  // info = { fait: true } quand un cours est terminé, { note } pour la note sur 20 d'une série (on garde la meilleure)
+  function marquer(info) {
+    const p = lireProg(), cle = cleDePage();
+    p.pages = p.pages || {};
+    const a = p.pages[cle] || {};
+    if (info.fait) a.fait = true;
+    if (info.note != null) a.note = Math.max(a.note == null ? 0 : a.note, info.note);
+    p.pages[cle] = a;
+    ecrireProg(p);
+  }
+  const partieFaite = (pt, pages) => !!(pages[pt.cours] && pages[pt.cours].fait) && !!pages[pt.questions] && pages[pt.questions].note != null;
+
+  /* ---------- Où se trouve-t-on ? ---------- */
+  function situer(cle) {
+    for (const m of PLAN) {
+      if (m.exercices === cle) return { m, onglet: 'exercices' };
+      if (m.fiche === cle) {
+        const h = location.hash.slice(1), i = Math.max(0, m.parties.findIndex(p => p.slug === h));
+        return { m, i, p: m.parties[i], onglet: 'fiche' };
+      }
+      const i = (m.parties || []).findIndex(p => p.cours === cle || p.questions === cle);
+      if (i >= 0) return { m, i, p: m.parties[i], onglet: m.parties[i].cours === cle ? 'cours' : 'questions' };
+    }
+    return null;
+  }
+  // adresse d'un onglet d'une partie (pre : dossier des pages, vide dans modules/)
+  function lien(m, p, onglet, pre) {
+    pre = pre || '';
+    if (onglet === 'cours') return pre + p.cours + '.html';
+    if (onglet === 'questions') return pre + p.questions + '.html';
+    return pre + m.fiche + '.html' + (p && p.slug ? '#' + p.slug : '');
+  }
+  function libelle(cle) {
+    const s = situer(cle);
+    if (!s) return '';
+    if (s.onglet === 'exercices') return `Module ${s.m.n} · Exercices`;
+    const quoi = { cours: 'Cours', questions: 'Questions', fiche: 'Fiche récapitulative' }[s.onglet];
+    return s.m.parties.length > 1 && s.onglet !== 'fiche' ? `Module ${s.m.n} · ${s.p.nom} · ${quoi}` : `Module ${s.m.n} · ${quoi}`;
+  }
+
+  /* ---------- Bandeau, parties et onglets d'une page ---------- */
+  const ONGLETS = [['cours', 'C', 'Cours'], ['questions', 'Q', 'Questions'], ['fiche', '≡', 'Fiche']];
   function menu(cle) {
-    const n = window.AppNav.init({
-      appName: 'Cinématique', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
-      onHome: () => { window.location.href = '../index.html'; },
-      onNavigate: key => { window.location.href = key + '.html'; },
-      groups: GROUPES,
-    });
-    n.setActive(cle);
-    const g = GROUPES.find(x => x.items.some(m => m.key === cle));
-    const item = g && g.items.find(m => m.key === cle);
-    n.setTitle(item ? `${g.title.split(' · ')[0]} · ${item.label}` : null);
-    return n;
+    const racine = document.getElementById('app-nav');
+    if (!racine) return;
+    const accueil = cle === 'accueil', s = accueil ? null : situer(cle), html = document.documentElement;
+    const prog = lireProg(), pages = prog.pages || {};
+    if (s) { prog.derniere = cle; ecrireProg(prog); }          // pour « Reprendre » sur l'accueil
+    const titre = s ? `Module ${s.m.n} · ${s.m.titre}` : '';
+    // bandeau : lien vers le portail (accueil) ou vers l'accueil de l'application (modules)
+    let h = '<div class="app-topbar">' + (accueil
+      ? '<a class="cin-pilule" href="../index.html"><span aria-hidden="true">←</span><span class="cin-court">Applications</span><span class="cin-long">Toutes les applications</span></a>'
+      : '<a class="cin-pilule cin-pilule-accueil" href="../index.html"><span aria-hidden="true">⌂</span>Accueil</a>') +
+      `<div class="app-topbar-title"><span class="app-name">Cinématique</span>${titre ? `<span class="sep">·</span><span class="module-name">${titre}</span>` : ''}</div></div><div class="app-topbar-spacer"></div>`;
+    if (s && s.onglet !== 'exercices') {
+      const multi = s.m.parties.length > 1;
+      html.classList.add('cin-nav');
+      if (multi) html.classList.add('cin-multi');
+      const pastilles = s.m.parties.map((pt, i) =>
+        `<a class="cin-pastille${i === s.i ? ' ici' : ''}${partieFaite(pt, pages) ? ' ok' : ''}" data-i="${i}" href="${lien(s.m, pt, s.onglet)}"${i === s.i ? ' aria-current="page"' : ''}>${pt.nom}</a>`).join('');
+      const onglets = ONGLETS.map(([o, ic, lib]) =>
+        `<a class="cin-onglet${o === s.onglet ? ' ici' : ''}" href="${lien(s.m, s.p, o)}" data-o="${o}"${o === s.onglet ? ' aria-current="page"' : ''}><span class="ic" aria-hidden="true">${ic}</span>${lib}</a>`).join('');
+      // téléphone : pastilles sous le bandeau, onglets en bas
+      if (multi) h += `<nav class="cin-haut" aria-label="Parties du module">${pastilles}</nav><div class="cin-haut-spacer"></div>`;
+      h += `<nav class="cin-bas" aria-label="Sections"><a class="cin-onglet" href="../index.html"><span class="ic" aria-hidden="true">⌂</span>Accueil</a>${onglets}</nav>`;
+      // ordinateur : colonne des parties, puis colonne des onglets (le plus étroit possible)
+      h += `<aside class="cin-lateral" aria-label="Navigation du module">${multi ? `<nav class="cin-col1" aria-label="Parties du module"><p class="cin-col-t">Module ${s.m.n}</p>${pastilles}</nav>` : ''}` +
+        `<nav class="cin-rail" aria-label="Sections">${multi ? '' : `<p class="cin-col-t">Module ${s.m.n}</p>`}${onglets}</nav></aside>`;
+    }
+    racine.innerHTML = h;
+    if (!s || s.onglet === 'exercices') return;
+    // pastille de la partie en cours visible dans la rangée défilante du téléphone
+    const haut = racine.querySelector('.cin-haut'), ici = haut && haut.querySelector('.ici');
+    if (ici) haut.scrollLeft = ici.offsetLeft - (haut.clientWidth - ici.offsetWidth) / 2;
+    // fiche : la partie choisie est donnée par l'ancre de la page (#vitesse…)
+    // (les figures de la fiche se dessinent après le premier défilement : on recale la page sur l'ancre)
+    if (s.onglet === 'fiche' && location.hash.length > 1) {
+      const aller = () => { const e = document.getElementById(location.hash.slice(1)); if (e) e.scrollIntoView(); };
+      addEventListener('load', () => { aller(); setTimeout(aller, 250); });
+    }
+    if (s.onglet === 'fiche' && s.m.parties.length > 1) {
+      addEventListener('hashchange', () => {
+        const i = Math.max(0, s.m.parties.findIndex(p => p.slug === location.hash.slice(1)));
+        racine.querySelectorAll('.cin-pastille').forEach(e => {
+          const on = +e.dataset.i === i;
+          e.classList.toggle('ici', on);
+          if (on) e.setAttribute('aria-current', 'page'); else e.removeAttribute('aria-current');
+        });
+        racine.querySelectorAll('.cin-onglet[data-o="fiche"]').forEach(e => { e.href = lien(s.m, s.m.parties[i], 'fiche'); });
+      });
+    }
+    // clavier du téléphone ouvert : la barre du bas s'efface (elle gênerait la saisie)
+    document.addEventListener('focusin', e => { if (e.target.classList && e.target.classList.contains('ph-champ')) html.classList.add('cin-saisie'); });
+    document.addEventListener('focusout', () => html.classList.remove('cin-saisie'));
+  }
+
+  /* ---------- Accueil : une ligne dépliable par module ---------- */
+  function accueil(zone) {
+    const prog = lireProg(), pages = prog.pages || {}, ex = lireExercices();
+    const derniere = prog.derniere && situer(prog.derniere) ? prog.derniere : null;
+    const total = m => (m.exercices ? 16 : m.parties.length * 2);
+    const fait = m => (m.exercices ? Math.min(16, Object.keys(ex).length)
+      : m.parties.reduce((n, pt) => n + (pages[pt.cours] && pages[pt.cours].fait ? 1 : 0) + (pages[pt.questions] && pages[pt.questions].note != null ? 1 : 0), 0));
+    const ouvert = derniere ? situer(derniere).m.n : (PLAN.find(m => fait(m) < total(m)) || PLAN[0]).n;
+    const bt = (cle, txt, cls) => `<a class="cin-bt${cls ? ' ' + cls : ''}" href="modules/${cle}.html">${txt}</a>`;
+    const btCours = pt => { const a = pages[pt.cours] || {}; return bt(pt.cours, 'Cours' + (a.fait ? ' ✓' : ''), (a.fait ? 'fait ' : '') + (derniere === pt.cours ? 'ici' : '')); };
+    const btQuestions = pt => { const a = pages[pt.questions] || {}; return bt(pt.questions, 'Questions' + (a.note != null ? ` <span class="cin-sc">${fmt(a.note)}/20</span>` : ''), (a.note != null ? 'fait ' : '') + (derniere === pt.questions ? 'ici' : '')); };
+    const module = m => {
+      const n = fait(m), t = total(m), termine = n === t, ouv = m.n === ouvert;
+      let corps;
+      if (m.exercices) corps = `<div class="cin-actions">${bt(m.exercices, 'Exercices 1 à 16 →', 'noir')}</div>`;
+      else {
+        const multi = m.parties.length > 1;
+        const btFiche = bt(m.fiche, multi ? 'Fiche récapitulative' : 'Fiche', derniere === m.fiche ? 'ici' : '');
+        // module à une seule partie : tout dans la même carte ; sinon une carte par partie, puis la fiche
+        corps = `<div class="cin-grille${multi ? ' deux' : ''}">` + m.parties.map(pt =>
+          `<div class="cin-partie">${multi ? `<span class="cin-partie-nom${partieFaite(pt, pages) ? ' ok' : ''}">${pt.nom}</span>` : ''}<div class="cin-actions">${btCours(pt)}${btQuestions(pt)}${multi ? '' : btFiche}</div></div>`).join('') +
+          `</div>${multi ? `<div class="cin-actions">${btFiche}</div>` : ''}`;
+      }
+      return `<div class="cin-module"><button class="cin-ligne" type="button" id="cin-b${m.n}" aria-expanded="${ouv}" aria-controls="cin-m${m.n}">` +
+        `<span class="cin-badge${termine ? ' fait' : ''}">${termine ? '✓' : m.n}</span>` +
+        `<span class="cin-ligne-t">${m.titre}<small>${m.desc}</small></span><span class="cin-ligne-n">${n}/${t}</span><span class="cin-chev" aria-hidden="true">›</span></button>` +
+        `<div class="cin-ouvert" id="cin-m${m.n}" role="region" aria-labelledby="cin-b${m.n}"${ouv ? '' : ' hidden'}>${corps}</div></div>`;
+    };
+    zone.innerHTML = (derniere ? `<a class="cin-reprendre" href="modules/${derniere}.html"><small>Reprendre</small><b>${libelle(derniere)} →</b></a>` : '') +
+      `<div class="cin-modules">${PLAN.map(module).join('')}</div>`;
+    // un seul module déplié à la fois
+    const lignes = zone.querySelectorAll('.cin-ligne');
+    lignes.forEach(b => b.addEventListener('click', () => {
+      const ouvrir = b.getAttribute('aria-expanded') !== 'true';
+      lignes.forEach(x => { x.setAttribute('aria-expanded', 'false'); document.getElementById(x.getAttribute('aria-controls')).hidden = true; });
+      if (ouvrir) {
+        b.setAttribute('aria-expanded', 'true');
+        document.getElementById(b.getAttribute('aria-controls')).hidden = false;
+        setTimeout(() => b.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 30);
+      }
+    }));
   }
 
   /* ---------- Confettis (sans-faute) ---------- */
@@ -884,6 +1012,6 @@
 
   window.CIN = Object.assign(window.CIN || {}, {
     MOINS, fmt, cs, sci, lire, proche, sgn, fr, dd, poly, sys, el, secouer, melanger, hasard, entre, champ, PARTIES, analyserIJ,
-    question, serie, aToi, Cours, graphe, menu, GROUPES, confettis,
+    question, serie, aToi, Cours, graphe, menu, accueil, PLAN, marquer, confettis,
   });
 })();

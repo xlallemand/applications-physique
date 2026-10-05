@@ -7,7 +7,12 @@
 .er-page button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .er-page p { margin: 0; }
 sub, sup { font-size: .7em; line-height: 0; }
-.er-card { scroll-margin-top: 76px; }
+/* hauteur du bandeau fixe (60 px, plus 48 px de pastilles sur téléphone) : les défilements s'arrêtent dessous */
+html { --cin-haut: 60px; --cin-col1: 120px; --cin-rail: 72px; scroll-padding-top: calc(var(--cin-haut) + 12px); }
+html.cin-nav { scroll-padding-bottom: 84px; }
+html.cin-multi { --cin-haut: 108px; }
+@media (min-width: 900px) { html.cin-multi { --cin-haut: 60px; } }
+/* (le décalage vient de scroll-padding-top : un scroll-margin s'y ajouterait) */
 
 /* (blocs communs avec l'application « pH » : cours, « À toi », questions, graphiques, exercices) */
 /* ---------- Cours ---------- */
@@ -325,3 +330,117 @@ sub, sup { font-size: .7em; line-height: 0; }
 .cin-fiche-figs .cin-tab { margin: 6px auto; }
 .cin-fiche-liens { justify-content: center; }
 @media (max-width: 640px) { .cin-fiche-figs, .cin-fiche-figs.deux { grid-template-columns: 1fr; } }
+
+/* ============================================================
+   Navigation (CIN.menu) : bandeau, parties (1er niveau), onglets (2e niveau)
+   Téléphone (moins de 900 px) : pastilles des parties sous le bandeau, onglets dans une barre en bas.
+   Ordinateur : colonne des parties, puis colonne étroite des onglets, à gauche du cours.
+   ============================================================ */
+.cin-pilule {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px; border-radius: 999px;
+  background: var(--paper); color: var(--ink); font: 700 .86rem/1 var(--font-sans); text-decoration: none; white-space: nowrap;
+  transition: background .15s;
+}
+.cin-pilule:hover { background: var(--paper-2); }
+.cin-pilule:focus-visible, .cin-pastille:focus-visible, .cin-onglet:focus-visible, .cin-bt:focus-visible, .cin-ligne:focus-visible, .cin-reprendre:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cin-court { display: none; }
+@media (max-width: 520px) { .cin-court { display: inline; } .cin-long { display: none; } }
+/* sur téléphone, l'accueil est dans la barre du bas */
+@media (max-width: 899px) { html.cin-nav .cin-pilule-accueil { display: none; } }
+
+/* pastilles des parties */
+.cin-pastille {
+  flex-shrink: 0; display: inline-flex; align-items: center; padding: 7px 13px; border-radius: 999px; background: var(--paper);
+  color: var(--ink-2); font: 700 .82rem/1.2 var(--font-sans); text-decoration: none; white-space: nowrap; transition: background .15s;
+}
+.cin-pastille:hover { background: var(--paper-2); color: var(--ink); }
+.cin-pastille.ici { background: var(--cle-bg); color: var(--accent-ink); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.cin-pastille.ok::before { content: '✓\00a0'; color: var(--success); }
+
+/* onglets : Cours, Questions, Fiche */
+.cin-onglet { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; color: var(--ink-2); font: 700 .68rem/1.2 var(--font-sans); text-decoration: none; }
+.cin-onglet .ic { width: 38px; height: 26px; border-radius: 999px; display: grid; place-items: center; font-size: .92rem; font-weight: 800; color: var(--ink-2); transition: background .15s; }
+.cin-onglet:hover .ic { background: var(--paper); }
+.cin-onglet.ici { color: var(--accent-ink); }
+.cin-onglet.ici .ic { background: var(--cle-bg); color: var(--accent-ink); }
+
+.cin-haut, .cin-haut-spacer, .cin-bas, .cin-lateral { display: none; }
+
+/* téléphone */
+@media (max-width: 899px) {
+  html.cin-multi .cin-haut {
+    position: fixed; top: 60px; left: 0; right: 0; z-index: 990; height: 48px; display: flex; align-items: center; gap: 6px; padding: 0 12px;
+    background: rgba(255,255,255,.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  html.cin-multi .cin-haut::-webkit-scrollbar { display: none; }
+  html.cin-multi .cin-haut-spacer { display: block; height: 48px; }
+  html.cin-nav .cin-bas {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 990; display: grid; grid-template-columns: repeat(4, 1fr);
+    background: rgba(255,255,255,.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line); padding: 6px 4px calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+  html.cin-nav body { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+  /* clavier ouvert : la barre du bas s'efface */
+  html.cin-saisie .cin-bas { display: none; }
+}
+
+/* ordinateur */
+@media (min-width: 900px) {
+  html.cin-nav .cin-lateral { position: fixed; top: 60px; bottom: 0; left: 0; z-index: 980; display: flex; }
+  html.cin-nav body { padding-left: var(--cin-rail); }
+  html.cin-multi body { padding-left: calc(var(--cin-col1) + var(--cin-rail)); }
+}
+.cin-col-t { margin: 0 0 4px 8px; font-size: .64rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
+.cin-lateral, .cin-lateral *, .cin-haut, .cin-bas { box-sizing: border-box; }
+.cin-col1 { width: var(--cin-col1); flex-shrink: 0; background: var(--sheet); padding: 16px 0 16px 6px; display: flex; flex-direction: column; gap: 5px; overflow-y: auto; }
+/* colonne la plus étroite possible : les noms longs passent à la ligne (largeur réglée sur le mot le plus long, « expérimentale ») */
+.cin-col1 .cin-pastille { display: block; white-space: normal; padding: 8px; margin-right: 6px; border-radius: 14px; font-size: .78rem; hyphens: auto; overflow-wrap: break-word; }
+/* la partie choisie se prolonge dans la colonne des onglets : on voit que les onglets lui appartiennent */
+.cin-col1 .cin-pastille.ici { margin-right: 0; border-radius: 14px 0 0 14px; box-shadow: none; }
+.cin-rail { width: var(--cin-rail); flex-shrink: 0; background: var(--cle-bg); border-right: 1px solid var(--cle-line); padding: 16px 0; display: flex; flex-direction: column; align-items: center; gap: 10px; overflow-y: auto; }
+.cin-rail .cin-col-t { margin: 0 0 2px; text-align: center; }
+.cin-rail .cin-onglet { width: 100%; font-size: .7rem; }
+.cin-rail .cin-onglet .ic { width: 44px; height: 32px; font-size: 1rem; background: rgba(255,255,255,.6); }
+.cin-rail .cin-onglet:hover .ic { background: var(--sheet); }
+.cin-rail .cin-onglet.ici .ic { background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--accent); }
+
+/* ---------- Accueil : une ligne dépliable par module ---------- */
+.cin-accueil { max-width: 48rem; margin: 20px auto 0; display: flex; flex-direction: column; gap: 12px; }
+.cin-reprendre { display: block; background: var(--ink); color: #fff; border-radius: 20px; padding: 14px 18px; text-decoration: none; transition: background .15s; }
+.cin-reprendre:hover { background: #2b2e36; }
+.cin-reprendre small { display: block; color: var(--line-strong); font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.cin-reprendre b { font-size: 1.02rem; }
+.cin-modules { display: flex; flex-direction: column; gap: 8px; }
+.cin-module { background: var(--paper); border-radius: 22px; }
+.cin-ligne {
+  display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; border: none; background: none; border-radius: 22px;
+  cursor: pointer; font: inherit; color: inherit; text-align: left; transition: background .15s;
+}
+.cin-ligne:hover { background: var(--paper-2); }
+.cin-badge { flex-shrink: 0; width: 36px; height: 36px; border-radius: 999px; display: grid; place-items: center; background: var(--cle-bg); color: var(--accent-ink); font-weight: 800; font-size: .9rem; }
+.cin-badge.fait { background: var(--success-bg); color: var(--success-text); }
+.cin-ligne-t { flex: 1; min-width: 0; font-weight: 800; font-size: 1.02rem; line-height: 1.25; letter-spacing: -.01em; }
+.cin-ligne-t small { display: block; margin-top: 2px; font-size: .82rem; font-weight: 600; letter-spacing: 0; color: var(--ink-2); }
+@media (max-width: 640px) { .cin-ligne-t small { display: none; } }
+.cin-ligne-n { font-size: .78rem; font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cin-chev { color: var(--ink-3); font-weight: 800; font-size: 1.1rem; transition: transform .15s; }
+.cin-ligne[aria-expanded="true"] .cin-chev { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .cin-chev { transition: none; } }
+.cin-ouvert { padding: 0 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.cin-ouvert[hidden] { display: none; }
+.cin-grille { display: grid; grid-template-columns: 1fr; gap: 8px; }
+@media (min-width: 700px) { .cin-grille.deux { grid-template-columns: 1fr 1fr; } }
+.cin-partie { background: var(--sheet); border-radius: 16px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.cin-partie-nom { font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
+.cin-partie-nom.ok::before { content: '✓\00a0'; color: var(--success); }
+.cin-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.cin-bt {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; background: var(--sheet); color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 700 .84rem/1.2 var(--font-sans); text-decoration: none; white-space: nowrap; transition: box-shadow .15s;
+}
+.cin-bt:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.cin-bt.fait { background: var(--success-bg); color: var(--success-text); box-shadow: none; }
+.cin-bt.ici { background: var(--cle-bg); color: var(--accent-ink); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.cin-bt.noir { background: var(--ink); color: #fff; box-shadow: none; }
+.cin-sc { font-variant-numeric: tabular-nums; }
