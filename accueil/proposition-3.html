@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Des applications pour s'entraîner en Physique-Chimie</title>
+<link rel="stylesheet" href="../assets/theme.css">
+<link rel="stylesheet" href="commun.css">
+<style>
+  /* ============================================================
+     PROPOSITION 3 — « Tableau des niveaux » (sans navigation)
+     L'image, puis un tableau : une ligne par application, une
+     colonne par niveau (un point quand l'application convient).
+     Un appui sur l'en-tête d'une colonne trie par niveau ; les
+     pastilles au-dessus trient par domaine. Les en-têtes restent
+     collés en haut de l'écran pendant le défilement.
+     ============================================================ */
+  :root { --col: 76px; --fin: 44px; }
+  @media (max-width: 760px) { :root { --col: 40px; --fin: 0px; } }
+
+  /* ---------- En-tête collé : pastilles de domaine + en-têtes de colonnes ---------- */
+  .tete { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--sheet) 94%, transparent);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 28px 28px 0 0; }
+  .tete.colle { border-radius: 0; }
+  .doms { display: flex; align-items: center; gap: 6px; padding-top: 22px; padding-bottom: 12px; }
+  .compteur { margin-left: auto; padding-left: 12px; font-size: .85rem; font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  @media (max-width: 760px) {
+    .doms { overflow-x: auto; scrollbar-width: none; padding-top: 16px; padding-bottom: 10px; }
+    .doms::-webkit-scrollbar { display: none; }
+  }
+
+  /* grille commune à l'en-tête et aux lignes */
+  .grille { display: grid; grid-template-columns: minmax(0, 1fr) repeat(5, var(--col)) var(--fin); align-items: center; }
+  .cols { border-bottom: 1.5px solid var(--ink); padding-bottom: 6px; }
+  .cols-lab { padding-left: 6px; font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); }
+  .col {
+    justify-self: center; width: calc(var(--col) - 6px); height: 34px; border: none; border-radius: 999px; background: none;
+    font: 800 .82rem/1 var(--font-sans); color: var(--ink); cursor: pointer; white-space: nowrap;
+    box-shadow: inset 0 0 0 1.5px var(--paper-3);
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: background .15s, color .15s;
+  }
+  .col:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .col[aria-pressed="true"] { background: var(--ink); color: #fff; box-shadow: none; }
+  .col:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .col .abr { display: none; }
+  @media (max-width: 760px) { .col { font-size: .68rem; height: 30px; padding: 0; width: calc(var(--col) - 3px); } .col .abr { display: inline; } .col .long { display: none; } }
+
+  /* ---------- Tableau ---------- */
+  #tableau { padding-bottom: 8px; }
+  .gr { display: flex; align-items: baseline; gap: 10px; padding: 18px 6px 6px; }
+  .gr h2 { margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -.03em; color: var(--c-ink); }
+  .gr span { font-size: .8rem; font-weight: 600; color: var(--ink-3); }
+  .ligne { min-height: 52px; border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none; border-radius: 12px; transition: background .15s; }
+  .ligne:hover { background: var(--paper); }
+  .ligne:focus-visible { outline: 2px solid var(--c); outline-offset: -2px; }
+  .ligne-t { padding: 8px 10px 8px 6px; min-width: 0; display: flex; align-items: baseline; gap: 12px; }
+  .ligne-t b { flex-shrink: 0; font-size: .98rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.25; }
+  .ligne-t small { min-width: 0; font-size: .84rem; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cell { justify-self: stretch; align-self: stretch; display: grid; place-items: center; }
+  .cell.sel { background: var(--paper); }
+  .ligne:hover .cell.sel { background: var(--paper-2); }
+  .point { width: 12px; height: 12px; border-radius: 50%; background: var(--c); }
+  .fin { display: grid; place-items: center; color: var(--ink-3); transition: color .15s; }
+  .fin svg { width: 16px; height: 16px; }
+  .ligne:hover .fin { color: var(--c); }
+  @media (max-width: 760px) {
+    .ligne-t small, .fin { display: none; }
+    .ligne-t b { flex-shrink: 1; font-size: .9rem; }
+    .ligne { min-height: 46px; border-radius: 0; }
+    .point { width: 10px; height: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== Bandeau d'accueil avec image en parallaxe ====== -->
+<header class="hero plx" data-graine="7">
+  <canvas aria-hidden="true"></canvas>
+  <div class="wrap"><nav class="hero-nav"><a class="marque" href="#">Physique-Chimie</a></nav></div>
+  <div class="wrap hero-texte">
+    <h1>Physique<br>Chimie</h1>
+    <p class="lead">Applications d'entraînement, niveau lycée, de la seconde à la terminale.</p>
+  </div>
+  <p class="legende">Traces de particules chargées dans une chambre à bulles.</p>
+</header>
+
+<!-- ====== Feuille de contenu ====== -->
+<main class="feuille">
+  <div class="tete" id="tete">
+    <div class="wrap">
+      <div class="doms" role="group" aria-label="Domaine" id="doms"></div>
+      <div class="grille cols" role="group" aria-label="Niveau" id="cols"></div>
+    </div>
+  </div>
+  <div class="wrap" id="tableau"></div>
+</main>
+
+<footer class="pied"><div class="wrap"><div>Applications d'entraînement en Physique-Chimie · Niveau lycée</div></div></footer>
+
+<script src="commun.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { DOMAINES, NIVEAUX, APPS } = ACC;
+
+  /* ---------- En-tête : pastilles de domaine et colonnes de niveau ---------- */
+  function tete() {
+    const vis = APPS.filter(ACC.visible);
+    document.getElementById('doms').innerHTML =
+      `<button type="button" class="puce" data-g="dom" data-id="" aria-pressed="${!ACC.filtre.dom.size}">Tous</button>` +
+      DOMAINES.map(d => `<button type="button" class="puce d-${d.id}" data-g="dom" data-id="${d.id}" aria-pressed="${ACC.choisi('dom', d.id)}"><span class="rond-c"></span>${d.court}</button>`).join('') +
+      `<span class="compteur" aria-live="polite">${ACC.actif() ? `${vis.length} / ${APPS.length}` : `${APPS.length} applications`}</span>`;
+    document.getElementById('cols').innerHTML =
+      '<span class="cols-lab">Application</span>' +
+      NIVEAUX.map(n => `<button type="button" class="col" data-g="niv" data-id="${n.id}" aria-pressed="${ACC.choisi('niv', n.id)}" title="${n.nom}"><span class="long">${n.court}</span><span class="abr">${n.abr}</span></button>`).join('') +
+      '<span></span>';
+  }
+  document.getElementById('tete').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.id) ACC.basculer(b.dataset.g, b.dataset.id); else ACC.toutAfficher(b.dataset.g);
+  });
+
+  /* ---------- Tableau : une ligne par application, regroupées par domaine ---------- */
+  function tableau() {
+    const vis = APPS.filter(ACC.visible);
+    const html = DOMAINES.map(d => {
+      const apps = vis.filter(a => a.dom === d.id);
+      if (!apps.length) return '';
+      return `
+        <section class="d-${d.id}">
+          <div class="gr"><h2>${d.nom}</h2><span>${apps.length}</span></div>
+          ${apps.map(a => `
+            <a class="grille ligne" href="../${a.dossier}/index.html" aria-label="${a.titre} (${a.niv.map(n => ACC.niveau(n).nom).join(', ')})">
+              <span class="ligne-t"><b>${a.titre}</b><small>${a.desc}</small></span>
+              ${NIVEAUX.map(n => `<span class="cell${ACC.choisi('niv', n.id) ? ' sel' : ''}">${a.niv.includes(n.id) ? '<span class="point"></span>' : ''}</span>`).join('')}
+              <span class="fin">${ACC.fleche}</span>
+            </a>`).join('')}
+        </section>`;
+    }).join('');
+    document.getElementById('tableau').innerHTML = html ||
+      '<div class="vide" style="margin-top:16px"><p>Aucune application pour ce choix.</p><button type="button" class="btn-small" id="vider">Tout afficher</button></div>';
+    const v = document.getElementById('vider');
+    if (v) v.onclick = () => ACC.toutAfficher();
+  }
+
+  function maj() { tete(); tableau(); }
+  ACC.surChangement(() => {
+    // après un tri, on ramène le haut du tableau sous l'en-tête si on l'avait dépassé
+    const f = document.querySelector('.feuille').getBoundingClientRect().top;
+    maj();
+    if (f < 0) scrollTo({ top: scrollY + f, behavior: 'auto' });
+  });
+  maj();
+
+  /* ---------- L'en-tête perd ses coins arrondis quand il est collé en haut ---------- */
+  const t = document.getElementById('tete');
+  const coller = () => t.classList.toggle('colle', document.querySelector('.feuille').getBoundingClientRect().top < 0);
+  addEventListener('scroll', coller, { passive: true });
+  coller();
+
+  ACC.parallaxe();
+})();
+</script>
+</body>
+</html>

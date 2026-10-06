@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr" class="nav">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Des applications pour s'entraîner en Physique-Chimie</title>
+<link rel="stylesheet" href="../assets/theme.css">
+<link rel="stylesheet" href="commun.css">
+<style>
+  /* ============================================================
+     PROPOSITION 2 — « Sommaire » (avec navigation, comme dans les applications)
+     Ordinateur (900 px et plus) : colonne de 264 px toujours ouverte à
+     gauche avec le tri (domaines, niveaux) et le sommaire des
+     applications ; le domaine visible à l'écran y est déplié et mis
+     en valeur.
+     Téléphone : bandeau « où suis-je » de 54 px ; un appui déroule le
+     même panneau (tri + sommaire) sous le bandeau.
+     ============================================================ */
+  html { scroll-padding-top: 66px; }
+  @media (min-width: 900px) { html { scroll-padding-top: 16px; } }
+
+  /* ---------- Panneau : tri + sommaire ---------- */
+  .som, .som * { box-sizing: border-box; }
+  .som { display: none; flex-direction: column; gap: 14px; background: var(--sheet); }
+  .som-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 0 6px; }
+  .som-app { font-weight: 800; font-size: 1.12rem; letter-spacing: -.02em; color: var(--ink); text-decoration: none; }
+  .som-n { font-size: .75rem; font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .som-lab { display: flex; align-items: center; justify-content: space-between; margin: 0 0 6px; padding: 0 6px; font-size: .66rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); }
+  .som-lab button { border: none; background: none; padding: 2px 4px; font: 700 .72rem var(--font-sans); letter-spacing: 0; text-transform: none; color: var(--ink-2); text-decoration: underline; cursor: pointer; }
+  .som .puces { display: flex; flex-wrap: wrap; gap: 5px; padding: 0 4px; }
+  .som .puce { height: 32px; padding: 0 11px; font-size: .8rem; }
+
+  /* arbre : domaine → applications */
+  .arbre { display: flex; flex-direction: column; gap: 2px; }
+  .sdom { border-radius: 14px; }
+  .sdom.ici { background: var(--c-bg); }
+  .sligne { width: 100%; display: flex; align-items: center; gap: 9px; padding: 7px 8px; border: none; background: none; border-radius: 14px;
+    cursor: pointer; font: inherit; color: var(--ink); text-align: left; transition: background .15s; touch-action: manipulation; }
+  .sligne:hover { background: var(--paper); }
+  .sdom.ici .sligne:hover { background: color-mix(in srgb, var(--sheet) 50%, transparent); }
+  .snum { flex-shrink: 0; width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; font-size: .72rem; font-weight: 800; background: var(--c-bg); color: var(--c-ink); }
+  .sdom.ici .snum, .ou .snum { background: var(--c); color: #fff; }
+  .st { flex: 1; min-width: 0; font-size: .88rem; font-weight: 700; line-height: 1.2; }
+  .sdom.ici .st { color: var(--c-ink); font-weight: 800; }
+  .sn { font-size: .7rem; font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .chev { font-weight: 800; color: var(--ink-3); transition: transform .15s; }
+  .sligne[aria-expanded="true"] .chev { transform: rotate(90deg); }
+  .senf { margin: 0 8px 6px 20px; padding-left: 12px; border-left: 2px solid color-mix(in srgb, var(--c) 30%, var(--sheet)); display: flex; flex-direction: column; gap: 1px; }
+  .senf[hidden] { display: none; }
+  .spage { display: block; padding: 5px 9px; border-radius: 999px; font-size: .82rem; font-weight: 600; color: var(--ink-2); text-decoration: none; line-height: 1.25; }
+  .spage:hover { background: var(--paper); color: var(--ink); }
+  .sdom.ici .spage:hover { background: color-mix(in srgb, var(--sheet) 75%, transparent); }
+  .sligne:focus-visible, .spage:focus-visible, .ou:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  /* ---------- Téléphone : bandeau « où suis-je » ---------- */
+  .barre, .barre-esp, .voile { display: none; }
+  .barre { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: 54px; align-items: center; padding: 0 10px;
+    background: color-mix(in srgb, var(--sheet) 94%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .ou { flex: 1; min-width: 0; height: 42px; display: flex; align-items: center; gap: 9px; border: none; border-radius: 999px;
+    background: var(--c-bg); padding: 0 14px 0 5px; cursor: pointer; font: inherit; color: var(--ink); text-align: left; touch-action: manipulation; }
+  .ou.tous { background: var(--paper); }
+  .ou.tous .snum { background: var(--ink); }
+  .ou[aria-expanded="true"] { box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .ou .snum { width: 32px; height: 32px; font-size: .8rem; }
+  .ou-t { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.2; }
+  .ou-t small { font-size: .7rem; font-weight: 700; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ou-t b { font-size: .92rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ou-chev { flex-shrink: 0; font-weight: 800; }
+  @media (max-width: 899px) {
+    .barre { display: flex; }
+    .barre-esp { display: block; height: 54px; }
+    html.som-ouvert .voile { display: block; position: fixed; inset: 54px 0 0; z-index: 990; background: rgba(22,24,29,.38); }
+    html.som-ouvert .som { display: flex; position: fixed; top: 54px; left: 0; right: 0; z-index: 995;
+      max-height: calc(100dvh - 54px - 40px); overflow-y: auto; overscroll-behavior: contain; padding: 14px 10px 16px; border-radius: 0 0 22px 22px; }
+    .som-tete { display: none; }
+  }
+  /* ---------- Ordinateur : panneau toujours ouvert à gauche ---------- */
+  @media (min-width: 900px) {
+    .som { display: flex; position: fixed; top: 0; bottom: 0; left: 0; z-index: 980; width: 264px; padding: 20px 12px; border-right: 1px solid var(--line); overflow-y: auto; }
+    body { padding-left: 264px; }
+  }
+
+  /* ---------- Contenu ---------- */
+  .hero-nav { display: none; }
+  .hero-texte { padding-top: 40px; }
+  #liste { padding-top: 26px; padding-bottom: 8px; }
+  .resume { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 6px; padding: 10px 10px 10px 18px; border-radius: 999px; background: var(--paper); font-size: .86rem; color: var(--ink-2); }
+  .resume b { color: var(--ink); }
+  .resume button { margin-left: auto; }
+  .dom { padding: 14px 0 12px; }
+  .dom-t { display: flex; align-items: baseline; gap: 10px; margin: 0 0 10px; padding: 0 4px; }
+  .dom-t h2 { margin: 0; font-size: 1.35rem; font-weight: 800; letter-spacing: -.03em; color: var(--c-ink); }
+  .dom-t span { font-size: .85rem; font-weight: 600; color: var(--ink-3); }
+  .tuiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+  .tuile { display: flex; flex-direction: column; gap: 6px; padding: 16px 18px 14px; border-radius: 20px; background: var(--paper); color: var(--ink); text-decoration: none; transition: background .15s; }
+  .tuile:hover { background: var(--c-bg); }
+  .tuile:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+  .tuile-n { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tuile-n .niv { background: var(--sheet); }
+  .tuile-n .niv.ici { background: var(--c); color: #fff; }
+  .tuile b { font-size: 1.04rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.25; }
+  .tuile p { margin: 0; font-size: .85rem; color: var(--ink-2); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  @media (max-width: 640px) {
+    /* téléphone : tuiles en lignes, sans description */
+    .tuiles { grid-template-columns: 1fr; gap: 6px; }
+    .tuile { flex-direction: row-reverse; justify-content: space-between; align-items: center; padding: 12px 14px 12px 16px; border-radius: 18px; }
+    .tuile p { display: none; }
+    .tuile-n { justify-content: flex-end; max-width: 46%; }
+    .dom-t h2 { font-size: 1.15rem; }
+    .resume { border-radius: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== Téléphone : bandeau « où suis-je » ====== -->
+<div class="barre"><button type="button" class="ou tous" id="ou" aria-expanded="false" aria-controls="som"></button></div>
+<div class="barre-esp"></div>
+<div class="voile" id="voile"></div>
+
+<!-- ====== Panneau : tri + sommaire ====== -->
+<nav class="som" id="som" aria-label="Tri et sommaire des applications">
+  <div class="som-tete"><a class="som-app" href="#">Physique-Chimie</a><span class="som-n" id="som-n"></span></div>
+  <div><p class="som-lab"><span>Domaine</span></p><div class="puces" role="group" aria-label="Domaine" id="p-dom"></div></div>
+  <div><p class="som-lab"><span>Niveau</span></p><div class="puces" role="group" aria-label="Niveau" id="p-niv"></div></div>
+  <div><p class="som-lab"><span>Sommaire</span></p><div class="arbre" id="arbre"></div></div>
+</nav>
+
+<!-- ====== Bandeau d'accueil avec image en parallaxe ====== -->
+<header class="hero plx" data-graine="7">
+  <canvas aria-hidden="true"></canvas>
+  <div class="wrap hero-texte">
+    <h1>Physique<br>Chimie</h1>
+    <p class="lead">Applications d'entraînement, niveau lycée, de la seconde à la terminale.</p>
+  </div>
+  <p class="legende">Traces de particules chargées dans une chambre à bulles.</p>
+</header>
+
+<!-- ====== Feuille de contenu ====== -->
+<main class="feuille">
+  <div class="wrap" id="liste"></div>
+</main>
+
+<footer class="pied"><div class="wrap"><div>Applications d'entraînement en Physique-Chimie · Niveau lycée</div></div></footer>
+
+<script src="commun.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { DOMAINES, NIVEAUX, APPS } = ACC;
+  const lettre = { physique: 'P', chimie: 'C', maths: 'M' };
+  const ouverts = new Set(['physique']);   // domaines dépliés dans le sommaire
+  let ici = null;                          // domaine visible à l'écran (null : en haut de page)
+
+  /* ---------- Panneau : pastilles de tri ---------- */
+  function puces() {
+    document.getElementById('p-dom').innerHTML =
+      `<button type="button" class="puce" data-g="dom" data-id="" aria-pressed="${!ACC.filtre.dom.size}">Tous</button>` +
+      DOMAINES.map(d => `<button type="button" class="puce d-${d.id}" data-g="dom" data-id="${d.id}" aria-pressed="${ACC.choisi('dom', d.id)}"><span class="rond-c"></span>${d.court}</button>`).join('');
+    document.getElementById('p-niv').innerHTML =
+      `<button type="button" class="puce" data-g="niv" data-id="" aria-pressed="${!ACC.filtre.niv.size}">Tous</button>` +
+      NIVEAUX.map(n => `<button type="button" class="puce" data-g="niv" data-id="${n.id}" aria-pressed="${ACC.choisi('niv', n.id)}" title="${n.nom}">${n.court}</button>`).join('');
+  }
+
+  /* ---------- Panneau : sommaire (domaine → applications) ---------- */
+  function arbre() {
+    const vis = APPS.filter(ACC.visible);
+    document.getElementById('som-n').textContent = ACC.actif() ? `${vis.length} / ${APPS.length}` : `${APPS.length} applications`;
+    document.getElementById('arbre').innerHTML = DOMAINES.map(d => {
+      const apps = vis.filter(a => a.dom === d.id);
+      if (!apps.length) return '';
+      const ouvert = ouverts.has(d.id);
+      return `
+        <div class="sdom d-${d.id}${ici === d.id ? ' ici' : ''}">
+          <button type="button" class="sligne" data-dom="${d.id}" aria-expanded="${ouvert}" aria-controls="senf-${d.id}">
+            <span class="snum">${lettre[d.id]}</span><span class="st">${d.nom}</span><span class="sn">${apps.length}</span><span class="chev">›</span>
+          </button>
+          <div class="senf" id="senf-${d.id}"${ouvert ? '' : ' hidden'}>
+            ${apps.map(a => `<a class="spage" href="../${a.dossier}/index.html">${a.titre}</a>`).join('')}
+          </div>
+        </div>`;
+    }).join('') || '<p class="som-n" style="padding:0 8px">Aucune application.</p>';
+  }
+
+  document.getElementById('som').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (b && b.dataset.g) {
+      if (b.dataset.id) ACC.basculer(b.dataset.g, b.dataset.id); else ACC.toutAfficher(b.dataset.g);
+    } else if (b && b.dataset.dom) {
+      // un appui sur un domaine le déplie / replie sur place (la page ne bouge pas)
+      const id = b.dataset.dom;
+      if (ouverts.has(id)) ouverts.delete(id); else ouverts.add(id);
+      arbre();
+    } else if (e.target.closest('a')) fermer();
+  });
+
+  /* ---------- Bandeau du téléphone : où suis-je ? ---------- */
+  function bandeau() {
+    const ou = document.getElementById('ou');
+    const vis = APPS.filter(ACC.visible);
+    const tri = [...ACC.filtre.dom].map(id => ACC.domaine(id).court)
+      .concat([...ACC.filtre.niv].map(id => ACC.niveau(id).court)).join(', ');
+    const petit = tri ? `Tri : ${tri}` : 'Physique-Chimie';
+    ou.className = 'ou' + (ici ? ` d-${ici}` : ' tous');
+    if (ici) {
+      const n = vis.filter(a => a.dom === ici).length;
+      ou.innerHTML = `<span class="snum">${lettre[ici]}</span><span class="ou-t"><small>${petit}</small><b>${ACC.domaine(ici).nom} · ${n}</b></span><span class="ou-chev">▾</span>`;
+    } else {
+      ou.innerHTML = `<span class="snum">${vis.length}</span><span class="ou-t"><small>${petit}</small><b>${ACC.actif() ? 'Applications triées' : 'Toutes les applications'}</b></span><span class="ou-chev">▾</span>`;
+    }
+  }
+  const ouvrir = () => { document.documentElement.classList.add('som-ouvert'); document.getElementById('ou').setAttribute('aria-expanded', 'true'); };
+  const fermer = () => { document.documentElement.classList.remove('som-ouvert'); document.getElementById('ou').setAttribute('aria-expanded', 'false'); };
+  document.getElementById('ou').addEventListener('click', () =>
+    document.documentElement.classList.contains('som-ouvert') ? fermer() : ouvrir());
+  document.getElementById('voile').addEventListener('click', fermer);
+  addEventListener('keydown', e => { if (e.key === 'Escape') fermer(); });
+
+  /* ---------- Liste : tuiles regroupées par domaine ---------- */
+  function liste() {
+    const vis = APPS.filter(ACC.visible);
+    let html = '';
+    if (ACC.actif()) {
+      const tri = [...ACC.filtre.dom].map(id => ACC.domaine(id).court)
+        .concat([...ACC.filtre.niv].map(id => ACC.niveau(id).nom)).join(' · ');
+      html += `<div class="resume"><span><b>${vis.length} / ${APPS.length}</b> applications · ${tri}</span><button type="button" class="btn-small" data-tout="1">Tout afficher</button></div>`;
+    }
+    html += DOMAINES.map(d => {
+      const apps = vis.filter(a => a.dom === d.id);
+      if (!apps.length) return '';
+      return `
+        <section class="dom d-${d.id}" id="${d.id}">
+          <div class="dom-t"><h2>${d.nom}</h2><span>${ACC.pluriel(apps.length, 'application')}</span></div>
+          <div class="tuiles">
+            ${apps.map(a => `
+              <a class="tuile" href="../${a.dossier}/index.html">
+                <span class="tuile-n">${ACC.etiquettes(a)}</span>
+                <b>${a.titre}</b>
+                <p>${a.desc}</p>
+              </a>`).join('')}
+          </div>
+        </section>`;
+    }).join('');
+    if (!vis.length) html += '<div class="vide"><p>Aucune application pour ce choix.</p><button type="button" class="btn-small" data-tout="1">Tout afficher</button></div>';
+    document.getElementById('liste').innerHTML = html;
+  }
+  document.getElementById('liste').addEventListener('click', e => {
+    if (e.target.closest('[data-tout]')) ACC.toutAfficher();
+  });
+
+  /* ---------- Domaine visible à l'écran : mis en valeur dans le sommaire et le bandeau ---------- */
+  function reperer() {
+    const haut = innerWidth >= 900 ? 120 : 160;
+    let nouveau = null;
+    document.querySelectorAll('#liste .dom').forEach(s => { if (s.getBoundingClientRect().top < haut) nouveau = s.id; });
+    if (nouveau !== ici) {
+      ici = nouveau;
+      if (ici) ouverts.add(ici);
+      arbre(); bandeau();
+    }
+  }
+  let attente = false;
+  addEventListener('scroll', () => {
+    if (!attente) { attente = true; requestAnimationFrame(() => { reperer(); attente = false; }); }
+  }, { passive: true });
+
+  function maj() { puces(); liste(); arbre(); bandeau(); reperer(); }
+  ACC.surChangement(() => {
+    // après un tri, on ramène le haut de la liste à l'écran si on l'avait dépassé
+    const f = document.querySelector('.feuille').getBoundingClientRect().top;
+    maj();
+    const marge = innerWidth >= 900 ? 0 : 54;
+    if (f < marge) scrollTo({ top: scrollY + f - marge, behavior: 'auto' });
+  });
+  maj();
+  ACC.parallaxe();
+})();
+</script>
+</body>
+</html>
