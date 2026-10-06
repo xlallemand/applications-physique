@@ -41,7 +41,10 @@ Ne change ni le contenu scientifique ni les fonctionnalités propres à une appl
 - `<title>` d'une page de module : `Module 1 : référentiel — Cinématique` ; accueil : le nom de l'application.
 - Corps de page : `<div id="app-nav"></div>` puis `<div class="er-page">…</div>`. La navigation s'y construit (voir §5).
 - Pour une nouvelle application : partir de `cinematique/modules/cin.js` (moteur de questions + navigation) et `cin.css`, renommer l'espace de noms et le préfixe de classes, remplacer `PLAN`, les clés de `localStorage` et les textes.
-- Déclarer l'application dans la liste `MATIERES` de `index.html` à la racine (portail) : `{ titre, desc, dossier, niveau }`, dans la bonne matière.
+- Déclarer l'application dans la liste `APPS` de `index.html` à la racine (portail) : `{ titre, dom, niv, dossier, desc }`, à la suite des applications du même domaine.
+  - `dom` : `'physique'`, `'chimie'` ou `'maths'` (outils mathématiques, collège compris) ;
+  - `niv` : liste parmi `'col'` (collège), `'2de'`, `'1re'`, `'spe'` (terminale spécialité), `'sti'` (terminale STI2D) ; `LYCEE` pour les quatre niveaux du lycée ;
+  - `desc` : une phrase courte (une ligne sur ordinateur, masquée sur téléphone).
 - Un nouveau dessin d'en-tête s'ajoute dans `assets/hero.js` (objet `dessins` + liste commentée en tête de fichier).
 
 ## 3. Style visuel (design « Chambre à bulles »)
@@ -95,6 +98,13 @@ Tout vient de `assets/theme.css`. N'écris **aucune couleur en dur** dans les CS
 1. Bandeau supérieur fixe avec le lien vers le portail (voir §5).
 2. **En-tête illustré** : `<header class="app-hero" data-dessin="…" style="margin-top:-24px">` avec `canvas`, `.app-hero-in` (kicker « Physique · Terminale », `h1`, `app-hero-lead`) et `.app-hero-edge`. Dessin animé par `assets/hero.js` (parallaxe).
 3. Liste des modules en **lignes dépliables** (voir §5), carte « Reprendre ».
+
+### Portail (`index.html` à la racine)
+
+1. En-tête illustré « Physique Chimie » (cliché de chambre à bulles en parallaxe), puis une feuille blanche qui le recouvre au défilement.
+2. **Barre de tri** collée en haut de l'écran : pastilles **Domaine** (Tous, Physique, Chimie, Outils maths) et **Niveau** (Tous, Collège, 2de, 1re, Tle spé, Tle STI2D), compteur d'applications et « Tout afficher » quand un tri est en cours. Par défaut, « Tous » : tout est affiché. Choisir une pastille ne garde que les applications qui la portent, en choisir d'autres les ajoute ; domaine et niveau se combinent. Le tri n'est pas mémorisé.
+3. **Liste compacte** regroupée par domaine (couleur du domaine) : une ligne par application avec titre, étiquettes de niveau (« Lycée » quand les quatre niveaux du lycée sont concernés ; celles du tri en cours sont mises en valeur), description sur une ligne et flèche. Deux colonnes sur ordinateur, une sur téléphone (description masquée sous 640 px, pastilles sur une ligne qui défile de côté).
+4. Pas de sommaire sur le portail.
 
 ### Page de module (cours, questions, fiche, exercices)
 
@@ -289,7 +299,7 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 5. **Style** : cartes `er-card`, boutons en pilule encre, encarts `.cle` / `callout-*`, badges ; supprimer les couleurs en dur et les classes de couleur Tailwind (le thème les neutralise, mais ne pas en ajouter).
 6. **Saisies** : ± pour les nombres, ≥ 16 px, cibles tactiles larges, retours d'erreur diagnostiqués (§6, §7, §8).
 7. **Progression** : `localStorage` en `try/catch`, meilleure note conservée.
-8. Passer la liste de §10, puis mettre à jour la description de l'application dans `index.html` du portail si elle a changé.
+8. Passer la liste de §10, puis mettre à jour la description et les étiquettes (`dom`, `niv`) de l'application dans `index.html` du portail si elles ont changé.
 
 ## 12. Fichiers de référence
 
@@ -305,4 +315,4 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 | Exemple de cours, de série, de fiche | `module_1_cours.html`, `module_1_questions.html`, `fiche_1.html` |
 | Accueil de l'application | `cinematique/index.html` |
 | Dessins d'en-tête | `assets/hero.js` |
-| Portail (liste des applications) | `index.html` (racine) |
+| Portail (liste des applications, tri par domaine et niveau) | `index.html` (racine) : `DOMAINES`, `NIVEAUX`, `APPS` |
