@@ -59,7 +59,7 @@
       desc: "Réactif limitant et tableau d'avancement, des molécules aux moles." },
     { titre: 'Combustions', dom: 'chimie', niv: ['sti'], dossier: 'combustions',
       desc: 'Équilibrer une combustion, masse de CO₂ formé et énergie libérée.' },
-    { titre: 'pH', dom: 'chimie', niv: ['spe', 'sti'], dossier: 'ph',
+    { titre: 'pH', dom: 'chimie', niv: ['spe'], dossier: 'ph',
       desc: 'Logarithme décimal et relation entre le pH et la concentration en ions H₃O⁺.' },
     // ---- Outils mathématiques ----
     { titre: 'Puissances de 10', dom: 'maths', niv: LYCEE, dossier: 'puissances-10',
