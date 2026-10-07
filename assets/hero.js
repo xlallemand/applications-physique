@@ -12,6 +12,7 @@
      graphique  papier millimétré, droites et points de mesure
      noyaux     noyaux radioactifs et courbe N(t)
      puissance  tension et intensité déphasées, puissance instantanée
+     transport  pylônes et lignes à haute tension, tension sinusoïdale
      cinematique  chronophotographies (positions successives) et vecteurs vitesse
      fractions  disques et barres partagés
      molecules  modèles moléculaires en boules
@@ -225,6 +226,45 @@
         ctx.beginPath();
         ctx.moveTo(x, y - r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.quadraticCurveTo(x, y, x, y + r);
         ctx.quadraticCurveTo(x, y, x - r, y); ctx.quadraticCurveTo(x, y, x, y - r); ctx.fill();
+      }
+    },
+
+    // Pylônes à haute tension reliés par des câbles (chaînette), tension sinusoïdale en fond
+    transport(ctx, w, h, c) {
+      const p = 24;
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineWidth = 1;
+      for (let i = 0, x = 0; x <= w; x += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .12; trait(ctx, x, 0, x, h); }
+      for (let i = 0, y = 0; y <= h; y += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .12; trait(ctx, 0, y, w, y); }
+      // tension sinusoïdale, très légère
+      ctx.globalAlpha = .18; ctx.lineWidth = 2.5;
+      const per = Math.max(260, w / 4);
+      courbe(ctx, x => h * .3 - h * .12 * Math.sin(2 * Math.PI * x / per), 0, w);
+      // pylône : treillis vu de face, deux consoles portant les câbles ; renvoie les points d'accroche
+      function pylone(x, base, H, a) {
+        const L = H * .16, haut = base - H;
+        ctx.globalAlpha = a; ctx.lineWidth = 2;
+        trait(ctx, x - L, base, x - L * .25, haut); trait(ctx, x + L, base, x + L * .25, haut);
+        ctx.lineWidth = 1;
+        for (let k = 0; k < 7; k++) {
+          const y1 = base - k * H / 7, y2 = base - (k + 1) * H / 7;
+          const e1 = L - (L * .75) * k / 7, e2 = L - (L * .75) * (k + 1) / 7;
+          trait(ctx, x - e1, y1, x + e2, y2); trait(ctx, x + e1, y1, x - e2, y2);
+        }
+        const c1 = haut + H * .12, c2 = haut + H * .32;
+        ctx.lineWidth = 2;
+        trait(ctx, x - L * 1.6, c1, x + L * 1.6, c1); trait(ctx, x - L * 2, c2, x + L * 2, c2);
+        trait(ctx, x - L * .25, haut, x, haut - H * .08); trait(ctx, x + L * .25, haut, x, haut - H * .08);
+        return [[x - L * 1.5, c1], [x + L * 1.5, c1], [x - L * 1.9, c2], [x + L * 1.9, c2]];
+      }
+      const ecart = Math.max(260, w / 3.6), H = h * .62, base = h * 1.02;
+      const pts = [];
+      for (let x = ecart * .35, k = 0; x < w + ecart; x += ecart, k++) pts.push(pylone(x, base - (k % 2) * h * .04, H, .42));
+      // câbles : chaînettes entre deux pylônes voisins
+      ctx.lineWidth = 1.5; ctx.globalAlpha = .38;
+      for (let k = 0; k + 1 < pts.length; k++) for (let j = 0; j < 4; j++) {
+        const [x1, y1] = pts[k][j], [x2, y2] = pts[k + 1][j], f = ecart * .07;
+        ctx.beginPath(); ctx.moveTo(x1, y1);
+        ctx.quadraticCurveTo((x1 + x2) / 2, (y1 + y2) / 2 + 2 * f, x2, y2); ctx.stroke();
       }
     },
 

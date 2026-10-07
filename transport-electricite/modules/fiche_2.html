@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : fiche récapitulative — Transport de l'électricité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="te.css">
+<script src="te.js"></script>
+<script src="schemas.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page te-fiche" id="fiche"></div>
+
+<script>
+/* ============================================================
+   Fiche récapitulative du module 2 : ce que montre la simulation
+   (#simulation), relations, schéma, méthode et intérêt pour le
+   transport (#proprietes).
+   ============================================================ */
+const sub = (x, i) => `${x}<sub>${i}</sub>`;
+const U1 = sub('U', 1), U2 = sub('U', 2), I1 = sub('I', 1), I2 = sub('I', 2), N1 = sub('N', 1), N2 = sub('N', 2);
+const rap = (h, b, inv) => `<span class="te-rap${inv ? ' inv' : ''}"><span>${h}</span><span>${b}</span></span>`;
+const TROIS = `m = ${rap(N2, N1)} = ${rap(U2, U1)} = ${rap(I1, I2, true)}`;
+document.getElementById('fiche').innerHTML = `
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Le transformateur</h2>
+  </div>
+
+  <section class="er-card" id="simulation">
+    <h3 class="cours-titre">Ce que montre la simulation</h3>
+    <div class="cle"><p>Un transformateur est formé de deux bobines (primaire : ${N1} spires ; secondaire : ${N2} spires) enroulées sur un même noyau de fer.</p>
+      <ul class="er-liste">
+        <li>La tension de sortie dépend des nombres de spires : ${U2} / ${U1} = ${N2} / ${N1}.</li>
+        <li>u<sub>1</sub> et u<sub>2</sub> ont la même fréquence et ne sont pas décalées (pas de déphasage) ; U<sub>2max</sub> / U<sub>1max</sub> = ${U2} / ${U1}.</li>
+        <li>L'intensité varie en sens inverse de la tension : ${U1} × ${I1} = ${U2} × ${I2} (la puissance se conserve).</li>
+      </ul></div>
+  </section>
+
+  <section class="er-card" id="proprietes">
+    <h3 class="cours-titre">Rôle et schéma</h3>
+    <div class="cle"><p>Un transformateur <b>augmente</b> (élévateur) ou <b>diminue</b> (abaisseur) une tension <b>alternative</b>. Il ne fonctionne pas en continu.</p></div>
+    ${SCH.chaine({ etages: [{ titre: 'primaire (entrée)', u: 'u<sub>1</sub>', i: 'i<sub>1</sub>' }, { titre: 'secondaire (sortie)', u: 'u<sub>2</sub>', i: 'i<sub>2</sub>' }],
+      transfos: [{ nom: 'T', n: [N1, N2] }], charge: { nom: 'appareil' }, aria: 'Symbole du transformateur : u1 et i1 au primaire, u2 et i2 au secondaire' })}
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Les trois relations</h3>
+    <div class="cle"><p class="ph-formule grand">${TROIS}</p>
+      <p>${U2} = m × ${U1} ; ${N2} = m × ${N1} ; ${I2} = ${rap(I1, 'm')}.</p>
+      <p>m &gt; 1 (${N2} &gt; ${N1}) : <b>élévateur</b> ; m &lt; 1 (${N2} &lt; ${N1}) : <b>abaisseur</b>.</p></div>
+    <div class="cle"><p><b class="cle-titre">La relation des intensités est à l'envers.</b> « Ce qu'il gagne en tension, il le perd en intensité » : ${U1} × ${I1} = ${U2} × ${I2}. Le côté qui a le plus de spires a la plus grande tension et la plus petite intensité.</p></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Méthode pour les exercices</h3>
+    <div class="cle"><ol class="er-liste">
+      <li>Faire le <b>schéma</b> et y placer les valeurs de l'énoncé au bon endroit (primaire : indice 1 ; secondaire : indice 2).</li>
+      <li>Écrire les <b>trois formules</b> : ${TROIS}.</li>
+      <li>Utiliser l'égalité qui ne contient qu'une seule inconnue.</li>
+    </ol></div>
+    ${SCH.transfo1({ U1: '20 kV', I1: '?', P1: '800 kW', U2: '400 kV', I2: '?', m: '?' })}
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Intérêt pour le transport</h3>
+    <div class="cle"><p>Un transformateur <b>élévateur</b> à la sortie de la centrale divise l'intensité par m, donc les pertes par effet Joule (R × I<sup>2</sup>) par m<sup>2</sup>. Des transformateurs <b>abaisseurs</b> ramènent ensuite la tension à 230 V pour les utilisateurs.</p></div>
+    ${SCH.chaine({ etages: [{ titre: 'production', u: 'u<sub>1</sub>', lignes: [SCH.l(U1 + ' =', SCH.v('20 kV'))] },
+      { titre: 'transport (lignes THT)', u: 'u<sub>2</sub>', lignes: [SCH.l(U2 + ' =', SCH.v('400 kV'))] },
+      { titre: 'distribution', u: 'u<sub>3</sub>', lignes: [SCH.l(sub('U', 3) + ' =', SCH.v('230 V'))] }],
+      transfos: [{ nom: 'élévateur' }, { nom: 'abaisseur' }], charge: { nom: 'maison' } })}
+  </section>
+
+  <div class="er-actions te-fiche-liens">
+    <a class="btn-secondary" style="text-decoration:none" href="module_2_simulation.html">Revoir la simulation</a>
+    <a class="btn-secondary" style="text-decoration:none" href="module_2_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" style="text-decoration:none" href="module_2_questions.html">Questions sur le transformateur</a>
+  </div>`;
+TE.menu('fiche_2');
+</script>
+</body>
+</html>

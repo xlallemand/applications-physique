@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions sur le risque électrique — Transport de l'électricité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="te.css">
+<script src="te.js"></script>
+<script src="schemas.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : le courant et le corps humain (3),
+   protection des biens (3), protection des personnes (3),
+   lecture du tableau électrique (1).
+   Chaque fabrique renvoie une question différente à chaque appel.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, proche } = TE;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const QCM = (theme, q, bonne, faux, solution, indice, opts) => ({ theme, parties: [fq.choix(q, [o('ok', bonne)].concat(faux.map((f, i) => o('f' + i, f))), 'ok', Object.assign({ solution, indice }, opts))] });
+const EFFETS = [[0.5, 'sensation très faible'], [10, 'seuil de non-lâcher (contraction des muscles)'], [30, 'paralysie respiratoire (après 3 min)'], [50, 'fibrillation cardiaque irréversible'], [1000, 'arrêt du cœur']];
+
+/* ---------- Groupe 1 : le courant et le corps humain ---------- */
+const G1 = [
+  function courantCorps() {
+    const [U, R] = hasard([[230, 1000], [50, 2000], [25, 2500], [120, 1500], [230, 2000]]), I = U / R * 1000;
+    return { theme: 'Le courant et le corps humain', enonce: `<p>Une personne touche un conducteur sous une tension U = ${U} V. Son corps se comporte comme un conducteur ohmique de résistance R = ${fmt(R)} Ω.</p>`,
+      parties: [fq.nombre('Calcule l\'intensité du courant qui la traverse, en milliampères.', 'I =', I, 'mA', {
+        diag: v => proche(v, I / 1000) ? 'Exprime le résultat en milliampères : 1 A = 1 000 mA.' : proche(v, U * R) ? 'I = U / R : on divise.' : 'I = U / R, puis convertis en mA.',
+        solution: calc(`I = ${TE.fr('U', 'R')} = ${TE.fr(String(U), fmt(R))} = ${fmt(I / 1000)} A = ${c(fmt(I) + ' mA')}`) })] };
+  },
+  function effet() {
+    const [I, txt] = hasard(EFFETS.slice(1));
+    return QCM('Le courant et le corps humain', `Un courant d'intensité ${I >= 1000 ? '1 A' : I + ' mA'} traverse le corps humain. L'effet correspondant est :`, txt,
+      EFFETS.filter(e => e[1] !== txt).map(e => e[1]).slice(0, 3), `${I >= 1000 ? '1 A' : I + ' mA'} : ${txt}.`, 'Pense au tableau des effets du courant : 10 mA, 30 mA, 50 mA, 1 A.');
+  },
+  () => QCM('Le courant et le corps humain', 'Ce qui détermine la gravité d\'une électrocution, c\'est :', 'l\'intensité du courant qui traverse le corps et la durée du contact', ['la puissance de l\'appareil touché', 'la longueur des fils', 'la fréquence du courant seulement'],
+    'Les effets dépendent de l\'intensité du courant qui traverse le corps et de la durée de son passage.', 'Le tableau des effets est donné en milliampères.'),
+  () => QCM('Le courant et le corps humain', 'À partir de quelle intensité ne peut-on plus lâcher un conducteur que l\'on tient ?', '10 mA', ['0,5 mA', '1 A', '100 A'], 'Dès 10 mA, les muscles se contractent : c\'est le seuil de non-lâcher.', 'C\'est une valeur en milliampères, assez faible.'),
+];
+
+/* ---------- Groupe 2 : protéger les biens ---------- */
+const G2 = [
+  function four() {
+    const [app, P] = hasard([['Un four', 2600], ['Un lave-linge', 2300], ['Une bouilloire', 2070], ['Un radiateur', 1610], ['Un sèche-linge', 3450]]), I = P / 230, cal = [10, 16, 20, 32].find(x => x > I);
+    return { theme: 'Protéger les biens', enonce: `<p>${app} (résistif, k = 1) porte l'indication « 230 V ~ 50 Hz ; ${fmt(P)} W ».</p>`,
+      parties: [
+        fq.nombre('Calcule l\'intensité efficace du courant qu\'il appelle.', 'I =', I, 'A', { rel: .01, diag: v => proche(v, P * 230) ? 'I = P / U (on divise).' : 'Pour un appareil résistif, S = P et I = P / U.', solution: calc(`I = ${TE.fr('P', 'U')} = ${TE.fr(fmt(P), '230')} ≈ ${c(fmt(+I.toFixed(1)) + ' A')}`) }),
+        fq.choix('Quel est le plus petit calibre de disjoncteur qui convient ?', [10, 16, 20, 32].map(x => o(String(x), x + ' A')), String(cal), { melanger: false, indice: 'Le calibre doit être supérieur à l\'intensité appelée.', solution: `${fmt(+I.toFixed(1))} A &lt; ${cal} A : un disjoncteur de ${cal} A convient.` }),
+      ] };
+  },
+  function multiprise() {
+    const apps = melanger([['un grille-pain', 3.5], ['une bouilloire', 6.5], ['un fer à repasser', 8], ['une cafetière', 4.5], ['un sèche-cheveux', 7.5]]).slice(0, hasard([2, 3]));
+    const I = apps.reduce((s, a) => s + a[1], 0), F = I === 16 ? 25 : hasard([16, 25]);     // jamais I égale au calibre
+    return { theme: 'Protéger les biens', enonce: `<p>On branche sur une multiprise ${apps.map(a => `${a[0]} (230 V – ${fmt(a[1])} A)`).join(apps.length > 2 ? ', ' : ' et ').replace(/, ([^,]*)$/, ' et $1')}.</p>`,
+      parties: [
+        fq.nombre('Calcule l\'intensité du courant qui sort de la prise murale quand tous fonctionnent.', 'I =', I, 'A', { diag: () => 'Les appareils sont en dérivation : les intensités s\'additionnent.', solution: calc(`I = ${apps.map(a => fmt(a[1])).join(' + ')} = ${c(fmt(I) + ' A')}`) }),
+        fq.choix(`La prise est protégée par un fusible de ${F} A. Peut-on les faire fonctionner en même temps ?`, [o('oui', 'oui'), o('non', 'non')], I < F ? 'oui' : 'non', { melanger: false, indice: `Compare ${fmt(I)} A au calibre ${F} A.`, solution: I < F ? `${fmt(I)} A &lt; ${F} A : oui.` : `${fmt(I)} A &gt; ${F} A : le fusible fondrait, non.` }),
+      ] };
+  },
+  () => QCM('Protéger les biens', 'Un disjoncteur divisionnaire (10 A, 16 A, 20 A…) protège :', 'les biens : il coupe en cas de surintensité, pour éviter l\'échauffement des fils et l\'incendie', ['les personnes : il coupe en cas de fuite de courant', 'les appareils : il coupe en cas de surtension', 'rien : il sert à allumer la lumière'],
+    'Le disjoncteur coupe si l\'intensité dépasse son calibre : il protège l\'installation contre l\'incendie.', 'Que se passe-t-il dans les fils quand l\'intensité est trop grande ?'),
+  () => QCM('Protéger les biens', 'Pourquoi les fils des plaques de cuisson (6 mm<sup>2</sup>) sont-ils plus gros que ceux de l\'éclairage (1,5 mm<sup>2</sup>) ?', 'ils doivent laisser passer un courant plus intense sans trop chauffer', ['la tension des plaques est plus grande', 'ils protègent les personnes', 'ils sont plus faciles à brancher'],
+    'Un fil plus gros a une plus petite résistance : il chauffe moins (effet Joule) quand il est parcouru par un courant intense (jusqu\'à 32 A).', 'Pense à l\'effet Joule.'),
+];
+
+/* ---------- Groupe 3 : protéger les personnes ---------- */
+const G3 = [
+  () => QCM('Protéger les personnes', 'Un disjoncteur différentiel 30 mA coupe le circuit quand :', 'le courant qui entre et celui qui sort diffèrent d\'au moins 30 mA (fuite de courant)', ['l\'intensité dépasse 30 A', 'la tension dépasse 30 V', 'on branche trop d\'appareils'],
+    'Il compare le courant entrant (phase) et le courant sortant (neutre) : une différence de 30 mA signale une fuite, peut-être à travers une personne.', 'Le mot « différentiel » vient de « différence ».'),
+  function fuite() {
+    const Ie = hasard([5, 8, 10, 12]), f = hasard([10, 20, 25, 35, 40, 50]), Is = Ie - f / 1000;
+    return { theme: 'Protéger les personnes', enonce: `<p>Dans un appareil défectueux, ${fmt(Ie, 3)} A entrent par la phase et ${fmt(Is, 3)} A ressortent par le neutre. L'installation est protégée par un disjoncteur différentiel 30 mA.</p>`,
+      parties: [
+        fq.nombre('Calcule le courant de fuite, en milliampères.', 'fuite =', f, 'mA', { diag: v => proche(v, f / 1000) ? 'Exprime-le en milliampères (× 1 000).' : 'Fais la différence entre le courant entrant et le courant sortant.', solution: calc(`${fmt(Ie, 3)} − ${fmt(Is, 3)} = ${fmt(f / 1000, 3)} A = ${c(f + ' mA')}`) }),
+        fq.choix('Le disjoncteur différentiel coupe-t-il ?', [o('oui', 'oui'), o('non', 'non')], f >= 30 ? 'oui' : 'non', { melanger: false, indice: 'Il coupe à partir de 30 mA.', solution: f >= 30 ? `${f} mA ≥ 30 mA : il coupe.` : `${f} mA &lt; 30 mA : il ne coupe pas (mais l'appareil doit être réparé).` }),
+      ] };
+  },
+  () => QCM('Protéger les personnes', 'Pourquoi relie-t-on à la terre la carcasse métallique d\'un lave-linge ?', 'pour qu\'un courant de fuite passe par le fil de terre plutôt que par une personne', ['pour diminuer sa consommation', 'pour éviter les surintensités', 'pour augmenter la tension'],
+    'Le fil de terre (vert-jaune) offre un chemin au courant de fuite ; le différentiel détecte alors la fuite et coupe.', 'Où va le courant de fuite si la carcasse n\'est pas reliée à la terre ?'),
+  () => QCM('Protéger les personnes', 'Quelles sont les deux protections des personnes contre le risque électrique ?', 'la mise à la terre des appareils et le disjoncteur différentiel', ['le disjoncteur et le fusible', 'le transformateur et le disjoncteur', 'la multiprise et le fusible'],
+    'Protection des personnes : relier les appareils à la terre et utiliser des disjoncteurs différentiels. Les disjoncteurs et les fusibles protègent les biens.', 'Les disjoncteurs ordinaires protègent les biens.'),
+];
+
+/* ---------- Groupe 4 : lecture du tableau électrique ---------- */
+function tableau() {
+  const q = hasard([
+    ['Dans ce tableau, que trouve-t-on au début de chaque rangée ?', 'un interrupteur différentiel 30 mA', ['un disjoncteur de 32 A', 'un transformateur', 'un fusible de 10 A'], 'Chaque rangée commence par un interrupteur différentiel 30 mA, qui protège les personnes sur tous les circuits de la rangée.'],
+    ['Quel est le calibre du disjoncteur des circuits d\'éclairage ?', '10 A', ['16 A', '32 A', '30 mA'], 'Les circuits d\'éclairage (fils de 1,5 mm<sup>2</sup>) sont protégés par des disjoncteurs de 10 A.'],
+    ['Jusqu\'à quelle intensité peut-on utiliser une prise de courant de ce logement ?', '16 A', ['10 A', '40 A', '30 mA'], 'Les prises sont protégées par des disjoncteurs de 16 A.'],
+    ['Quel circuit est protégé par le disjoncteur de 32 A, relié à des fils de 6 mm<sup>2</sup> ?', 'les plaques de cuisson', ['l\'éclairage', 'la sonnerie', 'les prises'], 'Les plaques de cuisson appellent un courant intense : disjoncteur de 32 A et fils de 6 mm<sup>2</sup>.'],
+  ]);
+  return { theme: 'Le tableau électrique', figure: z => { z.innerHTML = SCH.tableau(); }, parties: [fq.choix(q[0], [o('ok', q[1])].concat(q[2].map((f, i) => o('f' + i, f))), 'ok', { indice: 'Lis les indications écrites sur les modules du tableau.', solution: q[3] })] };
+}
+
+// tirage : 3 + 3 + 3 + 1 questions, sans répétition dans un groupe
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  return pris(G1, 3).concat(pris(G2, 3), pris(G3, 3), [tableau()]);
+}
+
+TE.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Le risque électrique',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : effets du courant sur le corps humain, protection des biens (disjoncteurs), protection des personnes (terre, disjoncteur différentiel), lecture d\'un tableau électrique.</p>',
+  questions: tirage,
+  revoir: { href: 'module_3_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4_cours.html', label: 'Module 4 : exercices de synthèse →' },
+});
+TE.menu('module_3_questions');
+</script>
+</body>
+</html>
