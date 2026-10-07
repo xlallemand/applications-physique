@@ -3,11 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 3 : Entraînement — Reconnaître</title>
+<title>Module 1 : entraînement — Proportionnalité</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="ptools.css">
-<script src="../../assets/nav.js"></script>
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
 <script src="ptools.js"></script>
 </head>
@@ -51,7 +53,7 @@ function maxScore() { return bank.reduce((s,q) => s + (q.type==='qcm3' ? 1 : q.i
 function renderIntro() {
   document.getElementById('app').innerHTML = `
     <div class="bg-white rounded-xl shadow-lg p-6">
-      <span class="content-module-badge">MODULE 3</span>
+      <span class="content-module-badge">MODULE 1 · ENTRAÎNEMENT</span>
       <h2 class="text-2xl font-bold text-[var(--app-accent-800)] mb-3">Entraînement</h2>
       <p class="text-gray-700 mb-2">Des situations physiques plus variées et quelques pièges classiques (situations affines, non linéaires...). Repère à chaque fois s'il s'agit d'une proportionnalité directe, inverse, ou d'aucune des deux.</p>
       <button onclick="start()" class="btn-primary mt-2">Commencer →</button>
@@ -63,7 +65,7 @@ function render() {
   if (idx >= bank.length) return finish();
   const q = bank[idx];
   const app = document.getElementById('app');
-  const head = ptHeader({ badge: 'MODULE 3', title: 'Entraînement', idx, total: bank.length, score });
+  const head = ptHeader({ badge: 'MODULE 1 · ENTRAÎNEMENT', title: 'Entraînement', idx, total: bank.length, score });
 
   if (q.type === 'qcm3') {
     app.innerHTML = head + `
@@ -150,30 +152,13 @@ function finish() {
   document.getElementById('app').innerHTML = ptFinish({
     score, max: maxScore(), trueMax: maxScore(),
     title: 'Entraînement terminé !', recap: answers,
-    restartFn: 'start()', nextHref: 'module_4.html', nextLabel: 'Module 4 : Utiliser la proportionnalité →',
+    restartFn: 'start()', nextHref: 'module_4.html', nextLabel: 'Module 2 : utiliser la proportionnalité →',
   });
 }
 
 renderIntro();
 
-const nav = AppNav.init({
-  appName: 'Proportionnalité', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
-  onHome: () => { window.location.href = '../index.html'; },
-  onNavigate: (key) => { window.location.href = key + '.html'; },
-  groups: [
-    { title: 'Reconnaître', items: [
-      { key: 'module_1', label: 'Module 1 : Cours' }, { key: 'module_2', label: 'Module 2 : Vérification' }, { key: 'module_3', label: 'Module 3 : Entraînement' },
-    ]},
-    { title: 'Utiliser', items: [
-      { key: 'module_4', label: 'Module 4 : Cours' }, { key: 'module_5', label: 'Module 5 : Vérification' }, { key: 'module_6', label: 'Module 6 : Entraînement' },
-    ]},
-    { title: 'Graphique', items: [
-      { key: 'module_7', label: 'Module 7 : Cours' }, { key: 'module_8', label: 'Module 8 : Vérification' }, { key: 'module_9', label: 'Module 9 : Entraînement' },
-    ]},
-  ],
-});
-nav.setActive('module_3');
-nav.setTitle('Module 3 : Entraînement');
+PT.menu('module_3');
 </script>
 </body>
 </html>

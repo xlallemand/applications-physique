@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="maths">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : fiche récapitulative — Proportionnalité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="plan.js"></script>
+<script src="ptools.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Représentation graphique</h2>
+  </div>
+<!-- Fiche récapitulative du module 3 : droite passant par l'origine, coefficient directeur. -->
+
+  <section class="er-card">
+    <h3 class="cours-titre">Reconnaître une proportionnalité</h3>
+    <div class="cle"><p>Un graphique y = f(x) représente une proportionnalité directe <b>si et seulement si</b> c'est une <b>droite qui passe par l'origine</b> (0 ; 0).</p>
+      <p>Droite ne passant pas par l'origine : situation affine. Courbe : non proportionnelle, même si elle part de l'origine.</p></div>
+    <div class="som-fiche-figs" data-x="graphes"></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Le coefficient directeur</h3>
+    <div class="cle"><p>La droite passe par l'origine : il suffit de lire les coordonnées d'un point B sur le quadrillage.</p>
+      <p class="som-formule">k = y<sub>B</sub> / x<sub>B</sub></p>
+      <p>Avec deux points A et B quelconques : k = (y<sub>B</sub> − y<sub>A</sub>) / (x<sub>B</sub> − x<sub>A</sub>).</p></div>
+    <div data-x="huile" style="max-width:420px;margin:0 auto"></div>
+    <p>Masse d'huile en fonction du volume : B (8 ; 6), donc ρ = 6 / 8 = 0,75 kg/L.</p>
+    <p>Le coefficient est en général une grandeur physique (masse volumique, vitesse, résistance, masse molaire…) : son unité te met sur la piste.</p>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_7.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_8.html">Vérification des connaissances</a>
+  </div>
+</div>
+<script>
+document.querySelector('[data-x="graphes"]').innerHTML = `
+  <div>${ptGraphSvg({ xMax: 10, yMax: 8, xLabel: 'x', yLabel: 'y', k: 0.7, intercept: 0, showPoints: false })}<p>Proportionnelle</p></div>
+  <div>${ptGraphSvg({ xMax: 10, yMax: 8, xLabel: 'x', yLabel: 'y', k: 0.5, intercept: 2, showPoints: false })}<p>Affine, non proportionnelle</p></div>
+  <div>${ptGraphSvg({ xMax: 10, yMax: 8, xLabel: 'x', yLabel: 'y', curved: true, curveFn: x => 2 * Math.sqrt(x), showPoints: false })}<p>Courbe, non proportionnelle</p></div>`;
+document.querySelector('[data-x="huile"]').innerHTML = ptGraphSvg({ xMax: 8, yMax: 8, nx: 4, ny: 4, xLabel: 'V (L)', yLabel: 'm (kg)', k: 0.75, intercept: 0, showPoints: true, pointA: [0, 0], pointB: [8, 6] });
+PT.menu('fiche_3');
+</script>
+</body>
+</html>
