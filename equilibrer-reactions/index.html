@@ -6,8 +6,11 @@
 <title>Équilibrer une réaction</title>
 <link rel="stylesheet" href="../assets/theme.css">
 <link rel="stylesheet" href="modules/er.css">
-<script src="../assets/nav.js"></script>
+<link rel="stylesheet" href="../assets/sommaire.css">
 <script src="../assets/hero.js"></script>
+<script src="../assets/sommaire.js"></script>
+<script src="../assets/molecules.js"></script>
+<script src="modules/er.js"></script>
 </head>
 <body>
 <div id="app-nav"></div>
@@ -24,67 +27,14 @@
     <div class="app-hero-edge"></div>
   </header>
 
-  <div class="module-list">
-    <div class="module-card clickable" onclick="location.href='modules/module_1.html'">
-      <div class="module-card-head">
-        <span class="module-badge">1</span>
-        <div class="module-card-body">
-          <div class="module-card-title">Comment équilibrer une réaction</div>
-          <div class="module-card-desc">Les atomes se conservent : on ajoute des nombres stœchiométriques et on voit le nombre d'atomes changer. Trois réactions pour apprendre la méthode.</div>
-        </div>
-        <span class="module-card-arrow">›</span>
-      </div>
-    </div>
-    <div class="module-card clickable" onclick="location.href='modules/module_2.html'">
-      <div class="module-card-head">
-        <span class="module-badge">2</span>
-        <div class="module-card-body">
-          <div class="module-card-title">Compter les atomes</div>
-          <div class="module-card-desc">Compter les atomes dans une molécule : indices, nombre stœchiométrique, parenthèses comme dans Cu(OH)<sub>2</sub>.</div>
-        </div>
-        <span class="module-card-arrow">›</span>
-      </div>
-    </div>
-    <div class="module-card clickable" onclick="location.href='modules/module_3.html'">
-      <div class="module-card-head">
-        <span class="module-badge">3</span>
-        <div class="module-card-body">
-          <div class="module-card-title">Entraînement : réactions faciles</div>
-          <div class="module-card-desc">10 réactions de difficulté croissante, notées sur 20, différentes à chaque essai. Aide dessinée pour les 5 premières.</div>
-        </div>
-        <span class="module-card-arrow">›</span>
-      </div>
-    </div>
-    <div class="module-card clickable" onclick="location.href='modules/module_4.html'">
-      <div class="module-card-head">
-        <span class="module-badge">4</span>
-        <div class="module-card-body">
-          <div class="module-card-title">Entraînement : réactions moins faciles</div>
-          <div class="module-card-desc">10 réactions plus difficiles à équilibrer (combustions, grands nombres stœchiométriques, parenthèses), notées sur 20.</div>
-        </div>
-        <span class="module-card-arrow">›</span>
-      </div>
-    </div>
-  </div>
+  <!-- une ligne dépliable par module (voir assets/sommaire.js) -->
+  <main class="som-accueil" id="accueil"></main>
 </div>
 
 <script>
-const nav = AppNav.init({
-  appName: 'Équilibrer une réaction',
-  portalHref: '../index.html',
-  portalLabel: 'Toutes les applications',
-  onHome: () => {},
-  onNavigate: (key) => { window.location.href = 'modules/' + key + '.html'; },
-  groups: [
-    { title: 'Modules', items: [
-      { key: 'module_1', label: 'Module 1 : Comment équilibrer une réaction' },
-      { key: 'module_2', label: 'Module 2 : Compter les atomes' },
-      { key: 'module_3', label: 'Module 3 : Réactions faciles' },
-      { key: 'module_4', label: 'Module 4 : Réactions moins faciles' },
-    ]},
-  ],
-});
-nav.setActive(null);
+// bandeau avec le lien vers le portail des applications, puis la liste des modules
+ER.menu('accueil');
+ER.accueil(document.getElementById('accueil'));
 </script>
 </body>
 </html>

@@ -329,6 +329,7 @@
 
     function fin() {
       const max = total(), pct = Math.round(score / max * 100);
+      window.SOM.marquer({ note: Math.round(score / max * 20 * 2) / 2 });   // meilleure note sur 20 (sommaire, accueil)
       let msg;
       if (score === max) msg = 'Tu sais équilibrer ces réactions.';
       else if (pct >= 70) msg = 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.';
@@ -455,24 +456,21 @@
     };
   }
 
-  /* ---------- Bandeau et menu communs aux modules ---------- */
-  const MODULES = [
-    { key: 'module_1', label: 'Module 1 : Comment équilibrer une réaction' },
-    { key: 'module_2', label: 'Module 2 : Compter les atomes' },
-    { key: 'module_3', label: 'Module 3 : Réactions faciles' },
-    { key: 'module_4', label: 'Module 4 : Réactions moins faciles' },
+  /* ---------- Plan de l'application et navigation (voir assets/sommaire.js) ---------- */
+  const PLAN = [
+    { n: 1, titre: 'Comment équilibrer une réaction', desc: 'Conservation des atomes, nombres stœchiométriques, la méthode sur trois réactions', fiche: 'fiche_1',
+      parties: [{ nom: 'Comment équilibrer', cours: 'module_1' }] },
+    { n: 2, titre: 'Compter les atomes', desc: 'Indices, nombre stœchiométrique, parenthèses comme dans Cu(OH)<sub>2</sub>', fiche: 'fiche_2',
+      parties: [{ nom: 'Compter les atomes', cours: 'module_2', noms: { cours: 'Règles et questions' } }] },
+    { n: 3, titre: 'Entraînement : réactions faciles', desc: '10 réactions de difficulté croissante, notées sur 20',
+      parties: [{ nom: 'Réactions faciles', entrainement: 'module_3' }] },
+    { n: 4, titre: 'Entraînement : réactions moins faciles', desc: 'Combustions, grands nombres stœchiométriques, parenthèses, notées sur 20',
+      parties: [{ nom: 'Réactions moins faciles', entrainement: 'module_4' }] },
   ];
-  function menu(cle) {
-    const n = window.AppNav.init({
-      appName: 'Équilibrer une réaction', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
-      onHome: () => { window.location.href = '../index.html'; },
-      onNavigate: key => { window.location.href = key + '.html'; },
-      groups: [{ title: 'Modules', items: MODULES }],
-    });
-    n.setActive(cle);
-    n.setTitle((MODULES.find(m => m.key === cle) || {}).label || null);
-    return n;
-  }
+  // (er.js est aussi chargé par « Combustions », dont le moteur remplace ensuite cette configuration)
+  window.SOM.init({ nom: 'Équilibrer une réaction', id: 'equilibrer-reactions', plan: PLAN });
+  const menu = cle => window.SOM.menu(cle);
+  const accueil = zone => window.SOM.accueil(zone);
 
   /* ---------- Confettis (sans-faute) ---------- */
   function confettis() {
@@ -491,6 +489,6 @@
 
   window.ER = {
     ELEMENTS, analyser, nb, formuleHTML, molecule, boules, bouleHTML, selecteur, Reaction, bilan, verifier, bilanHTML,
-    equationHTML, melanger, detailler, calculHTML, entrainement, menu, confettis, interrupteur, Comptage, indice,
+    equationHTML, melanger, detailler, calculHTML, entrainement, menu, accueil, PLAN, confettis, interrupteur, Comptage, indice,
   };
 })();
