@@ -6,7 +6,9 @@
     <title>Fractions - Entraînement</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="../assets/theme.css">
-    <script src="../assets/nav.js"></script>
+    <link rel="stylesheet" href="../equilibrer-reactions/modules/er.css">
+    <link rel="stylesheet" href="../assets/sommaire.css">
+    <script src="../assets/sommaire.js"></script>
 <script src="../assets/hero.js"></script>
     <script src="../assets/numpad.js"></script>
     <style>
@@ -69,76 +71,8 @@
       <div class="app-hero-edge"></div>
     </header>
 
-    <div id="menu" class="module-list mb-8">
-        <div class="module-card">
-            <div class="module-card-head">
-                <span class="module-badge">Module 1</span>
-                <div class="module-card-body">
-                    <div class="module-card-title">Simplification d'une fraction</div>
-                    <div class="module-card-desc">Trouver la forme irréductible d'une fraction en divisant par le PGCD</div>
-                    <div class="module-card-actions">
-                        <button onclick="showCourse(1)" class="btn-module btn-primary">Cours</button>
-                        <button onclick="showTraining(1)" class="btn-module btn-secondary">Entraînement (15 questions)</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="module-card">
-            <div class="module-card-head">
-                <span class="module-badge">Module 2</span>
-                <div class="module-card-body">
-                    <div class="module-card-title">Multiplication, inverse et division</div>
-                    <div class="module-card-desc">Multiplier deux fractions, calculer l'inverse, diviser deux fractions</div>
-                    <div class="module-card-actions">
-                        <button onclick="showCourse(2)" class="btn-module btn-primary">Cours</button>
-                        <button onclick="showTraining(2)" class="btn-module btn-secondary">Entraînement (15 questions)</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="module-card">
-            <div class="module-card-head">
-                <span class="module-badge">Module 3</span>
-                <div class="module-card-body">
-                    <div class="module-card-title">Addition et soustraction (même dénominateur)</div>
-                    <div class="module-card-desc">Additionner et soustraire des fractions qui ont le même dénominateur</div>
-                    <div class="module-card-actions">
-                        <button onclick="showCourse(3)" class="btn-module btn-primary">Cours</button>
-                        <button onclick="showTraining(3)" class="btn-module btn-secondary">Entraînement (15 questions)</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="module-card">
-            <div class="module-card-head">
-                <span class="module-badge">Module 4</span>
-                <div class="module-card-body">
-                    <div class="module-card-title">Addition et soustraction (dénominateurs différents)</div>
-                    <div class="module-card-desc">Trouver le dénominateur commun et calculer la somme ou la différence</div>
-                    <div class="module-card-actions">
-                        <button onclick="showCourse(4)" class="btn-module btn-primary">Cours</button>
-                        <button onclick="showTraining(4)" class="btn-module btn-secondary">Entraînement (15 questions)</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="module-card">
-            <div class="module-card-head">
-                <span class="module-badge">Module 5</span>
-                <div class="module-card-body">
-                    <div class="module-card-title">S'entraîner sur toutes les notions</div>
-                    <div class="module-card-desc">Questions qui combinent tous les modules — Niveau supérieur !</div>
-                    <div class="module-card-actions">
-                        <button onclick="showTraining(5)" class="btn-module btn-primary">Entraînement (20 questions)</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- une ligne dépliable par module (voir assets/sommaire.js) -->
+    <main id="menu" class="som-accueil"></main>
 
     <div id="moduleContainer"></div>
 </div>
@@ -147,39 +81,24 @@
 // ═══════════════════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════════════════
-const nav = AppNav.init({
-    appName: 'Fractions',
-    portalHref: '../index.html',
-    portalLabel: 'Toutes les applications',
-    onHome: () => backToMenu(),
-    onNavigate: (key) => {
-        const [type, num] = key.split('-');
-        if (type === 'course') showCourse(Number(num));
-        else showTraining(Number(num));
-    },
-    groups: [
-        { title: 'Module 1 — Simplification', items: [
-            { key: 'course-1', label: 'Cours' },
-            { key: 'training-1', label: 'Entraînement (15 questions)' },
-        ]},
-        { title: 'Module 2 — Multiplication, inverse, division', items: [
-            { key: 'course-2', label: 'Cours' },
-            { key: 'training-2', label: 'Entraînement (15 questions)' },
-        ]},
-        { title: 'Module 3 — Addition et soustraction (même dénominateur)', items: [
-            { key: 'course-3', label: 'Cours' },
-            { key: 'training-3', label: 'Entraînement (15 questions)' },
-        ]},
-        { title: 'Module 4 — Addition et soustraction (dénominateurs différents)', items: [
-            { key: 'course-4', label: 'Cours' },
-            { key: 'training-4', label: 'Entraînement (15 questions)' },
-        ]},
-        { title: 'Module 5 — Toutes les notions', items: [
-            { key: 'training-5', label: 'Entraînement (20 questions)' },
-        ]},
-    ],
-});
-nav.setActive(null);
+// ═══════════════════════════════════════════════════════════════
+// PLAN DE L'APPLICATION ET NAVIGATION (voir assets/sommaire.js)
+// Application en une seule page : chaque page du sommaire est une
+// ancre de l'adresse (#course-1, #training-1, #fiche-1…).
+// ═══════════════════════════════════════════════════════════════
+const PLAN = [
+    { n: 1, titre: 'Simplification d\'une fraction', desc: 'Trouver la forme irréductible en divisant par le PGCD', fiche: 'fiche-1',
+      parties: [{ nom: 'Simplification', cours: 'course-1', entrainement: 'training-1' }] },
+    { n: 2, titre: 'Multiplication, inverse et division', desc: 'Multiplier deux fractions, calculer l\'inverse, diviser deux fractions', fiche: 'fiche-2',
+      parties: [{ nom: 'Multiplication, inverse, division', cours: 'course-2', entrainement: 'training-2' }] },
+    { n: 3, titre: 'Addition et soustraction (même dénominateur)', desc: 'Additionner et soustraire des fractions de même dénominateur', fiche: 'fiche-3',
+      parties: [{ nom: 'Même dénominateur', cours: 'course-3', entrainement: 'training-3' }] },
+    { n: 4, titre: 'Addition et soustraction (dénominateurs différents)', desc: 'Trouver le dénominateur commun, puis calculer', fiche: 'fiche-4',
+      parties: [{ nom: 'Dénominateurs différents', cours: 'course-4', entrainement: 'training-4' }] },
+    { n: 5, titre: 'S\'entraîner sur toutes les notions', desc: 'Questions qui combinent tous les modules',
+      parties: [{ nom: 'Toutes les notions', entrainement: 'training-5' }] },
+];
+SOM.init({ nom: 'Fractions', id: 'fractions-college', spa: true, plan: PLAN });
 
 let currentPage = 'home'; // 'home' | 'course-1' … 'course-4' | 'training-1' … 'training-5'
 
@@ -250,8 +169,26 @@ function fracInput(numId, denId, cls) {
 // ═══════════════════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════════════════
-function setTopBarTitle(title) { nav.setTitle(title); }
-function updateActiveMenuItem() { nav.setActive(currentPage === 'home' ? null : currentPage); }
+// (le titre de la page affichée est donné par le bandeau du sommaire)
+function setTopBarTitle() {}
+// sommaire de la page affichée ; l'adresse suit la page (#course-1…) pour que le retour arrière fonctionne
+function updateActiveMenuItem() {
+    const h = currentPage === 'home' ? '' : '#' + currentPage;
+    if (location.hash !== h) history.pushState(null, '', location.pathname + location.search + h);
+    SOM.menu(currentPage === 'home' ? 'accueil' : currentPage);
+    if (currentPage === 'home') SOM.accueil(document.getElementById('menu'));
+    else if (/^course-/.test(currentPage)) SOM.marquer({ fait: true });      // cours ouvert (sommaire, accueil)
+}
+// une ancre de l'adresse ouvre la page correspondante (liens du sommaire et de l'accueil, retour arrière)
+function ouvrirAncre() {
+    const m = /^#(course|training|fiche)-(\d+)$/.exec(location.hash);
+    if (!m) { backToMenu(); return; }
+    const n = Number(m[2]);
+    if (m[1] === 'course') showCourse(n);
+    else if (m[1] === 'training') showTraining(n);
+    else showFiche(n);
+}
+addEventListener('hashchange', ouvrirAncre);
 
 function hideMenu() {
     document.getElementById('mainHeader').style.display = 'none';
@@ -275,7 +212,64 @@ function showCourse(num) {
     else if (num === 3) c.innerHTML = getCourse3();
     else if (num === 4) c.innerHTML = getCourse4();
     setTopBarTitle(`Module ${num} : ${MODULE_THEMES[num].title} — Cours`);
+    // lien vers la fiche récapitulative du module, en bas du cours
+    document.getElementById('moduleContainer').insertAdjacentHTML('beforeend', `<div class="er-actions" style="justify-content:center"><a class="btn-secondary" style="text-decoration:none" href="#fiche-${num}">Fiche récapitulative du module ${num}</a></div>`);
     currentPage = 'course-' + num;
+    updateActiveMenuItem();
+}
+// ═══════════════════════════════════════════════════════════════
+// FICHES RÉCAPITULATIVES (une par module avec un cours)
+// ═══════════════════════════════════════════════════════════════
+function getFiche(num) {
+    const carte = (titre, html) => `<section class="er-card"><h3 class="cours-titre">${titre}</h3>${html}</section>`;
+    const FICHES = {
+        1: ['Simplification d\'une fraction', [
+            carte('Fraction irréductible', `
+                <div class="cle"><p>${F('a', 'b')} est <b>irréductible</b> quand a et b n'ont aucun diviseur commun autre que 1.</p>
+                <p>Pour simplifier, on divise le numérateur et le dénominateur par leur <b>PGCD</b> :</p>
+                <p class="som-formule">${F('a', 'b')} = ${F('a ÷ PGCD(a,b)', 'b ÷ PGCD(a,b)')}</p></div>
+                <p>PGCD(18, 24) = 6, donc ${F(18, 24)} = ${F('18 ÷ 6', '24 ÷ 6')} = ${F(3, 4)}</p>`),
+            carte('Trouver le PGCD', `
+                <div class="cle"><p>Lister les diviseurs de chaque nombre, puis prendre le plus grand diviseur commun.</p></div>
+                <p>Diviseurs de 12 : 1, 2, 3, <b>4</b>, 6, 12 ; diviseurs de 8 : 1, 2, <b>4</b>, 8 : PGCD(12, 8) = 4.</p>
+                <p>Cas particuliers : ${F(3, 7)} est déjà irréductible (PGCD = 1) ; ${F(7, 7)} = 1 ; ${F(0, 5)} = 0.</p>`),
+        ]],
+        2: ['Multiplication, inverse et division', [
+            carte('Les trois règles', `
+                <div class="cle">
+                <p><b class="cle-titre">Multiplication</b> : numérateur × numérateur, dénominateur × dénominateur.</p><p class="som-formule">${F('a', 'b')} × ${F('c', 'd')} = ${F('a × c', 'b × d')}</p>
+                <p><b class="cle-titre">Inverse</b> : on retourne la fraction.</p><p class="som-formule">inverse de ${F('a', 'b')} = ${F('b', 'a')}</p>
+                <p><b class="cle-titre">Division</b> : diviser par une fraction, c'est multiplier par son inverse.</p><p class="som-formule">${F('a', 'b')} ÷ ${F('c', 'd')} = ${F('a', 'b')} × ${F('d', 'c')} = ${F('a × d', 'b × c')}</p></div>
+                <p>${F(2, 3)} × ${F(4, 5)} = ${F(8, 15)} &nbsp;·&nbsp; ${F(3, 4)} ÷ ${F(2, 5)} = ${F(3, 4)} × ${F(5, 2)} = ${F(15, 8)}</p>`),
+        ]],
+        3: ['Addition et soustraction (même dénominateur)', [
+            carte('La règle', `
+                <div class="cle"><p>Même dénominateur : on additionne (ou soustrait) <b>uniquement les numérateurs</b> et on garde le dénominateur.</p>
+                <p class="som-formule">${F('a', 'd')} + ${F('b', 'd')} = ${F('a + b', 'd')} &nbsp;&nbsp; ${F('a', 'd')} − ${F('b', 'd')} = ${F('a − b', 'd')}</p></div>
+                <p>${F(3, 8)} + ${F(2, 8)} = ${F(5, 8)} &nbsp;·&nbsp; ${F(7, 10)} − ${F(3, 10)} = ${F(4, 10)} = ${F(2, 5)} (on simplifie)</p>`),
+        ]],
+        4: ['Addition et soustraction (dénominateurs différents)', [
+            carte('La méthode', `
+                <div class="cle"><ol class="er-liste" style="margin:0">
+                    <li>trouver le dénominateur commun (souvent le <b>PPCM</b> des deux dénominateurs) ;</li>
+                    <li>transformer chaque fraction en fraction égale ayant ce dénominateur ;</li>
+                    <li>additionner ou soustraire les numérateurs ;</li>
+                    <li>simplifier si possible.</li></ol></div>
+                <p>Un dénominateur multiple de l'autre : ${F(1, 3)} + ${F(1, 6)} = ${F(2, 6)} + ${F(1, 6)} = ${F(3, 6)} = ${F(1, 2)}</p>
+                <p>Cas général, PPCM(3, 4) = 12 : ${F(2, 3)} + ${F(3, 4)} = ${F(8, 12)} + ${F(9, 12)} = ${F(17, 12)}</p>`),
+        ]],
+    };
+    const [titre, cartes] = FICHES[num];
+    return `<div class="som-fiche">
+        <div class="er-card"><span class="er-badge">MODULE ${num} · FICHE RÉCAPITULATIVE</span><h2 class="er-titre">${titre}</h2></div>
+        ${cartes.join('')}
+        <div class="er-actions som-fiche-liens"><a class="btn-secondary" href="#course-${num}">Revoir le cours</a><a class="btn-secondary" href="#training-${num}">S'entraîner</a></div>
+    </div>`;
+}
+function showFiche(num) {
+    hideMenu();
+    document.getElementById('moduleContainer').innerHTML = getFiche(num);
+    currentPage = 'fiche-' + num;
     updateActiveMenuItem();
 }
 function showTraining(num) {
@@ -836,6 +830,7 @@ function nextQuestion() {
 }
 
 function showResults() {
+    SOM.marquer({ note: Math.round(score / questions.length * 20 * 2) / 2 }, 'training-' + currentModule);   // meilleure note sur 20
     const total = questions.length;
     const pct = Math.round(score / total * 100);
     const color = MODULE_THEMES[currentModule].color;
@@ -1299,6 +1294,9 @@ function shuffle(arr) {
     }
     return a;
 }
+
+// page donnée par l'adresse (accueil par défaut)
+ouvrirAncre();
 </script>
 </body>
 </html>
