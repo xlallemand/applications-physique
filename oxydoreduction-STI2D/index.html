@@ -6,7 +6,9 @@
   <title>Oxydoréduction – Terminale STI2D</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="../assets/theme.css">
-  <script src="../assets/nav.js"></script>
+  <link rel="stylesheet" href="../equilibrer-reactions/modules/er.css">
+  <link rel="stylesheet" href="../assets/sommaire.css">
+  <script src="../assets/sommaire.js"></script>
 <script src="../assets/hero.js"></script>
   <script src="../assets/dragdrop.js"></script>
   <style>
@@ -106,49 +108,8 @@
 
 <div class="container mx-auto px-4 py-8 max-w-4xl">
 
-  <div id="menu" class="module-list mb-8">
-    <div class="module-group">
-      <div class="module-group-title">Cours</div>
-      <div class="module-card clickable" onclick="showModule('course')">
-        <div class="module-card-head">
-          <span class="module-badge">Module 1</span>
-          <div class="module-card-body">
-            <div class="module-card-title">Le cours</div>
-            <div class="module-card-desc">Oxydants, réducteurs, demi-équations et méthode pour écrire une réaction d'oxydoréduction</div>
-          </div>
-          <span class="module-card-arrow">›</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="module-group">
-      <div class="module-group-title">Entraînement</div>
-      <div class="module-card clickable" onclick="showModule('training')">
-        <div class="module-card-head">
-          <span class="module-badge">Module 2</span>
-          <div class="module-card-body">
-            <div class="module-card-title">Entraînement</div>
-            <div class="module-card-desc">Vérifie que tu as bien compris le cours avec des questions rapides. 10 questions.</div>
-          </div>
-          <span class="module-card-arrow">›</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="module-group">
-      <div class="module-group-title">Réactions</div>
-      <div class="module-card clickable" onclick="showModule('reactions')">
-        <div class="module-card-head">
-          <span class="module-badge">Module 3</span>
-          <div class="module-card-body">
-            <div class="module-card-title">Écrire les réactions d'oxydoréduction</div>
-            <div class="module-card-desc">Construis pas à pas l'équation bilan à partir des demi-équations — l'aide diminue au fil des questions. 20 questions.</div>
-          </div>
-          <span class="module-card-arrow">›</span>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- une ligne dépliable par module (voir assets/sommaire.js) -->
+  <main id="menu" class="som-accueil"></main>
 
   <!-- MODULE 1 -->
   <div id="module-course" class="hidden">
@@ -228,6 +189,7 @@
       </div>
       <div class="text-center mt-8">
         <button class="btn-primary text-xl" onclick="showModule('training')">J'ai compris, aux exercices ! &#8594;</button>
+        <a class="btn-secondary" style="text-decoration:none" href="#fiche">Fiche récapitulative</a>
       </div>
     </div>
   </div>
@@ -271,50 +233,84 @@
     </div>
   </div>
 
+
+  <!-- FICHE RÉCAPITULATIVE DU COURS -->
+  <div id="module-fiche" class="hidden som-fiche">
+    <div class="er-card"><span class="er-badge">MODULE 1 · FICHE RÉCAPITULATIVE</span><h2 class="er-titre">Oxydants et réducteurs</h2></div>
+    <section class="er-card">
+      <h3 class="cours-titre">Oxydant et réducteur</h3>
+      <div class="cle"><p>Un <b>oxydant</b> est une espèce chimique qui <b>capte</b> des électrons : Cu<span class="sup">2+</span> capte 2 électrons pour devenir Cu.</p>
+        <p>Un <b>réducteur</b> est une espèce chimique qui <b>cède</b> des électrons : Fe<span class="sup">2+</span> cède 1 électron pour devenir Fe<span class="sup">3+</span>.</p></div>
+    </section>
+    <section class="er-card">
+      <h3 class="cours-titre">Couple et demi-équation</h3>
+      <div class="cle"><p>Un couple est noté <b>Oxydant / Réducteur</b>. Sa demi-équation :</p>
+        <p class="som-formule">Oxydant + n e<span class="sup">&#8722;</span> = Réducteur</p></div>
+      <div class="cle"><p>Une <b>oxydation</b> forme l'oxydant (demi-équation lue à l'envers) : Réducteur → Oxydant + n e<span class="sup">&#8722;</span></p>
+        <p>Une <b>réduction</b> forme le réducteur (demi-équation lue à l'endroit) : Oxydant + n e<span class="sup">&#8722;</span> → Réducteur</p></div>
+    </section>
+    <section class="er-card">
+      <h3 class="cours-titre">Écrire une réaction d'oxydoréduction</h3>
+      <div class="cle"><ol class="er-liste" style="margin:0">
+        <li>repérer les réactifs dans les deux demi-équations données ;</li>
+        <li>orienter chaque demi-équation : le réactif à gauche ;</li>
+        <li>multiplier les demi-équations pour avoir le même nombre d'électrons ;</li>
+        <li>additionner membre à membre : les électrons s'éliminent.</li></ol></div>
+      <p class="cours-exemple-t">Exemple</p>
+      <p>Réaction entre Fe<span class="sup">3+</span> et Zn :<br>2 × (Fe<span class="sup">3+</span> + e<span class="sup">&#8722;</span> → Fe<span class="sup">2+</span>) &nbsp;(réduction)<br>1 × (Zn → Zn<span class="sup">2+</span> + 2 e<span class="sup">&#8722;</span>) &nbsp;(oxydation)</p>
+      <p class="som-formule">2 Fe<span class="sup">3+</span> + Zn → 2 Fe<span class="sup">2+</span> + Zn<span class="sup">2+</span></p>
+    </section>
+    <div class="er-actions som-fiche-liens"><a class="btn-secondary" href="#course">Revoir le cours</a><a class="btn-secondary" href="#training">S'entraîner</a></div>
+  </div>
+
 </div>
 <script>
 // =====================================================================
 // NAVIGATION
 // =====================================================================
-const nav = AppNav.init({
-  appName: 'Oxydoréduction',
-  portalHref: '../index.html',
-  portalLabel: 'Toutes les applications',
-  onHome: () => showMenu(),
-  onNavigate: (key) => showModule(key),
-  groups: [
-    { title: 'Cours', items: [ {key:'course', label:'Le cours'} ] },
-    { title: 'Entraînement', items: [ {key:'training', label:'Entraînement (10 questions)'} ] },
-    { title: 'Réactions', items: [ {key:'reactions', label:"Écrire les réactions (20 questions)"} ] },
-  ],
-});
-nav.setActive(null);
+// Plan de l'application et navigation (voir assets/sommaire.js).
+// Application en une seule page : chaque page du sommaire est une ancre de l'adresse (#course…).
+const PLAN = [
+  { n: 1, titre: 'Oxydants et réducteurs', desc: 'Oxydants, réducteurs, demi-équations, méthode pour écrire une réaction', fiche: 'fiche',
+    parties: [{ nom: 'Oxydants et réducteurs', cours: 'course', entrainement: 'training' }] },
+  { n: 2, titre: 'Écrire les réactions d\'oxydoréduction', desc: 'L\'équation bilan pas à pas, l\'aide diminue au fil des 20 questions',
+    parties: [{ nom: 'Écrire les réactions', entrainement: 'reactions' }] },
+];
+SOM.init({ nom: 'Oxydoréduction', id: 'oxydoreduction-STI2D', spa: true, plan: PLAN });
+const PAGES = ['course', 'training', 'reactions', 'fiche'];
 
-const MODULE_TITLES = { course:'Le cours', training:'Entraînement', reactions:'Écrire les réactions' };
-
+// l'adresse suit la page affichée (#course…) pour que le retour arrière fonctionne
+function suivreAdresse(cle) {
+  const h = cle ? '#' + cle : '';
+  if (location.hash !== h) history.pushState(null, '', location.pathname + location.search + h);
+}
 function showMenu() {
-  ['module-course','module-training','module-reactions'].forEach(function(id){
-    document.getElementById(id).classList.add('hidden');
-  });
+  PAGES.forEach(function(id){ document.getElementById('module-' + id).classList.add('hidden'); });
   document.getElementById('mainHeader').style.display = '';
   document.getElementById('menu').style.display = '';
-  nav.setTitle(null);
-  nav.setActive(null);
+  suivreAdresse('');
+  SOM.menu('accueil');
+  SOM.accueil(document.getElementById('menu'));
   window.scrollTo({top:0, behavior:'smooth'});
 }
 function showModule(m) {
   document.getElementById('mainHeader').style.display = 'none';
   document.getElementById('menu').style.display = 'none';
-  ['module-course','module-training','module-reactions'].forEach(function(id){
-    document.getElementById(id).classList.add('hidden');
-  });
+  PAGES.forEach(function(id){ document.getElementById('module-' + id).classList.add('hidden'); });
   document.getElementById('module-'+m).classList.remove('hidden');
   window.scrollTo({top:0, behavior:'smooth'});
-  nav.setTitle(MODULE_TITLES[m] || null);
-  nav.setActive(m);
+  suivreAdresse(m);
+  SOM.menu(m);
+  if (m==='course') SOM.marquer({ fait: true });              // cours ouvert (sommaire, accueil)
   if (m==='training') initTraining();
   if (m==='reactions') initReactions();
 }
+// une ancre de l'adresse ouvre la page correspondante (liens du sommaire et de l'accueil, retour arrière)
+function ouvrirAncre() {
+  const h = location.hash.slice(1);
+  if (PAGES.indexOf(h) >= 0) showModule(h); else showMenu();
+}
+addEventListener('hashchange', ouvrirAncre);
 
 // =====================================================================
 // MODULE 2 : ENTRAÎNEMENT
@@ -372,6 +368,7 @@ function checkTrainingAnswer(){
 }
 function nextTrainingQuestion(){tIdx++;loadTQ();}
 function showTResults(){
+  SOM.marquer({ note: Math.round(tScore / tQuestions.length * 20 * 2) / 2 }, 'training');   // meilleure note sur 20
   var pct=Math.round(tScore/tQuestions.length*100);
   var msg=pct>=90?'Excellent ! Tu maîtrises parfaitement ce chapitre !':pct>=70?'Très bien ! Continue comme ça !':pct>=50?'Pas mal ! Avec un peu plus de travail tu vas y arriver.':'Continue à t\'entraîner, tu vas progresser !';
   document.getElementById('training-question').innerHTML=
@@ -757,6 +754,7 @@ function updRScore(){
   document.getElementById('rTotalNum').textContent=rIdx+1;
 }
 function showRResults(){
+  SOM.marquer({ note: Math.round(rScore / RQ.length * 20 * 2) / 2 }, 'reactions');   // meilleure note sur 20
   document.getElementById('reaction-question').innerHTML=
     '<div class="bg-emerald-50 border border-emerald-200 rounded-2xl shadow-lg p-10 text-center">'+
     '<h3 class="text-2xl font-bold text-gray-800 mb-3">Bravo, vous avez terminé !</h3>'+
@@ -768,6 +766,9 @@ function showRResults(){
   document.getElementById('btn-next-reaction').classList.add('hidden');
   document.getElementById('progress-reactions').style.width='100%';
 }
+
+// page donnée par l'adresse (accueil par défaut)
+ouvrirAncre();
 </script>
 </body>
 </html>
