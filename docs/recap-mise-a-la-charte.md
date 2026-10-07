@@ -4,6 +4,7 @@ Branche : `claude/zen-babbage-9t2h94`. Références non modifiées : `cinematiqu
 
 ## Commun à toutes les applications
 
+- **Charte** (`docs/charte-applications.md`) mise à jour avec le module de sommaire commun (§2, §4, §5, §11, §12).
 - **Nouveau module de navigation partagé** : `assets/sommaire.js` + `assets/sommaire.css` (même présentation que Cinématique : sommaire à gauche sur ordinateur, bandeau « où suis-je » sur téléphone, accueil en lignes dépliables, carte « Reprendre », compteurs `n/m`, notes `/20`, progression dans `localStorage` en `try/catch`). Chaque application déclare seulement son `PLAN`. Il gère aussi les applications en une seule page (pages = ancres `#…`, retour arrière du navigateur correct).
 - **Menu burger (`assets/nav.js`) retiré partout** ; le fichier, devenu inutile, est supprimé.
 - **Accueil** : en-tête illustré conservé, lien « ← Toutes les applications » vers le portail.
@@ -36,5 +37,4 @@ Branche : `claude/zen-babbage-9t2h94`. Références non modifiées : `cinematiqu
 
 - Cours non réécrits en « notion → exemple → À toi » quand ils n'utilisent pas déjà ce moteur (avancement, combustions, équilibrer, lecture graphique, proportionnalité, équations, applications en une page) : refonte du contenu.
 - Tailwind (CDN) toujours utilisé dans les pages de Proportionnalité, Équations en physique et les applications en une page ; Chart.js (CDN) dans Désintégration radioactive.
-- La charte (`docs/charte-applications.md`) ne mentionne pas encore `assets/sommaire.js`.
 - Vérifié avec Playwright/Chromium à 1280 et 390 px (pages, liens, console, débordement, sommaire, ancres, notes). Safari iOS non testable ici ; Tailwind et Chart.js non chargés dans l'environnement de test (sans accès réseau à ces CDN).
