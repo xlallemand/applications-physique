@@ -3,18 +3,19 @@
    (Terminale STI2D ; même moteur que l'application « Cinématique »)
 
    TE.fmt, TE.lire             écriture et lecture des nombres (virgule)
+   TE.unite(v, 'V')             valeur avec préfixe : 20 kV, 6,5 mA
+   TE.o, TE.fq.choix, TE.fq.nombre   fabriques d'options et de parties de question
    TE.PARTIES                   parties de question :
        'choix'    boutons à choisir
        'nombre'   valeur numérique (avec bouton ±)
-       'coord'    coordonnées d'un vecteur en colonne
-       'ij'       écriture a i⃗ + b j⃗ avec un clavier à l'écran
-       'gabarit'  expression à trous (ex. : □ t + □)
-       'tracer'   vecteurs à tracer dans un repère (voir vecteurs.js)
+       'gabarit'  expression à trous (ex. : □ × □)
+       'sci'      écriture scientifique a × 10ⁿ
+       'schema'   valeurs à glisser sur un schéma (voir schemas.js)
    TE.question(zone, q, cb)     question en plusieurs parties
    TE.serie(opts)               série de questions notée sur 20
+   TE.decouverte(zone, qs)      questions guidées à côté d'une simulation (sans points)
    TE.aToi(zone, items, fin)    « À toi » dans les cours : il faut réussir pour continuer
    TE.Cours                     cours par étapes (une étape réussie fait apparaître la suivante)
-   TE.graphe(opts)              repère pour tracer des courbes (SVG)
    TE.menu(cle)                 sommaire de toute l'application (navigation d'une page)
    TE.accueil(zone)             accueil : une ligne dépliable par module
 
@@ -24,7 +25,6 @@
 (function () {
   'use strict';
 
-  const V = window.VEC || {};
   const MOINS = '−';
 
   /* ============================================================
@@ -63,24 +63,23 @@
     return /^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(t) ? parseFloat(t) : NaN;
   }
   const proche = (a, b, rel) => Math.abs(a - b) <= (rel == null ? .01 : rel) * Math.abs(b) + 1e-12;
-  // signe d'un nombre dans une somme : « + 3 », « − 3 »
-  const sgn = (v, txt) => (v < 0 ? ` ${MOINS} ` : ' + ') + (txt == null ? fmt(Math.abs(v)) : txt);
 
-  // écritures de la dérivation : fraction, d/dt, polynôme a t² + b t + c
-  const fr = (h, b) => `<span class="fr"><span>${h}</span><span>${b}</span></span>`;
-  const dd = (f, v) => fr('d' + f, 'd' + (v || 't'));
-  function poly(c, v) {
-    v = v || 't';
-    const deg = c.length - 1;
-    const t = c.map((k, i) => [k, deg - i === 0 ? '' : deg - i === 1 ? v : `${v}${deg - i === 2 ? '²' : deg - i === 3 ? '³' : '<sup>' + (deg - i) + '</sup>'}`]).filter(x => x[0]);
-    if (!t.length) return '0';
-    return t.map(([k, p], i) => (k < 0 ? (i ? ` ${MOINS} ` : MOINS) : (i ? ' + ' : '')) + (Math.abs(k) === 1 && p ? '' : fmt(Math.abs(k))) + p).join('');
+  // valeur avec un préfixe d'unité : unite(20000, 'V') → « 20 kV » ; unite(0.0065, 'A') → « 6,5 mA »
+  // n : nombre de chiffres significatifs au plus (3 par défaut)
+  function unite(v, u, n) {
+    const P = [[1e9, 'G'], [1e6, 'M'], [1e3, 'k'], [1, ''], [1e-3, 'm']];
+    const a = Math.abs(v), [f, pre] = P.find(([x]) => a >= x * .9995) || P[P.length - 1];
+    return `${fmt(+(v / f).toPrecision(n || 3))} ${pre}${u}`;
   }
+  // fabriques de parties de question (cours, séries, exercices)
+  const o = (id, label) => ({ id, label });
+  const fq = {
+    choix: (q, options, bonne, opts) => Object.assign({ type: 'choix', q, options, bonne, colonne: options.some(x => x.label.length > 24) }, opts),
+    nombre: (q, label, valeur, unite, opts) => Object.assign({ type: 'nombre', q, label, valeur, unite }, opts),
+  };
 
-  // système de coordonnées avec une accolade à sa hauteur : sys('x(t) = 3t + 2', 'y(t) = 0', …)
-  const ACC = '<span class="te-acc" aria-hidden="true"><svg viewBox="0 0 10 8"><path d="M10,1 Q5,1 5,8"/></svg><i></i>' +
-    '<svg viewBox="0 0 10 14"><path d="M5,0 Q5,7 0,7 Q5,7 5,14"/></svg><i></i><svg viewBox="0 0 10 8"><path d="M5,0 Q5,7 10,7"/></svg></span>';
-  const sys = (...l) => `<span class="te-sys">${ACC}<span class="te-sys-l">${l.map(x => `<span>${x}</span>`).join('')}</span></span>`;
+  // fraction écrite sur deux étages
+  const fr = (h, b) => `<span class="fr"><span>${h}</span><span>${b}</span></span>`;
 
   /* ============================================================
      OUTILS
@@ -199,183 +198,6 @@
     return { montrer() { ch.input.value = affichage(p); ch.desactiver(true); bVal.fermer(); } };
   }
 
-  // messages pour une lecture de coordonnées (diagnostic de vecteurs.js)
-  function messageLecture(code, u) {
-    u = u || ['i', 'j'];
-    const ui = V.nomHTML(u[0]), uj = V.nomHTML(u[1]);
-    return {
-      inverse: `tu as inversé les coordonnées : en haut le déplacement horizontal (selon ${ui}), en bas le déplacement vertical (selon ${uj}).`,
-      signeX: 'la 1<sup>re</sup> coordonnée a le mauvais signe : vers la droite elle est positive, vers la gauche négative.',
-      signeY: 'la 2<sup>de</sup> coordonnée a le mauvais signe : vers le haut elle est positive, vers le bas négative.',
-      signes: 'les deux coordonnées ont le mauvais signe (positif : vers la droite et vers le haut).',
-      y: 'la 1<sup>re</sup> coordonnée est juste, pas la 2<sup>de</sup> : compte les carreaux verticalement, de l\'origine à la pointe de la flèche.',
-      x: 'la 2<sup>de</sup> coordonnée est juste, pas la 1<sup>re</sup> : compte les carreaux horizontalement, de l\'origine à la pointe de la flèche.',
-      autre: 'compte les carreaux de l\'origine à la pointe de la flèche : d\'abord horizontalement, puis verticalement.',
-    }[code] || '';
-  }
-
-  // Coordonnées en colonne : p.label (ex. nom du vecteur), p.valeurs [a, b], p.tol, p.unites, p.unite, p.lecture (diagnostic)
-  function pCoord(zone, p, api) {
-    const d = el('div', 'ph-valeur te-coord');
-    if (p.label) d.appendChild(el('span', 'ph-lab', p.label));
-    const col = el('span', 'vcol te-vcol');
-    const a = champ({ petit: true, aria: '1re coordonnée' }), b = champ({ petit: true, aria: '2de coordonnée' });
-    col.appendChild(a.el); col.appendChild(b.el);
-    d.appendChild(col);
-    if (p.unite) d.appendChild(el('span', 'ph-unite', p.unite));
-    zone.appendChild(d);
-    const bVal = boutonValider(zone);
-    [a, b].forEach((c, k) => {
-      c.input.addEventListener('input', () => { api.effacer(); c.el.classList.remove('ko'); });
-      c.input.addEventListener('keydown', e => {
-        if (e.key !== 'Enter') return;
-        e.preventDefault();
-        if (k === 0 && b.input.value.trim() === '') b.input.focus(); else valider();
-      });
-    });
-    const tol = p.tol == null ? 1e-9 : p.tol;
-    function valider() {
-      if (api.fini()) return;
-      const va = lire(a.input.value), vb = lire(b.input.value);
-      if (isNaN(va) || isNaN(vb)) { secouer(d); api.message('Écris les deux coordonnées (en haut, puis en bas).'); return; }
-      const oka = Math.abs(va - p.valeurs[0]) <= tol + 1e-12, okb = Math.abs(vb - p.valeurs[1]) <= tol + 1e-12;
-      if (oka && okb) { a.desactiver(true); b.desactiver(true); bVal.fermer(); api.reussi(); return; }
-      a.el.classList.toggle('ko', !oka); b.el.classList.toggle('ko', !okb);
-      let msg = p.diag && p.diag([va, vb]);
-      if (!msg && p.lecture && Number.isInteger(va) && Number.isInteger(vb)) msg = 'Pas tout à fait : ' + messageLecture(V.diagnostic([va, vb], p.valeurs), p.unites);
-      api.erreur(msg || p.indice || 'Vérifie les coordonnées.');
-      secouer(d);
-    }
-    bVal.onclick = valider;
-    return {
-      montrer() {
-        a.input.value = p.affiche ? p.affiche[0] : fmt(p.valeurs[0]); b.input.value = p.affiche ? p.affiche[1] : fmt(p.valeurs[1]);
-        a.el.classList.remove('ko'); b.el.classList.remove('ko');
-        a.desactiver(true); b.desactiver(true); bVal.fermer();
-      },
-    };
-  }
-
-  /* ---------- Écriture a i⃗ + b j⃗ avec un clavier à l'écran ----------
-     Pas de champ texte : le clavier du téléphone ne s'ouvre pas et les
-     vecteurs unitaires s'écrivent avec leur flèche. Au clavier de
-     l'ordinateur : chiffres, virgule, + et −, i et j (ou x et y). */
-  function analyserIJ(toks) {
-    if (!toks.length) return { err: 'vide' };
-    const c = [0, 0], notes = new Set(), vus = [];
-    let i = 0, premier = true;
-    while (i < toks.length) {
-      let signe = 1, nSignes = 0;
-      while (toks[i] === '+' || toks[i] === '−') { if (toks[i] === '−') signe = -signe; nSignes++; i++; }
-      if (!premier && nSignes === 0) return { err: 'colle' };
-      if (nSignes > 1) notes.add('signes');
-      let num = '';
-      while (i < toks.length && /^[0-9,]$/.test(toks[i])) num += toks[i++];
-      if (toks[i] !== 'u0' && toks[i] !== 'u1') return { err: num ? (i < toks.length ? 'colle' : 'sansUnite') : 'incomplet' };
-      const k = toks[i++] === 'u0' ? 0 : 1;
-      if (num && !/^\d+(,\d+)?$/.test(num)) return { err: 'nombre' };
-      const val = num ? parseFloat(num.replace(',', '.')) : 1;
-      if (num && val === 1) notes.add('un');
-      if (num && val === 0) notes.add('zero');
-      if (vus.includes(k)) notes.add('double');
-      if (premier && k === 1 && !vus.length) notes.add('ordre');
-      vus.push(k);
-      c[k] += signe * val;
-      premier = false;
-    }
-    return { c, notes };
-  }
-  function pIJ(zone, p, api) {
-    const u = p.unites || ['i', 'j'];
-    const d = el('div', 'te-ij');
-    d.innerHTML = `<div class="ph-valeur">${p.label ? `<span class="ph-lab">${p.label}</span>` : ''}
-        <div class="te-ij-champ" tabindex="0" role="textbox" aria-label="Écriture avec ${u[0].replace('_', '')} et ${u[1].replace('_', '')}"></div></div>
-      <div class="te-ij-clavier">
-        ${['7', '8', '9', 'del', '4', '5', '6', '+', '1', '2', '3', '−', '0', ',', 'u0', 'u1'].map(t => `<button type="button" data-t="${t}" class="${/u|del|\+|−/.test(t) ? 'te-ij-op' : ''}"${t === 'del' ? ' aria-label="Effacer"' : ''}>${t === 'del' ? '⌫' : t === 'u0' ? V.nomHTML(u[0]) : t === 'u1' ? V.nomHTML(u[1]) : t}</button>`).join('')}
-      </div>`;
-    zone.appendChild(d);
-    const ch = d.querySelector('.te-ij-champ'), clav = d.querySelector('.te-ij-clavier');
-    const bVal = boutonValider(zone);
-    let toks = [], bloque = false;
-    function rendre(t) {
-      t = t || toks;
-      let h = '';
-      t.forEach(x => {
-        if (x === '+' || x === '−') h += ` ${x} `;
-        else if (x === 'u0' || x === 'u1') h += `<span class="te-ij-u">${V.nomHTML(u[x === 'u0' ? 0 : 1])}</span>`;
-        else h += x;
-      });
-      ch.innerHTML = (h || '<span class="te-ij-vide">écris avec les touches</span>') + (bloque ? '' : '<span class="te-ij-curseur"></span>');
-    }
-    function taper(t) {
-      if (bloque || api.fini()) return;
-      if (t === 'del') toks.pop();
-      else if (toks.length < 24) toks.push(t);
-      api.effacer();
-      rendre();
-    }
-    clav.querySelectorAll('button').forEach(b => { b.onclick = () => taper(b.dataset.t); });
-    ch.addEventListener('keydown', e => {
-      // touche du vecteur unitaire : sa lettre (i, j) ou son indice (x, y pour u⃗ₓ, u⃗ᵧ ; t, n pour u⃗ₜ, u⃗ₙ)
-      const k = e.key, x = { '+': '+', '-': '−', '−': '−', ',': ',', '.': ',', Backspace: 'del' }[k] ||
-        (/^[0-9]$/.test(k) ? k : null) || (k === u[0].split('_').pop() ? 'u0' : null) || (k === u[1].split('_').pop() ? 'u1' : null);
-      if (k === 'Enter') { e.preventDefault(); valider(); return; }
-      if (x) { e.preventDefault(); taper(x); }
-    });
-    rendre();
-    const attendu = p.valeurs;
-    const propre = V.ijHTML(attendu[0], attendu[1], u);
-    function valider() {
-      if (api.fini()) return;
-      const r = analyserIJ(toks);
-      const U = `${V.nomHTML(u[0])} ou ${V.nomHTML(u[1])}`;
-      if (r.err) {
-        secouer(d);
-        api.message({
-          vide: 'Écris le vecteur avec les touches.',
-          sansUnite: `Chaque nombre doit être suivi d'un vecteur unitaire (${U}).`,
-          incomplet: `L'écriture est incomplète : il manque un vecteur unitaire (${U}) après un signe.`,
-          colle: 'Sépare les termes par + ou −.',
-          nombre: 'Un des nombres est mal écrit.',
-        }[r.err]);
-        return;
-      }
-      const okv = Math.abs(r.c[0] - attendu[0]) < 1e-9 && Math.abs(r.c[1] - attendu[1]) < 1e-9;
-      if (okv) {
-        bloque = true; rendre(); clav.classList.add('fini'); bVal.fermer();
-        const n = [];
-        if (r.notes.has('zero')) n.push(`on n'écrit pas un terme nul (0 ${V.nomHTML(u[0])} ou 0 ${V.nomHTML(u[1])})`);
-        if (r.notes.has('un')) n.push('on n\'écrit pas le coefficient 1');
-        if (r.notes.has('signes')) n.push(`« + ${MOINS} » s'écrit « ${MOINS} »`);
-        if (r.notes.has('double')) n.push('on regroupe les termes en un seul par vecteur unitaire');
-        if (r.notes.has('ordre')) n.push(`on écrit d'habitude ${V.nomHTML(u[0])} en premier`);
-        api.reussi(false, n.length ? `Plus simplement : <b>${propre}</b> (${n.join(' ; ')}).` : '');
-        return;
-      }
-      let msg = p.diag && p.diag(r.c);
-      if (!msg && Number.isInteger(r.c[0]) && Number.isInteger(r.c[1]) && p.lecture !== false) {
-        const code = V.diagnostic(r.c, attendu);
-        msg = {
-          inverse: `Tu as inversé : le nombre devant ${V.nomHTML(u[0])} est le déplacement horizontal, le nombre devant ${V.nomHTML(u[1])} le déplacement vertical.`,
-          signeX: `Le terme en ${V.nomHTML(u[0])} a le mauvais signe.`,
-          signeY: `Le terme en ${V.nomHTML(u[1])} a le mauvais signe.`,
-          signes: 'Les deux termes ont le mauvais signe.',
-          y: `Le terme en ${V.nomHTML(u[0])} est juste, pas celui en ${V.nomHTML(u[1])}.`,
-          x: `Le terme en ${V.nomHTML(u[1])} est juste, pas celui en ${V.nomHTML(u[0])}.`,
-        }[code];
-      }
-      api.erreur(msg || p.indice || 'Vérifie les coefficients.');
-      secouer(d);
-    }
-    bVal.onclick = valider;
-    return {
-      montrer() {
-        bloque = true; clav.classList.add('fini'); bVal.fermer();
-        ch.innerHTML = propre;
-      },
-    };
-  }
-
   // Expression à trous : p.label, p.morceaux = [texte HTML | { v, tol, rel, aria }], p.diag(valeurs)
   function pGabarit(zone, p, api) {
     const d = el('div', 'ph-valeur te-gabarit');
@@ -421,32 +243,6 @@
     };
   }
 
-  // Vecteurs à tracer : p.repere = options de VEC.Repere (vecteurs à tracer avec leurs coordonnées), p.diag(v, code)
-  function pTracer(zone, p, api) {
-    const d = el('div', 'te-tracer');
-    zone.appendChild(d);
-    const r = new V.Repere(d, Object.assign({ mode: 'mixte' }, p.repere, { onChange: () => api.effacer() }));
-    const bVal = boutonValider(zone);
-    bVal.onclick = () => {
-      if (api.fini()) return;
-      const res = r.verifier(), faux = res.filter(x => x.code !== 'ok' && x.code !== 'vide'), vides = res.filter(x => x.code === 'vide');
-      if (!faux.length && !vides.length) { bVal.fermer(); api.reussi(); return; }
-      if (!faux.length) {
-        secouer(d);
-        api.message(vides.length === res.length ? `Trace ${res.length > 1 ? 'les vecteurs' : 'le vecteur'} avant de valider.` : `Il reste à tracer : ${vides.map(x => V.nomHTML(x.v.nom)).join(', ')}.`);
-        return;
-      }
-      const maj = t => t.charAt(0).toUpperCase() + t.slice(1);
-      // p.diag(vecteur, code) : message propre à la question (ou rien : message général)
-      const msg = x => (p.diag && p.diag(x.v, x.code)) || V.message(x.code, r.o.unitaires || p.unites);
-      api.erreur(faux.map(x => (res.length > 1 ? `<b>${V.nomHTML(x.v.nom)}</b> : ${msg(x)}` : maj(msg(x)))).join('<br>') +
-        (vides.length ? `<br>Il reste aussi à tracer : ${vides.map(x => V.nomHTML(x.v.nom)).join(', ')}.` : '') +
-        (res.length > 1 && res.some(x => x.code === 'ok') ? '<br><span class="er-petit">Les vecteurs justes (en vert) sont bloqués.</span>' : ''));
-      secouer(d);
-    };
-    return { montrer() { r.montrer(); bVal.fermer(); }, repere: r };
-  }
-
   // Écriture scientifique a × 10ⁿ : p.label, p.valeur, p.unite, p.rel (écart relatif, 3 % par défaut), p.cs, p.diag(v)
   function pSci(zone, p, api) {
     const d = el('div', 'ph-valeur');
@@ -483,7 +279,156 @@
     };
   }
 
-  const PARTIES = { choix: pChoix, nombre: pNombre, coord: pCoord, ij: pIJ, gabarit: pGabarit, tracer: pTracer, sci: pSci };
+  /* ---------- Défilement automatique pendant un glisser : près du haut ou du bas de l'écran, la page défile ---------- */
+  const defil = { y: -1, raf: null };
+  function suivreY(e) { defil.y = e.clientY; }
+  function tick() {
+    const h = innerHeight, y = defil.y, haut = 110, bas = 60;
+    let dy = 0;
+    if (y >= 0 && y < haut) dy = -Math.min(16, Math.ceil((haut - y) / 4));
+    else if (y > h - bas) dy = Math.min(16, Math.ceil((y - (h - bas)) / 4));
+    if (dy) scrollBy(0, dy);
+    defil.raf = requestAnimationFrame(tick);
+  }
+  function debutDefil() {
+    defil.y = -1;
+    addEventListener('pointermove', suivreY);
+    if (!defil.raf) defil.raf = requestAnimationFrame(tick);
+  }
+  function finDefil() {
+    removeEventListener('pointermove', suivreY);
+    if (defil.raf) cancelAnimationFrame(defil.raf);
+    defil.raf = null;
+  }
+
+  /* Étiquettes à glisser sur un schéma (assets/dragdrop.js) :
+     p.schema : HTML du schéma, avec des cases SCH.slot(id)
+     p.etiquettes : [{ id, label, cible (id de case ou liste d'ids), indice }]
+     Toutes les étiquettes doivent être placées ; les cases restantes sont les inconnues.
+     Au doigt : on touche une étiquette, puis une case. */
+  function pSchema(zone, p, api) {
+    const d = el('div', 'sc-exo');
+    d.innerHTML = `<div class="sc-palette"><p class="sc-palette-t">${p.titrePalette || 'Valeurs à placer'} <span>· fais-les glisser sur le schéma, ou touche une étiquette puis une case</span></p>
+        <div class="sc-palette-liste">${melanger(p.etiquettes).map(e => `<button type="button" class="sc-chip" data-id="${e.id}"><span>${e.label}</span></button>`).join('')}</div></div>
+      ${p.schema}`;
+    zone.appendChild(d);
+    const palette = d.querySelector('.sc-palette-liste');
+    const chips = Array.from(d.querySelectorAll('.sc-chip'));
+    const slots = Array.from(d.querySelectorAll('.sc-slot'));
+    const etiq = id => p.etiquettes.find(e => e.id === id);
+    const cibles = c => [].concat(etiq(c.dataset.id).cible);
+    const bVal = boutonValider(zone);
+    let choisie = null, fini = false;
+
+    function choisir(c) {
+      if (choisie) choisie.classList.remove('sc-choisie');
+      choisie = c;
+      if (c) c.classList.add('sc-choisie');
+      d.classList.toggle('sc-en-choix', !!c);
+    }
+    function remettrePh(s) {
+      if (s && s.classList.contains('sc-slot') && !s.querySelector('.sc-chip') && !s.querySelector('.sc-slot-ph')) s.insertAdjacentHTML('afterbegin', '<span class="sc-slot-ph">?</span>');
+    }
+    // place une étiquette dans une case (l'occupante retourne dans la palette) ou dans la palette
+    function placer(c, cible) {
+      const ancien = c.parentElement;
+      if (cible === ancien) return;
+      if (cible.classList.contains('sc-slot')) {
+        const occ = cible.querySelector('.sc-chip');
+        if (occ) palette.appendChild(occ);
+        const ph = cible.querySelector('.sc-slot-ph');
+        if (ph) ph.remove();
+        cible.appendChild(c);
+      } else palette.appendChild(c);
+      remettrePh(ancien);
+      slots.forEach(s => s.classList.remove('ok', 'ko'));
+      d.querySelector('.sc-palette').classList.toggle('vide', !palette.querySelector('.sc-chip'));
+      api.effacer();
+    }
+    chips.forEach(c => {
+      let x0 = 0, y0 = 0;
+      c.addEventListener('pointerdown', e => { x0 = e.clientX; y0 = e.clientY; }, true);
+      window.DragDrop.enable(c, {
+        zoneSelector: '.sc-slot, .sc-palette',
+        dragOverClass: 'sc-over',
+        onStart: debutDefil,
+        onCancel: finDefil,
+        onDrop: (item, z, e) => {
+          finDefil();
+          if (fini) return;
+          // simple appui (sans glisser) : sélection, ou dépôt de l'étiquette déjà choisie dans cette case
+          if (Math.hypot(e.clientX - x0, e.clientY - y0) < 8) {
+            if (choisie === item) { choisir(null); return; }
+            if (choisie && item.parentElement.classList.contains('sc-slot')) { placer(choisie, item.parentElement); choisir(null); return; }
+            choisir(item);
+            return;
+          }
+          choisir(null);
+          if (!z || !d.contains(z)) return;
+          placer(item, z.classList.contains('sc-palette') ? palette : z);
+        },
+      });
+      // clavier (Entrée, Espace) : sélection
+      c.addEventListener('keydown', e => {
+        if ((e.key === 'Enter' || e.key === ' ') && !fini) { e.preventDefault(); choisir(choisie === c ? null : c); }
+      });
+    });
+    slots.forEach(s => {
+      s.addEventListener('click', e => {
+        if (fini || !choisie || e.target.closest('.sc-chip')) return;
+        placer(choisie, s); choisir(null);
+      });
+      s.tabIndex = 0;
+      s.addEventListener('keydown', e => {
+        if ((e.key === 'Enter' || e.key === ' ') && e.target === s && choisie && !fini) { e.preventDefault(); placer(choisie, s); choisir(null); }
+      });
+    });
+    d.querySelector('.sc-palette').addEventListener('click', e => {
+      if (fini || !choisie || e.target.closest('.sc-chip')) return;
+      placer(choisie, palette); choisir(null);
+    });
+
+    function terminer() {
+      fini = true;
+      choisir(null);
+      chips.forEach(c => { c.style.pointerEvents = 'none'; c.tabIndex = -1; });
+      slots.forEach(s => { s.tabIndex = -1; });
+      d.classList.add('sc-fini');
+      bVal.fermer();
+    }
+    bVal.onclick = () => {
+      if (fini || api.fini()) return;
+      const reste = palette.querySelectorAll('.sc-chip').length;
+      if (reste) {
+        secouer(d.querySelector('.sc-palette'));
+        api.message(`Place toutes les valeurs sur le schéma (il en reste ${reste}).`);
+        return;
+      }
+      const fausses = [];
+      chips.forEach(c => {
+        const s = c.parentElement, ok = cibles(c).indexOf(s.dataset.slot) !== -1;
+        s.classList.toggle('ok', ok); s.classList.toggle('ko', !ok);
+        if (!ok) fausses.push(c);
+      });
+      if (!fausses.length) { terminer(); api.reussi(); return; }
+      const indices = fausses.map(c => etiq(c.dataset.id).indice).filter(Boolean);
+      api.erreur(`${fausses.length > 1 ? `${fausses.length} valeurs sont mal placées` : 'Une valeur est mal placée'} (case rouge).` +
+        (indices.length ? '<br>' + indices.map(t => '☛ ' + t).join('<br>') : ''));
+      secouer(d.querySelector('.sch') || d);
+    };
+    return {
+      montrer() {
+        chips.forEach(c => {
+          const s = slots.find(x => x.dataset.slot === cibles(c)[0] && !x.querySelector('.sc-chip')) || slots.find(x => x.dataset.slot === cibles(c)[0]);
+          placer(c, s);
+          s.classList.add('ok');
+        });
+        terminer();
+      },
+    };
+  }
+
+  const PARTIES = { choix: pChoix, nombre: pNombre, gabarit: pGabarit, sci: pSci, schema: pSchema };
 
   /* ============================================================
      « AFFICHER TOUT LE COURS »
@@ -673,6 +618,8 @@
     function afficher() {
       const q = questions[n], total = questions.length;
       if (q.avant) q.avant();
+      // les réponses sont mélangées (sauf q.melanger === false) ; k garde l'indice d'origine
+      const ordre = q.melanger === false ? q.choix.map((c, k) => k) : melanger(q.choix.map((c, k) => k));
       zone.innerHTML = `
         <div class="er-card te-dq">
           <div class="te-dq-tete">
@@ -681,7 +628,7 @@
           </div>
           <p class="te-dq-texte">${valeur(q.texte)}</p>
           ${q.consigne ? `<div class="te-dq-consigne"><span>${valeur(q.consigne)}</span></div>` : ''}
-          <div class="te-dq-choix">${q.choix.map((c, k) => `<button type="button" class="btn-secondary" data-k="${k}">${c.t}</button>`).join('')}</div>
+          <div class="te-dq-choix">${ordre.map(k => `<button type="button" class="btn-secondary" data-k="${k}">${q.choix[k].t}</button>`).join('')}</div>
           <div class="te-dq-actions"><button type="button" class="btn-primary te-dq-valider" disabled>Valider</button></div>
           <div class="te-dq-retour" aria-live="polite"></div>
         </div>
@@ -707,7 +654,7 @@
           secouer(retour);
           return;
         }
-        const c = q.choix[choisi], b = boutons[choisi];
+        const c = q.choix[choisi], b = zone.querySelector(`.te-dq-choix button[data-k="${choisi}"]`);
         b.classList.remove('choisi');
         if (!c.ok) {
           erreurs++;
@@ -884,46 +831,6 @@
   };
 
   /* ============================================================
-     REPÈRE POUR COURBES (SVG)
-     opts = { xmin, xmax, ymin, ymax, w, h, pasX, pasY, nomX, nomY, grille }
-     Renvoie { px(x), py(y), fond (SVG : grille, axes, graduations) }
-     ============================================================ */
-  function graphe(opts) {
-    const o = Object.assign({ xmin: 0, xmax: 10, ymin: 0, ymax: 10, w: 600, h: 320, pasX: 1, pasY: 1, nomX: 'x', nomY: 'y', grille: true, gradX: true, gradY: true, m: { g: 38, d: 22, h: 22, b: 28 } }, opts);
-    const L = o.w - o.m.g - o.m.d, H = o.h - o.m.h - o.m.b;
-    const px = x => o.m.g + (x - o.xmin) / (o.xmax - o.xmin) * L;
-    const py = y => o.m.h + (o.ymax - y) / (o.ymax - o.ymin) * H;
-    const C = V.C;
-    let g = '';
-    const nbPas = (a, b, p) => { const t = []; for (let v = Math.ceil(a / p - 1e-9) * p; v <= b + 1e-9; v += p) t.push(+v.toFixed(6)); return t; };
-    if (o.grille) {
-      nbPas(o.xmin, o.xmax, o.pasX).forEach(x => { g += V.trait(px(x), py(o.ymin), px(x), py(o.ymax), C.grille, 1); });
-      nbPas(o.ymin, o.ymax, o.pasY).forEach(y => { g += V.trait(px(o.xmin), py(y), px(o.xmax), py(y), C.grille, 1); });
-    }
-    const X0 = px(Math.max(o.xmin, Math.min(0, o.xmax))), Y0 = py(Math.max(o.ymin, Math.min(0, o.ymax)));
-    g += V.fleche(px(o.xmin), Y0, px(o.xmax) + 14, Y0, C.encre, 1.6, 9);
-    g += V.fleche(X0, py(o.ymin), X0, py(o.ymax) - 14, C.encre, 1.6, 9);
-    const t = o.taille || 13;
-    if (o.gradX) nbPas(o.xmin, o.xmax, o.gradPasX || o.pasX).forEach(x => { if (Math.abs(x) > 1e-9) g += `<text x="${px(x)}" y="${Y0 + t + 4}" font-size="${t}" font-weight="600" fill="${C.encre2}" text-anchor="middle">${fmt(x)}</text>`; });
-    if (o.gradY) nbPas(o.ymin, o.ymax, o.gradPasY || o.pasY).forEach(y => { if (Math.abs(y) > 1e-9) g += `<text x="${X0 - 6}" y="${py(y) + t * .36}" font-size="${t}" font-weight="600" fill="${C.encre2}" text-anchor="end">${fmt(y)}</text>`; });
-    g += `<text x="${X0 - 6}" y="${Y0 + t + 4}" font-size="${t}" font-weight="600" fill="${C.encre2}" text-anchor="end">O</text>`;
-    g += `<text x="${px(o.xmax) + 12}" y="${Y0 - 8}" font-size="${t + 1}" font-weight="700" fill="${C.encre}" text-anchor="end">${o.nomX}</text>`;
-    g += `<text x="${X0 + 8}" y="${py(o.ymax) - 6}" font-size="${t + 1}" font-weight="700" fill="${C.encre}">${o.nomY}</text>`;
-    // courbe d'une fonction
-    function courbe(f, a, b, coul, ep, n) {
-      let d = '';
-      n = n || 200;
-      for (let i = 0; i <= n; i++) {
-        const x = a + (b - a) * i / n, y = f(x);
-        if (isFinite(y)) d += (d ? 'L' : 'M') + px(x).toFixed(1) + ',' + py(y).toFixed(1);
-      }
-      return `<path d="${d}" fill="none" stroke="${coul || 'var(--accent)'}" stroke-width="${ep || 3}" stroke-linejoin="round" stroke-linecap="round"/>`;
-    }
-    const svg = (contenu, aria) => `<svg viewBox="0 0 ${o.w} ${o.h}" class="te-graphe" role="img" aria-label="${aria || 'Graphique'}" style="font-family:var(--font-sans)">${g}${contenu || ''}</svg>`;
-    return Object.assign(o, { px, py, fond: g, courbe, svg, X0, Y0 });
-  }
-
-  /* ============================================================
      PLAN DE L'APPLICATION, PROGRESSION ET NAVIGATION
 
      Sommaire de toute l'application : modules → parties → pages (Cours, Questions, Fiche).
@@ -944,7 +851,8 @@
       ] },
     { n: 3, titre: 'Risque électrique', desc: 'Disjoncteurs, disjoncteur différentiel, mise à la terre', fiche: 'fiche_3',
       parties: [{ nom: 'Risque électrique', cours: 'module_3_cours', questions: 'module_3_questions' }] },
-    { n: 4, titre: 'Puissance et transport en exercices', desc: 'Transformateurs et charge avec facteur de puissance', exercices: 'module_4_exercices', exNom: 'Exercices', nbEx: 10,
+    { n: 4, titre: 'Puissance et transport en exercices', desc: 'Transformateurs et charge avec facteur de puissance : méthode, exemples, exercices', fiche: 'fiche_4',
+      exercices: 'module_4_exercices', exNom: 'Exercices', nbEx: 14,
       parties: [{ nom: 'Méthode et exemples', slug: 'methode', cours: 'module_4_cours' }] },
   ];
 
@@ -1154,7 +1062,7 @@
   }
 
   window.TE = Object.assign(window.TE || {}, {
-    MOINS, fmt, cs, sci, lire, proche, sgn, fr, dd, poly, sys, el, secouer, melanger, hasard, entre, champ, PARTIES, analyserIJ,
-    question, serie, decouverte, aToi, Cours, graphe, menu, accueil, PLAN, marquer, confettis,
+    MOINS, fmt, cs, sci, lire, proche, fr, unite, o, fq, el, secouer, melanger, hasard, entre, champ, PARTIES,
+    question, serie, decouverte, aToi, Cours, menu, accueil, PLAN, marquer, confettis,
   });
 })();

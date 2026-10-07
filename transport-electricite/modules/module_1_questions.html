@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur les pertes par effet Joule — Transport de l'électricité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="te.css">
+<script src="te.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : calcul de P_J (2), effet d'une
+   variation de l'intensité (2), intérêt d'une tension élevée (2),
+   facteur de puissance (3), notions (1).
+   Chaque fabrique renvoie une question différente à chaque appel.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, entre, proche } = TE;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const QCM = (theme, q, bonne, faux, solution, indice) => ({ theme, parties: [fq.choix(q, [o('ok', bonne)].concat(faux.map((f, i) => o('f' + i, f))), 'ok', { solution, indice })] });
+
+/* ---------- Groupe 1 : calcul des pertes ---------- */
+const G1 = [
+  function pertes() {
+    const R = hasard([0.5, 1, 2, 4, 5, 8]), I = hasard([5, 10, 15, 20, 30, 40]);
+    return { theme: 'Calculer des pertes par effet Joule', enonce: `<p>Un câble de résistance R = ${fmt(R)} Ω est parcouru par un courant d'intensité I = ${fmt(I)} A.</p>`,
+      parties: [fq.nombre('Calcule la puissance perdue par effet Joule.', 'P<sub>J</sub> =', R * I * I, 'W', {
+        diag: v => proche(v, R * I) ? 'Tu as calculé R × I : l\'intensité est au carré.' : proche(v, (R * I) ** 2) ? 'Seule l\'intensité est au carré : R × I<sup>2</sup>, pas (R × I)<sup>2</sup>.' : 'P<sub>J</sub> = R × I<sup>2</sup>.',
+        solution: calc(`P<sub>J</sub> = R × I<sup>2</sup> = ${fmt(R)} × ${fmt(I)}<sup>2</sup> = ${c(fmt(R * I * I) + ' W')}`) })] };
+  },
+  function resistance() {
+    const R = hasard([0.5, 2, 4, 5]), I = hasard([10, 20, 50]), P = R * I * I;
+    return { theme: 'Calculer des pertes par effet Joule', enonce: `<p>Une ligne parcourue par un courant de ${fmt(I)} A dissipe ${fmt(P)} W par effet Joule.</p>`,
+      parties: [fq.nombre('Calcule la résistance R de la ligne.', 'R =', R, 'Ω', {
+        diag: v => proche(v, P / I) ? 'Tu as divisé par I. Il faut diviser par I<sup>2</sup> : R = P<sub>J</sub> / I<sup>2</sup>.' : 'P<sub>J</sub> = R × I<sup>2</sup>, donc R = P<sub>J</sub> / I<sup>2</sup>.',
+        solution: calc(`R = ${TE.fr('P<sub>J</sub>', 'I<sup>2</sup>')} = ${TE.fr(fmt(P), fmt(I) + '<sup>2</sup>')} = ${c(fmt(R) + ' Ω')}`) })] };
+  },
+  function unite() {
+    return QCM('Calculer des pertes par effet Joule', 'Dans P<sub>J</sub> = R × I<sup>2</sup>, les unités sont :', 'R en ohms (Ω), I en ampères (A), P<sub>J</sub> en watts (W)',
+      ['R en watts (W), I en ampères (A), P<sub>J</sub> en ohms (Ω)', 'R en ohms (Ω), I en volts (V), P<sub>J</sub> en watts (W)', 'R en ohms (Ω), I en ampères (A), P<sub>J</sub> en joules (J)'],
+      'R en ohms, I en ampères, P<sub>J</sub> (une puissance) en watts.', 'Une puissance s\'exprime en watts.');
+  },
+];
+
+/* ---------- Groupe 2 : variation de l'intensité ---------- */
+const G2 = [
+  function multiplie() {
+    const n = hasard([2, 3, 4, 5, 10]);
+    return QCM('Intensité et pertes', `L'intensité dans une ligne est multipliée par ${n}. Les pertes par effet Joule sont :`, `multipliées par ${n * n}`,
+      [`multipliées par ${n}`, `multipliées par ${2 * n}`, `divisées par ${n}`], `Intensité × ${n} → pertes × ${n}<sup>2</sup> = × ${n * n}.`, 'P<sub>J</sub> = R × I<sup>2</sup> : l\'intensité est au carré.');
+  },
+  function divise() {
+    const n = hasard([2, 3, 5, 10, 20]);
+    return QCM('Intensité et pertes', `L'intensité dans une ligne est divisée par ${n}. Les pertes par effet Joule sont :`, `divisées par ${n * n}`,
+      [`divisées par ${n}`, `divisées par ${2 * n}`, `multipliées par ${n}`], `Intensité ÷ ${n} → pertes ÷ ${n}<sup>2</sup> = ÷ ${n * n}.`, 'Si I est divisée par n, les pertes sont divisées par n<sup>2</sup>.');
+  },
+  function passe() {
+    const a = hasard([2, 3, 4, 5]), n = hasard([2, 3, 4]), b = a * n;
+    return { theme: 'Intensité et pertes', enonce: `<p>L'intensité dans un câble passe de ${a} A à ${b} A.</p>`,
+      parties: [fq.nombre('Par combien les pertes par effet Joule sont-elles multipliées ?', 'pertes ×', n * n, '', {
+        diag: v => proche(v, n) ? `L'intensité est multipliée par ${n}, mais les pertes dépendent de I<sup>2</sup>.` : 'Calcule le rapport des intensités, puis mets-le au carré.',
+        solution: calc(`${b} / ${a} = ${n} : intensité × ${n}, donc pertes × ${n}<sup>2</sup> = ${c('× ' + n * n)}`) })] };
+  },
+];
+
+/* ---------- Groupe 3 : intérêt d'une tension élevée ---------- */
+const G3 = [
+  function courant() {
+    const [P, U] = hasard([[100000, 1000], [50000, 1000], [200000, 10000], [600000, 20000], [800000, 20000], [20000, 400]]);
+    const I = P / U;
+    return { theme: 'Transporter sous haute tension', enonce: `<p>Une ligne transporte une puissance P = ${TE.unite(P, 'W')} sous une tension U = ${TE.unite(U, 'V')} (récepteur résistif).</p>`,
+      parties: [fq.nombre('Calcule l\'intensité du courant dans la ligne.', 'I =', I, 'A', {
+        diag: v => proche(v, P * U) ? 'Il faut diviser P par U.' : proche(v, I / 1000) || proche(v, I * 1000) ? 'Convertis d\'abord en watts et en volts (k = × 1 000).' : 'I = P / U.',
+        solution: calc(`I = ${TE.fr('P', 'U')} = ${TE.fr(fmt(P), fmt(U))} = ${c(fmt(I) + ' A')}`) })] };
+  },
+  function tension() {
+    const n = hasard([2, 4, 5, 10, 20]);
+    return QCM('Transporter sous haute tension', `Pour une même puissance transportée, on multiplie la tension par ${n}. Les pertes par effet Joule dans la ligne sont :`, `divisées par ${n * n}`,
+      [`divisées par ${n}`, `multipliées par ${n}`, `multipliées par ${n * n}`], `Tension × ${n} → intensité ÷ ${n} (I = P / U) → pertes ÷ ${n}<sup>2</sup> = ÷ ${n * n}.`, 'Que devient I = P / U ? Et les pertes R × I<sup>2</sup> ?');
+  },
+  function pourquoi() {
+    return QCM('Transporter sous haute tension', 'Pourquoi transporte-t-on l\'électricité sous très haute tension (400 kV) ?', 'pour diminuer l\'intensité, donc les pertes par effet Joule',
+      ['pour augmenter l\'intensité du courant', 'pour que l\'électricité aille plus vite', 'pour augmenter la puissance consommée par les utilisateurs'],
+      'Pour une même puissance, une tension élevée donne une intensité faible (I = P / U), donc des pertes R × I<sup>2</sup> faibles.', 'Pense à I = P / U et à P<sub>J</sub> = R × I<sup>2</sup>.');
+  },
+];
+
+/* ---------- Groupe 4 : facteur de puissance ---------- */
+const G4 = [
+  function apparente() {
+    const P = hasard([1150, 2300, 3450, 4600]), k = hasard([0.5, 0.8]), S = P / k;
+    return { theme: 'Facteur de puissance', enonce: `<p>Un appareil consomme une puissance active P = ${fmt(P)} W avec un facteur de puissance k = ${fmt(k)}.</p>`,
+      parties: [fq.nombre('Calcule la puissance apparente S fournie par le réseau.', 'S =', S, 'VA', {
+        diag: v => proche(v, P * k) ? 'Tu as multiplié par k. Comme k = P / S, on a S = P / k.' : 'k = P / S, donc S = P / k.',
+        solution: calc(`S = ${TE.fr('P', 'k')} = ${TE.fr(fmt(P), fmt(k))} = ${c(fmt(S) + ' VA')}`) })] };
+  },
+  function intensite() {
+    const P = hasard([1840, 2300, 4600, 3680]), k = hasard([0.8, 0.5]), S = P / k, I = S / 230;
+    return { theme: 'Facteur de puissance', enonce: `<p>Un moteur consomme une puissance active P = ${fmt(P)} W sous U = 230 V, avec un facteur de puissance k = ${fmt(k)}.</p>`,
+      parties: [
+        fq.nombre('Calcule la puissance apparente S.', 'S =', S, 'VA', { diag: v => proche(v, P * k) ? 'S = P / k (et non P × k).' : 'S = P / k.', solution: calc(`S = ${TE.fr(fmt(P), fmt(k))} = ${c(fmt(S) + ' VA')}`) }),
+        fq.nombre('Calcule l\'intensité du courant appelé.', 'I =', I, 'A', { diag: v => proche(v, P / 230) ? 'Tu as utilisé P : c\'est S = U × I, donc I = S / U.' : 'I = S / U.', solution: calc(`I = ${TE.fr('S', 'U')} = ${TE.fr(fmt(S), '230')} = ${c(fmt(I) + ' A')}`) }),
+      ] };
+  },
+  function compare() {
+    const k = hasard([[0.5, '4'], [0.8, '1,56']]);
+    return QCM('Facteur de puissance', `Un appareil consomme la même puissance active P, sous la même tension. Son facteur de puissance passe de 1 à ${fmt(k[0])}. Les pertes par effet Joule dans la ligne qui l'alimente sont multipliées par :`, k[1],
+      k[0] === .5 ? ['2', '0,5', '0,25'] : ['1,25', '0,8', '0,64'],
+      `I = P / (U × k) : l'intensité est multipliée par 1 / ${fmt(k[0])} = ${fmt(1 / k[0])}, donc les pertes par ${fmt(1 / k[0])}<sup>2</sup> ≈ ${k[1]}.`, 'Par combien l\'intensité est-elle multipliée ? Les pertes dépendent de I<sup>2</sup>.');
+  },
+  function sens() {
+    return QCM('Facteur de puissance', 'Quand le facteur de puissance cos φ d\'une installation diminue (à puissance active égale) :', 'l\'intensité dans les lignes augmente et les pertes aussi',
+      ['l\'intensité diminue et les pertes aussi', 'l\'intensité augmente mais les pertes diminuent', 'rien ne change'],
+      'I = P / (U × cos φ) : quand cos φ diminue, I augmente, et les pertes R × I<sup>2</sup> augmentent.', 'I = P / (U × cos φ).');
+  },
+  function edf() {
+    return QCM('Facteur de puissance', 'EDF impose aux installations industrielles un facteur de puissance :', 'cos φ ≥ 0,93', ['cos φ ≤ 0,93', 'cos φ ≥ 1,5', 'cos φ = 0'],
+      'cos φ ≥ 0,93 : proche de 1, pour limiter l\'intensité et donc les pertes dans les lignes.', 'Le facteur de puissance doit être proche de 1.');
+  },
+];
+
+/* ---------- Groupe 5 : notions ---------- */
+const G5 = [
+  () => QCM('Notions', 'Dans k = cos φ = P / S, la puissance P est :', 'la puissance active, réellement consommée par l\'appareil', ['la puissance apparente, fournie par EDF', 'la puissance perdue dans les câbles', 'la puissance maximale'],
+    'P est la puissance active (consommée) ; S = U × I est la puissance apparente (fournie par le réseau).', 'Laquelle est facturée à l\'utilisateur ?'),
+  () => QCM('Notions', 'Dans k = cos φ = P / S, la puissance S est :', 'la puissance apparente S = U × I, fournie par le réseau', ['la puissance active, consommée', 'la puissance perdue par effet Joule', 'la puissance utile'],
+    'S = U × I est la puissance apparente, fournie par EDF ; elle détermine l\'intensité dans les lignes.', 'S = U × I.'),
+  () => QCM('Notions', 'Les pertes par effet Joule dans une ligne électrique transforment de l\'énergie électrique en :', 'énergie thermique', ['énergie lumineuse', 'énergie mécanique', 'énergie chimique'],
+    'Les câbles chauffent : énergie thermique, perdue.', 'Que fait un câble parcouru par un courant ?'),
+];
+
+// tirage : 2 + 2 + 2 + 3 + 1 questions, sans répétition dans un groupe
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  return pris(G1, 2).concat(pris(G2, 2), pris(G3, 2), pris(G4, 3), pris(G5, 1));
+}
+
+TE.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Les pertes par effet Joule',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : calcul des pertes P<sub>J</sub> = R × I<sup>2</sup>, effet d\'une variation de l\'intensité, intérêt d\'une tension élevée, rôle du facteur de puissance. Garde ta calculatrice à portée de main.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2_simulation.html', label: 'Module 2 : le transformateur →' },
+});
+TE.menu('module_1_questions');
+</script>
+</body>
+</html>

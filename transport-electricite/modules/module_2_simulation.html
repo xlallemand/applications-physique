@@ -52,7 +52,20 @@
     <!-- ============ Questions ============ -->
     <div class="te-sim-droite">
       <div id="quiz"></div>
-      <div id="bilan" class="er-card" hidden></div>
+      <div id="bilan" class="er-card te-bilan" hidden>
+        <span class="er-badge">BILAN</span>
+        <h3 class="er-titre">À retenir</h3>
+        <div class="cle"><p><b class="cle-titre">Rôle.</b> Un transformateur <b>élève</b> ou <b>abaisse</b> une tension alternative, sans changer sa fréquence ni la décaler.</p></div>
+        <div class="cle"><p><b class="cle-titre">Rapport de transformation.</b></p>
+          <p class="ph-formule grand">m = <span class="te-rap"><span>N<sub>2</sub></span><span>N<sub>1</sub></span></span> = <span class="te-rap"><span>U<sub>2</sub></span><span>U<sub>1</sub></span></span> = <span class="te-rap inv"><span>I<sub>1</sub></span><span>I<sub>2</sub></span></span></p>
+          <p>Attention : la relation des intensités est <b>à l'envers</b> (indice 1 en haut). Ce que le transformateur gagne en tension, il le perd en intensité : U<sub>1</sub> × I<sub>1</sub> = U<sub>2</sub> × I<sub>2</sub>.</p></div>
+        <div class="cle"><p><b class="cle-titre">Élévateur ou abaisseur.</b> m &gt; 1 (N<sub>2</sub> &gt; N<sub>1</sub>) : élévateur ; m &lt; 1 (N<sub>2</sub> &lt; N<sub>1</sub>) : abaisseur.</p></div>
+        <div class="er-actions">
+          <a class="btn-primary" style="text-decoration:none" href="module_2_cours.html">Cours : propriétés du transformateur →</a>
+          <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#simulation">Fiche récapitulative</a>
+          <button type="button" class="btn-secondary" onclick="location.reload()">↻ Recommencer</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -230,38 +243,195 @@ function boutonsSpires(id, lire, ecrire) {
     majTout();
   }));
 }
-// configurations essayées (pour vérifier que l'élève a manipulé)
+// réglages essayés (pour vérifier que l'élève a manipulé) ; vidé au début d'une question d'exploration
 const essais = new Set();
-function majTout() {
-  essais.add(N1 + '/' + N2);
+function majTout(debut) {
+  if (!debut) essais.add(N1 + '/' + N2);
   dessinerSchema();
   dessinerOscillo();
 }
 boutonsSpires('segN1', () => N1, v => { N1 = v; });
 boutonsSpires('segN2', () => N2, v => { N2 = v; });
-majTout();
+majTout(true);
 
 /* ============================================================
    QUESTIONS DE DÉCOUVERTE
+   1. tension et nombres de spires (m = N2/N1 = U2/U1)
+   2. élévateur ou abaisseur
+   3. oscilloscope : pas de décalage, U2max / U1max = m
+   4. intensités : I1/I2 = m (« à l'envers »), puissance conservée
+   5. intérêt pour le transport
    ============================================================ */
 const reglage = (a, b) => N1 === a && N2 === b;
+const regler = (a, b) => `règle N<sub>1</sub> = ${a} et N<sub>2</sub> = ${b} avec les boutons sous le schéma.`;
+const explore = n => essais.size >= n;                 // réglages essayés depuis le début de la question
+const sub = (x, i) => `${x}<sub>${i}</sub>`;
+const U1s = sub('U', 1), U2s = sub('U', 2), I1s = sub('I', 1), I2s = sub('I', 2), N1s = sub('N', 1), N2s = sub('N', 2);
+
 const questions = [
+  /* ===== 1. Tensions et nombres de spires ===== */
   {
-    texte: 'Règle N<sub>1</sub> = 500 spires et N<sub>2</sub> = 1000 spires. Lis les voltmètres : comment la tension U<sub>2</sub> à la sortie se compare-t-elle à la tension U<sub>1</sub> à l\'entrée ?',
+    texte: `Règle N<sub>1</sub> = 500 spires et N<sub>2</sub> = 1000 spires. Lis les voltmètres : comment la tension ${U2s} à la sortie se compare-t-elle à la tension ${U1s} à l'entrée ?`,
     consigne: 'Les voltmètres affichent les valeurs efficaces des tensions.',
-    prealable: () => reglage(500, 1000) ? null : 'règle N<sub>1</sub> = 500 et N<sub>2</sub> = 1000 avec les boutons sous le schéma.',
+    prealable: () => reglage(500, 1000) ? null : regler(500, 1000),
     choix: [
-      { t: 'U<sub>2</sub> est 2 fois plus grande que U<sub>1</sub>', ok: true },
-      { t: 'U<sub>2</sub> est 2 fois plus petite que U<sub>1</sub>', pourquoi: 'Lis les deux voltmètres : U<sub>1</sub> = 10 V et U<sub>2</sub> = 20 V.' },
-      { t: 'U<sub>2</sub> est égale à U<sub>1</sub>', pourquoi: 'Lis les deux voltmètres : les valeurs sont différentes.' },
+      { t: `${U2s} est 2 fois plus grande que ${U1s}`, ok: true },
+      { t: `${U2s} est 2 fois plus petite que ${U1s}`, pourquoi: `Lis les deux voltmètres : ${U1s} = 10 V et ${U2s} = 20 V.` },
+      { t: `${U2s} est égale à ${U1s}`, pourquoi: 'Lis les deux voltmètres : les valeurs sont différentes.' },
     ],
-    bravo: 'U<sub>2</sub> = 20 V = 2 × 10 V. Le transformateur a <b>doublé</b> la tension.',
-    resume: 'N<sub>1</sub> = 500, N<sub>2</sub> = 1000 : U<sub>2</sub> = 2 × U<sub>1</sub>',
+    bravo: `${U2s} = 20 V = 2 × 10 V : le transformateur a <b>doublé</b> la tension.`,
+    resume: `${N1s} = 500, ${N2s} = 1000 : ${U2s} = 2 × ${U1s}`,
+  },
+  {
+    texte: `Avec ce même réglage, calcule le rapport des nombres de spires ${N2s} / ${N1s} = 1000 / 500. Que remarques-tu ?`,
+    prealable: () => reglage(500, 1000) ? null : regler(500, 1000),
+    choix: [
+      { t: `${N2s} / ${N1s} = 2 : c'est aussi le rapport ${U2s} / ${U1s}`, ok: true },
+      { t: `${N2s} / ${N1s} = 0,5 : c'est l'inverse de ${U2s} / ${U1s}`, pourquoi: '1000 / 500 = 2, pas 0,5 : tu as calculé 500 / 1000.' },
+      { t: `${N2s} / ${N1s} = 500 : il n'y a pas de lien avec les tensions`, pourquoi: '1000 / 500 est un quotient (une division), pas une différence.' },
+    ],
+    bravo: `${N2s} / ${N1s} = 2 et ${U2s} / ${U1s} = 20 / 10 = 2 : les deux rapports sont égaux. Ce nombre s'appelle le <b>rapport de transformation m</b>.`,
+    resume: `m = ${N2s} / ${N1s} = ${U2s} / ${U1s} = 2`,
+  },
+  {
+    texte: `Règle N<sub>1</sub> = 100 et N<sub>2</sub> = 500. Prévois d'abord la valeur de ${U2s} avec m = ${N2s} / ${N1s}, puis vérifie sur le voltmètre. ${U2s} vaut :`,
+    prealable: () => reglage(100, 500) ? null : regler(100, 500),
+    choix: [
+      { t: '50 V', ok: true },
+      { t: '2 V', pourquoi: `m = ${N2s} / ${N1s} = 500 / 100 = 5. Ici tu as divisé ${U1s} par 5.` },
+      { t: '500 V', pourquoi: `${U2s} = m × ${U1s} = 5 × 10 V. Le nombre de spires n'est pas une tension.` },
+      { t: '15 V', pourquoi: `On multiplie ${U1s} par m = 5 ; on n'ajoute pas 5 V.` },
+    ],
+    bravo: `m = 500 / 100 = 5, donc ${U2s} = m × ${U1s} = 5 × 10 = <b>50 V</b>.`,
+    resume: `${U2s} = m × ${U1s} : 100 → 500 spires, ${U2s} = 5 × 10 = 50 V`,
+  },
+  {
+    texte: `Essaie maintenant au moins 4 autres réglages. Dans tous les cas, le rapport ${U2s} / ${U1s} est égal à :`,
+    consigne: 'Pour chaque réglage, compare la division des deux tensions à celle des deux nombres de spires.',
+    avant: () => { essais.clear(); },
+    prealable: () => explore(4) ? null : `essaie au moins 4 réglages différents (il en reste ${4 - essais.size}).`,
+    choix: [
+      { t: `${N2s} / ${N1s}`, ok: true },
+      { t: `${N1s} / ${N2s}`, pourquoi: 'Avec N<sub>1</sub> = 100 et N<sub>2</sub> = 1000, la tension est multipliée par 10 : c\'est 1000 / 100, pas 100 / 1000.' },
+      { t: `${N2s} − ${N1s}`, pourquoi: 'Avec N<sub>1</sub> = 500 et N<sub>2</sub> = 1000, U<sub>2</sub> / U<sub>1</sub> = 2 alors que N<sub>2</sub> − N<sub>1</sub> = 500.' },
+    ],
+    bravo: `Dans tous les cas : <b>m = ${N2s} / ${N1s} = ${U2s} / ${U1s}</b>. Le rapport des tensions est égal au rapport des nombres de spires.`,
+    resume: `m = ${N2s} / ${N1s} = ${U2s} / ${U1s}, pour tous les réglages`,
+  },
+
+  /* ===== 2. Élévateur ou abaisseur ===== */
+  {
+    texte: `Règle N<sub>1</sub> = 1000 et N<sub>2</sub> = 100. Que fait le transformateur ?`,
+    prealable: () => reglage(1000, 100) ? null : regler(1000, 100),
+    choix: [
+      { t: 'Il abaisse la tension (divisée par 10)', ok: true },
+      { t: 'Il élève la tension (multipliée par 10)', pourquoi: `Lis les voltmètres : ${U2s} = 1 V est plus petite que ${U1s} = 10 V.` },
+      { t: 'Il ne change pas la tension', pourquoi: `Lis les voltmètres : ${U1s} = 10 V et ${U2s} = 1 V.` },
+    ],
+    bravo: `m = 100 / 1000 = 0,1 : ${U2s} = 0,1 × 10 = 1 V. Quand <b>m &lt; 1</b>, le transformateur est <b>abaisseur</b> de tension ; quand <b>m &gt; 1</b>, il est <b>élévateur</b>.`,
+    resume: 'm &gt; 1 : élévateur ; m &lt; 1 : abaisseur (ici m = 0,1)',
+  },
+  {
+    texte: 'Pour qu\'un transformateur <b>élève</b> la tension, sa bobine secondaire doit avoir :',
+    choix: [
+      { t: 'plus de spires que la bobine primaire', ok: true },
+      { t: 'moins de spires que la bobine primaire', pourquoi: `Avec ${N1s} = 1000 et ${N2s} = 100, la tension est abaissée. Essaie le contraire.` },
+      { t: 'autant de spires que la bobine primaire', pourquoi: `Règle ${N1s} = ${N2s} : ${U2s} = ${U1s}, la tension ne change pas.` },
+    ],
+    bravo: `Élévateur : ${N2s} &gt; ${N1s}, donc m &gt; 1. Abaisseur : ${N2s} &lt; ${N1s}, donc m &lt; 1. La bobine qui a le plus de spires est du côté de la tension la plus grande.`,
+    resume: `Élévateur : ${N2s} &gt; ${N1s} ; abaisseur : ${N2s} &lt; ${N1s}`,
+  },
+
+  /* ===== 3. Oscilloscope ===== */
+  {
+    texte: `Règle N<sub>1</sub> = 100 et N<sub>2</sub> = 500, puis regarde l'oscilloscope (descends si besoin). Les tensions u<sub>1</sub> et u<sub>2</sub> :`,
+    prealable: () => reglage(100, 500) ? null : regler(100, 500),
+    choix: [
+      { t: 'atteignent leur maximum au même instant : elles ne sont pas décalées', ok: true },
+      { t: 'sont décalées : u<sub>2</sub> est en retard sur u<sub>1</sub>', pourquoi: 'Regarde le trait vertical en pointillés : il passe par les maximums des deux courbes en même temps.' },
+      { t: 'n\'ont pas la même période', pourquoi: 'Les deux courbes s\'annulent aux mêmes instants : même période, même fréquence (50 Hz).' },
+    ],
+    bravo: 'u<sub>1</sub> et u<sub>2</sub> sont <b>en phase</b> (pas de déphasage) et ont la <b>même fréquence</b>, 50 Hz. Le transformateur ne change que la valeur de la tension.',
+    resume: 'u<sub>1</sub> et u<sub>2</sub> : même fréquence, pas de déphasage',
+  },
+  {
+    texte: () => `Avec ce réglage, l'oscilloscope indique U<sub>1max</sub> = 14,1 V et U<sub>2max</sub> = 70,7 V. Le rapport U<sub>2max</sub> / U<sub>1max</sub> est égal à :`,
+    prealable: () => reglage(100, 500) ? null : regler(100, 500),
+    choix: [
+      { t: 'm = 5, comme le rapport des tensions efficaces', ok: true },
+      { t: '1 : les tensions maximales sont égales', pourquoi: 'Lis les deux valeurs maximales sur l\'oscilloscope : elles sont différentes.' },
+      { t: 'm × √2 ≈ 7,1', pourquoi: 'Calcule 70,7 / 14,1 à la calculatrice.' },
+    ],
+    bravo: 'Pour chaque tension, U<sub>max</sub> = U<sub>eff</sub> × √2. Le rapport des tensions maximales est donc le même que celui des tensions efficaces : <b>m = 5</b>.',
+    resume: 'U<sub>2max</sub> / U<sub>1max</sub> = U<sub>2</sub> / U<sub>1</sub> = m',
+  },
+
+  /* ===== 4. Intensités ===== */
+  {
+    texte: `Règle N<sub>1</sub> = 500 et N<sub>2</sub> = 1000 : la tension est doublée. Lis maintenant les <b>ampèremètres</b>. L'intensité ${I2s} à la sortie est :`,
+    prealable: () => reglage(500, 1000) ? null : regler(500, 1000),
+    choix: [
+      { t: `2 fois plus petite que ${I1s}`, ok: true },
+      { t: `2 fois plus grande que ${I1s}`, pourquoi: `Lis les ampèremètres : ${I1s} = 2 A et ${I2s} = 1 A.` },
+      { t: `égale à ${I1s}`, pourquoi: `Lis les ampèremètres : ${I1s} = 2 A et ${I2s} = 1 A.` },
+    ],
+    bravo: `${I2s} = 1 A = 2 A / 2. La tension a été <b>multipliée</b> par 2, l'intensité a été <b>divisée</b> par 2 : l'intensité varie <b>en sens inverse</b> de la tension.`,
+    resume: `Tension × 2 → intensité ÷ 2 (sens inverse)`,
+  },
+  {
+    texte: `Règle N<sub>1</sub> = 1000 et N<sub>2</sub> = 100 (abaisseur, m = 0,1). Lis l'ampèremètre de sortie : ${I2s} vaut :`,
+    prealable: () => reglage(1000, 100) ? null : regler(1000, 100),
+    choix: [
+      { t: '20 A : 10 fois plus que I<sub>1</sub>', ok: true },
+      { t: '0,2 A : 10 fois moins que I<sub>1</sub>', pourquoi: 'Lis l\'ampèremètre de sortie : quand la tension est abaissée, l\'intensité augmente.' },
+      { t: '2 A, comme I<sub>1</sub>', pourquoi: 'Lis l\'ampèremètre de sortie.' },
+    ],
+    bravo: `La tension est divisée par 10 (10 V → 1 V), l'intensité est multipliée par 10 (2 A → 20 A). Encore une fois, l'intensité varie en sens inverse de la tension.`,
+    resume: 'Tension ÷ 10 → intensité × 10',
+  },
+  {
+    texte: `Essaie au moins 3 réglages en lisant les ampèremètres. Quelle relation est vraie dans tous les cas ?`,
+    avant: () => { essais.clear(); },
+    prealable: () => explore(3) ? null : `essaie au moins 3 réglages différents (il en reste ${3 - essais.size}).`,
+    choix: [
+      { t: `m = ${I1s} / ${I2s}`, ok: true },
+      { t: `m = ${I2s} / ${I1s}`, pourquoi: `Avec m = 2 (500 → 1000), ${I1s} = 2 A et ${I2s} = 1 A : ${I2s} / ${I1s} = 0,5, pas 2.` },
+      { t: `${I1s} = ${I2s}`, pourquoi: 'Lis les ampèremètres : les deux intensités sont différentes dès que N<sub>1</sub> ≠ N<sub>2</sub>.' },
+    ],
+    bravo: `<b>m = ${I1s} / ${I2s}</b> : attention, cette relation est « <b>à l'envers</b> » ! Pour les spires et les tensions, l'indice 2 est en haut (${N2s} / ${N1s}, ${U2s} / ${U1s}) ; pour les intensités, c'est l'indice 1 qui est en haut.`,
+    resume: `m = ${I1s} / ${I2s} : « à l'envers » de ${N2s} / ${N1s} et ${U2s} / ${U1s}`,
+  },
+  {
+    texte: () => `Pour le réglage actuel, calcule ${U1s} × ${I1s} (puissance reçue par le primaire) et ${U2s} × ${I2s} (puissance fournie à l'appareil). Que constates-tu ?`,
+    choix: [
+      { t: 'Les deux valent 20 W : la puissance se conserve', ok: true },
+      { t: `${U2s} × ${I2s} est plus grande quand le transformateur est élévateur`, pourquoi: `Avec 500 → 1000 : ${U1s} × ${I1s} = 10 × 2 = 20 W et ${U2s} × ${I2s} = 20 × 1 = 20 W.` },
+      { t: `${U2s} × ${I2s} est toujours plus petite`, pourquoi: 'Fais le calcul avec les valeurs affichées : les deux produits sont égaux.' },
+    ],
+    bravo: `${U1s} × ${I1s} = ${U2s} × ${I2s} = 20 W : un transformateur (parfait) ne crée pas d'énergie. <b>Ce qu'il gagne en tension, il le perd en intensité.</b> C'est pour cela que la relation des intensités est à l'envers.`,
+    resume: `${U1s} × ${I1s} = ${U2s} × ${I2s} : ce que le transformateur gagne en tension, il le perd en intensité`,
+  },
+
+  /* ===== 5. Intérêt pour le transport ===== */
+  {
+    texte: 'Dans une ligne électrique, les pertes par effet Joule valent P<sub>J</sub> = R × I<sup>2</sup>. Pour transporter l\'électricité avec le moins de pertes possible, on place à la sortie de la centrale un transformateur :',
+    choix: [
+      { t: 'élévateur : la tension augmente, l\'intensité diminue', ok: true },
+      { t: 'abaisseur : la tension diminue, l\'intensité diminue', pourquoi: 'Quand la tension diminue, l\'intensité augmente (sens inverse).' },
+      { t: 'abaisseur : la tension diminue, l\'intensité augmente', pourquoi: 'Une intensité plus grande donne des pertes R × I<sup>2</sup> plus grandes.' },
+    ],
+    bravo: 'Un transformateur élévateur multiplie la tension par m et divise l\'intensité par m : les pertes dans la ligne sont divisées par m<sup>2</sup>. Près des habitations, un transformateur abaisseur ramène la tension à 230 V.',
+    resume: 'Élévateur à la sortie de la centrale : intensité ÷ m, pertes ÷ m<sup>2</sup>',
   },
 ];
 
 TE.decouverte(document.getElementById('quiz'), questions, {
-  fin: () => { document.getElementById('bilan').hidden = false; },
+  fin: () => {
+    const b = document.getElementById('bilan');
+    b.hidden = false;
+    TE.marquer({ fait: true });
+    b.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  },
 });
 
 /* ---------- Navigation ---------- */

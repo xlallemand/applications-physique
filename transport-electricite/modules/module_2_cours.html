@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : propriétés du transformateur — Transport de l'électricité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="te.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="te.js"></script>
+<script src="schemas.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Propriétés du transformateur</h2>
+    <p class="er-contexte">Dans la simulation, tu as découvert qu'un transformateur <b>élève</b> ou <b>abaisse</b> une tension. Ce cours fixe les <b>trois relations</b> à connaître, la <b>méthode</b> pour résoudre un exercice, et l'<b>intérêt</b> du transformateur pour le transport de l'électricité. Après chaque notion, un exemple, puis à toi de jouer.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes : rôle et schéma du transformateur, les trois
+   relations (celle des intensités est « à l'envers »), méthode
+   (schéma + trois formules), intérêt pour le transport.
+   ============================================================ */
+const { o, fq, fmt, proche } = TE;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const sub = (x, i) => `${x}<sub>${i}</sub>`;
+const U1 = sub('U', 1), U2 = sub('U', 2), I1 = sub('I', 1), I2 = sub('I', 2), N1 = sub('N', 1), N2 = sub('N', 2);
+const rap = (h, b, inv) => `<span class="te-rap${inv ? ' inv' : ''}"><span>${h}</span><span>${b}</span></span>`;
+const TROIS = `m = ${rap(N2, N1)} = ${rap(U2, U1)} = ${rap(I1, I2, true)}`;
+const ELEV = [o('elev', 'élévateur de tension'), o('abai', 'abaisseur de tension')];
+
+new TE.Cours(document.getElementById('etapes'), [
+
+  // ---------- 1. Rôle et schéma ----------
+  (cours) => {
+    const k = cours.carte('1. Rôle et schéma d\'un transformateur');
+    cours.ajouter(k, `<div class="cours-bloc">
+        <p>Un transformateur est formé de deux bobines enroulées sur un même <b>noyau de fer</b> : la bobine <b>primaire</b> (N<sub>1</sub> spires), reliée à la source, et la bobine <b>secondaire</b> (N<sub>2</sub> spires), reliée à l'utilisation. La tension alternative du primaire crée un flux magnétique variable dans le noyau, qui fait apparaître une tension aux bornes du secondaire.</p>
+        <div class="cle"><p><b class="cle-titre">Rôle.</b> Un transformateur permet d'<b>augmenter</b> (élévateur) ou de <b>diminuer</b> (abaisseur) une tension <b>alternative</b>. Il ne fonctionne pas en courant continu. Il ne change pas la fréquence.</p></div>
+        <p>Sur un schéma électrique, le transformateur est représenté par <b>deux cercles entrelacés</b>. On place la tension et l'intensité de chaque côté : indice 1 pour le primaire (entrée), indice 2 pour le secondaire (sortie).</p>
+        ${SCH.chaine({ etages: [{ titre: 'primaire (entrée)', u: 'u<sub>1</sub>', i: 'i<sub>1</sub>' }, { titre: 'secondaire (sortie)', u: 'u<sub>2</sub>', i: 'i<sub>2</sub>' }],
+          transfos: [{ nom: 'T', n: [N1, N2] }], charge: { nom: 'appareil' }, aria: 'Symbole du transformateur : u1 et i1 au primaire, u2 et i2 au secondaire' })}
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <p>Le transformateur d'une lampe de bureau est branché sur le secteur (${U1} = 230 V) et alimente une ampoule sous ${U2} = 12 V.</p>
+        ${calc(`${U2} &lt; ${U1} : c'est un ${c('abaisseur de tension')}.`)}
+      </div>`);
+    const type = (q, bonne, sol) => ({ parties: [fq.choix(q, ELEV, bonne, { melanger: false, indice: 'Compare la tension de sortie (indice 2) à la tension d\'entrée (indice 1).', solution: sol })] });
+    TE.aToi(k, [
+      type(`Un transformateur reçoit ${U1} = 20 kV et fournit ${U2} = 400 kV. C'est un :`, 'elev', `${U2} &gt; ${U1} : la tension est augmentée, c'est un élévateur.`),
+      type(`Un chargeur de téléphone reçoit ${U1} = 230 V et fournit ${U2} = 5 V. C'est un :`, 'abai', `${U2} &lt; ${U1} : la tension est diminuée, c'est un abaisseur.`),
+      type(`Un transformateur a ${N1} = 200 spires et ${N2} = 1000 spires. C'est un :`, 'elev', `Le secondaire a plus de spires que le primaire : la tension est augmentée, c'est un élévateur.`),
+      { parties: [fq.choix('On branche un transformateur sur une batterie (tension continue de 12 V). À la sortie :', [o('ok', 'il n\'y a pas de tension'), o('a', 'la tension est élevée'), o('b', 'la tension est abaissée')], 'ok',
+        { indice: 'Le flux magnétique doit être variable pour faire apparaître une tension au secondaire.', solution: 'Un transformateur ne fonctionne qu\'en tension alternative : avec une tension continue, le flux ne varie pas et il n\'y a pas de tension au secondaire.' })] },
+    ], () => cours.continuer(k));
+    return k;
+  },
+
+  // ---------- 2. Les trois relations ----------
+  (cours) => {
+    const k = cours.carte('2. Les trois relations du transformateur');
+    cours.ajouter(k, `<div class="cours-bloc">
+        <div class="cle">
+          <p><b class="cle-titre">Rapport de transformation m.</b> Pour un transformateur (supposé parfait) :</p>
+          <p class="ph-formule grand">${TROIS}</p>
+          <p>d'où ${U2} = m × ${U1} et ${I2} = ${rap(I1, 'm')}.</p>
+          <ul class="er-liste"><li>m &gt; 1 (${N2} &gt; ${N1}) : <b>élévateur</b> de tension ;</li><li>m &lt; 1 (${N2} &lt; ${N1}) : <b>abaisseur</b> de tension.</li></ul>
+        </div>
+        <div class="te-attention"><p><b class="cle-titre">Attention : la relation des intensités est « à l'envers ».</b> Pour les spires et les tensions, l'indice <b>2 est en haut</b>. Pour les intensités, c'est l'indice <b>1 qui est en haut</b>.</p></div>
+        <div class="cle"><p><b class="cle-titre">Pour s'en souvenir.</b> Un transformateur ne fabrique pas d'énergie : la puissance est la même des deux côtés, ${U1} × ${I1} = ${U2} × ${I2}.</p>
+          <p class="ph-formule">« Ce qu'il gagne en tension, il le perd en intensité. »</p>
+          <p>Si la tension est multipliée par m, l'intensité est divisée par m. Le côté qui a le <b>plus de spires</b> a la <b>plus grande tension</b> et la <b>plus petite intensité</b>.</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple (exercice 10)</p>
+        <p>La plaque d'un transformateur indique ${U1} = 5 V et ${U2} = 20 V. Le primaire comporte ${N1} = 400 spires.</p>
+        ${calc(`m = ${rap(U2, U1)} = ${rap('20', '5')} = ${c('4')} : m &gt; 1, c'est un élévateur.<br>
+          m = ${rap(N2, N1)} donc ${N2} = m × ${N1} = 4 × 400 = ${c('1 600 spires')}.`)}
+        <p>Si le primaire est parcouru par ${I1} = 2 A, alors ${I2} = ${rap(I1, 'm')} = ${rap('2', '4')} = 0,5 A : la tension est multipliée par 4, l'intensité est divisée par 4.</p>
+      </div>`);
+    TE.aToi(k, [
+      { parties: [fq.choix('Quelle écriture du rapport de transformation est juste ?', [o('ok', TROIS.replace(/ inv/, '')), o('a', `m = ${rap(N2, N1)} = ${rap(U2, U1)} = ${rap(I2, I1)}`), o('b', `m = ${rap(N1, N2)} = ${rap(U1, U2)} = ${rap(I1, I2)}`)], 'ok',
+        { colonne: true, indice: 'Pour les intensités, la relation est « à l\'envers ».', solution: `${TROIS} : pour les intensités, l'indice 1 est en haut.` })] },
+      { titre: `Un transformateur reçoit ${U1} = 230 V et fournit ${U2} = 23 V.`, parties: [
+        fq.nombre('Calcule le rapport de transformation m.', 'm =', 0.1, '', { diag: v => proche(v, 10) ? `Tu as calculé ${U1} / ${U2}. Le rapport est ${U2} / ${U1} (sortie sur entrée).` : `m = ${U2} / ${U1}.`, solution: calc(`m = ${rap(U2, U1)} = ${rap('23', '230')} = ${c('0,1')} (abaisseur)`) }),
+        fq.nombre(`Le secondaire est parcouru par ${I2} = 5 A. Calcule ${I1}.`, `${I1} =`, 0.5, 'A', { diag: v => proche(v, 50) ? `Attention, la relation des intensités est à l'envers : m = ${I1} / ${I2}, donc ${I1} = m × ${I2}.` : `m = ${I1} / ${I2}, donc ${I1} = m × ${I2}.`, solution: calc(`${I1} = m × ${I2} = 0,1 × 5 = ${c('0,5 A')}`) + '<p>La tension est divisée par 10, l\'intensité est multipliée par 10 du primaire au secondaire.</p>' }),
+      ] },
+      { titre: `Un transformateur a ${N1} = 500 spires et ${N2} = 2 000 spires. Il est branché sous ${U1} = 12 V.`, parties: [
+        fq.nombre(`Calcule ${U2}.`, `${U2} =`, 48, 'V', { diag: v => proche(v, 3) ? `Tu as divisé : ${U2} = m × ${U1} avec m = ${N2} / ${N1} = 4.` : `Calcule d'abord m = ${N2} / ${N1}, puis ${U2} = m × ${U1}.`, solution: calc(`m = ${rap('2 000', '500')} = 4 ; ${U2} = 4 × 12 = ${c('48 V')}`) }),
+        fq.nombre(`Le primaire est parcouru par ${I1} = 2 A. Calcule ${I2}.`, `${I2} =`, 0.5, 'A', { diag: v => proche(v, 8) ? `Ce qu'il gagne en tension, il le perd en intensité : ${I2} = ${I1} / m.` : `${I2} = ${I1} / m.`, solution: calc(`${I2} = ${rap(I1, 'm')} = ${rap('2', '4')} = ${c('0,5 A')}`) }),
+      ] },
+    ], () => cours.continuer(k));
+    return k;
+  },
+
+  // ---------- 3. Méthode ----------
+  (cours) => {
+    const k = cours.carte('3. Méthode : d\'abord un schéma, puis les trois formules');
+    cours.ajouter(k, `<div class="cours-bloc">
+        <div class="cle"><p><b class="cle-titre">Méthode.</b> Dans un exercice sur un transformateur, commence <b>toujours</b> par :</p>
+          <ol class="er-liste">
+            <li>faire le <b>schéma</b> du transformateur et y placer <b>les valeurs de l'énoncé au bon endroit</b> : côté primaire (entrée, indice 1) ou côté secondaire (sortie, indice 2) ;</li>
+            <li>écrire les <b>trois formules</b> : ${TROIS} ;</li>
+            <li>choisir l'égalité qui ne contient qu'<b>une seule inconnue</b>, et calculer.</li>
+          </ol>
+          <p>Si une puissance est donnée : P = U × I (pour un récepteur résistif) ; elle est la même des deux côtés.</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple (exercice 8)</p>
+        <p>À la sortie d'une centrale nucléaire, un transformateur fait passer la tension de 20 kV à 400 kV. La puissance à l'entrée est de 800 kW. Calculer les intensités.</p>
+        ${SCH.transfo1({ U1: '20 kV', I1: '?', P1: '800 kW', U2: '400 kV', I2: '?', P2: '800 kW', m: '?' })}
+        ${calc(`${TROIS}<br>
+          m = ${rap(U2, U1)} = ${rap('400', '20')} = ${c('20')}<br>
+          ${I1} = ${rap('P', U1)} = ${rap('800 000', '20 000')} = ${c('40 A')}<br>
+          m = ${rap(I1, I2)} donc ${I2} = ${rap(I1, 'm')} = ${rap('40', '20')} = ${c('2 A')}`)}
+      </div>`);
+    // exercice 11 : 225 kV / 63 kV, 444 A à l'entrée
+    const ex11 = SCH.transfo1({ U1: '#U1', I1: '#I1', U2: '#U2', I2: '?', m: '?' });
+    const lampe = SCH.transfo1({ U1: '#U1', I1: '?', N1: '#N1', U2: '#U2', I2: '#I2', N2: '?', m: '?' });
+    TE.aToi(k, [
+      { titre: 'Exercice 11 : un transformateur de 225 kV / 63 kV fonctionne en abaisseur. L\'intensité d\'entrée vaut 444 A.', parties: [
+        { type: 'schema', q: 'Place les valeurs de l\'énoncé sur le schéma (les cases vides sont les inconnues).', schema: ex11, etiquettes: [
+          { id: 'a', label: '225 kV', cible: 'U1', indice: 'En abaisseur, la tension d\'entrée est la plus grande.' },
+          { id: 'b', label: '63 kV', cible: 'U2', indice: 'En abaisseur, la tension de sortie est la plus petite.' },
+          { id: 'c', label: '444 A', cible: 'I1', indice: 'L\'intensité d\'entrée est du côté du primaire (indice 1).' },
+        ], solution: '<p>Entrée (primaire) : ' + U1 + ' = 225 kV et ' + I1 + ' = 444 A. Sortie (secondaire) : ' + U2 + ' = 63 kV.</p>' },
+        fq.nombre('Calcule m (arrondi à 0,01).', 'm =', 0.28, '', { tol: 0.006, diag: v => proche(v, 3.57, .02) ? `En abaisseur, m &lt; 1 : m = ${U2} / ${U1}.` : `m = ${U2} / ${U1}.`, solution: calc(`m = ${rap(U2, U1)} = ${rap('63', '225')} = ${c('0,28')}`) }),
+        fq.nombre(`Calcule l'intensité de sortie ${I2}.`, `${I2} =`, 1586, 'A', { rel: .01, diag: v => proche(v, 124, .03) ? `Relation à l'envers : m = ${I1} / ${I2}, donc ${I2} = ${I1} / m. La tension baisse, l'intensité augmente.` : `${I2} = ${I1} / m.`, solution: calc(`${I2} = ${rap(I1, 'm')} = ${rap('444', '0,28')} ≈ ${c('1 586 A')}`) + '<p>La tension est abaissée : l\'intensité augmente.</p>' }),
+      ] },
+      { titre: `Le transformateur d'une lampe halogène est branché sur le secteur (230 V) et alimente l'ampoule sous 11,5 V. Son primaire a 1 000 spires ; l'ampoule est parcourue par 4 A.`, parties: [
+        { type: 'schema', q: 'Place les valeurs de l\'énoncé sur le schéma.', schema: lampe, etiquettes: [
+          { id: 'a', label: '230 V', cible: 'U1', indice: 'Le secteur est la source : côté primaire.' },
+          { id: 'b', label: '11,5 V', cible: 'U2', indice: 'L\'ampoule est alimentée par le secondaire.' },
+          { id: 'c', label: '1 000 spires', cible: 'N1', indice: 'Le nombre de spires donné est celui du primaire.' },
+          { id: 'd', label: '4 A', cible: 'I2', indice: 'L\'intensité dans l\'ampoule est celle du secondaire.' },
+        ] },
+        fq.nombre('Calcule m.', 'm =', 0.05, '', { diag: v => proche(v, 20) ? `m = ${U2} / ${U1} (sortie sur entrée).` : `m = ${U2} / ${U1}.`, solution: calc(`m = ${rap('11,5', '230')} = ${c('0,05')}`) }),
+        fq.nombre(`Calcule ${N2}.`, `${N2} =`, 50, 'spires', { diag: v => proche(v, 20000) ? `m = ${N2} / ${N1}, donc ${N2} = m × ${N1}.` : `${N2} = m × ${N1}.`, solution: calc(`${N2} = m × ${N1} = 0,05 × 1 000 = ${c('50 spires')}`) }),
+        fq.nombre(`Calcule ${I1}.`, `${I1} =`, 0.2, 'A', { diag: v => proche(v, 80) ? `Relation à l'envers : m = ${I1} / ${I2}, donc ${I1} = m × ${I2}.` : `${I1} = m × ${I2}.`, solution: calc(`m = ${rap(I1, I2)} donc ${I1} = m × ${I2} = 0,05 × 4 = ${c('0,2 A')}`) }),
+      ] },
+    ], () => cours.continuer(k));
+    return k;
+  },
+
+  // ---------- 4. Intérêt pour le transport ----------
+  (cours) => {
+    const k = cours.carte('4. Intérêt du transformateur pour le transport de l\'électricité');
+    cours.ajouter(k, `<div class="cours-bloc">
+        <p>Les pertes par effet Joule dans une ligne valent P<sub>J</sub> = R × I<sup>2</sup> (module 1). À la sortie de la centrale, un transformateur <b>élévateur</b> multiplie la tension par m et divise donc l'intensité par m : les pertes sont divisées par m<sup>2</sup>. Près des utilisateurs, des transformateurs <b>abaisseurs</b> ramènent la tension à 230 V.</p>
+        ${SCH.chaine({ etages: [{ titre: 'production', u: 'u<sub>1</sub>', lignes: [SCH.l(U1 + ' =', SCH.v('20 kV'))] },
+          { titre: 'transport (lignes THT)', u: 'u<sub>2</sub>', lignes: [SCH.l(U2 + ' =', SCH.v('400 kV'))] },
+          { titre: 'distribution', u: 'u<sub>3</sub>', lignes: [SCH.l(sub('U', 3) + ' =', SCH.v('230 V'))] }],
+          transfos: [{ nom: 'élévateur' }, { nom: 'abaisseur' }], charge: { nom: 'maison' }, aria: 'Centrale 20 kV, transformateur élévateur, lignes 400 kV, transformateur abaisseur, maison 230 V' })}
+        <div class="cle"><p><b class="cle-titre">À retenir.</b> On élève la tension pour le transport afin de <b>diminuer l'intensité</b>, donc les <b>pertes par effet Joule</b> dans les lignes. On l'abaisse ensuite pour la distribuer aux utilisateurs (230 V).</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple (exercice 8, suite)</p>
+        <p>Sans transformateur, la ligne serait parcourue par 40 A ; après le transformateur (m = 20), par 2 A seulement.</p>
+        ${calc(`Intensité ÷ 20 → pertes ÷ 20<sup>2</sup> = ${c('÷ 400')}.`)}
+      </div>`);
+    TE.aToi(k, [
+      { titre: 'Exercice 7 : la chaîne centrale (20 000 V) → dispositif 1 → lignes (400 000 V) → dispositif 2 → maison (230 V).', parties: [
+        fq.choix('Le dispositif 1 est :', [o('ok', 'un transformateur élévateur de tension'), o('a', 'un transformateur abaisseur de tension'), o('b', 'un alternateur')], 'ok',
+          { indice: 'La tension passe de 20 000 V à 400 000 V.', solution: 'La tension passe de 20 kV à 400 kV : transformateur élévateur (m = 20).' }),
+        fq.choix('Le dispositif 2 est :', [o('ok', 'un transformateur abaisseur de tension'), o('a', 'un transformateur élévateur de tension'), o('b', 'un disjoncteur')], 'ok',
+          { indice: 'La tension passe de 400 000 V à 230 V.', solution: 'La tension passe de 400 kV à 230 V : transformateur abaisseur.' }),
+        fq.choix('On transporte l\'électricité sous très haute tension car :', [o('ok', 'l\'intensité est plus faible, donc les pertes par effet Joule aussi'), o('a', 'l\'intensité est plus grande, ce qui transporte plus d\'énergie'), o('b', 'les câbles sont plus légers')], 'ok',
+          { indice: 'Pour une même puissance, si U augmente, I diminue. Et P<sub>J</sub> = R × I<sup>2</sup>.', solution: 'Transporter sous haute tension permet de diminuer le courant et donc les pertes par effet Joule.' }),
+      ] },
+      { parties: [fq.choix('Un transformateur élévateur de rapport m = 10 est placé à la sortie d\'une centrale. Les pertes par effet Joule dans la ligne sont :', [o('ok', 'divisées par 100'), o('a', 'divisées par 10'), o('b', 'multipliées par 10'), o('c', 'inchangées')], 'ok',
+        { indice: 'L\'intensité est divisée par m = 10. Les pertes dépendent de I<sup>2</sup>.', solution: 'Intensité ÷ 10 → pertes ÷ 10<sup>2</sup> = ÷ 100.' })] },
+    ], () => cours.continuer(k, 'Ce qu\'il faut retenir →'));
+    return k;
+  },
+
+  // ---------- À retenir ----------
+  (cours) => {
+    const k = cours.carte('À retenir');
+    cours.ajouter(k, `<div class="cle"><p><b class="cle-titre">Rôle.</b> Un transformateur augmente (élévateur) ou diminue (abaisseur) une tension <b>alternative</b>. Symbole : deux cercles entrelacés ; indice 1 au primaire (entrée), indice 2 au secondaire (sortie).</p></div>
+      <div class="cle"><p><b class="cle-titre">Les trois relations.</b></p><p class="ph-formule grand">${TROIS}</p>
+        <p>La relation des intensités est <b>à l'envers</b> : « ce qu'il gagne en tension, il le perd en intensité » (${U1} × ${I1} = ${U2} × ${I2}). m &gt; 1 : élévateur ; m &lt; 1 : abaisseur.</p></div>
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> Toujours commencer par un <b>schéma</b> avec les valeurs de l'énoncé au bon endroit, puis écrire les <b>trois formules</b>, et utiliser celle qui n'a qu'une inconnue.</p></div>
+      <div class="cle"><p><b class="cle-titre">Transport.</b> Élever la tension divise l'intensité par m et les pertes par effet Joule par m<sup>2</sup>. On abaisse ensuite la tension pour les utilisateurs.</p></div>
+      <div class="er-actions">
+        <a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur le transformateur →</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_3_cours.html">Module 3 : risque électrique</a>
+        <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#proprietes">Fiche récapitulative</a>
+      </div>`);
+    return k;
+  },
+]);
+
+TE.menu('module_2_cours');
+</script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : pertes par effet Joule — Transport de l'électricité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="te.css">
+<script src="te.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">Les pertes par effet Joule</h2>
+    <p class="er-contexte">Entre la centrale et ta maison, l'électricité parcourt des centaines de kilomètres de câbles. Ces câbles <b>chauffent</b> : une partie de l'énergie est <b>perdue</b>. On cherche ici de quoi dépendent ces pertes et comment les réduire, en reliant l'<b>intensité</b> du courant au <b>facteur de puissance</b> vu dans le chapitre « Puissance active ». Après chaque notion, un exemple, puis à toi de jouer.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes : effet Joule (P_J = R × I²), effet d'une
+   variation de I, intérêt d'une tension élevée, rôle du facteur
+   de puissance. Chaque notion : règle, exemple, « À toi ».
+   ============================================================ */
+const { o, fq, fmt } = TE;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const ohm = 'Ω';
+
+new TE.Cours(document.getElementById('etapes'), [
+
+  // ---------- 1. L'effet Joule ----------
+  (cours) => {
+    const k = cours.carte('1. Les câbles chauffent : l\'effet Joule');
+    cours.ajouter(k, `<div class="cours-bloc">
+        <p>Un câble électrique n'est pas un conducteur parfait : il a une petite <b>résistance R</b>. Quand un courant le traverse, il chauffe. Une partie de l'énergie électrique est convertie en <b>énergie thermique</b> : elle est perdue pour l'utilisateur. C'est l'<b>effet Joule</b>.</p>
+        <div class="cle">
+          <p><b class="cle-titre">Puissance perdue par effet Joule</b> dans un câble (une ligne électrique) :</p>
+          <p class="ph-formule grand">P<sub>J</sub> = R × I<sup>2</sup></p>
+          <ul class="er-liste">
+            <li>R : résistance du câble, en ohms (${ohm}) ;</li>
+            <li>I : intensité (efficace) du courant qui traverse le câble, en ampères (A) ;</li>
+            <li>P<sub>J</sub> : puissance perdue, en watts (W).</li>
+          </ul>
+        </div>
+        <div class="te-attention"><p><b class="cle-titre">Attention.</b> L'intensité est <b>au carré</b> : on calcule d'abord I<sup>2</sup> = I × I, puis on multiplie par R.</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <p>Une ligne de résistance R = 2 ${ohm} est parcourue par un courant d'intensité I = 10 A.</p>
+        ${calc(`P<sub>J</sub> = R × I<sup>2</sup> = 2 × 10<sup>2</sup> = 2 × 100 = ${c('200 W')}`)}
+      </div>`);
+    const pj = (R, I, opts) => fq.nombre(`Une ligne de résistance R = ${fmt(R)} ${ohm} est parcourue par I = ${fmt(I)} A. Calcule la puissance perdue par effet Joule.`, 'P<sub>J</sub> =', R * I * I, 'W', Object.assign({
+      diag: v => TE.proche(v, R * I) ? `Tu as calculé R × I. Il faut mettre I <b>au carré</b> : R × I × I.` : TE.proche(v, (R * I) ** 2) ? 'Tu as mis R × I au carré. Seule l\'intensité est au carré : R × I<sup>2</sup>.' : TE.proche(v, R * R * I) ? 'C\'est I qui est au carré, pas R.' : 'P<sub>J</sub> = R × I<sup>2</sup> : calcule d\'abord I<sup>2</sup>, puis multiplie par R.',
+      solution: calc(`P<sub>J</sub> = ${fmt(R)} × ${fmt(I)}<sup>2</sup> = ${fmt(R)} × ${fmt(I * I)} = ${c(fmt(R * I * I) + ' W')}`),
+    }, opts));
+    TE.aToi(k, [
+      { parties: [pj(5, 4)] },
+      { parties: [pj(0.5, 20)] },
+      { parties: [pj(3, 100, { solution: calc(`P<sub>J</sub> = 3 × 100<sup>2</sup> = 3 × 10 000 = ${c('30 000 W')} = 30 kW`) })] },
+      { parties: [fq.choix('L\'énergie perdue par effet Joule dans un câble est convertie en :', [o('th', 'énergie thermique'), o('lu', 'énergie lumineuse'), o('me', 'énergie mécanique'), o('ch', 'énergie chimique')], 'th',
+        { indice: 'Que fait un câble parcouru par un courant ?', solution: 'Le câble chauffe : l\'énergie est convertie en énergie thermique (chaleur), perdue.' })] },
+    ], () => cours.continuer(k));
+    return k;
+  },
+
+  // ---------- 2. Intensité doublée, pertes × 4 ----------
+  (cours) => {
+    const k = cours.carte('2. L\'intensité double, les pertes quadruplent');
+    cours.ajouter(k, `<div class="cours-bloc">
+        <p>Comme l'intensité est au carré dans P<sub>J</sub> = R × I<sup>2</sup>, les pertes augmentent <b>beaucoup plus vite</b> que l'intensité. Pour une ligne de résistance R = 2 ${ohm} :</p>
+        <div class="te-defile"><table class="te-tab">
+          <tr><th>I (A)</th><td>10</td><td>20</td><td>30</td><td>100</td></tr>
+          <tr><th>P<sub>J</sub> (W)</th><td>200</td><td>800</td><td>1 800</td><td>20 000</td></tr>
+        </table></div>
+        <div class="cle"><p><b class="cle-titre">À retenir.</b> Si l'intensité est multipliée par n, les pertes par effet Joule sont multipliées par n<sup>2</sup>. Si l'intensité est divisée par n, les pertes sont divisées par n<sup>2</sup>.</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <p>L'intensité dans une ligne passe de 5 A à 15 A : elle est multipliée par 15 / 5 = 3.</p>
+        ${calc(`Les pertes sont multipliées par 3<sup>2</sup> = ${c('9')}.`)}
+      </div>`);
+    const fois = ['×', '÷'];
+    const facteur = (q, bonne, faux, sol, indice) => ({ parties: [fq.choix(q, [o('ok', bonne)].concat(faux.map((f, i) => o('f' + i, f))), 'ok', { indice, solution: sol })] });
+    TE.aToi(k, [
+      facteur('L\'intensité dans une ligne est multipliée par 2. Les pertes par effet Joule sont :', 'multipliées par 4', ['multipliées par 2', 'divisées par 2', 'inchangées'],
+        'Intensité × 2 → pertes × 2<sup>2</sup> = × 4.', 'P<sub>J</sub> = R × I<sup>2</sup> : l\'intensité est au carré.'),
+      facteur('L\'intensité dans une ligne est divisée par 10. Les pertes par effet Joule sont :', 'divisées par 100', ['divisées par 10', 'multipliées par 10', 'divisées par 20'],
+        'Intensité ÷ 10 → pertes ÷ 10<sup>2</sup> = ÷ 100.', 'Si I est divisée par n, les pertes sont divisées par n<sup>2</sup>.'),
+      facteur('L\'intensité passe de 4 A à 12 A. Les pertes par effet Joule sont :', 'multipliées par 9', ['multipliées par 3', 'multipliées par 8', 'multipliées par 6'],
+        '12 / 4 = 3 : intensité × 3 → pertes × 3<sup>2</sup> = × 9.', 'Par combien l\'intensité est-elle multipliée ? Mets ce nombre au carré.'),
+    ], () => cours.continuer(k));
+    return k;
+  },
+
+  // ---------- 3. Augmenter la tension pour diminuer l'intensité ----------
+  (cours) => {
+    const k = cours.carte('3. Pour réduire les pertes : augmenter la tension');
+    cours.ajouter(k, `<div class="cours-bloc">
+        <p>Une centrale doit fournir une puissance P donnée (celle que consomment les utilisateurs). Pour un récepteur résistif, P = U × I, donc :</p>
+        <p class="ph-formule">I = ${TE.fr('P', 'U')}</p>
+        <p>Pour une même puissance, <b>plus la tension U est élevée, plus l'intensité I est faible</b>, et plus les pertes R × I<sup>2</sup> sont faibles.</p>
+        <div class="cle"><p><b class="cle-titre">À retenir.</b> Pour diminuer les pertes par effet Joule, il faut diminuer l'intensité. Pour transporter la même puissance avec une intensité plus faible, on <b>augmente la tension</b>. C'est pourquoi l'électricité est transportée sous très haute tension (jusqu'à 400 000 V).</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <p>On transporte P = 100 kW dans une ligne de résistance R = 1 ${ohm}.</p>
+        ${calc(`Sous U = 1 000 V : I = ${TE.fr('100 000', '1 000')} = 100 A, et P<sub>J</sub> = 1 × 100<sup>2</sup> = ${c('10 000 W')} : 10 % de la puissance est perdue !<br>
+          Sous U = 10 000 V : I = ${TE.fr('100 000', '10 000')} = 10 A, et P<sub>J</sub> = 1 × 10<sup>2</sup> = ${c('100 W')} : seulement 0,1 %.`)}
+        <p>Tension × 10 → intensité ÷ 10 → pertes ÷ 100.</p>
+      </div>`);
+    TE.aToi(k, [
+      { titre: 'Une puissance P = 20 kW = 20 000 W est transportée dans une ligne de résistance R = 0,2 Ω.', parties: [
+        fq.nombre('Sous U = 400 V, calcule l\'intensité I = P / U.', 'I =', 50, 'A', { diag: v => TE.proche(v, 8e6) ? 'Il faut diviser P par U, pas les multiplier.' : TE.proche(v, .05) ? 'Exprime P en watts : 20 kW = 20 000 W.' : 'I = P / U = 20 000 / 400.', solution: calc(`I = ${TE.fr('20 000', '400')} = ${c('50 A')}`) }),
+        fq.nombre('Calcule les pertes par effet Joule dans la ligne.', 'P<sub>J</sub> =', 500, 'W', { diag: v => TE.proche(v, 10) ? 'Tu as oublié le carré : P<sub>J</sub> = R × I<sup>2</sup>.' : 'P<sub>J</sub> = R × I<sup>2</sup> = 0,2 × 50<sup>2</sup>.', solution: calc(`P<sub>J</sub> = 0,2 × 50<sup>2</sup> = 0,2 × 2 500 = ${c('500 W')}`) }),
+        fq.nombre('On transporte maintenant la même puissance sous U = 2 000 V. Calcule les nouvelles pertes.', 'P<sub>J</sub> =', 20, 'W', { diag: v => TE.proche(v, 2) ? 'Tu as oublié le carré : P<sub>J</sub> = R × I<sup>2</sup>.' : TE.proche(v, 100) ? 'Les pertes ne sont pas divisées par 5 mais par 5<sup>2</sup> = 25.' : 'Calcule d\'abord I = 20 000 / 2 000, puis P<sub>J</sub> = R × I<sup>2</sup>.', solution: calc(`I = ${TE.fr('20 000', '2 000')} = 10 A, puis P<sub>J</sub> = 0,2 × 10<sup>2</sup> = ${c('20 W')}`) + '<p>Tension × 5 → intensité ÷ 5 → pertes ÷ 25.</p>' }),
+      ] },
+      { parties: [fq.choix('Pour une même puissance transportée, on multiplie la tension par 10. Les pertes par effet Joule sont :', [o('ok', 'divisées par 100'), o('a', 'divisées par 10'), o('b', 'multipliées par 10'), o('c', 'multipliées par 100')], 'ok',
+        { indice: 'Tension × 10 → intensité ÷ 10. Et les pertes dépendent de I<sup>2</sup>.', solution: 'Tension × 10 → intensité ÷ 10 → pertes ÷ 10<sup>2</sup> = ÷ 100.' })] },
+    ], () => cours.continuer(k));
+    return k;
+  },
+
+  // ---------- 4. Le facteur de puissance ----------
+  (cours) => {
+    const k = cours.carte('4. Un mauvais facteur de puissance augmente les pertes');
+    cours.ajouter(k, `<div class="cours-bloc">
+        <p>Rappel du chapitre « Puissance active » : un appareil consomme la <b>puissance active P</b>, mais le réseau doit lui fournir la <b>puissance apparente S = U × I</b>. Elles sont reliées par le facteur de puissance :</p>
+        <div class="cle">
+          <p class="ph-formule grand">k = cos φ = ${TE.fr('P', 'S')}</p>
+          <ul class="er-liste">
+            <li>P : puissance active, réellement consommée par l'appareil, en watts (W) ;</li>
+            <li>S = U × I : puissance apparente, fournie par le réseau (EDF), en voltampères (VA).</li>
+          </ul>
+          <p>Pour une puissance P donnée : S = ${TE.fr('P', 'k')} et I = ${TE.fr('S', 'U')}.</p>
+        </div>
+        <p>Si k &lt; 1, S est plus grande que P : il faut un courant <b>plus intense</b> pour fournir la même puissance active.</p>
+        <div class="cle"><p><b class="cle-titre">À retenir.</b> Plus le facteur de puissance cos φ est petit, plus l'intensité I est grande dans les lignes de distribution, et plus les pertes par effet Joule sont grandes. EDF impose aux installations industrielles <b>cos φ ≥ 0,93</b> (sinon, elles paient des pénalités).</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <p>Un moteur consomme P = 2 300 W sous U = 230 V.</p>
+        ${calc(`Si k = 1 : S = P = 2 300 VA et I = ${TE.fr('2 300', '230')} = ${c('10 A')}.<br>
+          Si k = 0,8 : S = ${TE.fr('2 300', '0,8')} = 2 875 VA et I = ${TE.fr('2 875', '230')} = ${c('12,5 A')}.`)}
+        <p>L'intensité est multipliée par 12,5 / 10 = 1,25 : les pertes dans les câbles sont multipliées par 1,25<sup>2</sup> ≈ 1,56.</p>
+      </div>`);
+    TE.aToi(k, [
+      { titre: 'Une machine consomme une puissance active P = 4 600 W sous U = 230 V, avec un facteur de puissance k = 0,8.', parties: [
+        fq.nombre('Calcule la puissance apparente S.', 'S =', 5750, 'VA', { diag: v => TE.proche(v, 3680) ? 'Tu as multiplié par k. Or k = P / S, donc S = P / k.' : 'S = P / k = 4 600 / 0,8.', solution: calc(`S = ${TE.fr('P', 'k')} = ${TE.fr('4 600', '0,8')} = ${c('5 750 VA')}`) }),
+        fq.nombre('Calcule l\'intensité I du courant dans la ligne qui l\'alimente.', 'I =', 25, 'A', { diag: v => TE.proche(v, 20) ? 'Tu as utilisé P au lieu de S : I = S / U.' : 'I = S / U = 5 750 / 230.', solution: calc(`I = ${TE.fr('S', 'U')} = ${TE.fr('5 750', '230')} = ${c('25 A')}`) }),
+        fq.choix('Avec k = 1, on aurait I = 4 600 / 230 = 20 A. Le passage de k = 1 à k = 0,8 multiplie les pertes dans la ligne par :', [o('ok', '1,56'), o('a', '1,25'), o('b', '0,8'), o('c', '1')], 'ok',
+          { indice: 'Intensité multipliée par 25 / 20 = 1,25. Et les pertes dépendent de I<sup>2</sup>.', solution: '(25 / 20)<sup>2</sup> = 1,25<sup>2</sup> ≈ 1,56 : les pertes augmentent de plus de 50 %.' }),
+      ] },
+      { parties: [fq.choix('Pour limiter les pertes dans les lignes, le facteur de puissance d\'une installation doit être :', [o('ok', 'le plus proche possible de 1'), o('a', 'le plus proche possible de 0'), o('b', 'supérieur à 1'), o('c', 'sans importance')], 'ok',
+        { indice: 'I = P / (U × k) : que devient I quand k diminue ?', solution: 'Avec k proche de 1, l\'intensité est la plus faible possible pour une puissance donnée : les pertes sont minimales. (k = cos φ ne peut pas dépasser 1.)' })] },
+    ], () => cours.continuer(k, 'Ce qu\'il faut retenir →'));
+    return k;
+  },
+
+  // ---------- À retenir ----------
+  (cours) => {
+    const k = cours.carte('À retenir');
+    cours.ajouter(k, `<div class="cle"><p><b class="cle-titre">Effet Joule.</b> Un câble de résistance R parcouru par un courant d'intensité I chauffe. Puissance perdue : <b>P<sub>J</sub> = R × I<sup>2</sup></b> (R en ${ohm}, I en A, P<sub>J</sub> en W).</p></div>
+      <div class="cle"><p><b class="cle-titre">Intensité au carré.</b> Intensité × n → pertes × n<sup>2</sup>. Intensité ÷ n → pertes ÷ n<sup>2</sup>.</p></div>
+      <div class="cle"><p><b class="cle-titre">Réduire les pertes.</b> Il faut diminuer I. Pour une même puissance, on y arrive en <b>augmentant la tension U</b> : transport sous très haute tension.</p></div>
+      <div class="cle"><p><b class="cle-titre">Facteur de puissance.</b> k = cos φ = P / S, avec P la puissance active (consommée) et S = U × I la puissance apparente (fournie par EDF). Plus cos φ est petit, plus I est grand dans les lignes, plus les pertes sont grandes. EDF impose aux industriels cos φ ≥ 0,93.</p></div>
+      <div class="er-actions">
+        <a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur les pertes par effet Joule →</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_2_simulation.html">Module 2 : le transformateur</a>
+        <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a>
+      </div>`);
+    return k;
+  },
+]);
+
+TE.menu('module_1_cours');
+</script>
+</body>
+</html>

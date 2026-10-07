@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : risque électrique — Transport de l'électricité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="te.css">
+<script src="te.js"></script>
+<script src="schemas.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS</span>
+    <h2 class="er-titre">Le risque électrique</h2>
+    <p class="er-contexte">Le courant électrique peut <b>tuer</b> une personne et <b>déclencher un incendie</b>. Dans une maison, le <b>tableau électrique</b> contient deux sortes de protections : les <b>disjoncteurs</b>, qui protègent les biens, et les <b>disjoncteurs différentiels</b>, qui protègent les personnes, avec la <b>mise à la terre</b>. Après chaque notion, un exemple, puis à toi de jouer.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes : effets du courant sur le corps humain,
+   protection des biens (disjoncteur, calibre, section des fils),
+   protection des personnes (terre, disjoncteur différentiel 30 mA),
+   le tableau électrique d'un logement.
+   ============================================================ */
+const { o, fq, fmt, proche } = TE;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+
+// tableau des effets du courant sur le corps humain (exercice 14)
+const EFFETS = `<div class="te-defile"><table class="te-tab">
+  <tr><th>Intensité minimale du courant<br>qui traverse le corps</th><th>Effet</th></tr>
+  <tr><td>0,5 mA</td><td>sensation très faible</td></tr>
+  <tr><td>10 mA</td><td>contraction des muscles : seuil de non-lâcher</td></tr>
+  <tr><td>30 mA (pendant 3 min)</td><td>paralysie respiratoire</td></tr>
+  <tr><td>40 mA (3 s) ou 50 mA (1 s)</td><td>fibrillation cardiaque irréversible</td></tr>
+  <tr><td>1 A</td><td>arrêt du cœur</td></tr>
+</table></div>`;
+
+// défaut d'isolement : le courant de fuite passe par la terre, le différentiel compare les courants
+const DEFAUT = `<svg class="te-fig" viewBox="0 0 640 260" role="img" aria-label="Défaut d'isolement : le courant qui entre par la phase est plus grand que celui qui sort par le neutre ; la différence part dans la terre et le disjoncteur différentiel coupe">
+  <g font-family="inherit" fill="#16181d">
+  <rect x="16" y="34" width="132" height="132" rx="10" fill="#ffffff" stroke="#16181d" stroke-width="2"/>
+  <text x="82" y="78" font-size="15" font-weight="800" text-anchor="middle">disjoncteur</text>
+  <text x="82" y="97" font-size="15" font-weight="800" text-anchor="middle">différentiel</text>
+  <text x="82" y="124" font-size="18" font-weight="800" text-anchor="middle" fill="#5a3fc4">30 mA</text>
+  <path d="M148,64 H440" stroke="#16181d" stroke-width="2.4" fill="none"/>
+  <path d="M148,136 H440" stroke="#16181d" stroke-width="2.4" fill="none"/>
+  <path d="M300,64 l-12,-6 v12 z" fill="#16181d"/><path d="M288,136 l12,-6 v12 z" fill="#16181d"/>
+  <text x="294" y="50" font-size="14" font-weight="700" text-anchor="middle">phase : courant entrant</text>
+  <text x="294" y="160" font-size="14" font-weight="700" text-anchor="middle">neutre : courant sortant</text>
+  <rect x="440" y="30" width="170" height="140" rx="12" fill="#f3f1ec" stroke="#16181d" stroke-width="3"/>
+  <text x="525" y="56" font-size="14" font-weight="800" text-anchor="middle">carcasse métallique</text>
+  <rect x="470" y="78" width="110" height="54" rx="6" fill="#ffffff" stroke="#55585f" stroke-width="1.5"/>
+  <text x="525" y="110" font-size="14" font-weight="700" text-anchor="middle">moteur</text>
+  <path d="M440,64 H470 M440,136 H470" stroke="#16181d" stroke-width="2.4"/>
+  <path d="M455,64 l8,10 l-14,8 l14,8 l-14,8 l8,10" stroke="#5a3fc4" stroke-width="2.4" fill="none"/>
+  <text x="430" y="196" font-size="13" font-weight="700" text-anchor="end" fill="#5a3fc4">défaut : la phase touche la carcasse</text>
+  <path d="M525,170 V222" stroke="#16181d" stroke-width="2.4" stroke-dasharray="7 4"/>
+  <path d="M507,222 h36 M513,230 h24 M519,238 h12" stroke="#16181d" stroke-width="2.4"/>
+  <path d="M533,192 l-8,12 l-8,-12 z" fill="#5a3fc4"/>
+  <text x="550" y="200" font-size="14" font-weight="800" fill="#5a3fc4">fuite vers la terre</text>
+  <text x="550" y="218" font-size="12" fill="#55585f">(fil de terre vert-jaune)</text>
+  </g></svg>`;
+
+new TE.Cours(document.getElementById('etapes'), [
+
+  // ---------- 1. Effets sur le corps humain ----------
+  (cours) => {
+    const k = cours.carte('1. Le courant électrique et le corps humain');
+    cours.ajouter(k, `<div class="cours-bloc">
+        <p>Ce n'est pas la tension qui blesse, c'est le <b>courant qui traverse le corps</b>. Le corps humain se comporte comme un conducteur ohmique de résistance R (environ 1 kΩ sous 230 V, peau sèche) : l'intensité vaut I = U / R.</p>
+        ${EFFETS}
+        <div class="cle"><p><b class="cle-titre">À retenir.</b> Dès 10 mA, on ne peut plus lâcher le conducteur ; à partir de 30 mA, le courant peut être mortel. Le danger augmente avec l'intensité et avec la durée du passage du courant.</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple (exercice 14)</p>
+        <p>Une personne touche un fil sous la tension du secteur, U = 230 V. Sa résistance vaut alors R = 1 kΩ = 1 000 Ω.</p>
+        ${calc(`I = ${TE.fr('U', 'R')} = ${TE.fr('230', '1 000')} = 0,23 A = ${c('230 mA')}`)}
+        <p>230 mA dépasse largement le seuil de fibrillation cardiaque (40 à 50 mA) : ce contact est <b>mortel</b>.</p>
+      </div>`);
+    TE.aToi(k, [
+      { titre: 'Exercice 14 (suite) : sous une tension de contact U = 50 V, la résistance du corps (peau sèche) vaut environ R = 2 kΩ.', parties: [
+        fq.nombre('Calcule l\'intensité du courant qui traverse le corps, en milliampères.', 'I =', 25, 'mA', { diag: v => proche(v, .025) ? 'Exprime le résultat en milliampères : 1 A = 1 000 mA.' : proche(v, 100000) ? 'I = U / R : on divise la tension par la résistance (en ohms).' : 'I = U / R, avec R = 2 000 Ω.', solution: calc(`I = ${TE.fr('50', '2 000')} = 0,025 A = ${c('25 mA')}`) }),
+        fq.choix('Ce courant de 25 mA :', [o('ok', 'dépasse le seuil de non-lâcher : 50 V n\'est pas sans danger'), o('a', 'est trop faible pour être ressenti'), o('b', 'arrête le cœur')], 'ok',
+          { indice: 'Compare 25 mA aux valeurs du tableau.', solution: '25 mA &gt; 10 mA : la personne ne peut plus lâcher. Une tension de 50 V n\'est pas assez basse pour protéger à coup sûr les personnes.' }),
+      ] },
+      { parties: [fq.choix('Ce qui est dangereux pour le corps humain, c\'est avant tout :', [o('ok', 'l\'intensité du courant qui le traverse'), o('a', 'la puissance de l\'appareil'), o('b', 'la fréquence du courant'), o('c', 'la longueur du fil')], 'ok',
+        { indice: 'Regarde la première colonne du tableau.', solution: 'Les effets dépendent de l\'intensité du courant qui traverse le corps (et de la durée).' })] },
+    ], () => cours.continuer(k));
+    return k;
+  },
+
+  // ---------- 2. Protéger les biens ----------
+  (cours) => {
+    const k = cours.carte('2. Protéger les biens : le disjoncteur');
+    cours.ajouter(k, `<div class="cours-bloc">
+        <p>Si l'on branche trop d'appareils sur un même circuit, ou en cas de court-circuit, l'intensité devient trop grande : c'est une <b>surintensité</b>. Les fils chauffent (effet Joule) et peuvent provoquer un <b>incendie</b>.</p>
+        <div class="cle"><p><b class="cle-titre">Disjoncteur (ou fusible).</b> Il coupe le circuit si l'intensité dépasse une certaine valeur, son <b>calibre</b> (10 A, 16 A, 20 A, 32 A…). Il <b>protège les biens</b> (les installations, contre les incendies).</p>
+          <p>Le calibre est adapté à la <b>section</b> des fils : plus le courant prévu est grand, plus les fils doivent être gros (éclairage : 1,5 mm<sup>2</sup> et 10 A ; prises : 2,5 mm<sup>2</sup> et 16 A ; plaques de cuisson : 6 mm<sup>2</sup> et 32 A).</p></div>
+        <p>Des appareils branchés sur une même prise multiple sont en <b>dérivation</b> : les intensités qu'ils appellent <b>s'additionnent</b>.</p>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple (exercice 12)</p>
+        <p>Un four porte l'indication « 230 V ~ 50 Hz 2 600 W ». C'est une résistance chauffante : k = 1, donc S = P = 2 600 VA.</p>
+        ${calc(`I = ${TE.fr('S', 'U')} = ${TE.fr('2 600', '230')} = ${c('11,3 A')}`)}
+        <p>Le disjoncteur (ou le fusible) de 16 A convient : 11,3 A &lt; 16 A.</p>
+      </div>`);
+    TE.aToi(k, [
+      { titre: 'Exercice 17 : on branche sur une multiprise un grille-pain (230 V – 3,5 A) et une bouilloire (230 V – 6,5 A).', parties: [
+        fq.choix('Sur la multiprise, les deux appareils sont branchés :', [o('ok', 'en dérivation'), o('a', 'en série')], 'ok', { melanger: false, indice: 'Chaque appareil reçoit les 230 V de la prise.', solution: 'En dérivation : chacun est alimenté sous 230 V.' }),
+        fq.nombre('Calcule l\'intensité du courant qui sort de la prise murale quand les deux fonctionnent.', 'I =', 10, 'A', { diag: v => proche(v, 3) ? 'En dérivation, les intensités s\'additionnent.' : 'I = 3,5 + 6,5.', solution: calc(`I = 3,5 + 6,5 = ${c('10 A')}`) }),
+        fq.choix('La prise est protégée par un fusible de 25 A. Peut-on faire fonctionner les deux appareils en même temps ?', [o('ok', 'oui, car 10 A &lt; 25 A'), o('a', 'non, car 10 A &lt; 25 A'), o('b', 'non, la multiprise va fondre')], 'ok',
+          { indice: 'Le fusible coupe si l\'intensité dépasse 25 A.', solution: '10 A &lt; 25 A : le fusible ne fond pas, on peut faire fonctionner les deux appareils.' }),
+      ] },
+      { parties: [fq.choix('Le disjoncteur des plaques de cuisson (32 A) est relié à des fils de 6 mm<sup>2</sup>, plus gros que ceux des prises (2,5 mm<sup>2</sup>), car :', [o('ok', 'ces fils doivent laisser passer un courant plus intense sans trop chauffer'), o('a', 'la tension est plus grande pour les plaques'), o('b', 'cela protège les personnes')], 'ok',
+        { indice: 'Pense à l\'effet Joule : un gros fil a une plus petite résistance.', solution: 'Un fil plus gros a une plus petite résistance : il chauffe moins quand un courant intense le traverse.' })] },
+    ], () => cours.continuer(k));
+    return k;
+  },
+
+  // ---------- 3. Protéger les personnes ----------
+  (cours) => {
+    const k = cours.carte('3. Protéger les personnes : la terre et le disjoncteur différentiel');
+    cours.ajouter(k, `<div class="cours-bloc">
+        <p>Si un fil abîmé touche la carcasse métallique d'un appareil (<b>défaut d'isolement</b>), la carcasse est sous tension : une personne qui la touche est traversée par un courant qui rejoint la terre.</p>
+        <div class="te-fig-cadre">${DEFAUT}</div>
+        <div class="cle">
+          <p><b class="cle-titre">Mise à la terre.</b> On relie la carcasse métallique des appareils à la terre (fil vert-jaune, prise avec broche de terre) : le courant de fuite passe par ce fil plutôt que par la personne.</p>
+          <p><b class="cle-titre">Disjoncteur différentiel.</b> Il compare le courant qui <b>entre</b> dans l'installation (par la phase) et celui qui en <b>ressort</b> (par le neutre). S'ils diffèrent de plus de <b>30 mA</b>, c'est qu'il y a une <b>fuite de courant</b> (par la terre ou par une personne) : il coupe en quelques millisecondes. Il <b>protège les personnes</b>.</p>
+        </div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple</p>
+        <p>Un lave-linge mal isolé : 10,000 A entrent par la phase, 9,965 A ressortent par le neutre.</p>
+        ${calc(`Fuite : 10,000 − 9,965 = 0,035 A = ${c('35 mA')} &gt; 30 mA : le disjoncteur différentiel coupe.`)}
+      </div>`);
+    TE.aToi(k, [
+      { parties: [fq.choix('Le disjoncteur différentiel 30 mA protège :', [o('ok', 'les personnes, contre les fuites de courant'), o('a', 'les biens, contre les surintensités'), o('b', 'les appareils, contre les surtensions')], 'ok',
+        { indice: '30 mA est le seuil de paralysie respiratoire.', solution: 'Il détecte une fuite de courant (qui peut passer par une personne) dès 30 mA : il protège les personnes.' })] },
+      { parties: [fq.nombre('Par la phase, 6,000 A entrent dans un appareil ; par le neutre, 5,980 A en ressortent. Calcule le courant de fuite, en milliampères.', 'fuite =', 20, 'mA', { diag: v => proche(v, .02) ? 'Exprime-le en milliampères (× 1 000).' : 'Calcule la différence 6,000 − 5,980.', solution: calc(`6,000 − 5,980 = 0,020 A = ${c('20 mA')}`) }),
+        fq.choix('Le disjoncteur différentiel 30 mA coupe-t-il ?', [o('non', 'non, car 20 mA &lt; 30 mA'), o('oui', 'oui, car il y a une fuite')], 'non', { melanger: false, indice: 'Il coupe si la fuite dépasse 30 mA.', solution: '20 mA &lt; 30 mA : il ne coupe pas. (La fuite est quand même anormale : il faut faire réparer l\'appareil.)' })] },
+      { parties: [fq.choix('Relier la carcasse métallique d\'un appareil à la terre permet :', [o('ok', 'au courant de fuite de passer par le fil de terre plutôt que par une personne'), o('a', 'de diminuer la consommation de l\'appareil'), o('b', 'd\'éviter les surintensités')], 'ok',
+        { indice: 'Le courant de fuite cherche à rejoindre la terre.', solution: 'Le fil de terre offre au courant de fuite un chemin facile : il ne passe pas par la personne, et le différentiel détecte la fuite.' })] },
+    ], () => cours.continuer(k));
+    return k;
+  },
+
+  // ---------- 4. Le tableau électrique ----------
+  (cours) => {
+    const k = cours.carte('4. Le tableau électrique d\'un logement');
+    cours.ajouter(k, `<div class="cours-bloc">
+        <p>Chaque rangée du tableau commence par un <b>interrupteur différentiel 30 mA</b> (avec son bouton test « T ») qui protège les personnes pour tous les circuits de la rangée. Il est suivi des <b>disjoncteurs divisionnaires</b>, un par circuit, dont le calibre est adapté à la section des fils et aux appareils.</p>
+        ${SCH.tableau({ reperes: true })}
+        <div class="cle"><p><b class="cle-titre">À retenir.</b> En tête de rangée : un différentiel 30 mA (protection des personnes). Puis un disjoncteur par circuit (protection des biens) : 10 A pour l'éclairage, 16 A pour les prises, 20 A pour les gros appareils, 32 A pour les plaques de cuisson.</p></div>
+      </div>
+      <div class="cours-exemple">
+        <p class="cours-exemple-t">Exemple (exercice 16)</p>
+        <p>Dans la première rangée, le différentiel indique 30 mA et 40 A : il se déclenche si le courant de fuite atteint <b>30 mA</b> ; il peut laisser passer jusqu'à 40 A au total. Une prise de courant (disjoncteur de 16 A) peut fournir au plus <b>16 A</b>.</p>
+      </div>`);
+    TE.aToi(k, [
+      { titre: 'Exercice 16 : utilise le tableau électrique ci-dessus (première rangée).', parties: [
+        fq.choix('À partir de quelle valeur du courant de fuite le disjoncteur différentiel se déclenche-t-il ?', [o('ok', '30 mA'), o('a', '40 A'), o('b', '16 A'), o('c', '10 A')], 'ok', { indice: 'C\'est la valeur en milliampères écrite sur le différentiel.', solution: '30 mA.' }),
+        fq.choix('Comment s\'appelle l\'élément de protection relié à chaque circuit (prises, éclairage…) ?', [o('ok', 'un disjoncteur (divisionnaire)'), o('a', 'un disjoncteur différentiel'), o('b', 'un transformateur')], 'ok', { indice: 'Il y en a un par circuit, avec un calibre en ampères.', solution: 'Un disjoncteur : il coupe en cas de surintensité (protection des biens, contre l\'incendie).' }),
+        fq.nombre('Jusqu\'à quelle intensité a-t-on accès à la sortie d\'une prise de courant ?', 'I =', 16, 'A', { diag: () => 'Lis le calibre du disjoncteur d\'une prise.', solution: calc(`Les prises sont protégées par des disjoncteurs de ${c('16 A')}.`) }),
+      ] },
+    ], () => cours.continuer(k, 'Ce qu\'il faut retenir →'));
+    return k;
+  },
+
+  // ---------- À retenir ----------
+  (cours) => {
+    const k = cours.carte('À retenir');
+    cours.ajouter(k, `<div class="cle"><p><b class="cle-titre">Danger.</b> C'est l'intensité du courant qui traverse le corps qui est dangereuse : dès 10 mA on ne peut plus lâcher, au-delà de 30 mA le courant peut être mortel. I = U / R, avec R ≈ 1 kΩ sous 230 V.</p></div>
+      <div class="cle"><p><b class="cle-titre">Protection des biens.</b> Les <b>disjoncteurs</b> (ou fusibles) coupent si l'intensité dépasse leur calibre : ils évitent les surintensités, donc l'échauffement des fils et les incendies. Le calibre est adapté à la section des fils.</p></div>
+      <div class="cle"><p><b class="cle-titre">Protection des personnes.</b> Relier les appareils à la <b>terre</b> ; utiliser des <b>disjoncteurs différentiels</b> (30 mA) qui coupent s'ils repèrent une fuite de courant.</p></div>
+      <div class="er-actions">
+        <a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur le risque électrique →</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Module 4 : exercices de synthèse</a>
+        <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html">Fiche récapitulative</a>
+      </div>`);
+    return k;
+  },
+]);
+
+TE.menu('module_3_cours');
+</script>
+</body>
+</html>
