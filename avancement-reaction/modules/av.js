@@ -7,7 +7,7 @@
                            (cours guidé) ou d'un coup (entraînement)
      AV.frise              frise de l'avancement : un « mur » par réactif
      AV.entrainement       10 questions notées sur 20
-     AV.menu               bandeau et menu communs aux modules
+     AV.menu, AV.accueil   sommaire de l'application et accueil (assets/sommaire.js)
    Formules et dessins des molécules : assets/molecules.js
    ============================================================ */
 (function () {
@@ -752,6 +752,7 @@
     }
     function fin() {
       const max = qs.length * 2, pct = Math.round(score / max * 100);
+      window.SOM.marquer({ note: Math.round(score / max * 20 * 2) / 2 });   // meilleure note sur 20 (sommaire, accueil)
       const msg = score === max ? 'Tu maîtrises le tableau d\'avancement.' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
         : pct >= 50 ? 'Pas mal ! Recommence : les questions changent à chaque fois.' : 'Continue à t\'entraîner. Tu peux revoir les modules précédents.';
       app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Entraînement terminé !</h2>
@@ -782,32 +783,26 @@
     }
   }
 
-  /* ---------- Bandeau et menu communs aux modules ---------- */
-  const GROUPES = [
-    { title: 'Niveau seconde', items: [
-      { key: 'module_1', label: 'Module 1 : Les nombres stœchiométriques en action' },
-      { key: 'module_2', label: "Module 2 : Le tableau d'avancement" },
-      { key: 'module_3', label: 'Module 3 : Des molécules aux moles' },
-      { key: 'module_4', label: 'Module 4 : Entraînement' },
-    ]},
-    { title: 'Niveau première', items: [
-      { key: 'module_5', label: 'Module 5 : Avec des puissances de 10' },
-      { key: 'module_6', label: 'Module 6 : Entraînement' },
-      { key: 'module_7', label: 'Module 7 : Aller plus loin, sans tableau' },
-    ]},
+  /* ---------- Plan de l'application et navigation (voir assets/sommaire.js) ---------- */
+  const PLAN = [
+    { n: 1, titre: 'Les nombres stœchiométriques en action', desc: 'Seconde · des molécules réagissent pas à pas, le réactif limitant', fiche: 'fiche_1',
+      parties: [{ nom: 'Les nombres stœchiométriques en action', cours: 'module_1' }] },
+    { n: 2, titre: 'Le tableau d\'avancement', desc: 'Seconde · l\'avancement x, le tableau ligne par ligne, x<sub>max</sub>', fiche: 'fiche_2',
+      parties: [{ nom: 'Le tableau d\'avancement', cours: 'module_2' }] },
+    { n: 3, titre: 'Des molécules aux moles', desc: 'Seconde · le même tableau en mol, nombres entiers puis décimaux', fiche: 'fiche_3',
+      parties: [{ nom: 'Des molécules aux moles', cours: 'module_3' }] },
+    { n: 4, titre: 'Entraînement', desc: 'Seconde · 10 tableaux d\'avancement notés sur 20',
+      parties: [{ nom: 'Entraînement', entrainement: 'module_4' }] },
+    { n: 5, titre: 'Avec des puissances de 10', desc: 'Première · quantités comme 6,0 × 10<sup>−3</sup> mol, réactions entre ions', fiche: 'fiche_5',
+      parties: [{ nom: 'Avec des puissances de 10', cours: 'module_5' }] },
+    { n: 6, titre: 'Entraînement', desc: 'Première · 10 tableaux avec des puissances de 10, notés sur 20',
+      parties: [{ nom: 'Entraînement', entrainement: 'module_6' }] },
+    { n: 7, titre: 'Aller plus loin : sans tableau', desc: 'Première · n<sub>initial</sub> ÷ nombre stœchiométrique, puis l\'état final', fiche: 'fiche_7',
+      parties: [{ nom: 'Sans tableau', cours: 'module_7' }] },
   ];
-  function menu(cle) {
-    const n = window.AppNav.init({
-      appName: "Avancement d'une réaction", portalHref: '../../index.html', portalLabel: 'Toutes les applications',
-      onHome: () => { window.location.href = '../index.html'; },
-      onNavigate: key => { window.location.href = key + '.html'; },
-      groups: GROUPES,
-    });
-    n.setActive(cle);
-    const item = GROUPES.reduce((a, g) => a.concat(g.items), []).find(m => m.key === cle);
-    n.setTitle(item ? item.label : null);
-    return n;
-  }
+  window.SOM.init({ nom: 'Avancement d\'une réaction', id: 'avancement-reaction', plan: PLAN });
+  const menu = cle => window.SOM.menu(cle);
+  const accueil = zone => window.SOM.accueil(zone);
 
   // Tirage aléatoire sans remise
   function melanger(t) {
@@ -818,6 +813,6 @@
 
   window.AV = {
     fmt, lire, egal, puissance, champ, expression, calculer, equationHTML, enteteEspeces, frise, animerFrise, texteUni,
-    Simulation, Exercice, entrainement, confettis, menu, melanger, COUL,
+    Simulation, Exercice, entrainement, confettis, menu, accueil, PLAN, melanger, COUL,
   };
 })();
