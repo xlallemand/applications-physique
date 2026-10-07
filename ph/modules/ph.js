@@ -10,7 +10,8 @@
    PH.aToi(zone, parties)     « À toi » dans les cours : il faut réussir pour continuer
    PH.Cours                   cours par étapes (une étape réussie fait apparaître la suivante)
    PH.diagPH, PH.diagC        erreurs fréquentes sur un pH ou une concentration
-   PH.menu(cle)               bandeau et menu communs aux modules
+   PH.menu(cle)               sommaire de toute l'application (assets/sommaire.js)
+   PH.accueil(zone)           accueil : une ligne dépliable par module
 
    Les styles des cartes, boutons et écrans de fin viennent de
    equilibrer-reactions/modules/er.css (même présentation).
@@ -343,20 +344,35 @@
      mode : 'serie'    bouton « Afficher la réponse » (0 point pour la question)
             'exercice' bouton « Voir la correction » toujours disponible
             'cours'    « Afficher la réponse » proposé après une erreur
+                       (ou tout de suite quand tout le cours est affiché)
      cb.fin(points) : 2 sans erreur, 1 après au moins une erreur, 0 si une réponse est affichée
      ============================================================ */
+  // « Afficher tout le cours » : les questions et les « À toi » en cours s'inscrivent ici ;
+  // quand l'élève demande tout le cours, chacun se déplie (PH.tout reste vrai ensuite)
+  const vivants = new Set();
   function question(zone, q, cb, mode) {
     mode = mode || 'serie';
     const etat = { erreurs: 0, vue: false, fini: false, details: [] };
-    let k = 0;
+    const n = q.parties.length, aides = [];
+    let rendues = 0, finies = 0, deplie = false;
     const libAide = mode === 'exercice' ? 'Voir la correction' : 'Afficher la réponse';
+    // « Afficher tout le cours » : les parties restantes apparaissent d'un coup
+    const inst = {
+      deplier() {
+        if (deplie) return;
+        deplie = true;
+        aides.forEach(a => a.classList.remove('hidden'));
+        while (rendues < n) partie();
+      },
+    };
     function partie() {
-      const p = q.parties[k];
+      const p = q.parties[rendues++];
       window.PH.partieEnCours = p;          // partie en cours (utile pour vérifier l'application)
       const d = el('div', 'ph-partie', `${p.q ? `<p class="ph-partie-q">${p.q}</p>` : ''}<div class="ph-partie-zone"></div><div class="ph-partie-retour"></div>
-        <div class="ph-partie-aide${mode === 'cours' ? ' hidden' : ''}"><button type="button" class="btn-small">${libAide}</button></div>`);
+        <div class="ph-partie-aide${mode === 'cours' && !deplie ? ' hidden' : ''}"><button type="button" class="btn-small">${libAide}</button></div>`);
       zone.appendChild(d);
       const ret = d.querySelector('.ph-partie-retour'), aide = d.querySelector('.ph-partie-aide'), bRep = aide.querySelector('button');
+      aides.push(aide);
       let finie = false, erreursIci = 0;
       const api = {
         fini: () => finie || etat.fini,
@@ -382,15 +398,24 @@
         } else if (!silencieux) {
           ret.innerHTML = '<p class="ph-ok">✓ Juste</p>';
         } else ret.innerHTML = '';
-        k++;
-        if (k < q.parties.length) {
-          partie();
-          const n = zone.lastElementChild;
-          setTimeout(() => n.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
-        } else { etat.fini = true; cb.fin(etat.vue ? 0 : etat.erreurs ? 1 : 2, etat); }
+        finies++;
+        if (finies < n) {
+          // partie suivante (déjà affichée si tout le cours est déplié)
+          if (!deplie && rendues < n) {
+            partie();
+            const s = zone.lastElementChild;
+            setTimeout(() => s.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+          }
+        } else {
+          etat.fini = true;
+          vivants.delete(inst);
+          cb.fin(etat.vue ? 0 : etat.erreurs ? 1 : 2, etat);
+        }
       }
     }
+    if (mode === 'cours') vivants.add(inst);
     partie();
+    if (mode === 'cours' && window.PH.tout) inst.deplier();
   }
 
   /* ============================================================
@@ -451,6 +476,7 @@
 
     function fin() {
       const max = qs.length * 2, pct = Math.round(score / max * 100);
+      SOM.marquer({ note: Math.round(score / max * 20 * 2) / 2 });     // meilleure note sur 20 (sommaire, accueil)
       const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
         : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
       app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
@@ -475,18 +501,38 @@
      ============================================================ */
   function aToi(zone, items, onFini) {
     const box = el('div', 'ph-atoi');
-    box.innerHTML = '<p class="ph-atoi-t">À toi</p>';
+    box.innerHTML = '<div class="ph-atoi-tete"><p class="ph-atoi-t">À toi</p></div>';
     zone.appendChild(box);
-    let i = 0;
-    function suivant() {
-      if (i >= items.length) { if (onFini) onFini(); return; }
-      const it = items[i];
+    let i = 0, deplie = false, termine = false;
+    // « Afficher tout le cours » : toutes les questions restantes, puis la suite du cours
+    const inst = {
+      deplier() {
+        if (deplie) return;
+        deplie = true;
+        while (i < items.length) rendre(i++);
+        finir();
+      },
+    };
+    function finir() {
+      if (termine) return;
+      termine = true;
+      vivants.delete(inst);
+      if (onFini) onFini();
+    }
+    function rendre(k) {
+      const it = items[k];
       const d = el('div', 'ph-atoi-q', `${it.titre ? `<p class="ph-atoi-titre">${it.titre}</p>` : ''}<div></div>`);
       box.appendChild(d);
-      question(d.lastElementChild, it, { fin() { i++; suivant(); } }, 'cours');
-      if (i > 0) setTimeout(() => d.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+      question(d.lastElementChild, it, { fin() { if (!deplie) suivant(); } }, 'cours');
+      if (k > 0 && !deplie) setTimeout(() => d.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
     }
+    function suivant() {
+      if (i >= items.length) { finir(); return; }
+      rendre(i++);
+    }
+    vivants.add(inst);
     suivant();
+    if (window.PH.tout) inst.deplier();
     return box;
   }
 
@@ -498,8 +544,10 @@
      cours.continuer(carte) pour proposer l'étape suivante.
      ============================================================ */
   function Cours(zone, etapes) {
-    this.zone = zone; this.etapes = etapes; this.n = 0;
+    this.zone = zone; this.etapes = etapes; this.n = 0; this.attente = null; this.bouton = null;
+    vivants.add(this);
     this.lancer(0);
+    this.boutonTout();
   }
   Cours.prototype.carte = function (titre) {
     const c = el('section', 'er-card er-etape');
@@ -514,47 +562,77 @@
   };
   Cours.prototype.lancer = function (n) {
     this.n = n;
-    return this.etapes[n](this);
+    const c = this.etapes[n](this);
+    // dernière étape atteinte : cours terminé (sommaire, accueil)
+    if (n === this.etapes.length - 1) { this.toutEstAffiche(); SOM.marquer({ fait: true }); }
+    return c;
   };
   // bouton « Continuer » : affiche l'étape suivante et la fait défiler à l'écran
+  // (quand tout le cours est affiché, l'étape suivante apparaît directement)
   Cours.prototype.continuer = function (parent, texte) {
-    const moi = this;
     if (this.n + 1 >= this.etapes.length) return;
+    if (window.PH.tout) { this.lancer(this.n + 1); return; }
     const d = this.ajouter(parent, `<div class="er-suite"><button type="button" class="btn-primary">${texte || 'Continuer →'}</button></div>`);
-    d.querySelector('button').onclick = () => {
-      d.remove();
-      const c = moi.lancer(moi.n + 1);
-      if (c) setTimeout(() => c.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
-    };
+    this.attente = d;
+    d.querySelector('button').onclick = () => this.suivante(true);
+  };
+  Cours.prototype.suivante = function (defiler) {
+    const d = this.attente;
+    if (!d) return;
+    this.attente = null;
+    d.remove();
+    if (defiler) {
+      // évite qu'un double appui sur « Continuer » réponde à l'étape suivante
+      this.zone.style.pointerEvents = 'none';
+      setTimeout(() => { this.zone.style.pointerEvents = ''; }, 400);
+    }
+    const c = this.lancer(this.n + 1);
+    if (c && defiler) setTimeout(() => c.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
+  };
+  Cours.prototype.deplier = function () { this.suivante(false); };
+
+  // bouton « Afficher tout le cours », dans le premier « À toi », près de la première question
+  Cours.prototype.boutonTout = function () {
+    const tete = this.zone.querySelector('.ph-atoi-tete');
+    if (!tete) return;
+    const b = el('button', 'btn-small ph-tout', 'Afficher tout le cours');
+    b.type = 'button';
+    b.title = 'Affiche toutes les parties du cours sans avoir à répondre aux questions (tu peux toujours y répondre)';
+    tete.appendChild(b);
+    this.bouton = b;
+    if (this.n === this.etapes.length - 1) this.toutEstAffiche();
+    b.onclick = () => this.toutAfficher();
+  };
+  Cours.prototype.toutAfficher = function () {
+    const b = this.bouton;
+    if (!b || b.disabled) return;
+    // la position de la page ne bouge pas : on garde le bouton au même endroit à l'écran
+    const avant = b.getBoundingClientRect().top;
+    window.PH.tout = true;
+    Array.from(vivants).forEach(x => x.deplier());
+    this.toutEstAffiche();
+    window.scrollBy(0, b.getBoundingClientRect().top - avant);
+  };
+  Cours.prototype.toutEstAffiche = function () {
+    if (!this.bouton) return;
+    this.bouton.disabled = true;
+    this.bouton.textContent = 'Tout le cours est affiché';
   };
 
-  /* ---------- Bandeau et menu communs aux modules ---------- */
-  const GROUPES = [
-    { title: 'Module 1 · La fonction logarithme décimal', items: [
-      { key: 'module_1_cours', label: 'Cours : la fonction log' },
-      { key: 'module_1_questions', label: 'Questions sur la fonction log' },
-    ]},
-    { title: 'Module 2 · Définition du pH', items: [
-      { key: 'module_2_cours', label: 'Cours : pH et [H₃O⁺]' },
-      { key: 'module_2_questions', label: 'Questions sur le pH' },
-    ]},
-    { title: 'Module 3 · Exercices', items: [
-      { key: 'module_3', label: "Exercices d'entraînement" },
-    ]},
+  /* ============================================================
+     PLAN DE L'APPLICATION ET NAVIGATION (voir assets/sommaire.js)
+     Sommaire de toute l'application : modules → parties → pages (Cours, Questions, Fiche).
+     ============================================================ */
+  const PLAN = [
+    { n: 1, titre: 'La fonction logarithme décimal', desc: 'Courbe, fonction réciproque 10<sup>x</sup>, propriétés de log', fiche: 'fiche_1',
+      parties: [{ nom: 'La fonction log', cours: 'module_1_cours', questions: 'module_1_questions' }] },
+    { n: 2, titre: 'Définition du pH', desc: 'pH = −log([H₃O⁺]/c°), passer du pH à la concentration et inversement', fiche: 'fiche_2',
+      parties: [{ nom: 'Définition du pH', cours: 'module_2_cours', questions: 'module_2_questions' }] },
+    { n: 3, titre: 'Exercices d\'entraînement', desc: 'Exercices du cours et exercices supplémentaires, correction détaillée', exercices: 'module_3', exNom: 'Exercices', nbEx: 20 },
   ];
-  function menu(cle) {
-    const n = window.AppNav.init({
-      appName: 'pH', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
-      onHome: () => { window.location.href = '../index.html'; },
-      onNavigate: key => { window.location.href = key + '.html'; },
-      groups: GROUPES,
-    });
-    n.setActive(cle);
-    const g = GROUPES.find(x => x.items.some(m => m.key === cle));
-    const item = g && g.items.find(m => m.key === cle);
-    n.setTitle(item ? `${g.title.split(' · ')[0]} · ${item.label}` : null);
-    return n;
-  }
+  window.SOM.init({ nom: 'pH', id: 'ph', cleEx: 'ph-exercices', plan: PLAN });
+  const menu = cle => window.SOM.menu(cle);
+  const accueil = zone => window.SOM.accueil(zone);
 
   /* ---------- Confettis (sans-faute) ---------- */
   function confettis() {
@@ -619,7 +697,8 @@
 
   window.PH = Object.assign(window.PH || {}, {
     fmt, cs, sci, p10, lire, proche, decomposer, H3O, C0, UNITE, MOINS, diagPH, diagC,
-    el, secouer, melanger, hasard, entre, champ, champsSci, PARTIES, question, serie, aToi, Cours, menu, GROUPES, confettis,
+    el, secouer, melanger, hasard, entre, champ, champsSci, PARTIES, question, serie, aToi, Cours, menu, accueil, PLAN, confettis,
+    vivant: x => vivants.add(x), oublier: x => vivants.delete(x),
     repere, courbeLog,
   });
 })();
