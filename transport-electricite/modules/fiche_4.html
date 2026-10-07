@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : fiche récapitulative — Transport de l'électricité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="te.css">
+<script src="te.js"></script>
+<script src="schemas.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page te-fiche" id="fiche"></div>
+
+<script>
+/* ============================================================
+   Fiche récapitulative du module 4 : le schéma complet, les
+   relations, la méthode de résolution.
+   ============================================================ */
+const sub = (x, i) => `${x}<sub>${i}</sub>`;
+const U = k => sub('U', k), I = k => sub('I', k), m = k => sub('m', k);
+const PU = sub('P', 'u'), PP = sub('P', 'perdue');
+const rap = (h, b) => `<span class="te-rap"><span>${h}</span><span>${b}</span></span>`;
+document.getElementById('fiche').innerHTML = `
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Puissance et transport : la méthode</h2>
+  </div>
+
+  <section class="er-card" id="methode">
+    <h3 class="cours-titre">Le schéma complet</h3>
+    ${SCH.reseau({ U1: '?', I1: '?', m1: `${rap(U(2), U(1))} = ${rap(I(1), I(2))}`, U2: '?', I2: '?', m2: `${rap(U(3), U(2))} = ${rap(I(2), I(3))}`, U3: '?', I3: '?', S: `${U(3)} × ${I(3)}`, P: 'k × S', k: 'P / S', eta: `${PU} / P`, Pu: 'η × P', Pp: `P − ${PU}` }, { charge: 'charge' })}
+    <div class="cle"><p>Production (moyenne tension) — T<sub>1</sub> élévateur — transport (haute tension) — T<sub>2</sub> abaisseur — distribution (230 V) — charge (P, k, η) — puissance utile.</p></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Les relations</h3>
+    <div class="cle"><ul class="er-liste">
+      <li>Transformateurs : ${m(1)} = ${rap(U(2), U(1))} = ${rap(I(1), I(2))} ; ${m(2)} = ${rap(U(3), U(2))} = ${rap(I(2), I(3))} (intensités « à l'envers »).</li>
+      <li>Puissance apparente : S = ${U(3)} × ${I(3)} (en VA).</li>
+      <li>Facteur de puissance : k = cos φ = ${rap('P', 'S')} ; charge résistive : k = 1 et S = P.</li>
+      <li>Rendement : η = ${rap(PU, 'P')} ; ${PP} = P − ${PU}.</li>
+    </ul></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">La méthode</h3>
+    <div class="cle"><ol class="er-liste">
+      <li>Faire le <b>schéma</b> et y placer toutes les données de l'énoncé.</li>
+      <li>Écrire <b>toutes les relations</b>.</li>
+      <li>Calculer <b>de proche en proche</b>, en général depuis la charge : ${PU} → P → S → ${I(3)} → ${I(2)} → ${I(1)}.</li>
+    </ol></div>
+    <div class="cle"><p><b class="cle-titre">Conclusion.</b> Plus le facteur de puissance de la charge est faible, plus l'intensité est grande dans tout le réseau, et plus les pertes par effet Joule dans les lignes sont grandes.</p></div>
+  </section>
+
+  <div class="er-actions te-fiche-liens">
+    <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Revoir la méthode et les exemples</a>
+    <a class="btn-secondary" style="text-decoration:none" href="module_4_exercices.html">Exercices</a>
+  </div>`;
+TE.menu('fiche_4');
+</script>
+</body>
+</html>

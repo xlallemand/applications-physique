@@ -57,8 +57,8 @@
     return `<div class="sch-col sch-tr">
       <div class="sch-circ">${FILS}${CERCLES}
         ${t.nom ? `<p class="sch-titre">${t.nom}</p>` : ''}
-        ${bas ? `<div class="sch-tr-lignes">${bas}</div>` : ''}
       </div>
+      ${bas ? `<div class="sch-bas">${bas}</div>` : ''}
     </div>`;
   }
   function charge(c) {
@@ -75,7 +75,7 @@
   }
 
   // largeur (px) nécessaire pour dessiner le schéma en ligne ; en dessous, il passe à la verticale
-  const largeurMin = o => o.etages.length * 150 + (o.etages.length - 1) * 64 + (o.charge ? 50 : 0) + (o.sortie ? 170 : 0) + 20;
+  const largeurMin = o => o.etages.length * 150 + (o.etages.length - 1) * 64 + (o.charge ? 100 : 0) + (o.sortie ? 150 : 0) + 20;
   // hauteur des fils : assez pour les lignes de l'étage le plus chargé
   const hauteur = o => Math.max(120, Math.max(...o.etages.map(e => (e.lignes || []).length)) * 46 + 22);
 
@@ -87,8 +87,8 @@
     });
     if (o.charge) h += charge(o.charge);
     if (o.sortie) h += sortie(o.sortie);
-    const min = largeurMin(o), bas = (o.transfos || []).some(t => t.n || (t.lignes || []).length) || o.etages.some(e => e.bas);
-    return `<div class="sch-cont"><div class="sch${bas ? ' avec-bas' : ''}${o.classe ? ' ' + o.classe : ''}" data-min="${min}" style="--h:${hauteur(o)}px;max-width:${Math.round(min * 1.3)}px" role="img" aria-label="${o.aria || 'Schéma de la chaîne électrique'}">${h}</div></div>`;
+    const min = largeurMin(o);
+    return `<div class="sch-cont"><div class="sch${o.classe ? ' ' + o.classe : ''}" data-min="${min}" style="--h:${hauteur(o)}px;max-width:${Math.round(min * 1.3)}px" role="${/sc-slot/.test(h) ? 'group' : 'img'}" aria-label="${o.aria || 'Schéma de la chaîne électrique'}">${h}</div></div>`;
   }
 
   /* ---------- En ligne ou à la verticale, selon la place disponible ----------
@@ -132,14 +132,17 @@
 
   // chaîne complète : production — T1 — transport — T2 — distribution — charge (k, η) — puissance utile
   // val = { U1, I1, m1, U2, I2, m2, U3, I3, S, P, k, eta, Pu, Pp } ; o.charge : nom de la charge
+  // o.n = 2 : un seul transformateur (val.m), le 2e étage alimente la charge (U2, I2, S) ; o.titres : nom des étages
   function reseau(val, o) {
     o = o || {};
-    const et = (k, titre) => ({ titre, u: sub('u', k), lignes: lignes([[sub('U', k) + ' =', 'U' + k], [sub('I', k) + ' =', 'I' + k]].concat(k === 3 ? [['S =', 'S']] : []), val) });
+    const n = o.n || 3, titres = o.titres || (n === 3 ? ['production', 'transport', 'distribution'] : ['réseau', 'utilisation']);
+    const et = k => ({ titre: titres[k - 1], u: sub('u', k), lignes: lignes([[sub('U', k) + ' =', 'U' + k], [sub('I', k) + ' =', 'I' + k]].concat(k === n ? [['S =', 'S']] : []), val) });
+    const tr = k => n === 2 ? { nom: 'T', lignes: lignes([['m =', 'm']], val) } : { nom: sub('T', k), lignes: lignes([[sub('m', k) + ' =', 'm' + k]], val) };
     const ch = lignes([['P =', 'P'], ['k =', 'k'], ['η =', 'eta']], val);
     const so = lignes([[sub('P', 'u') + ' =', 'Pu']], val), pe = lignes([[sub('P', 'perdue') + ' =', 'Pp']], val);
     return chaine({
-      etages: [et(1, o.titres ? o.titres[0] : 'production'), et(2, o.titres ? o.titres[1] : 'transport'), et(3, o.titres ? o.titres[2] : 'distribution')],
-      transfos: [{ nom: sub('T', 1), lignes: lignes([[sub('m', 1) + ' =', 'm1']], val) }, { nom: sub('T', 2), lignes: lignes([[sub('m', 2) + ' =', 'm2']], val) }],
+      etages: Array.from({ length: n }, (x, k) => et(k + 1)),
+      transfos: Array.from({ length: n - 1 }, (x, k) => tr(k + 1)),
       charge: { nom: o.charge || 'charge', lignes: ch },
       sortie: so.length || pe.length ? { lignes: so, pertes: pe.length ? pe : undefined } : undefined,
       aria: o.aria || 'Schéma de la chaîne de distribution avec les valeurs de l\'énoncé',
