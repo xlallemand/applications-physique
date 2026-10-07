@@ -630,7 +630,7 @@
       parties: [{ nom: 'Définition du pH', cours: 'module_2_cours', questions: 'module_2_questions' }] },
     { n: 3, titre: 'Exercices d\'entraînement', desc: 'Exercices du cours et exercices supplémentaires, correction détaillée', exercices: 'module_3', exNom: 'Exercices', nbEx: 20 },
   ];
-  window.SOM.init({ nom: 'pH', id: 'ph', cleEx: 'ph-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'pH', id: 'ph', cleEx: 'ph-exercices', plan: PLAN });     // (remplacé par l'application qui réutilise ce moteur)
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
 

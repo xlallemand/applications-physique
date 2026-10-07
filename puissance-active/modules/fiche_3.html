@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : fiche récapitulative — Puissance active</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="pa.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../ph/modules/ph.css">
+<link rel="stylesheet" href="../../lecture-graphique/modules/lgtools.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../ph/modules/ph.js"></script>
+<script src="../../lecture-graphique/modules/lgtools.js"></script>
+<script src="pa.js"></script>
+<script src="pa-outils.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche" id="fiche"></div>
+
+<script>
+/* ============================================================
+   Fiche récapitulative du module 3 : déphasage, avance, calcul de φ.
+   ============================================================ */
+document.getElementById('fiche').innerHTML = `
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Mesurer un déphasage</h2>
+  </div>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Déphasage entre u et i</h3>
+    <div class="cle"><ul class="er-liste" style="margin:0">
+      <li>Uniquement des <b>résistances</b> (radiateur) → <b>pas de déphasage</b> : u et i sont en phase.</li>
+      <li>Des <b>condensateurs</b> et des <b>bobines</b> (moteur) → u et i sont <b>déphasées</b>.</li></ul></div>
+    <div class="pa-figs2">
+      <div>${PA.figPhi({ T: 20, dt: 0, tu: 5, Um: 2.5, Im: 1.5, tmax: 40, pasT: 5, ymax: 3 })}<p>Radiateur : u et i en phase</p></div>
+      <div>${PA.figPhi({ T: 20, dt: -4, tu: 5, Um: 2.5, Im: 1.5, tmax: 40, pasT: 5, ymax: 3 })}<p>Moteur : u et i déphasées</p></div>
+    </div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Qui est en avance ?</h3>
+    <div class="cle"><p>En comparant deux sommets voisins, la grandeur qui arrive à son sommet <b>en premier</b> est <b>en avance</b> sur l'autre.</p></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Calculer le déphasage</h3>
+    <div class="cle"><p>Une période T correspond à un tour complet, 2π rad. Par proportionnalité :</p>
+      ${PA.tabProp({ unite: 's', T: 'T', dt: 'Δt' })}
+      <p class="som-formule">φ = 2π × Δt / T</p>
+      <p>φ en rad ; T et Δt dans la même unité (ou en cm, mesurés à la règle sur le graphique).</p></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_3_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_3_questions.html">Questions sur le déphasage</a>
+  </div>`;
+PA.menu('fiche_3');
+</script>
+</body>
+</html>

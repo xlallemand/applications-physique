@@ -387,41 +387,23 @@
   }
 
   /* ============================================================
-     BANDEAU ET MENU COMMUNS AUX MODULES
+     PLAN DE L'APPLICATION ET NAVIGATION (voir assets/sommaire.js)
+     Sommaire de toute l'application : modules → pages (Activité, Cours, Questions, Fiche).
      ============================================================ */
-  const GROUPES = [
-    { title: 'Module 1 · La valeur efficace', items: [
-      { key: 'module_1', label: 'La valeur efficace' },
-    ]},
-    { title: 'Module 2 · La puissance active', items: [
-      { key: 'module_2', label: 'Comprendre à quoi correspond la puissance active' },
-    ]},
-    { title: 'Module 3 · Mesurer un déphasage', items: [
-      { key: 'module_3_cours', label: 'Cours : mesurer un déphasage' },
-      { key: 'module_3_questions', label: 'Questions sur le déphasage' },
-    ]},
-    { title: 'Module 4 · La puissance active en exercices', items: [
-      { key: 'module_4_cours', label: 'Cours : les puissances et le schéma de conversion' },
-      { key: 'module_4_exercices', label: "Exercices d'application" },
-    ]},
+  const PLAN = [
+    { n: 1, titre: 'La valeur efficace', desc: 'Pourquoi la puissance reçue vaut U<sub>eff</sub> × I<sub>eff</sub> ; l\'énergie, aire sous la courbe p(t)', fiche: 'fiche_1',
+      parties: [{ nom: 'La valeur efficace', cours: 'module_1', noms: { cours: 'Activité' } }] },
+    { n: 2, titre: 'Comprendre la puissance active', desc: 'Déphasage entre u et i, P = U<sub>eff</sub> × I<sub>eff</sub> × cos φ, pertes en ligne', fiche: 'fiche_2',
+      parties: [{ nom: 'La puissance active', cours: 'module_2', noms: { cours: 'Activité' } }] },
+    { n: 3, titre: 'Mesurer un déphasage', desc: 'Qui est en avance, u ou i ? φ = 2π × Δt / T, mesures à la règle', fiche: 'fiche_3',
+      parties: [{ nom: 'Mesurer un déphasage', cours: 'module_3_cours', questions: 'module_3_questions' }] },
+    { n: 4, titre: 'La puissance active en exercices', desc: 'Schéma de conversion, puissances apparente, active, utile et perdue, facteur de puissance', fiche: 'fiche_4',
+      parties: [{ nom: 'La puissance active en exercices', cours: 'module_4_cours', questions: 'module_4_exercices', noms: { questions: 'Exercices' } }] },
   ];
-  // cle : clé du module affiché (null sur la page d'accueil) ; dossier : chemin vers les modules
-  function menu(cle, dossier) {
-    const d = dossier === undefined ? '' : dossier;
-    const n = window.AppNav.init({
-      appName: 'Puissance active',
-      portalHref: (cle ? '../' : '') + '../index.html',
-      portalLabel: 'Toutes les applications',
-      onHome: () => { if (cle) window.location.href = '../index.html'; },
-      onNavigate: key => { window.location.href = d + key + '.html'; },
-      groups: GROUPES,
-    });
-    n.setActive(cle);
-    const g = GROUPES.find(x => x.items.some(m => m.key === cle));
-    const item = g && g.items.find(m => m.key === cle);
-    n.setTitle(item ? `${g.title.split(' · ')[0]} · ${item.label}` : null);
-    return n;
-  }
+  // (pa.js est chargé après ph.js et lgtools.js : cette configuration remplace la leur)
+  window.SOM.init({ nom: 'Puissance active', id: 'puissance-active', plan: PLAN });
+  const menu = cle => window.SOM.menu(cle);
+  const accueil = zone => window.SOM.accueil(zone);
 
-  window.PA = { COUL, OMEGA, fmt, radians, Graphe, svg, quiz, dessins, curseurTactile, GROUPES, menu };
+  window.PA = { COUL, OMEGA, fmt, radians, Graphe, svg, quiz, dessins, curseurTactile, PLAN, menu, accueil };
 })();

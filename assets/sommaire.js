@@ -252,7 +252,8 @@
     }));
   }
 
-  function init(opts) { Object.assign(C, opts); return window.SOM; }
+  // (chaque appel remplace toute la configuration : une page qui charge le moteur d'une autre application la reconfigure)
+  function init(opts) { Object.assign(C, { nom: '', id: 'app', cleEx: null, spa: false, plan: [] }, opts); return window.SOM; }
 
   window.SOM = { init, menu, accueil, marquer, situer, libelle, lireProg, NOMS };
 })();
