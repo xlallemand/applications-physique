@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 2 : Exemple d'application</title>
+<title>Module 1 : exemple d'application — Équations en physique (avec aide)</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../../assets/theme.css">
-<script src="../../assets/nav.js"></script>
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
 <script src="../aide-rules.js"></script>
 <style>
@@ -129,34 +131,7 @@
 
 <script>
 
-const nav = AppNav.init({
-    appName: 'Équations en Physique (avec aide)',
-    portalHref: '../../index.html',
-    portalLabel: 'Toutes les applications',
-    onHome: () => { window.location.href = '../index.html'; },
-    onNavigate: (key) => { window.location.href = key + '.html'; },
-    groups: [
-        { title: 'Principe', items: [
-            { key: 'module_1', label: 'Module 1 : Méthode' },
-            { key: 'module_2', label: "Module 2 : Exemple d'application" },
-            { key: 'module_3', label: 'Module 3 : Entraînement' },
-        ]},
-        { title: 'Gestion des fractions', items: [
-            { key: 'module_4', label: 'Module 4 : Méthode' },
-            { key: 'module_5', label: 'Module 5 : Entraînement' },
-        ]},
-        { title: 'Gérer les + et les -', items: [
-            { key: 'module_6', label: 'Module 6 : Méthode' },
-            { key: 'module_7', label: 'Module 7 : Entraînement' },
-        ]},
-        { title: 'Gérer les fonctions réciproques', items: [
-            { key: 'module_8', label: 'Module 8 : Méthode' },
-            { key: 'module_9', label: 'Module 9 : Entraînement' },
-        ]},
-    ],
-});
-nav.setActive("module_2");
-nav.setTitle("Module 2 : Exemple d'application");
+EP.menu('module_2');
 
 // ═══════════════════════════════════════════════════════════════
 // OUTILS DE CONSTRUCTION DE NŒUDS
@@ -737,7 +712,7 @@ function renderModule2() {
     const q = module2Questions[m2Idx];
     app.innerHTML = `
       <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <span class="content-module-badge">MODULE 2</span>
+        <span class="content-module-badge">MODULE 1 · EXEMPLE</span>
         <h2 class="text-2xl font-bold text-indigo-900 mb-1">Exemple d'application</h2>
         <p class="text-xs text-gray-400 uppercase font-bold">Question ${m2Idx+1}/${module2Questions.length}</p>
       </div>
@@ -760,10 +735,11 @@ function renderModule2() {
 }
 function nextModule2Question(){ m2Idx++; renderModule2(); }
 function finishModule2() {
+    SOM.marquer({ fait: true });                              // page terminée (sommaire, accueil)
     document.getElementById('app').innerHTML = `
       <div class="bg-white rounded-xl shadow-lg p-8 text-center">
-        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Module 2 terminé !</h2>
-        <a href="module_3.html" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">Passer au module 3 →</a>
+        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Exemple terminé !</h2>
+        <a href="module_3.html" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">Entraînement →</a>
       </div>`;
 }
 

@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 5 : Entraînement</title>
+<title>Module 2 : entraînement — Équations en physique (avec aide)</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../../assets/theme.css">
-<script src="../../assets/nav.js"></script>
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
 <script src="../aide-rules.js"></script>
 <style>
@@ -150,34 +152,7 @@
 
 <script>
 
-const nav = AppNav.init({
-    appName: 'Équations en Physique (avec aide)',
-    portalHref: '../../index.html',
-    portalLabel: 'Toutes les applications',
-    onHome: () => { window.location.href = '../index.html'; },
-    onNavigate: (key) => { window.location.href = key + '.html'; },
-    groups: [
-        { title: 'Principe', items: [
-            { key: 'module_1', label: 'Module 1 : Méthode' },
-            { key: 'module_2', label: "Module 2 : Exemple d'application" },
-            { key: 'module_3', label: 'Module 3 : Entraînement' },
-        ]},
-        { title: 'Gestion des fractions', items: [
-            { key: 'module_4', label: 'Module 4 : Méthode' },
-            { key: 'module_5', label: 'Module 5 : Entraînement' },
-        ]},
-        { title: 'Gérer les + et les -', items: [
-            { key: 'module_6', label: 'Module 6 : Méthode' },
-            { key: 'module_7', label: 'Module 7 : Entraînement' },
-        ]},
-        { title: 'Gérer les fonctions réciproques', items: [
-            { key: 'module_8', label: 'Module 8 : Méthode' },
-            { key: 'module_9', label: 'Module 9 : Entraînement' },
-        ]},
-    ],
-});
-nav.setActive('module_5');
-nav.setTitle('Module 5 : Entraînement');
+EP.menu('module_5');
 
 // ═══════════════════════════════════════════════════════════════
 // OUTILS DE CONSTRUCTION DE NŒUDS
@@ -1046,7 +1021,7 @@ function renderModule4Intro() {
     if (window.DragDrop) DragDrop.cleanupGhosts();
     document.getElementById('app').innerHTML = `
       <div class="bg-white rounded-xl shadow-lg p-6">
-        <span class="content-module-badge">MODULE 5</span>
+        <span class="content-module-badge">MODULE 2 · ENTRAÎNEMENT</span>
         <h2 class="text-2xl font-bold text-indigo-900 mb-3">Entraînement</h2>
         <p class="text-gray-700 mb-2">Tu vas maintenant résoudre des équations plus complexes, comportant parfois plus de deux zones (un terme multiplié par une fraction entière). Elles sont déjà écrites : il ne reste qu'à déplacer les éléments pour isoler la grandeur demandée.</p>
         <p class="text-gray-700 mb-2"><b>Notation :</b> 2 points si l'équation est résolue en plusieurs étapes sans aucune erreur, 1 point s'il y a eu au moins une erreur avant d'y arriver, 0 point en cas d'abandon. La note finale est donnée en pourcentage.</p>
@@ -1065,7 +1040,7 @@ function renderModule4Question() {
     const progressPct = Math.round(m4Idx / module4Bank.length * 100);
     app.innerHTML = `
       <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <span class="content-module-badge">MODULE 5</span>
+        <span class="content-module-badge">MODULE 2 · ENTRAÎNEMENT</span>
         <h2 class="text-2xl font-bold text-indigo-900 mb-1">Entraînement</h2>
         <p class="text-xs text-gray-400 uppercase font-bold mb-2">Question ${displayNum}/${module4Bank.length} · Score : <span class="score-badge">${m4Score} pt${m4Score>1?'s':''}</span></p>
         <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${progressPct}%"></div></div>
@@ -1098,12 +1073,15 @@ function abandonQuestion4(){
 }
 function finishModule4() {
     const pct = Math.round(m4Score / m4MaxScore * 100);
+    const note = Math.round(m4Score / m4MaxScore * 20 * 2) / 2;
+    SOM.marquer({ note });                                   // meilleure note sur 20 (sommaire, accueil)
     const isMax = m4Score >= m4TrueMaxScore;
     const recapHtml = m4Answers.map(a => `<div class="recap-item">Q${a.num}<br><b>${a.pts}/${a.max}</b></div>`).join('');
     document.getElementById('app').innerHTML = `
       <div class="bg-white rounded-xl shadow-lg p-8 text-center">
         <h2 class="text-2xl font-bold text-indigo-900 mb-2">Entraînement terminé !</h2>
         ${isMax ? `<p class="text-lg font-bold text-amber-600 mb-2">🏆 Score maximal ! Bravo, c'est un sans-faute parfait !</p>` : ''}
+        <p style="font-size:2.6rem;font-weight:900;color:var(--accent);letter-spacing:-.03em;line-height:1.1;margin:6px 0 4px">${String(note).replace('.', ',')} / 20</p>
         <p class="text-lg text-gray-700 mb-4">Score : ${m4Score} / ${m4MaxScore} points (${pct}%)</p>
         <button onclick="startModule4Graded()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">↺ Recommencer l'entraînement</button>
         <div class="text-sm font-bold text-gray-500 mt-6 mb-2 text-left">Détail des points</div>
