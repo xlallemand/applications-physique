@@ -489,6 +489,7 @@
     function fin() {
       const max = qs.length * 2, pct = Math.round(score / max * 100);
       const note = Math.round(score / max * 40) / 2;           // note sur 20, arrondie au demi-point
+      window.SOM.marquer({ note });                              // meilleure note sur 20 (sommaire, accueil)
       const msg = score === max ? 'Sans-faute : tu maîtrises ces notions.' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
         : pct >= 50 ? 'Pas mal ! Recommence : les questions changent à chaque fois.' : 'Continue à t\'entraîner : lis bien les aides et les corrections.';
       app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
@@ -518,27 +519,21 @@
     }
   }
 
-  /* ---------- Bandeau et menu communs aux modules ---------- */
-  const GROUPES = [
-    { title: 'Exercices', items: [
-      { key: 'module_1', label: 'Module 1 : Les types de spectres' },
-      { key: 'module_2', label: "Module 2 : Température d'un corps chauffé" },
-      { key: 'module_3', label: "Module 3 : Composition d'une étoile" },
-      { key: 'module_4', label: 'Module 4 : Bilan, mission astronome' },
-    ]},
+  /* ---------- Plan de l'application et navigation (voir assets/sommaire.js) ---------- */
+  // pas de cours dans cette application : une série de questions par module, donc pas de fiche
+  const PLAN = [
+    { n: 1, titre: 'Les types de spectres', desc: 'Émission ou absorption, continu ou de raies, et la source qui les produit',
+      parties: [{ nom: 'Les types de spectres', questions: 'module_1' }] },
+    { n: 2, titre: 'Température d\'un corps chauffé', desc: 'Classer des spectres selon la température, couleur des étoiles',
+      parties: [{ nom: 'Température', questions: 'module_2' }] },
+    { n: 3, titre: 'Composition d\'une étoile', desc: 'Identifier les éléments chimiques grâce aux raies noires du spectre',
+      parties: [{ nom: 'Composition', questions: 'module_3' }] },
+    { n: 4, titre: 'Bilan : mission astronome', desc: 'Type de spectre, température et composition de trois étoiles',
+      parties: [{ nom: 'Mission astronome', questions: 'module_4' }] },
   ];
-  function menu(cle) {
-    const n = window.AppNav.init({
-      appName: 'Spectres et étoiles', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
-      onHome: () => { window.location.href = '../index.html'; },
-      onNavigate: key => { window.location.href = key + '.html'; },
-      groups: GROUPES,
-    });
-    n.setActive(cle);
-    const item = GROUPES[0].items.find(m => m.key === cle);
-    n.setTitle(item ? item.label : null);
-    return n;
-  }
+  window.SOM.init({ nom: 'Spectres et étoiles', id: 'spectres-etoiles', plan: PLAN });
+  const menu = cle => window.SOM.menu(cle);
+  const accueil = zone => window.SOM.accueil(zone);
 
-  window.EX = { serie, menu, astre, ligne, milliers, GROUPES };
+  window.EX = { serie, menu, accueil, PLAN, astre, ligne, milliers };
 })();

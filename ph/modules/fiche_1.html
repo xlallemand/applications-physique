@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : fiche récapitulative — pH</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ph.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ph.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche" id="fiche"></div>
+
+<script>
+/* ============================================================
+   Fiche récapitulative du module 1 : définition de log,
+   courbe, propriétés.
+   ============================================================ */
+const M = PH.MOINS;
+document.getElementById('fiche').innerHTML = `
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">La fonction logarithme décimal</h2>
+  </div>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Définition</h3>
+    <div class="cle"><p><b class="cle-titre">log, réciproque de 10<sup>x</sup>.</b></p>
+      <p class="ph-formule">y = log(x) &nbsp;⇔&nbsp; x = 10<sup>y</sup></p>
+      <p class="ph-formule">log(10<sup>a</sup>) = a &nbsp; et &nbsp; 10<sup>log a</sup> = a</p></div>
+    <p class="ph-calc">log(1 000) = log(10<sup>3</sup>) = <span class="c">3</span> &nbsp;·&nbsp; log(0,01) = log(10<sup>${M}2</sup>) = <span class="c">${M}2</span> &nbsp;·&nbsp; 10<sup>log 7</sup> = <span class="c">7</span></p>
+    <p class="er-petit">À la calculatrice : touche <b>log</b> ; 10<sup>x</sup> est souvent sur la même touche (« 2nde » ou « shift »).</p>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">La courbe</h3>
+    ${PH.courbeLog(innerWidth < 560 ? { reperes: true, w: 380, h: 300 } : { reperes: true }).svg}
+    <div class="cle"><ul class="er-liste" style="margin:0">
+      <li>log est définie pour <b>x &gt; 0</b> et <b>croissante</b> ;</li>
+      <li>log 1 = <b>0</b> et log 10 = <b>1</b> ; log x &lt; 0 si 0 &lt; x &lt; 1, log x &gt; 0 si x &gt; 1 ;</li>
+      <li>log x → <b>${M}∞</b> quand x → 0<sup>+</sup> ; log x → <b>+∞</b> quand x → +∞ (lentement).</li>
+    </ul></div>
+    <p>Sur une <b>échelle logarithmique</b>, chaque puissance de 10 occupe la même place : on voit en même temps des valeurs très petites et très grandes (pH, décibels…).</p>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Propriétés (a &gt; 0, b &gt; 0, n entier)</h3>
+    <div class="cle">
+      <p class="ph-formule">log(a × b) = log a + log b</p>
+      <p class="ph-formule">log(a / b) = log a − log b</p>
+      <p class="ph-formule">log(a<sup>n</sup>) = n × log a</p></div>
+    <p class="ph-calc">log(2 × 10<sup>${M}3</sup>) = log 2 + log(10<sup>${M}3</sup>) ≈ 0,30 + (${M}3) = <span class="c">${M}2,70</span><br>
+      log(8) = log(2<sup>3</sup>) = 3 × log 2 ≈ <span class="c">0,90</span></p>
+    <div class="callout"><p><b>Attention :</b> log(a <b>+</b> b) ≠ log a + log b. Par exemple log(10 + 10) = log 20 ≈ 1,30, alors que log 10 + log 10 = 2.</p></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_1_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_1_questions.html">Questions sur la fonction log</a>
+  </div>`;
+PH.menu('fiche_1');
+</script>
+</body>
+</html>

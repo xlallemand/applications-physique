@@ -371,6 +371,7 @@
 
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 40) / 2, pct = Math.round(score / max * 100);
+      window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
       const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
         : pct >= 50 ? 'Pas mal ! Recommence pour progresser.' : 'Continue à t\'entraîner : relis bien les corrections.';
       app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.finTitre || 'Série terminée !'}</h2>
@@ -386,34 +387,26 @@
     if (opts.sansIntro) demarrer(); else intro();
   }
 
-  /* ---------- Bandeau et menu communs aux modules ---------- */
-  const GROUPES = [
-    { title: 'La méthode', items: [
-      { key: 'module_1', label: "Module 1 : L'exercice type et la méthode" },
-    ]},
-    { title: "S'entraîner étape par étape", items: [
-      { key: 'module_2', label: 'Module 2 : Équilibrer une combustion' },
-      { key: 'module_3', label: 'Module 3 : Masse, quantité de matière, masse molaire' },
-      { key: 'module_4', label: 'Module 4 : Les relations stœchiométriques' },
-      { key: 'module_5', label: "Module 5 : L'énergie libérée" },
-    ]},
-    { title: 'Exercices complets', items: [
-      { key: 'module_6', label: "Module 6 : L'exemple du cours, pas à pas" },
-      { key: 'module_7', label: 'Module 7 : Exercices complets' },
-    ]},
+  /* ---------- Plan de l'application et navigation (voir assets/sommaire.js) ---------- */
+  const PLAN = [
+    { n: 1, titre: 'L\'exercice type et la méthode', desc: 'Masse de combustible → quantités de matière → masse de CO<sub>2</sub>, énergie libérée', fiche: 'fiche_1',
+      parties: [{ nom: 'La méthode', cours: 'module_1' }] },
+    { n: 2, titre: 'Équilibrer une combustion', desc: 'Test de départ, méthode C, H puis O, exemples guidés, entraînement noté', fiche: 'fiche_2',
+      parties: [{ nom: 'Équilibrer une combustion', cours: 'module_2', noms: { cours: 'Cours et entraînement' } }] },
+    { n: 3, titre: 'Masse, quantité de matière, masse molaire', desc: 'n = m / M, masse molaire d\'une molécule', fiche: 'fiche_3',
+      parties: [{ nom: 'Masse et quantité de matière', questions: 'module_3', noms: { questions: 'Cours rapide et questions' } }] },
+    { n: 4, titre: 'Les relations stœchiométriques', desc: 'Quantités consommées et formées, proportionnelles aux nombres stœchiométriques', fiche: 'fiche_4',
+      parties: [{ nom: 'Relations stœchiométriques', questions: 'module_4', noms: { questions: 'Cours rapide et questions' } }] },
+    { n: 5, titre: 'L\'énergie libérée', desc: 'Pouvoir calorifique, E = PC × m', fiche: 'fiche_5',
+      parties: [{ nom: 'L\'énergie libérée', questions: 'module_5', noms: { questions: 'Cours rapide et questions' } }] },
+    { n: 6, titre: 'L\'exemple du cours, pas à pas', desc: 'L\'exercice type résolu étape par étape, puis un deuxième exemple',
+      parties: [{ nom: 'L\'exemple du cours', exemple: 'module_6' }] },
+    { n: 7, titre: 'Exercices complets', desc: '10 exercices différents, étape par étape', exercices: 'module_7', exNom: 'Exercices complets' },
   ];
-  function menu(cle) {
-    const n = window.AppNav.init({
-      appName: 'Combustions', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
-      onHome: () => { window.location.href = '../index.html'; },
-      onNavigate: key => { window.location.href = key + '.html'; },
-      groups: GROUPES,
-    });
-    n.setActive(cle);
-    const item = GROUPES.reduce((a, g) => a.concat(g.items), []).find(m => m.key === cle);
-    n.setTitle(item ? item.label : null);
-    return n;
-  }
+  // (co.js est chargé après er.js : cette configuration remplace la sienne)
+  window.SOM.init({ nom: 'Combustions', id: 'combustions', plan: PLAN });
+  const menu = cle => window.SOM.menu(cle);
+  const accueil = zone => window.SOM.accueil(zone);
 
   const hasard = t => t[Math.floor(Math.random() * t.length)];
 
@@ -449,7 +442,7 @@
   }
 
   window.CO = {
-    COMB, MASSES, coefs, M, calculM, equation, fmt, lire, egal, UNITES, PARTIES, question, serie, indiceCombustion, menu, GROUPES,
+    COMB, MASSES, coefs, M, calculM, equation, fmt, lire, egal, UNITES, PARTIES, question, serie, indiceCombustion, menu, accueil, PLAN,
     hasard, melanger: ER.melanger, fH, schema,
   };
 })();

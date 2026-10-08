@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="maths">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : fiche récapitulative — Lecture graphique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="lgtools.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/numpad.js"></script>
+<script src="lgtools.js"></script>
+<script src="plan.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="lg-page som-fiche">
+  <div class="lg-card er-card">
+    <span class="lg-badge">MODULE 1 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="lg-titre">La méthode</h2>
+  </div>
+
+  <section class="lg-card er-card">
+    <h3 class="cours-titre">L'idée</h3>
+    <div class="cle"><p>Sur un axe gradué régulièrement, la <b>distance</b> mesurée sur le papier est <b>proportionnelle</b> à l'<b>écart de valeurs</b>. Avec l'échelle (distance pour une valeur connue), un <b>tableau de proportionnalité</b> donne la valeur qui correspond à n'importe quelle distance.</p></div>
+  </section>
+
+  <section class="lg-card er-card">
+    <h3 class="cours-titre">La méthode en quatre étapes</h3>
+    <div class="cle"><ol style="margin:0;padding-left:20px;line-height:1.6">
+      <li><b>Mesurer l'échelle</b> : la distance (en cm) entre deux graduations de l'axe, et l'écart de valeurs entre elles.</li>
+      <li><b>Mesurer la grandeur</b> : la distance (en cm) qui correspond à la grandeur recherchée, <b>le long du même axe</b>.</li>
+      <li><b>Remplir le tableau de proportionnalité</b>, sans oublier les unités.</li>
+      <li><b>Calculer</b> la valeur recherchée par un produit en croix.</li></ol></div>
+    <p class="cours-exemple-t">Exemple : période d'une tension</p>
+    <div id="figPeriodes"></div>
+    <div class="lg-table-wrap"><table class="lg-table">
+      <colgroup><col class="lg-col-titre"><col><col></colgroup>
+      <thead><tr><th></th><th>Distance (cm)</th><th>Durée (ms)</th></tr></thead>
+      <tbody><tr><th>Échelle</th><td>15,4</td><td>40</td></tr><tr><th>3 périodes</th><td>13,4</td><td class="lg-inconnue">3T</td></tr></tbody>
+    </table></div>
+    <p class="calcul">3T = (13,4 × 40) / 15,4 = 34,8 ms &nbsp;&nbsp;donc&nbsp;&nbsp; T = 34,8 / 3 = 11,6 ms</p>
+  </section>
+
+  <section class="lg-card er-card">
+    <h3 class="cours-titre">Mesurer grand pour être précis</h3>
+    <div class="cle"><p>Une règle se lit au millimètre près : l'erreur compte d'autant moins que la distance mesurée est grande.</p>
+      <ul style="margin:6px 0 0;padding-left:20px;line-height:1.6">
+        <li><b>Échelle</b> : choisir les deux graduations les plus éloignées.</li>
+        <li><b>Période</b> (ou longueur d'onde) : mesurer <b>plusieurs périodes</b>, puis diviser par leur nombre.</li>
+        <li><b>Amplitude</b> : mesurer de crête à crête (du minimum au maximum), puis diviser par 2.</li></ul></div>
+  </section>
+
+  <section class="lg-card er-card">
+    <h3 class="cours-titre">Lire la valeur d'un point</h3>
+    <div class="cle"><p>Pour l'<b>ordonnée</b> (ou une valeur maximale) : règle à la verticale, échelle sur l'<b>axe vertical</b>, distance mesurée depuis l'axe des abscisses. Pour l'<b>abscisse</b> : même méthode à l'horizontale.</p>
+      <p style="margin-top:8px">L'échelle et la grandeur se mesurent toujours le long du <b>même axe</b>.</p></div>
+  </section>
+
+  <div class="lg-actions som-fiche-liens" style="justify-content:center">
+    <a class="btn-secondary" href="module_1.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_2.html">S'entraîner</a>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Fiche récapitulative du module 1 : la méthode de lecture
+   graphique (exemple du cours : T = 11,6 ms).
+   ============================================================ */
+const exemple = {
+  type: 'periode', grandeur: { symbole: 'T', nom: 'période', noms: 'périodes' },
+  axeX: { min: 0, max: 40, pas: 5, nom: 't', unite: 'ms', libelle: 'Durée' },
+  axeY: { min: -5, max: 5, pas: 1, nom: 'u', unite: 'V' },
+  signal: { forme: 'sinus', periode: 11.6, ampl: 3.2, phase: 1.3 },
+};
+const R = LG.repere(exemple), A = LG.analyser(exemple, R);
+document.getElementById('figPeriodes').innerHTML = LG.figure(exemple, [{ ox: R.sx(A.tDepart), oy: R.sy(A.f(A.tDepart)), rot: 0, cur: Math.round(3 * 11.6 * R.mmX) }]);
+LG.menu('fiche_1');
+</script>
+</body>
+</html>

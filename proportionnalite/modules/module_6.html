@@ -3,11 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 6 : Entraînement — Calculer</title>
+<title>Module 2 : entraînement — Proportionnalité</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="ptools.css">
-<script src="../../assets/nav.js"></script>
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
 <script src="ptools.js"></script>
 <style>
@@ -83,7 +85,7 @@ function maxScore() { return bank.length * 3; }
 function renderIntro() {
   document.getElementById('app').innerHTML = `
     <div class="bg-white rounded-xl shadow-lg p-6">
-      <span class="content-module-badge">MODULE 6</span>
+      <span class="content-module-badge">MODULE 2 · ENTRAÎNEMENT</span>
       <h2 class="text-2xl font-bold text-[var(--app-accent-800)] mb-3">Entraînement</h2>
       <p class="text-gray-700 mb-2">Pour chaque situation, choisis ta méthode préférée (tableau, coefficient ou retour à l'unité) — sauf quand elle est imposée — puis place les grandeurs au bon endroit pour construire le calcul. Aucun résultat numérique n'est demandé : c'est la construction du calcul qui compte !</p>
       <button onclick="start()" class="btn-primary mt-2">Commencer →</button>
@@ -96,7 +98,7 @@ function render() {
   const q = bank[idx];
   currentMethod = q.forcedMethod || null;
   const app = document.getElementById('app');
-  const head = ptHeader({ badge: 'MODULE 6', title: 'Entraînement', idx, total: bank.length, score });
+  const head = ptHeader({ badge: 'MODULE 2 · ENTRAÎNEMENT', title: 'Entraînement', idx, total: bank.length, score });
 
   app.innerHTML = head + `
     <div class="bg-white rounded-xl shadow-lg p-6">
@@ -210,30 +212,13 @@ function finish() {
   document.getElementById('app').innerHTML = ptFinish({
     score, max: maxScore(), trueMax: maxScore(),
     title: 'Entraînement terminé !', recap: answers,
-    restartFn: 'start()', nextHref: 'module_7.html', nextLabel: 'Module 7 : Représentation graphique →',
+    restartFn: 'start()', nextHref: 'module_7.html', nextLabel: 'Module 3 : représentation graphique →',
   });
 }
 
 renderIntro();
 
-const nav = AppNav.init({
-  appName: 'Proportionnalité', portalHref: '../../index.html', portalLabel: 'Toutes les applications',
-  onHome: () => { window.location.href = '../index.html'; },
-  onNavigate: (key) => { window.location.href = key + '.html'; },
-  groups: [
-    { title: 'Reconnaître', items: [
-      { key: 'module_1', label: 'Module 1 : Cours' }, { key: 'module_2', label: 'Module 2 : Vérification' }, { key: 'module_3', label: 'Module 3 : Entraînement' },
-    ]},
-    { title: 'Utiliser', items: [
-      { key: 'module_4', label: 'Module 4 : Cours' }, { key: 'module_5', label: 'Module 5 : Vérification' }, { key: 'module_6', label: 'Module 6 : Entraînement' },
-    ]},
-    { title: 'Graphique', items: [
-      { key: 'module_7', label: 'Module 7 : Cours' }, { key: 'module_8', label: 'Module 8 : Vérification' }, { key: 'module_9', label: 'Module 9 : Entraînement' },
-    ]},
-  ],
-});
-nav.setActive('module_6');
-nav.setTitle('Module 6 : Entraînement');
+PT.menu('module_6');
 </script>
 </body>
 </html>

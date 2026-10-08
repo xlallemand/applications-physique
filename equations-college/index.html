@@ -6,7 +6,8 @@
 <title>Équations du 1er degré - Entraînement</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../assets/theme.css">
-<script src="../assets/nav.js"></script>
+<link rel="stylesheet" href="../assets/sommaire.css">
+<script src="../assets/sommaire.js"></script>
 <script src="../assets/hero.js"></script>
 <script src="../assets/numpad.js"></script>
 <style>
@@ -691,26 +692,36 @@ let state = {
 };
 
 // ═══════════════════════════════════════════════════════
-//  NAVIGATION (menu commun)
+//  PLAN DE L'APPLICATION ET NAVIGATION (voir assets/sommaire.js)
+//  Application en une seule page : chaque module est une ancre de
+//  l'adresse (#module-1…) ; « Ma progression » est l'ancre #stats.
+//  Pas de cours dans cette application (entraînements seuls) : pas de fiche.
 // ═══════════════════════════════════════════════════════
 
 const APP_NAME='Équations du 1er degré';
+const PLAN = MODULES.map((m, i) => ({ n: i + 1, titre: m.title, desc: m.desc,
+  parties: [{ nom: m.title, entrainement: 'module-' + (i + 1) }] }));
+SOM.init({ nom: APP_NAME, id: 'equations-college', spa: true, plan: PLAN });
 
-const nav = AppNav.init({
-  appName: APP_NAME,
-  portalHref: '../index.html',
-  portalLabel: 'Toutes les applications',
-  onHome: () => { if(canLeaveModule()) navigate('home'); },
-  onNavigate: (key) => {
-    if(!canLeaveModule()) return;
-    if(key==='stats') navigate('stats');
-    else startModule(Number(key.split('-')[1]));
-  },
-  groups: [
-    { title: 'Entraînement', items: MODULES.map((m,i)=>({ key:'module-'+i, label:'Module '+(i+1)+' : '+m.title })) },
-    { title: 'Suivi', items: [ { key:'stats', label:'Ma progression' } ] },
-  ],
-});
+// l'adresse suit la vue affichée pour que le retour arrière fonctionne
+function suivreAdresse(cle){
+  const h = cle ? '#' + cle : '';
+  if(location.hash !== h) history.pushState(null, '', location.pathname + location.search + h);
+}
+// ancre de la vue en cours
+function cleVue(){
+  if(state.view==='module' || state.view==='results') return 'module-' + (state.moduleId + 1);
+  return state.view==='stats' ? 'stats' : '';
+}
+// une ancre de l'adresse ouvre la vue correspondante (liens du sommaire et de l'accueil, retour arrière)
+function ouvrirAncre(){
+  const h = location.hash.slice(1), m = /^module-(\d+)$/.exec(h);
+  if(h === cleVue()) return;
+  if(!canLeaveModule()){ history.pushState(null, '', location.pathname + location.search + '#' + cleVue()); return; }
+  if(m && MODULES[m[1] - 1]) startModule(m[1] - 1);
+  else navigate(h === 'stats' ? 'stats' : 'home');
+}
+addEventListener('hashchange', ouvrirAncre);
 
 // Demande confirmation avant de quitter un module commencé
 function canLeaveModule(){
@@ -966,6 +977,7 @@ function finishModule(){
   const bestScore=existing?Math.max(existing.bestScore,totalScore):totalScore;
   db.results[mid]={ score:totalScore, bestScore, xp:totalXP, attempts };
   saveDB();
+  SOM.marquer({ note: totalScore }, 'module-' + (mid + 1));          // meilleure note sur 20 (sommaire, accueil)
 
   navigate('results');
   if(totalScore>=18) doConfetti();
@@ -1012,17 +1024,21 @@ function renderHome(){
 
     ${levelCard()}
 
-    <div class="module-list mb-8">
-      ${GROUPES_ACCUEIL.map(g=>`
-        <div class="module-group">
-          ${g.icon?`
+    <!-- une ligne dépliable par module (voir assets/sommaire.js) -->
+    <main class="som-accueil" id="accueil"></main>
+
+    <div class="som-accueil" style="margin-top:12px">
+      <a class="som-bt" href="#stats" style="align-self:flex-start">Ma progression →</a>
+      <!-- points clés : les règles travaillées dans les modules -->
+      ${GROUPES_ACCUEIL.filter(g=>g.icon).map(g=>`
           <div class="point-cle">
             <span class="point-cle-icone">${g.icon}</span>
-            <div><div class="point-cle-titre">Point clé</div><p>${g.txt}</p></div>
-          </div>`:`<div class="module-group-title">${g.titre}</div>`}
-          ${g.modules.map(moduleCardHTML).join('')}
-        </div>`).join('')}
+            <div><div class="point-cle-titre">Point clé · module${g.modules.length>1?'s':''} ${g.modules.map(i=>i+1).join(', ')}</div><p>${g.txt}</p></div>
+          </div>`).join('')}
     </div>`;
+  // les meilleures notes déjà enregistrées par l'application rejoignent la progression du sommaire
+  Object.keys(db.results).forEach(i => SOM.marquer({ note: db.results[i].bestScore }, 'module-' + (+i + 1)));
+  SOM.accueil(document.getElementById('accueil'));
 }
 
 // Points clés : chacun est affiché juste avant le ou les modules qui le travaillent
@@ -1034,28 +1050,6 @@ const GROUPES_ACCUEIL=[
   {icon:'−−',  txt:'<b>Deux facteurs négatifs</b> qui se multiplient donnent un résultat positif : (−)×(−) = (+)', modules:[6]},
   {titre:'Pour finir : toutes les règles ensemble', modules:[7]},
 ];
-
-// Carte d'un module sur l'accueil
-function moduleCardHTML(i){
-  const mod=MODULES[i], res=db.results[i];
-  return `
-        <div class="module-card">
-          <div class="module-card-head">
-            <span class="module-badge">Module ${i+1}</span>
-            <div class="module-card-body">
-              <div class="module-card-title">${mod.title}${res?`<span class="module-done">${res.bestScore}/20</span>`:''}</div>
-              <div class="module-card-desc">${mod.desc}</div>
-              ${res?`
-                <div class="module-score">Meilleur score : ${res.bestScore}/20 · ${res.attempts} tentative${res.attempts>1?'s':''}</div>
-                <div class="module-score-bar"><div class="module-score-fill" style="width:${Math.round(res.bestScore/20*100)}%"></div></div>
-              `:''}
-              <div class="module-card-actions">
-                <button onclick="startModule(${i})" class="btn-module ${res?'btn-secondary':'btn-primary'}">${res?'Refaire':'Commencer'} (${Q_PER_MODULE} équations)</button>
-              </div>
-            </div>
-          </div>
-        </div>`;
-}
 
 // ═══════════════════════════════════════════════════════
 //  AFFICHAGE — QUESTION
@@ -1144,8 +1138,8 @@ function renderQuestion(){
       </div>
     </div>`;
 
-  nav.setTitle('Module '+(state.moduleId+1)+' : '+mod.title);
-  nav.setActive('module-'+state.moduleId);
+  suivreAdresse(cleVue());
+  SOM.menu(cleVue());
 
   // Mise au point du champ de saisie
   if(!state.solved){
@@ -1200,8 +1194,8 @@ function renderResults(){
         </div>
       </div>
     </div>`;
-  nav.setTitle('Module '+(state.moduleId+1)+' : '+MODULES[state.moduleId].title);
-  nav.setActive('module-'+state.moduleId);
+  suivreAdresse(cleVue());
+  SOM.menu(cleVue());
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1259,8 +1253,8 @@ function renderStats(){
 
       <button class="btn-small" style="color:var(--danger);border-color:#fca5a5" onclick="confirmReset()">Réinitialiser la progression</button>
     </div>`;
-  nav.setTitle('Ma progression');
-  nav.setActive('stats');
+  suivreAdresse('stats');
+  SOM.menu('stats');
 }
 
 function confirmReset(){
@@ -1282,9 +1276,9 @@ function render(){
     case 'results': renderResults(); break;
     case 'stats':   renderStats(); break;
     default:
+      suivreAdresse('');
+      SOM.menu('accueil');
       renderHome();
-      nav.setTitle(null);
-      nav.setActive(null);
   }
 }
 
@@ -1294,7 +1288,11 @@ function render(){
 
 loadDB();
 baseSetNumpadPref(db.showKb);
-render();
+// vue donnée par l'adresse (accueil par défaut)
+const m0 = /^#module-(\d+)$/.exec(location.hash);
+if(m0 && MODULES[m0[1] - 1]) startModule(m0[1] - 1);
+else if(location.hash === '#stats') navigate('stats');
+else render();
 
 </script>
 </body>

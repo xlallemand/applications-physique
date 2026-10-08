@@ -36,11 +36,12 @@ Ne change ni le contenu scientifique ni les fonctionnalités propres à une appl
     images/                       images (jpg, svg)
 ```
 
-- Feuilles de style chargées dans cet ordre dans **toutes** les pages : `../../assets/theme.css`, `../../equilibrer-reactions/modules/er.css` (cartes, boutons, écrans de fin communs), puis `<pref>.css`.
+- Feuilles de style chargées dans cet ordre dans **toutes** les pages : `../../assets/theme.css`, `../../equilibrer-reactions/modules/er.css` (cartes, boutons, écrans de fin communs), `<pref>.css`, puis `../../assets/sommaire.css` (sommaire, accueil, fiches).
+- Scripts : `../../assets/sommaire.js` (navigation commune, voir §5) **avant** `<pref>.js`, qui déclare le `PLAN` et appelle `SOM.init`. Sur l'accueil, `../assets/hero.js` puis `../assets/sommaire.js` puis `modules/<pref>.js`.
 - Balise `<html lang="fr" data-matiere="…">` : `maths`, `chimie`, `physique` ou `college`. C'est ce qui fixe la couleur d'accent (voir §3).
 - `<title>` d'une page de module : `Module 1 : référentiel — Cinématique` ; accueil : le nom de l'application.
 - Corps de page : `<div id="app-nav"></div>` puis `<div class="er-page">…</div>`. La navigation s'y construit (voir §5).
-- Pour une nouvelle application : partir de `cinematique/modules/cin.js` (moteur de questions + navigation) et `cin.css`, renommer l'espace de noms et le préfixe de classes, remplacer `PLAN`, les clés de `localStorage` et les textes.
+- Pour une nouvelle application : partir de `cinematique/modules/cin.js` (moteur de questions) et `cin.css`, renommer l'espace de noms et le préfixe de classes, remplacer les textes ; **la navigation ne se recopie pas** : déclarer le `PLAN` et utiliser le module commun `assets/sommaire.js` (§5).
 - Déclarer l'application dans la liste `APPS` de `index.html` à la racine (portail) : `{ titre, dom, niv, dossier, desc }`, à la suite des applications du même domaine.
   - `dom` : `'physique'`, `'chimie'` ou `'maths'` (outils mathématiques, collège compris) ;
   - `niv` : liste parmi `'col'` (collège), `'2de'`, `'1re'`, `'spe'` (terminale spécialité), `'sti'` (terminale STI2D) ; `LYCEE` pour les quatre niveaux du lycée ;
@@ -152,14 +153,38 @@ Pas de lien « Fiche récapitulative » en haut du cours (la fiche est dans le s
 
 ### Fiche récapitulative (une par module)
 
-- Page `fiche_N.html`, classe `cin-fiche`, badge « MODULE N · FICHE RÉCAPITULATIVE ».
+- Page `fiche_N.html`, classe `som-fiche` (`cin-fiche` dans Cinématique), badge « MODULE N · FICHE RÉCAPITULATIVE ». Classes communes de `assets/sommaire.css` : `som-formule` (formule centrée), `som-tab` dans `som-defile` (tableau défilant), `som-fiche-figs` (figures), `som-fiche-liens` (liens du bas), `som-fr` (fraction).
 - Une carte par notion : `cours-titre`, `.cle` (définitions, formules), figures importantes (`cin-fiche-figs`, 2 ou 3 colonnes, 1 colonne sous 640 px), tableaux. **Que du contenu à retenir : aucune question.**
 - Une ancre `id="<slug>"` sur la première section de chaque partie du module, pour que le lien Fiche du sommaire ouvre la fiche à la bonne partie.
-- Bas de page : `.er-actions.cin-fiche-liens` avec « Revoir le cours » et « Questions sur… ».
+- Bas de page : `.er-actions.som-fiche-liens` avec « Revoir le cours » et « Questions sur… ».
+- En fin de cours, un lien vers la fiche du module.
 
 ## 5. Navigation
 
-Un **sommaire de toute l'application**, comme la table des matières d'un cahier : modules → parties → pages (**Cours**, **Questions**, **Fiche**, icônes `C`, `Q`, `≡`). Le plan est déclaré une fois dans `PLAN` (`cin.js`), construit par `CIN.menu(cle)`. Jamais de menu burger anonyme.
+Un **sommaire de toute l'application**, comme la table des matières d'un cahier : modules → parties → pages (**Cours**, **Questions**, **Fiche**, icônes `C`, `Q`, `≡`). Jamais de menu burger anonyme.
+
+### Module commun `assets/sommaire.js` (objet `SOM`)
+
+Toutes les applications utilisent ce module (+ `assets/sommaire.css`, classes préfixées `som-`) ; seules `cinematique/` et `transport-electricite/` gardent leur propre copie dans leur moteur (`CIN.menu`, même présentation). L'application déclare seulement son plan :
+
+```js
+const PLAN = [
+  { n: 1, titre: 'La fonction logarithme décimal', desc: 'Une phrase courte', fiche: 'fiche_1',   // fiche : seulement s'il y a un cours
+    parties: [{ nom: 'La fonction log', slug: 'log',                            // slug : ancre de la fiche (module en plusieurs parties)
+                cours: 'module_1_cours', questions: 'module_1_questions',
+                noms: { questions: 'Vérification' } }] },                      // libellés propres (facultatif)
+  { n: 3, titre: 'Exercices d\'entraînement', exercices: 'module_3', exNom: 'Exercices', nbEx: 20 },
+];
+SOM.init({ nom: 'pH', id: 'ph', cleEx: 'ph-exercices', plan: PLAN });
+```
+
+- Types de pages d'une partie, dans cet ordre : `simulation`, `cours`, `exemple`, `questions`, `entrainement` (icônes `▸`, `C`, `Ex`, `Q`, `E`) ; fiche `≡`, exercices `#`. Chaque type vaut la clé de la page (nom du fichier sans `.html`).
+- `SOM.menu(cle)` dans chaque page : `'accueil'` → bandeau avec le lien vers le portail ; sinon le sommaire, page `cle` encadrée.
+- `SOM.accueil(zone)` sur l'accueil : lignes dépliables, carte « Reprendre ».
+- `SOM.marquer({ fait: true })` en fin de cours, `SOM.marquer({ note })` en fin de série (note sur 20, la meilleure est gardée).
+- `SOM.init` remet la configuration à zéro : un moteur partagé entre applications (ex. `ph.js` chargé par Puissance active) est donc suivi du moteur de l'application, qui rappelle `SOM.init` avec son propre plan.
+- **Application en une seule page** (`spa: true`) : les clés du plan sont des ancres (`#cours-1`, `#fiche-1`…). L'application appelle `SOM.menu(cle)` à chaque changement d'écran, met l'adresse à jour (`history.pushState`) et ouvre l'écran demandé au chargement et sur `hashchange` : le retour arrière du navigateur reste correct. `SOM.marquer(info, cle)` y prend la clé explicitement.
+- Application d'un seul écran sans cours (simulation) : `SOM.init({ nom, id, plan: [] }); SOM.menu('accueil');` (bandeau vers le portail seul).
 
 - **On voit toujours où on est**, sans changer de page : le module et la partie de la page en cours sont dépliés et la page en cours est encadrée (`aria-current="page"`).
 - **On va dans n'importe quel module sans repasser par l'accueil** : un clic sur un module ou une partie le **déplie sur place** (la page ne change pas) ; un clic sur une page y va. Plusieurs modules peuvent être dépliés en même temps.
@@ -292,7 +317,7 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 
 À faire dans cet ordre, application par application, sans toucher au contenu scientifique ni perdre de fonctionnalité :
 
-1. **Navigation** : retirer `assets/nav.js` (menu burger `AppNav`) ; ajouter `PLAN`, `menu()` (sommaire) et `accueil()` selon §5 ; bandeau avec lien vers le portail sur l'accueil.
+1. **Navigation** : retirer l'ancien menu burger ; charger `assets/sommaire.css` et `assets/sommaire.js`, déclarer le `PLAN`, appeler `SOM.menu(cle)` dans chaque page et `SOM.accueil(zone)` sur l'accueil (§5).
 2. **Accueil** : en-tête illustré `app-hero` conservé, liste des modules en lignes dépliables, « Reprendre », compteurs et notes (§4, §5).
 3. **Découpage** : chaque module → une page de cours, une série de questions notée sur 20, une fiche récapitulative ; plusieurs parties si le module est long.
 4. **Cours** : passer en cours par étapes avec notion → exemple → « À toi » et bouton « Afficher tout le cours » (§6).
@@ -307,8 +332,10 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 |---|---|
 | Variables, boutons, encarts, bandeau, en-tête illustré | `assets/theme.css` |
 | Cartes, écrans de fin, confettis | `equilibrer-reactions/modules/er.css` |
-| Cours, « À toi », questions, graphiques, exercices, fiches, sommaire, accueil | `cinematique/modules/cin.css` |
-| Moteur de questions, séries, cours par étapes, `PLAN`, `menu` (sommaire), `accueil`, progression | `cinematique/modules/cin.js` |
+| Sommaire, accueil en lignes, progression, fiches (module commun `SOM`) | `assets/sommaire.js`, `assets/sommaire.css` |
+| Exemple de `PLAN` (pages séparées / une seule page) | `ph/modules/ph.js` / `puissances-10/index.html` |
+| Cours, « À toi », questions, graphiques, exercices | `cinematique/modules/cin.css` |
+| Moteur de questions, séries, cours par étapes | `cinematique/modules/cin.js` |
 | Repère et tracé de vecteurs, écritures vectorielles | `cinematique/modules/vecteurs.js` |
 | Figures SVG | `cinematique/modules/figures.js` |
 | Exercices (format des données) | `cinematique/modules/exercices.js`, `module_6.html` |

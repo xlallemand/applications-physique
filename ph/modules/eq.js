@@ -106,9 +106,11 @@
       g.querySelectorAll('.dm-new').forEach(x => x.classList.remove('dm-new'));
       g.insertAdjacentHTML('beforeend', lignes(cfg.etapes[n], n === 0));
     }
+    // « Afficher tout le cours » (ph.js) : toutes les étapes d'un coup, puis la suite
+    const inst = { deplier() { if (i >= cfg.etapes.length - 1) return; while (i < cfg.etapes.length - 1) { i++; montrer(i); } bouton(); } };
     function bouton() {
       act.innerHTML = '';
-      if (i >= cfg.etapes.length - 1) { if (cfg.onFini) cfg.onFini(); return; }
+      if (i >= cfg.etapes.length - 1) { if (window.PH.oublier) window.PH.oublier(inst); if (cfg.onFini) cfg.onFini(); return; }
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'btn-secondary';
       b.textContent = i === 0 ? 'Voir la première étape ↓' : 'Étape suivante ↓';
@@ -116,7 +118,8 @@
       act.appendChild(b);
     }
     montrer(0);
-    if (cfg.tout) { while (i < cfg.etapes.length - 1) { i++; montrer(i); } g.querySelectorAll('.dm-new').forEach(x => x.classList.remove('dm-new')); }
+    if (window.PH.vivant) window.PH.vivant(inst);
+    if (cfg.tout || window.PH.tout) { while (i < cfg.etapes.length - 1) { i++; montrer(i); } g.querySelectorAll('.dm-new').forEach(x => x.classList.remove('dm-new')); }
     bouton();
     return box;
   }

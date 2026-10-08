@@ -889,10 +889,13 @@
     }
     function fin() {
       const max = bank.length * MAXQ, pct = Math.round(score / max * 100);
+      const note = Math.round(score / max * 20 * 2) / 2;
+      if (window.SOM) window.SOM.marquer({ note });                 // meilleure note sur 20 (sommaire, accueil)
       if (score === max) confettis();
       app.innerHTML = `<div class="lg-card" style="text-align:center">
           <h2 class="lg-titre">Entraînement terminé !</h2>
           ${score === max ? '<p style="font-weight:800;color:var(--accent-ink)">🏆 Sans-faute !</p>' : ''}
+          <p class="lg-titre" style="font-size:2.4rem;color:var(--accent)">${fmt(note)} / 20</p>
           <p class="lg-contexte">Score : ${score} / ${max} points (${pct} %)</p>
           <div class="lg-actions" style="justify-content:center">
             <button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>

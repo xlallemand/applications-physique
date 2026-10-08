@@ -1,0 +1,174 @@
+/* ============================================================
+   Navigation commune (assets/sommaire.js) : sommaire de toute
+   l'application, accueil en lignes dépliables, fiches récapitulatives.
+   Mêmes styles que la navigation de l'application « Cinématique ».
+   Ordinateur (900 px et plus) : sommaire toujours ouvert dans une colonne à gauche, pas de bandeau.
+   Téléphone : bandeau « où suis-je » ; un appui déroule le même sommaire sous le bandeau.
+   ============================================================ */
+/* les défilements s'arrêtent sous le bandeau fixe (60 px à l'accueil, 54 px sur téléphone dans les modules) */
+html { scroll-padding-top: 72px; }
+html.som-nav { scroll-padding-top: 66px; }
+@media (min-width: 900px) { html.som-nav { scroll-padding-top: 16px; } }
+/* (le décalage vient de scroll-padding-top : un scroll-margin s'y ajouterait) */
+html.som-nav .er-etape { scroll-margin-top: 0; }
+
+.som-pilule {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px; border-radius: 999px;
+  background: var(--paper); color: var(--ink); font: 700 .86rem/1 var(--font-sans); text-decoration: none; white-space: nowrap;
+  transition: background .15s;
+}
+.som-pilule:hover { background: var(--paper-2); }
+.som-pilule:focus-visible, .som-ou:focus-visible, .som-sligne:focus-visible, .som-spt:focus-visible, .som-page:focus-visible,
+.som-bt:focus-visible, .som-ligne:focus-visible, .som-reprendre:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.som-court { display: none; }
+@media (max-width: 520px) { .som-court { display: inline; } .som-long { display: none; } }
+
+/* ---------- bandeau du téléphone : où suis-je ? ---------- */
+.som-barre, .som-barre-esp, .som-voile { display: none; }
+.som-barre {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000; height: 54px; align-items: center; padding: 0 10px;
+  background: rgba(255,255,255,.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line);
+}
+.som-ou {
+  flex: 1; min-width: 0; height: 42px; display: flex; align-items: center; gap: 9px; border: none; border-radius: 999px;
+  background: var(--cle-bg); padding: 0 14px 0 5px; cursor: pointer; font: inherit; color: var(--ink); text-align: left;
+}
+.som-ou[aria-expanded="true"] { box-shadow: inset 0 0 0 1.5px var(--accent); }
+.som-ou .som-snum { width: 32px; height: 32px; font-size: .85rem; }
+.som-ou-t { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.2; }
+.som-ou-t small { font-size: .7rem; font-weight: 700; color: var(--accent-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.som-ou-t b { font-size: .92rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.som-ou-chev { flex-shrink: 0; font-weight: 800; color: var(--accent-ink); }
+
+/* ---------- sommaire ---------- */
+.som-som, .som-som * { box-sizing: border-box; }
+.som-som { display: none; flex-direction: column; gap: 10px; background: var(--sheet); font-family: var(--font-sans); }
+.som-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 4px; }
+.som-app { font-weight: 800; font-size: 1.12rem; letter-spacing: -.02em; color: var(--ink); text-decoration: none; }
+.som-tete .som-pilule { padding: 7px 12px; font-size: .8rem; }
+.som-lab { margin: 0; padding: 0 6px; font-size: .66rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); }
+.som-arbre { display: flex; flex-direction: column; gap: 2px; }
+.som-smod { border-radius: 14px; }
+.som-smod.ici { background: var(--cle-bg); }
+.som-sligne {
+  width: 100%; display: flex; align-items: center; gap: 9px; padding: 7px 8px; border: none; background: none; border-radius: 14px;
+  cursor: pointer; font: inherit; color: var(--ink); text-align: left; transition: background .15s;
+}
+.som-sligne:hover { background: var(--paper); }
+.som-smod.ici .som-sligne:hover { background: rgba(255,255,255,.5); }
+.som-snum { flex-shrink: 0; width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; font-size: .75rem; font-weight: 800; background: var(--cle-bg); color: var(--accent-ink); }
+.som-snum.fait { background: var(--success-bg); color: var(--success-text); }
+.som-smod.ici .som-snum:not(.fait), .som-ou .som-snum { background: var(--accent); color: #fff; }
+.som-st { flex: 1; min-width: 0; font-size: .86rem; font-weight: 700; line-height: 1.2; }
+.som-smod.ici .som-st { color: var(--accent-ink); font-weight: 800; }
+.som-sn { font-size: .7rem; font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.som-sligne[aria-expanded="true"] .som-chev, .som-spt[aria-expanded="true"] .som-chev { transform: rotate(90deg); }
+.som-senf { margin: 0 8px 6px 20px; padding-left: 12px; border-left: 2px solid var(--cle-line); display: flex; flex-direction: column; gap: 1px; }
+.som-senf[hidden], .som-spages[hidden] { display: none; }
+.som-spt {
+  width: 100%; display: flex; align-items: center; gap: 6px; padding: 5px 6px; border: none; background: none; border-radius: 10px;
+  cursor: pointer; font: 600 .82rem/1.25 var(--font-sans); color: var(--ink-2); text-align: left;
+}
+.som-spt:hover { background: rgba(255,255,255,.6); }
+.som-spt.ici { color: var(--ink); font-weight: 800; }
+.som-spt .som-chev { margin-left: auto; font-size: .9rem; }
+.som-v { color: var(--success); }
+.som-spages { margin: 1px 0 4px 6px; display: flex; flex-direction: column; gap: 1px; }
+.som-senf > .som-spages { margin-left: 0; }
+.som-page { display: flex; align-items: center; gap: 8px; padding: 4px 9px; border-radius: 999px; font-size: .8rem; font-weight: 600; color: var(--ink-2); text-decoration: none; }
+.som-page:hover { background: rgba(255,255,255,.75); color: var(--ink); }
+.som-smod:not(.ici) .som-page:hover { background: var(--paper); }
+.som-page .ic { flex-shrink: 0; width: 22px; height: 19px; border-radius: 999px; display: grid; place-items: center; font-size: .68rem; font-weight: 800; background: var(--paper); color: var(--ink-2); }
+.som-smod.ici .som-page .ic { background: rgba(255,255,255,.75); }
+.som-page em { margin-left: auto; font-style: normal; font-size: .7rem; font-weight: 800; color: var(--success-text); font-variant-numeric: tabular-nums; }
+.som-page.ici { background: var(--sheet); color: var(--accent-ink); font-weight: 800; box-shadow: inset 0 0 0 1.5px var(--accent); }
+.som-smod .som-page.ici .ic { background: var(--cle-bg); color: var(--accent-ink); }
+.som-page.ici em { color: var(--accent); }
+
+/* téléphone : bandeau, sommaire déroulé sous le bandeau */
+@media (max-width: 899px) {
+  html.som-nav .som-barre { display: flex; }
+  html.som-nav .som-barre-esp { display: block; height: 54px; }
+  html.som-ouvert .som-voile { display: block; position: fixed; inset: 54px 0 0; z-index: 990; background: rgba(22,24,29,.38); }
+  html.som-ouvert .som-som {
+    display: flex; position: fixed; top: 54px; left: 0; right: 0; z-index: 995; max-height: calc(100vh - 54px - 40px); max-height: calc(100dvh - 54px - 40px);
+    overflow-y: auto; overscroll-behavior: contain; padding: 12px 10px 14px; border-radius: 0 0 22px 22px;
+  }
+  .som-lab { display: none; }
+}
+/* ordinateur : sommaire toujours ouvert à gauche */
+@media (min-width: 900px) {
+  html.som-nav .som-som {
+    display: flex; position: fixed; top: 0; bottom: 0; left: 0; z-index: 980; width: 264px;
+    padding: 18px 12px; border-right: 1px solid var(--line); overflow-y: auto;
+  }
+  html.som-nav body { padding-left: 264px; }
+}
+
+/* ---------- Accueil : une ligne dépliable par module ---------- */
+.som-accueil { max-width: 48rem; margin: 20px auto 0; display: flex; flex-direction: column; gap: 12px; }
+.som-reprendre { display: block; background: var(--ink); color: #fff; border-radius: 20px; padding: 14px 18px; text-decoration: none; transition: background .15s; }
+.som-reprendre:hover { background: #2b2e36; }
+.som-reprendre small { display: block; color: var(--line-strong); font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.som-reprendre b { font-size: 1.02rem; }
+.som-modules { display: flex; flex-direction: column; gap: 8px; }
+.som-module { background: var(--paper); border-radius: 22px; }
+.som-ligne {
+  display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; border: none; background: none; border-radius: 22px;
+  cursor: pointer; font: inherit; color: inherit; text-align: left; transition: background .15s;
+}
+.som-ligne:hover { background: var(--paper-2); }
+.som-badge { flex-shrink: 0; width: 36px; height: 36px; border-radius: 999px; display: grid; place-items: center; background: var(--cle-bg); color: var(--accent-ink); font-weight: 800; font-size: .9rem; }
+.som-badge.fait { background: var(--success-bg); color: var(--success-text); }
+.som-ligne-t { flex: 1; min-width: 0; font-weight: 800; font-size: 1.02rem; line-height: 1.25; letter-spacing: -.01em; }
+.som-ligne-t small { display: block; margin-top: 2px; font-size: .82rem; font-weight: 600; letter-spacing: 0; color: var(--ink-2); }
+@media (max-width: 640px) { .som-ligne-t small { display: none; } }
+.som-ligne-n { font-size: .78rem; font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.som-chev { color: var(--ink-3); font-weight: 800; font-size: 1.1rem; transition: transform .15s; }
+.som-ligne[aria-expanded="true"] .som-chev { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .som-chev { transition: none; } }
+.som-ouvert { padding: 0 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.som-ouvert[hidden] { display: none; }
+.som-grille { display: grid; grid-template-columns: 1fr; gap: 8px; }
+@media (min-width: 700px) { .som-grille.deux { grid-template-columns: 1fr 1fr; } }
+.som-partie { background: var(--sheet); border-radius: 16px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.som-partie-nom { font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
+.som-partie-nom.ok::before { content: '✓\00a0'; color: var(--success); }
+.som-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.som-bt {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; background: var(--sheet); color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 700 .84rem/1.2 var(--font-sans); text-decoration: none; white-space: nowrap; transition: box-shadow .15s;
+}
+.som-bt:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.som-bt.fait { background: var(--success-bg); color: var(--success-text); box-shadow: none; }
+.som-bt.ici { background: var(--cle-bg); color: var(--accent-ink); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.som-bt.noir { background: var(--ink); color: #fff; box-shadow: none; }
+.som-sc { font-variant-numeric: tabular-nums; }
+
+/* ---------- Fiches récapitulatives ---------- */
+.som-fiche .er-card { margin-bottom: 14px; }
+.som-fiche .cours-titre { margin-top: 0; }
+.som-fiche .er-card > p { margin: 8px 0 0; line-height: 1.55; }
+.som-fiche .cle { margin: 12px 0; }
+.som-fiche .cle p { margin: 0; }
+.som-fiche .cle p + p, .som-fiche .cle p + ul, .som-fiche .cle ul + p { margin-top: 8px; }
+.som-fiche .cours-exemple-t { font-size: .8rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin: 12px 0 6px; }
+.som-formule { text-align: center; font-size: 1.25rem; font-weight: 700; margin: 10px 0 !important; color: var(--ink); line-height: 1.5; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 480px) { .som-formule { font-size: 1.08rem; } }
+.som-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+.som-tab { border-collapse: collapse; margin: 8px 0; font-size: .95rem; font-variant-numeric: tabular-nums; }
+.som-tab th, .som-tab td { border: 1px solid var(--paper-3); padding: 6px 10px; text-align: center; white-space: nowrap; }
+.som-tab th { background: var(--paper); font-weight: 800; }
+@media (max-width: 480px) { .som-tab th, .som-tab td { padding: 5px 7px; font-size: .9rem; } }
+.som-fiche-figs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+.som-fiche-figs.deux { grid-template-columns: repeat(2, 1fr); }
+.som-fiche-figs > div { min-width: 0; text-align: center; }
+.som-fiche-figs > div > p, .som-fiche-leg { font-size: .88rem; font-weight: 600; color: var(--ink-2); line-height: 1.45; text-align: center; }
+.som-fiche-figs svg { max-width: 100%; height: auto; }
+.som-fiche-liens { justify-content: center; }
+.som-fiche-liens a { text-decoration: none; }
+@media (max-width: 640px) { .som-fiche-figs, .som-fiche-figs.deux { grid-template-columns: 1fr; } }
+/* fraction écrite dans une fiche : <span class="som-fr"><span>a</span><span>b</span></span> */
+.som-fr { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 3px; line-height: 1.25; }
+.som-fr > span { padding: 0 4px; }
+.som-fr > span + span { border-top: 2px solid currentColor; }

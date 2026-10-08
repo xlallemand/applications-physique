@@ -52,6 +52,8 @@
   /* ---------- Écran de fin ---------- */
   function ptFinish(opts) {
     const pct = Math.round((opts.score / opts.max) * 100);
+    const note = Math.round(opts.score / opts.max * 20 * 2) / 2;
+    if (window.SOM) window.SOM.marquer({ note });                   // meilleure note sur 20 (sommaire, accueil)
     const isMax = opts.score >= (opts.trueMax !== undefined ? opts.trueMax : opts.max);
     const recapHtml = (opts.recap || []).map(a =>
       `<div class="recap-item">Q${a.num}<br><b>${a.pts}/${a.max}</b></div>`).join('');
@@ -62,6 +64,7 @@
       <div class="bg-white rounded-xl shadow-lg p-8 text-center">
         <h2 class="text-2xl font-bold text-[var(--app-accent-800)] mb-2">${opts.title || 'Terminé !'}</h2>
         ${isMax ? `<p class="text-lg font-bold text-amber-600 mb-2">🏆 Score maximal ! Sans-faute !</p>` : ''}
+        <p class="pt-note">${String(note).replace('.', ',')} / 20</p>
         <p class="text-lg text-gray-700 mb-4">Score : ${opts.score} / ${opts.max} points (${pct}%)</p>
         <button onclick="${opts.restartFn}" class="btn-primary">↺ Recommencer</button>
         ${nextHtml}

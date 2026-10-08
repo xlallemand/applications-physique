@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 4 : Méthode</title>
+<title>Module 2 : méthode — Équations en physique (avec aide)</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../../assets/theme.css">
-<script src="../../assets/nav.js"></script>
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
 <script src="../aide-rules.js"></script>
 <style>
@@ -150,34 +152,7 @@
 
 <script>
 
-const nav = AppNav.init({
-    appName: 'Équations en Physique (avec aide)',
-    portalHref: '../../index.html',
-    portalLabel: 'Toutes les applications',
-    onHome: () => { window.location.href = '../index.html'; },
-    onNavigate: (key) => { window.location.href = key + '.html'; },
-    groups: [
-        { title: 'Principe', items: [
-            { key: 'module_1', label: 'Module 1 : Méthode' },
-            { key: 'module_2', label: "Module 2 : Exemple d'application" },
-            { key: 'module_3', label: 'Module 3 : Entraînement' },
-        ]},
-        { title: 'Gestion des fractions', items: [
-            { key: 'module_4', label: 'Module 4 : Méthode' },
-            { key: 'module_5', label: 'Module 5 : Entraînement' },
-        ]},
-        { title: 'Gérer les + et les -', items: [
-            { key: 'module_6', label: 'Module 6 : Méthode' },
-            { key: 'module_7', label: 'Module 7 : Entraînement' },
-        ]},
-        { title: 'Gérer les fonctions réciproques', items: [
-            { key: 'module_8', label: 'Module 8 : Méthode' },
-            { key: 'module_9', label: 'Module 9 : Entraînement' },
-        ]},
-    ],
-});
-nav.setActive('module_4');
-nav.setTitle('Module 4 : Méthode');
+EP.menu('module_4');
 
 // ═══════════════════════════════════════════════════════════════
 // OUTILS DE CONSTRUCTION DE NŒUDS
@@ -945,7 +920,7 @@ function renderTutorial() {
     const app = document.getElementById('app');
     app.innerHTML = `
       <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <span class="content-module-badge">MODULE 4</span>
+        <span class="content-module-badge">MODULE 2 · MÉTHODE</span>
         <h2 class="text-2xl font-bold text-indigo-900 mb-1">Méthode pour gérer les fractions</h2>
         <p class="text-xs text-gray-400 uppercase font-bold mb-4">Question ${m4TutIdx+1}/${module4Tutorial.length}</p>
         <div class="rule-card"><p class="text-sm text-gray-700">${TUTORIAL_EXPLAIN}</p></div>
@@ -958,11 +933,13 @@ function advanceTutorial() {
     else { finishModule4Methode(); }
 }
 function finishModule4Methode() {
+    SOM.marquer({ fait: true });                              // page terminée (sommaire, accueil)
     document.getElementById('app').innerHTML = `
       <div class="bg-white rounded-xl shadow-lg p-8 text-center">
-        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Module 4 terminé !</h2>
+        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Méthode terminée !</h2>
         <p class="text-gray-700 mb-4">Tu sais maintenant gérer les fractions dans une équation à plusieurs zones.</p>
-        <a href="module_5.html" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">Passer au module 5 →</a>
+        <a href="module_5.html" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">Entraînement →</a>
+        <a href="fiche_2.html" class="btn-secondary inline-block no-underline ml-2">Fiche récapitulative</a>
       </div>`;
 }
 
