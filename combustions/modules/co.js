@@ -394,7 +394,7 @@
     { n: 2, titre: 'Équilibrer une combustion', desc: 'Test de départ, méthode C, H puis O, exemples guidés, entraînement noté', fiche: 'fiche_2',
       parties: [{ nom: 'Équilibrer une combustion', cours: 'module_2', noms: { cours: 'Cours et entraînement' } }] },
     { n: 3, titre: 'Masse, quantité de matière, masse molaire', desc: 'n = m / M, masse molaire d\'une molécule', fiche: 'fiche_3',
-      parties: [{ nom: 'Masse et quantité de matière', questions: 'module_3', noms: { questions: 'Cours rapide et questions' } }] },
+      parties: [{ nom: 'Masse et quantité de matière', cours: 'module_3_cours', questions: 'module_3' }] },
     { n: 4, titre: 'Les relations stœchiométriques', desc: 'Quantités consommées et formées, proportionnelles aux nombres stœchiométriques', fiche: 'fiche_4',
       parties: [{ nom: 'Relations stœchiométriques', questions: 'module_4', noms: { questions: 'Cours rapide et questions' } }] },
     { n: 5, titre: 'L\'énergie libérée', desc: 'Pouvoir calorifique, E = PC × m', fiche: 'fiche_5',
