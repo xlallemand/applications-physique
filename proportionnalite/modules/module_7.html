@@ -4,144 +4,196 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 3 : cours — Proportionnalité</title>
-<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="ptools.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
 <script src="ptools.js"></script>
-<style>
-  .qtype-tag { display:inline-block; font-size:.7rem; font-weight:800; padding:3px 10px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px; background:var(--app-accent-100); color:var(--app-accent-800); }
-  .graph-row { display:flex; flex-wrap:wrap; gap:14px; justify-content:center; }
-  .graph-item { text-align:center; flex:1; min-width:220px; max-width:280px; }
-  .graph-item p { font-size:.82rem; font-weight:700; margin-top:4px; }
-  .check3 { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-  .check3 button { flex:1; min-width:150px; }
-  .formula-line { font-size:1.05rem; font-weight:700; color:var(--app-accent-800); text-align:center; margin:10px 0; }
-  .note-box-icon { flex-shrink:0; }
-</style>
+<script src="../../assets/cours.js"></script>
 </head>
-<body class="bg-white min-h-screen">
+<body>
 <div id="app-nav"></div>
-
-<div class="container mx-auto px-4 py-8 max-w-3xl" id="app">
-  <div class="bg-white rounded-xl shadow-lg p-6 md:p-10">
-    <span class="content-module-badge">MODULE 3 · COURS</span>
-    <h2 class="text-2xl font-bold text-[var(--app-accent-800)] mb-3">La proportionnalité sur un graphique</h2>
-    <p class="text-gray-700">Un graphique permet de visualiser d'un coup d'œil si deux grandeurs sont proportionnelles, et de déterminer le coefficient de proportionnalité sans calcul compliqué.</p>
-
-  <!-- ============ Notion 1 : reconnaître sur un graphique ============ -->
-  <h3 class="cours-titre">1. Une droite... qui passe par l'origine</h3>
-  <div class="cours-bloc">
-    <p class="cle mb-3">Un graphique y = f(x) représente une situation de proportionnalité directe <b>si et seulement si</b> c'est une <b>droite qui passe par l'origine</b> (0 ; 0).</p>
-    <div class="graph-row" id="g1"></div>
-    <p class="text-gray-700 mt-3">Une droite qui ne passe pas par l'origine correspond à une situation <b>affine</b> (y = ax + b, avec b &ne; 0) : ce n'est <b>pas</b> une proportionnalité. Une courbe non plus, même si elle part de l'origine.</p>
-
-    <div class="ex-card direct">
-      <span class="qtype-tag">Exemple direct</span>
-      <p class="text-gray-700">La masse m d'un volume V d'huile donne une droite passant par l'origine : m et V sont directement proportionnelles (coefficient = masse volumique de l'huile).</p>
-    </div>
-
-    <div class="ex-card">
-      <span class="qtype-tag">À toi de vérifier</span>
-      <p class="text-gray-700 mb-2">Voici le graphique du prix d'une course de VTC en fonction de la distance parcourue (prise en charge + prix au km) :</p>
-      <div class="graph-row"><div class="graph-item" id="gCheck1"></div></div>
-      <p class="font-semibold text-gray-800 mt-2">Ce graphique correspond-il à une situation de proportionnalité ?</p>
-      <div class="check3" id="chk1"></div>
-      <div id="chk1-fb" class="mt-2 font-semibold"></div>
-    </div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS</span>
+    <h2 class="er-titre">La proportionnalité sur un graphique</h2>
+    <p class="er-contexte">Un graphique permet de voir d'un coup d'œil si deux grandeurs sont <b>proportionnelles</b>, et de déterminer le <b>coefficient de proportionnalité</b> sans calcul compliqué.</p>
   </div>
-
-  <!-- ============ Notion 2 : lire le coefficient ============ -->
-  <h3 class="cours-titre">2. Déterminer le coefficient à l'aide de la droite</h3>
-  <div class="cours-bloc">
-    <p class="text-gray-700 mb-2">Comme la droite passe par l'origine, le <b>premier point peut toujours être pris à l'origine</b> (0 ; 0) : il suffit alors de lire les coordonnées d'<b>un seul autre point B</b> sur le quadrillage.</p>
-    <div class="formula-box">k = y<sub>B</sub> / x<sub>B</sub></div>
-
-    <div class="ex-card direct">
-      <span class="qtype-tag">Exemple direct</span>
-      <p class="text-gray-700 mb-2">Masse m (kg) d'une huile en fonction du volume V (L) :</p>
-      <div class="graph-row"><div class="graph-item" id="g2"></div></div>
-      <p class="text-gray-700">Le point B a pour coordonnées (8 ; 6).</p>
-      <div class="formula-res">&rho; = 6 / 8 = 0,75 kg/L</div>
-    </div>
-
-    <div class="note-box info">
-      <span class="note-box-icon">ℹ</span>
-      <p><b>Remarque :</b> si l'origine n'est pas visible sur le graphique (ou si on préfère utiliser deux points quelconques A et B), on calcule le rapport des <b>variations</b> : k = (y<sub>B</sub> &minus; y<sub>A</sub>) / (x<sub>B</sub> &minus; x<sub>A</sub>) — c'est exactement le <b>coefficient directeur</b> d'une droite, en mathématiques. Sur la même droite ci-dessus, avec A (2 ; 1,5) et B (8 ; 6) : k = (6 &minus; 1,5) / (8 &minus; 2) = 4,5 / 6 = 0,75 kg/L : on retrouve le même résultat.</p>
-    </div>
-
-    <div class="note-box info">
-      <span class="note-box-icon">ℹ</span>
-      <p><b>Le lien avec les formules que tu connais :</b> le coefficient directeur k n'est presque jamais un nombre "brut" : c'est en général une grandeur physique bien précise, dont l'unité te met sur la piste (voir module 1) — masse volumique &rho; (kg/L), vitesse v (m/s), résistance R (V/A = &Omega;), masse molaire M (g/mol)... Lire un coefficient directeur sur un graphique, c'est donc souvent calculer la valeur d'une grandeur physique connue !</p>
-    </div>
-
-    <div class="ex-card" id="checkG">
-      <span class="qtype-tag">À toi de vérifier</span>
-      <p class="text-gray-700 mb-2">Distance parcourue d (m) en fonction de la durée t (s), lors d'un mouvement à vitesse constante :</p>
-      <div class="graph-row"><div class="graph-item" id="g3"></div></div>
-      <p class="text-gray-700 mb-2">Place les coordonnées du point B dans le calcul de la vitesse (coefficient) — le résultat s'affichera automatiquement.</p>
-      <div class="pt-palette" id="palG"></div>
-      <div class="formula-line" id="formulaG"></div>
-      <div class="text-center mt-3"><button class="check-btn" onclick="verifyG()">Vérifier</button></div>
-      <p id="msgG" class="verif-msg mt-2 font-semibold"></p>
-    </div>
-  </div>
-
-  <div class="text-center mt-8">
-    <p class="text-gray-700 mb-3">Prêt à t'entraîner à lire des graphiques ?</p>
-    <a href="module_8.html" class="btn-primary inline-block no-underline">Vérification des connaissances →</a>
-    <a href="fiche_3.html" class="btn-secondary inline-block no-underline">Fiche récapitulative</a>
-  </div>
-  </div>
+  <div id="etapes"></div>
 </div>
 
 <script>
-document.getElementById('g1').innerHTML = `
-  <div class="graph-item">${ptGraphSvg({xMax:10,yMax:8,xLabel:'x',yLabel:'y',k:0.7,intercept:0,showPoints:false})}<p style="color:#166534">Proportionnelle</p></div>
-  <div class="graph-item">${ptGraphSvg({xMax:10,yMax:8,xLabel:'x',yLabel:'y',k:0.5,intercept:2,showPoints:false})}<p style="color:#991b1b">Affine, non proportionnelle</p></div>
-  <div class="graph-item">${ptGraphSvg({xMax:10,yMax:8,xLabel:'x',yLabel:'y',curved:true,curveFn:(x)=>2*Math.sqrt(x),showPoints:false})}<p style="color:#991b1b">Courbe, non proportionnelle</p></div>`;
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Graphiques : ptGraphSvg (ptools.js). Le glisser-déposer de l'ancien
+   cours (coordonnées de B dans le calcul de la vitesse) est une
+   partie « perso » d'un « À toi » (ptPartieGlisser).
+   ============================================================ */
+const { fmt, hasard } = COURS;
+const proche = (a, b) => COURS.proche(a, b, .01);
+const fr = (a, b) => `<span class="som-fr"><span>${a}</span><span>${b}</span></span>`;
+const exemple = COURS.exemple;
+// QCM sur un graphique
+const OPTS_G = [{ id: 'oui', label: 'Oui, proportionnalité' }, { id: 'aff', label: 'Non, situation affine' }, { id: 'aut', label: 'Non, autre situation' }];
+const qcmGraphe = (titre, enonce, bonne, indices, solution) => ({ titre, enonce,
+  parties: [{ type: 'choix', q: 'Ce graphique correspond-il à une situation de proportionnalité ?', options: OPTS_G, melanger: false, bonne, indices, solution }] });
 
-document.getElementById('gCheck1').innerHTML = ptGraphSvg({xMax:10,yMax:9,xLabel:'d (km)',yLabel:'prix (€)',k:0.6,intercept:2.5,showPoints:false});
-
-document.getElementById('g2').innerHTML = ptGraphSvg({xMax:8,yMax:8,nx:4,ny:4,xLabel:'V (L)',yLabel:'m (kg)',k:0.75,intercept:0,showPoints:true,pointA:[0,0],pointB:[8,6]});
-document.getElementById('g3').innerHTML = ptGraphSvg({xMax:8,yMax:20,nx:4,ny:4,xLabel:'t (s)',yLabel:'d (m)',k:2.5,intercept:0,showPoints:true,pointA:[0,0],pointB:[6,15]});
-
-document.getElementById('palG').innerHTML =
-  ptChip('numG', '15 m', 15) + ptChip('denG', '6 s', 6) +
-  ptChip('x1', '8 s', 8) + ptChip('x2', '20 m', 20);
-document.getElementById('formulaG').innerHTML = 'v = ' + ptFraction('numG', 'denG', 'liveG');
-const engG = ptSlotEngine(document.getElementById('checkG'), {
-  liveGroups: [{ slots: ['numG','denG'], op: 'div', target: '#liveG', decimals: 2, suffix: ' m/s' }],
-});
-function verifyG() {
-  const r = engG.verify();
-  const msg = document.getElementById('msgG');
-  if (r.correct === r.total) { msg.style.color = '#166534'; msg.textContent = '✓ Bien placé !'; }
-  else { msg.style.color = '#991b1b'; msg.textContent = `${r.correct}/${r.total} cases correctes.`; }
+/* ---------- 1. Une droite qui passe par l'origine ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Une droite… qui passe par l\'origine');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Un graphique y = f(x) représente une situation de proportionnalité directe <b>si et seulement si</b> c'est une <b>droite qui passe par l'origine</b> (0 ; 0).</p></div>
+      <div class="pt-graphes">
+        <div>${ptGraphSvg({ xMax: 10, yMax: 8, xLabel: 'x', yLabel: 'y', k: 0.7, intercept: 0, showPoints: false })}<p>✓ Proportionnelle</p></div>
+        <div>${ptGraphSvg({ xMax: 10, yMax: 8, xLabel: 'x', yLabel: 'y', k: 0.5, intercept: 2, showPoints: false })}<p>✗ Affine, non proportionnelle</p></div>
+        <div>${ptGraphSvg({ xMax: 10, yMax: 8, xLabel: 'x', yLabel: 'y', curved: true, curveFn: x => 2 * Math.sqrt(x), showPoints: false })}<p>✗ Courbe, non proportionnelle</p></div>
+      </div>
+      <p>Une droite qui ne passe pas par l'origine correspond à une situation <b>affine</b> (y = ax + b, avec b ≠ 0) : ce n'est <b>pas</b> une proportionnalité. Une courbe non plus, même si elle part de l'origine.</p>
+    </div>
+    ${exemple(`<p>La masse m d'un volume V d'huile donne une droite qui passe par l'origine : m et V sont directement proportionnelles (le coefficient est la masse volumique de l'huile).</p>
+      ${ptGraphSvg({ xMax: 8, yMax: 8, nx: 4, ny: 4, xLabel: 'V (L)', yLabel: 'm (kg)', k: 0.75, intercept: 0, showPoints: false })}`)}`);
+  // droite par l'origine et courbe : paramètres tirés au hasard
+  const kR = hasard([0.025, 0.03, 0.035]), kF = hasard([150, 200]);
+  c.aToi(carte, [
+    qcmGraphe('La course de VTC', `<p>Voici le graphique du prix d'une course de VTC en fonction de la distance parcourue (prise en charge + prix au km) :</p>
+        ${ptGraphSvg({ xMax: 10, yMax: 9, xLabel: 'd (km)', yLabel: 'prix (€)', k: 0.6, intercept: 2.5, showPoints: false })}`, 'aff',
+      { oui: 'C\'est bien une droite, mais elle ne passe pas par l\'origine : à 0 km, le prix vaut déjà 2,50 € (la prise en charge).',
+        aut: 'C\'est une droite qui ne passe pas par l\'origine : c\'est justement une situation affine.' },
+      '<p>Droite qui ne passe pas par l\'origine : situation <b>affine</b> (prix = prise en charge + prix au km × distance).</p>'),
+    qcmGraphe('Le ressort', `<p>Allongement ℓ d'un ressort en fonction de la masse m suspendue :</p>
+        ${ptGraphSvg({ xMax: 200, yMax: 8, nx: 4, ny: 4, xLabel: 'm (g)', yLabel: 'ℓ (cm)', k: kR, intercept: 0, showPoints: false })}`, 'oui',
+      { aff: 'La droite passe par l\'origine (0 ; 0) : il n\'y a pas de valeur de départ, ce n\'est pas une situation affine.',
+        aut: 'C\'est une droite, et elle passe par l\'origine.' },
+      '<p>Droite qui passe par l\'origine : l\'allongement est <b>proportionnel</b> à la masse.</p>'),
+    qcmGraphe('La distance de freinage', `<p>Distance de freinage d d'une voiture en fonction de sa vitesse v :</p>
+        ${ptGraphSvg({ xMax: 100, yMax: 80, nx: 5, ny: 4, xLabel: 'v (km/h)', yLabel: 'd (m)', curved: true, curveFn: x => x * x / kF, showPoints: false })}`, 'aut',
+      { oui: 'La courbe passe bien par l\'origine, mais ce n\'est pas une droite : il n\'y a pas proportionnalité.',
+        aff: 'Une situation affine donne une droite. Ici, ce n\'est pas une droite.' },
+      '<p>Une courbe, même si elle part de l\'origine, ne représente <b>pas</b> une proportionnalité (ici, d dépend de v<sup>2</sup>).</p>'),
+  ]);
+  return carte;
 }
 
-function renderCheck3(id, correct) {
-  const opts = ['Oui, proportionnalité', 'Non, situation affine', 'Non, autre situation'];
-  document.getElementById(id).innerHTML = opts.map(o => `<button class="mcq-btn" onclick="answerCheck3('${id}','${o}','${correct}')">${o}</button>`).join('');
+/* ---------- 2. Le coefficient avec un point ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Déterminer le coefficient à l\'aide de la droite');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Comme la droite passe par l'origine, le <b>premier point peut toujours être pris à l'origine</b> (0 ; 0) : il suffit alors de lire les coordonnées d'<b>un seul autre point B</b> sur le quadrillage.</p>
+      <div class="cle"><p class="crs-formule">k = ${fr('y<sub>B</sub>', 'x<sub>B</sub>')}</p></div>
+      <div class="callout-accent"><p><b>Le lien avec les formules que tu connais :</b> le coefficient k n'est presque jamais un nombre « brut » : c'est en général une grandeur physique bien précise, dont l'unité te met sur la piste (voir module 1) : masse volumique ρ (kg/L), vitesse v (m/s), résistance R (V/A = Ω), masse molaire M (g/mol)… Lire un coefficient sur un graphique, c'est donc souvent calculer la valeur d'une grandeur physique connue !</p></div>
+    </div>
+    ${exemple(`<p>Masse m (kg) d'une huile en fonction du volume V (L) :</p>
+      ${ptGraphSvg({ xMax: 8, yMax: 8, nx: 4, ny: 4, xLabel: 'V (L)', yLabel: 'm (kg)', k: 0.75, intercept: 0, showPoints: true, pointA: [0, 0], pointB: [8, 6] })}
+      <p>Le point B a pour coordonnées (8 ; 6).</p>
+      <p class="crs-calc">ρ = ${fr('6', '8')} = <span class="c">0,75 kg/L</span></p>`)}`);
+  // le mouvement de l'ancien cours : B (6 s ; 15 m)
+  const E = [
+    { id: 'numG', label: '15 m', valeur: 15, unite: 'm' },
+    { id: 'denG', label: '6 s', valeur: 6, unite: 's' },
+    { id: 'x1', label: '8 s', valeur: 8, unite: 's', indice: '« 8 s » est la plus grande valeur de l\'axe des temps, pas l\'abscisse du point B : lis-la sur le quadrillage, juste sous B.' },
+    { id: 'x2', label: '20 m', valeur: 20, unite: 'm', indice: '« 20 m » est la plus grande valeur de l\'axe des distances, pas l\'ordonnée du point B : lis-la sur le quadrillage, à gauche de B.' },
+  ];
+  // conducteur ohmique : R tirée au hasard, B sur le quadrillage
+  const R = hasard([20, 25, 40, 50]), IB = 0.3, UB = Math.round(R * IB * 10) / 10;
+  c.aToi(carte, [
+    { titre: 'La vitesse',
+      enonce: `<p>Distance parcourue d (m) en fonction de la durée t (s), lors d'un mouvement à vitesse constante :</p>
+        ${ptGraphSvg({ xMax: 8, yMax: 20, nx: 4, ny: 4, xLabel: 't (s)', yLabel: 'd (m)', k: 2.5, intercept: 0, showPoints: true, pointA: [0, 0], pointB: [6, 15] })}`,
+      parties: [
+        ptPartieGlisser({ q: 'Place les coordonnées du point B dans le calcul de la vitesse (le coefficient) : le résultat s\'affiche tout seul.', etiquettes: E,
+          cases: { n: ['numG'], d: ['denG'] },
+          direct: [{ nom: 'v', num: 'n', den: 'd' }],
+          html: (cv, res) => `<div class="pt-formule"><span>v =</span><span class="pt-frac"><span class="pt-frac-num">${cv('n')}</span><span class="pt-frac-line"></span><span class="pt-frac-den">${cv('d')}</span></span><span>= ${res('v')}</span></div>`,
+          diag: (pl, e) => {
+            const p = Object.keys(pl).map(k => e[pl[k]]).find(x => x && x.indice);
+            if (p) return p.indice;
+            return 'La vitesse est v = d / t : l\'ordonnée de B (la distance) au numérateur, son abscisse (la durée) au dénominateur.';
+          },
+          solution: `<p>B a pour coordonnées (6 s ; 15 m) : v = ${fr('15 m', '6 s')}.</p>` }),
+        { type: 'nombre', q: 'Quelle est la vitesse ?', label: 'v =', unite: 'm/s', valeur: 2.5, signe: false,
+          diag: v => (proche(v, 6 / 15) ? 'Tu as calculé t / d. La vitesse est v = d / t.' : proche(v, 15 / 8) || proche(v, 20 / 6) || proche(v, 20 / 8) ? 'Lis bien les coordonnées du point B (pas les valeurs au bout des axes) : B (6 ; 15).' : 'v = 15 / 6.'),
+          solution: `<p class="crs-calc">v = ${fr('15', '6')} = <span class="c">2,5 m/s</span></p>` },
+      ] },
+    { titre: 'La résistance',
+      enonce: `<p>Tension U aux bornes d'un conducteur ohmique en fonction de l'intensité I du courant qui le traverse :</p>
+        ${ptGraphSvg({ xMax: 0.4, yMax: 0.4 * R, nx: 4, ny: 4, xLabel: 'I (A)', yLabel: 'U (V)', k: R, intercept: 0, showPoints: true, pointA: [0, 0], pointB: [IB, UB] })}`,
+      parties: [
+        { type: 'champs', q: 'Lis les coordonnées du point B.', ligne: true,
+          champs: [{ label: 'I<sub>B</sub> =', valeur: IB, unite: 'A', signe: false }, { label: 'U<sub>B</sub> =', valeur: UB, unite: 'V', signe: false }],
+          diag: vs => (proche(vs[0], UB) && proche(vs[1], IB) ? 'Tu as inversé les coordonnées : l\'abscisse I<sub>B</sub> se lit sur l\'axe horizontal, l\'ordonnée U<sub>B</sub> sur l\'axe vertical.'
+            : 'Depuis B, descends verticalement jusqu\'à l\'axe des I, puis va horizontalement jusqu\'à l\'axe des U (les pointillés t\'aident).'),
+          solution: `<p>B (${fmt(IB)} A ; ${fmt(UB)} V).</p>` },
+        { type: 'nombre', q: 'Calcule le coefficient : la résistance R.', label: 'R =', unite: 'Ω', valeur: R, signe: false,
+          diag: v => (proche(v, IB / UB) ? 'Tu as calculé I / U. Le coefficient est R = U / I (en V/A = Ω) : l\'ordonnée divisée par l\'abscisse.'
+            : proche(v, IB * UB) ? 'Le coefficient est un <b>quotient</b> : R = U<sub>B</sub> / I<sub>B</sub>.'
+            : `R = U<sub>B</sub> / I<sub>B</sub> = ${fmt(UB)} / ${fmt(IB)}.`),
+          solution: `<p class="crs-calc">R = ${fr(fmt(UB), fmt(IB))} = <span class="c">${R} Ω</span></p>` },
+      ] },
+  ]);
+  return carte;
 }
-function answerCheck3(id, choice, correct) {
-  const box = document.getElementById(id), fb = document.getElementById(id + '-fb');
-  const ok = choice === correct;
-  box.querySelectorAll('.mcq-btn').forEach(b => {
-    b.disabled = true;
-    if (b.textContent === correct) b.classList.add('correct');
-    else if (b.textContent === choice) b.classList.add('wrong');
-  });
-  fb.textContent = ok ? '✓ Exact !' : `✕ La bonne réponse était : « ${correct} ».`;
-  fb.style.color = ok ? '#166534' : '#991b1b';
-}
-renderCheck3('chk1', 'Non, situation affine');
 
+/* ---------- 3. Avec deux points quelconques ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Avec deux points quelconques : le coefficient directeur');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Si l'origine n'est pas visible sur le graphique (ou si on préfère utiliser deux points quelconques A et B), on calcule le rapport des <b>variations</b> :</p>
+      <div class="cle"><p class="crs-formule">k = ${fr('y<sub>B</sub> − y<sub>A</sub>', 'x<sub>B</sub> − x<sub>A</sub>')}</p>
+        <p>C'est exactement le <b>coefficient directeur</b> d'une droite, en mathématiques.</p></div>
+    </div>
+    ${exemple(`<p>Sur la même droite que l'huile, avec A (2 ; 1,5) et B (8 ; 6) :</p>
+      ${ptGraphSvg({ xMax: 8, yMax: 8, nx: 4, ny: 4, xLabel: 'V (L)', yLabel: 'm (kg)', k: 0.75, intercept: 0, showPoints: true, pointA: [2, 1.5], pointB: [8, 6] })}
+      <p class="crs-calc">k = ${fr('6 − 1,5', '8 − 2')} = ${fr('4,5', '6')} = <span class="c">0,75 kg/L</span></p>
+      <p>On retrouve le même résultat qu'avec l'origine.</p>`)}`);
+  // un liquide : ρ tirée au hasard, A et B sur le quadrillage
+  const rho = hasard([0.8, 1.2, 1.5]), xA = 20, xB = 80, yA = Math.round(rho * xA * 10) / 10, yB = Math.round(rho * xB * 10) / 10;
+  // un mouvement dont l'origine n'est pas visible
+  const v = hasard([2, 3, 4]), tA = 15, tB = 25, dA = v * tA, dB = v * tB;
+  c.aToi(carte, [
+    { titre: 'Les variations',
+      enonce: `<p>Masse m d'un liquide en fonction de son volume V :</p>
+        ${ptGraphSvg({ xMax: 100, yMax: 100 * rho, nx: 5, ny: 5, xLabel: 'V (mL)', yLabel: 'm (g)', k: rho, intercept: 0, showPoints: true, pointA: [xA, yA], pointB: [xB, yB] })}`,
+      parties: [
+        { type: 'champs', q: 'Lis sur le graphique les variations entre A et B.', ligne: true,
+          champs: [{ label: 'V<sub>B</sub> − V<sub>A</sub> =', valeur: xB - xA, unite: 'mL', signe: false }, { label: 'm<sub>B</sub> − m<sub>A</sub> =', valeur: yB - yA, unite: 'g', signe: false }],
+          diag: vs => (proche(vs[0], yB - yA) && proche(vs[1], xB - xA) ? 'Tu as inversé : la variation du volume se lit sur l\'axe horizontal, celle de la masse sur l\'axe vertical.'
+            : proche(vs[0], xB) || proche(vs[1], yB) ? 'Ce sont les coordonnées de B. La variation, c\'est la différence entre B et A : on enlève les coordonnées de A.'
+            : 'Lis les coordonnées de A et de B sur le quadrillage, puis fais les différences B − A.'),
+          solution: `<p>A (${xA} ; ${fmt(yA)}) et B (${xB} ; ${fmt(yB)}) : ${xB} − ${xA} = ${xB - xA} mL et ${fmt(yB)} − ${fmt(yA)} = ${fmt(yB - yA)} g.</p>` },
+        { type: 'nombre', q: 'Calcule le coefficient : la masse volumique ρ.', label: 'ρ =', unite: 'g/mL', valeur: rho, signe: false,
+          diag: x => (proche(x, (xB - xA) / (yB - yA)) ? 'Tu as inversé : k = (variation de m) / (variation de V), l\'ordonnée au numérateur.'
+            : `ρ = ${fr(`m<sub>B</sub> − m<sub>A</sub>`, `V<sub>B</sub> − V<sub>A</sub>`)} = ${fmt(yB - yA)} / ${xB - xA}.`),
+          solution: `<p class="crs-calc">ρ = ${fr(fmt(yB - yA), xB - xA)} = <span class="c">${fmt(rho)} g/mL</span></p>` },
+      ] },
+    { titre: 'Sans l\'origine',
+      enonce: `<p>Distance d parcourue par un mobile en fonction de la durée t ; l'origine n'est pas visible sur ce graphique :</p>
+        ${ptGraphSvg({ xMin: 10, xMax: 30, yMin: 10 * v, yMax: 30 * v, nx: 4, ny: 4, xLabel: 't (s)', yLabel: 'd (m)', k: v, intercept: 0, showPoints: true, pointA: [tA, dA], pointB: [tB, dB] })}`,
+      parties: [{ type: 'nombre', q: 'Calcule la vitesse v (le coefficient directeur) avec les points A et B.', label: 'v =', unite: 'm/s', valeur: v, signe: false,
+        diag: x => (proche(x, (tB - tA) / (dB - dA)) ? 'Tu as inversé : v = (d<sub>B</sub> − d<sub>A</sub>) / (t<sub>B</sub> − t<sub>A</sub>), la variation de la distance au numérateur.'
+          : proche(x, dB - dA) ? `C'est la variation de la distance : divise-la par la variation de la durée (t<sub>B</sub> − t<sub>A</sub>).`
+          : 'Lis A et B sur le quadrillage, puis v = (d<sub>B</sub> − d<sub>A</sub>) / (t<sub>B</sub> − t<sub>A</sub>).'),
+        solution: `<p>A (${tA} s ; ${dA} m) et B (${tB} s ; ${dB} m) :</p><p class="crs-calc">v = ${fr(`${dB} − ${dA}`, `${tB} − ${tA}`)} = ${fr(dB - dA, tB - tA)} = <span class="c">${v} m/s</span></p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Reconnaître.</b> Proportionnalité directe ⇔ le graphique est une <b>droite qui passe par l'origine</b>. Droite qui n'y passe pas : situation affine ; courbe : pas de proportionnalité.</p></div>
+    <div class="cle"><p><b class="cle-titre">Le coefficient.</b> Avec l'origine et un point B : k = ${fr('y<sub>B</sub>', 'x<sub>B</sub>')}. Avec deux points A et B : k = ${fr('y<sub>B</sub> − y<sub>A</sub>', 'x<sub>B</sub> − x<sub>A</sub>')} (coefficient directeur).</p></div>
+    <div class="cle"><p><b class="cle-titre">Son unité</b> (unité de y / unité de x) indique la grandeur physique : masse volumique, vitesse, résistance, masse molaire…</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_8.html">Vérification des connaissances →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
 PT.menu('module_7');
-SOM.marquer({ fait: true });                                   // cours lu (sommaire, accueil)
 </script>
 </body>
 </html>

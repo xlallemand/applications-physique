@@ -70,7 +70,7 @@
   /* Memorization cards */
 
   /* ===== Cours des modules 1, 3 et 4 (moteur commun assets/cours.js) ===== */
-  .er-etape .cv-regle { text-align: center; font-weight: 800; margin: 10px 0; line-height: 1.5; color: var(--ink); }
+  .er-etape .cv-regle { text-align: center; font-size: 1.05rem; font-weight: 800; margin: 10px 0; line-height: 1.5; color: var(--ink); }
   .er-etape .cv-ecart { margin-top: 12px; }
   .crs-tab tr.cv-base td { background: var(--cle-bg); font-weight: 800; }
   /* figure : 1 dm² = 100 cm² */
@@ -1651,7 +1651,8 @@ const CV = (function () {
       </div>
       ${exemple(`<p><b>Exemple 3 :</b> convertir 450 µA en mA.</p>${calcul(450, 0, PR('µ'), PR('m'), 'A')}`)}
       <div class="crs-attention"><p><b class="cle-titre">Point de vigilance !</b> Le signe moins devant les exposants est crucial. Calcule toujours soigneusement la différence <b>(exposant départ) − (exposant arrivée)</b> en faisant attention aux signes : −6 − (−3) = −6 + 3 = −3.</p></div>`);
-    const [a, b] = melanger(PAIRES);
+    // une conversion entre deux petits préfixes (exposants négatifs), une autre avec un grand préfixe
+    const a = hasard(PAIRES.filter(t => PR(t[0]).exp < 0 && PR(t[1]).exp < 0)), b = hasard(PAIRES.filter(t => PR(t[0]).exp > 0 || PR(t[1]).exp > 0));
     c.aToi(carte, [
       conv1(600, 0, PR('n'), PR('m'), 's'),
       conv1(hasard(COEFS), 0, PR(a[0]), PR(a[1]), a[2]),
