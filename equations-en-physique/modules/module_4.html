@@ -34,6 +34,7 @@
         padding:9px 13px; min-height:40px; font-weight:700; color:var(--ink); cursor:grab; touch-action:none;
     }
     .eq-tile.dragging { opacity:.4; }
+    .eq-tile-lab { white-space:nowrap; }   /* nom de la grandeur (indice compris) d'un seul tenant */
     .eq-tile.tile-highlight { background:var(--cle-bg); border-color:var(--accent); color:var(--accent-ink); box-shadow:0 0 0 3px var(--cle-line); }
     .eq-tile.drag-over { border-color:var(--accent); box-shadow:0 0 0 3px var(--cle-line); }
     .mult-sign { display:inline-block; font-weight:800; color:var(--ink-3); margin:0 3px; font-size:1rem; flex-shrink:0; }
@@ -273,7 +274,7 @@ function monterEditeur(hote, cfg, api) {
             const items = node.items.map((it, idx) => {
                 const hl = (activeHighlightId && it.id === activeHighlightId) ? ' tile-highlight' : '';
                 const sep = (idx > 0 && !isOperatorTile(node.items[idx-1]) && !isOperatorTile(it)) ? '<span class="mult-sign">×</span>' : '';
-                return sep + `<span class="eq-tile${hl}" data-path="${path}" data-idx="${idx}">${it.label}<span class="tile-del">✕</span></span>`;
+                return sep + `<span class="eq-tile${hl}" data-path="${path}" data-idx="${idx}"><span class="eq-tile-lab">${it.label}</span><span class="tile-del">✕</span></span>`;
             }).join('');
             return `<div class="slot-simple" data-path="${path}">${items || '<span class="slot-placeholder">…</span>'}</div>`;
         }
