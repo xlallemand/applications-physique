@@ -6,58 +6,108 @@
 <title>Module 2 : Le tableau d'avancement — Avancement d'une réaction</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="av.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="../../assets/molecules.js"></script>
 <script src="av.js"></script>
+<script src="../../assets/cours.js"></script>
 </head>
 <body>
 <div id="app-nav"></div>
 <div class="av-page">
   <div class="er-card">
-    <span class="er-badge">MODULE 2 · SECONDE</span>
+    <span class="er-badge">MODULE 2 · COURS</span>
     <h2 class="er-titre">Le tableau d'avancement</h2>
-    <p class="er-contexte">Un tableau d'avancement résume l'évolution des quantités au cours de la réaction. On le construit d'abord avec des molécules.</p>
+    <p class="er-contexte">Tu vas décrire l'évolution d'une réaction avec l'<b>avancement x</b>, trouver l'<b>avancement maximal x<sub>max</sub></b> et le réactif limitant, puis construire un <b>tableau d'avancement</b> complet. On le construit d'abord avec des molécules.</p>
   </div>
   <div id="etapes"></div>
 </div>
 
 <script>
 /* ============================================================
-   1. L'avancement x relié à la simulation
-   2. et 3. Tableaux construits étape par étape (avec la ligne
-      « à chaque fois » et la frise de l'avancement)
-   4. À retenir
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. L'avancement x (simulation reliée au tableau, ligne « en cours »)
+   2. L'avancement maximal x_max (hypothèses, conclusion, frise)
+   3. Le tableau complet (méthode ; tableaux guidés AV.Exercice)
+   À retenir : la méthode
    ============================================================ */
-const zone = document.getElementById('etapes');
+const { entre, hasard, melanger, exemple } = COURS;
 const fH = MOL.formuleHTML;
+const eq = q => `<p class="av-equation">${AV.equationHTML(q)}</p>`;
+const mol = (n, f) => `${n} molécule${n > 1 ? 's' : ''} de ${fH(f)}`;
+const xm = 'x<sub>max</sub>';
+const coefX = c => (c > 1 ? c : '');
 
-function carte(html) {
-  const c = document.createElement('section');
-  c.className = 'er-card';
-  c.innerHTML = html;
-  zone.appendChild(c);
-  return c;
+// Réactions entre molécules pour les « À toi »
+const R = (r, p, c, nom) => ({ r, p, c, nom });
+const REACTIONS = [
+  R(['N2', 'H2'], ['NH3'], [1, 3, 2], "Synthèse de l'ammoniac"),
+  R(['H2', 'O2'], ['H2O'], [2, 1, 2], "Synthèse de l'eau"),
+  R(['CO', 'O2'], ['CO2'], [2, 1, 2], 'Combustion du monoxyde de carbone'),
+  R(['C3H8', 'O2'], ['CO2', 'H2O'], [1, 5, 3, 4], 'Combustion du propane'),
+  R(['C2H4', 'O2'], ['CO2', 'H2O'], [1, 3, 2, 2], "Combustion de l'éthylène"),
+  R(['H2S', 'O2'], ['SO2', 'H2O'], [2, 3, 2, 2], "Combustion du sulfure d'hydrogène"),
+];
+const especes = reac => reac.r.concat(reac.p);
+
+// Quantités au départ (molécules) : n = nombre stœchiométrique × b, avec b entier différent
+// pour chaque réactif (x_max entier, un seul réactif limitant, au plus 15 molécules).
+// piege = true : le réactif limitant est le plus nombreux au départ.
+function tirer(reac, piege) {
+  for (let i = 0; i < 2000; i++) {
+    const b = reac.r.map(() => entre(2, 5));
+    const n0 = reac.r.map((_, k) => reac.c[k] * b[k]);
+    if (new Set(b).size !== b.length || new Set(n0).size !== n0.length || n0.some(v => v > 15)) continue;
+    const L = b.indexOf(Math.min(...b));
+    if (piege != null && piege !== (n0[L] === Math.max(...n0))) continue;
+    return Object.assign({}, reac, { n0: n0.concat(reac.p.map(() => 0)), xm: b, L, xmax: b[L] });
+  }
 }
-function continuer(parent, suivante, texte) {
-  parent.insertAdjacentHTML('beforeend', `<div class="av-suite"><button type="button" class="btn-primary">${texte || 'Continuer →'}</button></div>`);
-  const b = parent.querySelector('.av-suite:last-child button');
-  b.onclick = () => { b.parentNode.remove(); const c = suivante(); c.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+const depart = q => `On place ${q.r.map((f, k) => mol(q.n0[k], f)).join(' et ')}.`;
+
+/* ---------- Diagnostics ---------- */
+// Hypothèse « ce réactif est épuisé » : n − c x_max = 0 donne x_max = n ÷ c
+function diagHyp(v, n, c, f) {
+  if (c > 1 && v === n) return `Tu as oublié de diviser par le nombre stœchiométrique : ${n} − ${c}${xm} = 0 donne ${xm} = ${n} ÷ ${c}.`;
+  if (c > 1 && v === n * c) return `Tu as multiplié par ${c}. ${n} − ${c}${xm} = 0 donne ${xm} = ${n} ÷ ${c}.`;
+  return `Si ${fH(f)} est épuisé : ${n} − ${coefX(c)}${xm} = 0, donc ${xm} = ${n} ÷ ${c}.`;
 }
+// Choix du réactif limitant : la plus petite valeur de x_max, pas le réactif le moins nombreux
+function diagChoix(q, k) {
+  const L = q.L;
+  return (q.n0[k] < q.n0[L] ? `${fH(q.r[k])} est le moins nombreux au départ, mais il faut tenir compte des nombres stœchiométriques. ` : '') +
+    `Si ${fH(q.r[k])} était limitant, ${xm} vaudrait ${q.xm[k]} ; si c'était ${fH(q.r[L])}, ${q.xm[L]}. ` +
+    `La réaction s'arrête au premier réactif épuisé : on garde la plus petite valeur.`;
+}
+const partieLimitant = q => ({
+  type: 'choix', q: 'Quel est le réactif limitant ?', melanger: false,
+  options: q.r.map((f, k) => ({ id: k, label: fH(f) })), bonne: q.L,
+  indices: Object.fromEntries(q.r.map((_, k) => k).filter(k => k !== q.L).map(k => [k, diagChoix(q, k)])),
+  solution: `<p>La plus petite valeur est ${xm} = ${q.xmax} : <b>${fH(q.r[q.L])}</b> est le réactif limitant.</p>`,
+});
 
 /* ---------- 1. L'avancement x ---------- */
-function etape1() {
+function etape1(c) {
+  const carte = c.carte('1. L\'avancement x');
   const q = { r: ['CH4', 'O2'], p: ['CO2', 'H2O'], c: [1, 2, 1, 2], n0: [3, 4, 0, 0] };
-  const c = carte(`<h3 class="cours-titre">1. L'avancement x</h3>
-    <div class="cle"><p><b class="cle-titre">L'avancement</b>, noté <b>x</b>, est le nombre de fois que la réaction a eu lieu. Au départ, x = 0.</p></div>
-    <p class="av-equation">${AV.equationHTML(q)}</p>
-    <p class="er-contexte">On reprend 3 molécules de CH<sub>4</sub> et 4 molécules de O<sub>2</sub>. Fais avancer la réaction et regarde le tableau : chaque quantité se calcule à partir de la quantité initiale et du nombre stœchiométrique.</p>
-    <div data-x="sim" style="margin-top:12px"></div>
-    <div class="av-tab-wrap" data-x="tab" style="margin-top:12px"></div>`);
-  const tab = c.querySelector('[data-x="tab"]');
+  const d = c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">L'avancement</b>, noté <b>x</b>, est le nombre de fois que la réaction a eu lieu. Au départ, x = 0.</p></div>
+      <div class="cle"><p><b class="cle-titre">Quand la réaction a eu lieu x fois</b> (c : nombre stœchiométrique de l'espèce) :</p>
+        <p class="av-formule-cle">réactif : n<sub>initial</sub> − c × x<br>produit : n<sub>initial</sub> + c × x</p></div>
+    </div>
+    ${exemple(`${eq(q)}
+      <p>On reprend 3 molécules de CH<sub>4</sub> et 4 molécules de O<sub>2</sub>. Fais avancer la réaction et regarde le tableau : chaque quantité se calcule à partir de la quantité initiale et du nombre stœchiométrique.</p>
+      <div data-x="sim" style="margin-top:12px"></div>
+      <div class="av-tab-wrap" data-x="tab" style="margin-top:12px"></div>
+      <p style="margin-top:10px">Pour un avancement x quelconque, la quantité de O<sub>2</sub> est <b>4 − 2x</b> : on part de 4 et on en retire 2 à chaque fois. Celle de H<sub>2</sub>O est <b>0 + 2x</b>.</p>
+      <p>La réaction s'arrête pour x = 2 : c'est l'<b>avancement maximal</b>, noté <b>${xm}</b>.</p>`)}`);
+  const tab = d.querySelector('[data-x="tab"]');
+  // tableau relié à la simulation : la ligne « en cours » suit la valeur de x
   function tableau(x) {
-    const esp = q.r.concat(q.p), nR = q.r.length;
+    const esp = especes(q), nR = q.r.length;
     const sg = k => (k < nR ? '−' : '+');
     const val = k => q.n0[k] + (k < nR ? -1 : 1) * q.c[k] * x;
     tab.innerHTML = `<table class="av-tab"><thead><tr><th>État</th><th><span class="av-long">Avancement</span><span class="av-court">Av.</span></th>${AV.enteteEspeces(q, true)}</tr></thead><tbody>
@@ -67,53 +117,156 @@ function etape1() {
       </tbody></table><p class="av-tab-unite">en nombre de molécules</p>`;
   }
   tableau(0);
-  new AV.Simulation(c.querySelector('[data-x="sim"]'), Object.assign({}, q, {
-    onEtape: tableau,
-    onFin: () => {
-      if (c.dataset.fini) return;
-      c.dataset.fini = 1;
-      c.insertAdjacentHTML('beforeend', `<div class="cle"><p>Pour un avancement x quelconque, la quantité de O<sub>2</sub> est <b>4 − 2x</b> : on part de 4 et on en retire 2 à chaque fois. Celle de H<sub>2</sub>O est <b>0 + 2x</b>.</p>
-        <p>La réaction s'arrête pour x = 2 : c'est l'<b>avancement maximal</b>, noté <b>x<sub>max</sub></b>.</p></div>`);
-      continuer(c, etape2, 'Construire le tableau →');
-    },
-  }));
-  return c;
+  new AV.Simulation(d.querySelector('[data-x="sim"]'), Object.assign({}, q, { n0: q.n0.slice(), onEtape: tableau }));
+
+  // ligne « en cours » d'un réactif et d'un produit, puis valeurs pour un x donné
+  const r = tirer(hasard(REACTIONS));
+  const nR = r.r.length;
+  const kb = hasard(r.r.map((_, k) => k).filter(k => r.c[k] > 1));
+  const kp = nR + hasard(r.p.map((_, j) => j).filter(j => r.c[nR + j] > 1));
+  const fb = r.r[kb], cb = r.c[kb], nb = r.n0[kb], fp = especes(r)[kp], cp = r.c[kp];
+  const k = entre(1, r.xmax);
+  c.aToi(carte, [
+    { titre: 'Un réactif',
+      enonce: `${eq(r)}<p>${depart(r)}</p>`,
+      parties: [{ type: 'choix', q: `Quelle est la quantité de ${fH(fb)} quand la réaction a eu lieu x fois ?`,
+        options: [{ id: 'ok', label: `${nb} − ${cb}x` }, { id: 'oubli', label: `${nb} − x` }, { id: 'signe', label: `${nb} + ${cb}x` }, { id: 'inv', label: `${cb} − ${nb}x` }],
+        bonne: 'ok',
+        indices: {
+          oubli: `Tu as oublié le nombre stœchiométrique : à chaque fois, ${cb} molécules de ${fH(fb)} disparaissent ; après x fois, ${cb} × x = ${cb}x.`,
+          signe: `${fH(fb)} est un réactif : il disparaît, sa quantité diminue. On retire ${cb}x.`,
+          inv: `Tu as inversé les nombres : on part de la quantité initiale (${nb}) et on retire ${cb} à chaque fois.`,
+        },
+        solution: `<p>On part de ${nb} et on retire ${cb} molécules à chaque fois : <b>${nb} − ${cb}x</b>.</p>` }] },
+    { titre: 'Un produit',
+      enonce: eq(r),
+      parties: [{ type: 'choix', q: `Quelle est la quantité de ${fH(fp)} quand la réaction a eu lieu x fois ?`,
+        options: [{ id: 'ok', label: `0 + ${cp}x` }, { id: 'signe', label: `0 − ${cp}x` }, { id: 'oubli', label: '0 + x' }, { id: 'inv', label: `${cp} + x` }],
+        bonne: 'ok',
+        indices: {
+          signe: `${fH(fp)} est un produit : il apparaît, sa quantité augmente. On ajoute ${cp}x.`,
+          oubli: `Tu as oublié le nombre stœchiométrique : à chaque fois, ${cp} molécules de ${fH(fp)} apparaissent ; après x fois, ${cp}x.`,
+          inv: `Au départ, il n'y a pas de ${fH(fp)} : on part de 0 et on ajoute ${cp} molécules à chaque fois.`,
+        },
+        solution: `<p>Au départ, il n'y en a pas ; il en apparaît ${cp} à chaque fois : <b>0 + ${cp}x</b> (soit ${cp}x).</p>` }] },
+    { titre: `Pour x = ${k}`,
+      enonce: `${eq(r)}<p>${depart(r)} La réaction a eu lieu ${k} fois : x = ${k}.</p>`,
+      parties: [{ type: 'champs', q: `Combien y a-t-il de molécules de ${fH(fb)} et de ${fH(fp)} ?`,
+        champs: [{ label: `${fH(fb)} :`, valeur: nb - cb * k, tol: 0, entier: true, signe: false, unite: 'molécules' },
+          { label: `${fH(fp)} :`, valeur: cp * k, tol: 0, entier: true, signe: false, unite: 'molécules' }],
+        diag: vs => {
+          if (vs[0] !== nb - cb * k) {
+            if (vs[0] === nb - k) return `${fH(fb)} : tu as oublié le nombre stœchiométrique. ${nb} − ${cb} × ${k}.`;
+            if (vs[0] === nb + cb * k) return `${fH(fb)} est un réactif : on retire ${cb} × ${k}, on n'ajoute pas.`;
+            return `${fH(fb)} : remplace x par ${k} dans ${nb} − ${cb}x.`;
+          }
+          if (vs[1] === k) return `${fH(fp)} : tu as oublié le nombre stœchiométrique. 0 + ${cp} × ${k}.`;
+          return `${fH(fp)} : remplace x par ${k} dans 0 + ${cp}x.`;
+        },
+        solution: `<p class="crs-calc">${fH(fb)} : ${nb} − ${cb} × ${k} = <span class="c">${nb - cb * k}</span><br>${fH(fp)} : 0 + ${cp} × ${k} = <span class="c">${cp * k}</span></p>` }] },
+  ]);
+  return carte;
 }
 
-/* ---------- 2. et 3. Construire le tableau ---------- */
-function exercice(titre, q, texte, suivante) {
-  const c = carte(`<h3 class="cours-titre">${titre}</h3>
-    <p class="av-equation">${AV.equationHTML(q)}</p>
-    <p class="er-contexte">${texte}</p><div data-x="ex" style="margin-top:12px"></div>`);
-  new AV.Exercice(c.querySelector('[data-x="ex"]'), Object.assign({}, q, {
-    unite: 'molécules', mode: 'entier', guide: true, molecules: true, frise: true,
-    etapes: ['initial', 'pont', 'cours', 'hyp', 'concl', 'final'],
-    onFini: () => continuer(c, suivante),
-  }));
-  return c;
-}
-const etape2 = () => exercice('2. Construire le tableau : combustion du méthane',
-  { r: ['CH4', 'O2'], p: ['CO2', 'H2O'], c: [1, 2, 1, 2], n0: [3, 4, 0, 0] },
-  'Au départ : 3 molécules de CH<sub>4</sub> et 4 molécules de O<sub>2</sub>. Complète le tableau étape par étape.', etape3);
-const etape3 = () => exercice("3. Un autre tableau : synthèse de l'ammoniac",
-  { r: ['N2', 'H2'], p: ['NH3'], c: [1, 3, 2], n0: [4, 9, 0] },
-  'Au départ : 4 molécules de N<sub>2</sub> et 9 molécules de H<sub>2</sub>.', etape4);
+/* ---------- 2. L'avancement maximal ---------- */
+function etape2(c) {
+  const carte = c.carte('2. L\'avancement maximal x<sub>max</sub>');
+  const d = c.ajouter(carte, `<div class="cours-bloc">
+      <p>La réaction s'arrête quand un réactif est épuisé. Pour savoir lequel, on fait une <b>hypothèse</b> pour chaque réactif.</p>
+      <div class="cle"><p><b class="cle-titre">Hypothèses</b> : pour chaque réactif, on suppose qu'il est le réactif limitant : sa quantité finale est nulle.</p>
+        <p class="av-formule-cle">n<sub>initial</sub> − c × ${xm} = 0 &nbsp;donc&nbsp; ${xm} = n<sub>initial</sub> ÷ c</p></div>
+      <div class="cle"><p><b class="cle-titre">Conclusion</b> : la réaction s'arrête au premier réactif épuisé : on garde la <b>plus petite</b> valeur. C'est l'avancement maximal ${xm}, et le réactif correspondant est le réactif limitant.</p></div>
+    </div>
+    ${exemple(`<p class="av-equation">CH<sub>4</sub> + <span class="av-c">2</span>&nbsp;O<sub>2</sub> → CO<sub>2</sub> + <span class="av-c">2</span>&nbsp;H<sub>2</sub>O</p>
+      <p>Au départ : 3 molécules de CH<sub>4</sub> et 4 molécules de O<sub>2</sub>.</p>
+      <div class="av-hyp" style="margin-top:10px">
+        <div><p class="av-hyp-q">Si CH<sub>4</sub> est limitant</p><p class="av-hyp-calc">3 − ${xm} = 0 donc ${xm} = <b>3</b></p></div>
+        <div class="gagne"><p class="av-hyp-q">Si O<sub>2</sub> est limitant</p><p class="av-hyp-calc">4 − 2${xm} = 0 donc ${xm} = 4 ÷ 2 = <b>2</b></p></div>
+      </div>
+      <div class="av-frise" data-x="frise"></div>
+      <p class="av-frise-legende">Chaque réactif dresse un mur à la valeur de x où il serait épuisé. L'avancement part de 0 et s'arrête au premier mur rencontré.</p>
+      <p style="margin-top:10px">On garde la plus petite valeur : <b>${xm} = 2</b>. O<sub>2</sub> est le réactif limitant.</p>`)}`);
+  AV.frise(d.querySelector('[data-x="frise"]'), [{ v: 3, nom: 'CH₄', couleur: AV.COUL[0] }, { v: 2, nom: 'O₂', couleur: AV.COUL[1] }], 2, 'decimal');
 
-/* ---------- 4. À retenir ---------- */
-function etape4() {
-  const c = carte(`<h3 class="cours-titre">À retenir : la méthode</h3>
+  const [ra, rb] = melanger(REACTIONS);
+  const a = tirer(ra), b = tirer(rb, true);
+  c.aToi(carte, [
+    { titre: 'Les deux hypothèses',
+      enonce: `${eq(a)}<p>${depart(a)}</p>`,
+      parties: [
+        { type: 'champs', q: 'Calcule la valeur de x<sub>max</sub> pour chaque hypothèse.',
+          champs: a.r.map((f, k) => ({ label: `Si ${fH(f)} est limitant : ${xm} =`, valeur: a.xm[k], tol: 0, entier: true, signe: false })),
+          diag: vs => { const k = vs.findIndex((v, j) => v !== a.xm[j]); return diagHyp(vs[k], a.n0[k], a.c[k], a.r[k]); },
+          solution: `<p class="crs-calc">${a.r.map((f, k) => `${fH(f)} : ${a.n0[k]} − ${coefX(a.c[k])}${xm} = 0 donc ${xm} = ${a.n0[k]} ÷ ${a.c[k]} = <span class="c">${a.xm[k]}</span>`).join('<br>')}</p>` },
+        partieLimitant(a),
+      ] },
+    { titre: 'Attention au piège',
+      enonce: `${eq(b)}<p>${depart(b)}</p>`,
+      parties: [
+        { type: 'nombre', q: 'Quel est l\'avancement maximal ?', label: `${xm} =`, valeur: b.xmax, tol: 0, entier: true, signe: false,
+          diag: v => {
+            if (v === Math.max(...b.xm)) return 'C\'est la plus grande des deux valeurs. La réaction s\'arrête au premier réactif épuisé : on garde la plus petite.';
+            if (v === Math.min(...b.r.map((_, k) => b.n0[k]))) return 'Tu as pris la plus petite quantité initiale. Il faut d\'abord diviser chaque quantité par son nombre stœchiométrique.';
+            const k = b.r.map((_, j) => j).find(j => v === b.n0[j]);
+            if (k != null) return `Tu as oublié de diviser par le nombre stœchiométrique : pour ${fH(b.r[k])}, ${xm} = ${b.n0[k]} ÷ ${b.c[k]}.`;
+            return 'Fais les deux hypothèses (n<sub>initial</sub> ÷ nombre stœchiométrique) et garde la plus petite valeur.';
+          },
+          solution: `<p class="crs-calc">${b.r.map((f, k) => `${fH(f)} : ${b.n0[k]} ÷ ${b.c[k]} = ${b.xm[k]}`).join('<br>')}</p><p>On garde la plus petite : <b>${xm} = ${b.xmax}</b>.</p>` },
+        partieLimitant(b),
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Le tableau complet ---------- */
+// Énoncé et tableau guidé (AV.Exercice étape par étape, avec dessins, ligne « à chaque fois » et frise)
+const guide = q => AV.partieExercice(Object.assign({}, q, {
+  unite: 'molécules', mode: 'entier', molecules: true, frise: true,
+  etapes: ['initial', 'pont', 'cours', 'hyp', 'concl', 'final'],
+}));
+function etape3(c) {
+  const carte = c.carte('3. Le tableau d\'avancement complet');
+  const q = { r: ['CH4', 'O2'], p: ['CO2', 'H2O'], c: [1, 2, 1, 2], n0: [3, 4, 0, 0] };
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Le tableau d'avancement rassemble tout : une colonne par espèce, une ligne par état. On le remplit dans cet ordre.</p>
+      <div class="cle"><p><b class="cle-titre">1. État initial</b> : les quantités de départ ; 0 pour les produits.</p>
+        <p><b class="cle-titre">2. État en cours</b> : réactif : n<sub>initial</sub> <b>−</b> c × x ; produit : n<sub>initial</sub> <b>+</b> c × x.</p>
+        <p><b class="cle-titre">3. Hypothèses</b> : pour chaque réactif, n<sub>initial</sub> − c × ${xm} = 0.</p>
+        <p><b class="cle-titre">4. Conclusion</b> : la plus petite valeur est ${xm} ; ce réactif est le réactif limitant.</p>
+        <p><b class="cle-titre">5. État final</b> : on remplace x par ${xm} dans la ligne « en cours ».</p></div>
+    </div>
+    ${exemple(`${eq(q)}<p>Au départ : 3 molécules de CH<sub>4</sub> et 4 molécules de O<sub>2</sub>.</p>
+      ${AV.tableauHTML(q, { unite: 'molécules', mode: 'entier', pont: true, molecules: true })}
+      <p style="margin-top:8px">Hypothèses : 3 − ${xm} = 0 donne ${xm} = 3 ; 4 − 2${xm} = 0 donne ${xm} = 2. On garde <b>${xm} = 2</b> : O<sub>2</sub> est le réactif limitant. La ligne « final » s'obtient en remplaçant x par 2.</p>`)}`);
+
+  const nh3 = { r: ['N2', 'H2'], p: ['NH3'], c: [1, 3, 2], n0: [4, 9, 0] };
+  const r2 = tirer(hasard(REACTIONS.filter(r => r.r.length + r.p.length === 3 && r.r[0] !== 'N2')));
+  c.aToi(carte, [
+    { titre: 'Synthèse de l\'ammoniac',
+      enonce: `${eq(nh3)}<p>Au départ : 4 molécules de N<sub>2</sub> et 9 molécules de H<sub>2</sub>. Complète le tableau étape par étape.</p>`,
+      parties: [guide(nh3)] },
+    { titre: r2.nom,
+      enonce: `${eq(r2)}<p>Au départ : ${r2.r.map((f, k) => mol(r2.n0[k], f)).join(' et ')}.</p>`,
+      parties: [guide(r2)] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir : la méthode ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir : la méthode');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">L'avancement</b> x est le nombre de fois que la réaction a eu lieu (x = 0 au départ). La réaction s'arrête pour l'<b>avancement maximal ${xm}</b>.</p></div>
     <div class="cle"><p><b class="cle-titre">1. État initial</b> : les quantités de départ ; 0 pour les produits.</p></div>
     <div class="cle"><p><b class="cle-titre">2. État en cours</b> : réactif : n<sub>initial</sub> <b>−</b> nombre stœchiométrique × x ; produit : n<sub>initial</sub> <b>+</b> nombre stœchiométrique × x.</p></div>
-    <div class="cle"><p><b class="cle-titre">3. Hypothèses</b> : pour chaque réactif, on suppose qu'il est épuisé (quantité finale nulle) et on calcule x<sub>max</sub>.</p></div>
-    <div class="cle"><p><b class="cle-titre">4. Conclusion</b> : la réaction s'arrête au premier réactif épuisé : on garde la <b>plus petite</b> valeur de x<sub>max</sub>. Ce réactif est le réactif limitant.</p></div>
-    <div class="cle"><p><b class="cle-titre">5. État final</b> : on remplace x par x<sub>max</sub> dans la ligne « en cours ».</p></div>
+    <div class="cle"><p><b class="cle-titre">3. Hypothèses</b> : pour chaque réactif, on suppose qu'il est épuisé (quantité finale nulle) et on calcule ${xm}.</p></div>
+    <div class="cle"><p><b class="cle-titre">4. Conclusion</b> : la réaction s'arrête au premier réactif épuisé : on garde la <b>plus petite</b> valeur de ${xm}. Ce réactif est le réactif limitant.</p></div>
+    <div class="cle"><p><b class="cle-titre">5. État final</b> : on remplace x par ${xm} dans la ligne « en cours ».</p></div>
     <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3.html">Module 3 : des molécules aux moles →</a>
       <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
-  SOM.marquer({ fait: true });                                 // dernière étape atteinte : cours terminé
-  return c;
+  return carte;
 }
 
-etape1();
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
 AV.menu('module_2');
 </script>
 </body>

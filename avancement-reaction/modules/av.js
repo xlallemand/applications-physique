@@ -11,6 +11,9 @@
      AV.partieExercice     tableau guidé (AV.Exercice) dans un « À toi » (assets/cours.js)
      AV.partieValeurs      valeurs saisies avec les champs de l'application dans un « À toi »
                            (puissances de 10 : nombre au clavier, exposant avec les flèches)
+     AV.partieRapports, AV.partieLimitant, AV.partieFinal
+                           parties d'« À toi » toutes faites (n ÷ c, réactif limitant, état final)
+                           avec les diagnostics AV.diagRapport, AV.diagChoixLimitant, AV.diagFinal
      AV.menu, AV.accueil   sommaire de l'application et accueil (assets/sommaire.js)
    Formules et dessins des molécules : assets/molecules.js
    ============================================================ */
@@ -917,6 +920,84 @@
     };
   }
 
+  /* ---------- Diagnostics des erreurs fréquentes (cours en mol) ----------
+     mode : 'decimal' ou 'puissance' (écriture des nombres) */
+  const puiss10 = r => isFinite(r) && r > 0 && Math.abs(Math.log10(r) - Math.round(Math.log10(r))) < 1e-6 && Math.round(Math.log10(r)) !== 0;
+  const fois = c => (c > 1 ? c + ' × ' : '');
+  // Rapport n_initial ÷ nombre stœchiométrique (x_max si ce réactif est limitant)
+  function diagRapport(v, n, c, f, mode) {
+    const N = fmt(n, mode);
+    if (c > 1 && egal(v, n)) return `Tu as oublié de diviser par le nombre stœchiométrique de ${fH(f)} : ${N} ÷ ${c}.`;
+    if (c > 1 && egal(v, n * c)) return `Tu as multiplié par ${c} au lieu de diviser : ${N} ÷ ${c}.`;
+    if (egal(v, c / n)) return `Tu as calculé ${c} ÷ ${N}. C'est la quantité qu'on divise par le nombre stœchiométrique : ${N} ÷ ${c}.`;
+    if (mode === 'puissance' && puiss10(v / (n / c))) return 'Le nombre devant est juste, mais pas la puissance de 10. Si le nombre devant devient plus petit que 1, l\'exposant diminue de 1 : 0,50 × 10<sup>−2</sup> = 5,0 × 10<sup>−3</sup>.';
+    return `Pour ${fH(f)} : ${N} ÷ ${c}.`;
+  }
+  // Mauvais choix du réactif limitant k : la plus petite valeur de n ÷ c, pas la plus petite quantité
+  function diagChoixLimitant(q, k, mode) {
+    const K = calculer(q), L = K.L, r = j => `${fH(q.r[j])} : ${fmt(q.n0[j], mode)} ÷ ${q.c[j]} = ${fmt(K.xm[j], mode)}`;
+    return (q.n0[k] < q.n0[L] ? `${fH(q.r[k])} est le moins abondant au départ, mais il faut tenir compte des nombres stœchiométriques. ` : '') +
+      `${r(k)} ; ${r(L)}. La réaction s'arrête au premier réactif épuisé : c'est la plus petite valeur qui compte.`;
+  }
+  // Quantités finales ; ks : espèces demandées (toutes par défaut), dans l'ordre des valeurs vs
+  function diagFinal(vs, q, mode, ks) {
+    const K = calculer(q), nR = q.r.length, f = v => fmt(v, mode), X = f(K.xmax);
+    ks = ks || K.esp.map((_, j) => j);
+    const i = vs.findIndex((v, j) => !egal(v, K.nf[ks[j]]));
+    if (i < 0) return '';
+    const k = ks[i], v = vs[i], s = K.esp[k], c = q.c[k];
+    if (k >= nR) {
+      if (c > 1 && egal(v, K.xmax)) return `${fH(s)} : tu as oublié le nombre stœchiométrique, ${c} × ${X}.`;
+      if (egal(v, -c * K.xmax)) return `${fH(s)} est un produit : sa quantité augmente, 0 + ${fois(c)}${X}.`;
+      return `${fH(s)} est un produit : n<sub>final</sub> = 0 + ${fois(c)}${X}.`;
+    }
+    if (k === K.L) return `${fH(s)} est le réactif limitant : il est entièrement consommé, ${f(q.n0[k])} − ${fois(c)}${X} = 0.`;
+    if (c > 1 && egal(v, q.n0[k] - K.xmax)) return `${fH(s)} : tu as oublié le nombre stœchiométrique. Il en disparaît ${c} × ${X} = ${f(c * K.xmax)}.`;
+    if (egal(v, q.n0[k] + c * K.xmax)) return `${fH(s)} est un réactif : sa quantité diminue. On retire ${fois(c)}${X}.`;
+    if (egal(v, 0)) return `${fH(s)} est en excès : il en reste à la fin.`;
+    return `${fH(s)} : ${f(q.n0[k])} − ${fois(c)}${X}${mode === 'puissance' ? ' (écris les deux nombres avec le même exposant pour soustraire)' : ''}.`;
+  }
+  // Calculs détaillés (solutions) : rapports n ÷ c, puis état final
+  function calculsRapports(q, mode) {
+    const K = calculer(q);
+    return `<p class="crs-calc">${q.r.map((s, k) => `${fH(s)} : ${fmt(q.n0[k], mode)} ÷ ${q.c[k]} = <span class="c">${fmt(K.xm[k], mode)} mol</span>`).join('<br>')}</p>`;
+  }
+  function calculsFinal(q, mode, ks) {
+    const K = calculer(q), nR = q.r.length, X = fmt(K.xmax, mode);
+    ks = ks || K.esp.map((_, j) => j);
+    return `<p class="crs-calc">${ks.map(k => `${fH(K.esp[k])} : ${k < nR ? fmt(q.n0[k], mode) + ' − ' : '0 + '}${fois(q.c[k])}${X} = <span class="c">${fmt(K.nf[k], mode)} mol</span>`).join('<br>')}</p>`;
+  }
+
+  /* ---------- Parties d'« À toi » toutes faites (cours en mol) ---------- */
+  // Rapports n ÷ c de chaque réactif (= x_max de chaque hypothèse)
+  // lab(f) : étiquette de la case ; en puissances de 10, champs de l'application
+  function partieRapports(q, mode, lab, question) {
+    const K = calculer(q);
+    const champs = q.r.map((s, k) => ({ lab: lab(s, k), valeur: K.xm[k], unite: 'mol', aria: 'rapport pour ' + s }));
+    const diag = vs => { const k = vs.findIndex((v, j) => !egal(v, K.xm[j])); return k < 0 ? '' : diagRapport(vs[k], q.n0[k], q.c[k], q.r[k], mode); };
+    const solution = calculsRapports(q, mode);
+    if (mode === 'puissance') return partieValeurs({ mode, q: question, champs, diag, solution });
+    return { type: 'champs', q: question, champs: champs.map(c => ({ label: c.lab, valeur: c.valeur, unite: c.unite, signe: false, aria: c.aria })), diag, solution };
+  }
+  // Choix du réactif limitant
+  function partieLimitant(q, mode) {
+    const K = calculer(q);
+    const indices = {};
+    q.r.forEach((_, k) => { if (k !== K.L) indices[k] = diagChoixLimitant(q, k, mode); });
+    return { type: 'choix', q: 'Quel est le réactif limitant ?', melanger: false,
+      options: q.r.map((s, k) => ({ id: k, label: fH(s) })), bonne: K.L, indices,
+      solution: `<p>La plus petite valeur est x<sub>max</sub> = ${fmt(K.xmax, mode)} mol : <b>${fH(q.r[K.L])}</b> est le réactif limitant.</p>` };
+  }
+  // Quantités à l'état final (ks : espèces demandées, toutes par défaut)
+  function partieFinal(q, mode, question, ks) {
+    const K = calculer(q);
+    ks = ks || K.esp.map((_, j) => j);
+    const champs = ks.map(k => ({ lab: `${fH(K.esp[k])} :`, valeur: K.nf[k], unite: 'mol', aria: 'quantité finale de ' + K.esp[k] }));
+    const diag = vs => diagFinal(vs, q, mode, ks), solution = calculsFinal(q, mode, ks);
+    if (mode === 'puissance') return partieValeurs({ mode, q: question, champs, diag, solution });
+    return { type: 'champs', q: question, champs: champs.map(c => ({ label: c.lab, valeur: c.valeur, unite: c.unite, signe: false, aria: c.aria })), diag, solution };
+  }
+
   /* ---------- Plan de l'application et navigation (voir assets/sommaire.js) ---------- */
   const PLAN = [
     { n: 1, titre: 'Les nombres stœchiométriques en action', desc: 'Seconde · des molécules réagissent pas à pas, le réactif limitant', fiche: 'fiche_1',
@@ -949,5 +1030,6 @@
     fmt, lire, egal, puissance, champ, expression, calculer, equationHTML, enteteEspeces, frise, animerFrise, texteUni,
     Simulation, Exercice, entrainement, confettis, menu, accueil, PLAN, melanger, COUL,
     tableauHTML, bilanHTML, partieExercice, partieValeurs,
+    diagRapport, diagChoixLimitant, diagFinal, calculsRapports, calculsFinal, partieRapports, partieLimitant, partieFinal,
   };
 })();

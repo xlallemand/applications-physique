@@ -92,7 +92,8 @@ function etape2(c) {
   const carte = c.carte('2. Écrire la relation utile');
   c.ajouter(carte, `<div class="cours-bloc">
       <p>Chaque quantité de matière est divisée par <b>son propre</b> nombre stœchiométrique. Pour un calcul, on garde seulement les deux espèces utiles, par exemple le combustible et le dioxyde de carbone :</p>
-      <div class="cle"><p class="co-formule">${frac('n(combustible)', 'a')} = ${frac(`n(${fH('CO2')})`, 'c')} &nbsp;donc&nbsp; n(${fH('CO2')}) = ${frac('c', 'a')} × n(combustible)</p></div>
+      <div class="cle"><p class="co-formule">${frac('n(combustible)', 'a')} = ${frac(`n(${fH('CO2')})`, 'c')}</p>
+        <p class="co-formule">donc n(${fH('CO2')}) = ${frac('c', 'a')} × n(combustible)</p></div>
     </div>
     ${exemple(`<p>Combustion du propane :</p>
       <p class="co-eq">${CO.equation('C3H8')}</p>
@@ -101,16 +102,18 @@ function etape2(c) {
       <p class="crs-calc">${frac(nf('C3H8'), 1)} = ${frac(nf('CO2'), 3)} donc ${nf('CO2')} = 3 × ${nf('C3H8')} = 3 × 0,2 = <span class="c">0,6 mol</span></p>`)}`);
   // relation à choisir : alcane dont le nombre stœchiométrique vaut 1
   const f = hasard(['C5H12', 'C7H16']), k = CO.coefs(f), nom = CO.COMB[f].nom;
-  const n2 = hasard([0.5, 0.2, 1.5]), n3 = hasard([0.9, 1.2, 0.6]);
+  // « du pentane, de pentane » ou « de l'heptane, d'heptane »
+  const h = /^h/.test(nom), duNom = (h ? 'de l\'' : 'du ') + nom, deNom = (h ? 'd\'' : 'de ') + nom;
+  const n2 = hasard([0.5, 0.2, 1.5]), n3 = hasard([0.9, 1.2, 1.5]);   // pas 0,6 : c'est le résultat de l'exemple
   c.aToi(carte, [
-    { titre: 'La bonne relation', enonce: `<p>Combustion du ${nom} :</p><p class="co-eq">${CO.equation(f)}</p>`,
-      parties: [{ type: 'choix', q: `Quelle relation lie les quantités de matière de ${nom} consommé et de ${fH('CO2')} formé ?`, colonne: true,
+    { titre: 'La bonne relation', enonce: `<p>Combustion ${duNom} :</p><p class="co-eq">${CO.equation(f)}</p>`,
+      parties: [{ type: 'choix', q: `Quelle relation lie les quantités de matière ${deNom} consommé et de ${fH('CO2')} formé ?`, colonne: true,
         options: [{ id: 'ok', label: `${frac(nf(f), 1)} = ${frac(nf('CO2'), k[2])}` }, { id: 'inv', label: `${frac(nf(f), k[2])} = ${frac(nf('CO2'), 1)}` },
           { id: 'prod', label: `${nf(f)} × 1 = ${nf('CO2')} × ${k[2]}` }],
         bonne: 'ok',
         indices: {
           inv: `Tu as échangé les nombres stœchiométriques : chaque quantité est divisée par <b>son propre</b> nombre, 1 pour ${fH(f)} et ${k[2]} pour ${fH('CO2')}.`,
-          prod: `On ne multiplie pas : on divise chaque quantité de matière par son nombre stœchiométrique. Avec ta relation, il y aurait ${k[2]} fois moins de ${fH('CO2')} que de ${nom}, alors que l'équation en donne ${k[2]} fois plus.`,
+          prod: `On ne multiplie pas : on divise chaque quantité de matière par son nombre stœchiométrique. Avec ta relation, il y aurait ${k[2]} fois moins de ${fH('CO2')} que ${deNom}, alors que l'équation en donne ${k[2]} fois plus.`,
         },
         solution: `<p class="co-formule">${relation(f)}</p><p>Donc ${nf('CO2')} = ${k[2]} × ${nf(f)}.</p>` }] },
     itemRel('Avec l\'éthanol', 'C2H6O', 0, n2, 3, `${fmt(n2)} mol d'éthanol brûlent.`, 'Quelle quantité d\'eau est formée ?'),
@@ -124,7 +127,8 @@ function etape3(c) {
   const carte = c.carte('3. Quand le combustible a le nombre 2');
   c.ajouter(carte, `<div class="cours-bloc">
       <p>Quand on a dû tout multiplier par 2 pour équilibrer (le cas du demi), le nombre stœchiométrique du combustible vaut 2. Il ne faut pas l'oublier dans la relation :</p>
-      <div class="cle"><p class="co-formule">${frac('n(combustible)', '2')} = ${frac(`n(${fH('CO2')})`, 'c')} &nbsp;donc&nbsp; n(${fH('CO2')}) = ${frac('c', '2')} × n(combustible)</p></div>
+      <div class="cle"><p class="co-formule">${frac('n(combustible)', '2')} = ${frac(`n(${fH('CO2')})`, 'c')}</p>
+        <p class="co-formule">donc n(${fH('CO2')}) = ${frac('c', '2')} × n(combustible)</p></div>
     </div>
     ${exemple(`<p>Combustion de l'éthane :</p>
       <p class="co-eq">${CO.equation('C2H6')}</p>

@@ -76,6 +76,11 @@
         .eq-tile { min-height:36px; }
         .eq-sign { font-size:1.4rem; margin:0 8px; }
         .flip-btn { width:36px; height:36px; font-size:1rem; margin-left:8px; }
+        /* téléphone : équation plus compacte, pour qu'elle tienne le plus souvent sans défiler */
+        .slot-simple { min-width:52px; min-height:50px; padding:6px 8px; gap:6px; }
+        .eq-sign { margin:0 6px; }
+        .flip-btn { margin-left:4px; }
+        .ep-zone { padding:24px 4px; }
     }
 
     /* ── Schéma « on divise / multiplie les deux côtés par… » ── */
@@ -112,6 +117,8 @@
     .ep-av { min-width:0; max-width:100%; }
     .er-etape .ep-av-t { font-size:.72rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); text-align:center; margin-bottom:4px; }
     .er-etape .ep-op { font-weight:800; color:var(--accent); text-align:center; }
+    .ep-op::after { content:' →'; }
+    @media (max-width:560px) { .ep-op::after { content:' ↓'; } }
     .ep-exemples .ep-avap + .ep-avap { border-top:1.5px dashed var(--paper-3); padding-top:12px; }
 </style>
 <link rel="stylesheet" href="../../assets/sommaire.css">
@@ -748,7 +755,7 @@ function etape2(c) {
         <div class="cle"><p><b class="cle-titre">Règle 2.</b> Un terme multiplicatif au numérateur (en haut) passe au dénominateur (en bas) de l'autre côté (cela revient à diviser les deux côtés de l'équation par ce terme).</p></div>
       </div>
       ${exemple(`<p>Dans ${fr('ρ', '1')} = ${fr('m', 'V')}, on fait passer ρ de l'autre côté :</p>
-        ${avantApres(eqStat(frac([T('rho', 'ρ')], [ONE]), frac([T('m')], [T('V')])), '÷ρ des deux côtés →',
+        ${avantApres(eqStat(frac([T('rho', 'ρ')], [ONE]), frac([T('m')], [T('V')])), '÷ρ des deux côtés',
                      eqStat(frac([ONE], [ONE]), frac([T('m')], [T('V'), T('rho', 'ρ')])))}
         <p>ρ quitte le numérateur à gauche (il y reste 1, voir la règle 4) et arrive au dénominateur à droite.</p>`)}
       ${MODE_EMPLOI}`);
@@ -764,7 +771,7 @@ function etape3(c) {
         <div class="cle"><p><b class="cle-titre">Règle 3.</b> Un terme multiplicatif au dénominateur (en bas) passe au numérateur (en haut) de l'autre côté (cela revient à multiplier les deux côtés de l'équation par ce terme).</p></div>
       </div>
       ${exemple(`<p>Dans ${fr('ρ', '1')} = ${fr('m', 'V')}, on fait passer V de l'autre côté :</p>
-        ${avantApres(eqStat(frac([T('rho', 'ρ')], [ONE]), frac([T('m')], [T('V')])), '×V des deux côtés →',
+        ${avantApres(eqStat(frac([T('rho', 'ρ')], [ONE]), frac([T('m')], [T('V')])), '×V des deux côtés',
                      eqStat(frac([T('rho', 'ρ'), T('V')], [ONE]), simple([T('m')])))}
         <p>V quitte le dénominateur à droite (la fraction disparaît, il reste m) et arrive au numérateur à gauche : ρ × V = m.</p>`)}`);
     c.aToi(carte, M_DEN.map(manip));
@@ -779,13 +786,13 @@ function etape4(c) {
         <div class="cle"><p><b class="cle-titre">Règle 4.</b> Numérateur vidé → on écrit 1. Dénominateur vidé → la fraction disparaît. On peut toujours transformer un terme en fraction avec l'icône « ··· / ··· » de la palette.</p></div>
       </div>
       ${exemple(`<div class="ep-exemples">
-        ${avantApres(eqStat(frac([T('R')], [ONE]), frac([T('U')], [T('I')])), 'R passe en bas à droite →',
+        ${avantApres(eqStat(frac([T('R')], [ONE]), frac([T('U')], [T('I')])), 'R passe en bas à droite',
                      eqStat(frac([ONE], [ONE]), frac([T('U')], [T('I'), T('R')])))}
         <p>Le numérateur de gauche est vidé : on y écrit 1.</p>
-        ${avantApres(eqStat(frac([T('R')], [ONE]), frac([T('U')], [T('I')])), 'I passe en haut à gauche →',
+        ${avantApres(eqStat(frac([T('R')], [ONE]), frac([T('U')], [T('I')])), 'I passe en haut à gauche',
                      eqStat(frac([T('R'), T('I')], [ONE]), simple([T('U')])))}
         <p>Le dénominateur de droite est vidé : la fraction disparaît, il reste U.</p>
-        ${avantApres(eqStat(simple([T('U')]), simple([T('R'), T('I')])), 'icône fraction sur U →',
+        ${avantApres(eqStat(simple([T('U')]), simple([T('R'), T('I')])), 'icône fraction sur U',
                      eqStat(frac([T('U')], [ONE]), simple([T('R'), T('I')])))}
         <p>U = ${fr('U', '1')} : un 1 au dénominateur ne change rien. À l'inverse, un dénominateur qui vaut 1 se supprime.</p></div>`)}`);
     c.aToi(carte, M_UN.map(manip));
@@ -799,7 +806,7 @@ function etape5(c) {
         <p>Si le terme à isoler se retrouve seul mais à droite, il n'y a rien de plus à calculer : il suffit d'écrire l'équation dans l'autre sens avec le bouton ⇄.</p>
         <div class="cle"><p><b class="cle-titre">Règle 5.</b> Le bouton ⇄ permet d'écrire l'équation dans l'autre sens, sans déplacer aucun terme.</p></div>
       </div>
-      ${exemple(`${avantApres(eqStat(frac([T('U')], [T('I')]), simple([T('R')])), '⇄ →',
+      ${exemple(`${avantApres(eqStat(frac([T('U')], [T('I')]), simple([T('R')])), '⇄',
                               eqStat(simple([T('R')]), frac([T('U')], [T('I')])))}
         <p>R est maintenant isolé à gauche : R = ${fr('U', 'I')}.</p>`)}`);
     c.aToi(carte, M_SENS.map(manip));

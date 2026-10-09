@@ -36,6 +36,11 @@
 const { fmt, hasard, exemple } = COURS;
 const frac = (a, b) => `<span class="co-frac"><span>${a}</span><span>${b}</span></span>`;
 const nom = f => CO.COMB[f].nom, PC = f => CO.COMB[f].PC;
+// articles devant le nom du combustible : « du butane, de l'hexane », « de butane, d'octane », « le méthanol, l'éthanol »
+const voyelle = f => /^[aeéèiouyh]/i.test(nom(f));
+const duNom = f => (voyelle(f) ? 'de l\'' : 'du ') + nom(f);
+const deNom = f => (voyelle(f) ? 'd\'' : 'de ') + nom(f);
+const leNom = f => (voyelle(f) ? 'l\'' : 'le ') + nom(f);
 const egal = (a, b) => COURS.proche(a, b, .005);
 // tableau de proportionnalité : une colonne par grandeur (énergie, masse) ; x : valeur cherchée
 const table = (l1, l2) => `<div class="crs-defile"><table class="co-prop"><tr><th>Énergie (MJ)</th><th>Masse (kg)</th></tr>${l1.map((v, k) => `<tr><td>${v}</td><td>${l2[k]}</td></tr>`).join('')}</table></div>`;
@@ -62,10 +67,10 @@ function etape1(c) {
   const f = hasard(['C3H8', 'C4H10', 'C8H18']), p = fmt(PC(f));
   const alcool = hasard(['C2H6O', 'CH4O']);
   c.aToi(carte, [
-    { titre: 'Que signifie cette valeur ?', enonce: `<p>Le pouvoir calorifique du ${nom(f)} est ${pcTxt(f)}.</p>`,
+    { titre: 'Que signifie cette valeur ?', enonce: `<p>Le pouvoir calorifique ${duNom(f)} est ${pcTxt(f)}.</p>`,
       parties: [{ type: 'choix', q: 'Que signifie cette valeur ?', colonne: true,
-        options: [{ id: 'ok', label: `La combustion de 1 kg de ${nom(f)} libère ${p} MJ.` }, { id: 'g', label: `La combustion de 1 g de ${nom(f)} libère ${p} MJ.` },
-          { id: 'mol', label: `La combustion de 1 mol de ${nom(f)} libère ${p} MJ.` }, { id: 'inv', label: `Il faut brûler ${p} kg de ${nom(f)} pour libérer 1 MJ.` }],
+        options: [{ id: 'ok', label: `La combustion de 1 kg ${deNom(f)} libère ${p} MJ.` }, { id: 'g', label: `La combustion de 1 g ${deNom(f)} libère ${p} MJ.` },
+          { id: 'mol', label: `La combustion de 1 mol ${deNom(f)} libère ${p} MJ.` }, { id: 'inv', label: `Il faut brûler ${p} kg ${deNom(f)} pour libérer 1 MJ.` }],
         bonne: 'ok',
         indices: {
           g: 'Regarde l\'unité : MJ/kg, des mégajoules par <b>kilogramme</b>, pas par gramme.',
@@ -75,13 +80,13 @@ function etape1(c) {
         solution: '<p>PC en MJ/kg : énergie (en MJ) libérée par la combustion de 1 kg de combustible.</p>' }] },
     { titre: 'Comparer deux combustibles', enonce: `<p>${pcTxt(alcool)} ; PC(propane) = 46 MJ/kg. On brûle 1 kg de chacun.</p>`,
       parties: [{ type: 'choix', q: 'Lequel libère le plus d\'énergie ?',
-        options: [{ id: 'C3H8', label: 'le propane' }, { id: 'alc', label: `le ${nom(alcool)}` }, { id: 'pareil', label: 'autant l\'un que l\'autre' }],
+        options: [{ id: 'C3H8', label: 'le propane' }, { id: 'alc', label: leNom(alcool) }, { id: 'pareil', label: 'autant l\'un que l\'autre' }],
         bonne: 'C3H8',
         indices: {
-          alc: `1 kg de propane libère 46 MJ, 1 kg de ${nom(alcool)} ${fmt(PC(alcool))} MJ : c'est le plus grand pouvoir calorifique qui libère le plus d'énergie.`,
+          alc: `1 kg de propane libère 46 MJ, 1 kg ${deNom(alcool)} ${fmt(PC(alcool))} MJ : c'est le plus grand pouvoir calorifique qui libère le plus d'énergie.`,
           pareil: 'Même masse ne veut pas dire même énergie : chaque combustible a son propre pouvoir calorifique.',
         },
-        solution: `<p>Le propane : 46 MJ par kg, contre ${fmt(PC(alcool))} MJ pour le ${nom(alcool)}.</p>` }] },
+        solution: `<p>Le propane : 46 MJ par kg, contre ${fmt(PC(alcool))} MJ pour ${leNom(alcool)}.</p>` }] },
   ]);
   return carte;
 }
@@ -101,7 +106,7 @@ function etape2(c) {
   const f1 = hasard(['C3H8', 'C4H10']), m1 = hasard([2, 3, 5]);
   const f2 = hasard(['CH4', 'C8H18']), m2 = hasard([0.5, 1.5]);
   const item = (titre, f, m) => ({
-    titre, enonce: `<p>On brûle ${fmt(m)} kg de ${nom(f)}. ${pcTxt(f)}.</p>`,
+    titre, enonce: `<p>On brûle ${fmt(m)} kg ${deNom(f)}. ${pcTxt(f)}.</p>`,
     parties: [{ type: 'nombre', q: 'Quelle énergie est libérée ?', label: 'E =', unite: 'MJ', valeur: PC(f) * m, signe: false,
       diag: v => diagE(v, PC(f), m),
       solution: `${table([fmt(PC(f)), x('E')], ['1', fmt(m)])}<p class="crs-calc">E = ${fmt(PC(f))} × ${fmt(m)} = <span class="c">${fmt(PC(f) * m)} MJ</span></p>` }],
@@ -129,7 +134,7 @@ function etape3(c) {
           : egal(v, g1 / 100) || egal(v, g1 / 10) ? 'Diviser par 1 000, c\'est décaler la virgule de <b>3</b> rangs vers la gauche.'
             : 'Divise la masse en grammes par 1 000.'),
         solution: `<p class="crs-calc">m = ${fmt(g1)} ÷ 1 000 = <span class="c">${fmt(g1 / 1000)} kg</span></p>` }] },
-    { titre: 'Une masse en grammes', enonce: `<p>On brûle ${fmt(g2)} g de ${nom(f2)}. ${pcTxt(f2)}.</p>`,
+    { titre: 'Une masse en grammes', enonce: `<p>On brûle ${fmt(g2)} g ${deNom(f2)}. ${pcTxt(f2)}.</p>`,
       parties: [
         { type: 'nombre', q: 'Convertis la masse en kg.', label: 'm =', unite: 'kg', valeur: m2, signe: false,
           diag: v => (egal(v, g2 * 1000) ? 'Tu as multiplié par 1 000 : il y a 1 000 fois moins de kg que de g. Divise par 1 000.' : 'Divise la masse en grammes par 1 000.'),
@@ -172,7 +177,7 @@ function etape4(c) {
           inv: 'Vérifie avec les unités : (MJ/kg) ÷ MJ = 1/kg, ce n\'est pas une masse.',
         },
         solution: '<p>m = E / PC. Unités : MJ ÷ (MJ/kg) = kg.</p>' }] },
-    { titre: 'La masse en kg', enonce: `<p>On veut obtenir ${fmt(E2)} MJ en brûlant de l'${nom(f2)}. ${pcTxt(f2)}.</p>`,
+    { titre: 'La masse en kg', enonce: `<p>On veut obtenir ${fmt(E2)} MJ en brûlant ${duNom(f2)}. ${pcTxt(f2)}.</p>`,
       parties: [{ type: 'nombre', q: 'Quelle masse faut-il brûler ?', label: 'm =', unite: 'kg', valeur: m2, signe: false,
         diag: v => (egal(v, E2 * PC(f2)) ? 'Tu as multiplié : la masse à brûler est m = E / PC.'
           : egal(v, PC(f2) / E2) ? 'Tu as calculé PC / E : c\'est l\'énergie qu\'on divise par le pouvoir calorifique, m = E / PC.'
