@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : équilibrer une combustion — Combustions</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="co.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="../../equilibrer-reactions/modules/er.js"></script>
+<script src="co.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Équilibrer une combustion</h2>
+    <p class="er-contexte">D'abord un rappel pour vérifier que tu sais <b>équilibrer une réaction</b> (étapes 1 à 3). Ensuite, la méthode propre aux <b>combustions</b> : C, puis H, puis O (étapes 4 à 6). Pour finir, un entraînement noté.</p>
+    <div class="er-actions co-raccourcis">
+      <a class="btn-small" style="text-decoration:none" href="module_2.html">Déjà à l'aise ? Va directement à l'entraînement noté →</a>
+      <a class="btn-small" style="text-decoration:none" href="../../equilibrer-reactions/index.html" target="_blank" rel="noopener">Il me faut un rappel approfondi ↗</a>
+    </div>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Rappel :      1. Compter les atomes   2. Une équation équilibrée   3. Équilibrer une réaction
+   Combustions : 4. L'équation d'une combustion   5. C, puis H, puis O   6. Le cas du demi
+   À retenir, puis l'entraînement noté (module_2.html).
+
+   Les réactions à équilibrer utilisent les outils de l'application
+   « Équilibrer une réaction » (ER.Reaction, ER.Comptage) et les parties
+   'especes' et 'equilibrer' de co.js, dans des parties 'perso' du cours.
+   Chaque outil est une instance : avec « Afficher tout le cours »,
+   tous les « À toi » sont affichés en même temps.
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const fH = CO.fH, eqHTML = ER.equationHTML;
+const LIEN = '../../equilibrer-reactions/';
+// lien vers un module de l'application « Équilibrer une réaction » (nouvel onglet)
+const lienER = (page, texte) => `<a class="co-lien-txt" href="${LIEN}${page}" target="_blank" rel="noopener">${texte} ↗</a>`;
+// « du méthane », « de l'éthanol », « de l'hexane »
+const duNom = f => (/^[aeéèiouyh]/i.test(CO.COMB[f].nom) ? 'de l\'' : 'du ') + CO.COMB[f].nom;
+// « combustible + O2 → CO2 + H2O », sans nombres stœchiométriques
+const nonEquilibree = f => `${fH(f)} + ${fH('O2')} → ${fH('CO2')} + ${fH('H2O')}`;
+
+const REGLE_COMPTAGE = 'Le nombre stœchiométrique multiplie tous les atomes de la molécule : nombre d\'atomes = nombre stœchiométrique × indice.';
+// Réactions simples du rappel (même liste que l'ancien test de départ et « Faire le point »)
+const DEPART = { r: ['Al2O3', 'C'], p: ['CO', 'Al4O3'], c: [2, 3, 3, 1], nom: 'Réduction de l\'oxyde d\'aluminium par le carbone' };
+const SIMPLES = [
+  { r: ['CO', 'O2'], p: ['CO2'], c: [2, 1, 2], nom: 'Combustion du monoxyde de carbone' },
+  { r: ['Mg', 'O2'], p: ['MgO'], c: [2, 1, 2], nom: 'Combustion du magnésium' },
+];
+
+/* ============================================================
+   OUTILS DES « À TOI » (parties 'perso' de assets/cours.js)
+   monter(zone, api) construit l'outil, appelle api.reussi() ou
+   api.erreur(diagnostic), et renvoie { montrer() } (réponse affichée).
+   ============================================================ */
+
+// Compter les atomes d'une espèce (ER.Comptage)
+function comptage(formule, coef) {
+  return {
+    type: 'perso',
+    monter(zone, api) {
+      // .co-test : sans l'interrupteur des dessins (on vérifie le calcul)
+      const d = COURS.el('div', 'co-test');
+      zone.appendChild(d);
+      new ER.Comptage(d, { formule, coef, regle: REGLE_COMPTAGE, onReussi: () => api.reussi() });
+      // ER.Comptage écrit lui-même son diagnostic (éléments faux, règle, puis calcul) : on compte seulement l'erreur
+      d.querySelector('[data-c="verifier"]').addEventListener('click', () => {
+        if (!api.fini() && d.querySelector('.er-rep.ko')) api.compterErreur();
+      });
+      return { montrer() { new ER.Comptage(d, { formule, coef, resolu: true }); } };
+    },
+  };
+}
+
+// Équilibrer une réaction quelconque (ER.Reaction), avec ou sans le nombre d'atomes affiché
+function equilibrer(q, comptes) {
+  return {
+    type: 'perso',
+    q: 'Ajuste les nombres stœchiométriques avec les flèches, puis valide.',
+    solution: `<p class="er-eq">${eqHTML(q.r, q.p, q.c)}</p>`,
+    monter(zone, api) {
+      const d = COURS.el('div');
+      zone.appendChild(d);
+      const reac = new ER.Reaction(d, { reactifs: q.r, produits: q.p, comptes, onChange: () => api.effacer() });
+      const a = COURS.el('div', 'er-actions co-actions-partie', '<button type="button" class="btn-primary">Valider</button>');
+      zone.appendChild(a);
+      a.querySelector('button').onclick = () => {
+        if (api.fini()) return;
+        // indice : premier élément non conservé, ou nombres non minimaux
+        const ind = ER.indice(q.r, q.p, reac.coefs);
+        if (ind.ok) { reac.activer(false); a.remove(); api.reussi(); return; }
+        COURS.secouer(d);
+        api.erreur(ind.html);
+      };
+      return { montrer() { reac.fixer(q.c); reac.activer(false); a.remove(); } };
+    },
+  };
+}
+
+// Partie de co.js ('especes' ou 'equilibrer') : le bouton « Valider » disparaît une fois la partie terminée
+function outilCO(type, p) {
+  return Object.assign({}, p, {
+    type: 'perso',
+    monter(zone, api) {
+      const fermer = () => { const a = zone.querySelector('.co-actions-partie'); if (a) a.remove(); };
+      const ctx = CO.PARTIES[type](zone, p, Object.assign({}, api, { reussi() { fermer(); api.reussi(); } }));
+      return { montrer() { ctx.montrer(); fermer(); } };
+    },
+  });
+}
+
+// Équilibrage guidé d'une combustion : C, puis H, puis O (et × 2 si un demi apparaît).
+// Seul le nombre stœchiométrique de l'étape en cours peut être modifié.
+function guidee(f) {
+  const coef = CO.coefs(f), demi = coef[0] === 2, nb = e => MOL.nb(f, e);
+  return {
+    type: 'perso',
+    q: 'Équilibre la réaction, étape par étape.',
+    solution: `<p class="er-eq">${CO.equation(f)}</p>${demi ? `<p>Avec 1 ${fH(f)}, il aurait fallu ${CO.fmt(coef[1] / 2)} ${fH('O2')} : on a tout multiplié par 2.</p>` : ''}`,
+    monter(zone, api) {
+      const box = COURS.el('div', 'co-guidee', `<p class="co-etape" data-x="et"></p><p class="co-guide" data-x="guide"></p>
+        <div data-x="r"></div><div data-x="ret"></div>
+        <div class="er-actions co-actions-partie" data-x="act"><button type="button" class="btn-primary" data-x="ok">Vérifier</button><button type="button" class="btn-secondary co-impossible hidden" data-x="imp">Impossible avec un nombre entier</button></div>`);
+      zone.appendChild(box);
+      const $ = x => box.querySelector(`[data-x="${x}"]`), ret = $('ret');
+      let etape = 'C', fini = false;
+      const reac = new ER.Reaction($('r'), {
+        reactifs: [f, 'O2'], produits: ['CO2', 'H2O'], comptes: true,
+        onChange: () => { if (!fini) { ret.innerHTML = ''; api.effacer(); } },
+      });
+      // a : sélecteurs actifs (0 combustible, 1 O2, 2 CO2, 3 H2O) ; g : consigne de l'étape
+      const ETAPES = {
+        C: { t: 'ÉTAPE 1 · LE CARBONE C', a: [2], g: `${fH(f)} contient ${nb('C')} atome${nb('C') > 1 ? 's' : ''} de carbone. Règle le nombre devant ${fH('CO2')} pour avoir autant d'atomes C de chaque côté.` },
+        H: { t: 'ÉTAPE 2 · L\'HYDROGÈNE H', a: [3], g: `${fH(f)} contient ${nb('H')} atomes d'hydrogène, et chaque ${fH('H2O')} en contient 2. Règle le nombre devant ${fH('H2O')}.` },
+        O: { t: 'ÉTAPE 3 · L\'OXYGÈNE O, EN DERNIER', a: [1], g: `Compte les atomes O dans les produits${nb('O') ? ' (sans oublier celui du combustible dans les réactifs)' : ''}, puis règle le nombre devant ${fH('O2')}. Si c'est impossible avec un nombre entier, touche « Impossible avec un nombre entier ».` },
+        X2: { t: 'ÉTAPE 4 · PAS DE DEMI : ON MULTIPLIE TOUT PAR 2', a: [0, 1, 2, 3], g: 'Multiplie <b>tous</b> les nombres stœchiométriques par 2 (y compris celui du combustible), puis vérifie.' },
+      };
+      function aller(e, msg) {
+        etape = e;
+        reac.sels.forEach((s, k) => s.activer(ETAPES[e].a.includes(k)));
+        $('et').textContent = ETAPES[e].t;
+        $('guide').innerHTML = ETAPES[e].g;
+        $('imp').classList.toggle('hidden', e !== 'O');
+        api.effacer();
+        ret.innerHTML = msg || '';
+      }
+      const ok = h => `<p class="co-ok">${h}</p>`;
+      function erreur(h) { ret.innerHTML = ''; COURS.secouer($('r')); api.erreur(h); }
+      // fin de l'exercice : on retire les consignes et les boutons
+      function fermer() {
+        fini = true;
+        reac.activer(false);
+        ['et', 'guide', 'act'].forEach(x => { const n = $(x); if (n) n.remove(); });
+        ret.innerHTML = '';
+      }
+      aller('C');
+      $('ok').onclick = () => {
+        if (fini || api.fini()) return;
+        const v = reac.verifier(), B = e => v.bilan.find(x => x.el === e), C = B('C'), H = B('H'), O = B('O');
+        if (etape === 'C') {
+          if (C.r === C.p) aller('H', ok(`✓ Carbone : ${C.r} atome${C.r > 1 ? 's' : ''} de chaque côté.`));
+          else erreur(`Carbone : ${C.r} dans les réactifs, ${C.p} dans les produits. Chaque ${fH('CO2')} contient 1 atome C.`);
+        } else if (etape === 'H') {
+          if (H.r === H.p) aller('O', ok(`✓ Hydrogène : ${H.r} atomes de chaque côté.`));
+          else erreur(`Hydrogène : ${H.r} dans les réactifs, ${H.p} dans les produits. Chaque ${fH('H2O')} contient 2 atomes H.`);
+        } else if (etape === 'O') {
+          if (O.r === O.p) { fermer(); api.reussi(); }
+          else erreur(`Oxygène : ${O.r} dans les réactifs, ${O.p} dans les produits. Chaque ${fH('O2')} apporte 2 atomes O.${demi ? ' Peux-tu vraiment y arriver avec un nombre entier ?' : ''}`);
+        } else if (v.equilibree && v.minimale) { fermer(); api.reussi(); }
+        else erreur(CO.indiceCombustion(f, reac.coefs));
+      };
+      $('imp').onclick = () => {
+        if (fini || api.fini() || etape !== 'O') return;
+        const O = reac.verifier().bilan.find(x => x.el === 'O'), apport = O.r - 2 * reac.coefs[1], besoin = (O.p - apport) / 2;
+        if (demi) {
+          aller('X2', `<div class="callout-accent er-retour"><p><b>Bien vu !</b> Il faut ${O.p} atomes O dans les produits${apport ? `, dont ${apport} apporté${apport > 1 ? 's' : ''} par le combustible` : ''} : il faudrait ${CO.fmt(besoin)} ${fH('O2')}. On ne peut pas couper une molécule en deux, les nombres stœchiométriques doivent être <b>entiers</b>.</p></div>`);
+        } else erreur(`Si, c'est possible : il faut ${O.p - apport} atomes O apportés par le dioxygène, soit ${CO.fmt(besoin)} ${fH('O2')}.`);
+      };
+      return { montrer() { reac.fixer(coef); fermer(); } };
+    },
+  };
+}
+
+/* ---------- 1. Compter les atomes ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Rappel : compter les atomes');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Dans une équation, l'<b>indice</b> (en bas, à droite d'un symbole) compte les atomes dans <b>une</b> molécule. Le <b>nombre stœchiométrique</b> (devant la formule) compte les molécules : il multiplie tous leurs atomes.</p>
+      <div class="cle"><p class="co-formule">nombre d'atomes = nombre stœchiométrique × indice</p></div>
+    </div>
+    ${exemple(`<p><b>2 ${fH('CO2')}</b> : 2 molécules, chacune avec 1 atome C et 2 atomes O.</p>
+      <p class="crs-calc">C : 2 × 1 = <span class="c">2 atomes</span> &nbsp;·&nbsp; O : 2 × 2 = <span class="c">4 atomes</span></p>`)}
+    <p class="co-legende">Besoin de plus d'explications ? ${lienER('modules/module_2.html', 'Équilibrer une réaction · module 2 : compter les atomes')}</p>`);
+  c.aToi(carte, [
+    { titre: `Dans 3 ${fH('H2O')}`, enonce: `<p>Combien y a-t-il d'atomes de chaque élément dans <b>3 ${fH('H2O')}</b> ? Règle les nombres avec les flèches.</p>`,
+      parties: [comptage('H2O', 3)] },
+    { titre: 'Une molécule plus grande', enonce: `<p>Combien y a-t-il d'atomes de chaque élément dans <b>2 ${fH('C2H6O')}</b> ?</p>`,
+      parties: [comptage('C2H6O', 2)] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Une équation équilibrée ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Rappel : une équation équilibrée');
+  const eau = { r: ['H2', 'O2'], p: ['H2O'], c: [2, 1, 2] };
+  const bilan = e => ER.bilanHTML(ER.verifier(e.r, e.p, e.c).bilan, { boule: false });
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Au cours d'une réaction, les atomes se réarrangent : aucun ne disparaît, aucun n'apparaît.</p>
+      <div class="cle"><p>Une équation est <b>équilibrée</b> si chaque élément a <b>le même nombre d'atomes</b> dans les réactifs et dans les produits.</p></div>
+    </div>
+    ${exemple(`<p class="er-eq">${eqHTML(eau.r, eau.p, eau.c)}</p>
+      <p>H : 2 × 2 = 4 dans les réactifs, 2 × 2 = 4 dans les produits. O : 2 dans les réactifs, 2 × 1 = 2 dans les produits.</p>
+      <div class="crs-defile">${bilan(eau)}</div>
+      <p>Chaque élément a autant d'atomes de chaque côté : l'équation est <b>équilibrée</b>.</p>`)}`);
+  // les deux équations de l'ancien « Faire le point », dans un ordre au hasard
+  const item = (e, indices) => ({
+    titre: 'Équilibrée ou pas ?', enonce: `<p class="er-eq">${eqHTML(e.r, e.p, e.c)}</p>`,
+    parties: [{ type: 'choix', q: 'Cette équation est-elle équilibrée ?', melanger: false,
+      options: [{ id: 'oui', label: 'Oui' }, { id: 'non', label: 'Non' }], bonne: e.ok ? 'oui' : 'non', indices,
+      solution: `<div class="crs-defile">${bilan(e)}</div>` }],
+  });
+  c.aToi(carte, melanger([
+    item({ r: ['CH4', 'O2'], p: ['CO2', 'H2O'], c: [1, 2, 1, 2], ok: true },
+      { non: `Compte avec les nombres stœchiométriques. O : 2 × 2 = 4 dans les réactifs ; 2 + 2 × 1 = 4 dans les produits. Fais de même pour C et H : tout est conservé.` }),
+    item({ r: ['N2', 'H2'], p: ['NH3'], c: [1, 1, 2], ok: false },
+      { oui: `Compte les atomes H : 2 dans les réactifs (un seul ${fH('H2')}), mais 2 × 3 = 6 dans les produits (2 ${fH('NH3')}).` }),
+  ]));
+  return carte;
+}
+
+/* ---------- 3. Équilibrer une réaction ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Rappel : équilibrer une réaction');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Pour équilibrer, on ajuste les <b>nombres stœchiométriques</b>, jamais les indices : changer un indice changerait la molécule.</p>
+      <div class="cle"><p>On cherche les <b>plus petits nombres entiers</b> qui donnent le même nombre d'atomes de chaque élément de chaque côté. Le nombre 1 ne s'écrit pas.</p></div>
+    </div>
+    ${exemple(`<p>Synthèse de l'ammoniac : ${fH('N2')} + ${fH('H2')} → ${fH('NH3')}</p>
+      <ol class="er-liste">
+        <li>Azote N : 2 dans les réactifs, 1 dans les produits → on met <b>2</b> devant ${fH('NH3')}.</li>
+        <li>Hydrogène H : 2 dans les réactifs, 2 × 3 = 6 dans les produits → on met <b>3</b> devant ${fH('H2')}.</li>
+        <li>On recompte : N : 2 et 2 ; H : 3 × 2 = 6 et 2 × 3 = 6 ✓</li>
+      </ol>
+      <p class="er-eq">${eqHTML(['N2', 'H2'], ['NH3'], [1, 3, 2])}</p>`)}
+    <p class="co-legende">Besoin de plus d'explications ? ${lienER('modules/module_1.html', 'Équilibrer une réaction · module 1 : comment équilibrer')}, puis ${lienER('modules/module_3.html', 'module 3 : réactions faciles')}</p>`);
+  const q = hasard(SIMPLES);
+  c.aToi(carte, [
+    { titre: 'Avec le nombre d\'atomes affiché', enonce: `<p class="er-q-nom">${q.nom}</p><p>Le nombre d'atomes de chaque élément est écrit sous chaque espèce.</p>`,
+      parties: [equilibrer(q, true)] },
+    { titre: 'Le test : sans le nombre d\'atomes affiché', enonce: `<p class="er-q-nom">${DEPART.nom}</p><p>Compte toi-même les atomes de chaque côté (nombre stœchiométrique × indice).</p>`,
+      parties: [equilibrer(DEPART, false)] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. L'équation d'une combustion ---------- */
+function etape4(c) {
+  const carte = c.carte('4. L\'équation d\'une combustion');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Une combustion dans le dioxygène a toujours la même forme :</p>
+      <div class="cle"><p class="co-formule">combustible + O<sub>2</sub> → CO<sub>2</sub> + H<sub>2</sub>O</p>
+        <p class="co-legende">Le dioxygène O<sub>2</sub> est toujours un <b>réactif</b> ; le dioxyde de carbone CO<sub>2</sub> et l'eau H<sub>2</sub>O sont toujours les <b>produits</b>.</p></div>
+    </div>
+    ${exemple(`<p>Le méthane ${fH('CH4')} brûle dans le dioxygène de l'air :</p>
+      <p class="er-eq">${nonEquilibree('CH4')}</p>
+      <p>Il reste à l'équilibrer : c'est l'étape suivante.</p>`)}`);
+  const f1 = hasard(['C3H8', 'C4H10']), f2 = hasard(['C2H6O', 'CH4O']);
+  const item = (titre, f, texte) => ({
+    titre, enonce: texte ? `<p>${texte}</p>` : '',
+    parties: [outilCO('especes', { comb: f, q: `Complète l'équation de la combustion ${duNom(f)} avec les bonnes espèces : touche une espèce pour la placer, touche une case pour la vider.`,
+      solution: `<p class="er-eq">${nonEquilibree(f)}</p><p>Le dioxygène est toujours un réactif ; le dioxyde de carbone et l'eau sont toujours les produits.</p>` })],
+  });
+  c.aToi(carte, [
+    item(`Combustion ${duNom(f1)}`, f1),
+    item(`Combustion ${duNom(f2)}`, f2, `${f2 === 'CH4O' ? 'Le méthanol' : 'L\'éthanol'} est un alcool : sa molécule contient un atome d'oxygène, mais sa combustion donne les mêmes produits.`),
+  ]);
+  return carte;
+}
+
+/* ---------- 5. C, puis H, puis O ---------- */
+function etape5(c) {
+  const carte = c.carte('5. Équilibrer : C, puis H, puis O');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Pour une combustion, on équilibre toujours dans le même ordre :</p>
+      <div class="cle"><ol class="er-liste" style="margin:0"><li><b>C</b> : le carbone, avec le nombre devant CO<sub>2</sub> ;</li><li><b>H</b> : l'hydrogène, avec le nombre devant H<sub>2</sub>O ;</li>
+        <li><b>O en dernier</b>, avec le nombre devant O<sub>2</sub> : cette molécule ne contient que de l'oxygène, la modifier ne change ni C ni H.</li></ol></div>
+      <p>Si le combustible contient de l'oxygène (un alcool), ses atomes O comptent dans les réactifs.</p>
+    </div>
+    ${exemple(`<p>Combustion du méthane : ${nonEquilibree('CH4')}</p>
+      <ol class="er-liste">
+        <li><b>C</b> : 1 atome dans ${fH('CH4')} → <b>1</b> ${fH('CO2')}.</li>
+        <li><b>H</b> : 4 atomes dans ${fH('CH4')}, 2 dans chaque ${fH('H2O')} → <b>2</b> ${fH('H2O')}.</li>
+        <li><b>O</b> : dans les produits, 1 × 2 + 2 × 1 = 4 atomes ; chaque ${fH('O2')} en apporte 2 → <b>2</b> ${fH('O2')}.</li>
+      </ol>
+      <p class="er-eq">${CO.equation('CH4')}</p>`)}`);
+  const f1 = hasard(['C3H8', 'C5H12', 'C2H4']), f2 = hasard(['C2H6O', 'C3H6O', 'C4H10O']);
+  c.aToi(carte, [
+    { titre: `Combustion ${duNom(f1)}, guidée`, enonce: `<p class="er-eq">${nonEquilibree(f1)}</p>`, parties: [guidee(f1)] },
+    { titre: 'Un combustible qui contient de l\'oxygène',
+      enonce: `<p>Combustion ${duNom(f2)} : ${nonEquilibree(f2)}. Ne compte pas l'atome O du combustible dans les produits : il est dans les réactifs.</p>`,
+      parties: [outilCO('equilibrer', { comb: f2, comptes: true, q: 'Équilibre la réaction : d\'abord C, puis H, et O en dernier.', solution: `<p class="er-eq">${CO.equation(f2)}</p>` })] },
+  ]);
+  return carte;
+}
+
+/* ---------- 6. Le cas du demi ---------- */
+function etape6(c) {
+  const carte = c.carte('6. Le cas du demi : on multiplie tout par 2');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Parfois, le nombre d'atomes O à apporter est impair : il faudrait un demi de O<sub>2</sub>. C'est impossible, on ne coupe pas une molécule en deux.</p>
+      <div class="cle"><p>Uniquement des <b>nombres entiers</b> : s'il faudrait un demi de O<sub>2</sub>, on <b>multiplie tous les nombres par 2</b>, y compris celui du combustible.</p></div>
+    </div>
+    ${exemple(`<p>Combustion de l'éthane : ${nonEquilibree('C2H6')}</p>
+      <ol class="er-liste">
+        <li><b>C</b> : 2 atomes → <b>2</b> ${fH('CO2')}.</li>
+        <li><b>H</b> : 6 atomes → <b>3</b> ${fH('H2O')}.</li>
+        <li><b>O</b> : dans les produits, 2 × 2 + 3 × 1 = 7 atomes → il faudrait 7 / 2 = 3,5 ${fH('O2')} : impossible.</li>
+        <li>On multiplie tout par 2 : 2 ${fH('C2H6')}, 7 ${fH('O2')}, 4 ${fH('CO2')}, 6 ${fH('H2O')}.</li>
+      </ol>
+      <p class="er-eq">${CO.equation('C2H6')}</p>`)}`);
+  const f1 = hasard(['C4H10', 'C2H2', 'C6H14']), f2 = hasard(['C8H18', 'CH4O', 'C3H6']);
+  c.aToi(carte, [
+    { titre: `Combustion ${duNom(f1)}, guidée`, enonce: `<p class="er-eq">${nonEquilibree(f1)}</p>`, parties: [guidee(f1)] },
+    { titre: 'Sans le nombre d\'atomes affiché',
+      enonce: `<p>Combustion ${duNom(f2)} : ${nonEquilibree(f2)}. Compte toi-même les atomes de chaque côté.</p>`,
+      parties: [outilCO('equilibrer', { comb: f2, comptes: false, q: 'Équilibre la réaction : C, puis H, puis O ; multiplie tout par 2 s\'il faudrait un demi.', solution: `<p class="er-eq">${CO.equation(f2)}</p>` })] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Équilibrer une réaction</b> · nombre d'atomes = nombre stœchiométrique × indice. Une équation est équilibrée si chaque élément a le même nombre d'atomes de chaque côté, avec les plus petits nombres entiers.</p></div>
+    <div class="cle"><p class="co-formule">combustible + O<sub>2</sub> → CO<sub>2</sub> + H<sub>2</sub>O</p>
+      <p>On équilibre dans l'ordre : <b>C</b> (avec CO<sub>2</sub>), puis <b>H</b> (avec H<sub>2</sub>O), puis <b>O en dernier</b> (avec O<sub>2</sub>).</p></div>
+    <div class="cle"><p>Que des nombres entiers : s'il faudrait un demi de O<sub>2</sub>, on multiplie tous les nombres par 2.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2.html">Entraînement noté : 10 combustions →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3_cours.html">Module 3 : masse, quantité de matière, masse molaire</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, etape5, etape6, aRetenir]);
+CO.menu('module_2_cours');
+</script>
+</body>
+</html>

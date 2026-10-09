@@ -6,186 +6,462 @@
 <title>Module 1 : Les nombres stœchiométriques en action — Avancement d'une réaction</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="av.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="../../assets/molecules.js"></script>
 <script src="av.js"></script>
+<script src="../../assets/cours.js"></script>
 </head>
 <body>
 <div id="app-nav"></div>
 <div class="av-page">
   <div class="er-card">
-    <span class="er-badge">MODULE 1 · SECONDE</span>
+    <span class="er-badge">MODULE 1 · COURS</span>
     <h2 class="er-titre">Les nombres stœchiométriques en action</h2>
-    <p class="er-contexte">Dans une équation de réaction, que signifient les nombres stœchiométriques ? Et pourquoi une réaction s'arrête-t-elle ? Observe quelques molécules réagir, une fois après l'autre.</p>
+    <p class="er-contexte">Tu vas voir ce que signifient les <b>nombres stœchiométriques</b> d'une équation de réaction, pourquoi une réaction s'arrête (le <b>réactif limitant</b>) et combien de fois elle peut avoir lieu, en observant des molécules réagir une fois après l'autre.</p>
   </div>
   <div id="etapes"></div>
 </div>
 
 <script>
 /* ============================================================
-   Trois étapes : combustion du méthane (prédiction du réactif
-   qui s'épuise), synthèse de l'ammoniac (prédiction du réactif
-   et du nombre de fois), puis quantités au choix.
-   Chaque étape réussie fait apparaître la suivante.
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Les nombres stœchiométriques
+   2. Le réactif limitant (prédis, puis observe : combustion du méthane)
+   3. Combien de fois la réaction a-t-elle lieu ? (prédis, puis observe :
+      synthèse de l'ammoniac)
+   4. Les proportions stœchiométriques (quantités au choix dans la simulation)
+   À retenir
+   Les simulations (AV.Simulation) sont créées dans leur carte, sans
+   identifiant fixe : plusieurs peuvent être affichées en même temps.
    ============================================================ */
-const zone = document.getElementById('etapes');
+const { entre, hasard, melanger, exemple } = COURS;
 const fH = MOL.formuleHTML;
 const fois = n => `Réaction : ${n} fois`;
+const eq = q => `<p class="av-equation">${AV.equationHTML(q)}</p>`;
+// « 3 molécules de O₂ », « 1 molécule de CH₄ »
+const mol = (n, f) => `${n} molécule${n > 1 ? 's' : ''} de ${fH(f)}`;
 
-function carte(html) {
-  const c = document.createElement('section');
-  c.className = 'er-card';
-  c.innerHTML = html;
-  zone.appendChild(c);
-  return c;
+// Réactions entre molécules pour les « À toi » (r : réactifs, p : produits, c : nombres stœchiométriques)
+const R = (r, p, c, nom) => ({ r, p, c, nom });
+const REACTIONS = [
+  R(['N2', 'H2'], ['NH3'], [1, 3, 2], "Synthèse de l'ammoniac"),
+  R(['H2', 'O2'], ['H2O'], [2, 1, 2], "Synthèse de l'eau"),
+  R(['CO', 'O2'], ['CO2'], [2, 1, 2], 'Combustion du monoxyde de carbone'),
+  R(['C3H8', 'O2'], ['CO2', 'H2O'], [1, 5, 3, 4], 'Combustion du propane'),
+  R(['C2H4', 'O2'], ['CO2', 'H2O'], [1, 3, 2, 2], "Combustion de l'éthylène"),
+  R(['H2S', 'O2'], ['SO2', 'H2O'], [2, 3, 2, 2], "Combustion du sulfure d'hydrogène"),
+];
+const especes = reac => reac.r.concat(reac.p);
+
+// Quantités au départ (en molécules) : la réaction peut avoir lieu un nombre de fois différent
+// avec chaque réactif. piege = true : le réactif limitant est le plus nombreux au départ ;
+// piege = false : il ne l'est pas ; reste = true : il reste un peu du réactif limitant à la fin.
+function tirer(reac, opts) {
+  opts = opts || {};
+  for (let i = 0; i < 2000; i++) {
+    const n0 = reac.r.map(() => entre(1, opts.max || 9));
+    const fs = reac.r.map((_, k) => Math.floor(n0[k] / reac.c[k]));
+    if (fs.some(x => x < 1) || new Set(fs).size !== fs.length || new Set(n0).size !== n0.length) continue;
+    const L = fs.indexOf(Math.min(...fs));
+    if (opts.piege != null && opts.piege !== (n0[L] === Math.max(...n0))) continue;
+    if (opts.reste && n0[L] % reac.c[L] === 0) continue;
+    const F = fs[L];
+    // quantités finales : réactif n − c × F, produit c × F
+    const nf = especes(reac).map((_, k) => (k < reac.r.length ? n0[k] - reac.c[k] * F : reac.c[k] * F));
+    return { n0, fs, L, F, nf };
+  }
 }
-function continuer(parent, suivante, texte) {
-  parent.insertAdjacentHTML('beforeend', `<div class="av-suite"><button type="button" class="btn-primary">${texte || 'Continuer →'}</button></div>`);
-  const b = parent.querySelector('.av-suite:last-child button');
-  b.onclick = () => { b.parentNode.remove(); const c = suivante(); c.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+const depart = (reac, t) => `On place ${reac.r.map((f, k) => mol(t.n0[k], f)).join(' et ')}.`;
+
+/* ---------- Diagnostics des erreurs fréquentes ---------- */
+// Nombre stœchiométrique : 1 au lieu du nombre écrit, indice de la formule, nombre d'une autre espèce
+function diagCoef(v, reac, k) {
+  const f = especes(reac)[k], c = reac.c[k];
+  if (v === 1) return `Le nombre stœchiométrique est le nombre écrit devant la formule : devant ${fH(f)}, c'est ${c}. Il ne vaut 1 que quand rien n'est écrit.`;
+  if (MOL.analyser(f).some(a => a.n === v)) return `${v} est un indice de la formule ${fH(f)} (le petit nombre en bas) : il compte les atomes dans une molécule. Le nombre de molécules qui réagissent est le nombre écrit <b>devant</b> la formule.`;
+  if (reac.c.includes(v)) return `${v} est le nombre stœchiométrique d'une autre espèce. Regarde le nombre écrit juste devant ${fH(f)}.`;
+  return `Lis le nombre écrit devant ${fH(f)} dans l'équation.`;
 }
-// Boutons de choix (un seul sélectionné)
-function boutons(el, noms, onChoix) {
-  el.innerHTML = noms.map((n, i) => `<button type="button" data-i="${i}">${n}</button>`).join('');
-  el.querySelectorAll('button').forEach(b => b.onclick = () => {
-    if (el.dataset.fige) return;
-    el.querySelectorAll('button').forEach(x => x.classList.toggle('choisi', x === b));
-    onChoix(+b.dataset.i);
+// La réaction a lieu n fois : n × c (oubli de c, une seule fois, addition)
+function diagFois(v, n, c, f, verbe) {
+  if (c > 1 && v === n) return `Tu as oublié le nombre stœchiométrique : à chaque fois, ${c} molécules de ${fH(f)} ${verbe} ; en ${n} fois : ${n} × ${c}.`;
+  if (v === c && n > 1) return `${c}, c'est pour une seule fois. La réaction a lieu ${n} fois : multiplie par ${n}.`;
+  if (v === n + c) return `On n'additionne pas : la réaction a lieu ${n} fois et, à chaque fois, ${c} molécule${c > 1 ? 's' : ''} de ${fH(f)} ${verbe}. On multiplie : ${n} × ${c}.`;
+  return `Multiplie le nombre de fois (${n}) par le nombre stœchiométrique de ${fH(f)} (${c}).`;
+}
+// Réactif limitant : le moins nombreux au départ n'est pas forcément le limitant
+function diagLimitant(reac, t, k) {
+  const L = t.L, fL = reac.r[L], fk = reac.r[k];
+  const debut = t.n0[k] < t.n0[L]
+    ? `${fH(fk)} est le moins nombreux au départ, mais ce n'est pas lui qui manque en premier : il faut tenir compte des nombres stœchiométriques. `
+    : '';
+  return debut + `À chaque fois, il faut ${mol(reac.c[L], fL)} : avec ${t.n0[L]}, la réaction ne peut avoir lieu que ${t.fs[L]} fois. ` +
+    `Avec ${mol(t.n0[k], fk)} (${reac.c[k]} à chaque fois), elle pourrait avoir lieu ${t.fs[k]} fois. ${fH(fL)} manque en premier.`;
+}
+// Nombre de fois possible avec un réactif : n ÷ c, partie entière
+function diagNbFois(v, n, c, f) {
+  const e = Math.floor(n / c);
+  if (c > 1 && v === n) return `Il faut ${mol(c, f)} à chaque fois : divise le nombre de molécules par ${c}.`;
+  if (c > 1 && v === n * c) return `Tu as multiplié. On cherche combien de fois on peut prendre ${c} molécules dans ${n} : on divise, ${n} ÷ ${c}.`;
+  if (n % c && (v === Math.ceil(n / c) || Math.abs(v - n / c) < 1e-9)) return `${n} ÷ ${c} ne tombe pas juste. La réaction a lieu un nombre entier de fois : avec ${n} molécules, elle a lieu ${e} fois et il en reste ${n - c * e}, pas assez pour une fois de plus.`;
+  return `Divise le nombre de molécules de ${fH(f)} (${n}) par son nombre stœchiométrique (${c}) et garde la partie entière.`;
+}
+// Quantités finales : réactif n − c × F, produit c × F
+function diagFinal(vs, reac, t) {
+  const esp = especes(reac), nR = reac.r.length;
+  const k = vs.findIndex((v, j) => v !== t.nf[j]);
+  if (k < 0) return '';
+  const f = esp[k], c = reac.c[k], v = vs[k], F = t.F;
+  if (k >= nR) {
+    if (c > 1 && v === F) return `${fH(f)} : tu as oublié le nombre stœchiométrique. À chaque fois, ${c} molécules apparaissent : ${c} × ${F} = ${c * F}.`;
+    return `${fH(f)} est un produit : il en apparaît ${c} à chaque fois, et la réaction a lieu ${F} fois.`;
+  }
+  const n = t.n0[k];
+  if (c > 1 && v === n - F) return `${fH(f)} : tu as oublié le nombre stœchiométrique. Il en disparaît ${c} à chaque fois, donc ${c} × ${F} = ${c * F} en tout.`;
+  if (v === 0 && t.nf[k] > 0) {
+    return k === t.L
+      ? `${fH(f)} est le réactif limitant, mais il en reste ${t.nf[k]} : pas assez pour que la réaction ait lieu une fois de plus (il en faut ${c}).`
+      : `${fH(f)} est en excès : il en reste à la fin.`;
+  }
+  if (v === n) return `${fH(f)} a réagi : il en a disparu ${c} × ${F} = ${c * F}.`;
+  return `${fH(f)} : ${n} − ${c} × ${F}.`;
+}
+
+/* ---------- « Prédis, puis observe » ----------
+   Le choix du réactif (et du nombre de fois) débloque la simulation ;
+   quand la réaction s'arrête, l'explication o.bilan(choix, nombre, x) s'affiche. */
+function predire(zone, q, o) {
+  zone.innerHTML = `<div class="av-predi"><p class="av-predi-q">${o.question}</p>
+      <div class="av-choix" data-x="choix"></div>
+      ${o.nombre ? `<div class="av-predi-ligne"><p class="av-predi-q" style="margin:0 !important">${o.nombre}</p><span data-x="nb"></span></div>` : ''}
+      <div class="er-actions" data-x="lancer"><button type="button" class="btn-primary" data-x="go" disabled>Lancer la réaction</button></div></div>
+    <div data-x="sim"></div><div data-x="fin"></div>`;
+  const $ = s => zone.querySelector(s);
+  let choix = -1, fini = false, nb = null;
+  const boites = $('[data-x="choix"]');
+  boites.innerHTML = o.options.map((n, i) => `<button type="button" data-i="${i}">${n}</button>`).join('');
+  const bs = [...boites.querySelectorAll('button')];
+  bs.forEach(b => {
+    b.onclick = () => {
+      if (b.disabled) return;
+      bs.forEach(x => x.classList.toggle('choisi', x === b));
+      choix = +b.dataset.i;
+      $('[data-x="go"]').disabled = false;
+    };
   });
-}
-
-/* ---------- 1. Combustion du méthane ---------- */
-function etape1() {
-  const q = { r: ['CH4', 'O2'], p: ['CO2', 'H2O'], c: [1, 2, 1, 2], n0: [3, 4, 0, 0] };
-  const c = carte(`<h3 class="cours-titre">1. La combustion du méthane</h3>
-    <p class="av-equation">${AV.equationHTML(q)}</p>
-    <p class="er-contexte">Dans un récipient, on place <b>3 molécules de méthane</b> CH<sub>4</sub> et <b>4 molécules de dioxygène</b> O<sub>2</sub>. L'équation indique qu'à chaque fois que la réaction a lieu, 1 molécule de CH<sub>4</sub> réagit avec 2 molécules de O<sub>2</sub>.</p>
-    <div class="av-predi"><p class="av-predi-q">À ton avis, quel réactif va manquer en premier ?</p>
-      <div class="av-choix" data-x="predi"></div>
-      <div class="er-actions"><button type="button" class="btn-primary" data-x="go" disabled>Lancer la réaction</button></div></div>
-    <div data-x="sim"></div><div data-x="fin"></div>`);
-  let prediction = -1;
-  boutons(c.querySelector('[data-x="predi"]'), [fH('CH4'), fH('O2'), 'Je ne sais pas'], i => { prediction = i; c.querySelector('[data-x="go"]').disabled = false; });
-  const sim = new AV.Simulation(c.querySelector('[data-x="sim"]'), Object.assign({}, q, {
-    verrou: true, compteur: fois,
-    onFin: () => {
-      if (c.dataset.fini) return;
-      c.dataset.fini = 1;
-      const bilan = prediction === 1 ? '<b class="er-ok">Bien vu !</b> '
-        : prediction === 0 ? '<b class="er-ko">Ce n\'était pas CH<sub>4</sub>.</b> ' : '';
-      c.querySelector('[data-x="fin"]').innerHTML = `<div class="${prediction === 1 ? 'callout-success' : 'callout'} er-retour">
-        <p>${bilan}Au départ, il y avait moins de molécules de CH<sub>4</sub> (3) que de O<sub>2</sub> (4). Pourtant, c'est O<sub>2</sub> qui manque en premier : à chaque fois, la réaction consomme <b>2</b> molécules de O<sub>2</sub> pour <b>1</b> molécule de CH<sub>4</sub>.</p>
-        <p>Il reste 1 molécule de CH<sub>4</sub> qui ne peut plus réagir : CH<sub>4</sub> est <b>en excès</b>.</p></div>`;
-      continuer(c, aRetenir);
-    },
-  }));
-  c.querySelector('[data-x="go"]').onclick = () => {
-    c.querySelector('[data-x="predi"]').dataset.fige = 1;
-    c.querySelector('[data-x="predi"]').querySelectorAll('button').forEach(b => { b.disabled = true; });
-    c.querySelector('.av-predi .er-actions').remove();
-    sim.deverrouiller();
-  };
-  return c;
-}
-
-/* ---------- À retenir ---------- */
-function aRetenir() {
-  const c = carte(`<h3 class="cours-titre">À retenir</h3>
-    <div class="cle"><p><b class="cle-titre">Les nombres stœchiométriques</b> indiquent combien de molécules de chaque espèce disparaissent (réactifs) ou apparaissent (produits) <b>à chaque fois</b> que la réaction a lieu.</p>
-      <p class="av-formule-cle">CH<sub>4</sub> + <span class="av-c">2</span> O<sub>2</sub> → CO<sub>2</sub> + <span class="av-c">2</span> H<sub>2</sub>O<br><span style="font-size:.9rem;font-weight:600">à chaque fois : −1 CH<sub>4</sub>, −2 O<sub>2</sub>, +1 CO<sub>2</sub>, +2 H<sub>2</sub>O</span></p></div>
-    <div class="cle"><p><b class="cle-titre">Le réactif limitant</b> est le réactif qui est épuisé en premier : la réaction s'arrête quand il n'y en a plus. Les autres réactifs sont <b>en excès</b> : il en reste à la fin.</p></div>
-    <div class="cle"><p><b class="cle-titre">Attention :</b> le réactif limitant n'est pas forcément celui qui est le moins nombreux au départ. Il faut tenir compte des nombres stœchiométriques.</p></div>`);
-  continuer(c, etape2);
-  return c;
-}
-
-/* ---------- 2. Synthèse de l'ammoniac ---------- */
-function etape2() {
-  const q = { r: ['N2', 'H2'], p: ['NH3'], c: [1, 3, 2], n0: [3, 6, 0] };
-  const c = carte(`<h3 class="cours-titre">2. La synthèse de l'ammoniac</h3>
-    <p class="av-equation">${AV.equationHTML(q)}</p>
-    <p class="er-contexte">On place <b>3 molécules de diazote</b> N<sub>2</sub> et <b>6 molécules de dihydrogène</b> H<sub>2</sub>.</p>
-    <div class="av-predi"><p class="av-predi-q">Quel réactif va manquer en premier ?</p>
-      <div class="av-choix" data-x="predi"></div>
-      <div class="av-predi-ligne"><p class="av-predi-q" style="margin:0 !important">Combien de fois la réaction pourra-t-elle avoir lieu ?</p><span data-x="nb"></span></div>
-      <div class="er-actions"><button type="button" class="btn-primary" data-x="go" disabled>Lancer la réaction</button></div></div>
-    <div data-x="sim"></div><div data-x="fin"></div>`);
-  let prediction = -1;
-  boutons(c.querySelector('[data-x="predi"]'), [fH('N2'), fH('H2')], i => { prediction = i; c.querySelector('[data-x="go"]').disabled = false; });
-  const nb = MOL.selecteur({ valeur: 1, min: 0, max: 6, label: 'le nombre de fois' });
-  c.querySelector('[data-x="nb"]').replaceWith(nb.el);
-  const sim = new AV.Simulation(c.querySelector('[data-x="sim"]'), Object.assign({}, q, {
-    verrou: true, compteur: fois,
+  if (o.nombre) {
+    nb = MOL.selecteur({ valeur: 1, min: 0, max: 6, label: 'le nombre de fois' });
+    $('[data-x="nb"]').replaceWith(nb.el);
+  }
+  const sim = new AV.Simulation($('[data-x="sim"]'), Object.assign({}, q, {
+    n0: q.n0.slice(), verrou: true, compteur: fois,
     onFin: x => {
-      if (c.dataset.fini) return;
-      c.dataset.fini = 1;
-      const okL = prediction === 1, okN = nb.valeur === x;
-      c.querySelector('[data-x="fin"]').innerHTML = `<div class="${okL && okN ? 'callout-success' : 'callout'} er-retour">
-        <p>${okL ? '<b class="er-ok">Réactif limitant bien prévu.</b>' : '<b class="er-ko">Le réactif limitant est H<sub>2</sub>.</b>'}
-          ${okN ? `<b class="er-ok">Nombre de fois bien prévu : ${x}.</b>` : `<b class="er-ko">La réaction a eu lieu ${x} fois (tu avais prévu ${nb.valeur}).</b>`}</p>
-        <p>À chaque fois, 3 molécules de H<sub>2</sub> disparaissent : avec 6 molécules, la réaction peut avoir lieu 6 ÷ 3 = <b>2 fois</b>. Avec N<sub>2</sub>, elle aurait pu avoir lieu 3 ÷ 1 = 3 fois : H<sub>2</sub> est épuisé avant.</p>
-        <p>À la fin : 1 molécule de N<sub>2</sub> (en excès), 0 de H<sub>2</sub> et 2 × 2 = 4 molécules de NH<sub>3</sub>.</p></div>`;
-      continuer(c, etape3);
+      if (fini) return;
+      fini = true;
+      $('[data-x="fin"]').innerHTML = o.bilan(choix, nb ? nb.valeur : null, x);
     },
   }));
-  c.querySelector('[data-x="go"]').onclick = () => {
-    c.querySelector('[data-x="predi"]').dataset.fige = 1;
-    c.querySelector('[data-x="predi"]').querySelectorAll('button').forEach(b => { b.disabled = true; });
-    nb.activer(false);
-    c.querySelector('.av-predi .er-actions').remove();
+  $('[data-x="go"]').onclick = () => {
+    bs.forEach(b => { b.disabled = true; });
+    if (nb) nb.activer(false);
+    $('[data-x="lancer"]').remove();
     sim.deverrouiller();
   };
-  return c;
 }
 
-/* ---------- 3. Quantités au choix ---------- */
-function etape3() {
+// Une fois la réaction, en dessins : CH₄ + O₂ O₂ → CO₂ + H₂O H₂O
+function uneFois(q) {
+  const esp = especes(q), nR = q.r.length;
+  return `<div class="av-une-fois" role="img" aria-label="Une fois la réaction : ${esp.map((f, k) => q.c[k] + ' ' + f).join(', ')}">` +
+    esp.map((f, k) => (k === 0 ? '' : `<span class="av-op">${k === nR ? '→' : '+'}</span>`) +
+      `<span class="av-grp"><span class="av-grp-mols">${MOL.molecule(f).repeat(q.c[k])}</span><span class="av-grp-nom">${q.c[k] > 1 ? q.c[k] + '&nbsp;' : ''}${fH(f)}</span></span>`).join('') +
+    '</div>';
+}
+
+/* ---------- 1. Les nombres stœchiométriques ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Les nombres stœchiométriques');
+  const q = { r: ['CH4', 'O2'], p: ['CO2', 'H2O'], c: [1, 2, 1, 2] };
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Une équation de réaction indique les espèces qui réagissent (les <b>réactifs</b>, à gauche de la flèche) et celles qui se forment (les <b>produits</b>, à droite). Le nombre écrit devant chaque formule est son <b>nombre stœchiométrique</b> ; quand rien n'est écrit, il vaut 1.</p>
+      <div class="cle"><p><b class="cle-titre">Les nombres stœchiométriques</b> indiquent combien de molécules de chaque espèce disparaissent (réactifs) ou apparaissent (produits) <b>à chaque fois</b> que la réaction a lieu.</p>
+        <p>Si la réaction a lieu plusieurs fois, on multiplie par le nombre de fois.</p></div>
+    </div>
+    ${exemple(`${eq(q)}${uneFois(q)}
+      <p>À chaque fois que la réaction a lieu : <b>−1</b> CH<sub>4</sub>, <b>−2</b> O<sub>2</sub>, <b>+1</b> CO<sub>2</sub>, <b>+2</b> H<sub>2</sub>O.</p>
+      <p>Si la réaction a lieu 3 fois :</p>
+      <p class="crs-calc">CH<sub>4</sub> qui disparaît : 3 × 1 = <span class="c">3 molécules</span><br>O<sub>2</sub> qui disparaît : 3 × 2 = <span class="c">6 molécules</span><br>H<sub>2</sub>O qui apparaît : 3 × 2 = <span class="c">6 molécules</span></p>`)}`);
+
+  const [r1, r2, r3] = melanger(REACTIONS);
+  // a. un réactif avec un nombre stœchiométrique supérieur à 1
+  const k1 = hasard(r1.r.map((_, k) => k).filter(k => r1.c[k] > 1));
+  // b. un réactif et un produit, la réaction a lieu n fois
+  const ka = hasard(r2.r.map((_, k) => k)), kp = r2.r.length + hasard(r2.p.map((_, j) => j));
+  const n = entre(2, 5), fa = especes(r2)[ka], fp = especes(r2)[kp];
+  // c. dans l'autre sens : un produit avec un nombre stœchiométrique supérieur à 1
+  const k3 = r3.r.length + hasard(r3.p.map((_, j) => j).filter(j => r3.c[r3.r.length + j] > 1));
+  const kr3 = hasard(r3.r.map((_, k) => k)), f3 = especes(r3)[k3], fr3 = r3.r[kr3], n3 = entre(2, 4), m3 = n3 * r3.c[k3];
+  c.aToi(carte, [
+    { titre: 'À chaque fois',
+      enonce: eq(r1),
+      parties: [{ type: 'nombre', q: `À chaque fois que la réaction a lieu, combien de molécules de ${fH(r1.r[k1])} disparaissent ?`,
+        label: `${fH(r1.r[k1])} :`, unite: 'molécules', valeur: r1.c[k1], tol: 0, entier: true, signe: false,
+        diag: v => diagCoef(v, r1, k1),
+        solution: `<p>Le nombre écrit devant ${fH(r1.r[k1])} est ${r1.c[k1]} : à chaque fois, <b>${mol(r1.c[k1], r1.r[k1])}</b> disparaissent.</p>` }] },
+    { titre: `La réaction a lieu ${n} fois`,
+      enonce: eq(r2),
+      parties: [{ type: 'champs', q: `La réaction a lieu ${n} fois. Combien de molécules de ${fH(fa)} disparaissent ? Combien de molécules de ${fH(fp)} apparaissent ?`,
+        champs: [{ label: `${fH(fa)} qui disparaît :`, valeur: n * r2.c[ka], tol: 0, entier: true, signe: false, unite: 'molécules' },
+          { label: `${fH(fp)} qui apparaît :`, valeur: n * r2.c[kp], tol: 0, entier: true, signe: false, unite: 'molécules' }],
+        diag: vs => (vs[0] !== n * r2.c[ka] ? diagFois(vs[0], n, r2.c[ka], fa, 'disparaissent') : diagFois(vs[1], n, r2.c[kp], fp, 'apparaissent')),
+        solution: `<p class="crs-calc">${fH(fa)} : ${n} × ${r2.c[ka]} = <span class="c">${n * r2.c[ka]} molécules</span><br>${fH(fp)} : ${n} × ${r2.c[kp]} = <span class="c">${n * r2.c[kp]} molécules</span></p>` }] },
+    { titre: 'Dans l\'autre sens',
+      enonce: `${eq(r3)}<p>Il est apparu ${mol(m3, f3)}.</p>`,
+      parties: [
+        { type: 'nombre', q: 'Combien de fois la réaction a-t-elle eu lieu ?', label: 'Nombre de fois :', valeur: n3, tol: 0, entier: true, signe: false,
+          diag: v => {
+            const c3 = r3.c[k3];
+            if (v === m3) return `À chaque fois, ${c3} molécules de ${fH(f3)} apparaissent : cherche combien de fois ${c3} il y a dans ${m3}. Divise ${m3} par ${c3}.`;
+            if (v === m3 * c3) return `Tu as multiplié. On cherche combien de paquets de ${c3} il y a dans ${m3} : on divise, ${m3} ÷ ${c3}.`;
+            return `Divise le nombre de molécules apparues (${m3}) par le nombre stœchiométrique de ${fH(f3)} (${c3}).`;
+          },
+          solution: `<p class="crs-calc">${m3} ÷ ${r3.c[k3]} = <span class="c">${n3} fois</span></p>` },
+        { type: 'nombre', q: `Combien de molécules de ${fH(fr3)} ont disparu ?`, label: `${fH(fr3)} :`, unite: 'molécules', valeur: n3 * r3.c[kr3], tol: 0, entier: true, signe: false,
+          diag: v => diagFois(v, n3, r3.c[kr3], fr3, 'disparaissent'),
+          solution: `<p class="crs-calc">${n3} × ${r3.c[kr3]} = <span class="c">${n3 * r3.c[kr3]} molécules</span></p>` },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Le réactif limitant ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Le réactif limitant');
+  const q = { r: ['CH4', 'O2'], p: ['CO2', 'H2O'], c: [1, 2, 1, 2], n0: [3, 4, 0, 0] };
+  const d = c.ajouter(carte, `<div class="cours-bloc">
+      <p>La réaction ne peut avoir lieu que s'il reste assez de molécules de <b>chaque</b> réactif. Elle s'arrête dès que l'un d'eux vient à manquer.</p>
+      <div class="cle"><p><b class="cle-titre">Le réactif limitant</b> est le réactif épuisé en premier : la réaction s'arrête quand il n'y en a plus assez. Les autres réactifs sont <b>en excès</b> : il en reste à la fin.</p></div>
+    </div>
+    ${exemple(`${eq(q)}
+      <p>Dans un récipient, on place <b>3 molécules de méthane</b> CH<sub>4</sub> et <b>4 molécules de dioxygène</b> O<sub>2</sub>. À chaque fois que la réaction a lieu, 1 molécule de CH<sub>4</sub> réagit avec 2 molécules de O<sub>2</sub>.</p>
+      <div data-x="predi" style="margin-top:10px"></div>`, 'Exemple : prédis, puis observe')}`);
+  predire(d.querySelector('[data-x="predi"]'), q, {
+    question: 'À ton avis, quel réactif va manquer en premier ?',
+    options: [fH('CH4'), fH('O2'), 'Je ne sais pas'],
+    bilan: choix => `<div class="${choix === 1 ? 'callout-success' : 'callout'} er-retour">
+        <p>${choix === 1 ? '<b class="er-ok">Bien vu !</b> ' : choix === 0 ? '<b class="er-ko">Ce n\'était pas CH<sub>4</sub>.</b> ' : ''}Au départ, il y avait moins de molécules de CH<sub>4</sub> (3) que de O<sub>2</sub> (4). Pourtant, c'est O<sub>2</sub> qui manque en premier : à chaque fois, la réaction consomme <b>2</b> molécules de O<sub>2</sub> pour <b>1</b> molécule de CH<sub>4</sub>.</p>
+        <p>Avec 4 molécules de O<sub>2</sub>, la réaction n'a lieu que 2 fois : O<sub>2</sub> est le <b>réactif limitant</b>. Il reste 1 molécule de CH<sub>4</sub> qui ne peut plus réagir : CH<sub>4</sub> est <b>en excès</b>.</p></div>
+      <div class="crs-attention"><p><b class="cle-titre">Attention :</b> le réactif limitant n'est pas forcément celui qui est le moins nombreux au départ. Il faut tenir compte des nombres stœchiométriques.</p></div>`,
+  });
+
+  // Quel est le réactif limitant ? (le premier cas est un piège : le limitant est le plus nombreux)
+  const [r1, r2, r3] = melanger(REACTIONS);
+  const item = (titre, reac, piege) => {
+    const t = tirer(reac, { piege });
+    const options = reac.r.map((f, k) => ({ id: k, label: fH(f) }));
+    const indices = {};
+    reac.r.forEach((f, k) => { if (k !== t.L) indices[k] = diagLimitant(reac, t, k); });
+    return { titre, enonce: `${eq(reac)}<p>${depart(reac, t)}</p>`,
+      parties: [{ type: 'choix', q: 'Quel est le réactif limitant ?', options, bonne: t.L, indices, melanger: false,
+        solution: `<p>${reac.r.map((f, k) => `Avec ${fH(f)} : ${t.n0[k]} molécules, ${reac.c[k]} à chaque fois, la réaction peut avoir lieu ${t.fs[k]} fois.`).join(' ')} <b>${fH(reac.r[t.L])}</b> est épuisé en premier : c'est le réactif limitant.</p>` }] };
+  };
+  c.aToi(carte, [
+    item('Attention au piège', r1, true),
+    item('Une autre réaction', r2, false),
+    item('Avec des nombres plus grands', r3, true),
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Combien de fois la réaction a-t-elle lieu ? ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Combien de fois la réaction a-t-elle lieu ?');
+  const q = { r: ['N2', 'H2'], p: ['NH3'], c: [1, 3, 2], n0: [3, 6, 0] };
+  const d = c.ajouter(carte, `<div class="cours-bloc">
+      <p>Pour prévoir le réactif limitant sans faire réagir les molécules une à une, on cherche combien de fois la réaction pourrait avoir lieu avec chaque réactif.</p>
+      <div class="cle"><p><b class="cle-titre">Nombre de fois</b> : pour chaque réactif, on divise son nombre de molécules par son nombre stœchiométrique (la réaction a lieu un nombre entier de fois : on garde la partie entière).</p>
+        <p>Le <b>plus petit</b> résultat donne le réactif limitant et le nombre de fois que la réaction a lieu.</p></div>
+      <div class="cle"><p><b class="cle-titre">À la fin</b> : un réactif a perdu (nombre stœchiométrique × nombre de fois) molécules ; un produit en a gagné (nombre stœchiométrique × nombre de fois).</p></div>
+    </div>
+    ${exemple(`${eq(q)}
+      <p>On place <b>3 molécules de diazote</b> N<sub>2</sub> et <b>6 molécules de dihydrogène</b> H<sub>2</sub>.</p>
+      <div data-x="predi" style="margin-top:10px"></div>`, 'Exemple : prédis, puis observe')}`);
+  predire(d.querySelector('[data-x="predi"]'), q, {
+    question: 'Quel réactif va manquer en premier ?',
+    options: [fH('N2'), fH('H2')],
+    nombre: 'Combien de fois la réaction pourra-t-elle avoir lieu ?',
+    bilan: (choix, nb, x) => {
+      const okL = choix === 1, okN = nb === x;
+      return `<div class="${okL && okN ? 'callout-success' : 'callout'} er-retour">
+        <p>${okL ? '<b class="er-ok">Réactif limitant bien prévu.</b>' : '<b class="er-ko">Le réactif limitant est H<sub>2</sub>.</b>'}
+          ${okN ? `<b class="er-ok">Nombre de fois bien prévu : ${x}.</b>` : `<b class="er-ko">La réaction a eu lieu ${x} fois (tu avais prévu ${nb}).</b>`}</p>
+        <p>À chaque fois, 3 molécules de H<sub>2</sub> disparaissent : avec 6 molécules, la réaction peut avoir lieu 6 ÷ 3 = <b>2 fois</b>. Avec N<sub>2</sub>, elle aurait pu avoir lieu 3 ÷ 1 = 3 fois : H<sub>2</sub> est épuisé avant.</p>
+        <p>À la fin : 3 − 1 × 2 = 1 molécule de N<sub>2</sub> (en excès), 6 − 3 × 2 = 0 molécule de H<sub>2</sub> et 2 × 2 = 4 molécules de NH<sub>3</sub>.</p></div>`;
+    },
+  });
+
+  const [r1, r2] = melanger(REACTIONS);
+  const t1 = tirer(r1, { reste: Math.random() < .7 }) || tirer(r1), t2 = tirer(r2);
+  const nR2 = r2.r.length;
+  c.aToi(carte, [
+    { titre: 'Le nombre de fois',
+      enonce: `${eq(r1)}<p>${depart(r1, t1)}</p>`,
+      parties: [
+        { type: 'champs', q: 'Pour chaque réactif, combien de fois la réaction pourrait-elle avoir lieu ?',
+          champs: r1.r.map((f, k) => ({ label: `Avec ${fH(f)} :`, valeur: t1.fs[k], tol: 0, entier: true, signe: false, unite: 'fois' })),
+          diag: vs => { const k = vs.findIndex((v, j) => v !== t1.fs[j]); return diagNbFois(vs[k], t1.n0[k], r1.c[k], r1.r[k]); },
+          solution: `<p class="crs-calc">${r1.r.map((f, k) => `${fH(f)} : ${t1.n0[k]} ÷ ${r1.c[k]}${t1.n0[k] % r1.c[k] ? ` → <span class="c">${t1.fs[k]} fois</span> (il en reste ${t1.n0[k] - r1.c[k] * t1.fs[k]})` : ` = <span class="c">${t1.fs[k]} fois</span>`}`).join('<br>')}</p>` },
+        { type: 'nombre', q: 'Combien de fois la réaction a-t-elle lieu ?', label: 'Nombre de fois :', valeur: t1.F, tol: 0, entier: true, signe: false,
+          diag: v => (v === Math.max(...t1.fs)
+            ? 'C\'est la plus grande valeur. La réaction s\'arrête dès que le premier réactif manque : on garde la plus petite.'
+            : `Prends le plus petit des nombres de fois trouvés : ${t1.fs.join(' et ')}.`),
+          solution: `<p>La plus petite valeur est ${t1.F} : la réaction a lieu <b>${t1.F} fois</b> et <b>${fH(r1.r[t1.L])}</b> est le réactif limitant.</p>` },
+      ] },
+    { titre: 'Les quantités à la fin',
+      enonce: `${eq(r2)}<p>${depart(r2, t2)} La réaction a lieu ${t2.F} fois (${fH(r2.r[t2.L])} est le réactif limitant).</p>`,
+      parties: [{ type: 'champs', q: 'Combien de molécules de chaque espèce y a-t-il à la fin ?',
+        champs: especes(r2).map((f, k) => ({ label: `${fH(f)} :`, valeur: t2.nf[k], tol: 0, entier: true, signe: false, unite: 'molécules' })),
+        diag: vs => diagFinal(vs, r2, t2),
+        solution: `<p class="crs-calc">${especes(r2).map((f, k) => (k < nR2
+          ? `${fH(f)} : ${t2.n0[k]} − ${r2.c[k]} × ${t2.F} = <span class="c">${t2.nf[k]}</span>`
+          : `${fH(f)} : ${r2.c[k]} × ${t2.F} = <span class="c">${t2.nf[k]}</span>`)).join('<br>')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Les proportions stœchiométriques ---------- */
+// Simulation avec des quantités au choix : le défi est de tout épuiser en même temps.
+// Tout est local à la zone : plusieurs exemplaires possibles dans la page.
+function bacASable(zone, api) {
   const REACS = [
     { nom: 'Méthane', r: ['CH4', 'O2'], p: ['CO2', 'H2O'], c: [1, 2, 1, 2], n0: [2, 6, 0, 0] },
     { nom: 'Ammoniac', r: ['N2', 'H2'], p: ['NH3'], c: [1, 3, 2], n0: [2, 7, 0] },
     { nom: 'Eau', r: ['H2', 'O2'], p: ['H2O'], c: [2, 1, 2], n0: [5, 3, 0] },
   ];
-  const c = carte(`<h3 class="cours-titre">3. À toi de choisir les quantités</h3>
-    <p class="er-contexte">Choisis une réaction et le nombre de molécules de chaque réactif au départ, puis fais-la avancer. Essaie de prévoir le réactif limitant avant de lancer. Peux-tu trouver des quantités pour lesquelles les deux réactifs sont épuisés en même temps ?</p>
-    <div class="av-onglets" data-x="onglets" style="margin-top:12px"></div>
-    <div class="av-depart" data-x="depart"></div>
-    <div data-x="sim"></div>`);
-  let reac = REACS[0], sim = null;
-  const onglets = c.querySelector('[data-x="onglets"]');
+  zone.innerHTML = '<div class="av-onglets" data-x="onglets"></div><div class="av-depart" data-x="depart"></div><div data-x="sim"></div>';
+  const $ = s => zone.querySelector(s);
+  let reac = REACS[0], sim = null, sels = [];
+  const onglets = $('[data-x="onglets"]');
   onglets.innerHTML = REACS.map((r, i) => `<button type="button" class="btn-small${i ? '' : ' actif'}" data-i="${i}">${r.nom}</button>`).join('');
-  onglets.querySelectorAll('button').forEach(b => b.onclick = () => {
-    onglets.querySelectorAll('button').forEach(x => x.classList.toggle('actif', x === b));
-    choisir(REACS[+b.dataset.i]);
+  const bOnglets = [...onglets.querySelectorAll('button')];
+  bOnglets.forEach(b => {
+    b.onclick = () => {
+      bOnglets.forEach(x => x.classList.toggle('actif', x === b));
+      choisir(REACS[+b.dataset.i]);
+    };
   });
   // Équation, avec sous chaque réactif le nombre de molécules au départ (comme la ligne « initial »
   // d'un tableau d'avancement) : ces nombres ne se confondent pas avec les nombres stœchiométriques
   function choisir(r) {
     reac = r;
-    const dep = c.querySelector('[data-x="depart"]');
+    const dep = $('[data-x="depart"]');
     const esp = r.r.concat(r.p), nR = r.r.length;
-    dep.innerHTML = `<p class="av-depart-titre">Nombre de molécules au départ :</p><div class="av-depart-eq">` + esp.map((f, k) =>
+    dep.innerHTML = '<p class="av-depart-titre">Nombre de molécules au départ :</p><div class="av-depart-eq">' + esp.map((f, k) =>
       (k === 0 ? '' : `<span class="av-depart-op">${k === nR ? '→' : '+'}</span>`) +
       `<div class="av-depart-col"><span class="av-depart-f">${(r.c[k] > 1 ? `<span class="av-c">${r.c[k]}</span>&nbsp;` : '') + fH(f)}</span>` +
       `<span class="av-depart-n" data-k="${k}">${k < nR ? '' : '0'}</span></div>`).join('') + '</div>';
-    r.r.forEach((f, k) => {
+    sels = r.r.map((f, k) => {
       const s = MOL.selecteur({ valeur: r.n0[k], min: 1, max: 9, label: 'le nombre de molécules de ' + f + ' au départ',
         onChange: v => { r.n0[k] = v; sim.recommencer(r.n0); } });
       dep.querySelector(`.av-depart-n[data-k="${k}"]`).appendChild(s.el);
+      return s;
     });
     if (sim) sim.changer(r);
-    else sim = new AV.Simulation(c.querySelector('[data-x="sim"]'), Object.assign({}, r, { n0: r.n0.slice(), compteur: fois }));
+    else sim = new AV.Simulation($('[data-x="sim"]'), Object.assign({}, r, { n0: r.n0.slice(), compteur: fois, onFin }));
+  }
+  // fin de la réaction : réussi si plus aucun réactif ne reste
+  function onFin() {
+    if (api.fini()) return;
+    const r = reac, restes = r.r.map((_, k) => sim.n(k));
+    if (restes.every(v => v === 0)) { api.reussi(); return; }
+    const kb = r.c[0] > r.c[1] ? 0 : 1, ks = 1 - kb;           // réactif au plus grand nombre stœchiométrique
+    const exces = r.r.map((f, k) => k).filter(k => restes[k] > 0);
+    api.erreur(`La réaction s'est arrêtée, mais il reste ${exces.map(k => mol(restes[k], r.r[k])).join(' et ')}. ` +
+      `À chaque fois, la réaction consomme ${mol(r.c[ks], r.r[ks])} et ${mol(r.c[kb], r.r[kb])} : il faut donc au départ ` +
+      `${r.c[kb] / r.c[ks]} fois plus de molécules de ${fH(r.r[kb])} que de ${fH(r.r[ks])}. Change les quantités et recommence.`);
   }
   choisir(reac);
-  c.insertAdjacentHTML('beforeend', `<div class="cle" style="margin-top:14px"><p>Avec des molécules, il peut rester un peu du réactif limitant quand il n'y en a plus assez pour réagir encore une fois (par exemple 1 molécule de O<sub>2</sub> alors qu'il en faut 2). Avec des quantités de matière (en mol), le réactif limitant est entièrement consommé : on le verra dans le module 3.</p></div>
-    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2.html">Module 2 : le tableau d'avancement →</a>
-      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
-  SOM.marquer({ fait: true });                                 // dernière étape atteinte : cours terminé
-  return c;
+  return {
+    // réponse : deux fois les proportions de l'équation pour la réaction affichée
+    montrer() {
+      const n0 = reac.r.map((_, k) => 2 * reac.c[k]);
+      n0.forEach((v, k) => { reac.n0[k] = v; sels[k].fixer(v); });
+      sim.recommencer(reac.n0);
+    },
+  };
 }
 
-etape1();
+function etape4(c) {
+  const carte = c.carte('4. Les proportions stœchiométriques');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Si on choisit bien les quantités au départ, tous les réactifs peuvent être épuisés en même temps.</p>
+      <div class="cle"><p><b class="cle-titre">Proportions stœchiométriques</b> : quand tous les réactifs sont épuisés en même temps (ils sont tous limitants), on dit qu'ils ont été introduits dans les proportions stœchiométriques. Il ne reste aucun réactif à la fin.</p></div>
+      <div class="cle"><p><b class="cle-titre">Avec des molécules</b>, il peut rester un peu du réactif limitant quand il n'y en a plus assez pour réagir encore une fois (par exemple 1 molécule de O<sub>2</sub> alors qu'il en faut 2). Avec des quantités de matière (en mol), le réactif limitant est entièrement consommé : on le verra dans le module 3.</p></div>
+    </div>
+    ${exemple(`<p class="av-equation">CH<sub>4</sub> + <span class="av-c">2</span>&nbsp;O<sub>2</sub> → CO<sub>2</sub> + <span class="av-c">2</span>&nbsp;H<sub>2</sub>O</p>
+      <p>Avec <b>2 molécules de CH<sub>4</sub> et 4 molécules de O<sub>2</sub></b> :</p>
+      <p class="crs-calc">CH<sub>4</sub> : 2 ÷ 1 = 2 fois &nbsp;·&nbsp; O<sub>2</sub> : 4 ÷ 2 = 2 fois</p>
+      <p>Les deux réactifs sont épuisés en même temps, après 2 fois : ils sont dans les <span class="c" style="font-weight:800">proportions stœchiométriques</span>. Il faut 2 fois plus de molécules de O<sub>2</sub> que de CH<sub>4</sub>.</p>
+      <p>Avec 2 CH<sub>4</sub> et 5 O<sub>2</sub>, la réaction a aussi lieu 2 fois, mais il reste 1 molécule de O<sub>2</sub> : elle ne peut pas réagir seule.</p>`)}`);
+
+  // b. proportions : un réactif de nombre stœchiométrique 1, combien faut-il de l'autre ?
+  const rb = hasard(REACTIONS.filter(r => r.c.slice(0, r.r.length).includes(1)));
+  const g = rb.c.indexOf(1), o = 1 - g, ng = entre(2, 4), no = ng * rb.c[o];
+  // c. il reste un peu du réactif limitant
+  const rc = hasard(REACTIONS.filter(r => r !== rb)), tc = tirer(rc, { reste: true });
+  c.aToi(carte, [
+    { titre: 'Tout épuiser en même temps',
+      enonce: '<p>Choisis une réaction et le nombre de molécules de chaque réactif au départ pour que <b>tous les réactifs soient épuisés en même temps</b>, puis fais avancer la réaction jusqu\'au bout.</p>',
+      parties: [{ type: 'perso', monter: bacASable,
+        solution: '<p>Il faut respecter les nombres stœchiométriques : par exemple 2 CH<sub>4</sub> et 4 O<sub>2</sub> (méthane), 2 N<sub>2</sub> et 6 H<sub>2</sub> (ammoniac), 4 H<sub>2</sub> et 2 O<sub>2</sub> (eau). À la fin, il ne reste aucun réactif.</p>' }] },
+    { titre: 'Les bonnes proportions',
+      enonce: `${eq(rb)}<p>On place ${mol(ng, rb.r[g])}.</p>`,
+      parties: [{ type: 'nombre', q: `Combien faut-il de molécules de ${fH(rb.r[o])} pour que les deux réactifs soient épuisés en même temps ?`,
+        label: `${fH(rb.r[o])} :`, unite: 'molécules', valeur: no, tol: 0, entier: true, signe: false,
+        diag: v => {
+          if (v === ng) return `Il ne suffit pas d'en mettre autant : à chaque fois, la réaction consomme ${mol(rb.c[o], rb.r[o])} pour 1 molécule de ${fH(rb.r[g])}.`;
+          if (v === ng + rb.c[o]) return `On n'additionne pas : la réaction a lieu ${ng} fois (une fois par molécule de ${fH(rb.r[g])}) et consomme ${rb.c[o]} ${fH(rb.r[o])} à chaque fois. On multiplie.`;
+          return `La réaction a lieu ${ng} fois (une fois par molécule de ${fH(rb.r[g])}) ; à chaque fois, il faut ${mol(rb.c[o], rb.r[o])}.`;
+        },
+        solution: `<p class="crs-calc">${ng} × ${rb.c[o]} = <span class="c">${no} molécules de ${fH(rb.r[o])}</span></p><p>La réaction a lieu ${ng} fois et les deux réactifs sont épuisés en même temps.</p>` }] },
+    { titre: 'Il en reste un peu',
+      enonce: `${eq(rc)}<p>${depart(rc, tc)}</p>`,
+      parties: [
+        { type: 'nombre', q: 'Combien de fois la réaction a-t-elle lieu ?', label: 'Nombre de fois :', valeur: tc.F, tol: 0, entier: true, signe: false,
+          diag: v => {
+            const k = tc.L;
+            if (v === Math.max(...tc.fs)) return 'C\'est la plus grande valeur. La réaction s\'arrête dès que le premier réactif manque : on garde la plus petite.';
+            return diagNbFois(v, tc.n0[k], rc.c[k], rc.r[k]);
+          },
+          solution: `<p class="crs-calc">${rc.r.map((f, k) => `${fH(f)} : ${tc.n0[k]} ÷ ${rc.c[k]} → ${tc.fs[k]} fois`).join('<br>')}</p><p>La réaction a lieu <b>${tc.F} fois</b> ; ${fH(rc.r[tc.L])} est le réactif limitant.</p>` },
+        { type: 'champs', q: 'Combien de molécules de chaque réactif reste-t-il à la fin ?',
+          champs: rc.r.map((f, k) => ({ label: `${fH(f)} :`, valeur: tc.nf[k], tol: 0, entier: true, signe: false, unite: 'molécules' })),
+          diag: vs => diagFinal(vs.concat(tc.nf.slice(rc.r.length)), rc, tc),
+          solution: `<p class="crs-calc">${rc.r.map((f, k) => `${fH(f)} : ${tc.n0[k]} − ${rc.c[k]} × ${tc.F} = <span class="c">${tc.nf[k]}</span>`).join('<br>')}</p><p>Il reste ${mol(tc.nf[tc.L], rc.r[tc.L])} du réactif limitant : il en faudrait ${rc.c[tc.L]} pour que la réaction ait lieu une fois de plus.</p>` },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Les nombres stœchiométriques</b> indiquent combien de molécules de chaque espèce disparaissent (réactifs) ou apparaissent (produits) <b>à chaque fois</b> que la réaction a lieu.</p>
+      <p class="av-formule-cle">CH<sub>4</sub> + <span class="av-c">2</span> O<sub>2</sub> → CO<sub>2</sub> + <span class="av-c">2</span> H<sub>2</sub>O<br><span style="font-size:.9rem;font-weight:600">à chaque fois : −1 CH<sub>4</sub>, −2 O<sub>2</sub>, +1 CO<sub>2</sub>, +2 H<sub>2</sub>O</span></p></div>
+    <div class="cle"><p><b class="cle-titre">Le réactif limitant</b> est le réactif qui est épuisé en premier : la réaction s'arrête quand il n'y en a plus. Les autres réactifs sont <b>en excès</b> : il en reste à la fin.</p></div>
+    <div class="cle"><p><b class="cle-titre">Attention :</b> le réactif limitant n'est pas forcément celui qui est le moins nombreux au départ. Il faut tenir compte des nombres stœchiométriques.</p></div>
+    <div class="cle"><p><b class="cle-titre">Nombre de fois</b> : pour chaque réactif, nombre de molécules ÷ nombre stœchiométrique (partie entière). Le plus petit résultat donne le réactif limitant et le nombre de fois que la réaction a lieu.</p></div>
+    <div class="cle"><p><b class="cle-titre">Proportions stœchiométriques</b> : tous les réactifs sont épuisés en même temps. Avec des molécules, il peut rester un peu du réactif limitant ; en mol, il est entièrement consommé.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2.html">Module 2 : le tableau d'avancement →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
 AV.menu('module_1');
 </script>
 </body>

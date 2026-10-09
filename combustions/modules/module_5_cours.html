@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 : l'énergie libérée — Combustions</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="co.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="../../equilibrer-reactions/modules/er.js"></script>
+<script src="co.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 5 · COURS</span>
+    <h2 class="er-titre">L'énergie libérée</h2>
+    <p class="er-contexte">Une combustion libère de l'énergie. Tu vas voir ce qu'est le <b>pouvoir calorifique</b> d'un combustible, et comment calculer l'<b>énergie libérée</b> ou la <b>masse à brûler</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Le pouvoir calorifique   2. E = PC × m   3. La masse en kg   4. m = E / PC
+   Pouvoirs calorifiques : CO.COMB (MJ/kg, valeurs arrondies).
+   ============================================================ */
+const { fmt, hasard, exemple } = COURS;
+const frac = (a, b) => `<span class="co-frac"><span>${a}</span><span>${b}</span></span>`;
+const nom = f => CO.COMB[f].nom, PC = f => CO.COMB[f].PC;
+const egal = (a, b) => COURS.proche(a, b, .005);
+// tableau de proportionnalité : une colonne par grandeur (énergie, masse) ; x : valeur cherchée
+const table = (l1, l2) => `<div class="crs-defile"><table class="co-prop"><tr><th>Énergie (MJ)</th><th>Masse (kg)</th></tr>${l1.map((v, k) => `<tr><td>${v}</td><td>${l2[k]}</td></tr>`).join('')}</table></div>`;
+const x = t => `<b class="x">${t}</b>`;
+const pcTxt = f => `PC(${nom(f)}) = ${fmt(PC(f))} MJ/kg`;
+
+// Erreurs fréquentes sur E = PC × m : division au lieu du produit, PC recopié, masse en g
+function diagE(v, pc, m, mg) {
+  if (mg != null && egal(v, pc * mg)) return `Tu as laissé la masse en grammes. PC est en MJ par <b>kilogramme</b> : convertis d'abord ${fmt(mg)} g en kg (÷ 1 000).`;
+  if (egal(v, pc / m) || egal(v, m / pc)) return 'Tu as divisé. L\'énergie est proportionnelle à la masse : E = PC × m.';
+  if (egal(v, pc)) return `${fmt(pc)} MJ, c'est l'énergie libérée par 1 kg. Ici on brûle ${fmt(m)} kg : multiplie par la masse.`;
+  return 'Applique E = PC × m, avec m en kg : le résultat est en MJ.';
+}
+
+/* ---------- 1. Le pouvoir calorifique ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Le pouvoir calorifique');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Brûler un combustible libère de l'énergie. Pour comparer les combustibles, on donne l'énergie libérée par <b>1 kg</b> de chacun.</p>
+      <div class="cle"><p>Le <b>pouvoir calorifique</b> PC d'un combustible est l'<b>énergie fournie par la combustion de 1 kg</b> de ce combustible. Il s'exprime en <span class="co-unite-tag">MJ/kg</span> (mégajoules par kilogramme).</p></div>
+    </div>
+    ${exemple(`<p>PC(méthane) = 50 MJ/kg : la combustion de 1 kg de méthane libère 50 MJ.</p>
+      <p>PC(éthanol) = 28,8 MJ/kg : 1 kg d'éthanol libère moins d'énergie que 1 kg de méthane.</p>`)}`);
+  const f = hasard(['C3H8', 'C4H10', 'C8H18']), p = fmt(PC(f));
+  const alcool = hasard(['C2H6O', 'CH4O']);
+  c.aToi(carte, [
+    { titre: 'Que signifie cette valeur ?', enonce: `<p>Le pouvoir calorifique du ${nom(f)} est ${pcTxt(f)}.</p>`,
+      parties: [{ type: 'choix', q: 'Que signifie cette valeur ?', colonne: true,
+        options: [{ id: 'ok', label: `La combustion de 1 kg de ${nom(f)} libère ${p} MJ.` }, { id: 'g', label: `La combustion de 1 g de ${nom(f)} libère ${p} MJ.` },
+          { id: 'mol', label: `La combustion de 1 mol de ${nom(f)} libère ${p} MJ.` }, { id: 'inv', label: `Il faut brûler ${p} kg de ${nom(f)} pour libérer 1 MJ.` }],
+        bonne: 'ok',
+        indices: {
+          g: 'Regarde l\'unité : MJ/kg, des mégajoules par <b>kilogramme</b>, pas par gramme.',
+          mol: 'L\'unité est MJ/kg : le pouvoir calorifique est donné pour une masse de 1 kg, pas pour une mole.',
+          inv: 'C\'est l\'inverse : MJ/kg, ce sont des MJ <b>pour</b> 1 kg de combustible.',
+        },
+        solution: '<p>PC en MJ/kg : énergie (en MJ) libérée par la combustion de 1 kg de combustible.</p>' }] },
+    { titre: 'Comparer deux combustibles', enonce: `<p>${pcTxt(alcool)} ; PC(propane) = 46 MJ/kg. On brûle 1 kg de chacun.</p>`,
+      parties: [{ type: 'choix', q: 'Lequel libère le plus d\'énergie ?',
+        options: [{ id: 'C3H8', label: 'le propane' }, { id: 'alc', label: `le ${nom(alcool)}` }, { id: 'pareil', label: 'autant l\'un que l\'autre' }],
+        bonne: 'C3H8',
+        indices: {
+          alc: `1 kg de propane libère 46 MJ, 1 kg de ${nom(alcool)} ${fmt(PC(alcool))} MJ : c'est le plus grand pouvoir calorifique qui libère le plus d'énergie.`,
+          pareil: 'Même masse ne veut pas dire même énergie : chaque combustible a son propre pouvoir calorifique.',
+        },
+        solution: `<p>Le propane : 46 MJ par kg, contre ${fmt(PC(alcool))} MJ pour le ${nom(alcool)}.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. E = PC × m ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Calculer l\'énergie libérée');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>L'énergie libérée est <b>proportionnelle</b> à la masse brûlée : 2 fois plus de combustible libère 2 fois plus d'énergie.</p>
+      <div class="cle"><p class="co-formule">E = PC × m</p>
+        <p class="co-legende"><b>E</b> : énergie en <span class="co-unite-tag">MJ</span> · <b>PC</b> : pouvoir calorifique en <span class="co-unite-tag">MJ/kg</span> · <b>m</b> : masse en <span class="co-unite-tag">kg</span></p></div>
+    </div>
+    ${exemple(`<p>On brûle 3 kg de méthane, PC = 50 MJ/kg :</p>
+      ${table(['50', x('E')], ['1', '3'])}
+      <p class="crs-calc">E = PC × m = 50 × 3 = <span class="c">150 MJ</span></p>`)}`);
+  // masses choisies pour que E tombe juste
+  const f1 = hasard(['C3H8', 'C4H10']), m1 = hasard([2, 3, 5]);
+  const f2 = hasard(['CH4', 'C8H18']), m2 = hasard([0.5, 1.5]);
+  const item = (titre, f, m) => ({
+    titre, enonce: `<p>On brûle ${fmt(m)} kg de ${nom(f)}. ${pcTxt(f)}.</p>`,
+    parties: [{ type: 'nombre', q: 'Quelle énergie est libérée ?', label: 'E =', unite: 'MJ', valeur: PC(f) * m, signe: false,
+      diag: v => diagE(v, PC(f), m),
+      solution: `${table([fmt(PC(f)), x('E')], ['1', fmt(m)])}<p class="crs-calc">E = ${fmt(PC(f))} × ${fmt(m)} = <span class="c">${fmt(PC(f) * m)} MJ</span></p>` }],
+  });
+  c.aToi(carte, [item('Quelques kilogrammes', f1, m1), item('Une masse non entière', f2, m2)]);
+  return carte;
+}
+
+/* ---------- 3. La masse en kilogrammes ---------- */
+function etape3(c) {
+  const carte = c.carte('3. La masse en kilogrammes');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Le pouvoir calorifique est en MJ par <b>kilogramme</b> : dans E = PC × m, la masse doit être en <b>kg</b>. Les masses sont souvent données en grammes : on convertit d'abord.</p>
+      <div class="cle"><p><b>1 kg = 1 000 g</b> : m (en kg) = m (en g) ÷ 1 000. Pour les énergies : <b>1 MJ = 1 000 kJ</b>.</p></div>
+    </div>
+    ${exemple(`<p>PC(éthanol) = 28,8 MJ/kg. Énergie libérée par la combustion de 23 g = 0,023 kg d'éthanol :</p>
+      ${table(['28,8', x('E')], ['1', '0,023'])}
+      <p class="crs-calc">E = 28,8 × 0,023 ≈ <span class="c">0,66 MJ</span></p>`, 'Exemple : l\'exercice type')}`);
+  const g1 = hasard([250, 1500, 80, 400]);
+  const f2 = hasard(['C3H8', 'C4H10', 'C7H16']), g2 = hasard([200, 500, 300]), m2 = g2 / 1000, E2 = PC(f2) * m2;
+  c.aToi(carte, [
+    { titre: 'Convertir une masse', enonce: `<p>Un échantillon a une masse de ${fmt(g1)} g.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est sa masse en kg ?', label: 'm =', unite: 'kg', valeur: g1 / 1000, signe: false,
+        diag: v => (egal(v, g1 * 1000) ? 'Tu as multiplié par 1 000. Un kilogramme vaut 1 000 g : il y a 1 000 fois <b>moins</b> de kg que de g. Divise par 1 000.'
+          : egal(v, g1 / 100) || egal(v, g1 / 10) ? 'Diviser par 1 000, c\'est décaler la virgule de <b>3</b> rangs vers la gauche.'
+            : 'Divise la masse en grammes par 1 000.'),
+        solution: `<p class="crs-calc">m = ${fmt(g1)} ÷ 1 000 = <span class="c">${fmt(g1 / 1000)} kg</span></p>` }] },
+    { titre: 'Une masse en grammes', enonce: `<p>On brûle ${fmt(g2)} g de ${nom(f2)}. ${pcTxt(f2)}.</p>`,
+      parties: [
+        { type: 'nombre', q: 'Convertis la masse en kg.', label: 'm =', unite: 'kg', valeur: m2, signe: false,
+          diag: v => (egal(v, g2 * 1000) ? 'Tu as multiplié par 1 000 : il y a 1 000 fois moins de kg que de g. Divise par 1 000.' : 'Divise la masse en grammes par 1 000.'),
+          solution: `<p class="crs-calc">m = ${fmt(g2)} ÷ 1 000 = <span class="c">${fmt(m2)} kg</span></p>` },
+        { type: 'nombre', q: 'Calcule l\'énergie libérée.', label: 'E =', unite: 'MJ', valeur: E2, signe: false,
+          diag: v => diagE(v, PC(f2), m2, g2),
+          solution: `<p class="crs-calc">E = ${fmt(PC(f2))} × ${fmt(m2)} = <span class="c">${fmt(E2)} MJ</span></p>` },
+        { type: 'nombre', q: 'Exprime cette énergie en kJ (1 MJ = 1 000 kJ).', label: 'E =', unite: 'kJ', valeur: E2 * 1000, signe: false,
+          diag: v => (egal(v, E2 / 1000) ? 'Tu as divisé : 1 MJ = 1 000 kJ, il y a 1 000 fois <b>plus</b> de kJ que de MJ. Multiplie par 1 000.' : 'Multiplie l\'énergie en MJ par 1 000.'),
+          solution: `<p class="crs-calc">E = ${fmt(E2)} × 1 000 = <span class="c">${fmt(E2 * 1000)} kJ</span></p>` },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. m = E / PC ---------- */
+function etape4(c) {
+  const carte = c.carte('4. Calculer la masse à brûler');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Dans l'autre sens : on connaît l'énergie E à obtenir et on cherche la masse m de combustible à brûler. On divise par le pouvoir calorifique.</p>
+      <div class="co-grille2">
+        <div class="cle" style="margin:0"><p><b class="cle-titre">Énergie libérée</b></p><p class="co-formule">E = PC × m</p></div>
+        <div class="cle" style="margin:0"><p><b class="cle-titre">Masse à brûler</b></p><p class="co-formule">m = ${frac('E', 'PC')}</p></div>
+      </div>
+      <p class="co-legende" style="margin-top:10px">E en MJ, PC en MJ/kg, <b>m en kg</b>. Vérification avec les unités : MJ ÷ (MJ/kg) = kg.</p>
+    </div>
+    ${exemple(`<p>Pour obtenir 23 MJ avec du propane, PC = 46 MJ/kg :</p>
+      ${table(['46', '23'], ['1', x('m')])}
+      <p class="crs-calc">m = ${frac('E', 'PC')} = ${frac('23', '46')} = <span class="c">0,5 kg</span> = 500 g</p>`)}`);
+  // masses choisies pour que le résultat tombe juste
+  const f2 = hasard(['C7H16', 'C4H10', 'C6H14']), m2 = hasard([2, 4, 3]), E2 = PC(f2) * m2;
+  const E3 = hasard([1.5, 2, 0.5]), m3 = E3 / 50;
+  c.aToi(carte, [
+    { titre: 'La bonne formule', enonce: '<p>On connaît l\'énergie E à obtenir et le pouvoir calorifique PC du combustible.</p>',
+      parties: [{ type: 'choix', q: 'Quelle formule donne la masse m à brûler ?',
+        options: [{ id: 'ok', label: `m = ${frac('E', 'PC')}` }, { id: 'x', label: 'm = E × PC' }, { id: 'inv', label: `m = ${frac('PC', 'E')}` }],
+        bonne: 'ok',
+        indices: {
+          x: 'Vérifie avec les unités : MJ × MJ/kg = MJ²/kg, ce n\'est pas une masse.',
+          inv: 'Vérifie avec les unités : (MJ/kg) ÷ MJ = 1/kg, ce n\'est pas une masse.',
+        },
+        solution: '<p>m = E / PC. Unités : MJ ÷ (MJ/kg) = kg.</p>' }] },
+    { titre: 'La masse en kg', enonce: `<p>On veut obtenir ${fmt(E2)} MJ en brûlant de l'${nom(f2)}. ${pcTxt(f2)}.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle masse faut-il brûler ?', label: 'm =', unite: 'kg', valeur: m2, signe: false,
+        diag: v => (egal(v, E2 * PC(f2)) ? 'Tu as multiplié : la masse à brûler est m = E / PC.'
+          : egal(v, PC(f2) / E2) ? 'Tu as calculé PC / E : c\'est l\'énergie qu\'on divise par le pouvoir calorifique, m = E / PC.'
+            : 'Applique m = E / PC : le résultat est en kg.'),
+        solution: `${table([fmt(PC(f2)), fmt(E2)], ['1', x('m')])}<p class="crs-calc">m = ${frac(fmt(E2), fmt(PC(f2)))} = <span class="c">${fmt(m2)} kg</span></p>` }] },
+    { titre: 'La masse en grammes', enonce: `<p>On veut obtenir ${fmt(E3)} MJ en brûlant du méthane. ${pcTxt('CH4')}.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle masse de méthane faut-il brûler ? Donne-la en grammes.', label: 'm =', unite: 'g', valeur: m3 * 1000, signe: false,
+        diag: v => (egal(v, m3) ? `${fmt(m3)}, c'est la masse en kg. Convertis-la en grammes : × 1 000.`
+          : egal(v, E3 * 50) || egal(v, E3 * 50 * 1000) ? 'Tu as multiplié : la masse à brûler est m = E / PC.'
+            : 'Calcule m = E / PC (en kg), puis convertis en grammes (× 1 000).'),
+        solution: `<p class="crs-calc">m = ${frac(fmt(E3), 50)} = ${fmt(m3)} kg = <span class="c">${fmt(m3 * 1000)} g</span></p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Pouvoir calorifique</b> · PC = énergie libérée par la combustion de 1 kg de combustible, en MJ/kg.</p></div>
+    <div class="cle"><p class="co-formule">E = PC × m &nbsp;·&nbsp; m = ${frac('E', 'PC')}</p>
+      <p class="co-legende">E en MJ, PC en MJ/kg, <b>m en kg</b> (1 kg = 1 000 g ; 1 MJ = 1 000 kJ).</p></div>
+    <div class="cle"><p>Plus le pouvoir calorifique est grand, plus la masse à brûler pour obtenir une même énergie est petite.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_5.html">Questions sur l'énergie libérée →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_6.html">Module 6 : l'exemple du cours, pas à pas</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_5.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
+CO.menu('module_5_cours');
+</script>
+</body>
+</html>
