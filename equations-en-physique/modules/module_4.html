@@ -166,7 +166,7 @@ function renderStatic(node) {
         if (node.items.length === 0) return '<span class="slot-placeholder">…</span>';
         return node.items.map((it, idx) => {
             const sep = (idx > 0 && !isOperatorTile(node.items[idx-1]) && !isOperatorTile(it)) ? '<span class="mult-sign">×</span>' : '';
-            return sep + `<span class="eq-tile-frozen">${it.label}</span>`;
+            return sep + `<span class="eq-tile-frozen"><span class="eq-tile-lab">${it.label}</span></span>`;
         }).join('');
     }
     if (node.kind === 'frac') {
@@ -472,7 +472,7 @@ function monterEditeur(hote, cfg, api) {
     function addPaletteTile(t) {
         const el = document.createElement('div');
         el.className = 'palette-tile';
-        el.innerHTML = t.label;
+        el.innerHTML = `<span class="eq-tile-lab">${t.label}</span>`;
         enableTileDrag(el, { type:'tile', id:t.id, label:t.label });
         pal.appendChild(el);
     }
