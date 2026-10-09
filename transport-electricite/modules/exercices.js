@@ -12,7 +12,11 @@
    le format de TE.PARTIES avec p.q (question) et p.correction
    (correction détaillée, toujours consultable).
    Une partie 'schema' commence la plupart des exercices : on place
-   les valeurs de l'énoncé sur le schéma avant de calculer.
+   les valeurs de l'énoncé sur le schéma avant de calculer. Le schéma
+   porte U, I et la puissance apparente S dans chaque partie (la même
+   partout), P juste avant la charge, et les trois formules de chaque
+   transformateur ; avant un calcul avec m, l'élève choisit laquelle
+   des trois formules utiliser (SCH.choixFormule).
    ============================================================ */
 (function () {
   'use strict';
@@ -24,7 +28,6 @@
   const U = k => sub('U', k), I = k => sub('I', k), N = k => sub('N', k), m = k => sub('m', k);
   const PU = sub('P', 'u'), PP = sub('P', 'perdue');
   const rap = (h, b) => `<span class="te-rap"><span>${h}</span><span>${b}</span></span>`;
-  const TROIS = `m = ${rap(N(2), N(1))} = ${rap(U(2), U(1))} = ${rap(I(1), I(2))}`;
   const etiq = (id, label, cible, indice) => ({ id, label, cible, indice });
   // fabriques de parties
   const choix = (q, options, bonne, correction, opts) => Object.assign({ type: 'choix', q, options, bonne, correction, colonne: options.some(x => x.label.length > 24) }, opts);
@@ -32,7 +35,20 @@
   const sci = (q, label, valeur, unite, correction, opts) => Object.assign({ type: 'sci', q, label, valeur, unite, correction, cs: 3, rel: .02 }, opts);
   const schema = (q, sch, etiquettes, correction) => ({ type: 'schema', q: q || 'Place les valeurs de l\'énoncé sur le schéma (les cases restées vides sont les inconnues).', schema: sch, etiquettes, correction });
   const ELEV = [o('elev', 'élévateur de tension'), o('abai', 'abaisseur de tension')];
-  const RES3 = (val, charge) => window.SCH.reseau(val, { charge });
+  const RES3 = (val, charge, titres) => window.SCH.reseau(val, { charge, titres });
+  const PARTIES_N = ['partie 1', 'partie 2', 'partie 3'];
+  // laquelle des trois formules du transformateur utiliser ? (T : transformateur seul ; T1, T2 : chaîne)
+  const T = (connues, cherche) => window.SCH.choixFormule({ a: 1, b: 2, connues, cherche });
+  const T1 = (connues, cherche) => window.SCH.choixFormule({ a: 1, b: 2, m: m(1), nomTr: 'T<sub>1</sub>', connues, cherche });
+  const T2 = (connues, cherche) => window.SCH.choixFormule({ a: 2, b: 3, m: m(2), prime: true, nomTr: 'T<sub>2</sub>', connues, cherche });
+  // repérer la production, le transport et la distribution sur la chaîne (noms à placer)
+  const reperage = charge => schema('Place le nom de chaque partie du réseau.',
+    window.SCH.chaine({ etages: [1, 2, 3].map(k => ({ titre: 'partie ' + k, u: sub('u', k), lignes: [window.SCH.l('', window.SCH.slot('p' + k))] })),
+      transfos: [{ nom: sub('T', 1) }, { nom: sub('T', 2) }], charge: { nom: charge }, aria: 'Chaîne : partie 1, transformateur T1, partie 2, transformateur T2, partie 3, charge' }), [
+      etiq('p', 'production', 'p1', 'La centrale <b>produit</b> l\'électricité : c\'est le début de la chaîne, avant l\'élévateur T<sub>1</sub>.'),
+      etiq('t', 'transport', 'p2', 'Entre T<sub>1</sub> et T<sub>2</sub>, la très haute tension sert à <b>transporter</b> l\'électricité sur de longues distances.'),
+      etiq('d', 'distribution', 'p3', 'Après l\'abaisseur T<sub>2</sub>, on <b>distribue</b> l\'électricité aux utilisateurs.')],
+    '<p>Partie 1 : <b>production</b> (centrale) ; partie 2 : <b>transport</b> (très haute tension) ; partie 3 : <b>distribution</b> (vers les utilisateurs).</p>');
 
   // tableau des effets du courant (exercice 14)
   const EFFETS = `<div class="te-defile"><table class="te-tab">
@@ -79,40 +95,48 @@
     { id: '8', groupe: 'transfo', titre: 'Exercice 8 : transport sous haute tension', desc: 'Centrale nucléaire : 20 kV → 400 kV, 800 kW.',
       contexte: '<p class="er-contexte">À la sortie d\'une centrale nucléaire, un transformateur va faire passer la tension d\'environ 20 kV à 400 kV pour être injectée sur le réseau de transport d\'électricité. La puissance à l\'entrée du transformateur est de 800 kW.</p>',
       parties: [
-        schema(null, window.SCH.transfo1({ U1: '#U1', I1: '?', P1: '#P', U2: '#U2', I2: '?', m: '?' }), [
-          etiq('a', '20 kV', 'U1', 'La tension d\'entrée est au primaire.'), etiq('b', '400 kV', 'U2', 'La tension de sortie est au secondaire.'), etiq('c', '800 kW', 'P', 'La puissance est donnée à l\'entrée du transformateur.')],
-          `<p>Primaire : ${U(1)} = 20 kV, P = 800 kW ; secondaire : ${U(2)} = 400 kV. Puis on écrit ${TROIS}.</p>`),
-        nombre('a. Déterminer le courant à l\'entrée du transformateur.', `${I(1)} =`, 40, 'A', calc(`P = ${U(1)} × ${I(1)} donc ${I(1)} = ${rap('P', U(1))} = ${rap('800 × 10<sup>3</sup>', '20 × 10<sup>3</sup>')} = ${c('40 A')}`),
-          { diag: v => proche(v, .04) || proche(v, 40000) ? 'Convertis : 800 kW = 800 000 W et 20 kV = 20 000 V.' : `${I(1)} = P / ${U(1)}.` }),
+        schema(null, window.SCH.transfo1({ U1: '#U1', I1: '?', S1: '#S', U2: '#U2', I2: '?', S2: '?', m: '?' }), [
+          etiq('a', '20 kV', 'U1', 'La tension d\'entrée est au primaire.'), etiq('b', '400 kV', 'U2', 'La tension de sortie est au secondaire.'), etiq('c', '800 kW', 'S', 'La puissance est donnée à l\'entrée du transformateur : elle se place avec U<sub>1</sub> et I<sub>1</sub>.')],
+          `<p>Primaire : ${U(1)} = 20 kV et la puissance S = 800 kW ; secondaire : ${U(2)} = 400 kV. Le transformateur ne perd pas de puissance : on retrouve la même puissance S au secondaire. Les trois formules de m sont sous le transformateur.</p>`),
+        nombre('a. Déterminer le courant à l\'entrée du transformateur.', `${I(1)} =`, 40, 'A', calc(`S = ${U(1)} × ${I(1)} donc ${I(1)} = ${rap('S', U(1))} = ${rap('800 × 10<sup>3</sup>', '20 × 10<sup>3</sup>')} = ${c('40 A')}`),
+          { diag: v => proche(v, .04) || proche(v, 40000) ? 'Convertis : 800 kW = 800 000 W et 20 kV = 20 000 V.' : `${I(1)} = S / ${U(1)}.` }),
+        T(['U1', 'U2', 'S1', 'I1'], 'm'),
         nombre('b. Calculer le rapport de transformation de ce transformateur.', 'm =', 20, '', calc(`m = ${rap(U(2), U(1))} = ${rap('400', '20')} = ${c('20')} (la tension est multipliée par 20)`),
           { diag: v => proche(v, .05) ? `m = ${U(2)} / ${U(1)} (sortie sur entrée).` : `m = ${U(2)} / ${U(1)}.` }),
-        nombre('c. En déduire le courant de sortie.', `${I(2)} =`, 2, 'A', calc(`m = ${rap(I(1), I(2))} donc ${I(2)} = ${rap(I(1), 'm')} = ${rap('40', '20')} = ${c('2 A')}`) + '<p>(ou P = U<sub>2</sub> × I<sub>2</sub> : 800 000 / 400 000 = 2 A.)</p>',
+        T(['U1', 'U2', 'I1', 'm'], 'I2'),
+        nombre('c. En déduire le courant de sortie.', `${I(2)} =`, 2, 'A', calc(`m = ${rap(I(1), I(2))} donc ${I(2)} = ${rap(I(1), 'm')} = ${rap('40', '20')} = ${c('2 A')}`) + '<p>(ou avec la même puissance S au secondaire : S = U<sub>2</sub> × I<sub>2</sub>, donc I<sub>2</sub> = 800 000 / 400 000 = 2 A.)</p>',
           { diag: v => proche(v, 800) ? `Relation à l'envers : m = ${I(1)} / ${I(2)}, donc ${I(2)} = ${I(1)} / m.` : `${I(2)} = ${I(1)} / m.` }),
         choix('d. Rappeler la relation permettant de déterminer la puissance dissipée par effet Joule dans un dipôle ohmique de résistance R.', [o('ok', 'P<sub>J</sub> = R × I<sup>2</sup>'), o('a', 'P<sub>J</sub> = R × I'), o('b', 'P<sub>J</sub> = U × I'), o('c', 'P<sub>J</sub> = R / I<sup>2</sup>')], 'ok',
           '<p>P<sub>J</sub> = R × I<sup>2</sup>.</p>', { indice: 'L\'intensité est au carré.' }),
         choix('e. Justifier l\'intérêt de transporter l\'énergie électrique sous haute tension.', [o('ok', 'sous haute tension, l\'intensité est plus faible, donc les pertes par effet Joule sont plus faibles'), o('a', 'sous haute tension, l\'intensité est plus grande, donc on transporte plus d\'énergie'), o('b', 'la haute tension est moins dangereuse')], 'ok',
           '<p>Sous haute tension, l\'intensité est plus faible (2 A au lieu de 40 A), donc les pertes par effet Joule R × I<sup>2</sup> sont plus faibles (divisées par 20<sup>2</sup> = 400).</p>', { indice: 'Compare les intensités à l\'entrée et à la sortie.' }),
+        choix('f. Entre quelles parties du réseau électrique ce transformateur est-il placé ?', [o('ok', 'entre la production et le transport'), o('a', 'entre le transport et la distribution'), o('b', 'entre la production et la distribution')], 'ok',
+          '<p>Il est à la sortie de la centrale (<b>production</b>, 20 kV) et élève la tension pour le réseau de <b>transport</b> (400 kV).</p>', { melanger: false, indice: 'Il est à la sortie de la centrale, et la tension de sortie est injectée sur le réseau de transport.', indices: { a: 'Le transport se fait sous 400 kV : ce transformateur fabrique cette très haute tension, il est donc avant le transport.', b: 'La distribution se fait sous basse tension (230 V) ; ici, la tension de sortie est 400 kV.' } }),
       ] },
 
     /* ============================ EXERCICE 9 ============================ */
     { id: '9', groupe: 'transfo', titre: 'Exercice 9 : chaîne de distribution', desc: '10 kV, 400 kV, 230 V : charge résistive, puis moteur (k = 0,8).',
       contexte: '<p class="er-contexte">On symbolise la chaîne de distribution électrique par le schéma ci-dessous. Les tensions efficaces sont : 10 kV au primaire de T<sub>1</sub> ; 400 kV au secondaire de T<sub>1</sub> ; 230 V au secondaire de T<sub>2</sub>. On alimente d\'abord une charge résistive de puissance 2 600 W.</p>',
       parties: [
-        schema(null, RES3({ U1: '#U1', I1: '?', m1: '?', U2: '#U2', I2: '?', m2: '?', U3: '#U3', I3: '?', S: '?', P: '#P', k: '?' }, 'charge'), [
-          etiq('a', '10 kV', 'U1', 'Le primaire de T<sub>1</sub> : partie 1.'), etiq('b', '400 kV', 'U2', 'Le secondaire de T<sub>1</sub> est aussi le primaire de T<sub>2</sub> : partie 2.'), etiq('c', '230 V', 'U3', 'Le secondaire de T<sub>2</sub> alimente la charge : partie 3.'), etiq('d', '2 600 W', 'P', 'La puissance de la charge résistive est sa puissance active.')],
-          `<p>${U(1)} = 10 kV ; ${U(2)} = 400 kV ; ${U(3)} = 230 V ; P = 2 600 W. Relations : ${m(1)} = ${rap(U(2), U(1))} = ${rap(I(1), I(2))} et ${m(2)} = ${rap(U(3), U(2))} = ${rap(I(2), I(3))}.</p>`),
+        schema(null, RES3({ U1: '#U1', I1: '?', S1: '?', m1: '?', U2: '#U2', I2: '?', S2: '?', m2: '?', U3: '#U3', I3: '?', S3: '?', P: '#P', k: '?' }, 'charge', PARTIES_N), [
+          etiq('a', '10 kV', 'U1', 'Le primaire de T<sub>1</sub> : partie 1.'), etiq('b', '400 kV', 'U2', 'Le secondaire de T<sub>1</sub> est aussi le primaire de T<sub>2</sub> : partie 2.'), etiq('c', '230 V', 'U3', 'Le secondaire de T<sub>2</sub> alimente la charge : partie 3.'), etiq('d', '2 600 W', 'P', 'La puissance de la charge résistive est sa puissance active : elle se place juste avant la charge.')],
+          `<p>${U(1)} = 10 kV ; ${U(2)} = 400 kV ; ${U(3)} = 230 V ; P = 2 600 W juste avant la charge. La puissance apparente S est la même dans les trois parties ; les trois formules de ${m(1)} et de ${m(2)} sont sous T<sub>1</sub> et T<sub>2</sub>.</p>`),
         choix('a. Quel qualificatif convient à la partie 1 (avant T<sub>1</sub>) ?', [o('prod', 'production'), o('tr', 'transport'), o('dist', 'distribution')], 'prod', '<p>Partie 1 : <b>production</b> (centrale, 10 kV).</p>', { melanger: false, indice: 'C\'est là que se trouve la centrale.' }),
         choix('Et à la partie 2 (entre T<sub>1</sub> et T<sub>2</sub>) ?', [o('prod', 'production'), o('tr', 'transport'), o('dist', 'distribution')], 'tr', '<p>Partie 2 : <b>transport</b> (lignes à 400 kV).</p>', { melanger: false, indice: 'La très haute tension sert à transporter l\'électricité sur de grandes distances.' }),
         choix('Et à la partie 3 (après T<sub>2</sub>) ?', [o('prod', 'production'), o('tr', 'transport'), o('dist', 'distribution')], 'dist', '<p>Partie 3 : <b>distribution</b> (230 V, chez les utilisateurs).</p>', { melanger: false, indice: 'On amène l\'électricité aux utilisateurs.' }),
         choix('b. Comment se nomment les éléments T<sub>1</sub> et T<sub>2</sub> ?', [o('ok', 'des transformateurs'), o('a', 'des alternateurs'), o('b', 'des disjoncteurs')], 'ok', '<p>T<sub>1</sub> et T<sub>2</sub> sont des transformateurs (T<sub>1</sub> élévateur, T<sub>2</sub> abaisseur).</p>', { indice: 'Ils changent la valeur de la tension.' }),
+        T1(['U1', 'U2'], 'm'),
         nombre(`c. Déterminer le rapport de transformation ${m(1)} de T<sub>1</sub>.`, `${m(1)} =`, 40, '', calc(`${m(1)} = ${rap(U(2), U(1))} = ${rap('400', '10')} = ${c('40')}`), { diag: v => proche(v, .025) ? `${m(1)} = ${U(2)} / ${U(1)}.` : `${m(1)} = ${U(2)} / ${U(1)}.` }),
+        T2(['U2', 'U3'], 'm'),
         sci(`Déterminer le rapport de transformation ${m(2)} de T<sub>2</sub>.`, `${m(2)} =`, 230 / 400000, '', calc(`${m(2)} = ${rap(U(3), U(2))} = ${rap('230', '400 × 10<sup>3</sup>')} = ${c('5,75 × 10<sup>−4</sup>')}`), { diag: v => proche(v, 400000 / 230, .03) ? `${m(2)} = ${U(3)} / ${U(2)} (sortie de T<sub>2</sub> sur entrée).` : 'Écris 400 kV en volts : 400 000 V.' }),
         nombre('d. Rappeler la valeur du facteur de puissance d\'une charge résistive.', 'k =', 1, '', '<p>Pour une charge résistive, φ = 0 et <b>k = cos φ = 1</b>.</p>', { diag: () => 'Pour une charge résistive, u et i sont en phase : φ = 0.' }),
         nombre('e. Déterminer l\'intensité du courant circulant dans le câble d\'alimentation de la charge.', `${I(3)} =`, 2600 / 230, 'A', calc(`k = 1 donc P = S = ${U(3)} × ${I(3)} ; ${I(3)} = ${rap('2 600', '230')} = ${c('11,3 A')}`), { rel: .01, diag: () => `k = 1 donc S = P, puis ${I(3)} = S / ${U(3)}.` }),
-        sci(`f. En déduire le courant ${I(2)} circulant dans les câbles entre les éléments T<sub>1</sub> et T<sub>2</sub>.`, `${I(2)} =`, 230 / 400000 * 2600 / 230, 'A', calc(`${m(2)} = ${rap(I(2), I(3))} donc ${I(2)} = ${m(2)} × ${I(3)} = 5,75 × 10<sup>−4</sup> × 11,3 = ${c('6,50 × 10<sup>−3</sup> A')}`), { diag: v => proche(v, 11.3 / 5.75e-4, .03) ? `Relation à l'envers : ${m(2)} = ${I(2)} / ${I(3)}, donc ${I(2)} = ${m(2)} × ${I(3)}.` : `${I(2)} = ${m(2)} × ${I(3)}.` }),
+        T2(['U2', 'U3', 'I3', 'm'], 'I2'),
+        sci(`f. En déduire le courant ${I(2)} circulant dans les câbles entre les éléments T<sub>1</sub> et T<sub>2</sub>.`, `${I(2)} =`, 230 / 400000 * 2600 / 230, 'A', calc(`${m(2)} = ${rap(I(2), I(3))} donc ${I(2)} = ${m(2)} × ${I(3)} = 5,75 × 10<sup>−4</sup> × 11,3 = ${c('6,50 × 10<sup>−3</sup> A')}`) + `<p>(ou avec la même puissance S partout : ${I(2)} = ${rap('S', U(2))} = ${rap('2 600', '400 000')} = 6,50 × 10<sup>−3</sup> A.)</p>`, { diag: v => proche(v, 11.3 / 5.75e-4, .03) ? `Relation à l'envers : ${m(2)} = ${I(2)} / ${I(3)}, donc ${I(2)} = ${m(2)} × ${I(3)}.` : `${I(2)} = ${m(2)} × ${I(3)}.` }),
         nombre('g. La charge est à présent un moteur de puissance active 2 600 W et de facteur de puissance k = 0,8. Déterminer la puissance apparente consommée par le moteur.', 'S =', 3250, 'VA', calc(`S = ${rap('P', 'k')} = ${rap('2 600', '0,8')} = ${c('3 250 VA')}`), { diag: v => proche(v, 2080) ? 'k = P / S, donc S = P / k.' : 'S = P / k.' }),
         nombre('h. En déduire l\'intensité du courant circulant dans le câble d\'alimentation de la charge.', `${I(3)} =`, 3250 / 230, 'A', calc(`S = ${U(3)} × ${I(3)} donc ${I(3)} = ${rap('3 250', '230')} = ${c('14,1 A')}`), { rel: .01, diag: v => proche(v, 11.3, .01) ? 'Avec le moteur, c\'est S (et non P) qui donne l\'intensité.' : `${I(3)} = S / ${U(3)}.` }),
-        sci(`i. En déduire le courant ${I(2)} circulant dans les câbles entre T<sub>1</sub> et T<sub>2</sub>.`, `${I(2)} =`, 230 / 400000 * 3250 / 230, 'A', calc(`${I(2)} = ${m(2)} × ${I(3)} = 5,75 × 10<sup>−4</sup> × 14,1 = ${c('8,1 × 10<sup>−3</sup> A')}`), { diag: () => `${I(2)} = ${m(2)} × ${I(3)}.` }),
+        T2(['U2', 'U3', 'I3', 'm'], 'I2'),
+        sci(`i. En déduire le courant ${I(2)} circulant dans les câbles entre T<sub>1</sub> et T<sub>2</sub>.`, `${I(2)} =`, 230 / 400000 * 3250 / 230, 'A', calc(`${I(2)} = ${m(2)} × ${I(3)} = 5,75 × 10<sup>−4</sup> × 14,1 = ${c('8,1 × 10<sup>−3</sup> A')}`) + `<p>(ou ${I(2)} = ${rap('S', U(2))} = ${rap('3 250', '400 000')} ≈ 8,1 × 10<sup>−3</sup> A.)</p>`, { diag: () => `${I(2)} = ${m(2)} × ${I(3)}.` }),
         choix('j. Par comparaison des résultats e et h : « Plus le facteur de puissance de la charge est faible, plus les pertes dans les lignes d\'alimentation sont… »', [o('ok', 'grandes'), o('a', 'petites')], 'ok',
           '<p>Plus le facteur de puissance est faible, plus les pertes dans les lignes sont <b>grandes</b> : I<sub>2</sub> passe de 6,5 mA à 8,1 mA, et P<sub>J</sub> = R × I<sup>2</sup>.</p>', { melanger: false, indice: 'Compare les intensités dans les lignes avec la charge résistive et avec le moteur.' }),
       ] },
@@ -121,10 +145,12 @@
     { id: '10', groupe: 'transfo', titre: 'Exercice 10 : transformateur', desc: 'Plaque signalétique 5 V / 20 V ; 400 spires au primaire.',
       contexte: '<p class="er-contexte">La plaque signalétique d\'un transformateur donne les indications suivantes : tension au primaire U<sub>1</sub> = 5 V ; tension au secondaire U<sub>2</sub> = 20 V ; fréquence f = 50 Hz. L\'enroulement au primaire de ce transformateur, supposé parfait, comporte 400 spires.</p>',
       parties: [
-        schema(null, window.SCH.transfo1({ U1: '#U1', N1: '#N1', U2: '#U2', N2: '?', m: '?' }), [
+        schema(null, window.SCH.transfo1({ U1: '#U1', I1: '?', S1: '?', N1: '#N1', U2: '#U2', I2: '?', S2: '?', N2: '?', m: '?' }), [
           etiq('a', '5 V', 'U1', 'Tension au primaire.'), etiq('b', '20 V', 'U2', 'Tension au secondaire.'), etiq('c', '400 spires', 'N1', 'L\'enroulement au primaire.')]),
         choix('a. Ce transformateur est-il utilisé en abaisseur ou en élévateur de tension ?', ELEV, 'elev', `<p>C'est un <b>élévateur</b> de tension car ${U(2)} &gt; ${U(1)}.</p>`, { melanger: false, indice: `Compare ${U(2)} et ${U(1)}.` }),
+        T(['U1', 'U2', 'N1'], 'm'),
         nombre('b. Calculer m, le rapport de transformation du transformateur.', 'm =', 4, '', calc(`m = ${rap(U(2), U(1))} = ${rap('20', '5')} = ${c('4')}`), { diag: v => proche(v, .25) ? `m = ${U(2)} / ${U(1)}.` : `m = ${U(2)} / ${U(1)}.` }),
+        T(['U1', 'U2', 'N1', 'm'], 'N2'),
         nombre('c. Déterminer le nombre de spires de l\'enroulement au secondaire.', `${N(2)} =`, 1600, 'spires', calc(`m = ${rap(N(2), N(1))} donc ${N(2)} = m × ${N(1)} = 4 × 400 = ${c('1 600 spires')}`), { diag: v => proche(v, 100) ? `${N(2)} = m × ${N(1)}.` : `${N(2)} = m × ${N(1)}.` }),
       ] },
 
@@ -191,24 +217,32 @@
     { id: 'A', groupe: 'synth', titre: 'Exercice A : alimenter un radiateur', desc: '20 kV, 400 kV, 230 V ; radiateur de 2 300 W.',
       contexte: '<p class="er-contexte">Une centrale produit l\'électricité sous 20 kV. Le transformateur T<sub>1</sub> élève la tension à 400 kV pour le transport ; le transformateur T<sub>2</sub> l\'abaisse à 230 V. On alimente un radiateur (charge résistive) de puissance 2 300 W.</p>',
       parties: [
-        schema(null, RES3({ U1: '#U1', I1: '?', m1: '?', U2: '#U2', I2: '?', m2: '?', U3: '#U3', I3: '?', S: '?', P: '#P', k: '#k' }, 'radiateur'), [
-          etiq('a', '20 kV', 'U1', 'La centrale : partie 1.'), etiq('b', '400 kV', 'U2', 'Le transport : partie 2.'), etiq('c', '230 V', 'U3', 'La distribution : partie 3.'), etiq('d', '2 300 W', 'P', 'Puissance active du radiateur.'), etiq('e', '1', 'k', 'Charge résistive : k = 1.')]),
+        reperage('radiateur'),
+        schema(null, RES3({ U1: '#U1', I1: '?', S1: '?', m1: '?', U2: '#U2', I2: '?', S2: '?', m2: '?', U3: '#U3', I3: '?', S3: '?', P: '#P', k: '#k' }, 'radiateur'), [
+          etiq('a', '20 kV', 'U1', 'La centrale : la production.'), etiq('b', '400 kV', 'U2', 'Le transport, entre T<sub>1</sub> et T<sub>2</sub>.'), etiq('c', '230 V', 'U3', 'La distribution, après T<sub>2</sub>.'), etiq('d', '2 300 W', 'P', 'Puissance active du radiateur, juste avant la charge.'), etiq('e', '1', 'k', 'Charge résistive : k = 1.')]),
+        T1(['U1', 'U2'], 'm'),
         nombre(`Calcule ${m(1)}.`, `${m(1)} =`, 20, '', calc(`${m(1)} = ${rap('400', '20')} = ${c('20')}`), { diag: () => `${m(1)} = ${U(2)} / ${U(1)}.` }),
+        T2(['U2', 'U3'], 'm'),
         sci(`Calcule ${m(2)}.`, `${m(2)} =`, 230 / 400000, '', calc(`${m(2)} = ${rap('230', '400 000')} = ${c('5,75 × 10<sup>−4</sup>')}`), { diag: () => `${m(2)} = ${U(3)} / ${U(2)}, avec ${U(2)} = 400 000 V.` }),
         nombre(`Calcule ${I(3)}.`, `${I(3)} =`, 10, 'A', calc(`k = 1 : S = P = 2 300 VA ; ${I(3)} = ${rap('2 300', '230')} = ${c('10 A')}`), { diag: () => `${I(3)} = S / ${U(3)}, avec S = P (k = 1).` }),
-        nombre(`Calcule ${I(2)} (en mA).`, `${I(2)} =`, 5.75, 'mA', calc(`${I(2)} = ${m(2)} × ${I(3)} = 5,75 × 10<sup>−4</sup> × 10 = ${c('5,75 mA')}`), { rel: .01, diag: v => proche(v, .00575, .02) ? 'Exprime le résultat en milliampères.' : `${I(2)} = ${m(2)} × ${I(3)} (relation à l'envers).` }),
-        nombre(`Calcule ${I(1)} (en mA).`, `${I(1)} =`, 115, 'mA', calc(`${I(1)} = ${m(1)} × ${I(2)} = 20 × 5,75 = ${c('115 mA')}`), { rel: .01, diag: v => proche(v, .2875, .02) ? `Relation à l'envers : ${I(1)} = ${m(1)} × ${I(2)}.` : `${I(1)} = ${m(1)} × ${I(2)}.` }),
+        T2(['U2', 'U3', 'I3', 'm'], 'I2'),
+        nombre(`Calcule ${I(2)} (en mA).`, `${I(2)} =`, 5.75, 'mA', calc(`${I(2)} = ${m(2)} × ${I(3)} = 5,75 × 10<sup>−4</sup> × 10 = ${c('5,75 mA')}`) + `<p>(ou avec la même puissance S partout : ${I(2)} = ${rap('2 300', '400 000')} = 5,75 × 10<sup>−3</sup> A.)</p>`, { rel: .01, diag: v => proche(v, .00575, .02) ? 'Exprime le résultat en milliampères.' : `${I(2)} = ${m(2)} × ${I(3)} (relation à l'envers).` }),
+        T1(['U1', 'U2', 'I2', 'm'], 'I1'),
+        nombre(`Calcule ${I(1)} (en mA).`, `${I(1)} =`, 115, 'mA', calc(`${I(1)} = ${m(1)} × ${I(2)} = 20 × 5,75 = ${c('115 mA')}`) + `<p>(ou ${I(1)} = ${rap('S', U(1))} = ${rap('2 300', '20 000')} = 0,115 A.)</p>`, { rel: .01, diag: v => proche(v, .2875, .02) ? `Relation à l'envers : ${I(1)} = ${m(1)} × ${I(2)}.` : `${I(1)} = ${m(1)} × ${I(2)}.` }),
       ] },
 
     /* ============================ SYNTHÈSE B ============================ */
     { id: 'B', groupe: 'synth', titre: 'Exercice B : un moteur sur le même réseau', desc: 'Machine de 1 840 W, k = 0,8 : comparaison avec un radiateur.',
       contexte: '<p class="er-contexte">Sur le réseau de l\'exercice A (20 kV, 400 kV, 230 V), on branche une machine de puissance active 1 840 W et de facteur de puissance 0,8.</p>',
       parties: [
-        schema(null, RES3({ U1: '#U1', m1: '?', U2: '#U2', I2: '?', m2: '?', U3: '#U3', I3: '?', S: '?', P: '#P', k: '#k' }, 'machine'), [
-          etiq('a', '20 kV', 'U1', 'La centrale : partie 1.'), etiq('b', '400 kV', 'U2', 'Le transport : partie 2.'), etiq('c', '230 V', 'U3', 'La distribution : partie 3.'), etiq('d', '1 840 W', 'P', 'Puissance active de la machine.'), etiq('e', '0,8', 'k', 'Facteur de puissance de la machine.')]),
+        schema(null, RES3({ U1: '#U1', I1: '?', S1: '?', m1: '?', U2: '#U2', I2: '?', S2: '?', m2: '?', U3: '#U3', I3: '?', S3: '?', P: '#P', k: '#k' }, 'machine'), [
+          etiq('a', '20 kV', 'U1', 'La centrale : la production.'), etiq('b', '400 kV', 'U2', 'Le transport, entre T<sub>1</sub> et T<sub>2</sub>.'), etiq('c', '230 V', 'U3', 'La distribution, après T<sub>2</sub>.'), etiq('d', '1 840 W', 'P', 'Puissance active de la machine, juste avant la charge.'), etiq('e', '0,8', 'k', 'Facteur de puissance de la machine.')]),
         nombre('Calcule la puissance apparente S.', 'S =', 2300, 'VA', calc(`S = ${rap('P', 'k')} = ${rap('1 840', '0,8')} = ${c('2 300 VA')}`), { diag: v => proche(v, 1472) ? 'S = P / k (et non P × k).' : 'S = P / k.' }),
         nombre(`Calcule ${I(3)}.`, `${I(3)} =`, 10, 'A', calc(`${I(3)} = ${rap('S', U(3))} = ${rap('2 300', '230')} = ${c('10 A')}`), { diag: v => proche(v, 8) ? 'C\'est S (et non P) qui donne l\'intensité.' : `${I(3)} = S / ${U(3)}.` }),
-        nombre(`Calcule ${I(2)} (en mA).`, `${I(2)} =`, 5.75, 'mA', calc(`${I(2)} = ${m(2)} × ${I(3)} = 5,75 × 10<sup>−4</sup> × 10 = ${c('5,75 mA')}`), { rel: .01, diag: v => proche(v, .00575, .02) ? 'Exprime le résultat en milliampères.' : `${I(2)} = ${m(2)} × ${I(3)} avec ${m(2)} = 230 / 400 000.` }),
+        T2(['U2', 'U3', 'I3'], 'm'),
+        sci(`Calcule ${m(2)}.`, `${m(2)} =`, 230 / 400000, '', calc(`${m(2)} = ${rap(U(3), U(2))} = ${rap('230', '400 000')} = ${c('5,75 × 10<sup>−4</sup>')}`), { diag: v => proche(v, 400000 / 230, .03) ? `${m(2)} = ${U(3)} / ${U(2)} (sortie de T<sub>2</sub> sur entrée).` : `${m(2)} = ${U(3)} / ${U(2)}, avec ${U(2)} = 400 000 V.` }),
+        T2(['U2', 'U3', 'I3', 'm'], 'I2'),
+        nombre(`Calcule ${I(2)} (en mA).`, `${I(2)} =`, 5.75, 'mA', calc(`${I(2)} = ${m(2)} × ${I(3)} = 5,75 × 10<sup>−4</sup> × 10 = ${c('5,75 mA')}`) + `<p>(ou ${I(2)} = ${rap('S', U(2))} = ${rap('2 300', '400 000')} = 5,75 × 10<sup>−3</sup> A.)</p>`, { rel: .01, diag: v => proche(v, .00575, .02) ? 'Exprime le résultat en milliampères.' : `${I(2)} = ${m(2)} × ${I(3)}.` }),
         nombre(`Un radiateur de même puissance (1 840 W) appellerait quelle intensité ${I(3)} ?`, `${I(3)} =`, 8, 'A', calc(`k = 1 : ${I(3)} = ${rap('1 840', '230')} = ${c('8 A')}`), { diag: () => 'Radiateur : S = P, puis I = S / U.' }),
         choix('Avec la machine plutôt qu\'avec le radiateur, les pertes par effet Joule dans tout le réseau sont multipliées par :', [o('ok', '1,56'), o('a', '1,25'), o('b', '0,8'), o('c', '2')], 'ok', calc(`Intensités × ${rap('10', '8')} = 1,25 partout, pertes × 1,25<sup>2</sup> ≈ ${c('1,56')}`), { indice: 'Les pertes dépendent de I<sup>2</sup>.' }),
       ] },
@@ -217,24 +251,30 @@
     { id: 'C', groupe: 'synth', titre: 'Exercice C : moteur avec rendement', desc: 'Un transformateur 20 kV → 230 V ; moteur de 2,4 kW utiles.',
       contexte: '<p class="er-contexte">Un transformateur abaisse la tension de 20 kV à 230 V. Il alimente un moteur de puissance utile 2,4 kW, de rendement 80 % et de facteur de puissance 0,75.</p>',
       parties: [
-        schema(null, window.SCH.reseau({ U1: '#U1', I1: '?', m: '?', U2: '#U2', I2: '?', S: '?', P: '?', k: '#k', eta: '#eta', Pu: '#Pu', Pp: '?' }, { n: 2, charge: 'moteur' }), [
+        schema(null, window.SCH.reseau({ U1: '#U1', I1: '?', S1: '?', m: '?', U2: '#U2', I2: '?', S2: '?', P: '?', k: '#k', eta: '#eta', Pu: '#Pu', Pp: '?' }, { n: 2, charge: 'moteur' }), [
           etiq('a', '20 kV', 'U1', 'Avant le transformateur.'), etiq('b', '230 V', 'U2', 'Le moteur est alimenté sous 230 V.'), etiq('c', '2,4 kW', 'Pu', 'La puissance utile sort du moteur.'), etiq('d', '0,8', 'eta', 'Rendement : 80 % = 0,8.'), etiq('e', '0,75', 'k', 'Facteur de puissance du moteur.')]),
         nombre('Calcule la puissance active P consommée par le moteur.', 'P =', 3000, 'W', calc(`P = ${rap(PU, 'η')} = ${rap('2 400', '0,8')} = ${c('3 000 W')}`), { diag: v => proche(v, 1920) ? `η = ${PU} / P, donc P = ${PU} / η.` : `P = ${PU} / η.` }),
         nombre('Calcule la puissance perdue par le moteur.', `${PP} =`, 600, 'W', calc(`${PP} = P − ${PU} = 3 000 − 2 400 = ${c('600 W')}`), { diag: () => `${PP} = P − ${PU}.` }),
         nombre('Calcule la puissance apparente S.', 'S =', 4000, 'VA', calc(`S = ${rap('3 000', '0,75')} = ${c('4 000 VA')}`), { diag: v => proche(v, 2250) ? 'S = P / k.' : 'S = P / k.' }),
         nombre(`Calcule ${I(2)}, l'intensité dans le câble du moteur.`, `${I(2)} =`, 4000 / 230, 'A', calc(`${I(2)} = ${rap('4 000', '230')} ≈ ${c('17,4 A')}`), { rel: .01, diag: () => `${I(2)} = S / ${U(2)}.` }),
-        nombre(`Calcule ${I(1)}, l'intensité dans la ligne à 20 kV.`, `${I(1)} =`, 0.2, 'A', calc(`m = ${rap('230', '20 000')} = 0,0115 ; ${I(1)} = m × ${I(2)} = 0,0115 × 17,4 = ${c('0,2 A')}`), { rel: .01, diag: v => proche(v, 1513, .03) ? `Relation à l'envers : ${I(1)} = m × ${I(2)}.` : `Calcule m = ${U(2)} / ${U(1)}, puis ${I(1)} = m × ${I(2)}.` }),
+        T(['U1', 'U2', 'I2'], 'm'),
+        nombre('Calcule le rapport de transformation m.', 'm =', 0.0115, '', calc(`m = ${rap(U(2), U(1))} = ${rap('230', '20 000')} = ${c('0,0115')}`), { rel: .01, diag: v => proche(v, 20000 / 230, .02) ? `m = ${U(2)} / ${U(1)} (sortie sur entrée).` : `m = ${U(2)} / ${U(1)}, avec ${U(1)} = 20 000 V.` }),
+        T(['U1', 'U2', 'I2', 'm'], 'I1'),
+        nombre(`Calcule ${I(1)}, l'intensité dans la ligne à 20 kV.`, `${I(1)} =`, 0.2, 'A', calc(`m = ${rap(I(1), I(2))} donc ${I(1)} = m × ${I(2)} = 0,0115 × 17,4 = ${c('0,2 A')}`) + `<p>(ou ${I(1)} = ${rap('S', U(1))} = ${rap('4 000', '20 000')} = 0,2 A.)</p>`, { rel: .01, diag: v => proche(v, 1513, .03) ? `Relation à l'envers : ${I(1)} = m × ${I(2)}.` : `${I(1)} = m × ${I(2)}.` }),
       ] },
 
     /* ============================ SYNTHÈSE D ============================ */
     { id: 'D', groupe: 'synth', titre: 'Exercice D : une usine pénalisée', desc: 'Usine de 920 kW sous 20 kV, k = 0,8 ; compensation.',
       contexte: '<p class="er-contexte">Une usine est alimentée sous 20 kV par un transformateur relié à une ligne à 400 kV. Elle consomme une puissance active de 920 kW avec un facteur de puissance de 0,8.</p>',
       parties: [
-        schema(null, window.SCH.reseau({ U1: '#U1', I1: '?', m: '?', U2: '#U2', I2: '?', S: '?', P: '#P', k: '#k' }, { n: 2, charge: 'usine', titres: ['transport', 'usine'] }), [
-          etiq('a', '400 kV', 'U1', 'La ligne de transport, avant le transformateur.'), etiq('b', '20 kV', 'U2', 'L\'usine est alimentée sous 20 kV.'), etiq('c', '920 kW', 'P', 'Puissance active de l\'usine.'), etiq('d', '0,8', 'k', 'Facteur de puissance de l\'usine.')]),
+        schema(null, window.SCH.reseau({ U1: '#U1', I1: '?', S1: '?', m: '?', U2: '#U2', I2: '?', S2: '?', P: '#P', k: '#k' }, { n: 2, charge: 'usine', titres: ['transport', 'usine'] }), [
+          etiq('a', '400 kV', 'U1', 'La ligne de transport, avant le transformateur.'), etiq('b', '20 kV', 'U2', 'L\'usine est alimentée sous 20 kV.'), etiq('c', '920 kW', 'P', 'Puissance active de l\'usine, juste avant la charge.'), etiq('d', '0,8', 'k', 'Facteur de puissance de l\'usine.')]),
         nombre('Calcule la puissance apparente S (en kVA).', 'S =', 1150, 'kVA', calc(`S = ${rap('920', '0,8')} = ${c('1 150 kVA')}`), { diag: v => proche(v, 736) ? 'S = P / k.' : proche(v, 1150000) ? 'Le résultat est demandé en kVA.' : 'S = P / k.' }),
         nombre(`Calcule l'intensité ${I(2)} du courant qui alimente l'usine.`, `${I(2)} =`, 57.5, 'A', calc(`${I(2)} = ${rap('S', U(2))} = ${rap('1 150 000', '20 000')} = ${c('57,5 A')}`), { diag: v => proche(v, 46) ? 'C\'est S (et non P) qui donne l\'intensité.' : `${I(2)} = S / ${U(2)} (en VA et en V).` }),
-        nombre(`Calcule l'intensité ${I(1)} dans la ligne à 400 kV.`, `${I(1)} =`, 2.875, 'A', calc(`m = ${rap('20', '400')} = 0,05 ; ${I(1)} = m × ${I(2)} = 0,05 × 57,5 ≈ ${c('2,88 A')}`), { rel: .01, diag: v => proche(v, 1150) ? `Relation à l'envers : ${I(1)} = m × ${I(2)}.` : `m = ${U(2)} / ${U(1)}, puis ${I(1)} = m × ${I(2)}.` }),
+        T(['U1', 'U2', 'I2'], 'm'),
+        nombre('Calcule le rapport de transformation m.', 'm =', 0.05, '', calc(`m = ${rap(U(2), U(1))} = ${rap('20', '400')} = ${c('0,05')}`), { diag: v => proche(v, 20) ? `m = ${U(2)} / ${U(1)} (sortie sur entrée).` : `m = ${U(2)} / ${U(1)}.` }),
+        T(['U1', 'U2', 'I2', 'm'], 'I1'),
+        nombre(`Calcule l'intensité ${I(1)} dans la ligne à 400 kV.`, `${I(1)} =`, 2.875, 'A', calc(`m = ${rap(I(1), I(2))} donc ${I(1)} = m × ${I(2)} = 0,05 × 57,5 ≈ ${c('2,88 A')}`) + `<p>(ou ${I(1)} = ${rap('S', U(1))} = ${rap('1 150 000', '400 000')} ≈ 2,88 A.)</p>`, { rel: .01, diag: v => proche(v, 1150) ? `Relation à l'envers : ${I(1)} = m × ${I(2)}.` : `${I(1)} = m × ${I(2)}.` }),
         choix('EDF impose cos φ ≥ 0,93 aux installations industrielles. Cette usine :', [o('ok', 'est pénalisée, car 0,8 &lt; 0,93'), o('a', 'respecte la règle, car 0,8 &lt; 1'), o('b', 'n\'est pas concernée')], 'ok', '<p>0,8 &lt; 0,93 : l\'usine paie des pénalités. Elle a intérêt à améliorer son facteur de puissance (par exemple avec des condensateurs).</p>', { indice: 'Compare 0,8 à 0,93.' }),
         nombre(`Après compensation, k = 1. Calcule la nouvelle intensité ${I(2)}.`, `${I(2)} =`, 46, 'A', calc(`S = P = 920 kVA ; ${I(2)} = ${rap('920 000', '20 000')} = ${c('46 A')}`), { diag: () => 'Avec k = 1, S = P.' }),
         choix('Les pertes par effet Joule dans les lignes sont alors divisées par :', [o('ok', '1,56'), o('a', '1,25'), o('b', '0,8'), o('c', '2')], 'ok', calc(`${rap('57,5', '46')} = 1,25 ; pertes ÷ 1,25<sup>2</sup> ≈ ${c('1,56')}`), { indice: 'Les pertes dépendent de I<sup>2</sup>.' }),
@@ -244,27 +284,37 @@
     { id: 'E', groupe: 'synth', titre: 'Exercice E : le schéma complet', desc: 'Centrale, deux transformateurs, compresseur avec rendement.',
       contexte: '<p class="er-contexte">Une centrale produit sous 20 kV ; T<sub>1</sub> élève la tension à 400 kV ; T<sub>2</sub> l\'abaisse à 230 V. On alimente un compresseur de puissance utile 2,76 kW, de rendement 80 % et de facteur de puissance 0,75.</p>',
       parties: [
-        schema(null, RES3({ U1: '#U1', I1: '?', m1: '?', U2: '#U2', I2: '?', m2: '?', U3: '#U3', I3: '?', S: '?', P: '?', k: '#k', eta: '#eta', Pu: '#Pu', Pp: '?' }, 'compresseur'), [
-          etiq('a', '20 kV', 'U1', 'La centrale : partie 1.'), etiq('b', '400 kV', 'U2', 'Le transport : partie 2.'), etiq('c', '230 V', 'U3', 'La distribution : partie 3.'),
+        reperage('compresseur'),
+        schema(null, RES3({ U1: '#U1', I1: '?', S1: '?', m1: '?', U2: '#U2', I2: '?', S2: '?', m2: '?', U3: '#U3', I3: '?', S3: '?', P: '?', k: '#k', eta: '#eta', Pu: '#Pu', Pp: '?' }, 'compresseur'), [
+          etiq('a', '20 kV', 'U1', 'La centrale : la production.'), etiq('b', '400 kV', 'U2', 'Le transport, entre T<sub>1</sub> et T<sub>2</sub>.'), etiq('c', '230 V', 'U3', 'La distribution, après T<sub>2</sub>.'),
           etiq('d', '2,76 kW', 'Pu', 'La puissance utile sort du compresseur.'), etiq('e', '0,8', 'eta', 'Rendement : 80 % = 0,8.'), etiq('f', '0,75', 'k', 'Facteur de puissance du compresseur.')]),
         nombre('Calcule la puissance active P.', 'P =', 3450, 'W', calc(`P = ${rap('2 760', '0,8')} = ${c('3 450 W')}`), { diag: v => proche(v, 2208) ? `P = ${PU} / η.` : `P = ${PU} / η.` }),
         nombre('Calcule la puissance perdue par le compresseur.', `${PP} =`, 690, 'W', calc(`${PP} = 3 450 − 2 760 = ${c('690 W')}`), { diag: () => `${PP} = P − ${PU}.` }),
         nombre('Calcule la puissance apparente S.', 'S =', 4600, 'VA', calc(`S = ${rap('3 450', '0,75')} = ${c('4 600 VA')}`), { diag: () => 'S = P / k.' }),
         nombre(`Calcule ${I(3)}.`, `${I(3)} =`, 20, 'A', calc(`${I(3)} = ${rap('4 600', '230')} = ${c('20 A')}`), { diag: () => `${I(3)} = S / ${U(3)}.` }),
-        nombre(`Calcule ${I(2)} (en mA).`, `${I(2)} =`, 11.5, 'mA', calc(`${m(2)} = ${rap('230', '400 000')} = 5,75 × 10<sup>−4</sup> ; ${I(2)} = 5,75 × 10<sup>−4</sup> × 20 = ${c('11,5 mA')}`), { rel: .01, diag: v => proche(v, .0115, .02) ? 'Exprime le résultat en milliampères.' : `${I(2)} = ${m(2)} × ${I(3)}.` }),
-        nombre(`Calcule ${I(1)} (en mA).`, `${I(1)} =`, 230, 'mA', calc(`${m(1)} = ${rap('400', '20')} = 20 ; ${I(1)} = 20 × 11,5 = ${c('230 mA')}`), { rel: .01, diag: v => proche(v, .23, .02) ? 'Exprime le résultat en milliampères.' : `${I(1)} = ${m(1)} × ${I(2)}.` }),
+        T2(['U2', 'U3', 'I3'], 'm'),
+        sci(`Calcule ${m(2)}.`, `${m(2)} =`, 230 / 400000, '', calc(`${m(2)} = ${rap(U(3), U(2))} = ${rap('230', '400 000')} = ${c('5,75 × 10<sup>−4</sup>')}`), { diag: v => proche(v, 400000 / 230, .03) ? `${m(2)} = ${U(3)} / ${U(2)} (sortie de T<sub>2</sub> sur entrée).` : `${m(2)} = ${U(3)} / ${U(2)}, avec ${U(2)} = 400 000 V.` }),
+        T2(['U2', 'U3', 'I3', 'm'], 'I2'),
+        nombre(`Calcule ${I(2)} (en mA).`, `${I(2)} =`, 11.5, 'mA', calc(`${I(2)} = ${m(2)} × ${I(3)} = 5,75 × 10<sup>−4</sup> × 20 = ${c('11,5 mA')}`) + `<p>(ou ${I(2)} = ${rap('S', U(2))} = ${rap('4 600', '400 000')} = 11,5 × 10<sup>−3</sup> A.)</p>`, { rel: .01, diag: v => proche(v, .0115, .02) ? 'Exprime le résultat en milliampères.' : `${I(2)} = ${m(2)} × ${I(3)}.` }),
+        T1(['U1', 'U2', 'I2'], 'm'),
+        nombre(`Calcule ${m(1)}.`, `${m(1)} =`, 20, '', calc(`${m(1)} = ${rap(U(2), U(1))} = ${rap('400', '20')} = ${c('20')}`), { diag: v => proche(v, .05) ? `${m(1)} = ${U(2)} / ${U(1)} (sortie de T<sub>1</sub> sur entrée).` : `${m(1)} = ${U(2)} / ${U(1)}.` }),
+        T1(['U1', 'U2', 'I2', 'm'], 'I1'),
+        nombre(`Calcule ${I(1)} (en mA).`, `${I(1)} =`, 230, 'mA', calc(`${I(1)} = ${m(1)} × ${I(2)} = 20 × 11,5 = ${c('230 mA')}`) + `<p>(ou ${I(1)} = ${rap('S', U(1))} = ${rap('4 600', '20 000')} = 0,23 A.)</p>`, { rel: .01, diag: v => proche(v, .23, .02) ? 'Exprime le résultat en milliampères.' : `${I(1)} = ${m(1)} × ${I(2)}.` }),
       ] },
 
     /* ============================ SYNTHÈSE F ============================ */
     { id: 'F', groupe: 'synth', titre: 'Exercice F : remonter à la puissance utile', desc: 'On mesure 20 A dans le câble d\'un moteur : puissances et ligne à 20 kV.',
       contexte: '<p class="er-contexte">Un transformateur abaisse la tension de 20 kV à 230 V pour alimenter un moteur de facteur de puissance 0,85 et de rendement 90 %. Un ampèremètre indique que le câble du moteur est parcouru par un courant de 20 A.</p>',
       parties: [
-        schema(null, window.SCH.reseau({ U1: '#U1', I1: '?', m: '?', U2: '#U2', I2: '#I2', S: '?', P: '?', k: '#k', eta: '#eta', Pu: '?', Pp: '?' }, { n: 2, charge: 'moteur' }), [
+        schema(null, window.SCH.reseau({ U1: '#U1', I1: '?', S1: '?', m: '?', U2: '#U2', I2: '#I2', S2: '?', P: '?', k: '#k', eta: '#eta', Pu: '?', Pp: '?' }, { n: 2, charge: 'moteur' }), [
           etiq('a', '20 kV', 'U1', 'Avant le transformateur.'), etiq('b', '230 V', 'U2', 'Le moteur est alimenté sous 230 V.'), etiq('c', '20 A', 'I2', 'Le courant dans le câble du moteur.'), etiq('d', '0,85', 'k', 'Facteur de puissance du moteur.'), etiq('e', '0,9', 'eta', 'Rendement : 90 % = 0,9.')]),
         nombre('Calcule la puissance apparente S.', 'S =', 4600, 'VA', calc(`S = ${U(2)} × ${I(2)} = 230 × 20 = ${c('4 600 VA')}`), { diag: () => `S = ${U(2)} × ${I(2)}.` }),
         nombre('Calcule la puissance active P.', 'P =', 3910, 'W', calc(`k = ${rap('P', 'S')} donc P = k × S = 0,85 × 4 600 = ${c('3 910 W')}`), { diag: v => proche(v, 5412, .01) ? 'k = P / S, donc P = k × S.' : 'P = k × S.' }),
         nombre('Calcule la puissance utile du moteur.', `${PU} =`, 3519, 'W', calc(`${PU} = η × P = 0,9 × 3 910 = ${c('3 519 W')}`), { diag: v => proche(v, 4344, .01) ? `η = ${PU} / P, donc ${PU} = η × P.` : `${PU} = η × P.` }),
-        nombre(`Calcule ${I(1)}, l'intensité dans la ligne à 20 kV.`, `${I(1)} =`, 0.23, 'A', calc(`m = ${rap('230', '20 000')} = 0,0115 ; ${I(1)} = m × ${I(2)} = 0,0115 × 20 = ${c('0,23 A')}`), { diag: v => proche(v, 1739, .02) ? `Relation à l'envers : ${I(1)} = m × ${I(2)}.` : `m = ${U(2)} / ${U(1)}, puis ${I(1)} = m × ${I(2)}.` }),
+        T(['U1', 'U2', 'I2'], 'm'),
+        nombre('Calcule le rapport de transformation m.', 'm =', 0.0115, '', calc(`m = ${rap(U(2), U(1))} = ${rap('230', '20 000')} = ${c('0,0115')}`), { rel: .01, diag: v => proche(v, 20000 / 230, .02) ? `m = ${U(2)} / ${U(1)} (sortie sur entrée).` : `m = ${U(2)} / ${U(1)}, avec ${U(1)} = 20 000 V.` }),
+        T(['U1', 'U2', 'I2', 'm'], 'I1'),
+        nombre(`Calcule ${I(1)}, l'intensité dans la ligne à 20 kV.`, `${I(1)} =`, 0.23, 'A', calc(`m = ${rap(I(1), I(2))} donc ${I(1)} = m × ${I(2)} = 0,0115 × 20 = ${c('0,23 A')}`) + `<p>(ou ${I(1)} = ${rap('S', U(1))} = ${rap('4 600', '20 000')} = 0,23 A.)</p>`, { diag: v => proche(v, 1739, .02) ? `Relation à l'envers : ${I(1)} = m × ${I(2)}.` : `${I(1)} = m × ${I(2)}.` }),
       ] },
   ];
 

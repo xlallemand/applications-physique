@@ -37,6 +37,12 @@ const U = k => sub('U', k), I = k => sub('I', k), m = k => sub('m', k);
 const PU = sub('P', 'u'), PP = sub('P', 'perdue');
 const rap = (h, b) => `<span class="te-rap"><span>${h}</span><span>${b}</span></span>`;
 const etiq = (id, label, cible, indice) => ({ id, label, cible, indice });
+// laquelle des trois formules de T1 / T2 utiliser ? (connues : grandeurs déjà connues)
+const F1 = (connues, cherche) => SCH.choixFormule({ a: 1, b: 2, m: m(1), nomTr: 'T<sub>1</sub>', connues, cherche });
+const F2 = (connues, cherche) => SCH.choixFormule({ a: 2, b: 3, m: m(2), prime: true, nomTr: 'T<sub>2</sub>', connues, cherche });
+// le schéma complet, avec ses relations
+const SCH_COMPLET = () => SCH.reseau({ U1: '?', I1: '?', S1: `${U(1)} × ${I(1)}`, U2: '?', I2: '?', S2: `${U(2)} × ${I(2)}`, U3: '?', I3: '?', S3: `${U(3)} × ${I(3)}`,
+  P: 'k × S', k: 'P / S', eta: `${PU} / P`, Pu: 'η × P', Pp: `P − ${PU}` }, { charge: 'charge' });
 
 new TE.Cours(document.getElementById('etapes'), [
 
@@ -45,12 +51,13 @@ new TE.Cours(document.getElementById('etapes'), [
     const k = cours.carte('1. Un seul schéma pour les deux chapitres');
     cours.ajouter(k, `<div class="cours-bloc">
         <p>L'électricité produite sous moyenne tension est élevée par le transformateur T<sub>1</sub>, transportée sous haute tension, abaissée par T<sub>2</sub> jusqu'à 230 V, puis consommée par une charge (moteur, radiateur…). Chaque grandeur a <b>sa place</b> sur le schéma :</p>
-        ${SCH.reseau({ U1: '?', I1: '?', m1: `${rap(U(2), U(1))} = ${rap(I(1), I(2))}`, U2: '?', I2: '?', m2: `${rap(U(3), U(2))} = ${rap(I(2), I(3))}`, U3: '?', I3: '?', S: `${U(3)} × ${I(3)}`, P: 'k × S', k: 'P / S', eta: `${PU} / P`, Pu: 'η × P', Pp: `P − ${PU}` }, { charge: 'charge' })}
+        ${SCH_COMPLET()}
         <ul class="er-liste">
-          <li>dans chaque partie du réseau : la tension U et l'intensité I (indices 1, 2, 3 de la centrale vers la charge) ;</li>
-          <li>sous chaque transformateur : son rapport de transformation m ;</li>
-          <li>juste avant la charge : la puissance apparente S = ${U(3)} × ${I(3)}, fournie par le réseau ;</li>
-          <li>sous la charge : la puissance active P (consommée), le facteur de puissance k = cos φ = P / S, le rendement η ;</li>
+          <li>dans chaque partie du réseau : la tension U, l'intensité I (indices 1, 2, 3 de la centrale vers la charge) et la puissance apparente S = U × I ;</li>
+          <li><b>S est la même dans toutes les parties</b> : les transformateurs ne perdent pas de puissance, on retrouve la même S avant et après chaque transformateur ;</li>
+          <li>sous chaque transformateur : son rapport de transformation et ses trois formules (pour T<sub>2</sub>, les spires de ses bobines sont notées N′) ;</li>
+          <li>juste avant la charge : la puissance apparente S, puis la puissance active P = k × S, consommée par la charge ;</li>
+          <li>sous la charge : le facteur de puissance k = cos φ = P / S et le rendement η ;</li>
           <li>à la sortie de la charge : la puissance utile ${PU} = η × P et la puissance perdue ${PP} = P − ${PU}.</li>
         </ul>
       </div>
@@ -58,12 +65,12 @@ new TE.Cours(document.getElementById('etapes'), [
         <p class="cours-exemple-t">Exemple</p>
         <p>« Un moteur de rendement 80 % et de facteur de puissance 0,75 est alimenté sous 230 V » : on écrit η = 0,8 et k = 0,75 sous la charge, et ${U(3)} = 230 V dans la dernière partie du réseau.</p>
       </div>`);
-    const vide = SCH.reseau({ m1: '#m1', m2: '#m2', S: '#S', P: '#P', k: '#k', eta: '#eta', Pu: '#Pu', Pp: '#Pp' });
+    const vide = SCH.reseau({ S1: '#S1', S2: '#S2', S3: '#S3', P: '#P', k: '#k', eta: '#eta', Pu: '#Pu', Pp: '#Pp' });
     TE.aToi(k, [
       { parties: [{ type: 'schema', q: 'Place chaque relation sur le schéma.', titrePalette: 'Relations à placer', schema: vide, etiquettes: [
-        etiq('m1', `${rap(U(2), U(1))}`, 'm1', 'Le rapport de T<sub>1</sub> compare la tension après T<sub>1</sub> (indice 2) à celle d\'avant (indice 1).'),
-        etiq('m2', `${rap(I(2), I(3))}`, 'm2', 'Le rapport de T<sub>2</sub> s\'écrit avec les intensités « à l\'envers » : indice d\'entrée de T<sub>2</sub> en haut.'),
-        etiq('S', `${U(3)} × ${I(3)}`, 'S', 'U × I est la puissance apparente, juste avant la charge.'),
+        etiq('S1', `${U(1)} × ${I(1)}`, 'S1', 'Dans chaque partie, S = U × I avec la tension et l\'intensité de cette partie : indice 1 à la sortie de la centrale.'),
+        etiq('S2', `${U(2)} × ${I(2)}`, 'S2', 'Entre T<sub>1</sub> et T<sub>2</sub>, la tension et l\'intensité ont l\'indice 2.'),
+        etiq('S', `${U(3)} × ${I(3)}`, 'S3', 'Juste avant la charge, la tension et l\'intensité ont l\'indice 3.'),
         etiq('P', 'k × S', 'P', 'La puissance active P = k × S est reçue par la charge.'),
         etiq('k', 'P / S', 'k', 'P / S est le facteur de puissance.'),
         etiq('eta', `${PU} / P`, 'eta', `${PU} / P est le rendement de la charge.`),
@@ -81,34 +88,38 @@ new TE.Cours(document.getElementById('etapes'), [
         <div class="cle"><p><b class="cle-titre">Méthode.</b></p>
           <ol class="er-liste">
             <li><b>Schéma</b> : place toutes les données de l'énoncé au bon endroit.</li>
-            <li><b>Relations</b> : écris-les toutes.<br>
-              T<sub>1</sub> : ${m(1)} = ${rap(U(2), U(1))} = ${rap(I(1), I(2))} ; T<sub>2</sub> : ${m(2)} = ${rap(U(3), U(2))} = ${rap(I(2), I(3))} ;<br>
-              charge : S = ${U(3)} × ${I(3)} ; k = ${rap('P', 'S')} ; η = ${rap(PU, 'P')}.</li>
-            <li><b>Calculs de proche en proche</b>, en partant de ce que l'on connaît : en général de la <b>charge</b> vers la centrale (P → S → ${I(3)} → ${I(2)} → ${I(1)}).</li>
+            <li><b>Relations</b> : les trois formules de chaque transformateur sont sous T<sub>1</sub> et T<sub>2</sub> ; dans chaque partie, S = U × I (la même S partout) ; charge : P = k × S ; η = ${rap(PU, 'P')}.</li>
+            <li><b>Calculs de proche en proche</b>, en partant de ce que l'on connaît : en général de la <b>charge</b> vers la centrale (P → S → ${I(3)} → ${I(2)} → ${I(1)}). Pour un transformateur, choisis la formule qui n'a qu'<b>une seule inconnue</b>.</li>
           </ol>
           <p>Pour une charge <b>résistive</b> (radiateur, four, lampe à incandescence) : k = 1, donc S = P.</p></div>
       </div>
       <div class="cours-exemple">
         <p class="cours-exemple-t">Exemple 1 (exercice 9, a à f)</p>
         <p>Tensions : 10 kV au primaire de T<sub>1</sub>, 400 kV au secondaire de T<sub>1</sub>, 230 V au secondaire de T<sub>2</sub>. On alimente une charge résistive de 2 600 W.</p>
-        ${SCH.reseau({ U1: '10 kV', I1: '?', m1: '?', U2: '400 kV', I2: '?', m2: '?', U3: '230 V', I3: '?', S: '?', P: '2 600 W', k: '1' }, { charge: 'radiateur' })}
-        ${calc(`${m(1)} = ${rap(U(2), U(1))} = ${rap('400 kV', '10 kV')} = ${c('40')} ; ${m(2)} = ${rap(U(3), U(2))} = ${rap('230', '400 000')} = ${c('5,75 × 10<sup>−4</sup>')}<br>
+        ${SCH.reseau({ U1: '10 kV', I1: '?', S1: '?', m1: '?', U2: '400 kV', I2: '?', S2: '?', m2: '?', U3: '230 V', I3: '?', S3: '?', P: '2 600 W', k: '1' }, { charge: 'radiateur' })}
+        ${calc(`On connaît les tensions : pour ${m(1)} et ${m(2)}, la formule des tensions n'a qu'une inconnue.<br>
+          ${m(1)} = ${rap(U(2), U(1))} = ${rap('400 kV', '10 kV')} = ${c('40')} ; ${m(2)} = ${rap(U(3), U(2))} = ${rap('230', '400 000')} = ${c('5,75 × 10<sup>−4</sup>')}<br>
           k = 1 donc S = P = 2 600 VA ; ${I(3)} = ${rap('S', U(3))} = ${rap('2 600', '230')} = ${c('11,3 A')}<br>
           ${m(2)} = ${rap(I(2), I(3))} donc ${I(2)} = ${m(2)} × ${I(3)} = 5,75 × 10<sup>−4</sup> × 11,3 = ${c('6,50 × 10<sup>−3</sup> A')} = 6,50 mA<br>
           ${m(1)} = ${rap(I(1), I(2))} donc ${I(1)} = ${m(1)} × ${I(2)} = 40 × 6,50 × 10<sup>−3</sup> = ${c('0,26 A')}`)}
+        <p>Autre chemin, avec la même puissance S partout : ${I(2)} = ${rap('S', U(2))} = ${rap('2 600', '400 000')} = 6,50 × 10<sup>−3</sup> A et ${I(1)} = ${rap('S', U(1))} = ${rap('2 600', '10 000')} = 0,26 A.</p>
         <p>Dans les lignes à haute tension, l'intensité n'est que de 6,5 mA, contre 11,3 A dans le câble de la charge.</p>
       </div>`);
-    const sch = SCH.reseau({ U1: '#U1', I1: '?', m1: '?', U2: '#U2', I2: '?', m2: '?', U3: '#U3', I3: '?', S: '?', P: '#P', k: '#k' }, { charge: 'radiateur' });
+    const sch = SCH.reseau({ U1: '#U1', I1: '?', S1: '?', m1: '?', U2: '#U2', I2: '?', S2: '?', m2: '?', U3: '#U3', I3: '?', S3: '?', P: '#P', k: '#k' }, { charge: 'radiateur' });
     TE.aToi(k, [
       { titre: 'Une centrale produit sous 20 kV ; T<sub>1</sub> élève la tension à 400 kV ; T<sub>2</sub> l\'abaisse à 230 V. Un radiateur (charge résistive) consomme 2 300 W.', parties: [
         { type: 'schema', q: 'Place les données sur le schéma.', schema: sch, etiquettes: [
           etiq('a', '20 kV', 'U1', 'La centrale produit sous moyenne tension : partie 1.'), etiq('b', '400 kV', 'U2', 'La haute tension est entre T<sub>1</sub> et T<sub>2</sub>.'), etiq('c', '230 V', 'U3', 'La charge est alimentée sous 230 V.'),
-          etiq('d', '2 300 W', 'P', 'La puissance consommée par le radiateur est sa puissance active.'), etiq('e', '1', 'k', 'Charge résistive : k = 1.') ] },
+          etiq('d', '2 300 W', 'P', 'La puissance consommée par le radiateur est sa puissance active : juste avant la charge.'), etiq('e', '1', 'k', 'Charge résistive : k = 1.') ] },
+        F1(['U1', 'U2', 'U3'], 'm'),
         fq.nombre(`Calcule ${m(1)}.`, `${m(1)} =`, 20, '', { diag: v => proche(v, .05) ? `${m(1)} = ${U(2)} / ${U(1)} (sortie de T<sub>1</sub> sur entrée).` : `${m(1)} = ${U(2)} / ${U(1)}.`, solution: calc(`${m(1)} = ${rap('400', '20')} = ${c('20')}`) }),
         fq.nombre(`Calcule l'intensité ${I(3)} dans le câble du radiateur.`, `${I(3)} =`, 10, 'A', { diag: () => `k = 1 donc S = P ; puis ${I(3)} = S / ${U(3)}.`, solution: calc(`S = P = 2 300 VA ; ${I(3)} = ${rap('2 300', '230')} = ${c('10 A')}`) }),
-        { type: 'sci', q: `Calcule ${m(2)} = ${U(3)} / ${U(2)}.`, label: `${m(2)} =`, valeur: 230 / 400000, cs: 3, rel: .01, diag: v => proche(v, 400000 / 230, .02) ? `${m(2)} = ${U(3)} / ${U(2)} : 230 / 400 000.` : 'Écris 400 kV en volts : 400 000 V.', solution: calc(`${m(2)} = ${rap('230', '400 000')} = ${c('5,75 × 10<sup>−4</sup>')}`) },
-        fq.nombre(`Calcule l'intensité ${I(2)} dans les lignes à haute tension, en milliampères.`, `${I(2)} =`, 5.75, 'mA', { rel: .01, diag: v => proche(v, .00575, .02) ? 'Exprime le résultat en milliampères (× 1 000).' : proche(v, 10 / (230 / 400000) * 1000, .05) || proche(v, 17391, .05) ? `Relation à l'envers : ${m(2)} = ${I(2)} / ${I(3)}, donc ${I(2)} = ${m(2)} × ${I(3)}.` : `${I(2)} = ${m(2)} × ${I(3)}.`, solution: calc(`${I(2)} = ${m(2)} × ${I(3)} = 5,75 × 10<sup>−4</sup> × 10 = 5,75 × 10<sup>−3</sup> A = ${c('5,75 mA')}`) }),
-        fq.nombre(`Calcule l'intensité ${I(1)} à la sortie de la centrale, en milliampères.`, `${I(1)} =`, 115, 'mA', { rel: .01, diag: v => proche(v, .115, .02) ? 'Exprime le résultat en milliampères.' : proche(v, .2875, .02) ? `Relation à l'envers : ${I(1)} = ${m(1)} × ${I(2)}.` : `${I(1)} = ${m(1)} × ${I(2)}.`, solution: calc(`${I(1)} = ${m(1)} × ${I(2)} = 20 × 5,75 = ${c('115 mA')}`) }),
+        F2(['U1', 'U2', 'U3', 'I3'], 'm'),
+        { type: 'sci', q: `Calcule ${m(2)}.`, label: `${m(2)} =`, valeur: 230 / 400000, cs: 3, rel: .01, diag: v => proche(v, 400000 / 230, .02) ? `${m(2)} = ${U(3)} / ${U(2)} : 230 / 400 000.` : 'Écris 400 kV en volts : 400 000 V.', solution: calc(`${m(2)} = ${rap('230', '400 000')} = ${c('5,75 × 10<sup>−4</sup>')}`) },
+        F2(['U2', 'U3', 'I3', 'm'], 'I2'),
+        fq.nombre(`Calcule l'intensité ${I(2)} dans les lignes à haute tension, en milliampères.`, `${I(2)} =`, 5.75, 'mA', { rel: .01, diag: v => proche(v, .00575, .02) ? 'Exprime le résultat en milliampères (× 1 000).' : proche(v, 10 / (230 / 400000) * 1000, .05) || proche(v, 17391, .05) ? `Relation à l'envers : ${m(2)} = ${I(2)} / ${I(3)}, donc ${I(2)} = ${m(2)} × ${I(3)}.` : `${I(2)} = ${m(2)} × ${I(3)}.`, solution: calc(`${m(2)} = ${rap(I(2), I(3))} donc ${I(2)} = ${m(2)} × ${I(3)} = 5,75 × 10<sup>−4</sup> × 10 = 5,75 × 10<sup>−3</sup> A = ${c('5,75 mA')}`) }),
+        F1(['U1', 'U2', 'I2', 'm'], 'I1'),
+        fq.nombre(`Calcule l'intensité ${I(1)} à la sortie de la centrale, en milliampères.`, `${I(1)} =`, 115, 'mA', { rel: .01, diag: v => proche(v, .115, .02) ? 'Exprime le résultat en milliampères.' : proche(v, .2875, .02) ? `Relation à l'envers : ${I(1)} = ${m(1)} × ${I(2)}.` : `${I(1)} = ${m(1)} × ${I(2)}.`, solution: calc(`${m(1)} = ${rap(I(1), I(2))} donc ${I(1)} = ${m(1)} × ${I(2)} = 20 × 5,75 = ${c('115 mA')}`) + `<p>(ou avec la même S partout : ${I(1)} = ${rap('2 300', '20 000')} = 0,115 A.)</p>` }),
       ] },
     ], () => cours.continuer(k));
     return k;
@@ -123,20 +134,21 @@ new TE.Cours(document.getElementById('etapes'), [
       <div class="cours-exemple">
         <p class="cours-exemple-t">Exemple 2 (exercice 9, g à j)</p>
         <p>Sur le même réseau (10 kV, 400 kV, 230 V), la charge est maintenant un moteur de puissance active 2 600 W et de facteur de puissance k = 0,8.</p>
-        ${SCH.reseau({ U1: '10 kV', m1: '40', U2: '400 kV', I2: '?', m2: '5,75 × 10<sup>−4</sup>', U3: '230 V', I3: '?', S: '?', P: '2 600 W', k: '0,8' }, { charge: 'moteur' })}
+        ${SCH.reseau({ U1: '10 kV', I1: '?', S1: '?', m1: '40', U2: '400 kV', I2: '?', S2: '?', m2: '5,75 × 10<sup>−4</sup>', U3: '230 V', I3: '?', S3: '?', P: '2 600 W', k: '0,8' }, { charge: 'moteur' })}
         ${calc(`S = ${rap('P', 'k')} = ${rap('2 600', '0,8')} = ${c('3 250 VA')}<br>
           ${I(3)} = ${rap('S', U(3))} = ${rap('3 250', '230')} = ${c('14,1 A')}<br>
           ${I(2)} = ${m(2)} × ${I(3)} = 5,75 × 10<sup>−4</sup> × 14,1 = ${c('8,1 × 10<sup>−3</sup> A')} = 8,1 mA`)}
         <p>Avec le même P, l'intensité passe de 6,5 mA (k = 1) à 8,1 mA (k = 0,8) dans les lignes : <b>plus le facteur de puissance de la charge est faible, plus les pertes dans les lignes sont grandes</b>.</p>
       </div>`);
-    const sch = SCH.reseau({ U1: '20 kV', m1: '20', U2: '400 kV', I2: '?', m2: '5,75 × 10<sup>−4</sup>', U3: '#U3', I3: '?', S: '?', P: '#P', k: '#k' }, { charge: 'machine' });
+    const sch = SCH.reseau({ U1: '20 kV', I1: '?', S1: '?', m1: '20', U2: '400 kV', I2: '?', S2: '?', m2: '5,75 × 10<sup>−4</sup>', U3: '#U3', I3: '?', S3: '?', P: '#P', k: '#k' }, { charge: 'machine' });
     TE.aToi(k, [
       { titre: 'Sur le réseau de l\'exemple 1 (20 kV, 400 kV, 230 V), on branche une machine de puissance active 1 840 W et de facteur de puissance 0,8.', parties: [
         { type: 'schema', q: 'Place les données de la machine sur le schéma.', schema: sch, etiquettes: [
-          etiq('a', '230 V', 'U3', 'La machine est alimentée sous 230 V.'), etiq('b', '1 840 W', 'P', 'La puissance active est consommée par la machine.'), etiq('c', '0,8', 'k', 'Le facteur de puissance est une caractéristique de la machine.') ] },
+          etiq('a', '230 V', 'U3', 'La machine est alimentée sous 230 V.'), etiq('b', '1 840 W', 'P', 'La puissance active est consommée par la machine : juste avant la charge.'), etiq('c', '0,8', 'k', 'Le facteur de puissance est une caractéristique de la machine.') ] },
         fq.nombre('Calcule la puissance apparente S.', 'S =', 2300, 'VA', { diag: v => proche(v, 1472) ? 'k = P / S, donc S = P / k (et non P × k).' : 'S = P / k.', solution: calc(`S = ${rap('1 840', '0,8')} = ${c('2 300 VA')}`) }),
         fq.nombre(`Calcule ${I(3)}.`, `${I(3)} =`, 10, 'A', { diag: v => proche(v, 8) ? `Tu as utilisé P : c'est S = ${U(3)} × ${I(3)}, donc ${I(3)} = S / ${U(3)}.` : `${I(3)} = S / ${U(3)}.`, solution: calc(`${I(3)} = ${rap('2 300', '230')} = ${c('10 A')}`) }),
-        fq.nombre(`Calcule ${I(2)}, en milliampères.`, `${I(2)} =`, 5.75, 'mA', { rel: .01, diag: v => proche(v, .00575, .02) ? 'Exprime le résultat en milliampères.' : `${I(2)} = ${m(2)} × ${I(3)}.`, solution: calc(`${I(2)} = 5,75 × 10<sup>−4</sup> × 10 = ${c('5,75 mA')}`) }),
+        F2(['U2', 'U3', 'I3', 'm'], 'I2'),
+        fq.nombre(`Calcule ${I(2)}, en milliampères.`, `${I(2)} =`, 5.75, 'mA', { rel: .01, diag: v => proche(v, .00575, .02) ? 'Exprime le résultat en milliampères.' : `${I(2)} = ${m(2)} × ${I(3)}.`, solution: calc(`${m(2)} = ${rap(I(2), I(3))} donc ${I(2)} = ${m(2)} × ${I(3)} = 5,75 × 10<sup>−4</sup> × 10 = ${c('5,75 mA')}`) + `<p>(ou ${I(2)} = ${rap('S', U(2))} = ${rap('2 300', '400 000')} = 5,75 mA.)</p>` }),
         fq.choix('Un radiateur de même puissance (1 840 W, k = 1) appellerait 1 840 / 230 = 8 A. Avec la machine, les pertes dans les lignes sont multipliées par :', [o('ok', '1,56'), o('a', '1,25'), o('b', '0,8'), o('c', '1')], 'ok',
           { indice: 'L\'intensité est multipliée par 10 / 8 = 1,25 dans tout le réseau ; les pertes dépendent de I<sup>2</sup>.', solution: '(10 / 8)<sup>2</sup> = 1,25<sup>2</sup> ≈ 1,56 : plus le facteur de puissance est faible, plus les pertes sont grandes.' }),
       ] },
@@ -148,17 +160,18 @@ new TE.Cours(document.getElementById('etapes'), [
   (cours) => {
     const k = cours.carte('4. Charge avec un rendement');
     cours.ajouter(k, `<div class="cours-bloc">
-        <p>Souvent, l'énoncé donne la <b>puissance utile</b> ${PU} d'un moteur (sa puissance mécanique) et son <b>rendement</b> η. On remonte alors : P = ${rap(PU, 'η')}, puis S = ${rap('P', 'k')}, puis les intensités.</p>
+        <p>Souvent, l'énoncé donne la <b>puissance utile</b> ${PU} d'un moteur (sa puissance mécanique) et son <b>rendement</b> η. On remonte alors : P = ${rap(PU, 'η')}, puis S = ${rap('P', 'k')}, puis les intensités. Comme S est la même dans tout le réseau, chaque intensité s'obtient aussi par I = S / U.</p>
       </div>
       <div class="cours-exemple">
         <p class="cours-exemple-t">Exemple 3</p>
         <p>Un transformateur abaisse la tension de 20 kV à 230 V. Il alimente un moteur de puissance utile 1,5 kW, de rendement 75 % et de facteur de puissance 0,8.</p>
-        ${SCH.reseau({ U1: '20 kV', I1: '?', m: '?', U2: '230 V', I2: '?', S: '?', P: '?', k: '0,8', eta: '0,75', Pu: '1,5 kW', Pp: '?' }, { n: 2, charge: 'moteur' })}
+        ${SCH.reseau({ U1: '20 kV', I1: '?', S1: '?', m: '?', U2: '230 V', I2: '?', S2: '?', P: '?', k: '0,8', eta: '0,75', Pu: '1,5 kW', Pp: '?' }, { n: 2, charge: 'moteur' })}
         ${calc(`P = ${rap(PU, 'η')} = ${rap('1 500', '0,75')} = ${c('2 000 W')} ; ${PP} = P − ${PU} = 2 000 − 1 500 = ${c('500 W')}<br>
           S = ${rap('P', 'k')} = ${rap('2 000', '0,8')} = ${c('2 500 VA')} ; ${I(2)} = ${rap('S', U(2))} = ${rap('2 500', '230')} = ${c('10,9 A')}<br>
-          m = ${rap(U(2), U(1))} = ${rap('230', '20 000')} = ${c('0,0115')} ; ${I(1)} = m × ${I(2)} = 0,0115 × 10,9 = ${c('0,125 A')}`)}
+          m = ${rap(U(2), U(1))} = ${rap('230', '20 000')} = ${c('0,0115')} ; m = ${rap(I(1), I(2))} donc ${I(1)} = m × ${I(2)} = 0,0115 × 10,9 = ${c('0,125 A')}`)}
+        <p>(ou avec la même S de part et d'autre du transformateur : ${I(1)} = ${rap('S', U(1))} = ${rap('2 500', '20 000')} = 0,125 A.)</p>
       </div>`);
-    const sch = SCH.reseau({ U1: '#U1', I1: '?', m1: '?', U2: '#U2', I2: '?', m2: '?', U3: '#U3', I3: '?', S: '?', P: '?', k: '#k', eta: '#eta', Pu: '#Pu', Pp: '?' }, { charge: 'pompe' });
+    const sch = SCH.reseau({ U1: '#U1', I1: '?', S1: '?', m1: '?', U2: '#U2', I2: '?', S2: '?', m2: '?', U3: '#U3', I3: '?', S3: '?', P: '?', k: '#k', eta: '#eta', Pu: '#Pu', Pp: '?' }, { charge: 'pompe' });
     TE.aToi(k, [
       { titre: 'Schéma complet : une centrale produit sous 20 kV ; T<sub>1</sub> élève la tension à 400 kV ; T<sub>2</sub> l\'abaisse à 230 V. Elle alimente une pompe de puissance utile 1 380 W, de rendement 80 % et de facteur de puissance 0,75.', parties: [
         { type: 'schema', q: 'Place les données sur le schéma.', schema: sch, etiquettes: [
@@ -168,7 +181,7 @@ new TE.Cours(document.getElementById('etapes'), [
         fq.nombre('Calcule la puissance perdue par la pompe.', `${PP} =`, 345, 'W', { diag: () => `${PP} = P − ${PU}.`, solution: calc(`${PP} = 1 725 − 1 380 = ${c('345 W')}`) }),
         fq.nombre('Calcule la puissance apparente S.', 'S =', 2300, 'VA', { diag: v => proche(v, 1293.75) ? 'S = P / k (et non P × k).' : 'S = P / k.', solution: calc(`S = ${rap('1 725', '0,75')} = ${c('2 300 VA')}`) }),
         fq.nombre(`Calcule ${I(3)}.`, `${I(3)} =`, 10, 'A', { diag: () => `${I(3)} = S / ${U(3)}.`, solution: calc(`${I(3)} = ${rap('2 300', '230')} = ${c('10 A')}`) }),
-        fq.nombre(`Calcule ${I(1)} à la sortie de la centrale, en milliampères (passe par ${I(2)}).`, `${I(1)} =`, 115, 'mA', { rel: .01, diag: v => proche(v, .115, .02) ? 'Exprime le résultat en milliampères.' : proche(v, 5.75, .02) ? `C'est ${I(2)} ; il reste à multiplier par ${m(1)} = 20.` : `${I(2)} = ${m(2)} × ${I(3)} avec ${m(2)} = 230 / 400 000, puis ${I(1)} = ${m(1)} × ${I(2)} avec ${m(1)} = 20.`, solution: calc(`${m(2)} = ${rap('230', '400 000')} = 5,75 × 10<sup>−4</sup> ; ${I(2)} = 5,75 × 10<sup>−4</sup> × 10 = 5,75 mA<br>${m(1)} = ${rap('400', '20')} = 20 ; ${I(1)} = 20 × 5,75 = ${c('115 mA')}`) }),
+        fq.nombre(`Calcule ${I(1)} à la sortie de la centrale, en milliampères. Pense à la puissance apparente S, la même dans tout le réseau.`, `${I(1)} =`, 115, 'mA', { rel: .01, diag: v => proche(v, .115, .02) ? 'Exprime le résultat en milliampères.' : proche(v, 5.75, .02) ? `C'est ${I(2)} (sous 400 kV) ; ${I(1)} est sous ${U(1)} = 20 kV.` : proche(v, 10, .02) ? `C'est ${I(3)} ; à la sortie de la centrale, la tension est ${U(1)} = 20 kV.` : `S est la même partout : ${I(1)} = S / ${U(1)}, avec S = 2 300 VA et ${U(1)} = 20 000 V.`, solution: calc(`S est la même dans tout le réseau : ${I(1)} = ${rap('S', U(1))} = ${rap('2 300', '20 000')} = 0,115 A = ${c('115 mA')}`) + `<p>(ou avec les transformateurs : ${m(2)} = ${rap('230', '400 000')} = 5,75 × 10<sup>−4</sup>, ${I(2)} = ${m(2)} × ${I(3)} = 5,75 mA ; ${m(1)} = 20, ${I(1)} = ${m(1)} × ${I(2)} = 115 mA.)</p>` }),
       ] },
     ], () => cours.continuer(k, 'Ce qu\'il faut retenir →'));
     return k;
@@ -177,9 +190,9 @@ new TE.Cours(document.getElementById('etapes'), [
   // ---------- À retenir ----------
   (cours) => {
     const k = cours.carte('À retenir');
-    cours.ajouter(k, `<div class="cle"><p><b class="cle-titre">Le schéma.</b> Production (${U(1)}, ${I(1)}) — T<sub>1</sub> (${m(1)}) — transport (${U(2)}, ${I(2)}) — T<sub>2</sub> (${m(2)}) — distribution (${U(3)}, ${I(3)}, S) — charge (P, k, η) — ${PU} et ${PP}. Place toujours les données de l'énoncé au bon endroit.</p></div>
-      <div class="cle"><p><b class="cle-titre">Les relations.</b> ${m(1)} = ${rap(U(2), U(1))} = ${rap(I(1), I(2))} ; ${m(2)} = ${rap(U(3), U(2))} = ${rap(I(2), I(3))} ; S = ${U(3)} × ${I(3)} ; k = ${rap('P', 'S')} ; η = ${rap(PU, 'P')} ; ${PP} = P − ${PU}.</p></div>
-      <div class="cle"><p><b class="cle-titre">De proche en proche.</b> En partant de la charge : ${PU} → P → S → ${I(3)} → ${I(2)} → ${I(1)}. Charge résistive : k = 1 et S = P.</p></div>
+    cours.ajouter(k, `<div class="cle"><p><b class="cle-titre">Le schéma.</b> Production (${U(1)}, ${I(1)}, S) — T<sub>1</sub> (${m(1)} et ses trois formules) — transport (${U(2)}, ${I(2)}, S) — T<sub>2</sub> (${m(2)} et ses trois formules) — distribution (${U(3)}, ${I(3)}, S, puis P juste avant la charge) — charge (k, η) — ${PU} et ${PP}. Place toujours les données de l'énoncé au bon endroit.</p></div>
+      <div class="cle"><p><b class="cle-titre">Les relations.</b> Transformateurs : m = ${rap('N<sub>2</sub>', 'N<sub>1</sub>')} ; m = ${rap(U(2), U(1))} ; m = ${rap(I(1), I(2))} (avec les indices de chaque transformateur) : on choisit celle qui n'a qu'une inconnue. Dans chaque partie : S = U × I, <b>la même S partout</b>. Charge : P = k × S ; η = ${rap(PU, 'P')} ; ${PP} = P − ${PU}.</p></div>
+      <div class="cle"><p><b class="cle-titre">De proche en proche.</b> En partant de la charge : ${PU} → P → S → ${I(3)} → ${I(2)} → ${I(1)} (avec les formules des transformateurs, ou I = S / U dans chaque partie). Charge résistive : k = 1 et S = P.</p></div>
       <div class="cle"><p><b class="cle-titre">Conclusion.</b> Plus le facteur de puissance de la charge est faible, plus l'intensité est grande dans tout le réseau, et plus les pertes dans les lignes sont grandes.</p></div>
       <div class="er-actions">
         <a class="btn-primary" style="text-decoration:none" href="module_4_exercices.html">Exercices →</a>
