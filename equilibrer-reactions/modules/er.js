@@ -649,15 +649,15 @@
 
   /* ---------- Équilibrer une réaction ----------
      cfg = { r: réactifs, p: produits, solution: [nombres], ordre: ['H', 'Cl'] (méthode),
-             direct: true   bilan et indice en direct, réussite dès que c'est équilibré ;
+             direct: true   bilan et indice en direct, réussite dès que c'est équilibré
+                            (« Afficher la réponse » proposé tout de suite : aucune erreur n'est validée) ;
                      false  l'élève calcule et valide (bilan montré après « Valider »),
              comptes: true  nombre d'atomes écrit sous chaque formule (avec le calcul),
-             essais: 10     (direct) changements sans réussite avant de proposer « Afficher la réponse »,
              q, bravo (explication ajoutée à la solution), dessins, memoire } */
   function partieEquilibrer(cfg) {
     const R = cfg.r, P = cfg.p, nbEsp = R.length + P.length;
     return {
-      type: 'perso', q: cfg.q,
+      type: 'perso', q: cfg.q, aide: !!cfg.direct,
       solution: `<p class="er-eq">${equationHTML(R, P, cfg.solution)}</p>${cfg.bravo ? `<p>${cfg.bravo}</p>` : ''}`,
       monter(zone, api) {
         const mem = cfg.memoire || {};
@@ -665,17 +665,14 @@
         zone.appendChild(box);
         const $ = a => box.querySelector(`[data-c="${a}"]`);
         const dessins = dessinsDepart(cfg, mem);
-        let changements = 0, aide = false, fini = false, act = null;
+        let fini = false, act = null;
         const r = new Reaction($('r'), {
           reactifs: R, produits: P, dessins, comptes: cfg.comptes !== false, detail: true,
           coefs: nombresValables(mem.c, nbEsp, 30) ? mem.c : null,
           onChange: c => {
             mem.c = c; mem.v = 0;
-            if (cfg.direct) {
-              maj();
-              // pas d'erreur « validée » en direct : « Afficher la réponse » après plusieurs essais
-              if (!fini && ++changements >= (cfg.essais || 10) && !aide) { aide = true; api.compterErreur(); }
-            } else { $('bilan').innerHTML = ''; api.effacer(); }
+            if (cfg.direct) maj();
+            else { $('bilan').innerHTML = ''; api.effacer(); }
           },
         });
         $('switch').replaceWith(interrupteur(dessins, b => { mem.d = b ? 1 : 0; r.options({ dessins: b }); }));

@@ -32,7 +32,9 @@
      'perso'   outil propre à l'application : p.monter(zone, api) → { montrer() }
                api.reussi() · api.erreur(diagnostic) · api.compterErreur() · api.effacer() · api.message(h)
      Toutes : p.q (question), p.solution (HTML affiché après la réponse,
-              par ex. « ✍ Complète ton cours : … »).
+              par ex. « ✍ Complète ton cours : … »),
+              p.aide (true : « Afficher la réponse » proposé tout de suite, pour un outil
+              où aucune erreur n'est validée, comme une réaction réglée en direct).
    ============================================================ */
 (function () {
   'use strict';
@@ -325,7 +327,7 @@
       const p = q.parties[rendues++];
       window.COURS.partieEnCours = p;          // partie en cours (utile pour vérifier l'application)
       const d = el('div', 'crs-partie', `${p.q ? `<p class="crs-partie-q">${p.q}</p>` : ''}<div class="crs-partie-zone"></div><div class="crs-partie-retour"></div>
-        <div class="crs-partie-aide${deplie ? '' : ' crs-cache'}"><button type="button" class="btn-small">Afficher la réponse</button></div>`);
+        <div class="crs-partie-aide${deplie || p.aide ? '' : ' crs-cache'}"><button type="button" class="btn-small">Afficher la réponse</button></div>`);
       zone.appendChild(d);
       const ret = d.querySelector('.crs-partie-retour'), aide = d.querySelector('.crs-partie-aide');
       aides.push(aide);
