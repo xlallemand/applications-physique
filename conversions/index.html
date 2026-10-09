@@ -1841,7 +1841,9 @@ const CV = (function () {
                           [eN, `Tu as oublié le changement de préfixe du dénominateur (${da.sym}${du} → ${db.sym}${du}) : calcule aussi son exposant, puis additionne.`]);
     }
     return conversion({ titre: o.titre, x, de: UC(na, nu, da, du, kd), vers: UC(nB, nu, db, du, kd), termes: [{ a: na.exp, b: nB.exp, k: 1 }, { a: da.exp, b: db.exp, k: kd }], erreurs,
-      aide: `Numérateur : exposant = départ − arrivée (${dit(na)} → ${dit(nB)}). Dénominateur : (départ − arrivée) × (${ent(kd)}) (${dit(da)} → ${dit(db)}). Puis additionne les deux.`,
+      aide: `${na === nB ? 'Le numérateur ne change pas (exposant 0).' : `Numérateur : exposant = départ − arrivée (${dit(na)} → ${dit(nB)}).`} ${da === db
+        ? 'Le dénominateur ne change pas (exposant 0).'
+        : `Dénominateur : exposant = (départ − arrivée) × (${ent(kd)}) (${dit(da)} → ${dit(db)}).`}${na !== nB && da !== db ? ' Puis additionne les deux.' : ''}`,
       solution: () => calcul4(o) });
   }
   // lignes de calcul d'une unité composée (exemples et corrections)
@@ -1849,7 +1851,7 @@ const CV = (function () {
     const { x, nu, na, nb: nB, du, da, db, kd } = o;
     const eN = na.exp - nB.exp, eD = (da.exp - db.exp) * kd, E = eN + eD;
     return `<p>Numérateur (${nu}) : ${na === nB ? `ne change pas : exposant = <b>0</b>` : `${dit(na)} → ${dit(nB)} : exposant = ${ent(na.exp)} − ${par(nB.exp)} = <b>${ent(eN)}</b>`}</p>
-      <p>Dénominateur (${du}<sup>${ent(kd)}</sup>) : ${da === db ? `ne change pas (${da.sym}${du} → ${db.sym}${du}) : exposant = (0) × (${ent(kd)}) = <b>0</b>` : `${dit(da)} → ${dit(db)} : exposant = (${ent(da.exp)} − ${par(db.exp)}) × (${ent(kd)}) = <b>${ent(eD)}</b>`}</p>
+      <p>Dénominateur (${du}<sup>${ent(kd)}</sup>) : ${da === db ? `ne change pas (${da.sym}${du} → ${db.sym}${du}) : exposant = (${ent(da.exp)} − ${par(db.exp)}) × (${ent(kd)}) = <b>0</b>` : `${dit(da)} → ${dit(db)} : exposant = (${ent(da.exp)} − ${par(db.exp)}) × (${ent(kd)}) = <b>${ent(eD)}</b>`}</p>
       <p>Exposant total : ${ent(eN)} + ${par(eD)} = <b>${ent(E)}</b></p>
       <p class="crs-calc">${nb(x)}&nbsp;${UC(na, nu, da, du, kd)} = <span class="c">${ecr(x, E)}&nbsp;${UC(nB, nu, db, du, kd)}</span></p>`;
   }

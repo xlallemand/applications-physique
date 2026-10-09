@@ -424,7 +424,7 @@ const COURS_FR = (function () {
         c.aToi(carte, [
             { titre: 'Trouver le PGCD',
               parties: [{ type: 'nombre', q: `Quel est le PGCD de ${p} et ${q} ?`, label: `PGCD(${p}, ${q}) =`, valeur: G, entier: true, signe: false, tol: 0,
-                diag: v => v <= 0 ? 'Le PGCD est un nombre entier positif.'
+                diag: v => !Number.isInteger(v) || v <= 0 ? 'Le PGCD est un nombre entier positif.'
                     : v > Math.min(p, q) ? `Le PGCD divise ${p} et ${q} : il ne peut pas être plus grand que ${Math.min(p, q)}. Tu as peut-être cherché un multiple commun.`
                     : p % v || q % v ? `${v} ne divise pas ${p % v ? p : q}.`
                     : `${v} divise bien ${p} et ${q}, mais ce n'est pas le <b>plus grand</b> diviseur commun.`,
@@ -524,8 +524,9 @@ const COURS_FR = (function () {
                 <div class="cle"><p class="crs-formule">inverse de ${F('a', 'b')} = ${F('b', 'a')}</p>
                     <p>Un nombre entier n s'écrit ${F('n', '1')} : son inverse est ${F('1', 'n')}.</p></div>
             </div>
-            ${exemple(`<p class="crs-calc">Inverse de ${F(3, 4)} = <span class="c">${F(4, 3)}</span> &nbsp;·&nbsp; inverse de ${F(2, 7)} = <span class="c">${F(7, 2)}</span></p>
-                <p class="crs-calc">Inverse de 5 = ${F(5, 1)} : <span class="c">${F(1, 5)}</span></p>`, 'Exemples')}`);
+            ${exemple(`<p class="crs-calc">Inverse de ${F(3, 4)} = <span class="c">${F(4, 3)}</span></p>
+                <p class="crs-calc">Inverse de ${F(2, 7)} = <span class="c">${F(7, 2)}</span></p>
+                <p class="crs-calc">5 = ${F(5, 1)}, donc inverse de 5 = <span class="c">${F(1, 5)}</span></p>`, 'Exemples')}`);
         const [a, b] = hasard([[5, 8], [3, 4], [2, 7], [4, 9], [3, 5], [7, 2]]);
         const n = entre(2, 9);
         const [p, q] = hasard([[2, 3], [3, 5], [4, 7], [5, 9]]);
@@ -639,7 +640,7 @@ const COURS_FR = (function () {
         return { titre,
             parties: [partieFrac({ q: `Calcule ${F(a, b)} ${op} ${F(c, d)} (simplifie si possible).`, n: s.n, d: s.d,
                 diag: (x, y) => (x === calc(a, c) && y === calc(b, d)) ? `Tu as ${op === '+' ? 'additionné' : 'soustrait'} les numérateurs entre eux et les dénominateurs entre eux : il faut d'abord mettre les deux fractions au <b>même dénominateur</b>.`
-                    : (y === L && x === calc(a, c)) ? `Le dénominateur commun ${L} est juste, mais il faut aussi multiplier chaque numérateur par le même nombre que son dénominateur : ${F(a, b)} = ${F(A, L)}.`
+                    : (y === L && x === calc(a, c)) ? `Le dénominateur commun ${L} est juste, mais il faut aussi multiplier chaque numérateur par le même nombre que son dénominateur : ${b === L ? `${F(c, d)} = ${F(C, L)}` : `${F(a, b)} = ${F(A, L)}`}.`
                     : (x === a * c && y === b * d) ? `Tu as multiplié les fractions : pour ${op === '+' ? 'une addition' : 'une soustraction'}, il faut un dénominateur commun.`
                     : null,
                 equiv: (x, y) => y % L === 0 && y > L ? `Ton calcul est juste, mais ${F(x, y)} n'est pas irréductible : divise par ${gcd(x, y)}. Avec le PPCM (${L}) comme dénominateur commun, les nombres restent plus petits.` : null,
@@ -709,7 +710,7 @@ const COURS_FR = (function () {
         c.aToi(carte, [
             { titre: 'Trouver le PPCM',
               parties: [{ type: 'nombre', q: `Quel est le PPCM de ${m} et ${n} ?`, label: `PPCM(${m}, ${n}) =`, valeur: P, entier: true, signe: false, tol: 0,
-                diag: v => v <= 0 ? 'Le PPCM est un nombre entier positif.'
+                diag: v => !Number.isInteger(v) || v <= 0 ? 'Le PPCM est un nombre entier positif.'
                     : v % m || v % n ? `${v} n'est pas un multiple de ${v % m ? m : n}.`
                     : `${v} est bien un multiple de ${m} et de ${n}, mais ce n'est pas le <b>plus petit</b>.`,
                 solution: `<p>Multiples de ${Math.max(m, n)} : ${[1, 2, 3, 4, 5].map(k => k * Math.max(m, n)).filter(x => x <= P).map(x => x === P ? `<b>${x}</b>` : x).join(', ')}</p>

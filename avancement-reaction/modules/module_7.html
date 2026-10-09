@@ -6,123 +6,170 @@
 <title>Module 7 : Aller plus loin, sans tableau — Avancement d'une réaction</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="av.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="../../assets/molecules.js"></script>
 <script src="av.js"></script>
 <script src="banque.js"></script>
+<script src="../../assets/cours.js"></script>
 </head>
 <body>
 <div id="app-nav"></div>
 <div class="av-page">
-  <div class="er-card" id="entete">
-    <span class="er-badge">MODULE 7 · PREMIÈRE</span>
+  <div class="er-card">
+    <span class="er-badge">MODULE 7 · COURS</span>
     <h2 class="er-titre">Aller plus loin : sans tableau</h2>
-    <p class="er-contexte">Avec un peu d'habitude, on peut trouver le réactif limitant et x<sub>max</sub> directement, sans écrire le tableau d'avancement.</p>
+    <p class="er-contexte">Avec un peu d'habitude, on trouve le <b>réactif limitant</b> et <b>x<sub>max</sub></b> directement, sans écrire le tableau d'avancement, puis les quantités à l'<b>état final</b>.</p>
   </div>
   <div id="etapes"></div>
 </div>
 
 <script>
 /* ============================================================
-   1. Le principe, avec la frise de l'avancement
-   2. Exemple guidé (nombres décimaux, frise)
-   3. Exemple guidé (puissances de 10)
-   4. Entraînement noté sans tableau
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Réactif limitant et x_max sans tableau (frise de l'avancement)
+   2. Les quantités à l'état final
+   3. Tout enchaîner (exemples guidés AV.Exercice sans tableau :
+      synthèse de l'eau avec la frise, iodure de plomb)
+   À retenir ; l'entraînement noté est sur sa propre page
+   (module_7_entrainement.html).
    ============================================================ */
-const zone = document.getElementById("etapes");
+const { hasard, exemple } = COURS;
 const fH = MOL.formuleHTML;
-function carte(html) {
-  const c = document.createElement("section");
-  c.className = "er-card";
-  c.innerHTML = html;
-  zone.appendChild(c);
-  return c;
-}
-function continuer(parent, suivante, texte) {
-  parent.insertAdjacentHTML("beforeend", `<div class="av-suite"><button type="button" class="btn-primary">${texte || "Continuer →"}</button></div>`);
-  const b = parent.querySelector(".av-suite:last-child button");
-  b.onclick = () => { b.parentNode.remove(); const c = suivante(); c.scrollIntoView({ behavior: "smooth", block: "start" }); };
+const eq = q => `<p class="av-equation">${AV.equationHTML(q)}</p>`;
+const xm = 'x<sub>max</sub>';
+const melange = (q, mode) => `On mélange ${q.r.map((s, k) => `${AV.fmt(q.n0[k], mode)} mol de ${fH(s)}`).join(' et ')}.`;
+const rapport = s => `${fH(s)} :`;
+const puiss10 = r => isFinite(r) && r > 0 && Math.abs(Math.log10(r) - Math.round(Math.log10(r))) < 1e-6 && Math.round(Math.log10(r)) !== 0;
+// Exemple guidé sans tableau (AV.Exercice : rapports, conclusion, état final)
+const guide = (q, mode, frise) => AV.partieExercice(Object.assign({}, q, { unite: 'mol', mode, frise, sansTableau: true, etapes: ['ratio', 'concl', 'final'] }));
+
+// x_max saisi directement (puissances de 10)
+function partieXmax(q) {
+  const K = AV.calculer(q), P = v => AV.fmt(v, 'puissance');
+  return AV.partieValeurs({ mode: 'puissance', q: `Quelle est la valeur de ${xm} ?`,
+    champs: [{ lab: `${xm} =`, valeur: K.xmax, unite: 'mol', aria: 'x max' }],
+    diag: vs => {
+      const v = vs[0];
+      if (AV.egal(v, Math.max(...K.xm))) return 'C\'est la plus grande des deux valeurs. La réaction s\'arrête au premier réactif épuisé : on garde la plus petite.';
+      const k = q.r.map((_, j) => j).find(j => q.c[j] > 1 && AV.egal(v, q.n0[j]));
+      if (k != null) return `Tu as oublié de diviser par le nombre stœchiométrique de ${fH(q.r[k])} : ${P(q.n0[k])} ÷ ${q.c[k]}.`;
+      if (puiss10(v / K.xmax)) return 'Le nombre devant est juste, mais pas la puissance de 10.';
+      return 'Calcule n<sub>initial</sub> ÷ nombre stœchiométrique pour chaque réactif et garde la plus petite valeur.';
+    },
+    solution: `${AV.calculsRapports(q, 'puissance')}<p>On garde la plus petite valeur : <b>${xm} = ${P(K.xmax)} mol</b>.</p>` });
 }
 
-/* ---------- 1. Le principe ---------- */
-function etape1() {
+/* ---------- 1. Réactif limitant et x_max sans tableau ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Réactif limitant et x<sub>max</sub> sans tableau');
   const q = { r: ['CH4', 'O2'], p: ['CO2', 'H2O'], c: [1, 2, 1, 2], n0: [3, 4, 0, 0] };
-  const c = carte(`<h3 class="cours-titre">1. Le principe</h3>
-    <p class="av-equation">${AV.equationHTML(q)}</p>
-    <p class="er-contexte">On mélange 3 mol de CH<sub>4</sub> et 4 mol de O<sub>2</sub>. Chaque fois que x augmente de 1 mol, 1 mol de CH<sub>4</sub> et 2 mol de O<sub>2</sub> disparaissent.</p>
-    <div class="av-hyp" style="margin-top:12px">
-      <div><p class="av-hyp-q">CH<sub>4</sub> serait épuisé pour</p><p class="av-hyp-calc">x = 3 ÷ 1 = <b>3 mol</b></p></div>
-      <div class="gagne"><p class="av-hyp-q">O<sub>2</sub> serait épuisé pour</p><p class="av-hyp-calc">x = 4 ÷ 2 = <b>2 mol</b></p></div>
+  const d = c.ajouter(carte, `<div class="cours-bloc">
+      <p>Chaque fois que l'avancement x augmente de 1 mol, chaque réactif perd « nombre stœchiométrique » mol. Un réactif serait donc épuisé pour x = n<sub>initial</sub> ÷ nombre stœchiométrique.</p>
+      <div class="cle"><p><b class="cle-titre">Réactif limitant et ${xm} sans tableau</b> : pour chaque réactif, on calcule</p>
+        <p class="av-formule-cle">n<sub>initial</sub> ÷ nombre stœchiométrique</p>
+        <p>Le réactif qui donne la <b>plus petite</b> valeur est le réactif limitant, et cette valeur est ${xm}.</p></div>
     </div>
-    <div class="av-frise" data-x="frise"></div>
-    <div class="er-actions" style="justify-content:center"><button type="button" class="btn-primary" data-x="go">Faire avancer la réaction ▶</button></div>
-    <div data-x="suite"></div>`);
+    ${exemple(`${eq(q)}
+      <p>On mélange 3 mol de CH<sub>4</sub> et 4 mol de O<sub>2</sub>. Chaque fois que x augmente de 1 mol, 1 mol de CH<sub>4</sub> et 2 mol de O<sub>2</sub> disparaissent.</p>
+      <div class="av-hyp" style="margin-top:12px">
+        <div><p class="av-hyp-q">CH<sub>4</sub> serait épuisé pour</p><p class="av-hyp-calc">x = 3 ÷ 1 = <b>3 mol</b></p></div>
+        <div class="gagne"><p class="av-hyp-q">O<sub>2</sub> serait épuisé pour</p><p class="av-hyp-calc">x = 4 ÷ 2 = <b>2 mol</b></p></div>
+      </div>
+      <div class="av-frise" data-x="frise"></div>
+      <div class="er-actions" style="justify-content:center" data-x="lancer"><button type="button" class="btn-primary" data-x="go">Faire avancer la réaction ▶</button></div>
+      <div data-x="suite"></div>`)}`);
+  // frise animée : le curseur part de 0 et s'arrête au premier mur
   const murs = [{ v: 3, nom: 'CH₄', couleur: AV.COUL[0] }, { v: 2, nom: 'O₂', couleur: AV.COUL[1] }];
-  AV.frise(c.querySelector('[data-x="frise"]'), murs, 0, 'decimal');
-  c.querySelector('[data-x="go"]').onclick = () => {
-    c.querySelector('[data-x="go"]').disabled = true;
-    AV.animerFrise(c.querySelector('[data-x="frise"]'), murs, 'decimal', () => {
-      c.querySelector('[data-x="suite"]').innerHTML = `
-        <div class="av-concl"><p>La réaction s'arrête au premier mur : <b>x<sub>max</sub> = 2 mol</b>, et le réactif limitant est <b>O<sub>2</sub></b>.</p></div>
-        <div class="cle"><p><b class="cle-titre">Réactif limitant et x<sub>max</sub> sans tableau</b> : pour chaque réactif, on calcule</p>
-          <p class="av-formule-cle">n<sub>initial</sub> ÷ nombre stœchiométrique</p>
-          <p>Le réactif qui donne la <b>plus petite</b> valeur est le réactif limitant, et cette valeur est x<sub>max</sub>.</p></div>
-        <div class="cle"><p><b class="cle-titre">Quantités à l'état final</b></p>
-          <p class="av-formule-cle">réactif : n<sub>final</sub> = n<sub>initial</sub> − nombre stœchiométrique × x<sub>max</sub><br>produit : n<sub>final</sub> = n<sub>initial</sub> + nombre stœchiométrique × x<sub>max</sub></p>
-          <p>Ici : n(CH<sub>4</sub>) = 3 − 1 × 2 = 1 mol ; n(O<sub>2</sub>) = 4 − 2 × 2 = 0 mol ; n(CO<sub>2</sub>) = 0 + 1 × 2 = 2 mol ; n(H<sub>2</sub>O) = 0 + 2 × 2 = 4 mol.</p></div>`;
-      continuer(c, etape2);
+  const zf = d.querySelector('[data-x="frise"]');
+  AV.frise(zf, murs, 0, 'decimal');
+  d.querySelector('[data-x="go"]').onclick = () => {
+    d.querySelector('[data-x="lancer"]').remove();
+    AV.animerFrise(zf, murs, 'decimal', () => {
+      d.querySelector('[data-x="suite"]').innerHTML = '<div class="av-concl"><p>La réaction s\'arrête au premier mur : <b>x<sub>max</sub> = 2 mol</b>, et le réactif limitant est <b>O<sub>2</sub></b>.</p></div>';
     });
   };
-  return c;
+
+  const a = BANQUE.quantites(hasard(BANQUE.REACTIONS.quatre.filter(x => x.r[0] !== 'CH4')), BANQUE.NIVEAUX.dixieme);
+  const b = BANQUE.quantites(hasard(BANQUE.REACTIONS.ions1.filter(x => x.c[1] === 2 && x.r[0] !== 'Pb2+')), BANQUE.NIVEAUX.puissance(hasard([-2, -3])));
+  c.aToi(carte, [
+    { titre: a.nom, enonce: `${eq(a)}<p>${melange(a, 'decimal')}</p>`,
+      parties: [AV.partieRapports(a, 'decimal', rapport, 'Calcule n<sub>initial</sub> ÷ nombre stœchiométrique pour chaque réactif.'), AV.partieLimitant(a, 'decimal')] },
+    { titre: b.nom, enonce: `${eq(b)}<p>${melange(b, 'puissance')}</p>`,
+      parties: [partieXmax(b), AV.partieLimitant(b, 'puissance')] },
+  ]);
+  return carte;
 }
 
-/* ---------- 2. et 3. Exemples guidés ---------- */
-function exercice(titre, q, mode, frise, texte, suivante) {
-  const c = carte(`<h3 class="cours-titre">${titre}</h3>
-    <p class="av-equation">${AV.equationHTML(q)}</p>
-    <p class="er-contexte">${texte}</p><div data-x="ex" style="margin-top:4px"></div>`);
-  new AV.Exercice(c.querySelector('[data-x="ex"]'), Object.assign({}, q, {
-    unite: 'mol', mode, guide: true, sansTableau: true, frise,
-    etapes: ['ratio', 'concl', 'final'],
-    onFini: () => continuer(c, suivante),
-  }));
-  return c;
-}
-const etape2 = () => exercice("2. Exemple : synthèse de l'eau",
-  { r: ['H2', 'O2'], p: ['H2O'], c: [2, 1, 2], n0: [0.8, 0.5, 0] }, 'decimal', true,
-  'On fait réagir 0,8 mol de H<sub>2</sub> avec 0,5 mol de O<sub>2</sub>.', etape3);
-const etape3 = () => exercice("3. Exemple : précipitation de l'iodure de plomb",
-  { r: ['Pb2+', 'I-'], p: ['PbI2'], c: [1, 2, 1], n0: [6.0e-3, 1.0e-2, 0] }, 'puissance', false,
-  'On mélange 6,0 × 10<sup>−3</sup> mol d\'ions Pb<sup>2+</sup> et 1,0 × 10<sup>−2</sup> mol d\'ions I<sup>−</sup>.', etape4);
+/* ---------- 2. Les quantités à l'état final ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Les quantités à l\'état final');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Une fois ${xm} connu, on calcule directement les quantités à la fin de la réaction.</p>
+      <div class="cle"><p><b class="cle-titre">Quantités à l'état final</b></p>
+        <p class="av-formule-cle">réactif : n<sub>final</sub> = n<sub>initial</sub> − nombre stœchiométrique × ${xm}<br>produit : n<sub>final</sub> = n<sub>initial</sub> + nombre stœchiométrique × ${xm}</p>
+        <p>Le réactif limitant finit à 0 mol.</p></div>
+    </div>
+    ${exemple(`<p class="av-equation">CH<sub>4</sub> + <span class="av-c">2</span>&nbsp;O<sub>2</sub> → CO<sub>2</sub> + <span class="av-c">2</span>&nbsp;H<sub>2</sub>O</p>
+      <p>3 mol de CH<sub>4</sub> et 4 mol de O<sub>2</sub> : ${xm} = 2 mol (O<sub>2</sub> est le réactif limitant).</p>
+      <p class="crs-calc">n(CH<sub>4</sub>) = 3 − 1 × 2 = <span class="c">1 mol</span><br>n(O<sub>2</sub>) = 4 − 2 × 2 = <span class="c">0 mol</span><br>n(CO<sub>2</sub>) = 0 + 1 × 2 = <span class="c">2 mol</span><br>n(H<sub>2</sub>O) = 0 + 2 × 2 = <span class="c">4 mol</span></p>`)}`);
 
-/* ---------- 4. Entraînement ---------- */
-function etape4() {
-  const c = carte(`<h3 class="cours-titre">4. S'entraîner sans tableau</h3>
-    <p class="er-contexte">10 questions notées sur 20, avec des puissances de 10 : rapports n<sub>initial</sub> ÷ nombre stœchiométrique, réactif limitant, x<sub>max</sub> et état final.</p>
-    <div class="er-actions"><button type="button" class="btn-primary" data-x="go">S'entraîner →</button>
+  const a = BANQUE.quantites(hasard(BANQUE.REACTIONS.quatre.filter(x => x.r[0] !== 'CH4')), BANQUE.NIVEAUX.dixieme);
+  const b = BANQUE.quantites(hasard(BANQUE.REACTIONS.ions2.filter(x => x.p.length === 1)), BANQUE.NIVEAUX.puissance(hasard([-2, -3])));
+  const Ka = AV.calculer(a), Kb = AV.calculer(b);
+  const donne = (q, K, mode) => `${melange(q, mode)} Le réactif limitant est ${fH(q.r[K.L])} et ${xm} = ${AV.fmt(K.xmax, mode)} mol.`;
+  c.aToi(carte, [
+    { titre: a.nom, enonce: `${eq(a)}<p>${donne(a, Ka, 'decimal')}</p>`,
+      parties: [AV.partieFinal(a, 'decimal', 'Calcule les quantités à l\'état final.')] },
+    { titre: b.nom, enonce: `${eq(b)}<p>${donne(b, Kb, 'puissance')}</p>`,
+      parties: [AV.partieFinal(b, 'puissance', 'Calcule les quantités à l\'état final.')] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Tout enchaîner sans tableau ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Tout enchaîner sans tableau');
+  const q = { r: ['Cu2+', 'HO-'], p: ['Cu(OH)2'], c: [1, 2, 1], n0: [2.0e-3, 5.0e-3, 0] };
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>On enchaîne les trois étapes, sans écrire de tableau.</p>
+      <div class="cle"><p><b class="cle-titre">1.</b> Pour chaque réactif : n<sub>initial</sub> ÷ nombre stœchiométrique.</p>
+        <p><b class="cle-titre">2.</b> La plus petite valeur est ${xm} ; ce réactif est le réactif limitant.</p>
+        <p><b class="cle-titre">3.</b> État final : réactif n<sub>initial</sub> − nombre stœchiométrique × ${xm} ; produit n<sub>initial</sub> + nombre stœchiométrique × ${xm}.</p></div>
+    </div>
+    ${exemple(`${eq(q)}<p>On mélange 2,0 × 10<sup>−3</sup> mol d'ions Cu<sup>2+</sup> et 5,0 × 10<sup>−3</sup> mol d'ions HO<sup>−</sup>.</p>
+      <p class="crs-calc">Cu<sup>2+</sup> : 2,0 × 10<sup>−3</sup> ÷ 1 = 2,0 × 10<sup>−3</sup> mol<br>HO<sup>−</sup> : 5,0 × 10<sup>−3</sup> ÷ 2 = 2,5 × 10<sup>−3</sup> mol</p>
+      <p>La plus petite valeur : <b>${xm} = 2,0 × 10<sup>−3</sup> mol</b>, Cu<sup>2+</sup> est le réactif limitant.</p>
+      <p class="crs-calc">Cu<sup>2+</sup> : 2,0 × 10<sup>−3</sup> − 2,0 × 10<sup>−3</sup> = <span class="c">0 mol</span><br>HO<sup>−</sup> : 5,0 × 10<sup>−3</sup> − 2 × 2,0 × 10<sup>−3</sup> = <span class="c">1,0 × 10<sup>−3</sup> mol</span><br>Cu(OH)<sub>2</sub> : 0 + 2,0 × 10<sup>−3</sup> = <span class="c">2,0 × 10<sup>−3</sup> mol</span></p>`)}`);
+
+  const eau = { r: ['H2', 'O2'], p: ['H2O'], c: [2, 1, 2], n0: [0.8, 0.5, 0] };
+  const pb = { r: ['Pb2+', 'I-'], p: ['PbI2'], c: [1, 2, 1], n0: [6.0e-3, 1.0e-2, 0] };
+  c.aToi(carte, [
+    { titre: 'Synthèse de l\'eau', enonce: `${eq(eau)}<p>On fait réagir 0,8 mol de H<sub>2</sub> avec 0,5 mol de O<sub>2</sub>.</p>`,
+      parties: [guide(eau, 'decimal', true)] },
+    { titre: 'Précipitation de l\'iodure de plomb', enonce: `${eq(pb)}<p>On mélange 6,0 × 10<sup>−3</sup> mol d'ions Pb<sup>2+</sup> et 1,0 × 10<sup>−2</sup> mol d'ions I<sup>−</sup>.</p>`,
+      parties: [guide(pb, 'puissance', false)] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Réactif limitant et ${xm} sans tableau</b> : pour chaque réactif, on calcule</p>
+      <p class="av-formule-cle">n<sub>initial</sub> ÷ nombre stœchiométrique</p>
+      <p>Le réactif qui donne la <b>plus petite</b> valeur est le réactif limitant, et cette valeur est ${xm}.</p></div>
+    <div class="cle"><p><b class="cle-titre">Quantités à l'état final</b></p>
+      <p class="av-formule-cle">réactif : n<sub>final</sub> = n<sub>initial</sub> − nombre stœchiométrique × ${xm}<br>produit : n<sub>final</sub> = n<sub>initial</sub> + nombre stœchiométrique × ${xm}</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_7_entrainement.html">S'entraîner sans tableau →</a>
       <a class="btn-secondary" style="text-decoration:none" href="fiche_7.html">Fiche récapitulative</a></div>`);
-  SOM.marquer({ fait: true });                                 // dernière étape atteinte : cours terminé
-  c.querySelector('[data-x="go"]').onclick = () => {
-    const entete = document.getElementById('entete');
-    if (entete) entete.remove();
-    AV.entrainement({
-      app: zone,
-      badge: 'MODULE 7 · PREMIÈRE', titre: 'Entraînement : sans tableau',
-      intro: '<p class="er-contexte">Pour chaque réaction, calcule n<sub>initial</sub> ÷ nombre stœchiométrique pour chaque réactif, trouve le réactif limitant et x<sub>max</sub>, puis les quantités à l\'état final.</p>',
-      enonce: q => `On mélange ${q.r.map((f, k) => `${AV.fmt(q.n0[k], 'puissance')} mol de ${fH(f)}`).join(' et ')}. Trouve le réactif limitant sans tableau.`,
-      questions: BANQUE.premiere,
-      // à partir de la 6e question, la formule de x_max n'est plus rappelée
-      exercice: i => ({ sansTableau: true, sansFormule: i >= 5, etapes: ['ratio', 'concl', 'final'] }),
-      note: i => (i === 5 ? 'À partir de cette question, la formule pour calculer x<sub>max</sub> n\'est plus rappelée.' : ''),
-      suite: { href: '../index.html', label: "Retour à l'accueil" },
-    });
-  };
-  return c;
+  return carte;
 }
 
-etape1();
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
 AV.menu('module_7');
 </script>
 </body>
