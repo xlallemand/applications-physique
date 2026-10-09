@@ -41,7 +41,7 @@ Branche : `claude/zen-babbage-9t2h94`. Références non modifiées : `cinematiqu
 |---|---|---|
 | **Combustions** | Modules 1 à 5 | Cours séparés des séries : nouvelles pages `module_2_cours` à `module_5_cours` ; `module_2` devient l'entraînement noté du module 2. L'ancien aiguillage du module 2 (test de départ qui sautait le rappel) est remplacé par des étapes de rappel et des liens vers « Équilibrer une réaction ». |
 | **Avancement d'une réaction** | Modules 1, 2, 3, 5, 7 | L'entraînement de fin du module 7 est sur sa propre page (`module_7_entrainement`). Trois exercices guidés deviennent des exemples rédigés. |
-| **Équilibrer une réaction** | Modules 1 et 2 | Le lien « Du mal à compter les atomes ? » ramène toujours au même endroit du cours. Réactions réglées en direct : « Afficher la réponse » apparaît après 10 réglages sans réussite. |
+| **Équilibrer une réaction** | Modules 1 et 2 | Le lien « Du mal à compter les atomes ? » ramène toujours au même endroit du cours. Réactions réglées en direct : « Afficher la réponse » proposé tout de suite. |
 | **Lecture graphique** | Module 1 | La partie « mesurer à la règle » passe en étape 2 (avant la méthode) pour que les « À toi » suivants se fassent à la règle. |
 | **Proportionnalité** | Cours des 3 modules | Tailwind retiré de ces pages. Phrase corrigée dans l'exemple du devoir sur 36. |
 | **Équations en physique** (avec et sans aide) | Méthode des 4 modules | Toutes les manipulations gardées, dans l'ordre ; exemple avant / après ajouté pour chaque règle ; Tailwind retiré de ces pages. Badge « MODULE N · MÉTHODE » gardé (libellé du sommaire). |
@@ -52,7 +52,7 @@ Branche : `claude/zen-babbage-9t2h94`. Références non modifiées : `cinematiqu
 
 Dans les cours, les saisies passent par les champs du moteur (bouton ±) au lieu du pavé numérique, qui reste dans les entraînements.
 
-Repéré mais non modifié (hors des cours) : dans Combustions, le test « équilibrer » repris de l'ancien module 2 utilise Al<sub>4</sub>O<sub>3</sub>, qui n'existe pas (le carbure d'aluminium est Al<sub>4</sub>C<sub>3</sub>) ; la série d'entraînement de `banque.js` contient des élisions manquantes (« Combustion du éthanol »).
+Corrigé ensuite dans Combustions : la réaction du test « équilibrer » (Al<sub>4</sub>O<sub>3</sub>, qui n'existe pas, remplacé par 2 Al<sub>2</sub>O<sub>3</sub> + 3 C → 4 Al + 3 CO<sub>2</sub>) et les élisions des séries et exercices (« de l'éthanol », « d'octane »). Dans Équilibrer une réaction, « Afficher la réponse » est proposé tout de suite sur les réactions réglées en direct. La charte décrit le moteur de cours commun (§2, §4, §6, §7, §11, §12).
 
 ## Non fait (à décider)
 
