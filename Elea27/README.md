@@ -1,6 +1,6 @@
 # Intégration des applications dans Éléa (Elea27)
 
-Objectif : publier chaque application du dépôt dans Éléa (Moodle des lycées) sous forme de **parcours qui suit le plan de l'application**, avec les **notes de chaque série** et si possible une **note globale** remontées dans Éléa. Import le plus simple possible, mise à jour facile, outil local hors connexion à terme.
+Objectif : publier chaque application du dépôt dans Éléa (Moodle des lycées) sous forme de **parcours qui suit le plan de l'application**, avec les **notes de chaque série** et une **note globale** remontées dans Éléa. Import le plus simple possible, mise à jour facile, outil local hors connexion à terme.
 
 Ce document garde les choix, les méthodes et l'état d'avancement pour reprendre le travail dans une autre session.
 
@@ -10,94 +10,132 @@ Ce document garde les choix, les méthodes et l'état d'avancement pour reprendr
 
 | Étape | État |
 |---|---|
-| 1. Étude des possibilités (ce document, §2 à §5) | faite, **en attente de validation** |
-| 2. Premier essai léger avec `conversions/` (sans outil automatique) | à faire après validation |
-| 3. Validation de l'import sur Éléa par l'enseignant | à faire |
-| 4. Outil local automatisé, autres applications | à faire après l'étape 3 |
-
-Décisions en attente :
-
-1. Montage retenu (recommandation : **C**, avec les zips de **B** livrés à côté en secours, voir §4).
-2. Forme de l'outil local : script Python (recommandé) ou page HTML (voir §6).
-3. Contenu du premier essai (proposition au §7).
+| 1. Étude des possibilités (§2 à §4) | faite ; montage **C** et outil **Python** validés par l'enseignant |
+| 2. Premier essai léger avec `conversions/` (sans outil automatique) | fait : `conversions-essai/`, testé sur un Moodle 4.5 local (§7) |
+| 3. Validation de l'import sur Éléa par l'enseignant | **en attente** (procédure : `conversions-essai/PROCEDURE.md`) |
+| 4. Outil local automatisé, autres applications | à faire après l'étape 3 (§8) |
 
 ## 2. Ce qu'Éléa permet à un enseignant
 
-Éléa est un Moodle (version 4.x, non vérifiée) sans possibilité d'installer de plugin ni de brancher un serveur externe. Un enseignant peut :
+Éléa est un Moodle (passé en 4.1 en janvier 2024 ; version actuelle non vérifiée) sans possibilité d'installer de plugin ni de brancher un serveur externe. Un enseignant peut :
 
 - ajouter une activité **« Paquetage SCORM »** (dépôt d'un `.zip`) ;
-- **restaurer une sauvegarde `.mbz`** dans un parcours : créer un parcours vide, puis *Plus → Réutilisation de cours → Restauration*, déposer le fichier (même procédure que pour les parcours de l'Éléathèque). Selon l'académie, il faut parfois ajouter le bloc Administration.
+- **restaurer une sauvegarde `.mbz`** : créer un parcours avec le gabarit « parcours vide », puis *Plus → Réutilisation de cours → Restauration*, déposer le fichier, cocher **« Fusionner le cours sauvegardé avec ce cours »** (procédure officielle DNE « Faire migrer un parcours »).
 
-## 3. Pourquoi SCORM
+## 3. Pourquoi SCORM, et les solutions écartées
 
-La seule façon pour une application HTML / JavaScript existante de renvoyer une note à Éléa **sans serveur** est **SCORM** : le lecteur SCORM de Moodle fournit une API JavaScript (`window.API` en SCORM 1.2) que la page appelle.
+La seule façon pour une application HTML / JavaScript existante de renvoyer une note à Éléa **sans serveur** est **SCORM** : le lecteur SCORM de Moodle fournit une API JavaScript (`window.API` en SCORM 1.2) que la page appelle. Le `.mbz` n'est pas une alternative au SCORM : c'est l'emballage d'un **parcours complet** (sections + activités SCORM déjà réglées), restauré en une fois.
 
-Le `.mbz` n'est pas une alternative au SCORM : c'est l'emballage d'un **parcours complet** (sections + activités SCORM déjà réglées), restauré en une fois.
-
-Point d'accroche dans le code : toutes les notes des applications passent par `SOM.marquer({ note })` (`assets/sommaire.js`), les cours terminés par `SOM.marquer({ fait: true })`. Un script « pont SCORM » ajouté **dans le paquet seulement** intercepte ces appels et transmet note / achèvement à Éléa. L'application d'origine n'est pas modifiée.
-
-Dans `conversions/` (application en une seule page, `spa: true`) : 7 séries notées sur 20 (`prefixes`, `niveau-1` à `niveau-4`, `ex-sq`, `ex-comp`), 14 pages au total dans le `PLAN`.
-
-### Solutions écartées
-
-| Solution | Raison |
+| Solution écartée | Raison |
 |---|---|
 | Lien URL / iframe vers l'application en ligne | aucune note remontée |
 | H5P | ne peut pas contenir une application HTML / JS libre |
-| Test Moodle (questions GIFT / XML) | notes natives, mais tout est à réécrire ; perte des questions aléatoires, du pavé numérique, du glisser-déposer, des diagnostics |
+| Test Moodle (questions GIFT / XML) | tout à réécrire ; perte des questions aléatoires, du pavé numérique, du glisser-déposer, des diagnostics |
 | LTI, xAPI / cmi5 | demandent un serveur ou un plugin impossible à installer sur Éléa |
 
-## 4. Les trois montages SCORM
+## 4. Montage retenu : C (un SCORM par page + un `.mbz` du parcours)
 
-| | A. Un seul SCORM pour toute l'application | B. Un SCORM par étape, ajoutés à la main | C. Un SCORM par étape + un `.mbz` du parcours |
+| | A. Un seul SCORM | B. Un SCORM par page, à la main | **C. B + `.mbz` (retenu)** |
 |---|---|---|---|
-| Import | 1 zip | une activité à créer et régler par étape (14 pour Conversions) | parcours vide → Restauration → 1 fichier |
-| Parcours visible dans Éléa | non : une seule activité, le sommaire de l'application guide | oui : une section par module, une activité par cours / série / fiche | oui, comme B, réglages compris |
-| Notes dans le carnet | une seule (globale) ; détail par série dans le rapport SCORM « Objectifs » | une colonne par série + total = note globale | comme B, total réglé en moyenne sur 20 |
-| Achèvement (✓ Éléa) | une case | par activité, à régler à la main | par activité, déjà réglé |
-| Mise à jour de l'application | remplacer le zip dans les paramètres de l'activité (notes conservées) | remplacer le zip de chaque activité touchée | comme B (notes conservées), ou restaurer le nouveau `.mbz` dans un parcours neuf (rentrée) |
-| Nouvelle application | 1 zip | tout refaire à la main | regénérer, 1 restauration |
-| Risque technique | faible | faible | moyen : `.mbz` = format interne de Moodle, généré hors Moodle, à valider sur Éléa |
+| Import | 1 zip | une activité à créer et régler par page | parcours vide → Restauration → 1 fichier |
+| Parcours visible dans Éléa | non | oui | oui, réglages compris |
+| Notes | une seule | une colonne par série + total | idem, total réglé |
+| Mise à jour | remplacer le zip | remplacer chaque zip touché | idem, ou nouveau `.mbz` dans un parcours neuf |
 
-**Recommandation : C**, en livrant aussi les zips de B : si la restauration échoue sur Éléa, on bascule sur B sans rien refaire.
+Les zips de B sont livrés à côté du `.mbz` : méthode de secours si la restauration échoue.
 
-## 5. Contraintes et choix techniques communs
+## 5. Choix techniques (validés sur Moodle 4.5 local)
 
-- **SCORM 1.2** (le mieux géré par Moodle). Note envoyée sur 20 (`cmi.core.score.raw`, `score.min = 0`, `score.max = 20`), note maximale de l'activité = 20, évaluation « note la plus haute » : comme l'application, qui garde la meilleure. Le pont n'envoie une note que si elle est meilleure que celle déjà enregistrée. *(Correspondance score brut ↔ note du carnet à vérifier sur Moodle lors de l'essai.)*
-- **Une activité = une page du `PLAN`** : chaque paquet ouvre l'application directement sur sa page (ancre pour une application en une seule page). Le sommaire interne et les liens vers les autres pages sont masqués : sinon un élève ferait le niveau 3 depuis l'activité « niveau 1 » et la note irait au mauvais endroit. La navigation entre étapes est celle d'Éléa.
-- **Achèvement** : cours → `completed` à la dernière étape (`SOM.marquer({ fait: true })`) ; fiche → `completed` à l'ouverture ; série → `passed` / `completed` à la note.
-- **Progression** : sur les postes partagés du lycée, le `localStorage` mélange les élèves. En mode Éléa, la progression est gardée par Éléa (`cmi.suspend_data`, 4 096 caractères en SCORM 1.2), plus dans le navigateur.
-- **Ressources en ligne** : Conversions charge Tailwind (cdn.jsdelivr.net) et la police Google Fonts. À embarquer dans le paquet pour ne pas dépendre du filtrage réseau du lycée (dans le paquet seulement).
-- **Mise à jour sans perte de notes** : remplacer le zip d'une activité garde les notes si l'identifiant de l'item du manifeste (`imsmanifest.xml`) ne change pas. Les identifiants sont donc fixes, dérivés de la clé de page du `PLAN` (ex. `conversions-niveau-1`).
-- **Carnet de notes** : pas de détail question par question (possible plus tard dans les rapports SCORM via `cmi.interactions`).
-- **Note globale** : catégorie du carnet en « moyenne des notes », sur 20. *(À vérifier : Moodle ne restaure la structure du carnet que si le parcours cible n'a pas encore de notes ; d'où la restauration dans un parcours vide.)*
-- **Format `.mbz`** : archive tar.gz de fichiers XML (`moodle_backup.xml`, `sections/`, `activities/scorm_N/`, `files.xml`, `files/<2 car.>/<sha1>`…). Pour un SCORM, il contient le zip **et** les fichiers décompressés (Moodle ne redécompresse pas à la restauration). Fichiers identiques stockés une seule fois. On génère un format d'une version de Moodle ancienne (4.1) : Moodle restaure les sauvegardes de versions antérieures.
+### Pont SCORM (`commun/elea-scorm.js`)
 
-## 6. Outil local (étape 4, pas encore commencé)
+Ajouté **dans le paquet seulement**, juste après `assets/sommaire.js` :
+`<script src="../elea/elea-scorm.js" data-page="niveau-1" data-type="serie" data-spa></script>`
 
-Principe : l'outil lit le `PLAN` de l'application (une seule source de vérité), copie l'application et les fichiers de `assets/` utilisés, ajoute le pont SCORM, puis écrit dans `Elea27/<application>/` un zip par activité et le `.mbz` du parcours. Hors connexion, aucune dépendance.
+- Point d'accroche : `SOM.marquer` (`assets/sommaire.js`), par où passent toutes les notes (`{ note }`) et les cours terminés (`{ fait: true }`). Aucune modification de l'application d'origine.
+- **Une activité = une page du `PLAN`** : le pont ouvre l'application sur sa page (ancre `#cle` en application d'une seule page), neutralise `SOM.menu` / `SOM.accueil` (pas de sommaire), masque les liens `.er-actions` vers les autres pages et bloque tout changement d'ancre ou lien vers une autre page (sinon la note irait dans la mauvaise activité). La navigation entre étapes est celle d'Éléa.
+- SCORM 1.2 : `LMSInitialize` ; statut `incomplete` à l'ouverture ; série : `cmi.core.score.raw` = note sur 20 (`score.min` 0, `score.max` 20), transmise **seulement si meilleure** que celle de la tentative en cours, puis statut `completed` ; cours : `completed` quand `SOM.marquer({ fait: true })` (dernière étape) ; fiche : `completed` à l'ouverture ; `LMSCommit` à chaque événement ; `session_time`, `exit` et `LMSFinish` au déchargement.
+- `localStorage` remplacé par un stockage en mémoire : rien n'est écrit dans le navigateur (postes partagés entre élèves). Pas besoin de `suspend_data` : la progression de l'application n'est plus affichée (sommaire masqué) ; l'état est porté par Éléa (statut, note).
+- Hors d'Éléa (pas d'API), l'application fonctionne sur sa page sans rien transmettre.
 
-- **Script Python** (bibliothèque standard seulement : `zipfile`, `tarfile`, `hashlib`) : `python Elea27/generer.py conversions`. Python à installer une fois. Peut aussi être lancé par Claude dans une session. *Recommandé.*
-- **Page HTML** (`generer.html`) : rien à installer ; zip et tar.gz écrits en JavaScript pur ; écriture directe dans un dossier seulement sous Chrome / Edge.
+### Paquets SCORM
 
-## 7. Premier essai proposé (étape 2)
+- Arborescence du dépôt conservée dans le zip (`conversions/index.html`, `assets/…`, `equilibrer-reactions/modules/er.css`) : chemins relatifs inchangés. Lancement : `conversions/index.html`.
+- Tout est embarqué, aucune requête externe : **Tailwind** (`commun/vendor/tailwind-browser-4.3.3.js`, licence MIT) au lieu du CDN jsdelivr ; **police** Hanken Grotesk (`commun/police/`, @fontsource 5.3.0, licence OFL) au lieu de Google Fonts (l'`@import` de `assets/theme.css` est remplacé dans la copie du paquet).
+- `imsmanifest.xml` SCORM 1.2, un seul SCO. **Identifiants fixes** dérivés de la page : `MANIFEST-conversions-niveau-1`, `ORG-…`, `ITEM-…`, `RES-…`. Remplacer le zip d'une activité garde les SCO, les tentatives et les notes (vérifié).
+- Zips et `.mbz` **reproductibles** (dates fixes, ordre trié) : refabriquer sans changement donne des fichiers identiques.
 
-Dossier `Elea27/conversions-essai/`, fait à la main (sans outil) :
+### Réglages des activités (dans le `.mbz`)
 
-- parcours de 2 sections :
-  1. *Les préfixes et la méthode* : Cours (achevé en fin de cours), Apprendre les préfixes (noté sur 20) ;
-  2. *S'entraîner à convertir* : Niveau 1, Niveau 2 (notés sur 20) ;
-- 3 notes + total sur 20 ;
-- livrables : le `.mbz`, les 4 zips SCORM, une procédure d'import pas à pas et la liste de ce qu'il faut vérifier dans Éléa.
+| Réglage Moodle | Série | Cours |
+|---|---|---|
+| Méthode d'évaluation (`grademethod`) | note la plus haute, sur 20 | objets d'apprentissage (1 si terminé) |
+| Tentatives | illimitées ; évaluation : tentative la plus haute | idem |
+| Nouvelle tentative (`forcenewattempt`) | quand la précédente est terminée (sinon Moodle rouvre en « révision » et n'enregistre plus) | idem |
+| Ouverture | page courante, accès direct au contenu (`skipview` toujours), sans structure ni navigation SCORM | idem |
+| Achèvement | automatique, statut « terminé » exigé | idem |
+| Coefficient dans le total | 1 | **0** |
 
-## 8. Environnement de travail de Claude (pour les sessions suivantes)
+Carnet : **moyenne pondérée** des notes, total sur 20, seules les séries notées comptent (`aggregateonlygraded`, réglage par défaut de Moodle). Le cours apparaît dans le carnet (1/1 quand il est fini) mais ne compte pas. Une série ouverte et pas finie n'a pas de note et ne compte pas.
 
-- PHP 8.3 (extensions pgsql, zip, intl, gd…) et PostgreSQL sont présents : on peut installer un Moodle local pour restaurer le `.mbz` et tester les notes SCORM avec Playwright avant livraison.
-- `download.moodle.org` et les archives GitHub sont bloqués par le proxy ; `git` vers `github.com/moodle/moodle` fonctionne (branche `MOODLE_405_STABLE`, clonage superficiel).
-- Ce test local ne remplace pas le test sur Éléa (version et réglages propres à la plateforme).
+### Format `.mbz` (`conversions-essai/fabrication/mbz.py`)
+
+- Archive tar.gz (ustar) : `.ARCHIVE_INDEX`, `moodle_backup.xml`, `course/`, `sections/section_N/`, `activities/scorm_N/` (`scorm.xml` avec les SCO, `module.xml`, `grades.xml`, `inforef.xml`…), `gradebook.xml`, `files.xml`, `files/<2 car.>/<sha1>` (fichiers identiques stockés une fois).
+- Structure relevée sur une sauvegarde faite par Moodle 4.5 ; la sauvegarde **se déclare Moodle 4.1** (`2022112800`) pour être restaurable sur 4.1 comme sur 4.5 sans avertissement (Moodle 4.5 n'applique aucune conversion aux sauvegardes postérieures à 4.0). Les éléments propres à 4.5 (sous-sections…) sont présents et ignorés par 4.1.
+- Pour un SCORM : le zip (aire `package`) **et** son contenu décompressé (aire `content`) ; Moodle ne redécompresse pas à la restauration.
+- Sans données utilisateur. Section 0 vide. Fusion dans un parcours existant : Moodle ne remplit le nom et le résumé d'une section que s'ils sont vides, et ne restaure le carnet (moyenne pondérée) que si le parcours n'a pas encore de catégorie de notes (cas du « parcours vide »).
+
+## 6. Organisation du dossier
+
+```
+Elea27/
+  README.md                       ce document
+  commun/                         fichiers copiés dans chaque paquet (dossier elea/ du zip)
+    elea-scorm.js                 pont SCORM
+    vendor/                       Tailwind embarqué + licence
+    police/                       police embarquée + licence
+  conversions-essai/              premier essai (Conversions, 2 modules, 4 activités)
+    PROCEDURE.md                  import dans Éléa pas à pas, vérifications, méthode de secours
+    conversions-essai.mbz         parcours à restaurer
+    scorm/                        les 4 paquets SCORM (secours, mises à jour)
+    fabrication/
+      construire_essai.py         fabrique scorm/ et le .mbz (python3, bibliothèque standard)
+      mbz.py                      écriture du .mbz
+  test-moodle/                    scripts de test sur un Moodle local (§7)
+```
+
+Refabriquer l'essai : `python3 Elea27/conversions-essai/fabrication/construire_essai.py`
+
+## 7. Tests sur un Moodle local (environnement de Claude)
+
+Fait pour l'essai, tout est passé :
+
+- restauration en fusion dans un parcours vide, **en ligne de commande** (`test-moodle/restaurer.php`) et **par l'interface** en tant qu'enseignant (Playwright : dépôt du fichier, « Fusionner », restauration en arrière-plan) : sections nommées, 4 activités, réglages, carnet en moyenne pondérée, aucun avertissement ;
+- parcours élève (`test-moodle/parcours-eleve.js`) : bonne page ouverte, pas de sommaire, liens vers les autres pages bloqués ; cours terminé ; préfixes 14/20 ; niveau 1 : 16, puis « Recommencer » à 12 non transmis, nouvelle tentative 18, puis 10 → reste **18** ; niveau 2 ouvert sans finir → pas de note ; **total 16/20** ;
+- série réellement jouée (`test-moodle/serie-jouee.js`, saisies et « Vérifier ») : 7/10 → **14/20** au carnet, activité « Terminé » ; vue téléphone 390 px sans défilement horizontal ;
+- remplacement du zip d'une activité : mêmes SCO, tentatives et notes conservées ;
+- paquet ouvert hors Moodle (fichier local) : fonctionne, aucune requête externe.
+
+Remarques : ce test ne remplace pas celui sur Éléa (version, gabarit « parcours vide », réglages de la plateforme). Safari iOS n'est pas testable ici.
+
+Remonter l'environnement de test (session Claude) :
+
+- PostgreSQL 16 : `pg_ctlcluster 16 main start`, base `moodle` / utilisateur `moodle` ;
+- Moodle : `git clone --depth 1 --branch MOODLE_405_STABLE https://github.com/moodle/moodle.git` (download.moodle.org et les archives GitHub sont bloqués par le proxy, git fonctionne), puis `php -d max_input_vars=5000 admin/cli/install.php --wwwroot=http://localhost:8080 --dbtype=pgsql … --lang=en` ;
+- serveur : `PHP_CLI_SERVER_WORKERS=6 php -d max_input_vars=5000 -d upload_max_filesize=100M -d post_max_size=100M -S localhost:8080` (plusieurs processus, sinon le sélecteur de fichiers bloque) ;
+- restauration par l'interface : elle passe en tâche de fond, la terminer avec `php admin/cli/adhoc_task.php --execute` ;
+- Playwright : `NODE_PATH=$(npm root -g) node …` (Chromium préinstallé).
+
+## 8. Suite prévue (après validation sur Éléa)
+
+Outil local `python3 Elea27/generer.py <application>` :
+
+- lit le `PLAN` de l'application (une seule source de vérité) et en déduit sections (modules) et activités (cours, exemple, questions, entraînement, fiche, exercices) ;
+- applications en plusieurs pages (`modules/*.html`) : lancement sur le fichier de la page, `data-spa` absent (le pont gère déjà ce cas, non testé) ;
+- généralise `construire_essai.py` et `mbz.py` ; écrit `Elea27/<application>/` (zips + `.mbz` + procédure) ;
+- points à traiter : exercices (`SOM` / `cleEx`, points par exercice), fiches, ressources propres à chaque application (images…), applications sans `SOM`.
 
 ## Sources consultées
 
-- Restauration d'un `.mbz` dans Éléa : documentation DNE « Découvrir et récupérer des parcours de la Éléathèque » (dne-elearning.gitlab.io), tutoriels DRANE (Martinique, Clermont, Paris).
+- Éléa : documentation DNE (dépôt `gitlab.com/dne-elearning/moodle-elea/documentation`) : « Découvrir et récupérer des parcours de la Éléathèque », « Faire migrer un parcours », billet « passage à Moodle 4.1 » (décembre 2023) ; tutoriels DRANE (Martinique, Clermont, Paris).
 - SCORM dans Éléa : DRANE Normandie (générateur d'activités SCORM), SVT Versailles (export SCORM Canoprof vers Éléa), Mathix (MathALÉA et Éléa).
-- Moodle : docs.moodle.org « Restauration de cours », « Paramètres SCORM ».
+- Moodle 4.5 (code source) : `mod/scorm` (notation, tentatives, achèvement), `backup/` (format et restauration).
