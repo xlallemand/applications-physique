@@ -114,22 +114,22 @@ new TE.Cours(document.getElementById('etapes'), [
             <li>écrire sous le transformateur les <b>trois formules</b> : m = ${rap(N2, N1)} ; m = ${rap(U2, U1)} ; m = ${rap(I1, I2, true)} ;</li>
             <li>choisir la formule qui ne contient qu'<b>une seule inconnue</b>, et calculer.</li>
           </ol>
-          <p>Dans chaque partie, la puissance se place avec U et I : c'est la <b>puissance apparente S = U × I</b>. Un transformateur ne perd pas de puissance : on retrouve la <b>même S</b> au primaire et au secondaire.</p></div>
+          <p>Dans chaque partie, la puissance se place avec U et I : c'est la <b>puissance P = U × I</b>. Un transformateur ne perd pas de puissance : on retrouve la <b>même P</b> au primaire et au secondaire.</p></div>
       </div>
       <div class="cours-exemple">
         <p class="cours-exemple-t">Exemple (exercice 8)</p>
         <p>À la sortie d'une centrale nucléaire, un transformateur fait passer la tension de 20 kV à 400 kV. La puissance à l'entrée est de 800 kW. Calculer les intensités.</p>
-        ${SCH.transfo1({ U1: '20 kV', I1: '?', S1: '800 kW', U2: '400 kV', I2: '?', S2: '800 kW', m: '?' })}
+        ${SCH.transfo1({ U1: '20 kV', I1: '?', P1: '800 kW', U2: '400 kV', I2: '?', P2: '800 kW', m: '?' }, { puissance: 'P' })}
         ${calc(`On connaît ${U1} et ${U2} : la formule des tensions n'a qu'une inconnue.<br>
           m = ${rap(U2, U1)} = ${rap('400', '20')} = ${c('20')}<br>
-          S = ${U1} × ${I1} donc ${I1} = ${rap('S', U1)} = ${rap('800 000', '20 000')} = ${c('40 A')}<br>
+          P = ${U1} × ${I1} donc ${I1} = ${rap('P', U1)} = ${rap('800 000', '20 000')} = ${c('40 A')}<br>
           On connaît maintenant m et ${I1} : la formule des intensités n'a plus qu'une inconnue.<br>
           m = ${rap(I1, I2)} donc ${I2} = ${rap(I1, 'm')} = ${rap('40', '20')} = ${c('2 A')}`)}
-        <p>(Avec la même puissance S au secondaire : ${I2} = ${rap('S', U2)} = ${rap('800 000', '400 000')} = 2 A, on retrouve le même résultat.)</p>
+        <p>(Avec la même puissance P au secondaire : ${I2} = ${rap('P', U2)} = ${rap('800 000', '400 000')} = 2 A, on retrouve le même résultat.)</p>
       </div>`);
     // exercice 11 : 225 kV / 63 kV, 444 A à l'entrée
-    const ex11 = SCH.transfo1({ U1: '#U1', I1: '#I1', S1: '?', U2: '#U2', I2: '?', S2: '?', m: '?' });
-    const lampe = SCH.transfo1({ U1: '#U1', I1: '?', S1: '?', N1: '#N1', U2: '#U2', I2: '#I2', S2: '?', N2: '?', m: '?' });
+    const ex11 = SCH.transfo1({ U1: '#U1', I1: '#I1', P1: '?', U2: '#U2', I2: '?', P2: '?', m: '?' }, { puissance: 'P' });
+    const lampe = SCH.transfo1({ U1: '#U1', I1: '?', P1: '?', N1: '#N1', U2: '#U2', I2: '#I2', P2: '?', N2: '?', m: '?' }, { puissance: 'P' });
     TE.aToi(k, [
       { titre: 'Exercice 11 : un transformateur de 225 kV / 63 kV fonctionne en abaisseur. L\'intensité d\'entrée vaut 444 A.', parties: [
         { type: 'schema', q: 'Place les valeurs de l\'énoncé sur le schéma (les cases vides sont les inconnues).', schema: ex11, etiquettes: [
@@ -197,7 +197,7 @@ new TE.Cours(document.getElementById('etapes'), [
     cours.ajouter(k, `<div class="cle"><p><b class="cle-titre">Rôle.</b> Un transformateur augmente (élévateur) ou diminue (abaisseur) une tension <b>alternative</b>. Symbole : deux cercles entrelacés ; indice 1 au primaire (entrée), indice 2 au secondaire (sortie).</p></div>
       <div class="cle"><p><b class="cle-titre">Les trois relations.</b></p><p class="ph-formule grand">${TROIS}</p>
         <p>La relation des intensités est <b>à l'envers</b> : « ce qu'il gagne en tension, il le perd en intensité » (${U1} × ${I1} = ${U2} × ${I2}). m &gt; 1 : élévateur ; m &lt; 1 : abaisseur.</p></div>
-      <div class="cle"><p><b class="cle-titre">Méthode.</b> Toujours commencer par un <b>schéma</b> avec les valeurs de l'énoncé au bon endroit et les <b>trois formules</b> sous le transformateur, puis choisir celle qui n'a qu'une inconnue. La puissance apparente S = U × I est la même des deux côtés.</p></div>
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> Toujours commencer par un <b>schéma</b> avec les valeurs de l'énoncé au bon endroit et les <b>trois formules</b> sous le transformateur, puis choisir celle qui n'a qu'une inconnue. La puissance P = U × I est la même des deux côtés.</p></div>
       <div class="cle"><p><b class="cle-titre">Transport.</b> Élever la tension divise l'intensité par m et les pertes par effet Joule par m<sup>2</sup>. On abaisse ensuite la tension pour les utilisateurs.</p></div>
       <div class="er-actions">
         <a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur le transformateur →</a>

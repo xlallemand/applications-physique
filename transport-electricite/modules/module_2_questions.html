@@ -97,25 +97,25 @@ const etiq = (id, label, cible, indice) => ({ id, label, cible, indice });
 // laquelle des trois formules du transformateur utiliser ? (connues : grandeurs déjà connues)
 const F = (connues, cherche) => SCH.choixFormule({ a: 1, b: 2, connues, cherche });
 const schemaQ = (theme, enonce, val, etiquettes, calculs) => ({ theme, enonce,
-  parties: [{ type: 'schema', q: 'Place les valeurs de l\'énoncé sur le schéma (les cases restées vides sont les inconnues).', schema: SCH.transfo1(val), etiquettes }].concat(calculs) });
+  parties: [{ type: 'schema', q: 'Place les valeurs de l\'énoncé sur le schéma (les cases restées vides sont les inconnues).', schema: SCH.transfo1(val, { puissance: 'P' }), etiquettes }].concat(calculs) });
 const G4 = [
   function centrale() {
     const [u1, u2] = hasard([[20000, 400000], [10000, 400000], [15000, 225000], [25000, 400000]]), P = hasard([600000, 900000, 1200000]);
     const m = u2 / u1, i1 = P / u1, i2 = i1 / m;
     return schemaQ('Schéma, puis calculs', `<p>À la sortie d'une centrale, un transformateur fait passer la tension de ${unite(u1, 'V')} à ${unite(u2, 'V')}. La puissance à son entrée est ${unite(P, 'W')}.</p>`,
-      { U1: '#U1', I1: '?', S1: '#S', U2: '#U2', I2: '?', S2: '?', m: '?' },
-      [etiq('a', unite(u1, 'V'), 'U1', 'La tension d\'entrée est au primaire.'), etiq('b', unite(u2, 'V'), 'U2', 'La tension de sortie est au secondaire.'), etiq('c', unite(P, 'W'), 'S', 'La puissance est donnée à l\'entrée : elle se place avec ' + U1 + ' et ' + I1 + '.')],
+      { U1: '#U1', I1: '?', P1: '#P', U2: '#U2', I2: '?', P2: '?', m: '?' },
+      [etiq('a', unite(u1, 'V'), 'U1', 'La tension d\'entrée est au primaire.'), etiq('b', unite(u2, 'V'), 'U2', 'La tension de sortie est au secondaire.'), etiq('c', unite(P, 'W'), 'P', 'La puissance est donnée à l\'entrée : elle se place avec ' + U1 + ' et ' + I1 + '.')],
       [F(['U1', 'U2'], 'm'),
        fq.nombre('Calcule m.', 'm =', m, '', { diag: v => proche(v, 1 / m) ? `m = ${U2} / ${U1}.` : `m = ${U2} / ${U1}.`, solution: calc(`m = ${rap(fmt(u2), fmt(u1))} = ${c(fmt(m))}`) }),
-       fq.nombre(`Calcule l'intensité d'entrée ${I1} (S = ${U1} × ${I1}).`, `${I1} =`, i1, 'A', { diag: v => proche(v, i1 / 1000) || proche(v, i1 * 1000) ? 'Exprime la puissance en watts et U en volts.' : `${I1} = S / ${U1}.`, solution: calc(`${I1} = ${rap('S', U1)} = ${rap(fmt(P), fmt(u1))} = ${c(fmt(i1) + ' A')}`) }),
+       fq.nombre(`Calcule l'intensité d'entrée ${I1} (P = ${U1} × ${I1}).`, `${I1} =`, i1, 'A', { diag: v => proche(v, i1 / 1000) || proche(v, i1 * 1000) ? 'Exprime la puissance en watts et U en volts.' : `${I1} = P / ${U1}.`, solution: calc(`${I1} = ${rap('P', U1)} = ${rap(fmt(P), fmt(u1))} = ${c(fmt(i1) + ' A')}`) }),
        F(['U1', 'U2', 'I1', 'm'], 'I2'),
-       fq.nombre(`Calcule l'intensité de sortie ${I2} (3 chiffres significatifs).`, `${I2} =`, i2, 'A', { rel: .01, diag: v => proche(v, i1 * m) ? `Relation à l'envers : ${I2} = ${I1} / m.` : `m = ${I1} / ${I2}, donc ${I2} = ${I1} / m.`, solution: calc(`${I2} = ${rap(I1, 'm')} = ${rap(fmt(i1), fmt(m))} = ${c(TE.cs(i2, 3) + ' A')}`) + `<p>(ou avec la même puissance S au secondaire : ${I2} = S / ${U2}.)</p>` })]);
+       fq.nombre(`Calcule l'intensité de sortie ${I2} (3 chiffres significatifs).`, `${I2} =`, i2, 'A', { rel: .01, diag: v => proche(v, i1 * m) ? `Relation à l'envers : ${I2} = ${I1} / m.` : `m = ${I1} / ${I2}, donc ${I2} = ${I1} / m.`, solution: calc(`${I2} = ${rap(I1, 'm')} = ${rap(fmt(i1), fmt(m))} = ${c(TE.cs(i2, 3) + ' A')}`) + `<p>(ou avec la même puissance P au secondaire : ${I2} = P / ${U2}.)</p>` })]);
   },
   function chargeur() {
     const [u2, m] = hasard([[11.5, 0.05], [23, 0.1], [46, 0.2], [115, 0.5]]), i2 = hasard([2, 4, 5, 10]), n1 = hasard([500, 1000, 2000]);
     const n2 = m * n1, i1 = m * i2;
     return schemaQ('Schéma, puis calculs', `<p>Un transformateur est branché sur le secteur (230 V) et alimente un appareil sous ${fmt(u2)} V. Son primaire comporte ${fmt(n1)} spires ; l'appareil est parcouru par un courant de ${fmt(i2)} A.</p>`,
-      { U1: '#U1', I1: '?', S1: '?', N1: '#N1', U2: '#U2', I2: '#I2', S2: '?', N2: '?', m: '?' },
+      { U1: '#U1', I1: '?', P1: '?', N1: '#N1', U2: '#U2', I2: '#I2', P2: '?', N2: '?', m: '?' },
       [etiq('a', '230 V', 'U1', 'Le secteur est la source : côté primaire.'), etiq('b', fmt(u2) + ' V', 'U2', 'L\'appareil est alimenté par le secondaire.'), etiq('c', fmt(n1) + ' spires', 'N1', 'Les spires données sont celles du primaire.'), etiq('d', fmt(i2) + ' A', 'I2', 'Le courant dans l\'appareil est celui du secondaire.')],
       [F(['U1', 'U2', 'N1', 'I2'], 'm'),
        fq.nombre('Calcule m.', 'm =', m, '', { diag: v => proche(v, 1 / m) ? `m = ${U2} / ${U1} (sortie sur entrée).` : `m = ${U2} / ${U1}.`, solution: calc(`m = ${rap(fmt(u2), '230')} = ${c(fmt(m))}`) }),
@@ -128,7 +128,7 @@ const G4 = [
     const u1 = hasard([6, 12]), [n1, n2] = hasard([[100, 500], [200, 1000], [100, 1000], [200, 1200]]), i1 = hasard([1.2, 3, 6, 12]);
     const m = n2 / n1, u2 = m * u1, i2 = i1 / m;
     return schemaQ('Schéma, puis calculs', `<p>Au laboratoire, on alimente sous ${u1} V la bobine de ${fmt(n1)} spires d'un transformateur ; l'autre bobine a ${fmt(n2)} spires. L'ampèremètre du primaire indique ${fmt(i1)} A.</p>`,
-      { U1: '#U1', I1: '#I1', S1: '?', N1: '#N1', U2: '?', I2: '?', S2: '?', N2: '#N2', m: '?' },
+      { U1: '#U1', I1: '#I1', P1: '?', N1: '#N1', U2: '?', I2: '?', P2: '?', N2: '#N2', m: '?' },
       [etiq('a', u1 + ' V', 'U1', 'La bobine alimentée est le primaire.'), etiq('b', fmt(n1) + ' spires', 'N1', 'La bobine alimentée est le primaire.'), etiq('c', fmt(n2) + ' spires', 'N2', 'L\'autre bobine est le secondaire.'), etiq('d', fmt(i1) + ' A', 'I1', 'L\'ampèremètre est au primaire.')],
       [F(['U1', 'I1', 'N1', 'N2'], 'm'),
        fq.nombre('Calcule m.', 'm =', m, '', { diag: v => proche(v, 1 / m) ? `m = ${N2} / ${N1}.` : `m = ${N2} / ${N1}.`, solution: calc(`m = ${rap(fmt(n2), fmt(n1))} = ${c(fmt(m))}`) }),
@@ -140,7 +140,7 @@ const G4 = [
   function plaque() {
     const [u2, m] = hasard([[46, 0.2], [23, 0.1], [115, 0.5], [11.5, 0.05]]), n2 = hasard([60, 120, 150, 300]), n1 = n2 / m;
     return schemaQ('Schéma, puis calculs', `<p>La plaque signalétique d'un transformateur monophasé indique : « Tension au primaire : 230 V ; tension au secondaire : ${fmt(u2)} V ». Le secondaire possède ${n2} spires.</p>`,
-      { U1: '#U1', I1: '?', S1: '?', N1: '?', U2: '#U2', I2: '?', S2: '?', N2: '#N2', m: '?' },
+      { U1: '#U1', I1: '?', P1: '?', N1: '?', U2: '#U2', I2: '?', P2: '?', N2: '#N2', m: '?' },
       [etiq('a', '230 V', 'U1', 'La tension au primaire.'), etiq('b', fmt(u2) + ' V', 'U2', 'La tension au secondaire.'), etiq('c', n2 + ' spires', 'N2', 'Les spires données sont celles du secondaire.')],
       [F(['U1', 'U2', 'N2'], 'm'),
        fq.nombre('Calcule m.', 'm =', m, '', { diag: v => proche(v, 1 / m) ? `m = ${U2} / ${U1}.` : `m = ${U2} / ${U1}.`, solution: calc(`m = ${rap(fmt(u2), '230')} = ${c(fmt(m))}`) }),

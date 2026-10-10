@@ -175,11 +175,13 @@
 
   // transformateur seul : val = { U1, I1, S1, N1, U2, I2, S2, P, N2, m } ; o.titres, o.charge (nom de l'appareil), o.i (flèches d'intensité)
   // P (puissance active) n'existe que juste avant une charge (o.charge) ; o.formules = false : sans les trois formules
+  // o.puissance = 'P' : puissance notée P dans chaque partie, sans distinguer apparente et active (clés val.P1, val.P2)
   function transfo1(val, o) {
     o = o || {};
+    const ps = o.puissance || 'S';
     const t = o.titres || ['primaire (entrée)', 'secondaire (sortie)'];
     const et = k => ({ titre: t[k - 1], u: sub('u', k), i: o.i ? sub('i', k) : '',
-      lignes: lignes([[sub('U', k) + ' =', 'U' + k], [sub('I', k) + ' =', 'I' + k], ['S =', 'S' + k]].concat(k === 2 && o.charge ? [['P =', 'P']] : []), val),
+      lignes: lignes([[sub('U', k) + ' =', 'U' + k], [sub('I', k) + ' =', 'I' + k], [ps + ' =', ps + k]].concat(k === 2 && o.charge && ps === 'S' ? [['P =', 'P']] : []), val),
       bas: val['N' + k] !== undefined ? [l(sub('N', k) + ' =', contenu(val['N' + k]))] : undefined });
     return chaine({ etages: [et(1), et(2)], transfos: [{ nom: o.nom || 'T', lignes: lignes([['m =', 'm']], val), formules: o.formules === false ? undefined : formules(1, 2) }],
       charge: o.charge ? { nom: o.charge, lignes: lignes([['k =', 'k']], val) } : undefined, aria: o.aria || 'Schéma du transformateur avec les valeurs de l\'énoncé' });
