@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 7 : Entraînement sans tableau — Avancement d'une réaction</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="av.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="av.js"></script>
+<script src="banque.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="av-page" id="app"></div>
+<script>
+// Entraînement noté du module 7 (auparavant en fin de cours, dans module_7.html) :
+// 10 questions avec des puissances de 10 (banque.js), sans tableau ;
+// à partir de la 6e question, la formule de x_max n'est plus rappelée
+const fH = MOL.formuleHTML;
+AV.entrainement({
+  app: document.getElementById('app'),
+  badge: 'MODULE 7 · PREMIÈRE', titre: 'Entraînement : sans tableau',
+  intro: '<p class="er-contexte">10 questions notées sur 20, avec des puissances de 10. Pour chaque réaction, calcule n<sub>initial</sub> ÷ nombre stœchiométrique pour chaque réactif, trouve le réactif limitant et x<sub>max</sub>, puis les quantités à l\'état final.</p>',
+  enonce: q => `On mélange ${q.r.map((f, k) => `${AV.fmt(q.n0[k], 'puissance')} mol de ${fH(f)}`).join(' et ')}. Trouve le réactif limitant sans tableau.`,
+  questions: BANQUE.premiere,
+  exercice: i => ({ sansTableau: true, sansFormule: i >= 5, etapes: ['ratio', 'concl', 'final'] }),
+  note: i => (i === 5 ? 'À partir de cette question, la formule pour calculer x<sub>max</sub> n\'est plus rappelée.' : ''),
+  suite: { href: '../index.html', label: "Retour à l'accueil" },
+});
+AV.menu('module_7_entrainement');
+</script>
+</body>
+</html>

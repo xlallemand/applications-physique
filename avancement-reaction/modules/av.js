@@ -7,6 +7,13 @@
                            (cours guidé) ou d'un coup (entraînement)
      AV.frise              frise de l'avancement : un « mur » par réactif
      AV.entrainement       10 questions notées sur 20
+     AV.tableauHTML        tableau d'avancement complet (exemple traité d'un cours)
+     AV.partieExercice     tableau guidé (AV.Exercice) dans un « À toi » (assets/cours.js)
+     AV.partieValeurs      valeurs saisies avec les champs de l'application dans un « À toi »
+                           (puissances de 10 : nombre au clavier, exposant avec les flèches)
+     AV.partieRapports, AV.partieLimitant, AV.partieFinal
+                           parties d'« À toi » toutes faites (n ÷ c, réactif limitant, état final)
+                           avec les diagnostics AV.diagRapport, AV.diagChoixLimitant, AV.diagFinal
      AV.menu, AV.accueil   sommaire de l'application et accueil (assets/sommaire.js)
    Formules et dessins des molécules : assets/molecules.js
    ============================================================ */
@@ -560,7 +567,9 @@
   Exercice.prototype.verifierEtape = function (id) {
     const moi = this, z = this.zones[id], E = this.ETAPES[id];
     const ret = z.querySelector('[data-x="retour"]'), act = z.querySelector('[data-x="actions"]');
+    if (this.fini) return;
     if (this.controler(id)) {
+      z.dataset.faite = 1;
       this.figer(id);
       ret.innerHTML = `<div class="callout-success er-retour"><p><b class="er-ok">C'est juste !</b>${this.messageReussite(id)}</p></div>`;
       act.innerHTML = '';
@@ -574,7 +583,9 @@
     if (n >= 2 && !act.querySelector('[data-x="voir"]')) {
       act.insertAdjacentHTML('beforeend', '<button type="button" class="btn-secondary" data-x="voir">Afficher la réponse</button>');
       act.querySelector('[data-x="voir"]').onclick = () => {
+        if (moi.fini) return;
         moi.vue = true;
+        z.dataset.faite = 1;
         moi.figer(id, true);
         ret.innerHTML = `<div class="callout er-retour"><p><b>Voici la réponse.</b>${moi.messageReussite(id)}</p></div>`;
         act.innerHTML = '';
@@ -599,6 +610,7 @@
   Exercice.prototype.suite = function (id) {
     const moi = this, c = this.cfg, i = c.etapes.indexOf(id);
     const apres = () => {
+      if (moi.fini) return;                       // tout a été affiché entre-temps (toutMontrer)
       if (i + 1 < c.etapes.length) {
         moi.ouvrirEtape(i + 1);
         moi.dessinerTableau();
@@ -607,11 +619,35 @@
       } else if (c.onFini) c.onFini(moi.erreurs, moi.vue);
     };
     if (id === 'concl' && c.frise) animerFrise(this.zones.concl.querySelector('[data-x="frise"]'), this.murs, c.mode, () => {
+      if (moi.fini) return;
+      // la frise est redessinée à chaque image : l'ancienne légende a disparu, on met la nouvelle
       moi.zones.concl.querySelector('[data-x="frise"]').insertAdjacentHTML('afterbegin', '<p class="av-frise-legende">L\'avancement part de 0 et s\'arrête au premier mur rencontré : c\'est x<sub>max</sub>.</p>');
-      moi.zones.concl.querySelector('.av-frise-legende').remove();
       apres();
     });
     else apres();
+  };
+
+  // Mode guidé : affiche d'un coup la réponse de toutes les étapes qui restent
+  // (« Afficher la réponse » d'un « À toi » de cours). Les étapes déjà réussies ne changent pas.
+  Exercice.prototype.toutMontrer = function () {
+    if (this.fini) return;
+    this.fini = true; this.vue = true;
+    const c = this.cfg;
+    c.etapes.forEach((id, i) => {
+      if (!this.zones[id]) this.ouvrirEtape(i);
+      const z = this.zones[id];
+      if (id === 'concl' && c.frise) {
+        const f = z.querySelector('[data-x="frise"]');
+        frise(f, this.murs, this.k.xmax, c.mode);
+        f.insertAdjacentHTML('afterbegin', '<p class="av-frise-legende">L\'avancement part de 0 et s\'arrête au premier mur rencontré : c\'est x<sub>max</sub>.</p>');
+      }
+      if (z.dataset.faite) return;
+      z.dataset.faite = 1;
+      this.figer(id, true);
+      z.querySelector('[data-x="retour"]').innerHTML = `<div class="callout er-retour"><p><b>Voici la réponse.</b>${this.messageReussite(id)}</p></div>`;
+      z.querySelector('[data-x="actions"]').innerHTML = '';
+    });
+    this.dessinerTableau();
   };
 
   // Mode évaluation : un seul bouton « Valider » pour tout le tableau
@@ -783,6 +819,185 @@
     }
   }
 
+  /* ============================================================
+     OUTILS DES COURS PAR ÉTAPES (moteur commun assets/cours.js)
+     ============================================================ */
+
+  // Contenu d'une case de la ligne « état final » : calcul détaillé (sauf en puissances de 10)
+  function caseFinale(q, K, j, mode) {
+    if (mode === 'puissance') return `<b>${fmt(K.nf[j], mode)}</b>`;
+    if (!q.n0[j] && q.c[j] === 1 && K.signe(j) === '+') return `<b>${fmt(K.nf[j], mode)}</b>`;
+    return (q.n0[j] || K.signe(j) === '−' ? `${fmt(q.n0[j], mode)} ${K.signe(j)} ` : '') +
+      `${q.c[j] > 1 ? q.c[j] + ' × ' : ''}${fmt(K.xmax, mode)} = <b>${fmt(K.nf[j], mode)}</b>`;
+  }
+
+  // Tableau d'avancement complet, déjà rempli (exemple traité)
+  // o = { unite: 'molécules' | 'mol', mode, pont: ligne « à chaque fois », molecules: dessins en tête }
+  function tableauHTML(q, o) {
+    o = o || {};
+    const K = calculer(q), mode = o.mode || 'decimal', f = v => fmt(v, mode);
+    const tete = `<tr><th>État</th><th><span class="av-long">Avancement</span><span class="av-court">Av.</span></th>${enteteEspeces(q, o.molecules)}</tr>`;
+    let corps = `<tr><td class="etat">initial</td><td class="x">0</td>${K.esp.map((_, j) => `<td>${f(q.n0[j])}</td>`).join('')}</tr>`;
+    if (o.pont) corps += `<tr class="pont"><td class="etat">à chaque fois</td><td class="x">+1</td>${K.esp.map((s, j) => `<td>${K.signe(j)}${q.c[j]} ${fH(s)}</td>`).join('')}</tr>`;
+    corps += `<tr><td class="etat">en cours</td><td class="x">x</td>${K.esp.map((_, j) => `<td>${f(q.n0[j])} ${K.signe(j)} ${coefX(q.c[j])}x</td>`).join('')}</tr>`;
+    corps += `<tr class="final"><td class="etat">final</td><td class="x">x<sub>max</sub> = ${f(K.xmax)}</td>${K.esp.map((_, j) => `<td>${caseFinale(q, K, j, mode)}</td>`).join('')}</tr>`;
+    return `<div class="av-tab-wrap"><table class="av-tab"><thead>${tete}</thead><tbody>${corps}</tbody></table>` +
+      `<p class="av-tab-unite">en ${o.unite === 'mol' ? 'mol' : 'nombre de molécules'}</p></div>`;
+  }
+
+  // Bilan d'un tableau : réactif limitant, x_max et état final (solution d'un « À toi »)
+  function bilanHTML(q, mode, unite) {
+    const K = calculer(q), u = unite === 'mol' ? ' mol' : '';
+    return `<p>Réactif limitant : <b>${fH(q.r[K.L])}</b> ; x<sub>max</sub> = ${fmt(K.xmax, mode)}${u}.</p>` +
+      `<p>État final : ${K.esp.map((s, j) => `${fH(s)} : ${fmt(K.nf[j], mode)}`).join(' ; ')}${unite === 'mol' ? ' (en mol)' : ' (en molécules)'}.</p>`;
+  }
+
+  // Tableau guidé étape par étape dans un « À toi » : partie « perso » du moteur de cours.
+  // cfg = options de AV.Exercice (r, p, c, n0, unite, mode, etapes, molecules, frise, sansTableau)
+  // L'exercice garde ses propres aides ; « Afficher la réponse » du cours remplit tout ce qui reste.
+  function partieExercice(cfg, q) {
+    return {
+      type: 'perso', q,
+      solution: bilanHTML(cfg, cfg.mode, cfg.unite),
+      monter(zone, api) {
+        const ex = new Exercice(zone, Object.assign({}, cfg, {
+          guide: true,
+          onFini: (erreurs, vue) => {
+            if (api.fini()) return;
+            if (erreurs || vue) api.compterErreur();     // « C'est juste. » plutôt que « Juste ! »
+            api.reussi();
+          },
+        }));
+        return { montrer() { ex.toutMontrer(); } };
+      },
+    };
+  }
+
+  // Une ou plusieurs valeurs saisies avec les champs de l'application (« perso » du moteur de cours)
+  // cfg = { mode: 'puissance' | 'decimal' | 'entier', champs: [{ lab, valeur, unite, aria }],
+  //         diag(valeurs, justes) → diagnostic, q, solution }
+  function partieValeurs(cfg) {
+    return {
+      type: 'perso', q: cfg.q, solution: cfg.solution,
+      monter(zone, api) {
+        const box = document.createElement('div');
+        box.className = 'av-saisies';
+        const ws = cfg.champs.map(ch => {
+          const l = document.createElement('div');
+          l.className = 'av-saisie';
+          l.innerHTML = `${ch.lab ? `<span class="av-lab">${ch.lab}</span>` : ''}<span data-x="w"></span>${ch.unite ? `<span class="av-unite">${ch.unite}</span>` : ''}`;
+          const w = champ(cfg.mode, { label: ch.aria || 'valeur', onChange: () => api.effacer() });
+          l.querySelector('[data-x="w"]').replaceWith(w.el);
+          box.appendChild(l);
+          return w;
+        });
+        zone.appendChild(box);
+        const act = document.createElement('div');
+        act.className = 'er-actions crs-actions-partie';
+        act.innerHTML = '<button type="button" class="btn-primary">Valider</button>';
+        zone.appendChild(act);
+        const fermer = () => { ws.forEach(w => w.activer(false)); act.remove(); };
+        function valider() {
+          if (api.fini()) return;
+          const vs = ws.map(w => w.valeur());
+          if (ws.some((w, k) => w.vide() || !isFinite(vs[k]))) {
+            api.message(ws.length > 1 ? 'Complète toutes les cases (avec un nombre).' : 'Écris un nombre (avec une virgule si besoin).');
+            return;
+          }
+          const ok = vs.map((v, k) => egal(v, cfg.champs[k].valeur));
+          ws.forEach((w, k) => w.marquer(ok[k]));
+          if (ok.every(Boolean)) { fermer(); api.reussi(); return; }
+          const nb = ok.filter(o => !o).length;
+          api.erreur((ws.length > 1 ? (nb > 1 ? 'Les cases en rouge sont fausses. ' : 'La case en rouge est fausse. ') : '') +
+            ((cfg.diag && cfg.diag(vs, ok)) || 'Vérifie ton calcul.'));
+          if (window.COURS) window.COURS.secouer(box);
+        }
+        act.querySelector('button').onclick = valider;
+        // Entrée = Valider
+        box.querySelectorAll('input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') valider(); }));
+        return { montrer() { ws.forEach((w, k) => { w.fixer(cfg.champs[k].valeur); w.marquer(true); }); fermer(); } };
+      },
+    };
+  }
+
+  /* ---------- Diagnostics des erreurs fréquentes (cours en mol) ----------
+     mode : 'decimal' ou 'puissance' (écriture des nombres) */
+  const puiss10 = r => isFinite(r) && r > 0 && Math.abs(Math.log10(r) - Math.round(Math.log10(r))) < 1e-6 && Math.round(Math.log10(r)) !== 0;
+  const fois = c => (c > 1 ? c + ' × ' : '');
+  // Rapport n_initial ÷ nombre stœchiométrique (x_max si ce réactif est limitant)
+  function diagRapport(v, n, c, f, mode) {
+    const N = fmt(n, mode);
+    if (c > 1 && egal(v, n)) return `Tu as oublié de diviser par le nombre stœchiométrique de ${fH(f)} : ${N} ÷ ${c}.`;
+    if (c > 1 && egal(v, n * c)) return `Tu as multiplié par ${c} au lieu de diviser : ${N} ÷ ${c}.`;
+    if (egal(v, c / n)) return `Tu as calculé ${c} ÷ ${N}. C'est la quantité qu'on divise par le nombre stœchiométrique : ${N} ÷ ${c}.`;
+    if (mode === 'puissance' && puiss10(v / (n / c))) return 'Le nombre devant est juste, mais pas la puissance de 10. Si le nombre devant devient plus petit que 1, l\'exposant diminue de 1 : 0,50 × 10<sup>−2</sup> = 5,0 × 10<sup>−3</sup>.';
+    return `Pour ${fH(f)} : ${N} ÷ ${c}.`;
+  }
+  // Mauvais choix du réactif limitant k : la plus petite valeur de n ÷ c, pas la plus petite quantité
+  function diagChoixLimitant(q, k, mode) {
+    const K = calculer(q), L = K.L, r = j => `${fH(q.r[j])} : ${fmt(q.n0[j], mode)} ÷ ${q.c[j]} = ${fmt(K.xm[j], mode)}`;
+    return (q.n0[k] < q.n0[L] ? `${fH(q.r[k])} est le moins abondant au départ, mais il faut tenir compte des nombres stœchiométriques. ` : '') +
+      `${r(k)} ; ${r(L)}. La réaction s'arrête au premier réactif épuisé : c'est la plus petite valeur qui compte.`;
+  }
+  // Quantités finales ; ks : espèces demandées (toutes par défaut), dans l'ordre des valeurs vs
+  function diagFinal(vs, q, mode, ks) {
+    const K = calculer(q), nR = q.r.length, f = v => fmt(v, mode), X = f(K.xmax);
+    ks = ks || K.esp.map((_, j) => j);
+    const i = vs.findIndex((v, j) => !egal(v, K.nf[ks[j]]));
+    if (i < 0) return '';
+    const k = ks[i], v = vs[i], s = K.esp[k], c = q.c[k];
+    if (k >= nR) {
+      if (c > 1 && egal(v, K.xmax)) return `${fH(s)} : tu as oublié le nombre stœchiométrique, ${c} × ${X}.`;
+      if (egal(v, -c * K.xmax)) return `${fH(s)} est un produit : sa quantité augmente, 0 + ${fois(c)}${X}.`;
+      return `${fH(s)} est un produit : n<sub>final</sub> = 0 + ${fois(c)}${X}.`;
+    }
+    if (k === K.L) return `${fH(s)} est le réactif limitant : il est entièrement consommé, ${f(q.n0[k])} − ${fois(c)}${X} = 0.`;
+    if (c > 1 && egal(v, q.n0[k] - K.xmax)) return `${fH(s)} : tu as oublié le nombre stœchiométrique. Il en disparaît ${c} × ${X} = ${f(c * K.xmax)}.`;
+    if (egal(v, q.n0[k] + c * K.xmax)) return `${fH(s)} est un réactif : sa quantité diminue. On retire ${fois(c)}${X}.`;
+    if (egal(v, 0)) return `${fH(s)} est en excès : il en reste à la fin.`;
+    return `${fH(s)} : ${f(q.n0[k])} − ${fois(c)}${X}${mode === 'puissance' ? ' (écris les deux nombres avec le même exposant pour soustraire)' : ''}.`;
+  }
+  // Calculs détaillés (solutions) : rapports n ÷ c, puis état final
+  function calculsRapports(q, mode) {
+    const K = calculer(q);
+    return `<p class="crs-calc">${q.r.map((s, k) => `${fH(s)} : ${fmt(q.n0[k], mode)} ÷ ${q.c[k]} = <span class="c">${fmt(K.xm[k], mode)} mol</span>`).join('<br>')}</p>`;
+  }
+  function calculsFinal(q, mode, ks) {
+    const K = calculer(q), nR = q.r.length, X = fmt(K.xmax, mode);
+    ks = ks || K.esp.map((_, j) => j);
+    return `<p class="crs-calc">${ks.map(k => `${fH(K.esp[k])} : ${k < nR ? fmt(q.n0[k], mode) + ' − ' : '0 + '}${fois(q.c[k])}${X} = <span class="c">${fmt(K.nf[k], mode)} mol</span>`).join('<br>')}</p>`;
+  }
+
+  /* ---------- Parties d'« À toi » toutes faites (cours en mol) ---------- */
+  // Rapports n ÷ c de chaque réactif (= x_max de chaque hypothèse)
+  // lab(f) : étiquette de la case ; en puissances de 10, champs de l'application
+  function partieRapports(q, mode, lab, question) {
+    const K = calculer(q);
+    const champs = q.r.map((s, k) => ({ lab: lab(s, k), valeur: K.xm[k], unite: 'mol', aria: 'rapport pour ' + s }));
+    const diag = vs => { const k = vs.findIndex((v, j) => !egal(v, K.xm[j])); return k < 0 ? '' : diagRapport(vs[k], q.n0[k], q.c[k], q.r[k], mode); };
+    const solution = calculsRapports(q, mode);
+    if (mode === 'puissance') return partieValeurs({ mode, q: question, champs, diag, solution });
+    return { type: 'champs', q: question, champs: champs.map(c => ({ label: c.lab, valeur: c.valeur, unite: c.unite, signe: false, aria: c.aria })), diag, solution };
+  }
+  // Choix du réactif limitant
+  function partieLimitant(q, mode) {
+    const K = calculer(q);
+    const indices = {};
+    q.r.forEach((_, k) => { if (k !== K.L) indices[k] = diagChoixLimitant(q, k, mode); });
+    return { type: 'choix', q: 'Quel est le réactif limitant ?', melanger: false,
+      options: q.r.map((s, k) => ({ id: k, label: fH(s) })), bonne: K.L, indices,
+      solution: `<p>La plus petite valeur est x<sub>max</sub> = ${fmt(K.xmax, mode)} mol : <b>${fH(q.r[K.L])}</b> est le réactif limitant.</p>` };
+  }
+  // Quantités à l'état final (ks : espèces demandées, toutes par défaut)
+  function partieFinal(q, mode, question, ks) {
+    const K = calculer(q);
+    ks = ks || K.esp.map((_, j) => j);
+    const champs = ks.map(k => ({ lab: `${fH(K.esp[k])} :`, valeur: K.nf[k], unite: 'mol', aria: 'quantité finale de ' + K.esp[k] }));
+    const diag = vs => diagFinal(vs, q, mode, ks), solution = calculsFinal(q, mode, ks);
+    if (mode === 'puissance') return partieValeurs({ mode, q: question, champs, diag, solution });
+    return { type: 'champs', q: question, champs: champs.map(c => ({ label: c.lab, valeur: c.valeur, unite: c.unite, signe: false, aria: c.aria })), diag, solution };
+  }
+
   /* ---------- Plan de l'application et navigation (voir assets/sommaire.js) ---------- */
   const PLAN = [
     { n: 1, titre: 'Les nombres stœchiométriques en action', desc: 'Seconde · des molécules réagissent pas à pas, le réactif limitant', fiche: 'fiche_1',
@@ -798,7 +1013,7 @@
     { n: 6, titre: 'Entraînement', desc: 'Première · 10 tableaux avec des puissances de 10, notés sur 20',
       parties: [{ nom: 'Entraînement', entrainement: 'module_6' }] },
     { n: 7, titre: 'Aller plus loin : sans tableau', desc: 'Première · n<sub>initial</sub> ÷ nombre stœchiométrique, puis l\'état final', fiche: 'fiche_7',
-      parties: [{ nom: 'Sans tableau', cours: 'module_7' }] },
+      parties: [{ nom: 'Sans tableau', cours: 'module_7', entrainement: 'module_7_entrainement' }] },
   ];
   window.SOM.init({ nom: 'Avancement d\'une réaction', id: 'avancement-reaction', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
@@ -814,5 +1029,7 @@
   window.AV = {
     fmt, lire, egal, puissance, champ, expression, calculer, equationHTML, enteteEspeces, frise, animerFrise, texteUni,
     Simulation, Exercice, entrainement, confettis, menu, accueil, PLAN, melanger, COUL,
+    tableauHTML, bilanHTML, partieExercice, partieValeurs,
+    diagRapport, diagChoixLimitant, diagFinal, calculsRapports, calculsFinal, partieRapports, partieLimitant, partieFinal,
   };
 })();

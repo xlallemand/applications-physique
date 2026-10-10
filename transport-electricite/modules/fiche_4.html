@@ -31,15 +31,16 @@ document.getElementById('fiche').innerHTML = `
 
   <section class="er-card" id="methode">
     <h3 class="cours-titre">Le schéma complet</h3>
-    ${SCH.reseau({ U1: '?', I1: '?', m1: `${rap(U(2), U(1))} = ${rap(I(1), I(2))}`, U2: '?', I2: '?', m2: `${rap(U(3), U(2))} = ${rap(I(2), I(3))}`, U3: '?', I3: '?', S: `${U(3)} × ${I(3)}`, P: 'k × S', k: 'P / S', eta: `${PU} / P`, Pu: 'η × P', Pp: `P − ${PU}` }, { charge: 'charge' })}
-    <div class="cle"><p>Production (moyenne tension) — T<sub>1</sub> élévateur — transport (haute tension) — T<sub>2</sub> abaisseur — distribution (230 V) — charge (P, k, η) — puissance utile.</p></div>
+    ${SCH.reseau({ U1: '?', I1: '?', S1: `${U(1)} × ${I(1)}`, U2: '?', I2: '?', S2: `${U(2)} × ${I(2)}`, U3: '?', I3: '?', S3: `${U(3)} × ${I(3)}`, P: 'k × S', k: 'P / S', eta: `${PU} / P`, Pu: 'η × P', Pp: `P − ${PU}` }, { charge: 'charge' })}
+    <div class="cle"><p>Production (moyenne tension) — T<sub>1</sub> élévateur — transport (haute tension) — T<sub>2</sub> abaisseur — distribution (230 V) — charge (k, η) — puissance utile.</p>
+      <p>Dans chaque partie : U, I et la puissance apparente S = U × I, <b>la même partout</b> (pas de pertes dans les transformateurs). Juste avant la charge : S, puis la puissance active P. Sous chaque transformateur : ses trois formules.</p></div>
   </section>
 
   <section class="er-card">
     <h3 class="cours-titre">Les relations</h3>
     <div class="cle"><ul class="er-liste">
-      <li>Transformateurs : ${m(1)} = ${rap(U(2), U(1))} = ${rap(I(1), I(2))} ; ${m(2)} = ${rap(U(3), U(2))} = ${rap(I(2), I(3))} (intensités « à l'envers »).</li>
-      <li>Puissance apparente : S = ${U(3)} × ${I(3)} (en VA).</li>
+      <li>Transformateurs : ${m(1)} = ${rap('N<sub>2</sub>', 'N<sub>1</sub>')} ; ${m(1)} = ${rap(U(2), U(1))} ; ${m(1)} = ${rap(I(1), I(2))} et ${m(2)} = ${rap('N′<sub>3</sub>', 'N′<sub>2</sub>')} ; ${m(2)} = ${rap(U(3), U(2))} ; ${m(2)} = ${rap(I(2), I(3))} (intensités « à l'envers ») : on choisit la formule qui n'a qu'une inconnue.</li>
+      <li>Puissance apparente : S = ${U(1)} × ${I(1)} = ${U(2)} × ${I(2)} = ${U(3)} × ${I(3)} (en VA), la même dans tout le réseau.</li>
       <li>Facteur de puissance : k = cos φ = ${rap('P', 'S')} ; charge résistive : k = 1 et S = P.</li>
       <li>Rendement : η = ${rap(PU, 'P')} ; ${PP} = P − ${PU}.</li>
     </ul></div>
@@ -49,8 +50,8 @@ document.getElementById('fiche').innerHTML = `
     <h3 class="cours-titre">La méthode</h3>
     <div class="cle"><ol class="er-liste">
       <li>Faire le <b>schéma</b> et y placer toutes les données de l'énoncé.</li>
-      <li>Écrire <b>toutes les relations</b>.</li>
-      <li>Calculer <b>de proche en proche</b>, en général depuis la charge : ${PU} → P → S → ${I(3)} → ${I(2)} → ${I(1)}.</li>
+      <li>Écrire <b>toutes les relations</b> (les trois formules sont sous chaque transformateur).</li>
+      <li>Calculer <b>de proche en proche</b>, en général depuis la charge : ${PU} → P → S → ${I(3)} → ${I(2)} → ${I(1)} (formule du transformateur qui n'a qu'une inconnue, ou I = S / U).</li>
     </ol></div>
     <div class="cle"><p><b class="cle-titre">Conclusion.</b> Plus le facteur de puissance de la charge est faible, plus l'intensité est grande dans tout le réseau, et plus les pertes par effet Joule dans les lignes sont grandes.</p></div>
   </section>

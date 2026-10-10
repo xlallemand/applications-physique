@@ -4,220 +4,305 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 2 : cours — Proportionnalité</title>
-<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="ptools.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
 <script src="ptools.js"></script>
+<script src="../../assets/cours.js"></script>
 <style>
-  .qtype-tag { display:inline-block; font-size:.7rem; font-weight:800; padding:3px 10px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px; background:var(--app-accent-100); color:var(--app-accent-800); }
-  .formula-line { font-size:1.05rem; font-weight:700; color:var(--app-accent-800); text-align:center; margin:10px 0; }
-  .verif-msg { margin-top:10px; font-weight:700; }
+  /* tableau de l'exemple « × k » : colonnes de même largeur, sous la flèche */
+  .pt-tab-k th, .pt-tab-k td { width: 100px; }
+  .pt-fleche-k { width: 200px; }
 </style>
 </head>
-<body class="bg-white min-h-screen">
+<body>
 <div id="app-nav"></div>
-
-<div class="container mx-auto px-4 py-8 max-w-3xl">
-  <div class="bg-white rounded-xl shadow-lg p-6 md:p-10">
-    <span class="content-module-badge">MODULE 2 · COURS</span>
-    <h2 class="text-2xl font-bold text-[var(--app-accent-800)] mb-3">Utiliser la proportionnalité : trois méthodes</h2>
-    <p class="text-gray-700">Une fois qu'on a reconnu une proportionnalité entre deux grandeurs A et B, on veut calculer une valeur inconnue. Voici trois méthodes équivalentes : choisis celle que tu préfères !</p>
-
-  <!-- ================= Méthode 1 : tableau ================= -->
-  <h3 class="cours-titre">Méthode 1 : Le tableau de proportionnalité <span class="text-base font-semibold text-gray-500">(la plus utilisée)</span></h3>
-  <div class="cours-bloc">
-    <p class="text-gray-700 mb-2">On place les deux grandeurs dans un tableau à deux colonnes, <b>avec les unités</b> — c'est essentiel ! Une ligne contient les deux valeurs connues, l'autre une valeur connue et l'inconnue.</p>
-    <div id="diagDirect"></div>
-    <p class="text-gray-700 mt-2">La flèche relie les trois grandeurs connues (b, c, puis a) jusqu'à l'inconnue : b et c se multiplient, puis on divise par a :</p>
-    <div class="formula-box">? = (c &times; b) / a</div>
-
-    <div class="ex-card direct">
-      <span class="qtype-tag qtype-directe" style="background:#dcfce7;color:#14532d">Exemple direct</span>
-      <p class="text-gray-700 mb-2"><b>Une voiture roule à 25 km/h. Combien de temps met-elle pour parcourir 52 m ?</b></p>
-      <p class="text-gray-700 mb-2">25 km/h veut dire qu'elle parcourt 25 km (25&times;10&sup3; m) en 1 h (3600 s). On convertit d'abord pour avoir des unités cohérentes.</p>
-      <div class="table-wrap"><table class="pt-table">
-        <thead><tr><th>d (m)</th><th>t (s)</th></tr></thead>
-        <tbody>
-          <tr><td>25 km = 25&times;10&sup3; m</td><td>1 h = 3600 s</td></tr>
-          <tr><td>52 m</td><td>?</td></tr>
-        </tbody>
-      </table></div>
-      <div class="formula-res">? = (3600 &times; 52) / 25&thinsp;000 &asymp; 7,49 s</div>
-    </div>
-
-    <div class="ex-card">
-      <span class="qtype-tag">À toi de vérifier — cas direct</span>
-      <p class="text-gray-700 mb-2">Un cycliste roule à 18 km/h. Place les grandeurs (déjà converties) au bon endroit dans le tableau, puis reporte-les dans la formule, pour préparer le calcul de la distance parcourue en 600 s (soit 10 min).</p>
-      <div id="flow1"></div>
-    </div>
-
-    <div class="mt-6 mb-4">
-      <h4 class="text-lg font-bold mb-2">Et pour une proportionnalité inverse ?</h4>
-      <p class="text-gray-700 mb-2"> On construit le même genre de tableau, mais cette fois le produit d'une ligne complète est constant.</p>
-      <div id="diagInverse"></div>
-      <div class="formula-box">? = (a &times; b) / c</div>
-      <div class="ex-card direct mt-3">
-        <span class="qtype-tag qtype-inverse" style="background:#fee2e2;color:#7f1d1d">Exemple direct</span>
-        <p class="text-gray-700 mb-2"><b>À température fixée, la pression d'un gaz et le volume qu'il occupe sont inversement proportionnels (si on le compresse en divisant son volume par 2, sa pression est multipliée par 2). Un gaz occupe un volume de 2 L sous une pression de 6 bar. Quel volume occupe-t-il sous une pression de 4 bar ?</b></p>
-        <div class="table-wrap"><table class="pt-table">
-          <thead><tr><th>P (bar)</th><th>V (L)</th></tr></thead>
-          <tbody>
-            <tr><td>6 bar</td><td>2 L</td></tr>
-            <tr><td>4 bar</td><td>?</td></tr>
-          </tbody>
-        </table></div>
-        <div class="formula-res">? = (6 &times; 2) / 4 = 3 L</div>
-      </div>
-    </div>
-
-    <div class="ex-card">
-      <span class="qtype-tag">À toi de vérifier — cas inverse</span>
-      <p class="text-gray-700 mb-2">Un gaz occupe 3 L sous une pression de 8 bar (à température fixée). Place les grandeurs dans le tableau, puis dans la formule, pour préparer le calcul de la pression lorsque le volume vaut 4 L.</p>
-      <div id="flow2"></div>
-    </div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Utiliser la proportionnalité : trois méthodes</h2>
+    <p class="er-contexte">Une fois qu'on a reconnu une proportionnalité entre deux grandeurs A et B, on veut calculer une valeur inconnue. Tu vas voir trois méthodes équivalentes : le <b>tableau de proportionnalité</b>, le <b>coefficient</b> et le <b>retour à l'unité</b>. Choisis celle que tu préfères !</p>
   </div>
-
-  <!-- ================= Méthode 2 : coefficient ================= -->
-  <h3 class="cours-titre">Méthode 2 : Le coefficient de proportionnalité</h3>
-  <div class="cours-bloc">
-    <p class="text-gray-700 mb-2">On calcule d'abord le coefficient k avec la ligne connue, puis on l'utilise pour trouver l'inconnue :</p>
-    <div class="formula-box">k = b / a &nbsp;&nbsp;&nbsp;puis&nbsp;&nbsp;&nbsp; ? = k &times; c</div>
-    <div class="note-box info"><span class="note-box-icon">ℹ</span><p><b>Cas d'une proportionnalité inverse :</b> le coefficient est alors le <b>produit</b> k = a &times; b, et on trouve l'inconnue par ? = k / c.</p></div>
-
-    <div class="ex-card direct">
-      <span class="qtype-tag qtype-directe" style="background:#dcfce7;color:#14532d">Exemple direct</span>
-      <p class="text-gray-700 mb-2"><b>Une batterie a une énergie massique fixée : elle stocke 60 Wh pour une masse de 0,4 kg. Quelle énergie peut stocker une batterie de 1,4 kg ?</b></p>
-      <div class="table-wrap">
-        <svg viewBox="0 0 200 30" style="width:100%;display:block" class="pt-diagram">
-          <path d="M 50 27 Q 100 3 150 27" fill="none" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#ptArrowK)"/>
-          <text x="100" y="13" text-anchor="middle" fill="#b45309" font-weight="800" font-size="13">&times;k</text>
-          <defs><marker id="ptArrowK" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#f59e0b"/></marker></defs>
-        </svg>
-        <table class="pt-table">
-        <thead><tr><th>m (kg)</th><th>E (Wh)</th></tr></thead>
-        <tbody>
-          <tr><td>0,4</td><td>60</td></tr>
-          <tr><td>1,4</td><td>?</td></tr>
-        </tbody>
-      </table></div>
-      <div class="formula-res">k = 60 / 0,4 = 150 Wh/kg</div>
-      <div class="formula-res">E = k &times; 1,4 = 150 &times; 1,4 = 210 Wh</div>
-    </div>
-
-    <div class="ex-card">
-      <span class="qtype-tag">À toi de vérifier</span>
-      <p class="text-gray-700 mb-2">Une résistance chauffante dissipe une énergie de 120 J en 4 s, à puissance constante. Place les grandeurs pour construire le calcul du coefficient (la puissance), puis de l'énergie dissipée en 15 s.</p>
-      <div class="pt-palette" id="pal3"></div>
-      <div class="text-sm font-bold text-gray-500 mb-1">Coefficient (puissance) :</div>
-      <div class="formula-line" id="line3a"></div>
-      <div class="text-sm font-bold text-gray-500 mb-1 mt-3">Énergie recherchée :</div>
-      <div class="formula-line" id="line3b"></div>
-      <div class="flex items-center justify-between mt-3">
-        <button class="check-btn" onclick="verify3()">Vérifier</button>
-      </div>
-      <p id="msg3" class="verif-msg"></p>
-    </div>
-  </div>
-
-  <!-- ================= Méthode 3 : retour à l'unité ================= -->
-  <h3 class="cours-titre">Méthode 3 : Le retour à l'unité (« règle de trois »)</h3>
-  <div class="cours-bloc">
-    <p class="text-gray-700 mb-2">On calcule la valeur de B correspondant à <b>1 unité</b> de A, puis on multiplie par la valeur de A qui nous intéresse :</p>
-    <div class="formula-box">1 unité de A &rarr; b / a &nbsp;&nbsp;&nbsp;puis&nbsp;&nbsp;&nbsp; ? = (b / a) &times; c</div>
-
-    <div class="ex-card direct">
-      <span class="qtype-tag qtype-directe" style="background:#dcfce7;color:#14532d">Exemple direct</span>
-      <p class="text-gray-700 mb-2"><b>Un devoir est noté sur 36 points. Un élève obtient 25 points. Quelle est sa note ramenée sur 20 ?</b></p>
-      <p class="text-gray-700">On ramène d'abord à 1 point du barème : 25 / 36 &asymp; 0,694 point sur 20 par point de barème.</p>
-      <div class="formula-res">note = 0,694 &times; 20 &asymp; 13,9 / 20</div>
-    </div>
-
-    <div class="ex-card">
-      <span class="qtype-tag">À toi de vérifier</span>
-      <p class="text-gray-700 mb-2">Une pile alimente un circuit dans lequel 3 lampes identiques montées en série se répartissent 9 V à parts égales. Place les grandeurs pour construire le calcul de la tension nécessaire pour 5 lampes identiques.</p>
-      <div class="pt-palette" id="pal4"></div>
-      <div class="text-sm font-bold text-gray-500 mb-1">Tension pour 1 lampe :</div>
-      <div class="formula-line" id="line4a"></div>
-      <div class="text-sm font-bold text-gray-500 mb-1 mt-3">Tension recherchée :</div>
-      <div class="formula-line" id="line4b"></div>
-      <div class="flex items-center justify-between mt-3">
-        <button class="check-btn" onclick="verify4()">Vérifier</button>
-      </div>
-      <p id="msg4" class="verif-msg"></p>
-    </div>
-  </div>
-
-  <div class="cle mt-8">
-    <p><b class="cle-titre">Les trois méthodes donnent toujours le même résultat.</b> Le tableau de proportionnalité est en général le plus facile à utiliser (et le plus visuel), surtout quand il faut convertir des unités — mais rien ne t'empêche de préférer le coefficient ou le retour à l'unité selon la situation.</p>
-  </div>
-
-  <div class="text-center mt-8">
-    <p class="text-gray-700 mb-3">Prêt à t'entraîner ?</p>
-    <a href="module_5.html" class="btn-primary inline-block no-underline">Vérification des connaissances →</a>
-    <a href="fiche_2.html" class="btn-secondary inline-block no-underline">Fiche récapitulative</a>
-  </div>
-  </div>
+  <div id="etapes"></div>
 </div>
 
 <script>
-document.getElementById('diagDirect').innerHTML = ptCrossDiagramSvg();
-document.getElementById('diagInverse').innerHTML = ptCrossDiagramInverseSvg();
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Les glisser-déposer de l'ancien cours (tableau puis formule,
+   coefficient, retour à l'unité) sont des parties « perso »
+   des « À toi » (ptPartieGlisser, ptools.js), suivies du calcul.
+   ============================================================ */
+const { fmt, hasard, entre, exemple } = COURS;
+const proche = (a, b) => COURS.proche(a, b, .01);
+const fr = (a, b) => `<span class="som-fr"><span>${a}</span><span>${b}</span></span>`;
+// tableau à deux colonnes : en-têtes, lignes (chaque case est du HTML)
+const tab = (ent, lignes, cls) => `<div class="crs-defile"><table class="crs-tab${cls ? ' ' + cls : ''}"><thead><tr>${ent.map(e => `<th>${e}</th>`).join('')}</tr></thead><tbody>${lignes.map(l => `<tr>${l.map(x => `<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+// tableau à compléter par glisser-déposer : en-têtes, lignes de cases (nom de case ou '?')
+const tabGlisser = (ent, lignes) => cv => `<div class="crs-defile"><table class="crs-tab"><thead><tr>${ent.map(e => `<th>${e}</th>`).join('')}</tr></thead><tbody>${lignes.map(l => `<tr>${l.map(x => (x === '?' ? '<td class="pt-inconnue">?</td>' : `<td>${cv(x)}</td>`)).join('')}</tr>`).join('')}</tbody></table></div>`;
+// formule à compléter : sym = (n1 × n2) / d
+const formuleCroix = sym => cv => `<div class="pt-formule"><span>${sym} =</span><span class="pt-frac"><span class="pt-frac-num">${cv('n1')} × ${cv('n2')}</span><span class="pt-frac-line"></span><span class="pt-frac-den">${cv('d')}</span></span></div>`;
+// étiquette piège trouvée parmi les cases remplies
+const piege = (pl, E) => { const e = Object.keys(pl).map(n => E[pl[n]]).find(x => x && x.indice); return e ? e.indice : ''; };
+// diagnostics de la formule du produit en croix
+const REGLE_DIRECTE = 'Regarde ton tableau : on multiplie les deux valeurs de la diagonale qui ne contient pas « ? », puis on divise par la troisième (celle qui est sur la même diagonale que « ? »).';
+const REGLE_INVERSE = 'Pour une proportionnalité inverse, le produit d\'une ligne complète est constant : on multiplie les deux valeurs de la ligne complète, puis on divise par la valeur connue de l\'autre ligne.';
 
-/* ---- Check 1 : tableau, cas direct (cycliste) ---- */
-ptTableauFlow(document.getElementById('flow1'), {
-  labelA: 't', unitA: 's', labelB: 'd', unitB: 'm',
-  a1: { label: '3 600 s', value: 3600 }, b1: { label: '18 000 m', value: 18000 }, a2: { label: '600 s', value: 600 },
-  distractors: [{ id: 'x1', label: '3 600 m' }, { id: 'x2', label: '18 000 s' }],
-  reverseCols: true,
-});
-
-/* ---- Check 2 : tableau, cas inverse (gaz) ---- */
-ptTableauFlow(document.getElementById('flow2'), {
-  labelA: 'V', unitA: 'L', labelB: 'P', unitB: 'bar',
-  a1: { label: '3 L', value: 3 }, b1: { label: '8 bar', value: 8 }, a2: { label: '4 L', value: 4 },
-  distractors: [{ id: 'x1', label: '3 bar' }, { id: 'x2', label: '8 L' }],
-  inverse: true,
-  reverseCols: true,
-});
-
-/* ---- Check 3 : coefficient (résistance chauffante) ---- */
-document.getElementById('pal3').innerHTML =
-  ptChip('e1', '120 J', 120) + ptChip('t1', '4 s', 4) + ptChip('t2', '15 s', 15) +
-  ptChip('x1', '120 s', 120) + ptChip('x2', '4 J', 4);
-document.getElementById('line3a').innerHTML = 'k = ' + ptFraction('e1', 't1', 'live3');
-document.getElementById('line3b').innerHTML = 'E = k &times; ' + ptSlot('t2');
-const eng3 = ptSlotEngine(document.querySelector('.ex-card:has(#pal3)'), {
-  liveGroups: [{ slots: ['e1','t1'], op: 'div', target: '#live3', decimals: 2, suffix: ' W' }],
-});
-function verify3() {
-  const r = eng3.verify();
-  const msg = document.getElementById('msg3');
-  if (r.correct === r.total) { msg.style.color = '#166534'; msg.textContent = '✓ Bien placé !'; }
-  else { msg.style.color = '#991b1b'; msg.textContent = `${r.correct}/${r.total} cases correctes — corrige les cases rouges.`; }
+/* ---------- 1. Le tableau de proportionnalité ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Méthode 1 : le tableau de proportionnalité');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>C'est la méthode la plus utilisée. On place les deux grandeurs dans un tableau à deux colonnes, <b>avec les unités</b> : c'est essentiel ! Une ligne contient les deux valeurs connues, l'autre une valeur connue et l'inconnue.</p>
+      ${ptCrossDiagramSvg()}
+      <p>La flèche relie les trois grandeurs connues (b, c, puis a) jusqu'à l'inconnue : b et c se multiplient, puis on divise par a.</p>
+      <div class="cle"><p class="crs-formule">? = ${fr('c × b', 'a')}</p></div>
+    </div>
+    ${exemple(`<p><b>Une voiture roule à 25 km/h. Combien de temps met-elle pour parcourir 52 m ?</b></p>
+      <p>25 km/h veut dire qu'elle parcourt 25 km (25 × 10<sup>3</sup> m) en 1 h (3 600 s). On convertit d'abord, pour avoir des unités cohérentes.</p>
+      ${tab(['d (m)', 't (s)'], [['25 km = 25 × 10<sup>3</sup> m', '1 h = 3 600 s'], ['52 m', '?']])}
+      <p class="crs-calc">? = ${fr('3 600 × 52', '25 000')} ≈ <span class="c">7,49 s</span></p>`)}`);
+  // le cycliste de l'ancien cours : 18 km/h, distance parcourue en 600 s
+  const E = [
+    { id: 'a1', label: '3 600 s', valeur: 3600, unite: 's' },
+    { id: 'b1', label: '18 000 m', valeur: 18000, unite: 'm' },
+    { id: 'a2', label: '600 s', valeur: 600, unite: 's' },
+    { id: 'x1', label: '3 600 m', valeur: 3600, unite: 'm', indice: '« 3 600 m » n\'est pas une donnée : 1 h = 3 600 <b>s</b>, c\'est une durée.' },
+    { id: 'x2', label: '18 000 s', valeur: 18000, unite: 's', indice: '« 18 000 s » n\'est pas une donnée : 18 km = 18 000 <b>m</b>, c\'est une distance.' },
+  ];
+  // une autre voiture : vitesse en km/h, durée entière
+  const V = hasard([36, 54, 72, 90]), vms = V / 3.6, t = entre(6, 40), D = vms * t;
+  c.aToi(carte, [
+    { titre: 'Le cycliste',
+      enonce: '<p>Un cycliste roule à 18 km/h, soit 18 000 m en 3 600 s (grandeurs déjà converties). On veut calculer la distance qu\'il parcourt en 600 s (10 min).</p>',
+      parties: [
+        ptPartieGlisser({ q: 'Place les grandeurs dans le tableau.', etiquettes: E,
+          cases: { d1: ['b1'], t1: ['a1'], t2: ['a2'] },
+          html: tabGlisser(['d (m)', 't (s)'], [['d1', 't1'], ['?', 't2']]),
+          diag: ptDiagTableau({ d1: 'm', t1: 's', t2: 's' }, 'Sur une même ligne, deux valeurs qui vont ensemble : le cycliste parcourt 18 000 m en 3 600 s. La durée de 600 s va sur la ligne de l\'inconnue.'),
+          solution: '<p>Sur la première ligne, les deux valeurs connues qui vont ensemble : 18 000 m en 3 600 s. Sur la seconde, la durée de 600 s, en face de la distance inconnue. Chaque valeur est dans la colonne de son unité.</p>' }),
+        ptPartieGlisser({ q: 'Reporte ces grandeurs dans la formule (les deux grandeurs du numérateur peuvent être posées dans n\'importe quel ordre).', etiquettes: E,
+          cases: { n1: ['a2', 'b1'], n2: ['a2', 'b1'], d: ['a1'] },
+          html: formuleCroix('d'),
+          diag: (pl, e) => piege(pl, e) || REGLE_DIRECTE,
+          solution: `<p class="crs-calc">d = ${fr('600 s × 18 000 m', '3 600 s')}</p>` }),
+        { type: 'nombre', q: 'Calcule la distance parcourue.', label: 'd =', unite: 'm', valeur: 3000, signe: false,
+          diag: v => (proche(v, 18000 * 3600 / 600) ? 'Tu as divisé par 600 : on divise par 3 600 s, la valeur sur la même diagonale que « ? ».'
+            : proche(v, 600 * 3600 / 18000) ? 'Tu as inversé : au numérateur, les deux valeurs de la diagonale sans « ? » (600 s et 18 000 m).'
+            : proche(v, 5) ? 'Tu as calculé la vitesse (5 m/s, la distance parcourue en 1 s) : multiplie-la encore par 600 s.'
+            : 'Calcule (600 × 18 000) / 3 600.'),
+          solution: `<p class="crs-calc">d = ${fr('600 × 18 000', '3 600')} = <span class="c">3 000 m</span></p>` },
+      ] },
+    { titre: 'Avec une conversion',
+      enonce: `<p>Une voiture roule à ${V} km/h.</p>`,
+      parties: [{ type: 'nombre', q: `Combien de temps met-elle pour parcourir ${fmt(D)} m ?`, label: 't =', unite: 's', valeur: t, signe: false,
+        diag: v => (proche(v, V * 1000 * D / 3600) ? `Tu as inversé le produit en croix : dans le tableau, la durée cherchée est en face de ${fmt(D)} m. t = (3 600 × ${fmt(D)}) / ${fmt(V * 1000)}.`
+          : proche(v, 3600 * D / V) ? `Tu n'as pas converti les km en m : ${V} km = ${fmt(V * 1000)} m.`
+          : proche(v, D / V) || proche(v, D / V * 60) ? `Convertis d'abord : ${V} km = ${fmt(V * 1000)} m et 1 h = 3 600 s, puis fais le produit en croix.`
+          : `Remplis le tableau (d en m, t en s) : ${fmt(V * 1000)} m ↔ 3 600 s et ${fmt(D)} m ↔ ?, puis fais le produit en croix.`),
+        solution: tab(['d (m)', 't (s)'], [[`${V} km = ${fmt(V * 1000)} m`, '1 h = 3 600 s'], [`${fmt(D)} m`, '?']]) + `<p class="crs-calc">t = ${fr(`3 600 × ${fmt(D)}`, fmt(V * 1000))} = <span class="c">${t} s</span></p>` }] },
+  ]);
+  return carte;
 }
 
-/* ---- Check 4 : retour à l'unité (lampes) ---- */
-document.getElementById('pal4').innerHTML =
-  ptChip('u1', '9 V', 9) + ptChip('n1', '3', 3) + ptChip('n2', '5', 5) +
-  ptChip('x1', '9 lampes', 9) + ptChip('x2', '3 V', 3);
-document.getElementById('line4a').innerHTML = ptFraction('u1', 'n1', 'live4', 'V');
-document.getElementById('line4b').innerHTML = 'U = (valeur pour 1) &times; ' + ptSlot('n2');
-const eng4 = ptSlotEngine(document.querySelector('.ex-card:has(#pal4)'), {
-  liveGroups: [{ slots: ['u1','n1'], op: 'div', target: '#live4', decimals: 2, suffix: ' V' }],
-});
-function verify4() {
-  const r = eng4.verify();
-  const msg = document.getElementById('msg4');
-  if (r.correct === r.total) { msg.style.color = '#166534'; msg.textContent = '✓ Bien placé !'; }
-  else { msg.style.color = '#991b1b'; msg.textContent = `${r.correct}/${r.total} cases correctes — corrige les cases rouges.`; }
+/* ---------- 2. Le tableau, cas inverse ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Et pour une proportionnalité inverse ?');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>On construit le même genre de tableau, mais cette fois le <b>produit</b> d'une ligne complète est constant : a × b = c × ?.</p>
+      ${ptCrossDiagramInverseSvg()}
+      <div class="cle"><p class="crs-formule">? = ${fr('a × b', 'c')}</p></div>
+    </div>
+    ${exemple(`<p><b>À température fixée, la pression d'un gaz et le volume qu'il occupe sont inversement proportionnels (si on le comprime en divisant son volume par 2, sa pression est multipliée par 2). Un gaz occupe un volume de 2 L sous une pression de 6 bar. Quel volume occupe-t-il sous une pression de 4 bar ?</b></p>
+      ${tab(['P (bar)', 'V (L)'], [['6 bar', '2 L'], ['4 bar', '?']])}
+      <p class="crs-calc">? = ${fr('6 × 2', '4')} = <span class="c">3 L</span></p>`)}`);
+  // le gaz de l'ancien cours : 3 L sous 8 bar, pression pour 4 L
+  const E = [
+    { id: 'a1', label: '3 L', valeur: 3, unite: 'L' },
+    { id: 'b1', label: '8 bar', valeur: 8, unite: 'bar' },
+    { id: 'a2', label: '4 L', valeur: 4, unite: 'L' },
+    { id: 'x1', label: '3 bar', valeur: 3, unite: 'bar', indice: '« 3 bar » n\'est pas une donnée : 3, c\'est le volume, en <b>L</b>.' },
+    { id: 'x2', label: '8 L', valeur: 8, unite: 'L', indice: '« 8 L » n\'est pas une donnée : 8, c\'est la pression, en <b>bar</b>.' },
+  ];
+  // un trajet de distance fixée : durée inversement proportionnelle à la vitesse
+  const tr = hasard([[60, 2, 80], [90, 2, 120], [50, 3, 75], [100, 3, 120], [40, 3, 60]]);
+  const [v1, t1, v2] = tr, t2 = v1 * t1 / v2;
+  c.aToi(carte, [
+    { titre: 'Le gaz comprimé',
+      enonce: '<p>Un gaz occupe 3 L sous une pression de 8 bar (à température fixée). On veut calculer sa pression lorsque son volume vaut 4 L.</p>',
+      parties: [
+        ptPartieGlisser({ q: 'Place les grandeurs dans le tableau.', etiquettes: E,
+          cases: { p1: ['b1'], v1: ['a1'], v2: ['a2'] },
+          html: tabGlisser(['P (bar)', 'V (L)'], [['p1', 'v1'], ['?', 'v2']]),
+          diag: ptDiagTableau({ p1: 'bar', v1: 'L', v2: 'L' }, 'Sur une même ligne, deux valeurs qui vont ensemble : le gaz occupe 3 L sous 8 bar. Le volume de 4 L va sur la ligne de l\'inconnue.'),
+          solution: '<p>Sur la première ligne, les deux valeurs connues qui vont ensemble : 8 bar pour 3 L. Sur la seconde, le volume de 4 L, en face de la pression inconnue. Chaque valeur est dans la colonne de son unité.</p>' }),
+        ptPartieGlisser({ q: 'Reporte ces grandeurs dans la formule (les deux grandeurs du numérateur peuvent être posées dans n\'importe quel ordre).', etiquettes: E,
+          cases: { n1: ['a1', 'b1'], n2: ['a1', 'b1'], d: ['a2'] },
+          html: formuleCroix('P'),
+          diag: (pl, e) => piege(pl, e) || (pl.d === 'a1' ? `C'est le produit en croix d'une proportionnalité <b>directe</b>. ${REGLE_INVERSE}` : REGLE_INVERSE),
+          solution: `<p class="crs-calc">P = ${fr('3 L × 8 bar', '4 L')}</p>` }),
+        { type: 'nombre', q: 'Calcule la pression.', label: 'P =', unite: 'bar', valeur: 6, signe: false,
+          diag: v => (proche(v, 4 * 8 / 3) ? 'Tu as fait le produit en croix d\'une proportionnalité directe : ici, quand le volume augmente, la pression diminue. P = (3 × 8) / 4.'
+            : proche(v, 3 * 4 / 8) ? 'Au numérateur, les deux valeurs de la ligne complète : 3 L et 8 bar.'
+            : 'Calcule (3 × 8) / 4.'),
+          solution: `<p class="crs-calc">P = ${fr('3 × 8', '4')} = <span class="c">6 bar</span></p>` },
+      ] },
+    { titre: 'Le même trajet, plus vite',
+      enonce: `<p>Un trajet dure ${t1} h à la vitesse moyenne de ${v1} km/h. La distance étant fixée, la durée du trajet est inversement proportionnelle à la vitesse.</p>`,
+      parties: [{ type: 'nombre', q: `Combien de temps dure le même trajet à ${v2} km/h ?`, label: 't =', unite: 'h', valeur: t2, signe: false,
+        diag: v => (proche(v, v2 * t1 / v1) ? `Tu as fait le produit en croix d'une proportionnalité directe : plus on roule vite, moins le trajet dure. Ici, v × t (la distance) est constant.`
+          : proche(v, v1 * v2 / t1) || proche(v, v1 * t1 * v2) ? `Pour une proportionnalité inverse : t = (${v1} × ${t1}) / ${v2}.`
+          : `Le produit v × t est le même pour les deux trajets : ${v1} × ${t1} = ${v2} × t.`),
+        solution: tab(['v (km/h)', 't (h)'], [[`${v1} km/h`, `${t1} h`], [`${v2} km/h`, '?']]) + `<p class="crs-calc">t = ${fr(`${v1} × ${t1}`, v2)} = <span class="c">${fmt(t2)} h</span></p>` }] },
+  ]);
+  return carte;
 }
 
+/* ---------- 3. Le coefficient de proportionnalité ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Méthode 2 : le coefficient de proportionnalité');
+  const flecheK = `<svg class="pt-fleche-k" viewBox="0 0 200 30" role="img" aria-label="On multiplie par k pour passer de la colonne m à la colonne E">
+      <path d="M 50 27 Q 100 3 150 27" fill="none" style="stroke:var(--accent)" stroke-width="2.5"/>
+      <path d="M150,27 L141.1,27.1 L144.5,19.9 Z" style="fill:var(--accent)"/>
+      <text x="100" y="13" text-anchor="middle" font-weight="800" font-size="13" style="fill:var(--accent-ink)">× k</text></svg>`;
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>On calcule d'abord le coefficient k avec la ligne connue, puis on l'utilise pour trouver l'inconnue :</p>
+      <div class="cle"><p class="crs-formule">k = ${fr('b', 'a')} &nbsp; puis &nbsp; ? = k × c</p></div>
+      <div class="pt-remarque"><p><b>Cas d'une proportionnalité inverse :</b> le coefficient est alors le <b>produit</b> k = a × b, et on trouve l'inconnue par ? = k / c.</p></div>
+    </div>
+    ${exemple(`<p><b>Une batterie a une énergie massique fixée : elle stocke 60 Wh pour une masse de 0,4 kg. Quelle énergie peut stocker une batterie de 1,4 kg ?</b></p>
+      ${flecheK}
+      ${tab(['m (kg)', 'E (Wh)'], [['0,4', '60'], ['1,4', '?']], 'pt-tab-k')}
+      <p class="crs-calc">k = ${fr('60', '0,4')} = 150 Wh/kg<br>E = k × 1,4 = 150 × 1,4 = <span class="c">210 Wh</span></p>`)}`);
+  // la résistance chauffante de l'ancien cours : 120 J en 4 s, énergie en 15 s
+  const E = [
+    { id: 'e1', label: '120 J', valeur: 120, unite: 'J' },
+    { id: 't1', label: '4 s', valeur: 4, unite: 's' },
+    { id: 't2', label: '15 s', valeur: 15, unite: 's' },
+    { id: 'x1', label: '120 s', valeur: 120, unite: 's', indice: '« 120 s » : 120, c\'est l\'énergie, en <b>J</b>.' },
+    { id: 'x2', label: '4 J', valeur: 4, unite: 'J', indice: '« 4 J » : 4, c\'est la durée, en <b>s</b>.' },
+  ];
+  // masse volumique d'un métal : ρ tiré au hasard, volumes entiers
+  const met = hasard([['aluminium', 2.7], ['fer', 7.9], ['cuivre', 8.9]]), rho = met[1];
+  const V1 = hasard([10, 20, 50]), V2 = hasard([15, 30, 40, 60]), m1 = Math.round(rho * V1 * 10) / 10, m2 = Math.round(rho * V2 * 10) / 10;
+  c.aToi(carte, [
+    { titre: 'La résistance chauffante',
+      enonce: '<p>Une résistance chauffante dissipe une énergie de 120 J en 4 s, à puissance constante.</p>',
+      parties: [
+        ptPartieGlisser({ q: 'Place les grandeurs pour construire le calcul du coefficient (la puissance), puis de l\'énergie dissipée en 15 s.', etiquettes: E,
+          cases: { kn: ['e1'], kd: ['t1'], c: ['t2'] },
+          direct: [{ nom: 'k', num: 'kn', den: 'kd' }],
+          html: (cv, res) => `<p class="pt-formule-lab">Coefficient (puissance) :</p>
+            <div class="pt-formule"><span>k =</span><span class="pt-frac"><span class="pt-frac-num">${cv('kn')}</span><span class="pt-frac-line"></span><span class="pt-frac-den">${cv('kd')}</span></span><span>= ${res('k')}</span></div>
+            <p class="pt-formule-lab">Énergie recherchée :</p>
+            <div class="pt-formule"><span>E = k ×</span>${cv('c')}</div>`,
+          diag: (pl, e) => piege(pl, e)
+            || (pl.kn === 't1' && pl.kd === 'e1' ? 'Le coefficient est la puissance P = E / t (en J/s, c\'est-à-dire en W) : l\'énergie au numérateur, la durée au dénominateur.'
+            : 'Le coefficient se calcule avec la situation connue (120 J en 4 s) ; on le multiplie ensuite par la nouvelle durée.'),
+          solution: `<p class="crs-calc">k = ${fr('120 J', '4 s')} = 30 J/s = 30 W &nbsp; puis &nbsp; E = k × 15 s</p>` }),
+        { type: 'nombre', q: 'Calcule l\'énergie dissipée en 15 s.', label: 'E =', unite: 'J', valeur: 450, signe: false,
+          diag: v => (proche(v, 30 / 15) ? 'Tu as divisé le coefficient par 15 : on le <b>multiplie</b> par la durée, E = k × 15.'
+            : proche(v, 4 / 120 * 15) ? 'Ton coefficient est inversé : k = 120 / 4 = 30 W (énergie divisée par durée).'
+            : proche(v, 120 * 15) ? 'Tu as multiplié l\'énergie par 15 s : il faut d\'abord calculer k = 120 / 4.'
+            : 'E = k × 15, avec k = 120 / 4.'),
+          solution: `<p class="crs-calc">E = 30 × 15 = <span class="c">450 J</span></p>` },
+      ] },
+    { titre: 'La masse volumique',
+      enonce: `<p>Un morceau de ${met[0]} de ${V1} cm<sup>3</sup> a une masse de ${fmt(m1)} g. La masse d'un métal est proportionnelle à son volume.</p>`,
+      parties: [
+        { type: 'nombre', q: 'Calcule le coefficient de proportionnalité : la masse volumique ρ.', label: 'ρ =', unite: 'g/cm<sup>3</sup>', valeur: rho, signe: false,
+          diag: v => (proche(v, V1 / m1) ? 'Tu as calculé V / m. La masse volumique est ρ = m / V (en g/cm<sup>3</sup>, « g par cm<sup>3</sup> ») : la masse divisée par le volume.'
+            : proche(v, m1 * V1) ? 'Le coefficient d\'une proportionnalité directe est un <b>quotient</b> : ρ = m / V.'
+            : `ρ = m / V = ${fmt(m1)} / ${V1}.`),
+          solution: `<p class="crs-calc">ρ = ${fr(fmt(m1), V1)} = <span class="c">${fmt(rho)} g/cm<sup>3</sup></span></p>` },
+        { type: 'nombre', q: `Quelle est la masse d'un morceau de ${V2} cm<sup>3</sup> du même métal ?`, label: 'm =', unite: 'g', valeur: m2, signe: false,
+          diag: v => (proche(v, rho / V2) || proche(v, V2 / rho) ? `On <b>multiplie</b> le coefficient par le nouveau volume : m = ρ × V = ${fmt(rho)} × ${V2}.`
+            : proche(v, m1 * V2) ? `Tu as multiplié la masse de départ par ${V2} : multiplie plutôt la masse d'un cm<sup>3</sup> (ρ = ${fmt(rho)} g/cm<sup>3</sup>).`
+            : `m = ρ × V = ${fmt(rho)} × ${V2}.`),
+          solution: `<p class="crs-calc">m = ρ × V = ${fmt(rho)} × ${V2} = <span class="c">${fmt(m2)} g</span></p>` },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Le retour à l'unité ---------- */
+function etape4(c) {
+  const carte = c.carte('4. Méthode 3 : le retour à l\'unité (« règle de trois »)');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>On calcule la valeur de B correspondant à <b>1 unité</b> de A, puis on multiplie par la valeur de A qui nous intéresse :</p>
+      <div class="cle"><p class="crs-formule">1 unité de A → ${fr('b', 'a')} &nbsp; puis &nbsp; ? = ${fr('b', 'a')} × c</p></div>
+    </div>
+    ${exemple(`<p><b>Un devoir est noté sur 36 points. Un élève obtient 25 points. Quelle est sa note ramenée sur 20 ?</b></p>
+      <p>On ramène d'abord à un barème sur 1 point : sur 1 point, l'élève aurait 25 / 36 ≈ 0,694 point. Sur 20 points, il a 20 fois plus :</p>
+      <p class="crs-calc">note = 0,694 × 20 ≈ <span class="c">13,9 / 20</span></p>`)}`);
+  // les lampes de l'ancien cours : 9 V pour 3 lampes, tension pour 5 lampes
+  const E = [
+    { id: 'u1', label: '9 V', valeur: 9, unite: 'V' },
+    { id: 'n1', label: '3', valeur: 3, unite: '' },
+    { id: 'n2', label: '5', valeur: 5, unite: '' },
+    { id: 'x1', label: '9 lampes', valeur: 9, unite: 'lampes', indice: '« 9 lampes » : il y a 3 lampes ; 9, c\'est la tension, en <b>V</b>.' },
+    { id: 'x2', label: '3 V', valeur: 3, unite: 'V', indice: '« 3 V » : 3, c\'est le nombre de lampes, pas une tension.' },
+  ];
+  // masse de piles identiques
+  const mp = hasard([23, 24, 46]), n1 = hasard([4, 6, 12]), n2 = hasard([5, 7, 9]), M1 = mp * n1;
+  c.aToi(carte, [
+    { titre: 'Les lampes',
+      enonce: '<p>Une pile alimente un circuit dans lequel 3 lampes identiques montées en série se répartissent 9 V à parts égales. On veut la tension nécessaire pour 5 lampes identiques.</p>',
+      parties: [
+        ptPartieGlisser({ q: 'Place les grandeurs pour construire le calcul de la tension pour 1 lampe, puis pour 5 lampes.', etiquettes: E,
+          cases: { un: ['u1'], ud: ['n1'], c: ['n2'] },
+          direct: [{ nom: 'u', num: 'un', den: 'ud' }],
+          html: (cv, res) => `<p class="pt-formule-lab">Tension pour 1 lampe :</p>
+            <div class="pt-formule"><span class="pt-frac"><span class="pt-frac-num">${cv('un')}</span><span class="pt-frac-line"></span><span class="pt-frac-den">${cv('ud')}</span></span><span>= ${res('u')}</span></div>
+            <p class="pt-formule-lab">Tension recherchée :</p>
+            <div class="pt-formule"><span>U = (valeur pour 1) ×</span>${cv('c')}</div>`,
+          diag: (pl, e) => piege(pl, e)
+            || (pl.un === 'n1' ? 'Pour une seule lampe, on divise la tension (9 V) par le nombre de lampes (3), pas l\'inverse.'
+            : 'On multiplie la tension d\'une lampe par le nouveau nombre de lampes.'),
+          solution: `<p class="crs-calc">${fr('9 V', '3')} = 3 V pour 1 lampe &nbsp; puis &nbsp; U = 3 V × 5</p>` }),
+        { type: 'nombre', q: 'Calcule la tension nécessaire pour 5 lampes.', label: 'U =', unite: 'V', valeur: 15, signe: false,
+          diag: v => (proche(v, 9 * 3 / 5) || proche(v, 3 / 5) ? 'On multiplie la tension d\'une lampe (3 V) par le nombre de lampes (5).'
+            : proche(v, 9 * 5) ? 'Tu as multiplié les 9 V (pour 3 lampes) par 5 : ramène-toi d\'abord à 1 lampe (9 / 3 = 3 V).'
+            : 'U = (9 / 3) × 5.'),
+          solution: `<p class="crs-calc">U = 3 × 5 = <span class="c">15 V</span></p>` },
+      ] },
+    { titre: 'Les piles',
+      enonce: `<p>${n1} piles identiques ont une masse totale de ${M1} g.</p>`,
+      parties: [
+        { type: 'nombre', q: 'Quelle est la masse d\'une seule pile ?', label: 'm =', unite: 'g', valeur: mp, signe: false,
+          diag: v => (proche(v, n1 / M1) ? `Tu as divisé le nombre de piles par la masse : c'est la masse qu'on divise par le nombre de piles (${M1} / ${n1}).`
+            : proche(v, M1 * n1) ? `Pour une seule pile, on <b>divise</b> par le nombre de piles : ${M1} / ${n1}.`
+            : `Masse d'une pile : ${M1} / ${n1}.`),
+          solution: `<p class="crs-calc">m = ${fr(M1, n1)} = <span class="c">${mp} g</span></p>` },
+        { type: 'nombre', q: `Quelle est la masse de ${n2} piles ?`, label: 'm =', unite: 'g', valeur: mp * n2, signe: false,
+          diag: v => (proche(v, mp / n2) ? `Pour ${n2} piles, on <b>multiplie</b> la masse d'une pile par ${n2}.`
+            : proche(v, M1 * n2) ? `Tu as multiplié la masse des ${n1} piles par ${n2} : multiplie la masse d'<b>une</b> pile (${mp} g).`
+            : `${mp} g par pile, donc ${mp} × ${n2}.`),
+          solution: `<p class="crs-calc">m = ${mp} × ${n2} = <span class="c">${mp * n2} g</span></p>` },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Le tableau de proportionnalité</b> (avec les unités) : proportionnalité directe ? = ${fr('c × b', 'a')} ; proportionnalité inverse ? = ${fr('a × b', 'c')}.</p></div>
+    <div class="cle"><p><b class="cle-titre">Le coefficient.</b> k = ${fr('b', 'a')} puis ? = k × c (inverse : k = a × b puis ? = k / c).</p></div>
+    <div class="cle"><p><b class="cle-titre">Le retour à l'unité.</b> On calcule la valeur pour 1 unité (${fr('b', 'a')}), puis on multiplie par c.</p></div>
+    <div class="cle"><p><b class="cle-titre">Les trois méthodes donnent toujours le même résultat.</b> Le tableau de proportionnalité est en général le plus facile à utiliser (et le plus visuel), surtout quand il faut convertir des unités, mais rien ne t'empêche de préférer le coefficient ou le retour à l'unité selon la situation.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_5.html">Vérification des connaissances →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_7.html">Module 3 : représentation graphique</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
 PT.menu('module_4');
-SOM.marquer({ fait: true });                                   // cours lu (sommaire, accueil)
 </script>
 </body>
 </html>

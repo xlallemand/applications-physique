@@ -15,11 +15,18 @@
      SCH.slot(id)        case vide où glisser une étiquette (partie 'schema' de te.js)
      SCH.transfo1(val)   transformateur seul, avec ses valeurs (voir plus bas)
      SCH.reseau(val)     chaîne complète : production, transport, distribution, charge
+     SCH.formules(a, b)  les trois formules d'un transformateur (m = N₂/N₁, m = U₂/U₁, m = I₁/I₂)
+     SCH.choixFormule()  partie de question : choisir laquelle des trois formules utiliser
      SCH.tableau()       tableau électrique d'un logement (SVG)
+
+   Dans chaque partie du réseau : la tension U, l'intensité I et la puissance
+   apparente S = U × I, la même partout (pas de pertes dans les transformateurs).
+   Juste avant la charge : S, puis la puissance active P. Sous chaque
+   transformateur : son rapport m et ses trois formules.
 
    o = {
      etages:   [{ titre, u, i, lignes: [HTML], bas: [HTML] }],
-     transfos: [{ nom, n: [gauche, droite], lignes: [HTML] }],   (un de moins que d'étages)
+     transfos: [{ nom, n: [gauche, droite], lignes: [HTML], formules: [HTML] }],   (un de moins que d'étages)
      charge:   { nom, lignes: [HTML] }                           (au bout du dernier étage)
      sortie:   { lignes: [HTML], pertes: [HTML] }                (puissance utile, pertes)
    }
@@ -53,8 +60,9 @@
     </div>`;
   }
   function transfo(t) {
-    const bas = (t.n ? `<div class="sch-nn"><span>${t.n[0]}</span><span>${t.n[1]}</span></div>` : '') + (t.lignes || []).join('');
-    return `<div class="sch-col sch-tr">
+    const bas = (t.n ? `<div class="sch-nn"><span>${t.n[0]}</span><span>${t.n[1]}</span></div>` : '') + (t.lignes || []).join('') +
+      (t.formules ? `<div class="sch-formules">${t.formules.join('')}</div>` : '');
+    return `<div class="sch-col sch-tr${t.formules ? ' avec-formules' : ''}">
       <div class="sch-circ">${FILS}${CERCLES}
         ${t.nom ? `<p class="sch-titre">${t.nom}</p>` : ''}
       </div>
@@ -88,7 +96,8 @@
     if (o.charge) h += charge(o.charge);
     if (o.sortie) h += sortie(o.sortie);
     const min = largeurMin(o);
-    return `<div class="sch-cont"><div class="sch${o.classe ? ' ' + o.classe : ''}" data-min="${min}" style="--h:${hauteur(o)}px;max-width:${Math.round(min * 1.3)}px" role="${/sc-slot/.test(h) ? 'group' : 'img'}" aria-label="${o.aria || 'Schéma de la chaîne électrique'}">${h}</div></div>`;
+    const avecF = (o.transfos || []).some(t => t && t.formules);
+    return `<div class="sch-cont"><div class="sch${avecF ? ' avec-formules' : ''}${o.classe ? ' ' + o.classe : ''}" data-min="${min}" style="--h:${hauteur(o)}px;max-width:${Math.round(min * 1.3)}px" role="${/sc-slot/.test(h) ? 'group' : 'img'}" aria-label="${o.aria || 'Schéma de la chaîne électrique'}">${h}</div></div>`;
   }
 
   /* ---------- En ligne ou à la verticale, selon la place disponible ----------
@@ -118,27 +127,78 @@
   const contenu = x => x === '?' ? inc() : String(x)[0] === '#' ? slot(String(x).slice(1)) : v(x);
   const lignes = (L, val) => L.filter(([, k]) => val[k] !== undefined).map(([nom, k]) => l(nom, contenu(val[k])));
   const sub = (x, i) => `${x}<sub>${i}</sub>`;
+  const rap = (h, b) => `<span class="te-rap"><span>${h}</span><span>${b}</span></span>`;
 
-  // transformateur seul : val = { U1, I1, P1, N1, U2, I2, P2, N2, m } ; o.titres, o.charge (nom de l'appareil), o.i (flèches d'intensité)
+  /* ---------- Les trois formules d'un transformateur ----------
+     a, b : indices des parties avant (primaire) et après (secondaire) le transformateur ;
+     o.m : nom du rapport (« m », « m₁ ») ; o.prime : spires notées N′ (2e transformateur d'une chaîne,
+     pour ne pas confondre ses bobines avec celles du 1er). Symboles : 'U1', 'I2', 'N1', 'N2p' (N′₂), 'm'. */
+  const SYM = s => s === 'm' ? 'm' : s[0] === 'N' && s.slice(-1) === 'p' ? sub('N′', s.slice(1, -1)) : sub(s[0], s.slice(1));
+  function relations(a, b, o) {
+    o = o || {};
+    const n = k => 'N' + k + (o.prime ? 'p' : '');
+    return [
+      { id: 'N', syms: [n(b), n(a)], html: rap(SYM(n(b)), SYM(n(a))) },
+      { id: 'U', syms: ['U' + b, 'U' + a], html: rap(SYM('U' + b), SYM('U' + a)) },
+      { id: 'I', syms: ['I' + a, 'I' + b], html: rap(SYM('I' + a), SYM('I' + b)) },
+    ];
+  }
+  // lignes « m = N₂ / N₁ », « m = U₂ / U₁ », « m = I₁ / I₂ » placées sous le transformateur
+  const formules = (a, b, o) => relations(a, b, o).map(r => l(`${(o && o.m) || 'm'} =`, `<span class="sc-val sc-formule">${r.html}</span>`));
+
+  /* Partie de question (TE.PARTIES 'choix') : laquelle des trois formules utiliser ?
+     o = { q, a, b, m, prime, connues: ['U1', 'U2'…], cherche: 'm' | 'I2'…, nomTr: 'T₂', solution }
+     La bonne formule est celle qui contient la grandeur cherchée et une seule inconnue. */
+  function choixFormule(o) {
+    const R = relations(o.a, o.b, o), mN = o.m || 'm';
+    const connue = x => x === 'm' ? o.connues.indexOf('m') !== -1 : o.connues.indexOf(x) !== -1;
+    const inconnues = r => ['m'].concat(r.syms).filter(x => !connue(x));
+    const bonnes = R.filter(r => ['m'].concat(r.syms).indexOf(o.cherche) !== -1 && inconnues(r).length === 1);
+    if (bonnes.length !== 1) throw new Error('choixFormule : la bonne formule n\'est pas unique (' + o.cherche + ')');
+    const indices = {};
+    R.forEach(r => {
+      if (r === bonnes[0]) return;
+      // (m en dernier : « N₂, N₁ et m sont inconnus »)
+      const inc = r.syms.filter(x => !connue(x)).map(SYM).concat(connue('m') ? [] : [mN]);
+      const et = t => t.length > 1 ? t.slice(0, -1).join(', ') + ' et ' + t[t.length - 1] : t[0];
+      indices[r.id] = ['m'].concat(r.syms).indexOf(o.cherche) === -1
+        ? `Cette formule ne contient pas ${o.cherche === 'm' ? mN : SYM(o.cherche)}, la grandeur cherchée.`
+        : `Dans cette formule, ${et(inc)} ${inc.length > 1 ? 'sont inconnus' : 'est inconnu'} : il faut une formule avec une seule inconnue.`;
+    });
+    const r = bonnes[0], quoi = ['m'].concat(r.syms).filter(x => connue(x) && x !== o.cherche).map(x => x === 'm' ? mN : SYM(x));
+    return {
+      type: 'choix', q: o.q || `Laquelle des trois formules ${o.nomTr ? `de ${o.nomTr} ` : ''}utilises-tu pour calculer ${o.cherche === 'm' ? mN : SYM(o.cherche)} ?`,
+      options: R.map(x => ({ id: x.id, label: `${mN} = ${x.html}` })), bonne: r.id, melanger: false, indices,
+      solution: o.solution || `<p>${mN} = ${r.html} : on connaît ${quoi.join(' et ')}, il ne reste qu'une inconnue, ${o.cherche === 'm' ? mN : SYM(o.cherche)}.</p>`,
+    };
+  }
+
+  // transformateur seul : val = { U1, I1, S1, N1, U2, I2, S2, P, N2, m } ; o.titres, o.charge (nom de l'appareil), o.i (flèches d'intensité)
+  // P (puissance active) n'existe que juste avant une charge (o.charge) ; o.formules = false : sans les trois formules
+  // o.puissance = 'P' : puissance notée P dans chaque partie, sans distinguer apparente et active (clés val.P1, val.P2)
   function transfo1(val, o) {
     o = o || {};
+    const ps = o.puissance || 'S';
     const t = o.titres || ['primaire (entrée)', 'secondaire (sortie)'];
     const et = k => ({ titre: t[k - 1], u: sub('u', k), i: o.i ? sub('i', k) : '',
-      lignes: lignes([[sub('U', k) + ' =', 'U' + k], [sub('I', k) + ' =', 'I' + k], [sub('P', k) + ' =', 'P' + k]], val),
+      lignes: lignes([[sub('U', k) + ' =', 'U' + k], [sub('I', k) + ' =', 'I' + k], [ps + ' =', ps + k]].concat(k === 2 && o.charge && ps === 'S' ? [['P =', 'P']] : []), val),
       bas: val['N' + k] !== undefined ? [l(sub('N', k) + ' =', contenu(val['N' + k]))] : undefined });
-    return chaine({ etages: [et(1), et(2)], transfos: [{ nom: o.nom || 'T', lignes: lignes([['m =', 'm']], val) }],
-      charge: o.charge ? { nom: o.charge, lignes: lignes([['P =', 'P']], val) } : undefined, aria: o.aria || 'Schéma du transformateur avec les valeurs de l\'énoncé' });
+    return chaine({ etages: [et(1), et(2)], transfos: [{ nom: o.nom || 'T', lignes: lignes([['m =', 'm']], val), formules: o.formules === false ? undefined : formules(1, 2) }],
+      charge: o.charge ? { nom: o.charge, lignes: lignes([['k =', 'k']], val) } : undefined, aria: o.aria || 'Schéma du transformateur avec les valeurs de l\'énoncé' });
   }
 
   // chaîne complète : production — T1 — transport — T2 — distribution — charge (k, η) — puissance utile
-  // val = { U1, I1, m1, U2, I2, m2, U3, I3, S, P, k, eta, Pu, Pp } ; o.charge : nom de la charge
-  // o.n = 2 : un seul transformateur (val.m), le 2e étage alimente la charge (U2, I2, S) ; o.titres : nom des étages
+  // val = { U1, I1, S1, m1, U2, I2, S2, m2, U3, I3, S3, P, k, eta, Pu, Pp } ; o.charge : nom de la charge
+  // o.n = 2 : un seul transformateur (val.m), le 2e étage alimente la charge (U2, I2, S2, P) ; o.titres : nom des étages
   function reseau(val, o) {
     o = o || {};
     const n = o.n || 3, titres = o.titres || (n === 3 ? ['production', 'transport', 'distribution'] : ['réseau', 'utilisation']);
-    const et = k => ({ titre: titres[k - 1], u: sub('u', k), lignes: lignes([[sub('U', k) + ' =', 'U' + k], [sub('I', k) + ' =', 'I' + k]].concat(k === n ? [['S =', 'S']] : []), val) });
-    const tr = k => n === 2 ? { nom: 'T', lignes: lignes([['m =', 'm']], val) } : { nom: sub('T', k), lignes: lignes([[sub('m', k) + ' =', 'm' + k]], val) };
-    const ch = lignes([['P =', 'P'], ['k =', 'k'], ['η =', 'eta']], val);
+    const et = k => ({ titre: titres[k - 1], u: sub('u', k),
+      lignes: lignes([[sub('U', k) + ' =', 'U' + k], [sub('I', k) + ' =', 'I' + k], ['S =', 'S' + k]].concat(k === n ? [['P =', 'P']] : []), val) });
+    const tr = k => n === 2
+      ? { nom: 'T', lignes: lignes([['m =', 'm']], val), formules: formules(1, 2) }
+      : { nom: sub('T', k), lignes: lignes([[sub('m', k) + ' =', 'm' + k]], val), formules: formules(k, k + 1, { m: sub('m', k), prime: k > 1 }) };
+    const ch = lignes([['k =', 'k'], ['η =', 'eta']], val);
     const so = lignes([[sub('P', 'u') + ' =', 'Pu']], val), pe = lignes([[sub('P', 'perdue') + ' =', 'Pp']], val);
     return chaine({
       etages: Array.from({ length: n }, (x, k) => et(k + 1)),
@@ -197,5 +257,5 @@
     return s + '</svg></div>';
   }
 
-  window.SCH = { chaine, transfo1, reseau, l, v, inc, slot, tableau };
+  window.SCH = { chaine, transfo1, reseau, formules, relations, choixFormule, l, v, inc, slot, tableau };
 })();

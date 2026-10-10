@@ -8,11 +8,12 @@
 <link rel="stylesheet" href="../assets/theme.css">
 <link rel="stylesheet" href="../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="../assets/sommaire.css">
+<link rel="stylesheet" href="../assets/cours.css">
 <script src="../assets/sommaire.js"></script>
 <script src="../assets/numpad.js"></script>
 <script src="../assets/dragdrop.js"></script>
-<script src="../assets/selfcheck.js"></script>
 <script src="../assets/hero.js"></script>
+<script src="../assets/cours.js"></script>
 <style>
   :root {
     --app-accent-50:  var(--paper);
@@ -67,6 +68,20 @@
   .tag-prefix { display: inline-block; background: var(--paper-2); border: 1px solid var(--line-strong); border-radius: 6px; padding: 1px 8px; color: var(--accent-ink); font-weight: 800; }
 
   /* Memorization cards */
+
+  /* ===== Cours des modules 1, 3 et 4 (moteur commun assets/cours.js) ===== */
+  .er-etape .cv-regle { text-align: center; font-size: 1.05rem; font-weight: 800; margin: 10px 0; line-height: 1.5; color: var(--ink); }
+  .er-etape .cv-ecart { margin-top: 12px; }
+  .crs-tab tr.cv-base td { background: var(--cle-bg); font-weight: 800; }
+  /* figure : 1 dm² = 100 cm² */
+  .cv-fig { margin: 14px 0 0; text-align: center; }
+  .cv-fig svg { width: 100%; max-width: 380px; height: auto; }
+  .cv-fig-fond { fill: var(--sheet); }
+  .cv-fig-un { fill: var(--cle-line); }
+  .cv-fig-grille { fill: none; stroke: var(--paper-3); stroke-width: 1; }
+  .cv-fig-bord { fill: none; stroke: var(--accent); stroke-width: 2; }
+  .cv-fig-t { font-family: var(--font-sans); font-size: 13px; font-weight: 600; fill: var(--ink); }
+  .cv-fig-t.fort { font-weight: 800; fill: var(--accent-ink); }
 </style>
 </head>
 <body>
@@ -97,181 +112,14 @@
   <main id="accueil" class="som-accueil"></main>
 </div>
 
-<!-- ====== MODULE 1 : COURS ====== -->
-<div id="screen-1" class="hidden-screen max-w-4xl mx-auto px-4 py-8">
-  <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-    <h2 class="text-2xl md:text-3xl font-bold text-cyan-900 mb-6">Cours : Les Conversions</h2>
-
-    <div class="mb-8">
-      <h3 class="text-2xl font-bold text-cyan-800 mb-4 border-b-2 border-cyan-300 pb-2">1. Qu'est-ce qu'un préfixe ?</h3>
-      <div class="bg-cyan-50 rounded-lg p-6 mb-4">
-        <p class="text-lg mb-3">Dans le Système International (SI), on ajoute des <strong>préfixes</strong> devant les unités de base (mètre, gramme, seconde, ampère, litre…) pour exprimer des grandeurs très grandes ou très petites, sans écrire de longues suites de zéros.</p>
-        <p class="cle text-lg">Chaque préfixe correspond à une <strong>puissance de 10</strong>. Par exemple, le préfixe <strong>k</strong> (kilo) vaut 10<sup>3</sup> = 1&nbsp;000, donc <strong>1 km = 1 000 m</strong>.</p>
-      </div>
-    </div>
-
-    <div class="mb-8">
-      <h3 class="text-2xl font-bold text-cyan-800 mb-4 border-b-2 border-cyan-300 pb-2">2. Tableau des préfixes SI</h3>
-      <div class="overflow-x-auto rounded-xl shadow-md">
-        <table class="prefix-table rounded-xl overflow-hidden text-sm">
-          <thead>
-            <tr>
-              <th>Préfixe</th>
-              <th>Symbole</th>
-              <th>Puissance de 10</th>
-              <th>Valeur décimale</th>
-              <th>Exemple</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td>téra</td><td class="font-black text-cyan-700 text-lg">T</td><td class="font-bold">10<sup>12</sup></td><td>1 000 000 000 000</td><td>1 To (téraoctet)</td></tr>
-            <tr><td>giga</td><td class="font-black text-cyan-700 text-lg">G</td><td class="font-bold">10<sup>9</sup></td><td>1 000 000 000</td><td>1 Go (gigaoctet)</td></tr>
-            <tr><td>méga</td><td class="font-black text-cyan-700 text-lg">M</td><td class="font-bold">10<sup>6</sup></td><td>1 000 000</td><td>1 MHz (mégahertz)</td></tr>
-            <tr><td>kilo</td><td class="font-black text-cyan-700 text-lg">k</td><td class="font-bold">10<sup>3</sup></td><td>1 000</td><td>1 km (kilomètre)</td></tr>
-            <tr><td>hecto</td><td class="font-black text-cyan-700 text-lg">h</td><td class="font-bold">10<sup>2</sup></td><td>100</td><td>1 hPa (hectopascal)</td></tr>
-            <tr><td>déca</td><td class="font-black text-cyan-700 text-lg">da</td><td class="font-bold">10<sup>1</sup></td><td>10</td><td>1 dam (décamètre)</td></tr>
-            <tr class="base-row"><td>— (aucun)</td><td class="font-black text-gray-600 text-lg">—</td><td class="font-bold">10<sup>0</sup> = 1</td><td>1</td><td>1 m (mètre)</td></tr>
-            <tr><td>déci</td><td class="font-black text-cyan-700 text-lg">d</td><td class="font-bold">10<sup>−1</sup></td><td>0,1</td><td>1 dL (décilitre)</td></tr>
-            <tr><td>centi</td><td class="font-black text-cyan-700 text-lg">c</td><td class="font-bold">10<sup>−2</sup></td><td>0,01</td><td>1 cm (centimètre)</td></tr>
-            <tr><td>milli</td><td class="font-black text-cyan-700 text-lg">m</td><td class="font-bold">10<sup>−3</sup></td><td>0,001</td><td>1 mA (milliampère)</td></tr>
-            <tr><td>micro</td><td class="font-black text-cyan-700 text-lg">µ</td><td class="font-bold">10<sup>−6</sup></td><td>0,000 001</td><td>1 µm (micromètre)</td></tr>
-            <tr><td>nano</td><td class="font-black text-cyan-700 text-lg">n</td><td class="font-bold">10<sup>−9</sup></td><td>0,000 000 001</td><td>1 nm (nanomètre)</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="mb-8">
-      <h3 class="text-2xl font-bold text-cyan-800 mb-4 border-b-2 border-cyan-300 pb-2">3. La méthode de conversion</h3>
-      <div class="cle mb-4">
-        <ol class="list-decimal ml-6 space-y-3 text-lg text-gray-800">
-          <li><strong>Recopier le nombre</strong> (le coefficient) tel quel.</li>
-          <li>
-            <strong>Multiplier par une puissance de 10</strong> dont l'exposant est :
-            <div class="bg-white rounded-lg px-4 py-3 mt-2 text-cyan-900 font-bold text-center border-2 border-cyan-200">
-              exposant = (puissance du préfixe de départ) − (puissance du préfixe d'arrivée)
-            </div>
-            <div class="text-gray-600 text-base mt-2">Si l'unité n'a pas de préfixe, sa puissance vaut <strong>0</strong>.</div>
-          </li>
-          <li><strong>Simplifier</strong> si possible (mais la notation scientifique est toujours acceptée).</li>
-        </ol>
-      </div>
-    </div>
-
-    <div class="mb-8">
-      <h3 class="text-2xl font-bold text-cyan-800 mb-4 border-b-2 border-cyan-300 pb-2">4. Exemples détaillés</h3>
-      <div class="bg-cyan-50 rounded-lg p-6 mb-4 space-y-3">
-        <div class="bg-white rounded-lg p-4">
-          <p class="font-bold text-cyan-700 mb-2">Exemple 1 : Convertir 5 km en m</p>
-          <p class="text-gray-600 text-sm mb-1">Préfixe de départ : <span class="tag-prefix">k</span> (kilo = 10<sup>3</sup>) &nbsp;→&nbsp; Préfixe d'arrivée : <em>aucun</em> (10<sup>0</sup>)</p>
-          <p class="text-gray-600 text-sm mb-2">Exposant de conversion : 3 − 0 = <strong>3</strong></p>
-          <p class="font-bold text-cyan-900">5 km = 5 × 10<sup>3</sup> m</p>
-          <div class="check-box">
-            <p class="check-label">Vérifie ta compréhension :</p>
-            <p class="check-question">Convertis 7 cm en m (donne le résultat sous la forme coefficient × 10<sup>exposant</sup>).</p>
-            <p class="check-hint">Aide : centi = 10<sup>−2</sup>, exposant de départ : −2, exposant d'arrivée : 0, −2 − 0 = ?</p>
-            <div class="flex flex-wrap items-center gap-4">
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Coefficient</label>
-                <input type="text" id="chk1_1a" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <span class="text-2xl font-black text-amber-700 mt-4">× 10</span>
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Exposant</label>
-                <input type="text" id="chk1_1b" class="power-input" placeholder="ex: −3" inputmode="numeric" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <button class="check-btn mt-4" onclick="checkConversion('chk1_1a','chk1_1b',7,-2,'chkr1_1')">Vérifier</button>
-            </div>
-            <div id="chk1_1-numpad"></div>
-            <p id="chkr1_1" class="mt-2 font-semibold"></p>
-          </div>
-        </div>
-        <div class="bg-white rounded-lg p-4">
-          <p class="font-bold text-cyan-700 mb-2">Exemple 2 : Convertir 3,2 m en cm</p>
-          <p class="text-gray-600 text-sm mb-1">Préfixe de départ : <em>aucun</em> (10<sup>0</sup>) &nbsp;→&nbsp; Préfixe d'arrivée : <span class="tag-prefix">c</span> (centi = 10<sup>−2</sup>)</p>
-          <p class="text-gray-600 text-sm mb-2">Exposant de conversion : 0 − (−2) = <strong>+2</strong></p>
-          <p class="font-bold text-cyan-900">3,2 m = 3,2 × 10<sup>2</sup> cm</p>
-          <div class="check-box">
-            <p class="check-label">Vérifie ta compréhension :</p>
-            <p class="check-question">Convertis 4 m en mm (donne le résultat sous la forme coefficient × 10<sup>exposant</sup>).</p>
-            <p class="check-hint">Aide : milli = 10<sup>−3</sup>, exposant de départ : 0, exposant d'arrivée : −3, 0 − (−3) = ?</p>
-            <div class="flex flex-wrap items-center gap-4">
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Coefficient</label>
-                <input type="text" id="chk1_2a" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <span class="text-2xl font-black text-amber-700 mt-4">× 10</span>
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Exposant</label>
-                <input type="text" id="chk1_2b" class="power-input" placeholder="ex: −3" inputmode="numeric" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <button class="check-btn mt-4" onclick="checkConversion('chk1_2a','chk1_2b',4,3,'chkr1_2')">Vérifier</button>
-            </div>
-            <div id="chk1_2-numpad"></div>
-            <p id="chkr1_2" class="mt-2 font-semibold"></p>
-          </div>
-        </div>
-        <div class="bg-white rounded-lg p-4">
-          <p class="font-bold text-cyan-700 mb-2">Exemple 3 : Convertir 450 µA en mA</p>
-          <p class="text-gray-600 text-sm mb-1">Préfixe de départ : <span class="tag-prefix">µ</span> (micro = 10<sup>−6</sup>) &nbsp;→&nbsp; Préfixe d'arrivée : <span class="tag-prefix">m</span> (milli = 10<sup>−3</sup>)</p>
-          <p class="text-gray-600 text-sm mb-2">Exposant de conversion : −6 − (−3) = <strong>−3</strong></p>
-          <p class="font-bold text-cyan-900">450 µA = 450 × 10<sup>−3</sup> mA</p>
-          <div class="check-box">
-            <p class="check-label">Vérifie ta compréhension :</p>
-            <p class="check-question">Convertis 600 ns en ms (donne le résultat sous la forme coefficient × 10<sup>exposant</sup>).</p>
-            <p class="check-hint">Aide : nano = 10<sup>−9</sup>, exposant de départ : −9, exposant d'arrivée : −3, −9 − (−3) = ?</p>
-            <div class="flex flex-wrap items-center gap-4">
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Coefficient</label>
-                <input type="text" id="chk1_3a" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <span class="text-2xl font-black text-amber-700 mt-4">× 10</span>
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Exposant</label>
-                <input type="text" id="chk1_3b" class="power-input" placeholder="ex: −3" inputmode="numeric" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <button class="check-btn mt-4" onclick="checkConversion('chk1_3a','chk1_3b',600,-6,'chkr1_3')">Vérifier</button>
-            </div>
-            <div id="chk1_3-numpad"></div>
-            <p id="chkr1_3" class="mt-2 font-semibold"></p>
-          </div>
-        </div>
-        <div class="bg-white rounded-lg p-4">
-          <p class="font-bold text-cyan-700 mb-2">Exemple 4 : Convertir 2,5 × 10<sup>4</sup> mm en m</p>
-          <p class="text-gray-600 text-sm mb-1">Préfixe de départ : <span class="tag-prefix">m</span> (milli = 10<sup>−3</sup>) &nbsp;→&nbsp; Préfixe d'arrivée : <em>aucun</em> (10<sup>0</sup>)</p>
-          <p class="text-gray-600 text-sm mb-1">Exposant de conversion : −3 − 0 = <strong>−3</strong></p>
-          <p class="text-gray-600 text-sm mb-2">On ajoute cet exposant à la puissance de 10 du nombre : 4 + (−3) = <strong>1</strong></p>
-          <p class="font-bold text-cyan-900">2,5 × 10<sup>4</sup> mm = 2,5 × 10<sup>4 + (−3)</sup> m = 2,5 × 10<sup>1</sup> m = <strong>25 m</strong></p>
-          <div class="check-box">
-            <p class="check-label">Vérifie ta compréhension :</p>
-            <p class="check-question">Convertis 6,3 × 10<sup>3</sup> cm en m (donne le résultat sous la forme coefficient × 10<sup>exposant</sup>).</p>
-            <p class="check-hint">Aide : exposant de départ : −2, exposant d'arrivée : 0, exposant du nombre : +3, −2 − 0 + 3 = ?</p>
-            <div class="flex flex-wrap items-center gap-4">
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Coefficient</label>
-                <input type="text" id="chk1_4a" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <span class="text-2xl font-black text-amber-700 mt-4">× 10</span>
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Exposant</label>
-                <input type="text" id="chk1_4b" class="power-input" placeholder="ex: −3" inputmode="numeric" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <button class="check-btn mt-4" onclick="checkConversion('chk1_4a','chk1_4b',6.3,1,'chkr1_4')">Vérifier</button>
-            </div>
-            <div id="chk1_4-numpad"></div>
-            <p id="chkr1_4" class="mt-2 font-semibold"></p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="cle flex items-start gap-4 mb-8">
-      <div>
-        <strong class="cle-titre">Point de vigilance !</strong> Le signe moins devant les exposants est crucial. Calcule toujours soigneusement la différence <strong>(exposant départ) − (exposant arrivée)</strong> en faisant attention aux signes.
-      </div>
-    </div>
+<!-- ====== MODULE 1 : COURS (étapes construites par le script CV, moteur commun assets/cours.js) ====== -->
+<div id="screen-1" class="hidden-screen er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">Les préfixes et la méthode</h2>
+    <p class="er-contexte">Les <b>préfixes</b> (k, m, µ…) placés devant une unité sont des <b>puissances de 10</b>. Tu vas apprendre le tableau des préfixes, puis une <b>méthode</b> pour convertir n'importe quelle valeur d'une unité à une autre.</p>
   </div>
-  <div class="er-actions" style="justify-content:center;margin-top:16px"><a class="btn-secondary" style="text-decoration:none" href="#fiche-1">Fiche récapitulative du module 1</a></div>
+  <div id="etapes-cours"></div>
 </div>
 
 <!-- ====== MODULE 1 : ASTUCES ====== -->
@@ -497,250 +345,14 @@
   <div id="ex-container"></div>
 </div>
 
-<!-- ====== MODULE 3 : COURS UNITÉS AU CARRÉ ET AU CUBE ====== -->
-<div id="screen-cours-sq" class="hidden-screen max-w-4xl mx-auto px-4 py-8">
-  <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-    <h2 class="text-2xl md:text-3xl font-bold text-cyan-900 mb-6">Cours : Unités au carré et au cube</h2>
-
-    <div class="mb-8">
-      <h3 class="text-2xl font-bold text-cyan-800 mb-4 border-b-2 border-cyan-300 pb-2">1. Le principe</h3>
-      <div class="bg-cyan-50 rounded-lg p-6 mb-4">
-        <p class="text-lg mb-3">Quand une unité est <strong>au carré</strong> (ex : m²) ou <strong>au cube</strong> (ex : m³), on applique la même méthode de conversion, mais avec une règle supplémentaire :</p>
-        <div class="cle font-bold text-center mb-3">
-          exposant de conversion = (exposant du préfixe de départ − exposant du préfixe d'arrivée) × puissance de l'unité
-        </div>
-        <ul class="list-disc ml-6 text-lg space-y-1">
-          <li>Si l'unité est <strong>au carré</strong> : on multiplie l'exposant de conversion par <strong>2</strong></li>
-          <li>Si l'unité est <strong>au cube</strong> : on multiplie l'exposant de conversion par <strong>3</strong></li>
-        </ul>
-        <div class="bg-white rounded-lg p-4 mt-3 text-gray-600 text-sm">
-          <strong class="text-cyan-900">Pourquoi ?</strong> Parce que (10<sup>a</sup>)<sup>b</sup> = 10<sup>a×b</sup>. En élevant le facteur de conversion à la puissance de l'unité, l'exposant se multiplie. Par exemple : (10<sup>−2</sup>)<sup>2</sup> = 10<sup>−4</sup>, donc convertir du cm² en m² introduit un facteur 10<sup>−4</sup> et non 10<sup>−2</sup>.
-        </div>
-      </div>
-    </div>
-
-    <div class="mb-8">
-      <h3 class="text-2xl font-bold text-cyan-800 mb-4 border-b-2 border-cyan-300 pb-2">2. La méthode en 3 étapes</h3>
-      <div class="cle mb-4">
-        <ol class="list-decimal ml-6 space-y-3 text-lg text-gray-800">
-          <li><strong>Trouver l'exposant du préfixe</strong> de départ et d'arrivée (comme d'habitude).</li>
-          <li><strong>Calculer la différence</strong> (départ − arrivée), puis <strong>multiplier par la puissance de l'unité</strong> (2 si carré, 3 si cube).</li>
-          <li><strong>Multiplier le nombre</strong> par 10 élevé à cet exposant final.</li>
-        </ol>
-      </div>
-    </div>
-
-    <div class="mb-8">
-      <h3 class="text-2xl font-bold text-cyan-800 mb-4 border-b-2 border-cyan-300 pb-2">3. Exemples détaillés</h3>
-      <div class="bg-cyan-50 rounded-lg p-6 mb-4 space-y-3">
-        <div class="bg-white rounded-lg p-4">
-          <p class="font-bold text-cyan-700 mb-2">Exemple 1 : Convertir 3 cm² en m²</p>
-          <p class="text-gray-600 text-sm mb-1">Préfixe de départ : <span class="tag-prefix">c</span> (centi = 10<sup>−2</sup>) &nbsp;→&nbsp; Préfixe d'arrivée : <em>aucun</em> (10<sup>0</sup>)</p>
-          <p class="text-gray-600 text-sm mb-1">Différence des exposants : −2 − 0 = −2</p>
-          <p class="text-gray-600 text-sm mb-2">Unité au carré → on multiplie par 2 : −2 × 2 = <strong>−4</strong></p>
-          <p class="font-bold text-cyan-900">3 cm² = 3 × 10<sup>−4</sup> m²</p>
-          <div class="check-box">
-            <p class="check-label">Vérifie ta compréhension :</p>
-            <p class="check-question">Convertis 8 mm² en m² (donne le résultat sous la forme coefficient × 10<sup>exposant</sup>).</p>
-            <p class="check-hint">Aide : différence des exposants : −3 − 0 = ?, puissance : multiplie par 2 (unité au carré).</p>
-            <div class="flex flex-wrap items-center gap-4">
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Coefficient</label>
-                <input type="text" id="chk8_1a" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <span class="text-2xl font-black text-amber-700 mt-4">× 10</span>
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Exposant</label>
-                <input type="text" id="chk8_1b" class="power-input" placeholder="ex: −3" inputmode="numeric" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <button class="check-btn mt-4" onclick="checkConversion('chk8_1a','chk8_1b',8,-6,'chkr8_1')">Vérifier</button>
-            </div>
-            <div id="chk8_1-numpad"></div>
-            <p id="chkr8_1" class="mt-2 font-semibold"></p>
-          </div>
-        </div>
-        <div class="bg-white rounded-lg p-4">
-          <p class="font-bold text-cyan-700 mb-2">Exemple 2 : Convertir 5 km² en m²</p>
-          <p class="text-gray-600 text-sm mb-1">Préfixe de départ : <span class="tag-prefix">k</span> (kilo = 10<sup>3</sup>) &nbsp;→&nbsp; Préfixe d'arrivée : <em>aucun</em> (10<sup>0</sup>)</p>
-          <p class="text-gray-600 text-sm mb-1">Différence des exposants : 3 − 0 = 3</p>
-          <p class="text-gray-600 text-sm mb-2">Unité au carré → on multiplie par 2 : 3 × 2 = <strong>6</strong></p>
-          <p class="font-bold text-cyan-900">5 km² = 5 × 10<sup>6</sup> m²</p>
-          <div class="check-box">
-            <p class="check-label">Vérifie ta compréhension :</p>
-            <p class="check-question">Convertis 3,5 hm² en m² (donne le résultat sous la forme coefficient × 10<sup>exposant</sup>).</p>
-            <p class="check-hint">Aide : différence des exposants : 2 − 0 = ?, puissance : multiplie par 2 (unité au carré).</p>
-            <div class="flex flex-wrap items-center gap-4">
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Coefficient</label>
-                <input type="text" id="chk8_2a" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <span class="text-2xl font-black text-amber-700 mt-4">× 10</span>
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Exposant</label>
-                <input type="text" id="chk8_2b" class="power-input" placeholder="ex: −3" inputmode="numeric" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <button class="check-btn mt-4" onclick="checkConversion('chk8_2a','chk8_2b',3.5,4,'chkr8_2')">Vérifier</button>
-            </div>
-            <div id="chk8_2-numpad"></div>
-            <p id="chkr8_2" class="mt-2 font-semibold"></p>
-          </div>
-        </div>
-        <div class="bg-white rounded-lg p-4">
-          <p class="font-bold text-cyan-700 mb-2">Exemple 3 : Convertir 2,5 mm³ en cm³</p>
-          <p class="text-gray-600 text-sm mb-1">Préfixe de départ : <span class="tag-prefix">m</span> (milli = 10<sup>−3</sup>) &nbsp;→&nbsp; Préfixe d'arrivée : <span class="tag-prefix">c</span> (centi = 10<sup>−2</sup>)</p>
-          <p class="text-gray-600 text-sm mb-1">Différence des exposants : −3 − (−2) = −1</p>
-          <p class="text-gray-600 text-sm mb-2">Unité au cube → on multiplie par 3 : −1 × 3 = <strong>−3</strong></p>
-          <p class="font-bold text-cyan-900">2,5 mm³ = 2,5 × 10<sup>−3</sup> cm³</p>
-          <div class="check-box">
-            <p class="check-label">Vérifie ta compréhension :</p>
-            <p class="check-question">Convertis 6,2 mm³ en cm³ (donne le résultat sous la forme coefficient × 10<sup>exposant</sup>).</p>
-            <p class="check-hint">Aide : différence des exposants : −3 − (−2) = ?, puissance : multiplie par 3 (unité au cube).</p>
-            <div class="flex flex-wrap items-center gap-4">
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Coefficient</label>
-                <input type="text" id="chk8_3a" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <span class="text-2xl font-black text-amber-700 mt-4">× 10</span>
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Exposant</label>
-                <input type="text" id="chk8_3b" class="power-input" placeholder="ex: −3" inputmode="numeric" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <button class="check-btn mt-4" onclick="checkConversion('chk8_3a','chk8_3b',6.2,-3,'chkr8_3')">Vérifier</button>
-            </div>
-            <div id="chk8_3-numpad"></div>
-            <p id="chkr8_3" class="mt-2 font-semibold"></p>
-          </div>
-        </div>
-        <div class="bg-white rounded-lg p-4">
-          <p class="font-bold text-cyan-700 mb-2">Exemple 4 : Convertir 1,2 × 10³ cm³ en m³</p>
-          <p class="text-gray-600 text-sm mb-1">Préfixe de départ : <span class="tag-prefix">c</span> (centi = 10<sup>−2</sup>) &nbsp;→&nbsp; Préfixe d'arrivée : <em>aucun</em> (10<sup>0</sup>)</p>
-          <p class="text-gray-600 text-sm mb-1">Différence des exposants : −2 − 0 = −2 ; × 3 = <strong>−6</strong></p>
-          <p class="text-gray-600 text-sm mb-2">On ajoute cet exposant à la puissance de 10 du nombre : 3 + (−6) = <strong>−3</strong></p>
-          <p class="font-bold text-cyan-900">1,2 × 10<sup>3</sup> cm³ = 1,2 × 10<sup>−3</sup> m³</p>
-          <div class="check-box">
-            <p class="check-label">Vérifie ta compréhension :</p>
-            <p class="check-question">Convertis 4,7 × 10<sup>5</sup> dm³ en m³ (donne le résultat sous la forme coefficient × 10<sup>exposant</sup>).</p>
-            <p class="check-hint">Aide : exposant de conversion = −1 × 3 = −3. Ajoute-le à l'exposant du nombre : 5 + (−3) = ?</p>
-            <div class="flex flex-wrap items-center gap-4">
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Coefficient</label>
-                <input type="text" id="chk8_4a" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <span class="text-2xl font-black text-amber-700 mt-4">× 10</span>
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Exposant</label>
-                <input type="text" id="chk8_4b" class="power-input" placeholder="ex: −3" inputmode="numeric" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <button class="check-btn mt-4" onclick="checkConversion('chk8_4a','chk8_4b',4.7,2,'chkr8_4')">Vérifier</button>
-            </div>
-            <div id="chk8_4-numpad"></div>
-            <p id="chkr8_4" class="mt-2 font-semibold"></p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="mb-8">
-      <h3 class="text-2xl font-bold text-cyan-800 mb-4 border-b-2 border-cyan-300 pb-2">4. Lien entre cm³, dm³, m³ et les litres</h3>
-      <div class="bg-cyan-50 rounded-lg p-6 mb-4">
-        <div class="cle mb-4">
-        <p class="text-lg mb-3">Le litre (L) est une unité de volume couramment utilisée. Voici les correspondances à connaître absolument :</p>
-
-        <div class="overflow-x-auto">
-          <table class="prefix-table text-sm w-full">
-            <thead><tr><th>Volume (m³)</th><th>Volume (L)</th></tr></thead>
-            <tbody>
-              <tr><td class="font-bold">1 m³</td><td class="font-bold">1 000 L</td></tr>
-              <tr><td class="font-bold">1 dm³</td><td class="font-bold">1 L </td></tr>
-              <tr><td class="font-bold">1 cm³</td><td class="font-bold">1 mL </td></tr>
-            </tbody>
-          </table>
-        </div>
-        </div>
-
-        <div class="bg-white rounded-lg p-4">
-          <p class="font-bold text-cyan-900 mb-2">Méthode pratique : se ramener à l'une de ces trois correspondances</p>
-          <p class="text-gray-600 text-sm mb-3">Pour convertir entre des multiples du m³ et des multiples du L, l'idée est simple : on s'arrange pour se ramener à une des équivalence mémorisée. Le choix de l'équivalence choisie n'a pas d'autre importance que de simplifier les calculs.</p>
-          <div class="space-y-3">
-            <div class="bg-cyan-50 rounded-lg p-3 text-sm">
-              <strong class="text-cyan-700">Exemple A :</strong> Convertir 500 cm³ en L<br>
-              On sait que 1 cm³ = 1 mL, donc 500 cm³ = 500 mL.<br>
-              Puis 500 mL = 500 × 10<sup>-3</sup> L <br>
-              <strong>→ 500 cm³ = 500 × 10<sup>−3</sup> L = 0,5 L</strong>
-              <div class="check-box">
-                <p class="check-label">Vérifie ta compréhension :</p>
-                <p class="check-question">Convertis 300 cm³ en L (donne le résultat sous la forme coefficient × 10<sup>exposant</sup>).</p>
-                <p class="check-hint">Aide : 1 cm³ = 1 mL, donc 300 cm³ = 300 mL. Convertis ensuite les mL en L (milli = 10<sup>−3</sup>).</p>
-                <div class="flex flex-wrap items-center gap-4">
-                  <div class="flex flex-col items-center gap-1">
-                    <label class="text-xs text-amber-800 font-bold uppercase">Coefficient</label>
-                    <input type="text" id="chk8_5a" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                  </div>
-                  <span class="text-2xl font-black text-amber-700 mt-4">× 10</span>
-                  <div class="flex flex-col items-center gap-1">
-                    <label class="text-xs text-amber-800 font-bold uppercase">Exposant</label>
-                    <input type="text" id="chk8_5b" class="power-input" placeholder="ex: −3" inputmode="numeric" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                  </div>
-                  <button class="check-btn mt-4" onclick="checkConversion('chk8_5a','chk8_5b',300,-3,'chkr8_5')">Vérifier</button>
-                </div>
-                <div id="chk8_5-numpad"></div>
-                <p id="chkr8_5" class="mt-2 font-semibold"></p>
-              </div>
-            </div>
-            <div class="bg-cyan-50 rounded-lg p-3 text-sm">
-              <strong class="text-cyan-700">Exemple B :</strong> Convertir 2,5 cL en cm³<br>
-              On sait que 1 cm³ = 1 mL, donc on commence par convertir 2,5 cL en mL.<br>
-              <strong>→ 2,5 cL = 2,5 × 10<sup>−2+3</sup> mL = 2,5 × 10<sup>1</sup> mL = 2,5 × 10<sup>1</sup> cm³</strong>
-              <div class="check-box">
-                <p class="check-label">Vérifie ta compréhension :</p>
-                <p class="check-question">Convertis 4,2 cL en cm³ (donne le résultat sous la forme coefficient × 10<sup>exposant</sup>).</p>
-                <p class="check-hint">Aide : 1 cm³ = 1 mL, donc convertis d'abord 4,2 cL en mL : exposant = −2 − (−3) = 1.</p>
-                <div class="flex flex-wrap items-center gap-4">
-                  <div class="flex flex-col items-center gap-1">
-                    <label class="text-xs text-amber-800 font-bold uppercase">Coefficient</label>
-                    <input type="text" id="chk8_6a" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                  </div>
-                  <span class="text-2xl font-black text-amber-700 mt-4">× 10</span>
-                  <div class="flex flex-col items-center gap-1">
-                    <label class="text-xs text-amber-800 font-bold uppercase">Exposant</label>
-                    <input type="text" id="chk8_6b" class="power-input" placeholder="ex: −3" inputmode="numeric" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                  </div>
-                  <button class="check-btn mt-4" onclick="checkConversion('chk8_6a','chk8_6b',4.2,1,'chkr8_6')">Vérifier</button>
-                </div>
-                <div id="chk8_6-numpad"></div>
-                <p id="chkr8_6" class="mt-2 font-semibold"></p>
-              </div>
-            </div>
-            <div class="bg-cyan-50 rounded-lg p-3 text-sm">
-              <strong class="text-cyan-700">Exemple C :</strong> Convertir 3 mm³ en mL<br>
-              On passe par les cm³ car 1 cm³ = 1 mL <br>
-              <strong>→ 3 mm³ = 3 × 10<sup>(-3+2)×3</sup> cm³ = 3 × 10<sup>-3</sup> cm³ = 3 × 10<sup>-3</sup> mL </strong>
-              <div class="check-box">
-                <p class="check-label">Vérifie ta compréhension :</p>
-                <p class="check-question">Convertis 5 mm³ en mL (donne le résultat sous la forme coefficient × 10<sup>exposant</sup>).</p>
-                <p class="check-hint">Aide : passe par les cm³ (1 cm³ = 1 mL) : exposant = (−3 − (−2)) × 3 = −3.</p>
-                <div class="flex flex-wrap items-center gap-4">
-                  <div class="flex flex-col items-center gap-1">
-                    <label class="text-xs text-amber-800 font-bold uppercase">Coefficient</label>
-                    <input type="text" id="chk8_7a" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                  </div>
-                  <span class="text-2xl font-black text-amber-700 mt-4">× 10</span>
-                  <div class="flex flex-col items-center gap-1">
-                    <label class="text-xs text-amber-800 font-bold uppercase">Exposant</label>
-                    <input type="text" id="chk8_7b" class="power-input" placeholder="ex: −3" inputmode="numeric" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                  </div>
-                  <button class="check-btn mt-4" onclick="checkConversion('chk8_7a','chk8_7b',5,-3,'chkr8_7')">Vérifier</button>
-                </div>
-                <div id="chk8_7-numpad"></div>
-                <p id="chkr8_7" class="mt-2 font-semibold"></p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+<!-- ====== MODULE 3 : COURS UNITÉS AU CARRÉ ET AU CUBE (script CV, moteur commun assets/cours.js) ====== -->
+<div id="screen-cours-sq" class="hidden-screen er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS</span>
+    <h2 class="er-titre">Unités au carré et au cube</h2>
+    <p class="er-contexte">Pour convertir des <b>surfaces</b> (m<sup>2</sup>) et des <b>volumes</b> (m<sup>3</sup>, L), on applique la même méthode qu'au module 1, avec une règle de plus : l'exposant se <b>multiplie par la puissance de l'unité</b>.</p>
   </div>
-  <div class="er-actions" style="justify-content:center;margin-top:16px"><a class="btn-secondary" style="text-decoration:none" href="#fiche-3">Fiche récapitulative du module 3</a></div>
+  <div id="etapes-cours-sq"></div>
 </div>
 
 <!-- ====== MODULE 3 : ENTRAÎNEMENT UNITÉS AU CARRÉ ET AU CUBE ====== -->
@@ -752,162 +364,14 @@
   <div id="exsq-container"></div>
 </div>
 
-<!-- ====== MODULE 4 : COURS UNITÉS COMPOSÉES ====== -->
-<div id="screen-cours-comp" class="hidden-screen max-w-4xl mx-auto px-4 py-8">
-  <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-    <h2 class="text-2xl md:text-3xl font-bold text-cyan-900 mb-6">Cours : Unités composées</h2>
-
-    <div class="mb-8">
-      <h3 class="text-2xl font-bold text-cyan-800 mb-4 border-b-2 border-cyan-300 pb-2">1. Qu'est-ce qu'une unité composée ?</h3>
-      <div class="bg-cyan-50 rounded-lg p-6 mb-4">
-        <p class="text-lg mb-3">Certaines grandeurs s'expriment avec une unité formée de <strong>deux unités combinées</strong> : une concentration massique en <strong>g.L<sup>−1</sup></strong>, une concentration molaire en <strong>mol.L<sup>−1</sup></strong>, une masse volumique en <strong>kg.m<sup>−3</sup></strong>…</p>
-        <p class="text-lg">L'exposant négatif (−1, −2 ou −3) indique que la deuxième unité est au dénominateur : g.L<sup>−1</sup> se lit « grammes par litre ».</p>
-      </div>
-      <div class="callout-warning flex items-start gap-4">
-        <div class="text-gray-700">
-          <strong class="text-yellow-700">Remarque !</strong> On peut aussi écrire cette unité <strong>g/L</strong> : c'est exactement la même chose que g.L<sup>−1</sup>, ça ne change rien au résultat. Mais il faut garder en tête que le symbole <strong>/</strong> indique que l'unité qui suit est en réalité affectée d'une puissance <strong>négative</strong> : c'est ce signe qu'il faudra utiliser dans le calcul de conversion, même s'il n'est pas écrit explicitement. Dans la suite, on utilisera toujours la notation g.L<sup>−1</sup>.
-        </div>
-      </div>
-    </div>
-
-    <div class="mb-8">
-      <h3 class="text-2xl font-bold text-cyan-800 mb-4 border-b-2 border-cyan-300 pb-2">2. Le principe de conversion</h3>
-      <div class="bg-cyan-50 rounded-lg p-6 mb-4">
-        <p class="text-lg mb-3">On applique la <strong>même méthode</strong> que pour les unités simples, en traitant chaque unité séparément :</p>
-        <ul class="list-disc ml-6 text-lg space-y-2 mb-4">
-          <li>Pour l'unité <strong>au numérateur</strong> (puissance +1, ex : le g de g.L<sup>−1</sup>) : exposant = (départ − arrivée), comme d'habitude.</li>
-          <li>Pour l'unité <strong>en puissance −1</strong> (le L<sup>−1</sup> de g.L<sup>−1</sup>) : on calcule la même différence (départ − arrivée), mais on <strong>multiplie le résultat par −1</strong>.</li>
-          <li>Si la puissance négative est <strong>−2</strong> ou <strong>−3</strong> (ex : le cm<sup>−3</sup> d'une masse volumique) : on <strong>inverse le signe</strong> de la différence et on <strong>multiplie par 2 ou 3</strong> (au total, on multiplie donc par −2 ou −3).</li>
-          <li>On <strong>additionne</strong> les deux exposants obtenus : c'est l'exposant final de conversion.</li>
-        </ul>
-        <div class="cle font-bold text-center">
-          exposant total = (exposant numérateur) + (exposant dénominateur × puissance du dénominateur)
-        </div>
-      </div>
-    </div>
-
-    <div class="mb-8">
-      <h3 class="text-2xl font-bold text-cyan-800 mb-4 border-b-2 border-cyan-300 pb-2">3. Exemples détaillés</h3>
-      <div class="bg-cyan-50 rounded-lg p-6 mb-4 space-y-3">
-
-        <div class="bg-white rounded-lg p-4">
-          <p class="font-bold text-cyan-700 mb-2">Exemple 1 : Convertir 3,5 g.L<sup>−1</sup> en mg.L<sup>−1</sup></p>
-          <p class="text-gray-600 text-sm mb-1">Numérateur (g) : <em>aucun</em> préfixe (10<sup>0</sup>) → <span class="tag-prefix">m</span> (milli = 10<sup>−3</sup>) : exposant = 0 − (−3) = <strong>3</strong></p>
-          <p class="text-gray-600 text-sm mb-1">Dénominateur (L<sup>−1</sup>) : ne change pas (L → L) : exposant = (0 − 0) × (−1) = <strong>0</strong></p>
-          <p class="text-gray-600 text-sm mb-2">Exposant total : 3 + 0 = <strong>3</strong></p>
-          <p class="font-bold text-cyan-900">3,5 g.L<sup>−1</sup> = 3,5 × 10<sup>3</sup> mg.L<sup>−1</sup></p>
-          <div class="check-box">
-            <p class="check-label">Vérifie ta compréhension :</p>
-            <p class="check-question">Convertis 4 g.L<sup>−1</sup> en mg.L<sup>−1</sup> (donne le résultat sous la forme coefficient × 10<sup>exposant</sup>).</p>
-            <p class="check-hint">Aide : numérateur : 0 − (−3) = ?, dénominateur inchangé (exposant 0).</p>
-            <div class="flex flex-wrap items-center gap-4">
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Coefficient</label>
-                <input type="text" id="chk10_1a" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <span class="text-2xl font-black text-amber-700 mt-4">× 10</span>
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Exposant</label>
-                <input type="text" id="chk10_1b" class="power-input" placeholder="ex: −3" inputmode="numeric" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <button class="check-btn mt-4" onclick="checkConversion('chk10_1a','chk10_1b',4,3,'chkr10_1')">Vérifier</button>
-            </div>
-            <div id="chk10_1-numpad"></div>
-            <p id="chkr10_1" class="mt-2 font-semibold"></p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-lg p-4">
-          <p class="font-bold text-cyan-700 mb-2">Exemple 2 : Convertir 2 g.L<sup>−1</sup> en g.mL<sup>−1</sup></p>
-          <p class="text-gray-600 text-sm mb-1">Numérateur (g) : ne change pas : exposant = <strong>0</strong></p>
-          <p class="text-gray-600 text-sm mb-1">Dénominateur (L<sup>−1</sup>) : <em>aucun</em> préfixe (10<sup>0</sup>) → <span class="tag-prefix">m</span> (milli = 10<sup>−3</sup>) : exposant = (0 − (−3)) × (−1) = 3 × (−1) = <strong>−3</strong></p>
-          <p class="text-gray-600 text-sm mb-2">Exposant total : 0 + (−3) = <strong>−3</strong></p>
-          <p class="font-bold text-cyan-900">2 g.L<sup>−1</sup> = 2 × 10<sup>−3</sup> g.mL<sup>−1</sup></p>
-          <div class="check-box">
-            <p class="check-label">Vérifie ta compréhension :</p>
-            <p class="check-question">Convertis 6 mol.L<sup>−1</sup> en mol.mL<sup>−1</sup> (donne le résultat sous la forme coefficient × 10<sup>exposant</sup>).</p>
-            <p class="check-hint">Aide : numérateur inchangé (exposant 0), dénominateur : (0 − (−3)) × (−1) = ?</p>
-            <div class="flex flex-wrap items-center gap-4">
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Coefficient</label>
-                <input type="text" id="chk10_2a" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <span class="text-2xl font-black text-amber-700 mt-4">× 10</span>
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Exposant</label>
-                <input type="text" id="chk10_2b" class="power-input" placeholder="ex: −3" inputmode="numeric" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <button class="check-btn mt-4" onclick="checkConversion('chk10_2a','chk10_2b',6,-3,'chkr10_2')">Vérifier</button>
-            </div>
-            <div id="chk10_2-numpad"></div>
-            <p id="chkr10_2" class="mt-2 font-semibold"></p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-lg p-4">
-          <p class="font-bold text-cyan-700 mb-2">Exemple 3 : Convertir 2 mg.L<sup>−1</sup> en g.mL<sup>−1</sup></p>
-          <p class="text-gray-600 text-sm mb-1">Numérateur (g) : <span class="tag-prefix">m</span> (milli = 10<sup>−3</sup>) → <em>aucun</em> préfixe (10<sup>0</sup>) : exposant = −3 − 0 = <strong>−3</strong></p>
-          <p class="text-gray-600 text-sm mb-1">Dénominateur (L<sup>−1</sup>) : <em>aucun</em> préfixe (10<sup>0</sup>) → <span class="tag-prefix">m</span> (milli = 10<sup>−3</sup>) : exposant = (0 − (−3)) × (−1) = <strong>−3</strong></p>
-          <p class="text-gray-600 text-sm mb-2">Exposant total : −3 + (−3) = <strong>−6</strong></p>
-          <p class="font-bold text-cyan-900">2 mg.L<sup>−1</sup> = 2 × 10<sup>−6</sup> g.mL<sup>−1</sup></p>
-          <div class="check-box">
-            <p class="check-label">Vérifie ta compréhension :</p>
-            <p class="check-question">Convertis 5 mg.L<sup>−1</sup> en g.mL<sup>−1</sup> (donne le résultat sous la forme coefficient × 10<sup>exposant</sup>).</p>
-            <p class="check-hint">Aide : numérateur : −3 − 0 = ?, dénominateur : (0 − (−3)) × (−1) = ?, puis additionne les deux.</p>
-            <div class="flex flex-wrap items-center gap-4">
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Coefficient</label>
-                <input type="text" id="chk10_3a" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <span class="text-2xl font-black text-amber-700 mt-4">× 10</span>
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Exposant</label>
-                <input type="text" id="chk10_3b" class="power-input" placeholder="ex: −3" inputmode="numeric" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <button class="check-btn mt-4" onclick="checkConversion('chk10_3a','chk10_3b',5,-6,'chkr10_3')">Vérifier</button>
-            </div>
-            <div id="chk10_3-numpad"></div>
-            <p id="chkr10_3" class="mt-2 font-semibold"></p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-lg p-4">
-          <p class="font-bold text-cyan-700 mb-2">Exemple 4 : Convertir 2,7 g.cm<sup>−3</sup> en kg.m<sup>−3</sup> (masse volumique de l'aluminium)</p>
-          <p class="text-gray-600 text-sm mb-1">Numérateur (g) : <em>aucun</em> préfixe (10<sup>0</sup>) → <span class="tag-prefix">k</span> (kilo = 10<sup>3</sup>) : exposant = 0 − 3 = <strong>−3</strong></p>
-          <p class="text-gray-600 text-sm mb-1">Dénominateur (m<sup>−3</sup>) : <span class="tag-prefix">c</span> (centi = 10<sup>−2</sup>) → <em>aucun</em> préfixe (10<sup>0</sup>) : exposant = (−2 − 0) × (−3) = <strong>6</strong></p>
-          <p class="text-gray-600 text-sm mb-2">Exposant total : −3 + 6 = <strong>3</strong></p>
-          <p class="font-bold text-cyan-900">2,7 g.cm<sup>−3</sup> = 2,7 × 10<sup>3</sup> kg.m<sup>−3</sup></p>
-          <div class="check-box">
-            <p class="check-label">Vérifie ta compréhension :</p>
-            <p class="check-question">Convertis 1 g.cm<sup>−3</sup> en kg.m<sup>−3</sup> (masse volumique de l'eau) (donne le résultat sous la forme coefficient × 10<sup>exposant</sup>).</p>
-            <p class="check-hint">Aide : numérateur : 0 − 3 = ?, dénominateur : (−2 − 0) × (−3) = ?, puis additionne les deux.</p>
-            <div class="flex flex-wrap items-center gap-4">
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Coefficient</label>
-                <input type="text" id="chk10_4a" class="answer-input" placeholder="ex: 3,5" inputmode="decimal" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <span class="text-2xl font-black text-amber-700 mt-4">× 10</span>
-              <div class="flex flex-col items-center gap-1">
-                <label class="text-xs text-amber-800 font-bold uppercase">Exposant</label>
-                <input type="text" id="chk10_4b" class="power-input" placeholder="ex: −3" inputmode="numeric" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-              </div>
-              <button class="check-btn mt-4" onclick="checkConversion('chk10_4a','chk10_4b',1,3,'chkr10_4')">Vérifier</button>
-            </div>
-            <div id="chk10_4-numpad"></div>
-            <p id="chkr10_4" class="mt-2 font-semibold"></p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="cle flex items-start gap-4 mb-8">
-      <div>
-        <strong class="cle-titre">Point de vigilance !</strong> Ne confonds pas la puissance de l'unité (−1, −2 ou −3, toujours la même pour une grandeur donnée) avec la puissance du préfixe (celle qui dépend de k, h, da, d, c, m…). C'est cette dernière qui varie d'un exercice à l'autre ; la puissance de l'unité, elle, ne sert qu'à savoir par quoi multiplier à la fin.
-      </div>
-    </div>
+<!-- ====== MODULE 4 : COURS UNITÉS COMPOSÉES (script CV, moteur commun assets/cours.js) ====== -->
+<div id="screen-cours-comp" class="hidden-screen er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS</span>
+    <h2 class="er-titre">Unités composées</h2>
+    <p class="er-contexte">Une concentration en <b>g.L<sup>−1</sup></b> ou une masse volumique en <b>kg.m<sup>−3</sup></b> s'écrit avec deux unités. Tu vas apprendre à convertir ces <b>unités composées</b> en traitant chaque unité séparément.</p>
   </div>
-  <div class="er-actions" style="justify-content:center;margin-top:16px"><a class="btn-secondary" style="text-decoration:none" href="#fiche-4">Fiche récapitulative du module 4</a></div>
+  <div id="etapes-cours-comp"></div>
 </div>
 
 <!-- ====== MODULE 4 : ENTRAÎNEMENT UNITÉS COMPOSÉES ====== -->
@@ -1046,12 +510,6 @@ function ouvrirAncre() {
 }
 addEventListener('hashchange', ouvrirAncre);
 
-// Pavé numérique des pages de cours (Module 1 et Module 8) : toujours affiché,
-// pas de bouton d'activation (celui-ci ne concerne que les pages d'entraînement).
-['chk1_1','chk1_2','chk1_3','chk1_4','chk8_1','chk8_2','chk8_3','chk8_4','chk8_5','chk8_6','chk8_7','chk10_1','chk10_2','chk10_3','chk10_4'].forEach(id => {
-  document.getElementById(id + '-numpad').innerHTML = numpadWidget(true);
-});
-
 function showHome() {
   document.querySelectorAll('[id^="screen-"]').forEach(el => {
     el.classList.remove('active-screen');
@@ -1079,11 +537,13 @@ function showModule(n) {
   const cle = cleEcran(n);
   suivreAdresse(cle);
   SOM.menu(cle);
-  if (n === 1 || n === 2 || n === 'cours-sq' || n === 'cours-comp') SOM.marquer({ fait: true });
+  // (les cours sont marqués faits à leur dernière étape « À retenir », voir CV)
+  if (n === 2) SOM.marquer({ fait: true });
 
   if (n === 1) {
     document.getElementById('screen-1').classList.replace('hidden-screen','active-screen');
     currentScreen = '1';
+    CV.lancer('cours');
   } else if (n === 2) {
     document.getElementById('screen-2').classList.replace('hidden-screen','active-screen');
     currentScreen = '2';
@@ -1094,6 +554,7 @@ function showModule(n) {
   } else if (n === 'cours-sq') {
     document.getElementById('screen-cours-sq').classList.replace('hidden-screen','active-screen');
     currentScreen = 'cours-sq';
+    CV.lancer('cours-sq');
   } else if (n === 'ex-sq') {
     document.getElementById('screen-ex-sq').classList.replace('hidden-screen','active-screen');
     currentScreen = 'ex-sq';
@@ -1101,6 +562,7 @@ function showModule(n) {
   } else if (n === 'cours-comp') {
     document.getElementById('screen-cours-comp').classList.replace('hidden-screen','active-screen');
     currentScreen = 'cours-comp';
+    CV.lancer('cours-comp');
   } else if (n === 'ex-comp') {
     document.getElementById('screen-ex-comp').classList.replace('hidden-screen','active-screen');
     currentScreen = 'ex-comp';
@@ -2010,6 +1472,540 @@ function exCompEnd() {
       </div>
     </div>`;
 }
+
+// ===== COURS DES MODULES 1, 3 ET 4 (moteur commun assets/cours.js) =====
+// notion → exemple → « À toi » ; chaque cours est recréé à chaque affichage
+// (nouvelles valeurs tirées au hasard) et marqué fait à « À retenir ».
+// Les réponses s'écrivent a × 10ⁿ (champ « sci ») : toute écriture égale est acceptée.
+const CV = (function () {
+  'use strict';
+  const { hasard, melanger, exemple, fmt } = COURS;
+
+  /* ---------- Écriture ---------- */
+  const ent = n => String(n).replace('-', '−');                      // entier avec le moins typographique
+  const pw = n => `10<sup>${ent(n)}</sup>`;                           // 10ⁿ
+  const par = n => (n < 0 ? `(${ent(n)})` : ent(n));                  // (−3) entre parenthèses après un signe
+  const nb = x => fmt(x).replace(/ /g, '&nbsp;');                    // 3,5 ; 1 000 (espaces insécables)
+  const ecr = (x, p) => (p ? `${nb(x)} × ${pw(p)}` : nb(x));         // nombre et sa puissance de 10
+  const PR = s => PREFIXES.find(q => q.sym === s);
+  const SANS = PR('');
+  const U = (q, u, k) => `${q.sym}${u}${k > 1 ? `<sup>${k}</sup>` : ''}`;             // cm², m³
+  const UC = (qn, nu, qd, du, kd) => `${qn.sym}${nu}.${qd.sym}${du}<sup>${ent(kd)}</sup>`; // mg.L⁻¹
+  // préfixe et sa puissance : « c (centi = 10⁻²) », « aucun (10⁰) »
+  const dit = q => (q.sym ? `<b>${q.sym}</b> (${q.name} = ${pw(q.exp)})` : `<i>aucun</i> (${pw(0)})`);
+  // nombre de chiffres significatifs du coefficient (réponse affichée)
+  const chiffres = x => Math.max(1, String(x).replace('.', '').replace(/^0+/, '').replace(/0+$/, '').length);
+  // valeur décimale quand elle reste lisible : « = 0,45 mA »
+  const simple = (v, vers) => (v >= 1e-3 && v < 1e7 ? ` = ${nb(+v.toPrecision(6))}&nbsp;${vers}` : '');
+  const COEFS = [1.5, 2, 2.5, 3, 3.2, 4, 4.5, 5, 6, 6.4, 7, 7.5, 8, 9];
+  // boutons de fin de cours : le premier est le bouton principal
+  const liens = l => `<div class="er-actions">${l.map(([h, t], i) => `<a class="${i ? 'btn-secondary' : 'btn-primary'}" style="text-decoration:none" href="#${h}">${t}</a>`).join('\n')}</div>`;
+
+  /* ---------- Une conversion à faire (« À toi ») ----------
+     o.x × 10^o.p dans l'unité o.de, à convertir en o.vers ;
+     o.termes : [{ a, b, k }] exposants des préfixes de départ (a) et d'arrivée (b), puissance de l'unité (k) ;
+     o.erreurs : [[exposant obtenu, diagnostic], …] erreurs typiques propres à la notion ;
+     o.aide : rappel de la méthode (erreur non reconnue) ; o.solution(E, p) : correction. */
+  function conversion(o) {
+    const p = o.p || 0;
+    const E = o.termes.reduce((s, t) => s + (t.a - t.b) * t.k, 0);
+    return { titre: o.titre, enonce: o.enonce,
+      parties: [{ type: 'sci', q: `Convertis ${ecr(o.x, p)}&nbsp;${o.de} en ${o.vers}.`, label: `${ecr(o.x, p)}&nbsp;${o.de} =`, unite: o.vers,
+        valeur: o.x * Math.pow(10, p + E), rel: 1e-6, cs: chiffres(o.x), diag: v => diagConv(v, o, p, E), solution: o.solution(E, p) }] };
+  }
+  // Diagnostic : on compare l'exposant obtenu par l'élève (par rapport au nombre recopié) aux erreurs typiques
+  function diagConv(v, o, p, E) {
+    if (!(v > 0)) return 'Une conversion ne change pas le signe : le résultat est positif.';
+    const r = Math.log10(v / o.x), R = Math.round(r);
+    if (Math.abs(r - R) > 1e-6) return `Recopie le nombre ${nb(o.x)} tel quel : la conversion ne change que la puissance de 10.`;
+    for (const [cand, msg] of (o.erreurs || [])) if (R === cand) return msg;
+    if (R === p - E) {
+      return `Tu as fait la conversion à l'envers : l'exposant est (départ) − (arrivée), pas (arrivée) − (départ). ${E > 0
+        ? `L'unité ${o.vers} est plus petite que ${o.de} : il en faut plus, le nombre doit augmenter.`
+        : `L'unité ${o.vers} est plus grande que ${o.de} : il en faut moins, le nombre doit diminuer.`}`;
+    }
+    if (p && R === E) return `N'oublie pas la puissance de 10 du nombre : on <b>ajoute</b> l'exposant de conversion à son exposant ${ent(p)} (10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a+b</sup>).`;
+    if (p && R === E - p) return 'On <b>ajoute</b> l\'exposant de conversion à celui du nombre (10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a+b</sup>), on ne le retranche pas.';
+    return o.aide;
+  }
+  // signe dans la différence (a) − (b) quand b est négatif
+  const msgSigne = (a, b) => `Attention aux signes dans la différence ${ent(a)} − ${par(b)}${b < 0 ? ` : retrancher un nombre négatif revient à ajouter son opposé, ${ent(a)} − ${par(b)} = ${ent(a)} + ${ent(-b)}` : ''}.`;
+
+  // Lignes de calcul d'une conversion simple ou au carré / au cube (exemples et corrections)
+  function calcul(x, p, pa, pb, u, k) {
+    k = k || 1;
+    const d = pa.exp - pb.exp, E = d * k, de = U(pa, u, k), vers = U(pb, u, k);
+    return `<p>Préfixe de départ : ${dit(pa)} → préfixe d'arrivée : ${dit(pb)}.</p>
+      ${k > 1 ? `<p>Différence des exposants : ${ent(pa.exp)} − ${par(pb.exp)} = ${ent(d)} ; unité au ${k === 2 ? 'carré' : 'cube'} : ${par(d)} × ${k} = <b>${ent(E)}</b></p>`
+              : `<p>Exposant de conversion : ${ent(pa.exp)} − ${par(pb.exp)} = <b>${ent(E)}</b></p>`}
+      ${p ? `<p>On ajoute cet exposant à la puissance de 10 du nombre : ${ent(p)} + ${par(E)} = <b>${ent(p + E)}</b></p>` : ''}
+      <p class="crs-calc">${ecr(x, p)}&nbsp;${de} = ${p ? `${nb(x)} × 10<sup>${ent(p)} + ${par(E)}</sup>&nbsp;${vers} = ` : ''}<span class="c">${ecr(x, p + E)}&nbsp;${vers}</span>${p + E ? simple(x * Math.pow(10, p + E), vers) : ''}</p>`;
+  }
+
+  /* ================= MODULE 1 : les préfixes et la méthode ================= */
+  const CONFUS = { T: 'G', G: 'M', M: 'm', k: 'h', h: 'k', da: 'd', d: 'da', c: 'm', m: 'M', 'µ': 'm', n: 'µ' };   // préfixes souvent confondus
+  // unités courantes avec un préfixe : [symbole du préfixe, unité]
+  const COURANTS = [['k', 'm'], ['c', 'm'], ['m', 'm'], ['µ', 'm'], ['n', 'm'], ['k', 'g'], ['m', 'g'], ['µ', 'g'], ['m', 's'], ['µ', 's'], ['n', 's'],
+    ['m', 'A'], ['µ', 'A'], ['k', 'W'], ['M', 'W'], ['G', 'W'], ['k', 'Hz'], ['M', 'Hz'], ['G', 'Hz'], ['h', 'Pa'], ['k', 'Pa'], ['k', 'J'], ['M', 'J'],
+    ['m', 'V'], ['k', 'V'], ['c', 'L'], ['m', 'L'], ['d', 'L'], ['h', 'L'], ['G', 'o'], ['T', 'o']];
+  // conversions entre deux préfixes : [départ, arrivée, unité]
+  const PAIRES = [['k', 'M', 'W'], ['M', 'k', 'Hz'], ['m', 'µ', 'A'], ['µ', 'm', 's'], ['n', 'µ', 'm'], ['µ', 'n', 'm'], ['c', 'm', 'm'], ['m', 'c', 'm'],
+    ['k', 'm', 'g'], ['m', 'k', 'g'], ['G', 'M', 'o'], ['h', 'k', 'Pa'], ['d', 'm', 'L'], ['c', 'm', 'L'], ['M', 'G', 'Hz'], ['m', 'µ', 'g']];
+  const nomPuissance = e => { const q = PNOB.find(x => x.exp === e); return q ? `${pw(e)}, c'est le préfixe <b>${q.sym}</b> (${q.name}).` : `${pw(e)} ne correspond à aucun préfixe du tableau.`; };
+  const signe = q => `Attention au signe : le préfixe ${q.name} sert pour les ${q.exp > 0 ? 'grandes' : 'petites'} valeurs, son exposant est ${q.exp > 0 ? 'positif' : 'négatif'}.`;
+
+  // conversion d'une unité simple : x × 10^p (pa u) → (pb u)
+  function conv1(x, p, pa, pb, u, titre) {
+    const erreurs = [];
+    if (pa.exp && pb.exp) erreurs.push([p + pa.exp + pb.exp, msgSigne(pa.exp, pb.exp)]);
+    return conversion({ titre, x, p, de: pa.sym + u, vers: pb.sym + u, termes: [{ a: pa.exp, b: pb.exp, k: 1 }], erreurs,
+      aide: `Exposant de conversion = (puissance du préfixe de départ) − (puissance du préfixe d'arrivée). Départ : ${dit(pa)} ; arrivée : ${dit(pb)}.${p ? ' Puis ajoute-le à l\'exposant du nombre.' : ''}`,
+      solution: () => calcul(x, p, pa, pb, u) });
+  }
+  // « Que vaut le préfixe … ? »
+  function quellePuissance(q) {
+    const exps = [...new Set([q.exp, -q.exp, PR(CONFUS[q.sym]).exp, ...melanger(PNOB).map(x => x.exp)])].slice(0, 4);
+    const indices = {};
+    exps.forEach(e => { if (e !== q.exp) indices['e' + e] = nomPuissance(e) + (e === -q.exp ? ' ' + signe(q) : ''); });
+    return { titre: 'Du préfixe à la puissance de 10',
+      parties: [{ type: 'choix', q: `Que vaut le préfixe <b>${q.sym}</b> (${q.name})&nbsp;?`, options: exps.map(e => ({ id: 'e' + e, label: pw(e) })), bonne: 'e' + q.exp, indices,
+        solution: `<p>${q.name} : <b>${q.sym}</b> = ${pw(q.exp)}${Math.abs(q.exp) <= 3 ? ` = ${nb(Math.pow(10, q.exp))}` : ''}.</p>` }] };
+  }
+  // « Quel préfixe correspond à 10ⁿ ? »
+  function quelPrefixe(q) {
+    const opp = PNOB.find(x => x.exp === -q.exp);
+    const cands = [...new Set([q, opp, PR(CONFUS[q.sym]), ...melanger(PNOB)].filter(Boolean))].slice(0, 4);
+    const indices = {};
+    cands.forEach(x => {
+      if (x !== q) indices[x.sym] = `<b>${x.sym}</b> (${x.name}) vaut ${pw(x.exp)}.` + (x === opp ? ` Attention au signe : ${pw(q.exp)} a un exposant ${q.exp > 0 ? 'positif' : 'négatif'}, c'est un préfixe des ${q.exp > 0 ? 'grandes' : 'petites'} valeurs.` : '');
+    });
+    return { titre: 'De la puissance de 10 au préfixe',
+      parties: [{ type: 'choix', q: `Quel préfixe correspond à ${pw(q.exp)}&nbsp;?`, options: cands.map(x => ({ id: x.sym, label: `<b>${x.sym}</b> (${x.name})` })), bonne: q.sym, indices,
+        solution: `<p>${pw(q.exp)}, c'est <b>${q.sym}</b> (${q.name}).</p>` }] };
+  }
+  // « 1 µs = … s »
+  function unPrefixe(sym, u) {
+    const q = PR(sym);
+    const erreurs = [[-q.exp, `${signe(q)} 1&nbsp;${sym}${u} vaut ${q.exp > 0 ? 'plus' : 'moins'} que 1&nbsp;${u}.`]];
+    PNOB.forEach(x => { if (x !== q && x.exp !== -q.exp) erreurs.push([x.exp, `${pw(x.exp)} correspond au préfixe <b>${x.sym}</b> (${x.name}), pas à <b>${sym}</b>.`]); });
+    return conversion({ titre: 'Écrire la valeur d\'un préfixe', x: 1, de: sym + u, vers: u, termes: [{ a: q.exp, b: 0, k: 1 }], erreurs,
+      aide: `Relis le tableau : quelle puissance de 10 correspond au préfixe ${sym} (${q.name})&nbsp;?`,
+      solution: () => `<p>${q.name} : ${sym} = ${pw(q.exp)}, donc</p><p class="crs-calc"><span class="c">1&nbsp;${sym}${u} = ${pw(q.exp)}&nbsp;${u}</span></p>` });
+  }
+
+  function m1e1(c) {
+    const carte = c.carte('1. Les préfixes : des puissances de 10');
+    const L = (n, s, e, v, ex) => `<tr${s ? '' : ' class="cv-base"'}><td>${n}</td><td><b>${s || '—'}</b></td><td>${pw(e)}${s ? '' : ' = 1'}</td><td>${v}</td><td>${ex}</td></tr>`;
+    c.ajouter(carte, `<div class="cours-bloc">
+        <p>Dans le Système International (SI), on ajoute des <b>préfixes</b> devant les unités de base (mètre, gramme, seconde, ampère, litre…) pour exprimer des grandeurs très grandes ou très petites, sans écrire de longues suites de zéros.</p>
+        <div class="cle"><p>Chaque préfixe correspond à une <b>puissance de 10</b>. Par exemple, le préfixe <b>k</b> (kilo) vaut 10<sup>3</sup> = 1&nbsp;000, donc <b>1 km = 1&nbsp;000 m</b>.</p></div>
+        <p class="cv-ecart"><b>Le tableau des préfixes SI</b></p>
+        <div class="crs-defile"><table class="crs-tab">
+          <tr><th>Préfixe</th><th>Symbole</th><th>Puissance de 10</th><th>Valeur décimale</th><th>Exemple</th></tr>
+          ${L('téra', 'T', 12, '1 000 000 000 000', '1 To (téraoctet)')}${L('giga', 'G', 9, '1 000 000 000', '1 Go (gigaoctet)')}
+          ${L('méga', 'M', 6, '1 000 000', '1 MHz (mégahertz)')}${L('kilo', 'k', 3, '1 000', '1 km (kilomètre)')}
+          ${L('hecto', 'h', 2, '100', '1 hPa (hectopascal)')}${L('déca', 'da', 1, '10', '1 dam (décamètre)')}
+          ${L('— (aucun)', '', 0, '1', '1 m (mètre)')}${L('déci', 'd', -1, '0,1', '1 dL (décilitre)')}
+          ${L('centi', 'c', -2, '0,01', '1 cm (centimètre)')}${L('milli', 'm', -3, '0,001', '1 mA (milliampère)')}
+          ${L('micro', 'µ', -6, '0,000 001', '1 µm (micromètre)')}${L('nano', 'n', -9, '0,000 000 001', '1 nm (nanomètre)')}
+        </table></div>
+      </div>
+      ${exemple(`<p class="crs-calc">1&nbsp;km = 10<sup>3</sup>&nbsp;m = <span class="c">1&nbsp;000&nbsp;m</span></p>
+        <p class="crs-calc">1&nbsp;mA = 10<sup>−3</sup>&nbsp;A = <span class="c">0,001&nbsp;A</span></p>
+        <p class="crs-calc">1&nbsp;GHz = <span class="c">10<sup>9</sup>&nbsp;Hz</span></p>`, 'Exemples')}`);
+    const q1 = hasard(PNOB.filter(q => q.sym !== 'k'));
+    const q2 = hasard(PNOB.filter(q => q.sym !== 'k' && q !== q1 && q.exp !== -q1.exp));
+    const [s3, u3] = hasard(COURANTS.filter(([s]) => s !== q1.sym && s !== q2.sym && s !== 'k'));
+    c.aToi(carte, [quellePuissance(q1), quelPrefixe(q2), unPrefixe(s3, u3)]);
+    return carte;
+  }
+
+  function m1e2(c) {
+    const carte = c.carte('2. La méthode de conversion');
+    c.ajouter(carte, `<div class="cours-bloc">
+        <p>Pour convertir, on ne change pas le nombre : on le multiplie par une puissance de 10.</p>
+        <div class="cle"><p><b class="cle-titre">Méthode.</b></p>
+          <ol class="er-liste"><li><b>Recopier le nombre</b> (le coefficient) tel quel.</li>
+            <li><b>Multiplier par une puissance de 10</b> dont l'exposant est :
+              <p class="cv-regle">exposant = (puissance du préfixe de départ) − (puissance du préfixe d'arrivée)</p>
+              Si l'unité n'a pas de préfixe, sa puissance vaut <b>0</b>.</li>
+            <li><b>Simplifier</b> si possible (mais la notation scientifique est toujours acceptée).</li></ol></div>
+      </div>
+      ${exemple(`<p><b>Exemple 1 :</b> convertir 5 km en m.</p>${calcul(5, 0, PR('k'), SANS, 'm')}
+        <p class="cv-ecart"><b>Exemple 2 :</b> convertir 3,2 m en cm.</p>${calcul(3.2, 0, SANS, PR('c'), 'm')}`, 'Exemples')}`);
+    // une unité courante, vers l'unité sans préfixe ou depuis elle
+    const [s, u] = hasard(COURANTS.filter(([x]) => Math.abs(PR(x).exp) <= 3));
+    const [pa, pb] = hasard([true, false]) ? [PR(s), SANS] : [SANS, PR(s)];
+    c.aToi(carte, [
+      conv1(7, 0, PR('c'), SANS, 'm', 'Vers l\'unité sans préfixe'),
+      conv1(4, 0, SANS, PR('m'), 'm', 'Depuis l\'unité sans préfixe'),
+      conv1(hasard(COEFS), 0, pa, pb, u, 'Une autre unité'),
+    ]);
+    return carte;
+  }
+
+  function m1e3(c) {
+    const carte = c.carte('3. Entre deux préfixes');
+    c.ajouter(carte, `<div class="cours-bloc">
+        <p>La méthode est la même quand les deux unités ont un préfixe. On retranche souvent un nombre négatif : attention aux signes.</p>
+      </div>
+      ${exemple(`<p><b>Exemple 3 :</b> convertir 450 µA en mA.</p>${calcul(450, 0, PR('µ'), PR('m'), 'A')}`)}
+      <div class="crs-attention"><p><b class="cle-titre">Point de vigilance !</b> Le signe moins devant les exposants est crucial. Calcule toujours soigneusement la différence <b>(exposant départ) − (exposant arrivée)</b> en faisant attention aux signes : −6 − (−3) = −6 + 3 = −3.</p></div>`);
+    // une conversion entre deux petits préfixes (exposants négatifs), une autre avec un grand préfixe
+    const a = hasard(PAIRES.filter(t => PR(t[0]).exp < 0 && PR(t[1]).exp < 0)), b = hasard(PAIRES.filter(t => PR(t[0]).exp > 0 || PR(t[1]).exp > 0));
+    c.aToi(carte, [
+      conv1(600, 0, PR('n'), PR('m'), 's'),
+      conv1(hasard(COEFS), 0, PR(a[0]), PR(a[1]), a[2]),
+      conv1(hasard(COEFS), 0, PR(b[0]), PR(b[1]), b[2]),
+    ]);
+    return carte;
+  }
+
+  function m1e4(c) {
+    const carte = c.carte('4. Quand le nombre a déjà une puissance de 10');
+    c.ajouter(carte, `<div class="cours-bloc">
+        <p>Si le nombre est déjà écrit avec une puissance de 10, on <b>ajoute</b> l'exposant de conversion à son exposant.</p>
+        <div class="cle"><p class="cv-regle">10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a + b</sup></p></div>
+      </div>
+      ${exemple(`<p><b>Exemple 4 :</b> convertir 2,5 × 10<sup>4</sup> mm en m.</p>${calcul(2.5, 4, PR('m'), SANS, 'm')}`)}`);
+    const t = hasard(PAIRES), p = hasard([2, 3, 4, 5, 6, -2, -3, -4]);
+    c.aToi(carte, [
+      conv1(6.3, 3, PR('c'), SANS, 'm'),
+      conv1(hasard(COEFS), p, PR(t[0]), PR(t[1]), t[2]),
+    ]);
+    return carte;
+  }
+
+  function m1Retenir(c) {
+    const carte = c.carte('À retenir');
+    c.ajouter(carte, `<div class="cle"><p>Chaque préfixe est une <b>puissance de 10</b> :</p>
+        <p>T = 10<sup>12</sup> · G = 10<sup>9</sup> · M = 10<sup>6</sup> · k = 10<sup>3</sup> · h = 10<sup>2</sup> · da = 10<sup>1</sup> · d = 10<sup>−1</sup> · c = 10<sup>−2</sup> · m = 10<sup>−3</sup> · µ = 10<sup>−6</sup> · n = 10<sup>−9</sup></p></div>
+      <div class="cle"><p>Pour convertir : on recopie le nombre et on le multiplie par 10 puissance</p>
+        <p class="cv-regle">(puissance du préfixe de départ) − (puissance du préfixe d'arrivée)</p>
+        <p>Une unité sans préfixe a la puissance 0. Attention aux signes.</p></div>
+      <div class="cle"><p>Si le nombre a déjà une puissance de 10, on <b>ajoute</b> les exposants.</p></div>
+      ${liens([['prefixes', 'Apprendre les préfixes →'], ['astuces', 'Astuces de mémorisation'], ['niveau-1', 'Module 2 : s\'entraîner à convertir'], ['fiche-1', 'Fiche récapitulative']])}`);
+    return carte;
+  }
+
+  /* ================= MODULE 3 : unités au carré et au cube ================= */
+  const CARRES = [['', 'c'], ['d', 'c'], ['c', 'm'], ['', 'm'], ['k', ''], ['', 'd'], ['h', ''], ['c', 'd']];
+  const CUBES = [['', 'd'], ['d', 'c'], ['c', ''], ['', 'c'], ['c', 'm'], ['d', '']];
+  // conversion d'une unité au carré (k = 2) ou au cube (k = 3) : x × 10^p (pa m^k) → (pb m^k)
+  function conv3(x, p, pa, pb, k, titre) {
+    const d = pa.exp - pb.exp;
+    const erreurs = [
+      [p + d, k === 2
+        ? 'Tu as converti comme une unité simple : l\'unité est au carré, la différence des exposants se multiplie par 2. Par exemple 1 dm<sup>2</sup> = 10 cm × 10 cm = 100 cm<sup>2</sup> : un facteur 100 = 10<sup>2</sup>, pas 10.'
+        : 'Tu as converti comme une unité simple : l\'unité est au cube, la différence des exposants se multiplie par 3. Par exemple 1 dm<sup>3</sup> = 10 cm × 10 cm × 10 cm = 1&nbsp;000 cm<sup>3</sup> : un facteur 1&nbsp;000 = 10<sup>3</sup>, pas 10.'],
+      [p - d, `Deux erreurs : la conversion est à l'envers (c'est départ − arrivée), et la différence des exposants n'est pas multipliée par ${k}.`],
+    ];
+    if (k === 3) erreurs.push([p + 2 * d, 'L\'unité est au cube : on multiplie la différence des exposants par 3, pas par 2.']);
+    if (pa.exp && pb.exp) erreurs.push([p + (pa.exp + pb.exp) * k, msgSigne(pa.exp, pb.exp)]);
+    return conversion({ titre, x, p, de: U(pa, 'm', k), vers: U(pb, 'm', k), termes: [{ a: pa.exp, b: pb.exp, k }], erreurs,
+      aide: `Exposant = (exposant du préfixe de départ − exposant du préfixe d'arrivée) × ${k}. Départ : ${dit(pa)} ; arrivée : ${dit(pb)}.${p ? ' Puis ajoute-le à l\'exposant du nombre.' : ''}`,
+      solution: () => calcul(x, p, pa, pb, 'm', k) });
+  }
+  const paire = l => { const [a, b] = hasard(l); return [PR(a), PR(b)]; };
+
+  // figure : un carré de 1 dm de côté contient 10 × 10 carrés de 1 cm de côté
+  function figureCarre() {
+    let g = '';
+    for (let i = 1; i < 10; i++) g += `M${20 + 12 * i} 10V130M20 ${10 + 12 * i}H140`;
+    return `<figure class="cv-fig"><svg viewBox="0 0 330 152" role="img" aria-label="Un carré de 1 dm de côté contient 10 × 10 = 100 carrés de 1 cm de côté : 1 dm² = 100 cm²">
+      <rect class="cv-fig-fond" x="20" y="10" width="120" height="120"/>
+      <rect class="cv-fig-un" x="128" y="10" width="12" height="12"/>
+      <path class="cv-fig-grille" d="${g}"/>
+      <rect class="cv-fig-bord" x="20" y="10" width="120" height="120"/>
+      <text class="cv-fig-t" x="80" y="148" text-anchor="middle">1 dm = 10 cm</text>
+      <text class="cv-fig-t" x="148" y="21">← 1 cm²</text>
+      <text class="cv-fig-t" x="160" y="70">1 dm² = 10 × 10 cm²</text>
+      <text class="cv-fig-t fort" x="160" y="94">= 100 cm² = 10² cm²</text>
+    </svg></figure>`;
+  }
+
+  function m3e1(c) {
+    const carte = c.carte('1. Les unités au carré');
+    c.ajouter(carte, `<div class="cours-bloc">
+        <p>Quand une unité est <b>au carré</b> (ex : m<sup>2</sup>) ou <b>au cube</b> (ex : m<sup>3</sup>), on applique la même méthode de conversion, avec une règle supplémentaire :</p>
+        <div class="cle"><p class="cv-regle">exposant de conversion = (exposant du préfixe de départ − exposant du préfixe d'arrivée) × puissance de l'unité</p>
+          <ul class="er-liste"><li>unité <b>au carré</b> : on multiplie par <b>2</b> ;</li><li>unité <b>au cube</b> : on multiplie par <b>3</b>.</li></ul></div>
+        <div class="cle"><p><b class="cle-titre">La méthode en 3 étapes.</b></p>
+          <ol class="er-liste"><li><b>Trouver l'exposant du préfixe</b> de départ et d'arrivée (comme d'habitude).</li>
+            <li><b>Calculer la différence</b> (départ − arrivée), puis <b>multiplier par la puissance de l'unité</b> (2 si carré, 3 si cube).</li>
+            <li><b>Multiplier le nombre</b> par 10 élevé à cet exposant final.</li></ol></div>
+        <p class="cv-ecart"><b>Pourquoi ?</b> Parce que (10<sup>a</sup>)<sup>b</sup> = 10<sup>a×b</sup>. En élevant le facteur de conversion à la puissance de l'unité, l'exposant se multiplie. Par exemple : (10<sup>−2</sup>)<sup>2</sup> = 10<sup>−4</sup>, donc convertir des cm<sup>2</sup> en m<sup>2</sup> introduit un facteur 10<sup>−4</sup> et non 10<sup>−2</sup>.</p>
+        ${figureCarre()}
+      </div>
+      ${exemple(`<p><b>Exemple 1 :</b> convertir 3 cm<sup>2</sup> en m<sup>2</sup>.</p>${calcul(3, 0, PR('c'), SANS, 'm', 2)}
+        <p class="cv-ecart"><b>Exemple 2 :</b> convertir 5 km<sup>2</sup> en m<sup>2</sup>.</p>${calcul(5, 0, PR('k'), SANS, 'm', 2)}`, 'Exemples')}`);
+    const [pa, pb] = paire(CARRES);
+    c.aToi(carte, [
+      conv3(8, 0, PR('m'), SANS, 2),
+      conv3(3.5, 0, PR('h'), SANS, 2),
+      conv3(hasard(COEFS), 0, pa, pb, 2),
+    ]);
+    return carte;
+  }
+
+  function m3e2(c) {
+    const carte = c.carte('2. Les unités au cube');
+    c.ajouter(carte, `<div class="cours-bloc">
+        <p>Pour une unité au cube, on multiplie la différence des exposants par <b>3</b>, car (10<sup>a</sup>)<sup>3</sup> = 10<sup>3a</sup>.</p>
+        <div class="cle"><p class="cv-regle">1 dm<sup>3</sup> = 10 cm × 10 cm × 10 cm = 1&nbsp;000 cm<sup>3</sup> = 10<sup>3</sup> cm<sup>3</sup></p></div>
+      </div>
+      ${exemple(`<p><b>Exemple 3 :</b> convertir 2,5 mm<sup>3</sup> en cm<sup>3</sup>.</p>${calcul(2.5, 0, PR('m'), PR('c'), 'm', 3)}`)}`);
+    const [pa, pb] = paire(CUBES);
+    c.aToi(carte, [
+      conv3(6.2, 0, PR('m'), PR('c'), 3),
+      conv3(hasard(COEFS), 0, pa, pb, 3),
+    ]);
+    return carte;
+  }
+
+  function m3e3(c) {
+    const carte = c.carte('3. Quand le nombre a déjà une puissance de 10');
+    c.ajouter(carte, `<div class="cours-bloc">
+        <p>Comme au module 1, on <b>ajoute</b> l'exposant de conversion (déjà multiplié par 2 ou 3) à la puissance de 10 du nombre.</p>
+      </div>
+      ${exemple(`<p><b>Exemple 4 :</b> convertir 1,2 × 10<sup>3</sup> cm<sup>3</sup> en m<sup>3</sup>.</p>${calcul(1.2, 3, PR('c'), SANS, 'm', 3)}`)}`);
+    const k = hasard([2, 3]), [pa, pb] = paire(k === 2 ? CARRES : CUBES);
+    c.aToi(carte, [
+      conv3(4.7, 5, PR('d'), SANS, 3),
+      conv3(hasard(COEFS), hasard([2, 3, 4, 5, -2, -3]), pa, pb, k),
+    ]);
+    return carte;
+  }
+
+  function m3e4(c) {
+    const carte = c.carte('4. Volumes et litres');
+    c.ajouter(carte, `<div class="cours-bloc">
+        <p>Le litre (L) est une unité de volume couramment utilisée. Voici les correspondances à connaître absolument :</p>
+        <div class="cle"><div class="crs-defile"><table class="crs-tab">
+          <tr><th>Volume (m<sup>3</sup>)</th><th>Volume (L)</th></tr>
+          <tr><td>1 m<sup>3</sup></td><td>1&nbsp;000 L</td></tr><tr><td>1 dm<sup>3</sup></td><td>1 L</td></tr><tr><td>1 cm<sup>3</sup></td><td>1 mL</td></tr>
+        </table></div></div>
+        <p class="cv-ecart"><b>Méthode pratique :</b> pour convertir entre des multiples du m<sup>3</sup> et des multiples du L, on se ramène à l'une de ces trois correspondances. Le choix de la correspondance n'a pas d'autre importance que de simplifier les calculs.</p>
+      </div>
+      ${exemple(`<p><b>Exemple A :</b> convertir 500 cm<sup>3</sup> en L.</p>
+        <p>On sait que 1 cm<sup>3</sup> = 1 mL, donc 500 cm<sup>3</sup> = 500 mL. Puis milli = 10<sup>−3</sup> :</p>
+        <p class="crs-calc">500 cm<sup>3</sup> = 500 mL = 500 × 10<sup>−3</sup> L = <span class="c">0,5 L</span></p>
+        <p class="cv-ecart"><b>Exemple B :</b> convertir 2,5 cL en cm<sup>3</sup>.</p>
+        <p>On sait que 1 cm<sup>3</sup> = 1 mL, donc on commence par convertir 2,5 cL en mL.</p>
+        <p class="crs-calc">2,5 cL = 2,5 × 10<sup>−2 + 3</sup> mL = 2,5 × 10<sup>1</sup> mL = <span class="c">2,5 × 10<sup>1</sup> cm<sup>3</sup></span></p>
+        <p class="cv-ecart"><b>Exemple C :</b> convertir 3 mm<sup>3</sup> en mL.</p>
+        <p>On passe par les cm<sup>3</sup>, car 1 cm<sup>3</sup> = 1 mL.</p>
+        <p class="crs-calc">3 mm<sup>3</sup> = 3 × 10<sup>(−3 + 2) × 3</sup> cm<sup>3</sup> = 3 × 10<sup>−3</sup> cm<sup>3</sup> = <span class="c">3 × 10<sup>−3</sup> mL</span></p>`, 'Exemples')}`);
+    c.aToi(carte, [
+      conversion({ titre: 'Des cm<sup>3</sup> aux litres', x: 300, de: 'cm<sup>3</sup>', vers: 'L', termes: [{ a: -3, b: 0, k: 1 }],
+        erreurs: [[0, '1 cm<sup>3</sup> ne vaut pas 1 L : 1 cm<sup>3</sup> = 1 mL (et 1 L = 1 dm<sup>3</sup>).'],
+                  [-6, 'Le litre n\'est pas le m<sup>3</sup> : 1 L = 1 dm<sup>3</sup>. Passe par 1 cm<sup>3</sup> = 1 mL, puis convertis les mL en L.']],
+        aide: '1 cm<sup>3</sup> = 1 mL : écris le volume en mL, puis convertis les mL en L (milli = 10<sup>−3</sup>).',
+        solution: () => '<p class="crs-calc">300 cm<sup>3</sup> = 300 mL = <span class="c">300 × 10<sup>−3</sup> L</span> = 0,3 L</p>' }),
+      conversion({ titre: 'Des cL aux cm<sup>3</sup>', x: 4.2, de: 'cL', vers: 'cm<sup>3</sup>', termes: [{ a: -2, b: -3, k: 1 }],
+        erreurs: [[0, '1 cL ne vaut pas 1 cm<sup>3</sup> : c\'est 1 mL qui vaut 1 cm<sup>3</sup>. Convertis d\'abord les cL en mL.'],
+                  [-5, msgSigne(-2, -3)]],
+        aide: '1 cm<sup>3</sup> = 1 mL : convertis d\'abord 4,2 cL en mL, avec l\'exposant (−2) − (−3).',
+        solution: () => '<p class="crs-calc">4,2 cL = 4,2 × 10<sup>−2 + 3</sup> mL = 4,2 × 10<sup>1</sup> mL = <span class="c">4,2 × 10<sup>1</sup> cm<sup>3</sup></span> = 42 cm<sup>3</sup></p>' }),
+      conversion({ titre: 'Des mm<sup>3</sup> aux mL', x: 5, de: 'mm<sup>3</sup>', vers: 'mL', termes: [{ a: -3, b: -2, k: 3 }],
+        erreurs: [[0, '1 mm<sup>3</sup> ne vaut pas 1 mL : c\'est 1 cm<sup>3</sup> qui vaut 1 mL. Convertis d\'abord les mm<sup>3</sup> en cm<sup>3</sup>.'],
+                  [-1, 'Des mm<sup>3</sup> aux cm<sup>3</sup>, l\'unité est au cube : la différence (−3) − (−2) = −1 se multiplie par 3.'],
+                  [-9, 'Le mL correspond au cm<sup>3</sup>, pas au m<sup>3</sup> : convertis les mm<sup>3</sup> en cm<sup>3</sup>.']],
+        aide: 'Passe par les cm<sup>3</sup> (1 cm<sup>3</sup> = 1 mL) : exposant = (−3 − (−2)) × 3.',
+        solution: () => '<p class="crs-calc">5 mm<sup>3</sup> = 5 × 10<sup>(−3 + 2) × 3</sup> cm<sup>3</sup> = 5 × 10<sup>−3</sup> cm<sup>3</sup> = <span class="c">5 × 10<sup>−3</sup> mL</span></p>' }),
+    ]);
+    return carte;
+  }
+
+  function m3Retenir(c) {
+    const carte = c.carte('À retenir');
+    c.ajouter(carte, `<div class="cle"><p class="cv-regle">exposant = (exposant du préfixe de départ − exposant du préfixe d'arrivée) × puissance de l'unité</p>
+        <p>Unité au carré : × 2 ; unité au cube : × 3, car (10<sup>a</sup>)<sup>b</sup> = 10<sup>a×b</sup>. Exemple : 1 dm<sup>2</sup> = 100 cm<sup>2</sup>, 1 dm<sup>3</sup> = 1&nbsp;000 cm<sup>3</sup>.</p></div>
+      <div class="cle"><p>Si le nombre a déjà une puissance de 10, on <b>ajoute</b> les exposants.</p></div>
+      <div class="cle"><p><b>Volumes et litres :</b> 1 m<sup>3</sup> = 1&nbsp;000 L ; 1 dm<sup>3</sup> = 1 L ; 1 cm<sup>3</sup> = 1 mL. On se ramène à l'une de ces correspondances.</p></div>
+      ${liens([['ex-sq', 'S\'entraîner : unités au carré et au cube →'], ['cours-comp', 'Module 4 : unités composées'], ['fiche-3', 'Fiche récapitulative']])}`);
+    return carte;
+  }
+
+  /* ================= MODULE 4 : unités composées ================= */
+  // conversion d'une unité composée : x (na nu).(da du)^kd → (nb nu).(db du)^kd
+  function conv4(o) {
+    const { x, nu, na, nb: nB, du, da, db, kd } = o;
+    const eN = na.exp - nB.exp, dD = da.exp - db.exp, eD = dD * kd;
+    const erreurs = [];
+    if (dD) {
+      erreurs.push([eN - eD, kd === -1
+        ? 'Tu as traité l\'unité du dénominateur comme celle du numérateur : pour l\'unité en puissance −1, la différence (départ − arrivée) se multiplie par −1.'
+        : `Pour l'unité du dénominateur (puissance ${ent(kd)}), la différence (départ − arrivée) se multiplie par ${ent(kd)} : n'oublie pas le signe −.`]);
+      if (kd !== -1) erreurs.push([eN - dD, `Le dénominateur est en puissance ${ent(kd)} (${du}<sup>${-kd}</sup> au dénominateur) : multiplie la différence par ${ent(kd)}, pas seulement par −1.`]);
+      if (eN) erreurs.push([eD, `Tu as oublié le changement de préfixe du numérateur (${na.sym}${nu} → ${nB.sym}${nu}) : calcule aussi son exposant, puis additionne.`],
+                          [eN, `Tu as oublié le changement de préfixe du dénominateur (${da.sym}${du} → ${db.sym}${du}) : calcule aussi son exposant, puis additionne.`]);
+    }
+    return conversion({ titre: o.titre, x, de: UC(na, nu, da, du, kd), vers: UC(nB, nu, db, du, kd), termes: [{ a: na.exp, b: nB.exp, k: 1 }, { a: da.exp, b: db.exp, k: kd }], erreurs,
+      aide: `${na === nB ? 'Le numérateur ne change pas (exposant 0).' : `Numérateur : exposant = départ − arrivée (${dit(na)} → ${dit(nB)}).`} ${da === db
+        ? 'Le dénominateur ne change pas (exposant 0).'
+        : `Dénominateur : exposant = (départ − arrivée) × (${ent(kd)}) (${dit(da)} → ${dit(db)}).`}${na !== nB && da !== db ? ' Puis additionne les deux.' : ''}`,
+      solution: () => calcul4(o) });
+  }
+  // lignes de calcul d'une unité composée (exemples et corrections)
+  function calcul4(o) {
+    const { x, nu, na, nb: nB, du, da, db, kd } = o;
+    const eN = na.exp - nB.exp, eD = (da.exp - db.exp) * kd, E = eN + eD;
+    return `<p>Numérateur (${nu}) : ${na === nB ? `ne change pas : exposant = <b>0</b>` : `${dit(na)} → ${dit(nB)} : exposant = ${ent(na.exp)} − ${par(nB.exp)} = <b>${ent(eN)}</b>`}</p>
+      <p>Dénominateur (${du}<sup>${ent(kd)}</sup>) : ${da === db ? `ne change pas (${da.sym}${du} → ${db.sym}${du}) : exposant = (${ent(da.exp)} − ${par(db.exp)}) × (${ent(kd)}) = <b>0</b>` : `${dit(da)} → ${dit(db)} : exposant = (${ent(da.exp)} − ${par(db.exp)}) × (${ent(kd)}) = <b>${ent(eD)}</b>`}</p>
+      <p>Exposant total : ${ent(eN)} + ${par(eD)} = <b>${ent(E)}</b></p>
+      <p class="crs-calc">${nb(x)}&nbsp;${UC(na, nu, da, du, kd)} = <span class="c">${ecr(x, E)}&nbsp;${UC(nB, nu, db, du, kd)}</span></p>`;
+  }
+  const NUM = [['g', ['', 'k', 'm']], ['mol', ['', 'm']]];   // unité du numérateur et ses préfixes
+  const DEN = ['', 'm', 'c', 'd'];                          // préfixes du litre
+  const deux = t => { const [a, b] = melanger(t); return [PR(a), PR(b)]; };
+  const L1 = { du: 'L', kd: -1 };
+
+  function m4e1(c) {
+    const carte = c.carte('1. Qu\'est-ce qu\'une unité composée ?');
+    c.ajouter(carte, `<div class="cours-bloc">
+        <p>Certaines grandeurs s'expriment avec une unité formée de <b>deux unités combinées</b> : une concentration massique en <b>g.L<sup>−1</sup></b>, une concentration molaire en <b>mol.L<sup>−1</sup></b>, une masse volumique en <b>kg.m<sup>−3</sup></b>…</p>
+        <div class="cle"><p>L'exposant négatif (−1, −2 ou −3) indique que la deuxième unité est <b>au dénominateur</b> : g.L<sup>−1</sup> se lit « grammes par litre ».</p></div>
+        <div class="callout cv-ecart"><p><b>Remarque !</b> On peut aussi écrire cette unité <b>g/L</b> : c'est exactement la même chose que g.L<sup>−1</sup>, ça ne change rien au résultat. Mais il faut garder en tête que le symbole <b>/</b> indique que l'unité qui suit est en réalité affectée d'une puissance <b>négative</b> : c'est ce signe qu'il faudra utiliser dans le calcul de conversion, même s'il n'est pas écrit explicitement. Dans la suite, on utilisera toujours la notation g.L<sup>−1</sup>.</p></div>
+      </div>
+      ${exemple(`<p>Une solution à 3,5 g.L<sup>−1</sup> (ou 3,5 g/L) contient 3,5 g de soluté <b>par litre</b> de solution.</p>
+        <p>kg.m<sup>−3</sup> se lit « kilogrammes par mètre cube » : m<sup>−3</sup>, c'est un m<sup>3</sup> au dénominateur.</p>`, 'Exemples')}`);
+    // écrire une unité avec un exposant
+    const w = hasard([
+      { nom: 'milligrammes par litre', A: 'mg', B: 'L', n: 1 }, { nom: 'moles par litre', A: 'mol', B: 'L', n: 1 },
+      { nom: 'kilogrammes par mètre cube', A: 'kg', B: 'm', n: 3 }, { nom: 'grammes par centimètre cube', A: 'g', B: 'cm', n: 3 },
+      { nom: 'watts par mètre carré', A: 'W', B: 'm', n: 2 },
+    ]);
+    const Bn = w.B + (w.n > 1 ? `<sup>${w.n}</sup>` : '');
+    const opts = [{ id: 'ok', label: `${w.A}.${w.B}<sup>−${w.n}</sup>` }, { id: 'sans', label: `${w.A}.${Bn}` }, { id: 'inv', label: `${w.A}<sup>−1</sup>.${Bn}` }];
+    const ind = {
+      sans: `Sans exposant négatif, ${w.A}.${Bn} est un produit (${w.A} × ${Bn}). « Par » indique que ${Bn} est au dénominateur : son exposant est négatif.`,
+      inv: `Là, c'est ${w.A} qui a l'exposant négatif : il serait au dénominateur. C'est l'unité qui suit « par » qui est au dénominateur.` };
+    if (w.n > 1) {
+      opts.push({ id: 'un', label: `${w.A}.${w.B}<sup>−1</sup>` });
+      ind.un = `${w.n === 3 ? 'Mètre cube : la puissance est 3' : 'Mètre carré : la puissance est 2'} ; au dénominateur, l'exposant est donc −${w.n}.`;
+    }
+    // le sens de l'exposant (puissance de l'unité, pas du préfixe)
+    const s = hasard([
+      { u: 'kg.m<sup>−3</sup>', B: 'm', n: 3, lu: 'mètre cube', pref: 'Le préfixe, c\'est le k de kg (kilo = 10<sup>3</sup>).' },
+      { u: 'g.cm<sup>−3</sup>', B: 'cm', n: 3, lu: 'centimètre cube', pref: 'Le préfixe, c\'est le c de cm (centi = 10<sup>−2</sup>).' },
+      { u: 'W.m<sup>−2</sup>', B: 'm', n: 2, lu: 'mètre carré', pref: 'Il n\'y a d\'ailleurs aucun préfixe devant m.' },
+    ]);
+    c.aToi(carte, [
+      { titre: 'Écrire une unité composée',
+        parties: [{ type: 'choix', q: `Comment écrit-on « ${w.nom} » avec un exposant&nbsp;?`, options: opts, bonne: 'ok', indices: ind,
+          solution: `<p>« ${w.nom} » : ${Bn} au dénominateur, donc <b>${w.A}.${w.B}<sup>−${w.n}</sup></b> (ou ${w.A}/${Bn}).</p>` }] },
+      { titre: 'Puissance de l\'unité ou du préfixe ?',
+        parties: [{ type: 'choix', q: `Dans ${s.u}, que signifie l'exposant −${s.n}&nbsp;?`, colonne: true,
+          options: [{ id: 'ok', label: `${s.B} est ${s.n === 3 ? 'au cube' : 'au carré'} et au dénominateur : « par ${s.lu} »` },
+                    { id: 'pref', label: `le préfixe vaut 10<sup>−${s.n}</sup>` }, { id: 'div', label: `on divise la valeur par ${s.n}` }],
+          bonne: 'ok',
+          indices: { pref: `Ne confonds pas la puissance de l'unité avec celle du préfixe. ${s.pref} Le −${s.n} porte sur l'unité : « par ${s.lu} ».`,
+                     div: `Ce n'est pas une division par ${s.n} : l'exposant −${s.n} indique un ${s.lu} au dénominateur.` },
+          solution: `<p>${s.u} se lit « … par ${s.lu} » : le −${s.n} est la puissance de l'unité ${s.B}, pas celle d'un préfixe.</p>` }] },
+    ]);
+    return carte;
+  }
+
+  function m4e2(c) {
+    const carte = c.carte('2. Changer le préfixe du numérateur');
+    c.ajouter(carte, `<div class="cours-bloc">
+        <p>On applique la <b>même méthode</b> que pour les unités simples, en traitant chaque unité séparément.</p>
+        <div class="cle"><p>Pour l'unité <b>au numérateur</b> (puissance +1, ex : le g de g.L<sup>−1</sup>) :</p>
+          <p class="cv-regle">exposant = (départ − arrivée), comme d'habitude</p>
+          <p>Si l'unité du dénominateur ne change pas, son exposant de conversion vaut 0.</p></div>
+      </div>
+      ${exemple(`<p><b>Exemple 1 :</b> convertir 3,5 g.L<sup>−1</sup> en mg.L<sup>−1</sup>.</p>${calcul4(Object.assign({ x: 3.5, nu: 'g', na: SANS, nb: PR('m'), da: SANS, db: SANS }, L1))}`)}`);
+    let nu, na, nB;
+    do { const [u, t] = hasard(NUM); nu = u; [na, nB] = deux(t); } while (nu === 'g' && !na.sym && nB.sym === 'm');
+    c.aToi(carte, [
+      conv4(Object.assign({ x: 4, nu: 'g', na: SANS, nb: PR('m'), da: SANS, db: SANS }, L1)),
+      conv4(Object.assign({ x: hasard(COEFS), nu, na, nb: nB, da: SANS, db: SANS }, L1)),
+    ]);
+    return carte;
+  }
+
+  function m4e3(c) {
+    const carte = c.carte('3. Changer le préfixe du dénominateur');
+    c.ajouter(carte, `<div class="cours-bloc">
+        <p>Pour l'unité <b>en puissance −1</b> (le L<sup>−1</sup> de g.L<sup>−1</sup>), on calcule la même différence (départ − arrivée), mais on <b>multiplie le résultat par −1</b>.</p>
+        <div class="cle"><p class="cv-regle">exposant du dénominateur = (départ − arrivée) × (−1)</p></div>
+        <p class="cv-ecart">C'est logique : un millilitre est 1&nbsp;000 fois plus petit qu'un litre, il contient 1&nbsp;000 fois moins de soluté. Le nombre de g.mL<sup>−1</sup> est donc 1&nbsp;000 fois plus petit que le nombre de g.L<sup>−1</sup>.</p>
+      </div>
+      ${exemple(`<p><b>Exemple 2 :</b> convertir 2 g.L<sup>−1</sup> en g.mL<sup>−1</sup>.</p>${calcul4(Object.assign({ x: 2, nu: 'g', na: SANS, nb: SANS, da: SANS, db: PR('m') }, L1))}`)}`);
+    let nu, da, db;
+    do { nu = hasard(['g', 'mol']); [da, db] = deux(DEN); } while (nu === 'mol' && !da.sym && db.sym === 'm');
+    c.aToi(carte, [
+      conv4(Object.assign({ x: 6, nu: 'mol', na: SANS, nb: SANS, da: SANS, db: PR('m') }, L1)),
+      conv4(Object.assign({ x: hasard(COEFS), nu, na: SANS, nb: SANS, da, db }, L1)),
+    ]);
+    return carte;
+  }
+
+  function m4e4(c) {
+    const carte = c.carte('4. Changer les deux préfixes');
+    c.ajouter(carte, `<div class="cours-bloc">
+        <p>Quand les deux préfixes changent, on calcule les deux exposants, puis on les <b>additionne</b> : c'est l'exposant final de conversion.</p>
+        <div class="cle"><p class="cv-regle">exposant total = (exposant numérateur) + (exposant dénominateur × puissance du dénominateur)</p></div>
+      </div>
+      ${exemple(`<p><b>Exemple 3 :</b> convertir 2 mg.L<sup>−1</sup> en g.mL<sup>−1</sup>.</p>${calcul4(Object.assign({ x: 2, nu: 'g', na: PR('m'), nb: SANS, da: SANS, db: PR('m') }, L1))}`)}`);
+    const [nu, t] = hasard(NUM), [na, nB] = deux(t), [da, db] = deux(DEN);
+    c.aToi(carte, [
+      conv4(Object.assign({ x: 5, nu: 'g', na: PR('m'), nb: SANS, da: SANS, db: PR('m') }, L1)),
+      conv4(Object.assign({ x: hasard(COEFS), nu, na, nb: nB, da, db }, L1)),
+    ]);
+    return carte;
+  }
+
+  function m4e5(c) {
+    const carte = c.carte('5. Dénominateur au carré ou au cube');
+    const ex = { x: 2.7, nu: 'g', na: SANS, nb: PR('k'), du: 'm', da: PR('c'), db: SANS, kd: -3 };
+    c.ajouter(carte, `<div class="cours-bloc">
+        <p>Si la puissance négative est <b>−2</b> ou <b>−3</b> (ex : le cm<sup>−3</sup> d'une masse volumique), on <b>inverse le signe</b> de la différence et on <b>multiplie par 2 ou 3</b> : au total, on multiplie donc par −2 ou −3.</p>
+        <div class="cle"><p class="cv-regle">exposant du dénominateur = (départ − arrivée) × puissance du dénominateur (−1, −2 ou −3)</p></div>
+      </div>
+      ${exemple(`<p><b>Exemple 4 :</b> convertir 2,7 g.cm<sup>−3</sup> en kg.m<sup>−3</sup> (masse volumique de l'aluminium).</p>${calcul4(ex)}`)}
+      <div class="crs-attention"><p><b class="cle-titre">Point de vigilance !</b> Ne confonds pas la puissance de l'unité (−1, −2 ou −3, toujours la même pour une grandeur donnée) avec la puissance du préfixe (celle qui dépend de k, h, da, d, c, m…). C'est cette dernière qui varie d'un exercice à l'autre ; la puissance de l'unité, elle, ne sert qu'à savoir par quoi multiplier à la fin.</p></div>`);
+    // masses volumiques et grandeurs surfaciques classiques
+    const v = hasard([
+      { x: hasard([920, 1260, 2700, 7800, 8900]), nu: 'g', na: PR('k'), nb: SANS, du: 'm', da: SANS, db: PR('c'), kd: -3 },   // kg.m⁻³ → g.cm⁻³
+      { x: hasard(COEFS), nu: 'g', na: SANS, nb: SANS, du: 'm', da: PR('c'), db: SANS, kd: -3 },                              // g.cm⁻³ → g.m⁻³
+      { x: hasard(COEFS), nu: 'W', na: SANS, nb: SANS, du: 'm', da: PR('c'), db: SANS, kd: -2 },                              // W.cm⁻² → W.m⁻²
+      { x: hasard(COEFS), nu: 'W', na: SANS, nb: SANS, du: 'm', da: SANS, db: PR('m'), kd: -2 },                              // W.m⁻² → W.mm⁻²
+    ]);
+    c.aToi(carte, [
+      conv4({ titre: 'La masse volumique de l\'eau', x: 1, nu: 'g', na: SANS, nb: PR('k'), du: 'm', da: PR('c'), db: SANS, kd: -3 }),
+      conv4(v),
+    ]);
+    return carte;
+  }
+
+  function m4Retenir(c) {
+    const carte = c.carte('À retenir');
+    c.ajouter(carte, `<div class="cle"><p>g.L<sup>−1</sup> se lit « grammes par litre » (on écrit aussi g/L) : l'exposant négatif indique l'unité au dénominateur.</p></div>
+      <div class="cle"><p>On traite chaque unité séparément :</p>
+        <ul class="er-liste"><li>unité au numérateur : exposant = (départ − arrivée) ;</li>
+          <li>unité en puissance −1, −2 ou −3 : (départ − arrivée) × (sa puissance).</li></ul>
+        <p class="cv-regle">exposant total = exposant du numérateur + exposant du dénominateur × puissance du dénominateur</p></div>
+      <div class="cle"><p><b>Attention :</b> ne confonds pas la puissance de l'unité (−1, −2, −3) avec la puissance du préfixe (k, c, m…).</p></div>
+      ${liens([['ex-comp', 'S\'entraîner : unités composées →'], ['fiche-4', 'Fiche récapitulative']])}`);
+    return carte;
+  }
+
+  // étapes de chaque cours (clé = ancre de la page)
+  const COURS_CV = {
+    'cours': { zone: 'etapes-cours', etapes: [m1e1, m1e2, m1e3, m1e4, m1Retenir] },
+    'cours-sq': { zone: 'etapes-cours-sq', etapes: [m3e1, m3e2, m3e3, m3e4, m3Retenir] },
+    'cours-comp': { zone: 'etapes-cours-comp', etapes: [m4e1, m4e2, m4e3, m4e4, m4e5, m4Retenir] },
+  };
+  // construit le cours de la page cle (#cours, #cours-sq, #cours-comp)
+  function lancer(cle) {
+    const def = COURS_CV[cle], zone = document.getElementById(def.zone);
+    zone.innerHTML = '';
+    new COURS.Cours(zone, def.etapes, { cle });
+  }
+  return { lancer };
+})();
 
 // Init
 // écran donné par l'adresse (accueil par défaut)

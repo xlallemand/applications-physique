@@ -16,6 +16,8 @@
    - un générateur de petits graphiques SVG (droites, points A/B)
    - deux schémas illustratifs (tableau de proportionnalité directe
      / inverse) pour le cours
+   - les parties « perso » des cours (glisser-déposer dans un tableau
+     ou une formule, pour les « À toi » de assets/cours.js)
    ============================================================ */
 
 (function () {
@@ -418,6 +420,120 @@
     renderPhase1();
   }
 
+  /* ============================================================
+     COURS : parties « perso » des « À toi » (moteur assets/cours.js)
+     Glisser-déposer d'étiquettes dans les cases d'un tableau ou
+     d'une formule. Chaque appel de monter() construit son propre
+     outil, sans id : plusieurs exemplaires peuvent exister dans la
+     page (mode « Afficher tout le cours »).
+
+     ptPartieGlisser(opts) → partie { type: 'perso', … }
+       opts.q, opts.solution : question et solution (HTML)
+       opts.etiquettes : [{ id, label, valeur, unite, indice }]
+           (indice : diagnostic d'une étiquette piège, ex. une unité fausse)
+       opts.cases : { nom: [ids acceptés] }
+       opts.html(caseVide, resultat) → HTML du tableau ou de la formule :
+           caseVide(nom) insère une case, resultat(nom) un résultat calculé en direct
+       opts.direct : [{ nom, num, den }] : résultat num / den affiché en direct
+           dès que les deux cases sont remplies (unité déduite des étiquettes)
+       opts.diag(placees, E) → diagnostic ; placees = { nom: id | null }, E = { id: étiquette }
+     ptDiagTableau(colonnes, indiceLigne) → diag d'un tableau,
+       colonnes = { nom de case: unité attendue dans cette colonne }
+     ============================================================ */
+  function melangerListe(t) {
+    const a = t.slice();
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  }
+  function ptPartieGlisser(opts) {
+    return {
+      type: 'perso', q: opts.q, solution: opts.solution,
+      monter(zone, api) {
+        const E = {};
+        opts.etiquettes.forEach(e => { E[e.id] = e; });
+        const noms = Object.keys(opts.cases);
+        const caseVide = nom => `<span class="pt-slot" data-case="${nom}" data-accept="${opts.cases[nom].join(',')}"><span class="pt-slot-ph">?</span></span>`;
+        const resultat = nom => `<span class="pt-live" data-res="${nom}">?</span>`;
+        const d = document.createElement('div');
+        d.className = 'pt-placer';
+        d.innerHTML = `<p class="pt-placer-aide">Fais glisser les étiquettes dans les cases. Tu peux les déplacer, ou les remettre en haut, avant de valider.</p>
+          <div class="pt-palette">${melangerListe(opts.etiquettes).map(e => ptChip(e.id, e.label, e.valeur, e.unite || '')).join('')}</div>
+          <div class="pt-placer-zone">${opts.html(caseVide, resultat)}</div>`;
+        zone.appendChild(d);
+        const palette = d.querySelector('.pt-palette');
+        const caseDe = nom => d.querySelector(`.pt-slot[data-case="${nom}"]`);
+        const chipDe = id => d.querySelector(`.pt-chip[data-chip-id="${id}"]`);
+        const dans = nom => { const c = caseDe(nom).querySelector('.pt-chip'); return c ? c.dataset.chipId : null; };
+        // résultats affichés en direct (division de deux cases)
+        function maj() {
+          (opts.direct || []).forEach(g => {
+            const cible = d.querySelector(`[data-res="${g.nom}"]`);
+            const n = caseDe(g.num).querySelector('.pt-chip'), q = caseDe(g.den).querySelector('.pt-chip');
+            if (!cible) return;
+            if (n && q && parseFloat(q.dataset.value)) {
+              const u = [n.dataset.unit, q.dataset.unit].filter(Boolean);
+              const unite = n.dataset.unit && q.dataset.unit ? `${n.dataset.unit}/${q.dataset.unit}` : u.join('');
+              cible.textContent = ptFmt(parseFloat(n.dataset.value) / parseFloat(q.dataset.value), 3) + (unite ? ' ' + unite : '');
+              cible.classList.add('pt-live-filled');
+            } else { cible.textContent = '?'; cible.classList.remove('pt-live-filled'); }
+          });
+        }
+        const eng = ptSlotEngine(d, { onChange: () => { maj(); api.effacer(); } });
+        const a = document.createElement('div');
+        a.className = 'er-actions crs-actions-partie';
+        a.innerHTML = '<button type="button" class="btn-primary">Valider</button>';
+        zone.appendChild(a);
+        const bVal = a.querySelector('button');
+        const fermer = () => { bVal.disabled = true; a.remove(); d.classList.add('pt-fige'); };
+        bVal.onclick = () => {
+          if (api.fini()) return;
+          const pl = {};
+          noms.forEach(nom => { pl[nom] = dans(nom); });
+          if (noms.some(nom => !pl[nom])) {
+            if (window.COURS) COURS.secouer(d.querySelector('.pt-placer-zone'));
+            api.message('Place une étiquette dans chaque case.');
+            return;
+          }
+          const r = eng.verify();
+          if (r.correct === r.total) { fermer(); api.reussi(); return; }
+          api.erreur(`${r.total - r.correct > 1 ? 'Les cases en rouge sont mal remplies.' : 'La case en rouge est mal remplie.'} ${(opts.diag && opts.diag(pl, E)) || ''}`);
+        };
+        return {
+          // « Afficher la réponse » : chaque étiquette à sa place
+          montrer() {
+            noms.forEach(nom => {
+              const occ = caseDe(nom).querySelector('.pt-chip');
+              if (occ && !opts.cases[nom].includes(occ.dataset.chipId)) palette.appendChild(occ);
+            });
+            noms.forEach(nom => {
+              const s = caseDe(nom);
+              if (s.querySelector('.pt-chip')) return;
+              const id = opts.cases[nom].find(i => { const c = chipDe(i); return c && !c.parentElement.classList.contains('pt-slot'); });
+              const ph = s.querySelector('.pt-slot-ph');
+              if (ph) ph.remove();
+              if (id) s.appendChild(chipDe(id));
+            });
+            eng.verify();
+            maj();
+            fermer();
+          },
+        };
+      },
+    };
+  }
+  // diagnostic d'un tableau : étiquette piège, mauvaise colonne, puis mauvaise ligne
+  function ptDiagTableau(colonnes, indiceLigne) {
+    return (pl, E) => {
+      const piege = Object.keys(pl).map(nom => E[pl[nom]]).find(e => e && e.indice);
+      if (piege) return piege.indice;
+      const mal = Object.keys(pl).find(nom => colonnes[nom] && E[pl[nom]] && E[pl[nom]].unite !== colonnes[nom]);
+      if (mal) return `Chaque valeur va dans la colonne de son unité : « ${E[pl[mal]].label} » est en ${E[pl[mal]].unite}.`;
+      return indiceLigne || 'Sur une même ligne, on place deux valeurs qui vont ensemble.';
+    };
+  }
+
+  window.ptPartieGlisser = ptPartieGlisser;
+  window.ptDiagTableau = ptDiagTableau;
   window.ptFmt = ptFmt;
   window.ptHeader = ptHeader;
   window.ptSkipBtn = ptSkipBtn;

@@ -36,12 +36,12 @@ Ne change ni le contenu scientifique ni les fonctionnalités propres à une appl
     images/                       images (jpg, svg)
 ```
 
-- Feuilles de style chargées dans cet ordre dans **toutes** les pages : `../../assets/theme.css`, `../../equilibrer-reactions/modules/er.css` (cartes, boutons, écrans de fin communs), `<pref>.css`, puis `../../assets/sommaire.css` (sommaire, accueil, fiches).
-- Scripts : `../../assets/sommaire.js` (navigation commune, voir §5) **avant** `<pref>.js`, qui déclare le `PLAN` et appelle `SOM.init`. Sur l'accueil, `../assets/hero.js` puis `../assets/sommaire.js` puis `modules/<pref>.js`.
+- Feuilles de style chargées dans cet ordre dans **toutes** les pages : `../../assets/theme.css`, `../../equilibrer-reactions/modules/er.css` (cartes, boutons, écrans de fin communs), `<pref>.css`, puis `../../assets/sommaire.css` (sommaire, accueil, fiches). Pages de cours : `../../assets/cours.css` en dernier.
+- Scripts : `../../assets/sommaire.js` (navigation commune, voir §5) **avant** `<pref>.js`, qui déclare le `PLAN` et appelle `SOM.init`. Pages de cours : `../../assets/cours.js` (moteur de cours commun, voir §4) après `<pref>.js`. Sur l'accueil, `../assets/hero.js` puis `../assets/sommaire.js` puis `modules/<pref>.js`.
 - Balise `<html lang="fr" data-matiere="…">` : `maths`, `chimie`, `physique` ou `college`. C'est ce qui fixe la couleur d'accent (voir §3).
 - `<title>` d'une page de module : `Module 1 : référentiel — Cinématique` ; accueil : le nom de l'application.
 - Corps de page : `<div id="app-nav"></div>` puis `<div class="er-page">…</div>`. La navigation s'y construit (voir §5).
-- Pour une nouvelle application : partir de `cinematique/modules/cin.js` (moteur de questions) et `cin.css`, renommer l'espace de noms et le préfixe de classes, remplacer les textes ; **la navigation ne se recopie pas** : déclarer le `PLAN` et utiliser le module commun `assets/sommaire.js` (§5).
+- Pour une nouvelle application : partir de `cinematique/modules/cin.js` (moteur de questions) et `cin.css`, renommer l'espace de noms et le préfixe de classes, remplacer les textes ; **la navigation et les cours ne se recopient pas** : déclarer le `PLAN` et utiliser le module commun `assets/sommaire.js` (§5), écrire les cours avec le moteur commun `assets/cours.js` (§4).
 - Déclarer l'application dans la liste `APPS` de `index.html` à la racine (portail) : `{ titre, dom, niv, dossier, desc }`, à la suite des applications du même domaine.
   - `dom` : `'physique'`, `'chimie'` ou `'maths'` (outils mathématiques, collège compris) ;
   - `niv` : liste parmi `'col'` (collège), `'2de'`, `'1re'`, `'spe'` (terminale spécialité), `'sti'` (terminale STI2D) ; `LYCEE` pour les quatre niveaux du lycée ;
@@ -123,15 +123,32 @@ Contenu dans `.er-page` (largeur max 60 rem, centré, marges réduites sur tél�
 
 ### Cours
 
-Cours **par étapes** (`new CIN.Cours(zone, [étape, étape…])`). Chaque étape = une carte `.er-card.er-etape` :
+Cours **par étapes**, écrit avec le **moteur de cours commun** `assets/cours.js` (objet `COURS`, styles `assets/cours.css`, classes préfixées `crs-`) ; seules `cinematique/` (moteur `CIN`), `transport-electricite/` (`TE`), `ph/` et `puissance-active/` (`PH`) gardent leur propre moteur, de même présentation.
+
+```js
+const cours = new COURS.Cours(zone, [etape1, etape2, aRetenir], { cle });   // cle : clé du PLAN (application en une seule page)
+function etape1(c) {
+  const carte = c.carte('1. Passer de la masse à la quantité de matière');
+  c.ajouter(carte, `<div class="cours-bloc">… <div class="cle">n = m / M</div></div>
+                    ${COURS.exemple('<p class="crs-calc">n = 64 / 16 = <span class="c">4 mol</span></p>')}`);
+  c.aToi(carte, [ { titre, enonce, parties: [p, …] }, … ]);   // « Continuer → » quand c'est réussi
+  return carte;
+}
+```
+
+Chaque étape = une carte `.er-card.er-etape` :
 
 - `h3.cours-titre` numéroté : « 1. Qu'est-ce qu'un référentiel ? » ;
 - `.cours-bloc` (fond papier) contenant le texte, puis `.cle` pour la définition / la formule / la règle ;
-- `.cours-exemple` (fond blanc) avec `.cours-exemple-t` (« Exemple ») : un exemple traité ;
-- formules : `.ph-formule` (centrées, grandes) ; calculs : `.ph-calc` (résultat en `.c`) ;
-- avertissement : `.cin-attention` ou `callout-danger` avec `cle-titre` ;
-- tableaux : `.cin-tab` dans un `.cin-defile` ; figures : SVG `.cin-fig` / `.cin-graphe`, image `.cin-image img` ;
-- puis le bloc **« À toi »** (voir §6), puis le bouton « Continuer → » (`btn-primary`, aligné à droite) qui n'apparaît qu'une fois le « À toi » réussi.
+- `.cours-exemple` (fond blanc) avec `.cours-exemple-t` (« Exemple ») : un exemple traité (`COURS.exemple(html)`) ;
+- formules : `.crs-formule` (centrées, grandes) ; calculs : `.crs-calc` (résultat en `.c`) ;
+- avertissement : `.crs-attention` ou `callout-danger` avec `cle-titre` ;
+- tableaux : `.crs-tab` dans un `.crs-defile` ; figures : SVG ou image de l'application ;
+- puis le bloc **« À toi »** (`c.aToi(carte, items)`, voir §6), puis le bouton « Continuer → » (`btn-primary`, aligné à droite) qui n'apparaît qu'une fois le « À toi » réussi. Une étape sans « À toi » appelle `c.continuer(carte)`.
+
+Parties de question du moteur (`p.type`) : `'choix'` (QCM, `indices` par mauvais choix), `'nombre'` (champ ±, `tol` ou `rel`, `diag(v)`), `'champs'` (plusieurs nombres validés ensemble, cases fausses en rouge), `'sci'` (a × 10<sup>n</sup>), `'texte'` (formule, mot), `'perso'` (outil propre à l'application : `monter(zone, api)` appelle `api.reussi()` / `api.erreur(diagnostic)` et renvoie `{ montrer() }`). Toutes ont `q`, `solution`, et `aide: true` quand aucune erreur ne peut être validée (réaction réglée en direct) : « Afficher la réponse » est alors proposé tout de suite. Un outil `perso` doit pouvoir exister en **plusieurs exemplaires** dans la page (pas d'`id` fixe ni d'état global) : avec « Afficher tout le cours », tous les « À toi » sont affichés en même temps.
+
+Le cours est marqué fait (sommaire, accueil) à l'affichage de la dernière étape.
 
 Dernière étape : carte **« À retenir »** (une `.cle` par notion), puis `.er-actions` : bouton principal vers les questions du module, boutons secondaires vers le cours suivant et vers la fiche récapitulative.
 
@@ -233,7 +250,7 @@ SOM.init({ nom: 'pH', id: 'ph', cleEx: 'ph-exercices', plan: PLAN });
 
 1. Une notion courte, la règle dans un encadré `.cle`.
 2. Un exemple traité (`.cours-exemple`).
-3. Un bloc **« À toi »** (`CIN.aToi`) : une suite de petites questions du **même type que l'exemple**, de difficulté progressive, sans points. Il faut les réussir (ou afficher la réponse) pour que « Continuer → » apparaisse.
+3. Un bloc **« À toi »** (`c.aToi` du moteur commun, `CIN.aToi` dans Cinématique) : une suite de petites questions du **même type que l'exemple**, de difficulté progressive, sans points. Il faut les réussir (ou afficher la réponse) pour que « Continuer → » apparaisse.
 4. Étape suivante. Le cours se termine par « À retenir ».
 
 Variantes de l'exemple trouvé par l'élève : quand l'exemple est donné sous forme de questions à résoudre, la réponse affichée est suivie de **« ✍ Complète ton cours : … »** (ce qu'il doit recopier dans son cahier).
@@ -244,6 +261,7 @@ Variantes de l'exemple trouvé par l'élève : quand l'exemple est donné sous f
 - Affiche d'un coup toutes les étapes **sans avoir à répondre**. La position dans la page ne bouge pas (le bouton reste à sa place à l'écran).
 - Les réponses ne sont pas affichées mais l'élève peut répondre (« Valider ») ou afficher directement la réponse (« Afficher la réponse » est disponible tout de suite).
 - Le bouton devient « Tout le cours est affiché » (désactivé). L'état reste vrai : les étapes suivantes s'affichent dépliées. Toute question ou « À toi » d'un cours s'enregistre pour être dépliable.
+- Le moteur commun place ce bouton tout seul dans le premier « À toi » du cours.
 
 ### Questions et retours à l'élève
 
@@ -277,7 +295,7 @@ Variantes de l'exemple trouvé par l'élève : quand l'exemple est donné sous f
 - **Vecteurs** : nom surmonté d'une flèche, jamais de gras seul : `VEC.nomHTML('v')` (`.vec-nom`), indice hors de la flèche (`u⃗ₜ`). **Coordonnées en colonne** entre parenthèses : `VEC.colHTML(a, b)` (`.vcol`). Écriture a i⃗ + b j⃗ : `VEC.ijHTML`.
 - Fractions `CIN.fr`, dérivées `CIN.dd('v')` (`dv/dt`), racines `.racine`, systèmes avec accolade `CIN.sys(...)`.
 - Ne jamais insérer de `${…}` dans du HTML « statique » : seuls les gabarits JavaScript (backticks) les évaluent.
-- Saisie d'un nombre : champ `.ph-champ` + bouton **±** (le clavier numérique des téléphones n'a pas toujours de « − »), `inputmode="decimal"`, `autocomplete="off"`, `spellcheck="false"`. Tolérance relative par défaut 0,5 % (ou absolue `tol`). L'unité est dans l'étiquette du champ ; préciser le nombre de chiffres significatifs attendu.
+- Saisie d'un nombre : champ `.crs-champ` (moteur commun ; `.ph-champ` dans Cinématique et pH) + bouton **±** (le clavier numérique des téléphones n'a pas toujours de « − »), `inputmode="decimal"`, `autocomplete="off"`, `spellcheck="false"`. Tolérance relative par défaut 0,5 % (ou absolue `tol`). L'unité est dans l'étiquette du champ ; préciser le nombre de chiffres significatifs attendu.
 
 ## 8. Tactile, smartphone, souris
 
@@ -320,7 +338,7 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 1. **Navigation** : retirer l'ancien menu burger ; charger `assets/sommaire.css` et `assets/sommaire.js`, déclarer le `PLAN`, appeler `SOM.menu(cle)` dans chaque page et `SOM.accueil(zone)` sur l'accueil (§5).
 2. **Accueil** : en-tête illustré `app-hero` conservé, liste des modules en lignes dépliables, « Reprendre », compteurs et notes (§4, §5).
 3. **Découpage** : chaque module → une page de cours, une série de questions notée sur 20, une fiche récapitulative ; plusieurs parties si le module est long.
-4. **Cours** : passer en cours par étapes avec notion → exemple → « À toi » et bouton « Afficher tout le cours » (§6).
+4. **Cours** : réécrire avec le moteur commun `assets/cours.js` en étapes notion → exemple → « À toi », bouton « Afficher tout le cours » (§4, §6). Les outils interactifs existants deviennent l'exemple ou des items `perso` d'« À toi ». Un cours mélangé à une série (cours dans l'intro de la série) passe sur sa propre page `module_N_cours.html`.
 5. **Style** : cartes `er-card`, boutons en pilule encre, encarts `.cle` / `callout-*`, badges ; supprimer les couleurs en dur et les classes de couleur Tailwind (le thème les neutralise, mais ne pas en ajouter).
 6. **Saisies** : ± pour les nombres, ≥ 16 px, cibles tactiles larges, retours d'erreur diagnostiqués (§6, §7, §8).
 7. **Progression** : `localStorage` en `try/catch`, meilleure note conservée.
@@ -334,8 +352,10 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 | Cartes, écrans de fin, confettis | `equilibrer-reactions/modules/er.css` |
 | Sommaire, accueil en lignes, progression, fiches (module commun `SOM`) | `assets/sommaire.js`, `assets/sommaire.css` |
 | Exemple de `PLAN` (pages séparées / une seule page) | `ph/modules/ph.js` / `puissances-10/index.html` |
-| Cours, « À toi », questions, graphiques, exercices | `cinematique/modules/cin.css` |
-| Moteur de questions, séries, cours par étapes | `cinematique/modules/cin.js` |
+| Cours par étapes, « À toi », « Afficher tout le cours » (moteur commun `COURS`) | `assets/cours.js`, `assets/cours.css` |
+| Exemple de cours avec le moteur commun (pages séparées / une seule page / outils `perso`) | `combustions/modules/module_3_cours.html` / `puissances-10/index.html` / `equilibrer-reactions/modules/module_1.html` |
+| Questions, graphiques, exercices | `cinematique/modules/cin.css` |
+| Moteur de questions, séries | `cinematique/modules/cin.js` |
 | Repère et tracé de vecteurs, écritures vectorielles | `cinematique/modules/vecteurs.js` |
 | Figures SVG | `cinematique/modules/figures.js` |
 | Exercices (format des données) | `cinematique/modules/exercices.js`, `module_6.html` |

@@ -14,7 +14,11 @@
   const DONNEES = 'Données : M(C) = 12 g/mol ; M(H) = 1 g/mol ; M(O) = 16 g/mol.';
   const nf = f => `n(${fH(f)})`, mf = f => `m(${fH(f)})`, Mf = f => `M(${fH(f)})`;
   const nom = f => COMB[f] ? COMB[f].nom : '';
-  const deDu = f => (/^[aeéiou]/i.test(nom(f)) ? 'd\'' : 'de ') + nom(f);
+  // élision devant une voyelle ou un h muet : « d'éthanol », « de l'octane », « l'hexane »
+  const elide = f => /^[aeéèêiouyh]/i.test(nom(f));
+  const deDu = f => (elide(f) ? 'd\'' : 'de ') + nom(f);
+  const duNom = f => (elide(f) ? 'de l\'' : 'du ') + nom(f);
+  const leNom = f => (elide(f) ? 'l\'' : 'le ') + nom(f);
   // fraction écrite en HTML
   const frac = (a, b) => `<span class="co-frac"><span>${a}</span><span>${b}</span></span>`;
 
@@ -29,11 +33,11 @@
   function qCombustion(f, avecEspeces, comptes) {
     const c = coefs(f), demi = c[0] === 2;
     const parties = [];
-    if (avecEspeces) parties.push({ type: 'especes', comb: f, q: `Complète l'équation de la combustion du ${nom(f)} avec les bonnes espèces.` });
+    if (avecEspeces) parties.push({ type: 'especes', comb: f, q: `Complète l'équation de la combustion ${duNom(f)} avec les bonnes espèces.` });
     parties.push({ type: 'equilibrer', comb: f, comptes, q: `Équilibre la réaction : d'abord C, puis H, et O en dernier.`, solution: `<span class="er-eq">${equation(f)}</span>` });
     return {
-      theme: `Combustion du ${nom(f)}`,
-      consigne: avecEspeces ? '' : `Équation de la combustion du ${nom(f)} : ${fH(f)} + ${fH('O2')} → ${fH('CO2')} + ${fH('H2O')}`,
+      theme: `Combustion ${duNom(f)}`,
+      consigne: avecEspeces ? '' : `Équation de la combustion ${duNom(f)} : ${fH(f)} + ${fH('O2')} → ${fH('CO2')} + ${fH('H2O')}`,
       parties,
       bilan: demi
         ? `Avec 1 ${fH(f)}, il aurait fallu ${fmt(c[1] / 2)} ${fH('O2')} : un demi est interdit, on a donc multiplié tous les nombres par 2.`
@@ -157,7 +161,7 @@
       parties: [pRelation('CH4', 0, n2, 3)], bilan: `${nf('H2O')} = 2 × ${nf('CH4')}.` });
     // 3 : la relation écrite
     const p3 = hasard(['C3H8', 'C5H12']), c3 = coefs(p3);
-    qs.push({ theme: 'Écrire la relation', enonce: eqEnonce(p3), consigne: `Combustion du ${nom(p3)}.`,
+    qs.push({ theme: 'Écrire la relation', enonce: eqEnonce(p3), consigne: `Combustion ${duNom(p3)}.`,
       parties: [
         { type: 'choix', q: 'Quelle relation lie les quantités de matière de combustible consommé et de CO<sub>2</sub> formé ?', colonne: true,
           options: melanger([
@@ -167,7 +171,7 @@
           ]), bonne: 'ok',
           indice: 'Chaque quantité de matière est divisée par son propre nombre stœchiométrique.', solution: relation(p3) },
         { type: 'choix', q: `Donc ${nf('CO2')} = … × ${nf(p3)}`, options: melanger([c3[2], 1, c3[1]].map(v => ({ id: String(v), label: String(v) })).concat([{ id: 'f', label: frac(1, c3[2]) }])),
-          bonne: String(c3[2]), indice: `Multiplie les deux membres de la relation par ${c3[2]}.`, solution: `${nf('CO2')} = ${c3[2]} × ${nf(p3)} : il se forme ${c3[2]} fois plus de CO<sub>2</sub> que de ${nom(p3)} consommé.` },
+          bonne: String(c3[2]), indice: `Multiplie les deux membres de la relation par ${c3[2]}.`, solution: `${nf('CO2')} = ${c3[2]} × ${nf(p3)} : il se forme ${c3[2]} fois plus de CO<sub>2</sub> que ${deDu(p3)} consommé.` },
       ], bilan: relation(p3) });
     // 4 et 5 : propane
     const n4 = hasard([0.2, 0.3, 0.4]);
@@ -236,19 +240,19 @@
       ]), bonne: 'ok', indice: 'Regarde l\'unité : MJ/kg, des mégajoules par kilogramme.', solution: 'PC en MJ/kg : énergie (MJ) libérée par la combustion de 1 kg de combustible.' }],
       bilan: 'Le pouvoir calorifique est l\'énergie libérée par la combustion d\'un kilogramme de combustible.' });
     const f2 = hasard(['CH4', 'C3H8', 'C4H10']), m2 = hasard([2, 3, 5, 0.5]);
-    qs.push({ theme: 'Calculer l\'énergie libérée', consigne: `On brûle ${fmt(m2)} kg de ${nom(f2)}. ${pcTxt(f2)}`, parties: [pE(f2, m2)], bilan: `E = PC × m = ${fmt(COMB[f2].PC * m2)} MJ.` });
+    qs.push({ theme: 'Calculer l\'énergie libérée', consigne: `On brûle ${fmt(m2)} kg ${deDu(f2)}. ${pcTxt(f2)}`, parties: [pE(f2, m2)], bilan: `E = PC × m = ${fmt(COMB[f2].PC * m2)} MJ.` });
     const g3 = hasard([250, 1500, 80, 400]);
     qs.push({ theme: 'Les unités de masse', consigne: `Le pouvoir calorifique est donné en MJ par kg : il faut souvent convertir la masse. Un échantillon a une masse de ${fmt(g3)} g.`,
       parties: [pConv(g3)], bilan: `${fmt(g3)} g = ${fmt(g3 / 1000)} kg.` });
     const f4 = hasard(['C3H8', 'C4H10', 'C7H16']), g4 = hasard([200, 500, 300]);
-    qs.push({ theme: 'Masse en grammes', consigne: `On brûle ${fmt(g4)} g de ${nom(f4)}. ${pcTxt(f4)}`, parties: [pConv(g4), pE(f4, g4 / 1000)], bilan: `E = ${fmt(COMB[f4].PC)} × ${fmt(g4 / 1000)} = ${fmt(COMB[f4].PC * g4 / 1000)} MJ.` });
+    qs.push({ theme: 'Masse en grammes', consigne: `On brûle ${fmt(g4)} g ${deDu(f4)}. ${pcTxt(f4)}`, parties: [pConv(g4), pE(f4, g4 / 1000)], bilan: `E = ${fmt(COMB[f4].PC)} × ${fmt(g4 / 1000)} = ${fmt(COMB[f4].PC * g4 / 1000)} MJ.` });
     qs.push({ theme: 'L\'exemple du cours', consigne: `On brûle 23 g d'éthanol. ${pcTxt('C2H6O')}`, parties: [pConv(23), pE('C2H6O', 0.023)], bilan: 'E = 28,8 × 0,023 ≈ 0,66 MJ.' });
     qs.push({ theme: 'Calculer la masse de combustible', consigne: 'On connaît l\'énergie E à obtenir et le pouvoir calorifique PC du combustible. On cherche la masse m à brûler.',
       parties: [{ type: 'choix', q: 'Quelle formule faut-il utiliser ?', options: melanger([{ id: 'ok', label: 'm = E / PC' }, { id: 'a', label: 'm = E × PC' }, { id: 'b', label: 'm = PC / E' }]), bonne: 'ok',
         indice: 'Vérifie avec les unités : le résultat doit être en kg.', solution: 'Vérification avec les unités : MJ ÷ (MJ/kg) = kg.' }],
       bilan: 'm = E / PC : m en kg, E en MJ, PC en MJ/kg.' });
     const f7 = hasard(['C7H16', 'C4H10', 'C6H14']), m7 = hasard([2, 4, 3]);
-    qs.push({ theme: 'Calculer la masse de combustible', consigne: `On veut obtenir ${fmt(COMB[f7].PC * m7)} MJ en brûlant du ${nom(f7)}. ${pcTxt(f7)}`, parties: [pMasseE(f7, COMB[f7].PC * m7)], bilan: `m = E / PC = ${fmt(m7)} kg.` });
+    qs.push({ theme: 'Calculer la masse de combustible', consigne: `On veut obtenir ${fmt(COMB[f7].PC * m7)} MJ en brûlant ${duNom(f7)}. ${pcTxt(f7)}`, parties: [pMasseE(f7, COMB[f7].PC * m7)], bilan: `m = E / PC = ${fmt(m7)} kg.` });
     const E8 = hasard([1.5, 2, 0.5]);
     qs.push({ theme: 'Calculer la masse de combustible', consigne: `On veut obtenir ${fmt(E8)} MJ en brûlant du méthane. ${pcTxt('CH4')} Donne le résultat en g ou en kg.`,
       parties: [pMasseE('CH4', E8, ['g', 'kg', 'MJ'])], bilan: `m = ${fmt(E8)} / 50 = ${fmt(E8 / 50)} kg = ${fmt(E8 / 50 * 1000)} g.` });
@@ -258,7 +262,7 @@
     const f10 = hasard(['C2H6O', 'CH4O']), E10 = hasard([23, 46]);
     qs.push({ theme: 'Comparer des combustibles', consigne: `On veut obtenir ${E10} MJ. Pouvoirs calorifiques : PC(${nom(f10)}) = ${fmt(COMB[f10].PC)} MJ/kg ; PC(propane) = 46 MJ/kg.`,
       parties: [pMasseE(f10, E10), pMasseE('C3H8', E10),
-        { type: 'choix', q: 'Quel combustible faut-il brûler en plus faible masse pour obtenir cette énergie ?', options: [{ id: f10, label: `le ${nom(f10)}` }, { id: 'C3H8', label: 'le propane' }], bonne: 'C3H8',
+        { type: 'choix', q: 'Quel combustible faut-il brûler en plus faible masse pour obtenir cette énergie ?', options: [{ id: f10, label: leNom(f10) }, { id: 'C3H8', label: 'le propane' }], bonne: 'C3H8',
           indice: 'Compare les deux masses calculées.', solution: 'Le propane a le plus grand pouvoir calorifique : il faut en brûler une plus petite masse.' }],
       bilan: 'Plus le pouvoir calorifique est grand, plus la masse à brûler pour une même énergie est petite.' });
     return qs;
@@ -286,10 +290,10 @@
     const f = e.f, c = coefs(f), n = e.m / M(f), nCO2 = n * c[2] / c[0], PC = COMB[f].PC;
     const qs = [];
     qs.push({ theme: '1. L\'équation de la combustion', parties: [
-      { type: 'especes', comb: f, q: `Complète l'équation de la combustion du ${nom(f)}.` },
+      { type: 'especes', comb: f, q: `Complète l'équation de la combustion ${duNom(f)}.` },
       { type: 'equilibrer', comb: f, q: 'Équilibre la réaction (C, puis H, puis O).', solution: `<span class="er-eq">${equation(f)}</span>` },
     ], bilan: c[0] === 2 ? 'Le demi-nombre de O<sub>2</sub> a été évité en multipliant tous les nombres par 2.' : '' });
-    qs.push({ theme: '2. Quantité de matière de combustible', consigne: `Calcule la quantité de matière de ${nom(f)} brûlé (${fmt(e.m)} g).`,
+    qs.push({ theme: '2. Quantité de matière de combustible', consigne: `Calcule la quantité de matière ${deDu(f)} qui a brûlé (${fmt(e.m)} g).`,
       parties: [pM(f), pN(f, e.m)], bilan: `${nf(f)} = ${fmt(n)} mol.` });
     qs.push({ theme: '3. Quantité de matière de CO₂ formé', consigne: 'Utilise la relation stœchiométrique.',
       parties: [pRelation(f, 0, n, 2)], bilan: relation(f) });
@@ -304,10 +308,10 @@
     }
     const num = qs.length + 1;
     if (e.E) {
-      qs.push({ theme: `${num}. Masse de combustible pour une énergie donnée`, consigne: `On veut obtenir une énergie de ${fmt(e.E)} MJ. Quelle masse de ${nom(f)} faut-il brûler ?`,
+      qs.push({ theme: `${num}. Masse de combustible pour une énergie donnée`, consigne: `On veut obtenir une énergie de ${fmt(e.E)} MJ. Quelle masse ${deDu(f)} faut-il brûler ?`,
         parties: [Object.assign(pMasseE(f, e.E, ['g', 'kg', 'MJ']), { q: '' })], bilan: `m = E / PC = ${fmt(e.E)} / ${fmt(PC)} = ${fmt(e.E / PC)} kg.` });
     } else {
-      qs.push({ theme: `${num}. Énergie libérée`, consigne: `Calcule l'énergie libérée par la combustion des ${fmt(e.m)} g de ${nom(f)}.`,
+      qs.push({ theme: `${num}. Énergie libérée`, consigne: `Calcule l'énergie libérée par la combustion des ${fmt(e.m)} g ${deDu(f)}.`,
         parties: [pConv(e.m), Object.assign(pE(f, e.m / 1000), { q: '' })], bilan: `E = ${fmt(PC)} × ${fmt(e.m / 1000)} = ${fmt(PC * e.m / 1000)} MJ.` });
     }
     return qs;

@@ -8,11 +8,12 @@
     <link rel="stylesheet" href="../assets/theme.css">
     <link rel="stylesheet" href="../equilibrer-reactions/modules/er.css">
     <link rel="stylesheet" href="../assets/sommaire.css">
+    <link rel="stylesheet" href="../assets/cours.css">
     <script src="../assets/sommaire.js"></script>
     <script src="../assets/numpad.js"></script>
     <script src="../assets/dragdrop.js"></script>
-    <script src="../assets/selfcheck.js"></script>
     <script src="../assets/hero.js"></script>
+    <script src="../assets/cours.js"></script>
     <style>
         :root {
             --app-accent-50:  var(--paper);
@@ -47,11 +48,25 @@
             width: 80px; font-size: 0.95rem; font-weight: 700; margin-top: -12px;
             padding: 4px 8px; border-radius: 6px; background: white;
         }
-        /* ── Exposant dans les cours (largeur élargie pour le signe -) */
-        .course-exp-input {
-            width: 80px !important; font-size: 0.95rem; font-weight: 700;
-            margin-top: -10px; padding: 4px 8px !important;
-        }
+        /* ── Cours par étapes (assets/cours.js) dans l'application en une page */
+        .p10-cours.er-page { max-width: none; padding: 0 0 32px; }
+        .p10-cours .er-actions a { text-decoration: none; }
+        .p10-cours ul.er-liste { list-style: disc; }
+        .p10-cours ol.er-liste { list-style: decimal; }
+        .p10-cours .er-liste li + li { margin-top: 4px; }
+        /* « … = 10 » suivi de la case de l'exposant, surélevée comme un exposant */
+        .p10-cours .crs-valeur:has(.p10-base) { padding-top: 22px; column-gap: 3px; }
+        .p10-cours .crs-valeur:has(.p10-base) > .crs-lab { white-space: nowrap; }
+        .p10-cours .crs-valeur:has(.p10-base) > .crs-champ-box { margin-top: -16px; }
+        .p10-cours .crs-valeur:has(.p10-base) .crs-champ { width: 62px; font-size: 16px; padding: 6px 4px; }
+        .p10-cours .crs-valeur:has(.p10-base) .crs-pm { width: 30px; height: 34px; font-size: .95rem; }
+        /* écriture scientifique en deux cases : [a] × 10 puis [n] en exposant */
+        .p10-cours .crs-champs.ligne:has(.p10-x10) { column-gap: 0; align-items: flex-start; padding-top: 16px; }
+        .p10-cours .crs-champs.ligne:has(.p10-x10) > .crs-valeur + .crs-valeur { margin: -16px 0 0 -6px; padding-left: 2px; }
+        .p10-cours .crs-champs.ligne:has(.p10-x10) > .crs-valeur + .crs-valeur .crs-champ { width: 58px; font-size: 16px; padding: 6px 4px; }
+        .p10-cours .crs-champs.ligne:has(.p10-x10) > .crs-valeur + .crs-valeur .crs-pm { width: 30px; height: 34px; font-size: .95rem; }
+        .p10-x10 { font-size: 1.15rem; font-weight: 800; }
+        .p10-cours .crs-lab .fraction, .p10-cours .crs-partie-q .fraction { font-size: 1rem; }
         sup input { width:80px; font-size:13px; vertical-align: baseline; }
         /* ── Toutes les zones de saisie (cours et entraînements) : même arrondi que dans Conversions */
         #moduleContainer input[type="text"] { border-radius: 10px; }
@@ -118,7 +133,7 @@ function updateActiveMenuItem() {
     if (location.hash !== h) history.pushState(null, '', location.pathname + location.search + h);
     SOM.menu(currentPage === 'home' ? 'accueil' : currentPage);
     if (currentPage === 'home') SOM.accueil(document.getElementById('menu'));
-    else if (/^course-/.test(currentPage)) SOM.marquer({ fait: true });      // cours ouvert (sommaire, accueil)
+    // (un cours est marqué fait par assets/cours.js quand sa dernière étape s'affiche)
 }
 // une ancre de l'adresse ouvre la page correspondante (liens du sommaire et de l'accueil, retour arrière)
 function ouvrirAncre() {
@@ -173,21 +188,22 @@ function backToMenu() {
     updateActiveMenuItem();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+// cours par étapes du module num (voir COURS_P10 plus bas) : en-tête, puis les étapes
+// construites par le moteur commun ; les liens de fin (entraînement, cours suivant,
+// fiche) sont dans la carte « À retenir »
 function showCourse(num) {
     hideMenu();
+    const cours = COURS_P10[num];
     const c = document.getElementById('moduleContainer');
-    if (num === 1) {
-        setTopBarTitle('Module 1 : Définitions et écritures — Cours');
-        c.innerHTML = getCourse1Content();
-    } else if (num === 2) {
-        setTopBarTitle('Module 2 : Écriture scientifique — Cours');
-        c.innerHTML = getCourse2Content();
-    } else if (num === 3) {
-        setTopBarTitle('Module 3 : Opérations avec les puissances de 10 — Cours');
-        c.innerHTML = getCourse3Content();
-    }
-    // lien vers la fiche récapitulative du module, en bas du cours
-    document.getElementById('moduleContainer').insertAdjacentHTML('beforeend', `<div class="er-actions" style="justify-content:center"><a class="btn-secondary" style="text-decoration:none" href="#fiche-${num}">Fiche récapitulative du module ${num}</a></div>`);
+    c.innerHTML = `<div class="er-page p10-cours">
+        <div class="er-card">
+            <span class="er-badge">MODULE ${num} · COURS</span>
+            <h2 class="er-titre">${cours.titre}</h2>
+            <p class="er-contexte">${cours.contexte}</p>
+        </div>
+        <div class="p10-etapes"></div>
+    </div>`;
+    new COURS.Cours(c.querySelector('.p10-etapes'), cours.etapes, { cle: 'course-' + num });
     currentPage = 'course-' + num;
     updateActiveMenuItem();
 }
@@ -266,333 +282,478 @@ function showTraining(num) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// COURS 1 — Définitions & écritures
+// COURS PAR ÉTAPES (moteur commun assets/cours.js) :
+// notion → exemple → « À toi » → … → « À retenir ».
+// Chaque cours est reconstruit à chaque affichage (showCourse) :
+// les valeurs des « À toi » sont tirées au hasard à chaque fois.
 // ═══════════════════════════════════════════════════════════════
-function getCourse1Content() {
-    return `
-    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-                    <h2 class="text-2xl md:text-3xl font-bold text-purple-900 mb-6">Cours 1 : Définitions et écritures</h2>
+const COURS_P10 = (function () {
+    const { hasard, entre, exemple, proche } = COURS;
+    const nb = COURS.fmt;                       // nombre écrit à la française : 1 000 ; 0,052
+    const ex = n => String(n).replace('-', '−'); // exposant avec le moins typographique
+    const p10 = n => `10<sup>${ex(n)}</sup>`;
+    const rang = n => `${n}<sup>e</sup>`;        // 3ᵉ rang
+    const pl = (k, mot) => `${k} ${mot}${Math.abs(k) > 1 ? 's' : ''}`;
+    // valeur exacte de a × 10ⁿ (évite 0,07000000000000001)
+    const val = (a, n) => +(a * Math.pow(10, n)).toPrecision(12);
+    const egal = (a, b) => proche(a, b, 1e-9);
+    // a écrit sans virgule : 1,2 → 12 ; 0,45 → 45 ; 3,06 → 306
+    const chiffres = a => +String(a).replace('.', '');
+    // étiquette d'une case d'exposant : « … = 10 » puis la case surélevée (voir .p10-base)
+    const base = avant => `${avant || ''}<span class="p10-base">10</span>`;
+    // liens de fin de cours (dernière carte « À retenir »)
+    const actions = liens => `<div class="er-actions">${liens.map(([h, t], i) =>
+        `<a class="${i ? 'btn-secondary' : 'btn-primary'}" href="${h}">${t}</a>`).join('')}</div>`;
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">1. Puissances positives : 10<sup>n</sup> (n ≥ 1)</h3>
-            <div class="bg-purple-50 rounded-lg p-6 mb-4">
-                <p class="cle text-lg mb-3">10<sup>n</sup> = 10 × 10 × ... × 10 (n fois). C'est un 1 suivi de n zéros.</p>
-                <div class="bg-white rounded p-4 mb-3">
-                    <p class="font-semibold mb-2">Exemples :</p>
-                    <p>• 10<sup>1</sup> = 10 &nbsp;•&nbsp; 10<sup>2</sup> = 100 &nbsp;•&nbsp; 10<sup>3</sup> = 1 000 &nbsp;•&nbsp; 10<sup>5</sup> = 100 000 &nbsp;•&nbsp; 10<sup>0</sup> = 1</p>
-                </div>
-                <div class="check-box">
-                    <p class="check-label">Vérifie ta compréhension :</p>
-                    <p class="check-question">Combien vaut 10<sup>4</sup> ?</p>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <input type="text" id="c1_1" inputmode="numeric" class="check-input w-28" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                        <button class="check-btn" onclick="checkAnswer('c1_1', 10000, 'r1_1')">Vérifier</button>
-                    </div>
-                    ${numpadWidget(true)}
-                    <p id="r1_1" class="mt-2 font-semibold"></p>
-                </div>
+    // Partie « exposant » : l'élève complète 10^[ ]
+    function partieExp(o) {
+        return { type: 'nombre', q: o.q, label: base(o.avant), valeur: o.valeur, entier: true, tol: 0,
+            aria: 'Exposant de la puissance de 10', diag: o.diag, solution: o.solution };
+    }
+    // Partie « écriture décimale » : réponse exacte (pas d'arrondi)
+    function partieDec(o) {
+        return { type: 'nombre', q: o.q, label: o.label, valeur: o.valeur, rel: 1e-9, signe: false, diag: o.diag, solution: o.solution };
+    }
+
+    /* ---------- Diagnostics des erreurs fréquentes ---------- */
+    // 10ⁿ (n > 0) écrit en décimal
+    function diagPuisPos(v, n) {
+        if (v === 10 * n) return `Tu as calculé 10 × ${n}. ${p10(n)} n'est pas 10 × ${n} : c'est 10 multiplié ${n} fois par lui-même.`;
+        if (v === Math.pow(10, n - 1)) return `Il manque un zéro : ${p10(n)}, c'est un 1 suivi de <b>${pl(n, 'zéro')}</b>.`;
+        if (v === Math.pow(10, n + 1)) return `Il y a un zéro de trop : ${p10(n)}, c'est un 1 suivi de <b>${pl(n, 'zéro')}</b>.`;
+        if (v < 0) return `${p10(n)} est un nombre positif : un 1 suivi de ${pl(n, 'zéro')}.`;
+        return `${p10(n)} s'écrit avec un 1 suivi de ${pl(n, 'zéro')}.`;
+    }
+    // 10⁻ⁿ écrit en décimal
+    function diagPuisNeg(v, n) {
+        if (v < 0) return `Un exposant négatif ne donne pas un nombre négatif : ${p10(-n)} = ${frac('1', p10(n))} est positif, plus petit que 1.`;
+        if (v >= 1) return `Avec un exposant négatif, le nombre est plus petit que 1 : ${p10(-n)} = ${frac('1', p10(n))} = 0,…`;
+        if (egal(v, val(1, -n - 1))) return `Il y a un zéro de trop : le chiffre 1 doit être au ${rang(n)} rang après la virgule.`;
+        if (egal(v, val(1, -n + 1))) return `Il manque un zéro : le chiffre 1 doit être au ${rang(n)} rang après la virgule.`;
+        return `${p10(-n)} = ${frac('1', p10(n))} : écris « 0, » puis place le chiffre 1 au ${rang(n)} rang après la virgule.`;
+    }
+    // a × 10ⁿ écrit en décimal : sens de déplacement de la virgule, nombre de rangs
+    function diagDecale(v, a, n) {
+        const r = Math.abs(n), sens = n > 0 ? 'droite' : 'gauche';
+        if (v < 0) return `Le résultat n'est pas négatif : multiplier par ${p10(n)} déplace seulement la virgule.`;
+        if (egal(v, val(a, -n))) return n > 0
+            ? `Tu as déplacé la virgule vers la gauche. Multiplier par ${p10(n)} (exposant positif) rend le nombre plus grand : la virgule va de ${pl(r, 'rang')} vers la <b>droite</b>.`
+            : `Tu as déplacé la virgule vers la droite. Multiplier par ${p10(n)} (exposant négatif) rend le nombre plus petit : la virgule va de ${pl(r, 'rang')} vers la <b>gauche</b>.`;
+        if (n > 0 && !Number.isInteger(a) && egal(v, val(chiffres(a), n)))
+            return `Tu as écrit les chiffres de ${nb(a)} sans la virgule puis ajouté les zéros : il faut <b>déplacer la virgule</b> de ${pl(r, 'rang')} vers la ${sens}.`;
+        if (egal(v, a)) return `Ajouter des zéros après la virgule ne change pas le nombre : déplace la virgule de ${pl(r, 'rang')} vers la ${sens}.`;
+        for (const k of [1, -1]) {
+            if (r + k > 0 && egal(v, val(a, n > 0 ? n + k : n - k)))
+                return `Tu as déplacé la virgule de ${pl(r + k, 'rang')} : il en faut exactement ${r}, vers la ${sens}.${n < 0 ? ' Compte les rangs, pas les zéros.' : ''}`;
+        }
+        return `Déplace la virgule de ${pl(r, 'rang')} vers la ${sens}, en complétant par des zéros si besoin.`;
+    }
+    // exposant trouvé à partir d'une écriture décimale : N = a × 10^n
+    function diagExposant(v, n, N, a) {
+        const r = Math.abs(n);
+        if (v === -n) return n > 0
+            ? `${nb(N)} est plus grand que ${nb(a)} : la virgule va vers la droite, l'exposant est <b>positif</b>.`
+            : `${nb(N)} est plus petit que 1 : la virgule va vers la gauche, l'exposant est <b>négatif</b>.`;
+        if (Math.abs(v) === r + 1) return `Tu as compté un rang de trop${N > 1 ? ' (peut-être tous les chiffres du nombre)' : ''} : compte seulement les rangs dont la virgule se déplace entre ${nb(a)} et ${nb(N)}.`;
+        if (Math.abs(v) === r - 1) return `Tu as compté un rang de moins${N < 1 ? ' (peut-être seulement les zéros)' : ''} : compte tous les rangs dont la virgule se déplace entre ${nb(a)} et ${nb(N)}.`;
+        return `Compte de combien de rangs la virgule se déplace pour passer de ${nb(a)} à ${nb(N)}.`;
+    }
+
+    /* ═══════════════ COURS 1 — Définitions et écritures ═══════════════ */
+    function c1Positives(c) {
+        const carte = c.carte('1. Les puissances de 10 positives');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>${p10('n')} se lit « 10 puissance n » (ou « 10 exposant n ») : c'est 10 multiplié n fois par lui-même.</p>
+                <div class="cle"><p class="crs-formule">10<sup>n</sup> = 10 × 10 × … × 10 &nbsp;(n facteurs)</p>
+                    <p>C'est un <b>1 suivi de n zéros</b>. Par convention, <b>10<sup>0</sup> = 1</b>.</p></div>
             </div>
-        </div>
+            ${exemple(`<p class="crs-calc">10<sup>3</sup> = 10 × 10 × 10 = <span class="c">1 000</span> &nbsp;(un 1 suivi de 3 zéros)</p>
+                <p>De même : 10<sup>1</sup> = 10 · 10<sup>2</sup> = 100 · 10<sup>5</sup> = 100 000 · 10<sup>0</sup> = 1.</p>`)}`);
+        const n = entre(4, 6), m = hasard([2, 3, 5, 7].filter(k => k !== n)), M = Math.pow(10, m);
+        c.aToi(carte, [
+            { titre: 'De la puissance au nombre',
+              parties: [{ type: 'nombre', q: `Combien vaut ${p10(n)} ?`, label: `${p10(n)} =`, valeur: Math.pow(10, n),
+                entier: true, signe: false, tol: 0, diag: v => diagPuisPos(v, n),
+                solution: `<p class="crs-calc">${p10(n)} = un 1 suivi de ${n} zéros = <span class="c">${nb(Math.pow(10, n))}</span></p>` }] },
+            { titre: 'Du nombre à la puissance',
+              enonce: `<p>Écris ${nb(M)} sous la forme d'une puissance de 10.</p>`,
+              parties: [partieExp({ avant: `${nb(M)} = `, valeur: m,
+                diag: v => v === m + 1 ? 'Tu as compté tous les chiffres, le 1 compris : compte seulement les zéros après le 1.'
+                    : v === m - 1 ? 'Il manque un zéro : compte-les tous.'
+                    : v === -m ? `${nb(M)} est plus grand que 1 : l'exposant est positif.`
+                    : 'L\'exposant est le nombre de zéros après le 1.',
+                solution: `<p class="crs-calc">${nb(M)} = un 1 suivi de ${m} zéros = <span class="c">${p10(m)}</span></p>` })] },
+            { titre: 'Un cas à part',
+              parties: [{ type: 'choix', q: 'Combien vaut 10<sup>0</sup> ?', melanger: false,
+                options: [{ id: 'un', label: '1' }, { id: 'zero', label: '0' }, { id: 'dix', label: '10' }], bonne: 'un',
+                indices: { zero: '10<sup>0</sup> n\'est pas 0 : c\'est un 1 suivi d\'aucun zéro.',
+                           dix: '10 = 10<sup>1</sup> (un 1 suivi d\'un zéro). 10<sup>0</sup>, c\'est un 1 suivi d\'aucun zéro.' },
+                solution: '<p>Par convention, <b>10<sup>0</sup> = 1</b> : un 1 suivi de 0 zéro.</p>' }] },
+        ]);
+        return carte;
+    }
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">2. Puissances négatives : 10<sup>-n</sup></h3>
-            <div class="bg-purple-50 rounded-lg p-6 mb-4">
-                <p class="cle text-lg mb-3">10<sup>-n</sup> = ${frac('1', '10<sup>n</sup>')} = 0,00...01 (avec n zéros après la virgule)</p>
-                <div class="bg-white rounded p-4 mb-3">
-                    <p class="font-semibold mb-2">Exemples :</p>
-                    <p>• 10<sup>-1</sup> = 0,1 &nbsp;•&nbsp; 10<sup>-2</sup> = 0,01 &nbsp;•&nbsp; 10<sup>-3</sup> = 0,001 &nbsp;•&nbsp; 10<sup>-5</sup> = 0,00001</p>
-                </div>
-                <div class="check-box">
-                    <p class="check-label">Vérifie ta compréhension :</p>
-                    <p class="check-question">Combien vaut 10<sup>-4</sup> ?</p>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <input type="text" id="c1_2" inputmode="decimal" class="check-input w-28" placeholder="0,…" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                        <button class="check-btn" onclick="checkAnswer('c1_2', '0,0001', 'r1_2', true)">Vérifier</button>
-                    </div>
-                    ${numpadWidget(true)}
-                    <p id="r1_2" class="mt-2 font-semibold"></p>
-                </div>
+    function c1Negatives(c) {
+        const carte = c.carte('2. Les puissances de 10 négatives');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>Avec un exposant négatif, on divise : 10<sup>−n</sup> est l'inverse de 10<sup>n</sup>. C'est un nombre positif, plus petit que 1.</p>
+                <div class="cle"><p class="crs-formule">10<sup>−n</sup> = ${frac('1', '10<sup>n</sup>')} = 0,0…01</p>
+                    <p>Le chiffre <b>1</b> est au <b>n<sup>e</sup> rang après la virgule</b> (il y a n zéros en tout, en comptant celui avant la virgule).</p></div>
             </div>
-        </div>
+            ${exemple(`<p class="crs-calc">10<sup>−3</sup> = ${frac('1', '10<sup>3</sup>')} = ${frac('1', '1 000')} = <span class="c">0,001</span></p>
+                <p>Le chiffre 1 est au 3<sup>e</sup> rang après la virgule.</p>
+                <p>De même : 10<sup>−1</sup> = 0,1 · 10<sup>−2</sup> = 0,01 · 10<sup>−5</sup> = 0,00001.</p>`)}`);
+        const n1 = entre(2, 3), n2 = entre(4, 5), m = hasard([3, 4, 5, 6].filter(k => k !== n1 && k !== n2)), N = val(1, -m);
+        const item = (titre, n) => ({ titre,
+            parties: [partieDec({ q: `Combien vaut ${p10(-n)} ?`, label: `${p10(-n)} =`, valeur: val(1, -n), diag: v => diagPuisNeg(v, n),
+                solution: `<p class="crs-calc">${p10(-n)} = ${frac('1', p10(n))} = <span class="c">${nb(val(1, -n))}</span> &nbsp;(le 1 au ${rang(n)} rang)</p>` })] });
+        c.aToi(carte, [
+            item('De la puissance au nombre', n1),
+            item('Un peu plus petit', n2),
+            { titre: 'Du nombre à la puissance',
+              enonce: `<p>Écris ${nb(N)} sous la forme d'une puissance de 10.</p>`,
+              parties: [partieExp({ avant: `${nb(N)} = `, valeur: -m,
+                diag: v => v === m ? `${nb(N)} est plus petit que 1 : l'exposant est <b>négatif</b>.`
+                    : v === -(m - 1) ? `Tu as compté seulement les zéros après la virgule : le 1 est au ${rang(m)} rang après la virgule.`
+                    : v === -(m + 1) ? `Le 1 est au ${rang(m)} rang après la virgule, pas au ${rang(m + 1)}.`
+                    : 'Regarde à quel rang après la virgule se trouve le chiffre 1.',
+                solution: `<p class="crs-calc">${nb(N)} : le 1 est au ${rang(m)} rang après la virgule, donc ${nb(N)} = <span class="c">${p10(-m)}</span></p>` })] },
+        ]);
+        return carte;
+    }
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">3. Lien avec l'écriture décimale</h3>
-
-            <div class="bg-green-50 rounded-lg p-6 mb-4">
-                <h4 class="cle text-xl font-semibold mb-3">Multiplier par 10<sup>n</sup> (n &gt; 0) → virgule vers la droite</h4>
-                <div class="bg-white rounded p-4 mb-3">
-                    <p class="font-semibold mb-2">Exemples :</p>
-                    <p>• 3,5 × 10<sup>2</sup> = 350 &nbsp;•&nbsp; 2,7 × 10<sup>4</sup> = 27 000 &nbsp;•&nbsp; 0,45 × 10<sup>3</sup> = 450</p>
-                </div>
-                <div class="check-box">
-                    <p class="check-label">Vérifie ta compréhension :</p>
-                    <p class="check-question">Combien vaut 1,2 × 10<sup>3</sup> ?</p>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <input type="text" id="c1_3" inputmode="decimal" class="check-input w-28" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                        <button class="check-btn" onclick="checkAnswer('c1_3', '1200', 'r1_3', true)">Vérifier</button>
-                    </div>
-                    ${numpadWidget(true)}
-                    <p id="r1_3" class="mt-2 font-semibold"></p>
-                </div>
+    function c1Droite(c) {
+        const carte = c.carte('3. Multiplier par 10<sup>n</sup> : la virgule va vers la droite');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>Multiplier par 10, c'est rendre le nombre 10 fois plus grand : chaque chiffre avance d'un rang.</p>
+                <div class="cle"><p>Multiplier un nombre par <b>10<sup>n</sup></b> (n &gt; 0), c'est déplacer sa virgule de <b>n rangs vers la droite</b>. On complète par des zéros si besoin.</p></div>
             </div>
+            ${exemple(`<p>3,5 → 35 → 350 : la virgule avance de 2 rangs vers la droite.</p>
+                <p class="crs-calc">3,5 × 10<sup>2</sup> = <span class="c">350</span></p>
+                <p>De même : 2,7 × 10<sup>4</sup> = 27 000 · 0,45 × 10<sup>3</sup> = 450.</p>`)}`);
+        const a1 = hasard([1.2, 2.5, 4.8, 6.3, 7.1]), n1 = hasard([2, 3]);
+        const a2 = hasard([0.45, 3.06, 5.25, 0.82]), n2 = hasard([3, 4]);
+        const item = (titre, a, n) => ({ titre,
+            parties: [partieDec({ q: `Combien vaut ${nb(a)} × ${p10(n)} ?`, label: `${nb(a)} × ${p10(n)} =`, valeur: val(a, n), diag: v => diagDecale(v, a, n),
+                solution: `<p class="crs-calc">La virgule avance de ${pl(n, 'rang')} : ${nb(a)} × ${p10(n)} = <span class="c">${nb(val(a, n))}</span></p>` })] });
+        c.aToi(carte, [item('Un chiffre après la virgule', a1, n1), item('Avec des zéros à compléter', a2, n2)]);
+        return carte;
+    }
 
-            <div class="bg-orange-50 rounded-lg p-6 mb-4">
-                <h4 class="cle text-xl font-semibold mb-3">Multiplier par 10<sup>-n</sup> (n &gt; 0) → virgule vers la gauche</h4>
-                <div class="bg-white rounded p-4 mb-3">
-                    <p class="font-semibold mb-2">Exemples :</p>
-                    <p>• 5,2 × 10<sup>-2</sup> = 0,052 &nbsp;•&nbsp; 8 × 10<sup>-3</sup> = 0,008 &nbsp;•&nbsp; 125 × 10<sup>-4</sup> = 0,0125</p>
-                </div>
-                <div class="check-box">
-                    <p class="check-label">Vérifie ta compréhension :</p>
-                    <p class="check-question">Combien vaut 7 × 10<sup>-2</sup> ?</p>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <input type="text" id="c1_4" inputmode="decimal" class="check-input w-28" placeholder="0,…" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                        <button class="check-btn" onclick="checkAnswer('c1_4', '0,07', 'r1_4', true)">Vérifier</button>
-                    </div>
-                    ${numpadWidget(true)}
-                    <p id="r1_4" class="mt-2 font-semibold"></p>
-                </div>
+    function c1Gauche(c) {
+        const carte = c.carte('4. Multiplier par 10<sup>−n</sup> : la virgule va vers la gauche');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>Multiplier par 10<sup>−1</sup> = 0,1, c'est diviser par 10 : chaque chiffre recule d'un rang.</p>
+                <div class="cle"><p>Multiplier un nombre par <b>10<sup>−n</sup></b> (n &gt; 0), c'est déplacer sa virgule de <b>n rangs vers la gauche</b>. On ajoute des zéros devant si besoin.</p></div>
             </div>
+            ${exemple(`<p>8 → 0,8 → 0,08 → 0,008 : la virgule recule de 3 rangs vers la gauche.</p>
+                <p class="crs-calc">8 × 10<sup>−3</sup> = <span class="c">0,008</span></p>
+                <p>De même : 5,2 × 10<sup>−2</sup> = 0,052 · 125 × 10<sup>−4</sup> = 0,0125.</p>`)}`);
+        const a1 = entre(2, 9), n1 = hasard([2, 3]);
+        const a2 = hasard([4.5, 36, 125, 2.4]), n2 = hasard([2, 3, 4]);
+        const item = (titre, a, n) => ({ titre,
+            parties: [partieDec({ q: `Combien vaut ${nb(a)} × ${p10(-n)} ?`, label: `${nb(a)} × ${p10(-n)} =`, valeur: val(a, -n), diag: v => diagDecale(v, a, -n),
+                solution: `<p class="crs-calc">La virgule recule de ${pl(n, 'rang')} : ${nb(a)} × ${p10(-n)} = <span class="c">${nb(val(a, -n))}</span></p>` })] });
+        c.aToi(carte, [item('Un nombre entier', a1, n1), item('Un autre nombre', a2, n2)]);
+        return carte;
+    }
 
-            <div class="bg-purple-50 rounded-lg p-6">
-                <h4 class="cle text-xl font-semibold mb-3">De l'écriture décimale vers la puissance de 10</h4>
-                <div class="bg-white rounded p-4 mb-3">
-                    <p class="font-semibold mb-2">On compte combien de rangs on déplace la virgule :</p>
-                    <p>• 3500 = 3,5 × 10<sup>3</sup> &nbsp;•&nbsp; 0,0042 = 4,2 × 10<sup>-3</sup> &nbsp;•&nbsp; 250 000 = 2,5 × 10<sup>5</sup></p>
-                </div>
-                <div class="check-box">
-                    <p class="check-label">Vérifie ta compréhension :</p>
-                    <p class="check-question">6000 = 6 × 10<sup>?</sup> — Quel est l'exposant ?</p>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <div class="flex items-start">
-                            <span class="text-2xl font-bold text-amber-800">10</span>
-                            <input type="text" id="c1_5" inputmode="numeric" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                        </div>
-                        <button class="check-btn" onclick="checkAnswer('c1_5', 3, 'r1_5')">Vérifier</button>
-                    </div>
-                    ${numpadWidget(true)}
-                    <p id="r1_5" class="mt-2 font-semibold"></p>
-                </div>
+    function c1VersPuissance(c) {
+        const carte = c.carte('5. De l\'écriture décimale à la puissance de 10');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>Dans l'autre sens, on cherche l'exposant n tel que le nombre s'écrive a × 10<sup>n</sup>.</p>
+                <div class="cle"><p>On compte de combien de rangs la virgule se déplace pour passer de a au nombre : vers la <b>droite</b> (le nombre est plus grand) → n <b>positif</b> ; vers la <b>gauche</b> (le nombre est plus petit) → n <b>négatif</b>.</p></div>
             </div>
-        </div>
+            ${exemple(`<p class="crs-calc">3 500 = <span class="c">3,5 × 10<sup>3</sup></span> &nbsp;(de 3,5 à 3 500 : 3 rangs vers la droite)</p>
+                <p class="crs-calc">0,0042 = <span class="c">4,2 × 10<sup>−3</sup></span> &nbsp;(de 4,2 à 0,0042 : 3 rangs vers la gauche)</p>
+                <p>De même : 250 000 = 2,5 × 10<sup>5</sup>.</p>`)}`);
+        const a1 = entre(2, 9), n1 = entre(3, 6);
+        const a2 = hasard([4.2, 3.7, 8.1, 2.6]), n2 = -entre(2, 4);
+        const a3 = hasard([2.5, 1.8, 7.3, 4.06]), n3 = entre(4, 6);
+        const item = (titre, a, n) => {
+            const N = val(a, n);
+            return { titre,
+                parties: [partieExp({ q: 'Complète l\'exposant :', avant: `${nb(N)} = ${nb(a)} × `, valeur: n,
+                    diag: v => diagExposant(v, n, N, a),
+                    solution: `<p class="crs-calc">De ${nb(a)} à ${nb(N)}, la virgule va de ${pl(Math.abs(n), 'rang')} vers la ${n > 0 ? 'droite' : 'gauche'} : ${nb(N)} = <span class="c">${nb(a)} × ${p10(n)}</span></p>` })] };
+        };
+        c.aToi(carte, [item('Un grand nombre', a1, n1), item('Un nombre plus petit que 1', a2, n2), item('Avec une virgule', a3, n3)]);
+        return carte;
+    }
 
-        <div class="text-center mt-8">
-            <button onclick="showTraining(1)" class="bg-purple-500 hover:bg-purple-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
-        </div>
-    </div>`;
-}
+    function c1Retenir(c) {
+        const carte = c.carte('À retenir');
+        c.ajouter(carte, `<div class="cle"><p>10<sup>n</sup> = 10 × … × 10 (n facteurs) : un 1 suivi de n zéros. <b>10<sup>0</sup> = 1</b>.</p>
+                <p>10<sup>−n</sup> = ${frac('1', '10<sup>n</sup>')} : le chiffre 1 est au n<sup>e</sup> rang après la virgule.</p></div>
+            <div class="cle"><p>× 10<sup>n</sup> (n &gt; 0) : la virgule se déplace de n rangs <b>vers la droite</b>.</p>
+                <p>× 10<sup>−n</sup> (n &gt; 0) : la virgule se déplace de n rangs <b>vers la gauche</b>.</p></div>
+            <div class="cle"><p>Dans l'autre sens, on compte les rangs : 3 500 = 3,5 × 10<sup>3</sup> · 0,0042 = 4,2 × 10<sup>−3</sup>.</p></div>
+            ${actions([['#training-1', 'S\'entraîner sur les définitions →'], ['#course-2', 'Module 2 : écriture scientifique'], ['#fiche-1', 'Fiche récapitulative']])}`);
+        return carte;
+    }
 
-// ═══════════════════════════════════════════════════════════════
-// COURS 2 — Écriture scientifique
-// ═══════════════════════════════════════════════════════════════
-function getCourse2Content() {
-    return `
-    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-                    <h2 class="text-2xl md:text-3xl font-bold text-purple-900 mb-6">Cours 2 : Écriture scientifique</h2>
+    /* ═══════════════ COURS 2 — Écriture scientifique ═══════════════ */
+    // quatre écritures égales d'un même nombre : une seule est scientifique
+    function itemReconnaitre(titre, e) {
+        const d1 = entre(1, 9), d2 = entre(0, 9), d3 = entre(1, 9);
+        const neg = e < 0 ? ' (l\'exposant peut être négatif : ce n\'est pas lui le problème)' : '';
+        return { titre,
+            parties: [{ type: 'choix', q: 'Ces quatre écritures désignent le même nombre. Laquelle est l\'écriture scientifique ?',
+                options: [
+                    { id: 'ok', label: `${d1},${d2}${d3} × ${p10(e)}` },
+                    { id: 'deux', label: `${d1}${d2},${d3} × ${p10(e - 1)}` },
+                    { id: 'zero', label: `0,${d1}${d2}${d3} × ${p10(e + 1)}` },
+                    { id: 'trois', label: `${d1}${d2}${d3} × ${p10(e - 2)}` }],
+                bonne: 'ok',
+                indices: {
+                    deux: `${d1}${d2},${d3} a deux chiffres avant la virgule : il faut 1 ≤ a &lt; 10${neg}.`,
+                    zero: `0,${d1}${d2}${d3} commence par 0 : il faut un chiffre <b>non nul</b> avant la virgule${neg}.`,
+                    trois: `${d1}${d2}${d3} est plus grand que 10 : il faut 1 ≤ a &lt; 10${neg}.` },
+                solution: `<p>${d1},${d2}${d3} × ${p10(e)} : un seul chiffre non nul avant la virgule (1 ≤ ${d1},${d2}${d3} &lt; 10).</p>` }] };
+    }
+    // corriger une écriture qui n'est pas scientifique : 35 × 10⁷ → 3,5 × 10⁸
+    function itemCorriger(titre) {
+        const w = hasard([{ m: 35, e: 7 }, { m: 47, e: 5 }, { m: 0.63, e: 4 }, { m: 12.8, e: -2 }, { m: 0.42, e: 3 }]);
+        const k = w.m >= 10 ? 1 : -1, a = val(w.m, -k), bon = w.e + k;
+        const faux = `${nb(w.m)} × ${p10(w.e)}`;
+        const autre = k > 0 ? `${nb(val(w.m, 1))} × ${p10(w.e - 1)}` : `${nb(val(w.m, -1))} × ${p10(w.e + 1)}`;
+        return { titre,
+            parties: [{ type: 'choix', q: `${faux} n'est pas en écriture scientifique. Quelle est la bonne écriture ?`,
+                options: [{ id: 'ok', label: `${nb(a)} × ${p10(bon)}` }, { id: 'meme', label: `${nb(a)} × ${p10(w.e)}` },
+                          { id: 'sens', label: `${nb(a)} × ${p10(w.e - k)}` }, { id: 'autre', label: autre }],
+                bonne: 'ok',
+                indices: {
+                    meme: k > 0 ? `${nb(a)} est 10 fois plus petit que ${nb(w.m)} : pour garder la même valeur, il faut une puissance de 10 dix fois plus grande (exposant + 1).`
+                                : `${nb(a)} est 10 fois plus grand que ${nb(w.m)} : pour garder la même valeur, il faut une puissance de 10 dix fois plus petite (exposant − 1).`,
+                    sens: k > 0 ? `${nb(w.m)} = ${nb(a)} × 10 : on <b>ajoute</b> 1 à l'exposant, on ne l'enlève pas.`
+                                : `${nb(w.m)} = ${nb(a)} × 10<sup>−1</sup> : on <b>enlève</b> 1 à l'exposant, on ne l'ajoute pas.`,
+                    autre: `C'est bien le même nombre, mais ${autre.split(' ×')[0]} n'est pas entre 1 et 10.` },
+                solution: `<p class="crs-calc">${faux} = ${nb(a)} × ${k > 0 ? '10' : '10<sup>−1</sup>'} × ${p10(w.e)} = <span class="c">${nb(a)} × ${p10(bon)}</span></p>` }] };
+    }
+    // diagnostic d'une écriture scientifique saisie (a, n) pour le nombre N = a0 × 10^n0
+    function diagSci(vs, N, a0, n0) {
+        const [a, n] = vs;
+        if (!Number.isInteger(n)) return 'L\'exposant n est un nombre entier.';
+        if (a >= 10 || a < 1) {
+            const pb = a >= 10 ? `${nb(a)} a plus d'un chiffre avant la virgule` : `${nb(a)} n'a pas de chiffre non nul avant la virgule`;
+            return egal(val(a, n), N) ? `Ton écriture est bien égale à ${nb(N)}, mais ${pb} : ce n'est pas l'écriture scientifique (il faut 1 ≤ a &lt; 10).`
+                                       : `${pb} : en écriture scientifique, 1 ≤ a &lt; 10.`;
+        }
+        if (!egal(a, a0)) return `Le nombre a garde les chiffres de ${nb(N)} : place la virgule juste après le premier chiffre non nul.`;
+        if (n === -n0) return n0 > 0 ? `Le signe de l'exposant est faux : ${nb(N)} est plus grand que 10, la virgule va vers la gauche, l'exposant est <b>positif</b>.`
+                                     : `Le signe de l'exposant est faux : ${nb(N)} est plus petit que 1, la virgule va vers la droite, l'exposant est <b>négatif</b>.`;
+        if (Math.abs(Math.abs(n) - Math.abs(n0)) === 1) return `Recompte les rangs : tu en as compté un de ${Math.abs(n) > Math.abs(n0) ? 'trop' : 'moins'} entre ${nb(N)} et ${nb(a0)}.`;
+        return `Compte de combien de rangs la virgule se déplace entre ${nb(N)} et ${nb(a0)}.`;
+    }
+    // écrire N en écriture scientifique : deux cases (a, puis l'exposant n)
+    function itemEcrire(titre, a0, n0) {
+        const N = val(a0, n0);
+        return { titre,
+            parties: [{ type: 'champs', q: `Écris ${nb(N)} en écriture scientifique.`, ligne: true,
+                champs: [{ valeur: a0, rel: 1e-9, signe: false, unite: '<span class="p10-x10">× 10</span>', aria: 'Nombre a, entre 1 et 10' },
+                         { valeur: n0, tol: 0, entier: true, aria: 'Exposant n' }],
+                diag: vs => diagSci(vs, N, a0, n0),
+                solution: `<p class="crs-calc">${nb(N)} → ${nb(a0)} : la virgule se déplace de ${pl(Math.abs(n0), 'rang')} vers la ${n0 > 0 ? 'gauche' : 'droite'}, donc ${nb(N)} = <span class="c">${nb(a0)} × ${p10(n0)}</span></p>` }] };
+    }
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">1. Définition</h3>
-            <div class="cle mb-4">
-                <p class="text-lg mb-3">Un nombre est en <strong>écriture scientifique</strong> s'il s'écrit :</p>
-                <div class="bg-white rounded-lg p-4 text-center text-2xl font-bold mb-4">a × 10<sup>n</sup></div>
-                <ul class="list-disc ml-6 text-lg space-y-1">
-                    <li><strong>a</strong> : un seul chiffre non nul avant la virgule (1 ≤ a &lt; 10)</li>
-                    <li><strong>n</strong> : entier relatif (positif, négatif ou nul)</li>
-                </ul>
+    function c2Definition(c) {
+        const carte = c.carte('1. Qu\'est-ce que l\'écriture scientifique ?');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>Un nombre est en <b>écriture scientifique</b> s'il s'écrit :</p>
+                <div class="cle"><p class="crs-formule">a × 10<sup>n</sup></p>
+                    <ul class="er-liste"><li><b>a</b> : un seul chiffre non nul avant la virgule (1 ≤ a &lt; 10) ;</li>
+                        <li><b>n</b> : un entier relatif (positif, négatif ou nul).</li></ul></div>
             </div>
-        </div>
+            ${exemple(`<p><b>Oui :</b> 3,47 × 10<sup>8</sup> · 7,25 × 10<sup>−5</sup> · 1,0 × 10<sup>12</sup> · 9,99 × 10<sup>−3</sup></p>
+                <p><b>Non :</b></p>
+                <ul class="er-liste"><li>35 × 10<sup>7</sup> : 35 a deux chiffres avant la virgule → il faut 3,5 × 10<sup>8</sup> ;</li>
+                    <li>0,42 × 10<sup>3</sup> : 0,42 commence par 0 → il faut 4,2 × 10<sup>2</sup> ;</li>
+                    <li>12,8 × 10<sup>−2</sup> : 12,8 a deux chiffres avant la virgule → il faut 1,28 × 10<sup>−1</sup>.</li></ul>`, 'Exemples et contre-exemples')}`);
+        c.aToi(carte, [
+            itemReconnaitre('Un grand nombre', entre(4, 8)),
+            itemReconnaitre('Un petit nombre', -entre(3, 6)),
+            itemCorriger('Corriger une écriture'),
+        ]);
+        return carte;
+    }
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">2. Exemples et contre-exemples</h3>
-            <div class="grid md:grid-cols-2 gap-4 mb-4">
-                <div class="bg-green-50 rounded-lg p-5">
-                    <p class="font-bold text-green-800 mb-3">✓ Écriture scientifique :</p>
-                    <p>• 3,47 × 10<sup>8</sup></p><p>• 7,25 × 10<sup>-5</sup></p>
-                    <p>• 1,0 × 10<sup>12</sup></p><p>• 9,99 × 10<sup>-3</sup></p>
-                </div>
-                <div class="bg-red-50 rounded-lg p-5">
-                    <p class="font-bold text-red-800 mb-3">✗ Pas en écriture scientifique :</p>
-                    <p>• 35 × 10<sup>7</sup> &nbsp;→ il faut 3,5 × 10<sup>8</sup></p>
-                    <p>• 0,42 × 10<sup>3</sup> → il faut 4,2 × 10<sup>2</sup></p>
-                    <p>• 12,8 × 10<sup>-2</sup> → il faut 1,28 × 10<sup>-1</sup></p>
-                </div>
+    function c2Methode(c) {
+        const carte = c.carte('2. Mettre un nombre en écriture scientifique');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>Pour écrire un nombre en écriture scientifique, on garde ses chiffres et on déplace la virgule :</p>
+                <div class="cle"><ol class="er-liste">
+                    <li>Déplace la virgule pour n'avoir qu'<b>un seul chiffre non nul avant la virgule</b> : c'est a.</li>
+                    <li>Le nombre de rangs déplacés donne n (sans son signe).</li>
+                    <li>Virgule déplacée vers la <b>gauche</b> (grand nombre) → exposant <b>positif</b>.</li>
+                    <li>Virgule déplacée vers la <b>droite</b> (nombre plus petit que 1) → exposant <b>négatif</b>.</li></ol></div>
             </div>
-            <div class="bg-purple-50 rounded-lg p-5">
-                <div class="check-box">
-                    <p class="check-label">Vérifie ta compréhension :</p>
-                    <p class="check-question">Écris 450 000 en écriture scientifique :</p>
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <input type="text" id="c2_1a" inputmode="decimal" class="check-input w-20" placeholder="a" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                        <span class="font-bold text-amber-900 text-lg">× 10</span>
-                        <sup><input type="text" id="c2_1b" inputmode="numeric" class="check-input course-exp-input" placeholder="n" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></sup>
-                        <button class="check-btn" onclick="checkSci('c2_1a','c2_1b',4.5,5,'r2_1')">Vérifier</button>
-                    </div>
-                    ${numpadWidget(true)}
-                    <p id="r2_1" class="mt-2 font-semibold"></p>
-                </div>
-            </div>
-        </div>
+            ${exemple(`<p class="crs-calc">28 300 = <span class="c">2,83 × 10<sup>4</sup></span> &nbsp;(4 rangs vers la gauche)</p>
+                <p class="crs-calc">0,000537 = <span class="c">5,37 × 10<sup>−4</sup></span> &nbsp;(4 rangs vers la droite)</p>`)}`);
+        c.aToi(carte, [
+            itemEcrire('Un grand nombre', hasard([4.5, 1.5, 2.4, 6.8, 8.2]), entre(4, 6)),
+            itemEcrire('Un nombre plus petit que 1', hasard([7.2, 3.5, 5.6, 9.1]), -entre(3, 5)),
+            itemEcrire('Avec trois chiffres', hasard([2.83, 5.37, 1.96, 6.04, 3.15]), hasard([3, 4, 5, -2, -3, -4])),
+        ]);
+        return carte;
+    }
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">3. Comment mettre en écriture scientifique ?</h3>
-            <div class="cle mb-4">
-                <ol class="list-decimal ml-6 space-y-2 text-gray-800">
-                    <li>Déplacer la virgule pour avoir <strong>un seul chiffre non nul avant la virgule</strong></li>
-                    <li>Compter le nombre de rangs déplacés → c'est <strong>|n|</strong></li>
-                    <li>Virgule déplacée vers la <strong>gauche</strong> → exposant <strong>positif</strong></li>
-                    <li>Virgule déplacée vers la <strong>droite</strong> → exposant <strong>négatif</strong></li>
-                </ol>
+    function c2Decimale(c) {
+        const carte = c.carte('3. Revenir à l\'écriture décimale');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>Pour écrire en décimal un nombre en écriture scientifique, on applique la règle du module 1.</p>
+                <div class="cle"><p>a × 10<sup>n</sup> : la virgule de a se déplace de n rangs vers la <b>droite</b> si n &gt; 0, vers la <b>gauche</b> si n &lt; 0.</p></div>
             </div>
-            <div class="bg-white border-2 border-indigo-200 rounded-lg p-5 mb-4">
-                <p class="font-semibold mb-3">Exemples :</p>
-                <p class="mb-2">• 28 300 = <span class="text-blue-700 font-bold">2,83</span> × 10<sup>4</sup> <span class="text-gray-500 text-sm">(4 rangs vers la gauche)</span></p>
-                <p class="mb-2">• 0,000537 = <span class="text-blue-700 font-bold">5,37</span> × 10<sup>-4</sup> <span class="text-gray-500 text-sm">(4 rangs vers la droite)</span></p>
-            </div>
-            <div class="check-box">
-                <p class="check-label">Vérifie ta compréhension :</p>
-                <p class="check-question">Écris 0,00072 en écriture scientifique :</p>
-                <div class="flex items-center gap-2 flex-wrap">
-                    <input type="text" id="c2_2a" inputmode="decimal" class="check-input w-20" placeholder="a" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                    <span class="font-bold text-amber-900 text-lg">× 10</span>
-                    <sup><input type="text" id="c2_2b" inputmode="numeric" class="check-input course-exp-input" placeholder="n" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></sup>
-                    <button class="check-btn" onclick="checkSci('c2_2a','c2_2b',7.2,-4,'r2_2')">Vérifier</button>
-                </div>
-                ${numpadWidget(true)}
-                <p id="r2_2" class="mt-2 font-semibold"></p>
-            </div>
-            <div class="check-box mt-4">
-                <p class="check-label">Vérifie ta compréhension :</p>
-                <p class="check-question">Écris en écriture décimale : 3,6 × 10<sup>4</sup></p>
-                <div class="flex items-center gap-3 flex-wrap">
-                    <input type="text" id="c2_3" inputmode="decimal" class="check-input w-28" placeholder="Réponse" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                    <button class="check-btn" onclick="checkAnswer('c2_3','36000','r2_3',true)">Vérifier</button>
-                </div>
-                ${numpadWidget(true)}
-                <p id="r2_3" class="mt-2 font-semibold"></p>
-            </div>
-        </div>
+            ${exemple(`<p class="crs-calc">2,83 × 10<sup>4</sup> = <span class="c">28 300</span> &nbsp;(4 rangs vers la droite)</p>
+                <p class="crs-calc">5,37 × 10<sup>−4</sup> = <span class="c">0,000537</span> &nbsp;(4 rangs vers la gauche)</p>`)}`);
+        const item = (titre, a, n) => ({ titre,
+            parties: [partieDec({ q: `Écris ${nb(a)} × ${p10(n)} en écriture décimale.`, label: `${nb(a)} × ${p10(n)} =`, valeur: val(a, n), diag: v => diagDecale(v, a, n),
+                solution: `<p class="crs-calc">La virgule va de ${pl(Math.abs(n), 'rang')} vers la ${n > 0 ? 'droite' : 'gauche'} : ${nb(a)} × ${p10(n)} = <span class="c">${nb(val(a, n))}</span></p>` })] });
+        c.aToi(carte, [
+            item('Exposant positif', hasard([3.6, 7.2, 1.8, 4.05, 9.3]), entre(3, 5)),
+            item('Exposant négatif', hasard([6.42, 7.25, 1.5, 3.08]), -entre(2, 4)),
+        ]);
+        return carte;
+    }
 
-        <div class="text-center mt-8">
-            <button onclick="showTraining(2)" class="bg-purple-500 hover:bg-purple-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
-        </div>
-    </div>`;
-}
+    function c2Retenir(c) {
+        const carte = c.carte('À retenir');
+        c.ajouter(carte, `<div class="cle"><p>Écriture scientifique : <b>a × 10<sup>n</sup></b> avec 1 ≤ a &lt; 10 (un seul chiffre non nul avant la virgule) et n entier relatif.</p></div>
+            <div class="cle"><p>Pour l'obtenir, on déplace la virgule : le nombre de rangs donne n ; vers la gauche → n positif, vers la droite → n négatif.</p>
+                <p>28 300 = 2,83 × 10<sup>4</sup> · 0,000537 = 5,37 × 10<sup>−4</sup></p></div>
+            <div class="cle"><p>Retour à l'écriture décimale : la virgule de a se déplace de n rangs (vers la droite si n &gt; 0, vers la gauche si n &lt; 0).</p></div>
+            ${actions([['#training-2', 'S\'entraîner sur l\'écriture scientifique →'], ['#course-3', 'Module 3 : opérations'], ['#fiche-2', 'Fiche récapitulative']])}`);
+        return carte;
+    }
 
-// ═══════════════════════════════════════════════════════════════
-// COURS 3 — Opérations
-// ═══════════════════════════════════════════════════════════════
-function getCourse3Content() {
-    return `
-    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-                    <h2 class="text-2xl md:text-3xl font-bold text-purple-900 mb-6">Cours 3 : Opérations avec les puissances de 10</h2>
+    /* ═══════════════ COURS 3 — Opérations ═══════════════ */
+    const par = n => n < 0 ? `(${ex(n)})` : ex(n);   // −4 → (−4) dans un calcul
+    function diagMul(v, a, b) {
+        if (v === a * b) return 'Tu as multiplié les exposants : pour un produit de puissances de 10, on les <b>additionne</b>.';
+        if ((a < 0 || b < 0) && (v === Math.abs(a) + Math.abs(b) || v === -(a + b) || v === -(Math.abs(a) + Math.abs(b))))
+            return `Attention aux signes : ${ex(a)} + ${par(b)} = ${ex(a + b)}.`;
+        if (v === a - b || v === b - a) return 'Tu as soustrait : pour un produit, on <b>additionne</b> les exposants.';
+        return `On additionne les exposants : ${ex(a)} + ${par(b)}.`;
+    }
+    function diagDiv(v, a, b) {
+        if (b < 0 && v === a + b) return `Soustraire un exposant négatif revient à ajouter : ${ex(a)} − ${par(b)} = ${ex(a)} + ${ex(-b)}.`;
+        if (v === a + b) return 'Tu as additionné : pour une division, on <b>soustrait</b> les exposants (celui du haut moins celui du bas).';
+        if (v === b - a) return `Tu as calculé ${ex(b)} − ${par(a)} : c'est l'exposant du <b>haut</b> moins celui du bas.`;
+        return `On soustrait les exposants : ${ex(a)} − ${par(b)}.`;
+    }
+    function diagPP(v, a, b) {
+        if (v === a + b) return 'Tu as additionné : pour une puissance de puissance, on <b>multiplie</b> les exposants.';
+        if (v === -(a * b)) return `Attention à la règle des signes : ${ex(a)} × ${par(b)} = ${ex(a * b)}.`;
+        if (a > 0 && b > 0 && v === Math.pow(a, b)) return `Tu as calculé ${a}<sup>${b}</sup> : il suffit de multiplier ${a} × ${b}.`;
+        return `On multiplie les exposants : ${ex(a)} × ${par(b)}.`;
+    }
+    // tirage au hasard recommencé tant que la condition « refus » est vraie
+    const tirerSauf = (tirer, refus) => { let x; do { x = tirer(); } while (refus(x)); return x; };
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">1. Multiplication : 10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a+b</sup></h3>
-            <div class="bg-green-50 rounded-lg p-6 mb-4">
-                <p class="cle mb-3 text-lg">On <strong>additionne</strong> les exposants.</p>
-                <div class="bg-white rounded p-4 mb-3">
-                    <p>• 10<sup>3</sup> × 10<sup>2</sup> = 10<sup>5</sup> &nbsp;•&nbsp; 10<sup>7</sup> × 10<sup>-4</sup> = 10<sup>3</sup> &nbsp;•&nbsp; 10<sup>-2</sup> × 10<sup>-3</sup> = 10<sup>-5</sup></p>
-                </div>
-                <div class="check-box">
-                    <p class="check-label">Vérifie ta compréhension :</p>
-                    <p class="check-question">10<sup>5</sup> × 10<sup>3</sup> = 10<sup>?</sup> — Quel est l'exposant ?</p>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <div class="flex items-start">
-                            <span class="text-2xl font-bold text-amber-800">10</span>
-                            <input type="text" id="c3_1" inputmode="numeric" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                        </div>
-                        <button class="check-btn" onclick="checkAnswer('c3_1', 8, 'r3_1')">Vérifier</button>
-                    </div>
-                    ${numpadWidget(true)}
-                    <p id="r3_1" class="mt-2 font-semibold"></p>
-                </div>
+    function c3Multiplication(c) {
+        const carte = c.carte('1. Multiplier deux puissances de 10');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>10<sup>3</sup> × 10<sup>2</sup> = (10 × 10 × 10) × (10 × 10) : il y a 3 + 2 = 5 facteurs 10.</p>
+                <div class="cle"><p class="crs-formule">10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a+b</sup></p>
+                    <p>On <b>additionne</b> les exposants.</p></div>
             </div>
-        </div>
+            ${exemple(`<p class="crs-calc">10<sup>3</sup> × 10<sup>2</sup> = 10<sup>3+2</sup> = <span class="c">10<sup>5</sup></span></p>
+                <p class="crs-calc">10<sup>7</sup> × 10<sup>−4</sup> = 10<sup>7+(−4)</sup> = <span class="c">10<sup>3</sup></span></p>
+                <p class="crs-calc">10<sup>−2</sup> × 10<sup>−3</sup> = 10<sup>−2+(−3)</sup> = <span class="c">10<sup>−5</sup></span></p>`)}`);
+        // le deuxième couple ne doit pas donner 10⁰ (a + b = 0)
+        const paires = [[entre(2, 7), entre(2, 7)], tirerSauf(() => [entre(4, 9), -entre(2, 7)], p => p[0] + p[1] === 0), [-entre(2, 5), -entre(1, 4)]];
+        const titres = ['Deux exposants positifs', 'Un exposant négatif', 'Deux exposants négatifs'];
+        c.aToi(carte, paires.map(([a, b], i) => ({ titre: titres[i],
+            parties: [partieExp({ q: 'Calcule et complète l\'exposant :', avant: `${p10(a)} × ${p10(b)} = `, valeur: a + b, diag: v => diagMul(v, a, b),
+                solution: `<p class="crs-calc">${p10(a)} × ${p10(b)} = 10<sup>${ex(a)}+${par(b)}</sup> = <span class="c">${p10(a + b)}</span></p>` })] })));
+        return carte;
+    }
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">2. Division : ${frac('10<sup>a</sup>', '10<sup>b</sup>')} = 10<sup>a−b</sup></h3>
-            <div class="bg-yellow-50 rounded-lg p-6 mb-4">
-                <p class="cle mb-3 text-lg">On <strong>soustrait</strong> les exposants.</p>
-                <div class="bg-white rounded p-4 mb-3">
-                    <p>• ${frac('10<sup>7</sup>','10<sup>3</sup>')} = 10<sup>4</sup> &nbsp;•&nbsp; ${frac('10<sup>2</sup>','10<sup>5</sup>')} = 10<sup>-3</sup> &nbsp;•&nbsp; ${frac('10<sup>-2</sup>','10<sup>-5</sup>')} = 10<sup>3</sup></p>
-                </div>
-                <div class="check-box">
-                    <p class="check-label">Vérifie ta compréhension :</p>
-                    <p class="check-question">${frac('10<sup>6</sup>', '10<sup>2</sup>')} = 10<sup>?</sup> — Quel est l'exposant ?</p>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <div class="flex items-start">
-                            <span class="text-2xl font-bold text-amber-800">10</span>
-                            <input type="text" id="c3_2" inputmode="numeric" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                        </div>
-                        <button class="check-btn" onclick="checkAnswer('c3_2', 4, 'r3_2')">Vérifier</button>
-                    </div>
-                    ${numpadWidget(true)}
-                    <p id="r3_2" class="mt-2 font-semibold"></p>
-                </div>
+    function c3Division(c) {
+        const carte = c.carte('2. Diviser deux puissances de 10');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>${frac('10<sup>5</sup>', '10<sup>2</sup>')} = ${frac('10 × 10 × 10 × 10 × 10', '10 × 10')} : on simplifie deux facteurs 10, il en reste 5 − 2 = 3.</p>
+                <div class="cle"><p class="crs-formule">${frac('10<sup>a</sup>', '10<sup>b</sup>')} = 10<sup>a−b</sup></p>
+                    <p>On <b>soustrait</b> les exposants : celui du haut moins celui du bas.</p></div>
             </div>
-        </div>
+            ${exemple(`<p class="crs-calc">${frac('10<sup>7</sup>', '10<sup>3</sup>')} = 10<sup>7−3</sup> = <span class="c">10<sup>4</sup></span></p>
+                <p class="crs-calc">${frac('10<sup>2</sup>', '10<sup>5</sup>')} = 10<sup>2−5</sup> = <span class="c">10<sup>−3</sup></span></p>
+                <p class="crs-calc">${frac('10<sup>−2</sup>', '10<sup>−5</sup>')} = 10<sup>−2−(−5)</sup> = <span class="c">10<sup>3</sup></span></p>`)}`);
+        const b1 = entre(1, 4), a1 = entre(b1 + 1, b1 + 5);
+        const a2 = entre(1, 4), b2 = entre(a2 + 2, a2 + 5);
+        const a3 = entre(2, 6), b3 = -entre(1, 4);
+        const titres = ['Le plus grand exposant en haut', 'Le plus grand exposant en bas', 'Un exposant négatif en bas'];
+        c.aToi(carte, [[a1, b1], [a2, b2], [a3, b3]].map(([a, b], i) => ({ titre: titres[i],
+            parties: [partieExp({ q: 'Calcule et complète l\'exposant :', avant: `${frac(p10(a), p10(b))} = `, valeur: a - b, diag: v => diagDiv(v, a, b),
+                solution: `<p class="crs-calc">${frac(p10(a), p10(b))} = 10<sup>${ex(a)}−${par(b)}</sup> = <span class="c">${p10(a - b)}</span></p>` })] })));
+        return carte;
+    }
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">3. Inverse : ${frac('1', '10<sup>a</sup>')} = 10<sup>−a</sup></h3>
-            <div class="bg-red-50 rounded-lg p-6 mb-4">
-                <p class="cle mb-3 text-lg">On <strong>change le signe</strong> de l'exposant.</p>
-                <div class="bg-white rounded p-4 mb-3">
-                    <p>• ${frac('1','10<sup>3</sup>')} = 10<sup>-3</sup> &nbsp;•&nbsp; ${frac('1','10<sup>-5</sup>')} = 10<sup>5</sup></p>
-                </div>
-                <div class="check-box">
-                    <p class="check-label">Vérifie ta compréhension :</p>
-                    <p class="check-question">${frac('1', '10<sup>7</sup>')} = 10<sup>?</sup> — Quel est l'exposant ?</p>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <div class="flex items-start">
-                            <span class="text-2xl font-bold text-amber-800">10</span>
-                            <input type="text" id="c3_3" inputmode="numeric" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                        </div>
-                        <button class="check-btn" onclick="checkAnswer('c3_3', -7, 'r3_3')">Vérifier</button>
-                    </div>
-                    ${numpadWidget(true)}
-                    <p id="r3_3" class="mt-2 font-semibold"></p>
-                </div>
+    function c3Inverse(c) {
+        const carte = c.carte('3. L\'inverse d\'une puissance de 10');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>C'est un cas particulier de la division : 1 = 10<sup>0</sup>, donc ${frac('1', '10<sup>a</sup>')} = 10<sup>0−a</sup>.</p>
+                <div class="cle"><p class="crs-formule">${frac('1', '10<sup>a</sup>')} = 10<sup>−a</sup></p>
+                    <p>On <b>change le signe</b> de l'exposant.</p></div>
             </div>
-        </div>
+            ${exemple(`<p class="crs-calc">${frac('1', '10<sup>3</sup>')} = <span class="c">10<sup>−3</sup></span> &nbsp;·&nbsp; ${frac('1', '10<sup>−5</sup>')} = <span class="c">10<sup>5</sup></span></p>`)}`);
+        const a = entre(2, 8), b = entre(2, 6), k = entre(2, 4), D = Math.pow(10, k);
+        c.aToi(carte, [
+            { titre: 'Un exposant positif',
+              parties: [partieExp({ q: 'Calcule et complète l\'exposant :', avant: `${frac('1', p10(a))} = `, valeur: -a,
+                diag: v => v === a ? 'Tu as gardé l\'exposant : pour l\'inverse, on <b>change son signe</b>.' : `On change le signe de l'exposant : ${ex(a)} devient ${ex(-a)}.`,
+                solution: `<p class="crs-calc">${frac('1', p10(a))} = <span class="c">${p10(-a)}</span></p>` })] },
+            { titre: 'Un exposant négatif',
+              parties: [partieExp({ q: 'Calcule et complète l\'exposant :', avant: `${frac('1', p10(-b))} = `, valeur: b,
+                diag: v => v === -b ? 'Tu as gardé l\'exposant : on change son signe, −' + b + ' devient ' + b + '.' : `On change le signe de l'exposant : ${ex(-b)} devient ${b}.`,
+                solution: `<p class="crs-calc">${frac('1', p10(-b))} = <span class="c">${p10(b)}</span></p>` })] },
+            { titre: 'Avec l\'écriture décimale',
+              parties: [partieExp({ q: `Écris ${frac('1', nb(D))} sous la forme d'une puissance de 10.`, avant: `${frac('1', nb(D))} = `, valeur: -k,
+                diag: v => v === k ? `${nb(D)} = ${p10(k)}, et l'inverse change le signe de l'exposant : l'exposant est négatif.`
+                    : `Écris d'abord ${nb(D)} sous la forme d'une puissance de 10, puis change le signe de l'exposant.`,
+                solution: `<p class="crs-calc">${frac('1', nb(D))} = ${frac('1', p10(k))} = <span class="c">${p10(-k)}</span></p>` })] },
+        ]);
+        return carte;
+    }
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">4. Puissance d'une puissance : (10<sup>a</sup>)<sup>b</sup> = 10<sup>a×b</sup></h3>
-            <div class="bg-pink-50 rounded-lg p-6 mb-4">
-                <p class="cle mb-3 text-lg">On <strong>multiplie</strong> les exposants.</p>
-                <div class="bg-white rounded p-4 mb-3">
-                    <p>• (10<sup>3</sup>)<sup>2</sup> = 10<sup>6</sup> &nbsp;•&nbsp; (10<sup>-2</sup>)<sup>3</sup> = 10<sup>-6</sup> &nbsp;•&nbsp; (10<sup>4</sup>)<sup>-1</sup> = 10<sup>-4</sup> &nbsp;•&nbsp; (10<sup>-3</sup>)<sup>-2</sup> = 10<sup>6</sup></p>
-                </div>
-                <div class="check-box">
-                    <p class="check-label">Vérifie ta compréhension :</p>
-                    <p class="check-question">(10<sup>2</sup>)<sup>5</sup> = 10<sup>?</sup> — Quel est l'exposant ?</p>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <div class="flex items-start">
-                            <span class="text-2xl font-bold text-amber-800">10</span>
-                            <input type="text" id="c3_4" inputmode="numeric" class="check-input course-exp-input" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-                        </div>
-                        <button class="check-btn" onclick="checkAnswer('c3_4', 10, 'r3_4')">Vérifier</button>
-                    </div>
-                    ${numpadWidget(true)}
-                    <p id="r3_4" class="mt-2 font-semibold"></p>
-                </div>
+    function c3Puissance(c) {
+        const carte = c.carte('4. La puissance d\'une puissance');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>(10<sup>3</sup>)<sup>2</sup> = 10<sup>3</sup> × 10<sup>3</sup> = 10<sup>3+3</sup> = 10<sup>6</sup> : c'est 3 × 2.</p>
+                <div class="cle"><p class="crs-formule">(10<sup>a</sup>)<sup>b</sup> = 10<sup>a×b</sup></p>
+                    <p>On <b>multiplie</b> les exposants (attention à la règle des signes).</p></div>
             </div>
-        </div>
+            ${exemple(`<p class="crs-calc">(10<sup>3</sup>)<sup>2</sup> = 10<sup>3×2</sup> = <span class="c">10<sup>6</sup></span> &nbsp;·&nbsp; (10<sup>−2</sup>)<sup>3</sup> = 10<sup>−2×3</sup> = <span class="c">10<sup>−6</sup></span></p>
+                <p class="crs-calc">(10<sup>4</sup>)<sup>−1</sup> = 10<sup>4×(−1)</sup> = <span class="c">10<sup>−4</sup></span> &nbsp;·&nbsp; (10<sup>−3</sup>)<sup>−2</sup> = 10<sup>−3×(−2)</sup> = <span class="c">10<sup>6</sup></span></p>`)}`);
+        const paires = [[entre(2, 5), entre(2, 5)], hasard([[-entre(2, 4), entre(2, 3)], [entre(2, 4), -entre(2, 3)]]), [-entre(2, 3), -entre(2, 3)]];
+        const titres = ['Deux exposants positifs', 'Un exposant négatif', 'Deux exposants négatifs'];
+        c.aToi(carte, paires.map(([a, b], i) => ({ titre: titres[i],
+            parties: [partieExp({ q: 'Calcule et complète l\'exposant :', avant: `(${p10(a)})<sup>${ex(b)}</sup> = `, valeur: a * b, diag: v => diagPP(v, a, b),
+                solution: `<p class="crs-calc">(${p10(a)})<sup>${ex(b)}</sup> = 10<sup>${ex(a)}×${par(b)}</sup> = <span class="c">${p10(a * b)}</span></p>` })] })));
+        return carte;
+    }
 
-        <div class="cle mb-8">
-            <p class="cle-titre mb-3 text-lg">Récapitulatif des règles :</p>
-            <div class="grid md:grid-cols-2 gap-3 text-gray-700">
-                <div class="bg-white rounded p-3"><strong>Multiplication :</strong> 10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a+b</sup></div>
-                <div class="bg-white rounded p-3"><strong>Division :</strong> ${frac('10<sup>a</sup>','10<sup>b</sup>')} = 10<sup>a-b</sup></div>
-                <div class="bg-white rounded p-3"><strong>Inverse :</strong> ${frac('1','10<sup>a</sup>')} = 10<sup>-a</sup></div>
-                <div class="bg-white rounded p-3"><strong>Puissance :</strong> (10<sup>a</sup>)<sup>b</sup> = 10<sup>a×b</sup></div>
-            </div>
-        </div>
+    function c3Retenir(c) {
+        const carte = c.carte('À retenir');
+        c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Multiplication</b> : on additionne les exposants.</p><p class="crs-formule">10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a+b</sup></p></div>
+            <div class="cle"><p><b class="cle-titre">Division</b> : on soustrait les exposants.</p><p class="crs-formule">${frac('10<sup>a</sup>', '10<sup>b</sup>')} = 10<sup>a−b</sup></p></div>
+            <div class="cle"><p><b class="cle-titre">Inverse</b> : on change le signe de l'exposant.</p><p class="crs-formule">${frac('1', '10<sup>a</sup>')} = 10<sup>−a</sup></p></div>
+            <div class="cle"><p><b class="cle-titre">Puissance d'une puissance</b> : on multiplie les exposants.</p><p class="crs-formule">(10<sup>a</sup>)<sup>b</sup> = 10<sup>a×b</sup></p></div>
+            ${actions([['#training-3', 'S\'entraîner sur les opérations →'], ['#training-4', 'Module 4 : toutes les notions'], ['#fiche-3', 'Fiche récapitulative']])}`);
+        return carte;
+    }
 
-        <div class="text-center mt-8">
-            <button onclick="showTraining(3)" class="bg-purple-500 hover:bg-purple-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
-        </div>
-    </div>`;
-}
+    return {
+        1: { titre: 'Définitions et écritures',
+             contexte: 'Tu vas voir ce que vaut <b>10<sup>n</sup></b> quand n est positif ou négatif, puis comment passer d\'un nombre écrit avec une puissance de 10 à son <b>écriture décimale</b>, et inversement.',
+             etapes: [c1Positives, c1Negatives, c1Droite, c1Gauche, c1VersPuissance, c1Retenir] },
+        2: { titre: 'Écriture scientifique',
+             contexte: 'Les très grands et les très petits nombres s\'écrivent en <b>écriture scientifique</b>, a × 10<sup>n</sup>. Tu vas apprendre à la reconnaître, à l\'obtenir et à revenir à l\'écriture décimale.',
+             etapes: [c2Definition, c2Methode, c2Decimale, c2Retenir] },
+        3: { titre: 'Opérations avec les puissances de 10',
+             contexte: 'Tu vas apprendre les quatre règles de calcul sur les puissances de 10 : <b>multiplication</b>, <b>division</b>, <b>inverse</b> et <b>puissance d\'une puissance</b>.',
+             etapes: [c3Multiplication, c3Division, c3Inverse, c3Puissance, c3Retenir] },
+    };
+})();
 
 // ═══════════════════════════════════════════════════════════════
 // HTML MODULE D'ENTRAÎNEMENT

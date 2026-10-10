@@ -5,199 +5,569 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Module 1 : La méthode — Lecture graphique</title>
 <link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="lgtools.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
 <script src="../../assets/sommaire.js"></script>
-<script src="../../assets/dragdrop.js"></script>
-<script src="../../assets/numpad.js"></script>
 <script src="lgtools.js"></script>
 <script src="plan.js"></script>
+<script src="../../assets/cours.js"></script>
 <style>
-  .cours-bloc p { margin: 0 0 10px; line-height: 1.55; }
-  .cours-bloc ol, .cours-bloc ul { margin: 6px 0 10px 22px; padding: 0; line-height: 1.55; }
-  .cours-bloc ol { list-style: decimal; }
-  .cours-bloc ul { list-style: disc; }
-  .cours-bloc li { margin-bottom: 4px; }
-  .cle { margin: 12px 0; }
-  .calcul { font-weight: 700; text-align: center; margin: 8px 0; font-size: 1.05rem; }
-  .precision { width: 100%; max-width: 420px; }
-  .check-choix { display: flex; flex-direction: column; gap: 8px; }
-  .check-choix button { text-align: left; }
-  .check-reponse { margin-top: 10px; font-weight: 700; }
+  /* ---------- Cours : listes, figures, tableaux ---------- */
+  .er-etape ol.er-liste { list-style: decimal; }
+  .er-etape ul.er-liste { list-style: disc; }
+  .er-etape .er-liste li + li { margin-top: 4px; }
+  .er-etape .lg-figure { margin: 12px auto; max-width: 680px; }
+  .er-etape .lg-table-wrap { margin: 10px 0; }
+  .lgc-etape-ex + .lgc-etape-ex { margin-top: 14px !important; }
+  /* ---------- « À toi » : graphique avec règle, mesures ---------- */
+  .er-page .lg-aide-regle { margin: 0 2px 6px; }
+  .lgc-regle { margin: 4px 0 12px; }
+  .lgc-saisie { margin-top: 10px; }
+  .lgc-mesures .lg-table { max-width: 420px; }
+  .lgc-mesures .lg-table td { padding: 6px 4px; }
+  .lgc-mesures .lg-table td .crs-champ-box { max-width: 100%; }
+  .lgc-mesures .crs-champ-box.lgc-ok .crs-champ { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); }
+  .lgc-mesures .crs-champ-box.lgc-ko .crs-champ { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); }
+  .lgc-n { margin-top: 8px; justify-content: center; }
+  .lgc-n .crs-lab { font-size: 1rem; font-weight: 700; }
+  .lgc-conseil { margin-top: 10px; line-height: 1.5; }
+  .lgc-figs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .lgc-figs > div > p { font-size: .88rem; color: var(--ink-2); margin-top: 4px; text-align: center; }
+  .lgc-figs .lg-figure { margin: 0; }
+  .lgc-figs.lgc-un { grid-template-columns: 1fr; max-width: 560px; }
+  @media (max-width: 640px) { .lgc-figs { grid-template-columns: 1fr; } }
+  @media (max-width: 480px) { .lgc-mesures .crs-champ-box.petit .crs-champ { width: 64px; } }
 </style>
 </head>
 <body>
 <div id="app-nav"></div>
-<div class="lg-page">
-  <div class="lg-card">
-    <span class="lg-badge">MODULE 1</span>
-    <h2 class="lg-titre">La méthode</h2>
-    <p class="lg-contexte">Sur un graphique, la valeur que l'on cherche tombe rarement sur une graduation. Pour la lire précisément, on mesure des distances à la règle et on utilise la <b>proportionnalité</b>.</p>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">La méthode</h2>
+    <p class="er-contexte">Sur un graphique, la valeur que l'on cherche tombe rarement sur une graduation. Pour la lire précisément, tu vas mesurer des distances <b>à la règle</b> et utiliser la <b>proportionnalité</b> (tableau et produit en croix).</p>
   </div>
-
-  <!-- ================= 1. Le problème ================= -->
-  <h3 class="cours-titre">1. Le problème</h3>
-  <div class="cours-bloc">
-    <p>On cherche la période T de cette tension. Les maximums ne tombent pas sur des graduations : à l'œil, on peut seulement dire que T est « entre 10 et 15 ms ».</p>
-    <div id="figProbleme"></div>
-    <div class="cle">
-      <p><b class="cle-titre">L'idée :</b> sur un axe gradué régulièrement, la <b>distance</b> mesurée sur le papier est <b>proportionnelle</b> à l'<b>écart de valeurs</b>. Si on connaît la distance qui correspond à une valeur connue (l'échelle), un <b>tableau de proportionnalité</b> donne la valeur qui correspond à n'importe quelle autre distance.</p>
-    </div>
-  </div>
-
-  <!-- ================= 2. La méthode ================= -->
-  <h3 class="cours-titre">2. La méthode en quatre étapes</h3>
-  <div class="cours-bloc">
-    <div class="cle">
-      <ol>
-        <li><b>Mesurer l'échelle</b> : la distance (en cm) entre deux graduations de l'axe, et l'écart de valeurs entre ces deux graduations.</li>
-        <li><b>Mesurer la grandeur</b> : la distance (en cm) qui correspond à la grandeur recherchée, <b>le long du même axe</b>.</li>
-        <li><b>Remplir le tableau de proportionnalité</b>, sans oublier les unités.</li>
-        <li><b>Calculer</b> la valeur recherchée par un produit en croix.</li>
-      </ol>
-    </div>
-
-    <div class="cours-exemple">
-      <p><b>Étape 1 · L'échelle.</b> On place le 0 de la règle sur la graduation 0 ms, et on lit la distance jusqu'à la graduation 40 ms : <b>15,4 cm</b> pour <b>40 ms</b>.</p>
-      <div id="figEchelle"></div>
-      <p style="margin-top:12px"><b>Étape 2 · La grandeur.</b> On place le 0 de la règle sur un maximum et on lit la distance jusqu'au maximum situé <b>3 périodes</b> plus loin : <b>13,4 cm</b> pour une durée de 3T.</p>
-      <div id="figPeriodes"></div>
-      <p style="margin-top:12px"><b>Étape 3 · Le tableau.</b></p>
-      <div class="lg-table-wrap"><table class="lg-table">
-        <colgroup><col class="lg-col-titre"><col><col></colgroup>
-        <thead><tr><th></th><th>Distance (cm)</th><th>Durée (ms)</th></tr></thead>
-        <tbody>
-          <tr><th>Échelle</th><td>15,4</td><td>40</td></tr>
-          <tr><th>3 périodes</th><td>13,4</td><td class="lg-inconnue">3T</td></tr>
-        </tbody>
-      </table></div>
-      <p><b>Étape 4 · Le calcul</b> (produit en croix) :</p>
-      <p class="calcul">3T = (13,4 × 40) / 15,4 = 34,8 ms &nbsp;&nbsp;donc&nbsp;&nbsp; T = 34,8 / 3 = 11,6 ms</p>
-    </div>
-  </div>
-
-  <!-- ================= 3. Précision ================= -->
-  <h3 class="cours-titre">3. Mesurer grand pour être précis</h3>
-  <div class="cours-bloc">
-    <p>Une règle se lit au millimètre près : chaque mesure comporte une erreur d'environ <b>1 mm</b>. Cette erreur compte d'autant moins que la distance mesurée est grande :</p>
-    <div class="lg-table-wrap"><table class="lg-table precision">
-      <thead><tr><th>Distance mesurée</th><th>Erreur de 1 mm</th></tr></thead>
-      <tbody>
-        <tr><td>3,9 cm</td><td>≈ 2,6 %</td></tr>
-        <tr><td>4,5 cm</td><td>≈ 2,2 %</td></tr>
-        <tr><td>13,4 cm</td><td>≈ 0,7 %</td></tr>
-        <tr><td>15,4 cm</td><td>≈ 0,6 %</td></tr>
-      </tbody>
-    </table></div>
-    <div class="cle">
-      <p><b class="cle-titre">Les valeurs mesurées doivent être les plus grandes possible :</b></p>
-      <ul>
-        <li><b>Échelle</b> : choisir les deux graduations les plus éloignées (de 0 à 40 ms : 15,4 cm, plutôt que de 5 à 15 ms : 3,9 cm).</li>
-        <li><b>Période</b> (ou longueur d'onde) : mesurer <b>plusieurs périodes</b>, puis diviser le résultat par leur nombre.</li>
-        <li><b>Amplitude</b> : mesurer l'écart entre le minimum et le maximum (crête à crête), puis diviser par 2.</li>
-      </ul>
-    </div>
-    <div class="check-box">
-      <p class="check-label">Vérifie ta compréhension :</p>
-      <p class="check-question">Pour mesurer une période le plus précisément possible, on mesure :</p>
-      <div class="check-choix" id="qcm">
-        <button type="button" class="btn-secondary" data-ok="0">une seule période, entre deux maximums voisins</button>
-        <button type="button" class="btn-secondary" data-ok="1">le plus grand nombre de périodes possible, puis on divise par ce nombre</button>
-        <button type="button" class="btn-secondary" data-ok="0">une demi-période, puis on multiplie par 2</button>
-      </div>
-      <p class="check-reponse" id="qcmRep"></p>
-    </div>
-  </div>
-
-  <!-- ================= 4. Autres lectures ================= -->
-  <h3 class="cours-titre">4. Lire la valeur d'un point</h3>
-  <div class="cours-bloc">
-    <p>Pour lire l'<b>ordonnée</b> d'un point (ou une <b>valeur maximale</b>), on tourne la règle à la verticale : l'échelle se mesure sur l'<b>axe vertical</b>, et la grandeur se mesure depuis l'axe des abscisses (valeur 0) jusqu'au point.</p>
-    <div class="cours-exemple">
-      <p>Température du thé à t = 15 min : l'échelle vaut <b>8,6 cm</b> pour <b>100 °C</b> (de 0 à 100 °C), et le point est à <b>2,8 cm</b> de l'axe des abscisses.</p>
-      <div id="figPoint"></div>
-      <p class="calcul">θ = (2,8 × 100) / 8,6 ≈ 32,6 °C</p>
-    </div>
-    <p>Pour lire l'<b>abscisse</b> d'un point, c'est la même méthode, à l'horizontale : échelle sur l'axe horizontal, distance mesurée depuis l'axe des ordonnées.</p>
-    <div class="note-box" style="display:flex;gap:10px;background:#fff;border-radius:16px;padding:12px 16px;margin-top:10px">
-      <span style="font-weight:800;color:var(--accent)">⚠</span>
-      <p style="margin:0">L'échelle et la grandeur doivent être mesurées le long du <b>même axe</b> : une durée avec l'axe des temps, une tension avec l'axe des tensions.</p>
-    </div>
-  </div>
-
-  <!-- ================= 5. Prise en main ================= -->
-  <h3 class="cours-titre">5. Prends en main la règle</h3>
-  <div class="cours-bloc">
-    <p>Fais glisser la règle par sa partie jaune, puis le curseur (●). Une loupe apparaît pendant le déplacement, et les boutons ◀ ▶ permettent d'affiner.</p>
-    <div class="lg-card" style="margin:0" id="bac"></div>
-    <div class="check-box">
-      <p class="check-label">Vérifie ta compréhension :</p>
-      <p class="check-question">Mesure la distance entre les graduations 0 ms et 40 ms de l'axe des temps. Combien lis-tu sur la règle (en cm) ?</p>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-        <input type="text" id="mesBac" inputmode="decimal" class="check-input" style="width:120px" placeholder="en cm" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">
-        <button type="button" class="check-btn" id="verifBac">Vérifier</button>
-      </div>
-      <p class="check-reponse" id="repBac"></p>
-    </div>
-  </div>
-
-  <div class="lg-actions" style="justify-content:center;margin-top:24px">
-    <a href="module_2.html" class="btn-primary" style="text-decoration:none;margin:0">Commencer l'entraînement →</a>
-    <a href="fiche_1.html" class="btn-secondary" style="text-decoration:none;margin:0">Fiche récapitulative</a>
-  </div>
+  <div id="etapes"></div>
 </div>
 
 <script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Graphiques et règle virtuelle : lgtools.js (LG.figure, LG.bacASable).
+   Distances du graphique en mm « papier » : la règle se lit au mm,
+   1 cm sur la règle = 10 unités du dessin.
+   ============================================================ */
+const { fmt, hasard, entre, exemple, el, secouer, lire, champ } = COURS;
+const proche = (a, b) => COURS.proche(a, b, .01);
+const TOL = 1.5;          // écart accepté sur une mesure à la règle (mm), comme dans les entraînements
+const LONGUEUR = 160;     // longueur graduée de la règle (mm)
+const fr = (a, b) => `<span class="som-fr"><span>${a}</span><span>${b}</span></span>`;
+const cm = mm => fmt(Math.round(mm) / 10, 1);              // distance en cm, lue au mm près
+// symbole avec indice : « U_max » → U<sub>max</sub>
+const symH = s => { const i = s.indexOf('_'); return i < 0 ? s : s.slice(0, i) + '<sub>' + s.slice(i + 1) + '</sub>'; };
+
 /* Exemple suivi dans tout le cours : tension sinusoïdale, T = 11,6 ms */
-const exemple = {
+const EX = {
   type: 'periode', grandeur: { symbole: 'T', nom: 'période', noms: 'périodes' },
   axeX: { min: 0, max: 40, pas: 5, nom: 't', unite: 'ms', libelle: 'Durée' },
-  axeY: { min: -5, max: 5, pas: 1, nom: 'u', unite: 'V' },
+  axeY: { min: -5, max: 5, pas: 1, nom: 'u', unite: 'V', libelle: 'Tension' },
   signal: { forme: 'sinus', periode: 11.6, ampl: 3.2, phase: 1.3 },
 };
-const R = LG.repere(exemple), A = LG.analyser(exemple, R);
-document.getElementById('figProbleme').innerHTML = LG.figure(exemple, []);
-// règle posée sur l'axe des temps, de 0 à 40 ms
-document.getElementById('figEchelle').innerHTML = LG.figure(exemple, [{ ox: R.sx(0), oy: R.sy(0), rot: 0, cur: Math.round(40 * R.mmX) }], true);
-// règle posée sur un maximum, curseur 3 périodes plus loin
-document.getElementById('figPeriodes').innerHTML = LG.figure(exemple, [{ ox: R.sx(A.tDepart), oy: R.sy(A.f(A.tDepart)), rot: 0, cur: Math.round(3 * 11.6 * R.mmX) }]);
-
+const R = LG.repere(EX), A = LG.analyser(EX, R);
 /* Lecture d'un point : refroidissement d'une tasse de thé */
-const the = {
+const THE = {
   type: 'lectureY', grandeur: { symbole: 'θ' },
   axeX: { min: 0, max: 40, pas: 5, nom: 't', unite: 'min', libelle: 'Durée' },
   axeY: { min: 0, max: 100, pas: 10, nom: 'θ', unite: '°C', libelle: 'Température' },
   f: t => 20 + 65 * Math.exp(-t / 9), x0: 15,
 };
-const R2 = LG.repere(the), A2 = LG.analyser(the, R2);
-document.getElementById('figPoint').innerHTML = LG.figure(the, [
-  { ox: R2.P.x0, oy: R2.sy(0), rot: -90, cur: Math.round(100 * R2.mmY) },
-  { ox: R2.sx(15), oy: R2.sy(0), rot: -90, cur: Math.round(A2.exact * R2.mmY) },
-]);
+const R2 = LG.repere(THE), A2 = LG.analyser(THE, R2);
+// graphique seul, sans grandeur repérée en orange (mesure d'une échelle)
+const libre = def => Object.assign({}, def, { type: 'libre' });
 
-/* QCM de compréhension */
-document.querySelectorAll('#qcm button').forEach(b => b.onclick = () => {
-  const ok = b.dataset.ok === '1', rep = document.getElementById('qcmRep');
-  document.querySelectorAll('#qcm button').forEach(x => { x.classList.remove('opt-correct', 'opt-wrong'); });
-  b.classList.add(ok ? 'opt-correct' : 'opt-wrong');
-  rep.style.color = ok ? 'var(--success-text)' : 'var(--danger-text)';
-  rep.textContent = ok ? '✓ Oui : la distance mesurée est plus grande, et l\'erreur de lecture est divisée par le nombre de périodes.'
-                       : '✕ Non : plus la distance mesurée est petite, plus l\'erreur de 1 mm compte. Essaie encore.';
-});
+// tableau de proportionnalité (même présentation que dans les entraînements)
+// lignes : [titre, distance, valeur, inconnue ?]
+function tableau(entetes, lignes) {
+  return `<div class="lg-table-wrap"><table class="lg-table">
+    <colgroup><col class="lg-col-titre"><col><col></colgroup>
+    <thead><tr><th></th><th>${entetes[0]}</th><th>${entetes[1]}</th></tr></thead>
+    <tbody>${lignes.map(l => `<tr><th>${l[0]}</th><td>${l[1]}</td><td${l[3] ? ' class="lg-inconnue"' : ''}>${l[2]}</td></tr>`).join('')}</tbody></table></div>`;
+}
 
-/* Bac à sable : mesure de l'échelle 0 → 40 ms (15,4 cm attendus) */
-setNumpadPref(false);
-LG.bacASable(document.getElementById('bac'), exemple);
-document.getElementById('verifBac').onclick = () => {
-  const v = LG.lireNombre(document.getElementById('mesBac').value), rep = document.getElementById('repBac');
-  const juste = Math.round(40 * R.mmX) / 10;
-  if (Math.abs(v - juste) <= 0.15) { rep.style.color = 'var(--success-text)'; rep.textContent = `✓ Bien mesuré : ${LG.fmt(juste, 1)} cm pour 40 ms.`; }
-  else if (v > 0) { rep.style.color = 'var(--danger-text)'; rep.textContent = '✕ Vérifie que le 0 de la règle est sur la graduation 0 ms et le curseur sur la graduation 40 ms.'; }
-  else { rep.style.color = 'var(--danger-text)'; rep.textContent = 'Écris la distance lue, en cm (par exemple 12,5).'; }
-};
+/* ============================================================
+   DIAGNOSTICS : erreurs classiques d'un produit en croix
+   a : distance de l'échelle (cm), b : valeur de l'échelle,
+   c : distance mesurée (cm) ; la bonne réponse est c × b / a
+   ============================================================ */
+function diagCroix(v, a, b, c, unite) {
+  if (proche(v, c * a / b)) return `Tu as inversé le rôle des colonnes : la valeur cherchée est dans la colonne « ${unite} ». Multiplie la distance mesurée (${fmt(c)} cm) par la valeur de l'échelle (${fmt(b)} ${unite}), puis divise par la distance de l'échelle (${fmt(a)} cm).`;
+  if (proche(v, a * b / c)) return `Ce n'est pas le bon produit en croix : on multiplie les deux nombres de la diagonale qui ne contient pas « ? » (${fmt(c)} cm et ${fmt(b)} ${unite}), puis on divise par le troisième (${fmt(a)} cm).`;
+  if (proche(v, c / a)) return `Tu as seulement calculé le rapport des distances (${fmt(c)} / ${fmt(a)}). Multiplie-le ensuite par la valeur de l'échelle (${fmt(b)} ${unite}).`;
+  if (proche(v, c * b)) return `N'oublie pas de diviser par la distance de l'échelle (${fmt(a)} cm).`;
+  if (proche(v, c)) return `Tu as recopié la distance mesurée, en cm. On demande une valeur en ${unite} : passe par le tableau de proportionnalité.`;
+  return `Écris le tableau : ${fmt(a)} cm ↔ ${fmt(b)} ${unite} et ${fmt(c)} cm ↔ ?, puis fais le produit en croix : ? = ${fmt(c)} × ${fmt(b)} / ${fmt(a)}.`;
+}
+// solution d'un produit en croix
+const calculCroix = (sym, a, b, c, unite) => `<p class="crs-calc">${sym} = ${fr(`${fmt(c)} × ${fmt(b)}`, fmt(a))} = <span class="c">${fmt(c * b / a)} ${unite}</span></p>`;
 
+/* ============================================================
+   OUTILS « PERSO » : graphique avec règle dans un « À toi ».
+   Chaque appel construit son propre graphique et sa propre règle
+   (LG.bacASable) : un outil peut exister en plusieurs exemplaires
+   dans la page (mode « Afficher tout le cours »).
+   ============================================================ */
+// bouton « Valider » d'une partie (même présentation que assets/cours.js)
+function boutonValider(zone) {
+  const a = el('div', 'er-actions crs-actions-partie', '<button type="button" class="btn-primary">Valider</button>');
+  zone.appendChild(a);
+  const b = a.querySelector('button');
+  b.fermer = () => { b.disabled = true; a.remove(); };
+  return b;
+}
+// graphique + règle interactive dans la zone de la partie
+function graphiqueRegle(zone, def) {
+  const box = el('div', 'lgc-regle');
+  zone.appendChild(box);
+  return LG.bacASable(box, def);
+}
+// règle de la correction : posée le long de l'axe horizontal (rot 0) ou vertical (rot −90)
+const regleX = (Rr, x, y, mm) => ({ ox: Rr.sx(x), oy: Rr.sy(y), rot: 0, cur: Math.round(mm) });
+const regleY = (Rr, x, y, mm) => ({ ox: Rr.sx(x), oy: Rr.sy(y), rot: -90, cur: Math.round(mm) });
+
+/* Mesurer à la règle la distance entre deux graduations d'un axe.
+   o = { def, axe: 'x' | 'y', de, a } (valeurs des deux graduations) */
+function partieDistance(o) {
+  const Rr = LG.repere(o.def), vertical = o.axe === 'y';
+  const ax = vertical ? o.def.axeY : o.def.axeX;
+  const mm = Math.abs(o.a - o.de) * (vertical ? Rr.mmY : Rr.mmX);     // distance attendue (mm)
+  const nomAxe = vertical ? 'vertical' : 'horizontal';
+  const grad = v => `${fmt(v)} ${ax.unite}`;
+  // position de la règle dans la correction
+  const yAxe = (o.def.axeY.min <= 0 && o.def.axeY.max >= 0) ? 0 : o.def.axeY.min;
+  const regle = vertical ? regleY(Rr, o.def.axeX.min, Math.min(o.de, o.a), mm) : regleX(Rr, Math.min(o.de, o.a), yAxe, mm);
+  return {
+    type: 'perso',
+    q: `Mesure la distance entre les graduations ${grad(o.de)} et ${grad(o.a)} de l'axe ${nomAxe}${vertical ? ' (tourne d\'abord la règle avec ↻ Tourner)' : ''}. Combien lis-tu sur la règle ?`,
+    solution: `<p>De ${grad(o.de)} à ${grad(o.a)}, la règle indique <b>${cm(mm)} cm</b> (à 1 mm près).</p>`,
+    monter(zone, api) {
+      graphiqueRegle(zone, libre(o.def));
+      const d = el('div', 'crs-valeur lgc-saisie');
+      d.appendChild(el('span', 'crs-lab', 'Distance ='));
+      const ch = champ({ signe: false, aria: 'Distance lue sur la règle, en cm' });
+      d.appendChild(ch.el);
+      d.appendChild(el('span', 'crs-unite', 'cm'));
+      zone.appendChild(d);
+      const bVal = boutonValider(zone);
+      ch.input.addEventListener('input', () => api.effacer());
+      ch.input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); valider(); } });
+      function valider() {
+        if (api.fini()) return;
+        const v = lire(String(ch.input.value).replace(/\s*cm\s*$/i, ''));
+        if (isNaN(v) || v <= 0) { secouer(d); api.message('Écris la distance lue sur la règle, en cm (par exemple 12,5).'); return; }
+        if (Math.abs(v * 10 - mm) <= TOL) { ch.desactiver(true); bVal.fermer(); api.reussi(); return; }
+        let diag;
+        if (Math.abs(v - mm) <= TOL) diag = 'Tu as écrit la distance en millimètres. La règle est graduée en centimètres : 10 mm = 1 cm.';
+        else if (Math.abs(v * 10 - mm) <= 4) diag = 'Tu y es presque : ajuste le 0 de la règle et le curseur avec ◀ ▶ (la loupe aide à viser les graduations).';
+        else if (vertical) diag = `Tourne la règle (↻ Tourner) pour la mettre à la verticale, place son 0 sur la graduation ${grad(o.de)} de l'axe vertical et le curseur sur la graduation ${grad(o.a)}.`;
+        else diag = `Place le 0 de la règle exactement sur la graduation ${grad(o.de)} et le curseur sur la graduation ${grad(o.a)} : la règle doit être bien alignée avec l'axe horizontal.`;
+        api.erreur(diag);
+        secouer(d);
+      }
+      bVal.onclick = valider;
+      return {
+        montrer() {
+          ch.input.value = cm(mm);
+          ch.desactiver(true);
+          bVal.fermer();
+          const f = el('div', 'lgc-figs lgc-un', `<div>${LG.figure(o.def, [regle], true)}<p>La règle bien placée</p></div>`);
+          zone.appendChild(f);
+        },
+      };
+    },
+  };
+}
+
+/* Mesures de la correction : échelle la plus grande possible
+   (deux graduations qui tiennent sous la règle), le plus de périodes possible */
+function reference(def, Rr, Ar) {
+  const ax = Ar.axe;
+  let k = Math.round((ax.max - ax.min) / ax.pas);
+  while (k > 1 && k * ax.pas * Ar.mm > LONGUEUR) k--;
+  const periode = def.type === 'periode';
+  const n = periode ? Ar.nMax : 1;
+  const mmG = periode ? n * Ar.exact * Ar.mm : Ar.liste[0].mm;
+  return { eD: Math.round(k * ax.pas * Ar.mm) / 10, eV: k * ax.pas, de: ax.min, a: ax.min + k * ax.pas, mD: Math.round(mmG) / 10, n, emm: k * ax.pas * Ar.mm, gmm: mmG };
+}
+
+/* La méthode complète, à la règle, sur un graphique (def.type : 'periode' ou 'lectureY').
+   Partie a (perso) : l'élève mesure l'échelle et la grandeur, et remplit le tableau ;
+   partie b (nombre) : il calcule la grandeur avec SES mesures (ctx.m), à 2 % près. */
+function questionMethode(def, titre, enonce) {
+  const Rr = LG.repere(def), Ar = LG.analyser(def, Rr);
+  const ax = Ar.axe, g = def.grandeur, sym = symH(g.symbole), periode = def.type === 'periode';
+  const ref = reference(def, Rr, Ar);
+  const ctx = { m: null };                                 // mesures validées par l'élève (propres à cette question)
+  const mesures = () => ctx.m || ref;
+  const resultat = m => m.mD * m.eV / m.eD / m.n;
+  const u = ax.unite, lib = `${ax.libelle || ax.nom} (${u})`;
+  const nomP = n => (n > 1 ? `${n} périodes` : '1 période');
+
+  // ---- a. Mesures et tableau ----
+  const partieTableau = {
+    type: 'perso',
+    q: periode
+      ? 'Mesure à la règle l\'échelle de l\'axe des temps, puis la durée de plusieurs périodes (d\'un maximum à un autre), et remplis le tableau.'
+      : 'Tourne la règle : mesure l\'échelle sur l\'axe vertical, puis la distance entre l\'axe des abscisses et le point, et remplis le tableau.',
+    solution: periode
+      ? `<p>Par exemple : échelle de ${fmt(ref.de)} à ${fmt(ref.a)} ${u}, soit <b>${fmt(ref.eD, 1)} cm</b> pour <b>${fmt(ref.eV)} ${u}</b> ; ${nomP(ref.n)} (d'un maximum à un autre) : <b>${fmt(ref.mD, 1)} cm</b>.</p>`
+      : `<p>Par exemple : échelle de ${fmt(ref.de)} à ${fmt(ref.a)} ${u}, soit <b>${fmt(ref.eD, 1)} cm</b> pour <b>${fmt(ref.eV)} ${u}</b> ; point : <b>${fmt(ref.mD, 1)} cm</b> au-dessus de l'axe des abscisses.</p>`,
+    monter(zone, api) {
+      graphiqueRegle(zone, def);
+      const t = el('div', 'lgc-mesures', tableau(['Distance (cm)', lib], [
+        ['Échelle', '<span data-c="eD"></span>', '<span data-c="eV"></span>'],
+        [periode ? 'Période(s)' : 'Point', '<span data-c="mD"></span>', periode ? `n${sym}` : sym, true],
+      ]));
+      zone.appendChild(t);
+      const cases = {};
+      const ajouter = (k, parent, aria, entier) => {
+        const ch = champ({ petit: true, signe: false, entier, aria });
+        parent.appendChild(ch.el);
+        cases[k] = ch;
+        ch.input.addEventListener('input', () => { ch.el.classList.remove('lgc-ok', 'lgc-ko'); api.effacer(); });
+        ch.input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); valider(); } });
+      };
+      ajouter('eD', t.querySelector('[data-c="eD"]'), 'Échelle : distance mesurée, en cm');
+      ajouter('eV', t.querySelector('[data-c="eV"]'), `Échelle : écart de valeurs, en ${u}`);
+      ajouter('mD', t.querySelector('[data-c="mD"]'), periode ? 'Distance mesurée pour les périodes, en cm' : 'Distance mesurée pour le point, en cm');
+      if (periode) {
+        const ln = el('div', 'crs-valeur lgc-n');
+        ln.appendChild(el('span', 'crs-lab', 'Nombre n de périodes mesurées :'));
+        t.appendChild(ln);
+        ajouter('n', ln, 'Nombre de périodes mesurées', true);
+      }
+      const bVal = boutonValider(zone);
+      const marquer = (k, ok) => { cases[k].el.classList.toggle('lgc-ok', ok); cases[k].el.classList.toggle('lgc-ko', !ok); };
+      const sansUnite = s => String(s).replace(/\s*(cm|mm|ms|s|min|°C|V)\s*$/i, '');
+
+      function valider() {
+        if (api.fini()) return;
+        const v = {};
+        Object.keys(cases).forEach(k => { v[k] = lire(sansUnite(cases[k].input.value)); });
+        if (Object.keys(v).some(k => isNaN(v[k]) || v[k] <= 0)) { secouer(t); api.message('Complète toutes les cases du tableau (des nombres positifs).'); return; }
+        const n = periode ? v.n : 1;
+        const err = [];
+        // échelle : la distance (cm) et l'écart de valeurs doivent se correspondre
+        const okE = Math.abs(v.eD * 10 - v.eV * Ar.mm) <= TOL;
+        if (!okE) {
+          const surPas = Math.abs(v.eV / ax.pas - Math.round(v.eV / ax.pas)) > 1e-6;
+          if (Math.abs(v.eD - v.eV * Ar.mm) <= TOL) err.push('Échelle : tu as écrit la distance en mm. Le tableau demande des cm (10 mm = 1 cm).');
+          else if (surPas) err.push(`Échelle : la valeur est l'<b>écart</b> entre les deux graduations où tu as placé le 0 et le curseur (par exemple, de ${fmt(ax.min + ax.pas)} à ${fmt(ax.min + 5 * ax.pas)} ${u}, l'écart est ${fmt(4 * ax.pas)} ${u}).`);
+          else err.push(`Échelle : ${fmt(v.eD)} cm ne correspondent pas à ${fmt(v.eV)} ${u}. Place le 0 de la règle et le curseur <b>exactement</b> sur deux graduations de l'axe ${periode ? 'des temps' : 'vertical'}, et écris l'écart de valeurs entre ces deux graduations.`);
+        }
+        // grandeur
+        let okG = false, okN = true;
+        if (periode) {
+          okN = Number.isInteger(n) && n >= 1;
+          const Tmm = Ar.exact * Ar.mm;
+          if (!okN) err.push('Nombre de périodes : écris un nombre entier (1, 2, 3…).');
+          else {
+            okG = Math.abs(v.mD * 10 - n * Tmm) <= TOL;
+            if (!okG) {
+              const k = Math.round(v.mD * 10 / Tmm);
+              if (k >= 1 && Math.abs(v.mD * 10 - k * Tmm) <= TOL) { okG = true; okN = false; err.push(`Nombre de périodes : ta distance correspond à ${nomP(k)}, pas à ${n}. Compte les motifs entre le 0 de la règle et le curseur.`); }
+              else if (Math.abs(v.mD - n * Tmm) <= TOL) err.push('Période(s) : tu as écrit la distance en mm. Le tableau demande des cm.');
+              else err.push(Ar.erreur);
+            }
+          }
+        } else {
+          okG = Math.abs(v.mD * 10 - Ar.liste[0].mm) <= TOL;
+          if (!okG) {
+            if (Math.abs(v.mD * 10 - (def.x0 - def.axeX.min) * Rr.mmX) <= TOL) err.push('Point : tu as mesuré à l\'horizontale, jusqu\'à l\'axe des ordonnées : c\'est l\'abscisse du point. Pour son ordonnée, la règle est verticale, de l\'axe des abscisses jusqu\'au point.');
+            else if (Math.abs(v.mD - Ar.liste[0].mm) <= TOL) err.push('Point : tu as écrit la distance en mm. Le tableau demande des cm.');
+            else err.push(Ar.erreur);
+          }
+        }
+        marquer('eD', okE); marquer('eV', okE); marquer('mD', okG);
+        if (periode) marquer('n', okN && okG);
+        if (err.length) { api.erreur(err.join('<br>')); secouer(t); return; }
+        // juste : les mesures de l'élève servent au calcul de la partie suivante
+        ctx.m = { eD: v.eD, eV: v.eV, mD: v.mD, n };
+        Object.keys(cases).forEach(k => cases[k].desactiver(true));
+        bVal.fermer();
+        const c = conseils(v.eD * 10, n);
+        if (c) zone.appendChild(el('div', 'callout-accent lgc-conseil', c));
+        api.reussi();
+      }
+      // conseils de précision (informatifs, la mesure est juste)
+      function conseils(eMm, n) {
+        const out = [];
+        if (eMm < .6 * ref.emm) out.push(`Pour l'échelle, tu as mesuré ${cm(eMm)} cm : tu pouvais aller jusqu'à ${fmt(ref.eD, 1)} cm (de ${fmt(ref.de)} à ${fmt(ref.a)} ${u}). Plus la distance mesurée est grande, moins l'erreur de lecture (environ 1 mm) compte.`);
+        if (periode && n < Ar.nMax) out.push(`Tu as mesuré ${n === 1 ? 'une seule période' : nomP(n)} : on peut en mesurer jusqu'à ${Ar.nMax} sur ce graphique. En mesurant plusieurs périodes puis en divisant par leur nombre, l'erreur de lecture est divisée d'autant.`);
+        return out.length ? `<p><b>Pour être plus précis :</b> ${out.join(' ')}</p>` : '';
+      }
+      bVal.onclick = valider;
+      return {
+        montrer() {
+          ctx.m = { eD: ref.eD, eV: ref.eV, mD: ref.mD, n: ref.n };
+          cases.eD.input.value = fmt(ref.eD, 1); cases.eV.input.value = fmt(ref.eV); cases.mD.input.value = fmt(ref.mD, 1);
+          if (cases.n) cases.n.input.value = String(ref.n);
+          Object.keys(cases).forEach(k => { cases[k].desactiver(true); marquer(k, true); });
+          bVal.fermer();
+          // la correction : les règles bien placées
+          const yAxe = (def.axeY.min <= 0 && def.axeY.max >= 0) ? 0 : def.axeY.min;
+          if (periode) {
+            const t0 = Ar.tDepart;
+            zone.appendChild(el('div', 'lgc-figs', `<div>${LG.figure(def, [regleX(Rr, ref.de, yAxe, ref.emm)], true)}<p>L'échelle : ${fmt(ref.eD, 1)} cm pour ${fmt(ref.eV)} ${u}</p></div>
+              <div>${LG.figure(def, [{ ox: Rr.sx(t0), oy: Rr.sy(Ar.f(t0)), rot: 0, cur: Math.round(ref.gmm) }])}<p>${nomP(ref.n)} : ${fmt(ref.mD, 1)} cm</p></div>`));
+          } else {
+            zone.appendChild(el('div', 'lgc-figs lgc-un', `<div>${LG.figure(def, [regleY(Rr, def.axeX.min, ref.de, ref.emm), regleY(Rr, def.x0, 0, ref.gmm)])}<p>L'échelle sur l'axe vertical, puis le point</p></div>`));
+          }
+        },
+      };
+    },
+  };
+
+  // ---- b. Le calcul, avec les mesures de l'élève ----
+  const partieCalcul = {
+    type: 'nombre', signe: false, rel: .02, label: `${sym} =`, unite: u,
+    q: periode ? `Calcule ${sym} avec ton tableau : produit en croix, puis division par le nombre de périodes.` : `Calcule ${sym} avec ton tableau (produit en croix).`,
+    get valeur() { return resultat(mesures()); },
+    get affiche() { return LG.fmtSig(resultat(mesures()), 3); },
+    diag(v) {
+      const m = mesures(), nT = m.mD * m.eV / m.eD;
+      if (periode && m.n > 1 && proche(v, nT)) return `C'est la durée de ${nomP(m.n)} (${m.n}${sym}). Divise-la par ${m.n} pour trouver une seule période.`;
+      if (periode && m.n > 1 && proche(v, nT * m.n)) return `Il faut <b>diviser</b> par le nombre de périodes (${m.n}), pas multiplier.`;
+      return diagCroix(v * m.n, m.eD, m.eV, m.mD, u);
+    },
+    get solution() {
+      const m = mesures(), nT = m.mD * m.eV / m.eD;
+      if (!periode) return `<p class="crs-calc">${sym} = ${fr(`${fmt(m.mD)} × ${fmt(m.eV)}`, fmt(m.eD))} ≈ <span class="c">${LG.fmtSig(nT, 3)} ${u}</span></p>`;
+      const ligne1 = m.n > 1 ? `${m.n}${sym} = ${fr(`${fmt(m.mD)} × ${fmt(m.eV)}`, fmt(m.eD))} ≈ ${LG.fmtSig(nT, 3)} ${u}` : '';
+      return `<p class="crs-calc">${ligne1 ? ligne1 + '<br>' : ''}${sym} = ${m.n > 1 ? fr(LG.fmtSig(nT, 3), m.n) : fr(`${fmt(m.mD)} × ${fmt(m.eV)}`, fmt(m.eD))} ≈ <span class="c">${LG.fmtSig(resultat(m), 3)} ${u}</span></p>
+        <p>Valeur utilisée pour tracer le graphique : ${LG.fmtSig(Ar.exact, 3)} ${u}.</p>`;
+    },
+  };
+  return { titre, enonce, parties: [partieTableau, partieCalcul] };
+}
+
+/* ---------- 1. Le problème et l'idée ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Le problème : lire entre les graduations');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>On cherche la période T de cette tension. Les maximums ne tombent pas sur des graduations : à l'œil, on peut seulement dire que T est « entre 10 et 15 ms ».</p>
+      ${LG.figure(EX, [])}
+      <div class="cle"><p><b class="cle-titre">L'idée.</b> Sur un axe gradué régulièrement, la <b>distance</b> mesurée sur le papier est <b>proportionnelle</b> à l'<b>écart de valeurs</b>. Si on connaît la distance qui correspond à une valeur connue (l'<b>échelle</b>), un <b>tableau de proportionnalité</b> donne la valeur qui correspond à n'importe quelle autre distance.</p></div>
+    </div>
+    ${exemple(`<p>Sur l'axe des temps de ce graphique, <b>15,4 cm</b> correspondent à <b>40 ms</b>. Une distance deux fois plus petite (7,7 cm) correspond à une durée deux fois plus petite (20 ms). Pour une distance quelconque, par exemple 5,0 cm, on fait un produit en croix :</p>
+      ${tableau(['Distance (cm)', 'Durée (ms)'], [['Échelle', '15,4', '40'], ['Mesure', '5,0', 't', true]])}
+      <p class="crs-calc">t = ${fr('5,0 × 40', '15,4')} ≈ <span class="c">13,0 ms</span></p>`)}`);
+  // valeurs choisies pour que le résultat tombe juste : r = a / b a au plus une décimale
+  const ech1 = hasard([[12, 60], [15, 30], [16, 40], [14, 70], [12, 30]]);
+  const ech2 = hasard([[15, 50], [16, 40], [15, 30], [14, 20], [12, 60]]), r2 = ech2[0] / ech2[1];
+  let t2 = entre(3, ech2[1] - 3);
+  if (t2 * 2 === ech2[1]) t2++;
+  const c2 = Math.round(r2 * t2 * 10) / 10;
+  const ech3 = hasard([[8, 4], [10, 5], [9, 3], [12, 4]]), r3 = ech3[0] / ech3[1];
+  const u3 = entre(3, ech3[1] * 10 - 3) / 10, c3 = Math.round(r3 * u3 * 10) / 10;
+  const item = (titre, enonce, sym, a, b, cc, unite, label) => ({
+    titre, enonce,
+    parties: [{ type: 'nombre', label: `${label} =`, unite, valeur: cc * b / a, signe: false,
+      diag: v => diagCroix(v, a, b, cc, unite), solution: tableau(['Distance (cm)', label === 't' ? 'Durée (ms)' : 'Tension (V)'], [['Échelle', fmt(a), fmt(b)], ['Mesure', fmt(cc, 1), sym, true]]) + calculCroix(sym, a, b, cc, unite) }],
+  });
+  c.aToi(carte, [
+    item('Une distance deux fois plus petite', `<p>Sur l'axe des temps d'un graphique, ${fmt(ech1[0])} cm correspondent à ${fmt(ech1[1])} ms. À quelle durée t correspond une distance de ${fmt(ech1[0] / 2, 1)} cm ?</p>`,
+      't', ech1[0], ech1[1], ech1[0] / 2, 'ms', 't'),
+    item('Avec un produit en croix', `<p>Sur l'axe des temps, ${fmt(ech2[0])} cm correspondent à ${fmt(ech2[1])} ms. À quelle durée t correspond une distance de ${fmt(c2, 1)} cm ?</p>`,
+      't', ech2[0], ech2[1], c2, 'ms', 't'),
+    item('Sur l\'axe vertical', `<p>Sur l'axe vertical d'un graphique, ${fmt(ech3[0])} cm correspondent à ${fmt(ech3[1])} V. Quelle tension u correspond à une distance de ${fmt(c3, 1)} cm ?</p>`,
+      'u', ech3[0], ech3[1], c3, 'V', 'u'),
+  ]);
+  return carte;
+}
+
+/* ---------- 2. La règle ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Mesurer une distance à la règle');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Pour mesurer une distance sur le graphique, tu disposes d'une <b>règle graduée en cm</b>. Fais-la glisser par sa partie jaune pour placer son <b>0</b> sur un premier repère, puis fais glisser le <b>curseur</b> (●) jusqu'au second : la distance s'affiche en rose. Une loupe apparaît pendant le déplacement, les boutons ◀ ▶ (ou les flèches du clavier) affinent la position du dernier élément touché, et <b>↻ Tourner</b> met la règle à la verticale.</p>
+      <div class="cle"><p><b class="cle-titre">Lire une distance.</b> Le 0 de la règle sur le premier repère, le curseur sur le second : on lit la distance au <b>millimètre</b> près (1 mm = 0,1 cm).</p></div>
+    </div>
+    ${exemple(`<p>Pour mesurer l'axe des températures de 0 à 100 °C, on tourne la règle à la verticale : son 0 sur la graduation 0 °C, le curseur sur la graduation 100 °C. La règle indique <b>8,6 cm</b>.</p>
+      ${LG.figure(THE, [regleY(R2, 0, 0, 100 * R2.mmY)], true)}`)}`);
+  c.aToi(carte, [
+    { titre: 'Une distance horizontale', parties: [partieDistance({ def: EX, axe: 'x', de: 0, a: 40 })] },
+    { titre: 'Une distance verticale', parties: [partieDistance({ def: EX, axe: 'y', de: -4, a: 4 })] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. La méthode en quatre étapes ---------- */
+function etape3(c) {
+  const carte = c.carte('3. La méthode en quatre étapes');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Pour lire précisément une grandeur sur un graphique, on suit toujours les mêmes étapes :</p>
+      <div class="cle"><ol class="er-liste">
+        <li><b>Mesurer l'échelle</b> : la distance (en cm) entre deux graduations de l'axe, et l'écart de valeurs entre ces deux graduations.</li>
+        <li><b>Mesurer la grandeur</b> : la distance (en cm) qui correspond à la grandeur recherchée, <b>le long du même axe</b>.</li>
+        <li><b>Remplir le tableau de proportionnalité</b>, sans oublier les unités.</li>
+        <li><b>Calculer</b> la valeur recherchée par un produit en croix.</li>
+      </ol></div>
+    </div>
+    ${exemple(`<p class="lgc-etape-ex"><b>Étape 1 · L'échelle.</b> On place le 0 de la règle sur la graduation 0 ms, et on lit la distance jusqu'à la graduation 40 ms : <b>15,4 cm</b> pour <b>40 ms</b>.</p>
+      ${LG.figure(EX, [regleX(R, 0, 0, 40 * R.mmX)], true)}
+      <p class="lgc-etape-ex"><b>Étape 2 · La grandeur.</b> On place le 0 de la règle sur un maximum et on lit la distance jusqu'au maximum situé <b>3 périodes</b> plus loin : <b>13,4 cm</b> pour une durée de 3T.</p>
+      ${LG.figure(EX, [{ ox: R.sx(A.tDepart), oy: R.sy(A.f(A.tDepart)), rot: 0, cur: Math.round(3 * 11.6 * R.mmX) }])}
+      <p class="lgc-etape-ex"><b>Étape 3 · Le tableau.</b></p>
+      ${tableau(['Distance (cm)', 'Durée (ms)'], [['Échelle', '15,4', '40'], ['3 périodes', '13,4', '3T', true]])}
+      <p class="lgc-etape-ex"><b>Étape 4 · Le calcul</b> (produit en croix), puis la division par le nombre de périodes :</p>
+      <p class="crs-calc">3T = ${fr('13,4 × 40', '15,4')} ≈ 34,8 ms</p>
+      <p class="crs-calc">donc T = ${fr('34,8', '3')} = <span class="c">11,6 ms</span></p>`)}`);
+  // valeurs choisies pour que le résultat tombe juste : r = a / b a au plus une décimale, T entier
+  const e1 = hasard([[14, 20], [15, 30], [16, 40], [12, 30]]), T1 = entre(4, Math.floor(e1[1] / 2) - 1);
+  const c1 = Math.round(e1[0] / e1[1] * T1 * 10) / 10;
+  const e2 = hasard([[16, 40], [15, 50], [12, 60]]), n2 = hasard([3, 4, 5]);
+  const T2 = entre(Math.max(3, Math.floor(e2[1] / (2 * n2))), Math.floor(e2[1] / n2) - 1);
+  const c2 = Math.round(e2[0] / e2[1] * n2 * T2 * 10) / 10;
+  // un nouveau signal à mesurer soi-même
+  const sig = { type: 'periode', grandeur: { symbole: 'T', nom: 'période', noms: 'périodes' },
+    axeX: { min: 0, max: 20, pas: 2, nom: 't', unite: 'ms', libelle: 'Durée' },
+    axeY: { min: -4, max: 4, pas: 1, nom: 'u', unite: 'V', libelle: 'Tension' },
+    signal: { forme: hasard(['sinus', 'triangle']), periode: hasard([4.4, 5.2]), ampl: 3, phase: .6 } };
+  c.aToi(carte, [
+    { titre: 'Une seule période mesurée',
+      enonce: `<p>Échelle : ${fmt(e1[0])} cm pour ${fmt(e1[1])} ms. Une période mesure ${fmt(c1, 1)} cm sur le papier.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est la période T ?', label: 'T =', unite: 'ms', valeur: T1, signe: false,
+        diag: v => diagCroix(v, e1[0], e1[1], c1, 'ms'),
+        solution: tableau(['Distance (cm)', 'Durée (ms)'], [['Échelle', fmt(e1[0]), fmt(e1[1])], ['1 période', fmt(c1, 1), 'T', true]]) + calculCroix('T', e1[0], e1[1], c1, 'ms') }] },
+    { titre: 'Plusieurs périodes mesurées',
+      enonce: `<p>Échelle : ${fmt(e2[0])} cm pour ${fmt(e2[1])} ms. Entre deux maximums séparés par ${n2} périodes, on mesure ${fmt(c2, 1)} cm.</p>`,
+      parties: [
+        { type: 'nombre', q: `Quelle est la durée ${n2}T de ces ${n2} périodes ?`, label: `${n2}T =`, unite: 'ms', valeur: n2 * T2, signe: false,
+          diag: v => (proche(v, T2) ? `C'est déjà la période T : la question demande d'abord la durée des ${n2} périodes mesurées.` : diagCroix(v, e2[0], e2[1], c2, 'ms')),
+          solution: tableau(['Distance (cm)', 'Durée (ms)'], [['Échelle', fmt(e2[0]), fmt(e2[1])], [`${n2} périodes`, fmt(c2, 1), `${n2}T`, true]]) + calculCroix(`${n2}T`, e2[0], e2[1], c2, 'ms') },
+        { type: 'nombre', q: 'Quelle est la période T ?', label: 'T =', unite: 'ms', valeur: T2, signe: false,
+          diag: v => (proche(v, n2 * n2 * T2) ? `Il faut <b>diviser</b> par ${n2}, pas multiplier.` : proche(v, n2 * T2) ? `C'est la durée des ${n2} périodes : divise-la par ${n2}.` : `Une seule période dure ${n2} fois moins que les ${n2} périodes : T = ${n2}T / ${n2}.`),
+          solution: `<p class="crs-calc">T = ${fr(fmt(n2 * T2), n2)} = <span class="c">${fmt(T2)} ms</span></p>` },
+      ] },
+    questionMethode(sig, 'À toi de mesurer', '<p>Détermine la période T de cette tension avec la méthode : mesure à la règle, tableau, calcul.</p>'),
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Mesurer grand ---------- */
+function etape4(c) {
+  const carte = c.carte('4. Mesurer grand pour être précis');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Une règle se lit au millimètre près : chaque mesure comporte une erreur d'environ <b>1 mm</b>. Cette erreur compte d'autant moins que la distance mesurée est grande :</p>
+      <div class="crs-defile"><table class="crs-tab">
+        <thead><tr><th>Distance mesurée</th><th>Erreur de 1 mm</th></tr></thead>
+        <tbody><tr><td>3,9 cm</td><td>≈ 2,6 %</td></tr><tr><td>4,5 cm</td><td>≈ 2,2 %</td></tr><tr><td>13,4 cm</td><td>≈ 0,7 %</td></tr><tr><td>15,4 cm</td><td>≈ 0,6 %</td></tr></tbody>
+      </table></div>
+      <div class="cle"><p><b class="cle-titre">Les distances mesurées doivent être les plus grandes possible :</b></p>
+        <ul class="er-liste">
+          <li><b>Échelle</b> : choisir les deux graduations les plus éloignées (de 0 à 40 ms : 15,4 cm, plutôt que de 5 à 15 ms : 3,9 cm).</li>
+          <li><b>Période</b> (ou longueur d'onde) : mesurer <b>plusieurs périodes</b>, puis diviser le résultat par leur nombre.</li>
+          <li><b>Amplitude</b> : mesurer l'écart entre le minimum et le maximum (crête à crête), puis diviser par 2.</li>
+        </ul></div>
+    </div>
+    ${exemple(`<p>Pour la période de l'exemple, une seule période mesure 4,5 cm : l'erreur de 1 mm (0,1 cm) en représente</p>
+      <p class="crs-calc">${fr('0,1', '4,5')} × 100 ≈ <span class="c">2,2 %</span></p>
+      <p>Trois périodes mesurent 13,4 cm : l'erreur ne représente plus que ${fr('0,1', '13,4')} × 100 ≈ 0,7 %, trois fois moins.</p>`)}`);
+  const d = hasard([2, 2.5, 4, 5, 10]), pct = 10 / d;
+  c.aToi(carte, [
+    { titre: 'L\'erreur en pourcentage',
+      enonce: `<p>Une distance mesurée vaut ${fmt(d, 1)} cm. L'erreur de lecture est de 1 mm.</p>`,
+      parties: [{ type: 'nombre', q: 'Quel pourcentage de la distance représente cette erreur ?', label: 'erreur ≈', unite: '%', valeur: pct, signe: false,
+        diag: v => {
+          if (proche(v, .1 / d)) return 'Tu as bien calculé 0,1 / distance : multiplie par 100 pour l\'écrire en pourcentage.';
+          if (proche(v, 100 / d) || proche(v, 1 / d)) return '1 mm = <b>0,1 cm</b> : c\'est 0,1 (et non 1) qu\'on divise par la distance en cm, puis on multiplie par 100.';
+          if (proche(v, d / .1) || proche(v, d * 10)) return 'Tu as inversé : c\'est l\'erreur (0,1 cm) qu\'on divise par la distance mesurée.';
+          return `L'erreur relative est l'erreur divisée par la distance mesurée, en %, avec les mêmes unités : 0,1 cm / ${fmt(d, 1)} cm × 100.`;
+        },
+        solution: `<p class="crs-calc">${fr('0,1', fmt(d, 1))} × 100 = <span class="c">${fmt(pct)} %</span></p>` }] },
+    { titre: 'L\'échelle',
+      parties: [{ type: 'choix', q: 'Les graduations de l\'axe des temps vont de 0 à 40 ms, tous les 5 ms. Entre quelles graduations mesures-tu l\'échelle ?', colonne: true,
+        options: [{ id: 'g', label: 'Entre 0 ms et 40 ms' }, { id: 'm', label: 'Entre 5 ms et 15 ms' }, { id: 'p', label: 'Entre 0 ms et 5 ms' }],
+        bonne: 'g',
+        indices: { m: 'Ces graduations ne sont qu\'à 3,9 cm l\'une de l\'autre : l\'erreur de 1 mm compte pour 2,6 %. Prends les graduations les plus éloignées.', p: 'Une seule graduation d\'écart : la distance est très petite (moins de 2 cm), l\'erreur de lecture compte beaucoup.' },
+        solution: '<p>De 0 à 40 ms, la distance est la plus grande possible (15,4 cm) : l\'erreur de 1 mm ne compte que pour 0,6 %.</p>' }] },
+    { titre: 'La période',
+      parties: [{ type: 'choix', q: 'Pour mesurer une période le plus précisément possible, on mesure :', colonne: true,
+        options: [{ id: 'une', label: 'une seule période, entre deux maximums voisins' }, { id: 'plus', label: 'le plus grand nombre de périodes possible, puis on divise par ce nombre' }, { id: 'demi', label: 'une demi-période, puis on multiplie par 2' }],
+        bonne: 'plus',
+        indices: { une: 'Une seule période donne une petite distance (4,5 cm dans l\'exemple) : l\'erreur de 1 mm compte pour plus de 2 %.', demi: 'Une demi-période est encore plus petite, et en multipliant par 2 on double aussi l\'erreur de lecture.' },
+        solution: '<p>La distance mesurée est plus grande, et l\'erreur de lecture est divisée par le nombre de périodes.</p>' }] },
+    { titre: 'L\'amplitude',
+      parties: [{ type: 'choix', q: 'Pour mesurer l\'amplitude d\'une tension le plus précisément possible, on mesure :', colonne: true,
+        options: [{ id: 'cc', label: 'l\'écart entre le minimum et le maximum (crête à crête), puis on divise par 2' }, { id: 'moy', label: 'l\'écart entre la valeur moyenne et le maximum' }, { id: 'oeil', label: 'la valeur du maximum, lue à l\'œil sur l\'axe vertical' }],
+        bonne: 'cc',
+        indices: { moy: 'C\'est bien l\'amplitude, mais la distance mesurée est deux fois plus petite que l\'écart crête à crête : l\'erreur de 1 mm compte deux fois plus.', oeil: 'À l\'œil, on ne lit pas entre les graduations : c\'est justement le problème de départ. On mesure à la règle.' },
+        solution: '<p>L\'écart crête à crête est deux fois plus grand que l\'amplitude : l\'erreur de lecture compte deux fois moins.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 5. Lire la valeur d'un point ---------- */
+function etape5(c) {
+  const carte = c.carte('5. Lire la valeur d\'un point');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Pour lire l'<b>ordonnée</b> d'un point (ou une <b>valeur maximale</b>), on tourne la règle à la verticale : l'échelle se mesure sur l'<b>axe vertical</b>, et la grandeur se mesure depuis l'axe des abscisses (valeur 0) jusqu'au point.</p>
+      <p>Pour lire l'<b>abscisse</b> d'un point, c'est la même méthode, à l'horizontale : échelle sur l'axe horizontal, distance mesurée depuis l'axe des ordonnées.</p>
+      <div class="crs-attention"><p><b class="cle-titre">Attention.</b> L'échelle et la grandeur doivent être mesurées le long du <b>même axe</b> : une durée avec l'axe des temps, une tension avec l'axe des tensions.</p></div>
+    </div>
+    ${exemple(`<p>Température du thé à t = 15 min : l'échelle vaut <b>8,6 cm</b> pour <b>100 °C</b> (de 0 à 100 °C), et le point est à <b>2,8 cm</b> de l'axe des abscisses.</p>
+      ${LG.figure(THE, [regleY(R2, 0, 0, 100 * R2.mmY), { ox: R2.sx(15), oy: R2.sy(0), rot: -90, cur: Math.round(A2.exact * R2.mmY) }])}
+      ${tableau(['Distance (cm)', 'Température (°C)'], [['Échelle', '8,6', '100'], ['Point', '2,8', 'θ', true]])}
+      <p class="crs-calc">θ = ${fr('2,8 × 100', '8,6')} ≈ <span class="c">32,6 °C</span></p>`)}`);
+  // valeurs choisies pour que le résultat tombe juste
+  const ctxs = [
+    { nom: 'Température', sym: 'θ', unite: '°C', a: 8, b: 80, val: () => entre(12, 75) },
+    { nom: 'Tension', sym: 'u', unite: 'V', a: 10, b: 5, val: () => entre(11, 48) / 10 },
+    { nom: 'Intensité', sym: 'I', unite: 'mA', a: 12, b: 60, val: () => entre(8, 55) },
+  ];
+  const k = hasard(ctxs), val = k.val(), dist = Math.round(k.a / k.b * val * 10) / 10;
+  // un autre point à lire soi-même : charge d'un condensateur
+  const condo = { type: 'lectureY', grandeur: { symbole: 'u' },
+    axeX: { min: 0, max: 10, pas: 1, nom: 't', unite: 's', libelle: 'Durée' },
+    axeY: { min: 0, max: 6, pas: 1, nom: 'u', unite: 'V', libelle: 'Tension' },
+    f: t => 5.5 * (1 - Math.exp(-t / 2)), x0: hasard([1, 1.5, 2.5, 3]) };
+  c.aToi(carte, [
+    { titre: 'L\'ordonnée d\'un point',
+      enonce: `<p>${k.nom} ${k.sym} : sur l'axe vertical, l'échelle vaut ${fmt(k.a, 1)} cm pour ${fmt(k.b)} ${k.unite} (à partir de 0). Le point est à ${fmt(dist, 1)} cm de l'axe des abscisses.</p>`,
+      parties: [{ type: 'nombre', q: `Quelle est la valeur de ${k.sym} ?`, label: `${k.sym} =`, unite: k.unite, valeur: val, signe: false,
+        diag: v => diagCroix(v, k.a, k.b, dist, k.unite),
+        solution: tableau(['Distance (cm)', `${k.nom} (${k.unite})`], [['Échelle', fmt(k.a, 1), fmt(k.b)], ['Point', fmt(dist, 1), k.sym, true]]) + calculCroix(k.sym, k.a, k.b, dist, k.unite) }] },
+    { titre: 'Le bon axe',
+      parties: [{ type: 'choix', q: 'Pour lire l\'abscisse d\'un point (une durée t), où mesures-tu l\'échelle ?', colonne: true,
+        options: [{ id: 'h', label: 'Sur l\'axe horizontal (l\'axe des temps)' }, { id: 'v', label: 'Sur l\'axe vertical' }, { id: 'n', label: 'Sur n\'importe quel axe, puisque les graduations sont régulières' }],
+        bonne: 'h',
+        indices: { v: 'L\'échelle et la grandeur se mesurent le long du <b>même axe</b> : une durée se lit sur l\'axe des temps, horizontal.', n: 'Les deux axes n\'ont pas la même échelle : 1 cm ne représente pas la même chose sur l\'axe des temps et sur l\'axe vertical.' },
+        solution: '<p>Une durée se mesure le long de l\'axe des temps : l\'échelle aussi.</p>' }] },
+    questionMethode(condo, 'À toi de mesurer', `<p>Charge d'un condensateur : détermine la tension u à t = ${fmt(condo.x0)} s (point repéré en orange) avec la méthode.</p>`),
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">L'idée.</b> Sur un axe gradué régulièrement, la distance mesurée est proportionnelle à l'écart de valeurs : avec l'échelle, un tableau de proportionnalité donne la valeur de n'importe quelle distance.</p></div>
+    <div class="cle"><p><b class="cle-titre">La méthode.</b></p><ol class="er-liste">
+      <li>Mesurer l'échelle (distance entre deux graduations, et écart de valeurs).</li>
+      <li>Mesurer la grandeur, le long du même axe.</li>
+      <li>Remplir le tableau de proportionnalité, avec les unités.</li>
+      <li>Calculer par un produit en croix.</li></ol></div>
+    <div class="cle"><p><b class="cle-titre">Mesurer grand.</b> Échelle entre les graduations les plus éloignées ; plusieurs périodes, puis division par leur nombre ; amplitude crête à crête, puis division par 2.</p></div>
+    <div class="cle"><p><b class="cle-titre">Lire un point.</b> Ordonnée : règle verticale, échelle sur l'axe vertical, distance depuis l'axe des abscisses. Abscisse : la même chose à l'horizontale.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2.html">Commencer l'entraînement →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, etape5, aRetenir]);
 LG.menu('module_1');
-SOM.marquer({ fait: true });                                   // cours lu (sommaire, accueil)
 </script>
 </body>
 </html>

@@ -8,67 +8,44 @@
 <link rel="stylesheet" href="../../assets/molecules.css">
 <link rel="stylesheet" href="er.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<style>
+  /* trois éléments à compter tiennent sur une ligne de téléphone */
+  @media (max-width: 480px) { .crs-atoi .er-reps { gap: 6px; } .crs-atoi .er-rep { padding-right: 7px; } }
+</style>
 <script src="../../assets/sommaire.js"></script>
 <script src="../../assets/molecules.js"></script>
 <script src="er.js"></script>
+<script src="../../assets/cours.js"></script>
 </head>
 <body>
 <div id="app-nav"></div>
 <div class="er-page">
   <div id="retourBar"></div>
-  <div id="app"></div>
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Compter les atomes</h2>
+    <p class="er-contexte">Pour équilibrer une réaction, il faut savoir compter les atomes dans une molécule. Tu vas voir les règles une à une : l'<b>indice</b>, le <b>nombre stœchiométrique</b>, puis les <b>parenthèses</b>.</p>
+  </div>
+  <div id="etapes"></div>
 </div>
 
 <script>
 /* ============================================================
-   Quatre parties, dans l'ordre. Chacune commence par une question
-   avec aide (règle énoncée), puis deux questions de vérification
-   tirées au hasard (une moyenne, une plus difficile).
+   Cours par étapes (assets/cours.js) : pour chaque règle, la règle,
+   un exemple dessiné, puis des espèces dont il faut compter les
+   atomes (ER.partieCompter), tirées au hasard : une moyenne, puis
+   une plus difficile.
+   Venu du module 1 (?retour=…), un bandeau ramène au module 1,
+   exactement où l'élève en était.
    ============================================================ */
-const PARTIES = [
-  {
-    titre: 'Une molécule, avec des indices',
-    regle: `<b class="cle-titre">L'indice</b>, écrit en petit en bas à droite, donne le nombre d'atomes de l'élément <b>juste avant lui</b>. Un élément sans indice compte pour <b>1 atome</b>.`,
-    aide: { f: 'H2O', c: 1, texte: `Dans H<sub>2</sub>O, l'indice 2 est juste après H : il porte sur H. Le O n'a pas d'indice : il compte pour 1 atome.` },
-    questions: [['CH4', 'NH3', 'CO2', 'H2O2'], ['C6H12O6', 'C2H6O', 'H2SO4', 'C3H8']].map(l => l.map(f => ({ f, c: 1 }))),
-  },
-  {
-    titre: 'Plusieurs molécules : le nombre stœchiométrique',
-    regle: `<b class="cle-titre">Le nombre stœchiométrique</b>, écrit devant la formule, donne le nombre de molécules. Il multiplie <b>toute</b> la molécule :<br><b>nombre d'atomes = nombre stœchiométrique × indice</b>.`,
-    aide: { f: 'H2O', c: 3, texte: `3 H<sub>2</sub>O, ce sont 3 molécules H<sub>2</sub>O. Chacune contient 2 H et 1 O : on multiplie par 3. Affiche les dessins pour voir les 3 groupes d'atomes.` },
-    questions: [
-      [{ f: 'CH4', c: 2 }, { f: 'NH3', c: 4 }, { f: 'CO2', c: 3 }, { f: 'O2', c: 5 }],
-      [{ f: 'C6H12O6', c: 2 }, { f: 'C2H6O', c: 3 }, { f: 'H2SO4', c: 2 }, { f: 'C3H8', c: 4 }],
-    ],
-  },
-  {
-    titre: 'Des parenthèses',
-    regle: `<b class="cle-titre">Un indice porte sur ce qu'il y a juste avant lui.</b> Si c'est une <b>parenthèse</b>, il porte sur <b>tout ce qu'elle contient</b>.<br>Cu(OH)<sub>2</sub> contient 2 fois le groupe OH : (OH)<sub>2</sub> = OH + OH, donc 2 O et 2 H.`,
-    aide: { f: 'Cu(OH)2', c: 1, texte: `L'indice 2 est juste après la parenthèse : il porte sur O et sur H. Le Cu n'a pas d'indice : 1 atome.` },
-    questions: [
-      [{ f: 'Al(OH)3', c: 1 }, { f: 'Fe(OH)3', c: 1 }, { f: 'Ca(OH)2', c: 1 }, { f: 'Mg(NO3)2', c: 1 }],
-      [{ f: 'CH2=C(CH3)2', c: 1 }, { f: 'Ca3(PO4)2', c: 1 }, { f: 'CH3-C(CH3)2-CH3', c: 1 }, { f: 'Al2(SO4)3', c: 1 }],
-    ],
-  },
-  {
-    titre: 'Parenthèses et nombre stœchiométrique',
-    regle: `On combine les deux règles : on compte d'abord les atomes d'<b>une</b> molécule (indices et parenthèses), puis on multiplie par le <b>nombre stœchiométrique</b>.`,
-    aide: { f: 'Cu(OH)2', c: 2, texte: `Une molécule Cu(OH)<sub>2</sub> contient 1 Cu, 2 O et 2 H. Le nombre 2 devant indique 2 molécules : on multiplie par 2.` },
-    questions: [
-      [{ f: 'Ca(OH)2', c: 3 }, { f: 'Al(OH)3', c: 2 }, { f: 'Fe(OH)3', c: 2 }],
-      [{ f: 'Mg(NO3)2', c: 3 }, { f: 'CH2=C(CH3)2', c: 2 }, { f: 'Ca3(PO4)2', c: 2 }],
-    ],
-  },
-];
-
-const app = document.getElementById('app');
-const hasard = l => l[Math.floor(Math.random() * l.length)];
-let partie = 0, num = 0, serie = [], dessins = false;
+const { exemple, hasard } = COURS;
+const fH = ER.formuleHTML;
 
 /* ---------- Retour au module 1, là où l'élève en était ---------- */
 const retour = new URLSearchParams(location.search).get('retour');
 // seule une adresse vers le module 1 est acceptée
-const retourOk = retour && /^module_1\.html(#[\w=&.,%-]*)?$/.test(retour);
+const retourOk = !!retour && /^module_1\.html(#[\w=&.,%-]*)?$/.test(retour);
 if (retourOk) {
   document.getElementById('retourBar').innerHTML = `<div class="er-retour-bar">
       <p>Tu viens du module 1.</p>
@@ -76,96 +53,151 @@ if (retourOk) {
     </div>`;
 }
 
-function entete() {
-  const fait = partie * 3 + num;
-  return `<div class="er-card">
-      <span class="er-badge">MODULE 2</span>
-      <h2 class="er-titre">Compter les atomes</h2>
-      <p class="er-meta">Partie ${partie + 1}/4 : ${PARTIES[partie].titre} · Question ${num + 1}/3</p>
-      <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(fait / 12 * 100)}%"></div></div>
-    </div>`;
+/* ---------- Les quatre règles ---------- */
+const REGLES = [
+  `<b class="cle-titre">L'indice</b>, écrit en petit en bas à droite, donne le nombre d'atomes de l'élément <b>juste avant lui</b>. Un élément sans indice compte pour <b>1 atome</b>.`,
+  `<b class="cle-titre">Le nombre stœchiométrique</b>, écrit devant la formule, donne le nombre de molécules. Il multiplie <b>toute</b> la molécule :`,
+  `<b class="cle-titre">Un indice porte sur ce qu'il y a juste avant lui.</b> Si c'est une <b>parenthèse</b>, il porte sur <b>tout ce qu'elle contient</b>.`,
+  `On combine les deux règles : on compte d'abord les atomes d'<b>une</b> molécule (indices et parenthèses), puis on multiplie par le <b>nombre stœchiométrique</b>.`,
+];
+const FORMULE = '<p class="er-formule-cle">nombre d\'atomes = nombre stœchiométrique × indice</p>';
+// rappels courts donnés quand l'erreur n'est pas reconnue
+const RAPPELS = [
+  'L\'indice donne le nombre d\'atomes de l\'élément juste avant lui ; un élément sans indice compte pour 1 atome.',
+  'Le nombre stœchiométrique multiplie toute la molécule : nombre d\'atomes = nombre stœchiométrique × indice.',
+  'Un indice écrit après une parenthèse porte sur tout ce qu\'elle contient.',
+  'Compte les atomes d\'une molécule (indices et parenthèses), puis multiplie par le nombre stœchiométrique.',
+];
+
+// Les dessins restent affichés (ou masqués) d'une question à l'autre, comme l'élève les a laissés
+const PREF = { dessins: false };
+const ecrire = (f, c) => (c > 1 ? c + ' ' : '') + fH(f);
+// une espèce dont il faut compter les atomes
+const compter = (titre, f, c, regle) => ({ titre, parties: [ER.partieCompter({
+  formule: f, coef: c, regle,
+  dessins: () => PREF.dessins, onDessins: b => { PREF.dessins = b; },
+  q: `Combien y a-t-il d'atomes de chaque élément dans <b>${ecrire(f, c)}</b> ?`,
+})] });
+// exemple dessiné (espèce fixe, molécules et atomes en boules)
+function dessin(carte, f, c) {
+  new ER.Reaction(carte.querySelector('[data-x="ex"]'), { reactifs: [f], produits: [], coefs: [c], selecteurs: false, dessins: true });
 }
 
-function accueil() {
-  app.innerHTML = `<div class="er-card">
-      <span class="er-badge">MODULE 2</span>
-      <h2 class="er-titre">Compter les atomes</h2>
-      <p class="er-contexte">Pour équilibrer une réaction, il faut savoir compter les atomes dans une molécule. Entraîne-toi en quatre parties, dans l'ordre. Chaque partie commence par une question avec la règle, puis deux questions pour vérifier que c'est compris.</p>
-      <div class="module-list" style="margin-top:14px">
-        ${PARTIES.map((p, i) => `<div class="module-card clickable" data-p="${i}" role="button" tabindex="0">
-            <div class="module-card-head">
-              <span class="module-badge">${i + 1}</span>
-              <div class="module-card-body"><div class="module-card-title">${p.titre}</div></div>
-              <span class="module-card-arrow">›</span>
-            </div>
-          </div>`).join('')}
-      </div>
-      <div class="er-actions"><button type="button" class="btn-primary" data-a="go">Commencer par la partie 1 →</button></div>
-    </div>`;
-  app.querySelectorAll('[data-p]').forEach(c => {
-    c.onclick = () => commencer(+c.dataset.p);
-    c.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); commencer(+c.dataset.p); } };
-  });
-  app.querySelector('[data-a="go"]').onclick = () => commencer(0);
+/* ---------- 1. L'indice ---------- */
+function indice(c) {
+  const carte = c.carte('1. L\'indice');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Une formule chimique indique les atomes d'une molécule : chaque élément y est écrit avec son symbole (H, C, O, N…).</p>
+      <div class="cle"><p>${REGLES[0]}</p></div>
+    </div>
+    ${exemple(`<p>Combien d'atomes de chaque élément dans <b>H<sub>2</sub>O</b> ?</p>
+      <div style="margin:10px 0" data-x="ex"></div>
+      <p>L'indice 2 est juste après H : il porte sur H. Le O n'a pas d'indice : il compte pour 1 atome.</p>
+      <p class="crs-calc">H<sub>2</sub>O : <span class="c">2 H</span> et <span class="c">1 O</span></p>`)}`);
+  dessin(carte, 'H2O', 1);
+  c.aToi(carte, [
+    { titre: 'Sur quoi porte l\'indice ?',
+      parties: [{ type: 'choix', q: 'Dans CO<sub>2</sub>, sur quel élément porte l\'indice 2 ?',
+        options: [{ id: 'O', label: 'Sur O' }, { id: 'C', label: 'Sur C' }, { id: 'CO', label: 'Sur C et sur O' }],
+        bonne: 'O',
+        indices: {
+          C: 'L\'indice est écrit juste après O : il porte sur l\'élément juste avant lui, O. C n\'a pas d\'indice : 1 atome.',
+          CO: 'Un indice ne porte que sur l\'élément juste avant lui (sauf après une parenthèse). Ici, c\'est O ; C n\'a pas d\'indice.',
+        },
+        solution: '<p class="crs-calc">CO<sub>2</sub> : <span class="c">1 C</span> et <span class="c">2 O</span></p>' }] },
+    compter('Une molécule simple', hasard(['CH4', 'NH3', 'H2O2']), 1, RAPPELS[0]),
+    compter('Une molécule plus grande', hasard(['C6H12O6', 'C2H6O', 'H2SO4', 'C3H8']), 1, RAPPELS[0]),
+  ]);
+  return carte;
 }
 
-function commencer(p) {
-  partie = p; num = 0;
-  const P = PARTIES[p];
-  serie = [P.aide, hasard(P.questions[0]), hasard(P.questions[1])];
-  question();
+/* ---------- 2. Le nombre stœchiométrique ---------- */
+function stoechiometrique(c) {
+  const carte = c.carte('2. Le nombre stœchiométrique');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Dans une équation de réaction, il y a souvent plusieurs molécules de la même espèce.</p>
+      <div class="cle"><p>${REGLES[1]}</p>${FORMULE}</div>
+    </div>
+    ${exemple(`<p>Combien d'atomes de chaque élément dans <b>3 H<sub>2</sub>O</b> ?</p>
+      <div style="margin:10px 0" data-x="ex"></div>
+      <p>3 H<sub>2</sub>O, ce sont 3 molécules H<sub>2</sub>O. Chacune contient 2 H et 1 O : on multiplie par 3.</p>
+      <p class="crs-calc">3 H<sub>2</sub>O : 3 × 2 = <span class="c">6 H</span> et 3 × 1 = <span class="c">3 O</span></p>`)}`);
+  dessin(carte, 'H2O', 3);
+  const m = hasard([{ f: 'CH4', c: 2 }, { f: 'NH3', c: 4 }, { f: 'CO2', c: 3 }, { f: 'O2', c: 5 }]);
+  const d = hasard([{ f: 'C6H12O6', c: 2 }, { f: 'C2H6O', c: 3 }, { f: 'H2SO4', c: 2 }, { f: 'C3H8', c: 4 }]);
+  c.aToi(carte, [
+    compter('Plusieurs molécules', m.f, m.c, RAPPELS[1]),
+    compter('Plusieurs molécules plus grandes', d.f, d.c, RAPPELS[1]),
+  ]);
+  return carte;
 }
 
-function question() {
-  const P = PARTIES[partie], q = serie[num], avecAide = num === 0;
-  const fHTML = (q.c > 1 ? q.c + ' ' : '') + ER.formuleHTML(q.f);
-  app.innerHTML = entete() + `<div class="er-card">
-      ${avecAide ? `<div class="cle" style="margin:0 0 14px"><p>${P.regle}</p></div>` : ''}
-      <p class="er-consigne">Combien y a-t-il d'atomes de chaque élément dans <b>${fHTML}</b> ?</p>
-      ${avecAide ? `<p class="er-guide" style="margin-bottom:12px">${q.texte}</p>` : ''}
-      <div data-a="cpt"></div>
-    </div>`;
-  window.scrollTo(0, 0);
-  new ER.Comptage(app.querySelector('[data-a="cpt"]'), {
-    formule: q.f, coef: q.c,
-    dessins: avecAide || dessins,
-    regle: P.regle.replace(/<br>.*$/, ''),
-    onReussi: () => {
-      const der = num === 2, fin = der && partie === PARTIES.length - 1;
-      const actions = app.querySelector('[data-c="actions"]');
-      actions.innerHTML = `<button type="button" class="btn-primary" data-a="suivant" disabled>${fin ? 'Terminer →' : der ? `Partie ${partie + 2} →` : 'Question suivante →'}</button>`;
-      const b = actions.querySelector('button');
-      // court délai : un double-clic sur « Vérifier » ne fait pas passer la question sans la lire
-      setTimeout(() => { b.disabled = false; }, 450);
-      b.onclick = () => {
-        if (fin) return bilan();
-        if (der) return commencer(partie + 1);
-        num++; question();
-      };
-    },
-  });
-  // l'état de l'interrupteur est conservé d'une question à l'autre (sauf questions avec aide : dessins affichés)
-  app.querySelector('.er-switch-bar input').addEventListener('change', e => { if (!avecAide) dessins = e.target.checked; });
+/* ---------- 3. Des parenthèses ---------- */
+function parentheses(c) {
+  const carte = c.carte('3. Des parenthèses');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Certaines formules contiennent un groupe d'atomes entre parenthèses, suivi d'un indice.</p>
+      <div class="cle"><p>${REGLES[2]}</p></div>
+    </div>
+    ${exemple(`<p>Combien d'atomes de chaque élément dans <b>Cu(OH)<sub>2</sub></b> ?</p>
+      <div style="margin:10px 0" data-x="ex"></div>
+      <p>Cu(OH)<sub>2</sub> contient 2 fois le groupe OH : (OH)<sub>2</sub> = OH + OH. L'indice 2 est juste après la parenthèse : il porte sur O et sur H. Le Cu n'a pas d'indice : 1 atome.</p>
+      <p class="crs-calc">Cu(OH)<sub>2</sub> : <span class="c">1 Cu</span>, 2 × 1 = <span class="c">2 O</span> et 2 × 1 = <span class="c">2 H</span></p>`)}`);
+  dessin(carte, 'Cu(OH)2', 1);
+  c.aToi(carte, [
+    { titre: 'Sur quoi porte l\'indice ?',
+      parties: [{ type: 'choix', q: 'Dans Ca(OH)<sub>2</sub>, sur quoi porte l\'indice 2 ?',
+        options: [{ id: 'OH', label: 'Sur O et sur H' }, { id: 'H', label: 'Sur H seulement' }, { id: 'tout', label: 'Sur Ca, O et H' }],
+        bonne: 'OH',
+        indices: {
+          H: 'L\'indice est écrit juste après la parenthèse, pas juste après H : il porte sur tout ce qu\'elle contient, O et H.',
+          tout: 'Ca est en dehors de la parenthèse : l\'indice ne porte pas sur lui. Ca n\'a pas d\'indice, il compte pour 1 atome.',
+        },
+        solution: '<p class="crs-calc">Ca(OH)<sub>2</sub> : <span class="c">1 Ca</span>, <span class="c">2 O</span> et <span class="c">2 H</span></p>' }] },
+    compter('Une parenthèse', hasard(['Al(OH)3', 'Fe(OH)3', 'Mg(NO3)2']), 1, RAPPELS[2]),
+    compter('Plus difficile', hasard(['CH2=C(CH3)2', 'Ca3(PO4)2', 'CH3-C(CH3)2-CH3', 'Al2(SO4)3']), 1, RAPPELS[2]),
+  ]);
+  return carte;
 }
 
-function bilan() {
-  app.innerHTML = `<div class="er-card">
-      <span class="er-badge">MODULE 2</span>
-      <h2 class="er-titre">Bravo, tu sais compter les atomes !</h2>
-      ${PARTIES.map(p => `<div class="cle" style="margin:10px 0"><p>${p.regle}</p></div>`).join('')}
-      <div class="er-actions">
-        ${retourOk ? `<a class="btn-primary" style="text-decoration:none" href="${retour}">← Revenir au module 1, où j'en étais</a>`
-                   : `<a class="btn-primary" style="text-decoration:none" href="module_3.html">Module 3 : réactions faciles →</a>`}
-        <button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
-        <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a>
-      </div>
-    </div>`;
-  app.querySelector('[data-a="re"]').onclick = accueil;
-  window.scrollTo(0, 0);
-  SOM.marquer({ fait: true });                                 // les quatre parties sont faites (sommaire, accueil)
+/* ---------- 4. Parenthèses et nombre stœchiométrique ---------- */
+function lesDeux(c) {
+  const carte = c.carte('4. Parenthèses et nombre stœchiométrique');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Une espèce dont la formule a des parenthèses peut aussi avoir un nombre stœchiométrique.</p>
+      <div class="cle"><p>${REGLES[3]}</p></div>
+    </div>
+    ${exemple(`<p>Combien d'atomes de chaque élément dans <b>2 Cu(OH)<sub>2</sub></b> ?</p>
+      <div style="margin:10px 0" data-x="ex"></div>
+      <p>Une molécule Cu(OH)<sub>2</sub> contient 1 Cu, 2 O et 2 H. Le nombre 2 devant indique 2 molécules : on multiplie par 2.</p>
+      <p class="crs-calc">2 Cu(OH)<sub>2</sub> : 2 × 1 = <span class="c">2 Cu</span>, 2 × 2 = <span class="c">4 O</span> et 2 × 2 = <span class="c">4 H</span></p>`)}`);
+  dessin(carte, 'Cu(OH)2', 2);
+  const m = hasard([{ f: 'Ca(OH)2', c: 3 }, { f: 'Al(OH)3', c: 2 }, { f: 'Fe(OH)3', c: 2 }]);
+  const d = hasard([{ f: 'Mg(NO3)2', c: 3 }, { f: 'CH2=C(CH3)2', c: 2 }, { f: 'Ca3(PO4)2', c: 2 }]);
+  c.aToi(carte, [
+    compter('Parenthèse et nombre stœchiométrique', m.f, m.c, RAPPELS[3]),
+    compter('Plus difficile', d.f, d.c, RAPPELS[3]),
+  ]);
+  return carte;
 }
 
-accueil();
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>${REGLES[0]}</p><p>H<sub>2</sub>O : 2 H et 1 O.</p></div>
+    <div class="cle"><p>${REGLES[1]}</p>${FORMULE}<p>3 H<sub>2</sub>O : 6 H et 3 O.</p></div>
+    <div class="cle"><p>${REGLES[2]}</p><p>Cu(OH)<sub>2</sub> contient 2 fois le groupe OH : 1 Cu, 2 O et 2 H.</p></div>
+    <div class="cle"><p><b class="cle-titre">Les deux règles ensemble.</b> On compte d'abord les atomes d'<b>une</b> molécule (indices et parenthèses), puis on multiplie par le <b>nombre stœchiométrique</b>.</p><p>2 Cu(OH)<sub>2</sub> : 2 Cu, 4 O et 4 H.</p></div>
+    <div class="er-actions">
+      ${retourOk ? `<a class="btn-primary" style="text-decoration:none" href="${retour}">← Revenir au module 1, où j'en étais</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_3.html">Module 3 : s'entraîner</a>`
+        : '<a class="btn-primary" style="text-decoration:none" href="module_3.html">Module 3 : s\'entraîner →</a>'}
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [indice, stoechiometrique, parentheses, lesDeux, aRetenir]);
 ER.menu('module_2');
 </script>
 </body>

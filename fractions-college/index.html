@@ -8,9 +8,11 @@
     <link rel="stylesheet" href="../assets/theme.css">
     <link rel="stylesheet" href="../equilibrer-reactions/modules/er.css">
     <link rel="stylesheet" href="../assets/sommaire.css">
+    <link rel="stylesheet" href="../assets/cours.css">
     <script src="../assets/sommaire.js"></script>
 <script src="../assets/hero.js"></script>
     <script src="../assets/numpad.js"></script>
+    <script src="../assets/cours.js"></script>
     <style>
         :root {
             --app-accent-50:  var(--paper);
@@ -44,6 +46,26 @@
         }
         .frac-input-wrap input { width: 72px; text-align: center; font-weight: 700; padding: 5px 4px; }
         .frac-input-wrap .frac-bar { border-bottom: 2.5px solid currentColor; width: 100%; margin: 3px 0; }
+
+        /* ── Cours par étapes (assets/cours.js) dans l'application en une page */
+        .fr-cours.er-page { max-width: none; padding: 0 0 32px; }
+        .fr-cours .er-actions a { text-decoration: none; }
+        .fr-cours ol.er-liste { list-style: decimal; }
+        .fr-cours .er-liste li + li { margin-top: 4px; }
+        .fr-cours .cours-bloc .cle + p { margin-top: 12px; }
+        .fr-cours .crs-calc .frac, .fr-cours .crs-formule .frac { margin: 0 3px; }
+        /* saisie d'une fraction : numérateur au-dessus du dénominateur, trait de fraction entre les deux */
+        .fr-cours .crs-champs:not(.ligne) {
+            display: inline-flex; align-items: center; gap: 12px;
+            background: linear-gradient(var(--ink), var(--ink)) center / 96px 3px no-repeat;
+        }
+        .fr-cours .crs-champs:not(.ligne) .crs-champ { width: 84px; }
+        /* « a/b = [case] sur M » : numérateur à compléter au-dessus du dénominateur donné */
+        .fr-cours .crs-valeur:has(.fr-den) { display: inline-grid; grid-template-columns: auto auto; align-items: center; column-gap: 10px; row-gap: 0; }
+        .fr-cours .crs-valeur:has(.fr-den) > .crs-lab { grid-row: 1 / span 2; }
+        .fr-cours .crs-valeur:has(.fr-den) > .crs-champ-box { grid-column: 2; padding-bottom: 6px; border-bottom: 3px solid var(--ink); }
+        .fr-cours .crs-valeur:has(.fr-den) > .crs-unite { grid-column: 2; text-align: center; padding-top: 4px; }
+        .fr-cours .crs-valeur:has(.fr-den) .crs-champ { width: 84px; }
 
         /* ── Toutes les zones de saisie (cours et entraînements) : même arrondi que dans Conversions */
         #moduleContainer input[type="text"] { border-radius: 10px; }
@@ -177,7 +199,7 @@ function updateActiveMenuItem() {
     if (location.hash !== h) history.pushState(null, '', location.pathname + location.search + h);
     SOM.menu(currentPage === 'home' ? 'accueil' : currentPage);
     if (currentPage === 'home') SOM.accueil(document.getElementById('menu'));
-    else if (/^course-/.test(currentPage)) SOM.marquer({ fait: true });      // cours ouvert (sommaire, accueil)
+    // (un cours est marqué fait par assets/cours.js quand sa dernière étape s'affiche)
 }
 // une ancre de l'adresse ouvre la page correspondante (liens du sommaire et de l'accueil, retour arrière)
 function ouvrirAncre() {
@@ -204,16 +226,22 @@ function backToMenu() {
     updateActiveMenuItem();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+// cours par étapes du module num (voir COURS_FR plus bas) : en-tête, puis les étapes
+// construites par le moteur commun ; les liens de fin (entraînement, module suivant,
+// fiche) sont dans la carte « À retenir »
 function showCourse(num) {
     hideMenu();
+    const cours = COURS_FR[num];
     const c = document.getElementById('moduleContainer');
-    if (num === 1) c.innerHTML = getCourse1();
-    else if (num === 2) c.innerHTML = getCourse2();
-    else if (num === 3) c.innerHTML = getCourse3();
-    else if (num === 4) c.innerHTML = getCourse4();
-    setTopBarTitle(`Module ${num} : ${MODULE_THEMES[num].title} — Cours`);
-    // lien vers la fiche récapitulative du module, en bas du cours
-    document.getElementById('moduleContainer').insertAdjacentHTML('beforeend', `<div class="er-actions" style="justify-content:center"><a class="btn-secondary" style="text-decoration:none" href="#fiche-${num}">Fiche récapitulative du module ${num}</a></div>`);
+    c.innerHTML = `<div class="er-page fr-cours">
+        <div class="er-card">
+            <span class="er-badge">MODULE ${num} · COURS</span>
+            <h2 class="er-titre">${cours.titre}</h2>
+            <p class="er-contexte">${cours.contexte}</p>
+        </div>
+        <div class="fr-etapes"></div>
+    </div>`;
+    new COURS.Cours(c.querySelector('.fr-etapes'), cours.etapes, { cle: 'course-' + num });
     currentPage = 'course-' + num;
     updateActiveMenuItem();
 }
@@ -289,411 +317,437 @@ function showTraining(num) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// VÉRIFICATION DANS LES COURS
+// COURS PAR ÉTAPES (moteur commun assets/cours.js) :
+// notion → exemple → « À toi » → … → « À retenir ».
+// Chaque cours est reconstruit à chaque affichage (showCourse) :
+// les fractions des « À toi » sont tirées au hasard à chaque fois.
 // ═══════════════════════════════════════════════════════════════
-function checkFrac(numId, denId, correctN, correctD, resultId) {
-    const result = document.getElementById(resultId);
-    const user = readFrac(numId, denId);
-    const cs = simplify(correctN, correctD);
-    if (!user) {
-        result.innerHTML = '✗ Vérifie ta saisie.'; result.style.color = '#991b1b';
-        return;
+const COURS_FR = (function () {
+    const { hasard, entre, exemple, melanger } = COURS;
+    // liens de fin de cours (dernière carte « À retenir »)
+    const actions = liens => `<div class="er-actions">${liens.map(([h, t], i) =>
+        `<a class="${i ? 'btn-secondary' : 'btn-primary'}" href="${h}">${t}</a>`).join('')}</div>`;
+    // tirage au hasard recommencé tant que la condition « refus » est vraie
+    const tirerSauf = (tirer, refus) => { let x; do { x = tirer(); } while (refus(x)); return x; };
+    // fraction irréductible écrite : 6/9 → 2/3 ; 6/6 → 1
+    const ecrire = (n, d) => { const s = simplify(n, d); return s.d === 1 ? String(s.n) : F(s.n, s.d); };
+    // fin d'un calcul : « 6/9 = 2/3 » (simplification si besoin), le résultat mis en valeur
+    const fin = (n, d) => { const s = simplify(n, d); return s.n !== n || s.d !== d ? `${F(n, d)} = <span class="c">${ecrire(n, d)}</span>` : `<span class="c">${F(n, d)}</span>`; };
+    const PAR = { '+': 'additionne', '−': 'soustrais' };
+
+    /* ---------- Saisie d'une fraction (deux cases validées ensemble) ----------
+       o = { q, n, d : fraction attendue (irréductible),
+             diag(x, y) : diagnostic propre au calcul (ou rien),
+             equiv(x, y) : message propre quand la fraction est juste mais pas simplifiée,
+             zero : message quand le dénominateur saisi est 0, indice, solution } */
+    function partieFrac(o) {
+        return { type: 'champs', q: o.q,
+            champs: [{ valeur: o.n, tol: 0, entier: true, signe: false, aria: 'Numérateur' },
+                     { valeur: o.d, tol: 0, entier: true, signe: false, aria: 'Dénominateur' }],
+            diag: vs => diagFrac(vs[0], vs[1], o), solution: o.solution };
     }
-    const res = compareFrac(user, correctN, correctD);
-    if (res === 'ok') {
-        result.innerHTML = '✓ Correct ! 🎉'; result.style.color = '#166534';
-    } else if (res === 'equiv') {
-        result.innerHTML = `✗ Ta fraction est égale au résultat mais elle n'est pas irréductible : ${F(user.n, user.d)} = ${F(cs.n, cs.d)}`;
-        result.style.color = '#991b1b';
-    } else {
-        result.innerHTML = `✗ Incorrect. La réponse est : ${F(cs.n, cs.d)}`; result.style.color = '#991b1b';
+    function diagFrac(x, y, o) {
+        if (!Number.isInteger(x) || !Number.isInteger(y)) return 'Le numérateur et le dénominateur sont des nombres entiers.';
+        if (y === 0) return o.zero || 'Le dénominateur d\'une fraction ne peut pas être 0.';
+        if (x < 0 && y < 0) return 'Écris la fraction sans signe moins : un quotient de deux nombres négatifs est positif.';
+        // fraction égale au résultat mais pas irréductible : oubli de simplifier
+        if (x * o.d === o.n * y) return (o.equiv && o.equiv(x, y))
+            || `Ta fraction ${F(x, y)} est égale au résultat, mais elle n'est pas irréductible : divise encore le numérateur et le dénominateur par ${gcd(x, y)}.`;
+        const propre = o.diag && o.diag(x, y);
+        if (propre) return propre;
+        if (x * o.n === o.d * y) return 'Tu as inversé le numérateur et le dénominateur.';
+        return o.indice || 'Vérifie ton calcul.';
     }
-}
 
-function checkInt(inputId, correct, resultId) {
-    const val = parseInt(document.getElementById(inputId).value);
-    const result = document.getElementById(resultId);
-    if (val === correct) {
-        result.innerHTML = '✓ Correct ! 🎉'; result.style.color = '#166534';
-    } else {
-        result.innerHTML = `✗ Incorrect. La réponse est : ${correct}`; result.style.color = '#991b1b';
+    /* ═══════════════ COURS 1 — Simplification ═══════════════ */
+    // erreurs fréquentes quand on simplifie a/b
+    function diagSimpl(x, y, a, b) {
+        if ((x === a) !== (y === b)) return 'Il faut diviser le numérateur <b>et</b> le dénominateur par le même nombre.';
+        if (a - x === b - y && x > 0) return 'On ne soustrait pas : on <b>divise</b> le numérateur et le dénominateur par le même nombre.';
+        if (x > 0 && y > 0 && a % x === 0 && b % y === 0 && a / x !== b / y)
+            return `Tu as divisé ${a} par ${a / x} et ${b} par ${b / y} : il faut diviser les deux par le <b>même</b> nombre, leur PGCD.`;
+        return null;
     }
-}
+    function equivSimpl(x, y, a, b) {
+        if (x === a && y === b) return `Tu as recopié la fraction : divise le numérateur et le dénominateur par leur PGCD (${gcd(a, b)}).`;
+        return `Tu as simplifié, mais pas jusqu'au bout : ${F(x, y)} se simplifie encore par ${gcd(x, y)}. En divisant directement par le PGCD (${gcd(a, b)}), tu arrives au résultat en une fois.`;
+    }
+    // simplifier a/b (avec ou sans le PGCD donné)
+    function itemSimplifier(titre, a, b, pgcdDonne) {
+        const g = gcd(a, b), s = simplify(a, b);
+        return { titre,
+            enonce: pgcdDonne ? `<p>PGCD(${a}, ${b}) = ${g}.</p>` : '',
+            parties: [partieFrac({ q: `Simplifie ${F(a, b)} : donne la fraction irréductible.`, n: s.n, d: s.d,
+                diag: (x, y) => diagSimpl(x, y, a, b), equiv: (x, y) => equivSimpl(x, y, a, b),
+                indice: `Divise ${a} et ${b} par leur PGCD${pgcdDonne ? ` (${g})` : ''}.`,
+                solution: `<p class="crs-calc">PGCD(${a}, ${b}) = ${g}, donc ${F(a, b)} = ${F(`${a} ÷ ${g}`, `${b} ÷ ${g}`)} = <span class="c">${F(s.n, s.d)}</span></p>` })] };
+    }
+    // diviseurs de n, ceux qui sont communs avec m en gras
+    const listeDiv = (n, m) => divisors(n).map(k => m % k === 0 ? `<b>${k}</b>` : k).join(', ');
 
-// ═══════════════════════════════════════════════════════════════
-// COURS 1 — Simplification
-// ═══════════════════════════════════════════════════════════════
-function getCourse1() {
-    return `
-    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-        <h2 class="text-2xl md:text-3xl font-bold text-blue-900 mb-6">Cours 1 : Simplification d'une fraction</h2>
-        ${numpadToggleBar()}
-
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">1. Qu'est-ce qu'une fraction irréductible ?</h3>
-            <div class="bg-blue-50 rounded-lg p-6 mb-4">
-                <p class="cle text-lg mb-3">Une fraction ${F('a','b')} est <strong>irréductible</strong> quand le numérateur <strong>a</strong> et le dénominateur <strong>b</strong> n'ont <strong>aucun diviseur commun autre que 1</strong>.</p>
-                <p class="text-lg mb-3">Pour simplifier une fraction, on divise le numérateur et le dénominateur par leur <strong>PGCD</strong> (Plus Grand Commun Diviseur).</p>
-                <div class="bg-blue-200 rounded-lg p-4 text-center text-xl font-bold mb-2">
-                    ${F('a','b')} = ${F('a ÷ PGCD(a,b)','b ÷ PGCD(a,b)')}
-                </div>
+    function c1Irreductible(c) {
+        const carte = c.carte('1. Qu\'est-ce qu\'une fraction irréductible ?');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>Une fraction ${F('a', 'b')} est <b>irréductible</b> quand le numérateur a et le dénominateur b n'ont <b>aucun diviseur commun autre que 1</b>.</p>
+                <div class="cle"><p>Pour simplifier une fraction, on divise le numérateur et le dénominateur par leur <b>PGCD</b> (plus grand commun diviseur) :</p>
+                    <p class="crs-formule">${F('a', 'b')} = ${F('a ÷ PGCD(a, b)', 'b ÷ PGCD(a, b)')}</p></div>
             </div>
-        </div>
+            ${exemple(`<p>Simplifier ${F(6, 9)} : PGCD(6, 9) = 3.</p>
+                <p class="crs-calc">${F(6, 9)} = ${F('6 ÷ 3', '9 ÷ 3')} = <span class="c">${F(2, 3)}</span> &nbsp;irréductible ✓</p>
+                <p>De même : ${F(18, 24)} = ${F('18 ÷ 6', '24 ÷ 6')} = ${F(3, 4)} (PGCD = 6) · ${F(15, 25)} = ${F('15 ÷ 5', '25 ÷ 5')} = ${F(3, 5)} (PGCD = 5).</p>`, 'Exemples')}`);
+        // une fraction irréductible et trois fractions qui se simplifient
+        const bonne = hasard([[5, 7], [4, 9], [8, 15], [9, 10], [7, 12]]);
+        const pieges = melanger([[4, 6], [9, 12], [6, 10], [10, 15], [14, 21], [12, 20]]).slice(0, 3);
+        const indices = {};
+        pieges.forEach(([a, b], k) => { const g = gcd(a, b); indices['f' + k] = `${a} et ${b} sont tous les deux divisibles par ${g} : ${F(a, b)} = ${F(a / g, b / g)}.`; });
+        const [a, b, g] = hasard([[14, 21, 7], [15, 25, 5], [16, 24, 8], [12, 18, 6], [20, 30, 10], [9, 15, 3]]);
+        c.aToi(carte, [
+            { titre: 'Reconnaître une fraction irréductible',
+              parties: [{ type: 'choix', q: 'Laquelle de ces fractions est irréductible ?',
+                options: [{ id: 'ok', label: F(bonne[0], bonne[1]) }, ...pieges.map(([x, y], k) => ({ id: 'f' + k, label: F(x, y) }))],
+                bonne: 'ok', indices,
+                solution: `<p>${F(bonne[0], bonne[1])} : le seul diviseur commun de ${bonne[0]} et ${bonne[1]} est 1.</p>` }] },
+            itemSimplifier('Simplifier avec le PGCD', a, b, g),
+        ]);
+        return carte;
+    }
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">2. Exemples</h3>
-            <div class="bg-blue-50 rounded-lg p-6 mb-4 space-y-4">
-                <div class="bg-white rounded p-4">
-                    <p class="font-semibold text-blue-900 mb-1">Exemple 1 :</p>
-                    <p>Simplifier ${F(6,9)}.</p>
-                    <p>PGCD(6, 9) = 3</p>
-                    <p>${F(6,9)} = ${F('6 ÷ 3','9 ÷ 3')} = ${F(2,3)} &nbsp; ✓ irréductible</p>
-                </div>
-                <div class="bg-white rounded p-4">
-                    <p class="font-semibold text-blue-900 mb-1">Exemple 2 :</p>
-                    <p>Simplifier ${F(18,24)}.</p>
-                    <p>PGCD(18, 24) = 6</p>
-                    <p>${F(18,24)} = ${F('18 ÷ 6','24 ÷ 6')} = ${F(3,4)} &nbsp; ✓ irréductible</p>
-                </div>
-                <div class="bg-white rounded p-4">
-                    <p class="font-semibold text-blue-900 mb-1">Exemple 3 :</p>
-                    <p>Simplifier ${F(15,25)}.</p>
-                    <p>PGCD(15, 25) = 5</p>
-                    <p>${F(15,25)} = ${F('15 ÷ 5','25 ÷ 5')} = ${F(3,5)} &nbsp; ✓ irréductible</p>
-                </div>
+    function c1Pgcd(c) {
+        const carte = c.carte('2. Comment trouver le PGCD ?');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <div class="cle"><p><b class="cle-titre">Méthode des diviseurs communs.</b> On écrit la liste des diviseurs de chaque nombre, puis on prend le plus grand diviseur commun.</p></div>
             </div>
-        </div>
+            ${exemple(`<p>Diviseurs de 12 : 1, 2, 3, <b>4</b>, 6, 12</p>
+                <p>Diviseurs de 8 : 1, 2, <b>4</b>, 8</p>
+                <p>PGCD(12, 8) = 4, donc :</p>
+                <p class="crs-calc">${F(12, 8)} = ${F('12 ÷ 4', '8 ÷ 4')} = <span class="c">${F(3, 2)}</span></p>`)}`);
+        const [p, q, G] = hasard([[12, 18, 6], [15, 25, 5], [8, 20, 4], [14, 21, 7], [16, 24, 8], [9, 27, 9]]);
+        const f1 = hasard([[10, 15], [6, 9], [8, 12], [14, 35], [12, 20]]);
+        const f2 = hasard([[36, 48], [24, 36], [30, 45], [28, 42], [32, 48]]);
+        c.aToi(carte, [
+            { titre: 'Trouver le PGCD',
+              parties: [{ type: 'nombre', q: `Quel est le PGCD de ${p} et ${q} ?`, label: `PGCD(${p}, ${q}) =`, valeur: G, entier: true, signe: false, tol: 0,
+                diag: v => !Number.isInteger(v) || v <= 0 ? 'Le PGCD est un nombre entier positif.'
+                    : v > Math.min(p, q) ? `Le PGCD divise ${p} et ${q} : il ne peut pas être plus grand que ${Math.min(p, q)}. Tu as peut-être cherché un multiple commun.`
+                    : p % v || q % v ? `${v} ne divise pas ${p % v ? p : q}.`
+                    : `${v} divise bien ${p} et ${q}, mais ce n'est pas le <b>plus grand</b> diviseur commun.`,
+                solution: `<p>Diviseurs de ${p} : ${listeDiv(p, q)}</p><p>Diviseurs de ${q} : ${listeDiv(q, p)}</p><p class="crs-calc">PGCD(${p}, ${q}) = <span class="c">${G}</span></p>` }] },
+            itemSimplifier('Simplifier', f1[0], f1[1], false),
+            itemSimplifier('Des nombres plus grands', f2[0], f2[1], false),
+        ]);
+        return carte;
+    }
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">3. Comment trouver le PGCD ?</h3>
-            <div class="bg-indigo-50 rounded-lg p-6 mb-4">
-                <p class="cle mb-3"><strong>Méthode des diviseurs communs :</strong> lister les diviseurs de chaque nombre, puis prendre le plus grand commun.</p>
-                <div class="bg-white rounded p-4 mb-3">
-                    <p>Diviseurs de 12 : 1, 2, 3, <strong>4</strong>, 6, 12</p>
-                    <p>Diviseurs de 8 : 1, 2, <strong>4</strong>, 8</p>
-                    <p>PGCD(12, 8) = <strong>4</strong></p>
-                    <p class="mt-2">${F(12,8)} = ${F('12 ÷ 4','8 ÷ 4')} = ${F(3,2)}</p>
-                </div>
+    function c1Cas(c) {
+        const carte = c.carte('3. Cas particuliers');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <div class="cle"><p>Si PGCD(a, b) = 1, la fraction est <b>déjà irréductible</b>.</p>
+                    <p>Si le numérateur est égal au dénominateur, la fraction vaut <b>1</b>.</p>
+                    <p>Si le numérateur est 0, la fraction vaut <b>0</b>.</p></div>
             </div>
-            <div class="check-box">
-                <p class="check-label">Vérifie ta compréhension :</p>
-                <p class="check-question">Simplifie ${F(10,15)} — donne la fraction irréductible :</p>
-                <div class="flex items-center gap-3 flex-wrap">
-                    ${fracInput('c1_n1', 'c1_d1', 'check-input')}
-                    <button class="check-btn" onclick="checkFrac('c1_n1','c1_d1',2,3,'r1_1')">Vérifier</button>
-                </div>
-                ${fracNumpad()}
-                <p id="r1_1" class="mt-2 font-semibold"></p>
+            ${exemple(`<p class="crs-calc">${F(3, 7)} : PGCD(3, 7) = 1 → <span class="c">déjà irréductible</span></p>
+                <p class="crs-calc">${F(7, 7)} = 7 ÷ 7 = <span class="c">1</span> &nbsp;·&nbsp; ${F(0, 5)} = 0 ÷ 5 = <span class="c">0</span></p>`, 'Exemples')}`);
+        const [a, b] = hasard([[8, 15], [9, 14], [10, 21], [4, 9], [16, 25], [14, 15]]);
+        const indices = {};
+        [2, 3, 5].forEach(k => { indices['k' + k] = a % k ? `${a} n'est pas divisible par ${k}.` : `${k} divise ${a}, mais ${b} n'est pas divisible par ${k}.`; });
+        const n = entre(3, 12), d = entre(3, 12);
+        c.aToi(carte, [
+            { titre: 'Peut-on simplifier ?',
+              parties: [{ type: 'choix', q: `Peut-on simplifier ${F(a, b)} ?`, melanger: false, colonne: true,
+                options: [{ id: 'non', label: 'Non, elle est déjà irréductible' }, { id: 'k2', label: 'Oui, par 2' }, { id: 'k3', label: 'Oui, par 3' }, { id: 'k5', label: 'Oui, par 5' }],
+                bonne: 'non', indices,
+                solution: `<p>Diviseurs de ${a} : ${listeDiv(a, b)} · diviseurs de ${b} : ${listeDiv(b, a)}. PGCD(${a}, ${b}) = 1 : ${F(a, b)} est déjà irréductible.</p>` }] },
+            { titre: 'Numérateur égal au dénominateur',
+              parties: [{ type: 'nombre', q: `Combien vaut ${F(n, n)} ?`, label: `${F(n, n)} =`, valeur: 1, entier: true, signe: false, tol: 0,
+                diag: v => v === 0 ? `${n} − ${n} = 0, mais une fraction est une <b>division</b> : ${n} ÷ ${n} = 1.`
+                    : v === n ? `Une fraction est une division : ${F(n, n)} = ${n} ÷ ${n}.`
+                    : `Une fraction est une division : ${n} ÷ ${n}.`,
+                solution: `<p class="crs-calc">${F(n, n)} = ${n} ÷ ${n} = <span class="c">1</span></p>` }] },
+            { titre: 'Numérateur nul',
+              parties: [{ type: 'nombre', q: `Combien vaut ${F(0, d)} ?`, label: `${F(0, d)} =`, valeur: 0, entier: true, signe: false, tol: 0,
+                diag: v => v === d ? `0 ÷ ${d} = 0 : zéro partagé en ${d} parts, ça fait toujours 0.`
+                    : `Une fraction est une division : ${F(0, d)} = 0 ÷ ${d}.`,
+                solution: `<p class="crs-calc">${F(0, d)} = 0 ÷ ${d} = <span class="c">0</span></p>` }] },
+        ]);
+        return carte;
+    }
+
+    function c1Retenir(c) {
+        const carte = c.carte('À retenir');
+        c.ajouter(carte, `<div class="cle"><p>${F('a', 'b')} est <b>irréductible</b> quand a et b n'ont aucun diviseur commun autre que 1. Pour simplifier, on divise a et b par leur <b>PGCD</b> :</p>
+                <p class="crs-formule">${F('a', 'b')} = ${F('a ÷ PGCD(a, b)', 'b ÷ PGCD(a, b)')}</p></div>
+            <div class="cle"><p>PGCD : on liste les diviseurs de chaque nombre et on prend le plus grand diviseur commun.</p></div>
+            <div class="cle"><p>${F(3, 7)} est déjà irréductible (PGCD = 1) · ${F(7, 7)} = 1 · ${F(0, 5)} = 0.</p></div>
+            ${actions([['#training-1', 'S\'entraîner à simplifier →'], ['#course-2', 'Module 2 : multiplication, inverse et division'], ['#fiche-1', 'Fiche récapitulative']])}`);
+        return carte;
+    }
+
+    /* ═══════════════ COURS 2 — Multiplication, inverse, division ═══════════════ */
+    function itemProduit(titre, [a, b, c, d]) {
+        const s = simplify(a * c, b * d);
+        return { titre,
+            parties: [partieFrac({ q: `Calcule ${F(a, b)} × ${F(c, d)} (donne une fraction irréductible).`, n: s.n, d: s.d,
+                diag: (x, y) => x * (b * c) === y * (a * d) ? `Tu as multiplié en croix (${a} × ${d} et ${b} × ${c}) : pour un produit, on multiplie numérateur × numérateur et dénominateur × dénominateur.`
+                    : x === a + c && y === b + d ? 'Tu as additionné : pour un produit, on <b>multiplie</b> les numérateurs entre eux et les dénominateurs entre eux.'
+                    : null,
+                indice: `Calcule ${a} × ${c} au numérateur et ${b} × ${d} au dénominateur, puis simplifie si possible.`,
+                solution: `<p class="crs-calc">${F(a, b)} × ${F(c, d)} = ${F(`${a} × ${c}`, `${b} × ${d}`)} = ${fin(a * c, b * d)}</p>` })] };
+    }
+    function itemQuotient(titre, [a, b, c, d]) {
+        const s = simplify(a * d, b * c);
+        return { titre,
+            parties: [partieFrac({ q: `Calcule ${F(a, b)} ÷ ${F(c, d)} (donne une fraction irréductible).`, n: s.n, d: s.d,
+                diag: (x, y) => x * (b * d) === y * (a * c) ? `Tu as multiplié par ${F(c, d)} sans la retourner : diviser par ${F(c, d)}, c'est multiplier par son <b>inverse</b> ${F(d, c)}.`
+                    : x * (a * d) === y * (b * c) ? 'Tu as retourné la première fraction : c\'est la deuxième (celle par laquelle on divise) qu\'on retourne.'
+                    : null,
+                indice: `Multiplie ${F(a, b)} par l'inverse de ${F(c, d)}, puis simplifie si possible.`,
+                solution: `<p class="crs-calc">${F(a, b)} ÷ ${F(c, d)} = ${F(a, b)} × ${F(d, c)} = ${F(`${a} × ${d}`, `${b} × ${c}`)} = ${fin(a * d, b * c)}</p>` })] };
+    }
+
+    function c2Multiplication(c) {
+        const carte = c.carte('1. Multiplier deux fractions');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>On multiplie <b>numérateur × numérateur</b> et <b>dénominateur × dénominateur</b> :</p>
+                <div class="cle"><p class="crs-formule">${F('a', 'b')} × ${F('c', 'd')} = ${F('a × c', 'b × d')}</p></div>
             </div>
-        </div>
+            ${exemple(`<p class="crs-calc">${F(2, 3)} × ${F(4, 5)} = ${F('2 × 4', '3 × 5')} = <span class="c">${F(8, 15)}</span></p>
+                <p class="crs-calc">${F(3, 4)} × ${F(8, 9)} = ${F('3 × 8', '4 × 9')} = ${F(24, 36)} = <span class="c">${F(2, 3)}</span> &nbsp;(après simplification)</p>
+                <p class="crs-calc">${F(5, 7)} × ${F(7, 5)} = ${F('5 × 7', '7 × 5')} = ${F(35, 35)} = <span class="c">1</span> &nbsp;(fractions inverses)</p>`, 'Exemples')}`);
+        c.aToi(carte, [
+            itemProduit('Un produit simple', hasard([[3, 5, 2, 7], [2, 3, 4, 5], [1, 4, 3, 5], [4, 7, 2, 3], [5, 6, 1, 7]])),
+            itemProduit('Un produit à simplifier', hasard([[3, 4, 8, 9], [2, 3, 9, 4], [5, 6, 3, 10], [4, 5, 15, 8], [2, 5, 5, 6], [3, 8, 4, 9]])),
+        ]);
+        return carte;
+    }
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-blue-800 mb-4 border-b-2 border-blue-300 pb-2">4. Cas particuliers</h3>
-            <div class="grid md:grid-cols-2 gap-4">
-                <div class="bg-green-50 rounded-lg p-5">
-                    <p class="font-bold text-green-900 mb-2">Fraction déjà irréductible :</p>
-                    <p>${F(3,7)} → PGCD(3,7) = 1 → déjà irréductible ✓</p>
-                </div>
-                <div class="bg-yellow-50 rounded-lg p-5">
-                    <p class="font-bold text-yellow-900 mb-2">Numérateur ou dénominateur = 1 :</p>
-                    <p>${F(7,7)} = 1 &nbsp;•&nbsp; ${F(0,5)} = 0</p>
-                </div>
+    function c2Inverse(c) {
+        const carte = c.carte('2. L\'inverse d\'une fraction');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>L'inverse de ${F('a', 'b')} est ${F('b', 'a')} : on <b>retourne</b> la fraction.</p>
+                <div class="cle"><p class="crs-formule">inverse de ${F('a', 'b')} = ${F('b', 'a')}</p>
+                    <p>Un nombre entier n s'écrit ${F('n', '1')} : son inverse est ${F('1', 'n')}.</p></div>
             </div>
-            <div class="check-box mt-4">
-                <p class="check-label">Vérifie ta compréhension :</p>
-                <p class="check-question">Simplifie ${F(36,48)} — donne la fraction irréductible :</p>
-                <div class="flex items-center gap-3 flex-wrap">
-                    ${fracInput('c1_n2', 'c1_d2', 'check-input')}
-                    <button class="check-btn" onclick="checkFrac('c1_n2','c1_d2',3,4,'r1_2')">Vérifier</button>
-                </div>
-                ${fracNumpad()}
-                <p id="r1_2" class="mt-2 font-semibold"></p>
+            ${exemple(`<p class="crs-calc">Inverse de ${F(3, 4)} = <span class="c">${F(4, 3)}</span></p>
+                <p class="crs-calc">Inverse de ${F(2, 7)} = <span class="c">${F(7, 2)}</span></p>
+                <p class="crs-calc">5 = ${F(5, 1)}, donc inverse de 5 = <span class="c">${F(1, 5)}</span></p>`, 'Exemples')}`);
+        const [a, b] = hasard([[5, 8], [3, 4], [2, 7], [4, 9], [3, 5], [7, 2]]);
+        const n = entre(2, 9);
+        const [p, q] = hasard([[2, 3], [3, 5], [4, 7], [5, 9]]);
+        c.aToi(carte, [
+            { titre: 'Inverse d\'une fraction',
+              parties: [partieFrac({ q: `Quel est l'inverse de ${F(a, b)} ?`, n: b, d: a,
+                diag: (x, y) => x === a && y === b ? 'Tu as recopié la fraction : l\'inverse, c\'est la fraction <b>retournée</b> (le dénominateur passe en haut).' : null,
+                indice: 'Retourne la fraction : le numérateur passe en bas, le dénominateur en haut.',
+                solution: `<p class="crs-calc">Inverse de ${F(a, b)} = <span class="c">${F(b, a)}</span></p>` })] },
+            { titre: 'Inverse d\'un nombre entier',
+              parties: [partieFrac({ q: `Quel est l'inverse de ${n} ? Écris-le sous forme de fraction.`, n: 1, d: n,
+                diag: (x, y) => x === n && y === 1 ? `${F(n, 1)} = ${n} : c'est le nombre lui-même. Retourne ${F(n, 1)}.` : null,
+                indice: `${n} = ${F(n, 1)} : retourne cette fraction.`,
+                solution: `<p class="crs-calc">${n} = ${F(n, 1)}, donc son inverse est <span class="c">${F(1, n)}</span></p>` })] },
+            { titre: 'Une fraction et son inverse',
+              parties: [{ type: 'choix', q: `Combien vaut ${F(p, q)} × ${F(q, p)} ?`,
+                options: [{ id: 'un', label: '1' }, { id: 'carre', label: F(p * p, q * q) }, { id: 'zero', label: '0' }],
+                bonne: 'un',
+                indices: { carre: `Tu as multiplié ${F(p, q)} par elle-même : ici la deuxième fraction est retournée, ${F(`${p} × ${q}`, `${q} × ${p}`)}.`,
+                           zero: `Ce n'est pas une soustraction : ${F(`${p} × ${q}`, `${q} × ${p}`)} = ${F(p * q, p * q)}.` },
+                solution: `<p class="crs-calc">${F(p, q)} × ${F(q, p)} = ${F(`${p} × ${q}`, `${q} × ${p}`)} = ${F(p * q, p * q)} = <span class="c">1</span></p><p>Une fraction multipliée par son inverse donne toujours 1.</p>` }] },
+        ]);
+        return carte;
+    }
+
+    function c2Division(c) {
+        const carte = c.carte('3. Diviser deux fractions');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>Diviser par une fraction, c'est <b>multiplier par son inverse</b> :</p>
+                <div class="cle"><p class="crs-formule">${F('a', 'b')} ÷ ${F('c', 'd')} = ${F('a', 'b')} × ${F('d', 'c')} = ${F('a × d', 'b × c')}</p></div>
             </div>
-        </div>
+            ${exemple(`<p class="crs-calc">${F(3, 4)} ÷ ${F(2, 5)} = ${F(3, 4)} × ${F(5, 2)} = ${F('3 × 5', '4 × 2')} = <span class="c">${F(15, 8)}</span></p>
+                <p class="crs-calc">${F(6, 7)} ÷ ${F(3, 7)} = ${F(6, 7)} × ${F(7, 3)} = ${F('6 × 7', '7 × 3')} = ${F(42, 21)} = <span class="c">2</span></p>`, 'Exemples')}`);
+        c.aToi(carte, [
+            itemQuotient('Une division simple', hasard([[3, 4, 2, 5], [2, 3, 5, 7], [1, 2, 3, 5], [5, 6, 1, 7], [3, 5, 4, 7]])),
+            itemQuotient('Une division à simplifier', hasard([[4, 5, 2, 3], [2, 3, 4, 9], [5, 8, 5, 4], [3, 4, 9, 8], [2, 5, 4, 3]])),
+        ]);
+        return carte;
+    }
 
-        <div class="text-center mt-8">
-            <button onclick="showTraining(1)" class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
-        </div>
-    </div>`;
-}
+    function c2Retenir(c) {
+        const carte = c.carte('À retenir');
+        c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Multiplication</b> : numérateur × numérateur, dénominateur × dénominateur.</p><p class="crs-formule">${F('a', 'b')} × ${F('c', 'd')} = ${F('a × c', 'b × d')}</p></div>
+            <div class="cle"><p><b class="cle-titre">Inverse</b> : on retourne la fraction.</p><p class="crs-formule">inverse de ${F('a', 'b')} = ${F('b', 'a')}</p></div>
+            <div class="cle"><p><b class="cle-titre">Division</b> : diviser par une fraction, c'est multiplier par son inverse.</p><p class="crs-formule">${F('a', 'b')} ÷ ${F('c', 'd')} = ${F('a × d', 'b × c')}</p></div>
+            ${actions([['#training-2', 'S\'entraîner sur la multiplication et la division →'], ['#course-3', 'Module 3 : addition et soustraction (même dénominateur)'], ['#fiche-2', 'Fiche récapitulative']])}`);
+        return carte;
+    }
 
-// ═══════════════════════════════════════════════════════════════
-// COURS 2 — Multiplication, inverse, division
-// ═══════════════════════════════════════════════════════════════
-function getCourse2() {
-    return `
-    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-        <h2 class="text-2xl md:text-3xl font-bold text-purple-900 mb-6">Cours 2 : Multiplication, inverse et division</h2>
-        ${numpadToggleBar()}
+    /* ═══════════════ COURS 3 — Même dénominateur ═══════════════ */
+    // a/d op b/d
+    function itemMeme(titre, a, b, d, op) {
+        const r = op === '+' ? a + b : a - b, s = simplify(r, d);
+        return { titre,
+            parties: [partieFrac({ q: `Calcule ${F(a, d)} ${op} ${F(b, d)} (simplifie si possible).`, n: s.n, d: s.d,
+                zero: `Tu as soustrait les dénominateurs (${d} − ${d} = 0) : quand ils sont égaux, on <b>garde</b> le dénominateur et on soustrait seulement les numérateurs.`,
+                diag: (x, y) => x * (2 * d) === y * r ? 'Tu as additionné les dénominateurs : quand ils sont égaux, on <b>garde</b> le dénominateur et on additionne seulement les numérateurs.'
+                    : x === a * b && y === d * d ? `Tu as multiplié : pour ${op === '+' ? 'une addition' : 'une soustraction'}, on ${op === '+' ? 'additionne' : 'soustrait'} les numérateurs.`
+                    : null,
+                indice: `Garde le dénominateur ${d} et ${PAR[op]} les numérateurs : ${a} ${op} ${b}.`,
+                solution: `<p class="crs-calc">${F(a, d)} ${op} ${F(b, d)} = ${F(`${a} ${op} ${b}`, d)} = ${fin(r, d)}</p>` })] };
+    }
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">1. Multiplication de deux fractions</h3>
-            <div class="bg-purple-50 rounded-lg p-6 mb-4">
-                <p class="text-lg mb-3">On multiplie <strong>numérateur × numérateur</strong> et <strong>dénominateur × dénominateur</strong> :</p>
-                <div class="bg-purple-200 rounded-lg p-4 text-center text-xl font-bold mb-4">
-                    ${F('a','b')} × ${F('c','d')} = ${F('a × c','b × d')}
-                </div>
-                <div class="bg-white rounded p-4 space-y-3">
-                    <p class="font-semibold">Exemples :</p>
-                    <p>${F(2,3)} × ${F(4,5)} = ${F('2 × 4','3 × 5')} = ${F(8,15)}</p>
-                    <p>${F(3,4)} × ${F(8,9)} = ${F('3 × 8','4 × 9')} = ${F(24,36)} = ${F(2,3)} <span class="text-gray-500 text-sm">(après simplification)</span></p>
-                    <p>${F(5,7)} × ${F(7,5)} = ${F('5 × 7','7 × 5')} = ${F(35,35)} = 1 <span class="text-gray-500 text-sm">(fractions inverses !)</span></p>
-                </div>
-                <div class="check-box">
-                    <p class="check-label">Vérifie ta compréhension :</p>
-                    <p class="check-question">Calcule ${F(3,5)} × ${F(2,7)} (donne la réponse irréductible) :</p>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        ${fracInput('c2_n1', 'c2_d1', 'check-input')}
-                        <button class="check-btn" onclick="checkFrac('c2_n1','c2_d1',6,35,'r2_1')">Vérifier</button>
-                    </div>
-                    ${fracNumpad()}
-                    <p id="r2_1" class="mt-2 font-semibold"></p>
-                </div>
+    function c3Addition(c) {
+        const carte = c.carte('1. Additionner deux fractions de même dénominateur');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>Quand deux fractions ont <b>le même dénominateur</b>, on additionne <b>uniquement les numérateurs</b> et on <b>garde le dénominateur</b>.</p>
+                <div class="cle"><p class="crs-formule">${F('a', 'd')} + ${F('b', 'd')} = ${F('a + b', 'd')}</p></div>
+                <p><b>Astuce :</b> pense à des parts de pizza. Si la pizza est coupée en 8 parts, 3 parts plus 2 parts font bien 5 parts sur 8.</p>
             </div>
-        </div>
+            ${exemple(`<p class="crs-calc">${F(3, 8)} + ${F(2, 8)} = ${F('3 + 2', 8)} = <span class="c">${F(5, 8)}</span> &nbsp;·&nbsp; ${F(1, 5)} + ${F(3, 5)} = ${F('1 + 3', 5)} = <span class="c">${F(4, 5)}</span></p>
+                <p class="crs-calc">${F(5, 6)} + ${F(1, 6)} = ${F('5 + 1', 6)} = ${F(6, 6)} = <span class="c">1</span> &nbsp;(on simplifie !)</p>`, 'Exemples')}`);
+        // somme déjà irréductible, puis somme à simplifier
+        const [a, b, d] = tirerSauf(() => { const d = hasard([5, 7, 9, 11, 13]), a = entre(1, d - 2); return [a, entre(1, d - 1 - a), d]; },
+            ([a, b, d]) => gcd(a + b, d) !== 1);
+        const [p, q, D] = hasard([[4, 2, 9], [3, 2, 10], [5, 1, 12], [4, 6, 15], [1, 3, 6], [3, 3, 8]]);
+        c.aToi(carte, [itemMeme('Une addition', a, b, d, '+'), itemMeme('Une addition à simplifier', p, q, D, '+')]);
+        return carte;
+    }
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">2. L'inverse d'une fraction</h3>
-            <div class="bg-pink-50 rounded-lg p-6 mb-4">
-                <p class="text-lg mb-3">L'inverse de ${F('a','b')} est ${F('b','a')} — on <strong>retourne</strong> la fraction !</p>
-                <div class="bg-pink-200 rounded-lg p-4 text-center text-xl font-bold mb-4">
-                    Inverse de ${F('a','b')} = ${F('b','a')}
-                </div>
-                <div class="bg-white rounded p-4 space-y-2">
-                    <p class="font-semibold">Exemples :</p>
-                    <p>Inverse de ${F(3,4)} = ${F(4,3)}</p>
-                    <p>Inverse de ${F(5,1)} = ${F(1,5)} <span class="text-gray-500 text-sm">(5 entier = ${F(5,1)})</span></p>
-                    <p>Inverse de ${F(2,7)} = ${F(7,2)}</p>
-                </div>
-                <div class="check-box">
-                    <p class="check-label">Vérifie ta compréhension :</p>
-                    <p class="check-question">Quel est l'inverse de ${F(5,8)} ?</p>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        ${fracInput('c2_n2', 'c2_d2', 'check-input')}
-                        <button class="check-btn" onclick="checkFrac('c2_n2','c2_d2',8,5,'r2_2')">Vérifier</button>
-                    </div>
-                    ${fracNumpad()}
-                    <p id="r2_2" class="mt-2 font-semibold"></p>
-                </div>
+    function c3Soustraction(c) {
+        const carte = c.carte('2. Soustraire deux fractions de même dénominateur');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>C'est la même règle : on soustrait <b>uniquement les numérateurs</b> et on <b>garde le dénominateur</b>.</p>
+                <div class="cle"><p class="crs-formule">${F('a', 'd')} − ${F('b', 'd')} = ${F('a − b', 'd')}</p></div>
             </div>
-        </div>
+            ${exemple(`<p class="crs-calc">${F(5, 7)} − ${F(2, 7)} = ${F('5 − 2', 7)} = <span class="c">${F(3, 7)}</span></p>
+                <p class="crs-calc">${F(7, 10)} − ${F(3, 10)} = ${F('7 − 3', 10)} = ${F(4, 10)} = <span class="c">${F(2, 5)}</span> &nbsp;(simplification par 2)</p>
+                <p class="crs-calc">${F(9, 12)} − ${F(3, 12)} = ${F('9 − 3', 12)} = ${F(6, 12)} = <span class="c">${F(1, 2)}</span> &nbsp;(simplification par 6)</p>`, 'Exemples')}`);
+        const [a, b, d] = tirerSauf(() => { const d = hasard([7, 9, 11, 13, 15]), a = entre(3, d - 1); return [a, entre(1, a - 1), d]; },
+            ([a, b, d]) => gcd(a - b, d) !== 1);
+        const [p, q, D] = hasard([[7, 3, 10], [9, 3, 12], [11, 5, 12], [7, 4, 9], [9, 3, 15], [5, 3, 8]]);
+        c.aToi(carte, [itemMeme('Une soustraction', a, b, d, '−'), itemMeme('Une soustraction à simplifier', p, q, D, '−')]);
+        return carte;
+    }
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-purple-800 mb-4 border-b-2 border-purple-300 pb-2">3. Division de deux fractions</h3>
-            <div class="bg-violet-50 rounded-lg p-6 mb-4">
-                <p class="text-lg mb-3">Diviser par une fraction, c'est <strong>multiplier par son inverse</strong> :</p>
-                <div class="bg-violet-200 rounded-lg p-4 text-center text-xl font-bold mb-4">
-                    ${F('a','b')} ÷ ${F('c','d')} = ${F('a','b')} × ${F('d','c')} = ${F('a × d','b × c')}
-                </div>
-                <div class="bg-white rounded p-4 space-y-3">
-                    <p class="font-semibold">Exemples :</p>
-                    <p>${F(3,4)} ÷ ${F(2,5)} = ${F(3,4)} × ${F(5,2)} = ${F('3×5','4×2')} = ${F(15,8)}</p>
-                    <p>${F(6,7)} ÷ ${F(3,7)} = ${F(6,7)} × ${F(7,3)} = ${F('6×7','7×3')} = ${F(42,21)} = 2</p>
-                </div>
-                <div class="check-box">
-                    <p class="check-label">Vérifie ta compréhension :</p>
-                    <p class="check-question">Calcule ${F(4,5)} ÷ ${F(2,3)} (donne la réponse irréductible) :</p>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        ${fracInput('c2_n3', 'c2_d3', 'check-input')}
-                        <button class="check-btn" onclick="checkFrac('c2_n3','c2_d3',6,5,'r2_3')">Vérifier</button>
-                    </div>
-                    ${fracNumpad()}
-                    <p id="r2_3" class="mt-2 font-semibold"></p>
-                </div>
+    function c3Retenir(c) {
+        const carte = c.carte('À retenir');
+        c.ajouter(carte, `<div class="cle"><p>Même dénominateur : on additionne (ou on soustrait) <b>uniquement les numérateurs</b> et on garde le dénominateur.</p>
+                <p class="crs-formule">${F('a', 'd')} + ${F('b', 'd')} = ${F('a + b', 'd')} &nbsp;&nbsp; ${F('a', 'd')} − ${F('b', 'd')} = ${F('a − b', 'd')}</p></div>
+            <div class="cle"><p>On simplifie le résultat si possible : ${F(7, 10)} − ${F(3, 10)} = ${F(4, 10)} = ${F(2, 5)}.</p></div>
+            ${actions([['#training-3', 'S\'entraîner sur l\'addition et la soustraction →'], ['#course-4', 'Module 4 : dénominateurs différents'], ['#fiche-3', 'Fiche récapitulative']])}`);
+        return carte;
+    }
+
+    /* ═══════════════ COURS 4 — Dénominateurs différents ═══════════════ */
+    // a/b op c/d avec L = PPCM(b, d)
+    function itemDiff(titre, [a, b, c, d], op) {
+        const L = lcm(b, d), A = a * L / b, C = c * L / d, r = op === '+' ? A + C : A - C, s = simplify(r, L);
+        const calc = (x, y) => op === '+' ? x + y : x - y;
+        return { titre,
+            parties: [partieFrac({ q: `Calcule ${F(a, b)} ${op} ${F(c, d)} (simplifie si possible).`, n: s.n, d: s.d,
+                diag: (x, y) => (x === calc(a, c) && y === calc(b, d)) ? `Tu as ${op === '+' ? 'additionné' : 'soustrait'} les numérateurs entre eux et les dénominateurs entre eux : il faut d'abord mettre les deux fractions au <b>même dénominateur</b>.`
+                    : (y === L && x === calc(a, c)) ? `Le dénominateur commun ${L} est juste, mais il faut aussi multiplier chaque numérateur par le même nombre que son dénominateur : ${b === L ? `${F(c, d)} = ${F(C, L)}` : `${F(a, b)} = ${F(A, L)}`}.`
+                    : (x === a * c && y === b * d) ? `Tu as multiplié les fractions : pour ${op === '+' ? 'une addition' : 'une soustraction'}, il faut un dénominateur commun.`
+                    : null,
+                equiv: (x, y) => y % L === 0 && y > L ? `Ton calcul est juste, mais ${F(x, y)} n'est pas irréductible : divise par ${gcd(x, y)}. Avec le PPCM (${L}) comme dénominateur commun, les nombres restent plus petits.` : null,
+                indice: `Mets d'abord les deux fractions au même dénominateur (${L}), puis ${PAR[op]} les numérateurs.`,
+                solution: `<p class="crs-calc">Dénominateur commun : ${L}. ${L === b ? `${F(c, d)} = ${F(`${c} × ${L / d}`, `${d} × ${L / d}`)} = ${F(C, L)}`
+                        : L === d ? `${F(a, b)} = ${F(`${a} × ${L / b}`, `${b} × ${L / b}`)} = ${F(A, L)}`
+                        : `${F(a, b)} = ${F(A, L)} et ${F(c, d)} = ${F(C, L)}`}</p>
+                    <p class="crs-calc">${F(A, L)} ${op} ${F(C, L)} = ${F(`${A} ${op} ${C}`, L)} = ${fin(r, L)}</p>` })] };
+    }
+
+    function c4Principe(c) {
+        const carte = c.carte('1. Le principe : un dénominateur commun');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <p>Pour additionner ou soustraire des fractions de dénominateurs <b>différents</b>, on doit d'abord les mettre <b>au même dénominateur</b>.</p>
+                <div class="cle"><ol class="er-liste">
+                    <li>Trouver le <b>dénominateur commun</b> (souvent le PPCM des deux dénominateurs) ;</li>
+                    <li>transformer chaque fraction en fraction égale ayant ce dénominateur ;</li>
+                    <li>additionner ou soustraire les numérateurs ;</li>
+                    <li>simplifier si possible.</li></ol></div>
+                <p>Pour changer le dénominateur sans changer la fraction, on multiplie le numérateur <b>et</b> le dénominateur par le même nombre.</p>
             </div>
-        </div>
+            ${exemple(`<p class="crs-calc">${F(1, 3)} = ${F('1 × 2', '3 × 2')} = <span class="c">${F(2, 6)}</span> &nbsp;·&nbsp; ${F(3, 4)} = ${F('3 × 2', '4 × 2')} = <span class="c">${F(6, 8)}</span></p>`)}`);
+        const item = (titre, a, b, k) => {
+            const M = b * k;
+            return { titre,
+                parties: [{ type: 'nombre', q: `Complète pour que la fraction ait le dénominateur ${M}.`, label: `${F(a, b)} =`,
+                    unite: `<span class="fr-den">${M}</span>`, valeur: a * k, entier: true, signe: false, tol: 0, aria: 'Numérateur',
+                    diag: v => v === a ? `Tu as gardé le numérateur : le dénominateur a été multiplié par ${k}, le numérateur doit l'être aussi.`
+                        : v === a + M - b ? `Tu as ajouté ${M - b} : pour garder une fraction égale, on <b>multiplie</b> le numérateur et le dénominateur par le même nombre (ici ${k}).`
+                        : `${b} × ${k} = ${M} : multiplie aussi le numérateur ${a} par ${k}.`,
+                    solution: `<p class="crs-calc">${b} × ${k} = ${M}, donc ${F(a, b)} = ${F(`${a} × ${k}`, `${b} × ${k}`)} = <span class="c">${F(a * k, M)}</span></p>` }] };
+        };
+        const [a, b] = hasard([[1, 3], [3, 4], [2, 5], [5, 6], [1, 4]]);
+        const [p, q] = hasard([[2, 3], [3, 5], [4, 7], [5, 8]]);
+        c.aToi(carte, [item('Une fraction égale', a, b, entre(2, 3)), item('Un autre exemple', p, q, entre(3, 5))]);
+        return carte;
+    }
 
-        <div class="cle mb-8">
-            <p class="cle-titre mb-3 text-lg">Récapitulatif :</p>
-            <div class="grid md:grid-cols-3 gap-3 text-gray-700">
-                <div class="bg-white rounded p-3"><strong>Multiplication :</strong><br>${F('a','b')} × ${F('c','d')} = ${F('a×c','b×d')}</div>
-                <div class="bg-white rounded p-3"><strong>Inverse :</strong><br>Inverse de ${F('a','b')} = ${F('b','a')}</div>
-                <div class="bg-white rounded p-3"><strong>Division :</strong><br>${F('a','b')} ÷ ${F('c','d')} = ${F('a×d','b×c')}</div>
+    function c4CasSimple(c) {
+        const carte = c.carte('2. Cas simple : un dénominateur est multiple de l\'autre');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <div class="cle"><p>Si un dénominateur est un multiple de l'autre, c'est lui le dénominateur commun : on ne transforme que l'autre fraction.</p></div>
             </div>
-        </div>
+            ${exemple(`<p>${F(1, 3)} + ${F(1, 6)} : 6 est un multiple de 3, on met tout au dénominateur 6.</p>
+                <p class="crs-calc">${F(1, 3)} = ${F('1 × 2', '3 × 2')} = ${F(2, 6)}, donc ${F(2, 6)} + ${F(1, 6)} = ${F('2 + 1', 6)} = ${F(3, 6)} = <span class="c">${F(1, 2)}</span></p>
+                <p>${F(3, 4)} − ${F(1, 8)} : 8 est un multiple de 4, dénominateur commun 8.</p>
+                <p class="crs-calc">${F(3, 4)} = ${F('3 × 2', '4 × 2')} = ${F(6, 8)}, donc ${F(6, 8)} − ${F(1, 8)} = ${F('6 − 1', 8)} = <span class="c">${F(5, 8)}</span></p>`, 'Exemples')}`);
+        c.aToi(carte, [
+            itemDiff('Une addition', hasard([[1, 2, 1, 4], [1, 3, 1, 9], [2, 3, 1, 6], [1, 4, 3, 8], [2, 5, 3, 10]]), '+'),
+            itemDiff('Une soustraction', hasard([[3, 4, 1, 8], [7, 8, 1, 4], [4, 5, 1, 10], [2, 3, 1, 9]]), '−'),
+            itemDiff('Un résultat à simplifier', hasard([[1, 3, 1, 6], [1, 4, 1, 12], [1, 2, 1, 6], [3, 4, 1, 12], [2, 5, 1, 10]]), '+'),
+        ]);
+        return carte;
+    }
 
-        <div class="text-center mt-8">
-            <button onclick="showTraining(2)" class="bg-purple-500 hover:bg-purple-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
-        </div>
-    </div>`;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// COURS 3 — Addition/soustraction même dénominateur
-// ═══════════════════════════════════════════════════════════════
-function getCourse3() {
-    return `
-    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-        <h2 class="text-2xl md:text-3xl font-bold text-green-900 mb-6">Cours 3 : Addition et soustraction (même dénominateur)</h2>
-        ${numpadToggleBar()}
-
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-green-300 pb-2">1. La règle</h3>
-            <div class="bg-green-50 rounded-lg p-6 mb-4">
-                <p class="text-lg mb-3">Quand deux fractions ont <strong>le même dénominateur</strong>, on additionne (ou soustrait) <strong>uniquement les numérateurs</strong> et on <strong>garde le dénominateur</strong> :</p>
-                <div class="bg-green-200 rounded-lg p-4 text-center text-xl font-bold mb-4">
-                    ${F('a','d')} + ${F('b','d')} = ${F('a + b','d')} &nbsp;&nbsp; et &nbsp;&nbsp; ${F('a','d')} − ${F('b','d')} = ${F('a − b','d')}
-                </div>
-                <div class="bg-white rounded p-4 text-gray-700">
-                    <p>💡 <strong>Astuce :</strong> Pense à des parts de pizza ! Si la pizza est coupée en 8 parts, ajouter 3 parts et 2 parts donne bien 5 parts sur 8.</p>
-                </div>
+    function c4Ppcm(c) {
+        const carte = c.carte('3. Cas général : utiliser le PPCM');
+        c.ajouter(carte, `<div class="cours-bloc">
+                <div class="cle"><p>Le <b>PPCM</b> (plus petit commun multiple) de deux nombres est le plus petit entier divisible par les deux. On le prend comme dénominateur commun.</p></div>
+                <p>Pour le trouver, écris les multiples du plus grand dénominateur jusqu'à tomber sur un multiple de l'autre : multiples de 4 : 4, 8, <b>12</b> ; 12 est divisible par 3, donc PPCM(3, 4) = 12.</p>
             </div>
-        </div>
+            ${exemple(`<p>${F(2, 3)} + ${F(3, 4)} : PPCM(3, 4) = 12.</p>
+                <p class="crs-calc">${F(2, 3)} = ${F('2 × 4', '3 × 4')} = ${F(8, 12)} et ${F(3, 4)} = ${F('3 × 3', '4 × 3')} = ${F(9, 12)}, donc ${F(8, 12)} + ${F(9, 12)} = ${F('8 + 9', 12)} = <span class="c">${F(17, 12)}</span></p>
+                <p>${F(5, 6)} − ${F(1, 4)} : PPCM(6, 4) = 12.</p>
+                <p class="crs-calc">${F(5, 6)} = ${F('5 × 2', '6 × 2')} = ${F(10, 12)} et ${F(1, 4)} = ${F('1 × 3', '4 × 3')} = ${F(3, 12)}, donc ${F(10, 12)} − ${F(3, 12)} = ${F('10 − 3', 12)} = <span class="c">${F(7, 12)}</span></p>`, 'Exemples')}`);
+        const [m, n] = hasard([[3, 4], [4, 6], [6, 8], [2, 5], [6, 9], [4, 10]]), P = lcm(m, n);
+        c.aToi(carte, [
+            { titre: 'Trouver le PPCM',
+              parties: [{ type: 'nombre', q: `Quel est le PPCM de ${m} et ${n} ?`, label: `PPCM(${m}, ${n}) =`, valeur: P, entier: true, signe: false, tol: 0,
+                diag: v => !Number.isInteger(v) || v <= 0 ? 'Le PPCM est un nombre entier positif.'
+                    : v % m || v % n ? `${v} n'est pas un multiple de ${v % m ? m : n}.`
+                    : `${v} est bien un multiple de ${m} et de ${n}, mais ce n'est pas le <b>plus petit</b>.`,
+                solution: `<p>Multiples de ${Math.max(m, n)} : ${[1, 2, 3, 4, 5].map(k => k * Math.max(m, n)).filter(x => x <= P).map(x => x === P ? `<b>${x}</b>` : x).join(', ')}</p>
+                    <p class="crs-calc">${P} est le premier divisible par ${Math.min(m, n)} : PPCM(${m}, ${n}) = <span class="c">${P}</span></p>` }] },
+            itemDiff('Une addition', hasard([[1, 3, 1, 4], [1, 4, 2, 5], [3, 5, 1, 3], [2, 5, 1, 3], [1, 6, 2, 5]]), '+'),
+            itemDiff('Une soustraction', hasard([[5, 6, 1, 4], [3, 4, 1, 6], [5, 6, 3, 8], [7, 10, 1, 4], [5, 8, 1, 6]]), '−'),
+        ]);
+        return carte;
+    }
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-green-300 pb-2">2. Exemples d'addition</h3>
-            <div class="bg-blue-50 rounded-lg p-6 space-y-4">
-                <div class="bg-white rounded p-4">
-                    <p>${F(3,8)} + ${F(2,8)} = ${F('3 + 2','8')} = ${F(5,8)}</p>
-                </div>
-                <div class="bg-white rounded p-4">
-                    <p>${F(1,5)} + ${F(3,5)} = ${F('1 + 3','5')} = ${F(4,5)}</p>
-                </div>
-                <div class="bg-white rounded p-4">
-                    <p>${F(5,6)} + ${F(1,6)} = ${F('5 + 1','6')} = ${F(6,6)} = 1 <span class="text-gray-500 text-sm">(on simplifie !)</span></p>
-                </div>
-            </div>
-            <div class="check-box mt-4">
-                <p class="check-label">Vérifie ta compréhension :</p>
-                <p class="check-question">Calcule ${F(4,9)} + ${F(2,9)} (simplifie si possible) :</p>
-                <div class="flex items-center gap-3 flex-wrap">
-                    ${fracInput('c3_n1', 'c3_d1', 'check-input')}
-                    <button class="check-btn" onclick="checkFrac('c3_n1','c3_d1',6,9,'r3_1')">Vérifier</button>
-                </div>
-                ${fracNumpad()}
-                <p id="r3_1" class="mt-2 font-semibold"></p>
-            </div>
-        </div>
+    function c4Retenir(c) {
+        const carte = c.carte('À retenir');
+        c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Même dénominateur</b> : ${F('a', 'd')} ± ${F('b', 'd')} = ${F('a ± b', 'd')}</p></div>
+            <div class="cle"><p><b class="cle-titre">Dénominateurs différents</b> : on met les deux fractions au même dénominateur (le PPCM des dénominateurs), puis on additionne ou on soustrait les numérateurs, et on simplifie si possible.</p>
+                <p>${F(2, 3)} + ${F(3, 4)} = ${F(8, 12)} + ${F(9, 12)} = ${F(17, 12)}</p></div>
+            ${actions([['#training-4', 'S\'entraîner sur les dénominateurs différents →'], ['#training-5', 'Module 5 : toutes les notions'], ['#fiche-4', 'Fiche récapitulative']])}`);
+        return carte;
+    }
 
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-green-300 pb-2">3. Exemples de soustraction</h3>
-            <div class="bg-blue-50 rounded-lg p-6 space-y-4">
-                <div class="bg-white rounded p-4">
-                    <p>${F(7,10)} − ${F(3,10)} = ${F('7 − 3','10')} = ${F(4,10)} = ${F(2,5)} <span class="text-gray-500 text-sm">(simplification par 2)</span></p>
-                </div>
-                <div class="bg-white rounded p-4">
-                    <p>${F(5,7)} − ${F(2,7)} = ${F('5 − 2','7')} = ${F(3,7)}</p>
-                </div>
-                <div class="bg-white rounded p-4">
-                    <p>${F(9,12)} − ${F(3,12)} = ${F('9 − 3','12')} = ${F(6,12)} = ${F(1,2)} <span class="text-gray-500 text-sm">(simplification par 6)</span></p>
-                </div>
-            </div>
-            <div class="check-box mt-4">
-                <p class="check-label">Vérifie ta compréhension :</p>
-                <p class="check-question">Calcule ${F(11,15)} − ${F(4,15)} (simplifie si possible) :</p>
-                <div class="flex items-center gap-3 flex-wrap">
-                    ${fracInput('c3_n2', 'c3_d2', 'check-input')}
-                    <button class="check-btn" onclick="checkFrac('c3_n2','c3_d2',7,15,'r3_2')">Vérifier</button>
-                </div>
-                ${fracNumpad()}
-                <p id="r3_2" class="mt-2 font-semibold"></p>
-            </div>
-        </div>
-
-        <div class="text-center mt-8">
-            <button onclick="showTraining(3)" class="bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
-        </div>
-    </div>`;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// COURS 4 — Addition/soustraction dénominateurs différents
-// ═══════════════════════════════════════════════════════════════
-function getCourse4() {
-    return `
-    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-10">
-        <h2 class="text-2xl md:text-3xl font-bold text-orange-900 mb-6">Cours 4 : Addition et soustraction (dénominateurs différents)</h2>
-        ${numpadToggleBar()}
-
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-orange-800 mb-4 border-b-2 border-orange-300 pb-2">1. Le principe : trouver un dénominateur commun</h3>
-            <div class="bg-orange-50 rounded-lg p-6 mb-4">
-                <p class="text-lg mb-3">Pour additionner ou soustraire des fractions avec des dénominateurs <strong>différents</strong>, on doit d'abord les mettre <strong>au même dénominateur</strong>.</p>
-                <div class="cle"><ol class="list-decimal ml-6 space-y-2">
-                    <li>Trouver le <strong>dénominateur commun</strong> (souvent le PPCM des deux dénominateurs)</li>
-                    <li>Transformer chaque fraction en fraction équivalente avec ce dénominateur commun</li>
-                    <li>Additionner ou soustraire les numérateurs</li>
-                    <li>Simplifier si possible</li>
-                </ol></div>
-            </div>
-        </div>
-
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-orange-800 mb-4 border-b-2 border-orange-300 pb-2">2. Cas simple : un dénominateur est multiple de l'autre</h3>
-            <div class="bg-blue-50 rounded-lg p-6 space-y-4">
-                <div class="bg-white rounded p-4">
-                    <p class="font-semibold text-orange-900 mb-2">Exemple :</p>
-                    <p>${F(1,3)} + ${F(1,6)}</p>
-                    <p>6 est multiple de 3 → on met tout au dénominateur 6</p>
-                    <p>${F(1,3)} = ${F('1 × 2','3 × 2')} = ${F(2,6)}</p>
-                    <p>Donc : ${F(2,6)} + ${F(1,6)} = ${F('2 + 1','6')} = ${F(3,6)} = ${F(1,2)}</p>
-                </div>
-                <div class="bg-white rounded p-4">
-                    <p class="font-semibold text-orange-900 mb-2">Exemple :</p>
-                    <p>${F(3,4)} − ${F(1,8)}</p>
-                    <p>8 est multiple de 4 → dénominateur commun = 8</p>
-                    <p>${F(3,4)} = ${F('3 × 2','4 × 2')} = ${F(6,8)}</p>
-                    <p>Donc : ${F(6,8)} − ${F(1,8)} = ${F('6 − 1','8')} = ${F(5,8)}</p>
-                </div>
-            </div>
-            <div class="check-box mt-4">
-                <p class="check-label">Vérifie ta compréhension :</p>
-                <p class="check-question">Calcule ${F(1,2)} + ${F(1,4)} :</p>
-                <div class="flex items-center gap-3 flex-wrap">
-                    ${fracInput('c4_n1', 'c4_d1', 'check-input')}
-                    <button class="check-btn" onclick="checkFrac('c4_n1','c4_d1',3,4,'r4_1')">Vérifier</button>
-                </div>
-                ${fracNumpad()}
-                <p id="r4_1" class="mt-2 font-semibold"></p>
-            </div>
-        </div>
-
-        <div class="mb-8">
-            <h3 class="text-2xl font-bold text-orange-800 mb-4 border-b-2 border-orange-300 pb-2">3. Cas général : utiliser le PPCM</h3>
-            <div class="bg-amber-50 rounded-lg p-6 mb-4">
-                <p class="cle mb-3">Le <strong>PPCM</strong> (Plus Petit Commun Multiple) est le plus petit entier divisible par les deux dénominateurs.</p>
-                <div class="bg-white rounded p-4 space-y-4">
-                    <div>
-                        <p class="font-semibold text-amber-900 mb-2">Exemple : ${F(2,3)} + ${F(3,4)}</p>
-                        <p>PPCM(3, 4) = 12</p>
-                        <p>${F(2,3)} = ${F('2 × 4','3 × 4')} = ${F(8,12)}</p>
-                        <p>${F(3,4)} = ${F('3 × 3','4 × 3')} = ${F(9,12)}</p>
-                        <p>Donc : ${F(8,12)} + ${F(9,12)} = ${F('8 + 9','12')} = ${F(17,12)}</p>
-                    </div>
-                    <div>
-                        <p class="font-semibold text-amber-900 mb-2">Exemple : ${F(5,6)} − ${F(1,4)}</p>
-                        <p>PPCM(6, 4) = 12</p>
-                        <p>${F(5,6)} = ${F('5 × 2','6 × 2')} = ${F(10,12)}</p>
-                        <p>${F(1,4)} = ${F('1 × 3','4 × 3')} = ${F(3,12)}</p>
-                        <p>Donc : ${F(10,12)} − ${F(3,12)} = ${F('10 − 3','12')} = ${F(7,12)}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="check-box">
-                <p class="check-label">Vérifie ta compréhension :</p>
-                <p class="check-question">Calcule ${F(1,3)} + ${F(1,4)} :</p>
-                <div class="flex items-center gap-3 flex-wrap">
-                    ${fracInput('c4_n2', 'c4_d2', 'check-input')}
-                    <button class="check-btn" onclick="checkFrac('c4_n2','c4_d2',7,12,'r4_2')">Vérifier</button>
-                </div>
-                ${fracNumpad()}
-                <p id="r4_2" class="mt-2 font-semibold"></p>
-            </div>
-        </div>
-
-        <div class="cle mb-8">
-            <p class="cle-titre mb-3 text-lg">Récapitulatif :</p>
-            <div class="grid md:grid-cols-2 gap-3 text-gray-700">
-                <div class="bg-white rounded p-3"><strong>Même dénominateur :</strong><br>${F('a','d')} ± ${F('b','d')} = ${F('a ± b','d')}</div>
-                <div class="bg-white rounded p-3"><strong>Dénominateurs différents :</strong><br>On met au dénominateur PPCM, puis on ± les numérateurs</div>
-            </div>
-        </div>
-
-        <div class="text-center mt-8">
-            <button onclick="showTraining(4)" class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-lg text-xl font-bold shadow-lg">Passer à l'entraînement !</button>
-        </div>
-    </div>`;
-}
+    return {
+        1: { titre: 'Simplification d\'une fraction',
+             contexte: 'Tu vas apprendre à rendre une fraction <b>irréductible</b> en divisant son numérateur et son dénominateur par leur <b>PGCD</b>.',
+             etapes: [c1Irreductible, c1Pgcd, c1Cas, c1Retenir] },
+        2: { titre: 'Multiplication, inverse et division',
+             contexte: 'Tu vas apprendre à <b>multiplier</b> deux fractions, à trouver l\'<b>inverse</b> d\'une fraction et à <b>diviser</b> par une fraction.',
+             etapes: [c2Multiplication, c2Inverse, c2Division, c2Retenir] },
+        3: { titre: 'Addition et soustraction (même dénominateur)',
+             contexte: 'Quand deux fractions ont le <b>même dénominateur</b>, les additionner ou les soustraire est simple : tu vas voir comment.',
+             etapes: [c3Addition, c3Soustraction, c3Retenir] },
+        4: { titre: 'Addition et soustraction (dénominateurs différents)',
+             contexte: 'Pour additionner ou soustraire des fractions de <b>dénominateurs différents</b>, on les met d\'abord au même dénominateur, avec le <b>PPCM</b>.',
+             etapes: [c4Principe, c4CasSimple, c4Ppcm, c4Retenir] },
+    };
+})();
 
 // ═══════════════════════════════════════════════════════════════
 // HTML MODULE D'ENTRAÎNEMENT

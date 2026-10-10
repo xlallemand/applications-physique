@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : masse, quantité de matière, masse molaire — Combustions</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="co.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="../../equilibrer-reactions/modules/er.js"></script>
+<script src="co.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS</span>
+    <h2 class="er-titre">Masse, quantité de matière, masse molaire</h2>
+    <p class="er-contexte">Pour passer de la masse de combustible brûlée à la masse de CO<sub>2</sub> rejetée, on compte les molécules en <b>moles</b>. Tu vas voir comment passer d'une masse à une quantité de matière, et inversement.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Masses molaires atomiques : C = 12, H = 1, O = 16 g/mol.
+   ============================================================ */
+const { fmt, hasard, entre, exemple } = COURS;
+const fH = CO.fH;
+const frac = (a, b) => `<span class="co-frac"><span>${a}</span><span>${b}</span></span>`;
+
+// Molécules des questions : « 36 g d'eau », « la masse molaire de l'eau »
+const MOLECULES = [
+  { f: 'H2O', de: 'd\'eau', du: 'de l\'eau' }, { f: 'CO2', de: 'de dioxyde de carbone', du: 'du dioxyde de carbone' },
+  { f: 'CH4', de: 'de méthane', du: 'du méthane' }, { f: 'O2', de: 'de dioxygène', du: 'du dioxygène' },
+  { f: 'C3H8', de: 'de propane', du: 'du propane' }, { f: 'C2H6O', de: 'd\'éthanol', du: 'de l\'éthanol' },
+  { f: 'C4H10', de: 'de butane', du: 'du butane' },
+];
+const masseMolaire = f => CO.M(f);
+
+// Erreurs fréquentes sur n = m / M : produit au lieu du quotient, quotient inversé
+function diagN(v, m, M) {
+  if (CO.egal(v, m * M)) return 'Tu as multiplié m par M. La quantité de matière est n = m / M : on <b>divise</b> la masse par la masse molaire.';
+  if (CO.egal(v, M / m)) return 'Tu as calculé M / m. C\'est la masse qu\'on divise : n = m / M.';
+  return 'Applique n = m / M, avec m en g et M en g/mol.';
+}
+function diagM(v, n, M) {
+  if (CO.egal(v, n / M)) return 'Tu as divisé n par M. Pour retrouver la masse, on <b>multiplie</b> : m = n × M.';
+  if (CO.egal(v, M / n)) return 'Tu as calculé M / n. La masse est m = n × M.';
+  return 'Applique m = n × M, avec n en mol et M en g/mol.';
+}
+// Erreurs fréquentes sur une masse molaire : un atome compté une seule fois
+function diagMolaire(v, f) {
+  const atomes = MOL.analyser(f);
+  if (v === atomes.reduce((s, a) => s + CO.MASSES[a.el], 0)) return 'Tu as compté chaque élément une seule fois. Multiplie la masse molaire de chaque atome par son nombre dans la formule (l\'indice).';
+  if (v === atomes.reduce((s, a) => s + a.n, 0)) return 'Tu as compté les atomes. Il faut additionner leurs masses molaires : M(C) = 12, M(H) = 1, M(O) = 16 g/mol.';
+  return 'Additionne les masses molaires de tous les atomes : ' + CO.calculM(f, true) + '.';
+}
+
+/* ---------- 1. La quantité de matière ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Passer de la masse à la quantité de matière');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Les molécules sont trop petites pour être comptées une par une : on les compte par paquets, les <b>moles</b>. La <b>quantité de matière</b> n (le nombre de moles) se calcule à partir de la masse m et de la <b>masse molaire</b> M, la masse d'une mole.</p>
+      <div class="cle"><p class="co-formule">n = ${frac('m', 'M')}</p>
+        <p class="co-legende"><b>n</b> : quantité de matière en <span class="co-unite-tag">mol</span> · <b>m</b> : masse en <span class="co-unite-tag">g</span> · <b>M</b> : masse molaire en <span class="co-unite-tag">g/mol</span></p>
+        <p class="co-legende">La même relation s'écrit aussi <b>m = n × M</b> ou <b>M = m / n</b>.</p></div>
+    </div>
+    ${exemple(`<p>On brûle m = 64 g de méthane CH<sub>4</sub>, de masse molaire M = 16 g/mol.</p>
+      <p class="crs-calc">n = ${frac('m', 'M')} = ${frac('64', '16')} = <span class="c">4 mol</span></p>`)}`);
+  // m multiple de M pour que le résultat tombe juste
+  const a = hasard(MOLECULES.slice(0, 4)), Ma = masseMolaire(a.f), na = entre(2, 5);
+  const b = hasard(MOLECULES.slice(4)), Mb = masseMolaire(b.f), nb = hasard([0.5, 1.5, 2.5, 3]);
+  const d = hasard(MOLECULES.slice(0, 2)), Md = masseMolaire(d.f), nd = entre(2, 6);
+  c.aToi(carte, [
+    { titre: 'De la masse à la quantité de matière',
+      enonce: `<p>On dispose de m = ${fmt(na * Ma)} g ${a.de} ${fH(a.f)}, de masse molaire M = ${Ma} g/mol.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est la quantité de matière ?', label: 'n =', unite: 'mol', valeur: na, signe: false,
+        diag: v => diagN(v, na * Ma, Ma), solution: `<p class="crs-calc">n = ${frac(fmt(na * Ma), Ma)} = <span class="c">${fmt(na)} mol</span></p>` }] },
+    { titre: 'Un résultat non entier',
+      enonce: `<p>On brûle m = ${fmt(nb * Mb)} g ${b.de} ${fH(b.f)}, de masse molaire M = ${Mb} g/mol.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle quantité de matière de combustible brûle-t-on ?', label: 'n =', unite: 'mol', valeur: nb, signe: false,
+        diag: v => diagN(v, nb * Mb, Mb), solution: `<p class="crs-calc">n = ${frac(fmt(nb * Mb), Mb)} = <span class="c">${fmt(nb)} mol</span></p>` }] },
+    { titre: 'Dans l\'autre sens',
+      enonce: `<p>Une combustion forme n = ${nd} mol ${d.de} ${fH(d.f)}, de masse molaire M = ${Md} g/mol.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle masse cela représente-t-il ?', label: 'm =', unite: 'g', valeur: nd * Md, signe: false,
+        diag: v => diagM(v, nd, Md), solution: `<p class="crs-calc">m = n × M = ${nd} × ${Md} = <span class="c">${fmt(nd * Md)} g</span></p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Vérifier avec les unités ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Vérifier une formule avec les unités');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Les unités se calculent comme les nombres. Si la formule est juste, l'unité du résultat est la bonne.</p>
+      <div class="cle"><p class="co-formule">n = ${frac('m', 'M')} → ${frac('g', 'g/mol')} = g × ${frac('mol', 'g')} = mol ✓</p></div>
+    </div>
+    ${exemple(`<p>Un élève écrit n = m × M. Unité : g × g/mol = g²/mol. Ce n'est pas des moles : la formule est <b>fausse</b>.</p>`)}`);
+  c.aToi(carte, [
+    { titre: 'Quelle formule donne une masse ?',
+      parties: [{ type: 'choix', q: 'On connaît n (en mol) et M (en g/mol). Quelle formule donne une masse en g ?', melanger: false,
+        options: [{ id: 'nM', label: 'm = n × M' }, { id: 'n/M', label: `m = ${frac('n', 'M')}` }, { id: 'M/n', label: `m = ${frac('M', 'n')}` }],
+        bonne: 'nM',
+        indices: { 'n/M': `Unité : ${frac('mol', 'g/mol')} = mol²/g. Ce n'est pas des grammes.`, 'M/n': `Unité : ${frac('g/mol', 'mol')} = g/mol². Ce n'est pas des grammes.` },
+        solution: '<p>mol × g/mol = g : c\'est bien une masse.</p>' }] },
+    { titre: 'Quelle formule donne une masse molaire ?',
+      parties: [{ type: 'choix', q: 'On connaît m (en g) et n (en mol). Quelle formule donne une masse molaire en g/mol ?', melanger: false,
+        options: [{ id: 'mn', label: 'M = m × n' }, { id: 'm/n', label: `M = ${frac('m', 'n')}` }, { id: 'n/m', label: `M = ${frac('n', 'm')}` }],
+        bonne: 'm/n',
+        indices: { mn: 'Unité : g × mol. Ce n\'est pas des g/mol.', 'n/m': `Unité : ${frac('mol', 'g')}, c'est l'inverse de g/mol.` },
+        solution: `<p>${frac('g', 'mol')} = g/mol : c'est bien une masse molaire.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Masse molaire d'une molécule ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Calculer la masse molaire d\'une molécule');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>La masse molaire d'une molécule est la somme des masses molaires de ses atomes : chaque masse est <b>multipliée par le nombre d'atomes</b> (l'indice dans la formule).</p>
+      <div class="cle"><p>M(C) = 12 g/mol ; M(H) = 1 g/mol ; M(O) = 16 g/mol.</p></div>
+    </div>
+    ${exemple(`<p>L'eau H<sub>2</sub>O contient 2 atomes H et 1 atome O :</p>
+      <p class="crs-calc">M(H<sub>2</sub>O) = 2 × M(H) + M(O) = 2 × 1 + 16 = <span class="c">18 g/mol</span></p>`)}`);
+  const item = (titre, f) => ({ titre, enonce: `<p>Calcule la masse molaire ${MOLECULES.find(m => m.f === f).du} ${fH(f)}.</p>`,
+    parties: [{ type: 'nombre', label: `M(${fH(f)}) =`, unite: 'g/mol', valeur: masseMolaire(f), tol: 0, signe: false, entier: true,
+      diag: v => diagMolaire(v, f), solution: `<p class="crs-calc">${CO.calculM(f)}</p>` }] });
+  c.aToi(carte, [
+    item('Deux éléments', hasard(['CO2', 'CH4'])),
+    item('Plus d\'atomes', hasard(['C3H8', 'C4H10'])),
+    item('Trois éléments', 'C2H6O'),
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p class="co-formule">n = ${frac('m', 'M')} &nbsp;·&nbsp; m = n × M</p>
+      <p class="co-legende">n en mol · m en g · M en g/mol. On vérifie une formule avec les unités.</p></div>
+    <div class="cle"><p>Masse molaire d'une molécule : somme des masses molaires de ses atomes, chacune multipliée par le nombre d'atomes.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3.html">Questions sur la quantité de matière →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Module 4 : relations stœchiométriques</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+CO.menu('module_3_cours');
+</script>
+</body>
+</html>

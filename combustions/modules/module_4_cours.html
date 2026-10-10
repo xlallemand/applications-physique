@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : relations stœchiométriques — Combustions</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="co.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="../../equilibrer-reactions/modules/er.js"></script>
+<script src="co.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS</span>
+    <h2 class="er-titre">Les relations stœchiométriques</h2>
+    <p class="er-contexte">L'équation équilibrée donne les proportions en moles. Tu vas voir comment calculer les <b>quantités de matière consommées et formées</b> à partir des <b>nombres stœchiométriques</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. La relation   2. Pour une combustion   3. Combustible avec un nombre 2
+   Équations des combustions : CO.equation, nombres stœchiométriques : CO.coefs.
+   ============================================================ */
+const { fmt, hasard, exemple } = COURS;
+const fH = CO.fH;
+const frac = (a, b) => `<span class="co-frac"><span>${a}</span><span>${b}</span></span>`;
+const nf = f => `n(${fH(f)})`;
+// espèces de la combustion de f, dans l'ordre de l'équation
+const especes = f => [f, 'O2', 'CO2', 'H2O'];
+// relation complète : n(comb)/a = n(O2)/b = n(CO2)/c = n(H2O)/d
+const relation = f => CO.coefs(f).map((c, k) => frac(nf(especes(f)[k]), c)).join(' = ');
+const egal = (a, b) => COURS.proche(a, b, .005);
+
+// Erreurs fréquentes en passant de n(S) (nombre a) à n(C) (nombre b) : rapport inversé,
+// nombre du combustible oublié, quantité recopiée
+function diagRel(v, nS, a, b, S, C) {
+  const rel = `${frac(nf(S), a)} = ${frac(nf(C), b)}`;
+  if (a !== b && egal(v, nS * a / b)) return `Tu as inversé le rapport. D'après ${rel}, ${nf(C)} = ${a === 1 ? b : frac(b, a)} × ${nf(S)}.`;
+  if (a !== 1 && egal(v, nS * b)) return `Tu as oublié de diviser par ${a}, le nombre stœchiométrique de ${fH(S)} : ${rel}.`;
+  if (a !== b && egal(v, nS)) return `Tu as recopié ${nf(S)}. Les quantités de matière suivent les nombres stœchiométriques : ${rel}.`;
+  return `Utilise la relation ${rel}.`;
+}
+
+// « À toi » : quantité de matière de l'espèce kC à partir de celle de l'espèce kS
+function itemRel(titre, f, kS, nS, kC, texte, q) {
+  const c = CO.coefs(f), S = especes(f)[kS], C = especes(f)[kC], v = nS * c[kC] / c[kS];
+  const facteur = c[kS] === 1 ? `${c[kC]}` : frac(c[kC], c[kS]);
+  return {
+    titre, enonce: `<p class="co-eq">${CO.equation(f)}</p><p>${texte}</p>`,
+    parties: [{ type: 'nombre', q, label: `${nf(C)} =`, unite: 'mol', valeur: v, signe: false,
+      diag: x => diagRel(x, nS, c[kS], c[kC], S, C),
+      solution: `<p class="crs-calc">${frac(nf(S), c[kS])} = ${frac(nf(C), c[kC])} donc ${nf(C)} = ${facteur} × ${nf(S)} = ${facteur} × ${fmt(nS)} = <span class="c">${fmt(v)} mol</span></p>` }],
+  };
+}
+
+/* ---------- 1. La relation ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Les quantités suivent les nombres stœchiométriques');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Une équation équilibrée, c'est comme une recette : pour 1 « part » de méthane, il faut 2 parts de dioxygène. Les quantités de matière consommées et formées sont dans les mêmes proportions que les nombres stœchiométriques.</p>
+      <div class="cle"><p>Pour la réaction <b>a A + b B → c C + d D</b> :</p>
+        <p class="co-formule">${frac('n<sub>A</sub>', 'a')} = ${frac('n<sub>B</sub>', 'b')} = ${frac('n<sub>C</sub>', 'c')} = ${frac('n<sub>D</sub>', 'd')}</p>
+        <p class="co-legende">n<sub>A</sub>, n<sub>B</sub> : quantités de matière <b>consommées</b> · n<sub>C</sub>, n<sub>D</sub> : quantités de matière <b>formées</b>.</p></div>
+    </div>
+    ${exemple(`<p>Combustion du méthane :</p>
+      <p class="co-eq">${CO.equation('CH4')}</p>
+      <p class="co-formule">${relation('CH4')}</p>
+      <p>Si 3 mol de ${fH('CH4')} brûlent :</p>
+      <p class="crs-calc">n(${fH('O2')}) = 2 × 3 = <span class="c">6 mol</span> consommées · n(${fH('CO2')}) = <span class="c">3 mol</span> et n(${fH('H2O')}) = 2 × 3 = <span class="c">6 mol</span> formées</p>`)}`);
+  const n1 = hasard([2, 4, 5]), n2 = hasard([0.5, 1.5, 2.5]);
+  c.aToi(carte, [
+    itemRel('Le dioxygène consommé', 'CH4', 0, n1, 1, `${n1} mol de méthane brûlent.`, 'Quelle quantité de dioxygène est consommée ?'),
+    itemRel('L\'eau formée', 'CH4', 0, n2, 3, `${fmt(n2)} mol de méthane brûlent.`, 'Quelle quantité d\'eau est formée ?'),
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Pour une combustion ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Écrire la relation utile');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Chaque quantité de matière est divisée par <b>son propre</b> nombre stœchiométrique. Pour un calcul, on garde seulement les deux espèces utiles, par exemple le combustible et le dioxyde de carbone :</p>
+      <div class="cle"><p class="co-formule">${frac('n(combustible)', 'a')} = ${frac(`n(${fH('CO2')})`, 'c')}</p>
+        <p class="co-formule">donc n(${fH('CO2')}) = ${frac('c', 'a')} × n(combustible)</p></div>
+    </div>
+    ${exemple(`<p>Combustion du propane :</p>
+      <p class="co-eq">${CO.equation('C3H8')}</p>
+      <p class="co-formule">${relation('C3H8')}</p>
+      <p>Si 0,2 mol de propane brûlent :</p>
+      <p class="crs-calc">${frac(nf('C3H8'), 1)} = ${frac(nf('CO2'), 3)} donc ${nf('CO2')} = 3 × ${nf('C3H8')} = 3 × 0,2 = <span class="c">0,6 mol</span></p>`)}`);
+  // relation à choisir : alcane dont le nombre stœchiométrique vaut 1
+  const f = hasard(['C5H12', 'C7H16']), k = CO.coefs(f), nom = CO.COMB[f].nom;
+  // « du pentane, de pentane » ou « de l'heptane, d'heptane »
+  const h = /^h/.test(nom), duNom = (h ? 'de l\'' : 'du ') + nom, deNom = (h ? 'd\'' : 'de ') + nom;
+  const n2 = hasard([0.5, 0.2, 1.5]), n3 = hasard([0.9, 1.2, 1.5]);   // pas 0,6 : c'est le résultat de l'exemple
+  c.aToi(carte, [
+    { titre: 'La bonne relation', enonce: `<p>Combustion ${duNom} :</p><p class="co-eq">${CO.equation(f)}</p>`,
+      parties: [{ type: 'choix', q: `Quelle relation lie les quantités de matière ${deNom} consommé et de ${fH('CO2')} formé ?`, colonne: true,
+        options: [{ id: 'ok', label: `${frac(nf(f), 1)} = ${frac(nf('CO2'), k[2])}` }, { id: 'inv', label: `${frac(nf(f), k[2])} = ${frac(nf('CO2'), 1)}` },
+          { id: 'prod', label: `${nf(f)} × 1 = ${nf('CO2')} × ${k[2]}` }],
+        bonne: 'ok',
+        indices: {
+          inv: `Tu as échangé les nombres stœchiométriques : chaque quantité est divisée par <b>son propre</b> nombre, 1 pour ${fH(f)} et ${k[2]} pour ${fH('CO2')}.`,
+          prod: `On ne multiplie pas : on divise chaque quantité de matière par son nombre stœchiométrique. Avec ta relation, il y aurait ${k[2]} fois moins de ${fH('CO2')} que ${deNom}, alors que l'équation en donne ${k[2]} fois plus.`,
+        },
+        solution: `<p class="co-formule">${relation(f)}</p><p>Donc ${nf('CO2')} = ${k[2]} × ${nf(f)}.</p>` }] },
+    itemRel('Avec l\'éthanol', 'C2H6O', 0, n2, 3, `${fmt(n2)} mol d'éthanol brûlent.`, 'Quelle quantité d\'eau est formée ?'),
+    itemRel('Dans l\'autre sens', 'C3H8', 2, n3, 0, `La combustion de propane a formé ${fmt(n3)} mol de ${fH('CO2')}.`, 'Quelle quantité de propane a été consommée ?'),
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Combustible avec un nombre stœchiométrique 2 ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Quand le combustible a le nombre 2');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Quand on a dû tout multiplier par 2 pour équilibrer (le cas du demi), le nombre stœchiométrique du combustible vaut 2. Il ne faut pas l'oublier dans la relation :</p>
+      <div class="cle"><p class="co-formule">${frac('n(combustible)', '2')} = ${frac(`n(${fH('CO2')})`, 'c')}</p>
+        <p class="co-formule">donc n(${fH('CO2')}) = ${frac('c', '2')} × n(combustible)</p></div>
+    </div>
+    ${exemple(`<p>Combustion de l'éthane :</p>
+      <p class="co-eq">${CO.equation('C2H6')}</p>
+      <p class="crs-calc">${frac(nf('C2H6'), 2)} = ${frac(nf('CO2'), 4)} donc ${nf('CO2')} = ${frac(4, 2)} × ${nf('C2H6')} = 2 × ${nf('C2H6')}</p>
+      <p>Si 0,3 mol d'éthane brûlent : n(${fH('CO2')}) = 2 × 0,3 = <b>0,6 mol</b>.</p>`)}`);
+  const k = CO.coefs('C4H10'), n2 = hasard([0.5, 0.2, 0.4]), n3 = hasard([0.4, 0.2, 0.6]);
+  c.aToi(carte, [
+    { titre: 'Combustion du butane', enonce: `<p class="co-eq">${CO.equation('C4H10')}</p>`,
+      parties: [{ type: 'choix', q: `${nf('CO2')} = … × ${nf('C4H10')}`,
+        options: [{ id: '4', label: '4' }, { id: '8', label: '8' }, { id: 'inv', label: frac(2, 8) }, { id: '1', label: '1' }],
+        bonne: '4',
+        indices: {
+          8: `Tu as oublié le nombre stœchiométrique du butane, ${k[0]} : ${frac(nf('C4H10'), k[0])} = ${frac(nf('CO2'), k[2])}, donc ${nf('CO2')} = ${frac(k[2], k[0])} × ${nf('C4H10')}.`,
+          inv: `Tu as inversé le rapport : il se forme plus de ${fH('CO2')} que de butane consommé (${k[2]} ${fH('CO2')} pour ${k[0]} ${fH('C4H10')}).`,
+          1: `Les quantités ne sont pas égales : l'équation donne ${k[2]} ${fH('CO2')} pour ${k[0]} ${fH('C4H10')}.`,
+        },
+        solution: `<p class="crs-calc">${frac(nf('C4H10'), k[0])} = ${frac(nf('CO2'), k[2])} donc ${nf('CO2')} = ${frac(k[2], k[0])} × ${nf('C4H10')} = <span class="c">4 × ${nf('C4H10')}</span></p>` }] },
+    itemRel('Le dioxyde de carbone formé', 'C4H10', 0, n2, 2, `${fmt(n2)} mol de butane brûlent.`, `Quelle quantité de ${fH('CO2')} est formée ?`),
+    itemRel('Le dioxygène consommé', 'C2H6', 0, n3, 1, `${fmt(n3)} mol d'éthane brûlent.`, 'Quelle quantité de dioxygène est consommée ?'),
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>Pour la réaction <b>a A + b B → c C + d D</b>, les quantités de matière consommées et formées sont proportionnelles aux nombres stœchiométriques :</p>
+      <p class="co-formule">${frac('n<sub>A</sub>', 'a')} = ${frac('n<sub>B</sub>', 'b')} = ${frac('n<sub>C</sub>', 'c')} = ${frac('n<sub>D</sub>', 'd')}</p></div>
+    <div class="cle"><p>Chaque quantité est divisée par <b>son propre</b> nombre stœchiométrique ; on garde les deux espèces utiles. N'oublie pas le nombre du combustible quand il vaut 2.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4.html">Questions sur les relations stœchiométriques →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_5_cours.html">Module 5 : l'énergie libérée</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+CO.menu('module_4_cours');
+</script>
+</body>
+</html>

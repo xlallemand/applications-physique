@@ -33,8 +33,28 @@ Branche : `claude/zen-babbage-9t2h94`. Références non modifiées : `cinematiqu
 | **Désintégration radioactive** | Menu burger remplacé par le bandeau vers le portail (un seul écran, pas de cours → pas de sommaire ni de fiche). |
 | **Schéma d'une pile** | Idem. |
 
+## Cours réécrits au format « notion → exemple → À toi »
+
+**Moteur commun** `assets/cours.js` + `assets/cours.css` (objet `COURS`) : cours par étapes, encadré `.cle`, exemple traité, « À toi » (questions sans points, diagnostic ciblé de chaque erreur, « Continuer → » une fois réussi), bouton « Afficher tout le cours », « À retenir », cours marqué fait à la dernière étape. Les outils interactifs des applications (simulations, glisser-déposer, équations à équilibrer, règle…) deviennent des questions « À toi » et fonctionnent en plusieurs exemplaires quand tout le cours est affiché.
+
+| Application | Cours réécrits | À savoir |
+|---|---|---|
+| **Combustions** | Modules 1 à 5 | Cours séparés des séries : nouvelles pages `module_2_cours` à `module_5_cours` ; `module_2` devient l'entraînement noté du module 2. L'ancien aiguillage du module 2 (test de départ qui sautait le rappel) est remplacé par des étapes de rappel et des liens vers « Équilibrer une réaction ». |
+| **Avancement d'une réaction** | Modules 1, 2, 3, 5, 7 | L'entraînement de fin du module 7 est sur sa propre page (`module_7_entrainement`). Trois exercices guidés deviennent des exemples rédigés. |
+| **Équilibrer une réaction** | Modules 1 et 2 | Le lien « Du mal à compter les atomes ? » ramène toujours au même endroit du cours. Réactions réglées en direct : « Afficher la réponse » proposé tout de suite. |
+| **Lecture graphique** | Module 1 | La partie « mesurer à la règle » passe en étape 2 (avant la méthode) pour que les « À toi » suivants se fassent à la règle. |
+| **Proportionnalité** | Cours des 3 modules | Tailwind retiré de ces pages. Phrase corrigée dans l'exemple du devoir sur 36. |
+| **Équations en physique** (avec et sans aide) | Méthode des 4 modules | Toutes les manipulations gardées, dans l'ordre ; exemple avant / après ajouté pour chaque règle ; Tailwind retiré de ces pages. Badge « MODULE N · MÉTHODE » gardé (libellé du sommaire). |
+| **Puissances de 10** | Cours 1 à 3 | Phrase fausse corrigée (« 10<sup>−n</sup> = 0,00…01 avec n zéros après la virgule »). |
+| **Fractions** | Cours 1 à 4 | Étape « fractions égales » ajoutée en tête du cours 4. |
+| **Oxydoréduction** | Cours du module 1 | Le cours n'est plus marqué fait à l'ouverture, mais à « À retenir ». |
+| **Conversions** | Cours des modules 1, 3, 4 | Petites questions d'origine gardées, questions tirées au hasard en plus. |
+
+Dans les cours, les saisies passent par les champs du moteur (bouton ±) au lieu du pavé numérique, qui reste dans les entraînements.
+
+Corrigé ensuite dans Combustions : la réaction du test « équilibrer » (Al<sub>4</sub>O<sub>3</sub>, qui n'existe pas, remplacé par 2 Al<sub>2</sub>O<sub>3</sub> + 3 C → 4 Al + 3 CO<sub>2</sub>) et les élisions des séries et exercices (« de l'éthanol », « d'octane »). Dans Équilibrer une réaction, « Afficher la réponse » est proposé tout de suite sur les réactions réglées en direct. La charte décrit le moteur de cours commun (§2, §4, §6, §7, §11, §12).
+
 ## Non fait (à décider)
 
-- Cours non réécrits en « notion → exemple → À toi » quand ils n'utilisent pas déjà ce moteur (avancement, combustions, équilibrer, lecture graphique, proportionnalité, équations, applications en une page) : refonte du contenu.
-- Tailwind (CDN) toujours utilisé dans les pages de Proportionnalité, Équations en physique et les applications en une page ; Chart.js (CDN) dans Désintégration radioactive.
+- Tailwind (CDN) toujours utilisé dans les pages de vérification, d'exemple et d'entraînement de Proportionnalité et d'Équations en physique, et dans les applications en une page (hors contenu des cours) ; Chart.js (CDN) dans Désintégration radioactive.
 - Vérifié avec Playwright/Chromium à 1280 et 390 px (pages, liens, console, débordement, sommaire, ancres, notes). Safari iOS non testable ici ; Tailwind et Chart.js non chargés dans l'environnement de test (sans accès réseau à ces CDN).

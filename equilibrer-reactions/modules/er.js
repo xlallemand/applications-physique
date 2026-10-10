@@ -11,6 +11,9 @@
      ER.calculHTML    calcul détaillé du nombre d'atomes (explications)
      ER.Comptage      compter les atomes d'une espèce (modules 1 et 2)
      ER.indice        indice pour équilibrer (premier élément non conservé)
+     ER.diagComptage  diagnostic d'une erreur de comptage (nombre stœchiométrique oublié…)
+     ER.partieCompter, ER.partieRegler, ER.partieEquilibrer
+                      outils des « À toi » des cours (assets/cours.js, partie 'perso')
      ER.interrupteur  interrupteur « Afficher les molécules et les atomes »
      ER.entrainement  entraînement noté sur 20 (modules 3 et 4)
      ER.menu          bandeau et menu communs aux modules
@@ -456,12 +459,266 @@
     };
   }
 
+  /* ============================================================
+     DIAGNOSTIC D'UNE ERREUR DE COMPTAGE
+     Pour l'élément el de la formule f précédée du nombre stœchiométrique
+     coef, l'élève a trouvé v atomes : on reconnaît les erreurs classiques
+     (nombre stœchiométrique oublié ou additionné, indice d'une parenthèse
+     oublié, élément présent à plusieurs endroits, indice mal attribué).
+     Renvoie '' si l'erreur n'est pas reconnue.
+     ============================================================ */
+  function diagComptage(f, coef, el, v) {
+    const d = detailler(f).find(a => a.el === el);
+    if (!d) return '';
+    coef = coef || 1;
+    const par = d.termes.reduce((s, t) => s + t.n * t.m, 0);              // atomes dans une molécule
+    const sansPar = d.termes.reduce((s, t) => s + t.n, 0);                // … en oubliant l'indice des parenthèses
+    const tPar = d.termes.find(t => t.m > 1);
+    const E = `<b>${el}</b>`;
+    if (tPar && coef > 1 && v === sansPar) {
+      return `Pour ${E}, n'oublie ni l'indice ${tPar.m} de la parenthèse, ni le nombre stœchiométrique ${coef} : ${calculHTML(f, coef, el)}.`;
+    }
+    if (tPar && coef > 1 && v === par && v === coef * sansPar) {
+      return `Pour ${E}, il faut multiplier par l'indice ${tPar.m} de la parenthèse <b>et</b> par le nombre stœchiométrique ${coef} : ${calculHTML(f, coef, el)}.`;
+    }
+    if (coef > 1 && v === par) {
+      return `Pour ${E}, tu as compté les atomes d'<b>une seule</b> molécule. Le nombre stœchiométrique ${coef} multiplie toute la molécule : ${coef} × ${par}.`;
+    }
+    if (coef > 1 && v === par + coef) {
+      return `Pour ${E}, tu as additionné le nombre stœchiométrique et l'indice : on les <b>multiplie</b>.`;
+    }
+    if (tPar && v === coef * sansPar) {
+      return `Pour ${E}, l'indice ${tPar.m} écrit après la parenthèse porte sur <b>tout</b> ce qu'elle contient, donc aussi sur ${el}.`;
+    }
+    if (d.termes.length > 1 && d.termes.some(t => v === coef * t.n * t.m)) {
+      return `${E} apparaît à plusieurs endroits de la formule : additionne tous ses atomes.`;
+    }
+    if (d.termes.length === 1 && par === 1) {
+      return `${E} n'a pas d'indice : il compte pour 1 atome par molécule${coef > 1 ? `, donc ${coef} × 1 = ${coef}` : ''}.`;
+    }
+    if (d.termes.length === 1 && !tPar && v === coef) {
+      return `L'indice ${par} est écrit juste après ${E} : il porte sur ${el}${coef > 1 ? `, puis on multiplie par ${coef}` : ''}.`;
+    }
+    return '';
+  }
+
+  /* ============================================================
+     OUTILS DES COURS (« À toi » de assets/cours.js)
+     Chaque fonction renvoie une partie de question
+       { type: 'perso', q, solution, monter(zone, api) → { montrer() } }
+     L'outil se construit dans zone, sans id ni état global : plusieurs
+     exemplaires peuvent être affichés en même temps (« Afficher tout le cours »).
+     api.reussi() quand c'est juste, api.erreur(diagnostic) sinon ; montrer()
+     affiche la réponse.
+     cfg.memoire (facultatif) : objet où l'outil garde son état
+       { c: nombres choisis, d: 1 si les dessins sont affichés, v: 1 si la réponse
+         en place a déjà été validée } ; il y est relu au montage (retour du
+       module 2 au même endroit, voir module_1.html).
+     cfg.dessins : dessins affichés au départ (booléen ou fonction) ; cfg.onDessins(b).
+     ============================================================ */
+  function creer(tag, cls, html) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html != null) e.innerHTML = html;
+    return e;
+  }
+  function secouer(e) { if (!e) return; e.classList.remove('er-secoue'); void e.offsetWidth; e.classList.add('er-secoue'); }
+  const enListe = t => t.join(', ').replace(/, ([^,]*)$/, ' et $1');
+  // bouton « Valider » (même présentation que ceux de assets/cours.js)
+  function boutonValider(zone) {
+    const a = creer('div', 'er-actions crs-actions-partie', '<button type="button" class="btn-primary">Valider</button>');
+    zone.appendChild(a);
+    return a;
+  }
+  // dessins affichés au départ : mémoire de l'outil, sinon réglage demandé
+  function dessinsDepart(cfg, mem) {
+    if (mem.d != null) return !!mem.d;
+    return !!(typeof cfg.dessins === 'function' ? cfg.dessins() : cfg.dessins);
+  }
+  // nombres gardés en mémoire, s'ils sont valables (adresse abîmée…)
+  const nombresValables = (c, n, max) => Array.isArray(c) && c.length === n && c.every(x => Number.isInteger(x) && x >= 1 && x <= max);
+
+  /* ---------- Compter les atomes de chaque élément d'une espèce ----------
+     cfg = { formule, coef, q, regle (rappel si l'erreur n'est pas reconnue), dessins, onDessins, memoire } */
+  function partieCompter(cfg) {
+    const f = cfg.formule, coef = cfg.coef || 1;
+    const comp = analyser(f).map(a => ({ el: a.el, n: coef * a.n }));
+    const calculs = liste => liste.map(x => `<li><b>${x.el}</b> : ${calculHTML(f, coef, x.el)} atome${x.n > 1 ? 's' : ''}</li>`).join('');
+    return {
+      type: 'perso', q: cfg.q,
+      solution: `<ul class="er-calculs">${calculs(comp)}</ul>`,
+      monter(zone, api) {
+        const mem = cfg.memoire || {};
+        const box = creer('div', 'er-cpt', `<div data-c="switch"></div><div data-c="espece"></div>
+          <p class="er-cpt-q">Nombre d'atomes de chaque élément :</p><div class="er-reps" data-c="reps"></div>`);
+        zone.appendChild(box);
+        const $ = a => box.querySelector(`[data-c="${a}"]`);
+        const dessins = dessinsDepart(cfg, mem);
+        const esp = new Reaction($('espece'), { reactifs: [f], produits: [], coefs: [coef], selecteurs: false, dessins });
+        $('switch').replaceWith(interrupteur(dessins, b => {
+          mem.d = b ? 1 : 0;
+          esp.options({ dessins: b });
+          if (cfg.onDessins) cfg.onDessins(b);
+        }));
+        const depart = nombresValables(mem.c, comp.length, 60) ? mem.c : null;
+        let erreurs = 0;
+        const sels = comp.map((a, k) => {
+          const rep = creer('div', 'er-rep');
+          const sel = selecteur({
+            valeur: depart ? depart[k] : 1, min: 1, max: 60, label: 'le nombre d\'atomes de ' + a.el,
+            onChange: () => {
+              rep.classList.remove('ok', 'ko');
+              mem.c = sels.map(x => x.sel.valeur); mem.v = 0;
+              api.effacer();
+            },
+          });
+          rep.appendChild(sel.el);
+          rep.insertAdjacentHTML('beforeend', `<span class="er-rep-el">${a.el}</span>`);
+          $('reps').appendChild(rep);
+          return { sel, rep, el: a.el, n: a.n };
+        });
+        const act = boutonValider(zone);
+        function fermer() {
+          sels.forEach(x => { x.sel.fixer(x.n); x.sel.activer(false); x.rep.classList.remove('ko'); x.rep.classList.add('ok'); });
+          act.remove();
+        }
+        function valider() {
+          if (api.fini()) return;
+          mem.v = 1;
+          const faux = sels.filter(x => x.sel.valeur !== x.n);
+          sels.forEach(x => { x.rep.classList.toggle('ok', x.sel.valeur === x.n); x.rep.classList.toggle('ko', x.sel.valeur !== x.n); });
+          if (!faux.length) { fermer(); api.reussi(); return; }
+          erreurs++;
+          // un diagnostic par élément faux (sans répétition) ; sinon la règle
+          const raisons = faux.map(x => diagComptage(f, coef, x.el, x.sel.valeur));
+          const uniques = [...new Set(raisons.filter(Boolean))];
+          let h = `Vérifie le nombre d'atomes de ${enListe(faux.map(x => `<b>${x.el}</b>`))}. ${uniques.join(' ')}`;
+          if (raisons.some(r => !r) && cfg.regle) h += ' ' + cfg.regle;
+          // à partir de la 2e erreur, le calcul des éléments faux
+          if (erreurs >= 2) h += `<br>Le calcul : ${faux.map(x => `<b>${x.el}</b> : ${calculHTML(f, coef, x.el)}`).join(' ; ')}.`;
+          api.erreur(h);
+          secouer($('reps'));
+        }
+        act.querySelector('button').onclick = valider;
+        if (mem.v && depart) valider();                       // retour du module 2 : réponse déjà validée
+        return { montrer: fermer };
+      },
+    };
+  }
+
+  /* ---------- Régler un nombre stœchiométrique pour obtenir un nombre d'atomes ----------
+     cfg = { formule, el, cible (nombre d'atomes de el voulu), max, q, dessins, memoire } */
+  function partieRegler(cfg) {
+    const f = cfg.formule, el = cfg.el, n = nb(f, el), bon = cfg.cible / n, max = cfg.max || 9;
+    const fh = formuleHTML(f);
+    return {
+      type: 'perso', q: cfg.q,
+      solution: `<p class="crs-calc">${bon} ${fh} : ${bon} × ${n} = <span class="c">${cfg.cible} atomes ${el}</span></p>`,
+      monter(zone, api) {
+        const mem = cfg.memoire || {};
+        const box = creer('div', null, '<div data-c="switch"></div><div data-c="r"></div>');
+        zone.appendChild(box);
+        const dessins = dessinsDepart(cfg, mem);
+        const r = new Reaction(box.querySelector('[data-c="r"]'), {
+          reactifs: [f], produits: [], max, dessins,
+          coefs: nombresValables(mem.c, 1, max) ? mem.c : [1],
+          onChange: c => { mem.c = c; mem.v = 0; api.effacer(); },
+        });
+        box.querySelector('[data-c="switch"]').replaceWith(interrupteur(dessins, b => { mem.d = b ? 1 : 0; r.options({ dessins: b }); }));
+        const act = boutonValider(zone);
+        function fermer() { r.fixer([bon]); r.activer(false); act.remove(); }
+        function valider() {
+          if (api.fini()) return;
+          mem.v = 1;
+          const k = r.coefs[0];
+          if (k === bon) { r.activer(false); act.remove(); api.reussi(); return; }
+          secouer(r.el);
+          const at = k * n > 1 ? 'atomes' : 'atome';
+          if (k === cfg.cible) {
+            api.erreur(`Tu as écrit ${k} molécules : ${k} × ${n} = ${k * n} atomes ${el}. Chaque molécule ${fh} contient déjà ${n} atomes ${el} (l'indice).`);
+          } else {
+            api.erreur(`Avec ${k > 1 ? k + ' ' : ''}${fh}, il y a ${k} × ${n} = ${k * n} ${at} ${el}. Il en faut ${cfg.cible} : ${k * n < cfg.cible ? 'augmente' : 'diminue'} le nombre stœchiométrique.`);
+          }
+        }
+        act.querySelector('button').onclick = valider;
+        if (mem.v) valider();
+        return { montrer: fermer };
+      },
+    };
+  }
+
+  /* ---------- Équilibrer une réaction ----------
+     cfg = { r: réactifs, p: produits, solution: [nombres], ordre: ['H', 'Cl'] (méthode),
+             direct: true   bilan et indice en direct, réussite dès que c'est équilibré
+                            (« Afficher la réponse » proposé tout de suite : aucune erreur n'est validée) ;
+                     false  l'élève calcule et valide (bilan montré après « Valider »),
+             comptes: true  nombre d'atomes écrit sous chaque formule (avec le calcul),
+             q, bravo (explication ajoutée à la solution), dessins, memoire } */
+  function partieEquilibrer(cfg) {
+    const R = cfg.r, P = cfg.p, nbEsp = R.length + P.length;
+    return {
+      type: 'perso', q: cfg.q, aide: !!cfg.direct,
+      solution: `<p class="er-eq">${equationHTML(R, P, cfg.solution)}</p>${cfg.bravo ? `<p>${cfg.bravo}</p>` : ''}`,
+      monter(zone, api) {
+        const mem = cfg.memoire || {};
+        const box = creer('div', null, '<div data-c="switch"></div><div data-c="r"></div><div data-c="bilan"></div><div data-c="guide"></div>');
+        zone.appendChild(box);
+        const $ = a => box.querySelector(`[data-c="${a}"]`);
+        const dessins = dessinsDepart(cfg, mem);
+        let fini = false, act = null;
+        const r = new Reaction($('r'), {
+          reactifs: R, produits: P, dessins, comptes: cfg.comptes !== false, detail: true,
+          coefs: nombresValables(mem.c, nbEsp, 30) ? mem.c : null,
+          onChange: c => {
+            mem.c = c; mem.v = 0;
+            if (cfg.direct) maj();
+            else { $('bilan').innerHTML = ''; api.effacer(); }
+          },
+        });
+        $('switch').replaceWith(interrupteur(dessins, b => { mem.d = b ? 1 : 0; r.options({ dessins: b }); }));
+        // réaction équilibrée (ou réponse affichée) : nombres figés, bilan final
+        function fermer() {
+          fini = true;
+          r.activer(false);
+          $('guide').innerHTML = '';
+          $('bilan').innerHTML = bilanHTML(r.bilan());
+          if (act) act.remove();
+        }
+        // mode direct : bilan et indice à chaque réglage
+        function maj() {
+          if (fini || api.fini()) return;
+          $('bilan').innerHTML = bilanHTML(r.bilan());
+          const ind = indice(R, P, r.coefs, cfg.ordre);
+          if (ind.ok) { fermer(); api.reussi(); return; }
+          $('guide').innerHTML = `<p class="er-guide">${ind.html}</p>`;
+        }
+        // mode « Valider » : bilan et indice après chaque essai
+        function valider() {
+          if (fini || api.fini()) return;
+          mem.v = 1;
+          $('bilan').innerHTML = bilanHTML(r.bilan());
+          const ind = indice(R, P, r.coefs, cfg.ordre);
+          if (ind.ok) { fermer(); api.reussi(); return; }
+          secouer(r.el);
+          api.erreur(ind.html);
+        }
+        if (!cfg.direct) {
+          act = boutonValider(zone);
+          act.querySelector('button').onclick = valider;
+        }
+        if (cfg.direct) maj();
+        else if (mem.v) valider();                            // retour du module 2 : réponse déjà validée
+        return { montrer() { if (!fini) r.fixer(cfg.solution); fermer(); } };
+      },
+    };
+  }
+
   /* ---------- Plan de l'application et navigation (voir assets/sommaire.js) ---------- */
   const PLAN = [
     { n: 1, titre: 'Comment équilibrer une réaction', desc: 'Conservation des atomes, nombres stœchiométriques, la méthode sur trois réactions', fiche: 'fiche_1',
       parties: [{ nom: 'Comment équilibrer', cours: 'module_1' }] },
     { n: 2, titre: 'Compter les atomes', desc: 'Indices, nombre stœchiométrique, parenthèses comme dans Cu(OH)<sub>2</sub>', fiche: 'fiche_2',
-      parties: [{ nom: 'Compter les atomes', cours: 'module_2', noms: { cours: 'Règles et questions' } }] },
+      parties: [{ nom: 'Compter les atomes', cours: 'module_2' }] },
     { n: 3, titre: 'Entraînement : réactions faciles', desc: '10 réactions de difficulté croissante, notées sur 20',
       parties: [{ nom: 'Réactions faciles', entrainement: 'module_3' }] },
     { n: 4, titre: 'Entraînement : réactions moins faciles', desc: 'Combustions, grands nombres stœchiométriques, parenthèses, notées sur 20',
@@ -490,5 +747,6 @@
   window.ER = {
     ELEMENTS, analyser, nb, formuleHTML, molecule, boules, bouleHTML, selecteur, Reaction, bilan, verifier, bilanHTML,
     equationHTML, melanger, detailler, calculHTML, entrainement, menu, accueil, PLAN, confettis, interrupteur, Comptage, indice,
+    diagComptage, partieCompter, partieRegler, partieEquilibrer,
   };
 })();
