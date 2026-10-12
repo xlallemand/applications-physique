@@ -12,8 +12,8 @@ Ce document garde les choix, les méthodes et l'état d'avancement pour reprendr
 |---|---|
 | 1. Étude des possibilités (§2 à §4) | faite ; montage **C** et outil **Python** validés par l'enseignant |
 | 2. Premier essai léger avec `conversions/` (sans outil automatique) | fait : `conversions-essai/`, testé sur un Moodle 4.5 local (§7) |
-| 3. Validation de l'import sur Éléa par l'enseignant | **en attente** (procédure : `conversions-essai/PROCEDURE.md`) |
-| 4. Outil local automatisé, autres applications | à faire après l'étape 3 (§8) |
+| 3. Validation de l'import sur Éléa par l'enseignant | **validée** (12/10/2026) : restauration du `.mbz` réussie, notes remontées dans Éléa |
+| 4. Outil local automatisé, autres applications | à lancer (§8) |
 
 ## 2. Ce qu'Éléa permet à un enseignant
 
@@ -125,7 +125,7 @@ Remonter l'environnement de test (session Claude) :
 - restauration par l'interface : elle passe en tâche de fond, la terminer avec `php admin/cli/adhoc_task.php --execute` ;
 - Playwright : `NODE_PATH=$(npm root -g) node …` (Chromium préinstallé).
 
-## 8. Suite prévue (après validation sur Éléa)
+## 8. Suite prévue
 
 Outil local `python3 Elea27/generer.py <application>` :
 
