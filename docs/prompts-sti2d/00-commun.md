@@ -10,6 +10,7 @@ Ce fichier est lu au début de chaque session qui fabrique l'application d'un ch
   - PDF : lis-le avec `Read` et `pages` ; c'est le rendu exact, notes manuscrites comprises.
   - `.docx` sans PDF complété : convertis-le d'abord (`soffice --headless --convert-to pdf --outdir <scratchpad> "<fichier.docx>"`), puis lis le PDF obtenu.
   - Pour un texte tapé seul (données, consignes), `pdftotext -layout` coûte bien moins cher.
+  - Page de correction **blanche dans le PDF** : la correction est une image EMF du `.docx` (cas du chapitre 14). Extrais-la avec `unzip -o "<docx>" 'word/media/*'`, puis convertis-la avec `soffice --headless --convert-to png <image>.emf`.
 - **Économie de tokens.** Le prompt du chapitre résume déjà le cours, les méthodes et les erreurs relevées dans les corrections : ne relis pas le cours en entier. Lis les **énoncés** (données exactes, figures à refaire en SVG) et les **corrections** (pour rédiger les corrections détaillées), une page à la fois, une seule fois, en notant ce dont tu as besoin. Ne relis une page de cours que pour vérifier un détail.
 - Quand une correction manuscrite contient une erreur relevée dans le prompt, utilise la valeur corrigée du prompt.
 
