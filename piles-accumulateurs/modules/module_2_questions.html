@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions sur la capacité et l'énergie — Chapitre 2 : Piles et accumulateurs</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pa2.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pa2.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : énergie disponible E = U × Q (4),
+   durée de fonctionnement et capacité (4), intensité totale de
+   plusieurs appareils (2).
+   Erreurs diagnostiquées : mAh non convertis, Wh et J confondus,
+   Q / I inversé.
+   ============================================================ */
+const { o, fq, fmt, fr, sci, hasard, melanger, proche, batterie } = PA2;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+
+/* ---------- Groupe 1 : énergie disponible ---------- */
+const G1 = [
+  function enWh() {
+    const [U, Q] = hasard([[1.55, 105], [1.5, 2400], [7.4, 900], [3.7, 2600], [1.2, 2000], [3.6, 3400]]);
+    return { theme: 'Énergie disponible', enonce: `<p>Une pile de tension nominale ${fmt(U)} V a une capacité de ${fmt(Q)} mAh.</p>`,
+      parties: [fq.nombre('Calcule l\'énergie disponible, en Wh (3 chiffres significatifs).', 'E =', U * Q / 1000, 'Wh', { rel: .01, signe: false, affiche: fmt(r3(U * Q / 1000)),
+        diag: v => proche(v, U * Q, .02) ? 'Convertis la capacité en Ah avant de multiplier (1 Ah = 1 000 mAh).' : proche(v, U * Q / 1000 * 3600, .02) ? 'C\'est en joules : avec Q en Ah, E est en Wh.' : 'E = U × Q, avec Q en Ah.',
+        solution: calc(`Q = ${fmt(Q)} mAh = ${fmt(Q / 1000)} Ah<br>E = U × Q = ${fmt(U)} V × ${fmt(Q / 1000)} Ah ≈ ${c(fmt(r3(U * Q / 1000)) + ' Wh')}`) })] };
+  },
+  function batterie12() {
+    const [U, Q] = hasard([[12, 80], [12, 120], [12, 75], [24, 50], [40, 40]]);
+    return { theme: 'Énergie disponible', enonce: batterie({ lignes: [`${Q} Ah · ${U} V`], aria: `Batterie marquée ${Q} Ah et ${U} V` }),
+      parties: [fq.nombre('Calcule l\'énergie disponible dans cette batterie.', 'E =', U * Q, 'Wh', { signe: false,
+        diag: v => proche(v, U * Q * 3600) ? 'Avec Q en Ah, E = U × Q est directement en Wh.' : proche(v, Q / U) || proche(v, U / Q) ? 'E = U × Q : on multiplie.' : 'E = U × Q.',
+        solution: calc(`E = U × Q = ${U} V × ${Q} Ah = ${c(fmt(U * Q) + ' Wh')}`) })] };
+  },
+  function enJoules() {
+    const [U, Q] = hasard([[1.5, 2.4], [3.7, 2.6], [12, 80], [1.2, 2]]);
+    const E = U * Q * 3600;
+    return { theme: 'Énergie en joules', enonce: `<p>Un accumulateur de ${fmt(U)} V a une capacité de ${fmt(Q)} Ah.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule l\'énergie disponible, en joules.', label: 'E =', valeur: E, unite: 'J', cs: 3, rel: .01,
+        diag: v => proche(v, U * Q, .02) ? 'C\'est en Wh : multiplie par 3 600 pour l\'avoir en joules.' : proche(v, U * Q * 60, .02) ? '1 h = 3 600 s (pas 60).' : 'E = U × Q avec Q en A·s (1 Ah = 3 600 A·s), ou E en Wh × 3 600.',
+        solution: calc(`E = ${fmt(U)} × ${fmt(Q)} = ${fmt(U * Q)} Wh = ${fmt(U * Q)} × 3 600 J ≈ ${c(sci(E, 3) + ' J')}`) }] };
+  },
+  function quelleUnite() {
+    return { theme: 'Unités', parties: [fq.choix('On calcule E = U × Q avec U en volts et Q en ampères-heures. L\'énergie obtenue est en :', [o('ok', 'wattheures (Wh)'), o('a', 'joules (J)'), o('b', 'ampères-heures (Ah)'), o('c', 'watts (W)')], 'ok',
+      { indices: { a: 'On obtient des joules avec Q en A·s (ampères-secondes).', b: 'Ah est l\'unité de la capacité.', c: 'Le watt est l\'unité de la puissance.' }, solution: '<p>V × A × h = W × h = Wh.</p>' })] };
+  },
+];
+
+/* ---------- Groupe 2 : capacité et durée ---------- */
+const G2 = [
+  function duree() {
+    const [Q, I] = hasard([[2600, 30], [2600, 2600], [2400, 200], [1200, 50], [3000, 250], [800, 40]]);
+    return { theme: 'Durée de fonctionnement', enonce: `<p>Une pile de capacité ${fmt(Q)} mAh alimente un appareil qui consomme ${I} mA.</p>`,
+      parties: [fq.nombre('Pendant combien de temps fonctionne-t-il (3 chiffres significatifs) ?', 'Δt =', Q / I, 'h', { rel: .01, signe: false, affiche: fmt(r3(Q / I)),
+        diag: v => proche(v, I / Q, .02) ? 'Rapport inversé : Δt = Q / I.' : proche(v, Q * I, .02) ? 'On divise : Δt = Q / I.' : 'Δt = Q / I.',
+        solution: calc(`Q = I × Δt donc Δt = ${fr('Q', 'I')} = ${fr(fmt(Q) + ' mAh', I + ' mA')} ≈ ${c(fmt(r3(Q / I)) + ' h')}`) })] };
+  },
+  function dureeUnites() {
+    const [Q, I] = hasard([[2.4, 300], [1.5, 250], [3.6, 450], [0.9, 150], [80, 11200]]);
+    const ImA = I, IA = I / 1000;
+    return { theme: 'Durée de fonctionnement', enonce: `<p>Une batterie de capacité ${fmt(Q)} Ah alimente un appareil qui consomme ${Q >= 80 ? fmt(IA) + ' A' : ImA + ' mA'}.</p>`,
+      parties: [fq.nombre('Pendant combien de temps fonctionne-t-il (3 chiffres significatifs) ?', 'Δt =', Q / IA, 'h', { rel: .01, signe: false, affiche: fmt(r3(Q / IA)),
+        diag: v => proche(v, Q / ImA, .02) ? `Convertis : ${ImA} mA = ${fmt(IA)} A (ou ${fmt(Q)} Ah = ${fmt(Q * 1000)} mAh).` : proche(v, IA / Q, .02) ? 'Rapport inversé : Δt = Q / I.' : 'Δt = Q / I, avec des unités qui vont ensemble.',
+        solution: calc(`Δt = ${fr(fmt(Q) + ' Ah', fmt(IA) + ' A')} ≈ ${c(fmt(r3(Q / IA)) + ' h')}`) })] };
+  },
+  function capacite() {
+    const [I, t] = hasard([[2, 5], [0.5, 8], [4, 12], [1.5, 6], [0.2, 10]]);
+    return { theme: 'Capacité', enonce: `<p>Une batterie débite ${fmt(I)} A pendant ${t} h avant d'être déchargée.</p>`,
+      parties: [fq.nombre('Quelle est sa capacité ?', 'Q =', I * t, 'Ah', { signe: false, diag: v => proche(v, I / t) || proche(v, t / I) ? 'Q = I × Δt : on multiplie.' : 'Q = I × Δt.', solution: calc(`Q = I × Δt = ${fmt(I)} A × ${t} h = ${c(fmt(I * t) + ' Ah')}`) })] };
+  },
+  function intensite() {
+    const [Q, t] = hasard([[2400, 12], [60, 10], [1500, 30], [80, 16]]);
+    const u = Q > 100 ? 'mAh' : 'Ah', ui = Q > 100 ? 'mA' : 'A';
+    return { theme: 'Intensité', enonce: `<p>On veut qu'une batterie de ${fmt(Q)} ${u} dure ${t} h.</p>`,
+      parties: [fq.nombre('Quelle intensité moyenne peut-elle débiter ?', 'I =', Q / t, ui, { signe: false, rel: .01,
+        diag: v => proche(v, Q * t) ? 'Q = I × Δt donc I = Q / Δt : on divise.' : proche(v, t / Q, .02) ? 'Rapport inversé : I = Q / Δt.' : 'I = Q / Δt.', solution: calc(`I = ${fr('Q', 'Δt')} = ${fr(fmt(Q) + ' ' + u, t + ' h')} = ${c(fmt(r3(Q / t)) + ' ' + ui)}`) })] };
+  },
+];
+
+/* ---------- Groupe 3 : plusieurs appareils ---------- */
+const APPAREILS = [['chauffage', 1.3], ['frigo', 0.6], ['pompe à eau', 1.5], ['téléviseur', 3.9], ['éclairage', 3.8], ['alarme gaz', 0.085], ['radio', 0.4]];
+const G3 = [
+  function somme() {
+    const l = melanger(APPAREILS).slice(0, 3), I = l.reduce((s, x) => s + x[1], 0);
+    return { theme: 'Plusieurs appareils', enonce: `<p>Fonctionnent en même temps : ${l.map(x => `${x[0]} (${fmt(x[1])} A)`).join(', ')}.</p>`,
+      parties: [fq.nombre('Quelle intensité totale la batterie débite-t-elle ?', 'I =', I, 'A', { signe: false, rel: .005, diag: () => 'Les intensités s\'additionnent.', solution: calc(`I = ${l.map(x => fmt(x[1])).join(' + ')} = ${c(fmt(+I.toFixed(3)) + ' A')}`) })] };
+  },
+  function sommeDuree() {
+    const l = melanger(APPAREILS).slice(0, 2), I = l.reduce((s, x) => s + x[1], 0), Q = hasard([60, 80, 100, 120]);
+    return { theme: 'Plusieurs appareils', enonce: `<p>Une batterie de ${Q} Ah alimente en même temps : ${l.map(x => `${x[0]} (${fmt(x[1])} A)`).join(' et ')}.</p>`,
+      parties: [fq.nombre('Combien de temps peut-elle les alimenter (3 chiffres significatifs) ?', 'Δt =', Q / I, 'h', { signe: false, rel: .01, affiche: fmt(r3(Q / I)),
+        diag: v => proche(v, Q / l[0][1], .02) || proche(v, Q / l[1][1], .02) ? 'Les deux appareils fonctionnent en même temps : additionne leurs intensités.' : proche(v, I / Q, .02) ? 'Rapport inversé : Δt = Q / I.' : 'I = somme des intensités, puis Δt = Q / I.',
+        solution: calc(`I = ${l.map(x => fmt(x[1])).join(' + ')} = ${fmt(+I.toFixed(3))} A<br>Δt = ${fr(Q + ' Ah', fmt(+I.toFixed(3)) + ' A')} ≈ ${c(fmt(r3(Q / I)) + ' h')}`) })] };
+  },
+];
+
+// tirage : 4 + 4 + 2 questions
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  return pris(G1, 4).concat(pris(G2, 4), pris(G3, 2));
+}
+
+PA2.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Capacité et énergie disponible',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : énergie disponible en Wh et en J, durée de fonctionnement, capacité, plusieurs appareils sur la même batterie.</p>',
+  questions: tirage,
+  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3_cours.html', label: 'Module 3 : énergies massique et volumique →' },
+});
+PA2.menu('module_2_questions');
+</script>
+</body>
+</html>

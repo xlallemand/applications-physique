@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : pile ou accumulateur — Chapitre 2 : Piles et accumulateurs</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pa2.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="pa2.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">Pile ou accumulateur</h2>
+    <p class="er-contexte">Une pile et un accumulateur convertissent de l'énergie <b>chimique</b> en énergie <b>électrique</b>. Tu vas voir ce qui les distingue (la <b>réversibilité</b>), puis lire leurs caractéristiques : <b>tension à vide</b> et <b>capacité</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Chaîne de conversion à compléter par glisser-déposer (partie
+   'schema' du moteur PA2, utilisée ici comme outil 'perso').
+   ============================================================ */
+const { fmt, hasard, melanger, exemple } = COURS;
+const { chaine, conv, slot, proche, batterie, tableauTechnos, TECHNOS } = PA2;
+const c = h => `<span class="c">${h}</span>`;
+const etiq = (id, label, cible, indice) => ({ id, label, cible, indice });
+const glisser = (q, schema, etiquettes, solution, titrePalette) => ({ type: 'perso', q, solution, etiquettes,
+  monter: (zone, api) => PA2.PARTIES.schema(zone, { schema, etiquettes, titrePalette }, api) });
+const QCM = (titre, q, options, bonne, indices, solution) => ({ titre, parties: [{ type: 'choix', q, options, bonne, indices, solution, melanger: false, indice: 'Relis le cours et le tableau des technologies.' }] });
+
+// piles et accumulateurs de la vie courante
+const OBJETS = [
+  { nom: 'une pile alcaline AA (LR6)', acc: false }, { nom: 'une pile bouton de montre', acc: false }, { nom: 'une pile plate 4,5 V', acc: false },
+  { nom: 'la batterie d\'un téléphone', acc: true }, { nom: 'la batterie d\'une voiture', acc: true }, { nom: 'la batterie d\'un vélo électrique', acc: true },
+  { nom: 'la batterie d\'un ordinateur portable', acc: true },
+];
+
+/* ---------- 1. La conversion d'énergie ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Une pile convertit de l\'énergie chimique');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Dans une pile, des <b>espèces chimiques</b> réagissent : leur énergie <b>chimique</b> est convertie en énergie <b>électrique</b>, utilisée par un appareil (un moteur, une lampe…).</p>
+      <div class="cle">${chaine(['espèces chimiques', { fl: 'énergie chimique' }, 'pile', { fl: 'énergie électrique' }, 'moteur'], 'Espèces chimiques, énergie chimique, pile, énergie électrique, moteur')}</div>
+    </div>
+    ${exemple(`<p>Comme tout convertisseur, la pile chauffe un peu : une partie de l'énergie est perdue sous forme thermique.</p>
+      ${conv({ appareil: 'pile', a: { f: 'énergie chimique' }, u: { f: 'énergie électrique' }, p: { f: 'énergie thermique' } })}`)}`);
+  const intrus = hasard(['énergie mécanique', 'énergie rayonnante', 'énergie nucléaire']);
+  c_.aToi(carte, [
+    { titre: 'Compléter la chaîne', parties: [glisser('Place les deux formes d\'énergie sur la chaîne (une étiquette est en trop).',
+      chaine(['espèces chimiques', { fl: slot('a') }, 'pile', { fl: slot('b') }, 'lampe'], 'Chaîne à compléter : espèces chimiques, pile, lampe'),
+      [etiq('a', 'énergie chimique', 'a', 'Les espèces chimiques stockent de l\'énergie chimique.'), etiq('b', 'énergie électrique', 'b', 'La pile alimente la lampe par un courant électrique.'),
+        etiq('x', intrus, null, `Il n'y a pas d'${intrus} entre les espèces chimiques et la lampe.`)],
+      '<p>Espèces chimiques → énergie chimique → pile → énergie électrique → lampe.</p>', 'Formes d\'énergie')] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Pile ou accumulateur ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Pile ou accumulateur : la réversibilité');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Pile.</b> Une pile <b>n'est pas réversible</b> : quand ses réactifs sont épuisés, elle est usée (on la recycle).</p></div>
+      <div class="cle"><p><b class="cle-titre">Accumulateur.</b> Un accumulateur <b>est réversible</b> : on peut le <b>recharger</b>. Pendant la charge, il convertit l'énergie électrique en énergie chimique ; pendant la décharge, l'énergie chimique en énergie électrique.</p></div>
+      <p>Une « batterie » est en général un ensemble d'accumulateurs.</p>
+    </div>
+    ${exemple(`<p>La batterie d'un téléphone se recharge : c'est un <b>accumulateur</b> (lithium-ion).</p>
+      ${chaine(['réseau électrique', { fl: 'énergie électrique' }, 'accumulateur (charge)', { fl: 'énergie chimique' }, 'stockée'], 'Charge : énergie électrique convertie en énergie chimique')}`)}`);
+  const objs = melanger(OBJETS).slice(0, 3);
+  const PA = [{ id: 'p', label: 'une pile' }, { id: 'a', label: 'un accumulateur' }];
+  c_.aToi(carte, objs.map((ob, k) => QCM(k ? null : 'Pile ou accumulateur ?', `${ob.nom.charAt(0).toUpperCase() + ob.nom.slice(1)} est :`, PA, ob.acc ? 'a' : 'p',
+    { p: 'Elle se recharge : elle est réversible.', a: 'Elle ne se recharge pas : quand elle est usée, on la recycle.' },
+    `<p>${ob.nom.charAt(0).toUpperCase() + ob.nom.slice(1)} ${ob.acc ? 'se recharge : c\'est un <b>accumulateur</b>' : 'ne se recharge pas : c\'est une <b>pile</b>'}.</p>`)).concat([
+    QCM('Pendant la recharge', 'Pendant la recharge d\'un accumulateur, quelle conversion a lieu ?', [{ id: 'ok', label: 'énergie électrique → énergie chimique' }, { id: 'a', label: 'énergie chimique → énergie électrique' }, { id: 'b', label: 'énergie électrique → énergie thermique seulement' }], 'ok',
+      { a: 'Ça, c\'est la décharge (quand l\'accumulateur alimente un appareil).', b: 'L\'accumulateur chauffe un peu, mais il stocke surtout l\'énergie.' }, '<p>À la recharge, l\'énergie électrique est stockée sous forme chimique.</p>'),
+  ]));
+  return carte;
+}
+
+/* ---------- 3. Tension à vide et capacité ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Tension à vide et capacité');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Force électromotrice.</b> La f.é.m. d'une pile est sa <b>tension nominale</b>, c'est-à-dire sa <b>tension à vide</b> : la tension entre ses bornes quand rien n'est branché.</p></div>
+      <div class="cle"><p><b class="cle-titre">Capacité.</b> La capacité Q est la <b>quantité d'électricité</b> que peut fournir la pile. Elle s'exprime en ampères-heures (<b>Ah</b>) ou en milliampères-heures (<b>mAh</b>) : 1 Ah = 1 000 mAh.</p></div>
+    </div>
+    ${exemple(`${batterie({ lignes: ['Li-ion', '3,7 V · 2 600 mAh'], aria: 'Accumulateur Li-ion marqué 3,7 V et 2 600 mAh' })}
+      <p>Tension à vide : U = 3,7 V ; capacité : Q = 2 600 mAh = 2,6 Ah.</p>`)}`);
+  const [U, Q] = hasard([[1.5, 2400], [1.2, 2000], [3.6, 3400], [7.4, 900], [1.55, 105]]);
+  const Qa = hasard([800, 1500, 2600, 4500]);
+  c_.aToi(carte, [
+    { titre: 'Lire une étiquette', enonce: batterie({ lignes: [`${fmt(U)} V · ${fmt(Q)} mAh`], aria: `Pile marquée ${fmt(U)} V et ${fmt(Q)} mAh` }),
+      parties: [{ type: 'champs', q: 'Quelles sont la tension à vide et la capacité ?', champs: [{ label: 'U =', valeur: U, unite: 'V', signe: false }, { label: 'Q =', valeur: Q, unite: 'mAh', signe: false }],
+        diag: vs => proche(vs[0], Q) ? 'Tu as inversé : la tension est en V, la capacité en mAh.' : 'La tension est en volts (V), la capacité en milliampères-heures (mAh).',
+        solution: `<p>U = ${fmt(U)} V (tension à vide) ; Q = ${fmt(Q)} mAh (capacité).</p>` }] },
+    { titre: 'Convertir une capacité', enonce: `<p>Une batterie a une capacité de ${fmt(Qa)} mAh.</p>`,
+      parties: [{ type: 'nombre', q: 'Convertis-la en ampères-heures.', label: 'Q =', valeur: Qa / 1000, unite: 'Ah', signe: false,
+        diag: v => proche(v, Qa * 1000) ? 'On divise par 1 000 : 1 Ah = 1 000 mAh.' : '1 Ah = 1 000 mAh.', solution: `<p class="crs-calc">Q = ${fmt(Qa)} mAh = ${fmt(Qa)} / 1 000 = ${c(fmt(Qa / 1000) + ' Ah')}</p>` }] },
+    { titre: 'Tension à vide', parties: [{ type: 'choix', q: 'La tension à vide d\'une pile se mesure :', melanger: false,
+      options: [{ id: 'ok', label: 'avec un voltmètre, quand rien n\'est branché sur la pile' }, { id: 'a', label: 'quand la pile alimente un moteur' }, { id: 'b', label: 'avec un ampèremètre' }], bonne: 'ok',
+      indices: { a: '« À vide » : rien n\'est branché sur la pile.', b: 'Une tension se mesure avec un voltmètre.' }, solution: '<p>« À vide » signifie que la pile ne débite pas : rien n\'est branché.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Les technologies d'accumulateurs ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. Les différentes technologies d\'accumulateurs');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Chaque technologie a ses caractéristiques : f.é.m. d'un élément, énergie massique, nombre de cycles de charge et de décharge.</p>
+      ${tableauTechnos(true)}
+    </div>
+    ${exemple('<p>Les voitures électriques utilisent des accumulateurs <b>Li-ion</b> : à masse égale, ils stockent le plus d\'énergie (énergie massique la plus grande).</p>')}`);
+  const T = TECHNOS.map(t => ({ id: t.nom, label: t.nom }));
+  c_.aToi(carte, [
+    QCM('La batterie d\'une voiture thermique', 'Quelle technologie équipe la batterie d\'une voiture thermique ?', T, 'Plomb-acide',
+      { 'Li-ion': 'Le Li-ion équipe les téléphones et les voitures électriques.', 'Ni-MH': 'Le Ni-MH équipe les voitures hybrides.', 'Ni-Cd': 'Le Ni-Cd est réservé à des usages industriels.' }, '<p>L\'accumulateur au <b>plomb</b> est le plus répandu : batteries des voitures thermiques.</p>'),
+    QCM('La plus grande f.é.m.', 'Quel élément a la plus grande force électromotrice ?', T, 'Li-ion', null, '<p>Li-ion : 3,6 V par élément (contre 2,1 V pour le plomb et 1,2 V pour les Ni-Cd et Ni-MH).</p>'),
+    QCM('Le plus de cycles', 'Quel accumulateur supporte le plus de cycles de charge ?', T, 'Ni-Cd', null, '<p>Ni-Cd : 2 000 cycles ; il est très fiable et a une longue durée de vie.</p>'),
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle">${chaine(['espèces chimiques', { fl: 'énergie chimique' }, 'pile', { fl: 'énergie électrique' }, 'appareil'])}</div>
+    <div class="cle"><p>Une <b>pile</b> n'est pas réversible ; un <b>accumulateur</b> est réversible (on peut le recharger).</p></div>
+    <div class="cle"><p><b>f.é.m.</b> = tension nominale = <b>tension à vide</b> (rien de branché). <b>Capacité</b> Q : quantité d'électricité que peut fournir la pile, en Ah ou mAh (1 Ah = 1 000 mAh).</p></div>
+    <div class="cle"><p>Technologies : plomb-acide (voitures), Ni-Cd (fiable, polluant), Ni-MH (portables, hybrides), Li-ion (électronique, voitures électriques).</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur les piles et accumulateurs →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2_cours.html">Module 2 : capacité et énergie</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
+PA2.menu('module_1_cours');
+</script>
+</body>
+</html>

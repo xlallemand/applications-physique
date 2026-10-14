@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : énergies massique et volumique — Chapitre 2 : Piles et accumulateurs</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pa2.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pa2.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS</span>
+    <h2 class="er-titre">Énergies massique et volumique</h2>
+    <p class="er-contexte">Pour comparer des batteries, on rapporte leur énergie à leur <b>masse</b> (énergie massique) ou à leur <b>volume</b> (énergie volumique). Tu peux calculer avec les unités, avec un <b>tableau de proportionnalité</b> ou avec la formule : choisis ta méthode.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Trois méthodes montrées par le professeur, au choix de l'élève :
+   l'analyse des unités, le tableau de proportionnalité (unités en
+   tête de ligne, produit en croix), la formule que l'on isole.
+   Le tableau à remplir est un outil 'perso' (PA2.partieTableau).
+   ============================================================ */
+const { fmt, hasard, exemple } = COURS;
+const { fr, proche, sci, partieTableau } = PA2;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+// tableau de proportionnalité écrit (exemples) : unités en tête de ligne
+const tab = (l1, l2) => `<div class="pa2-defile"><table class="pa2-prop-tab"><tr><th>${l1[0]}</th><td>${l1[1]}</td><td>${l1[2]}</td></tr><tr><th>${l2[0]}</th><td>${l2[1]}</td><td>${l2[2]}</td></tr></table></div>`;
+const OU = '<p class="pa2-ou">OU</p>';
+
+/* ---------- 1. L'énergie massique ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. L\'énergie massique');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>L'<b>énergie massique</b> est l'énergie contenue par unité de masse, c'est-à-dire par kilogramme :</p>
+      <div class="cle"><p class="crs-formule">E<sub>m</sub> = ${fr('E', 'm')}</p><p>E<sub>m</sub> en <b>Wh/kg</b> (Wh·kg<sup>−1</sup>), E en Wh, m en kg.</p></div>
+    </div>
+    ${exemple(`<p>Quelle énergie contient une pile de masse m = 20 g et d'énergie massique E<sub>m</sub> = 130 Wh·kg<sup>−1</sup> ? D'abord : m = 20 g = 0,020 kg.</p>
+      <p><b>Méthode 1 : les unités.</b> Wh/kg × kg = Wh, donc :</p><p class="crs-calc">E = 130 × 0,020 = <span class="c">2,6 Wh</span></p>
+      ${OU}<p><b>Méthode 2 : le tableau de proportionnalité.</b> 130 Wh pour 1 kg ; ? Wh pour 0,020 kg :</p>
+      ${tab(['Wh', '130', '?'], ['kg', '1', '0,020'])}<p class="crs-calc">? = ${fr('130 × 0,020', '1')} = <span class="c">2,6 Wh</span> (produit en croix)</p>
+      ${OU}<p><b>Méthode 3 : la formule.</b></p><p class="crs-calc">E<sub>m</sub> = ${fr('E', 'm')} donc E = E<sub>m</sub> × m = 130 Wh/kg × 0,020 kg = <span class="c">2,6 Wh</span></p>`)}
+    <div class="ph-lien-app"><p>Besoin de revoir les tableaux de proportionnalité ?</p><a class="btn-small" href="../../proportionnalite/index.html">Revois la proportionnalité →</a></div>`);
+  const [Em, mg] = hasard([[130, 20], [100, 45], [150, 30], [80, 25], [200, 40]]);
+  const [Em2, E2] = hasard([[50, 5000], [80, 5000], [40, 960], [120, 1800]]);
+  const m = mg / 1000;
+  c_.aToi(carte, [
+    { titre: 'Avec le tableau', enonce: `<p>Une pile de masse m = ${mg} g a une énergie massique E<sub>m</sub> = ${Em} Wh·kg<sup>−1</sup>. Quelle énergie contient-elle ?</p>`,
+      parties: [partieTableau({ lignes: [['Wh', { v: Em }, '?'], ['kg', 1, { v: m }]],
+          diag: vs => proche(vs[1], mg) ? `La masse doit être en kg : ${mg} g = ${fmt(m)} kg.` : proche(vs[0], m) || proche(vs[1], Em) ? 'Chaque nombre va dans la ligne de son unité : les Wh en haut, les kg en bas.' : '',
+          solution: `<p>${Em} Wh pour 1 kg, ? Wh pour ${fmt(m)} kg.</p>` }),
+        { type: 'nombre', q: 'Calcule la case « ? » (produit en croix).', label: 'E =', valeur: Em * m, unite: 'Wh', signe: false, rel: .01,
+          diag: v => proche(v, Em * mg) ? `La masse doit être en kg (${fmt(m)} kg).` : proche(v, Em / m, .02) ? 'Produit en croix : on multiplie les deux nombres de la diagonale, puis on divise par le troisième (1).' : `E = ${Em} × ${fmt(m)} / 1.`,
+          solution: `<p class="crs-calc">E = ${fr(`${Em} × ${fmt(m)}`, '1')} = ${c(fmt(r3(Em * m)) + ' Wh')}</p>` }] },
+    { titre: 'La masse nécessaire', enonce: `<p>On veut stocker E = ${fmt(E2)} Wh avec des accumulateurs d'énergie massique E<sub>m</sub> = ${Em2} Wh·kg<sup>−1</sup>.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle masse d\'accumulateurs faut-il ? (méthode au choix)', label: 'm =', valeur: E2 / Em2, unite: 'kg', signe: false, rel: .01,
+        diag: v => proche(v, E2 * Em2, .02) ? 'Tu as multiplié : m = E / E<sub>m</sub> (vérifie l\'unité : Wh × Wh/kg n\'est pas des kg).' : proche(v, Em2 / E2, .02) ? 'Rapport inversé : m = E / E<sub>m</sub>.' : 'E<sub>m</sub> = E / m donc m = E / E<sub>m</sub>.',
+        solution: `<p class="crs-calc">E<sub>m</sub> = ${fr('E', 'm')} donc m = ${fr('E', 'E<sub>m</sub>')} = ${fr(fmt(E2) + ' Wh', Em2 + ' Wh/kg')} = ${c(fmt(r3(E2 / Em2)) + ' kg')}</p>
+          <p>Avec le tableau : ${Em2} Wh pour 1 kg ; ${fmt(E2)} Wh pour m kg, donc m = ${fr(`${fmt(E2)} × 1`, Em2)}.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. L'énergie volumique ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. L\'énergie volumique');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">E<sub>V</sub> = ${fr('E', 'V')}</p><p>E<sub>V</sub> en <b>Wh/m<sup>3</sup></b> (Wh·m<sup>−3</sup>), E en Wh, V en m<sup>3</sup>.</p></div>
+    </div>
+    ${exemple(`<p>Quel volume doit faire une batterie d'énergie volumique 1,2 × 10<sup>5</sup> Wh·m<sup>−3</sup> pour stocker 4,0 kWh ?</p>
+      <p class="crs-calc">E = 4,0 kWh = 4,0 × 10<sup>3</sup> Wh<br>E<sub>V</sub> = ${fr('E', 'V')} donc V = ${fr('E', 'E<sub>V</sub>')} = ${fr('4,0 × 10<sup>3</sup> Wh', '1,2 × 10<sup>5</sup> Wh/m<sup>3</sup>')} ≈ <span class="c">3,3 × 10<sup>−2</sup> m<sup>3</sup></span> (33 L)</p>`)}`);
+  const [E, V] = hasard([[960, 0.0133], [1440, 0.0216], [500, 0.004], [2400, 0.02]]);
+  const [kWh, EV] = hasard([[4, 1.2e5], [6, 2e5], [10, 2.5e5], [3, 1e5]]);
+  c_.aToi(carte, [
+    { titre: 'Calculer une énergie volumique', enonce: `<p>Une batterie stocke ${fmt(E)} Wh dans un volume de ${fmt(V)} m<sup>3</sup>.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule son énergie volumique.', label: 'E<sub>V</sub> =', valeur: E / V, unite: 'Wh/m<sup>3</sup>', cs: 3, rel: .01,
+        diag: v => proche(v, V / E, .02) ? 'Rapport inversé : E<sub>V</sub> = E / V.' : proche(v, E * V, .02) ? 'On divise : E<sub>V</sub> = E / V.' : 'E<sub>V</sub> = E / V.',
+        solution: `<p class="crs-calc">E<sub>V</sub> = ${fr(fmt(E) + ' Wh', fmt(V) + ' m<sup>3</sup>')} ≈ ${c(sci(E / V, 3) + ' Wh/m<sup>3</sup>')}</p>` }] },
+    { titre: 'Calculer un volume', enonce: `<p>On veut stocker ${kWh} kWh avec une batterie d'énergie volumique ${sci(EV, 2)} Wh·m<sup>−3</sup>.</p>`,
+      parties: [{ type: 'sci', q: 'Quel volume faut-il ?', label: 'V =', valeur: kWh * 1000 / EV, unite: 'm<sup>3</sup>', cs: 2, rel: .02,
+        diag: v => proche(v, kWh / EV, .03) ? `Convertis l'énergie en Wh : ${kWh} kWh = ${fmt(kWh * 1000)} Wh.` : proche(v, EV / (kWh * 1000), .03) ? 'Rapport inversé : V = E / E<sub>V</sub>.' : 'V = E / E<sub>V</sub>, avec E en Wh.',
+        solution: `<p class="crs-calc">E = ${kWh} kWh = ${fmt(kWh * 1000)} Wh<br>V = ${fr('E', 'E<sub>V</sub>')} = ${fr(fmt(kWh * 1000) + ' Wh', sci(EV, 2) + ' Wh/m<sup>3</sup>')} = ${c(sci(kWh * 1000 / EV, 2) + ' m<sup>3</sup>')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Le volume d'un pavé ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Le volume d\'une batterie');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Une batterie a la forme d'un pavé : V = longueur × largeur × hauteur. Les dimensions sont souvent données en <b>mm</b> : on les convertit en <b>m</b> avant de multiplier, pour obtenir des m<sup>3</sup>.</p>
+      <div class="cle"><p>1 mm = 0,001 m &nbsp;·&nbsp; V = L × l × h, en m<sup>3</sup></p></div>
+    </div>
+    ${exemple(`<p>Batterie de 330 × 171 × 235,5 mm :</p>
+      <p class="crs-calc">V = 0,330 m × 0,171 m × 0,2355 m ≈ <span class="c">0,0133 m<sup>3</sup></span> (1,33 × 10<sup>−2</sup> m<sup>3</sup>)</p>`)}`);
+  const d = hasard([[513, 189, 223], [242, 175, 190], [278, 175, 190], [353, 175, 190]]), V = d.reduce((p, x) => p * x / 1000, 1);
+  c_.aToi(carte, [
+    { titre: 'À toi de calculer', enonce: `<p>Une batterie mesure ${d.join(' × ')} mm.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule son volume en m<sup>3</sup>.', label: 'V =', valeur: V, unite: 'm<sup>3</sup>', cs: 3, rel: .01,
+        diag: v => proche(v, V * 1e9, .02) ? 'Ce sont des mm<sup>3</sup> : convertis chaque dimension en mètres avant de multiplier.' : proche(v, V * 1e6, .02) ? 'Ce sont des cm<sup>3</sup> : convertis les dimensions en mètres.' : 'Convertis chaque dimension en m (÷ 1 000), puis multiplie.',
+        solution: `<p class="crs-calc">V = ${d.map(x => fmt(x / 1000)).join(' × ')} ≈ ${c(sci(V, 3) + ' m<sup>3</sup>')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Comparer des batteries ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. Comparer deux batteries');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Pour une même énergie, la batterie qui a la plus grande <b>énergie massique</b> est la plus <b>légère</b> ; celle qui a la plus grande <b>énergie volumique</b> est la moins <b>encombrante</b>.</p></div>
+    </div>
+    ${exemple('<p>Batterie 1 : 29,4 Wh/kg ; batterie 2 : 34,5 Wh/kg. À énergie égale, la batterie 2 est la plus légère.</p>')}`);
+  const [a, b] = hasard([[29.4, 34.5], [40, 25], [72, 60], [110, 150]]);
+  c_.aToi(carte, [
+    { titre: 'La plus légère', enonce: `<p>Accumulateur A : E<sub>m</sub> = ${fmt(a)} Wh/kg ; accumulateur B : E<sub>m</sub> = ${fmt(b)} Wh/kg.</p>`,
+      parties: [{ type: 'choix', q: 'Pour stocker la même énergie, lequel est le plus léger ?', melanger: false, options: [{ id: 'A', label: 'A' }, { id: 'B', label: 'B' }], bonne: a > b ? 'A' : 'B',
+        indice: 'Plus l\'énergie massique est grande, plus chaque kilogramme stocke d\'énergie : il en faut moins.', solution: `<p>${a > b ? 'A' : 'B'} : son énergie massique est la plus grande, il faut moins de kilogrammes pour la même énergie.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">E<sub>m</sub> = ${fr('E', 'm')} &nbsp;·&nbsp; E<sub>V</sub> = ${fr('E', 'V')}</p><p>E<sub>m</sub> en Wh/kg, E<sub>V</sub> en Wh/m<sup>3</sup>, E en Wh, m en kg, V en m<sup>3</sup>.</p></div>
+    <div class="cle"><p>Trois méthodes : les unités (Wh/kg × kg = Wh), le tableau de proportionnalité (unités en tête de ligne, produit en croix), la formule que l'on isole.</p></div>
+    <div class="cle"><p>Volume d'un pavé : dimensions converties en m, puis V = L × l × h.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur les énergies massique et volumique →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Module 4 : branchements</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
+PA2.menu('module_3_cours');
+</script>
+</body>
+</html>

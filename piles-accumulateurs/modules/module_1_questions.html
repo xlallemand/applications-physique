@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur les piles et accumulateurs — Chapitre 2 : Piles et accumulateurs</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pa2.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="pa2.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : pile ou accumulateur (3),
+   tension à vide et capacité (3), chaîne et schéma de conversion
+   (2), technologies d'accumulateurs (2).
+   Chaque fabrique renvoie une question différente à chaque appel.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, proche, chaine, conv, slot, batterie, TECHNOS } = PA2;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const etiq = (id, label, cible, indice) => ({ id, label, cible, indice });
+const maj = t => t.charAt(0).toUpperCase() + t.slice(1);
+
+const OBJETS = [
+  { nom: 'une pile alcaline AA (LR6)', acc: false }, { nom: 'une pile bouton de montre', acc: false }, { nom: 'une pile plate 4,5 V', acc: false },
+  { nom: 'la batterie d\'un téléphone', acc: true }, { nom: 'la batterie d\'une voiture', acc: true }, { nom: 'la batterie d\'un vélo électrique', acc: true },
+  { nom: 'la batterie d\'un ordinateur portable', acc: true }, { nom: 'la batterie d\'une perceuse sans fil', acc: true },
+];
+
+/* ---------- Groupe 1 : pile ou accumulateur ---------- */
+const G1 = [
+  function reconnaitre() {
+    const ob = hasard(OBJETS);
+    return { theme: 'Pile ou accumulateur ?', enonce: `<p>On s'intéresse à ${ob.nom}.</p>`,
+      parties: [fq.choix('S\'agit-il d\'une pile ou d\'un accumulateur ?', [o('p', 'une pile (non réversible)'), o('a', 'un accumulateur (réversible)')], ob.acc ? 'a' : 'p',
+        { melanger: false, indices: { p: 'Elle se recharge : elle est réversible.', a: 'Elle ne se recharge pas : quand elle est usée, on la recycle.' }, solution: `<p>${maj(ob.nom)} ${ob.acc ? 'se recharge : accumulateur' : 'ne se recharge pas : pile'}.</p>` })] };
+  },
+  function reversible() {
+    return { theme: 'Réversibilité', parties: [fq.choix('Un accumulateur est dit réversible car :', [o('ok', 'il peut être rechargé : il convertit aussi l\'énergie électrique en énergie chimique'), o('a', 'il ne perd aucune énergie'), o('b', 'on peut le brancher dans les deux sens'), o('c', 'il fournit du courant continu')], 'ok',
+      { indices: { a: 'Il y a toujours des pertes (énergie thermique).', b: 'Il a une borne + et une borne − : le sens compte.', c: 'Une pile aussi fournit du courant continu, et elle n\'est pas réversible.' }, solution: '<p>Réversible : la conversion peut se faire dans les deux sens (décharge et charge).</p>' })] };
+  },
+  function charge() {
+    const phase = hasard(['charge', 'décharge']);
+    return { theme: 'Charge et décharge', enonce: `<p>On s'intéresse à un accumulateur pendant sa <b>${phase}</b>.</p>`,
+      parties: [fq.choix('Quelle conversion d\'énergie a lieu ?', [o('ec', 'énergie électrique → énergie chimique'), o('ce', 'énergie chimique → énergie électrique'), o('et', 'énergie électrique → énergie mécanique')], phase === 'charge' ? 'ec' : 'ce',
+        { melanger: false, indices: { ec: 'Pendant la décharge, l\'accumulateur alimente un appareil : il fournit de l\'énergie électrique.', ce: 'Pendant la charge, on lui fournit de l\'énergie électrique qu\'il stocke.', et: 'Un accumulateur stocke l\'énergie sous forme chimique.' },
+          solution: phase === 'charge' ? '<p>Charge : énergie électrique → énergie chimique (stockée).</p>' : '<p>Décharge : énergie chimique → énergie électrique.</p>' })] };
+  },
+  function pileUsee() {
+    return { theme: 'Pile', parties: [fq.choix('Que devient une pile quand ses réactifs sont épuisés ?', [o('ok', 'elle est usée : on la dépose dans un bac de recyclage'), o('a', 'on la recharge sur le secteur'), o('b', 'elle se recharge toute seule')], 'ok',
+      { indices: { a: 'Une pile n\'est pas réversible : on ne la recharge pas.', b: 'Une pile n\'est pas réversible.' }, solution: '<p>Une pile n\'est pas réversible : une fois usée, elle se recycle.</p>' })] };
+  },
+];
+
+/* ---------- Groupe 2 : tension à vide et capacité ---------- */
+const PILES = [[1.5, 2400], [1.2, 2000], [3.6, 3400], [7.4, 900], [1.55, 105], [3.7, 2600]];
+const G2 = [
+  function etiquette() {
+    const [U, Q] = hasard(PILES);
+    return { theme: 'Lire une étiquette', enonce: batterie({ lignes: [`${fmt(U)} V · ${fmt(Q)} mAh`], aria: `Pile marquée ${fmt(U)} V et ${fmt(Q)} mAh` }),
+      parties: [fq.nombre('a. Quelle est sa tension à vide ?', 'U =', U, 'V', { signe: false, diag: v => proche(v, Q) ? 'C\'est la capacité (en mAh). La tension est en volts.' : 'Lis la valeur en volts.', solution: `<p>U = ${fmt(U)} V.</p>` }),
+        fq.nombre('b. Quelle est sa capacité, en Ah ?', 'Q =', Q / 1000, 'Ah', { signe: false, diag: v => proche(v, Q) ? 'C\'est en mAh : divise par 1 000 pour l\'avoir en Ah.' : '1 Ah = 1 000 mAh.', solution: calc(`Q = ${fmt(Q)} mAh = ${c(fmt(Q / 1000) + ' Ah')}`) })] };
+  },
+  function definitionVide() {
+    return { theme: 'Tension à vide', parties: [fq.choix('La force électromotrice (f.é.m.) d\'une pile est :', [o('ok', 'sa tension à vide, quand rien n\'est branché'), o('a', 'la quantité d\'électricité qu\'elle peut fournir'), o('b', 'l\'intensité qu\'elle débite'), o('c', 'son énergie disponible')], 'ok',
+      { indices: { a: 'Ça, c\'est la capacité.', b: 'La f.é.m. est une tension (en V).', c: 'L\'énergie disponible est E = U × Q.' }, solution: '<p>f.é.m. = tension nominale = tension à vide.</p>' })] };
+  },
+  function definitionCapacite() {
+    return { theme: 'Capacité', parties: [fq.choix('La capacité d\'une pile s\'exprime en :', [o('ok', 'ampères-heures (Ah ou mAh)'), o('a', 'volts (V)'), o('b', 'wattheures (Wh)'), o('c', 'ampères (A)')], 'ok',
+      { indices: { a: 'Le volt est l\'unité de la tension.', b: 'Le wattheure est une unité d\'énergie.', c: 'L\'ampère est l\'unité de l\'intensité ; la capacité est une intensité multipliée par une durée.' }, solution: '<p>La capacité (quantité d\'électricité) s\'exprime en Ah ou mAh.</p>' })] };
+  },
+  function conversion() {
+    const sens = hasard(['mAh', 'Ah']), Q = sens === 'mAh' ? hasard([800, 1500, 2600, 4500, 105]) : hasard([0.9, 2.4, 1.2, 0.35]);
+    return { theme: 'Convertir une capacité', enonce: `<p>Une capacité vaut Q = ${fmt(Q)} ${sens}.</p>`,
+      parties: [fq.nombre(`Convertis-la en ${sens === 'mAh' ? 'Ah' : 'mAh'}.`, 'Q =', sens === 'mAh' ? Q / 1000 : Q * 1000, sens === 'mAh' ? 'Ah' : 'mAh', { signe: false,
+        diag: v => proche(v, sens === 'mAh' ? Q * 1000 : Q / 1000) ? 'Dans l\'autre sens : 1 Ah = 1 000 mAh.' : '1 Ah = 1 000 mAh.', solution: calc(`Q = ${fmt(Q)} ${sens} = ${c(fmt(sens === 'mAh' ? Q / 1000 : Q * 1000) + (sens === 'mAh' ? ' Ah' : ' mAh'))}`) })] };
+  },
+];
+
+/* ---------- Groupe 3 : chaîne et schéma de conversion ---------- */
+const G3 = [
+  function chaineAc() {
+    const app = hasard(['moteur', 'lampe', 'téléphone']), intrus = hasard(['énergie mécanique', 'énergie nucléaire', 'énergie rayonnante']);
+    return { theme: 'Chaîne de conversion', parties: [{ type: 'schema', q: 'Complète la chaîne de conversion d\'une pile (une étiquette est en trop).', titrePalette: 'Formes d\'énergie',
+      schema: chaine(['espèces chimiques', { fl: slot('a') }, 'pile', { fl: slot('b') }, app]),
+      etiquettes: [etiq('a', 'énergie chimique', 'a', 'Les espèces chimiques stockent de l\'énergie chimique.'), etiq('b', 'énergie électrique', 'b', 'La pile fournit un courant électrique.'), etiq('x', intrus, null, `Pas d'${intrus} ici.`)],
+      solution: `<p>Espèces chimiques → énergie chimique → pile → énergie électrique → ${app}.</p>` }] };
+  },
+  function schemaConv() {
+    return { theme: 'Schéma de conversion', parties: [{ type: 'schema', q: 'Place les formes d\'énergie sur le schéma de conversion d\'une pile (une étiquette est en trop).', titrePalette: 'Formes d\'énergie',
+      schema: conv({ appareil: 'pile', a: { f: slot('a') }, u: { f: slot('u') }, p: { f: slot('p') } }),
+      etiquettes: [etiq('a', 'énergie chimique', 'a', 'La pile reçoit l\'énergie chimique de ses réactifs.'), etiq('u', 'énergie électrique', 'u', 'La pile sert à fournir de l\'énergie électrique.'),
+        etiq('p', 'énergie thermique', 'p', 'L\'énergie perdue est la chaleur.'), etiq('x', 'énergie mécanique', null, 'Rien ne bouge dans une pile.')],
+      solution: '<p>Énergie chimique → pile → énergie électrique (utile) + énergie thermique (perdue).</p>' }] };
+  },
+];
+
+/* ---------- Groupe 4 : technologies d'accumulateurs ---------- */
+const T = TECHNOS.map(t => o(t.nom, t.nom));
+const G4 = [
+  function usage() {
+    const [q, bonne, sol] = hasard([
+      ['Quelle technologie équipe la batterie d\'une voiture thermique ?', 'Plomb-acide', 'L\'accumulateur au plomb équipe les voitures thermiques.'],
+      ['Quelle technologie équipe les téléphones et les ordinateurs portables ?', 'Li-ion', 'Le Li-ion domine l\'électronique portable.'],
+      ['Quelle technologie équipe les voitures hybrides ?', 'Ni-MH', 'Le Ni-MH est plus sûr que le lithium : il équipe les voitures hybrides.'],
+      ['Quel accumulateur n\'est plus vendu au grand public car il contient un métal polluant ?', 'Ni-Cd', 'Le cadmium est polluant et toxique.'],
+    ]);
+    return { theme: 'Technologies', parties: [fq.choix(q, T, bonne, { melanger: false, indice: 'Relis le tableau des technologies (doc. 2 de l\'activité 2).', solution: `<p>${sol}</p>` })] };
+  },
+  function fem() {
+    const t = hasard(TECHNOS);
+    return { theme: 'Technologies', enonce: `<p>Un accumulateur ${t.nom}.</p>`,
+      parties: [fq.nombre('Quelle est la f.é.m. d\'un élément ?', 'f.é.m. =', t.fem, 'V', { signe: false, diag: () => 'Plomb-acide : 2,1 V ; Ni-Cd et Ni-MH : 1,2 V ; Li-ion : 3,6 V.', solution: `<p>${t.nom} : ${fmt(t.fem)} V par élément.</p>` })] };
+  },
+  function massique() {
+    return { theme: 'Technologies', parties: [fq.choix('À masse égale, quelle technologie stocke le plus d\'énergie ?', T, 'Li-ion', { melanger: false, indice: 'Compare les énergies massiques (en Wh/kg).', solution: '<p>Li-ion : 150 à 250 Wh/kg, la plus grande énergie massique.</p>' })] };
+  },
+];
+
+// tirage : 3 + 3 + 2 + 2 questions
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  return pris(G1, 3).concat(pris(G2, 3), pris(G3, 2), pris(G4, 2));
+}
+
+PA2.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Pile ou accumulateur',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : reconnaître une pile ou un accumulateur, tension à vide et capacité, chaîne de conversion, technologies d\'accumulateurs.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2_cours.html', label: 'Module 2 : capacité et énergie →' },
+});
+PA2.menu('module_1_questions');
+</script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : capacité et énergie disponible — Chapitre 2 : Piles et accumulateurs</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pa2.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pa2.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Capacité et énergie disponible</h2>
+    <p class="er-contexte">La <b>capacité</b> d'une pile indique combien de temps elle peut débiter un courant ; avec sa tension, on calcule l'<b>énergie disponible</b>, en Wh ou en J.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Q = I × Δt (Q en Ah, I en A, Δt en h) ; E = U × Q (Q en Ah → E en Wh ;
+   Q en A·s → E en J). Erreurs diagnostiquées : mAh non convertis,
+   Wh et J confondus, Q / I inversé.
+   ============================================================ */
+const { fmt, hasard, exemple } = COURS;
+const { fr, proche } = PA2;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+
+/* ---------- 1. La capacité ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. La capacité : Q = I × Δt');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Une pile de capacité Q peut débiter une intensité I pendant une durée Δt :</p>
+      <div class="cle"><p class="crs-formule">Q = I × Δt &nbsp;&nbsp;donc&nbsp;&nbsp; Δt = ${fr('Q', 'I')}</p>
+        <p>Q en <b>Ah</b>, I en <b>A</b>, Δt en <b>h</b> (ou Q en mAh et I en mA).</p></div>
+    </div>
+    ${exemple(`<p>Une pile de capacité 2 600 mAh :</p>
+      <p class="crs-calc">débitée à 2 600 mA, elle se décharge en Δt = ${fr('2 600 mAh', '2 600 mA')} = <span class="c">1 h</span><br>
+      débitée à 30 mA, elle dure Δt = ${fr('2 600 mAh', '30 mA')} ≈ <span class="c">87 h</span></p>
+      <p>On peut aussi raisonner : « combien de fois 30 mA dans 2 600 mAh ? » → environ 87 fois, donc 87 heures.</p>`)}`);
+  const [Q1, I1] = hasard([[2400, 200], [1200, 50], [3000, 250], [800, 40], [2600, 130]]);
+  const [I2, t2] = hasard([[2, 5], [0.5, 8], [4, 12], [1.5, 6]]);
+  const [Q3, I3] = hasard([[2.4, 300], [1.5, 250], [3.6, 450], [0.9, 150]]);
+  c_.aToi(carte, [
+    { titre: 'Une durée de fonctionnement', enonce: `<p>Une pile de capacité ${fmt(Q1)} mAh alimente un appareil qui consomme ${I1} mA.</p>`,
+      parties: [{ type: 'nombre', q: 'Pendant combien de temps fonctionne-t-il ?', label: 'Δt =', valeur: Q1 / I1, rel: .01, unite: 'h', signe: false,
+        diag: v => proche(v, I1 / Q1, .02) ? 'Rapport inversé : Δt = Q / I.' : proche(v, Q1 * I1, .02) ? 'On divise : Δt = Q / I.' : 'Δt = Q / I : combien de fois I dans Q ?',
+        solution: `<p class="crs-calc">Δt = ${fr(fmt(Q1) + ' mAh', I1 + ' mA')} = ${c(fmt(r3(Q1 / I1)) + ' h')}</p>` }] },
+    { titre: 'Une capacité', enonce: `<p>Une batterie débite ${fmt(I2)} A pendant ${t2} h avant d'être déchargée.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est sa capacité ?', label: 'Q =', valeur: I2 * t2, unite: 'Ah', signe: false,
+        diag: v => proche(v, I2 / t2) || proche(v, t2 / I2) ? 'Q = I × Δt : on multiplie.' : 'Q = I × Δt.', solution: `<p class="crs-calc">Q = I × Δt = ${fmt(I2)} A × ${t2} h = ${c(fmt(I2 * t2) + ' Ah')}</p>` }] },
+    { titre: 'Des unités différentes', enonce: `<p>Un accumulateur de capacité ${fmt(Q3)} Ah alimente un appareil qui consomme ${I3} mA.</p>`,
+      parties: [{ type: 'nombre', q: 'Pendant combien de temps fonctionne-t-il ?', label: 'Δt =', valeur: Q3 * 1000 / I3, rel: .01, unite: 'h', signe: false,
+        diag: v => proche(v, Q3 / I3, .02) ? `Mets Q et I dans des unités qui vont ensemble : ${fmt(Q3)} Ah = ${fmt(Q3 * 1000)} mAh.` : proche(v, I3 / Q3 / 1000, .02) ? 'Rapport inversé : Δt = Q / I.' : 'Δt = Q / I, avec Q en mAh et I en mA (ou Q en Ah et I en A).',
+        solution: `<p class="crs-calc">Q = ${fmt(Q3)} Ah = ${fmt(Q3 * 1000)} mAh<br>Δt = ${fr(fmt(Q3 * 1000) + ' mAh', I3 + ' mA')} = ${c(fmt(r3(Q3 * 1000 / I3)) + ' h')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. L'énergie disponible ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. L\'énergie disponible : E = U × Q');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">E = U × Q</p>
+        <ul class="er-liste"><li>U en V et Q en <b>Ah</b> : E en <b>Wh</b> (V × A × h) ;</li><li>U en V et Q en <b>A·s</b> : E en <b>J</b> (V × A × s).</li></ul></div>
+      <p>Conversions : 1 Ah = 1 000 mAh ; 1 Wh = 3 600 J.</p>
+    </div>
+    ${exemple(`<p>Pile bouton : capacité 105 mAh, tension nominale 1,55 V.</p>
+      <p class="crs-calc">Q = 105 mAh = 0,105 Ah<br>E = U × Q = 1,55 V × 0,105 Ah ≈ <span class="c">0,163 Wh</span><br>E = 0,163 × 3 600 ≈ 586 J</p>`)}`);
+  const [U, Qm] = hasard([[1.5, 2400], [3.7, 2600], [1.2, 2000], [7.4, 900], [3.6, 3400]]);
+  const [U2, Q2] = hasard([[12, 80], [12, 120], [24, 50], [48, 20]]);
+  const Wh = hasard([2.4, 3.6, 10, 18.5]);
+  c_.aToi(carte, [
+    { titre: 'En wattheures', enonce: `<p>Un accumulateur de ${fmt(U)} V a une capacité de ${fmt(Qm)} mAh.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule l\'énergie disponible, en Wh.', label: 'E =', valeur: U * Qm / 1000, rel: .01, unite: 'Wh', signe: false,
+        diag: v => proche(v, U * Qm, .02) ? `Convertis d'abord la capacité en Ah : ${fmt(Qm)} mAh = ${fmt(Qm / 1000)} Ah.` : proche(v, Qm / 1000 / U, .02) || proche(v, U / (Qm / 1000), .02) ? 'E = U × Q : on multiplie.' : 'E = U × Q, avec Q en Ah.',
+        solution: `<p class="crs-calc">Q = ${fmt(Qm)} mAh = ${fmt(Qm / 1000)} Ah<br>E = ${fmt(U)} V × ${fmt(Qm / 1000)} Ah = ${c(fmt(r3(U * Qm / 1000)) + ' Wh')}</p>` }] },
+    { titre: 'Une batterie de voiture', enonce: `<p>Une batterie porte l'indication « ${U2} V – ${Q2} Ah ».</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule l\'énergie disponible.', label: 'E =', valeur: U2 * Q2, unite: 'Wh', signe: false,
+        diag: v => proche(v, U2 * Q2 * 3600) ? 'C\'est en joules : avec Q en Ah, E = U × Q est en Wh.' : 'E = U × Q.', solution: `<p class="crs-calc">E = U × Q = ${U2} V × ${Q2} Ah = ${c(fmt(U2 * Q2) + ' Wh')}</p>` }] },
+    { titre: 'Des wattheures aux joules', enonce: `<p>Une pile contient une énergie de ${fmt(Wh)} Wh.</p>`,
+      parties: [{ type: 'nombre', q: 'Convertis cette énergie en joules.', label: 'E =', valeur: Wh * 3600, unite: 'J', signe: false,
+        diag: v => proche(v, Wh / 3600) ? 'On multiplie par 3 600 : 1 Wh = 3 600 J.' : proche(v, Wh * 60) ? '1 h = 3 600 s, donc 1 Wh = 3 600 J.' : '1 Wh = 3 600 J.', solution: `<p class="crs-calc">E = ${fmt(Wh)} × 3 600 = ${c(fmt(Wh * 3600) + ' J')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Plusieurs appareils ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Plusieurs appareils en même temps');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Quand plusieurs appareils fonctionnent en même temps sur la même batterie, leurs intensités <b>s'additionnent</b> : I = I<sub>1</sub> + I<sub>2</sub> + …</p>
+    </div>
+    ${exemple(`<p>Un frigo (0,60 A), une pompe (1,5 A) et un téléviseur (3,9 A) fonctionnent sur une batterie de 60 Ah.</p>
+      <p class="crs-calc">I = 0,60 + 1,5 + 3,9 = 6,0 A<br>Δt = ${fr('Q', 'I')} = ${fr('60 Ah', '6,0 A')} = <span class="c">10 h</span></p>`)}`);
+  const app = hasard([[1.3, 0.6, 3.8], [0.6, 1.5, 0.085], [1.3, 3.9, 0.6], [2.5, 1.5, 4]]);
+  const I = app.reduce((s, x) => s + x, 0), Q = hasard([60, 80, 100]);
+  c_.aToi(carte, [
+    { titre: 'L\'intensité totale', enonce: `<p>Trois appareils fonctionnent ensemble : ${app.map(x => fmt(x) + ' A').join(', ')}.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle intensité la batterie débite-t-elle ?', label: 'I =', valeur: I, rel: .005, unite: 'A', signe: false,
+        diag: () => 'Les intensités s\'additionnent.', solution: `<p class="crs-calc">I = ${app.map(x => fmt(x)).join(' + ')} = ${c(fmt(+I.toFixed(3)) + ' A')}</p>` },
+      { type: 'nombre', q: `La batterie a une capacité de ${Q} Ah. Combien de temps peut-elle les alimenter ?`, label: 'Δt =', valeur: Q / I, rel: .01, unite: 'h', signe: false,
+        diag: v => proche(v, I / Q, .02) ? 'Rapport inversé : Δt = Q / I.' : 'Δt = Q / I.', solution: `<p class="crs-calc">Δt = ${fr(Q + ' Ah', fmt(+I.toFixed(3)) + ' A')} ≈ ${c(fmt(r3(Q / I)) + ' h')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">Q = I × Δt &nbsp;·&nbsp; Δt = ${fr('Q', 'I')}</p><p>Q en Ah, I en A, Δt en h (ou mAh, mA, h).</p></div>
+    <div class="cle"><p class="crs-formule">E = U × Q</p><p>Q en Ah → E en Wh ; Q en A·s → E en J. 1 Ah = 1 000 mAh ; 1 Wh = 3 600 J.</p></div>
+    <div class="cle"><p>Plusieurs appareils en même temps : les intensités s'additionnent.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur la capacité et l'énergie →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3_cours.html">Module 3 : énergies massique et volumique</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+PA2.menu('module_2_cours');
+</script>
+</body>
+</html>

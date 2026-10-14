@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : questions sur les branchements — Chapitre 2 : Piles et accumulateurs</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pa2.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pa2.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : série (3), dérivation (3),
+   type de branchement pour un besoin donné (2), assemblage de
+   cellules avec l'outil (2).
+   Erreurs diagnostiquées : série et dérivation inversées,
+   multiplication au lieu de division.
+   ============================================================ */
+const { o, fq, fmt, fr, hasard, melanger, proche, partieAssemblage } = PA2;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+
+/* ---------- Groupe 1 : en série ---------- */
+const G1 = [
+  function nombre() {
+    const [Ub, Uc] = hasard([[12, 2], [24, 2], [7.2, 1.2], [3.6, 1.2], [14.4, 3.6], [48, 2]]);
+    const n = Ub / Uc;
+    return { theme: 'En série', enonce: `<p>Une batterie de ${fmt(Ub)} V est formée de cellules de ${fmt(Uc)} V branchées en série.</p>`,
+      parties: [fq.nombre('Combien de cellules contient-elle ?', 'n =', Math.round(n), '', { signe: false, tol: .01,
+        diag: v => proche(v, Ub * Uc, .02) ? 'On divise : n = U<sub>batterie</sub> / U<sub>cellule</sub>.' : 'n = U<sub>batterie</sub> / U<sub>cellule</sub>.',
+        solution: calc(`n = ${fr(fmt(Ub) + ' V', fmt(Uc) + ' V')} = ${c(fmt(Math.round(n)) + ' cellules')}`) })] };
+  },
+  function tension() {
+    const [n, Uc] = hasard([[4, 1.5], [3, 3.6], [10, 1.2], [6, 2.1], [6, 2]]);
+    return { theme: 'En série', enonce: `<p>On branche ${n} cellules de ${fmt(Uc)} V en série.</p>`,
+      parties: [fq.nombre('Quelle tension obtient-on ?', 'U =', n * Uc, 'V', { signe: false, diag: v => proche(v, Uc) ? 'En série, les tensions s\'additionnent.' : `U = ${n} × ${fmt(Uc)} V.`, solution: calc(`U = ${n} × ${fmt(Uc)} V = ${c(fmt(n * Uc) + ' V')}`) })] };
+  },
+  function capaciteSerie() {
+    const [n, U, Q] = hasard([[2, 12, 80], [3, 1.5, 2.4], [4, 3.6, 2.5]]);
+    return { theme: 'En série', enonce: `<p>On branche en série ${n} accumulateurs identiques (${fmt(U)} V ; ${fmt(Q)} Ah).</p>`,
+      parties: [fq.nombre('Quelle est la capacité de l\'ensemble ?', 'Q =', Q, 'Ah', { signe: false, diag: v => proche(v, n * Q) ? 'En série, ce sont les tensions qui s\'additionnent ; la capacité ne change pas.' : 'En série, la capacité ne change pas.', solution: calc(`En série : U = ${n} × ${fmt(U)} = ${fmt(n * U)} V et ${c('Q = ' + fmt(Q) + ' Ah')} (inchangée)`) })] };
+  },
+];
+
+/* ---------- Groupe 2 : en dérivation ---------- */
+const G2 = [
+  function capacite() {
+    const [n, U, Q] = hasard([[2, 12, 80], [3, 12, 120], [2, 24, 50], [4, 3.6, 2.5]]);
+    return { theme: 'En dérivation', enonce: `<p>On branche en dérivation ${n} batteries identiques de ${fmt(U)} V et ${fmt(Q)} Ah.</p>`,
+      parties: [fq.nombre('Quelle est la capacité de l\'ensemble ?', 'Q =', n * Q, 'Ah', { signe: false, diag: v => proche(v, Q) ? 'En dérivation, les capacités s\'additionnent.' : `Q = ${n} × ${fmt(Q)} Ah.`, solution: calc(`Q = ${n} × ${fmt(Q)} Ah = ${c(fmt(n * Q) + ' Ah')}`) }),
+        fq.nombre('Quelle est sa tension ?', 'U =', U, 'V', { signe: false, diag: v => proche(v, n * U) ? 'En dérivation, la tension ne change pas.' : 'En dérivation, la tension est celle d\'une batterie.', solution: calc(`${c('U = ' + fmt(U) + ' V')} : en dérivation, la tension ne change pas.`) })] };
+  },
+  function intensites() {
+    const [I1, I2] = hasard([[2, 3], [1.5, 1.5], [4, 6]]);
+    return { theme: 'En dérivation', enonce: `<p>Deux batteries en dérivation alimentent un appareil : la première débite ${fmt(I1)} A, la seconde ${fmt(I2)} A.</p>`,
+      parties: [fq.nombre('Quelle intensité l\'appareil reçoit-il ?', 'I =', I1 + I2, 'A', { signe: false, diag: () => 'En dérivation, les intensités s\'additionnent.', solution: calc(`I = ${fmt(I1)} + ${fmt(I2)} = ${c(fmt(I1 + I2) + ' A')}`) })] };
+  },
+  function regle() {
+    return { theme: 'En dérivation', parties: [fq.choix('En dérivation (en parallèle), qu\'est-ce qui s\'additionne ?', [o('ok', 'les intensités et les capacités'), o('a', 'les tensions'), o('b', 'rien : tout reste identique')], 'ok',
+      { melanger: false, indices: { a: 'Les tensions s\'additionnent en série.', b: 'Avec deux batteries en dérivation, on peut débiter deux fois plus longtemps.' }, solution: '<p>En dérivation : les intensités et les capacités s\'additionnent ; la tension ne change pas.</p>' })] };
+  },
+];
+
+/* ---------- Groupe 3 : quel branchement pour quel besoin ? ---------- */
+const G3 = [
+  function plusDeTension() {
+    return { theme: 'Choisir un branchement', enonce: '<p>On dispose de plusieurs accumulateurs de 1,2 V et on veut alimenter un appareil sous 6 V.</p>',
+      parties: [fq.choix('Comment les brancher ?', [o('ok', 'en série : les tensions s\'additionnent'), o('a', 'en dérivation : les tensions s\'additionnent'), o('b', 'en dérivation : les capacités s\'additionnent')], 'ok',
+        { melanger: false, indices: { a: 'En dérivation, la tension ne change pas.', b: 'C\'est vrai, mais on a besoin d\'une tension plus grande, pas d\'une capacité plus grande.' }, solution: '<p>En série : 5 × 1,2 V = 6 V.</p>' })] };
+  },
+  function plusLongtemps() {
+    return { theme: 'Choisir un branchement', enonce: '<p>Une batterie de camping-car (12 V) ne tient pas une journée. On veut tenir plus longtemps, toujours sous 12 V.</p>',
+      parties: [fq.choix('Que faire ?', [o('ok', 'ajouter une deuxième batterie de 12 V en dérivation'), o('a', 'ajouter une deuxième batterie de 12 V en série'), o('b', 'remplacer la batterie par une pile')], 'ok',
+        { melanger: false, indices: { a: 'En série, on obtiendrait 24 V : trop pour les appareils.', b: 'Une pile ne se recharge pas et contient beaucoup moins d\'énergie.' }, solution: '<p>En dérivation, la tension reste 12 V et les capacités s\'additionnent : la durée de fonctionnement augmente.</p>' })] };
+  },
+];
+
+/* ---------- Groupe 4 : assemblage avec l'outil ---------- */
+const CIBLES = [
+  { U: 3.6, Q: 2.5, cible: { U: 10.8, Q: 2.5 } }, { U: 3.6, Q: 2.5, cible: { U: 7.2, Q: 7.5 } }, { U: 1.2, Q: 2, cible: { U: 4.8, Q: 4 } },
+  { U: 2, Q: 40, cible: { U: 12, Q: 80 } }, { U: 3.6, Q: 3, cible: { U: 14.4, Q: 6 } }, { U: 1.5, Q: 2.4, cible: { U: 4.5, Q: 4.8 } },
+];
+const G4 = melanger(CIBLES).map(a => function assembler() {
+  return { theme: 'Assembler des cellules', parties: [partieAssemblage(a)], bilan: `${fmt(a.cible.U / a.U)} cellules en série × ${fmt(a.cible.Q / a.Q)} branche${a.cible.Q / a.Q > 1 ? 's' : ''} = ${fmt(a.cible.U / a.U * a.cible.Q / a.Q)} cellules.` };
+});
+
+// tirage : 3 + 3 + 2 + 2 questions
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  return pris(G1, 3).concat(pris(G2, 3), pris(G3, 2), pris(G4, 2));
+}
+
+PA2.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 4 · QUESTIONS', titre: 'Branchements',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : cellules en série, batteries en dérivation, choix d\'un branchement, assemblage de cellules.</p>',
+  questions: tirage,
+  revoir: { href: 'module_4_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_5.html', label: 'Module 5 : exercices du manuel →' },
+});
+PA2.menu('module_4_questions');
+</script>
+</body>
+</html>
