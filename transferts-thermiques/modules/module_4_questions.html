@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : questions sur les parois composées — Chapitre 5 : Flux et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="tt.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="tt.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : résistance totale de 2 ou 3 couches
+   (5), flux à travers un mur isolé (2), épaisseur d'isolant à ajouter
+   pour atteindre une résistance donnée (2), double vitrage (1).
+   Les énoncés montrent le schéma de la paroi en couches (TT.paroi).
+   Erreurs diagnostiquées : épaisseurs non converties en m, résistances
+   multipliées, résistance d'une seule couche utilisée pour le flux,
+   résistance du mur oubliée dans l'épaisseur d'isolant.
+   ============================================================ */
+const { o, fq, fmt, fr, sci, cs, hasard, melanger, proche, paroiRemplie } = TT;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+const KW = 'K·W<sup>−1</sup>';
+const M = {
+  beton: ['béton', 'beton', 1.28], brique: ['brique', 'brique', 1.15], platre: ['plâtre', 'platre', 0.35], ba13: ['BA13', 'platre', 0.31],
+  laine: ['laine de verre', 'isolant', 0.04], poly: ['polystyrène', 'isolant', 0.03], fibre: ['fibre de bois', 'bois', 0.05], verre: ['verre', 'verre', 0.811], air: ['air', 'air', 0.025],
+};
+// couche : [clé du matériau, épaisseur, unité ('cm' ou 'mm')]
+const couche = ([k, e, u]) => ({ nom: M[k][0], motif: M[k][1], lam: M[k][2], e: `${fmt(e)} ${u}`, ev: u === 'cm' ? e / 100 : e / 1000 });
+const Rc = (x, S) => x.ev / (x.lam * S);
+// diagnostic d'une résistance totale fausse
+const dR = (v, cs_, S) => {
+  const Rs = cs_.map(x => Rc(x, S)), R = Rs.reduce((a, b) => a + b, 0);
+  if (cs_.some(x => proche(v, R + Rc(x, S) * 99, .03) || proche(v, R + Rc(x, S) * 999, .03))) return 'Une épaisseur n\'est pas en mètres : convertis chaque épaisseur (cm → m, mm → m).';
+  if (Rs.some(r => proche(v, r, .03))) return 'Il faut additionner les résistances de <b>toutes</b> les couches.';
+  if (proche(v, Rs.reduce((a, b) => a * b, 1), .03)) return 'Les résistances s\'additionnent.';
+  return 'Calcule R<sub>i</sub> = e<sub>i</sub> / (λ<sub>i</sub> × S) pour chaque couche (e en m), puis additionne.';
+};
+const schema = (cs_, S) => paroiRemplie({ couches: cs_, cotes: [{ nom: 'intérieur' }, { nom: 'extérieur' }], S });
+
+/* ---------- Groupe 1 : deux couches ---------- */
+const DEUX = [
+  [[['platre', 13, 'mm'], ['laine', 20, 'cm']], 70], [[['beton', 10, 'cm'], ['poly', 2, 'cm']], 10], [[['beton', 20, 'cm'], ['laine', 10, 'cm']], 12],
+  [[['brique', 20, 'cm'], ['poly', 8, 'cm']], 15], [[['ba13', 12.5, 'mm'], ['fibre', 10, 'cm']], 20],
+];
+const G1 = [
+  function deuxR() {
+    const [a, b] = hasard([[0.0156, 0.5], [0.013, 0.208], [5.3e-4, 0.071], [0.0078, 0.051]]);
+    return { theme: 'Résistance totale', enonce: `<p>Deux couches accolées ont des résistances thermiques R<sub>1</sub> = ${fmt(a)} ${KW} et R<sub>2</sub> = ${fmt(b)} ${KW}.</p>`,
+      parties: [fq.nombre('Quelle est la résistance thermique de la paroi (3 chiffres significatifs) ?', 'R =', a + b, KW, { signe: false, rel: .01, affiche: cs(a + b, 3),
+        diag: v => proche(v, a * b, .03) ? 'Les résistances de couches accolées s\'additionnent.' : 'R = R<sub>1</sub> + R<sub>2</sub>.', solution: calc(`R = ${fmt(a)} + ${fmt(b)} ≈ ${c(cs(a + b, 3) + ' ' + KW)}`) })] };
+  },
+  function deuxCouches() {
+    const [cc, S] = hasard(DEUX), cs_ = cc.map(couche), R = cs_.reduce((s, x) => s + Rc(x, S), 0);
+    return { theme: 'Résistance totale', enonce: `<p>Une paroi de ${fmt(S)} m<sup>2</sup> est formée de ${cs_.map(x => `${x.e} de ${x.nom} (λ = ${fmt(x.lam)} W·m<sup>−1</sup>·K<sup>−1</sup>)`).join(' et de ')}.</p>${schema(cs_, S)}`,
+      parties: [fq.nombre('Calcule la résistance thermique totale de la paroi (2 chiffres significatifs).', 'R =', R, KW, { signe: false, rel: .03, affiche: cs(R, 2), diag: v => dR(v, cs_, S),
+        solution: calc(cs_.map((x, i) => `R<sub>${i + 1}</sub> = ${fr(fmt(x.ev), fmt(x.lam) + ' × ' + fmt(S))} ≈ ${sci(Rc(x, S), 2)} ${KW}`).join('<br>') + `<br>R = R<sub>1</sub> + R<sub>2</sub> ≈ ${c(cs(R, 2) + ' ' + KW)}`) })] };
+  },
+  function plusIsolante() {
+    const [cc, S] = hasard(DEUX), cs_ = cc.map(couche), Rs = cs_.map(x => Rc(x, S)), k = Rs[0] > Rs[1] ? 0 : 1;
+    return { theme: 'Quelle couche isole ?', enonce: `<p>Une paroi de ${fmt(S)} m<sup>2</sup> : ${cs_.map(x => `${x.e} de ${x.nom} (λ = ${fmt(x.lam)})`).join(' et ')}.</p>${schema(cs_, S)}`,
+      parties: [fq.choix('Laquelle des deux couches a la plus grande résistance thermique ?', cs_.map((x, i) => o(String(i), `la couche de ${x.nom}`)), String(k),
+        { melanger: false, indice: 'Calcule R<sub>i</sub> = e<sub>i</sub> / (λ<sub>i</sub> × S) pour chaque couche, avec e en m.',
+          solution: `<p>${cs_.map((x, i) => `R<sub>${i + 1}</sub> ≈ ${sci(Rs[i], 2)} ${KW}`).join(' ; ')} : c'est la couche de ${cs_[k].nom} qui isole le plus.</p>` })] };
+  },
+];
+
+/* ---------- Groupe 2 : trois couches ---------- */
+const TROIS = [
+  [[['ba13', 12.5, 'mm'], ['poly', 10, 'cm'], ['brique', 20, 'cm']], 28.8], [[['platre', 13, 'mm'], ['laine', 12, 'cm'], ['beton', 18, 'cm']], 25],
+  [[['verre', 4, 'mm'], ['air', 16, 'mm'], ['verre', 4, 'mm']], 2], [[['ba13', 12.5, 'mm'], ['fibre', 14, 'cm'], ['brique', 20, 'cm']], 30],
+];
+const G2 = [
+  function troisCouches() {
+    const [cc, S] = hasard(TROIS), cs_ = cc.map(couche), R = cs_.reduce((s, x) => s + Rc(x, S), 0);
+    return { theme: 'Trois couches', enonce: `<p>Une paroi de ${fmt(S)} m<sup>2</sup> est formée de trois couches accolées (λ en W·m<sup>−1</sup>·K<sup>−1</sup>) :</p>${schema(cs_, S)}`,
+      parties: [fq.nombre('Calcule la résistance thermique totale (2 chiffres significatifs).', 'R =', R, KW, { signe: false, rel: .03, affiche: cs(R, 2), diag: v => dR(v, cs_, S),
+        solution: calc(cs_.map((x, i) => `R<sub>${i + 1}</sub> = ${fr(fmt(x.ev), fmt(x.lam) + ' × ' + fmt(S))} ≈ ${sci(Rc(x, S), 2)}`).join('<br>') + `<br>R = R<sub>1</sub> + R<sub>2</sub> + R<sub>3</sub> ≈ ${c(cs(R, 2) + ' ' + KW)}`) })] };
+  },
+  function troisR() {
+    const [x, y, z] = hasard([[0.002, 0.25, 0.012], [1.4e-3, 0.116, 6.04e-3], [0.0074, 0.24, 0.0074], [5.3e-4, 0.104, 0.0141]]);
+    return { theme: 'Trois couches', enonce: `<p>Trois couches accolées : R<sub>1</sub> = ${sci(x, 2)} ${KW} ; R<sub>2</sub> = ${fmt(y)} ${KW} ; R<sub>3</sub> = ${sci(z, 3)} ${KW}.</p>`,
+      parties: [fq.nombre('Calcule la résistance totale (2 chiffres significatifs).', 'R =', x + y + z, KW, { signe: false, rel: .03, affiche: cs(x + y + z, 2),
+        diag: v => proche(v, y, .02) ? 'Les petites résistances s\'ajoutent aussi.' : 'R = R<sub>1</sub> + R<sub>2</sub> + R<sub>3</sub> (attention aux puissances de 10).', solution: calc(`R = ${fmt(x)} + ${fmt(y)} + ${fmt(z)} ≈ ${c(cs(x + y + z, 2) + ' ' + KW)}`) })] };
+  },
+];
+
+/* ---------- Groupe 3 : flux à travers un mur isolé ---------- */
+const G3 = [
+  function flux() {
+    const [cc, S] = hasard(DEUX), cs_ = cc.map(couche), R = cs_.reduce((s, x) => s + Rc(x, S), 0);
+    const [ti, te] = hasard([[20, 8], [19, 5], [20, -2], [21, -5], [19, 2]]), dT = ti - te;
+    const cotes = [{ nom: 'intérieur', T: ti }, { nom: 'extérieur', T: te }];
+    return { theme: 'Flux à travers un mur isolé', enonce: `<p>Une paroi de ${fmt(S)} m<sup>2</sup> sépare l'intérieur (${ti} °C) de l'extérieur (${fmt(te)} °C) :</p>${paroiRemplie({ couches: cs_, cotes, S })}`,
+      parties: [fq.nombre('Calcule la résistance totale (3 chiffres significatifs).', 'R =', R, KW, { signe: false, rel: .01, affiche: cs(R, 3), diag: v => dR(v, cs_, S),
+          solution: calc(`R = ${cs_.map(x => sci(Rc(x, S), 3)).join(' + ')} ≈ ${c(cs(R, 3) + ' ' + KW)}`) }),
+        fq.nombre('Calcule le flux thermique (3 chiffres significatifs).', 'Φ =', dT / R, 'W', { signe: false, rel: .015, affiche: fmt(r3(dT / R)),
+          diag: v => cs_.some(x => proche(v, dT / Rc(x, S), .03)) ? 'Utilise la résistance <b>totale</b>.' : proche(v, Math.abs(ti + te) / R, .03) ? `ΔT = ${ti} − (${fmt(te)}) = ${dT} K.` : 'Φ = ΔT / R.',
+          solution: calc(`Φ = ${fr(dT, cs(R, 3))} ≈ ${c(fmt(r3(dT / R)) + ' W')}, de l'intérieur vers l'extérieur`) })] };
+  },
+  function energie() {
+    const [P, h] = hasard([[167, 0.5], [340, 2], [88, 24], [113, 10]]);
+    return { theme: 'Énergie perdue', enonce: `<p>Un flux de ${P} W traverse une paroi pendant ${fmt(h)} h.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule l\'énergie perdue, en joules (2 chiffres significatifs).', label: 'Q =', valeur: P * h * 3600, unite: 'J', cs: 2, rel: .05,
+        diag: v => proche(v, P * h, .03) ? 'La durée doit être en secondes : 1 h = 3 600 s.' : 'Q = Φ × Δt, Δt en s.', solution: calc(`Q = ${P} × ${fmt(h)} × 3 600 ≈ ${c(sci(P * h * 3600, 2) + ' J')}`) }] };
+  },
+];
+
+/* ---------- Groupe 4 : épaisseur d'isolant ---------- */
+const G4 = [
+  function epaisseur() {
+    const [Rv, Rb, l, S, nom] = hasard([[1, 0.02, 0.04, 5, 'laine de verre'], [0.6, 0.012, 0.03, 8, 'polystyrène'], [2, 0.05, 0.035, 4, 'laine de mouton'], [0.8, 0.016, 0.05, 10, 'fibre de bois'], [0.5, 0.0156, 0.04, 10, 'laine de verre']]);
+    const Ri = Rv - Rb, e = Ri * l * S;
+    return { theme: 'Épaisseur d\'isolant', enonce: `<p>Un mur de ${fmt(S)} m<sup>2</sup> a déjà une résistance de ${fmt(Rb)} ${KW}. On veut atteindre R = ${fmt(Rv)} ${KW} en ajoutant de la ${nom} (λ = ${fmt(l)} W·m<sup>−1</sup>·K<sup>−1</sup>).</p>`,
+      parties: [fq.nombre('Quelle résistance doit avoir la couche d\'isolant ?', 'R<sub>isolant</sub> =', Ri, KW, { signe: false, rel: .005,
+          diag: v => proche(v, Rv) ? 'Le mur a déjà une résistance : retire-la.' : proche(v, Rv + Rb) ? 'On soustrait.' : 'R = R<sub>mur</sub> + R<sub>isolant</sub>.', solution: calc(`R<sub>isolant</sub> = ${fmt(Rv)} − ${fmt(Rb)} = ${c(fmt(Ri) + ' ' + KW)}`) }),
+        fq.nombre('Quelle épaisseur d\'isolant faut-il, en cm (3 chiffres significatifs) ?', 'e =', e * 100, 'cm', { signe: false, rel: .01, affiche: fmt(r3(e * 100)),
+          diag: v => proche(v, e, .02) ? 'C\'est en mètres : convertis en cm.' : proche(v, Rv * l * S * 100, .02) ? 'Utilise R<sub>isolant</sub>, pas la résistance totale.' : proche(v, Ri / (l * S) * 100, .02) ? 'e = R × λ × S : on multiplie.' : 'e = R<sub>isolant</sub> × λ × S.',
+          solution: calc(`e = ${fmt(Ri)} × ${fmt(l)} × ${fmt(S)} ≈ ${fmt(r3(e))} m = ${c(fmt(r3(e * 100)) + ' cm')}`) })] };
+  },
+  function quelIsolant() {
+    return { theme: 'Épaisseur d\'isolant', parties: [fq.choix('Pour obtenir la même résistance thermique, quel isolant permet la couche la plus mince ?', [o('poly', 'le polystyrène extrudé (λ = 0,030)'), o('laine', 'la laine de verre (λ = 0,040)'), o('fibre', 'la fibre de bois (λ = 0,050)')], 'poly',
+      { melanger: false, indice: 'e = R × λ × S : à R et S égales, l\'épaisseur est proportionnelle à λ.', solution: '<p>e = R × λ × S : le plus petit λ donne la plus petite épaisseur, donc le polystyrène extrudé.</p>' })] };
+  },
+];
+
+/* ---------- Groupe 5 : double vitrage ---------- */
+const G5 = [
+  function vitrage() {
+    const ea = hasard([12, 16, 20]), Rv = .004 / (.811 * 2), Ra = ea / 1000 / (.025 * 2), R = 2 * Rv + Ra;
+    const cs_ = [couche(['verre', 4, 'mm']), couche(['air', ea, 'mm']), couche(['verre', 4, 'mm'])];
+    return { theme: 'Double vitrage', enonce: `<p>Un double vitrage de 2,0 m<sup>2</sup> (λ en W·m<sup>−1</sup>·K<sup>−1</sup>) :</p>${schema(cs_, 2)}`,
+      parties: [fq.nombre('Calcule sa résistance thermique (2 chiffres significatifs).', 'R =', R, KW, { signe: false, rel: .03, affiche: cs(R, 2), diag: v => (proche(v, Rv + Ra, .01) ? 'Il y a <b>deux</b> verres.' : dR(v, cs_, 2)),
+        solution: calc(`R<sub>verre</sub> = ${fr('4 × 10<sup>−3</sup>', '0,811 × 2,0')} ≈ 2,47 × 10<sup>−3</sup> ; R<sub>air</sub> = ${fr(ea + ' × 10<sup>−3</sup>', '0,025 × 2,0')} = ${cs(Ra, 2)}<br>R = 2 × R<sub>verre</sub> + R<sub>air</sub> ≈ ${c(cs(R, 2) + ' ' + KW)}`) })] };
+  },
+];
+
+// les 10 questions, dans l'ordre des thèmes (chacune tire ses propres valeurs)
+function tirage() {
+  return [G1[0](), G1[1](), G1[2](), G2[0](), G2[1](), G3[0](), G3[1](), G4[0](), G4[1](), G5[0]()];
+}
+
+TT.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 4 · QUESTIONS', titre: 'Parois composées',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : résistance totale de 2 ou 3 couches, flux à travers un mur isolé, épaisseur d\'isolant à ajouter, double vitrage.</p>',
+  questions: tirage,
+  revoir: { href: 'module_4_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_5.html', label: 'Module 5 : exercices du manuel →' },
+});
+TT.menu('module_4_questions');
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions sur le flux thermique — Chapitre 5 : Flux et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="tt.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="tt.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : flux Φ = Q / Δt avec conversions
+   (4), énergie Q = Φ × Δt en joules (3), en Wh ou kWh (2), unité du
+   flux (1).
+   Erreur diagnostiquée surtout : durée non convertie en secondes
+   (laissée en min ou en h), kJ ou MJ non convertis, Wh et J confondus.
+   ============================================================ */
+const { o, fq, fmt, fr, sci, hasard, melanger, proche } = TT;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+const hm = (h, m) => (h ? h + ' h' : '') + (m ? (h ? ' ' : '') + m + ' min' : '');
+// diagnostic d'un flux faux (Q en J, durée t en s ; h, m : la durée de l'énoncé)
+const dPhi = (v, Q, t, h, m, kilo) => proche(v, t / Q, .02) ? 'Rapport inversé : Φ = Q / Δt.'
+  : (m != null && (proche(v, Q / (h * 60 + m), .02) || proche(v, Q / (h + m / 60), .02))) ? 'Convertis la durée en <b>secondes</b> : 1 min = 60 s, 1 h = 3 600 s.'
+  : (kilo && proche(v, Q / kilo / t, .02)) ? `Convertis l'énergie en joules (× ${fmt(kilo)}).` : 'Φ = Q / Δt, avec Q en J et Δt en s.';
+
+/* ---------- Groupe 1 : flux thermique ---------- */
+const G1 = [
+  function direct() {
+    const [Q, t] = hasard([[6000, 120], [18000, 600], [24000, 300], [9000, 60], [45000, 900]]);
+    return { theme: 'Flux thermique', enonce: `<p>Une énergie Q = ${fmt(Q)} J traverse une paroi en Δt = ${t} s.</p>`,
+      parties: [fq.nombre('Calcule le flux thermique.', 'Φ =', Q / t, 'W', { signe: false, diag: v => dPhi(v, Q, t), solution: calc(`Φ = ${fr('Q', 'Δt')} = ${fr(fmt(Q) + ' J', t + ' s')} = ${c(fmt(Q / t) + ' W')}`) })] };
+  },
+  function kJmin() {
+    const [Q, m] = hasard([[360, 10], [720, 30], [90, 5], [540, 15], [1200, 40]]);
+    const t = m * 60;
+    return { theme: 'Flux thermique', enonce: `<p>Un mur laisse passer Q = ${Q} kJ en ${m} min.</p>`,
+      parties: [fq.nombre('Calcule le flux thermique (3 chiffres significatifs).', 'Φ =', Q * 1000 / t, 'W', { signe: false, rel: .01, affiche: fmt(r3(Q * 1000 / t)),
+        diag: v => dPhi(v, Q * 1000, t, 0, m, 1000), solution: calc(`Q = ${Q} kJ = ${fmt(Q * 1000)} J ; Δt = ${m} × 60 = ${t} s<br>Φ = ${fr(fmt(Q * 1000) + ' J', t + ' s')} ≈ ${c(fmt(r3(Q * 1000 / t)) + ' W')}`) })] };
+  },
+  function heuresMin() {
+    const [Q, h, m] = hasard([[750, 1, 15], [540, 1, 30], [900, 2, 30], [1080, 1, 0], [2880, 2, 0]]);
+    const t = h * 3600 + m * 60;
+    return { theme: 'Flux thermique', enonce: `<p>Une quantité de chaleur Q = ${fmt(Q)} kJ est échangée à travers une paroi en ${hm(h, m)}.</p>`,
+      parties: [fq.nombre('Convertis la durée en secondes.', 'Δt =', t, 's', { signe: false,
+          diag: v => proche(v, (h + m / 100) * 3600) ? `${hm(h, m)} n'est pas ${h},${m} h : convertis séparément.` : proche(v, h * 60 + m) ? 'C\'est en minutes : multiplie par 60.' : '1 h = 3 600 s ; 1 min = 60 s.', solution: calc(`Δt = ${h} × 3 600 + ${m} × 60 = ${c(fmt(t) + ' s')}`) }),
+        fq.nombre('Calcule le flux thermique (3 chiffres significatifs).', 'Φ =', Q * 1000 / t, 'W', { signe: false, rel: .01, affiche: fmt(r3(Q * 1000 / t)),
+          diag: v => dPhi(v, Q * 1000, t, h, m, 1000), solution: calc(`Φ = ${fr(fmt(Q) + ' × 10<sup>3</sup> J', fmt(t) + ' s')} ≈ ${c(fmt(r3(Q * 1000 / t)) + ' W')}`) })] };
+  },
+  function MJ() {
+    const [Q, m] = hasard([[2.94, 10], [1.8, 30], [3.6, 20], [0.6, 5]]);
+    const t = m * 60;
+    return { theme: 'Flux thermique', enonce: `<p>Une plaque de cuivre transfère ${fmt(Q)} MJ en ${m} min.</p>`,
+      parties: [fq.nombre('Calcule le flux thermique (3 chiffres significatifs).', 'Φ =', Q * 1e6 / t, 'W', { signe: false, rel: .01, affiche: fmt(r3(Q * 1e6 / t)),
+        diag: v => dPhi(v, Q * 1e6, t, 0, m, 1e6), solution: calc(`Φ = ${fr(fmt(Q) + ' × 10<sup>6</sup> J', m + ' × 60 s')} ≈ ${c(fmt(r3(Q * 1e6 / t)) + ' W')}`) })] };
+  },
+];
+
+/* ---------- Groupe 2 : énergie en joules ---------- */
+const G2 = [
+  function minutes() {
+    const [P, m] = hasard([[167, 30], [50, 45], [120, 20], [952, 10], [340, 15]]);
+    return { theme: 'Énergie transférée', enonce: `<p>Un flux thermique de ${P} W traverse une paroi pendant ${m} min.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule l\'énergie transférée, en joules (2 chiffres significatifs).', label: 'Q =', valeur: P * m * 60, unite: 'J', cs: 2, rel: .05,
+        diag: v => proche(v, P * m, .03) ? `La durée doit être en secondes : ${m} min = ${m * 60} s.` : proche(v, P / (m * 60), .03) ? 'On multiplie : Q = Φ × Δt.' : 'Q = Φ × Δt, avec Δt en s.',
+        solution: calc(`Q = Φ × Δt = ${P} W × ${m * 60} s ≈ ${c(sci(P * m * 60, 2) + ' J')}`) }] };
+  },
+  function journee() {
+    const [P, h] = hasard([[88, 24], [69, 24], [500, 8], [250, 12], [1500, 3]]);
+    return { theme: 'Énergie transférée', enonce: `<p>Un flux thermique de ${fmt(P)} W traverse un vitrage pendant ${h} h.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule l\'énergie transférée, en joules (2 chiffres significatifs).', label: 'Q =', valeur: P * h * 3600, unite: 'J', cs: 2, rel: .05,
+        diag: v => proche(v, P * h, .03) ? `Ce sont des Wh : en joules, la durée doit être en secondes (${h} h = ${fmt(h * 3600)} s).` : proche(v, P * h * 60, .03) ? '1 h = 3 600 s.' : 'Q = Φ × Δt, avec Δt en s.',
+        solution: calc(`Q = ${fmt(P)} W × ${h} × 3 600 s ≈ ${c(sci(P * h * 3600, 2) + ' J')}`) }] };
+  },
+  function duree() {
+    const [P, Q] = hasard([[50, 180], [200, 360], [25, 90], [500, 1800]]);
+    return { theme: 'Durée d\'un transfert', enonce: `<p>Un flux thermique de ${P} W transfère ${Q} kJ.</p>`,
+      parties: [fq.nombre('Combien de temps faut-il ?', 'Δt =', Q * 1000 / P, 's', { signe: false,
+        diag: v => proche(v, Q / P) ? `Convertis l'énergie en joules : ${Q} kJ = ${fmt(Q * 1000)} J.` : proche(v, P / (Q * 1000)) ? 'Rapport inversé : Δt = Q / Φ.' : 'Q = Φ × Δt donc Δt = Q / Φ.',
+        solution: calc(`Δt = ${fr('Q', 'Φ')} = ${fr(fmt(Q * 1000) + ' J', P + ' W')} = ${c(fmt(Q * 1000 / P) + ' s')} (soit ${fmt(Q * 1000 / P / 60)} min)`) })] };
+  },
+];
+
+/* ---------- Groupe 3 : énergie en Wh et kWh ---------- */
+const G3 = [
+  function kWh() {
+    const [P, h] = hasard([[350, 8], [90, 24], [1200, 5], [250, 12], [8900, 24]]);
+    return { theme: 'Énergie en kWh', enonce: `<p>Un flux thermique de ${fmt(P)} W traverse un mur pendant ${h} h.</p>`,
+      parties: [fq.nombre('Calcule l\'énergie perdue, en kWh.', 'Q =', P * h / 1000, 'kWh', { signe: false, rel: .01,
+        diag: v => proche(v, P * h) ? 'Ce sont des Wh : divise par 1 000.' : proche(v, P * h * 3600 / 1000, .02) ? 'Avec Δt en h, Q = Φ × Δt est en Wh, pas en J.' : 'Q = Φ × Δt (Δt en h) en Wh ; 1 kWh = 1 000 Wh.',
+        solution: calc(`Q = ${fmt(P)} W × ${h} h = ${fmt(P * h)} Wh = ${c(fmt(P * h / 1000) + ' kWh')}`) })] };
+  },
+  function WhJ() {
+    const Wh = hasard([2, 5, 50, 0.5]);
+    return { theme: 'Wh et joules', parties: [fq.nombre(`Convertis ${fmt(Wh)} Wh en joules.`, 'Q =', Wh * 3600, 'J', { signe: false,
+      diag: v => proche(v, Wh / 3600) ? 'On multiplie : 1 Wh = 3 600 J.' : proche(v, Wh * 60) ? '1 h = 3 600 s, donc 1 Wh = 3 600 J.' : '1 Wh = 1 W × 3 600 s = 3 600 J.',
+      solution: calc(`Q = ${fmt(Wh)} × 3 600 = ${c(fmt(Wh * 3600) + ' J')}`) })] };
+  },
+];
+
+/* ---------- Groupe 4 : unité ---------- */
+const G4 = [
+  function unite() {
+    return { theme: 'Unités', parties: [fq.choix('Le flux thermique Φ s\'exprime en :', [o('ok', 'watts (W)'), o('a', 'joules (J)'), o('b', 'kelvins (K)'), o('c', 'K·W<sup>−1</sup>')], 'ok',
+      { indices: { a: 'Le joule est l\'unité de l\'énergie Q ; Φ est une énergie par seconde.', b: 'Le kelvin est l\'unité de la température.', c: 'K·W<sup>−1</sup> est l\'unité de la résistance thermique.' }, solution: '<p>Φ = Q / Δt : des joules par seconde, c\'est-à-dire des <b>watts</b>.</p>' })] };
+  },
+];
+
+// tirage : 4 + 3 + 2 + 1 questions
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  return pris(G1, 4).concat(pris(G2, 3), pris(G3, 2), pris(G4, 1));
+}
+
+TT.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Flux thermique',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : flux thermique Φ = Q / Δt avec conversions, énergie transférée Q = Φ × Δt en joules et en kWh.</p>',
+  questions: tirage,
+  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3_cours.html', label: 'Module 3 : résistance thermique →' },
+});
+TT.menu('module_2_questions');
+</script>
+</body>
+</html>

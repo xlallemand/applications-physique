@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : fiche récapitulative — Chapitre 5 : Flux et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="tt.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="tt.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Parois composées</h2>
+  </div>
+<!-- Fiche récapitulative du module 4 : résistances en série, méthode avec schéma, double vitrage, épaisseur d'isolant. -->
+
+  <section class="er-card" id="parois">
+    <h3 class="cours-titre">Couches accolées</h3>
+    <div class="cle"><p class="som-formule">R = R<sub>1</sub> + R<sub>2</sub> + R<sub>3</sub> &nbsp;·&nbsp; R<sub>i</sub> = <span class="som-fr"><span>e<sub>i</sub></span><span>λ<sub>i</sub> × S</span></span></p>
+      <p>Même surface S pour toutes les couches ; puis Φ = ΔT / R.</p></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">La méthode avec un schéma</h3>
+    <div id="fig-paroi"></div>
+    <div class="cle"><ol class="er-liste"><li>Schéma : e et λ de chaque couche, températures des deux côtés, S.</li><li>R<sub>i</sub> de chaque couche (e en m).</li><li>R = somme des R<sub>i</sub>.</li><li>Φ = ΔT / R, du chaud vers le froid.</li></ol></div>
+    <p class="cours-exemple-t">Exemple</p>
+    <p>Béton 15 cm (λ = 1,28) + polystyrène 5 cm (λ = 0,030), 20 m<sup>2</sup>, 20 °C et 0 °C : R ≈ 5,9 × 10<sup>−3</sup> + 8,3 × 10<sup>−2</sup> ≈ 0,089 K·W<sup>−1</sup> ; Φ = 20 / 0,089 ≈ 224 W.</p>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Double vitrage et isolation</h3>
+    <div class="cle"><p>Double vitrage verre / air / verre : c'est la lame d'<b>air immobile</b> (λ = 0,025) qui isole.</p></div>
+    <div class="cle"><p>Isolant à ajouter : R<sub>isolant</sub> = R visée − R des autres couches ; e = R<sub>isolant</sub> × λ × S.</p></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_4_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_4_questions.html">Questions sur les parois composées</a>
+  </div>
+</div>
+<script>
+// schéma rempli de l'exemple
+document.getElementById('fig-paroi').innerHTML = TT.paroiRemplie({
+  couches: [{ nom: 'béton', motif: 'beton', e: '15 cm', lam: 1.28 }, { nom: 'polystyrène', motif: 'isolant', e: '5 cm', lam: .03 }],
+  cotes: [{ nom: 'intérieur', T: 20 }, { nom: 'extérieur', T: 0 }], S: 20,
+}, { R: ['5,9 × 10<sup>−3</sup>', '8,3 × 10<sup>−2</sup>', '0,089'], phi: '224 W', sens: 1 });
+TT.menu('fiche_4');
+</script>
+</body>
+</html>

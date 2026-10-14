@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur la température et les transferts — Chapitre 5 : Flux et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="tt.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="tt.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : conversions K ↔ °C (3), écart de
+   température (2), mode de transfert d'une situation (3), sens du
+   transfert, y compris quand l'extérieur est plus chaud (2).
+   Erreurs diagnostiquées : 273 retiré au lieu d'être ajouté (et
+   inversement), soustraction de températures négatives, 273 ajouté
+   à un écart, « froid » qui se transfère.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, proche } = TT;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+
+/* ---------- Groupe 1 : conversions ---------- */
+const G1 = [
+  function versK() {
+    const t = hasard([12, 18, 21, 37, 45, 80, 100, 150]);
+    return { theme: 'Des °C aux kelvins', enonce: `<p>Un liquide est à la température θ = ${t} °C.</p>`,
+      parties: [fq.nombre('Quelle est sa température absolue T ?', 'T =', t + 273, 'K', { tol: .5, signe: false,
+        diag: v => proche(v, t - 273) ? 'Des °C aux K, on <b>ajoute</b> 273.' : proche(v, t) ? 'Il faut ajouter 273 : 0 °C = 273 K.' : 'T = θ + 273.',
+        solution: calc(`T = θ + 273 = ${t} + 273 = ${c(fmt(t + 273) + ' K')}`) })] };
+  },
+  function negVersK() {
+    const t = hasard([-3, -5, -12, -18, -20, -40, -80]);
+    return { theme: 'Des °C aux kelvins', enonce: `<p>Un congélateur est à θ = ${fmt(t)} °C.</p>`,
+      parties: [fq.nombre('Quelle est sa température absolue T ?', 'T =', t + 273, 'K', { tol: .5, signe: false,
+        diag: v => proche(v, 273 - t) ? `Attention au signe : ${fmt(t)} + 273 = 273 − ${-t}.` : proche(v, t - 273) || proche(v, 273 + t - 2 * 273) ? 'On ajoute 273.' : 'T = θ + 273.',
+        solution: calc(`T = ${fmt(t)} + 273 = ${c(fmt(t + 273) + ' K')}`) })] };
+  },
+  function versC() {
+    const T = hasard([250, 263, 280, 298, 310, 353, 400, 77, 20]);
+    return { theme: 'Des kelvins aux °C', enonce: `<p>Un objet est à la température absolue T = ${T} K.</p>`,
+      parties: [fq.nombre('Quelle est sa température θ en degrés Celsius ?', 'θ =', T - 273, '°C', { tol: .5,
+        diag: v => proche(v, T + 273) ? 'Des K aux °C, on <b>retire</b> 273.' : proche(v, 273 - T) ? 'Attention au signe : θ = T − 273.' : 'θ = T − 273.',
+        solution: calc(`θ = T − 273 = ${T} − 273 = ${c(fmt(T - 273) + ' °C')}`) })] };
+  },
+  function zero() {
+    return { theme: 'Zéro absolu', parties: [fq.choix('Le zéro absolu, la température la plus basse possible, vaut :', [o('ok', '0 K, soit −273 °C'), o('a', '0 °C, soit 273 K'), o('b', '−273 K')], 'ok',
+      { indices: { a: '0 °C est la température de la glace qui fond : on peut descendre bien plus bas.', b: 'Une température en kelvins n\'est jamais négative.' }, solution: '<p>0 K = −273 °C : c\'est le zéro absolu.</p>' })] };
+  },
+];
+
+/* ---------- Groupe 2 : écart de température ---------- */
+const G2 = [
+  function ecartNeg() {
+    const [a, b] = hasard([[-3, -20], [-5, -18], [2, -12], [-1, -15], [4, -9], [19, -6], [20, -2]]);
+    return { theme: 'Écart de température', enonce: `<p>D'un côté d'une paroi, il fait ${fmt(a)} °C ; de l'autre, ${fmt(b)} °C.</p>`,
+      parties: [fq.nombre('Calcule ΔT = T<sub>chaud</sub> − T<sub>froid</sub>.', 'ΔT =', a - b, 'K', { tol: .01,
+        diag: v => proche(v, a + b) || proche(v, -(a + b)) || proche(v, Math.abs(Math.abs(a) - Math.abs(b))) ? `Soustraire un nombre négatif, c'est ajouter son opposé : ${fmt(a)} − (${fmt(b)}) = ${fmt(a)} + ${-b}.` : proche(v, b - a) ? 'Commence par la température la plus chaude.' : 'ΔT = T<sub>chaud</sub> − T<sub>froid</sub>.',
+        solution: calc(`ΔT = ${fmt(a)} − (${fmt(b)}) = ${c(fmt(a - b) + ' K')}`) })] };
+  },
+  function ecartK() {
+    const d = hasard([8, 14, 17, 22, 35]);
+    return { theme: 'Écart de température', enonce: `<p>L'écart de température entre les deux faces d'un mur est de ${d} °C.</p>`,
+      parties: [fq.nombre('Combien vaut cet écart en kelvins ?', 'ΔT =', d, 'K', { tol: .01, signe: false,
+        diag: v => proche(v, d + 273) ? 'On ajoute 273 à une température, pas à un écart : un écart a la même valeur en K et en °C.' : 'Un écart de température a la même valeur en K et en °C.',
+        solution: `<p>ΔT = ${c(d + ' K')} : les « + 273 » des deux températures s'annulent.</p>` })] };
+  },
+];
+
+/* ---------- Groupe 3 : modes de transfert ---------- */
+const SITUATIONS = [
+  ['cond', 'La poignée métallique d\'une poêle posée sur le feu devient brûlante.'],
+  ['cond', 'Une cuillère plongée dans un thé chaud chauffe jusqu\'au manche.'],
+  ['cond', 'La chaleur de la maison traverse le mur en béton.'],
+  ['cond', 'Le fer à repasser chauffe le tissu.'],
+  ['cond', 'Pieds nus, le carrelage froid te refroidit les pieds.'],
+  ['conv', 'Au-dessus d\'un radiateur, l\'air chaud monte vers le plafond.'],
+  ['conv', 'L\'eau d\'une casserole se met en mouvement en chauffant.'],
+  ['conv', 'Un sèche-cheveux souffle de l\'air chaud.'],
+  ['conv', 'Le vent froid refroidit ta peau.'],
+  ['ray', 'Le Soleil chauffe la Terre à travers le vide de l\'espace.'],
+  ['ray', 'Assis devant la cheminée, tu sens la chaleur du feu sur ton visage.'],
+  ['ray', 'Un chauffage infrarouge de terrasse réchauffe les clients à distance.'],
+  ['ray', 'Le sable de la plage est chauffé par le Soleil.'],
+];
+const MODES = [o('cond', 'conduction'), o('conv', 'convection'), o('ray', 'rayonnement')];
+const DEF = {
+  cond: 'conduction : dans un solide (ou entre solides qui se touchent), de proche en proche, sans déplacement de matière',
+  conv: 'convection : un fluide (air, eau) se déplace et transporte l\'énergie',
+  ray: 'rayonnement : l\'énergie arrive sans support matériel, même à travers le vide',
+};
+const G3 = SITUATIONS.map(s => function mode() {
+  const ind = {};
+  MODES.forEach(m => { if (m.id !== s[0]) ind[m.id] = `La ${DEF[m.id]}. Est-ce le cas ici ?`; });
+  return { theme: 'Mode de transfert', enonce: `<p>${s[1]}</p>`, parties: [fq.choix('Par quel mode se fait le transfert thermique ?', MODES, s[0], { melanger: false, indices: ind, solution: `<p>C'est la ${DEF[s[0]]}.</p>` })] };
+});
+
+/* ---------- Groupe 4 : sens du transfert ---------- */
+const G4 = [
+  function sens() {
+    const [ti, te] = hasard([[19, 5], [20, -2], [-3, -20], [21, 8], [22, 35], [24, 31], [19, 28], [18, 40]]);
+    const bon = ti > te ? 'ie' : 'ei';
+    return { theme: 'Sens du transfert', enonce: `<p>Température intérieure : ${fmt(ti)} °C ; température extérieure : ${fmt(te)} °C.</p>`,
+      parties: [fq.choix('Dans quel sens se fait le transfert thermique à travers le mur ?', [o('ie', 'de l\'intérieur vers l\'extérieur'), o('ei', 'de l\'extérieur vers l\'intérieur')], bon,
+        { melanger: false, indice: 'Le transfert va toujours du plus chaud vers le plus froid : compare les deux températures (attention aux signes).',
+          solution: `<p>${ti > te ? `${fmt(ti)} °C > ${fmt(te)} °C` : `${fmt(te)} °C > ${fmt(ti)} °C`} : du chaud vers le froid, donc ${bon === 'ie' ? 'de l\'intérieur vers l\'extérieur' : 'de l\'extérieur vers l\'intérieur'}.</p>` })] };
+  },
+  function boisson() {
+    const [obj, t, amb] = hasard([['une canette', 5, 22], ['un bol de soupe', 70, 20], ['un glaçon', -18, 20], ['une tasse de café', 80, 19]]);
+    const froid = t < amb;
+    return { theme: 'Sens du transfert', enonce: `<p>Tu poses ${obj} à ${fmt(t)} °C sur une table, dans une pièce à ${amb} °C.</p>`,
+      parties: [fq.choix('Que se passe-t-il ?', [o('ok', froid ? `la pièce cède de l'énergie à ${obj}, qui se réchauffe` : `${obj} cède de l'énergie à la pièce et se refroidit`),
+        o('a', froid ? `${obj} cède du « froid » à la pièce` : `la pièce cède de l'énergie à ${obj}`), o('b', 'rien : les températures ne changent pas')], 'ok',
+        { colonne: true, indices: { a: froid ? 'Le « froid » ne se transfère pas : c\'est l\'énergie qui va du chaud vers le froid.' : 'L\'énergie va du plus chaud vers le plus froid.', b: 'Deux corps à des températures différentes échangent de l\'énergie.' },
+          solution: `<p>L'énergie va du plus chaud (${froid ? 'la pièce' : obj}) vers le plus froid (${froid ? obj : 'la pièce'}), jusqu'à l'égalité des températures.</p>` })] };
+  },
+];
+
+// tirage : 3 + 2 + 3 + 2 questions
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  return pris(G1, 3).concat(pris(G2, 2), pris(G3, 3), [G4[0](), G4[1]()]);
+}
+
+TT.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Température et modes de transfert',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : conversions entre kelvins et degrés Celsius, écart de température, mode de transfert d\'une situation, sens du transfert.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2_cours.html', label: 'Module 2 : flux thermique →' },
+});
+TT.menu('module_1_questions');
+</script>
+</body>
+</html>

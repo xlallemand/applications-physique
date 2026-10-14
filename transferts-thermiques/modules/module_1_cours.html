@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : température et modes de transfert — Chapitre 5 : Flux et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="tt.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="tt.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">Température et modes de transfert</h2>
+    <p class="er-contexte">On mesure la température en <b>degrés Celsius</b> ou en <b>kelvins</b>. Un objet chaud cède de l'énergie à un objet froid : c'est un <b>transfert thermique</b>, par <b>conduction</b>, <b>convection</b> ou <b>rayonnement</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   T (K) = θ (°C) + 273 ; une différence de température a la même
+   valeur en K et en °C ; trois modes de transfert ; le transfert va
+   toujours du chaud vers le froid.
+   Erreurs diagnostiquées : 273 soustrait au lieu d'être ajouté,
+   différence de températures négatives mal calculée.
+   ============================================================ */
+const { fmt, hasard, melanger, exemple } = COURS;
+const { echelles, modes, proche, o } = TT;
+const c = h => `<span class="c">${h}</span>`;
+const QCM = (titre, enonce, q, options, bonne, indices, solution) => ({ titre, enonce, parties: [{ type: 'choix', q, options, bonne, indices, solution, colonne: true }] });
+
+/* ---------- 1. Les échelles de température ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Degrés Celsius et kelvins');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Dans la vie courante, on repère la température θ en <b>degrés Celsius</b> (°C). En physique, on utilise la température <b>absolue</b> T, en <b>kelvins</b> (K) : elle part du <b>zéro absolu</b>, la température la plus basse possible.</p>
+      <div class="cle"><p class="crs-formule">T (K) = θ (°C) + 273</p><p>donc θ (°C) = T (K) − 273 ; le zéro absolu : 0 K = −273 °C. On écrit « 293 K », sans « degré ».</p></div>
+      ${echelles()}
+    </div>
+    ${exemple(`<p class="crs-calc">θ = 20 °C : T = 20 + 273 = <span class="c">293 K</span><br>T = 77 K (azote liquide) : θ = 77 − 273 = <span class="c">−196 °C</span></p>`)}`);
+  const t1 = hasard([15, 25, 37, 60, 100]), t2 = hasard([-20, -3, -18, -40, -10]), T3 = hasard([300, 250, 373, 263, 4]);
+  c_.aToi(carte, [
+    { titre: 'Des °C aux kelvins', enonce: `<p>La température d'une pièce est θ = ${fmt(t1)} °C.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est sa température absolue ?', label: 'T =', valeur: t1 + 273, unite: 'K', tol: .5,
+        diag: v => proche(v, t1 - 273) ? 'Pour passer des °C aux K, on <b>ajoute</b> 273.' : 'T = θ + 273.', solution: `<p class="crs-calc">T = ${fmt(t1)} + 273 = ${c(fmt(t1 + 273) + ' K')}</p>` }] },
+    { titre: 'Une température négative', enonce: `<p>Dehors, il fait θ = ${fmt(t2)} °C.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est la température absolue ?', label: 'T =', valeur: t2 + 273, unite: 'K', tol: .5,
+        diag: v => proche(v, -t2 + 273) ? `Attention au signe : T = (${fmt(t2)}) + 273 = 273 − ${fmt(-t2)}.` : proche(v, t2 - 273) ? 'On ajoute 273.' : 'T = θ + 273.',
+        solution: `<p class="crs-calc">T = ${fmt(t2)} + 273 = ${c(fmt(t2 + 273) + ' K')}</p><p>Une température en kelvins n'est jamais négative.</p>` }] },
+    { titre: 'Des kelvins aux °C', enonce: `<p>Un objet est à la température absolue T = ${fmt(T3)} K.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est sa température en degrés Celsius ?', label: 'θ =', valeur: T3 - 273, unite: '°C', tol: .5,
+        diag: v => proche(v, T3 + 273) ? 'Des K aux °C, on <b>retire</b> 273.' : proche(v, 273 - T3) ? 'Attention au signe : θ = T − 273.' : 'θ = T − 273.',
+        solution: `<p class="crs-calc">θ = ${fmt(T3)} − 273 = ${c(fmt(T3 - 273) + ' °C')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Une différence de température ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Une différence de température');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Pour un transfert thermique, on calcule souvent l'<b>écart</b> entre la température du côté chaud et celle du côté froid.</p>
+      <div class="cle"><p class="crs-formule">ΔT = T<sub>chaud</sub> − T<sub>froid</sub></p><p>Une <b>différence</b> de température a la <b>même valeur</b> en kelvins et en degrés Celsius : les « + 273 » s'annulent.</p></div>
+    </div>
+    ${exemple(`<p>Intérieur à 19 °C, extérieur à 5 °C :</p>
+      <p class="crs-calc">ΔT = 19 − 5 = 14 °C, soit <span class="c">ΔT = 14 K</span><br>(en kelvins : 292 − 278 = 14 K, le même écart)</p>
+      <p>Avec des températures négatives, attention aux signes : hôtel de glace à −3 °C, extérieur à −20 °C :</p>
+      <p class="crs-calc">ΔT = −3 − (−20) = −3 + 20 = <span class="c">17 K</span></p>`)}`);
+  const [a, b] = hasard([[-3, -20], [-5, -18], [2, -12], [-1, -15], [4, -9]]);
+  const [x, y] = hasard([[22, 35], [20, 31], [24, 38]]);
+  const d = hasard([12, 17, 25, 30]);
+  c_.aToi(carte, [
+    { titre: 'Deux températures négatives', enonce: `<p>Il fait ${fmt(a)} °C d'un côté d'une paroi et ${fmt(b)} °C de l'autre.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule l\'écart de température ΔT = T<sub>chaud</sub> − T<sub>froid</sub>.', label: 'ΔT =', valeur: a - b, unite: 'K', tol: .01, signe: true,
+        diag: v => proche(v, a + b) || proche(v, -(a + b)) || proche(v, Math.abs(a) - Math.abs(b)) ? `Soustraire un nombre négatif, c'est ajouter son opposé : ${fmt(a)} − (${fmt(b)}) = ${fmt(a)} + ${fmt(-b)}.` : proche(v, b - a) ? 'Commence par la température la plus chaude : ΔT est positif.' : 'ΔT = T<sub>chaud</sub> − T<sub>froid</sub>.',
+        solution: `<p class="crs-calc">Le côté chaud est à ${fmt(a)} °C.<br>ΔT = ${fmt(a)} − (${fmt(b)}) = ${fmt(a)} + ${fmt(-b)} = ${c(fmt(a - b) + ' K')}</p>` }] },
+    { titre: 'L\'extérieur plus chaud', enonce: `<p>En été, il fait ${x} °C dans un bureau climatisé et ${y} °C dehors.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule l\'écart de température.', label: 'ΔT =', valeur: y - x, unite: 'K', tol: .01,
+        diag: v => proche(v, x - y) ? 'Le côté chaud est l\'extérieur : ΔT = T<sub>chaud</sub> − T<sub>froid</sub> est positif.' : 'ΔT = T<sub>chaud</sub> − T<sub>froid</sub>.',
+        solution: `<p class="crs-calc">ΔT = ${y} − ${x} = ${c(fmt(y - x) + ' K')}</p>` }] },
+    QCM('En kelvins ?', '', `Un écart de température vaut ΔT = ${d} °C. Combien vaut-il en kelvins ?`,
+      [o('ok', `${d} K`), o('a', `${d + 273} K`), o('b', `${d - 273} K`)], 'ok',
+      { a: 'On ajoute 273 à une température, pas à un écart : les « + 273 » des deux températures s\'annulent.', b: 'Un écart garde la même valeur : on n\'ajoute ni ne retire 273.' },
+      `<p>ΔT = ${d} K : une différence de température a la même valeur en K et en °C.</p>`),
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Les trois modes de transfert ---------- */
+const SITUATIONS = [
+  ['cond', 'La poignée métallique d\'une casserole posée sur le feu devient chaude.'],
+  ['cond', 'Une cuillère plongée dans un bol de soupe chaude chauffe jusqu\'au manche.'],
+  ['cond', 'La chaleur de la maison traverse le mur en béton.'],
+  ['cond', 'Pieds nus, le carrelage froid te refroidit les pieds.'],
+  ['conv', 'Au-dessus d\'un radiateur, l\'air chaud monte vers le plafond.'],
+  ['conv', 'L\'eau d\'une casserole se met en mouvement en chauffant.'],
+  ['conv', 'Un sèche-cheveux souffle de l\'air chaud sur tes cheveux.'],
+  ['ray', 'Le Soleil chauffe la Terre à travers le vide de l\'espace.'],
+  ['ray', 'Assis devant la cheminée, tu sens la chaleur du feu sur ton visage.'],
+  ['ray', 'Une lampe chauffante de salle de bain te réchauffe à distance.'],
+];
+const MODES = [o('cond', 'conduction'), o('conv', 'convection'), o('ray', 'rayonnement')];
+const IND_MODES = {
+  cond: 'Conduction : dans un solide (ou entre deux solides qui se touchent), de proche en proche, sans déplacement de matière.',
+  conv: 'Convection : c\'est un fluide (air, eau) qui se déplace et emporte l\'énergie.',
+  ray: 'Rayonnement : l\'énergie arrive sans support matériel, même à travers le vide (Soleil, feu, lampe).',
+};
+const NOM_MODE = { cond: 'conduction', conv: 'convection', ray: 'rayonnement' };
+function qMode(titre, s) {
+  const ind = {};
+  MODES.forEach(m => { if (m.id !== s[0]) ind[m.id] = IND_MODES[m.id] + ' Est-ce le cas ici ?'; });
+  return { titre, enonce: `<p>${s[1]}</p>`, parties: [{ type: 'choix', q: 'Par quel mode se fait le transfert thermique ?', options: MODES, bonne: s[0], melanger: false, indices: ind,
+    solution: `<p><b>${NOM_MODE[s[0]]}</b> : ${IND_MODES[s[0]].split(' : ')[1]}</p>` }] };
+}
+function etape3(c_) {
+  const carte = c_.carte('3. Les trois modes de transfert thermique');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      ${modes()}
+      <div class="cle"><ul class="er-liste"><li><b>Conduction</b> : dans un solide, l'énergie passe de proche en proche, sans déplacement de matière (tige chauffée, mur).</li>
+        <li><b>Convection</b> : un fluide (air, eau) se déplace et transporte l'énergie (l'air chaud monte).</li>
+        <li><b>Rayonnement</b> : l'énergie se propage sans support matériel, même dans le vide (Soleil, feu).</li></ul></div>
+    </div>
+    ${exemple(`<p>Une casserole d'eau sur une plaque électrique :</p>
+      <p class="crs-calc">la plaque chauffe le fond de la casserole : <span class="c">conduction</span><br>l'eau chaude du fond monte et se mélange : <span class="c">convection</span><br>tu sens la chaleur de la plaque rouge en approchant la main : <span class="c">rayonnement</span></p>`)}`);
+  const [s1, s2, s3] = ['cond', 'conv', 'ray'].map(m => hasard(SITUATIONS.filter(s => s[0] === m)));
+  c_.aToi(carte, melanger([s1, s2, s3]).map((s, k) => qMode(`Situation ${k + 1}`, s)));
+  return carte;
+}
+
+/* ---------- 4. Le sens du transfert ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. Le sens du transfert thermique');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Règle.</b> Le transfert thermique se fait toujours <b>du corps le plus chaud vers le corps le plus froid</b>. Il s'arrête quand les deux sont à la même température.</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc">Hôtel de glace : intérieur −3 °C, extérieur −20 °C. L'intérieur est le plus chaud : transfert <span class="c">de l'intérieur vers l'extérieur</span>.<br>
+      En été : intérieur 22 °C, extérieur 35 °C. Transfert <span class="c">de l'extérieur vers l'intérieur</span>.</p>`)}`);
+  const [ti, te] = hasard([[19, 5], [20, -2], [-3, -20], [21, 8]]);
+  const [ti2, te2] = hasard([[22, 35], [24, 31], [19, 28]]);
+  const sens = (titre, ti, te) => QCM(titre, `<p>Température intérieure : ${fmt(ti)} °C ; température extérieure : ${fmt(te)} °C.</p>`, 'Dans quel sens se fait le transfert thermique à travers le mur ?',
+    [o('ie', 'de l\'intérieur vers l\'extérieur'), o('ei', 'de l\'extérieur vers l\'intérieur'), o('0', 'il n\'y en a pas')], ti > te ? 'ie' : 'ei',
+    { [ti > te ? 'ei' : 'ie']: 'Le transfert va du plus chaud vers le plus froid : compare les deux températures (attention aux signes).', 0: 'Les deux côtés n\'ont pas la même température : il y a un transfert.' },
+    `<p>${ti > te ? `${fmt(ti)} °C > ${fmt(te)} °C : de l'intérieur vers l'extérieur.` : `${fmt(te)} °C > ${fmt(ti)} °C : de l'extérieur vers l'intérieur.`}</p>`);
+  c_.aToi(carte, [
+    sens('En hiver', ti, te),
+    sens('En été', ti2, te2),
+    QCM('Une boisson fraîche', '<p>Tu poses une canette à 5 °C sur une table, dans une pièce à 22 °C.</p>', 'Que se passe-t-il ?',
+      [o('ok', 'l\'air et la table cèdent de l\'énergie à la canette, qui se réchauffe'), o('a', 'la canette cède du « froid » à la pièce'), o('b', 'rien : la canette garde sa température')], 'ok',
+      { a: 'Le « froid » ne se transfère pas : c\'est de l\'énergie qui va du chaud (la pièce) vers le froid (la canette).', b: 'Deux corps à des températures différentes échangent toujours de l\'énergie.' },
+      '<p>L\'énergie va du plus chaud (air, table) vers le plus froid (canette), jusqu\'à ce que la canette soit à 22 °C.</p>'),
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">T (K) = θ (°C) + 273</p><p>0 K = −273 °C (zéro absolu). Une différence de température a la même valeur en K et en °C.</p></div>
+    <div class="cle"><p>Trois modes de transfert thermique : <b>conduction</b> (solide, de proche en proche), <b>convection</b> (déplacement d'un fluide), <b>rayonnement</b> (sans support matériel).</p></div>
+    <div class="cle"><p>Le transfert thermique va toujours <b>du chaud vers le froid</b>.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur la température et les transferts →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2_cours.html">Module 2 : flux thermique</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
+TT.menu('module_1_cours');
+</script>
+</body>
+</html>
