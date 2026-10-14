@@ -124,7 +124,7 @@ Diagnostic ciblé à chaque erreur. Exemples :
 11. boule d'aluminium et bâton d'ébonite ;
 12. clou attiré par un aimant ;
 13. voiture au démarrage.
-14., 15., 16. : ajouter 3 autres situations
+14. , 15., 16. : ajouter 3 autres situations
 
 **Bilans attendus** (la fiche est vierge : ce sont les réponses à coder) :
 
