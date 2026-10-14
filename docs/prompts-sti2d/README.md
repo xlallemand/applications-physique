@@ -16,7 +16,7 @@ Le nom de chaque application est le titre du chapitre avec son numéro, le même
 |---|---|---|---|
 | Chapitre 1 : Énergie et puissance | `chapitre-01.md` | `energie-puissance/` | activité STEP, aire sous P(t) |
 | Chapitre 2 : Piles et accumulateurs | `chapitre-02.md` | `piles-accumulateurs/` | assemblage de cellules |
-| Chapitre 3 : Puissances actives et apparentes | — | `puissance-active/` | déjà fait : nom à mettre à jour |
+| Chapitre 3 : Puissances active et apparente | — | `puissance-active/` | déjà fait : nom à mettre à jour |
 | Chapitre 4 : Transport et distribution de l'électricité | — | `transport-electricite/` | déjà fait : nom à mettre à jour |
 | Chapitre 5 : Flux et transferts thermiques | `chapitre-05.md` | `transferts-thermiques/` | schéma de paroi en couches |
 | Chapitre 6 : Principe fondamental de la dynamique | `chapitre-06.md` | `principe-dynamique/` | **bilan des forces** |
@@ -37,7 +37,7 @@ Le nom de chaque application est le titre du chapitre avec son numéro, le même
 ## Chapitres 3 et 4 (déjà faits)
 
 Pour leur donner leur nom de chapitre, écris dans une session :
-> Applique la règle « Nom de l'application » de `docs/prompts-sti2d/00-commun.md` §3 à `puissance-active/` (« Chapitre 3 : Puissances actives et apparentes ») et à `transport-electricite/` (« Chapitre 4 : Transport et distribution de l'électricité »). Ne change rien d'autre.
+> Applique la règle « Nom de l'application » de `docs/prompts-sti2d/00-commun.md` §3 à `puissance-active/` (« Chapitre 3 : Puissances active et apparente ») et à `transport-electricite/` (« Chapitre 4 : Transport et distribution de l'électricité »). Ne change rien d'autre.
 
 ## Ordre conseillé
 
