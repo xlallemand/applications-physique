@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions sur la puissance — Chapitre 1 : Énergie et puissance</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ep.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ep.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : puissance moyenne avec
+   conversions (3), dérivée de l'énergie (4), graphique E(t) (2),
+   valeurs successives (1).
+   Erreurs diagnostiquées : P(t) non dérivée (on calcule E au lieu
+   de P), constante gardée, coefficient non doublé, calculatrice en
+   degrés au lieu de radians, droite linéaire ou affine, unités.
+   ============================================================ */
+const { o, fq, fmt, fr, hasard, melanger, proche, graphe } = EP;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+function poly(a, b, k) {
+  const t = [];
+  if (a) t.push(`${a === 1 ? '' : fmt(a) + ' '}t²`);
+  if (b) t.push(`${b === 1 ? '' : fmt(b) + ' '}t`);
+  if (k || !t.length) t.push(fmt(k));
+  return t.join(' + ');
+}
+
+/* ---------- Groupe 1 : puissance moyenne ---------- */
+const G1 = [
+  function kilojoules() {
+    const [E, t] = hasard([[54, 45], [36, 30], [180, 90], [96, 80], [30, 25]]);
+    return { theme: 'Puissance moyenne', enonce: `<p>Un appareil convertit une énergie E = ${E} kJ en ${t} s.</p>`,
+      parties: [fq.nombre('Calcule sa puissance moyenne, en W.', 'P =', E * 1000 / t, 'W', { signe: false,
+        diag: v => proche(v, E / t) ? `C'est en kW : convertis E en joules (${E} kJ = ${fmt(E * 1000)} J).` : proche(v, t / E) || proche(v, t / E / 1000) ? 'Rapport inversé : P = E / Δt.' : 'P = E / Δt, avec E en J et Δt en s.',
+        solution: calc(`P = ${fr('E', 'Δt')} = ${fr(fmt(E * 1000) + ' J', t + ' s')} = ${c(fmt(E * 1000 / t) + ' W')}`) })] };
+  },
+  function kilowattheures() {
+    const [E, t] = hasard([[3, 2], [4.5, 3], [1.2, 0.5], [6, 4], [2, 0.25], [0.6, 0.5]]);
+    return { theme: 'Puissance moyenne', enonce: `<p>Un four consomme ${fmt(E)} kWh en ${fmt(t)} h.</p>`,
+      parties: [fq.nombre('Calcule sa puissance moyenne, en kW.', 'P =', E / t, 'kW', { signe: false,
+        diag: v => proche(v, E * t) ? 'On divise : P = E / Δt.' : proche(v, t / E) ? 'Rapport inversé : P = E / Δt.' : 'Avec E en kWh et Δt en h, P = E / Δt est en kW.',
+        solution: calc(`P = ${fr(fmt(E) + ' kWh', fmt(t) + ' h')} = ${c(fmt(E / t) + ' kW')}`) })] };
+  },
+  function minutes() {
+    const [E, m] = hasard([[360, 2], [720, 3], [900, 5], [1500, 10], [24, 4]]);
+    const unite = E < 100 ? 'kJ' : 'J', EJ = E < 100 ? E * 1000 : E;
+    return { theme: 'Puissance moyenne', enonce: `<p>Un moteur convertit ${fmt(E)} ${unite} en ${m} min.</p>`,
+      parties: [fq.nombre('Calcule sa puissance moyenne, en W.', 'P =', EJ / (m * 60), 'W', { signe: false, rel: .01,
+        diag: v => proche(v, EJ / m, .02) ? `Convertis la durée en secondes : ${m} min = ${m * 60} s.` : proche(v, E / (m * 60), .02) ? `Convertis l'énergie en joules : ${E} kJ = ${fmt(EJ)} J.` : 'P = E / Δt, avec E en J et Δt en s.',
+        solution: calc(`${unite === 'kJ' ? `E = ${E} kJ = ${fmt(EJ)} J ; ` : ''}Δt = ${m} min = ${m * 60} s<br>P = ${fr(fmt(EJ) + ' J', (m * 60) + ' s')} = ${c(fmt(r3(EJ / (m * 60))) + ' W')}`) })] };
+  },
+  function energieDepuisP() {
+    const [P, t] = hasard([[1500, 3], [2000, 1.5], [800, 2], [100, 5]]);
+    return { theme: 'Puissance et énergie', enonce: `<p>Un appareil de puissance ${fmt(P)} W fonctionne pendant ${fmt(t)} h.</p>`,
+      parties: [fq.nombre('Quelle énergie consomme-t-il, en kWh ?', 'E =', P / 1000 * t, 'kWh', { signe: false,
+        diag: v => proche(v, P * t) ? `C'est en Wh : convertis en kWh (1 kWh = 1 000 Wh).` : proche(v, P / 1000 / t) ? 'E = P × Δt : on multiplie.' : 'E = P × Δt avec P en kW et Δt en h.',
+        solution: calc(`P = ${fmt(P)} W = ${fmt(P / 1000)} kW<br>E = P × Δt = ${fmt(P / 1000)} kW × ${fmt(t)} h = ${c(fmt(P / 1000 * t) + ' kWh')}`) })] };
+  },
+];
+
+/* ---------- Groupe 2 : puissance instantanée, dérivée de l'énergie ---------- */
+const G2 = [
+  function constante() {
+    const k = hasard([500, 800, 1200, 50]);
+    return { theme: 'Dériver l\'énergie', enonce: `<p>L'énergie d'un système est E(t) = ${k} (en J).</p>`,
+      parties: [fq.nombre('Quelle est la puissance instantanée P(t) ?', 'P(t) =', 0, 'W', { tol: 1e-9,
+        diag: v => proche(v, k) ? 'La dérivée d\'une constante est 0 : l\'énergie ne varie pas.' : 'La dérivée d\'une constante est 0.', solution: calc(`P(t) = ${c('0 W')}`) })] };
+  },
+  function affine() {
+    const a = hasard([25, 40, 120, 250]), b = hasard([5, 12, 100]), t = hasard([10, 20]);
+    return { theme: 'Dériver l\'énergie', enonce: `<p>E(t) = ${a} t + ${b} (E en J, t en s).</p>`,
+      parties: [fq.nombre(`Calcule la puissance à t = ${t} s.`, `P(${t}) =`, a, 'W', { signe: false,
+        diag: v => proche(v, a * t + b) ? 'Tu as calculé l\'énergie E(t). La puissance est la <b>dérivée</b> : P(t) = a.' : proche(v, a + b) ? `La dérivée de la constante ${b} est 0.` : proche(v, a * t) ? 'La dérivée de a t est a (pas a t).' : 'La dérivée de a t + b est a.',
+        solution: calc(`P(t) = ${a}, donc P(${t}) = ${c(a + ' W')} (la puissance est constante)`) })] };
+  },
+  function polynome() {
+    const a = hasard([2, 3, 4, 5, 10, 25, 98]), b = hasard([0, 2, 5, 8]), k = hasard([1, 3, 20]), t = hasard([2, 4, 5, 10]);
+    return { theme: 'Dériver l\'énergie', enonce: `<p>E(t) = ${poly(a, b, k)} (E en J, t en s).</p>`,
+      parties: [
+        { type: 'gabarit', q: 'a. Écris l\'expression de P(t).', label: 'P(t) =', morceaux: [{ v: 2 * a, aria: 'Coefficient de t' }, 't +', { v: b, aria: 'Terme constant' }],
+          diag: ([u, v]) => proche(u, a, .001) ? 'La dérivée de a t² est <b>2 a t</b>.' : proche(v, b + k, .001) && k ? 'La constante disparaît : sa dérivée est 0.' : 'Dérive terme à terme : a t² → 2 a t ; b t → b ; constante → 0.',
+          solution: calc(`P(t) = 2 × ${a} t + ${b} = ${c(`${2 * a} t${b ? ' + ' + b : ''}`)}`) },
+        fq.nombre(`b. Calcule la puissance à t = ${t} s.`, `P(${t}) =`, 2 * a * t + b, 'W', { signe: false,
+          diag: v => proche(v, a * t * t + b * t + k) ? 'Tu as calculé E(t). Utilise l\'expression de P(t).' : `P(${t}) = ${2 * a} × ${t} + ${b}.`, solution: calc(`P(${t}) = ${2 * a} × ${t} + ${b} = ${c(fmt(2 * a * t + b) + ' W')}`) }),
+      ] };
+  },
+  function sinus() {
+    const [A, w, t] = hasard([[25, 6.28, 10], [20, 2, 3], [10, 3, 2], [50, 0.5, 4], [40, 1.5, 2], [30, 2.5, 1]]);
+    const P = A * w * Math.cos(w * t), Pdeg = A * w * Math.cos(w * t * Math.PI / 180);
+    return { theme: 'Dériver un sinus', enonce: `<p>E(t) = ${A} sin(${fmt(w)} t) + 2 (E en J, t en s).</p>`,
+      parties: [
+        { type: 'gabarit', q: 'a. Écris l\'expression de P(t).', label: 'P(t) =', morceaux: [{ v: A * w, rel: .001, aria: 'Coefficient devant le cosinus' }, 'cos(', { v: w, aria: 'Nombre devant t' }, 't)'],
+          diag: ([u]) => proche(u, A, .001) ? `Multiplie A par ω : ${A} × ${fmt(w)}.` : 'La dérivée de A sin(ω t) est A ω cos(ω t).', solution: calc(`P(t) = ${A} × ${fmt(w)} cos(${fmt(w)} t) = ${c(`${fmt(A * w)} cos(${fmt(w)} t)`)}`) },
+        fq.nombre(`b. Calcule P à t = ${t} s (3 chiffres significatifs).`, `P(${t}) =`, P, 'W', { rel: .01, affiche: fmt(r3(P)),
+          diag: v => proche(v, Pdeg, .02) ? 'Ta calculatrice est en <b>degrés</b> : passe-la en <b>radians</b>.' : proche(v, -P, .02) ? 'Attention au signe.' : proche(v, A * Math.sin(w * t) + 2, .02) ? 'Tu as calculé E(t), pas P(t).' : `P(${t}) = ${fmt(A * w)} × cos(${fmt(r3(w * t))}), en radians.`,
+          solution: calc(`P(${t}) = ${fmt(A * w)} × cos(${fmt(w)} × ${t}) ≈ ${c(fmt(r3(P)) + ' W')}`) }),
+      ] };
+  },
+  function cinetique() {
+    const m = hasard([800, 1000, 1200]), k = hasard([1, 2, 3]), t = hasard([2, 3, 4]);
+    const P = m * k * k * t;
+    return { theme: 'Énergie cinétique', enonce: `<p>Un véhicule de masse ${fmt(m)} kg accélère : v(t) = ${k === 1 ? '' : k + ' '}t (v en m/s). Son énergie cinétique est E<sub>c</sub> = ½ m v².</p>`,
+      parties: [fq.nombre(`Calcule la puissance qu'il reçoit à t = ${t} s.`, `P(${t}) =`, P, 'W', { signe: false,
+        diag: v => proche(v, m * k * k * t * t / 2) ? 'Tu as calculé l\'énergie cinétique : dérive-la d\'abord.' : proche(v, P / 2) ? 'La dérivée de a t² est 2 a t : n\'oublie pas le facteur 2.' : proche(v, m * k * t) ? `La vitesse est au carré : v² = ${k * k} t².` : `E<sub>c</sub>(t) = ½ × ${fmt(m)} × ${k * k} t², puis P(t) = E<sub>c</sub>'(t).`,
+        solution: calc(`E<sub>c</sub>(t) = ½ × ${fmt(m)} × (${k} t)² = ${fmt(m * k * k / 2)} t²<br>P(t) = 2 × ${fmt(m * k * k / 2)} t = ${fmt(m * k * k)} t<br>P(${t}) = ${fmt(m * k * k)} × ${t} = ${c(fmt(P) + ' W')}`) })] };
+  },
+];
+
+/* ---------- Groupe 3 : graphique E(t) ---------- */
+function droite(P, E0, tx) {
+  const tmax = tx * 1.5, ymax = Math.ceil((E0 + P * tmax) / 2000) * 2000 + 2000;
+  return { xmax: tmax, ymax, pasX: tx / 4, pasY: 2000, nomX: 't (s)', nomY: 'E (J)', mg: 62, courbes: [[[0, E0], [tmax, E0 + P * tmax]]], points: [[tx, E0 + P * tx]],
+    traits: [[tx, 0, tx, E0 + P * tx], [0, E0 + P * tx, tx, E0 + P * tx]], aria: `Énergie en fonction du temps : droite passant par (0 s ; ${E0} J) et (${tx} s ; ${E0 + P * tx} J)` };
+}
+const G3 = [
+  function coefficient() {
+    const [P, tx] = hasard([[250, 40], [150, 40], [300, 20], [400, 30], [200, 50], [500, 20]]), E0 = hasard([0, 0, 2000]);
+    return { theme: 'Graphique E(t)', enonce: `<p>Énergie consommée par un appareil en fonction du temps :</p>${graphe(droite(P, E0, tx))}`,
+      parties: [fq.nombre('Quelle est la puissance de l\'appareil ?', 'P =', P, 'W', { signe: false,
+        diag: v => proche(v, (E0 + P * tx) / tx) && E0 ? `La droite ne part pas de 0 : ΔE = ${fmt(E0 + P * tx)} − ${fmt(E0)}.` : proche(v, tx / (P * tx)) || proche(v, tx / (E0 + P * tx)) ? 'Rapport inversé : P = ΔE / Δt.' : 'La puissance est le coefficient directeur : P = ΔE / Δt.',
+        solution: calc(`P = ${fr('ΔE', 'Δt')} = ${fr(`${fmt(E0 + P * tx)} − ${fmt(E0)}`, `${tx} − 0`)} = ${c(P + ' W')}`) })] };
+  },
+  function lineaire() {
+    const [P, tx] = hasard([[250, 40], [300, 20], [200, 50]]), E0 = hasard([0, 2000, 4000]);
+    return { theme: 'Graphique E(t)', enonce: graphe(droite(P, E0, tx)),
+      parties: [fq.choix('La droite représente une fonction :', [o('lin', 'linéaire : E = a t'), o('aff', 'affine non linéaire : E = a t + b, avec b ≠ 0')], E0 ? 'aff' : 'lin',
+        { melanger: false, indice: E0 ? 'Regarde la valeur de E à t = 0 : la droite passe-t-elle par l\'origine ?' : 'La droite passe par l\'origine (0 ; 0).',
+          solution: E0 ? `<p>À t = 0, E = ${fmt(E0)} J : la droite ne passe pas par l'origine, la fonction est affine.</p>` : '<p>La droite passe par l\'origine : la fonction est linéaire.</p>' })] };
+  },
+  function expression() {
+    const [P, tx] = hasard([[250, 40], [150, 40], [300, 20]]);
+    return { theme: 'Graphique E(t)', enonce: `<p>La droite passe par l'origine.</p>${graphe(droite(P, 0, tx))}`,
+      parties: [{ type: 'gabarit', q: 'Écris l\'expression de E(t).', label: 'E(t) =', morceaux: [{ v: P, aria: 'Coefficient directeur' }, 't'],
+        diag: ([v]) => proche(v, P * tx) ? 'C\'est une énergie : le coefficient est ΔE / Δt.' : 'E = a t, avec a = ΔE / Δt (le coefficient directeur).', solution: calc(`a = ${fr(fmt(P * tx) + ' J', tx + ' s')} = ${P} W, donc ${c(`E = ${P} t`)} et P(t) = E'(t) = ${P} W`) }] };
+  },
+];
+
+/* ---------- Groupe 4 : valeurs successives ---------- */
+function successives() {
+  const t0 = hasard([4, 6, 8, 20]), dt = hasard([0.1, 0.2, 0.5]), E0 = hasard([300, 450, 800, 2500]), dE = hasard([3, 4, 6, 9, 12]);
+  return { theme: 'Valeurs successives', enonce: `<div class="ph-defile"><table class="ph-tableau"><tr><th>t (s)</th><td>${fmt(t0)}</td><td>${fmt(t0 + dt)}</td></tr><tr><th>E (J)</th><td>${fmt(E0)}</td><td>${fmt(E0 + dE)}</td></tr></table></div>`,
+    parties: [fq.nombre(`Estime la puissance à t = ${t0} s.`, `P(${t0}) ≈`, dE / dt, 'W', { signe: false,
+      diag: v => proche(v, E0 / t0, .02) || proche(v, (E0 + dE) / (t0 + dt), .02) ? 'Utilise les variations : ΔE = E<sub>2</sub> − E<sub>1</sub> et Δt = t<sub>2</sub> − t<sub>1</sub>.' : proche(v, dt / dE, .02) ? 'Rapport inversé : P ≈ ΔE / Δt.' : 'P ≈ ΔE / Δt.',
+      solution: calc(`P ≈ ${fr(`${fmt(E0 + dE)} − ${fmt(E0)}`, `${fmt(t0 + dt)} − ${fmt(t0)}`)} = ${c(fmt(r3(dE / dt)) + ' W')}`) })] };
+}
+
+// tirage : 3 + 4 + 2 + 1 questions, sans répétition dans un groupe
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  return pris(G1, 3).concat(pris(G2, 4), pris(G3, 2), [successives()]);
+}
+
+EP.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Puissance moyenne et instantanée',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : puissance moyenne avec des conversions, puissance instantanée (dérivée de l\'énergie), lecture d\'un graphique E(t). Calculatrice en <b>radians</b>.</p>',
+  questions: tirage,
+  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3_cours.html', label: 'Module 3 : calcul de l\'énergie →' },
+});
+EP.menu('module_2_questions');
+</script>
+</body>
+</html>

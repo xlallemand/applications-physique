@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : puissance moyenne et instantanée — Chapitre 1 : Énergie et puissance</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ep.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ep.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Puissance moyenne et puissance instantanée</h2>
+    <p class="er-contexte">La <b>puissance</b> indique la vitesse à laquelle l'énergie est convertie. Tu vas calculer une puissance <b>moyenne</b>, puis la puissance <b>instantanée</b>, qui est la <b>dérivée</b> de l'énergie par rapport au temps.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Dérivées utiles : constante → 0 ; a t + b → a ; a t² → 2 a t ;
+   sin(a t) → a cos(a t) (calculatrice en radians).
+   ============================================================ */
+const { fmt, hasard, entre, exemple } = COURS;
+const { fr, proche, graphe } = EP;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+// polynôme a t² + b t + c écrit proprement
+function poly(a, b, k) {
+  const t = [];
+  if (a) t.push(`${a === 1 ? '' : fmt(a) + ' '}t²`);
+  if (b) t.push(`${b === 1 ? '' : fmt(b) + ' '}t`);
+  if (k || !t.length) t.push(fmt(k));
+  return t.join(' + ');
+}
+// erreurs classiques sur la dérivée de a t² + b t + c : coefficient non doublé, constante gardée
+function diagPoly(vs, a, b, k) {
+  const [u, v] = vs;
+  if (proche(u, a, .001) && a !== 0) return 'La dérivée de a t² est <b>2 a t</b> : le coefficient de t² est multiplié par 2.';
+  if (proche(v, b + k, .001) && k) return 'La constante disparaît : la dérivée d\'une constante est 0.';
+  if (proche(v, k, .001) && k !== b) return 'Le terme constant de P(t) vient du terme b t de E(t) (sa dérivée est b) ; la constante de E(t) disparaît.';
+  return 'Dérive terme à terme : a t² → 2 a t ; b t → b ; constante → 0.';
+}
+
+/* ---------- 1. La puissance moyenne ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. La puissance moyenne');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Un appareil qui convertit une énergie E pendant une durée Δt a une <b>puissance moyenne</b> :</p>
+      <div class="cle"><p class="crs-formule">P = ${fr('E', 'Δt')}</p>
+        <p>Unités : P en <b>W</b>, E en <b>J</b>, Δt en <b>s</b> (1 W = 1 J/s) ; ou P en <b>kW</b>, E en <b>kWh</b>, Δt en <b>h</b>.</p></div>
+    </div>
+    ${exemple(`<p>Une bouilloire convertit 180 kJ en 1 min 30 s.</p>
+      <p class="crs-calc">E = 180 kJ = 180 000 J ; Δt = 1 min 30 s = 90 s<br>P = ${fr('E', 'Δt')} = ${fr('180 000 J', '90 s')} = <span class="c">2 000 W</span></p>`)}`);
+  const [E1, t1] = hasard([[54, 45], [36, 30], [72, 60], [90, 45], [150, 120]]);            // kJ, s
+  const [E2, t2] = hasard([[3, 2], [4.5, 3], [1.2, 0.5], [6, 4], [2, 0.25]]);                // kWh, h
+  const [E3, m3] = hasard([[360, 2], [720, 3], [900, 5], [1500, 10]]);                        // J, min
+  c_.aToi(carte, [
+    { titre: 'Des kilojoules', enonce: `<p>Un sèche-cheveux convertit ${E1} kJ en ${t1} s.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule sa puissance moyenne, en W.', label: 'P =', valeur: E1 * 1000 / t1, unite: 'W', signe: false,
+        diag: v => proche(v, E1 / t1) ? `C'est la puissance en kW. Convertis E en joules : ${E1} kJ = ${fmt(E1 * 1000)} J.` : proche(v, t1 / E1 / 1000) || proche(v, t1 / E1) ? 'Rapport inversé : P = E / Δt.' : 'P = E / Δt, avec E en J et Δt en s.',
+        solution: `<p class="crs-calc">P = ${fr(fmt(E1 * 1000) + ' J', t1 + ' s')} = ${c(fmt(E1 * 1000 / t1) + ' W')}</p>` }] },
+    { titre: 'Des kilowattheures', enonce: `<p>Un radiateur consomme ${fmt(E2)} kWh en ${fmt(t2)} h.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule sa puissance moyenne, en kW.', label: 'P =', valeur: E2 / t2, unite: 'kW', signe: false,
+        diag: v => proche(v, E2 * t2) ? 'On divise : P = E / Δt.' : proche(v, t2 / E2) ? 'Rapport inversé : P = E / Δt.' : 'Avec E en kWh et Δt en h, P = E / Δt est en kW.',
+        solution: `<p class="crs-calc">P = ${fr(fmt(E2) + ' kWh', fmt(t2) + ' h')} = ${c(fmt(E2 / t2) + ' kW')}</p>` }] },
+    { titre: 'Des minutes', enonce: `<p>Un petit moteur convertit ${fmt(E3)} J en ${m3} min.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule sa puissance moyenne, en W.', label: 'P =', valeur: E3 / (m3 * 60), unite: 'W', signe: false,
+        diag: v => proche(v, E3 / m3) ? `Convertis la durée en secondes : ${m3} min = ${m3 * 60} s.` : 'P = E / Δt, avec Δt en secondes.',
+        solution: `<p class="crs-calc">Δt = ${m3} min = ${m3 * 60} s<br>P = ${fr(fmt(E3) + ' J', (m3 * 60) + ' s')} = ${c(fmt(r3(E3 / (m3 * 60))) + ' W')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. La puissance instantanée ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. La puissance instantanée : la dérivée de l\'énergie');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>La <b>puissance instantanée</b> est la variation de l'énergie par rapport au temps, à un instant t. C'est la <b>dérivée</b> de l'énergie :</p>
+      <div class="cle"><p class="crs-formule">P(t) = ${fr('dE', 'dt')} = E'(t)</p></div>
+      <div class="crs-defile"><table class="crs-tab"><tr><th>E(t)</th><th>P(t) = E'(t)</th></tr>
+        <tr><td>constante (ex. 500)</td><td>0</td></tr><tr><td>a t + b</td><td>a</td></tr><tr><td>a t²</td><td>2 a t</td></tr><tr><td>a sin(ω t)</td><td>a ω cos(ω t)</td></tr></table></div>
+      <p>On dérive une somme terme à terme. P est en W quand E est en J et t en s.</p>
+    </div>
+    ${exemple(`<p>E(t) = 98 t² + 5 t + 1. Calcule P à t = 10 s.</p>
+      <p class="crs-calc">P(t) = 2 × 98 t + 5 + 0 = 196 t + 5<br>P(10) = 196 × 10 + 5 = <span class="c">1 965 W</span></p>`)}`);
+  const a = hasard([2, 3, 4, 5, 6, 10, 12, 25]), b = hasard([0, 2, 4, 5, 8, 10]), k = hasard([1, 3, 6, 20, 50]), t = hasard([2, 3, 4, 5, 10]);
+  const a2 = hasard([25, 40, 120, 250, 300]), b2 = hasard([5, 12, 50, 100]), k3 = hasard([500, 800, 1200]);
+  c_.aToi(carte, [
+    { titre: 'Dériver un polynôme', enonce: `<p>E(t) = ${poly(a, b, k)}</p>`,
+      parties: [{ type: 'champs', ligne: true, q: 'Écris l\'expression de P(t).', champs: [{ label: 'P(t) =', valeur: 2 * a, unite: '× t +', signe: false }, { valeur: b, signe: false }],
+        diag: vs => diagPoly(vs, a, b, k), solution: `<p class="crs-calc">P(t) = 2 × ${a} t + ${b} = ${c(`${2 * a} t${b ? ' + ' + b : ''}`)}</p>` },
+      { type: 'nombre', q: `Calcule la puissance à t = ${t} s.`, label: `P(${t}) =`, valeur: 2 * a * t + b, unite: 'W', signe: false,
+        diag: v => proche(v, a * t * t + b * t + k) ? 'Tu as calculé l\'énergie E(t), pas la puissance : utilise l\'expression de P(t).' : `P(${t}) = ${2 * a} × ${t} + ${b}.`,
+        solution: `<p class="crs-calc">P(${t}) = ${2 * a} × ${t} + ${b} = ${c(fmt(2 * a * t + b) + ' W')}</p>` }] },
+    { titre: 'Une fonction affine', enonce: `<p>E(t) = ${a2} t + ${b2}</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est la puissance P(t) ?', label: 'P(t) =', valeur: a2, unite: 'W', signe: false,
+        diag: v => proche(v, a2 + b2) ? `La dérivée de la constante ${b2} est 0.` : 'La dérivée de a t + b est a.',
+        solution: `<p class="crs-calc">P(t) = ${c(a2 + ' W')} : la puissance est constante.</p>` }] },
+    { titre: 'Une énergie constante', enonce: `<p>E(t) = ${k3}</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est la puissance P(t) ?', label: 'P(t) =', valeur: 0, tol: 1e-9, unite: 'W',
+        diag: v => proche(v, k3) ? 'La dérivée d\'une constante est 0 : l\'énergie ne change pas, aucune énergie n\'est convertie.' : 'La dérivée d\'une constante est 0.',
+        solution: `<p class="crs-calc">P(t) = ${c('0 W')} : l'énergie ne varie pas.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Le sinus : en radians ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Dériver un sinus : la calculatrice en radians');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">E(t) = A sin(ω t) + B &nbsp;→&nbsp; P(t) = A ω cos(ω t)</p>
+        <p>Pour calculer cos(ω t), la calculatrice doit être en <b>radians</b> (pas en degrés).</p></div>
+    </div>
+    ${exemple(`<p>E(t) = 25 sin(6,28 t) + 2. Calcule P à t = 10 s.</p>
+      <p class="crs-calc">P(t) = 25 × 6,28 cos(6,28 t) + 0 = 157 cos(6,28 t)<br>P(10) = 157 cos(62,8) ≈ <span class="c">157 W</span> (en radians)</p>`)}`);
+  const [A, w, t] = hasard([[20, 2, 3], [10, 3, 2], [50, 0.5, 4], [40, 1.5, 2], [30, 2.5, 1]]);
+  const P = A * w * Math.cos(w * t), Pdeg = A * w * Math.cos(w * t * Math.PI / 180);
+  c_.aToi(carte, [
+    { titre: 'Dériver puis calculer', enonce: `<p>E(t) = ${A} sin(${fmt(w)} t) + 5</p>`,
+      parties: [{ type: 'champs', ligne: true, q: 'Écris l\'expression de P(t).', champs: [{ label: 'P(t) =', valeur: A * w, signe: false, unite: '× cos(' }, { valeur: w, signe: false, unite: 't)' }],
+        diag: vs => proche(vs[0], A, .001) ? `On multiplie A par ω : ${A} × ${fmt(w)}.` : 'La dérivée de A sin(ω t) est A ω cos(ω t) ; la constante disparaît.',
+        solution: `<p class="crs-calc">P(t) = ${A} × ${fmt(w)} cos(${fmt(w)} t) = ${c(`${fmt(A * w)} cos(${fmt(w)} t)`)}</p>` },
+      { type: 'nombre', q: `Calcule P à t = ${t} s (3 chiffres significatifs).`, label: `P(${t}) =`, valeur: P, rel: .01, unite: 'W',
+        diag: v => proche(v, Pdeg, .02) ? 'Ta calculatrice est en <b>degrés</b> : passe-la en <b>radians</b>.' : proche(v, -P, .02) ? 'Attention au signe : le cosinus est négatif ici.' : proche(v, A * Math.sin(w * t) + 5, .02) ? 'Tu as calculé E(t), pas P(t).' : `P(${t}) = ${fmt(A * w)} × cos(${fmt(w * t)}), en radians.`,
+        solution: `<p class="crs-calc">P(${t}) = ${fmt(A * w)} × cos(${fmt(w)} × ${t}) = ${fmt(A * w)} × cos(${fmt(w * t)}) ≈ ${c(fmt(r3(P)) + ' W')}</p>${P < 0 ? '<p>P est négative : à cet instant, le système perd de l\'énergie.</p>' : ''}` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. L'énergie cinétique d'un véhicule ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. Un exemple : l\'énergie cinétique d\'un véhicule');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">E<sub>c</sub> = ${fr('1', '2')} m v²</p>
+        <p>E<sub>c</sub> en J, m en kg, v en m/s.</p></div>
+      <p>Si la vitesse dépend du temps, on remplace v par son expression, puis on dérive.</p>
+    </div>
+    ${exemple(`<p>Un véhicule de masse m accélère : v(t) = 2 t.</p>
+      <p class="crs-calc">E<sub>c</sub>(t) = ${fr('1', '2')} m (2 t)² = ${fr('1', '2')} m × 4 t² = 2 m t²<br>P(t) = E<sub>c</sub>'(t) = 2 × 2 m t = <span class="c">4 m t</span></p>
+      <p>Avec m = 1 000 kg : P(2) = 4 × 1 000 × 2 = 8 000 W.</p>`)}`);
+  const m = hasard([800, 1000, 1200, 1500]), k = hasard([1, 2, 3, 4]), t = hasard([2, 3, 5]);
+  const coefE = m * k * k / 2, coefP = m * k * k;
+  c_.aToi(carte, [
+    { titre: 'À toi de dériver', enonce: `<p>Un véhicule de masse m = ${fmt(m)} kg accélère : v(t) = ${k === 1 ? '' : k + ' '}t (v en m/s).</p>`,
+      parties: [{ type: 'nombre', q: 'Écris E<sub>c</sub>(t) sous la forme E<sub>c</sub> = □ t² : que vaut le coefficient ?', label: 'E<sub>c</sub>(t) =', valeur: coefE, unite: '× t²', signe: false,
+        diag: v => proche(v, m * k / 2) ? `La vitesse est au carré : (${k} t)² = ${k * k} t².` : proche(v, m * k * k) ? 'N\'oublie pas le ½.' : `E<sub>c</sub> = ½ × ${fmt(m)} × (${k} t)².`,
+        solution: `<p class="crs-calc">E<sub>c</sub> = ${fr('1', '2')} × ${fmt(m)} × (${k} t)² = ${fr('1', '2')} × ${fmt(m)} × ${k * k} t² = ${c(fmt(coefE) + ' t²')}</p>` },
+      { type: 'nombre', q: `Calcule la puissance reçue par le véhicule à t = ${t} s.`, label: `P(${t}) =`, valeur: coefP * t, unite: 'W', signe: false,
+        diag: v => proche(v, coefE * t * t) ? 'Tu as calculé l\'énergie cinétique, pas la puissance : dérive d\'abord.' : proche(v, coefE * t) ? 'La dérivée de a t² est 2 a t : multiplie par 2.' : `P(t) = 2 × ${fmt(coefE)} t = ${fmt(coefP)} t.`,
+        solution: `<p class="crs-calc">P(t) = 2 × ${fmt(coefE)} t = ${fmt(coefP)} t<br>P(${t}) = ${fmt(coefP)} × ${t} = ${c(fmt(coefP * t) + ' W')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 5. Sur un graphique E(t) ---------- */
+function etape5(c_) {
+  const carte = c_.carte('5. Lire la puissance sur un graphique E(t)');
+  const ex = { xmax: 60, ymax: 16000, pasX: 10, pasY: 2000, nomX: 't (s)', nomY: 'E (J)', mg: 62, courbes: [[[0, 0], [60, 15000]]],
+    traits: [[40, 0, 40, 10000], [0, 10000, 40, 10000]], points: [[40, 10000]],
+    cotes: [{ x1: 0, y1: 0, x2: 40, y2: 0, t: '40 s' }, { x1: 46, y1: 0, x2: 46, y2: 10000, t: '10 000 J' }], aria: 'Énergie en fonction du temps : droite passant par l\'origine et par le point (40 s ; 10 000 J)' };
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Si le graphique E(t) est une <b>droite</b>, la puissance est constante : c'est le <b>coefficient directeur</b> de la droite.</p>
+        <p class="crs-formule">P = ${fr('ΔE', 'Δt')}</p>
+        <p>Une droite qui passe par l'origine représente une fonction <b>linéaire</b> (E = a t) ; sinon, une fonction <b>affine</b> (E = a t + b).</p></div>
+      <div class="ph-lien-app"><p>Besoin de revoir la lecture d'un graphique ?</p><a class="btn-small" href="../../lecture-graphique/index.html">Revois la lecture graphique →</a></div>
+    </div>
+    ${exemple(`${graphe(ex)}<p>La droite passe par l'origine : E est une fonction <b>linéaire</b> du temps.</p>
+      <p class="crs-calc">P = ${fr('10 000 J', '40 s')} = <span class="c">250 W</span> ; donc E = 250 t</p>`)}`);
+  const [P, tx] = hasard([[150, 40], [300, 20], [400, 30], [200, 50], [500, 20]]);
+  const E0 = hasard([0, 2000]), tmax = tx * 1.5, ymax = Math.ceil((E0 + P * tmax) / 2000) * 2000 + 2000;
+  const g = { xmax: tmax, ymax, pasX: tx / 4, pasY: 2000, nomX: 't (s)', nomY: 'E (J)', mg: 62, courbes: [[[0, E0], [tmax, E0 + P * tmax]]], points: [[tx, E0 + P * tx]],
+    traits: [[tx, 0, tx, E0 + P * tx], [0, E0 + P * tx, tx, E0 + P * tx]], aria: `Énergie en fonction du temps : droite passant par (0 ; ${E0} J) et (${tx} s ; ${E0 + P * tx} J)` };
+  c_.aToi(carte, [
+    { titre: 'Linéaire ou affine ?', enonce: graphe(g),
+      parties: [{ type: 'choix', q: 'Cette droite représente une fonction :', melanger: false, options: [{ id: 'lin', label: 'linéaire' }, { id: 'aff', label: 'affine (non linéaire)' }], bonne: E0 ? 'aff' : 'lin',
+        indice: E0 ? 'La droite ne passe pas par l\'origine : à t = 0, E n\'est pas nulle.' : 'La droite passe par l\'origine (0 ; 0).',
+        solution: E0 ? `<p>À t = 0, E = ${fmt(E0)} J : la droite ne passe pas par l'origine, la fonction est <b>affine</b>.</p>` : '<p>La droite passe par l\'origine : la fonction est <b>linéaire</b>.</p>' },
+      { type: 'nombre', q: 'Calcule le coefficient directeur de la droite : c\'est la puissance.', label: 'P =', valeur: P, unite: 'W', signe: false,
+        diag: v => proche(v, (E0 + P * tx) / tx) && E0 ? `La droite ne part pas de 0 : ΔE = ${fmt(E0 + P * tx)} − ${fmt(E0)} J.` : proche(v, tx / (E0 + P * tx)) || proche(v, tx / (P * tx)) ? 'Rapport inversé : P = ΔE / Δt.' : 'P = ΔE / Δt entre deux points de la droite.',
+        solution: `<p class="crs-calc">P = ${fr('ΔE', 'Δt')} = ${fr(`${fmt(E0 + P * tx)} − ${fmt(E0)}`, `${tx} − 0`)} = ${c(P + ' W')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 6. Avec des valeurs successives ---------- */
+function etape6(c_) {
+  const carte = c_.carte('6. Avec des valeurs successives');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Avec un tableau de valeurs mesurées, on calcule la puissance à un instant avec deux mesures très proches :</p>
+      <div class="cle"><p class="crs-formule">P ≈ ${fr('petite variation d\'énergie', 'petite durée')}</p></div>
+    </div>
+    ${exemple(`<div class="crs-defile"><table class="crs-tab"><tr><th>t (s)</th><td>10</td><td>10,5</td></tr><tr><th>E (J)</th><td>1 200</td><td>1 260</td></tr></table></div>
+      <p class="crs-calc">P(10) ≈ ${fr('1 260 − 1 200', '10,5 − 10')} = ${fr('60 J', '0,5 s')} = <span class="c">120 W</span></p>`)}`);
+  const t0 = hasard([4, 6, 8, 20]), dt = hasard([0.1, 0.2, 0.5]), E0 = hasard([300, 450, 800, 2500]), dE = hasard([3, 4, 6, 9, 12]);
+  c_.aToi(carte, [
+    { titre: 'À partir d\'un tableau', enonce: `<div class="crs-defile"><table class="crs-tab"><tr><th>t (s)</th><td>${fmt(t0)}</td><td>${fmt(t0 + dt)}</td></tr><tr><th>E (J)</th><td>${fmt(E0)}</td><td>${fmt(E0 + dE)}</td></tr></table></div>`,
+      parties: [{ type: 'nombre', q: `Estime la puissance à t = ${t0} s.`, label: `P(${t0}) ≈`, valeur: dE / dt, unite: 'W', signe: false,
+        diag: v => proche(v, (E0 + dE) / (t0 + dt), .02) || proche(v, E0 / t0, .02) ? 'Utilise les <b>variations</b> : ΔE = E<sub>2</sub> − E<sub>1</sub> et Δt = t<sub>2</sub> − t<sub>1</sub>.' : proche(v, dt / dE, .02) ? 'Rapport inversé : P ≈ ΔE / Δt.' : 'P ≈ ΔE / Δt.',
+        solution: `<p class="crs-calc">P ≈ ${fr(`${fmt(E0 + dE)} − ${fmt(E0)}`, `${fmt(t0 + dt)} − ${fmt(t0)}`)} = ${fr(dE + ' J', fmt(dt) + ' s')} = ${c(fmt(r3(dE / dt)) + ' W')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">P = ${fr('E', 'Δt')}</p><p>Puissance moyenne : W, J, s (1 W = 1 J/s) ou kW, kWh, h.</p></div>
+    <div class="cle"><p class="crs-formule">P(t) = ${fr('dE', 'dt')} = E'(t)</p><p>La puissance instantanée est la <b>dérivée</b> de l'énergie : constante → 0 ; a t + b → a ; a t² → 2 a t ; a sin(ω t) → a ω cos(ω t), calculatrice en <b>radians</b>.</p></div>
+    <div class="cle"><p>Graphique E(t) droit : P = <b>coefficient directeur</b> = ΔE / Δt. Valeurs successives : P ≈ petite variation d'énergie / petite durée.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur la puissance →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3_cours.html">Module 3 : calcul de l'énergie</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, etape5, etape6, aRetenir]);
+EP.menu('module_2_cours');
+</script>
+</body>
+</html>

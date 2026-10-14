@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : fiche récapitulative — Chapitre 1 : Énergie et puissance</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ep.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ep.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Calcul de l'énergie</h2>
+  </div>
+<!-- Fiche récapitulative du module 3 : E = P × Δt, aire sous la courbe, I(t) à U constante, Wh et autonomie. -->
+
+  <section class="er-card" id="energie">
+    <h3 class="cours-titre">Puissance constante</h3>
+    <div class="cle"><p class="som-formule">E = P × Δt</p>
+      <p>E en J, P en W, Δt en s ; ou E en kWh, P en kW, Δt en h.</p></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Puissance variable : l'aire sous la courbe</h3>
+    <div class="cle"><p>L'énergie est l'<b>intégrale</b> de la puissance : <b>E = aire sous la courbe P(t)</b>. On découpe l'aire en morceaux simples, puis on additionne :</p>
+      <ul class="er-liste"><li>rectangle : base × hauteur ;</li><li>triangle : base × hauteur / 2 ;</li><li>trapèze : un triangle posé sur un rectangle.</li></ul>
+      <p>La base est une <b>durée</b> (différence de deux dates), la hauteur une <b>puissance</b>.</p></div>
+    <div class="som-fiche-figs deux">
+      <div><div id="fig1"></div><p>Triangle : E = 100 s × 200 W / 2 = 10 000 J</p></div>
+      <div><div id="fig2"></div><p>Trapèze : E = 24 000 × 155 / 2 + 14 000 × 155 ≈ 4,0 × 10<sup>6</sup> J</p></div>
+    </div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Graphique I(t), wattheures, autonomie</h3>
+    <div class="cle"><p>Tension U constante : P = U × I ; on obtient P(t) en <b>multipliant chaque graduation</b> de l'axe I par U.</p></div>
+    <div class="cle"><p class="som-formule">1 Wh = 3 600 J</p>
+      <p class="som-formule">autonomie = <span class="som-fr"><span>énergie disponible</span><span>puissance moyenne</span></span></p></div>
+    <p class="cours-exemple-t">Exemple</p>
+    <p>11,5 Wh = 41 400 J ; avec 21,7 W : autonomie = 41 400 / 21,7 ≈ 1 908 s ≈ 31,8 min.</p>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_3_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_3_questions.html">Questions sur l'énergie</a>
+  </div>
+</div>
+<script>
+document.getElementById('fig1').innerHTML = EP.graphe({ xmax: 220, ymax: 250, pasX: 50, pasY: 50, nomX: 't (s)', nomY: 'P (W)', hMin: 180, hMax: 220, ratio: .6,
+  courbes: [[[0, 0], [100, 200], [200, 0], [220, 0]]], aires: [{ de: 100, a: 200, motif: 1 }], aria: 'Triangle hachuré sous la courbe P(t) entre 100 et 200 s' });
+document.getElementById('fig2').innerHTML = EP.graphe({ xmax: 200, ymax: 80000, pasX: 25, gradX: 50, pasY: 10000, gradY: 20000, nomX: 't (s)', nomY: 'P (W)', mg: 64, hMin: 180, hMax: 220, ratio: .6,
+  courbes: [[[0, 72000], [25, 72000], [25, 38000], [180, 14000], [180, 0], [200, 0]]],
+  aires: [{ pts: [[25, 14000], [25, 38000], [180, 14000]], motif: 2 }, { pts: [[25, 0], [25, 14000], [180, 14000], [180, 0]], motif: 3 }],
+  traits: [[25, 14000, 180, 14000]], aria: 'Trapèze découpé en un triangle et un rectangle entre 25 et 180 s' });
+EP.menu('fiche_3');
+</script>
+</body>
+</html>

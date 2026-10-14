@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : calcul de l'énergie — Chapitre 1 : Énergie et puissance</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ep.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ep.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS</span>
+    <h2 class="er-titre">Calcul de l'énergie</h2>
+    <p class="er-contexte">Quand on connaît la puissance, on retrouve l'énergie : par <b>E = P × Δt</b> si la puissance est constante, et par l'<b>aire sous la courbe P(t)</b> dans tous les cas. Tu vas régler l'intervalle sur le graphique, lire la base et la hauteur, puis calculer.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   L'outil « aire sous la courbe » (EP.partieAire) est un item 'perso' :
+   l'élève règle les bornes de l'intervalle, l'aire se hachure, puis il
+   lit la base et la hauteur et calcule l'énergie. Plusieurs outils
+   peuvent être affichés en même temps (« Afficher tout le cours »).
+   ============================================================ */
+const { fmt, hasard, exemple } = COURS;
+const { fr, proche, graphe, partieAire, aireSous } = EP;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+
+// diagnostics : aire d'un triangle sans le « / 2 », base ou hauteur mal lues
+function diagRect(v, b, h) {
+  if (proche(v, b + h)) return 'L\'aire d\'un rectangle est base × hauteur : on <b>multiplie</b>.';
+  if (proche(v, b * h / 2)) return 'C\'est un <b>rectangle</b> : pas de division par 2 (c\'est pour un triangle).';
+  return `E = P × Δt = ${fmt(h)} × ${fmt(b)}.`;
+}
+function diagTri(v, b, h) {
+  if (proche(v, b * h)) return 'C\'est un <b>triangle</b> : son aire est base × hauteur <b>/ 2</b>.';
+  return `E = ${fmt(b)} × ${fmt(h)} / 2.`;
+}
+
+/* ---------- 1. Puissance constante ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Puissance constante : E = P × Δt');
+  const g = { xmax: 4, ymax: 250, pasX: 1, pasY: 50, nomX: 't (s)', nomY: 'P (W)', courbes: [[[0, 200], [4, 200]]], aires: [{ de: 1, a: 3, motif: 1 }],
+    traits: [[1, 0, 1, 200], [3, 0, 3, 200]], cotes: [{ x1: 1, y1: 0, x2: 3, y2: 0, t: 'Δt = 2 s' }, { x1: 3.3, y1: 0, x2: 3.3, y2: 200, t: '200 W' }],
+    hMax: 260, aria: 'Puissance constante de 200 W ; aire hachurée entre 1 s et 3 s' };
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Si la puissance P est <b>constante</b> pendant la durée Δt :</p>
+      <div class="cle"><p class="crs-formule">E = P × Δt</p>
+        <p>E en J, P en W, Δt en s ; ou E en kWh, P en kW, Δt en h.</p></div>
+      <p>Sur le graphique P(t), c'est l'aire d'un <b>rectangle</b> : base Δt, hauteur P.</p>
+    </div>
+    ${exemple(`${graphe(g)}<p class="crs-calc">E = P × Δt = 200 W × 2 s = <span class="c">400 J</span></p>`)}`);
+  const P = hasard([150, 250, 400]), [a, b] = hasard([[2, 6], [1, 4], [3, 8], [2, 7]]), Pk = hasard([1.5, 2, 2.5]), h = hasard([2, 3, 4]);
+  const gA = { xmax: 10, ymax: P * 1.25, pasX: 1, pasY: P / 5, gradY: P / 5, nomX: 't (s)', nomY: 'P (W)', courbes: [[[0, P], [10, P]]], aria: `Puissance constante de ${P} W pendant 10 s` };
+  c_.aToi(carte, [
+    { titre: 'Avec l\'outil : l\'aire d\'un rectangle', enonce: `<p>Quelle énergie l'appareil convertit-il entre t = ${a} s et t = ${b} s ?</p>`,
+      parties: [partieAire({ g: gA, de: a, a: b, t1: 0, t2: 1, solution: '<p>L\'aire hachurée est un rectangle.</p>' }),
+        { type: 'champs', q: 'Lis la base et la hauteur du rectangle sur le graphique.', champs: [{ label: 'Δt =', valeur: b - a, unite: 's', signe: false }, { label: 'P =', valeur: P, unite: 'W', signe: false }],
+          diag: vs => proche(vs[0], b) ? `La base est la <b>durée</b> : Δt = ${b} − ${a}.` : 'La base est la durée (différence des deux dates) ; la hauteur est la puissance, lue sur l\'axe vertical.', solution: `<p>Δt = ${b} − ${a} = ${b - a} s ; P = ${P} W.</p>` },
+        { type: 'nombre', q: 'Calcule l\'énergie.', label: 'E =', valeur: P * (b - a), unite: 'J', signe: false, diag: v => diagRect(v, b - a, P),
+          solution: `<p class="crs-calc">E = P × Δt = ${P} W × ${b - a} s = ${c(fmt(P * (b - a)) + ' J')}</p>` }] },
+    { titre: 'En kilowattheures', enonce: `<p>Un radiateur de puissance ${fmt(Pk)} kW fonctionne pendant ${h} h.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle énergie consomme-t-il ?', label: 'E =', valeur: Pk * h, unite: 'kWh', signe: false,
+        diag: v => proche(v, Pk * h * 1000) ? 'Avec P en kW et Δt en h, E est directement en kWh.' : proche(v, Pk / h) ? 'E = P × Δt : on multiplie.' : 'E = P × Δt.',
+        solution: `<p class="crs-calc">E = P × Δt = ${fmt(Pk)} kW × ${h} h = ${c(fmt(Pk * h) + ' kWh')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Puissance variable : l'aire sous la courbe ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Puissance variable : l\'aire sous la courbe P(t)');
+  const g = { xmax: 220, ymax: 250, pasX: 50, pasY: 50, nomX: 't (s)', nomY: 'P (W)', courbes: [[[0, 0], [100, 200], [200, 0], [220, 0]]], aires: [{ de: 100, a: 200, motif: 1 }],
+    traits: [[0, 200, 100, 200]], cotes: [{ x1: 100, y1: 0, x2: 200, y2: 0, t: '100 s' }, { x1: 96, y1: 0, x2: 96, y2: 200, t: '200 W', pos: 'gauche' }],
+    hMax: 260, aria: 'Puissance qui monte de 0 à 200 W entre 0 et 100 s puis redescend à 0 à 200 s ; triangle hachuré entre 100 et 200 s' };
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Quand la puissance varie, l'énergie est l'<b>intégrale</b> de la puissance :</p>
+      <div class="cle"><p class="crs-formule">E = aire sous la courbe P(t)</p>
+        <p>On découpe l'aire en figures simples : <b>rectangle</b> (base × hauteur), <b>triangle</b> (base × hauteur / 2), trapèze (rectangle + triangle). Cela marche aussi quand P est constante.</p></div>
+    </div>
+    ${exemple(`<p>Énergie convertie entre t = 100 s et t = 200 s :</p>${graphe(g)}
+      <p class="crs-calc">E = ${fr('base × hauteur', '2')} = ${fr('100 s × 200 W', '2')} = <span class="c">10 000 J</span> (10 kJ)</p>`)}`);
+  const Pm = hasard([200, 300, 400, 600]), T1 = hasard([20, 40]), T2 = T1 + hasard([40, 60]);
+  const gA = { xmax: T2 + 20, ymax: Pm * 1.25, pasX: 10, gradX: 20, pasY: Pm / 4, nomX: 't (s)', nomY: 'P (W)', courbes: [[[0, 0], [T1, Pm], [T2, 0], [T2 + 20, 0]]],
+    aria: `Puissance qui monte de 0 à ${Pm} W entre 0 et ${T1} s, puis redescend à 0 à ${T2} s` };
+  c_.aToi(carte, [
+    { titre: 'Avec l\'outil : l\'aire d\'un triangle', enonce: `<p>Quelle énergie l'appareil convertit-il entre t = ${T1} s et t = ${T2} s ?</p>`,
+      parties: [partieAire({ g: gA, de: T1, a: T2, t1: 0, t2: 10 }),
+        { type: 'champs', q: 'Lis la base et la hauteur du triangle.', champs: [{ label: 'base Δt =', valeur: T2 - T1, unite: 's', signe: false }, { label: 'hauteur P =', valeur: Pm, unite: 'W', signe: false }],
+          diag: vs => proche(vs[0], T2) ? `La base est une durée : ${T2} − ${T1}.` : 'La base est la durée (différence des deux dates) ; la hauteur est la puissance la plus grande, lue sur l\'axe vertical.', solution: `<p>Base : ${T2} − ${T1} = ${T2 - T1} s ; hauteur : ${Pm} W.</p>` },
+        { type: 'nombre', q: 'Calcule l\'énergie.', label: 'E =', valeur: (T2 - T1) * Pm / 2, unite: 'J', signe: false, diag: v => diagTri(v, T2 - T1, Pm),
+          solution: `<p class="crs-calc">E = ${fr(`${T2 - T1} s × ${Pm} W`, '2')} = ${c(fmt((T2 - T1) * Pm / 2) + ' J')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Découper l'aire en morceaux ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Découper l\'aire en plusieurs morceaux');
+  // exemple de l'exercice 15 : de 25 s à 180 s, P passe de 38 000 W à 14 000 W
+  const g = { xmax: 200, ymax: 80000, pasX: 25, gradX: 50, pasY: 10000, gradY: 20000, nomX: 't (s)', nomY: 'P (W)', mg: 64, fmtY: v => fmt(v),
+    courbes: [[[0, 72000], [25, 72000], [25, 38000], [180, 14000], [180, 0], [200, 0]]],
+    aires: [{ pts: [[25, 14000], [25, 38000], [180, 14000]], motif: 2 }, { pts: [[25, 0], [25, 14000], [180, 14000], [180, 0]], motif: 3 }],
+    traits: [[25, 14000, 180, 14000]], cotes: [{ x1: 25, y1: 0, x2: 180, y2: 0, t: '155 s' }, { x1: 186, y1: 14000, x2: 186, y2: 38000, t: '24 000 W' }, { x1: 21, y1: 0, x2: 21, y2: 14000, t: '14 000 W', pos: 'gauche' }],
+    hMax: 290, aria: 'Puissance de 38 000 W à 25 s qui diminue jusqu\'à 14 000 W à 180 s ; aire découpée en un triangle et un rectangle' };
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Une aire compliquée se découpe en morceaux simples : on calcule chaque aire, puis on les <b>additionne</b>. Un trapèze se découpe en un <b>triangle</b> posé sur un <b>rectangle</b>.</p>
+    </div>
+    ${exemple(`<p>Entre t = 25 s et t = 180 s, la puissance d'un moteur passe de 38 000 W à 14 000 W :</p>${graphe(g)}
+      <p class="crs-calc">E = triangle + rectangle = ${fr('24 000 W × 155 s', '2')} + 14 000 W × 155 s<br>E = 1 860 000 + 2 170 000 = 4 030 000 J ≈ <span class="c">4,0 × 10<sup>6</sup> J</span></p>`)}`);
+  const P1 = hasard([300, 400, 500]), P2 = hasard([100, 200]), t1 = hasard([10, 20]), t2 = t1 + 20;
+  const pts = [[0, P1], [t1, P1], [t2, P2], [t2, 0], [t2 + 10, 0]];
+  const E1 = P1 * t1, Etri = (P1 - P2) * (t2 - t1) / 2, Erect = P2 * (t2 - t1), E = E1 + Etri + Erect;
+  const gA = { xmax: t2 + 10, ymax: P1 * 1.25, pasX: 5, gradX: 10, pasY: 50, gradY: 100, nomX: 't (s)', nomY: 'P (W)', courbes: [pts],
+    aria: `Puissance de ${P1} W de 0 à ${t1} s, qui diminue ensuite jusqu'à ${P2} W à ${t2} s, puis s'annule` };
+  const decoupe = [{ pts: [[0, 0], [0, P1], [t1, P1], [t1, 0]], motif: 1 }, { pts: [[t1, P2], [t1, P1], [t2, P2]], motif: 2 }, { pts: [[t1, 0], [t1, P2], [t2, P2], [t2, 0]], motif: 3 }];
+  c_.aToi(carte, [
+    { titre: 'Avec l\'outil : trois morceaux', enonce: `<p>Quelle énergie l'appareil convertit-il entre t = 0 et t = ${t2} s ?</p>`,
+      parties: [partieAire({ g: gA, de: 0, a: t2, t1: 5, t2: 10, decoupe, pas: 5,
+        solution: '<p>L\'aire se découpe en un rectangle (de 0 à ' + t1 + ' s), puis un triangle posé sur un rectangle (de ' + t1 + ' à ' + t2 + ' s).</p>' }),
+        { type: 'champs', q: 'Calcule l\'aire de chaque morceau.', champs: [{ label: 'rectangle de gauche :', valeur: E1, unite: 'J', signe: false }, { label: 'triangle :', valeur: Etri, unite: 'J', signe: false }, { label: 'rectangle de droite :', valeur: Erect, unite: 'J', signe: false }],
+          diag: vs => proche(vs[1], 2 * Etri) ? 'Le triangle : base × hauteur <b>/ 2</b>.' : proche(vs[1], P1 * (t2 - t1) / 2) ? `La hauteur du triangle est ${P1} − ${P2} = ${P1 - P2} W (il est posé sur le rectangle).` : 'Rectangle : base × hauteur ; triangle : base × hauteur / 2. Lis les dates et les puissances sur les axes.',
+          solution: `<p class="crs-calc">rectangle : ${P1} × ${t1} = ${fmt(E1)} J<br>triangle : (${P1} − ${P2}) × ${t2 - t1} / 2 = ${fmt(Etri)} J<br>rectangle : ${P2} × ${t2 - t1} = ${fmt(Erect)} J</p>` },
+        { type: 'nombre', q: 'En déduire l\'énergie totale.', label: 'E =', valeur: E, unite: 'J', signe: false,
+          diag: () => 'Additionne les trois aires.', solution: `<p class="crs-calc">E = ${fmt(E1)} + ${fmt(Etri)} + ${fmt(Erect)} = ${c(fmt(E) + ' J')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Un graphique I(t) à tension constante ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. Un graphique I(t) à tension constante');
+  const g = { xmax: 200, ymax: 2.4, pasX: 20, gradX: 40, pasY: .2, gradY: .4, nomX: 't (s)', nomY: 'I (A)', mg: 48,
+    courbes: [[[0, 0], [5, 0], [5, .65], [60, .65], [60, 1.9], [180, 1.9], [180, 0], [200, 0]]], traits: [[0, .65, 5, .65], [0, 1.9, 60, 1.9]],
+    textes: [{ x: 30, y: .65, t: '× 7,2 → 4,7 W', dy: -8 }, { x: 120, y: 1.9, t: '× 7,2 → 13,7 W', dy: -8 }],
+    hMax: 260, aria: 'Intensité de 0 entre 0 et 5 s, 0,65 A de 5 à 60 s, 1,9 A de 60 à 180 s' };
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Si on connaît l'intensité I(t) et que la tension U est <b>constante</b>, on trace d'abord P = U × I : cela revient à <b>multiplier chaque graduation</b> de l'axe vertical par U. Puis on calcule l'aire sous la courbe P(t).</p>
+      <div class="cle"><p class="crs-formule">P = U × I</p><p>P en W, U en V, I en A.</p></div>
+    </div>
+    ${exemple(`<p>Un moteur de robot est alimenté sous U = 7,2 V :</p>${graphe(g)}
+      <p class="crs-calc">De 5 à 60 s : P = 7,2 × 0,65 ≈ 4,7 W, donc E = 4,7 W × 55 s ≈ <span class="c">259 J</span></p>`)}`);
+  const U = hasard([12, 24, 6]), I = hasard([1.5, 2, 2.5]), d = hasard([20, 30, 40]);
+  const gA = { xmax: d + 20, ymax: 3, pasX: 10, pasY: .5, nomX: 't (s)', nomY: 'I (A)', mg: 44, courbes: [[[0, 0], [10, 0], [10, I], [10 + d, I], [10 + d, 0], [d + 20, 0]]],
+    aria: `Intensité de ${fmt(I)} A entre 10 s et ${10 + d} s, nulle ailleurs` };
+  c_.aToi(carte, [
+    { titre: 'D\'abord la puissance', enonce: `<p>Ce moteur est alimenté sous une tension constante U = ${U} V.</p>${graphe(gA)}`,
+      parties: [{ type: 'nombre', q: 'Quelle puissance reçoit-il entre 10 s et ' + (10 + d) + ' s ?', label: 'P =', valeur: U * I, unite: 'W', signe: false,
+        diag: v => proche(v, U / I) || proche(v, I / U) ? 'P = U × I : on multiplie.' : 'P = U × I.', solution: `<p class="crs-calc">P = U × I = ${U} V × ${fmt(I)} A = ${c(fmt(U * I) + ' W')}</p>` },
+      { type: 'nombre', q: 'Quelle énergie reçoit-il entre 10 s et ' + (10 + d) + ' s ?', label: 'E =', valeur: U * I * d, unite: 'J', signe: false,
+        diag: v => proche(v, I * d) ? 'L\'aire sous la courbe I(t) n\'est pas une énergie : multiplie d\'abord I par U pour avoir P.' : proche(v, U * I * (10 + d)) ? `La durée est Δt = ${10 + d} − 10 = ${d} s.` : 'E = P × Δt.',
+        solution: `<p class="crs-calc">E = P × Δt = ${fmt(U * I)} W × ${d} s = ${c(fmt(U * I * d) + ' J')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 5. Wattheures et autonomie ---------- */
+function etape5(c_) {
+  const carte = c_.carte('5. Wattheures et autonomie');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">1 Wh = 1 W × 3 600 s = 3 600 J</p></div>
+      <div class="cle"><p class="crs-formule">autonomie = ${fr('énergie disponible', 'puissance moyenne')}</p>
+        <p>Énergie en J et puissance en W : autonomie en s. Énergie en Wh et puissance en W : autonomie en h.</p></div>
+    </div>
+    ${exemple(`<p>Une batterie contient 11,5 Wh ; le robot consomme en moyenne 21,7 W.</p>
+      <p class="crs-calc">E = 11,5 Wh = 11,5 × 3 600 = 41 400 J<br>autonomie = ${fr('41 400 J', '21,7 W')} ≈ 1 908 s ≈ <span class="c">31,8 min</span></p>`)}`);
+  const Wh = hasard([5, 12, 20, 50]), P = hasard([4, 8, 10, 25]), Wh2 = hasard([30, 60, 90]), P2 = hasard([15, 20, 45]);
+  c_.aToi(carte, [
+    { titre: 'Des wattheures aux joules', enonce: `<p>Une batterie contient une énergie de ${Wh} Wh.</p>`,
+      parties: [{ type: 'nombre', q: 'Convertis cette énergie en joules.', label: 'E =', valeur: Wh * 3600, unite: 'J', signe: false,
+        diag: v => proche(v, Wh * 60) ? '1 h = 3 600 s (pas 60).' : proche(v, Wh / 3600) ? 'On multiplie par 3 600 : 1 Wh = 3 600 J.' : '1 Wh = 3 600 J.', solution: `<p class="crs-calc">E = ${Wh} × 3 600 = ${c(fmt(Wh * 3600) + ' J')}</p>` }] },
+    { titre: 'L\'autonomie', enonce: `<p>Une batterie de ${Wh2} Wh alimente un appareil de puissance moyenne ${P2} W.</p>`,
+      parties: [{ type: 'nombre', q: 'Combien de temps fonctionne-t-il, en heures ?', label: 'autonomie =', valeur: Wh2 / P2, rel: .01, unite: 'h', signe: false,
+        diag: v => proche(v, P2 / Wh2, .02) ? 'Rapport inversé : autonomie = énergie / puissance.' : proche(v, Wh2 * P2, .02) ? 'On divise : autonomie = énergie / puissance.' : 'autonomie = énergie (Wh) / puissance (W).',
+        solution: `<p class="crs-calc">autonomie = ${fr(Wh2 + ' Wh', P2 + ' W')} ≈ ${c(fmt(r3(Wh2 / P2)) + ' h')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">E = P × Δt</p><p>Puissance constante : E en J, P en W, Δt en s ; ou E en kWh, P en kW, Δt en h.</p></div>
+    <div class="cle"><p class="crs-formule">E = aire sous la courbe P(t)</p><p>L'énergie est l'intégrale de la puissance : on découpe l'aire en rectangles (base × hauteur) et triangles (base × hauteur / 2), puis on additionne.</p></div>
+    <div class="cle"><p>Graphique I(t) avec U constante : P = U × I (on multiplie chaque graduation par U).</p></div>
+    <div class="cle"><p>1 Wh = 3 600 J ; autonomie = énergie disponible / puissance moyenne.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur l'énergie →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_4.html">Module 4 : exercices du manuel</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, etape5, aRetenir]);
+EP.menu('module_3_cours');
+</script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur le rendement — Chapitre 1 : Énergie et puissance</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ep.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="ep.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : calcul du rendement (3),
+   puissance utile ou apportée (3), formes d'énergie (2),
+   diagramme énergétique (2).
+   Chaque fabrique renvoie une question différente à chaque appel.
+   Erreurs diagnostiquées : rapport inversé (η > 1), unités non
+   converties, P_u = η × P_a confondu avec P_a = P_u / η.
+   ============================================================ */
+const { o, fq, fmt, fr, hasard, melanger, proche, conv, slot, diagramme } = EP;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const r2 = v => +v.toPrecision(2), r3 = v => +v.toPrecision(3);
+const etiq = (id, label, cible, indice) => ({ id, label, cible, indice });
+
+// diagnostics communs
+function diagEta(v, Pu, Pa, brutU, brutA) {
+  if (proche(v, Pa / Pu, .02)) return 'Tu as inversé le rapport : η = P<sub>u</sub> / P<sub>a</sub>. Un rendement ne dépasse jamais 1.';
+  if (brutU != null && proche(v, brutU / brutA, .02)) return 'Les deux puissances ne sont pas dans la même unité : convertis-les avant de diviser.';
+  if (brutU != null && proche(v, brutA / brutU, .02)) return 'Rapport inversé, et unités à convertir : η = P<sub>u</sub> / P<sub>a</sub>, dans la même unité.';
+  if (proche(v, 100 * Pu / Pa, .02)) return 'On attend l\'écriture décimale, pas le pourcentage.';
+  return 'η = P<sub>u</sub> / P<sub>a</sub>, avec P<sub>u</sub> et P<sub>a</sub> dans la même unité.';
+}
+const diagPu = (v, eta, Pa) => proche(v, Pa / eta, .02) ? 'Tu as divisé par η : P<sub>u</sub> = η × P<sub>a</sub> (la puissance utile est plus petite que P<sub>a</sub>).' : 'η = P<sub>u</sub> / P<sub>a</sub> donc P<sub>u</sub> = η × P<sub>a</sub>.';
+const diagPa = (v, eta, Pu) => proche(v, eta * Pu, .02) ? 'Tu as multiplié par η : P<sub>a</sub> = P<sub>u</sub> / η (la puissance apportée est plus grande que P<sub>u</sub>).' : 'η = P<sub>u</sub> / P<sub>a</sub> donc P<sub>a</sub> = P<sub>u</sub> / η.';
+
+/* ---------- Groupe 1 : calculer un rendement ---------- */
+const G1 = [
+  function memeUnite() {
+    const [Pu, Pa] = hasard([[15, 45], [30, 50], [24, 40], [63, 70], [180, 200], [350, 500]]);
+    return { theme: 'Calculer un rendement', enonce: `<p>Un appareil reçoit une puissance P<sub>a</sub> = ${Pa} W et fournit une puissance utile P<sub>u</sub> = ${Pu} W.</p>`,
+      parties: [fq.nombre('Calcule son rendement (2 chiffres significatifs).', 'η =', Pu / Pa, '', { rel: .02, signe: false, affiche: fmt(r2(Pu / Pa)), diag: v => diagEta(v, Pu, Pa),
+        solution: calc(`η = ${fr('P<sub>u</sub>', 'P<sub>a</sub>')} = ${fr(Pu + ' W', Pa + ' W')} = ${c(fmt(r2(Pu / Pa)))}`) })] };
+  },
+  function unitesMelangees() {
+    const cas = hasard([
+      { u: [5.0, 'mW'], a: [4.5, 'W'], fu: 1e-3, fa: 1 }, { u: [2.8, 'kW'], a: [3000, 'W'], fu: 1e3, fa: 1 },
+      { u: [450, 'W'], a: [0.6, 'kW'], fu: 1, fa: 1e3 }, { u: [36, 'mW'], a: [0.12, 'W'], fu: 1e-3, fa: 1 }, { u: [1.7, 'kW'], a: [2000, 'W'], fu: 1e3, fa: 1 },
+    ]);
+    const Pu = cas.u[0] * cas.fu, Pa = cas.a[0] * cas.fa, eta = Pu / Pa;
+    const conversion = cas.fu !== 1 ? `P<sub>u</sub> = ${fmt(cas.u[0])} ${cas.u[1]} = ${fmt(Pu)} W` : `P<sub>a</sub> = ${fmt(cas.a[0])} ${cas.a[1]} = ${fmt(Pa)} W`;
+    return { theme: 'Calculer un rendement', enonce: `<p>Un convertisseur reçoit P<sub>a</sub> = ${fmt(cas.a[0])} ${cas.a[1]} et fournit P<sub>u</sub> = ${fmt(cas.u[0])} ${cas.u[1]}.</p>`,
+      parties: [fq.nombre('Calcule son rendement (2 chiffres significatifs).', 'η =', eta, '', { rel: .02, signe: false, affiche: fmt(r2(eta)), diag: v => diagEta(v, Pu, Pa, cas.u[0], cas.a[0]),
+        solution: calc(`${conversion}<br>η = ${fr(fmt(Pu) + ' W', fmt(Pa) + ' W')} ≈ ${c(fmt(r2(eta)))}`) })] };
+  },
+  function energies() {
+    const [Eu, Ea] = hasard([[1.2, 1.5], [36, 45], [0.9, 1.2], [5.4, 6], [27, 36]]);
+    return { theme: 'Rendement et énergies', enonce: `<p>Pendant une heure de fonctionnement, un moteur reçoit ${fmt(Ea)} MJ d'énergie électrique et fournit ${fmt(Eu)} MJ d'énergie mécanique.</p>`,
+      parties: [fq.nombre('Calcule son rendement, en pourcentage.', 'η =', 100 * Eu / Ea, '%', { rel: .01, signe: false, affiche: fmt(r3(100 * Eu / Ea)),
+        diag: v => proche(v, Eu / Ea, .02) ? 'C\'est l\'écriture décimale : multiplie par 100 pour l\'avoir en %.' : proche(v, 100 * Ea / Eu, .02) ? 'Rapport inversé : η = E<sub>u</sub> / E<sub>a</sub> (un rendement ne dépasse pas 100 %).' : 'η = E<sub>u</sub> / E<sub>a</sub>, puis × 100.',
+        solution: calc(`η = ${fr('E<sub>u</sub>', 'E<sub>a</sub>')} = ${fr(fmt(Eu) + ' MJ', fmt(Ea) + ' MJ')} = ${fmt(r3(Eu / Ea))} = ${c(fmt(r3(100 * Eu / Ea)) + ' %')}`) })] };
+  },
+  function impossible() {
+    const [Pu, Pa] = hasard([[30, 40], [48, 60], [60, 75], [80, 100]]);
+    return { theme: 'Un rendement impossible', enonce: `<p>Une lampe reçoit ${Pa} W et rayonne ${Pu} W de lumière. Un élève écrit : η = ${Pa} / ${Pu} = ${fmt(r3(Pa / Pu))}.</p>`,
+      parties: [fq.choix('Que penses-tu de ce résultat ?', [o('ok', `Il est faux : il a inversé le rapport, η = ${Pu} / ${Pa} = ${fmt(r3(Pu / Pa))}`), o('a', 'Il est juste : la lampe est très efficace'), o('b', `Il est juste, c'est ${fmt(r3(100 * Pa / Pu))} %`)], 'ok',
+        { indices: { a: 'Un rendement supérieur à 1 voudrait dire que la lampe fournit plus d\'énergie qu\'elle n\'en reçoit : impossible.', b: 'Un rendement ne peut pas dépasser 100 %.' }, solution: `<p>η = P<sub>u</sub> / P<sub>a</sub> = ${Pu} / ${Pa} = ${fmt(r3(Pu / Pa))} : toujours inférieur à 1.</p>` })] };
+  },
+];
+
+/* ---------- Groupe 2 : puissance utile ou apportée ---------- */
+const G2 = [
+  function puissanceUtile() {
+    const [eta, Pa, u] = hasard([[.85, 45, 'W'], [.05, 1.0, 'kW'], [.33, 10, 'mW'], [.9, 2.5, 'kW'], [.75, 120, 'W'], [.6, 40, 'mW']]);
+    return { theme: 'Calculer une puissance utile', enonce: `<p>Un appareil de rendement η = ${fmt(eta)} reçoit une puissance P<sub>a</sub> = ${fmt(Pa)} ${u}.</p>`,
+      parties: [fq.nombre(`Calcule la puissance utile, en ${u}.`, 'P<sub>u</sub> =', eta * Pa, u, { rel: .01, signe: false, affiche: fmt(r3(eta * Pa)), diag: v => diagPu(v, eta, Pa),
+        solution: calc(`η = ${fr('P<sub>u</sub>', 'P<sub>a</sub>')} donc P<sub>u</sub> = η × P<sub>a</sub><br>P<sub>u</sub> = ${fmt(eta)} × ${fmt(Pa)} ${u} = ${c(fmt(r3(eta * Pa)) + ' ' + u)}`) })] };
+  },
+  function puissanceApportee() {
+    const [eta, Pu, u] = hasard([[.13, 500, 'W'], [.42, 54, 'mW'], [.6, 5.2, 'kW'], [.8, 36, 'W'], [.25, 15, 'W'], [.9, 4.5, 'kW']]);
+    return { theme: 'Calculer une puissance apportée', enonce: `<p>Un appareil de rendement η = ${fmt(eta)} fournit une puissance utile P<sub>u</sub> = ${fmt(Pu)} ${u}.</p>`,
+      parties: [fq.nombre(`Calcule la puissance qu'il reçoit, en ${u}.`, 'P<sub>a</sub> =', Pu / eta, u, { rel: .01, signe: false, affiche: fmt(r3(Pu / eta)), diag: v => diagPa(v, eta, Pu),
+        solution: calc(`η = ${fr('P<sub>u</sub>', 'P<sub>a</sub>')} donc P<sub>a</sub> = ${fr('P<sub>u</sub>', 'η')}<br>P<sub>a</sub> = ${fr(fmt(Pu) + ' ' + u, fmt(eta))} ≈ ${c(fmt(r3(Pu / eta)) + ' ' + u)}`) })] };
+  },
+  function pourcentage() {
+    const [pc, Pu] = hasard([[80, 400], [75, 600], [40, 20], [90, 1800], [25, 50]]);
+    const eta = pc / 100;
+    return { theme: 'Rendement en pourcentage', enonce: `<p>Le rendement d'un moteur est de ${pc} %. Il fournit une puissance mécanique de ${fmt(Pu)} W.</p>`,
+      parties: [fq.nombre('Quelle puissance électrique reçoit-il ?', 'P<sub>a</sub> =', Pu / eta, 'W', { rel: .01, signe: false,
+        diag: v => proche(v, Pu / pc, .02) ? `Écris d'abord η en écriture décimale : ${pc} % = ${fmt(eta)}.` : proche(v, Pu * pc, .02) || proche(v, Pu * eta, .02) ? diagPa(Pu * eta, eta, Pu) : 'P<sub>a</sub> = P<sub>u</sub> / η, avec η en écriture décimale.',
+        solution: calc(`η = ${pc} % = ${fmt(eta)}<br>P<sub>a</sub> = ${fr('P<sub>u</sub>', 'η')} = ${fr(fmt(Pu) + ' W', fmt(eta))} = ${c(fmt(r3(Pu / eta)) + ' W')}`) })] };
+  },
+  function choixFormule() {
+    const cherche = hasard(['Pa', 'Pu']);
+    const ok = cherche === 'Pa' ? `P<sub>a</sub> = ${fr('P<sub>u</sub>', 'η')}` : 'P<sub>u</sub> = η × P<sub>a</sub>';
+    const faux = cherche === 'Pa' ? ['P<sub>a</sub> = η × P<sub>u</sub>', `P<sub>a</sub> = ${fr('η', 'P<sub>u</sub>')}`] : [`P<sub>u</sub> = ${fr('P<sub>a</sub>', 'η')}`, `P<sub>u</sub> = ${fr('η', 'P<sub>a</sub>')}`];
+    return { theme: 'Isoler une grandeur', enonce: `<p>On connaît le rendement η et ${cherche === 'Pa' ? 'la puissance utile P<sub>u</sub>' : 'la puissance apportée P<sub>a</sub>'}.</p>`,
+      parties: [fq.choix(`Quelle formule donne ${cherche === 'Pa' ? 'la puissance apportée' : 'la puissance utile'} ?`, [o('ok', ok), o('a', faux[0]), o('b', faux[1])], 'ok',
+        { indice: 'Pars de η = P<sub>u</sub> / P<sub>a</sub>, puis isole la grandeur cherchée. Vérifie : P<sub>u</sub> est toujours plus petite que P<sub>a</sub>.', solution: `<p>η = ${fr('P<sub>u</sub>', 'P<sub>a</sub>')} donc ${ok}.</p>` })] };
+  },
+  function pertes() {
+    const [eta, Pa] = hasard([[.8, 1500], [.9, 2000], [.75, 800], [.6, 250], [.95, 4000]]);
+    const Pu = eta * Pa;
+    return { theme: 'Puissance perdue', enonce: `<p>Un moteur électrique de rendement η = ${fmt(eta)} reçoit une puissance P<sub>a</sub> = ${fmt(Pa)} W.</p>`,
+      parties: [
+        fq.nombre('a. Calcule la puissance utile.', 'P<sub>u</sub> =', Pu, 'W', { rel: .01, signe: false, diag: v => diagPu(v, eta, Pa), solution: calc(`P<sub>u</sub> = η × P<sub>a</sub> = ${fmt(eta)} × ${fmt(Pa)} W = ${c(fmt(Pu) + ' W')}`) }),
+        fq.nombre('b. Calcule la puissance perdue.', 'P<sub>perdue</sub> =', Pa - Pu, 'W', { rel: .01, signe: false,
+          diag: v => proche(v, Pa + Pu) ? 'La puissance perdue est ce qui reste : P<sub>perdue</sub> = P<sub>a</sub> − P<sub>u</sub>.' : 'P<sub>perdue</sub> = P<sub>a</sub> − P<sub>u</sub>.',
+          solution: calc(`P<sub>perdue</sub> = P<sub>a</sub> − P<sub>u</sub> = ${fmt(Pa)} − ${fmt(Pu)} = ${c(fmt(Pa - Pu) + ' W')}`) }),
+      ], bilan: 'La puissance perdue se retrouve sous forme thermique : le moteur chauffe.' };
+  },
+];
+
+/* ---------- Groupe 3 : formes d'énergie ---------- */
+const FORMES = { el: 'électrique', me: 'mécanique', th: 'thermique', ch: 'chimique', ra: 'rayonnante' };
+const APPAREILS = [
+  { un: 'un moteur électrique', a: 'el', u: 'me' }, { un: 'une lampe', a: 'el', u: 'ra' }, { un: 'un panneau solaire photovoltaïque', a: 'ra', u: 'el' },
+  { un: 'un alternateur de vélo', a: 'me', u: 'el' }, { un: 'un moteur de voiture à essence', a: 'ch', u: 'me' }, { un: 'une pile qui alimente une lampe de poche', a: 'ch', u: 'el' },
+  { un: 'un radiateur électrique', a: 'el', u: 'th' }, { un: 'une éolienne', a: 'me', u: 'el' },
+];
+const optsFormes = () => Object.keys(FORMES).map(k => o(k, 'énergie ' + FORMES[k]));
+const G3 = [
+  function formeUtile() {
+    const ap = hasard(APPAREILS.filter(a => a.u !== 'th'));
+    return { theme: 'Énergie utile', enonce: `<p>On s'intéresse à ${ap.un}.</p>`,
+      parties: [fq.choix('Quelle est la forme de l\'énergie utile ?', optsFormes(), ap.u,
+        { indices: { [ap.a]: 'C\'est l\'énergie qu\'il reçoit (énergie apportée). L\'énergie utile est celle qu\'on attend de l\'appareil.', th: 'L\'énergie thermique est ici de l\'énergie perdue : l\'appareil chauffe, mais ce n\'est pas son rôle.' },
+          indice: 'Demande-toi ce qu\'on attend de cet appareil.', solution: `<p>Énergie utile : énergie <b>${FORMES[ap.u]}</b> (énergie apportée : ${FORMES[ap.a]}).</p>` })] };
+  },
+  function formeApportee() {
+    const ap = hasard(APPAREILS);
+    return { theme: 'Énergie apportée', enonce: `<p>On s'intéresse à ${ap.un}.</p>`,
+      parties: [fq.choix('Quelle est la forme de l\'énergie apportée (reçue) ?', optsFormes(), ap.a,
+        { indices: { [ap.u]: 'C\'est l\'énergie qu\'il fournit (énergie utile). L\'énergie apportée est celle qu\'il reçoit pour fonctionner.' },
+          indice: 'Demande-toi ce que reçoit l\'appareil pour fonctionner.', solution: `<p>Énergie apportée : énergie <b>${FORMES[ap.a]}</b> (énergie utile : ${FORMES[ap.u]}).</p>` })] };
+  },
+  function formePerdue() {
+    const ap = hasard(APPAREILS.filter(a => a.u !== 'th'));
+    return { theme: 'Énergie perdue', enonce: `<p>On s'intéresse à ${ap.un}.</p>`,
+      parties: [fq.choix('Sous quelle forme est, en général, l\'énergie perdue ?', optsFormes(), 'th',
+        { indices: { [ap.a]: 'C\'est l\'énergie apportée.', [ap.u]: 'C\'est l\'énergie utile.' }, indice: 'Un appareil qui fonctionne chauffe.', solution: '<p>L\'énergie perdue est en général de l\'énergie <b>thermique</b> : l\'appareil chauffe.</p>' })] };
+  },
+  function schemaFormes() {
+    const ap = hasard(APPAREILS.filter(a => a.u !== 'th'));
+    const intrus = hasard(Object.keys(FORMES).filter(k => ![ap.a, ap.u, 'th'].includes(k)));
+    return { theme: 'Schéma de conversion', enonce: `<p>Complète le schéma de conversion de ${ap.un}.</p>`,
+      parties: [{ type: 'schema', q: 'Place les formes d\'énergie (une étiquette est en trop).', titrePalette: 'Formes d\'énergie',
+        schema: conv({ appareil: ap.un.replace(/^une? /, ''), a: { f: slot('a') }, u: { f: slot('u') }, p: { f: slot('p') } }),
+        etiquettes: [etiq('a', 'énergie ' + FORMES[ap.a], 'a', 'L\'énergie apportée est celle que l\'appareil reçoit.'), etiq('u', 'énergie ' + FORMES[ap.u], 'u', 'L\'énergie utile est celle qu\'on attend de l\'appareil.'),
+          etiq('p', 'énergie thermique', 'p', 'L\'énergie perdue est la chaleur.'), etiq('x', 'énergie ' + FORMES[intrus], null, `Il n'y a pas d'énergie ${FORMES[intrus]} ici.`)],
+        solution: `<p>Énergie ${FORMES[ap.a]} → énergie ${FORMES[ap.u]} (utile) + énergie thermique (perdue).</p>` }] };
+  },
+];
+
+/* ---------- Groupe 4 : diagramme énergétique ---------- */
+const DIAG = [
+  { app: 'Lampe à LED', a: 'électrique', u: 'lumineuse' }, { app: 'Moteur électrique', a: 'électrique', u: 'mécanique' },
+  { app: 'Panneau solaire', a: 'rayonnante', u: 'électrique' }, { app: 'Moteur à essence', a: 'chimique', u: 'mécanique' },
+];
+const G4 = [
+  function perdueEtRendement() {
+    const d = hasard(DIAG), [Ea, eta] = hasard([[60, .05], [11, .27], [200, .75], [50, .4], [400, .3], [80, .9]]);
+    const Eu = +(Ea * eta).toFixed(1), Ep = +(Ea - Eu).toFixed(1);
+    return { theme: 'Lire un diagramme énergétique', enonce: `<p>Voici le diagramme énergétique d'un appareil pendant une seconde.</p>
+        ${diagramme({ entree: { t: 'Énergie ' + d.a, v: fmt(Ea) + ' J', k: Ea }, appareil: d.app, sorties: [{ t: 'Énergie ' + d.u, v: fmt(Eu) + ' J', k: Eu }, { t: 'Énergie thermique', v: '?', k: Ep }] })}`,
+      parties: [
+        fq.nombre('a. Quelle énergie est perdue sous forme thermique ?', 'E<sub>perdue</sub> =', Ep, 'J', { rel: .01, signe: false,
+          diag: v => proche(v, Ea + Eu) ? 'L\'énergie apportée se partage entre énergie utile et énergie perdue : soustrais.' : 'E<sub>perdue</sub> = E<sub>a</sub> − E<sub>u</sub>.',
+          solution: calc(`E<sub>perdue</sub> = E<sub>a</sub> − E<sub>u</sub> = ${fmt(Ea)} − ${fmt(Eu)} = ${c(fmt(Ep) + ' J')}`) }),
+        fq.nombre('b. Calcule le rendement de l\'appareil (2 chiffres significatifs).', 'η =', Eu / Ea, '', { rel: .02, signe: false, affiche: fmt(r2(Eu / Ea)),
+          diag: v => proche(v, Ep / Ea, .02) ? 'Tu as utilisé l\'énergie perdue. Le rendement compare l\'énergie <b>utile</b> à l\'énergie apportée.' : proche(v, Ea / Eu, .02) ? 'Rapport inversé : η = E<sub>u</sub> / E<sub>a</sub>.' : 'η = E<sub>u</sub> / E<sub>a</sub>.',
+          solution: calc(`η = ${fr('E<sub>u</sub>', 'E<sub>a</sub>')} = ${fr(fmt(Eu) + ' J', fmt(Ea) + ' J')} ≈ ${c(fmt(r2(Eu / Ea)))}`) }),
+      ] };
+  },
+  function plusEconome() {
+    const d = hasard(DIAG.slice(0, 2));
+    const [a1, u1, a2, u2] = hasard([[60, 3, 11, 3], [100, 5, 20, 4], [40, 2, 8, 2], [75, 12, 50, 20]]);
+    const e1 = u1 / a1, e2 = u2 / a2, bon = e2 > e1 ? 'B' : 'A';
+    const dia = (n, a, u) => diagramme({ entree: { t: 'Énergie ' + d.a, v: a + ' J', k: a }, appareil: `${d.app} ${n}`, sorties: [{ t: 'Énergie ' + d.u, v: u + ' J', k: u }, { t: 'Énergie thermique', v: (a - u) + ' J', k: a - u }] });
+    return { theme: 'Comparer deux rendements', enonce: `<p>Diagrammes énergétiques de deux appareils A et B qui font le même travail :</p>${dia('A', a1, u1)}${dia('B', a2, u2)}`,
+      parties: [fq.choix('Quel appareil est le plus économe en énergie ?', [o('A', 'l\'appareil A'), o('B', 'l\'appareil B')], bon,
+        { melanger: false, indice: `Compare les rendements : η = E<sub>u</sub> / E<sub>a</sub> pour chacun.`,
+          solution: `<p>η<sub>A</sub> = ${u1} / ${a1} ≈ ${fmt(r2(e1))} ; η<sub>B</sub> = ${u2} / ${a2} ≈ ${fmt(r2(e2))}. L'appareil ${bon}, qui a le meilleur rendement, est le plus économe.</p>` })] };
+  },
+];
+
+// tirage : 3 + 3 + 2 + 2 questions, sans répétition dans un groupe
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  return pris(G1, 3).concat(pris(G2, 3), pris(G3, 2), pris(G4, 2));
+}
+
+EP.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Rendement et schéma de conversion',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : calculer un rendement, une puissance utile ou apportée, reconnaître les formes d\'énergie, lire un diagramme énergétique. Garde ta calculatrice à portée de main.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2_cours.html', label: 'Module 2 : la puissance →' },
+});
+EP.menu('module_1_questions');
+</script>
+</body>
+</html>

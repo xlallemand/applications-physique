@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions sur le calcul de l'énergie — Chapitre 1 : Énergie et puissance</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ep.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ep.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : aire sous la courbe P(t) (4 :
+   créneau, triangle, trapèze, deux morceaux), E = P × Δt avec des
+   heures ou des kWh (2), wattheures et autonomie (2), graphique
+   I(t) à tension constante (2).
+   Erreurs diagnostiquées : triangle sans « / 2 », base mal lue
+   (date au lieu de durée), heures non converties, Wh × 60, aire
+   sous I(t) prise pour une énergie.
+   ============================================================ */
+const { o, fq, fmt, fr, sci, hasard, melanger, proche, graphe, partieAire } = EP;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+// graphique P(t) avec l'intervalle [a, b] repéré par deux pointillés
+const gP = (pts, xmax, ymax, pasX, pasY, a, b, aria, extra) => Object.assign({ xmax, ymax, pasX, pasY, nomX: 't (s)', nomY: 'P (W)', courbes: [pts],
+  traits: [[a, 0, a, ymax], [b, 0, b, ymax]], aria }, extra);
+
+/* ---------- Groupe 1 : aire sous la courbe ---------- */
+const G1 = [
+  function creneau() {
+    const P = hasard([150, 250, 400]), [a, b] = hasard([[2, 6], [1, 4], [3, 8], [2, 7]]);
+    const g = { xmax: 10, ymax: P * 1.25, pasX: 1, pasY: P / 5, nomX: 't (s)', nomY: 'P (W)', courbes: [[[0, P], [10, P]]], aria: `Puissance constante de ${P} W` };
+    return { theme: 'Aire sous la courbe : rectangle', enonce: `<p>Quelle énergie l'appareil convertit-il entre t = ${a} s et t = ${b} s ?</p>`,
+      parties: [partieAire({ g, de: a, a: b, t1: 0, t2: 1 }),
+        fq.nombre('Calcule l\'énergie convertie.', 'E =', P * (b - a), 'J', { signe: false,
+          diag: v => proche(v, P * b) ? `La base est la durée : Δt = ${b} − ${a} = ${b - a} s.` : proche(v, P * (b - a) / 2) ? 'C\'est un rectangle : pas de division par 2.' : 'E = P × Δt (aire du rectangle).',
+          solution: calc(`E = P × Δt = ${P} W × ${b - a} s = ${c(fmt(P * (b - a)) + ' J')}`) })] };
+  },
+  function triangle() {
+    const Pm = hasard([200, 300, 400, 600]), T1 = hasard([20, 40]), T2 = T1 + hasard([40, 60]), xmax = T2 + 20;
+    const pts = [[0, 0], [T1, Pm], [T2, 0], [xmax, 0]];
+    return { theme: 'Aire sous la courbe : triangle', enonce: `<p>Quelle énergie l'appareil convertit-il entre t = ${T1} s et t = ${T2} s ?</p>${graphe(gP(pts, xmax, Pm * 1.25, 10, Pm / 4, T1, T2, `Puissance qui monte de 0 à ${Pm} W entre 0 et ${T1} s, puis redescend à 0 à ${T2} s`, { gradX: 20, aires: [{ de: T1, a: T2, motif: 1 }] }))}`,
+      parties: [fq.nombre('Calcule l\'aire hachurée.', 'E =', (T2 - T1) * Pm / 2, 'J', { signe: false,
+        diag: v => proche(v, (T2 - T1) * Pm) ? 'C\'est un triangle : base × hauteur <b>/ 2</b>.' : proche(v, T2 * Pm / 2) ? `La base est la durée : ${T2} − ${T1} = ${T2 - T1} s.` : 'Triangle : base × hauteur / 2.',
+        solution: calc(`E = ${fr(`${T2 - T1} s × ${Pm} W`, '2')} = ${c(fmt((T2 - T1) * Pm / 2) + ' J')}`) })] };
+  },
+  function trapeze() {
+    const Pa = hasard([400, 500, 600]), Pb = hasard([100, 200]), t1 = hasard([10, 20]), d = hasard([20, 40]), t2 = t1 + d, xmax = t2 + 10;
+    const pts = [[0, 0], [t1, 0], [t1, Pa], [t2, Pb], [t2, 0], [xmax, 0]], E = Pb * d + (Pa - Pb) * d / 2;
+    return { theme: 'Aire sous la courbe : trapèze', enonce: `<p>Entre t = ${t1} s et t = ${t2} s, la puissance passe de ${Pa} W à ${Pb} W :</p>${graphe(gP(pts, xmax, Pa * 1.25, 5, 100, t1, t2, `Puissance qui passe de ${Pa} W à ${t1} s à ${Pb} W à ${t2} s`, { gradX: 10, aires: [{ pts: [[t1, Pb], [t1, Pa], [t2, Pb]], motif: 2 }, { pts: [[t1, 0], [t1, Pb], [t2, Pb], [t2, 0]], motif: 3 }], traits: [[t1, Pb, t2, Pb]] }))}
+      <p>L'aire est découpée en un triangle posé sur un rectangle.</p>`,
+      parties: [
+        fq.nombre('a. Aire du rectangle (en bas) :', 'E<sub>1</sub> =', Pb * d, 'J', { signe: false, diag: v => proche(v, Pb * d / 2) ? 'Un rectangle : pas de / 2.' : `Base ${d} s, hauteur ${Pb} W.`, solution: calc(`E<sub>1</sub> = ${Pb} W × ${d} s = ${fmt(Pb * d)} J`) }),
+        fq.nombre('b. Aire du triangle (au-dessus) :', 'E<sub>2</sub> =', (Pa - Pb) * d / 2, 'J', { signe: false,
+          diag: v => proche(v, Pa * d / 2) ? `La hauteur du triangle est ${Pa} − ${Pb} = ${Pa - Pb} W : il est posé sur le rectangle.` : proche(v, (Pa - Pb) * d) ? 'Un triangle : base × hauteur / 2.' : `Base ${d} s, hauteur ${Pa} − ${Pb} W, puis / 2.`,
+          solution: calc(`E<sub>2</sub> = ${fr(`${d} s × ${Pa - Pb} W`, '2')} = ${fmt((Pa - Pb) * d / 2)} J`) }),
+        fq.nombre('c. Énergie totale convertie :', 'E =', E, 'J', { signe: false, diag: () => 'Additionne les deux aires.', solution: calc(`E = ${fmt(Pb * d)} + ${fmt((Pa - Pb) * d / 2)} = ${c(fmt(E) + ' J')}`) }),
+      ] };
+  },
+  function deuxMorceaux() {
+    const P1 = hasard([200, 300]), P2 = hasard([500, 600]), t1 = hasard([10, 20]), t2 = t1 + hasard([10, 20]), xmax = t2 + 10;
+    const pts = [[0, P1], [t1, P1], [t1, P2], [t2, P2], [t2, 0], [xmax, 0]], E = P1 * t1 + P2 * (t2 - t1);
+    return { theme: 'Aire sous la courbe : deux morceaux', enonce: `<p>Quelle énergie l'appareil convertit-il entre t = 0 et t = ${t2} s ?</p>${graphe(gP(pts, xmax, 700, 5, 100, 0, t2, `Puissance de ${P1} W de 0 à ${t1} s, puis ${P2} W jusqu'à ${t2} s`, { gradX: 10, aires: [{ de: 0, a: t1, motif: 1 }, { de: t1, a: t2, motif: 2 }] }))}`,
+      parties: [fq.nombre('Calcule l\'énergie totale (somme des deux rectangles).', 'E =', E, 'J', { signe: false,
+        diag: v => proche(v, P2 * t2) || proche(v, P1 * t2) ? 'Les deux morceaux n\'ont pas la même hauteur : calcule chaque rectangle, puis additionne.' : proche(v, P1 * t1 + P2 * t2) ? `Le second rectangle va de ${t1} s à ${t2} s : sa base est ${t2 - t1} s.` : 'Additionne les aires des deux rectangles.',
+        solution: calc(`E = ${P1} W × ${t1} s + ${P2} W × ${t2 - t1} s = ${fmt(P1 * t1)} + ${fmt(P2 * (t2 - t1))} = ${c(fmt(E) + ' J')}`) })] };
+  },
+];
+
+/* ---------- Groupe 2 : E = P × Δt ---------- */
+const G2 = [
+  function kWh() {
+    const [P, h, mn] = hasard([[2, 3, 0], [1.5, 2, 30], [0.8, 5, 0], [3, 1, 30]]), d = h + mn / 60;
+    return { theme: 'E = P × Δt', enonce: `<p>Un appareil de puissance ${fmt(P)} kW fonctionne pendant ${h} h${mn ? ' ' + mn + ' min' : ''}.</p>`,
+      parties: [fq.nombre('Quelle énergie consomme-t-il, en kWh ?', 'E =', P * d, 'kWh', { signe: false,
+        diag: v => mn && proche(v, P * (h + mn / 100)) ? `${mn} min = ${fmt(mn / 60)} h (pas 0,${mn} h).` : proche(v, P * d * 1000) ? 'Avec P en kW et Δt en h, E est en kWh.' : 'E = P × Δt, avec Δt en heures.',
+        solution: calc(`${mn ? `Δt = ${h} h ${mn} min = ${fmt(d)} h<br>` : ''}E = ${fmt(P)} kW × ${fmt(d)} h = ${c(fmt(P * d) + ' kWh')}`) })] };
+  },
+  function joules() {
+    const [P, m] = hasard([[60, 5], [100, 2], [1200, 3], [40, 10]]);
+    const E = P * m * 60;
+    return { theme: 'E = P × Δt', enonce: `<p>Un appareil de puissance ${fmt(P)} W fonctionne pendant ${m} min.</p>`,
+      parties: [{ type: 'sci', q: 'Quelle énergie convertit-il, en joules ?', label: 'E =', valeur: E, unite: 'J', cs: 3, rel: .01,
+        diag: v => proche(v, P * m, .02) ? `Convertis la durée en secondes : ${m} min = ${m * 60} s.` : 'E = P × Δt, avec P en W et Δt en s.', solution: calc(`Δt = ${m} min = ${m * 60} s<br>E = ${fmt(P)} W × ${m * 60} s = ${fmt(E)} J = ${c(sci(E, 3) + ' J')}`) }] };
+  },
+];
+
+/* ---------- Groupe 3 : wattheures et autonomie ---------- */
+const G3 = [
+  function versJoules() {
+    const Wh = hasard([5, 11.5, 20, 50]);
+    return { theme: 'Wattheures et joules', enonce: `<p>Une batterie contient une énergie de ${fmt(Wh)} Wh.</p>`,
+      parties: [fq.nombre('Convertis cette énergie en joules.', 'E =', Wh * 3600, 'J', { signe: false,
+        diag: v => proche(v, Wh * 60) ? '1 h = 3 600 s : 1 Wh = 3 600 J.' : proche(v, Wh / 3600) ? 'On multiplie par 3 600.' : '1 Wh = 1 W × 3 600 s = 3 600 J.', solution: calc(`E = ${fmt(Wh)} Wh = ${fmt(Wh)} × 3 600 = ${c(fmt(Wh * 3600) + ' J')}`) })] };
+  },
+  function autonomie() {
+    const [Wh, P] = hasard([[11.5, 21.7], [20, 8], [5, 2.5], [60, 45], [12, 18]]), s = Wh * 3600 / P;
+    return { theme: 'Autonomie', enonce: `<p>Une batterie de ${fmt(Wh)} Wh alimente un appareil de puissance moyenne ${fmt(P)} W.</p>`,
+      parties: [fq.nombre('Quelle est son autonomie, en minutes ?', 'autonomie ≈', s / 60, 'min', { signe: false, rel: .01, affiche: fmt(r3(s / 60)),
+        diag: v => proche(v, Wh / P, .02) ? `C'est l'autonomie en heures : convertis en minutes (× 60).` : proche(v, s, .02) ? 'C\'est en secondes : divise par 60.' : proche(v, P / Wh * 60, .02) ? 'Rapport inversé : autonomie = énergie / puissance.' : 'autonomie = énergie / puissance, puis conversion en minutes.',
+        solution: calc(`autonomie = ${fr(fmt(Wh) + ' Wh', fmt(P) + ' W')} ≈ ${fmt(r3(Wh / P))} h ≈ ${c(fmt(r3(s / 60)) + ' min')}<br>(ou E = ${fmt(Wh * 3600)} J, puis ${fmt(Wh * 3600)} / ${fmt(P)} ≈ ${fmt(Math.round(s))} s)`) })] };
+  },
+];
+
+/* ---------- Groupe 4 : graphique I(t) à tension constante ---------- */
+const G4 = [
+  function courant() {
+    const U = hasard([12, 24, 7.2]), I = hasard([1.5, 2, 0.5]), d = hasard([20, 30, 40]), xmax = d + 20;
+    const g = { xmax, ymax: 3, pasX: 10, pasY: .5, nomX: 't (s)', nomY: 'I (A)', mg: 44, courbes: [[[0, 0], [10, 0], [10, I], [10 + d, I], [10 + d, 0], [xmax, 0]]], aria: `Intensité de ${fmt(I)} A entre 10 et ${10 + d} s` };
+    return { theme: 'Graphique I(t)', enonce: `<p>Un moteur est alimenté sous une tension constante U = ${fmt(U)} V.</p>${graphe(g)}`,
+      parties: [
+        fq.nombre(`a. Quelle puissance reçoit-il entre 10 s et ${10 + d} s ?`, 'P =', U * I, 'W', { signe: false, rel: .01, diag: v => proche(v, U / I) ? 'P = U × I : on multiplie.' : 'P = U × I.', solution: calc(`P = U × I = ${fmt(U)} V × ${fmt(I)} A = ${fmt(U * I)} W`) }),
+        fq.nombre('b. Quelle énergie reçoit-il en tout ?', 'E =', U * I * d, 'J', { signe: false, rel: .01,
+          diag: v => proche(v, I * d) ? 'L\'aire sous I(t) n\'est pas une énergie : utilise P = U × I.' : proche(v, U * I * (10 + d)) ? `Le moteur ne fonctionne que pendant ${d} s.` : 'E = P × Δt.', solution: calc(`E = ${fmt(U * I)} W × ${d} s = ${c(fmt(U * I * d) + ' J')}`) }),
+      ] };
+  },
+  function graduations() {
+    const U = hasard([400, 230, 12]), I = hasard([20, 60, 100, 140]);
+    return { theme: 'Graphique I(t)', enonce: `<p>Pour tracer P(t) à partir d'un graphique I(t) à tension constante U = ${U} V, on multiplie chaque graduation de l'axe vertical par U.</p>`,
+      parties: [fq.nombre(`Quelle puissance correspond à la graduation I = ${I} A ?`, 'P =', U * I, 'W', { signe: false,
+        diag: v => proche(v, I / U) || proche(v, U / I) ? 'P = U × I.' : 'Multiplie la graduation par U.', solution: calc(`P = ${U} × ${I} = ${c(fmt(U * I) + ' W')}`) })] };
+  },
+];
+
+// tirage : 4 + 2 + 2 + 2 questions
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  return pris(G1, 4).concat(pris(G2, 2), pris(G3, 2), pris(G4, 2));
+}
+
+EP.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Calcul de l\'énergie',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : aire sous la courbe P(t), E = P × Δt avec des conversions, autonomie d\'une batterie, graphique I(t) à tension constante.</p>',
+  questions: tirage,
+  revoir: { href: 'module_3_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4.html', label: 'Module 4 : exercices du manuel →' },
+});
+EP.menu('module_3_questions');
+</script>
+</body>
+</html>
