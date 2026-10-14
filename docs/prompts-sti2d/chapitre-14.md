@@ -40,6 +40,10 @@ L'application existe : `combustions/`. **Ne change ni le contenu scientifique ni
    
    Corrige ce qui manque.
 
+## A ajouter dans le cours
+
+- **Contenus du cours papier absents de l'application** : n = c × V (concentration) et m = ρ × V. Ajouter dans le cours du module 3. Ces formules sont parfois utiles, quand on n'a pas la masse mais le volume.
+
 ## Le nouveau module d'exercices
 
 Groupes et ordre de la feuille ; chaque exercice de calcul commence par le **schéma de la méthode** (`CO.schema` de `co.js`). L'élève y place les données de l'énoncé, comme les schémas de `transport-electricite`, puis enchaîne : équation, n = m / M, relation stœchiométrique, m = n × M, énergie.
@@ -110,4 +114,3 @@ Masse volumique m = ρ × V : explique-la dans la correction, l'application ne l
 ## À signaler au professeur (sans rien changer dans l'application)
 
 - **Cours papier complété** : la note manuscrite écrit « 28,8 × 23 / 10³ = 0,066 MJ » ; c'est **0,66 MJ**. L'application affiche déjà 0,66 MJ.
-- **Contenus du cours papier absents de l'application** : n = c × V (concentration) et m = ρ × V. Ajout possible dans le cours du module 3, **seulement si le professeur le demande**.

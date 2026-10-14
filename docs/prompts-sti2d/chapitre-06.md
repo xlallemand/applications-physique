@@ -124,6 +124,7 @@ Diagnostic ciblé à chaque erreur. Exemples :
 11. boule d'aluminium et bâton d'ébonite ;
 12. clou attiré par un aimant ;
 13. voiture au démarrage.
+14., 15., 16. : ajouter 3 autres situations
 
 **Bilans attendus** (la fiche est vierge : ce sont les réponses à coder) :
 
@@ -143,7 +144,7 @@ Diagnostic ciblé à chaque erreur. Exemples :
 | Brique immobile, planche inclinée | P⃗ ; R⃗<sub>N</sub> (perpendiculaire) ; f⃗ (le long de la pente, vers le haut) ; R⃗ = R⃗<sub>N</sub> + f⃗ compense P⃗ |
 | Brique qui glisse | P⃗ ; R⃗<sub>N</sub> ; f⃗ vers le haut de la pente ; elles ne se compensent pas |
 | Clou attiré par l'aimant | P⃗ ; F⃗<sub>mag</sub> (à distance, du centre vers l'aimant) ; R⃗ du sol (au point de contact) |
-| Voiture au démarrage (traction avant) | P⃗ ; R⃗ de la route sur les roues avant = R⃗<sub>N</sub> + force motrice vers l'avant (frottement de la route sur les roues motrices) ; R⃗<sub>N</sub> sur les roues arrière ; frottements de l'air vers l'arrière |
+| Voiture au démarrage (traction avant) | P⃗ ; R⃗ de la route sur les roues avant = R⃗<sub>N</sub> + force motrice vers l'avant (frottement de la route sur les roues motrices) ; R⃗<sub>N</sub> sur les roues arrière + frottements de la route vers l'arrière ; frottements de l'air vers l'arrière |
 
 ## Exercices (même numérotation que la feuille)
 
