@@ -4,7 +4,7 @@ Lis d'abord `docs/prompts-sti2d/00-commun.md` (sources, charte, structure, livra
 
 ## Application
 
-- Dossier `energie-lumiere/`, nom « Énergie transportée par la lumière », `data-matiere="physique"`, préfixe `el`.
+- Dossier `energie-lumiere/`, nom « Chapitre 10 : Énergie transportée par la lumière », `data-matiere="physique"`, préfixe `el`.
 - Portail : desc « Capteurs photothermiques et photovoltaïques, photon E = h f, caractéristique d'un panneau solaire. » ; dessin d'en-tête : nouveau dessin « soleil, rayons et panneau » dans `hero.js`, ou `formules:physique`.
 
 ## Sources (`TSTI2D/10- Energie transportee par la lumiere/`)

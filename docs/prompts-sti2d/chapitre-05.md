@@ -4,7 +4,7 @@ Lis d'abord `docs/prompts-sti2d/00-commun.md` (sources, charte, structure, livra
 
 ## Application
 
-- Dossier `transferts-thermiques/`, nom « Flux et transferts thermiques », `data-matiere="physique"`, préfixe `tt`.
+- Dossier `transferts-thermiques/`, nom « Chapitre 5 : Flux et transferts thermiques », `data-matiere="physique"`, préfixe `tt`.
 - Portail : desc « Kelvin, modes de transfert, flux thermique, résistance thermique d'une paroi. » ; dessin d'en-tête : `formules:physique`, ou un nouveau dessin « paroi et flux » dans `hero.js`.
 
 ## Sources (`TSTI2D/05- Transferts thermiques/`)

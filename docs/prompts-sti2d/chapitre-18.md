@@ -4,7 +4,7 @@ Lis d'abord `docs/prompts-sti2d/00-commun.md` (sources, charte, structure, livra
 
 ## Application
 
-- Dossier `ondes-sonores/`, nom « Ondes sonores », `data-matiere="physique"`, préfixe `os`.
+- Dossier `ondes-sonores/`, nom « Chapitre 18 : Ondes sonores », `data-matiere="physique"`, préfixe `os`.
 - Portail : desc « Son pur, son complexe, hauteur et timbre, niveau sonore en décibels, audiogramme, atténuation. »
 - Dessin d'en-tête : `spectre` (créé au chapitre 17 ; s'il n'existe pas, crée-le comme décrit là-bas).
 

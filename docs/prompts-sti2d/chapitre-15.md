@@ -1,4 +1,4 @@
-# Chapitre 15 : Oxydoréduction, piles et accumulateurs (prompt de génération)
+# Chapitre 15 : Oxydoréduction (piles et accumulateurs) (prompt de génération)
 
 Lis d'abord `docs/prompts-sti2d/00-commun.md` (sources, charte, structure, livraison).
 
@@ -9,7 +9,7 @@ Deux modules du chapitre sont déjà développés :
 - `oxydoreduction-STI2D/` : application d'une seule page (`spa: true`). Module 1 « Oxydants et réducteurs » (cours `COURS` + entraînement), module 2 « Écrire les réactions » (20 questions, l'aide diminue). Elle charge **Tailwind** (CDN), hors charte.
 - `pile/` : « Schéma d'une pile », un écran sans module. Schéma à compléter par glisser-déposer (polarités, e⁻, I, ions du pont salin, anode / cathode, demi-équations, équation de fonctionnement), série de questions. Elle est aussi utilisée en Tle spécialité. Elle charge Tailwind et a des boutons `btn-blue` / `btn-orange` / `btn-green`, hors charte.
 
-**Décision** : l'application du chapitre 15 est **`oxydoreduction-STI2D/`, transformée en application à pages séparées** (`index.html` + `modules/`, préfixe `ox`, `data-matiere="chimie"`). Garde le nom du dossier : il est cité dans le portail.
+**Décision** : l'application du chapitre 15 est **`oxydoreduction-STI2D/`, transformée en application à pages séparées** (`index.html` + `modules/`, nom « Chapitre 15 : Oxydoréduction (piles et accumulateurs) », préfixe `ox`, `data-matiere="chimie"`). Garde le nom du dossier : il est cité dans le portail.
 
 - **Les deux modules existants y deviennent les modules 1 et 2, sans perte de contenu ni de fonctionnalité** : cours, entraînement, 20 questions à aide décroissante. Seule la mise en page passe à la charte : cartes `er-card`, boutons pilule, plus de Tailwind dans ces pages.
 - **Le schéma de la pile devient le module 5.** Sors le moteur de `pile/index.html` dans `pile/pile.js` (+ `pile/pile.css`), sans changer son comportement. `pile/index.html` et la page du module 5 le chargent tous les deux : une seule source, l'application `pile/` reste en place pour la spécialité.
@@ -17,7 +17,7 @@ Deux modules du chapitre sont déjà développés :
   - Passe ses boutons aux classes de la charte (`btn-primary` / `btn-secondary` / `btn-small` : jamais de bouton coloré, §3), pour les deux usages.
 - **Anciennes adresses** : redirige `oxydoreduction-STI2D/index.html#course`, `#training`, `#reactions`, `#fiche` vers les nouvelles pages (petit script sur l'accueil), pour garder les favoris des élèves. L'ancienne progression (`localStorage`) peut être perdue : dis-le dans le compte rendu.
 - **Portail** :
-  - titre « Oxydoréduction, piles et accumulateurs » ;
+  - titre « Chapitre 15 : Oxydoréduction (piles et accumulateurs) » (nom de l'application, voir `00-commun.md` §3) ;
   - desc « Oxydants, réducteurs, équations, quantités de matière, piles : schéma et capacité. » ;
   - `niv: ['sti']` ;
   - dessin d'en-tête `formules:redox`.

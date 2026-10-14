@@ -4,7 +4,7 @@ Lis d'abord `docs/prompts-sti2d/00-commun.md` (sources, charte, structure, livra
 
 ## Application
 
-- Dossier `principe-dynamique/`, nom « Principe fondamental de la dynamique », `data-matiere="physique"`, préfixe `pfd`.
+- Dossier `principe-dynamique/`, nom « Chapitre 6 : Principe fondamental de la dynamique », `data-matiere="physique"`, préfixe `pfd`.
 - Portail : desc « Bilan des forces, accélération, Σ F⃗ = m a⃗ et principe d'inertie. » ; dessin d'en-tête : `cinematique`.
 
 ## Sources (`TSTI2D/06- Principe fondamental de la dynamique/`)

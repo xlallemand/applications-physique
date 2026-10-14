@@ -4,7 +4,7 @@ Lis d'abord `docs/prompts-sti2d/00-commun.md` (sources, charte, structure, livra
 
 ## Application
 
-- Dossier `energie-nucleaire/`, nom « Énergie nucléaire », `data-matiere="physique"` (partie « Matière et matériaux »), préfixe `nuc`.
+- Dossier `energie-nucleaire/`, nom « Chapitre 13 : Énergie nucléaire », `data-matiere="physique"` (partie « Matière et matériaux »), préfixe `nuc`.
 - Portail : desc « Fission, fusion, défaut de masse, E = |Δm| c², énergie d'un échantillon. » ; dessin d'en-tête : `noyaux`.
 
 ## Sources (`TSTI2D/13- Energie nucleaire/`)

@@ -4,7 +4,7 @@ Lis d'abord `docs/prompts-sti2d/00-commun.md` (sources, charte, structure, livra
 
 ## Application
 
-- Dossier `spectre-signal/`, nom « Spectre d'un signal périodique », `data-matiere="physique"`, préfixe `sp`.
+- Dossier `spectre-signal/`, nom « Chapitre 17 : Spectre d'un signal périodique », `data-matiere="physique"`, préfixe `sp`.
 - Portail : desc « Décomposition de Fourier, composante continue, fondamental et harmoniques, lecture d'un spectre. »
 - Dessin d'en-tête : **nouveau dessin `spectre`** dans `assets/hero.js` (signal périodique non sinusoïdal en haut, raies du spectre en dessous). Il resservira au chapitre 18.
 

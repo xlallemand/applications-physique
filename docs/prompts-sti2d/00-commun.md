@@ -26,7 +26,14 @@ Ce fichier est lu au début de chaque session qui fabrique l'application d'un ch
 
 ## 3. Structure de l'application
 
-- Un dossier à la racine (nom donné dans le prompt du chapitre), `index.html` et `modules/`. Préfixe de 2 ou 3 lettres, espace de noms global propre.
+- Un dossier à la racine (nom court sans numéro de chapitre, donné dans le prompt du chapitre), `index.html` et `modules/`. Préfixe de 2 ou 3 lettres, espace de noms global propre.
+- **Nom de l'application = titre du chapitre avec son numéro** : « Chapitre N : Titre », tel que le donne le prompt du chapitre (ligne « nom »). Le même texte, au caractère près, partout où l'application est nommée :
+  - `<title>` et `<h1>` de l'accueil ;
+  - `SOM.init({ nom })` (sommaire et barre du haut) ;
+  - fin du `<title>` des pages de module (« Module 1 : … — Chapitre N : Titre ») ;
+  - `titre` de l'entrée `APPS` du portail.
+  
+  `SOM.init({ id })` reste le nom du dossier : c'est la clé de la progression enregistrée.
 - Pour le reste, suis la charte : `<html lang="fr" data-matiere="physique|chimie">`, feuilles de style et scripts dans l'ordre du §2, `SOM` pour la navigation, `COURS` (`assets/cours.js`) pour les cours, moteur de questions et d'exercices copié depuis `cinematique/modules/cin.js` puis renommé.
 - Chaque module :
   - un cours (notion → exemple → « À toi », « Afficher tout le cours », « À retenir ») ;
@@ -36,7 +43,7 @@ Ce fichier est lu au début de chaque session qui fabrique l'application d'un ch
   Un module long se découpe en parties (a, b…).
 - Dernier module : **exercices du support papier, avec la même numérotation**, donc le numéro du manuel et sa page (« Exercice 11 p. 32 »). Chaque exercice est guidé par parties, avec la correction détaillée toujours disponible (« Voir la correction », 0 point). Les exercices supplémentaires ou de bac portent une lettre ou leur titre (comme les exercices de synthèse A à F de `transport-electricite`).
 - Les simulations ou activités demandées par le prompt du chapitre sont des pages de type `simulation` (icône ▸), placées en tête de la partie qu'elles introduisent. Chaque simulation est suivie d'un bilan à compléter (« ✍ Complète ton cours ») et marquée faite à l'affichage du bilan.
-- Portail : ajoute l'application dans `APPS` de `index.html` (racine), `niv: ['sti']`, à la suite des applications STI2D du même domaine. Ajoute un dessin d'en-tête dans `assets/hero.js` seulement si aucun dessin existant ne convient (liste en tête du fichier).
+- Portail : ajoute l'application dans `APPS` de `index.html` (racine), `niv: ['sti']`, `titre` = nom de l'application, parmi les applications STI2D du même domaine dans l'ordre des numéros de chapitre. Ajoute un dessin d'en-tête dans `assets/hero.js` seulement si aucun dessin existant ne convient (liste en tête du fichier).
 - Applications d'outils à citer en lien (« Revois… ») plutôt que de refaire leur contenu : `conversions/`, `puissances-10/`, `equations-en-physique/`, `proportionnalite/`, `lecture-graphique/`.
 
 ## 4. Habitudes du professeur (visibles dans les corrections)

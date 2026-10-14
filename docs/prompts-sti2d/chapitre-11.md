@@ -4,7 +4,7 @@ Lis d'abord `docs/prompts-sti2d/00-commun.md` (sources, charte, structure, livra
 
 ## Application
 
-- Dossier `changements-etat/`, nom « Changements d'état et transferts thermiques », `data-matiere="physique"` (partie « Matière et matériaux »), préfixe `ce`.
+- Dossier `changements-etat/`, nom « Chapitre 11 : Changements d'état et transferts thermiques », `data-matiere="physique"` (partie « Matière et matériaux »), préfixe `ce`.
 - Portail : desc « Chaleur latente, Q = m c ΔT et Q = m L, diagramme d'état, schéma des étapes d'un chauffage. » ; dessin d'en-tête : `molecules`, ou un nouveau dessin « glaçon, eau, vapeur » dans `hero.js`.
 
 ## Sources (`TSTI2D/11- Changements d'etat et transferts thermiques/`)

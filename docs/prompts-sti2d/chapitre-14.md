@@ -39,6 +39,7 @@ L'application existe : `combustions/`. **Ne change ni le contenu scientifique ni
    - aucun débordement à 390 px.
    
    Corrige ce qui manque.
+5. **Nom de l'application** : « Chapitre 14 : Combustions » (`00-commun.md` §3), dans le `<title>` et le `<h1>` de l'accueil, `SOM.init({ nom })` de `co.js`, la fin du `<title>` des pages de module et le `titre` de l'entrée `APPS` du portail. Le dossier `combustions/` et `SOM.init({ id })` ne changent pas.
 
 ## A ajouter dans le cours
 

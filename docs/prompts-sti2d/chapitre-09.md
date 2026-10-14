@@ -4,7 +4,7 @@ Lis d'abord `docs/prompts-sti2d/00-commun.md` (sources, charte, structure, livra
 
 ## Application
 
-- Dossier `statique-fluides/`, nom « Statique des fluides », `data-matiere="physique"`, préfixe `sf`.
+- Dossier `statique-fluides/`, nom « Chapitre 9 : Statique des fluides », `data-matiere="physique"`, préfixe `sf`.
 - Portail : desc « Pression et force pressante, pression relative, principe fondamental de l'hydrostatique. » ; dessin d'en-tête : nouveau dessin « château d'eau et niveaux » dans `hero.js`, ou `formules:physique`.
 
 ## Sources (`TSTI2D/09- Statique des fluides/`)

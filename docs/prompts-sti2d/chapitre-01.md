@@ -4,7 +4,7 @@ Lis d'abord `docs/prompts-sti2d/00-commun.md` (sources, charte, structure, livra
 
 ## Application
 
-- Dossier `energie-puissance/`, nom « Énergie et puissance », `data-matiere="physique"`, préfixe `ep`.
+- Dossier `energie-puissance/`, nom « Chapitre 1 : Énergie et puissance », `data-matiere="physique"`, préfixe `ep`.
 - Portail :
   - desc : « Rendement, puissance moyenne et instantanée, énergie et aire sous la courbe. »
   - dessin d'en-tête : `puissance`.

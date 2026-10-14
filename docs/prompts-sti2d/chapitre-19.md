@@ -4,7 +4,7 @@ Lis d'abord `docs/prompts-sti2d/00-commun.md` (sources, charte, structure, livra
 
 ## Application
 
-- Dossier `ondes-electromagnetiques/`, nom « Ondes électromagnétiques », `data-matiere="physique"`, préfixe `oem`.
+- Dossier `ondes-electromagnetiques/`, nom « Chapitre 19 : Ondes électromagnétiques », `data-matiere="physique"`, préfixe `oem`.
 - Portail : desc « Longueur d'onde et fréquence, domaines des télécommunications, modulation AM et FM, antennes. »
 - Dessin d'en-tête : nouveau dessin « antenne et onde modulée » dans `hero.js`, ou `spectre` (chapitre 17).
 

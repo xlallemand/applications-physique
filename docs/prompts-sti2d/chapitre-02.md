@@ -4,7 +4,7 @@ Lis d'abord `docs/prompts-sti2d/00-commun.md` (sources, charte, structure, livra
 
 ## Application
 
-- Dossier `piles-accumulateurs/`, nom « Piles et accumulateurs », `data-matiere="physique"` (partie « Énergie » du programme), préfixe `pa2`. Pas `pa` : ce préfixe est pris par Puissance active.
+- Dossier `piles-accumulateurs/`, nom « Chapitre 2 : Piles et accumulateurs », `data-matiere="physique"` (partie « Énergie » du programme), préfixe `pa2`. Pas `pa` : ce préfixe est pris par Puissance active.
 - Portail :
   - desc : « Capacité, énergie disponible, énergies massique et volumique, branchements. »
   - dessin d'en-tête : `formules:pile`.

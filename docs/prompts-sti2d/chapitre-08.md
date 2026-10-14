@@ -4,7 +4,7 @@ Lis d'abord `docs/prompts-sti2d/00-commun.md` (sources, charte, structure, livra
 
 ## Application
 
-- Dossier `mouvements-rotation/`, nom « Mouvements de rotation », `data-matiere="physique"`, préfixe `rot`.
+- Dossier `mouvements-rotation/`, nom « Chapitre 8 : Mouvements de rotation », `data-matiere="physique"`, préfixe `rot`.
 - Portail : desc « Vitesse angulaire, tr/min et rad/s, moment d'une force, couple, point de fonctionnement d'un moteur. » ; dessin d'en-tête : nouveau dessin « engrenages et arcs de cercle » dans `hero.js`, ou `formules:physique`.
 
 ## Sources (`TSTI2D/08- Mouvements de rotation/`)

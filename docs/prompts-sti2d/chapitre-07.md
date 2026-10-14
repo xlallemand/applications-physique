@@ -4,7 +4,7 @@ Lis d'abord `docs/prompts-sti2d/00-commun.md` (sources, charte, structure, livra
 
 ## Application
 
-- Dossier `energie-cinetique/`, nom « Travail et énergie cinétique », `data-matiere="physique"`, préfixe `ec`.
+- Dossier `energie-cinetique/`, nom « Chapitre 7 : Théorème de l'énergie cinétique », `data-matiere="physique"`, préfixe `ec`.
 - Portail : desc « Frottements, travail d'une force, énergie cinétique et théorème de l'énergie cinétique. » ; dessin d'en-tête : `cinematique`, ou un nouveau dessin « wagon tiré » dans `hero.js`.
 
 ## Sources (`TSTI2D/07- Theoreme de l'energie cinetique/`)

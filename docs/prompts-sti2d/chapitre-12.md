@@ -4,7 +4,7 @@ Lis d'abord `docs/prompts-sti2d/00-commun.md` (sources, charte, structure, livra
 
 ## Application
 
-- Dossier `radioactivite/`, nom « Radioactivité », `data-matiere="physique"` (partie « Matière et matériaux »), préfixe `rad`.
+- Dossier `radioactivite/`, nom « Chapitre 12 : Radioactivité », `data-matiere="physique"` (partie « Matière et matériaux »), préfixe `rad`.
 - Portail : desc « Noyau, α, β⁻, β⁺, γ, activité, demi-vie, N(t) = N₀ e^(−λt) et calcul de t. » ; dessin d'en-tête : `noyaux` (existe déjà).
 
 ## Sources (`TSTI2D/12- Radioactivite/`)

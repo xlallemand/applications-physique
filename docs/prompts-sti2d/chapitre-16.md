@@ -4,7 +4,7 @@ Lis d'abord `docs/prompts-sti2d/00-commun.md` (sources, charte, structure, livra
 
 ## Application
 
-- Dossier `acides-bases/`, nom « Acides et bases », `data-matiere="chimie"`, préfixe `ab`.
+- Dossier `acides-bases/`, nom « Chapitre 16 : Acides et bases », `data-matiere="chimie"`, préfixe `ab`.
 - Portail : desc « Couples acide/base, réactions acido-basiques, pH = −log[H₃O⁺] et quantités de matière. » ; dessin d'en-tête `formules:ph`.
 
 ## Sources (`TSTI2D/16- Acides et bases/`)
