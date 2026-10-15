@@ -75,11 +75,11 @@ function etape2(c_) {
       <p class="crs-calc">ΔT = 19 − 5 = 14 °C, soit <span class="c">ΔT = 14 K</span><br>(en kelvins : 292 − 278 = 14 K, le même écart)</p>
       <p>Avec des températures négatives, attention aux signes : hôtel de glace à −3 °C, extérieur à −20 °C :</p>
       <p class="crs-calc">ΔT = −3 − (−20) = −3 + 20 = <span class="c">17 K</span></p>`)}`);
-  const [a, b] = hasard([[-3, -20], [-5, -18], [2, -12], [-1, -15], [4, -9]]);
+  const [a, b] = hasard([[2, -12], [4, -9], [1, -15], [3, -18], [5, -8]]);   // une seule température négative
   const [x, y] = hasard([[22, 35], [20, 31], [24, 38]]);
   const d = hasard([12, 17, 25, 30]);
   c_.aToi(carte, [
-    { titre: 'Deux températures négatives', enonce: `<p>Il fait ${fmt(a)} °C d'un côté d'une paroi et ${fmt(b)} °C de l'autre.</p>`,
+    { titre: 'Une température négative', enonce: `<p>Il fait ${fmt(a)} °C d'un côté d'une paroi et ${fmt(b)} °C de l'autre.</p>`,
       parties: [{ type: 'nombre', q: 'Calcule l\'écart de température ΔT = T<sub>chaud</sub> − T<sub>froid</sub>.', label: 'ΔT =', valeur: a - b, unite: 'K', tol: .01, signe: true,
         diag: v => proche(v, a + b) || proche(v, -(a + b)) || proche(v, Math.abs(a) - Math.abs(b)) ? `Soustraire un nombre négatif, c'est ajouter son opposé : ${fmt(a)} − (${fmt(b)}) = ${fmt(a)} + ${fmt(-b)}.` : proche(v, b - a) ? 'Commence par la température la plus chaude : ΔT est positif.' : 'ΔT = T<sub>chaud</sub> − T<sub>froid</sub>.',
         solution: `<p class="crs-calc">Le côté chaud est à ${fmt(a)} °C.<br>ΔT = ${fmt(a)} − (${fmt(b)}) = ${fmt(a)} + ${fmt(-b)} = ${c(fmt(a - b) + ' K')}</p>` }] },

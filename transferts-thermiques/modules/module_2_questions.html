@@ -18,8 +18,9 @@
 <script>
 /* ============================================================
    10 questions tirées au hasard : flux Φ = Q / Δt avec conversions
-   (4), énergie Q = Φ × Δt en joules (3), en Wh ou kWh (2), unité du
-   flux (1).
+   (3), énergie Q = Φ × Δt en joules (3), en Wh ou kWh (2), flux et
+   puissance (2) : Φ est une puissance, Φ = Q / Δt et Q = Φ × Δt sont
+   P = E / Δt et E = P × Δt avec d'autres noms.
    Erreur diagnostiquée surtout : durée non convertie en secondes
    (laissée en min ou en h), kJ ou MJ non convertis, Wh et J confondus.
    ============================================================ */
@@ -31,7 +32,7 @@ const hm = (h, m) => (h ? h + ' h' : '') + (m ? (h ? ' ' : '') + m + ' min' : ''
 // diagnostic d'un flux faux (Q en J, durée t en s ; h, m : la durée de l'énoncé)
 const dPhi = (v, Q, t, h, m, kilo) => proche(v, t / Q, .02) ? 'Rapport inversé : Φ = Q / Δt.'
   : (m != null && (proche(v, Q / (h * 60 + m), .02) || proche(v, Q / (h + m / 60), .02))) ? 'Convertis la durée en <b>secondes</b> : 1 min = 60 s, 1 h = 3 600 s.'
-  : (kilo && proche(v, Q / kilo / t, .02)) ? `Convertis l'énergie en joules (× ${fmt(kilo)}).` : 'Φ = Q / Δt, avec Q en J et Δt en s.';
+  : (kilo && proche(v, Q / kilo / t, .02)) ? `Convertis l'énergie en joules (× ${fmt(kilo)}).` : 'Φ = Q / Δt (comme P = E / Δt), avec Q en J et Δt en s.';
 
 /* ---------- Groupe 1 : flux thermique ---------- */
 const G1 = [
@@ -71,21 +72,21 @@ const G2 = [
     const [P, m] = hasard([[167, 30], [50, 45], [120, 20], [952, 10], [340, 15]]);
     return { theme: 'Énergie transférée', enonce: `<p>Un flux thermique de ${P} W traverse une paroi pendant ${m} min.</p>`,
       parties: [{ type: 'sci', q: 'Calcule l\'énergie transférée, en joules (2 chiffres significatifs).', label: 'Q =', valeur: P * m * 60, unite: 'J', cs: 2, rel: .05,
-        diag: v => proche(v, P * m, .03) ? `La durée doit être en secondes : ${m} min = ${m * 60} s.` : proche(v, P / (m * 60), .03) ? 'On multiplie : Q = Φ × Δt.' : 'Q = Φ × Δt, avec Δt en s.',
+        diag: v => proche(v, P * m, .03) ? `La durée doit être en secondes : ${m} min = ${m * 60} s.` : proche(v, P / (m * 60), .03) ? 'On multiplie : Q = Φ × Δt, comme E = P × Δt.' : 'Q = Φ × Δt (comme E = P × Δt), avec Δt en s.',
         solution: calc(`Q = Φ × Δt = ${P} W × ${m * 60} s ≈ ${c(sci(P * m * 60, 2) + ' J')}`) }] };
   },
   function journee() {
     const [P, h] = hasard([[88, 24], [69, 24], [500, 8], [250, 12], [1500, 3]]);
     return { theme: 'Énergie transférée', enonce: `<p>Un flux thermique de ${fmt(P)} W traverse un vitrage pendant ${h} h.</p>`,
       parties: [{ type: 'sci', q: 'Calcule l\'énergie transférée, en joules (2 chiffres significatifs).', label: 'Q =', valeur: P * h * 3600, unite: 'J', cs: 2, rel: .05,
-        diag: v => proche(v, P * h, .03) ? `Ce sont des Wh : en joules, la durée doit être en secondes (${h} h = ${fmt(h * 3600)} s).` : proche(v, P * h * 60, .03) ? '1 h = 3 600 s.' : 'Q = Φ × Δt, avec Δt en s.',
+        diag: v => proche(v, P * h, .03) ? `Ce sont des Wh : en joules, la durée doit être en secondes (${h} h = ${fmt(h * 3600)} s).` : proche(v, P * h * 60, .03) ? '1 h = 3 600 s.' : 'Q = Φ × Δt (comme E = P × Δt), avec Δt en s.',
         solution: calc(`Q = ${fmt(P)} W × ${h} × 3 600 s ≈ ${c(sci(P * h * 3600, 2) + ' J')}`) }] };
   },
   function duree() {
     const [P, Q] = hasard([[50, 180], [200, 360], [25, 90], [500, 1800]]);
     return { theme: 'Durée d\'un transfert', enonce: `<p>Un flux thermique de ${P} W transfère ${Q} kJ.</p>`,
       parties: [fq.nombre('Combien de temps faut-il ?', 'Δt =', Q * 1000 / P, 's', { signe: false,
-        diag: v => proche(v, Q / P) ? `Convertis l'énergie en joules : ${Q} kJ = ${fmt(Q * 1000)} J.` : proche(v, P / (Q * 1000)) ? 'Rapport inversé : Δt = Q / Φ.' : 'Q = Φ × Δt donc Δt = Q / Φ.',
+        diag: v => proche(v, Q / P) ? `Convertis l'énergie en joules : ${Q} kJ = ${fmt(Q * 1000)} J.` : proche(v, P / (Q * 1000)) ? 'Rapport inversé : Δt = Q / Φ.' : 'Q = Φ × Δt (comme E = P × Δt) donc Δt = Q / Φ.',
         solution: calc(`Δt = ${fr('Q', 'Φ')} = ${fr(fmt(Q * 1000) + ' J', P + ' W')} = ${c(fmt(Q * 1000 / P) + ' s')} (soit ${fmt(Q * 1000 / P / 60)} min)`) })] };
   },
 ];
@@ -96,7 +97,7 @@ const G3 = [
     const [P, h] = hasard([[350, 8], [90, 24], [1200, 5], [250, 12], [8900, 24]]);
     return { theme: 'Énergie en kWh', enonce: `<p>Un flux thermique de ${fmt(P)} W traverse un mur pendant ${h} h.</p>`,
       parties: [fq.nombre('Calcule l\'énergie perdue, en kWh.', 'Q =', P * h / 1000, 'kWh', { signe: false, rel: .01,
-        diag: v => proche(v, P * h) ? 'Ce sont des Wh : divise par 1 000.' : proche(v, P * h * 3600 / 1000, .02) ? 'Avec Δt en h, Q = Φ × Δt est en Wh, pas en J.' : 'Q = Φ × Δt (Δt en h) en Wh ; 1 kWh = 1 000 Wh.',
+        diag: v => proche(v, P * h) ? 'Ce sont des Wh : divise par 1 000.' : proche(v, P * h * 3600 / 1000, .02) ? 'Avec Δt en h, Q = Φ × Δt est en Wh, pas en J.' : 'Q = Φ × Δt (comme E = P × Δt) : Δt en h donne des Wh ; 1 kWh = 1 000 Wh.',
         solution: calc(`Q = ${fmt(P)} W × ${h} h = ${fmt(P * h)} Wh = ${c(fmt(P * h / 1000) + ' kWh')}`) })] };
   },
   function WhJ() {
@@ -107,24 +108,44 @@ const G3 = [
   },
 ];
 
-/* ---------- Groupe 4 : unité ---------- */
+/* ---------- Groupe 4 : flux et puissance ---------- */
+const FORMULES = { PE: `P = ${fr('E', 'Δt')}`, EP: 'E = P × Δt', UI: 'P = U × I', vd: `v = ${fr('d', 'Δt')}` };
 const G4 = [
   function unite() {
-    return { theme: 'Unités', parties: [fq.choix('Le flux thermique Φ s\'exprime en :', [o('ok', 'watts (W)'), o('a', 'joules (J)'), o('b', 'kelvins (K)'), o('c', 'K·W<sup>−1</sup>')], 'ok',
-      { indices: { a: 'Le joule est l\'unité de l\'énergie Q ; Φ est une énergie par seconde.', b: 'Le kelvin est l\'unité de la température.', c: 'K·W<sup>−1</sup> est l\'unité de la résistance thermique.' }, solution: '<p>Φ = Q / Δt : des joules par seconde, c\'est-à-dire des <b>watts</b>.</p>' })] };
+    return { theme: 'Flux et puissance', parties: [fq.choix('Le flux thermique Φ s\'exprime en :', [o('ok', 'watts (W)'), o('a', 'joules (J)'), o('b', 'kelvins (K)'), o('c', 'K·W<sup>−1</sup>')], 'ok',
+      { indices: { a: 'Le joule est l\'unité de l\'énergie Q ; Φ est une énergie par seconde : une puissance.', b: 'Le kelvin est l\'unité de la température.', c: 'K·W<sup>−1</sup> est l\'unité de la résistance thermique.' }, solution: '<p>Φ = Q / Δt : des joules par seconde, c\'est-à-dire des <b>watts</b>, comme toute puissance (P = E / Δt).</p>' })] };
+  },
+  // Φ = Q / Δt ou Q = Φ × Δt : quelle formule déjà connue ?
+  function formule() {
+    const [f, bonne] = hasard([[`Φ = ${fr('Q', 'Δt')}`, 'PE'], ['Q = Φ × Δt', 'EP']]);
+    const ind = { PE: 'P = E / Δt correspond à Φ = Q / Δt : une puissance, c\'est une énergie divisée par une durée.', EP: 'E = P × Δt donne une énergie : elle correspond à Q = Φ × Δt.',
+      UI: 'P = U × I est la puissance électrique : elle ne fait pas intervenir de durée.', vd: 'v = d / Δt est une vitesse : une distance par seconde, pas une énergie par seconde.' };
+    delete ind[bonne];
+    return { theme: 'Flux et puissance', parties: [fq.choix(`${f} correspond à quelle formule que tu connais déjà ?`, Object.keys(FORMULES).map(k => o(k, FORMULES[k])), bonne,
+      { indices: ind, solution: `<p>Seuls les noms changent : le flux thermique Φ est une puissance P et la quantité de chaleur Q est une énergie E. ${f} est donc ${FORMULES[bonne]}.</p>` })] };
+  },
+  // un flux de 1 500 W et un radiateur de 1 500 W : même énergie
+  function comparer() {
+    const P = hasard([500, 800, 1000, 1500, 2000]), h = hasard([1, 2, 3]);
+    const nb = fmt(P).replace(/ /g, '&nbsp;') + '&nbsp;W';   // sans retour à la ligne dans le nombre
+    return { theme: 'Flux et puissance', enonce: `<p>Un mur laisse passer un flux thermique de ${nb}. Un radiateur électrique a une puissance de ${nb}.</p>`,
+      parties: [fq.choix(`En ${h} h, l'énergie thermique Q qui traverse le mur est :`,
+        [o('ok', 'égale à l\'énergie E reçue par le radiateur'), o('a', 'plus grande que l\'énergie E reçue par le radiateur'), o('b', 'plus petite que l\'énergie E reçue par le radiateur'), o('c', 'impossible à comparer : un flux et une puissance sont deux grandeurs différentes')], 'ok',
+        { indices: { a: 'Φ et P sont deux puissances de même valeur : Q = Φ × Δt et E = P × Δt donnent la même énergie.', b: 'Φ et P sont deux puissances de même valeur : Q = Φ × Δt et E = P × Δt donnent la même énergie.', c: 'Un flux thermique est une puissance, en watts comme celle du radiateur.' },
+          solution: calc(`Q = Φ × Δt = ${fmt(P)} W × ${h} h = ${c(fmt(P * h) + ' Wh')}<br>E = P × Δt = ${fmt(P)} W × ${h} h = ${c(fmt(P * h) + ' Wh')}`) + '<p>Le flux thermique est une puissance : mêmes formules, mêmes résultats.</p>' })] };
   },
 ];
 
-// tirage : 4 + 3 + 2 + 1 questions
+// tirage : 3 + 3 + 2 + 2 questions
 function tirage() {
   const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
-  return pris(G1, 4).concat(pris(G2, 3), pris(G3, 2), pris(G4, 1));
+  return pris(G1, 3).concat(pris(G2, 3), pris(G3, 2), pris(G4, 2));
 }
 
 TT.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 2 · QUESTIONS', titre: 'Flux thermique',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : flux thermique Φ = Q / Δt avec conversions, énergie transférée Q = Φ × Δt en joules et en kWh.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : flux thermique Φ = Q / Δt avec conversions, énergie transférée Q = Φ × Δt en joules et en kWh, et le lien avec P = E / Δt et E = P × Δt.</p>',
   questions: tirage,
   revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
   suite: { href: 'module_3_cours.html', label: 'Module 3 : résistance thermique →' },
