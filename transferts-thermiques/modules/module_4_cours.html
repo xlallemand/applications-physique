@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : parois composées — Chapitre 5 : Flux et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="tt.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="tt.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS</span>
+    <h2 class="er-titre">Parois composées</h2>
+    <p class="er-contexte">Un mur isolé, un faux plafond, un double vitrage sont formés de plusieurs <b>couches accolées</b>. Leurs résistances thermiques <b>s'additionnent</b>. Pour ne rien oublier, on commence par un <b>schéma</b> de la paroi.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   R = R1 + R2 + R3 (couches accolées, même surface S) ; méthode avec
+   le schéma de paroi en couches (TT.schemaParoi : l'élève place e, λ,
+   les températures et S par glisser-déposer, puis choisit le sens du
+   flux) ; double vitrage ; épaisseur d'isolant à ajouter.
+   Erreurs diagnostiquées : épaisseurs non converties en m, résistances
+   multipliées au lieu d'être additionnées, R visée non diminuée des
+   résistances déjà présentes.
+   ============================================================ */
+const { fmt, sci, hasard, exemple } = COURS;
+const { fr, proche, o, cs, paroi, paroiRemplie, schemaParoi, partieSens, val } = TT;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+const KW = 'K·W<sup>−1</sup>';
+// partie de glisser-déposer du moteur TT, utilisée ici comme outil 'perso' du moteur de cours
+const glisser = p => ({ type: 'perso', q: p.q, solution: p.solution, monter: (zone, api) => TT.PARTIES.schema(zone, p, api) });
+
+/* ---------- 1. Les résistances s'additionnent ---------- */
+const EX1 = { couches: [{ nom: 'béton', motif: 'beton', e: '15 cm', ev: .15, lam: 1.28 }, { nom: 'polystyrène', motif: 'isolant', e: '5 cm', ev: .05, lam: .03 }],
+  cotes: [{ nom: 'intérieur', T: 20 }, { nom: 'extérieur', T: 0 }], S: 20 };
+function etape1(c_) {
+  const carte = c_.carte('1. Des couches accolées : R = R<sub>1</sub> + R<sub>2</sub> + R<sub>3</sub>');
+  const R1 = .15 / (1.28 * 20), R2 = .05 / (.03 * 20), R = R1 + R2;
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Quand plusieurs couches sont accolées (« en série »), le flux thermique traverse l'une après l'autre : chaque couche ajoute sa résistance.</p>
+      <div class="cle"><p class="crs-formule">R = R<sub>1</sub> + R<sub>2</sub> + R<sub>3</sub> &nbsp; avec &nbsp; R<sub>i</sub> = ${fr('e<sub>i</sub>', 'λ<sub>i</sub> × S')}</p>
+        <p>Toutes les couches ont la <b>même surface</b> S. Ensuite : Φ = ΔT / R.</p></div>
+    </div>
+    ${exemple(`<p>Un mur de 20 m<sup>2</sup> : 15 cm de béton (λ = 1,28) et 5 cm de polystyrène (λ = 0,030) ; 20 °C dedans, 0 °C dehors.</p>
+      ${paroiRemplie(EX1, { R: [sci(R1, 2), sci(R2, 2), cs(R, 2)], phi: Math.round(20 / R) + ' W', sens: 1, aria: 'Mur en deux couches, béton et polystyrène, avec les valeurs de l\'exemple' })}
+      <p class="crs-calc">R<sub>1</sub> = ${fr('0,15', '1,28 × 20')} ≈ 5,9 × 10<sup>−3</sup> K·W<sup>−1</sup> ; R<sub>2</sub> = ${fr('0,05', '0,030 × 20')} ≈ 8,3 × 10<sup>−2</sup> K·W<sup>−1</sup><br>
+      R = R<sub>1</sub> + R<sub>2</sub> ≈ <span class="c">0,089 K·W<sup>−1</sup></span> ; Φ = ${fr('20 − 0', '0,089')} ≈ <span class="c">224 W</span>, de l'intérieur vers l'extérieur.</p>`)}`);
+  const [a, b] = hasard([[0.0156, 0.5], [0.013, 0.208], [5.3e-4, 0.071], [0.0116, 0.178]]);
+  const [x, y, z] = hasard([[0.002, 0.25, 0.012], [1.4e-3, 0.116, 6.04e-3], [0.0074, 0.24, 0.0074]]);
+  c_.aToi(carte, [
+    { titre: 'Deux couches', enonce: `<p>Une paroi est formée de deux couches de résistances R<sub>1</sub> = ${fmt(a)} ${KW} et R<sub>2</sub> = ${fmt(b)} ${KW}.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule sa résistance thermique totale (3 chiffres significatifs).', label: 'R =', valeur: a + b, unite: KW, signe: false, rel: .01, affiche: cs(a + b, 3),
+        diag: v => proche(v, a * b, .03) ? 'Les résistances de couches accolées s\'<b>additionnent</b>.' : 'R = R<sub>1</sub> + R<sub>2</sub>.', solution: `<p class="crs-calc">R = ${fmt(a)} + ${fmt(b)} ≈ ${c(cs(a + b, 3) + ' ' + KW)}</p>` }] },
+    { titre: 'Trois couches', enonce: `<p>Un mur est formé de trois couches : R<sub>1</sub> = ${sci(x, 2)} ${KW}, R<sub>2</sub> = ${fmt(y)} ${KW} et R<sub>3</sub> = ${sci(z, 3)} ${KW}.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule sa résistance thermique totale (2 chiffres significatifs).', label: 'R =', valeur: x + y + z, unite: KW, signe: false, rel: .03, affiche: cs(x + y + z, 2),
+        diag: v => proche(v, y, .02) ? 'N\'oublie pas les petites résistances : elles s\'ajoutent aussi.' : 'R = R<sub>1</sub> + R<sub>2</sub> + R<sub>3</sub> (attention aux puissances de 10).',
+        solution: `<p class="crs-calc">R = ${fmt(x)} + ${fmt(y)} + ${fmt(z)} ≈ ${c(cs(x + y + z, 2) + ' ' + KW)}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. La méthode avec un schéma ---------- */
+const DONNEES = [
+  { texte: 'Un mur de 12 m<sup>2</sup> est formé de 20 cm de béton (λ = 1,28 W·m<sup>−1</sup>·K<sup>−1</sup>) doublé, côté intérieur, de 10 cm de laine de verre (λ = 0,040 W·m<sup>−1</sup>·K<sup>−1</sup>). Il fait 20 °C à l\'intérieur et −5 °C dehors.',
+    couches: [{ nom: 'laine de verre', motif: 'isolant', e: '10 cm', ev: .1, lam: .04 }, { nom: 'béton', motif: 'beton', e: '20 cm', ev: .2, lam: 1.28 }], cotes: [{ nom: 'intérieur', T: 20 }, { nom: 'extérieur', T: -5 }], S: 12,
+    intrus: [{ label: '25 K', indice: '25 K est l\'écart de température : on le calcule avec les deux températures, ce n\'est pas une donnée à placer.' }] },
+  { texte: 'Un mur de 15 m<sup>2</sup> est formé de 20 cm de brique (λ = 1,15 W·m<sup>−1</sup>·K<sup>−1</sup>) et de 8 cm de polystyrène (λ = 0,030 W·m<sup>−1</sup>·K<sup>−1</sup>) côté intérieur. Il fait 19 °C à l\'intérieur et 2 °C dehors.',
+    couches: [{ nom: 'polystyrène', motif: 'isolant', e: '8 cm', ev: .08, lam: .03 }, { nom: 'brique', motif: 'brique', e: '20 cm', ev: .2, lam: 1.15 }], cotes: [{ nom: 'intérieur', T: 19 }, { nom: 'extérieur', T: 2 }], S: 15 },
+  { texte: 'Le plafond d\'une pièce de 40 m<sup>2</sup> est en plâtre de 13 mm (λ = 0,35 W·m<sup>−1</sup>·K<sup>−1</sup>), recouvert de 20 cm de laine de verre (λ = 0,040 W·m<sup>−1</sup>·K<sup>−1</sup>). La pièce est à 20 °C, le grenier au-dessus à 6 °C.',
+    couches: [{ nom: 'plâtre', motif: 'platre', e: '13 mm', ev: .013, lam: .35 }, { nom: 'laine de verre', motif: 'isolant', e: '20 cm', ev: .2, lam: .04 }], cotes: [{ nom: 'pièce', T: 20 }, { nom: 'grenier', T: 6 }], S: 40 },
+];
+function etape2(c_) {
+  const carte = c_.carte('2. La méthode : d\'abord un schéma');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b></p><ol class="er-liste"><li>Dessine la paroi en couches ; note pour chaque couche son épaisseur e et sa conductivité λ, puis les températures des deux côtés et la surface S.</li>
+        <li>Calcule la résistance R<sub>i</sub> = e<sub>i</sub> / (λ<sub>i</sub> × S) de chaque couche (e en m).</li>
+        <li>Additionne : R = R<sub>1</sub> + R<sub>2</sub> + …</li><li>Calcule Φ = ΔT / R ; le flux va du chaud vers le froid.</li></ol></div>
+    </div>
+    ${exemple('<p>Voir l\'exemple de l\'étape 1 : schéma, R<sub>1</sub>, R<sub>2</sub>, R, puis Φ.</p>')}`);
+  const d = hasard(DONNEES);
+  const [c1, c2] = d.couches, R1 = c1.ev / (c1.lam * d.S), R2 = c2.ev / (c2.lam * d.S), R = R1 + R2, dT = d.cotes[0].T - d.cotes[1].T;
+  const [n1, n2] = [c1, c2].map(x => x.nom);
+  c_.aToi(carte, [
+    { titre: 'Une paroi en deux couches', enonce: `<p>${d.texte}</p>`,
+      parties: [
+        glisser(schemaParoi(d)),
+        partieSens({ cotes: [`${d.cotes[0].nom === 'pièce' ? 'la pièce' : 'l\'intérieur'} (${fmt(d.cotes[0].T)} °C)`, `${d.cotes[1].nom === 'grenier' ? 'le grenier' : 'l\'extérieur'} (${fmt(d.cotes[1].T)} °C)`], bon: 1 }),
+        { type: 'sci', q: `Calcule la résistance R<sub>1</sub> de la couche de ${n1} (2 chiffres significatifs).`, label: 'R<sub>1</sub> =', valeur: R1, unite: KW, cs: 2, rel: .05,
+          diag: v => proche(v, R1 * 100, .03) || proche(v, R1 * 1000, .03) ? `L'épaisseur doit être en mètres : ${c1.e} = ${fmt(c1.ev)} m.` : 'R<sub>1</sub> = e<sub>1</sub> / (λ<sub>1</sub> × S).',
+          solution: `<p class="crs-calc">R<sub>1</sub> = ${fr(fmt(c1.ev), fmt(c1.lam) + ' × ' + fmt(d.S))} ≈ ${c(sci(R1, 2) + ' ' + KW)}</p>` },
+        { type: 'sci', q: `Calcule la résistance R<sub>2</sub> de la couche de ${n2} (2 chiffres significatifs).`, label: 'R<sub>2</sub> =', valeur: R2, unite: KW, cs: 2, rel: .05,
+          diag: v => proche(v, R2 * 100, .03) || proche(v, R2 * 1000, .03) ? `L'épaisseur doit être en mètres : ${c2.e} = ${fmt(c2.ev)} m.` : 'R<sub>2</sub> = e<sub>2</sub> / (λ<sub>2</sub> × S).',
+          solution: `<p class="crs-calc">R<sub>2</sub> = ${fr(fmt(c2.ev), fmt(c2.lam) + ' × ' + fmt(d.S))} ≈ ${c(sci(R2, 2) + ' ' + KW)}</p>` },
+        { type: 'nombre', q: 'Calcule la résistance totale de la paroi (3 chiffres significatifs).', label: 'R =', valeur: R, unite: KW, signe: false, rel: .01, affiche: cs(R, 3),
+          diag: v => proche(v, R1 * R2, .03) ? 'Les résistances s\'additionnent.' : 'R = R<sub>1</sub> + R<sub>2</sub>.', solution: `<p class="crs-calc">R = R<sub>1</sub> + R<sub>2</sub> ≈ ${c(cs(R, 3) + ' ' + KW)}</p>` },
+        { type: 'nombre', q: 'Calcule le flux thermique (3 chiffres significatifs).', label: 'Φ =', valeur: dT / R, unite: 'W', signe: false, rel: .015, affiche: fmt(r3(dT / R)),
+          diag: v => proche(v, dT / R1, .03) || proche(v, dT / R2, .03) ? 'Utilise la résistance <b>totale</b> R.' : proche(v, Math.abs(d.cotes[0].T + d.cotes[1].T) / R, .03) ? `Calcule bien ΔT = ${fmt(d.cotes[0].T)} − (${fmt(d.cotes[1].T)}) = ${dT} K.` : 'Φ = ΔT / R.',
+          solution: `<p class="crs-calc">ΔT = ${fmt(d.cotes[0].T)} − (${fmt(d.cotes[1].T)}) = ${dT} K ; Φ = ${fr(dT, cs(R, 3))} ≈ ${c(fmt(r3(dT / R)) + ' W')}</p>` +
+            paroiRemplie(d, { R: [sci(R1, 2), sci(R2, 2), cs(R, 3)], phi: fmt(r3(dT / R)) + ' W', sens: 1 }) },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Le double vitrage ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Le double vitrage : verre, air, verre');
+  const Rv = .004 / (.811 * 2), Ra = .016 / (.025 * 2);
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Un double vitrage est formé de deux verres séparés par une lame d'<b>air immobile</b> (ou d'un autre gaz). L'air immobile conduit très mal l'énergie (λ = 0,025 W·m<sup>−1</sup>·K<sup>−1</sup>) : c'est lui qui isole.</p>
+      ${paroi({ couches: [{ nom: 'verre', motif: 'verre', e: val('4 mm'), lam: val('0,811') }, { nom: 'air', motif: 'air', e: val('16 mm'), lam: val('0,025') }, { nom: 'verre', motif: 'verre', e: val('4 mm'), lam: val('0,811') }],
+        cotes: [{ nom: 'intérieur' }, { nom: 'extérieur' }], S: val('2,0 m<sup>2</sup>'), aria: 'Double vitrage : verre de 4 mm, air de 16 mm, verre de 4 mm' })}
+    </div>
+    ${exemple(`<p class="crs-calc">R<sub>verre</sub> = ${fr('4 × 10<sup>−3</sup>', '0,811 × 2,0')} ≈ 2,5 × 10<sup>−3</sup> K·W<sup>−1</sup> ; R<sub>air</sub> = ${fr('16 × 10<sup>−3</sup>', '0,025 × 2,0')} = 0,32 K·W<sup>−1</sup><br>
+      R = 2 × R<sub>verre</sub> + R<sub>air</sub> ≈ <span class="c">0,32 K·W<sup>−1</sup></span> : plus de 100 fois la résistance d'un simple verre de 4 mm.</p>`)}`);
+  const ea = hasard([12, 10, 20]), Ra2 = ea / 1000 / (.025 * 2), R = 2 * Rv + Ra2;
+  c_.aToi(carte, [
+    { titre: 'Un autre double vitrage', enonce: `<p>Double vitrage de 2,0 m<sup>2</sup> : deux verres de 4 mm (λ = 0,811) et ${ea} mm d'air (λ = 0,025). R<sub>verre</sub> ≈ 2,47 × 10<sup>−3</sup> K·W<sup>−1</sup>.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule la résistance de la lame d\'air (2 chiffres significatifs).', label: 'R<sub>air</sub> =', valeur: Ra2, unite: KW, signe: false, rel: .03, affiche: cs(Ra2, 2),
+          diag: v => proche(v, Ra2 * 1000, .03) ? `Convertis : ${ea} mm = ${fmt(ea / 1000)} m.` : 'R<sub>air</sub> = e / (λ<sub>air</sub> × S).', solution: `<p class="crs-calc">R<sub>air</sub> = ${fr(ea + ' × 10<sup>−3</sup>', '0,025 × 2,0')} = ${c(cs(Ra2, 2) + ' ' + KW)}</p>` },
+        { type: 'nombre', q: 'Calcule la résistance du double vitrage (2 chiffres significatifs).', label: 'R =', valeur: R, unite: KW, signe: false, rel: .03, affiche: cs(R, 2),
+          diag: v => proche(v, Rv + Ra2, .01) ? 'Il y a <b>deux</b> verres.' : 'R = R<sub>verre</sub> + R<sub>air</sub> + R<sub>verre</sub>.', solution: `<p class="crs-calc">R = 2 × 2,47 × 10<sup>−3</sup> + ${cs(Ra2, 2)} ≈ ${c(cs(R, 2) + ' ' + KW)}</p>` },
+        { type: 'choix', q: 'Qu\'est-ce qui isole surtout dans un double vitrage ?', options: [o('air', 'la lame d\'air immobile'), o('verre', 'les deux verres'), o('cadre', 'le cadre de la fenêtre')], bonne: 'air', melanger: false,
+          indices: { verre: 'Compare R<sub>verre</sub> ≈ 0,0025 et R<sub>air</sub> : le verre conduit bien l\'énergie (λ ≈ 1).', cadre: 'Le calcul porte sur le vitrage seul : compare les résistances des couches.' },
+          solution: '<p>La lame d\'air a une résistance environ 100 fois plus grande que celle d\'un verre : c\'est elle qui isole.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Quelle épaisseur d'isolant ? ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. Quelle épaisseur d\'isolant ajouter ?');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Pour atteindre une résistance totale R visée : R<sub>isolant</sub> = R − (résistances des autres couches), puis e<sub>isolant</sub> = R<sub>isolant</sub> × λ<sub>isolant</sub> × S.</p></div>
+    </div>
+    ${exemple(`<p>Un mur de béton de 20 cm (λ = 1,28) a une surface de 10 m<sup>2</sup>. On veut R = 0,50 K·W<sup>−1</sup> en ajoutant de la laine de verre (λ = 0,040).</p>
+      <p class="crs-calc">R<sub>béton</sub> = ${fr('0,20', '1,28 × 10')} ≈ 0,016 K·W<sup>−1</sup><br>R<sub>laine</sub> = 0,50 − 0,016 = 0,484 K·W<sup>−1</sup><br>e = R<sub>laine</sub> × λ × S = 0,484 × 0,040 × 10 ≈ <span class="c">0,19 m = 19 cm</span></p>`)}`);
+  const [Rv, Rb, l, S, nom] = hasard([[1, 0.02, 0.04, 5, 'laine de verre'], [0.6, 0.012, 0.03, 8, 'polystyrène'], [2, 0.05, 0.035, 4, 'laine de mouton'], [0.8, 0.016, 0.05, 10, 'fibre de bois']]);
+  const Ri = Rv - Rb, e = Ri * l * S;
+  c_.aToi(carte, [
+    { titre: 'Isoler un mur', enonce: `<p>Un mur de ${fmt(S)} m<sup>2</sup> a déjà une résistance de ${fmt(Rb)} ${KW}. On veut atteindre R = ${fmt(Rv)} ${KW} avec de la ${nom} (λ = ${fmt(l)} W·m<sup>−1</sup>·K<sup>−1</sup>).</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle résistance doit avoir la couche d\'isolant ?', label: 'R<sub>isolant</sub> =', valeur: Ri, unite: KW, signe: false, rel: .005,
+          diag: v => proche(v, Rv) ? 'Le mur a déjà une résistance : retire-la de la valeur visée.' : proche(v, Rv + Rb) ? 'On soustrait : R<sub>isolant</sub> = R − R<sub>mur</sub>.' : 'R = R<sub>mur</sub> + R<sub>isolant</sub>.', solution: `<p class="crs-calc">R<sub>isolant</sub> = ${fmt(Rv)} − ${fmt(Rb)} = ${c(fmt(Ri) + ' ' + KW)}</p>` },
+        { type: 'nombre', q: 'Quelle épaisseur d\'isolant faut-il, en cm (3 chiffres significatifs) ?', label: 'e =', valeur: e * 100, unite: 'cm', signe: false, rel: .01, affiche: fmt(r3(e * 100)),
+          diag: v => proche(v, e, .02) ? 'C\'est en mètres : convertis en cm.' : proche(v, Rv * l * S * 100, .02) ? 'Utilise R<sub>isolant</sub>, pas la résistance totale.' : 'e = R<sub>isolant</sub> × λ × S.', solution: `<p class="crs-calc">e = ${fmt(Ri)} × ${fmt(l)} × ${fmt(S)} ≈ ${fmt(r3(e))} m = ${c(fmt(r3(e * 100)) + ' cm')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">R = R<sub>1</sub> + R<sub>2</sub> + R<sub>3</sub> &nbsp;·&nbsp; R<sub>i</sub> = ${fr('e<sub>i</sub>', 'λ<sub>i</sub> × S')}</p><p>Couches accolées : même surface S ; on additionne les résistances, puis Φ = ΔT / R.</p></div>
+    <div class="cle"><p>Méthode : schéma de la paroi (e et λ de chaque couche, températures, S) → chaque R<sub>i</sub> → R totale → Φ, du chaud vers le froid.</p></div>
+    <div class="cle"><p>Double vitrage : c'est la lame d'<b>air immobile</b> qui isole. Isolant à ajouter : R<sub>isolant</sub> = R visée − R des autres couches ; e = R<sub>isolant</sub> × λ × S.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4_questions.html">Questions sur les parois composées →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_5.html">Module 5 : exercices du manuel</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
+TT.menu('module_4_cours');
+</script>
+</body>
+</html>

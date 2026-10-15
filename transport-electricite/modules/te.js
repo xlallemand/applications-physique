@@ -953,7 +953,7 @@
     // accueil de l'application : bandeau avec le lien vers le portail des applications
     if (cle === 'accueil') {
       racine.innerHTML = '<div class="app-topbar"><a class="te-pilule" href="../index.html"><span aria-hidden="true">←</span><span class="te-court">Applications</span><span class="te-long">Toutes les applications</span></a>' +
-        '<div class="app-topbar-title"><span class="app-name">Transport de l\'électricité</span></div></div><div class="app-topbar-spacer"></div>';
+        '<div class="app-topbar-title"><span class="app-name">Chapitre 4 : Transport et distribution de l\'électricité</span></div></div><div class="app-topbar-spacer"></div>';
       return;
     }
     if (!situer(cle)) return;
@@ -974,7 +974,7 @@
         `<div class="te-barre"><button type="button" class="te-ou" aria-expanded="false" aria-controls="te-som" aria-label="Sommaire : module ${s.m.n}, ${ou}">` +
         `<span class="te-snum">${s.m.n}</span><span class="te-ou-t"><small>${s.m.titre}</small><b>${ou}</b></span><span class="te-ou-chev" aria-hidden="true">▾</span></button></div>` +
         '<div class="te-barre-esp"></div><div class="te-voile"></div>' +
-        `<aside class="te-som" id="te-som" aria-label="Sommaire"><div class="te-som-tete"><a class="te-som-app" href="../index.html">Transport de l'électricité</a>` +
+        `<aside class="te-som" id="te-som" aria-label="Sommaire"><div class="te-som-tete"><a class="te-som-app" href="../index.html">Chapitre 4 : Transport et distribution de l'électricité</a>` +
         '<a class="te-pilule" href="../index.html"><span aria-hidden="true">⌂</span>Accueil</a></div>' +
         `<p class="te-som-lab">Sommaire</p><nav class="te-som-arbre" aria-label="Modules">${sommaire(s, pages, ex)}</nav></aside>`;
       // déplier / replier un module ou une partie sur place

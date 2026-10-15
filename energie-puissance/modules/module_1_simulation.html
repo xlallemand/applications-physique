@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : activité, stocker de l'énergie en plein air — Chapitre 1 : Énergie et puissance</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ep.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="ep.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page ep-large">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · ACTIVITÉ</span>
+    <h2 class="er-titre">Stocker de l'énergie en plein air (activité 1 p. 24)</h2>
+    <p class="er-contexte">Une <b>station de transfert d'énergie par pompage</b> (STEP) relie deux lacs de montagne. Quand on a trop d'électricité, on <b>pompe</b> l'eau vers le lac du haut ; quand on en manque, on la laisse redescendre dans des <b>turbines</b>. Change le mode de fonctionnement, observe, puis réponds aux questions.</p>
+  </div>
+
+  <div class="ep-sim">
+    <!-- ============ Simulation et données ============ -->
+    <div class="ep-sim-gauche">
+      <div class="er-card">
+        <h3 class="cours-titre">La STEP</h3>
+        <div id="step"></div>
+      </div>
+      <div class="er-card">
+        <h3 class="cours-titre">Les données</h3>
+        <ul class="ep-donnees">
+          <li>Altitude du bassin supérieur : <b>1 590 m</b> ; du bassin inférieur : <b>770 m</b>.</li>
+          <li>Débit d'eau en turbinage : <b>216 m<sup>3</sup>·s<sup>−1</sup></b> ; en pompage : <b>135 m<sup>3</sup>·s<sup>−1</sup></b>.</li>
+          <li>Puissance disponible pour le pompage : <b>8 pompes de 150 MW</b> chacune.</li>
+          <li>Volume utile : 14 300 000 m<sup>3</sup>.</li>
+          <li>Énergie potentielle de pesanteur d'une masse m à l'altitude z : <b>E<sub>p</sub> = m × g × z</b>, avec g = 9,81 N·kg<sup>−1</sup>.</li>
+          <li>1 m<sup>3</sup> d'eau a une masse de 1 000 kg.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ============ Questions ============ -->
+    <div class="ep-sim-droite">
+      <div class="er-card ph-question">
+        <p class="er-q-nom">Questions de l'activité</p>
+        <p class="er-petit" style="margin-bottom:10px">Sans points : chaque question réussie fait apparaître la suivante. Après une erreur, tu peux afficher la réponse.</p>
+        <div id="questions"></div>
+      </div>
+      <div id="bilan" class="er-card" hidden>
+        <span class="er-badge">BILAN</span>
+        <h3 class="er-titre">✍ Complète ton cours</h3>
+        <div class="cle"><p><b class="cle-titre">Schéma de conversion.</b> Un convertisseur reçoit une énergie (ou une puissance) <b>apportée</b> ; il en restitue une partie sous la forme voulue, l'énergie <b>utile</b>. Le reste est l'énergie <b>perdue</b>, en général sous forme <b>thermique</b>.</p></div>
+        <div id="bilanSchema"></div>
+        <div class="cle"><p><b class="cle-titre">Rendement.</b> η = E<sub>u</sub> / E<sub>a</sub> = P<sub>u</sub> / P<sub>a</sub>, sans unité, toujours inférieur à 1 (ici η ≈ 0,90, soit 90 %).</p></div>
+        <div class="cle"><p><b class="cle-titre">Convertisseur réversible.</b> Il convertit l'énergie dans les deux sens (STEP : turbinage et pompage ; accumulateur : décharge et charge). Un groupe électrogène diesel n'est pas réversible.</p></div>
+        <div class="cle"><p><b class="cle-titre">Intérêt du stockage.</b> Les énergies éolienne et solaire sont <b>intermittentes</b> : on stocke l'électricité produite en trop pour la restituer quand on en manque.</p></div>
+        <div class="er-actions">
+          <a class="btn-primary" style="text-decoration:none" href="module_1_cours.html">Le cours du module 1 →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Activité 1 p. 24 : station de transfert d'énergie par pompage.
+   La STEP est dessinée par EP.step (turbinage ou pompage) ; les
+   questions de l'activité se suivent (EP.question, mode 'cours' :
+   sans points, réponse disponible après une erreur). Le bilan
+   « ✍ Complète ton cours » s'affiche à la fin : l'activité est faite.
+   Valeurs (vérifiées par un script) : Δz = 820 m ; m = 216 000 kg ;
+   E_p = 216 000 × 9,81 × 820 ≈ 1,74 × 10⁹ J ; Δt = 216 / 135 = 1,6 s ;
+   E_élec = 1 200 MW × 1,6 s = 1,92 × 10⁹ J ; η ≈ 0,90.
+   ============================================================ */
+const { o, fmt, sci, proche, slot, val, conv } = EP;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const etiq = (id, label, cible, indice) => ({ id, label, cible, indice });
+
+EP.step(document.getElementById('step'));
+
+// Valeurs de l'activité
+const DZ = 1590 - 770, M = 216 * 1000, G = 9.81;
+const EP_ = M * G * DZ, DT = 216 / 135, EELEC = 8 * 150e6 * DT, ETA = EP_ / EELEC;
+
+// schéma de conversion à compléter (formes d'énergie)
+const schemaFormes = appareil => conv({ appareil, a: { f: slot('a') }, u: { f: slot('u') }, p: { f: slot('p') } });
+const FORMES = {
+  pp: 'énergie potentielle de pesanteur', el: 'énergie électrique', th: 'énergie thermique', ch: 'énergie chimique', ra: 'énergie rayonnante',
+};
+
+const parties = [
+  { type: 'choix', q: '1. Quel est l\'intérêt de stocker de l\'énergie électrique, dans le cadre de la transition énergétique ?', colonne: true,
+    options: [
+      o('ok', 'Garder l\'électricité produite en trop par les éoliennes et les panneaux solaires (énergies intermittentes) pour la restituer quand on en manque'),
+      o('a', 'Produire plus d\'électricité que n\'en consomment les pompes'),
+      o('b', 'Supprimer toutes les pertes d\'énergie du réseau'),
+      o('c', 'Remplacer les centrales par des barrages'),
+    ], bonne: 'ok',
+    indices: { a: 'Une STEP ne crée pas d\'énergie : elle restitue, en turbinage, une partie de l\'énergie dépensée au pompage.', b: 'Toute conversion s\'accompagne de pertes : tu vas calculer le rendement de la STEP.', c: 'La STEP ne produit pas d\'énergie à partir de rien : il faut d\'abord pomper l\'eau avec de l\'électricité produite ailleurs.' },
+    solution: '<p>Le vent et le soleil ne produisent pas quand on veut : ce sont des énergies <b>intermittentes</b>. Stocker l\'électricité permet d\'ajuster la production à la consommation.</p>' },
+  { type: 'schema', q: '2. Mets la STEP en mode <b>Turbinage</b>. Place les formes d\'énergie sur le schéma de conversion (une étiquette est en trop).',
+    titrePalette: 'Formes d\'énergie',
+    schema: schemaFormes('turbine + alternateur'),
+    etiquettes: [etiq('pp', FORMES.pp, 'a', 'En turbinage, c\'est l\'eau en hauteur qui apporte l\'énergie : énergie potentielle de pesanteur.'),
+      etiq('el', FORMES.el, 'u', 'L\'alternateur fournit de l\'énergie électrique au réseau : c\'est l\'énergie utile.'),
+      etiq('th', FORMES.th, 'p', 'Les frottements et l\'effet Joule chauffent la turbine et l\'alternateur : énergie perdue sous forme thermique.'),
+      etiq('ch', FORMES.ch, null, 'L\'énergie chimique est celle d\'un carburant ou d\'une pile : il n\'y en a pas ici.')],
+    solution: `<p>Turbinage : énergie potentielle de pesanteur → turbine + alternateur → énergie électrique (utile) + énergie thermique (perdue).</p>` },
+  { type: 'schema', q: 'Mets maintenant la STEP en mode <b>Pompage</b>. Place les formes d\'énergie sur ce nouveau schéma de conversion.',
+    titrePalette: 'Formes d\'énergie',
+    schema: schemaFormes('moteur + pompe'),
+    etiquettes: [etiq('el', FORMES.el, 'a', 'En pompage, les pompes prennent de l\'énergie électrique sur le réseau : c\'est l\'énergie apportée.'),
+      etiq('pp', FORMES.pp, 'u', 'L\'eau remontée en haut stocke de l\'énergie potentielle de pesanteur : c\'est le but du pompage.'),
+      etiq('th', FORMES.th, 'p', 'Les moteurs et les pompes chauffent : énergie perdue sous forme thermique.'),
+      etiq('ra', FORMES.ra, null, 'L\'énergie rayonnante est celle de la lumière (soleil, lampe) : il n\'y en a pas ici.')],
+    solution: `<p>Pompage : énergie électrique → moteur + pompe → énergie potentielle de pesanteur (utile) + énergie thermique (perdue). C'est le schéma du turbinage « à l'envers ».</p>` },
+  { type: 'choix', q: '3. Pourquoi le fonctionnement de cette installation est-il qualifié de réversible ?', colonne: true,
+    options: [
+      o('ok', 'Elle convertit l\'énergie dans les deux sens : potentielle → électrique en turbinage, électrique → potentielle en pompage'),
+      o('a', 'Elle ne perd aucune énergie'),
+      o('b', 'L\'eau du lac du haut ne s\'épuise jamais'),
+    ], bonne: 'ok',
+    indices: { a: 'Il y a toujours des pertes (énergie thermique), comme dans ton schéma.', b: 'Le volume utile est limité (14 300 000 m<sup>3</sup>) : « réversible » parle du sens de la conversion d\'énergie.' },
+    solution: '<p>Un convertisseur est <b>réversible</b> quand il peut convertir l\'énergie dans les deux sens. Les mêmes machines fonctionnent en turbine-alternateur ou en moteur-pompe.</p>' },
+  { type: 'choix', q: '4. Un groupe électrogène produit de l\'énergie électrique grâce à un moteur diesel. Peut-il être qualifié de convertisseur réversible ?', colonne: true,
+    options: [
+      o('ok', 'Non : en lui fournissant de l\'énergie électrique, on ne peut pas reformer le gazole consommé'),
+      o('a', 'Oui : il produit de l\'énergie électrique, comme la STEP'),
+      o('b', 'Oui : il suffit de faire tourner le moteur dans l\'autre sens'),
+    ], bonne: 'ok',
+    indices: { a: 'Produire de l\'électricité ne suffit pas : il faut pouvoir faire la conversion inverse (électrique → chimique).', b: 'Même en faisant tourner le moteur à l\'envers, on ne reconstitue pas le carburant brûlé.' },
+    solution: '<p>Le gazole brûlé (énergie chimique) ne peut pas être reconstitué : le groupe électrogène <b>n\'est pas réversible</b>.</p>' },
+  { type: 'nombre', q: '5. On veut calculer le rendement de ce stockage.<br>a. Quelle est la différence d\'altitude Δz entre les deux bassins ?', label: 'Δz =', valeur: DZ, unite: 'm', tol: .5, signe: false,
+    diag: v => proche(v, 1590 + 770) ? 'Une différence se calcule par une <b>soustraction</b>.' : 'Δz = altitude du haut − altitude du bas.',
+    solution: calc(`Δz = 1 590 − 770 = ${c('820 m')}`) },
+  { type: 'nombre', q: 'b. Quelle est la masse d\'eau qui descend en une seconde lors du turbinage ? (1 m<sup>3</sup> d\'eau a une masse de 1 000 kg)', label: 'm =', valeur: M, unite: 'kg', signe: false,
+    diag: v => proche(v, 216) ? 'Ce sont des m<sup>3</sup> : convertis en kg (1 m<sup>3</sup> = 1 000 kg).' : proche(v, 135000) || proche(v, 135) ? 'En <b>turbinage</b>, le débit est de 216 m<sup>3</sup> par seconde (135 m<sup>3</sup>/s, c\'est le pompage).' : 'En une seconde, 216 m<sup>3</sup> descendent ; chaque m<sup>3</sup> a une masse de 1 000 kg.',
+    solution: calc(`En une seconde : V = 216 m<sup>3</sup>, donc m = 216 × 1 000 = ${c('216 000 kg')}`) },
+  { type: 'sci', q: 'c. En déduire l\'énergie potentielle de pesanteur convertie en énergie électrique en une seconde.', label: 'E<sub>p</sub> =', valeur: EP_, unite: 'J', cs: 3, rel: .01,
+    diag: v => proche(v, M * G * 1590, .02) || proche(v, M * G * 770, .02) ? 'Utilise la <b>différence d\'altitude</b> Δz = 820 m (l\'eau descend de 820 m).' : proche(v, 216 * G * DZ, .02) ? 'La masse doit être en kg : m = 216 000 kg.' : proche(v, M * DZ, .02) ? 'N\'oublie pas g = 9,81 N/kg.' : 'E<sub>p</sub> = m × g × Δz, avec m en kg, g en N/kg et Δz en m.',
+    solution: calc(`E<sub>p</sub> = m × g × Δz = 216 000 kg × 9,81 N/kg × 820 m ≈ ${c('1,74 × 10<sup>9</sup> J')}`) },
+  { type: 'nombre', q: 'd. Les pompes remontent 135 m<sup>3</sup> par seconde. Combien de temps faut-il pour remonter les 216 m<sup>3</sup> dans le bassin supérieur ?', label: 'Δt =', valeur: DT, unite: 's', rel: .01, signe: false,
+    diag: v => proche(v, 135 / 216, .02) ? 'Tu as fait 135 / 216. On cherche combien de fois 135 m<sup>3</sup> il y a dans 216 m<sup>3</sup> : Δt = 216 / 135.' : 'Δt = volume à remonter / débit de pompage.',
+    solution: calc(`Δt = ${EP.fr('216 m<sup>3</sup>', '135 m<sup>3</sup>/s')} = ${c('1,6 s')}`) },
+  { type: 'sci', q: 'e. En déduire l\'énergie électrique dépensée par les 8 pompes pour remonter cette eau (E = P × Δt).', label: 'E<sub>élec</sub> =', valeur: EELEC, unite: 'J', cs: 3, rel: .01,
+    diag: v => proche(v, 150e6 * DT, .02) ? 'Il y a <b>8 pompes</b> : P = 8 × 150 MW = 1 200 MW.' : proche(v, 8 * 150e6, .02) ? 'Les pompes fonctionnent pendant Δt = 1,6 s : E = P × Δt.' : proche(v, 8 * 150 * DT, .02) ? 'Convertis la puissance en watts : 1 MW = 10<sup>6</sup> W.' : 'E = P × Δt avec P = 8 × 150 MW = 1 200 × 10<sup>6</sup> W et Δt = 1,6 s.',
+    solution: calc(`P = 8 × 150 MW = 1 200 MW = 1,2 × 10<sup>9</sup> W<br>E<sub>élec</sub> = P × Δt = 1,2 × 10<sup>9</sup> W × 1,6 s = ${c('1,92 × 10<sup>9</sup> J')}`) },
+  { type: 'nombre', q: 'f. Calcule le rendement du stockage : l\'énergie utile est l\'énergie potentielle récupérée, l\'énergie apportée est l\'énergie électrique dépensée au pompage. Donne 2 chiffres significatifs.', label: 'η =', valeur: ETA, rel: .02, signe: false, affiche: '0,90',
+    diag: v => v > 1 ? 'Un rendement ne dépasse jamais 1 : tu as inversé le rapport. η = E<sub>utile</sub> / E<sub>apportée</sub>.' : 'η = E<sub>p</sub> / E<sub>élec</sub>.',
+    solution: calc(`η = ${EP.fr('E<sub>u</sub>', 'E<sub>a</sub>')} = ${EP.fr('E<sub>p</sub>', 'E<sub>élec</sub>')} = ${EP.fr('1,74 × 10<sup>9</sup> J', '1,92 × 10<sup>9</sup> J')} ≈ ${c('0,90')}`) + '<p>Sur 100 J dépensés pour pomper, la STEP en restitue environ 90 : le stockage perd environ 10 % de l\'énergie.</p>' },
+];
+
+EP.question(document.getElementById('questions'), { parties }, {
+  fin() {
+    const b = document.getElementById('bilan');
+    // schéma de conversion général, recopié dans le cours
+    document.getElementById('bilanSchema').innerHTML = conv({ appareil: 'convertisseur', eta: 'rendement η',
+      a: { f: 'E<sub>a</sub>' }, u: { f: 'E<sub>u</sub>' }, p: { f: 'E<sub>perdue</sub> (thermique)' } });
+    b.hidden = false;
+    EP.marquer({ fait: true });                                      // activité faite (sommaire, accueil)
+    setTimeout(() => b.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+  },
+}, 'cours');
+
+EP.menu('module_1_simulation');
+</script>
+</body>
+</html>

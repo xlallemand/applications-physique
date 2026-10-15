@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions sur l'accélération — Chapitre 6 : Principe fondamental de la dynamique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pfd.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pfd.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : a = Δv / Δt avec conversions
+   km/h → m/s (4), dérivées simples de v(t) (3), signe de a (2),
+   unité (1).
+   Erreurs diagnostiquées : km/h non convertis (ou multipliés par 3,6),
+   Δv à l'envers, constante non dérivée, rapport inversé.
+   ============================================================ */
+const { o, fq, fmt, fr, hasard, melanger, proche } = PFD;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+const MS2 = 'm·s<sup>−2</sup>';
+
+/* ---------- Groupe 1 : a = Δv / Δt ---------- */
+const G1 = [
+  function demarrage() {
+    const [v, t] = hasard([[27.8, 2.5], [20, 4], [30, 5], [12, 3], [25, 2]]);
+    return { theme: 'Accélération', enonce: `<p>Un véhicule passe de 0 à ${fmt(v)} m/s en ${fmt(t)} s, avec une accélération constante.</p>`,
+      parties: [fq.nombre('Calcule son accélération (3 chiffres significatifs).', 'a =', v / t, MS2, { signe: false, rel: .01, affiche: fmt(r3(v / t)),
+        diag: x => proche(x, t / v, .02) ? 'Rapport inversé : a = Δv / Δt.' : proche(x, v * t, .02) ? 'On divise : a = Δv / Δt.' : 'a = Δv / Δt.', solution: calc(`a = ${fr('Δv', 'Δt')} = ${fr(fmt(v) + ' − 0', fmt(t))} ≈ ${c(fmt(r3(v / t)) + ' ' + MS2)}`) })] };
+  },
+  function kmh() {
+    const [v, t] = hasard([[100, 2.5], [100, 8], [90, 10], [50, 5], [72, 4], [130, 12]]);
+    return { theme: 'Accélération et km/h', enonce: `<p>Une voiture passe de 0 à ${v} km/h en ${fmt(t)} s.</p>`,
+      parties: [fq.nombre('Convertis la vitesse finale en m/s (3 chiffres significatifs).', 'v =', v / 3.6, 'm/s', { signe: false, rel: .01, affiche: fmt(r3(v / 3.6)),
+          diag: x => proche(x, v * 3.6, .02) ? 'Des km/h aux m/s, on <b>divise</b> par 3,6.' : 'v (m/s) = v (km/h) / 3,6.', solution: calc(`v = ${fr(v, '3,6')} ≈ ${c(fmt(r3(v / 3.6)) + ' m/s')}`) }),
+        fq.nombre('Calcule son accélération (3 chiffres significatifs).', 'a =', v / 3.6 / t, MS2, { signe: false, rel: .01, affiche: fmt(r3(v / 3.6 / t)),
+          diag: x => proche(x, v / t, .02) ? 'Utilise la vitesse en m/s.' : 'a = Δv / Δt.', solution: calc(`a = ${fr(fmt(r3(v / 3.6)), fmt(t))} ≈ ${c(fmt(r3(v / 3.6 / t)) + ' ' + MS2)}`) })] };
+  },
+  function deuxVitesses() {
+    const [a, b, t] = hasard([[5, 15, 4], [10, 25, 6], [8, 20, 3], [2, 14, 4]]);
+    return { theme: 'Accélération', enonce: `<p>Un cycliste passe de ${a} m/s à ${b} m/s en ${t} s.</p>`,
+      parties: [fq.nombre('Calcule son accélération (3 chiffres significatifs).', 'a =', (b - a) / t, MS2, { signe: false, rel: .01, affiche: fmt(r3((b - a) / t)),
+        diag: x => proche(x, b / t, .02) ? `Δv = ${b} − ${a}.` : proche(x, (a + b) / t, .02) ? 'Δv est une différence.' : 'a = (v<sub>fin</sub> − v<sub>début</sub>) / Δt.', solution: calc(`a = ${fr(b + ' − ' + a, t)} ≈ ${c(fmt(r3((b - a) / t)) + ' ' + MS2)}`) })] };
+  },
+  function duree() {
+    const [v, a] = hasard([[20, 4], [27.8, 11.1], [30, 2.5], [12, 1.5]]);
+    return { theme: 'Durée', enonce: `<p>Un véhicule accélère de 0 à ${fmt(v)} m/s avec une accélération constante de ${fmt(a)} ${MS2}.</p>`,
+      parties: [fq.nombre('Combien de temps lui faut-il (3 chiffres significatifs) ?', 'Δt =', v / a, 's', { signe: false, rel: .01, affiche: fmt(r3(v / a)),
+        diag: x => proche(x, v * a, .02) ? 'a = Δv / Δt donc Δt = Δv / a : on divise.' : proche(x, a / v, .02) ? 'Rapport inversé : Δt = Δv / a.' : 'Δt = Δv / a.', solution: calc(`a = ${fr('Δv', 'Δt')} donc Δt = ${fr('Δv', 'a')} = ${fr(fmt(v), fmt(a))} ≈ ${c(fmt(r3(v / a)) + ' s')}`) })] };
+  },
+];
+
+/* ---------- Groupe 2 : dérivées ---------- */
+const G2 = [
+  function lineaire() {
+    const k = hasard([7.25, 3.2, 9.81, 2.5, 6]);
+    return { theme: 'Accélération et dérivée', enonce: `<p>Un avion démarre avec v = ${fmt(k)} t (v en m/s, t en s).</p>`,
+      parties: [fq.nombre('Quelle est son accélération ?', 'a =', k, MS2, { signe: false, diag: () => 'a = v′ : la dérivée de k t est k.', solution: calc(`a = v′ = ${c(fmt(k) + ' ' + MS2)}`) })] };
+  },
+  function affine() {
+    const [k, v0] = hasard([[4, 5], [1.5, 12], [0.8, 3], [2.4, 10]]);
+    return { theme: 'Accélération et dérivée', enonce: `<p>v = ${fmt(k)} t + ${v0} (v en m/s, t en s).</p>`,
+      parties: [fq.nombre('Quelle est l\'accélération ?', 'a =', k, MS2, { signe: false, diag: x => proche(x, k + v0) || proche(x, v0) ? `La dérivée d'une constante est nulle : ${v0} disparaît.` : 'a = v′.', solution: calc(`a = v′ = ${fmt(k)} + 0 = ${c(fmt(k) + ' ' + MS2)}`) })] };
+  },
+  function derivee() {
+    return { theme: 'Définition', parties: [fq.choix('L\'accélération est :', [o('ok', 'la dérivée de la vitesse par rapport au temps'), o('a', 'la vitesse divisée par la distance'), o('b', 'la dérivée de la position')], 'ok',
+      { melanger: false, indices: { a: 'L\'accélération mesure la variation de la vitesse au cours du <b>temps</b>.', b: 'La dérivée de la position est la vitesse.' }, solution: '<p>a = dv/dt : la variation de la vitesse au cours du temps.</p>' })] };
+  },
+];
+
+/* ---------- Groupe 3 : signe de a ---------- */
+const G3 = [
+  function freinage() {
+    const [v, t] = hasard([[18, 6], [12, 4], [30, 10], [10, 4]]);
+    return { theme: 'Signe de l\'accélération', enonce: `<p>Un véhicule passe de ${v} m/s à l'arrêt en ${t} s.</p>`,
+      parties: [fq.nombre('Calcule Δv / Δt, avec son signe.', 'a =', -v / t, MS2, { rel: .01, diag: x => proche(x, v / t, .02) ? `Δv = 0 − ${v} : le résultat est négatif.` : 'a = (v<sub>fin</sub> − v<sub>début</sub>) / Δt.', solution: calc(`a = ${fr('0 − ' + v, t)} = ${c(fmt(-v / t) + ' ' + MS2)}`) }),
+        fq.choix('Que signifie ce signe ?', [o('ok', 'le véhicule ralentit'), o('a', 'le véhicule recule'), o('b', 'le véhicule accélère')], 'ok', { melanger: false, indices: { a: 'Le signe de a ne dit pas le sens du déplacement.', b: 'La vitesse diminue.' }, solution: '<p>a &lt; 0 : la vitesse diminue, le véhicule ralentit. La valeur de l\'accélération est le nombre positif.</p>' })] };
+  },
+  function norme() {
+    const [v, t] = hasard([[10, 4], [15, 5], [8, 2]]);
+    return { theme: 'Valeur de l\'accélération', enonce: `<p>Une balle roule sur un green : sa vitesse passe de ${v} m/s à 0 en ${t} s.</p>`,
+      parties: [fq.nombre('Quelle est la valeur (norme) de son accélération ?', 'a =', v / t, MS2, { signe: false, rel: .01, diag: x => proche(x, -v / t, .02) ? 'Pour une valeur, on garde le nombre positif.' : 'a = |Δv| / Δt.', solution: calc(`Δv / Δt = ${fr('0 − ' + v, t)} = ${fmt(-v / t)} ${MS2} : la valeur est ${c(fmt(v / t) + ' ' + MS2)}`) })] };
+  },
+];
+
+/* ---------- Groupe 4 : unité ---------- */
+const G4 = [
+  function unite() {
+    return { theme: 'Unité', parties: [fq.choix('L\'accélération s\'exprime en :', [o('ok', 'm·s<sup>−2</sup>'), o('a', 'm·s<sup>−1</sup>'), o('b', 'N'), o('c', 'm')], 'ok',
+      { indices: { a: 'm·s<sup>−1</sup> est l\'unité de la vitesse ; on la divise encore par des secondes.', b: 'Le newton est l\'unité des forces.', c: 'Le mètre est une unité de longueur.' }, solution: '<p>a = Δv / Δt : (m/s) / s = m/s<sup>2</sup> = m·s<sup>−2</sup>.</p>' })] };
+  },
+];
+
+// tirage : 4 + 3 + 2 + 1 questions
+function tirage() {
+  return G1.map(f => f()).concat(G2.map(f => f()), G3.map(f => f()), G4.map(f => f()));
+}
+
+PFD.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Accélération',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : a = Δv / Δt avec conversions de km/h en m/s, dérivées de la vitesse, signe et valeur de l\'accélération.</p>',
+  questions: tirage,
+  revoir: { href: 'module_3_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4_cours.html', label: 'Module 4 : principe fondamental de la dynamique →' },
+});
+PFD.menu('module_3_questions');
+</script>
+</body>
+</html>

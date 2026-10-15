@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : principe fondamental de la dynamique — Chapitre 6 : Principe fondamental de la dynamique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pfd.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../cinematique/modules/vecteurs.js"></script>
+<script src="pfd.js"></script>
+<script src="situations.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS</span>
+    <h2 class="er-titre">Principe fondamental de la dynamique</h2>
+    <p class="er-contexte">La <b>somme des forces</b> (la résultante) qui s'exercent sur un système fixe son <b>accélération</b> : Σ <span class="vec-nom">F</span> = m <span class="vec-nom">a</span>. Quand les forces se compensent, le système est immobile ou en mouvement rectiligne uniforme : c'est le <b>principe d'inertie</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   m <span class="vec-nom">a</span> = Σ <span class="vec-nom">F</span> (référentiel galiléen) ; principe d'inertie ; <span class="vec-nom">a</span> et Σ <span class="vec-nom">F</span> ont
+   la même direction et le même sens ; résultante sans souci d'échelle
+   (forces opposées : soustraction ; perpendiculaires : diagonale du
+   rectangle), tracée avec le repère de cinematique/modules/vecteurs.js
+   (PFD.partieResultante, PFD.partieAcc) ; méthode type des ex. 2 et 5.
+   Erreurs diagnostiquées : masse en g ou en tonnes non convertie,
+   m × a et ΣF / m confondus, frottements ajoutés au lieu d'être retirés.
+   ============================================================ */
+const { fmt, sci, hasard, melanger, exemple } = COURS;
+const { o, fr, proche, nomV, sceneRemplie, partieResultante, partieAcc, SITUATIONS } = PFD;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+const MS2 = 'm·s<sup>−2</sup>', SF = 'Σ <span class="vec-nom">F</span>';
+
+/* ---------- 1. Le principe fondamental ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Σ <span class="vec-nom">F</span> = m <span class="vec-nom">a</span>');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Principe fondamental de la dynamique.</b> Dans un référentiel galiléen :</p>
+        <p class="crs-formule">m <span class="vec-nom">a</span> = Σ <span class="vec-nom">F</span><sub>ext</sub></p><p>m en kg, a en m·s<sup>−2</sup>, Σ F en N. Σ <span class="vec-nom">F</span><sub>ext</sub>, la <b>résultante</b> des forces, est la somme (l'addition) de toutes les forces extérieures.</p></div>
+    </div>
+    ${exemple(`<p>Une voiture de 1 200 kg a une accélération de 2,0 ${MS2}.</p><p class="crs-calc">Σ F = m × a = 1 200 kg × 2,0 ${MS2} = <span class="c">2 400 N</span></p>`)}`);
+  const [m1, a1] = hasard([[600, 11.1], [1500, 2], [80, 3.5], [0.046, 2.5]]), [F2, m2] = hasard([[3000, 1200], [6660, 600], [150, 75], [9000, 1500]]);
+  const [mt, a3] = hasard([[10, 7.25], [2, 1.5], [40, 0.5]]);
+  c_.aToi(carte, [
+    { titre: 'Une résultante', enonce: `<p>Un système de masse ${fmt(m1)} kg a une accélération de ${fmt(a1)} ${MS2}.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule la valeur de la résultante des forces (3 chiffres significatifs).', label: 'Σ F =', valeur: m1 * a1, unite: 'N', signe: false, rel: .01, affiche: fmt(r3(m1 * a1)),
+        diag: v => proche(v, m1 / a1, .02) || proche(v, a1 / m1, .02) ? 'Σ F = m × a : on multiplie.' : 'Σ F = m × a.', solution: `<p class="crs-calc">Σ F = m × a = ${fmt(m1)} × ${fmt(a1)} ≈ ${c(fmt(r3(m1 * a1)) + ' N')}</p>` }] },
+    { titre: 'Une accélération', enonce: `<p>La résultante des forces sur un système de ${fmt(m2)} kg vaut ${fmt(F2)} N.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule son accélération (3 chiffres significatifs).', label: 'a =', valeur: F2 / m2, unite: MS2, signe: false, rel: .01, affiche: fmt(r3(F2 / m2)),
+        diag: v => proche(v, F2 * m2, .02) ? 'Σ F = m a donc a = Σ F / m : on divise.' : proche(v, m2 / F2, .02) ? 'Rapport inversé : a = Σ F / m.' : 'a = Σ F / m.', solution: `<p class="crs-calc">a = ${fr('Σ F', 'm')} = ${fr(fmt(F2), fmt(m2))} ≈ ${c(fmt(r3(F2 / m2)) + ' ' + MS2)}</p>` }] },
+    { titre: 'Une masse en tonnes', enonce: `<p>Un avion de ${mt} tonnes démarre avec une accélération de ${fmt(a3)} ${MS2}.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule la résultante des forces (3 chiffres significatifs).', label: 'Σ F =', valeur: mt * 1000 * a3, unite: 'N', cs: 3, rel: .01,
+        diag: v => proche(v, mt * a3, .02) ? `Convertis la masse en kg : ${mt} t = ${fmt(mt * 1000)} kg.` : 'Σ F = m × a, m en kg.', solution: `<p class="crs-calc">Σ F = ${fmt(mt)} × 10<sup>3</sup> kg × ${fmt(a3)} ${MS2} = ${c(sci(mt * 1000 * a3, 3) + ' N')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Le principe d'inertie ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Le principe d\'inertie');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Principe d'inertie.</b> Σ <span class="vec-nom">F</span><sub>ext</sub> = <span class="vec-nom">0</span> ⇔ le système est <b>immobile</b> ou en <b>mouvement rectiligne uniforme</b> (<span class="vec-nom">a</span> = <span class="vec-nom">0</span>).</p></div>
+    </div>
+    ${exemple(`<div class="pfd-sc-cadre">${sceneRemplie(SITUATIONS.parachute)}</div><p>Le parachutiste descend en ligne droite à vitesse constante : <span class="vec-nom">a</span> = <span class="vec-nom">0</span>, donc ${nomV('P')} + ${nomV('f')} = <span class="vec-nom">0</span>. Les frottements de l'air compensent exactement le poids.</p>`)}`);
+  const q = (titre, enonce, opts, bonne, ind, sol) => ({ titre, enonce: `<p>${enonce}</p>`, parties: [{ type: 'choix', q: 'Que peut-on dire de la résultante des forces ?', options: opts, bonne, melanger: false, indices: ind, solution: `<p>${sol}</p>` }] });
+  const OPTS = [o('nul', 'Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span> : les forces se compensent'), o('pas', 'Σ <span class="vec-nom">F</span> ≠ <span class="vec-nom">0</span>')];
+  c_.aToi(carte, melanger([
+    q('Un livre sur une table', 'Un livre est posé, immobile, sur une table.', OPTS, 'nul', { pas: 'Le livre est immobile : pense au principe d\'inertie.' }, 'Immobile : Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span>.'),
+    q('Une voiture sur l\'autoroute', 'Une voiture roule en ligne droite à 130 km/h constants.', OPTS, 'nul', { pas: 'Mouvement rectiligne <b>uniforme</b> : pense au principe d\'inertie.' }, 'Mouvement rectiligne uniforme : Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span> (la force motrice compense les frottements).'),
+    q('Une voiture qui freine', 'Une voiture freine en ligne droite.', OPTS, 'pas', { nul: 'La vitesse change : <span class="vec-nom">a</span> ≠ <span class="vec-nom">0</span>.' }, 'La voiture ralentit : <span class="vec-nom">a</span> ≠ <span class="vec-nom">0</span>, donc Σ <span class="vec-nom">F</span> = m <span class="vec-nom">a</span> ≠ <span class="vec-nom">0</span>.'),
+    q('Un virage', 'Une moto prend un virage à vitesse constante.', OPTS, 'pas', { nul: 'Le mouvement n\'est pas rectiligne.' }, 'Le mouvement n\'est pas rectiligne : ce n\'est pas un mouvement rectiligne uniforme, Σ <span class="vec-nom">F</span> ≠ <span class="vec-nom">0</span>.'),
+  ]).slice(0, 3));
+  return carte;
+}
+
+/* ---------- 3. La direction : <span class="vec-nom">a</span> et Σ <span class="vec-nom">F</span> ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. <span class="vec-nom">a</span> et Σ <span class="vec-nom">F</span> ont la même direction et le même sens');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="crs-defile"><table class="crs-tab"><tr><th>Si on connaît…</th><th>alors…</th><th>et la valeur</th></tr>
+        <tr><td>${SF}</td><td><span class="vec-nom">a</span> a la même direction et le même sens que ${SF}</td><td>a = Σ F / m</td></tr>
+        <tr><td><span class="vec-nom">a</span></td><td>${SF} a la même direction et le même sens que <span class="vec-nom">a</span></td><td>Σ F = m × a</td></tr></table></div>
+      <div class="cle"><p><b class="cle-titre">Résultante, sans souci d'échelle.</b> Deux forces <b>opposées</b> : on soustrait. Deux forces <b>perpendiculaires</b> : la résultante est la diagonale du rectangle. Dans le quadrillage, on met les flèches bout à bout.</p></div>
+    </div>
+    ${exemple('<p><span class="vec-nom">F</span><sub>1</sub> = 4 N vers la gauche et <span class="vec-nom">F</span><sub>2</sub> = 1 N vers la droite : Σ <span class="vec-nom">F</span> = 3 N vers la gauche. <span class="vec-nom">a</span> est donc dirigée vers la gauche.</p><p><span class="vec-nom">F</span><sub>1</sub> = 2 N vers le haut et <span class="vec-nom">F</span><sub>3</sub> = 4 N vers le bas : elles se réduisent à 2 N vers le bas ; avec <span class="vec-nom">F</span><sub>2</sub> = 3 N vers la droite, Σ <span class="vec-nom">F</span> est la diagonale « 3 carreaux à droite, 2 carreaux vers le bas ».</p>')}`);
+  const [a, b] = hasard([[[-4, 0], [2, 0]], [[0, 3], [0, -1]], [[3, 0], [-1, 0]]]);
+  const op = [{ nom: 'F_1', coord: a }, { nom: 'F_2', coord: b }];
+  const pp = [{ nom: 'F_1', coord: [0, 2] }, { nom: 'F_2', coord: [3, 0] }, { nom: 'F_3', coord: [0, -4] }];
+  c_.aToi(carte, [
+    { titre: 'Deux forces opposées', enonce: '<p>Deux forces s\'exercent sur un objet, au point G (1 carreau = 1 N).</p>',
+      parties: [partieResultante({ forces: op, etendue: 4, solution: '<p>Les deux forces sont opposées : on soustrait leurs valeurs ; Σ <span class="vec-nom">F</span> est dans le sens de la plus grande.</p>' })] },
+    { titre: 'Trois forces', enonce: '<p>Trois forces s\'exercent au point G : F<sub>1</sub> = 2 N vers le haut, F<sub>2</sub> = 3 N vers la droite, F<sub>3</sub> = 4 N vers le bas (1 carreau = 1 N).</p>',
+      parties: [partieResultante({ forces: pp, etendue: 4, solution: '<p><span class="vec-nom">F</span><sub>1</sub> + <span class="vec-nom">F</span><sub>3</sub> = 2 N vers le bas ; avec <span class="vec-nom">F</span><sub>2</sub> = 3 N vers la droite, Σ <span class="vec-nom">F</span> est la diagonale : 3 carreaux à droite, 2 vers le bas.</p>' }),
+        partieAcc({ forces: pp, etendue: 4, solution: '<p><span class="vec-nom">a</span> a la même direction et le même sens que Σ <span class="vec-nom">F</span> : en diagonale, vers le bas et la droite.</p>' })] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. La méthode type ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. La méthode type');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><ol class="er-liste"><li>Bilan des forces.</li><li>Les forces qui se compensent : ${nomV('P')} + ${nomV('RN')} = <span class="vec-nom">0</span>.</li><li>Σ <span class="vec-nom">F</span> = ce qui reste.</li>
+        <li>Projection sur la direction du mouvement : m a = F<sub>m</sub> − f (les forces dans le sens du mouvement comptent positivement).</li><li>On isole l'inconnue.</li></ol></div>
+    </div>
+    ${exemple(`<p>Une voiture de 1 000 kg démarre avec a = 2,0 ${MS2} ; les frottements valent f = 300 N.</p>
+      <p class="crs-calc">${nomV('P')} + ${nomV('RN')} = <span class="vec-nom">0</span> donc ${SF} = ${nomV('Fm')} + ${nomV('f')}<br>m a = F<sub>m</sub> − f donc F<sub>m</sub> = m a + f = 1 000 × 2,0 + 300 = <span class="c">2 300 N</span></p>`)}`);
+  const [m, a, f] = hasard([[850, 2.5, 250], [1200, 1.5, 400], [900, 3, 350], [1500, 2, 600]]);
+  const [m2, a2, Fm] = hasard([[1000, 1.2, 1700], [800, 2, 1900], [1200, 0.5, 1000]]);
+  c_.aToi(carte, [
+    { titre: 'La force motrice', enonce: `<p>Une voiture de ${fmt(m)} kg démarre en ligne droite avec une accélération de ${fmt(a)} ${MS2}. Les frottements valent f = ${f} N.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule la force motrice F<sub>m</sub>.', label: 'F<sub>m</sub> =', valeur: m * a + f, unite: 'N', signe: false, rel: .005,
+        diag: v => proche(v, m * a - f) ? 'm a = F<sub>m</sub> − f donc F<sub>m</sub> = m a <b>+</b> f.' : proche(v, m * a) ? 'N\'oublie pas les frottements : F<sub>m</sub> = m a + f.' : 'm a = F<sub>m</sub> − f, puis isole F<sub>m</sub>.',
+        solution: `<p class="crs-calc">m a = F<sub>m</sub> − f donc F<sub>m</sub> = m a + f = ${fmt(m)} × ${fmt(a)} + ${f} = ${c(fmt(m * a + f) + ' N')}</p>` }] },
+    { titre: 'Les frottements', enonce: `<p>Une voiture de ${fmt(m2)} kg accélère à ${fmt(a2)} ${MS2} avec une force motrice de ${fmt(Fm)} N.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule la valeur des frottements f.', label: 'f =', valeur: Fm - m2 * a2, unite: 'N', signe: false, rel: .005,
+        diag: v => proche(v, Fm + m2 * a2) ? 'm a = F<sub>m</sub> − f donc f = F<sub>m</sub> − m a.' : 'f = F<sub>m</sub> − m a.', solution: `<p class="crs-calc">f = F<sub>m</sub> − m a = ${fmt(Fm)} − ${fmt(m2)} × ${fmt(a2)} = ${c(fmt(Fm - m2 * a2) + ' N')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">m <span class="vec-nom">a</span> = Σ <span class="vec-nom">F</span><sub>ext</sub></p><p>Dans un référentiel galiléen ; m en kg, a en m·s<sup>−2</sup>, Σ F en N. Σ <span class="vec-nom">F</span> (la résultante) est la somme de toutes les forces.</p></div>
+    <div class="cle"><p><b>Principe d'inertie</b> : Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span> ⇔ immobile ou mouvement rectiligne uniforme.</p></div>
+    <div class="cle"><p><span class="vec-nom">a</span> et Σ <span class="vec-nom">F</span> ont la même direction et le même sens : a = Σ F / m ; Σ F = m × a. Forces opposées : on soustrait ; perpendiculaires : diagonale du rectangle.</p></div>
+    <div class="cle"><p>Méthode : bilan → forces qui se compensent → Σ <span class="vec-nom">F</span> = ce qui reste → m a = F<sub>m</sub> − f → on isole.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4_questions.html">Questions sur le principe fondamental →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_5.html">Module 5 : exercices</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
+PFD.menu('module_4_cours');
+</script>
+</body>
+</html>

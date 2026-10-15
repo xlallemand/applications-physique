@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : référentiel et nature du mouvement — Chapitre 6 : Principe fondamental de la dynamique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pfd.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pfd.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">Référentiel et nature du mouvement</h2>
+    <p class="er-contexte">Un mouvement se décrit toujours <b>par rapport à</b> un objet de référence : le <b>référentiel</b>. Une chronophotographie permet ensuite de dire si le mouvement est <b>uniforme</b>, <b>accéléré</b> ou <b>décéléré</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Référentiel (terrestre, géocentrique, héliocentrique), référentiel
+   galiléen, nature d'un mouvement rectiligne d'après une
+   chronophotographie animée (PFD.chrono).
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { o, chrono } = PFD;
+
+/* ---------- 1. Le référentiel ---------- */
+const REFS = [o('ter', 'terrestre'), o('geo', 'géocentrique'), o('helio', 'héliocentrique')];
+const SITU_REF = [
+  ['ter', 'Une voiture roule sur une autoroute.'], ['ter', 'Un skieur descend une piste.'], ['ter', 'Un avion décolle de la piste.'],
+  ['geo', 'Un satellite tourne autour de la Terre.'], ['geo', 'La Lune tourne autour de la Terre.'],
+  ['helio', 'Mars tourne autour du Soleil.'], ['helio', 'Une comète passe près du Soleil.'],
+];
+const IND_REF = {
+  ter: 'Le référentiel terrestre (le sol, un bâtiment) convient pour les mouvements à la surface de la Terre.',
+  geo: 'Le référentiel géocentrique (centre de la Terre et trois étoiles lointaines) sert pour les satellites et la Lune.',
+  helio: 'Le référentiel héliocentrique (centre du Soleil et trois étoiles lointaines) sert pour les planètes et les comètes.',
+};
+function qRef(titre, sit) {
+  const ind = {};
+  REFS.forEach(r => { if (r.id !== sit[0]) ind[r.id] = IND_REF[r.id] + ' Est-ce adapté ici ?'; });
+  return { titre, enonce: `<p>${sit[1]}</p>`, parties: [{ type: 'choix', q: 'Quel référentiel est le plus adapté pour étudier ce mouvement ?', options: REFS, bonne: sit[0], melanger: false, indices: ind, solution: `<p>${IND_REF[sit[0]]}</p>` }] };
+}
+function etape1(c_) {
+  const carte = c_.carte('1. Le référentiel');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> Le <b>référentiel</b> est le solide de référence par rapport auquel on étudie le mouvement du <b>système</b>.</p></div>
+      <ul class="er-liste"><li><b>terrestre</b> : le sol, un bâtiment (le plus souvent) ;</li><li><b>géocentrique</b> : le centre de la Terre (satellites, Lune) ;</li><li><b>héliocentrique</b> : le centre du Soleil (planètes).</li></ul>
+    </div>
+    ${exemple('<p>Un voyageur assis dans un train qui roule est <b>immobile</b> dans le référentiel du train, mais <b>en mouvement</b> dans le référentiel terrestre (le quai). Le mouvement dépend du référentiel choisi.</p>')}`);
+  const [a, b, c] = ['ter', 'geo', 'helio'].map(k => hasard(SITU_REF.filter(x => x[0] === k)));
+  c_.aToi(carte, melanger([a, b, c]).map((s, k) => qRef(`Situation ${k + 1}`, s)));
+  return carte;
+}
+
+/* ---------- 2. Le référentiel galiléen ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Le référentiel galiléen');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> Un référentiel est <b>galiléen</b> si le <b>principe d'inertie</b> y est vérifié. Un référentiel immobile ou en <b>mouvement rectiligne uniforme</b> par rapport à un référentiel galiléen est lui aussi galiléen.</p></div>
+      <p>Pour des expériences courtes à la surface de la Terre, le référentiel <b>terrestre</b> est considéré comme galiléen.</p>
+    </div>
+    ${exemple('<p>Un train qui roule en ligne droite à vitesse constante est un référentiel galiléen. Un train qui freine ne l\'est pas : un objet posé sur la tablette glisse vers l\'avant sans qu\'aucune force ne le pousse.</p>')}`);
+  const q = (titre, enonce, bonne, ind, sol) => ({ titre, enonce: `<p>${enonce}</p>`, parties: [{ type: 'choix', q: 'Ce référentiel peut-il être considéré comme galiléen ?', options: [o('oui', 'oui'), o('non', 'non')], bonne, melanger: false, indices: { [bonne === 'oui' ? 'non' : 'oui']: ind }, solution: `<p>${sol}</p>` }] });
+  c_.aToi(carte, melanger([
+    q('Un TGV', 'Le référentiel d\'un TGV qui roule en ligne droite à 300 km/h constants.', 'oui', 'Un mouvement rectiligne <b>uniforme</b> par rapport au sol : regarde la définition.', 'Mouvement rectiligne uniforme par rapport au référentiel terrestre (galiléen) : il est galiléen.'),
+    q('Un bus qui démarre', 'Le référentiel d\'un bus qui démarre.', 'non', 'Le bus accélère : son mouvement n\'est pas uniforme.', 'Le bus accélère : ce référentiel n\'est pas galiléen (les passagers sont projetés vers l\'arrière).'),
+    q('Une voiture dans un virage', 'Le référentiel d\'une voiture qui prend un virage à vitesse constante.', 'non', 'Le mouvement n\'est pas rectiligne.', 'Le mouvement n\'est pas rectiligne : ce référentiel n\'est pas galiléen.'),
+  ]).slice(0, 2));
+  return carte;
+}
+
+/* ---------- 3. La nature d'un mouvement rectiligne ---------- */
+const NATURES = [o('uniforme', 'uniforme'), o('accelere', 'accéléré'), o('decelere', 'décéléré')];
+const SOL_NAT = {
+  uniforme: 'Les points sont <b>régulièrement espacés</b> : la vitesse est constante, le mouvement est uniforme.',
+  accelere: 'Les points sont de <b>plus en plus espacés</b> : la vitesse augmente, le mouvement est accéléré.',
+  decelere: 'Les points sont de <b>moins en moins espacés</b> : la vitesse diminue, le mouvement est décéléré.',
+};
+function qNature(titre, type) {
+  const ind = {};
+  NATURES.forEach(n => { if (n.id !== type) ind[n.id] = 'Compare les distances entre deux positions successives, du début à la fin (le mobile va de gauche à droite).'; });
+  return { titre, enonce: chrono({ type }), parties: [{ type: 'choix', q: 'Le mobile va de gauche à droite. Quelle est la nature de son mouvement ?', options: NATURES, bonne: type, melanger: false, indices: ind, solution: `<p>${SOL_NAT[type]}</p>` }] };
+}
+function etape3(c_) {
+  const carte = c_.carte('3. Uniforme, accéléré ou décéléré ?');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Une <b>chronophotographie</b> montre les positions successives du système à <b>intervalles de temps égaux</b>. Plus deux positions sont éloignées, plus le système va vite.</p>
+      <div class="cle"><ul class="er-liste"><li>positions <b>régulièrement espacées</b> : mouvement <b>uniforme</b> (vitesse constante) ;</li>
+        <li>positions de <b>plus en plus espacées</b> : mouvement <b>accéléré</b> ;</li><li>positions de <b>moins en moins espacées</b> : mouvement <b>décéléré</b>.</li></ul>
+        <p>Si la trajectoire est une droite, le mouvement est <b>rectiligne</b>.</p></div>
+    </div>
+    ${exemple(`${chrono({ type: 'uniforme', titre: 'Rectiligne uniforme' })}${chrono({ type: 'accelere', titre: 'Rectiligne accéléré' })}${chrono({ type: 'decelere', titre: 'Rectiligne décéléré' })}`)}`);
+  c_.aToi(carte, melanger(['uniforme', 'accelere', 'decelere']).map((t, k) => qNature(`Chronophotographie ${k + 1}`, t)));
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Le <b>référentiel</b> est le solide de référence : terrestre (le plus souvent), géocentrique (satellites), héliocentrique (planètes).</p></div>
+    <div class="cle"><p>Un référentiel <b>galiléen</b> vérifie le principe d'inertie ; il est immobile ou en mouvement rectiligne uniforme par rapport à un autre référentiel galiléen. Le référentiel terrestre est considéré comme galiléen.</p></div>
+    <div class="cle"><p>Chronophotographie : positions régulièrement espacées → uniforme ; de plus en plus espacées → accéléré ; de moins en moins espacées → décéléré.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur le référentiel et le mouvement →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2_simulation.html">Module 2 : bilan des forces</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+PFD.menu('module_1_cours');
+</script>
+</body>
+</html>

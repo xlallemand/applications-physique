@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : branchements — Chapitre 2 : Piles et accumulateurs</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pa2.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pa2.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS</span>
+    <h2 class="er-titre">Branchements</h2>
+    <p class="er-contexte">Une batterie est un assemblage de <b>cellules</b> (accumulateurs). Branchées <b>en série</b>, elles additionnent leurs tensions ; branchées <b>en dérivation</b>, elles additionnent leurs intensités et leurs capacités. Tu vas assembler des cellules pour obtenir la batterie voulue.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   L'outil d'assemblage (PA2.partieAssemblage) est un item 'perso' :
+   cellules en série dans chaque branche, branches en dérivation ;
+   tension, capacité et énergie s'affichent en direct.
+   ============================================================ */
+const { fmt, hasard, exemple } = COURS;
+const { fr, proche, partieAssemblage } = PA2;
+const c = h => `<span class="c">${h}</span>`;
+
+/* ---------- 1. En série ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. En série, les tensions s\'additionnent');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Cellules identiques <b>en série</b> (la borne + de l'une reliée à la borne − de la suivante) : les <b>tensions s'additionnent</b>, la capacité ne change pas.</p>
+        <p class="crs-formule">U<sub>batterie</sub> = n × U<sub>cellule</sub> &nbsp;·&nbsp; n = ${fr('U<sub>batterie</sub>', 'U<sub>cellule</sub>')}</p></div>
+    </div>
+    ${exemple(`<p>Une batterie au plomb de 12 V est faite de cellules de 2 V en série :</p>
+      <p class="crs-calc">n = ${fr('12 V', '2 V')} = <span class="c">6 cellules</span></p>`)}`);
+  const [Ub, Uc] = hasard([[12, 2], [24, 2], [7.2, 1.2], [3.6, 1.2], [14.4, 3.6], [48, 2]]);
+  const [n2, Uc2] = hasard([[4, 1.5], [3, 3.6], [10, 1.2], [6, 2.1]]);
+  c_.aToi(carte, [
+    { titre: 'Nombre de cellules', enonce: `<p>Une batterie de ${fmt(Ub)} V est faite de cellules de ${fmt(Uc)} V en série.</p>`,
+      parties: [{ type: 'nombre', q: 'Combien de cellules contient-elle ?', label: 'n =', valeur: Ub / Uc, tol: .01, unite: 'cellules', signe: false, entier: true,
+        diag: v => proche(v, Ub * Uc, .02) ? 'On divise : n = U<sub>batterie</sub> / U<sub>cellule</sub>.' : 'n = U<sub>batterie</sub> / U<sub>cellule</sub>.', solution: `<p class="crs-calc">n = ${fr(fmt(Ub) + ' V', fmt(Uc) + ' V')} = ${c(fmt(Ub / Uc) + ' cellules')}</p>` }] },
+    { titre: 'Tension d\'un assemblage', enonce: `<p>On branche en série ${n2} cellules de ${fmt(Uc2)} V.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle tension obtient-on ?', label: 'U =', valeur: n2 * Uc2, unite: 'V', signe: false,
+        diag: v => proche(v, Uc2) ? 'En série, les tensions s\'additionnent.' : `U = ${n2} × ${fmt(Uc2)} V.`, solution: `<p class="crs-calc">U = ${n2} × ${fmt(Uc2)} = ${c(fmt(n2 * Uc2) + ' V')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. En dérivation ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. En dérivation, les capacités s\'additionnent');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Batteries identiques <b>en dérivation</b> (= en parallèle : bornes + reliées entre elles, bornes − entre elles) : la tension ne change pas, les <b>intensités</b> et les <b>capacités s'additionnent</b>.</p>
+        <p class="crs-formule">Q<sub>totale</sub> = n × Q</p></div>
+    </div>
+    ${exemple(`<p>Deux batteries de 12 V et 80 Ah en dérivation :</p>
+      <p class="crs-calc">U = <span class="c">12 V</span> ; Q = 2 × 80 = <span class="c">160 Ah</span></p>`)}`);
+  const [n, U, Q] = hasard([[2, 12, 80], [3, 12, 120], [2, 24, 50], [4, 3.6, 2.5]]);
+  c_.aToi(carte, [
+    { titre: 'Deux grandeurs à trouver', enonce: `<p>On branche en dérivation ${n} batteries identiques de ${fmt(U)} V et ${fmt(Q)} Ah.</p>`,
+      parties: [{ type: 'champs', q: 'Quelles sont la tension et la capacité de l\'ensemble ?', champs: [{ label: 'U =', valeur: U, unite: 'V', signe: false }, { label: 'Q =', valeur: n * Q, unite: 'Ah', signe: false }],
+        diag: vs => proche(vs[0], n * U) && proche(vs[1], Q) ? 'Tu as inversé : en dérivation, ce sont les capacités qui s\'additionnent, pas les tensions.' : proche(vs[0], n * U) ? 'En dérivation, la tension ne change pas.' : 'En dérivation, U ne change pas et Q = n × Q de chaque batterie.',
+        solution: `<p class="crs-calc">U = ${fmt(U)} V ; Q = ${n} × ${fmt(Q)} = ${c(fmt(n * Q) + ' Ah')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Assembler des cellules ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Assembler des cellules');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Pour obtenir une batterie de tension et de capacité données, on règle :</p>
+      <ul class="er-liste"><li>le nombre de cellules <b>en série</b> dans chaque branche : il fixe la <b>tension</b> ;</li><li>le nombre de <b>branches en dérivation</b> : il fixe la <b>capacité</b>.</li></ul>
+      <div class="cle"><p>U = (cellules en série) × U<sub>cellule</sub> &nbsp;·&nbsp; Q = (branches) × Q<sub>cellule</sub> &nbsp;·&nbsp; E = U × Q</p></div>
+    </div>
+    ${exemple(`<p>Avec des cellules de 3,6 V et 2,5 Ah, on veut 7,2 V et 5 Ah : 2 cellules en série (2 × 3,6 = 7,2 V), et 2 branches en dérivation (2 × 2,5 = 5 Ah). Il faut 4 cellules ; l'énergie est E = 7,2 × 5 = 36 Wh.</p>`)}`);
+  const cibles = [
+    { U: 3.6, Q: 2.5, cible: { U: 10.8, Q: 2.5 } }, { U: 3.6, Q: 2.5, cible: { U: 7.2, Q: 7.5 } }, { U: 1.2, Q: 2, cible: { U: 4.8, Q: 4 } },
+    { U: 2, Q: 40, cible: { U: 12, Q: 80 } }, { U: 3.6, Q: 3, cible: { U: 14.4, Q: 6 } },
+  ];
+  const [a, b] = [hasard(cibles.slice(0, 2)), hasard(cibles.slice(2))];
+  c_.aToi(carte, [
+    { titre: 'Une première batterie', parties: [partieAssemblage(a)] },
+    { titre: 'Une deuxième batterie', parties: [partieAssemblage(b),
+      { type: 'nombre', q: 'Quelle est l\'énergie disponible dans cette batterie ?', label: 'E =', valeur: b.cible.U * b.cible.Q, unite: 'Wh', signe: false, rel: .01,
+        diag: v => proche(v, b.U * b.Q, .02) ? 'C\'est l\'énergie d\'une seule cellule : utilise U et Q de la batterie.' : 'E = U × Q de la batterie.',
+        solution: `<p class="crs-calc">E = U × Q = ${fmt(b.cible.U)} V × ${fmt(b.cible.Q)} Ah = ${c(fmt(+(b.cible.U * b.cible.Q).toPrecision(4)) + ' Wh')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p><b class="cle-titre">En série</b> · les tensions s'additionnent (la capacité ne change pas). Nombre de cellules : n = U<sub>batterie</sub> / U<sub>cellule</sub>.</p></div>
+    <div class="cle"><p><b class="cle-titre">En dérivation</b> (= en parallèle) · les intensités et les capacités s'additionnent (la tension ne change pas).</p></div>
+    <div class="cle"><p>Une batterie au plomb de 12 V contient 6 cellules de 2 V en série.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4_questions.html">Questions sur les branchements →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_5.html">Module 5 : exercices du manuel</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+PA2.menu('module_4_cours');
+</script>
+</body>
+</html>

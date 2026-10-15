@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : rendement et schéma de conversion — Chapitre 1 : Énergie et puissance</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ep.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="ep.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">Rendement et schéma de conversion</h2>
+    <p class="er-contexte">Un appareil <b>convertit</b> l'énergie qu'il reçoit en une autre forme d'énergie, avec des <b>pertes</b>. Tu vas représenter cette conversion par un <b>schéma</b>, puis calculer le <b>rendement</b> de l'appareil.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Le schéma de conversion à compléter par glisser-déposer est la
+   partie 'schema' du moteur EP, utilisée ici comme outil 'perso'.
+   ============================================================ */
+const { fmt, hasard, entre, melanger, exemple } = COURS;
+const { conv, slot, val, inc, fr, proche } = EP;
+const c = h => `<span class="c">${h}</span>`;
+const etiq = (id, label, cible, indice) => ({ id, label, cible, indice });
+// schéma de conversion à compléter (outil « perso » du cours)
+const glisser = (q, schema, etiquettes, solution, titrePalette) => ({ type: 'perso', q, solution, etiquettes,
+  monter: (zone, api) => EP.PARTIES.schema(zone, { schema, etiquettes, titrePalette }, api) });
+
+// Formes d'énergie et appareils (forme apportée, utile, perdue)
+const FORMES = { el: 'électrique', me: 'mécanique', th: 'thermique', ch: 'chimique', ra: 'rayonnante', nu: 'nucléaire' };
+const APPAREILS = [
+  { nom: 'moteur électrique', un: 'un moteur électrique', a: 'el', u: 'me', p: 'th' },
+  { nom: 'lampe', un: 'une lampe', a: 'el', u: 'ra', p: 'th', note: 'la lumière est de l\'énergie rayonnante' },
+  { nom: 'panneau solaire', un: 'un panneau solaire', a: 'ra', u: 'el', p: 'th' },
+  { nom: 'alternateur', un: 'un alternateur', a: 'me', u: 'el', p: 'th' },
+  { nom: 'moteur à essence', un: 'un moteur à essence', a: 'ch', u: 'me', p: 'th' },
+  { nom: 'pile', un: 'une pile qui alimente un circuit', a: 'ch', u: 'el', p: 'th' },
+];
+
+/* ---------- Diagnostics des erreurs classiques sur le rendement ---------- */
+function diagEta(v, Pu, Pa, brutU, brutA) {
+  if (proche(v, Pa / Pu, .02)) return 'Tu as inversé le rapport. η = P<sub>u</sub> / P<sub>a</sub> : la puissance <b>utile</b> divisée par la puissance <b>apportée</b>. Un rendement ne dépasse jamais 1.';
+  if (brutU != null && proche(v, brutU / brutA, .02)) return 'Les deux puissances ne sont pas dans la même unité : convertis-les d\'abord (1 kW = 1 000 W ; 1 mW = 0,001 W).';
+  if (proche(v, 100 * Pu / Pa, .02)) return 'Donne η en écriture décimale, sans le pourcentage (80 % s\'écrit 0,80).';
+  return 'η = P<sub>u</sub> / P<sub>a</sub>, avec les deux puissances dans la même unité.';
+}
+function diagPu(v, eta, Pa) {
+  if (proche(v, Pa / eta, .02)) return 'Tu as divisé par η. On isole P<sub>u</sub> : P<sub>u</sub> = η × P<sub>a</sub>. La puissance utile est <b>plus petite</b> que la puissance apportée.';
+  return 'η = P<sub>u</sub> / P<sub>a</sub> donc P<sub>u</sub> = η × P<sub>a</sub>.';
+}
+function diagPa(v, eta, Pu) {
+  if (proche(v, eta * Pu, .02)) return 'Tu as multiplié par η. On isole P<sub>a</sub> : P<sub>a</sub> = P<sub>u</sub> / η. La puissance apportée est <b>plus grande</b> que la puissance utile.';
+  return 'η = P<sub>u</sub> / P<sub>a</sub> donc P<sub>a</sub> = P<sub>u</sub> / η.';
+}
+
+/* ---------- 1. Les formes d'énergie ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Les formes d\'énergie');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>L'énergie existe sous plusieurs <b>formes</b> :</p>
+      <ul class="er-liste">
+        <li>énergie <b>chimique</b> : stockée dans une batterie, une pile, l'essence, le gaz, les aliments ;</li>
+        <li>énergie <b>électrique</b> : transportée par le courant électrique ;</li>
+        <li>énergie <b>rayonnante</b> (ou lumineuse, solaire) : transportée par la lumière ;</li>
+        <li>énergie <b>mécanique</b> : celle d'un objet en mouvement (ou placé en hauteur) ;</li>
+        <li>énergie <b>thermique</b> : la chaleur ;</li>
+        <li>énergie <b>nucléaire</b> : stockée dans les noyaux des atomes.</li>
+      </ul>
+    </div>
+    ${exemple('<p>Dans une voiture à essence, le moteur reçoit l\'énergie <b>chimique</b> de l\'essence et la convertit en énergie <b>mécanique</b> (la voiture avance). Le moteur chauffe : une partie de l\'énergie est convertie en énergie <b>thermique</b>.</p>')}`);
+  const QCM = (titre, q, bonne, indices, solution) => ({ titre, parties: [{ type: 'choix', q, melanger: true,
+    options: Object.keys(FORMES).filter(k => k !== 'nu').map(k => ({ id: k, label: 'énergie ' + FORMES[k] })), bonne,
+    indices, solution }] });
+  c_.aToi(carte, [
+    QCM('Une batterie de téléphone', 'Sous quelle forme une batterie chargée stocke-t-elle l\'énergie ?', 'ch',
+      { el: 'La batterie fournit de l\'énergie électrique quand elle se décharge, mais elle la stocke sous une autre forme, dans des réactions chimiques.' },
+      '<p>Une batterie stocke de l\'énergie <b>chimique</b> ; elle la convertit en énergie électrique quand on l\'utilise.</p>'),
+    QCM('Un panneau solaire', 'Quelle forme d\'énergie un panneau solaire reçoit-il ?', 'ra',
+      { el: 'C\'est ce qu\'il fournit. Il reçoit la lumière du soleil.', th: 'Le soleil chauffe le panneau, mais ce qui le fait fonctionner, c\'est la lumière.' },
+      '<p>Le panneau reçoit l\'énergie <b>rayonnante</b> (lumineuse) du soleil.</p>'),
+    QCM('Un ventilateur', 'Quelle forme d\'énergie utile un ventilateur fournit-il ?', 'me',
+      { el: 'Il reçoit de l\'énergie électrique ; ce qu\'on attend de lui, c\'est que les pales tournent.', th: 'Le ventilateur chauffe un peu : c\'est de l\'énergie perdue, pas utile.' },
+      '<p>Les pales tournent : le ventilateur fournit de l\'énergie <b>mécanique</b>.</p>'),
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Le schéma de conversion ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Le schéma de conversion');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Un appareil (un <b>convertisseur</b>) reçoit une énergie <b>apportée</b>. Il en convertit une partie sous la forme voulue : c'est l'énergie <b>utile</b>. Le reste est l'énergie <b>perdue</b>, en général sous forme <b>thermique</b> (l'appareil chauffe).</p>
+      <div class="cle">${conv({ appareil: 'convertisseur', eta: '(rendement η)', a: { f: 'E<sub>a</sub> ou P<sub>a</sub>' }, u: { f: 'E<sub>u</sub> ou P<sub>u</sub>' }, p: { f: 'E<sub>perdue</sub> ou P<sub>perdue</sub>' } })}
+        <p style="text-align:center"><b>E<sub>a</sub> = E<sub>u</sub> + E<sub>perdue</sub></b> : rien ne se crée, rien ne se perd vraiment. On écrit la même chose avec les puissances.</p></div>
+    </div>
+    ${exemple(`<p>Un moteur électrique reçoit une puissance électrique de 500 W et fournit une puissance mécanique de 400 W.</p>
+      ${conv({ grandeur: 'Puissance', appareil: 'moteur', a: { f: 'électrique', v: val('500 W') }, u: { f: 'mécanique', v: val('400 W') }, p: { f: 'thermique', v: val('100 W') } })}
+      <p class="crs-calc">P<sub>perdue</sub> = P<sub>a</sub> − P<sub>u</sub> = 500 − 400 = <span class="c">100 W</span></p>`)}`);
+  // formes d'énergie d'un appareil tiré au hasard (une étiquette en trop)
+  const ap = hasard(APPAREILS);
+  const intrus = hasard(Object.keys(FORMES).filter(k => ![ap.a, ap.u, ap.p].includes(k) && k !== 'nu'));
+  const etiqs = [etiq('a', 'énergie ' + FORMES[ap.a], 'a', `Que reçoit ${ap.un} pour fonctionner ?`),
+    etiq('u', 'énergie ' + FORMES[ap.u], 'u', `Qu'attend-on de ${ap.un} ?${ap.note ? ' (' + ap.note + ')' : ''}`),
+    etiq('p', 'énergie ' + FORMES[ap.p], 'p', 'L\'énergie perdue est presque toujours de la chaleur : l\'appareil chauffe.'),
+    etiq('x', 'énergie ' + FORMES[intrus], null, `Il n'y a pas d'énergie ${FORMES[intrus]} en jeu ici.`)];
+  // valeurs d'un moteur : P_a, P_u, P_perdue
+  const Pa = hasard([800, 1000, 1200, 1500, 2000, 2500]), eta = hasard([.6, .7, .75, .8, .9]), Pu = Pa * eta, Pp = Pa - Pu;
+  const Pa2 = hasard([60, 80, 100, 120]), Pu2 = hasard([12, 15, 18, 20, 24]);
+  c_.aToi(carte, [
+    { titre: `Les formes d'énergie : ${ap.un}`, parties: [glisser(`Place les formes d'énergie sur le schéma de conversion de <b>${ap.un}</b> (une étiquette est en trop).`,
+      conv({ appareil: ap.nom, a: { f: slot('a') }, u: { f: slot('u') }, p: { f: slot('p') } }), etiqs,
+      `<p>${ap.un.charAt(0).toUpperCase() + ap.un.slice(1)} : énergie ${FORMES[ap.a]} → énergie ${FORMES[ap.u]} (utile) + énergie ${FORMES[ap.p]} (perdue).</p>`, 'Formes d\'énergie')] },
+    { titre: 'Les valeurs sur le schéma', enonce: `<p>Un moteur électrique reçoit une puissance de ${fmt(Pa)} W. Il fournit une puissance mécanique de ${fmt(Pu)} W ; le reste, ${fmt(Pp)} W, est perdu en chaleur.</p>`,
+      parties: [glisser('Place les trois puissances sur le schéma de conversion.',
+        conv({ grandeur: 'Puissance', appareil: 'moteur', a: { f: 'électrique', v: slot('a') }, u: { f: 'mécanique', v: slot('u') }, p: { f: 'thermique', v: slot('p') } }),
+        [etiq('a', fmt(Pa) + ' W', 'a', 'La puissance apportée est celle que le moteur reçoit : c\'est la plus grande.'),
+          etiq('u', fmt(Pu) + ' W', 'u', 'La puissance utile est la puissance mécanique fournie.'),
+          etiq('p', fmt(Pp) + ' W', 'p', 'La puissance perdue est la chaleur : P<sub>perdue</sub> = P<sub>a</sub> − P<sub>u</sub>.')],
+        `<p>P<sub>a</sub> = ${fmt(Pa)} W ; P<sub>u</sub> = ${fmt(Pu)} W ; P<sub>perdue</sub> = ${fmt(Pp)} W. On vérifie : ${fmt(Pu)} + ${fmt(Pp)} = ${fmt(Pa)} W.</p>`, 'Puissances')] },
+    { titre: 'La puissance perdue', enonce: `<p>Une lampe reçoit une puissance électrique de ${Pa2} W et rayonne une puissance lumineuse de ${Pu2} W.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle puissance est perdue sous forme thermique ?', label: 'P<sub>perdue</sub> =', valeur: Pa2 - Pu2, unite: 'W', signe: false,
+        diag: v => proche(v, Pa2 + Pu2) ? 'La puissance perdue est ce qui reste : on <b>soustrait</b> P<sub>u</sub> à P<sub>a</sub>.' : 'P<sub>perdue</sub> = P<sub>a</sub> − P<sub>u</sub>.',
+        solution: `<p class="crs-calc">P<sub>perdue</sub> = P<sub>a</sub> − P<sub>u</sub> = ${Pa2} − ${Pu2} = ${c((Pa2 - Pu2) + ' W')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Le rendement ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Le rendement');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Le <b>rendement</b> η (lettre grecque « êta ») indique quelle part de l'énergie apportée est convertie en énergie utile.</p>
+      <div class="cle"><p class="crs-formule">η = ${fr('P<sub>u</sub>', 'P<sub>a</sub>')} = ${fr('E<sub>u</sub>', 'E<sub>a</sub>')}</p>
+        <p>η n'a <b>pas d'unité</b> ; il est compris entre 0 et 1 (on peut aussi l'écrire en %). Les deux puissances doivent être dans la <b>même unité</b>.</p></div>
+    </div>
+    ${exemple(`<p>Le moteur électrique reçoit 500 W et fournit 400 W.</p>
+      <p class="crs-calc">η = ${fr('P<sub>u</sub>', 'P<sub>a</sub>')} = ${fr('400 W', '500 W')} = <span class="c">0,80</span> (soit 80 %)</p>`)}`);
+  const [Pu1, Pa1] = hasard([[15, 45], [30, 40], [45, 60], [18, 24], [72, 90], [120, 150]]);
+  const [mu, Wa] = hasard([[500, 2], [900, 1.5], [360, 0.6], [750, 2.5]]);       // P_u en mW, P_a en W
+  const [ku, Wa3] = hasard([[2.8, 3000], [1.8, 2000], [4.5, 5000], [0.9, 1200]]); // P_u en kW, P_a en W
+  c_.aToi(carte, [
+    { titre: 'Même unité', enonce: `<p>Un appareil reçoit P<sub>a</sub> = ${Pa1} W et fournit P<sub>u</sub> = ${Pu1} W.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule son rendement (2 chiffres significatifs).', label: 'η =', valeur: Pu1 / Pa1, rel: .02, signe: false,
+        diag: v => diagEta(v, Pu1, Pa1), solution: `<p class="crs-calc">η = ${fr(Pu1 + ' W', Pa1 + ' W')} = ${c(fmt(+(Pu1 / Pa1).toPrecision(2)))}</p>` }] },
+    { titre: 'Des unités différentes', enonce: `<p>Un petit moteur reçoit P<sub>a</sub> = ${fmt(Wa)} W et fournit P<sub>u</sub> = ${mu} mW.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule son rendement (2 chiffres significatifs).', label: 'η =', valeur: mu / 1000 / Wa, rel: .02, signe: false,
+        diag: v => diagEta(v, mu / 1000, Wa, mu, Wa), solution: `<p class="crs-calc">P<sub>u</sub> = ${mu} mW = ${fmt(mu / 1000)} W<br>η = ${fr(fmt(mu / 1000) + ' W', fmt(Wa) + ' W')} = ${c(fmt(+(mu / 1000 / Wa).toPrecision(2)))}</p>` }] },
+    { titre: 'En pourcentage', enonce: `<p>Un convertisseur reçoit P<sub>a</sub> = ${fmt(Wa3)} W et fournit P<sub>u</sub> = ${fmt(ku)} kW.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule son rendement, en pourcentage.', label: 'η =', valeur: 100 * ku * 1000 / Wa3, rel: .01, unite: '%', signe: false,
+        diag: v => proche(v, ku * 1000 / Wa3, .02) ? 'C\'est le rendement en écriture décimale : multiplie par 100 pour l\'avoir en %.' : diagEta(v / 100, ku * 1000, Wa3, ku, Wa3),
+        solution: `<p class="crs-calc">P<sub>u</sub> = ${fmt(ku)} kW = ${fmt(ku * 1000)} W<br>η = ${fr(fmt(ku * 1000) + ' W', fmt(Wa3) + ' W')} = ${fmt(+(ku * 1000 / Wa3).toPrecision(3))} = ${c(fmt(+(100 * ku * 1000 / Wa3).toPrecision(3)) + ' %')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Calculer P_u ou P_a ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. Calculer la puissance utile ou la puissance apportée');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>On isole la grandeur cherchée dans η = P<sub>u</sub> / P<sub>a</sub> :</p>
+      <div class="cle"><p class="crs-formule">P<sub>u</sub> = η × P<sub>a</sub> &nbsp;&nbsp;·&nbsp;&nbsp; P<sub>a</sub> = ${fr('P<sub>u</sub>', 'η')}</p>
+        <p>On rédige en trois temps : la formule, la grandeur cherchée isolée, puis l'application numérique <b>avec les unités</b>.</p></div>
+      <p>Pour vérifier : P<sub>u</sub> est toujours <b>plus petite</b> que P<sub>a</sub>.</p>
+    </div>
+    ${exemple(`<p>Un moteur de rendement η = 0,13 fournit P<sub>u</sub> = 500 W. Quelle puissance reçoit-il ?</p>
+      <p class="crs-calc">η = ${fr('P<sub>u</sub>', 'P<sub>a</sub>')} donc P<sub>a</sub> = ${fr('P<sub>u</sub>', 'η')}<br>P<sub>a</sub> = ${fr('500 W', '0,13')} ≈ <span class="c">3 846 W</span> (≈ 3,8 kW)</p>`)}`);
+  const [e1, Pa1] = hasard([[.85, 45], [.9, 60], [.75, 120], [.6, 250], [.95, 2000]]);
+  const [e2, Pu2] = hasard([[.42, 54], [.8, 36], [.25, 15], [.6, 90], [.3, 21]]);
+  c_.aToi(carte, [
+    { titre: 'La puissance utile', enonce: `<p>Un appareil de rendement η = ${fmt(e1)} reçoit P<sub>a</sub> = ${fmt(Pa1)} W.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule la puissance utile.', label: 'P<sub>u</sub> =', valeur: e1 * Pa1, unite: 'W', rel: .01, signe: false,
+        diag: v => diagPu(v, e1, Pa1), solution: `<p class="crs-calc">P<sub>u</sub> = η × P<sub>a</sub> = ${fmt(e1)} × ${fmt(Pa1)} W = ${c(fmt(+(e1 * Pa1).toPrecision(4)) + ' W')}</p>` }] },
+    { titre: 'La puissance apportée', enonce: `<p>Un appareil de rendement η = ${fmt(e2)} fournit P<sub>u</sub> = ${fmt(Pu2)} mW.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule la puissance qu\'il reçoit, en mW.', label: 'P<sub>a</sub> =', valeur: Pu2 / e2, unite: 'mW', rel: .01, signe: false,
+        diag: v => proche(v, Pu2 / e2 / 1000, .02) ? 'Le résultat est demandé en mW : garde l\'unité de P<sub>u</sub>.' : diagPa(v, e2, Pu2),
+        solution: `<p class="crs-calc">P<sub>a</sub> = ${fr('P<sub>u</sub>', 'η')} = ${fr(fmt(Pu2) + ' mW', fmt(e2))} ≈ ${c(fmt(+(Pu2 / e2).toPrecision(3)) + ' mW')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 5. Les pièges ---------- */
+function etape5(c_) {
+  const carte = c_.carte('5. Les deux pièges du rendement');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Même unité.</b> Avant de diviser, on met P<sub>u</sub> et P<sub>a</sub> dans la même unité (mW, W ou kW).</p></div>
+      <div class="cle"><p><b class="cle-titre">η ≤ 1.</b> Un appareil ne fournit jamais plus d'énergie qu'il n'en reçoit. Si tu trouves η &gt; 1, tu as inversé le rapport.</p></div>
+      <div class="ph-lien-app"><p>Besoin de revoir les préfixes (m, k, M) ?</p><a class="btn-small" href="../../conversions/index.html">Revois les conversions →</a></div>
+    </div>
+    ${exemple(`<p>P<sub>u</sub> = 5,0 mW et P<sub>a</sub> = 4,5 W.</p>
+      <p class="crs-calc">P<sub>u</sub> = 5,0 mW = 5,0 × 10<sup>−3</sup> W<br>η = ${fr('5,0 × 10<sup>−3</sup> W', '4,5 W')} ≈ <span class="c">1,1 × 10<sup>−3</sup></span> (soit 0,11 %)</p>`)}`);
+  const [Pu, Pa] = hasard([[30, 40], [45, 60], [36, 48], [60, 75]]);
+  c_.aToi(carte, [
+    { titre: 'Un résultat impossible', enonce: `<p>Pour un appareil qui reçoit ${Pa} W et fournit ${Pu} W, un élève écrit η = ${Pa} / ${Pu} = ${fmt(+(Pa / Pu).toPrecision(3))}.</p>`,
+      parties: [{ type: 'choix', q: 'Que penses-tu de son résultat ?', colonne: true,
+        options: [{ id: 'ok', label: `Il est faux : un rendement ne dépasse pas 1, il a inversé le rapport (η = ${fmt(+(Pu / Pa).toPrecision(3))})` },
+          { id: 'a', label: 'Il est juste : l\'appareil fournit plus d\'énergie qu\'il n\'en reçoit' },
+          { id: 'b', label: 'Il est juste, mais il faut l\'écrire en % : 125 %' }], bonne: 'ok',
+        indices: { a: 'Impossible : l\'énergie utile est toujours plus petite que l\'énergie apportée (il y a des pertes).', b: 'Un rendement supérieur à 100 % n\'existe pas.' },
+        solution: `<p>η = P<sub>u</sub> / P<sub>a</sub> = ${Pu} / ${Pa} = ${fmt(+(Pu / Pa).toPrecision(3))}.</p>` }] },
+    { titre: 'Des kW et des W', enonce: '<p>Un convertisseur reçoit P<sub>a</sub> = 3 000 W et fournit P<sub>u</sub> = 2,8 kW.</p>',
+      parties: [{ type: 'nombre', q: 'Calcule son rendement (2 chiffres significatifs).', label: 'η =', valeur: 2800 / 3000, rel: .02, signe: false,
+        diag: v => diagEta(v, 2800, 3000, 2.8, 3000), solution: `<p class="crs-calc">P<sub>u</sub> = 2,8 kW = 2 800 W<br>η = ${fr('2 800 W', '3 000 W')} ≈ ${c('0,93')} (93 %)</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Formes d'énergie.</b> Chimique, électrique, rayonnante, mécanique, thermique, nucléaire.</p></div>
+    <div class="cle"><p><b class="cle-titre">Schéma de conversion.</b> Énergie apportée → appareil (η) → énergie utile + énergie perdue (en général thermique) ; E<sub>a</sub> = E<sub>u</sub> + E<sub>perdue</sub>.</p></div>
+    <div class="cle"><p class="crs-formule">η = ${fr('P<sub>u</sub>', 'P<sub>a</sub>')} = ${fr('E<sub>u</sub>', 'E<sub>a</sub>')} &nbsp;·&nbsp; P<sub>u</sub> = η × P<sub>a</sub> &nbsp;·&nbsp; P<sub>a</sub> = ${fr('P<sub>u</sub>', 'η')}</p>
+      <p>η sans unité, entre 0 et 1 ; P<sub>u</sub> et P<sub>a</sub> dans la même unité.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur le rendement →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2_cours.html">Module 2 : la puissance</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, etape5, aRetenir]);
+EP.menu('module_1_cours');
+</script>
+</body>
+</html>

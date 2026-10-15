@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : résistance thermique d'une paroi — Chapitre 5 : Flux et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="tt.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="tt.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS</span>
+    <h2 class="er-titre">Résistance thermique d'une paroi</h2>
+    <p class="er-contexte">Une paroi freine le transfert thermique : on la caractérise par sa <b>résistance thermique</b> R<sub>th</sub>. Elle dépend de l'<b>épaisseur</b>, de la <b>surface</b> et de la <b>conductivité thermique</b> λ du matériau.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Φ = ΔT / R_th ; R_th = e / (λ × S) ; raisonnements (λ petit :
+   isolant ; R grande : Φ petit ; R proportionnelle à e) avec la paroi
+   réglable de TT (outil d'exploration et partie 'perso' avec un
+   objectif) ; isoler R, λ ou e.
+   Erreurs diagnostiquées : e en cm, ΔT mal calculé avec des
+   températures négatives, λ et R confondus pour juger l'isolation.
+   ============================================================ */
+const { fmt, sci, hasard, melanger, exemple } = COURS;
+const { fr, proche, o, cs, outilParoi, partieParoi } = TT;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+
+/* ---------- 1. Φ = ΔT / R ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Le flux à travers une paroi : Φ = ΔT / R<sub>th</sub>');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Plus l'écart de température entre les deux faces est grand, plus le flux est grand. Plus la paroi <b>résiste</b> au transfert, plus le flux est petit.</p>
+      <div class="cle"><p class="crs-formule">Φ = ${fr('T<sub>int</sub> − T<sub>ext</sub>', 'R<sub>th</sub>')} &nbsp; en général &nbsp; Φ = ${fr('ΔT', 'R<sub>th</sub>')}</p>
+        <p>ΔT = T<sub>chaud</sub> − T<sub>froid</sub> en K (ou °C) ; Φ en W ; R<sub>th</sub>, la <b>résistance thermique</b>, en <b>K·W<sup>−1</sup></b>.</p></div>
+    </div>
+    ${exemple(`<p>Hôtel de glace : −3,0 °C à l'intérieur, −20 °C dehors ; paroi de résistance R<sub>th</sub> = 0,022 K·W<sup>−1</sup>.</p>
+      <p class="crs-calc">Φ = ${fr('T<sub>int</sub> − T<sub>ext</sub>', 'R<sub>th</sub>')} = ${fr('−3,0 − (−20)', '0,022')} = ${fr('17', '0,022')} ≈ <span class="c">773 W</span></p>`)}`);
+  const [d, R] = hasard([[15, 5], [20, 0.5], [14, 0.07], [12, 0.072], [25, 2.5]]);
+  const [a, b, R2] = hasard([[19, -6, 0.25], [20, -2, 0.32], [-3, -20, 0.044], [18, -7, 0.5]]);
+  const [d3, P3] = hasard([[3, 27.6], [20, 2000], [22, 88], [15, 300]]);
+  c_.aToi(carte, [
+    { titre: 'Un flux', enonce: `<p>L'écart de température entre les deux faces d'une paroi est de ${d} °C ; sa résistance thermique est R<sub>th</sub> = ${fmt(R)} K·W<sup>−1</sup>.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule le flux thermique (3 chiffres significatifs).', label: 'Φ =', valeur: d / R, unite: 'W', signe: false, rel: .01, affiche: fmt(r3(d / R)),
+        diag: v => proche(v, d * R, .02) ? 'On divise par R : Φ = ΔT / R.' : proche(v, R / d, .02) ? 'Rapport inversé : Φ = ΔT / R.' : 'Φ = ΔT / R.',
+        solution: `<p class="crs-calc">Φ = ${fr('ΔT', 'R')} = ${fr(d, fmt(R))} ≈ ${c(fmt(r3(d / R)) + ' W')}</p>` }] },
+    { titre: 'Une température négative', enonce: `<p>Intérieur à ${fmt(a)} °C, extérieur à ${fmt(b)} °C ; R<sub>th</sub> = ${fmt(R2)} K·W<sup>−1</sup>.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule le flux thermique (3 chiffres significatifs).', label: 'Φ =', valeur: (a - b) / R2, unite: 'W', signe: false, rel: .01, affiche: fmt(r3((a - b) / R2)),
+        diag: v => proche(v, Math.abs(a + b) / R2, .02) || proche(v, Math.abs(Math.abs(a) - Math.abs(b)) / R2, .02) ? `Calcule bien ΔT : ${fmt(a)} − (${fmt(b)}) = ${fmt(a - b)} K.` : 'Φ = ΔT / R avec ΔT = T<sub>chaud</sub> − T<sub>froid</sub>.',
+        solution: `<p class="crs-calc">ΔT = ${fmt(a)} − (${fmt(b)}) = ${fmt(a - b)} K<br>Φ = ${fr(fmt(a - b), fmt(R2))} ≈ ${c(fmt(r3((a - b) / R2)) + ' W')}</p>` }] },
+    { titre: 'Retrouver R', enonce: `<p>Un flux de ${fmt(P3)} W traverse une paroi dont les faces ont un écart de température de ${d3} °C.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule sa résistance thermique (3 chiffres significatifs).', label: 'R<sub>th</sub> =', valeur: d3 / P3, unite: 'K·W<sup>−1</sup>', signe: false, rel: .01, affiche: cs(d3 / P3, 3),
+        diag: v => proche(v, P3 / d3, .02) ? 'Rapport inversé : Φ = ΔT / R donc R = ΔT / Φ.' : proche(v, P3 * d3, .02) ? 'On divise : R = ΔT / Φ.' : 'R = ΔT / Φ.',
+        solution: `<p class="crs-calc">Φ = ${fr('ΔT', 'R')} donc R = ${fr('ΔT', 'Φ')} = ${fr(d3, fmt(P3))} ≈ ${c(cs(d3 / P3, 3) + ' K·W<sup>−1</sup>')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. R = e / (λ S) ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. La résistance thermique : R<sub>th</sub> = e / (λ × S)');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">R<sub>th</sub> = ${fr('e', 'λ × S')}</p>
+        <p>e : épaisseur en <b>m</b> ; S : surface en <b>m<sup>2</sup></b> ; λ : <b>conductivité thermique</b> du matériau, en W·m<sup>−1</sup>·K<sup>−1</sup> ; R<sub>th</sub> en K·W<sup>−1</sup>.</p></div>
+      <p>Conversions : 1 cm = 10<sup>−2</sup> m ; 1 mm = 10<sup>−3</sup> m ; 1 cm<sup>2</sup> = 10<sup>−4</sup> m<sup>2</sup>.</p>
+    </div>
+    ${exemple(`<p>Laine de mouton : e = 5,0 cm, S = 1,0 m<sup>2</sup>, λ = 0,035 W·m<sup>−1</sup>·K<sup>−1</sup>.</p>
+      <p class="crs-calc">e = 5,0 cm = 5,0 × 10<sup>−2</sup> m<br>R<sub>th</sub> = ${fr('e', 'λ × S')} = ${fr('5,0 × 10<sup>−2</sup>', '0,035 × 1,0')} ≈ <span class="c">1,43 K·W<sup>−1</sup></span></p>`)}`);
+  const ecm = hasard([2, 4, 5, 12, 20, 25]);
+  const [e2, l2, S2] = hasard([[20, 0.04, 70], [10, 1.28, 10], [50, 2.2, 10], [2, 0.039, 10], [10, 0.03, 28.8]]);
+  const [emm, l3, S3] = hasard([[4, 0.81, 1], [12, 1, 1.8], [4, 0.17, 1.8], [13, 0.35, 70]]);
+  const R2 = e2 / 100 / (l2 * S2), R3 = emm / 1000 / (l3 * S3);
+  c_.aToi(carte, [
+    { titre: 'Convertir l\'épaisseur', enonce: `<p>Une plaque d'isolant a une épaisseur de ${ecm} cm.</p>`,
+      parties: [{ type: 'nombre', q: 'Écris cette épaisseur en mètres.', label: 'e =', valeur: ecm / 100, unite: 'm', signe: false,
+        diag: v => proche(v, ecm / 1000) ? '1 cm = 0,01 m : on divise par 100.' : proche(v, ecm * 100) ? 'Un mètre fait 100 cm : on divise par 100.' : '1 cm = 10<sup>−2</sup> m.', solution: `<p class="crs-calc">e = ${ecm} cm = ${c(fmt(ecm / 100) + ' m')}</p>` }] },
+    { titre: 'Une résistance thermique', enonce: `<p>Une couche de ${e2} cm d'épaisseur, de conductivité λ = ${fmt(l2)} W·m<sup>−1</sup>·K<sup>−1</sup>, couvre ${fmt(S2)} m<sup>2</sup>.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule sa résistance thermique (2 chiffres significatifs).', label: 'R<sub>th</sub> =', valeur: R2, unite: 'K·W<sup>−1</sup>', cs: 2, rel: .05,
+        diag: v => proche(v, R2 * 100, .03) ? `L'épaisseur doit être en mètres : ${e2} cm = ${fmt(e2 / 100)} m.` : proche(v, e2 / 100 * l2 * S2, .03) || proche(v, e2 / 100 * l2 / S2, .03) ? 'R = e / (λ × S) : λ et S sont tous les deux au dénominateur.' : 'R = e / (λ × S), e en m.',
+        solution: `<p class="crs-calc">R<sub>th</sub> = ${fr(fmt(e2 / 100) + ' m', fmt(l2) + ' × ' + fmt(S2))} ≈ ${c(sci(R2, 2) + ' K·W<sup>−1</sup>')}</p>` }] },
+    { titre: 'Une épaisseur en millimètres', enonce: `<p>Une plaque de ${emm} mm d'épaisseur, de conductivité λ = ${fmt(l3)} W·m<sup>−1</sup>·K<sup>−1</sup>, a une surface de ${fmt(S3)} m<sup>2</sup>.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule sa résistance thermique (2 chiffres significatifs).', label: 'R<sub>th</sub> =', valeur: R3, unite: 'K·W<sup>−1</sup>', cs: 2, rel: .05,
+        diag: v => proche(v, R3 * 1000, .03) ? `Convertis : ${emm} mm = ${fmt(emm / 1000)} m.` : proche(v, R3 * 10, .03) ? '1 mm = 10<sup>−3</sup> m (et non 10<sup>−2</sup>).' : 'R = e / (λ × S), e en m.',
+        solution: `<p class="crs-calc">e = ${emm} mm = ${emm} × 10<sup>−3</sup> m<br>R<sub>th</sub> = ${fr(emm + ' × 10<sup>−3</sup>', fmt(l3) + ' × ' + fmt(S3))} ≈ ${c(sci(R3, 2) + ' K·W<sup>−1</sup>')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Raisonner sur une paroi ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Raisonner : qu\'est-ce qui isole ?');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><ul class="er-liste"><li>Plus λ est <b>petit</b>, plus le matériau est <b>isolant</b> (laine de verre, polystyrène, air immobile).</li>
+        <li>Plus R<sub>th</sub> est <b>grande</b>, meilleure est l'isolation, et plus le flux Φ est <b>petit</b>.</li>
+        <li>R<sub>th</sub> est <b>proportionnelle</b> à e : doubler l'épaisseur double R<sub>th</sub>, donc divise Φ par 2.</li></ul></div>
+      <p>Règle la paroi ci-dessous : épaisseur, surface, températures, matériau. La flèche du flux va du chaud vers le froid ; son épaisseur est proportionnelle à Φ.</p>
+      ${outilParoi({ e: 0.2, mat: 'beton', S: 10, Ti: 19, Te: 5 })}
+    </div>
+    ${exemple(`<p>Mur de 20 cm, 10 m<sup>2</sup>, 19 °C dedans et 5 °C dehors (ΔT = 14 K) :</p>
+      <p class="crs-calc">en béton (λ = 1,28) : R = ${fr('0,20', '1,28 × 10')} ≈ 0,0156 K·W<sup>−1</sup> et Φ = ${fr('14', '0,0156')} ≈ <span class="c">896 W</span><br>
+      en laine de verre (λ = 0,040) : R = ${fr('0,20', '0,040 × 10')} = 0,50 K·W<sup>−1</sup> et Φ = ${fr('14', '0,50')} = <span class="c">28 W</span></p>`)}`);
+  const ch = (titre, q, options, bonne, indices, solution) => ({ titre, parties: [{ type: 'choix', q, options, bonne, indices, solution, melanger: false, colonne: true }] });
+  c_.aToi(carte, [
+    ch('Doubler l\'épaisseur', 'Avec la paroi réglable, double l\'épaisseur e. Que devient le flux Φ ?',
+      [o('d2', 'il est divisé par 2'), o('x2', 'il est multiplié par 2'), o('eg', 'il ne change pas')], 'd2',
+      { x2: 'Une paroi plus épaisse isole mieux : R double, donc Φ = ΔT / R diminue.', eg: 'Regarde la valeur de R : elle dépend de e.' },
+      '<p>R = e / (λ S) double, donc Φ = ΔT / R est divisé par 2 : la flèche est deux fois moins épaisse.</p>'),
+    ch('Doubler la surface', 'Double la surface S de la paroi. Que devient sa résistance thermique R ?',
+      [o('d2', 'elle est divisée par 2'), o('x2', 'elle est multipliée par 2'), o('eg', 'elle ne change pas')], 'd2',
+      { x2: 'S est au dénominateur de R = e / (λ × S).', eg: 'S est dans la formule de R.' },
+      '<p>S est au dénominateur : R est divisée par 2, et le flux double (deux fois plus de surface laisse passer deux fois plus d\'énergie).</p>'),
+    ch('Le meilleur isolant', 'Sur la paroi réglable, quel matériau donne le plus petit flux, à épaisseur égale ?',
+      [o('poly', 'le polystyrène (λ = 0,030)'), o('beton', 'le béton (λ = 1,28)'), o('brique', 'la brique (λ = 1,15)')], 'poly',
+      { beton: 'Le béton a la plus grande conductivité : c\'est le plus mauvais isolant de la liste.', brique: 'Plus λ est grand, plus le matériau conduit l\'énergie : ce n\'est pas un isolant.' },
+      '<p>Le polystyrène a la plus petite conductivité λ : c\'est le meilleur isolant.</p>'),
+    { titre: 'À toi de régler', parties: [partieParoi({ q: 'Avec de la laine de verre, sur 10 m<sup>2</sup>, entre 19 °C et 5 °C : règle la <b>plus petite épaisseur</b> qui limite le flux à 20 W au plus, puis valide.',
+      e: 0.1, mat: 'laine', S: 10, Ti: 19, Te: 5, fixe: ['mat', 'S', 'T'], montre: { e: 0.28 },
+      cible: x => Math.round(x.e * 100) === 28,
+      diag: x => x.phi > 20 + 1e-9 ? `Φ ≈ ${fmt(r3(x.phi))} W : c'est trop. Augmente l'épaisseur pour augmenter R.` : 'Le flux est bien de 20 W au plus, mais l\'épaisseur n\'est pas la plus petite possible : diminue-la.',
+      solution: `<p class="crs-calc">Φ = 20 W donc R = ${fr('ΔT', 'Φ')} = ${fr('14', '20')} = 0,70 K·W<sup>−1</sup><br>e = R × λ × S = 0,70 × 0,040 × 10 = ${c('0,28 m = 28 cm')}</p>` })] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Isoler une grandeur ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. Isoler une grandeur');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">R = ${fr('ΔT', 'Φ')} &nbsp;·&nbsp; λ = ${fr('e', 'R × S')} &nbsp;·&nbsp; e = R × λ × S</p></div>
+      <div class="ph-lien-app"><p>Revois comment isoler une grandeur dans une formule.</p><a class="btn-small" href="../../equations-en-physique/index.html">Équations en physique →</a></div>
+    </div>
+    ${exemple(`<p>Une porte de 4,0 cm d'épaisseur et de 1,6 m<sup>2</sup> sépare deux pièces à 22 °C et 19 °C ; le flux vaut 27,6 W.</p>
+      <p class="crs-calc">R = ${fr('ΔT', 'Φ')} = ${fr('22 − 19', '27,6')} ≈ 0,109 K·W<sup>−1</sup><br>
+      R = ${fr('e', 'λ × S')} donc λ = ${fr('e', 'R × S')} = ${fr('4,0 × 10<sup>−2</sup>', '0,109 × 1,6')} ≈ <span class="c">0,23 W·m<sup>−1</sup>·K<sup>−1</sup></span> : du bois.</p>`)}`);
+  const [e, R, S] = hasard([[0.04, 0.109, 1.6], [0.1, 0.5, 5], [0.2, 0.25, 2], [0.05, 0.025, 2]]);
+  const [R2, l2, S2] = hasard([[0.109, 0.15, 1.6], [0.7, 0.04, 10], [1.5, 0.035, 2], [0.5, 0.03, 4]]);
+  c_.aToi(carte, [
+    { titre: 'Une conductivité', enonce: `<p>Une plaque de ${fmt(e * 100)} cm d'épaisseur et de ${fmt(S)} m<sup>2</sup> a une résistance thermique de ${fmt(R)} K·W<sup>−1</sup>.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule la conductivité λ du matériau (2 chiffres significatifs).', label: 'λ =', valeur: e / (R * S), unite: 'W·m<sup>−1</sup>·K<sup>−1</sup>', signe: false, rel: .03, affiche: cs(e / (R * S), 2),
+        diag: v => proche(v, e * 100 / (R * S), .03) ? 'L\'épaisseur doit être en mètres.' : proche(v, R * S / e, .03) ? 'Rapport inversé : λ = e / (R × S).' : proche(v, e * S / R, .03) ? 'R et S sont tous les deux au dénominateur : λ = e / (R × S).' : 'λ = e / (R × S).',
+        solution: `<p class="crs-calc">λ = ${fr('e', 'R × S')} = ${fr(fmt(e) + ' m', fmt(R) + ' × ' + fmt(S))} ≈ ${c(cs(e / (R * S), 2) + ' W·m<sup>−1</sup>·K<sup>−1</sup>')}</p>` }] },
+    { titre: 'Une épaisseur', enonce: `<p>On veut une résistance thermique de ${fmt(R2)} K·W<sup>−1</sup> avec un matériau de conductivité ${fmt(l2)} W·m<sup>−1</sup>·K<sup>−1</sup>, sur ${fmt(S2)} m<sup>2</sup>.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule l\'épaisseur nécessaire, en mm (arrondie au mm).', label: 'e =', valeur: R2 * l2 * S2 * 1000, unite: 'mm', signe: false, tol: 1,
+        diag: v => proche(v, R2 * l2 * S2, .03) ? 'C\'est en mètres : convertis en mm (× 1 000).' : proche(v, R2 / (l2 * S2) * 1000, .03) ? 'e = R × λ × S : on multiplie par λ et par S.' : 'R = e / (λ × S) donc e = R × λ × S (en m), puis en mm.',
+        solution: `<p class="crs-calc">e = R × λ × S = ${fmt(R2)} × ${fmt(l2)} × ${fmt(S2)} ≈ ${fmt(+(R2 * l2 * S2).toFixed(4))} m = ${c(fmt(Math.round(R2 * l2 * S2 * 1000)) + ' mm')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">Φ = ${fr('ΔT', 'R<sub>th</sub>')} &nbsp;·&nbsp; R<sub>th</sub> = ${fr('e', 'λ × S')}</p><p>Φ en W, ΔT en K, R<sub>th</sub> en K·W<sup>−1</sup>, e en m, S en m<sup>2</sup>, λ en W·m<sup>−1</sup>·K<sup>−1</sup>.</p></div>
+    <div class="cle"><p>λ petit : matériau isolant. R grande : bonne isolation, Φ petit. Doubler e double R et divise Φ par 2.</p></div>
+    <div class="cle"><p>R = ΔT / Φ ; λ = e / (R × S) ; e = R × λ × S.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur la résistance thermique →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Module 4 : parois composées</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
+TT.menu('module_3_cours');
+</script>
+</body>
+</html>

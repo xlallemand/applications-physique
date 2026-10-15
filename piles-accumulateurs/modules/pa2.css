@@ -1,0 +1,339 @@
+/* ============================================================
+   Styles de l'application « Chapitre 2 : Piles et accumulateurs »
+   (repris de « Chapitre 1 : Énergie et puissance », lui-même repris
+   de « Cinématique » : questions, exercices, étiquettes à placer,
+   schéma de conversion ; en fin de fichier : chaîne de conversion,
+   tableau de proportionnalité, assemblage de cellules, batteries)
+   Complète assets/theme.css, le fichier er.css de l'application
+   « Équilibrer une réaction » (cartes, boutons, écran de fin) et
+   assets/sommaire.css (navigation, accueil, fiches).
+   ============================================================ */
+
+.er-page button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.er-page p { margin: 0; }
+sub, sup { font-size: .7em; line-height: 0; }
+
+/* (blocs communs avec l'application « pH » : cours, « À toi », questions, graphiques, exercices) */
+/* ---------- Cours ---------- */
+.er-etape .cle { margin: 12px 0; }
+.cle p + p, .cours-bloc p + p, .cours-exemple p + p { margin-top: 8px; }
+.cours-bloc { margin: 0 0 12px; }
+.cours-bloc .cle { margin: 12px 0 0; }
+.cours-exemple { line-height: 1.6; }
+.cours-exemple-t { font-size: .8rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px !important; }
+.ph-formule { text-align: center; font-size: 1.35rem; font-weight: 700; margin: 10px 0 !important; color: var(--ink); line-height: 1.5; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ph-formule.grand { font-size: 1.6rem; }
+@media (max-width: 480px) { .ph-formule { font-size: 1.12rem; } .ph-formule.grand { font-size: 1.3rem; } }
+.ph-calc { font-size: 1.1rem; line-height: 2.1; font-variant-numeric: tabular-nums; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ph-calc .c { color: var(--accent-ink); font-weight: 800; }
+@media (max-width: 480px) { .ph-calc { font-size: 1rem; } }
+.ph-r { color: var(--accent-ink); font-weight: 800; }
+.ph-lien-app {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  background: var(--cle-bg); border-radius: 16px; padding: 10px 12px 10px 16px; margin: 14px 0;
+}
+.ph-lien-app p { font-size: .92rem; color: var(--ink); font-weight: 600; }
+.ph-lien-app a { text-decoration: none; }
+.ph-grille2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 640px) { .ph-grille2 { grid-template-columns: 1fr; } }
+.ph-tableau { border-collapse: collapse; margin: 10px auto; font-variant-numeric: tabular-nums; }
+.ph-tableau th, .ph-tableau td { border: 1.5px solid var(--paper-3); padding: 6px 12px; text-align: center; white-space: nowrap; }
+.ph-tableau th { background: var(--paper); font-weight: 700; }
+.ph-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 480px) { .ph-tableau th, .ph-tableau td { padding: 5px 7px; font-size: .9rem; } }
+
+
+/* ---------- Questions ---------- */
+.ph-enonce { margin-bottom: 12px; line-height: 1.55; }
+.ph-partie + .ph-partie { margin-top: 16px; padding-top: 14px; border-top: 1.5px dashed var(--paper-3); }
+.ph-partie-q { font-weight: 700; color: var(--ink); margin-bottom: 10px !important; line-height: 1.5; }
+.ph-partie-aide { margin-top: 10px; }
+.ph-partie-aide .btn-small { color: var(--ink-2); }
+.ph-msg { margin-top: 10px !important; font-size: .92rem; color: var(--ink-2); font-weight: 600; }
+.ph-ok { margin-top: 8px !important; color: var(--success-text); font-weight: 800; }
+.ph-actions-partie { margin-top: 10px; }
+.ph-bilan { margin-top: 16px; }
+.ph-solution { line-height: 1.6; }
+.ph-solution .ph-calc { font-size: 1.02rem; line-height: 1.9; }
+.ph-question .er-consigne { margin-bottom: 8px !important; }
+
+/* Choix */
+.ph-choix { display: flex; flex-wrap: wrap; gap: 8px; }
+.ph-choix-col { flex-direction: column; align-items: stretch; }
+.ph-choix button { min-height: 46px; text-align: left; line-height: 1.4; border-radius: 16px; padding: 10px 18px; }
+.ph-choix button:disabled { cursor: default; opacity: 1; }
+.ph-choix button.juste { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); color: var(--success-text); }
+.ph-choix button.faux { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+.ph-choix svg { display: block; width: 150px; max-width: 100%; height: auto; }
+
+/* Valeur numérique */
+.ph-valeur { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.ph-lab { font-size: 1.15rem; font-weight: 800; color: var(--ink); white-space: nowrap; }
+.ph-unite { font-size: 1.1rem; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.ph-champ-box { display: inline-flex; align-items: center; gap: 4px; }
+.ph-champ {
+  width: 120px; font: inherit; font-size: 1.15rem; font-weight: 800; text-align: center; padding: 9px 8px;
+  border: none; border-radius: 12px; box-shadow: inset 0 0 0 1.5px var(--paper-3); background: var(--sheet); color: var(--ink);
+  -webkit-appearance: none; appearance: none;
+}
+.ph-champ:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.ph-champ:disabled { background: var(--paper); color: var(--ink); -webkit-text-fill-color: var(--ink); opacity: 1; }
+.ph-champ-box.petit .ph-champ { width: 78px; font-size: 1.05rem; padding: 8px 6px; }
+.ph-pm {
+  width: 38px; height: 42px; flex-shrink: 0; border: none; border-radius: 12px; cursor: pointer;
+  background: var(--paper); color: var(--ink); font: inherit; font-size: 1.1rem; font-weight: 800;
+}
+.ph-pm:disabled { opacity: .35; cursor: default; }
+.ph-champ-box.petit .ph-pm { width: 32px; height: 38px; font-size: 1rem; }
+.ph-sci { display: inline-flex; align-items: flex-start; flex-wrap: nowrap; gap: 3px; max-width: 100%; }
+.ph-sci .ph-champ-box.petit .ph-champ { width: 74px; }
+.ph-x10 { font-size: 1.15rem; font-weight: 800; align-self: center; white-space: nowrap; }
+.ph-exposant { margin-top: -16px; }
+.ph-exposant .ph-champ { width: 58px; font-size: 16px; padding: 6px 4px; }
+.ph-exposant .ph-pm { width: 30px; height: 34px; font-size: .95rem; }
+@media (max-width: 400px) {
+  .ph-champ-box.petit .ph-champ, .ph-sci .ph-champ-box.petit .ph-champ { width: 64px; }
+  .ph-exposant .ph-champ { width: 48px; }
+  .ph-champ-box.petit .ph-pm { width: 28px; }
+  .ph-exposant .ph-pm { width: 26px; }
+  .ph-x10 { font-size: 1.05rem; }
+}
+
+/* ---------- Graphiques ---------- */
+.ph-graphe { display: block; width: 100%; height: auto; max-width: 640px; margin: 8px auto; touch-action: pan-y; }
+.ph-grille { stroke: var(--paper-3); stroke-width: 1; stroke-dasharray: 3 4; }
+.ph-axe { stroke: var(--ink); stroke-width: 1.6; }
+.ph-fleche { fill: var(--ink); }
+.ph-graduation { font: 600 13px var(--font-sans); fill: var(--ink-2); }
+.ph-axe-nom { font: 700 14px var(--font-sans); fill: var(--ink); }
+.ph-courbe { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linejoin: round; }
+.ph-pointille { stroke: var(--accent-ink); stroke-width: 1.5; stroke-dasharray: 6 5; }
+.ph-point { fill: var(--accent-ink); }
+.ph-point-mobile { fill: var(--sheet); stroke: var(--accent-ink); stroke-width: 3; }
+.ph-lecture { stroke: var(--accent-ink); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.ph-zone-rouge { fill: var(--danger-bg); }
+.ph-theo { stroke: var(--danger); stroke-width: 2; stroke-dasharray: 7 5; fill: none; }
+.ph-mesure { fill: none; stroke: var(--accent-ink); stroke-width: 2.5; }
+.ph-croix { stroke: var(--accent-ink); stroke-width: 2.5; }
+.ph-txt-rouge { font: 700 13px var(--font-sans); fill: var(--danger-text); }
+.ph-txt-bleu { font: 700 13px var(--font-sans); fill: var(--accent-ink); }
+.ph-curseur { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+.ph-curseur input[type="range"] { flex: 1; min-width: 200px; accent-color: var(--accent); height: 32px; }
+.ph-lecture-txt { background: var(--sheet); border-radius: 14px; padding: 8px 14px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 220px; text-align: center; }
+.ph-mini-graphe { display: block; }
+
+/* ---------- Exercices (module 6) ---------- */
+.ph-ex-groupe { margin-bottom: 18px; }
+.ph-ex-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; }
+.ph-ex-carte {
+  display: flex; align-items: center; gap: 12px; text-align: left; width: 100%;
+  background: var(--paper); border: none; border-radius: 18px; padding: 14px 16px; cursor: pointer; font: inherit; color: var(--ink);
+  transition: background .15s;
+}
+.ph-ex-carte:hover { background: var(--paper-2); }
+.ph-ex-num { flex-shrink: 0; min-width: 40px; height: 40px; border-radius: 999px; display: grid; place-items: center; background: var(--cle-bg); color: var(--accent-ink); font-weight: 800; font-size: .85rem; padding: 0 6px; }
+.ph-ex-carte.fait .ph-ex-num { background: var(--success-bg); color: var(--success-text); }
+.ph-ex-titre { font-weight: 800; line-height: 1.25; }
+.ph-ex-desc { font-size: .85rem; color: var(--ink-2); margin-top: 2px; line-height: 1.35; }
+.ph-ex-score { font-size: .78rem; font-weight: 700; color: var(--success-text); margin-top: 3px; }
+.ph-contexte { background: var(--cle-bg); border-color: var(--cle-line); }
+.ph-contexte .er-contexte { color: var(--ink); }
+.ph-donnees { margin-top: 8px !important; font-size: .92rem; color: var(--ink-2); line-height: 1.55; }
+.ph-ex-nav { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; }
+.ph-retour-liste { border: none; background: none; font: 700 .9rem var(--font-sans); color: var(--ink-2); cursor: pointer; padding: 6px 0; }
+.ph-retour-liste:hover { color: var(--ink); }
+/* ---------- Saisies propres à l'application ---------- */
+.ph-partie-fig:empty, .ph-atoi-fig:empty { display: none; }
+.ph-partie-fig, .ph-atoi-fig { margin: 4px 0 10px; }
+.ph-champ-box.ko .ph-champ { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); }
+
+/* expression à trous */
+.pa2-gab { gap: 8px 6px; }
+.pa2-gab-txt { font-size: 1.15rem; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.pa2-gab .ph-champ-box.petit .ph-champ { width: 60px; }
+.pa2-gab-grp { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+@media (max-width: 400px) { .pa2-gab .ph-champ-box.petit .ph-champ { width: 50px; } .pa2-gab { gap: 8px 4px; } }
+
+/* graphiques et figures */
+.pa2-image { margin: 4px 0 12px; }
+.pa2-image img { display: block; width: 100%; max-width: 640px; height: auto; margin: 0 auto; border-radius: 14px; }
+.pa2-fig { display: block; width: 100%; height: auto; margin: 8px auto; }
+.pa2-fig text { font-family: var(--font-sans); }
+.pa2-attention { background: var(--danger-bg); border-radius: 18px; padding: 14px 18px; margin: 12px 0; }
+.pa2-attention .cle-titre { color: var(--danger-text); }
+
+/* « complète ton cours » (exemples du cours trouvés par l'élève) */
+.pa2-complete { margin-top: 8px !important; padding: 8px 12px; border-radius: 12px; background: var(--sheet); font-weight: 600; }
+.pa2-complete b:first-child { color: var(--accent-ink); }
+
+/* fractions sur deux étages (PA2.fr) */
+.fr { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.15; margin: 0 .12em; font-size: .92em; }
+.fr > span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 .2em .05em; }
+.fr > span:last-child { padding: .05em .2em 0; }
+.ph-formule .fr, .ph-calc .fr { font-size: .85em; }
+.racine { white-space: nowrap; }
+.pa2-nobr { white-space: nowrap; display: inline-block; }
+.racine > span { border-top: 1.5px solid currentColor; padding: 0 .15em; margin-left: .05em; }
+
+/* tableaux du cours */
+.pa2-tab { border-collapse: collapse; margin: 10px auto; font-variant-numeric: tabular-nums; }
+.pa2-tab th, .pa2-tab td { border: 1.5px solid var(--paper-3); padding: 7px 12px; text-align: center; }
+.pa2-tab th { background: var(--paper); font-weight: 700; }
+.pa2-tab td.vide { color: var(--ink-3); }
+.pa2-tab tr.inutile td { color: var(--ink-3); background: repeating-linear-gradient(135deg, transparent 0 6px, var(--paper) 6px 12px); }
+.pa2-tab td.trouve { background: var(--success-bg); color: var(--success-text); font-weight: 800; }
+.pa2-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 480px) { .pa2-tab th, .pa2-tab td { padding: 5px 7px; font-size: .92rem; } }
+
+
+/* ---------- cases et étiquettes à placer sur un schéma ---------- */
+.sc-ligne { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 3px 0; }
+.sc-nom { font-weight: 800; font-size: .95rem; white-space: nowrap; }
+.sc-val { display: inline-block; min-width: 54px; padding: 4px 9px; border-radius: 10px; background: var(--cle-bg); color: var(--accent-ink); font-weight: 800; font-size: .95rem; white-space: nowrap; text-align: center; font-variant-numeric: tabular-nums; }
+.sc-val.inconnue { background: var(--sheet); color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); }
+.sc-slot {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 74px; min-height: 42px; padding: 3px;
+  border: 2px dashed var(--ink-3); border-radius: 12px; background: var(--sheet); transition: background .15s, border-color .15s;
+  vertical-align: middle; touch-action: manipulation;
+}
+.sc-slot-ph { color: var(--ink-3); font-weight: 800; padding: 0 6px; }
+.sc-slot:has(.sc-chip) { border-style: solid; border-color: var(--paper-3); }
+.sc-over, .sc-en-choix .sc-slot:hover { background: var(--cle-bg); border-color: var(--accent); }
+.sc-en-choix .sc-slot { border-color: var(--accent); }
+.sc-slot.ok { border-color: var(--success) !important; background: var(--success-bg) !important; }
+.sc-slot.ko { border-color: var(--danger) !important; background: var(--danger-bg) !important; }
+.sc-chip {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 5px 11px;
+  background: var(--sheet); border: 2px solid var(--accent); border-radius: 10px; color: var(--accent-ink);
+  font: 800 .92rem/1.2 var(--font-sans); cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; text-align: center; font-variant-numeric: tabular-nums;
+}
+.sc-chip > span { display: inline; }
+.sc-chip.dragging { opacity: .35; }
+.sc-chip.sc-choisie { background: var(--accent); color: var(--sheet); box-shadow: 0 0 0 3px var(--cle-line); }
+.sc-fini .sc-chip { cursor: default; border-color: var(--success); color: var(--success-text); }
+.sc-slot:focus-visible, .sc-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sc-palette { background: var(--paper); border: 1.5px dashed var(--line-strong); border-radius: 14px; padding: 8px 10px 10px; margin: 6px 0 4px; touch-action: manipulation; }
+.sc-palette-t { font-size: .8rem; font-weight: 700; color: var(--ink-2); margin-bottom: 6px !important; }
+.sc-palette-t span { font-weight: 500; color: var(--ink-2); }
+.sc-palette-liste { display: flex; flex-wrap: wrap; gap: 6px; min-height: 40px; align-items: center; }
+.sc-palette.vide .sc-palette-liste::before { content: 'Toutes les étiquettes sont placées.'; font-size: .85rem; color: var(--ink-2); font-style: italic; }
+.sc-fini .sc-palette { display: none; }
+@media (max-width: 380px) {
+  .sc-slot { min-width: 64px; }
+  .sc-chip { font-size: .85rem; padding: 4px 8px; }
+  .sc-nom { font-size: .88rem; }
+}
+/* palette visible pendant qu'on fait défiler le schéma (téléphone : sous le bandeau) */
+@media (max-width: 899px) {
+  .sc-exo .sc-palette { position: sticky; top: 62px; z-index: 5; }
+}
+
+/* figures dessinées à la largeur disponible (PA2.fig) */
+.pa2-fig { width: 100%; margin: 6px 0 10px; }
+.pa2-fig svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+
+/* ============================================================
+   SCHÉMA DE CONVERSION D'ÉNERGIE (PA2.conv)
+   En ligne sur un écran large, à la verticale sous 600 px.
+   ============================================================ */
+.pa2-cv {
+  display: grid; align-items: center; margin: 10px 0; padding: 12px 8px; background: var(--sheet); border-radius: 16px;
+  border: 1.5px solid var(--paper-3);
+  grid-template-columns: minmax(0, 1fr) minmax(40px, .7fr) auto minmax(40px, .7fr) minmax(0, 1fr);
+  grid-template-areas: "a fa ap fu u" ". . fp . ." ". . p . .";
+}
+.pa2-cv-a { grid-area: a; } .pa2-cv-u { grid-area: u; } .pa2-cv-p { grid-area: p; }
+.pa2-cv-fa { grid-area: fa; } .pa2-cv-fu { grid-area: fu; } .pa2-cv-fp { grid-area: fp; }
+.pa2-cv-ap { grid-area: ap; }
+.pa2-cv-z { text-align: center; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.pa2-cv-t { font-size: .78rem; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; color: var(--ink-2); }
+.pa2-cv-f { font-weight: 700; font-size: .95rem; line-height: 1.3; }
+.pa2-cv-v { font-weight: 800; font-variant-numeric: tabular-nums; }
+.pa2-cv-ap {
+  border: 2px solid var(--ink); border-radius: 14px; padding: 12px 16px; text-align: center; background: var(--cle-bg);
+  min-width: 110px; line-height: 1.3;
+}
+.pa2-cv-eta { margin-top: 4px; font-weight: 700; font-size: .95rem; }
+/* flèches */
+.pa2-cv-fl { position: relative; justify-self: stretch; height: 2.5px; background: var(--ink); margin: 0 4px; }
+.pa2-cv-fl::after { content: ''; position: absolute; right: -2px; top: 50%; transform: translateY(-50%); border: 6px solid transparent; border-left: 10px solid var(--ink); border-right: 0; }
+.pa2-cv-fp { justify-self: center; width: 2.5px; height: 30px; margin: 4px 0; }
+.pa2-cv-fp::after { right: auto; left: 50%; top: auto; bottom: -2px; transform: translateX(-50%); border: 6px solid transparent; border-top: 10px solid var(--ink); border-bottom: 0; }
+.pa2-cv .sc-slot { min-width: 96px; }
+@media (max-width: 600px) {
+  .pa2-cv { grid-template-columns: 1fr 1fr; grid-template-areas: "a a" "fa fa" "ap ap" "fu fp" "u p"; row-gap: 2px; padding: 12px 6px; }
+  .pa2-cv-fl, .pa2-cv-fp { justify-self: center; width: 2.5px; height: 26px; margin: 4px 0; }
+  .pa2-cv-fl::after { right: auto; left: 50%; top: auto; bottom: -2px; transform: translateX(-50%); border: 6px solid transparent; border-top: 10px solid var(--ink); border-bottom: 0; }
+  .pa2-cv-ap { justify-self: center; }
+  .pa2-cv .sc-slot { min-width: 80px; }
+}
+
+/* données de l'énoncé, en liste compacte */
+.pa2-donnees { margin: 6px 0 0; padding-left: 18px; line-height: 1.6; }
+.pa2-fig-leg { text-align: center; font-weight: 600; font-size: .9rem; color: var(--ink-2); margin: -4px 0 10px !important; }
+
+/* ============================================================
+   CHAÎNE DE CONVERSION (PA2.chaine)
+   ============================================================ */
+.pa2-ch { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 4px; margin: 10px 0; padding: 12px 8px; background: var(--sheet); border: 1.5px solid var(--paper-3); border-radius: 16px; }
+.pa2-ch-bloc { border: 2px solid var(--ink); border-radius: 12px; padding: 8px 12px; font-weight: 800; background: var(--cle-bg); text-align: center; line-height: 1.25; }
+.pa2-ch-fl { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 96px; padding: 0 2px; }
+.pa2-ch-nom { font-size: .85rem; font-weight: 700; color: var(--accent-ink); text-align: center; line-height: 1.2; }
+.pa2-ch-tr { position: relative; display: block; width: 100%; min-width: 70px; height: 2.5px; background: var(--ink); }
+.pa2-ch-tr::after { content: ''; position: absolute; right: -2px; top: 50%; transform: translateY(-50%); border: 6px solid transparent; border-left: 10px solid var(--ink); border-right: 0; }
+@media (max-width: 600px) {
+  .pa2-ch { flex-direction: column; }
+  .pa2-ch-fl { flex-direction: row-reverse; gap: 10px; min-width: 0; }
+  .pa2-ch-tr { width: 2.5px; min-width: 0; height: 30px; }
+  .pa2-ch-tr::after { right: auto; left: 50%; top: auto; bottom: -2px; transform: translateX(-50%); border: 6px solid transparent; border-top: 10px solid var(--ink); border-bottom: 0; }
+}
+
+/* ---------- tableau de proportionnalité (unités en tête de ligne) ---------- */
+.pa2-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+.pa2-prop-tab { border-collapse: collapse; margin: 6px 0; font-variant-numeric: tabular-nums; }
+.pa2-prop-tab th, .pa2-prop-tab td { border: 1.5px solid var(--paper-3); padding: 6px 12px; text-align: center; white-space: nowrap; font-weight: 700; min-width: 70px; }
+.pa2-prop-tab th { background: var(--paper); font-weight: 800; color: var(--accent-ink); border-right: 2.5px solid var(--ink); }
+.pa2-prop-tab tr:first-child td, .pa2-prop-tab tr:first-child th { border-bottom: 2.5px solid var(--ink); }
+.pa2-prop-tab td.pa2-prop-inc { color: var(--accent); font-size: 1.2rem; font-weight: 900; }
+.pa2-prop-tab .ph-champ-box.petit .ph-champ { width: 86px; }
+.pa2-croix { color: var(--accent-ink); font-weight: 800; }
+
+/* ---------- assemblage de cellules (PA2.partieAssemblage) ---------- */
+.pa2-as-cmd { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-bottom: 8px; }
+.pa2-as-b { display: inline-flex; align-items: center; gap: 6px; background: var(--paper); border-radius: 999px; padding: 4px 6px 4px 14px; }
+.pa2-as-nom { font-weight: 800; font-size: .92rem; }
+.pa2-as-v { min-width: 28px; text-align: center; font-weight: 800; font-size: 1.1rem; color: var(--accent-ink); font-variant-numeric: tabular-nums; }
+.pa2-as-pas {
+  width: 46px; height: 42px; border: none; border-radius: 999px; background: var(--sheet); color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 800 1.15rem var(--font-sans); cursor: pointer;
+}
+.pa2-as-pas:hover:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.pa2-as-pas:disabled { opacity: .35; cursor: default; }
+.pa2-as-pas:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pa2-as-fig { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.pa2-as-fig svg { display: block; max-width: 100%; height: auto; font-family: var(--font-sans); }
+.pa2-as-fil { stroke: var(--ink); stroke-width: 2; }
+.pa2-as-cel { fill: var(--cle-bg); stroke: var(--accent); stroke-width: 2; }
+.pa2-as-borne { fill: var(--accent); }
+.pa2-as-t { font: 700 11.5px var(--font-sans); fill: var(--accent-ink); }
+.pa2-as-pol { font: 800 18px var(--font-sans); fill: var(--ink); }
+.pa2-as-res { display: flex; flex-wrap: wrap; gap: 6px 10px; margin-top: 8px; font-variant-numeric: tabular-nums; }
+.pa2-as-res span { background: var(--paper); border-radius: 999px; padding: 5px 12px; font-size: .95rem; }
+.pa2-as-res b { color: var(--accent-ink); }
+
+/* ---------- batteries dessinées (PA2.batterie) ---------- */
+.pa2-batt { font-family: var(--font-sans); }
+.pa2-b-dessus { fill: var(--paper-2); stroke: var(--ink-2); stroke-width: 1.6; }
+.pa2-b-face { fill: var(--ink-2); stroke: var(--ink); stroke-width: 1.6; }
+.pa2-b-etiq { fill: var(--sheet); stroke: var(--paper-3); stroke-width: 1; }
+.pa2-b-t { font: 800 16px var(--font-sans); fill: var(--ink); }
+.pa2-b-cel { fill: var(--sheet); stroke: var(--ink-3); stroke-width: 1.4; }
+.pa2-b-borne { fill: var(--ink-2); }
+.pa2-b-pont { stroke: var(--accent); stroke-width: 5; stroke-linecap: round; fill: none; }
+.pa2-b-pol { font: 800 15px var(--font-sans); fill: var(--ink); }
+/* tableau des technologies d'accumulateurs */
+.pa2-technos td.pa2-usage { white-space: normal; min-width: 180px; text-align: left; font-size: .9rem; }
+.pa2-note { font-size: .85rem; color: var(--ink-2); margin-top: 6px !important; line-height: 1.45; }
+/* « OU » entre deux méthodes */
+.pa2-ou { text-align: center; font-weight: 900; letter-spacing: .08em; color: var(--accent); margin: 10px 0 !important; }

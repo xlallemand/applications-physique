@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions sur la résistance thermique — Chapitre 5 : Flux et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="tt.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="tt.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : flux Φ = ΔT / R (3), résistance
+   R = e / (λ S) avec conversions (3), isoler R, λ ou e (2), juger
+   l'isolation : matériau le plus isolant d'un tableau, effet de e (2).
+   Erreurs diagnostiquées : e laissée en cm ou en mm, ΔT mal calculé
+   avec des températures négatives, λ et R confondus pour juger de
+   l'isolation, rapports inversés.
+   ============================================================ */
+const { o, fq, fmt, fr, sci, cs, hasard, melanger, proche, MATERIAUX } = TT;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+const KW = 'K·W<sup>−1</sup>', LAM = 'W·m<sup>−1</sup>·K<sup>−1</sup>';
+
+/* ---------- Groupe 1 : flux ---------- */
+const G1 = [
+  function flux() {
+    const [d, R] = hasard([[15, 5], [20, 0.5], [14, 0.07], [12, 0.072], [25, 2.5], [17, 5.3], [20, 0.059]]);
+    return { theme: 'Flux à travers une paroi', enonce: `<p>L'écart de température entre les deux faces d'une paroi est de ${d} °C. Sa résistance thermique est R<sub>th</sub> = ${fmt(R)} ${KW}.</p>`,
+      parties: [fq.nombre('Calcule le flux thermique (3 chiffres significatifs).', 'Φ =', d / R, 'W', { signe: false, rel: .01, affiche: fmt(r3(d / R)),
+        diag: v => proche(v, d * R, .02) ? 'Φ = ΔT / R : on divise par R.' : proche(v, R / d, .02) ? 'Rapport inversé : Φ = ΔT / R.' : 'Φ = ΔT / R.',
+        solution: calc(`Φ = ${fr('ΔT', 'R<sub>th</sub>')} = ${fr(d, fmt(R))} ≈ ${c(fmt(r3(d / R)) + ' W')}`) })] };
+  },
+  function fluxNeg() {
+    const [a, b, R] = hasard([[-3, -20, 0.022], [19, -6, 0.25], [20, -2, 0.32], [-5, -18, 0.04], [18, -7, 0.5], [21, -4, 0.1]]);
+    return { theme: 'Flux à travers une paroi', enonce: `<p>Intérieur à ${fmt(a)} °C, extérieur à ${fmt(b)} °C. La paroi a une résistance thermique de ${fmt(R)} ${KW}.</p>`,
+      parties: [fq.nombre('Calcule l\'écart de température ΔT.', 'ΔT =', a - b, 'K', { tol: .01,
+          diag: v => proche(v, Math.abs(a + b)) || proche(v, Math.abs(Math.abs(a) - Math.abs(b))) ? `Soustraire un nombre négatif, c'est ajouter son opposé : ${fmt(a)} − (${fmt(b)}) = ${fmt(a)} + ${-b}.` : 'ΔT = T<sub>chaud</sub> − T<sub>froid</sub>.', solution: calc(`ΔT = ${fmt(a)} − (${fmt(b)}) = ${c(fmt(a - b) + ' K')}`) }),
+        fq.nombre('Calcule le flux thermique (3 chiffres significatifs).', 'Φ =', (a - b) / R, 'W', { signe: false, rel: .01, affiche: fmt(r3((a - b) / R)),
+          diag: v => proche(v, (a - b) * R, .02) ? 'Φ = ΔT / R : on divise.' : 'Φ = ΔT / R.', solution: calc(`Φ = ${fr(fmt(a - b), fmt(R))} ≈ ${c(fmt(r3((a - b) / R)) + ' W')}`) })] };
+  },
+  function sensEte() {
+    const [a, b, R] = hasard([[22, 35, 3.33], [24, 31, 1.4], [20, 36, 0.8]]);
+    return { theme: 'Flux à travers une paroi', enonce: `<p>En été : intérieur à ${a} °C, extérieur à ${b} °C. La paroi a une résistance thermique de ${fmt(R)} ${KW}.</p>`,
+      parties: [fq.nombre('Calcule le flux thermique (2 chiffres significatifs).', 'Φ =', (b - a) / R, 'W', { signe: false, rel: .03, affiche: cs((b - a) / R, 2),
+          diag: v => proche(-v, (b - a) / R, .03) ? 'Un flux se donne positif : ΔT = T<sub>chaud</sub> − T<sub>froid</sub>, ici l\'extérieur est le plus chaud.' : 'Φ = ΔT / R avec ΔT = T<sub>chaud</sub> − T<sub>froid</sub>.',
+          solution: calc(`Φ = ${fr(b + ' − ' + a, fmt(R))} ≈ ${c(cs((b - a) / R, 2) + ' W')}`) }),
+        fq.choix('Dans quel sens se fait ce transfert ?', [o('ok', 'de l\'extérieur vers l\'intérieur'), o('a', 'de l\'intérieur vers l\'extérieur')], 'ok',
+          { melanger: false, indices: { a: 'Le transfert va du chaud vers le froid : ici, l\'extérieur est le plus chaud.' }, solution: '<p>Du chaud (l\'extérieur) vers le froid (l\'intérieur).</p>' })] };
+  },
+];
+
+/* ---------- Groupe 2 : résistance thermique ---------- */
+const G2 = [
+  function Rcm() {
+    const [e, l, S] = hasard([[20, 0.04, 70], [10, 1.28, 10], [50, 2.2, 10], [2, 0.039, 10], [5, 0.035, 1], [10, 0.03, 28.8], [4, 0.23, 1.6]]);
+    const R = e / 100 / (l * S);
+    return { theme: 'Résistance thermique', enonce: `<p>Une couche de ${e} cm d'épaisseur, de conductivité thermique λ = ${fmt(l)} ${LAM}, a une surface de ${fmt(S)} m<sup>2</sup>.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule sa résistance thermique (2 chiffres significatifs).', label: 'R<sub>th</sub> =', valeur: R, unite: KW, cs: 2, rel: .05,
+        diag: v => proche(v, R * 100, .03) ? `L'épaisseur doit être en mètres : ${e} cm = ${fmt(e / 100)} m.` : proche(v, e / 100 * l * S, .03) || proche(v, e / 100 * l / S, .03) || proche(v, e / 100 * S / l, .03) ? 'R = e / (λ × S) : λ et S sont au dénominateur.' : 'R = e / (λ × S), e en m.',
+        solution: calc(`R<sub>th</sub> = ${fr('e', 'λ × S')} = ${fr(fmt(e / 100) + ' m', fmt(l) + ' × ' + fmt(S))} ≈ ${c(sci(R, 2) + ' ' + KW)}`) }] };
+  },
+  function Rmm() {
+    const [e, l, S] = hasard([[4, 0.81, 1], [12, 1, 1.8], [4, 0.17, 1.8], [13, 0.35, 70], [12.5, 0.31, 28.8], [16, 0.025, 2]]);
+    const R = e / 1000 / (l * S);
+    return { theme: 'Résistance thermique', enonce: `<p>Une plaque de ${fmt(e)} mm d'épaisseur, de conductivité λ = ${fmt(l)} ${LAM}, a une surface de ${fmt(S)} m<sup>2</sup>.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule sa résistance thermique (2 chiffres significatifs).', label: 'R<sub>th</sub> =', valeur: R, unite: KW, cs: 2, rel: .05,
+        diag: v => proche(v, R * 1000, .03) ? `Convertis : ${fmt(e)} mm = ${fmt(e / 1000)} m.` : proche(v, R * 10, .03) ? '1 mm = 10<sup>−3</sup> m.' : 'R = e / (λ × S), e en m.',
+        solution: calc(`R<sub>th</sub> = ${fr(fmt(e) + ' × 10<sup>−3</sup>', fmt(l) + ' × ' + fmt(S))} ≈ ${c(sci(R, 2) + ' ' + KW)}`) }] };
+  },
+  function Rcm2() {
+    const [l, nom] = hasard([[390, 'cuivre'], [50, 'acier'], [200, 'aluminium']]);
+    const R = 0.005 / (l * 0.01);
+    return { theme: 'Résistance thermique', enonce: `<p>Une plaque de ${nom} (λ = ${l} ${LAM}) a une surface de 100 cm<sup>2</sup> et une épaisseur de 5 mm.</p>`,
+      parties: [fq.nombre('Convertis la surface en m<sup>2</sup>.', 'S =', 0.01, 'm<sup>2</sup>', { signe: false,
+          diag: v => proche(v, 1) ? '1 m<sup>2</sup> = 10 000 cm<sup>2</sup> (et non 100).' : proche(v, 0.0001) ? '100 cm<sup>2</sup> = 100 × 10<sup>−4</sup> m<sup>2</sup>.' : '1 cm<sup>2</sup> = 10<sup>−4</sup> m<sup>2</sup>.', solution: calc(`S = 100 × 10<sup>−4</sup> = ${c('0,01 m<sup>2</sup>')}`) }),
+        { type: 'sci', q: 'Calcule sa résistance thermique (2 chiffres significatifs).', label: 'R<sub>th</sub> =', valeur: R, unite: KW, cs: 2, rel: .05,
+          diag: v => proche(v, R * 1000, .03) ? 'Convertis l\'épaisseur en m : 5 mm = 5 × 10<sup>−3</sup> m.' : 'R = e / (λ × S), e en m et S en m<sup>2</sup>.',
+          solution: calc(`R<sub>th</sub> = ${fr('5 × 10<sup>−3</sup>', l + ' × 0,01')} ≈ ${c(sci(R, 2) + ' ' + KW)}`) }] };
+  },
+];
+
+/* ---------- Groupe 3 : isoler une grandeur ---------- */
+const G3 = [
+  function lam() {
+    const [e, d, P, S] = hasard([[4, 3, 27.6, 1.6], [10, 20, 40, 5], [5, 17, 12, 1], [2, 14, 100, 2]]);
+    const R = d / P, L = e / 100 / (R * S);
+    return { theme: 'Conductivité d\'un matériau', enonce: `<p>Une plaque de ${e} cm d'épaisseur et de ${fmt(S)} m<sup>2</sup> sépare deux milieux dont l'écart de température est de ${d} °C. Le flux qui la traverse vaut ${fmt(P)} W.</p>`,
+      parties: [fq.nombre('Calcule sa résistance thermique (3 chiffres significatifs).', 'R<sub>th</sub> =', R, KW, { signe: false, rel: .01, affiche: cs(R, 3),
+          diag: v => proche(v, P / d, .02) ? 'R = ΔT / Φ.' : 'Φ = ΔT / R donc R = ΔT / Φ.', solution: calc(`R = ${fr('ΔT', 'Φ')} = ${fr(d, fmt(P))} ≈ ${c(cs(R, 3) + ' ' + KW)}`) }),
+        fq.nombre('Calcule la conductivité λ du matériau (2 chiffres significatifs).', 'λ =', L, LAM, { signe: false, rel: .03, affiche: cs(L, 2),
+          diag: v => proche(v, L * 100, .03) ? 'L\'épaisseur doit être en mètres.' : proche(v, R * S / (e / 100), .03) ? 'Rapport inversé : λ = e / (R × S).' : 'R = e / (λ × S) donc λ = e / (R × S).',
+          solution: calc(`λ = ${fr('e', 'R × S')} = ${fr(fmt(e / 100), cs(R, 3) + ' × ' + fmt(S))} ≈ ${c(cs(L, 2) + ' ' + LAM)}`) })] };
+  },
+  function epaisseur() {
+    const [R, l, S, nom] = hasard([[0.109, 0.15, 1.6, 'pin maritime'], [0.7, 0.04, 10, 'laine de verre'], [1.5, 0.035, 2, 'laine de mouton'], [0.5, 0.03, 4, 'polystyrène']]);
+    const e = R * l * S;
+    return { theme: 'Épaisseur d\'une paroi', enonce: `<p>On veut une paroi de ${nom} (λ = ${fmt(l)} ${LAM}) de ${fmt(S)} m<sup>2</sup> et de résistance thermique ${fmt(R)} ${KW}.</p>`,
+      parties: [fq.nombre('Quelle épaisseur faut-il, en mm (arrondie au mm) ?', 'e =', e * 1000, 'mm', { signe: false, tol: 1,
+        diag: v => proche(v, e, .03) ? 'C\'est en mètres : convertis en mm (× 1 000).' : proche(v, R / (l * S) * 1000, .03) ? 'e = R × λ × S : on multiplie.' : 'R = e / (λ × S) donc e = R × λ × S.',
+        solution: calc(`e = R × λ × S = ${fmt(R)} × ${fmt(l)} × ${fmt(S)} ≈ ${fmt(+e.toFixed(4))} m = ${c(Math.round(e * 1000) + ' mm')}`) })] };
+  },
+];
+
+/* ---------- Groupe 4 : juger l'isolation ---------- */
+const G4 = [
+  function tableau() {
+    const l = melanger([['pin maritime', 0.15], ['liège expansé', 0.043], ['contreplaqué', 0.2], ['chêne', 0.23], ['béton', 1.28], ['plâtre', 0.35], ['laine de verre', 0.04], ['brique', 1.15]]).slice(0, 4);
+    const best = l.reduce((a, b) => (b[1] < a[1] ? b : a)), worst = l.reduce((a, b) => (b[1] > a[1] ? b : a));
+    return { theme: 'Le meilleur isolant', enonce: `<div class="ph-defile"><table class="ph-tableau"><tr><th>Matériau</th>${l.map(x => `<th>${x[0]}</th>`).join('')}</tr><tr><td>λ (${LAM})</td>${l.map(x => `<td>${fmt(x[1])}</td>`).join('')}</tr></table></div>`,
+      parties: [fq.choix('Quel est le matériau le plus isolant ?', l.map(x => o(x[0], x[0])), best[0],
+        { melanger: false, indices: { [worst[0]]: 'C\'est le plus grand λ : ce matériau conduit le mieux l\'énergie, c\'est le moins isolant.' }, indice: 'Le plus isolant a la plus <b>petite</b> conductivité thermique λ.',
+          solution: `<p>${best[0]} : sa conductivité λ = ${fmt(best[1])} ${LAM} est la plus petite.</p>` })] };
+  },
+  function doubler() {
+    const [quoi, bon, sol] = hasard([
+      ['l\'épaisseur e', 'd2', 'R = e / (λ S) double, donc Φ = ΔT / R est divisé par 2.'],
+      ['la surface S', 'x2', 'R = e / (λ S) est divisée par 2, donc Φ = ΔT / R double.'],
+      ['l\'écart de température ΔT', 'x2', 'R ne change pas ; Φ = ΔT / R double.'],
+    ]);
+    return { theme: 'Raisonner', parties: [fq.choix(`On double ${quoi} d'une paroi, sans rien changer d'autre. Que devient le flux thermique ?`, [o('d2', 'il est divisé par 2'), o('x2', 'il est multiplié par 2'), o('eg', 'il ne change pas')], bon,
+      { melanger: false, indice: 'Écris R = e / (λ × S) puis Φ = ΔT / R, et regarde où se trouve la grandeur doublée.', solution: `<p>${sol}</p>` })] };
+  },
+  function Rgrand() {
+    return { theme: 'Raisonner', parties: [fq.choix('Deux parois de même surface : R<sub>A</sub> = 0,5 K·W<sup>−1</sup> et R<sub>B</sub> = 2 K·W<sup>−1</sup>. Laquelle isole le mieux ?', [o('B', 'la paroi B'), o('A', 'la paroi A'), o('eg', 'on ne peut pas savoir sans λ')], 'B',
+      { melanger: false, indices: { A: 'Plus R est grande, plus la paroi résiste au transfert : c\'est l\'inverse de λ.', eg: 'R suffit : elle tient déjà compte de λ, de e et de S.' }, solution: '<p>Plus la résistance thermique est grande, meilleure est l\'isolation : la paroi B (Φ = ΔT / R est 4 fois plus petit).</p>' })] };
+  },
+];
+
+// tirage : 3 + 3 + 2 + 2 questions
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  return pris(G1, 3).concat(pris(G2, 3), pris(G3, 2), pris(G4, 2));
+}
+
+TT.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Résistance thermique d\'une paroi',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : flux Φ = ΔT / R, résistance R = e / (λ × S) avec conversions, calcul de R, λ ou e, choix du meilleur isolant.</p>',
+  questions: tirage,
+  revoir: { href: 'module_3_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4_cours.html', label: 'Module 4 : parois composées →' },
+});
+TT.menu('module_3_questions');
+</script>
+</body>
+</html>

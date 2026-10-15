@@ -401,7 +401,7 @@
       parties: [{ nom: 'La puissance active en exercices', cours: 'module_4_cours', questions: 'module_4_exercices', noms: { questions: 'Exercices' } }] },
   ];
   // (pa.js est chargé après ph.js et lgtools.js : cette configuration remplace la leur)
-  window.SOM.init({ nom: 'Puissance active', id: 'puissance-active', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 3 : Puissances active et apparente', id: 'puissance-active', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
 

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions sur les énergies massique et volumique — Chapitre 2 : Piles et accumulateurs</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pa2.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pa2.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : énergie massique (4, dont une
+   avec le tableau de proportionnalité), énergie volumique (3),
+   volume d'une batterie et comparaison (2), unités (1).
+   Erreurs diagnostiquées : masse en g, dimensions en mm, rapport
+   inversé, multiplication au lieu de division.
+   ============================================================ */
+const { o, fq, fmt, fr, sci, hasard, melanger, proche, partieTableau } = PA2;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+
+/* ---------- Groupe 1 : énergie massique ---------- */
+const G1 = [
+  function energie() {
+    const [Em, mg] = hasard([[130, 20], [100, 45], [150, 30], [80, 25], [200, 40], [60, 150]]), m = mg / 1000;
+    return { theme: 'Énergie massique', enonce: `<p>Une pile de masse ${mg} g a une énergie massique de ${Em} Wh·kg<sup>−1</sup>.</p>`,
+      parties: [fq.nombre('Quelle énergie contient-elle ?', 'E =', Em * m, 'Wh', { signe: false, rel: .01,
+        diag: v => proche(v, Em * mg) ? `Convertis la masse en kg : ${mg} g = ${fmt(m)} kg.` : proche(v, Em / m, .02) || proche(v, m / Em, .02) ? 'E = E<sub>m</sub> × m (Wh/kg × kg = Wh).' : 'E = E<sub>m</sub> × m, avec m en kg.',
+        solution: calc(`m = ${mg} g = ${fmt(m)} kg<br>E = E<sub>m</sub> × m = ${Em} Wh/kg × ${fmt(m)} kg = ${c(fmt(r3(Em * m)) + ' Wh')}`) })] };
+  },
+  function masse() {
+    const [Em, E] = hasard([[50, 5000], [80, 5000], [110, 5000], [250, 5000], [40, 960], [120, 1800]]);
+    return { theme: 'Énergie massique', enonce: `<p>On veut stocker ${fmt(E)} Wh avec des accumulateurs d'énergie massique ${Em} Wh·kg<sup>−1</sup>.</p>`,
+      parties: [fq.nombre('Quelle masse d\'accumulateurs faut-il (3 chiffres significatifs) ?', 'm =', E / Em, 'kg', { signe: false, rel: .01, affiche: fmt(r3(E / Em)),
+        diag: v => proche(v, E * Em, .02) ? 'On divise : m = E / E<sub>m</sub>.' : proche(v, Em / E, .02) ? 'Rapport inversé : m = E / E<sub>m</sub>.' : 'm = E / E<sub>m</sub>.',
+        solution: calc(`E<sub>m</sub> = ${fr('E', 'm')} donc m = ${fr('E', 'E<sub>m</sub>')} = ${fr(fmt(E) + ' Wh', Em + ' Wh/kg')} ≈ ${c(fmt(r3(E / Em)) + ' kg')}`) })] };
+  },
+  function calculEm() {
+    const [E, m] = hasard([[960, 32.6], [1440, 41.7], [36, 0.25], [2.6, 0.02]]);
+    return { theme: 'Énergie massique', enonce: `<p>Une batterie de masse ${fmt(m)} kg stocke une énergie de ${fmt(E)} Wh.</p>`,
+      parties: [fq.nombre('Calcule son énergie massique (3 chiffres significatifs).', 'E<sub>m</sub> =', E / m, 'Wh/kg', { signe: false, rel: .01, affiche: fmt(r3(E / m)),
+        diag: v => proche(v, m / E, .02) ? 'Rapport inversé : E<sub>m</sub> = E / m.' : proche(v, E * m, .02) ? 'On divise : E<sub>m</sub> = E / m.' : 'E<sub>m</sub> = E / m.',
+        solution: calc(`E<sub>m</sub> = ${fr('E', 'm')} = ${fr(fmt(E) + ' Wh', fmt(m) + ' kg')} ≈ ${c(fmt(r3(E / m)) + ' Wh/kg')}`) })] };
+  },
+  function tableau() {
+    const [Em, E] = hasard([[50, 5000], [80, 5000], [110, 5000], [30, 600]]);
+    return { theme: 'Tableau de proportionnalité', enonce: `<p>Quelle masse d'accumulateurs d'énergie massique ${Em} Wh·kg<sup>−1</sup> faut-il pour stocker ${fmt(E)} Wh ?</p>`,
+      parties: [partieTableau({ lignes: [['Wh', { v: Em }, { v: E }], ['kg', 1, '?']], q: 'a. Complète le tableau (unités en tête de ligne).',
+          diag: vs => proche(vs[0], E) && proche(vs[1], Em) ? `${Em} Wh correspondent à 1 kg : ils vont dans la même colonne que le 1.` : '' }),
+        fq.nombre('b. Calcule la case « ? » (produit en croix).', 'm =', E / Em, 'kg', { signe: false, rel: .01, affiche: fmt(r3(E / Em)),
+          diag: v => proche(v, E * Em, .02) ? `Produit en croix : ${fmt(E)} × 1 / ${Em}.` : 'm = (nombre de la diagonale × 1) / le troisième nombre.',
+          solution: calc(`m = ${fr(`${fmt(E)} × 1`, Em)} ≈ ${c(fmt(r3(E / Em)) + ' kg')}`) })] };
+  },
+];
+
+/* ---------- Groupe 2 : énergie volumique ---------- */
+const G2 = [
+  function calculEV() {
+    const [E, V] = hasard([[960, 0.0133], [1440, 0.0216], [500, 0.004], [2400, 0.02]]);
+    return { theme: 'Énergie volumique', enonce: `<p>Une batterie stocke ${fmt(E)} Wh dans un volume de ${fmt(V)} m<sup>3</sup>.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule son énergie volumique.', label: 'E<sub>V</sub> =', valeur: E / V, unite: 'Wh/m<sup>3</sup>', cs: 3, rel: .01,
+        diag: v => proche(v, V / E, .02) ? 'Rapport inversé : E<sub>V</sub> = E / V.' : 'E<sub>V</sub> = E / V.', solution: calc(`E<sub>V</sub> = ${fr(fmt(E) + ' Wh', fmt(V) + ' m<sup>3</sup>')} ≈ ${c(sci(E / V, 3) + ' Wh/m<sup>3</sup>')}`) }] };
+  },
+  function volume() {
+    const [kWh, EV] = hasard([[4, 1.2e5], [6, 2e5], [10, 2.5e5], [3, 1e5]]);
+    return { theme: 'Énergie volumique', enonce: `<p>On veut stocker ${kWh} kWh avec une batterie d'énergie volumique ${sci(EV, 2)} Wh·m<sup>−3</sup>.</p>`,
+      parties: [{ type: 'sci', q: 'Quel volume de batterie faut-il ?', label: 'V =', valeur: kWh * 1000 / EV, unite: 'm<sup>3</sup>', cs: 2, rel: .02,
+        diag: v => proche(v, kWh / EV, .03) ? `Convertis l'énergie en Wh : ${kWh} kWh = ${fmt(kWh * 1000)} Wh.` : proche(v, EV / kWh / 1000, .03) ? 'Rapport inversé : V = E / E<sub>V</sub>.' : 'V = E / E<sub>V</sub>.',
+        solution: calc(`V = ${fr('E', 'E<sub>V</sub>')} = ${fr(fmt(kWh * 1000) + ' Wh', sci(EV, 2) + ' Wh/m<sup>3</sup>')} = ${c(sci(kWh * 1000 / EV, 2) + ' m<sup>3</sup>')}`) }] };
+  },
+  function energieDepuisEV() {
+    const [EV, V] = hasard([[7.2e4, 0.0133], [1.2e5, 0.03], [2e5, 0.005]]);
+    return { theme: 'Énergie volumique', enonce: `<p>Une batterie d'énergie volumique ${sci(EV, 2)} Wh·m<sup>−3</sup> a un volume de ${fmt(V)} m<sup>3</sup>.</p>`,
+      parties: [fq.nombre('Quelle énergie stocke-t-elle (3 chiffres significatifs) ?', 'E =', EV * V, 'Wh', { signe: false, rel: .01, affiche: fmt(r3(EV * V)),
+        diag: v => proche(v, EV / V, .02) || proche(v, V / EV, .02) ? 'E = E<sub>V</sub> × V (Wh/m<sup>3</sup> × m<sup>3</sup> = Wh).' : 'E = E<sub>V</sub> × V.',
+        solution: calc(`E = E<sub>V</sub> × V = ${sci(EV, 2)} × ${fmt(V)} ≈ ${c(fmt(r3(EV * V)) + ' Wh')}`) })] };
+  },
+];
+
+/* ---------- Groupe 3 : volume et comparaison ---------- */
+const G3 = [
+  function pave() {
+    const d = hasard([[330, 171, 235.5], [513, 189, 223], [242, 175, 190], [278, 175, 190]]), V = d.reduce((p, x) => p * x / 1000, 1);
+    return { theme: 'Volume d\'une batterie', enonce: `<p>Une batterie mesure ${d.map(fmt).join(' × ')} mm.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule son volume en m<sup>3</sup>.', label: 'V =', valeur: V, unite: 'm<sup>3</sup>', cs: 3, rel: .01,
+        diag: v => proche(v, V * 1e9, .02) ? 'Ce sont des mm<sup>3</sup> : convertis d\'abord chaque dimension en mètres.' : proche(v, V * 1e6, .02) ? 'Ce sont des cm<sup>3</sup> : convertis les dimensions en mètres.' : 'Chaque dimension en m (÷ 1 000), puis V = L × l × h.',
+        solution: calc(`V = ${d.map(x => fmt(x / 1000)).join(' × ')} ≈ ${c(sci(V, 3) + ' m<sup>3</sup>')}`) }] };
+  },
+  function comparer() {
+    const quoi = hasard(['m', 'V']);
+    const [a, b] = quoi === 'm' ? hasard([[29.4, 34.5], [40, 25], [110, 150]]) : hasard([[7.22e4, 6.67e4], [1.2e5, 2e5]]);
+    const u = quoi === 'm' ? 'Wh/kg' : 'Wh/m<sup>3</sup>', g = quoi === 'm' ? 'massique' : 'volumique';
+    const ff = v => (v > 1e4 ? sci(v, 3) : fmt(v));
+    return { theme: 'Comparer deux batteries', enonce: `<p>Batterie A : énergie ${g} ${ff(a)} ${u} ; batterie B : ${ff(b)} ${u}.</p>`,
+      parties: [fq.choix(`Pour stocker la même énergie, quelle batterie est la plus ${quoi === 'm' ? 'légère' : 'compacte (la moins encombrante)'} ?`, [o('A', 'la batterie A'), o('B', 'la batterie B')], a > b ? 'A' : 'B',
+        { melanger: false, indice: `Plus l'énergie ${g} est grande, moins il faut de ${quoi === 'm' ? 'kilogrammes' : 'mètres cubes'} pour la même énergie.`, solution: `<p>La batterie ${a > b ? 'A' : 'B'} a la plus grande énergie ${g}.</p>` })] };
+  },
+];
+
+/* ---------- Groupe 4 : unités ---------- */
+function unites() {
+  const q = hasard([
+    ['Quelle est l\'unité de l\'énergie massique ?', 'Wh/kg', ['Wh', 'kg/Wh', 'Wh/m<sup>3</sup>'], 'Énergie par kilogramme : Wh/kg (Wh·kg<sup>−1</sup>).'],
+    ['Quelle est l\'unité de l\'énergie volumique ?', 'Wh/m<sup>3</sup>', ['Wh/kg', 'm<sup>3</sup>/Wh', 'Wh'], 'Énergie par mètre cube : Wh/m<sup>3</sup> (Wh·m<sup>−3</sup>).'],
+  ]);
+  return { theme: 'Unités', parties: [fq.choix(q[0], [o('ok', q[1])].concat(q[2].map((f, i) => o('f' + i, f))), 'ok', { indice: 'C\'est une énergie divisée par une masse ou par un volume.', solution: `<p>${q[3]}</p>` })] };
+}
+
+// tirage : 4 + 3 + 2 + 1 questions
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  return pris(G1, 4).concat(pris(G2, 3), pris(G3, 2), [unites()]);
+}
+
+PA2.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Énergies massique et volumique',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : énergie, masse ou volume à partir de l\'énergie massique ou volumique, volume d\'une batterie, comparaison de deux batteries. Méthode au choix : unités, tableau de proportionnalité ou formule.</p>',
+  questions: tirage,
+  revoir: { href: 'module_3_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4_cours.html', label: 'Module 4 : branchements →' },
+});
+PA2.menu('module_3_questions');
+</script>
+</body>
+</html>
