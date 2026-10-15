@@ -19,7 +19,7 @@
   <div class="er-card">
     <span class="er-badge">MODULE 2 · COURS</span>
     <h2 class="er-titre">Flux thermique</h2>
-    <p class="er-contexte">Le <b>flux thermique</b> Φ indique quelle énergie traverse une paroi chaque seconde : c'est une <b>puissance</b>, en watts. Tu vas le calculer, puis calculer l'<b>énergie</b> transférée pendant une durée donnée.</p>
+    <p class="er-contexte">Le <b>flux thermique</b> Φ, c'est une <b>puissance</b> : l'énergie qui traverse une paroi chaque seconde, en watts. Ses formules, tu les connais déjà : ce sont <b>P = E / Δt</b> et <b>E = P × Δt</b>. Seul le vocabulaire change : P devient Φ et E devient Q. Tu vas calculer un flux, puis l'<b>énergie</b> transférée pendant une durée donnée.</p>
   </div>
   <div id="etapes"></div>
 </div>
@@ -27,6 +27,8 @@
 <script>
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Lien avec le chapitre 1 : Φ = Q / Δt et Q = Φ × Δt sont P = E / Δt
+   et E = P × Δt, seul le vocabulaire change (le flux est une puissance).
    Φ = Q / Δt (Φ en W, Q en J, Δt en s) ; conversions de durée
    (1 h 15 = 3 600 + 15 × 60 = 4 500 s) et d'énergie (kJ, MJ) ;
    Q = Φ × Δt en J (Δt en s) ou en Wh (Δt en h).
@@ -37,22 +39,36 @@ const { fr, proche, o } = TT;
 const c = h => `<span class="c">${h}</span>`;
 const r3 = v => +v.toPrecision(3);
 const hm = (h, m) => (h ? h + ' h' : '') + (m ? (h ? ' ' : '') + m + ' min' : '');
+const QCM = (titre, enonce, q, options, bonne, indices, solution) => ({ titre, enonce, parties: [{ type: 'choix', q, options, bonne, indices, solution, colonne: true }] });
+// tableau « énergie et puissance (chapitre 1) → transfert thermique » : mêmes formules, autres noms
+const LIEN = `<table class="tt-lien"><tr><th>Énergie et puissance (chapitre 1)</th><th>Transfert thermique</th></tr>
+  <tr><td>puissance <b>P</b>, en W</td><td>flux thermique <b>Φ</b>, en W</td></tr>
+  <tr><td>énergie <b>E</b>, en J</td><td>énergie thermique <b>Q</b>, en J</td></tr>
+  <tr><td>P = ${fr('E', 'Δt')}</td><td>Φ = ${fr('Q', 'Δt')}</td></tr>
+  <tr><td>E = P × Δt</td><td>Q = Φ × Δt</td></tr></table>`;
 
 /* ---------- 1. Le flux thermique ---------- */
 function etape1(c_) {
   const carte = c_.carte('1. Le flux thermique : Φ = Q / Δt');
   c_.ajouter(carte, `<div class="cours-bloc">
-      <p>Une énergie thermique Q traverse une paroi pendant une durée Δt. Le <b>flux thermique</b> Φ (lettre grecque « phi ») est l'énergie qui la traverse par seconde : c'est la <b>puissance thermique</b> qui traverse la paroi.</p>
+      <p>Tu connais déjà la <b>puissance</b> : c'est une énergie par seconde, P = E / Δt. Une lampe de 50 W reçoit 50 J chaque seconde.</p>
+      <p>Une énergie thermique Q traverse une paroi pendant une durée Δt. L'énergie qui la traverse par seconde est donc aussi une puissance : on l'appelle le <b>flux thermique</b> Φ (lettre grecque « phi »). <b>Les formules sont les mêmes, seuls les noms changent :</b></p>
+      <div class="cle">${LIEN}<p>Le flux thermique <b>est une puissance</b> : la puissance thermique qui traverse la paroi.</p></div>
       <div class="cle"><p class="crs-formule">Φ = ${fr('Q', 'Δt')}</p><p>Φ en <b>watts</b> (W), Q en <b>joules</b> (J), Δt en <b>secondes</b> (s).</p></div>
     </div>
     ${exemple(`<p>Une paroi laisse passer 180 kJ en une heure.</p>
-      <p class="crs-calc">Q = 180 kJ = 180 000 J ; Δt = 1 h = 3 600 s<br>Φ = ${fr('Q', 'Δt')} = ${fr('180 000 J', '3 600 s')} = <span class="c">50 W</span></p>`)}`);
+      <p class="crs-calc">Q = 180 kJ = 180 000 J ; Δt = 1 h = 3 600 s<br>Φ = ${fr('Q', 'Δt')} = ${fr('180 000 J', '3 600 s')} = <span class="c">50 W</span></p>
+      <p>50 J traversent la paroi chaque seconde : comme la lampe de 50 W, c'est une puissance de 50 W.</p>`)}`);
   const [Q1, t1] = hasard([[6000, 120], [18000, 600], [24000, 300], [9000, 60]]);
   const [Q2, m2] = hasard([[360, 10], [720, 30], [90, 5], [540, 15]]);
   c_.aToi(carte, [
+    QCM('Même formule, autres noms', '', 'Φ = Q / Δt correspond à quelle formule que tu connais déjà ?',
+      [o('ok', 'P = E / Δt'), o('a', 'E = P × Δt'), o('b', 'P = U × I'), o('c', 'v = d / Δt')], 'ok',
+      { a: 'E = P × Δt donne une énergie : elle correspond à Q = Φ × Δt.', b: 'P = U × I est la puissance électrique ; Φ = Q / Δt relie une énergie et une durée.', c: 'v = d / Δt est une distance par seconde ; Φ est une énergie par seconde.' },
+      `<p>Φ = Q / Δt, c'est P = E / Δt avec d'autres noms : le flux Φ est une puissance, Q est une énergie.</p>`),
     { titre: 'Un calcul direct', enonce: `<p>Une énergie Q = ${fmt(Q1)} J traverse une fenêtre en Δt = ${t1} s.</p>`,
       parties: [{ type: 'nombre', q: 'Calcule le flux thermique.', label: 'Φ =', valeur: Q1 / t1, unite: 'W', signe: false,
-        diag: v => proche(v, t1 / Q1) ? 'Rapport inversé : Φ = Q / Δt.' : proche(v, Q1 * t1) ? 'On divise : Φ = Q / Δt.' : 'Φ = Q / Δt.',
+        diag: v => proche(v, t1 / Q1) ? 'Rapport inversé : Φ = Q / Δt.' : proche(v, Q1 * t1) ? 'On divise : Φ = Q / Δt, comme P = E / Δt.' : 'Φ = Q / Δt, comme P = E / Δt.',
         solution: `<p class="crs-calc">Φ = ${fr(fmt(Q1) + ' J', t1 + ' s')} = ${c(fmt(Q1 / t1) + ' W')}</p>` }] },
     { titre: 'Des kilojoules et des minutes', enonce: `<p>Un mur laisse passer Q = ${Q2} kJ en ${m2} min.</p>`,
       parties: [{ type: 'nombre', q: 'Convertis la durée en secondes.', label: 'Δt =', valeur: m2 * 60, unite: 's', signe: false,
@@ -93,22 +109,24 @@ function etape2(c_) {
 function etape3(c_) {
   const carte = c_.carte('3. L\'énergie transférée : Q = Φ × Δt');
   c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Pour calculer l'énergie, tu connais déjà <b>E = P × Δt</b>. Avec les noms du transfert thermique, c'est la même formule :</p>
       <div class="cle"><p class="crs-formule">Q = Φ × Δt</p><ul class="er-liste"><li>Φ en W et Δt en <b>s</b> : Q en <b>J</b> ;</li><li>Φ en W et Δt en <b>h</b> : Q en <b>Wh</b> (1 Wh = 3 600 J ; 1 kWh = 1 000 Wh).</li></ul></div>
     </div>
     ${exemple(`<p>Un vitrage laisse passer un flux de 88 W pendant une journée (24 h).</p>
       <p class="crs-calc">Q = Φ × Δt = 88 W × 24 × 3 600 s ≈ <span class="c">7,6 × 10<sup>6</sup> J</span></p>
       <p class="tt-ou">OU</p>
-      <p class="crs-calc">Q = 88 W × 24 h = 2 112 Wh ≈ <span class="c">2,1 kWh</span></p>`)}`);
+      <p class="crs-calc">Q = 88 W × 24 h = 2 112 Wh ≈ <span class="c">2,1 kWh</span></p>
+      <p>C'est l'énergie que consommerait un appareil de 88 W allumé pendant 24 h : on la compte en kWh, comme sur une facture d'électricité.</p>`)}`);
   const [P, m] = hasard([[167, 30], [50, 45], [120, 20], [952, 10]]);
   const [P2, h2] = hasard([[350, 8], [90, 24], [1200, 5], [250, 12]]);
   c_.aToi(carte, [
     { titre: 'En joules', enonce: `<p>Un flux thermique de ${P} W traverse un faux plafond pendant ${m} min.</p>`,
       parties: [{ type: 'sci', q: 'Calcule l\'énergie transférée, en joules.', label: 'Q =', valeur: P * m * 60, unite: 'J', cs: 2, rel: .05,
-        diag: v => proche(v, P * m, .03) ? `La durée doit être en secondes : ${m} min = ${m * 60} s.` : proche(v, P * m / 60, .03) ? `Multiplie par 60 : ${m} min = ${m * 60} s.` : 'Q = Φ × Δt, Δt en s.',
+        diag: v => proche(v, P * m, .03) ? `La durée doit être en secondes : ${m} min = ${m * 60} s.` : proche(v, P * m / 60, .03) ? `Multiplie par 60 : ${m} min = ${m * 60} s.` : 'Q = Φ × Δt (comme E = P × Δt), Δt en s.',
         solution: `<p class="crs-calc">Δt = ${m} × 60 = ${m * 60} s<br>Q = ${P} W × ${m * 60} s = ${c(sci(P * m * 60, 2) + ' J')}</p>` }] },
     { titre: 'En kilowattheures', enonce: `<p>Un flux thermique de ${fmt(P2)} W traverse un mur pendant ${h2} h.</p>`,
       parties: [{ type: 'nombre', q: 'Calcule l\'énergie perdue, en kWh.', label: 'Q =', valeur: P2 * h2 / 1000, unite: 'kWh', signe: false, rel: .01,
-        diag: v => proche(v, P2 * h2) ? `Ce sont des Wh : divise par 1 000 pour avoir des kWh.` : proche(v, P2 * h2 * 3600 / 1000, .02) ? 'Avec Δt en h, Q = Φ × Δt est directement en Wh.' : 'Q = Φ × Δt avec Δt en h donne des Wh ; 1 kWh = 1 000 Wh.',
+        diag: v => proche(v, P2 * h2) ? `Ce sont des Wh : divise par 1 000 pour avoir des kWh.` : proche(v, P2 * h2 * 3600 / 1000, .02) ? 'Avec Δt en h, Q = Φ × Δt est directement en Wh.' : 'Q = Φ × Δt (comme E = P × Δt) avec Δt en h donne des Wh ; 1 kWh = 1 000 Wh.',
         solution: `<p class="crs-calc">Q = ${fmt(P2)} W × ${h2} h = ${fmt(P2 * h2)} Wh = ${c(fmt(P2 * h2 / 1000) + ' kWh')}</p>` }] },
   ]);
   return carte;
@@ -117,7 +135,8 @@ function etape3(c_) {
 /* ---------- À retenir ---------- */
 function aRetenir(c_) {
   const carte = c_.carte('À retenir');
-  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">Φ = ${fr('Q', 'Δt')}</p><p>Le flux thermique est une puissance : Φ en W, Q en J, Δt en s.</p></div>
+  c_.ajouter(carte, `<div class="cle"><p><b>Le flux thermique est une puissance.</b> Ses formules sont celles de l'énergie et de la puissance, seuls les noms changent :</p>${LIEN}</div>
+    <div class="cle"><p class="crs-formule">Φ = ${fr('Q', 'Δt')}</p><p>Φ en W, Q en J, Δt en s.</p></div>
     <div class="cle"><p>Conversions : 1 h = 3 600 s ; 1 h 15 = 3 600 + 15 × 60 = 4 500 s ; 1 kJ = 10<sup>3</sup> J ; 1 MJ = 10<sup>6</sup> J.</p></div>
     <div class="cle"><p class="crs-formule">Q = Φ × Δt</p><p>Δt en s : Q en J ; Δt en h : Q en Wh (1 Wh = 3 600 J).</p></div>
     <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur le flux thermique →</a>

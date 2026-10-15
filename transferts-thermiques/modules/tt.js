@@ -974,7 +974,7 @@
   const PLAN = [
     { n: 1, titre: 'Température et modes de transfert', desc: 'Kelvin et degré Celsius, conduction, convection, rayonnement, sens du transfert', fiche: 'fiche_1',
       parties: [{ nom: 'Température et modes de transfert', cours: 'module_1_cours', questions: 'module_1_questions' }] },
-    { n: 2, titre: 'Flux thermique', desc: 'Φ = Q / Δt en watts ; Q = Φ × Δt en J ou en Wh', fiche: 'fiche_2',
+    { n: 2, titre: 'Flux thermique', desc: 'Le flux est une puissance : Φ = Q / Δt comme P = E / Δt ; Q = Φ × Δt comme E = P × Δt', fiche: 'fiche_2',
       parties: [{ nom: 'Flux thermique', cours: 'module_2_cours', questions: 'module_2_questions' }] },
     { n: 3, titre: 'Résistance thermique d\'une paroi', desc: 'Φ = ΔT / R<sub>th</sub> et R<sub>th</sub> = e / (λ × S)', fiche: 'fiche_3',
       parties: [{ nom: 'Résistance thermique d\'une paroi', cours: 'module_3_cours', questions: 'module_3_questions' }] },
