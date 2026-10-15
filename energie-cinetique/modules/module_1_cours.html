@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : forces de frottement — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">Forces de frottement</h2>
+    <p class="er-contexte">Un solide qui glisse sur un support subit des <b>frottements solides</b> ; un objet qui avance dans l'air ou dans l'eau subit des <b>frottements fluides</b> : la <b>traînée</b>, f<sub>x</sub> = ½ × ρ × v² × S × C<sub>x</sub>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Frottements solides (R⃗ = R⃗N + f⃗), traînée f_x = ½ ρ v² S Cx avec
+   conversions (km/h → m/s, cm² → m²), influence de v (au carré), de S
+   et de Cx, traînée et portance d'une aile.
+   Erreurs diagnostiquées : ½ oublié, v non élevée au carré, km/h ou
+   cm² non convertis, ρ de l'eau pris pour celui de l'air.
+   Valeurs (vérifiées par un script) : cycliste 10 m/s → 22,5 N ;
+   voiture 90 km/h → 187,5 N ; balle 35 cm² → 0,35 N ; nageur → 160 N.
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { o, fmt, proche, nomV, fr } = EC;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const CX = 'C<sub>x</sub>', FX = 'f<sub>x</sub>';
+const traine = (rho, v, S, cx) => .5 * rho * v * v * S * cx;
+
+/* ---------- 1. Les frottements solides ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Les frottements solides');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Quand un solide <b>glisse</b> (ou tend à glisser) sur un support, le support exerce sur lui une réaction ${nomV('R')} qui n'est plus perpendiculaire au support. On la décompose en deux forces :</p>
+      <div class="cle"><p class="crs-formule">${nomV('R')} = ${nomV('RN')} + ${nomV('f')}</p>
+        <ul class="er-liste"><li>${nomV('RN')} : la <b>réaction normale</b>, perpendiculaire au support ;</li>
+          <li>${nomV('f')} : les <b>frottements</b>, parallèles au support et <b>opposés au mouvement</b>.</li></ul></div>
+      ${EC.figFrottement()}
+      <p>Sans frottements (glace très lisse, coussin d'air), ${nomV('f')} = ${nomV('R').replace('R', '0')} et ${nomV('R')} = ${nomV('RN')}.</p>
+      <div class="ph-lien-app"><p>Revois le bilan des forces et la réaction du support (chapitre 6).</p>
+        <a class="btn-small" href="../../principe-dynamique/modules/module_2_cours.html">Chapitre 6 →</a></div>
+    </div>
+    ${exemple(`<p>On pousse un carton qui glisse vers la droite sur le sol. Le sol exerce ${nomV('RN')}, verticale vers le haut, et ${nomV('f')}, horizontale <b>vers la gauche</b> (contre le mouvement).</p>`)}`);
+  const sens = [['gauche', 'droite'], ['droite', 'gauche']];
+  const [mvt, bon] = hasard(sens);
+  c_.aToi(carte, [
+    { titre: 'Le sens des frottements', enonce: `<p>Une caisse glisse vers la <b>${mvt}</b> sur le plancher d'un camion.</p>`,
+      parties: [{ type: 'choix', q: `Dans quel sens est dirigée la force de frottement ${nomV('f')} ?`, melanger: false,
+        options: [o('droite', 'vers la droite'), o('gauche', 'vers la gauche'), o('haut', 'vers le haut'), o('bas', 'vers le bas')], bonne: bon,
+        indices: { [mvt]: 'Les frottements s\'<b>opposent</b> au mouvement : ils sont dans le sens contraire.', haut: 'Vers le haut, c\'est la réaction normale. Les frottements sont parallèles au support.', bas: 'Vers le bas, c\'est le poids. Les frottements sont parallèles au support.' },
+        solution: `<p>${nomV('f')} est parallèle au support et opposée au mouvement : vers la ${bon}.</p>` }] },
+    { titre: 'Sans frottements', enonce: '<p>Un palet glisse sur une table à coussin d\'air : les frottements sont négligeables.</p>',
+      parties: [{ type: 'choix', q: `Que vaut la réaction ${nomV('R')} de la table ?`, colonne: true,
+        options: [o('ok', `${nomV('R')} = ${nomV('RN')} : elle est perpendiculaire à la table`), o('nul', `${nomV('R')} est nulle`), o('obl', `${nomV('R')} est oblique, vers l'arrière`)], bonne: 'ok',
+        indices: { nul: `La table empêche toujours le palet de tomber : ${nomV('RN')} existe.`, obl: `Une réaction oblique vient des frottements : ici ${nomV('f')} est nulle.` },
+        solution: `<p>${nomV('f')} est nulle, donc ${nomV('R')} = ${nomV('RN')}, perpendiculaire au support.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. La traînée ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Les frottements fluides : la traînée');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Un objet qui se déplace dans un fluide (air, eau) subit une force opposée à son mouvement : la <b>traînée</b>.</p>
+      <div class="cle"><p class="crs-formule">${FX} = ½ × ρ × v² × S × ${CX}</p><p>Cette formule est toujours donnée ; il faut savoir l'utiliser, avec les <b>bonnes unités</b> :</p></div>
+      <div class="crs-defile"><table class="crs-tab ec-tab-unites"><thead><tr><th>Grandeur</th><th>Nom</th><th>Unité</th></tr></thead><tbody>
+        <tr><td>${FX}</td><td>traînée</td><td><b>N</b></td></tr>
+        <tr><td>ρ</td><td>masse volumique du fluide</td><td><b>kg·m<sup>−3</sup></b></td></tr>
+        <tr><td>v</td><td>vitesse</td><td><b>m·s<sup>−1</sup></b></td></tr>
+        <tr><td>S</td><td>maître-couple (surface vue de face)</td><td><b>m²</b></td></tr>
+        <tr><td>${CX}</td><td>coefficient de traînée</td><td><b>sans unité</b></td></tr></tbody></table></div>
+      <p>À retenir : ρ<sub>eau</sub> = 1 000 kg/m³ ; ρ<sub>air</sub> ≈ 1 kg/m³. Une vitesse en km/h se divise par 3,6 ; une surface en cm² se multiplie par 10<sup>−4</sup> (1 cm² = 10<sup>−4</sup> m²).</p>
+      <div class="ph-lien-app"><p>Revois les conversions d'unités.</p><a class="btn-small" href="../../conversions/index.html">Conversions →</a></div>
+    </div>
+    ${exemple(`<p>Un cycliste roule à 36 km/h dans l'air (ρ = 1 kg/m³) ; S = 0,50 m², ${CX} = 0,90.</p>
+      ${calc('v = 36 / 3,6 = 10 m/s')}
+      ${calc(`${FX} = ½ × ρ × v² × S × ${CX} = 0,5 × 1 kg/m³ × (10 m/s)² × 0,50 m² × 0,90 = ${c('22,5 N')}`)}`)}`);
+  const itemV = { titre: 'Une voiture', enonce: `<p>Une voiture roule à <b>90 km/h</b> dans l'air (ρ = 1,0 kg/m³) ; S = 2,0 m², ${CX} = 0,30.</p>`,
+    parties: [
+      { type: 'nombre', q: 'Convertis la vitesse en m/s.', label: 'v =', valeur: 25, unite: 'm/s', signe: false,
+        diag: v => (proche(v, 324) ? 'Des km/h aux m/s, on <b>divise</b> par 3,6.' : 'v (m/s) = v (km/h) / 3,6.'), solution: calc(`v = 90 / 3,6 = ${c('25 m/s')}`) },
+      { type: 'nombre', q: `Calcule la traînée ${FX}.`, label: `${FX} =`, valeur: 187.5, unite: 'N', rel: .01, signe: false,
+        diag: v => (proche(v, 375) ? 'N\'oublie pas le facteur ½.' : proche(v, 7.5) ? 'La vitesse est <b>au carré</b> : v² = 25² = 625.' : proche(v, traine(1, 90, 2, .3), .02) ? 'Utilise la vitesse en m/s (25 m/s).' : `${FX} = 0,5 × ρ × v² × S × ${CX}.`),
+        solution: calc(`${FX} = 0,5 × 1,0 × 25² × 2,0 × 0,30 = ${c('187,5 N')} ≈ 190 N`) },
+    ] };
+  const itemB = { titre: 'Une balle de tennis', enonce: `<p>Une balle de tennis vole à 20 m/s dans l'air (ρ = 1,0 kg/m³) ; son maître-couple vaut <b>S = 35 cm²</b> et ${CX} = 0,50.</p>`,
+    parties: [
+      { type: 'nombre', q: 'Convertis le maître-couple en m².', label: 'S =', valeur: .0035, unite: 'm²', rel: .01, signe: false, affiche: '0,0035',
+        diag: v => (proche(v, .35) ? '1 cm² = 10<sup>−4</sup> m² (et non 10<sup>−2</sup>) : un carré de 1 cm de côté, c\'est 0,01 m × 0,01 m.' : proche(v, 350000) ? 'Les m² sont plus grands que les cm² : le nombre doit diminuer.' : '35 cm² = 35 × 10<sup>−4</sup> m².'),
+        solution: calc(`S = 35 × 10<sup>−4</sup> m² = ${c('0,0035 m²')}`) },
+      { type: 'nombre', q: `Calcule la traînée ${FX}.`, label: `${FX} =`, valeur: .35, unite: 'N', rel: .01, signe: false,
+        diag: v => (proche(v, .7) ? 'N\'oublie pas le facteur ½.' : proche(v, 3500) ? 'Utilise S en m² (0,0035 m²).' : proche(v, .0175) ? 'La vitesse est <b>au carré</b> : v² = 400.' : `${FX} = 0,5 × ρ × v² × S × ${CX}.`),
+        solution: calc(`${FX} = 0,5 × 1,0 × 20² × 0,0035 × 0,50 = ${c('0,35 N')}`) },
+    ] };
+  const itemN = { titre: 'Un nageur', enonce: `<p>Un nageur avance à 2,0 m/s dans l'<b>eau</b> ; S = 0,10 m², ${CX} = 0,80.</p>`,
+    parties: [
+      { type: 'nombre', q: `Calcule la traînée ${FX} (pense à la masse volumique de l'eau).`, label: `${FX} =`, valeur: 160, unite: 'N', rel: .01, signe: false,
+        diag: v => (proche(v, .16) ? 'Dans l\'eau, ρ = 1 000 kg/m³ (et non 1 kg/m³ comme l\'air).' : proche(v, 320) ? 'N\'oublie pas le facteur ½.' : proche(v, 80) ? 'La vitesse est <b>au carré</b> : v² = 4.' : `${FX} = 0,5 × ρ × v² × S × ${CX} avec ρ = 1 000 kg/m³.`),
+        solution: calc(`${FX} = 0,5 × 1 000 × 2,0² × 0,10 × 0,80 = ${c('160 N')}`) + '<p>Dans l\'eau, mille fois plus dense que l\'air, la traînée est bien plus grande.</p>' },
+    ] };
+  c_.aToi(carte, [itemV, itemB, itemN]);
+  return carte;
+}
+
+/* ---------- 3. De quoi dépend la traînée ? ---------- */
+const FACT = [
+  { q: 'la vitesse est multipliée par 2', bon: '4', ind: { 2: 'La vitesse est <b>au carré</b> : 2² = 4.', 8: 'La vitesse est au carré (2²), pas au cube.' }, sol: '(2)² = 4 : la traînée est multipliée par 4.' },
+  { q: 'la vitesse est multipliée par 3', bon: '9', ind: { 3: 'La vitesse est <b>au carré</b> : 3² = 9.', 6: '3² = 3 × 3 = 9, pas 3 × 2.' }, sol: '(3)² = 9 : la traînée est multipliée par 9.' },
+  { q: 'le maître-couple S est multiplié par 2', bon: '2', ind: { 4: 'S n\'est pas au carré : la traînée est proportionnelle à S.', 1: 'La traînée est proportionnelle à S : elle change.' }, sol: 'La traînée est proportionnelle à S : elle est multipliée par 2.' },
+];
+const OPTS_FACT = ['1', '2', '3', '4', '6', '8', '9'];
+function qFacteur(f) {
+  const opts = melanger(OPTS_FACT.filter(x => x !== f.bon)).slice(0, 3).concat([f.bon]).sort((a, b) => a - b).map(x => o(x, '× ' + x));
+  return { titre: 'Effet sur la traînée', enonce: `<p>Toutes les autres grandeurs restant les mêmes, ${f.q}.</p>`,
+    parties: [{ type: 'choix', q: 'Par combien la traînée est-elle multipliée ?', options: opts, bonne: f.bon, melanger: false, indices: f.ind, indice: 'Regarde la formule : v est au carré ; ρ, S et C<sub>x</sub> ne le sont pas.', solution: `<p>${f.sol}</p>` }] };
+}
+function etape3(c_) {
+  const carte = c_.carte('3. De quoi dépend la traînée ?');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>La traînée est <b>proportionnelle</b> à ρ, à S et à ${CX}, mais <b>pas</b> à v : elle varie comme <b>v²</b>.</p>
+        <ul class="er-liste"><li>v multipliée par 2 → ${FX} multipliée par 2² = <b>4</b> ;</li><li>S multiplié par 2 → ${FX} multipliée par <b>2</b>.</li></ul></div>
+      <p>Pour diminuer la traînée : une <b>forme profilée</b> (petit ${CX}) et un <b>petit maître-couple</b> (position recroquevillée du skieur, voiture basse).</p>
+      ${EC.figFormes()}
+    </div>
+    ${exemple(`<p>Une voiture passe de 50 km/h à 100 km/h : sa vitesse double, donc la traînée est multipliée par 4. C'est pourquoi la consommation augmente beaucoup sur autoroute.</p>`)}`);
+  c_.aToi(carte, [qFacteur(FACT[1]), qFacteur(FACT[2]),
+    { titre: 'La meilleure forme', parties: [{ type: 'choix', q: `Quelle forme a le plus petit coefficient de traînée ${CX} (voir les formes ci-dessus) ?`,
+      options: [o('prof', 'le corps profilé'), o('semi', 'le corps semi-profilé'), o('sphere', 'la sphère'), o('cube', 'le cube')], bonne: 'prof', melanger: false,
+      indices: { semi: `Le corps semi-profilé (${CX} = 0,09) est bien placé, mais il y a encore plus petit.`, sphere: `La sphère a ${CX} = 0,47 : plus de dix fois le corps profilé.`, cube: `Le cube a le plus grand ${CX} (1,05).` },
+      solution: `<p>Le corps profilé : ${CX} = 0,04, la forme d'une goutte d'eau couchée.</p>` }] }]);
+  return carte;
+}
+
+/* ---------- 4. L'avion : traînée et portance ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. L\'avion : traînée et portance');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Sur l'aile d'un avion, la force de l'air se décompose en deux :</p>
+      <div class="cle"><ul class="er-liste"><li>la <b>traînée</b>, opposée au mouvement ;</li>
+        <li>la <b>portance</b>, perpendiculaire au mouvement, vers le haut : l'air passe plus vite au-dessus de l'aile qu'en dessous ; la pression, plus forte sous l'aile, la pousse vers le haut.</li></ul></div>
+      ${EC.figAile()}
+    </div>
+    ${exemple('<p>En vol à altitude constante, la portance compense le poids de l\'avion, et la poussée des moteurs compense la traînée.</p>')}`);
+  c_.aToi(carte, [
+    { titre: 'La portance', parties: [{ type: 'choix', q: 'La portance d\'une aile est due :', colonne: true,
+      options: [o('ok', 'à la différence de pression entre le dessous et le dessus de l\'aile'), o('mot', 'à la poussée des moteurs'), o('fr', 'aux frottements de l\'air sur l\'aile')], bonne: 'ok',
+      indices: { mot: 'Les moteurs font avancer l\'avion vers l\'avant, pas vers le haut.', fr: 'Les frottements de l\'air donnent la traînée, opposée au mouvement.' },
+      solution: '<p>La pression plus forte sous l\'aile (air lent) que dessus (air rapide) pousse l\'aile vers le haut.</p>' }] },
+    { titre: 'La traînée', parties: [{ type: 'choix', q: 'L\'avion vole vers la droite. La traînée est dirigée :', melanger: false,
+      options: [o('g', 'vers la gauche'), o('d', 'vers la droite'), o('h', 'vers le haut'), o('b', 'vers le bas')], bonne: 'g',
+      indices: { d: 'La traînée freine l\'avion : elle est opposée au mouvement.', h: 'Vers le haut, c\'est la portance.', b: 'Vers le bas, c\'est le poids.' },
+      solution: '<p>La traînée est opposée au mouvement : vers la gauche.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p><b>Frottements solides</b> : ${nomV('R')} = ${nomV('RN')} + ${nomV('f')} ; ${nomV('f')} est parallèle au support et opposée au mouvement.</p></div>
+    <div class="cle"><p><b>Traînée</b> (frottements fluides) : ${FX} = ½ × ρ × v² × S × ${CX}, avec ${FX} en N, ρ en kg·m<sup>−3</sup>, v en m·s<sup>−1</sup>, S (maître-couple) en m², ${CX} sans unité. ρ<sub>eau</sub> = 1 000 kg/m³, ρ<sub>air</sub> ≈ 1 kg/m³.</p></div>
+    <div class="cle"><p>La traînée varie comme <b>v²</b> (v × 2 → ${FX} × 4) ; elle est proportionnelle à S et à ${CX}. Pour la diminuer : forme profilée, petit maître-couple.</p></div>
+    <div class="cle"><p><b>Aile d'avion</b> : traînée (opposée au mouvement) et <b>portance</b> (vers le haut, due à la différence de pression entre le dessous et le dessus de l'aile).</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur les frottements →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2_simulation.html">Module 2 : travail d'une force</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
+EC.menu('module_1_cours');
+</script>
+</body>
+</html>

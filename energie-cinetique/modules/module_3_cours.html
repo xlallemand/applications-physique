@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : énergie cinétique — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS</span>
+    <h2 class="er-titre">Énergie cinétique</h2>
+    <p class="er-contexte">Un solide en mouvement possède une énergie liée à sa vitesse : l'<b>énergie cinétique</b> E<sub>c</sub> = ½ m v². La vitesse doit être en <b>m/s</b> : on convertit les km/h <b>avant</b> d'élever au carré.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   E_c = ½ m v² (J, kg, m/s), conversion km/h → m/s avant le carré,
+   vitesse à partir de E_c (v = √(2 E_c / m)), effet du doublement de v.
+   Erreurs diagnostiquées : ½ oublié, v non élevée au carré, km/h non
+   convertis (ou divisés par 3,6 après le carré), g au lieu de kg,
+   racine oubliée.
+   Valeurs (vérifiées par un script) : ballon 0,45 kg à 20 m/s → 90 J ;
+   balle 58 g à 50 m/s → 72,5 J ; voiture 1 200 kg à 90 km/h →
+   3,75 × 10⁵ J ; camion 38 t à 72 km/h → 7,6 × 10⁶ J ;
+   9 000 J et 20 kg → 30 m/s = 108 km/h.
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { o, fmt, proche, fr, rac } = EC;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const EC_ = 'E<sub>c</sub>';
+const ec = (m, v) => .5 * m * v * v;
+// diagnostic commun du calcul de E_c (m en kg, v en m/s) ; brut : valeurs non converties
+function diagEc(x, m, v, brut) {
+  const e = ec(m, v);
+  if (proche(x, 2 * e, .02)) return 'N\'oublie pas le facteur ½.';
+  if (proche(x, e / v, .02)) return 'La vitesse est <b>au carré</b>.';
+  if (brut && brut.v && proche(x, ec(m, brut.v), .02)) return 'Convertis d\'abord la vitesse en <b>m/s</b> (÷ 3,6).';
+  if (brut && brut.v && proche(x, .5 * m * brut.v * brut.v / 3.6, .02)) return 'On divise par 3,6 <b>avant</b> d\'élever au carré : v = ' + fmt(v) + ' m/s, puis v².';
+  if (brut && brut.m && proche(x, ec(brut.m, v), .02)) return 'La masse doit être en <b>kg</b>.';
+  return `${EC_} = ½ × m × v², avec m en kg et v en m/s.`;
+}
+
+/* ---------- 1. E_c = ½ m v² ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. L\'énergie cinétique');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> L'<b>énergie cinétique</b> d'un solide de masse m qui se déplace à la vitesse v :</p>
+        <p class="crs-formule">${EC_} = ½ × m × v²</p>
+        <p>${EC_} en <b>joules (J)</b>, m en <b>kg</b>, v en <b>m·s<sup>−1</sup></b>. Un solide immobile (v = 0) a une énergie cinétique nulle.</p></div>
+    </div>
+    ${exemple(`<p>Un ballon de 0,45 kg est frappé à 20 m/s.</p>${calc(`${EC_} = ½ × m × v² = 0,5 × 0,45 kg × (20 m/s)² = ${c('90 J')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une balle de tennis', enonce: `<p>Au service, une balle de tennis de <b>58 g</b> part à 50 m/s.</p>`,
+      parties: [
+        { type: 'nombre', q: 'Convertis la masse en kg.', label: 'm =', valeur: .058, unite: 'kg', signe: false, rel: .005,
+          diag: v => (proche(v, 58000) ? 'Les kg sont plus grands que les g : le nombre diminue (÷ 1 000).' : '1 kg = 1 000 g : on divise par 1 000.'), solution: calc(`m = 58 / 1 000 = ${c('0,058 kg')}`) },
+        { type: 'nombre', q: `Calcule son énergie cinétique ${EC_}.`, label: `${EC_} =`, valeur: 72.5, unite: 'J', signe: false, rel: .01,
+          diag: x => diagEc(x, .058, 50, { m: 58 }), solution: calc(`${EC_} = 0,5 × 0,058 × 50² = ${c('72,5 J')}`) },
+      ] },
+    { titre: 'Un cycliste', enonce: '<p>Un cycliste et son vélo (80 kg en tout) roulent à 10 m/s.</p>',
+      parties: [{ type: 'nombre', q: `Calcule leur énergie cinétique ${EC_}.`, label: `${EC_} =`, valeur: 4000, unite: 'J', signe: false,
+        diag: x => diagEc(x, 80, 10), solution: calc(`${EC_} = 0,5 × 80 × 10² = ${c('4 000 J')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Vitesse en km/h ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Une vitesse en km/h');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Dans ${EC_} = ½ m v², la vitesse est en <b>m/s</b>. On convertit les km/h (÷ 3,6) <b>avant</b> d'élever au carré : on calcule d'abord v en m/s, puis v².</p></div>
+      <div class="crs-attention"><p><b class="cle-titre">Attention.</b> 90² / 3,6 n'est pas (90 / 3,6)² : le carré se fait sur la vitesse déjà convertie.</p></div>
+      <div class="ph-lien-app"><p>Revois les conversions d'unités.</p><a class="btn-small" href="../../conversions/index.html">Conversions →</a></div>
+    </div>
+    ${exemple(`<p>Une voiture de 1 200 kg roule à 90 km/h.</p>${calc('v = 90 / 3,6 = 25 m/s')}${calc(`${EC_} = 0,5 × 1 200 kg × (25 m/s)² = 375 000 J = ${c('3,75 × 10<sup>5</sup> J')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Un camion', enonce: '<p>Un camion de <b>38 t</b> roule à <b>72 km/h</b>.</p>',
+      parties: [
+        { type: 'nombre', q: 'Convertis la masse en kg (1 t = 1 000 kg).', label: 'm =', valeur: 38000, unite: 'kg', signe: false,
+          diag: v => (proche(v, 38) ? 'La masse est donnée en tonnes : multiplie par 1 000.' : '1 t = 1 000 kg.'), solution: calc(`m = 38 × 1 000 = ${c('38 000 kg')}`) },
+        { type: 'nombre', q: 'Convertis la vitesse en m/s.', label: 'v =', valeur: 20, unite: 'm/s', signe: false,
+          diag: v => (proche(v, 259.2) ? 'Des km/h aux m/s, on <b>divise</b> par 3,6.' : 'v = 72 / 3,6.'), solution: calc(`v = 72 / 3,6 = ${c('20 m/s')}`) },
+        { type: 'sci', q: `Calcule son énergie cinétique ${EC_}.`, label: `${EC_} =`, valeur: ec(38000, 20), unite: 'J', cs: 2, rel: .01,
+          diag: x => diagEc(x, 38000, 20, { v: 72, m: 38 }), solution: calc(`${EC_} = 0,5 × 38 000 × 20² = 7 600 000 J = ${c('7,6 × 10<sup>6</sup> J')}`) },
+      ] },
+    { titre: 'Une moto', enonce: '<p>Une moto de 250 kg (avec son pilote) roule à <b>108 km/h</b>.</p>',
+      parties: [{ type: 'sci', q: `Calcule son énergie cinétique ${EC_} (3 chiffres significatifs).`, label: `${EC_} =`, valeur: ec(250, 30), unite: 'J', cs: 3, rel: .01,
+        diag: x => diagEc(x, 250, 30, { v: 108 }), solution: calc(`v = 108 / 3,6 = 30 m/s ; ${EC_} = 0,5 × 250 × 30² = 112 500 J ≈ ${c('1,13 × 10<sup>5</sup> J')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Retrouver la vitesse ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Retrouver la vitesse');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>On isole v dans ${EC_} = ½ m v² :</p>
+        <p class="crs-formule">v² = ${fr('2 × ' + EC_, 'm')} &nbsp; donc &nbsp; v = ${rac(fr('2 × ' + EC_, 'm'))}</p></div>
+    </div>
+    ${exemple(`<p>Une boule de 2,0 kg a une énergie cinétique de 400 J.</p>${calc(`v² = ${fr('2 × 400', '2,0')} = 400 donc v = ${rac('400')} = ${c('20 m/s')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Un traîneau', enonce: '<p>Un traîneau de 20 kg a une énergie cinétique de 9 000 J.</p>',
+      parties: [
+        { type: 'nombre', q: 'Calcule sa vitesse en m/s.', label: 'v =', valeur: 30, unite: 'm/s', signe: false,
+          diag: v => (proche(v, 900) ? 'Tu as trouvé v² : prends la <b>racine carrée</b>.' : proche(v, Math.sqrt(450)) ? 'v² = 2 × E<sub>c</sub> / m : n\'oublie pas le 2.' : proche(v, 450) ? 'Il manque le 2, puis la racine carrée.' : 'v = √(2 × E<sub>c</sub> / m).'),
+          solution: calc(`v = ${rac(fr('2 × 9 000', '20'))} = ${rac('900')} = ${c('30 m/s')}`) },
+        { type: 'nombre', q: 'Convertis-la en km/h.', label: 'v =', valeur: 108, unite: 'km/h', signe: false,
+          diag: v => (proche(v, 30 / 3.6) ? 'Des m/s aux km/h, on <b>multiplie</b> par 3,6.' : 'v (km/h) = v (m/s) × 3,6.'), solution: calc(`v = 30 × 3,6 = ${c('108 km/h')}`) },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Si la vitesse double ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. Si la vitesse double');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>${EC_} est proportionnelle à <b>m</b> mais varie comme <b>v²</b> : si la vitesse double, l'énergie cinétique est multipliée par 2² = <b>4</b>.</p></div>
+    </div>
+    ${exemple(`<p>Une voiture passe de 50 km/h à 100 km/h : sa vitesse double, son énergie cinétique est multipliée par 4. Il faudra 4 fois plus d'énergie pour l'arrêter : la distance de freinage est multipliée par 4.</p>`)}`);
+  const q = (titre, txt, bon, ind, sol) => ({ titre, enonce: `<p>${txt}</p>`, parties: [{ type: 'choix', q: `Par combien ${EC_} est-elle multipliée ?`, melanger: false,
+    options: ['2', '3', '4', '6', '9'].map(x => o(x, '× ' + x)), bonne: bon, indices: ind, indice: 'm est au premier degré, v au carré.', solution: `<p>${sol}</p>` }] });
+  c_.aToi(carte, [
+    q('La vitesse triple', 'Un skieur passe de 10 m/s à 30 m/s.', '9', { 3: 'La vitesse est au carré : 3² = 9.', 6: '3² = 3 × 3 = 9.' }, 'v × 3 donne v² × 9 : E<sub>c</sub> × 9.'),
+    q('La masse double', 'Un camion chargé a une masse deux fois plus grande qu\'à vide ; il roule à la même vitesse.', '2', { 4: 'La masse n\'est pas au carré : E<sub>c</sub> est proportionnelle à m.' }, 'E<sub>c</sub> est proportionnelle à m : × 2.'),
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>${EC_} = ½ × m × v², en <b>J</b>, avec m en <b>kg</b> et v en <b>m/s</b>.</p></div>
+    <div class="cle"><p>Une vitesse en km/h se divise par 3,6 <b>avant</b> d'être élevée au carré. g → kg : ÷ 1 000 ; t → kg : × 1 000.</p></div>
+    <div class="cle"><p>v = √(2 ${EC_} / m). Si v double, ${EC_} est multipliée par 4 ; si m double, ${EC_} double.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur l'énergie cinétique →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_4a_cours.html">Module 4 : théorème de l'énergie cinétique</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
+EC.menu('module_3_cours');
+</script>
+</body>
+</html>

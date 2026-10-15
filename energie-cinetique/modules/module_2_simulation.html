@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : simulateur, travail d'une force — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+<script src="travail.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · SIMULATION</span>
+    <h2 class="er-titre">Travail d'une force (activité)</h2>
+    <p class="er-contexte">Une force qui s'exerce sur un objet pendant qu'il se déplace lui <b>fournit</b> ou lui <b>retire</b> de l'énergie : c'est le <b>travail</b> de la force. En quatre étapes, tu vas découvrir de quoi il dépend : la <b>valeur de la force</b>, la <b>distance</b> parcourue et l'<b>angle</b> entre la force et le déplacement. Chaque étape réussie débloque la suivante.</p>
+  </div>
+
+  <!-- ============ Étape 1 : le wagon ============ -->
+  <section class="er-card ec-etape" id="e1">
+    <h3 class="cours-titre">1. Quelle est la meilleure façon de déplacer un wagon ?</h3>
+    <p class="er-contexte">Les cinq personnages veulent déplacer le wagon du point <b>A</b> (à gauche) au point <b>B</b> (à droite). Le wagon ne peut pas quitter les rails. Le dessin est vu de dessus.</p>
+    <div class="ph-question" id="q1"></div>
+  </section>
+
+  <!-- ============ Étape 2 : le simulateur ============ -->
+  <section class="er-card ec-etape" id="e2" hidden>
+    <h3 class="cours-titre">2. Le simulateur</h3>
+    <p class="er-contexte">Un chariot se déplace de A vers B, tiré par une force <span class="vec-nom">F</span>. Règle la valeur <b>F</b> de la force, la distance <b>AB</b> (curseur, ou fais glisser le point B) et l'angle <b>α</b> entre la force et le déplacement (curseur, ou fais tourner la flèche). Lance le chariot pour voir l'effet de la force.</p>
+    <div class="ec-duo">
+      <div class="ec-duo-sim" id="sim"></div>
+      <div class="ec-duo-q ph-question" id="q2"></div>
+    </div>
+  </section>
+
+  <!-- ============ Étape 3 : quelle formule ? ============ -->
+  <section class="er-card ec-etape" id="e3" hidden>
+    <h3 class="cours-titre">3. Quelle formule ?</h3>
+    <p class="er-contexte">Relis tes trois tableaux : W est proportionnel à F, proportionnel à AB, et il dépend de l'angle α (positif, nul ou négatif).</p>
+    <div class="ph-question" id="q3"></div>
+  </section>
+
+  <!-- ============ Étape 4 : le chemin suivi ============ -->
+  <section class="er-card ec-etape" id="e4" hidden>
+    <h3 class="cours-titre">4. Travail d'une force et chemin suivi</h3>
+    <p class="er-contexte">La force <span class="vec-nom">F</span> reste la même pendant tout le trajet : <b>F = 10 N</b>, horizontale, dirigée vers B (α = 0° par rapport à AB). AB = 1 m. On va de A à B par quatre chemins différents : appuie sur un trajet pour le parcourir.</p>
+    <div id="chemins"></div>
+    <div class="ph-question" id="q4" style="margin-top:14px"></div>
+  </section>
+
+  <!-- ============ Bilan ============ -->
+  <section class="er-card ec-bilan" id="bilan" hidden>
+    <span class="er-badge">BILAN</span>
+    <h3 class="er-titre">✍ Complète ton cours</h3>
+    <div class="cle"><p><b class="cle-titre">Définition.</b> Le <b>travail d'une force</b> est l'énergie transmise à un solide par cette force au cours d'un déplacement. Il s'exprime en <b>joules (J)</b>.</p></div>
+    <div id="bilanFig"></div>
+    <div class="cle"><p class="ph-formule">W<sub>AB</sub>(<span class="vec-nom">F</span>) = F × AB × cos α</p>
+      <p>F : valeur de la force (constante), en N ; AB : longueur du déplacement, en m ; α : angle entre <span class="vec-nom">F</span> et le déplacement <span class="vec-nom">AB</span>.</p></div>
+    <div class="cle"><p><b class="cle-titre">Signe du travail.</b></p>
+      <ul class="er-liste"><li>α &lt; 90° : W &gt; 0, travail <b>moteur</b> (maximal pour α = 0°) ;</li>
+        <li>α = 90° : W = 0, travail <b>nul</b> (force perpendiculaire au déplacement) ;</li>
+        <li>α &gt; 90° : W &lt; 0, travail <b>résistant</b> (maximal en valeur absolue pour α = 180°).</li></ul></div>
+    <div class="cle"><p><b class="cle-titre">Chemin suivi.</b> Pour une force constante, le travail <b>ne dépend pas du chemin suivi</b> : seulement des points de départ A et d'arrivée B.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_2_cours.html">Le cours du module 2 →</a>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   Activité « travail d'une force » : remplace l'animation en ligne
+   (phyanim) par le simulateur EC.Simu (travail.js), même déroulé :
+     1. le wagon : répliques dans les bulles, moteur / résistant / nul,
+        le plus grand travail, unité ;
+     2. le simulateur : W pour F = 10 N, α = 0°, AB = 1 m, puis les trois
+        tableaux de la question 7 (F, AB, puis α variables) ;
+     3. la formule (question 8), vérifiée à la calculatrice ;
+     4. les quatre trajets (même travail), le trajet 3 expliqué.
+   Questions sans points (mode 'cours' : réponse disponible après une
+   erreur) ; chaque étape réussie affiche la suivante ; le bilan
+   « ✍ Complète ton cours » marque l'activité comme faite.
+   Valeurs (vérifiées par un script) : W = 10 × 1 × cos 45° ≈ 7,1 J ;
+   cos 90° = 0 ; cos 135° ≈ −0,707 ; cos 180° = −1.
+   ============================================================ */
+const { o, fmt, proche, nomV, V, wagonSchema, figTravail } = EC;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const F_ = n => V('F', n);
+
+// affiche l'étape suivante et l'amène à l'écran
+function ouvrir(id) {
+  const e = document.getElementById(id);
+  e.hidden = false;
+  setTimeout(() => e.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+}
+
+/* ---------- 1. Le wagon ---------- */
+const REPLIQUES = {
+  a: '« Je résisterai ! »', b: '« Je ne sers à rien. »', c: '« C\'est moi le plus efficace ! »', d: '« Je fais ce que je peux ! »',
+};
+const chip = (id, l) => `<b>${l}</b><span class="ec-replique"> ${REPLIQUES[l]}</span>`;
+const parties1 = [
+  { type: 'schema', titrePalette: 'Répliques',
+    q: `1. Place dans les bulles ce que dit chaque personnage (deux personnages disent la même chose) :
+      <span class="ec-repliques" style="display:block;font-weight:500">a. ${REPLIQUES.a} &nbsp; b. ${REPLIQUES.b} &nbsp; c. ${REPLIQUES.c} &nbsp; d. ${REPLIQUES.d}</span>`,
+    schema: wagonSchema(),
+    etiquettes: [
+      { id: 'a', label: chip('a', 'a'), cible: 'F4', indice: `${REPLIQUES.a} : ce personnage s'oppose au déplacement, il tire vers l'<b>arrière</b>.` },
+      { id: 'b', label: chip('b', 'b'), cible: 'F5', indice: `${REPLIQUES.b} : il tire <b>perpendiculairement</b> aux rails, or le wagon ne peut pas aller sur le côté.` },
+      { id: 'c', label: chip('c', 'c'), cible: 'F1', indice: `${REPLIQUES.c} : il tire exactement dans le <b>sens du déplacement</b>.` },
+      { id: 'd1', label: chip('d', 'd'), cible: ['F2', 'F3'], indice: `${REPLIQUES.d} : ils tirent <b>en biais</b>, un peu vers l'avant.` },
+      { id: 'd2', label: chip('d', 'd'), cible: ['F2', 'F3'], indice: `${REPLIQUES.d} : ils tirent <b>en biais</b>, un peu vers l'avant.` },
+    ],
+    solution: `<p>${F_(1)} tire dans le sens du déplacement : ${REPLIQUES.c} ${F_(2)} et ${F_(3)} tirent en biais : ${REPLIQUES.d} ${F_(4)} tire vers l'arrière : ${REPLIQUES.a} ${F_(5)} tire perpendiculairement aux rails : ${REPLIQUES.b}</p>` },
+  { type: 'choix', q: 'On appelle <b>travail d\'une force</b> l\'énergie qu\'une force transmet à un objet au cours d\'un déplacement.<br>2. Quelle est l\'unité du travail d\'une force ?',
+    options: [o('J', 'le joule (J)'), o('N', 'le newton (N)'), o('W', 'le watt (W)'), o('m', 'le mètre (m)')], bonne: 'J', melanger: false,
+    indices: { N: 'Le newton est l\'unité des <b>forces</b>. Le travail est une <b>énergie</b>.', W: 'Le watt est l\'unité des <b>puissances</b> (attention : le travail se note W, mais ce n\'est pas son unité).', m: 'Le mètre est l\'unité des longueurs. Le travail est une <b>énergie</b>.' },
+    solution: '<p>Le travail est une énergie : il s\'exprime en <b>joules (J)</b>.</p>' },
+  { type: 'grille', q: '3. Un travail peut être <b>moteur</b>, <b>résistant</b> ou <b>nul</b>. Choisis l\'adjectif qui convient pour chaque personnage.',
+    options: [o('m', 'moteur'), o('r', 'résistant'), o('n', 'nul')],
+    lignes: [
+      { id: 'F1', label: `${F_(1)} <span class="ec-grille-desc">tire dans le sens du déplacement</span>`, bonne: 'm', indices: { r: 'Il aide le wagon à avancer : son travail est moteur.', n: 'Il fait avancer le wagon : il lui fournit de l\'énergie.' } },
+      { id: 'F2', label: `${F_(2)} <span class="ec-grille-desc">tire en biais, vers l'avant</span>`, bonne: 'm', indices: { r: `${F_(2)} tire un peu vers l'avant : il aide le déplacement.`, n: `${F_(2)} n'est pas perpendiculaire aux rails : une partie de son effort fait avancer le wagon.` } },
+      { id: 'F3', label: `${F_(3)} <span class="ec-grille-desc">tire en biais, vers l'avant</span>`, bonne: 'm', indices: { r: `${F_(3)} tire un peu vers l'avant : il aide le déplacement.`, n: `${F_(3)} n'est pas perpendiculaire aux rails : une partie de son effort fait avancer le wagon.` } },
+      { id: 'F4', label: `${F_(4)} <span class="ec-grille-desc">tire vers l'arrière</span>`, bonne: 'r', indices: { m: `${F_(4)} tire à l'opposé du déplacement : il freine le wagon.`, n: `${F_(4)} n'est pas perpendiculaire aux rails : il freine le wagon.` } },
+      { id: 'F5', label: `${F_(5)} <span class="ec-grille-desc">tire perpendiculairement aux rails</span>`, bonne: 'n', indices: { m: `${F_(5)} tire sur le côté : sa force ne fait ni avancer ni reculer le wagon.`, r: `${F_(5)} tire sur le côté : sa force ne fait ni avancer ni reculer le wagon.` } },
+    ],
+    solution: '<p>Une force qui aide le déplacement a un travail <b>moteur</b> ; une force qui s\'y oppose, un travail <b>résistant</b> ; une force perpendiculaire au déplacement, un travail <b>nul</b>.</p>' },
+  { type: 'choix', q: `4. Les cinq personnages exercent des forces de même valeur (F<sub>1</sub> = F<sub>2</sub> = F<sub>3</sub> = F<sub>4</sub> = F<sub>5</sub>). Lequel fournit le plus grand travail ?`,
+    options: [1, 2, 3, 4, 5].map(n => o('F' + n, F_(n))), bonne: 'F1', melanger: false,
+    indices: { F2: `${F_(2)} tire en biais : seule une partie de sa force sert à faire avancer le wagon.`, F3: `${F_(3)} tire en biais : seule une partie de sa force sert à faire avancer le wagon.`,
+      F4: `${F_(4)} freine le wagon : son travail est résistant.`, F5: `${F_(5)} ne sert à rien : son travail est nul.` },
+    solution: `<p>${F_(1)} tire exactement dans le sens du déplacement : toute sa force sert à faire avancer le wagon. Son travail est le plus grand.</p>` },
+];
+EC.question(document.getElementById('q1'), { parties: parties1 }, { fin() { ouvrir('e2'); } }, 'cours');
+
+/* ---------- 2. Le simulateur ---------- */
+const simu = EC.Simu(document.getElementById('sim'), { F: 10, AB: 1, alpha: 0 });
+const solTab = '<p>Lis tes résultats : quand F double, W double ; quand AB double, W double. Pour l\'angle : W est maximal à 0°, diminue jusqu\'à 0 à 90°, puis devient négatif ; à 180°, W = −F × AB.</p>';
+const parties2 = [
+  { type: 'nombre', q: 'Garde F = 10 N, α = 0° et AB = 1 m. Quelle est l\'énergie fournie par la force, c\'est-à-dire son travail W ?', label: 'W =', valeur: 10, unite: 'J', tol: .1, signe: false,
+    diag: v => (proche(v, 1) ? 'Lis bien la valeur sous le dessin, avec F = 10 N.' : 'Remets F = 10 N, α = 0° et AB = 1 m, puis lis W sous le dessin.'),
+    solution: '<p>W = 10 J : la force de 10 N fournit 10 J au chariot sur 1 m.</p>' },
+  EC.partieTableauW({ q: '7 a. Fais varier la force (α = 0°, AB = 1 m) et écris le travail lu sur le simulateur.', lignes: [[10, 0, 1], [15, 0, 1], [20, 0, 1]],
+    solution: '<p>W = 10 J, 15 J, 20 J : <b>W est proportionnel à F</b>.</p>' }),
+  EC.partieTableauW({ q: '7 b. Fais varier la distance AB (F = 10 N, α = 0°) : déplace le point B ou utilise le curseur.', lignes: [[10, 0, .2], [10, 0, .5], [10, 0, 1.1]],
+    solution: '<p>W = 2 J, 5 J, 11 J : <b>W est proportionnel à AB</b>.</p>' }),
+  EC.partieTableauW({ q: '7 c. Fais varier l\'angle α (F = 10 N, AB = 1 m). Un angle négatif : la force tire de l\'autre côté.', lignes: [[10, 45, 1], [10, 90, 1], [10, 135, 1], [10, 180, 1], [10, -90, 1]],
+    solution: '<p>W = 7,1 J ; 0 J ; −7,1 J ; −10 J ; 0 J. W dépend de l\'angle : positif (moteur) pour α &lt; 90°, nul pour α = ±90°, négatif (résistant) au-delà.</p>' + solTab }),
+];
+EC.question(document.getElementById('q2'), { parties: parties2 }, { fin() { ouvrir('e3'); } }, 'cours');
+
+/* ---------- 3. Quelle formule ? ---------- */
+const parties3 = [
+  { type: 'choix', colonne: true, melanger: false, q: '8. D\'après tes tableaux, quelle formule permet de calculer le travail W<sub>AB</sub>(<span class="vec-nom">F</span>) ?',
+    options: [o('a', 'a. W = F × AB'), o('b', 'b. W = F / AB'), o('c', 'c. W = F × AB × α'), o('d', 'd. W = F × AB × cos α'), o('e', 'e. W = F × AB × sin α')], bonne: 'd',
+    indices: {
+      a: 'Avec F × AB, W serait le même pour tous les angles : regarde ton tableau 7 c, W change avec α (il vaut même 0 à 90°).',
+      b: 'Dans ton tableau 7 b, W <b>augmente</b> quand AB augmente : W est proportionnel à AB, on ne divise pas par AB.',
+      c: 'Avec F × AB × α, on trouverait W = 0 pour α = 0°, et 900 J pour α = 90° : ton tableau dit le contraire.',
+      e: 'Avec sin α, le travail serait nul à 0° (sin 0° = 0) : regarde ton tableau, W = 10 J pour α = 0°.',
+    },
+    solution: '<p>cos 0° = 1 : W = F × AB, le maximum. cos 90° = 0 : W = 0. cos 180° = −1 : W = −F × AB. C\'est bien ce que montrent les tableaux.</p><p class="ph-formule">W<sub>AB</sub>(<span class="vec-nom">F</span>) = F × AB × cos α</p>' },
+  { type: 'nombre', q: 'Vérifie la ligne α = 45° avec ta calculatrice, réglée en <b>degrés</b> : 10 × 1 × cos 45° = ? (2 décimales)', label: 'W =', valeur: 10 * Math.cos(Math.PI / 4), unite: 'J', tol: .01, signe: false, affiche: '7,07',
+    diag: v => (proche(v, 10 * Math.cos(45), .02) ? 'Ta calculatrice est réglée en <b>radians</b> : passe-la en <b>degrés</b>, puis recommence.' : proche(v, 10 * Math.sin(Math.PI / 4)) ? 'C\'est aussi 7,07… mais avec cos !' : 'Tape 10 × 1 × cos(45) sur la calculatrice en degrés.'),
+    solution: calc(`W = 10 × 1 × cos 45° ≈ ${c('7,07 J')}`) + '<p>On retrouve les 7,1 J lus sur le simulateur. Pense à régler la calculatrice en <b>degrés</b> quand l\'angle est en degrés.</p>' },
+];
+EC.question(document.getElementById('q3'), { parties: parties3 }, { fin() { ouvrir('e4'); } }, 'cours');
+
+/* ---------- 4. Le chemin suivi ---------- */
+const chemins = EC.Chemins(document.getElementById('chemins'));
+const parties4 = [
+  { type: 'perso', aide: true, q: '9. Fais les quatre trajets, l\'un après l\'autre.',
+    monter(zone, api) {
+      const p = EC.el('p', 'ec-simu-etat');
+      zone.appendChild(p);
+      const maj = faits => {
+        p.textContent = `Trajets faits : ${faits.size} sur 4.`;
+        if (faits.size === 4 && !api.fini()) api.reussi();
+      };
+      chemins.surFait(maj);
+      maj(chemins.faits);
+      return { montrer() { p.textContent = 'Les quatre trajets donnent W = 10 J.'; } };
+    } },
+  { type: 'choix', colonne: true, q: 'Que remarques-tu ?',
+    options: [o('ok', 'Le travail est le même pour les quatre trajets : il ne dépend pas du chemin suivi'), o('long', 'Plus le trajet est long, plus le travail est grand'), o('court', 'Le trajet direct (le plus court) donne le plus grand travail')], bonne: 'ok',
+    indices: { long: 'Regarde ton tableau : le trajet 4 est le plus long, et pourtant W = 10 J comme les autres.', court: 'Regarde ton tableau : le trajet 1 donne W = 10 J, comme les autres.' },
+    solution: '<p>Tous les trajets donnent W = 10 J : pour une force constante, le travail <b>ne dépend pas du chemin suivi</b>, seulement des points A et B.</p>' },
+  { type: 'grille', q: '10. Refais le trajet 3. Pour chaque partie du trajet, quel est l\'angle entre la force et le déplacement, et que devient le travail ?',
+    options: [o('0', 'α = 0° : W augmente'), o('90', 'α = 90° : W ne change pas'), o('180', 'α = 180° : W diminue')],
+    lignes: [
+      { id: 'm', label: 'Partie 1 <span class="ec-grille-desc">déplacement vertical vers le haut</span>', bonne: '90', indices: { 0: 'La force est horizontale et le déplacement vertical : ils sont perpendiculaires.', 180: 'La force est horizontale et le déplacement vertical : ils sont perpendiculaires.' },
+        apres: `<p class="ec-expr">${nomV('F')} ⊥ au déplacement : W = 0 sur cette partie.</p>` },
+      { id: 'h', label: 'Partie 2 <span class="ec-grille-desc">déplacement horizontal, vers la droite</span>', bonne: '0', indices: { 90: 'Ici le déplacement est horizontal, comme la force.', 180: 'La force et le déplacement vont tous les deux vers la droite : même sens.' },
+        apres: '<p class="ec-expr">α = 0° : W = 10 × 1 × cos 0° = 10 J sur cette partie.</p>' },
+      { id: 'd', label: 'Partie 3 <span class="ec-grille-desc">déplacement vertical vers le bas</span>', bonne: '90', indices: { 0: 'La force est horizontale et le déplacement vertical : ils sont perpendiculaires.', 180: 'Le déplacement vers le bas est perpendiculaire à la force horizontale (pas opposé).' },
+        apres: `<p class="ec-expr">${nomV('F')} ⊥ au déplacement : W = 0 sur cette partie.</p>` },
+    ],
+    solution: '<p>Seule la partie horizontale apporte du travail : W = 0 + 10 J + 0 = 10 J, comme sur le trajet direct.</p>' },
+];
+EC.question(document.getElementById('q4'), { parties: parties4 }, {
+  fin() {
+    document.getElementById('bilanFig').innerHTML = figTravail({ alpha: 30 });
+    ouvrir('bilan');
+    EC.marquer({ fait: true });                                      // activité faite (sommaire, accueil)
+  },
+}, 'cours');
+
+EC.menu('module_2_simulation');
+</script>
+</body>
+</html>

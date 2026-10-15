@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions sur le travail d'une force — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : W = F × AB × cos α pour des valeurs
+   aléatoires, α parmi 0°, 30°, 45°, 60°, 90°, 120°, 135°, 180° (4),
+   travail moteur, résistant ou nul (2), travail du poids à la montée
+   et à la descente (2), travail de la réaction normale et force
+   perpendiculaire au déplacement (2).
+   Erreurs diagnostiquées : calculatrice en radians, signe oublié pour
+   α > 90° (à 180° : cos = −1), sin au lieu de cos, cos oublié,
+   longueur du chemin AB prise pour la hauteur h.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, entre, proche, nomV, W } = EC;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const cosd = a => { const x = Math.cos(a * Math.PI / 180); return Math.abs(x) < 1e-9 ? 0 : x; };
+const r3 = v => (v === 0 ? 0 : +v.toPrecision(3));
+const G = 9.81;
+
+/* ---------- Groupe 1 : W = F × AB × cos α ---------- */
+function qCalcul(a) {
+  const F = hasard([20, 25, 40, 50, 80, 120, 150, 200, 500]), AB = hasard([2, 3, 4, 5, 8, 10, 12, 15, 20]), w = F * AB * cosd(a);
+  const ctx = hasard([`Une force de ${F} N tire un chariot sur ${AB} m.`, `On pousse une caisse avec une force de ${F} N sur ${AB} m.`, `Une corde exerce une force de ${F} N sur un traîneau qui avance de ${AB} m.`]);
+  return { theme: 'Travail d\'une force', enonce: `<p>${ctx} L'angle entre la force et le déplacement vaut α = ${a}°.</p>`,
+    parties: [fq.nombre(`Calcule le travail ${W('F')} (3 chiffres significatifs, avec son signe).`, `${W('F')} =`, w, 'J', { rel: .01, tol: w === 0 ? 1e-9 : null, affiche: fmt(r3(w)),
+      diag: v => (Math.abs(w) > 1e-9 && proche(v, F * AB * Math.cos(a), .02) ? 'Ta calculatrice est en <b>radians</b> : règle-la en <b>degrés</b>.'
+        : w < 0 && proche(v, -w, .02) ? `α = ${a}° est plus grand que 90° : cos α &lt; 0, le travail est <b>négatif</b>.`
+        : proche(v, F * AB * Math.sin(a * Math.PI / 180), .02) && a !== 45 ? 'C\'est <b>cos α</b>, pas sin α.'
+        : proche(v, F * AB) && a !== 0 ? 'N\'oublie pas de multiplier par cos α.'
+        : a === 90 ? 'La force est perpendiculaire au déplacement : cos 90° = 0.' : 'W = F × AB × cos α.'),
+      solution: calc(`${W('F')} = F × AB × cos α = ${F} × ${AB} × cos ${a}° = ${c(fmt(r3(w)) + ' J')}`) })] };
+}
+const ANGLES = [[0, 30, 45], [60, 120], [90, 180], [135, 150]];
+const G1 = ANGLES.map(liste => () => qCalcul(hasard(liste)));
+
+/* ---------- Groupe 2 : moteur, résistant ou nul ---------- */
+const NAT = [o('m', 'moteur'), o('r', 'résistant'), o('n', 'nul')];
+const SITUATIONS = [
+  ['Un parachutiste descend : le travail de son poids.', 'm', 'Le poids est vers le bas, le parachutiste descend : même sens.'],
+  ['Un ballon monte après un coup de pied : le travail de son poids.', 'r', 'Le poids est vers le bas, le ballon monte : sens contraires.'],
+  ['Une voiture roule sur une route horizontale : le travail de la réaction normale de la route.', 'n', 'La réaction normale est perpendiculaire à la route, donc au déplacement.'],
+  ['Une voiture accélère : le travail de la force motrice.', 'm', 'La force motrice est dans le sens du déplacement.'],
+  ['Un cycliste roule : le travail des frottements de l\'air.', 'r', 'Les frottements de l\'air sont opposés au mouvement.'],
+  ['Un satellite tourne en cercle autour de la Terre : le travail de la force d\'attraction de la Terre, dirigée vers le centre du cercle.', 'n', 'La force est dirigée vers le centre, perpendiculaire au déplacement (tangent au cercle).'],
+];
+function qNature() {
+  const [txt, bon, ind] = hasard(SITUATIONS), sol = { m: 'moteur (W > 0)', r: 'résistant (W < 0)', n: 'nul (W = 0)' };
+  const indices = {};
+  NAT.forEach(x => { if (x.id !== bon) indices[x.id] = ind; });
+  return { theme: 'Signe du travail', enonce: `<p>${txt}</p>`, parties: [fq.choix('Ce travail est :', NAT, bon, { melanger: false, indices, solution: `<p>${ind} Le travail est ${sol[bon]}.</p>` })] };
+}
+function qAngle() {
+  const a = hasard([20, 60, 80, 100, 135, 170, 90]), bon = a < 90 ? 'm' : a > 90 ? 'r' : 'n';
+  return { theme: 'Signe du travail', enonce: `<p>Une force fait un angle α = ${a}° avec le déplacement.</p>`,
+    parties: [fq.choix('Son travail est :', NAT, bon, { melanger: false, indice: 'α < 90° : moteur ; α = 90° : nul ; α > 90° : résistant.', solution: `<p>cos ${a}° ${a < 90 ? '&gt; 0' : a > 90 ? '&lt; 0' : '= 0'} : travail ${NAT.find(x => x.id === bon).label}.</p>` })] };
+}
+const G2 = [qNature, qAngle];
+
+/* ---------- Groupe 3 : travail du poids ---------- */
+function qPoids(monte) {
+  const [qui, m] = hasard(monte ? [['Un randonneur', 70], ['Une cycliste', 65], ['Un alpiniste', 80]] : [['Un skieur', 75], ['Une luge chargée', 40], ['Un snowboardeur', 68]]);
+  const h = hasard([150, 200, 300, 450, 600]), AB = h * hasard([4, 5, 6]), w = (monte ? -1 : 1) * m * G * h;
+  return { theme: 'Travail du poids', enonce: `<p>${qui} de ${m} kg ${monte ? 'monte' : 'descend'} un chemin de ${fmt(AB)} m de long ; le dénivelé est de ${h} m (g = 9,81 N/kg).</p>`,
+    parties: [fq.choix(`Le travail du poids ${W('P')} est :`, NAT, monte ? 'r' : 'm', { melanger: false, indices: { [monte ? 'm' : 'r']: monte ? 'Il monte : le poids (vers le bas) s\'oppose au mouvement.' : 'Il descend : le poids (vers le bas) aide le mouvement.', n: 'L\'altitude change : le poids travaille.' } }),
+      { type: 'sci', q: `Calcule ${W('P')} (3 chiffres significatifs, avec son signe).`, label: `${W('P')} =`, valeur: w, unite: 'J', cs: 3, rel: .01,
+        diag: v => (proche(Math.abs(v), m * G * AB, .02) ? 'h est le <b>dénivelé</b>, pas la longueur du chemin.' : proche(v, -w, .02) ? (monte ? 'À la montée, le travail du poids est <b>négatif</b>.' : 'À la descente, le travail du poids est <b>positif</b>.') : `${monte ? '−' : ''}m × g × h.`),
+        solution: calc(`${W('P')} = ${monte ? '−' : ''}m × g × h = ${monte ? '−' : ''}${m} × 9,81 × ${h} ≈ ${c(EC.sci(w, 3) + ' J')}`) }] };
+}
+const G3 = [() => qPoids(true), () => qPoids(false)];
+
+/* ---------- Groupe 4 : force perpendiculaire au déplacement ---------- */
+function qRN() {
+  const [qui, RN, d] = hasard([['Une voiture', 12000, 200], ['Un vélo', 750, 80], ['Un chariot de supermarché', 250, 30]]);
+  return { theme: 'Force perpendiculaire', enonce: `<p>${qui} roule sur ${d} m d'un sol horizontal. La réaction normale du sol vaut R<sub>N</sub> = ${fmt(RN)} N.</p>`,
+    parties: [fq.nombre(`Que vaut le travail ${W('RN')} ?`, `${W('RN')} =`, 0, 'J', { tol: 1e-9,
+      diag: v => (proche(Math.abs(v), RN * d, .02) ? `${nomV('RN')} est verticale, le déplacement horizontal : α = 90°, cos 90° = 0.` : 'La réaction normale est perpendiculaire au déplacement.'),
+      solution: `<p>${nomV('RN')} ⊥ au déplacement, donc ${W('RN')} = 0, sans calcul.</p>` })] };
+}
+function qPoidsHoriz() {
+  const m = hasard([2, 5, 20, 1200]);
+  return { theme: 'Force perpendiculaire', enonce: `<p>Un objet de ${fmt(m)} kg se déplace de 10 m sur un sol horizontal.</p>`,
+    parties: [fq.choix(`Que vaut le travail de son poids ${W('P')} ?`, [o('ok', `0 car ${nomV('P')} ⊥ au déplacement`), o('mgh', `m × g × 10 = ${fmt(Math.round(m * G * 10))} J`), o('neg', `−m × g × 10 = −${fmt(Math.round(m * G * 10))} J`)], 'ok',
+      { colonne: true, indices: { mgh: 'L\'altitude ne change pas : le poids, vertical, est perpendiculaire au déplacement horizontal.', neg: 'L\'altitude ne change pas : le poids, vertical, est perpendiculaire au déplacement horizontal.' }, solution: `<p>${nomV('P')} ⊥ au déplacement : ${W('P')} = 0.</p>` })] };
+}
+function qUnite() {
+  return { theme: 'Unité du travail', parties: [fq.choix('Le travail d\'une force s\'exprime en :', [o('J', 'joules (J)'), o('N', 'newtons (N)'), o('W', 'watts (W)'), o('Nm', 'newtons par mètre (N/m)')], 'J',
+    { indices: { N: 'Le newton est l\'unité des forces ; le travail est une énergie.', W: 'Le watt est l\'unité des puissances.', Nm: 'W = F × AB : on <b>multiplie</b> des newtons par des mètres : N·m = J.' }, solution: '<p>Le travail est une énergie : en joules (1 J = 1 N × 1 m).</p>' })] };
+}
+const G4 = [qRN, qPoidsHoriz, qUnite];
+
+// tirage : 4 + 2 + 2 + 2 questions
+function tirage() {
+  return G1.map(f => f()).concat(G2.map(f => f()), G3.map(f => f()), melanger(G4).slice(0, 2).map(f => f()));
+}
+
+EC.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Travail d\'une force',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : W = F × AB × cos α, travail moteur, résistant ou nul, travail du poids, force perpendiculaire au déplacement. Garde ta calculatrice en <b>degrés</b>.</p>',
+  questions: tirage,
+  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3_cours.html', label: 'Module 3 : énergie cinétique →' },
+});
+EC.menu('module_2_questions');
+</script>
+</body>
+</html>

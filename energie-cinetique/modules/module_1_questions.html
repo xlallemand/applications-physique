@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur les forces de frottement — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : calcul de la traînée avec
+   conversions km/h → m/s et cm² → m² (4), effet d'un changement de
+   v, S, Cx ou ρ (3), forme et unités (2), frottements solides ou
+   portance (1).
+   Erreurs diagnostiquées : ½ oublié, v non élevée au carré, km/h ou
+   cm² non convertis, ρ de l'air utilisé dans l'eau, facteur 2 au lieu
+   de 4 quand v double.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, proche, nomV } = EC;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const CX = 'C<sub>x</sub>', FX = 'f<sub>x</sub>';
+const tr = (rho, v, S, cx) => .5 * rho * v * v * S * cx;
+const r3 = v => +v.toPrecision(3);
+// diagnostic commun du calcul de la traînée (v en m/s, S en m²) ; brut : valeurs non converties
+function diagFx(x, rho, v, S, cx, brut) {
+  const t = tr(rho, v, S, cx);
+  if (proche(x, 2 * t, .02)) return 'N\'oublie pas le facteur ½.';
+  if (proche(x, t / v, .02)) return 'La vitesse est <b>au carré</b>.';
+  if (brut && brut.v && proche(x, tr(rho, brut.v, S, cx), .02)) return 'Utilise la vitesse en <b>m/s</b> (divise les km/h par 3,6).';
+  if (brut && brut.S && proche(x, tr(rho, v, brut.S, cx), .02)) return 'Utilise S en <b>m²</b> (1 cm² = 10<sup>−4</sup> m²).';
+  if (rho === 1000 && proche(x, tr(1, v, S, cx), .02)) return 'Dans l\'eau, ρ = 1 000 kg/m³.';
+  return `${FX} = 0,5 × ρ × v² × S × ${CX}, avec v en m/s et S en m².`;
+}
+const conv = (kmh) => fq.nombre('Convertis la vitesse en m/s (3 chiffres significatifs).', 'v =', kmh / 3.6, 'm/s', { signe: false, rel: .01, affiche: fmt(r3(kmh / 3.6)),
+  diag: x => (proche(x, kmh * 3.6, .02) ? 'Des km/h aux m/s, on <b>divise</b> par 3,6.' : 'v (m/s) = v (km/h) / 3,6.'), solution: calc(`v = ${kmh} / 3,6 ≈ ${c(fmt(r3(kmh / 3.6)) + ' m/s')}`) });
+
+/* ---------- Groupe 1 : calcul de la traînée ---------- */
+const G1 = [
+  function voiture() {
+    const kmh = hasard([72, 90, 108, 126]), S = hasard([1.8, 2, 2.2]), cx = hasard([.28, .3, .32, .35]), rho = hasard([1, 1.2]), v = kmh / 3.6, t = tr(rho, v, S, cx);
+    return { theme: 'Traînée d\'une voiture', enonce: `<p>Une voiture roule à <b>${kmh} km/h</b> dans l'air (ρ = ${fmt(rho)} kg/m³). Son maître-couple vaut S = ${fmt(S)} m² et ${CX} = ${fmt(cx)}.</p>`,
+      parties: [conv(kmh), fq.nombre(`Calcule la traînée ${FX} (3 chiffres significatifs).`, `${FX} =`, t, 'N', { signe: false, rel: .01, affiche: fmt(r3(t)),
+        diag: x => diagFx(x, rho, v, S, cx, { v: kmh }), solution: calc(`${FX} = 0,5 × ${fmt(rho)} × ${fmt(r3(v))}² × ${fmt(S)} × ${fmt(cx)} ≈ ${c(fmt(r3(t)) + ' N')}`) })] };
+  },
+  function cycliste() {
+    const [qui, kmh, S, cx] = hasard([['Un cycliste', 36, .5, .9], ['Un cycliste', 45, .4, .8], ['Un skieur', 54, .5, .7], ['Un skieur recroquevillé', 72, .3, .6]]), v = kmh / 3.6, t = tr(1, v, S, cx);
+    return { theme: 'Traînée', enonce: `<p>${qui} avance à <b>${kmh} km/h</b> dans l'air (ρ = 1 kg/m³) ; S = ${fmt(S)} m², ${CX} = ${fmt(cx)}.</p>`,
+      parties: [conv(kmh), fq.nombre(`Calcule la traînée ${FX} (3 chiffres significatifs).`, `${FX} =`, t, 'N', { signe: false, rel: .01, affiche: fmt(r3(t)),
+        diag: x => diagFx(x, 1, v, S, cx, { v: kmh }), solution: calc(`${FX} = 0,5 × 1 × ${fmt(r3(v))}² × ${fmt(S)} × ${fmt(cx)} ≈ ${c(fmt(r3(t)) + ' N')}`) })] };
+  },
+  function balle() {
+    const [qui, v, Scm, cx] = hasard([['Une balle de tennis', 20, 35, .5], ['Une balle de tennis', 30, 35, .5], ['Un ballon de handball', 15, 250, .47], ['Une balle de ping-pong', 10, 12, .5]]), S = Scm * 1e-4, t = tr(1, v, S, cx);
+    return { theme: 'Traînée d\'une balle', enonce: `<p>${qui} vole à ${v} m/s dans l'air (ρ = 1 kg/m³) ; son maître-couple vaut <b>S = ${Scm} cm²</b> et ${CX} = ${fmt(cx)}.</p>`,
+      parties: [fq.nombre('Convertis le maître-couple en m².', 'S =', S, 'm²', { signe: false, rel: .01, affiche: fmt(S),
+          diag: x => (proche(x, Scm * 1e-2) ? '1 cm² = 10<sup>−4</sup> m² (un carré de 0,01 m de côté), et non 10<sup>−2</sup> m².' : proche(x, Scm * 1e4) ? 'Les m² sont plus grands que les cm² : le nombre doit diminuer.' : `${Scm} cm² = ${Scm} × 10<sup>−4</sup> m².`),
+          solution: calc(`S = ${Scm} × 10<sup>−4</sup> = ${c(fmt(S) + ' m²')}`) }),
+        fq.nombre(`Calcule la traînée ${FX} (2 chiffres significatifs).`, `${FX} =`, t, 'N', { signe: false, rel: .03, affiche: fmt(+t.toPrecision(2)),
+          diag: x => diagFx(x, 1, v, S, cx, { S: Scm }), solution: calc(`${FX} = 0,5 × 1 × ${v}² × ${fmt(S)} × ${fmt(cx)} ≈ ${c(fmt(+t.toPrecision(2)) + ' N')}`) })] };
+  },
+  function eau() {
+    const [qui, v, S, cx] = hasard([['Un nageur', 2, .1, .8], ['Un nageur', 1.5, .12, .7], ['Un plongeur', 1, .15, .9], ['Un kayak', 3, .08, .5]]), t = tr(1000, v, S, cx);
+    return { theme: 'Traînée dans l\'eau', enonce: `<p>${qui} avance à ${fmt(v)} m/s dans l'<b>eau</b> ; S = ${fmt(S)} m², ${CX} = ${fmt(cx)}.</p>`,
+      parties: [fq.nombre(`Calcule la traînée ${FX} (3 chiffres significatifs).`, `${FX} =`, t, 'N', { signe: false, rel: .01, affiche: fmt(r3(t)),
+        diag: x => diagFx(x, 1000, v, S, cx), solution: calc(`${FX} = 0,5 × 1 000 × ${fmt(v)}² × ${fmt(S)} × ${fmt(cx)} = ${c(fmt(r3(t)) + ' N')}`) })] };
+  },
+];
+
+/* ---------- Groupe 2 : effet d'un changement ---------- */
+const CHANGES = [
+  { q: 'la vitesse double', bon: '4', fausses: { 2: 'v est <b>au carré</b> : 2² = 4.', 8: 'v est au carré (2²), pas au cube.' }, sol: 'v est au carré : 2² = 4, la traînée est multipliée par 4.' },
+  { q: 'la vitesse triple', bon: '9', fausses: { 3: 'v est <b>au carré</b> : 3² = 9.', 6: '3² = 3 × 3 = 9.' }, sol: '3² = 9 : la traînée est multipliée par 9.' },
+  { q: 'la vitesse est divisée par 2', bon: '0,25', fausses: { '0,5': 'v est au carré : (1/2)² = 1/4.', 2: 'La vitesse diminue : la traînée aussi.' }, sol: '(½)² = ¼ : la traînée est multipliée par 0,25 (divisée par 4).' },
+  { q: 'le maître-couple S double', bon: '2', fausses: { 4: 'S n\'est pas au carré : la traînée est proportionnelle à S.', '0,5': 'Une surface plus grande donne une traînée plus grande.' }, sol: 'La traînée est proportionnelle à S : × 2.' },
+  { q: `le coefficient ${CX} est divisé par 2 (forme plus profilée)`, bon: '0,5', fausses: { '0,25': `${CX} n'est pas au carré.`, 2: 'Une forme plus profilée diminue la traînée.' }, sol: `La traînée est proportionnelle à ${CX} : × 0,5.` },
+];
+const G2 = CHANGES.map(ch => function () {
+  const opts = ['0,25', '0,5', '2', '4', '9'].map(x => o(x, '× ' + x));
+  return { theme: 'Effet sur la traînée', enonce: `<p>Toutes les autres grandeurs restant les mêmes, ${ch.q}.</p>`,
+    parties: [fq.choix('Par combien la traînée est-elle multipliée ?', opts, ch.bon, { melanger: false, indices: ch.fausses, indice: `Regarde la formule ${FX} = ½ × ρ × v² × S × ${CX} : seule v est au carré.`, solution: `<p>${ch.sol}</p>` })] };
+});
+
+/* ---------- Groupe 3 : forme et unités ---------- */
+const FORMES = [['corps profilé', .04], ['corps semi-profilé', .09], ['demi-sphère', .42], ['sphère', .47], ['cube', 1.05]];
+const G3 = [
+  function forme() {
+    const t = melanger(FORMES).slice(0, 3), bon = t.reduce((a, b) => (b[1] < a[1] ? b : a));
+    return { theme: 'Coefficient de traînée', enonce: `<p>Coefficients de traînée : ${t.map(f => `${f[0]} ${CX} = ${fmt(f[1])}`).join(' ; ')}.</p>`,
+      parties: [fq.choix('Quelle forme subit la plus petite traînée, à vitesse et maître-couple égaux ?', t.map(f => o(f[0], f[0])), bon[0], {
+        indice: `La traînée est proportionnelle à ${CX} : on cherche le plus petit ${CX}.`, solution: `<p>Le plus petit ${CX} : ${bon[0]} (${fmt(bon[1])}).</p>` })] };
+  },
+  function unites() {
+    const [g, nom, bon, faux] = hasard([
+      ['ρ', 'la masse volumique du fluide', 'kg·m<sup>−3</sup>', { 'kg': 'C\'est une masse <b>par mètre cube</b>.', 'm²': 'm² est l\'unité de S.' }],
+      ['S', 'le maître-couple', 'm²', { 'm': 'S est une <b>surface</b>.', 'kg·m<sup>−3</sup>': 'C\'est l\'unité de ρ.' }],
+      [CX, 'le coefficient de traînée', 'sans unité', { 'N': 'Le newton est l\'unité de la traînée elle-même.', 'm²': 'm² est l\'unité de S.' }],
+      ['v', 'la vitesse', 'm·s<sup>−1</sup>', { 'km/h': 'Dans la formule, la vitesse doit être en <b>m/s</b>.', 'm': 'Le mètre est une longueur.' }],
+    ]);
+    const opts = ['kg·m<sup>−3</sup>', 'm²', 'sans unité', 'm·s<sup>−1</sup>', 'N', 'kg', 'm', 'km/h'];
+    const choix = melanger(opts.filter(x => x !== bon && !faux[x])).slice(0, 1).concat(Object.keys(faux), [bon]);
+    return { theme: 'Unités de la formule', enonce: `<p>Dans la formule ${FX} = ½ × ρ × v² × S × ${CX}, ${g} est ${nom}.</p>`,
+      parties: [fq.choix(`Quelle est l'unité de ${g} ?`, melanger(choix).map(x => o(x, x)), bon, { indices: faux, indice: 'Revois le tableau des unités du cours.', solution: `<p>${g} : ${bon}.</p>` })] };
+  },
+];
+
+/* ---------- Groupe 4 : frottements solides, portance ---------- */
+const G4 = [
+  function solides() {
+    const mvt = hasard(['droite', 'gauche']), bon = mvt === 'droite' ? 'gauche' : 'droite';
+    return { theme: 'Frottements solides', enonce: `<p>Un livre glisse vers la ${mvt} sur une table et ralentit.</p>`,
+      parties: [fq.choix(`Dans quel sens est dirigée la force de frottement ${nomV('f')} ?`, [o('droite', 'vers la droite'), o('gauche', 'vers la gauche'), o('haut', 'vers le haut'), o('bas', 'vers le bas')], bon,
+        { melanger: false, indices: { [mvt]: 'Les frottements s\'opposent au mouvement.', haut: 'Vers le haut, c\'est la réaction normale.', bas: 'Vers le bas, c\'est le poids.' }, solution: `<p>${nomV('f')} est opposée au mouvement : vers la ${bon}. La réaction du support est ${nomV('R')} = ${nomV('RN')} + ${nomV('f')}.</p>` })] };
+  },
+  function portance() {
+    return { theme: 'Portance', parties: [fq.choix('D\'où vient la portance qui fait voler un avion ?', [o('ok', 'de la différence de pression entre le dessous et le dessus de l\'aile'), o('mot', 'de la poussée des moteurs'), o('tr', 'de la traînée')], 'ok',
+      { indices: { mot: 'Les moteurs font avancer l\'avion.', tr: 'La traînée est opposée au mouvement : elle freine l\'avion.' }, solution: '<p>L\'air passe plus vite au-dessus de l\'aile ; la pression, plus forte en dessous, pousse l\'aile vers le haut.</p>' })] };
+  },
+];
+
+// tirage : 4 + 3 + 2 + 1 questions
+function tirage() {
+  return G1.map(f => f()).concat(melanger(G2).slice(0, 3).map(f => f()), G3.map(f => f()), [hasard(G4)()]);
+}
+
+EC.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Forces de frottement',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : calcul de la traînée avec les conversions d\'unités, effet de la vitesse et du maître-couple, coefficient de traînée, frottements solides.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2_simulation.html', label: 'Module 2 : travail d\'une force →' },
+});
+EC.menu('module_1_questions');
+</script>
+</body>
+</html>

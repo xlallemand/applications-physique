@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : théorème de l'énergie cinétique, freinage et démarrage — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS · PARTIE B</span>
+    <h2 class="er-titre">Théorème de l'énergie cinétique : freinage et démarrage</h2>
+    <p class="er-contexte">Trois « classiques du bac » : la <b>force de freinage</b>, la <b>distance d'arrêt</b> et la <b>force de frottement</b> au démarrage. Même méthode à chaque fois : schéma, théorème, travaux (les forces ⊥ au déplacement donnent 0), application numérique, inconnue isolée.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Exemples 3, 4 et 5 du cours traités avec le schéma (EC.schemaMvt),
+   puis « À toi » à valeurs changées avec l'outil schéma (données
+   glissées, angle de chaque force, théorème) et le calcul.
+   Valeurs (vérifiées par un script) :
+     ex. 3 : 900 kg, 50 km/h, 10 m → ΔE_c = −8,68 × 10⁴ J, f ≈ 8,7 × 10³ N ;
+     ex. 4 : 800 kg, 70 km/h, f = 9,0 × 10³ N → AB ≈ 16,8 m ;
+     ex. 5 : 800 kg, 0 → 20 km/h sur 12 m, F_m = 1,3 × 10³ N → f ≈ 271 N ;
+     « À toi » : 1 000 kg, 72 km/h, 25 m → f = 8,0 × 10³ N ;
+       1 200 kg, 90 km/h, f = 1,5 × 10⁴ N → AB = 25 m ;
+       1 000 kg, 0 → 36 km/h sur 25 m, F_m = 2,5 × 10³ N → f = 500 N.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, fmt, proche, fr, nomV, W, schemaMvt, partieDonnees, partieAngles, partieEquation, versCours } = EC;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const EC_ = 'E<sub>c</sub>', vA = 'v<sub>A</sub>', vB = 'v<sub>B</sub>';
+const v2 = x => `${x}<sup>2</sup>`;
+const TEC = `${EC_}(B) − ${EC_}(A) = ${W('P')} + ${W('RN')} + ${W('f')}`;
+
+/* ---------- 1. Exemple 3 : la force de freinage ---------- */
+const FREIN = { sens: 'droite', objet: 'voiture', forces: ['P', 'RN', 'f'] };
+function etape1(c_) {
+  const carte = c_.carte('1. La force de freinage (exemple 3)');
+  c_.ajouter(carte, exemple(`<p>Une voiture de masse m = 900 kg, qui roule à v = 50 km/h, freine pour s'arrêter. La distance d'arrêt est de 10 m. Calculer la valeur de la force de frottement pendant le freinage (supposée constante).</p>
+      ${schemaMvt(Object.assign({ angles: true }, FREIN), { m: '900 kg', vA: '50 km/h', vB: '0 m/s', d: '10 m' })}
+      <p>Théorème de l'énergie cinétique :</p>
+      ${calc(TEC)}
+      ${calc(`½ m ${v2(vB)} − ½ m ${v2(vA)} = 0 + 0 + f × AB × cos 180° &nbsp; (0 car ⊥ au déplacement)`)}
+      ${calc(`½ × 900 × 0<sup>2</sup> − ½ × 900 × (${fr('50', '3,6')})<sup>2</sup> = f × 10 × (−1)`)}
+      ${calc(`−8,68 × 10<sup>4</sup> = −10 f &nbsp; donc &nbsp; f = ${fr('8,68 × 10<sup>4</sup>', '10')} ≈ ${c('8,7 × 10<sup>3</sup> N')}`)}`, 'Exemple 3 (traité, classique du bac)'));
+  c_.aToi(carte, [{ titre: 'Un freinage', enonce: '<p>Une voiture de <b>1 000 kg</b> roule à <b>72 km/h</b>. Elle freine et s\'arrête sur <b>25 m</b>. On cherche la force de frottement f, supposée constante.</p>',
+    parties: [
+      versCours(partieDonnees(FREIN, { m: '1 000 kg', vA: '72 km/h', vB: '0 m/s', d: '25 m' })),
+      versCours(partieAngles(FREIN)),
+      partieEquation(FREIN),
+      { type: 'nombre', q: `Convertis ${vA} en m/s.`, label: `${vA} =`, valeur: 20, unite: 'm/s', signe: false, diag: v => (proche(v, 259.2) ? 'On <b>divise</b> par 3,6.' : '72 / 3,6.'), solution: calc(`${vA} = 72 / 3,6 = ${c('20 m/s')}`) },
+      { type: 'sci', q: `Calcule ΔE<sub>c</sub> = ${EC_}(B) − ${EC_}(A), avec son signe.`, label: 'ΔE<sub>c</sub> =', valeur: -2e5, unite: 'J', cs: 2, rel: .01,
+        diag: v => (proche(v, 2e5) ? `${EC_}(B) = 0 : ΔE<sub>c</sub> = 0 − ${EC_}(A) est <b>négative</b>.` : proche(Math.abs(v), .5 * 1000 * 72 * 72) ? 'Utilise la vitesse en m/s.' : `ΔE<sub>c</sub> = 0 − ½ × 1 000 × 20².`),
+        solution: calc(`ΔE<sub>c</sub> = ½ × 1 000 × 0<sup>2</sup> − ½ × 1 000 × 20<sup>2</sup> = ${c('−2,0 × 10<sup>5</sup> J')}`) },
+      { type: 'nombre', q: 'Isole f et calcule-la.', label: 'f =', valeur: 8000, unite: 'N', signe: false,
+        diag: v => (proche(v, -8000) ? 'Une force (sa valeur) est positive : −2,0 × 10<sup>5</sup> = −25 f donne f &gt; 0.' : proche(v, 2e5 * 25) ? 'On <b>divise</b> par AB : f = 2,0 × 10<sup>5</sup> / 25.' : '−2,0 × 10<sup>5</sup> = f × 25 × (−1).'),
+        solution: calc(`−2,0 × 10<sup>5</sup> = −25 f &nbsp; donc &nbsp; f = ${fr('2,0 × 10<sup>5</sup>', '25')} = ${c('8,0 × 10<sup>3</sup> N')}`) },
+    ] }]);
+  return carte;
+}
+
+/* ---------- 2. Exemple 4 : la distance d'arrêt ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. La distance d\'arrêt (exemple 4)');
+  c_.ajouter(carte, exemple(`<p>Une voiture de masse m = 800 kg, qui roule à v = 70 km/h, freine pour s'arrêter. La force de frottement du sol sur les roues est supposée constante, f = 9,0 × 10<sup>3</sup> N. Calculer sa distance d'arrêt.</p>
+      ${schemaMvt(Object.assign({ angles: true }, FREIN), { m: '800 kg', vA: '70 km/h', vB: '0 m/s', d: '?' })}
+      ${calc(TEC)}
+      ${calc(`½ × 800 × 0<sup>2</sup> − ½ × 800 × (${fr('70', '3,6')})<sup>2</sup> = 0 + 0 + 9,0 × 10<sup>3</sup> × AB × cos 180°`)}
+      ${calc(`0 − 1,51 × 10<sup>5</sup> = −9,0 × 10<sup>3</sup> × AB`)}
+      ${calc(`AB = ${fr('−1,51 × 10<sup>5</sup>', '−9,0 × 10<sup>3</sup>')} = ${fr('1,51 × 10<sup>5</sup>', '9,0 × 10<sup>3</sup>')} ≈ ${c('16,8 m')} &nbsp; (soit AB = ${fr('½ m ' + v2(vA), 'f')})`)}`, 'Exemple 4 (traité, classique du bac)'));
+  c_.aToi(carte, [{ titre: 'Une distance d\'arrêt', enonce: '<p>Une voiture de <b>1 200 kg</b> roule à <b>90 km/h</b> et freine jusqu\'à l\'arrêt. La force de frottement vaut f = <b>1,5 × 10<sup>4</sup> N</b>. On cherche la distance d\'arrêt.</p>',
+    parties: [
+      versCours(partieDonnees(FREIN, { m: '1 200 kg', vA: '90 km/h', vB: '0 m/s', d: '?' }, { intrus: [{ label: '1,5 × 10<sup>4</sup> N', indice: 'C\'est la valeur d\'une <b>force</b> (f) : elle n\'est ni une vitesse, ni une masse, ni une distance.' }] })),
+      versCours(partieAngles(FREIN)),
+      { type: 'nombre', q: 'Calcule la distance d\'arrêt AB.', label: 'AB =', valeur: 25, unite: 'm', signe: false, rel: .01,
+        diag: v => (proche(v, .5 * 1200 * 90 * 90 / 15000) ? 'Convertis d\'abord la vitesse : 90 km/h = 25 m/s.' : proche(v, 1200 * 625 / 15000) ? 'N\'oublie pas le ½ de l\'énergie cinétique.' : proche(v, -25) ? 'Une distance est positive.' : 'AB = ½ m v<sub>A</sub>² / f.'),
+        solution: calc(`0 − ½ × 1 200 × 25<sup>2</sup> = −1,5 × 10<sup>4</sup> × AB`) + calc(`AB = ${fr('3,75 × 10<sup>5</sup>', '1,5 × 10<sup>4</sup>')} = ${c('25 m')}`) },
+    ] }]);
+  return carte;
+}
+
+/* ---------- 3. Exemple 5 : le démarrage ---------- */
+const DEMAR = { sens: 'droite', objet: 'voiture', forces: ['P', 'RN', 'Fm', 'f'] };
+function etape3(c_) {
+  const carte = c_.carte('3. Le démarrage : force de frottement (exemple 5)');
+  c_.ajouter(carte, exemple(`<p>Une voiture de masse m = 800 kg démarre. Elle passe de 0 à 20 km/h sur une distance d = 12 m. La force motrice, supposée constante, vaut F<sub>m</sub> = 1,3 × 10<sup>3</sup> N. Calculer la force de frottement solide.</p>
+      ${schemaMvt(Object.assign({ angles: true }, DEMAR), { m: '800 kg', vA: '0 (démarre)', vB: '20 km/h', d: '12 m' })}
+      ${calc(`½ m ${v2(vB)} − ½ m ${v2(vA)} = ${W('P')} + ${W('RN')} + ${W('Fm')} + ${W('f')}`)}
+      ${calc(`½ × 800 × (${fr('20', '3,6')})<sup>2</sup> − 0 = 0 + 0 + F<sub>m</sub> × AB × cos 0° + f × AB × cos 180°`)}
+      ${calc(`1,23 × 10<sup>4</sup> = 1,3 × 10<sup>3</sup> × 12 × 1 + f × 12 × (−1)`)}
+      ${calc(`−3 254 = −12 f &nbsp; donc &nbsp; f = ${fr('3 254', '12')} ≈ ${c('271 N')}`)}`, 'Exemple 5 (traité, classique du bac)'));
+  c_.aToi(carte, [{ titre: 'Un démarrage', enonce: '<p>Une voiture de <b>1 000 kg</b> démarre et atteint <b>36 km/h</b> sur <b>25 m</b>. La force motrice vaut F<sub>m</sub> = 2,5 × 10<sup>3</sup> N. On cherche la force de frottement f.</p>',
+    parties: [
+      versCours(partieDonnees(DEMAR, { m: '1 000 kg', vA: '0 m/s', vB: '36 km/h', d: '25 m' })),
+      versCours(partieAngles(DEMAR)),
+      partieEquation(DEMAR),
+      { type: 'nombre', q: `Calcule ${EC_}(B) (v<sub>B</sub> = 36 km/h = 10 m/s).`, label: `${EC_}(B) =`, valeur: 5e4, unite: 'J', signe: false,
+        diag: v => (proche(v, .5 * 1000 * 36 * 36) ? 'Utilise la vitesse en m/s : 10 m/s.' : proche(v, 1e5) ? 'N\'oublie pas le ½.' : '½ × 1 000 × 10².'), solution: calc(`${EC_}(B) = ½ × 1 000 × 10<sup>2</sup> = ${c('5,0 × 10<sup>4</sup> J')}`) },
+      { type: 'nombre', q: 'Isole f et calcule-la.', label: 'f =', valeur: 500, unite: 'N', signe: false,
+        diag: v => (proche(v, 4500) ? 'Il faut retrancher : 5,0 × 10<sup>4</sup> − 2,5 × 10<sup>3</sup> × 25 = −25 f.' : proche(v, -500) ? 'Une valeur de force est positive.' : '5,0 × 10<sup>4</sup> = 2,5 × 10<sup>3</sup> × 25 − 25 f.'),
+        solution: calc(`5,0 × 10<sup>4</sup> − 0 = 0 + 0 + 2,5 × 10<sup>3</sup> × 25 × 1 + f × 25 × (−1)`) + calc(`5,0 × 10<sup>4</sup> = 6,25 × 10<sup>4</sup> − 25 f &nbsp; donc &nbsp; f = ${fr('6,25 × 10<sup>4</sup> − 5,0 × 10<sup>4</sup>', '25')} = ${c('500 N')}`) },
+    ] }]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Sur une route horizontale, ${nomV('P')} et ${nomV('RN')} sont ⊥ au déplacement : leurs travaux sont <b>nuls</b>. Les frottements (α = 180°) : ${W('f')} = −f × AB. La force motrice (α = 0°) : ${W('Fm')} = F<sub>m</sub> × AB.</p></div>
+    <div class="cle"><p>Freinage jusqu'à l'arrêt (${vB} = 0) : −½ m ${v2(vA)} = −f × AB, donc f = ½ m ${v2(vA)} / AB et AB = ½ m ${v2(vA)} / f.</p></div>
+    <div class="cle"><p>Démarrage (${vA} = 0) : ½ m ${v2(vB)} = F<sub>m</sub> × AB − f × AB.</p></div>
+    <div class="cle"><p>Vitesses en <b>m/s</b> (÷ 3,6) avant de les élever au carré.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4b_questions.html">Questions : freinage et démarrage →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_5.html">Module 5 : exercices</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#freinage">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+EC.menu('module_4b_cours');
+</script>
+</body>
+</html>
