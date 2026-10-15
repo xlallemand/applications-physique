@@ -23,7 +23,7 @@
 (function () {
   'use strict';
 
-  const { o, fmt, fr, sci, cs, proche, paroi, val, schemaParoi, paroiRemplie, partieSens } = window.TT;
+  const { o, fmt, fr, sci, cs, proche, paroi, val, schemaParoi, paroiRemplie, partieSens, noteFluxNeg, noteDTNeg } = window.TT;
   const calc = h => `<p class="ph-calc">${h}</p>`;
   const c = h => `<span class="c">${h}</span>`;
   const KW = 'K·W<sup>−1</sup>', LAM = 'W·m<sup>−1</sup>·K<sup>−1</sup>';
@@ -33,7 +33,11 @@
   // 2 chiffres significatifs : l'arrondi peut s'écarter de 5 % de la valeur exacte (1,35 → 1,4)
   const scient = (q, label, valeur, unite, correction, opts) => Object.assign({ type: 'sci', q, label, valeur, unite, correction, cs: 2, rel: .05 }, opts);
   // diagnostics fréquents
-  const dPhi = (v, dT, R) => proche(v, dT * R, .03) ? 'Φ = ΔT / R : on divise par R.' : proche(v, R / dT, .03) ? 'Rapport inversé : Φ = ΔT / R.' : 'Φ = ΔT / R<sub>th</sub>.';
+  const dPhi = (v, dT, R) => (proche(Math.abs(v), dT * R, .03) ? 'Φ = ΔT / R : on divise par R.' : proche(Math.abs(v), R / dT, .03) ? 'Rapport inversé : Φ = ΔT / R.' : 'Φ = ΔT / R<sub>th</sub>.');
+  // flux négatif : juste aussi, compté dans l'autre sens (remarque ajoutée à la correction) ;
+  // sans côtés nommés dans l'énoncé, il est compté du froid vers le chaud
+  const neg = (phi, compte, reel) => [{ valeur: -phi, note: noteFluxNeg(compte || 'du froid vers le chaud', reel || 'du chaud vers le froid') }];
+  const EXT_INT = 'de l\'extérieur vers l\'intérieur', INT_EXT = 'de l\'intérieur vers l\'extérieur';
   const dR = (v, e, l, S, unite) => proche(v, e * (unite === 'mm' ? 1000 : 100) / (l * S), .03) ? `L'épaisseur doit être en mètres (${unite === 'mm' ? '1 mm = 10<sup>−3</sup> m' : '1 cm = 10<sup>−2</sup> m'}).`
     : proche(v, e * l * S, .03) || proche(v, e * l / S, .03) || proche(v, e * S / l, .03) ? 'R = e / (λ × S) : λ et S sont au dénominateur.' : 'R<sub>th</sub> = e / (λ × S), e en m et S en m<sup>2</sup>.';
   const Rth = (e, l, S) => e / (l * S);
@@ -77,9 +81,10 @@
         <p class="tt-donnees"><b>Données</b> : λ<sub>neige</sub> = 0,100 ${LAM} ; λ<sub>glace</sub> = 2,200 ${LAM}.</p>`,
       parties: [
         nombre('1. Calcule l\'écart de température entre l\'intérieur et l\'extérieur.', 'ΔT =', 17, 'K', calc(`ΔT = T<sub>int</sub> − T<sub>ext</sub> = −3,0 − (−20) = −3,0 + 20 = ${c('17 K')}`),
-          { tol: .05, signe: true, diag: v => proche(v, 23) || proche(v, -23) ? 'Soustraire −20, c\'est ajouter 20 : −3,0 − (−20) = −3,0 + 20.' : proche(v, -17) ? 'Le côté chaud est l\'intérieur : ΔT = T<sub>chaud</sub> − T<sub>froid</sub> est positif.' : 'ΔT = T<sub>int</sub> − T<sub>ext</sub>.' }),
+          { tol: .05, signe: true, aussi: [{ valeur: -17, note: noteDTNeg('de l\'extérieur vers l\'intérieur', 'de l\'intérieur vers l\'extérieur') }],
+            diag: v => proche(v, 23) || proche(v, -23) ? 'Soustraire −20, c\'est ajouter 20 : −3,0 − (−20) = −3,0 + 20.' : 'ΔT = T<sub>int</sub> − T<sub>ext</sub>.' }),
         nombre('1. Calcule le flux thermique à travers la paroi de glace (3 chiffres significatifs).', 'Φ =', 17 / .022, 'W', calc(`Φ = ${fr('T<sub>int</sub> − T<sub>ext</sub>', 'R<sub>1</sub>')} = ${fr('17', '0,022')} ≈ ${c('773 W')}`),
-          { rel: .01, affiche: '773', diag: v => dPhi(v, 17, .022) }),
+          { rel: .01, affiche: '773', signe: true, aussi: [{ valeur: -17 / .022, note: noteFluxNeg('de l\'extérieur vers l\'intérieur', 'de l\'intérieur vers l\'extérieur') }], diag: v => dPhi(Math.abs(v), 17, .022) }),
         partieSens({ q: '2. Dans quel sens ce transfert de chaleur se produit-il ?', cotes: ['l\'intérieur (−3,0 °C)', 'l\'extérieur (−20 °C)'], bon: 1,
           solution: '<p>Le transfert thermique se fait du chaud (l\'intérieur, −3,0 °C) vers le froid (l\'extérieur, −20 °C).</p>' }),
         nombre('3. Quelle est la résistance thermique R<sub>2</sub> si l\'on double l\'épaisseur de glace ?', 'R<sub>2</sub> =', .044, KW, calc(`R = ${fr('e', 'λ × S')} est proportionnelle à e : si on double e, on double R.<br>R<sub>2</sub> = 2 × R<sub>1</sub> = 2 × 0,022 = ${c('0,044 ' + KW)}`),
@@ -105,13 +110,13 @@
         nombre('a) Convertis la durée 1 h 15 en secondes.', 'Δt =', 4500, 's', calc(`1 h 15 = 3 600 s + 15 × 60 s = ${c('4 500 s')}`),
           { diag: v => proche(v, 75) ? 'Ce sont des minutes : multiplie par 60.' : proche(v, 1.15 * 3600) ? '1 h 15, ce n\'est pas 1,15 h : convertis séparément l\'heure et les minutes.' : '1 h = 3 600 s et 1 min = 60 s.' }),
         nombre('a) Calcule le flux thermique (3 chiffres significatifs).', 'Φ =', 750e3 / 4500, 'W', calc(`Φ = ${fr('Q', 'Δt')} = ${fr('750 × 10<sup>3</sup> J', '4 500 s')} ≈ ${c('167 W')}`),
-          { rel: .01, affiche: '167', diag: v => proche(v, 750 / 4500, .02) ? 'Convertis l\'énergie en joules : 750 kJ = 750 × 10<sup>3</sup> J.' : proche(v, 750e3 / 75, .02) || proche(v, 750e3 / 1.25, .02) ? 'La durée doit être en secondes.' : 'Φ = Q / Δt.' }),
+          { signe: true, aussi: neg(750e3 / 4500), rel: .01, affiche: '167', diag: v => proche(v, 750 / 4500, .02) ? 'Convertis l\'énergie en joules : 750 kJ = 750 × 10<sup>3</sup> J.' : proche(v, 750e3 / 75, .02) || proche(v, 750e3 / 1.25, .02) ? 'La durée doit être en secondes.' : 'Φ = Q / Δt.' }),
         nombre('b) Calcule le flux thermique (2 chiffres significatifs).', 'Φ =', 17 / 5.3, 'W', calc(`Φ = ${fr('T<sub>chaud</sub> − T<sub>froid</sub>', 'R<sub>th</sub>')} = ${fr('17', '5,3')} ≈ ${c('3,2 W')}`),
-          { rel: .02, affiche: '3,2', diag: v => dPhi(v, 17, 5.3) }),
+          { signe: true, aussi: neg(17 / 5.3), rel: .02, affiche: '3,2', diag: v => dPhi(v, 17, 5.3) }),
         nombre('c) Calcule la résistance thermique de la couche de laine de mouton (3 chiffres significatifs).', 'R<sub>th</sub> =', .05 / .035, KW, calc(`R<sub>th</sub> = ${fr('e', 'λ × S')} = ${fr('5,0 × 10<sup>−2</sup>', '0,035 × 1,0')} ≈ ${c('1,43 ' + KW)}`),
           { rel: .01, affiche: '1,43', diag: v => dR(v, .05, .035, 1, 'cm') }),
         nombre('c) Calcule le flux thermique (2 chiffres significatifs).', 'Φ =', 17 / (.05 / .035), 'W', calc(`Φ = ${fr('T<sub>chaud</sub> − T<sub>froid</sub>', 'R<sub>th</sub>')} = ${fr('17', '1,43')} ≈ ${c('12 W')}`),
-          { rel: .03, affiche: '12', diag: v => dPhi(v, 17, 1.43) }),
+          { signe: true, aussi: neg(17 / (.05 / .035)), rel: .03, affiche: '12', diag: v => dPhi(v, 17, 1.43) }),
       ] },
 
     /* ============================ EXERCICE 8 ============================ */
@@ -122,18 +127,19 @@
         <li>c) L'énergie thermique perdue à travers la paroi est de 180 kJ par heure.</li>
         <li>d) La différence de température entre les deux faces est de 25 °C pour une paroi d'épaisseur e = 4 mm et dont la conductivité thermique est de λ = 0,810 ${LAM}.</li></ul>`,
       parties: [
-        nombre('a) Calcule le flux thermique (2 chiffres significatifs).', 'Φ =', 3, 'W', calc(`Φ = ${fr('ΔT', 'R<sub>th</sub>')} = ${fr('15', '5,00')} = ${c('3,0 W')}, du chaud vers le froid`), { rel: .01, diag: v => dPhi(v, 15, 5) }),
+        nombre('a) Calcule le flux thermique (2 chiffres significatifs).', 'Φ =', 3, 'W', calc(`Φ = ${fr('ΔT', 'R<sub>th</sub>')} = ${fr('15', '5,00')} = ${c('3,0 W')}, du chaud vers le froid`), { signe: true, aussi: neg(3), rel: .01, diag: v => dPhi(v, 15, 5) }),
         nombre('b) Calcule le flux thermique (2 chiffres significatifs).', 'Φ =', 13 / 3.33, 'W', calc(`Φ = ${fr('T<sub>ext</sub> − T<sub>int</sub>', 'R<sub>th</sub>')} = ${fr('35 − 22', '3,33')} ≈ ${c('3,9 W')}`),
-          { rel: .02, affiche: '3,9', diag: v => proche(v, 57 / 3.33, .03) ? 'ΔT est une différence : 35 − 22.' : dPhi(v, 13, 3.33) }),
+          { rel: .02, affiche: '3,9', signe: true, aussi: [{ valeur: -13 / 3.33, note: noteFluxNeg('de l\'intérieur vers l\'extérieur', 'de l\'extérieur vers l\'intérieur') }],
+            diag: v => proche(Math.abs(v), 57 / 3.33, .03) ? 'ΔT est une différence : 35 − 22.' : dPhi(Math.abs(v), 13, 3.33) }),
         partieSens({ q: 'b) Dans quel sens se fait ce transfert ?', cotes: ['l\'intérieur (22 °C)', 'l\'extérieur (35 °C)'], bon: 2,
           solution: '<p>L\'extérieur (35 °C) est plus chaud que l\'intérieur (22 °C) : le transfert se fait de l\'extérieur vers l\'intérieur.</p>' }),
         nombre('c) Calcule le flux thermique.', 'Φ =', 50, 'W', calc(`Φ = ${fr('Q', 'Δt')} = ${fr('180 × 10<sup>3</sup> J', '3 600 s')} = ${c('50 W')}, du chaud vers le froid`),
-          { rel: .01, diag: v => proche(v, 180) ? 'L\'énergie est perdue en une heure : divise par Δt = 3 600 s (et convertis 180 kJ en J).' : proche(v, .05) ? 'Convertis 180 kJ en joules.' : proche(v, 3000) ? 'Δt = 1 h = 3 600 s (pas 60 s).' : 'Φ = Q / Δt, Q en J et Δt en s.' }),
+          { signe: true, aussi: neg(50), rel: .01, diag: v => proche(v, 180) ? 'L\'énergie est perdue en une heure : divise par Δt = 3 600 s (et convertis 180 kJ en J).' : proche(v, .05) ? 'Convertis 180 kJ en joules.' : proche(v, 3000) ? 'Δt = 1 h = 3 600 s (pas 60 s).' : 'Φ = Q / Δt, Q en J et Δt en s.' }),
         scient('d) Calcule la résistance thermique de la paroi (3 chiffres significatifs).', 'R<sub>th</sub> =', .004 / .81, KW, calc(`R<sub>th</sub> = ${fr('e', 'λ × S')} = ${fr('4 × 10<sup>−3</sup>', '0,810 × 1,0')} ≈ ${c('4,94 × 10<sup>−3</sup> ' + KW)}`),
           { cs: 3, rel: .01, diag: v => dR(v, .004, .81, 1, 'mm') }),
         scient('d) Calcule le flux thermique (2 chiffres significatifs).', 'Φ =', 25 / (.004 / .81), 'W', calc(`Φ = ${fr('ΔT', 'R<sub>th</sub>')} = ${fr('25', '4,94 × 10<sup>−3</sup>')} ≈ ${c('5,1 × 10<sup>3</sup> W')}, du chaud vers le froid`) +
           '<p class="tt-note">Un flux s\'exprime en watts. Une paroi aussi mince et aussi conductrice laisse passer un très grand flux.</p>',
-          { diag: v => proche(v, 25 * .004 / .81, .03) ? 'Φ = ΔT / R : on divise par R.' : proche(v, 25 / 4.94, .03) ? 'Attention à la puissance de 10 : R = 4,94 × 10<sup>−3</sup> K·W<sup>−1</sup>.' : 'Φ = ΔT / R.' }),
+          { signe: true, aussi: neg(25 / (.004 / .81)), diag: v => proche(v, 25 * .004 / .81, .03) ? 'Φ = ΔT / R : on divise par R.' : proche(v, 25 / 4.94, .03) ? 'Attention à la puissance de 10 : R = 4,94 × 10<sup>−3</sup> K·W<sup>−1</sup>.' : 'Φ = ΔT / R.' }),
       ] },
 
     /* ============================ EXERCICE 13 ============================ */
@@ -158,7 +164,7 @@
           { diag: v => proche(v, R13p * R13m, .05) ? 'Les résistances s\'additionnent.' : proche(v, R13p, .03) || proche(v, R13m, .03) ? 'Additionne les deux résistances.' : 'R<sub>totale</sub> = R<sub>mur</sub> + R<sub>poly</sub> (attention aux puissances de 10).' }),
         nombre('e) Calcule le flux thermique pour une différence de température de 20 °C (2 chiffres significatifs).', 'Φ =', 20 / R13, 'W', calc(`Φ = ${fr('T<sub>int</sub> − T<sub>ext</sub>', 'R<sub>totale</sub>')} = ${fr('20', '5,9 × 10<sup>−2</sup>')} ≈ ${c('340 W')} (2 chiffres significatifs)`) +
           '<p class="tt-note">La question impose ΔT = 20 °C (et non 19 − 5 = 14 °C, les valeurs de la figure).</p>',
-          { rel: .015, affiche: '340', diag: v => proche(v, 14 / R13, .03) ? 'La question donne la différence de température : 20 °C.' : proche(v, 20 / R13p, .03) || proche(v, 20 / R13m, .03) ? 'Utilise la résistance <b>totale</b>.' : dPhi(v, 20, R13) }),
+          { signe: true, aussi: neg(20 / R13, EXT_INT, INT_EXT), rel: .015, affiche: '340', diag: v => proche(v, 14 / R13, .03) ? 'La question donne la différence de température : 20 °C.' : proche(v, 20 / R13p, .03) || proche(v, 20 / R13m, .03) ? 'Utilise la résistance <b>totale</b>.' : dPhi(v, 20, R13) }),
       ] },
 
     /* ============================ EXERCICE 14 ============================ */
@@ -178,7 +184,7 @@
         scient('a) En déduire la résistance thermique totale du faux plafond.', 'R<sub>totale</sub> =', R14, KW, calc(`R<sub>totale</sub> = R<sub>plâtre</sub> + R<sub>laine</sub> = 5,3 × 10<sup>−4</sup> + 7,1 × 10<sup>−2</sup> ≈ ${c('7,2 × 10<sup>−2</sup> ' + KW)}`),
           { diag: v => proche(v, R14l, .01) ? 'N\'oublie pas le plâtre : sa résistance est petite, mais elle s\'ajoute.' : 'R<sub>totale</sub> = R<sub>plâtre</sub> + R<sub>laine</sub> (attention aux puissances de 10).' }),
         nombre('b) Calcule le flux thermique (3 chiffres significatifs).', 'Φ =', P14phi, 'W', calc(`Φ = ${fr('T<sub>chaud</sub> − T<sub>froid</sub>', 'R<sub>totale</sub>')} = ${fr('20 − 8', '7,2 × 10<sup>−2</sup>')} ≈ ${c('167 W')}`),
-          { rel: .01, affiche: '167', diag: v => proche(v, 28 / R14, .03) ? 'ΔT = 20 − 8 = 12 K (une différence).' : dPhi(v, 12, R14) }),
+          { signe: true, aussi: neg(P14phi, 'de l\'espace au-dessus du faux plafond vers le local', 'du local vers l\'espace au-dessus du faux plafond'), rel: .01, affiche: '167', diag: v => proche(v, 28 / R14, .03) ? 'ΔT = 20 − 8 = 12 K (une différence).' : dPhi(v, 12, R14) }),
         scient('c) Calcule l\'énergie dissipée en 30 min.', 'Q =', P14phi * 1800, 'J', calc(`E (ou Q) = Φ × Δt = 167 W × 30 × 60 s ≈ ${c('3,0 × 10<sup>5</sup> J')} = 300 kJ`),
           { diag: v => proche(v, P14phi * 30, .03) ? 'La durée doit être en secondes : 30 min = 1 800 s.' : proche(v, P14phi * .5, .03) ? 'En joules, la durée doit être en secondes (0,5 h donnerait des Wh).' : 'Q = Φ × Δt, Δt en s.' }),
       ] },
@@ -216,9 +222,9 @@
       parties: [
         nombre('a) Convertis la durée en secondes.', 'Δt =', 600, 's', calc(`Δt = 10 × 60 = ${c('600 s')}`), { diag: () => '1 min = 60 s.' }),
         nombre('a) Calcule le flux thermique à travers la plaque de cuivre.', 'Φ<sub>Cu</sub> =', 4900, 'W', calc(`Φ<sub>Cu</sub> = ${fr('Q', 'Δt')} = ${fr('2,94 × 10<sup>6</sup> J', '10 × 60 s')} = ${c('4 900 W')}`),
-          { rel: .01, diag: v => proche(v, 2.94e6 / 10) ? 'La durée doit être en secondes : 10 min = 600 s.' : proche(v, 2.94 / 600, .02) ? 'Convertis : 2,94 MJ = 2,94 × 10<sup>6</sup> J.' : 'Φ = Q / Δt.' }),
+          { signe: true, aussi: neg(4900), rel: .01, diag: v => proche(v, 2.94e6 / 10) ? 'La durée doit être en secondes : 10 min = 600 s.' : proche(v, 2.94 / 600, .02) ? 'Convertis : 2,94 MJ = 2,94 × 10<sup>6</sup> J.' : 'Φ = Q / Δt.' }),
         nombre('b) Calcule le flux thermique à travers la plaque d\'aluminium (3 chiffres significatifs).', 'Φ<sub>Al</sub> =', 20 / .021, 'W', calc(`Φ<sub>Al</sub> = ${fr('ΔT', 'R')} = ${fr('20', '2,1 × 10<sup>−2</sup>')} ≈ ${c('952 W')}`),
-          { rel: .01, affiche: '952', diag: v => dPhi(v, 20, .021) }),
+          { signe: true, aussi: neg(20 / .021), rel: .01, affiche: '952', diag: v => dPhi(v, 20, .021) }),
         nombre('c) Calcule la résistance thermique de la plaque d\'acier.', 'R<sub>ac</sub> =', .01, KW, calc(`Φ<sub>ac</sub> = ${fr('ΔT', 'R')} ⇔ R = ${fr('ΔT', 'Φ<sub>ac</sub>')} = ${fr('20', '2 × 10<sup>3</sup>')} = ${c('0,01 ' + KW)}`),
           { rel: .01, diag: v => proche(v, 10) ? 'Convertis : 2 kW = 2 000 W.' : proche(v, 100) ? 'Rapport inversé : R = ΔT / Φ.' : 'R = ΔT / Φ.' }),
         choix('d) Quel matériau transfère le plus rapidement la chaleur ?', [o('cu', 'le cuivre'), o('al', 'l\'aluminium'), o('ac', 'l\'acier')], 'cu',
@@ -293,9 +299,9 @@
           { melanger: false, indices: { A: 'Compare R<sub>A</sub> ≈ 0,25 et R<sub>B</sub> ≈ 0,32 K·W<sup>−1</sup>.' } }),
         nombre('c) Calcule le flux thermique à travers le vitrage A (2 chiffres significatifs).', 'Φ<sub>A</sub> =', phiA, 'W', calc(`Φ<sub>A</sub> = ${fr('ΔT', 'R<sub>A</sub>')} = ${fr('20 − (−2)', 'R<sub>A</sub>')} = ${fr('22', '0,247')} ≈ ${c('89 W')}`) +
           '<p class="tt-note">Avec R<sub>A</sub> arrondie à 0,25, on trouve 88 W.</p>',
-          { rel: .03, affiche: '89', diag: v => proche(v, 18 / RA, .03) ? 'ΔT = 20 − (−2) = 22 K.' : dPhi(v, 22, RA) }),
+          { signe: true, aussi: neg(phiA, EXT_INT, INT_EXT), rel: .03, affiche: '89', diag: v => proche(v, 18 / RA, .03) ? 'ΔT = 20 − (−2) = 22 K.' : dPhi(v, 22, RA) }),
         nombre('c) Calcule le flux thermique à travers le vitrage B (2 chiffres significatifs).', 'Φ<sub>B</sub> =', phiB, 'W', calc(`Φ<sub>B</sub> = ${fr('22', '0,325')} ≈ ${c('68 W')}`) + '<p class="tt-note">Avec R<sub>B</sub> arrondie à 0,32, on trouve 69 W.</p>',
-          { rel: .03, affiche: '68', diag: v => proche(v, 18 / RB, .03) ? 'ΔT = 20 − (−2) = 22 K.' : dPhi(v, 22, RB) }),
+          { signe: true, aussi: neg(phiB, EXT_INT, INT_EXT), rel: .03, affiche: '68', diag: v => proche(v, 18 / RB, .03) ? 'ΔT = 20 − (−2) = 22 K.' : dPhi(v, 22, RB) }),
         partieSens({ q: 'c) Dans quel sens s\'effectue ce transfert thermique ?', cotes: ['l\'intérieur (20 °C)', 'l\'extérieur (−2 °C)'], bon: 1,
           solution: '<p>Le transfert thermique se fait de l\'intérieur vers l\'extérieur.</p>' }),
         scient('d) Calcule l\'énergie transférée en un jour à travers le vitrage A.', 'Q<sub>A</sub> =', phiA * 86400, 'J', calc(`En 24 h = 24 × 3 600 s : Q<sub>A</sub> = Φ<sub>A</sub> × Δt = 89 × 24 × 3 600 ≈ ${c('7,7 × 10<sup>6</sup> J')}<br>(ou 89 × 24 ≈ 2,1 × 10<sup>3</sup> Wh = 2,1 kWh)`),
@@ -303,7 +309,7 @@
         scient('d) Et à travers le vitrage B ?', 'Q<sub>B</sub> =', phiB * 86400, 'J', calc(`Q<sub>B</sub> = 68 × 24 × 3 600 ≈ ${c('5,8 × 10<sup>6</sup> J')}<br>(ou 68 × 24 ≈ 1,6 × 10<sup>3</sup> Wh = 1,6 kWh)`),
           { diag: v => proche(v, phiB * 24, .03) ? 'Ce sont des Wh : en joules, Δt = 24 × 3 600 s.' : 'Q = Φ × Δt avec Δt = 24 × 3 600 s.' }),
         scient('e) Calcule le flux à travers un simple vitrage de 4 mm.', 'Φ =', phiS, 'W', calc(`R = R<sub>verre</sub> = 2,47 × 10<sup>−3</sup> ${KW}<br>Φ = ${fr('22', '2,47 × 10<sup>−3</sup>')} ≈ ${c('8,9 × 10<sup>3</sup> W')} : il est beaucoup plus grand.`),
-          { diag: v => dPhi(v, 22, Rv) }),
+          { signe: true, aussi: neg(phiS, EXT_INT, INT_EXT), diag: v => dPhi(v, 22, Rv) }),
         nombre('e) Calcule l\'énergie perdue en un jour avec ce simple vitrage, en kWh (3 chiffres significatifs).', 'E =', phiS * 24 / 1000, 'kWh', calc(`E = 8 900 W × 24 h ≈ 214 × 10<sup>3</sup> Wh = ${c('214 kWh')}`),
           { rel: .01, affiche: '214', diag: v => proche(v, phiS * 24, .02) ? 'Ce sont des Wh : divise par 1 000.' : proche(v, phiS * 86400 / 1000, .02) ? 'Avec Δt en h, Φ × Δt est en Wh.' : 'E = Φ × Δt, Δt = 24 h, puis en kWh.' }),
         choix('e) Conclure.', [o('ok', 'l\'isolation avec un simple vitrage est beaucoup plus mauvaise : environ 100 fois plus d\'énergie perdue'), o('a', 'le simple vitrage isole presque aussi bien'), o('b', 'le simple vitrage isole mieux, car il a moins de verre')], 'ok',

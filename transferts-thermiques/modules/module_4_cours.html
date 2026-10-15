@@ -37,7 +37,10 @@
    résistances déjà présentes.
    ============================================================ */
 const { fmt, sci, hasard, exemple } = COURS;
-const { fr, proche, o, cs, paroi, paroiRemplie, schemaParoi, partieSens, val } = TT;
+const { fr, proche, o, cs, paroi, paroiRemplie, schemaParoi, partieSens, val, noteFluxNeg } = TT;
+// « de l'intérieur », « vers le grenier »… (remarque d'un flux négatif)
+const de_ = n => (n === 'pièce' ? 'de la pièce' : n === 'grenier' ? 'du grenier' : 'de l\'' + n);
+const vers_ = n => (n === 'pièce' ? 'vers la pièce' : n === 'grenier' ? 'vers le grenier' : 'vers l\'' + n);
 const c = h => `<span class="c">${h}</span>`;
 const r3 = v => +v.toPrecision(3);
 const KW = 'K·W<sup>−1</sup>';
@@ -107,8 +110,9 @@ function etape2(c_) {
           solution: `<p class="crs-calc">R<sub>2</sub> = ${fr(fmt(c2.ev), fmt(c2.lam) + ' × ' + fmt(d.S))} ≈ ${c(sci(R2, 2) + ' ' + KW)}</p>` },
         { type: 'nombre', q: 'Calcule la résistance totale de la paroi (3 chiffres significatifs).', label: 'R =', valeur: R, unite: KW, signe: false, rel: .01, affiche: cs(R, 3),
           diag: v => proche(v, R1 * R2, .03) ? 'Les résistances s\'additionnent.' : 'R = R<sub>1</sub> + R<sub>2</sub>.', solution: `<p class="crs-calc">R = R<sub>1</sub> + R<sub>2</sub> ≈ ${c(cs(R, 3) + ' ' + KW)}</p>` },
-        { type: 'nombre', q: 'Calcule le flux thermique (3 chiffres significatifs).', label: 'Φ =', valeur: dT / R, unite: 'W', signe: false, rel: .015, affiche: fmt(r3(dT / R)),
-          diag: v => proche(v, dT / R1, .03) || proche(v, dT / R2, .03) ? 'Utilise la résistance <b>totale</b> R.' : proche(v, Math.abs(d.cotes[0].T + d.cotes[1].T) / R, .03) ? `Calcule bien ΔT = ${fmt(d.cotes[0].T)} − (${fmt(d.cotes[1].T)}) = ${dT} K.` : 'Φ = ΔT / R.',
+        { type: 'nombre', q: 'Calcule le flux thermique (3 chiffres significatifs).', label: 'Φ =', valeur: dT / R, unite: 'W', rel: .015, affiche: fmt(r3(dT / R)),
+          aussi: [{ valeur: -dT / R, note: noteFluxNeg(`${de_(d.cotes[1].nom)} ${vers_(d.cotes[0].nom)}`, `${de_(d.cotes[0].nom)} ${vers_(d.cotes[1].nom)}`) }],
+          diag: v => proche(Math.abs(v), dT / R1, .03) || proche(Math.abs(v), dT / R2, .03) ? 'Utilise la résistance <b>totale</b> R.' : proche(Math.abs(v), Math.abs(d.cotes[0].T + d.cotes[1].T) / R, .03) ? `Calcule bien ΔT = ${fmt(d.cotes[0].T)} − (${fmt(d.cotes[1].T)}) = ${dT} K.` : 'Φ = ΔT / R.',
           solution: `<p class="crs-calc">ΔT = ${fmt(d.cotes[0].T)} − (${fmt(d.cotes[1].T)}) = ${dT} K ; Φ = ${fr(dT, cs(R, 3))} ≈ ${c(fmt(r3(dT / R)) + ' W')}</p>` +
             paroiRemplie(d, { R: [sci(R1, 2), sci(R2, 2), cs(R, 3)], phi: fmt(r3(dT / R)) + ' W', sens: 1 }) },
       ] },

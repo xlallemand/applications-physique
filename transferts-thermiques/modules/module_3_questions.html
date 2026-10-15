@@ -18,17 +18,21 @@
 <script>
 /* ============================================================
    10 questions tirées au hasard : flux Φ = ΔT / R (2), sens et signe
-   du flux (2 : Φ toujours positif, ΔT = T_chaud − T_froid, sens du
-   chaud vers le froid, vers l'intérieur quand il fait plus chaud
-   dehors), résistance R = e / (λ S) avec conversions (2), isoler R, λ
+   du flux (2 : en STI2D Φ est compté positivement, ΔT = T_chaud −
+   T_froid, sens du chaud vers le froid, vers l'intérieur quand il fait
+   plus chaud dehors ; un flux négatif n'est pas faux, il va dans le
+   sens contraire de la flèche : ces réponses sont acceptées avec une
+   remarque, et un QCM a deux réponses justes), résistance
+   R = e / (λ S) avec conversions (2), isoler R, λ
    ou e (2), juger l'isolation : matériau le plus isolant d'un tableau,
    effet de e (2).
    Erreurs diagnostiquées : e laissée en cm ou en mm, ΔT mal calculé
-   avec des températures négatives, flux ou ΔT négatifs, sens du
-   transfert inversé, λ et R confondus pour juger de l'isolation,
+   avec des températures négatives, sens du transfert inversé (flux
+   compté du froid vers le chaud), λ et R confondus pour juger de l'isolation,
    rapports inversés.
    ============================================================ */
-const { o, fq, fmt, fr, sci, cs, hasard, melanger, proche, MATERIAUX } = TT;
+const { o, fq, fmt, fr, sci, cs, hasard, melanger, proche, MATERIAUX, noteFluxNeg, noteDTNeg } = TT;
+const INT_EXT = 'de l\'intérieur vers l\'extérieur', EXT_INT = 'de l\'extérieur vers l\'intérieur';
 const calc = h => `<p class="ph-calc">${h}</p>`;
 const c = h => `<span class="c">${h}</span>`;
 const r3 = v => +v.toPrecision(3);
@@ -46,52 +50,57 @@ const G1 = [
   function fluxNeg() {
     const [a, b, R] = hasard([[-3, -20, 0.022], [19, -6, 0.25], [20, -2, 0.32], [-5, -18, 0.04], [18, -7, 0.5], [21, -4, 0.1]]);
     return { theme: 'Flux à travers une paroi', enonce: `<p>Intérieur à ${fmt(a)} °C, extérieur à ${fmt(b)} °C. La paroi a une résistance thermique de ${fmt(R)} ${KW}.</p>`,
-      parties: [fq.nombre('Calcule l\'écart de température ΔT.', 'ΔT =', a - b, 'K', { tol: .01,
-          diag: v => proche(v, Math.abs(a + b)) || proche(v, Math.abs(Math.abs(a) - Math.abs(b))) ? `Soustraire un nombre négatif, c'est ajouter son opposé : ${fmt(a)} − (${fmt(b)}) = ${fmt(a)} + ${-b}.` : 'ΔT = T<sub>chaud</sub> − T<sub>froid</sub>.', solution: calc(`ΔT = ${fmt(a)} − (${fmt(b)}) = ${c(fmt(a - b) + ' K')}`) }),
-        fq.nombre('Calcule le flux thermique (3 chiffres significatifs).', 'Φ =', (a - b) / R, 'W', { signe: false, rel: .01, affiche: fmt(r3((a - b) / R)),
-          diag: v => proche(v, (a - b) * R, .02) ? 'Φ = ΔT / R : on divise.' : 'Φ = ΔT / R.', solution: calc(`Φ = ${fr(fmt(a - b), fmt(R))} ≈ ${c(fmt(r3((a - b) / R)) + ' W')}`) })] };
+      parties: [fq.nombre('Calcule l\'écart de température ΔT.', 'ΔT =', a - b, 'K', { tol: .01, aussi: [{ valeur: b - a, note: noteDTNeg(EXT_INT, INT_EXT) }],
+          diag: v => proche(v, Math.abs(a + b)) || proche(v, Math.abs(Math.abs(a) - Math.abs(b))) || proche(v, -Math.abs(a + b)) || proche(v, -Math.abs(Math.abs(a) - Math.abs(b))) ? `Soustraire un nombre négatif, c'est ajouter son opposé : ${fmt(a)} − (${fmt(b)}) = ${fmt(a)} + ${-b}.` : 'ΔT = T<sub>chaud</sub> − T<sub>froid</sub>.', solution: calc(`ΔT = ${fmt(a)} − (${fmt(b)}) = ${c(fmt(a - b) + ' K')}`) }),
+        fq.nombre('Calcule le flux thermique (3 chiffres significatifs).', 'Φ =', (a - b) / R, 'W', { rel: .01, affiche: fmt(r3((a - b) / R)), aussi: [{ valeur: (b - a) / R, note: noteFluxNeg(EXT_INT, INT_EXT) }],
+          diag: v => proche(Math.abs(v), (a - b) * R, .02) ? 'Φ = ΔT / R : on divise.' : 'Φ = ΔT / R.', solution: calc(`Φ = ${fr(fmt(a - b), fmt(R))} ≈ ${c(fmt(r3((a - b) / R)) + ' W')}, de l'intérieur vers l'extérieur`) })] };
   },
 ];
 
 /* ---------- Groupe 1 bis : sens et signe du flux ---------- */
-const NEG = 'Le flux thermique est toujours compté positivement : ΔT = T<sub>chaud</sub> − T<sub>froid</sub> est positif.';
+// en STI2D, Φ est compté positivement et son sens se donne à part ; un flux négatif n'est pas faux :
+// il va dans le sens contraire de celui où on le compte (le sens de la flèche)
 const CHAUD_FROID = 'Le transfert thermique va toujours du chaud vers le froid.';
 const G1b = [
-  // plus chaud dehors : sens, ΔT puis Φ (le bouton ± reste pour que l'erreur de signe soit possible)
+  // plus chaud dehors : sens, ΔT puis Φ (valeurs négatives acceptées, avec une remarque)
   function sensEte() {
     const [a, b, R] = hasard([[22, 35, 3.33], [24, 31, 1.4], [20, 36, 0.8], [25, 34, 0.45]]);
+    const P = cs((b - a) / R, 2);
     return { theme: 'Sens et signe du flux', enonce: `<p>En été : intérieur à ${a} °C, extérieur à ${b} °C. La paroi a une résistance thermique de ${fmt(R)} ${KW}.</p>`,
-      parties: [fq.choix('Dans quel sens se fait le transfert thermique ?', [o('ok', 'de l\'extérieur vers l\'intérieur'), o('a', 'de l\'intérieur vers l\'extérieur')], 'ok',
+      parties: [fq.choix('Dans quel sens se fait le transfert thermique ?', [o('ok', EXT_INT), o('a', INT_EXT)], 'ok',
           { melanger: false, indices: { a: CHAUD_FROID + ' Ici, l\'extérieur est le plus chaud.' }, solution: '<p>Du chaud (l\'extérieur) vers le froid (l\'intérieur) : la maison reçoit de l\'énergie.</p>' }),
-        fq.nombre('Calcule l\'écart de température ΔT.', 'ΔT =', b - a, 'K', { tol: .01,
-          diag: v => proche(v, a - b) ? 'ΔT est toujours positif : ΔT = T<sub>chaud</sub> − T<sub>froid</sub>, ici T<sub>ext</sub> − T<sub>int</sub>.' : 'ΔT = T<sub>chaud</sub> − T<sub>froid</sub>.',
-          solution: calc(`ΔT = T<sub>ext</sub> − T<sub>int</sub> = ${b} − ${a} = ${c((b - a) + ' K')}`) }),
-        fq.nombre('Calcule le flux thermique (2 chiffres significatifs).', 'Φ =', (b - a) / R, 'W', { rel: .03, affiche: cs((b - a) / R, 2),
-          diag: v => proche(-v, (b - a) / R, .03) ? NEG + ' Le sens (vers l\'intérieur) se donne par une phrase, pas par un signe.' : proche(v, (b - a) * R, .03) ? 'Φ = ΔT / R : on divise.' : 'Φ = ΔT / R.',
-          solution: calc(`Φ = ${fr('ΔT', 'R<sub>th</sub>')} = ${fr(b - a, fmt(R))} ≈ ${c(cs((b - a) / R, 2) + ' W')}, de l'extérieur vers l'intérieur`) })] };
+        fq.nombre('Calcule l\'écart de température ΔT.', 'ΔT =', b - a, 'K', { tol: .01, aussi: [{ valeur: a - b, note: noteDTNeg(INT_EXT, EXT_INT) }],
+          diag: () => 'ΔT = T<sub>chaud</sub> − T<sub>froid</sub>.',
+          solution: calc(`ΔT = T<sub>ext</sub> − T<sub>int</sub> = ${b} − ${a} = ${c((b - a) + ' K')}`) + `<p class="tt-note">(Juste aussi : ΔT = T<sub>int</sub> − T<sub>ext</sub> = ${a - b} K, si on compte le flux de l'intérieur vers l'extérieur.)</p>` }),
+        fq.nombre('Calcule le flux thermique (2 chiffres significatifs).', 'Φ =', (b - a) / R, 'W', { rel: .03, affiche: P, aussi: [{ valeur: (a - b) / R, note: noteFluxNeg(INT_EXT, EXT_INT) }],
+          diag: v => proche(Math.abs(v), (b - a) * R, .03) ? 'Φ = ΔT / R : on divise.' : 'Φ = ΔT / R.',
+          solution: calc(`Φ = ${fr('ΔT', 'R<sub>th</sub>')} = ${fr(b - a, fmt(R))} ≈ ${c(P + ' W')}, de l'extérieur vers l'intérieur`) + `<p class="tt-note">(Juste aussi : Φ = −${P} W, compté de l'intérieur vers l'extérieur.)</p>` })] };
   },
-  // un élève écrit Φ = (T_int − T_ext) / R alors qu'il fait plus chaud dehors
+  // un élève écrit Φ = (T_int − T_ext) / R < 0 alors qu'il fait plus chaud dehors : c'est juste
   function critique() {
     const [a, b, R] = hasard([[19, 31, 0.5], [21, 33, 0.4], [23, 35, 0.3], [20, 36, 0.8], [24, 32, 0.2]]);
     const p = fmt(r3((b - a) / R));
-    return { theme: 'Sens et signe du flux', enonce: `<p>En été, il fait ${a} °C dans une maison et ${b} °C dehors ; un mur a une résistance thermique de ${fmt(R)} ${KW}. Un élève écrit :</p>${calc(`Φ = ${fr('T<sub>int</sub> − T<sub>ext</sub>', 'R<sub>th</sub>')} = ${fr(a + ' − ' + b, fmt(R))} = −${p} W`)}`,
-      parties: [fq.choix('Qu\'en penses-tu ?', [o('ok', `C'est faux : un flux thermique est toujours positif. Φ = ${p} W, de l'extérieur vers l'intérieur.`), o('a', 'C\'est juste : le signe « − » indique que le flux va vers l\'intérieur.'),
+    return { theme: 'Sens et signe du flux', enonce: `<p>En été, il fait ${a} °C dans une maison et ${b} °C dehors ; un mur a une résistance thermique de ${fmt(R)} ${KW}. Un élève compte le flux de l'intérieur vers l'extérieur et écrit :</p>${calc(`Φ = ${fr('T<sub>int</sub> − T<sub>ext</sub>', 'R<sub>th</sub>')} = ${fr(a + ' − ' + b, fmt(R))} = −${p} W`)}`,
+      parties: [fq.choix('Qu\'en penses-tu ?', [o('ok', 'C\'est juste : le signe «&nbsp;−&nbsp;» indique que le flux va dans le sens contraire, de l\'extérieur vers l\'intérieur.'), o('a', 'C\'est faux : un flux thermique ne peut pas être négatif.'),
           o('b', `C'est juste : la maison perd ${p} W.`), o('c', 'C\'est faux : il faut d\'abord convertir les températures en kelvins.')], 'ok',
-        { indices: { a: 'On ne donne pas le sens par un signe : Φ est toujours positif, et on précise le sens par une phrase ou une flèche.', b: 'Il fait plus chaud dehors : la maison reçoit de l\'énergie, elle n\'en perd pas.', c: 'Un écart de température a la même valeur en K et en °C : la conversion ne change rien.' },
-          solution: calc(`ΔT = T<sub>ext</sub> − T<sub>int</sub> = ${b} − ${a} = ${b - a} K ; Φ = ${fr(b - a, fmt(R))} = ${c(p + ' W')}`) + '<p>Le flux est positif ; il va de l\'extérieur (le plus chaud) vers l\'intérieur.</p>' })] };
+        { indices: { a: 'Un flux négatif n\'est pas faux : il va dans le sens contraire de celui où on le compte. En STI2D, on préfère le donner positif, mais les deux écritures sont justes.', b: 'Il fait plus chaud dehors : la maison reçoit de l\'énergie, elle n\'en perd pas. C\'est ce que dit le signe «&nbsp;−&nbsp;».', c: 'Un écart de température a la même valeur en K et en °C : la conversion ne change rien.' },
+          solution: `<p>«&nbsp;Φ = −${p} W compté de l'intérieur vers l'extérieur&nbsp;» et «&nbsp;Φ = ${p} W de l'extérieur vers l'intérieur&nbsp;» disent la même chose : ${p} W entrent dans la maison. En STI2D, on préfère la seconde écriture (ΔT = T<sub>ext</sub> − T<sub>int</sub> = ${b - a} K).</p>` })] };
   },
-  // signe et sens du flux dans une situation : positif ou négatif, vers l'intérieur ou vers l'extérieur
+  // signe et sens du flux dans une situation : deux réponses justes (Φ positif dans le sens du transfert,
+  // ou Φ négatif avec la flèche dans l'autre sens)
   function signe() {
     const s = hasard([
-      { t: 'En hiver, il fait 19 °C dans une maison et 2 °C dehors.', ch: 'l\'intérieur', fr: 'l\'extérieur', a: 'de l\'intérieur vers l\'extérieur', b: 'de l\'extérieur vers l\'intérieur' },
-      { t: 'En été, il fait 24 °C dans une maison climatisée et 35 °C dehors.', ch: 'l\'extérieur', fr: 'l\'intérieur', a: 'de l\'extérieur vers l\'intérieur', b: 'de l\'intérieur vers l\'extérieur' },
-      { t: 'Dans un hôtel de glace, il fait −3 °C à l\'intérieur et −20 °C dehors.', ch: 'l\'intérieur', fr: 'l\'extérieur', a: 'de l\'intérieur vers l\'extérieur', b: 'de l\'extérieur vers l\'intérieur' },
+      { t: 'En hiver, il fait 19 °C dans une maison et 2 °C dehors.', ch: 'l\'intérieur', fr: 'l\'extérieur', a: INT_EXT, b: EXT_INT },
+      { t: 'En été, il fait 24 °C dans une maison climatisée et 35 °C dehors.', ch: 'l\'extérieur', fr: 'l\'intérieur', a: EXT_INT, b: INT_EXT },
+      { t: 'Dans un hôtel de glace, il fait −3 °C à l\'intérieur et −20 °C dehors.', ch: 'l\'intérieur', fr: 'l\'extérieur', a: INT_EXT, b: EXT_INT },
       { t: 'Un congélateur à −18 °C est posé dans une cuisine à 20 °C.', ch: 'la cuisine', fr: 'l\'intérieur du congélateur', a: 'de la cuisine vers l\'intérieur du congélateur', b: 'de l\'intérieur du congélateur vers la cuisine' },
     ]);
     return { theme: 'Sens et signe du flux', enonce: `<p>${s.t}</p>`,
-      parties: [fq.choix('Le flux thermique à travers la paroi est :', [o('ok', 'positif, ' + s.a), o('pb', 'positif, ' + s.b), o('na', 'négatif, ' + s.a), o('nb', 'négatif, ' + s.b)], 'ok',
-        { indices: { pb: CHAUD_FROID, na: NEG, nb: NEG + ' Et il va du chaud vers le froid.' },
-          solution: `<p>Le flux est toujours positif ; il va du chaud (${s.ch}) vers le froid (${s.fr}) : ${s.a}.</p>` })] };
+      parties: [fq.choix('Comment peut-on décrire le flux thermique à travers la paroi ? Choisis une réponse juste.',
+        [o('pa', 'Φ positif, flèche ' + s.a), o('nb', 'Φ négatif, flèche ' + s.b), o('pb', 'Φ positif, flèche ' + s.b), o('na', 'Φ négatif, flèche ' + s.a)], ['pa', 'nb'],
+        { colonne: true, notes: { pa: 'C\'est l\'écriture préférée en STI2D.', nb: 'C\'est juste aussi : le signe «&nbsp;−&nbsp;» indique que le flux va dans le sens contraire de la flèche.' },
+          indices: { pb: 'Un flux positif va dans le sens de la flèche ; or ' + CHAUD_FROID.charAt(0).toLowerCase() + CHAUD_FROID.slice(1), na: 'Un flux négatif va dans le sens contraire de la flèche : ici, il irait du froid vers le chaud.' },
+          solution: `<p>Le transfert va du chaud (${s.ch}) vers le froid (${s.fr}). <b>Deux réponses sont justes</b> : «&nbsp;Φ positif, flèche ${s.a}&nbsp;» (écriture préférée en STI2D) et «&nbsp;Φ négatif, flèche ${s.b}&nbsp;» : le signe «&nbsp;−&nbsp;» indique que le flux va dans le sens contraire de la flèche.</p>` })] };
   },
 ];
 
@@ -181,7 +190,7 @@ function tirage() {
 TT.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 3 · QUESTIONS', titre: 'Résistance thermique d\'une paroi',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : flux Φ = ΔT / R, toujours positif, et sens du transfert, résistance R = e / (λ × S) avec conversions, calcul de R, λ ou e, choix du meilleur isolant.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : flux Φ = ΔT / R, son signe et le sens du transfert, résistance R = e / (λ × S) avec conversions, calcul de R, λ ou e, choix du meilleur isolant.</p>',
   questions: tirage,
   revoir: { href: 'module_3_cours.html', label: 'Revoir le cours' },
   suite: { href: 'module_4_cours.html', label: 'Module 4 : parois composées →' },
