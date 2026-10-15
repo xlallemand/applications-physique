@@ -12,9 +12,17 @@
    PFD.serie(opts)                      série de questions notée sur 20
    PFD.outil(monter)                    outil interactif placé dans du HTML
    PFD.V(n, s), PFD.nomV(clé)           noms de vecteurs (flèche au-dessus) : <span class="vec-nom">P</span>, <span class="vec-nom">R</span>ₙ, <span class="vec-nom">f</span>, <span class="vec-nom">T</span>…
-   PFD.scene(s, o), PFD.sceneRemplie(s) dessin d'une situation (SVG), avec ses forces
-   PFD.bilan(s)                         bilan des forces en quatre étapes (situations : modules/situations.js)
-   PFD.chrono(o)                        chronophotographie animée (uniforme, accéléré, décéléré)
+   PFD.couleurs(noms)                   une couleur différente pour chaque force d'un dessin
+   PFD.scene(s, o), PFD.sceneRemplie(s) dessin d'une situation (SVG), avec ses forces (flèches superposées décalées)
+   PFD.diagramme(sys, objets), PFD.diagrammeDe(s, etat)
+                                        diagramme objet-action (SVG)
+   PFD.bilan(s, opts)                   bilan des forces étape par étape (situations : modules/situations.js) :
+                                        acteurs, force de l'air négligeable ou non, diagramme objet-action,
+                                        tracé, noms, compensation
+   PFD.infoForces()                     infographie : forces à distance, forces de contact
+   PFD.chrono(o)                        chronophotographie animée (trajectoire rectiligne, circulaire ou
+                                        curviligne ; mouvement uniforme, accéléré, décéléré)
+   PFD.partieMouvement(o)               décrire un mouvement en deux mots (trajectoire, puis vitesse)
    PFD.partieResultante(o), PFD.partieAcc(o)
                                         tracer Σ <span class="vec-nom">F</span> puis <span class="vec-nom">a</span> dans un quadrillage
                                         (repère de cinematique/modules/vecteurs.js, à charger avant)
@@ -690,7 +698,8 @@
      NOMS DES VECTEURS FORCES (HTML et SVG)
      ============================================================ */
   const V = (n, s) => `<span class="vec-nom">${n}</span>${s ? `<sub>${s}</sub>` : ''}`;
-  const NOMS = { P: ['P'], RN: ['R', 'N'], R: ['R'], f: ['f'], T: ['T'], FA: ['F', 'A'], Fm: ['F', 'm'], Fmag: ['F', 'mag'], Felec: ['F', 'élec'], Fpied: ['F', 'pied'], F: ['F'] };
+  // F⃗archi : poussée d'Archimède (eau, huile, air…) ; F⃗air : force de l'air (ses frottements)
+  const NOMS = { P: ['P'], RN: ['R', 'N'], R: ['R'], f: ['f'], T: ['T'], Farchi: ['F', 'archi'], Fair: ['F', 'air'], Fm: ['F', 'm'], Fmag: ['F', 'mag'], Felec: ['F', 'élec'], Fpied: ['F', 'pied'], F: ['F'] };
   const nomV = k => V(...NOMS[k]);
   // ce que désigne chaque nom (diagnostic d'un nom mal choisi)
   const SENS_NOM = {
@@ -699,21 +708,48 @@
     R: `${nomV('R')} est la <b>réaction</b> du support (<span class="vec-nom">R</span> = <span class="vec-nom">R</span><sub>N</sub> + <span class="vec-nom">f</span>).`,
     f: `${nomV('f')} désigne les <b>frottements</b>.`,
     T: `${nomV('T')} est la <b>tension</b> d'un fil, d'un ressort ou d'une corde.`,
-    FA: `${nomV('FA')} est la <b>poussée d'Archimède</b> exercée par un fluide, verticale vers le haut.`,
+    Farchi: `${nomV('Farchi')} est la <b>poussée d'Archimède</b> exercée par un fluide (eau, huile, air…), verticale vers le haut.`,
+    Fair: `${nomV('Fair')} est la force exercée par l'<b>air</b> (ses frottements).`,
     Fm: `${nomV('Fm')} est la <b>force motrice</b>.`,
     Fmag: `${nomV('Fmag')} est la force <b>magnétique</b> exercée par un aimant.`,
     Felec: `${nomV('Felec')} est la force <b>électrique</b> exercée par un objet chargé.`,
     Fpied: `${nomV('Fpied')} est la force exercée par le <b>pied</b>.`,
     F: `${nomV('F')} est une force quelconque (ici, celle de la corde).`,
   };
-  // nom en SVG (lettre, indice, petite flèche au-dessus) ; x : centre, y : ligne de base
-  function nomSVG(k, x, y, cls) {
+  // largeur d'un nom en SVG
+  const largeurNom = k => { const [p, s] = NOMS[k]; return p.length * 9.5 + (s ? s.length * 6.6 : 0); };
+  // nom en SVG (lettre, indice, petite flèche au-dessus) ; x : centre, y : ligne de base ; coul : couleur de la force
+  function nomSVG(k, x, y, cls, coul) {
     const [p, s] = NOMS[k];
     const wp = p.length * 9.5, ws = s ? s.length * 6.6 : 0, x0 = x - (wp + ws) / 2;
     const ya = y - 15, x2 = x0 + Math.max(wp, 9) + 1;
-    return `<g class="pfd-nom${cls ? ' ' + cls : ''}"><text x="${x0.toFixed(1)}" y="${y.toFixed(1)}">${p}${s ? `<tspan dy="4" font-size="10.5">${s}</tspan>` : ''}</text>` +
+    return `<g class="pfd-nom${cls ? ' ' + cls : ''}"${coul ? ` style="color:${coul}"` : ''}><text x="${x0.toFixed(1)}" y="${y.toFixed(1)}">${p}${s ? `<tspan dy="4" font-size="10.5">${s}</tspan>` : ''}</text>` +
       `<path d="M${(x0 + 1).toFixed(1)},${ya.toFixed(1)} H${x2.toFixed(1)} M${(x2 - 3).toFixed(1)},${(ya - 2.6).toFixed(1)} L${x2.toFixed(1)},${ya.toFixed(1)} L${(x2 - 3).toFixed(1)},${(ya + 2.6).toFixed(1)}"/></g>`;
   }
+
+  /* ============================================================
+     COULEURS DES VECTEURS FORCES : une couleur différente pour chaque
+     force d'un même dessin (attributs de présentation des SVG, comme
+     VEC.C). La couleur suit le nom de la force (le poids est toujours
+     orange, la réaction du support bleue…) ; si deux forces d'un même
+     dessin ont la même couleur, la seconde prend une couleur libre.
+     ============================================================ */
+  const COUL = { P: '#d9480f', RN: '#1971c2', R: '#1971c2', f: '#c2255c', T: '#5c940d', Farchi: '#0b7285', Fair: '#1098ad',
+    Fm: '#b35c00', F: '#b35c00', Fpied: '#5c940d', Fmag: '#862e9c', Felec: '#862e9c' };
+  const COUL_LIBRES = ['#5c940d', '#862e9c', '#b35c00', '#c2255c', '#1971c2', '#0b7285', '#d9480f', '#1098ad'];
+  const COUL_QUAD = ['#d9480f', '#1971c2', '#5c940d', '#862e9c'];      // F⃗₁, F⃗₂… dans le quadrillage
+  function couleurs(noms) {
+    const res = noms.map(() => null), prises = [];
+    // d'abord la couleur propre à chaque nom, puis une couleur libre pour les doublons
+    noms.forEach((k, i) => { const c = COUL[k]; if (c && prises.indexOf(c) === -1) { res[i] = c; prises.push(c); } });
+    noms.forEach((k, i) => {
+      if (res[i]) return;
+      res[i] = COUL_LIBRES.find(x => prises.indexOf(x) === -1) || COUL_LIBRES[0];
+      prises.push(res[i]);
+    });
+    return res;
+  }
+  const couleursForces = fs => couleurs(fs.map(f => f.noms[0]));
 
   /* ============================================================
      DIRECTIONS (angles en degrés, 0 = vers la droite, 90 = vers le haut)
@@ -732,30 +768,59 @@
      SCÈNE D'UNE SITUATION (SVG, repère 360 × 256 ; dessins entre y = 0 et 240,
      la marge du bas garde lisibles les noms des forces dirigées vers le bas)
      s = { dessin (SVG), points: { G: [x, y], A: […] }, nomsPts, titre, lf (longueur des flèches) }
-     o = { forces: [{ pt, ang, nom, num, etat ('ok', 'ko', 'actif') }], points (cliquables), actif (point choisi) }
+     o = { forces: [{ pt, ang, nom, num, etat ('ok', 'ko', 'actif'), coul, cote }], points (cliquables), actif (point choisi) }
+     Chaque force a sa couleur (coul) ; l'état d'un tracé se lit sur sa pastille
+     numérotée (verte si juste, rouge si faux) et une flèche fausse est en tirets.
      ============================================================ */
   const LF = 58, HS = 256;                        // longueur des flèches (sans souci d'échelle), hauteur du dessin
-  function fleche(x, y, ang, cls, dec, lf) {
+  function fleche(x, y, ang, cls, dec, lf, coul) {
     const r = ang * Math.PI / 180, c = Math.cos(r), s = -Math.sin(r), L = lf || LF;
     const x1 = x - s * dec, y1 = y + c * dec, x2 = x1 + L * c, y2 = y1 + L * s, bx = x2 - 11 * c, by = y2 - 11 * s;
     const f = v => v.toFixed(1);
-    return { svg: `<g class="pfd-f${cls ? ' ' + cls : ''}"><line x1="${f(x1)}" y1="${f(y1)}" x2="${f(bx)}" y2="${f(by)}"/><path d="M${f(x2)},${f(y2)} L${f(bx - 5.5 * s)},${f(by + 5.5 * c)} L${f(bx + 5.5 * s)},${f(by - 5.5 * c)} Z"/></g>`, x2, y2, c, s };
+    return { svg: `<g class="pfd-f${cls ? ' ' + cls : ''}"${coul ? ` style="color:${coul}"` : ''}><line x1="${f(x1)}" y1="${f(y1)}" x2="${f(bx)}" y2="${f(by)}"/><path d="M${f(x2)},${f(y2)} L${f(bx - 5.5 * s)},${f(by + 5.5 * c)} L${f(bx + 5.5 * s)},${f(by - 5.5 * c)} Z"/></g>`, x2, y2, c, s };
+  }
+  // Deux flèches qui se superposeraient (sur la même droite, segments qui se recouvrent) :
+  // la seconde est décalée de quelques pixels perpendiculairement, pour qu'on voie les deux
+  // (d'abord du côté opposé à son nom, qui s'écrit à gauche d'une flèche vers le bas).
+  // a, b : { x, y, c, s, L } (départ, direction unitaire, longueur) ; ea, eb : décalages
+  function recouvre(a, ea, b, eb) {
+    if (Math.abs(a.c * b.s - a.s * b.c) > .06) return false;              // pas parallèles
+    const meme = a.c * b.c + a.s * b.s > 0;                               // même sens : les pointes se gênent
+    const ax = a.x - a.s * ea, ay = a.y + a.c * ea, bx = b.x - b.s * eb, by = b.y + b.c * eb;
+    if (Math.abs((bx - ax) * -a.s + (by - ay) * a.c) >= (meme ? 11 : 5)) return false;
+    // recouvrement des deux segments, projetés sur la direction de a
+    const t1 = (bx - ax) * a.c + (by - ay) * a.s, t2 = t1 + b.L * (b.c * a.c + b.s * a.s);
+    return Math.min(a.L, Math.max(t1, t2)) - Math.max(0, Math.min(t1, t2)) > 3;
+  }
+  function decalages(geo) {
+    const dec = [];
+    geo.forEach((a, i) => {
+      if (!a) { dec.push(0); return; }
+      const e = [0, -6, 6, -12, 12, -18, 18].find(x => geo.slice(0, i).every((b, j) => !b || !recouvre(a, x, b, dec[j])));
+      dec.push(e || 0);
+    });
+    return dec;
   }
   function scene(s, o) {
     o = o || {};
     const fs = o.forces || [];
+    const geo = fs.map(f => {
+      if (!f || f.pt == null || f.ang == null) return null;
+      const r = f.ang * Math.PI / 180, p = s.points[f.pt];
+      return { x: p[0], y: p[1], c: Math.cos(r), s: -Math.sin(r), L: s.lf || LF };
+    });
+    const dec = decalages(geo);
     let g = s.dessin;
     fs.forEach((f, i) => {
-      if (!f || f.pt == null || f.ang == null) return;
-      // deux flèches identiques (même point, même direction) sont écartées l'une de l'autre
-      const avant = fs.slice(0, i).filter(x => x && x.pt === f.pt && x.ang != null && ecartAngle(x.ang, f.ang) < 2).length;
-      const meme = fs.filter(x => x && x.pt === f.pt && x.ang != null && ecartAngle(x.ang, f.ang) < 2).length;
-      const dec = meme > 1 ? (avant - (meme - 1) / 2) * 12 : 0;
-      const p = s.points[f.pt], a = fleche(p[0], p[1], f.ang, f.etat, dec, s.lf);
+      if (!geo[i]) return;
+      const p = s.points[f.pt], a = fleche(p[0], p[1], f.ang, f.etat, dec[i], s.lf, f.coul);
       g += a.svg;
-      const lx = a.x2 + a.c * 15 - a.s * 9, ly = a.y2 + a.s * 15 + a.c * 9;
-      if (f.nom) g += nomSVG(f.nom, lx, ly + 6, f.etat);
-      else if (f.num) g += `<g class="pfd-num${f.etat ? ' ' + f.etat : ''}"><circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="8.5"/><text x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}" text-anchor="middle">${f.num}</text></g>`;
+      // nom au-delà de la pointe, sur le côté ; une flèche décalée a son nom du côté du décalage
+      // (f.cote = −1 : nom de l'autre côté, quand il gênerait un autre nom)
+      const cote = (f.cote || (dec[i] < 0 ? -1 : 1)) * 9;
+      const lx = a.x2 + a.c * 15 - a.s * cote, ly = a.y2 + a.s * 15 + a.c * cote;
+      if (f.nom) g += nomSVG(f.nom, lx, ly + 6, f.etat, f.coul);
+      else if (f.num) g += `<g class="pfd-num${f.etat ? ' ' + f.etat : ''}"${!f.etat && f.coul ? ` style="color:${f.coul}"` : ''}><circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="8.5"/><text x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}" text-anchor="middle">${f.num}</text></g>`;
     });
     Object.keys(s.points).forEach(id => {
       const [x, y] = s.points[id];
@@ -767,20 +832,119 @@
   }
 
   /* ============================================================
-     BILAN DES FORCES : une situation en quatre étapes (+ compensation)
-     PFD.bilan(s) → { enonce, parties } : question pour PFD.question ou COURS
+     DIAGRAMME OBJET-ACTION (SVG, repère 360 × 200)
+     Le système au centre ; autour, chaque objet qui agit sur lui, relié
+     par un trait en pointillés (action à distance) ou plein (action de
+     contact) ; trait barré : force négligeable. Le nom des forces est
+     écrit près du trait, dans la couleur de leur vecteur.
+     PFD.diagramme(sys, objets, o)
+       objets : [{ nom, type ('distance' | 'contact' | null : pas encore choisi),
+                   neglige, forces: [{ nom (clé de NOMS), coul }], note }]
+       placement : le premier objet (la Terre) en haut à droite, les trois
+       suivants en bas, les autres en haut à gauche
+     PFD.diagrammeDe(s, etat) : celui d'une situation ; etat (pendant le bilan) :
+       { types: { acteur: 'distance' | 'contact' }, air: null (pas encore dit) | true | false,
+         noms: [clé du nom choisi, par force] }
+     ============================================================ */
+  const HD = 200;
+  const court = t => t.replace(/^(la |le |les |l'|l’)/i, '');
+  const lgTexte = t => t.length * 7.5;                       // largeur d'un texte de 13 px, gras
+  function diagramme(sys, objets, o) {
+    o = o || {};
+    const f1 = v => v.toFixed(1);
+    const S = { x: 180, y: 100, rx: Math.min(112, lgTexte(sys) / 2 + 18), ry: 20 };
+    const haut = [], bas = [];
+    objets.forEach((ob, i) => { if (i === 0) haut.push(ob); else if (bas.length < 3) bas.push(ob); else haut.unshift(ob); });
+    const XH = [[], [280], [80, 280]], XB = [[], [180], [92, 268], [62, 180, 298]];
+    const pl = haut.map((ob, k) => ({ ob, x: XH[haut.length][k], y: 32, max: 150 }))
+      .concat(bas.map((ob, k) => ({ ob, x: XB[bas.length][k], y: 170, max: bas.length === 3 ? 114 : 160 })));
+    // point du bord d'une ellipse, dans la direction (dx, dy)
+    const bord = (e, dx, dy) => { const l = Math.hypot(dx, dy), ux = dx / l, uy = dy / l, t = 1 / Math.hypot(ux / e.rx, uy / e.ry); return [e.x + t * ux, e.y + t * uy]; };
+    // nom dans une bulle (resserré s'il est trop long)
+    const texte = (e, t) => `<text x="${e.x}" y="${e.y + 4.5}" text-anchor="middle" class="pfd-do-t"${lgTexte(t) > 2 * e.rx - 14 ? ` textLength="${(2 * e.rx - 16).toFixed(0)}" lengthAdjust="spacingAndGlyphs"` : ''}>${t}</text>`;
+    let traits = '', bulles = `<ellipse cx="${S.x}" cy="${S.y}" rx="${f1(S.rx)}" ry="${S.ry}" class="pfd-do-sys"/>${texte(S, sys)}`, noms = '';
+    // étendue horizontale du dessin : le cadre est resserré autour (texte plus grand à l'écran)
+    let xmin = S.x - S.rx, xmax = S.x + S.rx;
+    const etendre = (a, b) => { xmin = Math.min(xmin, a); xmax = Math.max(xmax, b); };
+    pl.forEach(p => {
+      const ob = p.ob, e = { x: p.x, y: p.y, rx: Math.min(p.max / 2, lgTexte(ob.nom) / 2 + 13), ry: 16 };
+      etendre(e.x - e.rx, e.x + e.rx);
+      bulles += `<ellipse cx="${e.x}" cy="${e.y}" rx="${f1(e.rx)}" ry="${e.ry}" class="pfd-do-obj"/>${texte(e, ob.nom)}`;
+      const [x1, y1] = bord(S, e.x - S.x, e.y - S.y), [x2, y2] = bord(e, S.x - e.x, S.y - e.y);
+      traits += `<line x1="${f1(x1)}" y1="${f1(y1)}" x2="${f1(x2)}" y2="${f1(y2)}" class="pfd-do-l${ob.type === 'distance' ? ' dist' : ob.type === 'contact' ? '' : ' vide'}"/>`;
+      // milieu du trait, direction du trait (ux, uy) et normale tournée vers l'extérieur (nx, ny)
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, l = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / l, uy = (y2 - y1) / l;
+      let nx = -uy, ny = ux;
+      // côté des noms : vers l'extérieur pour les objets du bas, au-dessus du trait pour ceux du haut
+      if (e.y < S.y ? ny > 0 : (nx * (e.x - S.x) < 0 || (Math.abs(e.x - S.x) < 1 && nx < 0))) { nx = -nx; ny = -ny; }
+      const ancre = nx > .3 ? 'start' : nx < -.3 ? 'end' : 'middle';
+      if (ob.neglige) {
+        // trait barré : un petit trait en travers (à 60° du trait), et le mot « négligeable »
+        const vx = ux * .5 - uy * .866, vy = ux * .866 + uy * .5;
+        traits += `<line x1="${f1(mx - 11 * vx)}" y1="${f1(my - 11 * vy)}" x2="${f1(mx + 11 * vx)}" y2="${f1(my + 11 * vy)}" class="pfd-do-barre"/>`;
+        const xn = mx + nx * 13;
+        noms += `<text x="${f1(xn)}" y="${f1(my + ny * 13 + 4)}" text-anchor="${ancre}" class="pfd-do-neg">négligeable</text>`;
+        etendre(ancre === 'start' ? xn : ancre === 'end' ? xn - 70 : xn - 35, ancre === 'start' ? xn + 70 : ancre === 'end' ? xn : xn + 35);
+      }
+      // noms des forces, en ligne à côté du milieu du trait (un nom répété n'est écrit qu'une fois)
+      // (la note, « (frottements) », suit les noms sur la même ligne)
+      const fs = (ob.forces || []).filter((fo, k, l) => l.findIndex(x => x.nom === fo.nom) === k);
+      if (!fs.length) return;
+      const larg = fs.map(fo => largeurNom(fo.nom)), lnote = ob.note ? ob.note.length * 6.4 + 6 : 0;
+      const tot = larg.reduce((a, b) => a + b, 0) + 8 * (fs.length - 1) + lnote;
+      let x = mx + nx * 12 - (ancre === 'end' ? tot : ancre === 'middle' ? tot / 2 : 0);
+      etendre(x, x + tot);
+      const yb = my + ny * 12 + (ny < -.3 ? 3 : ny > .3 ? 19 : 6);
+      fs.forEach((fo, k) => { noms += nomSVG(fo.nom, x + larg[k] / 2, yb, '', fo.coul); x += larg[k] + 8; });
+      if (ob.note) noms += `<text x="${f1(x - 2)}" y="${f1(yb)}" class="pfd-do-neg">${ob.note}</text>`;
+    });
+    const aria = o.aria || `Diagramme objet-action du système ${sys} : ` + objets.map(ob => `${ob.nom}, ${ob.type === 'distance' ? 'action à distance' : ob.type === 'contact' ? 'action de contact' : 'type à choisir'}${ob.neglige ? ', force négligeable' : ''}`).join(' ; ');
+    // o.cadre = [x0, x1] : cadre imposé (diagrammes côte à côte, à la même échelle)
+    const x0 = o.cadre ? o.cadre[0] : Math.max(0, Math.floor(xmin - 8)), x1 = o.cadre ? o.cadre[1] : Math.min(360, Math.ceil(xmax + 8));
+    return `<svg viewBox="${x0} 0 ${x1 - x0} ${HD}" class="pfd-do" style="max-width:${Math.round(440 * (x1 - x0) / 360)}px" role="img" aria-label="${aria}">${traits}${bulles}${noms}</svg>`;
+  }
+  // type d'action d'un acteur (l'air agit toujours par contact, même quand sa force est négligée)
+  const typeDe = (s, a) => a.type || (s.forces.find(f => f.acteur === a.id) || {}).type || 'contact';
+  function diagrammeDe(s, etat, o) {
+    const cols = couleursForces(s.forces);
+    const objets = s.acteurs.map(a => {
+      const forces = [];
+      s.forces.forEach((f, i) => {
+        if (f.acteur !== a.id) return;
+        const k = etat ? etat.noms[i] : f.noms[0];
+        if (k) forces.push({ nom: k, coul: cols[i] });
+      });
+      const neglige = a.id === 'air' && !!s.air && s.air.neglige && (!etat || etat.air != null);
+      return { nom: a.court || court(a.nom), type: etat ? etat.types[a.id] || null : typeDe(s, a), neglige, forces,
+        note: a.id === 'air' && forces.length && s.air && s.air.cause === 'frottements' ? '(frottements)' : '' };
+    });
+    return diagramme(s.sysCourt || court(s.systeme), objets, o);
+  }
+  // diagrammes de plusieurs situations affichées côte à côte : même cadre, donc même échelle
+  function diagrammesDe(liste) {
+    const cadres = liste.map(s => diagrammeDe(s).match(/viewBox="([\d.]+) 0 ([\d.]+)/)).map(m => [+m[1], +m[1] + +m[2]]);
+    const cadre = [Math.min(...cadres.map(c => c[0])), Math.max(...cadres.map(c => c[1]))];
+    return liste.map(s => diagrammeDe(s, null, { cadre }));
+  }
+
+  /* ============================================================
+     BILAN DES FORCES : une situation, étape par étape
+     PFD.bilan(s, opts) → { enonce, parties } : question pour PFD.question ou COURS
        1. qui agit sur le système ? (acteurs à sélectionner, distracteurs)
-       2. à distance ou de contact ?
-       3. tracé : point de départ (centre G ou point de contact), direction et sens
+       2. l'air touche le système : peut-on négliger sa force ? (si l'air est un acteur)
+       3. diagramme objet-action : à distance (pointillés) ou de contact (trait plein) ?
+       4. tracé : point de départ (centre G ou point de contact), direction et sens
           (8 directions, + directions propres : perpendiculaire au support, le long du fil…)
-       4. nom de chaque vecteur
-       5. les forces se compensent-elles ? (si s.comp)
-     Toutes les parties partagent l'état de la situation (plusieurs exemplaires possibles).
+       5. nom de chaque vecteur (écrit aussi sur le diagramme)
+       6. les forces se compensent-elles ? (si s.comp)
+     opts.diagramme : s'arrêter au diagramme objet-action (étapes 1 à 3).
+     Toutes les parties partagent l'état de la situation (plusieurs exemplaires
+     possibles) ; les diagrammes affichés se mettent à jour à chaque choix.
      Format d'une situation : voir modules/situations.js.
      ============================================================ */
-  const MANQUE = 'Il manque un acteur : cherche d\'abord les actions à distance (la Terre attire toujours le système), puis <b>chaque objet qui touche</b> le système.';
+  const MANQUE = 'Il manque un acteur : cherche d\'abord les actions à distance (la Terre attire toujours le système), puis <b>chaque objet qui touche</b> le système (l\'air aussi).';
   function partieActeurs(s) {
-    return { type: 'perso', q: `1. Qui agit sur le système (${s.systeme}) ? Sélectionne <b>tous</b> les acteurs, puis valide.`,
+    return { type: 'perso', q: `Qui agit sur le système (${s.systeme}) ? Sélectionne <b>tous</b> les acteurs, puis valide.`,
       solution: `<p>${s.acteurs.map(a => `${cap(a.nom)} : ${a.pourquoi}`).join(' ; ')}.</p>`,
       monter(zone, api) {
         const cands = melanger(s.acteurs.concat(s.distracteurs || []));
@@ -818,33 +982,76 @@
         return { montrer: figer };
       } };
   }
-  const typeDe = (s, a) => s.forces.find(f => f.acteur === a.id).type;
-  function partieTypes(s) {
-    return { type: 'perso', q: '2. Chaque acteur agit-il <b>à distance</b> ou <b>par contact</b> ?',
+  // L'air touche le système : peut-on négliger sa force ?
+  // s.air = { neglige, cause ('frottements' | 'archi', si elle n'est pas négligeable), raison, indice }
+  const REGLE_AIR = 'On néglige la force de l\'air, sauf si ses <b>frottements</b> ne sont pas négligeables (grande vitesse, grande surface : parachute…) ou si sa <b>poussée d\'Archimède</b> ne l\'est pas (objet très léger pour son volume : montgolfière, ballon d\'hélium).';
+  const OPTS_AIR = [{ id: 'oui', label: 'oui : on la néglige' }, { id: 'frottements', label: 'non : les frottements de l\'air ne sont pas négligeables' },
+    { id: 'archi', label: 'non : la poussée d\'Archimède de l\'air n\'est pas négligeable' }];
+  const bonneAir = a => (a.neglige ? 'oui' : a.cause);
+  function partieAir(s, st) {
+    const bonne = bonneAir(s.air);
+    return { type: 'perso', q: 'L\'air touche le système : peut-on <b>négliger</b> sa force ?', solution: `<p>${s.air.raison}</p>`,
+      monter(zone, api) {
+        const box = el('div', 'ph-choix ph-choix-col');
+        zone.appendChild(box);
+        let fige = false;
+        const bs = OPTS_AIR.map(x => {
+          const b = el('button', 'btn-secondary', x.label);
+          b.type = 'button';
+          box.appendChild(b);
+          b.onclick = () => {
+            if (fige || api.fini() || b.disabled) return;
+            if (x.id === bonne) { figer(); api.reussi(); return; }
+            b.classList.add('faux'); b.disabled = true;
+            api.erreur(s.air.indice || REGLE_AIR);
+          };
+          return { b, x };
+        });
+        // réponse connue : les diagrammes affichés barrent le trait de l'air si sa force est négligeable
+        function figer() {
+          fige = true;
+          bs.forEach(({ b, x }) => { b.disabled = true; if (x.id === bonne) b.classList.add('juste'); });
+          st.air = s.air.neglige;
+          st.maj();
+        }
+        return { montrer: figer };
+      } };
+  }
+  function partieTypes(s, st) {
+    return { type: 'perso', q: 'Complète le <b>diagramme objet-action</b> : chaque acteur agit-il <b>à distance</b> (trait en pointillés) ou <b>par contact</b> (trait plein) ?',
       solution: `<p>${s.acteurs.map(a => `${cap(a.nom)} : ${typeDe(s, a) === 'distance' ? 'à distance' : 'contact'}`).join(' ; ')}.</p>`,
       monter(zone, api) {
+        const fig = el('div', 'pfd-do-cadre');
+        zone.appendChild(fig);
         const d = el('div', 'pfd-types');
         d.innerHTML = s.acteurs.map(a => `<div class="pfd-type" data-id="${a.id}"><span class="pfd-type-nom">${cap(a.nom)}</span>
           <span class="pfd-type-b" role="group" aria-label="${cap(a.nom)}"><button type="button" data-v="distance" aria-pressed="false">à distance</button><button type="button" data-v="contact" aria-pressed="false">de contact</button></span></div>`).join('');
         zone.appendChild(d);
         const bVal = boutonValider(zone);
+        const dessiner = () => { fig.innerHTML = diagrammeDe(s, st); };
+        st.ecoute.push(dessiner);
         let fige = false;
         d.querySelectorAll('.pfd-type-b button').forEach(b => {
           b.onclick = () => {
             if (fige || api.fini()) return;
             b.parentElement.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
-            b.closest('.pfd-type').classList.remove('ko');
+            const r = b.closest('.pfd-type');
+            r.classList.remove('ko');
+            st.types[r.dataset.id] = b.dataset.v;
             api.effacer();
+            st.maj();
           };
         });
         function figer() {
           fige = true;
           d.querySelectorAll('.pfd-type').forEach(r => {
             const a = s.acteurs.find(x => x.id === r.dataset.id);
+            st.types[a.id] = typeDe(s, a);
             r.classList.remove('ko'); r.classList.add('ok');
             r.querySelectorAll('button').forEach(b => { b.disabled = true; b.setAttribute('aria-pressed', b.dataset.v === typeDe(s, a) ? 'true' : 'false'); });
           });
           bVal.fermer();
+          st.maj();
         }
         bVal.onclick = () => {
           if (fige || api.fini()) return;
@@ -855,10 +1062,11 @@
           faux.forEach(r => r.classList.add('ko'));
           api.erreur('<br>' + faux.map(r => {
             const a = s.acteurs.find(x => x.id === r.dataset.id);
-            return '☛ ' + (typeDe(s, a) === 'distance' ? `${cap(a.nom)} agit <b>sans toucher</b> ${s.systeme} : c'est une action à distance.` : `${cap(a.nom)} <b>touche</b> ${s.systeme} : c'est une action de contact.`);
+            return '☛ ' + (typeDe(s, a) === 'distance' ? `${cap(a.nom)} agit <b>sans toucher</b> ${s.systeme} : c'est une action à distance (trait en pointillés).` : `${cap(a.nom)} <b>touche</b> ${s.systeme} : c'est une action de contact (trait plein).`);
           }).join('<br>'));
           secouer(d);
         };
+        dessiner();
         return { montrer: figer };
       } };
   }
@@ -871,13 +1079,14 @@
   }
   function partieTrace(s, st) {
     const lieu = p => (p === 'G' ? 'le centre G' : 'le point ' + p);
-    return { type: 'perso', q: '3. Trace chaque force : choisis son <b>point de départ</b>, puis sa <b>direction</b> et son <b>sens</b> (sans souci d\'échelle).',
+    const cols = couleursForces(s.forces);
+    return { type: 'perso', q: `Trace chaque force : choisis son <b>point de départ</b>, puis sa <b>direction</b> et son <b>sens</b> (sans souci d'échelle).${s.air && s.air.neglige ? ' La force de l\'air est négligée : on ne la dessine pas.' : ''}`,
       solution: `<p>${s.forces.map((f, i) => `${i + 1}. ${cap(f.lib)} : depuis ${lieu(f.pts[0])}${f.pts.length > 1 ? ` (ou ${f.pts.slice(1).map(lieu).join(', ')})` : ''}, ${texteDir(s, f.angs[0])}`).join(' ;<br>')}.</p>`,
       monter(zone, api) {
         const pos = st.pos;
         let sel = 0, fige = false, drag = null;
         const d = el('div', 'pfd-tr');
-        d.innerHTML = `<div class="vec-chips pfd-tr-chips" role="group" aria-label="Force à tracer">${s.forces.map((f, i) => `<button type="button" class="vec-chip" data-i="${i}">${i + 1}. ${cap(f.lib)}</button>`).join('')}</div>
+        d.innerHTML = `<div class="vec-chips pfd-tr-chips" role="group" aria-label="Force à tracer">${s.forces.map((f, i) => `<button type="button" class="vec-chip" data-i="${i}"><span class="pfd-tr-pastille" style="background:${cols[i]}" aria-hidden="true"></span>${i + 1}. ${cap(f.lib)}</button>`).join('')}</div>
           <div class="pfd-sc-cadre pfd-tr-fig"></div>
           <p class="pfd-tr-etape" aria-live="polite"></p>
           <div class="pfd-tr-pts" role="group" aria-label="Point de départ">${Object.keys(s.points).map(id => `<button type="button" class="pfd-pt" data-pt="${id}" aria-pressed="false"><b>${id}</b> ${s.nomsPts[id]}</button>`).join('')}</div>
@@ -888,7 +1097,7 @@
         const bVal = boutonValider(zone);
         const verrou = i => fige || pos[i].ok;
         function dessiner() {
-          figZ.innerHTML = scene(s, { forces: pos.map((p, i) => ({ pt: p.pt, ang: p.ang, num: i + 1, etat: p.etat || (i === sel && !fige ? 'actif' : '') })),
+          figZ.innerHTML = scene(s, { forces: pos.map((p, i) => ({ pt: p.pt, ang: p.ang, num: i + 1, coul: cols[i], cote: s.forces[i].cote, etat: p.etat || (i === sel && !fige ? 'actif' : '') })),
             points: !fige, actif: pos[sel] && pos[sel].pt, aria: `${s.titre} : forces tracées` });
           d.querySelectorAll('.pfd-tr-chips .vec-chip').forEach(c => {
             const i = +c.dataset.i, p = pos[i];
@@ -958,37 +1167,43 @@
             p.etat = 'ko';
             msgs.push(`☛ <b>Force ${i + 1}</b> (${f.lib}) : ${!okPt ? diagPt(f) : diagDir(f, p.ang)}`);
           });
-          if (!msgs.length) { fige = true; dessiner(); bVal.fermer(); api.reussi(); return; }
+          if (!msgs.length) { fige = true; dessiner(); bVal.fermer(); st.maj(); api.reussi(); return; }
           sel = pos.findIndex(p => !p.ok);
           dessiner();
           api.erreur('<br>' + msgs.join('<br>'));
           secouer(figZ);
         };
-        return { montrer() { s.forces.forEach((f, i) => Object.assign(pos[i], { pt: f.pts[0], ang: f.angs[0], ok: true, etat: 'ok' })); fige = true; dessiner(); bVal.fermer(); } };
+        return { montrer() { s.forces.forEach((f, i) => Object.assign(pos[i], { pt: f.pts[0], ang: f.angs[0], ok: true, etat: 'ok' })); fige = true; dessiner(); bVal.fermer(); st.maj(); } };
       } };
   }
   function partieNoms(s, st) {
-    const cands = s.nomsProposes;
-    return { type: 'perso', q: '4. Donne le <b>nom</b> de chaque vecteur force.',
+    const cands = s.nomsProposes, cols = couleursForces(s.forces);
+    return { type: 'perso', q: 'Donne le <b>nom</b> de chaque vecteur force (il s\'écrit aussi sur le diagramme objet-action).',
       solution: `<p>${s.forces.map((f, i) => `${i + 1}. ${cap(f.lib)} : ${nomV(f.noms[0])}`).join(' ; ')}.</p>`,
       monter(zone, api) {
         const d = el('div', 'pfd-noms');
-        d.innerHTML = `<div class="pfd-sc-cadre pfd-noms-fig"></div>` + s.forces.map((f, i) => `<div class="pfd-nom-l" data-i="${i}"><span class="pfd-nom-lib">${i + 1}. ${cap(f.lib)}</span>
+        d.innerHTML = `<div class="pfd-noms-figs"><div class="pfd-do-cadre pfd-noms-do"></div><div class="pfd-sc-cadre pfd-noms-fig"></div></div>` + s.forces.map((f, i) => `<div class="pfd-nom-l" data-i="${i}"><span class="pfd-nom-lib"><span class="pfd-tr-pastille" style="background:${cols[i]}" aria-hidden="true"></span>${i + 1}. ${cap(f.lib)}</span>
           <span class="pfd-nom-ch" role="group" aria-label="Nom de la force ${i + 1}">${cands.map(k => `<button type="button" data-k="${k}" aria-pressed="false">${nomV(k)}</button>`).join('')}</span></div>`).join('');
         zone.appendChild(d);
-        const figZ = d.querySelector('.pfd-noms-fig');
+        const doZ = d.querySelector('.pfd-noms-do'), figZ = d.querySelector('.pfd-noms-fig');
         const bVal = boutonValider(zone);
         let fige = false;
+        // le diagramme et le dessin montrent les noms choisis, dans la couleur de chaque force
         const dessiner = () => {
-          figZ.innerHTML = scene(s, { forces: s.forces.map((f, i) => ({ pt: st.pos[i].pt || f.pts[0], ang: st.pos[i].ang == null ? f.angs[0] : st.pos[i].ang, num: i + 1, nom: st.noms[i], etat: st.noms[i] ? 'ok' : '' })),
+          doZ.innerHTML = diagrammeDe(s, st);
+          figZ.innerHTML = scene(s, { forces: s.forces.map((f, i) => ({ pt: st.pos[i].pt || f.pts[0], ang: st.pos[i].ang == null ? f.angs[0] : st.pos[i].ang, num: i + 1, nom: st.noms[i], coul: cols[i], cote: f.cote })),
             marques: Object.keys(s.points), aria: `${s.titre} : forces à nommer` });
         };
+        st.ecoute.push(dessiner);
         d.querySelectorAll('.pfd-nom-ch button').forEach(b => {
           b.onclick = () => {
             if (fige || api.fini()) return;
             b.parentElement.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
-            b.closest('.pfd-nom-l').classList.remove('ko');
+            const r = b.closest('.pfd-nom-l');
+            r.classList.remove('ko');
+            st.noms[+r.dataset.i] = b.dataset.k;
             api.effacer();
+            st.maj();
           };
         });
         function figer() {
@@ -999,7 +1214,7 @@
             r.classList.remove('ko'); r.classList.add('ok');
             r.querySelectorAll('button').forEach(b => { b.disabled = true; b.setAttribute('aria-pressed', b.dataset.k === f.noms[0] ? 'true' : 'false'); });
           });
-          dessiner(); bVal.fermer();
+          bVal.fermer(); st.maj();
         }
         bVal.onclick = () => {
           if (fige || api.fini()) return;
@@ -1008,10 +1223,9 @@
           const faux = rangs.filter(r => s.forces[+r.dataset.i].noms.indexOf(r.querySelector('[aria-pressed="true"]').dataset.k) === -1);
           if (!faux.length) {
             // les noms choisis restent affichés (<span class="vec-nom">R</span> accepté pour <span class="vec-nom">R</span>ₙ sans frottement…)
-            rangs.forEach(r => { st.noms[+r.dataset.i] = r.querySelector('[aria-pressed="true"]').dataset.k; });
             fige = true;
             rangs.forEach(r => { r.classList.add('ok'); r.querySelectorAll('button').forEach(b => { b.disabled = true; }); });
-            dessiner(); bVal.fermer(); api.reussi(); return;
+            bVal.fermer(); st.maj(); api.reussi(); return;
           }
           faux.forEach(r => r.classList.add('ko'));
           api.erreur('<br>' + faux.map(r => {
@@ -1026,24 +1240,86 @@
   }
   function partieComp(s) {
     const autre = s.comp.bonne === 'oui' ? 'non' : 'oui';
-    return { type: 'choix', q: `5. ${s.comp.q || 'Ces forces se compensent-elles ?'}`, melanger: false, colonne: true,
+    return { type: 'choix', q: s.comp.q || 'Ces forces se compensent-elles ?', melanger: false, colonne: true,
       options: [{ id: 'oui', label: 'oui : leur somme est nulle' }, { id: 'non', label: 'non : leur somme n\'est pas nulle' }], bonne: s.comp.bonne,
       indices: { [autre]: s.comp.indice }, solution: `<p>${s.comp.expl}</p>` };
   }
-  function bilan(s) {
-    const st = { pos: s.forces.map(() => ({ pt: null, ang: null, etat: '', ok: false })), noms: s.forces.map(() => null) };
-    const parties = [partieActeurs(s), partieTypes(s), partieTrace(s, st), partieNoms(s, st)];
-    if (s.comp) parties.push(partieComp(s));
+  function bilan(s, opts) {
+    opts = opts || {};
+    // état partagé : tracés, noms et types choisis, réponse sur l'air ; diagrammes à redessiner
+    const st = { pos: s.forces.map(() => ({ pt: null, ang: null, etat: '', ok: false })), noms: s.forces.map(() => null), types: {}, air: null, ecoute: [] };
+    st.maj = () => st.ecoute.forEach(f => f());
+    const parties = [partieActeurs(s)];
+    if (s.air) parties.push(partieAir(s, st));
+    parties.push(partieTypes(s, st));
+    if (!opts.diagramme) {
+      parties.push(partieTrace(s, st), partieNoms(s, st));
+      if (s.comp) parties.push(partieComp(s));
+    }
+    parties.forEach((p, k) => { p.q = `${k + 1}. ${p.q}`; });
     return { enonce: `${s.enonce ? `<p>${s.enonce}</p>` : ''}<div class="pfd-sc-cadre">${scene(s, { aria: s.titre })}</div>`, parties };
   }
   // scène avec toutes ses forces tracées et nommées (exemples, fiches, corrections)
-  const sceneRemplie = (s, o) => scene(s, Object.assign({ forces: s.forces.map(f => ({ pt: f.pts[0], ang: f.angs[0], nom: f.noms[0] })), marques: Object.keys(s.points), aria: `${s.titre} : bilan des forces` }, o));
+  const sceneRemplie = (s, o) => {
+    const cols = couleursForces(s.forces);
+    return scene(s, Object.assign({ forces: s.forces.map((f, i) => ({ pt: f.pts[0], ang: f.angs[0], nom: f.noms[0], coul: cols[i], cote: f.cote })), marques: Object.keys(s.points), aria: `${s.titre} : bilan des forces` }, o));
+  };
+
+  /* ============================================================
+     INFOGRAPHIE « forces à distance, forces de contact »
+     PFD.infoForces() → HTML : deux colonnes (une seule sur téléphone),
+     dans l'ordre de la méthode : d'abord les forces à distance (trois
+     possibles, flèche depuis le centre, pointillés dans le diagramme
+     objet-action), puis les forces de contact (chaque objet qui touche,
+     l'air compris ; flèche depuis le point de contact, trait plein).
+     ============================================================ */
+  function infoForces() {
+    // petit dessin : un bloc posé sur un support, une force depuis le centre G ou depuis le point de contact A
+    const bloc = dist => `<svg viewBox="0 0 150 104" class="pfd-info-sc" role="img" aria-label="${dist ? 'Force à distance : la flèche part du centre G' : 'Force de contact : la flèche part du point de contact A'}">
+        <line x1="12" y1="66" x2="138" y2="66" class="pfd-sc-sol"/>${[24, 40, 56, 72, 88, 104, 120, 136].map(x => `<line x1="${x}" y1="67" x2="${x - 7}" y2="74" class="pfd-sc-hach"/>`).join('')}
+        <rect x="48" y="36" width="54" height="30" class="pfd-sc-sys"/>
+        ${dist ? fleche(75, 51, 270, '', 0, 46, COUL.P).svg + '<circle cx="75" cy="51" r="3.5" class="pfd-pt-m"/><text x="81" y="47" class="pfd-pt-t">G</text>'
+    : fleche(75, 66, 90, '', 0, 52, COUL.RN).svg + '<circle cx="75" cy="66" r="3.5" class="pfd-pt-m"/><text x="81" y="82" class="pfd-pt-t">A</text>'}</svg>`;
+    // petit diagramme objet-action : un objet relié au système
+    const mini = (obj, dist) => `<svg viewBox="0 0 170 38" class="pfd-info-do" role="img" aria-label="Diagramme objet-action : ${obj} relié au système par un trait ${dist ? 'en pointillés' : 'plein'}">
+        <line x1="58" y1="19" x2="104" y2="19" class="pfd-do-l${dist ? ' dist' : ''}"/>
+        <ellipse cx="32" cy="19" rx="28" ry="14" class="pfd-do-obj"/><text x="32" y="23" text-anchor="middle" class="pfd-do-t">${obj}</text>
+        <ellipse cx="134" cy="19" rx="32" ry="15" class="pfd-do-sys"/><text x="134" y="23" text-anchor="middle" class="pfd-do-t">système</text></svg>`;
+    // icônes des trois forces à distance
+    const ic = {
+      terre: '<svg viewBox="0 0 32 32" class="pfd-info-ic" aria-hidden="true"><circle cx="16" cy="16" r="12" class="pfd-sc-sys"/><ellipse cx="16" cy="16" rx="5.5" ry="12" class="pfd-info-trait"/><line x1="4" y1="16" x2="28" y2="16" class="pfd-info-trait"/></svg>',
+      aimant: '<svg viewBox="0 0 32 32" class="pfd-info-ic" aria-hidden="true"><rect x="2" y="10" width="28" height="12" class="pfd-sc-obj"/><line x1="16" y1="10" x2="16" y2="22" class="pfd-info-trait"/><text x="9" y="20" text-anchor="middle" class="pfd-info-ict">N</text><text x="23" y="20" text-anchor="middle" class="pfd-info-ict">S</text></svg>',
+      charges: '<svg viewBox="0 0 32 32" class="pfd-info-ic" aria-hidden="true"><circle cx="9" cy="16" r="7" class="pfd-sc-obj"/><circle cx="23" cy="16" r="7" class="pfd-sc-obj"/><text x="9" y="20.5" text-anchor="middle" class="pfd-info-ict">+</text><text x="23" y="20" text-anchor="middle" class="pfd-info-ict">−</text></svg>',
+    };
+    return `<div class="pfd-info">
+      <section class="pfd-info-c" aria-label="D'abord les forces à distance">
+        <p class="pfd-info-t"><span class="pfd-info-n">1</span><span>D'abord : les forces <b>à distance</b></span></p>
+        <p class="pfd-info-s">Il n'y en a que <b>trois</b> possibles :</p>
+        <ul class="pfd-info-l">
+          <li>${ic.terre}<span><b>le poids</b> ${nomV('P')}<small>exercé par la Terre (toujours)</small></span></li>
+          <li>${ic.aimant}<span><b>la force magnétique</b> ${nomV('Fmag')}<small>s'il y a des aimants</small></span></li>
+          <li>${ic.charges}<span><b>la force électrique</b> ${nomV('Felec')}<small>s'il y a des charges + ou −</small></span></li></ul>
+        <div class="pfd-info-fig">${bloc(true)}<p>La flèche part du <b>centre</b> G du système.</p></div>
+        <div class="pfd-info-fig">${mini('Terre', true)}<p>Diagramme objet-action : trait en <b>pointillés</b>.</p></div>
+      </section>
+      <section class="pfd-info-c" aria-label="Puis les forces de contact">
+        <p class="pfd-info-t"><span class="pfd-info-n">2</span><span>Puis : les forces <b>de contact</b></span></p>
+        <p class="pfd-info-s"><b>Chaque objet qui touche</b> le système exerce une force :</p>
+        <ul class="pfd-info-chips"><li>le support (sol, table…)</li><li>un fil, une corde, un ressort</li><li>une main, un pied</li><li>un liquide (eau, huile…)</li><li><b>l'air</b>, toujours</li></ul>
+        <div class="pfd-info-fig">${bloc(false)}<p>La flèche part du <b>point de contact</b> A.</p></div>
+        <div class="pfd-info-fig">${mini('sol', false)}<p>Diagramme objet-action : trait <b>plein</b>.</p></div>
+      </section>
+    </div>`;
+  }
 
   /* ============================================================
      CHRONOPHOTOGRAPHIE (SVG) : positions successives d'un mobile à
-     intervalles de temps égaux, de gauche à droite. Animée (un point
-     après l'autre, « ↺ Rejouer ») sauf o.anim = false ou mouvement réduit.
-     o = { type: 'uniforme' | 'accelere' | 'decelere', n, pos: [fractions de 0 à 1], titre }
+     intervalles de temps égaux, sur une trajectoire rectiligne (de gauche
+     à droite), circulaire ou curviligne (le départ est marqué). Animée
+     (un point après l'autre, « ↺ Rejouer ») sauf o.anim = false ou
+     mouvement réduit.
+     o = { traj: 'rectiligne' | 'circulaire' | 'curviligne', type: 'uniforme' | 'accelere' | 'decelere',
+           n, pos: [fractions de la longueur parcourue, de 0 à 1], titre }
      ============================================================ */
   function positions(type, n) {
     return Array.from({ length: n }, (_, k) => {
@@ -1051,18 +1327,41 @@
       return type === 'uniforme' ? x : type === 'accelere' ? x * x : 1 - (1 - x) * (1 - x);
     });
   }
+  // trajectoires : point de paramètre u (0 à 1), hauteur du dessin, place du mot « départ »
+  const bez = (a, b, c, d, u) => (1 - u) * (1 - u) * (1 - u) * a + 3 * (1 - u) * (1 - u) * u * b + 3 * (1 - u) * u * u * c + u * u * u * d;
+  const TRAJETS = {
+    rectiligne: { h: 40, pt: u => [18 + u * 324, 20] },
+    circulaire: { h: 150, dep: [-10, 4, 'end'], pt: u => { const a = (200 - u * 300) * Math.PI / 180; return [180 + 64 * Math.cos(a), 78 - 64 * Math.sin(a)]; } },
+    curviligne: { h: 150, dep: [0, 20, 'start'], pt: u => [bez(20, 120, 240, 340, u), bez(118, -70, 240, 30, u)] },
+  };
+  // trajectoire échantillonnée, puis points placés à des fractions de sa longueur
+  function surTrajet(T, fractions) {
+    const N = 400, ech = [], cum = [0];
+    for (let k = 0; k <= N; k++) ech.push(T.pt(k / N));
+    for (let k = 1; k <= N; k++) cum.push(cum[k - 1] + Math.hypot(ech[k][0] - ech[k - 1][0], ech[k][1] - ech[k - 1][1]));
+    const L = cum[N];
+    return fractions.map(f => {
+      const l = f * L;
+      let k = 1;
+      while (k < N && cum[k] < l) k++;
+      const t = (l - cum[k - 1]) / ((cum[k] - cum[k - 1]) || 1);
+      return [ech[k - 1][0] + t * (ech[k][0] - ech[k - 1][0]), ech[k - 1][1] + t * (ech[k][1] - ech[k - 1][1])];
+    });
+  }
   function chrono(o) {
     o = o || {};
     return outil(div => {
-      const ps = o.pos || positions(o.type, o.n || 9);
+      const traj = o.traj || 'rectiligne', T = TRAJETS[traj], ps = surTrajet(T, o.pos || positions(o.type, o.n || (traj === 'rectiligne' ? 9 : 10)));
+      const fond = traj === 'rectiligne' ? '<line x1="14" y1="20" x2="346" y2="20" class="pfd-chrono-axe"/>'
+        : `<polyline points="${Array.from({ length: 81 }, (_, k) => T.pt(k / 80).map(v => v.toFixed(1)).join(',')).join(' ')}" class="pfd-chrono-axe trajet"/>`;
+      const dep = T.dep ? `<text x="${(ps[0][0] + T.dep[0]).toFixed(1)}" y="${(ps[0][1] + T.dep[1]).toFixed(1)}" text-anchor="${T.dep[2]}" class="pfd-chrono-dep">départ</text>` : '';
       div.classList.add('pfd-chrono');
-      div.innerHTML = `${o.titre ? `<p class="pfd-chrono-t">${o.titre}</p>` : ''}<div class="pfd-chrono-l"><svg viewBox="0 0 360 40" role="img" aria-label="Chronophotographie : positions successives à intervalles de temps égaux"></svg>
+      div.innerHTML = `${o.titre ? `<p class="pfd-chrono-t">${o.titre}</p>` : ''}<div class="pfd-chrono-l${traj === 'rectiligne' ? '' : ' haut'}"><svg viewBox="0 0 360 ${T.h}" role="img" aria-label="Chronophotographie : positions successives à intervalles de temps égaux"></svg>
         ${o.anim === false ? '' : '<button type="button" class="btn-small pfd-rejouer" aria-label="Rejouer l\'animation">↺</button>'}</div>`;
       const svg = div.querySelector('svg'), bt = div.querySelector('.pfd-rejouer');
       let minuteur = null;
       const dessiner = k => {
-        svg.innerHTML = `<line x1="14" y1="20" x2="346" y2="20" class="pfd-chrono-axe"/>` +
-          ps.slice(0, k).map((p, i) => `<circle cx="${(18 + p * 324).toFixed(1)}" cy="20" r="${i === k - 1 && k < ps.length ? 6.5 : 5}" class="pfd-chrono-pt"/>`).join('');
+        svg.innerHTML = fond + dep + ps.slice(0, k).map((p, i) => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${i === k - 1 && k < ps.length ? 6.5 : 5}" class="pfd-chrono-pt"/>`).join('');
       };
       const jouer = () => {
         clearInterval(minuteur);
@@ -1074,6 +1373,83 @@
       if (bt) bt.onclick = jouer;
       jouer();
     });
+  }
+
+  /* ============================================================
+     DÉCRIRE UN MOUVEMENT EN DEUX MOTS : la trajectoire (rectiligne,
+     circulaire ou curviligne), puis la vitesse (uniforme, accéléré,
+     décéléré ou ralenti : ces deux derniers mots veulent dire la même chose).
+     PFD.partieMouvement({ traj, vit ('uniforme' | 'accelere' | 'decelere'), q,
+       ind: { traj, vit } (diagnostics propres à une situation décrite par un texte) })
+       → partie 'perso' (cours, séries, exercices)
+     ============================================================ */
+  const MOTS_TRAJ = [['rectiligne', 'rectiligne'], ['circulaire', 'circulaire'], ['curviligne', 'curviligne']];
+  const MOTS_VIT = [['uniforme', 'uniforme'], ['accelere', 'accéléré'], ['decelere', 'décéléré'], ['ralenti', 'ralenti']];
+  const motVit = v => ({ uniforme: 'uniforme', accelere: 'accéléré', decelere: 'décéléré (ou ralenti)' })[v];
+  const SENS_TRAJ = { rectiligne: 'la trajectoire est une <b>droite</b>', circulaire: 'la trajectoire est un <b>cercle</b> (ou un arc de cercle)', curviligne: 'la trajectoire est une <b>courbe</b> quelconque' };
+  const SENS_VIT = { uniforme: 'la vitesse est <b>constante</b> (positions régulièrement espacées)', accelere: 'la vitesse <b>augmente</b> (positions de plus en plus espacées)', decelere: 'la vitesse <b>diminue</b> (positions de moins en moins espacées)' };
+  // diagnostic ciblé d'un mot mal choisi, d'après une chronophotographie
+  function diagTraj(choisi, bon) {
+    if (bon === 'rectiligne') return 'Les positions sont <b>alignées</b> : la trajectoire est une droite.';
+    if (choisi === 'rectiligne') return 'Les positions ne sont pas alignées sur une droite.';
+    return bon === 'circulaire' ? 'Les positions sont sur un <b>cercle</b> : on dit circulaire (curviligne, c\'est pour une courbe quelconque).'
+      : 'La courbe n\'est pas un cercle : sa courbure change. On dit curviligne.';
+  }
+  function diagVit(choisi, bon) {
+    if (bon === 'uniforme') return 'Les écarts entre deux positions successives sont <b>égaux</b> : la vitesse ne change pas.';
+    if (choisi === 'uniforme') return 'Les écarts entre deux positions successives ne sont pas égaux : la vitesse change.';
+    return bon === 'accelere' ? 'Les écarts entre deux positions successives <b>augmentent</b> : le mobile va de plus en plus vite.'
+      : 'Les écarts entre deux positions successives <b>diminuent</b> : le mobile va de moins en moins vite.';
+  }
+  function partieMouvement(o) {
+    const ind = o.ind || {};
+    const okVit = v => v === o.vit || (o.vit === 'decelere' && v === 'ralenti');
+    return { type: 'perso', q: o.q || 'Décris le mouvement avec <b>deux mots</b> : la trajectoire, puis la vitesse.',
+      solution: o.solution || `<p>Mouvement <b>${o.traj} ${motVit(o.vit)}</b> : ${SENS_TRAJ[o.traj]} et ${SENS_VIT[o.vit]}.</p>`,
+      monter(zone, api) {
+        const d = el('div', 'pfd-mvt');
+        const ligne = (k, titre, mots) => `<div class="pfd-type pfd-mvt-l" data-k="${k}"><span class="pfd-type-nom">${titre}</span>
+          <span class="pfd-type-b pfd-mvt-b" role="group" aria-label="${titre.replace(/<[^>]+>/g, '')}">${mots.map(([id, t]) => `<button type="button" data-v="${id}" aria-pressed="false">${t}</button>`).join('')}</span></div>`;
+        d.innerHTML = ligne('traj', '1<sup>er</sup> mot : la trajectoire', MOTS_TRAJ) + ligne('vit', '2<sup>e</sup> mot : la vitesse', MOTS_VIT) + '<p class="pfd-mvt-res" aria-live="polite"></p>';
+        zone.appendChild(d);
+        const bVal = boutonValider(zone);
+        const choix = { traj: null, vit: null }, res = d.querySelector('.pfd-mvt-res');
+        let fige = false;
+        const lib = (k, v) => (k === 'traj' ? MOTS_TRAJ : MOTS_VIT).find(x => x[0] === v)[1];
+        const maj = () => { res.innerHTML = `Mouvement <b>${choix.traj ? lib('traj', choix.traj) : '…'}</b> <b>${choix.vit ? lib('vit', choix.vit) : '…'}</b>`; };
+        d.querySelectorAll('.pfd-mvt-b button').forEach(b => {
+          b.onclick = () => {
+            if (fige || api.fini()) return;
+            const l = b.closest('.pfd-mvt-l');
+            l.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+            l.classList.remove('ko');
+            choix[l.dataset.k] = b.dataset.v;
+            maj(); api.effacer();
+          };
+        });
+        function figer(montrer) {
+          fige = true;
+          if (montrer) { choix.traj = o.traj; if (!okVit(choix.vit)) choix.vit = o.vit; }
+          d.querySelectorAll('.pfd-mvt-l').forEach(l => {
+            l.classList.remove('ko'); l.classList.add('ok');
+            l.querySelectorAll('button').forEach(b => { b.disabled = true; b.setAttribute('aria-pressed', b.dataset.v === choix[l.dataset.k] ? 'true' : 'false'); });
+          });
+          maj(); bVal.fermer();
+        }
+        bVal.onclick = () => {
+          if (fige || api.fini()) return;
+          if (!choix.traj || !choix.vit) { secouer(d); api.message('Choisis un mot pour la trajectoire <b>et</b> un mot pour la vitesse.'); return; }
+          const okT = choix.traj === o.traj, okV = okVit(choix.vit);
+          if (okT && okV) { figer(false); api.reussi(); return; }
+          const msgs = [];
+          if (!okT) { d.querySelector('[data-k="traj"]').classList.add('ko'); msgs.push('☛ <b>Trajectoire</b> : ' + (ind.traj || diagTraj(choix.traj, o.traj))); }
+          if (!okV) { d.querySelector('[data-k="vit"]').classList.add('ko'); msgs.push('☛ <b>Vitesse</b> : ' + (ind.vit || diagVit(choix.vit === 'ralenti' ? 'decelere' : choix.vit, o.vit))); }
+          api.erreur('<br>' + msgs.join('<br>'));
+          secouer(d);
+        };
+        maj();
+        return { montrer: () => figer(true) };
+      } };
   }
 
   /* ============================================================
@@ -1090,7 +1466,8 @@
     const E = o.etendue || 5;
     return new window.VEC.Repere(zone, { xmin: -E, xmax: E, ymin: -E, ymax: E, axes: false, unitaires: false, mode: 'mixte',
       points: [{ nom: 'G', x: 0, y: 0, dx: -10, dy: 16 }], aria: o.aria || 'Quadrillage : forces appliquées au point G',
-      vecteurs: o.forces.map(f => ({ nom: f.nom, dep: [0, 0], coord: f.coord, fixe: true, coul: window.VEC.C.encre2, nomPos: f.nomPos })).concat([aTracer]) });
+      // une couleur par force (Σ F⃗, déjà tracée, en noir)
+      vecteurs: o.forces.map((f, i) => ({ nom: f.nom, dep: [0, 0], coord: f.coord, fixe: true, coul: f.nom === 'ΣF' ? window.VEC.C.encre : COUL_QUAD[i % COUL_QUAD.length], nomPos: f.nomPos })).concat([aTracer]) });
   }
   function partieResultante(o) {
     const S = o.somme || somme(o.forces), ech = o.echelle || 1;
@@ -1137,10 +1514,11 @@
      PLAN DE L'APPLICATION ET NAVIGATION (voir assets/sommaire.js)
      ============================================================ */
   const PLAN = [
-    { n: 1, titre: 'Référentiel et nature du mouvement', desc: 'Référentiel galiléen, mouvement uniforme, accéléré ou décéléré', fiche: 'fiche_1',
+    { n: 1, titre: 'Référentiel et nature du mouvement', desc: 'Référentiel galiléen, décrire un mouvement en deux mots (trajectoire, vitesse)', fiche: 'fiche_1',
       parties: [{ nom: 'Référentiel et nature du mouvement', cours: 'module_1_cours', questions: 'module_1_questions' }] },
-    { n: 2, titre: 'Faire un bilan des forces', desc: 'Forces à distance et de contact, poids, réaction du support, forces qui se compensent', fiche: 'fiche_2',
-      parties: [{ nom: 'Faire un bilan des forces', simulation: 'module_2_simulation', cours: 'module_2_cours', questions: 'module_2_questions', noms: { simulation: 'Atelier : bilan des forces' } }] },
+    { n: 2, titre: 'Faire un bilan des forces', desc: 'Forces à distance et de contact, force de l\'air, diagramme objet-action, poids, réaction du support, forces qui se compensent', fiche: 'fiche_2',
+      // le cours, puis l'atelier (page « exemple » : entre le cours et les questions)
+      parties: [{ nom: 'Faire un bilan des forces', cours: 'module_2_cours', exemple: 'module_2_simulation', questions: 'module_2_questions', noms: { exemple: 'Atelier : bilan des forces' } }] },
     { n: 3, titre: 'Accélération', desc: 'a = dv/dt ; a = Δv / Δt en m·s<sup>−2</sup>', fiche: 'fiche_3',
       parties: [{ nom: 'Accélération', cours: 'module_3_cours', questions: 'module_3_questions' }] },
     { n: 4, titre: 'Principe fondamental de la dynamique', desc: 'Σ <span class="vec-nom">F</span> = m <span class="vec-nom">a</span>, principe d\'inertie, résultante des forces', fiche: 'fiche_4',
@@ -1155,6 +1533,7 @@
   window.PFD = Object.assign(window.PFD || {}, {
     MOINS, fmt, cs, sci, lire, proche, fr, unite, o, fq, el, secouer, melanger, hasard, entre, champ, PARTIES,
     question, serie, confettis, fig, monter, outil, cap, V, NOMS, nomV, nomSVG, DIR_TXT, texteDir, ecartAngle, scene, sceneRemplie, bilan,
-    positions, chrono, somme, partieResultante, partieAcc, PLAN, menu, accueil, marquer,
+    COUL, COUL_LIBRES, couleurs, couleursForces, court, diagramme, diagrammeDe, diagrammesDe, typeDe, REGLE_AIR, OPTS_AIR, bonneAir, infoForces,
+    positions, chrono, partieMouvement, MOTS_VIT, motVit, somme, partieResultante, partieAcc, PLAN, menu, accueil, marquer,
   });
 })();

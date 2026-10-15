@@ -340,11 +340,13 @@ sub, sup { font-size: .7em; line-height: 0; }
 .pfd-sc-semelle { stroke: var(--ink); stroke-width: 3; }
 .pfd-sc-penta { fill: var(--accent); opacity: .45; stroke: none; }
 /* forces : flèches, noms, numéros */
-.pfd-f line { stroke: var(--accent-ink); stroke-width: 3; stroke-linecap: round; }
-.pfd-f path { fill: var(--accent-ink); }
-.pfd-f.actif line { stroke: var(--accent); } .pfd-f.actif path { fill: var(--accent); }
-.pfd-f.ok line { stroke: var(--success); } .pfd-f.ok path { fill: var(--success); }
-.pfd-f.ko line { stroke: var(--danger); } .pfd-f.ko path { fill: var(--danger); }
+/* flèches des forces : chaque force a sa couleur (attribut style posé par PFD.scene) ;
+   en cours de tracé, la flèche choisie est plus épaisse, une flèche fausse est en tirets */
+.pfd-f { color: var(--accent-ink); }
+.pfd-f line { stroke: currentColor; stroke-width: 3; stroke-linecap: round; }
+.pfd-f path { fill: currentColor; }
+.pfd-f.actif line { stroke-width: 4.2; }
+.pfd-f.ko line { stroke-dasharray: 6 4; stroke-linecap: butt; }
 .pfd-nom { color: var(--accent-ink); }
 .pfd-nom.ok { color: var(--success-text); }
 .pfd-nom text { font: 800 15px var(--font-sans); fill: currentColor; stroke: var(--sheet); stroke-width: 3; paint-order: stroke; }
@@ -420,10 +422,11 @@ sub, sup { font-size: .7em; line-height: 0; }
    EXEMPLE TRAITÉ DU BALLON, ATELIER
    ============================================================ */
 .pfd-ballon { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 8px 0; }
-.pfd-ballon figure { margin: 0; background: var(--paper); border-radius: 16px; padding: 8px; }
-.pfd-ballon figcaption { font-size: .88rem; line-height: 1.45; margin-top: 6px; }
-.pfd-ballon figcaption b { display: block; color: var(--accent-ink); margin-bottom: 2px; }
-@media (max-width: 760px) { .pfd-ballon { grid-template-columns: 1fr; } .pfd-ballon .pfd-sc { max-width: 340px; margin: 0 auto; } }
+.pfd-ballon figure { margin: 0; background: var(--paper); border-radius: 16px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.pfd-ballon-t { font-weight: 800; color: var(--accent-ink); text-align: center; }
+.pfd-ballon .pfd-do { background: var(--sheet); border-radius: 14px; }
+.pfd-ballon figcaption { font-size: .88rem; line-height: 1.45; }
+@media (max-width: 760px) { .pfd-ballon { grid-template-columns: 1fr; } .pfd-ballon .pfd-sc, .pfd-ballon .pfd-do { max-width: 340px; margin: 0 auto; } }
 .pfd-situs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .pfd-situs button {
   min-width: 46px; min-height: 46px; border: none; border-radius: 999px; background: var(--paper); color: var(--ink);
@@ -441,9 +444,87 @@ sub, sup { font-size: .7em; line-height: 0; }
 .pfd-chrono-t { font-weight: 800; font-size: .9rem; margin-bottom: 2px !important; }
 .pfd-chrono-l { display: flex; align-items: center; gap: 8px; background: var(--sheet); border-radius: 12px; padding: 2px 6px; }
 .pfd-chrono-l svg { flex: 1; min-width: 0; height: auto; display: block; }
+.pfd-chrono-l.haut svg { max-width: 420px; margin: 0 auto; }
 .pfd-chrono-axe { stroke: var(--paper-3); stroke-width: 2; }
+.pfd-chrono-axe.trajet { fill: none; stroke-dasharray: 3 5; stroke-linecap: round; }
+.pfd-chrono-dep { font: 700 11px var(--font-sans); fill: var(--ink-2); }
 .pfd-chrono-pt { fill: var(--accent); }
 .pfd-rejouer { min-width: 44px; min-height: 40px; }
 
 /* repère des forces (cinematique/modules/vecteurs.js) dans un « À toi » */
 .crs-atoi .vec-cadre, .ph-question .vec-cadre { margin-top: 6px; }
+
+/* ============================================================
+   DIAGRAMME OBJET-ACTION (PFD.diagramme)
+   ============================================================ */
+.pfd-do-cadre { display: flex; justify-content: center; margin: 4px 0 10px; }
+.pfd-do { display: block; width: 100%; max-width: 440px; height: auto; font-family: var(--font-sans); background: var(--sheet); border-radius: 14px; }
+.pfd-do-sys { fill: var(--cle-bg); stroke: var(--accent); stroke-width: 2; }
+.pfd-do-obj { fill: var(--sheet); stroke: var(--ink-2); stroke-width: 1.6; }
+.pfd-do-t { font: 700 13px var(--font-sans); fill: var(--ink); }
+.pfd-do-l { stroke: var(--ink); stroke-width: 2; }
+.pfd-do-l.dist { stroke-dasharray: 6 5; }
+.pfd-do-l.vide { stroke: var(--paper-3); stroke-width: 1.5; stroke-dasharray: 2 4; }
+.pfd-do-barre { stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; }
+.pfd-do-neg { font: 600 12px var(--font-sans); fill: var(--ink-2); font-style: italic; }
+/* étape des noms : le diagramme à côté du dessin (l'un sous l'autre sur téléphone) */
+.pfd-noms-figs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-items: center; }
+.pfd-noms-figs .pfd-do-cadre, .pfd-noms-figs .pfd-sc-cadre { margin: 0; }
+@media (max-width: 700px) { .pfd-noms-figs { grid-template-columns: 1fr; } }
+/* pastille de couleur d'une force (choix de la force à tracer, noms) */
+.pfd-tr-pastille { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 7px; vertical-align: -1px; }
+
+/* ============================================================
+   INFOGRAPHIE : FORCES À DISTANCE, FORCES DE CONTACT (PFD.infoForces)
+   ============================================================ */
+.pfd-info { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 10px 0 4px; }
+@media (max-width: 680px) { .pfd-info { grid-template-columns: 1fr; } }
+.pfd-info-c { background: var(--sheet); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.pfd-info-t { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.02rem; color: var(--ink); letter-spacing: -.01em; }
+.pfd-info-t b { color: var(--accent-ink); }
+.pfd-info-n { flex: none; display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--sheet); font-weight: 800; font-size: .9rem; }
+.pfd-info-s { font-size: .93rem; color: var(--ink-2); }
+.pfd-info-l { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.pfd-info-l li { display: flex; align-items: center; gap: 10px; background: var(--paper); border-radius: 12px; padding: 6px 10px; line-height: 1.3; }
+.pfd-info-l small { display: block; color: var(--ink-2); font-size: .82rem; }
+.pfd-info-ic { flex: none; width: 32px; height: 32px; }
+.pfd-info-trait { fill: none; stroke: var(--accent); stroke-width: 1.4; }
+.pfd-info-ict { font: 800 10px var(--font-sans); fill: var(--ink); }
+.pfd-info-chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.pfd-info-chips li { background: var(--paper); border-radius: 999px; padding: 5px 12px; font-size: .88rem; }
+.pfd-info-fig { display: flex; align-items: center; gap: 10px; border-top: 1.5px dashed var(--paper-3); padding-top: 8px; }
+.pfd-info-fig p { font-size: .9rem; line-height: 1.4; }
+.pfd-info-sc { flex: none; width: 118px; height: auto; }
+.pfd-info-do { flex: none; width: 140px; height: auto; }
+
+/* ============================================================
+   DÉCRIRE UN MOUVEMENT EN DEUX MOTS (PFD.partieMouvement)
+   ============================================================ */
+.pfd-mvt { display: grid; gap: 8px; }
+.pfd-mvt-b { flex-wrap: wrap; }
+.pfd-mvt-b button { min-height: 46px; padding: 8px 14px; }
+.pfd-mvt-l.ok button[aria-pressed="true"] { background: var(--success-bg); box-shadow: inset 0 0 0 2px var(--success); color: var(--success-text); }
+.pfd-mvt-res { text-align: center; font-size: 1.05rem; color: var(--ink-2); margin-top: 2px !important; }
+.pfd-mvt-res b { color: var(--accent-ink); }
+
+/* jambe et chaussure de l'exemple du ballon */
+.pfd-sc-jambe { fill: var(--paper-3); stroke: var(--ink-2); stroke-width: 1.5; }
+.pfd-sc-chaussure { fill: var(--ink-2); stroke: var(--ink); stroke-width: 1.5; stroke-linejoin: round; }
+.pfd-sc-chaussette { stroke: var(--ink-2); stroke-width: 3; }
+
+/* ============================================================
+   LES QUATRE CAS DE FIGURE DU PRINCIPE FONDAMENTAL (module 4)
+   colonne de gauche : en vecteurs ; colonne de droite : en valeurs
+   ============================================================ */
+.pfd-cas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 10px 0; }
+@media (max-width: 560px) { .pfd-cas { grid-template-columns: 1fr; } }
+.pfd-cas-c { background: var(--sheet); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; line-height: 1.5; }
+.pfd-cas-c p { margin: 0; }
+.pfd-cas-t { display: inline-block; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--accent-ink); background: var(--cle-bg); border-radius: 999px; padding: 2px 9px; margin-bottom: 4px; }
+
+/* les deux mots qui décrivent un mouvement (module 1) : côte à côte, l'un sous l'autre sur téléphone */
+.pfd-2mots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 10px 0; }
+@media (max-width: 560px) { .pfd-2mots { grid-template-columns: 1fr; } }
+.pfd-2mots > div { background: var(--sheet); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; }
+.pfd-2mots-t { font-weight: 800; color: var(--accent-ink); margin-bottom: 4px !important; }
+.pfd-cas-f { font-weight: 800; font-size: 1.12rem; color: var(--ink); margin-top: 4px !important; }

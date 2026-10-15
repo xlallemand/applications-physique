@@ -19,15 +19,28 @@
     <span class="er-badge">MODULE 2 · FICHE RÉCAPITULATIVE</span>
     <h2 class="er-titre">Faire un bilan des forces</h2>
   </div>
-<!-- Fiche récapitulative du module 2 : méthode du bilan des forces, poids, réaction du support, compensation. -->
+<!-- Fiche récapitulative du module 2 : méthode du bilan des forces (infographie), force de l'air,
+     diagramme objet-action, poids, réaction du support, compensation. -->
 
   <section class="er-card" id="bilan">
-    <h3 class="cours-titre">La méthode</h3>
-    <div class="cle"><ol class="er-liste">
-      <li><b>Forces à distance</b> (3 possibles) : poids (Terre), force magnétique (aimant), force électrique (objet chargé). Flèche depuis le <b>centre</b> G.</li>
-      <li><b>Forces de contact</b> : chaque objet qui <b>touche</b> le système. Flèche depuis le <b>point de contact</b>.</li>
-      <li>Direction et sens de chaque force (sans souci d'échelle).</li><li>Nom du vecteur.</li><li>Les forces se compensent-elles ?</li></ol></div>
-    <div class="som-fiche-figs" id="figs"></div>
+    <h3 class="cours-titre">La méthode : forces à distance, forces de contact</h3>
+    <div id="info"></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">La force de l'air</h3>
+    <div class="cle"><p>L'air touche toujours le système (sauf dans le vide ou dans un liquide) : il y a toujours une force de l'air. On la <b>néglige</b>, sauf si :</p>
+      <ul class="er-liste"><li>ses <b>frottements</b> ne sont pas négligeables (grande vitesse, grande surface : parachute…) : <span class="vec-nom">F</span><sub>air</sub> ;</li>
+      <li>sa <b>poussée d'Archimède</b> n'est pas négligeable (système très léger pour son volume : montgolfière, ballon d'hélium).</li></ul></div>
+    <div class="cle"><p>Poussée d'Archimède d'un fluide (air, eau, huile…) : <b><span class="vec-nom">F</span><sub>archi</sub></b>, verticale, vers le haut.</p></div>
+    <div class="som-fiche-figs deux" id="helium"></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Le diagramme objet-action</h3>
+    <div class="cle"><p>Le <b>système</b> au centre, relié à chaque objet qui agit sur lui : trait en <b>pointillés</b> = action à distance ; trait <b>plein</b> = action de contact ; trait <b>barré</b> = force négligeable. Le <b>nom de la force</b> s'écrit sur le trait.</p></div>
+    <p class="cours-exemple-t">Exemple : le ballon de foot</p>
+    <div id="ballon"></div>
   </section>
 
   <section class="er-card">
@@ -41,14 +54,25 @@
     <div class="cle"><p>Somme nulle : Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span> (même direction, sens opposés, même valeur pour deux forces). Exemple : palet d'air-hockey, <span class="vec-nom">R</span><sub>N</sub> et <span class="vec-nom">P</span> se compensent ; skieur sans frottement, elles ne se compensent pas.</p></div>
   </section>
 
+  <section class="er-card">
+    <h3 class="cours-titre">Trois bilans de la fiche</h3>
+    <div class="pfd-ballon" id="figs"></div>
+  </section>
+
   <div class="er-actions som-fiche-liens">
     <a class="btn-secondary" href="module_2_cours.html">Revoir le cours</a>
     <a class="btn-secondary" href="module_2_questions.html">Questions sur le bilan des forces</a>
   </div>
 </div>
 <script>
-// trois bilans de la fiche, avec leurs forces
-document.getElementById('figs').innerHTML = ['brique', 'incline', 'voiture'].map(id => PFD.sceneRemplie(PFD.SITUATIONS[id])).join('');
+// infographie de la méthode, exemple du ballon d'hélium, exemple traité du ballon,
+// puis trois bilans de la fiche (diagramme objet-action au-dessus du dessin)
+const S = PFD.SITUATIONS;
+document.getElementById('info').innerHTML = PFD.infoForces();
+document.getElementById('helium').innerHTML = `${PFD.diagrammeDe(S.helium)}${PFD.sceneRemplie(S.helium)}`;
+document.getElementById('ballon').innerHTML = PFD.ballonHTML();
+const trois = ['brique', 'incline', 'voiture'].map(id => S[id]), dos = PFD.diagrammesDe(trois);
+document.getElementById('figs').innerHTML = trois.map((s, k) => `<figure><p class="pfd-ballon-t">${s.titre}</p>${dos[k]}${PFD.sceneRemplie(s)}</figure>`).join('');
 PFD.menu('fiche_2');
 </script>
 </body>

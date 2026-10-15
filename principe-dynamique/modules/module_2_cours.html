@@ -20,7 +20,7 @@
   <div class="er-card">
     <span class="er-badge">MODULE 2 · COURS</span>
     <h2 class="er-titre">Faire un bilan des forces</h2>
-    <p class="er-contexte">La méthode du <b>diagramme objet-action</b> : d'abord les forces <b>à distance</b>, puis une force pour <b>chaque objet qui touche</b> le système. Tu vas aussi calculer le <b>poids</b>, décrire la <b>réaction du support</b> et dire si des forces se <b>compensent</b>.</p>
+    <p class="er-contexte">La méthode : d'abord les forces <b>à distance</b>, puis une force pour <b>chaque objet qui touche</b> le système, <b>l'air</b> compris. On les rassemble dans le <b>diagramme objet-action</b>. Tu vas aussi calculer le <b>poids</b>, décrire la <b>réaction du support</b> et dire si des forces se <b>compensent</b>.</p>
   </div>
   <div id="etapes"></div>
 </div>
@@ -29,13 +29,16 @@
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
    Forces à distance (poids, magnétique, électrique : depuis le centre)
-   et de contact (depuis le point de contact) ; P = m × g ;
-   <span class="vec-nom">R</span> = <span class="vec-nom">R</span>ₙ + <span class="vec-nom">f</span> ; forces qui se compensent. Les « À toi » des étapes 3 et 4
-   utilisent l'outil de bilan des forces (PFD.bilan) : palet d'air-hockey
+   et de contact (depuis le point de contact), en infographie
+   (PFD.infoForces) ; la force de l'air (toujours là, souvent négligée ;
+   poussée d'Archimède notée F⃗archi) ; le diagramme objet-action
+   (exemple du ballon, puis outil PFD.bilan arrêté au diagramme) ;
+   P = m × g ; R⃗ = R⃗ₙ + f⃗ ; forces qui se compensent. Les « À toi » des
+   étapes 5 et 6 font un bilan complet (PFD.bilan) : palet d'air-hockey
    et skieur sans frottement (fiche « Faire un bilan des forces »).
    ============================================================ */
 const { fmt, sci, hasard, melanger, exemple } = COURS;
-const { o, fr, proche, nomV, sceneRemplie, bilan, SITUATIONS, BALLON } = PFD;
+const { o, fr, proche, nomV, sceneRemplie, bilan, infoForces, OPTS_AIR, REGLE_AIR, SITUATIONS, BALLON } = PFD;
 const c = h => `<span class="c">${h}</span>`;
 const r3 = v => +v.toPrecision(3);
 
@@ -47,12 +50,11 @@ const ACTIONS = [
 function etape1(c_) {
   const carte = c_.carte('1. Forces à distance, forces de contact');
   c_.ajouter(carte, `<div class="cours-bloc">
-      <div class="cle"><p><b class="cle-titre">Méthode.</b></p><ol class="er-liste">
-        <li><b>Forces à distance</b> : il n'y en a que trois : le <b>poids</b> (la Terre), la force <b>magnétique</b> (un aimant), la force <b>électrique</b> (un objet chargé). La flèche part du <b>centre</b> G du système.</li>
-        <li><b>Forces de contact</b> : <b>chaque objet qui touche</b> le système exerce une force. La flèche part du <b>point de contact</b>.</li></ol></div>
+      <p><b class="cle-titre">Méthode.</b> Pour faire le bilan des forces qui s'exercent sur le système, on cherche :</p>
+      ${infoForces()}
     </div>
     ${exemple(`<div class="pfd-sc-cadre">${sceneRemplie(BALLON[0], { aria: 'Ballon posé sur le sol : poids et réaction du sol' })}</div>
-      <p>Ballon posé sur le sol. À distance : la Terre → poids ${nomV('P')}, depuis G, vers le bas. Contact : le sol → ${nomV('RN')}, depuis le point de contact A, vers le haut.</p>`)}`);
+      <p>Ballon posé sur le sol. À distance : la Terre → poids ${nomV('P')}, depuis G, vers le bas. Contact : le sol → ${nomV('RN')}, depuis le point de contact A, vers le haut (l'air touche aussi le ballon, mais sa force est négligeable : voir la partie 2).</p>`)}`);
   const choisies = melanger(ACTIONS.filter(a => a[0] === 'dist')).slice(0, 1).concat(melanger(ACTIONS.filter(a => a[0] === 'cont')).slice(0, 2));
   c_.aToi(carte, melanger(choisies).map((a, k) => ({ titre: `Action ${k + 1}`, enonce: `<p>${a[1]}</p>`,
     parties: [{ type: 'choix', q: 'Cette action est-elle à distance ou de contact ?', options: [o('dist', 'à distance'), o('cont', 'de contact')], bonne: a[0], melanger: false,
@@ -61,9 +63,56 @@ function etape1(c_) {
   return carte;
 }
 
-/* ---------- 2. Le poids ---------- */
+/* ---------- 2. La force de l'air ---------- */
+// situations : [texte, réponse ('oui' : négligeable, 'frottements', 'archi'), explication]
+const AIRS = [
+  ['Une brique est posée sur une table.', 'oui', 'Immobile, et lourde pour son volume : on néglige la force de l\'air.'],
+  ['Une pomme tombe d\'un arbre (chute de 2 m).', 'oui', 'Chute courte, vitesse faible : on néglige la force de l\'air.'],
+  ['Une bille roule lentement sur une table.', 'oui', 'Vitesse faible, petite surface : on néglige la force de l\'air.'],
+  ['Un parachutiste descend, parachute ouvert.', 'frottements', 'Le parachute a une très grande surface : les frottements de l\'air freinent la chute.'],
+  ['Une voiture roule sur l\'autoroute à 130 km/h.', 'frottements', 'Grande vitesse, grande surface : les frottements de l\'air ne sont pas négligeables.'],
+  ['Une feuille de papier tombe en virevoltant.', 'frottements', 'Très légère et de grande surface : les frottements de l\'air la freinent beaucoup.'],
+  ['Une montgolfière s\'élève dans le ciel.', 'archi', 'L\'air chaud de l\'enveloppe la rend très légère pour son volume : la poussée d\'Archimède de l\'air la fait monter.'],
+  ['Un ballon de baudruche gonflé à l\'hélium monte vers le plafond.', 'archi', 'Très léger pour son volume : la poussée d\'Archimède de l\'air le fait monter.'],
+  ['Un dirigeable flotte dans l\'air, immobile.', 'archi', 'Rempli d\'hélium, très léger pour son volume : la poussée d\'Archimède de l\'air compense son poids.'],
+];
 function etape2(c_) {
-  const carte = c_.carte('2. Le poids : P = m × g');
+  const carte = c_.carte('2. La force de l\'air');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Sauf dans le vide ou dans un liquide, le système est entouré d'air : <b>l'air le touche toujours</b>. Il y a donc <b>toujours une force de l'air</b>, une force de contact.</p>
+      <div class="cle"><p><b class="cle-titre">Règle.</b> On <b>néglige</b> souvent la force de l'air, sauf :</p>
+        <ul class="er-liste"><li>quand les <b>frottements de l'air</b> ne sont pas négligeables (grande vitesse, grande surface : parachute, voiture rapide, ballon frappé fort…) ; la force de l'air se note alors ${nomV('Fair')} ;</li>
+        <li>quand la <b>poussée d'Archimède</b> de l'air n'est pas négligeable (système très léger pour son volume : montgolfière, ballon de baudruche gonflé à l'hélium).</li></ul></div>
+      <div class="cle"><p><b class="cle-titre">Notation.</b> La poussée d'Archimède, exercée par un fluide (l'air, l'eau, l'huile…), se note <b>${nomV('Farchi')}</b>. Elle est verticale, vers le haut.</p></div>
+    </div>
+    ${exemple(`<div class="pfd-sc-cadre">${sceneRemplie(SITUATIONS.helium)}</div>
+      <p>${SITUATIONS.helium.enonce} L'air touche le ballon, et sa poussée d'Archimède n'est pas négligeable : ${nomV('Farchi')}, depuis G, vers le haut. Elle compense le poids ${nomV('P')} et la force ${nomV('T')} de la ficelle.</p>`)}`);
+  // une situation de chaque sorte : force de l'air négligeable, frottements, poussée d'Archimède
+  const choisies = ['oui', 'frottements', 'archi'].map(r => hasard(AIRS.filter(a => a[1] === r)));
+  const ind = { oui: REGLE_AIR, frottements: 'Ici, les frottements de l\'air sont-ils vraiment importants ? Grande vitesse ? Grande surface ?', archi: 'Le système est-il très léger pour son volume, comme une montgolfière ou un ballon d\'hélium ?' };
+  c_.aToi(carte, melanger(choisies).map((a, k) => ({ titre: `Situation ${k + 1}`, enonce: `<p>${a[0]}</p>`,
+    parties: [{ type: 'choix', q: 'L\'air touche le système : peut-on négliger sa force ?', options: OPTS_AIR, bonne: a[1], melanger: false, colonne: true,
+      indices: OPTS_AIR.reduce((m, x) => (x.id === a[1] ? m : Object.assign(m, { [x.id]: ind[x.id] })), {}), solution: `<p>${a[2]}</p>` }] })));
+  return carte;
+}
+
+/* ---------- 3. Le diagramme objet-action ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Le diagramme objet-action');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> On écrit le <b>système</b> au centre, puis <b>tous les objets qui agissent</b> sur lui : la Terre (et les aimants, les objets chargés), puis chaque objet qui le touche, l'air compris. On relie chaque objet au système :</p>
+        <ul class="er-liste"><li>trait en <b>pointillés</b> : action <b>à distance</b> ;</li><li>trait <b>plein</b> : action <b>de contact</b> ;</li><li>trait <b>barré</b> : force <b>négligeable</b> (souvent celle de l'air).</li></ul>
+        <p>Sur chaque trait, on écrit le <b>nom de la force</b>. Il ne reste plus qu'à dessiner chaque force sur le schéma.</p></div>
+    </div>
+    ${exemple(`<p>Bilan des forces qui s'exercent sur un <b>ballon</b> de foot : le diagramme objet-action, puis les forces dessinées.</p>${PFD.ballonHTML()}`)}`);
+  c_.aToi(carte, [Object.assign({ titre: 'La brique sur la planche' }, bilan(SITUATIONS.brique, { diagramme: true })),
+    Object.assign({ titre: 'La balle lancée' }, bilan(SITUATIONS.balle, { diagramme: true }))]);
+  return carte;
+}
+
+/* ---------- 4. Le poids ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. Le poids : P = m × g');
   c_.ajouter(carte, `<div class="cours-bloc">
       <div class="cle"><p class="crs-formule">P = m × g</p><p>P en <b>newtons</b> (N), m en <b>kg</b>, g = 9,81 N/kg (intensité de la pesanteur). Dans certains sujets, g n'est pas donné : on peut prendre g = 10 N/kg.</p>
         <p>Le poids ${nomV('P')} est <b>vertical</b>, <b>vers le bas</b>, et part du centre G du système.</p></div>
@@ -84,9 +133,9 @@ function etape2(c_) {
   return carte;
 }
 
-/* ---------- 3. La réaction du support ---------- */
-function etape3(c_) {
-  const carte = c_.carte('3. La réaction du support');
+/* ---------- 5. La réaction du support ---------- */
+function etape5(c_) {
+  const carte = c_.carte('5. La réaction du support');
   c_.ajouter(carte, `<div class="cours-bloc">
       <div class="cle"><p class="crs-formule">${nomV('R')} = ${nomV('RN')} + ${nomV('f')}</p>
         <ul class="er-liste"><li><b>Sans frottement</b>, la force du support est <b>perpendiculaire au support</b> : c'est ${nomV('RN')} (N = normale = perpendiculaire).</li>
@@ -98,9 +147,9 @@ function etape3(c_) {
   return carte;
 }
 
-/* ---------- 4. Des forces qui se compensent ---------- */
-function etape4(c_) {
-  const carte = c_.carte('4. Des forces qui se compensent');
+/* ---------- 6. Des forces qui se compensent ---------- */
+function etape6(c_) {
+  const carte = c_.carte('6. Des forces qui se compensent');
   c_.ajouter(carte, `<div class="cours-bloc">
       <div class="cle"><p><b class="cle-titre">Définition.</b> Des forces se <b>compensent</b> quand leur somme vectorielle est nulle : Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span>. Deux forces qui se compensent ont la même direction, des sens opposés et la même valeur.</p></div>
     </div>
@@ -113,17 +162,19 @@ function etape4(c_) {
 /* ---------- À retenir ---------- */
 function aRetenir(c_) {
   const carte = c_.carte('À retenir');
-  c_.ajouter(carte, `<div class="cle"><p>Bilan des forces : 1. forces à distance (poids, magnétique, électrique), depuis le centre G ; 2. un objet qui touche = une force de contact, depuis le point de contact ; 3. direction et sens ; 4. nom ; 5. compensation ou non.</p></div>
+  c_.ajouter(carte, `<div class="cle"><p><b>Bilan des forces</b> : d'abord les forces à distance, puis les forces de contact ; pour chaque force, son point de départ, sa direction, son sens et son nom ; enfin, les forces se compensent-elles ?</p>${infoForces()}</div>
+    <div class="cle"><p>L'<b>air</b> touche toujours le système : on néglige sa force, sauf si ses frottements (${nomV('Fair')}) ou sa poussée d'Archimède (${nomV('Farchi')}) ne sont pas négligeables.</p></div>
+    <div class="cle"><p><b>Diagramme objet-action</b> : le système au centre, relié à chaque objet qui agit sur lui ; pointillés = à distance, trait plein = contact, trait barré = force négligeable ; le nom de la force sur le trait.</p></div>
     <div class="cle"><p class="crs-formule">P = m × g</p><p>P en N, m en kg, g = 9,81 N/kg ; vertical, vers le bas.</p></div>
     <div class="cle"><p>${nomV('R')} = ${nomV('RN')} + ${nomV('f')} : sans frottement, réaction perpendiculaire au support ; les frottements s'opposent au glissement.</p></div>
     <div class="cle"><p>Des forces se compensent quand leur somme est nulle : Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span>.</p></div>
-    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur le bilan des forces →</a>
-      <a class="btn-secondary" style="text-decoration:none" href="module_3_cours.html">Module 3 : accélération</a>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_simulation.html">Atelier : bilan des forces →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2_questions.html">Questions sur le bilan des forces</a>
       <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
   return carte;
 }
 
-new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, etape5, etape6, aRetenir]);
 PFD.menu('module_2_cours');
 </script>
 </body>
