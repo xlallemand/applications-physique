@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur le référentiel et le mouvement — Chapitre 6 : Principe fondamental de la dynamique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pfd.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pfd.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : référentiel adapté à une
+   situation (3), référentiel galiléen (2), nature du mouvement
+   d'après une chronophotographie (3) ou d'après des positions
+   successives (2).
+   Erreurs diagnostiquées : référentiel géocentrique et héliocentrique
+   confondus, mouvement « uniforme » parce que la trajectoire est une
+   droite, écarts croissants et décroissants confondus.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, chrono } = PFD;
+
+/* ---------- Groupe 1 : référentiel adapté ---------- */
+const REFS = [o('ter', 'terrestre'), o('geo', 'géocentrique'), o('helio', 'héliocentrique')];
+const IND = {
+  ter: 'Le référentiel terrestre convient pour les mouvements à la surface de la Terre.',
+  geo: 'Le référentiel géocentrique (centre de la Terre) sert pour les satellites et la Lune.',
+  helio: 'Le référentiel héliocentrique (centre du Soleil) sert pour les planètes et les comètes.',
+};
+const SITU = [
+  ['ter', 'Un cycliste roule sur une route droite.'], ['ter', 'Une balle de tennis est lancée.'], ['ter', 'Un ascenseur monte.'], ['ter', 'Une voiture de course démarre.'],
+  ['geo', 'Un satellite GPS tourne autour de la Terre.'], ['geo', 'La Station spatiale internationale tourne autour de la Terre.'], ['geo', 'La Lune tourne autour de la Terre.'],
+  ['helio', 'Vénus tourne autour du Soleil.'], ['helio', 'La Terre tourne autour du Soleil.'], ['helio', 'Une sonde voyage de la Terre vers Mars.'],
+];
+const G1 = SITU.map(s => function ref() {
+  const ind = {};
+  REFS.forEach(r => { if (r.id !== s[0]) ind[r.id] = IND[r.id] + ' Est-ce adapté ici ?'; });
+  return { theme: 'Référentiel', enonce: `<p>${s[1]}</p>`, parties: [fq.choix('Quel référentiel est le plus adapté pour étudier ce mouvement ?', REFS, s[0], { melanger: false, indices: ind, solution: `<p>${IND[s[0]]}</p>` })] };
+});
+
+/* ---------- Groupe 2 : référentiel galiléen ---------- */
+const GAL = [
+  ['Le référentiel d\'un train qui roule en ligne droite à vitesse constante.', 'oui', 'Mouvement rectiligne uniforme par rapport au sol : il est galiléen.'],
+  ['Le référentiel d\'un ascenseur qui démarre.', 'non', 'L\'ascenseur accélère : il n\'est pas galiléen.'],
+  ['Le référentiel terrestre, pour une expérience de quelques minutes.', 'oui', 'Pour une expérience courte, on considère le référentiel terrestre comme galiléen.'],
+  ['Le référentiel d\'une voiture qui freine.', 'non', 'La voiture ralentit : elle n\'est pas en mouvement rectiligne uniforme.'],
+  ['Le référentiel d\'un manège qui tourne.', 'non', 'Le mouvement n\'est pas rectiligne.'],
+];
+const G2 = GAL.map(g => function gal() {
+  return { theme: 'Référentiel galiléen', enonce: `<p>${g[0]}</p>`, parties: [fq.choix('Ce référentiel peut-il être considéré comme galiléen ?', [o('oui', 'oui'), o('non', 'non')], g[1],
+    { melanger: false, indice: 'Un référentiel galiléen est immobile ou en mouvement rectiligne uniforme par rapport à un référentiel galiléen.', solution: `<p>${g[2]}</p>` })] };
+});
+
+/* ---------- Groupe 3 : chronophotographies ---------- */
+const NAT = [o('uniforme', 'uniforme'), o('accelere', 'accéléré'), o('decelere', 'décéléré')];
+const SOL = { uniforme: 'Positions régulièrement espacées : mouvement uniforme.', accelere: 'Positions de plus en plus espacées : mouvement accéléré.', decelere: 'Positions de moins en moins espacées : mouvement décéléré.' };
+const G3 = ['uniforme', 'accelere', 'decelere'].map(t => function nature() {
+  return { theme: 'Nature du mouvement', enonce: `<p>Chronophotographie d'un mobile qui va de gauche à droite (intervalles de temps égaux) :</p>${chrono({ type: t, n: hasard([7, 8, 9, 10]) })}`,
+    parties: [fq.choix('Quelle est la nature de son mouvement ?', NAT, t, { melanger: false, indice: 'Compare les écarts entre deux positions successives : sont-ils égaux, de plus en plus grands, de plus en plus petits ?', solution: `<p>${SOL[t]}</p>` })] };
+});
+
+/* ---------- Groupe 4 : positions successives ---------- */
+const G4 = [
+  function positions() {
+    const t = hasard(['uniforme', 'accelere', 'decelere']), d0 = hasard([2, 3, 5]);
+    const ecarts = t === 'uniforme' ? [d0, d0, d0, d0] : t === 'accelere' ? [d0, d0 + 1, d0 + 2, d0 + 3] : [d0 + 3, d0 + 2, d0 + 1, d0];
+    const x = ecarts.reduce((l, e) => l.concat([l[l.length - 1] + e]), [0]);
+    return { theme: 'Nature du mouvement', enonce: `<p>Toutes les 0,1 s, on repère la position d'un mobile sur une droite : x = ${x.map(v => fmt(v)).join(' cm ; ')} cm.</p>`,
+      parties: [fq.choix('Quelle est la nature de son mouvement ?', NAT, t, { melanger: false, indice: 'Calcule la distance parcourue entre deux positions successives.', solution: `<p>Distances parcourues pendant chaque intervalle : ${ecarts.join(' ; ')} cm. ${SOL[t]}</p>` })] };
+  },
+  function piege() {
+    return { theme: 'Nature du mouvement', parties: [fq.choix('La trajectoire d\'une voiture est une droite. Peut-on dire que son mouvement est uniforme ?', [o('non', 'non : il faut aussi que la vitesse soit constante'), o('oui', 'oui : une trajectoire droite suffit')], 'non',
+      { melanger: false, indices: { oui: '« Rectiligne » parle de la trajectoire ; « uniforme » parle de la vitesse.' }, solution: '<p>Rectiligne = trajectoire droite ; uniforme = vitesse constante. La voiture peut accélérer en ligne droite.</p>' })] };
+  },
+];
+
+// tirage : 3 + 2 + 3 + 2 questions
+function tirage() {
+  const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
+  return pris(G1, 3).concat(pris(G2, 2), pris(G3, 3), [G4[0](), G4[1]()]);
+}
+
+PFD.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Référentiel et nature du mouvement',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : référentiel adapté à une situation, référentiel galiléen, nature d\'un mouvement rectiligne d\'après une chronophotographie ou des positions successives.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2_simulation.html', label: 'Module 2 : bilan des forces →' },
+});
+PFD.menu('module_1_questions');
+</script>
+</body>
+</html>

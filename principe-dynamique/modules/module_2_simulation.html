@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : atelier, faire un bilan des forces — Chapitre 6 : Principe fondamental de la dynamique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pfd.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pfd.js"></script>
+<script src="situations.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · ATELIER</span>
+    <h2 class="er-titre">Faire un bilan des forces</h2>
+    <p class="er-contexte">Avant de calculer quoi que ce soit en dynamique, on fait la liste des <b>forces</b> qui s'exercent sur le système. Applique <b>toujours la même méthode</b> : un exemple traité, puis quinze situations, de la plus simple à la plus difficile.</p>
+  </div>
+
+  <div class="er-card">
+    <h3 class="cours-titre">La méthode du diagramme objet-action</h3>
+    <div class="cle"><ol class="er-liste">
+      <li><b>Forces à distance</b> : il n'y en a que trois possibles : le <b>poids</b> (la Terre), la force <b>magnétique</b> (un aimant), la force <b>électrique</b> (un objet chargé). Leur flèche part du <b>centre</b> G du système.</li>
+      <li><b>Forces de contact</b> : <b>chaque objet qui touche</b> le système exerce une force. Sa flèche part du <b>point de contact</b>.</li>
+      <li>Pour chaque force : sa <b>direction</b> et son <b>sens</b> (sans souci d'échelle).</li>
+      <li>Le <b>nom</b> de chaque vecteur : <span class="vec-nom">P</span>, <span class="vec-nom">R</span><sub>N</sub>, <span class="vec-nom">f</span>, <span class="vec-nom">T</span>…</li>
+      <li>Les forces se <b>compensent</b>-elles (somme nulle) ?</li></ol></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="cours-titre">Exemple traité : le ballon de foot</h3>
+    <p class="er-contexte">Le système est le ballon. Regarde comment le bilan change avant, pendant et après la frappe.</p>
+    <div id="ballon" class="pfd-ballon"></div>
+  </div>
+
+  <div class="er-card ph-question" id="situation"></div>
+
+  <div id="bilan" class="er-card" hidden>
+    <span class="er-badge">BILAN</span>
+    <h3 class="er-titre">✍ Complète ton cours</h3>
+    <div class="cle"><p><b class="cle-titre">Bilan des forces.</b> 1. Forces à distance (3 possibles : poids, magnétique, électrique), depuis le centre G. 2. Un objet qui touche = une force de contact, depuis le point de contact. 3. Direction et sens. 4. Nom du vecteur. 5. Compensation ou non.</p></div>
+    <div class="cle"><p><b class="cle-titre">Réaction du support.</b> <span class="vec-nom">R</span> = <span class="vec-nom">R</span><sub>N</sub> + <span class="vec-nom">f</span>. Sans frottement, la réaction est <b>perpendiculaire au support</b> (<span class="vec-nom">R</span><sub>N</sub>). Les frottements <span class="vec-nom">f</span> sont parallèles au support, <b>opposés au glissement</b> qu'il y aurait sans eux.</p></div>
+    <div class="cle"><p><b class="cle-titre">Pièges.</b> Un objet qui ne touche plus le système (la main qui a lâché la balle) n'exerce plus de force. Le moteur d'une voiture fait partie du système : c'est la route qui pousse les roues motrices (force motrice).</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_2_cours.html">Le cours du module 2 →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Atelier « Faire un bilan des forces » : l'exemple traité du ballon
+   (PFD.sceneRemplie), puis les situations de la fiche dans l'ordre
+   PFD.PARCOURS, une à la fois, chacune en quatre étapes (PFD.bilan) +
+   la question de compensation. Sans points (mode 'cours' : réponse
+   disponible après une erreur). Les situations réussies sont gardées
+   dans le navigateur ; on peut aller à n'importe quelle situation.
+   Le bilan « ✍ Complète ton cours » s'affiche après la dernière
+   situation (ou quand toutes sont faites) : l'atelier est fait.
+   ============================================================ */
+const S = PFD.SITUATIONS, ORDRE = PFD.PARCOURS;
+const CLE = 'principe-dynamique-atelier';
+function lire() { try { return JSON.parse(localStorage.getItem(CLE)) || {}; } catch (e) { return {}; } }
+function noter(id) { try { const r = lire(); r[id] = true; localStorage.setItem(CLE, JSON.stringify(r)); } catch (e) { /* stockage indisponible */ } }
+
+// l'exemple traité : trois dessins avec leurs forces
+document.getElementById('ballon').innerHTML = PFD.BALLON.map(b => `<figure>${PFD.sceneRemplie(b, { aria: 'Ballon ' + b.titre.toLowerCase() + ' : bilan des forces' })}<figcaption><b>${b.titre}</b>${b.texte}</figcaption></figure>`).join('');
+
+const zone = document.getElementById('situation');
+function afficherBilan() {
+  const b = document.getElementById('bilan');
+  if (!b.hidden) return;
+  b.hidden = false;
+  PFD.marquer({ fait: true });                                     // atelier fait (sommaire, accueil)
+}
+function situation(k, defiler) {
+  const s = S[ORDRE[k]], faits = lire(), q = PFD.bilan(s);
+  zone.innerHTML = `<p class="er-q-nom">Situation ${k + 1} / ${ORDRE.length}</p><h3 class="er-titre" style="margin-top:2px">${s.titre}</h3>
+    <div class="pfd-situs" role="group" aria-label="Choisir une situation">${ORDRE.map((id, i) => `<button type="button" data-k="${i}" class="${faits[id] ? 'fait' : ''}" aria-current="${i === k}" title="${S[id].titre}" aria-label="Situation ${i + 1} : ${S[id].titre}${faits[id] ? ' (faite)' : ''}">${faits[id] ? '✓' : i + 1}</button>`).join('')}</div>
+    <div class="ph-enonce" style="margin-top:12px">${q.enonce}</div><div data-a="parties"></div><div class="er-actions" data-a="suite"></div>`;
+  zone.querySelectorAll('.pfd-situs button').forEach(b => { b.onclick = () => situation(+b.dataset.k, true); });
+  if (defiler) zone.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  PFD.question(zone.querySelector('[data-a="parties"]'), q, {
+    fin() {
+      noter(s.id);
+      const s2 = zone.querySelector('[data-a="suite"]'), der = k === ORDRE.length - 1;
+      s2.innerHTML = der ? '<button type="button" class="btn-primary">Voir le bilan →</button>' : `<button type="button" class="btn-primary">Situation ${k + 2} →</button>`;
+      s2.querySelector('button').onclick = () => {
+        if (der) { afficherBilan(); document.getElementById('bilan').scrollIntoView({ behavior: 'smooth', block: 'start' }); } else situation(k + 1, true);
+      };
+      if (der || ORDRE.every(id => lire()[id])) afficherBilan();
+      setTimeout(() => s2.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+    },
+  }, 'cours');
+}
+// reprise à la première situation pas encore faite
+const faits = lire(), premiere = ORDRE.findIndex(id => !faits[id]);
+situation(premiere < 0 ? 0 : premiere, false);
+if (premiere < 0) afficherBilan();
+PFD.menu('module_2_simulation');
+</script>
+</body>
+</html>

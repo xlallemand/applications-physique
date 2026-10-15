@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : accélération — Chapitre 6 : Principe fondamental de la dynamique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pfd.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pfd.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS</span>
+    <h2 class="er-titre">Accélération</h2>
+    <p class="er-contexte">L'<b>accélération</b> mesure la variation de la vitesse au cours du temps. On la calcule en <b>dérivant</b> la vitesse, ou avec <b>Δv / Δt</b> quand elle est constante. Unité : le <b>m·s<sup>−2</sup></b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   a = dv/dt (= v′), en m·s⁻² ; a constante : a = Δv / Δt
+   (négative si le système ralentit, on garde la valeur positive pour
+   une norme) ; conversion km/h → m/s (÷ 3,6) ; a = Σ F / m au module 4.
+   Erreurs diagnostiquées : km/h non convertis, Δv calculé à l'envers,
+   constante non dérivée, Δt et Δv inversés.
+   ============================================================ */
+const { fmt, hasard, exemple } = COURS;
+const { fr, proche } = PFD;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+const MS2 = 'm·s<sup>−2</sup>';
+
+/* ---------- 1. Définition : la dérivée de la vitesse ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. L\'accélération : a = dv/dt');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition (à connaître).</b> L'accélération est la <b>variation de la vitesse</b> au cours du temps : c'est la dérivée de la vitesse.</p>
+        <p class="crs-formule">a = ${fr('dv', 'dt')} = v′ &nbsp; en m·s<sup>−2</sup></p></div>
+      <p>Pour v = k × t + v<sub>0</sub> (k et v<sub>0</sub> constants), la dérivée vaut a = k : la constante v<sub>0</sub> disparaît.</p>
+    </div>
+    ${exemple(`<p>Un avion démarre avec une vitesse v = 7,25 t (v en m/s, t en s).</p><p class="crs-calc">a = v′ = <span class="c">7,25 ${MS2}</span></p>`)}`);
+  const [k1] = hasard([[3.2], [9.81], [2.5], [6]]), [k2, v0] = hasard([[4, 5], [1.5, 12], [0.8, 3]]), [k3, v3] = hasard([[-2, 20], [-5, 30], [-1.5, 15]]);
+  c_.aToi(carte, [
+    { titre: 'Une vitesse proportionnelle au temps', enonce: `<p>v = ${fmt(k1)} t (v en m/s, t en s).</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est l\'accélération ?', label: 'a =', valeur: k1, unite: MS2, signe: false, diag: () => 'Dérive v = k t : on obtient k.', solution: `<p class="crs-calc">a = v′ = ${c(fmt(k1) + ' ' + MS2)}</p>` }] },
+    { titre: 'Avec une vitesse de départ', enonce: `<p>v = ${fmt(k2)} t + ${v0} (v en m/s, t en s).</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est l\'accélération ?', label: 'a =', valeur: k2, unite: MS2, signe: false,
+        diag: v => proche(v, k2 + v0) || proche(v, v0) ? `La dérivée d'une constante est nulle : ${v0} disparaît.` : 'a = v′ : dérive v.', solution: `<p class="crs-calc">a = v′ = ${fmt(k2)} + 0 = ${c(fmt(k2) + ' ' + MS2)}</p>` }] },
+    { titre: 'Un système qui ralentit', enonce: `<p>v = ${fmt(k3)} t + ${v3} (v en m/s, t en s).</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est l\'accélération ? (avec son signe)', label: 'a =', valeur: k3, unite: MS2,
+        diag: v => proche(v, -k3) ? 'Garde le signe : la vitesse diminue, a est négative.' : 'a = v′.', solution: `<p class="crs-calc">a = v′ = ${c(fmt(k3) + ' ' + MS2)}</p><p>a est négative : le système ralentit.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Accélération constante : a = Δv / Δt ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Accélération constante : a = Δv / Δt');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">a = ${fr('Δv', 'Δt')} = ${fr('v<sub>fin</sub> − v<sub>début</sub>', 'durée')}</p>
+        <p>Un résultat <b>négatif</b> veut dire que le système <b>ralentit</b>. Pour la valeur (la norme) de l'accélération, on garde le nombre positif.</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc">Une voiture passe de 0 à 27,8 m/s en 2,5 s : a = ${fr('27,8 − 0', '2,5')} ≈ <span class="c">11,1 ${MS2}</span><br>
+      Une balle de golf passe de 10 m/s à 0 en 4,0 s : a = ${fr('0 − 10', '4,0')} = −2,5 ${MS2} : elle ralentit ; la valeur de son accélération est <span class="c">a = 2,5 ${MS2}</span>.</p>`)}`);
+  const [v1, t1] = hasard([[20, 4], [30, 5], [12, 3], [25, 2]]), [va, vb, t2] = hasard([[5, 15, 4], [10, 25, 6], [8, 20, 3]]), [vd, td] = hasard([[18, 6], [12, 4], [30, 10]]);
+  c_.aToi(carte, [
+    { titre: 'Un démarrage', enonce: `<p>Un scooter passe de 0 à ${v1} m/s en ${t1} s.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule son accélération.', label: 'a =', valeur: v1 / t1, unite: MS2, signe: false, rel: .01,
+        diag: v => proche(v, t1 / v1, .02) ? 'Rapport inversé : a = Δv / Δt.' : proche(v, v1 * t1) ? 'On divise : a = Δv / Δt.' : 'a = Δv / Δt.', solution: `<p class="crs-calc">a = ${fr(v1 + ' − 0', t1)} = ${c(fmt(r3(v1 / t1)) + ' ' + MS2)}</p>` }] },
+    { titre: 'Une vitesse de départ', enonce: `<p>Un cycliste passe de ${va} m/s à ${vb} m/s en ${t2} s.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule son accélération (3 chiffres significatifs).', label: 'a =', valeur: (vb - va) / t2, unite: MS2, signe: false, rel: .01, affiche: fmt(r3((vb - va) / t2)),
+        diag: v => proche(v, vb / t2, .02) ? `Δv = v<sub>fin</sub> − v<sub>début</sub> = ${vb} − ${va}.` : proche(v, (vb + va) / t2, .02) ? 'Δv est une différence.' : 'a = (v<sub>fin</sub> − v<sub>début</sub>) / Δt.', solution: `<p class="crs-calc">a = ${fr(vb + ' − ' + va, t2)} ≈ ${c(fmt(r3((vb - va) / t2)) + ' ' + MS2)}</p>` }] },
+    { titre: 'Un freinage', enonce: `<p>Un véhicule passe de ${vd} m/s à l'arrêt en ${td} s.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule Δv / Δt, avec son signe.', label: 'a =', valeur: -vd / td, unite: MS2,
+        diag: v => proche(v, vd / td) ? 'Δv = v<sub>fin</sub> − v<sub>début</sub> = 0 − ' + vd + ' : le résultat est négatif.' : 'a = (0 − ' + vd + ') / ' + td + '.', solution: `<p class="crs-calc">a = ${fr('0 − ' + vd, td)} = ${c(fmt(-vd / td) + ' ' + MS2)}</p><p>Négatif : le véhicule ralentit ; la valeur de l'accélération est ${fmt(vd / td)} ${MS2}.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Des km/h aux m/s ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Convertir les km/h en m/s');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">v (m/s) = ${fr('v (km/h)', '3,6')}</p><p>1 km/h = ${fr('1 000 m', '3 600 s')} = ${fr('1', '3,6')} m/s. Dans a = Δv / Δt, la vitesse doit être en <b>m/s</b> et la durée en <b>s</b>.</p></div>
+      <div class="ph-lien-app"><p>Revois les conversions d'unités.</p><a class="btn-small" href="../../conversions/index.html">Conversions →</a></div>
+    </div>
+    ${exemple(`<p class="crs-calc">100 km/h = ${fr('100', '3,6')} ≈ 27,8 m/s ; de 0 à 100 km/h en 2,5 s : a = ${fr('27,8', '2,5')} ≈ <span class="c">11,1 ${MS2}</span></p>`)}`);
+  const kmh = hasard([36, 54, 72, 90, 108]), [kmh2, t2] = hasard([[100, 8], [90, 10], [50, 5], [130, 12]]);
+  c_.aToi(carte, [
+    { titre: 'Une conversion', enonce: `<p>Une voiture roule à ${kmh} km/h.</p>`,
+      parties: [{ type: 'nombre', q: 'Convertis cette vitesse en m/s.', label: 'v =', valeur: kmh / 3.6, unite: 'm/s', signe: false, rel: .01,
+        diag: v => proche(v, kmh * 3.6, .02) ? 'Des km/h aux m/s, on <b>divise</b> par 3,6.' : 'v = v (km/h) / 3,6.', solution: `<p class="crs-calc">v = ${fr(kmh, '3,6')} = ${c(fmt(r3(kmh / 3.6)) + ' m/s')}</p>` }] },
+    { titre: 'Une accélération', enonce: `<p>Une voiture passe de 0 à ${kmh2} km/h en ${t2} s.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule son accélération (3 chiffres significatifs).', label: 'a =', valeur: kmh2 / 3.6 / t2, unite: MS2, signe: false, rel: .01, affiche: fmt(r3(kmh2 / 3.6 / t2)),
+        diag: v => proche(v, kmh2 / t2, .02) ? `Convertis d'abord la vitesse en m/s : ${kmh2} km/h = ${fmt(r3(kmh2 / 3.6))} m/s.` : proche(v, kmh2 * 3.6 / t2, .02) ? 'Des km/h aux m/s, on divise par 3,6.' : 'a = Δv / Δt, v en m/s.',
+        solution: `<p class="crs-calc">v = ${fr(kmh2, '3,6')} ≈ ${fmt(r3(kmh2 / 3.6))} m/s ; a = ${fr(fmt(r3(kmh2 / 3.6)), t2)} ≈ ${c(fmt(r3(kmh2 / 3.6 / t2)) + ' ' + MS2)}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">a = ${fr('dv', 'dt')} = v′ &nbsp; en m·s<sup>−2</sup></p><p>La variation de la vitesse au cours du temps (à connaître).</p></div>
+    <div class="cle"><p class="crs-formule">a = ${fr('Δv', 'Δt')} = ${fr('v<sub>fin</sub> − v<sub>début</sub>', 'durée')}</p><p>Si a est constante. Résultat négatif : le système ralentit ; pour une valeur, on garde le nombre positif.</p></div>
+    <div class="cle"><p>km/h → m/s : on divise par 3,6. On connaît aussi a = Σ F / m (module 4).</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur l'accélération →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Module 4 : principe fondamental de la dynamique</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+PFD.menu('module_3_cours');
+</script>
+</body>
+</html>

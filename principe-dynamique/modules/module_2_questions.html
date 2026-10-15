@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions sur le bilan des forces — Chapitre 6 : Principe fondamental de la dynamique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pfd.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pfd.js"></script>
+<script src="situations.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions sur des situations tirées au hasard (situations.js) :
+   2 bilans complets avec l'outil (acteurs, distance ou contact,
+   tracé, noms, compensation), puis 8 questions courtes : qui agit
+   sur le système, distance ou contact, point de départ, direction
+   et sens, nom du vecteur, « ces forces se compensent-elles ? »,
+   calcul du poids.
+   Diagnostics : ceux de chaque situation (la main qui a lâché la
+   balle, le moteur qui fait partie de la voiture, les frottements
+   qui s'opposent au glissement…).
+   ============================================================ */
+const { o, fq, fmt, fr, hasard, melanger, proche, nomV, scene, sceneRemplie, bilan, texteDir, DIR_TXT, ecartAngle, SITUATIONS: S, PARCOURS } = PFD;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const cap = PFD.cap;
+const TOUTES = PARCOURS.concat(['palet', 'skieurSans']).map(id => S[id]);
+const fig = s => `<div class="pfd-sc-cadre">${scene(s)}</div>`;
+const lieu = p => (p === 'G' ? 'du centre G' : `du point ${p}`);
+
+/* ---------- bilans complets ---------- */
+function complet() {
+  const s = hasard(TOUTES.filter(x => x.forces.length <= 4));
+  return Object.assign({ theme: 'Bilan des forces', consigne: s.titre }, bilan(s));
+}
+
+/* ---------- questions courtes ---------- */
+const COURTES = [
+  // qui agit sur le système ?
+  function acteurs() {
+    const s = hasard(TOUTES.filter(x => (x.distracteurs || []).length));
+    const bon = s.acteurs.map(a => a.nom).join(', '), d = hasard(s.distracteurs);
+    const opts = [o('ok', bon), o('d', s.acteurs.map(a => a.nom).concat([d.nom]).join(', '))];
+    if (s.acteurs.length > 1) opts.push(o('m', s.acteurs.slice(1).map(a => a.nom).join(', ')));
+    return { theme: 'Qui agit ?', enonce: `<p>${s.enonce}</p>${fig(s)}`, parties: [fq.choix(`Qui exerce une force sur ${s.systeme} ?`, opts, 'ok',
+      { indices: { d: d.diag, m: 'La Terre attire toujours le système : il y a toujours le poids.' }, solution: `<p>${s.acteurs.map(a => `${cap(a.nom)} : ${a.pourquoi}`).join(' ; ')}.</p>` })] };
+  },
+  // distance ou contact
+  function type() {
+    const s = hasard(TOUTES), f = hasard(s.forces), a = s.acteurs.find(x => x.id === f.acteur);
+    return { theme: 'À distance ou de contact ?', enonce: `<p>${s.enonce}</p>${fig(s)}`, parties: [fq.choix(`${cap(a.nom)} agit sur ${s.systeme}. Cette action est :`, [o('distance', 'à distance'), o('contact', 'de contact')], f.type,
+      { melanger: false, indice: f.type === 'distance' ? `${cap(a.nom)} ne touche pas ${s.systeme}.` : `${cap(a.nom)} touche ${s.systeme}.`, solution: `<p>${f.type === 'distance' ? 'Action à distance : la flèche part du centre G.' : 'Action de contact : la flèche part du point de contact.'}</p>` })] };
+  },
+  // point de départ
+  function point() {
+    const s = hasard(TOUTES.filter(x => Object.keys(x.points).length > 1)), f = hasard(s.forces.filter(x => x.pts.length === 1)) || s.forces[0];
+    const opts = Object.keys(s.points).map(id => o(id, `${lieu(id)} (${s.nomsPts[id]})`));
+    return { theme: 'Point de départ', enonce: `<p>${s.enonce}</p><div class="pfd-sc-cadre">${scene(s, { marques: Object.keys(s.points) })}</div>`,
+      parties: [fq.choix(`D'où part la flèche de la ${f.lib} ?`, opts, f.pts[0], { melanger: false, colonne: true, indice: f.type === 'distance' ? 'Une force à distance part du centre du système.' : 'Une force de contact part du point de contact.',
+        solution: `<p>${cap(f.type === 'distance' ? 'force à distance' : 'force de contact')} : ${lieu(f.pts[0])}.</p>` })] };
+  },
+  // direction et sens
+  function direction() {
+    const s = hasard(TOUTES), f = hasard(s.forces);
+    const bon = texteDir(s, f.angs[0]);
+    const autres = melanger(Object.values(DIR_TXT).concat((s.speciales || []).map(x => x.label)).filter(t => t !== bon && !f.angs.some(a => texteDir(s, a) === t))).slice(0, 3);
+    return { theme: 'Direction et sens', enonce: `<p>${s.enonce}</p>${fig(s)}`, parties: [fq.choix(`Quelle est la direction et le sens de la ${f.lib} ?`, [o('ok', bon)].concat(autres.map((t, k) => o('x' + k, t))), 'ok',
+      { colonne: true, indice: cap(f.diagDir), solution: `<p>${cap(f.diagDir)}</p>` })] };
+  },
+  // nom du vecteur
+  function nom() {
+    const s = hasard(TOUTES), i = Math.floor(Math.random() * s.forces.length), f = s.forces[i];
+    const opts = melanger(s.nomsProposes.filter(k => f.noms.indexOf(k) === -1)).slice(0, 3).map(k => o(k, nomV(k))).concat([o(f.noms[0], nomV(f.noms[0]))]);
+    return { theme: 'Nom du vecteur', enonce: `<p>${s.enonce}</p><div class="pfd-sc-cadre">${scene(s, { forces: s.forces.map((g, k) => ({ pt: g.pts[0], ang: g.angs[0], num: k + 1, etat: k === i ? 'actif' : '' })) })}</div>`,
+      parties: [fq.choix(`Comment note-t-on la force n° ${i + 1} (${f.lib}) ?`, opts, f.noms[0], { indice: f.indNom, solution: `<p>${f.indNom}</p>` })] };
+  },
+  // compensation
+  function compense() {
+    const s = hasard(TOUTES.filter(x => x.comp));
+    return { theme: 'Compensation', enonce: `<p>${s.enonce}</p><div class="pfd-sc-cadre">${sceneRemplie(s)}</div>`,
+      parties: [fq.choix(s.comp.q || 'Ces forces se compensent-elles ?', [o('oui', 'oui : leur somme est nulle'), o('non', 'non : leur somme n\'est pas nulle')], s.comp.bonne, { melanger: false, indice: s.comp.indice, solution: `<p>${s.comp.expl}</p>` })] };
+  },
+  // poids
+  function poids() {
+    const [m, u] = hasard([[850, 'kg'], [46, 'g'], [400, 'g'], [600, 'kg'], [10, 't']]);
+    const mk = u === 'g' ? m / 1000 : u === 't' ? m * 1000 : m, P = mk * 9.81;
+    return { theme: 'Le poids', enonce: `<p>Un système a une masse de ${fmt(m)} ${u === 't' ? 'tonnes' : u}.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule son poids (g = 9,81 N/kg, 3 chiffres significatifs).', label: 'P =', valeur: P, unite: 'N', cs: 3, rel: .01,
+        diag: v => proche(v, m * 9.81, .02) && u !== 'kg' ? 'Convertis la masse en kg.' : proche(v, mk / 9.81, .02) ? 'On multiplie : P = m × g.' : 'P = m × g, m en kg.',
+        solution: calc(`m = ${fmt(mk)} kg ; P = m × g = ${fmt(mk)} × 9,81 ≈ ${c(PFD.sci(P, 3) + ' N')}`) }] };
+  },
+];
+
+// tirage : 2 bilans complets + 8 questions courtes (dont une de chaque sorte)
+function tirage() {
+  const courtes = COURTES.map(f => f()).concat([hasard(COURTES)()]);
+  return [complet(), complet()].concat(melanger(courtes));
+}
+
+PFD.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Faire un bilan des forces',
+  intro: '<p class="er-contexte">10 questions sur des situations tirées au hasard : deux bilans complets, puis des questions courtes (qui agit, distance ou contact, point de départ, direction et sens, nom du vecteur, compensation, poids).</p>',
+  questions: tirage,
+  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3_cours.html', label: 'Module 3 : accélération →' },
+});
+PFD.menu('module_2_questions');
+</script>
+</body>
+</html>

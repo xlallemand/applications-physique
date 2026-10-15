@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : questions sur le principe fondamental — Chapitre 6 : Principe fondamental de la dynamique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pfd.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../cinematique/modules/vecteurs.js"></script>
+<script src="pfd.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : Σ F = m a (2), a = Σ F / m (2),
+   F_m ou f à partir de m a = F_m − f (2), direction de <span class="vec-nom">a</span> d'après les
+   forces (2), principe d'inertie (1), résultante à tracer dans le
+   quadrillage (1, repère de cinematique/modules/vecteurs.js).
+   Erreurs diagnostiquées : masse non convertie en kg, m × a et
+   Σ F / m confondus, frottements ajoutés au lieu d'être retirés,
+   <span class="vec-nom">a</span> dans le sens de la plus petite force.
+   ============================================================ */
+const { o, fq, fmt, fr, sci, hasard, melanger, proche, nomV, partieResultante } = PFD;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+const MS2 = 'm·s<sup>−2</sup>';
+
+/* ---------- Groupe 1 : Σ F = m a ---------- */
+const G1 = [
+  function somme() {
+    const [m, a, u] = hasard([[600, 11.1, 'kg'], [740, 11.5, 'kg'], [46, 2.5, 'g'], [1200, 2, 'kg'], [10, 6, 't']]);
+    const mk = u === 'g' ? m / 1000 : u === 't' ? m * 1000 : m, F = mk * a;
+    return { theme: 'Σ F = m a', enonce: `<p>Un système de masse ${fmt(m)} ${u === 't' ? 'tonnes' : u} a une accélération de ${fmt(a)} ${MS2}.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule la valeur de la résultante des forces (3 chiffres significatifs).', label: 'Σ F =', valeur: F, unite: 'N', cs: 3, rel: .01,
+        diag: v => proche(v, m * a, .02) && u !== 'kg' ? 'Convertis la masse en kg.' : proche(v, mk / a, .02) ? 'Σ F = m × a : on multiplie.' : 'Σ F = m × a, m en kg.',
+        solution: calc(`Σ F = m × a = ${fmt(mk)} kg × ${fmt(a)} ${MS2} ≈ ${c(sci(F, 3) + ' N')}`) }] };
+  },
+  function inertieCalc() {
+    const [m, v] = hasard([[850, 20], [1200, 30], [70, 5]]);
+    return { theme: 'Σ F = m a', enonce: `<p>Un système de ${fmt(m)} kg se déplace en ligne droite à ${v} m/s constants.</p>`,
+      parties: [fq.nombre('Que vaut la résultante des forces ?', 'Σ F =', 0, 'N', { tol: .001, diag: () => 'Vitesse constante en ligne droite : a = 0, donc Σ F = m × 0.', solution: calc(`Mouvement rectiligne uniforme : a = 0 donc Σ F = m × 0 = ${c('0 N')} (principe d'inertie)`) })] };
+  },
+];
+
+/* ---------- Groupe 2 : a = Σ F / m ---------- */
+const G2 = [
+  function accel() {
+    const [F, m] = hasard([[3000, 1200], [6660, 600], [150, 75], [9000, 1500], [0.115, 0.046]]);
+    return { theme: 'a = Σ F / m', enonce: `<p>La résultante des forces sur un système de ${fmt(m)} kg vaut ${fmt(F)} N.</p>`,
+      parties: [fq.nombre('Calcule son accélération (3 chiffres significatifs).', 'a =', F / m, MS2, { signe: false, rel: .01, affiche: fmt(r3(F / m)),
+        diag: v => proche(v, F * m, .02) ? 'a = Σ F / m : on divise.' : proche(v, m / F, .02) ? 'Rapport inversé : a = Σ F / m.' : 'a = Σ F / m.', solution: calc(`a = ${fr('Σ F', 'm')} = ${fr(fmt(F), fmt(m))} ≈ ${c(fmt(r3(F / m)) + ' ' + MS2)}`) })] };
+  },
+  function masse() {
+    const [F, a] = hasard([[2400, 2], [8510, 11.5], [60000, 6]]);
+    return { theme: 'Retrouver la masse', enonce: `<p>Une résultante de ${fmt(F)} N donne à un véhicule une accélération de ${fmt(a)} ${MS2}.</p>`,
+      parties: [fq.nombre('Quelle est la masse du véhicule ?', 'm =', F / a, 'kg', { signe: false, rel: .01, diag: v => proche(v, F * a, .02) ? 'm = Σ F / a : on divise.' : 'Σ F = m a donc m = Σ F / a.', solution: calc(`m = ${fr('Σ F', 'a')} = ${fr(fmt(F), fmt(a))} = ${c(fmt(r3(F / a)) + ' kg')}`) })] };
+  },
+];
+
+/* ---------- Groupe 3 : m a = F_m − f ---------- */
+const G3 = [
+  function motrice() {
+    const [m, a, f] = hasard([[850, 2.5, 250], [1200, 1.5, 400], [900, 3, 350], [1500, 2, 600]]);
+    return { theme: 'Force motrice', enonce: `<p>Une voiture de ${fmt(m)} kg démarre en ligne droite avec une accélération de ${fmt(a)} ${MS2}. Les frottements valent f = ${f} N ; le poids et la réaction de la route se compensent.</p>`,
+      parties: [fq.choix('Quelle relation écrire ?', [o('ok', 'm a = F<sub>m</sub> − f'), o('a', 'm a = F<sub>m</sub> + f'), o('b', 'm a = f − F<sub>m</sub>')], 'ok', { melanger: false, indices: { a: 'Les frottements s\'opposent au mouvement : ils comptent négativement.', b: 'La force motrice est dans le sens du mouvement : elle compte positivement.' }, solution: '<p>Projection sur le sens du mouvement : m a = F<sub>m</sub> − f.</p>' }),
+        fq.nombre('Calcule la force motrice.', 'F<sub>m</sub> =', m * a + f, 'N', { signe: false, rel: .005, diag: v => proche(v, m * a - f) ? 'F<sub>m</sub> = m a <b>+</b> f.' : proche(v, m * a) ? 'N\'oublie pas les frottements.' : 'F<sub>m</sub> = m a + f.', solution: calc(`F<sub>m</sub> = m a + f = ${fmt(m)} × ${fmt(a)} + ${f} = ${c(fmt(m * a + f) + ' N')}`) })] };
+  },
+  function frottements() {
+    const [m, v0, t] = hasard([[0.046, 10, 4], [0.16, 6, 3], [0.43, 8, 5]]);
+    const a = v0 / t, f = m * a;
+    return { theme: 'Frottements', enonce: `<p>Une balle de ${fmt(m * 1000)} g roule sur l'herbe : sa vitesse passe de ${v0} m/s à 0 en ${t} s. Le poids et la réaction du sol se compensent ; seuls les frottements <span class="vec-nom">f</span> ralentissent la balle.</p>`,
+      parties: [fq.nombre('Calcule la valeur de l\'accélération.', 'a =', a, MS2, { signe: false, rel: .01, diag: x => proche(x, -a, .02) ? 'Pour la valeur, garde le nombre positif.' : 'a = |Δv| / Δt.', solution: calc(`a = ${fr(v0, t)} = ${c(fmt(r3(a)) + ' ' + MS2)}`) }),
+        fq.nombre('Calcule la valeur des frottements (3 chiffres significatifs).', 'f =', f, 'N', { signe: false, rel: .01, affiche: fmt(r3(f)),
+          diag: x => proche(x, m * 1000 * a, .02) ? 'Convertis la masse en kg.' : 'Σ F = f = m × a.', solution: calc(`<span class="vec-nom">P</span> + <span class="vec-nom">R</span><sub>N</sub> = <span class="vec-nom">0</span> donc Σ F = f = m a = ${fmt(m)} × ${fmt(r3(a))} ≈ ${c(fmt(r3(f)) + ' N')}`) })] };
+  },
+];
+
+/* ---------- Groupe 4 : direction de <span class="vec-nom">a</span> ---------- */
+const G4 = [
+  function opposees() {
+    const [g, d] = hasard([[5, 2], [2, 6], [3, 3], [4, 1]]);
+    const bon = g > d ? 'g' : d > g ? 'd' : 'nul';
+    return { theme: 'Direction de <span class="vec-nom">a</span>', enonce: `<p>Un bloc posé sur une table sans frottement est tiré vers la gauche par une force de ${g} N et vers la droite par une force de ${d} N. Le poids et la réaction de la table se compensent.</p>`,
+      parties: [fq.choix('Que peut-on dire du vecteur accélération <span class="vec-nom">a</span> ?', [o('g', 'il est dirigé vers la gauche'), o('d', 'il est dirigé vers la droite'), o('nul', '<span class="vec-nom">a</span> = <span class="vec-nom">0</span>')], bon,
+        { melanger: false, indice: '<span class="vec-nom">a</span> a la même direction et le même sens que Σ <span class="vec-nom">F</span> : du côté de la plus grande force (forces opposées : on soustrait).', solution: `<p>Σ F = ${Math.abs(g - d)} N${bon === 'nul' ? ' : les forces se compensent, <span class="vec-nom">a</span> = <span class="vec-nom">0</span>' : ` vers la ${bon === 'g' ? 'gauche' : 'droite'} ; <span class="vec-nom">a</span> a la même direction et le même sens`}.</p>` })] };
+  },
+  function freine() {
+    return { theme: 'Direction de <span class="vec-nom">a</span>', parties: [fq.choix('Une voiture roule vers la droite et freine. Dans quel sens est dirigée la résultante des forces ?', [o('ok', 'vers la gauche, comme <span class="vec-nom">a</span>'), o('a', 'vers la droite, dans le sens du mouvement'), o('b', 'elle est nulle')], 'ok',
+      { melanger: false, indices: { a: 'La voiture ralentit : <span class="vec-nom">a</span> est opposé à la vitesse, et Σ <span class="vec-nom">F</span> a le sens de <span class="vec-nom">a</span>.', b: 'La vitesse change : <span class="vec-nom">a</span> ≠ <span class="vec-nom">0</span>.' }, solution: '<p>Elle ralentit : <span class="vec-nom">a</span> est dirigé vers l\'arrière (la gauche), et Σ <span class="vec-nom">F</span> = m <span class="vec-nom">a</span> aussi.</p>' })] };
+  },
+];
+
+/* ---------- Groupe 5 : principe d'inertie et tracé ---------- */
+const G5 = [
+  function inertie() {
+    const [txt, bon, sol] = hasard([
+      ['Un palet glisse en ligne droite à vitesse constante sur la glace.', 'nul', 'Mouvement rectiligne uniforme : Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span>.'],
+      ['Une balle tombe de plus en plus vite.', 'pas', 'La vitesse augmente : <span class="vec-nom">a</span> ≠ <span class="vec-nom">0</span>, donc Σ <span class="vec-nom">F</span> ≠ <span class="vec-nom">0</span>.'],
+      ['Une lampe est suspendue, immobile, au plafond.', 'nul', 'Immobile : Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span>.']]);
+    return { theme: 'Principe d\'inertie', enonce: `<p>${txt}</p>`, parties: [fq.choix('Que peut-on dire de la résultante des forces ?', [o('nul', 'Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span>'), o('pas', 'Σ <span class="vec-nom">F</span> ≠ <span class="vec-nom">0</span>')], bon,
+      { melanger: false, indice: 'Principe d\'inertie : Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span> ⇔ immobile ou mouvement rectiligne uniforme.', solution: `<p>${sol}</p>` })] };
+  },
+  function trace() {
+    const F = hasard([[{ nom: 'F_1', coord: [0, 2] }, { nom: 'F_2', coord: [3, 0] }, { nom: 'F_3', coord: [0, -4] }], [{ nom: 'F_1', coord: [-3, 0] }, { nom: 'F_2', coord: [0, 2] }], [{ nom: 'F_1', coord: [0, 3] }, { nom: 'F_2', coord: [2, 0] }, { nom: 'F_3', coord: [-4, 0] }, { nom: 'F_4', coord: [0, -3] }]]);
+    return { theme: 'Résultante', enonce: '<p>Les forces qui s\'exercent sur un objet sont dessinées au point G (1 carreau = 1 N).</p>',
+      parties: [partieResultante({ forces: F, etendue: 4, solution: '<p>On met les flèches bout à bout : les forces opposées se soustraient, la résultante va de G à l\'extrémité de la dernière flèche.</p>' })] };
+  },
+];
+
+// tirage : 2 + 2 + 2 + 2 + 2 questions
+function tirage() {
+  return [G1, G2, G3, G4, G5].reduce((l, g) => l.concat(g.map(f => f())), []);
+}
+
+PFD.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 4 · QUESTIONS', titre: 'Principe fondamental de la dynamique',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : Σ F = m a, a = Σ F / m, force motrice et frottements, direction de <span class="vec-nom">a</span>, principe d\'inertie, résultante à tracer.</p>',
+  questions: tirage,
+  revoir: { href: 'module_4_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_5.html', label: 'Module 5 : exercices →' },
+});
+PFD.menu('module_4_questions');
+</script>
+</body>
+</html>

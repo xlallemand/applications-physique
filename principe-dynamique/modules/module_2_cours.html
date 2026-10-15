@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : faire un bilan des forces — Chapitre 6 : Principe fondamental de la dynamique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pfd.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pfd.js"></script>
+<script src="situations.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Faire un bilan des forces</h2>
+    <p class="er-contexte">La méthode du <b>diagramme objet-action</b> : d'abord les forces <b>à distance</b>, puis une force pour <b>chaque objet qui touche</b> le système. Tu vas aussi calculer le <b>poids</b>, décrire la <b>réaction du support</b> et dire si des forces se <b>compensent</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Forces à distance (poids, magnétique, électrique : depuis le centre)
+   et de contact (depuis le point de contact) ; P = m × g ;
+   <span class="vec-nom">R</span> = <span class="vec-nom">R</span>ₙ + <span class="vec-nom">f</span> ; forces qui se compensent. Les « À toi » des étapes 3 et 4
+   utilisent l'outil de bilan des forces (PFD.bilan) : palet d'air-hockey
+   et skieur sans frottement (fiche « Faire un bilan des forces »).
+   ============================================================ */
+const { fmt, sci, hasard, melanger, exemple } = COURS;
+const { o, fr, proche, nomV, sceneRemplie, bilan, SITUATIONS, BALLON } = PFD;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+
+/* ---------- 1. À distance ou de contact ---------- */
+const ACTIONS = [
+  ['dist', 'La Terre attire une pomme qui tombe.'], ['dist', 'Un aimant attire un trombone posé à quelques centimètres.'], ['dist', 'Une règle frottée attire de petits morceaux de papier.'],
+  ['cont', 'Une corde tire un traîneau.'], ['cont', 'Le vent pousse la voile d\'un bateau.'], ['cont', 'Une table porte un livre.'], ['cont', 'L\'eau porte un bateau qui flotte.'],
+];
+function etape1(c_) {
+  const carte = c_.carte('1. Forces à distance, forces de contact');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b></p><ol class="er-liste">
+        <li><b>Forces à distance</b> : il n'y en a que trois : le <b>poids</b> (la Terre), la force <b>magnétique</b> (un aimant), la force <b>électrique</b> (un objet chargé). La flèche part du <b>centre</b> G du système.</li>
+        <li><b>Forces de contact</b> : <b>chaque objet qui touche</b> le système exerce une force. La flèche part du <b>point de contact</b>.</li></ol></div>
+    </div>
+    ${exemple(`<div class="pfd-sc-cadre">${sceneRemplie(BALLON[0], { aria: 'Ballon posé sur le sol : poids et réaction du sol' })}</div>
+      <p>Ballon posé sur le sol. À distance : la Terre → poids ${nomV('P')}, depuis G, vers le bas. Contact : le sol → ${nomV('RN')}, depuis le point de contact A, vers le haut.</p>`)}`);
+  const choisies = melanger(ACTIONS.filter(a => a[0] === 'dist')).slice(0, 1).concat(melanger(ACTIONS.filter(a => a[0] === 'cont')).slice(0, 2));
+  c_.aToi(carte, melanger(choisies).map((a, k) => ({ titre: `Action ${k + 1}`, enonce: `<p>${a[1]}</p>`,
+    parties: [{ type: 'choix', q: 'Cette action est-elle à distance ou de contact ?', options: [o('dist', 'à distance'), o('cont', 'de contact')], bonne: a[0], melanger: false,
+      indices: { dist: 'Les deux objets se touchent-ils ? Seuls le poids, la force magnétique et la force électrique agissent à distance.', cont: 'Les deux objets ne se touchent pas.' },
+      solution: `<p>${a[0] === 'dist' ? 'Les objets ne se touchent pas : action à distance.' : 'Les objets se touchent : action de contact.'}</p>` }] })));
+  return carte;
+}
+
+/* ---------- 2. Le poids ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Le poids : P = m × g');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">P = m × g</p><p>P en <b>newtons</b> (N), m en <b>kg</b>, g = 9,81 N/kg (intensité de la pesanteur). Dans certains sujets, g n'est pas donné : on peut prendre g = 10 N/kg.</p>
+        <p>Le poids ${nomV('P')} est <b>vertical</b>, <b>vers le bas</b>, et part du centre G du système.</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc">Voiture de 850 kg : P = m × g = 850 kg × 9,81 N/kg ≈ <span class="c">8,34 × 10<sup>3</sup> N</span></p>`)}`);
+  const m1 = hasard([60, 75, 1200, 2.5]), mg = hasard([46, 400, 250, 58]), P3 = hasard([981, 4905, 196.2, 1962]);
+  c_.aToi(carte, [
+    { titre: 'Un poids', enonce: `<p>Un objet a une masse m = ${fmt(m1)} kg.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule son poids (g = 9,81 N/kg, 3 chiffres significatifs).', label: 'P =', valeur: m1 * 9.81, unite: 'N', signe: false, rel: .01, affiche: fmt(r3(m1 * 9.81)),
+        diag: v => proche(v, m1 / 9.81, .02) ? 'On multiplie : P = m × g.' : proche(v, m1 * 10, .02) ? 'Ici, prends g = 9,81 N/kg.' : 'P = m × g.', solution: `<p class="crs-calc">P = ${fmt(m1)} × 9,81 ≈ ${c(fmt(r3(m1 * 9.81)) + ' N')}</p>` }] },
+    { titre: 'Une masse en grammes', enonce: `<p>Une balle a une masse de ${mg} g.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule son poids (g = 9,81 N/kg, 3 chiffres significatifs).', label: 'P =', valeur: mg / 1000 * 9.81, unite: 'N', signe: false, rel: .01, affiche: fmt(r3(mg / 1000 * 9.81)),
+        diag: v => proche(v, mg * 9.81, .02) ? `Convertis la masse en kg : ${mg} g = ${fmt(mg / 1000)} kg.` : 'P = m × g, avec m en kg.', solution: `<p class="crs-calc">m = ${mg} g = ${fmt(mg / 1000)} kg ; P = ${fmt(mg / 1000)} × 9,81 ≈ ${c(fmt(r3(mg / 1000 * 9.81)) + ' N')}</p>` }] },
+    { titre: 'Retrouver la masse', enonce: `<p>Un objet a un poids de ${fmt(P3)} N (g = 9,81 N/kg).</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est sa masse ?', label: 'm =', valeur: P3 / 9.81, unite: 'kg', signe: false, rel: .01,
+        diag: v => proche(v, P3 * 9.81, .02) ? 'P = m × g donc m = P / g : on divise.' : 'm = P / g.', solution: `<p class="crs-calc">P = m × g donc m = ${fr('P', 'g')} = ${fr(fmt(P3), '9,81')} = ${c(fmt(r3(P3 / 9.81)) + ' kg')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. La réaction du support ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. La réaction du support');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">${nomV('R')} = ${nomV('RN')} + ${nomV('f')}</p>
+        <ul class="er-liste"><li><b>Sans frottement</b>, la force du support est <b>perpendiculaire au support</b> : c'est ${nomV('RN')} (N = normale = perpendiculaire).</li>
+        <li><b>Avec frottement</b>, on ajoute ${nomV('f')}, parallèle au support, <b>opposée au mouvement</b> qu'il y aurait si le solide glissait sans frottement.</li></ul></div>
+    </div>
+    ${exemple(`<div class="pfd-sc-cadre">${sceneRemplie(SITUATIONS.livre)}</div>
+      <p>Livre que l'on tire vers la droite sur une table : ${nomV('P')} (Terre), ${nomV('RN')} (table, perpendiculaire), ${nomV('f')} (table, vers la gauche : opposé au glissement), ${nomV('F')} (corde).</p>`)}`);
+  c_.aToi(carte, [Object.assign({ titre: 'Le palet d\'air-hockey' }, bilan(SITUATIONS.palet))]);
+  return carte;
+}
+
+/* ---------- 4. Des forces qui se compensent ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. Des forces qui se compensent');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> Des forces se <b>compensent</b> quand leur somme vectorielle est nulle : Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span>. Deux forces qui se compensent ont la même direction, des sens opposés et la même valeur.</p></div>
+    </div>
+    ${exemple(`<p>Palet d'air-hockey : ${nomV('RN')} et ${nomV('P')} se compensent toujours. Skieur sans frottement : elles ne se compensent pas ; leur somme Σ <span class="vec-nom">F</span> = ${nomV('RN')} + ${nomV('P')} fait accélérer le skieur vers le bas de la pente.</p>
+      <div class="pfd-sc-cadre">${sceneRemplie(SITUATIONS.skieurSans)}</div>`)}`);
+  c_.aToi(carte, [Object.assign({ titre: 'Un skieur sans frottement' }, bilan(SITUATIONS.skieurSans))]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Bilan des forces : 1. forces à distance (poids, magnétique, électrique), depuis le centre G ; 2. un objet qui touche = une force de contact, depuis le point de contact ; 3. direction et sens ; 4. nom ; 5. compensation ou non.</p></div>
+    <div class="cle"><p class="crs-formule">P = m × g</p><p>P en N, m en kg, g = 9,81 N/kg ; vertical, vers le bas.</p></div>
+    <div class="cle"><p>${nomV('R')} = ${nomV('RN')} + ${nomV('f')} : sans frottement, réaction perpendiculaire au support ; les frottements s'opposent au glissement.</p></div>
+    <div class="cle"><p>Des forces se compensent quand leur somme est nulle : Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span>.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur le bilan des forces →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3_cours.html">Module 3 : accélération</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
+PFD.menu('module_2_cours');
+</script>
+</body>
+</html>
