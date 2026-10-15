@@ -25,7 +25,7 @@
    multipliées, résistance d'une seule couche utilisée pour le flux,
    résistance du mur oubliée dans l'épaisseur d'isolant.
    ============================================================ */
-const { o, fq, fmt, fr, sci, cs, hasard, melanger, proche, paroiRemplie } = TT;
+const { o, fq, fmt, fr, sci, cs, hasard, melanger, proche, paroiRemplie, noteFluxNeg } = TT;
 const calc = h => `<p class="ph-calc">${h}</p>`;
 const c = h => `<span class="c">${h}</span>`;
 const r3 = v => +v.toPrecision(3);
@@ -103,8 +103,9 @@ const G3 = [
     return { theme: 'Flux à travers un mur isolé', enonce: `<p>Une paroi de ${fmt(S)} m<sup>2</sup> sépare l'intérieur (${ti} °C) de l'extérieur (${fmt(te)} °C) :</p>${paroiRemplie({ couches: cs_, cotes, S })}`,
       parties: [fq.nombre('Calcule la résistance totale (3 chiffres significatifs).', 'R =', R, KW, { signe: false, rel: .01, affiche: cs(R, 3), diag: v => dR(v, cs_, S),
           solution: calc(`R = ${cs_.map(x => sci(Rc(x, S), 3)).join(' + ')} ≈ ${c(cs(R, 3) + ' ' + KW)}`) }),
-        fq.nombre('Calcule le flux thermique (3 chiffres significatifs).', 'Φ =', dT / R, 'W', { signe: false, rel: .015, affiche: fmt(r3(dT / R)),
-          diag: v => cs_.some(x => proche(v, dT / Rc(x, S), .03)) ? 'Utilise la résistance <b>totale</b>.' : proche(v, Math.abs(ti + te) / R, .03) ? `ΔT = ${ti} − (${fmt(te)}) = ${dT} K.` : 'Φ = ΔT / R.',
+        fq.nombre('Calcule le flux thermique (3 chiffres significatifs).', 'Φ =', dT / R, 'W', { rel: .015, affiche: fmt(r3(dT / R)),
+          aussi: [{ valeur: -dT / R, note: noteFluxNeg('de l\'extérieur vers l\'intérieur', 'de l\'intérieur vers l\'extérieur') }],
+          diag: v => cs_.some(x => proche(Math.abs(v), dT / Rc(x, S), .03)) ? 'Utilise la résistance <b>totale</b>.' : proche(Math.abs(v), Math.abs(ti + te) / R, .03) ? `ΔT = ${ti} − (${fmt(te)}) = ${dT} K.` : 'Φ = ΔT / R.',
           solution: calc(`Φ = ${fr(dT, cs(R, 3))} ≈ ${c(fmt(r3(dT / R)) + ' W')}, de l'intérieur vers l'extérieur`) })] };
   },
   function energie() {
