@@ -21,16 +21,18 @@
      La dernière étape (« À retenir ») marque le cours comme fait dans le sommaire.
 
    Parties de question (p.type) :
-     'choix'   p.options [{ id, label }], p.bonne, p.indices { id: diagnostic }, p.indice, p.colonne, p.melanger
+     'choix'   p.options [{ id, label }], p.bonne (un id, ou une liste d'ids si plusieurs réponses sont justes),
+               p.notes { id: remarque ajoutée à « Juste ! » }, p.indices { id: diagnostic }, p.indice, p.colonne, p.melanger
      'nombre'  p.label, p.valeur, p.tol (écart absolu) ou p.rel (relatif, 0,5 % par défaut), p.unite,
-               p.entier, p.signe (false : pas de bouton ±), p.diag(v) → diagnostic, p.indice, p.dec / p.affiche
+               p.entier, p.signe (false : pas de bouton ±), p.diag(v) → diagnostic, p.indice, p.dec / p.affiche,
+               p.aussi [{ valeur, note }] : autres réponses justes, avec la remarque ajoutée à « Juste ! »
      'champs'  plusieurs nombres validés ensemble : p.champs [{ label, valeur, tol, rel, unite, entier, signe }],
                p.ligne (true : sur une seule ligne), p.diag(valeurs) → diagnostic
      'sci'     écriture a × 10ⁿ : p.label, p.valeur, p.unite, p.rel (3 % par défaut), p.cs, p.diag(v)
      'texte'   p.label, p.reponses ['CO2', …] (comparaison sans espaces ni casse, sauf p.casse),
                p.diag(texte) → diagnostic, p.affiche, p.largeur (px)
      'perso'   outil propre à l'application : p.monter(zone, api) → { montrer() }
-               api.reussi() · api.erreur(diagnostic) · api.compterErreur() · api.effacer() · api.message(h)
+               api.reussi(note) · api.erreur(diagnostic) · api.compterErreur() · api.effacer() · api.message(h)
      Toutes : p.q (question), p.solution (HTML affiché après la réponse,
               par ex. « ✍ Complète ton cours : … »),
               p.aide (true : « Afficher la réponse » proposé tout de suite, pour un outil
@@ -141,16 +143,17 @@
     const box = el('div', 'crs-choix' + (p.colonne ? ' crs-choix-col' : ''));
     zone.appendChild(box);
     const opts = p.melanger === false ? p.options : melanger(p.options);
+    const bonnes = [].concat(p.bonne);          // plusieurs réponses justes possibles
     const bs = opts.map(o => {
       const b = el('button', 'btn-secondary', o.label);
       b.type = 'button';
       box.appendChild(b);
       b.onclick = () => {
         if (api.fini() || b.disabled) return;
-        if (o.id === p.bonne) {
+        if (bonnes.includes(o.id)) {
           b.classList.add('juste');
           bs.forEach(x => { x.b.disabled = true; });
-          api.reussi();
+          api.reussi(p.notes && p.notes[o.id]);
         } else {
           b.classList.add('faux'); b.disabled = true;
           api.erreur((p.indices && p.indices[o.id]) || p.indice || '');
@@ -158,7 +161,7 @@
       };
       return { b, o };
     });
-    return { montrer() { bs.forEach(({ b, o }) => { b.disabled = true; if (o.id === p.bonne) b.classList.add('juste'); }); } };
+    return { montrer() { bs.forEach(({ b, o }) => { b.disabled = true; if (bonnes.includes(o.id)) b.classList.add('juste'); }); } };
   }
 
   // Réponse affichée dans le champ (« Afficher la réponse ») : arrondie comme la réponse attendue
@@ -186,6 +189,9 @@
       const v = lire(ch.input.value);
       if (isNaN(v)) { secouer(d); api.message('Écris un nombre (avec une virgule si besoin).'); return; }
       if (juste(p, v)) { ch.desactiver(true); bVal.fermer(); api.reussi(); return; }
+      // autre réponse juste (par ex. un flux négatif compté dans l'autre sens)
+      const autre = (p.aussi || []).find(a => juste(Object.assign({}, p, { valeur: a.valeur }), v));
+      if (autre) { ch.desactiver(true); bVal.fermer(); api.reussi(autre.note); return; }
       api.erreur((p.diag && p.diag(v)) || p.indice || 'Vérifie ton calcul.');
       secouer(d);
     }
@@ -341,17 +347,17 @@
           api.compterErreur();
           ret.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">Ce n'est pas ça.</b> ${h || ''}</p></div>`;
         },
-        reussi() { terminer(false); },
+        reussi(note) { terminer(false, note); },
       };
       window.COURS.apiEnCours = api;           // (idem)
       const ctx = PARTIES[p.type](d.querySelector('.crs-partie-zone'), p, api);
       aide.querySelector('button').onclick = () => { if (finie) return; ctx.montrer(); etat.vue = true; terminer(true); };
-      function terminer(vue) {
+      function terminer(vue, note) {
         finie = true;
         aide.remove();
         const titre = vue ? 'Réponse' : (etat.erreurs ? 'C\'est juste.' : 'Juste !');
-        ret.innerHTML = p.solution || vue
-          ? `<div class="${vue ? 'callout' : 'callout-success'} er-retour crs-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b></p>${p.solution ? `<div>${p.solution}</div>` : ''}</div>`
+        ret.innerHTML = p.solution || vue || note
+          ? `<div class="${vue ? 'callout' : 'callout-success'} er-retour crs-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${p.solution ? `<div>${p.solution}</div>` : ''}</div>`
           : '<p class="crs-ok">✓ Juste</p>';
         finies++;
         if (finies < n) {

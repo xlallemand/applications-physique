@@ -133,11 +133,13 @@
      api.reussi(silencieux, note) · api.erreur(indice) · api.effacer() · api.message(h) · api.fini()
      ============================================================ */
 
-  // Choix parmi des boutons : p.options [{ id, label }], p.bonne, p.indice ou p.indices[id], p.colonne
+  // Choix parmi des boutons : p.options [{ id, label }], p.bonne (un id, ou une liste d'ids si plusieurs
+  // réponses sont justes), p.notes[id] (remarque ajoutée à « Juste ! »), p.indice ou p.indices[id], p.colonne
   function pChoix(zone, p, api) {
     const box = el('div', 'ph-choix' + (p.colonne ? ' ph-choix-col' : ''));
     zone.appendChild(box);
     const opts = p.melanger === false ? p.options : melanger(p.options);
+    const bonnes = [].concat(p.bonne);
     const bs = opts.map(o => {
       const b = el('button', 'btn-secondary', o.label);
       b.type = 'button';
@@ -145,10 +147,10 @@
       box.appendChild(b);
       b.onclick = () => {
         if (api.fini() || b.disabled) return;
-        if (o.id === p.bonne) {
+        if (bonnes.includes(o.id)) {
           b.classList.add('juste');
           bs.forEach(x => { x.b.disabled = true; });
-          api.reussi();
+          api.reussi(false, p.notes && p.notes[o.id]);
         } else {
           b.classList.add('faux'); b.disabled = true;
           api.erreur((p.indices && p.indices[o.id]) || p.indice || '');
@@ -156,7 +158,7 @@
       };
       return { b, o };
     });
-    return { montrer() { bs.forEach(({ b, o }) => { b.disabled = true; if (o.id === p.bonne) b.classList.add('juste'); }); } };
+    return { montrer() { bs.forEach(({ b, o }) => { b.disabled = true; if (bonnes.includes(o.id)) b.classList.add('juste'); }); } };
   }
 
   // Bouton « Valider » d'une partie
@@ -181,7 +183,8 @@
     return fmt(p.valeur);
   }
 
-  // Valeur numérique : p.label, p.valeur, p.tol (écart absolu) ou p.rel (écart relatif), p.unite, p.diag(v), p.indice
+  // Valeur numérique : p.label, p.valeur, p.tol (écart absolu) ou p.rel (écart relatif), p.unite, p.diag(v), p.indice,
+  // p.aussi [{ valeur, note }] : autres réponses justes, avec la remarque ajoutée à « Juste ! »
   function pNombre(zone, p, api) {
     const d = el('div', 'ph-valeur');
     if (p.label) d.appendChild(el('span', 'ph-lab', p.label));
@@ -197,6 +200,9 @@
       const v = lire(ch.input.value);
       if (isNaN(v)) { secouer(d); api.message('Écris un nombre (avec une virgule si besoin).'); return; }
       if (juste(v, p)) { ch.desactiver(true); bVal.fermer(); api.reussi(); return; }
+      // autre réponse juste (par ex. un flux négatif compté dans l'autre sens)
+      const autre = (p.aussi || []).find(a => juste(v, Object.assign({}, p, { valeur: a.valeur })));
+      if (autre) { ch.desactiver(true); bVal.fermer(); api.reussi(false, autre.note); return; }
       api.erreur((p.diag && p.diag(v)) || p.indice || 'Vérifie ton calcul.');
       secouer(d);
     }
@@ -809,6 +815,12 @@
      o = { q, cotes: ['l\'intérieur (19 °C)', 'l\'extérieur (5 °C)'], bon: 1 (du côté 1 vers le côté 2) | 2, schema (options de paroi pour la réponse), solution } */
   // « de » devant un nom : « de l'intérieur », « du local », « des pièces »
   const de = x => (/^le /.test(x) ? 'du ' + x.slice(3) : /^les /.test(x) ? 'des ' + x.slice(4) : 'de ' + x);
+  /* Flux compté dans l'autre sens. En STI2D, on donne le flux positif et son sens à part ; un flux
+     négatif n'est pas faux pour autant : il va dans le sens contraire de celui où on le compte.
+     compte : sens où l'élève a compté le flux (« de l'intérieur vers l'extérieur ») ;
+     reel : sens réel du transfert (« de l'extérieur vers l'intérieur »). Remarques ajoutées à « Juste ! ». */
+  const noteFluxNeg = (compte, reel) => `Ton flux négatif est juste aussi : il est compté ${compte}, et le signe «&nbsp;−&nbsp;» indique qu'il va en réalité dans le sens contraire, ${reel}. En STI2D, on préfère le donner positif, ${reel}.`;
+  const noteDTNeg = (compte, reel) => `C'est juste aussi si tu comptes le flux ${compte} : ΔT et Φ sont alors négatifs, et le flux va en réalité ${reel}. En STI2D, on préfère ΔT = T<sub>chaud</sub> − T<sub>froid</sub>, positif.`;
   function partieSens(o) {
     const [a, b] = o.cotes;
     return { type: 'choix', q: o.q || 'Dans quel sens se fait le transfert thermique à travers la paroi ?', melanger: false, colonne: true,
@@ -989,7 +1001,7 @@
 
   window.TT = Object.assign(window.TT || {}, {
     MOINS, fmt, cs, sci, lire, proche, fr, unite, o, fq, el, secouer, melanger, hasard, entre, champ, PARTIES,
-    question, serie, confettis, fig, monter, outil, echelles, modes, MATERIAUX, slot, val, inc, paroi, partieSens, schemaParoi, paroiRemplie,
+    question, serie, confettis, fig, monter, outil, echelles, modes, MATERIAUX, slot, val, inc, paroi, partieSens, noteFluxNeg, noteDTNeg, schemaParoi, paroiRemplie,
     paroiExplo, partieParoi, outilParoi, PLAN, menu, accueil, marquer,
   });
 })();

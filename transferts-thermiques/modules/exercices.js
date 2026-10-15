@@ -23,7 +23,7 @@
 (function () {
   'use strict';
 
-  const { o, fmt, fr, sci, cs, proche, paroi, val, schemaParoi, paroiRemplie, partieSens } = window.TT;
+  const { o, fmt, fr, sci, cs, proche, paroi, val, schemaParoi, paroiRemplie, partieSens, noteFluxNeg, noteDTNeg } = window.TT;
   const calc = h => `<p class="ph-calc">${h}</p>`;
   const c = h => `<span class="c">${h}</span>`;
   const KW = 'K·W<sup>−1</sup>', LAM = 'W·m<sup>−1</sup>·K<sup>−1</sup>';
@@ -77,9 +77,10 @@
         <p class="tt-donnees"><b>Données</b> : λ<sub>neige</sub> = 0,100 ${LAM} ; λ<sub>glace</sub> = 2,200 ${LAM}.</p>`,
       parties: [
         nombre('1. Calcule l\'écart de température entre l\'intérieur et l\'extérieur.', 'ΔT =', 17, 'K', calc(`ΔT = T<sub>int</sub> − T<sub>ext</sub> = −3,0 − (−20) = −3,0 + 20 = ${c('17 K')}`),
-          { tol: .05, signe: true, diag: v => proche(v, 23) || proche(v, -23) ? 'Soustraire −20, c\'est ajouter 20 : −3,0 − (−20) = −3,0 + 20.' : proche(v, -17) ? 'Le côté chaud est l\'intérieur : ΔT = T<sub>chaud</sub> − T<sub>froid</sub> est positif.' : 'ΔT = T<sub>int</sub> − T<sub>ext</sub>.' }),
+          { tol: .05, signe: true, aussi: [{ valeur: -17, note: noteDTNeg('de l\'extérieur vers l\'intérieur', 'de l\'intérieur vers l\'extérieur') }],
+            diag: v => proche(v, 23) || proche(v, -23) ? 'Soustraire −20, c\'est ajouter 20 : −3,0 − (−20) = −3,0 + 20.' : 'ΔT = T<sub>int</sub> − T<sub>ext</sub>.' }),
         nombre('1. Calcule le flux thermique à travers la paroi de glace (3 chiffres significatifs).', 'Φ =', 17 / .022, 'W', calc(`Φ = ${fr('T<sub>int</sub> − T<sub>ext</sub>', 'R<sub>1</sub>')} = ${fr('17', '0,022')} ≈ ${c('773 W')}`),
-          { rel: .01, affiche: '773', diag: v => dPhi(v, 17, .022) }),
+          { rel: .01, affiche: '773', signe: true, aussi: [{ valeur: -17 / .022, note: noteFluxNeg('de l\'extérieur vers l\'intérieur', 'de l\'intérieur vers l\'extérieur') }], diag: v => dPhi(Math.abs(v), 17, .022) }),
         partieSens({ q: '2. Dans quel sens ce transfert de chaleur se produit-il ?', cotes: ['l\'intérieur (−3,0 °C)', 'l\'extérieur (−20 °C)'], bon: 1,
           solution: '<p>Le transfert thermique se fait du chaud (l\'intérieur, −3,0 °C) vers le froid (l\'extérieur, −20 °C).</p>' }),
         nombre('3. Quelle est la résistance thermique R<sub>2</sub> si l\'on double l\'épaisseur de glace ?', 'R<sub>2</sub> =', .044, KW, calc(`R = ${fr('e', 'λ × S')} est proportionnelle à e : si on double e, on double R.<br>R<sub>2</sub> = 2 × R<sub>1</sub> = 2 × 0,022 = ${c('0,044 ' + KW)}`),
@@ -124,7 +125,8 @@
       parties: [
         nombre('a) Calcule le flux thermique (2 chiffres significatifs).', 'Φ =', 3, 'W', calc(`Φ = ${fr('ΔT', 'R<sub>th</sub>')} = ${fr('15', '5,00')} = ${c('3,0 W')}, du chaud vers le froid`), { rel: .01, diag: v => dPhi(v, 15, 5) }),
         nombre('b) Calcule le flux thermique (2 chiffres significatifs).', 'Φ =', 13 / 3.33, 'W', calc(`Φ = ${fr('T<sub>ext</sub> − T<sub>int</sub>', 'R<sub>th</sub>')} = ${fr('35 − 22', '3,33')} ≈ ${c('3,9 W')}`),
-          { rel: .02, affiche: '3,9', diag: v => proche(v, 57 / 3.33, .03) ? 'ΔT est une différence : 35 − 22.' : dPhi(v, 13, 3.33) }),
+          { rel: .02, affiche: '3,9', signe: true, aussi: [{ valeur: -13 / 3.33, note: noteFluxNeg('de l\'intérieur vers l\'extérieur', 'de l\'extérieur vers l\'intérieur') }],
+            diag: v => proche(Math.abs(v), 57 / 3.33, .03) ? 'ΔT est une différence : 35 − 22.' : dPhi(Math.abs(v), 13, 3.33) }),
         partieSens({ q: 'b) Dans quel sens se fait ce transfert ?', cotes: ['l\'intérieur (22 °C)', 'l\'extérieur (35 °C)'], bon: 2,
           solution: '<p>L\'extérieur (35 °C) est plus chaud que l\'intérieur (22 °C) : le transfert se fait de l\'extérieur vers l\'intérieur.</p>' }),
         nombre('c) Calcule le flux thermique.', 'Φ =', 50, 'W', calc(`Φ = ${fr('Q', 'Δt')} = ${fr('180 × 10<sup>3</sup> J', '3 600 s')} = ${c('50 W')}, du chaud vers le froid`),
