@@ -14,6 +14,7 @@
      puissance  tension et intensité déphasées, puissance instantanée
      transport  pylônes et lignes à haute tension, tension sinusoïdale
      cinematique  chronophotographies (positions successives) et vecteurs vitesse
+     wagon      wagon tiré sur des rails par des cordes à différents angles (travail d'une force)
      fractions  disques et barres partagés
      molecules  modèles moléculaires en boules
      formules:physique | formules:redox | formules:pile | formules:combustion | formules:ph | formules:algebre
@@ -304,6 +305,52 @@
       fleche(xm, ym, 60 * Math.sin(a0), -60 * Math.cos(a0), .6);
       fleche(xm, ym, -r * .5 * Math.cos(a0), -r * .5 * Math.sin(a0), .45);
       ctx.globalAlpha = .35; ctx.beginPath(); ctx.arc(cx, cy, 3, 0, 7); ctx.fill();
+    },
+
+    // Wagon sur des rails, tiré par des cordes à différents angles (forces et angle α),
+    // formule du travail en filigrane
+    wagon(ctx, w, h, c) {
+      const p = 26;
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineWidth = 1;
+      for (let x = 0, i = 0; x <= w; x += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .11; trait(ctx, x, 0, x, h); }
+      for (let y = 0, i = 0; y <= h; y += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .11; trait(ctx, 0, y, w, y); }
+      function fleche(x, y, ang, L, a) {
+        const r = ang * Math.PI / 180, ux = Math.cos(r), uy = -Math.sin(r), t = 11;
+        const x2 = x + L * ux, y2 = y + L * uy;
+        ctx.globalAlpha = a; ctx.lineWidth = 3; trait(ctx, x, y, x2 - ux * 5, y2 - uy * 5);
+        ctx.beginPath(); ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - ux * t - uy * t * .45, y2 - uy * t + ux * t * .45);
+        ctx.lineTo(x2 - ux * t + uy * t * .45, y2 - uy * t - ux * t * .45); ctx.closePath(); ctx.fill();
+      }
+      // rails et traverses
+      const yR = h * .56;
+      for (let x = 4; x < w; x += 24) { ctx.globalAlpha = .14; ctx.lineWidth = 6; trait(ctx, x, yR - 5, x, yR + 19); }
+      ctx.globalAlpha = .4; ctx.lineWidth = 2.5; trait(ctx, 0, yR, w, yR); trait(ctx, 0, yR + 14, w, yR + 14);
+      // wagons : caisse, fenêtres, roues
+      function wagon(x, a) {
+        const L = 150, H = 62, y = yR - H - 10;
+        ctx.globalAlpha = a; ctx.lineWidth = 2.5; ctx.strokeRect(x, y, L, H);
+        ctx.lineWidth = 1.5;
+        for (let k = 0; k < 4; k++) ctx.strokeRect(x + 12 + k * 34, y + 12, 24, 20);
+        ctx.lineWidth = 2.5;
+        [x + 30, x + L - 30].forEach(xr => { ctx.beginPath(); ctx.arc(xr, yR - 4, 9, 0, 7); ctx.stroke(); });
+        return [x + L, y + H / 2];
+      }
+      wagon(w * .1, .25);
+      const [xf, yf] = wagon(w * .52, .5);
+      // forces : dans le sens du déplacement, en biais, perpendiculaire ; arc de l'angle α
+      fleche(xf, yf, 0, 120, .55);
+      fleche(xf, yf - 12, 35, 110, .4);
+      fleche(xf - 75, yR - 72, 90, 70, .3);
+      ctx.globalAlpha = .45; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(xf, yf - 12, 54, -35 * Math.PI / 180, 0); ctx.stroke();
+      ctx.font = `600 22px ${police()}`; ctx.fillText('α', xf + 62, yf - 26);
+      // formules en filigrane
+      ctx.font = `600 20px ${police()}`; ctx.globalAlpha = .22;
+      ctx.fillText('W = F × AB × cos α', w * .06, h * .2);
+      ctx.fillText('ΔEc = Σ W', w * .7, h * .16);
+      ctx.font = `500 17px ${police()}`; ctx.globalAlpha = .16;
+      ctx.fillText('Ec = ½ m v²', w * .36, h * .1);
     },
 
     // Formules écrites en quinconce, plus ou moins marquées
