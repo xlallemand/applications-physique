@@ -18,14 +18,17 @@
 <script>
 /* ============================================================
    10 questions tirées au hasard : référentiel adapté à une
-   situation (3), référentiel galiléen (2), nature du mouvement
-   d'après une chronophotographie (3) ou d'après des positions
-   successives (2).
+   situation (3), référentiel galiléen (2), description d'un mouvement
+   en deux mots (trajectoire, puis vitesse) d'après une
+   chronophotographie (3), d'après des positions successives (1),
+   d'après une situation décrite par un texte (1, ou le piège
+   « rectiligne n'est pas uniforme »).
    Erreurs diagnostiquées : référentiel géocentrique et héliocentrique
    confondus, mouvement « uniforme » parce que la trajectoire est une
-   droite, écarts croissants et décroissants confondus.
+   droite, cercle et courbe quelconque confondus, écarts croissants et
+   décroissants confondus.
    ============================================================ */
-const { o, fq, fmt, hasard, melanger, chrono } = PFD;
+const { o, fq, fmt, hasard, melanger, chrono, partieMouvement } = PFD;
 
 /* ---------- Groupe 1 : référentiel adapté ---------- */
 const REFS = [o('ter', 'terrestre'), o('geo', 'géocentrique'), o('helio', 'héliocentrique')];
@@ -58,42 +61,57 @@ const G2 = GAL.map(g => function gal() {
     { melanger: false, indice: 'Un référentiel galiléen est immobile ou en mouvement rectiligne uniforme par rapport à un référentiel galiléen.', solution: `<p>${g[2]}</p>` })] };
 });
 
-/* ---------- Groupe 3 : chronophotographies ---------- */
-const NAT = [o('uniforme', 'uniforme'), o('accelere', 'accéléré'), o('decelere', 'décéléré')];
-const SOL = { uniforme: 'Positions régulièrement espacées : mouvement uniforme.', accelere: 'Positions de plus en plus espacées : mouvement accéléré.', decelere: 'Positions de moins en moins espacées : mouvement décéléré.' };
-const G3 = ['uniforme', 'accelere', 'decelere'].map(t => function nature() {
-  return { theme: 'Nature du mouvement', enonce: `<p>Chronophotographie d'un mobile qui va de gauche à droite (intervalles de temps égaux) :</p>${chrono({ type: t, n: hasard([7, 8, 9, 10]) })}`,
-    parties: [fq.choix('Quelle est la nature de son mouvement ?', NAT, t, { melanger: false, indice: 'Compare les écarts entre deux positions successives : sont-ils égaux, de plus en plus grands, de plus en plus petits ?', solution: `<p>${SOL[t]}</p>` })] };
+/* ---------- Groupe 3 : chronophotographies (deux mots) ---------- */
+const G3 = ['rectiligne', 'circulaire', 'curviligne'].map(tr => function mouvement() {
+  const vit = hasard(['uniforme', 'accelere', 'decelere']);
+  return { theme: 'Décrire un mouvement', enonce: `<p>Chronophotographie d'un mobile (intervalles de temps égaux)${tr === 'rectiligne' ? ', qui va de gauche à droite' : ' ; il part du point marqué « départ »'} :</p>${chrono({ traj: tr, type: vit, n: hasard([8, 9, 10]) })}`,
+    parties: [partieMouvement({ traj: tr, vit })] };
 });
 
-/* ---------- Groupe 4 : positions successives ---------- */
+/* ---------- Groupe 4 : positions successives, situations décrites par un texte ---------- */
+// situations : [texte, trajectoire, vitesse, indice trajectoire, indice vitesse]
+const TEXTES = [
+  ['Un TGV roule en ligne droite à 300 km/h constants.', 'rectiligne', 'uniforme', 'En ligne droite : la trajectoire est une droite.', '300 km/h constants : la vitesse ne change pas.'],
+  ['Un ascenseur démarre et monte de plus en plus vite.', 'rectiligne', 'accelere', 'Un ascenseur monte tout droit.', 'De plus en plus vite : la vitesse augmente.'],
+  ['Une voiture freine en ligne droite jusqu\'à l\'arrêt.', 'rectiligne', 'decelere', 'En ligne droite : la trajectoire est une droite.', 'Elle freine : sa vitesse diminue.'],
+  ['La nacelle d\'une grande roue tourne à vitesse constante.', 'circulaire', 'uniforme', 'La nacelle décrit un cercle.', 'À vitesse constante : la vitesse ne change pas.'],
+  ['Un manège démarre : un cheval de bois tourne de plus en plus vite.', 'circulaire', 'accelere', 'Le cheval de bois décrit un cercle.', 'De plus en plus vite : la vitesse augmente.'],
+  ['Un satellite géostationnaire tourne autour de la Terre à vitesse constante.', 'circulaire', 'uniforme', 'Le satellite décrit un cercle autour de la Terre.', 'À vitesse constante : la vitesse ne change pas.'],
+  ['Une moto accélère dans un virage en S.', 'curviligne', 'accelere', 'Un virage en S n\'est ni une droite ni un cercle : c\'est une courbe quelconque.', 'Elle accélère : sa vitesse augmente.'],
+  ['Un skieur ralentit en faisant un slalom.', 'curviligne', 'decelere', 'Un slalom n\'est ni une droite ni un cercle : c\'est une courbe quelconque.', 'Il ralentit : sa vitesse diminue.'],
+];
 const G4 = [
   function positions() {
     const t = hasard(['uniforme', 'accelere', 'decelere']), d0 = hasard([2, 3, 5]);
     const ecarts = t === 'uniforme' ? [d0, d0, d0, d0] : t === 'accelere' ? [d0, d0 + 1, d0 + 2, d0 + 3] : [d0 + 3, d0 + 2, d0 + 1, d0];
     const x = ecarts.reduce((l, e) => l.concat([l[l.length - 1] + e]), [0]);
-    return { theme: 'Nature du mouvement', enonce: `<p>Toutes les 0,1 s, on repère la position d'un mobile sur une droite : x = ${x.map(v => fmt(v)).join(' cm ; ')} cm.</p>`,
-      parties: [fq.choix('Quelle est la nature de son mouvement ?', NAT, t, { melanger: false, indice: 'Calcule la distance parcourue entre deux positions successives.', solution: `<p>Distances parcourues pendant chaque intervalle : ${ecarts.join(' ; ')} cm. ${SOL[t]}</p>` })] };
+    return { theme: 'Décrire un mouvement', enonce: `<p>Toutes les 0,1 s, on repère la position d'un mobile qui se déplace sur une droite : x = ${x.map(v => fmt(v)).join(' cm ; ')} cm.</p>`,
+      parties: [partieMouvement({ traj: 'rectiligne', vit: t, ind: { traj: 'Le mobile se déplace sur une droite.', vit: `Calcule la distance parcourue entre deux positions successives : ${ecarts.join(' ; ')} cm.` },
+        solution: `<p>Le mobile se déplace sur une droite : trajectoire rectiligne. Distances parcourues pendant chaque intervalle : ${ecarts.join(' ; ')} cm, donc mouvement <b>rectiligne ${PFD.motVit(t)}</b>.</p>` })] };
+  },
+  function texte() {
+    const [txt, tr, vit, it, iv] = hasard(TEXTES);
+    return { theme: 'Décrire un mouvement', enonce: `<p>${txt}</p>`, parties: [partieMouvement({ traj: tr, vit, ind: { traj: it, vit: iv }, solution: `<p>Mouvement <b>${tr} ${PFD.motVit(vit)}</b>.</p>` })] };
   },
   function piege() {
-    return { theme: 'Nature du mouvement', parties: [fq.choix('La trajectoire d\'une voiture est une droite. Peut-on dire que son mouvement est uniforme ?', [o('non', 'non : il faut aussi que la vitesse soit constante'), o('oui', 'oui : une trajectoire droite suffit')], 'non',
-      { melanger: false, indices: { oui: '« Rectiligne » parle de la trajectoire ; « uniforme » parle de la vitesse.' }, solution: '<p>Rectiligne = trajectoire droite ; uniforme = vitesse constante. La voiture peut accélérer en ligne droite.</p>' })] };
+    return { theme: 'Décrire un mouvement', parties: [fq.choix('La trajectoire d\'une voiture est une droite. Peut-on dire que son mouvement est uniforme ?', [o('non', 'non : il faut aussi que la vitesse soit constante'), o('oui', 'oui : une trajectoire droite suffit')], 'non',
+      { melanger: false, indices: { oui: '« Rectiligne » parle de la trajectoire ; « uniforme » parle de la vitesse.' }, solution: '<p>Rectiligne = trajectoire droite (1<sup>er</sup> mot) ; uniforme = vitesse constante (2<sup>e</sup> mot). La voiture peut accélérer en ligne droite.</p>' })] };
   },
 ];
 
-// tirage : 3 + 2 + 3 + 2 questions
+// tirage : 3 + 2 + 3 + 2 questions (positions successives, puis une situation décrite par un texte ou le piège)
 function tirage() {
   const pris = (g, n) => melanger(g).slice(0, n).map(f => f());
-  return pris(G1, 3).concat(pris(G2, 2), pris(G3, 3), [G4[0](), G4[1]()]);
+  return pris(G1, 3).concat(pris(G2, 2), pris(G3, 3), [G4[0](), hasard([G4[1], G4[1], G4[2]])()]);
 }
 
 PFD.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 1 · QUESTIONS', titre: 'Référentiel et nature du mouvement',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : référentiel adapté à une situation, référentiel galiléen, nature d\'un mouvement rectiligne d\'après une chronophotographie ou des positions successives.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : référentiel adapté à une situation, référentiel galiléen, description d\'un mouvement en <b>deux mots</b> (trajectoire, puis vitesse) d\'après une chronophotographie, des positions successives ou une situation.</p>',
   questions: tirage,
   revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
-  suite: { href: 'module_2_simulation.html', label: 'Module 2 : bilan des forces →' },
+  suite: { href: 'module_2_cours.html', label: 'Module 2 : bilan des forces →' },
 });
 PFD.menu('module_1_questions');
 </script>

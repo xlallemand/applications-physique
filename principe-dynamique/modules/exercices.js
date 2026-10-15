@@ -19,12 +19,14 @@
        F_m = 850 × 2,50 + 250 = 2 375 N ≈ 2,4 × 10³ N (corrigé à la main) ;
      ex. 11 : la corde est dessinée horizontale, pour que <span class="vec-nom">P</span> et <span class="vec-nom">R</span> se
        compensent comme le dit la correction ;
-     ex. 19 : la correction titre « p. 86 » : c'est la p. 87.
+     ex. 19 : la correction titre « p. 86 » : c'est la p. 87 ; la poussée
+       d'Archimède est notée F⃗archi (notation de toute l'application), pas F⃗A.
+   Ex. 7 : chaque mouvement se décrit en deux mots (trajectoire, puis vitesse).
    ============================================================ */
 (function () {
   'use strict';
 
-  const { o, fmt, fr, sci, proche, nomV, chrono, bilan, sceneRemplie, partieResultante, partieAcc } = window.PFD;
+  const { o, fmt, fr, sci, proche, nomV, chrono, partieMouvement, bilan, sceneRemplie, partieResultante, partieAcc } = window.PFD;
   const calc = h => `<p class="ph-calc">${h}</p>`;
   const c = h => `<span class="c">${h}</span>`;
   const MS2 = 'm·s<sup>−2</sup>';
@@ -36,15 +38,22 @@
   const parties = q => q.parties.map(p => Object.assign({}, p, { correction: p.solution }));
 
   /* ---------- petites figures (SVG) ---------- */
-  function fl(x1, y1, x2, y2, cls) {
+  // flèche ; coul : couleur de la force (une couleur par force, voir PFD.COUL)
+  function fl(x1, y1, x2, y2, cls, coul) {
     const a = Math.atan2(y2 - y1, x2 - x1), c_ = Math.cos(a), s = Math.sin(a), bx = x2 - 11 * c_, by = y2 - 11 * s;
-    return `<g class="pfd-f${cls ? ' ' + cls : ''}"><line x1="${x1}" y1="${y1}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}"/><path d="M${x2},${y2} L${(bx - 5.5 * s).toFixed(1)},${(by + 5.5 * c_).toFixed(1)} L${(bx + 5.5 * s).toFixed(1)},${(by - 5.5 * c_).toFixed(1)} Z"/></g>`;
+    return `<g class="pfd-f${cls ? ' ' + cls : ''}"${coul ? ` style="color:${coul}"` : ''}><line x1="${x1}" y1="${y1}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}"/><path d="M${x2},${y2} L${(bx - 5.5 * s).toFixed(1)},${(by + 5.5 * c_).toFixed(1)} L${(bx + 5.5 * s).toFixed(1)},${(by - 5.5 * c_).toFixed(1)} Z"/></g>`;
   }
-  const etiq = (x, y, n, s) => `<text x="${x}" y="${y}" class="pfd-sc-txt" text-anchor="middle" style="font-weight:800">${n}${s ? `<tspan dy="3" font-size="9">${s}</tspan>` : ''}</text><path d="M${x - 5},${y - 13} h10 m-3,-2.5 l3,2.5 l-3,2.5" fill="none" stroke="currentColor" style="color:var(--ink-2)" stroke-width="1.2"/>`;
+  // nom d'un vecteur (centré en x) : lettre, indice, petite flèche au-dessus de la lettre ; coul : couleur de la force
+  const etiq = (x, y, n, s, coul) => {
+    const x0 = x - (n.length * 8.5 + (s ? s.length * 5.4 : 0)) / 2;
+    return `<g style="color:${coul || 'var(--ink-2)'}"><text x="${x0.toFixed(1)}" y="${y}" class="pfd-sc-txt" style="font-weight:800;fill:currentColor">${n}${s ? `<tspan dy="3" font-size="9">${s}</tspan>` : ''}</text>` +
+      `<path d="M${(x0 + 1).toFixed(1)},${y - 13} h${n.length * 8.5} m-3,-2.5 l3,2.5 l-3,2.5" fill="none" stroke="currentColor" stroke-width="1.2"/></g>`;
+  };
+  const { COUL } = window.PFD;
   const svg = (w, h, contenu, aria) => `<div class="pfd-sc-cadre"><svg viewBox="0 0 ${w} ${h}" class="pfd-sc" style="max-width:${w * 1.3}px" role="img" aria-label="${aria}">${contenu}</svg></div>`;
   // ex. 9 a) : bloc sur un support, deux forces horizontales de longueurs g (vers la gauche) et d (vers la droite)
   const bloc9 = (g, d, n1, n2, titre) => svg(260, 90, `<rect x="40" y="56" width="180" height="10" class="pfd-sc-obj"/><rect x="104" y="38" width="52" height="18" class="pfd-sc-sys"/>` +
-    fl(104, 47, 104 - g, 47) + fl(156, 47, 156 + d, 47) + etiq(104 - g / 2, 34, 'F', n1) + etiq(156 + d / 2, 34, 'F', n2) + `<text x="130" y="84" text-anchor="middle" class="pfd-sc-txt" style="font-weight:800">${titre}</text>`, `${titre} : force F${n1} vers la gauche, F${n2} vers la droite`);
+    fl(104, 47, 104 - g, 47, '', COUL.P) + fl(156, 47, 156 + d, 47, '', COUL.RN) + etiq(104 - g / 2, 34, 'F', n1, COUL.P) + etiq(156 + d / 2, 34, 'F', n2, COUL.RN) + `<text x="130" y="84" text-anchor="middle" class="pfd-sc-txt" style="font-weight:800">${titre}</text>`, `${titre} : force F${n1} vers la gauche, F${n2} vers la droite`);
 
   /* ---------- la balle de golf (ex. 2) ---------- */
   const GOLF = { id: 'golf', titre: 'Balle de golf qui roule sur le green', systeme: 'la balle', enonce: 'La balle roule vers la droite sur le green et ralentit à cause des frottements de l\'herbe.',
@@ -52,12 +61,14 @@
       `<line x1="150" y1="130" x2="214" y2="130" class="pfd-sc-mvt"/><path d="M222,130 L213,126 L213,134 Z" class="pfd-sc-mvt-p"/><text x="226" y="134" class="pfd-sc-txt">roule</text><text x="28" y="214" class="pfd-sc-txt">green (herbe)</text>`,
     points: { G: [180, 170], A: [180, 190] }, nomsPts: { G: 'centre de la balle', A: 'contact avec l\'herbe' },
     acteurs: [{ id: 'terre', nom: 'la Terre', pourquoi: 'elle attire la balle, à distance (le poids)', manque: 'La Terre attire toujours le système : n\'oublie pas le poids.' },
-      { id: 'herbe', nom: 'l\'herbe', pourquoi: 'elle touche la balle', manque: 'L\'herbe touche la balle : elle exerce une force de contact.' }],
-    distracteurs: [{ id: 'club', nom: 'le club', diag: 'Le club a frappé la balle, mais il ne la touche plus.' }, { id: 'air', nom: 'l\'air', diag: 'On néglige l\'action de l\'air.' }],
+      { id: 'herbe', nom: 'l\'herbe', pourquoi: 'elle touche la balle', manque: 'L\'herbe touche la balle : elle exerce une force de contact.' },
+      { id: 'air', nom: 'l\'air', pourquoi: 'il touche toujours le système (force souvent négligeable)', manque: 'L\'air touche toujours le système : il exerce toujours une force de contact (souvent négligeable).' }],
+    air: { neglige: true, raison: 'La balle roule lentement et n\'est pas très légère pour son volume : on néglige la force de l\'air.' },
+    distracteurs: [{ id: 'club', nom: 'le club', diag: 'Le club a frappé la balle, mais il ne la touche plus.' }],
     forces: [{ acteur: 'terre', type: 'distance', lib: 'force exercée par la Terre', pts: ['G'], angs: [270], noms: ['P'], diagDir: 'le poids est <b>vertical, vers le bas</b>.', indNom: `La force exercée par la Terre est le poids ${nomV('P')}.` },
       { acteur: 'herbe', type: 'contact', lib: 'réaction perpendiculaire de l\'herbe', pts: ['A'], angs: [90], noms: ['RN'], diagDir: 'la réaction normale est <b>perpendiculaire au sol</b> : verticale, vers le haut.', indNom: `La réaction perpendiculaire au support se note ${nomV('RN')}.` },
       { acteur: 'herbe', type: 'contact', lib: 'frottement de l\'herbe', pts: ['A'], angs: [180], noms: ['f'], diagDir: 'les frottements s\'opposent au mouvement de la balle vers la droite : <b>vers la gauche</b>.', indNom: `Les frottements se notent ${nomV('f')}.` }],
-    nomsProposes: ['P', 'RN', 'R', 'f', 'T', 'FA'] };
+    nomsProposes: ['P', 'RN', 'R', 'f', 'T', 'Farchi'] };
 
   // ex. 9 b) : forces au point G (1 carreau = 1 N)
   const CAS1 = [{ nom: 'F_1', coord: [0, 2] }, { nom: 'F_2', coord: [3, 0] }, { nom: 'F_3', coord: [0, -4] }];
@@ -107,12 +118,13 @@
       ] },
 
     /* ============================ EXERCICE 7 ============================ */
-    { id: '7', groupe: 'direction', titre: 'Exercice 7 p. 85 : trois mouvements rectilignes', desc: 'Accéléré, décéléré ou uniforme ?',
+    { id: '7', groupe: 'direction', titre: 'Exercice 7 p. 85 : trois mouvements rectilignes', desc: 'Décrire chaque mouvement en deux mots.',
       contexte: `<p class="er-contexte">On peut considérer trois cas de mouvement rectiligne, mobile allant de la gauche vers la droite. Attribuer à chacun des cas la bonne dénomination : accéléré – décéléré – uniforme.</p>
+        <p class="pfd-donnees">Décris chaque mouvement avec deux mots : la trajectoire, puis la vitesse.</p>
         ${chrono({ type: 'uniforme', n: 10, anim: false, titre: '1<sup>er</sup> cas' })}${chrono({ pos: [0, .03, .07, .12, .2, .31, .45, .61, .8, 1], anim: false, titre: '2<sup>e</sup> cas' })}${chrono({ pos: [0, .2, .39, .55, .69, .8, .88, .94, .98, 1], anim: false, titre: '3<sup>e</sup> cas' })}`,
-      parties: ['1<sup>er</sup>', '2<sup>e</sup>', '3<sup>e</sup>'].map((n, k) => choix(`Quelle est la nature du mouvement dans le ${n} cas ?`, [o('u', 'uniforme'), o('a', 'accéléré'), o('d', 'décéléré')], ['u', 'a', 'd'][k],
-        `<p>${n} cas : mouvement rectiligne ${['uniforme (positions régulièrement espacées)', 'accéléré (positions de plus en plus espacées)', 'décéléré (positions de moins en moins espacées)'][k]}.</p>`,
-        { indice: 'Le mobile va de gauche à droite : regarde comment évoluent les écarts entre deux positions successives.' })) },
+      parties: ['1<sup>er</sup>', '2<sup>e</sup>', '3<sup>e</sup>'].map((n, k) => Object.assign(partieMouvement({ traj: 'rectiligne', vit: ['uniforme', 'accelere', 'decelere'][k], q: `Décris le mouvement du ${n} cas avec deux mots : la trajectoire, puis la vitesse.`,
+        ind: { traj: 'L\'énoncé le dit : les trois mouvements sont rectilignes (trajectoire droite).' } }),
+        { solution: `<p>${n} cas : mouvement <b>rectiligne ${['uniforme</b> (positions régulièrement espacées)', 'accéléré</b> (positions de plus en plus espacées)', 'décéléré</b> ou <b>ralenti</b> (positions de moins en moins espacées)'][k]}.</p>` })) },
 
     /* ============================ EXERCICE 9 ============================ */
     { id: '9', groupe: 'direction', titre: 'Exercice 9 p. 85 : vecteur accélération', desc: 'Direction de <span class="vec-nom">a</span> ; résultante de trois ou quatre forces.',
@@ -211,28 +223,28 @@
 
     /* ============================ EXERCICE 19 ============================ */
     { id: '19', groupe: 'pfd', titre: 'Exercice 19 p. 87 : boule de pétanque et parachute', desc: 'Poussée d\'Archimède négligeable, chute à vitesse constante.',
-      contexte: `<p class="er-contexte">On considère un système {boule de pétanque + parachute}. La masse de la boule de pétanque étant très supérieure à celle des tissus et fils utilisés pour fabriquer le parachute, on assimile la masse du système à la masse de la boule de pétanque. Le système en chute est soumis à l'action mécanique de la Terre, modélisée par le poids <span class="vec-nom">P</span>, et à l'action mécanique exercée par l'air, modélisée par une force de frottement <span class="vec-nom">f</span> et par la poussée d'Archimède <span class="vec-nom">F</span><sub>A</sub>. La masse du système étudié est m = 400 g, et le diamètre de la boule est d = 10 cm.</p>
+      contexte: `<p class="er-contexte">On considère un système {boule de pétanque + parachute}. La masse de la boule de pétanque étant très supérieure à celle des tissus et fils utilisés pour fabriquer le parachute, on assimile la masse du système à la masse de la boule de pétanque. Le système en chute est soumis à l'action mécanique de la Terre, modélisée par le poids <span class="vec-nom">P</span>, et à l'action mécanique exercée par l'air, modélisée par une force de frottement <span class="vec-nom">f</span> et par la poussée d'Archimède <span class="vec-nom">F</span><sub>archi</sub>. La masse du système étudié est m = 400 g, et le diamètre de la boule est d = 10 cm.</p>
         ${svg(200, 150, `<line x1="20" y1="132" x2="180" y2="132" class="pfd-sc-sol"/><circle cx="100" cy="76" r="14" class="pfd-sc-sys"/><circle cx="100" cy="76" r="2.5" class="pfd-pt-m"/><text x="86" y="80" class="pfd-pt-t">G</text>` +
-          fl(100, 76, 100, 116) + fl(96, 76, 96, 30) + fl(106, 76, 106, 50) + etiq(116, 120, 'P', '') + etiq(84, 34, 'f', '') + etiq(124, 54, 'F', 'A'), 'Système en chute : poids vers le bas, frottement et poussée d\'Archimède vers le haut, depuis G')}
+          fl(100, 76, 100, 116, '', COUL.P) + fl(96, 76, 96, 30, '', COUL.f) + fl(106, 76, 106, 50, '', COUL.Farchi) + etiq(116, 120, 'P', '', COUL.P) + etiq(84, 34, 'f', '', COUL.f) + etiq(130, 54, 'F', 'archi', COUL.Farchi), 'Système en chute : poids vers le bas, frottement et poussée d\'Archimède vers le haut, depuis G')}
         <ol class="pfd-donnees"><li>Le référentiel d'étude étant supposé galiléen, écrire le principe fondamental de la dynamique appliqué au système étudié.</li>
         <li>Montrer, à l'aide d'un calcul numérique, que l'on peut négliger la poussée d'Archimède par rapport au poids du système.</li>
         <li>Durant la dernière partie de la chute de la boule de pétanque la vitesse est constante. Que peut-on déduire quant à son accélération ?</li>
         <li>D'après les questions précédentes, déterminer la valeur de la force de frottement durant la dernière partie de la chute.</li></ol>
-        <p class="pfd-donnees"><b>Données</b> : F<sub>A</sub> = ρ<sub>air</sub> × V × g, où ρ<sub>air</sub> = 1,23 kg·m<sup>−3</sup>, V le volume (en m<sup>3</sup>) du corps placé dans l'air, g = 9,81 m·s<sup>−2</sup> ; volume d'une sphère de rayon r : V = (4/3) × π × r<sup>3</sup>.</p>`,
+        <p class="pfd-donnees"><b>Données</b> : F<sub>archi</sub> = ρ<sub>air</sub> × V × g, où ρ<sub>air</sub> = 1,23 kg·m<sup>−3</sup>, V le volume (en m<sup>3</sup>) du corps placé dans l'air, g = 9,81 m·s<sup>−2</sup> ; volume d'une sphère de rayon r : V = (4/3) × π × r<sup>3</sup>.</p>`,
       parties: [
-        choix('1. Écris le principe fondamental de la dynamique.', [o('ok', 'Σ <span class="vec-nom">F</span> = m <span class="vec-nom">a</span>, soit <span class="vec-nom">P</span> + <span class="vec-nom">f</span> + <span class="vec-nom">F</span><sub>A</sub> = m <span class="vec-nom">a</span>'), o('a', 'Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span>'), o('b', '<span class="vec-nom">P</span> = m <span class="vec-nom">a</span>')], 'ok',
-          calc('Σ <span class="vec-nom">F</span><sub>i</sub> = m × <span class="vec-nom">a</span>, soit <span class="vec-nom">P</span> + <span class="vec-nom">f</span> + <span class="vec-nom">F</span><sub>A</sub> = m <span class="vec-nom">a</span>.'), { indices: { a: 'Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span> est le principe d\'inertie : un cas particulier.', b: 'Il y a trois forces : la somme de toutes les forces.' } }),
+        choix('1. Écris le principe fondamental de la dynamique.', [o('ok', 'Σ <span class="vec-nom">F</span> = m <span class="vec-nom">a</span>, soit <span class="vec-nom">P</span> + <span class="vec-nom">f</span> + <span class="vec-nom">F</span><sub>archi</sub> = m <span class="vec-nom">a</span>'), o('a', 'Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span>'), o('b', '<span class="vec-nom">P</span> = m <span class="vec-nom">a</span>')], 'ok',
+          calc('Σ <span class="vec-nom">F</span><sub>i</sub> = m × <span class="vec-nom">a</span>, soit <span class="vec-nom">P</span> + <span class="vec-nom">f</span> + <span class="vec-nom">F</span><sub>archi</sub> = m <span class="vec-nom">a</span>.'), { indices: { a: 'Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span> est le principe d\'inertie : un cas particulier.', b: 'Il y a trois forces : la somme de toutes les forces.' } }),
         nombre('2. Calcule le poids du système (3 chiffres significatifs).', 'P =', P19, 'N', calc(`P = m × g = 0,400 × 9,81 = ${c('3,92 N')}`), { rel: .01, affiche: '3,92', diag: v => proche(v, 400 * 9.81, .02) ? 'Convertis la masse en kg : 400 g = 0,400 kg.' : 'P = m × g.' }),
         scient('2. Calcule le volume de la boule (2 chiffres significatifs).', 'V =', V19, 'm<sup>3</sup>', calc(`r = d / 2 = 5,0 cm = 0,050 m ; V = ${fr('4', '3')} × π × (0,050)<sup>3</sup> = ${c('5,2 × 10<sup>−4</sup> m<sup>3</sup>')}`),
           { cs: 2, rel: .02, diag: v => proche(v, 4 / 3 * Math.PI * 1e-3, .03) ? 'Le rayon est la moitié du diamètre : r = 0,050 m.' : proche(v, V19 * 1e6, .03) ? 'Le rayon doit être en mètres : r = 0,050 m.' : 'V = (4/3) × π × r<sup>3</sup>, avec r = 0,050 m.' }),
-        scient('2. Calcule la poussée d\'Archimède (2 chiffres significatifs).', 'F<sub>A</sub> =', FA19, 'N', calc(`F<sub>A</sub> = ρ<sub>air</sub> × V × g = 1,23 × 5,2 × 10<sup>−4</sup> × 9,81 = ${c('6,3 × 10<sup>−3</sup> N')}`),
-          { cs: 2, rel: .03, diag: v => proche(v, 1.23 * V19, .03) ? 'N\'oublie pas g = 9,81 m·s<sup>−2</sup>.' : 'F<sub>A</sub> = ρ<sub>air</sub> × V × g.' }),
-        nombre('2. Calcule le rapport P / F<sub>A</sub> (2 chiffres significatifs).', 'P / F<sub>A</sub> =', P19 / FA19, '', calc(`${fr('P', 'F<sub>A</sub>')} = ${fr('3,92', '6,3 × 10<sup>−3</sup>')} ≈ ${c('620')}`) +
+        scient('2. Calcule la poussée d\'Archimède (2 chiffres significatifs).', 'F<sub>archi</sub> =', FA19, 'N', calc(`F<sub>archi</sub> = ρ<sub>air</sub> × V × g = 1,23 × 5,2 × 10<sup>−4</sup> × 9,81 = ${c('6,3 × 10<sup>−3</sup> N')}`),
+          { cs: 2, rel: .03, diag: v => proche(v, 1.23 * V19, .03) ? 'N\'oublie pas g = 9,81 m·s<sup>−2</sup>.' : 'F<sub>archi</sub> = ρ<sub>air</sub> × V × g.' }),
+        nombre('2. Calcule le rapport P / F<sub>archi</sub> (2 chiffres significatifs).', 'P / F<sub>archi</sub> =', P19 / FA19, '', calc(`${fr('P', 'F<sub>archi</sub>')} = ${fr('3,92', '6,3 × 10<sup>−3</sup>')} ≈ ${c('620')}`) +
           '<p>Cela signifie que l\'intensité du poids est 620 fois supérieure à celle de la poussée d\'Archimède : on peut donc négliger cette dernière devant le poids.</p>',
-          { rel: .02, affiche: '620', diag: v => proche(v, FA19 / P19, .03) ? 'Rapport inversé : P / F<sub>A</sub>.' : 'P / F<sub>A</sub>.' }),
+          { rel: .02, affiche: '620', diag: v => proche(v, FA19 / P19, .03) ? 'Rapport inversé : P / F<sub>archi</sub>.' : 'P / F<sub>archi</sub>.' }),
         choix('3. La vitesse est constante (et le mouvement rectiligne). Que peut-on en déduire ?', [o('ok', 'l\'accélération est nulle'), o('a', 'l\'accélération est égale à g'), o('b', 'l\'accélération est constante mais non nulle')], 'ok',
           '<p>Si la vitesse est constante, alors son accélération est nulle.</p>', { indices: { a: 'L\'accélération est la variation de la vitesse.', b: 'La vitesse ne varie pas.' } }),
-        nombre('4. Détermine la valeur de la force de frottement (3 chiffres significatifs).', 'f =', P19, 'N', calc(`D'après les questions précédentes, Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span> (<span class="vec-nom">F</span><sub>A</sub> négligée), donc f − P = 0, c'est-à-dire : f = P = ${c('3,92 N')}`),
+        nombre('4. Détermine la valeur de la force de frottement (3 chiffres significatifs).', 'f =', P19, 'N', calc(`D'après les questions précédentes, Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span> (<span class="vec-nom">F</span><sub>archi</sub> négligée), donc f − P = 0, c'est-à-dire : f = P = ${c('3,92 N')}`),
           { rel: .01, affiche: '3,92', diag: v => proche(v, P19 - FA19, .002) ? 'La poussée d\'Archimède est négligeable : f = P.' : proche(v, 0) ? 'Le poids, lui, n\'est pas nul : f compense P.' : 'Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span> donc f = P.' }),
       ] },
   ];

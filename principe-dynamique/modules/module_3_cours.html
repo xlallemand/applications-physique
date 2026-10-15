@@ -19,7 +19,7 @@
   <div class="er-card">
     <span class="er-badge">MODULE 3 · COURS</span>
     <h2 class="er-titre">Accélération</h2>
-    <p class="er-contexte">L'<b>accélération</b> mesure la variation de la vitesse au cours du temps. On la calcule en <b>dérivant</b> la vitesse, ou avec <b>Δv / Δt</b> quand elle est constante. Unité : le <b>m·s<sup>−2</sup></b>.</p>
+    <p class="er-contexte">L'<b>accélération</b> est la <b>dérivée de la vitesse</b> : elle mesure la <b>variation de la vitesse</b> au cours du temps. Selon ce que l'on connaît, il y a <b>quatre façons</b> de la calculer. Unité : le <b>m·s<sup>−2</sup></b>.</p>
   </div>
   <div id="etapes"></div>
 </div>
@@ -27,24 +27,68 @@
 <script>
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
-   a = dv/dt (= v′), en m·s⁻² ; a constante : a = Δv / Δt
-   (négative si le système ralentit, on garde la valeur positive pour
-   une norme) ; conversion km/h → m/s (÷ 3,6) ; a = Σ F / m au module 4.
+   Définition : a = dv/dt (= v′), la variation de la vitesse, en m·s⁻² ;
+   puis les quatre façons de calculer a, selon ce que l'on connaît :
+     1. l'expression v(t) : a = v′ ;
+     2. une vitesse constante : a = 0 ;
+     3. les vitesses de départ et d'arrivée (a considérée constante) :
+        a = Δv / Δt (négative si le système ralentit, on garde la valeur
+        positive pour une norme), avec la conversion km/h → m/s (÷ 3,6) ;
+     4. les forces : a = Σ F / m (principe fondamental, module 4).
    Erreurs diagnostiquées : km/h non convertis, Δv calculé à l'envers,
-   constante non dérivée, Δt et Δv inversés.
+   constante non dérivée, Δt et Δv inversés, vitesse prise pour a,
+   Σ F et m inversés.
    ============================================================ */
-const { fmt, hasard, exemple } = COURS;
-const { fr, proche } = PFD;
+const { fmt, hasard, melanger, exemple } = COURS;
+const { o, fr, proche } = PFD;
 const c = h => `<span class="c">${h}</span>`;
 const r3 = v => +v.toPrecision(3);
 const MS2 = 'm·s<sup>−2</sup>';
 
-/* ---------- 1. Définition : la dérivée de la vitesse ---------- */
+/* ---------- 1. Définition, et les quatre façons de calculer a ---------- */
+const FACONS = [o('derivee', 'a = v′ : on dérive v(t)'), o('nulle', 'a = 0'), o('delta', 'a = Δv / Δt'), o('pfd', 'a = Σ F / m')];
+// situations : [façon, texte]
+const SITU_A = [
+  ['derivee', 'On connaît la vitesse d\'un train en fonction du temps : v = 0,5 t + 12.'], ['derivee', 'La vitesse d\'une fusée au décollage s\'écrit v = 30 t.'],
+  ['nulle', 'Une voiture roule en ligne droite à 90 km/h constants.'], ['nulle', 'Un tapis roulant avance à 0,5 m/s, sans changer de vitesse.'],
+  ['delta', 'Un cycliste passe de 4 m/s à 10 m/s en 3 s (accélération considérée constante).'], ['delta', 'Une moto passe de 0 à 100 km/h en 4 s (accélération considérée constante).'],
+  ['pfd', 'La résultante des forces qui s\'exercent sur un chariot de 20 kg vaut 50 N.'], ['pfd', 'On connaît la masse d\'une voiture et toutes les forces qui s\'exercent sur elle.'],
+];
+const IND_A = {
+  derivee: 'On connaît l\'expression de la vitesse en fonction du temps : on la dérive.',
+  nulle: 'La vitesse ne change pas : elle ne varie pas.',
+  delta: 'On connaît une vitesse de départ, une vitesse d\'arrivée et une durée.',
+  pfd: 'On connaît des forces et une masse : c\'est le principe fondamental de la dynamique.',
+};
 function etape1(c_) {
-  const carte = c_.carte('1. L\'accélération : a = dv/dt');
+  const carte = c_.carte('1. L\'accélération : la dérivée de la vitesse');
   c_.ajouter(carte, `<div class="cours-bloc">
-      <div class="cle"><p><b class="cle-titre">Définition (à connaître).</b> L'accélération est la <b>variation de la vitesse</b> au cours du temps : c'est la dérivée de la vitesse.</p>
+      <div class="cle"><p><b class="cle-titre">Définition (à connaître).</b> L'accélération est la <b>dérivée de la vitesse</b> par rapport au temps :</p>
         <p class="crs-formule">a = ${fr('dv', 'dt')} = v′ &nbsp; en m·s<sup>−2</sup></p></div>
+      <p>Elle correspond à la <b>variation de la vitesse</b> au cours du temps : a &gt; 0 quand la vitesse augmente, a &lt; 0 quand elle diminue, a = 0 quand elle ne change pas.</p>
+      <div class="cle"><p><b class="cle-titre">Comment calculer l'accélération ?</b> Il y a quatre façons, selon ce que l'on connaît :</p>
+        <div class="pfd-cas">
+          <div class="pfd-cas-c"><span class="pfd-cas-t">1<sup>re</sup> façon</span><p>On a l'<b>expression</b> (la formule) de la vitesse en fonction du temps, v(t) : on la dérive.</p><p class="pfd-cas-f">a = v′</p></div>
+          <div class="pfd-cas-c"><span class="pfd-cas-t">2<sup>e</sup> façon</span><p>La vitesse est <b>constante</b>.</p><p class="pfd-cas-f">a = 0</p></div>
+          <div class="pfd-cas-c"><span class="pfd-cas-t">3<sup>e</sup> façon</span><p>On a une <b>vitesse de départ</b> et une <b>vitesse d'arrivée</b>, et on considère l'accélération constante.</p><p class="pfd-cas-f">a = ${fr('Δv', 'Δt')}</p></div>
+          <div class="pfd-cas-c"><span class="pfd-cas-t">4<sup>e</sup> façon</span><p>On a les <b>forces</b> (et la masse) : principe fondamental de la dynamique (<a href="module_4_cours.html">module 4</a>).</p><p class="pfd-cas-f">a = ${fr('Σ F', 'm')}</p></div>
+        </div></div>
+    </div>
+    ${exemple(`<p>a = 2,5 ${MS2} : la vitesse augmente de 2,5 m/s chaque seconde.<br>a = −2 ${MS2} : la vitesse diminue de 2 m/s chaque seconde.<br>a = 0 : la vitesse ne change pas.</p>`)}`);
+  // une situation de chaque façon : l'élève choisit la façon de calculer a
+  const choisies = ['derivee', 'nulle', 'delta', 'pfd'].map(k => hasard(SITU_A.filter(s => s[0] === k)));
+  c_.aToi(carte, melanger(choisies).map((s, k) => ({ titre: `Situation ${k + 1}`, enonce: `<p>${s[1]}</p>`,
+    parties: [{ type: 'choix', q: 'Comment calculer l\'accélération ?', options: FACONS, bonne: s[0], melanger: false,
+      indices: FACONS.reduce((m, x) => (x.id === s[0] ? m : Object.assign(m, { [x.id]: IND_A[s[0]] })), {}), solution: `<p>${IND_A[s[0]]}</p>` }] })));
+  return carte;
+}
+
+/* ---------- 2. 1re façon : on connaît v(t), a = v′ ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. On connaît v(t) : a = v′');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Si on a l'<b>expression de la vitesse</b> en fonction du temps, on la <b>dérive</b> :</p>
+        <p class="crs-formule">a = v′</p></div>
       <p>Pour v = k × t + v<sub>0</sub> (k et v<sub>0</sub> constants), la dérivée vaut a = k : la constante v<sub>0</sub> disparaît.</p>
     </div>
     ${exemple(`<p>Un avion démarre avec une vitesse v = 7,25 t (v en m/s, t en s).</p><p class="crs-calc">a = v′ = <span class="c">7,25 ${MS2}</span></p>`)}`);
@@ -62,11 +106,33 @@ function etape1(c_) {
   return carte;
 }
 
-/* ---------- 2. Accélération constante : a = Δv / Δt ---------- */
-function etape2(c_) {
-  const carte = c_.carte('2. Accélération constante : a = Δv / Δt');
+/* ---------- 3. 2e façon : vitesse constante, a = 0 ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Vitesse constante : a = 0');
   c_.ajouter(carte, `<div class="cours-bloc">
-      <div class="cle"><p class="crs-formule">a = ${fr('Δv', 'Δt')} = ${fr('v<sub>fin</sub> − v<sub>début</sub>', 'durée')}</p>
+      <div class="cle"><p>Si la <b>vitesse est constante</b>, elle ne varie pas : son accélération est <b>nulle</b>.</p>
+        <p class="crs-formule">a = 0</p>
+        <p>(La dérivée d'une constante est nulle.)</p></div>
+    </div>
+    ${exemple(`<p>Un TGV roule en ligne droite à 300 km/h constants : sa vitesse ne change pas.</p><p class="crs-calc">a = <span class="c">0 ${MS2}</span></p>`)}`);
+  const vt = hasard([0.5, 0.6, 1.2]), [vb, nb] = hasard([[8, 'un bateau'], [12, 'un camion'], [25, 'un train']]);
+  c_.aToi(carte, [
+    { titre: 'Un tapis roulant', enonce: `<p>Un tapis roulant avance toujours à ${fmt(vt)} m/s.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est l\'accélération d\'une valise posée sur le tapis ?', label: 'a =', valeur: 0, unite: MS2, tol: .001,
+        diag: v => proche(v, vt) ? `${fmt(vt)} m/s est la vitesse, pas sa variation : la vitesse ne change pas.` : 'La vitesse est constante : elle ne varie pas.', solution: `<p class="crs-calc">Vitesse constante : a = ${c('0 ' + MS2)}</p>` }] },
+    { titre: 'Une vitesse qui ne dépend pas du temps', enonce: `<p>La vitesse de ${nb} s'écrit v = ${vb} (v en m/s), quel que soit t.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est son accélération ?', label: 'a =', valeur: 0, unite: MS2, tol: .001,
+        diag: v => proche(v, vb) ? `La dérivée d'une constante est nulle : v′ = 0.` : 'a = v′, et v ne dépend pas de t.', solution: `<p class="crs-calc">v = ${vb} est constante : a = v′ = ${c('0 ' + MS2)}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. 3e façon : vitesses de départ et d'arrivée, a = Δv / Δt ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. Vitesses de départ et d\'arrivée : a = Δv / Δt');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Si on a une <b>vitesse de départ</b> et une <b>vitesse d'arrivée</b>, et qu'on considère que l'accélération est <b>constante</b> :</p>
+        <p class="crs-formule">a = ${fr('Δv', 'Δt')} = ${fr('v<sub>fin</sub> − v<sub>début</sub>', 'durée')}</p>
         <p>Un résultat <b>négatif</b> veut dire que le système <b>ralentit</b>. Pour la valeur (la norme) de l'accélération, on garde le nombre positif.</p></div>
     </div>
     ${exemple(`<p class="crs-calc">Une voiture passe de 0 à 27,8 m/s en 2,5 s : a = ${fr('27,8 − 0', '2,5')} ≈ <span class="c">11,1 ${MS2}</span><br>
@@ -86,9 +152,9 @@ function etape2(c_) {
   return carte;
 }
 
-/* ---------- 3. Des km/h aux m/s ---------- */
-function etape3(c_) {
-  const carte = c_.carte('3. Convertir les km/h en m/s');
+/* ---------- 5. Des km/h aux m/s ---------- */
+function etape5(c_) {
+  const carte = c_.carte('5. Convertir les km/h en m/s');
   c_.ajouter(carte, `<div class="cours-bloc">
       <div class="cle"><p class="crs-formule">v (m/s) = ${fr('v (km/h)', '3,6')}</p><p>1 km/h = ${fr('1 000 m', '3 600 s')} = ${fr('1', '3,6')} m/s. Dans a = Δv / Δt, la vitesse doit être en <b>m/s</b> et la durée en <b>s</b>.</p></div>
       <div class="ph-lien-app"><p>Revois les conversions d'unités.</p><a class="btn-small" href="../../conversions/index.html">Conversions →</a></div>
@@ -107,19 +173,43 @@ function etape3(c_) {
   return carte;
 }
 
+/* ---------- 6. 4e façon : avec les forces, a = Σ F / m ---------- */
+function etape6(c_) {
+  const carte = c_.carte('6. Avec les forces : a = Σ F / m');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Si on connaît la <b>résultante des forces</b> Σ F (la somme de toutes les forces) et la <b>masse</b> m, le principe fondamental de la dynamique donne :</p>
+        <p class="crs-formule">a = ${fr('Σ F', 'm')}</p><p>Σ F en N, m en kg, a en m·s<sup>−2</sup>.</p></div>
+      <div class="ph-lien-app"><p>Le principe fondamental de la dynamique, et comment trouver Σ F, sont au module 4.</p><a class="btn-small" href="module_4_cours.html">Module 4 →</a></div>
+    </div>
+    ${exemple(`<p>Sur une voiture de course de 600 kg, la résultante des forces vaut 6 660 N.</p><p class="crs-calc">a = ${fr('Σ F', 'm')} = ${fr('6 660', '600')} = <span class="c">11,1 ${MS2}</span></p>`)}`);
+  const [F1, m1] = hasard([[50, 20], [3000, 1200], [150, 75], [9000, 1500]]), [F2, mg] = hasard([[0.115, 46], [0.6, 400], [1.5, 250]]);
+  c_.aToi(carte, [
+    { titre: 'Un véhicule', enonce: `<p>La résultante des forces sur un véhicule de ${fmt(m1)} kg vaut ${fmt(F1)} N.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule son accélération.', label: 'a =', valeur: F1 / m1, unite: MS2, signe: false, rel: .01,
+        diag: v => proche(v, F1 * m1, .02) ? 'On divise : a = Σ F / m.' : proche(v, m1 / F1, .02) ? 'Rapport inversé : a = Σ F / m.' : 'a = Σ F / m.', solution: `<p class="crs-calc">a = ${fr(fmt(F1), fmt(m1))} = ${c(fmt(r3(F1 / m1)) + ' ' + MS2)}</p>` }] },
+    { titre: 'Une masse en grammes', enonce: `<p>La résultante des forces sur une balle de ${mg} g vaut ${fmt(F2)} N.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule son accélération (3 chiffres significatifs).', label: 'a =', valeur: F2 / (mg / 1000), unite: MS2, signe: false, rel: .01, affiche: fmt(r3(F2 / (mg / 1000))),
+        diag: v => proche(v, F2 / mg, .02) ? `Convertis la masse en kg : ${mg} g = ${fmt(mg / 1000)} kg.` : 'a = Σ F / m, avec m en kg.', solution: `<p class="crs-calc">m = ${mg} g = ${fmt(mg / 1000)} kg ; a = ${fr(fmt(F2), fmt(mg / 1000))} ≈ ${c(fmt(r3(F2 / (mg / 1000))) + ' ' + MS2)}</p>` }] },
+  ]);
+  return carte;
+}
+
 /* ---------- À retenir ---------- */
 function aRetenir(c_) {
   const carte = c_.carte('À retenir');
-  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">a = ${fr('dv', 'dt')} = v′ &nbsp; en m·s<sup>−2</sup></p><p>La variation de la vitesse au cours du temps (à connaître).</p></div>
-    <div class="cle"><p class="crs-formule">a = ${fr('Δv', 'Δt')} = ${fr('v<sub>fin</sub> − v<sub>début</sub>', 'durée')}</p><p>Si a est constante. Résultat négatif : le système ralentit ; pour une valeur, on garde le nombre positif.</p></div>
-    <div class="cle"><p>km/h → m/s : on divise par 3,6. On connaît aussi a = Σ F / m (module 4).</p></div>
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">a = ${fr('dv', 'dt')} = v′ &nbsp; en m·s<sup>−2</sup></p><p>L'accélération est la dérivée de la vitesse : la variation de la vitesse au cours du temps (à connaître).</p></div>
+    <div class="cle"><p><b>Quatre façons</b> de calculer a, selon ce que l'on connaît :</p>
+      <ul class="er-liste"><li>l'expression de v(t) : <b>a = v′</b> ;</li><li>une vitesse constante : <b>a = 0</b> ;</li>
+      <li>une vitesse de départ et d'arrivée (a considérée constante) : <b>a = Δv / Δt</b> = (v<sub>fin</sub> − v<sub>début</sub>) / durée ; résultat négatif : le système ralentit ;</li>
+      <li>les forces : <b>a = Σ F / m</b> (principe fondamental de la dynamique, module 4).</li></ul></div>
+    <div class="cle"><p>km/h → m/s : on divise par 3,6.</p></div>
     <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur l'accélération →</a>
       <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Module 4 : principe fondamental de la dynamique</a>
       <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html">Fiche récapitulative</a></div>`);
   return carte;
 }
 
-new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, etape5, etape6, aRetenir]);
 PFD.menu('module_3_cours');
 </script>
 </body>

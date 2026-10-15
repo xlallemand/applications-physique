@@ -19,7 +19,7 @@
   <div class="er-card">
     <span class="er-badge">MODULE 1 · COURS</span>
     <h2 class="er-titre">Référentiel et nature du mouvement</h2>
-    <p class="er-contexte">Un mouvement se décrit toujours <b>par rapport à</b> un objet de référence : le <b>référentiel</b>. Une chronophotographie permet ensuite de dire si le mouvement est <b>uniforme</b>, <b>accéléré</b> ou <b>décéléré</b>.</p>
+    <p class="er-contexte">Un mouvement se décrit toujours <b>par rapport à</b> un objet de référence : le <b>référentiel</b>. On le décrit ensuite avec <b>deux mots</b> : la <b>trajectoire</b> (rectiligne, circulaire ou curviligne), puis la <b>vitesse</b> (uniforme, accéléré, décéléré ou ralenti).</p>
   </div>
   <div id="etapes"></div>
 </div>
@@ -28,11 +28,12 @@
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
    Référentiel (terrestre, géocentrique, héliocentrique), référentiel
-   galiléen, nature d'un mouvement rectiligne d'après une
-   chronophotographie animée (PFD.chrono).
+   galiléen, description d'un mouvement en deux mots (trajectoire, puis
+   vitesse) d'après une chronophotographie animée (PFD.chrono, outil
+   PFD.partieMouvement).
    ============================================================ */
 const { hasard, melanger, exemple } = COURS;
-const { o, chrono } = PFD;
+const { o, chrono, partieMouvement } = PFD;
 
 /* ---------- 1. Le référentiel ---------- */
 const REFS = [o('ter', 'terrestre'), o('geo', 'géocentrique'), o('helio', 'héliocentrique')];
@@ -80,28 +81,27 @@ function etape2(c_) {
   return carte;
 }
 
-/* ---------- 3. La nature d'un mouvement rectiligne ---------- */
-const NATURES = [o('uniforme', 'uniforme'), o('accelere', 'accéléré'), o('decelere', 'décéléré')];
-const SOL_NAT = {
-  uniforme: 'Les points sont <b>régulièrement espacés</b> : la vitesse est constante, le mouvement est uniforme.',
-  accelere: 'Les points sont de <b>plus en plus espacés</b> : la vitesse augmente, le mouvement est accéléré.',
-  decelere: 'Les points sont de <b>moins en moins espacés</b> : la vitesse diminue, le mouvement est décéléré.',
-};
-function qNature(titre, type) {
-  const ind = {};
-  NATURES.forEach(n => { if (n.id !== type) ind[n.id] = 'Compare les distances entre deux positions successives, du début à la fin (le mobile va de gauche à droite).'; });
-  return { titre, enonce: chrono({ type }), parties: [{ type: 'choix', q: 'Le mobile va de gauche à droite. Quelle est la nature de son mouvement ?', options: NATURES, bonne: type, melanger: false, indices: ind, solution: `<p>${SOL_NAT[type]}</p>` }] };
+/* ---------- 3. Décrire un mouvement en deux mots ---------- */
+const TRAJS = ['rectiligne', 'circulaire', 'curviligne'], VITS = ['uniforme', 'accelere', 'decelere'];
+function qMouvement(titre, traj, vit) {
+  return { titre, enonce: chrono({ traj, type: vit }), parties: [partieMouvement({ traj, vit })] };
 }
 function etape3(c_) {
-  const carte = c_.carte('3. Uniforme, accéléré ou décéléré ?');
+  const carte = c_.carte('3. Décrire un mouvement en deux mots');
   c_.ajouter(carte, `<div class="cours-bloc">
       <p>Une <b>chronophotographie</b> montre les positions successives du système à <b>intervalles de temps égaux</b>. Plus deux positions sont éloignées, plus le système va vite.</p>
-      <div class="cle"><ul class="er-liste"><li>positions <b>régulièrement espacées</b> : mouvement <b>uniforme</b> (vitesse constante) ;</li>
-        <li>positions de <b>plus en plus espacées</b> : mouvement <b>accéléré</b> ;</li><li>positions de <b>moins en moins espacées</b> : mouvement <b>décéléré</b>.</li></ul>
-        <p>Si la trajectoire est une droite, le mouvement est <b>rectiligne</b>.</p></div>
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> On décrit un mouvement avec <b>deux mots</b> : d'abord la trajectoire, puis la vitesse.</p>
+        <div class="pfd-2mots"><div><p class="pfd-2mots-t">1<sup>er</sup> mot : la trajectoire</p><ul class="er-liste">
+            <li><b>rectiligne</b> : une droite ;</li><li><b>circulaire</b> : un cercle (ou un arc de cercle) ;</li><li><b>curviligne</b> : une courbe quelconque.</li></ul></div>
+          <div><p class="pfd-2mots-t">2<sup>e</sup> mot : la vitesse</p><ul class="er-liste">
+            <li><b>uniforme</b> : la vitesse est constante (positions régulièrement espacées) ;</li><li><b>accéléré</b> : la vitesse augmente (positions de plus en plus espacées) ;</li>
+            <li><b>décéléré</b> ou <b>ralenti</b> : la vitesse diminue (positions de moins en moins espacées).</li></ul></div></div>
+        <p>Exemple : un mouvement <b>rectiligne uniforme</b>, un mouvement <b>circulaire accéléré</b>.</p></div>
     </div>
-    ${exemple(`${chrono({ type: 'uniforme', titre: 'Rectiligne uniforme' })}${chrono({ type: 'accelere', titre: 'Rectiligne accéléré' })}${chrono({ type: 'decelere', titre: 'Rectiligne décéléré' })}`)}`);
-  c_.aToi(carte, melanger(['uniforme', 'accelere', 'decelere']).map((t, k) => qNature(`Chronophotographie ${k + 1}`, t)));
+    ${exemple(`${chrono({ type: 'uniforme', titre: 'Rectiligne uniforme (le mobile va de gauche à droite)' })}${chrono({ traj: 'circulaire', type: 'accelere', titre: 'Circulaire accéléré' })}${chrono({ traj: 'curviligne', type: 'decelere', titre: 'Curviligne décéléré (ou ralenti)' })}`)}`);
+  // trois chronophotographies : chaque trajectoire et chaque vitesse une fois
+  const vits = melanger(VITS);
+  c_.aToi(carte, melanger(TRAJS).map((tr, k) => qMouvement(`Chronophotographie ${k + 1}`, tr, vits[k])));
   return carte;
 }
 
@@ -110,9 +110,10 @@ function aRetenir(c_) {
   const carte = c_.carte('À retenir');
   c_.ajouter(carte, `<div class="cle"><p>Le <b>référentiel</b> est le solide de référence : terrestre (le plus souvent), géocentrique (satellites), héliocentrique (planètes).</p></div>
     <div class="cle"><p>Un référentiel <b>galiléen</b> vérifie le principe d'inertie ; il est immobile ou en mouvement rectiligne uniforme par rapport à un autre référentiel galiléen. Le référentiel terrestre est considéré comme galiléen.</p></div>
-    <div class="cle"><p>Chronophotographie : positions régulièrement espacées → uniforme ; de plus en plus espacées → accéléré ; de moins en moins espacées → décéléré.</p></div>
+    <div class="cle"><p>Un mouvement se décrit avec <b>deux mots</b> : la trajectoire (<b>rectiligne</b>, <b>circulaire</b> ou <b>curviligne</b>), puis la vitesse (<b>uniforme</b>, <b>accéléré</b>, <b>décéléré</b> ou <b>ralenti</b>). Exemple : mouvement rectiligne uniforme.</p>
+      <p>Chronophotographie : positions régulièrement espacées → uniforme ; de plus en plus espacées → accéléré ; de moins en moins espacées → décéléré (ralenti).</p></div>
     <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur le référentiel et le mouvement →</a>
-      <a class="btn-secondary" style="text-decoration:none" href="module_2_simulation.html">Module 2 : bilan des forces</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2_cours.html">Module 2 : bilan des forces</a>
       <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
   return carte;
 }
