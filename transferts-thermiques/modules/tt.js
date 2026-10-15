@@ -255,7 +255,8 @@
     };
   }
 
-  // Écriture scientifique a × 10ⁿ : p.label, p.valeur, p.unite, p.rel (écart relatif, 3 % par défaut), p.cs, p.diag(v)
+  // Écriture scientifique a × 10ⁿ : p.label, p.valeur, p.unite, p.rel (écart relatif, 3 % par défaut), p.cs, p.diag(v),
+  // p.aussi [{ valeur, note }] : autres réponses justes, avec la remarque ajoutée à « Juste ! »
   function pSci(zone, p, api) {
     const d = el('div', 'ph-valeur');
     if (p.label) d.appendChild(el('span', 'ph-lab', p.label));
@@ -277,6 +278,9 @@
       if (isNaN(vn) || !Number.isInteger(vn)) { secouer(d); api.message('Écris l\'exposant de la puissance de 10 (un nombre entier).'); return; }
       const v = va * Math.pow(10, vn);
       if (proche(v, p.valeur, p.rel == null ? .03 : p.rel)) { a.desactiver(true); n.desactiver(true); bVal.fermer(); api.reussi(); return; }
+      // autre réponse juste (par ex. un flux négatif compté dans l'autre sens)
+      const autre = (p.aussi || []).find(x => proche(v, x.valeur, p.rel == null ? .03 : p.rel));
+      if (autre) { a.desactiver(true); n.desactiver(true); bVal.fermer(); api.reussi(false, autre.note); return; }
       api.erreur((p.diag && p.diag(v)) || p.indice || 'Vérifie ton calcul.');
       secouer(d);
     }
