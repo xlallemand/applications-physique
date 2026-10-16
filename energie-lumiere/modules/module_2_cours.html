@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : conversion photothermique — Chapitre 10 : Énergie transportée par la lumière</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="el.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="el.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Conversion photothermique</h2>
+    <p class="er-contexte">Dans un panneau solaire thermique, l'eau reçoit de l'énergie et sa température monte. On calcule cette énergie avec <b>Q = m × c × (T<sub>f</sub> − T<sub>i</sub>)</b>, et la masse d'eau qui circule avec le <b>débit</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Q = m × c × (T_f − T_i) ; écart de température en K ou en °C
+   2. Élévation de température : ΔT = Q / (m c), T_f = T_i + ΔT
+   3. Débits : D = V / Δt, V = D × Δt (proportionnalité ou formule,
+      exemple du professeur : 0,25 m³/h → 6 m³ en 24 h) ; 1 L d'eau = 1 kg
+   4. Énergie reçue par l'eau dans un capteur : débit → masse → Q
+   c_eau = 4 180 J·kg⁻¹·K⁻¹.
+   Valeurs (vérifiées par un script) : 200 × 4 180 × 40 ≈ 3,34 × 10⁷ J ;
+   50 × 4 180 × 40 ≈ 8,36 × 10⁶ J ; 2,0 × 4 180 × 70 ≈ 5,85 × 10⁵ J ;
+   1,0 × 10⁶ / (10 × 4 180) ≈ 23,9 K ; 5,0 × 10⁶ / (100 × 4 180) ≈ 12,0 K ;
+   2,5 × 10⁶ / (30 × 4 180) ≈ 19,9 K → 37,9 °C ; 0,5 × 3 = 1,5 m³ ;
+   0,20 × 600 = 120 L ; 40 × 5 = 200 L → 200 × 4 180 × 30 ≈ 2,51 × 10⁷ J ;
+   0,10 × 4 = 0,40 m³ → 400 × 4 180 × 10 ≈ 1,67 × 10⁷ J.
+   ============================================================ */
+const { exemple } = COURS;
+const { proche, fr } = EL;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .02);
+const CE = 4180, Ti = 'T<sub>i</sub>', Tf = 'T<sub>f</sub>';
+const UC = 'J·kg<sup>−1</sup>·K<sup>−1</sup>';
+
+/* ---------- 1. Q = m c (Tf − Ti) ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. L\'énergie reçue par l\'eau');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Formule.</b> Quand une masse m d'eau passe de la température ${Ti} à ${Tf}, elle reçoit l'énergie thermique :</p>
+        <p class="crs-formule">Q = m × c × (${Tf} − ${Ti})</p>
+        <p>Q en <b>J</b>, m en <b>kg</b>, c : capacité thermique massique en ${UC} (ou J·kg<sup>−1</sup>·°C<sup>−1</sup>). Pour l'eau : c = 4 180 ${UC}.</p></div>
+      <div class="crs-attention"><p><b class="cle-titre">Kelvins ou degrés ?</b> Un <b>écart</b> de température est le même en K et en °C : si la température monte de 10 °C, elle monte de 10 K. Pas de conversion ici.</p></div>
+    </div>
+    ${exemple(`<p>Le ballon d'un chauffe-eau solaire contient 200 L d'eau (200 kg), chauffée de 15 °C à 55 °C.</p>
+      ${calc(`Q = m × c × (${Tf} − ${Ti}) = 200 kg × 4 180 ${UC} × (55 − 15) K`)}
+      ${calc(`Q = ${c('3,34 × 10<sup>7</sup> J')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une bassine d\'eau', enonce: '<p>50 L d\'eau (50 kg) passent de 20 °C à 60 °C.</p>',
+      parties: [{ type: 'sci', q: 'Calcule l\'énergie reçue par l\'eau (3 chiffres significatifs).', label: 'Q =', valeur: 50 * CE * 40, unite: 'J', cs: 3, rel: .01,
+        diag: v => (pr(v, 50 * CE * 60) ? 'Tu as utilisé T<sub>f</sub> seule : c\'est l\'<b>écart</b> T<sub>f</sub> − T<sub>i</sub> = 40 °C qui compte.' : pr(v, 50 * CE * 80) ? 'C\'est la <b>différence</b> T<sub>f</sub> − T<sub>i</sub>, pas la somme.' : pr(v, 50 * CE * 313) ? 'Pas de conversion en kelvins : un écart de 40 °C est un écart de 40 K.' : 'Q = 50 × 4 180 × (60 − 20).'),
+        solution: calc(`Q = 50 × 4 180 × (60 − 20) = ${c('8,36 × 10<sup>6</sup> J')}`) }] },
+    { titre: 'c en kJ', enonce: '<p>Une bouilloire chauffe 2,0 kg d\'eau de 15 °C à 85 °C. On donne c = 4,18 kJ·kg<sup>−1</sup>·K<sup>−1</sup>.</p>',
+      parties: [{ type: 'sci', q: 'Calcule l\'énergie reçue par l\'eau, en joules.', label: 'Q =', valeur: 2 * CE * 70, unite: 'J', cs: 3, rel: .01,
+        diag: v => (pr(v, 2 * 4.18 * 70) ? 'Convertis c en J : 4,18 kJ = 4 180 J (sinon le résultat est en kJ).' : pr(v, 2 * CE * 85) ? 'C\'est l\'écart T<sub>f</sub> − T<sub>i</sub> = 70 °C.' : 'c = 4 180 J·kg<sup>−1</sup>·K<sup>−1</sup>, puis Q = 2,0 × 4 180 × 70.'),
+        solution: calc('c = 4,18 kJ·kg<sup>−1</sup>·K<sup>−1</sup> = 4 180 J·kg<sup>−1</sup>·K<sup>−1</sup>') + calc(`Q = 2,0 × 4 180 × (85 − 15) = ${c('5,85 × 10<sup>5</sup> J')}`) }] },
+    { titre: 'Un écart en kelvins', enonce: '<p>La température de l\'eau passe de 12 °C à 47 °C.</p>',
+      parties: [{ type: 'nombre', q: 'Quel est l\'écart de température, en kelvins ?', label: `${Tf} − ${Ti} =`, valeur: 35, unite: 'K', signe: false, tol: .01,
+        diag: v => (pr(v, 35 + 273) || pr(v, 35 + 273.15) ? 'Un <b>écart</b> ne se convertit pas : 35 °C d\'écart = 35 K d\'écart.' : 'T<sub>f</sub> − T<sub>i</sub> = 47 − 12.'),
+        solution: calc(`${Tf} − ${Ti} = 47 − 12 = 35 °C, soit ${c('35 K')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Élévation de température ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. L\'élévation de température');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Formule.</b> De Q = m × c × ΔT (avec ΔT = ${Tf} − ${Ti}), on tire :</p>
+        <p class="crs-formule">ΔT = ${fr('Q', 'm × c')} &nbsp;&nbsp;&nbsp; ${Tf} = ${Ti} + ΔT</p></div>
+    </div>
+    ${exemple(`<p>10 kg d'eau à 15 °C reçoivent 1,0 × 10<sup>6</sup> J. Quelle est leur température finale ?</p>
+      ${calc(`ΔT = ${fr('Q', 'm × c')} = ${fr('1,0 × 10<sup>6</sup> J', '10 kg × 4 180 ' + UC)} ≈ ${c('23,9 K')}`)}
+      ${calc(`${Tf} = ${Ti} + ΔT = 15 + 23,9 ≈ ${c('38,9 °C')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Élévation', enonce: '<p>100 kg d\'eau reçoivent 5,0 × 10<sup>6</sup> J.</p>',
+      parties: [{ type: 'nombre', q: 'De combien de degrés leur température monte-t-elle ? (une décimale)', label: 'ΔT =', valeur: 5e6 / (100 * CE), unite: 'K', signe: false, tol: .06, dec: 1,
+        diag: v => (pr(v, 5e6 * 100 / CE) || pr(v, 5e6 * CE / 100) ? 'On divise Q par le <b>produit</b> m × c : ΔT = Q / (m × c).' : pr(v, 5e6 / (100 * 4.18)) ? 'c = 4 180 J·kg<sup>−1</sup>·K<sup>−1</sup> (pas 4,18).' : 'ΔT = 5,0 × 10<sup>6</sup> / (100 × 4 180).'),
+        solution: calc(`ΔT = ${fr('5,0 × 10<sup>6</sup>', '100 × 4 180')} ≈ ${c('12,0 K')}`) }] },
+    { titre: 'Température finale', enonce: '<p>30 kg d\'eau à 18 °C reçoivent 2,5 × 10<sup>6</sup> J.</p>',
+      parties: [{ type: 'nombre', q: 'Calcule l\'élévation de température (une décimale).', label: 'ΔT =', valeur: 2.5e6 / (30 * CE), unite: 'K', signe: false, tol: .06, dec: 1,
+        diag: v => (pr(v, 18 + 2.5e6 / (30 * CE)) ? 'Ça, c\'est déjà la température finale : on demande d\'abord l\'élévation ΔT.' : 'ΔT = Q / (m × c) = 2,5 × 10<sup>6</sup> / (30 × 4 180).'),
+        solution: calc(`ΔT = ${fr('2,5 × 10<sup>6</sup>', '30 × 4 180')} ≈ ${c('19,9 K')}`) },
+      { type: 'nombre', q: 'Quelle est la température finale de l\'eau ? (une décimale)', label: `${Tf} =`, valeur: 18 + 2.5e6 / (30 * CE), unite: '°C', signe: false, tol: .06, dec: 1,
+        diag: v => (pr(v, 18 + 2.5e6 / (30 * CE) + 273) ? 'Reste en °C : T<sub>f</sub> = T<sub>i</sub> + ΔT, avec T<sub>i</sub> = 18 °C.' : pr(v, 2.5e6 / (30 * CE) - 18) ? 'La température <b>monte</b> : on ajoute ΔT.' : 'T<sub>f</sub> = 18 + 19,9.'),
+        solution: calc(`${Tf} = 18 + 19,9 ≈ ${c('37,9 °C')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Débits ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Les débits');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Formule.</b> Le débit D est le volume V qui s'écoule pendant une durée Δt :</p>
+        <p class="crs-formule">D = ${fr('V', 'Δt')} &nbsp;&nbsp;&nbsp; V = D × Δt</p>
+        <p>D en L·s<sup>−1</sup>, m³·h<sup>−1</sup>… : V et Δt dans les unités du débit. Pour l'eau : <b>1 L = 1 kg</b> et <b>1 m³ = 1 000 kg</b>.</p></div>
+    </div>
+    ${exemple(`<p>Un débit de 0,25 m³/h : quel volume s'écoule en une journée (24 h) ?</p>
+      <p><b>Méthode 1 : la proportionnalité.</b></p>
+      <div class="crs-defile"><table class="crs-tab"><tr><th>Volume</th><td>0,25 m³</td><td>V</td></tr><tr><th>Durée</th><td>1 h</td><td>24 h</td></tr></table></div>
+      ${calc(`V = ${fr('0,25 × 24', '1')} = ${c('6 m³')}`)}
+      <p><b>Méthode 2 : la formule.</b></p>
+      ${calc(`V = D × Δt = 0,25 m³/h × 24 h = ${c('6 m³')}`)}
+      <p>6 m³ d'eau, c'est une masse de 6 × 1 000 = 6 000 kg.</p>`)}
+    <div class="ph-lien-app"><p>Revois les tableaux de proportionnalité.</p><a class="btn-small" href="../../proportionnalite/index.html">Proportionnalité →</a></div>`);
+  c_.aToi(carte, [
+    { titre: 'En m³ par heure', enonce: '<p>Un capteur est traversé par un débit de 0,5 m³/h pendant 3 h.</p>',
+      parties: [{ type: 'nombre', q: 'Quel volume d\'eau l\'a traversé ?', label: 'V =', valeur: 1.5, unite: 'm³', signe: false, tol: .01,
+        diag: v => (pr(v, 0.5 / 3) || pr(v, 6) ? 'V = D × Δt : on <b>multiplie</b> le débit par la durée.' : 'V = 0,5 × 3.'),
+        solution: calc(`V = D × Δt = 0,5 m³/h × 3 h = ${c('1,5 m³')}`) },
+      { type: 'nombre', q: 'Quelle est la masse de cette eau ?', label: 'm =', valeur: 1500, unite: 'kg', signe: false, tol: .5,
+        diag: v => (pr(v, 1.5) ? '1 m³ d\'eau a une masse de 1 000 kg.' : pr(v, 15) || pr(v, 150) ? '1 m³ = 1 000 L, et 1 L d\'eau = 1 kg.' : 'm = 1,5 × 1 000.'),
+        solution: calc(`m = 1,5 × 1 000 = ${c('1 500 kg')}`) }] },
+    { titre: 'En litres par seconde', enonce: '<p>Un tuyau débite 0,20 L/s pendant 10 min.</p>',
+      parties: [{ type: 'nombre', q: 'Quel volume d\'eau a coulé ?', label: 'V =', valeur: 120, unite: 'L', signe: false, tol: .5,
+        diag: v => (pr(v, 2) ? 'Le débit est en litres par <b>seconde</b> : convertis 10 min en secondes (600 s).' : pr(v, 0.2 / 600) || pr(v, 50) ? 'V = D × Δt.' : 'Δt = 10 × 60 = 600 s, puis V = 0,20 × 600.'),
+        solution: calc('Δt = 10 min = 600 s') + calc(`V = D × Δt = 0,20 L/s × 600 s = ${c('120 L')}`) + '<p>soit une masse de 120 kg.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Énergie reçue dans un capteur ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. L\'énergie reçue par l\'eau dans un capteur');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>L'eau traverse le capteur avec un débit connu. On enchaîne trois étapes :</p>
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> 1. le volume V = D × Δt ; 2. la masse m (1 L = 1 kg) ; 3. l'énergie Q = m × c × (${Tf} − ${Ti}).</p></div>
+    </div>
+    ${exemple(`<p>De l'eau traverse un capteur avec un débit de 40 L/h pendant 5 h ; elle entre à 20 °C et sort à 50 °C.</p>
+      ${calc('V = D × Δt = 40 L/h × 5 h = 200 L, donc m = 200 kg')}
+      ${calc(`Q = 200 kg × 4 180 ${UC} × (50 − 20) K = ${c('2,51 × 10<sup>7</sup> J')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Un capteur de piscine', enonce: '<p>Un capteur est traversé par un débit de 0,10 m³/h pendant 4 h. L\'eau entre à 15 °C et sort à 25 °C.</p>',
+      parties: [{ type: 'nombre', q: 'Quelle masse d\'eau a traversé le capteur ?', label: 'm =', valeur: 400, unite: 'kg', signe: false, tol: .5,
+        diag: v => (pr(v, .4) ? 'Tu as le volume en m³ : 1 m³ d\'eau = 1 000 kg.' : pr(v, .025) || pr(v, 25) ? 'V = D × Δt : on multiplie.' : 'V = 0,10 × 4 = 0,40 m³, soit 400 kg.'),
+        solution: calc(`V = 0,10 m³/h × 4 h = 0,40 m³, donc m = ${c('400 kg')}`) },
+      { type: 'sci', q: 'Calcule l\'énergie reçue par l\'eau (3 chiffres significatifs).', label: 'Q =', valeur: 400 * CE * 10, unite: 'J', cs: 3, rel: .01,
+        diag: v => (pr(v, .4 * CE * 10) ? 'La masse doit être en kg : 0,40 m³ = 400 kg.' : pr(v, 400 * CE * 25) ? 'C\'est l\'écart de température : 25 − 15 = 10 K.' : 'Q = 400 × 4 180 × (25 − 15).'),
+        solution: calc(`Q = 400 × 4 180 × (25 − 15) = ${c('1,67 × 10<sup>7</sup> J')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">Q = m × c × (${Tf} − ${Ti})</p><p>Q en J, m en kg, c en ${UC} (eau : 4 180). Un écart de température est le même en K et en °C.</p></div>
+    <div class="cle"><p>ΔT = Q / (m × c) &nbsp;·&nbsp; ${Tf} = ${Ti} + ΔT</p></div>
+    <div class="cle"><p>D = V / Δt &nbsp;·&nbsp; V = D × Δt (proportionnalité ou formule). Eau : 1 L = 1 kg ; 1 m³ = 1 000 kg.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur la conversion photothermique →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3a_cours.html">Module 3 : ondes et photons</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
+EL.menu('module_2_cours');
+</script>
+</body>
+</html>

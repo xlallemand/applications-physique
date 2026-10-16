@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions sur les ondes et les photons — Chapitre 10 : Énergie transportée par la lumière</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="el.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="el.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : λ ↔ f avec préfixes (3 : MHz, nm,
+   GHz / µm / THz), énergie d'un photon E = h f (1) et E = h c / λ (1),
+   domaine d'une onde (1), eV → J (1), J → eV (1), absorption ou
+   émission (1), photon d'une transition entre deux niveaux (1).
+   h = 6,63 × 10⁻³⁴ J·s ; c = 3,00 × 10⁸ m·s⁻¹ ; 1 eV = 1,602 × 10⁻¹⁹ J.
+   Erreurs diagnostiquées : préfixe non converti (ou mal converti),
+   λ = f / c, h oublié, E = h / f, multiplication au lieu de division
+   (eV ↔ J), ΔE négatif ou en somme.
+   ============================================================ */
+const { o, fq, fmt, cs, sci, hasard, melanger, proche, fr, H, C, EV, HYDROGENE, figNiveaux, idDomaine, optionsDomaine, NOMS_DOM, nomCouleur } = EL;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .02);
+const HV = '6,63 × 10<sup>−34</sup>', CV = '3,00 × 10<sup>8</sup>';
+const DONNEES = `<p class="ph-donnees">Données : h = ${HV} J·s ; c = ${CV} m·s<sup>−1</sup> ; 1 eV = 1,602 × 10<sup>−19</sup> J.</p>`;
+// diagnostic commun : préfixe oublié ou mal converti (k : facteur du préfixe)
+const diagPrefixe = (v, juste, k, nom) => {
+  if (pr(v, juste * k) || pr(v, juste / k)) return `Convertis d'abord le préfixe : 1 ${nom}.`;
+  return '';
+};
+
+/* ---------- Groupe 1 : λ ↔ f avec préfixes ---------- */
+function qMHz() {
+  const f = hasard([88.0, 91.5, 95.7, 101.1, 104.3, 105.5]), lam = C / (f * 1e6);
+  return { theme: 'Longueur d\'onde d\'une radio', enonce: `<p>Une station de radio émet à ${fmt(f, 1)} MHz.</p>${DONNEES}`,
+    parties: [fq.nombre('Calcule la longueur d\'onde (3 chiffres significatifs).', 'λ =', lam, 'm', { signe: false, rel: .005, cs: 3,
+      diag: v => diagPrefixe(v, lam, 1e6, 'MHz = 10<sup>6</sup> Hz') || (pr(v, f * 1e6 / C) ? 'Tu as calculé f / c : c\'est λ = c / f.' : `λ = ${CV} / (${fmt(f, 1)} × 10<sup>6</sup>).`),
+      solution: calc(`λ = ${fr('c', 'f')} = ${fr(CV, fmt(f, 1) + ' × 10<sup>6</sup>')} ≈ ${c(cs(lam, 3) + ' m')}`) })] };
+}
+function qNm() {
+  const [nm, qui] = hasard([[450, 'Une LED bleue'], [532, 'Un laser vert'], [589, 'Une lampe à vapeur de sodium'], [633, 'Un laser hélium-néon'], [780, 'Un lecteur de CD']]), f = C / (nm * 1e-9);
+  return { theme: 'Fréquence d\'une lumière', enonce: `<p>${qui} émet une lumière de longueur d'onde ${nm} nm.</p>${DONNEES}`,
+    parties: [fq.sci('Calcule sa fréquence (3 chiffres significatifs).', 'f =', f, 'Hz', { cs: 3, rel: .01,
+      diag: v => (pr(v, C / nm) ? 'Convertis λ en mètres : 1 nm = 10<sup>−9</sup> m.' : pr(v, C / (nm * 1e-6)) ? '1 nm = 10<sup>−9</sup> m (pas 10<sup>−6</sup>).' : pr(v, nm * 1e-9 / C) ? 'Tu as calculé λ / c : c\'est f = c / λ.' : `f = ${CV} / (${nm} × 10<sup>−9</sup>).`),
+      solution: calc(`f = ${fr('c', 'λ')} = ${fr(CV, nm + ' × 10<sup>−9</sup>')} ≈ ${c(sci(f, 3) + ' Hz')}`) })] };
+}
+function qPrefixe() {
+  return hasard([
+    () => { const [g, qui] = hasard([[5.0, 'Le Wi-Fi'], [1.575, 'Le signal GPS'], [0.9, 'Un téléphone portable'], [2.45, 'Un four à micro-ondes']]), lam = C / (g * 1e9);
+      return { theme: 'Préfixe giga', enonce: `<p>${qui} utilise une fréquence de ${fmt(g)} GHz.</p>${DONNEES}`,
+        parties: [fq.nombre('Calcule la longueur d\'onde, en mètres (3 chiffres significatifs).', 'λ =', lam, 'm', { signe: false, rel: .005, cs: 3,
+          diag: v => (pr(v, C / (g * 1e6)) ? '1 GHz = 10<sup>9</sup> Hz (giga, pas méga).' : diagPrefixe(v, lam, 1e9, 'GHz = 10<sup>9</sup> Hz') || (pr(v, g * 1e9 / C) ? 'C\'est λ = c / f.' : `λ = ${CV} / (${fmt(g)} × 10<sup>9</sup>).`)),
+          solution: calc(`λ = ${fr(CV, fmt(g) + ' × 10<sup>9</sup>')} ≈ ${c(cs(lam, 3) + ' m')}`) })] }; },
+    () => { const u = hasard([1.5, 2.0, 5.0, 12, 50]), f = C / (u * 1e-6);
+      return { theme: 'Préfixe micro', enonce: `<p>Un rayonnement infrarouge a une longueur d'onde de ${fmt(u)} µm.</p>${DONNEES}`,
+        parties: [fq.sci('Calcule sa fréquence.', 'f =', f, 'Hz', { cs: 2, rel: .01,
+          diag: v => (pr(v, C / (u * 1e-9)) ? '1 µm = 10<sup>−6</sup> m (micro, pas nano).' : diagPrefixe(v, f, 1e6, 'µm = 10<sup>−6</sup> m') || (pr(v, u * 1e-6 / C) ? 'C\'est f = c / λ.' : `f = ${CV} / (${fmt(u)} × 10<sup>−6</sup>).`)),
+          solution: calc(`f = ${fr(CV, fmt(u) + ' × 10<sup>−6</sup>')} = ${c(sci(f, 2) + ' Hz')}`) })] }; },
+    () => { const t = hasard([400, 500, 600, 750]), lam = C / (t * 1e12);
+      return { theme: 'Préfixe téra', enonce: `<p>Une lumière a une fréquence de ${t} THz.</p>${DONNEES}`,
+        parties: [fq.sci('Calcule sa longueur d\'onde, en mètres.', 'λ =', lam, 'm', { cs: 2, rel: .01,
+          diag: v => (pr(v, C / (t * 1e9)) ? '1 THz = 10<sup>12</sup> Hz (téra, pas giga).' : diagPrefixe(v, lam, 1e12, 'THz = 10<sup>12</sup> Hz') || `λ = ${CV} / (${t} × 10<sup>12</sup>).`),
+          solution: calc(`λ = ${fr(CV, t + ' × 10<sup>12</sup>')} = ${c(sci(lam, 2) + ' m')} = ${Math.round(lam * 1e9)} nm`) })] }; },
+  ])();
+}
+
+/* ---------- Groupe 2 : énergie d'un photon ---------- */
+function qEhf() {
+  const t = hasard([300, 450, 600, 750, 900]), f = t * 1e12, E = H * f;
+  return { theme: 'Énergie d\'un photon : E = h × f', enonce: `<p>Une onde électromagnétique a une fréquence de ${t} THz.</p>${DONNEES}`,
+    parties: [fq.sci('Calcule l\'énergie d\'un photon (3 chiffres significatifs).', 'E =', E, 'J', { cs: 3, rel: .01,
+      diag: v => (pr(v, H * t) ? 'Convertis la fréquence en Hz : 1 THz = 10<sup>12</sup> Hz.' : pr(v, f) ? 'Multiplie par la constante de Planck h.' : pr(v, H / f) || pr(v, f / H) ? 'E = h × f : on multiplie.' : `E = ${HV} × ${t} × 10<sup>12</sup>.`),
+      solution: calc(`f = ${t} × 10<sup>12</sup> Hz`) + calc(`E = h × f = ${HV} × ${t} × 10<sup>12</sup> ≈ ${c(sci(E, 3) + ' J')}`) })] };
+}
+function qEhcl() {
+  const nm = hasard([350, 450, 550, 700, 900]), E = H * C / (nm * 1e-9);
+  return { theme: 'Énergie d\'un photon : E = h c / λ', enonce: `<p>Un rayonnement a une longueur d'onde de ${nm} nm.</p>${DONNEES}`,
+    parties: [fq.sci('Calcule l\'énergie d\'un photon (3 chiffres significatifs).', 'E =', E, 'J', { cs: 3, rel: .01,
+      diag: v => (pr(v, H * C / nm) ? 'Convertis λ en mètres : 1 nm = 10<sup>−9</sup> m.' : pr(v, C / (nm * 1e-9)) ? 'Ça, c\'est la fréquence : multiplie-la par h.' : pr(v, nm * 1e-9 / (H * C)) || pr(v, H * nm * 1e-9 / C) ? 'E = h × c / λ : λ est au dénominateur.' : `E = ${HV} × ${CV} / (${nm} × 10<sup>−9</sup>).`),
+      solution: calc(`E = ${fr('h × c', 'λ')} = ${fr(HV + ' × ' + CV, nm + ' × 10<sup>−9</sup>')} ≈ ${c(sci(E, 3) + ' J')}`) })] };
+}
+
+/* ---------- Groupe 3 : domaine ---------- */
+function qDomaine() {
+  const [txt, lam, sol] = hasard([
+    ['un rayonnement de longueur d\'onde 0,5 nm', 0.5e-9, '0,5 nm = 5 × 10<sup>−10</sup> m, entre 10<sup>−11</sup> m et 10<sup>−8</sup> m'],
+    ['un rayonnement de longueur d\'onde 2 µm', 2e-6, '2 µm = 2 000 nm, entre 800 nm et 1 mm'],
+    ['une onde de longueur d\'onde 3 cm', 0.03, '3 cm = 0,03 m, entre 1 mm et 1 m (micro-ondes)'],
+    ['un rayonnement de longueur d\'onde 250 nm', 250e-9, '250 nm, entre 10 nm et 400 nm'],
+    ['un rayonnement de longueur d\'onde 1 × 10<sup>−12</sup> m', 1e-12, '10<sup>−12</sup> m, moins de 10<sup>−11</sup> m'],
+    ['une onde de fréquence 1,0 × 10<sup>18</sup> Hz', C / 1e18, 'λ = c / f = 3,0 × 10<sup>−10</sup> m, entre 10<sup>−11</sup> m et 10<sup>−8</sup> m'],
+    ['une onde de fréquence 5,0 × 10<sup>14</sup> Hz', C / 5e14, 'λ = c / f = 6,0 × 10<sup>−7</sup> m = 600 nm, entre 400 et 800 nm'],
+    ['une onde de fréquence 100 MHz', C / 1e8, 'λ = c / f = 3,0 m, plus de 1 m (ondes radio)'],
+  ]);
+  const d = idDomaine(lam);
+  return { theme: 'Domaine d\'une onde', enonce: `<p>On considère ${txt}.</p><p class="ph-donnees">Visible : de 400 nm à 800 nm ; c = ${CV} m·s<sup>−1</sup>.</p>`,
+    parties: [fq.choix('À quel domaine appartient-elle ?', optionsDomaine(), d, { melanger: false, colonne: false,
+      indice: 'Convertis la longueur d\'onde en mètres (ou calcule-la avec λ = c / f), puis situe-la : γ < 10<sup>−11</sup> m < X < 10<sup>−8</sup> m < UV < 400 nm < visible < 800 nm < IR < 1 mm < ondes hertziennes.',
+      solution: `<p>${sol} : ${NOMS_DOM[d]}.</p>` })] };
+}
+
+/* ---------- Groupe 4 : eV ↔ J ---------- */
+function qEvJ() {
+  const e = hasard([1.5, 2.2, 3.4, 4.5, 10.2, 13.6]), J = e * EV;
+  return { theme: 'eV → J', enonce: `<p>Un photon a une énergie de ${fmt(e)} eV.</p><p class="ph-donnees">Donnée : 1 eV = 1,602 × 10<sup>−19</sup> J.</p>`,
+    parties: [fq.sci('Convertis cette énergie en joules (3 chiffres significatifs).', 'E =', J, 'J', { cs: 3, rel: .01,
+      diag: v => (pr(v, e / EV) ? 'eV → J : on <b>multiplie</b> par 1,602 × 10<sup>−19</sup>.' : pr(v, e * 1.602) ? 'N\'oublie pas la puissance de 10 : 10<sup>−19</sup>.' : `E = ${fmt(e)} × 1,602 × 10<sup>−19</sup>.`),
+      solution: calc(`E = ${fmt(e)} × 1,602 × 10<sup>−19</sup> ≈ ${c(sci(J, 3) + ' J')}`) })] };
+}
+function qJEv() {
+  const J = hasard([2.4e-19, 3.2e-19, 4.8e-19, 6.4e-19, 1.6e-18, 8.0e-19]), e = J / EV;
+  return { theme: 'J → eV', enonce: `<p>Un photon a une énergie de ${sci(J, 2)} J.</p><p class="ph-donnees">Donnée : 1 eV = 1,602 × 10<sup>−19</sup> J.</p>`,
+    parties: [fq.nombre('Convertis cette énergie en électronvolts (2 chiffres significatifs).', 'E =', e, 'eV', { signe: false, rel: .012, cs: 2,
+      diag: v => (pr(v, J * EV) ? 'J → eV : on <b>divise</b> par 1,602 × 10<sup>−19</sup>.' : `E = ${sci(J, 2)} / 1,602 × 10<sup>−19</sup>.`),
+      solution: calc(`E = ${fr(sci(J, 2), '1,602 × 10<sup>−19</sup>')} ≈ ${c(cs(e, 2) + ' eV')}`) })] };
+}
+
+/* ---------- Groupe 5 : absorption ou émission ---------- */
+function qAbsEm() {
+  const [de, vers] = hasard([[0, 1], [1, 0], [0, 2], [2, 0], [1, 2], [2, 1]]), abs = vers > de;
+  return { theme: 'Absorption ou émission', enonce: `<p>Le diagramme montre une transition de l'électron d'un atome.</p>${figNiveaux({ de, vers })}`,
+    parties: [fq.choix('S\'agit-il d\'une absorption ou d\'une émission de photon ?', [o('abs', 'absorption'), o('em', 'émission')], abs ? 'abs' : 'em',
+        { melanger: false, indices: { abs: 'L\'électron <b>descend</b> : il perd de l\'énergie, emportée par un photon émis.', em: 'L\'électron <b>monte</b> : il gagne l\'énergie d\'un photon absorbé.' },
+          solution: `<p>L'électron ${abs ? 'monte : il gagne l\'énergie du photon absorbé' : 'descend : il perd de l\'énergie, emportée par le photon émis'}.</p>` }),
+      fq.choix('Ce phénomène est le principe de fonctionnement :', [o('pv', 'd\'un panneau photovoltaïque'), o('led', 'd\'une LED')], abs ? 'pv' : 'led',
+        { melanger: false, indices: { pv: 'Un panneau photovoltaïque absorbe la lumière ; ici l\'atome émet un photon.', led: 'Une LED émet de la lumière ; ici l\'atome absorbe un photon.' },
+          solution: `<p>${abs ? 'Absorption : panneau photovoltaïque (les photons absorbés arrachent des électrons).' : 'Émission : LED (diode électroluminescente).'}</p>` })] };
+}
+
+/* ---------- Groupe 6 : photon d'une transition ---------- */
+function qTransition() {
+  const dE = hasard([0.8, 1.2, 1.8, 2.1, 2.5, 2.8, 3.5, 4.2]), bas = hasard([-7.4, -6.0, -5.2, -4.8]), haut = Math.round((bas + dE) * 100) / 100;
+  const lam = H * C / (dE * EV), nm = lam * 1e9, d = idDomaine(lam);
+  const f2 = v => fmt(v, 2);
+  return { theme: 'Le photon d\'une transition', enonce: `<p>Dans un atome, l'électron descend du niveau E<sub>2</sub> = ${f2(haut)} eV au niveau E<sub>1</sub> = ${f2(bas)} eV.</p>${DONNEES}`,
+    parties: [fq.nombre('a) Quelle énergie ΔE perd l\'électron, en eV ?', 'ΔE =', dE, 'eV', { signe: false, tol: .006, dec: 2,
+        diag: v => (pr(v, -dE) ? 'Une énergie perdue s\'écrit positive : ΔE = E<sub>2</sub> − E<sub>1</sub>.' : pr(v, Math.abs(haut + bas)) ? `C'est la <b>différence</b> : ${f2(haut)} − (${f2(bas)}).` : `ΔE = E<sub>2</sub> − E<sub>1</sub> = ${f2(haut)} − (${f2(bas)}).`),
+        solution: calc(`ΔE = ${f2(haut)} − (${f2(bas)}) = ${c(f2(dE) + ' eV')}`) }),
+      fq.nombre('b) Calcule la longueur d\'onde du photon émis, en nm (3 chiffres significatifs).', 'λ =', nm, 'nm', { signe: false, rel: .012, cs: 3,
+        diag: v => (pr(v, lam) ? 'Ton résultat est en mètres : 1 m = 10<sup>9</sup> nm.' : pr(v, H * C / dE) || pr(v, H * C / dE * 1e9) ? 'Convertis d\'abord ΔE en joules (× 1,602 × 10<sup>−19</sup>).' : pr(v, dE * EV / H) ? 'Ça, c\'est la fréquence ; λ = c / f = h × c / ΔE.' : 'ΔE en J, puis λ = h × c / ΔE, puis en nm.'),
+        solution: calc(`ΔE = ${f2(dE)} × 1,602 × 10<sup>−19</sup> ≈ ${sci(dE * EV, 3)} J`) + calc(`λ = ${fr('h × c', 'ΔE')} = ${fr(HV + ' × ' + CV, sci(dE * EV, 3))} ≈ ${sci(lam, 3)} m = ${c(cs(nm, 3) + ' nm')}`) }),
+      fq.choix('c) À quel domaine appartient ce photon ?', optionsDomaine(), d, { melanger: false,
+        indice: 'Visible : de 400 nm à 800 nm ; en dessous, ultraviolet ; au-dessus, infrarouge.',
+        solution: `<p>${cs(nm, 3)} nm : ${d === 'visible' ? `lumière visible (${nomCouleur(nm)})` : NOMS_DOM[d]}.</p>` })] };
+}
+
+// tirage : 3 + 2 + 1 + 2 + 1 + 1 questions
+function tirage() {
+  return [qMHz(), qNm(), qEhf(), qDomaine(), qEvJ(), qPrefixe(), qEhcl(), qJEv(), qAbsEm(), qTransition()];
+}
+
+EL.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Ondes et photons',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : longueur d\'onde et fréquence avec les préfixes, énergie d\'un photon, domaines du spectre, électronvolts, absorption et émission.</p><div class="ph-lien-app"><p>Besoin de revoir les puissances de 10 ?</p><a class="btn-small" href="../../puissances-10/index.html">Puissances de 10 →</a></div>',
+  questions: tirage,
+  revoir: { href: 'module_3b_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4_cours.html', label: 'Module 4 : panneau photovoltaïque →' },
+});
+EL.menu('module_3_questions');
+</script>
+</body>
+</html>

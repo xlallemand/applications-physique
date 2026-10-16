@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : fréquence et longueur d'onde — Chapitre 10 : Énergie transportée par la lumière</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="el.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="el.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS · PARTIE 1</span>
+    <h2 class="er-titre">Fréquence et longueur d'onde</h2>
+    <p class="er-contexte">La lumière est une <b>onde électromagnétique</b>, caractérisée par sa <b>fréquence f</b> ou sa <b>longueur d'onde λ</b>. On passe de l'une à l'autre avec la vitesse de la lumière c, puis on situe l'onde dans le <b>spectre électromagnétique</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. λ = c / f et f = c / λ (exemples du professeur : 107,7 MHz,
+      laser 650 nm, la₃ à 440 Hz avec v = 340 m/s)
+   2. Les préfixes (THz, GHz, MHz, µm, nm)
+   3. Le spectre électromagnétique (EL.spectre) et les domaines
+   Valeurs (vérifiées par un script) : 3,00 × 10⁸ / 107,7 × 10⁶ ≈ 2,79 m ;
+   3,00 × 10⁸ / 650 × 10⁻⁹ ≈ 4,62 × 10¹⁴ Hz ; 340 / 440 ≈ 0,773 m ;
+   3,00 × 10⁸ / 95,0 × 10⁶ ≈ 3,16 m ; 3,00 × 10⁸ / 532 × 10⁻⁹ ≈ 5,64 × 10¹⁴ Hz ;
+   340 / 880 ≈ 0,386 m ; 3,00 × 10⁸ / 2,4 × 10⁹ = 0,125 m ;
+   3,00 × 10⁸ / 2,45 × 10⁹ ≈ 0,122 m ; 3,00 × 10⁸ / 10 × 10⁻⁶ = 3,0 × 10¹³ Hz ;
+   3,00 × 10⁸ / 600 × 10¹² = 5,0 × 10⁻⁷ m ; 3,00 × 10⁸ / 100 × 10⁶ = 3,0 m.
+   Erreurs diagnostiquées : préfixe non converti, λ = f / c, c au lieu
+   de 340 m/s pour le son, mauvais exposant du préfixe.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, proche, fr, spectre, optionsDomaine } = EL;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .02);
+const C = 3e8;
+const CV = '3,00 × 10<sup>8</sup>';
+
+/* ---------- 1. λ = c / f ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Fréquence et longueur d\'onde');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Formule.</b> Pour une onde électromagnétique (lumière, ondes radio…) :</p>
+        <p class="crs-formule">λ = ${fr('c', 'f')} &nbsp;&nbsp;&nbsp; f = ${fr('c', 'λ')}</p>
+        <p>λ : longueur d'onde en <b>m</b> ; f : fréquence en <b>Hz</b> ; c = ${CV} m·s<sup>−1</sup> : vitesse de la lumière.</p></div>
+      <p><b>Astuce.</b> λ et f sont <b>inverses</b> l'une de l'autre : au numérateur, on met toujours la <b>vitesse de l'onde</b> en m/s. Pour une onde sonore, c'est la vitesse du son, v = 340 m/s.</p>
+    </div>
+    ${exemple(`<p>Une station de radio émet à f = 107,7 MHz :</p>
+      ${calc(`λ = ${fr('c', 'f')} = ${fr(CV + ' m/s', '107,7 × 10<sup>6</sup> Hz')} ≈ ${c('2,79 m')}`)}
+      <p>Un laser rouge a une longueur d'onde λ = 650 nm :</p>
+      ${calc(`f = ${fr('c', 'λ')} = ${fr(CV + ' m/s', '650 × 10<sup>−9</sup> m')} ≈ ${c('4,62 × 10<sup>14</sup> Hz')}`)}
+      <p>Le la<sub>3</sub> d'un diapason est un son de fréquence 440 Hz :</p>
+      ${calc(`λ = ${fr('v', 'f')} = ${fr('340 m/s', '440 Hz')} ≈ ${c('0,773 m')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une station de radio', enonce: '<p>Une station de radio émet à 95,0 MHz.</p>',
+      parties: [{ type: 'nombre', q: 'Calcule la longueur d\'onde de ses ondes (3 chiffres significatifs).', label: 'λ =', valeur: C / 95e6, unite: 'm', signe: false, rel: .005, affiche: '3,16',
+        diag: v => (pr(v, C / 95) ? 'Convertis la fréquence en Hz : 95,0 MHz = 95,0 × 10<sup>6</sup> Hz.' : pr(v, 95e6 / C) ? 'Tu as calculé f / c : c\'est λ = c / f.' : `λ = ${CV} / (95,0 × 10<sup>6</sup>).`),
+        solution: calc(`λ = ${fr(CV, '95,0 × 10<sup>6</sup>')} ≈ ${c('3,16 m')}`) }] },
+    { titre: 'Un laser vert', enonce: '<p>Un laser vert émet une lumière de longueur d\'onde 532 nm.</p>',
+      parties: [{ type: 'sci', q: 'Calcule la fréquence de cette lumière.', label: 'f =', valeur: C / 532e-9, unite: 'Hz', cs: 3, rel: .01,
+        diag: v => (pr(v, C / 532) ? 'Convertis λ en mètres : 532 nm = 532 × 10<sup>−9</sup> m.' : pr(v, 532e-9 / C) ? 'Tu as calculé λ / c : c\'est f = c / λ.' : pr(v, C / 532e-6) ? '1 nm = 10<sup>−9</sup> m (pas 10<sup>−6</sup> m).' : `f = ${CV} / (532 × 10<sup>−9</sup>).`),
+        solution: calc(`f = ${fr(CV, '532 × 10<sup>−9</sup>')} ≈ ${c('5,64 × 10<sup>14</sup> Hz')}`) }] },
+    { titre: 'Un son', enonce: '<p>Une flûte joue un la<sub>4</sub>, de fréquence 880 Hz. La vitesse du son vaut 340 m/s.</p>',
+      parties: [{ type: 'nombre', q: 'Calcule la longueur d\'onde de ce son (3 chiffres significatifs).', label: 'λ =', valeur: 340 / 880, unite: 'm', signe: false, rel: .005, affiche: '0,386',
+        diag: v => (pr(v, C / 880) ? 'C\'est un son : au numérateur, la vitesse du son (340 m/s), pas celle de la lumière.' : pr(v, 880 / 340) ? 'Tu as calculé f / v : c\'est λ = v / f.' : 'λ = 340 / 880.'),
+        solution: calc(`λ = ${fr('v', 'f')} = ${fr('340', '880')} ≈ ${c('0,386 m')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Les préfixes ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Les préfixes');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Les fréquences et les longueurs d'onde sont souvent données avec un préfixe : on le remplace par sa puissance de 10 <b>avant</b> le calcul.</p>
+      <div class="crs-defile"><table class="crs-tab"><tr><th>préfixe</th><td>T (téra)</td><td>G (giga)</td><td>M (méga)</td><td>k (kilo)</td><td>m (milli)</td><td>µ (micro)</td><td>n (nano)</td></tr>
+        <tr><th>valeur</th><td>10<sup>12</sup></td><td>10<sup>9</sup></td><td>10<sup>6</sup></td><td>10<sup>3</sup></td><td>10<sup>−3</sup></td><td>10<sup>−6</sup></td><td>10<sup>−9</sup></td></tr></table></div>
+      <div class="ph-lien-app"><p>Revois les puissances de 10 et les préfixes.</p><a class="btn-small" href="../../puissances-10/index.html">Puissances de 10 →</a></div>
+    </div>
+    ${exemple(`<p>Le Wi-Fi utilise une fréquence de 2,4 GHz :</p>
+      ${calc('f = 2,4 GHz = 2,4 × 10<sup>9</sup> Hz')}
+      ${calc(`λ = ${fr(CV, '2,4 × 10<sup>9</sup>')} = 0,125 m = ${c('12,5 cm')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Un four à micro-ondes', enonce: '<p>Un four à micro-ondes fonctionne à 2,45 GHz.</p>',
+      parties: [{ type: 'nombre', q: 'Calcule la longueur d\'onde, en mètres (3 chiffres significatifs).', label: 'λ =', valeur: C / 2.45e9, unite: 'm', signe: false, rel: .005, affiche: '0,122',
+        diag: v => (pr(v, C / 2.45e6) ? '1 GHz = 10<sup>9</sup> Hz (giga, pas méga).' : pr(v, C / 2.45) ? 'Convertis la fréquence en Hz : 2,45 GHz = 2,45 × 10<sup>9</sup> Hz.' : pr(v, 2.45e9 / C) ? 'C\'est λ = c / f.' : `λ = ${CV} / (2,45 × 10<sup>9</sup>).`),
+        solution: calc(`λ = ${fr(CV, '2,45 × 10<sup>9</sup>')} ≈ ${c('0,122 m')}`) }] },
+    { titre: 'Une caméra thermique', enonce: '<p>Une caméra thermique détecte un rayonnement de longueur d\'onde 10 µm.</p>',
+      parties: [{ type: 'sci', q: 'Calcule sa fréquence.', label: 'f =', valeur: C / 10e-6, unite: 'Hz', cs: 2, rel: .01,
+        diag: v => (pr(v, C / 10e-9) ? '1 µm = 10<sup>−6</sup> m (micro, pas nano).' : pr(v, C / 10) ? 'Convertis λ en mètres : 10 µm = 10 × 10<sup>−6</sup> m.' : pr(v, 10e-6 / C) ? 'C\'est f = c / λ.' : `f = ${CV} / (10 × 10<sup>−6</sup>).`),
+        solution: calc(`f = ${fr(CV, '10 × 10<sup>−6</sup>')} = ${c('3,0 × 10<sup>13</sup> Hz')}`) }] },
+    { titre: 'Une lumière de 600 THz',
+      parties: [{ type: 'sci', q: 'Calcule la longueur d\'onde d\'une lumière de fréquence 600 THz, en mètres.', label: 'λ =', valeur: C / 600e12, unite: 'm', cs: 2, rel: .01,
+        diag: v => (pr(v, C / 600e9) ? '1 THz = 10<sup>12</sup> Hz (téra, pas giga).' : pr(v, C / 600) ? 'Convertis la fréquence en Hz : 600 THz = 600 × 10<sup>12</sup> Hz.' : `λ = ${CV} / (600 × 10<sup>12</sup>).`),
+        solution: calc(`λ = ${fr(CV, '600 × 10<sup>12</sup>')} = ${c('5,0 × 10<sup>−7</sup> m')} = 500 nm (lumière visible).`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Le spectre électromagnétique ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Le spectre électromagnétique');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Les ondes électromagnétiques sont classées par longueur d'onde : c'est le <b>spectre électromagnétique</b>.</p>
+      ${spectre()}
+      <div class="cle"><p><b class="cle-titre">À savoir.</b> La lumière <b>visible</b> va de <b>400 nm</b> (violet) à <b>800 nm</b> (rouge). En dessous de 400 nm : ultraviolet (UV), rayons X, rayons γ ; au-dessus de 800 nm : infrarouge (IR), micro-ondes, ondes radio (ondes hertziennes).</p>
+        <p>Plus λ est <b>petite</b>, plus f est <b>grande</b>.</p></div>
+    </div>
+    ${exemple(`<p>Un rayonnement de longueur d'onde 1,0 × 10<sup>−10</sup> m : entre 10<sup>−11</sup> m et 10<sup>−8</sup> m, ce sont des <b>rayons X</b>.</p>
+      <p>Une onde de fréquence 100 MHz : λ = ${CV} / (100 × 10<sup>6</sup>) = 3,0 m, plus de 1 m : une <b>onde radio</b> (onde hertzienne).</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une lampe à bronzer', enonce: '<p>Une lampe à bronzer émet un rayonnement de longueur d\'onde 250 nm.</p>',
+      parties: [{ type: 'choix', q: 'À quel domaine appartient-il ?', options: optionsDomaine(), bonne: 'UV', melanger: false,
+        indices: { visible: 'Le visible commence à 400 nm : 250 nm est plus petit.', X: 'Les rayons X sont en dessous de 10 nm (10<sup>−8</sup> m).', IR: 'L\'infrarouge est au-delà de 800 nm.' },
+        solution: '<p>250 nm est entre 10 nm et 400 nm : c\'est de l\'<b>ultraviolet</b>.</p>' }] },
+    { titre: 'Une télécommande', enonce: '<p>Une télécommande émet à 3,0 × 10<sup>14</sup> Hz.</p>',
+      parties: [{ type: 'nombre', q: 'Calcule la longueur d\'onde, en nm.', label: 'λ =', valeur: 1000, unite: 'nm', signe: false, rel: .01,
+        diag: v => (pr(v, 1e-6) ? 'C\'est en mètres : 1 × 10<sup>−6</sup> m = 1 000 nm.' : 'λ = 3,00 × 10<sup>8</sup> / 3,0 × 10<sup>14</sup> = 10<sup>−6</sup> m.'),
+        solution: calc(`λ = ${fr(CV, '3,0 × 10<sup>14</sup>')} = 1,0 × 10<sup>−6</sup> m = ${c('1 000 nm')}`) },
+      { type: 'choix', q: 'À quel domaine appartient ce rayonnement ?', options: optionsDomaine(), bonne: 'IR', melanger: false,
+        indices: { visible: '1 000 nm dépasse 800 nm : ce n\'est plus visible.', UV: 'L\'ultraviolet est en dessous de 400 nm.', hertz: 'Les ondes hertziennes commencent à 1 mm.' },
+        solution: '<p>1 000 nm est entre 800 nm et 1 mm : c\'est de l\'<b>infrarouge</b>.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">λ = ${fr('c', 'f')} &nbsp;&nbsp;&nbsp; f = ${fr('c', 'λ')}</p><p>λ en m, f en Hz, c = ${CV} m·s<sup>−1</sup> (son : v = 340 m/s). Préfixes convertis avant le calcul.</p></div>
+    <div class="cle"><p>Visible : 400 nm à 800 nm. Du plus petit λ au plus grand : γ, X, UV, visible, IR, micro-ondes, radio.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3b_simulation.html">Partie 2 : photons et niveaux d'énergie →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#ondes">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+EL.menu('module_3a_cours');
+</script>
+</body>
+</html>

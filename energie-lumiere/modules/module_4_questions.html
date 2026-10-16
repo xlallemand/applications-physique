@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : questions sur le panneau photovoltaïque — Chapitre 10 : Énergie transportée par la lumière</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="el.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="el.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : point de fonctionnement sur une
+   caractéristique générée (2 : placer le point avec le rectangle, puis
+   lire et calculer P_max ; point déjà repéré), tension à vide (1),
+   sommet d'une courbe P(U) (1), puissance reçue = irradiance × S (2),
+   rendement d'un panneau (2), surface de N cellules carrées (1),
+   circuit de mesure (1).
+   Les caractéristiques ont la forme de celle du module TE2200,
+   mises à l'échelle (EL.caracEchelle) pour que le point de puissance
+   maximale tombe sur des valeurs lisibles.
+   Erreurs diagnostiquées : point avant ou après le coude, tension à vide
+   prise pour U_nominal, mm non convertis, côté non élevé au carré,
+   rapport inversé, pourcentage, durée en h au lieu de s.
+   ============================================================ */
+const { o, fq, fmt, cs, sci, hasard, melanger, proche, fr, caracEchelle, figCarac, figPU, partiePanneau, partieCircuit } = EL;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .03);
+
+// panneaux : point de puissance maximale (U ; I) et axes adaptés
+const PANNEAUX = [
+  { u: 15, i: 3, ax: { u: { max: 20, pas: 5, sous: 1 }, i: { max: 4, pas: 1, sous: .5 }, p: { max: 50, pas: 10 } }, tu: 1, ti: .25 },
+  { u: 18, i: .5, ax: { u: { max: 25, pas: 5, sous: 1 }, i: { max: .6, pas: .1, sous: .05 }, p: { max: 10, pas: 2 } }, tu: 1, ti: .03 },
+  { u: 30, i: 8, ax: { u: { max: 40, pas: 5, sous: 1 }, i: { max: 10, pas: 2, sous: 1 }, p: { max: 300, pas: 50 } }, tu: 1, ti: .5 },
+  { u: 24, i: 5, ax: { u: { max: 30, pas: 5, sous: 1 }, i: { max: 6, pas: 1, sous: .5 }, p: { max: 150, pas: 25 } }, tu: 1, ti: .25 },
+  { u: 36, i: 6, ax: { u: { max: 50, pas: 10, sous: 2 }, i: { max: 7, pas: 1, sous: .5 }, p: { max: 250, pas: 50 } }, tu: 2, ti: .25 },
+];
+const panneau = () => { const p = hasard(PANNEAUX); return Object.assign({ def: caracEchelle(p.u, p.i, p.ax) }, p); };
+const nI = i => fmt(i, i < 1 ? 2 : 1);
+
+/* ---------- Groupe 1 : point de fonctionnement ---------- */
+function qPlacer() {
+  const p = panneau(), P = p.u * p.i;
+  return { theme: 'Point de fonctionnement', enonce: '<p>Voici la caractéristique I = f(U) d\'un panneau photovoltaïque.</p>',
+    parties: [partiePanneau({ def: p.def, depart: p.def.uv * .25, afficheP: false, mini: false, tolU: p.def.uv * .06,
+        q: 'a) Fais glisser le point ● sur la courbe jusqu\'au point de fonctionnement (le rectangle grisé a pour aire P = U × I), puis valide.',
+        solution: `<p>Le point de fonctionnement est au coude de la courbe : U et I y sont grands en même temps (U ≈ ${p.u} V, I ≈ ${nI(p.i)} A).</p>` }),
+      { type: 'gabarit', q: 'b) Lis les coordonnées du point de fonctionnement.', morceaux: ['U<sub>nominal</sub> =', { v: p.u, tol: p.tu, aria: 'Tension nominale', affiche: String(p.u) }, 'V ;', 'I<sub>nominal</sub> =', { v: p.i, tol: p.ti, aria: 'Intensité nominale', affiche: nI(p.i) }, 'A'],
+        diag: v => (Math.abs(v[0] - p.def.uv) < p.tu ? 'La tension à vide (I = 0) n\'est pas le point de fonctionnement : lis U au coude de la courbe.' : 'Descends du point jusqu\'à l\'axe des U, puis va du point jusqu\'à l\'axe des I.'),
+        solution: `<p>U<sub>nominal</sub> ≈ ${p.u} V ; I<sub>nominal</sub> ≈ ${nI(p.i)} A.</p>` },
+      fq.nombre('c) Calcule la puissance maximale du panneau.', 'P<sub>max</sub> =', P, 'W', { signe: false, rel: .08, affiche: fmt(P),
+        diag: v => (pr(v, p.u / p.i) || pr(v, p.i / p.u) ? 'P = U × I : on multiplie.' : `P<sub>max</sub> = U<sub>nominal</sub> × I<sub>nominal</sub> = ${p.u} × ${nI(p.i)}.`),
+        solution: calc(`P<sub>max</sub> = ${p.u} V × ${nI(p.i)} A = ${c(fmt(P) + ' W')}`) })] };
+}
+function qLirePoint() {
+  const p = panneau(), P = p.u * p.i;
+  return { theme: 'Puissance au point de fonctionnement', enonce: `<p>Le point de fonctionnement est repéré sur la caractéristique du panneau.</p>${figCarac(p.def, { point: p.def.mpp.u })}`,
+    parties: [fq.nombre('Calcule la puissance électrique maximale fournie par le panneau.', 'P<sub>max</sub> =', P, 'W', { signe: false, rel: .08, affiche: fmt(P),
+      diag: v => (pr(v, p.def.uv * p.def.f(0)) ? 'Le point de fonctionnement n\'est pas (tension à vide ; courant pour U = 0) : lis U et I au point repéré.' : pr(v, p.u / p.i) || pr(v, p.i / p.u) ? 'P = U × I : on multiplie.' : `Lis U ≈ ${p.u} V et I ≈ ${nI(p.i)} A au point repéré, puis P = U × I.`),
+      solution: calc(`U<sub>nominal</sub> ≈ ${p.u} V ; I<sub>nominal</sub> ≈ ${nI(p.i)} A`) + calc(`P<sub>max</sub> = ${p.u} × ${nI(p.i)} = ${c(fmt(P) + ' W')}`) })] };
+}
+function qVide() {
+  const p = panneau();
+  return { theme: 'Tension à vide', enonce: `<p>Voici la caractéristique I = f(U) d'un panneau photovoltaïque.</p>${figCarac(p.def)}`,
+    parties: [fq.nombre('Lis la tension à vide du panneau.', 'U =', p.def.uv, 'V', { signe: false, tol: p.tu * .8, affiche: fmt(Math.round(p.def.uv * 2) / 2),
+      diag: v => (Math.abs(v - p.u) < p.tu ? 'Ça, c\'est la tension au coude (point de fonctionnement). À vide, I = 0 : lis où la courbe coupe l\'axe des U.' : v < p.u ? 'À vide, le panneau ne débite pas : I = 0. Lis l\'abscisse du point où la courbe rejoint l\'axe des U.' : 'Lis l\'abscisse du point où la courbe coupe l\'axe des U.'),
+      solution: `<p>La tension à vide est la tension pour I = 0 : U ≈ ${fmt(p.def.uv, 1)} V.</p>` })] };
+}
+function qPU() {
+  const p = panneau(), P = p.u * p.i;
+  return { theme: 'Courbe P(U)', enonce: `<p>Voici la courbe P(U) d'un panneau photovoltaïque.</p>${figPU(p.def)}`,
+    parties: [fq.nombre('Lis la puissance maximale du panneau.', 'P<sub>max</sub> =', P, 'W', { signe: false, tol: p.ax.p.pas * .2, affiche: fmt(P),
+      diag: v => (v < P * .7 ? 'Repère le <b>sommet</b> de la courbe (le point le plus haut) et lis son ordonnée.' : 'Lis l\'ordonnée du sommet sur l\'axe des P.'),
+      solution: `<p>Le sommet de la courbe donne P<sub>max</sub> ≈ ${fmt(P)} W (pour U ≈ ${p.u} V).</p>` })] };
+}
+
+/* ---------- Groupe 2 : puissance reçue ---------- */
+function qPrecue() {
+  const irr = hasard([400, 500, 600, 750, 800, 1000]), S = hasard([1.2, 1.6, 2.4, 3.5, 10, 25]), P = irr * S;
+  return { theme: 'Puissance solaire reçue', enonce: `<p>Une installation de ${fmt(S)} m² reçoit une irradiance de ${irr} W·m<sup>−2</sup>.</p>`,
+    parties: [fq.nombre('Calcule la puissance solaire reçue.', 'P<sub>reçue</sub> =', P, 'W', { signe: false, tol: .5,
+      diag: v => (pr(v, irr / S) || pr(v, S / irr) ? 'W·m<sup>−2</sup>, c\'est des watts <b>par</b> mètre carré : on multiplie par la surface.' : `P = ${irr} × ${fmt(S)}.`),
+      solution: calc(`P<sub>reçue</sub> = ${irr} ${fr('W', 'm²')} × ${fmt(S)} m² = ${c(fmt(P) + ' W')}`) })] };
+}
+function qPrecueE() {
+  const [L, l] = hasard([[1.65, 0.99], [1.70, 1.00], [1.20, 0.80], [2.00, 1.00]]), irr = hasard([500, 800, 1000]), h = hasard([2, 3, 4]);
+  const S = L * l, P = irr * S, E = P * h * 3600;
+  return { theme: 'Puissance et énergie reçues', enonce: `<p>Un panneau rectangulaire mesure ${fmt(L)} m sur ${fmt(l)} m. Il reçoit une irradiance de ${irr} W·m<sup>−2</sup> pendant ${h} h.</p>`,
+    parties: [fq.nombre('a) Calcule la puissance solaire reçue (au watt près).', 'P<sub>reçue</sub> =', P, 'W', { signe: false, tol: .6, dec: 0,
+        diag: v => (pr(v, irr * (L + l)) || pr(v, irr * 2 * (L + l)) ? 'La surface d\'un rectangle est L × l.' : `S = ${fmt(L)} × ${fmt(l)} = ${fmt(S)} m², puis P = ${irr} × S.`),
+        solution: calc(`S = ${fmt(L)} × ${fmt(l)} = ${fmt(S)} m²`) + calc(`P<sub>reçue</sub> = ${irr} × ${fmt(S)} ≈ ${c(fmt(Math.round(P)) + ' W')}`) }),
+      fq.sci('b) Quelle énergie reçoit-il pendant cette durée, en joules ?', 'E =', E, 'J', { cs: 3, rel: .01,
+        diag: v => (pr(v, P * h) ? 'Pour des joules, la durée doit être en <b>secondes</b> : 1 h = 3 600 s.' : pr(v, P * h * 60) ? '1 h = 3 600 s (et non 60 s).' : `E = P × Δt = ${fmt(Math.round(P))} × ${h * 3600}.`),
+        solution: calc(`Δt = ${h} h = ${fmt(h * 3600)} s`) + calc(`E = P × Δt = ${fmt(Math.round(P))} × ${fmt(h * 3600)} ≈ ${c(sci(E, 3) + ' J')}`) })] };
+}
+
+/* ---------- Groupe 3 : rendement d'un panneau ---------- */
+function qRendementUI() {
+  const [U, I] = hasard([[30, 6], [36, 5], [24, 7.5], [18, 10]]), S = hasard([1.5, 1.6, 2.0]), irr = 1000, Pr = irr * S, Pe = U * I, eta = Pe / Pr;
+  return { theme: 'Rendement d\'un panneau', enonce: `<p>Un panneau de ${fmt(S)} m², éclairé à ${irr} W·m<sup>−2</sup>, fournit une tension de ${U} V et une intensité de ${fmt(I)} A.</p>`,
+    parties: [fq.nombre('a) Calcule la puissance électrique fournie.', 'P<sub>électrique</sub> =', Pe, 'W', { signe: false, tol: .5,
+        diag: v => (pr(v, U / I) || pr(v, I / U) ? 'P = U × I.' : `P = ${U} × ${fmt(I)}.`), solution: calc(`P<sub>électrique</sub> = ${U} × ${fmt(I)} = ${c(fmt(Pe) + ' W')}`) }),
+      fq.nombre('b) Calcule la puissance solaire reçue.', 'P<sub>reçue</sub> =', Pr, 'W', { signe: false, tol: .5,
+        diag: v => (pr(v, irr / S) ? 'On multiplie l\'irradiance par la surface.' : `P = ${irr} × ${fmt(S)}.`), solution: calc(`P<sub>reçue</sub> = ${irr} × ${fmt(S)} = ${c(fmt(Pr) + ' W')}`) }),
+      fq.nombre('c) Calcule le rendement du panneau, en pourcentage (au % près).', 'η =', eta * 100, '%', { signe: false, tol: .6, dec: 0,
+        diag: v => (pr(v, Pr / Pe * 100) || pr(v, Pr / Pe) ? 'η = P<sub>électrique</sub> / P<sub>reçue</sub> : le rendement est plus petit que 1.' : pr(v, eta) ? 'Multiplie par 100 pour l\'avoir en %.' : `η = ${fmt(Pe)} / ${fmt(Pr)}, puis × 100.`),
+        solution: calc(`η = ${fr(fmt(Pe) + ' W', fmt(Pr) + ' W')} ≈ ${c(fmt(Math.round(eta * 100)) + ' %')}`) })] };
+}
+function qRendementP() {
+  const [Pe, Pr] = hasard([[255, 1600], [18, 120], [3.2, 20], [76, 500], [210, 1400]]), eta = Pe / Pr;
+  const k = Pr >= 1000 ? 'kW' : 'W', f = v => (k === 'kW' ? fmt(v / 1000) : fmt(v));
+  return { theme: 'Rendement d\'un panneau', enonce: `<p>Un panneau photovoltaïque reçoit une puissance lumineuse de ${f(Pr)} ${k} et fournit une puissance électrique de ${f(Pe)} ${k}.</p>`,
+    parties: [fq.nombre('Calcule son rendement, en pourcentage (une décimale).', 'η =', eta * 100, '%', { signe: false, tol: .06, dec: 1,
+      diag: v => (pr(v, Pr / Pe * 100) || pr(v, Pr / Pe) ? 'η = P<sub>électrique</sub> / P<sub>reçue</sub>.' : pr(v, eta) ? 'Multiplie par 100 pour l\'avoir en %.' : `η = ${f(Pe)} / ${f(Pr)}, puis × 100.`),
+      solution: calc(`η = ${fr(f(Pe) + ' ' + k, f(Pr) + ' ' + k)} ≈ ${c(fmt(eta * 100, 1) + ' %')}`) })] };
+}
+
+/* ---------- Groupe 4 : surface de N cellules ---------- */
+function qCellules() {
+  const [N, a] = hasard([[36, 125], [60, 156], [72, 125], [48, 100], [60, 166], [32, 150]]), am = a / 1000, S = N * am * am;
+  return { theme: 'Surface des cellules', enonce: `<p>Un module photovoltaïque compte ${N} cellules carrées de ${a} mm de côté.</p>`,
+    parties: [fq.nombre('Calcule la surface totale des cellules, en m² (3 chiffres significatifs).', 'S =', S, 'm²', { signe: false, rel: .006, cs: 3,
+      diag: v => (pr(v, N * a * a) ? 'Convertis d\'abord le côté en mètres : ' + a + ' mm = ' + fmt(am) + ' m.' : pr(v, N * am) ? 'La surface d\'un carré est a² : il faut élever le côté au carré.' : pr(v, am * am) ? 'C\'est la surface d\'<b>une</b> cellule : multiplie par ' + N + '.' : pr(v, N * a * a / 100) || pr(v, N * a * a * 1e-4) ? '1 mm = 10<sup>−3</sup> m, donc 1 mm² = 10<sup>−6</sup> m².' : `S = ${N} × (${fmt(am)} m)².`),
+      solution: calc(`Une cellule : (${fmt(am)} m)² = ${fmt(am * am, 6).replace(/0+$/, '')} m²`) + calc(`S = ${N} × ${fmt(am * am, 6).replace(/0+$/, '')} ≈ ${c(cs(S, 3) + ' m²')}`) })] };
+}
+
+/* ---------- Groupe 5 : circuit de mesure ---------- */
+function qCircuit() {
+  return { theme: 'Circuit de mesure (question bac)', enonce: '<p>On veut tracer la caractéristique I = f(U) d\'un panneau photovoltaïque éclairé.</p>',
+    parties: [partieCircuit()] };
+}
+
+// tirage : 2 + 1 + 1 + 2 + 2 + 1 + 1 questions
+function tirage() {
+  return [qPlacer(), qPrecue(), qVide(), qRendementP(), qCellules(), qLirePoint(), qPrecueE(), qPU(), qCircuit(), qRendementUI()];
+}
+
+EL.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 4 · QUESTIONS', titre: 'Panneau photovoltaïque et puissance solaire',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : point de fonctionnement sur une caractéristique, tension à vide, courbe P(U), puissance solaire reçue, rendement d\'un panneau, surface des cellules, circuit de mesure.</p>',
+  questions: tirage,
+  revoir: { href: 'module_4_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_5.html', label: 'Module 5 : exercices →' },
+});
+EL.menu('module_4_questions');
+</script>
+</body>
+</html>

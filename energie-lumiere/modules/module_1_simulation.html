@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : activité, capteurs hybrides — Chapitre 10 : Énergie transportée par la lumière</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="el.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="el.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · ACTIVITÉ</span>
+    <h2 class="er-titre">Capteurs hybrides</h2>
+    <p class="er-contexte">Une maison peut récupérer l'énergie du <b>Soleil</b> et celle du <b>sous-sol</b>. Lis les deux documents, puis complète les <b>schémas énergétiques</b> de ses capteurs et compare les technologies de cellules photovoltaïques.</p>
+  </div>
+
+  <!-- ============ Les documents ============ -->
+  <section class="er-card">
+    <h3 class="cours-titre" style="margin-top:0">Les documents</h3>
+    <div class="el-docs">
+      <div class="el-doc-carte">
+        <p class="el-doc-t"><span class="er-badge">DOC. 1</span>Un habitat à très faible consommation énergétique</p>
+        <p>Pour limiter la consommation d'énergie électrique fournie par le réseau, une maison peut recourir à des panneaux solaires <b>photovoltaïques</b>, des panneaux solaires <b>photothermiques</b> ou des capteurs thermiques enfouis dans le sous-sol afin de récupérer l'énergie <b>géothermique</b>.</p>
+        <p>Afin de gagner de l'espace, capteurs photovoltaïques et photothermiques peuvent être combinés en un seul capteur dit <b>hybride</b>.</p>
+        <div id="doc1"></div>
+      </div>
+      <div class="el-doc-carte">
+        <p class="el-doc-t"><span class="er-badge">DOC. 2</span>Les principales technologies de cellules photovoltaïques</p>
+        <p>Il existe essentiellement trois types de cellules, dont le matériau de base est le <b>silicium</b>, obtenu à partir du sable, très abondant sur Terre.</p>
+        <div class="el-defile"><table class="el-tab">
+          <tr><th>Matériau</th><th>silicium monocristallin</th><th>silicium multicristallin</th><th>silicium amorphe</th></tr>
+          <tr><th>Fabrication</th><td>à base de silicium pur</td><td>par recyclage du silicium</td><td>fine couche de silicium non cristallin déposée sur du verre</td></tr>
+          <tr><th>Part de marché</th><td>environ 40 %</td><td>environ 45 %</td><td>environ 2 %</td></tr>
+          <tr><th>Rendement</th><td>+++ (14 à 16 %)</td><td>++ (12 à 14 %)</td><td>+ (5 à 7 %)</td></tr>
+          <tr><th>Coût de fabrication</th><td>+++</td><td>++</td><td>+</td></tr>
+        </table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Les questions ============ -->
+  <section class="er-card ph-question">
+    <p class="er-q-nom">Questions de l'activité</p>
+    <p class="er-petit" style="margin-bottom:10px">Sans points : chaque question réussie fait apparaître la suivante. Après une erreur, tu peux afficher la réponse.</p>
+    <div id="questions"></div>
+  </section>
+
+  <!-- ============ Bilan ============ -->
+  <section class="er-card el-bilan" id="bilan" hidden>
+    <span class="er-badge">BILAN</span>
+    <h3 class="er-titre">✍ Complète ton cours</h3>
+    <div class="cle"><p><b class="cle-titre">Deux conversions.</b> L'énergie solaire (lumineuse) est récupérée :</p>
+      <ul class="er-liste"><li>par un <b>convertisseur photothermique</b> (panneau solaire thermique), qui fournit de l'<b>énergie thermique</b> ;</li>
+        <li>par un <b>convertisseur photoélectrique</b> (panneau photovoltaïque), qui fournit de l'<b>énergie électrique</b>.</li></ul></div>
+    <div class="cle"><p><b class="cle-titre">Capteur hybride.</b> Il fournit à la fois de l'énergie thermique et de l'énergie électrique : sur la même surface, il récupère plus d'énergie, son <b>rendement est meilleur</b>.</p></div>
+    <div class="cle"><p><b class="cle-titre">Cellules.</b> Le <b>silicium multicristallin</b> est le plus répandu : ni le moins cher, ni le plus efficace, c'est le <b>meilleur compromis prix / rendement</b>.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_1_cours.html">Le cours du module 1 →</a>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   Activité « capteurs hybrides » (d'après l'activité complétée du
+   professeur) : doc. 1 redessiné en SVG (EL.dessin('maison'), énergies
+   en GJ par an), doc. 2 en tableau. Schémas énergétiques à compléter
+   par glisser-déposer (EL.partieChaine) : géothermique (thermique →
+   thermique), photovoltaïque (solaire → électrique), hybride (solaire →
+   thermique et électrique). Questions sans points (mode 'cours') ;
+   le bilan « ✍ Complète ton cours » marque l'activité comme faite.
+   ============================================================ */
+const { o, partieChaine } = EL;
+document.getElementById('doc1').innerHTML = EL.dessin('maison');
+const noms = { entree: 'Énergie reçue', sortie: 'Énergie fournie' };
+const nomsH = { entree: 'Énergie reçue', sortie: 'Énergies fournies' };
+
+const parties = [
+  partieChaine({ q: '1. Complète le schéma énergétique du <b>capteur géothermique</b> (doc. 1).', conv: 'capteur géothermique', noms,
+    entree: 'thermique', sorties: ['thermique'], intrus: ['solaire', 'electrique'],
+    indices: { solaire: 'Le capteur géothermique est enfoui dans le sous-sol : il ne reçoit pas la lumière du Soleil.', electrique: 'Sur le doc. 1, le capteur géothermique envoie une flèche d\'énergie thermique (tirets) vers la pompe à chaleur.' },
+    solution: '<p>Le capteur géothermique prélève l\'énergie thermique du sous-sol et la fournit, sous forme thermique, à la pompe à chaleur.</p>' }),
+  partieChaine({ q: '2. Complète le schéma énergétique du <b>capteur photovoltaïque</b>.', conv: 'capteur photovoltaïque', noms,
+    entree: 'solaire', sorties: ['electrique'], intrus: ['thermique', 'chimique'],
+    indices: { thermique: 'Les panneaux photovoltaïques envoient une flèche d\'énergie <b>électrique</b> (trait plein) vers le réseau et les appareils.', chimique: 'Aucune énergie chimique ici : regarde la légende du doc. 1.', electrique: 'Le panneau reçoit la lumière du Soleil.', solaire: 'Que fournit le panneau ? Regarde la légende du doc. 1.' },
+    solution: '<p>Le capteur photovoltaïque reçoit l\'énergie solaire (rayonnement, lumière) et fournit de l\'énergie électrique.</p>' }),
+  partieChaine({ q: '3. Complète le schéma énergétique du <b>capteur hybride</b>.', conv: 'capteur hybride', noms: nomsH,
+    entree: 'solaire', sorties: ['thermique', 'electrique'], intrus: ['chimique'],
+    indices: { chimique: 'Aucune énergie chimique ici : regarde les flèches qui partent du capteur hybride sur le doc. 1.', solaire: 'Le capteur hybride fournit deux formes d\'énergie : suis ses flèches sur le doc. 1.' },
+    solution: '<p>Le capteur hybride reçoit l\'énergie solaire et fournit <b>à la fois</b> de l\'énergie thermique (eau chaude) et de l\'énergie électrique.</p>' }),
+  { type: 'choix', colonne: true, q: '4. Quel est l\'intérêt d\'un capteur hybride ?',
+    options: [o('ok', 'Il récupère à la fois de l\'énergie électrique et de l\'énergie thermique : son rendement est meilleur'), o('nuit', 'Il fonctionne aussi la nuit'),
+      o('geo', 'Il récupère en plus l\'énergie géothermique du sous-sol'), o('elec', 'Il produit plus d\'énergie électrique qu\'un panneau photovoltaïque de même surface')], bonne: 'ok',
+    indices: { nuit: 'Sans lumière, un capteur solaire ne reçoit pas d\'énergie.', geo: 'Le capteur hybride est sur le toit : il reçoit l\'énergie solaire, pas l\'énergie du sous-sol.', elec: 'Sa part électrique ne dépasse pas celle d\'un panneau photovoltaïque : ce qu\'il gagne, c\'est l\'énergie thermique <b>en plus</b>.' },
+    solution: '<p>Sur la même surface, le capteur hybride fournit de l\'énergie électrique <b>et</b> de l\'énergie thermique : il récupère une plus grande part de l\'énergie solaire reçue, son <b>rendement est meilleur</b>.</p>' },
+  { type: 'choix', colonne: true, q: '5. Quelle est la technologie de cellules photovoltaïques la plus répandue ? (doc. 2)',
+    options: [o('multi', 'Le silicium multicristallin'), o('mono', 'Le silicium monocristallin'), o('amo', 'Le silicium amorphe')], bonne: 'multi', melanger: false,
+    indices: { mono: 'Compare les parts de marché : 40 % pour le monocristallin, et pour le multicristallin ?', amo: 'Le silicium amorphe n\'a que 2 % du marché.' },
+    solution: '<p>Le silicium multicristallin, avec environ 45 % du marché.</p>' },
+  { type: 'choix', colonne: true, q: 'Est-ce la technologie la moins chère, ou la plus efficace ?',
+    options: [o('ok', 'Ni l\'une ni l\'autre : c\'est le meilleur compromis entre prix et rendement'), o('cher', 'C\'est la moins chère'), o('eff', 'C\'est la plus efficace (meilleur rendement)')], bonne: 'ok', melanger: false,
+    indices: { cher: 'Le silicium amorphe coûte moins cher à fabriquer (+ contre ++).', eff: 'Le silicium monocristallin a un meilleur rendement (14 à 16 % contre 12 à 14 %).' },
+    solution: '<p>Le multicristallin n\'est ni le moins cher (c\'est l\'amorphe) ni le plus efficace (c\'est le monocristallin) : il offre le <b>meilleur compromis prix / rendement</b>.</p>' },
+];
+
+EL.question(document.getElementById('questions'), { parties }, {
+  fin() {
+    const b = document.getElementById('bilan');
+    b.hidden = false;
+    EL.marquer({ fait: true });                                      // activité faite (sommaire, accueil)
+    setTimeout(() => b.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+  },
+}, 'cours');
+
+EL.menu('module_1_simulation');
+</script>
+</body>
+</html>
