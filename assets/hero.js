@@ -15,6 +15,7 @@
      transport  pylônes et lignes à haute tension, tension sinusoïdale
      cinematique  chronophotographies (positions successives) et vecteurs vitesse
      wagon      wagon tiré sur des rails par des cordes à différents angles (travail d'une force)
+     rotation   engrenages, arcs de cercle et sens de rotation (mouvements de rotation)
      fractions  disques et barres partagés
      molecules  modèles moléculaires en boules
      formules:physique | formules:redox | formules:pile | formules:combustion | formules:ph | formules:algebre
@@ -351,6 +352,59 @@
       ctx.fillText('ΔEc = Σ W', w * .7, h * .16);
       ctx.font = `500 17px ${police()}`; ctx.globalAlpha = .16;
       ctx.fillText('Ec = ½ m v²', w * .36, h * .1);
+    },
+
+    // Engrenages qui s'entraînent, arcs de cercle avec leur sens de rotation, angle θ ;
+    // formules du chapitre en filigrane
+    rotation(ctx, w, h, c) {
+      const p = 26;
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineWidth = 1;
+      for (let x = 0, i = 0; x <= w; x += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .11; trait(ctx, x, 0, x, h); }
+      for (let y = 0, i = 0; y <= h; y += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .11; trait(ctx, 0, y, w, y); }
+      // roue dentée de centre (cx, cy), rayon r, n dents, tournée de a0
+      function engrenage(cx, cy, r, n, a0, a) {
+        const d = r * .16, pas = 2 * Math.PI / n;
+        ctx.globalAlpha = a; ctx.lineWidth = 2.5; ctx.beginPath();
+        for (let k = 0; k < n; k++) {
+          const t = a0 + k * pas, pt = (rr, aa) => [cx + rr * Math.cos(aa), cy + rr * Math.sin(aa)];
+          [[r - d, t], [r - d, t + pas * .2], [r + d, t + pas * .3], [r + d, t + pas * .55], [r - d, t + pas * .65]].forEach(([rr, aa], j) => {
+            const [x, y] = pt(rr, aa);
+            if (k === 0 && j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          });
+        }
+        ctx.closePath(); ctx.stroke();
+        ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, r * .55, 0, 7); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx, cy, r * .12, 0, 7); ctx.stroke();
+        for (let k = 0; k < 4; k++) { const t = a0 + k * Math.PI / 2; trait(ctx, cx + r * .12 * Math.cos(t), cy + r * .12 * Math.sin(t), cx + r * .55 * Math.cos(t), cy + r * .55 * Math.sin(t)); }
+      }
+      // flèche courbe : arc de centre (cx, cy), de a1 à a2 (radians, sens du canvas), pointe au bout
+      function arcFleche(cx, cy, r, a1, a2, a) {
+        ctx.globalAlpha = a; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(cx, cy, r, a1, a2, a2 < a1); ctx.stroke();
+        const s = a2 > a1 ? 1 : -1, x = cx + r * Math.cos(a2), y = cy + r * Math.sin(a2), tx = -Math.sin(a2) * s, ty = Math.cos(a2) * s, t = 11;
+        ctx.beginPath(); ctx.moveTo(x + tx * 4, y + ty * 4);
+        ctx.lineTo(x - tx * t - ty * t * .45, y - ty * t + tx * t * .45);
+        ctx.lineTo(x - tx * t + ty * t * .45, y - ty * t - tx * t * .45); ctx.closePath(); ctx.fill();
+      }
+      const r1 = Math.min(110, h * .3), x1 = w * .72, y1 = h * .42, r2 = r1 * .62, x2 = x1 + (r1 + r2) * .97, y2 = y1 + r1 * .35;
+      engrenage(x1, y1, r1, 18, .1, .4);
+      engrenage(x2 - (r1 + r2) * .02, y2, r2, 11, .25, .3);
+      arcFleche(x1, y1, r1 * 1.35, -2.6, -1.7, .45);
+      arcFleche(x2, y2, r2 * 1.45, 1.2, .2, .35);
+      // cercle, rayon et angle θ (à gauche)
+      const cx = w * .22, cy = h * .55, R = Math.min(120, h * .34);
+      ctx.globalAlpha = .3; ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.stroke(); ctx.setLineDash([]);
+      ctx.globalAlpha = .45; trait(ctx, cx, cy, cx + R, cy); trait(ctx, cx, cy, cx + R * Math.cos(-1), cy + R * Math.sin(-1));
+      ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(cx, cy, R, -1, 0); ctx.stroke();
+      ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, 34, -1, 0); ctx.stroke();
+      ctx.font = `600 22px ${police()}`; ctx.fillText('θ', cx + 42, cy - 14);
+      // formules en filigrane
+      ctx.font = `600 20px ${police()}`; ctx.globalAlpha = .22;
+      ctx.fillText('ω = θ / Δt', w * .38, h * .2);
+      ctx.fillText('M = F × d', w * .46, h * .86);
+      ctx.font = `500 17px ${police()}`; ctx.globalAlpha = .16;
+      ctx.fillText('v = R × ω', w * .05, h * .14);
+      ctx.fillText('1 tr/min = 2π rad / 60 s', w * .4, h * .5);
     },
 
     // Formules écrites en quinconce, plus ou moins marquées

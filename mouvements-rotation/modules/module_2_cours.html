@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : convertir tr/min et rad/s — Chapitre 8 : Mouvements de rotation</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rot.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rot.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Convertir tr/min et rad/s</h2>
+    <p class="er-contexte">Sur un moteur, la vitesse de rotation est souvent donnée en <b>tours par minute</b> (tr/min) ; dans les formules, on l'utilise en <b>radians par seconde</b> (rad/s). On convertit en écrivant la vitesse comme une <b>fraction</b>, avec les unités.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Méthode du professeur : 1500 tr/min = 1500 tours / 1 min
+   = 1500 × 2π rad / 60 s ≈ 157 rad/s ; dans l'autre sens
+   25 rad/s = 25 rad / 1 s = (25 / 2π tours) / (1 / 60 min)
+   = 25 × 60 / (2π) tr/min ≈ 239 tr/min ; tr/s : ω = 2π × n.
+   Outil : la fraction à compléter étape par étape (ROT.partieFraction).
+   Erreurs diagnostiquées : × 2π oublié, ÷ 60 au lieu de × 60
+   (et l'inverse), π au lieu de 2π, 360 au lieu de 2π.
+   Valeurs (vérifiées par un script) : 3000 tr/min ≈ 314 rad/s ;
+   750 tr/min ≈ 78,5 rad/s ; 50 rad/s ≈ 477 tr/min ;
+   100 rad/s ≈ 955 tr/min ; 25 tr/s ≈ 157 rad/s ; 50 tr/s ≈ 314 rad/s.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, fmt, proche, fr, DEUX_PI, partieFraction } = ROT;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .015);
+
+/* ---------- 1. tr/min → rad/s ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Des tours par minute aux radians par seconde');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Règle.</b></p>
+        <p class="crs-formule">1 tour = 2π rad &nbsp;&nbsp;·&nbsp;&nbsp; 1 min = 60 s</p></div>
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> On écrit la vitesse comme une fraction (nombre de tours / durée), puis on remplace chaque unité :</p>
+        <ul class="er-liste"><li>en haut, les tours deviennent des radians : × 2π ;</li><li>en bas, les minutes deviennent des secondes : 1 min = 60 s.</li></ul></div>
+      <div class="ph-lien-app"><p>Revois les conversions d'unités.</p><a class="btn-small" href="../../conversions/index.html">Conversions →</a></div>
+    </div>
+    ${exemple(`<p>Un moteur tourne à 1 500 tr/min.</p>${calc(`1 500 tr/min = ${fr('1 500 tours', '1 min')} = ${fr('1 500 × 2π rad', '60 s')} ≈ ${c('157 rad/s')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une perceuse', enonce: '<p>Une perceuse tourne à 3 000 tr/min. Complète la fraction ligne par ligne ; le bouton <b>?</b> change à chaque appui (2π, π, 360).</p>',
+      parties: [partieFraction({ sens: 'trmin', valeur: 3000, q: 'Convertis 3 000 tr/min en rad/s.',
+        solution: calc(`3 000 tr/min = ${fr('3 000 tours', '1 min')} = ${fr('3 000 × 2π rad', '60 s')} ≈ ${c('314 rad/s')}`) })] },
+    { titre: 'Un moteur de ventilateur', enonce: '<p>Le moteur d\'un ventilateur tourne à 750 tr/min.</p>',
+      parties: [partieFraction({ sens: 'trmin', valeur: 750, q: 'Convertis 750 tr/min en rad/s.',
+        solution: calc(`750 tr/min = ${fr('750 × 2π rad', '60 s')} ≈ ${c('78,5 rad/s')}`) })] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. rad/s → tr/min ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Des radians par seconde aux tours par minute');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> Même écriture en fraction, dans l'autre sens :</p>
+        <ul class="er-liste"><li>en haut, les radians deviennent des tours : on <b>divise</b> par 2π (2π rad = 1 tour) ;</li>
+          <li>en bas, 1 s = 1 / 60 min ; diviser par 1 / 60, c'est <b>multiplier</b> par 60.</li></ul></div>
+    </div>
+    ${exemple(`<p>Une roue tourne à 25 rad/s.</p>${calc(`25 rad/s = ${fr('25 rad', '1 s')}`)}
+      <p>Tableau de proportionnalité pour l'angle :</p>
+      <div class="crs-defile"><table class="crs-tab"><tr><th>rad</th><td>2π</td><td>25</td></tr><tr><th>tours</th><td>1</td><td>25 / (2π)</td></tr></table></div>
+      ${calc(`25 rad/s = ${fr('25 / 2π tours', '1 / 60 min')} = ${fr('25 × 60', '2π')} tr/min ≈ ${c('239 tr/min')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Un rotor', enonce: '<p>Un rotor tourne à 50 rad/s.</p>',
+      parties: [partieFraction({ sens: 'rads', valeur: 50, q: 'Convertis 50 rad/s en tr/min.',
+        solution: calc(`50 rad/s = ${fr('50 / 2π tours', '1 / 60 min')} = ${fr('50 × 60', '2π')} tr/min ≈ ${c('477 tr/min')}`) })] },
+    { titre: 'Sans aide', enonce: '<p>Un moteur tourne à 100 rad/s.</p>',
+      parties: [{ type: 'nombre', q: 'Convertis cette vitesse en tr/min (arrondi à l\'unité).', label: 'n =', valeur: 100 * 60 / DEUX_PI, unite: 'tr/min', signe: false, rel: .01, affiche: '955',
+        diag: v => (pr(v, 100 / DEUX_PI / 60) ? 'Diviser par 1/60, c\'est <b>multiplier</b> par 60.' : pr(v, 100 * DEUX_PI * 60) || pr(v, 100 * DEUX_PI / 60) ? 'Des radians aux tours, on <b>divise</b> par 2π.' : pr(v, 100 * 60 / Math.PI) ? 'Un tour vaut 2π rad, pas π.' : pr(v, 6000) ? 'N\'oublie pas de diviser par 2π.' : 'n = 100 × 60 / (2π).'),
+        solution: calc(`100 rad/s = ${fr('100 × 60', '2π')} tr/min ≈ ${c('955 tr/min')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Tours par seconde ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Des tours par seconde');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>La <b>fréquence de rotation</b> n peut aussi s'écrire en <b>tours par seconde</b> (tr/s, c'est-à-dire en Hz). Chaque tour vaut 2π rad :</p>
+        <p class="crs-formule">ω = 2π × n &nbsp;&nbsp;(n en tr/s)</p>
+        <p>Et 1 tr/s = 60 tr/min (il y a 60 s dans une minute).</p></div>
+    </div>
+    ${exemple(`<p>Un moteur tourne à 25 tr/s.</p>${calc(`ω = 2π × 25 ≈ ${c('157 rad/s')}`)}${calc(`n = 25 × 60 = ${c('1 500 tr/min')}`)}<p>On retrouve l'exemple de l'étape 1.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une turbine', enonce: '<p>Une turbine tourne à 50 tr/s.</p>',
+      parties: [
+        { type: 'nombre', q: 'Calcule sa vitesse angulaire ω.', label: 'ω =', valeur: DEUX_PI * 50, unite: 'rad/s', signe: false, rel: .01, affiche: '314',
+          diag: v => (pr(v, Math.PI * 50) ? 'Un tour vaut 2π rad (pas π).' : pr(v, 50 * DEUX_PI / 60) ? 'Ici n est déjà en tours par <b>seconde</b> : pas de ÷ 60.' : pr(v, 50 / DEUX_PI) ? 'On <b>multiplie</b> par 2π.' : 'ω = 2π × n.'),
+          solution: calc(`ω = 2π × 50 ≈ ${c('314 rad/s')}`) },
+        { type: 'nombre', q: 'Exprime sa fréquence de rotation en tr/min.', label: 'n =', valeur: 3000, unite: 'tr/min', signe: false, rel: .005,
+          diag: v => (pr(v, 50 / 60) ? 'En une minute (60 s), elle fait 60 fois plus de tours : × 60.' : 'n (tr/min) = n (tr/s) × 60.'),
+          solution: calc(`n = 50 × 60 = ${c('3 000 tr/min')}`) },
+      ] },
+    { titre: 'La bonne formule', enonce: '<p>La vitesse de rotation n est donnée en <b>tr/min</b>.</p>',
+      parties: [{ type: 'choix', q: 'Quelle formule donne ω en rad/s ?', colonne: true,
+        options: [o('ok', 'ω = 2π × n / 60'), o('x60', 'ω = 2π × n × 60'), o('pi', 'ω = π × n / 60'), o('inv', 'ω = n × 60 / (2π)')], bonne: 'ok',
+        indices: { x60: 'n tours en 1 min, c\'est n tours en 60 s : on <b>divise</b> par 60.', pi: 'Un tour vaut 2π rad.', inv: 'C\'est la formule dans l\'autre sens (rad/s → tr/min).' },
+        solution: `<p>ω = ${fr('n × 2π rad', '60 s')} : × 2π pour les tours, ÷ 60 pour les minutes.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p><b>1 tour = 2π rad</b> et <b>1 min = 60 s</b>. On écrit la vitesse comme une fraction, avec les unités, puis on remplace chaque unité.</p></div>
+    <div class="cle"><p>tr/min → rad/s : × 2π ÷ 60 &nbsp;(1 500 tr/min ≈ 157 rad/s).</p></div>
+    <div class="cle"><p>rad/s → tr/min : × 60 ÷ 2π &nbsp;(25 rad/s ≈ 239 tr/min).</p></div>
+    <div class="cle"><p>n en tr/s : ω = 2π × n ; 1 tr/s = 60 tr/min.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur les conversions →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3_cours.html">Module 3 : moment d'une force et couple</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+ROT.menu('module_2_cours');
+</script>
+</body>
+</html>

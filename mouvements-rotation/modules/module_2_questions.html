@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions sur les conversions — Chapitre 8 : Mouvements de rotation</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rot.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rot.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : tr/min → rad/s (4, dont une avec
+   la fraction à compléter), rad/s → tr/min (3, dont une avec la
+   fraction), tr/s ↔ rad/s (2), erreur à repérer (1).
+   Erreurs diagnostiquées : × 2π oublié, ÷ 60 au lieu de × 60 (et
+   l'inverse), π au lieu de 2π, 360 au lieu de 2π.
+   ============================================================ */
+const { o, fq, fmt, cs, hasard, melanger, proche, fr, DEUX_PI, partieFraction } = ROT;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .015);
+const r3 = v => cs(v, 3);
+
+// diagnostics communs
+function diagVersRad(x, N) {
+  if (pr(x, N * DEUX_PI * 60)) return 'Les minutes sont au dénominateur : 1 min = 60 s, on <b>divise</b> par 60.';
+  if (pr(x, N * Math.PI / 60)) return 'Un tour vaut <b>2π</b> rad (π rad, c\'est un demi-tour).';
+  if (pr(x, N / 60)) return 'Tu as des tours par seconde : multiplie encore par 2π pour avoir des radians.';
+  if (pr(x, N * 60 / DEUX_PI)) return 'C\'est la conversion dans l\'autre sens : tr/min → rad/s, c\'est × 2π ÷ 60.';
+  if (pr(x, N * 6)) return '360 donne des degrés ; en radians, un tour = 2π rad.';
+  return `Écris la fraction : ${fmt(N)} tr/min = ${fmt(N)} × 2π rad / 60 s.`;
+}
+function diagVersTr(x, W) {
+  if (pr(x, W / DEUX_PI / 60)) return 'Diviser par 1 / 60 min, c\'est <b>multiplier</b> par 60.';
+  if (pr(x, W * DEUX_PI * 60) || pr(x, W * DEUX_PI / 60)) return 'Des radians aux tours, on <b>divise</b> par 2π.';
+  if (pr(x, W * 60 / Math.PI)) return 'Un tour vaut 2π rad (pas π).';
+  if (pr(x, W * 60)) return 'N\'oublie pas de diviser par 2π (2π rad = 1 tour).';
+  if (pr(x, W / DEUX_PI)) return 'Tu as des tours par <b>seconde</b> : × 60 pour des tours par minute.';
+  return `${fmt(W)} rad/s = ${fmt(W)} × 60 / (2π) tr/min.`;
+}
+
+/* ---------- Groupe 1 : tr/min → rad/s ---------- */
+const MOTEURS = [['Un moteur asynchrone', 1450], ['Une perceuse', 2800], ['Un lave-linge en essorage', 1200], ['Une meuleuse', 6000], ['Un moteur de ventilateur', 900], ['Un disque dur', 5400], ['Un moteur de pompe', 2900], ['Une éolienne', 30]];
+function qVersRadFraction() {
+  const N = hasard([600, 1500, 2400, 3600, 1800]), w = N * DEUX_PI / 60;
+  return { theme: 'tr/min → rad/s', consigne: 'Complète la fraction ligne par ligne ; le bouton <b>?</b> change à chaque appui (2π, π, 360).',
+    parties: [partieFraction({ sens: 'trmin', valeur: N, q: `Convertis ${fmt(N)} tr/min en rad/s.`,
+      solution: calc(`${fmt(N)} tr/min = ${fr(fmt(N) + ' tours', '1 min')} = ${fr(fmt(N) + ' × 2π rad', '60 s')} ≈ ${c(r3(w) + ' rad/s')}`) })] };
+}
+function qVersRad(qui, N) {
+  const w = N * DEUX_PI / 60;
+  return { theme: 'tr/min → rad/s', enonce: `<p>${qui} tourne à ${fmt(N)} tr/min.</p>`,
+    parties: [fq.nombre('Calcule sa vitesse angulaire ω en rad/s (3 chiffres significatifs).', 'ω =', w, 'rad/s', { signe: false, rel: .01, affiche: r3(w),
+      diag: x => diagVersRad(x, N),
+      solution: calc(`ω = ${fr(fmt(N) + ' × 2π rad', '60 s')} ≈ ${c(r3(w) + ' rad/s')}`) })] };
+}
+
+/* ---------- Groupe 2 : rad/s → tr/min ---------- */
+function qVersTrFraction() {
+  const W = hasard([10, 20, 40, 80]), n = W * 60 / DEUX_PI;
+  return { theme: 'rad/s → tr/min', consigne: 'Complète la fraction ligne par ligne ; le bouton <b>?</b> change à chaque appui (2π, π, 360).',
+    parties: [partieFraction({ sens: 'rads', valeur: W, q: `Convertis ${fmt(W)} rad/s en tr/min.`,
+      solution: calc(`${fmt(W)} rad/s = ${fr(fmt(W) + ' / 2π tours', '1 / 60 min')} = ${fr(fmt(W) + ' × 60', '2π')} tr/min ≈ ${c(fmt(Math.round(n)) + ' tr/min')}`) })] };
+}
+function qVersTr() {
+  const [qui, W] = hasard([['Un rotor', 150], ['Une roue de voiture', 90], ['Un moteur électrique', 300], ['Un tambour', 60], ['Une hélice', 250]]), n = W * 60 / DEUX_PI;
+  return { theme: 'rad/s → tr/min', enonce: `<p>${qui} tourne à ω = ${fmt(W)} rad/s.</p>`,
+    parties: [fq.nombre('Exprime sa vitesse de rotation en tr/min (arrondi à l\'unité).', 'n =', n, 'tr/min', { signe: false, rel: .01, affiche: fmt(Math.round(n)),
+      diag: x => diagVersTr(x, W),
+      solution: calc(`n = ${fr(fmt(W) + ' × 60', '2π')} ≈ ${c(fmt(Math.round(n)) + ' tr/min')}`) })] };
+}
+
+/* ---------- Groupe 3 : tr/s ---------- */
+function qTrsVersRad() {
+  const n = hasard([5, 10, 20, 40, 50]), w = DEUX_PI * n;
+  return { theme: 'tr/s → rad/s', enonce: `<p>Un moteur tourne à ${n} tr/s.</p>`,
+    parties: [fq.nombre('Calcule sa vitesse angulaire ω (3 chiffres significatifs).', 'ω =', w, 'rad/s', { signe: false, rel: .01, affiche: r3(w),
+      diag: x => (pr(x, Math.PI * n) ? 'Un tour vaut 2π rad (pas π).' : pr(x, w / 60) ? 'n est déjà en tours par <b>seconde</b> : pas de ÷ 60.' : pr(x, n / DEUX_PI) ? 'On <b>multiplie</b> par 2π.' : 'ω = 2π × n (n en tr/s).'),
+      solution: calc(`ω = 2π × ${n} ≈ ${c(r3(w) + ' rad/s')}`) })] };
+}
+function qRadVersTrs() {
+  const n = hasard([4, 8, 15, 25]), w = +r3(DEUX_PI * n).replace(',', '.').replace(/\s/g, '');
+  return { theme: 'rad/s → tr/s', enonce: `<p>Une roue tourne à ω = ${fmt(w)} rad/s.</p>`,
+    parties: [fq.nombre('Combien de tours fait-elle par seconde ?', 'n =', w / DEUX_PI, 'tr/s', { signe: false, rel: .015, affiche: fmt(n),
+      diag: x => (pr(x, w * DEUX_PI) ? 'Des radians aux tours, on <b>divise</b> par 2π.' : pr(x, w / Math.PI) ? 'Un tour vaut 2π rad.' : 'n = ω / 2π.'),
+      solution: calc(`n = ${fr(fmt(w), '2π')} ≈ ${c(fmt(n) + ' tr/s')}`) })] };
+}
+
+/* ---------- Groupe 4 : erreur à repérer ---------- */
+function qErreur() {
+  const [txt, bon, sol] = hasard([
+    ['Un élève écrit : 1 500 tr/min = 1 500 × 2π × 60 ≈ 565 000 rad/s.', 'x60', 'Les 60 s sont au dénominateur : 1 500 × 2π / 60 ≈ 157 rad/s.'],
+    ['Un élève écrit : 1 500 tr/min = 1 500 × π / 60 ≈ 78,5 rad/s.', 'pi', 'Un tour vaut 2π rad : 1 500 × 2π / 60 ≈ 157 rad/s.'],
+    ['Un élève écrit : 1 500 tr/min = 1 500 / 60 = 25 rad/s.', 'oubli', '1 500 / 60 = 25 tr/s ; en radians : 25 × 2π ≈ 157 rad/s.'],
+  ]);
+  return { theme: 'Repérer une erreur', enonce: `<p>${txt}</p>`,
+    parties: [fq.choix('Quelle est son erreur ?', [o('x60', 'Il multiplie par 60 au lieu de diviser'), o('pi', 'Il prend π au lieu de 2π'), o('oubli', 'Il oublie de multiplier par 2π'), o('rien', 'Il n\'y a pas d\'erreur')], bon,
+      { melanger: false, colonne: true, indices: { x60: 'Regarde le 60 : il est bien au dénominateur ici.', pi: 'Regarde le facteur devant : il est correct ou absent ?', oubli: 'Regarde s\'il y a un facteur π ou 2π.', rien: 'Refais le calcul : 1 500 tr/min ≈ 157 rad/s.' },
+        solution: `<p>${sol}</p>` })] };
+}
+
+// tirage : 4 + 3 + 2 + 1 questions
+function tirage() {
+  const m = melanger(MOTEURS);
+  return [qVersRadFraction(), qVersRad(...m[0]), qVersRad(...m[1]), qVersRad(...m[2]), qVersTrFraction(), qVersTr(), qVersTr(), qTrsVersRad(), qRadVersTrs(), qErreur()];
+}
+
+ROT.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Convertir tr/min et rad/s',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : des tr/min aux rad/s, des rad/s aux tr/min, des tours par seconde, et une erreur à repérer.</p>',
+  questions: tirage,
+  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3_cours.html', label: 'Module 3 : moment d\'une force et couple →' },
+});
+ROT.menu('module_2_questions');
+</script>
+</body>
+</html>

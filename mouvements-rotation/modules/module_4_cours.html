@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : caractéristique d'un moteur — Chapitre 8 : Mouvements de rotation</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rot.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="rot.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS</span>
+    <h2 class="er-titre">Caractéristique d'un moteur et point de fonctionnement</h2>
+    <p class="er-contexte">La <b>caractéristique</b> d'un moteur est la courbe de son couple utile en fonction de sa fréquence de rotation. Superposée à celle de la charge qu'il entraîne, elle donne le <b>point de fonctionnement</b> : la vitesse et le couple du moteur avec cette charge.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Caractéristique T_u(n) d'un moteur : couple au démarrage, couple
+   maximal, fréquence nominale, fréquence de rotation à vide, zone
+   utile ; lecture de valeurs ; point de fonctionnement (intersection
+   avec la caractéristique de la charge, T_u = T_r).
+   Outils : étiquettes à glisser sur une caractéristique
+   (ROT.partieEtiquettes), point de fonctionnement à placer, puis à lire
+   avec les pointillés vers les axes (ROT.partiePoint).
+   Courbes (ROT.pchip : les extremums sont aux points donnés) :
+     moteur 1 : (0 ; 12) (250 ; 11) (700 ; 24) (900 ; 10) (1 000 ; 0),
+       charge 1 : T_r = 2 + 8 (n / 900)² → point de fonctionnement (900 ; 10) ;
+     moteur 2 : (0 ; 9) (300 ; 8) (800 ; 20) (1 100 ; 8) (1 200 ; 0) ;
+     moteur 3 : (0 ; 10) (250 ; 9) (600 ; 18) (800 ; 8) (900 ; 0),
+       charge 3 : T_r = 3 + 5 (n / 800)² → point de fonctionnement (800 ; 8).
+   ============================================================ */
+const { exemple } = COURS;
+const { o, fmt, proche, pchip, grapheFig, partiePoint, partieEtiquettes, versCours, melanger } = ROT;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const Tu = 'T<sub>u</sub>', Tr = 'T<sub>r</sub>';
+const NOM_TU = 'T<tspan dy="4" font-size="10">u</tspan><tspan dy="-4"> (N·m)</tspan>';
+const NOM_T = 'T (N·m)';
+const axeN = max => ({ max, pas: 200, sous: 100, nom: 'n (tr/min)' });
+
+const M1 = pchip([[0, 12], [250, 11], [700, 24], [900, 10], [1000, 0]]), C1 = n => 2 + 8 * (n / 900) ** 2;
+const M2 = pchip([[0, 9], [300, 8], [800, 20], [1100, 8], [1200, 0]]);
+const M3 = pchip([[0, 10], [250, 9], [600, 18], [800, 8], [900, 0]]), C3 = n => 3 + 5 * (n / 800) ** 2;
+const moteur = (f, a, etiq) => ({ f, de: 0, a, cls: 'moteur', etiq });
+
+/* ---------- 1. La caractéristique d'un moteur ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. La caractéristique d\'un moteur');
+  const def = { x: axeN(1200), y: { max: 30, pas: 5, sous: 1, nom: NOM_TU }, courbes: [moteur(M1, 1000)],
+    reperes: [{ x: 0, y: 12, lettre: 'A', dx: 18, dy: -16 }, { x: 700, y: 24, lettre: 'B' }, { x: 900, y: 10, lettre: 'C', dx: 18, dy: -6 }, { x: 1000, y: 0, lettre: 'D', dx: 16, dy: -16 }],
+    zone: { de: 900, a: 1000, lettre: 'E', f: M1 },
+    aria: 'Caractéristique d\'un moteur : le couple part de 12 N·m au démarrage, baisse un peu, monte jusqu\'à 24 N·m à 700 tr/min, puis chute jusqu\'à 0 à 1 000 tr/min' };
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> La <b>caractéristique</b> d'un moteur est la courbe du <b>couple utile</b> ${Tu} (moment du couple fourni par le moteur, en N·m) en fonction de sa <b>fréquence de rotation</b> n (en tr/s ou en tr/min).</p></div>
+      <div class="rot-carac">${grapheFig(def)}
+        <ul class="er-liste rot-legende">
+          <li><b>A</b> : le <b>couple au démarrage</b> (n = 0) ;</li>
+          <li><b>B</b> : le <b>couple maximal</b> ;</li>
+          <li><b>C</b> : la <b>fréquence nominale</b> ;</li>
+          <li><b>D</b> : la <b>fréquence de rotation à vide</b> (${Tu} = 0 : le moteur ne fournit plus de couple) ;</li>
+          <li><b>E</b> : la <b>zone utile</b>, entre la fréquence nominale et la fréquence à vide.</li></ul></div>
+      <div class="cle"><p>Le couple maximal et la fréquence nominale sont <b>écrits sur le moteur</b> (plaque signalétique). La zone utile est la <b>meilleure zone de fonctionnement</b> du moteur.</p></div>
+    </div>`);
+  const def2 = { x: axeN(1400), y: { max: 25, pas: 5, sous: 1, nom: NOM_TU }, courbes: [moteur(M2, 1200)],
+    reperes: [{ x: 1200, y: 0, lettre: 'A', dx: 16, dy: -16 }, { x: 800, y: 20, lettre: 'B' }, { x: 0, y: 9, lettre: 'C', dx: 18, dy: -16 }, { x: 1100, y: 8, lettre: 'D', dx: 18, dy: -6 }],
+    zone: { de: 1100, a: 1200, lettre: 'E', f: M2 }, aria: 'Caractéristique d\'un autre moteur, avec cinq repères A, B, C, D et E' };
+  c_.aToi(carte, [
+    { titre: 'Un autre moteur', enonce: '<p>Voici la caractéristique d\'un autre moteur. Les lettres ne sont pas dans le même ordre.</p>',
+      parties: [versCours(partieEtiquettes(def2, {
+        q: 'Place le nom de chaque grandeur repérée par une lettre (glisse les étiquettes, ou touche une étiquette puis une case).',
+        noms: { A: 'fréquence de rotation à vide', B: 'couple maximal', C: 'couple au démarrage', D: 'fréquence nominale', E: 'zone utile' },
+        indices: { A: 'À vide, le moteur ne fournit plus de couple : T<sub>u</sub> = 0.', B: 'Le couple maximal est le sommet de la courbe.', C: 'Au démarrage, n = 0 : le point est sur l\'axe vertical.', D: 'La fréquence nominale est sur la partie qui descend, au début de la zone utile.', E: 'La zone utile est un intervalle, entre la fréquence nominale et la fréquence à vide.' },
+        solution: '<p>A : fréquence à vide (T<sub>u</sub> = 0) ; B : couple maximal (sommet) ; C : couple au démarrage (n = 0) ; D : fréquence nominale ; E : zone utile, entre D et A.</p>' }))] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Lire une caractéristique ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Lire une caractéristique');
+  const def = { x: axeN(1200), y: { max: 30, pas: 5, sous: 1, nom: NOM_TU }, courbes: [moteur(M1, 1000)],
+    lectures: [{ x: 700, y: 24, tx: '700', ty: '24' }], points: [[1000, 0], [0, 12]],
+    aria: 'Caractéristique du moteur : sommet à 24 N·m pour 700 tr/min, lu avec des pointillés vers les axes ; couple nul à 1 000 tr/min ; 12 N·m au démarrage' };
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> On repère le point sur la courbe, puis on trace des <b>pointillés</b> vers les deux axes et on lit les valeurs avec le quadrillage.</p></div>
+      <div class="ph-lien-app"><p>Revois la lecture graphique.</p><a class="btn-small" href="../../lecture-graphique/index.html">Lecture graphique →</a></div>
+    </div>
+    ${exemple(`<p>Caractéristique du moteur de l'étape 1 :</p>${grapheFig(def)}
+      <ul class="er-liste"><li>couple maximal : ${Tu} = ${c('24 N·m')}, atteint pour n = ${c('700 tr/min')} ;</li>
+        <li>fréquence de rotation à vide (${Tu} = 0) : n = ${c('1 000 tr/min')} ;</li><li>couple au démarrage (n = 0) : ${Tu} = ${c('12 N·m')}.</li></ul>`)}`);
+  const def3 = { x: axeN(1000), y: { max: 20, pas: 5, sous: 1, nom: NOM_TU }, courbes: [moteur(M3, 900)], aria: 'Caractéristique d\'un moteur : 10 N·m au démarrage, sommet vers 18 N·m, couple nul vers 900 tr/min' };
+  c_.aToi(carte, [
+    { titre: 'Un petit moteur', enonce: `<p>Lis les valeurs sur la caractéristique de ce moteur.</p>${grapheFig(def3)}`,
+      parties: [
+        { type: 'nombre', q: 'Quel est son couple maximal ?', label: `${Tu} max =`, valeur: 18, unite: 'N·m', signe: false, tol: .6,
+          diag: v => (proche(v, 600, .1) ? 'C\'est une fréquence : le couple se lit sur l\'axe <b>vertical</b>.' : proche(v, 10, .05) ? 'C\'est le couple au démarrage : le couple maximal est le <b>sommet</b> de la courbe.' : 'Lis l\'ordonnée du sommet de la courbe.'),
+          solution: '<p>Le sommet de la courbe est à 18 N·m.</p>' },
+        { type: 'nombre', q: 'À quelle fréquence de rotation est-il atteint ?', label: 'n =', valeur: 600, unite: 'tr/min', signe: false, tol: 30,
+          diag: v => (proche(v, 900, .05) ? 'C\'est la fréquence à vide : lis l\'abscisse du <b>sommet</b>.' : 'Descends du sommet en pointillés jusqu\'à l\'axe horizontal.'), solution: '<p>Le sommet est à n = 600 tr/min.</p>' },
+        { type: 'nombre', q: 'Quelle est sa fréquence de rotation à vide ?', label: 'n =', valeur: 900, unite: 'tr/min', signe: false, tol: 25,
+          diag: v => (proche(v, 600, .05) ? 'À vide, le couple est <b>nul</b> : c\'est le point où la courbe coupe l\'axe horizontal.' : 'À vide, T<sub>u</sub> = 0 : lis où la courbe coupe l\'axe horizontal.'), solution: '<p>La courbe coupe l\'axe des abscisses à n = 900 tr/min.</p>' },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Point de fonctionnement ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Le point de fonctionnement');
+  const def = { x: axeN(1200), y: { max: 30, pas: 5, sous: 1, nom: NOM_T },
+    courbes: [moteur(M1, 1000, { x: 520, y: 23.5, texte: 'moteur', ancre: 'end' }), { f: C1, de: 0, a: 1150, cls: 'charge', etiq: { x: 1150, y: 17.5, texte: 'charge', ancre: 'end' } }],
+    lectures: [{ x: 900, y: 10, tx: '900', ty: '10' }],
+    aria: 'Caractéristiques du moteur et de la charge superposées : elles se coupent au point de fonctionnement, n = 900 tr/min et T = 10 N·m' };
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Le moteur entraîne une <b>charge</b> (pompe, ventilateur, treuil, scooter…). La charge oppose un <b>couple résistant</b> ${Tr}, qui dépend lui aussi de n : c'est la caractéristique de la charge.</p>
+      <div class="cle"><p><b class="cle-titre">Point de fonctionnement.</b> C'est l'<b>intersection</b> de la caractéristique du moteur et de celle de la charge, tracées sur le même graphique. En ce point :</p>
+        <p class="crs-formule">${Tu} = ${Tr}</p>
+        <p>Il donne la <b>vitesse de rotation</b> et le <b>couple</b> du moteur avec cette charge.</p></div>
+    </div>
+    ${exemple(`<p>Le moteur de l'étape 1 entraîne une charge (courbe en tirets).</p>${grapheFig(def)}
+      <p>Les courbes se coupent pour n = ${c('900 tr/min')} et ${Tu} = ${Tr} = ${c('10 N·m')}.</p>`)}`);
+  const def3 = { x: axeN(1000), y: { max: 20, pas: 5, sous: 1, nom: NOM_T },
+    courbes: [moteur(M3, 900, { x: 560, y: 18.5, texte: 'moteur', ancre: 'end' }), { f: C3, de: 0, a: 1000, cls: 'charge', etiq: { x: 990, y: 12.2, texte: 'charge', ancre: 'end' } }],
+    aria: 'Caractéristiques d\'un moteur et de sa charge superposées' };
+  c_.aToi(carte, [
+    { titre: 'Une pompe', enonce: '<p>Le petit moteur de l\'étape 2 entraîne une pompe.</p>',
+      parties: [
+        partiePoint(def3, { cible: [800, 8], tol: [25, .7], depart: [300, 15], moteur: M3, charge: C3,
+          solution: '<p>Le point de fonctionnement est l\'intersection des deux courbes.</p>' }),
+        { type: 'nombre', q: 'Lis la fréquence de rotation du moteur avec cette pompe.', label: 'n =', valeur: 800, unite: 'tr/min', signe: false, tol: 30,
+          diag: v => (proche(v, 8, .2) ? 'C\'est le couple : la fréquence se lit sur l\'axe <b>horizontal</b>.' : 'Suis les pointillés jusqu\'à l\'axe horizontal.'), solution: '<p>n = 800 tr/min.</p>' },
+        { type: 'nombre', q: 'Lis le couple du moteur.', label: `${Tu} =`, valeur: 8, unite: 'N·m', signe: false, tol: .6,
+          diag: v => (proche(v, 800, .1) ? 'C\'est la fréquence : le couple se lit sur l\'axe <b>vertical</b>.' : 'Suis les pointillés jusqu\'à l\'axe vertical.'), solution: '<p>T<sub>u</sub> = 8 N·m.</p>' },
+        { type: 'choix', q: 'Que vaut le couple résistant de la pompe au point de fonctionnement ?', options: [o('ok', `${Tr} = 8 N·m`), o('zero', `${Tr} = 0`), o('max', `${Tr} = 18 N·m`)], bonne: 'ok', melanger: false,
+          indices: { zero: 'La pompe freine le moteur : son couple résistant n\'est pas nul.', max: '18 N·m, c\'est le couple maximal du moteur.' },
+          solution: `<p>Au point de fonctionnement, ${Tu} = ${Tr} : le couple résistant vaut aussi 8 N·m.</p>` },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Caractéristique d'un moteur : courbe du couple utile ${Tu} (N·m) en fonction de la fréquence de rotation n (tr/s ou tr/min).</p></div>
+    <div class="cle"><p>On y lit : le couple au démarrage (n = 0), le couple maximal (sommet), la fréquence nominale, la fréquence à vide (${Tu} = 0), et la <b>zone utile</b> entre fréquence nominale et fréquence à vide.</p></div>
+    <div class="cle"><p>Point de fonctionnement : intersection des caractéristiques du moteur et de la charge ; ${Tu} = ${Tr}. Il donne la vitesse de rotation et le couple du moteur avec sa charge.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4_questions.html">Questions sur les caractéristiques →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_5.html">Module 5 : exercices</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+ROT.menu('module_4_cours');
+</script>
+</body>
+</html>
