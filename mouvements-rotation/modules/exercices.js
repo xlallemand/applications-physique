@@ -71,7 +71,7 @@
         calc(`ω = ${fr('θ', 'Δt')} ⇔ θ = ω × Δt = 1,57 × 10 = ${c('15,7 rad')}`),
         { rel: .01, diag: v => (pr(v, .157) ? 'θ = ω × Δt : on multiplie.' : pr(v, 150) ? 'Utilise ω en rad/s (1,57), pas en tr/min.' : 'θ = ω × Δt.') }),
       nombre('Exprime cet angle en degrés.', 'θ =', 900, '°',
-        `<div class="ph-defile"><table class="ph-tableau"><tr><td>2π rad</td><td>360°</td></tr><tr><td>15,7 rad</td><td>?</td></tr></table></div>` + calc(`θ = ${fr('360 × 15,7', '2π')} ≈ ${c('900°')}`) + '<p>Soit 2,5 tours.</p>',
+        `<div class="ph-defile"><table class="ph-tableau"><thead><tr><th>angle (rad)</th><th>angle (°)</th></tr></thead><tbody><tr><td>2π</td><td>360</td></tr><tr><td>15,7</td><td>?</td></tr></tbody></table></div>` + calc(`θ = ${fr('360 × 15,7', '2π')} ≈ ${c('900°')}`) + '<p>Soit 2,5 tours.</p>',
         { tol: 2, diag: v => (pr(v, 15.7 * 360) ? 'C\'est 2π rad qui vaut 360° (pas 1 rad).' : pr(v, 15.7 * DEUX_PI / 360) ? 'Produit en croix inversé : 360 × 15,7 / 2π.' : pr(v, 450) ? '2π rad = 360° (et π rad = 180°).' : 'Tableau de proportionnalité : 2π rad ↔ 360°.') }),
     ],
   };

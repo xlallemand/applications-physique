@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 3 : moment d'une force et couple — Chapitre 8 : Mouvements de rotation</title>
+<title>Module 3 : moment d'une force — Chapitre 8 : Mouvements de rotation</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="rot.css">
@@ -17,8 +17,8 @@
 <div id="app-nav"></div>
 <div class="er-page">
   <div class="er-card">
-    <span class="er-badge">MODULE 3 · COURS</span>
-    <h2 class="er-titre">Moment d'une force et couple</h2>
+    <span class="er-badge">MODULE 3 · COURS · PARTIE A</span>
+    <h2 class="er-titre">Moment d'une force</h2>
     <p class="er-contexte">Pour faire tourner une clé, un volant, une porte, il ne suffit pas de pousser fort : il faut pousser <b>loin de l'axe</b> et dans la <b>bonne direction</b>. Le <b>moment</b> M = F × d mesure cet effet de rotation.</p>
   </div>
   <div id="etapes"></div>
@@ -27,19 +27,21 @@
 <script>
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Partie A du module 3 (partie B : couple de forces, module_3b_cours).
    M = F × d (N·m, N, m) ; d = bras de levier : distance de l'axe à la
-   droite d'action ; force oblique : d = OA × cos α ; couple de forces
-   M = F × D (somme des deux moments).
+   droite d'action ; force oblique : d = OA × cos α ; lien avec le couple
+   d'un moteur, unité N·m (ni N/m, ni mN, ni J).
    Outil : clé tournant autour de O (ROT.partieCle), en plusieurs
    exemplaires : moment maximal, force dirigée vers l'axe (M = 0),
    bras de levier de 20 cm.
    Erreurs diagnostiquées : cm non convertis, d pris égal à OA,
-   sin au lieu de cos, D divisé par 2 ou F doublée, division inversée.
+   sin au lieu de cos, division inversée, diamètre pris pour le rayon,
+   unités confondues (N, N/m, mN, J).
    Valeurs (vérifiées par un script) : volant 20 N × 0,15 m = 3,0 N·m ;
    20 N × 0,40 m = 8,0 N·m ; 50 N × 0,25 m = 12,5 N·m ;
    30 cos 40° ≈ 23,0 cm, M ≈ 23,0 N·m ; 50 cos 30° ≈ 43,3 cm,
-   80 × 0,433 ≈ 34,6 N·m ; couple 20 N × 0,30 m = 6,0 N·m ;
-   60 N × 0,50 m = 30 N·m ; 24 / 0,30 = 80 N.
+   80 × 0,433 ≈ 34,6 N·m ; visseuse 5,0 / 0,10 = 50 N ;
+   tapis roulant 3,0 / 0,060 = 50 N.
    ============================================================ */
 const { exemple } = COURS;
 const { o, fmt, proche, fr, V, rad, partieCle } = ROT;
@@ -129,27 +131,33 @@ function etape3(c_) {
   return carte;
 }
 
-/* ---------- 4. Couple de forces ---------- */
+/* ---------- 4. Le couple d'un moteur ---------- */
 function etape4(c_) {
-  const carte = c_.carte('4. Le couple de forces');
+  const carte = c_.carte('4. Le couple d\'un moteur');
   c_.ajouter(carte, `<div class="cours-bloc">
-      <div class="cle"><p><b class="cle-titre">Définition.</b> Un <b>couple de forces</b> est l'ensemble de deux forces de <b>même intensité</b>, de <b>même direction</b> mais de <b>sens opposés</b> (et de droites d'action différentes).</p>
-        ${ROT.figCouple()}
-        <p class="crs-formule">M = F × D</p>
-        <p>M : moment du couple en N·m ; F : valeur commune des deux forces en N ; D : distance entre les droites d'action des deux forces, en m.</p></div>
+      <p>Un moteur fait tourner son <b>arbre</b> (son axe de sortie), qui entraîne une roue, une pompe, un foret… Son effet de rotation est un <b>moment</b> : on l'appelle le <b>couple du moteur</b> (couple utile T<sub>u</sub>). C'est la grandeur étudiée dans le module 4 avec la caractéristique d'un moteur.</p>
+      <div class="cle"><p><b class="cle-titre">Unité.</b> Comme tout moment, le couple d'un moteur s'exprime en <b>newton-mètre</b> :</p>
+        <p class="crs-formule">1 N·m = 1 N × 1 m</p>
+        <p>Des newtons <b>multipliés</b> par des mètres. On l'écrit aussi N.m ou Nm.</p></div>
+      <div class="crs-attention"><p><b class="cle-titre">Attention.</b> N·m n'est pas N/m (des newtons <b>divisés</b> par des mètres), ni mN (le millinewton, une force). On n'écrit pas non plus un moment en joules (J) : le joule est réservé aux énergies.</p></div>
+      <p class="rot-note">Pourquoi « couple » ? Les forces que le moteur exerce sur son arbre forment un couple de forces : c'est la partie B de ce module.</p>
     </div>
-    ${exemple(`<p>On tourne un volant de diamètre 30 cm à deux mains : F<sub>1</sub> = F<sub>2</sub> = 20 N.</p>${ROT.figVolant({ couple: true })}
-      ${calc(`M = F × D = 20 N × 0,30 m = ${c('6,0 N·m')}`)}
-      <p>C'est la somme des moments des deux forces : M<sub>1</sub> + M<sub>2</sub> = 20 × 0,15 + 20 × 0,15 = 6,0 N·m.</p>`)}`);
+    ${exemple(`<p>Sur la plaque d'une visseuse, on lit : couple 5,0 N·m. Pour empêcher son axe de tourner avec une clé de 10 cm fixée dessus, il faudrait appuyer au bout de la clé avec la force :</p>${calc(`M = F × d donc F = ${fr('M', 'd')} = ${fr('5,0 N·m', '0,10 m')} = ${c('50 N')}`)}`)}`);
   c_.aToi(carte, [
-    { titre: 'Une clé en croix', enonce: '<p>On desserre un écrou avec une clé en croix : on exerce F = 60 N à chaque extrémité, en sens opposés ; la distance entre les deux droites d\'action est D = 50 cm.</p>',
-      parties: [{ type: 'nombre', q: 'Calcule le moment du couple.', label: 'M =', valeur: 30, unite: 'N·m', signe: false, rel: .01,
-        diag: v => (pr(v, 3000) ? 'D doit être en mètres : 50 cm = 0,50 m.' : pr(v, 15) ? 'D est la distance entre les <b>deux</b> droites d\'action (50 cm), pas la moitié.' : pr(v, 60) ? 'M = F × D avec F la valeur <b>commune</b> des forces (on ne double pas F).' : 'M = F × D.'),
-        solution: calc(`M = F × D = 60 N × 0,50 m = ${c('30 N·m')}`) }] },
-    { titre: 'La force minimale', enonce: '<p>Pour débloquer une vis, il faut un couple de moment M = 24 N·m. La distance entre les droites d\'action des deux forces est D = 0,30 m.</p>',
-      parties: [{ type: 'nombre', q: 'Quelle force minimale F faut-il exercer de chaque côté ?', label: 'F =', valeur: 80, unite: 'N', signe: false, rel: .01,
-        diag: v => (pr(v, 7.2) ? 'M = F × D donc F = M / D : on <b>divise</b>.' : pr(v, .0125) ? 'F = M / D (et non D / M).' : pr(v, 40) ? 'F est la valeur de <b>chacune</b> des deux forces : F = M / D.' : 'F = M / D.'),
-        solution: calc(`M = F × D donc F = ${fr('M', 'D')} = ${fr('24 N·m', '0,30 m')} = ${c('80 N')}`) }] },
+    { titre: 'La plaque d\'un moteur', enonce: '<p>Sur la plaque signalétique d\'un moteur, on lit : « couple nominal : 12 N·m ».</p>',
+      parties: [{ type: 'choix', q: 'Que représente ce nombre ?', colonne: true, melanger: false,
+        options: [o('moment', 'Le moment qui fait tourner l\'arbre du moteur'), o('force', 'Une force de 12 N'), o('energie', 'Une énergie de 12 J'), o('vitesse', 'Une vitesse de rotation')], bonne: 'moment',
+        indices: { force: 'L\'unité est N·m (newton × mètre) : ce n\'est pas une force, qui s\'exprime en N.', energie: 'Un moment ne s\'exprime pas en joules : l\'unité lue est N·m.', vitesse: 'Une vitesse de rotation s\'exprime en tr/min ou en rad/s.' },
+        solution: '<p>Le couple d\'un moteur est un moment : 12 N·m, c\'est l\'effet de rotation que le moteur exerce sur son arbre.</p>' }] },
+    { titre: 'La bonne unité', enonce: '',
+      parties: [{ type: 'choix', q: 'Quelle écriture est l\'unité d\'un couple ?', melanger: false,
+        options: [o('Nsm', 'N/m'), o('mN', 'mN'), o('Nm', 'N·m'), o('J', 'J')], bonne: 'Nm',
+        indices: { Nsm: 'N/m, ce sont des newtons <b>divisés</b> par des mètres. Or M = F × d : on <b>multiplie</b>.', mN: 'mN, c\'est le millinewton : une force (un millième de newton).', J: 'Le joule est l\'unité des énergies, pas des moments.' },
+        solution: '<p>M = F × d : des newtons multipliés par des mètres, donc des <b>N·m</b> (newton-mètre).</p>' }] },
+    { titre: 'Un tapis roulant', enonce: '<p>Le moteur d\'un tapis roulant exerce un couple de 3,0 N·m sur un rouleau de <b>rayon 6,0 cm</b>. La force du rouleau sur le tapis est tangente au rouleau.</p>',
+      parties: [{ type: 'nombre', q: 'Quelle force F le rouleau exerce-t-il sur le tapis ?', label: 'F =', valeur: 50, unite: 'N', signe: false, rel: .01,
+        diag: v => (pr(v, .5) ? 'Le rayon doit être en <b>mètres</b> : 6,0 cm = 0,060 m.' : pr(v, .18) ? 'M = F × d donc F = M / d : on <b>divise</b>.' : pr(v, 25) ? 'Le bras de levier est le <b>rayon</b> (6,0 cm), pas le diamètre.' : pr(v, .02) ? 'F = M / d (et non d / M).' : 'F = M / d, d en m.'),
+        solution: calc(`La force est tangente au rouleau : d = rayon = 0,060 m. M = F × d donc F = ${fr('M', 'd')} = ${fr('3,0 N·m', '0,060 m')} = ${c('50 N')}`) }] },
   ]);
   return carte;
 }
@@ -159,15 +167,15 @@ function aRetenir(c_) {
   const carte = c_.carte('À retenir');
   c_.ajouter(carte, `<div class="cle"><p>Moment d'une force : <b>M = F × d</b>, en <b>N·m</b> (F en N, d en m).</p></div>
     <div class="cle"><p>d = <b>bras de levier</b> : distance entre l'axe de rotation et la <b>droite d'action</b> de la force. Force dirigée vers l'axe : d = 0, M = 0. Clé inclinée de α, force verticale : d = OA × cos α.</p></div>
-    <div class="cle"><p>Couple de forces : deux forces de même intensité, même direction, sens opposés. <b>M = F × D</b>, D distance entre les deux droites d'action.</p></div>
-    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur le moment et le couple →</a>
-      <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Module 4 : caractéristique d'un moteur</a>
-      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html">Fiche récapitulative</a></div>`);
+    <div class="cle"><p>Le <b>couple d'un moteur</b> est un moment : il s'exprime en <b>N·m</b> (newton-mètre = newton × mètre), et jamais en N/m, en mN ou en J.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Partie B : couple de forces →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3_questions.html">Questions sur le moment et le couple</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#moment">Fiche récapitulative</a></div>`);
   return carte;
 }
 
 new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
-ROT.menu('module_3_cours');
+ROT.menu('module_3a_cours');
 </script>
 </body>
 </html>

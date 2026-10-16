@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : couple de forces — Chapitre 8 : Mouvements de rotation</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rot.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rot.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS · PARTIE B</span>
+    <h2 class="er-titre">Couple de forces</h2>
+    <p class="er-contexte">Pour tourner un volant ou une clé en croix, on utilise deux mains : les deux forces forment un <b>couple de forces</b>. Son moment se calcule avec <b>M = F × D</b>, toujours en <b>N·m</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Partie B du module 3 (partie A : moment d'une force, module_3a_cours).
+   Couple de forces : deux forces de même intensité, même direction,
+   sens opposés ; M = F × D (somme des deux moments) ; force à exercer
+   F = M / D.
+   Erreurs diagnostiquées : cm non convertis, D divisé par 2, F doublée,
+   division inversée.
+   Valeurs (vérifiées par un script) : volant 20 N × 0,30 m = 6,0 N·m ;
+   60 N × 0,50 m = 30 N·m ; vanne 18 / 0,30 = 60 N ; 24 / 0,30 = 80 N.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, proche, fr } = ROT;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .015);
+
+/* ---------- 1. Couple de forces ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Le couple de forces');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> Un <b>couple de forces</b> est l'ensemble de deux forces de <b>même intensité</b>, de <b>même direction</b> mais de <b>sens opposés</b> (et de droites d'action différentes).</p>
+        ${ROT.figCouple()}
+        <p class="crs-formule">M = F × D</p>
+        <p>M : moment du couple en N·m ; F : valeur commune des deux forces en N ; D : distance entre les droites d'action des deux forces, en m.</p></div>
+    </div>
+    ${exemple(`<p>On tourne un volant de diamètre 30 cm à deux mains : F<sub>1</sub> = F<sub>2</sub> = 20 N.</p>${ROT.figVolant({ couple: true })}
+      ${calc(`M = F × D = 20 N × 0,30 m = ${c('6,0 N·m')}`)}
+      <p>C'est la somme des moments des deux forces : M<sub>1</sub> + M<sub>2</sub> = 20 × 0,15 + 20 × 0,15 = 6,0 N·m.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une clé en croix', enonce: '<p>On desserre un écrou avec une clé en croix : on exerce F = 60 N à chaque extrémité, en sens opposés ; la distance entre les deux droites d\'action est D = 50 cm.</p>',
+      parties: [{ type: 'nombre', q: 'Calcule le moment du couple.', label: 'M =', valeur: 30, unite: 'N·m', signe: false, rel: .01,
+        diag: v => (pr(v, 3000) ? 'D doit être en mètres : 50 cm = 0,50 m.' : pr(v, 15) ? 'D est la distance entre les <b>deux</b> droites d\'action (50 cm), pas la moitié.' : pr(v, 60) ? 'M = F × D avec F la valeur <b>commune</b> des forces (on ne double pas F).' : 'M = F × D.'),
+        solution: calc(`M = F × D = 60 N × 0,50 m = ${c('30 N·m')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Force à exercer ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. La force à exercer');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>On isole F dans M = F × D : la force à exercer <b>de chaque côté</b> est</p>
+        <p class="crs-formule">F = ${fr('M', 'D')}</p></div>
+    </div>
+    ${exemple(`<p>Pour ouvrir une vanne, il faut un couple de 18 N·m. On la tourne à deux mains, avec D = 0,30 m.</p>${calc(`F = ${fr('M', 'D')} = ${fr('18 N·m', '0,30 m')} = ${c('60 N')} de chaque côté`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'La force minimale', enonce: '<p>Pour débloquer une vis, il faut un couple de moment M = 24 N·m. La distance entre les droites d\'action des deux forces est D = 0,30 m.</p>',
+      parties: [{ type: 'nombre', q: 'Quelle force minimale F faut-il exercer de chaque côté ?', label: 'F =', valeur: 80, unite: 'N', signe: false, rel: .01,
+        diag: v => (pr(v, 7.2) ? 'M = F × D donc F = M / D : on <b>divise</b>.' : pr(v, .0125) ? 'F = M / D (et non D / M).' : pr(v, 40) ? 'F est la valeur de <b>chacune</b> des deux forces : F = M / D.' : 'F = M / D.'),
+        solution: calc(`M = F × D donc F = ${fr('M', 'D')} = ${fr('24 N·m', '0,30 m')} = ${c('80 N')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Couple de forces : deux forces de même intensité, même direction, sens opposés.</p></div>
+    <div class="cle"><p><b>M = F × D</b>, en <b>N·m</b> : F valeur commune des deux forces (N), D distance entre les deux droites d'action (m). C'est la somme des moments des deux forces.</p></div>
+    <div class="cle"><p>Force à exercer de chaque côté : F = M / D.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur le moment et le couple →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Module 4 : caractéristique d'un moteur</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#couple">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+ROT.menu('module_3b_cours');
+</script>
+</body>
+</html>
