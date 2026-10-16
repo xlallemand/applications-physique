@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : presse, cric hydraulique et baromètre — Chapitre 9 : Statique des fluides</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="sf.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS</span>
+    <h2 class="er-titre">Presse, cric hydraulique et baromètre</h2>
+    <p class="er-contexte">Deux applications du principe fondamental : le liquide d'une presse ou d'un cric <b>transmet la pression</b> et multiplie la force ; le <b>baromètre de Torricelli</b> mesure la pression atmosphérique avec une colonne de mercure.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Transmission : P_A = P_B (même altitude) ; P = F₁ / S₁ ; F₂ = P × S₂ ;
+   S = π R². Torricelli : P_A = 0 (vide), P_B = P_C = P_atm,
+   P_atm = ρ_Hg × g × h (ρ_Hg = 13 600 kg·m⁻³, g = 9,8 m·s⁻²).
+   Erreurs diagnostiquées : R non élevé au carré, diamètre au lieu du
+   rayon, R en cm, rapport des rayons au lieu des surfaces, h en mm,
+   hPa non convertis.
+   Valeurs (vérifiées par un script) : exemple R₁ = 1,0 cm, R₂ = 10 cm,
+   F₁ = 200 N → S₁ = 3,14 × 10⁻⁴ m², P = 6,37 × 10⁵ Pa, F₂ = 2,0 × 10⁴ N ;
+   « À toi » R₁ = 1,5 cm, R₂ = 12 cm, F₁ = 100 N → 7,07 × 10⁻⁴ m²,
+   1,41 × 10⁵ Pa, 6,4 × 10³ N ; 750 mm → 99 960 Pa ; 740 mm → 9,86 × 10⁴ Pa ;
+   1 020 hPa → 765 mm.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, proche, fr, dessin } = SF;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .02);
+const G = 9.8, RHG = 13600;
+
+/* ---------- 1. Transmission de la pression ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Le liquide transmet la pression');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Dans un cric ou une presse hydraulique, on pousse le petit piston avec une force F<sub>1</sub>. A et B sont dans le même liquide, à la même altitude :</p>
+      <div class="cle"><p class="crs-formule">P<sub>A</sub> = P<sub>B</sub> = P = ${fr('F<sub>1</sub>', 'S<sub>1</sub>')} &nbsp;&nbsp; donc &nbsp;&nbsp; F<sub>2</sub> = P × S<sub>2</sub></p>
+        <p>Si S<sub>2</sub> est beaucoup plus grande que S<sub>1</sub>, F<sub>2</sub> est beaucoup plus grande que F<sub>1</sub> : le système <b>multiplie la force</b>.</p>
+        <p>Surface d'un piston de rayon R : <b>S = π × R²</b> (R en m).</p></div>
+      ${dessin('cric')}
+    </div>
+    ${exemple(`<p>Un cric a un petit piston de rayon R<sub>1</sub> = 1,0 cm et un grand piston de rayon R<sub>2</sub> = 10 cm. On pousse le petit piston avec F<sub>1</sub> = 200 N.</p>
+      ${calc('S<sub>1</sub> = π × R<sub>1</sub>² = π × (1,0 × 10<sup>−2</sup> m)² ≈ 3,14 × 10<sup>−4</sup> m²')}
+      ${calc(`P = ${fr('F<sub>1</sub>', 'S<sub>1</sub>')} = ${fr('200 N', '3,14 × 10<sup>−4</sup> m²')} ≈ 6,37 × 10<sup>5</sup> Pa`)}
+      ${calc('S<sub>2</sub> = π × (10 × 10<sup>−2</sup> m)² ≈ 3,14 × 10<sup>−2</sup> m²')}
+      ${calc(`F<sub>2</sub> = P × S<sub>2</sub> = 6,37 × 10<sup>5</sup> × 3,14 × 10<sup>−2</sup> ≈ ${c('2,0 × 10<sup>4</sup> N')}`)}
+      <p>F<sub>2</sub> = 100 × F<sub>1</sub> : le rayon est 10 fois plus grand, donc la surface 10² = 100 fois plus grande.</p>`)}`);
+  const S1 = Math.PI * 0.015 ** 2, P = 100 / S1, F2 = P * Math.PI * 0.12 ** 2;
+  c_.aToi(carte, [
+    { titre: 'Un autre cric', enonce: '<p>Petit piston : R<sub>1</sub> = 1,5 cm ; grand piston : R<sub>2</sub> = 12 cm ; force sur le petit piston : F<sub>1</sub> = 100 N.</p>',
+      parties: [
+        { type: 'sci', q: 'Calcule la surface S<sub>1</sub> du petit piston (3 chiffres significatifs).', label: 'S<sub>1</sub> =', valeur: S1, unite: 'm²', cs: 3, rel: .01,
+          diag: v => (pr(v, Math.PI * 0.015) ? 'Le rayon est élevé <b>au carré</b> : S = π × R².' : pr(v, Math.PI * 0.03 ** 2) ? 'Prends le <b>rayon</b> (1,5 cm), pas le diamètre.' : pr(v, Math.PI * 1.5 ** 2) ? 'Le rayon doit être en <b>mètres</b> : 1,5 cm = 1,5 × 10<sup>−2</sup> m.' : pr(v, 0.015 ** 2) ? 'Tu as oublié π.' : 'S<sub>1</sub> = π × (1,5 × 10<sup>−2</sup>)².'),
+          solution: calc(`S<sub>1</sub> = π × (1,5 × 10<sup>−2</sup> m)² ≈ ${c('7,07 × 10<sup>−4</sup> m²')}`) },
+        { type: 'sci', q: 'Calcule la pression P dans le liquide (3 chiffres significatifs).', label: 'P =', valeur: P, unite: 'Pa', cs: 3, rel: .01,
+          diag: v => (pr(v, S1 / 100) ? 'C\'est P = F<sub>1</sub> / S<sub>1</sub>.' : pr(v, 100 * S1) ? 'On divise : P = F<sub>1</sub> / S<sub>1</sub>.' : 'P = F<sub>1</sub> / S<sub>1</sub>.'),
+          solution: calc(`P = ${fr('F<sub>1</sub>', 'S<sub>1</sub>')} = ${fr('100 N', '7,07 × 10<sup>−4</sup> m²')} ≈ ${c('1,41 × 10<sup>5</sup> Pa')}`) },
+        { type: 'sci', q: 'Calcule la force F<sub>2</sub> exercée par le grand piston (2 chiffres significatifs).', label: 'F<sub>2</sub> =', valeur: F2, unite: 'N', cs: 2, rel: .02,
+          diag: v => (pr(v, 100 * 12 / 1.5) ? 'Tu as pris le rapport des <b>rayons</b> : la force est multipliée par le rapport des <b>surfaces</b>, (R<sub>2</sub> / R<sub>1</sub>)².' : pr(v, P / (Math.PI * 0.12 ** 2)) ? 'F<sub>2</sub> = P × S<sub>2</sub> (on multiplie).' : pr(v, P * Math.PI * 0.24 ** 2) ? 'Prends le rayon R<sub>2</sub>, pas le diamètre.' : 'S<sub>2</sub> = π × (0,12 m)², puis F<sub>2</sub> = P × S<sub>2</sub>.'),
+          solution: calc(`S<sub>2</sub> = π × (0,12 m)² ≈ 4,52 × 10<sup>−2</sup> m²`) + calc(`F<sub>2</sub> = P × S<sub>2</sub> ≈ 1,41 × 10<sup>5</sup> × 4,52 × 10<sup>−2</sup> ≈ ${c('6,4 × 10<sup>3</sup> N')}`) + '<p>F<sub>2</sub> = 64 × F<sub>1</sub>, car (12 / 1,5)² = 8² = 64.</p>' },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Le baromètre de Torricelli ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Le baromètre de Torricelli');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>On remplit de mercure un tube fermé, puis on le retourne sur une cuve de mercure : le mercure descend un peu et laisse du <b>vide</b> en haut du tube.</p>
+      ${dessin('barometre')}
+      <div class="cle"><ul class="er-liste"><li>En A, dans le vide : <b>P<sub>A</sub> = 0 Pa</b>.</li>
+          <li>B et C sont dans le mercure, à la même altitude, et C est à la surface libre : <b>P<sub>B</sub> = P<sub>C</sub> = P<sub>atm</sub></b>.</li>
+          <li>Principe fondamental entre A (haut) et B (bas) : P<sub>B</sub> = P<sub>A</sub> + ρ<sub>Hg</sub> × g × h, donc :</li></ul>
+        <p class="crs-formule">P<sub>atm</sub> = ρ<sub>Hg</sub> × g × h</p>
+        <p>ρ<sub>Hg</sub> = 13 600 kg·m<sup>−3</sup>. La hauteur de mercure mesure la pression : le <b>« mm de mercure »</b> est une unité de pression.</p></div>
+    </div>
+    ${exemple(`<p>La colonne de mercure mesure h = 750 mm.</p>
+      ${calc(`P<sub>atm</sub> = ρ<sub>Hg</sub> × g × h = 13 600 × 9,8 × 0,750 = 99 960 Pa ≈ ${c('1,0 × 10<sup>5</sup> Pa')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'En haut du tube',
+      parties: [{ type: 'choix', q: 'Que vaut la pression P<sub>A</sub> en haut de la colonne de mercure ?', options: [o('zero', '0 Pa'), o('atm', 'P<sub>atm</sub>'), o('rgh', 'ρ<sub>Hg</sub> × g × h')], bonne: 'zero', melanger: false,
+        indices: { atm: 'Le tube est fermé : l\'air n\'y entre pas. Au-dessus du mercure, il y a du vide.', rgh: 'ρ<sub>Hg</sub> × g × h, c\'est la pression en B, en bas de la colonne.' },
+        solution: '<p>Au-dessus du mercure, c\'est le vide : P<sub>A</sub> = 0 Pa (à retenir).</p>' }] },
+    { titre: 'Un jour de beau temps', enonce: '<p>La colonne de mercure mesure h = 740 mm.</p>',
+      parties: [{ type: 'sci', q: 'Calcule la pression atmosphérique (3 chiffres significatifs).', label: 'P<sub>atm</sub> =', valeur: RHG * G * 0.74, unite: 'Pa', cs: 3, rel: .006,
+        diag: v => (pr(v, RHG * G * 740) ? 'h doit être en <b>mètres</b> : 740 mm = 0,740 m.' : pr(v, 1000 * G * 0.74) ? 'C\'est du mercure : ρ<sub>Hg</sub> = 13 600 kg·m<sup>−3</sup>.' : pr(v, 1e5 + RHG * G * 0.74) ? 'En A, c\'est le vide (0 Pa) : P<sub>atm</sub> = ρ<sub>Hg</sub> × g × h, sans rien ajouter.' : 'P<sub>atm</sub> = 13 600 × 9,8 × 0,740.'),
+        solution: calc(`P<sub>atm</sub> = 13 600 × 9,8 × 0,740 ≈ ${c('9,86 × 10<sup>4</sup> Pa')}`) }] },
+    { titre: 'La hauteur de mercure', enonce: '<p>La pression atmosphérique vaut 1 020 hPa.</p>',
+      parties: [{ type: 'nombre', q: 'Quelle hauteur de mercure indique le baromètre (en mm) ?', label: 'h =', valeur: 102000 / (RHG * G) * 1000, unite: 'mm', signe: false, rel: .006, affiche: '765',
+        diag: v => (pr(v, 102000 / (RHG * G)) ? 'C\'est la hauteur en <b>mètres</b> : convertis en mm.' : pr(v, 1020 / (RHG * G) * 1000) ? 'Convertis d\'abord la pression en Pa : 1 020 hPa = 102 000 Pa.' : pr(v, 102000 / (1000 * G) * 1000) ? 'Prends ρ<sub>Hg</sub> = 13 600 kg·m<sup>−3</sup>.' : 'h = P<sub>atm</sub> / (ρ<sub>Hg</sub> × g), en m, puis en mm.'),
+        solution: calc(`h = ${fr('P<sub>atm</sub>', 'ρ<sub>Hg</sub> × g')} = ${fr('102 000', '13 600 × 9,8')} ≈ 0,765 m = ${c('765 mm')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Dans un liquide, la pression se transmet : même pression en A et B à la même altitude.</p>
+      <p class="crs-formule">P = ${fr('F<sub>1</sub>', 'S<sub>1</sub>')} &nbsp;·&nbsp; F<sub>2</sub> = P × S<sub>2</sub> &nbsp;·&nbsp; S = π × R²</p>
+      <p>Si S<sub>2</sub> ≫ S<sub>1</sub>, alors F<sub>2</sub> ≫ F<sub>1</sub> : le cric multiplie la force.</p></div>
+    <div class="cle"><p>Baromètre de Torricelli : P<sub>A</sub> = 0 Pa (vide), P<sub>B</sub> = P<sub>C</sub> = P<sub>atm</sub>.</p>
+      <p class="crs-formule">P<sub>atm</sub> = ρ<sub>Hg</sub> × g × h</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4_questions.html">Questions sur le cric et le baromètre →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_5.html">Module 5 : exercices</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+SF.menu('module_4_cours');
+</script>
+</body>
+</html>

@@ -16,6 +16,7 @@
      cinematique  chronophotographies (positions successives) et vecteurs vitesse
      wagon      wagon tiré sur des rails par des cordes à différents angles (travail d'une force)
      rotation   engrenages, arcs de cercle et sens de rotation (mouvements de rotation)
+     fluides    château d'eau et niveaux, hauteur h, forces pressantes sur les parois (statique des fluides)
      fractions  disques et barres partagés
      molecules  modèles moléculaires en boules
      formules:physique | formules:redox | formules:pile | formules:combustion | formules:ph | formules:algebre
@@ -405,6 +406,58 @@
       ctx.font = `500 17px ${police()}`; ctx.globalAlpha = .16;
       ctx.fillText('v = R × ω', w * .05, h * .14);
       ctx.fillText('1 tr/min = 2π rad / 60 s', w * .4, h * .5);
+    },
+
+    // Château d'eau relié à une maison, niveaux de l'eau en pointillés et hauteur h,
+    // récipient avec les forces pressantes perpendiculaires aux parois ; formules en filigrane
+    fluides(ctx, w, h, c, rnd) {
+      const p = 26;
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineWidth = 1;
+      for (let x = 0, i = 0; x <= w; x += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .11; trait(ctx, x, 0, x, h); }
+      for (let y = 0, i = 0; y <= h; y += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .11; trait(ctx, 0, y, w, y); }
+      function fleche(x, y, dx, dy, a) {
+        const L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, t = 10;
+        ctx.globalAlpha = a; ctx.lineWidth = 2.5; trait(ctx, x, y, x + dx - ux * 4, y + dy - uy * 4);
+        ctx.beginPath(); ctx.moveTo(x + dx, y + dy);
+        ctx.lineTo(x + dx - ux * t - uy * t * .45, y + dy - uy * t + ux * t * .45);
+        ctx.lineTo(x + dx - ux * t + uy * t * .45, y + dy - uy * t - ux * t * .45); ctx.closePath(); ctx.fill();
+      }
+      // sol, château d'eau (cuve évasée sur un pilier) et maison
+      const k = Math.min(1.1, h / 440), sol = h * .66, xc = w * .74, yS = sol - 210 * k;
+      ctx.globalAlpha = .35; ctx.lineWidth = 2; trait(ctx, 0, sol, w, sol);
+      ctx.globalAlpha = .14; ctx.beginPath(); ctx.moveTo(xc - 46 * k, yS); ctx.lineTo(xc + 46 * k, yS); ctx.lineTo(xc + 36 * k, yS + 70 * k); ctx.lineTo(xc - 36 * k, yS + 70 * k); ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = .5; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(xc - 52 * k, yS - 18 * k); ctx.lineTo(xc - 36 * k, yS + 72 * k); ctx.lineTo(xc + 36 * k, yS + 72 * k); ctx.lineTo(xc + 52 * k, yS - 18 * k); ctx.stroke();
+      ctx.strokeRect(xc - 12 * k, yS + 72 * k, 24 * k, sol - yS - 72 * k);
+      const xm = xc + 150 * k, ym = sol - 60 * k;
+      ctx.globalAlpha = .4; ctx.strokeRect(xm - 45 * k, ym, 90 * k, 60 * k);
+      ctx.beginPath(); ctx.moveTo(xm - 55 * k, ym); ctx.lineTo(xm, ym - 40 * k); ctx.lineTo(xm + 55 * k, ym); ctx.stroke();
+      ctx.lineWidth = 3; ctx.globalAlpha = .3; ctx.beginPath(); ctx.moveTo(xc, yS + 72 * k); ctx.lineTo(xc, sol + 8); ctx.lineTo(xm, sol + 8); ctx.lineTo(xm, sol - 8); ctx.stroke();
+      // niveaux en pointillés et cote h entre la surface et l'arrivée d'eau
+      ctx.lineWidth = 1.5; ctx.setLineDash([7, 6]); ctx.globalAlpha = .35;
+      trait(ctx, xc + 52 * k, yS, xm + 95 * k, yS); trait(ctx, xm, sol - 8, xm + 95 * k, sol - 8); ctx.setLineDash([]);
+      fleche(xm + 85 * k, (yS + sol) / 2, 0, -(sol - yS) / 2 + 4, .5); fleche(xm + 85 * k, (yS + sol) / 2, 0, (sol - yS) / 2 - 12, .5);
+      ctx.font = `600 22px ${police()}`; ctx.globalAlpha = .45; ctx.fillText('h', xm + 93 * k, (yS + sol) / 2 + 8);
+      // récipient rempli de liquide : bulles et forces pressantes perpendiculaires aux parois
+      const x0 = w * .05, x1 = w * .2, y0 = h * .14, y1 = h * .56;
+      ctx.globalAlpha = .1; ctx.fillRect(x0, y0 + 20, x1 - x0, y1 - y0 - 20);
+      ctx.globalAlpha = .45; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x0, y1); ctx.lineTo(x1, y1); ctx.lineTo(x1, y0); ctx.stroke();
+      ctx.lineWidth = 1.5; trait(ctx, x0, y0 + 20, x1, y0 + 20);
+      for (let i = 0; i < 4; i++) {
+        const y = y0 + 50 + i * (y1 - y0 - 60) / 3, L = 18 + i * 12;
+        fleche(x1, y, L, 0, .35); fleche(x0, y, -L, 0, .35);
+      }
+      fleche((x0 + x1) / 2, y1, 0, 52, .4);
+      for (let i = 0; i < 14; i++) {
+        ctx.globalAlpha = .18 + rnd() * .2; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(x0 + 12 + rnd() * (x1 - x0 - 24), y0 + 34 + rnd() * (y1 - y0 - 44), 2 + rnd() * 4, 0, 7); ctx.stroke();
+      }
+      // formules en filigrane
+      ctx.font = `600 20px ${police()}`; ctx.globalAlpha = .22;
+      ctx.fillText('P = F / S', w * .3, h * .1);
+      ctx.fillText('Pbas = Phaut + ρ g h', w * .44, h * .58);
+      ctx.font = `500 17px ${police()}`; ctx.globalAlpha = .16;
+      ctx.fillText('1 bar = 10⁵ Pa', w * .5, h * .24);
+      ctx.fillText('Prel = Pabs − Patm', w * .26, h * .7);
     },
 
     // Formules écrites en quinconce, plus ou moins marquées

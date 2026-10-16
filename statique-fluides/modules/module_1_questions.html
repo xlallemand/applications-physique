@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur la pression — Chapitre 9 : Statique des fluides</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="sf.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : P = F / S avec S en m², en cm²,
+   en mm² et avec un poids (4), F = P × S avec P en bar ou en hPa (3),
+   conversion d'une surface au tableau (1), conversion d'une pression (1),
+   formule à choisir (1).
+   Erreurs diagnostiquées : cm² converti comme des cm (× 10⁻²), mm²
+   avec 10⁻³, bar ou hPa non convertis, P = S / F ou F × S, masse au lieu
+   du poids (g = 9,81 N/kg).
+   ============================================================ */
+const { o, fq, fmt, sci, hasard, melanger, proche, fr, partieSurfaces } = SF;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .03);
+const G = 9.81;
+const s2 = v => sci(v, 2);
+
+/* ---------- Groupe 1 : P = F / S ---------- */
+// S en m²
+function qPm2() {
+  const [qui, F, S] = hasard([['Une armoire de poids 1 500 N', 1500, 0.25], ['Un coffre de poids 800 N', 800, 0.04], ['Un réfrigérateur de poids 600 N', 600, 0.30], ['Une caisse de poids 2 400 N', 2400, 1.2]]);
+  const P = F / S;
+  return { theme: 'P = F / S', enonce: `<p>${qui} repose sur le sol par une surface de ${fmt(S)} m².</p>`,
+    parties: [fq.sci('Calcule la pression exercée sur le sol (2 chiffres significatifs).', 'P =', P, 'Pa', { cs: 2, rel: .02,
+      diag: v => (pr(v, S / F) ? 'Tu as calculé S / F : c\'est P = F / S.' : pr(v, F * S) ? 'Tu as multiplié : P = F / S.' : `P = F / S = ${fmt(F)} / ${fmt(S)}.`),
+      solution: calc(`P = ${fr('F', 'S')} = ${fr(fmt(F) + ' N', fmt(S) + ' m²')} = ${c(s2(P) + ' Pa')}`) })] };
+}
+// S en cm²
+function qPcm2() {
+  const [F, S] = hasard([[12, 4], [30, 15], [60, 25], [90, 50], [45, 20]]);
+  const P = F / (S * 1e-4);
+  return { theme: 'P = F / S, S en cm²', enonce: `<p>Une force pressante de ${F} N s'exerce sur une surface de ${S} cm².</p>`,
+    parties: [fq.sci('Calcule la pression (2 chiffres significatifs).', 'P =', P, 'Pa', { cs: 2, rel: .02,
+      diag: v => (pr(v, F / (S * 1e-2)) ? 'Tu as converti les cm² comme des cm (× 10<sup>−2</sup>) : 1 cm² = 10<sup>−4</sup> m².' : pr(v, F / S) ? 'Convertis d\'abord la surface en m² : 1 cm² = 10<sup>−4</sup> m².' : pr(v, S * 1e-4 / F) ? 'C\'est P = F / S (pas S / F).' : `S = ${S} × 10<sup>−4</sup> m², puis P = F / S.`),
+      solution: calc(`S = ${S} cm² = ${S} × 10<sup>−4</sup> m²`) + calc(`P = ${fr('F', 'S')} = ${fr(F + ' N', S + ' × 10<sup>−4</sup> m²')} = ${c(s2(P) + ' Pa')}`) })] };
+}
+// objet posé : F = m × g, S en cm²
+function qMasse() {
+  const [qui, m, S] = hasard([['Un pot de fleurs de 5,0 kg', 5, 80], ['Un livre de 1,2 kg', 1.2, 400], ['Une bouteille de 1,5 kg', 1.5, 50], ['Un haltère de 2,0 kg', 2, 20]]);
+  const F = m * G, P = F / (S * 1e-4);
+  return { theme: 'Pression d\'un objet posé', enonce: `<p>${qui} est posé sur une table. Il la touche sur une surface de ${S} cm² (g = 9,81 N/kg).</p>`,
+    parties: [fq.sci('Calcule la pression exercée sur la table (2 chiffres significatifs).', 'P =', P, 'Pa', { cs: 2, rel: .03,
+      diag: v => (pr(v, m / (S * 1e-4)) ? 'La force pressante est le <b>poids</b> : F = m × g.' : pr(v, F / (S * 1e-2)) ? '1 cm² = 10<sup>−4</sup> m² (pas 10<sup>−2</sup>).' : pr(v, F / S) ? 'Convertis la surface en m².' : 'F = m × g, S en m², puis P = F / S.'),
+      solution: calc(`F = m × g = ${fmt(m)} × 9,81 ≈ ${fmt(+F.toPrecision(3))} N ; S = ${S} × 10<sup>−4</sup> m²`) + calc(`P = ${fr('F', 'S')} ≈ ${c(s2(P) + ' Pa')}`) })] };
+}
+// S en mm²
+function qPmm2() {
+  const [qui, F, S] = hasard([['Un clou', 40, 2], ['La lame d\'un couteau', 10, 4], ['Une aiguille', 5, 0.5], ['La pointe d\'un compas', 2, 0.1]]);
+  const P = F / (S * 1e-6);
+  return { theme: 'P = F / S, S en mm²', enonce: `<p>${qui} appuie avec une force de ${F} N sur une surface de ${fmt(S)} mm².</p>`,
+    parties: [fq.sci('Calcule la pression exercée (2 chiffres significatifs).', 'P =', P, 'Pa', { cs: 2, rel: .02,
+      diag: v => (pr(v, F / (S * 1e-3)) ? 'Tu as utilisé 1 mm² = 10<sup>−3</sup> m² : c\'est 10<sup>−6</sup> m² (3 × 2 rangs).' : pr(v, F / (S * 1e-2)) ? '1 mm² = 10<sup>−6</sup> m².' : pr(v, F / S) ? 'Convertis la surface en m² : 1 mm² = 10<sup>−6</sup> m².' : `S = ${fmt(S)} × 10<sup>−6</sup> m², puis P = F / S.`),
+      solution: calc(`S = ${fmt(S)} mm² = ${fmt(S)} × 10<sup>−6</sup> m²`) + calc(`P = ${fr(F + ' N', fmt(S) + ' × 10<sup>−6</sup> m²')} = ${c(s2(P) + ' Pa')}`) })] };
+}
+
+/* ---------- Groupe 2 : F = P × S ---------- */
+// P en bar, S en m²
+function qFbar() {
+  const [qui, Pb, S] = hasard([['la porte d\'un caisson de plongée', 3, 1.5], ['le fond d\'une cuve', 1.5, 0.40], ['un hublot', 6, 0.05], ['le couvercle d\'une cocotte', 2, 0.02]]);
+  const F = Pb * 1e5 * S;
+  return { theme: 'F = P × S', enonce: `<p>Un fluide exerce une pression de ${fmt(Pb)} bar sur ${qui}, de surface ${fmt(S)} m².</p>`,
+    parties: [fq.sci('Calcule la force pressante (2 chiffres significatifs).', 'F =', F, 'N', { cs: 2, rel: .02,
+      diag: v => (pr(v, Pb * S) ? 'Convertis d\'abord la pression en Pa : 1 bar = 10<sup>5</sup> Pa.' : pr(v, Pb * 1e5 / S) ? 'Tu as divisé : F = P × S.' : pr(v, Pb * 1e3 * S) ? '1 bar = 10<sup>5</sup> Pa (pas 10<sup>3</sup>).' : 'P en Pa, puis F = P × S.'),
+      solution: calc(`P = ${fmt(Pb)} bar = ${fmt(Pb)} × 10<sup>5</sup> Pa`) + calc(`F = P × S = ${fmt(Pb)} × 10<sup>5</sup> Pa × ${fmt(S)} m² = ${c(s2(F) + ' N')}`) })] };
+}
+// P en bar, S en cm²
+function qFbarcm2() {
+  const [Pb, S] = hasard([[2, 10], [5, 20], [10, 50], [8, 5], [200, 4]]);
+  const F = Pb * 1e5 * S * 1e-4;
+  return { theme: 'F = P × S, deux conversions', enonce: `<p>Dans un circuit hydraulique, l'huile est à ${Pb} bar. Elle pousse un piston de surface ${S} cm².</p>`,
+    parties: [fq.sci('Calcule la force exercée sur le piston (2 chiffres significatifs).', 'F =', F, 'N', { cs: 2, rel: .02,
+      diag: v => (pr(v, Pb * S * 1e-4) ? 'Convertis la pression en Pa : 1 bar = 10<sup>5</sup> Pa.' : pr(v, Pb * 1e5 * S * 1e-2) ? '1 cm² = 10<sup>−4</sup> m² (pas 10<sup>−2</sup>).' : pr(v, Pb * 1e5 * S) ? 'Convertis la surface en m² : 1 cm² = 10<sup>−4</sup> m².' : pr(v, Pb * S) ? 'Convertis la pression en Pa et la surface en m².' : 'P en Pa, S en m², puis F = P × S.'),
+      solution: calc(`P = ${Pb} × 10<sup>5</sup> Pa ; S = ${S} × 10<sup>−4</sup> m²`) + calc(`F = P × S = ${c(s2(F) + ' N')}`) })] };
+}
+// P en hPa (air), S en m²
+function qFhPa() {
+  const [hpa, qui, S] = hasard([[1013, 'une vitre', 1.2], [950, 'une porte', 2], [1020, 'une table', 0.8], [990, 'une feuille de papier', 0.06]]);
+  const F = hpa * 100 * S;
+  return { theme: 'Force pressante de l\'air', enonce: `<p>L'air est à ${fmt(hpa)} hPa. Il pousse sur ${qui}, de surface ${fmt(S)} m².</p>`,
+    parties: [fq.sci('Calcule la force pressante de l\'air sur cette surface (2 chiffres significatifs).', 'F =', F, 'N', { cs: 2, rel: .02,
+      diag: v => (pr(v, hpa * S) ? 'Convertis la pression en Pa : 1 hPa = 100 Pa.' : pr(v, hpa * 1000 * S) ? '1 hPa = 100 Pa (pas 1 000).' : pr(v, hpa * 100 / S) ? 'F = P × S (on multiplie).' : 'P en Pa, puis F = P × S.'),
+      solution: calc(`P = ${fmt(hpa)} hPa = ${fmt(hpa)} × 100 Pa`) + calc(`F = P × S = ${fmt(hpa * 100)} Pa × ${fmt(S)} m² ≈ ${c(s2(F) + ' N')}`) })] };
+}
+
+/* ---------- Groupe 3 : conversions ---------- */
+function qSurface() {
+  const [v, u, txt] = hasard([['25', 'cm2', '25 × 10<sup>−4</sup> m² = 0,002 5 m²'], ['8', 'cm2', '8 × 10<sup>−4</sup> m² = 0,000 8 m²'], ['150', 'mm2', '150 × 10<sup>−6</sup> m² = 0,000 15 m²'], ['40', 'dm2', '40 × 10<sup>−2</sup> m² = 0,4 m²'], ['2,5', 'cm2', '2,5 × 10<sup>−4</sup> m² = 0,000 25 m²']]);
+  const nom = { cm2: 'cm²', mm2: 'mm²', dm2: 'dm²' }[u];
+  return { theme: 'Convertir une surface', consigne: 'Touche la colonne après laquelle tu places la virgule pour avoir des m², puis valide.',
+    parties: [partieSurfaces({ valeur: v, de: u, vers: 'm2', solution: calc(`${v} ${nom} = ${c(txt)}`) })] };
+}
+function qPression() {
+  return hasard([
+    () => { const b = hasard([1.2, 2.2, 3.5, 6]); return { theme: 'Convertir une pression', parties: [fq.sci(`Convertis ${fmt(b)} bar en pascals.`, 'P =', b * 1e5, 'Pa', { cs: 2, rel: .01,
+      diag: v => (pr(v, b * 1e3) ? '1 bar = 10<sup>5</sup> Pa (pas 10<sup>3</sup>).' : pr(v, b * 100) ? '1 bar = 1 000 hPa = 10<sup>5</sup> Pa.' : pr(v, b * 1e-5) ? 'On <b>multiplie</b> par 10<sup>5</sup>.' : '1 bar = 10<sup>5</sup> Pa.'),
+      solution: calc(`${fmt(b)} bar = ${c(fmt(b) + ' × 10<sup>5</sup> Pa')}`) })] }; },
+    () => { const h = hasard([980, 1005, 1030, 870]); return { theme: 'Convertir une pression', parties: [fq.sci(`Convertis ${fmt(h)} hPa en pascals.`, 'P =', h * 100, 'Pa', { cs: 3, rel: .005,
+      diag: v => (pr(v, h * 1000) ? '1 hPa = 100 Pa (h = hecto = 100).' : pr(v, h / 100) ? 'On <b>multiplie</b> par 100.' : '1 hPa = 100 Pa.'),
+      solution: calc(`${fmt(h)} hPa = ${fmt(h)} × 100 Pa = ${c(sci(h * 100, 3) + ' Pa')}`) })] }; },
+    () => { const p = hasard([2e5, 4.5e5, 8e5, 1.5e6]); return { theme: 'Convertir une pression', parties: [fq.nombre(`Convertis ${sci(p, 2)} Pa en bars.`, 'P =', p / 1e5, 'bar', { signe: false, rel: .01,
+      diag: v => (pr(v, p * 1e5) ? 'On <b>divise</b> par 10<sup>5</sup> pour passer des Pa aux bars.' : pr(v, p / 100) ? 'Ça, ce sont des hPa : pour des bars, on divise par 10<sup>5</sup>.' : pr(v, p / 1000) ? '1 bar = 10<sup>5</sup> Pa (pas 10<sup>3</sup>).' : 'On divise par 10<sup>5</sup>.'),
+      solution: calc(`${sci(p, 2)} Pa = ${c(fmt(p / 1e5) + ' bar')}`) })] }; },
+  ])();
+}
+function qFormule() {
+  return hasard([
+    () => ({ theme: 'La bonne formule', enonce: '<p>On connaît la pression P d\'un fluide et la surface S d\'une paroi.</p>',
+      parties: [fq.choix('Quelle formule donne la force pressante F sur la paroi ?', [o('ok', 'F = P × S'), o('div', 'F = P / S'), o('inv', 'F = S / P'), o('add', 'F = P + S')], 'ok',
+        { melanger: false, indices: { div: 'De P = F / S, on tire F en multipliant par S.', inv: 'De P = F / S, on tire F en multipliant les deux côtés par S.', add: 'On ne peut pas additionner une pression et une surface.' },
+          solution: '<p>P = F / S, donc F = P × S.</p>' })] }),
+    () => ({ theme: 'Une question d\'unités', enonce: '<p>On veut calculer une pression en pascals avec P = F / S.</p>',
+      parties: [fq.choix('Dans quelles unités faut-il écrire F et S ?', [o('ok', 'F en N et S en m²'), o('cm', 'F en N et S en cm²'), o('kg', 'F en kg et S en m²'), o('bar', 'F en bar et S en m²')], 'ok',
+        { melanger: false, colonne: true, indices: { cm: 'Le pascal correspond à des N par <b>m²</b> : convertis les cm² en m².', kg: 'Une force s\'exprime en newtons (N) ; le kilogramme est l\'unité de masse.', bar: 'Le bar est une unité de pression, pas de force.' },
+          solution: '<p>1 Pa = 1 N/m² : F en newtons, S en mètres carrés.</p>' })] }),
+  ])();
+}
+
+// tirage : 4 + 3 + 2 + 1 questions
+function tirage() {
+  return [qPm2(), qPcm2(), qMasse(), qPmm2(), qFbar(), qFbarcm2(), qFhPa(), qSurface(), qPression(), qFormule()];
+}
+
+SF.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Pression et force pressante',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : calculer une pression P = F / S, une force pressante F = P × S, et convertir les surfaces et les pressions.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2_cours.html', label: 'Module 2 : pression absolue et relative →' },
+});
+SF.menu('module_1_questions');
+</script>
+</body>
+</html>

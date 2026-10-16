@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : pression absolue et pression relative — Chapitre 9 : Statique des fluides</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="sf.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Pression absolue et pression relative</h2>
+    <p class="er-contexte">Une pression se mesure <b>par rapport au vide</b> (pression absolue) ou <b>par rapport à la pression atmosphérique</b> (pression relative). Les manomètres des pneus et des canalisations donnent la pression relative.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   P_rel = P_abs − P_atm ; P_atm ≈ 1 bar = 10⁵ Pa.
+   Exemple : pneu à 2,2 bar (manomètre, pression relative),
+   P_abs = 2,2 + 1 = 3,2 bar.
+   Erreurs diagnostiquées : P_atm ajoutée au lieu d'être retirée (et
+   l'inverse), confusion entre les deux pressions, bar et Pa mélangés.
+   Valeurs : 4,0 + 1 = 5,0 bar ; 4,5 − 1 = 3,5 bar ;
+   3,3 × 10⁵ − 10⁵ = 2,3 × 10⁵ Pa.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, proche, dessin, versCours } = SF;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .02);
+
+/* ---------- 1. Deux références ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Par rapport au vide ou par rapport à l\'air ?');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définitions.</b></p>
+        <ul class="er-liste"><li>La <b>pression absolue</b> P<sub>abs</sub> est mesurée par rapport au <b>vide</b> (où P = 0 Pa).</li>
+          <li>La <b>pression relative</b> P<sub>rel</sub> est mesurée par rapport à la <b>pression atmosphérique</b> : c'est l'écart avec la pression de l'air ambiant.</li></ul>
+        <p class="crs-formule">P<sub>rel</sub> = P<sub>abs</sub> − P<sub>atm</sub></p></div>
+      ${dessin('axe', { quoi: 'pneu' })}
+    </div>
+    ${exemple(`<p>Le manomètre de la station de gonflage indique 2,2 bar pour un pneu : c'est une <b>pression relative</b>. Quelle est la pression absolue de l'air dans le pneu ?</p>
+      ${calc('P<sub>rel</sub> = P<sub>abs</sub> − P<sub>atm</sub>, donc P<sub>abs</sub> = P<sub>rel</sub> + P<sub>atm</sub>')}
+      ${calc(`P<sub>abs</sub> = 2,2 bar + 1,0 bar = ${c('3,2 bar')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Un pneu de vélo', enonce: '<p>Le manomètre d\'une pompe indique 4,0 bar dans un pneu de vélo.</p>',
+      parties: [{ type: 'nombre', q: 'Quelle est la pression absolue de l\'air dans le pneu ?', label: 'P<sub>abs</sub> =', valeur: 5, unite: 'bar', signe: false, tol: .05,
+        diag: v => (pr(v, 3) ? 'Le manomètre donne la pression relative : on <b>ajoute</b> P<sub>atm</sub> pour avoir la pression absolue.' : pr(v, 4) ? 'C\'est la pression relative (celle du manomètre). La pression absolue est plus grande de P<sub>atm</sub>.' : 'P<sub>abs</sub> = P<sub>rel</sub> + P<sub>atm</sub>.'),
+        solution: calc(`P<sub>abs</sub> = P<sub>rel</sub> + P<sub>atm</sub> = 4,0 + 1,0 = ${c('5,0 bar')}`) }] },
+    { titre: 'Une canalisation', enonce: '<p>Dans une canalisation, la pression absolue de l\'eau vaut 4,5 bar.</p>',
+      parties: [{ type: 'nombre', q: 'Quelle pression lit-on sur le manomètre (pression relative) ?', label: 'P<sub>rel</sub> =', valeur: 3.5, unite: 'bar', signe: false, tol: .05,
+        diag: v => (pr(v, 5.5) ? 'P<sub>rel</sub> = P<sub>abs</sub> − P<sub>atm</sub> : on <b>retire</b> la pression atmosphérique.' : pr(v, 4.5) ? 'C\'est la pression absolue : le manomètre indique l\'écart avec P<sub>atm</sub>.' : 'P<sub>rel</sub> = P<sub>abs</sub> − P<sub>atm</sub>.'),
+        solution: calc(`P<sub>rel</sub> = P<sub>abs</sub> − P<sub>atm</sub> = 4,5 − 1,0 = ${c('3,5 bar')}`) }] },
+    { titre: 'En pascals', enonce: '<p>La pression absolue dans un pneu de voiture vaut 3,3 × 10<sup>5</sup> Pa (P<sub>atm</sub> = 10<sup>5</sup> Pa).</p>',
+      parties: [{ type: 'sci', q: 'Calcule la pression relative.', label: 'P<sub>rel</sub> =', valeur: 2.3e5, unite: 'Pa', cs: 2, rel: .01,
+        diag: v => (pr(v, 4.3e5) ? 'On <b>retire</b> P<sub>atm</sub> = 10<sup>5</sup> Pa.' : pr(v, 3.3e5 - 1) ? 'Attention aux unités : P<sub>atm</sub> = 10<sup>5</sup> Pa, pas 1 Pa.' : pr(v, 3.3e5) ? 'C\'est la pression absolue.' : 'P<sub>rel</sub> = 3,3 × 10<sup>5</sup> − 1,0 × 10<sup>5</sup>.'),
+        solution: calc(`P<sub>rel</sub> = 3,3 × 10<sup>5</sup> − 1,0 × 10<sup>5</sup> = ${c('2,3 × 10<sup>5</sup> Pa')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Qui mesure quoi ? ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Qui mesure quoi ?');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">À savoir.</b></p>
+        <ul class="er-liste"><li>Un <b>manomètre</b> (pneus, canalisations, bouteilles de gaz) mesure une <b>pression relative</b>. La pression « des canalisations » et « des pneus » est une pression relative.</li>
+          <li>Un <b>baromètre</b> (météo) mesure la pression atmosphérique : une <b>pression absolue</b>.</li>
+          <li>Dans le <b>vide</b>, la pression absolue vaut <b>0 Pa</b>. Dans l'air ambiant, la pression relative vaut <b>0</b>.</li></ul></div>
+    </div>
+    ${exemple('<p>Un pneu crevé, à l\'air libre : son manomètre indique 0 bar (pression relative nulle), mais l\'air qu\'il contient est à P<sub>abs</sub> = P<sub>atm</sub> ≈ 1 bar.</p>')}`);
+  c_.aToi(carte, [
+    { titre: 'Absolue ou relative ?',
+      parties: [versCours({ type: 'grille', q: 'Pour chaque pression, choisis : absolue ou relative ?', options: [o('abs', 'absolue'), o('rel', 'relative')],
+        lignes: [
+          { id: 'gonf', label: 'Le manomètre de la station de gonflage indique 2,2 bar.', bonne: 'rel', indices: { abs: 'Un manomètre mesure l\'écart avec la pression atmosphérique.' } },
+          { id: 'baro', label: 'Le baromètre du salon indique 1 015 hPa.', bonne: 'abs', indices: { rel: 'Un baromètre mesure la pression de l\'air par rapport au vide : 1 015 hPa ≈ 1 bar, c\'est la pression atmosphérique elle-même.' } },
+          { id: 'plomb', label: 'Le plombier annonce « 3 bar » dans les canalisations.', bonne: 'rel', indices: { abs: 'La pression des canalisations est une pression relative (mesurée au manomètre).' } },
+          { id: 'vide', label: 'Dans le vide spatial, la pression vaut 0 Pa.', bonne: 'abs', indices: { rel: 'Le vide sert de référence pour la pression absolue : P<sub>abs</sub> = 0 Pa.' } },
+        ],
+        solution: '<p>Manomètre (pneus, canalisations) : pression relative. Baromètre et vide : pression absolue.</p>' })] },
+    { titre: 'L\'air ambiant',
+      parties: [{ type: 'choix', q: 'Que vaut la pression <b>relative</b> de l\'air ambiant ?', options: [o('zero', '0'), o('bar', '1 bar'), o('pa', '10<sup>5</sup> Pa'), o('moins', '−1 bar')], bonne: 'zero', melanger: false,
+        indices: { bar: '1 bar, c\'est sa pression absolue. La pression relative est l\'écart avec P<sub>atm</sub>.', pa: '10<sup>5</sup> Pa, c\'est sa pression absolue.', moins: 'P<sub>rel</sub> = P<sub>abs</sub> − P<sub>atm</sub> = P<sub>atm</sub> − P<sub>atm</sub>.' },
+        solution: '<p>P<sub>rel</sub> = P<sub>atm</sub> − P<sub>atm</sub> = 0.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Pression <b>absolue</b> : par rapport au vide (0 Pa). Pression <b>relative</b> : par rapport à la pression atmosphérique.</p></div>
+    <div class="cle"><p class="crs-formule">P<sub>rel</sub> = P<sub>abs</sub> − P<sub>atm</sub></p></div>
+    <div class="cle"><p>Manomètre (pneus, canalisations) : pression relative. Exemple : pneu à 2,2 bar → P<sub>abs</sub> = 3,2 bar.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur les pressions absolue et relative →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3a_cours.html">Module 3 : principe fondamental de l'hydrostatique</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+SF.menu('module_2_cours');
+</script>
+</body>
+</html>

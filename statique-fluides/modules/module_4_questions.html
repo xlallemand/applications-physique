@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : questions sur le cric et le baromètre — Chapitre 9 : Statique des fluides</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="sf.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : surface d'un piston (1), pression
+   dans le liquide (1), force sur le grand piston (3, dont une avec les
+   surfaces données), facteur multiplicateur (1), rayon nécessaire (1),
+   baromètre : P en A (1), hauteur de mercure (1), P_atm (1).
+   ρ_Hg = 13 600 kg·m⁻³, g = 9,8 m·s⁻².
+   Erreurs diagnostiquées : R non élevé au carré, diamètre, R en cm,
+   rapport des rayons au lieu des surfaces, h en mm, hPa non convertis.
+   ============================================================ */
+const { o, fq, fmt, sci, hasard, melanger, proche, fr } = SF;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .02);
+const G = 9.8, RHG = 13600, PI = Math.PI;
+const s = (v, n) => sci(v, n || 2);
+const figCric = z => { z.innerHTML = SF.dessin('cric'); };
+
+/* ---------- Groupe 1 : piston, pression ---------- */
+function qSurface() {
+  const R = hasard([4, 6, 8, 12, 25]), S = PI * (R * 1e-3) ** 2;
+  return { theme: 'Surface d\'un piston', enonce: `<p>Un piston circulaire a un rayon de ${R} mm.</p>`,
+    parties: [fq.sci('Calcule sa surface en m² (3 chiffres significatifs).', 'S =', S, 'm²', { cs: 3, rel: .01,
+      diag: v => (pr(v, PI * R * 1e-3) ? 'Le rayon est élevé <b>au carré</b> : S = π × R².' : pr(v, PI * (2 * R * 1e-3) ** 2) ? 'Prends le <b>rayon</b>, pas le diamètre.' : pr(v, PI * R ** 2) ? 'Le rayon doit être en <b>mètres</b> : 1 mm = 10<sup>−3</sup> m.' : pr(v, PI * (R * 1e-2) ** 2) ? '1 mm = 10<sup>−3</sup> m (pas 10<sup>−2</sup>).' : pr(v, (R * 1e-3) ** 2) ? 'Tu as oublié π.' : `S = π × (${R} × 10<sup>−3</sup> m)².`),
+      solution: calc(`S = π × R² = π × (${R} × 10<sup>−3</sup> m)² ≈ ${c(s(S, 3) + ' m²')}`) })] };
+}
+function qPression() {
+  const R = hasard([1.0, 1.5, 2.0]), F = hasard([50, 120, 200, 300]), S = PI * (R * 1e-2) ** 2, P = F / S;
+  return { theme: 'Pression dans le liquide', enonce: `<p>On pousse le petit piston d'un cric (rayon ${fmt(R)} cm) avec une force de ${F} N.</p>`, figure: figCric,
+    parties: [fq.sci('Calcule la pression dans l\'huile (2 chiffres significatifs).', 'P =', P, 'Pa', { cs: 2, rel: .02,
+      diag: v => (pr(v, F / (PI * R * 1e-2)) ? 'S = π × R² : le rayon est élevé au carré.' : pr(v, F / (PI * R ** 2)) ? 'Le rayon doit être en mètres.' : pr(v, F / (PI * (2 * R * 1e-2) ** 2)) ? 'Prends le rayon, pas le diamètre.' : pr(v, F * S) ? 'P = F / S (on divise).' : 'S = π × R² (R en m), puis P = F / S.'),
+      solution: calc(`S = π × (${fmt(R)} × 10<sup>−2</sup> m)² ≈ ${s(S, 3)} m²`) + calc(`P = ${fr('F', 'S')} ≈ ${c(s(P) + ' Pa')}`) })] };
+}
+
+/* ---------- Groupe 2 : force sur le grand piston ---------- */
+function qForce() {
+  const R1 = hasard([0.5, 1.0, 2.0]), k = hasard([5, 8, 10, 15]), F1 = hasard([50, 100, 150, 200]), R2 = R1 * k, F2 = F1 * k * k;
+  return { theme: 'Force sur le grand piston', enonce: `<p>Un cric a un petit piston de rayon ${fmt(R1)} cm et un grand piston de rayon ${fmt(R2)} cm. On pousse le petit piston avec ${F1} N.</p>`, figure: figCric,
+    parties: [fq.sci('Calcule la force F<sub>2</sub> exercée par le grand piston (2 chiffres significatifs).', 'F<sub>2</sub> =', F2, 'N', { cs: 2, rel: .02,
+      diag: v => (pr(v, F1 * k) ? 'Tu as multiplié par le rapport des <b>rayons</b>. La force est multipliée par le rapport des <b>surfaces</b> : (R<sub>2</sub> / R<sub>1</sub>)².' : pr(v, F1 / k / k) || pr(v, F1 / k) ? 'Le grand piston exerce une force plus <b>grande</b> : F<sub>2</sub> = P × S<sub>2</sub>.' : 'P = F<sub>1</sub> / S<sub>1</sub>, puis F<sub>2</sub> = P × S<sub>2</sub>.'),
+      solution: calc(`P = ${fr('F<sub>1</sub>', 'S<sub>1</sub>')} et F<sub>2</sub> = P × S<sub>2</sub>, donc F<sub>2</sub> = F<sub>1</sub> × ${fr('S<sub>2</sub>', 'S<sub>1</sub>')} = F<sub>1</sub> × (${fr('R<sub>2</sub>', 'R<sub>1</sub>')})²`) +
+        calc(`F<sub>2</sub> = ${F1} × (${fmt(R2)} / ${fmt(R1)})² = ${F1} × ${k * k} = ${c(s(F2) + ' N')}`) })] };
+}
+function qForceS() {
+  const [S1, S2, F1] = hasard([[2, 400, 50], [5, 500, 100], [4, 1000, 80], [10, 800, 150]]), F2 = F1 * S2 / S1;
+  return { theme: 'Presse hydraulique', enonce: `<p>Une presse hydraulique a un petit piston de ${S1} cm² et un grand piston de ${S2} cm². On exerce ${F1} N sur le petit piston.</p>`,
+    parties: [fq.sci('Calcule la force exercée par le grand piston (2 chiffres significatifs).', 'F<sub>2</sub> =', F2, 'N', { cs: 2, rel: .02,
+      diag: v => (pr(v, F1 * S1 / S2) ? 'Le grand piston donne la plus <b>grande</b> force : F<sub>2</sub> = F<sub>1</sub> × S<sub>2</sub> / S<sub>1</sub>.' : pr(v, F1 * Math.sqrt(S2 / S1)) ? 'La force est proportionnelle à la surface (pas à sa racine).' : 'P = F<sub>1</sub> / S<sub>1</sub> ; F<sub>2</sub> = P × S<sub>2</sub>.'),
+      solution: calc(`P = ${fr('F<sub>1</sub>', 'S<sub>1</sub>')} = ${fr(F1 + ' N', S1 + ' × 10<sup>−4</sup> m²')} = ${s(F1 / (S1 * 1e-4))} Pa`) + calc(`F<sub>2</sub> = P × S<sub>2</sub> = ${s(F1 / (S1 * 1e-4))} × ${S2} × 10<sup>−4</sup> = ${c(s(F2) + ' N')}`) })] };
+}
+function qFacteur() {
+  const k = hasard([3, 5, 10, 20]);
+  return { theme: 'Facteur multiplicateur', enonce: `<p>Le rayon du grand piston d'un cric est ${k} fois plus grand que celui du petit piston.</p>`,
+    parties: [fq.choix('Par combien la force est-elle multipliée ?', [o('k2', fmt(k * k)), o('k', fmt(k)), o('2k', fmt(2 * k)), o('k3', fmt(k ** 3))], 'k2',
+      { melanger: false, indices: { k: 'La force est multipliée par le rapport des <b>surfaces</b>, pas des rayons.', '2k': 'S = π × R² : le rayon est élevé au carré.', k3: 'S = π × R² : au carré, pas au cube.' },
+        solution: `<p>S = π × R² : si R est ${k} fois plus grand, S est ${k}² = ${k * k} fois plus grande, et F<sub>2</sub> = P × S<sub>2</sub> aussi.</p>` })] };
+}
+function qRayon() {
+  const [F1, R1, k, qui] = hasard([[100, 1.0, 10, 'une voiture de 1 t (poids ≈ 1,0 × 10<sup>4</sup> N)'], [150, 1.0, 8, 'une charge de poids 9,6 × 10<sup>3</sup> N'], [200, 0.5, 20, 'une charge de poids 8,0 × 10<sup>4</sup> N'], [120, 2.0, 5, 'une charge de poids 3,0 × 10<sup>3</sup> N']]);
+  const F2 = F1 * k * k, R2 = R1 * k;
+  return { theme: 'Rayon nécessaire', enonce: `<p>On pousse le petit piston (rayon ${fmt(R1)} cm) avec ${F1} N. On veut soulever ${qui}.</p>`, figure: figCric,
+    parties: [fq.nombre('Quel rayon doit avoir le grand piston (en cm) ?', 'R<sub>2</sub> =', R2, 'cm', { signe: false, rel: .02,
+      diag: v => (pr(v, R1 * k * k) ? 'Le rapport des surfaces vaut F<sub>2</sub> / F<sub>1</sub> = ' + (k * k) + ' ; le rapport des rayons est sa <b>racine carrée</b>.' : pr(v, R1 / k) ? 'Le grand piston a un rayon plus grand.' : 'S<sub>2</sub> / S<sub>1</sub> = F<sub>2</sub> / F<sub>1</sub>, et R<sub>2</sub> / R<sub>1</sub> = √(S<sub>2</sub> / S<sub>1</sub>).'),
+      solution: calc(`${fr('S<sub>2</sub>', 'S<sub>1</sub>')} = ${fr('F<sub>2</sub>', 'F<sub>1</sub>')} = ${fr(fmt(F2), F1)} = ${k * k} ; donc ${fr('R<sub>2</sub>', 'R<sub>1</sub>')} = √${k * k} = ${k}`) + calc(`R<sub>2</sub> = ${k} × ${fmt(R1)} cm = ${c(fmt(R2) + ' cm')}`) })] };
+}
+
+/* ---------- Groupe 3 : baromètre ---------- */
+const figBaro = z => { z.innerHTML = SF.dessin('barometre'); };
+function qVide() {
+  return hasard([
+    () => ({ theme: 'Baromètre de Torricelli', figure: figBaro, parties: [fq.choix('Que vaut la pression en A, en haut de la colonne de mercure ?', [o('zero', '0 Pa'), o('atm', 'P<sub>atm</sub>'), o('rgh', 'ρ<sub>Hg</sub> × g × h')], 'zero',
+      { melanger: false, indices: { atm: 'Le tube est fermé : au-dessus du mercure, c\'est le vide.', rgh: 'C\'est la pression en B.' }, solution: '<p>Vide : P<sub>A</sub> = 0 Pa.</p>' })] }),
+    () => ({ theme: 'Baromètre de Torricelli', figure: figBaro, parties: [fq.choix('Que vaut la pression en B, dans le tube au niveau de la surface de la cuve ?', [o('atm', 'P<sub>atm</sub>, comme en C'), o('zero', '0 Pa'), o('plus', 'P<sub>atm</sub> + ρ<sub>Hg</sub> × g × h')], 'atm',
+      { melanger: false, colonne: true, indices: { zero: 'Le vide est en A, en haut du tube.', plus: 'P<sub>B</sub> = P<sub>A</sub> + ρ g h avec P<sub>A</sub> = 0 ; et B est à la même altitude que C.' },
+        solution: '<p>B et C sont dans le mercure à la même altitude : P<sub>B</sub> = P<sub>C</sub> = P<sub>atm</sub> (C est à la surface libre).</p>' })] }),
+  ])();
+}
+function qHg() {
+  const hpa = hasard([980, 1000, 1013, 1030, 960]), h = hpa * 100 / (RHG * G) * 1000;
+  return { theme: 'Hauteur de mercure', enonce: `<p>La pression atmosphérique vaut ${fmt(hpa)} hPa.</p>`, figure: figBaro,
+    parties: [fq.nombre('Quelle est la hauteur h de la colonne de mercure (en mm) ?', 'h =', h, 'mm', { signe: false, rel: .006, affiche: fmt(Math.round(h)),
+      diag: v => (pr(v, h / 1000) ? 'C\'est la hauteur en mètres : convertis en mm.' : pr(v, h / 100) ? 'Convertis la pression en Pa : 1 hPa = 100 Pa.' : pr(v, hpa * 100 / (1000 * G) * 1000) ? 'Prends ρ<sub>Hg</sub> = 13 600 kg·m<sup>−3</sup>.' : 'h = P<sub>atm</sub> / (ρ<sub>Hg</sub> × g).'),
+      solution: calc(`h = ${fr('P<sub>atm</sub>', 'ρ<sub>Hg</sub> × g')} = ${fr(fmt(hpa * 100), '13 600 × 9,8')} ≈ ${fmt(+(h / 1000).toFixed(3))} m = ${c(fmt(Math.round(h)) + ' mm')}`) })] };
+}
+function qPatm() {
+  const h = hasard([735, 750, 760, 770]), P = RHG * G * h / 1000;
+  return { theme: 'Mesurer la pression atmosphérique', enonce: `<p>La colonne de mercure d'un baromètre mesure ${h} mm.</p>`, figure: figBaro,
+    parties: [fq.sci('Calcule la pression atmosphérique (3 chiffres significatifs).', 'P<sub>atm</sub> =', P, 'Pa', { cs: 3, rel: .006,
+      diag: v => (pr(v, P * 1000) ? 'h doit être en mètres.' : pr(v, 1000 * G * h / 1000) ? 'Prends ρ<sub>Hg</sub> = 13 600 kg·m<sup>−3</sup>.' : pr(v, 1e5 + P) ? 'En A, c\'est le vide : P<sub>atm</sub> = ρ<sub>Hg</sub> × g × h, sans ajouter 10<sup>5</sup> Pa.' : 'P<sub>atm</sub> = ρ<sub>Hg</sub> × g × h, h en m.'),
+      solution: calc(`P<sub>atm</sub> = ρ<sub>Hg</sub> × g × h = 13 600 × 9,8 × ${fmt(h / 1000)} ≈ ${c(s(P, 3) + ' Pa')}`) })] };
+}
+
+// tirage : 2 + 5 + 3 questions
+function tirage() {
+  return [qSurface(), qPression(), qForce(), qForce(), qForceS(), qFacteur(), qRayon(), qVide(), qHg(), qPatm()];
+}
+
+SF.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 4 · QUESTIONS', titre: 'Presse, cric hydraulique et baromètre',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : surface d\'un piston, pression transmise, force sur le grand piston, rayon nécessaire, baromètre de Torricelli. Données : ρ<sub>Hg</sub> = 13 600 kg·m<sup>−3</sup>, g = 9,8 m·s<sup>−2</sup>.</p>',
+  questions: tirage,
+  revoir: { href: 'module_4_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_5.html', label: 'Module 5 : exercices →' },
+});
+SF.menu('module_4_questions');
+</script>
+</body>
+</html>

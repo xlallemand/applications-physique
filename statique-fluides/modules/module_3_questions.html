@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions sur le principe fondamental — Chapitre 9 : Statique des fluides</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="sf.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard (ρ_eau = 1 000 kg·m⁻³, g = 9,8 m·s⁻²,
+   P_atm = 10⁵ Pa) :
+     pression au fond, absolue (2, dont une avec le schéma) et relative (1) ;
+     pression en un point haut (2, dont une avec le schéma) ;
+     hauteur nécessaire (2, dont une avec le schéma) ;
+     deux liquides superposés, interface puis fond (1) ;
+     liquide autre que l'eau, ρ donné (1) ; calcul de tête (1).
+   Erreurs diagnostiquées (SF.diagHydro) : P_atm oubliée, signe de ρ g h,
+   g oublié, h en cm, bar non converti, différence des pressions oubliée.
+   ============================================================ */
+const { o, fq, fmt, sci, hasard, melanger, proche, fr, partieSchema, choixFormule, diagHydro } = SF;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .02);
+const G = 9.8, ATM = 'P<sub>atm</sub> = 10<sup>5</sup> Pa';
+const VIDE = { label: '0 Pa', indice: '0 Pa, c\'est le vide. À la surface libre d\'un liquide à l\'air libre, P = P<sub>atm</sub>.' };
+const iSurface = 'À la surface libre, la pression est connue : P = P<sub>atm</sub> = 10<sup>5</sup> Pa.';
+const s = (v, n) => sci(v, n || 2);
+const consigne = 'Méthode : schéma (point haut, point bas, valeurs connues), choix de la formule, puis calcul.';
+
+/* ---------- Groupe 1 : pression au fond ---------- */
+// avec le schéma : piscine ou bassin
+function qFondSchema() {
+  const d = hasard([1.5, 2.0, 2.5, 3.0, 4.0]), P = 1e5 + 1000 * G * d;
+  return { theme: 'Pression au fond', consigne, enonce: `<p>Un bassin rempli d'eau a une profondeur de <b>${fmt(d)} m</b>. Sa surface est à l'air libre.</p>`,
+    parties: [
+      partieSchema({ type: 'piscine', dessin: { nomLiquide: 'eau' }, points: [
+        { pt: 'A', desc: 'surface', role: 'haut', p: ATM, indice: 'P<sub>atm</sub> est la pression de la surface libre (A).', indiceVide: iSurface },
+        { pt: 'B', desc: 'fond', role: 'bas', p: null }], h: { label: fmt(d) + ' m' }, intrus: [VIDE],
+        solution: `<p>A (surface) : point haut, P<sub>A</sub> = P<sub>atm</sub>. B (fond) : point bas, inconnue. h = ${fmt(d)} m.</p>` }),
+      choixFormule({ haut: 'A', bas: 'B', cherche: 'bas' }),
+      fq.sci('Calcule la pression absolue au fond (3 chiffres significatifs).', 'P<sub>B</sub> =', P, 'Pa', { cs: 3, rel: .006,
+        diag: diagHydro({ cherche: 'bas', Ph: 1e5, rho: 1000, g: G, h: d, surface: true }),
+        solution: calc(`P<sub>B</sub> = P<sub>A</sub> + ρ × g × h = 10<sup>5</sup> + 1 000 × 9,8 × ${fmt(d)} = ${c(s(P, 3) + ' Pa')}`) })] };
+}
+// sans schéma : un plongeur
+function qFond() {
+  const d = hasard([5, 8, 12, 15, 25]), P = 1e5 + 1000 * G * d;
+  return { theme: 'Pression en profondeur', enonce: `<p>Un plongeur nage à <b>${d} m</b> sous la surface d'un lac (eau douce).</p>`,
+    parties: [fq.sci('Calcule la pression absolue de l\'eau à cette profondeur (2 chiffres significatifs).', 'P =', P, 'Pa', { cs: 2, rel: .02,
+      diag: diagHydro({ cherche: 'bas', Ph: 1e5, rho: 1000, g: G, h: d, surface: true }),
+      solution: calc(`Point haut : la surface, P = P<sub>atm</sub>. P = P<sub>atm</sub> + ρ × g × h = 10<sup>5</sup> + 1 000 × 9,8 × ${d} ≈ ${c(s(P) + ' Pa')}`) })] };
+}
+// pression relative au fond
+function qFondRel() {
+  const d = hasard([2.0, 3.5, 6.0, 10]), r = 1000 * G * d;
+  return { theme: 'Pression relative au fond', enonce: `<p>Une cuve d'eau ouverte à l'air libre a une profondeur de ${fmt(d)} m.</p>`,
+    parties: [fq.sci('Calcule la pression <b>relative</b> au fond (2 chiffres significatifs).', 'P<sub>rel</sub> =', r, 'Pa', { cs: 2, rel: .02,
+      diag: v => (pr(v, 1e5 + r) ? 'C\'est la pression absolue. La pression relative est l\'écart avec P<sub>atm</sub> : P<sub>rel</sub> = ρ × g × h.' : pr(v, 1000 * d) ? 'Tu as oublié g.' : 'P<sub>rel</sub> = P<sub>abs</sub> − P<sub>atm</sub> = ρ × g × h.'),
+      solution: calc(`P<sub>abs</sub> = P<sub>atm</sub> + ρ × g × h, donc P<sub>rel</sub> = P<sub>abs</sub> − P<sub>atm</sub> = ρ × g × h = 1 000 × 9,8 × ${fmt(d)} ≈ ${c(s(r) + ' Pa')}`) })] };
+}
+
+/* ---------- Groupe 2 : pression en un point haut ---------- */
+function qHautSchema() {
+  const pb = hasard([3.0, 3.5, 4.0]), h = hasard([3.0, 5.0, 7.0, 9.0]), P = pb * 1e5 - 1000 * G * h;
+  return { theme: 'Pression en un point haut', consigne, enonce: `<p>À l'arrivée d'eau d'une maison, le réducteur règle la pression à <b>${fmt(pb)} bar</b>. Les combles sont <b>${fmt(h)} m</b> plus haut.</p>`,
+    parties: [
+      partieSchema({ type: 'combles', points: [
+        { pt: 'C', desc: 'combles', role: 'haut', p: null },
+        { pt: 'A', desc: 'arrivée', role: 'bas', p: fmt(pb) + ' bar', indice: 'La pression du réducteur est celle de l\'arrivée d\'eau (A).', indiceVide: 'La pression de l\'arrivée d\'eau est donnée : celle du réducteur.' }],
+        h: { label: fmt(h) + ' m' }, intrus: [{ label: ATM, indice: 'A n\'est pas une surface libre : sa pression est réglée par le réducteur.' }],
+        solution: `<p>A (arrivée) : point bas, P<sub>A</sub> = ${fmt(pb)} bar. C (combles) : point haut, inconnue. h = ${fmt(h)} m.</p>` }),
+      choixFormule({ haut: 'C', bas: 'A', cherche: 'haut' }),
+      fq.sci('Calcule P<sub>C</sub> (2 chiffres significatifs).', 'P<sub>C</sub> =', P, 'Pa', { cs: 2, rel: .02,
+        diag: diagHydro({ cherche: 'haut', Pb: pb * 1e5, rho: 1000, g: G, h, bar: true }),
+        solution: calc(`P<sub>C</sub> = P<sub>A</sub> − ρ × g × h = ${fmt(pb)} × 10<sup>5</sup> − 1 000 × 9,8 × ${fmt(h)} ≈ ${c(s(P) + ' Pa')}`) })] };
+}
+function qHaut() {
+  const [pb, h, txt] = hasard([[4.0, 12, 'au 4ᵉ étage, 12 m plus haut'], [5.0, 18, 'au 6ᵉ étage, 18 m plus haut'], [2.5, 6, 'à l\'étage, 6 m plus haut'], [6.0, 30, 'au 10ᵉ étage, 30 m plus haut']]);
+  const P = pb * 1e5 - 1000 * G * h;
+  return { theme: 'Pression à un étage', enonce: `<p>Au pied d'un immeuble, la pression de l'eau vaut ${fmt(pb)} bar. Un robinet est ${txt}.</p>`,
+    parties: [fq.sci('Calcule la pression de l\'eau à ce robinet (2 chiffres significatifs).', 'P =', P, 'Pa', { cs: 2, rel: .02,
+      diag: diagHydro({ cherche: 'haut', Pb: pb * 1e5, rho: 1000, g: G, h, bar: true }),
+      solution: calc(`Le robinet est le point haut : P = P<sub>bas</sub> − ρ × g × h = ${fmt(pb)} × 10<sup>5</sup> − 1 000 × 9,8 × ${h} ≈ ${c(s(P) + ' Pa')}`) })] };
+}
+
+/* ---------- Groupe 3 : hauteur nécessaire ---------- */
+function qHauteurSchema() {
+  const pb = hasard([2.5, 3.5, 4.5, 5.0]), h = (pb * 1e5 - 1e5) / (1000 * G);
+  return { theme: 'Hauteur nécessaire', consigne, enonce: `<p>Une maison est alimentée par un château d'eau. On veut une pression d'au moins <b>${fmt(pb)} bar</b> à son arrivée d'eau.</p>`,
+    parties: [
+      partieSchema({ type: 'chateau', points: [
+        { pt: 'C', desc: 'surface', role: 'haut', p: ATM, indice: 'P<sub>atm</sub> est la pression de la surface libre (C).', indiceVide: iSurface },
+        { pt: 'M', desc: 'maison', role: 'bas', p: fmt(pb) + ' bar', indice: 'C\'est la pression voulue dans la maison (M).', indiceVide: 'La pression voulue dans la maison est donnée.' }],
+        h: { label: null }, intrus: [VIDE],
+        solution: `<p>Les deux pressions sont connues : P<sub>C</sub> = P<sub>atm</sub>, P<sub>M</sub> = ${fmt(pb)} bar. L'inconnue est h.</p>` }),
+      choixFormule({ haut: 'C', bas: 'M', cherche: 'h' }),
+      fq.nombre('Calcule la hauteur minimale h (3 chiffres significatifs).', 'h =', h, 'm', { signe: false, rel: .01, affiche: fmt(+h.toPrecision(3)),
+        diag: diagHydro({ cherche: 'h', Pb: pb * 1e5, Ph: 1e5, rho: 1000, g: G, bar: true }),
+        solution: calc(`h = ${fr('P<sub>M</sub> − P<sub>C</sub>', 'ρ × g')} = ${fr(fmt(pb) + ' × 10<sup>5</sup> − 1 × 10<sup>5</sup>', '1 000 × 9,8')} ≈ ${c(fmt(+h.toPrecision(3)) + ' m')}`) })] };
+}
+function qProfondeur() {
+  const pa = hasard([1.5, 2.0, 2.5, 3.2]), h = (pa - 1) * 1e5 / (1000 * G);
+  return { theme: 'Quelle profondeur ?', enonce: `<p>L'ordinateur de plongée indique une pression absolue de ${fmt(pa)} bar.</p>`,
+    parties: [fq.nombre('À quelle profondeur est le plongeur (3 chiffres significatifs) ?', 'h =', h, 'm', { signe: false, rel: .01, affiche: fmt(+h.toPrecision(3)),
+      diag: diagHydro({ cherche: 'h', Pb: pa * 1e5, Ph: 1e5, rho: 1000, g: G, bar: true }),
+      solution: calc(`Point haut : la surface (P<sub>atm</sub>) ; point bas : le plongeur.`) + calc(`h = ${fr('P<sub>bas</sub> − P<sub>atm</sub>', 'ρ × g')} = ${fr(fmt(pa) + ' × 10<sup>5</sup> − 10<sup>5</sup>', '1 000 × 9,8')} ≈ ${c(fmt(+h.toPrecision(3)) + ' m')}`) })] };
+}
+
+/* ---------- Groupe 4 : deux liquides, autre liquide, calcul de tête ---------- */
+function qDeuxLiquides() {
+  const r1 = hasard([800, 850, 900]), h1 = hasard([0.20, 0.40, 0.50]), h2 = hasard([0.60, 1.0, 1.2]);
+  const PI = 1e5 + r1 * G * h1, PF = PI + 1000 * G * h2;
+  return { theme: 'Deux liquides superposés', enonce: `<p>Une cuve ouverte contient ${fmt(h1 * 100)} cm d'huile (ρ<sub>1</sub> = ${r1} kg·m<sup>−3</sup>) au-dessus de ${fmt(h2)} m d'eau.</p>`,
+    figure: z => { z.innerHTML = SF.dessin('reservoir', { liq1: `huile : ρ<tspan dy="4" font-size="10">1</tspan><tspan dy="-4"> = ${r1} kg·m</tspan><tspan dy="-6" font-size="10">−3</tspan>`,
+      h1: `h<tspan dy="4" font-size="10">1</tspan><tspan dy="-4"> = ${fmt(h1 * 100)} cm</tspan>`, h2: `h<tspan dy="4" font-size="10">2</tspan><tspan dy="-4"> = ${fmt(h2)} m</tspan>` }); },
+    parties: [
+      fq.sci('Étape 1, dans l\'huile : calcule la pression P<sub>I</sub> à l\'interface (3 chiffres significatifs).', 'P<sub>I</sub> =', PI, 'Pa', { cs: 3, rel: .006,
+        diag: v => (pr(v, 1e5 + 1000 * G * h1) ? 'Au-dessus de l\'interface, c\'est de l\'<b>huile</b> : ρ<sub>1</sub>.' : diagHydro({ cherche: 'bas', Ph: 1e5, rho: r1, g: G, h: h1, hcm: true, surface: true })(v)),
+        solution: calc(`P<sub>I</sub> = P<sub>atm</sub> + ρ<sub>1</sub> × g × h<sub>1</sub> = 10<sup>5</sup> + ${r1} × 9,8 × ${fmt(h1)} ≈ ${c(s(PI, 3) + ' Pa')}`) }),
+      fq.sci('Étape 2, dans l\'eau : calcule la pression P<sub>F</sub> au fond (3 chiffres significatifs).', 'P<sub>F</sub> =', PF, 'Pa', { cs: 3, rel: .006,
+        diag: v => (pr(v, PI + r1 * G * h2) ? 'Entre l\'interface et le fond, c\'est de l\'<b>eau</b> : ρ<sub>2</sub> = 1 000 kg·m<sup>−3</sup>.' : pr(v, 1e5 + 1000 * G * h2) ? 'Le point haut est l\'interface : pars de P<sub>I</sub>, pas de P<sub>atm</sub>.' : pr(v, 1e5 + 1000 * G * (h1 + h2)) ? 'Il y a deux liquides : on ne peut pas prendre ρ<sub>eau</sub> sur toute la hauteur.' : diagHydro({ cherche: 'bas', Ph: PI, rho: 1000, g: G, h: h2 })(v)),
+        solution: calc(`P<sub>F</sub> = P<sub>I</sub> + ρ<sub>2</sub> × g × h<sub>2</sub> = ${fmt(Math.round(PI))} + 1 000 × 9,8 × ${fmt(h2)} ≈ ${c(s(PF, 3) + ' Pa')}`) })] };
+}
+function qAutreLiquide() {
+  const [nom, r, h, unit] = hasard([['d\'eau de mer', 1025, 40, 'm'], ['d\'huile', 920, 2.5, 'm'], ['d\'éthanol', 790, 3.0, 'm'], ['de mercure', 13600, 0.50, 'm'], ['de fioul', 850, 4.0, 'm']]);
+  const P = 1e5 + r * G * h;
+  return { theme: 'Un autre liquide', enonce: `<p>Une cuve ouverte contient ${fmt(h)} m ${nom} (ρ = ${fmt(r)} kg·m<sup>−3</sup>).</p>`,
+    parties: [fq.sci('Calcule la pression absolue au fond de la cuve (2 chiffres significatifs).', 'P =', P, 'Pa', { cs: 2, rel: .02,
+      diag: v => (pr(v, 1e5 + 1000 * G * h) && r !== 1025 ? `Ce n'est pas de l'eau : prends ρ = ${fmt(r)} kg·m<sup>−3</sup>.` : diagHydro({ cherche: 'bas', Ph: 1e5, rho: r, g: G, h, surface: true })(v)),
+      solution: calc(`P = P<sub>atm</sub> + ρ × g × h = 10<sup>5</sup> + ${fmt(r)} × 9,8 × ${fmt(h)} ≈ ${c(s(P) + ' Pa')}`) })] };
+}
+function qTete() {
+  const [d, bon] = hasard([[30, 4], [20, 3], [40, 5], [50, 6]]);
+  const opts = [o('ok', `≈ ${bon} bar`), o('oubli', `≈ ${bon - 1} bar`), o('x10', `≈ ${d} bar`), o('plus', `≈ ${d + 1} bar`)];
+  return { theme: 'Calcul de tête', enonce: `<p>Un plongeur descend à ${d} m sous la surface de la mer. À la surface, la pression vaut 1 bar.</p>`,
+    parties: [fq.choix('Sans calculatrice, estime la pression absolue qu\'il subit.', opts, 'ok',
+      { melanger: false, indices: { oubli: 'N\'oublie pas le bar de l\'air à la surface.', x10: 'On gagne 1 bar tous les <b>10 m</b>, pas tous les mètres.', plus: 'On gagne 1 bar tous les <b>10 m</b>, pas tous les mètres.' },
+        solution: `<p>Tous les 10 m d'eau, on gagne 1 bar : P ≈ 1 + ${d / 10} = ${bon} bar.</p>` })] };
+}
+
+// tirage : 3 + 2 + 2 + 3 questions, les questions avec schéma réparties dans la série
+function tirage() {
+  return [qFond(), qFondSchema(), qFondRel(), qHaut(), qHautSchema(), qProfondeur(), qHauteurSchema(), qDeuxLiquides(), qAutreLiquide(), qTete()];
+}
+
+SF.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Principe fondamental de l\'hydrostatique',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : pression au fond, en un point haut, hauteur nécessaire, deux liquides superposés, un autre liquide que l\'eau. Données : ρ<sub>eau</sub> = 1 000 kg·m<sup>−3</sup>, g = 9,8 m·s<sup>−2</sup>, P<sub>atm</sub> = 10<sup>5</sup> Pa. Trois questions se font avec le schéma.</p>',
+  questions: tirage,
+  revoir: { href: 'module_3b_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4_cours.html', label: 'Module 4 : presse, cric et baromètre →' },
+});
+SF.menu('module_3_questions');
+</script>
+</body>
+</html>
