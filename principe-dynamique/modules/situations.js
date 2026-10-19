@@ -18,11 +18,15 @@
          si ses frottements ou sa poussée d'Archimède ne sont pas négligeables,
        forces: [{ acteur, type: 'distance' | 'contact', lib, pts: [points acceptés],
                   angs: [angles acceptés, en degrés, 0 = vers la droite, 90 = vers le haut],
-                  noms: [noms acceptés], diagDir, indNom }],
+                  noms: [noms acceptés], diagDir, indNom, L (longueur de la flèche, facultatif) }],
        speciales: [{ label, ang }] (directions propres : perpendiculaire au support…),
        nomsProposes: [noms affichés à l'étape 4], comp: { bonne, expl, indice, q } }
    Plan incliné : pente de 25° (descend vers la droite) : perpendiculaire au
    support 65°, parallèle vers le haut de la pente 155°, vers le bas 335°.
+   Longueurs des flèches (sans souci d'échelle, mais cohérentes) : des forces
+   qui se compensent ont des longueurs qui s'équilibrent (F⃗archi = P⃗ + T⃗ pour le
+   ballon d'hélium ; sur le plan incliné, R⃗ₙ = P cos 25° et f⃗ = P sin 25°) ; quand
+   elles ne se compensent pas, leur somme a le sens du mouvement accéléré.
    ============================================================ */
 (function () {
   'use strict';
@@ -49,6 +53,8 @@
   const sur = (t, h) => [+(AI[0] + t * U[0] + h * N[0]).toFixed(1), +(AI[1] + t * U[1] + h * N[1]).toFixed(1)];
   const plan = () => `<polygon points="30,80 ${(30 + 300).toFixed(0)},${(80 + 300 * Math.tan(A_INC)).toFixed(1)} 30,${(80 + 300 * Math.tan(A_INC)).toFixed(1)}" class="pfd-sc-obj"/>`;
   const brique = () => `<polygon points="${[sur(-34, 0), sur(34, 0), sur(34, 40), sur(-34, 40)].map(p => p.join(',')).join(' ')}" class="pfd-sc-sys"/>`;
+  // longueurs : celle du poids (longueur par défaut des flèches), et ses composantes sur le plan incliné
+  const LP = 58, L_RN_INC = +(LP * Math.cos(A_INC)).toFixed(1), L_F_INC = +(LP * Math.sin(A_INC)).toFixed(1);
   const SPEC_INC = [{ label: '⊥ perpendiculaire au support', ang: 65 }, { label: '∥ au support, vers le haut de la pente', ang: 155 }, { label: '∥ au support, vers le bas de la pente', ang: 335 }];
   const skieur = () => {
     const a = sur(-30, 0), b = sur(30, 0), k = sur(0, 4), h = sur(0, 30), t = sur(0, 38), m = sur(0, 22), bt = sur(14, 2);
@@ -75,9 +81,10 @@
   const POIDS = { acteur: 'terre', type: 'distance', lib: 'force exercée par la Terre', pts: ['G'], angs: [270], noms: ['P'], diagDir: 'le poids est <b>vertical, vers le bas</b>.', indNom: `La force exercée par la Terre est le poids ${nomV('P')}.` };
   const RN_HORIZ = (acteur, lib, avecR) => ({ acteur, type: 'contact', lib, pts: ['A'], angs: [90], noms: avecR ? ['RN', 'R'] : ['RN'],
     diagDir: 'la réaction normale est <b>perpendiculaire au support</b> : ici, verticale vers le haut.', indNom: `La réaction perpendiculaire au support se note ${nomV('RN')} (N comme normale).` });
-  const RN_INC = acteur => ({ acteur, type: 'contact', lib: `réaction perpendiculaire de la ${acteur === 'piste' ? 'piste' : 'planche'}`, pts: ['A'], angs: [65], noms: ['RN'],
+  const RN_INC = acteur => ({ acteur, type: 'contact', lib: `réaction perpendiculaire de la ${acteur === 'piste' ? 'piste' : 'planche'}`, pts: ['A'], angs: [65], noms: ['RN'], L: L_RN_INC,
     diagDir: 'la réaction normale est <b>perpendiculaire au support</b>, même quand il est incliné : choisis « perpendiculaire au support ».', indNom: `La réaction perpendiculaire au support se note ${nomV('RN')}.` });
-  const F_INC = acteur => ({ acteur, type: 'contact', lib: `frottement de la ${acteur === 'piste' ? 'piste' : 'planche'}`, pts: ['A'], angs: [155], noms: ['f'],
+  // frottements qui retiennent la brique immobile (P sin 25°) ; plus faibles quand elle glisse en accélérant (L: 14)
+  const F_INC = acteur => ({ acteur, type: 'contact', lib: `frottement de la ${acteur === 'piste' ? 'piste' : 'planche'}`, pts: ['A'], angs: [155], noms: ['f'], L: L_F_INC,
     diagDir: 'les frottements s\'opposent au glissement : sans eux, le système glisserait vers le bas de la pente, donc <span class="vec-nom">f</span> est <b>parallèle au support, vers le haut de la pente</b>.', indNom: `Les frottements se notent ${nomV('f')}.` });
   const NOMS_BASE = ['P', 'RN', 'R', 'f', 'T', 'Farchi'];
 
@@ -142,8 +149,8 @@
     points: { G: [180, 110] }, nomsPts: { G: 'centre de la goutte' },
     acteurs: [TERRE, { id: 'huile', nom: 'l\'huile', pourquoi: 'elle touche la goutte (poussée d\'Archimède et frottements)', manque: 'L\'huile touche la goutte : elle exerce une force de contact (qu\'on sépare en poussée d\'Archimède et frottements).' }],
     distracteurs: [{ id: 'eprouvette', nom: 'l\'éprouvette', diag: 'L\'éprouvette ne touche pas la goutte.' }, { id: 'air', nom: 'l\'air', diag: 'La goutte est dans l\'huile : l\'air ne la touche pas.' }],
-    forces: [POIDS, { acteur: 'huile', type: 'contact', lib: 'poussée d\'Archimède de l\'huile', pts: ['G'], angs: [90], noms: ['Farchi'], diagDir: 'la poussée d\'Archimède est <b>verticale, vers le haut</b>.', diagPt: 'l\'huile entoure toute la goutte : on dessine la force depuis le centre G.', indNom: `La poussée d'Archimède d'un fluide se note ${nomV('Farchi')}.` },
-      { acteur: 'huile', type: 'contact', lib: 'frottement de l\'huile', pts: ['G'], angs: [90], noms: ['f'], diagDir: 'les frottements s\'opposent au mouvement : la goutte descend, <span class="vec-nom">f</span> est <b>vertical, vers le haut</b>.', diagPt: 'l\'huile entoure toute la goutte : on dessine la force depuis le centre G.', indNom: `Les frottements se notent ${nomV('f')}.` }],
+    forces: [POIDS, { acteur: 'huile', type: 'contact', lib: 'poussée d\'Archimède de l\'huile', pts: ['G'], angs: [90], noms: ['Farchi'], L: 22, diagDir: 'la poussée d\'Archimède est <b>verticale, vers le haut</b>.', diagPt: 'l\'huile entoure toute la goutte : on dessine la force depuis le centre G.', indNom: `La poussée d'Archimède d'un fluide se note ${nomV('Farchi')}.` },
+      { acteur: 'huile', type: 'contact', lib: 'frottement de l\'huile', pts: ['G'], angs: [90], noms: ['f'], L: 36, diagDir: 'les frottements s\'opposent au mouvement : la goutte descend, <span class="vec-nom">f</span> est <b>vertical, vers le haut</b>.', diagPt: 'l\'huile entoure toute la goutte : on dessine la force depuis le centre G.', indNom: `Les frottements se notent ${nomV('f')}.` }],
     nomsProposes: NOMS_BASE,
     comp: { q: 'La goutte descend à vitesse constante, en ligne droite. Ces forces se compensent-elles ?', bonne: 'oui', expl: `Mouvement rectiligne uniforme : d'après le principe d'inertie, ${nomV('P')} + ${nomV('Farchi')} + ${nomV('f')} = <span class="vec-nom">0</span>. L'huile exerce une seule action, qu'on sépare en deux forces (comme dans l'exercice 19).`, indice: 'Mouvement rectiligne à vitesse constante : pense au principe d\'inertie.' } };
 
@@ -162,7 +169,7 @@
     dessin: `${plan()}${brique()}${mvt(m1[0], m1[1], m2[0], m2[1], '')}${txt(m2[0] + 6, m2[1] - 6, 'glisse')}${txt(50, 214, 'planche inclinée')}`,
     points: { G: G_INC, A: AI.map(v => +v.toFixed(1)) }, nomsPts: { G: 'centre de la brique', A: 'contact avec la planche' },
     acteurs: [TERRE, touche('planche', 'la planche', 'la brique'), AIR], air: NEGL(),
-    forces: [POIDS, RN_INC('planche'), Object.assign(F_INC('planche'), { diagDir: 'les frottements s\'opposent au glissement : la brique glisse vers le bas, <span class="vec-nom">f</span> est <b>parallèle au support, vers le haut de la pente</b>.' })],
+    forces: [POIDS, RN_INC('planche'), Object.assign(F_INC('planche'), { L: 14, diagDir: 'les frottements s\'opposent au glissement : la brique glisse vers le bas, <span class="vec-nom">f</span> est <b>parallèle au support, vers le haut de la pente</b>.' })],
     speciales: SPEC_INC, nomsProposes: NOMS_BASE,
     comp: { bonne: 'non', expl: 'La brique accélère : les forces ne se compensent pas ; leur somme est dirigée vers le bas de la pente.', indice: 'La brique glisse de plus en plus vite.' } };
 
@@ -180,6 +187,8 @@
 
   /* ===== boule d'aluminium et bâton d'ébonite frotté ===== */
   const O_B = [120, 24], C_B = [190, 140], A_B = versPt(C_B, 10, O_B), T_B = angVers(A_B, O_B);
+  // T⃗ compense à la fois le poids (verticalement) et la force électrique (horizontalement)
+  const L_T_B = +(LP / Math.sin(T_B * Math.PI / 180)).toFixed(1), L_FE_B = +(-L_T_B * Math.cos(T_B * Math.PI / 180)).toFixed(1);
   S.ebonite = { id: 'ebonite', titre: 'Boule d\'aluminium attirée par un bâton d\'ébonite frotté', systeme: 'la boule', enonce: 'Une boule d\'aluminium, suspendue à un fil, est attirée par un bâton d\'ébonite frotté (électrisé) ; elle reste immobile, déviée.',
     dessin: `<rect x="80" y="14" width="90" height="10" class="pfd-sc-obj"/>${fil(O_B[0], O_B[1], A_B[0], A_B[1])}<line x1="120" y1="24" x2="120" y2="180" class="pfd-sc-verticale"/><circle cx="${C_B[0]}" cy="${C_B[1]}" r="10" class="pfd-sc-sys"/>` +
       `<rect x="226" y="135" width="110" height="10" rx="4" class="pfd-sc-obj"/>${txt(281, 128, '− − − −', 'middle')}${txt(281, 166, 'bâton frotté', 'middle')}`,
@@ -187,8 +196,8 @@
     acteurs: [TERRE, touche2('fil', 'le fil', 'la boule'), { id: 'baton', nom: 'le bâton frotté', pourquoi: 'il attire la boule, à distance (force électrique)', manque: 'Le bâton frotté attire la boule sans la toucher : force électrique, à distance.' }, AIR],
     air: NEGL('La boule est immobile et pas très légère pour son volume : on néglige la force de l\'air.'),
     distracteurs: [{ id: 'support', nom: 'le support', diag: 'Le support ne touche pas la boule : c\'est le fil qui la tient.' }],
-    forces: [POIDS, { acteur: 'fil', type: 'contact', lib: 'force exercée par le fil', pts: ['A'], angs: [T_B], noms: ['T'], diagDir: 'un fil tire <b>le long du fil, vers le point d\'attache</b>.', indNom: `La force exercée par un fil se note ${nomV('T')}.` },
-      { acteur: 'baton', type: 'distance', lib: 'force exercée par le bâton', pts: ['G'], angs: [0], noms: ['Felec'], diagDir: 'le bâton attire la boule : la force est dirigée <b>vers le bâton</b>, horizontale vers la droite.', indNom: `La force exercée par un objet électrisé se note ${nomV('Felec')}.` }],
+    forces: [POIDS, { acteur: 'fil', type: 'contact', lib: 'force exercée par le fil', pts: ['A'], angs: [T_B], noms: ['T'], L: L_T_B, diagDir: 'un fil tire <b>le long du fil, vers le point d\'attache</b>.', indNom: `La force exercée par un fil se note ${nomV('T')}.` },
+      { acteur: 'baton', type: 'distance', lib: 'force exercée par le bâton', pts: ['G'], angs: [0], noms: ['Felec'], L: L_FE_B, diagDir: 'le bâton attire la boule : la force est dirigée <b>vers le bâton</b>, horizontale vers la droite.', indNom: `La force exercée par un objet électrisé se note ${nomV('Felec')}.` }],
     speciales: [{ label: 'le long du fil, vers le point d\'attache', ang: T_B }], nomsProposes: ['P', 'RN', 'f', 'T', 'Fmag', 'Felec'],
     comp: { bonne: 'oui', expl: `La boule est immobile : ${nomV('P')} + ${nomV('T')} + ${nomV('Felec')} = <span class="vec-nom">0</span> (trois forces qui se compensent).`, indice: 'La boule reste immobile.' } };
 
@@ -198,8 +207,8 @@
     points: { G: [227, 175], A: [250, 210] }, nomsPts: { G: 'centre du clou', A: 'contact avec le sol' },
     acteurs: [TERRE, { id: 'aimant', nom: 'l\'aimant', pourquoi: 'il attire le clou, à distance', manque: 'L\'aimant attire le clou sans le toucher : force magnétique, à distance.' }, touche2('sol', 'le sol', 'le clou'), AIR],
     air: NEGL(),
-    forces: [POIDS, { acteur: 'aimant', type: 'distance', lib: 'force exercée par l\'aimant', pts: ['G'], angs: [135], noms: ['Fmag'], diagDir: 'l\'aimant attire le clou : la force est dirigée <b>vers l\'aimant</b>, en haut à gauche.', indNom: `La force exercée par un aimant se note ${nomV('Fmag')}.` },
-      { acteur: 'sol', type: 'contact', lib: 'réaction du sol', pts: ['A'], angs: [90, 45], noms: ['R', 'RN'], diagDir: 'le sol empêche le clou de s\'enfoncer : sa réaction est dirigée <b>vers le haut</b> (verticale, ou penchée vers la droite car elle retient aussi le clou de glisser).', indNom: `La réaction du sol se note ${nomV('R')}.` }],
+    forces: [POIDS, { acteur: 'aimant', type: 'distance', lib: 'force exercée par l\'aimant', pts: ['G'], angs: [135], noms: ['Fmag'], L: 41, diagDir: 'l\'aimant attire le clou : la force est dirigée <b>vers l\'aimant</b>, en haut à gauche.', indNom: `La force exercée par un aimant se note ${nomV('Fmag')}.` },
+      { acteur: 'sol', type: 'contact', lib: 'réaction du sol', pts: ['A'], angs: [45, 90], noms: ['R', 'RN'], L: 41, diagDir: 'le sol empêche le clou de s\'enfoncer et le retient de glisser vers l\'aimant : sa réaction est dirigée <b>vers le haut et la droite</b> (on accepte aussi verticale, vers le haut).', indNom: `La réaction du sol se note ${nomV('R')}.` }],
     nomsProposes: ['P', 'R', 'f', 'T', 'Fmag', 'Felec'] };
 
   /* ===== voiture au démarrage ===== */
@@ -213,11 +222,11 @@
     distracteurs: [{ id: 'moteur', nom: 'le moteur', diag: 'Le moteur fait partie de la voiture (le système) : il n\'exerce pas de force extérieure. C\'est la route qui pousse les roues motrices vers l\'avant.' },
       { id: 'conducteur', nom: 'le conducteur', diag: 'Le conducteur est dans la voiture : il fait partie du système.' }],
     forces: [POIDS,
-      { acteur: 'route', type: 'contact', lib: 'route sur les roues avant : réaction perpendiculaire', pts: ['A'], angs: [90], noms: ['RN'], diagDir: 'la réaction normale est <b>perpendiculaire à la route</b> : verticale, vers le haut.', diagPt: 'les roues avant touchent la route au point A.', indNom: `La réaction perpendiculaire au support se note ${nomV('RN')}.` },
+      { acteur: 'route', type: 'contact', lib: 'route sur les roues avant : réaction perpendiculaire', pts: ['A'], angs: [90], noms: ['RN'], L: 26, diagDir: 'la réaction normale est <b>perpendiculaire à la route</b> : verticale, vers le haut.', diagPt: 'les roues avant touchent la route au point A.', indNom: `La réaction perpendiculaire au support se note ${nomV('RN')}.` },
       { acteur: 'route', type: 'contact', lib: 'route sur les roues avant (motrices) : frottement', pts: ['A'], angs: [0], noms: ['Fm'], diagDir: 'les roues motrices poussent la route vers l\'arrière ; la route les pousse donc <b>vers l\'avant</b> : c\'est la force motrice.', diagPt: 'les roues avant (motrices) touchent la route au point A.', indNom: `Ce frottement de la route sur les roues motrices fait avancer la voiture : c'est la force motrice ${nomV('Fm')}.` },
-      { acteur: 'route', type: 'contact', lib: 'route sur les roues arrière : réaction perpendiculaire', pts: ['B'], angs: [90], noms: ['RN'], cote: -1, diagDir: 'la réaction normale est <b>perpendiculaire à la route</b> : verticale, vers le haut.', diagPt: 'les roues arrière touchent la route au point B.', indNom: `La réaction perpendiculaire au support se note ${nomV('RN')}.` },
-      { acteur: 'route', type: 'contact', lib: 'route sur les roues arrière : frottement', pts: ['B'], angs: [180], noms: ['f'], diagDir: 'sur les roues arrière (non motrices), les frottements de la route s\'opposent au mouvement : <b>vers l\'arrière</b>.', diagPt: 'les roues arrière touchent la route au point B.', indNom: `Les frottements se notent ${nomV('f')}.` },
-      { acteur: 'air', type: 'contact', lib: 'force de l\'air (frottements)', pts: ['G'], angs: [180], noms: ['Fair', 'f'], diagDir: 'les frottements de l\'air s\'opposent au mouvement : <b>vers l\'arrière</b>.', diagPt: 'l\'air touche toute la carrosserie : on dessine sa force depuis le centre G.', indNom: `La force de l'air (ses frottements) se note ${nomV('Fair')}.` }],
+      { acteur: 'route', type: 'contact', lib: 'route sur les roues arrière : réaction perpendiculaire', pts: ['B'], angs: [90], noms: ['RN'], cote: -1, L: 20, diagDir: 'la réaction normale est <b>perpendiculaire à la route</b> : verticale, vers le haut.', diagPt: 'les roues arrière touchent la route au point B.', indNom: `La réaction perpendiculaire au support se note ${nomV('RN')}.` },
+      { acteur: 'route', type: 'contact', lib: 'route sur les roues arrière : frottement', pts: ['B'], angs: [180], noms: ['f'], L: 14, diagDir: 'sur les roues arrière (non motrices), les frottements de la route s\'opposent au mouvement : <b>vers l\'arrière</b>.', diagPt: 'les roues arrière touchent la route au point B.', indNom: `Les frottements se notent ${nomV('f')}.` },
+      { acteur: 'air', type: 'contact', lib: 'force de l\'air (frottements)', pts: ['G'], angs: [180], noms: ['Fair', 'f'], L: 18, diagDir: 'les frottements de l\'air s\'opposent au mouvement : <b>vers l\'arrière</b>.', diagPt: 'l\'air touche toute la carrosserie : on dessine sa force depuis le centre G.', indNom: `La force de l'air (ses frottements) se note ${nomV('Fair')}.` }],
     nomsProposes: ['P', 'RN', 'f', 'Fair', 'Fm', 'Farchi'],
     comp: { bonne: 'non', expl: 'La voiture accélère : les forces ne se compensent pas ; leur somme est dirigée vers l\'avant.', indice: 'La voiture démarre : sa vitesse augmente.' } };
 
@@ -240,7 +249,7 @@
     points: { G: G_SKI, A: AI.map(v => +v.toFixed(1)) }, nomsPts: { G: 'centre du skieur', A: 'contact skis-neige' },
     acteurs: [TERRE, touche('piste', 'la piste', 'les skis'), AIR], air: NEGL('L\'énoncé le dit : on néglige l\'action de l\'air.'),
     distracteurs: [{ id: 'teleski', nom: 'le téléski', diag: 'Le skieur a lâché le téléski : il ne le touche plus.' }],
-    forces: [POIDS, RN_INC('piste'), Object.assign(F_INC('piste'), { diagDir: 'les frottements de la neige s\'opposent au glissement vers le bas : <b>parallèles au support, vers le haut de la pente</b>.' })],
+    forces: [POIDS, RN_INC('piste'), Object.assign(F_INC('piste'), { L: 14, diagDir: 'les frottements de la neige s\'opposent au glissement vers le bas : <b>parallèles au support, vers le haut de la pente</b>.' })],
     speciales: SPEC_INC, nomsProposes: NOMS_BASE,
     comp: { bonne: 'non', expl: 'Le skieur accélère : les forces ne se compensent pas ; leur somme est dirigée vers le bas de la pente.', indice: 'Le skieur prend de la vitesse.' } };
 
@@ -283,8 +292,9 @@
     acteurs: [TERRE, touche('ficelle', 'la ficelle', 'le ballon'), Object.assign({}, AIR, { pourquoi: 'il touche le ballon et le pousse vers le haut (poussée d\'Archimède)' })],
     air: { neglige: false, cause: 'archi', raison: 'Le ballon d\'hélium est très léger pour son volume : la poussée d\'Archimède de l\'air n\'est pas négligeable (lâché, il monterait).', indice: 'Lâché, le ballon monterait : qu\'est-ce qui le pousse vers le haut ?' },
     distracteurs: [{ id: 'poids', nom: 'le petit poids', diag: 'Le petit poids ne touche pas le ballon : c\'est la ficelle qui le retient.' }],
-    forces: [POIDS, { acteur: 'ficelle', type: 'contact', lib: 'force exercée par la ficelle', pts: ['A'], angs: [270], noms: ['T'], diagDir: 'la ficelle retient le ballon : elle tire <b>vers le bas</b>, le long de la ficelle.', indNom: `La force d'une ficelle (d'un fil) se note ${nomV('T')} (tension).` },
-      { acteur: 'air', type: 'contact', lib: 'poussée d\'Archimède de l\'air', pts: ['G'], angs: [90], noms: ['Farchi'], diagDir: 'la poussée d\'Archimède est <b>verticale, vers le haut</b>.', diagPt: 'l\'air entoure tout le ballon : on dessine sa poussée depuis le centre G.', indNom: `La poussée d'Archimède se note ${nomV('Farchi')}.` }],
+    // F⃗archi compense P⃗ + T⃗ : sa flèche est aussi longue que les deux autres réunies
+    forces: [Object.assign({}, POIDS, { L: 30 }), { acteur: 'ficelle', type: 'contact', lib: 'force exercée par la ficelle', pts: ['A'], angs: [270], noms: ['T'], L: 26, diagDir: 'la ficelle retient le ballon : elle tire <b>vers le bas</b>, le long de la ficelle.', indNom: `La force d'une ficelle (d'un fil) se note ${nomV('T')} (tension).` },
+      { acteur: 'air', type: 'contact', lib: 'poussée d\'Archimède de l\'air', pts: ['G'], angs: [90], noms: ['Farchi'], L: 56, diagDir: 'la poussée d\'Archimède est <b>verticale, vers le haut</b>.', diagPt: 'l\'air entoure tout le ballon : on dessine sa poussée depuis le centre G.', indNom: `La poussée d'Archimède se note ${nomV('Farchi')}.` }],
     nomsProposes: ['P', 'RN', 'f', 'T', 'Farchi', 'Fair'],
     comp: { bonne: 'oui', expl: `Le ballon est immobile : ${nomV('P')} + ${nomV('T')} + ${nomV('Farchi')} = <span class="vec-nom">0</span>. La poussée d'Archimède compense le poids et la tension de la ficelle.`, indice: 'Le ballon reste immobile.' } };
 

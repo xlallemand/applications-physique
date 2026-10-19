@@ -769,7 +769,9 @@
      SCÈNE D'UNE SITUATION (SVG, repère 360 × 256 ; dessins entre y = 0 et 240,
      la marge du bas garde lisibles les noms des forces dirigées vers le bas)
      s = { dessin (SVG), points: { G: [x, y], A: […] }, nomsPts, titre, lf (longueur des flèches) }
-     o = { forces: [{ pt, ang, nom, num, etat ('ok', 'ko', 'actif'), coul, cote }], points (cliquables), actif (point choisi) }
+     o = { forces: [{ pt, ang, nom, num, etat ('ok', 'ko', 'actif'), coul, cote, L }], points (cliquables), actif (point choisi) }
+     L : longueur propre d'une flèche (sinon s.lf) : des forces qui se compensent ont
+     des longueurs qui s'équilibrent (ex. F⃗archi = P⃗ + T⃗ en longueur).
      Chaque force a sa couleur (coul) ; l'état d'un tracé se lit sur sa pastille
      numérotée (verte si juste, rouge si faux) et une flèche fausse est en tirets.
      ============================================================ */
@@ -825,17 +827,20 @@
     const geo = fs.map(f => {
       if (!f || f.pt == null || f.ang == null) return null;
       const r = f.ang * Math.PI / 180, p = s.points[f.pt];
-      return { x: p[0], y: p[1], c: Math.cos(r), s: -Math.sin(r), L: s.lf || LF };
+      return { x: p[0], y: p[1], c: Math.cos(r), s: -Math.sin(r), L: f.L || s.lf || LF };
     });
     const dec = decalages(geo);
     let g = s.dessin;
     fs.forEach((f, i) => {
       if (!geo[i]) return;
-      const p = s.points[f.pt], a = fleche(p[0], p[1], f.ang, f.etat, dec[i], s.lf, f.coul);
+      const p = s.points[f.pt], a = fleche(p[0], p[1], f.ang, f.etat, dec[i], f.L || s.lf, f.coul);
       g += a.svg;
       // nom au-delà de la pointe, sur le côté ; une flèche décalée a son nom du côté du décalage
-      // (f.cote = −1 : nom de l'autre côté, quand il gênerait un autre nom)
-      const cote = (f.cote || (dec[i] < 0 ? -1 : 1)) * 9;
+      // (f.cote = −1 : nom de l'autre côté, quand il gênerait un autre nom) ; une flèche
+      // verticale décalée écarte son nom de toute sa demi-largeur, pour qu'il ne tombe pas
+      // sur la flèche voisine, plus longue (F⃗archi et f⃗ de la goutte)
+      const ecart = f.nom && dec[i] && Math.abs(a.s) > .7 ? Math.max(9, 5 + largeurNom(f.nom) / 2) : 9;
+      const cote = (f.cote || (dec[i] < 0 ? -1 : 1)) * ecart;
       const lx = a.x2 + a.c * 15 - a.s * cote, ly = a.y2 + a.s * 15 + a.c * cote;
       if (f.nom) g += nomSVG(f.nom, lx, ly + 6, f.etat, f.coul);
       else if (f.num) g += `<g class="pfd-num${f.etat ? ' ' + f.etat : ''}"${!f.etat && f.coul ? ` style="color:${f.coul}"` : ''}><circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="8.5"/><text x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}" text-anchor="middle">${f.num}</text></g>`;
@@ -1136,7 +1141,7 @@
         const bVal = boutonValider(zone);
         const verrou = i => fige || pos[i].ok;
         function dessiner() {
-          figZ.innerHTML = scene(s, { forces: pos.map((p, i) => ({ pt: p.pt, ang: p.ang, num: i + 1, coul: cols[i], cote: s.forces[i].cote, etat: p.etat || (i === sel && !fige ? 'actif' : '') })),
+          figZ.innerHTML = scene(s, { forces: pos.map((p, i) => ({ pt: p.pt, ang: p.ang, num: i + 1, coul: cols[i], cote: s.forces[i].cote, L: s.forces[i].L, etat: p.etat || (i === sel && !fige ? 'actif' : '') })),
             points: !fige, actif: pos[sel] && pos[sel].pt, aria: `${s.titre} : forces tracées` });
           d.querySelectorAll('.pfd-tr-chips .vec-chip').forEach(c => {
             const i = +c.dataset.i, p = pos[i];
@@ -1233,7 +1238,7 @@
         // le diagramme et le dessin montrent les noms choisis, dans la couleur de chaque force
         const dessiner = () => {
           doZ.innerHTML = diagrammeDe(s, st);
-          figZ.innerHTML = scene(s, { forces: s.forces.map((f, i) => ({ pt: st.pos[i].pt || f.pts[0], ang: st.pos[i].ang == null ? f.angs[0] : st.pos[i].ang, num: i + 1, nom: st.noms[i], coul: cols[i], cote: f.cote })),
+          figZ.innerHTML = scene(s, { forces: s.forces.map((f, i) => ({ pt: st.pos[i].pt || f.pts[0], ang: st.pos[i].ang == null ? f.angs[0] : st.pos[i].ang, num: i + 1, nom: st.noms[i], coul: cols[i], cote: f.cote, L: f.L })),
             marques: Object.keys(s.points), aria: `${s.titre} : forces à nommer` });
         };
         st.ecoute.push(dessiner);
@@ -1311,7 +1316,7 @@
   // scène avec toutes ses forces tracées et nommées (exemples, fiches, corrections)
   const sceneRemplie = (s, o) => {
     const cols = couleursForces(s.forces);
-    return scene(s, Object.assign({ forces: s.forces.map((f, i) => ({ pt: f.pts[0], ang: f.angs[0], nom: f.noms[0], coul: cols[i], cote: f.cote })), marques: Object.keys(s.points), aria: `${s.titre} : bilan des forces` }, o));
+    return scene(s, Object.assign({ forces: s.forces.map((f, i) => ({ pt: f.pts[0], ang: f.angs[0], nom: f.noms[0], coul: cols[i], cote: f.cote, L: f.L })), marques: Object.keys(s.points), aria: `${s.titre} : bilan des forces` }, o));
   };
 
   /* ============================================================
@@ -1579,7 +1584,14 @@
     { n: 3, titre: 'Accélération', desc: 'a = dv/dt ; a = Δv / Δt en m·s<sup>−2</sup>', fiche: 'fiche_3',
       parties: [{ nom: 'Accélération', cours: 'module_3_cours', questions: 'module_3_questions' }] },
     { n: 4, titre: 'Principe fondamental de la dynamique', desc: 'Σ <span class="vec-nom">F</span> = m <span class="vec-nom">a</span>, principe d\'inertie, résultante des forces', fiche: 'fiche_4',
-      parties: [{ nom: 'Principe fondamental de la dynamique', cours: 'module_4_cours', questions: 'module_4_questions' }] },
+      // quatre sous-modules de cours, puis les questions et la fiche
+      sousModules: true,
+      parties: [
+        { nom: 'Principe fondamental de la dynamique', slug: 'pfd', cours: 'module_4a_cours', noms: { cours: 'Cours : principe fondamental de la dynamique' } },
+        { nom: 'Principe d\'inertie', slug: 'inertie', cours: 'module_4b_cours', noms: { cours: 'Cours : principe d\'inertie' } },
+        { nom: 'Résultante des forces et accélération', slug: 'direction', cours: 'module_4c_cours', noms: { cours: 'Cours : résultante des forces et accélération' } },
+        { nom: 'Méthode type', slug: 'methode', cours: 'module_4d_cours', noms: { cours: 'Cours : méthode type' } },
+        { nom: 'Principe fondamental de la dynamique', questions: 'module_4_questions' }] },
     { n: 5, titre: 'Exercices', desc: 'Exercices 1, 2, 3 et 5 à 19 de la feuille (p. 84-87), guidés pas à pas', exercices: 'module_5', exNom: 'Exercices 1 à 19', nbEx: 11 },
   ];
   window.SOM.init({ nom: 'Chapitre 6 : Principe fondamental de la dynamique', id: 'principe-dynamique', cleEx: 'principe-dynamique-exercices', plan: PLAN });

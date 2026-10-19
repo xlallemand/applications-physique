@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : principe fondamental de la dynamique — Chapitre 6 : Principe fondamental de la dynamique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pfd.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pfd.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 1 / 4</span>
+    <h2 class="er-titre">Principe fondamental de la dynamique</h2>
+    <p class="er-contexte">La <b>somme des forces</b> (la résultante) qui s'exercent sur un système fixe son <b>accélération</b> : Σ <span class="vec-nom">F</span> = m <span class="vec-nom">a</span>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 1 du module 4 : Σ F⃗ = m a⃗ dans un référentiel galiléen ; calculs de Σ F, de a,
+   masse en tonnes.
+   Erreurs diagnostiquées : masse en g ou en tonnes non convertie,
+   m × a et ΣF / m confondus.
+   ============================================================ */
+const { fmt, sci, hasard, melanger, exemple } = COURS;
+const { o, fr, proche, nomV, sceneRemplie, diagrammeDe, partieResultante, partieAcc, SITUATIONS } = PFD;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+const MS2 = 'm·s<sup>−2</sup>', SF = 'Σ <span class="vec-nom">F</span>';
+
+/* ---------- 1. Le principe fondamental ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Σ <span class="vec-nom">F</span> = m <span class="vec-nom">a</span>');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Principe fondamental de la dynamique.</b> Dans un référentiel galiléen :</p>
+        <p class="crs-formule">m <span class="vec-nom">a</span> = Σ <span class="vec-nom">F</span><sub>ext</sub></p><p>m en kg, a en m·s<sup>−2</sup>, Σ F en N. Σ <span class="vec-nom">F</span><sub>ext</sub>, la <b>résultante</b> des forces, est la somme (l'addition) de toutes les forces extérieures.</p></div>
+    </div>
+    ${exemple(`<p>Une voiture de 1 200 kg a une accélération de 2,0 ${MS2}.</p><p class="crs-calc">Σ F = m × a = 1 200 kg × 2,0 ${MS2} = <span class="c">2 400 N</span></p>`)}`);
+  const [m1, a1] = hasard([[600, 11.1], [1500, 2], [80, 3.5], [0.046, 2.5]]), [F2, m2] = hasard([[3000, 1200], [6660, 600], [150, 75], [9000, 1500]]);
+  const [mt, a3] = hasard([[10, 7.25], [2, 1.5], [40, 0.5]]);
+  c_.aToi(carte, [
+    { titre: 'Une résultante', enonce: `<p>Un système de masse ${fmt(m1)} kg a une accélération de ${fmt(a1)} ${MS2}.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule la valeur de la résultante des forces (3 chiffres significatifs).', label: 'Σ F =', valeur: m1 * a1, unite: 'N', signe: false, rel: .01, affiche: fmt(r3(m1 * a1)),
+        diag: v => proche(v, m1 / a1, .02) || proche(v, a1 / m1, .02) ? 'Σ F = m × a : on multiplie.' : 'Σ F = m × a.', solution: `<p class="crs-calc">Σ F = m × a = ${fmt(m1)} × ${fmt(a1)} ≈ ${c(fmt(r3(m1 * a1)) + ' N')}</p>` }] },
+    { titre: 'Une accélération', enonce: `<p>La résultante des forces sur un système de ${fmt(m2)} kg vaut ${fmt(F2)} N.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule son accélération (3 chiffres significatifs).', label: 'a =', valeur: F2 / m2, unite: MS2, signe: false, rel: .01, affiche: fmt(r3(F2 / m2)),
+        diag: v => proche(v, F2 * m2, .02) ? 'Σ F = m a donc a = Σ F / m : on divise.' : proche(v, m2 / F2, .02) ? 'Rapport inversé : a = Σ F / m.' : 'a = Σ F / m.', solution: `<p class="crs-calc">a = ${fr('Σ F', 'm')} = ${fr(fmt(F2), fmt(m2))} ≈ ${c(fmt(r3(F2 / m2)) + ' ' + MS2)}</p>` }] },
+    { titre: 'Une masse en tonnes', enonce: `<p>Un avion de ${mt} tonnes démarre avec une accélération de ${fmt(a3)} ${MS2}.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule la résultante des forces (3 chiffres significatifs).', label: 'Σ F =', valeur: mt * 1000 * a3, unite: 'N', cs: 3, rel: .01,
+        diag: v => proche(v, mt * a3, .02) ? `Convertis la masse en kg : ${mt} t = ${fmt(mt * 1000)} kg.` : 'Σ F = m × a, m en kg.', solution: `<p class="crs-calc">Σ F = ${fmt(mt)} × 10<sup>3</sup> kg × ${fmt(a3)} ${MS2} = ${c(sci(mt * 1000 * a3, 3) + ' N')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">m <span class="vec-nom">a</span> = Σ <span class="vec-nom">F</span><sub>ext</sub></p><p>Dans un référentiel galiléen ; m en kg, a en m·s<sup>−2</sup>, Σ F en N. Σ <span class="vec-nom">F</span> (la résultante) est la somme de toutes les forces.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4b_cours.html">Cours : principe d'inertie →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#pfd">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+PFD.menu('module_4a_cours');
+</script>
+</body>
+</html>

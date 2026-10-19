@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : méthode type — Chapitre 6 : Principe fondamental de la dynamique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pfd.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pfd.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 4 / 4</span>
+    <h2 class="er-titre">Méthode type</h2>
+    <p class="er-contexte">Pour résoudre un exercice de dynamique, on suit toujours la même <b>méthode</b> : bilan des forces, forces qui se compensent, résultante, puis Σ <span class="vec-nom">F</span> = m <span class="vec-nom">a</span>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 4 du module 4 : méthode type des ex. 2 et 5, avec les quatre cas de figure du cours
+   (Σ F⃗ ou a⃗ en vecteurs, Σ F ou a en valeurs).
+   Erreurs diagnostiquées : frottements ajoutés au lieu d'être retirés.
+   ============================================================ */
+const { fmt, sci, hasard, melanger, exemple } = COURS;
+const { o, fr, proche, nomV, sceneRemplie, diagrammeDe, partieResultante, partieAcc, SITUATIONS } = PFD;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+const MS2 = 'm·s<sup>−2</sup>', SF = 'Σ <span class="vec-nom">F</span>';
+
+/* ---------- 1. La méthode type ---------- */
+// les quatre cas de figure (cours en source) : en vecteurs, on obtient une direction et un sens ; en valeurs, on calcule
+const CAS4 = [
+  ['Si on a Σ <span class="vec-nom">F</span><sub>ext</sub>', 'on obtient <span class="vec-nom">a</span> : même direction et même sens', 'en vecteurs'],
+  ['Si on a Σ F<sub>ext</sub>', `on calcule a = ${fr('Σ F<sub>ext</sub>', 'm')}`, 'en valeurs'],
+  ['Si on a <span class="vec-nom">a</span>', 'on obtient Σ <span class="vec-nom">F</span><sub>ext</sub> : même direction et même sens', 'en vecteurs'],
+  ['Si on a a', 'on calcule Σ F<sub>ext</sub> = m × a', 'en valeurs'],
+].map(([si, alors, type]) => `<div class="pfd-cas-c"><span class="pfd-cas-t">${type}</span><p><b>${si}</b>,</p><p>${alors}</p></div>`).join('');
+function etape1(c_) {
+  const carte = c_.carte('1. La méthode type');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><ol class="er-liste"><li>Bilan des forces, avec le diagramme objet-action.</li><li>Il y a souvent des forces qui se compensent (par exemple ${nomV('P')} et ${nomV('RN')} : ${nomV('P')} + ${nomV('RN')} = <span class="vec-nom">0</span>).</li><li>Σ <span class="vec-nom">F</span><sub>ext</sub> = ce qui reste.</li>
+        <li>On utilise m <span class="vec-nom">a</span> = Σ <span class="vec-nom">F</span><sub>ext</sub>, selon ce que l'on a (quatre cas de figure, ci-dessous).</li></ol></div>
+      <div class="pfd-cas">${CAS4}</div>
+      <p>Quand il reste plusieurs forces sur la direction du mouvement, on projette : m a = F<sub>m</sub> − f (les forces dans le sens du mouvement comptent positivement), puis on isole l'inconnue.</p>
+    </div>
+    ${exemple(`<p>Une voiture de 1 000 kg démarre avec a = 2,0 ${MS2} ; les frottements valent f = 300 N.</p>
+      <p class="crs-calc">${nomV('P')} + ${nomV('RN')} = <span class="vec-nom">0</span> donc ${SF} = ${nomV('Fm')} + ${nomV('f')}<br>m a = F<sub>m</sub> − f donc F<sub>m</sub> = m a + f = 1 000 × 2,0 + 300 = <span class="c">2 300 N</span></p>`)}`);
+  const [m, a, f] = hasard([[850, 2.5, 250], [1200, 1.5, 400], [900, 3, 350], [1500, 2, 600]]);
+  const [m2, a2, Fm] = hasard([[1000, 1.2, 1700], [800, 2, 1900], [1200, 0.5, 1000]]);
+  c_.aToi(carte, [
+    { titre: 'La force motrice', enonce: `<p>Une voiture de ${fmt(m)} kg démarre en ligne droite avec une accélération de ${fmt(a)} ${MS2}. Les frottements valent f = ${f} N.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule la force motrice F<sub>m</sub>.', label: 'F<sub>m</sub> =', valeur: m * a + f, unite: 'N', signe: false, rel: .005,
+        diag: v => proche(v, m * a - f) ? 'm a = F<sub>m</sub> − f donc F<sub>m</sub> = m a <b>+</b> f.' : proche(v, m * a) ? 'N\'oublie pas les frottements : F<sub>m</sub> = m a + f.' : 'm a = F<sub>m</sub> − f, puis isole F<sub>m</sub>.',
+        solution: `<p class="crs-calc">m a = F<sub>m</sub> − f donc F<sub>m</sub> = m a + f = ${fmt(m)} × ${fmt(a)} + ${f} = ${c(fmt(m * a + f) + ' N')}</p>` }] },
+    { titre: 'Les frottements', enonce: `<p>Une voiture de ${fmt(m2)} kg accélère à ${fmt(a2)} ${MS2} avec une force motrice de ${fmt(Fm)} N.</p>`,
+      parties: [{ type: 'nombre', q: 'Calcule la valeur des frottements f.', label: 'f =', valeur: Fm - m2 * a2, unite: 'N', signe: false, rel: .005,
+        diag: v => proche(v, Fm + m2 * a2) ? 'm a = F<sub>m</sub> − f donc f = F<sub>m</sub> − m a.' : 'f = F<sub>m</sub> − m a.', solution: `<p class="crs-calc">f = F<sub>m</sub> − m a = ${fmt(Fm)} − ${fmt(m2)} × ${fmt(a2)} = ${c(fmt(Fm - m2 * a2) + ' N')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Méthode type : bilan des forces (diagramme objet-action) → il y a souvent des forces qui se compensent (${nomV('P')} et ${nomV('RN')}) → Σ <span class="vec-nom">F</span><sub>ext</sub> = ce qui reste → selon ce que l'on a :</p>
+      <div class="pfd-cas">${CAS4}</div><p>Plusieurs forces sur la direction du mouvement : m a = F<sub>m</sub> − f, puis on isole l'inconnue.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4_questions.html">Questions sur le principe fondamental →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_5.html">Module 5 : exercices</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#methode">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+PFD.menu('module_4d_cours');
+</script>
+</body>
+</html>
