@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : l'énergie cinétique — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 1 / 4</span>
+    <h2 class="er-titre">L'énergie cinétique</h2>
+    <p class="er-contexte">Un solide en mouvement possède une énergie liée à sa vitesse : l'<b>énergie cinétique</b> E<sub>c</sub> = ½ m v², en joules, avec m en <b>kg</b> et v en <b>m/s</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 1 du module 3 : E_c = ½ m v² (J, kg, m/s).
+   Erreurs diagnostiquées : ½ oublié, v non élevée au carré, g au lieu de kg.
+   Valeurs (vérifiées par un script) : ballon 0,45 kg à 20 m/s → 90 J ;
+   balle 58 g à 50 m/s → 72,5 J ; cycliste 80 kg à 10 m/s → 4 000 J.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, proche } = EC;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const EC_ = 'E<sub>c</sub>';
+const ec = (m, v) => .5 * m * v * v;
+// diagnostic commun du calcul de E_c (m en kg, v en m/s) ; brut : valeurs non converties
+function diagEc(x, m, v, brut) {
+  const e = ec(m, v);
+  if (proche(x, 2 * e, .02)) return 'N\'oublie pas le facteur ½.';
+  if (proche(x, e / v, .02)) return 'La vitesse est <b>au carré</b>.';
+  if (brut && brut.v && proche(x, ec(m, brut.v), .02)) return 'Convertis d\'abord la vitesse en <b>m/s</b> (÷ 3,6).';
+  if (brut && brut.v && proche(x, .5 * m * brut.v * brut.v / 3.6, .02)) return 'On divise par 3,6 <b>avant</b> d\'élever au carré : v = ' + fmt(v) + ' m/s, puis v².';
+  if (brut && brut.m && proche(x, ec(brut.m, v), .02)) return 'La masse doit être en <b>kg</b>.';
+  return `${EC_} = ½ × m × v², avec m en kg et v en m/s.`;
+}
+
+/* ---------- 1. E_c = ½ m v² ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. L\'énergie cinétique');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> L'<b>énergie cinétique</b> d'un solide de masse m qui se déplace à la vitesse v :</p>
+        <p class="crs-formule">${EC_} = ½ × m × v²</p>
+        <p>${EC_} en <b>joules (J)</b>, m en <b>kg</b>, v en <b>m·s<sup>−1</sup></b>. Un solide immobile (v = 0) a une énergie cinétique nulle.</p></div>
+    </div>
+    ${exemple(`<p>Un ballon de 0,45 kg est frappé à 20 m/s.</p>${calc(`${EC_} = ½ × m × v² = 0,5 × 0,45 kg × (20 m/s)² = ${c('90 J')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une balle de tennis', enonce: `<p>Au service, une balle de tennis de <b>58 g</b> part à 50 m/s.</p>`,
+      parties: [
+        { type: 'nombre', q: 'Convertis la masse en kg.', label: 'm =', valeur: .058, unite: 'kg', signe: false, rel: .005,
+          diag: v => (proche(v, 58000) ? 'Les kg sont plus grands que les g : le nombre diminue (÷ 1 000).' : '1 kg = 1 000 g : on divise par 1 000.'), solution: calc(`m = 58 / 1 000 = ${c('0,058 kg')}`) },
+        { type: 'nombre', q: `Calcule son énergie cinétique ${EC_}.`, label: `${EC_} =`, valeur: 72.5, unite: 'J', signe: false, rel: .01,
+          diag: x => diagEc(x, .058, 50, { m: 58 }), solution: calc(`${EC_} = 0,5 × 0,058 × 50² = ${c('72,5 J')}`) },
+      ] },
+    { titre: 'Un cycliste', enonce: '<p>Un cycliste et son vélo (80 kg en tout) roulent à 10 m/s.</p>',
+      parties: [{ type: 'nombre', q: `Calcule leur énergie cinétique ${EC_}.`, label: `${EC_} =`, valeur: 4000, unite: 'J', signe: false,
+        diag: x => diagEc(x, 80, 10), solution: calc(`${EC_} = 0,5 × 80 × 10² = ${c('4 000 J')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>${EC_} = ½ × m × v², en <b>J</b>, avec m en <b>kg</b> et v en <b>m/s</b>. g → kg : ÷ 1 000 ; t → kg : × 1 000.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Cours : vitesse en km/h →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#energie-cinetique">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+EC.menu('module_3a_cours');
+</script>
+</body>
+</html>

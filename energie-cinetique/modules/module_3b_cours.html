@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : vitesse en km/h — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 2 / 4</span>
+    <h2 class="er-titre">Vitesse en km/h</h2>
+    <p class="er-contexte">Une vitesse en <b>km/h</b> se convertit en <b>m/s</b> en divisant par 3,6 ; dans E<sub>c</sub> = ½ m v², on convertit <b>avant</b> d'élever au carré.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 2 du module 3 : conversion km/h → m/s (÷ 3,6, avec
+   1 km/h = 1 000 m / 3 600 s) et m/s → km/h (× 3,6), puis vitesse en km/h
+   dans E_c (conversion avant le carré).
+   Erreurs diagnostiquées : × 3,6 au lieu de ÷ 3,6 (et l'inverse), km/h
+   non convertis ou divisés par 3,6 après le carré, ½ oublié, t non converties.
+   Valeurs (vérifiées par un script) : 90 km/h → 25 m/s ; 10 m/s → 36 km/h ;
+   voiture 1 200 kg à 90 km/h → 3,75 × 10⁵ J ; camion 38 t à 72 km/h →
+   7,6 × 10⁶ J ; moto 250 kg à 108 km/h → 1,13 × 10⁵ J.
+   ============================================================ */
+const { hasard, exemple } = COURS;
+const { fmt, proche, fr } = EC;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const EC_ = 'E<sub>c</sub>';
+const ec = (m, v) => .5 * m * v * v;
+// diagnostic commun du calcul de E_c (m en kg, v en m/s) ; brut : valeurs non converties
+function diagEc(x, m, v, brut) {
+  const e = ec(m, v);
+  if (proche(x, 2 * e, .02)) return 'N\'oublie pas le facteur ½.';
+  if (proche(x, e / v, .02)) return 'La vitesse est <b>au carré</b>.';
+  if (brut && brut.v && proche(x, ec(m, brut.v), .02)) return 'Convertis d\'abord la vitesse en <b>m/s</b> (÷ 3,6).';
+  if (brut && brut.v && proche(x, .5 * m * brut.v * brut.v / 3.6, .02)) return 'On divise par 3,6 <b>avant</b> d\'élever au carré : v = ' + fmt(v) + ' m/s, puis v².';
+  if (brut && brut.m && proche(x, ec(brut.m, v), .02)) return 'La masse doit être en <b>kg</b>.';
+  return `${EC_} = ½ × m × v², avec m en kg et v en m/s.`;
+}
+
+/* ---------- 1. Convertir les km/h en m/s (et les m/s en km/h) ---------- */
+const r3 = v => +v.toPrecision(3);
+function etape1(c_) {
+  const carte = c_.carte('1. Convertir les km/h en m/s');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">v (m/s) = ${fr('v (km/h)', '3,6')}</p>
+        <p>En effet, 1 km/h, c'est 1 km parcouru en 1 h : 1 km/h = ${fr('1 km', '1 h')} = ${fr('1 000 m', '3 600 s')} = ${fr('1', '3,6')} m/s.</p>
+        <p>Dans l'autre sens, des m/s aux km/h, on <b>multiplie</b> par 3,6 : 1 m/s = 3,6 km/h.</p></div>
+      <p>Repère : une même vitesse s'écrit avec un nombre <b>plus grand</b> en km/h qu'en m/s. Dans ${EC_} = ½ m v², la vitesse doit être en <b>m/s</b>.</p>
+      <div class="ph-lien-app"><p>Revois les conversions d'unités.</p><a class="btn-small" href="../../conversions/index.html">Conversions →</a></div>
+    </div>
+    ${exemple(`${calc(`Une voiture roule à 90 km/h : v = ${fr('90', '3,6')} = ${c('25 m/s')}`)}
+      ${calc(`Un sprinteur court à 10 m/s : v = 10 × 3,6 = ${c('36 km/h')}`)}`)}`);
+  const kmh = hasard([36, 54, 72, 108]), ms = hasard([5, 15, 20, 30]), kmh3 = hasard([50, 80, 100, 130]);
+  c_.aToi(carte, [
+    { titre: 'Des km/h aux m/s', enonce: `<p>Un TER roule à ${kmh} km/h.</p>`,
+      parties: [{ type: 'nombre', q: 'Convertis cette vitesse en m/s.', label: 'v =', valeur: kmh / 3.6, unite: 'm/s', signe: false, rel: .01,
+        diag: v => (proche(v, kmh * 3.6, .02) ? 'Des km/h aux m/s, on <b>divise</b> par 3,6 (le nombre en m/s est plus petit).' : 'v (m/s) = v (km/h) / 3,6.'),
+        solution: calc(`v = ${fr(kmh, '3,6')} = ${c(fmt(kmh / 3.6) + ' m/s')}`) }] },
+    { titre: 'Des m/s aux km/h', enonce: `<p>Un cycliste roule à ${ms} m/s.</p>`,
+      parties: [{ type: 'nombre', q: 'Convertis cette vitesse en km/h.', label: 'v =', valeur: ms * 3.6, unite: 'km/h', signe: false, rel: .01,
+        diag: v => (proche(v, ms / 3.6, .02) ? 'Des m/s aux km/h, on <b>multiplie</b> par 3,6 (le nombre en km/h est plus grand).' : 'v (km/h) = v (m/s) × 3,6.'),
+        solution: calc(`v = ${ms} × 3,6 = ${c(fmt(ms * 3.6) + ' km/h')}`) }] },
+    { titre: 'Un résultat à arrondir', enonce: `<p>Une voiture roule à ${kmh3} km/h.</p>`,
+      parties: [{ type: 'nombre', q: 'Convertis cette vitesse en m/s (3 chiffres significatifs).', label: 'v =', valeur: kmh3 / 3.6, unite: 'm/s', signe: false, rel: .01, affiche: fmt(r3(kmh3 / 3.6)),
+        diag: v => (proche(v, kmh3 * 3.6, .02) ? 'Des km/h aux m/s, on <b>divise</b> par 3,6.' : 'v (m/s) = v (km/h) / 3,6.'),
+        solution: calc(`v = ${fr(kmh3, '3,6')} ≈ ${c(fmt(r3(kmh3 / 3.6)) + ' m/s')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Vitesse en km/h dans E_c ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Une vitesse en km/h dans E<sub>c</sub>');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Dans ${EC_} = ½ m v², la vitesse est en <b>m/s</b>. On convertit les km/h (÷ 3,6) <b>avant</b> d'élever au carré : on calcule d'abord v en m/s, puis v².</p></div>
+      <div class="crs-attention"><p><b class="cle-titre">Attention.</b> 90² / 3,6 n'est pas (90 / 3,6)² : le carré se fait sur la vitesse déjà convertie.</p></div>
+    </div>
+    ${exemple(`<p>Une voiture de 1 200 kg roule à 90 km/h.</p>${calc('v = 90 / 3,6 = 25 m/s')}${calc(`${EC_} = 0,5 × 1 200 kg × (25 m/s)² = 375 000 J = ${c('3,75 × 10<sup>5</sup> J')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Un camion', enonce: '<p>Un camion de <b>38 t</b> roule à <b>72 km/h</b>.</p>',
+      parties: [
+        { type: 'nombre', q: 'Convertis la masse en kg (1 t = 1 000 kg).', label: 'm =', valeur: 38000, unite: 'kg', signe: false,
+          diag: v => (proche(v, 38) ? 'La masse est donnée en tonnes : multiplie par 1 000.' : '1 t = 1 000 kg.'), solution: calc(`m = 38 × 1 000 = ${c('38 000 kg')}`) },
+        { type: 'nombre', q: 'Convertis la vitesse en m/s.', label: 'v =', valeur: 20, unite: 'm/s', signe: false,
+          diag: v => (proche(v, 259.2) ? 'Des km/h aux m/s, on <b>divise</b> par 3,6.' : 'v = 72 / 3,6.'), solution: calc(`v = 72 / 3,6 = ${c('20 m/s')}`) },
+        { type: 'sci', q: `Calcule son énergie cinétique ${EC_}.`, label: `${EC_} =`, valeur: ec(38000, 20), unite: 'J', cs: 2, rel: .01,
+          diag: x => diagEc(x, 38000, 20, { v: 72, m: 38 }), solution: calc(`${EC_} = 0,5 × 38 000 × 20² = 7 600 000 J = ${c('7,6 × 10<sup>6</sup> J')}`) },
+      ] },
+    { titre: 'Une moto', enonce: '<p>Une moto de 250 kg (avec son pilote) roule à <b>108 km/h</b>.</p>',
+      parties: [{ type: 'sci', q: `Calcule son énergie cinétique ${EC_} (3 chiffres significatifs).`, label: `${EC_} =`, valeur: ec(250, 30), unite: 'J', cs: 3, rel: .01,
+        diag: x => diagEc(x, 250, 30, { v: 108 }), solution: calc(`v = 108 / 3,6 = 30 m/s ; ${EC_} = 0,5 × 250 × 30² = 112 500 J ≈ ${c('1,13 × 10<sup>5</sup> J')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>km/h → m/s : on <b>divise</b> par 3,6 (1 km/h = ${fr('1 000 m', '3 600 s')}) ; m/s → km/h : on <b>multiplie</b> par 3,6.</p></div>
+    <div class="cle"><p>Dans ${EC_} = ½ m v², une vitesse en km/h se divise par 3,6 <b>avant</b> d'être élevée au carré.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3c_cours.html">Cours : retrouver la vitesse →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#kmh">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+EC.menu('module_3b_cours');
+</script>
+</body>
+</html>

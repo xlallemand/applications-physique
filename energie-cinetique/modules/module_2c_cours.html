@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : travail du poids — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 3 / 4</span>
+    <h2 class="er-titre">Travail du poids</h2>
+    <p class="er-contexte">Quand un solide change d'altitude, le travail de son poids vaut <b>m × g × h</b> à la descente et <b>−m × g × h</b> à la montée ; h est la <b>différence d'altitude</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 3 du module 2 : travail du poids (± m g h).
+   Erreurs diagnostiquées : signe oublié à la montée, longueur du chemin
+   prise pour la hauteur h, masse oubliée.
+   Valeurs (vérifiées par un script) : 70 × 9,81 × 200 ≈ 1,37 × 10⁵ J ;
+   −60 × 9,81 × 500 ≈ −2,94 × 10⁵ J ; 0,50 × 9,81 × 2,0 ≈ 9,81 J.
+   ============================================================ */
+const { exemple } = COURS;
+const { proche, W, figPente } = EC;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+
+/* ---------- 1. Travail du poids ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Le travail du poids');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Quand un solide de masse m change d'altitude de h :</p>
+        <p class="crs-formule">${W('P')} = m × g × h</p><p style="text-align:center">s'il <b>descend</b> de h (travail moteur) ;</p>
+        <p class="crs-formule">${W('P')} = −m × g × h</p><p style="text-align:center">s'il <b>monte</b> de h (travail résistant).</p>
+        <p>h est la <b>différence d'altitude</b> (en m), pas la longueur du chemin AB ; g = 9,81 N/kg.</p></div>
+      ${figPente({ sens: 'descend' })}
+    </div>
+    ${exemple(`<p>Un skieur de 70 kg descend une piste de 800 m de long ; le dénivelé est h = 200 m.</p>
+      ${calc(`${W('P')} = m × g × h = 70 kg × 9,81 N/kg × 200 m ≈ ${c('1,37 × 10<sup>5</sup> J')}`)}<p>Le skieur descend : le travail du poids est moteur. La longueur de la piste (800 m) ne sert pas.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une randonnée', enonce: '<p>Une randonneuse de 60 kg monte au sommet d\'une colline par un chemin de 3,0 km ; le dénivelé est de 500 m.</p>',
+      parties: [{ type: 'sci', q: `Calcule le travail de son poids ${W('P')} (3 chiffres significatifs, avec son signe).`, label: `${W('P')} =`, valeur: -60 * 9.81 * 500, unite: 'J', cs: 3, rel: .01,
+        diag: v => (proche(v, 60 * 9.81 * 500, .02) ? 'Elle <b>monte</b> : le travail du poids est négatif (bouton ± devant le nombre).' : proche(Math.abs(v), 60 * 9.81 * 3000, .02) ? 'h est le <b>dénivelé</b> (500 m), pas la longueur du chemin.' : '−m × g × h, avec h = 500 m.'),
+        solution: calc(`${W('P')} = −m × g × h = −60 × 9,81 × 500 ≈ ${c('−2,94 × 10<sup>5</sup> J')}`) + '<p>À la montée, le poids s\'oppose au mouvement : travail résistant.</p>' }] },
+    { titre: 'Une chute', enonce: '<p>Une balle de 0,50 kg tombe d\'une hauteur de 2,0 m.</p>',
+      parties: [{ type: 'nombre', q: `Calcule le travail de son poids ${W('P')} (3 chiffres significatifs).`, label: `${W('P')} =`, valeur: .5 * 9.81 * 2, unite: 'J', rel: .01,
+        diag: v => (proche(v, -9.81) ? 'Elle <b>descend</b> : le travail du poids est positif.' : proche(v, 9.81 * 2) ? 'N\'oublie pas la masse : m = 0,50 kg.' : 'm × g × h.'),
+        solution: calc(`${W('P')} = 0,50 × 9,81 × 2,0 ≈ ${c('9,81 J')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Travail du poids : ${W('P')} = m g h à la descente (moteur), −m g h à la montée (résistant), avec h la <b>différence d'altitude</b> et g = 9,81 N/kg.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2d_cours.html">Cours : force perpendiculaire au déplacement →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#poids">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+EC.menu('module_2c_cours');
+</script>
+</body>
+</html>

@@ -751,8 +751,11 @@
   document.addEventListener('DOMContentLoaded', () => chercherOutils(document.body));
   const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
 
-  // racine carrée écrite avec sa barre : √200
-  const rac = x => `<span class="racine">√<span>${x}</span></span>`;
+  // racine carrée écrite avec sa barre : √200 ; le signe (SVG étiré) prend la hauteur du contenu
+  // (une fraction comprise) et rejoint la barre posée juste au-dessus du contenu
+  const rac = x => '<span class="racine"><span class="racine-signe"><span class="racine-lu">√</span>' +
+    '<svg viewBox="0 0 10 100" preserveAspectRatio="none" aria-hidden="true"><path d="M0,62 L2.6,55 L5.6,99 L10,0" vector-effect="non-scaling-stroke"/></svg></span>' +
+    `<span class="racine-sous">${x}</span></span>`;
   // case vide d'un schéma, où glisser une étiquette (partie 'schema')
   const slot = id => `<span class="sc-slot" data-slot="${id}"><span class="sc-slot-ph">?</span></span>`;
   const f1 = v => (+v).toFixed(1);
@@ -1115,9 +1118,24 @@
     { n: 1, titre: 'Forces de frottement', desc: 'Frottements solides, traînée f<sub>x</sub> = ½ ρ v² S C<sub>x</sub>, portance', fiche: 'fiche_1',
       parties: [{ nom: 'Forces de frottement', simulation: 'module_1_simulation', cours: 'module_1_cours', questions: 'module_1_questions', noms: { simulation: 'Activité : la traînée' } }] },
     { n: 2, titre: 'Travail d\'une force', desc: 'W<sub>AB</sub>(<span class="vec-nom">F</span>) = F × AB × cos α ; travail moteur, résistant ou nul ; travail du poids', fiche: 'fiche_2',
-      parties: [{ nom: 'Travail d\'une force', simulation: 'module_2_simulation', cours: 'module_2_cours', questions: 'module_2_questions', noms: { simulation: 'Simulateur : travail d\'une force' } }] },
+      // le simulateur (activité de découverte), quatre sous-modules de cours, puis les questions et la fiche
+      sousModules: true,
+      parties: [
+        { nom: 'Simulateur', simulation: 'module_2_simulation', noms: { simulation: 'Simulateur : travail d\'une force' } },
+        { nom: 'Définition et formule', slug: 'travail', cours: 'module_2a_cours', noms: { cours: 'Cours : définition et formule' } },
+        { nom: 'Travail moteur, résistant ou nul', slug: 'signe', cours: 'module_2b_cours', noms: { cours: 'Cours : travail moteur, résistant ou nul' } },
+        { nom: 'Travail du poids', slug: 'poids', cours: 'module_2c_cours', noms: { cours: 'Cours : travail du poids' } },
+        { nom: 'Force perpendiculaire au déplacement', slug: 'perpendiculaire', cours: 'module_2d_cours', noms: { cours: 'Cours : force perpendiculaire au déplacement' } },
+        { nom: 'Travail d\'une force', questions: 'module_2_questions' }] },
     { n: 3, titre: 'Énergie cinétique', desc: 'E<sub>c</sub> = ½ m v², vitesse en m/s', fiche: 'fiche_3',
-      parties: [{ nom: 'Énergie cinétique', cours: 'module_3_cours', questions: 'module_3_questions' }] },
+      // quatre sous-modules de cours, puis les questions et la fiche
+      sousModules: true,
+      parties: [
+        { nom: 'L\'énergie cinétique', slug: 'energie-cinetique', cours: 'module_3a_cours', noms: { cours: 'Cours : l\'énergie cinétique' } },
+        { nom: 'Vitesse en km/h', slug: 'kmh', cours: 'module_3b_cours', noms: { cours: 'Cours : vitesse en km/h' } },
+        { nom: 'Retrouver la vitesse', slug: 'vitesse', cours: 'module_3c_cours', noms: { cours: 'Cours : retrouver la vitesse' } },
+        { nom: 'Si la vitesse double', slug: 'double', cours: 'module_3d_cours', noms: { cours: 'Cours : si la vitesse double' } },
+        { nom: 'Énergie cinétique', questions: 'module_3_questions' }] },
     { n: 4, titre: 'Théorème de l\'énergie cinétique', desc: 'ΔE<sub>c</sub> = Σ W, méthode avec schéma : chute, freinage, démarrage', fiche: 'fiche_4',
       parties: [{ nom: 'Énoncé et chute', slug: 'chute', cours: 'module_4a_cours', questions: 'module_4a_questions' },
         { nom: 'Freinage et démarrage', slug: 'freinage', cours: 'module_4b_cours', questions: 'module_4b_questions' }] },

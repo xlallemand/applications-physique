@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : travail moteur, résistant ou nul — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+<script src="travail.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 2 / 4</span>
+    <h2 class="er-titre">Travail moteur, résistant ou nul</h2>
+    <p class="er-contexte">Le signe de cos α donne le signe du travail : il est <b>moteur</b> (W &gt; 0), <b>résistant</b> (W &lt; 0) ou <b>nul</b> (W = 0).</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 2 du module 2 : signe du travail (moteur, résistant, nul),
+   avec le simulateur EC.Simu (travail.js) en « À toi ».
+   ============================================================ */
+const { exemple } = COURS;
+const { o } = EC;
+
+/* ---------- 1. Signe du travail ---------- */
+// « À toi » avec le simulateur : régler la force pour obtenir le travail demandé
+function partieSimu(q, test, diag, reponse, sol, init) {
+  return { type: 'perso', q, solution: sol,
+    monter(zone, api) {
+      const s = EC.Simu(zone, Object.assign({ boutons: false, chariot: false }, init));
+      const b = EC.boutonValider(zone);
+      b.onclick = () => {
+        if (api.fini()) return;
+        const e = s.etat();
+        if (test(e)) { b.fermer(); api.reussi(); } else api.erreur(diag(e));
+      };
+      return { montrer() { s.regler(reponse); b.fermer(); } };
+    } };
+}
+function etape1(c_) {
+  const carte = c_.carte('1. Travail moteur, résistant ou nul');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><ul class="er-liste">
+        <li>α &lt; 90° : cos α &gt; 0, <b>W &gt; 0</b> : travail <b>moteur</b>, il fait <b>augmenter</b> la vitesse ;</li>
+        <li>α &gt; 90° : cos α &lt; 0, <b>W &lt; 0</b> : travail <b>résistant</b>, il fait <b>diminuer</b> la vitesse ;</li>
+        <li>α = 90° : cos α = 0, <b>W = 0</b> : travail <b>nul</b>.</li></ul></div>
+    </div>
+    ${exemple('<p>Un enfant tire sa luge avec une corde inclinée de 30° : travail <b>moteur</b>. Les frottements de la neige sur la luge, opposés au mouvement (α = 180°) : travail <b>résistant</b>. Le poids de la luge, perpendiculaire au sol horizontal : travail <b>nul</b>.</p>')}`);
+  c_.aToi(carte, [
+    { titre: 'Un travail résistant', parties: [partieSimu('Règle le simulateur pour que le travail de la force soit <b>résistant</b> (avec F ≠ 0 et AB ≠ 0), puis valide.',
+      e => e.W < -1e-9, e => (e.F === 0 || e.AB === 0 ? 'Avec F = 0 ou AB = 0, le travail est nul.' : Math.abs(e.W) < 1e-9 ? 'À α = ±90°, le travail est nul.' : 'Le travail est moteur : la force tire vers l\'avant. Fais-la tirer vers l\'arrière (α plus grand que 90°).'),
+      { alpha: 150 }, '<p>Le travail est résistant quand α est compris entre 90° et 180° (ou entre −90° et −180°) : la force tire vers l\'arrière.</p>', { F: 10, AB: 1, alpha: 30 })] },
+    { titre: 'Un travail donné', parties: [partieSimu('Avec F = 10 N et AB = 1 m, règle l\'angle α pour que le travail vaille <b>W = 5,0 J</b>.',
+      e => Math.abs(e.W - 5) < .05, e => (e.F !== 10 || e.AB !== 1 ? 'Garde F = 10 N et AB = 1,0 m.' : e.W < 0 ? 'Le travail doit être moteur : α inférieur à 90°.' : e.W > 5 ? 'W est trop grand : augmente α.' : 'W est trop petit : diminue α.'),
+      { F: 10, AB: 1, alpha: 60 }, '<p>10 × 1 × cos α = 5 donne cos α = 0,5 : α = 60° (ou −60°).</p>', { F: 10, AB: 1, alpha: 0 })] },
+    { titre: 'Quel travail ?', enonce: '<p>Une voiture freine : les frottements de la route sur les roues s\'opposent au mouvement.</p>',
+      parties: [{ type: 'choix', q: 'Le travail des frottements est :', options: [o('m', 'moteur'), o('r', 'résistant'), o('n', 'nul')], bonne: 'r', melanger: false,
+        indices: { m: 'Les frottements ralentissent la voiture : ils lui retirent de l\'énergie.', n: 'Les frottements sont opposés au déplacement (α = 180°), pas perpendiculaires.' },
+        solution: '<p>α = 180°, cos α = −1 : W &lt; 0, travail résistant (la vitesse diminue).</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>W &gt; 0 : travail <b>moteur</b> (la vitesse augmente) ; W &lt; 0 : travail <b>résistant</b> (la vitesse diminue) ; W = 0 : travail <b>nul</b>.</p></div>
+    <div class="cle"><p>α &lt; 90° : moteur ; α &gt; 90° : résistant ; α = 90° : nul.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2c_cours.html">Cours : travail du poids →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#signe">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+EC.menu('module_2b_cours');
+</script>
+</body>
+</html>

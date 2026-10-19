@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : force perpendiculaire au déplacement — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 4 / 4</span>
+    <h2 class="er-titre">Force perpendiculaire au déplacement</h2>
+    <p class="er-contexte">Une force <b>perpendiculaire</b> au déplacement ne travaille pas : <b>W = 0</b>, sans calcul.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 4 du module 2 : force perpendiculaire au déplacement
+   (W = 0 sans calcul).
+   ============================================================ */
+const { exemple } = COURS;
+const { o, nomV, W } = EC;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+
+/* ---------- 1. Force perpendiculaire au déplacement ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Une force perpendiculaire au déplacement');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Une force <b>perpendiculaire</b> au déplacement ne travaille pas : α = 90°, cos 90° = 0, donc <b>W = 0</b>.</p>
+        <p>Important : <b>pas besoin de calcul</b>. On écrit simplement : « la force est ⊥ au déplacement, donc W = 0 ».</p></div>
+    </div>
+    ${exemple(`<p>Une voiture roule sur une route horizontale. Le poids ${nomV('P')} et la réaction normale ${nomV('RN')} sont verticaux, le déplacement est horizontal :</p>
+      ${calc(`${W('P')} = 0 car ${nomV('P')} ⊥ au déplacement ; ${W('RN')} = 0 car ${nomV('RN')} ⊥ au déplacement`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'La réaction de la route', enonce: `<p>Un vélo roule sur 50 m d'une route horizontale. La route exerce sur lui la réaction normale ${nomV('RN')}, de valeur 800 N.</p>`,
+      parties: [{ type: 'choix', q: `Que vaut le travail ${W('RN')} ?`, colonne: true, bonne: 'ok',
+        options: [o('ok', `0 car ${nomV('RN')} ⊥ au déplacement`), o('p', '800 × 50 = 40 000 J'), o('m', '−800 × 50 = −40 000 J')],
+        indices: { p: `${nomV('RN')} est verticale et le déplacement horizontal : α = 90°.`, m: `${nomV('RN')} ne s'oppose pas au déplacement : elle lui est perpendiculaire.` },
+        solution: `<p>${nomV('RN')} est perpendiculaire au déplacement : ${W('RN')} = 0, sans calcul.</p>` }] },
+    { titre: 'Le plateau du serveur', enonce: '<p>Un serveur marche en ligne droite sur un sol horizontal en portant un plateau. Sa main exerce sur le plateau une force verticale, vers le haut.</p>',
+      parties: [{ type: 'choix', q: 'Le travail de cette force est :', options: [o('m', 'moteur'), o('r', 'résistant'), o('n', 'nul')], bonne: 'n', melanger: false,
+        indices: { m: 'La force est verticale, le déplacement horizontal : regarde l\'angle.', r: 'La force est verticale, le déplacement horizontal : regarde l\'angle.' },
+        solution: '<p>La force est perpendiculaire au déplacement : W = 0. Porter un plateau à l\'horizontale ne lui fournit pas d\'énergie.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Une force <b>perpendiculaire au déplacement</b> ne travaille pas : « la force est ⊥ au déplacement donc W = 0 ».</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur le travail d'une force →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#perpendiculaire">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+EC.menu('module_2d_cours');
+</script>
+</body>
+</html>
