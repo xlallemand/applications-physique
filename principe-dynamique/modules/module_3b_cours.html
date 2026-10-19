@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : dériver la vitesse — Chapitre 6 : Principe fondamental de la dynamique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pfd.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pfd.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 2 / 5</span>
+    <h2 class="er-titre">Dériver la vitesse</h2>
+    <p class="er-contexte">1<sup>re</sup> façon de calculer l'accélération : on connaît l'<b>expression de la vitesse</b> en fonction du temps, v(t), et on la <b>dérive</b> : a = v′.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 2 du module 3 : 1re façon de calculer a : on connaît v(t), a = v′.
+   Erreurs diagnostiquées : constante non dérivée, signe oublié.
+   ============================================================ */
+const { fmt, hasard, melanger, exemple } = COURS;
+const { o, fr, proche } = PFD;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+const MS2 = 'm·s<sup>−2</sup>';
+
+/* ---------- 1. 1re façon : on connaît v(t), a = v′ ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. On connaît v(t) : a = v′');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Si on a l'<b>expression de la vitesse</b> en fonction du temps, on la <b>dérive</b> :</p>
+        <p class="crs-formule">a = v′</p></div>
+      <p>Pour v = k × t + v<sub>0</sub> (k et v<sub>0</sub> constants), la dérivée vaut a = k : la constante v<sub>0</sub> disparaît.</p>
+    </div>
+    ${exemple(`<p>Un avion démarre avec une vitesse v = 7,25 t (v en m/s, t en s).</p><p class="crs-calc">a = v′ = <span class="c">7,25 ${MS2}</span></p>`)}`);
+  const [k1] = hasard([[3.2], [9.81], [2.5], [6]]), [k2, v0] = hasard([[4, 5], [1.5, 12], [0.8, 3]]), [k3, v3] = hasard([[-2, 20], [-5, 30], [-1.5, 15]]);
+  c_.aToi(carte, [
+    { titre: 'Une vitesse proportionnelle au temps', enonce: `<p>v = ${fmt(k1)} t (v en m/s, t en s).</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est l\'accélération ?', label: 'a =', valeur: k1, unite: MS2, signe: false, diag: () => 'Dérive v = k t : on obtient k.', solution: `<p class="crs-calc">a = v′ = ${c(fmt(k1) + ' ' + MS2)}</p>` }] },
+    { titre: 'Avec une vitesse de départ', enonce: `<p>v = ${fmt(k2)} t + ${v0} (v en m/s, t en s).</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est l\'accélération ?', label: 'a =', valeur: k2, unite: MS2, signe: false,
+        diag: v => proche(v, k2 + v0) || proche(v, v0) ? `La dérivée d'une constante est nulle : ${v0} disparaît.` : 'a = v′ : dérive v.', solution: `<p class="crs-calc">a = v′ = ${fmt(k2)} + 0 = ${c(fmt(k2) + ' ' + MS2)}</p>` }] },
+    { titre: 'Un système qui ralentit', enonce: `<p>v = ${fmt(k3)} t + ${v3} (v en m/s, t en s).</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est l\'accélération ? (avec son signe)', label: 'a =', valeur: k3, unite: MS2,
+        diag: v => proche(v, -k3) ? 'Garde le signe : la vitesse diminue, a est négative.' : 'a = v′.', solution: `<p class="crs-calc">a = v′ = ${c(fmt(k3) + ' ' + MS2)}</p><p>a est négative : le système ralentit.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>On connaît v(t) : <b>a = v′</b>. Pour v = k × t + v<sub>0</sub>, a = k : la dérivée d'une constante est nulle.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3c_cours.html">Cours : vitesse constante →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#derivee">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+PFD.menu('module_3b_cours');
+</script>
+</body>
+</html>

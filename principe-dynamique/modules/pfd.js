@@ -1582,7 +1582,15 @@
         { nom: 'Forces qui se compensent', slug: 'compensation', cours: 'module_2f_cours', noms: { cours: 'Cours : forces qui se compensent' } },
         { nom: 'Bilan des forces', exemple: 'module_2_simulation', questions: 'module_2_questions', noms: { exemple: 'Atelier : bilan des forces' } }] },
     { n: 3, titre: 'Accélération', desc: 'a = dv/dt ; a = Δv / Δt en m·s<sup>−2</sup>', fiche: 'fiche_3',
-      parties: [{ nom: 'Accélération', cours: 'module_3_cours', questions: 'module_3_questions' }] },
+      // cinq sous-modules de cours, puis les questions et la fiche
+      sousModules: true,
+      parties: [
+        { nom: 'Définition de l\'accélération', slug: 'definition', cours: 'module_3a_cours', noms: { cours: 'Cours : définition de l\'accélération' } },
+        { nom: 'Dériver la vitesse', slug: 'derivee', cours: 'module_3b_cours', noms: { cours: 'Cours : dériver la vitesse' } },
+        { nom: 'Vitesse constante', slug: 'constante', cours: 'module_3c_cours', noms: { cours: 'Cours : vitesse constante' } },
+        { nom: 'Accélération constante', slug: 'delta', cours: 'module_3d_cours', noms: { cours: 'Cours : accélération constante' } },
+        { nom: 'Accélération et forces', slug: 'forces', cours: 'module_3e_cours', noms: { cours: 'Cours : accélération et forces' } },
+        { nom: 'Accélération', questions: 'module_3_questions' }] },
     { n: 4, titre: 'Principe fondamental de la dynamique', desc: 'Σ <span class="vec-nom">F</span> = m <span class="vec-nom">a</span>, principe d\'inertie, résultante des forces', fiche: 'fiche_4',
       // quatre sous-modules de cours, puis les questions et la fiche
       sousModules: true,
