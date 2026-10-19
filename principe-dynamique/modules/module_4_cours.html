@@ -40,7 +40,7 @@
    m × a et ΣF / m confondus, frottements ajoutés au lieu d'être retirés.
    ============================================================ */
 const { fmt, sci, hasard, melanger, exemple } = COURS;
-const { o, fr, proche, nomV, sceneRemplie, partieResultante, partieAcc, SITUATIONS } = PFD;
+const { o, fr, proche, nomV, sceneRemplie, diagrammeDe, partieResultante, partieAcc, SITUATIONS } = PFD;
 const c = h => `<span class="c">${h}</span>`;
 const r3 = v => +v.toPrecision(3);
 const MS2 = 'm·s<sup>−2</sup>', SF = 'Σ <span class="vec-nom">F</span>';
@@ -75,7 +75,7 @@ function etape2(c_) {
   c_.ajouter(carte, `<div class="cours-bloc">
       <div class="cle"><p><b class="cle-titre">Principe d'inertie.</b> Σ <span class="vec-nom">F</span><sub>ext</sub> = <span class="vec-nom">0</span> ⇔ le système est <b>immobile</b> ou en <b>mouvement rectiligne uniforme</b> (<span class="vec-nom">a</span> = <span class="vec-nom">0</span>).</p></div>
     </div>
-    ${exemple(`<div class="pfd-sc-cadre">${sceneRemplie(SITUATIONS.parachute)}</div><p>Le parachutiste descend en ligne droite à vitesse constante : <span class="vec-nom">a</span> = <span class="vec-nom">0</span>, donc ${nomV('P')} + ${nomV('Fair')} = <span class="vec-nom">0</span>. La force de l'air (ses frottements) compense exactement le poids.</p>`)}`);
+    ${exemple(`<div class="pfd-noms-figs"><div class="pfd-do-cadre">${diagrammeDe(SITUATIONS.parachute)}</div><div class="pfd-sc-cadre">${sceneRemplie(SITUATIONS.parachute)}</div></div><p>Bilan des forces avec le diagramme objet-action : la Terre (${nomV('P')}) et l'air (${nomV('Fair')}). Le parachutiste descend en ligne droite à vitesse constante : <span class="vec-nom">a</span> = <span class="vec-nom">0</span>, donc ${nomV('P')} + ${nomV('Fair')} = <span class="vec-nom">0</span>. La force de l'air (ses frottements) compense exactement le poids.</p>`)}`);
   const q = (titre, enonce, opts, bonne, ind, sol) => ({ titre, enonce: `<p>${enonce}</p>`, parties: [{ type: 'choix', q: 'Que peut-on dire de la résultante des forces ?', options: opts, bonne, melanger: false, indices: ind, solution: `<p>${sol}</p>` }] });
   const OPTS = [o('nul', 'Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span> : les forces se compensent'), o('pas', 'Σ <span class="vec-nom">F</span> ≠ <span class="vec-nom">0</span>')];
   c_.aToi(carte, melanger([
@@ -121,7 +121,7 @@ const CAS4 = [
 function etape4(c_) {
   const carte = c_.carte('4. La méthode type');
   c_.ajouter(carte, `<div class="cours-bloc">
-      <div class="cle"><ol class="er-liste"><li>Bilan des forces.</li><li>Il y a souvent des forces qui se compensent (par exemple ${nomV('P')} et ${nomV('RN')} : ${nomV('P')} + ${nomV('RN')} = <span class="vec-nom">0</span>).</li><li>Σ <span class="vec-nom">F</span><sub>ext</sub> = ce qui reste.</li>
+      <div class="cle"><ol class="er-liste"><li>Bilan des forces, avec le diagramme objet-action.</li><li>Il y a souvent des forces qui se compensent (par exemple ${nomV('P')} et ${nomV('RN')} : ${nomV('P')} + ${nomV('RN')} = <span class="vec-nom">0</span>).</li><li>Σ <span class="vec-nom">F</span><sub>ext</sub> = ce qui reste.</li>
         <li>On utilise m <span class="vec-nom">a</span> = Σ <span class="vec-nom">F</span><sub>ext</sub>, selon ce que l'on a (quatre cas de figure, ci-dessous).</li></ol></div>
       <div class="pfd-cas">${CAS4}</div>
       <p>Quand il reste plusieurs forces sur la direction du mouvement, on projette : m a = F<sub>m</sub> − f (les forces dans le sens du mouvement comptent positivement), puis on isole l'inconnue.</p>
@@ -148,7 +148,7 @@ function aRetenir(c_) {
   c_.ajouter(carte, `<div class="cle"><p class="crs-formule">m <span class="vec-nom">a</span> = Σ <span class="vec-nom">F</span><sub>ext</sub></p><p>Dans un référentiel galiléen ; m en kg, a en m·s<sup>−2</sup>, Σ F en N. Σ <span class="vec-nom">F</span> (la résultante) est la somme de toutes les forces.</p></div>
     <div class="cle"><p><b>Principe d'inertie</b> : Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span> ⇔ immobile ou mouvement rectiligne uniforme.</p></div>
     <div class="cle"><p><span class="vec-nom">a</span> et Σ <span class="vec-nom">F</span> ont la même direction et le même sens : a = Σ F / m ; Σ F = m × a. Forces opposées : on soustrait ; perpendiculaires : diagonale du rectangle.</p></div>
-    <div class="cle"><p>Méthode type : bilan des forces → il y a souvent des forces qui se compensent (${nomV('P')} et ${nomV('RN')}) → Σ <span class="vec-nom">F</span><sub>ext</sub> = ce qui reste → selon ce que l'on a :</p>
+    <div class="cle"><p>Méthode type : bilan des forces (diagramme objet-action) → il y a souvent des forces qui se compensent (${nomV('P')} et ${nomV('RN')}) → Σ <span class="vec-nom">F</span><sub>ext</sub> = ce qui reste → selon ce que l'on a :</p>
       <div class="pfd-cas">${CAS4}</div><p>Plusieurs forces sur la direction du mouvement : m a = F<sub>m</sub> − f, puis on isole l'inconnue.</p></div>
     <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4_questions.html">Questions sur le principe fondamental →</a>
       <a class="btn-secondary" style="text-decoration:none" href="module_5.html">Module 5 : exercices</a>

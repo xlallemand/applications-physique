@@ -19,6 +19,8 @@
 
    PLAN = [{ n, titre, desc, fiche,          fiche : clé de la fiche récapitulative (s'il y a un cours)
              parties: [{ nom, slug, simulation, cours, exemple, questions, entrainement, noms }],
+             sousModules,                    true : cours découpé en sous-modules (une partie par cours, nommé
+                                             « Cours : … » dans noms.cours) : une seule liste de pages, puis la fiche
              exercices, exNom, nbEx }]       page d'exercices du module (nbEx : nombre d'exercices comptés)
      Chaque type de page d'une partie vaut la clé de la page (nom du fichier sans .html,
      ou nom de l'ancre en mode page unique). noms : libellés propres, ex. { questions: 'Vérification' }.
@@ -66,6 +68,8 @@
   const pageFaite = (pt, o, pages) => { const a = pages[pt[o]] || {}; return !!a.fait || a.note != null; };
   const partieFaite = (pt, pages) => pagesPartie(pt).every(o => pageFaite(pt, o, pages));
   const parties = m => m.parties || [];
+  // module affiché en une seule liste de pages : une seule partie, ou des sous-modules de cours
+  const plat = m => parties(m).length <= 1 || !!m.sousModules;
 
   /* ---------- Où se trouve-t-on ? ---------- */
   function situer(cle) {
@@ -98,7 +102,7 @@
     if (!s) return '';
     if (s.onglet === 'exercices') return `Module ${s.m.n} · ${s.m.exNom || 'Exercices'}`;
     const quoi = s.onglet === 'fiche' ? NOMS.fiche : nomPage(s.p, s.onglet);
-    return parties(s.m).length > 1 && s.onglet !== 'fiche' ? `Module ${s.m.n} · ${s.p.nom} · ${quoi}` : `Module ${s.m.n} · ${quoi}`;
+    return !plat(s.m) && s.onglet !== 'fiche' ? `Module ${s.m.n} · ${s.p.nom} · ${quoi}` : `Module ${s.m.n} · ${quoi}`;
   }
 
   /* ---------- Avancement d'un module (sommaire et accueil) ---------- */
@@ -122,22 +126,22 @@
   const chev = '<span class="som-chev" aria-hidden="true">›</span>';
   const feuille = (href, ic, lib, etat, ici) =>
     `<a class="som-page${ici ? ' ici' : ''}" href="${href}"${ici ? ' aria-current="page"' : ''}><span class="ic" aria-hidden="true">${ic}</span>${lib}${etat ? `<em>${etat}</em>` : ''}</a>`;
-  // les pages d'une partie (Cours ✓, Questions 16/20…), puis la fiche du module
-  function feuilles(m, p, s, pages) {
-    const ici = o => s.m === m && s.p === p && s.onglet === o;
-    return pagesPartie(p).map(o => feuille(lien(m, p, o), ICONES[o], nomPage(p, o), etatPage(p[o], pages), ici(o))).join('') +
-      (m.fiche ? feuille(lien(m, p, 'fiche'), ICONES.fiche, 'Fiche', '', ici('fiche')) : '');
-  }
+  // les pages d'une partie (Cours ✓, Questions 16/20…)
+  const feuillesPages = (m, p, s, pages) =>
+    pagesPartie(p).map(o => feuille(lien(m, p, o), ICONES[o], nomPage(p, o), etatPage(p[o], pages), s.m === m && s.p === p && s.onglet === o)).join('');
+  // la fiche du module (p : la partie dont la fiche s'ouvre à l'ancre ; null : la fiche entière)
+  const feuilleFiche = (m, p, s) => (m.fiche ? feuille(lien(m, p, 'fiche'), ICONES.fiche, 'Fiche', '', s.m === m && s.onglet === 'fiche' && (!p || s.p === p)) : '');
   const feuilleEx = (m, s, pages) => feuille(lien(m, null, 'exercices'), ICONES.exercices, m.exNom || 'Exercices', m.nbEx ? '' : etatPage(m.exercices, pages), s.m === m && s.onglet === 'exercices');
   function sommaire(s, pages, ex) {
     return C.plan.map(m => {
       const ici = s.m === m, n = faitModule(m, pages, ex), t = totalModule(m), fini = n === t;
       let enfants;
-      if (parties(m).length <= 1) enfants = `<div class="som-spages">${parties(m).length ? feuilles(m, m.parties[0], s, pages) : ''}${m.exercices ? feuilleEx(m, s, pages) : ''}</div>`;
+      // une seule liste : les pages de chaque partie (sous-modules compris), puis la fiche
+      if (plat(m)) enfants = `<div class="som-spages">${parties(m).map(p => feuillesPages(m, p, s, pages)).join('')}${feuilleFiche(m, null, s)}${m.exercices ? feuilleEx(m, s, pages) : ''}</div>`;
       else enfants = m.parties.map((p, i) => {
         const pici = ici && s.p === p, id = `som-s${m.n}-${i}`;
         return `<button type="button" class="som-spt${pici ? ' ici' : ''}" aria-expanded="${pici}" aria-controls="${id}">${partieFaite(p, pages) ? '<span class="som-v" aria-label="terminé">✓</span>' : ''}${p.nom}${chev}</button>` +
-          `<div class="som-spages" id="${id}"${pici ? '' : ' hidden'}>${feuilles(m, p, s, pages)}</div>`;
+          `<div class="som-spages" id="${id}"${pici ? '' : ' hidden'}>${feuillesPages(m, p, s, pages)}${feuilleFiche(m, p, s)}</div>`;
       }).join('') + (m.exercices ? `<div class="som-spages">${feuilleEx(m, s, pages)}</div>` : '');
       return `<div class="som-smod${ici ? ' ici' : ''}"><button type="button" class="som-sligne" aria-expanded="${ici}" aria-controls="som-s${m.n}">` +
         `<span class="som-snum${fini ? ' fait' : ''}">${fini ? '✓' : m.n}</span><span class="som-st">${m.titre}</span><span class="som-sn">${n}/${t}</span>${chev}</button>` +
@@ -174,7 +178,7 @@
     // (re)construit le bandeau et le sommaire ; sur une fiche, la partie dépend de l'ancre
     function rendre() {
       const s = situer(cle), pages = lireProg().pages || {}, ex = lireExercices();
-      const multi = parties(s.m).length > 1;
+      const multi = !plat(s.m);
       const ou = s.onglet === 'exercices' ? (s.m.exNom || NOMS.exercices) : s.onglet === 'fiche' ? NOMS.fiche
         : multi ? `${s.p.nom} · ${nomPage(s.p, s.onglet)}` : nomPage(s.p, s.onglet);
       racine.innerHTML =
@@ -225,12 +229,14 @@
     };
     const module = m => {
       const n = fait(m), t = total(m), termine = n === t, ouv = m.n === ouvert;
-      const multi = parties(m).length > 1;
-      const btFiche = m.fiche ? bt(m.fiche, multi ? 'Fiche récapitulative' : 'Fiche', derniere === m.fiche ? 'ici' : '') : '';
+      const multi = !plat(m);
+      const btFiche = m.fiche ? bt(m.fiche, multi || m.sousModules ? 'Fiche récapitulative' : 'Fiche', derniere === m.fiche ? 'ici' : '') : '';
       const btEx = m.exercices ? bt(m.exercices, (m.exNom || NOMS.exercices) + ' →', 'noir') : '';
-      // module à une seule partie : tout dans la même carte ; sinon une carte par partie, puis la fiche
-      const corps = (parties(m).length ? `<div class="som-grille${multi ? ' deux' : ''}">` + m.parties.map(pt =>
-        `<div class="som-partie">${multi || m.exercices ? `<span class="som-partie-nom${partieFaite(pt, pages) ? ' ok' : ''}">${pt.nom}</span>` : ''}<div class="som-actions">${pagesPartie(pt).map(o => btPage(pt, o)).join('')}${multi ? '' : btFiche}</div></div>`).join('') +
+      // module à une seule partie : tout dans la même carte ; sous-modules de cours : une seule carte,
+      // les pages en liste puis la fiche ; sinon une carte par partie, puis la fiche
+      const groupes = m.sousModules ? [parties(m)] : parties(m).map(pt => [pt]);
+      const corps = (parties(m).length ? `<div class="som-grille${multi ? ' deux' : ''}">` + groupes.map(g =>
+        `<div class="som-partie">${multi || m.exercices ? `<span class="som-partie-nom${partieFaite(g[0], pages) ? ' ok' : ''}">${g[0].nom}</span>` : ''}<div class="som-actions${m.sousModules ? ' som-liste' : ''}">${g.map(pt => pagesPartie(pt).map(o => btPage(pt, o)).join('')).join('')}${multi ? '' : btFiche}</div></div>`).join('') +
         `</div>` : '') + `${multi && btFiche ? `<div class="som-actions">${btFiche}</div>` : ''}${btEx ? `<div class="som-actions">${btEx}</div>` : ''}`;
       return `<div class="som-module"><button class="som-ligne" type="button" id="som-b${m.n}" aria-expanded="${ouv}" aria-controls="som-m${m.n}">` +
         `<span class="som-badge${termine ? ' fait' : ''}">${termine ? '✓' : m.n}</span>` +

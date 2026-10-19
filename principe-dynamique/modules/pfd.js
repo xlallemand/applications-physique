@@ -16,9 +16,10 @@
    PFD.scene(s, o), PFD.sceneRemplie(s) dessin d'une situation (SVG), avec ses forces (flèches superposées décalées)
    PFD.diagramme(sys, objets), PFD.diagrammeDe(s, etat)
                                         diagramme objet-action (SVG)
-   PFD.bilan(s, opts)                   bilan des forces étape par étape (situations : modules/situations.js) :
-                                        acteurs, force de l'air négligeable ou non, diagramme objet-action,
-                                        tracé, noms, compensation
+   PFD.bilan(s, opts)                   bilan des forces étape par étape (situations : modules/situations.js),
+                                        méthode du diagramme objet-action : actions à distance, objets qui
+                                        touchent le système, force de l'air négligeable ou non, puis tracé
+                                        des forces sur le schéma, noms, compensation
    PFD.infoForces()                     infographie : forces à distance, forces de contact
    PFD.chrono(o)                        chronophotographie animée (trajectoire rectiligne, circulaire ou
                                         curviligne ; mouvement uniforme, accéléré, décéléré)
@@ -780,8 +781,8 @@
     return { svg: `<g class="pfd-f${cls ? ' ' + cls : ''}"${coul ? ` style="color:${coul}"` : ''}><line x1="${f(x1)}" y1="${f(y1)}" x2="${f(bx)}" y2="${f(by)}"/><path d="M${f(x2)},${f(y2)} L${f(bx - 5.5 * s)},${f(by + 5.5 * c)} L${f(bx + 5.5 * s)},${f(by - 5.5 * c)} Z"/></g>`, x2, y2, c, s };
   }
   // Deux flèches qui se superposeraient (sur la même droite, segments qui se recouvrent) :
-  // la seconde est décalée de quelques pixels perpendiculairement, pour qu'on voie les deux
-  // (d'abord du côté opposé à son nom, qui s'écrit à gauche d'une flèche vers le bas).
+  // on les écarte toutes les deux de 2 px perpendiculairement, chacune d'un côté, pour qu'on
+  // voie les deux (le nom d'une flèche décalée s'écrit du côté de son décalage).
   // a, b : { x, y, c, s, L } (départ, direction unitaire, longueur) ; ea, eb : décalages
   function recouvre(a, ea, b, eb) {
     if (Math.abs(a.c * b.s - a.s * b.c) > .06) return false;              // pas parallèles
@@ -792,12 +793,29 @@
     const t1 = (bx - ax) * a.c + (by - ay) * a.s, t2 = t1 + b.L * (b.c * a.c + b.s * a.s);
     return Math.min(a.L, Math.max(t1, t2)) - Math.max(0, Math.min(t1, t2)) > 3;
   }
+  const ECART = 2;                                 // décalage de chaque flèche superposée (px)
   function decalages(geo) {
-    const dec = [];
+    const dec = geo.map(() => 0);
+    // groupes de flèches qui se recouvrent (de proche en proche)
+    const groupe = geo.map((_, i) => i);
+    const chef = i => (groupe[i] === i ? i : (groupe[i] = chef(groupe[i])));
     geo.forEach((a, i) => {
-      if (!a) { dec.push(0); return; }
-      const e = [0, -6, 6, -12, 12, -18, 18].find(x => geo.slice(0, i).every((b, j) => !b || !recouvre(a, x, b, dec[j])));
-      dec.push(e || 0);
+      if (!a) return;
+      for (let j = 0; j < i; j++) if (geo[j] && recouvre(geo[j], 0, a, 0)) groupe[chef(i)] = chef(j);
+    });
+    const groupes = {};
+    geo.forEach((a, i) => { if (a) (groupes[chef(i)] = groupes[chef(i)] || []).push(i); });
+    Object.keys(groupes).forEach(k => {
+      const g = groupes[k];
+      if (g.length < 2) return;
+      // repère du groupe : la première flèche ; n = (−s, c), côté vers lequel une flèche est décalée
+      const r = geo[g[0]], pos = i => (geo[i].x - r.x) * -r.s + (geo[i].y - r.y) * r.c;
+      // les flèches déjà un peu écartées gardent leur ordre ; à égalité, la première du côté +
+      g.slice().sort((i, j) => pos(j) - pos(i) || i - j).forEach((i, k) => {
+        const e = ECART * (g.length - 1 - 2 * k);
+        // une flèche de sens opposé à la première a sa normale inversée
+        dec[i] = geo[i].c * r.c + geo[i].s * r.s > 0 ? e : -e;
+      });
     });
     return dec;
   }
@@ -836,15 +854,17 @@
      Le système au centre ; autour, chaque objet qui agit sur lui, relié
      par un trait en pointillés (action à distance) ou plein (action de
      contact) ; trait barré : force négligeable. Le nom des forces est
-     écrit près du trait, dans la couleur de leur vecteur.
+     écrit près du trait, dans la couleur de leur vecteur. Un objet donne
+     une force ; quand on la décompose (<span class="vec-nom">R</span> = <span class="vec-nom">R</span>ₙ + <span class="vec-nom">f</span>), ses composantes sont
+     reliées par « + ».
      PFD.diagramme(sys, objets, o)
        objets : [{ nom, type ('distance' | 'contact' | null : pas encore choisi),
                    neglige, forces: [{ nom (clé de NOMS), coul }], note }]
        placement : le premier objet (la Terre) en haut à droite, les trois
        suivants en bas, les autres en haut à gauche
      PFD.diagrammeDe(s, etat) : celui d'une situation ; etat (pendant le bilan) :
-       { types: { acteur: 'distance' | 'contact' }, air: null (pas encore dit) | true | false,
-         noms: [clé du nom choisi, par force] }
+       { bulles() : [{ a (acteur, distracteur ou action à distance absente), type }] dessinées par l'élève,
+         air: null (pas encore dit) | true | false, noms: [clé du nom choisi, par force] }
      ============================================================ */
   const HD = 200;
   const court = t => t.replace(/^(la |le |les |l'|l’)/i, '');
@@ -890,13 +910,17 @@
       // (la note, « (frottements) », suit les noms sur la même ligne)
       const fs = (ob.forces || []).filter((fo, k, l) => l.findIndex(x => x.nom === fo.nom) === k);
       if (!fs.length) return;
-      const larg = fs.map(fo => largeurNom(fo.nom)), lnote = ob.note ? ob.note.length * 6.4 + 6 : 0;
-      const tot = larg.reduce((a, b) => a + b, 0) + 8 * (fs.length - 1) + lnote;
+      const larg = fs.map(fo => largeurNom(fo.nom)), lnote = ob.note ? ob.note.length * 6.4 + 6 : 0, PLUS = 18;
+      const tot = larg.reduce((a, b) => a + b, 0) + PLUS * (fs.length - 1) + lnote;
       let x = mx + nx * 12 - (ancre === 'end' ? tot : ancre === 'middle' ? tot / 2 : 0);
       etendre(x, x + tot);
       const yb = my + ny * 12 + (ny < -.3 ? 3 : ny > .3 ? 19 : 6);
-      fs.forEach((fo, k) => { noms += nomSVG(fo.nom, x + larg[k] / 2, yb, '', fo.coul); x += larg[k] + 8; });
-      if (ob.note) noms += `<text x="${f1(x - 2)}" y="${f1(yb)}" class="pfd-do-neg">${ob.note}</text>`;
+      fs.forEach((fo, k) => {
+        noms += nomSVG(fo.nom, x + larg[k] / 2, yb, '', fo.coul);
+        x += larg[k];
+        if (k < fs.length - 1) { noms += `<text x="${f1(x + PLUS / 2)}" y="${f1(yb)}" text-anchor="middle" class="pfd-do-plus">+</text>`; x += PLUS; }
+      });
+      if (ob.note) noms += `<text x="${f1(x + 6)}" y="${f1(yb)}" class="pfd-do-neg">${ob.note}</text>`;
     });
     const aria = o.aria || `Diagramme objet-action du système ${sys} : ` + objets.map(ob => `${ob.nom}, ${ob.type === 'distance' ? 'action à distance' : ob.type === 'contact' ? 'action de contact' : 'type à choisir'}${ob.neglige ? ', force négligeable' : ''}`).join(' ; ');
     // o.cadre = [x0, x1] : cadre imposé (diagrammes côte à côte, à la même échelle)
@@ -905,9 +929,22 @@
   }
   // type d'action d'un acteur (l'air agit toujours par contact, même quand sa force est négligée)
   const typeDe = (s, a) => a.type || (s.forces.find(f => f.acteur === a.id) || {}).type || 'contact';
+  // les trois actions à distance possibles (la Terre toujours, plus rarement un aimant ou un objet électrisé)
+  const DIST = [
+    { id: 'terre', label: 'la Terre (le poids)', court: 'Terre', manque: 'La Terre attire <b>toujours</b> le système : n\'oublie pas le poids.' },
+    { id: 'aimant', label: 'un aimant (force magnétique)', court: 'aimant', intrus: 'Aucun aimant n\'agit ici : pas de force magnétique.' },
+    { id: 'charge', label: 'un objet électrisé (force électrique)', court: 'objet électrisé', intrus: 'Aucun objet électrisé (frotté) ici : pas de force électrique.' },
+  ];
+  // sorte d'une action à distance, d'après le nom de sa force
+  function sorteDist(s, a) {
+    const n = (s.forces.find(f => f.acteur === a.id) || { noms: [] }).noms;
+    return n.indexOf('Fmag') !== -1 ? 'aimant' : n.indexOf('Felec') !== -1 ? 'charge' : 'terre';
+  }
   function diagrammeDe(s, etat, o) {
     const cols = couleursForces(s.forces);
-    const objets = s.acteurs.map(a => {
+    // pendant le bilan : seulement les bulles déjà dessinées par l'élève
+    const bulles = etat ? etat.bulles() : s.acteurs.map(a => ({ a, type: typeDe(s, a) }));
+    const objets = bulles.map(({ a, type }) => {
       const forces = [];
       s.forces.forEach((f, i) => {
         if (f.acteur !== a.id) return;
@@ -915,7 +952,7 @@
         if (k) forces.push({ nom: k, coul: cols[i] });
       });
       const neglige = a.id === 'air' && !!s.air && s.air.neglige && (!etat || etat.air != null);
-      return { nom: a.court || court(a.nom), type: etat ? etat.types[a.id] || null : typeDe(s, a), neglige, forces,
+      return { nom: a.court || court(a.nom), type, neglige, forces,
         note: a.id === 'air' && forces.length && s.air && s.air.cause === 'frottements' ? '(frottements)' : '' };
     });
     return diagramme(s.sysCourt || court(s.systeme), objets, o);
@@ -930,55 +967,107 @@
   /* ============================================================
      BILAN DES FORCES : une situation, étape par étape
      PFD.bilan(s, opts) → { enonce, parties } : question pour PFD.question ou COURS
-       1. qui agit sur le système ? (acteurs à sélectionner, distracteurs)
-       2. l'air touche le système : peut-on négliger sa force ? (si l'air est un acteur)
-       3. diagramme objet-action : à distance (pointillés) ou de contact (trait plein) ?
-       4. tracé : point de départ (centre G ou point de contact), direction et sens
+     Méthode du diagramme objet-action : on dessine d'abord le diagramme, bulle par bulle,
+     puis les forces sur le schéma.
+       1. les actions à distance : parmi les trois possibles (la Terre, toujours ; un aimant ;
+          un objet électrisé), lesquelles ? (trait en pointillés)
+       2. une bulle pour chaque objet qui touche le système, l'air compris (distracteurs) ;
+          chacun donne une force (trait plein)
+       3. l'air touche le système : peut-on négliger sa force ? (si l'air est un acteur ; trait barré)
+       4. tracé sur le schéma : point de départ (centre G ou point de contact), direction et sens
           (8 directions, + directions propres : perpendiculaire au support, le long du fil…)
        5. nom de chaque vecteur (écrit aussi sur le diagramme)
        6. les forces se compensent-elles ? (si s.comp)
-     opts.diagramme : s'arrêter au diagramme objet-action (étapes 1 à 3).
+     opts.jusqua : 'diagramme' (étapes 1 à 3), 'trace' (1 à 4), 'noms' (1 à 5) ; sinon tout.
      Toutes les parties partagent l'état de la situation (plusieurs exemplaires
-     possibles) ; les diagrammes affichés se mettent à jour à chaque choix.
+     possibles) ; le diagramme se dessine au fil des choix et suit l'élève : il
+     s'affiche dans la dernière étape commencée (celui d'une étape finie est masqué
+     quand la suivante apparaît).
      Format d'une situation : voir modules/situations.js.
      ============================================================ */
-  const MANQUE = 'Il manque un acteur : cherche d\'abord les actions à distance (la Terre attire toujours le système), puis <b>chaque objet qui touche</b> le système (l\'air aussi).';
-  function partieActeurs(s) {
-    return { type: 'perso', q: `Qui agit sur le système (${s.systeme}) ? Sélectionne <b>tous</b> les acteurs, puis valide.`,
-      solution: `<p>${s.acteurs.map(a => `${cap(a.nom)} : ${a.pourquoi}`).join(' ; ')}.</p>`,
+  const MANQUE = 'Il manque un objet : cherche <b>chaque objet qui touche</b> le système (l\'air aussi).';
+  // diagramme objet-action d'une étape : il remplace celui des étapes déjà finies
+  function figDo(zone, st) {
+    const fig = el('div', 'pfd-do-cadre');
+    zone.appendChild(fig);
+    st.figs.forEach(f => { if (f.dataset.fini) f.hidden = true; });
+    st.figs.push(fig);
+    return fig;
+  }
+  // boutons à cocher (actions à distance, objets qui touchent) : ids sélectionnés, dans l'ordre des appuis
+  function boutonsActs(zone, liste, choisis, api, quand) {
+    const d = el('div', 'pfd-acts');
+    d.innerHTML = liste.map(a => `<button type="button" class="pfd-act" data-id="${a.id}" aria-pressed="false">${cap(a.label || a.nom)}</button>`).join('');
+    zone.appendChild(d);
+    d.querySelectorAll('.pfd-act').forEach(b => {
+      b.onclick = () => {
+        if (b.disabled || api.fini()) return;
+        const oui = b.getAttribute('aria-pressed') !== 'true', k = choisis.indexOf(b.dataset.id);
+        b.setAttribute('aria-pressed', oui ? 'true' : 'false');
+        if (oui && k === -1) choisis.push(b.dataset.id);
+        if (!oui && k !== -1) choisis.splice(k, 1);
+        b.classList.remove('ko');
+        api.effacer();
+        quand();
+      };
+    });
+    // réponse connue : les bons boutons en vert, tout est figé
+    d.figer = bons => d.querySelectorAll('.pfd-act').forEach(b => {
+      const bon = bons.indexOf(b.dataset.id) !== -1;
+      b.disabled = true; b.classList.remove('ko'); b.classList.toggle('ok', bon); b.setAttribute('aria-pressed', bon ? 'true' : 'false');
+    });
+    return d;
+  }
+  // 1. les actions à distance : il n'y en a que trois possibles
+  function partieDistance(s, st, distants) {
+    const presentes = distants.map(a => sorteDist(s, a));
+    return { type: 'perso', q: `Dessine le <b>diagramme objet-action</b>. D'abord les actions <b>à distance</b> : il n'y en a que trois possibles. Lesquelles s'exercent sur ${s.systeme} ? Sélectionne-les, puis valide.`,
+      solution: `<p>${distants.map(a => `${cap(a.nom)} : ${a.pourquoi}`).join(' ; ')}. Dans le diagramme : trait en <b>pointillés</b>.</p>`,
       monter(zone, api) {
-        const cands = melanger(s.acteurs.concat(s.distracteurs || []));
-        const d = el('div', 'pfd-acts');
-        d.innerHTML = cands.map(a => `<button type="button" class="pfd-act" data-id="${a.id}" aria-pressed="false">${cap(a.nom)}</button>`).join('');
-        zone.appendChild(d);
+        const fig = figDo(zone, st);
+        const d = boutonsActs(zone, DIST, st.dist, api, st.maj);
         const bVal = boutonValider(zone);
-        let fige = false;
-        d.querySelectorAll('.pfd-act').forEach(b => {
-          b.onclick = () => {
-            if (fige || api.fini()) return;
-            b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
-            b.classList.remove('ko');
-            api.effacer();
-          };
-        });
         function figer() {
-          fige = true;
-          d.querySelectorAll('.pfd-act').forEach(b => {
-            const bon = s.acteurs.some(a => a.id === b.dataset.id);
-            b.disabled = true; b.classList.remove('ko'); b.classList.toggle('ok', bon); b.setAttribute('aria-pressed', bon ? 'true' : 'false');
-          });
-          bVal.fermer();
+          st.distOk = true; fig.dataset.fini = '1';
+          d.figer(presentes); bVal.fermer(); st.maj();
         }
         bVal.onclick = () => {
-          if (fige || api.fini()) return;
-          const c = new Set(Array.from(d.querySelectorAll('.pfd-act[aria-pressed="true"]')).map(b => b.dataset.id));
-          if (!c.size) { secouer(d); api.message('Touche les acteurs qui agissent sur le système, puis valide.'); return; }
-          const intrus = (s.distracteurs || []).filter(x => c.has(x.id)), manque = s.acteurs.filter(a => !c.has(a.id));
+          if (st.distOk || api.fini()) return;
+          if (!st.dist.length) { secouer(d); api.message('Touche les actions à distance qui s\'exercent sur le système, puis valide.'); return; }
+          const intrus = st.dist.filter(k => presentes.indexOf(k) === -1), manque = presentes.filter(k => st.dist.indexOf(k) === -1);
+          if (!intrus.length && !manque.length) { figer(); api.reussi(); return; }
+          intrus.forEach(k => d.querySelector(`[data-id="${k}"]`).classList.add('ko'));
+          api.erreur('<br>' + intrus.map(k => '☛ ' + DIST.find(x => x.id === k).intrus)
+            .concat(manque.map(k => '☛ ' + (distants.find(a => sorteDist(s, a) === k).manque || DIST.find(x => x.id === k).manque))).join('<br>'));
+          secouer(d);
+        };
+        st.maj();
+        return { montrer: figer };
+      } };
+  }
+  // 2. une bulle pour chaque objet qui touche le système : chacun donne une force
+  function partieContact(s, st, contacts) {
+    return { type: 'perso', q: `Puis les actions <b>de contact</b> : une bulle pour <b>chaque objet qui touche</b> ${s.systeme}. Chacun donne une force. Sélectionne-les, puis valide.`,
+      solution: `<p>${contacts.length ? contacts.map(a => `${cap(a.nom)} : ${a.pourquoi}`).join(' ; ') + '. Dans le diagramme : trait <b>plein</b>.' : 'Aucun objet ne touche le système.'}</p>`,
+      monter(zone, api) {
+        const fig = figDo(zone, st);
+        const cands = melanger(contacts.concat(s.distracteurs || []));
+        const d = boutonsActs(zone, cands, st.contacts, api, st.maj);
+        const bVal = boutonValider(zone);
+        function figer() {
+          st.contactOk = true; fig.dataset.fini = '1';
+          d.figer(contacts.map(a => a.id)); bVal.fermer(); st.maj();
+        }
+        bVal.onclick = () => {
+          if (st.contactOk || api.fini()) return;
+          if (!st.contacts.length && contacts.length) { secouer(d); api.message('Touche les objets qui touchent le système, puis valide.'); return; }
+          const intrus = (s.distracteurs || []).filter(x => st.contacts.indexOf(x.id) !== -1), manque = contacts.filter(a => st.contacts.indexOf(a.id) === -1);
           if (!intrus.length && !manque.length) { figer(); api.reussi(); return; }
           intrus.forEach(x => d.querySelector(`[data-id="${x.id}"]`).classList.add('ko'));
           api.erreur('<br>' + intrus.map(x => '☛ ' + x.diag).concat(manque.length ? ['☛ ' + (manque[0].manque || MANQUE)] : []).join('<br>'));
           secouer(d);
         };
+        st.maj();
         return { montrer: figer };
       } };
   }
@@ -990,8 +1079,9 @@
   const bonneAir = a => (a.neglige ? 'oui' : a.cause);
   function partieAir(s, st) {
     const bonne = bonneAir(s.air);
-    return { type: 'perso', q: 'L\'air touche le système : peut-on <b>négliger</b> sa force ?', solution: `<p>${s.air.raison}</p>`,
+    return { type: 'perso', q: 'L\'air touche le système : peut-on <b>négliger</b> sa force ? (Si oui, son trait est barré.)', solution: `<p>${s.air.raison}</p>`,
       monter(zone, api) {
+        const fig = figDo(zone, st);
         const box = el('div', 'ph-choix ph-choix-col');
         zone.appendChild(box);
         let fige = false;
@@ -1009,64 +1099,12 @@
         });
         // réponse connue : les diagrammes affichés barrent le trait de l'air si sa force est négligeable
         function figer() {
-          fige = true;
+          fige = true; fig.dataset.fini = '1';
           bs.forEach(({ b, x }) => { b.disabled = true; if (x.id === bonne) b.classList.add('juste'); });
           st.air = s.air.neglige;
           st.maj();
         }
-        return { montrer: figer };
-      } };
-  }
-  function partieTypes(s, st) {
-    return { type: 'perso', q: 'Complète le <b>diagramme objet-action</b> : chaque acteur agit-il <b>à distance</b> (trait en pointillés) ou <b>par contact</b> (trait plein) ?',
-      solution: `<p>${s.acteurs.map(a => `${cap(a.nom)} : ${typeDe(s, a) === 'distance' ? 'à distance' : 'contact'}`).join(' ; ')}.</p>`,
-      monter(zone, api) {
-        const fig = el('div', 'pfd-do-cadre');
-        zone.appendChild(fig);
-        const d = el('div', 'pfd-types');
-        d.innerHTML = s.acteurs.map(a => `<div class="pfd-type" data-id="${a.id}"><span class="pfd-type-nom">${cap(a.nom)}</span>
-          <span class="pfd-type-b" role="group" aria-label="${cap(a.nom)}"><button type="button" data-v="distance" aria-pressed="false">à distance</button><button type="button" data-v="contact" aria-pressed="false">de contact</button></span></div>`).join('');
-        zone.appendChild(d);
-        const bVal = boutonValider(zone);
-        const dessiner = () => { fig.innerHTML = diagrammeDe(s, st); };
-        st.ecoute.push(dessiner);
-        let fige = false;
-        d.querySelectorAll('.pfd-type-b button').forEach(b => {
-          b.onclick = () => {
-            if (fige || api.fini()) return;
-            b.parentElement.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
-            const r = b.closest('.pfd-type');
-            r.classList.remove('ko');
-            st.types[r.dataset.id] = b.dataset.v;
-            api.effacer();
-            st.maj();
-          };
-        });
-        function figer() {
-          fige = true;
-          d.querySelectorAll('.pfd-type').forEach(r => {
-            const a = s.acteurs.find(x => x.id === r.dataset.id);
-            st.types[a.id] = typeDe(s, a);
-            r.classList.remove('ko'); r.classList.add('ok');
-            r.querySelectorAll('button').forEach(b => { b.disabled = true; b.setAttribute('aria-pressed', b.dataset.v === typeDe(s, a) ? 'true' : 'false'); });
-          });
-          bVal.fermer();
-          st.maj();
-        }
-        bVal.onclick = () => {
-          if (fige || api.fini()) return;
-          const rangs = Array.from(d.querySelectorAll('.pfd-type'));
-          if (rangs.some(r => !r.querySelector('[aria-pressed="true"]'))) { secouer(d); api.message('Choisis « à distance » ou « de contact » pour chaque acteur.'); return; }
-          const faux = rangs.filter(r => r.querySelector('[aria-pressed="true"]').dataset.v !== typeDe(s, s.acteurs.find(x => x.id === r.dataset.id)));
-          if (!faux.length) { figer(); api.reussi(); return; }
-          faux.forEach(r => r.classList.add('ko'));
-          api.erreur('<br>' + faux.map(r => {
-            const a = s.acteurs.find(x => x.id === r.dataset.id);
-            return '☛ ' + (typeDe(s, a) === 'distance' ? `${cap(a.nom)} agit <b>sans toucher</b> ${s.systeme} : c'est une action à distance (trait en pointillés).` : `${cap(a.nom)} <b>touche</b> ${s.systeme} : c'est une action de contact (trait plein).`);
-          }).join('<br>'));
-          secouer(d);
-        };
-        dessiner();
+        st.maj();
         return { montrer: figer };
       } };
   }
@@ -1080,11 +1118,12 @@
   function partieTrace(s, st) {
     const lieu = p => (p === 'G' ? 'le centre G' : 'le point ' + p);
     const cols = couleursForces(s.forces);
-    return { type: 'perso', q: `Trace chaque force : choisis son <b>point de départ</b>, puis sa <b>direction</b> et son <b>sens</b> (sans souci d'échelle).${s.air && s.air.neglige ? ' La force de l\'air est négligée : on ne la dessine pas.' : ''}`,
+    return { type: 'perso', q: `Dessine maintenant sur le schéma les forces du diagramme : pour chacune, choisis son <b>point de départ</b>, puis sa <b>direction</b> et son <b>sens</b> (sans souci d'échelle).${s.air && s.air.neglige ? ' La force de l\'air est négligée : on ne la dessine pas.' : ''}`,
       solution: `<p>${s.forces.map((f, i) => `${i + 1}. ${cap(f.lib)} : depuis ${lieu(f.pts[0])}${f.pts.length > 1 ? ` (ou ${f.pts.slice(1).map(lieu).join(', ')})` : ''}, ${texteDir(s, f.angs[0])}`).join(' ;<br>')}.</p>`,
       monter(zone, api) {
         const pos = st.pos;
         let sel = 0, fige = false, drag = null;
+        const doFig = figDo(zone, st);
         const d = el('div', 'pfd-tr');
         d.innerHTML = `<div class="vec-chips pfd-tr-chips" role="group" aria-label="Force à tracer">${s.forces.map((f, i) => `<button type="button" class="vec-chip" data-i="${i}"><span class="pfd-tr-pastille" style="background:${cols[i]}" aria-hidden="true"></span>${i + 1}. ${cap(f.lib)}</button>`).join('')}</div>
           <div class="pfd-sc-cadre pfd-tr-fig"></div>
@@ -1167,13 +1206,14 @@
             p.etat = 'ko';
             msgs.push(`☛ <b>Force ${i + 1}</b> (${f.lib}) : ${!okPt ? diagPt(f) : diagDir(f, p.ang)}`);
           });
-          if (!msgs.length) { fige = true; dessiner(); bVal.fermer(); st.maj(); api.reussi(); return; }
+          if (!msgs.length) { fige = true; doFig.dataset.fini = '1'; dessiner(); bVal.fermer(); st.maj(); api.reussi(); return; }
           sel = pos.findIndex(p => !p.ok);
           dessiner();
           api.erreur('<br>' + msgs.join('<br>'));
           secouer(figZ);
         };
-        return { montrer() { s.forces.forEach((f, i) => Object.assign(pos[i], { pt: f.pts[0], ang: f.angs[0], ok: true, etat: 'ok' })); fige = true; dessiner(); bVal.fermer(); st.maj(); } };
+        st.maj();
+        return { montrer() { s.forces.forEach((f, i) => Object.assign(pos[i], { pt: f.pts[0], ang: f.angs[0], ok: true, etat: 'ok' })); fige = true; doFig.dataset.fini = '1'; dessiner(); bVal.fermer(); st.maj(); } };
       } };
   }
   function partieNoms(s, st) {
@@ -1186,6 +1226,8 @@
           <span class="pfd-nom-ch" role="group" aria-label="Nom de la force ${i + 1}">${cands.map(k => `<button type="button" data-k="${k}" aria-pressed="false">${nomV(k)}</button>`).join('')}</span></div>`).join('');
         zone.appendChild(d);
         const doZ = d.querySelector('.pfd-noms-do'), figZ = d.querySelector('.pfd-noms-fig');
+        st.figs.forEach(f => { if (f.dataset.fini) f.hidden = true; });
+        st.figs.push(doZ);
         const bVal = boutonValider(zone);
         let fige = false;
         // le diagramme et le dessin montrent les noms choisis, dans la couleur de chaque force
@@ -1246,18 +1288,25 @@
   }
   function bilan(s, opts) {
     opts = opts || {};
-    // état partagé : tracés, noms et types choisis, réponse sur l'air ; diagrammes à redessiner
-    const st = { pos: s.forces.map(() => ({ pt: null, ang: null, etat: '', ok: false })), noms: s.forces.map(() => null), types: {}, air: null, ecoute: [] };
-    st.maj = () => st.ecoute.forEach(f => f());
-    const parties = [partieActeurs(s)];
+    const distants = s.acteurs.filter(a => typeDe(s, a) === 'distance'), contacts = s.acteurs.filter(a => typeDe(s, a) !== 'distance');
+    const objets = contacts.concat(s.distracteurs || []);
+    // état partagé : actions à distance et objets choisis, réponse sur l'air, tracés et noms ; diagrammes à redessiner
+    const st = { dist: [], contacts: [], distOk: false, contactOk: false, air: null, pos: s.forces.map(() => ({ pt: null, ang: null, etat: '', ok: false })),
+      noms: s.forces.map(() => null), figs: [], ecoute: [] };
+    // bulles dessinées : les actions à distance (une sorte choisie sans acteur : bulle de l'élève), puis les objets qui touchent
+    st.bulles = () => (st.distOk ? distants : DIST.filter(k => st.dist.indexOf(k.id) !== -1).map(k => distants.find(a => sorteDist(s, a) === k.id) || { id: '_' + k.id, nom: k.court }))
+      .map(a => ({ a, type: 'distance' }))
+      .concat((st.contactOk ? contacts : st.contacts.map(id => objets.find(x => x.id === id))).map(a => ({ a, type: 'contact' })));
+    st.maj = () => { st.figs.forEach(f => { f.innerHTML = diagrammeDe(s, st); }); st.ecoute.forEach(f => f()); };
+    const jusqua = opts.jusqua || 'tout';
+    const parties = [partieDistance(s, st, distants)];
+    if (objets.length) parties.push(partieContact(s, st, contacts));
     if (s.air) parties.push(partieAir(s, st));
-    parties.push(partieTypes(s, st));
-    if (!opts.diagramme) {
-      parties.push(partieTrace(s, st), partieNoms(s, st));
-      if (s.comp) parties.push(partieComp(s));
-    }
+    if (jusqua !== 'diagramme') parties.push(partieTrace(s, st));
+    if (jusqua === 'noms' || jusqua === 'tout') parties.push(partieNoms(s, st));
+    if (jusqua === 'tout' && s.comp) parties.push(partieComp(s));
     parties.forEach((p, k) => { p.q = `${k + 1}. ${p.q}`; });
-    return { enonce: `${s.enonce ? `<p>${s.enonce}</p>` : ''}<div class="pfd-sc-cadre">${scene(s, { aria: s.titre })}</div>`, parties };
+    return { enonce: `${s.enonce ? `<p>${s.enonce}</p>` : ''}${s.dessin ? `<div class="pfd-sc-cadre">${scene(s, { aria: s.titre })}</div>` : ''}`, parties };
   }
   // scène avec toutes ses forces tracées et nommées (exemples, fiches, corrections)
   const sceneRemplie = (s, o) => {
@@ -1516,9 +1565,17 @@
   const PLAN = [
     { n: 1, titre: 'Référentiel et nature du mouvement', desc: 'Référentiel galiléen, décrire un mouvement en deux mots (trajectoire, vitesse)', fiche: 'fiche_1',
       parties: [{ nom: 'Référentiel et nature du mouvement', cours: 'module_1_cours', questions: 'module_1_questions' }] },
-    { n: 2, titre: 'Faire un bilan des forces', desc: 'Forces à distance et de contact, force de l\'air, diagramme objet-action, poids, réaction du support, forces qui se compensent', fiche: 'fiche_2',
-      // le cours, puis l'atelier (page « exemple » : entre le cours et les questions)
-      parties: [{ nom: 'Faire un bilan des forces', cours: 'module_2_cours', exemple: 'module_2_simulation', questions: 'module_2_questions', noms: { exemple: 'Atelier : bilan des forces' } }] },
+    { n: 2, titre: 'Faire un bilan des forces', desc: 'Forces à distance et de contact, diagramme objet-action, force de l\'air, poids, réaction du support, forces qui se compensent', fiche: 'fiche_2',
+      // six sous-modules de cours, puis l'atelier (page « exemple » : entre les cours et les questions), les questions et la fiche
+      sousModules: true,
+      parties: [
+        { nom: 'Forces à distance, forces de contact', slug: 'distance', cours: 'module_2a_cours', noms: { cours: 'Cours : forces à distance, forces de contact' } },
+        { nom: 'Méthode du diagramme objet-action', slug: 'diagramme', cours: 'module_2b_cours', noms: { cours: 'Cours : méthode du diagramme objet-action' } },
+        { nom: 'Force de l\'air', slug: 'air', cours: 'module_2c_cours', noms: { cours: 'Cours : force de l\'air' } },
+        { nom: 'Poids', slug: 'poids', cours: 'module_2d_cours', noms: { cours: 'Cours : poids' } },
+        { nom: 'Réaction du support', slug: 'reaction', cours: 'module_2e_cours', noms: { cours: 'Cours : réaction du support' } },
+        { nom: 'Forces qui se compensent', slug: 'compensation', cours: 'module_2f_cours', noms: { cours: 'Cours : forces qui se compensent' } },
+        { nom: 'Bilan des forces', exemple: 'module_2_simulation', questions: 'module_2_questions', noms: { exemple: 'Atelier : bilan des forces' } }] },
     { n: 3, titre: 'Accélération', desc: 'a = dv/dt ; a = Δv / Δt en m·s<sup>−2</sup>', fiche: 'fiche_3',
       parties: [{ nom: 'Accélération', cours: 'module_3_cours', questions: 'module_3_questions' }] },
     { n: 4, titre: 'Principe fondamental de la dynamique', desc: 'Σ <span class="vec-nom">F</span> = m <span class="vec-nom">a</span>, principe d\'inertie, résultante des forces', fiche: 'fiche_4',
@@ -1533,7 +1590,7 @@
   window.PFD = Object.assign(window.PFD || {}, {
     MOINS, fmt, cs, sci, lire, proche, fr, unite, o, fq, el, secouer, melanger, hasard, entre, champ, PARTIES,
     question, serie, confettis, fig, monter, outil, cap, V, NOMS, nomV, nomSVG, DIR_TXT, texteDir, ecartAngle, scene, sceneRemplie, bilan,
-    COUL, COUL_LIBRES, couleurs, couleursForces, court, diagramme, diagrammeDe, diagrammesDe, typeDe, REGLE_AIR, OPTS_AIR, bonneAir, infoForces,
+    COUL, COUL_LIBRES, couleurs, couleursForces, court, diagramme, diagrammeDe, diagrammesDe, typeDe, DIST, sorteDist, REGLE_AIR, OPTS_AIR, bonneAir, infoForces,
     positions, chrono, partieMouvement, MOTS_VIT, motVit, somme, partieResultante, partieAcc, PLAN, menu, accueil, marquer,
   });
 })();

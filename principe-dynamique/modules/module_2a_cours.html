@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : forces à distance, forces de contact — Chapitre 6 : Principe fondamental de la dynamique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pfd.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pfd.js"></script>
+<script src="situations.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 1 / 6</span>
+    <h2 class="er-titre">Forces à distance, forces de contact</h2>
+    <p class="er-contexte">Une force modélise l'action d'un objet sur le <b>système</b>. Il y a deux sortes de forces : les forces <b>à distance</b> (il n'y en a que trois) et les forces <b>de contact</b> (un objet qui touche le système).</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 1 du module 2 : les trois forces à distance (poids,
+   magnétique, électrique : depuis le centre G), puis les forces de
+   contact (chaque objet qui touche, l'air compris : depuis le point de
+   contact). Infographie PFD.infoForces dans « À retenir ».
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { o, nomV, scene, sceneRemplie, couleursForces, infoForces, SITUATIONS, BALLON } = PFD;
+
+// dessin d'une situation avec quelques-unes de ses forces (rangs dans s.forces)
+function sceneAvec(s, ks, aria) {
+  const cols = couleursForces(s.forces);
+  return scene(s, { forces: ks.map(k => { const f = s.forces[k]; return { pt: f.pts[0], ang: f.angs[0], nom: f.noms[0], coul: cols[k], cote: f.cote }; }), marques: ['G'], aria });
+}
+
+/* ---------- 1. Les forces à distance ---------- */
+// [force ('poids', 'mag', 'elec'), situation]
+const DISTANCES = [
+  ['poids', 'Une pomme tombe d\'un arbre.'], ['poids', 'Un parachutiste saute de l\'avion.'],
+  ['mag', 'Un aimant attire un trombone posé à quelques centimètres.'], ['mag', 'L\'aiguille d\'une boussole tourne quand on approche un aimant.'],
+  ['elec', 'Une règle en plastique frottée attire de petits morceaux de papier.'], ['elec', 'Un ballon de baudruche frotté sur un pull attire des cheveux.'],
+];
+const OPTS_DIST = [o('poids', 'le poids'), o('mag', 'la force magnétique'), o('elec', 'la force électrique')];
+const SOL_DIST = {
+  poids: `La Terre attire le système : c'est le poids ${nomV('P')}.`,
+  mag: `Un aimant agit sans toucher : c'est la force magnétique ${nomV('Fmag')}.`,
+  elec: `Un objet frotté est électrisé (chargé) : c'est la force électrique ${nomV('Felec')}.`,
+};
+const IND_DIST = {
+  poids: 'Le poids est la force exercée par la Terre. Y a-t-il ici un aimant ou un objet frotté ?',
+  mag: 'La force magnétique est exercée par un <b>aimant</b>.',
+  elec: 'La force électrique est exercée par un objet <b>électrisé</b> (frotté, chargé + ou −).',
+};
+function etape1(c_) {
+  const carte = c_.carte('1. Les forces à distance');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Règle.</b> Il n'y a que <b>trois</b> forces à distance :</p>
+        <ul class="er-liste"><li>le <b>poids</b> ${nomV('P')}, exercé par la Terre : il est <b>toujours</b> là ;</li>
+        <li>la <b>force magnétique</b> ${nomV('Fmag')}, s'il y a un aimant ;</li>
+        <li>la <b>force électrique</b> ${nomV('Felec')}, s'il y a un objet électrisé (frotté, chargé + ou −).</li></ul>
+        <p>Une force à distance part du <b>centre G</b> du système.</p></div>
+    </div>
+    ${exemple(`<div class="pfd-sc-cadre">${sceneAvec(SITUATIONS.clou, [0, 1], 'Clou attiré par un aimant : poids et force magnétique, depuis G')}</div>
+      <p>Un clou est attiré par un aimant, sans le toucher. Forces à distance : la Terre → poids ${nomV('P')}, vers le bas ; l'aimant → force magnétique ${nomV('Fmag')}, vers l'aimant. Les deux flèches partent du centre G du clou.</p>`)}`);
+  // une situation de chaque force
+  const choisies = ['poids', 'mag', 'elec'].map(k => hasard(DISTANCES.filter(d => d[0] === k)));
+  c_.aToi(carte, melanger(choisies).map((d, k) => ({ titre: `Situation ${k + 1}`, enonce: `<p>${d[1]}</p>`,
+    parties: [{ type: 'choix', q: 'Quelle est cette force à distance ?', options: OPTS_DIST, bonne: d[0], melanger: false,
+      indices: OPTS_DIST.reduce((m, x) => (x.id === d[0] ? m : Object.assign(m, { [x.id]: IND_DIST[x.id] })), {}), solution: `<p>${SOL_DIST[d[0]]}</p>` }] })));
+  return carte;
+}
+
+/* ---------- 2. Les forces de contact ---------- */
+const ACTIONS = [
+  ['dist', 'La Terre attire une pomme qui tombe.'], ['dist', 'Un aimant attire un trombone posé à quelques centimètres.'], ['dist', 'Une règle frottée attire de petits morceaux de papier.'],
+  ['cont', 'Une corde tire un traîneau.'], ['cont', 'Le vent pousse la voile d\'un bateau.'], ['cont', 'Une table porte un livre.'], ['cont', 'L\'eau porte un bateau qui flotte.'],
+];
+function etape2(c_) {
+  const carte = c_.carte('2. Les forces de contact');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Règle.</b> <b>Chaque objet qui touche</b> le système exerce une force <b>de contact</b> : le support (sol, table…), un fil, une corde, un ressort, une main, un pied, un liquide (eau, huile…), et <b>l'air</b>, qui touche toujours le système.</p>
+        <p>Une force de contact part du <b>point de contact</b>.</p></div>
+    </div>
+    ${exemple(`<div class="pfd-sc-cadre">${sceneRemplie(BALLON[0], { aria: 'Ballon posé sur le sol : poids et réaction du sol' })}</div>
+      <p>Ballon posé sur le sol. À distance : la Terre → poids ${nomV('P')}, depuis G, vers le bas. Contact : le sol touche le ballon → ${nomV('RN')}, depuis le point de contact A, vers le haut. L'air touche aussi le ballon, mais sa force est négligeable (voir le cours sur la force de l'air).</p>`)}`);
+  const choisies = melanger(ACTIONS.filter(a => a[0] === 'dist')).slice(0, 1).concat(melanger(ACTIONS.filter(a => a[0] === 'cont')).slice(0, 2));
+  c_.aToi(carte, melanger(choisies).map((a, k) => ({ titre: `Action ${k + 1}`, enonce: `<p>${a[1]}</p>`,
+    parties: [{ type: 'choix', q: 'Cette action est-elle à distance ou de contact ?', options: [o('dist', 'à distance'), o('cont', 'de contact')], bonne: a[0], melanger: false,
+      indices: { dist: 'Les deux objets se touchent-ils ? Seuls le poids, la force magnétique et la force électrique agissent à distance.', cont: 'Les deux objets ne se touchent pas.' },
+      solution: `<p>${a[0] === 'dist' ? 'Les objets ne se touchent pas : action à distance.' : 'Les objets se touchent : action de contact.'}</p>` }] })));
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Il n'y a que <b>trois forces à distance</b> : le poids ${nomV('P')} (toujours), la force magnétique ${nomV('Fmag')}, la force électrique ${nomV('Felec')}. La flèche part du centre G.</p></div>
+    <div class="cle"><p><b>Chaque objet qui touche</b> le système, l'air compris, exerce une <b>force de contact</b>. La flèche part du point de contact.</p></div>
+    ${infoForces()}
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2b_cours.html">Cours : méthode du diagramme objet-action →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#distance">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+PFD.menu('module_2a_cours');
+</script>
+</body>
+</html>

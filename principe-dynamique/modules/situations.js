@@ -11,7 +11,8 @@
      { id, titre, systeme ('la brique'), sysCourt (nom dans le diagramme objet-action, facultatif),
        enonce, dessin (SVG, repère 360 × 240),
        points: { G: [x, y], A: […] }, nomsPts: { G: 'centre…' }, lf (longueur des flèches, facultatif),
-       acteurs: [{ id, nom, pourquoi, manque, court }], distracteurs: [{ id, nom, diag }],
+       acteurs: [{ id, nom, pourquoi, manque, court }] (les actions à distance, puis les objets qui touchent),
+       distracteurs: [{ id, nom, diag }] (objets proposés à tort parmi ceux qui touchent le système),
        air: { neglige, cause ('frottements' | 'archi'), raison, indice } : l'air touche presque
          toujours le système, c'est donc un acteur (le dernier) ; sa force est négligée sauf
          si ses frottements ou sa poussée d'Archimède ne sont pas négligeables,
@@ -139,7 +140,7 @@
   S.goutte = { id: 'goutte', titre: 'Goutte qui tombe dans l\'huile', systeme: 'la goutte', enonce: 'Une goutte de permanganate de potassium tombe dans l\'huile, à vitesse constante.',
     dessin: `<rect x="152" y="40" width="56" height="180" class="pfd-sc-eau"/><path d="M150,20 V214 Q150,222 158,222 H202 Q210,222 210,214 V20" class="pfd-sc-recip"/><circle cx="180" cy="110" r="9" class="pfd-sc-sys"/>${mvt(232, 92, 232, 140, '')}${txt(240, 120, 'chute')}${txt(218, 200, 'huile')}`,
     points: { G: [180, 110] }, nomsPts: { G: 'centre de la goutte' },
-    acteurs: [TERRE, { id: 'huile', nom: 'l\'huile', pourquoi: 'elle touche la goutte (poussée d\'Archimède et frottements)', manque: 'L\'huile touche la goutte : elle exerce des forces de contact.' }],
+    acteurs: [TERRE, { id: 'huile', nom: 'l\'huile', pourquoi: 'elle touche la goutte (poussée d\'Archimède et frottements)', manque: 'L\'huile touche la goutte : elle exerce une force de contact (qu\'on sépare en poussée d\'Archimède et frottements).' }],
     distracteurs: [{ id: 'eprouvette', nom: 'l\'éprouvette', diag: 'L\'éprouvette ne touche pas la goutte.' }, { id: 'air', nom: 'l\'air', diag: 'La goutte est dans l\'huile : l\'air ne la touche pas.' }],
     forces: [POIDS, { acteur: 'huile', type: 'contact', lib: 'poussée d\'Archimède de l\'huile', pts: ['G'], angs: [90], noms: ['Farchi'], diagDir: 'la poussée d\'Archimède est <b>verticale, vers le haut</b>.', diagPt: 'l\'huile entoure toute la goutte : on dessine la force depuis le centre G.', indNom: `La poussée d'Archimède d'un fluide se note ${nomV('Farchi')}.` },
       { acteur: 'huile', type: 'contact', lib: 'frottement de l\'huile', pts: ['G'], angs: [90], noms: ['f'], diagDir: 'les frottements s\'opposent au mouvement : la goutte descend, <span class="vec-nom">f</span> est <b>vertical, vers le haut</b>.', diagPt: 'l\'huile entoure toute la goutte : on dessine la force depuis le centre G.', indNom: `Les frottements se notent ${nomV('f')}.` }],
