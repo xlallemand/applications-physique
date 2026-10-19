@@ -22,14 +22,14 @@
 
 <script>
 /* ============================================================
-   Entraînement : 10 réactions, chacune en 5 parties (reaction.js) :
-   a) et b) les deux demi-équations avec l'outil DEMI, c) orienter,
-   d) égaliser les électrons, e) additionner et simplifier.
-   L'aide diminue au fil des réactions :
-     niveau 1 (réactions 1 à 4)  aides libres, demi-équations étape par étape ;
-     niveau 2 (réactions 5 à 7)  aides payantes (1 point de moins) ;
-     niveau 3 (réactions 8 à 10) sans aide : demi-équations d'un seul tenant,
-                                 nombres de l'équation finale écrits directement.
+   Entraînement : 10 réactions, chacune écrite entièrement dans l'outil
+   compact REAC.partie (reaction.js) : une réserve, les deux
+   demi-équations dans le sens de la réaction, leurs multiplicateurs,
+   puis l'équation de la réaction. L'aide diminue au fil des réactions :
+     niveau 1 (réactions 1 à 3)  nombres multipliés sous les yeux, aides libres ;
+     niveau 2 (réactions 4 à 7)  facteur devant la demi-équation, aides payantes ;
+     niveau 3 (réactions 8 à 10) facteur devant la demi-équation, sans aide.
+   « Vérifier » une demi-équation est facultatif et coûte un point.
    Les réactions vont des plus simples (sans H+) à celles où il faut
    simplifier H+ et H2O. Chaque réaction est notée 2, 1 ou 0 point.
    Réactions : [couple dont l'oxydant réagit, couple dont le réducteur réagit].
@@ -46,28 +46,30 @@ function reaction(p, niveau) {
   return { theme: NIVEAUX[niveau],
     consigne: `Écris l'équation de la réaction entre ${R(h(a.ox))} et ${R(h(b.red))}.`,
     enonce: `<p>Couples : ${couple(a)} et ${couple(b)}.</p>`,
-    parties: REAC.parties({ a, b, niveau, serie: true }) };
+    parties: [REAC.partie({ a, b, niveau, serie: true, ordre: hasard(['ab', 'ba']) })] };
 }
 
 // tirage : réactions différentes, de plus en plus difficiles
 function tirage() {
   const s = melanger(SANS_H), a = melanger(AVEC_H), f = melanger(SIMPLIFIER);
   return [
-    reaction(s[0], 1), reaction(a[0], 1), reaction(s[1], 1), reaction(a[1], 1),
-    reaction(a[2], 2), reaction(f[0], 2), reaction(a[3], 2),
-    reaction(hasard([s[2], a[4]]), 3), reaction(f[1], 3), reaction(f[2], 3),
+    reaction(s[0], 1), reaction(a[0], 1), reaction(s[1], 1),
+    reaction(a[1], 2), reaction(f[0], 2), reaction(a[2], 2), reaction(s[2], 2),
+    reaction(a[3], 3), reaction(f[1], 3), reaction(f[2], 3),
   ];
 }
 
 OX.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 4 · ENTRAÎNEMENT', titre: 'Écrire les réactions d\'oxydoréduction',
-  intro: `<p class="er-contexte">10 réactions à écrire entièrement : les deux demi-équations avec l'outil, puis l'équation de la réaction. L'aide diminue au fil des réactions.</p>`,
+  intro: `<p class="er-contexte">10 réactions à écrire entièrement dans un seul outil : les deux demi-équations dans le sens de la réaction, leurs multiplicateurs, puis l'équation de la réaction. L'aide diminue au fil des réactions.</p>`,
   aidesPayantes: true,
-  bareme: `<ul class="er-liste" style="margin-top:8px"><li>réactions 1 à 4 : les aides sont libres ;</li><li>réactions 5 à 7 : afficher une aide coûte un point ;</li>
-    <li>réactions 8 à 10 : pas d'aide, tu écris les demi-équations d'un seul tenant et directement les nombres de l'équation finale.</li></ul>`,
+  bareme: `<ul class="er-liste" style="margin-top:8px"><li>réactions 1 à 3 : les nombres d'une demi-équation se multiplient sous tes yeux, les aides (atomes et charges) sont libres ;</li>
+    <li>réactions 4 à 7 : le multiplicateur s'écrit devant la demi-équation, afficher les aides coûte un point ;</li>
+    <li>réactions 8 à 10 : sans aide ;</li>
+    <li>le bouton « Vérifier » d'une demi-équation est facultatif : s'en servir coûte un point. Seule l'équation juste du premier coup, sans aide ni vérification, rapporte 2 points.</li></ul>`,
   questions: tirage,
-  revoir: { href: 'module_3_cours.html', label: 'Revoir le cours' },
+  revoir: { href: 'module_4_cours.html', label: 'Revoir la méthode express' },
   suite: { href: '../index.html', label: 'Accueil de l\'application' },
 });
 OX.menu('module_4');

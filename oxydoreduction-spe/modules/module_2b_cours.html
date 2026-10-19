@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 2 : les électrons, test et entraînement — Oxydoréduction</title>
+<title>Module 2 : équilibrer les charges — Oxydoréduction</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="../../assets/molecules.css">
@@ -21,108 +21,34 @@
 <div id="app-nav"></div>
 <div class="er-page">
   <div class="er-card">
-    <span class="er-badge">MODULE 2 · COURS · PARTIE B</span>
-    <h2 class="er-titre">Équilibrer les charges : test et entraînement</h2>
-    <p class="er-contexte">Placer les <b>électrons</b> est l'étape la plus délicate. Commence par un <b>test</b> de trois demi-équations : si tout est juste, tu passes directement aux questions. Sinon, l'application te propose un <b>entraînement</b> pas à pas sur les difficultés repérées : calculer une charge totale, savoir où placer les électrons, trouver leur nombre.</p>
+    <span class="er-badge">MODULE 2 · COURS 2 / 2</span>
+    <h2 class="er-titre">Équilibrer les charges</h2>
+    <p class="er-contexte">Placer les <b>électrons</b> est l'étape la plus délicate. Tu t'entraînes à <b>calculer une charge totale</b>, à savoir <b>de quel côté</b> placer les électrons et <b>combien</b> en mettre, puis sur des demi-équations.</p>
   </div>
   <div id="etapes"></div>
 </div>
 
 <script>
 /* ============================================================
-   Parcours adapté (assets/cours.js, étapes construites à la demande) :
-   1. test : trois demi-équations à terminer (étape 4 de l'outil DEMI,
-      sans aides) ; chaque erreur est classée (DEMI.DIFFICULTES) ;
-   2. bilan : aucune erreur → lien vers les questions (l'entraînement
-      reste possible) ; sinon les difficultés repérées et l'entraînement ;
-   3. calculer la charge totale d'un membre (signe d'un ion négatif,
+   Cours par étapes (assets/cours.js) : entraînement aux électrons
+   1. calculer la charge totale d'un membre (signe d'un ion négatif,
       nombre stœchiométrique) ;
-   4. ajouter des électrons fait baisser la charge ; où les placer
+   2. ajouter des électrons fait baisser la charge ; où les placer
       (comparer deux nombres négatifs) ;
-   5. combien d'électrons : l'écart entre deux charges ;
-   6. vérification : deux demi-équations sans aides.
-   Une partie d'entraînement sans difficulté repérée au test est
-   seulement proposée (« M'entraîner quand même »). Avec « Afficher
-   tout le cours », tout est déplié.
+   3. combien d'électrons : l'écart entre deux charges ; puis deux
+      demi-équations à terminer (étape 4 de l'outil DEMI, sans aides).
+   Les valeurs sont tirées au hasard à chaque visite.
    ============================================================ */
-const { hasard, melanger, exemple } = COURS;
+const { hasard, exemple } = COURS;
 const { h, COUPLES: C, charge: fq } = OX;
 const { q } = DEMI.outils;                                        // charge d'une entité : 'MnO4^-' → −1
 const calc = x => `<p class="crs-calc">${x}</p>`;
 const EL = 'e<sup>−</sup>', HP = 'H<sup>+</sup>';
 const elec = n => `${n}&nbsp;${EL}`;
+// deux couples pour les demi-équations à terminer
+const VERIF = [hasard(['MnO4', 'Cr2O7', 'SO4']), hasard(['S4O6', 'I2', 'Br2'])];
 
-// difficultés repérées pendant le test (codes de DEMI.DIFFICULTES)
-const profil = { codes: [], faits: 0, justes: 0 };
-const BESOINS = {
-  charge: ['charge-signe', 'charge-coef', 'e-nombre'],
-  cote: ['e-cote', 'e-signe', 'e-deux', 'e-oubli'],
-  nombre: ['charge-somme', 'charge-seul', 'e-nombre'],
-};
-const aucunBesoin = () => !profil.codes.length;
-// une partie d'entraînement est proposée si le test a repéré une de ses difficultés,
-// si l'élève s'entraîne « quand même » (aucune erreur), ou si tout le cours est affiché
-const besoin = k => COURS.tout || aucunBesoin() || profil.codes.some(x => BESOINS[k].includes(x));
-
-// trois couples pour le test, deux autres pour la vérification
-const TEST = [hasard(['Cr2O7', 'MnO4']), hasard(['S4O6', 'I2', 'Cl2']), hasard(['IO3', 'SO4', 'NO3'])];
-const VERIF = [hasard(['MnO4', 'Cr2O7'].filter(k => !TEST.includes(k))), hasard(['S4O6', 'I2', 'Br2'].filter(k => !TEST.includes(k)))];
-
-// partie d'entraînement : proposée, ou seulement accessible par « M'entraîner quand même »
-function entrainement(c, carte, cle, html, items) {
-  if (besoin(cle)) { c.ajouter(carte, html); c.aToi(carte, items); return; }
-  c.ajouter(carte, `<div class="callout-success er-retour"><p><b class="er-ok">✓ Pas d'erreur de ce type au test.</b> Tu peux passer à la suite.</p></div>
-    <div class="er-actions"><button type="button" class="btn-small" data-a="quand-meme">M'entraîner quand même</button></div>`);
-  const b = carte.querySelector('[data-a="quand-meme"]');
-  b.onclick = () => {
-    b.parentElement.remove();
-    // l'entraînement se place avant le bouton « Continuer »
-    const z = c.ajouter(carte, html), suite = carte.querySelector('.er-suite');
-    if (suite) carte.insertBefore(z, suite);
-    COURS.aToi(z, items);
-  };
-  c.continuer(carte);
-}
-
-/* ---------- 1. Le test ---------- */
-function etape1(c) {
-  const carte = c.carte('1. Le test');
-  c.ajouter(carte, `<div class="cours-bloc">
-      <div class="cle"><p><b class="cle-titre">Rappel.</b> Un électron porte la charge <b>−1</b>. On ajoute des électrons du côté où la charge totale est la plus grande (le côté de l'oxydant), autant que l'écart entre les deux charges.</p></div>
-      <p style="margin-top:12px">Dans chaque demi-équation, les étapes 1 à 3 sont déjà faites : il ne reste que les électrons à placer. <b>Pas d'aides</b> : le test sert à repérer tes difficultés.</p>
-    </div>`);
-  c.aToi(carte, TEST.map((k, i) => ({ titre: `Test ${i + 1} / 3`,
-    parties: [DEMI.partie({ couple: C[k], depart: 3, aides: 'aucune', recommencer: false,
-      onErreur: code => profil.codes.push(code),
-      onFini: b => { profil.faits++; if (!b.erreurs && !b.vues) profil.justes++; } })] })));
-  return carte;
-}
-
-/* ---------- 2. Le bilan du test ---------- */
-const PARTIES_ENT = { charge: '3. Calculer la charge totale d\'un membre', cote: '4. Où placer les électrons', nombre: '5. Combien d\'électrons' };
-function etape2(c) {
-  const carte = c.carte('2. Ton bilan');
-  if (COURS.tout) {
-    c.ajouter(carte, '<p>Tout le cours est affiché : les trois parties d\'entraînement sont dépliées.</p>');
-    c.continuer(carte);
-  } else if (aucunBesoin()) {
-    c.ajouter(carte, `<div class="callout-success er-retour"><p><b class="er-ok">Aucune erreur au test : tu sais équilibrer les charges.</b></p>
-        <p>Tu peux passer directement aux questions du module 2, ou t'entraîner quand même.</p></div>
-      <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur les demi-équations →</a></div>`);
-    c.continuer(carte, 'M\'entraîner quand même →');
-  } else {
-    const n = {};
-    profil.codes.forEach(x => { n[x] = (n[x] || 0) + 1; });
-    const parties = Object.keys(PARTIES_ENT).filter(k => profil.codes.some(x => BESOINS[k].includes(x)));
-    c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Difficultés repérées</b> (${profil.justes} demi-équation${profil.justes > 1 ? 's' : ''} sur 3 juste${profil.justes > 1 ? 's' : ''} du premier coup) :</p>
-        <ul class="er-liste">${Object.keys(n).map(x => `<li>${DEMI.DIFFICULTES[x]}${n[x] > 1 ? ` (${n[x]} fois)` : ''}</li>`).join('')}</ul></div>
-      <p style="margin-top:12px">Ton entraînement : <b>${parties.map(k => PARTIES_ENT[k]).join('</b>, <b>')}</b>. Les autres parties sont seulement proposées. Termine par la vérification.</p>`);
-    c.continuer(carte, 'Commencer l\'entraînement →');
-  }
-  return carte;
-}
-
-/* ---------- 3. Calculer la charge totale d'un membre ---------- */
+/* ---------- 1. Calculer la charge totale d'un membre ---------- */
 // membre : [[formule, nombre stœchiométrique], …] ; diagnostics des erreurs de signe et de nombre oublié
 function qCharge(titre, membre) {
   const v = membre.reduce((s, [f, k]) => s + k * q(f), 0);
@@ -141,16 +67,16 @@ function qCharge(titre, membre) {
       },
       solution: calc(`${det} = <span class="c">${fq(v)}</span>`) }] };
 }
-function etape3(c) {
-  const carte = c.carte('3. Calculer la charge totale d\'un membre');
-  const html = `<div class="cours-bloc">
+function etape1(c) {
+  const carte = c.carte('1. Calculer la charge totale d\'un membre');
+  c.ajouter(carte, `<div class="cours-bloc">
       <div class="cle"><p><b class="cle-titre">Charge totale.</b> On additionne la charge de chaque entité, <b>multipliée par son nombre stœchiométrique</b>. Une charge négative compte en moins ; une molécule (H<sub>2</sub>O, SO<sub>2</sub>…) compte pour 0.</p></div>
     </div>
     ${exemple(`${calc(`${h('MnO4^-')} + 8&nbsp;${HP} : &nbsp;(−1) + 8 × (+1) = −1 + 8 = <span class="c">+7</span>`)}
       ${calc(`2 ${h('Cr^3+')} : &nbsp;2 × (+3) = <span class="c">+6</span>`)}
       ${calc(`2 ${h('S2O3^2-')} : &nbsp;2 × (−2) = <span class="c">−4</span>`)}
-      ${calc(`${h('S4O6^2-')} + 2&nbsp;${EL} : &nbsp;(−2) + 2 × (−1) = −2 − 2 = <span class="c">−4</span>`)}`, 'Exemples')}`;
-  entrainement(c, carte, 'charge', html, [
+      ${calc(`${h('S4O6^2-')} + 2&nbsp;${EL} : &nbsp;(−2) + 2 × (−1) = −2 − 2 = <span class="c">−4</span>`)}`, 'Exemples')}`);
+  c.aToi(carte, [
     qCharge('Un nombre devant un ion', [[hasard(['Fe^3+', 'Al^3+', 'Cr^3+']), hasard([2, 3])]]),
     qCharge('Un ion négatif et des ions H⁺', hasard([[['SO4^2-', 1], ['H^+', 4]], [['NO3^-', 1], ['H^+', 4]], [['NO3^-', 1], ['H^+', 2]]])),
     qCharge('Un résultat négatif', hasard([[['I^-', 2]], [['Cl^-', 2]], [['S2O3^2-', 2]]])),
@@ -160,7 +86,7 @@ function etape3(c) {
   return carte;
 }
 
-/* ---------- 4. Ajouter des électrons, et où ---------- */
+/* ---------- 2. Ajouter des électrons, et où ---------- */
 function qApres(titre, depart, n) {
   const v = depart - n;
   return { titre, enonce: `<p>La charge totale d'un membre vaut <b>${fq(depart)}</b>. On ajoute ${elec(n)} à ce membre.</p>`,
@@ -179,17 +105,17 @@ function qCote(titre, g, d) {
       indices: { [g > d ? 'd' : 'g']: `Ajouter des électrons fait <b>baisser</b> la charge : on les ajoute du côté où elle est la plus grande. ${g < 0 || d < 0 ? `Sur une droite graduée, ${fq(Math.max(g, d))} est à droite de ${fq(Math.min(g, d))} : ${fq(Math.max(g, d))} est le plus grand.` : `${fq(Math.max(g, d))} est plus grand que ${fq(Math.min(g, d))}.`}` },
       solution: `<p>${fq(Math.max(g, d))} &gt; ${fq(Math.min(g, d))} : on ajoute les électrons <b>${g > d ? 'à gauche' : 'à droite'}</b> pour faire baisser la charge de ce côté.</p>` }] };
 }
-function etape4(c) {
-  const carte = c.carte('4. Ajouter des électrons fait baisser la charge');
-  const html = `<div class="cours-bloc">
+function etape2(c) {
+  const carte = c.carte('2. Ajouter des électrons fait baisser la charge');
+  c.ajouter(carte, `<div class="cours-bloc">
       <div class="cle"><p><b class="cle-titre">À retenir.</b> Un électron porte la charge <b>−1</b>. Ajouter n ${EL} à un membre fait <b>baisser</b> sa charge de n.</p>
         <p>On ajoute donc les électrons <b>du côté où la charge est la plus grande</b>. Avec des nombres négatifs, le plus grand est le plus proche de 0 : −2 est plus grand que −4.</p></div>
     </div>
     ${exemple(`${calc('+7 et 5&nbsp;e<sup>−</sup> ajoutés : +7 − 5 = <span class="c">+2</span>')}
       ${calc('0 et 2&nbsp;e<sup>−</sup> ajoutés : 0 − 2 = <span class="c">−2</span>')}
       ${calc('−2 et 2&nbsp;e<sup>−</sup> ajoutés : −2 − 2 = <span class="c">−4</span>')}
-      <p>${h('S4O6^2-')} = 2&nbsp;${h('S2O3^2-')} : charge −2 à gauche, −4 à droite. −2 est plus grand que −4 : les électrons vont <b>à gauche</b>.</p>`, 'Exemples')}`;
-  entrainement(c, carte, 'cote', html, [
+      <p>${h('S4O6^2-')} = 2&nbsp;${h('S2O3^2-')} : charge −2 à gauche, −4 à droite. −2 est plus grand que −4 : les électrons vont <b>à gauche</b>.</p>`, 'Exemples')}`);
+  c.aToi(carte, [
     qApres('La charge baisse', hasard([7, 12, 10]), hasard([3, 5])),
     qApres('En passant sous 0', 0, hasard([1, 2])),
     qApres('Une charge déjà négative', hasard([-1, -2]), 2),
@@ -200,7 +126,7 @@ function etape4(c) {
   return carte;
 }
 
-/* ---------- 5. Combien d'électrons ---------- */
+/* ---------- 3. Combien d'électrons ---------- */
 function qCombien(titre, g, d) {
   const n = g - d;
   return { titre, enonce: `<p>Sans les électrons, la charge totale vaut <b>${fq(g)}</b> à gauche et <b>${fq(d)}</b> à droite. Les électrons vont à gauche.</p>`,
@@ -213,30 +139,23 @@ function qCombien(titre, g, d) {
       },
       solution: calc(`n = ${fq(g)} − (${fq(d)}) = <span class="c">${n}</span> &nbsp;; vérification : ${fq(g)} − ${n} = ${fq(d)}`) }] };
 }
-function etape5(c) {
-  const carte = c.carte('5. Combien d\'électrons ?');
-  const html = `<div class="cours-bloc">
+function etape3(c) {
+  const carte = c.carte('3. Combien d\'électrons ?');
+  c.ajouter(carte, `<div class="cours-bloc">
       <div class="cle"><p><b class="cle-titre">Méthode.</b> Le nombre d'électrons est l'<b>écart entre les deux charges</b> : la plus grande moins la plus petite. Vérifie ensuite qu'avec ces électrons, les deux charges sont égales.</p></div>
     </div>
     ${exemple(`${calc('+7 et +2 : &nbsp;n = 7 − 2 = <span class="c">5</span> &nbsp;(+7 − 5 = +2 ✓)')}
       ${calc('0 et −2 : &nbsp;n = 0 − (−2) = 0 + 2 = <span class="c">2</span> &nbsp;(0 − 2 = −2 ✓)')}
       ${calc('−2 et −4 : &nbsp;n = −2 − (−4) = −2 + 4 = <span class="c">2</span> &nbsp;(−2 − 2 = −4 ✓)')}
-      <p>Soustraire un nombre négatif revient à ajouter son opposé : − (−4) = + 4.</p>`, 'Exemples')}`;
-  entrainement(c, carte, 'nombre', html, [
+      <p>Soustraire un nombre négatif revient à ajouter son opposé : − (−4) = + 4.</p>`, 'Exemples')}`);
+  c.aToi(carte, [
     qCombien('Deux charges positives', ...hasard([[12, 6], [7, 2], [4, 3]])),
     qCombien('Une charge nulle', hasard([3, 10, 2]), 0),
     qCombien('Une charge négative', 0, hasard([-2, -1])),
     qCombien('Deux charges négatives', -2, -4),
     qCombien('Tout se mélange', hasard([2, 1]), hasard([-2, -1])),
-  ]);
-  return carte;
-}
-
-/* ---------- 6. Vérification ---------- */
-function etape6(c) {
-  const carte = c.carte('6. Vérifie que tu sais faire');
-  c.ajouter(carte, '<div class="cours-bloc"><p>Deux demi-équations à terminer, sans aides : place les électrons, du bon côté et en bon nombre.</p></div>');
-  c.aToi(carte, VERIF.map((k, i) => ({ titre: `Vérification ${i + 1} / 2`, parties: [DEMI.partie({ couple: C[k], depart: 3, aides: 'aucune' })] })));
+  ].concat(VERIF.map((k, i) => ({ titre: `Sur une demi-équation (${i + 1} / 2)`,
+    parties: [DEMI.partie({ couple: C[k], depart: 3, aides: 'aucune', q: `Les étapes 1 à 3 sont faites : place les électrons, du bon côté et en bon nombre (couple ${h(C[k].ox)} / ${h(C[k].red)}).` })] }))));
   return carte;
 }
 
@@ -247,12 +166,11 @@ function aRetenir(c) {
     <div class="cle"><p>Un électron porte la charge −1 : ajouter n ${EL} fait baisser la charge de n. On ajoute les électrons <b>du côté où la charge est la plus grande</b> (le côté de l'oxydant).</p></div>
     <div class="cle"><p>Le nombre d'électrons est l'<b>écart entre les deux charges</b> : −2 − (−4) = 2. On vérifie que les charges sont alors égales.</p></div>
     <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur les demi-équations →</a>
-      <a class="btn-secondary" style="text-decoration:none" href="module_3_cours.html">Module 3 : écrire l'équation d'une réaction</a>
-      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#electrons">Fiche récapitulative</a></div>`);
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#charges">Fiche récapitulative</a></div>`);
   return carte;
 }
 
-new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, etape5, etape6, aRetenir]);
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
 OX.menu('module_2b_cours');
 </script>
 </body>

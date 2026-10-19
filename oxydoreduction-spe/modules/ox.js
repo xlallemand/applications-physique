@@ -17,6 +17,7 @@
      OX.COUPLES                         couples oxydant / réducteur (formules de MOL)
      OX.h(f), OX.couple(c)              formule HTML ; couple écrit « Ox / Red »
      OX.charge(n)                       charge écrite avec son signe : +7, −2, 0
+     OX.M1                              couples simples et petites écritures des cours du module 1
    OX.menu(cle), OX.accueil(zone)       navigation commune (SOM) avec le plan de l'application
 
    L'outil d'équilibrage d'une demi-équation est dans demi.js (DEMI),
@@ -427,19 +428,66 @@
   const couple = c => `${h(c.ox)} / ${h(c.red)}`;
   const charge = n => (n > 0 ? '+' + n : n < 0 ? MOINS + -n : '0');
 
+  /* ---------- Cours du module 1 : couples sans H+ ni H2O (formules HTML) ---------- */
+  // n : électrons échangés ; qo, qr : charges de l'oxydant et du réducteur
+  // (fonction : assets/molecules.js doit être chargé)
+  const couplesSimples = () => ({
+    Ag:  { ox: h('Ag^+'),  red: 'Ag',       n: 1, qo: 1, qr: 0 },
+    Fe3: { ox: h('Fe^3+'), red: h('Fe^2+'), n: 1, qo: 3, qr: 2 },
+    Cu:  { ox: h('Cu^2+'), red: 'Cu',       n: 2, qo: 2, qr: 0 },
+    Pb:  { ox: h('Pb^2+'), red: 'Pb',       n: 2, qo: 2, qr: 0 },
+    Ni:  { ox: h('Ni^2+'), red: 'Ni',       n: 2, qo: 2, qr: 0 },
+    Fe:  { ox: h('Fe^2+'), red: 'Fe',       n: 2, qo: 2, qr: 0 },
+    Zn:  { ox: h('Zn^2+'), red: 'Zn',       n: 2, qo: 2, qr: 0 },
+    Sn:  { ox: h('Sn^4+'), red: h('Sn^2+'), n: 2, qo: 4, qr: 2 },
+    Al:  { ox: h('Al^3+'), red: 'Al',       n: 3, qo: 3, qr: 0 },
+    Cr:  { ox: h('Cr^3+'), red: 'Cr',       n: 3, qo: 3, qr: 0 },
+  });
+  const nE = n => (n === 1 ? '' : n + '&nbsp;') + 'e<sup>−</sup>';         // « 2 e⁻ », « e⁻ » (1 ne s'écrit pas)
+  const M1 = {
+    couples: couplesSimples, nE,
+    sPl: n => (n > 1 ? 's' : ''),
+    charge: v => (v === 0 ? '0' : v + '+'),                                  // charge d'un ion positif : 2+, 0
+    calc: x => `<p class="crs-calc">${x}</p>`,
+    demi: c => `${c.ox} + ${nE(c.n)} = ${c.red}`,                            // demi-équation du couple
+    reduc: c => `${c.ox} + ${nE(c.n)} → ${c.red}`,                           // lue à l'endroit : réduction
+    oxyd: c => `${c.red} → ${c.ox} + ${nE(c.n)}`,                            // lue à l'envers : oxydation
+    couple: c => `${c.ox} / ${c.red}`,
+    // question « oxydant ou réducteur ? » ; capte : l'espèce X capte des électrons
+    choixRole: (X, capte) => ({ type: 'choix', q: `${X} est :`, melanger: false,
+      options: [{ id: 'ox', label: 'un oxydant' }, { id: 'red', label: 'un réducteur' }], bonne: capte ? 'ox' : 'red',
+      indices: {
+        red: `${X} <b>capte</b> des électrons : c'est ce que fait un oxydant. Un réducteur, lui, en cède.`,
+        ox: `${X} <b>cède</b> des électrons : c'est ce que fait un réducteur. Un oxydant, lui, en capte.` },
+      solution: `<p>${X} ${capte ? 'capte' : 'cède'} des électrons : c'est un <b>${capte ? 'oxydant' : 'réducteur'}</b>.</p>` }),
+  };
+
   /* ============================================================
      PLAN DE L'APPLICATION ET NAVIGATION (voir assets/sommaire.js)
      ============================================================ */
+  // deux progressions : toute l'application (modules 1 à 4), ou la progression rapide
+  // (module 4 : méthode express en une infographie, puis l'entraînement)
   const PLAN = [
     { n: 1, titre: 'Oxydants, réducteurs et couples', desc: 'Oxydant, réducteur, couple Ox / Red, oxydation et réduction, réaction entre un oxydant et un réducteur', fiche: 'fiche_1',
-      parties: [{ nom: 'Oxydants, réducteurs et couples', cours: 'module_1_cours', questions: 'module_1_questions' }] },
-    { n: 2, titre: 'Équilibrer une demi-équation', desc: 'Les éléments, O avec H<sub>2</sub>O, H avec H<sup>+</sup>, les charges avec les électrons', fiche: 'fiche_2',
-      parties: [{ nom: 'La méthode en 4 étapes', slug: 'methode', cours: 'module_2a_cours' },
-        { nom: 'Les électrons : test et entraînement', slug: 'electrons', cours: 'module_2b_cours', questions: 'module_2_questions' }] },
-    { n: 3, titre: 'Écrire l\'équation d\'une réaction', desc: 'Deux demi-équations, orienter, égaliser les électrons, additionner et simplifier', fiche: 'fiche_3',
+      // quatre sous-modules de cours, puis les questions et la fiche
+      sousModules: true,
+      parties: [
+        { nom: 'Oxydant et réducteur', slug: 'oxred', cours: 'module_1a_cours', noms: { cours: 'Cours : oxydant et réducteur' } },
+        { nom: 'Couple et demi-équation', slug: 'couple', cours: 'module_1b_cours', noms: { cours: 'Cours : couple et demi-équation' } },
+        { nom: 'Oxydation et réduction', slug: 'oxydation', cours: 'module_1c_cours', noms: { cours: 'Cours : oxydation et réduction' } },
+        { nom: 'Réaction entre un oxydant et un réducteur', slug: 'reaction', cours: 'module_1d_cours', noms: { cours: 'Cours : réaction entre un oxydant et un réducteur' } },
+        { nom: 'Oxydants, réducteurs et couples', questions: 'module_1_questions' }] },
+    { n: 2, titre: 'Équilibrer une demi-équation', desc: 'La méthode en 4 étapes : les éléments, O avec H<sub>2</sub>O, H avec H<sup>+</sup>, les charges avec les électrons', fiche: 'fiche_2',
+      // deux sous-modules de cours, puis les questions et la fiche
+      sousModules: true,
+      parties: [
+        { nom: 'La méthode en 4 étapes', slug: 'methode', cours: 'module_2a_cours', noms: { cours: 'Cours : la méthode en 4 étapes' } },
+        { nom: 'Équilibrer les charges', slug: 'charges', cours: 'module_2b_cours', noms: { cours: 'Cours : équilibrer les charges' } },
+        { nom: 'Équilibrer une demi-équation', questions: 'module_2_questions' }] },
+    { n: 3, titre: 'Écrire l\'équation d\'une réaction', desc: 'Les demi-équations dans le bon sens, égaliser les électrons, additionner et simplifier', fiche: 'fiche_3',
       parties: [{ nom: 'Écrire l\'équation d\'une réaction', cours: 'module_3_cours', questions: 'module_3_questions' }] },
-    { n: 4, titre: 'Entraînement : écrire les réactions', desc: 'Les deux demi-équations puis l\'équation de la réaction, l\'aide diminue au fil des 10 réactions',
-      parties: [{ nom: 'Écrire les réactions', entrainement: 'module_4' }] },
+    { n: 4, titre: 'Écrire les réactions', desc: 'La méthode express en une infographie (progression rapide), puis 10 réactions : l\'aide diminue',
+      parties: [{ nom: 'Écrire les réactions', cours: 'module_4_cours', entrainement: 'module_4', noms: { cours: 'Méthode express' } }] },
   ];
   window.SOM.init({ nom: 'Oxydoréduction', id: 'oxydoreduction-spe', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
@@ -449,7 +497,7 @@
   window.OX = Object.assign(window.OX || {}, {
     MOINS, fmt, lire, proche, o, fq, el, secouer, melanger, hasard, entre, champ, boutonValider, PARTIES, versCours,
     question, serie, confettis,
-    COUPLES, h, couple, charge,
+    COUPLES, h, couple, charge, M1,
     PLAN, menu, accueil, marquer,
   });
 })();

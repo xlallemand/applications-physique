@@ -24,10 +24,10 @@
    10 questions tirées au hasard, dans l'ordre de la méthode :
    H2O à ajouter (côté et nombre), H+ à ajouter, charge totale d'un
    membre, électrons (côté et nombre), demi-équation juste parmi des
-   erreurs classiques, puis 5 demi-équations entières avec l'outil
-   (3 guidées étape par étape, 2 d'un seul tenant).
-   Les aides de l'outil coûtent un point : la question ne rapporte
-   plus qu'un point au plus.
+   erreurs classiques, puis 5 demi-équations entières avec l'outil,
+   d'un seul tenant (une seule validation) : 3 avec l'aide activable,
+   2 sans aide. L'aide coûte un point : la question ne rapporte plus
+   qu'un point au plus.
    ============================================================ */
 const { o, fq, hasard, melanger, h, COUPLES: C, charge: fc } = OX;
 const { q, kf } = DEMI.outils;
@@ -113,23 +113,23 @@ function qBonne() {
       h: `Il manque des ions ${HP} : chaque molécule ${H2O} contient 2 atomes H.` },
     solution: ecr(F) })] };
 }
-/* ---------- demi-équations entières avec l'outil (aides payantes) ---------- */
-function qOutil(k, mode) {
-  return { theme: mode === 'libre' ? 'Toute la demi-équation, d\'un seul tenant' : 'Toute la demi-équation, étape par étape',
-    parties: [DEMI.partie({ couple: C[k], serie: true, mode, aides: 'payant' })] };
+/* ---------- demi-équations entières avec l'outil, d'un seul tenant (aucune validation intermédiaire) ---------- */
+function qOutil(k, aides) {
+  return { theme: aides === 'aucune' ? 'Toute la demi-équation, sans aide' : 'Toute la demi-équation, avec l\'aide si besoin',
+    parties: [DEMI.partie({ couple: C[k], serie: true, mode: 'libre', aides })] };
 }
 
-// tirage : 5 questions sur les étapes, puis 5 demi-équations entières (couples différents)
+// tirage : 5 questions sur les étapes, puis 5 demi-équations entières (couples différents) :
+// les 3 premières avec l'aide activable (1 point de moins), les 2 dernières sans aide
 function tirage() {
-  const g = melanger(['SO4', 'NO3', 'H2O2', 'CO2', 'O2e', 'NO3b', 'Ald', 'O2']).slice(0, 3);
-  const l = melanger(['MnO4', 'Cr2O7', 'IO3', 'ClO', 'Ac', 'S4O6']).slice(0, 2);
-  return [qEau(), qH(), qCharge(), qElectrons(), qBonne()].concat(g.map(k => qOutil(k, 'guide')), l.map(k => qOutil(k, 'libre')));
+  const L = melanger(['SO4', 'NO3', 'H2O2', 'CO2', 'O2e', 'NO3b', 'Ald', 'O2', 'MnO4', 'Cr2O7', 'IO3', 'ClO', 'Ac', 'S4O6']).slice(0, 5);
+  return [qEau(), qH(), qCharge(), qElectrons(), qBonne()].concat(L.map((k, i) => qOutil(k, i < 3 ? 'payant' : 'aucune')));
 }
 
 OX.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 2 · QUESTIONS', titre: 'Équilibrer une demi-équation',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : chaque étape de la méthode, puis 5 demi-équations entières à écrire avec l\'outil (3 étape par étape, 2 d\'un seul tenant).</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : chaque étape de la méthode, puis 5 demi-équations entières à écrire d\'un seul tenant avec l\'outil (les 3 premières avec l\'aide si besoin, les 2 dernières sans aide).</p>',
   aidesPayantes: true,
   questions: tirage,
   revoir: { href: 'module_2a_cours.html', label: 'Revoir le cours' },

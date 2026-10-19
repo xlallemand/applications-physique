@@ -20,11 +20,12 @@
 /* ============================================================
    10 questions tirées au hasard : capter / céder (2), lire un couple
    (dont des couples avec H+ et H2O), écrire un couple, demi-équation,
-   couple d'une demi-équation, oxydation ou réduction, oxydé ou réduit
+   oxydant d'une demi-équation, oxydation ou réduction, oxydé ou réduit
    (grille), produits d'une réaction, espèce oxydée.
    Erreurs diagnostiquées : capter et céder confondus, couple écrit à
    l'envers, électrons du mauvais côté, oxydation et réduction
    confondues, réactifs pris pour les produits.
+   Un couple n'est jamais proposé écrit à l'envers.
    ============================================================ */
 const { o, fq, hasard, melanger, h } = OX;
 const ELEC = 'e<sup>−</sup>';
@@ -66,14 +67,14 @@ function qLire() {
     indices: { red: `Un couple s'écrit Oxydant / Réducteur : ${c.red}, écrit en second, est le réducteur.`, ox: `Un couple s'écrit Oxydant / Réducteur : ${c.ox}, écrit en premier, est l'oxydant.` },
     solution: `<p>L'oxydant est ${c.ox}, le réducteur est ${c.red}.</p>` })] };
 }
-/* ---------- écrire un couple ---------- */
+/* ---------- écrire un couple (jamais proposé à l'envers) ---------- */
 function qEcrire() {
   const c = hasard(SIMPLES.concat(OXYGENES.slice(0, 2)));
   const sens = hasard(['reduit', 'oxyde']);
   const txt = sens === 'reduit' ? `${c.ox} peut être réduit en ${c.red}.` : `${c.red} peut être oxydé en ${c.ox}.`;
   return { theme: 'Écrire un couple', enonce: `<p>${txt}</p>`,
-    parties: [fq.choix('Quel est le couple oxydant / réducteur ?', [o('ok', couple(c)), o('inv', `${c.red} / ${c.ox}`)], 'ok', { melanger: false,
-      indices: { inv: `On écrit l'oxydant en premier. ${sens === 'reduit' ? `${c.ox} est réduit : il capte des électrons, c'est l'oxydant.` : `${c.red} est oxydé : il cède des électrons, c'est le réducteur, écrit en second.`}` },
+    parties: [fq.choix('Quelle espèce s\'écrit en premier dans le couple oxydant / réducteur ?', [o('ox', c.ox), o('red', c.red)], 'ox', {
+      indices: { red: `On écrit l'oxydant en premier. ${sens === 'reduit' ? `${c.ox} est réduit : il capte des électrons, c'est l'oxydant.` : `${c.red} est oxydé : il cède des électrons, c'est le réducteur, écrit en second.`}` },
       solution: `<p>L'oxydant ${c.ox} s'écrit en premier : <b>${couple(c)}</b>.</p>` })] };
 }
 /* ---------- demi-équation d'un couple simple ---------- */
@@ -85,13 +86,13 @@ function qDemi() {
       nb: `La charge passe de ${c.qo}+ à ${c.qr ? c.qr + '+' : '0'} : compte la différence.` },
     solution: `<p><b>${c.ox} + ${nE(c.n)} = ${c.red}</b></p>` })] };
 }
-/* ---------- couple d'une demi-équation avec H+ et H2O ---------- */
+/* ---------- l'oxydant d'une demi-équation avec H+ et H2O ---------- */
 function qCoupleDe() {
   const c = hasard(OXYGENES.slice(0, 6));
   return { theme: 'Couple d\'une demi-équation', enonce: `<p class="ox-eqn">${c.demi}</p>`,
-    parties: [fq.choix('Cette demi-équation est celle du couple :', [o('ok', couple(c)), o('inv', `${c.red} / ${c.ox}`), o('eau', 'H<sup>+</sup> / H<sub>2</sub>O')], 'ok', { melanger: false,
-      indices: { inv: `L'oxydant, écrit avec les électrons, se place en premier : ${c.ox}.`, eau: 'H<sup>+</sup> et H<sub>2</sub>O servent seulement à équilibrer H et O. Le couple est formé de l\'oxydant (avec les électrons) et du réducteur qu\'il devient.' },
-      solution: `<p>${c.ox} capte les électrons et devient ${c.red} : couple <b>${couple(c)}</b>.</p>` })] };
+    parties: [fq.choix('Dans cette demi-équation, quel est l\'oxydant du couple ?', [o('ok', c.ox), o('red', c.red), o('h', 'H<sup>+</sup>')], 'ok', {
+      indices: { red: `${c.red} est l'espèce formée quand l'oxydant capte les électrons : c'est le réducteur.`, h: 'H<sup>+</sup> sert seulement à équilibrer l\'élément H. L\'oxydant est l\'espèce du couple écrite du même côté que les électrons.' },
+      solution: `<p>${c.ox} capte les électrons et devient ${c.red} : c'est l'oxydant, couple <b>${couple(c)}</b>.</p>` })] };
 }
 /* ---------- oxydation ou réduction ---------- */
 function qTransfo() {
@@ -149,7 +150,7 @@ OX.serie({
   badge: 'MODULE 1 · QUESTIONS', titre: 'Oxydants, réducteurs et couples',
   intro: '<p class="er-contexte">10 questions tirées au hasard : oxydant et réducteur, couples et demi-équations, oxydation et réduction, réaction entre un oxydant et un réducteur.</p>',
   questions: tirage,
-  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  revoir: { href: 'module_1a_cours.html', label: 'Revoir le cours' },
   suite: { href: 'module_2a_cours.html', label: 'Module 2 : équilibrer une demi-équation →' },
 });
 OX.menu('module_1_questions');
