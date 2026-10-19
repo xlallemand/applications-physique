@@ -1,0 +1,121 @@
+/* ============================================================
+   Styles de l'application « Oxydoréduction » (spécialité)
+   Outil « Équilibrer une demi-équation » (modules/demi.js)
+   ============================================================ */
+
+.ox-outil { display: flex; flex-direction: column; gap: 14px; }
+.ox-etiq {
+  font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-2); margin: 0 0 8px !important;
+}
+
+/* ---------- Couple et réserve à gauche, demi-équation à côté ---------- */
+.ox-haut { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; -webkit-user-select: none; user-select: none; }
+.ox-palette { flex: 0 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.ox-couple, .ox-reserve, .ox-demi { background: var(--paper); border-radius: 18px; padding: 12px 14px; }
+.ox-demi { flex: 1 1 420px; min-width: 0; }
+.ox-couple-l { display: flex; align-items: center; gap: 8px; }
+.ox-barre { font-size: 1.6rem; font-weight: 700; color: var(--ink-2); }
+
+.ox-eq { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+.ox-membre {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px;
+  min-height: 150px; min-width: 140px; padding: 6px; border-radius: 16px;
+  border: 2px dashed var(--line-strong); transition: background .15s, border-color .15s;
+}
+.ox-membre.ox-survol { border-color: var(--accent); background: var(--cle-bg); }
+.ox-fini .ox-membre { border-color: transparent; min-height: 0; }
+.ox-vide { color: var(--ink-2); font-size: .9rem; font-weight: 600; padding: 0 10px; }
+.ox-egal { font-size: 2rem; font-weight: 800; color: var(--ink); padding: 0 2px; }
+.ox-plus { font-size: 1.5rem; font-weight: 700; color: var(--ink-2); }
+
+/* une espèce placée : flèches (nombre stœchiométrique) + formule */
+.ox-terme { display: flex; align-items: center; gap: 2px; background: var(--sheet); border-radius: 16px; padding: 4px 6px 4px 4px; }
+.ox-fini .ox-terme { padding: 6px 10px; }
+.ox-f { font-size: 1.6rem; font-weight: 800; letter-spacing: -.01em; white-space: nowrap; color: var(--ink); padding: 2px 4px; border-radius: 10px; }
+
+/* ---------- Jetons à glisser (couple, réserve) ---------- */
+.ox-jeton {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 46px; min-width: 58px;
+  padding: 4px 12px; border-radius: 12px; background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3);
+  font-size: 1.35rem; font-weight: 800; white-space: nowrap; color: var(--ink);
+}
+.ox-mobile { cursor: grab; -webkit-tap-highlight-color: transparent; }
+@media (hover: hover) {
+  .ox-jeton.ox-mobile:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .ox-f.ox-mobile:hover { background: var(--paper-2); }
+}
+.ox-jeton.ox-pris { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line-strong); color: var(--ink-2); }
+.ox-jeton.ox-off { opacity: .4; }
+.ox-mobile.dragging { opacity: .35; }
+.drag-ghost.ox-f { background: var(--sheet); }
+
+.ox-reserve-l { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ---------- Étapes de la méthode ---------- */
+.ox-etapes { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 0; }
+.ox-etapes li {
+  display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px 5px 5px; border-radius: 999px;
+  background: var(--paper); color: var(--ink-2); font-size: .88rem; font-weight: 700;
+}
+.ox-pastille {
+  display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--sheet); color: var(--ink-2); font-size: .8rem; font-weight: 800; flex-shrink: 0;
+}
+.ox-etapes li.ox-encours { background: var(--cle-bg); color: var(--accent-ink); }
+.ox-etapes li.ox-encours .ox-pastille { background: var(--accent); color: #fff; }
+.ox-etapes li.ox-fait .ox-pastille { color: var(--accent-ink); }
+.ox-consigne { font-size: 1rem; font-weight: 600; line-height: 1.45; color: var(--ink); }
+.ox-consigne b { color: var(--accent-ink); }
+.ox-actions { margin-top: 0; }
+.ox-retour:empty { display: none; }
+.ox-final {
+  margin: 10px 0; padding: 10px 14px; background: var(--sheet); border-radius: 12px; overflow-x: auto;
+  white-space: nowrap; text-align: center; font-size: 1.35rem; font-weight: 800; color: var(--ink);
+}
+
+/* ---------- Aides : atomes et charges de chaque côté du signe = ---------- */
+.ox-aides { margin-top: 12px; overflow-x: auto; }
+.ox-bilan { border-collapse: separate; border-spacing: 0 4px; margin: 0 auto; font-size: 1rem; font-variant-numeric: tabular-nums; }
+.ox-bilan thead th { font-size: .78rem; font-weight: 700; color: var(--ink-2); padding: 0 12px; text-align: center; }
+.ox-bilan tbody th, .ox-bilan td { background: var(--sheet); padding: 6px 14px; white-space: nowrap; }
+.ox-bilan tbody th { text-align: left; font-weight: 800; border-radius: 12px 0 0 12px; }
+.ox-bilan td { text-align: center; }
+.ox-bilan td:last-child { border-radius: 0 12px 12px 0; }
+.ox-bilan td b { font-weight: 800; }
+.ox-bilan td small { display: block; font-size: .78rem; font-weight: 600; color: var(--ink-2); }
+.ox-bilan .ox-signe { font-weight: 800; color: var(--ink-2); padding: 6px 4px; }
+.ox-bilan tr.ox-eg th, .ox-bilan tr.ox-eg td { background: var(--success-bg); }
+.ox-bilan tr.ox-eg .ox-signe { color: var(--success-text); }
+
+/* flèches plus compactes à la souris (les cibles tactiles restent larges) */
+@media (hover: hover) and (pointer: fine) {
+  .ox-terme .er-sel button { width: 40px; height: 32px; border-radius: 10px; }
+  .ox-terme .er-sel button svg { width: 20px; height: 20px; }
+  .ox-terme .er-sel-val { min-width: 40px; font-size: 1.45rem; }
+  .ox-f { font-size: 1.45rem; }
+  .ox-membre { min-height: 118px; min-width: 130px; }
+}
+
+/* ---------- Choix du couple (page de prototype) ---------- */
+.ox-choix { display: flex; flex-wrap: wrap; gap: 8px; }
+.ox-choix .btn-small { min-height: 40px; touch-action: manipulation; }
+.ox-choix .btn-small[aria-pressed="true"] { background: var(--ink); color: #fff; box-shadow: none; }
+
+@media (max-width: 640px) {
+  .ox-palette { flex: 1 1 100%; flex-direction: row; flex-wrap: wrap; }
+  .ox-demi { flex-basis: 100%; }
+}
+@media (max-width: 560px) {
+  .ox-couple, .ox-reserve, .ox-demi { padding: 10px 8px; border-radius: 16px; }
+  .ox-membre { min-height: 140px; min-width: 120px; padding: 4px; gap: 4px; }
+  .ox-f { font-size: 1.3rem; padding: 2px; }
+  .ox-terme { padding: 2px 4px 2px 2px; border-radius: 14px; }
+  .ox-egal { font-size: 1.7rem; }
+  .ox-plus { font-size: 1.25rem; }
+  .ox-jeton { font-size: 1.2rem; }
+  .ox-etapes li:not(.ox-encours) { padding-right: 5px; }
+  .ox-etapes li:not(.ox-encours) > span + span { display: none; }   /* seul le titre de l'étape en cours */
+  .ox-bilan tbody th, .ox-bilan td { padding: 5px 10px; }
+  .ox-final { font-size: 1.15rem; }
+}
