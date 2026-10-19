@@ -975,7 +975,8 @@
         `<span class="te-snum">${s.m.n}</span><span class="te-ou-t"><small>${s.m.titre}</small><b>${ou}</b></span><span class="te-ou-chev" aria-hidden="true">▾</span></button></div>` +
         '<div class="te-barre-esp"></div><div class="te-voile"></div>' +
         `<aside class="te-som" id="te-som" aria-label="Sommaire"><div class="te-som-tete"><a class="te-som-app" href="../index.html">Chapitre 4 : Transport et distribution de l'électricité</a>` +
-        '<a class="te-pilule" href="../index.html"><span aria-hidden="true">⌂</span>Accueil</a></div>' +
+        // bouton « Accueil » : portail des applications (index.html à la racine du dépôt)
+        '<a class="te-pilule" href="../../index.html"><span aria-hidden="true">⌂</span>Accueil</a></div>' +
         `<p class="te-som-lab">Sommaire</p><nav class="te-som-arbre" aria-label="Modules">${sommaire(s, pages, ex)}</nav></aside>`;
       // déplier / replier un module ou une partie sur place
       racine.querySelectorAll('.te-sligne, .te-spt').forEach(b => b.addEventListener('click', () => {

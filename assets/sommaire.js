@@ -97,6 +97,8 @@
     return adresse(p[onglet], depuisAccueil);
   }
   const accueilApp = () => (C.spa ? 'index.html' : '../index.html');
+  // portail des applications (index.html à la racine du dépôt) : bouton « Accueil » du sommaire
+  const portail = () => (C.spa ? '../index.html' : '../../index.html');
   function libelle(cle) {
     const s = situer(cle);
     if (!s) return '';
@@ -186,7 +188,7 @@
         `<span class="som-snum">${s.m.n}</span><span class="som-ou-t"><small>${s.m.titre}</small><b>${ou}</b></span><span class="som-ou-chev" aria-hidden="true">▾</span></button></div>` +
         '<div class="som-barre-esp"></div><div class="som-voile"></div>' +
         `<aside class="som-som" id="som-som" aria-label="Sommaire"><div class="som-tete"><a class="som-app" href="${accueilApp()}">${C.nom}</a>` +
-        `<a class="som-pilule" href="${accueilApp()}"><span aria-hidden="true">⌂</span>Accueil</a></div>` +
+        `<a class="som-pilule" href="${portail()}"><span aria-hidden="true">⌂</span>Accueil</a></div>` +
         `<p class="som-lab">Sommaire</p><nav class="som-arbre" aria-label="Modules">${sommaire(s, pages, ex)}</nav></aside>`;
       // déplier / replier un module ou une partie sur place
       racine.querySelectorAll('.som-sligne, .som-spt').forEach(b => b.addEventListener('click', () => {

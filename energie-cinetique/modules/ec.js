@@ -990,9 +990,9 @@
     [130, 160, 190, 220, 250].forEach(x => { g += trait(x, 152, x, 126, 'ec-tr ec-tr-p'); });
     // l'aile : bord d'attaque arrondi à droite, bord de fuite pointu à gauche
     g += `<path d="M100,116 C150,92 220,82 262,90 Q292,98 284,111 Q260,120 210,120 C160,120 130,119 100,116 Z" class="ec-sc-aile"/>`;
-    g += `<text x="200" y="110" text-anchor="middle" class="ec-sc-txt" style="font-weight:800">aile</text>`;
-    // portance (vers le haut) et traînée (vers l'arrière)
-    g += fleche(196, 92, 90, 62, COUL.port).svg + `<text x="206" y="36" class="ec-sc-lbl" style="fill:${COUL.port}">portance</text>`;
+    g += `<text x="240" y="110" text-anchor="middle" class="ec-sc-txt" style="font-weight:800">aile</text>`;
+    // portance (vers le haut, partant du bord inférieur de l'aile) et traînée (vers l'arrière)
+    g += fleche(205, 120, 90, 90, COUL.port).svg + `<text x="215" y="36" class="ec-sc-lbl" style="fill:${COUL.port}">portance</text>`;
     g += fleche(100, 116, 180, 70, COUL.f).svg + `<text x="30" y="106" class="ec-sc-lbl" style="fill:${COUL.f}">traînée</text>`;
     g += trait(300, 196, 360, 196, 'ec-tr ec-tr-mvt') + `<text x="296" y="200" text-anchor="end" class="ec-sc-txt">sens de déplacement de l'avion</text>`;
     return `<svg viewBox="0 0 380 210" class="ec-doc" role="img" aria-label="Aile d'avion : l'air passe vite au-dessus et lentement en dessous ; la pression est plus forte en dessous ; la portance est vers le haut, la traînée vers l'arrière">${g}</svg>`;
