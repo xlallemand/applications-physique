@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : questions — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard, une série pour tout le module 4 :
+   énoncé du théorème (1), chute (2), lancé vers le haut (2), freinage (2),
+   distance d'arrêt (1), démarrage (1), angle de chaque force ou théorème
+   écrit pour la situation (1). Valeurs aléatoires, choisies pour des
+   calculs propres (g = 10 m·s⁻² ou 9,81 m·s⁻²).
+   Erreurs diagnostiquées : racine oubliée, facteur 2 ou ½ oublié, signe
+   de m g h, v_B ≠ 0 au sommet, signe du travail, km/h non convertis,
+   division par AB oubliée, travail de la force motrice oublié.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, proche, fr, rac, sci, W, schemaMvt, partieAngles, partieEquation } = EC;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const vA = 'v<sub>A</sub>', vB = 'v<sub>B</sub>', EC_ = 'E<sub>c</sub>';
+const v2 = x => `${x}<sup>2</sup>`;
+const r3 = v => +v.toPrecision(3);
+const CHUTE = { sens: 'bas', objet: 'pomme', forces: ['P'], d: 'h' }, LANCER = { sens: 'haut', objet: 'balle', forces: ['P'], d: 'h' };
+const FREIN = { sens: 'droite', objet: 'voiture', forces: ['P', 'RN', 'f'] }, DEMAR = { sens: 'droite', objet: 'voiture', forces: ['P', 'RN', 'Fm', 'f'] };
+const gTxt = g => (g === 10 ? '10 m·s<sup>−2</sup>' : '9,81 m·s<sup>−2</sup>');
+
+/* ---------- Énoncé du théorème ---------- */
+const ENONCE = [
+  function bilan() {
+    const eA = hasard([20, 40, 60, 100]), w1 = hasard([30, 50, 80]), w2 = -hasard([10, 20, 30]), eB = eA + w1 + w2;
+    return { theme: 'Théorème de l\'énergie cinétique', enonce: `<p>Un chariot a une énergie cinétique de ${eA} J en A. Entre A et B, une force fournit un travail de ${w1} J et les frottements un travail de ${fmt(w2)} J.</p>`,
+      parties: [fq.nombre(`Calcule ${EC_}(B).`, `${EC_}(B) =`, eB, 'J', { signe: false, tol: .01,
+        diag: x => (proche(x, eA + w1 - w2) ? 'Le travail des frottements est <b>négatif</b> : on l\'ajoute avec son signe.' : proche(x, w1 + w2) ? `C'est ΔE<sub>c</sub> ; ${EC_}(B) = ${EC_}(A) + ΔE<sub>c</sub>.` : `${EC_}(B) = ${EC_}(A) + Σ W.`),
+        solution: calc(`${EC_}(B) = ${eA} + ${w1} + (${fmt(w2)}) = ${c(eB + ' J')}`) })] };
+  },
+  function signe() {
+    const [txt, bon] = hasard([['La somme des travaux des forces est positive.', 'a'], ['La somme des travaux des forces est négative.', 'r'], ['La somme des travaux des forces est nulle.', 'c']]);
+    return { theme: 'Théorème de l\'énergie cinétique', enonce: `<p>Un solide va de A à B. ${txt}</p>`,
+      parties: [fq.choix('Entre A et B, le solide :', [o('a', 'accélère'), o('r', 'ralentit'), o('c', 'garde la même vitesse')], bon, { melanger: false, indice: 'ΔE<sub>c</sub> = Σ W : le signe de Σ W donne le signe de ΔE<sub>c</sub>.', solution: '<p>ΔE<sub>c</sub> a le signe de Σ W : positif → la vitesse augmente ; négatif → elle diminue ; nul → elle ne change pas.</p>' })] };
+  },
+];
+
+/* ---------- Chute : vitesse à l'arrivée ---------- */
+function qChute(g, avecEq) {
+  const [qui, m] = hasard([['Une pomme', '100 g'], ['Une bille', '20 g'], ['Un pot de fleurs', '1,5 kg'], ['Une balle', '60 g']]);
+  const h = g === 10 ? hasard([1.25, 1.8, 3.2, 5, 7.2, 20]) : hasard([2, 4, 6, 10, 15]), v = Math.sqrt(2 * g * h);
+  const ps = [];
+  if (avecEq) ps.push(partieEquation(CHUTE, { solution: `<p>Le poids, seule force qui travaille, est dans le sens du déplacement : ${W('P')} = m g h.</p>` }));
+  ps.push(fq.nombre(`Calcule ${vB}, la vitesse en arrivant au sol (3 chiffres significatifs).`, `${vB} =`, v, 'm/s', { signe: false, rel: .01, affiche: fmt(r3(v)),
+    diag: x => (proche(x, v * v, .02) ? 'Tu as trouvé v² : prends la <b>racine carrée</b>.' : proche(x, Math.sqrt(g * h), .02) ? `${v2(vB)} = 2 g h : n'oublie pas le 2.` : proche(x, 2 * g * h, .02) ? 'Prends la racine carrée.' : `${vB} = √(2 g h).`),
+    solution: calc(`½ m ${v2(vB)} − 0 = m g h donc ${vB} = ${rac('2 g h')} = ${rac(`2 × ${fmt(g)} × ${fmt(h)}`)} ≈ ${c(fmt(r3(v)) + ' m/s')}`) }));
+  return { theme: 'Vitesse après une chute', enonce: `<p>${qui} de ${m} tombe sans vitesse initiale d'une hauteur de ${fmt(h)} m (g = ${gTxt(g)} ; on néglige l'air).</p>`,
+    figure: z => { z.innerHTML = schemaMvt(CHUTE, { m, vA: '0', vB: '?', d: fmt(h) + ' m' }); }, parties: ps };
+}
+function qChuteLancee() {
+  const [va, h] = hasard([[5, 3.75], [6, 6.4], [10, 15], [4, 2.4]]);
+  const v = Math.sqrt(va * va + 20 * h);
+  return { theme: 'Vitesse après une chute', enonce: `<p>On lance une balle vers le bas avec une vitesse ${vA} = ${va} m/s, d'une hauteur de ${fmt(h)} m (g = 10 m·s<sup>−2</sup>).</p>`,
+    parties: [fq.nombre(`Calcule ${vB}, la vitesse en arrivant au sol (3 chiffres significatifs).`, `${vB} =`, v, 'm/s', { signe: false, rel: .01, affiche: fmt(r3(v)),
+      diag: x => (proche(x, Math.sqrt(20 * h), .02) ? `${vA} n'est pas nulle ici : ½ m ${v2(vB)} − ½ m ${v2(vA)} = m g h.` : proche(x, va + Math.sqrt(20 * h), .02) ? 'On n\'ajoute pas les vitesses : ce sont les <b>carrés</b> qui s\'ajoutent.' : `${v2(vB)} = ${v2(vA)} + 2 g h.`),
+      solution: calc(`½ m ${v2(vB)} − ½ m ${v2(vA)} = m g h donc ${v2(vB)} = ${v2(vA)} + 2 g h = ${va}<sup>2</sup> + 2 × 10 × ${fmt(h)} = ${fmt(r3(v * v))}`) + calc(`${vB} ≈ ${c(fmt(r3(v)) + ' m/s')}`) })] };
+}
+/* ---------- Lancé vers le haut : hauteur atteinte ---------- */
+function qHauteur(avecSommet) {
+  const v = hasard([4, 6, 8, 10, 12, 14]), h = v * v / 20;
+  const ps = [];
+  if (avecSommet) ps.push(fq.choix(`Que vaut la vitesse ${vB} au sommet B ?`, [o('0', '0 m/s'), o('vA', `${v} m/s (la même qu'au départ)`), o('div', `${v / 2} m/s (la moitié)`)], '0',
+    { melanger: false, indices: { vA: 'L\'objet ralentit en montant…', div: 'Au sommet, l\'objet s\'arrête un instant avant de redescendre.' }, solution: `<p>Au sommet, l'objet s'arrête un instant : ${vB} = 0 (à savoir).</p>` }));
+  ps.push(fq.nombre('Calcule la hauteur h atteinte (2 chiffres significatifs).', 'h =', h, 'm', { signe: false, rel: .01, affiche: fmt(h),
+    diag: x => (proche(x, -h) ? 'Une hauteur est positive : 0 − ½ m v<sub>A</sub>² = −m g h.' : proche(x, 2 * h) ? 'N\'oublie pas le ½ de l\'énergie cinétique.' : proche(x, v / 20) ? 'La vitesse est au carré.' : `h = ${fr(v2(vA), '2 g')}.`),
+    solution: calc(`0 − ½ m ${v2(vA)} = −m g h donc h = ${fr(v2(vA), '2 g')} = ${fr(v + '<sup>2</sup>', '2 × 10')} = ${c(fmt(h) + ' m')}`) }));
+  return { theme: 'Hauteur atteinte', enonce: `<p>On lance verticalement vers le haut une balle avec une vitesse ${vA} = ${v} m/s (g = 10 m·s<sup>−2</sup>, air négligé).</p>`,
+    figure: z => { z.innerHTML = schemaMvt(LANCER, { vA: v + ' m/s', vB: '0', d: '?' }); }, parties: ps };
+}
+/* ---------- Freinage : force de frottement ---------- */
+function qForce(avecEq) {
+  const m = hasard([800, 1000, 1200, 1500]), kmh = hasard([36, 54, 72, 90]), d = hasard([10, 15, 20, 25, 30, 40]), v = kmh / 3.6, ec = .5 * m * v * v, f = ec / d;
+  const ps = [];
+  if (avecEq) ps.push(partieEquation(FREIN, { solution: `<p>${W('P')} = ${W('RN')} = 0 (⊥ au déplacement) ; ${W('f')} = f × AB × cos 180° = −f × AB.</p>` }));
+  ps.push({ type: 'sci', q: 'Calcule la valeur f de la force de frottement (3 chiffres significatifs).', label: 'f =', valeur: f, unite: 'N', cs: 3, rel: .01,
+    diag: x => (proche(x, .5 * m * kmh * kmh / d, .02) ? 'Convertis la vitesse en m/s (÷ 3,6).' : proche(x, 2 * f, .02) ? 'N\'oublie pas le ½.' : proche(x, ec, .02) ? 'Il faut encore diviser par AB.' : proche(x, -f, .02) ? 'La valeur d\'une force est positive.' : 'f = ½ m v<sub>A</sub>² / AB.'),
+    solution: calc(`0 − ½ m ${v2(vA)} = −f × AB, avec ${vA} = ${kmh} / 3,6 = ${fmt(v)} m/s`) + calc(`f = ${fr('½ × ' + fmt(m) + ' × ' + fmt(v) + '<sup>2</sup>', fmt(d))} ≈ ${c(sci(f, 3) + ' N')}`) });
+  return { theme: 'Force de freinage', enonce: `<p>Une voiture de ${fmt(m)} kg roule à ${kmh} km/h. Elle freine et s'arrête sur ${d} m. Les frottements sont supposés constants.</p>`,
+    figure: z => { z.innerHTML = schemaMvt(FREIN, { m: fmt(m) + ' kg', vA: kmh + ' km/h', vB: '0', d: d + ' m' }); }, parties: ps };
+}
+/* ---------- Distance d'arrêt ---------- */
+function qDistance() {
+  const m = hasard([800, 1000, 1200]), kmh = hasard([36, 54, 72, 90, 108]), f = hasard([5000, 6000, 8000, 9000, 10000]), v = kmh / 3.6, AB = .5 * m * v * v / f;
+  return { theme: 'Distance d\'arrêt', enonce: `<p>Une voiture de ${fmt(m)} kg roule à ${kmh} km/h et freine jusqu'à l'arrêt. La force de frottement vaut f = ${sci(f, 2)} N.</p>`,
+    figure: z => { z.innerHTML = schemaMvt(FREIN, { m: fmt(m) + ' kg', vA: kmh + ' km/h', vB: '0', d: '?' }); },
+    parties: [fq.nombre('Calcule la distance d\'arrêt AB (3 chiffres significatifs).', 'AB =', AB, 'm', { signe: false, rel: .01, affiche: fmt(r3(AB)),
+      diag: x => (proche(x, .5 * m * kmh * kmh / f, .02) ? 'Convertis la vitesse en m/s (÷ 3,6).' : proche(x, 2 * AB, .02) ? 'N\'oublie pas le ½.' : proche(x, -AB, .02) ? 'Une distance est positive.' : 'AB = ½ m v<sub>A</sub>² / f.'),
+      solution: calc(`0 − ½ m ${v2(vA)} = −f × AB donc AB = ${fr('½ m ' + v2(vA), 'f')} = ${fr('½ × ' + fmt(m) + ' × ' + fmt(v) + '<sup>2</sup>', sci(f, 2))} ≈ ${c(fmt(r3(AB)) + ' m')}`) })] };
+}
+/* ---------- Démarrage : force de frottement ---------- */
+function qDemarrage() {
+  const [m, kmh, d] = hasard([[1000, 36, 25], [800, 18, 10], [1200, 54, 45], [1000, 18, 10]]), v = kmh / 3.6, ec = .5 * m * v * v;
+  const f = hasard([200, 300, 400, 500]), Fm = f + ec / d;
+  return { theme: 'Frottements au démarrage', enonce: `<p>Une voiture de ${fmt(m)} kg démarre et atteint ${kmh} km/h sur ${d} m. La force motrice vaut F<sub>m</sub> = ${fmt(Fm)} N.</p>`,
+    figure: z => { z.innerHTML = schemaMvt(DEMAR, { m: fmt(m) + ' kg', vA: '0', vB: kmh + ' km/h', d: d + ' m' }); },
+    parties: [fq.nombre('Calcule la force de frottement f.', 'f =', f, 'N', { signe: false, rel: .01,
+      diag: x => (proche(x, Fm + ec / d, .02) ? `Le travail des frottements est négatif : ½ m ${v2(vB)} = F<sub>m</sub> × AB − f × AB.` : proche(x, Fm, .02) ? 'Tu as oublié l\'énergie cinétique gagnée.' : proche(x, Fm - .5 * m * kmh * kmh / d, .05) ? 'Convertis la vitesse en m/s.' : `½ m ${v2(vB)} = F<sub>m</sub> × AB − f × AB.`),
+      solution: calc(`½ m ${v2(vB)} − 0 = 0 + 0 + F<sub>m</sub> × AB × 1 + f × AB × (−1)`) + calc(`½ × ${fmt(m)} × ${fmt(v)}<sup>2</sup> = ${fmt(Fm)} × ${d} − ${d} f, donc f = ${fr(fmt(Fm * d) + ' − ' + fmt(ec), d)} = ${c(fmt(f) + ' N')}`) })] };
+}
+/* ---------- Angle de chaque force, théorème écrit pour la situation ---------- */
+const ANGLES = [
+  function anglesPoids() {
+    const s = hasard([CHUTE, LANCER]);
+    return { theme: 'Travail du poids', enonce: `<p>${s.sens === 'bas' ? 'Une pomme tombe de A (en haut) à B (en bas).' : 'Une balle lancée vers le haut monte de A (en bas) à B (le sommet).'}</p>`,
+      figure: z => { z.innerHTML = schemaMvt(s, {}); }, parties: [partieAngles(s)] };
+  },
+  function angles() {
+    const s = hasard([FREIN, DEMAR]);
+    return { theme: 'Angle de chaque force', enonce: `<p>${s === FREIN ? 'Une voiture freine sur une route horizontale.' : 'Une voiture démarre sur une route horizontale ; les frottements ne sont pas négligés.'}</p>`,
+      figure: z => { z.innerHTML = schemaMvt(s, {}); }, parties: [partieAngles(s)] };
+  },
+  function equation() {
+    const s = hasard([FREIN, DEMAR]);
+    return { theme: 'Le théorème', enonce: `<p>${s === FREIN ? 'Une voiture freine sur une route horizontale.' : 'Une voiture démarre sur une route horizontale ; les frottements ne sont pas négligés.'}</p>`,
+      figure: z => { z.innerHTML = schemaMvt(s, {}); }, parties: [partieEquation(s)] };
+  },
+];
+
+// tirage : énoncé 1, chute 2, lancé 2, freinage 2, distance d'arrêt 1, démarrage 1, angles ou théorème 1
+function tirage() {
+  return [hasard(ENONCE)(), qChute(10, true), hasard([() => qChute(9.81, false), qChuteLancee])(), qHauteur(true), qHauteur(false),
+    qForce(true), qForce(false), qDistance(), qDemarrage(), hasard(ANGLES)()];
+}
+
+EC.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 4 · QUESTIONS', titre: 'Théorème de l\'énergie cinétique',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : énoncé du théorème, chute, lancé vers le haut, freinage, distance d\'arrêt, démarrage, angles et théorème. Calculatrice à portée de main.</p>',
+  questions: tirage,
+  revoir: { href: 'module_4a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_5.html', label: 'Module 5 : exercices →' },
+});
+EC.menu('module_4_questions');
+</script>
+</body>
+</html>

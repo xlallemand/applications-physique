@@ -1136,9 +1136,17 @@
         { nom: 'Retrouver la vitesse', slug: 'vitesse', cours: 'module_3c_cours', noms: { cours: 'Cours : retrouver la vitesse' } },
         { nom: 'Si la vitesse double', slug: 'double', cours: 'module_3d_cours', noms: { cours: 'Cours : si la vitesse double' } },
         { nom: 'Énergie cinétique', questions: 'module_3_questions' }] },
-    { n: 4, titre: 'Théorème de l\'énergie cinétique', desc: 'ΔE<sub>c</sub> = Σ W, méthode avec schéma : chute, freinage, démarrage', fiche: 'fiche_4',
-      parties: [{ nom: 'Énoncé et chute', slug: 'chute', cours: 'module_4a_cours', questions: 'module_4a_questions' },
-        { nom: 'Freinage et démarrage', slug: 'freinage', cours: 'module_4b_cours', questions: 'module_4b_questions' }] },
+    { n: 4, titre: 'Théorème de l\'énergie cinétique', desc: 'ΔE<sub>c</sub> = Σ W, méthode avec schéma : chute, lancé vers le haut, freinage, distance d\'arrêt, démarrage', fiche: 'fiche_4',
+      // l'énoncé puis cinq utilisations (sous-modules de cours), une seule série de questions et la fiche
+      sousModules: true,
+      parties: [
+        { nom: 'Énoncé', slug: 'enonce', cours: 'module_4a_cours', noms: { cours: 'Cours : énoncé' } },
+        { nom: 'Chute', slug: 'chute', cours: 'module_4b_cours', noms: { cours: 'Utilisation : chute' } },
+        { nom: 'Lancé vers le haut', slug: 'lancer', cours: 'module_4c_cours', noms: { cours: 'Utilisation : lancé vers le haut' } },
+        { nom: 'Freinage', slug: 'freinage', cours: 'module_4d_cours', noms: { cours: 'Utilisation : freinage' } },
+        { nom: 'Distance d\'arrêt', slug: 'arret', cours: 'module_4e_cours', noms: { cours: 'Utilisation : distance d\'arrêt' } },
+        { nom: 'Démarrage', slug: 'demarrage', cours: 'module_4f_cours', noms: { cours: 'Utilisation : démarrage' } },
+        { nom: 'Théorème de l\'énergie cinétique', questions: 'module_4_questions' }] },
     { n: 5, titre: 'Exercices', desc: 'Exercices 18 et 19 p. 98, guidés pas à pas', exercices: 'module_5', exNom: 'Exercices 18 et 19', nbEx: 2 },
   ];
   window.SOM.init({ nom: 'Chapitre 7 : Théorème de l\'énergie cinétique', id: 'energie-cinetique', cleEx: 'energie-cinetique-exercices', plan: PLAN });

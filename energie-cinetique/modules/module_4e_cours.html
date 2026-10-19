@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : utilisation, distance d'arrêt — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 5 / 6</span>
+    <h2 class="er-titre">Utilisation : distance d'arrêt</h2>
+    <p class="er-contexte">Un « classique du bac » : la <b>distance d'arrêt</b> d'une voiture, connaissant la force de frottement. Même méthode à chaque fois : <b>schéma</b>, <b>théorème</b>, <b>travaux</b> (les forces ⊥ au déplacement donnent 0), application numérique, inconnue isolée.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 5 du module 4 : exemple 4 du cours (distance d'arrêt)
+   traité avec le schéma, puis « À toi » à valeurs changées.
+   Valeurs (vérifiées par un script) : ex. 4 : 800 kg, 70 km/h,
+   f = 9,0 × 10³ N → AB ≈ 16,8 m ; « À toi » : 1 200 kg, 90 km/h,
+   f = 1,5 × 10⁴ N → AB = 25 m.
+   ============================================================ */
+const { exemple } = COURS;
+const { proche, fr, W, schemaMvt, partieDonnees, partieAngles, versCours } = EC;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const EC_ = 'E<sub>c</sub>', vA = 'v<sub>A</sub>', vB = 'v<sub>B</sub>';
+const v2 = x => `${x}<sup>2</sup>`;
+const TEC = `${EC_}(B) − ${EC_}(A) = ${W('P')} + ${W('RN')} + ${W('f')}`;
+const FREIN = { sens: 'droite', objet: 'voiture', forces: ['P', 'RN', 'f'] };
+
+/* ---------- 1. Exemple 4 : la distance d'arrêt ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. La distance d\'arrêt (exemple 4)');
+  c_.ajouter(carte, exemple(`<p>Une voiture de masse m = 800 kg, qui roule à v = 70 km/h, freine pour s'arrêter. La force de frottement du sol sur les roues est supposée constante, f = 9,0 × 10<sup>3</sup> N. Calculer sa distance d'arrêt.</p>
+      ${schemaMvt(Object.assign({ angles: true }, FREIN), { m: '800 kg', vA: '70 km/h', vB: '0 m/s', d: '?' })}
+      ${calc(TEC)}
+      ${calc(`½ × 800 × 0<sup>2</sup> − ½ × 800 × (${fr('70', '3,6')})<sup>2</sup> = 0 + 0 + 9,0 × 10<sup>3</sup> × AB × cos 180°`)}
+      ${calc(`0 − 1,51 × 10<sup>5</sup> = −9,0 × 10<sup>3</sup> × AB`)}
+      ${calc(`AB = ${fr('−1,51 × 10<sup>5</sup>', '−9,0 × 10<sup>3</sup>')} = ${fr('1,51 × 10<sup>5</sup>', '9,0 × 10<sup>3</sup>')} ≈ ${c('16,8 m')} &nbsp; (soit AB = ${fr('½ m ' + v2(vA), 'f')})`)}`, 'Exemple 4 (traité, classique du bac)'));
+  c_.aToi(carte, [{ titre: 'Une distance d\'arrêt', enonce: '<p>Une voiture de <b>1 200 kg</b> roule à <b>90 km/h</b> et freine jusqu\'à l\'arrêt. La force de frottement vaut f = <b>1,5 × 10<sup>4</sup> N</b>. On cherche la distance d\'arrêt.</p>',
+    parties: [
+      versCours(partieDonnees(FREIN, { m: '1 200 kg', vA: '90 km/h', vB: '0 m/s', d: '?' }, { intrus: [{ label: '1,5 × 10<sup>4</sup> N', indice: 'C\'est la valeur d\'une <b>force</b> (f) : elle n\'est ni une vitesse, ni une masse, ni une distance.' }] })),
+      versCours(partieAngles(FREIN)),
+      { type: 'nombre', q: 'Calcule la distance d\'arrêt AB.', label: 'AB =', valeur: 25, unite: 'm', signe: false, rel: .01,
+        diag: v => (proche(v, .5 * 1200 * 90 * 90 / 15000) ? 'Convertis d\'abord la vitesse : 90 km/h = 25 m/s.' : proche(v, 1200 * 625 / 15000) ? 'N\'oublie pas le ½ de l\'énergie cinétique.' : proche(v, -25) ? 'Une distance est positive.' : 'AB = ½ m v<sub>A</sub>² / f.'),
+        solution: calc(`0 − ½ × 1 200 × 25<sup>2</sup> = −1,5 × 10<sup>4</sup> × AB`) + calc(`AB = ${fr('3,75 × 10<sup>5</sup>', '1,5 × 10<sup>4</sup>')} = ${c('25 m')}`) },
+    ] }]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Freinage jusqu'à l'arrêt (${vB} = 0) : −½ m ${v2(vA)} = −f × AB, donc la distance d'arrêt vaut AB = ${fr('½ m ' + v2(vA), 'f')}.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4f_cours.html">Utilisation : démarrage →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#arret">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+EC.menu('module_4e_cours');
+</script>
+</body>
+</html>
