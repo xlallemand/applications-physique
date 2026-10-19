@@ -6,13 +6,31 @@
                               { montrer(), reprendre() }
        opts = {
          couple: { ox: 'MnO4^-', red: 'Mn^2+' }   formules (charge après ^)
+         mode: 'guide'     une étape de la méthode après l'autre (défaut)
+               'libre'     toute la demi-équation, validée en une fois
+         depart, jusqua    (guide) première et dernière étape à faire (0 à 3) :
+                           les étapes avant « depart » sont déjà faites
+         aides: 'libre'    bouton « Afficher les aides » (défaut)
+                'ouvertes' aides affichées dès le départ
+                'payant'   la première ouverture coûte un point (série)
+                'aucune'   pas d'aides
+         api, compter      partie d'un moteur de questions (voir DEMI.partie) :
+                           api.reussi() à la fin, api.compterErreur() à chaque
+                           erreur et aide payante si compter
+         part              la partie (DEMI.partie) dont l'outil complète la solution
+         montrerEtape      false : pas de bouton « Afficher la réponse de l'étape »
+         final             false : pas de demi-équation finale dans le message
+         recommencer       false : pas de bouton « Recommencer »
          onFini(bilan)     demi-équation équilibrée ;
-                           bilan = { erreurs, vues, codes, html }
+                           bilan = { erreurs, vues, codes, aides, html }
          onErreur(code)    une erreur vient d'être repérée (voir DIFFICULTES)
+         onAide()          aides payantes ouvertes
        }
+     DEMI.partie(o)           l'outil en partie « perso » d'un cours ou d'une série
      DEMI.solution(couple)    demi-équation équilibrée, étape par étape
      DEMI.ecrire(termes)      écriture HTML d'une demi-équation
      DEMI.DIFFICULTES         libellé de chaque difficulté repérée
+     DEMI.outils              petits outils (charges, atomes, écriture)
 
    Méthode suivie, une étape après l'autre (chaque étape est validée) :
      1. oxydant à gauche, réducteur à droite ; équilibrer les éléments
@@ -183,9 +201,15 @@
   function outil(zone, opts) {
     const cp = opts.couple, ref = solution(cp);
     const nOx = html(cp.ox), nRed = html(cp.red);
-    let T, etape, erreurs, vues, codes, aides = false;
+    const libre = opts.mode === 'libre';
+    const depart = libre ? 0 : opts.depart || 0;
+    const derniere = libre ? 3 : (opts.jusqua == null ? 3 : opts.jusqua);   // dernière étape à faire
+    const modeAides = opts.aides || 'libre';
+    const api = opts.api, compter = !!opts.compter;
+    let T, etape, erreurs, vues, codes, aides = false, aidesVues = false, parMoteur = false;
+    const fini = () => etape > derniere;
 
-    zone.innerHTML = `<div class="ox-outil">
+    zone.innerHTML = `<div class="ox-outil${libre ? ' ox-libre' : ''}">
         <div class="ox-haut">
           <div class="ox-palette">
             <div class="ox-couple"><p class="ox-etiq">Couple</p><div class="ox-couple-l"></div></div>
@@ -200,13 +224,13 @@
             <div class="ox-aides hidden" aria-live="polite"></div>
           </div>
         </div>
-        <ol class="ox-etapes"></ol>
+        <ol class="ox-etapes${libre ? ' hidden' : ''}"></ol>
         <p class="ox-consigne"></p>
         <div class="er-actions ox-actions">
-          <button type="button" class="btn-primary ox-valider">Valider l'étape</button>
-          <button type="button" class="btn-small ox-b-aides" aria-expanded="false">Afficher les aides</button>
-          <button type="button" class="btn-small ox-b-montrer hidden">Afficher la réponse de l'étape</button>
-          <button type="button" class="btn-small ox-b-zero">Recommencer</button>
+          <button type="button" class="btn-primary ox-valider">${libre ? 'Valider' : 'Valider l\'étape'}</button>
+          <button type="button" class="btn-small ox-b-aides${modeAides === 'aucune' ? ' hidden' : ''}" aria-expanded="false"></button>
+          <button type="button" class="btn-small ox-b-montrer hidden">${libre ? 'Afficher la réponse' : 'Afficher la réponse de l\'étape'}</button>
+          <button type="button" class="btn-small ox-b-zero${opts.recommencer === false ? ' hidden' : ''}">Recommencer</button>
         </div>
         <div class="ox-retour"></div>
       </div>`;
@@ -219,12 +243,14 @@
     const ajoutes = (f, c) => T.filter(t => t.f === f && t.cote === c).reduce((x, t) => x + t.coef - t.base, 0);
     const molecules = (f, c) => T.filter(t => t.f === f && t.cote === c).reduce((x, t) => x + t.coef, 0);
     const role = r => T.find(t => t.role === r);
+    // nombre de chaque espèce du couple après l'étape 1 (solution)
+    const base0 = r => ref.etapes[0].find(t => t.role === r).coef;
 
     /* ---------- Affichage ---------- */
-    // nombre réglable : espèces du couple à l'étape 1, puis H2O, H+, e− à leur étape
-    const reglable = t => (etape === 0 ? estCouple(t) : etape <= 3 && t.f === F_ETAPE[etape]);
+    // nombre réglable : espèces du couple à l'étape 1, puis H2O, H+, e− à leur étape (tout en mode libre)
+    const reglable = t => !fini() && (libre || (etape === 0 ? estCouple(t) : t.f === F_ETAPE[etape]));
     // espèce que l'on peut déplacer ou retirer (glisser hors de la demi-équation)
-    const deplacable = t => (etape === 0 ? estCouple(t) : etape <= 3 && t.role === ROLE_ETAPE[etape]);
+    const deplacable = t => !fini() && (libre || (etape === 0 ? estCouple(t) : t.role === ROLE_ETAPE[etape]));
 
     function jeton(f) {
       const j = document.createElement('span');
@@ -241,7 +267,7 @@
     function terme(t) {
       const b = document.createElement('div');
       b.className = 'ox-terme';
-      if (etape > 3) {
+      if (fini()) {
         // demi-équation terminée : nombres écrits, 1 n'est pas écrit
         b.innerHTML = `${t.coef > 1 ? `<span class="er-coef-fixe">${t.coef}</span>` : ''}<span class="ox-f">${html(t.f)}</span>`;
         return b;
@@ -260,8 +286,8 @@
       return b;
     }
     function rendre() {
-      const fini = etape > 3;
-      racine.classList.toggle('ox-fini', fini);
+      const f = fini();
+      racine.classList.toggle('ox-fini', f);
       // couple : chaque espèce se glisse dans la demi-équation (étape 1)
       const lc = $('.ox-couple-l');
       lc.innerHTML = '';
@@ -269,7 +295,7 @@
         if (i) lc.insertAdjacentHTML('beforeend', '<span class="ox-barre" aria-hidden="true">/</span>');
         const j = jeton(cp[r]);
         if (role(r)) j.classList.add('ox-pris');
-        else if (etape === 0) mobile(j, { role: r, f: cp[r] });
+        else if (!f && (libre || etape === 0)) mobile(j, { role: r, f: cp[r] });
         lc.appendChild(j);
       });
       // membres de gauche et de droite
@@ -283,12 +309,12 @@
           m.appendChild(terme(t));
         });
       });
-      // réserve : H2O, H+ puis e−, chacun à son étape
+      // réserve : H2O, H+ puis e−, chacun à son étape (toutes en mode libre)
       const lr = $('.ox-reserve-l');
       lr.innerHTML = '';
       RESERVE.forEach(r => {
         const j = jeton(r.f);
-        if (r.etape === etape) mobile(j, r); else j.classList.add('ox-off');
+        if (!f && (libre || r.etape === etape)) mobile(j, r); else j.classList.add('ox-off');
         lr.appendChild(j);
       });
       // étapes de la méthode
@@ -296,10 +322,13 @@
         const cls = k < etape ? 'ox-fait' : k === etape ? 'ox-encours' : '';
         return `<li class="${cls}"${k === etape ? ' aria-current="step"' : ''}><span class="ox-pastille">${k < etape ? '✓' : k + 1}</span><span>${e.titre}</span></li>`;
       }).join('');
-      $('.ox-consigne').innerHTML = fini ? '' : `<b>Étape ${etape + 1}.</b> ${ETAPES[etape].consigne}`;
-      $('.ox-consigne').classList.toggle('hidden', fini);
-      $('.ox-valider').classList.toggle('hidden', fini);
-      $('.ox-b-montrer').classList.toggle('hidden', fini || !erreurs[etape]);
+      $('.ox-consigne').innerHTML = f ? '' : libre
+        ? `Écris la demi-équation du couple ${nOx} / ${nRed} : glisse les espèces, règle les nombres avec les flèches, puis valide.`
+        : `<b>Étape ${etape + 1}.</b> ${ETAPES[etape].consigne}`;
+      $('.ox-consigne').classList.toggle('hidden', f);
+      $('.ox-valider').classList.toggle('hidden', f);
+      $('.ox-b-montrer').classList.toggle('hidden', f || opts.montrerEtape === false || !(libre ? erreurs.some(Boolean) : erreurs[etape]));
+      if (f && api) $('.ox-b-zero').classList.add('hidden');
       majAides();
     }
 
@@ -307,7 +336,7 @@
     function majAides() {
       const box = $('.ox-aides'), b = $('.ox-b-aides');
       box.classList.toggle('hidden', !aides);
-      b.textContent = aides ? 'Masquer les aides' : 'Afficher les aides';
+      b.textContent = aides ? 'Masquer les aides' : modeAides === 'payant' && !aidesVues ? 'Afficher les aides (1 point de moins)' : 'Afficher les aides';
       b.setAttribute('aria-expanded', String(aides));
       if (!aides) return;
       const els = autres(cp);
@@ -325,6 +354,20 @@
         els.map(el => { const g = nb('g', el), d = nb('d', el); return ligne(el, g, d, `<b>${g}</b>`, `<b>${d}</b>`); }).join('') +
         ligne('Charge', qG, qD, `<b>${fq(qG)}</b>${detail('g')}`, `<b>${fq(qD)}</b>${detail('d')}`) +
         '</tbody></table>';
+    }
+    function basculerAides() {
+      if (modeAides === 'aucune') return;
+      aides = !aides;
+      // aides payantes (séries, entraînement) : la question ne rapporte plus qu'un point au plus
+      if (aides && !aidesVues) {
+        aidesVues = true;
+        if (modeAides === 'payant') {
+          if (api && compter) api.compterErreur();
+          if (opts.onAide) opts.onAide();
+        }
+      }
+      majAides();
+      if (aides) $('.ox-aides').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     /* ---------- Glisser-déposer ---------- */
@@ -401,7 +444,8 @@
       const G0 = qG + eG, D0 = qD + eD;                          // charges sans les électrons
       const n = G0 - D0;                                           // électrons attendus (à gauche)
       // à partir de la 2e erreur, on donne les charges de chaque côté
-      const rappel = erreurs[3] ? ` Sans les électrons, la charge totale vaut ${fq(G0)} à gauche et ${fq(D0)} à droite.` : '';
+      const deja = libre ? erreurs.reduce((a, b) => a + b, 0) : erreurs[3];
+      const rappel = deja ? ` Sans les électrons, la charge totale vaut ${fq(G0)} à gauche et ${fq(D0)} à droite.` : '';
       if (eG && eD) return { code: 'e-deux', msg: 'Tu as mis des électrons des deux côtés du signe = : il n\'en faut que d\'un seul côté.' };
       if (qG === qD) return { ok: true };
       if (!eG && !eD) return { code: 'e-oubli', msg: 'Les charges ne sont pas égales des deux côtés : ajoute des électrons e<sup>−</sup>.' + rappel };
@@ -412,7 +456,7 @@
       // électrons à gauche, mauvais nombre : quelle erreur de calcul de la charge ?
       const d = diagCharge(eG, G0, D0);
       if (d) return d;
-      return { code: 'e-nombre', msg: erreurs[3]
+      return { code: 'e-nombre', msg: deja
         ? `Sans les électrons, la charge totale vaut ${fq(G0)} à gauche et ${fq(D0)} à droite. Avec ${eG}&nbsp;e<sup>−</sup> à gauche, la charge de gauche devient ${fq(G0)} − ${eG} = ${fq(G0 - eG)} : elle doit être égale à ${fq(D0)}.`
         : 'Ce n\'est pas le bon nombre d\'électrons. Calcule la charge totale de chaque côté, sans les électrons : chaque e<sup>−</sup> ajouté à gauche fait baisser la charge de gauche de 1.' };
     }
@@ -436,6 +480,29 @@
       return pistes.length === 1 ? pistes[0] : null;
     }
 
+    // Mode libre : la demi-équation est vérifiée étape par étape de la méthode. Les H2O (ou H+)
+    // ajoutés à l'espèce du couple qui en est (H2O2 / H2O, H+ / H2) sont séparés du couple.
+    function verifierLibre() {
+      const garde = T;
+      T = [];
+      garde.forEach(t => {
+        if (!estCouple(t)) { T.push(Object.assign({}, t, { base: 0 })); return; }
+        const b = base0(t.role);
+        const reste = t.f === EAU ? 'eau' : t.f === HP ? 'h' : null;
+        if (reste && t.coef > b) {
+          T.push(Object.assign({}, t, { coef: b, base: b }));
+          T.push({ role: reste, f: t.f, cote: t.cote, coef: t.coef - b, base: 0 });
+        } else T.push(Object.assign({}, t, { base: t.coef }));
+      });
+      let v = { ok: true };
+      for (let k = 0; k < 4 && v.ok; k++) {
+        v = [v1, v2, v3, v4][k]();
+        if (!v.ok && !v.format) v.msg = `<b>${ETAPES[k].titre}.</b> ${v.msg}`;
+      }
+      T = garde;
+      return v;
+    }
+
     /* ---------- Valider, réussir, montrer ---------- */
     function retour(h) {
       const r = $('.ox-retour');
@@ -443,17 +510,19 @@
       if (h) setTimeout(() => r.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60);
     }
     function valider() {
-      if (etape > 3) return;
-      const v = [v1, v2, v3, v4][etape]();
+      if (fini()) return;
+      const v = libre ? verifierLibre() : [v1, v2, v3, v4][etape]();
       if (v.format) { retour(`<div class="callout er-retour"><p>${v.msg}</p></div>`); return; }
       if (!v.ok) {
         erreurs[etape]++;
         codes.push(v.code);
         if (opts.onErreur) opts.onErreur(v.code);
+        if (api && compter) api.compterErreur();
         retour(`<div class="callout-danger er-retour"><p><b class="er-ko">Ce n'est pas ça.</b> ${v.msg}</p></div>`);
-        $('.ox-b-montrer').classList.remove('hidden');
+        if (opts.montrerEtape !== false) $('.ox-b-montrer').classList.remove('hidden');
         return;
       }
+      if (libre) { T = ref.etapes[3].map(t => Object.assign({}, t, { base: 0 })); etape = 3; }
       reussir(false);
     }
     function reussir(vue) {
@@ -461,45 +530,73 @@
       if (k === 0) T.forEach(t => { if (estCouple(t)) t.base = t.coef; });   // nombres du couple fixés
       vues[k] = vue;
       etape++;
-      const titre = vue ? 'Réponse' : erreurs[k] ? 'C\'est juste.' : 'Juste !';
-      let h = `<p><b class="${vue ? '' : 'er-ok'}">${titre}</b> ${ref.textes[k]}</p>`;
-      if (etape > 3) {
+      const titre = vue ? 'Réponse' : erreurs.slice(libre ? 0 : k, k + 1).some(Boolean) ? 'C\'est juste.' : 'Juste !';
+      let h = `<p><b class="${vue ? '' : 'er-ok'}">${titre}</b> ${libre ? 'La demi-équation est équilibrée.' : ref.textes[k]}</p>`;
+      if (fini() && derniere === 3 && opts.final !== false) {
         h += `<div class="ox-final">${ecrire(T)}</div>
           <p>Autant d'atomes de chaque élément et la même charge (${fq(charges(T, 'g'))}) de chaque côté : la demi-équation est équilibrée.</p>`;
       }
-      retour(`<div class="${vue ? 'callout' : 'callout-success'} er-retour">${h}</div>`);
+      // partie d'un moteur de questions : la réponse affichée par le moteur suffit ;
+      // dans une série, le dernier message passe dans celui du moteur (« Juste ! » ou « C'est juste. »)
+      const part = opts.part, eq = `<div class="ox-final">${ecrire(T)}</div>`;
+      if (fini() && api && part && (parMoteur || compter)) {
+        retour('');
+        part.solution = parMoteur ? eq : `<p>${libre ? 'La demi-équation est équilibrée.' : ref.textes[k]}</p>${derniere === 3 ? eq : ''}`;
+      } else if (!parMoteur) retour(`<div class="${vue ? 'callout' : 'callout-success'} er-retour">${h}</div>`);
       rendre();
-      if (etape > 3 && opts.onFini) {
-        opts.onFini({ erreurs: erreurs.reduce((a, b) => a + b, 0), vues: vues.filter(Boolean).length, codes: codes.slice(), html: ecrire(T) });
+      if (fini()) {
+        const bilan = { erreurs: erreurs.reduce((a, b) => a + b, 0), vues: vues.filter(Boolean).length, codes: codes.slice(), aides: aidesVues, html: ecrire(T) };
+        if (opts.onFini) opts.onFini(bilan);
+        if (api && !parMoteur) api.reussi();
       }
     }
     // réponse de l'étape en cours (les étapes déjà faites sont justes)
     function montrerEtape() {
-      const b0 = r => ref.etapes[0].find(t => t.role === r).coef;
-      T = ref.etapes[etape].map(t => Object.assign({}, t, { base: estCouple(t) && etape > 0 ? b0(t.role) : 0 }));
+      if (libre) etape = 3;
+      T = ref.etapes[etape].map(t => Object.assign({}, t, { base: estCouple(t) && etape > 0 ? base0(t.role) : 0 }));
       reussir(true);
     }
+    // état de départ : demi-équation vide, ou déjà faite jusqu'à l'étape « depart »
     function reprendre() {
-      T = []; etape = 0; erreurs = [0, 0, 0, 0]; vues = [false, false, false, false]; codes = [];
+      T = depart ? ref.etapes[depart - 1].map(t => Object.assign({}, t, { base: estCouple(t) ? base0(t.role) : 0 })) : [];
+      etape = depart; erreurs = [0, 0, 0, 0]; vues = [false, false, false, false]; codes = [];
       retour('');
       rendre();
     }
 
     $('.ox-valider').onclick = valider;
-    $('.ox-b-montrer').onclick = () => { if (etape <= 3) montrerEtape(); };
+    $('.ox-b-montrer').onclick = () => { if (!fini()) montrerEtape(); };
     $('.ox-b-zero').onclick = reprendre;
-    $('.ox-b-aides').onclick = () => {
-      aides = !aides;
-      majAides();
-      if (aides) $('.ox-aides').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    };
+    $('.ox-b-aides').onclick = basculerAides;
+    if (modeAides === 'ouvertes') aides = aidesVues = true;
     reprendre();
     return {
       reprendre,
-      // toute la réponse (« Afficher la réponse » d'un cours)
-      montrer() { while (etape <= 3) montrerEtape(); },
+      // toute la réponse (« Afficher la réponse » d'un cours ou d'une série)
+      montrer() { parMoteur = true; while (!fini()) montrerEtape(); },
     };
   }
 
-  window.DEMI = { outil, solution, ecrire, DIFFICULTES };
+  /* Partie « perso » des moteurs de questions (cours : assets/cours.js ; séries : OX.question)
+     o = { couple, q, serie (true : erreurs et aides payantes comptées, réponse donnée par le moteur),
+           et les options de l'outil : mode, depart, jusqua, aides, onFini, onErreur }
+     Dans un cours, l'outil affiche lui-même ses messages ; dans une série, le dernier passe
+     dans celui du moteur. « Afficher la réponse » du moteur complète toute la demi-équation. */
+  function partie(o) {
+    const serie = !!o.serie;
+    const def = serie ? { compter: true, montrerEtape: false, final: false, recommencer: false } : { compter: false };
+    const p = {
+      type: 'perso', outil: 'demi', o,
+      q: o.q || `Équilibre la demi-équation du couple ${html(o.couple.ox)} / ${html(o.couple.red)}.`,
+      solution: '',
+    };
+    p.monter = (zone, api) => outil(zone, Object.assign(def, o, { api, part: p }));
+    return p;
+  }
+
+  window.DEMI = {
+    outil, partie, solution, ecrire, DIFFICULTES, ETAPES,
+    // petits outils communs avec l'écriture des réactions (reaction.js)
+    outils: { EAU, HP, E, ORDRE, pgcd, q, compo, atomes, charges, autres, fq, kf, html, texte, trier },
+  };
 })();

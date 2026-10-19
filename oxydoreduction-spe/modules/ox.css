@@ -1,6 +1,98 @@
 /* ============================================================
    Styles de l'application « Oxydoréduction » (spécialité)
-   Outil « Équilibrer une demi-équation » (modules/demi.js)
+   - cours et questions (repris de « Chapitre 9 : Statique des
+     fluides » : questions, champs, choix, grille de choix) ;
+   - outil « Équilibrer une demi-équation » (modules/demi.js) ;
+   - écriture des réactions (modules/reaction.js).
+   Complète assets/theme.css, le fichier er.css de l'application
+   « Équilibrer une réaction » (cartes, boutons, écran de fin),
+   assets/molecules.css (sélecteur à flèches) et assets/sommaire.css
+   (navigation, accueil, fiches).
+   ============================================================ */
+
+.er-page button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.er-page p { margin: 0; }
+sub, sup { font-size: .7em; line-height: 0; }
+
+/* ---------- Cours ---------- */
+.er-etape .cle { margin: 12px 0; }
+.cle p + p, .cours-bloc p + p, .cours-exemple p + p { margin-top: 8px; }
+.cours-bloc { margin: 0 0 12px; }
+.cours-bloc .cle { margin: 12px 0 0; }
+.cours-exemple { line-height: 1.6; }
+.cours-exemple-t { font-size: .8rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px !important; }
+.ph-calc { font-size: 1.1rem; line-height: 2.1; font-variant-numeric: tabular-nums; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ph-calc .c { color: var(--accent-ink); font-weight: 800; }
+@media (max-width: 480px) { .ph-calc { font-size: 1rem; } }
+/* équations : retour à la ligne entre deux termes (le nombre reste collé à sa formule) */
+.ox-eqn { overflow-x: auto; -webkit-overflow-scrolling: touch; text-wrap: pretty; font-size: 1.1rem; line-height: 1.9; font-variant-numeric: tabular-nums; }
+.ox-eqn .c { color: var(--accent-ink); font-weight: 800; }
+@media (max-width: 480px) { .ox-eqn { font-size: 1rem; } }
+.ox-r { background: var(--cle-bg); color: var(--accent-ink); border-radius: 6px; padding: 0 4px; font-weight: 800; }
+.ox-barre-e { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--ink-2); }
+
+/* ---------- Questions ---------- */
+.ph-enonce { margin-bottom: 12px; line-height: 1.55; }
+.ph-partie + .ph-partie { margin-top: 16px; padding-top: 14px; border-top: 1.5px dashed var(--paper-3); }
+.ph-partie-q { font-weight: 700; color: var(--ink); margin-bottom: 10px !important; line-height: 1.5; }
+.ph-partie-aide { margin-top: 10px; }
+.ph-partie-aide .btn-small { color: var(--ink-2); }
+.ph-partie-fig:empty { display: none; }
+.ph-partie-fig { margin: 4px 0 10px; }
+.ph-msg { margin-top: 10px !important; font-size: .92rem; color: var(--ink-2); font-weight: 600; }
+.ph-ok { margin-top: 8px !important; color: var(--success-text); font-weight: 800; }
+.ph-actions-partie { margin-top: 10px; }
+.ph-bilan { margin-top: 16px; }
+.ph-solution { line-height: 1.6; }
+.ph-question .er-consigne { margin-bottom: 8px !important; }
+
+/* Choix */
+.ph-choix { display: flex; flex-wrap: wrap; gap: 8px; }
+.ph-choix-col { flex-direction: column; align-items: stretch; }
+.ph-choix button { min-height: 46px; text-align: left; line-height: 1.4; border-radius: 16px; padding: 10px 18px; }
+.ph-choix button:disabled { cursor: default; opacity: 1; }
+.ph-choix button.juste { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); color: var(--success-text); }
+.ph-choix button.faux { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+
+/* Valeur numérique */
+.ph-valeur { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.ph-lab { font-size: 1.15rem; font-weight: 800; color: var(--ink); white-space: nowrap; }
+.ph-unite { font-size: 1.1rem; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.ph-champ-box { display: inline-flex; align-items: center; gap: 4px; }
+.ph-champ {
+  width: 120px; font: inherit; font-size: 1.15rem; font-weight: 800; text-align: center; padding: 9px 8px;
+  border: none; border-radius: 12px; box-shadow: inset 0 0 0 1.5px var(--paper-3); background: var(--sheet); color: var(--ink);
+  -webkit-appearance: none; appearance: none;
+}
+.ph-champ:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.ph-champ:disabled { background: var(--paper); color: var(--ink); -webkit-text-fill-color: var(--ink); opacity: 1; }
+.ph-pm {
+  width: 38px; height: 42px; flex-shrink: 0; border: none; border-radius: 12px; cursor: pointer;
+  background: var(--paper); color: var(--ink); font: inherit; font-size: 1.1rem; font-weight: 800;
+}
+.ph-pm:disabled { opacity: .35; cursor: default; }
+
+/* Grille de choix : un choix par ligne */
+.ph-grille { display: flex; flex-direction: column; gap: 8px; }
+.ph-grille-l { background: var(--paper); border-radius: 16px; padding: 10px 12px; transition: background .15s, box-shadow .15s; }
+.ph-grille-l.ok { background: var(--success-bg); box-shadow: inset 0 0 0 2px var(--success); }
+.ph-grille-l.ko { background: var(--danger-bg); box-shadow: inset 0 0 0 2px var(--danger); }
+.ph-grille-nom { font-weight: 800; margin-bottom: 8px; line-height: 1.4; }
+.ph-grille-ch { display: flex; flex-wrap: wrap; gap: 6px; }
+.ph-grille-b {
+  min-height: 46px; padding: 8px 16px; border: none; border-radius: 999px; background: var(--sheet); color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 700 .95rem var(--font-sans); cursor: pointer; transition: background .15s, box-shadow .15s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.ph-grille-b:hover:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.ph-grille-b[aria-pressed="true"] { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.ph-grille-l.ok .ph-grille-b[aria-pressed="true"] { background: var(--success-text); }
+.ph-grille-b:disabled { cursor: default; }
+.ph-grille-b:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ph-grille-apres { margin-top: 8px; padding-top: 8px; border-top: 1.5px dashed var(--paper-3); }
+
+/* ============================================================
+   OUTIL « ÉQUILIBRER UNE DEMI-ÉQUATION »
    ============================================================ */
 
 .ox-outil { display: flex; flex-direction: column; gap: 14px; }
@@ -63,7 +155,7 @@
   background: var(--sheet); color: var(--ink-2); font-size: .8rem; font-weight: 800; flex-shrink: 0;
 }
 .ox-etapes li.ox-encours { background: var(--cle-bg); color: var(--accent-ink); }
-.ox-etapes li.ox-encours .ox-pastille { background: var(--accent); color: #fff; }
+.ox-etapes li.ox-encours .ox-pastille { background: var(--accent); color: var(--sheet); }
 .ox-etapes li.ox-fait .ox-pastille { color: var(--accent-ink); }
 .ox-consigne { font-size: 1rem; font-weight: 600; line-height: 1.45; color: var(--ink); }
 .ox-consigne b { color: var(--accent-ink); }
@@ -71,7 +163,7 @@
 .ox-retour:empty { display: none; }
 .ox-final {
   margin: 10px 0; padding: 10px 14px; background: var(--sheet); border-radius: 12px; overflow-x: auto;
-  white-space: nowrap; text-align: center; font-size: 1.35rem; font-weight: 800; color: var(--ink);
+  text-align: center; text-wrap: balance; font-size: 1.35rem; font-weight: 800; color: var(--ink);
 }
 
 /* ---------- Aides : atomes et charges de chaque côté du signe = ---------- */
@@ -97,10 +189,47 @@
   .ox-membre { min-height: 118px; min-width: 130px; }
 }
 
-/* ---------- Choix du couple (page de prototype) ---------- */
-.ox-choix { display: flex; flex-wrap: wrap; gap: 8px; }
-.ox-choix .btn-small { min-height: 40px; touch-action: manipulation; }
-.ox-choix .btn-small[aria-pressed="true"] { background: var(--ink); color: #fff; box-shadow: none; }
+/* ============================================================
+   ÉCRITURE DES RÉACTIONS (modules/reaction.js)
+   ============================================================ */
+.ox-rx { display: flex; flex-direction: column; gap: 8px; -webkit-user-select: none; user-select: none; }
+.ox-rx-l { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; background: var(--paper); border-radius: 16px; padding: 8px 12px; }
+.ox-rx-eq { flex: 1 1 auto; min-width: 0; font-weight: 700; }
+.ox-rx-nom { font-size: .85rem; font-weight: 800; color: var(--accent-ink); background: var(--cle-bg); border-radius: 999px; padding: 4px 12px; }
+.ox-inv { min-height: 42px; }
+.ox-rx-mult { flex-wrap: wrap; }
+.ox-rx-k { flex-shrink: 0; }
+.ox-rx-x { font-size: 1.5rem; font-weight: 800; color: var(--ink); }
+.ox-rx-ne { flex-basis: 100%; font-size: .92rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.ox-rx-ne:empty { display: none; }
+.ox-rx-aide { font-size: .92rem; color: var(--accent-ink); font-weight: 600; line-height: 1.45; }
+.ox-rx-somme, .ox-rx-coefs {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px;
+  background: var(--paper); border-radius: 16px; padding: 10px;
+}
+.ox-rx-membre { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; }
+.ox-rx-fl { font-size: 1.6rem; font-weight: 800; color: var(--ink); padding: 0 4px; }
+.ox-ts {
+  min-height: 44px; padding: 6px 12px; border: none; border-radius: 12px; background: var(--sheet);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 700 1.05rem var(--font-sans); color: var(--ink); cursor: pointer; white-space: nowrap;
+}
+@media (hover: hover) { .ox-ts:hover:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--ink); } }
+.ox-ts.ox-double { background: var(--cle-bg); box-shadow: inset 0 0 0 2px var(--accent); }
+.ox-ts.ox-ts-vide { opacity: .6; }
+.ox-ts:disabled { cursor: default; }
+.ox-ts:focus-visible, .ox-inv:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ox-rx-fin { text-align: center; font-weight: 800; background: var(--sheet); border-radius: 12px; padding: 6px 12px; }
+.ox-rx-coefs .ox-terme { background: var(--sheet); }
+.ox-terme.ko { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); }
+.ox-rx .ox-aides { margin-top: 4px; }
+
+/* ---------- Divers ---------- */
+.ox-note { font-size: .88rem; color: var(--ink-2); margin-top: 6px !important; line-height: 1.5; }
+.ox-lien { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  background: var(--cle-bg); border-radius: 16px; padding: 10px 12px 10px 16px; margin: 14px 0; }
+.ox-lien p { font-size: .95rem; color: var(--ink); font-weight: 600; }
+.ox-lien a { text-decoration: none; }
+.ox-bilan-test { margin-top: 10px; }
 
 @media (max-width: 640px) {
   .ox-palette { flex: 1 1 100%; flex-direction: row; flex-wrap: wrap; }
@@ -118,4 +247,7 @@
   .ox-etapes li:not(.ox-encours) > span + span { display: none; }   /* seul le titre de l'étape en cours */
   .ox-bilan tbody th, .ox-bilan td { padding: 5px 10px; }
   .ox-final { font-size: 1.15rem; }
+  .ox-rx-l { padding: 8px; }
+  .ox-ts { font-size: .95rem; padding: 6px 9px; }
+  .ox-rx-somme, .ox-rx-coefs { padding: 8px 4px; gap: 6px; }
 }

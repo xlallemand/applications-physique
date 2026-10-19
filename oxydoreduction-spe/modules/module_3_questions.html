@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions sur l'équation d'une réaction — Oxydoréduction</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="ox.js"></script>
+<script src="demi.js"></script>
+<script src="reaction.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard (les demi-équations sont données) :
+   quelle demi-équation retourner, orienter (2), multiplier (2),
+   additionner et simplifier (2), l'équation juste parmi des erreurs
+   classiques (électrons gardés, H+ non simplifiés, demi-équations
+   non multipliées), écrire directement les nombres de l'équation (2).
+   Les aides des outils coûtent un point.
+   Réactions : [couple dont l'oxydant réagit, couple dont le réducteur réagit].
+   ============================================================ */
+const { o, fq, hasard, melanger, h, COUPLES: C, couple } = OX;
+const R = s => `<span class="ox-r">${s}</span>`;
+const eqn = x => `<p class="ox-eqn">${x}</p>`;
+const REACTIONS = [['Cr2O7', 'Fe3'], ['MnO4', 'I2'], ['H2O2', 'Fe3'], ['NO3', 'Cu'], ['Cu', 'Al'], ['MnO4', 'Cl2'], ['Cr2O7', 'I2'], ['O2e', 'Fe3'],
+  ['Fe3', 'I2'], ['Ag', 'Cu'], ['I2', 'S4O6'], ['H2O2', 'I2'], ['NO3', 'Ag'], ['Cl2', 'Fe3'], ['MnO4', 'Fe3']];
+const SIMPLIFIER = [['MnO4', 'CO2'], ['MnO4', 'O2'], ['MnO4', 'SO4'], ['Cr2O7', 'SO4'], ['MnO4', 'Ald'], ['H2O2', 'Ald']];
+const enonce = p => `<p>Réaction entre ${R(h(C[p[0]].ox))} et ${R(h(C[p[1]].red))}. Demi-équations des couples :</p>` +
+  eqn(melanger([DEMI.solution(C[p[0]]).html, DEMI.solution(C[p[1]]).html]).join('<br>'));
+const opt = (p, x) => Object.assign({ a: C[p[0]], b: C[p[1]], serie: true, aides: 'payant' }, x);
+
+/* ---------- quelle demi-équation retourner ? ---------- */
+function qRetourner(p) {
+  const a = C[p[0]], b = C[p[1]];
+  return { theme: 'Orienter', enonce: enonce(p),
+    parties: [fq.choix('Quelle demi-équation faut-il retourner pour écrire la réaction ?', [o('b', `celle du couple ${couple(b)}`), o('a', `celle du couple ${couple(a)}`), o('deux', 'les deux')], 'b', { melanger: false, colonne: true,
+      indices: { a: `${h(a.ox)} est un réactif et il est déjà à gauche de sa demi-équation : on la garde dans son sens.`, deux: `${h(a.ox)} est déjà à gauche : seule la demi-équation de ${h(b.red)}, écrit à droite, est retournée.` },
+      solution: `<p>${h(b.red)} est un réactif écrit à droite de sa demi-équation : on retourne celle du couple <b>${couple(b)}</b> (oxydation).</p>` })] };
+}
+/* ---------- orienter, multiplier, additionner (outils) ---------- */
+const qOrienter = p => ({ theme: 'Orienter', enonce: enonce(p), parties: [REAC.partieOrienter(opt(p, { ordre: hasard(['ab', 'ba']) }))] });
+const qMultiplier = p => ({ theme: 'Égaliser les électrons', enonce: enonce(p), parties: [REAC.partieMultiplier(opt(p))] });
+const qAdditionner = p => ({ theme: 'Additionner et simplifier', enonce: enonce(p), parties: [REAC.partieAdditionner(opt(p))] });
+const qCoefficients = p => ({ theme: 'Écrire l\'équation', enonce: enonce(p), parties: [REAC.partieAdditionner(opt(p, { mode: 'coefficients' }))] });
+/* ---------- l'équation juste ---------- */
+function qBonne(p) {
+  const r = REAC.reaction(C[p[0]], C[p[1]]);
+  const sansE = r.somme.filter(t => t.f !== 'e^-');
+  const options = [o('ok', r.html)];
+  const avecE = REAC.ecrire(r.somme);
+  options.push(o('e', avecE));
+  // H+ (ou H2O) non simplifiés
+  if (r.somme.filter(t => t.f === 'H^+').length > 1) options.push(o('h', REAC.ecrire(sansE)));
+  // demi-équations additionnées sans être multipliées
+  if (r.mA > 1 || r.mB > 1) options.push(o('mult', REAC.ecrire(nonMultiplie(r))));
+  return { theme: 'L\'équation juste', enonce: enonce(p),
+    parties: [fq.choix('Quelle est l\'équation de la réaction ?', options, 'ok', { colonne: true,
+      indices: { e: 'Les électrons se simplifient : ils ne figurent jamais dans l\'équation d\'une réaction.',
+        h: 'Des ions H<sup>+</sup> figurent des deux côtés de la flèche : il faut les simplifier.',
+        mult: 'Les deux demi-équations n\'échangent pas le même nombre d\'électrons : il faut d\'abord les multiplier.' },
+      solution: `<p>${r.mA} × (réduction) + ${r.mB} × (oxydation), puis on simplifie :</p>${eqn(r.html)}` })] };
+}
+// somme des deux demi-équations orientées, sans multiplication, électrons retirés de chaque côté
+function nonMultiplie(r) {
+  const T = [];
+  r.A.concat(REAC.inverser(r.B)).forEach(t => {
+    const u = T.find(x => x.f === t.f && x.cote === t.cote);
+    if (u) u.coef += t.coef; else T.push(Object.assign({}, t));
+  });
+  // H+ et H2O présents des deux côtés : simplifiés ; les électrons sont retirés
+  T.forEach(t => { const u = T.find(x => x !== t && x.f === t.f && x.cote !== t.cote); if (u && t.f !== 'e^-') { const m = Math.min(t.coef, u.coef); t.coef -= m; u.coef -= m; } });
+  return T.filter(t => t.coef > 0 && t.f !== 'e^-');
+}
+
+// tirage : 10 questions, chacune sur une réaction différente quand c'est possible
+function tirage() {
+  const L = melanger(REACTIONS), S = melanger(SIMPLIFIER);
+  const mult = L.filter(p => { const r = REAC.reaction(C[p[0]], C[p[1]]); return r.mA > 1 || r.mB > 1; });
+  return [qRetourner(L[0]), qOrienter(L[1]), qOrienter(S[0]), qMultiplier(mult[0]), qMultiplier(mult[1] || mult[0]),
+    qAdditionner(L[2]), qAdditionner(S[1]), qBonne(hasard([S[2], mult[2] || L[3]])), qCoefficients(L[4]), qCoefficients(S[3])];
+}
+
+OX.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Écrire l\'équation d\'une réaction',
+  intro: '<p class="er-contexte">10 questions tirées au hasard, les demi-équations sont données : orienter, égaliser les électrons, additionner et simplifier, puis écrire directement l\'équation de la réaction.</p>',
+  aidesPayantes: true,
+  questions: tirage,
+  revoir: { href: 'module_3_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4.html', label: 'Module 4 : entraînement →' },
+});
+OX.menu('module_3_questions');
+</script>
+</body>
+</html>
