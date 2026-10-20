@@ -21,10 +21,13 @@
    10 questions tirées au hasard : capter / céder (2), lire un couple
    (dont des couples avec H+ et H2O), écrire un couple, demi-équation,
    oxydant d'une demi-équation, oxydation ou réduction, oxydé ou réduit
-   (grille), produits d'une réaction, espèce oxydée.
+   (grille), produits d'une réaction, les deux couples mis en jeu dans
+   une réaction.
    Erreurs diagnostiquées : capter et céder confondus, couple écrit à
    l'envers, électrons du mauvais côté, oxydation et réduction
-   confondues, réactifs pris pour les produits.
+   confondues, réactifs pris pour les produits, deux réactifs (ou deux
+   espèces qui ne se transforment pas l'une en l'autre) pris pour un couple.
+   Une demi-équation s'écrit toujours avec le signe =, même orientée.
    Un couple n'est jamais proposé écrit à l'envers.
    ============================================================ */
 const { o, fq, hasard, melanger, h } = OX;
@@ -97,10 +100,10 @@ function qCoupleDe() {
 /* ---------- oxydation ou réduction ---------- */
 function qTransfo() {
   const c = hasard(SIMPLES), sens = hasard(['oxyd', 'reduc']);
-  const eq = sens === 'oxyd' ? `${c.red} → ${c.ox} + ${nE(c.n)}` : `${c.ox} + ${nE(c.n)} → ${c.red}`;
-  return { theme: 'Oxydation ou réduction', enonce: `<p class="ox-eqn">${eq}</p>`,
+  const eq = sens === 'oxyd' ? `${c.red} = ${c.ox} + ${nE(c.n)}` : `${c.ox} + ${nE(c.n)} = ${c.red}`;
+  return { theme: 'Oxydation ou réduction', enonce: `<p>Demi-équation écrite dans le sens de la transformation :</p><p class="ox-eqn">${eq}</p>`,
     parties: [fq.choix('Cette transformation est :', [o('oxyd', 'une oxydation'), o('reduc', 'une réduction')], sens, { melanger: false,
-      indices: { reduc: `Les électrons sont après la flèche : ${c.red} les perd. Une perte d'électrons est une oxydation.`, oxyd: `Les électrons sont avant la flèche : ${c.ox} les gagne. Un gain d'électrons est une réduction.` },
+      indices: { reduc: `Les électrons sont à droite du signe = : ${c.red}, à gauche, les perd. Une perte d'électrons est une oxydation.`, oxyd: `Les électrons sont à gauche du signe =, avec ${c.ox} : il les gagne. Un gain d'électrons est une réduction.` },
       solution: sens === 'oxyd' ? `<p>${c.red} perd des électrons : <b>oxydation</b>.</p>` : `<p>${c.ox} gagne des électrons : <b>réduction</b>.</p>` })] };
 }
 /* ---------- vocabulaire (grille) ---------- */
@@ -128,21 +131,23 @@ function qProduits() {
       indices: { inv: 'Ce sont les réactifs.', ox: `${a.ox} est un réactif : il capte des électrons et devient ${a.red}.`, red: `${b.red} est un réactif : il cède des électrons et devient ${b.ox}.` },
       solution: `<p>${a.ox} est réduit en <b>${a.red}</b>, ${b.red} est oxydé en <b>${b.ox}</b>.</p>` })] };
 }
-function qOxyde() {
+/* ---------- les deux couples mis en jeu dans une réaction ---------- */
+// on évalue la reconnaissance d'un couple : deux espèces qui se transforment l'une en l'autre
+function qCouples() {
   const [i, j] = hasard(REACTIONS), a = SIMPLES[i], b = SIMPLES[j];
-  const quoi = hasard(['oxyde', 'reduit']);
-  return { theme: 'Une réaction', enonce: `<p>Réaction : ${a.ox} + ${b.red} → ${a.red} + ${b.ox} (nombres stœchiométriques non écrits).</p>`,
-    parties: [fq.choix(`Quelle espèce est ${quoi === 'oxyde' ? 'oxydée' : 'réduite'} ?`, [o('a', a.ox), o('b', b.red), o('pa', a.red), o('pb', b.ox)], quoi === 'oxyde' ? 'b' : 'a', { melanger: false,
-      indices: quoi === 'oxyde'
-        ? { a: `${a.ox} capte des électrons : il est réduit.`, pa: `${a.red} est un produit.`, pb: `${b.ox} est un produit : c'est ce que devient l'espèce oxydée.` }
-        : { b: `${b.red} cède des électrons : il est oxydé.`, pa: `${a.red} est un produit : c'est ce que devient l'espèce réduite.`, pb: `${b.ox} est un produit.` },
-      solution: quoi === 'oxyde' ? `<p>${b.red} cède des électrons : il est <b>oxydé</b> en ${b.ox}.</p>` : `<p>${a.ox} capte des électrons : il est <b>réduit</b> en ${a.red}.</p>` })] };
+  return { theme: 'Les couples d\'une réaction', enonce: `<p>Réaction : ${a.ox} + ${b.red} → ${a.red} + ${b.ox} (nombres stœchiométriques non écrits).</p>`,
+    parties: [fq.choix('Quels sont les deux couples mis en jeu ?', [
+      o('ok', `${couple(a)} et ${couple(b)}`), o('reactifs', `${a.ox} / ${b.red} et ${b.ox} / ${a.red}`), o('memes', `${a.ox} / ${b.ox} et ${a.red} / ${b.red}`)], 'ok', { colonne: true,
+      indices: {
+        reactifs: `${a.ox} et ${b.red} sont les deux réactifs : ils réagissent ensemble, mais ne forment pas un couple. Dans un couple, les deux espèces se transforment l'une en l'autre : ${a.ox} devient ${a.red}.`,
+        memes: `${a.ox} ne se transforme pas en ${b.ox}. Dans un couple, les deux espèces se transforment l'une en l'autre en échangeant des électrons : ${a.ox} devient ${a.red}.` },
+      solution: `<p>Chaque réactif se transforme en l'autre espèce de son couple : ${a.ox} devient ${a.red}, ${b.red} devient ${b.ox}. Couples : <b>${couple(a)}</b> et <b>${couple(b)}</b>.</p>` })] };
 }
 
 // tirage : 10 questions, dans l'ordre du cours
 function tirage() {
   const r = hasard([true, false]);
-  return [qRole(r), qRole(!r), qLire(), qEcrire(), qDemi(), qCoupleDe(), qTransfo(), qGrille(), qProduits(), qOxyde()];
+  return [qRole(r), qRole(!r), qLire(), qEcrire(), qDemi(), qCoupleDe(), qTransfo(), qGrille(), qProduits(), qCouples()];
 }
 
 OX.serie({

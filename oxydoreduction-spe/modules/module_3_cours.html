@@ -31,15 +31,18 @@
 
 <script>
 /* ============================================================
-   Cours par étapes (assets/cours.js) :
+   Cours par étapes (assets/cours.js). L'équation s'écrit partout avec
+   l'outil de l'entraînement du module 4 (REAC.partie : une réserve, les
+   deux demi-équations l'une au-dessus de l'autre, multiplicateurs,
+   équation), en mode guidé : la consigne de chaque étape est écrite à
+   côté de sa zone, chaque étape est validée toute seule dès qu'elle est
+   juste, et les aides donnent les électrons échangés par chaque
+   demi-équation.
    1. entourer les réactifs (REAC.partieReactifs), puis écrire les deux
-      demi-équations directement dans le sens de la réaction, d'un seul
-      tenant (outil DEMI, mode libre, flèche) ; le bouton « Inverser »
-      n'est proposé que dans le premier « À toi » ;
-   2. égaliser les électrons (REAC.partieMultiplier) ;
-   3. additionner et simplifier (REAC.partieAdditionner) ;
-   4. toute la méthode au même endroit (REAC.partie : une réserve, les deux
-      demi-équations l'une au-dessus de l'autre, multiplicateurs, équation).
+      demi-équations dans le sens de la réaction (étape 1 seule) ;
+   2. égaliser les électrons (demi-équations données, étape 2 seule) ;
+   3. additionner et simplifier (demi-équations multipliées données) ;
+   4. toute la méthode au même endroit (les trois étapes à la suite).
    Dans chaque « À toi », les aides disparaissent : présentes, puis
    absentes. Les réactions sont tirées au hasard à chaque visite.
    Réactions : [couple dont l'oxydant réagit, couple dont le réducteur réagit].
@@ -61,32 +64,32 @@ function deux(liste) {
   return [p, reste.find(x => !x.some(k => p.includes(k))) || reste[0]];
 }
 
+// outil de l'entraînement du module 4 en mode guidé ; o : étapes à faire (depart, jusqua), aides, niveau
+const guide = (p, o) => REAC.partie(r2(p, Object.assign({ guide: true, ordre: hasard(['ab', 'ba']) }, o)));
+
 /* ---------- 1. Les deux demi-équations dans le bon sens ---------- */
-// a) entourer les réactifs, b) et c) les deux demi-équations dans le sens de la réaction
-function dansLeBonSens(p, aides, inverser) {
-  const a = C[p[0]], b = C[p[1]];
-  const demi = (c, sens, l) => DEMI.partie({ couple: c, mode: 'libre', sens, fleche: true, aides, inverser,
-    q: `${l}) Écris la demi-équation du couple ${couple(c)} dans le sens de la réaction : le réactif à gauche de la flèche.`,
-    consigne: 'Glisse les espèces, règle les nombres avec les flèches, puis valide une seule fois, quand tout est équilibré.' });
-  return [REAC.partieReactifs({ a, b, ordre: hasard(['ab', 'ba']), q: 'a) Entoure les deux réactifs dans les couples : touche chacun d\'eux.' }),
-    ...melanger([['red', a], ['ox', b]]).map(([sens, c], i) => demi(c, sens, 'bc'[i]))];
+// a) entourer les réactifs, b) les deux demi-équations dans le sens de la réaction (étape 1 de l'outil)
+function dansLeBonSens(p, aides) {
+  const a = C[p[0]], b = C[p[1]], ordre = hasard(['ab', 'ba']);
+  return [REAC.partieReactifs({ a, b, ordre, q: 'a) Entoure les deux réactifs dans les couples : touche chacun d\'eux.' }),
+    REAC.partie({ a, b, ordre, guide: true, jusqua: 0, aides, q: 'b) Écris les deux demi-équations dans le sens de la réaction.' })];
 }
 function etape1(c) {
   const carte = c.carte('1. Écrire les deux demi-équations dans le bon sens');
   c.ajouter(carte, `<div class="cours-bloc">
       <div class="cle"><p><b class="cle-titre">Méthode, étape 1.</b> Dans la réaction entre l'oxydant Ox<sub>1</sub> d'un couple et le réducteur Red<sub>2</sub> d'un autre couple :</p>
         <ul class="er-liste"><li>on <b>entoure les deux réactifs</b> dans les deux couples Ox<sub>1</sub> / Red<sub>1</sub> et Ox<sub>2</sub> / Red<sub>2</sub> ;</li>
-          <li>on écrit chaque demi-équation <b>directement dans le sens de la réaction</b>, avec une flèche et <b>le réactif à gauche</b> : celle de l'oxydant est une réduction, celle du réducteur une oxydation, avec les électrons à droite.</li></ul>
-        <p class="crs-formule">Ox<sub>1</sub> + n<sub>1</sub> e<sup>−</sup> → Red<sub>1</sub> &nbsp; et &nbsp; Red<sub>2</sub> → Ox<sub>2</sub> + n<sub>2</sub> e<sup>−</sup></p></div>
+          <li>on écrit chaque demi-équation <b>directement dans le sens de la réaction</b>, avec le signe = (jamais de flèche dans une demi-équation) et <b>le réactif à gauche</b> : celle de l'oxydant est une réduction, celle du réducteur une oxydation, avec les électrons à droite.</li></ul>
+        <p class="crs-formule">Ox<sub>1</sub> + n<sub>1</sub> e<sup>−</sup> = Red<sub>1</sub> &nbsp; et &nbsp; Red<sub>2</sub> = Ox<sub>2</sub> + n<sub>2</sub> e<sup>−</sup></p></div>
     </div>
     ${exemple(`<p>Les ions permanganate ${h('MnO4^-')} oxydent les ions fer(II) ${h('Fe^2+')}. Couples : ${E(h('MnO4^-'))} / ${h('Mn^2+')} et ${h('Fe^3+')} / ${E(h('Fe^2+'))}.</p>
-      ${eqn(`${h('MnO4^-')} + 8&nbsp;${HP} + 5&nbsp;${EL} → ${h('Mn^2+')} + 4&nbsp;${H2O} &nbsp;(réduction)`)}
-      ${eqn(`${h('Fe^2+')} → ${h('Fe^3+')} + ${EL} &nbsp;(oxydation : ${h('Fe^2+')}, le réactif, est à gauche)`)}`)}`);
+      ${eqn(`${h('MnO4^-')} + 8&nbsp;${HP} + 5&nbsp;${EL} = ${h('Mn^2+')} + 4&nbsp;${H2O} &nbsp;(réduction)`)}
+      ${eqn(`${h('Fe^2+')} = ${h('Fe^3+')} + ${EL} &nbsp;(oxydation : ${h('Fe^2+')}, le réactif, est à gauche)`)}`)}`);
   const p1 = hasard(SIMPLES.filter(x => ['Cr2O7', 'MnO4', 'H2O2', 'NO3'].includes(x[0])));
   const p2 = hasard(SIMPLIFIER.concat(SIMPLES).filter(x => !x.some(k => p1.includes(k))));
   c.aToi(carte, [
-    { titre: 'Avec l\'aide si tu en as besoin', enonce: `<p>Réaction entre ${h(C[p1[0]].ox)} et ${h(C[p1[1]].red)}.</p>`, parties: dansLeBonSens(p1, 'libre', true) },
-    { titre: 'Sans aide', enonce: `<p>Réaction entre ${h(C[p2[0]].ox)} et ${h(C[p2[1]].red)}.</p>`, parties: dansLeBonSens(p2, 'aucune', false) },
+    { titre: 'Avec l\'aide si tu en as besoin', enonce: `<p>Réaction entre ${h(C[p1[0]].ox)} et ${h(C[p1[1]].red)}.</p>`, parties: dansLeBonSens(p1, 'libre') },
+    { titre: 'Sans aide', enonce: `<p>Réaction entre ${h(C[p2[0]].ox)} et ${h(C[p2[1]].red)}.</p>`, parties: dansLeBonSens(p2, 'aucune') },
   ]);
   return carte;
 }
@@ -99,14 +102,14 @@ function etape2(c) {
       <div class="cle"><p><b class="cle-titre">Méthode, étape 2.</b> On multiplie chaque demi-équation (toutes ses espèces) par un nombre entier, le plus petit possible, pour que les nombres d'électrons soient égaux : on cherche le <b>plus petit multiple commun</b> des deux nombres d'électrons.</p></div>
     </div>
     ${exemple(`<p>La réduction de ${h('MnO4^-')} échange 5 électrons, l'oxydation de ${h('Fe^2+')} un seul. On multiplie la seconde par 5 :</p>
-      ${eqn(`1 × ( ${h('MnO4^-')} + 8&nbsp;${HP} + 5&nbsp;${EL} → ${h('Mn^2+')} + 4&nbsp;${H2O} )`)}
-      ${eqn(`<span class="c">5</span> × ( ${h('Fe^2+')} → ${h('Fe^3+')} + ${EL} )`)}
+      ${eqn(`1 × ( ${h('MnO4^-')} + 8&nbsp;${HP} + 5&nbsp;${EL} = ${h('Mn^2+')} + 4&nbsp;${H2O} )`)}
+      ${eqn(`<span class="c">5</span> × ( ${h('Fe^2+')} = ${h('Fe^3+')} + ${EL} )`)}
       <p>Avec ${h('NO3^-')} (3 électrons) et Cu (2 électrons) : 3 × 2 = 2 × 3 = 6 électrons, on multiplie par 2 et par 3.</p>`)}`);
   const L = SIMPLES.concat(SIMPLIFIER).filter(p => { const r = REAC.reaction(C[p[0]], C[p[1]]); return r.mA > 1 || r.mB > 1; });
   const [p1, p2] = deux(L);
   c.aToi(carte, [
-    { titre: 'Avec les aides', enonce: enonce(p1), parties: [REAC.partieMultiplier(r2(p1, { aides: 'ouvertes' }))] },
-    { titre: 'Sans les aides', enonce: enonce(p2), parties: [REAC.partieMultiplier(r2(p2, { aides: 'aucune' }))] },
+    { titre: 'Avec les aides', enonce: enonce(p1), parties: [guide(p1, { depart: 1, jusqua: 1, aides: 'ouvertes', q: 'Les demi-équations sont écrites : multiplie-les pour égaliser les électrons.' })] },
+    { titre: 'Sans les aides', enonce: enonce(p2), parties: [guide(p2, { depart: 1, jusqua: 1, aides: 'aucune', q: 'Les demi-équations sont écrites : multiplie-les pour égaliser les électrons.' })] },
   ]);
   return carte;
 }
@@ -127,8 +130,8 @@ function etape3(c) {
       ${eqn(`<span class="c">${REAC.reaction(C.MnO4, C.CO2).html}</span>`)}`, 'Exemple 2')}`);
   const p1 = hasard(SIMPLES), p2 = hasard(SIMPLIFIER.filter(x => !x.some(k => p1.includes(k)))) || hasard(SIMPLIFIER);
   c.aToi(carte, [
-    { titre: 'Avec les aides', enonce: enonce(p1), parties: [REAC.partieAdditionner(r2(p1, { aides: 'ouvertes' }))] },
-    { titre: 'Sans les aides', enonce: enonce(p2), parties: [REAC.partieAdditionner(r2(p2, { aides: 'aucune' }))] },
+    { titre: 'Avec les aides', enonce: enonce(p1), parties: [guide(p1, { depart: 2, aides: 'ouvertes', q: 'Les demi-équations sont écrites et multipliées : écris l\'équation de la réaction.' })] },
+    { titre: 'Sans les aides', enonce: enonce(p2), parties: [guide(p2, { depart: 2, aides: 'aucune', q: 'Les demi-équations sont écrites et multipliées : écris l\'équation de la réaction.' })] },
   ]);
   return carte;
 }
@@ -137,13 +140,13 @@ function etape3(c) {
 function etape4(c) {
   const carte = c.carte('4. Toute la méthode, au même endroit');
   c.ajouter(carte, `<div class="cours-bloc">
-      <p>Tout se fait maintenant dans un seul outil : une <b>réserve</b> au-dessus, les <b>deux demi-équations</b> l'une au-dessus de l'autre, à écrire directement dans le bon sens (le réactif à gauche), le <b>multiplicateur</b> à droite de chacune, puis l'<b>équation de la réaction</b>.</p>
-      <p>Le bouton « Vérifier » d'une demi-équation est facultatif : tu peux écrire directement l'équation de la réaction et la valider.</p>
+      <p>Les trois étapes se font maintenant à la suite, dans le même outil : une <b>réserve</b> au-dessus, les <b>deux demi-équations</b> l'une au-dessus de l'autre, à écrire directement dans le bon sens (le réactif à gauche), le <b>multiplicateur</b> à droite de chacune, puis l'<b>équation de la réaction</b>.</p>
+      <p>Chaque étape est validée toute seule dès qu'elle est juste : l'étape suivante s'ouvre alors.</p>
     </div>`);
   const [p1, p2] = deux(SIMPLES.concat(SIMPLIFIER));
   c.aToi(carte, [
-    { titre: 'Avec les aides', enonce: enonce(p1), parties: [REAC.partie(r2(p1, { niveau: 1, ordre: hasard(['ab', 'ba']) }))] },
-    { titre: 'Sans les aides', enonce: enonce(p2), parties: [REAC.partie(r2(p2, { niveau: 3, ordre: hasard(['ab', 'ba']) }))] },
+    { titre: 'Avec les aides', enonce: enonce(p1), parties: [guide(p1, { niveau: 1, q: 'Écris l\'équation de la réaction en suivant les trois étapes.' })] },
+    { titre: 'Sans les aides', enonce: enonce(p2), parties: [guide(p2, { niveau: 3, q: 'Écris l\'équation de la réaction en suivant les trois étapes.' })] },
   ]);
   return carte;
 }
@@ -152,7 +155,7 @@ function etape4(c) {
 function aRetenir(c) {
   const carte = c.carte('À retenir');
   c.ajouter(carte, `<div class="cle"><p><b>Écrire l'équation de la réaction entre Ox<sub>1</sub> et Red<sub>2</sub></b> :</p>
-      <ol class="er-liste"><li>entourer les deux réactifs dans les couples, puis écrire les deux demi-équations directement dans le bon sens, le réactif à gauche de la flèche : Ox<sub>1</sub> + n<sub>1</sub> e<sup>−</sup> → Red<sub>1</sub> et Red<sub>2</sub> → Ox<sub>2</sub> + n<sub>2</sub> e<sup>−</sup> ;</li>
+      <ol class="er-liste"><li>entourer les deux réactifs dans les couples, puis écrire les deux demi-équations directement dans le bon sens, le réactif à gauche du signe = : Ox<sub>1</sub> + n<sub>1</sub> e<sup>−</sup> = Red<sub>1</sub> et Red<sub>2</sub> = Ox<sub>2</sub> + n<sub>2</sub> e<sup>−</sup> ;</li>
         <li>les multiplier pour qu'elles échangent le même nombre d'électrons ;</li>
         <li>les additionner : les électrons se simplifient, ainsi que les ${HP} et ${H2O} présents des deux côtés.</li></ol></div>
     <div class="cle"><p class="crs-formule">${REAC.reaction(C.MnO4, C.Fe3).html}</p></div>

@@ -12,8 +12,9 @@
                            les étapes avant « depart » sont déjà faites
          sens: 'red'       oxydant à gauche, réducteur à droite (défaut)
                'ox'        sens d'une oxydation : réducteur à gauche, électrons à droite
-         fleche            true : flèche → au lieu du signe = (demi-équation écrite
-                           dans le sens d'une réaction, le réactif à gauche)
+         reactif           true : demi-équation écrite dans le sens d'une réaction, le
+                           réactif à gauche du signe = (jamais de flèche dans une
+                           demi-équation : elle est réservée à l'équation d'une réaction)
          inverser          true : bouton « ⇄ Inverser » (échange les deux membres)
          explique          (guide) consigne détaillée de chaque étape : quelle espèce
                            glisser, de quel côté, et sur quel nombre régler les flèches
@@ -36,10 +37,10 @@
          onAide()          aides payantes ouvertes
        }
      DEMI.partie(o)           l'outil en partie « perso » d'un cours ou d'une série
-     DEMI.solution(couple, o) demi-équation équilibrée, étape par étape (o : sens, fleche)
+     DEMI.solution(couple, o) demi-équation équilibrée, étape par étape (o : sens, reactif)
      DEMI.verifier(couple, termes, o)
                               vérifie une demi-équation écrite ailleurs (moteur des
-                              réactions) : termes [{ f, cote, coef }], o = { sens, fleche } ;
+                              réactions) : termes [{ f, cote, coef }], o = { sens, reactif } ;
                               renvoie { ok } ou { code, msg } ou { format, msg }
      DEMI.ecrire(termes, signe)  écriture HTML d'une demi-équation
      DEMI.DIFFICULTES         libellé de chaque difficulté repérée
@@ -165,11 +166,12 @@
   }
 
   // mots des côtés : le côté logique c ('g' : celui de l'oxydant) dit avec son vrai côté
+  // (une demi-équation s'écrit toujours avec le signe =, même orientée)
   function mots(o) {
-    const inv = o.sens === 'ox', fleche = !!o.fleche;
+    const inv = o.sens === 'ox', reactif = !!o.reactif;
     const cote = c => ((c === 'g') !== inv ? 'à gauche' : 'à droite');
     const de = c => ((c === 'g') !== inv ? 'de gauche' : 'de droite');
-    return { inv, fleche, signe: fleche ? '→' : '=', du: fleche ? 'de la flèche' : 'du signe =', cote, de };
+    return { inv, reactif, signe: '=', du: 'du signe =', cote, de };
   }
 
   /* ============================================================
@@ -261,10 +263,10 @@
      renvoient { ok } ou { code, msg } (erreur) ou { format, msg } (rien à juger)
      ============================================================ */
   function controles(cp, o) {
-    const M = mots(o || {}), { inv, fleche, du, cote, de } = M;
+    const M = mots(o || {}), { inv, reactif, du, cote, de } = M;
     const ref = solution(cp);
     const nOx = html(cp.ox), nRed = html(cp.red);
-    const forme = inv ? 'Red → Ox + n e<sup>−</sup>' : fleche ? 'Ox + n e<sup>−</sup> → Red' : 'Ox + n e<sup>−</sup> = Red';
+    const forme = inv ? 'Red = Ox + n e<sup>−</sup>' : 'Ox + n e<sup>−</sup> = Red';
     const nb = (T, c, el) => atomes(T, c)[el] || 0;
     // nombre d'espèces f ajoutées d'un côté (sans celles du couple : H2O de H2O2 / H2O, H+ de H+ / H2)
     const ajoutes = (T, f, c) => T.filter(t => t.f === f && t.cote === c).reduce((x, t) => x + t.coef - (t.base || 0), 0);
@@ -279,8 +281,8 @@
       if (!ox || !red) return { format: true, msg: `Glisse l'oxydant et le réducteur du couple ${nOx} / ${nRed} dans la demi-équation.` };
       if (ox.cote === red.cote) return { code: 'placement', msg: `L'oxydant et le réducteur ne vont pas du même côté ${du} : l'oxydant ${nOx} ${cote('g')}, le réducteur ${nRed} ${cote('d')}.` };
       if (ox.cote === 'd') {
-        if (fleche && inv) return { code: 'placement', msg: `Le réactif est ${nRed} : il s'écrit à gauche de la flèche, et l'oxydant ${nOx} qu'il forme à droite. C'est une oxydation : ${forme}.` };
-        if (fleche) return { code: 'placement', msg: `Le réactif est ${nOx} : il s'écrit à gauche de la flèche, et le réducteur ${nRed} qu'il forme à droite. C'est une réduction : ${forme}.` };
+        if (reactif && inv) return { code: 'placement', msg: `Le réactif est ${nRed} : il s'écrit à gauche du signe =, et l'oxydant ${nOx} qu'il forme à droite. C'est une oxydation : ${forme}.` };
+        if (reactif) return { code: 'placement', msg: `Le réactif est ${nOx} : il s'écrit à gauche du signe =, et le réducteur ${nRed} qu'il forme à droite. C'est une réduction : ${forme}.` };
         return { code: 'placement', msg: `Tu as inversé l'oxydant et le réducteur. On écrit l'oxydant ${nOx} ${cote('g')} ${du} et le réducteur ${nRed} ${cote('d')} : ${forme}. Dans le couple ${nOx} / ${nRed}, l'oxydant est écrit en premier.` };
       }
       const els = autres(cp);
@@ -388,7 +390,7 @@
   }
 
   /* Vérifie une demi-équation écrite dans un autre outil (moteur des réactions)
-     termes [{ f, cote, coef }] aux côtés écrits ; o = { sens, fleche } */
+     termes [{ f, cote, coef }] aux côtés écrits ; o = { sens, reactif } */
   function verifier(cp, termes, o) {
     const C = controles(cp, o), { du } = C.M;
     if (!termes.length) return { format: true, msg: 'Cette demi-équation est vide : glisse les espèces du couple et, si besoin, H<sub>2</sub>O, H<sup>+</sup> et e<sup>−</sup>.' };
@@ -714,7 +716,7 @@
 
   /* Partie « perso » des moteurs de questions (cours : assets/cours.js ; séries : OX.question)
      o = { couple, q, serie (true : erreurs et aides payantes comptées, réponse donnée par le moteur),
-           et les options de l'outil : mode, depart, jusqua, sens, fleche, inverser, explique, aides, onFini, onErreur }
+           et les options de l'outil : mode, depart, jusqua, sens, reactif, inverser, explique, aides, onFini, onErreur }
      Dans un cours, l'outil affiche lui-même ses messages ; dans une série, le dernier passe
      dans celui du moteur. « Afficher la réponse » du moteur complète toute la demi-équation. */
   function partie(o) {

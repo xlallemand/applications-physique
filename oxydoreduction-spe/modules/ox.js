@@ -450,8 +450,8 @@
     charge: v => (v === 0 ? '0' : v + '+'),                                  // charge d'un ion positif : 2+, 0
     calc: x => `<p class="crs-calc">${x}</p>`,
     demi: c => `${c.ox} + ${nE(c.n)} = ${c.red}`,                            // demi-équation du couple
-    reduc: c => `${c.ox} + ${nE(c.n)} → ${c.red}`,                           // lue à l'endroit : réduction
-    oxyd: c => `${c.red} → ${c.ox} + ${nE(c.n)}`,                            // lue à l'envers : oxydation
+    reduc: c => `${c.ox} + ${nE(c.n)} → ${c.red}`,                           // lue à l'endroit : réduction (flèche : cours 1c seulement)
+    oxyd: c => `${c.red} → ${c.ox} + ${nE(c.n)}`,                            // lue à l'envers : oxydation (idem)
     couple: c => `${c.ox} / ${c.red}`,
     // question « oxydant ou réducteur ? » ; capte : l'espèce X capte des électrons
     choixRole: (X, capte) => ({ type: 'choix', q: `${X} est :`, melanger: false,
