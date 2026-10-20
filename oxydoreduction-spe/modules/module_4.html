@@ -22,10 +22,12 @@
 
 <script>
 /* ============================================================
-   Entraînement : 10 réactions, chacune écrite entièrement dans l'outil
-   compact REAC.partie (reaction.js) : une réserve, les deux
-   demi-équations dans le sens de la réaction, leurs multiplicateurs,
-   puis l'équation de la réaction. L'aide diminue au fil des réactions :
+   Entraînement : 10 réactions. Pour chacune, on entoure d'abord les deux
+   réactifs dans les couples (REAC.partieReactifs, comme dans le cours du
+   module 3), puis on l'écrit entièrement dans l'outil compact REAC.partie
+   (reaction.js) : une réserve, les deux demi-équations dans le sens de la
+   réaction, leurs multiplicateurs, puis l'équation de la réaction.
+   L'aide diminue au fil des réactions :
      niveau 1 (réactions 1 à 3)  nombres multipliés sous les yeux, aides libres ;
      niveau 2 (réactions 4 à 7)  facteur devant la demi-équation, aides payantes ;
      niveau 3 (réactions 8 à 10) facteur devant la demi-équation, sans aide.
@@ -34,19 +36,20 @@
    simplifier H+ et H2O. Chaque réaction est notée 2, 1 ou 0 point.
    Réactions : [couple dont l'oxydant réagit, couple dont le réducteur réagit].
    ============================================================ */
-const { hasard, melanger, h, COUPLES: C, couple } = OX;
+const { hasard, melanger, h, COUPLES: C } = OX;
 const R = s => `<span class="ox-r">${s}</span>`;
 const SANS_H = [['Fe3', 'I2'], ['Ag', 'Cu'], ['Cu', 'Al'], ['Cl2', 'Fe3'], ['I2', 'S4O6'], ['Fe3', 'Cu'], ['Br2', 'I2'], ['Ag', 'Zn']];
 const AVEC_H = [['MnO4', 'Fe3'], ['Cr2O7', 'Fe3'], ['H2O2', 'Fe3'], ['MnO4', 'I2'], ['Cr2O7', 'I2'], ['NO3', 'Cu'], ['H2O2', 'I2'], ['O2e', 'Fe3'], ['MnO4', 'Cl2'], ['NO3', 'Ag']];
 const SIMPLIFIER = [['MnO4', 'CO2'], ['MnO4', 'O2'], ['MnO4', 'SO4'], ['Cr2O7', 'SO4'], ['MnO4', 'Ald'], ['H2O2', 'Ald'], ['Cr2O7', 'Ac']];
 const NIVEAUX = { 1: 'Niveau 1 · aides libres', 2: 'Niveau 2 · aides : 1 point de moins', 3: 'Niveau 3 · sans aide' };
 
+// a) les deux réactifs à entourer dans les couples, b) toute la réaction dans l'outil compact
 function reaction(p, niveau) {
-  const a = C[p[0]], b = C[p[1]];
+  const a = C[p[0]], b = C[p[1]], ordre = hasard(['ab', 'ba']);
   return { theme: NIVEAUX[niveau],
     consigne: `Écris l'équation de la réaction entre ${R(h(a.ox))} et ${R(h(b.red))}.`,
-    enonce: `<p>Couples : ${couple(a)} et ${couple(b)}.</p>`,
-    parties: [REAC.partie({ a, b, niveau, serie: true, ordre: hasard(['ab', 'ba']) })] };
+    parties: [REAC.partieReactifs({ a, b, ordre, q: 'a) Entoure les deux réactifs dans les couples : touche chacun d\'eux.' }),
+      REAC.partie({ a, b, niveau, serie: true, ordre, q: 'b) Écris les deux demi-équations dans le sens de la réaction (le réactif à gauche du signe =), multiplie-les pour égaliser les électrons, puis écris l\'équation de la réaction.' })] };
 }
 
 // tirage : réactions différentes, de plus en plus difficiles
@@ -62,7 +65,7 @@ function tirage() {
 OX.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 4 · ENTRAÎNEMENT', titre: 'Écrire les réactions d\'oxydoréduction',
-  intro: `<p class="er-contexte">10 réactions à écrire entièrement dans un seul outil : les deux demi-équations dans le sens de la réaction, leurs multiplicateurs, puis l'équation de la réaction. L'aide diminue au fil des réactions.</p>`,
+  intro: `<p class="er-contexte">10 réactions : pour chacune, entoure d'abord les deux réactifs dans les couples, puis écris-la entièrement dans un seul outil : les deux demi-équations dans le sens de la réaction, leurs multiplicateurs, puis l'équation de la réaction. L'aide diminue au fil des réactions.</p>`,
   aidesPayantes: true,
   bareme: `<ul class="er-liste" style="margin-top:8px"><li>réactions 1 à 3 : les nombres d'une demi-équation se multiplient sous tes yeux, les aides (atomes et charges) sont libres ;</li>
     <li>réactions 4 à 7 : le multiplicateur s'écrit devant la demi-équation, afficher les aides coûte un point ;</li>

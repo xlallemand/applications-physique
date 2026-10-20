@@ -34,7 +34,7 @@
    1. la méthode, présentée sur Cr2O7^2- / Cr^3+ : chaque étape dit
       exactement quoi glisser et sur quel nombre régler les flèches ;
    2. deux demi-équations guidées (une étape validée après l'autre) :
-      une où il faut H2O et H+, une où l'une des deux ne sert pas ;
+      une sans H2O (seulement H+), une sans H2O ni H+ ;
    3. deux demi-équations d'un seul tenant (une seule validation) :
       avec l'aide activable, puis sans aide.
    Aux étapes 1 et 2, l'aide de l'élément en cours d'équilibrage est
@@ -50,7 +50,8 @@ function tirer(listes) {
   const pris = [];
   return listes.map(l => { const k = hasard(l.filter(x => !pris.includes(x))); pris.push(k); return k; });
 }
-const [kEau, kSans, kAide, kSeul] = tirer([['MnO4', 'SO4', 'NO3', 'NO3b'], ['CO2', 'O2'], ['ClO', 'H2O2', 'NO3', 'SO4', 'MnO4'], ['IO3', 'Cr2O7', 'MnO4', 'Ald', 'NO3b']]);
+// étape 2 : un couple sans H2O (O déjà équilibré), un couple sans H2O ni H+
+const [kSansEau, kRien, kAide, kSeul] = tirer([['CO2', 'O2', 'Ald'], ['S4O6', 'Cl2', 'Br2'], ['ClO', 'H2O2', 'NO3', 'SO4', 'MnO4'], ['IO3', 'Cr2O7', 'MnO4', 'Ald', 'NO3b']]);
 const nomCouple = k => `${h(C[k].ox)} / ${h(C[k].red)}`;
 
 /* ---------- 1. La méthode ---------- */
@@ -81,10 +82,12 @@ function etape2(c) {
     ${exemple(`<p>Couple I<sub>2</sub> / ${h('I^-')} : il n'y a ni atome O ni atome H, on n'ajoute ni ${H2O} ni ${HP}.</p>
       ${calc(`I<sub>2</sub> + 2&nbsp;${EL} = 2&nbsp;${h('I^-')}`)}`)}`);
   c.aToi(carte, [
-    { titre: `Avec ${H2O} et ${HP}`, parties: [DEMI.partie({ couple: C[kEau] })] },
-    { titre: 'Une des deux espèces ne sert pas',
-      enonce: `<p>Dans ce couple, une des deux espèces ${H2O} ou ${HP} ne sert pas. Regarde l'aide sous la demi-équation à chaque étape : si l'élément est déjà équilibré, n'ajoute rien et valide.</p>`,
-      parties: [DEMI.partie({ couple: C[kSans] })] },
+    { titre: 'Seulement s\'il en faut (1 / 2)',
+      enonce: `<p>Regarde l'aide sous la demi-équation à chaque étape : si l'élément est déjà équilibré, n'ajoute rien et valide.</p>`,
+      parties: [DEMI.partie({ couple: C[kSansEau] })] },
+    { titre: 'Seulement s\'il en faut (2 / 2)',
+      enonce: `<p>Même chose : n'ajoute ${H2O} ou ${HP} que s'il manque des atomes O ou H.</p>`,
+      parties: [DEMI.partie({ couple: C[kRien] })] },
   ]);
   return carte;
 }

@@ -6,7 +6,9 @@
                               b celui dont le réducteur réagit ; renvoie
                               { A, B (demi-équations), nA, nB (électrons), L, mA, mB
                                 (multiplicateurs), somme, finale (termes), html (équation) }
-     REAC.ecrire(T, signe)    écriture HTML d'une équation (termes { f, cote, coef })
+     REAC.ecrire(T, signe)    écriture HTML d'une équation (termes { f, cote, coef }) ;
+                              signe '→' (réaction, par défaut) ou '=' (demi-équation)
+     REAC.solutionHTML(r, j)  les demi-équations (signe =), multipliées, puis l'équation
 
    Parties « perso » (cours : assets/cours.js ; séries : OX.question) :
      REAC.partieReactifs(o)     entourer (toucher) les deux réactifs dans les couples
@@ -16,13 +18,17 @@
                                 'coefficients' : on règle les nombres de l'équation finale
      REAC.partie(o)             toute la réaction dans un seul outil compact (REAC.outil) :
                                 une réserve, les deux demi-équations à écrire dans le sens de
-                                la réaction, un multiplicateur à droite de chacune, puis
-                                l'équation de la réaction
+                                la réaction (le réactif à gauche du signe =), un multiplicateur
+                                à droite de chacune, puis l'équation de la réaction (flèche)
        o = { a, b, ordre ('ab' ou 'ba' : ordre des demi-équations), serie,
              niveau : 1  coefficients multipliés sous les yeux, aides libres
                       2  facteur « m × ( … ) » devant la demi-équation, aides payantes en série
                       3  facteur devant la demi-équation, pas d'aides
-             reel, aides : pour régler à part ces deux aides }
+             reel, aides : pour régler à part ces deux aides,
+             guide : true (cours) : étapes validées toutes seules, consigne de chaque
+                     étape à côté de sa zone ; depart, jusqua : étapes déjà faites,
+                     dernière étape à faire (0 à 2) ; electrons : électrons échangés
+                     dans les aides (par défaut en mode guidé) }
      Aides de l'outil : nombre d'atomes de chaque élément et charges de chaque côté, en
      une ligne sous chaque équation. « Vérifier » une demi-équation est facultatif ;
      dans une série, s'en servir coûte un point (comme une aide payante) : seul le
@@ -45,6 +51,7 @@
   // ordre d'écriture : espèces du couple a, du couple b, puis H+, H2O et e−
   const rang = t => (t.f === E ? 4 : t.f === EAU && t.role !== 'red' && t.role !== 'ox' ? 3 : t.f === HP && t.role !== 'ox' ? 2 : t.de === 'b' ? 1 : 0);
   const trier = T => T.slice().sort((x, y) => rang(x) - rang(y));
+  // signe : '→' (réaction, par défaut) ou '=' (demi-équation, même orientée)
   function ecrire(T, signe) {
     const m = c => trier(T.filter(t => t.cote === c)).map(t => kf(t.coef, t.f)).join(' + ');
     return `${m('g')} ${signe || '→'} ${m('d')}`;
@@ -74,11 +81,15 @@
     finale.forEach(t => { t.coef /= g; });
     return { a, b, A, B, nA, nB, L, mA, mB, somme, finale, html: ecrire(finale) };
   }
-  // les deux demi-équations dans le sens de la réaction, multipliées, puis l'équation (HTML)
-  function solutionHTML(r) {
-    const ligne = (T, m) => (m > 1 ? `${m} × ( ${ecrire(T)} )` : ecrire(T));
-    return `<p class="ox-eqn">${ligne(r.A, r.mA)} &nbsp;(réduction)<br>${ligne(inverser(r.B), r.mB)} &nbsp;(oxydation)</p>
-      <p class="ox-eqn"><b>${r.html}</b></p>`;
+  // les deux demi-équations dans le sens de la réaction (signe =), multipliées, puis l'équation (HTML)
+  // jusqua : 0 (les demi-équations seules), 1 (multipliées), 2 (puis l'équation, par défaut)
+  function solutionHTML(r, jusqua) {
+    const j = jusqua == null ? 2 : jusqua;
+    const ligne = (T, m) => (j > 0 && m > 1 ? `${m} × ( ${ecrire(T, '=')} )` : ecrire(T, '='));
+    const demis = `<p class="ox-eqn">${ligne(r.A, r.mA)} &nbsp;(réduction)<br>${ligne(inverser(r.B), r.mB)} &nbsp;(oxydation)</p>`;
+    if (j === 0) return demis;
+    if (j === 1) return `${demis}<p>Les deux demi-équations échangent ${elec(r.L)}.</p>`;
+    return `${demis}<p class="ox-eqn"><b>${r.html}</b></p>`;
   }
 
   /* ============================================================
@@ -169,7 +180,7 @@
         let fini = false;
         const lignes = [{ c: 'A', T: orA, n: r.nA }, { c: 'B', T: orB, n: r.nB }];
         box.innerHTML = lignes.map(L => `<div class="ox-rx-l ox-rx-mult" data-c="${L.c}"><div class="ox-rx-k"></div><span class="ox-rx-x">×</span>
-            <div class="ox-rx-eq ox-eqn">( ${ecrire(L.T)} )</div><p class="ox-rx-ne"></p></div>`).join('') + '<p class="ox-rx-aide hidden"></p>';
+            <div class="ox-rx-eq ox-eqn">( ${ecrire(L.T, '=')} )</div><p class="ox-rx-ne"></p></div>`).join('') + '<p class="ox-rx-aide hidden"></p>';
         const sels = {};
         lignes.forEach(L => {
           const sel = selecteur({ valeur: 1, min: 1, max: 10, label: 'le multiplicateur de la demi-équation', onChange: v => { k[L.c] = v; api.effacer(); maj(); } });
@@ -372,14 +383,30 @@
      TOUTE LA RÉACTION DANS UN SEUL OUTIL
      Une réserve (espèces des deux couples, H2O, H+, e−) au-dessus de deux
      demi-équations vides, à écrire dans le sens de la réaction (le réactif à
-     gauche), chacune avec son multiplicateur à droite et un bouton « Vérifier »
-     facultatif ; puis l'équation de la réaction, validée par « Valider la réaction ».
+     gauche du signe =), chacune avec son multiplicateur à droite et un bouton
+     « Vérifier » facultatif ; puis l'équation de la réaction (avec la flèche),
+     validée par « Valider la réaction ».
+     Mode guidé (o.guide, cours du module 3) : trois étapes validées toutes
+     seules dès qu'elles sont justes, sans bouton à toucher :
+       0. les deux demi-équations, 1. les multiplicateurs, 2. l'équation.
+     La consigne de chaque étape est écrite juste à côté de sa zone, et une
+     étape validée est marquée « ✓ Étape n validée ».
+       o.depart (0 à 2) : étapes déjà faites (demi-équations écrites, multipliées)
+       o.jusqua (0 à 2) : dernière étape à faire (les suivantes ne sont pas montrées)
+     o.electrons : les aides donnent aussi les électrons échangés par chaque
+     demi-équation (par défaut en mode guidé).
      ============================================================ */
   function outil(zone, o) {
     const r = reaction(o.a, o.b), api = o.api, serie = !!o.serie;
     const niveau = o.niveau || 1;
     const reelMult = o.reel != null ? !!o.reel : niveau === 1;          // coefficients multipliés sous les yeux
     const modeAides = o.aides || (niveau === 1 ? 'libre' : niveau === 2 ? (serie ? 'payant' : 'libre') : 'aucune');
+    const guide = !!o.guide;
+    const depart = guide ? o.depart || 0 : 0, jusqua = guide && o.jusqua != null ? o.jusqua : 2;
+    const avecE = o.electrons != null ? !!o.electrons : guide;            // électrons échangés dans les aides
+    // équations présentes : sans la réaction si on s'arrête avant (mode guidé)
+    const KS = jusqua === 2 ? ['A', 'B', 'R'] : ['A', 'B'];
+    let etape = depart;                                                   // étape en cours (mode guidé)
     // les trois équations : A (réduction de l'oxydant réactif), B (oxydation du réducteur réactif), R (réaction)
     const EQ = {
       A: { cp: o.a, sens: 'red', T: [], m: 1, ok: false, max: MAXM },
@@ -395,26 +422,44 @@
     const rangF = f => (RES.includes(f) ? RES.indexOf(f) : f === HP ? 4 : f === E ? 5 : 6);
     let fini = false, verifVu = false, aidesOuv = modeAides === 'ouvertes', aidesVues = aidesOuv;
 
+    // consignes des étapes du mode guidé (texte, puis message une fois l'étape validée ou déjà faite)
+    const ETAPES = [
+      { titre: 'Les deux demi-équations, dans le sens de la réaction',
+        texte: `Écris chaque demi-équation avec le <b>réactif à gauche du signe =</b> : glisse les espèces de la réserve, puis règle les nombres avec les boutons ▲ ▼. Celle de ${html(o.a.ox)} est une réduction (électrons à gauche), celle de ${html(o.b.red)} une oxydation (électrons à droite). Une demi-équation juste est marquée « ✓ juste ».`,
+        fait: 'les deux demi-équations sont justes.', donne: 'les deux demi-équations sont écrites dans le sens de la réaction.' },
+      { titre: 'Égaliser les électrons',
+        texte: 'Règle le <b>multiplicateur ×</b> de chaque demi-équation : les deux doivent échanger <b>le même nombre d\'électrons</b>, le plus petit possible.',
+        fait: `les deux demi-équations échangent ${elec(r.L)}.`, donne: `les demi-équations sont multipliées : elles échangent ${elec(r.L)}.` },
+      { titre: 'L\'équation de la réaction',
+        texte: 'Additionne les deux demi-équations multipliées : glisse chaque espèce de la réserve du bon côté de la flèche et règle les nombres. Simplifie ce qui figure des deux côtés : il ne reste <b>aucun électron</b>.',
+        fait: 'l\'équation de la réaction est juste.' },
+    ];
+    const blocEtape = k => (guide && k <= jusqua ? `<div class="ox-rxo-g" data-e="${k}">
+        <p class="ox-rxo-g-t"><span class="ox-rxo-g-n" aria-hidden="true">${k + 1}</span><span class="ox-rxo-g-l" aria-live="polite"></span></p>
+        <p class="ox-rxo-g-x"></p><p class="ox-rxo-g-m"></p></div>` : '');
     const ligneDemi = k => `<div class="ox-rxo-l" data-k="${k}">
         <div class="ox-rxo-tete"><span class="ox-rxo-nom">Couple ${couple(EQ[k].cp)}</span><span class="ox-rxo-etat"></span></div>
         <div class="ox-rxo-ligne">
           <div class="ox-rxo-eq"></div>
-          <div class="ox-rxo-mult"><span class="ox-rxo-x" aria-hidden="true">×</span></div>
+          ${jusqua >= 1 ? '<div class="ox-rxo-mult"><span class="ox-rxo-x" aria-hidden="true">×</span></div>' : ''}
           <button type="button" class="btn-small ox-rxo-verif"></button>
         </div>
         <div class="ox-rxo-cpt hidden"></div>
         <div class="ox-rxo-msg"></div>
       </div>`;
-    zone.innerHTML = `<div class="ox-rxo">
-        <div class="ox-rxo-res"><span class="ox-etiq">Réserve</span><div class="ox-rxo-jetons"></div></div>
+    zone.innerHTML = `<div class="ox-rxo${guide ? ' ox-rxo-guide' : ''}">
+        <div class="ox-rxo-res${guide && depart === 1 && jusqua === 1 ? ' hidden' : ''}"><span class="ox-etiq">Réserve</span><div class="ox-rxo-jetons"></div></div>
+        ${blocEtape(0)}
         ${ordre.map(ligneDemi).join('')}
-        <div class="ox-rxo-l ox-rxo-r" data-k="R">
+        ${blocEtape(1)}
+        ${blocEtape(2)}
+        ${jusqua === 2 ? `<div class="ox-rxo-l ox-rxo-r" data-k="R">
           <div class="ox-rxo-tete"><span class="ox-rxo-nom">Équation de la réaction</span></div>
           <div class="ox-rxo-ligne"><div class="ox-rxo-eq"></div></div>
           <div class="ox-rxo-cpt hidden"></div>
-        </div>
-        <div class="er-actions ox-rxo-actions">
-          <button type="button" class="btn-primary ox-rxo-valider">Valider la réaction</button>
+        </div>` : ''}
+        <div class="er-actions ox-rxo-actions${guide && modeAides === 'aucune' ? ' hidden' : ''}">
+          ${guide ? '' : '<button type="button" class="btn-primary ox-rxo-valider">Valider la réaction</button>'}
           <button type="button" class="btn-small ox-rxo-b-aides${modeAides === 'aucune' ? ' hidden' : ''}" aria-expanded="false"></button>
         </div>
       </div>`;
@@ -434,7 +479,8 @@
       e.setAttribute('aria-label', 'Glisser ' + texte(html(src.f || src.t.f)));
       DragDrop.enable(e, { zoneSelector: '.ox-rxo-m', dragOverClass: 'ox-survol', onDrop: (it, z) => deposer(src, z) });
     }
-    const modifiable = k => !fini && !(EQ[k].ok);
+    // mode guidé : seules les équations de l'étape en cours se modifient
+    const modifiable = k => !fini && !(EQ[k].ok) && (!guide || etape === (k === 'R' ? 2 : 0));
 
     /* ---------- Une équation : membres, termes, facteur ---------- */
     // nombre affiché devant une espèce (multiplié sous les yeux au niveau 1)
@@ -442,8 +488,9 @@
     function rendreEq(k) {
       const Q = EQ[k], box = ligne(k).querySelector('.ox-rxo-eq');
       const facteur = k !== 'R' && !reelMult && Q.m > 1;
+      // demi-équation : signe = (même orientée) ; réaction : flèche
       box.innerHTML = (facteur ? `<span class="ox-rxo-fact">${Q.m}&nbsp;×&nbsp;(</span>` : '') +
-        `<div class="ox-rxo-m" data-k="${k}" data-cote="g" role="group" aria-label="Membre de gauche"></div><span class="ox-rxo-fl" aria-hidden="true">→</span>` +
+        `<div class="ox-rxo-m" data-k="${k}" data-cote="g" role="group" aria-label="Membre de gauche"></div><span class="ox-rxo-fl" aria-hidden="true">${k === 'R' ? '→' : '='}</span>` +
         `<div class="ox-rxo-m" data-k="${k}" data-cote="d" role="group" aria-label="Membre de droite"></div>` +
         (facteur ? '<span class="ox-rxo-fact">)</span>' : '');
       ['g', 'd'].forEach(c => {
@@ -470,6 +517,7 @@
       const sel = selecteur({
         valeur: n, min: m, max: max * m, label: 'le nombre devant ' + texte(html(t.f)),
         onChange: v => {
+          if (!modifiable(k)) return;                                     // équation validée entre-temps (mode guidé)
           if (m > 1) { t.coef = Math.min(max, Math.max(1, t.coef + (v > t.coef * m ? 1 : -1))); sel.fixer(t.coef * m); } else t.coef = v;
           changement(k, false);
         },
@@ -480,7 +528,9 @@
       b.appendChild(f);
       return b;
     }
-    // état d'une ligne : facteur, bouton « Vérifier », aides (atomes et charges)
+    // électrons d'une demi-équation, sans son multiplicateur
+    const nbElec = k => EQ[k].T.filter(t => t.f === E).reduce((x, t) => x + t.coef, 0);
+    // état d'une ligne : facteur, bouton « Vérifier », aides (atomes, charges, électrons)
     function majLigne(k) {
       const L = ligne(k), Q = EQ[k];
       if (k !== 'R') {
@@ -488,7 +538,7 @@
         L.querySelector('.ox-rxo-etat').innerHTML = Q.ok ? '<span class="ox-ok-tag">✓ juste</span>' : '';
         const b = L.querySelector('.ox-rxo-verif');
         b.textContent = serie && !verifVu ? 'Vérifier (1 point de moins)' : 'Vérifier';
-        b.classList.toggle('hidden', Q.ok || fini);
+        b.classList.toggle('hidden', guide || Q.ok || fini);
       }
       const cpt = L.querySelector('.ox-rxo-cpt');
       cpt.classList.toggle('hidden', !aidesOuv || !Q.T.length);
@@ -499,14 +549,22 @@
       const pastille = (nom, g, d) => `<span class="ox-cpt${g === d ? ' ok' : ''}"><b>${nom}</b> ${g} ${g === d ? '=' : '≠'} ${d}</span>`;
       const qG = charges(T, 'g'), qD = charges(T, 'd');
       cpt.innerHTML = els.map(x => pastille(x, AG[x] || 0, AD[x] || 0)).join('') + pastille('charge', fq(qG), fq(qD));
+      // électrons échangés : en vert quand les deux demi-équations en échangent autant
+      if (avecE && k !== 'R') {
+        const n = nbElec(k), tot = n * Q.m, autre = k === 'A' ? 'B' : 'A';
+        const egal = tot > 0 && tot === nbElec(autre) * EQ[autre].m;
+        cpt.insertAdjacentHTML('beforeend', `<span class="ox-cpt${egal ? ' ok' : ''}"><b>électrons échangés</b> ${Q.m > 1 ? `${Q.m} × ${n} = ` : ''}${tot}${egal ? ' : autant que l\'autre' : ''}</span>`);
+      }
     }
-    // une équation vient de changer : messages effacés, aides à jour
+    // une équation vient de changer : messages effacés, aides à jour, étape contrôlée (mode guidé)
     function changement(k, redessiner) {
       if (k === 'R') EQ.R.faux = [];
       if (redessiner) rendreEq(k); else majLigne(k);
       if (k === 'R' && !redessiner) zone.querySelectorAll('.ox-rxo-r .ox-terme.ko').forEach(x => x.classList.remove('ko'));
       if (k !== 'R') ligne(k).querySelector('.ox-rxo-msg').innerHTML = '';
+      if (avecE && k !== 'R') ['A', 'B'].forEach(majLigne);              // électrons des deux demi-équations
       if (api) api.effacer();
+      controler();
     }
 
     /* ---------- Glisser-déposer ---------- */
@@ -527,19 +585,21 @@
         if (dest) ajouter(dest.k, src.t.f, dest.c, src.t.coef);             // … et posée ailleurs (sinon : retirée)
         changement(src.k, true);
       } else if (dest) ajouter(dest.k, src.f, dest.c, 1);
-      if (dest) changement(dest.k, true);
+      if (dest && !fini) changement(dest.k, true);
     }
 
     /* ---------- Multiplicateurs ---------- */
     const mults = {};
-    ['A', 'B'].forEach(k => {
-      const sel = selecteur({
-        valeur: 1, min: 1, max: 10, label: 'le multiplicateur de la demi-équation du couple ' + texte(couple(EQ[k].cp)),
-        onChange: v => { EQ[k].m = v; changement(k, true); },
+    if (jusqua >= 1) {
+      ['A', 'B'].forEach(k => {
+        const sel = selecteur({
+          valeur: 1, min: 1, max: 10, label: 'le multiplicateur de la demi-équation du couple ' + texte(couple(EQ[k].cp)),
+          onChange: v => { if (fini || (guide && etape !== 1)) return; EQ[k].m = v; changement(k, true); },
+        });
+        ligne(k).querySelector('.ox-rxo-mult').appendChild(sel.el);
+        mults[k] = sel;
       });
-      ligne(k).querySelector('.ox-rxo-mult').appendChild(sel.el);
-      mults[k] = sel;
-    });
+    }
 
     /* ---------- Vérifier une demi-équation (facultatif) ---------- */
     ['A', 'B'].forEach(k => {
@@ -549,7 +609,7 @@
         const msg = ligne(k).querySelector('.ox-rxo-msg');
         // dans une série, se servir de « Vérifier » coûte un point (une seule fois)
         if (serie && !verifVu) { verifVu = true; if (api) api.compterErreur(); }
-        const v = window.DEMI.verifier(Q.cp, Q.T, { sens: Q.sens, fleche: true });
+        const v = window.DEMI.verifier(Q.cp, Q.T, { sens: Q.sens, reactif: true });
         if (v.format) msg.innerHTML = `<div class="callout er-retour"><p>${v.msg}</p></div>`;
         else if (!v.ok) { msg.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">Pas encore.</b> ${v.msg}</p></div>`; secouer(ligne(k).querySelector('.ox-rxo-eq')); }
         else { Q.ok = true; msg.innerHTML = ''; rendreEq(k); }
@@ -562,7 +622,7 @@
     function majAides() {
       bAides.textContent = aidesOuv ? 'Masquer les aides' : modeAides === 'payant' && !aidesVues ? 'Afficher les aides (1 point de moins)' : 'Afficher les aides';
       bAides.setAttribute('aria-expanded', String(aidesOuv));
-      ['A', 'B', 'R'].forEach(majLigne);
+      KS.forEach(majLigne);
     }
     bAides.onclick = () => {
       if (fini || modeAides === 'aucune') return;
@@ -571,53 +631,116 @@
       majAides();
     };
 
+    /* ---------- Mode guidé : chaque étape validée toute seule dès qu'elle est juste ---------- */
+    function controler() {
+      if (!guide || fini) return;
+      if (etape === 0) {
+        ['A', 'B'].forEach(k => {
+          const Q = EQ[k];
+          if (!Q.ok && Q.T.length && window.DEMI.verifier(Q.cp, Q.T, { sens: Q.sens, reactif: true }).ok) { Q.ok = true; rendreEq(k); }
+        });
+        if (EQ.A.ok && EQ.B.ok) etapeFaite();
+      } else if (etape === 1) {
+        const eA = EQ.A.m * r.nA, eB = EQ.B.m * r.nB;
+        // électrons égaux mais trop nombreux : on le dit, sans compter d'erreur
+        bloc(1).querySelector('.ox-rxo-g-m').innerHTML = eA === eB && eA > r.L
+          ? `Les deux demi-équations échangent ${elec(eA)} : c'est bien autant, mais prends les plus petits multiplicateurs possibles.` : '';
+        if (eA === eB && eA === r.L) etapeFaite();
+      } else if (etape === 2 && EQ.R.T.length && !diagReaction(r, EQ.R.T)) etapeFaite();
+    }
+    const bloc = k => zone.querySelector(`.ox-rxo-g[data-e="${k}"]`);
+    // l'étape en cours est juste : on passe à la suivante (ou c'est fini)
+    function etapeFaite() {
+      etape++;
+      if (etape > jusqua) { terminer(); if (api) api.reussi(); return; }
+      majGuide();
+      const b = bloc(etape);
+      setTimeout(() => b.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+      controler();                                                        // déjà juste (autant d'électrons) : validée tout de suite
+    }
+    // consignes des étapes (validée : une seule ligne ; en cours : avec son texte ; à venir : le titre),
+    // multiplicateurs, et réserve placée sous la consigne de l'étape où l'on glisse des espèces
+    // (elle reste près de l'équation à écrire : on n'a pas à glisser d'un bout à l'autre de l'outil)
+    function majGuide() {
+      if (!guide) return;
+      zone.querySelectorAll('.ox-rxo-g').forEach(b => {
+        const k = +b.dataset.e;
+        b.classList.toggle('fait', k < etape);
+        b.classList.toggle('encours', k === etape);
+        b.classList.toggle('avenir', k > etape);
+        b.querySelector('.ox-rxo-g-n').textContent = k < etape ? '✓' : k + 1;
+        b.querySelector('.ox-rxo-g-l').innerHTML = k < etape
+          ? (k < depart ? `<b>Étape ${k + 1} déjà faite</b> : ${ETAPES[k].donne}` : `<b>Étape ${k + 1} validée</b> : ${ETAPES[k].fait}`)
+          : `<b>Étape ${k + 1} · ${ETAPES[k].titre}</b>`;
+        b.querySelector('.ox-rxo-g-x').innerHTML = k === etape ? ETAPES[k].texte : '';
+        if (k !== etape) b.querySelector('.ox-rxo-g-m').innerHTML = '';
+      });
+      Object.values(mults).forEach(x => x.activer(!fini && etape === 1));
+      const res = $('.ox-rxo-res');
+      res.classList.toggle('ox-rxo-off', fini || etape === 1);
+      if (!fini && (etape === 0 || etape === 2)) bloc(etape).after(res);
+      KS.forEach(rendreEq);
+    }
+
     /* ---------- Valider la réaction ---------- */
     function terminer() {
       fini = true;
+      if (guide) etape = jusqua + 1;
       $('.ox-rxo').classList.add('ox-rxo-fini');
       Object.values(mults).forEach(x => x.activer(false));
       const a = $('.ox-rxo-actions');
       if (a) a.remove();
-      ['A', 'B', 'R'].forEach(rendreEq);
+      if (guide) majGuide(); else KS.forEach(rendreEq);
     }
-    $('.ox-rxo-valider').onclick = () => {
-      if (fini || (api && api.fini())) return;
-      if (!EQ.R.T.length) {
-        if (api) api.message('Écris l\'équation de la réaction : glisse les espèces de la réserve de chaque côté de la flèche, puis règle les nombres.');
+    if (!guide) {
+      $('.ox-rxo-valider').onclick = () => {
+        if (fini || (api && api.fini())) return;
+        if (!EQ.R.T.length) {
+          if (api) api.message('Écris l\'équation de la réaction : glisse les espèces de la réserve de chaque côté de la flèche, puis règle les nombres.');
+          secouer(ligne('R'));
+          return;
+        }
+        const d = diagReaction(r, EQ.R.T);
+        if (!d) { terminer(); if (api) api.reussi(); return; }
+        EQ.R.faux = d.faux || [];
+        rendreEq('R');
+        if (api) api.erreur(d.msg);
         secouer(ligne('R'));
-        return;
-      }
-      const d = diagReaction(r, EQ.R.T);
-      if (!d) { terminer(); if (api) api.reussi(); return; }
-      EQ.R.faux = d.faux || [];
-      rendreEq('R');
-      if (api) api.erreur(d.msg);
-      secouer(ligne('R'));
-    };
+      };
+    }
+
+    // les deux demi-équations dans le sens de la réaction (justes)
+    function remplirDemis() {
+      EQ.A.T = reel(window.DEMI.solution(o.a).etapes[3], false).map(t => ({ f: t.f, cote: t.cote, coef: t.coef }));
+      EQ.B.T = reel(window.DEMI.solution(o.b).etapes[3], true).map(t => ({ f: t.f, cote: t.cote, coef: t.coef }));
+      EQ.A.ok = EQ.B.ok = true;
+    }
+    // mode guidé : étapes déjà faites
+    if (depart >= 1) remplirDemis();
+    if (depart >= 2) { EQ.A.m = r.mA; EQ.B.m = r.mB; mults.A.fixer(r.mA); mults.B.fixer(r.mB); }
 
     majAides();
-    ['A', 'B', 'R'].forEach(rendreEq);
+    if (guide) majGuide(); else KS.forEach(rendreEq);
     return {
       // toute la réponse : les deux demi-équations dans le sens de la réaction, multipliées, et l'équation
       montrer() {
-        EQ.A.T = reel(window.DEMI.solution(o.a).etapes[3], false).map(t => ({ f: t.f, cote: t.cote, coef: t.coef }));
-        EQ.B.T = reel(window.DEMI.solution(o.b).etapes[3], true).map(t => ({ f: t.f, cote: t.cote, coef: t.coef }));
-        EQ.A.m = r.mA; EQ.B.m = r.mB; EQ.A.ok = EQ.B.ok = true;
-        mults.A.fixer(r.mA); mults.B.fixer(r.mB);
-        EQ.R.T = r.finale.map(t => ({ f: t.f, cote: t.cote, coef: t.coef })); EQ.R.faux = [];
+        remplirDemis();
+        if (jusqua >= 1) { EQ.A.m = r.mA; EQ.B.m = r.mB; mults.A.fixer(r.mA); mults.B.fixer(r.mB); }
+        if (jusqua === 2) { EQ.R.T = r.finale.map(t => ({ f: t.f, cote: t.cote, coef: t.coef })); EQ.R.faux = []; }
         ['A', 'B'].forEach(k => { ligne(k).querySelector('.ox-rxo-msg').innerHTML = ''; });
         terminer();
       },
     };
   }
 
-  // l'outil en partie « perso » d'un cours ou d'une série
+  // l'outil en partie « perso » d'un cours ou d'une série ; en mode guidé, rien ne se
+  // valide à la main : « Afficher la réponse » est proposé tout de suite (cours)
   function partie(o) {
     const r = reaction(o.a, o.b);
     const p = {
-      type: 'perso', outil: 'reaction', o,
-      q: o.q || 'Écris les deux demi-équations dans le sens de la réaction (le réactif à gauche de la flèche), multiplie-les pour égaliser les électrons, puis écris l\'équation de la réaction.',
-      solution: o.solution != null ? o.solution : solutionHTML(r),
+      type: 'perso', outil: 'reaction', o, aide: !!o.guide,
+      q: o.q || 'Écris les deux demi-équations dans le sens de la réaction (le réactif à gauche du signe =), multiplie-les pour égaliser les électrons, puis écris l\'équation de la réaction.',
+      solution: o.solution != null ? o.solution : solutionHTML(r, o.guide && o.jusqua != null ? o.jusqua : 2),
     };
     p.monter = (zone, api) => outil(zone, Object.assign({}, o, { api }));
     return p;

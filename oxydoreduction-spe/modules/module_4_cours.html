@@ -28,9 +28,12 @@
 /* ============================================================
    Progression rapide : la méthode en une infographie, sans question
    (le cours est marqué fait à l'affichage), puis l'entraînement du
-   module 4. Trois blocs reliés par des flèches : les mots, la
+   module 4. Trois blocs reliés par des flèches : les mots (dont
+   oxydation et réduction, selon le sens de la demi-équation), la
    demi-équation en 4 étapes (MnO4^- / Mn^2+), l'équation de la réaction
-   en 3 étapes (MnO4^- et Fe^2+), puis les pièges à éviter.
+   en 3 étapes (MnO4^- et Fe^2+), puis les pièges à éviter. Une
+   demi-équation s'écrit toujours avec le signe = ; la flèche est
+   réservée à l'équation de la réaction.
    ============================================================ */
 const { h } = OX;
 const H2O = 'H<sub>2</sub>O', HP = 'H<sup>+</sup>', EL = 'e<sup>−</sup>';
@@ -45,11 +48,13 @@ const fleche = '<div class="ox-info-fl" aria-hidden="true">↓</div>';
 
 document.getElementById('info').innerHTML = `<div class="ox-info">
   <section class="ox-info-bloc">
-    ${tete('A', 'Les mots', 'Oxydant, réducteur, couple')}
+    ${tete('A', 'Les mots', 'Oxydant, réducteur, couple, réduction, oxydation')}
     <div class="ox-info-mots">
       <div class="ox-info-tuile"><b>Oxydant</b>capte des électrons : ${Mn}, ${h('Cu^2+')}, ${Fe3}…</div>
       <div class="ox-info-tuile"><b>Réducteur</b>cède des électrons : ${Fe2}, Zn, ${h('I^-')}…</div>
       <div class="ox-info-tuile"><b>Couple Ox / Red</b>Ox + n ${EL} = Red<br><small>les électrons du côté de l'oxydant</small></div>
+      <div class="ox-info-tuile large"><b>Réduction</b>gain d'électrons : la demi-équation écrite dans le sens <span class="f">Ox + n ${EL} = Red</span><br><small>l'oxydant, à gauche du signe =, capte des électrons : <span class="f">${h('Cu^2+')} + 2&nbsp;${EL} = Cu</span></small></div>
+      <div class="ox-info-tuile large"><b>Oxydation</b>perte d'électrons : la demi-équation écrite dans le sens <span class="f">Red = Ox + n ${EL}</span><br><small>le réducteur, à gauche du signe =, cède des électrons : <span class="f">${Fe2} = ${Fe3} + ${EL}</span></small></div>
     </div>
   </section>
   ${fleche}
@@ -66,9 +71,9 @@ document.getElementById('info').innerHTML = `<div class="ox-info">
   <section class="ox-info-bloc">
     ${tete('C', 'Écrire l\'équation de la réaction', `3 étapes, réaction entre ${Mn} et ${Fe2}`)}
     <ol class="ox-info-etapes">
-      ${etape(1, 'Entourer les réactifs dans les couples, puis écrire les deux demi-équations dans le bon sens : le réactif à gauche de la flèche',
-        `${ent(Mn)} / ${Mn2} &nbsp; et &nbsp; ${Fe3} / ${ent(Fe2)}<br>${Mn} + 8&nbsp;${HP} + 5&nbsp;${EL} → ${Mn2} + 4&nbsp;${H2O} &nbsp;<small>(réduction)</small><br>${Fe2} → ${Fe3} + ${EL} &nbsp;<small>(oxydation)</small>`)}
-      ${etape(2, 'Multiplier pour que les deux demi-équations échangent le même nombre d\'électrons', `1 × ( … 5&nbsp;${EL} … ) &nbsp; et &nbsp; ${c('5 ×')} ( ${Fe2} → ${Fe3} + ${EL} )`)}
+      ${etape(1, 'Entourer les réactifs dans les couples, puis écrire les deux demi-équations dans le bon sens : le réactif à gauche du signe =',
+        `${ent(Mn)} / ${Mn2} &nbsp; et &nbsp; ${Fe3} / ${ent(Fe2)}<br>${Mn} + 8&nbsp;${HP} + 5&nbsp;${EL} = ${Mn2} + 4&nbsp;${H2O} &nbsp;<small>(réduction)</small><br>${Fe2} = ${Fe3} + ${EL} &nbsp;<small>(oxydation)</small>`)}
+      ${etape(2, 'Multiplier pour que les deux demi-équations échangent le même nombre d\'électrons', `1 × ( … 5&nbsp;${EL} … ) &nbsp; et &nbsp; ${c('5 ×')} ( ${Fe2} = ${Fe3} + ${EL} )`)}
       ${etape(3, `Additionner, puis simplifier les électrons (et les ${HP}, ${H2O} présents des deux côtés)`,
         `${Mn} + 5&nbsp;${Fe2} + 8&nbsp;${HP} + ${barre(`5&nbsp;${EL}`)} → ${Mn2} + 5&nbsp;${Fe3} + 4&nbsp;${H2O} + ${barre(`5&nbsp;${EL}`)}`)}
     </ol>
