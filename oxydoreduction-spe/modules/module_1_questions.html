@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur les oxydants et les réducteurs — Oxydoréduction</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="ox.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : capter / céder (2), lire un couple
+   (dont des couples avec H+ et H2O), écrire un couple, demi-équation,
+   oxydant d'une demi-équation, oxydation ou réduction, oxydé ou réduit
+   (grille), produits d'une réaction, espèce oxydée.
+   Erreurs diagnostiquées : capter et céder confondus, couple écrit à
+   l'envers, électrons du mauvais côté, oxydation et réduction
+   confondues, réactifs pris pour les produits.
+   Un couple n'est jamais proposé écrit à l'envers.
+   ============================================================ */
+const { o, fq, hasard, melanger, h } = OX;
+const ELEC = 'e<sup>−</sup>';
+const nE = n => (n === 1 ? '' : n + '&nbsp;') + ELEC;
+
+// couples simples (n électrons) et couples avec H+ et H2O (demi-équation écrite)
+const SIMPLES = [
+  { ox: h('Ag^+'), red: 'Ag', n: 1, qo: 1, qr: 0 }, { ox: h('Cu^2+'), red: 'Cu', n: 2, qo: 2, qr: 0 },
+  { ox: h('Fe^3+'), red: h('Fe^2+'), n: 1, qo: 3, qr: 2 }, { ox: h('Zn^2+'), red: 'Zn', n: 2, qo: 2, qr: 0 },
+  { ox: h('Al^3+'), red: 'Al', n: 3, qo: 3, qr: 0 }, { ox: h('Pb^2+'), red: 'Pb', n: 2, qo: 2, qr: 0 },
+  { ox: h('Sn^4+'), red: h('Sn^2+'), n: 2, qo: 4, qr: 2 }, { ox: h('Fe^2+'), red: 'Fe', n: 2, qo: 2, qr: 0 },
+];
+const OXYGENES = [
+  { ox: h('MnO4^-'), red: h('Mn^2+'), demi: `${h('MnO4^-')} + 8&nbsp;H<sup>+</sup> + 5&nbsp;e<sup>−</sup> = ${h('Mn^2+')} + 4&nbsp;H<sub>2</sub>O` },
+  { ox: h('Cr2O7^2-'), red: h('Cr^3+'), demi: `${h('Cr2O7^2-')} + 14&nbsp;H<sup>+</sup> + 6&nbsp;e<sup>−</sup> = 2&nbsp;${h('Cr^3+')} + 7&nbsp;H<sub>2</sub>O` },
+  { ox: 'H<sub>2</sub>O<sub>2</sub>', red: 'H<sub>2</sub>O', demi: 'H<sub>2</sub>O<sub>2</sub> + 2&nbsp;H<sup>+</sup> + 2&nbsp;e<sup>−</sup> = 2&nbsp;H<sub>2</sub>O' },
+  { ox: 'O<sub>2</sub>', red: 'H<sub>2</sub>O<sub>2</sub>', demi: 'O<sub>2</sub> + 2&nbsp;H<sup>+</sup> + 2&nbsp;e<sup>−</sup> = H<sub>2</sub>O<sub>2</sub>' },
+  { ox: h('SO4^2-'), red: 'SO<sub>2</sub>', demi: `${h('SO4^2-')} + 4&nbsp;H<sup>+</sup> + 2&nbsp;e<sup>−</sup> = SO<sub>2</sub> + 2&nbsp;H<sub>2</sub>O` },
+  { ox: h('NO3^-'), red: 'NO', demi: `${h('NO3^-')} + 4&nbsp;H<sup>+</sup> + 3&nbsp;e<sup>−</sup> = NO + 2&nbsp;H<sub>2</sub>O` },
+  { ox: 'I<sub>2</sub>', red: h('I^-'), demi: `I<sub>2</sub> + 2&nbsp;e<sup>−</sup> = 2&nbsp;${h('I^-')}` },
+  { ox: h('S4O6^2-'), red: h('S2O3^2-'), demi: `${h('S4O6^2-')} + 2&nbsp;e<sup>−</sup> = 2&nbsp;${h('S2O3^2-')}` },
+];
+const couple = c => `${c.ox} / ${c.red}`;
+// réactions : couple dont l'oxydant réagit, couple dont le réducteur réagit (indices dans SIMPLES)
+const REACTIONS = [[1, 3], [0, 1], [5, 3], [1, 7], [0, 3], [1, 4], [2, 1], [0, 7], [2, 3]];
+
+/* ---------- capter / céder ---------- */
+function qRole(capte) {
+  const c = hasard(SIMPLES), X = capte ? c.ox : c.red, Y = capte ? c.red : c.ox;
+  return { theme: 'Oxydant ou réducteur', enonce: `<p>${X} peut ${capte ? 'capter' : 'céder'} ${c.n} électron${c.n > 1 ? 's' : ''} pour devenir ${Y}.</p>`,
+    parties: [fq.choix(`${X} est :`, [o('ox', 'un oxydant'), o('red', 'un réducteur')], capte ? 'ox' : 'red', { melanger: false,
+      indices: { red: `${X} <b>capte</b> des électrons : c'est un oxydant.`, ox: `${X} <b>cède</b> des électrons : c'est un réducteur.` },
+      solution: `<p>${X} ${capte ? 'capte' : 'cède'} des électrons : c'est un <b>${capte ? 'oxydant' : 'réducteur'}</b>.</p>` })] };
+}
+/* ---------- lire un couple ---------- */
+function qLire() {
+  const c = hasard(OXYGENES.concat(SIMPLES)), quoi = hasard(['ox', 'red']);
+  return { theme: 'Lire un couple', parties: [fq.choix(`Dans le couple ${couple(c)}, quel est ${quoi === 'ox' ? 'l\'oxydant' : 'le réducteur'} ?`, [o('ox', c.ox), o('red', c.red)], quoi, { melanger: false,
+    indices: { red: `Un couple s'écrit Oxydant / Réducteur : ${c.red}, écrit en second, est le réducteur.`, ox: `Un couple s'écrit Oxydant / Réducteur : ${c.ox}, écrit en premier, est l'oxydant.` },
+    solution: `<p>L'oxydant est ${c.ox}, le réducteur est ${c.red}.</p>` })] };
+}
+/* ---------- écrire un couple (jamais proposé à l'envers) ---------- */
+function qEcrire() {
+  const c = hasard(SIMPLES.concat(OXYGENES.slice(0, 2)));
+  const sens = hasard(['reduit', 'oxyde']);
+  const txt = sens === 'reduit' ? `${c.ox} peut être réduit en ${c.red}.` : `${c.red} peut être oxydé en ${c.ox}.`;
+  return { theme: 'Écrire un couple', enonce: `<p>${txt}</p>`,
+    parties: [fq.choix('Quelle espèce s\'écrit en premier dans le couple oxydant / réducteur ?', [o('ox', c.ox), o('red', c.red)], 'ox', {
+      indices: { red: `On écrit l'oxydant en premier. ${sens === 'reduit' ? `${c.ox} est réduit : il capte des électrons, c'est l'oxydant.` : `${c.red} est oxydé : il cède des électrons, c'est le réducteur, écrit en second.`}` },
+      solution: `<p>L'oxydant ${c.ox} s'écrit en premier : <b>${couple(c)}</b>.</p>` })] };
+}
+/* ---------- demi-équation d'un couple simple ---------- */
+function qDemi() {
+  const c = hasard(SIMPLES.filter(x => x.n > 1));
+  return { theme: 'Demi-équation', parties: [fq.choix(`Quelle est la demi-équation du couple ${couple(c)} ?`, [
+      o('ok', `${c.ox} + ${nE(c.n)} = ${c.red}`), o('cote', `${c.red} + ${nE(c.n)} = ${c.ox}`), o('droite', `${c.ox} = ${c.red} + ${nE(c.n)}`), o('nb', `${c.ox} + ${nE(c.n + 1)} = ${c.red}`)], 'ok', { colonne: true,
+    indices: { cote: `Les électrons s'écrivent avec l'oxydant ${c.ox} : c'est lui qui les capte.`, droite: 'Les électrons s\'écrivent du côté de l\'oxydant : Oxydant + n e<sup>−</sup> = Réducteur.',
+      nb: `La charge passe de ${c.qo}+ à ${c.qr ? c.qr + '+' : '0'} : compte la différence.` },
+    solution: `<p><b>${c.ox} + ${nE(c.n)} = ${c.red}</b></p>` })] };
+}
+/* ---------- l'oxydant d'une demi-équation avec H+ et H2O ---------- */
+function qCoupleDe() {
+  const c = hasard(OXYGENES.slice(0, 6));
+  return { theme: 'Couple d\'une demi-équation', enonce: `<p class="ox-eqn">${c.demi}</p>`,
+    parties: [fq.choix('Dans cette demi-équation, quel est l\'oxydant du couple ?', [o('ok', c.ox), o('red', c.red), o('h', 'H<sup>+</sup>')], 'ok', {
+      indices: { red: `${c.red} est l'espèce formée quand l'oxydant capte les électrons : c'est le réducteur.`, h: 'H<sup>+</sup> sert seulement à équilibrer l\'élément H. L\'oxydant est l\'espèce du couple écrite du même côté que les électrons.' },
+      solution: `<p>${c.ox} capte les électrons et devient ${c.red} : c'est l'oxydant, couple <b>${couple(c)}</b>.</p>` })] };
+}
+/* ---------- oxydation ou réduction ---------- */
+function qTransfo() {
+  const c = hasard(SIMPLES), sens = hasard(['oxyd', 'reduc']);
+  const eq = sens === 'oxyd' ? `${c.red} → ${c.ox} + ${nE(c.n)}` : `${c.ox} + ${nE(c.n)} → ${c.red}`;
+  return { theme: 'Oxydation ou réduction', enonce: `<p class="ox-eqn">${eq}</p>`,
+    parties: [fq.choix('Cette transformation est :', [o('oxyd', 'une oxydation'), o('reduc', 'une réduction')], sens, { melanger: false,
+      indices: { reduc: `Les électrons sont après la flèche : ${c.red} les perd. Une perte d'électrons est une oxydation.`, oxyd: `Les électrons sont avant la flèche : ${c.ox} les gagne. Un gain d'électrons est une réduction.` },
+      solution: sens === 'oxyd' ? `<p>${c.red} perd des électrons : <b>oxydation</b>.</p>` : `<p>${c.ox} gagne des électrons : <b>réduction</b>.</p>` })] };
+}
+/* ---------- vocabulaire (grille) ---------- */
+const PHRASES = [
+  ['Une oxydation est une perte d\'électrons.', 'v', 'Le réducteur perd (cède) des électrons : c\'est une oxydation.'],
+  ['Une réduction est une perte d\'électrons.', 'f', 'Une réduction est un gain d\'électrons : l\'oxydant capte des électrons.'],
+  ['Un oxydant est réduit au cours d\'une réaction.', 'v', 'L\'oxydant capte des électrons : il subit une réduction, il est réduit.'],
+  ['Un réducteur est réduit au cours d\'une réaction.', 'f', 'Le réducteur cède des électrons : il est oxydé.'],
+  ['Dans une demi-équation, les électrons sont du côté de l\'oxydant.', 'v', 'Oxydant + n e<sup>−</sup> = Réducteur.'],
+  ['Dans un couple, on écrit le réducteur en premier.', 'f', 'On écrit Oxydant / Réducteur : l\'oxydant en premier.'],
+  ['Une réaction d\'oxydoréduction est un transfert d\'électrons.', 'v', 'Le réducteur d\'un couple cède des électrons à l\'oxydant d\'un autre couple.'],
+  ['Des électrons peuvent rester libres dans une solution.', 'f', 'Les électrons cédés par le réducteur sont tous captés par l\'oxydant.'],
+];
+function qGrille() {
+  const l = melanger(PHRASES).slice(0, 4);
+  return { theme: 'Vocabulaire', parties: [{ type: 'grille', q: 'Pour chaque phrase, choisis : vrai ou faux ?', options: [o('v', 'vrai'), o('f', 'faux')],
+    lignes: l.map(([t, b, i], k) => ({ id: 'l' + k, label: t, bonne: b, indices: { [b === 'v' ? 'f' : 'v']: i } })),
+    solution: '<p>Oxydation : perte d\'électrons (le réducteur est oxydé). Réduction : gain d\'électrons (l\'oxydant est réduit).</p>' }] };
+}
+/* ---------- réaction : produits, espèce oxydée ---------- */
+function qProduits() {
+  const [i, j] = hasard(REACTIONS), a = SIMPLES[i], b = SIMPLES[j];
+  return { theme: 'Une réaction', enonce: `<p>On met en présence ${a.ox} et ${b.red}. Couples : ${couple(a)} et ${couple(b)}.</p>`,
+    parties: [fq.choix('Quels sont les produits de la réaction ?', [o('ok', `${a.red} et ${b.ox}`), o('inv', `${a.ox} et ${b.red}`), o('ox', `${a.ox} et ${b.ox}`), o('red', `${a.red} et ${b.red}`)], 'ok', { melanger: false,
+      indices: { inv: 'Ce sont les réactifs.', ox: `${a.ox} est un réactif : il capte des électrons et devient ${a.red}.`, red: `${b.red} est un réactif : il cède des électrons et devient ${b.ox}.` },
+      solution: `<p>${a.ox} est réduit en <b>${a.red}</b>, ${b.red} est oxydé en <b>${b.ox}</b>.</p>` })] };
+}
+function qOxyde() {
+  const [i, j] = hasard(REACTIONS), a = SIMPLES[i], b = SIMPLES[j];
+  const quoi = hasard(['oxyde', 'reduit']);
+  return { theme: 'Une réaction', enonce: `<p>Réaction : ${a.ox} + ${b.red} → ${a.red} + ${b.ox} (nombres stœchiométriques non écrits).</p>`,
+    parties: [fq.choix(`Quelle espèce est ${quoi === 'oxyde' ? 'oxydée' : 'réduite'} ?`, [o('a', a.ox), o('b', b.red), o('pa', a.red), o('pb', b.ox)], quoi === 'oxyde' ? 'b' : 'a', { melanger: false,
+      indices: quoi === 'oxyde'
+        ? { a: `${a.ox} capte des électrons : il est réduit.`, pa: `${a.red} est un produit.`, pb: `${b.ox} est un produit : c'est ce que devient l'espèce oxydée.` }
+        : { b: `${b.red} cède des électrons : il est oxydé.`, pa: `${a.red} est un produit : c'est ce que devient l'espèce réduite.`, pb: `${b.ox} est un produit.` },
+      solution: quoi === 'oxyde' ? `<p>${b.red} cède des électrons : il est <b>oxydé</b> en ${b.ox}.</p>` : `<p>${a.ox} capte des électrons : il est <b>réduit</b> en ${a.red}.</p>` })] };
+}
+
+// tirage : 10 questions, dans l'ordre du cours
+function tirage() {
+  const r = hasard([true, false]);
+  return [qRole(r), qRole(!r), qLire(), qEcrire(), qDemi(), qCoupleDe(), qTransfo(), qGrille(), qProduits(), qOxyde()];
+}
+
+OX.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Oxydants, réducteurs et couples',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : oxydant et réducteur, couples et demi-équations, oxydation et réduction, réaction entre un oxydant et un réducteur.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2a_cours.html', label: 'Module 2 : équilibrer une demi-équation →' },
+});
+OX.menu('module_1_questions');
+</script>
+</body>
+</html>

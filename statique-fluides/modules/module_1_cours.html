@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : pression et force pressante — Chapitre 9 : Statique des fluides</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="sf.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">Pression et force pressante</h2>
+    <p class="er-contexte">Un <b>fluide</b> (liquide ou gaz) pousse sur les parois qui le contiennent : c'est la <b>force pressante</b>. La <b>pression</b> P = F / S compare cette force à la surface pressée. On la calcule avec la surface en <b>m²</b> et la pression en <b>pascals</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Exemples du cours du professeur : bécher de 0,1 kg sur 30 cm²
+   (F = m g = 0,981 N ; P ≈ 327 Pa) ; fond de piscine de 200 m² à
+   1,5 bar (F = 3,0 × 10⁷ N, poids de 3 000 tonnes).
+   Outil : tableau de conversion des surfaces (SF.partieSurfaces).
+   Erreurs diagnostiquées : cm² converti comme des cm (× 10⁻²), mm²
+   converti avec 10⁻³, bar non converti, P = S / F, masse au lieu du poids.
+   Valeurs (vérifiées par un script) : 200 / 0,050 = 4,0 × 10³ Pa ;
+   2,5 × 9,81 / 200 × 10⁻⁴ ≈ 1,2 × 10³ Pa ; 20 / 0,20 × 10⁻⁶ = 1,0 × 10⁸ Pa ;
+   30 cm² = 0,003 m² ; 50 mm² = 5 × 10⁻⁵ m² ; 4 cm² = 4 × 10⁻⁴ m² ;
+   2,5 bar = 2,5 × 10⁵ Pa ; 1 013 hPa = 1,013 × 10⁵ Pa ; 3,0 × 10⁵ Pa = 3 bar ;
+   5,0 × 10⁶ × 0,20 = 1,0 × 10⁶ N ; 150 bar × 20 cm² = 3,0 × 10⁴ N.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, proche, fr, sci, dessin, versCours, partieSurfaces } = SF;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .03);
+
+/* ---------- 1. Origine de la pression ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. D\'où vient la pression ?');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Dans un fluide (liquide ou gaz), les molécules sont en <b>agitation permanente</b> : elles se déplacent dans tous les sens et heurtent sans cesse les parois.</p>
+      ${dessin('molecules')}
+      <div class="cle"><p><b class="cle-titre">Définition.</b> Les <b>chocs des molécules</b> sur une paroi sont à l'origine de la <b>pression</b>. Ensemble, ils exercent sur la paroi une force, la <b>force pressante</b>, toujours <b>perpendiculaire à la paroi</b>.</p></div>
+    </div>`);
+  c_.aToi(carte, [
+    { titre: 'Un ballon gonflé', enonce: '<p>Un ballon de baudruche est gonflé d\'air.</p>',
+      parties: [{ type: 'choix', q: 'Qu\'est-ce qui pousse sur la paroi du ballon ?', colonne: true,
+        options: [o('chocs', 'Les chocs des molécules d\'air sur la paroi'), o('poids', 'Le poids de l\'air contenu dans le ballon'), o('chaleur', 'La chaleur de l\'air'), o('caout', 'L\'élasticité du caoutchouc')], bonne: 'chocs',
+        indices: { poids: 'Le poids de l\'air est très faible ; et il ne pousse que vers le bas, alors que le ballon est poussé dans toutes les directions.', chaleur: 'La température joue sur la vitesse des molécules, mais ce sont leurs chocs qui poussent la paroi.', caout: 'Le caoutchouc retient l\'air : il pousse vers l\'intérieur, pas vers l\'extérieur.' },
+        solution: '<p>Les molécules d\'air heurtent sans cesse la paroi : ces chocs sont à l\'origine de la pression.</p>' }] },
+    { titre: 'La direction de la force pressante',
+      parties: [{ type: 'choix', q: 'Comment est dirigée la force pressante exercée par un fluide sur une paroi ?', colonne: true,
+        options: [o('perp', 'Perpendiculairement à la paroi'), o('para', 'Parallèlement à la paroi'), o('bas', 'Toujours vers le bas'), o('haut', 'Toujours vers le haut')], bonne: 'perp',
+        indices: { para: 'Regarde les flèches du dessin : elles font un angle droit avec la paroi.', bas: 'Sur une paroi verticale, la force est horizontale : regarde le dessin.', haut: 'Sur le fond d\'un récipient, la force est dirigée vers le bas : ce n\'est pas toujours vers le haut.' },
+        solution: '<p>La force pressante est toujours <b>perpendiculaire</b> à la paroi, dirigée du fluide vers la paroi.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Surfaces en m² ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Convertir une surface en m²');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Dans P = F / S, la surface s'exprime en <b>m²</b>. Dans un tableau de conversion des surfaces, chaque unité occupe <b>deux colonnes</b> (1 m² = 100 dm² = 10 000 cm²).</p>
+      <div class="cle"><p><b class="cle-titre">Règle.</b></p>
+        <p class="crs-formule">1 dm² = 10<sup>−2</sup> m² &nbsp;·&nbsp; 1 cm² = 10<sup>−4</sup> m² &nbsp;·&nbsp; 1 mm² = 10<sup>−6</sup> m²</p></div>
+      <div class="crs-attention"><p><b class="cle-titre">Attention.</b> 1 cm = 10<sup>−2</sup> m, mais <b>1 cm² = 10<sup>−4</sup> m²</b> : un carré de 1 cm de côté vaut (10<sup>−2</sup> m)² = 10<sup>−4</sup> m².</p></div>
+      <div class="ph-lien-app"><p>Revois les unités au carré et au cube.</p><a class="btn-small" href="../../conversions/index.html#cours-sq">Conversions →</a></div>
+    </div>
+    ${exemple(`<p>Le fond d'un bécher a une surface de 30 cm².</p>
+      <div class="crs-defile"><table class="crs-tab"><tr><th colspan="2">m²</th><th colspan="2">dm²</th><th colspan="2">cm²</th></tr>
+        <tr><td>0,</td><td>0</td><td>0</td><td>0</td><td>3</td><td>0</td></tr></table></div>
+      ${calc(`30 cm² = 30 × 10<sup>−4</sup> m² = ${c('0,003 m²')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Le fond du bécher', enonce: '<p>Touche la colonne après laquelle tu places la virgule pour avoir des m², puis valide.</p>',
+      parties: [versCours(partieSurfaces({ valeur: '30', de: 'cm2', vers: 'm2', solution: calc(`30 cm² = 30 × 10<sup>−4</sup> m² = ${c('0,003 m²')}`) }))] },
+    { titre: 'Une pointe de punaise',
+      parties: [versCours(partieSurfaces({ valeur: '50', de: 'mm2', vers: 'm2', solution: calc(`50 mm² = 50 × 10<sup>−6</sup> m² = ${c('5 × 10<sup>−5</sup> m²')}`) }))] },
+    { titre: 'Sans tableau',
+      parties: [{ type: 'sci', q: 'Convertis 4 cm² en m² (écriture scientifique).', label: 'S =', valeur: 4e-4, unite: 'm²', cs: 1, rel: .01,
+        diag: v => (pr(v, 4e-2) ? 'C\'est la conversion des cm en m. Pour des cm², c\'est × 10<sup>−4</sup>.' : pr(v, 4e-6) ? 'C\'est la conversion des mm² : pour des cm², c\'est × 10<sup>−4</sup>.' : pr(v, 4e4) ? 'Un cm² est plus petit qu\'un m² : l\'exposant est négatif.' : '1 cm² = 10<sup>−4</sup> m².'),
+        solution: calc(`4 cm² = ${c('4 × 10<sup>−4</sup> m²')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. P = F / S ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. La pression : P = F / S');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Formule.</b> Une force pressante F répartie sur une surface S exerce la pression :</p>
+        <p class="crs-formule">P = ${fr('F', 'S')}</p>
+        <p>P en <b>pascals (Pa)</b>, F en <b>newtons (N)</b>, S en <b>m²</b>. 1 Pa = 1 N/m².</p></div>
+      <p>Pour une même force, plus la surface est petite, plus la pression est grande.</p>
+    </div>
+    ${exemple(`<p>Un bécher de masse 0,1 kg est posé sur la table. Son fond a une surface de 30 cm². Quelle pression exerce-t-il sur la table ?</p>
+      <p>La force pressante est le poids du bécher : F = m × g = 0,1 kg × 9,81 N/kg = 0,981 N.</p>
+      ${calc('S = 30 cm² = 30 × 10<sup>−4</sup> m²')}
+      ${calc(`P = ${fr('F', 'S')} = ${fr('0,981 N', '30 × 10<sup>−4</sup> m²')} ≈ ${c('327 Pa')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une valise', enonce: '<p>Une valise de poids 200 N repose sur le sol par une surface de 0,050 m².</p>',
+      parties: [{ type: 'sci', q: 'Calcule la pression exercée sur le sol.', label: 'P =', valeur: 4000, unite: 'Pa', cs: 2, rel: .02,
+        diag: v => (pr(v, 0.05 / 200) ? 'Tu as calculé S / F : c\'est P = F / S.' : pr(v, 10) ? 'Tu as multiplié : P = F / S.' : 'P = F / S = 200 / 0,050.'),
+        solution: calc(`P = ${fr('F', 'S')} = ${fr('200 N', '0,050 m²')} = ${c('4,0 × 10<sup>3</sup> Pa')}`) }] },
+    { titre: 'Une brique', enonce: '<p>Une brique de masse 2,5 kg est posée sur sa grande face, de surface 200 cm² (g = 9,81 N/kg).</p>',
+      parties: [{ type: 'sci', q: 'Calcule la pression exercée par la brique sur le sol.', label: 'P =', valeur: 2.5 * 9.81 / 200e-4, unite: 'Pa', cs: 2, rel: .03,
+        diag: v => (pr(v, 2.5 * 9.81 / 2) ? 'Tu as converti les cm² comme des cm (× 10<sup>−2</sup>) : 1 cm² = 10<sup>−4</sup> m².' : pr(v, 2.5 / 200e-4) ? 'La force est le <b>poids</b> F = m × g, pas la masse.' : pr(v, 2.5 * 9.81 / 200) ? 'Convertis d\'abord la surface en m² : 200 cm² = 200 × 10<sup>−4</sup> m².' : 'F = m × g, S en m², puis P = F / S.'),
+        solution: calc('F = m × g = 2,5 × 9,81 ≈ 24,5 N ; S = 200 × 10<sup>−4</sup> m²') + calc(`P = ${fr('24,5 N', '200 × 10<sup>−4</sup> m²')} ≈ ${c('1,2 × 10<sup>3</sup> Pa')}`) }] },
+    { titre: 'Une punaise', enonce: '<p>Le pouce pousse une punaise avec une force de 20 N. La pointe touche le mur sur 0,20 mm².</p>',
+      parties: [{ type: 'sci', q: 'Calcule la pression exercée par la pointe sur le mur.', label: 'P =', valeur: 1e8, unite: 'Pa', cs: 2, rel: .02,
+        diag: v => (pr(v, 1e5) ? 'Tu as utilisé 1 mm² = 10<sup>−3</sup> m² : c\'est 10<sup>−6</sup> m².' : pr(v, 1e4) ? 'Tu as utilisé 1 mm² = 10<sup>−2</sup> m² : c\'est 10<sup>−6</sup> m².' : pr(v, 100) ? 'Convertis la surface en m² : 1 mm² = 10<sup>−6</sup> m².' : 'S = 0,20 × 10<sup>−6</sup> m², puis P = F / S.'),
+        solution: calc(`P = ${fr('20 N', '0,20 × 10<sup>−6</sup> m²')} = ${c('1,0 × 10<sup>8</sup> Pa')}`) + '<p>Une pression énorme : la pointe s\'enfonce dans le mur.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Unités de pression ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. Les unités de pression');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Unités.</b> Le <b>pascal (Pa)</b> est l'unité du système international. On rencontre aussi :</p>
+        <p class="crs-formule">1 bar = 10<sup>5</sup> Pa &nbsp;·&nbsp; 1 hPa = 100 Pa</p>
+        <p>La <b>pression atmosphérique</b> vaut environ <b>1 bar = 10<sup>5</sup> Pa = 1 000 hPa</b>. Dans les exercices, 1 atm = 1 bar.</p></div>
+      <p>Dans un calcul, on convertit toujours la pression en <b>Pa</b>.</p>
+    </div>
+    ${exemple(`${calc('1,5 bar = 1,5 × 10<sup>5</sup> Pa')}${calc('920 hPa = 920 × 100 Pa = 9,2 × 10<sup>4</sup> Pa')}`)}`);
+  c_.aToi(carte, [
+    { titre: 'bar → Pa',
+      parties: [{ type: 'sci', q: 'Convertis 2,5 bar en pascals.', label: 'P =', valeur: 2.5e5, unite: 'Pa', cs: 2, rel: .01,
+        diag: v => (pr(v, 250) ? 'Tu as multiplié par 100, comme pour des hPa : 1 bar = 10<sup>5</sup> Pa.' : pr(v, 2.5e3) ? '1 bar = 1 000 <b>hPa</b> = 10<sup>5</sup> Pa (pas 10<sup>3</sup> Pa).' : pr(v, 2.5e-5) ? 'Un bar vaut 100 000 Pa : on <b>multiplie</b> par 10<sup>5</sup>.' : '1 bar = 10<sup>5</sup> Pa.'),
+        solution: calc(`2,5 bar = ${c('2,5 × 10<sup>5</sup> Pa')}`) }] },
+    { titre: 'hPa → Pa', enonce: '<p>La météo annonce une pression de 1 013 hPa.</p>',
+      parties: [{ type: 'sci', q: 'Convertis cette pression en pascals.', label: 'P =', valeur: 101300, unite: 'Pa', cs: 4, rel: .002,
+        diag: v => (pr(v, 10.13) ? 'Un hPa vaut 100 Pa : on <b>multiplie</b> par 100.' : pr(v, 1.013e6) ? '1 hPa = 100 Pa (h = hecto = 100, pas 1 000).' : '1 hPa = 100 Pa.'),
+        solution: calc(`1 013 hPa = 1 013 × 100 Pa = ${c('1,013 × 10<sup>5</sup> Pa')}`) }] },
+    { titre: 'Pa → bar',
+      parties: [{ type: 'nombre', q: 'Convertis 3,0 × 10<sup>5</sup> Pa en bars.', label: 'P =', valeur: 3, unite: 'bar', signe: false, rel: .01,
+        diag: v => (pr(v, 3e10) ? 'On <b>divise</b> par 10<sup>5</sup> pour passer des Pa aux bars.' : pr(v, 3000) ? '1 bar = 10<sup>5</sup> Pa : on divise par 10<sup>5</sup>.' : pr(v, 300) ? 'Tu as divisé par 1 000 : 1 bar = 10<sup>5</sup> Pa, on divise par 10<sup>5</sup>.' : '3,0 × 10<sup>5</sup> Pa / 10<sup>5</sup>.'),
+        solution: calc(`3,0 × 10<sup>5</sup> Pa = ${c('3,0 bar')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 5. F = P × S ---------- */
+function etape5(c_) {
+  const carte = c_.carte('5. Calculer une force pressante : F = P × S');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Formule.</b> De P = F / S, on tire :</p>
+        <p class="crs-formule">F = P × S</p>
+        <p>F en N, P en <b>Pa</b>, S en <b>m²</b>.</p></div>
+    </div>
+    ${exemple(`<p>Le fond d'une piscine a une surface de 200 m². La pression au fond vaut 1,5 bar. Quelle force pressante l'eau exerce-t-elle sur le fond ?</p>
+      ${calc('P = 1,5 bar = 1,5 × 10<sup>5</sup> Pa')}
+      ${calc(`F = P × S = 1,5 × 10<sup>5</sup> Pa × 200 m² = ${c('3,0 × 10<sup>7</sup> N')}`)}
+      <p>C'est le poids d'une masse m = F / g = 3,0 × 10<sup>7</sup> / 9,81 ≈ 3 × 10<sup>6</sup> kg, soit <b>3 000 tonnes</b> !</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Le hublot d\'un sous-marin', enonce: '<p>En plongée, l\'eau exerce une pression de 5,0 × 10<sup>6</sup> Pa sur un hublot de surface 0,20 m².</p>',
+      parties: [{ type: 'sci', q: 'Calcule la force pressante sur le hublot.', label: 'F =', valeur: 1e6, unite: 'N', cs: 2, rel: .02,
+        diag: v => (pr(v, 2.5e7) ? 'Tu as divisé : F = P × S.' : pr(v, 4e-8) ? 'Tu as calculé S / P : F = P × S.' : 'F = P × S = 5,0 × 10<sup>6</sup> × 0,20.'),
+        solution: calc(`F = P × S = 5,0 × 10<sup>6</sup> Pa × 0,20 m² = ${c('1,0 × 10<sup>6</sup> N')}`) }] },
+    { titre: 'Un vérin hydraulique', enonce: '<p>L\'huile d\'un vérin est à 150 bar. Elle pousse un piston de surface 20 cm².</p>',
+      parties: [{ type: 'sci', q: 'Calcule la force exercée par l\'huile sur le piston.', label: 'F =', valeur: 150e5 * 20e-4, unite: 'N', cs: 2, rel: .02,
+        diag: v => (pr(v, 150 * 20e-4) ? 'Convertis la pression en Pa : 150 bar = 150 × 10<sup>5</sup> Pa.' : pr(v, 150e5 * 20e-2) ? '1 cm² = 10<sup>−4</sup> m² (et pas 10<sup>−2</sup>).' : pr(v, 150e5 * 20) ? 'Convertis la surface en m² : 20 cm² = 20 × 10<sup>−4</sup> m².' : pr(v, 150e3 * 20e-4) ? '1 bar = 10<sup>5</sup> Pa.' : 'P en Pa, S en m², puis F = P × S.'),
+        solution: calc('P = 150 × 10<sup>5</sup> Pa ; S = 20 × 10<sup>−4</sup> m²') + calc(`F = P × S = 150 × 10<sup>5</sup> × 20 × 10<sup>−4</sup> = ${c('3,0 × 10<sup>4</sup> N')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>La pression vient des <b>chocs des molécules</b> du fluide sur les parois. La force pressante est <b>perpendiculaire</b> à la paroi.</p></div>
+    <div class="cle"><p class="crs-formule">P = ${fr('F', 'S')} &nbsp;&nbsp; F = P × S</p><p>P en Pa, F en N, S en m².</p></div>
+    <div class="cle"><p>1 cm² = 10<sup>−4</sup> m² ; 1 mm² = 10<sup>−6</sup> m² ; 1 dm² = 10<sup>−2</sup> m².</p></div>
+    <div class="cle"><p>1 bar = 10<sup>5</sup> Pa ; 1 hPa = 100 Pa ; P<sub>atm</sub> ≈ 1 bar = 10<sup>5</sup> Pa = 1 000 hPa.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur la pression →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2_cours.html">Module 2 : pression absolue et relative</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, etape5, aRetenir]);
+SF.menu('module_1_cours');
+</script>
+</body>
+</html>

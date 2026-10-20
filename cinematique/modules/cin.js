@@ -960,7 +960,8 @@
         `<span class="cin-snum">${s.m.n}</span><span class="cin-ou-t"><small>${s.m.titre}</small><b>${ou}</b></span><span class="cin-ou-chev" aria-hidden="true">▾</span></button></div>` +
         '<div class="cin-barre-esp"></div><div class="cin-voile"></div>' +
         `<aside class="cin-som" id="cin-som" aria-label="Sommaire"><div class="cin-som-tete"><a class="cin-som-app" href="../index.html">Cinématique</a>` +
-        '<a class="cin-pilule" href="../index.html"><span aria-hidden="true">⌂</span>Accueil</a></div>' +
+        // bouton « Accueil » : portail des applications (index.html à la racine du dépôt)
+        '<a class="cin-pilule" href="../../index.html"><span aria-hidden="true">⌂</span>Accueil</a></div>' +
         `<p class="cin-som-lab">Sommaire</p><nav class="cin-som-arbre" aria-label="Modules">${sommaire(s, pages, ex)}</nav></aside>`;
       // déplier / replier un module ou une partie sur place
       racine.querySelectorAll('.cin-sligne, .cin-spt').forEach(b => b.addEventListener('click', () => {

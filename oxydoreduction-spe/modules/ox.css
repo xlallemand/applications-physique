@@ -1,0 +1,378 @@
+/* ============================================================
+   Styles de l'application « Oxydoréduction » (spécialité)
+   - cours et questions (repris de « Chapitre 9 : Statique des
+     fluides » : questions, champs, choix, grille de choix) ;
+   - outil « Équilibrer une demi-équation » (modules/demi.js) ;
+   - écriture des réactions (modules/reaction.js), dont l'outil
+     compact « toute la réaction » ;
+   - accueil (les deux progressions) et méthode express (infographie).
+   Complète assets/theme.css, le fichier er.css de l'application
+   « Équilibrer une réaction » (cartes, boutons, écran de fin),
+   assets/molecules.css (sélecteur à flèches) et assets/sommaire.css
+   (navigation, accueil, fiches).
+   ============================================================ */
+
+.er-page button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.er-page p { margin: 0; }
+sub, sup { font-size: .7em; line-height: 0; }
+
+/* ---------- Cours ---------- */
+.er-etape .cle { margin: 12px 0; }
+.cle p + p, .cours-bloc p + p, .cours-exemple p + p { margin-top: 8px; }
+.cours-bloc { margin: 0 0 12px; }
+.cours-bloc .cle { margin: 12px 0 0; }
+.cours-exemple { line-height: 1.6; }
+.cours-exemple-t { font-size: .8rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px !important; }
+.ph-calc { font-size: 1.1rem; line-height: 2.1; font-variant-numeric: tabular-nums; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ph-calc .c { color: var(--accent-ink); font-weight: 800; }
+@media (max-width: 480px) { .ph-calc { font-size: 1rem; } }
+/* équations : retour à la ligne entre deux termes (le nombre reste collé à sa formule) */
+.ox-eqn { overflow-x: auto; -webkit-overflow-scrolling: touch; text-wrap: pretty; font-size: 1.1rem; line-height: 1.9; font-variant-numeric: tabular-nums; }
+.ox-eqn .c { color: var(--accent-ink); font-weight: 800; }
+@media (max-width: 480px) { .ox-eqn { font-size: 1rem; } }
+.ox-r { background: var(--cle-bg); color: var(--accent-ink); border-radius: 6px; padding: 0 4px; font-weight: 800; }
+.ox-barre-e { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--ink-2); }
+
+/* ---------- Questions ---------- */
+.ph-enonce { margin-bottom: 12px; line-height: 1.55; }
+.ph-partie + .ph-partie { margin-top: 16px; padding-top: 14px; border-top: 1.5px dashed var(--paper-3); }
+.ph-partie-q { font-weight: 700; color: var(--ink); margin-bottom: 10px !important; line-height: 1.5; }
+.ph-partie-aide { margin-top: 10px; }
+.ph-partie-aide .btn-small { color: var(--ink-2); }
+.ph-partie-fig:empty { display: none; }
+.ph-partie-fig { margin: 4px 0 10px; }
+.ph-msg { margin-top: 10px !important; font-size: .92rem; color: var(--ink-2); font-weight: 600; }
+.ph-ok { margin-top: 8px !important; color: var(--success-text); font-weight: 800; }
+.ph-actions-partie { margin-top: 10px; }
+.ph-bilan { margin-top: 16px; }
+.ph-solution { line-height: 1.6; }
+.ph-question .er-consigne { margin-bottom: 8px !important; }
+
+/* Choix */
+.ph-choix { display: flex; flex-wrap: wrap; gap: 8px; }
+.ph-choix-col { flex-direction: column; align-items: stretch; }
+.ph-choix button { min-height: 46px; text-align: left; line-height: 1.4; border-radius: 16px; padding: 10px 18px; }
+.ph-choix button:disabled { cursor: default; opacity: 1; }
+.ph-choix button.juste { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); color: var(--success-text); }
+.ph-choix button.faux { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+
+/* Valeur numérique */
+.ph-valeur { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.ph-lab { font-size: 1.15rem; font-weight: 800; color: var(--ink); white-space: nowrap; }
+.ph-unite { font-size: 1.1rem; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.ph-champ-box { display: inline-flex; align-items: center; gap: 4px; }
+.ph-champ {
+  width: 120px; font: inherit; font-size: 1.15rem; font-weight: 800; text-align: center; padding: 9px 8px;
+  border: none; border-radius: 12px; box-shadow: inset 0 0 0 1.5px var(--paper-3); background: var(--sheet); color: var(--ink);
+  -webkit-appearance: none; appearance: none;
+}
+.ph-champ:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.ph-champ:disabled { background: var(--paper); color: var(--ink); -webkit-text-fill-color: var(--ink); opacity: 1; }
+.ph-pm {
+  width: 38px; height: 42px; flex-shrink: 0; border: none; border-radius: 12px; cursor: pointer;
+  background: var(--paper); color: var(--ink); font: inherit; font-size: 1.1rem; font-weight: 800;
+}
+.ph-pm:disabled { opacity: .35; cursor: default; }
+
+/* Grille de choix : un choix par ligne */
+.ph-grille { display: flex; flex-direction: column; gap: 8px; }
+.ph-grille-l { background: var(--paper); border-radius: 16px; padding: 10px 12px; transition: background .15s, box-shadow .15s; }
+.ph-grille-l.ok { background: var(--success-bg); box-shadow: inset 0 0 0 2px var(--success); }
+.ph-grille-l.ko { background: var(--danger-bg); box-shadow: inset 0 0 0 2px var(--danger); }
+.ph-grille-nom { font-weight: 800; margin-bottom: 8px; line-height: 1.4; }
+.ph-grille-ch { display: flex; flex-wrap: wrap; gap: 6px; }
+.ph-grille-b {
+  min-height: 46px; padding: 8px 16px; border: none; border-radius: 999px; background: var(--sheet); color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 700 .95rem var(--font-sans); cursor: pointer; transition: background .15s, box-shadow .15s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.ph-grille-b:hover:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.ph-grille-b[aria-pressed="true"] { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.ph-grille-l.ok .ph-grille-b[aria-pressed="true"] { background: var(--success-text); }
+.ph-grille-b:disabled { cursor: default; }
+.ph-grille-b:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ph-grille-apres { margin-top: 8px; padding-top: 8px; border-top: 1.5px dashed var(--paper-3); }
+
+/* ============================================================
+   OUTIL « ÉQUILIBRER UNE DEMI-ÉQUATION »
+   ============================================================ */
+
+.ox-outil { display: flex; flex-direction: column; gap: 14px; }
+.ox-etiq {
+  font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-2); margin: 0 0 8px !important;
+}
+
+/* ---------- Couple et réserve à gauche, demi-équation à côté ---------- */
+.ox-haut { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; -webkit-user-select: none; user-select: none; }
+.ox-palette { flex: 0 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.ox-couple, .ox-reserve, .ox-demi { background: var(--paper); border-radius: 18px; padding: 12px 14px; }
+.ox-demi { flex: 1 1 420px; min-width: 0; }
+.ox-couple-l { display: flex; align-items: center; gap: 8px; }
+.ox-barre { font-size: 1.6rem; font-weight: 700; color: var(--ink-2); }
+
+.ox-eq { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+.ox-membre {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px;
+  min-height: 150px; min-width: 140px; padding: 6px; border-radius: 16px;
+  border: 2px dashed var(--line-strong); transition: background .15s, border-color .15s;
+}
+.ox-membre.ox-survol { border-color: var(--accent); background: var(--cle-bg); }
+.ox-fini .ox-membre { border-color: transparent; min-height: 0; }
+.ox-vide { color: var(--ink-2); font-size: .9rem; font-weight: 600; padding: 0 10px; }
+.ox-egal { font-size: 2rem; font-weight: 800; color: var(--ink); padding: 0 2px; }
+.ox-plus { font-size: 1.5rem; font-weight: 700; color: var(--ink-2); }
+
+/* une espèce placée : flèches (nombre stœchiométrique) + formule */
+.ox-terme { display: flex; align-items: center; gap: 2px; background: var(--sheet); border-radius: 16px; padding: 4px 6px 4px 4px; }
+.ox-fini .ox-terme { padding: 6px 10px; }
+.ox-f { font-size: 1.6rem; font-weight: 800; letter-spacing: -.01em; white-space: nowrap; color: var(--ink); padding: 2px 4px; border-radius: 10px; }
+
+/* ---------- Jetons à glisser (couple, réserve) ---------- */
+.ox-jeton {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 46px; min-width: 58px;
+  padding: 4px 12px; border-radius: 12px; background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3);
+  font-size: 1.35rem; font-weight: 800; white-space: nowrap; color: var(--ink);
+}
+.ox-mobile { cursor: grab; -webkit-tap-highlight-color: transparent; }
+@media (hover: hover) {
+  .ox-jeton.ox-mobile:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .ox-f.ox-mobile:hover { background: var(--paper-2); }
+}
+.ox-jeton.ox-pris { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line-strong); color: var(--ink-2); }
+.ox-jeton.ox-off { opacity: .4; }
+.ox-mobile.dragging { opacity: .35; }
+.drag-ghost.ox-f { background: var(--sheet); }
+
+.ox-reserve-l { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ---------- Étapes de la méthode ---------- */
+.ox-etapes { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 0; }
+.ox-etapes li {
+  display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px 5px 5px; border-radius: 999px;
+  background: var(--paper); color: var(--ink-2); font-size: .88rem; font-weight: 700;
+}
+.ox-pastille {
+  display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--sheet); color: var(--ink-2); font-size: .8rem; font-weight: 800; flex-shrink: 0;
+}
+.ox-etapes li.ox-encours { background: var(--cle-bg); color: var(--accent-ink); }
+.ox-etapes li.ox-encours .ox-pastille { background: var(--accent); color: var(--sheet); }
+.ox-etapes li.ox-fait .ox-pastille { color: var(--accent-ink); }
+.ox-consigne { font-size: 1rem; font-weight: 600; line-height: 1.45; color: var(--ink); }
+.ox-consigne b { color: var(--accent-ink); }
+.ox-actions { margin-top: 0; }
+.ox-retour:empty { display: none; }
+.ox-final {
+  margin: 10px 0; padding: 10px 14px; background: var(--sheet); border-radius: 12px; overflow-x: auto;
+  text-align: center; text-wrap: balance; font-size: 1.35rem; font-weight: 800; color: var(--ink);
+}
+
+/* ---------- Aides : atomes et charges de chaque côté du signe = ---------- */
+.ox-aides { margin-top: 12px; overflow-x: auto; }
+.ox-bilan { border-collapse: separate; border-spacing: 0 4px; margin: 0 auto; font-size: 1rem; font-variant-numeric: tabular-nums; }
+.ox-bilan thead th { font-size: .78rem; font-weight: 700; color: var(--ink-2); padding: 0 12px; text-align: center; }
+.ox-bilan tbody th, .ox-bilan td { background: var(--sheet); padding: 6px 14px; white-space: nowrap; }
+.ox-bilan tbody th { text-align: left; font-weight: 800; border-radius: 12px 0 0 12px; }
+.ox-bilan td { text-align: center; }
+.ox-bilan td:last-child { border-radius: 0 12px 12px 0; }
+.ox-bilan td b { font-weight: 800; }
+.ox-bilan td small { display: block; font-size: .78rem; font-weight: 600; color: var(--ink-2); }
+.ox-bilan .ox-signe { font-weight: 800; color: var(--ink-2); padding: 6px 4px; }
+.ox-bilan tr.ox-eg th, .ox-bilan tr.ox-eg td { background: var(--success-bg); }
+.ox-bilan tr.ox-eg .ox-signe { color: var(--success-text); }
+
+/* flèches plus compactes à la souris (les cibles tactiles restent larges) */
+@media (hover: hover) and (pointer: fine) {
+  .ox-terme .er-sel button { width: 40px; height: 32px; border-radius: 10px; }
+  .ox-terme .er-sel button svg { width: 20px; height: 20px; }
+  .ox-terme .er-sel-val { min-width: 40px; font-size: 1.45rem; }
+  .ox-f { font-size: 1.45rem; }
+  .ox-membre { min-height: 118px; min-width: 130px; }
+}
+
+/* ============================================================
+   ÉCRITURE DES RÉACTIONS (modules/reaction.js)
+   ============================================================ */
+.ox-rx { display: flex; flex-direction: column; gap: 8px; -webkit-user-select: none; user-select: none; }
+.ox-rx-l { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; background: var(--paper); border-radius: 16px; padding: 8px 12px; }
+.ox-rx-eq { flex: 1 1 auto; min-width: 0; font-weight: 700; }
+.ox-rx-mult { flex-wrap: wrap; }
+.ox-rx-k { flex-shrink: 0; }
+.ox-rx-x { font-size: 1.5rem; font-weight: 800; color: var(--ink); }
+.ox-rx-ne { flex-basis: 100%; font-size: .92rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.ox-rx-ne:empty { display: none; }
+.ox-rx-aide { font-size: .92rem; color: var(--accent-ink); font-weight: 600; line-height: 1.45; }
+.ox-rx-somme, .ox-rx-coefs {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px;
+  background: var(--paper); border-radius: 16px; padding: 10px;
+}
+.ox-rx-membre { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; }
+.ox-rx-fl { font-size: 1.6rem; font-weight: 800; color: var(--ink); padding: 0 4px; }
+.ox-ts {
+  min-height: 44px; padding: 6px 12px; border: none; border-radius: 12px; background: var(--sheet);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 700 1.05rem var(--font-sans); color: var(--ink); cursor: pointer; white-space: nowrap;
+}
+@media (hover: hover) { .ox-ts:hover:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--ink); } }
+.ox-ts.ox-double { background: var(--cle-bg); box-shadow: inset 0 0 0 2px var(--accent); }
+.ox-ts.ox-ts-vide { opacity: .6; }
+.ox-ts:disabled { cursor: default; }
+.ox-ts:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ox-rx-fin { text-align: center; font-weight: 800; background: var(--sheet); border-radius: 12px; padding: 6px 12px; }
+.ox-rx-coefs .ox-terme { background: var(--sheet); }
+.ox-terme.ko { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); }
+.ox-rx .ox-aides { margin-top: 4px; }
+
+/* ============================================================
+   ENTOURER LES RÉACTIFS (REAC.partieReactifs)
+   ============================================================ */
+.ox-ent { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; background: var(--paper); border-radius: 16px; padding: 10px 12px; }
+.ox-ent-c { display: inline-flex; align-items: center; gap: 6px; }
+.ox-ent-et { font-weight: 700; color: var(--ink-2); }
+.ox-ent-b {
+  min-height: 46px; min-width: 56px; padding: 4px 14px; border: none; border-radius: 999px; cursor: pointer;
+  background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3); color: var(--ink);
+  font: 800 1.3rem var(--font-sans); white-space: nowrap; transition: background .15s, box-shadow .15s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) { .ox-ent-b:hover:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--ink); } }
+.ox-ent-b[aria-pressed="true"], .ox-ent-b[aria-pressed="true"]:hover { box-shadow: inset 0 0 0 3px var(--accent); background: var(--cle-bg); color: var(--accent-ink); }
+.ox-ent-b:disabled { cursor: default; }
+.ox-ent-b:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* espèce entourée dans un texte */
+.ox-entoure { display: inline-block; border: 2px solid var(--accent); border-radius: 999px; padding: 0 6px; font-weight: 800; color: var(--accent-ink); line-height: 1.35; }
+
+/* ============================================================
+   TOUTE LA RÉACTION DANS UN SEUL OUTIL (REAC.outil) : version compacte
+   ============================================================ */
+.ox-rxo { display: flex; flex-direction: column; gap: 8px; -webkit-user-select: none; user-select: none; }
+.ox-rxo-res { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; background: var(--paper); border-radius: 16px; padding: 8px 10px; }
+.ox-rxo-res .ox-etiq { margin: 0 !important; }
+.ox-rxo-jetons { display: flex; flex-wrap: wrap; gap: 6px; }
+.ox-jeton.ox-rxo-j { min-height: 40px; min-width: 48px; padding: 2px 10px; border-radius: 10px; font-size: 1.12rem; }
+.ox-rxo-l { background: var(--paper); border-radius: 16px; padding: 6px 10px 8px; transition: box-shadow .15s; }
+.ox-rxo-l.ok { box-shadow: inset 0 0 0 2px var(--success); }
+.ox-rxo-r { background: var(--cle-bg); }
+.ox-rxo-tete { display: flex; align-items: center; gap: 8px; min-height: 22px; margin-bottom: 2px; }
+.ox-rxo-nom { font-size: .88rem; font-weight: 800; color: var(--ink-2); }
+.ox-rxo-r .ox-rxo-nom { color: var(--accent-ink); }
+.ox-ok-tag { font-size: .78rem; font-weight: 800; color: var(--success-text); background: var(--success-bg); border-radius: 999px; padding: 1px 8px; }
+.ox-rxo-ligne { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; }
+.ox-rxo-eq { flex: 1 1 320px; min-width: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.ox-rxo-m {
+  flex: 1 1 130px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2px 4px;
+  min-height: 60px; padding: 3px; border-radius: 12px; border: 2px dashed var(--line-strong); transition: background .15s, border-color .15s;
+}
+.ox-rxo-m.ox-survol { border-color: var(--accent); background: var(--sheet); }
+.ox-rxo-l.ok .ox-rxo-m, .ox-rxo-fini .ox-rxo-m { flex: 0 1 auto; border-color: transparent; min-height: 0; }
+.ox-rxo-l.ok .ox-rxo-eq, .ox-rxo-fini .ox-rxo-eq { gap: 6px; }
+.ox-rxo .ox-vide { font-size: .82rem; padding: 0 6px; }
+.ox-rxo-fl { font-size: 1.5rem; font-weight: 800; color: var(--ink); padding: 0 2px; }
+.ox-rxo-fact { font-size: 1.3rem; font-weight: 800; color: var(--accent-ink); white-space: nowrap; }
+.ox-rxo-mult { display: inline-flex; align-items: center; gap: 4px; }
+.ox-rxo-x { font-size: 1.3rem; font-weight: 800; color: var(--ink); }
+.ox-rxo .ox-terme { padding: 2px 4px 2px 2px; border-radius: 12px; gap: 1px; }
+.ox-rxo .ox-f { font-size: 1.2rem; padding: 2px 3px; }
+.ox-rxo .er-coef-fixe { font-size: 1.2rem; padding: 0 3px 0 4px; }
+.ox-rxo .er-sel button { width: 42px; height: 30px; border-radius: 10px; }
+.ox-rxo .er-sel button svg { width: 18px; height: 18px; }
+.ox-rxo .er-sel-val { font-size: 1.2rem; min-width: 34px; line-height: 1.2; }
+@media (hover: hover) and (pointer: fine) {
+  .ox-rxo .er-sel button { width: 34px; height: 22px; border-radius: 8px; }
+  .ox-rxo .er-sel button svg { width: 16px; height: 16px; }
+}
+/* aides : atomes et charges en une ligne de pastilles */
+.ox-rxo-cpt { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.ox-cpt { font-size: .8rem; font-weight: 600; color: var(--ink-2); background: var(--sheet); border-radius: 999px; padding: 2px 8px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ox-cpt b { color: var(--ink); font-weight: 800; }
+.ox-cpt.ok, .ox-cpt.ok b { background: var(--success-bg); color: var(--success-text); }
+.ox-rxo-msg { margin-top: 6px; }
+.ox-rxo-msg:empty { display: none; }
+.ox-rxo-msg .er-retour { margin: 0; padding: 8px 12px; font-size: .92rem; }
+.ox-rxo-actions { margin-top: 2px; }
+.ox-aide-vide { font-size: .9rem; font-weight: 600; color: var(--ink-2); text-align: center; }
+/* téléphone : chaque membre sur toute la largeur, la flèche entre les deux */
+@media (max-width: 560px) {
+  .ox-rxo-l { padding: 6px 8px 8px; }
+  .ox-rxo-eq { justify-content: center; }
+  .ox-rxo-m { flex-basis: 100%; min-height: 52px; }
+}
+
+/* ============================================================
+   ACCUEIL : LES DEUX PROGRESSIONS
+   ============================================================ */
+.ox-parcours { max-width: 48rem; margin: 20px auto 0; }
+.ox-parcours-t { font-size: .76rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 8px 4px !important; }
+.ox-parcours-g { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ox-parcours-c {
+  display: flex; flex-direction: column; gap: 4px; background: var(--paper); border-radius: 22px; padding: 14px 18px;
+  text-decoration: none; color: var(--ink); transition: background .15s;
+}
+.ox-parcours-c:hover { background: var(--paper-2); }
+.ox-parcours-c:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ox-parcours-c small { font-size: .72rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--accent-ink); }
+.ox-parcours-c b { font-size: 1.08rem; letter-spacing: -.01em; }
+.ox-parcours-c span { font-size: .9rem; color: var(--ink-2); line-height: 1.45; }
+.ox-parcours-c em { margin-top: auto; padding-top: 6px; font-style: normal; font-weight: 800; color: var(--accent-ink); }
+.ox-parcours-c.rapide { background: var(--cle-bg); }
+.ox-parcours-c.rapide:hover { background: var(--cle-line); }
+@media (max-width: 640px) { .ox-parcours-g { grid-template-columns: 1fr; } }
+
+/* ============================================================
+   MÉTHODE EXPRESS : INFOGRAPHIE (module_4_cours.html)
+   ============================================================ */
+.ox-info { display: flex; flex-direction: column; }
+.ox-info-bloc { background: var(--paper); border-radius: 20px; padding: 14px 16px; }
+.ox-info-tete { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.ox-info-tete b { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 12px; background: var(--ink); color: var(--sheet); font-size: 1rem; font-weight: 800; }
+.ox-info-tete h3 { margin: 0; font-size: 1.12rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.25; }
+.ox-info-tete h3 small { display: block; font-size: .82rem; font-weight: 600; letter-spacing: 0; color: var(--ink-2); }
+.ox-info-fl { text-align: center; font-size: 1.6rem; font-weight: 800; color: var(--accent); line-height: 1; padding: 6px 0; }
+.ox-info-mots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ox-info-tuile { background: var(--sheet); border-radius: 14px; padding: 10px 12px; line-height: 1.45; }
+.ox-info-tuile b { display: block; color: var(--accent-ink); font-size: .95rem; }
+.ox-info-etapes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ox-info-e { position: relative; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 2px 10px; background: var(--sheet); border-radius: 14px; padding: 10px 12px; }
+.ox-info-e:not(:last-child)::after { content: ''; position: absolute; left: 28px; top: 46px; bottom: -10px; width: 2px; background: var(--cle-line); }
+.ox-info-n { grid-row: span 2; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--sheet); font-weight: 800; }
+.ox-info-r { font-weight: 800; line-height: 1.35; align-self: center; }
+.ox-info-r small { font-weight: 600; color: var(--ink-2); }
+.ox-info-x { font-size: 1.04rem; line-height: 1.8; font-variant-numeric: tabular-nums; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ox-info-x .c { color: var(--accent-ink); font-weight: 800; background: var(--cle-bg); border-radius: 6px; padding: 0 3px; }
+.ox-info-x .ox-barre-e { color: var(--ink-3); }
+.ox-info-fin { margin-top: 8px; text-align: center; font-size: 1.15rem; font-weight: 800; line-height: 1.7; background: var(--cle-bg); color: var(--ink); border-radius: 14px; padding: 10px 12px; overflow-x: auto; }
+.ox-info-pieges { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+.ox-info-pieges li { position: relative; padding-left: 22px; line-height: 1.45; }
+.ox-info-pieges li::before { content: '!'; position: absolute; left: 0; top: 1px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); color: var(--sheet); font-size: .72rem; font-weight: 800; display: grid; place-items: center; }
+@media (max-width: 640px) {
+  .ox-info-mots, .ox-info-pieges { grid-template-columns: 1fr; }
+  .ox-info-bloc { padding: 12px 10px; }
+  .ox-info-e { padding: 10px 8px; grid-template-columns: 30px minmax(0, 1fr); gap: 2px 8px; }
+  .ox-info-n { width: 30px; height: 30px; }
+  .ox-info-e:not(:last-child)::after { left: 22px; top: 42px; }
+  .ox-info-x { font-size: .98rem; }
+}
+
+/* ---------- Divers ---------- */
+.ox-note { font-size: .88rem; color: var(--ink-2); margin-top: 6px !important; line-height: 1.5; }
+
+@media (max-width: 640px) {
+  .ox-palette { flex: 1 1 100%; flex-direction: row; flex-wrap: wrap; }
+  .ox-demi { flex-basis: 100%; }
+}
+@media (max-width: 560px) {
+  .ox-couple, .ox-reserve, .ox-demi { padding: 10px 8px; border-radius: 16px; }
+  .ox-membre { min-height: 140px; min-width: 120px; padding: 4px; gap: 4px; }
+  .ox-f { font-size: 1.3rem; padding: 2px; }
+  .ox-terme { padding: 2px 4px 2px 2px; border-radius: 14px; }
+  .ox-egal { font-size: 1.7rem; }
+  .ox-plus { font-size: 1.25rem; }
+  .ox-jeton { font-size: 1.2rem; }
+  .ox-etapes li:not(.ox-encours) { padding-right: 5px; }
+  .ox-etapes li:not(.ox-encours) > span + span { display: none; }   /* seul le titre de l'étape en cours */
+  .ox-bilan tbody th, .ox-bilan td { padding: 5px 10px; }
+  .ox-final { font-size: 1.15rem; }
+  .ox-rx-l { padding: 8px; }
+  .ox-ts { font-size: .95rem; padding: 6px 9px; }
+  .ox-rx-somme, .ox-rx-coefs { padding: 8px 4px; gap: 6px; }
+}

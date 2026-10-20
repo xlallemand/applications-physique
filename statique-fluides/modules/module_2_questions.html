@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions sur les pressions absolue et relative — Chapitre 9 : Statique des fluides</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="sf.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : pression absolue → relative (3,
+   dont une en Pa), relative → absolue (3, dont une en Pa), appareils
+   et situations (grille), vide, air ambiant, manomètre (3).
+   P_atm = 1,0 bar = 10⁵ Pa.
+   Erreurs diagnostiquées : P_atm ajoutée au lieu d'être retirée (et
+   l'inverse), confusion des deux pressions, 1 bar retiré à des Pa.
+   ============================================================ */
+const { o, fq, fmt, sci, hasard, melanger, proche } = SF;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .02);
+
+/* ---------- Groupe 1 : absolue → relative ---------- */
+const CAS_ABS = [['l\'air d\'un pneu de voiture', 3.2], ['l\'eau d\'une canalisation', 4.5], ['l\'air d\'une bouteille de plongée', 201], ['l\'eau d\'un circuit de chauffage', 2.5], ['l\'air d\'un ballon de basket', 1.6], ['le gaz d\'une bonbonne', 8]];
+function qVersRel(qui, Pa) {
+  const r = +(Pa - 1).toFixed(2);
+  return { theme: 'Absolue → relative', enonce: `<p>La pression absolue de ${qui} vaut ${fmt(Pa)} bar.</p>`,
+    parties: [fq.nombre('Quelle pression relative indique un manomètre ?', 'P<sub>rel</sub> =', r, 'bar', { signe: false, tol: .05,
+      diag: v => (pr(v, Pa + 1) ? 'P<sub>rel</sub> = P<sub>abs</sub> − P<sub>atm</sub> : on <b>retire</b> 1 bar.' : pr(v, Pa) ? 'C\'est la pression absolue : le manomètre indique l\'écart avec P<sub>atm</sub>.' : 'P<sub>rel</sub> = P<sub>abs</sub> − P<sub>atm</sub>, avec P<sub>atm</sub> = 1,0 bar.'),
+      solution: calc(`P<sub>rel</sub> = P<sub>abs</sub> − P<sub>atm</sub> = ${fmt(Pa)} − 1,0 = ${c(fmt(r) + ' bar')}`) })] };
+}
+function qVersRelPa() {
+  const Pa = hasard([2.4e5, 3.6e5, 5.0e5, 1.8e5]), r = Pa - 1e5;
+  return { theme: 'Absolue → relative, en Pa', enonce: `<p>La pression absolue dans un réservoir vaut ${sci(Pa, 2)} Pa (P<sub>atm</sub> = 1,0 × 10<sup>5</sup> Pa).</p>`,
+    parties: [fq.sci('Calcule la pression relative.', 'P<sub>rel</sub> =', r, 'Pa', { cs: 2, rel: .01,
+      diag: v => (pr(v, Pa + 1e5) ? 'On <b>retire</b> P<sub>atm</sub>.' : pr(v, Pa - 1) ? 'P<sub>atm</sub> = 10<sup>5</sup> Pa (et non 1 Pa) : les deux pressions doivent être dans la même unité.' : pr(v, Pa) ? 'C\'est la pression absolue.' : 'P<sub>rel</sub> = P<sub>abs</sub> − P<sub>atm</sub>.'),
+      solution: calc(`P<sub>rel</sub> = ${sci(Pa, 2)} − 1,0 × 10<sup>5</sup> = ${c(sci(r, 2) + ' Pa')}`) })] };
+}
+
+/* ---------- Groupe 2 : relative → absolue ---------- */
+const CAS_REL = [['Le manomètre de la station indique 2,2 bar dans un pneu', 2.2], ['Le manomètre d\'une chaudière indique 1,5 bar', 1.5], ['Le manomètre d\'une pompe à vélo indique 6,0 bar', 6], ['Le plombier mesure 3,0 bar au robinet', 3], ['Le manomètre d\'un extincteur indique 14 bar', 14]];
+function qVersAbs(txt, r) {
+  const a = r + 1;
+  return { theme: 'Relative → absolue', enonce: `<p>${txt}.</p>`,
+    parties: [fq.nombre('Quelle est la pression absolue ?', 'P<sub>abs</sub> =', a, 'bar', { signe: false, tol: .05,
+      diag: v => (pr(v, r - 1) ? 'Un manomètre indique la pression relative : P<sub>abs</sub> = P<sub>rel</sub> + P<sub>atm</sub> (on <b>ajoute</b>).' : pr(v, r) ? 'C\'est la pression relative, celle du manomètre.' : 'P<sub>abs</sub> = P<sub>rel</sub> + P<sub>atm</sub>.'),
+      solution: calc(`P<sub>abs</sub> = P<sub>rel</sub> + P<sub>atm</sub> = ${fmt(r)} + 1,0 = ${c(fmt(a) + ' bar')}`) })] };
+}
+function qVersAbsPa() {
+  const r = hasard([1.5e5, 2.0e5, 4.0e5, 6.5e5]), a = r + 1e5;
+  return { theme: 'Relative → absolue, en Pa', enonce: `<p>Un manomètre indique ${sci(r, 2)} Pa (P<sub>atm</sub> = 1,0 × 10<sup>5</sup> Pa).</p>`,
+    parties: [fq.sci('Calcule la pression absolue.', 'P<sub>abs</sub> =', a, 'Pa', { cs: 2, rel: .01,
+      diag: v => (pr(v, r - 1e5) ? 'On <b>ajoute</b> P<sub>atm</sub> à la pression du manomètre.' : pr(v, r + 1) ? 'P<sub>atm</sub> = 10<sup>5</sup> Pa (et non 1 Pa).' : pr(v, r) ? 'C\'est la pression relative.' : 'P<sub>abs</sub> = P<sub>rel</sub> + P<sub>atm</sub>.'),
+      solution: calc(`P<sub>abs</sub> = ${sci(r, 2)} + 1,0 × 10<sup>5</sup> = ${c(sci(a, 2) + ' Pa')}`) })] };
+}
+
+/* ---------- Groupe 3 : appareils et situations ---------- */
+const SITUATIONS = [
+  ['Le manomètre d\'un pneu indique 2,0 bar.', 'rel', 'Un manomètre mesure l\'écart avec P<sub>atm</sub>.'],
+  ['Un baromètre indique 1 013 hPa.', 'abs', 'Un baromètre mesure la pression atmosphérique par rapport au vide.'],
+  ['La pression de l\'eau du réseau est de 3 bar.', 'rel', 'La pression des canalisations est une pression relative.'],
+  ['Dans une ampoule où l\'on a fait le vide, P = 0 Pa.', 'abs', 'Le vide est la référence de la pression absolue.'],
+  ['La météo annonce une dépression à 980 hPa.', 'abs', 'La pression atmosphérique annoncée par la météo est une pression absolue.'],
+  ['Le manomètre d\'une bouteille de gaz indique 7 bar.', 'rel', 'Un manomètre mesure l\'écart avec P<sub>atm</sub>.'],
+];
+function qGrille() {
+  const l = melanger(SITUATIONS).slice(0, 4);
+  return { theme: 'Absolue ou relative ?', parties: [{ type: 'grille', q: 'Pour chaque pression, choisis : absolue ou relative ?', options: [o('abs', 'absolue'), o('rel', 'relative')],
+    lignes: l.map(([t, b, i], k) => ({ id: 'l' + k, label: t, bonne: b, indices: { [b === 'abs' ? 'rel' : 'abs']: i } })),
+    solution: '<p>Manomètre (pneus, canalisations, bouteilles) : pression relative. Baromètre, météo et vide : pression absolue.</p>' }] };
+}
+function qVide() {
+  return { theme: 'Le vide', enonce: '<p>On a fait le vide dans une enceinte : il n\'y a plus aucune molécule.</p>',
+    parties: [fq.choix('Que vaut la pression absolue dans l\'enceinte ?', [o('zero', '0 Pa'), o('atm', '10<sup>5</sup> Pa'), o('moins', '−10<sup>5</sup> Pa'), o('un', '1 bar')], 'zero',
+      { melanger: false, indices: { atm: 'C\'est la pression de l\'air ambiant. Sans molécule, il n\'y a plus de chocs.', moins: '−10<sup>5</sup> Pa serait la pression <b>relative</b> du vide. La pression absolue ne peut pas être négative.', un: '1 bar, c\'est l\'air ambiant.' },
+        solution: '<p>Sans molécule, plus de chocs : P<sub>abs</sub> = 0 Pa. (Sa pression relative vaut 0 − 10<sup>5</sup> = −10<sup>5</sup> Pa.)</p>' })] };
+}
+function qAir() {
+  return { theme: 'L\'air ambiant', enonce: '<p>On mesure la pression de l\'air de la classe.</p>',
+    parties: [fq.choix('Que vaut sa pression relative ?', [o('zero', '0'), o('bar', '1 bar'), o('pa', '10<sup>5</sup> Pa'), o('hpa', '1 000 hPa')], 'zero',
+      { melanger: false, indices: { bar: 'C\'est sa pression absolue. La pression relative est l\'écart avec P<sub>atm</sub>.', pa: 'C\'est sa pression absolue.', hpa: '1 000 hPa = 1 bar : c\'est sa pression absolue.' },
+        solution: '<p>P<sub>rel</sub> = P<sub>abs</sub> − P<sub>atm</sub> = P<sub>atm</sub> − P<sub>atm</sub> = 0.</p>' })] };
+}
+function qMano() {
+  return { theme: 'Le manomètre', enonce: '<p>Après une crevaison, le pneu est à l\'air libre : son manomètre indique 0 bar.</p>',
+    parties: [fq.choix('Quelle est la pression absolue de l\'air dans le pneu ?', [o('un', '1 bar'), o('zero', '0 bar'), o('deux', '2 bar'), o('moins', '−1 bar')], 'un',
+      { melanger: false, indices: { zero: '0 bar, c\'est la pression relative lue sur le manomètre. Il reste de l\'air dans le pneu.', deux: 'P<sub>abs</sub> = P<sub>rel</sub> + P<sub>atm</sub> = 0 + 1.', moins: 'P<sub>abs</sub> = P<sub>rel</sub> + P<sub>atm</sub> : on ajoute.' },
+        solution: '<p>P<sub>abs</sub> = P<sub>rel</sub> + P<sub>atm</sub> = 0 + 1 = 1 bar : l\'air du pneu est à la pression atmosphérique.</p>' })] };
+}
+
+// tirage : 3 + 3 + 4 questions
+function tirage() {
+  const a = melanger(CAS_ABS), r = melanger(CAS_REL);
+  return [qVersRel(...a[0]), qVersRel(...a[1]), qVersRelPa(), qVersAbs(...r[0]), qVersAbs(...r[1]), qVersAbsPa(), qGrille(), qVide(), qAir(), qMano()];
+}
+
+SF.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Pression absolue et pression relative',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : passer de la pression absolue à la pression relative et inversement, et reconnaître qui mesure quoi.</p>',
+  questions: tirage,
+  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3a_cours.html', label: 'Module 3 : principe fondamental de l\'hydrostatique →' },
+});
+SF.menu('module_2_questions');
+</script>
+</body>
+</html>

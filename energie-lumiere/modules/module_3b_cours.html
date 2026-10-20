@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : photons et niveaux d'énergie — Chapitre 10 : Énergie transportée par la lumière</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="el.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="el.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS · PARTIE 2</span>
+    <h2 class="er-titre">Photons et niveaux d'énergie</h2>
+    <p class="er-contexte">La lumière transporte son énergie par paquets, les <b>photons</b> : E = h × f. Un atome absorbe ou émet un photon quand son électron change de <b>niveau d'énergie</b> : c'est le principe du <b>panneau photovoltaïque</b> et de la <b>LED</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Le photon : E = h × f = h c / λ
+   2. L'électronvolt : 1 eV = 1,602 × 10⁻¹⁹ J
+   3. Niveaux d'énergie : absorption (panneau photovoltaïque) et émission
+      (LED) ; outil EL.partieNiveaux (atome d'hydrogène E₁ = −13,6 eV,
+      E₂ = −3,40 eV, E₃ = −1,51 eV) : l'élève choisit une transition, le
+      photon entre ou sort, f, λ et le domaine s'affichent
+   4. Le photon d'une transition : ΔE (eV) → J → λ
+   h = 6,63 × 10⁻³⁴ J·s ; c = 3,00 × 10⁸ m·s⁻¹.
+   Valeurs (vérifiées par un script) : 6,63 × 10⁻³⁴ × 3,00 × 10⁸ / 650 × 10⁻⁹ ≈ 3,06 × 10⁻¹⁹ J ;
+   6,63 × 10⁻³⁴ × 5,0 × 10¹⁴ ≈ 3,3 × 10⁻¹⁹ J ; h c / 400 × 10⁻⁹ ≈ 4,97 × 10⁻¹⁹ J ;
+   6,63 × 10⁻²⁰ / 6,63 × 10⁻³⁴ = 1,0 × 10¹⁴ Hz ; 3,0 × 1,602 × 10⁻¹⁹ ≈ 4,81 × 10⁻¹⁹ J ;
+   8,0 × 10⁻¹⁹ / 1,602 × 10⁻¹⁹ ≈ 5,0 eV ; 1,89 eV ≈ 3,03 × 10⁻¹⁹ J → 657 nm ;
+   10,2 eV ≈ 1,63 × 10⁻¹⁸ J → 1,22 × 10⁻⁷ m (UV).
+   Erreurs diagnostiquées : h oublié, nm non convertis, E = h / f,
+   division au lieu de multiplication (eV ↔ J), signe de ΔE.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, proche, fr, sci, H, C, EV, HYDROGENE, figNiveaux, partieNiveaux, versCours, optionsDomaine } = EL;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .02);
+const HV = '6,63 × 10<sup>−34</sup>', CV = '3,00 × 10<sup>8</sup>';
+
+/* ---------- 1. Le photon ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. L\'énergie d\'un photon');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Formule.</b> Une onde électromagnétique de fréquence f (longueur d'onde λ) transporte des photons d'énergie :</p>
+        <p class="crs-formule">E = h × f = ${fr('h × c', 'λ')}</p>
+        <p>E en <b>J</b>, f en Hz, λ en m ; h = ${HV} J·s (constante de Planck) ; c = ${CV} m·s<sup>−1</sup>.</p></div>
+      <p>Plus f est grande (plus λ est petite), plus le photon transporte d'énergie : un photon UV est plus énergétique qu'un photon rouge.</p>
+    </div>
+    ${exemple(`<p>Le laser rouge de 650 nm (f ≈ 4,62 × 10<sup>14</sup> Hz) :</p>
+      ${calc(`E = h × f = ${HV} × 4,62 × 10<sup>14</sup> ≈ ${c('3,06 × 10<sup>−19</sup> J')}`)}
+      <p>ou directement avec λ :</p>
+      ${calc(`E = ${fr('h × c', 'λ')} = ${fr(HV + ' × ' + CV, '650 × 10<sup>−9</sup>')} ≈ ${c('3,06 × 10<sup>−19</sup> J')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Avec la fréquence', enonce: '<p>Une lumière a une fréquence f = 5,0 × 10<sup>14</sup> Hz.</p>',
+      parties: [{ type: 'sci', q: 'Calcule l\'énergie d\'un de ses photons.', label: 'E =', valeur: H * 5e14, unite: 'J', cs: 2, rel: .02,
+        diag: v => (pr(v, 5e14) ? 'Multiplie par la constante de Planck h.' : pr(v, H / 5e14) || pr(v, 5e14 / H) ? 'On <b>multiplie</b> : E = h × f.' : `E = ${HV} × 5,0 × 10<sup>14</sup>.`),
+        solution: calc(`E = h × f = ${HV} × 5,0 × 10<sup>14</sup> ≈ ${c('3,3 × 10<sup>−19</sup> J')}`) }] },
+    { titre: 'Avec la longueur d\'onde', enonce: '<p>Une lumière violette a une longueur d\'onde λ = 400 nm.</p>',
+      parties: [{ type: 'sci', q: 'Calcule l\'énergie d\'un de ses photons (3 chiffres significatifs).', label: 'E =', valeur: H * C / 400e-9, unite: 'J', cs: 3, rel: .01,
+        diag: v => (pr(v, H * C / 400) ? 'Convertis λ en mètres : 400 nm = 400 × 10<sup>−9</sup> m.' : pr(v, H * 400e-9 / C) || pr(v, 400e-9 / (H * C)) ? 'E = h × c / λ : λ est au dénominateur.' : pr(v, C / 400e-9) ? 'Ça, c\'est la fréquence : multiplie-la par h.' : `E = ${HV} × ${CV} / (400 × 10<sup>−9</sup>).`),
+        solution: calc(`E = ${fr('h × c', 'λ')} = ${fr(HV + ' × ' + CV, '400 × 10<sup>−9</sup>')} ≈ ${c('4,97 × 10<sup>−19</sup> J')}`) }] },
+    { titre: 'Retrouver la fréquence', enonce: '<p>Un photon infrarouge a une énergie E = 6,63 × 10<sup>−20</sup> J.</p>',
+      parties: [{ type: 'sci', q: 'Calcule la fréquence de l\'onde.', label: 'f =', valeur: 6.63e-20 / H, unite: 'Hz', cs: 2, rel: .02,
+        diag: v => (pr(v, 6.63e-20 * H) ? 'De E = h × f, on tire f = E / h : on <b>divise</b>.' : pr(v, H / 6.63e-20) ? 'C\'est f = E / h (pas h / E).' : `f = 6,63 × 10<sup>−20</sup> / ${HV}.`),
+        solution: calc(`f = ${fr('E', 'h')} = ${fr('6,63 × 10<sup>−20</sup>', HV)} = ${c('1,0 × 10<sup>14</sup> Hz')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. L'électronvolt ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. L\'électronvolt');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Les énergies des photons sont toutes petites en joules : on utilise souvent l'<b>électronvolt</b> (eV).</p>
+      <div class="cle"><p><b class="cle-titre">Conversion.</b></p><p class="crs-formule">1 eV = 1,602 × 10<sup>−19</sup> J</p>
+        <p>eV → J : on <b>multiplie</b> par 1,602 × 10<sup>−19</sup> ; J → eV : on <b>divise</b>.</p></div>
+    </div>
+    ${exemple(`${calc(`2,0 eV = 2,0 × 1,602 × 10<sup>−19</sup> J ≈ ${c('3,20 × 10<sup>−19</sup> J')}`)}
+      ${calc(`3,06 × 10<sup>−19</sup> J = ${fr('3,06 × 10<sup>−19</sup>', '1,602 × 10<sup>−19</sup>')} eV ≈ ${c('1,91 eV')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'eV → J',
+      parties: [{ type: 'sci', q: 'Convertis 3,0 eV en joules.', label: 'E =', valeur: 3 * EV, unite: 'J', cs: 3, rel: .01,
+        diag: v => (pr(v, 3 / EV) ? 'eV → J : on <b>multiplie</b> par 1,602 × 10<sup>−19</sup>.' : pr(v, 3 * 1.602) ? 'N\'oublie pas 10<sup>−19</sup>.' : '3,0 × 1,602 × 10<sup>−19</sup>.'),
+        solution: calc(`3,0 eV = 3,0 × 1,602 × 10<sup>−19</sup> J ≈ ${c('4,81 × 10<sup>−19</sup> J')}`) }] },
+    { titre: 'J → eV',
+      parties: [{ type: 'nombre', q: 'Convertis 8,0 × 10<sup>−19</sup> J en électronvolts (2 chiffres significatifs).', label: 'E =', valeur: 8e-19 / EV, unite: 'eV', signe: false, rel: .01, affiche: '5,0',
+        diag: v => (pr(v, 8e-19 * EV) ? 'J → eV : on <b>divise</b> par 1,602 × 10<sup>−19</sup>.' : 'E = 8,0 × 10<sup>−19</sup> / 1,602 × 10<sup>−19</sup>.'),
+        solution: calc(`E = ${fr('8,0 × 10<sup>−19</sup>', '1,602 × 10<sup>−19</sup>')} ≈ ${c('5,0 eV')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Niveaux d'énergie ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Absorption et émission d\'un photon');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>L'électron d'un atome ne peut avoir que certaines énergies : les <b>niveaux d'énergie</b> E<sub>1</sub>, E<sub>2</sub>, E<sub>3</sub>… La matière et la lumière échangent de l'énergie par photons :</p>
+      <div class="som-fiche-figs el-niv-figs">
+        <div><p class="cours-exemple-t">Absorption</p>${figNiveaux({ de: 0, vers: 1 })}</div>
+        <div><p class="cours-exemple-t">Émission</p>${figNiveaux({ de: 1, vers: 0 })}</div>
+      </div>
+      <div class="cle"><p><b class="cle-titre">Absorption.</b> Un photon est absorbé : l'électron <b>monte</b> et gagne l'énergie ΔE = E<sub>2</sub> − E<sub>1</sub> = h × f. Si l'énergie du photon suffit à arracher l'électron, il se forme un courant électrique : c'est le principe du <b>panneau photovoltaïque</b>.</p></div>
+      <div class="cle"><p><b class="cle-titre">Émission.</b> L'électron <b>descend</b> et perd l'énergie ΔE = E<sub>2</sub> − E<sub>1</sub> = h × f, emportée par un photon émis : c'est le principe de la <b>LED</b> (DEL, diode électroluminescente).</p></div>
+    </div>
+    ${exemple(`<p>Dans l'atome d'hydrogène, l'électron descend de E<sub>3</sub> = −1,51 eV à E<sub>2</sub> = −3,40 eV : il perd ΔE = 1,89 eV et émet un photon de lumière <b>rouge</b> (λ ≈ 657 nm).</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Explore l\'atome d\'hydrogène', enonce: '<p>Touche un niveau (ou un bouton) pour y faire passer l\'électron : regarde le photon absorbé ou émis, sa fréquence, sa longueur d\'onde et son domaine. Fais une absorption, puis une émission.</p>',
+      parties: [partieNiveaux({ libre: true, aide: true, montrer: [0, 2],
+        solution: '<p>L\'électron qui <b>monte</b> absorbe un photon ; l\'électron qui <b>descend</b> en émet un. Plus l\'écart d\'énergie est grand, plus f est grande et λ petite.</p>' })] },
+    { titre: 'Un photon visible', enonce: '<p>L\'électron est sur le niveau E<sub>3</sub>.</p>',
+      parties: [partieNiveaux({ depart: 2, montrer: [2, 1], q: 'Fais émettre à l\'atome un photon de <b>lumière visible</b>.',
+        but: { sens: 'emission', test: t => t.dom.id === 'visible', diag: t => `Ce photon est dans l'ultraviolet (λ ≈ ${Math.round(t.nm)} nm) : il est invisible. Il faut un écart d'énergie plus petit, entre 1,6 et 3,1 eV environ.` },
+        solution: '<p>De E<sub>3</sub> à E<sub>2</sub> : ΔE = 1,89 eV, λ ≈ 657 nm, lumière rouge. Les chutes vers E<sub>1</sub> libèrent beaucoup plus d\'énergie : photons ultraviolets.</p>' })] },
+    { titre: 'Panneau ou LED ?',
+      parties: [{ type: 'choix', q: 'Dans un panneau photovoltaïque, quel phénomène se produit ?', options: [o('abs', 'l\'absorption de photons'), o('em', 'l\'émission de photons')], bonne: 'abs', melanger: false,
+        indices: { em: 'Le panneau reçoit la lumière : ses électrons gagnent de l\'énergie.' }, solution: '<p>Absorption : les photons absorbés arrachent des électrons, d\'où le courant.</p>' },
+      { type: 'choix', q: 'Et dans une LED ?', options: [o('abs', 'l\'absorption de photons'), o('em', 'l\'émission de photons')], bonne: 'em', melanger: false,
+        indices: { abs: 'La LED produit de la lumière : ses électrons perdent de l\'énergie en émettant des photons.' }, solution: '<p>Émission : les électrons descendent de niveau et émettent des photons.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Le photon d'une transition ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. Calculer le photon d\'une transition');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> 1. ΔE = E<sub>haut</sub> − E<sub>bas</sub> (positif, en eV) ; 2. ΔE en J (× 1,602 × 10<sup>−19</sup>) ; 3. λ = ${fr('h × c', 'ΔE')} (ou f = ΔE / h) ; 4. le domaine.</p></div>
+    </div>
+    ${exemple(`<p>Hydrogène, de E<sub>3</sub> = −1,51 eV à E<sub>2</sub> = −3,40 eV :</p>
+      ${calc('ΔE = −1,51 − (−3,40) = 1,89 eV = 1,89 × 1,602 × 10<sup>−19</sup> ≈ 3,03 × 10<sup>−19</sup> J')}
+      ${calc(`λ = ${fr('h × c', 'ΔE')} = ${fr(HV + ' × ' + CV, '3,03 × 10<sup>−19</sup>')} ≈ ${c('6,57 × 10<sup>−7</sup> m = 657 nm')} : rouge`)}`)}`);
+  const dE = 10.2, J = dE * EV, lam = H * C / J;
+  c_.aToi(carte, [
+    { titre: 'De E₂ à E₁', enonce: '<p>Dans l\'atome d\'hydrogène, l\'électron descend de E<sub>2</sub> = −3,40 eV à E<sub>1</sub> = −13,6 eV.</p>',
+      parties: [{ type: 'nombre', q: 'Quelle énergie perd l\'électron, en eV ?', label: 'ΔE =', valeur: dE, unite: 'eV', signe: false, tol: .01,
+          diag: v => (pr(v, 17) ? 'C\'est la <b>différence</b> : −3,40 − (−13,6) = −3,40 + 13,6.' : pr(v, -10.2) ? 'Une énergie perdue s\'écrit positive : ΔE = E<sub>2</sub> − E<sub>1</sub>.' : 'ΔE = E<sub>2</sub> − E<sub>1</sub> = −3,40 − (−13,6).'),
+          solution: calc(`ΔE = −3,40 − (−13,6) = ${c('10,2 eV')}`) },
+        { type: 'sci', q: 'Convertis-la en joules.', label: 'ΔE =', valeur: J, unite: 'J', cs: 3, rel: .01,
+          diag: v => (pr(v, dE / EV) ? 'eV → J : on multiplie par 1,602 × 10<sup>−19</sup>.' : '10,2 × 1,602 × 10<sup>−19</sup>.'),
+          solution: calc(`ΔE = 10,2 × 1,602 × 10<sup>−19</sup> ≈ ${c('1,63 × 10<sup>−18</sup> J')}`) },
+        { type: 'sci', q: 'Calcule la longueur d\'onde du photon émis.', label: 'λ =', valeur: lam, unite: 'm', cs: 3, rel: .015,
+          diag: v => (pr(v, J / (H * C)) ? 'λ = h × c / ΔE : ΔE est au dénominateur.' : pr(v, H * C / dE) ? 'Utilise ΔE en <b>joules</b>.' : pr(v, J / H) ? 'Ça, c\'est la fréquence f = ΔE / h ; λ = c / f.' : `λ = ${HV} × ${CV} / 1,63 × 10<sup>−18</sup>.`),
+          solution: calc(`λ = ${fr('h × c', 'ΔE')} = ${fr(HV + ' × ' + CV, '1,63 × 10<sup>−18</sup>')} ≈ ${c('1,22 × 10<sup>−7</sup> m')}`) },
+        { type: 'choix', q: 'À quel domaine appartient ce photon ?', options: optionsDomaine(), bonne: 'UV', melanger: false,
+          indices: { visible: '1,22 × 10<sup>−7</sup> m = 122 nm, moins de 400 nm : ce n\'est pas visible.', X: 'Les rayons X sont en dessous de 10 nm.' },
+          solution: '<p>122 nm est entre 10 nm et 400 nm : <b>ultraviolet</b>.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">E = h × f = ${fr('h × c', 'λ')}</p><p>E en J, h = ${HV} J·s, f en Hz, λ en m.</p></div>
+    <div class="cle"><p>1 eV = 1,602 × 10<sup>−19</sup> J.</p></div>
+    <div class="cle"><p><b>Absorption</b> : l'électron monte et gagne ΔE = h × f (panneau photovoltaïque). <b>Émission</b> : l'électron descend et perd ΔE = h × f (LED).</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur les ondes et les photons →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Module 4 : panneau photovoltaïque</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#photons">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
+EL.menu('module_3b_cours');
+</script>
+</body>
+</html>

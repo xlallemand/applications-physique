@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur les capteurs et le rendement — Chapitre 10 : Énergie transportée par la lumière</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="el.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="el.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : schémas énergétiques à compléter (2),
+   type de conversion d'un dispositif (2), calcul d'un rendement (2),
+   P_utile ou P_absorbée avec le rendement (2), puissance perdue puis
+   rendement (1), technologies de cellules (1).
+   Erreurs diagnostiquées : rapport inversé (P_a / P_u), pourcentage
+   non converti, multiplication au lieu de division, pertes ajoutées.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, proche, fr, partieChaine } = EL;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .02);
+const Pu = 'P<sub>utile</sub>', Pa = 'P<sub>absorbée</sub>', Pp = 'P<sub>perdue</sub>';
+const pct = r => fmt(Math.round(r * 1000) / 10) + ' %';
+
+/* ---------- Groupe 1 : schémas énergétiques ---------- */
+const DISPOSITIFS = [
+  { nom: 'un panneau photovoltaïque', conv: 'panneau photovoltaïque', entree: 'solaire', sorties: ['electrique'], pertes: 'thermique', intrus: ['chimique'],
+    indices: { chimique: 'Le panneau ne contient pas de réactifs : pas d\'énergie chimique.', electrique: 'L\'énergie utile d\'un panneau photovoltaïque est électrique ; il reçoit l\'énergie solaire.', thermique: 'Le panneau s\'échauffe : l\'énergie thermique est perdue.' },
+    sol: 'Énergie solaire reçue, énergie électrique utile, énergie thermique perdue (le panneau chauffe).' },
+  { nom: 'un chauffe-eau solaire (panneau thermique)', conv: 'chauffe-eau solaire', entree: 'solaire', sorties: ['thermique'], pertes: 'thermique', intrus: ['electrique'],
+    indices: { electrique: 'Un chauffe-eau solaire ne produit pas d\'électricité : il chauffe l\'eau.', solaire: 'L\'énergie solaire est reçue ; le chauffe-eau fournit de l\'énergie thermique.' },
+    sol: 'Énergie solaire reçue ; l\'énergie utile est thermique (l\'eau chauffe), l\'énergie perdue aussi (cédée à l\'environnement).' },
+  { nom: 'une LED (diode électroluminescente)', conv: 'LED', entree: 'electrique', sorties: ['lumineuse'], pertes: 'thermique', intrus: ['solaire'],
+    indices: { solaire: 'La LED est alimentée par une pile ou le secteur : elle reçoit de l\'énergie électrique.', lumineuse: 'La LED <b>émet</b> la lumière : l\'énergie lumineuse est l\'énergie utile.', electrique: 'La LED reçoit l\'énergie électrique.' },
+    sol: 'Énergie électrique reçue, énergie lumineuse utile, énergie thermique perdue (la LED chauffe un peu).' },
+  { nom: 'un capteur hybride', conv: 'capteur hybride', entree: 'solaire', sorties: ['thermique', 'electrique'], intrus: ['chimique'], noms: { sortie: 'Énergies utiles' },
+    indices: { chimique: 'Pas d\'énergie chimique : le capteur hybride réunit un panneau photovoltaïque et un panneau thermique.', solaire: 'Le capteur hybride reçoit l\'énergie solaire ; il en fournit deux formes.' },
+    sol: 'Le capteur hybride reçoit l\'énergie solaire et fournit à la fois de l\'énergie thermique et de l\'énergie électrique.' },
+  { nom: 'un capteur géothermique enterré', conv: 'capteur géothermique', entree: 'thermique', sorties: ['thermique'], intrus: ['solaire', 'electrique'], noms: { sortie: 'Énergie fournie' },
+    indices: { solaire: 'Le capteur est enterré : il ne reçoit pas la lumière du Soleil.', electrique: 'Le capteur géothermique fournit de l\'énergie thermique à une pompe à chaleur.' },
+    sol: 'Le capteur prélève l\'énergie thermique du sous-sol et la fournit sous forme thermique.' },
+];
+function fabChaines() {
+  return melanger(DISPOSITIFS).slice(0, 2).map(d => () => ({ theme: 'Schéma énergétique', enonce: `<p>Complète le schéma énergétique ${d.nom.startsWith('une') ? 'd\'une' : 'd\'un'} ${d.nom.replace(/^une? /, '')}.</p>`,
+    parties: [partieChaine({ conv: d.conv, entree: d.entree, sorties: d.sorties, pertes: d.pertes, intrus: d.intrus, indices: d.indices, noms: d.noms, solution: `<p>${d.sol}</p>` })] }));
+}
+
+/* ---------- Groupe 2 : type de conversion ---------- */
+const SITUATIONS = [
+  ['Un chauffe-eau solaire fournit l\'eau chaude d\'une maison.', 'th'], ['Un four solaire concentre la lumière pour cuire les aliments.', 'th'],
+  ['Des capteurs réchauffent l\'eau d\'une piscine.', 'th'], ['Un panneau chauffe l\'air qui circule dans une maison.', 'th'],
+  ['Une calculatrice fonctionne grâce à une petite cellule placée au-dessus de l\'écran.', 'pv'], ['Les panneaux d\'un satellite alimentent ses appareils électroniques.', 'pv'],
+  ['Un lampadaire autonome recharge sa batterie le jour.', 'pv'], ['Une toiture solaire injecte de l\'électricité dans le réseau.', 'pv'],
+];
+function fabTypes() {
+  return melanger(SITUATIONS).slice(0, 2).map(([t, rep]) => () => ({ theme: 'Type de conversion', enonce: `<p>${t}</p>`,
+    parties: [fq.choix('Quelle conversion de l\'énergie lumineuse est réalisée ?', [o('th', 'photothermique (énergie thermique)'), o('pv', 'photovoltaïque (énergie électrique)')], rep,
+      { melanger: false, indices: { th: 'Le dispositif fournit de l\'énergie électrique (appareils, batterie, réseau) : c\'est une conversion photovoltaïque.', pv: 'Le dispositif chauffe (eau, air, aliments) : il fournit de l\'énergie thermique, c\'est une conversion photothermique.' },
+        solution: `<p>${rep === 'th' ? 'Le dispositif fournit de l\'énergie <b>thermique</b> : conversion photothermique.' : 'Le dispositif fournit de l\'énergie <b>électrique</b> : conversion photovoltaïque (photoélectrique).'}</p>` })] }));
+}
+
+/* ---------- Groupe 3 : calculer un rendement ---------- */
+// panneaux photovoltaïques (r de 12 à 20 %) ou capteurs thermiques (r de 45 à 65 %)
+function tirerAppareil() {
+  return hasard([
+    () => { const a = hasard([800, 1000, 1200, 1500, 2000, 2400]), r = hasard([.12, .14, .15, .16, .18, .2]); return { qui: 'Un panneau photovoltaïque', recu: 'une puissance lumineuse', fourni: 'une puissance électrique', a, r, u: Math.round(r * a) }; },
+    () => { const a = hasard([1000, 1500, 2000, 2500, 3000]), r = hasard([.45, .5, .55, .6, .65]); return { qui: 'Un capteur solaire thermique', recu: 'une puissance lumineuse', fourni: 'une puissance thermique à l\'eau', a, r, u: Math.round(r * a) }; },
+  ])();
+}
+function qRendement() {
+  const x = tirerAppareil(), r = x.u / x.a;
+  return { theme: 'Calculer un rendement', enonce: `<p>${x.qui} reçoit ${x.recu} de ${fmt(x.a)} W et fournit ${x.fourni} de ${fmt(x.u)} W.</p>`,
+    parties: [fq.nombre('Calcule son rendement (nombre décimal, 2 chiffres après la virgule).', 'r =', r, '', { signe: false, tol: .006, dec: 2,
+      diag: v => (pr(v, x.a / x.u) ? 'Tu as calculé P<sub>absorbée</sub> / P<sub>utile</sub> : un rendement est toujours plus petit que 1.' : pr(v, r * 100) ? 'C\'est le pourcentage : écris le nombre décimal.' : `r = ${Pu} / ${Pa} = ${fmt(x.u)} / ${fmt(x.a)}.`),
+      solution: calc(`r = ${fr(Pu, Pa)} = ${fr(fmt(x.u) + ' W', fmt(x.a) + ' W')} = ${c(fmt(r, 2) + ' = ' + pct(r))}`) })] };
+}
+function qRendementPct() {
+  const [qui, a, u, unite] = hasard([['Un panneau photovoltaïque', 60, 9, 'kWh'], ['Une centrale photovoltaïque', 250, 40, 'MWh'], ['Un capteur thermique', 20, 11, 'kWh'], ['Une toiture photovoltaïque', 400, 68, 'kWh'], ['Un chauffe-eau solaire', 30, 15, 'kWh']]);
+  const r = u / a;
+  return { theme: 'Rendement en pourcentage', enonce: `<p>${qui} reçoit ${fmt(a)} ${unite} d'énergie lumineuse et fournit ${fmt(u)} ${unite} d'énergie utile.</p>`,
+    parties: [fq.nombre('Calcule son rendement, en pourcentage.', 'r =', r * 100, '%', { signe: false, tol: .2,
+      diag: v => (pr(v, r) ? 'C\'est le nombre décimal : multiplie par 100 pour l\'avoir en %.' : pr(v, a / u * 100) || pr(v, a / u) ? `C'est E<sub>utile</sub> / E<sub>absorbée</sub> : ${fmt(u)} / ${fmt(a)}.` : `r = ${fmt(u)} / ${fmt(a)}, puis × 100.`),
+      solution: calc(`r = ${fr('E<sub>utile</sub>', 'E<sub>absorbée</sub>')} = ${fr(fmt(u) + ' ' + unite, fmt(a) + ' ' + unite)} = ${fmt(r, 3).replace(/0+$/, '')} = ${c(pct(r))}`) })] };
+}
+
+/* ---------- Groupe 4 : P_utile ou P_absorbée avec le rendement ---------- */
+function qPutile() {
+  const x = tirerAppareil();
+  return { theme: 'Puissance utile', enonce: `<p>${x.qui} de rendement ${pct(x.r)} reçoit ${x.recu} de ${fmt(x.a)} W.</p>`,
+    parties: [fq.nombre('Calcule la puissance utile qu\'il fournit.', `${Pu} =`, x.r * x.a, 'W', { signe: false, tol: .5,
+      diag: v => (pr(v, x.r * 100 * x.a) ? `Écris le rendement en nombre décimal : ${pct(x.r)} = ${fmt(x.r, 2)}.` : pr(v, x.a / x.r) ? 'On <b>multiplie</b> : P<sub>utile</sub> = r × P<sub>absorbée</sub> (elle est plus petite que P<sub>absorbée</sub>).' : `${Pu} = r × ${Pa} = ${fmt(x.r, 2)} × ${fmt(x.a)}.`),
+      solution: calc(`${Pu} = r × ${Pa} = ${fmt(x.r, 2)} × ${fmt(x.a)} W = ${c(fmt(x.r * x.a) + ' W')}`) })] };
+}
+function qPabsorbee() {
+  const x = tirerAppareil();
+  return { theme: 'Puissance absorbée', enonce: `<p>${x.qui} de rendement ${pct(x.r)} fournit ${x.fourni} de ${fmt(x.r * x.a)} W.</p>`,
+    parties: [fq.nombre('Quelle puissance lumineuse reçoit-il ?', `${Pa} =`, x.a, 'W', { signe: false, tol: .5,
+      diag: v => (pr(v, x.r * x.r * x.a) ? 'On <b>divise</b> par le rendement : P<sub>absorbée</sub> = P<sub>utile</sub> / r (elle est plus grande que P<sub>utile</sub>).' : pr(v, x.a / 100) ? `Écris le rendement en nombre décimal : ${pct(x.r)} = ${fmt(x.r, 2)}.` : `${Pa} = ${Pu} / r = ${fmt(x.r * x.a)} / ${fmt(x.r, 2)}.`),
+      solution: calc(`${Pa} = ${fr(Pu, 'r')} = ${fr(fmt(x.r * x.a) + ' W', fmt(x.r, 2))} = ${c(fmt(x.a) + ' W')}`) })] };
+}
+
+/* ---------- Groupe 5 : puissance perdue, puis rendement ---------- */
+function qPertes() {
+  const x = tirerAppareil(), pp = x.a - x.u, r = x.u / x.a;
+  return { theme: 'Puissance perdue et rendement', enonce: `<p>${x.qui} reçoit ${x.recu} de ${fmt(x.a)} W ; il perd ${fmt(pp)} W sous forme thermique.</p>`,
+    parties: [fq.nombre('a) Quelle puissance utile fournit-il ?', `${Pu} =`, x.u, 'W', { signe: false, tol: .5,
+        diag: v => (pr(v, x.a + pp) ? 'L\'énergie perdue ne s\'ajoute pas : P<sub>absorbée</sub> = P<sub>utile</sub> + P<sub>perdue</sub>, donc on la <b>retire</b>.' : `${Pu} = ${Pa} − ${Pp}.`),
+        solution: calc(`${Pu} = ${Pa} − ${Pp} = ${fmt(x.a)} − ${fmt(pp)} = ${c(fmt(x.u) + ' W')}`) }),
+      fq.nombre('b) Calcule son rendement, en pourcentage.', 'r =', r * 100, '%', { signe: false, tol: .2,
+        diag: v => (pr(v, pp / x.a * 100) ? 'Tu as calculé la part <b>perdue</b> : le rendement utilise la puissance <b>utile</b>.' : pr(v, r) ? 'Multiplie par 100 pour l\'avoir en %.' : `r = ${fmt(x.u)} / ${fmt(x.a)}, puis × 100.`),
+        solution: calc(`r = ${fr(fmt(x.u) + ' W', fmt(x.a) + ' W')} = ${c(pct(r))}`) })] };
+}
+
+/* ---------- Groupe 6 : technologies de cellules (doc. 2 de l'activité) ---------- */
+function qCellules() {
+  const tab = `<div class="el-defile"><table class="el-tab"><tr><th>Silicium</th><th>monocristallin</th><th>multicristallin</th><th>amorphe</th></tr>
+    <tr><th>Part de marché</th><td>40 %</td><td>45 %</td><td>2 %</td></tr><tr><th>Rendement</th><td>14 à 16 %</td><td>12 à 14 %</td><td>5 à 7 %</td></tr>
+    <tr><th>Coût de fabrication</th><td>+++</td><td>++</td><td>+</td></tr></table></div>`;
+  const opts = [o('mono', 'monocristallin'), o('multi', 'multicristallin'), o('amo', 'amorphe')];
+  const [q, bonne, sol] = hasard([
+    ['Quelle cellule a le meilleur rendement ?', 'mono', 'Le monocristallin : 14 à 16 %.'],
+    ['Quelle cellule coûte le moins cher à fabriquer ?', 'amo', 'L\'amorphe (+), mais son rendement est faible (5 à 7 %).'],
+    ['Quelle cellule est le meilleur compromis entre prix et rendement ?', 'multi', 'Le multicristallin : rendement moyen (12 à 14 %), coût moyen ; c\'est d\'ailleurs le plus répandu (45 %).'],
+  ]);
+  return { theme: 'Technologies de cellules', enonce: `<p>Voici les trois principales technologies de cellules photovoltaïques.</p>${tab}`,
+    parties: [fq.choix(q, opts, bonne, { melanger: false, indice: 'Lis la bonne ligne du tableau : rendement, coût, ou les deux à la fois.', solution: `<p>${sol}</p>` })] };
+}
+
+// tirage : 2 + 2 + 2 + 2 + 1 + 1 questions
+function tirage() {
+  const ch = fabChaines(), ty = fabTypes();
+  return [ch[0](), ty[0](), qRendement(), qPutile(), ch[1](), qRendementPct(), qPabsorbee(), ty[1](), qPertes(), qCellules()];
+}
+
+EL.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Capteurs et rendement',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : compléter des schémas énergétiques, reconnaître une conversion photothermique ou photovoltaïque, calculer un rendement et l\'utiliser.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2_cours.html', label: 'Module 2 : conversion photothermique →' },
+});
+EL.menu('module_1_questions');
+</script>
+</body>
+</html>

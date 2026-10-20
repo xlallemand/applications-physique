@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : panneau photovoltaïque et puissance solaire — Chapitre 10 : Énergie transportée par la lumière</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="el.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="el.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS</span>
+    <h2 class="er-titre">Panneau photovoltaïque et puissance solaire</h2>
+    <p class="er-contexte">La <b>caractéristique I = f(U)</b> d'un panneau permet de trouver son <b>point de fonctionnement</b>, où la puissance électrique P = U × I est maximale. On calcule ensuite la <b>puissance solaire reçue</b> et le <b>rendement</b> du panneau.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Caractéristique I(U), point de fonctionnement (P = U × I maximale),
+      tension à vide ; outil du rectangle O-U-I-point (EL.partiePanneau) :
+      son aire vaut P, la courbe P(U) suit en dessous
+   2. Variante : la courbe P(U), P_max est son sommet
+   3. « Question bac » : le circuit de mesure (appareils à placer)
+   4. Puissance solaire reçue : irradiance × S (proportionnalité ou unités),
+      exemple du professeur 500 W·m⁻² × 2,4 m² = 1 200 W ; E = P × Δt
+   5. Rendement d'un panneau ; surface de N cellules carrées
+   Caractéristique du cours (500 W·m⁻²) : U_nominal ≈ 18 V, I_nominal ≈ 0,52 A,
+   P_max ≈ 9,4 W, tension à vide 22 V (EL.carac('cours')).
+   Valeurs (vérifiées par un script) : panneau des « À toi » de point de
+   puissance maximale (15 V ; 3,0 A) : P = 45 W, tension à vide ≈ 18,3 V ;
+   panneau de (30 V ; 8,0 A) : P_max = 240 W ; 800 × 1,6 = 1 280 W ;
+   1 280 × 7 200 ≈ 9,22 × 10⁶ J ; 72 × 0,125² = 1,125 m² ; 1 000 × 1,125 = 1 125 W ;
+   180 / 1 125 = 16 % ; 36 × 0,100² = 0,36 m² ; 900 × 0,36 = 324 W ; 50 / 324 ≈ 15,4 %.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, proche, fr, fmt, carac, caracEchelle, figCarac, figPU, partiePanneau, partieCircuit, circuit, versCours } = EL;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .03);
+
+const COURS_P = carac('cours');
+// panneaux des « À toi » : même forme de caractéristique, mise à l'échelle
+const P15 = caracEchelle(15, 3, { u: { max: 20, pas: 5, sous: 1 }, i: { max: 4, pas: 1, sous: .5 }, p: { max: 50, pas: 10 } });
+const P30 = caracEchelle(30, 8, { u: { max: 40, pas: 5, sous: 1 }, i: { max: 10, pas: 2, sous: 1 }, p: { max: 300, pas: 50 } });
+
+/* ---------- 1. Caractéristique et point de fonctionnement ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. La caractéristique I = f(U) d\'un panneau');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>On mesure l'intensité I du courant fourni par un panneau éclairé pour différentes tensions U à ses bornes : c'est sa <b>caractéristique</b>.</p>
+      ${figCarac(COURS_P, { point: COURS_P.mpp.u, rect: true, vide: true, etiq: 'point de fonctionnement' })}
+      <div class="cle"><p><b class="cle-titre">Point de fonctionnement.</b> C'est le point où la puissance électrique</p>
+        <p class="crs-formule">P = U × I</p>
+        <p>est <b>maximale</b> : quand U et I sont tous les deux grands en même temps, juste avant le « coude » de la courbe. On y lit P<sub>max</sub> = U<sub>nominal</sub> × I<sub>nominal</sub>.</p>
+        <p>La <b>tension à vide</b> est la tension pour I = 0 (dernier point de la courbe).</p></div>
+      <p>P = U × I est l'<b>aire du rectangle</b> grisé : le point de fonctionnement est celui qui donne le plus grand rectangle.</p>
+    </div>
+    ${exemple(`<p>Sur la caractéristique ci-dessus (éclairement 500 W·m<sup>−2</sup>) :</p>
+      ${calc(`U<sub>nominal</sub> ≈ 18 V ; I<sub>nominal</sub> ≈ 0,52 A ; P<sub>max</sub> = 18 × 0,52 ≈ ${c('9,4 W')}`)}
+      <p>Tension à vide : U = 22 V (pour I = 0).</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Le plus grand rectangle', enonce: '<p>Voici la caractéristique d\'un autre panneau. Fais glisser le point sur la courbe : le rectangle a pour aire P = U × I, et la courbe P(U) en dessous suit ton point.</p>',
+      parties: [partiePanneau({ def: P15, depart: 5,
+        solution: '<p>Le rectangle est le plus grand au coude de la courbe : U ≈ 15 V et I ≈ 3,0 A. À gauche, U est petite ; à droite, I s\'effondre.</p>' })] },
+    { titre: 'Les valeurs du panneau',
+      parties: [{ type: 'nombre', q: 'Calcule la puissance maximale de ce panneau, P<sub>max</sub> = U<sub>nominal</sub> × I<sub>nominal</sub>.', label: 'P<sub>max</sub> =', valeur: 45, unite: 'W', signe: false, tol: 2.5, affiche: '45',
+          diag: v => (pr(v, 15 / 3) || pr(v, 3 / 15) ? 'P = U × I : on multiplie.' : pr(v, 18.3 * 3.17) ? 'Tu as pris la tension à vide et le courant pour U = 0 : prends les valeurs du point de fonctionnement.' : 'Au point de fonctionnement : U ≈ 15 V, I ≈ 3,0 A.'),
+          solution: calc(`P<sub>max</sub> = 15 V × 3,0 A = ${c('45 W')}`) },
+        { type: 'nombre', q: 'Quelle est la tension à vide de ce panneau ?', label: 'U =', valeur: P15.uv, unite: 'V', signe: false, tol: .6, affiche: fmt(P15.uv, 1),
+          diag: v => (pr(v, 15) ? 'La tension à vide est la tension pour I = 0 : le point où la courbe rejoint l\'axe des U.' : 'Lis l\'abscisse du point où la courbe coupe l\'axe des tensions.'),
+          solution: `<p>Pour I = 0 : U ≈ ${fmt(P15.uv, 1)} V.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. La courbe P(U) ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Variante : la courbe P(U)');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Un sujet peut donner directement la courbe P(U) du panneau.</p>
+      <div class="cle"><p><b class="cle-titre">Lecture.</b> P<sub>max</sub> est le <b>sommet</b> de la courbe P(U) ; son abscisse est U<sub>nominal</sub>.</p></div>
+    </div>
+    ${exemple(`<p>Le panneau du cours (500 W·m<sup>−2</sup>) :</p>${figPU(COURS_P, { sommet: true })}
+      ${calc(`Sommet : U<sub>nominal</sub> ≈ 18 V et ${c('P<sub>max</sub> ≈ 9,4 W')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Un module de toiture', enonce: `<p>Voici la courbe P(U) d'un module photovoltaïque de toiture.</p>${figPU(P30)}`,
+      parties: [{ type: 'nombre', q: 'Lis la puissance maximale du module.', label: 'P<sub>max</sub> =', valeur: P30.mpp.p, unite: 'W', signe: false, tol: 8, affiche: '240',
+          diag: v => (v < 100 ? 'Lis l\'ordonnée du <b>sommet</b> de la courbe, sur l\'axe des P (une graduation = 50 W).' : 'Repère le point le plus haut de la courbe, puis lis sa valeur sur l\'axe vertical.'),
+          solution: '<p>Le sommet est à P<sub>max</sub> ≈ 240 W.</p>' },
+        { type: 'nombre', q: 'Pour quelle tension U<sub>nominal</sub> ?', label: 'U =', valeur: 30, unite: 'V', signe: false, tol: 1, affiche: '30',
+          diag: v => (v > 34 ? 'Ça, c\'est la tension à vide (P = 0) : lis l\'abscisse du sommet.' : 'Descends du sommet jusqu\'à l\'axe des U.'),
+          solution: '<p>Le sommet est à U<sub>nominal</sub> ≈ 30 V.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Le circuit de mesure ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Le circuit pour tracer la caractéristique');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>C'est une <b>question de bac</b> : « dessiner le schéma du circuit pour tracer cette caractéristique ».</p>
+      ${circuit()}
+      <div class="cle"><p><b class="cle-titre">Le circuit.</b> Le panneau éclairé alimente une <b>résistance variable</b>. Le <b>voltmètre</b> est branché en <b>dérivation</b> aux bornes du panneau (il mesure U), l'<b>ampèremètre</b> en <b>série</b> (il mesure I). En faisant varier la résistance, on obtient chaque point (U ; I).</p></div>
+    </div>`);
+  c_.aToi(carte, [
+    { titre: 'Refais le schéma',
+      parties: [versCours(partieCircuit())] },
+    { titre: 'Les branchements',
+      parties: [{ type: 'choix', q: 'Comment branche-t-on l\'ampèremètre ?', options: [o('serie', 'en série'), o('der', 'en dérivation')], bonne: 'serie', melanger: false,
+          indices: { der: 'L\'ampèremètre mesure le courant qui le <b>traverse</b> : il doit être sur le fil, en série.' }, solution: '<p>En série : tout le courant fourni par le panneau le traverse.</p>' },
+        { type: 'choix', q: 'Pourquoi utilise-t-on une résistance <b>variable</b> ?', colonne: true,
+          options: [o('ok', 'Pour obtenir plusieurs points (U ; I) de la caractéristique'), o('prot', 'Pour protéger le panneau d\'un court-circuit'), o('ecl', 'Pour changer l\'éclairement du panneau')], bonne: 'ok',
+          indices: { prot: 'Ce n\'est pas son rôle ici : chaque valeur de la résistance donne un nouveau couple (U ; I).', ecl: 'L\'éclairement dépend de la lumière reçue, pas du circuit.' },
+          solution: '<p>Chaque valeur de la résistance donne un point (U ; I) : on trace la courbe point par point.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Puissance solaire reçue ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. La puissance solaire reçue');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>La puissance solaire est donnée <b>par unité de surface</b>, en W·m<sup>−2</sup> : on l'appelle aussi <b>irradiance</b> (ou éclairement). Concentre-toi sur l'unité : 500 W·m<sup>−2</sup>, c'est 500 W reçus par chaque mètre carré.</p>
+      <div class="cle"><p><b class="cle-titre">Formules.</b></p>
+        <p class="crs-formule">P<sub>reçue</sub> = irradiance × S</p><p class="crs-formule">E = P × Δt</p>
+        <p>irradiance en W·m<sup>−2</sup>, S en m², P en W ; E en J (Δt en s) ou en Wh (Δt en h).</p></div>
+    </div>
+    ${exemple(`<p>Une irradiance de 500 W·m<sup>−2</sup> sur un panneau de S = 2,4 m².</p>
+      <p><b>Méthode 1 : la proportionnalité.</b></p>
+      <div class="crs-defile"><table class="crs-tab"><tr><th>Puissance</th><td>500 W</td><td>P<sub>reçue</sub></td></tr><tr><th>Surface</th><td>1 m²</td><td>2,4 m²</td></tr></table></div>
+      ${calc(`P<sub>reçue</sub> = ${fr('500 × 2,4', '1')} = ${c('1 200 W')}`)}
+      <p><b>Méthode 2 : la formule (et les unités).</b></p>
+      ${calc(`P<sub>reçue</sub> = 500 ${fr('W', 'm²')} × 2,4 m² = ${c('1 200 W')}`)}
+      <p>En 3 h : E = P × Δt = 1 200 W × 3 h = 3 600 Wh = 3,6 kWh.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Un panneau en été', enonce: '<p>Un panneau de 1,6 m² reçoit une irradiance de 800 W·m<sup>−2</sup>.</p>',
+      parties: [{ type: 'nombre', q: 'Calcule la puissance solaire reçue.', label: 'P<sub>reçue</sub> =', valeur: 1280, unite: 'W', signe: false, tol: .5,
+          diag: v => (pr(v, 800 / 1.6) || pr(v, 1.6 / 800) ? 'L\'unité W·m<sup>−2</sup> dit « W par m² » : on <b>multiplie</b> par la surface.' : 'P = 800 × 1,6.'),
+          solution: calc(`P<sub>reçue</sub> = 800 W·m<sup>−2</sup> × 1,6 m² = ${c('1 280 W')}`) },
+        { type: 'sci', q: 'Quelle énergie reçoit-il en 2 h, en joules ?', label: 'E =', valeur: 1280 * 7200, unite: 'J', cs: 3, rel: .01,
+          diag: v => (pr(v, 2560) ? 'Pour avoir des joules, la durée doit être en <b>secondes</b> : 2 h = 7 200 s.' : pr(v, 1280 * 120) ? '1 h = 3 600 s (et non 60 s).' : 'E = P × Δt = 1 280 × 7 200.'),
+          solution: calc('Δt = 2 h = 2 × 3 600 s = 7 200 s') + calc(`E = P × Δt = 1 280 W × 7 200 s ≈ ${c('9,22 × 10<sup>6</sup> J')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 5. Rendement d'un panneau ---------- */
+function etape5(c_) {
+  const carte = c_.carte('5. Le rendement d\'un panneau');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> 1. la surface du panneau : pour N cellules carrées de côté a (en <b>m</b>), S = N × a² ; 2. P<sub>reçue</sub> = irradiance × S ; 3. P<sub>électrique</sub> = U × I ; 4. η = P<sub>électrique</sub> / P<sub>reçue</sub>.</p></div>
+    </div>
+    ${exemple(`<p>Un module de 72 cellules carrées de 125 mm de côté, éclairé à 1 000 W·m<sup>−2</sup>, fournit 30 V et 6,0 A.</p>
+      ${calc('a = 125 mm = 0,125 m ; S = 72 × 0,125² = 1,125 m²')}
+      ${calc('P<sub>reçue</sub> = 1 000 × 1,125 = 1 125 W ; P<sub>électrique</sub> = 30 × 6,0 = 180 W')}
+      ${calc(`η = ${fr('180 W', '1 125 W')} = ${c('0,16 = 16 %')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Un petit panneau', enonce: '<p>Un panneau compte 36 cellules carrées de 100 mm de côté. Il est éclairé à 900 W·m<sup>−2</sup> et fournit une puissance électrique de 50 W.</p>',
+      parties: [{ type: 'nombre', q: 'Calcule la surface du panneau, en m².', label: 'S =', valeur: .36, unite: 'm²', signe: false, tol: .002,
+          diag: v => (pr(v, 360000) ? 'Convertis d\'abord le côté en mètres : 100 mm = 0,100 m.' : pr(v, 3.6) ? 'La surface d\'un carré est a² : 0,100² = 0,0100 m².' : pr(v, .01) ? 'C\'est la surface d\'<b>une</b> cellule : multiplie par 36.' : 'S = 36 × 0,100².'),
+          solution: calc(`S = 36 × (0,100 m)² = ${c('0,36 m²')}`) },
+        { type: 'nombre', q: 'Quelle puissance solaire reçoit-il ?', label: 'P<sub>reçue</sub> =', valeur: 324, unite: 'W', signe: false, tol: .5,
+          diag: v => (pr(v, 2500) ? 'P = irradiance × S : on multiplie.' : 'P = 900 × 0,36.'),
+          solution: calc(`P<sub>reçue</sub> = 900 × 0,36 = ${c('324 W')}`) },
+        { type: 'nombre', q: 'Calcule son rendement, en pourcentage (une décimale).', label: 'η =', valeur: 50 / 324 * 100, unite: '%', signe: false, tol: .1, dec: 1,
+          diag: v => (pr(v, 324 / 50 * 100) || pr(v, 324 / 50) ? 'η = P<sub>électrique</sub> / P<sub>reçue</sub> (plus petit que 1).' : pr(v, 50 / 324) ? 'Multiplie par 100 pour l\'avoir en %.' : 'η = 50 / 324, puis × 100.'),
+          solution: calc(`η = ${fr('50 W', '324 W')} ≈ ${c('15,4 %')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p><b>Point de fonctionnement</b> : là où P = U × I est maximale (U et I grands en même temps, au coude de la caractéristique). P<sub>max</sub> = U<sub>nominal</sub> × I<sub>nominal</sub>. Tension à vide : U pour I = 0. Sur une courbe P(U), P<sub>max</sub> est le sommet.</p></div>
+    <div class="cle"><p>Mesure : voltmètre en <b>dérivation</b>, ampèremètre en <b>série</b>, résistance variable.</p></div>
+    <div class="cle"><p>P<sub>reçue</sub> = irradiance (W·m<sup>−2</sup>) × S (m²) ; E = P × Δt ; η = P<sub>électrique</sub> / P<sub>reçue</sub>.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4_questions.html">Questions sur le panneau photovoltaïque →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_5.html">Module 5 : exercices</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, etape5, aRetenir]);
+EL.menu('module_4_cours');
+</script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : utilisation, lancé vers le haut — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 3 / 6</span>
+    <h2 class="er-titre">Utilisation : lancé vers le haut</h2>
+    <p class="er-contexte">Un objet lancé vers le haut ralentit : à la montée, le poids est opposé au déplacement. Au <b>sommet</b>, sa vitesse est <b>nulle</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 3 du module 4 : exemple 2 du cours (pomme lancée vers le
+   haut, v_B = 0 au sommet) avec le schéma, puis « À toi » à valeurs changées.
+   Valeurs (vérifiées par un script) : ex. 2 h = 5 m ; « À toi » : balle
+   lancée à 8,0 m/s → h = 3,2 m.
+   ============================================================ */
+const { exemple } = COURS;
+const { proche, fr, W, schemaMvt, partieDonnees, partieAngles, partieEquation, versCours } = EC;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const EC_ = 'E<sub>c</sub>', vA = 'v<sub>A</sub>', vB = 'v<sub>B</sub>';
+const v2 = x => `${x}<sup>2</sup>`;
+const G = 'm·s<sup>−2</sup>';
+
+/* ---------- 1. Exemple 2 : la hauteur atteinte ---------- */
+const LANCER = { sens: 'haut', objet: 'pomme', forces: ['P'], d: 'h' };
+function etape1(c_) {
+  const carte = c_.carte('1. Lancé vers le haut : la hauteur atteinte (exemple 2)');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="crs-attention"><p><b class="cle-titre">Important, à savoir.</b> Au <b>sommet</b> de sa trajectoire, un objet lancé vers le haut s'arrête un instant : <b>${vB} = 0</b>.</p></div>
+      <p>À la montée, le poids est opposé au déplacement : ${W('P')} = −m g h.</p>
+    </div>
+    ${exemple(`<p>On lance une pomme de masse m = 100 g vers le haut, avec une vitesse ${vA} = 10 m/s. À quelle hauteur va-t-elle monter ? (g = 10 ${G})</p>
+      ${schemaMvt(Object.assign({ angles: true }, LANCER), { m: '100 g', vA: '10 m/s', vB: '0 (sommet)', d: '?' })}
+      ${calc(`${EC_}(B) − ${EC_}(A) = ${W('P')}`)}
+      ${calc(`½ m ${v2(vB)} − ½ m ${v2(vA)} = −m g h`)}
+      ${calc(`½ × 100 × 10<sup>−3</sup> × 0 − ½ × 100 × 10<sup>−3</sup> × 10<sup>2</sup> = −100 × 10<sup>−3</sup> × 10 × h`)}
+      ${calc(`−5 = −1 × h &nbsp; donc &nbsp; ${c('h = 5 m')}`)}`, 'Exemple 2 (traité)')}`);
+  c_.aToi(carte, [{ titre: 'Une balle lancée vers le haut', enonce: `<p>On lance verticalement vers le haut une balle de <b>200 g</b>, avec une vitesse de <b>8,0 m/s</b>. On cherche la hauteur atteinte (g = 10 ${G}, air négligé).</p>`,
+    parties: [
+      versCours(partieDonnees(LANCER, { m: '200 g', vA: '8,0 m/s', vB: '0 m/s', d: '?' })),
+      versCours(partieAngles(LANCER)),
+      partieEquation(LANCER),
+      { type: 'nombre', q: 'Calcule la hauteur h atteinte.', label: 'h =', valeur: 3.2, unite: 'm', signe: false,
+        diag: v => (proche(v, -3.2) ? 'Une hauteur est positive : les deux membres sont négatifs (0 − ½ m v<sub>A</sub>² = −m g h), le signe − se simplifie.' : proche(v, 6.4) ? 'N\'oublie pas le ½ : ½ m v² = m g h.' : proche(v, .8) ? 'La vitesse est au carré : 8,0² = 64.' : 'h = v<sub>A</sub>² / (2 g).'),
+        solution: calc(`0 − ½ m ${v2(vA)} = −m g h donc h = ${fr(v2(vA), '2 g')} = ${fr('8,0<sup>2</sup>', '2 × 10')} = ${c('3,2 m')}`) },
+    ] }]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Lancer vers le haut : ${W('P')} = −m g h ; au sommet, <b>${vB} = 0</b>, donc h = ${fr(v2(vA), '2 g')}.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4d_cours.html">Utilisation : freinage →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#lancer">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+EC.menu('module_4c_cours');
+</script>
+</body>
+</html>

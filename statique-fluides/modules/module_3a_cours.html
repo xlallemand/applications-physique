@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : le principe fondamental de l'hydrostatique — Chapitre 9 : Statique des fluides</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="sf.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS · PARTIE A</span>
+    <h2 class="er-titre">Le principe fondamental de l'hydrostatique</h2>
+    <p class="er-contexte">Dans un liquide au repos, la pression <b>augmente avec la profondeur</b>. Le principe fondamental de l'hydrostatique relie la pression de deux points, un <b>point haut</b> et un <b>point bas</b>, à la hauteur h qui les sépare.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   P_bas = P_haut + ρ g h (ρ_eau = 1 000 kg·m⁻³, g = 9,8 m·s⁻²) ;
+   même altitude dans le même liquide → même pression ; surface libre
+   à l'air libre : P = P_atm = 10⁵ Pa ; vide : P = 0 Pa ;
+   calcul de tête : tous les 10 m d'eau, on gagne 1 bar.
+   Erreurs diagnostiquées : g oublié, h en cm, P_atm oubliée,
+   point haut et point bas inversés, surface libre prise à 0 Pa.
+   Valeurs (vérifiées par un script) : 1 000 × 9,8 × 2,0 = 1,96 × 10⁴ Pa ;
+   1 000 × 9,8 × 5,0 = 4,9 × 10⁴ Pa ; 900 × 9,8 × 0,40 ≈ 3,5 × 10³ Pa ;
+   de tête : 30 m → 4 bar ; 20 m → 3 bar ; 45 m → 5,5 bar ; 3 bar → 20 m.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, proche, fr, dessin } = SF;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .03);
+
+/* ---------- 1. Le principe ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Le principe fondamental de l\'hydrostatique');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Principe.</b> Dans un même liquide incompressible au repos, entre un point haut et un point bas :</p>
+        <p class="crs-formule">P<sub>point bas</sub> = P<sub>point haut</sub> + ρ × g × h</p>
+        <ul class="er-liste"><li>P en <b>Pa</b> ;</li><li>ρ : masse volumique du liquide en <b>kg·m<sup>−3</sup></b> (ρ<sub>eau</sub> = 1 000 kg·m<sup>−3</sup>) ;</li>
+          <li>g = 9,8 m·s<sup>−2</sup> ;</li><li>h = z<sub>haut</sub> − z<sub>bas</sub> : différence d'altitude entre les deux points, en <b>m</b>.</li></ul></div>
+      <p>Le point bas est plus profond : sa pression est plus grande, de ρ × g × h.</p>
+    </div>
+    ${exemple(`<p>Dans l'eau, deux points sont séparés par une hauteur h = 2,0 m. De combien la pression du point bas dépasse-t-elle celle du point haut ?</p>
+      ${calc(`P<sub>bas</sub> − P<sub>haut</sub> = ρ × g × h = 1 000 kg·m<sup>−3</sup> × 9,8 m·s<sup>−2</sup> × 2,0 m ≈ ${c('2,0 × 10<sup>4</sup> Pa')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: '5 m d\'eau',
+      parties: [{ type: 'sci', q: 'De combien la pression augmente-t-elle quand on descend de 5,0 m dans l\'eau (g = 9,8 m·s<sup>−2</sup>) ?', label: 'ρ × g × h =', valeur: 4.9e4, unite: 'Pa', cs: 2, rel: .02,
+        diag: v => (pr(v, 5000) ? 'Tu as oublié g : ρ × g × h.' : pr(v, 9800) ? 'Tu as oublié h : ρ × g × h.' : pr(v, 1.49e5) ? 'On demande l\'augmentation ρ × g × h, sans ajouter P<sub>atm</sub>.' : 'ρ × g × h = 1 000 × 9,8 × 5,0.'),
+        solution: calc(`ρ × g × h = 1 000 × 9,8 × 5,0 = ${c('4,9 × 10<sup>4</sup> Pa')}`) }] },
+    { titre: 'Dans de l\'huile', enonce: '<p>Dans une cuve d\'huile (ρ = 900 kg·m<sup>−3</sup>), deux points sont séparés de 40 cm.</p>',
+      parties: [{ type: 'sci', q: 'Calcule la différence de pression entre ces deux points.', label: 'ρ × g × h =', valeur: 900 * 9.8 * 0.4, unite: 'Pa', cs: 2, rel: .02,
+        diag: v => (pr(v, 900 * 9.8 * 40) ? 'h doit être en <b>mètres</b> : 40 cm = 0,40 m.' : pr(v, 1000 * 9.8 * 0.4) ? 'Ce n\'est pas de l\'eau : prends ρ = 900 kg·m<sup>−3</sup>.' : pr(v, 900 * 0.4) ? 'Tu as oublié g.' : 'ρ × g × h = 900 × 9,8 × 0,40.'),
+        solution: calc(`ρ × g × h = 900 × 9,8 × 0,40 ≈ ${c('3,5 × 10<sup>3</sup> Pa')}`) }] },
+    { titre: 'Point haut ou point bas ?', enonce: '<p>Dans un lac, le point A est à 3 m de profondeur, le point B à 1 m de profondeur.</p>',
+      parties: [{ type: 'choix', q: 'Lequel est le point haut ?', options: [o('B', 'B'), o('A', 'A'), o('aucun', 'Aucun : ça dépend de la pression')], bonne: 'B', melanger: false,
+        indices: { A: 'A est plus profond : c\'est le point bas.', aucun: 'Le point haut est simplement le plus haut des deux (le moins profond).' },
+        solution: '<p>B est le moins profond : c\'est le point haut. A est le point bas, à la plus grande pression : P<sub>A</sub> = P<sub>B</sub> + ρ × g × 2 m.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Même altitude, surface libre, vide ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Même altitude, surface libre, vide');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Même altitude.</b> Dans un même liquide au repos, deux points à la <b>même altitude</b> ont la <b>même pression</b> (h = 0), quelle que soit la forme du récipient.</p></div>
+      ${dessin('vase')}
+      <div class="crs-attention"><p><b class="cle-titre">Très important.</b> À la <b>surface libre</b> d'un liquide à l'air libre (château d'eau, piscine, lac), la pression est celle de l'air : <b>P = P<sub>atm</sub> = 10<sup>5</sup> Pa</b>.</p>
+        <p>Dans le <b>vide</b> (en haut d'un baromètre à mercure), <b>P = 0 Pa</b>.</p></div>
+    </div>`);
+  c_.aToi(carte, [
+    { titre: 'Un château d\'eau', enonce: '<p>La cuve d\'un château d\'eau est ouverte sur l\'air.</p>',
+      parties: [{ type: 'choix', q: 'Quelle est la pression à la surface de l\'eau de la cuve ?', options: [o('atm', 'P<sub>atm</sub> = 10<sup>5</sup> Pa'), o('zero', '0 Pa'), o('rgh', 'ρ × g × h'), o('rien', 'On ne peut pas savoir')], bonne: 'atm', melanger: false,
+        indices: { zero: '0 Pa, c\'est le vide. Ici, l\'air appuie sur la surface.', rgh: 'Il n\'y a pas de hauteur d\'eau au-dessus de la surface.', rien: 'C\'est une surface libre à l\'air libre : sa pression est connue.' },
+        solution: '<p>Surface libre à l\'air libre : P = P<sub>atm</sub> = 10<sup>5</sup> Pa. C\'est souvent la pression connue du point haut.</p>' }] },
+    { titre: 'Dans une piscine', enonce: '<p>Dans une piscine, A est à 1,2 m de profondeur près du bord, B à 1,2 m de profondeur au milieu du bassin.</p>',
+      parties: [{ type: 'choix', q: 'Compare les pressions en A et en B.', options: [o('egal', 'P<sub>A</sub> = P<sub>B</sub>'), o('A', 'P<sub>A</sub> > P<sub>B</sub>'), o('B', 'P<sub>B</sub> > P<sub>A</sub>')], bonne: 'egal', melanger: false,
+        indices: { A: 'Le bord ne change rien : seule compte la profondeur.', B: 'Au milieu, il n\'y a pas plus d\'eau <b>au-dessus</b> de B qu\'au-dessus de A.' },
+        solution: '<p>Même liquide, même altitude : P<sub>A</sub> = P<sub>B</sub>.</p>' }] },
+    { titre: 'Un baromètre à mercure', enonce: '<p>En haut du tube d\'un baromètre à mercure, au-dessus du mercure, il n\'y a que du vide.</p>',
+      parties: [{ type: 'choix', q: 'Quelle est la pression juste au-dessus du mercure ?', options: [o('zero', '0 Pa'), o('atm', 'P<sub>atm</sub> = 10<sup>5</sup> Pa'), o('mm', '760 mm')], bonne: 'zero', melanger: false,
+        indices: { atm: 'Le tube est fermé : l\'air n\'y entre pas. Il n\'y a que du vide.', mm: 'C\'est une hauteur de mercure, pas la pression dans le vide.' },
+        solution: '<p>Dans le vide, P = 0 Pa.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Calculer de tête ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Calculer de tête');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Remarque.</b> Avec ρ<sub>eau</sub> = 1 000 kg·m<sup>−3</sup> et g ≈ 10 m·s<sup>−2</sup>, pour 10 m de profondeur :</p>
+        <p class="crs-formule">ρ × g × h = 1 000 × 10 × 10 = 10<sup>5</sup> Pa = 1 bar</p>
+        <p><b>Tous les 10 m dans l'eau, on gagne 1 bar.</b></p></div>
+    </div>
+    ${exemple(`<p>Un plongeur descend à 30 m de profondeur. La pression à la surface vaut 1 bar.</p>
+      ${calc(`P ≈ 1 bar + 3 × 1 bar = ${c('4 bar')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'À 20 m',
+      parties: [{ type: 'nombre', q: 'Estime la pression absolue à 20 m de profondeur dans la mer.', label: 'P ≈', valeur: 3, unite: 'bar', signe: false, tol: .15,
+        diag: v => (pr(v, 2) ? 'N\'oublie pas la pression de l\'air à la surface : 1 bar.' : pr(v, 21) ? '20 m d\'eau, c\'est 2 bar (1 bar tous les 10 m), pas 20.' : 'Surface : 1 bar ; 20 m d\'eau : + 2 bar.'),
+        solution: calc(`P ≈ 1 bar + 2 × 1 bar = ${c('3 bar')}`) }] },
+    { titre: 'Au pied d\'un château d\'eau', enonce: '<p>La surface de l\'eau d\'un château d\'eau est 45 m plus haut qu\'un robinet.</p>',
+      parties: [{ type: 'nombre', q: 'Estime la pression absolue au robinet.', label: 'P ≈', valeur: 5.5, unite: 'bar', signe: false, tol: .15,
+        diag: v => (pr(v, 4.5) ? 'N\'oublie pas P<sub>atm</sub> à la surface libre : + 1 bar.' : pr(v, 46) ? '45 m d\'eau, c\'est 4,5 bar.' : 'Surface : 1 bar ; 45 m d\'eau : + 4,5 bar.'),
+        solution: calc(`P ≈ 1 + 4,5 = ${c('5,5 bar')}`) }] },
+    { titre: 'Quelle hauteur ?', enonce: '<p>On veut une pression absolue de 3 bar à un robinet alimenté par un réservoir ouvert à l\'air libre.</p>',
+      parties: [{ type: 'nombre', q: 'Estime la hauteur d\'eau nécessaire au-dessus du robinet.', label: 'h ≈', valeur: 20, unite: 'm', signe: false, tol: 1,
+        diag: v => (pr(v, 30) ? 'La surface est déjà à 1 bar : il ne manque que 2 bar.' : pr(v, 2) ? '1 bar tous les <b>10 m</b> : 2 bar → 20 m.' : 'Il manque 3 − 1 = 2 bar, à raison de 1 bar tous les 10 m.'),
+        solution: calc(`Il manque 3 − 1 = 2 bar, soit h ≈ ${c('20 m')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">P<sub>bas</sub> = P<sub>haut</sub> + ρ × g × h</p><p>P en Pa, ρ en kg·m<sup>−3</sup>, g = 9,8 m·s<sup>−2</sup>, h en m (z<sub>haut</sub> − z<sub>bas</sub>).</p></div>
+    <div class="cle"><p>Même liquide, même altitude : même pression.</p></div>
+    <div class="cle"><p>Surface libre à l'air libre : <b>P = P<sub>atm</sub> = 10<sup>5</sup> Pa</b>. Vide : <b>P = 0 Pa</b>.</p></div>
+    <div class="cle"><p>De tête : tous les 10 m dans l'eau, on gagne 1 bar.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Partie B : la méthode du schéma →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#principe">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+SF.menu('module_3a_cours');
+</script>
+</body>
+</html>

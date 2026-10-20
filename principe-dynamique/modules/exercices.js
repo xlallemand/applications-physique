@@ -9,9 +9,10 @@
    parties: [p] ou une fonction qui les fabrique (ex. 2 : le bilan des forces garde son état) } ; chaque partie suit le format de PFD.PARTIES avec
    p.q (question) et p.correction (correction détaillée : formule,
    grandeur isolée, application numérique avec les unités).
-   Le bilan des forces de l'ex. 2 utilise l'outil PFD.bilan ; les
-   résultantes de l'ex. 9 b) se tracent dans le quadrillage
-   (cinematique/modules/vecteurs.js).
+   Bilans des forces avec la méthode du diagramme objet-action (outil
+   PFD.bilan) : complet pour l'ex. 2, arrêté au diagramme pour les ex. 11
+   et 5 (la figure est dans l'énoncé) ; les résultantes de l'ex. 9 b) se
+   tracent dans le quadrillage (cinematique/modules/vecteurs.js).
 
    Valeurs vérifiées par un script. Écarts avec les corrections :
      ex. 3 : l'énoncé dit « sur la voiture » : on écrit « sur l'avion » ;
@@ -36,6 +37,8 @@
   const scient = (q, label, valeur, unite, correction, opts) => Object.assign({ type: 'sci', q, label, valeur, unite, correction, cs: 3, rel: .01 }, opts);
   // les parties d'un bilan des forces : la correction est la solution de chaque étape
   const parties = q => q.parties.map(p => Object.assign({}, p, { correction: p.solution }));
+  // les étapes d'un bilan placées dans une question de l'exercice : num(k) remplace la numérotation de PFD.bilan
+  const etapes = (q, num) => parties(q).map((p, k) => Object.assign(p, { q: num(k) + p.q.replace(/^\d+\. /, '') }));
 
   /* ---------- petites figures (SVG) ---------- */
   // flèche ; coul : couleur de la force (une couleur par force, voir PFD.COUL)
@@ -69,6 +72,22 @@
       { acteur: 'herbe', type: 'contact', lib: 'réaction perpendiculaire de l\'herbe', pts: ['A'], angs: [90], noms: ['RN'], diagDir: 'la réaction normale est <b>perpendiculaire au sol</b> : verticale, vers le haut.', indNom: `La réaction perpendiculaire au support se note ${nomV('RN')}.` },
       { acteur: 'herbe', type: 'contact', lib: 'frottement de l\'herbe', pts: ['A'], angs: [180], noms: ['f'], diagDir: 'les frottements s\'opposent au mouvement de la balle vers la droite : <b>vers la gauche</b>.', indNom: `Les frottements se notent ${nomV('f')}.` }],
     nomsProposes: ['P', 'RN', 'R', 'f', 'T', 'Farchi'] };
+
+  /* ---------- diagrammes objet-action des ex. 11 et 5 (sans dessin : la figure est dans l'énoncé) ---------- */
+  const [TERRE, , AIR] = GOLF.acteurs;
+  const BLOC = { id: 'bloc', titre: 'Bloc tiré par une corde', systeme: 'le bloc',
+    acteurs: [TERRE, { id: 'sol', nom: 'le sol', pourquoi: 'il touche le bloc', manque: 'Le sol touche le bloc : il exerce une force de contact.' },
+      { id: 'corde', nom: 'la corde', pourquoi: 'elle touche le bloc et le tire', manque: 'La corde touche le bloc : elle exerce une force de contact.' }, AIR],
+    air: { neglige: true, raison: 'Le bloc n\'est pas très léger pour son volume, et rien n\'indique une grande vitesse : on néglige la force de l\'air.' },
+    distracteurs: [{ id: 'tireur', nom: 'la personne qui tire', diag: 'La personne tient la corde, mais elle ne touche pas le bloc : c\'est la corde qui le tire.' }],
+    forces: [{ acteur: 'terre', type: 'distance', noms: ['P'] }, { acteur: 'sol', type: 'contact', noms: ['R'] }, { acteur: 'corde', type: 'contact', noms: ['F'] }] };
+  const AUTO = { id: 'auto', titre: 'Automobile qui démarre', systeme: 'la voiture',
+    acteurs: [TERRE, { id: 'route', nom: 'la route', pourquoi: 'elle touche les roues', manque: 'La route touche les roues : elle exerce une force de contact.' },
+      Object.assign({}, AIR, { pourquoi: 'il touche la voiture et la freine (frottements)' })],
+    air: { neglige: false, cause: 'frottements', raison: 'Une voiture a une grande surface face à l\'air : ses frottements ne sont pas négligeables (l\'énoncé évalue les frottements à f = 250 N).', indice: 'L\'énoncé parle de forces de frottement.' },
+    distracteurs: [{ id: 'moteur', nom: 'le moteur', diag: 'Le moteur fait partie de la voiture (le système) : il n\'exerce pas de force extérieure. C\'est la route qui pousse les roues motrices vers l\'avant.' },
+      { id: 'feu', nom: 'le feu tricolore', diag: 'Le feu ne touche pas la voiture : il n\'exerce aucune force.' }],
+    forces: [{ acteur: 'terre', type: 'distance', noms: ['P'] }, { acteur: 'route', type: 'contact', noms: ['RN'] }, { acteur: 'route', type: 'contact', noms: ['Fm'] }, { acteur: 'air', type: 'contact', noms: ['f'] }] };
 
   // ex. 9 b) : forces au point G (1 carreau = 1 N)
   const CAS1 = [{ nom: 'F_1', coord: [0, 2] }, { nom: 'F_2', coord: [3, 0] }, { nom: 'F_3', coord: [0, -4] }];
@@ -161,31 +180,35 @@
       ] },
 
     /* ============================ EXERCICE 11 ============================ */
-    { id: '11', groupe: 'direction', titre: 'Exercice 11 p. 86 : un bloc tiré', desc: 'Résultante, bilan des forces, force de traction.',
+    { id: '11', groupe: 'direction', titre: 'Exercice 11 p. 86 : un bloc tiré', desc: 'Résultante, bilan des forces (diagramme objet-action), force de traction.',
       contexte: `<p class="er-contexte">Le bloc ci-dessous glisse le long du sol sans frottement.</p>
         ${svg(300, 110, `<rect x="10" y="88" width="280" height="10" class="pfd-sc-obj"/><rect x="60" y="44" width="56" height="44" class="pfd-sc-sys"/><circle cx="88" cy="66" r="3" class="pfd-pt-m"/><text x="76" y="62" class="pfd-pt-t">G</text>` +
           `<line x1="116" y1="66" x2="246" y2="66" class="pfd-sc-fil"/><path d="M246,58 q 10,-4 18,2 q 6,6 0,12 q -8,6 -18,2 z" class="pfd-sc-obj"/>${fl(92, 30, 150, 30)}${etiq(121, 22, 'a', '')}`, 'Bloc tiré par une corde horizontale, accélération vers la droite')}
         <ul class="pfd-donnees"><li>a) Tracer, sans soucis d'échelle, la résultante des forces s'exerçant sur le bloc.</li><li>b) Faire le bilan des forces s'exerçant sur le bloc.</li><li>c) En déduire le sens et la direction de la force de traction <span class="vec-nom">F</span>.</li></ul>`,
-      parties: [
+      // (le diagramme objet-action garde son état : les parties sont refaites à chaque fois)
+      parties: () => { const dia = etapes(bilan(BLOC, { jusqua: 'diagramme' }), k => `b) ${k + 1}. `); return [
         choix('a) Comment est dirigée la résultante des forces ?', [o('ok', 'horizontale, vers la droite, comme <span class="vec-nom">a</span>'), o('a', 'verticale, vers le bas'), o('b', 'elle est nulle')], 'ok',
           '<p>Σ <span class="vec-nom">F</span> a la même direction et le même sens que <span class="vec-nom">a</span> : horizontale, vers la droite.</p>', { indices: { a: 'Σ <span class="vec-nom">F</span> a le sens de <span class="vec-nom">a</span>.', b: 'Le bloc accélère : <span class="vec-nom">a</span> ≠ <span class="vec-nom">0</span>.' } }),
-        choix('b) Quelles forces s\'exercent sur le bloc ?', [o('ok', 'le poids, la réaction du sol et la force de traction'), o('a', 'le poids et la force de traction'), o('b', 'le poids, la réaction du sol, la traction et des frottements')], 'ok',
-          '<p>Sur le bloc s\'exercent le poids <span class="vec-nom">P</span>, la réaction du support <span class="vec-nom">R</span> et la force de traction <span class="vec-nom">F</span>.</p>', { indices: { a: 'Le sol touche le bloc : il exerce une force.', b: 'Le bloc glisse <b>sans frottement</b>.' } }),
+        ...dia,
+        choix(`b) ${dia.length + 1}. D'après ton diagramme, quelles forces s'exercent sur le bloc ?`, [o('ok', 'le poids, la réaction du sol et la force de traction'), o('a', 'le poids et la force de traction'), o('b', 'le poids, la réaction du sol, la traction et des frottements')], 'ok',
+          '<p>Une force par bulle non barrée : la Terre → le poids <span class="vec-nom">P</span> ; le sol → la réaction du support <span class="vec-nom">R</span> ; la corde → la force de traction <span class="vec-nom">F</span>.</p>', { indices: { a: 'Le sol touche le bloc : sa bulle donne une force.', b: 'Le bloc glisse <b>sans frottement</b> : le sol donne une seule force, perpendiculaire au sol.' } }),
         choix('c) Quels sont la direction et le sens de la force de traction <span class="vec-nom">F</span> ?', [o('ok', 'la même direction et le même sens que Σ <span class="vec-nom">F</span> et <span class="vec-nom">a</span> : horizontale, vers la droite'), o('a', 'verticale, vers le haut'), o('b', 'horizontale, vers la gauche')], 'ok',
           '<p>Comme le poids et la réaction du support se compensent, Σ <span class="vec-nom">F</span> = <span class="vec-nom">F</span> : la force de traction a le même sens et la même direction que la résultante des forces et que le vecteur accélération.</p>',
           { indices: { a: '<span class="vec-nom">P</span> et <span class="vec-nom">R</span> se compensent : il reste <span class="vec-nom">F</span> = Σ <span class="vec-nom">F</span>.', b: '<span class="vec-nom">F</span> = Σ <span class="vec-nom">F</span>, qui a le sens de <span class="vec-nom">a</span>.' } }),
-      ] },
+      ]; } },
 
     /* ============================ EXERCICE 5 ============================ */
-    { id: '5', groupe: 'pfd', titre: 'Exercice 5 p. 84 : démarrage au feu vert', desc: 'Bilan, poids, résultante, puis la force motrice.',
+    { id: '5', groupe: 'pfd', titre: 'Exercice 5 p. 84 : démarrage au feu vert', desc: 'Bilan (diagramme objet-action), poids, résultante, puis la force motrice.',
       contexte: `<p class="er-contexte">Une automobile de masse m = 850 kg est à l'arrêt à un feu rouge. Quand le feu passe au vert, la voiture a une accélération constante a = 2,50 m·s<sup>−2</sup>, suivant une trajectoire rectiligne. On évalue les forces de frottement à f = 250 N. On note <span class="vec-nom">F</span><sub>m</sub> la force motrice de la voiture.</p>
         <ol class="pfd-donnees"><li>Faire le bilan des forces s'exerçant sur la voiture.</li><li>Calculer la valeur du poids P de l'automobile.</li><li>Exprimer la résultante des forces Σ <span class="vec-nom">F</span> s'exerçant sur la voiture.</li>
         <li>Représenter, sans soucis d'échelle, le vecteur accélération <span class="vec-nom">a</span> puis la résultante des forces Σ <span class="vec-nom">F</span> sur un même schéma.</li><li>Quelle relation peut-on écrire entre m, a, f et F<sub>m</sub> ?</li><li>En déduire la valeur de la force motrice F<sub>m</sub> de la voiture.</li></ol>
         <p class="pfd-donnees"><b>Donnée</b> : g = 9,81 m·s<sup>−2</sup>.</p>`,
-      parties: [
-        choix('1. Quelles forces s\'exercent sur la voiture ?', [o('ok', 'le poids <span class="vec-nom">P</span>, la réaction de la route <span class="vec-nom">N</span>, les frottements <span class="vec-nom">f</span> et la force motrice <span class="vec-nom">F</span><sub>m</sub>'), o('a', 'le poids <span class="vec-nom">P</span>, la force motrice <span class="vec-nom">F</span><sub>m</sub> et la force du moteur'), o('b', 'le poids <span class="vec-nom">P</span> et la force motrice <span class="vec-nom">F</span><sub>m</sub>')], 'ok',
-          '<p>Les forces qui s\'exercent sur la voiture sont le poids <span class="vec-nom">P</span>, la réaction de la route <span class="vec-nom">N</span>, les forces de frottement <span class="vec-nom">f</span> et la force motrice <span class="vec-nom">F</span><sub>m</sub>.</p>',
-          { indices: { a: 'Le moteur fait partie de la voiture : la force motrice est exercée par la route sur les roues motrices.', b: 'La route touche la voiture (réaction), et il y a des frottements.' } }),
+      // (le diagramme objet-action garde son état : les parties sont refaites à chaque fois)
+      parties: () => { const dia = etapes(bilan(AUTO, { jusqua: 'diagramme' }), k => `1. ${'abcdef'[k]}) `); return [
+        ...dia,
+        choix(`1. ${'abcdef'[dia.length]}) D'après ton diagramme, quelles forces s'exercent sur la voiture ?`, [o('ok', 'le poids <span class="vec-nom">P</span>, la réaction de la route <span class="vec-nom">N</span>, les frottements <span class="vec-nom">f</span> et la force motrice <span class="vec-nom">F</span><sub>m</sub>'), o('a', 'le poids <span class="vec-nom">P</span>, la force motrice <span class="vec-nom">F</span><sub>m</sub> et la force du moteur'), o('b', 'le poids <span class="vec-nom">P</span> et la force motrice <span class="vec-nom">F</span><sub>m</sub>')], 'ok',
+          '<p>Les forces qui s\'exercent sur la voiture sont le poids <span class="vec-nom">P</span> (la Terre), la réaction de la route <span class="vec-nom">N</span> et la force motrice <span class="vec-nom">F</span><sub>m</sub> (la route : une force, qu\'on décompose ; la route pousse les roues motrices vers l\'avant), et les forces de frottement <span class="vec-nom">f</span> (surtout l\'air), vers l\'arrière.</p>',
+          { indices: { a: 'Le moteur fait partie de la voiture : il n\'a pas de bulle dans le diagramme. La force motrice est exercée par la route sur les roues motrices.', b: 'La route touche la voiture (réaction), et l\'air la freine (frottements).' } }),
         scient('2. Calcule la valeur du poids P.', 'P =', 850 * 9.81, 'N', calc(`P = m × g = 850 × 9,81 = ${c('8,34 × 10<sup>3</sup> N')}`), { diag: v => proche(v, 850 / 9.81, .02) ? 'P = m × g : on multiplie.' : 'P = m × g.' }),
         choix('3. Exprime la résultante des forces.', [o('ok', 'Σ <span class="vec-nom">F</span> = <span class="vec-nom">P</span> + <span class="vec-nom">N</span> + <span class="vec-nom">f</span> + <span class="vec-nom">F</span><sub>m</sub> = <span class="vec-nom">f</span> + <span class="vec-nom">F</span><sub>m</sub>, car <span class="vec-nom">P</span> + <span class="vec-nom">N</span> = <span class="vec-nom">0</span>'), o('a', 'Σ <span class="vec-nom">F</span> = <span class="vec-nom">F</span><sub>m</sub>'), o('b', 'Σ <span class="vec-nom">F</span> = <span class="vec-nom">P</span> + <span class="vec-nom">F</span><sub>m</sub>')], 'ok',
           calc('Σ <span class="vec-nom">F</span> = <span class="vec-nom">P</span> + <span class="vec-nom">N</span> + <span class="vec-nom">f</span> + <span class="vec-nom">F</span><sub>m</sub> = <span class="vec-nom">f</span> + <span class="vec-nom">F</span><sub>m</sub> car <span class="vec-nom">P</span> + <span class="vec-nom">N</span> = <span class="vec-nom">0</span>'), { indices: { a: 'N\'oublie pas les frottements.', b: 'Le poids est compensé par la réaction de la route.' } }),
@@ -196,7 +219,7 @@
         nombre('6. En déduire la valeur de la force motrice.', 'F<sub>m</sub> =', 850 * 2.5 + 250, 'N', calc(`F<sub>m</sub> = m × a + f = 850 × 2,5 + 250 = ${c('2 375 N')} ≈ 2,4 × 10<sup>3</sup> N`) +
           '<p class="pfd-note">Le corrigé du manuel calcule avec 580 kg (coquille) : avec la masse de l\'énoncé, 850 kg, on trouve 2 375 N.</p>',
           { rel: .015, diag: v => proche(v, 580 * 2.5 + 250, .01) ? 'La masse de la voiture est 850 kg.' : proche(v, 850 * 2.5 - 250, .01) ? 'F<sub>m</sub> = m a <b>+</b> f.' : proche(v, 850 * 2.5, .01) ? 'N\'oublie pas les frottements.' : 'F<sub>m</sub> = m × a + f.' }),
-      ] },
+      ]; } },
 
     /* ============================ EXERCICE 13 ============================ */
     { id: '13', groupe: 'pfd', titre: 'Exercice 13 p. 86 : Formule 1 contre avion de chasse', desc: 'Force de propulsion et force de poussée.',
@@ -225,7 +248,7 @@
     { id: '19', groupe: 'pfd', titre: 'Exercice 19 p. 87 : boule de pétanque et parachute', desc: 'Poussée d\'Archimède négligeable, chute à vitesse constante.',
       contexte: `<p class="er-contexte">On considère un système {boule de pétanque + parachute}. La masse de la boule de pétanque étant très supérieure à celle des tissus et fils utilisés pour fabriquer le parachute, on assimile la masse du système à la masse de la boule de pétanque. Le système en chute est soumis à l'action mécanique de la Terre, modélisée par le poids <span class="vec-nom">P</span>, et à l'action mécanique exercée par l'air, modélisée par une force de frottement <span class="vec-nom">f</span> et par la poussée d'Archimède <span class="vec-nom">F</span><sub>archi</sub>. La masse du système étudié est m = 400 g, et le diamètre de la boule est d = 10 cm.</p>
         ${svg(200, 150, `<line x1="20" y1="132" x2="180" y2="132" class="pfd-sc-sol"/><circle cx="100" cy="76" r="14" class="pfd-sc-sys"/><circle cx="100" cy="76" r="2.5" class="pfd-pt-m"/><text x="86" y="80" class="pfd-pt-t">G</text>` +
-          fl(100, 76, 100, 116, '', COUL.P) + fl(96, 76, 96, 30, '', COUL.f) + fl(106, 76, 106, 50, '', COUL.Farchi) + etiq(116, 120, 'P', '', COUL.P) + etiq(84, 34, 'f', '', COUL.f) + etiq(130, 54, 'F', 'archi', COUL.Farchi), 'Système en chute : poids vers le bas, frottement et poussée d\'Archimède vers le haut, depuis G')}
+          fl(100, 76, 100, 116, '', COUL.P) + fl(98, 76, 98, 30, '', COUL.f) + fl(102, 76, 102, 50, '', COUL.Farchi) + etiq(116, 120, 'P', '', COUL.P) + etiq(84, 34, 'f', '', COUL.f) + etiq(130, 54, 'F', 'archi', COUL.Farchi), 'Système en chute : poids vers le bas, frottement et poussée d\'Archimède vers le haut, depuis G')}
         <ol class="pfd-donnees"><li>Le référentiel d'étude étant supposé galiléen, écrire le principe fondamental de la dynamique appliqué au système étudié.</li>
         <li>Montrer, à l'aide d'un calcul numérique, que l'on peut négliger la poussée d'Archimède par rapport au poids du système.</li>
         <li>Durant la dernière partie de la chute de la boule de pétanque la vitesse est constante. Que peut-on déduire quant à son accélération ?</li>

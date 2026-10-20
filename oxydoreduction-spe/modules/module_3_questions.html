@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions sur l'équation d'une réaction — Oxydoréduction</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="ox.js"></script>
+<script src="demi.js"></script>
+<script src="reaction.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard :
+   entourer les réactifs, écrire une demi-équation directement dans le
+   sens de la réaction (2, la première avec le bouton « Inverser »),
+   multiplier (2), additionner et simplifier (2), écrire directement
+   les nombres de l'équation (2), toute la réaction dans l'outil
+   compact (REAC.partie). Les aides des outils coûtent un point.
+   Réactions : [couple dont l'oxydant réagit, couple dont le réducteur réagit].
+   ============================================================ */
+const { hasard, melanger, h, COUPLES: C, couple } = OX;
+const R = s => `<span class="ox-r">${s}</span>`;
+const eqn = x => `<p class="ox-eqn">${x}</p>`;
+const REACTIONS = [['Cr2O7', 'Fe3'], ['MnO4', 'I2'], ['H2O2', 'Fe3'], ['NO3', 'Cu'], ['Cu', 'Al'], ['MnO4', 'Cl2'], ['Cr2O7', 'I2'], ['O2e', 'Fe3'],
+  ['Fe3', 'I2'], ['Ag', 'Cu'], ['I2', 'S4O6'], ['H2O2', 'I2'], ['NO3', 'Ag'], ['Cl2', 'Fe3'], ['MnO4', 'Fe3']];
+const SIMPLIFIER = [['MnO4', 'CO2'], ['MnO4', 'O2'], ['MnO4', 'SO4'], ['Cr2O7', 'SO4'], ['MnO4', 'Ald'], ['H2O2', 'Ald']];
+const enonce = p => `<p>Réaction entre ${R(h(C[p[0]].ox))} et ${R(h(C[p[1]].red))}. Demi-équations des couples :</p>` +
+  eqn(melanger([DEMI.solution(C[p[0]]).html, DEMI.solution(C[p[1]]).html]).join('<br>'));
+const opt = (p, x) => Object.assign({ a: C[p[0]], b: C[p[1]], serie: true, aides: 'payant' }, x);
+
+/* ---------- entourer les réactifs ---------- */
+const qReactifs = p => ({ theme: 'Les réactifs', enonce: `<p>Réaction entre ${h(C[p[0]].ox)} et ${h(C[p[1]].red)}.</p>`,
+  parties: [REAC.partieReactifs({ a: C[p[0]], b: C[p[1]], ordre: hasard(['ab', 'ba']) })] });
+/* ---------- une demi-équation dans le sens de la réaction ---------- */
+// k : 0 (demi-équation de l'oxydant qui réagit) ou 1 (celle du réducteur qui réagit)
+function qSens(p, k, inverser) {
+  const c = C[p[k]];
+  return { theme: 'Dans le sens de la réaction', enonce: `<p>Réaction entre ${R(h(C[p[0]].ox))} et ${R(h(C[p[1]].red))}.</p>`,
+    parties: [DEMI.partie({ couple: c, serie: true, mode: 'libre', sens: k ? 'ox' : 'red', fleche: true, aides: 'payant', inverser,
+      q: `Écris la demi-équation du couple ${couple(c)} dans le sens de la réaction : le réactif à gauche de la flèche.${inverser ? ' Le bouton « ⇄ Inverser » échange les deux membres.' : ''}` })] };
+}
+/* ---------- multiplier, additionner, écrire l'équation (outils) ---------- */
+const qMultiplier = p => ({ theme: 'Égaliser les électrons', enonce: enonce(p), parties: [REAC.partieMultiplier(opt(p))] });
+const qAdditionner = p => ({ theme: 'Additionner et simplifier', enonce: enonce(p), parties: [REAC.partieAdditionner(opt(p))] });
+const qCoefficients = p => ({ theme: 'Écrire l\'équation', enonce: enonce(p), parties: [REAC.partieAdditionner(opt(p, { mode: 'coefficients' }))] });
+/* ---------- toute la réaction dans l'outil compact ---------- */
+const qReaction = p => ({ theme: 'Toute la réaction',
+  consigne: `Écris l'équation de la réaction entre ${R(h(C[p[0]].ox))} et ${R(h(C[p[1]].red))}.`,
+  enonce: `<p>Couples : ${couple(C[p[0]])} et ${couple(C[p[1]])}.</p>`,
+  parties: [REAC.partie({ a: C[p[0]], b: C[p[1]], serie: true, niveau: 2, ordre: hasard(['ab', 'ba']) })] });
+
+// tirage : 10 questions, chacune sur une réaction différente quand c'est possible
+function tirage() {
+  const L = melanger(REACTIONS), S = melanger(SIMPLIFIER);
+  const mult = L.filter(p => { const r = REAC.reaction(C[p[0]], C[p[1]]); return r.mA > 1 || r.mB > 1; });
+  return [qReactifs(L[0]), qSens(L[1], 1, true), qSens(S[0], hasard([0, 1]), false), qMultiplier(mult[0]), qMultiplier(mult[1] || mult[0]),
+    qAdditionner(L[2]), qAdditionner(S[1]), qCoefficients(L[3]), qCoefficients(S[2]), qReaction(hasard([L[4], S[3]]))];
+}
+
+OX.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Écrire l\'équation d\'une réaction',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : repérer les réactifs, écrire une demi-équation dans le sens de la réaction, égaliser les électrons, additionner et simplifier, écrire directement l\'équation de la réaction, puis toute une réaction dans le même outil.</p>',
+  aidesPayantes: true,
+  questions: tirage,
+  revoir: { href: 'module_3_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4.html', label: 'Module 4 : entraînement →' },
+});
+OX.menu('module_3_questions');
+</script>
+</body>
+</html>

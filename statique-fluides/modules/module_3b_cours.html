@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : la méthode du schéma — Chapitre 9 : Statique des fluides</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="sf.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS · PARTIE B</span>
+    <h2 class="er-titre">La méthode du schéma</h2>
+    <p class="er-contexte">Pour appliquer le principe fondamental, on travaille <b>toujours sur un schéma</b> : on y repère le <b>point haut</b> et le <b>point bas</b>, on y note les pressions connues et la hauteur h. La case vide est l'<b>inconnue</b> ; on choisit alors la formule.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : les trois exemples du cours
+   du professeur (ρ = 1 000 kg·m⁻³, g = 9,8 m·s⁻², P_atm = 10⁵ Pa) :
+     point bas : maison 50 m sous la surface du château d'eau,
+       P_M = 10⁵ + 1 000 × 9,8 × 50 = 5,9 × 10⁵ Pa ;
+     point haut : combles 8 m au-dessus du réducteur réglé à 3 bar,
+       P_C = 3 × 10⁵ − 1 000 × 9,8 × 8 ≈ 2,2 × 10⁵ Pa ;
+     hauteur : 3 bar dans la maison, h = (3 × 10⁵ − 10⁵) / (1 000 × 9,8) ≈ 20,4 m
+       (« OU mieux : h = (P_M − P_C) / (ρ g) ») ;
+   puis deux liquides superposés (deux paires point haut / point bas).
+   « À toi » : schéma à compléter (SF.partieSchema), choix de la formule
+   (SF.choixFormule), calcul (diagnostics SF.diagHydro).
+   Valeurs (vérifiées par un script) : 35 m → 4,4 × 10⁵ Pa ;
+   2,5 bar − 6,0 m → 1,9 × 10⁵ Pa ; 4,0 bar → h ≈ 30,6 m ;
+   huile 900 sur 30 cm puis eau sur 80 cm : 1,03 × 10⁵ puis 1,10 × 10⁵ Pa ;
+   huile 800 sur 20 cm puis eau sur 1,5 m : 1,02 × 10⁵ puis 1,16 × 10⁵ Pa.
+   ============================================================ */
+const { exemple } = COURS;
+const { proche, fr, sci, dessin, schemaFig, partieSchema, choixFormule, diagHydro, versCours } = SF;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .02);
+const G = 9.8;
+const ATM = 'P<sub>atm</sub> = 10<sup>5</sup> Pa';
+const VIDE = { label: '0 Pa', indice: '0 Pa, c\'est le vide. À la surface libre d\'un liquide à l\'air libre, P = P<sub>atm</sub>.' };
+const iSurface = 'À la surface libre de l\'eau, la pression est connue : P = P<sub>atm</sub> = 10<sup>5</sup> Pa.';
+
+/* ---------- 1. Calculer la pression en un point bas ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. La méthode : calculer la pression en un point bas');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> Toujours avec un schéma :</p>
+        <ol class="er-liste"><li>repère sur le schéma le <b>point haut</b> et le <b>point bas</b> ;</li>
+          <li>note la pression connue (souvent P<sub>atm</sub> à la surface libre) et la hauteur h entre les deux points ;</li>
+          <li>écris P<sub>bas</sub> = P<sub>haut</sub> + ρ × g × h ;</li>
+          <li>isole l'inconnue : P<sub>haut</sub> = P<sub>bas</sub> − ρ × g × h, ou h = ${fr('P<sub>bas</sub> − P<sub>haut</sub>', 'ρ × g')}.</li></ol></div>
+    </div>
+    ${exemple(`<p>Quelle est la pression P<sub>M</sub> à l'arrivée d'eau d'une maison située 50 m sous la surface de l'eau du château d'eau ?</p>
+      ${schemaFig('chateau', {}, [{ pt: 'C', desc: 'surface', role: 'haut', p: ATM }, { pt: 'M', desc: 'maison', role: 'bas', p: '?' }, { h: true, v: '50 m' }])}
+      <p>C : surface de l'eau du château, à l'air libre : P<sub>C</sub> = P<sub>atm</sub> = 1 bar = 10<sup>5</sup> Pa. L'inconnue est P<sub>M</sub>, au point bas.</p>
+      ${calc('D\'après le principe fondamental de l\'hydrostatique : P<sub>M</sub> = P<sub>C</sub> + ρ<sub>eau</sub> × g × h')}
+      ${calc(`P<sub>M</sub> = 10<sup>5</sup> Pa + 1 000 kg·m<sup>−3</sup> × 9,8 m·s<sup>−2</sup> × 50 m = ${c('5,9 × 10<sup>5</sup> Pa')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une autre maison', enonce: '<p>Une autre maison est alimentée par le même château d\'eau. Son arrivée d\'eau est <b>35 m</b> sous la surface de l\'eau du château.</p>',
+      parties: [
+        versCours(partieSchema({ type: 'chateau', points: [
+          { pt: 'C', desc: 'surface', role: 'haut', p: ATM, indice: 'P<sub>atm</sub> est la pression de la surface libre (C).', indiceVide: iSurface },
+          { pt: 'M', desc: 'maison', role: 'bas', p: null }], h: { label: '35 m' }, intrus: [VIDE],
+          solution: '<p>C (surface, à l\'air libre) est le point haut : P<sub>C</sub> = P<sub>atm</sub>. M est le point bas ; sa pression est l\'inconnue. h = 35 m.</p>' })),
+        versCours(choixFormule({ haut: 'C', bas: 'M', cherche: 'bas' })),
+        { type: 'sci', q: 'Calcule P<sub>M</sub> (2 chiffres significatifs).', label: 'P<sub>M</sub> =', valeur: 1e5 + 1000 * G * 35, unite: 'Pa', cs: 2, rel: .02,
+          diag: diagHydro({ cherche: 'bas', Ph: 1e5, rho: 1000, g: G, h: 35, surface: true }),
+          solution: calc(`P<sub>M</sub> = P<sub>C</sub> + ρ × g × h = 10<sup>5</sup> + 1 000 × 9,8 × 35 ≈ ${c('4,4 × 10<sup>5</sup> Pa')}`) },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Calculer la pression en un point haut ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Calculer la pression en un point haut');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Quand la pression connue est celle du point bas, on isole P<sub>haut</sub> :</p>
+      <div class="cle"><p class="crs-formule">P<sub>haut</sub> = P<sub>bas</sub> − ρ × g × h</p></div>
+    </div>
+    ${exemple(`<p>À l'arrivée d'eau A d'une maison, un réducteur de pression règle la pression à <b>3 bar</b> en sortie. Quelle est la pression P<sub>C</sub> dans les combles, 8 m au-dessus de l'arrivée d'eau ?</p>
+      ${schemaFig('combles', {}, [{ pt: 'C', desc: 'combles', role: 'haut', p: '?' }, { pt: 'A', desc: 'arrivée', role: 'bas', p: '3 bar' }, { h: true, v: '8 m' }])}
+      ${calc('P<sub>A</sub> = 3 bar = 3 × 10<sup>5</sup> Pa (on convertit en Pa)')}
+      ${calc('P<sub>C</sub> = P<sub>A</sub> − ρ<sub>eau</sub> × g × h')}
+      ${calc(`P<sub>C</sub> = 3 × 10<sup>5</sup> Pa − 1 000 kg·m<sup>−3</sup> × 9,8 m·s<sup>−2</sup> × 8 m ≈ ${c('2,2 × 10<sup>5</sup> Pa')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Un réducteur à 2,5 bar', enonce: '<p>Le réducteur d\'une autre maison est réglé à <b>2,5 bar</b>. Les combles sont <b>6,0 m</b> au-dessus de l\'arrivée d\'eau.</p>',
+      parties: [
+        versCours(partieSchema({ type: 'combles', points: [
+          { pt: 'C', desc: 'combles', role: 'haut', p: null },
+          { pt: 'A', desc: 'arrivée', role: 'bas', p: '2,5 bar', indice: 'La pression réglée par le réducteur est celle de l\'arrivée d\'eau (A).', indiceVide: 'La pression de l\'arrivée d\'eau est donnée : c\'est celle du réducteur.' }],
+          h: { label: '6,0 m' }, intrus: [{ label: ATM, indice: 'A n\'est pas une surface libre : sa pression est réglée par le réducteur.' }],
+          solution: '<p>A (arrivée d\'eau, en bas) est le point bas : P<sub>A</sub> = 2,5 bar. C (combles) est le point haut ; sa pression est l\'inconnue. h = 6,0 m.</p>' })),
+        versCours(choixFormule({ haut: 'C', bas: 'A', cherche: 'haut' })),
+        { type: 'sci', q: 'Calcule P<sub>C</sub> (2 chiffres significatifs).', label: 'P<sub>C</sub> =', valeur: 2.5e5 - 1000 * G * 6, unite: 'Pa', cs: 2, rel: .02,
+          diag: diagHydro({ cherche: 'haut', Pb: 2.5e5, rho: 1000, g: G, h: 6, bar: true }),
+          solution: calc('P<sub>A</sub> = 2,5 bar = 2,5 × 10<sup>5</sup> Pa') + calc(`P<sub>C</sub> = P<sub>A</sub> − ρ × g × h = 2,5 × 10<sup>5</sup> − 1 000 × 9,8 × 6,0 ≈ ${c('1,9 × 10<sup>5</sup> Pa')}`) },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Calculer une hauteur ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Calculer la hauteur nécessaire');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Quand les deux pressions sont connues, l'inconnue est h :</p>
+      <div class="cle"><p class="crs-formule">h = ${fr('P<sub>bas</sub> − P<sub>haut</sub>', 'ρ × g')}</p></div>
+    </div>
+    ${exemple(`<p>La maison doit avoir une pression d'au moins <b>3 bar</b>. Quelle doit être la hauteur minimale h du château d'eau (entre la surface de l'eau et la maison) ?</p>
+      ${schemaFig('chateau', {}, [{ pt: 'C', desc: 'surface', role: 'haut', p: ATM }, { pt: 'M', desc: 'maison', role: 'bas', p: '3 bar' }, { h: true, v: '?' }])}
+      ${calc('P<sub>M</sub> = P<sub>C</sub> + ρ<sub>eau</sub> × g × h')}
+      ${calc('3 × 10<sup>5</sup> = 1 × 10<sup>5</sup> + 1 000 × 9,8 × h &nbsp;(car P<sub>C</sub> = pression atmosphérique)')}
+      ${calc(`h = ${fr('3 × 10<sup>5</sup> − 1 × 10<sup>5</sup>', '1 000 × 9,8')} ≈ ${c('20,4 m')}`)}
+      <p>OU mieux, en isolant h d'abord : h = ${fr('P<sub>M</sub> − P<sub>C</sub>', 'ρ<sub>eau</sub> × g')}.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Pour 4 bar', enonce: '<p>On veut maintenant une pression d\'au moins <b>4,0 bar</b> dans la maison.</p>',
+      parties: [
+        versCours(partieSchema({ type: 'chateau', points: [
+          { pt: 'C', desc: 'surface', role: 'haut', p: ATM, indice: 'P<sub>atm</sub> est la pression de la surface libre (C).', indiceVide: iSurface },
+          { pt: 'M', desc: 'maison', role: 'bas', p: '4,0 bar', indice: '4,0 bar, c\'est la pression voulue dans la maison (M).', indiceVide: 'La pression voulue dans la maison est donnée : 4,0 bar.' }],
+          h: { label: null }, intrus: [VIDE],
+          solution: '<p>Les deux pressions sont connues (P<sub>C</sub> = P<sub>atm</sub>, P<sub>M</sub> = 4,0 bar) : l\'inconnue est h.</p>' })),
+        versCours(choixFormule({ haut: 'C', bas: 'M', cherche: 'h' })),
+        { type: 'nombre', q: 'Calcule la hauteur h (3 chiffres significatifs).', label: 'h =', valeur: 3e5 / (1000 * G), unite: 'm', signe: false, rel: .01, affiche: '30,6',
+          diag: diagHydro({ cherche: 'h', Pb: 4e5, Ph: 1e5, rho: 1000, g: G, bar: true }),
+          solution: calc(`h = ${fr('P<sub>M</sub> − P<sub>C</sub>', 'ρ × g')} = ${fr('4,0 × 10<sup>5</sup> − 1,0 × 10<sup>5</sup>', '1 000 × 9,8')} ≈ ${c('30,6 m')}`) },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Deux liquides superposés ---------- */
+function etape4(c_) {
+  const liq = (n, i, r) => `${n} : ρ<tspan dy="4" font-size="10">${i}</tspan><tspan dy="-4"> = ${r} kg·m</tspan><tspan dy="-6" font-size="10">−3</tspan>`;
+  const carte = c_.carte('4. Deux liquides superposés');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Le principe ne s'applique que dans <b>un même liquide</b>. Avec deux liquides qui ne se mélangent pas, le moins dense est au-dessus : on applique le principe <b>deux fois</b>.</p>
+      <div class="cle"><ol class="er-liste"><li>Surface libre S (point haut) → interface I (point bas), dans le liquide 1 : P<sub>I</sub> = P<sub>S</sub> + ρ<sub>1</sub> × g × h<sub>1</sub> ;</li>
+        <li>interface I (point haut) → fond F (point bas), dans le liquide 2 : P<sub>F</sub> = P<sub>I</sub> + ρ<sub>2</sub> × g × h<sub>2</sub>.</li></ol></div>
+    </div>
+    ${exemple(`<p>Une cuve contient 30 cm d'huile (ρ<sub>1</sub> = 900 kg·m<sup>−3</sup>) au-dessus de 80 cm d'eau.</p>
+      ${dessin('reservoir', { liq1: liq('huile', 1, 900), liq2: liq('eau', 2, '1 000'), h1: 'h<tspan dy="4" font-size="10">1</tspan><tspan dy="-4"> = 30 cm</tspan>', h2: 'h<tspan dy="4" font-size="10">2</tspan><tspan dy="-4"> = 80 cm</tspan>' })}
+      ${calc(`P<sub>I</sub> = P<sub>S</sub> + ρ<sub>1</sub> × g × h<sub>1</sub> = 10<sup>5</sup> + 900 × 9,8 × 0,30 ≈ 102 646 Pa ≈ ${c('1,03 × 10<sup>5</sup> Pa')}`)}
+      ${calc(`P<sub>F</sub> = P<sub>I</sub> + ρ<sub>2</sub> × g × h<sub>2</sub> = 102 646 + 1 000 × 9,8 × 0,80 ≈ ${c('1,10 × 10<sup>5</sup> Pa')}`)}`)}`);
+  const PI = 1e5 + 800 * G * 0.2, PF = PI + 1000 * G * 1.5;
+  const diagF = v => (pr(v, PI + 800 * G * 1.5) ? 'Entre I et F, le liquide est de l\'<b>eau</b> : ρ<sub>2</sub> = 1 000 kg·m<sup>−3</sup>.' : pr(v, 1e5 + 1000 * G * 1.5) ? 'Le point haut est maintenant I (interface) : pars de P<sub>I</sub>, pas de P<sub>atm</sub>.' : diagHydro({ cherche: 'bas', Ph: PI, rho: 1000, g: G, h: 1.5 })(v));
+  c_.aToi(carte, [
+    { titre: 'Huile sur eau', enonce: '<p>Une cuve contient <b>20 cm</b> d\'huile (ρ<sub>1</sub> = 800 kg·m<sup>−3</sup>) au-dessus de <b>1,5 m</b> d\'eau. La surface est à l\'air libre.</p>',
+      parties: [
+        versCours(partieSchema({ type: 'reservoir', dessin: { etape: 1 }, q: '<b>Étape 1</b>, dans l\'huile : repère le point haut et le point bas, puis place les valeurs connues. Laisse vide la case de l\'inconnue.',
+          points: [{ pt: 'S', desc: 'surface', role: 'haut', p: ATM, indice: 'P<sub>atm</sub> est la pression de la surface libre (S).', indiceVide: iSurface.replace('de l\'eau', 'de l\'huile') },
+            { pt: 'I', desc: 'interface', role: 'bas', p: null }],
+          h: { nom: 'h<sub>1</sub>', label: '0,20 m' }, intrus: [{ label: '1,5 m', indice: '1,5 m est la hauteur d\'eau. Entre S et I, il n\'y a que de l\'huile : h<sub>1</sub> = 20 cm.' }],
+          solution: '<p>Dans l\'huile : S (surface) est le point haut, I (interface) le point bas. h<sub>1</sub> = 20 cm = 0,20 m.</p>' })),
+        { type: 'sci', q: 'Calcule P<sub>I</sub> (3 chiffres significatifs).', label: 'P<sub>I</sub> =', valeur: PI, unite: 'Pa', cs: 3, rel: .006,
+          diag: v => (pr(v, 1e5 + 1000 * G * 0.2) ? 'Au-dessus de I, c\'est de l\'<b>huile</b> : ρ<sub>1</sub> = 800 kg·m<sup>−3</sup>.' : diagHydro({ cherche: 'bas', Ph: 1e5, rho: 800, g: G, h: 0.2, hcm: true, surface: true })(v)),
+          solution: calc(`P<sub>I</sub> = P<sub>S</sub> + ρ<sub>1</sub> × g × h<sub>1</sub> = 10<sup>5</sup> + 800 × 9,8 × 0,20 ≈ 101 568 Pa ≈ ${c('1,02 × 10<sup>5</sup> Pa')}`) },
+        versCours(partieSchema({ type: 'reservoir', dessin: { etape: 2 }, q: '<b>Étape 2</b>, dans l\'eau : repère le nouveau point haut et le nouveau point bas, puis place les valeurs connues.',
+          points: [{ pt: 'I', desc: 'interface', role: 'haut', p: '1,02 × 10<sup>5</sup> Pa', indice: 'C\'est la pression de l\'interface, calculée à l\'étape 1.', indiceVide: 'La pression de l\'interface est connue : tu viens de la calculer.' },
+            { pt: 'F', desc: 'fond', role: 'bas', p: null }],
+          h: { nom: 'h<sub>2</sub>', label: '1,5 m' }, intrus: [{ label: ATM, indice: 'I n\'est pas à l\'air libre : sa pression est celle calculée à l\'étape 1.' }],
+          solution: '<p>Dans l\'eau : I est maintenant le point haut (P<sub>I</sub> ≈ 1,02 × 10<sup>5</sup> Pa), F le point bas. h<sub>2</sub> = 1,5 m.</p>' })),
+        { type: 'sci', q: 'Calcule P<sub>F</sub>, la pression au fond (3 chiffres significatifs).', label: 'P<sub>F</sub> =', valeur: PF, unite: 'Pa', cs: 3, rel: .006, diag: diagF,
+          solution: calc(`P<sub>F</sub> = P<sub>I</sub> + ρ<sub>2</sub> × g × h<sub>2</sub> = 101 568 + 1 000 × 9,8 × 1,5 ≈ ${c('1,16 × 10<sup>5</sup> Pa')}`) },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Toujours un <b>schéma</b> : point haut, point bas, pressions connues, h. La case vide est l'inconnue.</p></div>
+    <div class="cle"><p class="crs-formule">P<sub>bas</sub> = P<sub>haut</sub> + ρ × g × h &nbsp;·&nbsp; P<sub>haut</sub> = P<sub>bas</sub> − ρ × g × h &nbsp;·&nbsp; h = ${fr('P<sub>bas</sub> − P<sub>haut</sub>', 'ρ × g')}</p></div>
+    <div class="cle"><p>Pressions en <b>Pa</b> (3 bar = 3 × 10<sup>5</sup> Pa), h en <b>m</b>. Surface libre : P = P<sub>atm</sub>.</p></div>
+    <div class="cle"><p>Deux liquides : on applique le principe deux fois (surface → interface, puis interface → fond), avec la masse volumique de chaque liquide.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur le principe fondamental →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Module 4 : presse, cric et baromètre</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#methode">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
+SF.menu('module_3b_cours');
+</script>
+</body>
+</html>

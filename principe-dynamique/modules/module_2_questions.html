@@ -19,17 +19,17 @@
 <script>
 /* ============================================================
    10 questions sur des situations tirées au hasard (situations.js) :
-   2 bilans complets avec l'outil (acteurs, force de l'air négligeable
-   ou non, diagramme objet-action, tracé, noms, compensation), puis
-   8 questions courtes : qui agit sur le système (et, l'air étant
-   toujours là, peut-on négliger sa force ?), distance ou contact,
-   point de départ, direction et sens, nom du vecteur, « ces forces
-   se compensent-elles ? », calcul du poids.
+   2 bilans complets avec l'outil (méthode du diagramme objet-action :
+   actions à distance, objets qui touchent, force de l'air négligeable
+   ou non ; puis tracé, noms, compensation), puis 8 questions courtes :
+   le diagramme objet-action seul, distance ou contact, point de départ,
+   direction et sens, nom du vecteur, « ces forces se compensent-elles ? »,
+   calcul du poids.
    Diagnostics : ceux de chaque situation (la main qui a lâché la
    balle, le moteur qui fait partie de la voiture, les frottements
    qui s'opposent au glissement…).
    ============================================================ */
-const { o, fq, fmt, fr, hasard, melanger, proche, nomV, scene, sceneRemplie, bilan, texteDir, DIR_TXT, ecartAngle, OPTS_AIR, REGLE_AIR, bonneAir, couleursForces, SITUATIONS: S, PARCOURS } = PFD;
+const { o, fq, fmt, hasard, melanger, proche, nomV, scene, sceneRemplie, bilan, texteDir, DIR_TXT, couleursForces, SITUATIONS: S, PARCOURS } = PFD;
 const calc = h => `<p class="ph-calc">${h}</p>`;
 const c = h => `<span class="c">${h}</span>`;
 const cap = PFD.cap;
@@ -45,19 +45,10 @@ function complet() {
 
 /* ---------- questions courtes ---------- */
 const COURTES = [
-  // qui agit sur le système ?
-  // (quand l'air fait partie des acteurs, on demande ensuite si sa force est négligeable)
-  function acteurs() {
-    const s = hasard(TOUTES.filter(x => (x.distracteurs || []).length));
-    const liste = l => l.map(a => a.nom).join(', '), d = hasard(s.distracteurs);
-    const opts = [o('ok', liste(s.acteurs)), o('d', liste(s.acteurs.concat([d])))];
-    if (s.air) opts.push(o('sansair', liste(s.acteurs.filter(a => a.id !== 'air'))));
-    if (s.acteurs.length > 2) opts.push(o('m', liste(s.acteurs.slice(1))));
-    const parties = [fq.choix(`Qui exerce une force sur ${s.systeme} ?`, opts, 'ok',
-      { indices: { d: d.diag, m: 'La Terre attire toujours le système : il y a toujours le poids.', sansair: 'L\'air touche toujours le système : il exerce toujours une force de contact (souvent négligeable).' },
-        solution: `<p>${s.acteurs.map(a => `${cap(a.nom)} : ${a.pourquoi}`).join(' ; ')}.</p>` })];
-    if (s.air) parties.push(fq.choix('L\'air touche le système : peut-on négliger sa force ?', OPTS_AIR, bonneAir(s.air), { melanger: false, colonne: true, indice: s.air.indice || REGLE_AIR, solution: `<p>${s.air.raison}</p>` }));
-    return { theme: 'Qui agit ?', enonce: `<p>${s.enonce}</p>${fig(s)}`, parties };
+  // le diagramme objet-action seul : actions à distance, objets qui touchent, force de l'air
+  function diagramme() {
+    const s = hasard(TOUTES);
+    return Object.assign({ theme: 'Diagramme objet-action', consigne: s.titre }, bilan(s, { jusqua: 'diagramme' }));
   },
   // distance ou contact
   function type() {
@@ -86,7 +77,7 @@ const COURTES = [
     const s = hasard(TOUTES), i = Math.floor(Math.random() * s.forces.length), f = s.forces[i];
     const opts = melanger(s.nomsProposes.filter(k => f.noms.indexOf(k) === -1)).slice(0, 3).map(k => o(k, nomV(k))).concat([o(f.noms[0], nomV(f.noms[0]))]);
     const cols = couleursForces(s.forces);
-    return { theme: 'Nom du vecteur', enonce: `<p>${s.enonce}</p><div class="pfd-sc-cadre">${scene(s, { forces: s.forces.map((g, k) => ({ pt: g.pts[0], ang: g.angs[0], num: k + 1, coul: cols[k], cote: g.cote, etat: k === i ? 'actif' : '' })) })}</div>`,
+    return { theme: 'Nom du vecteur', enonce: `<p>${s.enonce}</p><div class="pfd-sc-cadre">${scene(s, { forces: s.forces.map((g, k) => ({ pt: g.pts[0], ang: g.angs[0], num: k + 1, coul: cols[k], cote: g.cote, L: g.L, etat: k === i ? 'actif' : '' })) })}</div>`,
       parties: [fq.choix(`Comment note-t-on la force n° ${i + 1} (${f.lib}) ?`, opts, f.noms[0], { indice: f.indNom, solution: `<p>${f.indNom}</p>` })] };
   },
   // compensation
@@ -115,10 +106,10 @@ function tirage() {
 PFD.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 2 · QUESTIONS', titre: 'Faire un bilan des forces',
-  intro: '<p class="er-contexte">10 questions sur des situations tirées au hasard : deux bilans complets (avec le diagramme objet-action), puis des questions courtes (qui agit, force de l\'air négligeable ou non, distance ou contact, point de départ, direction et sens, nom du vecteur, compensation, poids).</p>',
+  intro: '<p class="er-contexte">10 questions sur des situations tirées au hasard : deux bilans complets (le diagramme objet-action, puis les forces sur le schéma), puis des questions courtes (diagramme objet-action, distance ou contact, point de départ, direction et sens, nom du vecteur, compensation, poids).</p>',
   questions: tirage,
-  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
-  suite: { href: 'module_3_cours.html', label: 'Module 3 : accélération →' },
+  revoir: { href: 'module_2b_cours.html', label: 'Revoir la méthode du diagramme objet-action' },
+  suite: { href: 'module_3a_cours.html', label: 'Module 3 : accélération →' },
 });
 PFD.menu('module_2_questions');
 </script>

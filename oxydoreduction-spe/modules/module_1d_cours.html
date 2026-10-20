@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : réaction entre un oxydant et un réducteur — Oxydoréduction</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="ox.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS 4 / 4</span>
+    <h2 class="er-titre">Réaction entre un oxydant et un réducteur</h2>
+    <p class="er-contexte">Une <b>réaction d'oxydoréduction</b> est un transfert d'électrons entre l'oxydant d'un couple et le réducteur d'un autre couple. Tu vas apprendre à trouver ses <b>produits</b> et l'espèce <b>oxydée</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Sous-module 4 du module 1 (assets/cours.js) : notion → exemple → « À toi ».
+   Les réactions des « À toi » sont tirées au hasard à chaque visite.
+   Erreurs diagnostiquées : réactifs pris pour les produits, espèce
+   oxydée et espèce réduite confondues.
+   ============================================================ */
+const { hasard, exemple } = COURS;
+const { h } = OX;
+const { calc, couple } = OX.M1;
+const CP = OX.M1.couples();
+
+// réactions : [couple dont l'oxydant réagit, couple dont le réducteur réagit]
+const REACTIONS = [['Cu', 'Zn'], ['Ag', 'Cu'], ['Pb', 'Zn'], ['Cu', 'Fe'], ['Ag', 'Zn'], ['Ni', 'Zn'], ['Cu', 'Al'], ['Fe3', 'Cu'], ['Ag', 'Ni']];
+
+/* ---------- 1. Réaction entre un oxydant et un réducteur ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Réaction entre un oxydant et un réducteur');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Un réducteur ne cède des électrons que si un oxydant est là pour les capter : les électrons ne restent jamais libres dans une solution.</p>
+      <div class="cle"><p><b class="cle-titre">Réaction d'oxydoréduction.</b> C'est un <b>transfert d'électrons</b> entre l'<b>oxydant d'un couple</b> et le <b>réducteur d'un autre couple</b> :</p>
+        <ul class="er-liste"><li>le réducteur Red<sub>2</sub> cède des électrons : il est <b>oxydé</b> en Ox<sub>2</sub> ;</li>
+          <li>l'oxydant Ox<sub>1</sub> capte ces électrons : il est <b>réduit</b> en Red<sub>1</sub>.</li></ul>
+        <p class="crs-formule">Ox<sub>1</sub> + Red<sub>2</sub> → Red<sub>1</sub> + Ox<sub>2</sub></p></div>
+    </div>
+    ${exemple(`<p>Une lame de zinc Zn plonge dans une solution d'ions ${h('Cu^2+')} : un dépôt de cuivre apparaît. Couples : ${h('Cu^2+')} / Cu et ${h('Zn^2+')} / Zn.</p>
+      ${calc(`Zn → ${h('Zn^2+')} + 2&nbsp;e<sup>−</sup> &nbsp;(oxydation : Zn est oxydé)<br>${h('Cu^2+')} + 2&nbsp;e<sup>−</sup> → Cu &nbsp;(réduction : ${h('Cu^2+')} est réduit)`)}
+      <p>Les 2 électrons cédés par Zn sont captés par ${h('Cu^2+')} :</p>
+      ${calc(`<span class="c">${h('Cu^2+')} + Zn → Cu + ${h('Zn^2+')}</span>`)}
+      <p>Le module 3 montre comment écrire l'équation quand les nombres d'électrons des deux demi-équations sont différents.</p>`)}`);
+  const [k1, k2] = hasard(REACTIONS), a = CP[k1], b = CP[k2];
+  const [l1, l2] = hasard(REACTIONS.filter(p => !p.includes(k1) && !p.includes(k2))), a2 = CP[l1], b2 = CP[l2];
+  c.aToi(carte, [
+    { titre: 'Les produits',
+      enonce: `<p>On met en présence ${a.ox} et ${b.red}. Couples : ${couple(a)} et ${couple(b)}.</p>`,
+      parties: [{ type: 'choix', q: 'Quels sont les produits de la réaction&nbsp;?', melanger: false,
+        options: [{ id: 'ok', label: `${a.red} et ${b.ox}` }, { id: 'inv', label: `${a.ox} et ${b.red}` }, { id: 'ox', label: `${a.ox} et ${b.ox}` }], bonne: 'ok',
+        indices: { inv: `Ce sont les réactifs. ${a.ox} est réduit : il devient le réducteur de son couple. ${b.red} est oxydé : il devient l'oxydant de son couple.`,
+                   ox: `${a.ox} capte des électrons : il devient ${a.red}, le réducteur de son couple.` },
+        solution: `<p>${a.ox} est réduit en <b>${a.red}</b> ; ${b.red} est oxydé en <b>${b.ox}</b>.</p>` }] },
+    { titre: 'Qui est oxydé ?',
+      enonce: `<p>Réaction : ${a2.ox} + ${b2.red} → ${a2.red} + ${b2.ox} (nombres stœchiométriques non écrits).</p>`,
+      parties: [{ type: 'choix', q: 'Quelle espèce est oxydée&nbsp;?', melanger: false,
+        options: [{ id: 'ox', label: a2.ox }, { id: 'red', label: b2.red }], bonne: 'red',
+        indices: { ox: `${a2.ox} capte des électrons pour devenir ${a2.red} : il est réduit. L'espèce oxydée est celle qui cède des électrons.` },
+        solution: `<p>${b2.red} cède des électrons et devient ${b2.ox} : il est <b>oxydé</b>. ${a2.ox} est réduit.</p>` },
+        { type: 'choix', q: 'Quel est l\'oxydant qui réagit&nbsp;?', melanger: false,
+          options: [{ id: 'ox', label: a2.ox }, { id: 'red', label: b2.red }, { id: 'p', label: b2.ox }], bonne: 'ox',
+          indices: { red: `${b2.red} cède des électrons : c'est le réducteur qui réagit.`, p: `${b2.ox} est un produit : il se forme pendant la réaction.` },
+          solution: `<p>${a2.ox} capte les électrons cédés par ${b2.red} : c'est l'<b>oxydant</b> qui réagit.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>Une <b>réaction d'oxydoréduction</b> est un transfert d'électrons entre l'oxydant d'un couple et le réducteur d'un autre couple : Ox<sub>1</sub> + Red<sub>2</sub> → Red<sub>1</sub> + Ox<sub>2</sub>.</p>
+      <p>Le réducteur qui réagit est oxydé, l'oxydant qui réagit est réduit.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur les oxydants et les réducteurs →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html#reaction">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+OX.menu('module_1d_cours');
+</script>
+</body>
+</html>

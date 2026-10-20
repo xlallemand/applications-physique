@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : la méthode en 4 étapes — Oxydoréduction</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="ox.js"></script>
+<script src="demi.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 1 / 2</span>
+    <h2 class="er-titre">La méthode en 4 étapes</h2>
+    <p class="er-contexte">Pour écrire la demi-équation d'un couple comme Cr<sub>2</sub>O<sub>7</sub><sup>2−</sup> / Cr<sup>3+</sup>, on équilibre dans l'ordre : les <b>éléments autres que O et H</b>, l'élément <b>O avec H<sub>2</sub>O</b>, l'élément <b>H avec H<sup>+</sup></b>, puis les <b>charges avec les électrons e<sup>−</sup></b>. Les 4 étapes se font à la suite, sur la même demi-équation.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js), avec l'outil DEMI (demi.js) :
+   1. la méthode, présentée sur Cr2O7^2- / Cr^3+ : chaque étape dit
+      exactement quoi glisser et sur quel nombre régler les flèches ;
+   2. deux demi-équations guidées (une étape validée après l'autre) :
+      une où il faut H2O et H+, une où l'une des deux ne sert pas ;
+   3. deux demi-équations d'un seul tenant (une seule validation) :
+      avec l'aide activable, puis sans aide.
+   Aux étapes 1 et 2, l'aide de l'élément en cours d'équilibrage est
+   toujours affichée sous la demi-équation. Les couples des étapes 2 et 3
+   sont tirés au hasard à chaque visite.
+   ============================================================ */
+const { hasard, exemple } = COURS;
+const { h, COUPLES: C } = OX;
+const calc = x => `<p class="crs-calc">${x}</p>`;
+const H2O = 'H<sub>2</sub>O', HP = 'H<sup>+</sup>', EL = 'e<sup>−</sup>';
+// couples différents, un dans chaque liste
+function tirer(listes) {
+  const pris = [];
+  return listes.map(l => { const k = hasard(l.filter(x => !pris.includes(x))); pris.push(k); return k; });
+}
+const [kEau, kSans, kAide, kSeul] = tirer([['MnO4', 'SO4', 'NO3', 'NO3b'], ['CO2', 'O2'], ['ClO', 'H2O2', 'NO3', 'SO4', 'MnO4'], ['IO3', 'Cr2O7', 'MnO4', 'Ald', 'NO3b']]);
+const nomCouple = k => `${h(C[k].ox)} / ${h(C[k].red)}`;
+
+/* ---------- 1. La méthode ---------- */
+function etape1(c) {
+  const carte = c.carte('1. La méthode en 4 étapes');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> Pour écrire la demi-équation d'un couple Ox / Red :</p>
+        <ol class="er-liste"><li>on écrit l'oxydant à gauche du signe =, le réducteur à droite, et on <b>équilibre les éléments autres que O et H</b> ;</li>
+          <li>on équilibre l'élément <b>O</b> en ajoutant des molécules d'eau ${H2O} ;</li>
+          <li>on équilibre l'élément <b>H</b> en ajoutant des ions ${HP} ;</li>
+          <li>on équilibre les <b>charges</b> en ajoutant des électrons ${EL}.</li></ol></div>
+      <p style="margin-top:12px">Pour équilibrer un élément, on écrit un <b>nombre stœchiométrique</b> devant une espèce. On ne change <b>jamais</b> les indices : ${h('Cr2O7^2-')} reste ${h('Cr2O7^2-')}.</p>
+    </div>
+    <div class="callout-accent"><p><b>L'outil.</b> Glisse les espèces du couple et de la réserve dans la demi-équation, règle les nombres avec les flèches ▲ ▼, puis valide chaque étape. Sous la demi-équation, l'aide compte les atomes de l'élément en cours d'équilibrage (les charges à la dernière étape).</p></div>`);
+  c.aToi(carte, [{ titre: 'Exemple guidé : suis les consignes',
+    enonce: `<p>Couple ${nomCouple('Cr2O7')} (ion dichromate / ion chrome III). À chaque étape, la consigne sous l'outil te dit exactement quoi faire.</p>`,
+    parties: [DEMI.partie({ couple: C.Cr2O7, explique: true, q: `Écris la demi-équation du couple ${nomCouple('Cr2O7')} en suivant les consignes.` })] }]);
+  return carte;
+}
+
+/* ---------- 2. H2O et H+ : seulement s'il en faut ---------- */
+function etape2(c) {
+  const carte = c.carte(`2. ${H2O} et ${HP} : seulement s'il en faut`);
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>On ajoute ${H2O} seulement s'il <b>manque des atomes O</b> d'un côté, et ${HP} seulement s'il <b>manque des atomes H</b>. Si un élément est déjà équilibré, on n'ajoute rien : on passe à l'étape suivante.</p>
+        <p>Attention : une molécule ${H2O} contient <b>2 atomes H</b>.</p></div>
+    </div>
+    ${exemple(`<p>Couple I<sub>2</sub> / ${h('I^-')} : il n'y a ni atome O ni atome H, on n'ajoute ni ${H2O} ni ${HP}.</p>
+      ${calc(`I<sub>2</sub> + 2&nbsp;${EL} = 2&nbsp;${h('I^-')}`)}`)}`);
+  c.aToi(carte, [
+    { titre: `Avec ${H2O} et ${HP}`, parties: [DEMI.partie({ couple: C[kEau] })] },
+    { titre: 'Une des deux espèces ne sert pas',
+      enonce: `<p>Dans ce couple, une des deux espèces ${H2O} ou ${HP} ne sert pas. Regarde l'aide sous la demi-équation à chaque étape : si l'élément est déjà équilibré, n'ajoute rien et valide.</p>`,
+      parties: [DEMI.partie({ couple: C[kSans] })] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Toute la demi-équation d'un seul tenant ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Toute la demi-équation d\'un seul tenant');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Tu fais les 4 étapes à la suite, <b>sans valider entre les étapes</b> : tu valides une seule fois, quand toute la demi-équation est écrite.</p>
+        <p>Avant de valider, vérifie toi-même : <b>autant d'atomes de chaque élément</b> et <b>la même charge</b> de chaque côté du signe =.</p></div>
+    </div>`);
+  c.aToi(carte, [
+    { titre: 'Avec l\'aide si tu en as besoin', parties: [DEMI.partie({ couple: C[kAide], mode: 'libre', aides: 'libre' })] },
+    { titre: 'Sans aide', parties: [DEMI.partie({ couple: C[kSeul], mode: 'libre', aides: 'aucune' })] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b>Équilibrer la demi-équation d'un couple Ox / Red</b> (oxydant à gauche, réducteur à droite) :</p>
+      <ol class="er-liste"><li>équilibrer les éléments autres que O et H (nombres stœchiométriques, jamais les indices) ;</li>
+        <li>équilibrer O en ajoutant ${H2O}, s'il en faut ;</li>
+        <li>équilibrer H en ajoutant ${HP}, s'il en faut (une molécule ${H2O} contient 2 atomes H) ;</li>
+        <li>équilibrer les charges en ajoutant des électrons ${EL} du côté où la charge est la plus grande.</li></ol></div>
+    <div class="cle"><p class="crs-formule">${h('Cr2O7^2-')} + 14&nbsp;${HP} + 6&nbsp;${EL} = 2&nbsp;${h('Cr^3+')} + 7&nbsp;${H2O}</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2b_cours.html">Cours : équilibrer les charges →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#methode">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+OX.menu('module_2a_cours');
+</script>
+</body>
+</html>

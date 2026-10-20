@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : fiche récapitulative — Chapitre 9 : Statique des fluides</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="sf.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Principe fondamental de l'hydrostatique</h2>
+  </div>
+<!-- Fiche récapitulative du module 3 : le principe (P_bas = P_haut + ρ g h, même altitude, surface libre, vide, calcul de tête)
+     et la méthode du schéma (point bas, point haut, hauteur, deux liquides). -->
+
+  <section class="er-card" id="principe">
+    <h3 class="cours-titre">Le principe</h3>
+    <div class="cle"><p>Dans un même liquide incompressible au repos :</p>
+      <p class="som-formule">P<sub>point bas</sub> = P<sub>point haut</sub> + ρ × g × h</p>
+      <p>P en Pa ; ρ en kg·m<sup>−3</sup> (ρ<sub>eau</sub> = 1 000 kg·m<sup>−3</sup>) ; g = 9,8 m·s<sup>−2</sup> ; h = z<sub>haut</sub> − z<sub>bas</sub> en m.</p></div>
+    <div class="cle"><p>Deux points à la <b>même altitude</b> dans le même liquide ont la <b>même pression</b>.</p></div>
+    <div class="cle"><p><b>Très important</b> : à la surface libre d'un liquide à l'air libre, <b>P = P<sub>atm</sub> = 10<sup>5</sup> Pa</b>. Dans le vide, <b>P = 0 Pa</b>.</p></div>
+    <div class="cle"><p>De tête (ρ = 1 000, g ≈ 10) : <b>tous les 10 m dans l'eau, on gagne 1 bar</b>.</p></div>
+  </section>
+
+  <section class="er-card" id="methode">
+    <h3 class="cours-titre">La méthode du schéma</h3>
+    <div class="cle"><ol class="er-liste"><li>Repérer sur le schéma le <b>point haut</b> et le <b>point bas</b> ;</li>
+      <li>noter la pression connue (souvent P<sub>atm</sub> à la surface) et h ;</li>
+      <li>écrire P<sub>bas</sub> = P<sub>haut</sub> + ρ × g × h ;</li>
+      <li>isoler l'inconnue : P<sub>haut</sub> = P<sub>bas</sub> − ρ × g × h ; h = <span class="som-fr"><span>P<sub>bas</sub> − P<sub>haut</sub></span><span>ρ × g</span></span>.</li></ol></div>
+    <div id="figs"></div>
+    <p class="cours-exemple-t">Exemples</p>
+    <p><b>Point bas</b> : maison 50 m sous la surface du château d'eau : P<sub>M</sub> = 10<sup>5</sup> + 1 000 × 9,8 × 50 = 5,9 × 10<sup>5</sup> Pa.</p>
+    <p><b>Point haut</b> : combles 8 m au-dessus du réducteur réglé à 3 bar : P<sub>C</sub> = 3 × 10<sup>5</sup> − 1 000 × 9,8 × 8 ≈ 2,2 × 10<sup>5</sup> Pa.</p>
+    <p><b>Hauteur</b> : 3 bar dans la maison : h = (3 × 10<sup>5</sup> − 1 × 10<sup>5</sup>) / (1 000 × 9,8) ≈ 20,4 m.</p>
+    <div class="cle"><p><b>Deux liquides</b> superposés : on applique le principe deux fois, surface → interface (ρ<sub>1</sub>, h<sub>1</sub>) puis interface → fond (ρ<sub>2</sub>, h<sub>2</sub>).</p></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_3a_cours.html">Revoir le cours : le principe</a>
+    <a class="btn-secondary" href="module_3b_cours.html">Revoir le cours : la méthode du schéma</a>
+    <a class="btn-secondary" href="module_3_questions.html">Questions sur le principe fondamental</a>
+  </div>
+</div>
+<script>
+const ATM = 'P<sub>atm</sub> = 10<sup>5</sup> Pa';
+document.getElementById('figs').innerHTML = `<div>${SF.schemaFig('chateau', {}, [{ pt: 'C', desc: 'surface', role: 'haut', p: ATM }, { pt: 'M', desc: 'maison', role: 'bas', p: '?' }, { h: true, v: '50 m' }])}</div>
+  <div>${SF.schemaFig('combles', {}, [{ pt: 'C', desc: 'combles', role: 'haut', p: '?' }, { pt: 'A', desc: 'arrivée', role: 'bas', p: '3 bar' }, { h: true, v: '8 m' }])}</div>`;
+SF.menu('fiche_3');
+</script>
+</body>
+</html>

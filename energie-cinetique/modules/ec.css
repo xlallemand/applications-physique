@@ -35,6 +35,10 @@ sub, sup { font-size: .7em; line-height: 0; }
 }
 .ph-lien-app p { font-size: .92rem; color: var(--ink); font-weight: 600; }
 .ph-lien-app a { text-decoration: none; }
+.ec-liens { display: flex; flex-wrap: wrap; gap: 8px; }
+/* étapes d'une manipulation d'équation écrites dans le cours (une ligne par étape, la raison en petit) */
+.ec-manip li { margin: 6px 0; font-weight: 700; }
+.ec-manip small { display: block; font-weight: 500; font-size: .85rem; color: var(--ink-2); }
 .ph-grille2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 640px) { .ph-grille2 { grid-template-columns: 1fr; } }
 .ph-tableau { border-collapse: collapse; margin: 10px auto; font-variant-numeric: tabular-nums; }
@@ -172,9 +176,15 @@ sub, sup { font-size: .7em; line-height: 0; }
 .fr > span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 .2em .05em; }
 .fr > span:last-child { padding: .05em .2em 0; }
 .ph-formule .fr, .ph-calc .fr { font-size: .85em; }
-.racine { white-space: nowrap; }
+/* racine carrée (EC.rac) : le signe √ s'étire à la hauteur du contenu, la barre est
+   le bord haut du contenu ; le signe démarre à mi-épaisseur de la barre pour la rejoindre */
+.racine { --rac-ep: 1.5px; display: inline-flex; align-items: stretch; vertical-align: baseline; white-space: nowrap; margin: 0 .05em; }
+.racine-signe { position: relative; flex: none; width: .62em; }
+.racine-signe svg { position: absolute; left: 0; top: calc(var(--rac-ep) / 2); width: 100%; height: calc(100% - var(--rac-ep) / 2); overflow: visible;
+  fill: none; stroke: currentColor; stroke-width: var(--rac-ep); stroke-linejoin: round; stroke-linecap: round; }
+.racine-sous { align-self: baseline; border-top: var(--rac-ep) solid currentColor; padding: .12em .15em 0 .12em; }
+.racine-lu { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .ec-nobr { white-space: nowrap; display: inline-block; }
-.racine > span { border-top: 1.5px solid currentColor; padding: 0 .15em; margin-left: .05em; }
 
 /* tableaux du cours */
 .ec-tab { border-collapse: collapse; margin: 10px auto; font-variant-numeric: tabular-nums; }
@@ -511,4 +521,68 @@ sub, sup { font-size: .7em; line-height: 0; }
   .ec-sch-h .ec-sc-txt { font-size: 14px; }
   .ec-sch-h .ec-sc-pt { font-size: 17px; }
   .ec-sch-h .ec-nom text { font-size: 18px; }
+}
+
+/* ============================================================
+   Éditeur d'équation (equation.js) : isoler une grandeur par
+   glisser-déposer (même présentation que l'application
+   « Équations en physique »)
+   ============================================================ */
+.eqe-tete { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.er-etape .eqe-t { font-size: .75rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); margin: 14px 0 8px; }
+.er-etape .eqe-tete .eqe-t { margin: 0; }
+/* étapes déjà vérifiées (équations écrites) */
+.eqe-histo { margin: 0 0 12px; padding: 0 0 0 1.6em; }
+.eqe-histo li { padding: 6px 0; border-bottom: 1.5px dashed var(--paper-3); }
+.eqe-histo li::marker { font-weight: 800; color: var(--accent); }
+.eqe-ligne { display: flex; align-items: center; gap: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; font-size: 1.05rem; font-weight: 700; }
+.eqe-ligne .eqe-tuile { background: none; border: 0; padding: 0 2px; min-height: 0; margin: 0; }
+.eqe-ligne .eqe-case { border: 0; background: none; min-width: 0; min-height: 0; padding: 0; gap: 2px; }
+.eqe-ligne .eqe-fois { margin: 0 1px; }
+.eqe-ligne .eqe-barre-frac { height: 2px; }
+.eqe-ligne .eqe-frac { gap: 2px; margin: 0 2px; }
+/* équation manipulable */
+.eqe-zone { display: flex; align-items: center; justify-content: center; justify-content: safe center; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch;
+  min-height: 110px; padding: 24px 8px; border: 2px dashed var(--paper-3); border-radius: 12px; background: var(--paper); }
+.eqe-membre { display: flex; align-items: center; flex-shrink: 0; border-radius: 12px; padding: 4px; transition: background .15s; }
+.eqe-membre.drag-over { background: var(--cle-bg); }
+.eqe-egal { font-size: 1.6rem; font-weight: 800; color: var(--ink); margin: 0 10px; flex-shrink: 0; }
+.eqe-ligne .eqe-egal { font-size: 1.05rem; margin: 0 6px; }
+.eqe-case { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 64px; min-height: 54px; padding: 6px 10px;
+  border: 2px dashed var(--ink-3); border-radius: 10px; background: var(--sheet); position: relative; transition: background .15s; }
+.eqe-case.drag-over { background: var(--cle-bg); }
+.eqe-vide { color: var(--ink-3); font-weight: 700; }
+.eqe-tuile { display: inline-flex; align-items: center; min-height: 40px; padding: 8px 13px; border: 2px solid var(--line-strong); border-radius: 8px;
+  background: var(--paper-2); font-weight: 700; color: var(--ink); white-space: nowrap; cursor: grab; }
+.eqe-tuile.un { cursor: default; }
+.eqe-tuile.dragging, .eqe-outil.dragging { opacity: .4; }
+.eqe-fois { font-weight: 800; color: var(--ink-3); flex-shrink: 0; }
+.eqe-frac { display: inline-flex; flex-direction: column; align-items: stretch; gap: 4px; margin: 0 4px; }
+.eqe-barre-frac { display: block; height: 3px; border-radius: 2px; background: var(--ink); }
+.eqe-suppr { position: absolute; top: -10px; right: -10px; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--sheet);
+  background: var(--danger); color: var(--sheet); font: inherit; font-size: 11px; font-weight: 800; line-height: 1; padding: 0; cursor: pointer;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.eqe-zone .eqe-rac { --rac-ep: 3px; }
+.eqe-zone .eqe-rac .racine-signe { width: 18px; }
+.eqe-zone .eqe-rac .racine-sous { padding: 6px 4px 0 6px; }
+.eqe-inverser { width: 44px; height: 44px; flex-shrink: 0; margin-left: 8px; border-radius: 50%; border: 2px solid var(--line-strong); background: var(--paper-2);
+  color: var(--ink); font: inherit; font-size: 1.3rem; font-weight: 800; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.eqe-inverser:hover { background: var(--paper-3); }
+/* palette d'outils */
+.eqe-palette { display: flex; flex-wrap: wrap; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+.eqe-outil { display: inline-flex; align-items: center; justify-content: center; min-width: 58px; min-height: 48px; padding: 6px 14px;
+  border: 2px solid var(--line-strong); border-radius: 10px; background: var(--sheet); font-weight: 800; color: var(--ink); cursor: grab; }
+.eqe-outil-frac { flex-direction: column; gap: 2px; font-size: .8rem; letter-spacing: 2px; }
+.eqe-outil-frac .eqe-barre-frac { width: 28px; height: 2px; }
+.eqe-outil .racine { --rac-ep: 2px; font-size: 1.2rem; }
+.eqe-ok { color: var(--success-text); font-weight: 700; }
+/* réussi ou réponse affichée : seules restent les étapes */
+.eqe-fige .eqe-travail, .eqe-fige .eqe-recommencer { display: none; }
+.eqe-tuile:focus-visible, .eqe-inverser:focus-visible, .eqe-suppr:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 480px) {
+  .eqe-zone { padding: 18px 4px; gap: 4px; }
+  .eqe-tuile { padding: 7px 10px; min-height: 36px; font-size: .9rem; }
+  .eqe-case { min-width: 48px; min-height: 48px; padding: 5px; gap: 4px; }
+  .eqe-egal { font-size: 1.3rem; margin: 0 4px; }
+  .eqe-inverser { width: 38px; height: 38px; font-size: 1.1rem; margin-left: 4px; }
 }

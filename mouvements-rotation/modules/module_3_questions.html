@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions sur le moment et le couple — Chapitre 8 : Mouvements de rotation</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rot.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rot.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : M = F × d avec conversion cm → m (3),
+   bras de levier d'une force oblique d = OA × cos α (2), moment d'un
+   couple M = F × D (2), force minimale F = M / d ou M / D (2),
+   bras de levier sur la clé (1 : force vers l'axe, ou réglage de la
+   clé pour un moment donné).
+   Erreurs diagnostiquées : cm non convertis, d pris égal à OA, sin au
+   lieu de cos, calculatrice en radians, D divisé par 2, F doublée,
+   division inversée.
+   ============================================================ */
+const { o, fq, fmt, cs, hasard, melanger, proche, fr, rad, partieCle } = ROT;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .015);
+const r3 = v => cs(v, 3);
+
+/* ---------- Groupe 1 : M = F × d ---------- */
+const SITUATIONS = [['On serre un écrou avec une clé', 'perpendiculaire à la clé'], ['On pousse une porte', 'perpendiculaire à la porte'], ['On tourne une manivelle', 'perpendiculaire à la manivelle'], ['Un cycliste appuie sur une pédale', 'perpendiculaire à la manivelle'], ['On ouvre un robinet à volant', 'tangente au volant']];
+function qMoment(k) {
+  const [txt, perp] = SITUATIONS[k], F = hasard([15, 20, 40, 50, 80, 120, 150]), dcm = hasard([12, 15, 18, 25, 30, 35, 60, 75]), d = dcm / 100, M = F * d;
+  return { theme: 'Moment d\'une force', enonce: `<p>${txt} : force F = ${F} N, ${perp}, appliquée à <b>${dcm} cm</b> de l'axe de rotation.</p>`,
+    parties: [fq.nombre('Calcule le moment de cette force.', 'M =', M, 'N·m', { signe: false, rel: .01,
+      diag: x => (pr(x, F * dcm) ? `d doit être en <b>mètres</b> : ${dcm} cm = ${fmt(d)} m.` : pr(x, F / d) || pr(x, d / F) ? 'M = F × d : on multiplie.' : 'M = F × d, d en m.'),
+      solution: calc(`M = F × d = ${F} N × ${fmt(d)} m = ${c(fmt(M) + ' N·m')}`) })] };
+}
+
+/* ---------- Groupe 2 : force oblique ---------- */
+function qOblique() {
+  const OA = hasard([25, 30, 35, 40, 50]), al = hasard([20, 25, 30, 40, 50, 60]), F = hasard([60, 80, 100, 120, 150]);
+  const d = OA * Math.cos(rad(al)), M = F * d / 100;
+  return { theme: 'Bras de levier d\'une force oblique', enonce: `<p>Une clé OA = ${OA} cm fait un angle α = ${al}° avec l'horizontale. On exerce en A une force verticale F = ${F} N.</p>${ROT.figOblique({ alpha: al, OA: OA + ' cm' })}`,
+    parties: [
+      fq.nombre('Calcule le bras de levier d, en cm (3 chiffres significatifs).', 'd =', d, 'cm', { signe: false, rel: .01, affiche: r3(d),
+        diag: x => (pr(x, OA * Math.sin(rad(al))) ? 'OH est le côté <b>adjacent</b> à α : d = OA × <b>cos</b> α.' : pr(x, OA) ? 'd n\'est pas OA : la force n\'est pas perpendiculaire à la clé.' : pr(Math.abs(x), Math.abs(OA * Math.cos(al))) ? 'Mets ta calculatrice en <b>degrés</b>.' : 'd = OA × cos α.'),
+        solution: calc(`d = OA × cos α = ${OA} cm × cos ${al}° ≈ ${c(r3(d) + ' cm')}`) }),
+      fq.nombre('Calcule le moment de la force (3 chiffres significatifs).', 'M =', M, 'N·m', { signe: false, rel: .01, affiche: r3(M),
+        diag: x => (pr(x, F * d) ? 'd doit être en mètres.' : pr(x, F * OA / 100) ? 'Utilise le bras de levier d (et non OA).' : 'M = F × d, d en m.'),
+        solution: calc(`M = ${F} N × ${fmt(+(d / 100).toFixed(4))} m ≈ ${c(r3(M) + ' N·m')}`) }),
+    ] };
+}
+
+/* ---------- Groupe 3 : couple de forces ---------- */
+function qCouple() {
+  const [txt, F, Dcm] = hasard([['Une clé en croix', 70, 40], ['Un tourne-à-gauche (outil de taraudage)', 25, 30], ['Un démonte-roue en croix', 90, 50], ['Une vanne à volant', 45, 24]]), D = Dcm / 100, M = F * D;
+  return { theme: 'Moment d\'un couple', enonce: `<p>${txt} : on exerce deux forces opposées de ${F} N chacune ; la distance entre leurs droites d'action est <b>${Dcm} cm</b>.</p>`,
+    parties: [fq.nombre('Calcule le moment du couple.', 'M =', M, 'N·m', { signe: false, rel: .01,
+      diag: x => (pr(x, F * Dcm) ? 'D doit être en mètres.' : pr(x, M / 2) ? 'D est la distance entre les <b>deux</b> droites d\'action (on ne la divise pas par 2).' : pr(x, 2 * M) ? 'F est la valeur <b>commune</b> des deux forces : on ne la double pas.' : 'M = F × D.'),
+      solution: calc(`M = F × D = ${F} N × ${fmt(D)} m = ${c(fmt(M) + ' N·m')}`) })] };
+}
+function qCoupleVolant() {
+  const Dcm = hasard([30, 36, 40, 44]), F = hasard([15, 20, 25, 30]), M = F * Dcm / 100;
+  return { theme: 'Couple sur un volant', enonce: `<p>Un conducteur tourne un volant de <b>diamètre ${Dcm} cm</b> avec ses deux mains, placées aux extrémités d'un diamètre : deux forces opposées, tangentes au volant, de ${F} N chacune.</p>`,
+    parties: [fq.nombre('Calcule le moment du couple.', 'M =', M, 'N·m', { signe: false, rel: .01,
+      diag: x => (pr(x, M / 2) ? 'Ici D est le <b>diamètre</b> : les droites d\'action passent aux deux extrémités du diamètre.' : pr(x, F * Dcm) ? 'D doit être en mètres.' : pr(x, 2 * M) ? 'On ne double pas F.' : 'M = F × D.'),
+      solution: calc(`D = ${Dcm} cm = ${fmt(Dcm / 100)} m ; M = F × D = ${F} × ${fmt(Dcm / 100)} = ${c(fmt(M) + ' N·m')}`) + `<p>C'est aussi la somme des deux moments : 2 × ${F} × ${fmt(Dcm / 200)} = ${fmt(M)} N·m.</p>` })] };
+}
+
+/* ---------- Groupe 4 : force minimale ---------- */
+function qForceMin() {
+  const [M, dcm] = hasard([[30, 25], [45, 30], [60, 40], [12, 15], [90, 50]]), d = dcm / 100, F = M / d;
+  return { theme: 'Force minimale', enonce: `<p>Pour débloquer un écrou, il faut un moment de ${M} N·m. On appuie perpendiculairement à la clé, à <b>${dcm} cm</b> de l'axe.</p>`,
+    parties: [fq.nombre('Quelle force minimale faut-il exercer ?', 'F =', F, 'N', { signe: false, rel: .01,
+      diag: x => (pr(x, M * d) ? 'M = F × d donc F = M / d : on <b>divise</b>.' : pr(x, M / dcm) ? 'd doit être en mètres.' : pr(x, d / M) ? 'F = M / d (et non d / M).' : 'F = M / d.'),
+      solution: calc(`M = F × d donc F = ${fr('M', 'd')} = ${fr(M + ' N·m', fmt(d) + ' m')} = ${c(fmt(F) + ' N')}`) })] };
+}
+function qForceCouple() {
+  const [M, Dcm] = hasard([[36, 40], [24, 30], [50, 50], [18, 20]]), D = Dcm / 100, F = M / D;
+  return { theme: 'Force minimale (couple)', enonce: `<p>Avec une clé en croix, il faut un couple de ${M} N·m. La distance entre les droites d'action des deux forces est D = ${Dcm} cm.</p>`,
+    parties: [fq.nombre('Quelle force F faut-il exercer de chaque côté ?', 'F =', F, 'N', { signe: false, rel: .01,
+      diag: x => (pr(x, M * D) ? 'F = M / D : on <b>divise</b>.' : pr(x, F / 2) ? 'F est la force exercée de <b>chaque</b> côté : F = M / D.' : pr(x, M / Dcm) ? 'D doit être en mètres.' : 'F = M / D.'),
+      solution: calc(`F = ${fr('M', 'D')} = ${fr(M + ' N·m', fmt(D) + ' m')} = ${c(fmt(F) + ' N')}`) })] };
+}
+
+/* ---------- Groupe 5 : bras de levier sur la clé ---------- */
+function qVersAxe() {
+  return { theme: 'Bras de levier', enonce: '<p>On tire sur une clé avec une force dont la droite d\'action passe par l\'axe de l\'écrou.</p>',
+    parties: [fq.choix('Que vaut le moment de cette force ?', [o('zero', 'M = 0'), o('FOA', 'M = F × OA'), o('max', 'Il est maximal'), o('neg', 'Il est négatif')], 'zero',
+      { melanger: false, indices: { FOA: 'Le bras de levier est la distance de l\'axe à la <b>droite d\'action</b> : ici elle est nulle.', max: 'Une force dirigée vers l\'axe ne fait pas tourner la clé.', neg: 'Le bras de levier est nul.' },
+        solution: '<p>d = 0, donc M = F × 0 = 0 : la clé ne tourne pas.</p>' })] };
+}
+function qRegler() {
+  const M = hasard([4, 5, 6]), d = M / 20;
+  return { theme: 'Régler la clé', enonce: `<p>La force vaut F = 20 N. Règle le point d'application A et l'orientation de la force pour obtenir un moment M = ${fmt(M)} N·m (à 0,05 N·m près).</p>`,
+    parties: [partieCle({ q: `Il faut un bras de levier d = M / F = ${fmt(d)} m. Règle la clé, puis valide.`, L: .4, a: .1, beta: 90, F: 20,
+      cible: { verif: s => (Math.abs(s.M - M) <= .05 ? null : s.M < M ? `M = ${fmt(s.M, 2)} N·m : trop petit. Augmente le bras de levier : éloigne A de l'axe, ou rends la force plus perpendiculaire à la clé.`
+          : `M = ${fmt(s.M, 2)} N·m : trop grand. Diminue le bras de levier : rapproche A de l'axe, ou incline la force par rapport à la clé.`),
+        montrer: { a: d, beta: 90 } },
+      solution: `<p>Par exemple : A à ${fmt(d * 100)} cm de O, force perpendiculaire à la clé : d = ${fmt(d)} m et M = 20 × ${fmt(d)} = ${fmt(M)} N·m.</p>` })] };
+}
+
+// tirage : 3 + 2 + 2 + 2 + 1 questions
+function tirage() {
+  const k = melanger([0, 1, 2, 3, 4]);
+  return [qMoment(k[0]), qMoment(k[1]), qMoment(k[2]), qOblique(), qOblique(), qCouple(), qCoupleVolant(), qForceMin(), qForceCouple(), hasard([qVersAxe, qRegler])()];
+}
+
+ROT.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Moment d\'une force et couple',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : moment d\'une force, bras de levier d\'une force oblique, moment d\'un couple, force minimale.</p>',
+  questions: tirage,
+  revoir: { href: 'module_3a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4_cours.html', label: 'Module 4 : caractéristique d\'un moteur →' },
+});
+ROT.menu('module_3_questions');
+</script>
+</body>
+</html>

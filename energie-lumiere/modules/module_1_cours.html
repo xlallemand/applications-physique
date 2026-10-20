@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : récupérer l'énergie lumineuse — Chapitre 10 : Énergie transportée par la lumière</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="el.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="el.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">Récupérer l'énergie lumineuse</h2>
+    <p class="er-contexte">La lumière du Soleil transporte de l'énergie. Un <b>panneau thermique</b> la convertit en énergie thermique, un <b>panneau photovoltaïque</b> en énergie électrique. Le <b>rendement</b> dit quelle part de l'énergie reçue est récupérée.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Les deux conversions (schémas énergétiques à compléter, EL.partieChaine)
+   2. Le rendement r = P_utile / P_absorbée (lien avec le chapitre 1)
+   3. Isoler P_utile ou P_absorbée
+   Valeurs (vérifiées par un script) : 180 / 1 200 = 0,15 ;
+   1 100 / 2 000 = 0,55 ; 2 000 − 1 100 = 900 W ; 9 / 50 = 0,18 ;
+   0,20 × 800 = 160 W ; 0,16 × 1 500 = 240 W ; 300 / 0,60 = 500 W ;
+   1,2 / 0,15 = 8,0 kW.
+   Erreurs diagnostiquées : rapport inversé (P_a / P_u), pourcentage
+   non converti, multiplication au lieu de division.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, proche, fr, chaine, partieChaine, versCours } = EL;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .02);
+const Pu = 'P<sub>utile</sub>', Pa = 'P<sub>absorbée</sub>', Pp = 'P<sub>perdue</sub>';
+
+/* ---------- 1. Deux conversions ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Deux façons de récupérer l\'énergie lumineuse');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>L'énergie <b>solaire</b> (énergie lumineuse, énergie du rayonnement) peut être convertie de deux façons :</p>
+      ${chaine({ entree: 'solaire', conv: 'convertisseur photothermique', sorties: ['thermique'], noms: { sortie: 'Énergie fournie' } })}
+      ${chaine({ entree: 'solaire', conv: 'convertisseur photoélectrique', sorties: ['électrique'], noms: { sortie: 'Énergie fournie' } })}
+      <div class="cle"><p><b class="cle-titre">Définitions.</b> Un <b>convertisseur photothermique</b> (panneau solaire thermique) convertit l'énergie lumineuse en <b>énergie thermique</b>.</p>
+        <p>Un <b>convertisseur photoélectrique</b> (panneau photovoltaïque) convertit l'énergie lumineuse en <b>énergie électrique</b>.</p></div>
+    </div>
+    ${exemple(`<p>Un <b>chauffe-eau solaire</b> chauffe l'eau sanitaire d'une maison : conversion <b>photothermique</b>.</p>
+      <p>Une <b>calculatrice solaire</b> fonctionne grâce à une petite cellule : conversion <b>photovoltaïque</b> (photoélectrique).</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une piscine', enonce: '<p>Des capteurs posés sur le toit d\'un local technique réchauffent l\'eau d\'une piscine.</p>',
+      parties: [{ type: 'choix', q: 'Quelle conversion réalisent-ils ?', options: [o('th', 'photothermique'), o('pv', 'photovoltaïque')], bonne: 'th', melanger: false,
+        indices: { pv: 'Ils fournissent de l\'énergie thermique (l\'eau chauffe), pas de l\'énergie électrique.' },
+        solution: '<p>L\'énergie lumineuse devient énergie thermique : conversion photothermique.</p>' }] },
+    { titre: 'Un lampadaire autonome', enonce: '<p>Le jour, un panneau recharge la batterie d\'un lampadaire, qui éclaire la nuit.</p>',
+      parties: [{ type: 'choix', q: 'Quelle conversion réalise le panneau ?', options: [o('th', 'photothermique'), o('pv', 'photovoltaïque')], bonne: 'pv', melanger: false,
+        indices: { th: 'Le panneau recharge une batterie : il fournit de l\'énergie électrique.' },
+        solution: '<p>L\'énergie lumineuse devient énergie électrique : conversion photovoltaïque (photoélectrique).</p>' }] },
+    { titre: 'Le schéma d\'un panneau photovoltaïque', enonce: '<p>Un panneau photovoltaïque s\'échauffe au soleil : une partie de l\'énergie reçue est perdue.</p>',
+      parties: [versCours(partieChaine({ conv: 'panneau photovoltaïque', entree: 'solaire', sorties: ['electrique'], pertes: 'thermique', intrus: ['chimique'],
+        indices: { chimique: 'Aucune énergie chimique : le panneau ne contient pas de réactifs.', thermique: 'Le panneau chauffe : l\'énergie thermique est perdue (dissipée).', electrique: 'L\'énergie utile d\'un panneau photovoltaïque est électrique.' },
+        solution: '<p>L\'énergie solaire reçue devient de l\'énergie électrique (utile) ; le reste est perdu sous forme thermique.</p>' }))] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Le rendement ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Le rendement');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Comme pour tout convertisseur (chapitre 1), l'énergie absorbée se partage entre l'énergie <b>utile</b> et l'énergie <b>perdue</b> :</p>
+      ${chaine({ entree: 'absorbée', conv: 'appareil', sorties: ['utile'], pertes: 'perdue', noms: { entree: 'Énergie', sortie: 'Énergie', pertes: 'Énergie' } })}
+      <div class="cle"><p><b class="cle-titre">Formule.</b> Le rendement r (ou η) est :</p>
+        <p class="crs-formule">r = ${fr(Pu, Pa)} = ${fr('E<sub>utile</sub>', 'E<sub>absorbée</sub>')}</p>
+        <p>r n'a <b>pas d'unité</b> ; il est compris entre 0 et 1. En pourcentage : × 100. Et ${Pa} = ${Pu} + ${Pp}.</p></div>
+      <div class="ph-lien-app"><p>Revois l'énergie, la puissance et le rendement.</p><a class="btn-small" href="../../energie-puissance/index.html">Chapitre 1 →</a></div>
+    </div>
+    ${exemple(`<p>Un panneau photovoltaïque reçoit une puissance lumineuse de 1 200 W et fournit une puissance électrique de 180 W.</p>
+      ${calc(`r = ${fr(Pu, Pa)} = ${fr('180 W', '1 200 W')} = ${c('0,15 = 15 %')}`)}
+      ${calc(`${Pp} = 1 200 − 180 = ${c('1 020 W')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Un capteur thermique', enonce: '<p>Un capteur solaire thermique reçoit 2 000 W et fournit 1 100 W à l\'eau qui le traverse.</p>',
+      parties: [{ type: 'nombre', q: 'Calcule son rendement (nombre décimal).', label: 'r =', valeur: 0.55, signe: false, tol: .005,
+        diag: v => (pr(v, 2000 / 1100) ? 'Tu as calculé P<sub>absorbée</sub> / P<sub>utile</sub> : le rendement est toujours plus petit que 1.' : pr(v, 55) ? 'C\'est le pourcentage : écris le nombre décimal (55 % = 0,55).' : 'r = P<sub>utile</sub> / P<sub>absorbée</sub> = 1 100 / 2 000.'),
+        solution: calc(`r = ${fr('1 100 W', '2 000 W')} = ${c('0,55 = 55 %')}`) },
+      { type: 'nombre', q: 'Quelle puissance est perdue ?', label: `${Pp} =`, valeur: 900, unite: 'W', signe: false, tol: .5,
+        diag: v => (pr(v, 3100) ? 'On <b>retire</b> l\'énergie utile de l\'énergie absorbée.' : 'P<sub>perdue</sub> = P<sub>absorbée</sub> − P<sub>utile</sub>.'),
+        solution: calc(`${Pp} = 2 000 − 1 100 = ${c('900 W')}`) }] },
+    { titre: 'Avec des énergies', enonce: '<p>En une journée, un panneau photovoltaïque reçoit 50 kWh d\'énergie lumineuse et produit 9 kWh d\'énergie électrique.</p>',
+      parties: [{ type: 'nombre', q: 'Calcule son rendement, en pourcentage.', label: 'r =', valeur: 18, unite: '%', signe: false, tol: .2,
+        diag: v => (pr(v, .18) ? 'C\'est le nombre décimal : multiplie par 100 pour l\'avoir en %.' : pr(v, 50 / 9 * 100) || pr(v, 50 / 9) ? 'C\'est E<sub>utile</sub> / E<sub>absorbée</sub> : 9 / 50.' : 'r = E<sub>utile</sub> / E<sub>absorbée</sub> = 9 / 50, puis × 100.'),
+        solution: calc(`r = ${fr('9 kWh', '50 kWh')} = 0,18 = ${c('18 %')}`) + '<p>Les deux énergies sont dans la même unité : pas besoin de convertir.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Isoler une puissance ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Calculer une puissance avec le rendement');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Formules.</b> De r = ${Pu} / ${Pa}, on tire :</p>
+        <p class="crs-formule">${Pu} = r × ${Pa} &nbsp;&nbsp;&nbsp; ${Pa} = ${fr(Pu, 'r')}</p>
+        <p>Le rendement s'écrit en <b>nombre décimal</b> dans le calcul : 20 % = 0,20.</p></div>
+    </div>
+    ${exemple(`<p>Un panneau de rendement 20 % reçoit 800 W. Quelle puissance électrique fournit-il ?</p>
+      ${calc(`${Pu} = r × ${Pa} = 0,20 × 800 W = ${c('160 W')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Puissance utile', enonce: '<p>Un panneau photovoltaïque de rendement 16 % reçoit une puissance lumineuse de 1 500 W.</p>',
+      parties: [{ type: 'nombre', q: 'Calcule la puissance électrique fournie.', label: `${Pu} =`, valeur: 240, unite: 'W', signe: false, tol: .5,
+        diag: v => (pr(v, 24000) ? 'Écris le rendement en nombre décimal : 16 % = 0,16.' : pr(v, 1500 / .16) ? 'On <b>multiplie</b> : P<sub>utile</sub> = r × P<sub>absorbée</sub>.' : 'P<sub>utile</sub> = 0,16 × 1 500.'),
+        solution: calc(`${Pu} = 0,16 × 1 500 W = ${c('240 W')}`) }] },
+    { titre: 'Puissance absorbée', enonce: '<p>Un capteur thermique de rendement 60 % fournit 300 W à l\'eau.</p>',
+      parties: [{ type: 'nombre', q: 'Quelle puissance lumineuse reçoit-il ?', label: `${Pa} =`, valeur: 500, unite: 'W', signe: false, tol: .5,
+        diag: v => (pr(v, 180) ? 'Tu as multiplié : ici on cherche P<sub>absorbée</sub> = P<sub>utile</sub> / r. Elle est plus grande que P<sub>utile</sub>.' : pr(v, 5) ? 'Écris le rendement en nombre décimal : 60 % = 0,60.' : 'P<sub>absorbée</sub> = P<sub>utile</sub> / r = 300 / 0,60.'),
+        solution: calc(`${Pa} = ${fr(Pu, 'r')} = ${fr('300 W', '0,60')} = ${c('500 W')}`) }] },
+    { titre: 'Une toiture', enonce: '<p>Une toiture photovoltaïque de rendement 15 % fournit 1,2 kW.</p>',
+      parties: [{ type: 'nombre', q: 'Quelle puissance lumineuse reçoit-elle ?', label: `${Pa} =`, valeur: 8, unite: 'kW', signe: false, rel: .01,
+        diag: v => (pr(v, .18) ? 'On divise : P<sub>absorbée</sub> = P<sub>utile</sub> / r.' : pr(v, .08) ? 'Écris le rendement en nombre décimal : 15 % = 0,15.' : 'P<sub>absorbée</sub> = 1,2 / 0,15.'),
+        solution: calc(`${Pa} = ${fr('1,2 kW', '0,15')} = ${c('8,0 kW')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Énergie solaire → <b>convertisseur photothermique</b> (panneau thermique) → énergie <b>thermique</b>.</p>
+      <p>Énergie solaire → <b>convertisseur photoélectrique</b> (panneau photovoltaïque) → énergie <b>électrique</b>.</p></div>
+    <div class="cle"><p class="crs-formule">r = ${fr(Pu, Pa)} = ${fr('E<sub>utile</sub>', 'E<sub>absorbée</sub>')}</p><p>Sans unité, entre 0 et 1 ; ${Pa} = ${Pu} + ${Pp}.</p></div>
+    <div class="cle"><p>${Pu} = r × ${Pa} &nbsp;·&nbsp; ${Pa} = ${Pu} / r</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur les capteurs et le rendement →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2_cours.html">Module 2 : conversion photothermique</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+EL.menu('module_1_cours');
+</script>
+</body>
+</html>

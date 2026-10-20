@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : principe d'inertie — Chapitre 6 : Principe fondamental de la dynamique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="pfd.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="pfd.js"></script>
+<script src="situations.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 2 / 4</span>
+    <h2 class="er-titre">Principe d'inertie</h2>
+    <p class="er-contexte">Quand les forces se <b>compensent</b> (Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span>), le système est <b>immobile</b> ou en <b>mouvement rectiligne uniforme</b> : c'est le <b>principe d'inertie</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 2 du module 4 : Σ F⃗ = 0⃗ ⇔ immobile ou mouvement rectiligne uniforme ; exemple du
+   parachutiste (diagramme objet-action et forces qui se compensent).
+   ============================================================ */
+const { fmt, sci, hasard, melanger, exemple } = COURS;
+const { o, fr, proche, nomV, sceneRemplie, diagrammeDe, partieResultante, partieAcc, SITUATIONS } = PFD;
+const c = h => `<span class="c">${h}</span>`;
+const r3 = v => +v.toPrecision(3);
+const MS2 = 'm·s<sup>−2</sup>', SF = 'Σ <span class="vec-nom">F</span>';
+
+/* ---------- 1. Le principe d'inertie ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Le principe d\'inertie');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Principe d'inertie.</b> Σ <span class="vec-nom">F</span><sub>ext</sub> = <span class="vec-nom">0</span> ⇔ le système est <b>immobile</b> ou en <b>mouvement rectiligne uniforme</b> (<span class="vec-nom">a</span> = <span class="vec-nom">0</span>).</p></div>
+    </div>
+    ${exemple(`<div class="pfd-noms-figs"><div class="pfd-do-cadre">${diagrammeDe(SITUATIONS.parachute)}</div><div class="pfd-sc-cadre">${sceneRemplie(SITUATIONS.parachute)}</div></div><p>Bilan des forces avec le diagramme objet-action : la Terre (${nomV('P')}) et l'air (${nomV('Fair')}). Le parachutiste descend en ligne droite à vitesse constante : <span class="vec-nom">a</span> = <span class="vec-nom">0</span>, donc ${nomV('P')} + ${nomV('Fair')} = <span class="vec-nom">0</span>. La force de l'air (ses frottements) compense exactement le poids.</p>`)}`);
+  const q = (titre, enonce, opts, bonne, ind, sol) => ({ titre, enonce: `<p>${enonce}</p>`, parties: [{ type: 'choix', q: 'Que peut-on dire de la résultante des forces ?', options: opts, bonne, melanger: false, indices: ind, solution: `<p>${sol}</p>` }] });
+  const OPTS = [o('nul', 'Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span> : les forces se compensent'), o('pas', 'Σ <span class="vec-nom">F</span> ≠ <span class="vec-nom">0</span>')];
+  c_.aToi(carte, melanger([
+    q('Un livre sur une table', 'Un livre est posé, immobile, sur une table.', OPTS, 'nul', { pas: 'Le livre est immobile : pense au principe d\'inertie.' }, 'Immobile : Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span>.'),
+    q('Une voiture sur l\'autoroute', 'Une voiture roule en ligne droite à 130 km/h constants.', OPTS, 'nul', { pas: 'Mouvement rectiligne <b>uniforme</b> : pense au principe d\'inertie.' }, 'Mouvement rectiligne uniforme : Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span> (la force motrice compense les frottements).'),
+    q('Une voiture qui freine', 'Une voiture freine en ligne droite.', OPTS, 'pas', { nul: 'La vitesse change : <span class="vec-nom">a</span> ≠ <span class="vec-nom">0</span>.' }, 'La voiture ralentit : <span class="vec-nom">a</span> ≠ <span class="vec-nom">0</span>, donc Σ <span class="vec-nom">F</span> = m <span class="vec-nom">a</span> ≠ <span class="vec-nom">0</span>.'),
+    q('Un virage', 'Une moto prend un virage à vitesse constante.', OPTS, 'pas', { nul: 'Le mouvement n\'est pas rectiligne.' }, 'Le mouvement n\'est pas rectiligne : ce n\'est pas un mouvement rectiligne uniforme, Σ <span class="vec-nom">F</span> ≠ <span class="vec-nom">0</span>.'),
+  ]).slice(0, 3));
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p><b>Principe d'inertie</b> : Σ <span class="vec-nom">F</span> = <span class="vec-nom">0</span> ⇔ immobile ou mouvement rectiligne uniforme.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4c_cours.html">Cours : résultante des forces et accélération →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#inertie">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+PFD.menu('module_4b_cours');
+</script>
+</body>
+</html>

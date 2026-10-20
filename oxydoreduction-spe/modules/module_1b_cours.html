@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : couple et demi-équation — Oxydoréduction</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="ox.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS 2 / 4</span>
+    <h2 class="er-titre">Couple et demi-équation</h2>
+    <p class="er-contexte">Un oxydant et le réducteur qu'il devient forment un <b>couple</b>. Tu vas apprendre à l'écrire, <b>Oxydant / Réducteur</b>, et à écrire sa <b>demi-équation</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Sous-module 2 du module 1 (assets/cours.js) : notion → exemple → « À toi ».
+   Les couples des « À toi » sont tirés au hasard à chaque visite ; un
+   couple n'est jamais écrit à l'envers.
+   Erreurs diagnostiquées : oxydant et réducteur confondus, électrons
+   du mauvais côté, nombre d'électrons, H+ pris pour l'oxydant.
+   ============================================================ */
+const { hasard, exemple } = COURS;
+const { h } = OX;
+const { nE, charge, calc, demi, couple } = OX.M1;
+const CP = OX.M1.couples();
+
+/* ---------- 1. Couple et demi-équation ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Couple oxydant / réducteur et demi-équation');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Un oxydant et le réducteur qu'il devient en captant des électrons forment un <b>couple</b>. On le note <b>Oxydant / Réducteur</b> : l'oxydant toujours en premier.</p>
+      <div class="cle"><p>À ce couple correspond une <b>demi-équation</b> :</p>
+        <p class="crs-formule">Oxydant + n e<sup>−</sup> = Réducteur</p>
+        <p>n est le nombre d'électrons échangés. Les électrons s'écrivent <b>du côté de l'oxydant</b> : c'est lui qui les capte. Le signe = indique que l'échange peut se faire dans les deux sens.</p></div>
+      <p style="margin-top:12px">Dans certains couples, l'oxydant contient de l'oxygène : la demi-équation fait alors aussi intervenir des ions H<sup>+</sup> et des molécules d'eau H<sub>2</sub>O. Le module 2 montre comment l'écrire.</p>
+    </div>
+    ${exemple(`<p>Couple ${h('Cu^2+')} / Cu :</p>${calc(`${h('Cu^2+')} + 2&nbsp;e<sup>−</sup> = Cu`)}
+      <p>Couple ${h('Fe^3+')} / ${h('Fe^2+')} :</p>${calc(`${h('Fe^3+')} + e<sup>−</sup> = ${h('Fe^2+')}`)}
+      <p>Couple ${h('MnO4^-')} / ${h('Mn^2+')} (ion permanganate / ion manganèse) :</p>${calc(`${h('MnO4^-')} + 8&nbsp;H<sup>+</sup> + 5&nbsp;e<sup>−</sup> = ${h('Mn^2+')} + 4&nbsp;H<sub>2</sub>O`)}`, 'Exemples')}`);
+  const k1 = hasard(['Ag', 'Zn', 'Al', 'Sn', 'Pb']), c1 = CP[k1], quoi = hasard(['ox', 'red']);
+  const c2 = CP[hasard(['Zn', 'Pb', 'Ni', 'Al', 'Cr', 'Fe'].filter(k => k !== k1))];
+  const c3 = hasard([
+    { ox: h('Cr2O7^2-'), red: h('Cr^3+'), hp: true, demi: `${h('Cr2O7^2-')} + 14&nbsp;H<sup>+</sup> + 6&nbsp;e<sup>−</sup> = 2&nbsp;${h('Cr^3+')} + 7&nbsp;H<sub>2</sub>O` },
+    { ox: h('SO4^2-'), red: 'SO<sub>2</sub>', hp: true, demi: `${h('SO4^2-')} + 4&nbsp;H<sup>+</sup> + 2&nbsp;e<sup>−</sup> = SO<sub>2</sub> + 2&nbsp;H<sub>2</sub>O` },
+    { ox: h('NO3^-'), red: 'NO', hp: true, demi: `${h('NO3^-')} + 4&nbsp;H<sup>+</sup> + 3&nbsp;e<sup>−</sup> = NO + 2&nbsp;H<sub>2</sub>O` },
+    { ox: 'I<sub>2</sub>', red: h('I^-'), demi: `I<sub>2</sub> + 2&nbsp;e<sup>−</sup> = 2&nbsp;${h('I^-')}` },
+  ]);
+  c.aToi(carte, [
+    { titre: 'Lire un couple',
+      parties: [{ type: 'choix', q: `Dans le couple ${couple(c1)}, quel est ${quoi === 'ox' ? 'l\'oxydant' : 'le réducteur'}&nbsp;?`, melanger: false,
+        options: [{ id: 'ox', label: c1.ox }, { id: 'red', label: c1.red }], bonne: quoi,
+        indices: { red: `Un couple s'écrit Oxydant / Réducteur : l'oxydant est écrit en premier. ${c1.red} est le réducteur.`,
+                   ox: `Un couple s'écrit Oxydant / Réducteur : le réducteur est écrit en second. ${c1.ox} est l'oxydant.` },
+        solution: `<p>Couple Oxydant / Réducteur : l'oxydant est ${c1.ox}, le réducteur est ${c1.red}.</p>` }] },
+    { titre: 'Écrire la demi-équation',
+      parties: [{ type: 'choix', q: `Quelle est la demi-équation du couple ${couple(c2)}&nbsp;?`, colonne: true,
+        options: [{ id: 'ok', label: demi(c2) }, { id: 'cote', label: `${c2.red} + ${nE(c2.n)} = ${c2.ox}` },
+                  { id: 'droite', label: `${c2.ox} = ${c2.red} + ${nE(c2.n)}` }, { id: 'nb', label: `${c2.ox} + ${nE(c2.n - 1)} = ${c2.red}` }],
+        bonne: 'ok',
+        indices: {
+          cote: `Les électrons sont du mauvais côté : c'est l'oxydant ${c2.ox} qui les capte, ils s'écrivent avec lui.`,
+          droite: 'Les électrons sont du mauvais côté : ils s\'écrivent avec l\'oxydant, avant le signe = (Oxydant + n e<sup>−</sup> = Réducteur).',
+          nb: `Le nombre d'électrons ne va pas : la charge passe de ${charge(c2.qo)} (${c2.ox}) à ${charge(c2.qr)} (${c2.red}).` },
+        solution: `<p>${demi(c2)} : l'oxydant ${c2.ox} capte ${c2.n} électrons pour devenir ${c2.red}.</p>` }] },
+    { titre: 'L\'oxydant d\'une demi-équation',
+      enonce: calc(c3.demi),
+      parties: [{ type: 'choix', q: 'Dans cette demi-équation, quel est l\'oxydant du couple&nbsp;?',
+        options: [{ id: 'ok', label: c3.ox }, { id: 'red', label: c3.red }].concat(c3.hp ? [{ id: 'h', label: 'H<sup>+</sup>' }] : []), bonne: 'ok',
+        indices: { red: `${c3.red} est l'espèce formée quand l'oxydant capte les électrons : c'est le réducteur du couple.`,
+                   h: 'H<sup>+</sup> sert seulement à équilibrer l\'élément H. L\'oxydant est l\'espèce du couple écrite du même côté que les électrons.' },
+        solution: `<p>${c3.ox} est écrit avec les électrons : il les capte, c'est l'oxydant. Il devient ${c3.red}. Le couple s'écrit <b>${c3.ox} / ${c3.red}</b>.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>Un couple se note <b>Oxydant / Réducteur</b>, l'oxydant en premier. Sa demi-équation, avec les électrons du côté de l'oxydant :</p>
+      <p class="crs-formule">Oxydant + n e<sup>−</sup> = Réducteur</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1c_cours.html">Cours : oxydation et réduction →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html#couple">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+OX.menu('module_1b_cours');
+</script>
+</body>
+</html>

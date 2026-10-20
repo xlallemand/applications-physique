@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : oxydation et réduction — Oxydoréduction</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="ox.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS 3 / 4</span>
+    <h2 class="er-titre">Oxydation et réduction</h2>
+    <p class="er-contexte">Une demi-équation se lit dans les deux sens. Tu vas apprendre à distinguer une <b>oxydation</b> (perte d'électrons) d'une <b>réduction</b> (gain d'électrons).</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Sous-module 3 du module 1 (assets/cours.js) : notion → exemple → « À toi ».
+   Les couples des « À toi » sont tirés au hasard à chaque visite.
+   Erreurs diagnostiquées : oxydation et réduction confondues,
+   électrons du mauvais côté, « oxydé » et « réduit » confondus.
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { h } = OX;
+const { nE, calc, reduc, oxyd, couple } = OX.M1;
+const CP = OX.M1.couples();
+
+/* ---------- 1. Oxydation et réduction ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Oxydation et réduction');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Une demi-équation peut se lire dans les deux sens. Selon le sens, la transformation n'a pas le même nom.</p>
+      <div class="cle"><p>Une <b>oxydation</b> est une <b>perte d'électrons</b> : le réducteur cède des électrons et forme l'oxydant. On lit la demi-équation <b>à l'envers</b> :</p>
+        <p class="crs-formule">Réducteur → Oxydant + n e<sup>−</sup></p>
+        <p>Une <b>réduction</b> est un <b>gain d'électrons</b> : l'oxydant capte des électrons et forme le réducteur. On lit la demi-équation <b>à l'endroit</b> :</p>
+        <p class="crs-formule">Oxydant + n e<sup>−</sup> → Réducteur</p>
+        <p>On dit qu'un oxydant <b>est réduit</b> (il subit une réduction) et qu'un réducteur <b>est oxydé</b> (il subit une oxydation).</p></div>
+      <p style="margin-top:12px">Pour reconnaître une transformation, regarde où sont les électrons : <b>après la flèche</b>, ils sont cédés (oxydation) ; <b>avant la flèche</b>, ils sont captés (réduction).</p>
+    </div>
+    ${exemple(`${calc(`Zn → ${h('Zn^2+')} + 2&nbsp;e<sup>−</sup>`)}
+      <p>Zn cède 2 électrons : c'est une <b>oxydation</b>, Zn est oxydé en ${h('Zn^2+')}.</p>
+      ${calc(`${h('Cu^2+')} + 2&nbsp;e<sup>−</sup> → Cu`)}
+      <p>${h('Cu^2+')} capte 2 électrons : c'est une <b>réduction</b>, ${h('Cu^2+')} est réduit en Cu.</p>`, 'Exemples')}`);
+  const ks = melanger(['Ag', 'Fe3', 'Al', 'Pb', 'Ni', 'Sn', 'Fe']);
+  // une oxydation et une réduction, dans un ordre au hasard
+  const reconnaitre = (cp, sens) => ({
+    enonce: `<p class="crs-calc">${sens === 'oxyd' ? oxyd(cp) : reduc(cp)}</p>`,
+    parties: [{ type: 'choix', q: 'Est-ce une oxydation ou une réduction&nbsp;?', melanger: false,
+      options: [{ id: 'oxyd', label: 'Une oxydation' }, { id: 'reduc', label: 'Une réduction' }], bonne: sens,
+      indices: {
+        reduc: `Les électrons sont après la flèche : ${cp.red} les cède. Perdre des électrons, c'est une oxydation : elle forme l'oxydant ${cp.ox}.`,
+        oxyd: `Les électrons sont avant la flèche : ${cp.ox} les capte. Gagner des électrons, c'est une réduction : elle forme le réducteur ${cp.red}.` },
+      solution: sens === 'oxyd'
+        ? `<p>${cp.red} cède ${nE(cp.n)} : c'est une <b>oxydation</b>, ${cp.red} est oxydé en ${cp.ox}.</p>`
+        : `<p>${cp.ox} capte ${nE(cp.n)} : c'est une <b>réduction</b>, ${cp.ox} est réduit en ${cp.red}.</p>` }],
+  });
+  const sens = melanger(['oxyd', 'reduc']);
+  // écrire l'oxydation ou la réduction d'un couple
+  const cp = CP[ks[2]], s3 = hasard(['oxyd', 'reduc']);
+  const ecrire = s3 === 'oxyd'
+    ? { options: [{ id: 'ok', label: oxyd(cp) }, { id: 'autre', label: reduc(cp) }, { id: 'cote', label: `${cp.red} + ${nE(cp.n)} → ${cp.ox}` }],
+        indices: { autre: `C'est la réduction : elle forme le réducteur. L'oxydation forme l'oxydant ${cp.ox} : on lit la demi-équation à l'envers.`,
+                   cote: 'Les électrons sont du mauvais côté : dans une oxydation, le réducteur cède des électrons ; ils apparaissent après la flèche, avec l\'oxydant.' },
+        solution: `<p>L'oxydation forme l'oxydant ${cp.ox} : <b>${oxyd(cp)}</b>.</p>` }
+    : { options: [{ id: 'ok', label: reduc(cp) }, { id: 'autre', label: oxyd(cp) }, { id: 'cote', label: `${cp.ox} → ${cp.red} + ${nE(cp.n)}` }],
+        indices: { autre: `C'est l'oxydation : elle forme l'oxydant. La réduction forme le réducteur ${cp.red} : on lit la demi-équation à l'endroit.`,
+                   cote: 'Les électrons sont du mauvais côté : dans une réduction, l\'oxydant capte des électrons ; ils s\'écrivent avant la flèche, avec lui.' },
+        solution: `<p>La réduction forme le réducteur ${cp.red} : <b>${reduc(cp)}</b>.</p>` };
+  const cq = CP[ks[3]], quoi = hasard(['ox', 'red']);
+  c.aToi(carte, [
+    reconnaitre(CP[ks[0]], sens[0]),
+    reconnaitre(CP[ks[1]], sens[1]),
+    { titre: 'Écrire la transformation',
+      parties: [Object.assign({ type: 'choix', q: `Quelle est ${s3 === 'oxyd' ? 'l\'oxydation' : 'la réduction'} du couple ${couple(cp)}&nbsp;?`, colonne: true, bonne: 'ok' }, ecrire)] },
+    { titre: 'Oxydé ou réduit ?',
+      parties: [{ type: 'choix', q: `Au cours d'une réaction, ${quoi === 'ox' ? `l'oxydant ${cq.ox}` : `le réducteur ${cq.red}`} :`, melanger: false,
+        options: [{ id: 'red', label: 'est réduit' }, { id: 'ox', label: 'est oxydé' }], bonne: quoi === 'ox' ? 'red' : 'ox',
+        indices: { ox: 'Un oxydant capte des électrons : il subit une réduction, il <b>est réduit</b>.', red: 'Un réducteur cède des électrons : il subit une oxydation, il <b>est oxydé</b>.' },
+        solution: quoi === 'ox' ? `<p>${cq.ox} capte des électrons : il est <b>réduit</b> en ${cq.red}.</p>` : `<p>${cq.red} cède des électrons : il est <b>oxydé</b> en ${cq.ox}.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>Une <b>oxydation</b> est une perte d'électrons : Réducteur → Oxydant + n e<sup>−</sup>. Le réducteur <b>est oxydé</b>.</p>
+      <p>Une <b>réduction</b> est un gain d'électrons : Oxydant + n e<sup>−</sup> → Réducteur. L'oxydant <b>est réduit</b>.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1d_cours.html">Cours : réaction entre un oxydant et un réducteur →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html#oxydation">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+OX.menu('module_1c_cours');
+</script>
+</body>
+</html>

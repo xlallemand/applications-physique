@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : utilisation, démarrage — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 6 / 6</span>
+    <h2 class="er-titre">Utilisation : démarrage</h2>
+    <p class="er-contexte">Un « classique du bac » : la <b>force de frottement</b> pendant le démarrage d'une voiture, connaissant la force motrice. Même méthode à chaque fois : <b>schéma</b>, <b>théorème</b>, <b>travaux</b> (les forces ⊥ au déplacement donnent 0), application numérique, inconnue isolée.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 6 du module 4 : exemple 5 du cours (démarrage) traité
+   avec le schéma, puis « À toi » à valeurs changées.
+   Valeurs (vérifiées par un script) : ex. 5 : 800 kg, 0 → 20 km/h sur
+   12 m, F_m = 1,3 × 10³ N → f ≈ 271 N ; « À toi » : 1 000 kg,
+   0 → 36 km/h sur 25 m, F_m = 2,5 × 10³ N → f = 500 N.
+   ============================================================ */
+const { exemple } = COURS;
+const { proche, fr, W, schemaMvt, partieDonnees, partieAngles, partieEquation, versCours } = EC;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const EC_ = 'E<sub>c</sub>', vA = 'v<sub>A</sub>', vB = 'v<sub>B</sub>';
+const v2 = x => `${x}<sup>2</sup>`;
+
+/* ---------- 1. Exemple 5 : le démarrage ---------- */
+const DEMAR = { sens: 'droite', objet: 'voiture', forces: ['P', 'RN', 'Fm', 'f'] };
+function etape1(c_) {
+  const carte = c_.carte('1. Le démarrage : force de frottement (exemple 5)');
+  c_.ajouter(carte, exemple(`<p>Une voiture de masse m = 800 kg démarre. Elle passe de 0 à 20 km/h sur une distance d = 12 m. La force motrice, supposée constante, vaut F<sub>m</sub> = 1,3 × 10<sup>3</sup> N. Calculer la force de frottement solide.</p>
+      ${schemaMvt(Object.assign({ angles: true }, DEMAR), { m: '800 kg', vA: '0 (démarre)', vB: '20 km/h', d: '12 m' })}
+      ${calc(`½ m ${v2(vB)} − ½ m ${v2(vA)} = ${W('P')} + ${W('RN')} + ${W('Fm')} + ${W('f')}`)}
+      ${calc(`½ × 800 × (${fr('20', '3,6')})<sup>2</sup> − 0 = 0 + 0 + F<sub>m</sub> × AB × cos 0° + f × AB × cos 180°`)}
+      ${calc(`1,23 × 10<sup>4</sup> = 1,3 × 10<sup>3</sup> × 12 × 1 + f × 12 × (−1)`)}
+      ${calc(`−3 254 = −12 f &nbsp; donc &nbsp; f = ${fr('3 254', '12')} ≈ ${c('271 N')}`)}`, 'Exemple 5 (traité, classique du bac)'));
+  c_.aToi(carte, [{ titre: 'Un démarrage', enonce: '<p>Une voiture de <b>1 000 kg</b> démarre et atteint <b>36 km/h</b> sur <b>25 m</b>. La force motrice vaut F<sub>m</sub> = 2,5 × 10<sup>3</sup> N. On cherche la force de frottement f.</p>',
+    parties: [
+      versCours(partieDonnees(DEMAR, { m: '1 000 kg', vA: '0 m/s', vB: '36 km/h', d: '25 m' })),
+      versCours(partieAngles(DEMAR)),
+      partieEquation(DEMAR),
+      { type: 'nombre', q: `Calcule ${EC_}(B) (v<sub>B</sub> = 36 km/h = 10 m/s).`, label: `${EC_}(B) =`, valeur: 5e4, unite: 'J', signe: false,
+        diag: v => (proche(v, .5 * 1000 * 36 * 36) ? 'Utilise la vitesse en m/s : 10 m/s.' : proche(v, 1e5) ? 'N\'oublie pas le ½.' : '½ × 1 000 × 10².'), solution: calc(`${EC_}(B) = ½ × 1 000 × 10<sup>2</sup> = ${c('5,0 × 10<sup>4</sup> J')}`) },
+      { type: 'nombre', q: 'Isole f et calcule-la.', label: 'f =', valeur: 500, unite: 'N', signe: false,
+        diag: v => (proche(v, 4500) ? 'Il faut retrancher : 5,0 × 10<sup>4</sup> − 2,5 × 10<sup>3</sup> × 25 = −25 f.' : proche(v, -500) ? 'Une valeur de force est positive.' : '5,0 × 10<sup>4</sup> = 2,5 × 10<sup>3</sup> × 25 − 25 f.'),
+        solution: calc(`5,0 × 10<sup>4</sup> − 0 = 0 + 0 + 2,5 × 10<sup>3</sup> × 25 × 1 + f × 25 × (−1)`) + calc(`5,0 × 10<sup>4</sup> = 6,25 × 10<sup>4</sup> − 25 f &nbsp; donc &nbsp; f = ${fr('6,25 × 10<sup>4</sup> − 5,0 × 10<sup>4</sup>', '25')} = ${c('500 N')}`) },
+    ] }]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>La force motrice (α = 0°) : ${W('Fm')} = F<sub>m</sub> × AB ; les frottements (α = 180°) : ${W('f')} = −f × AB.</p></div>
+    <div class="cle"><p>Démarrage (${vA} = 0) : ½ m ${v2(vB)} = F<sub>m</sub> × AB − f × AB.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4_questions.html">Questions sur le théorème de l'énergie cinétique →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#demarrage">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+EC.menu('module_4f_cours');
+</script>
+</body>
+</html>

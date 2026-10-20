@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : retrouver la vitesse — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="equation.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 3 / 4</span>
+    <h2 class="er-titre">Retrouver la vitesse</h2>
+    <p class="er-contexte">Connaissant l'énergie cinétique et la masse, on retrouve la vitesse en <b>isolant v</b> dans E<sub>c</sub> = ½ m v² : v = √(2 E<sub>c</sub> / m).</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 3 du module 3 : isoler v dans E_c = ½ m v² (étapes de la
+   manipulation, éditeur d'équation EC.editeurEquation de equation.js en
+   « À toi », lien vers l'application « Équations en physique »), puis
+   calculer v = √(2 E_c / m).
+   Erreurs diagnostiquées : racine oubliée, 2 oublié ; dans l'éditeur,
+   grandeur changée de côté sans changer d'étage, racine appliquée à un
+   seul membre.
+   Valeurs (vérifiées par un script) : 400 J et 2,0 kg → 20 m/s ;
+   9 000 J et 20 kg → 30 m/s = 108 km/h.
+   ============================================================ */
+const { exemple } = COURS;
+const { proche, fr, rac } = EC;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const EC_ = 'E<sub>c</sub>';
+const MODE_EMPLOI = `<p>On écrit E<sub>c</sub> = ½ × m × v² sous la forme E<sub>c</sub> = ${fr('m × v²', '2')}. Isole v : fais glisser une grandeur (à la souris ou au doigt) pour la changer de place, glisse l'outil fraction ou l'outil √ sur un membre de l'équation, ⇄ inverse le sens de l'équation. Clique sur <b>Vérifier l'étape</b> après chaque manipulation.</p>`;
+// l'équation de l'éditeur (equation.js) et les étapes de la correction
+const EQ_EC = {
+  tuiles: { Ec: EC_, m: 'm', v: 'v', deux: '2' },
+  gauche: { num: ['Ec'] }, droite: { num: ['m', 'v²'], den: ['deux'] },
+  cible: 'v',
+  etapes: [
+    { gauche: { num: ['deux', 'Ec'] }, droite: { num: ['m', 'v²'] } },
+    { gauche: { num: ['deux', 'Ec'], den: ['m'] }, droite: { num: ['v²'] } },
+    { gauche: { num: ['deux', 'Ec'], den: ['m'], rac: true }, droite: { num: ['v'] } },
+    { gauche: { num: ['v'] }, droite: { num: ['deux', 'Ec'], den: ['m'], rac: true } },
+  ],
+};
+const V_EC = `v = ${rac(fr('2 × ' + EC_, 'm'))}`;
+
+/* ---------- 1. Retrouver la vitesse ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Retrouver la vitesse');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>On isole v dans ${EC_} = ½ m v² :</p>
+        <p class="crs-formule">v² = ${fr('2 × ' + EC_, 'm')} &nbsp; donc &nbsp; ${V_EC}</p></div>
+      <p>Pour isoler v, on manipule l'équation étape par étape (½ × m × v² s'écrit aussi ${fr('m × v²', '2')}) :</p>
+      <ol class="er-liste ec-manip">
+        <li>${EC_} = ${fr('m × v²', '2')}</li>
+        <li>2 × ${EC_} = m × v² <small>2 change de côté : il divisait, il multiplie</small></li>
+        <li>${fr('2 × ' + EC_, 'm')} = v² <small>m change de côté : il multipliait, il divise</small></li>
+        <li>${rac(fr('2 × ' + EC_, 'm'))} = v <small>racine carrée des deux membres : elle supprime le carré</small></li>
+        <li>${V_EC} <small>on écrit l'équation dans l'autre sens</small></li></ol>
+      <div class="ph-lien-app"><p>Entraîne-toi à isoler une grandeur dans cette équation et dans d'autres du même type, avec l'application « Équations en physique ».</p>
+        <span class="ec-liens"><a class="btn-small" href="../../equations-en-physique/modules/module_5.html">Les fractions →</a>
+        <a class="btn-small" href="../../equations-en-physique/modules/module_9.html">Racine et carré →</a></span></div>
+    </div>
+    ${exemple(`<p>Une boule de 2,0 kg a une énergie cinétique de 400 J.</p>${calc(`v² = ${fr('2 × 400', '2,0')} = 400 donc v = ${rac('400')} = ${c('20 m/s')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Isoler v en manipulant l\'équation', enonce: MODE_EMPLOI,
+      parties: [{ type: 'perso', monter: (zone, api) => EC.editeurEquation(zone, EQ_EC, api),
+        solution: `<p>2 change de côté (il multiplie), puis m (il divise), puis la racine carrée des deux membres supprime le carré : ${V_EC}.</p>` }] },
+    { titre: 'Un traîneau', enonce: '<p>Un traîneau de 20 kg a une énergie cinétique de 9 000 J.</p>',
+      parties: [
+        { type: 'nombre', q: 'Calcule sa vitesse en m/s.', label: 'v =', valeur: 30, unite: 'm/s', signe: false,
+          diag: v => (proche(v, 900) ? 'Tu as trouvé v² : prends la <b>racine carrée</b>.' : proche(v, Math.sqrt(450)) ? 'v² = 2 × E<sub>c</sub> / m : n\'oublie pas le 2.' : proche(v, 450) ? 'Il manque le 2, puis la racine carrée.' : 'v = √(2 × E<sub>c</sub> / m).'),
+          solution: calc(`v = ${rac(fr('2 × 9 000', '20'))} = ${rac('900')} = ${c('30 m/s')}`) },
+        { type: 'nombre', q: 'Convertis-la en km/h.', label: 'v =', valeur: 108, unite: 'km/h', signe: false,
+          diag: v => (proche(v, 30 / 3.6) ? 'Des m/s aux km/h, on <b>multiplie</b> par 3,6.' : 'v (km/h) = v (m/s) × 3,6.'), solution: calc(`v = 30 × 3,6 = ${c('108 km/h')}`) },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p class="crs-formule">${V_EC}</p><p>On l'obtient en isolant v : 2 et m changent de côté, puis la racine carrée des deux membres supprime le carré.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3d_cours.html">Cours : si la vitesse double →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#vitesse">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+EC.menu('module_3c_cours');
+</script>
+</body>
+</html>

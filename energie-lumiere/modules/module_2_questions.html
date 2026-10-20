@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions sur la conversion photothermique — Chapitre 10 : Énergie transportée par la lumière</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="el.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="el.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : la bonne relation (1), énergie Q
+   reçue par l'eau (2 : volume en L, c en kJ), écart de température
+   en K (1), élévation de température et température finale (2),
+   volume ou masse d'eau d'après un débit (2), énergie reçue par l'eau
+   dans un capteur (1), élévation de température dans un capteur (1).
+   c_eau = 4 180 J·kg⁻¹·K⁻¹.
+   Erreurs diagnostiquées : T_f au lieu de l'écart, somme des
+   températures, conversion inutile en K, c en kJ, minutes non
+   converties, m³ non convertis en kg, ΔT = Q × m / c.
+   ============================================================ */
+const { o, fq, fmt, sci, hasard, proche, fr } = EL;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .02);
+const CE = 4180, Ti = 'T<sub>i</sub>', Tf = 'T<sub>f</sub>', UC = 'J·kg<sup>−1</sup>·K<sup>−1</sup>';
+const s3 = v => sci(v, 3);
+const DONNEE = `<p class="ph-donnees">Donnée : c<sub>eau</sub> = 4 180 ${UC} ; 1 L d'eau a une masse de 1 kg.</p>`;
+
+/* ---------- Groupe 1 : la relation ---------- */
+function qRelation() {
+  return { theme: 'La bonne relation', enonce: '<p>On veut calculer l\'énergie thermique Q reçue par une masse m d\'eau qui passe de T<sub>i</sub> à T<sub>f</sub>.</p>',
+    parties: [fq.choix('Quelle relation utilises-tu ?', [o('ok', `Q = m × c × (${Tf} − ${Ti})`), o('tf', `Q = m × c × ${Tf}`), o('div', `Q = c × (${Tf} − ${Ti}) / m`), o('som', `Q = m × c × (${Tf} + ${Ti})`)], 'ok',
+      { melanger: false, colonne: true, indices: { tf: 'C\'est l\'<b>écart</b> de température qui compte, pas la température finale.', div: 'Plus il y a d\'eau, plus il faut d\'énergie : Q est proportionnelle à m (on multiplie).', som: 'C\'est la <b>différence</b> T<sub>f</sub> − T<sub>i</sub>.' },
+        solution: `<p>Q = m × c × (${Tf} − ${Ti}), avec Q en J, m en kg et c en ${UC}.</p>` })] };
+}
+
+/* ---------- Groupe 2 : énergie Q ---------- */
+function qQ() {
+  const [qui, V] = hasard([['Le ballon d\'un chauffe-eau solaire contient', 150], ['Le ballon d\'un chauffe-eau solaire contient', 300], ['Une cuve contient', 80], ['Un réservoir contient', 500]]);
+  const ti = hasard([10, 12, 15, 18]), tf = ti + hasard([25, 30, 35, 40, 45]), Q = V * CE * (tf - ti);
+  return { theme: 'Énergie reçue par l\'eau', enonce: `<p>${qui} ${V} L d'eau, chauffée de ${ti} °C à ${tf} °C.</p>${DONNEE}`,
+    parties: [fq.sci('Calcule l\'énergie reçue par l\'eau (3 chiffres significatifs).', 'Q =', Q, 'J', { cs: 3, rel: .01,
+      diag: v => (pr(v, V * CE * tf) ? 'C\'est l\'écart T<sub>f</sub> − T<sub>i</sub> qui compte, pas T<sub>f</sub>.' : pr(v, V * CE * (tf + ti)) ? 'C\'est la <b>différence</b> des températures.' : pr(v, V * 4.18 * (tf - ti)) ? 'c = 4 180 J·kg<sup>−1</sup>·K<sup>−1</sup>.' : pr(v, V * CE * (tf - ti + 273)) ? 'Pas de conversion : un écart en °C est le même en K.' : `m = ${V} kg ; Q = ${V} × 4 180 × (${tf} − ${ti}).`),
+      solution: calc(`m = ${V} kg`) + calc(`Q = m × c × (${Tf} − ${Ti}) = ${V} × 4 180 × (${tf} − ${ti}) = ${c(s3(Q) + ' J')}`) })] };
+}
+function qQkJ() {
+  const m = hasard([1.5, 2, 2.5, 4, 5]), ti = hasard([12, 15, 20]), tf = hasard([60, 70, 80, 90]), Q = m * CE * (tf - ti);
+  return { theme: 'Énergie reçue, c en kJ', enonce: `<p>On chauffe ${fmt(m)} kg d'eau de ${ti} °C à ${tf} °C. On donne c<sub>eau</sub> = 4,18 kJ·kg<sup>−1</sup>·K<sup>−1</sup>.</p>`,
+    parties: [fq.sci('Calcule l\'énergie reçue, en joules (3 chiffres significatifs).', 'Q =', Q, 'J', { cs: 3, rel: .01,
+      diag: v => (pr(v, m * 4.18 * (tf - ti)) ? 'Ton résultat est en kJ : convertis c en J (4,18 kJ = 4 180 J).' : pr(v, m * CE * tf) ? 'C\'est l\'écart T<sub>f</sub> − T<sub>i</sub> qui compte.' : `Q = ${fmt(m)} × 4 180 × (${tf} − ${ti}).`),
+      solution: calc(`c = 4,18 kJ·kg<sup>−1</sup>·K<sup>−1</sup> = 4 180 ${UC}`) + calc(`Q = ${fmt(m)} × 4 180 × (${tf} − ${ti}) = ${c(s3(Q) + ' J')}`) })] };
+}
+
+/* ---------- Groupe 3 : écart en kelvins ---------- */
+function qKelvin() {
+  const ti = hasard([8, 12, 14, 17, 21]), tf = ti + hasard([18, 26, 33, 41, 52]);
+  return { theme: 'Écart de température', enonce: `<p>La température de l'eau passe de ${ti} °C à ${tf} °C.</p>`,
+    parties: [fq.nombre('Quel est l\'écart de température, en kelvins ?', `${Tf} − ${Ti} =`, tf - ti, 'K', { signe: false, tol: .01,
+      diag: v => (pr(v, tf - ti + 273) || pr(v, tf - ti + 273.15) ? 'Un <b>écart</b> de température est le même en °C et en K : pas de + 273.' : pr(v, tf + ti) ? 'C\'est la <b>différence</b> T<sub>f</sub> − T<sub>i</sub>, pas la somme.' : `Écart : T<sub>f</sub> − T<sub>i</sub> = ${tf} − ${ti}.`),
+      solution: calc(`${Tf} − ${Ti} = ${tf} − ${ti} = ${tf - ti} °C, soit ${c((tf - ti) + ' K')}`) })] };
+}
+
+/* ---------- Groupe 4 : élévation de température ---------- */
+function qDeltaT() {
+  const m = hasard([20, 40, 50, 80, 100, 150]), Q = hasard([2, 3, 4, 5, 6, 8]) * 1e6, dT = Q / (m * CE);
+  return { theme: 'Élévation de température', enonce: `<p>${m} kg d'eau reçoivent une énergie Q = ${fmt(Q / 1e6)},0 × 10<sup>6</sup> J.</p>${DONNEE}`,
+    parties: [fq.nombre('De combien de degrés la température de l\'eau monte-t-elle ? (une décimale)', 'ΔT =', dT, 'K', { signe: false, tol: Math.max(.06, dT * .006), dec: 1,
+      diag: v => (pr(v, Q * m / CE) || pr(v, Q * CE / m) ? 'On divise Q par le <b>produit</b> m × c : ΔT = Q / (m × c).' : pr(v, Q / (m * 4.18)) ? 'c = 4 180 J·kg<sup>−1</sup>·K<sup>−1</sup>.' : `ΔT = ${fmt(Q / 1e6)} × 10<sup>6</sup> / (${m} × 4 180).`),
+      solution: calc(`ΔT = ${fr('Q', 'm × c')} = ${fr(fmt(Q / 1e6) + ',0 × 10<sup>6</sup>', m + ' × 4 180')} ≈ ${c(fmt(dT, 1) + ' K')}`) })] };
+}
+function qTf() {
+  const m = hasard([10, 25, 40, 60]), ti = hasard([12, 15, 18, 20]), Q = hasard([1, 1.5, 2, 2.5, 3]) * 1e6, dT = Q / (m * CE), tf = ti + dT;
+  return { theme: 'Température finale', enonce: `<p>${m} kg d'eau à ${ti} °C reçoivent une énergie de ${sci(Q, 2)} J.</p>${DONNEE}`,
+    parties: [fq.nombre('a) Calcule l\'élévation de température (une décimale).', 'ΔT =', dT, 'K', { signe: false, tol: Math.max(.06, dT * .006), dec: 1,
+        diag: v => (pr(v, tf) ? 'Ça, c\'est la température finale : on demande d\'abord ΔT.' : 'ΔT = Q / (m × c).'),
+        solution: calc(`ΔT = ${fr(sci(Q, 2), m + ' × 4 180')} ≈ ${c(fmt(dT, 1) + ' K')}`) }),
+      fq.nombre('b) Quelle est la température finale de l\'eau ? (une décimale)', `${Tf} =`, tf, '°C', { signe: false, tol: Math.max(.06, dT * .006), dec: 1,
+        diag: v => (pr(v, tf + 273) ? 'Reste en °C : T<sub>f</sub> = T<sub>i</sub> + ΔT.' : pr(v, dT - ti) || pr(v, ti - dT) ? 'La température <b>monte</b> : on ajoute ΔT à T<sub>i</sub>.' : `${Tf} = ${ti} + ${fmt(dT, 1)}.`),
+        solution: calc(`${Tf} = ${Ti} + ΔT = ${ti} + ${fmt(dT, 1)} ≈ ${c(fmt(tf, 1) + ' °C')}`) })] };
+}
+
+/* ---------- Groupe 5 : débits ---------- */
+function qDebitMin() {
+  const D = hasard([.1, .15, .2, .25, .5]), t = hasard([5, 10, 15, 20]), V = D * t * 60;
+  return { theme: 'Masse d\'eau d\'après un débit', enonce: `<p>Un capteur est traversé par un débit de ${fmt(D)} L/s pendant ${t} min.</p>`,
+    parties: [fq.nombre('Quelle masse d\'eau l\'a traversé ?', 'm =', V, 'kg', { signe: false, tol: .5,
+      diag: v => (pr(v, D * t) ? 'Le débit est en litres par <b>seconde</b> : convertis les minutes en secondes.' : pr(v, t * 60 / D) || pr(v, D / (t * 60)) ? 'V = D × Δt : on multiplie le débit par la durée.' : `Δt = ${t} × 60 s ; V = ${fmt(D)} × ${t * 60} L ; 1 L = 1 kg.`),
+      solution: calc(`Δt = ${t} min = ${t * 60} s`) + calc(`V = D × Δt = ${fmt(D)} L/s × ${t * 60} s = ${fmt(V)} L, donc ${c('m = ' + fmt(V) + ' kg')}`) })] };
+}
+function qDebitM3() {
+  const D = hasard([.25, .3, .5, .8, 1.2]), t = hasard([2, 3, 6, 8, 24]), V = D * t;
+  return { theme: 'Volume et masse d\'après un débit', enonce: `<p>Le débit d'eau dans un capteur solaire est de ${fmt(D)} m³/h. Il fonctionne pendant ${t} h.</p>`,
+    parties: [fq.nombre('a) Quel volume d\'eau le traverse ?', 'V =', V, 'm³', { signe: false, tol: .001,
+        diag: v => (pr(v, D / t) || pr(v, t / D) ? 'V = D × Δt (ou la proportionnalité : ' + fmt(D) + ' m³ en 1 h, combien en ' + t + ' h ?).' : `V = ${fmt(D)} × ${t}.`),
+        solution: calc(`V = D × Δt = ${fmt(D)} m³/h × ${t} h = ${c(fmt(V) + ' m³')}`) }),
+      fq.nombre('b) Quelle est la masse de cette eau ?', 'm =', V * 1000, 'kg', { signe: false, tol: .5,
+        diag: v => (pr(v, V) ? '1 m³ d\'eau a une masse de 1 000 kg.' : pr(v, V * 100) || pr(v, V * 10) ? '1 m³ = 1 000 L et 1 L d\'eau = 1 kg.' : `m = ${fmt(V)} × 1 000.`),
+        solution: calc(`m = ${fmt(V)} × 1 000 = ${c(fmt(V * 1000) + ' kg')}`) })] };
+}
+
+/* ---------- Groupe 6 : dans un capteur ---------- */
+function qCapteurQ() {
+  const D = hasard([20, 30, 40, 50, 60]), t = hasard([2, 3, 4, 5]), ti = hasard([15, 18, 20]), tf = ti + hasard([15, 20, 25, 30]), m = D * t, Q = m * CE * (tf - ti);
+  return { theme: 'Énergie reçue dans un capteur', enonce: `<p>De l'eau traverse un capteur solaire avec un débit de ${D} L/h pendant ${t} h. Elle entre à ${ti} °C et sort à ${tf} °C.</p>${DONNEE}`,
+    parties: [fq.nombre('a) Quelle masse d\'eau a traversé le capteur ?', 'm =', m, 'kg', { signe: false, tol: .5,
+        diag: v => (pr(v, D / t) || pr(v, t / D) ? 'V = D × Δt : on multiplie.' : `V = ${D} × ${t} L ; 1 L = 1 kg.`),
+        solution: calc(`V = ${D} L/h × ${t} h = ${m} L, donc ${c('m = ' + m + ' kg')}`) }),
+      fq.sci('b) Calcule l\'énergie reçue par cette eau (3 chiffres significatifs).', 'Q =', Q, 'J', { cs: 3, rel: .01,
+        diag: v => (pr(v, m * CE * tf) ? 'C\'est l\'écart T<sub>f</sub> − T<sub>i</sub>.' : pr(v, D * CE * (tf - ti)) ? 'Utilise la masse de toute l\'eau qui a traversé le capteur pendant ' + t + ' h.' : `Q = ${m} × 4 180 × (${tf} − ${ti}).`),
+        solution: calc(`Q = ${m} × 4 180 × (${tf} − ${ti}) = ${c(s3(Q) + ' J')}`) })] };
+}
+function qCapteurDT() {
+  const D = hasard([.5, 1, 1.5, 2]), t = hasard([1, 2, 3]), m = D * t * 1000, Q = hasard([1, 1.2, 1.5, 2, 2.5]) * 1e7, dT = Q / (m * CE);
+  return { theme: 'Élévation de température dans un capteur', enonce: `<p>Un capteur, traversé par un débit de ${fmt(D)} m³/h pendant ${t} h, transfère à l'eau une énergie de ${sci(Q, 2)} J.</p>${DONNEE}`,
+    parties: [fq.nombre('a) Quelle masse d\'eau a traversé le capteur ?', 'm =', m, 'kg', { signe: false, tol: .5,
+        diag: v => (pr(v, D * t) ? 'Tu as le volume en m³ : 1 m³ d\'eau = 1 000 kg.' : `V = ${fmt(D)} × ${t} m³, puis × 1 000 kg.`),
+        solution: calc(`V = ${fmt(D)} m³/h × ${t} h = ${fmt(D * t)} m³, donc ${c('m = ' + fmt(m) + ' kg')}`) }),
+      fq.nombre('b) De combien la température de l\'eau monte-t-elle ? (2 décimales)', 'ΔT =', dT, 'K', { signe: false, tol: Math.max(.006, dT * .006), dec: 2,
+        diag: v => (pr(v, Q / (D * t * CE)) ? 'La masse doit être en kg (pas le volume en m³).' : pr(v, Q * m / CE) ? 'ΔT = Q / (m × c).' : `ΔT = ${sci(Q, 2)} / (${fmt(m)} × 4 180).`),
+        solution: calc(`ΔT = ${fr('Q', 'm × c')} = ${fr(sci(Q, 2), fmt(m) + ' × 4 180')} ≈ ${c(fmt(dT, 2) + ' K')}`) })] };
+}
+
+// tirage : 1 + 2 + 1 + 2 + 2 + 2 questions
+function tirage() {
+  return [qRelation(), qQ(), qKelvin(), qDeltaT(), qDebitM3(), qQkJ(), qTf(), qDebitMin(), qCapteurQ(), qCapteurDT()];
+}
+
+EL.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Conversion photothermique',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : énergie reçue par l\'eau Q = m × c × (T<sub>f</sub> − T<sub>i</sub>), élévation de température, masse d\'eau d\'après un débit, énergie reçue dans un capteur.</p>',
+  questions: tirage,
+  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3a_cours.html', label: 'Module 3 : ondes et photons →' },
+});
+EL.menu('module_2_questions');
+</script>
+</body>
+</html>

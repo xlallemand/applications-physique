@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : vitesse angulaire — Chapitre 8 : Mouvements de rotation</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rot.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rot.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">Vitesse angulaire</h2>
+    <p class="er-contexte">Un solide qui tourne autour d'un axe : chacun de ses points décrit un cercle. On mesure la rapidité de la rotation par la <b>vitesse angulaire</b> ω (en rad/s) ; la vitesse d'un point dépend en plus de sa distance à l'axe : <b>v = R × ω</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   ω = θ / Δt ; v = R × ω (R : rayon) ; période T et fréquence f
+   (ω = 2π / T, f = 1 / T) ; angle balayé θ = ω × Δt, conversion en
+   degrés par un tableau de proportionnalité (2π rad ↔ 360°).
+   Outil : disque qui tourne (ROT.partieDisque).
+   Erreurs diagnostiquées : division inversée, diamètre pris pour le
+   rayon (erreur de la correction de l'ex. 12), cm non convertis,
+   2π oublié ou remplacé par π, 1 rad pris pour 360°.
+   Valeurs (vérifiées par un script) : 30 rad en 5,0 s → 6,0 rad/s ;
+   12 rad en 4,0 s → 3,0 rad/s ; 2,5 rad en 0,50 s → 5,0 rad/s ;
+   0,30 × 4,0 = 1,2 m/s ; roue de 70 cm à 20 rad/s → 7,0 m/s ;
+   T = 5,0 s → ω ≈ 1,26 rad/s, f = 0,20 Hz ; T = 0,50 s → ω ≈ 12,6 rad/s,
+   f = 2,0 Hz ; 0,80 × 5,0 = 4,0 rad ≈ 229° ; 0,50 × 6,0 = 3,0 rad ≈ 172°.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, proche, fr, V, DEUX_PI, partieDisque } = ROT;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const omega = 'ω';
+
+/* ---------- 1. ω = θ / Δt ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. La vitesse angulaire');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Un solide tourne autour d'un axe fixe. Un de ses points M décrit un <b>cercle</b> centré sur l'axe. Pendant la durée Δt, le rayon OM tourne d'un angle θ.</p>
+      ${ROT.figArc()}
+      <div class="cle"><p><b class="cle-titre">Définition.</b> La <b>vitesse angulaire</b> est l'angle balayé par seconde :</p>
+        <p class="crs-formule">${omega} = ${fr('θ', 'Δt')}</p>
+        <p>${omega} en <b>rad·s<sup>−1</sup></b> (ou rad/s), θ en <b>radians (rad)</b>, Δt en <b>secondes (s)</b>.</p></div>
+      <p class="rot-note">Tous les points du solide tournent du même angle pendant la même durée : ils ont tous la même vitesse angulaire.</p>
+    </div>
+    ${exemple(`<p>Une roue tourne de θ = 30 rad en Δt = 5,0 s.</p>${calc(`${omega} = ${fr('θ', 'Δt')} = ${fr('30 rad', '5,0 s')} = ${c('6,0 rad/s')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une meule', enonce: '<p>Une meule tourne de θ = 12 rad en Δt = 4,0 s.</p>',
+      parties: [{ type: 'nombre', q: `Calcule sa vitesse angulaire ${omega}.`, label: `${omega} =`, valeur: 3, unite: 'rad/s', signe: false, rel: .01,
+        diag: v => (proche(v, 4 / 12) ? 'Tu as divisé Δt par θ : c\'est l\'<b>angle</b> qu\'on divise par la durée.' : proche(v, 48) ? 'On divise θ par Δt (on ne multiplie pas).' : `${omega} = θ / Δt.`),
+        solution: calc(`${omega} = ${fr('12 rad', '4,0 s')} = ${c('3,0 rad/s')}`) }] },
+    { titre: 'Un rotor', enonce: '<p>Le rotor d\'un moteur tourne de θ = 2,5 rad en Δt = 0,50 s.</p>',
+      parties: [{ type: 'nombre', q: `Calcule sa vitesse angulaire ${omega}.`, label: `${omega} =`, valeur: 5, unite: 'rad/s', signe: false, rel: .01,
+        diag: v => (proche(v, 1.25) ? 'On <b>divise</b> θ par Δt.' : proche(v, .2) ? 'Tu as divisé Δt par θ : c\'est θ / Δt.' : `${omega} = θ / Δt.`),
+        solution: calc(`${omega} = ${fr('2,5 rad', '0,50 s')} = ${c('5,0 rad/s')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. v = R × ω ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. La vitesse d\'un point');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Plus un point est loin de l'axe, plus le cercle qu'il parcourt est grand : il va plus vite. Sa vitesse ${V('v')} est <b>tangente</b> au cercle.</p>
+      <div class="cle"><p><b class="cle-titre">Vitesse d'un point.</b> Pour un point situé à la distance R de l'axe :</p>
+        <p class="crs-formule">v = R × ${omega}</p>
+        <p>v en <b>m·s<sup>−1</sup></b>, R = <b>rayon</b> du cercle (distance à l'axe) en <b>m</b>, ${omega} en rad·s<sup>−1</sup>.</p></div>
+      <div class="crs-attention"><p><b class="cle-titre">Attention.</b> R est le <b>rayon</b>. Si l'énoncé donne le <b>diamètre</b> D d'une roue, d'un tambour, d'un manège… on prend R = D / 2. Et R en <b>mètres</b>.</p></div>
+    </div>
+    ${exemple(`<p>Un point d'un disque est à R = 0,30 m de l'axe ; le disque tourne à ${omega} = 4,0 rad/s.</p>${calc(`v = R × ${omega} = 0,30 m × 4,0 rad/s = ${c('1,2 m/s')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Sur le disque', enonce: '<p>Le disque ci-dessous tourne à la vitesse angulaire ω que tu règles ; le point P est à la distance R de l\'axe. Fais varier R : v change, ω ne change pas.</p>',
+      parties: [partieDisque({ q: `Règle ${omega} = 4,00 rad/s, puis place le point P à la distance R qui lui donne une vitesse v = 1,2 m/s.`,
+        omega: 2, R: .15, dt: 1, fixe: { dt: true },
+        cible: {
+          verif: s => (Math.abs(s.omega - 4) > 1e-6 ? `Règle d'abord ${omega} = 4,00 rad/s (curseur ω).`
+            : Math.abs(s.R - .3) < 1e-6 ? null
+            : `Avec R = ${fmt(s.R, 2)} m, v = ${fmt(s.R, 2)} × 4 = ${fmt(s.R * 4, 2)} m/s : ${s.R < .3 ? 'trop faible, éloigne P de l\'axe' : 'trop grande, rapproche P de l\'axe'}.`),
+          montrer: { omega: 4, R: .3 } },
+        solution: calc(`v = R × ${omega} donc R = ${fr('v', omega)} = ${fr('1,2', '4,0')} = ${c('0,30 m')}`) })] },
+    { titre: 'Une roue de vélo', enonce: '<p>Une roue de vélo de <b>diamètre 70 cm</b> tourne à la vitesse angulaire ω = 20 rad/s.</p>',
+      parties: [
+        { type: 'nombre', q: 'Quel est le rayon R de la roue, en mètres ?', label: 'R =', valeur: .35, unite: 'm', signe: false, rel: .005,
+          diag: v => (proche(v, .7) ? 'C\'est le diamètre : le rayon est la <b>moitié</b> du diamètre.' : proche(v, 35) ? 'Convertis en mètres : 1 m = 100 cm.' : proche(v, 70) ? 'Prends la moitié du diamètre, en mètres.' : 'R = D / 2, en mètres.'),
+          solution: calc(`R = ${fr('D', '2')} = ${fr('70 cm', '2')} = 35 cm = ${c('0,35 m')}`) },
+        { type: 'nombre', q: 'Calcule la vitesse v d\'un point de la périphérie (le bord) de la roue.', label: 'v =', valeur: 7, unite: 'm/s', signe: false, rel: .01,
+          diag: v => (proche(v, 14) ? 'Tu as pris le diamètre : v = R × ω avec R = 0,35 m.' : proche(v, 700) || proche(v, 1400) ? 'R doit être en mètres.' : 'v = R × ω.'),
+          solution: calc(`v = R × ${omega} = 0,35 m × 20 rad/s = ${c('7,0 m/s')}`) },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Période et fréquence ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Période et fréquence de rotation');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Période.</b> La <b>période</b> T est la durée d'un tour (en s). En un tour, l'angle balayé est θ = 2π rad :</p>
+        <p class="crs-formule">${omega} = ${fr('2π', 'T')}</p></div>
+      <div class="cle"><p><b class="cle-titre">Fréquence.</b> La <b>fréquence de rotation</b> f est le nombre de tours par seconde :</p>
+        <p class="crs-formule">f = ${fr('1', 'T')}</p>
+        <p>f en <b>hertz (Hz)</b>, T en s.</p></div>
+    </div>
+    ${exemple(`<p>Une éolienne fait un tour en T = 5,0 s.</p>${calc(`${omega} = ${fr('2π', 'T')} = ${fr('2π rad', '5,0 s')} ≈ ${c('1,26 rad/s')}`)}${calc(`f = ${fr('1', 'T')} = ${fr('1', '5,0 s')} = ${c('0,20 Hz')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Un tour en 2 s', enonce: '<p>Sur le disque, T est affichée sous la figure.</p>',
+      parties: [partieDisque({ q: `Règle ${omega} pour que le disque fasse un tour en T = 2,0 s (à 0,05 s près).`,
+        omega: 1, R: .3, dt: 0, fixe: { R: true },
+        cible: {
+          verif: s => { const T = DEUX_PI / s.omega; return Math.abs(T - 2) <= .05 ? null : `Avec ω = ${fmt(s.omega, 2)} rad/s, T = 2π / ω = ${fmt(T, 2)} s : ${T > 2 ? 'le disque tourne trop lentement, augmente ω' : 'il tourne trop vite, diminue ω'}.`; },
+          montrer: { omega: 3.15 } },
+        solution: calc(`${omega} = ${fr('2π', 'T')} = ${fr('2π', '2,0')} = π ≈ ${c('3,14 rad/s')}`) })] },
+    { titre: 'Un disque de ponceuse', enonce: '<p>Le disque d\'une ponceuse fait un tour en T = 0,50 s.</p>',
+      parties: [
+        { type: 'nombre', q: `Calcule sa vitesse angulaire ${omega}.`, label: `${omega} =`, valeur: DEUX_PI / .5, unite: 'rad/s', signe: false, rel: .01, affiche: '12,6',
+          diag: v => (proche(v, 2) ? 'Tu as calculé 1 / T : un tour, c\'est <b>2π</b> rad, ω = 2π / T.' : proche(v, Math.PI / .5) ? 'Un tour, c\'est 2π rad (pas π).' : proche(v, DEUX_PI * .5) ? 'On <b>divise</b> 2π par T.' : `${omega} = 2π / T.`),
+          solution: calc(`${omega} = ${fr('2π', '0,50 s')} ≈ ${c('12,6 rad/s')}`) },
+        { type: 'nombre', q: 'Calcule sa fréquence de rotation f.', label: 'f =', valeur: 2, unite: 'Hz', signe: false, rel: .01,
+          diag: v => (proche(v, .5) ? 'f = 1 / T (et non T).' : 'f = 1 / T.'), solution: calc(`f = ${fr('1', '0,50 s')} = ${c('2,0 Hz')}`) + '<p>2 tours par seconde.</p>' },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Angle balayé ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. Angle balayé pendant une durée');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>On isole θ dans ${omega} = θ / Δt :</p>
+        <p class="crs-formule">θ = ${omega} × Δt</p></div>
+      <div class="cle"><p><b class="cle-titre">Radians et degrés.</b> Un tour : <b>2π rad = 360°</b>. On passe des radians aux degrés avec un tableau de proportionnalité.</p></div>
+      <div class="ph-lien-app"><p>Revois les tableaux de proportionnalité.</p><a class="btn-small" href="../../proportionnalite/index.html">Proportionnalité →</a></div>
+    </div>
+    ${exemple(`<p>Un disque tourne à ${omega} = 0,80 rad/s pendant Δt = 5,0 s.</p>${calc(`θ = ${omega} × Δt = 0,80 rad/s × 5,0 s = ${c('4,0 rad')}`)}
+      <div class="crs-defile"><table class="crs-tab"><thead><tr><th>angle (rad)</th><th>angle (°)</th></tr></thead><tbody><tr><td>2π</td><td>360</td></tr><tr><td>4,0</td><td>?</td></tr></tbody></table></div>
+      ${calc(`θ = ${fr('360 × 4,0', '2π')} ≈ ${c('229°')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Un tour exactement', enonce: '<p>Le disque tourne à ω = 1,00 rad/s. Fais avancer le temps avec le curseur Δt (ou ▶).</p>',
+      parties: [partieDisque({ q: 'Règle Δt pour que le disque ait fait exactement un tour (le point P revient au départ).',
+        omega: 1, R: .3, dt: 0, fixe: { omega: true, R: true },
+        cible: {
+          verif: s => { const th = s.omega * s.dt; return Math.abs(th - DEUX_PI) <= .06 ? null : `θ = ω × Δt = ${fmt(th, 2)} rad : ${th < DEUX_PI ? 'pas encore un tour (2π ≈ 6,28 rad)' : 'plus d\'un tour (2π ≈ 6,28 rad)'}.`; },
+          montrer: { dt: 6.3 } },
+        solution: calc(`Un tour : θ = 2π rad, donc Δt = ${fr('θ', omega)} = ${fr('2π', '1,00')} ≈ ${c('6,3 s')}`) + '<p>C\'est la période T du disque.</p>' })] },
+    { titre: 'Une roue', enonce: '<p>Une roue tourne à ω = 0,50 rad/s pendant Δt = 6,0 s.</p>',
+      parties: [
+        { type: 'nombre', q: 'Calcule l\'angle θ balayé, en radians.', label: 'θ =', valeur: 3, unite: 'rad', signe: false, rel: .01,
+          diag: v => (proche(v, 12) ? 'θ = ω × Δt : on <b>multiplie</b>.' : proche(v, 1 / 12) ? 'θ = ω × Δt.' : 'θ = ω × Δt.'), solution: calc(`θ = 0,50 rad/s × 6,0 s = ${c('3,0 rad')}`) },
+        { type: 'nombre', q: 'Convertis cet angle en degrés (arrondi au degré).', label: 'θ =', valeur: 3 * 360 / DEUX_PI, unite: '°', signe: false, tol: 1, affiche: '172',
+          diag: v => (proche(v, 1080) ? 'Un radian ne vaut pas 360° : c\'est <b>2π rad</b> qui vaut 360°.' : proche(v, 3 * DEUX_PI / 360) ? 'Le produit en croix est inversé : 360 × 3,0 / 2π.' : proche(v, 3 * 180 / DEUX_PI) ? '2π rad = 360° (et π rad = 180°).' : 'Tableau : 2π rad ↔ 360°, 3,0 rad ↔ ? ; θ = 360 × 3,0 / 2π.'),
+          solution: calc(`θ = ${fr('360 × 3,0', '2π')} ≈ ${c('172°')}`) },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Vitesse angulaire : ${omega} = θ / Δt, en <b>rad/s</b> (θ en rad, Δt en s). Angle balayé : θ = ${omega} × Δt.</p></div>
+    <div class="cle"><p>Vitesse d'un point à la distance R de l'axe : <b>v = R × ${omega}</b>, R = <b>rayon</b> (moitié du diamètre) en m.</p></div>
+    <div class="cle"><p>Période T (durée d'un tour) : ${omega} = 2π / T ; fréquence f = 1 / T en Hz. Un tour : 2π rad = 360°.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur la vitesse angulaire →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2_cours.html">Module 2 : convertir tr/min et rad/s</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
+ROT.menu('module_1_cours');
+</script>
+</body>
+</html>

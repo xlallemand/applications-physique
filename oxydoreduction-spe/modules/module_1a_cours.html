@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : oxydant et réducteur — Oxydoréduction</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="ox.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS 1 / 4</span>
+    <h2 class="er-titre">Oxydant et réducteur</h2>
+    <p class="er-contexte">Une réaction d'oxydoréduction est un <b>transfert d'électrons</b>. Tu vas apprendre à reconnaître un <b>oxydant</b>, qui capte des électrons, et un <b>réducteur</b>, qui en cède.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Sous-module 1 du module 1 (assets/cours.js) : notion → exemple → « À toi ».
+   Les espèces des « À toi » sont tirées au hasard à chaque visite.
+   Erreurs diagnostiquées : capter et céder confondus, nombre
+   d'électrons lu sur une seule charge (ou leur somme).
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { h } = OX;
+const { sPl, charge, choixRole } = OX.M1;
+const CP = OX.M1.couples();
+
+/* ---------- 1. Oxydant et réducteur ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Oxydant et réducteur');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Certaines espèces chimiques peuvent <b>capter</b> des électrons, d'autres peuvent en <b>céder</b>. Un électron porte une charge négative (−1) : capter des électrons fait <b>diminuer</b> la charge d'une espèce, en céder la fait <b>augmenter</b>.</p>
+      <div class="cle"><p><b class="cle-titre">Définitions.</b> Un <b>oxydant</b> est une espèce chimique capable de <b>capter</b> un ou plusieurs électrons.</p>
+        <p>Un <b>réducteur</b> est une espèce chimique capable de <b>céder</b> un ou plusieurs électrons.</p></div>
+    </div>
+    ${exemple(`<p>${h('Cu^2+')} peut capter <b>2 électrons</b> pour devenir Cu : ${h('Cu^2+')} est un <b>oxydant</b>.</p>
+      <p>${h('Fe^2+')} peut céder <b>1 électron</b> pour devenir ${h('Fe^3+')} : ${h('Fe^2+')} est un <b>réducteur</b>.</p>
+      <p>Le nombre d'électrons se lit sur les charges : de ${h('Cu^2+')} (charge 2+) à Cu (charge 0), la charge diminue de 2, donc 2 électrons captés.</p>`, 'Exemples')}`);
+  // une espèce qui capte, une qui cède (ordre au hasard), puis un nombre d'électrons à trouver
+  const kc = hasard(['Ag', 'Zn', 'Al', 'Pb', 'Sn']), kd = hasard(['Zn', 'Ag', 'Al', 'Ni', 'Sn'].filter(k => k !== kc));
+  const role = (cp, capte) => {
+    const X = capte ? cp.ox : cp.red, Y = capte ? cp.red : cp.ox;
+    return { enonce: `<p>${X} peut ${capte ? 'capter' : 'céder'} ${cp.n} électron${sPl(cp.n)} pour devenir ${Y}.</p>`, parties: [choixRole(X, capte)] };
+  };
+  const t = hasard([
+    { de: 'Al', vers: h('Al^3+'), qa: 0, qb: 3 }, { de: 'Cr', vers: h('Cr^3+'), qa: 0, qb: 3 },
+    { de: 'Fe', vers: h('Fe^3+'), qa: 0, qb: 3 }, { de: h('Sn^2+'), vers: h('Sn^4+'), qa: 2, qb: 4 },
+    { de: h('Sn^4+'), vers: h('Sn^2+'), qa: 4, qb: 2 }, { de: h('Pb^2+'), vers: 'Pb', qa: 2, qb: 0 },
+  ]);
+  const n = Math.abs(t.qb - t.qa), capte = t.qb < t.qa;
+  c.aToi(carte, melanger([role(CP[kc], true), role(CP[kd], false)]).concat([
+    { titre: 'Compter les électrons',
+      enonce: `<p>${t.de} devient ${t.vers}.</p>`,
+      parties: [
+        { type: 'nombre', q: `Combien d'électrons ${t.de} échange-t-il pour devenir ${t.vers}&nbsp;?`, label: 'n =', unite: 'électron(s)', valeur: n, tol: 0, entier: true, signe: false,
+          diag: v => {
+            if (v === t.qb && t.qa !== 0) return `Tu as pris la charge de ${t.vers} seulement. ${t.de} est déjà chargé (${charge(t.qa)}) : compare les deux charges.`;
+            if (v === t.qa && t.qb !== 0) return `Tu as pris la charge de ${t.de} seulement. ${t.vers} est encore chargé (${charge(t.qb)}) : compare les deux charges.`;
+            if (v === t.qa + t.qb) return 'Fais la différence des deux charges, pas leur somme.';
+            return `Compare les charges : ${t.de} a la charge ${charge(t.qa)}, ${t.vers} la charge ${charge(t.qb)}. Chaque électron échangé change la charge de 1.`;
+          },
+          solution: `<p>La charge passe de ${charge(t.qa)} à ${charge(t.qb)} : elle ${capte ? 'diminue' : 'augmente'} de ${n}. ${t.de} ${capte ? 'capte' : 'cède'} <b>${n} électron${sPl(n)}</b>.</p>` },
+        choixRole(t.de, capte),
+      ] },
+  ]));
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>Un <b>oxydant</b> capte des électrons ; un <b>réducteur</b> cède des électrons.</p>
+      <p>Le nombre d'électrons échangés se lit sur les charges : capter n électrons fait baisser la charge de n.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1b_cours.html">Cours : couple et demi-équation →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html#oxred">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+OX.menu('module_1a_cours');
+</script>
+</body>
+</html>

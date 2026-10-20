@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : moment d'une force — Chapitre 8 : Mouvements de rotation</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rot.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rot.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS · PARTIE A</span>
+    <h2 class="er-titre">Moment d'une force</h2>
+    <p class="er-contexte">Pour faire tourner une clé, un volant, une porte, il ne suffit pas de pousser fort : il faut pousser <b>loin de l'axe</b> et dans la <b>bonne direction</b>. Le <b>moment</b> M = F × d mesure cet effet de rotation.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Partie A du module 3 (partie B : couple de forces, module_3b_cours).
+   M = F × d (N·m, N, m) ; d = bras de levier : distance de l'axe à la
+   droite d'action ; force oblique : d = OA × cos α ; lien avec le couple
+   d'un moteur, unité N·m (ni N/m, ni mN, ni J).
+   Outil : clé tournant autour de O (ROT.partieCle), en plusieurs
+   exemplaires : moment maximal, force dirigée vers l'axe (M = 0),
+   bras de levier de 20 cm.
+   Erreurs diagnostiquées : cm non convertis, d pris égal à OA,
+   sin au lieu de cos, division inversée, diamètre pris pour le rayon,
+   unités confondues (N, N/m, mN, J).
+   Valeurs (vérifiées par un script) : volant 20 N × 0,15 m = 3,0 N·m ;
+   20 N × 0,40 m = 8,0 N·m ; 50 N × 0,25 m = 12,5 N·m ;
+   30 cos 40° ≈ 23,0 cm, M ≈ 23,0 N·m ; 50 cos 30° ≈ 43,3 cm,
+   80 × 0,433 ≈ 34,6 N·m ; visseuse 5,0 / 0,10 = 50 N ;
+   tapis roulant 3,0 / 0,060 = 50 N.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, fmt, proche, fr, V, rad, partieCle } = ROT;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .015);
+
+/* ---------- 1. Moment d'une force ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Le moment d\'une force');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> Le <b>moment d'une force</b> par rapport à un axe traduit l'efficacité de cette force pour faire <b>tourner</b> un solide autour de cet axe :</p>
+        <p class="crs-formule">M(${V('F')}) = F × d</p>
+        <p>M en <b>newton-mètres (N·m)</b>, F en <b>N</b>, d en <b>m</b> : d est le <b>bras de levier</b> (étape 2). Quand la force est perpendiculaire à la clé, d est la distance entre l'axe et le point où l'on appuie.</p></div>
+    </div>
+    ${exemple(`<p>On tourne un volant de diamètre 30 cm en exerçant une force F = 20 N tangente au volant.</p>${ROT.figVolant()}
+      ${calc('d = 30 / 2 = 15 cm = 0,15 m')}${calc(`M = F × d = 20 N × 0,15 m = ${c('3,0 N·m')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Où appuyer ?', enonce: '<p>La clé mesure 40 cm ; la force vaut F = 20 N. Fais glisser le point A le long de la clé et la pointe de la force pour l\'orienter (ou utilise les boutons).</p>',
+      parties: [partieCle({ q: 'Où faut-il appuyer, et dans quelle direction, pour obtenir le moment le plus grand ? Règle la clé, puis valide.',
+        L: .4, a: .1, beta: 120, F: 20,
+        cible: {
+          verif: s => (s.a < .4 - 1e-9 ? 'Appuie plus <b>loin de l\'axe</b> : plus le bras de levier est grand, plus le moment est grand.'
+            : Math.abs(Math.sin(rad(s.beta))) < .999 ? 'Oriente la force <b>perpendiculairement</b> à la clé : la droite d\'action est alors le plus loin possible de O.' : null),
+          montrer: { a: .4, beta: 90 } },
+        solution: `<p>On appuie au bout de la clé (OA = 40 cm), avec une force perpendiculaire à la clé : d = OA = 0,40 m.</p>${calc(`M = 20 N × 0,40 m = ${c('8,0 N·m')}`)}` })] },
+    { titre: 'Une clé de mécanicien', enonce: '<p>Un mécanicien exerce une force F = 50 N, perpendiculaire à la clé, à <b>25 cm</b> de l\'axe de l\'écrou.</p>',
+      parties: [{ type: 'nombre', q: 'Calcule le moment de cette force.', label: 'M =', valeur: 12.5, unite: 'N·m', signe: false, rel: .01,
+        diag: v => (pr(v, 1250) ? 'd doit être en <b>mètres</b> : 25 cm = 0,25 m.' : pr(v, 200) || pr(v, .005) ? 'M = F × d : on multiplie.' : 'M = F × d, d en m.'),
+        solution: calc(`M = F × d = 50 N × 0,25 m = ${c('12,5 N·m')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Bras de levier ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Le bras de levier');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> La <b>droite d'action</b> d'une force est la droite qui porte la force. Le <b>bras de levier</b> d est la distance entre l'<b>axe de rotation</b> et la <b>droite d'action</b> : on la mesure sur la perpendiculaire à la droite d'action passant par l'axe.</p></div>
+      <div class="crs-attention"><p><b class="cle-titre">Attention.</b> d n'est pas toujours la distance OA entre l'axe et le point où l'on appuie : c'est le cas seulement si la force est perpendiculaire à OA. Si la droite d'action passe par l'axe, d = 0 et M = 0 : la force ne fait pas tourner.</p></div>
+    </div>
+    ${exemple(`<p>Sur la clé ci-dessous, la force est inclinée : le bras de levier d (en couleur, avec l'équerre) est plus court que OA.</p>${ROT.figCle({ a: .3, beta: 60, aria: 'Clé tournant autour de O ; force inclinée appliquée en A, à 30 cm de O ; la droite d\'action passe à la distance d de O, plus courte que OA' })}
+      ${calc('OA = 30 cm mais d ≈ 26 cm : M = F × d (et non F × OA)')}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une force vers l\'axe', enonce: '<p>La force vaut F = 20 N.</p>',
+      parties: [
+        partieCle({ q: 'Oriente la force pour que sa droite d\'action passe par l\'axe O.', L: .4, a: .3, beta: 60, F: 20,
+          cible: { verif: s => (s.d <= .003 ? null : 'La droite d\'action (pointillés) doit passer par le point O : oriente la force le long de la clé.'), montrer: { beta: 180 } },
+          solution: '<p>La force est dirigée vers l\'axe (ou dans le sens opposé) : sa droite d\'action passe par O.</p>' }),
+        { type: 'choix', q: 'Que vaut alors le moment de la force ?', options: [o('zero', 'M = 0 : la clé ne tourne pas'), o('FOA', 'M = F × OA = 6,0 N·m'), o('max', 'Le moment est maximal')], bonne: 'zero', melanger: false, colonne: true,
+          indices: { FOA: 'Le bras de levier n\'est pas OA : c\'est la distance de O à la droite d\'action, ici nulle.', max: 'Essaie de tourner une clé en tirant dans son axe : rien ne tourne.' },
+          solution: '<p>d = 0, donc M = F × 0 = 0 : une force dont la droite d\'action passe par l\'axe ne fait pas tourner le solide.</p>' },
+      ] },
+    { titre: 'Un bras de levier de 20 cm', enonce: '<p>Le point A est au bout de la clé (OA = 40 cm) ; F = 20 N.</p>',
+      parties: [partieCle({ q: 'Oriente la force pour que le bras de levier soit d = 20 cm (la moitié de OA).', L: .4, a: .4, beta: 90, F: 20,
+        cible: {
+          verif: s => (Math.abs(s.a - .4) > 1e-9 ? 'Laisse le point A au bout de la clé (OA = 40 cm).'
+            : Math.abs(s.d - .2) <= .002 ? null
+            : s.d > .2 ? `d = ${fmt(s.d * 100, 1)} cm : trop grand. Incline davantage la force par rapport à la clé.` : `d = ${fmt(s.d * 100, 1)} cm : trop petit. Rapproche la force de la perpendiculaire à la clé.`),
+          montrer: { beta: 150 } },
+        solution: `<p>Il faut incliner la force de 30° par rapport à la clé : sa droite d'action passe alors à 20 cm de O.</p>${calc(`M = 20 N × 0,20 m = ${c('4,0 N·m')}`)}<p>Deux fois moins qu'avec une force perpendiculaire (8,0 N·m).</p>` })] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Force oblique ---------- */
+function etape3(c_) {
+  const carte = c_.carte('3. Une clé inclinée');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>La clé OA fait un angle α avec l'horizontale ; on appuie verticalement en A. La droite d'action est verticale : le bras de levier est la distance horizontale OH.</p>
+      ${ROT.figOblique({ alpha: 40, OA: 'OA' })}
+      <div class="cle"><p><b class="cle-titre">Bras de levier.</b> Dans le triangle OHA rectangle en H : cos α = OH / OA, donc</p>
+        <p class="crs-formule">d = OA × cos α</p></div>
+    </div>
+    ${exemple(`<p>OA = 30 cm, α = 40°, F = 100 N (verticale).</p>${calc('d = OA × cos α = 30 cm × cos 40° ≈ 23,0 cm = 0,230 m')}${calc(`M = F × d = 100 N × 0,230 m ≈ ${c('23,0 N·m')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une manivelle inclinée', enonce: '<p>Une manivelle OA = 50 cm fait un angle α = 30° avec l\'horizontale. On appuie verticalement en A avec une force F = 80 N.</p>',
+      parties: [
+        { type: 'nombre', q: 'Calcule le bras de levier d, en cm (3 chiffres significatifs).', label: 'd =', valeur: 50 * Math.cos(rad(30)), unite: 'cm', signe: false, rel: .01, affiche: '43,3',
+          diag: v => (pr(v, 25) ? 'Dans le triangle OHA, OH est le côté adjacent à α : c\'est <b>cos</b> α (et non sin α).' : pr(v, 50) ? 'd n\'est pas OA : la force n\'est pas perpendiculaire à la manivelle. d = OA × cos α.' : pr(v, 50 * Math.cos(30)) ? 'Ta calculatrice est en radians : mets-la en <b>degrés</b>.' : 'd = OA × cos α.'),
+          solution: calc(`d = 50 cm × cos 30° ≈ ${c('43,3 cm')}`) },
+        { type: 'nombre', q: 'Calcule le moment de la force.', label: 'M =', valeur: 80 * .5 * Math.cos(rad(30)), unite: 'N·m', signe: false, rel: .01, affiche: '34,6',
+          diag: v => (pr(v, 80 * 50 * Math.cos(rad(30))) ? 'd doit être en mètres : 43,3 cm = 0,433 m.' : pr(v, 40) ? 'Utilise le bras de levier d = 0,433 m (et non OA).' : 'M = F × d, d en m.'),
+          solution: calc(`M = 80 N × 0,433 m ≈ ${c('34,6 N·m')}`) },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Le couple d'un moteur ---------- */
+function etape4(c_) {
+  const carte = c_.carte('4. Le couple d\'un moteur');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Un moteur fait tourner son <b>arbre</b> (son axe de sortie), qui entraîne une roue, une pompe, un foret… Son effet de rotation est un <b>moment</b> : on l'appelle le <b>couple du moteur</b> (couple utile T<sub>u</sub>). C'est la grandeur étudiée dans le module 4 avec la caractéristique d'un moteur.</p>
+      <div class="cle"><p><b class="cle-titre">Unité.</b> Comme tout moment, le couple d'un moteur s'exprime en <b>newton-mètre</b> :</p>
+        <p class="crs-formule">1 N·m = 1 N × 1 m</p>
+        <p>Des newtons <b>multipliés</b> par des mètres. On l'écrit aussi N.m ou Nm.</p></div>
+      <div class="crs-attention"><p><b class="cle-titre">Attention.</b> N·m n'est pas N/m (des newtons <b>divisés</b> par des mètres), ni mN (le millinewton, une force). On n'écrit pas non plus un moment en joules (J) : le joule est réservé aux énergies.</p></div>
+      <p class="rot-note">Pourquoi « couple » ? Les forces que le moteur exerce sur son arbre forment un couple de forces : c'est la partie B de ce module.</p>
+    </div>
+    ${exemple(`<p>Sur la plaque d'une visseuse, on lit : couple 5,0 N·m. Pour empêcher son axe de tourner avec une clé de 10 cm fixée dessus, il faudrait appuyer au bout de la clé avec la force :</p>${calc(`M = F × d donc F = ${fr('M', 'd')} = ${fr('5,0 N·m', '0,10 m')} = ${c('50 N')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'La plaque d\'un moteur', enonce: '<p>Sur la plaque signalétique d\'un moteur, on lit : « couple nominal : 12 N·m ».</p>',
+      parties: [{ type: 'choix', q: 'Que représente ce nombre ?', colonne: true, melanger: false,
+        options: [o('moment', 'Le moment qui fait tourner l\'arbre du moteur'), o('force', 'Une force de 12 N'), o('energie', 'Une énergie de 12 J'), o('vitesse', 'Une vitesse de rotation')], bonne: 'moment',
+        indices: { force: 'L\'unité est N·m (newton × mètre) : ce n\'est pas une force, qui s\'exprime en N.', energie: 'Un moment ne s\'exprime pas en joules : l\'unité lue est N·m.', vitesse: 'Une vitesse de rotation s\'exprime en tr/min ou en rad/s.' },
+        solution: '<p>Le couple d\'un moteur est un moment : 12 N·m, c\'est l\'effet de rotation que le moteur exerce sur son arbre.</p>' }] },
+    { titre: 'La bonne unité', enonce: '',
+      parties: [{ type: 'choix', q: 'Quelle écriture est l\'unité d\'un couple ?', melanger: false,
+        options: [o('Nsm', 'N/m'), o('mN', 'mN'), o('Nm', 'N·m'), o('J', 'J')], bonne: 'Nm',
+        indices: { Nsm: 'N/m, ce sont des newtons <b>divisés</b> par des mètres. Or M = F × d : on <b>multiplie</b>.', mN: 'mN, c\'est le millinewton : une force (un millième de newton).', J: 'Le joule est l\'unité des énergies, pas des moments.' },
+        solution: '<p>M = F × d : des newtons multipliés par des mètres, donc des <b>N·m</b> (newton-mètre).</p>' }] },
+    { titre: 'Un tapis roulant', enonce: '<p>Le moteur d\'un tapis roulant exerce un couple de 3,0 N·m sur un rouleau de <b>rayon 6,0 cm</b>. La force du rouleau sur le tapis est tangente au rouleau.</p>',
+      parties: [{ type: 'nombre', q: 'Quelle force F le rouleau exerce-t-il sur le tapis ?', label: 'F =', valeur: 50, unite: 'N', signe: false, rel: .01,
+        diag: v => (pr(v, .5) ? 'Le rayon doit être en <b>mètres</b> : 6,0 cm = 0,060 m.' : pr(v, .18) ? 'M = F × d donc F = M / d : on <b>divise</b>.' : pr(v, 25) ? 'Le bras de levier est le <b>rayon</b> (6,0 cm), pas le diamètre.' : pr(v, .02) ? 'F = M / d (et non d / M).' : 'F = M / d, d en m.'),
+        solution: calc(`La force est tangente au rouleau : d = rayon = 0,060 m. M = F × d donc F = ${fr('M', 'd')} = ${fr('3,0 N·m', '0,060 m')} = ${c('50 N')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Moment d'une force : <b>M = F × d</b>, en <b>N·m</b> (F en N, d en m).</p></div>
+    <div class="cle"><p>d = <b>bras de levier</b> : distance entre l'axe de rotation et la <b>droite d'action</b> de la force. Force dirigée vers l'axe : d = 0, M = 0. Clé inclinée de α, force verticale : d = OA × cos α.</p></div>
+    <div class="cle"><p>Le <b>couple d'un moteur</b> est un moment : il s'exprime en <b>N·m</b> (newton-mètre = newton × mètre), et jamais en N/m, en mN ou en J.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Partie B : couple de forces →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3_questions.html">Questions sur le moment et le couple</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#moment">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, etape4, aRetenir]);
+ROT.menu('module_3a_cours');
+</script>
+</body>
+</html>

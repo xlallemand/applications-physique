@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : si la vitesse double — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 4 / 4</span>
+    <h2 class="er-titre">Si la vitesse double</h2>
+    <p class="er-contexte">E<sub>c</sub> est proportionnelle à la masse, mais varie comme le <b>carré</b> de la vitesse.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 4 du module 3 : effet sur E_c d'une vitesse multipliée
+   (au carré) et d'une masse multipliée (proportionnelle).
+   ============================================================ */
+const { exemple } = COURS;
+const { o } = EC;
+const EC_ = 'E<sub>c</sub>';
+/* ---------- 1. Si la vitesse double ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Si la vitesse double');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>${EC_} est proportionnelle à <b>m</b> mais varie comme <b>v²</b> : si la vitesse double, l'énergie cinétique est multipliée par 2² = <b>4</b>.</p></div>
+    </div>
+    ${exemple(`<p>Une voiture passe de 50 km/h à 100 km/h : sa vitesse double, son énergie cinétique est multipliée par 4. Il faudra 4 fois plus d'énergie pour l'arrêter : la distance de freinage est multipliée par 4.</p>`)}`);
+  const q = (titre, txt, bon, ind, sol) => ({ titre, enonce: `<p>${txt}</p>`, parties: [{ type: 'choix', q: `Par combien ${EC_} est-elle multipliée ?`, melanger: false,
+    options: ['2', '3', '4', '6', '9'].map(x => o(x, '× ' + x)), bonne: bon, indices: ind, indice: 'm est au premier degré, v au carré.', solution: `<p>${sol}</p>` }] });
+  c_.aToi(carte, [
+    q('La vitesse triple', 'Un skieur passe de 10 m/s à 30 m/s.', '9', { 3: 'La vitesse est au carré : 3² = 9.', 6: '3² = 3 × 3 = 9.' }, 'v × 3 donne v² × 9 : E<sub>c</sub> × 9.'),
+    q('La masse double', 'Un camion chargé a une masse deux fois plus grande qu\'à vide ; il roule à la même vitesse.', '2', { 4: 'La masse n\'est pas au carré : E<sub>c</sub> est proportionnelle à m.' }, 'E<sub>c</sub> est proportionnelle à m : × 2.'),
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Si v double, ${EC_} est multipliée par <b>4</b> (2² = 4) ; si v triple, par 9 ; si m double, ${EC_} double.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur l'énergie cinétique →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#double">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+EC.menu('module_3d_cours');
+</script>
+</body>
+</html>

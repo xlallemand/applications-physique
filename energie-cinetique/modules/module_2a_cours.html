@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : le travail d'une force — Chapitre 7 : Théorème de l'énergie cinétique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ec.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ec.js"></script>
+<script src="travail.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 1 / 4</span>
+    <h2 class="er-titre">Le travail d'une force</h2>
+    <p class="er-contexte">Le <b>travail</b> d'une force est l'énergie qu'elle transmet à un solide au cours d'un déplacement : W<sub>AB</sub>(<span class="vec-nom">F</span>) = <b>F × AB × cos α</b>, en <b>joules</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 1 du module 2 : définition et formule W = F × AB × cos α
+   (calculatrice en degrés, cos 0° = 1, cos 90° = 0, cos 180° = −1).
+   Erreurs diagnostiquées : calculatrice en radians, sin au lieu de cos,
+   signe oublié pour α > 90°, cos α oublié.
+   Valeurs (vérifiées par un script) : 50 × 4,0 × cos 30° ≈ 173 J ;
+   20 × 5 × cos 60° = 50 J ; 40 × 2,5 × cos 120° = −50 J.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, proche, nomV, W, figTravail } = EC;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const WF = W('F');
+const cosd = a => EC.cosd(a);
+const rad = a => Math.cos(a);   // cos d'un angle pris (à tort) en radians
+
+// petit cercle trigonométrique : cos 0° = 1, cos 90° = 0, cos 180° = −1
+const CERCLE = `<svg viewBox="0 0 300 168" class="ec-doc ec-doc-petit" style="max-width:300px" role="img" aria-label="Cercle trigonométrique : cos 0° = 1, cos 90° = 0, cos 180° = −1">
+  <line x1="40" y1="90" x2="262" y2="90" class="ec-sc-sol"/><path d="M270,90 l-9,-4 v8 Z" class="ec-sc-point"/><text x="272" y="82" class="ec-sc-txt">cos α</text>
+  <line x1="150" y1="20" x2="150" y2="160" class="ec-sc-cote"/>
+  <circle cx="150" cy="90" r="58" fill="none" class="ec-sc-arc"/>
+  <circle cx="208" cy="90" r="5" class="ec-sc-point"/><circle cx="150" cy="32" r="5" class="ec-sc-point"/><circle cx="92" cy="90" r="5" class="ec-sc-point"/>
+  <text x="214" y="80" class="ec-sc-alpha">α = 0°</text><text x="158" y="26" class="ec-sc-alpha">α = 90°</text><text x="86" y="80" text-anchor="end" class="ec-sc-alpha">α = 180°</text>
+  <text x="208" y="110" text-anchor="middle" class="ec-sc-proj">1</text><text x="160" y="110" class="ec-sc-proj">0</text><text x="92" y="110" text-anchor="middle" class="ec-sc-proj">−1</text></svg>
+  <p style="text-align:center"><b>cos 0° = 1 ; cos 90° = 0 ; cos 180° = −1</b></p>`;
+
+/* ---------- 1. Définition et formule ---------- */
+function qCalcul(titre, F, AB, a) {
+  const w = F * AB * cosd(a);
+  return { titre, enonce: `<p>F = ${F} N, AB = ${fmt(AB)} m, α = ${a}°.</p>`,
+    parties: [{ type: 'nombre', q: `Calcule le travail ${WF}.`, label: `${WF} =`, valeur: w, unite: 'J', rel: .01, tol: Math.abs(w) < 1e-9 ? 1e-9 : null,
+      diag: v => (proche(v, F * AB * rad(a), .02) ? 'Ta calculatrice est en <b>radians</b> : règle-la en <b>degrés</b>.'
+        : proche(v, -w, .02) ? `cos ${a}° est <b>négatif</b> : le travail aussi.`
+        : proche(v, F * AB * Math.sin(a * Math.PI / 180), .02) ? 'C\'est <b>cos</b> α, pas sin α.'
+        : proche(v, F * AB, .02) ? 'N\'oublie pas de multiplier par cos α.' : 'W = F × AB × cos α.'),
+      solution: calc(`${WF} = ${F} × ${fmt(AB)} × cos ${a}° = ${c(fmt(Math.round(w * 10) / 10) + ' J')}`) }] };
+}
+function etape1(c_) {
+  const carte = c_.carte('1. Le travail d\'une force');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> Le <b>travail</b> d'une force est l'<b>énergie transmise</b> à un solide par cette force au cours d'un déplacement. Il s'exprime en <b>joules (J)</b>.</p></div>
+      ${figTravail({ alpha: 30 })}
+      <div class="cle"><p class="crs-formule">${WF} = F × AB × cos α</p>
+        <p>F : valeur de la force, constante, en N ; AB : longueur du déplacement, en m ; α : angle entre ${nomV('F')} et le déplacement <span class="vec-nom">AB</span>.</p></div>
+      <p><b>Calculatrice</b> : règle-la en <b>degrés</b> quand l'angle est en degrés (en radians quand il est en radians). Trois valeurs à connaître :</p>
+      ${CERCLE}
+    </div>
+    ${exemple(`<p>Une force de 50 N tire un chariot sur AB = 4,0 m ; elle fait un angle de 30° avec le déplacement.</p>
+      ${calc(`${WF} = F × AB × cos α = 50 N × 4,0 m × cos 30° ≈ ${c('173 J')}`)}`)}`);
+  c_.aToi(carte, [qCalcul('Calcul 1', 20, 5, 60), qCalcul('Calcul 2', 200, 3, 0), qCalcul('Calcul 3', 40, 2.5, 120)]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Le <b>travail</b> d'une force est l'énergie transmise au solide au cours d'un déplacement, en <b>joules</b> : ${WF} = F × AB × cos α (calculatrice en degrés).</p></div>
+    <div class="cle"><p>cos 0° = 1 ; cos 90° = 0 ; cos 180° = −1.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2b_cours.html">Cours : travail moteur, résistant ou nul →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#travail">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+EC.menu('module_2a_cours');
+</script>
+</body>
+</html>

@@ -29,7 +29,7 @@ Ne change ni le contenu scientifique ni les fonctionnalités propres à une appl
     <pref>.js                     moteur : questions, cours par étapes, navigation, accueil
     module_N_cours.html           cours du module N
     module_N_questions.html       série de questions du module N
-    module_Na_cours.html …        module découpé en parties : a, b, c… (ou 2b), un cours + une série de questions par partie
+    module_Na_cours.html …        cours trop long découpé en sous-modules de cours : a, b, c… (voir §4, « Longueur d'un cours »)
     fiche_N.html                  fiche récapitulative du module N
     module_6.html                 page d'exercices (liste puis un exercice à la fois)
     exercices.js                  données des exercices
@@ -150,6 +150,14 @@ Parties de question du moteur (`p.type`) : `'choix'` (QCM, `indices` par mauvais
 
 Le cours est marqué fait (sommaire, accueil) à l'affichage de la dernière étape.
 
+#### Longueur d'un cours : sous-modules
+
+- Chaque cours, et chaque sous-module de cours, reste **court** : il ne dépasse pas la longueur du cours du module 1 « Référentiel et nature du mouvement » de l'application « Chapitre 6 : Principe fondamental de la dynamique » (`principe-dynamique/modules/module_1_cours.html`), soit **trois étapes** notion → exemple → « À toi », plus « À retenir ».
+- Un cours plus long est **découpé en plusieurs sous-modules de cours**, une page par notion (`module_2a_cours.html`, `module_2b_cours.html`…), nommés **« Cours : nom de la notion »** dans le sommaire et sur l'accueil (badge `MODULE 2 · COURS 1 / 6`, titre de la page : le nom de la notion).
+- Après les sous-modules : l'atelier ou la simulation s'il y en a, **une seule série de questions** pour tout le module, puis **une seule fiche récapitulative** pour l'ensemble des sous-modules, **placée après les questions** (une section par sous-module, avec son ancre).
+- « À retenir » d'un sous-module : bouton principal vers le sous-module suivant (le dernier : vers l'atelier ou les questions), bouton secondaire vers la fiche, à l'ancre du sous-module.
+- Dans le `PLAN` : `sousModules: true`, une partie par sous-module (§5). Exemple : module 2 de `principe-dynamique/`.
+
 Dernière étape : carte **« À retenir »** (une `.cle` par notion), puis `.er-actions` : bouton principal vers les questions du module, boutons secondaires vers le cours suivant et vers la fiche récapitulative.
 
 Pas de lien « Fiche récapitulative » en haut du cours (la fiche est dans le sommaire).
@@ -190,6 +198,10 @@ const PLAN = [
     parties: [{ nom: 'La fonction log', slug: 'log',                            // slug : ancre de la fiche (module en plusieurs parties)
                 cours: 'module_1_cours', questions: 'module_1_questions',
                 noms: { questions: 'Vérification' } }] },                      // libellés propres (facultatif)
+  { n: 2, titre: 'Faire un bilan des forces', desc: '…', fiche: 'fiche_2', sousModules: true,      // cours découpé en sous-modules (§4)
+    parties: [{ nom: 'Poids', slug: 'poids', cours: 'module_2a_cours', noms: { cours: 'Cours : poids' } },
+              { nom: 'Réaction du support', slug: 'reaction', cours: 'module_2b_cours', noms: { cours: 'Cours : réaction du support' } },
+              { nom: 'Bilan des forces', questions: 'module_2_questions' }] },              // la série, après tous les cours
   { n: 3, titre: 'Exercices d\'entraînement', exercices: 'module_3', exNom: 'Exercices', nbEx: 20 },
 ];
 SOM.init({ nom: 'pH', id: 'ph', cleEx: 'ph-exercices', plan: PLAN });
@@ -207,6 +219,7 @@ SOM.init({ nom: 'pH', id: 'ph', cleEx: 'ph-exercices', plan: PLAN });
 - **On va dans n'importe quel module sans repasser par l'accueil** : un clic sur un module ou une partie le **déplie sur place** (la page ne change pas) ; un clic sur une page y va. Plusieurs modules peuvent être dépliés en même temps.
 - Chaque ligne de module : pastille (numéro, ✓ si tout est fait), titre, compteur `n/m`, chevron. Les pages affichent leur état : Cours ✓, Questions avec la meilleure note `16/20`.
 - Module à une seule partie : ses trois pages directement sous le module. Module d'exercices : une page « Exercices 1 à 16 ».
+- Module découpé en sous-modules de cours (`sousModules: true`) : une seule liste de pages sous le module, dans l'ordre (« Cours : … » de chaque sous-module, atelier, Questions), puis la Fiche ; sur l'accueil, une seule carte avec ces pages en liste.
 - Les pages sont de simples liens `<a>` (retour arrière du navigateur correct). La Fiche d'une partie ouvre `fiche_N.html#<slug-de-la-partie>` ; sur la fiche, le sommaire suit l'ancre (`hashchange`).
 - Tout est accessible à tout moment : aucun verrouillage entre modules ou parties.
 - Seuil téléphone / ordinateur : **900 px** de large.
@@ -328,6 +341,7 @@ Avec Playwright / Chromium (déjà installé, ne pas relancer `playwright instal
 5. Navigation : la page en cours est encadrée dans le sommaire, déplier un autre module ne change pas de page, chaque lien du sommaire mène à la bonne page, ancres de fiche, sommaire du téléphone (ouverture, fermeture, voile), bouton Reprendre, ✓ et notes (profil persistant), lien vers le portail.
 6. Tous les liens internes pointent vers des pages existantes.
 7. Tracés de vecteurs : glisser à la souris, au doigt (CDP), flèches ; valeur affichée en direct.
+8. Longueur : aucun cours ne dépasse la longueur de référence (§4, « Longueur d'un cours ») ; sinon, des sous-modules.
 
 Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire explicitement dans le compte rendu.
 
@@ -337,7 +351,7 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 
 1. **Navigation** : retirer l'ancien menu burger ; charger `assets/sommaire.css` et `assets/sommaire.js`, déclarer le `PLAN`, appeler `SOM.menu(cle)` dans chaque page et `SOM.accueil(zone)` sur l'accueil (§5).
 2. **Accueil** : en-tête illustré `app-hero` conservé, liste des modules en lignes dépliables, « Reprendre », compteurs et notes (§4, §5).
-3. **Découpage** : chaque module → une page de cours, une série de questions notée sur 20, une fiche récapitulative ; plusieurs parties si le module est long.
+3. **Découpage** : chaque module → une page de cours, une série de questions notée sur 20, une fiche récapitulative ; un cours trop long est découpé en sous-modules de cours (§4, « Longueur d'un cours »).
 4. **Cours** : réécrire avec le moteur commun `assets/cours.js` en étapes notion → exemple → « À toi », bouton « Afficher tout le cours » (§4, §6). Les outils interactifs existants deviennent l'exemple ou des items `perso` d'« À toi ». Un cours mélangé à une série (cours dans l'intro de la série) passe sur sa propre page `module_N_cours.html`.
 5. **Style** : cartes `er-card`, boutons en pilule encre, encarts `.cle` / `callout-*`, badges ; supprimer les couleurs en dur et les classes de couleur Tailwind (le thème les neutralise, mais ne pas en ajouter).
 6. **Saisies** : ± pour les nombres, ≥ 16 px, cibles tactiles larges, retours d'erreur diagnostiqués (§6, §7, §8).

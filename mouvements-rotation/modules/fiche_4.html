@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : fiche récapitulative — Chapitre 8 : Mouvements de rotation</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rot.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rot.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Caractéristique d'un moteur et point de fonctionnement</h2>
+  </div>
+<!-- Fiche récapitulative du module 4 : caractéristique T_u(n), grandeurs repérées, point de fonctionnement. -->
+
+  <section class="er-card" id="caracteristique">
+    <h3 class="cours-titre">Caractéristique d'un moteur</h3>
+    <div class="cle"><p>Courbe du <b>couple utile</b> T<sub>u</sub> (N·m) en fonction de la <b>fréquence de rotation</b> n (tr/s ou tr/min).</p></div>
+    <div id="fig-carac"></div>
+    <ul class="er-liste rot-legende">
+      <li><b>A</b> : couple au démarrage (n = 0) ;</li>
+      <li><b>B</b> : couple maximal (sommet) ;</li>
+      <li><b>C</b> : fréquence nominale ;</li>
+      <li><b>D</b> : fréquence de rotation à vide (T<sub>u</sub> = 0) ;</li>
+      <li><b>E</b> : zone utile, entre la fréquence nominale et la fréquence à vide : la meilleure zone de fonctionnement.</li></ul>
+    <div class="cle"><p>Le couple maximal et la fréquence nominale sont écrits sur le moteur.</p></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Point de fonctionnement</h3>
+    <div class="cle"><p>Intersection des caractéristiques du <b>moteur</b> (T<sub>u</sub>) et de la <b>charge</b> (couple résistant T<sub>r</sub>), tracées sur le même graphique :</p>
+      <p class="som-formule">T<sub>u</sub> = T<sub>r</sub></p>
+      <p>Il donne la vitesse de rotation et le couple du moteur avec cette charge. On lit n et T avec des pointillés vers les axes.</p></div>
+    <div id="fig-point"></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_4_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_4_questions.html">Questions sur les caractéristiques</a>
+  </div>
+</div>
+<script>
+// mêmes courbes que dans le cours (moteur 1 et charge 1)
+const M1 = ROT.pchip([[0, 12], [250, 11], [700, 24], [900, 10], [1000, 0]]), C1 = n => 2 + 8 * (n / 900) ** 2;
+const axeN = { max: 1200, pas: 200, sous: 100, nom: 'n (tr/min)' };
+document.getElementById('fig-carac').innerHTML = ROT.grapheFig({ x: axeN, y: { max: 30, pas: 5, sous: 1, nom: 'T<tspan dy="4" font-size="10">u</tspan><tspan dy="-4"> (N·m)</tspan>' },
+  courbes: [{ f: M1, de: 0, a: 1000, cls: 'moteur' }],
+  reperes: [{ x: 0, y: 12, lettre: 'A', dx: 18, dy: -16 }, { x: 700, y: 24, lettre: 'B' }, { x: 900, y: 10, lettre: 'C', dx: 18, dy: -6 }, { x: 1000, y: 0, lettre: 'D', dx: 16, dy: -16 }],
+  zone: { de: 900, a: 1000, lettre: 'E', f: M1 }, aria: 'Caractéristique d\'un moteur avec les repères A à E' });
+document.getElementById('fig-point').innerHTML = ROT.grapheFig({ x: axeN, y: { max: 30, pas: 5, sous: 1, nom: 'T (N·m)' },
+  courbes: [{ f: M1, de: 0, a: 1000, cls: 'moteur', etiq: { x: 520, y: 23.5, texte: 'moteur', ancre: 'end' } }, { f: C1, de: 0, a: 1150, cls: 'charge', etiq: { x: 1150, y: 17.5, texte: 'charge', ancre: 'end' } }],
+  lectures: [{ x: 900, y: 10, tx: '900', ty: '10' }], aria: 'Point de fonctionnement : intersection des caractéristiques du moteur et de la charge, n = 900 tr/min et T = 10 N·m' });
+ROT.menu('fiche_4');
+</script>
+</body>
+</html>

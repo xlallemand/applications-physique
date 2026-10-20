@@ -1,0 +1,372 @@
+/* ============================================================
+   Styles de l'application « Chapitre 9 : Statique des fluides »
+   (repris de « Chapitre 8 : Mouvements de rotation » : questions,
+   exercices, étiquettes à placer, grille de choix ; en fin de
+   fichier : dessins, schéma point haut / point bas à compléter,
+   tableau de conversion des surfaces)
+   Complète assets/theme.css, le fichier er.css de l'application
+   « Équilibrer une réaction » (cartes, boutons, écran de fin) et
+   assets/sommaire.css (navigation, accueil, fiches).
+   ============================================================ */
+
+.er-page button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.er-page p { margin: 0; }
+sub, sup { font-size: .7em; line-height: 0; }
+
+/* (blocs communs avec l'application « pH » : cours, « À toi », questions, graphiques, exercices) */
+/* ---------- Cours ---------- */
+.er-etape .cle { margin: 12px 0; }
+.cle p + p, .cours-bloc p + p, .cours-exemple p + p { margin-top: 8px; }
+.cours-bloc { margin: 0 0 12px; }
+.cours-bloc .cle { margin: 12px 0 0; }
+.cours-exemple { line-height: 1.6; }
+.cours-exemple-t { font-size: .8rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px !important; }
+.ph-formule { text-align: center; font-size: 1.35rem; font-weight: 700; margin: 10px 0 !important; color: var(--ink); line-height: 1.5; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ph-formule.grand { font-size: 1.6rem; }
+@media (max-width: 480px) { .ph-formule { font-size: 1.12rem; } .ph-formule.grand { font-size: 1.3rem; } }
+.ph-calc { font-size: 1.1rem; line-height: 2.1; font-variant-numeric: tabular-nums; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ph-calc .c { color: var(--accent-ink); font-weight: 800; }
+@media (max-width: 480px) { .ph-calc { font-size: 1rem; } }
+.ph-r { color: var(--accent-ink); font-weight: 800; }
+.ph-lien-app {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  background: var(--cle-bg); border-radius: 16px; padding: 10px 12px 10px 16px; margin: 14px 0;
+}
+.ph-lien-app p { font-size: .92rem; color: var(--ink); font-weight: 600; }
+.ph-lien-app a { text-decoration: none; }
+.ph-grille2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 640px) { .ph-grille2 { grid-template-columns: 1fr; } }
+.ph-tableau { border-collapse: collapse; margin: 10px auto; font-variant-numeric: tabular-nums; }
+.ph-tableau th, .ph-tableau td { border: 1.5px solid var(--paper-3); padding: 6px 12px; text-align: center; white-space: nowrap; }
+.ph-tableau th { background: var(--paper); font-weight: 700; }
+.ph-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 480px) { .ph-tableau th, .ph-tableau td { padding: 5px 7px; font-size: .9rem; } }
+
+
+/* ---------- Questions ---------- */
+.ph-enonce { margin-bottom: 12px; line-height: 1.55; }
+.ph-partie + .ph-partie { margin-top: 16px; padding-top: 14px; border-top: 1.5px dashed var(--paper-3); }
+.ph-partie-q { font-weight: 700; color: var(--ink); margin-bottom: 10px !important; line-height: 1.5; }
+.ph-partie-aide { margin-top: 10px; }
+.ph-partie-aide .btn-small { color: var(--ink-2); }
+.ph-msg { margin-top: 10px !important; font-size: .92rem; color: var(--ink-2); font-weight: 600; }
+.ph-ok { margin-top: 8px !important; color: var(--success-text); font-weight: 800; }
+.ph-actions-partie { margin-top: 10px; }
+.ph-bilan { margin-top: 16px; }
+.ph-solution { line-height: 1.6; }
+.ph-solution .ph-calc { font-size: 1.02rem; line-height: 1.9; }
+.ph-question .er-consigne { margin-bottom: 8px !important; }
+
+/* Choix */
+.ph-choix { display: flex; flex-wrap: wrap; gap: 8px; }
+.ph-choix-col { flex-direction: column; align-items: stretch; }
+.ph-choix button { min-height: 46px; text-align: left; line-height: 1.4; border-radius: 16px; padding: 10px 18px; }
+.ph-choix button:disabled { cursor: default; opacity: 1; }
+.ph-choix button.juste { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); color: var(--success-text); }
+.ph-choix button.faux { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+.ph-choix svg { display: block; width: 150px; max-width: 100%; height: auto; }
+
+/* Valeur numérique */
+.ph-valeur { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.ph-lab { font-size: 1.15rem; font-weight: 800; color: var(--ink); white-space: nowrap; }
+.ph-unite { font-size: 1.1rem; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.ph-champ-box { display: inline-flex; align-items: center; gap: 4px; }
+.ph-champ {
+  width: 120px; font: inherit; font-size: 1.15rem; font-weight: 800; text-align: center; padding: 9px 8px;
+  border: none; border-radius: 12px; box-shadow: inset 0 0 0 1.5px var(--paper-3); background: var(--sheet); color: var(--ink);
+  -webkit-appearance: none; appearance: none;
+}
+.ph-champ:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.ph-champ:disabled { background: var(--paper); color: var(--ink); -webkit-text-fill-color: var(--ink); opacity: 1; }
+.ph-champ-box.petit .ph-champ { width: 78px; font-size: 1.05rem; padding: 8px 6px; }
+.ph-pm {
+  width: 38px; height: 42px; flex-shrink: 0; border: none; border-radius: 12px; cursor: pointer;
+  background: var(--paper); color: var(--ink); font: inherit; font-size: 1.1rem; font-weight: 800;
+}
+.ph-pm:disabled { opacity: .35; cursor: default; }
+.ph-champ-box.petit .ph-pm { width: 32px; height: 38px; font-size: 1rem; }
+.ph-sci { display: inline-flex; align-items: flex-start; flex-wrap: nowrap; gap: 3px; max-width: 100%; }
+.ph-sci .ph-champ-box.petit .ph-champ { width: 74px; }
+.ph-x10 { font-size: 1.15rem; font-weight: 800; align-self: center; white-space: nowrap; }
+.ph-exposant { margin-top: -16px; }
+.ph-exposant .ph-champ { width: 58px; font-size: 16px; padding: 6px 4px; }
+.ph-exposant .ph-pm { width: 30px; height: 34px; font-size: .95rem; }
+@media (max-width: 400px) {
+  .ph-champ-box.petit .ph-champ, .ph-sci .ph-champ-box.petit .ph-champ { width: 64px; }
+  .ph-exposant .ph-champ { width: 48px; }
+  .ph-champ-box.petit .ph-pm { width: 28px; }
+  .ph-exposant .ph-pm { width: 26px; }
+  .ph-x10 { font-size: 1.05rem; }
+}
+
+/* ---------- Graphiques ---------- */
+.ph-graphe { display: block; width: 100%; height: auto; max-width: 640px; margin: 8px auto; touch-action: pan-y; }
+.ph-grille { stroke: var(--paper-3); stroke-width: 1; stroke-dasharray: 3 4; }
+.ph-axe { stroke: var(--ink); stroke-width: 1.6; }
+.ph-fleche { fill: var(--ink); }
+.ph-graduation { font: 600 13px var(--font-sans); fill: var(--ink-2); }
+.ph-axe-nom { font: 700 14px var(--font-sans); fill: var(--ink); }
+.ph-courbe { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linejoin: round; }
+.ph-pointille { stroke: var(--accent-ink); stroke-width: 1.5; stroke-dasharray: 6 5; }
+.ph-point { fill: var(--accent-ink); }
+.ph-point-mobile { fill: var(--sheet); stroke: var(--accent-ink); stroke-width: 3; }
+.ph-lecture { stroke: var(--accent-ink); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.ph-zone-rouge { fill: var(--danger-bg); }
+.ph-theo { stroke: var(--danger); stroke-width: 2; stroke-dasharray: 7 5; fill: none; }
+.ph-mesure { fill: none; stroke: var(--accent-ink); stroke-width: 2.5; }
+.ph-croix { stroke: var(--accent-ink); stroke-width: 2.5; }
+.ph-txt-rouge { font: 700 13px var(--font-sans); fill: var(--danger-text); }
+.ph-txt-bleu { font: 700 13px var(--font-sans); fill: var(--accent-ink); }
+.ph-curseur { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+.ph-curseur input[type="range"] { flex: 1; min-width: 200px; accent-color: var(--accent); height: 32px; }
+.ph-lecture-txt { background: var(--sheet); border-radius: 14px; padding: 8px 14px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 220px; text-align: center; }
+.ph-mini-graphe { display: block; }
+
+/* ---------- Exercices (module 6) ---------- */
+.ph-ex-groupe { margin-bottom: 18px; }
+.ph-ex-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; }
+.ph-ex-carte {
+  display: flex; align-items: center; gap: 12px; text-align: left; width: 100%;
+  background: var(--paper); border: none; border-radius: 18px; padding: 14px 16px; cursor: pointer; font: inherit; color: var(--ink);
+  transition: background .15s;
+}
+.ph-ex-carte:hover { background: var(--paper-2); }
+.ph-ex-num { flex-shrink: 0; min-width: 40px; height: 40px; border-radius: 999px; display: grid; place-items: center; background: var(--cle-bg); color: var(--accent-ink); font-weight: 800; font-size: .85rem; padding: 0 6px; }
+.ph-ex-carte.fait .ph-ex-num { background: var(--success-bg); color: var(--success-text); }
+.ph-ex-titre { font-weight: 800; line-height: 1.25; }
+.ph-ex-desc { font-size: .85rem; color: var(--ink-2); margin-top: 2px; line-height: 1.35; }
+.ph-ex-score { font-size: .78rem; font-weight: 700; color: var(--success-text); margin-top: 3px; }
+.ph-contexte { background: var(--cle-bg); border-color: var(--cle-line); }
+.ph-contexte .er-contexte { color: var(--ink); }
+.ph-donnees { margin-top: 8px !important; font-size: .92rem; color: var(--ink-2); line-height: 1.55; }
+.ph-ex-nav { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; }
+.ph-retour-liste { border: none; background: none; font: 700 .9rem var(--font-sans); color: var(--ink-2); cursor: pointer; padding: 6px 0; }
+.ph-retour-liste:hover { color: var(--ink); }
+/* ---------- Saisies propres à l'application ---------- */
+.ph-partie-fig:empty, .ph-atoi-fig:empty { display: none; }
+.ph-partie-fig, .ph-atoi-fig { margin: 4px 0 10px; }
+.ph-champ-box.ko .ph-champ { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); }
+
+/* expression à trous */
+.sf-gab { gap: 8px 6px; }
+.sf-gab-txt { font-size: 1.15rem; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.sf-gab .ph-champ-box.petit .ph-champ { width: 60px; }
+.sf-gab-grp { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+@media (max-width: 400px) { .sf-gab .ph-champ-box.petit .ph-champ { width: 50px; } .sf-gab { gap: 8px 4px; } }
+
+/* encart d'avertissement */
+.sf-attention { background: var(--danger-bg); border-radius: 18px; padding: 14px 18px; margin: 12px 0; }
+.sf-attention .cle-titre { color: var(--danger-text); }
+
+/* « complète ton cours » (exemples du cours trouvés par l'élève) */
+.sf-complete { margin-top: 8px !important; padding: 8px 12px; border-radius: 12px; background: var(--sheet); font-weight: 600; }
+.sf-complete b:first-child { color: var(--accent-ink); }
+
+/* fractions sur deux étages (SF.fr) */
+.fr { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.15; margin: 0 .12em; font-size: .92em; }
+.fr > span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 .2em .05em; }
+.fr > span:last-child { padding: .05em .2em 0; }
+.ph-formule .fr, .ph-calc .fr { font-size: .85em; }
+.racine { white-space: nowrap; }
+.sf-nobr { white-space: nowrap; display: inline-block; }
+.racine > span { border-top: 1.5px solid currentColor; padding: 0 .15em; margin-left: .05em; }
+
+/* tableaux du cours */
+.sf-tab { border-collapse: collapse; margin: 10px auto; font-variant-numeric: tabular-nums; }
+.sf-tab th, .sf-tab td { border: 1.5px solid var(--paper-3); padding: 7px 12px; text-align: center; }
+.sf-tab th { background: var(--paper); font-weight: 700; }
+.sf-tab td.vide { color: var(--ink-3); }
+.sf-tab tr.inutile td { color: var(--ink-3); background: repeating-linear-gradient(135deg, transparent 0 6px, var(--paper) 6px 12px); }
+.sf-tab td.trouve { background: var(--success-bg); color: var(--success-text); font-weight: 800; }
+.sf-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 480px) { .sf-tab th, .sf-tab td { padding: 5px 7px; font-size: .92rem; } }
+
+
+/* ---------- cases et étiquettes à placer sur un schéma ---------- */
+.sc-ligne { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 3px 0; }
+.sc-nom { font-weight: 800; font-size: .95rem; white-space: nowrap; }
+.sc-val { display: inline-block; min-width: 54px; padding: 4px 9px; border-radius: 10px; background: var(--cle-bg); color: var(--accent-ink); font-weight: 800; font-size: .95rem; white-space: nowrap; text-align: center; font-variant-numeric: tabular-nums; }
+.sc-val.inconnue { background: var(--sheet); color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); }
+.sc-slot {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 74px; min-height: 42px; padding: 3px;
+  border: 2px dashed var(--ink-3); border-radius: 12px; background: var(--sheet); transition: background .15s, border-color .15s;
+  vertical-align: middle; touch-action: manipulation;
+}
+.sc-slot-ph { color: var(--ink-3); font-weight: 800; padding: 0 6px; }
+.sc-slot:has(.sc-chip) { border-style: solid; border-color: var(--paper-3); }
+.sc-over, .sc-en-choix .sc-slot:hover { background: var(--cle-bg); border-color: var(--accent); }
+.sc-en-choix .sc-slot { border-color: var(--accent); }
+.sc-slot.ok { border-color: var(--success) !important; background: var(--success-bg) !important; }
+.sc-slot.ko { border-color: var(--danger) !important; background: var(--danger-bg) !important; }
+.sc-chip {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 5px 11px;
+  background: var(--sheet); border: 2px solid var(--accent); border-radius: 10px; color: var(--accent-ink);
+  font: 800 .92rem/1.2 var(--font-sans); cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; text-align: center; font-variant-numeric: tabular-nums;
+}
+.sc-chip > span { display: inline; }
+.sc-chip.dragging { opacity: .35; }
+.sc-chip.sc-choisie { background: var(--accent); color: var(--sheet); box-shadow: 0 0 0 3px var(--cle-line); }
+.sc-fini .sc-chip { cursor: default; border-color: var(--success); color: var(--success-text); }
+.sc-slot:focus-visible, .sc-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sc-palette { background: var(--paper); border: 1.5px dashed var(--line-strong); border-radius: 14px; padding: 8px 10px 10px; margin: 6px 0 4px; touch-action: manipulation; }
+.sc-palette-t { font-size: .8rem; font-weight: 700; color: var(--ink-2); margin-bottom: 6px !important; }
+.sc-palette-t span { font-weight: 500; color: var(--ink-2); }
+.sc-palette-liste { display: flex; flex-wrap: wrap; gap: 6px; min-height: 40px; align-items: center; }
+.sc-palette.vide .sc-palette-liste::before { content: 'Toutes les étiquettes sont placées.'; font-size: .85rem; color: var(--ink-2); font-style: italic; }
+.sc-fini .sc-palette { display: none; }
+@media (max-width: 380px) {
+  .sc-slot { min-width: 64px; }
+  .sc-chip { font-size: .85rem; padding: 4px 8px; }
+  .sc-nom { font-size: .88rem; }
+}
+/* palette visible pendant qu'on fait défiler le schéma (téléphone : sous le bandeau) */
+@media (max-width: 899px) {
+  .sc-exo .sc-palette { position: sticky; top: 62px; z-index: 5; }
+}
+
+
+/* nom de vecteur surmonté d'une flèche (repris de cinematique/modules/cin.css) */
+.vec-nom { position: relative; display: inline-block; min-width: .62em; padding-top: .32em; line-height: 1; text-align: center; }
+.vec-nom::before { content: ''; position: absolute; left: 0; right: .02em; top: .1em; border-top: .09em solid currentColor; }
+.vec-nom::after {
+  content: ''; position: absolute; right: .01em; top: -.005em; width: .23em; height: .23em; box-sizing: border-box;
+  border-top: .09em solid currentColor; border-right: .09em solid currentColor; transform: rotate(45deg);
+}
+
+/* notes */
+.sf-note { font-size: .88rem; color: var(--ink-2); margin-top: 6px !important; line-height: 1.5; }
+.sf-gris { color: var(--ink-2); }
+
+/* grille de choix (une ligne par élément) */
+.sf-grille { display: flex; flex-direction: column; gap: 8px; }
+.sf-grille-l { background: var(--paper); border-radius: 16px; padding: 10px 12px; transition: background .15s, box-shadow .15s; }
+.sf-grille-l.ok { background: var(--success-bg); box-shadow: inset 0 0 0 2px var(--success); }
+.sf-grille-l.ko { background: var(--danger-bg); box-shadow: inset 0 0 0 2px var(--danger); }
+.sf-grille-nom { font-weight: 800; margin-bottom: 8px; line-height: 1.4; }
+.sf-grille-ch { display: flex; flex-wrap: wrap; gap: 6px; }
+.sf-grille-b {
+  min-height: 46px; padding: 8px 16px; border: none; border-radius: 999px; background: var(--sheet); color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 700 .95rem var(--font-sans); cursor: pointer; transition: background .15s, box-shadow .15s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.sf-grille-b:hover:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.sf-grille-b[aria-pressed="true"] { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.sf-grille-l.ok .sf-grille-b[aria-pressed="true"] { background: var(--success-text); }
+.sf-grille-b:disabled { cursor: default; }
+.sf-grille-b:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sf-grille-apres { margin-top: 8px; padding-top: 8px; border-top: 1.5px dashed var(--paper-3); }
+
+/* ============================================================
+   PROPRE AU CHAPITRE 9
+   ============================================================ */
+/* ---------- dessins (SVG) ---------- */
+.sf-dessin { display: block; width: 100%; max-width: 560px; height: auto; margin: 6px auto 4px; font-family: var(--font-sans); }
+.sf-docs { display: grid; gap: 12px; }
+@media (min-width: 760px) { .sf-docs.deux { grid-template-columns: 1fr 1fr; } }
+.sf-t { font: 600 13px var(--font-sans); fill: var(--ink-2); }
+.sf-t-pt { font: 800 16px var(--font-sans); fill: var(--ink); stroke: var(--sheet); stroke-width: 3; paint-order: stroke; }
+.sf-t-h { font: 800 16px var(--font-sans); fill: var(--accent-ink); stroke: var(--sheet); stroke-width: 3; paint-order: stroke; }
+.sf-t-liq { font: 700 14px var(--font-sans); fill: var(--ink); stroke: var(--cle-bg); stroke-width: 3; paint-order: stroke; }
+.sf-t-f { font: 800 16px var(--font-sans); fill: var(--accent-ink); }
+.sf-t-a { font: 700 13px var(--font-sans); fill: var(--ink); stroke: var(--sheet); stroke-width: 3; paint-order: stroke; }
+.sf-t-r { font: 700 13px var(--font-sans); fill: var(--accent-ink); }
+.sf-pt line { stroke: var(--ink); stroke-width: 2.6; stroke-linecap: round; }
+.sf-eau { fill: var(--cle-bg); }
+.sf-huile { fill: var(--paper-3); }
+.sf-mercure { fill: var(--line-strong); }
+.sf-vide { fill: var(--sheet); }
+.sf-gaz { fill: var(--paper); stroke: var(--ink); stroke-width: 2.5; }
+.sf-mol { fill: var(--accent); opacity: .75; }
+.sf-surface { stroke: var(--accent); stroke-width: 2.5; }
+.sf-surface-hg { stroke: var(--ink-2); stroke-width: 2; }
+.sf-interface { stroke: var(--ink-2); stroke-width: 1.8; }
+.sf-paroi { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.sf-tube { fill: none; stroke: var(--ink); stroke-width: 2.5; }
+.sf-sol { stroke: var(--ink-2); stroke-width: 2; fill: none; }
+.sf-terre { fill: var(--paper-2); }
+.sf-pilier { fill: var(--paper-2); stroke: var(--ink-2); stroke-width: 2; }
+.sf-tuyau { fill: none; stroke: var(--ink-2); stroke-width: 7; stroke-linejoin: round; }
+.sf-tuyau-eau { fill: none; stroke: var(--cle-bg); stroke-width: 3.5; stroke-linejoin: round; }
+.sf-maison { fill: var(--sheet); stroke: var(--ink-2); stroke-width: 2; }
+.sf-toit { fill: var(--paper-2); stroke: var(--ink-2); stroke-width: 2; stroke-linejoin: round; }
+.sf-porte { fill: var(--paper-2); stroke: var(--ink-2); stroke-width: 1.5; }
+.sf-plancher { stroke: var(--ink-3); stroke-width: 1.5; }
+.sf-reducteur { fill: var(--sheet); stroke: var(--ink); stroke-width: 2; }
+.sf-reducteur-x { stroke: var(--ink); stroke-width: 1.5; }
+.sf-niveau { stroke: var(--ink-3); stroke-width: 1.4; stroke-dasharray: 6 5; }
+.sf-renvoi { stroke: var(--ink-3); stroke-width: 1.2; }
+.sf-actif { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 8 5; }
+.sf-cote line { stroke: var(--accent-ink); stroke-width: 1.6; }
+.sf-cote path { fill: var(--accent-ink); }
+.sf-f { color: var(--accent-ink); }
+.sf-f-v { color: var(--ink-2); }
+.sf-f-abs, .sf-axe-p { color: var(--ink); }
+.sf-f line, .sf-f-abs line { stroke: currentColor; stroke-width: 3; stroke-linecap: round; }
+.sf-f-v line, .sf-axe-p line { stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.sf-f path, .sf-f-v path, .sf-f-abs path, .sf-axe-p path { fill: currentColor; }
+.sf-grad { stroke: var(--ink); stroke-width: 2; }
+.sf-piston { fill: var(--paper-3); stroke: var(--ink); stroke-width: 2; }
+.sf-tige { stroke: var(--ink); stroke-width: 4; }
+.sf-charge { fill: var(--paper-2); stroke: var(--ink-2); stroke-width: 2; }
+/* téléphone : le dessin est réduit, les textes sont agrandis pour rester lisibles */
+@media (max-width: 560px) {
+  .sf-dessin .sf-t { font-size: 18px; }
+  .sf-dessin .sf-t-pt, .sf-dessin .sf-t-h, .sf-dessin .sf-t-f { font-size: 22px; }
+  .sf-dessin .sf-t-liq, .sf-dessin .sf-t-a, .sf-dessin .sf-t-r { font-size: 17px; }
+}
+
+/* ---------- schéma à compléter : cartouches posés sur le dessin ---------- */
+/* (sur un écran étroit, les cartouches passent sous le dessin, dans l'ordre des points) */
+.sf-sch-cadre { container-type: inline-size; margin: 8px 0; }
+.sf-sch { position: relative; max-width: 560px; margin: 0 auto; }
+.sf-sch .sf-dessin { margin: 0; max-width: none; }
+.sf-cart {
+  position: absolute; display: flex; flex-direction: column; gap: 4px; padding: 5px 7px;
+  background: var(--sheet); border: 1.5px solid var(--cle-line); border-radius: 12px;
+}
+.sf-cart-l { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.sf-lettre { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 4px; border-radius: 999px; background: var(--ink); color: var(--sheet); font-weight: 800; font-size: .9rem; }
+.sf-cart-desc { font-size: .8rem; color: var(--ink-2); font-weight: 700; }
+.sf-cart .sc-slot { min-width: 92px; min-height: 36px; }
+.sf-cart .sc-chip { min-height: 30px; padding: 3px 8px; font-size: .85rem; }
+.sf-cart .sc-val { font-size: .88rem; }
+.sf-cart .sc-nom { font-size: .9rem; }
+.sc-slot.sf-inconnue { border-style: solid; border-color: var(--accent); background: var(--cle-bg); }
+.sc-slot.sf-inconnue .sc-slot-ph { color: var(--accent-ink); }
+/* nom de la cote (h) masqué quand son cartouche est posé sur le dessin */
+.sf-sch .sf-cote-nom { display: none; }
+@container (max-width: 539px) {
+  /* dessin réduit : textes agrandis (comme sur téléphone) */
+  .sf-sch .sf-dessin .sf-t { font-size: 18px; }
+  .sf-sch .sf-dessin .sf-t-pt, .sf-sch .sf-dessin .sf-t-h, .sf-sch .sf-dessin .sf-t-f { font-size: 22px; }
+  .sf-sch .sf-dessin .sf-t-liq, .sf-sch .sf-dessin .sf-t-a, .sf-sch .sf-dessin .sf-t-r { font-size: 17px; }
+  .sf-sch .sf-cote-nom { display: inline; }
+  .sf-sch .sf-renvoi { display: none; }
+  .sf-carts { display: grid; gap: 6px; margin-top: 8px; }
+  .sf-cart { position: static; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+  .sf-cart-l { white-space: normal; }
+}
+
+/* ---------- tableau de conversion des surfaces ---------- */
+.sf-tabs { display: flex; flex-direction: column; gap: 6px; }
+.sf-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.sf-tabs-t { border-collapse: collapse; margin: 0 auto; font-variant-numeric: tabular-nums; }
+.sf-tabs-t th { background: var(--paper); border: 1.5px solid var(--paper-3); padding: 6px 4px; font-weight: 800; }
+.sf-tabs-t td { border-top: 1.5px solid var(--paper-3); border-bottom: 1.5px solid var(--paper-3); padding: 0; }
+.sf-tabs-t td:nth-child(odd) { border-left: 1.5px solid var(--paper-3); border-right: 1px dashed var(--paper-3); }
+.sf-tabs-t td:nth-child(even) { border-right: 1.5px solid var(--paper-3); }
+.sf-tabs-c {
+  position: relative; display: block; width: 38px; height: 46px; border: none; background: var(--sheet); color: var(--ink);
+  font: 800 1.15rem var(--font-sans); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.sf-tabs-c:hover:not(:disabled) { background: var(--paper); }
+.sf-tabs-c:disabled { cursor: default; color: var(--ink); opacity: 1; }
+.sf-tabs-c:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.sf-tabs-c.depart::before { content: ''; position: absolute; right: -2px; top: 6px; bottom: 6px; border-right: 3px dotted var(--ink-3); }
+.sf-tabs-c.virgule { box-shadow: inset -3px 0 0 var(--accent); }
+.sf-tabs-c.virgule::after { content: ','; position: absolute; right: -5px; bottom: -4px; color: var(--accent-ink); font-size: 1.6rem; line-height: 1; }
+.sf-tabs-c.zero { color: var(--accent-ink); }
+.sf-tabs-lect { font-size: .92rem; color: var(--ink-2); line-height: 1.5; }
+.sf-tabs-lect b { color: var(--accent-ink); }
+@media (max-width: 400px) { .sf-tabs-c { width: 34px; } }

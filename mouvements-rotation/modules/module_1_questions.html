@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur la vitesse angulaire — Chapitre 8 : Mouvements de rotation</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rot.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rot.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : ω à partir de θ et Δt (2),
+   ω à partir de la période T (2), v = R ω (3, dont le diamètre donné
+   à la place du rayon), T et f à partir de ω (1), angle balayé et
+   conversion en degrés (2).
+   Erreurs diagnostiquées : division inversée, 2π oublié ou remplacé
+   par π, diamètre pris pour le rayon, cm non convertis, 1 rad pris
+   pour 360°.
+   ============================================================ */
+const { o, fq, fmt, cs, hasard, melanger, proche, fr, DEUX_PI } = ROT;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const W = 'ω';
+const pr = (a, b) => proche(a, b, .02);
+
+/* ---------- Groupe 1 : ω = θ / Δt ---------- */
+function qOmega() {
+  const [qui, w, dt] = hasard([['Une roue', 4, 5], ['Un rotor de moteur', 12, .5], ['Une meule', 8, 2], ['Une hélice', 25, .4], ['Un tambour de machine à laver', 5, 3]]), th = w * dt;
+  return { theme: 'Vitesse angulaire', enonce: `<p>${qui} tourne de θ = ${fmt(th)} rad en Δt = ${fmt(dt)} s.</p>`,
+    parties: [fq.nombre(`Calcule sa vitesse angulaire ${W}.`, `${W} =`, w, 'rad/s', { signe: false, rel: .01,
+      diag: x => (pr(x, dt / th) ? 'Tu as divisé Δt par θ : ω = θ / Δt.' : pr(x, th * dt) ? 'On <b>divise</b> θ par Δt.' : `${W} = θ / Δt.`),
+      solution: calc(`${W} = ${fr('θ', 'Δt')} = ${fr(fmt(th) + ' rad', fmt(dt) + ' s')} = ${c(fmt(w) + ' rad/s')}`) })] };
+}
+function qOmegaTours() {
+  const [N, dt] = hasard([[3, 2], [5, 4], [10, 5], [2, 1], [6, 3]]), w = N * DEUX_PI / dt;
+  return { theme: 'Vitesse angulaire', enonce: `<p>Une roue fait <b>${N} tours</b> en Δt = ${fmt(dt)} s.</p>`,
+    parties: [
+      fq.nombre('Quel angle θ a-t-elle balayé, en radians (3 chiffres significatifs) ?', 'θ =', N * DEUX_PI, 'rad', { signe: false, rel: .01, affiche: cs(N * DEUX_PI, 3),
+        diag: x => (pr(x, N * 360) ? 'C\'est en degrés : en radians, un tour vaut 2π rad.' : pr(x, N * Math.PI) ? 'Un tour vaut 2π rad (pas π).' : pr(x, N) ? 'Un tour vaut 2π rad : multiplie par 2π.' : 'θ = nombre de tours × 2π.'),
+        solution: calc(`θ = ${N} × 2π ≈ ${c(cs(N * DEUX_PI, 3) + ' rad')}`) }),
+      fq.nombre(`Calcule sa vitesse angulaire ${W}.`, `${W} =`, w, 'rad/s', { signe: false, rel: .01, affiche: cs(w, 3),
+        diag: x => (pr(x, N / dt) ? 'Tu as divisé le nombre de tours : utilise l\'angle en radians.' : pr(x, dt / (N * DEUX_PI)) ? 'C\'est θ / Δt (et non Δt / θ).' : `${W} = θ / Δt.`),
+        solution: calc(`${W} = ${fr('θ', 'Δt')} = ${fr(cs(N * DEUX_PI, 3) + ' rad', fmt(dt) + ' s')} ≈ ${c(cs(w, 3) + ' rad/s')}`) }),
+    ] };
+}
+
+/* ---------- Groupe 2 : ω à partir de la période ---------- */
+function qPeriode() {
+  const [qui, T] = hasard([['Une éolienne', 4], ['Une grande roue', 10], ['Un ventilateur', .05], ['Un disque vinyle', 1.8], ['Un manège', 8], ['Une meule', .02]]), w = DEUX_PI / T;
+  return { theme: 'Période et vitesse angulaire', enonce: `<p>${qui} fait un tour en T = ${fmt(T)} s.</p>`,
+    parties: [fq.nombre(`Calcule sa vitesse angulaire ${W} (3 chiffres significatifs).`, `${W} =`, w, 'rad/s', { signe: false, rel: .01, affiche: cs(w, 3),
+      diag: x => (pr(x, 1 / T) ? 'Tu as calculé 1 / T : en un tour, l\'angle est <b>2π</b> rad.' : pr(x, Math.PI / T) ? 'Un tour vaut 2π rad (pas π).' : pr(x, DEUX_PI * T) ? 'On <b>divise</b> 2π par T.' : pr(x, 360 / T) ? 'En radians : un tour = 2π rad (pas 360).' : `${W} = 2π / T.`),
+      solution: calc(`${W} = ${fr('2π', 'T')} = ${fr('2π', fmt(T) + ' s')} ≈ ${c(cs(w, 3) + ' rad/s')}`) })] };
+}
+function qFrequence() {
+  const [qui, T] = hasard([['Une perceuse', .02], ['Un ventilateur', .1], ['Une roue de vélo', .25], ['Une hélice de drone', .005]]), f = 1 / T, w = DEUX_PI / T;
+  return { theme: 'Période et fréquence', enonce: `<p>${qui} fait un tour en T = ${fmt(T)} s.</p>`,
+    parties: [
+      fq.nombre('Calcule sa fréquence de rotation f.', 'f =', f, 'Hz', { signe: false, rel: .01, diag: x => (pr(x, T) ? 'f = 1 / T.' : 'f = 1 / T : nombre de tours par seconde.'), solution: calc(`f = ${fr('1', fmt(T) + ' s')} = ${c(fmt(f) + ' Hz')}`) }),
+      fq.nombre(`Calcule sa vitesse angulaire ${W} (3 chiffres significatifs).`, `${W} =`, w, 'rad/s', { signe: false, rel: .01, affiche: cs(w, 3),
+        diag: x => (pr(x, f) ? 'Un tour vaut 2π rad : ω = 2π / T.' : pr(x, Math.PI / T) ? 'Un tour vaut 2π rad (pas π).' : `${W} = 2π / T.`),
+        solution: calc(`${W} = ${fr('2π', fmt(T) + ' s')} ≈ ${c(cs(w, 3) + ' rad/s')}`) }),
+    ] };
+}
+
+/* ---------- Groupe 3 : v = R × ω ---------- */
+function qVitesseCm() {
+  const [qui, Rcm, w] = hasard([['Un point d\'un disque', 20, 15], ['L\'extrémité d\'une pale', 40, 30], ['Un point d\'une poulie', 5, 100], ['La valve d\'une roue', 30, 20]]), R = Rcm / 100, v = R * w;
+  return { theme: 'Vitesse d\'un point', enonce: `<p>${qui} est à <b>${Rcm} cm</b> de l'axe de rotation ; la vitesse angulaire est ${W} = ${fmt(w)} rad/s.</p>`,
+    parties: [fq.nombre('Calcule sa vitesse v.', 'v =', v, 'm/s', { signe: false, rel: .01,
+      diag: x => (pr(x, Rcm * w) ? 'R doit être en <b>mètres</b> : ' + Rcm + ' cm = ' + fmt(R) + ' m.' : pr(x, w / R) || pr(x, R / w) ? 'v = R × ω : on multiplie.' : 'v = R × ω, R en m.'),
+      solution: calc(`v = R × ${W} = ${fmt(R)} m × ${fmt(w)} rad/s = ${c(fmt(v) + ' m/s')}`) })] };
+}
+function qVitesseDiametre() {
+  const [qui, Dcm, w] = hasard([['Un tambour de machine à laver', 50, 80], ['Une meule', 20, 150], ['Une roue de voiture', 60, 50], ['Un disque de scie circulaire', 30, 300], ['Une poulie', 16, 125]]), R = Dcm / 200, v = R * w;
+  return { theme: 'Vitesse d\'un point (diamètre donné)', enonce: `<p>${qui} de <b>diamètre ${Dcm} cm</b> tourne à ${W} = ${fmt(w)} rad/s.</p>`,
+    parties: [
+      fq.nombre('Quel est le rayon R, en mètres ?', 'R =', R, 'm', { signe: false, rel: .005,
+        diag: x => (pr(x, Dcm / 100) ? 'C\'est le diamètre : le rayon est la <b>moitié</b> du diamètre.' : pr(x, Dcm / 2) ? 'Convertis en mètres (÷ 100).' : 'R = D / 2, en m.'),
+        solution: calc(`R = ${fr('D', '2')} = ${fr(Dcm + ' cm', '2')} = ${Dcm / 2} cm = ${c(fmt(R) + ' m')}`) }),
+      fq.nombre('Calcule la vitesse v d\'un point de la périphérie.', 'v =', v, 'm/s', { signe: false, rel: .01,
+        diag: x => (pr(x, 2 * v) ? 'Tu as pris le diamètre : v = R × ω avec R = D / 2.' : pr(x, 100 * v) || pr(x, 200 * v) ? 'R doit être en mètres.' : 'v = R × ω.'),
+        solution: calc(`v = R × ${W} = ${fmt(R)} m × ${fmt(w)} rad/s = ${c(fmt(v) + ' m/s')}`) }),
+    ] };
+}
+function qRayon() {
+  const [w, R] = hasard([[10, .4], [20, .15], [5, 1.2], [50, .08]]), v = R * w;
+  return { theme: 'Distance à l\'axe', enonce: `<p>Un solide tourne à ${W} = ${fmt(w)} rad/s. Un de ses points a une vitesse v = ${fmt(v)} m/s.</p>`,
+    parties: [fq.nombre('À quelle distance R de l\'axe se trouve ce point ?', 'R =', R, 'm', { signe: false, rel: .01,
+      diag: x => (pr(x, v * w) ? 'v = R × ω donc R = v / ω : on <b>divise</b>.' : pr(x, w / v) ? 'R = v / ω (et non ω / v).' : 'R = v / ω.'),
+      solution: calc(`v = R × ${W} donc R = ${fr('v', W)} = ${fr(fmt(v), fmt(w))} = ${c(fmt(R) + ' m')}`) })] };
+}
+
+/* ---------- Groupe 4 : T et f à partir de ω ---------- */
+function qPeriodeDeOmega() {
+  const T = hasard([.5, 1, 2, 4, 5, .2]), w = +cs(DEUX_PI / T, 3).replace(',', '.'), Tv = DEUX_PI / w;
+  return { theme: 'Période', enonce: `<p>Un disque tourne à ${W} = ${fmt(w)} rad/s.</p>`,
+    parties: [fq.nombre('Calcule sa période T (durée d\'un tour).', 'T =', Tv, 's', { signe: false, rel: .015, affiche: fmt(T),
+      diag: x => (pr(x, w / DEUX_PI) ? 'C\'est l\'inverse : T = 2π / ω.' : pr(x, DEUX_PI * w) ? 'On divise 2π par ω.' : pr(x, 1 / w) ? 'Un tour vaut 2π rad : T = 2π / ω.' : 'ω = 2π / T donc T = 2π / ω.'),
+      solution: calc(`T = ${fr('2π', W)} = ${fr('2π', fmt(w))} ≈ ${c(fmt(T) + ' s')}`) })] };
+}
+
+/* ---------- Groupe 5 : angle balayé ---------- */
+function qAngle() {
+  const [w, dt] = hasard([[.5, 8], [1.5, 4], [2, 3], [.25, 20], [4, 2.5]]), th = w * dt, deg = th * 360 / DEUX_PI;
+  return { theme: 'Angle balayé', enonce: `<p>Une roue tourne à ${W} = ${fmt(w)} rad/s pendant Δt = ${fmt(dt)} s.</p>`,
+    parties: [
+      fq.nombre('Calcule l\'angle θ balayé, en radians.', 'θ =', th, 'rad', { signe: false, rel: .01, diag: x => (pr(x, w / dt) || pr(x, dt / w) ? 'θ = ω × Δt : on <b>multiplie</b>.' : 'θ = ω × Δt.'),
+        solution: calc(`θ = ${W} × Δt = ${fmt(w)} × ${fmt(dt)} = ${c(fmt(th) + ' rad')}`) }),
+      fq.nombre('Convertis-le en degrés (arrondi au degré).', 'θ =', deg, '°', { signe: false, tol: 1, affiche: fmt(Math.round(deg)),
+        diag: x => (pr(x, th * 360) ? 'C\'est 2π rad qui vaut 360° (et pas 1 rad).' : pr(x, th * DEUX_PI / 360) ? 'Produit en croix inversé : θ = 360 × θ(rad) / 2π.' : pr(x, th * 180 / DEUX_PI) ? '2π rad = 360° (π rad = 180°).' : 'Tableau : 2π rad ↔ 360°.'),
+        solution: calc(`θ = ${fr('360 × ' + fmt(th), '2π')} ≈ ${c(fmt(Math.round(deg)) + '°')}`) }),
+    ] };
+}
+function qDegres() {
+  const [th, deg] = hasard([[Math.PI, 180], [Math.PI / 2, 90], [DEUX_PI * 3, 1080], [Math.PI / 4, 45]]);
+  const thS = th === Math.PI ? 'π' : th === Math.PI / 2 ? 'π / 2' : th === Math.PI / 4 ? 'π / 4' : '6π';
+  return { theme: 'Radians et degrés', enonce: `<p>Un rayon d'une roue a tourné de θ = ${thS} rad.</p>`,
+    parties: [fq.nombre('Combien cela fait-il en degrés ?', 'θ =', deg, '°', { signe: false, tol: .5,
+      diag: x => (pr(x, deg * 2) ? 'Un tour = 2π rad = 360° : π rad = 180°.' : pr(x, deg / 2) ? '2π rad = 360°, donc π rad = 180°.' : '2π rad ↔ 360° : produit en croix.'),
+      solution: calc(`2π rad ↔ 360° donc θ = ${fr('360 × ' + thS, '2π')} = ${c(deg + '°')}`) })] };
+}
+
+// tirage : 2 + 2 + 3 + 1 + 2 questions
+function tirage() {
+  return [qOmega(), qOmegaTours(), qPeriode(), qFrequence(), qVitesseCm(), qVitesseDiametre(), qRayon(), qPeriodeDeOmega(), qAngle(), qDegres()];
+}
+
+ROT.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Vitesse angulaire',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : vitesse angulaire, période et fréquence, vitesse d\'un point (attention au diamètre !), angle balayé et conversion en degrés.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2_cours.html', label: 'Module 2 : convertir tr/min et rad/s →' },
+});
+ROT.menu('module_1_questions');
+</script>
+</body>
+</html>
