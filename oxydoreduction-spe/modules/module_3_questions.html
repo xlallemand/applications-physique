@@ -25,9 +25,13 @@
    10 questions tirées au hasard :
    entourer les réactifs, écrire une demi-équation directement dans le
    sens de la réaction (2, la première avec le bouton « Inverser »),
-   multiplier (2), additionner et simplifier (2), écrire directement
-   les nombres de l'équation (2), toute la réaction dans l'outil
-   compact (REAC.partie). Les aides des outils coûtent un point.
+   multiplier, l'autre réactif quand un seul est donné avec les deux
+   couples (2, REAC.partieAutreReactif : un oxydant réagit avec un
+   réducteur, et inversement), le bon couple quand le second réactif
+   appartient à deux couples (2, REAC.partieBonCouple, OX.DEUX_COUPLES),
+   puis l'équation de deux réactions dans l'outil compact (REAC.partie).
+   Les questions 5 à 8 ne demandent pas d'équilibrer : seulement de
+   trouver le second réactif. Les aides des outils coûtent un point.
    Réactions : [couple dont l'oxydant réagit, couple dont le réducteur réagit].
    ============================================================ */
 const { hasard, melanger, h, COUPLES: C, couple } = OX;
@@ -51,12 +55,23 @@ function qSens(p, k, inverser) {
     parties: [DEMI.partie({ couple: c, serie: true, mode: 'libre', sens: k ? 'ox' : 'red', reactif: true, aides: 'payant', inverser,
       q: `Écris la demi-équation du couple ${couple(c)} dans le sens de la réaction : le réactif à gauche du signe =.${inverser ? ' Le bouton « ⇄ Inverser » échange les deux membres.' : ''}` })] };
 }
-/* ---------- multiplier, additionner, écrire l'équation (outils) ---------- */
+/* ---------- multiplier (outil) ---------- */
 const qMultiplier = p => ({ theme: 'Égaliser les électrons', enonce: enonce(p), parties: [REAC.partieMultiplier(opt(p))] });
-const qAdditionner = p => ({ theme: 'Additionner et simplifier', enonce: enonce(p), parties: [REAC.partieAdditionner(opt(p))] });
-const qCoefficients = p => ({ theme: 'Écrire l\'équation', enonce: enonce(p), parties: [REAC.partieAdditionner(opt(p, { mode: 'coefficients' }))] });
+/* ---------- l'autre réactif : un réactif et les deux couples (sans équilibrer) ---------- */
+function qAutre(p) {
+  const a = C[p[0]], b = C[p[1]], donne = hasard(['ox', 'red']), G = donne === 'ox' ? a.ox : b.red;
+  return { theme: 'L\'autre réactif', enonce: `<p>${R(h(G))} réagit avec une espèce de l'autre couple.</p>`,
+    parties: [REAC.partieAutreReactif({ a, b, donne, ordre: hasard(['ab', 'ba']) })] };
+}
+/* ---------- le bon couple : le second réactif appartient à deux couples (sans équilibrer) ---------- */
+function qBonCouple(d) {
+  const a = C[d.p[0]], b = C[d.p[1]], X = d.x ? b.red : a.ox, G = d.x ? a.ox : b.red;
+  return { theme: 'Le bon couple',
+    enonce: `<p>Réaction entre ${R(h(G))} (couple ${couple(d.x ? a : b)}) et ${R(h(X))}. ${h(X)} appartient à deux couples : il est oxydant dans l'un, réducteur dans l'autre.</p>`,
+    parties: [REAC.partieBonCouple({ a, b, x: d.x, leurre: C[d.leurre], ordre: hasard(['ab', 'ba']) })] };
+}
 /* ---------- toute la réaction dans l'outil compact ---------- */
-const qReaction = p => ({ theme: 'Toute la réaction',
+const qReaction = p => ({ theme: 'Écrire l\'équation d\'une réaction',
   consigne: `Écris l'équation de la réaction entre ${R(h(C[p[0]].ox))} et ${R(h(C[p[1]].red))}.`,
   enonce: `<p>Couples : ${couple(C[p[0]])} et ${couple(C[p[1]])}.</p>`,
   parties: [REAC.partie({ a: C[p[0]], b: C[p[1]], serie: true, niveau: 2, ordre: hasard(['ab', 'ba']) })] });
@@ -65,14 +80,17 @@ const qReaction = p => ({ theme: 'Toute la réaction',
 function tirage() {
   const L = melanger(REACTIONS), S = melanger(SIMPLIFIER);
   const mult = L.filter(p => { const r = REAC.reaction(C[p[0]], C[p[1]]); return r.mA > 1 || r.mB > 1; });
-  return [qReactifs(L[0]), qSens(L[1], 1, true), qSens(S[0], hasard([0, 1]), false), qMultiplier(mult[0]), qMultiplier(mult[1] || mult[0]),
-    qAdditionner(L[2]), qAdditionner(S[1]), qCoefficients(L[3]), qCoefficients(S[2]), qReaction(hasard([L[4], S[3]]))];
+  const reste = L.slice(2).filter(p => p !== mult[0]);
+  // le bon couple : deux espèces à placer différentes si possible
+  const d = melanger(OX.DEUX_COUPLES), d2 = d.slice(1).find(x => x.leurre !== d[0].leurre) || d[1];
+  return [qReactifs(L[0]), qSens(L[1], 1, true), qSens(S[0], hasard([0, 1]), false), qMultiplier(mult[0]),
+    qAutre(reste[0]), qAutre(reste[1]), qBonCouple(d[0]), qBonCouple(d2), qReaction(reste[2]), qReaction(S[1])];
 }
 
 OX.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 3 · QUESTIONS', titre: 'Écrire l\'équation d\'une réaction',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : repérer les réactifs, écrire une demi-équation dans le sens de la réaction, égaliser les électrons, additionner et simplifier, écrire directement l\'équation de la réaction, puis toute une réaction dans le même outil.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : repérer les réactifs, écrire une demi-équation dans le sens de la réaction, égaliser les électrons, trouver le second réactif (quand un seul est donné, puis quand il appartient à deux couples), puis écrire l\'équation de deux réactions.</p>',
   aidesPayantes: true,
   questions: tirage,
   revoir: { href: 'module_3_cours.html', label: 'Revoir le cours' },
