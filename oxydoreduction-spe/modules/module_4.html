@@ -22,9 +22,15 @@
 
 <script>
 /* ============================================================
-   Entraînement : 10 réactions. Pour chacune, on entoure d'abord les deux
-   réactifs dans les couples (REAC.partieReactifs, comme dans le cours du
-   module 3), puis on l'écrit entièrement dans l'outil compact REAC.partie
+   Entraînement : 10 réactions. Pour chacune, on repère d'abord les
+   réactifs dans les couples :
+     réactions 1 à 5  on entoure les deux réactifs (REAC.partieReactifs) ;
+     réactions 6 à 8  un seul réactif est donné, avec les deux couples : on
+                      trouve l'autre (REAC.partieAutreReactif : un oxydant
+                      réagit avec un réducteur, et inversement) ;
+     réactions 9, 10  le second réactif appartient à deux couples : on le
+                      prend dans le bon (REAC.partieBonCouple, OX.DEUX_COUPLES).
+   Puis on l'écrit entièrement dans l'outil compact REAC.partie
    (reaction.js) : une réserve, les deux demi-équations dans le sens de la
    réaction, leurs multiplicateurs, puis l'équation de la réaction.
    L'aide diminue au fil des réactions :
@@ -36,36 +42,60 @@
    simplifier H+ et H2O. Chaque réaction est notée 2, 1 ou 0 point.
    Réactions : [couple dont l'oxydant réagit, couple dont le réducteur réagit].
    ============================================================ */
-const { hasard, melanger, h, COUPLES: C } = OX;
+const { hasard, melanger, h, COUPLES: C, couple } = OX;
 const R = s => `<span class="ox-r">${s}</span>`;
 const SANS_H = [['Fe3', 'I2'], ['Ag', 'Cu'], ['Cu', 'Al'], ['Cl2', 'Fe3'], ['I2', 'S4O6'], ['Fe3', 'Cu'], ['Br2', 'I2'], ['Ag', 'Zn']];
 const AVEC_H = [['MnO4', 'Fe3'], ['Cr2O7', 'Fe3'], ['H2O2', 'Fe3'], ['MnO4', 'I2'], ['Cr2O7', 'I2'], ['NO3', 'Cu'], ['H2O2', 'I2'], ['O2e', 'Fe3'], ['MnO4', 'Cl2'], ['NO3', 'Ag']];
 const SIMPLIFIER = [['MnO4', 'CO2'], ['MnO4', 'O2'], ['MnO4', 'SO4'], ['Cr2O7', 'SO4'], ['MnO4', 'Ald'], ['H2O2', 'Ald'], ['Cr2O7', 'Ac']];
 const NIVEAUX = { 1: 'Niveau 1 · aides libres', 2: 'Niveau 2 · aides : 1 point de moins', 3: 'Niveau 3 · sans aide' };
 
-// a) les deux réactifs à entourer dans les couples, b) toute la réaction dans l'outil compact
+// b) toute la réaction dans l'outil compact
+const outil = (a, b, niveau, ordre) => REAC.partie({ a, b, niveau, serie: true, ordre,
+  q: 'b) Écris les deux demi-équations dans le sens de la réaction (le réactif à gauche du signe =), multiplie-les pour égaliser les électrons, puis écris l\'équation de la réaction.' });
+
+// a) les deux réactifs à entourer dans les couples
 function reaction(p, niveau) {
   const a = C[p[0]], b = C[p[1]], ordre = hasard(['ab', 'ba']);
   return { theme: NIVEAUX[niveau],
     consigne: `Écris l'équation de la réaction entre ${R(h(a.ox))} et ${R(h(b.red))}.`,
-    parties: [REAC.partieReactifs({ a, b, ordre, q: 'a) Entoure les deux réactifs dans les couples : touche chacun d\'eux.' }),
-      REAC.partie({ a, b, niveau, serie: true, ordre, q: 'b) Écris les deux demi-équations dans le sens de la réaction (le réactif à gauche du signe =), multiplie-les pour égaliser les électrons, puis écris l\'équation de la réaction.' })] };
+    parties: [REAC.partieReactifs({ a, b, ordre, q: 'a) Entoure les deux réactifs dans les couples : touche chacun d\'eux.' }), outil(a, b, niveau, ordre)] };
+}
+// a) un seul réactif donné, avec les deux couples : trouver l'autre réactif
+function unReactif(p, niveau) {
+  const a = C[p[0]], b = C[p[1]], ordre = hasard(['ab', 'ba']), donne = hasard(['ox', 'red']);
+  const G = donne === 'ox' ? a.ox : b.red;
+  return { theme: NIVEAUX[niveau],
+    consigne: `${R(h(G))} réagit avec une espèce de l'autre couple. Écris l'équation de la réaction.`,
+    parties: [REAC.partieAutreReactif({ a, b, ordre, donne, q: `a) ${h(G)} est entouré : c'est un des deux réactifs. Touche l'autre réactif.` }), outil(a, b, niveau, ordre)] };
+}
+// a) un réactif et son couple ; le second réactif appartient à deux couples : le prendre dans le bon
+function bonCouple(d, niveau) {
+  const a = C[d.p[0]], b = C[d.p[1]], X = d.x ? b.red : a.ox, G = d.x ? a.ox : b.red;
+  return { theme: NIVEAUX[niveau],
+    consigne: `Écris l'équation de la réaction entre ${R(h(G))} (couple ${couple(d.x ? a : b)}) et ${R(h(X))}.`,
+    parties: [REAC.partieBonCouple({ a, b, x: d.x, leurre: C[d.leurre], ordre: hasard(['ab', 'ba']),
+      q: `a) ${h(X)} appartient à deux couples : il y est oxydant dans l'un, réducteur dans l'autre. Touche-le dans le couple où il réagit avec ${h(G)}.` }),
+    outil(a, b, niveau, hasard(['ab', 'ba']))] };
 }
 
 // tirage : réactions différentes, de plus en plus difficiles
 function tirage() {
   const s = melanger(SANS_H), a = melanger(AVEC_H), f = melanger(SIMPLIFIER);
+  // réactions 9 et 10 : pas déjà tirées, et deux espèces à placer différentes si possible
+  const pris = [s[0], a[0], s[1], a[1], f[0], a[2], s[2], a[3]];
+  const d = melanger(OX.DEUX_COUPLES.filter(x => !pris.some(p => p[0] === x.p[0] && p[1] === x.p[1])));
+  const d2 = d.slice(1).find(x => x.leurre !== d[0].leurre) || d[1];
   return [
     reaction(s[0], 1), reaction(a[0], 1), reaction(s[1], 1),
-    reaction(a[1], 2), reaction(f[0], 2), reaction(a[2], 2), reaction(s[2], 2),
-    reaction(a[3], 3), reaction(f[1], 3), reaction(f[2], 3),
+    reaction(a[1], 2), reaction(f[0], 2), unReactif(a[2], 2), unReactif(s[2], 2),
+    unReactif(a[3], 3), bonCouple(d[0], 3), bonCouple(d2, 3),
   ];
 }
 
 OX.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 4 · ENTRAÎNEMENT', titre: 'Écrire les réactions d\'oxydoréduction',
-  intro: `<p class="er-contexte">10 réactions : pour chacune, entoure d'abord les deux réactifs dans les couples, puis écris-la entièrement dans un seul outil : les deux demi-équations dans le sens de la réaction, leurs multiplicateurs, puis l'équation de la réaction. L'aide diminue au fil des réactions.</p>`,
+  intro: `<p class="er-contexte">10 réactions. Pour chacune, repère d'abord les réactifs dans les couples : les deux réactifs (réactions 1 à 5), l'autre réactif quand un seul est donné (réactions 6 à 8), le bon couple quand un réactif appartient à deux couples (réactions 9 et 10). Écris-la ensuite entièrement dans un seul outil : les deux demi-équations dans le sens de la réaction, leurs multiplicateurs, puis l'équation de la réaction. L'aide diminue au fil des réactions.</p>`,
   aidesPayantes: true,
   bareme: `<ul class="er-liste" style="margin-top:8px"><li>réactions 1 à 3 : les nombres d'une demi-équation se multiplient sous tes yeux, les aides (atomes et charges) sont libres ;</li>
     <li>réactions 4 à 7 : le multiplicateur s'écrit devant la demi-équation, afficher les aides coûte un point ;</li>

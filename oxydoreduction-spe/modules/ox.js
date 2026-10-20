@@ -18,6 +18,8 @@
      OX.h(f), OX.couple(c)              formule HTML ; couple écrit « Ox / Red »
      OX.charge(n)                       charge écrite avec son signe : +7, −2, 0
      OX.M1                              couples simples et petites écritures des cours du module 1
+     OX.DEUX_COUPLES                    réactions dont un réactif appartient à deux couples
+     OX.methodeExpress()                la méthode en une infographie (HTML)
    OX.menu(cle), OX.accueil(zone)       navigation commune (SOM) avec le plan de l'application
 
    L'outil d'équilibrage d'une demi-équation est dans demi.js (DEMI),
@@ -462,6 +464,85 @@
       solution: `<p>${X} ${capte ? 'capte' : 'cède'} des électrons : c'est un <b>${capte ? 'oxydant' : 'réducteur'}</b>.</p>` }),
   };
 
+  /* ---------- Méthode express : toute la méthode en une infographie ----------
+     (module 4, « Méthode express », et début du cours du module 3) ;
+     renvoie le HTML (assets/molecules.js doit être chargé) */
+  function methodeExpress() {
+    const H2O = 'H<sub>2</sub>O', HP = 'H<sup>+</sup>', EL = 'e<sup>−</sup>';
+    const Mn = h('MnO4^-'), Mn2 = h('Mn^2+'), Fe2 = h('Fe^2+'), Fe3 = h('Fe^3+');
+    const c = s => `<span class="c">${s}</span>`;                       // terme ajouté à cette étape
+    const ent = s => `<span class="ox-entoure">${s}</span>`;             // réactif entouré
+    const barre = s => `<span class="ox-barre-e">${s}</span>`;           // terme simplifié
+    // une étape numérotée : règle en gras, exemple dessous
+    const etape = (n, regle, ex) => `<li class="ox-info-e"><span class="ox-info-n" aria-hidden="true">${n}</span><p class="ox-info-r">${regle}</p><div class="ox-info-x">${ex}</div></li>`;
+    const tete = (n, titre, sous) => `<div class="ox-info-tete"><b aria-hidden="true">${n}</b><h3>${titre}<small>${sous}</small></h3></div>`;
+    const fleche = '<div class="ox-info-fl" aria-hidden="true">↓</div>';
+    return `<div class="ox-info">
+  <section class="ox-info-bloc">
+    ${tete('A', 'Les mots', 'Oxydant, réducteur, couple, réduction, oxydation')}
+    <div class="ox-info-mots">
+      <div class="ox-info-tuile"><b>Oxydant</b>capte des électrons : ${Mn}, ${h('Cu^2+')}, ${Fe3}…</div>
+      <div class="ox-info-tuile"><b>Réducteur</b>cède des électrons : ${Fe2}, Zn, ${h('I^-')}…</div>
+      <div class="ox-info-tuile"><b>Couple Ox / Red</b>Ox + n ${EL} = Red<br><small>les électrons du côté de l'oxydant</small></div>
+      <div class="ox-info-tuile large"><b>Réduction</b>gain d'électrons : la demi-équation écrite dans le sens <span class="f">Ox + n ${EL} = Red</span><br><small>l'oxydant, à gauche du signe =, capte des électrons : <span class="f">${h('Cu^2+')} + 2&nbsp;${EL} = Cu</span></small></div>
+      <div class="ox-info-tuile large"><b>Oxydation</b>perte d'électrons : la demi-équation écrite dans le sens <span class="f">Red = Ox + n ${EL}</span><br><small>le réducteur, à gauche du signe =, cède des électrons : <span class="f">${Fe2} = ${Fe3} + ${EL}</span></small></div>
+    </div>
+  </section>
+  ${fleche}
+  <section class="ox-info-bloc">
+    ${tete('B', 'Écrire la demi-équation d\'un couple', `4 étapes, sur le couple ${Mn} / ${Mn2}`)}
+    <ol class="ox-info-etapes">
+      ${etape(1, 'Oxydant à gauche, réducteur à droite. Équilibrer les éléments autres que O et H <small>(un nombre devant l\'espèce, jamais un indice)</small>', `${Mn} = ${Mn2} &nbsp;<small>(1 Mn de chaque côté)</small>`)}
+      ${etape(2, `Équilibrer O : ajouter ${H2O} du côté où il en manque`, `${Mn} = ${Mn2} + ${c(`4&nbsp;${H2O}`)}`)}
+      ${etape(3, `Équilibrer H : ajouter ${HP} du côté où il en manque <small>(une molécule ${H2O} contient 2 H)</small>`, `${Mn} + ${c(`8&nbsp;${HP}`)} = ${Mn2} + 4&nbsp;${H2O}`)}
+      ${etape(4, `Équilibrer les charges : ajouter ${EL} du côté où la charge est la plus grande <small>(+7 contre +2 : 5 ${EL})</small>`, `${Mn} + 8&nbsp;${HP} + ${c(`5&nbsp;${EL}`)} = ${Mn2} + 4&nbsp;${H2O}`)}
+    </ol>
+  </section>
+  ${fleche}
+  <section class="ox-info-bloc">
+    ${tete('C', 'Écrire l\'équation de la réaction', `3 étapes, réaction entre ${Mn} et ${Fe2}`)}
+    <ol class="ox-info-etapes">
+      ${etape(1, 'Entourer les réactifs dans les couples, puis écrire les deux demi-équations dans le bon sens : le réactif à gauche du signe =',
+        `${ent(Mn)} / ${Mn2} &nbsp; et &nbsp; ${Fe3} / ${ent(Fe2)}<br>${Mn} + 8&nbsp;${HP} + 5&nbsp;${EL} = ${Mn2} + 4&nbsp;${H2O} &nbsp;<small>(réduction)</small><br>${Fe2} = ${Fe3} + ${EL} &nbsp;<small>(oxydation)</small>`)}
+      ${etape(2, 'Multiplier pour que les deux demi-équations échangent le même nombre d\'électrons', `1 × ( … 5&nbsp;${EL} … ) &nbsp; et &nbsp; ${c('5 ×')} ( ${Fe2} = ${Fe3} + ${EL} )`)}
+      ${etape(3, `Additionner, puis simplifier les électrons (et les ${HP}, ${H2O} présents des deux côtés)`,
+        `${Mn} + 5&nbsp;${Fe2} + 8&nbsp;${HP} + ${barre(`5&nbsp;${EL}`)} → ${Mn2} + 5&nbsp;${Fe3} + 4&nbsp;${H2O} + ${barre(`5&nbsp;${EL}`)}`)}
+    </ol>
+    <p class="ox-info-fin">${Mn} + 5&nbsp;${Fe2} + 8&nbsp;${HP} → ${Mn2} + 5&nbsp;${Fe3} + 4&nbsp;${H2O}</p>
+  </section>
+  ${fleche}
+  <section class="ox-info-bloc">
+    ${tete('!', 'Les pièges', 'à vérifier avant de valider')}
+    <ul class="ox-info-pieges">
+      <li>Ne jamais changer un indice : ${h('Cr2O7^2-')} reste ${h('Cr2O7^2-')}.</li>
+      <li>Une molécule ${H2O} contient 2 atomes H.</li>
+      <li>Un électron porte la charge −1 : une charge négative compte en moins.</li>
+      <li>Multiplier <b>toute</b> la demi-équation, pas seulement une espèce.</li>
+      <li>Aucun électron dans l'équation de la réaction.</li>
+      <li>À la fin : autant d'atomes de chaque élément et la même charge de chaque côté.</li>
+    </ul>
+  </section>
+</div>`;
+  }
+
+  /* ---------- Réactions dont un réactif appartient à deux couples ----------
+     (oxydant dans l'un, réducteur dans l'autre : il faut le prendre dans le bon couple)
+     p : [couple dont l'oxydant réagit, couple dont le réducteur réagit] ;
+     x : 0 si ce réactif est l'oxydant de p[0], 1 s'il est le réducteur de p[1] ;
+     leurre : son autre couple, où il joue l'autre rôle */
+  const DEUX_COUPLES = [
+    { p: ['MnO4', 'O2'], x: 1, leurre: 'H2O2' },        // H2O2 réducteur (O2 / H2O2), pas oxydant (H2O2 / H2O)
+    { p: ['Cr2O7', 'O2'], x: 1, leurre: 'H2O2' },
+    { p: ['H2O2', 'Fe3'], x: 0, leurre: 'O2' },         // H2O2 oxydant (H2O2 / H2O), pas réducteur (O2 / H2O2)
+    { p: ['H2O2', 'I2'], x: 0, leurre: 'O2' },
+    { p: ['MnO4', 'Fe3'], x: 1, leurre: 'Fe' },         // Fe2+ réducteur (Fe3+ / Fe2+), pas oxydant (Fe2+ / Fe)
+    { p: ['Cr2O7', 'Fe3'], x: 1, leurre: 'Fe' },
+    { p: ['Fe', 'Zn'], x: 0, leurre: 'Fe3' },           // Fe2+ oxydant (Fe2+ / Fe), pas réducteur (Fe3+ / Fe2+)
+    { p: ['Fe', 'Al'], x: 0, leurre: 'Fe3' },
+    { p: ['I2', 'S4O6'], x: 0, leurre: 'IO3' },         // I2 oxydant (I2 / I−), pas réducteur (IO3− / I2)
+    { p: ['Cl2', 'Fe3'], x: 0, leurre: 'ClO' },         // Cl2 oxydant (Cl2 / Cl−), pas réducteur (ClO− / Cl2)
+  ];
+
   /* ============================================================
      PLAN DE L'APPLICATION ET NAVIGATION (voir assets/sommaire.js)
      ============================================================ */
@@ -497,7 +578,7 @@
   window.OX = Object.assign(window.OX || {}, {
     MOINS, fmt, lire, proche, o, fq, el, secouer, melanger, hasard, entre, champ, boutonValider, PARTIES, versCours,
     question, serie, confettis,
-    COUPLES, h, couple, charge, M1,
+    COUPLES, h, couple, charge, M1, DEUX_COUPLES, methodeExpress,
     PLAN, menu, accueil, marquer,
   });
 })();

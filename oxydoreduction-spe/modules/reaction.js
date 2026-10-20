@@ -12,6 +12,9 @@
 
    Parties « perso » (cours : assets/cours.js ; séries : OX.question) :
      REAC.partieReactifs(o)     entourer (toucher) les deux réactifs dans les couples
+     REAC.partieAutreReactif(o) un seul réactif donné : toucher l'autre (o.donne 'ox' ou 'red')
+     REAC.partieBonCouple(o)    le second réactif appartient à deux couples : le toucher dans
+                                le bon (o.x, o.leurre ; voir OX.DEUX_COUPLES)
      REAC.partieMultiplier(o)   multiplier pour égaliser les électrons (demi-équations données)
      REAC.partieAdditionner(o)  o.mode 'simplifier' : la somme est écrite, on touche les espèces
                                 présentes des deux côtés pour les simplifier ;
@@ -28,7 +31,8 @@
              guide : true (cours) : étapes validées toutes seules, consigne de chaque
                      étape à côté de sa zone ; depart, jusqua : étapes déjà faites,
                      dernière étape à faire (0 à 2) ; electrons : électrons échangés
-                     dans les aides (par défaut en mode guidé) }
+                     dans les aides (par défaut en mode guidé) ; aideEtapes : sous
+                     chaque étape, un bouton d'aide qui dit exactement quoi faire }
      Aides de l'outil : nombre d'atomes de chaque élément et charges de chaque côté, en
      une ligne sous chaque équation. « Vérifier » une demi-équation est facultatif ;
      dans une série, s'en servir coûte un point (comme une aide payante) : seul le
@@ -158,6 +162,92 @@
         return {
           montrer() { bs.forEach(b => b.setAttribute('aria-pressed', String(especes.some(x => x.reactif && x.f === b.dataset.f)))); terminer(); },
         };
+      },
+    };
+  }
+
+  /* ============================================================
+     L'AUTRE RÉACTIF : un seul réactif est donné (déjà entouré dans son couple) ;
+     on touche l'autre, dans l'autre couple (un seul choix, validé tout de suite).
+     Un oxydant réagit avec un réducteur, un réducteur avec un oxydant.
+     o = { a, b, ordre, donne : 'ox' (l'oxydant de a est donné) ou 'red' (le réducteur de b) }
+     ============================================================ */
+  const BARRE = '<span class="ox-barre" aria-hidden="true">/</span>';
+  const donneHTML = f => `<span class="ox-ent-b ox-ent-donne" role="img" aria-label="${texte(html(f))}, réactif donné">${html(f)}</span>`;
+  const fixeHTML = f => `<span class="ox-ent-f">${html(f)}</span>`;
+  // rôle de l'espèce donnée (ox : oxydant) : son nom, celui du rôle de l'autre réactif (avec leurs articles),
+  // et la place de l'autre réactif dans Ox / Red
+  const roles = ox => ({
+    nom: ox ? 'oxydant' : 'réducteur', leNom: ox ? 'l\'oxydant' : 'le réducteur',
+    autre: ox ? 'réducteur' : 'oxydant', leAutre: ox ? 'le réducteur' : 'l\'oxydant', deAutre: ox ? 'de réducteur' : 'd\'oxydant',
+    place: ox ? 'en second' : 'en premier',
+  });
+  // boutons : bonne réponse en vert, mauvais choix en rouge (et désactivé), comme un choix
+  function choixUnique(bs, juste, api, diag, box) {
+    let fini = false;
+    const terminer = () => { fini = true; bs.forEach(b => { b.disabled = true; }); };
+    bs.forEach(b => {
+      b.onclick = () => {
+        if (fini || api.fini() || b.disabled) return;
+        if (juste(b)) { b.classList.add('juste'); terminer(); api.reussi(); return; }
+        b.classList.add('faux'); b.disabled = true;
+        api.erreur(diag(b));
+        secouer(box);
+      };
+    });
+    return { montrer() { bs.filter(juste).forEach(b => b.classList.add('juste')); terminer(); } };
+  }
+  function partieAutreReactif(o) {
+    const ox = o.donne === 'ox', R = roles(ox);
+    const G = ox ? o.a.ox : o.b.red, X = ox ? o.b.red : o.a.ox;            // réactif donné, réactif à trouver
+    const cG = ox ? o.a : o.b, cX = ox ? o.b : o.a;
+    const regle = `${html(G)} est un <b>${R.nom}</b> : il réagit avec un <b>${R.autre}</b>, celui de l'autre couple`;
+    return {
+      type: 'perso', outil: 'autre-reactif', o,
+      q: o.q || `${html(G)} est entouré : c'est un des deux réactifs. Touche l'autre réactif.`,
+      solution: `<p>${html(G)} est <b>${R.leNom}</b> du couple ${couple(cG)}. Un ${R.nom} réagit toujours avec un <b>${R.autre}</b> : l'autre réactif est ${R.leAutre} de l'autre couple, <span class="ox-entoure">${html(X)}</span> (couple ${couple(cX)}, écrit ${R.place}).</p>`,
+      monter(zone, api) {
+        const box = el('div', 'ox-ent');
+        zone.appendChild(box);
+        const cps = o.ordre === 'ba' ? [o.b, o.a] : [o.a, o.b];
+        box.innerHTML = cps.map(c => `<span class="ox-ent-c">${[c.ox, c.red].map(f => (f === G ? donneHTML(f)
+          : `<button type="button" class="ox-ent-b" data-f="${f}">${html(f)}</button>`)).join(BARRE)}</span>`).join('<span class="ox-ent-et">et</span>');
+        const bs = Array.from(box.querySelectorAll('button.ox-ent-b'));
+        const diag = b => (b.dataset.f === (ox ? o.a.red : o.b.ox)
+          ? `${html(b.dataset.f)} est dans le même couple que ${html(G)} : c'est l'espèce que ${html(G)} devient, pas un réactif. ${regle}.`
+          : `${html(b.dataset.f)} est un ${R.nom}, comme ${html(G)}. Un ${R.nom} ne réagit pas avec un autre ${R.nom} : il réagit avec un <b>${R.autre}</b>. Dans l'autre couple, ${R.leAutre} est écrit ${R.place} (Ox / Red).`);
+        return choixUnique(bs, b => b.dataset.f === X, api, diag, box);
+      },
+    };
+  }
+
+  /* ============================================================
+     LE BON COUPLE : un réactif est donné avec son couple ; le second réactif
+     appartient à deux couples (oxydant dans l'un, réducteur dans l'autre) :
+     on le touche dans le couple où il joue le rôle qui convient (validé tout de suite).
+     o = { a, b, x (0 : ce réactif est l'oxydant de a ; 1 : le réducteur de b),
+           leurre (son autre couple), ordre (ordre des deux couples proposés) }
+     ============================================================ */
+  function partieBonCouple(o) {
+    const X = o.x ? o.b.red : o.a.ox, G = o.x ? o.a.ox : o.b.red;          // réactif à placer, réactif donné
+    const cX = o.x ? o.b : o.a, cG = o.x ? o.a : o.b, L = o.leurre;
+    const R = roles(!!o.x);                                                 // rôle du réactif donné (oxydant si x = 1)
+    const lAilleurs = o.x ? 'l\'oxydant' : 'le réducteur', placeL = o.x ? 'en premier' : 'en second';   // son rôle dans le leurre
+    const deux = o.ordre === 'ba' ? [L, cX] : [cX, L];
+    return {
+      type: 'perso', outil: 'bon-couple', o,
+      q: o.q || `${html(X)} appartient à deux couples. Touche-le dans le couple où il réagit avec ${html(G)}.`,
+      solution: `<p>${html(G)} est un <b>${R.nom}</b> : il réagit avec un <b>${R.autre}</b>. Ici, ${html(X)} joue donc le rôle <b>${R.deAutre}</b> : on le prend dans le couple <span class="ox-entoure">${couple(cX)}</span>, où il est écrit ${R.place} (Ox / Red). Dans le couple ${couple(L)}, il est ${lAilleurs} : ce couple ne sert pas.</p>`,
+      monter(zone, api) {
+        const box = el('div', 'ox-ent');
+        zone.appendChild(box);
+        // le couple du réactif donné (entouré), puis les deux couples du second réactif, lui seul à toucher
+        box.innerHTML = `<span class="ox-ent-c">${[cG.ox, cG.red].map(f => (f === G ? donneHTML(f) : fixeHTML(f))).join(BARRE)}</span><span class="ox-ent-et">et</span>` +
+          deux.map((c, i) => `<span class="ox-ent-c">${[c.ox, c.red].map(f => (f === X
+            ? `<button type="button" class="ox-ent-b" data-i="${i}" aria-label="${texte(html(X))} dans le couple ${texte(couple(c))}">${html(f)}</button>` : fixeHTML(f))).join(BARRE)}</span>`).join('<span class="ox-ent-et">ou</span>');
+        const bs = Array.from(box.querySelectorAll('button.ox-ent-b'));
+        const diag = () => `Dans le couple ${couple(L)}, ${html(X)} est <b>${lAilleurs}</b> (écrit ${placeL}). Or ${html(G)} est un <b>${R.nom}</b> : il réagit avec un <b>${R.autre}</b>. Prends ${html(X)} dans le couple où il est ${R.autre} (écrit ${R.place}).`;
+        return choixUnique(bs, b => deux[+b.dataset.i] === cX, api, diag, box);
       },
     };
   }
@@ -436,7 +526,8 @@
     ];
     const blocEtape = k => (guide && k <= jusqua ? `<div class="ox-rxo-g" data-e="${k}">
         <p class="ox-rxo-g-t"><span class="ox-rxo-g-n" aria-hidden="true">${k + 1}</span><span class="ox-rxo-g-l" aria-live="polite"></span></p>
-        <p class="ox-rxo-g-x"></p><p class="ox-rxo-g-m"></p></div>` : '');
+        <p class="ox-rxo-g-x"></p><p class="ox-rxo-g-m"></p>
+        ${o.aideEtapes ? '<div class="ox-rxo-g-aide hidden"><button type="button" class="btn-small" aria-expanded="false">Aide pour cette étape</button><div class="ox-rxo-g-ad hidden"></div></div>' : ''}</div>` : '');
     const ligneDemi = k => `<div class="ox-rxo-l" data-k="${k}">
         <div class="ox-rxo-tete"><span class="ox-rxo-nom">Couple ${couple(EQ[k].cp)}</span><span class="ox-rxo-etat"></span></div>
         <div class="ox-rxo-ligne">
@@ -674,6 +765,9 @@
           : `<b>Étape ${k + 1} · ${ETAPES[k].titre}</b>`;
         b.querySelector('.ox-rxo-g-x').innerHTML = k === etape ? ETAPES[k].texte : '';
         if (k !== etape) b.querySelector('.ox-rxo-g-m').innerHTML = '';
+        // aide détaillée : seulement sous l'étape en cours
+        const a = b.querySelector('.ox-rxo-g-aide');
+        if (a) a.classList.toggle('hidden', fini || k !== etape);
       });
       Object.values(mults).forEach(x => x.activer(!fini && etape === 1));
       const res = $('.ox-rxo-res');
@@ -681,6 +775,46 @@
       if (!fini && (etape === 0 || etape === 2)) bloc(etape).after(res);
       KS.forEach(rendreEq);
     }
+
+    /* ---------- Mode guidé, o.aideEtapes : sous chaque étape, une aide qui dit exactement quoi faire ---------- */
+    // « A, B et C »
+    const liste = L => (L.length > 1 ? `${L.slice(0, -1).join(', ')} et ${L[L.length - 1]}` : L[0] || '');
+    const membre = (T, c) => liste(T.filter(t => t.cote === c).sort((x, y) => rangF(x.f) - rangF(y.f)).map(t => kf(t.coef, t.f)));
+    function aideEtape(k) {
+      // 1. chaque demi-équation : le réactif à gauche, les espèces et leurs nombres de chaque côté
+      if (k === 0) {
+        return ordre.map(K => {
+          const Q = EQ[K], inv = Q.sens === 'ox', T = reel(window.DEMI.solution(Q.cp).etapes[3], inv);
+          return `<p>Couple ${couple(Q.cp)} : le réactif ${html(inv ? Q.cp.red : Q.cp.ox)} va à gauche, c'est une ${inv ? 'oxydation' : 'réduction'}. Glisse à gauche du signe = : ${membre(T, 'g')} ; à droite : ${membre(T, 'd')}. Règle chaque nombre avec ▲ ▼ : ${window.DEMI.ecrire(T, '=')}.</p>`;
+        }).join('');
+      }
+      // 2. les multiplicateurs : plus petit multiple commun des deux nombres d'électrons
+      if (k === 1) {
+        const n = K => (K === 'A' ? r.nA : r.nB), m = K => (K === 'A' ? r.mA : r.mB);
+        const regle = K => `${m(K) > 1 ? 'règle' : 'laisse'} le multiplicateur de la demi-équation du couple ${couple(EQ[K].cp)} sur <b>${m(K)}</b> (${m(K)} × ${n(K)} = ${r.L})`;
+        return `<p>La demi-équation du couple ${couple(o.a)} échange ${elec(r.nA)}, celle du couple ${couple(o.b)} ${elec(r.nB)}. Le plus petit multiple commun de ${r.nA} et ${r.nB} est ${r.L} : ${ordre.map(regle).join(' ; ')}.</p>`;
+      }
+      // 3. l'équation : ce qui se simplifie dans la somme, puis chaque espèce et son nombre
+      const nb = (f, c) => r.somme.filter(t => t.f === f && t.cote === c).reduce((x, t) => x + t.coef, 0);
+      const simpl = [E, HP, EAU].map(f => {
+        const g = nb(f, 'g'), d = nb(f, 'd');
+        if (!g || !d) return '';
+        if (g === d) return `Les ${kf(g, f)} de chaque côté se simplifient.`;
+        return `${kf(g, f)} à gauche et ${kf(d, f)} à droite : il en reste ${Math.abs(g - d)} ${g > d ? 'à gauche' : 'à droite'}.`;
+      }).filter(Boolean);
+      return `<p>Additionne les deux demi-équations multipliées, puis simplifie. ${simpl.join(' ')}</p>
+        <p>Glisse à gauche de la flèche : ${membre(r.finale, 'g')} ; à droite : ${membre(r.finale, 'd')}. Règle chaque nombre avec ▲ ▼ : ${r.html}.</p>`;
+    }
+    zone.querySelectorAll('.ox-rxo-g-aide').forEach(a => {
+      const b = a.querySelector('button'), d = a.querySelector('.ox-rxo-g-ad'), k = +a.parentElement.dataset.e;
+      b.onclick = () => {
+        const ouvrir = d.classList.contains('hidden');
+        if (ouvrir && !d.innerHTML) d.innerHTML = aideEtape(k);
+        d.classList.toggle('hidden', !ouvrir);
+        b.textContent = ouvrir ? 'Masquer l\'aide' : 'Aide pour cette étape';
+        b.setAttribute('aria-expanded', String(ouvrir));
+      };
+    });
 
     /* ---------- Valider la réaction ---------- */
     function terminer() {
@@ -746,5 +880,5 @@
     return p;
   }
 
-  window.REAC = { reaction, ecrire, inverser, multiplier, solutionHTML, diagReaction, partieReactifs, partieMultiplier, partieAdditionner, outil, partie };
+  window.REAC = { reaction, ecrire, inverser, multiplier, solutionHTML, diagReaction, partieReactifs, partieAutreReactif, partieBonCouple, partieMultiplier, partieAdditionner, outil, partie };
 })();
