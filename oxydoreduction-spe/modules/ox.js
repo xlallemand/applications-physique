@@ -484,8 +484,19 @@
       <div class="ox-info-tuile"><b>Oxydant</b>capte des électrons : ${Mn}, ${h('Cu^2+')}, ${Fe3}…</div>
       <div class="ox-info-tuile"><b>Réducteur</b>cède des électrons : ${Fe2}, Zn, ${h('I^-')}…</div>
       <div class="ox-info-tuile"><b>Couple Ox / Red</b>Ox + n ${EL} = Red<br><small>les électrons du côté de l'oxydant</small></div>
-      <div class="ox-info-tuile large"><b>Réduction</b>gain d'électrons : la demi-équation écrite dans le sens <span class="f">Ox + n ${EL} = Red</span><br><small>l'oxydant, à gauche du signe =, capte des électrons : <span class="f">${h('Cu^2+')} + 2&nbsp;${EL} = Cu</span></small></div>
-      <div class="ox-info-tuile large"><b>Oxydation</b>perte d'électrons : la demi-équation écrite dans le sens <span class="f">Red = Ox + n ${EL}</span><br><small>le réducteur, à gauche du signe =, cède des électrons : <span class="f">${Fe2} = ${Fe3} + ${EL}</span></small></div>
+      <div class="ox-info-tuile ox-info-sens"><b>Réduction et oxydation</b>
+        <div class="ox-info-sch">
+          <p class="ox-info-def"><b>Oxydation</b>formation de l'oxydant</p>
+          <div class="ox-info-dem">
+            <span class="ox-info-lab">réduction</span>
+            <span class="ox-info-ar ox-info-ar-d" aria-hidden="true"></span>
+            <span class="ox-info-eq">Ox + n ${EL} = Red</span>
+            <span class="ox-info-ar ox-info-ar-g" aria-hidden="true"></span>
+            <span class="ox-info-lab">oxydation</span>
+          </div>
+          <p class="ox-info-def"><b>Réduction</b>formation du réducteur</p>
+        </div>
+      </div>
     </div>
   </section>
   ${fleche}
