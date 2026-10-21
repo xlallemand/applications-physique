@@ -1,0 +1,98 @@
+/* ============================================================
+   Styles du moteur de synthèse de Fourier (assets/fourier.js)
+   Graphiques du signal et du spectre (quadrillage en pointillés
+   --paper-3, axes --ink, courbe --accent), simulateur (curseurs
+   larges, réglage précis, signaux prédéfinis, options).
+   Les couleurs des harmoniques sont des attributs de présentation
+   SVG (FOURIER.COUL), comme VEC.C.
+   ============================================================ */
+
+/* ---------- Graphiques ---------- */
+.fo-svg { display: block; max-width: 100%; height: auto; overflow: visible; font-family: var(--font-sans); }
+.fo-svg text { font-family: var(--font-sans); }
+.fo-grille { stroke: var(--paper-3); stroke-width: 1; stroke-dasharray: 3 3; }
+.fo-axe { stroke: var(--ink); stroke-width: 1.4; }
+.fo-pointe { fill: var(--ink); }
+.fo-txt { font-size: 12px; fill: var(--ink-2); font-variant-numeric: tabular-nums; }
+.fo-titre { font-size: 12.5px; font-weight: 700; fill: var(--ink); paint-order: stroke; stroke: var(--sheet); stroke-width: 4px; stroke-linejoin: round; }
+.fo-courbe { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; }
+.fo-cible { fill: none; stroke: var(--ink-3); stroke-width: 7; stroke-linejoin: round; opacity: .35; }
+.fo-ideale { fill: none; stroke: var(--ink-3); stroke-width: 2.5; stroke-dasharray: 7 4; }
+.fo-moyenne { stroke: var(--accent-ink); stroke-width: 1.6; stroke-dasharray: 8 5; }
+.fo-txt-moy { fill: var(--accent-ink); font-weight: 700; paint-order: stroke; stroke: var(--sheet); stroke-width: 4px; }
+.fo-raie { stroke: var(--accent); stroke-linecap: butt; }
+.fo-raie-choix { stroke: var(--cle-bg); stroke-width: 16; }
+.fo-txt-raie { fill: var(--ink); font-weight: 700; font-size: 12.5px; paint-order: stroke; stroke: var(--sheet); stroke-width: 4px; }
+.fo-txt-raie.nul { fill: var(--ink-3); font-weight: 600; }
+.fo-txt-raie.choisie { fill: var(--accent-ink); font-weight: 800; }
+.fo-bande { fill: var(--cle-bg); opacity: .8; }
+.fo-txt-bande { fill: var(--accent-ink); font-weight: 700; }
+.fo-poignee { fill: var(--sheet); stroke: var(--accent); stroke-width: 2.5; }
+.fo-poignee.nul { stroke: var(--ink-3); stroke-dasharray: 3 2; }
+.fo-tire { cursor: ns-resize; touch-action: none; }
+.fo-tire:hover .fo-poignee { stroke-width: 3.5; }
+/* curseurs de mesure */
+.fo-mes { stroke: var(--accent-ink); stroke-width: 1.6; stroke-dasharray: 6 4; }
+.fo-mes-fl { stroke: var(--accent-ink); stroke-width: 1.6; }
+.fo-mes-pt { fill: var(--accent-ink); }
+.fo-mes-txt { font-size: 12.5px; font-weight: 800; fill: var(--accent-ink); paint-order: stroke; stroke: var(--sheet); stroke-width: 4px; }
+.fo-mes-poignee { fill: var(--accent); }
+.fo-mes-grip { stroke: var(--sheet); stroke-width: 1.6; }
+[data-mes].fo-tire { cursor: ew-resize; }
+
+/* ---------- Simulateur ---------- */
+.fo-simu { display: flex; flex-direction: column; gap: 10px; }
+.fo-bloc { background: var(--sheet); border: 1px solid var(--line); border-radius: 16px; padding: 8px 8px 10px; }
+.fo-g { touch-action: pan-y; -webkit-user-select: none; user-select: none; }
+.fo-lect-mes, .fo-lecture { font-size: .92rem; color: var(--ink); padding: 4px 6px 0; font-variant-numeric: tabular-nums; line-height: 1.45; min-height: 1.5em; }
+.fo-lect-mes b { color: var(--accent-ink); }
+.fo-legende { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 4px 0; }
+.fo-leg {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 4px 12px 4px 10px; border-radius: 999px; border: 0;
+  background: var(--paper); color: var(--ink); font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; font-variant-numeric: tabular-nums;
+}
+.fo-leg:hover { background: var(--paper-2); }
+.fo-leg.actif { background: var(--cle-bg); color: var(--accent-ink); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.fo-leg-vide { font-size: .85rem; color: var(--ink-2); padding: 6px 4px; }
+/* réglage précis de la raie choisie */
+.fo-fin { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 4px 0; }
+.fo-fin-t { font-size: .78rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
+.fo-fin-l { display: inline-flex; align-items: center; gap: 6px; }
+.fo-fin-champ { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+.fo-champ {
+  width: 84px; height: 42px; padding: 0 10px; border-radius: 12px; border: 1.5px solid var(--paper-3); background: var(--sheet);
+  font: inherit; font-size: 16px; font-weight: 700; text-align: center; color: var(--ink); font-variant-numeric: tabular-nums;
+}
+.fo-champ:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.fo-mini {
+  min-width: 42px; height: 42px; border-radius: 999px; border: 0; background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3);
+  font: inherit; font-size: 1.05rem; font-weight: 800; color: var(--ink); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.fo-mini:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.fo-mini:focus-visible, .fo-leg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* curseurs f1 et a0 (larges : au doigt comme à la souris) */
+.fo-reglages { display: grid; gap: 4px 18px; }
+@media (min-width: 640px) { .fo-reglages { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.fo-reglage { display: flex; flex-direction: column; min-height: 46px; }
+.fo-reglage-nom { font-weight: 700; font-variant-numeric: tabular-nums; }
+.fo-reglage-nom b { color: var(--accent-ink); }
+.fo-reglage input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 46px; background: transparent; cursor: pointer; margin: 0; touch-action: pan-y; }
+.fo-reglage input[type="range"]:focus { outline: none; }
+.fo-reglage input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+.fo-reglage input[type="range"]::-webkit-slider-runnable-track { height: 8px; border-radius: 999px; background: var(--paper-3); }
+.fo-reglage input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; margin-top: -11px; border-radius: 50%; background: var(--accent); border: 3px solid var(--sheet); box-shadow: 0 0 0 1.5px var(--accent); }
+.fo-reglage input[type="range"]::-moz-range-track { height: 8px; border-radius: 999px; background: var(--paper-3); }
+.fo-reglage input[type="range"]::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); border: 3px solid var(--sheet); box-shadow: 0 0 0 1.5px var(--accent); }
+/* signaux prédéfinis et options */
+.fo-petit-t { font-size: .78rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin: 0 0 6px; }
+.fo-predef-l { display: flex; flex-wrap: wrap; gap: 8px; }
+.fo-predef-l .btn-secondary { min-height: 42px; padding: 8px 16px; font-size: .92rem; }
+.fo-options { display: grid; gap: 2px 18px; }
+@media (min-width: 640px) { .fo-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.fo-case { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 600; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.fo-case input { width: 22px; height: 22px; accent-color: var(--accent); flex: none; margin: 0; cursor: pointer; }
+.fo-case input:disabled + span { color: var(--ink-2); font-weight: 500; }
+@media (max-width: 520px) {
+  .fo-bloc { padding: 6px 2px 8px; border-radius: 14px; }
+}

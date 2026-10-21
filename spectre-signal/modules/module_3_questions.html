@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions, exploiter les graphiques — Chapitre 17 : Spectre d'un signal périodique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="sp.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : T et f sur un signal généré (nT
+   lisible sur la grille) (2), f à partir de T (1), intervalle de
+   fréquences nécessaire (2), harmoniques transmis par une bande donnée
+   (2), largeur d'une bande passante (1), qualité de la transmission
+   (1), fréquence conservée ou non (1).
+   Erreurs diagnostiquées : durée non divisée par n, T non converti en
+   s, borne haute = rang suivant, largeur = somme des bornes, fréquence
+   prise pour un rang.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, proche, fr, entre } = SP;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+
+/* ---------- T et f sur un signal (n périodes à partir de t = 0) ---------- */
+function qSignal() {
+  const [f1, n] = hasard([[200, 3], [250, 4], [400, 6], [400, 4], [500, 7], [500, 9], [125, 2]]), T = 1000 / f1;
+  const a = [1.5, 0, 0, 0];
+  melanger([2, 3, 4]).slice(0, 2).forEach(k => { a[k - 1] = hasard([.5, .75, 1]); });
+  const spec = { f1, a0: 0, a };
+  return { theme: 'Période et fréquence d\'un signal', enonce: `<p>Voici un signal périodique. La flèche encadre ${n} périodes.</p>${SP.figSignal(spec, { tmax: 20, pasT: 1, ymin: -4, ymax: 4, pasY: 1, H: 220, Wmax: 620, mesure: { t1: 0, t2: n * T, label: n + 'T' } })}`,
+    parties: [
+      fq.nombre(`Lis la durée de ces ${n} périodes.`, `${n}T =`, n * T, 'ms', { tol: .25, signe: false, diag: v => (proche(v, T, .05) ? `C'est la durée d'<b>une</b> période : lis la durée totale de la flèche (${n} périodes).` : 'Lis l\'instant où finit la flèche sur l\'axe des temps.'), solution: `<p>${n}T = ${c(fmt(n * T) + ' ms')}.</p>` }),
+      fq.nombre('Calcule la période T.', 'T =', T, 'ms', { rel: .02, signe: false, diag: v => (proche(v, n * T) ? `Divise par le nombre de périodes, ${n}.` : `T = durée / ${n}.`), solution: calc(`T = ${fr(fmt(n * T) + ' ms', n)} = ${c(fmt(T) + ' ms')}`) }),
+      fq.nombre('Calcule la fréquence f du signal.', 'f =', f1, 'Hz', { rel: .02, signe: false, diag: v => (proche(v, 1 / T, .02) ? `T doit être en secondes : ${fmt(T)} ms = ${fmt(T / 1000)} s.` : 'f = 1 / T, avec T en s.'), solution: calc(`f = ${fr('1', fmt(T / 1000) + ' s')} = ${c(fmt(f1) + ' Hz')}`) })] };
+}
+function qFreqT() {
+  const [T, u, Ts] = hasard([[2.5, 'ms', 2.5e-3], [8, 'ms', 8e-3], [20, 'ms', 20e-3], [500, 'µs', 500e-6], [125, 'µs', 125e-6]]), f = 1 / Ts;
+  return { theme: 'Fréquence à partir de la période', enonce: `<p>On mesure la période d'un signal : T = ${fmt(T)} ${u}.</p>`,
+    parties: [fq.nombre('Quelle est la fréquence f<sub>1</sub> de son fondamental ?', 'f<sub>1</sub> =', f, 'Hz', { rel: .01, signe: false,
+      diag: v => (proche(v, 1 / T, .02) ? `Convertis d'abord T en secondes : ${fmt(T)} ${u} = ${SP.sci(Ts, 2)} s.` : 'La fréquence du fondamental est celle du signal : f = 1 / T, T en s.'),
+      solution: calc(`f<sub>1</sub> = f = ${fr('1', 'T')} = ${fr('1', SP.sci(Ts, 2) + ' s')} = ${c(fmt(f) + ' Hz')}`) })] };
+}
+
+/* ---------- Intervalle de fréquences ---------- */
+function qIntervalle() {
+  const f1 = hasard([100, 150, 200, 250, 300, 400]), k = entre(3, 8);
+  return { theme: 'Intervalle de fréquences', enonce: `<p>Un signal a un fondamental de fréquence f<sub>1</sub> = ${f1} Hz. On veut transmettre le fondamental et les harmoniques jusqu'au rang ${k}.</p>`,
+    parties: [
+      { type: 'gabarit', q: 'Quel intervalle de fréquences faut-il transmettre ?', morceaux: ['[', { v: f1, aria: 'Borne basse, en Hz' }, 'Hz ;', { v: k * f1, aria: 'Borne haute, en Hz' }, 'Hz ]'],
+        diag: v => (proche(v[1], (k + 1) * f1) ? `La borne haute est la fréquence du rang ${k} : ${k} × ${f1} Hz.` : proche(v[0], 0) ? 'La borne basse est la fréquence du fondamental.' : proche(v[1], k) ? `${k} est le rang : sa fréquence est ${k} × f<sub>1</sub>.` : `De f<sub>1</sub> à ${k} × f<sub>1</sub>.`),
+        solution: calc(`De f<sub>1</sub> = ${f1} Hz à f<sub>${k}</sub> = ${k} × ${f1} = ${fmt(k * f1)} Hz : ${c(`[${f1} Hz ; ${fmt(k * f1)} Hz]`)}`) },
+      fq.nombre('Quelle est sa largeur ?', 'Δf =', (k - 1) * f1, 'Hz', { signe: false,
+        diag: v => (proche(v, (k + 1) * f1) ? 'On soustrait les bornes.' : proche(v, k * f1) ? `On retire la borne basse : ${fmt(k * f1)} − ${f1}.` : 'Δf = borne haute − borne basse.'),
+        solution: calc(`Δf = ${fmt(k * f1)} − ${f1} = ${c(fmt((k - 1) * f1) + ' Hz')}`) })] };
+}
+
+/* ---------- Harmoniques transmis par une bande ---------- */
+function qTransmis() {
+  const f1 = hasard([100, 150, 200, 250]), impairs = Math.random() < .5, N = impairs ? 13 : 8;
+  const rangs = Array.from({ length: N }, (_, i) => i + 1).filter(n => !impairs || n % 2);
+  const fa = hasard([0, f1 / 2, 1.5 * f1, 2 * f1]), fb = fa + hasard([3, 4, 5, 6]) * f1 + f1 / 2;
+  const dedans = rangs.filter(n => n * f1 >= fa && n * f1 <= fb);
+  const lib = l => (l.length ? `Les rangs ${l.slice(0, -1).join(', ')}${l.length > 1 ? ' et ' : ''}${l[l.length - 1]}` : 'Aucun');
+  const plus = rangs.filter(n => n * f1 > fb)[0], moins = dedans[0];
+  const opts = [o('ok', lib(dedans))];
+  if (plus) opts.push(o('plus', lib(dedans.concat([plus]))));
+  if (dedans.length > 1) opts.push(o('moins', lib(dedans.slice(1))));
+  opts.push(o('tous', lib(rangs)));
+  const uniques = opts.filter((x, i) => opts.findIndex(y => y.label === x.label) === i);
+  return { theme: 'Harmoniques transmis', enonce: `<p>Un signal de fréquence f<sub>1</sub> = ${f1} Hz contient ${impairs ? 'les harmoniques de rang impair' : 'tous les harmoniques'} jusqu'au rang ${N}. Il traverse un système de bande passante [${fmt(fa)} Hz ; ${fmt(fb)} Hz].</p>`,
+    parties: [fq.choix('Quels rangs sont transmis ?', uniques, 'ok', { colonne: true,
+      indices: { plus: `Le rang ${plus} est à ${plus} × ${f1} = ${fmt(plus * f1)} Hz : au-dessus de ${fmt(fb)} Hz.`, moins: `Le rang ${moins} est à ${fmt(moins * f1)} Hz : il est bien dans la bande.`, tous: 'Seuls les harmoniques dont la <b>fréquence</b> n × f<sub>1</sub> est dans la bande passante sont transmis.' },
+      solution: `<p>Fréquences des harmoniques : ${rangs.map(n => fmt(n * f1)).join(', ')} Hz. Dans [${fmt(fa)} ; ${fmt(fb)}] Hz : ${dedans.map(n => fmt(n * f1)).join(', ')} Hz, soit ${lib(dedans).toLowerCase()}.</p>` })] };
+}
+
+/* ---------- Largeur d'une bande passante ---------- */
+function qLargeur() {
+  const [txt, a, b, ua, ub] = hasard([['l\'oreille humaine', 20, 20000, '20 Hz', '20 kHz'], ['une ligne téléphonique', 300, 3400, '300 Hz', '3,4 kHz'], ['un petit haut-parleur', 150, 15000, '150 Hz', '15 kHz'], ['un système de transmission', 0, 2000, '0 Hz', '2 kHz']]);
+  return { theme: 'Largeur d\'une bande passante', enonce: `<p>La bande passante de ${txt} va de ${ua} à ${ub}.</p>`,
+    parties: [fq.nombre('Quelle est sa largeur, en Hz ?', 'Δf =', b - a, 'Hz', { signe: false,
+      diag: v => (proche(v, b + a) ? 'On soustrait les bornes.' : proche(v, b / 1000 - a, .01) ? `Convertis d'abord ${ub} en Hz.` : 'Δf = borne haute − borne basse, toutes deux en Hz.'),
+      solution: calc(`Δf = ${fmt(b)} − ${fmt(a)} = ${c(fmt(b - a) + ' Hz')}`) })] };
+}
+
+/* ---------- Qualité de la transmission ---------- */
+function qQualite() {
+  const f1 = hasard([300, 400, 440, 500]), rangs = hasard([[1, 2, 3], [1, 2, 4, 6], [1, 3, 5, 7], [1, 2, 3, 4, 5]]);
+  const bp = 2000, raies = rangs.map(n => ({ f: n * f1, a: hasard([40, 60, 80, 100, 120]) }));
+  const ok = rangs.every(n => n * f1 <= bp), fmax = Math.max(...raies.map(r => r.f));
+  return { theme: 'Qualité de la transmission', enonce: `<p>Le spectre d'un son (en mV) est envoyé dans un système de bande passante 0 à 2 kHz (zone grisée).</p>${SP.figSpectre(raies, { Wmax: 600, H: 210, unite: 'mV', uniteF: 'kHz', fmax: Math.max(4000, fmax + 500), pasF: 250, etiqF: [0, 1000, 2000, 3000, 4000], amax: 140, pasA: 20, etiqA: [0, 40, 80, 120], bande: [0, bp], titreF: 'Fréquence (en kHz)' })}`,
+    parties: [fq.choix('Ce son est-il transmis avec une bonne qualité ?', [o('oui', 'Oui : tous ses harmoniques sont dans la bande passante'), o('non', 'Non : des harmoniques sont au-dessus de 2 kHz')], ok ? 'oui' : 'non',
+      { melanger: false, indices: { oui: 'Regarde les raies à droite de la zone grisée.', non: 'Toutes les raies sont-elles dans la zone grisée ?' },
+        solution: `<p>L'harmonique le plus élevé est à ${fmt(fmax / 1000)} kHz : ${ok ? 'tout est dans la bande passante, le son est bien transmis.' : 'il est au-dessus de 2 kHz, il ne sera pas transmis : le son est déformé.'}</p>` })] };
+}
+
+/* ---------- Fréquence conservée ? ---------- */
+function qConservee() {
+  const f1 = hasard([200, 300, 440]);
+  return { theme: 'Fréquence du signal transmis', enonce: `<p>Un son de fréquence ${f1} Hz traverse un système qui supprime ses harmoniques les plus aigus (le fondamental passe).</p>`,
+    parties: [fq.choix('La fréquence du son transmis :', [o('ok', `reste ${f1} Hz : c'est celle du fondamental`), o('baisse', 'diminue, car il manque des harmoniques'), o('hausse', 'augmente')], 'ok',
+      { colonne: true, indices: { baisse: 'Les harmoniques perdus changent la forme du signal, pas sa période.', hausse: 'La période est imposée par le fondamental, qui est transmis.' },
+        solution: '<p>Supprimer des harmoniques change la forme du signal (le timbre d\'un son), pas sa fréquence, qui est celle du fondamental.</p>' })] };
+}
+
+// tirage : 2 + 1 + 2 + 2 + 1 + 1 + 1 questions
+function tirage() {
+  return [qSignal(), qSignal(), qFreqT(), qIntervalle(), qIntervalle(), qTransmis(), qTransmis(), qLargeur(), qQualite(), qConservee()];
+}
+
+SP.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Exploiter les graphiques',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : période et fréquence d\'un signal, intervalle de fréquences à transmettre, harmoniques transmis par une bande passante.</p>',
+  questions: tirage,
+  revoir: { href: 'module_3a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4.html', label: 'Module 4 : exercices →' },
+});
+SP.menu('module_3_questions');
+</script>
+</body>
+</html>

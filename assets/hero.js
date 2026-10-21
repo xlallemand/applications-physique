@@ -18,6 +18,7 @@
      rotation   engrenages, arcs de cercle et sens de rotation (mouvements de rotation)
      fluides    château d'eau et niveaux, hauteur h, forces pressantes sur les parois (statique des fluides)
      lumiere    soleil, rayons ondulés (photons) et panneau photovoltaïque incliné (énergie transportée par la lumière)
+     spectre    signal périodique non sinusoïdal en haut, raies de son spectre en dessous (spectre d'un signal, ondes sonores)
      fractions  disques et barres partagés
      molecules  modèles moléculaires en boules
      formules:physique | formules:redox | formules:pile | formules:combustion | formules:ph | formules:algebre
@@ -504,6 +505,39 @@
       ctx.fillText('P = U × I', w * .06, h * .9);
       ctx.fillText('Q = m c (Tf − Ti)', w * .4, h * .3);
       ctx.fillText('r = Pu / Pa', w * .62, h * .92);
+    },
+
+    // Signal périodique non sinusoïdal (somme d'harmoniques) en haut, raies de son spectre en dessous
+    spectre(ctx, w, h, c) {
+      const p = 24;
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineWidth = 1;
+      for (let x = 0, i = 0; x <= w; x += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .11; trait(ctx, x, 0, x, h); }
+      for (let y = 0, i = 0; y <= h; y += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .11; trait(ctx, 0, y, w, y); }
+      // signal : fondamental et harmoniques (amplitudes de l'exemple du cours), harmoniques en fin trait
+      // (seule la partie haute du canevas est visible : il est plus haut que l'en-tête pour la parallaxe)
+      const A = [1.5, 1, .67, .17], per = Math.max(230, w / 4.2), om = 2 * Math.PI / per, ys = h * .2, k = h * .052;
+      const s = x => A.reduce((S, a, i) => S + a * Math.sin((i + 1) * om * x), 0);
+      ctx.globalAlpha = .3; ctx.lineWidth = 1.5; trait(ctx, 0, ys, w, ys);
+      A.forEach((a, i) => { ctx.globalAlpha = .16; ctx.lineWidth = 1.3; courbe(ctx, x => ys - k * a * Math.sin((i + 1) * om * x), 0, w); });
+      ctx.globalAlpha = .75; ctx.lineWidth = 2.6; courbe(ctx, x => ys - k * s(x), 0, w);
+      // spectre : axe des fréquences et raies verticales à f1, 2 f1, 3 f1…
+      const yb = h * .57, x0 = w * .08, pas = Math.max(70, Math.min(140, w / 11)), H = h * .17;
+      ctx.globalAlpha = .45; ctx.lineWidth = 1.5; trait(ctx, x0, yb, w, yb); trait(ctx, x0, yb, x0, yb - H * 1.25);
+      const raies = [.62, 1, .66, .45, .11, .3, .22, .08, .16, .12, .05, .09];
+      raies.forEach((a, i) => {
+        const x = x0 + (i + 1) * pas;
+        if (x > w - 10) return;
+        ctx.globalAlpha = .6; ctx.lineWidth = 4; trait(ctx, x, yb, x, yb - H * a);
+        ctx.globalAlpha = .35; ctx.font = `600 13px ${police()}`; ctx.fillText(i ? `${i + 1}f₁` : 'f₁', x - 8, yb + 17);
+      });
+      ctx.globalAlpha = .6; ctx.lineWidth = 6; trait(ctx, x0 + 2, yb, x0 + 2, yb - H * .5);
+      // formules en filigrane
+      ctx.font = `600 19px ${police()}`; ctx.globalAlpha = .2;
+      ctx.fillText('fₙ = n × f₁', w * .7, h * .37);
+      ctx.fillText('ω = 2πf', w * .05, h * .37);
+      ctx.font = `500 16px ${police()}`; ctx.globalAlpha = .15;
+      ctx.fillText('s(t) = a₀ + Σ aₙ sin(n ω t)', w * .36, h * .4);
+      ctx.fillText('f = 1 / T', w * .86, h * .05);
     },
 
     // Formules écrites en quinconce, plus ou moins marquées

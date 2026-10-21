@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : lire un spectre — Chapitre 17 : Spectre d'un signal périodique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="sp.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 1 / 2</span>
+    <h2 class="er-titre">Lire un spectre</h2>
+    <p class="er-contexte">Le <b>spectre</b> d'un signal représente l'<b>amplitude</b> des sinusoïdes qui le composent en fonction de leur <b>fréquence</b>. On y lit la composante continue, le fondamental et les harmoniques.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 1 du module 2 : définition du spectre (exemple du
+   cours : signal calculé à partir de son spectre), lecture de a0, f1
+   et a1, puis outil « lire un spectre » (toucher une raie, lire sa
+   fréquence et son amplitude, puis son rang).
+   Erreurs diagnostiquées : raie à 0 Hz prise pour le fondamental,
+   fréquence et amplitude inversées, rang = position sur le dessin.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, proche } = SP;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const an = n => `a<sub>${n}</sub>`;
+
+/* ---------- 1. Le spectre d'un signal ---------- */
+const S1 = SP.spectreAuHasard({ a0: true, mV: false });
+function etape1(c_) {
+  const carte = c_.carte('1. Le spectre d\'un signal');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> Le <b>spectre</b> d'un signal représente l'<b>amplitude</b> des sinusoïdes qui le composent en fonction de leur <b>fréquence</b>. Chaque sinusoïde est une <b>raie</b> verticale. On y lit :</p>
+        <ul class="er-liste"><li>la raie à <b>f = 0 Hz</b> : la <b>composante continue</b> a<sub>0</sub> ;</li>
+          <li>la première raie après 0 Hz : le <b>fondamental</b>, de fréquence f<sub>1</sub>, qui est la <b>fréquence du signal</b> ;</li>
+          <li>les raies suivantes : les <b>harmoniques</b>, de fréquences f<sub>n</sub> = n × f<sub>1</sub> et d'amplitudes a<sub>n</sub>.</li></ul></div>
+    </div>
+    ${exemple(`<p>Le signal s(t) de l'exemple du cours et son spectre (amplitudes en mV) :</p>
+      ${SP.figSignal(SP.COURS_EX, Object.assign({ Wmax: 640, H: 210 }, SP.COURS_OPTS_SIGNAL))}
+      ${SP.figSpectre(SP.COURS_RAIES_MV(), Object.assign({ Wmax: 640, H: 220 }, SP.COURS_OPTS_SPECTRE))}
+      <ul class="er-liste"><li>raie à 0 Hz : ${an(0)} = ${c('1 000 mV')}, la valeur moyenne du signal (1 V) ;</li>
+        <li>fondamental : f<sub>1</sub> = ${c('150 Hz')}, ${an(1)} = ${c('1 500 mV')} ;</li>
+        <li>harmoniques : 300 Hz (${an(2)} = 1 000 mV), 450 Hz (${an(3)} = 670 mV), 600 Hz (${an(4)} ≈ 170 mV).</li></ul>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Lire un spectre', enonce: `<p>Voici le spectre d'un signal (amplitudes en ${S1.unite}).</p>${SP.figSpectre(S1.raies, Object.assign({ Wmax: 600, H: 220 }, S1.opts))}`, parties: [
+      { type: 'nombre', q: `Quelle est sa composante continue ${an(0)} ?`, label: `${an(0)} =`, valeur: S1.a0, unite: S1.unite, tol: S1.gA / 4, signe: false,
+        diag: v => (proche(v, S1.a[0]) ? `C'est l'amplitude du fondamental. ${an(0)} est la raie à <b>0 Hz</b>, contre l'axe vertical.` : proche(v, 0) ? 'Regarde contre l\'axe vertical, à 0 Hz : il y a une raie.' : `Lis la hauteur de la raie à 0 Hz (une ligne du quadrillage tous les ${fmt(S1.gA)} ${S1.unite}).`),
+        solution: `<p>La raie à 0 Hz mesure ${c(fmt(S1.a0) + ' ' + S1.unite)} : c'est la composante continue, la valeur moyenne du signal.</p>` },
+      { type: 'nombre', q: 'Quelle est la fréquence f<sub>1</sub> du fondamental ?', label: 'f<sub>1</sub> =', valeur: S1.f1, unite: 'Hz', tol: S1.gF / 4, signe: false,
+        diag: v => (proche(v, 0) ? 'La raie à 0 Hz est la <b>composante continue</b>, pas le fondamental : le fondamental est la première raie <b>après</b> 0 Hz.'
+          : `Le fondamental est la première raie après 0 Hz. Lis sa fréquence sur l'axe horizontal (une ligne verticale tous les ${fmt(S1.gF)} Hz).`),
+        solution: `<p>La première raie après 0 Hz est à ${c(fmt(S1.f1) + ' Hz')} : c'est le fondamental, et la fréquence du signal.</p>` },
+      { type: 'nombre', q: `Quelle est l'amplitude ${an(1)} du fondamental ?`, label: `${an(1)} =`, valeur: S1.a[0], unite: S1.unite, tol: S1.gA / 4, signe: false,
+        diag: v => (proche(v, S1.a0) ? 'C\'est la raie à 0 Hz : prends la raie du fondamental.' : `Va du haut de la raie jusqu'à l'axe vertical (une ligne tous les ${fmt(S1.gA)} ${S1.unite}).`),
+        solution: `<p>${an(1)} = ${c(fmt(S1.a[0]) + ' ' + S1.unite)}.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Lire une raie ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Lire une raie');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Pour lire une raie : on descend jusqu'à l'axe des fréquences pour sa <b>fréquence</b>, on va vers l'axe vertical depuis son sommet pour son <b>amplitude</b>. Attention aux unités des axes (Hz ou kHz, V ou mV).</p>
+      <div class="cle"><p>Le <b>rang</b> d'un harmonique est le nombre n tel que f<sub>n</sub> = n × f<sub>1</sub> : n = f<sub>n</sub> / f<sub>1</sub>. Ce n'est pas forcément la position de la raie sur le dessin : des harmoniques peuvent manquer.</p></div>
+    </div>
+    ${exemple(`<p>Dans l'exemple du cours, la raie à 450 Hz a pour amplitude 670 mV ; son rang est n = 450 / 150 = ${c('3')} : c'est ${an(3)}.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Le fondamental', parties: [SP.partieLireSpectre({ mode: 'fondamental', sp: SP.spectreAuHasard({ a0: true }) })] },
+    { titre: 'Un harmonique', parties: [SP.partieLireSpectre({ mode: 'harmonique', sp: SP.spectreAuHasard() })] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Le <b>spectre</b> donne l'amplitude des sinusoïdes qui composent le signal en fonction de leur fréquence.</p></div>
+    <div class="cle"><p>Raie à 0 Hz : composante continue a<sub>0</sub>. Première raie après 0 Hz : le <b>fondamental</b> f<sub>1</sub> = fréquence du signal. Raies suivantes : les <b>harmoniques</b>, f<sub>n</sub> = n × f<sub>1</sub>.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2b_cours.html">Cours : rang d'un harmonique →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#lire">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+SP.menu('module_2a_cours');
+</script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur l'analyse de Fourier — Chapitre 17 : Spectre d'un signal périodique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="sp.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : composante continue = valeur
+   moyenne (2), pulsation ω = 2πf (2), fréquence du terme de rang n
+   (3), ce que change l'ajout d'un harmonique ou d'une composante
+   continue (2), vocabulaire (1).
+   Erreurs diagnostiquées : maximum ou amplitude pris pour la moyenne,
+   2π oublié ou π seul, multiplication et division inversées, rang
+   oublié, période de l'harmonique prise pour celle du signal.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, proche, fr } = SP;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const an = n => `a<sub>${n}</sub>`;
+const DPI = 2 * Math.PI;
+function diagOmega(v, f) {
+  if (proche(v, f, .01)) return 'ω n\'est pas égale à f : ω = 2 × π × f.';
+  if (proche(v, Math.PI * f, .01)) return 'Il manque le facteur 2 : ω = <b>2</b> × π × f.';
+  if (proche(v, f / DPI, .02)) return 'On <b>multiplie</b> f par 2π.';
+  return 'ω = 2 × π × f, avec f en Hz.';
+}
+
+/* ---------- Groupe 1 : composante continue ---------- */
+const G1 = [
+  function lectureA0() {
+    const a0 = hasard([-1.5, -1, -.5, .5, 1, 1.5, 2]), a1 = hasard([1, 1.5, 2]), spec = { f1: hasard([200, 250, 500]), a0, a: [a1] };
+    return { theme: 'Composante continue', enonce: `<p>Ce signal est une sinusoïde à laquelle on a ajouté une composante continue.</p>${SP.figSignal(spec, { tmax: 10, pasT: 1, ymin: -4, ymax: 4, pasY: .5, etiqY: [-4, -3, -2, -1, 0, 1, 2, 3, 4], H: 220, Wmax: 560 })}`,
+      parties: [fq.nombre(`Quelle est sa composante continue ${an(0)} ?`, `${an(0)} =`, a0, 'V', { tol: .05,
+        diag: v => (proche(v, a0 + a1) ? 'C\'est le maximum : la valeur moyenne est au milieu, entre le maximum et le minimum.' : proche(v, a0 - a1) ? 'C\'est le minimum : la valeur moyenne est au milieu, entre le maximum et le minimum.' : proche(v, a1) ? 'C\'est l\'amplitude de la sinusoïde, pas sa valeur moyenne.' : '(maximum + minimum) / 2.'),
+        solution: calc(`${an(0)} = ${fr(`${fmt(a0 + a1)} + (${fmt(a0 - a1)})`, '2')} = ${c(fmt(a0) + ' V')}`) })] };
+  },
+  function definitionA0() {
+    return { theme: 'Composante continue', parties: [fq.choix(`La composante continue ${an(0)} d'un signal périodique est :`,
+      [o('ok', 'sa valeur moyenne'), o('max', 'sa valeur maximale'), o('a1', 'l\'amplitude du fondamental'), o('f', 'sa fréquence')], 'ok',
+      { colonne: true, indices: { max: 'La composante continue est la partie qui ne varie pas : le signal oscille autour d\'elle.', a1: 'L\'amplitude du fondamental est a<sub>1</sub>.', f: 'a<sub>0</sub> est une tension (en V), pas une fréquence.' },
+        solution: `<p>${an(0)} est la valeur moyenne du signal : il oscille autour d'elle.</p>` })] };
+  },
+  function a0Spectre() {
+    return { theme: 'Composante continue', parties: [fq.choix(`Dans le spectre d'un signal, la composante continue ${an(0)} est :`,
+      [o('ok', 'la raie à 0 Hz'), o('f1', 'la raie à la fréquence f<sub>1</sub>'), o('haut', 'la plus haute raie'), o('non', 'absente du spectre')], 'ok',
+      { colonne: true, indices: { f1: 'La raie à f<sub>1</sub> est le fondamental.', haut: 'La plus haute raie est celle de plus grande amplitude, pas forcément a<sub>0</sub>.', non: 'Une tension constante ne varie pas : où la placer sur l\'axe des fréquences ?' },
+        solution: '<p>Une tension constante a une fréquence nulle : a<sub>0</sub> est la raie à <b>0 Hz</b>.</p>' })] };
+  },
+];
+
+/* ---------- Groupe 2 : pulsation ---------- */
+function qOmega() {
+  const f = hasard([50, 100, 150, 200, 440, 1000]), w = DPI * f;
+  return { theme: 'Pulsation', enonce: `<p>Un signal périodique a pour fréquence f = ${fmt(f)} Hz.</p>`,
+    parties: [fq.nombre('Calcule sa pulsation ω.', 'ω =', w, 'rad/s', { rel: .01, signe: false, affiche: fmt(Math.round(w)), diag: v => diagOmega(v, f),
+      solution: calc(`ω = 2 × π × f = 2 × π × ${fmt(f)} Hz ≈ ${c(fmt(Math.round(w)) + ' rad/s')}`) })] };
+}
+function qFreqOmega() {
+  const f = hasard([50, 100, 200, 400]), w = Math.round(DPI * f);
+  return { theme: 'Pulsation', enonce: `<p>Un signal s'écrit s(t) = 3 × sin(${fmt(w)} × t) (t en s).</p>`,
+    parties: [fq.nombre('Quelle est sa fréquence f ?', 'f =', w / DPI, 'Hz', { rel: .01, signe: false, affiche: fmt(f),
+      diag: v => (proche(v, w * DPI, .02) ? 'ω = 2πf, donc f = ω / (2π) : on <b>divise</b>.' : proche(v, w / Math.PI, .02) ? 'Divise par 2π, pas seulement par π.' : proche(v, w) ? 'Le nombre devant t est la pulsation ω, pas la fréquence.' : 'f = ω / (2π).'),
+      solution: calc(`ω = ${fmt(w)} rad/s, donc f = ${fr('ω', '2π')} = ${fr(fmt(w), '2π')} ≈ ${c(fmt(f) + ' Hz')}`) })] };
+}
+const G2 = [qOmega, qFreqOmega];
+
+/* ---------- Groupe 3 : fréquence du terme de rang n ---------- */
+const G3 = [
+  function freqRang() {
+    const f = hasard([50, 100, 150, 200, 250]), n = hasard([2, 3, 4, 5, 6, 7]);
+    return { theme: 'Fréquence d\'un harmonique', enonce: `<p>Un signal a pour fréquence f = ${f} Hz.</p>`,
+      parties: [fq.nombre(`Quelle est la fréquence de son harmonique de rang ${n} ?`, `f<sub>${n}</sub> =`, n * f, 'Hz', { signe: false,
+        diag: v => (proche(v, f / n, .01) ? 'On <b>multiplie</b> par le rang.' : proche(v, f + n) ? 'On multiplie par le rang, on n\'ajoute pas.' : `f<sub>n</sub> = n × f.`),
+        solution: calc(`f<sub>${n}</sub> = ${n} × ${f} Hz = ${c(fmt(n * f) + ' Hz')}`) })] };
+  },
+  function terme() {
+    const f = hasard([100, 150, 200, 250]), n = hasard([2, 3, 4, 5]), a = hasard([.2, .4, .5, .8]);
+    return { theme: 'Lire un terme de la somme', enonce: `<p>Un signal contient le terme ${fmt(a)} × sin(${n} × 2π × ${f} × t) (en V, t en s).</p>`,
+      parties: [fq.nombre('Quelle est l\'amplitude de cette sinusoïde ?', 'a =', a, 'V', { signe: false, diag: v => (proche(v, n) ? `${n} est le rang de l'harmonique.` : 'L\'amplitude est le nombre devant « sin ».'), solution: `<p>L'amplitude est le nombre devant le sinus : ${c(fmt(a) + ' V')}.</p>` }),
+        fq.nombre('Quelle est sa fréquence ?', 'f =', n * f, 'Hz', { signe: false, diag: v => (proche(v, f) ? `${f} Hz est la fréquence du fondamental : multiplie par le rang ${n}.` : proche(v, DPI * n * f, .02) ? 'C\'est la pulsation : la fréquence est n × f.' : 'Fréquence : n × f.'),
+          solution: calc(`f = ${n} × ${f} Hz = ${c(fmt(n * f) + ' Hz')}`) })] };
+  },
+  function possible() {
+    const f = hasard([100, 200, 250, 300]), bonne = hasard([2, 3, 4]) * f;
+    const fausses = melanger([f / 2, 1.5 * f, 2.5 * f, f + 30]).slice(0, 3);
+    return { theme: 'Fréquences possibles', enonce: `<p>Un signal périodique a pour fréquence f = ${f} Hz.</p>`,
+      parties: [fq.choix('Laquelle de ces fréquences peut être celle d\'une sinusoïde qui le compose ?', [o('ok', fmt(bonne) + ' Hz')].concat(fausses.map((x, i) => o('f' + i, fmt(x) + ' Hz'))), 'ok',
+        { indice: `Les sinusoïdes qui composent le signal ont des fréquences multiples de f : ${f}, ${2 * f}, ${3 * f}… Hz.`,
+          solution: `<p>${fmt(bonne)} = ${bonne / f} × ${f} : c'est un multiple de f, donc un harmonique possible (rang ${bonne / f}).</p>` })] };
+  },
+];
+
+/* ---------- Groupe 4 : ce qui change ---------- */
+const G4 = [
+  function ajoutHarm() {
+    const f = hasard([100, 200, 250, 500]), T = 1000 / f, n = hasard([2, 3]);
+    return { theme: 'Ajouter un harmonique', enonce: `<p>On ajoute un harmonique de rang ${n} à une sinusoïde de fréquence ${f} Hz (période ${fmt(T)} ms).</p>`,
+      parties: [fq.choix('Que devient la période du signal obtenu ?', [o('ok', `Elle reste égale à ${fmt(T)} ms`), o('div', `Elle devient ${fmt(+(T / n).toFixed(3))} ms`), o('mul', `Elle devient ${fmt(T * n)} ms`)], 'ok',
+        { melanger: false, indices: { div: `${fmt(+(T / n).toFixed(3))} ms est la période de l'harmonique seul. Le motif complet se répète toujours toutes les ${fmt(T)} ms.`, mul: 'La période ne s\'allonge pas : l\'harmonique se répète exactement plusieurs fois dans une période du fondamental.' },
+          solution: '<p>La forme change, mais la période reste celle du fondamental : la fréquence du signal est f<sub>1</sub>.</p>' })] };
+  },
+  function ajoutA0() {
+    const a0 = hasard([1, 2, 3]);
+    return { theme: 'Ajouter une composante continue', parties: [fq.choix(`On ajoute une composante continue ${an(0)} = ${a0} V à un signal périodique. Le signal :`,
+      [o('ok', `monte de ${a0} V sans changer de forme ni de période`), o('forme', 'change de forme'), o('f', 'change de fréquence'), o('amp', `voit son amplitude multipliée par ${a0}`)], 'ok',
+      { colonne: true, indices: { forme: 'On ajoute la même valeur à chaque instant : toute la courbe est décalée.', f: 'Une constante ne change pas la durée du motif.', amp: 'On ajoute, on ne multiplie pas.' },
+        solution: `<p>Chaque valeur du signal augmente de ${a0} V : la courbe est décalée vers le haut, sa valeur moyenne devient ${a0} V.</p>` })] };
+  },
+];
+
+/* ---------- Groupe 5 : vocabulaire ---------- */
+function fondamental() {
+  return { theme: 'Vocabulaire', parties: [fq.choix('Le fondamental d\'un signal périodique est :',
+    [o('ok', 'la sinusoïde de rang 1, de même fréquence que le signal'), o('grand', 'la sinusoïde de plus grande amplitude'), o('a0', 'la composante continue'), o('haut', 'la sinusoïde de plus haute fréquence')], 'ok',
+    { colonne: true, indices: { grand: 'Pas forcément : un harmonique peut avoir une amplitude plus grande que le fondamental.', a0: 'La composante continue est a<sub>0</sub> (fréquence nulle).', haut: 'Le fondamental a la plus basse fréquence (après 0 Hz).' },
+      solution: '<p>Le fondamental est la sinusoïde de rang 1, de fréquence f<sub>1</sub> : c\'est la fréquence du signal.</p>' })] };
+}
+
+// tirage : 2 + 2 + 3 + 2 + 1 questions
+function tirage() {
+  return melanger(G1).slice(0, 2).map(f => f()).concat(G2.map(f => f()), G3.map(f => f()), G4.map(f => f()), [fondamental()]);
+}
+
+SP.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Analyse de Fourier',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : composante continue, pulsation ω = 2πf, fréquence des harmoniques, ce que change l\'ajout d\'un harmonique.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2a_cours.html', label: 'Module 2 : le spectre →' },
+});
+SP.menu('module_1_questions');
+</script>
+</body>
+</html>

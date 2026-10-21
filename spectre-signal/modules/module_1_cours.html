@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : analyse de Fourier — Chapitre 17 : Spectre d'un signal périodique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="sp.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">Analyse de Fourier</h2>
+    <p class="er-contexte">Tout signal périodique est une <b>somme de sinusoïdes</b> : une <b>composante continue</b> a<sub>0</sub>, le <b>fondamental</b> et des <b>harmoniques</b>. On l'écrit s(t) = a<sub>0</sub> + Σ a<sub>n</sub> × sin(n × ω × t + φ<sub>n</sub>), avec la pulsation ω = 2πf.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Partie physique : un créneau est la somme de sinusoïdes (figure
+      du cours : harmoniques séparés, puis leur somme) ; petit
+      simulateur pour ajouter un harmonique.
+   2. Partie maths : s(t) = a0 + Σ an sin(n ω t + φn), ω = 2πf,
+      fréquence du terme de rang n.
+   3. a0 = composante continue = valeur moyenne.
+   Erreurs diagnostiquées : 2π oublié, π au lieu de 2π, ω = f / 2π,
+   f × n oublié, maximum pris pour la moyenne.
+   Valeurs (vérifiées par un script) : ω = 2π × 50 ≈ 314 rad/s ;
+   ω = 2π × 200 ≈ 1 257 rad/s ; 3 × 50 = 150 Hz ; 4 × 200 = 800 Hz.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, fmt, proche, hasard, fr } = SP;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const an = n => `a<sub>${n}</sub>`;
+const CRENEAU = { f1: 200, a0: 0, a: FOURIER.PREDEFINIS.creneau.a.slice(0, 9) };
+const FIG_C = { tmax: 10, pasT: 1, ymin: -1.5, ymax: 1.5, pasY: .5, nom: 'u', unite: 'V' };
+// diagnostic du calcul de ω = 2πf
+function diagOmega(v, f) {
+  if (proche(v, f, .01)) return 'ω n\'est pas égale à f : ω = 2 × π × f.';
+  if (proche(v, Math.PI * f, .01)) return 'Il manque le facteur 2 : ω = <b>2</b> × π × f.';
+  if (proche(v, f / (2 * Math.PI), .02)) return 'On <b>multiplie</b> f par 2π (on ne divise pas).';
+  if (proche(v, 2 * f, .01)) return 'N\'oublie pas π : ω = 2 × π × f.';
+  return 'ω = 2 × π × f, avec f en Hz : ω en rad/s.';
+}
+
+/* ---------- 1. Une somme de sinusoïdes ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Tout signal périodique est une somme de sinusoïdes');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Partie physique.</b> Tout signal périodique peut se décomposer en une <b>somme de fonctions sinusoïdales</b>.</p></div>
+    </div>
+    ${exemple(`<p>Les cinq sinusoïdes de couleur (en haut) s'additionnent : leur somme (en bas) approche un signal <b>créneau</b> (en gris). Chacune a sa fréquence et son amplitude.</p>
+      <div class="sp-figs deux"><div>${SP.figSignal(CRENEAU, Object.assign({ harmoniques: true, somme: false, Wmax: 460, H: 200, aria: 'Les cinq sinusoïdes de fréquences 200, 600, 1 000, 1 400 et 1 800 Hz' }, FIG_C))}<p class="sp-fig-leg">Les sinusoïdes (harmoniques)</p></div>
+      <div>${SP.figSignal(CRENEAU, Object.assign({ ideale: 'creneau', Wmax: 460, H: 200, aria: 'Leur somme, proche d\'un créneau' }, FIG_C))}<p class="sp-fig-leg">Leur somme, et le créneau en gris</p></div></div>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Compter les sinusoïdes', parties: [
+      { type: 'choix', q: 'Combien de sinusoïdes forment le signal de l\'exemple ?', options: [o('1', '1'), o('2', '2'), o('5', '5'), o('inf', 'une infinité')], bonne: '5', melanger: false,
+        indices: { 1: 'Compte les courbes de couleur de la figure du haut.', 2: 'Compte toutes les courbes de couleur, même les petites.', inf: 'Il en faudrait une infinité pour obtenir <b>exactement</b> le créneau gris ; ici on en a additionné quelques-unes.' },
+        solution: '<p>Cinq sinusoïdes, de fréquences 200, 600, 1 000, 1 400 et 1 800 Hz : leur somme approche le créneau sans l\'atteindre exactement.</p>' }] },
+    { titre: 'Ajouter une sinusoïde', parties: [
+      SP.partieSimu({ q: `Ce créneau n'est fait que de trois sinusoïdes. Ajoute la sinusoïde de rang 7 : fais glisser la poignée de la raie ${an(7)} jusqu'à 0,2 V (ou écris 0,18 dans le réglage précis).`,
+        sim: { f1: 200, a: CRENEAU.a.slice(0, 5), forme: 'creneau', ideale: true, cases: ['ideale', 'harmoniques'], Hs: 190, Hf: 190 },
+        conditions: e => [[`${an(7)} entre 0,15 et 0,25 V`, e.a[6] >= .149 && e.a[6] <= .251], [`${an(1)}, ${an(3)}, ${an(5)} gardées`, e.a[0] > 0 && e.a[2] > 0 && e.a[4] > 0]],
+        regl: { a: CRENEAU.a.slice(0, 7) },
+        solution: '<p>Avec une sinusoïde de plus, la somme se rapproche du créneau gris : les paliers sont plus plats, les fronts plus raides.</p>' })] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. L'écriture mathématique ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. L\'écriture mathématique');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Partie maths.</b> Un signal périodique de fréquence f s'écrit :</p>
+        <p class="crs-formule">s(t) = a<sub>0</sub> + Σ a<sub>n</sub> × sin(n × ω × t + φ<sub>n</sub>) = a<sub>0</sub> + Σ a<sub>n</sub> × sin(n × 2πf × t + φ<sub>n</sub>)</p>
+        <ul class="er-liste"><li>ω = 2πf est la <b>pulsation</b>, en rad/s (f en Hz) ;</li>
+          <li>a<sub>0</sub> est la <b>composante continue</b> ;</li>
+          <li>le terme de rang n est une sinusoïde d'amplitude a<sub>n</sub> et de fréquence <b>n × f</b> : le rang 1 est le <b>fondamental</b>, les rangs 2, 3… les <b>harmoniques</b>.</li></ul></div>
+    </div>
+    ${exemple(`<p>Un signal de fréquence f = 50 Hz.</p>${calc(`ω = 2 × π × f = 2 × π × 50 Hz ≈ ${c('314 rad/s')}`)}
+      <p>Le terme de rang 3, a<sub>3</sub> × sin(3 × ω × t), est une sinusoïde de fréquence 3 × 50 = ${c('150 Hz')}.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une pulsation', enonce: '<p>Un signal a pour fréquence f = 200 Hz.</p>', parties: [
+      { type: 'nombre', q: 'Calcule sa pulsation ω.', label: 'ω =', valeur: 2 * Math.PI * 200, unite: 'rad/s', rel: .01, signe: false, affiche: '1 257', diag: v => diagOmega(v, 200),
+        solution: calc(`ω = 2 × π × 200 Hz ≈ ${c('1 257 rad/s')}`) },
+      { type: 'nombre', q: 'Quelle est la fréquence du terme de rang 4 ?', label: 'f<sub>4</sub> =', valeur: 800, unite: 'Hz', signe: false,
+        diag: v => (proche(v, 204) ? 'On <b>multiplie</b> la fréquence par le rang : 4 × 200.' : proche(v, 50) ? 'On multiplie par le rang, on ne divise pas.' : 'Fréquence du terme de rang n : n × f.'),
+        solution: calc(`f<sub>4</sub> = 4 × 200 Hz = ${c('800 Hz')}`) }] },
+    { titre: 'Une autre pulsation', enonce: '<p>Le courant du réseau électrique a pour fréquence f = 50 Hz. Un appareil absorbe un courant qui contient le terme a<sub>5</sub> × sin(5 × ω × t).</p>', parties: [
+      { type: 'nombre', q: 'Quelle est la fréquence de ce terme ?', label: 'f<sub>5</sub> =', valeur: 250, unite: 'Hz', signe: false,
+        diag: v => (proche(v, 10) ? 'On multiplie par le rang : 5 × 50.' : proche(v, 2 * Math.PI * 250, .02) ? 'C\'est la pulsation : la fréquence est 5 × 50 Hz.' : 'Fréquence du terme de rang n : n × f.'),
+        solution: calc(`f<sub>5</sub> = 5 × 50 Hz = ${c('250 Hz')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. La composante continue ---------- */
+// sinusoïde décalée : a0 et a1 tirés au hasard (lecture à 0,5 V près sur le quadrillage)
+const A0 = hasard([-1, -.5, .5, 1, 1.5]), A1 = hasard([1, 1.5, 2]);
+const DEC = { f1: 250, a0: A0, a: [A1] };
+const FIG_DEC = { tmax: 10, pasT: 1, ymin: -4, ymax: 4, pasY: .5, etiqY: [-4, -3, -2, -1, 0, 1, 2, 3, 4], nom: 'u', unite: 'V', H: 220, Wmax: 560 };
+function etape3(c_) {
+  const carte = c_.carte('3. La composante continue a<sub>0</sub>');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> a<sub>0</sub> est la <b>composante continue</b> du signal : c'est sa <b>valeur moyenne</b>. Les sinusoïdes ont une moyenne nulle : a<sub>0</sub> est la seule partie qui ne varie pas.</p></div>
+      <p>Sur une figure symétrique par rapport à l'axe des temps (autant au-dessus qu'en dessous), a<sub>0</sub> = 0.</p>
+    </div>
+    ${exemple(`<p>Le signal de l'exemple du cours oscille autour de la droite en pointillés : sa valeur moyenne est a<sub>0</sub> = 1 000 mV = 1 V.</p>
+      ${SP.figSignal(SP.COURS_EX, Object.assign({ moyenne: true, Wmax: 620, H: 220 }, SP.COURS_OPTS_SIGNAL))}
+      <p>Le créneau de l'étape 1, lui, est symétrique : a<sub>0</sub> = 0.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Une sinusoïde décalée', enonce: `<p>Ce signal est une sinusoïde à laquelle on a ajouté une composante continue.</p>${SP.figSignal(DEC, FIG_DEC)}`, parties: [
+      { type: 'nombre', q: `Lis sa valeur maximale et sa valeur minimale, puis donne sa composante continue ${an(0)} (sa valeur moyenne, au milieu).`, label: `${an(0)} =`, valeur: A0, unite: 'V', tol: .05,
+        diag: v => (proche(v, A0 + A1) ? 'C\'est la valeur <b>maximale</b>. La moyenne est au milieu, entre le maximum et le minimum.' : proche(v, A0 - A1) ? 'C\'est la valeur <b>minimale</b>. La moyenne est au milieu, entre le maximum et le minimum.'
+          : proche(v, A1) ? 'C\'est l\'amplitude de la sinusoïde. a<sub>0</sub> est la valeur autour de laquelle le signal oscille.' : proche(v, -A0) ? 'Attention au signe : regarde si le milieu est au-dessus ou en dessous de 0.' : 'a<sub>0</sub> = (maximum + minimum) / 2 pour une sinusoïde décalée.'),
+        solution: calc(`${an(0)} = ${fr(`${fmt(A0 + A1)} + (${fmt(A0 - A1)})`, '2')} = ${c(fmt(A0) + ' V')}`) }] },
+    { titre: 'Un signal symétrique', enonce: `<p>Voici le signal de l'exercice 6.</p>${SP.figSignal(SP.SPEC.ex6, Object.assign({ Wmax: 560, H: 220 }, SP.DOCS.ex6Signal.opts))}`, parties: [
+      { type: 'choix', q: `Que vaut sa composante continue ${an(0)} ?`, options: [o('0', '0 V'), o('max', '1,6 V'), o('5', '5 V')], bonne: '0', melanger: false,
+        indices: { max: '1,6 V est la valeur maximale. Le signal est-il autant au-dessus qu\'en dessous de l\'axe ?', 5: '5 ms est la période du signal, pas sa valeur moyenne.' },
+        solution: '<p>Le signal est autant au-dessus qu\'en dessous de l\'axe des temps : sa valeur moyenne est nulle, a<sub>0</sub> = 0.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Tout signal périodique est une <b>somme de sinusoïdes</b> : s(t) = a<sub>0</sub> + Σ a<sub>n</sub> × sin(n × ω × t + φ<sub>n</sub>).</p></div>
+    <div class="cle"><p>Pulsation : <b>ω = 2πf</b> (rad/s, f en Hz). Le terme de rang n a pour fréquence <b>n × f</b> : rang 1, le fondamental ; rangs 2, 3…, les harmoniques.</p></div>
+    <div class="cle"><p>a<sub>0</sub> = <b>composante continue</b> = <b>valeur moyenne</b> du signal (a<sub>0</sub> = 0 pour une figure symétrique).</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur l'analyse de Fourier →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2a_cours.html">Module 2 : le spectre</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+SP.menu('module_1_cours');
+</script>
+</body>
+</html>

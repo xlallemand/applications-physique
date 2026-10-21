@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions sur le spectre — Chapitre 17 : Spectre d'un signal périodique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="sp.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard sur des spectres générés : a0 (1),
+   f1 (1), amplitude et fréquence d'un harmonique (1), rang d'une raie
+   (1), harmonique absent (1), fréquence de l'harmonique de rang 7
+   absent (1), rang de l'harmonique de 1 800 Hz (1), raie impossible
+   (1), outil « lire un spectre » (1), vocabulaire (1).
+   Erreurs diagnostiquées : raie à 0 Hz prise pour le fondamental,
+   rang compté sur le dessin ou à partir de 0 Hz, division et
+   multiplication inversées, amplitude d'un harmonique absent.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, proche, fr, entre } = SP;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const an = n => `a<sub>${n}</sub>`;
+const fig = sp => SP.figSpectre(sp.raies, Object.assign({ Wmax: 600, H: 220 }, sp.opts));
+const enonce = sp => `<p>Voici le spectre d'un signal périodique (amplitudes en ${sp.unite}).</p>${fig(sp)}`;
+const diagF0 = 'La raie à 0 Hz est la <b>composante continue</b>, pas le fondamental : le fondamental est la première raie <b>après</b> 0 Hz.';
+
+function qA0() {
+  const sp = SP.spectreAuHasard({ a0: true });
+  return { theme: 'Composante continue', enonce: enonce(sp), parties: [fq.nombre(`Quelle est la composante continue ${an(0)} ?`, `${an(0)} =`, sp.a0, sp.unite, { tol: sp.gA / 4, signe: false,
+    diag: v => (proche(v, sp.a[0]) ? 'C\'est le fondamental : a<sub>0</sub> est la raie à 0 Hz, contre l\'axe vertical.' : `Hauteur de la raie à 0 Hz (une ligne tous les ${fmt(sp.gA)} ${sp.unite}).`),
+    solution: `<p>La raie à 0 Hz : ${an(0)} = ${c(fmt(sp.a0) + ' ' + sp.unite)}.</p>` })] };
+}
+function qF1() {
+  const sp = SP.spectreAuHasard({ a0: true });
+  return { theme: 'Fondamental', enonce: enonce(sp), parties: [fq.nombre('Quelle est la fréquence f<sub>1</sub> du fondamental ?', 'f<sub>1</sub> =', sp.f1, 'Hz', { tol: sp.gF / 4, signe: false,
+    diag: v => (proche(v, 0) ? diagF0 : `Première raie après 0 Hz ; une ligne verticale tous les ${fmt(sp.gF)} Hz.`),
+    solution: `<p>La première raie après 0 Hz est à f<sub>1</sub> = ${c(fmt(sp.f1) + ' Hz')}.</p>` })] };
+}
+function qHarm() {
+  const sp = SP.spectreAuHasard({ a0: false }), r = hasard(sp.raies.filter(x => x.n >= 2));
+  return { theme: 'Lire un harmonique', enonce: enonce(sp), parties: [
+    fq.nombre(`Quelle est la fréquence de l'harmonique de rang ${r.n} ?`, `f<sub>${r.n}</sub> =`, r.f, 'Hz', { tol: sp.gF / 4, signe: false,
+      diag: v => (proche(v, r.n * sp.f1) ? '' : `Commence par lire f<sub>1</sub> (première raie), puis f<sub>${r.n}</sub> = ${r.n} × f<sub>1</sub>.`),
+      solution: calc(`f<sub>${r.n}</sub> = ${r.n} × ${fmt(sp.f1)} Hz = ${c(fmt(r.f) + ' Hz')}`) }),
+    fq.nombre(`Quelle est son amplitude ${an(r.n)} ?`, `${an(r.n)} =`, r.a, sp.unite, { tol: sp.gA / 4, signe: false,
+      diag: () => `Hauteur de la raie à ${fmt(r.f)} Hz (une ligne tous les ${fmt(sp.gA)} ${sp.unite}).`,
+      solution: `<p>${an(r.n)} = ${c(fmt(r.a) + ' ' + sp.unite)}.</p>` })] };
+}
+function qRang() {
+  const sp = SP.spectreAuHasard({ a0: Math.random() < .5 }), r = hasard(sp.raies.filter(x => x.n >= 2));
+  const pos = sp.raies.filter(x => x.f && x.f <= r.f).length;
+  return { theme: 'Rang d\'une raie', enonce: enonce(sp), parties: [fq.nombre(`Quel est le rang de la raie à ${fmt(r.f)} Hz ?`, 'n =', r.n, '', { signe: false,
+    diag: v => (v === pos && pos !== r.n ? 'Le rang n\'est pas la position de la raie sur le dessin (des harmoniques manquent) : n = f<sub>n</sub> / f<sub>1</sub>.' : v === r.n - 1 ? 'Le fondamental est le rang 1 : n = f<sub>n</sub> / f<sub>1</sub>.' : 'n = f<sub>n</sub> / f<sub>1</sub> (lis d\'abord f<sub>1</sub>).'),
+    solution: calc(`n = ${fr(fmt(r.f) + ' Hz', fmt(sp.f1) + ' Hz')} = ${c(r.n)}`) })] };
+}
+function qAbsent() {
+  const sp = SP.spectreAuHasard({ rangs: [1, 2, 4, 5].concat(Math.random() < .5 ? [6] : []), a0: false }), n = 3;
+  return { theme: 'Harmonique absent', enonce: enonce(sp), parties: [fq.nombre(`Quelle est l'amplitude ${an(n)} de l'harmonique de rang ${n} ?`, `${an(n)} =`, 0, sp.unite, { tol: 1e-9, signe: false,
+    diag: v => (proche(v, sp.a[3]) ? 'La 3<sup>e</sup> raie dessinée n\'est pas forcément le rang 3 : regarde à la fréquence 3 × f<sub>1</sub>.' : `Le rang 3 est à 3 × f<sub>1</sub> = ${fmt(3 * sp.f1)} Hz : y a-t-il une raie ?`),
+    solution: `<p>Il n'y a pas de raie à 3 × ${fmt(sp.f1)} = ${fmt(3 * sp.f1)} Hz : l'harmonique de rang 3 manque, ${an(3)} = ${c('0')}.</p>` })] };
+}
+function qRang7() {
+  const sp = SP.spectreAuHasard({ rangs: [1, 2, 3, 5].slice(0, entre(3, 4)), a0: false, f1s: [50, 100, 150, 200] });
+  return { theme: 'Harmonique absent du spectre', enonce: enonce(sp), parties: [fq.nombre('Quelle serait la fréquence de l\'harmonique de rang 7, absent de ce spectre ?', 'f<sub>7</sub> =', 7 * sp.f1, 'Hz', { signe: false,
+    diag: v => (proche(v, 0) ? 'Il est absent (amplitude nulle), mais sa fréquence serait 7 × f<sub>1</sub>.' : proche(v, 6 * sp.f1) ? 'f<sub>7</sub> = <b>7</b> × f<sub>1</sub>.' : 'Lis f<sub>1</sub>, puis f<sub>7</sub> = 7 × f<sub>1</sub>.'),
+    solution: calc(`f<sub>7</sub> = 7 × ${fmt(sp.f1)} Hz = ${c(fmt(7 * sp.f1) + ' Hz')}`) })] };
+}
+function q1800() {
+  const [f1, n] = hasard([[100, 18], [150, 12], [200, 9], [300, 6], [450, 4], [600, 3]]);
+  return { theme: 'Rang d\'un harmonique', enonce: `<p>Le fondamental d'un signal a pour fréquence f<sub>1</sub> = ${f1} Hz.</p>`,
+    parties: [fq.nombre('Quel est le rang de l\'harmonique de fréquence 1 800 Hz ?', 'n =', n, '', { signe: false,
+      diag: v => (proche(v, 1800 * f1) ? 'On <b>divise</b> : n = f<sub>n</sub> / f<sub>1</sub>.' : v === n - 1 ? 'Le fondamental est le rang 1 : n = 1 800 / f<sub>1</sub>.' : 'n = f<sub>n</sub> / f<sub>1</sub>.'),
+      solution: calc(`n = ${fr('1 800 Hz', f1 + ' Hz')} = ${c(n)}`) })] };
+}
+function qImpossible() {
+  const f1 = hasard([100, 200, 300, 400]), bad = f1 * hasard([1.5, 2.5, 3.5]);
+  const bons = melanger([2, 3, 4, 5, 6].map(k => k * f1)).slice(0, 3);
+  return { theme: 'Raie impossible', enonce: `<p>Le fondamental d'un signal a pour fréquence f<sub>1</sub> = ${f1} Hz.</p>`,
+    parties: [fq.choix('Laquelle de ces raies est impossible dans son spectre ?', [o('ok', fmt(bad) + ' Hz')].concat(bons.map((x, i) => o('b' + i, fmt(x) + ' Hz'))), 'ok',
+      { indice: 'Une raie n\'est possible qu\'à un multiple de f<sub>1</sub> : calcule f / f<sub>1</sub> pour chaque raie.',
+        solution: `<p>${fmt(bad)} / ${f1} = ${fmt(bad / f1)} : ce n'est pas un entier, cette raie est impossible.</p>` })] };
+}
+function qOutil() {
+  return { theme: 'Lire un spectre', parties: [SP.partieLireSpectre({ mode: 'harmonique' })] };
+}
+function qVocab() {
+  return { theme: 'Vocabulaire', parties: [fq.choix('La fréquence d\'un signal périodique est égale :',
+    [o('ok', 'à la fréquence du fondamental f<sub>1</sub>'), o('haut', 'à la fréquence de la raie la plus haute'), o('0', 'à 0 Hz (la première raie du spectre)'), o('der', 'à la fréquence du dernier harmonique')], 'ok',
+    { colonne: true, indices: { haut: 'La plus haute raie a la plus grande amplitude, ce n\'est pas forcément le fondamental.', 0: diagF0, der: 'Le dernier harmonique a une fréquence n × f<sub>1</sub>, bien plus grande que celle du signal.' },
+      solution: '<p>La fréquence du signal est celle du fondamental, la première raie après 0 Hz.</p>' })] };
+}
+
+// tirage : une question de chaque sorte, dans un ordre qui va de la lecture au calcul
+function tirage() {
+  return [qA0, qF1, qHarm, qRang, qAbsent, qRang7, q1800, qImpossible, qOutil, qVocab].map(f => f());
+}
+
+SP.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Le spectre',
+  intro: '<p class="er-contexte">10 questions sur des spectres tirés au hasard : composante continue, fondamental, harmoniques, rang d\'une raie, raies absentes ou impossibles.</p>',
+  questions: tirage,
+  revoir: { href: 'module_2a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3a_cours.html', label: 'Module 3 : exploiter les graphiques →' },
+});
+SP.menu('module_2_questions');
+</script>
+</body>
+</html>

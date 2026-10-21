@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : fiche récapitulative — Chapitre 17 : Spectre d'un signal périodique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="sp.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Le spectre</h2>
+  </div>
+<!-- Fiche récapitulative du module 2 : une section par sous-module de cours (lire un spectre, rang d'un harmonique),
+     avec l'ancre de la partie du sommaire. -->
+
+  <section class="er-card" id="lire">
+    <h3 class="cours-titre">Lire un spectre</h3>
+    <div class="cle"><p>Le <b>spectre</b> représente l'<b>amplitude</b> des sinusoïdes qui composent le signal en fonction de leur <b>fréquence</b>.</p>
+      <ul class="er-liste"><li>raie à <b>0 Hz</b> : la <b>composante continue</b> a<sub>0</sub> (valeur moyenne) ;</li>
+        <li>première raie après 0 Hz : le <b>fondamental</b>, de fréquence f<sub>1</sub> = <b>fréquence du signal</b> ;</li>
+        <li>raies suivantes : les <b>harmoniques</b> de rang n, de fréquences f<sub>n</sub> = n × f<sub>1</sub> et d'amplitudes a<sub>n</sub>.</li></ul></div>
+    <p class="cours-exemple-t">Exemple du cours</p>
+    <div class="som-fiche-figs deux" id="figs"></div>
+    <p>a<sub>0</sub> = 1 000 mV ; f<sub>1</sub> = 150 Hz, a<sub>1</sub> = 1 500 mV ; 300 Hz : a<sub>2</sub> = 1 000 mV ; 450 Hz : a<sub>3</sub> = 670 mV ; 600 Hz : a<sub>4</sub> ≈ 170 mV.</p>
+  </section>
+
+  <section class="er-card" id="rang">
+    <h3 class="cours-titre">Rang d'un harmonique</h3>
+    <div class="cle"><p class="som-formule">f<sub>n</sub> = n × f<sub>1</sub> &nbsp; ; &nbsp; n = f<sub>n</sub> / f<sub>1</sub></p>
+      <p>Le rang est un nombre entier. Ce n'est pas la position de la raie sur le dessin : des harmoniques peuvent manquer (amplitude nulle).</p></div>
+    <div class="cle"><p>Une raie dont la fréquence n'est pas un multiple de f<sub>1</sub> est <b>impossible</b>.</p></div>
+    <p class="cours-exemple-t">Exemple</p>
+    <p>f<sub>1</sub> = 50 Hz : rang 3 à 150 Hz ; rang 7 à 350 Hz ; une raie à 175 Hz est impossible (175 / 50 = 3,5). f<sub>1</sub> = 200 Hz : la raie à 1 800 Hz est de rang 1 800 / 200 = 9.</p>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_2a_cours.html">Revoir les cours</a>
+    <a class="btn-secondary" href="module_2_questions.html">Questions sur le spectre</a>
+  </div>
+</div>
+<script>
+// figures : signal et spectre de l'exemple du cours
+document.getElementById('figs').innerHTML =
+  `<div>${SP.figSignal(SP.COURS_EX, Object.assign({ H: 200, Wmax: 460 }, SP.COURS_OPTS_SIGNAL))}<p class="sp-fig-leg">Signal s(t)</p></div>` +
+  `<div>${SP.figSpectre(SP.COURS_RAIES_MV(), Object.assign({ H: 200, Wmax: 460 }, SP.COURS_OPTS_SPECTRE))}<p class="sp-fig-leg">Son spectre</p></div>`;
+SP.menu('fiche_2');
+</script>
+</body>
+</html>

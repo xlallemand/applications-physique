@@ -1,0 +1,240 @@
+/* ============================================================
+   Styles de l'application « Chapitre 17 : Spectre d'un signal
+   périodique » (blocs communs repris de « Chapitre 7 : Théorème de
+   l'énergie cinétique », lui-même repris de « Cinématique » :
+   cours, questions, exercices, saisies, grille de choix ; en fin de
+   fichier : étapes du simulateur, outils « lire un spectre » et
+   « mesurer une période »).
+   Complète assets/theme.css, le fichier er.css de l'application
+   « Équilibrer une réaction » (cartes, boutons, écran de fin),
+   assets/sommaire.css (navigation, accueil, fiches) et
+   assets/fourier.css (graphiques du signal et du spectre).
+   ============================================================ */
+
+.er-page button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.er-page p { margin: 0; }
+sub, sup { font-size: .7em; line-height: 0; }
+
+/* (blocs communs avec l'application « pH » : cours, « À toi », questions, graphiques, exercices) */
+/* ---------- Cours ---------- */
+.er-etape .cle { margin: 12px 0; }
+.cle p + p, .cours-bloc p + p, .cours-exemple p + p { margin-top: 8px; }
+.cours-bloc { margin: 0 0 12px; }
+.cours-bloc .cle { margin: 12px 0 0; }
+.cours-exemple { line-height: 1.6; }
+.cours-exemple-t { font-size: .8rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px !important; }
+.ph-formule { text-align: center; font-size: 1.35rem; font-weight: 700; margin: 10px 0 !important; color: var(--ink); line-height: 1.5; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ph-formule.grand { font-size: 1.6rem; }
+@media (max-width: 480px) { .ph-formule { font-size: 1.12rem; } .ph-formule.grand { font-size: 1.3rem; } }
+.ph-calc { font-size: 1.1rem; line-height: 2.1; font-variant-numeric: tabular-nums; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ph-calc .c { color: var(--accent-ink); font-weight: 800; }
+@media (max-width: 480px) { .ph-calc { font-size: 1rem; } }
+.ph-r { color: var(--accent-ink); font-weight: 800; }
+.ph-lien-app {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  background: var(--cle-bg); border-radius: 16px; padding: 10px 12px 10px 16px; margin: 14px 0;
+}
+.ph-lien-app p { font-size: .92rem; color: var(--ink); font-weight: 600; }
+.ph-lien-app a { text-decoration: none; }
+.sp-liens { display: flex; flex-wrap: wrap; gap: 8px; }
+/* étapes d'une manipulation d'équation écrites dans le cours (une ligne par étape, la raison en petit) */
+.sp-manip li { margin: 6px 0; font-weight: 700; }
+.sp-manip small { display: block; font-weight: 500; font-size: .85rem; color: var(--ink-2); }
+.ph-grille2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 640px) { .ph-grille2 { grid-template-columns: 1fr; } }
+.ph-tableau { border-collapse: collapse; margin: 10px auto; font-variant-numeric: tabular-nums; }
+.ph-tableau th, .ph-tableau td { border: 1.5px solid var(--paper-3); padding: 6px 12px; text-align: center; white-space: nowrap; }
+.ph-tableau th { background: var(--paper); font-weight: 700; }
+.ph-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 480px) { .ph-tableau th, .ph-tableau td { padding: 5px 7px; font-size: .9rem; } }
+
+
+/* ---------- Questions ---------- */
+.ph-enonce { margin-bottom: 12px; line-height: 1.55; }
+.ph-partie + .ph-partie { margin-top: 16px; padding-top: 14px; border-top: 1.5px dashed var(--paper-3); }
+.ph-partie-q { font-weight: 700; color: var(--ink); margin-bottom: 10px !important; line-height: 1.5; }
+.ph-partie-aide { margin-top: 10px; }
+.ph-partie-aide .btn-small { color: var(--ink-2); }
+.ph-msg { margin-top: 10px !important; font-size: .92rem; color: var(--ink-2); font-weight: 600; }
+.ph-ok { margin-top: 8px !important; color: var(--success-text); font-weight: 800; }
+.ph-actions-partie { margin-top: 10px; }
+.ph-bilan { margin-top: 16px; }
+.ph-solution { line-height: 1.6; }
+.ph-solution .ph-calc { font-size: 1.02rem; line-height: 1.9; }
+.ph-question .er-consigne { margin-bottom: 8px !important; }
+
+/* Choix */
+.ph-choix { display: flex; flex-wrap: wrap; gap: 8px; }
+.ph-choix-col { flex-direction: column; align-items: stretch; }
+.ph-choix button { min-height: 46px; text-align: left; line-height: 1.4; border-radius: 16px; padding: 10px 18px; }
+.ph-choix button:disabled { cursor: default; opacity: 1; }
+.ph-choix button.juste { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); color: var(--success-text); }
+.ph-choix button.faux { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+.ph-choix svg { display: block; width: 150px; max-width: 100%; height: auto; }
+
+/* Valeur numérique */
+.ph-valeur { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.ph-lab { font-size: 1.15rem; font-weight: 800; color: var(--ink); white-space: nowrap; }
+.ph-unite { font-size: 1.1rem; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.ph-champ-box { display: inline-flex; align-items: center; gap: 4px; }
+.ph-champ {
+  width: 120px; font: inherit; font-size: 1.15rem; font-weight: 800; text-align: center; padding: 9px 8px;
+  border: none; border-radius: 12px; box-shadow: inset 0 0 0 1.5px var(--paper-3); background: var(--sheet); color: var(--ink);
+  -webkit-appearance: none; appearance: none;
+}
+.ph-champ:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.ph-champ:disabled { background: var(--paper); color: var(--ink); -webkit-text-fill-color: var(--ink); opacity: 1; }
+.ph-champ-box.petit .ph-champ { width: 78px; font-size: 1.05rem; padding: 8px 6px; }
+.ph-pm {
+  width: 38px; height: 42px; flex-shrink: 0; border: none; border-radius: 12px; cursor: pointer;
+  background: var(--paper); color: var(--ink); font: inherit; font-size: 1.1rem; font-weight: 800;
+}
+.ph-pm:disabled { opacity: .35; cursor: default; }
+.ph-champ-box.petit .ph-pm { width: 32px; height: 38px; font-size: 1rem; }
+.ph-sci { display: inline-flex; align-items: flex-start; flex-wrap: nowrap; gap: 3px; max-width: 100%; }
+.ph-sci .ph-champ-box.petit .ph-champ { width: 74px; }
+.ph-x10 { font-size: 1.15rem; font-weight: 800; align-self: center; white-space: nowrap; }
+.ph-exposant { margin-top: -16px; }
+.ph-exposant .ph-champ { width: 58px; font-size: 16px; padding: 6px 4px; }
+.ph-exposant .ph-pm { width: 30px; height: 34px; font-size: .95rem; }
+@media (max-width: 400px) {
+  .ph-champ-box.petit .ph-champ, .ph-sci .ph-champ-box.petit .ph-champ { width: 64px; }
+  .ph-exposant .ph-champ { width: 48px; }
+  .ph-champ-box.petit .ph-pm { width: 28px; }
+  .ph-exposant .ph-pm { width: 26px; }
+  .ph-x10 { font-size: 1.05rem; }
+}
+
+/* ---------- Exercices (module 6) ---------- */
+.ph-ex-groupe { margin-bottom: 18px; }
+.ph-ex-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; }
+.ph-ex-carte {
+  display: flex; align-items: center; gap: 12px; text-align: left; width: 100%;
+  background: var(--paper); border: none; border-radius: 18px; padding: 14px 16px; cursor: pointer; font: inherit; color: var(--ink);
+  transition: background .15s;
+}
+.ph-ex-carte:hover { background: var(--paper-2); }
+.ph-ex-num { flex-shrink: 0; min-width: 40px; height: 40px; border-radius: 999px; display: grid; place-items: center; background: var(--cle-bg); color: var(--accent-ink); font-weight: 800; font-size: .85rem; padding: 0 6px; }
+.ph-ex-carte.fait .ph-ex-num { background: var(--success-bg); color: var(--success-text); }
+.ph-ex-titre { font-weight: 800; line-height: 1.25; }
+.ph-ex-desc { font-size: .85rem; color: var(--ink-2); margin-top: 2px; line-height: 1.35; }
+.ph-ex-score { font-size: .78rem; font-weight: 700; color: var(--success-text); margin-top: 3px; }
+.ph-contexte { background: var(--cle-bg); border-color: var(--cle-line); }
+.ph-contexte .er-contexte { color: var(--ink); }
+.ph-donnees { margin-top: 8px !important; font-size: .92rem; color: var(--ink-2); line-height: 1.55; }
+.ph-ex-nav { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; }
+.ph-retour-liste { border: none; background: none; font: 700 .9rem var(--font-sans); color: var(--ink-2); cursor: pointer; padding: 6px 0; }
+.ph-retour-liste:hover { color: var(--ink); }
+/* tableaux (séries, exercices, corrections : repris de cinematique/modules/cin.css) */
+.ph-tableau { border-collapse: collapse; margin: 10px auto; font-variant-numeric: tabular-nums; }
+.ph-tableau th, .ph-tableau td { border: 1.5px solid var(--paper-3); padding: 6px 12px; text-align: center; white-space: nowrap; }
+.ph-tableau th { background: var(--paper); font-weight: 700; }
+.ph-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 480px) { .ph-tableau th, .ph-tableau td { padding: 5px 7px; font-size: .9rem; } }
+
+/* ---------- Saisies propres à l'application ---------- */
+.ph-partie-fig:empty, .ph-atoi-fig:empty { display: none; }
+.ph-partie-fig, .ph-atoi-fig { margin: 4px 0 10px; }
+.ph-champ-box.ko .ph-champ { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); }
+
+/* expression à trous */
+.sp-gab { gap: 8px 6px; }
+.sp-gab-txt { font-size: 1.15rem; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.sp-gab .ph-champ-box.petit .ph-champ { width: 60px; }
+.sp-gab-grp { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+@media (max-width: 400px) { .sp-gab .ph-champ-box.petit .ph-champ { width: 50px; } .sp-gab { gap: 8px 4px; } }
+
+/* graphiques et figures */
+.sp-image { margin: 4px 0 12px; }
+.sp-image img { display: block; width: 100%; max-width: 640px; height: auto; margin: 0 auto; border-radius: 14px; }
+.sp-fig { display: block; width: 100%; height: auto; margin: 8px auto; }
+.sp-fig text { font-family: var(--font-sans); }
+.sp-attention { background: var(--danger-bg); border-radius: 18px; padding: 14px 18px; margin: 12px 0; }
+.sp-attention .cle-titre { color: var(--danger-text); }
+
+/* « complète ton cours » (exemples du cours trouvés par l'élève) */
+.sp-complete { margin-top: 8px !important; padding: 8px 12px; border-radius: 12px; background: var(--sheet); font-weight: 600; }
+.sp-complete b:first-child { color: var(--accent-ink); }
+
+/* fractions sur deux étages (SP.fr) */
+.fr { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.15; margin: 0 .12em; font-size: .92em; }
+.fr > span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 .2em .05em; }
+.fr > span:last-child { padding: .05em .2em 0; }
+.ph-formule .fr, .ph-calc .fr { font-size: .85em; }
+/* racine carrée (SP.rac) : le signe √ s'étire à la hauteur du contenu, la barre est
+   le bord haut du contenu ; le signe démarre à mi-épaisseur de la barre pour la rejoindre */
+.racine { --rac-ep: 1.5px; display: inline-flex; align-items: stretch; vertical-align: baseline; white-space: nowrap; margin: 0 .05em; }
+.racine-signe { position: relative; flex: none; width: .62em; }
+.racine-signe svg { position: absolute; left: 0; top: calc(var(--rac-ep) / 2); width: 100%; height: calc(100% - var(--rac-ep) / 2); overflow: visible;
+  fill: none; stroke: currentColor; stroke-width: var(--rac-ep); stroke-linejoin: round; stroke-linecap: round; }
+.racine-sous { align-self: baseline; border-top: var(--rac-ep) solid currentColor; padding: .12em .15em 0 .12em; }
+.racine-lu { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sp-nobr { white-space: nowrap; display: inline-block; }
+
+/* tableaux du cours */
+.sp-tab { border-collapse: collapse; margin: 10px auto; font-variant-numeric: tabular-nums; }
+.sp-tab th, .sp-tab td { border: 1.5px solid var(--paper-3); padding: 7px 12px; text-align: center; }
+.sp-tab th { background: var(--paper); font-weight: 700; }
+.sp-tab td.vide { color: var(--ink-3); }
+.sp-tab tr.inutile td { color: var(--ink-3); background: repeating-linear-gradient(135deg, transparent 0 6px, var(--paper) 6px 12px); }
+.sp-tab td.trouve { background: var(--success-bg); color: var(--success-text); font-weight: 800; }
+.sp-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 480px) { .sp-tab th, .sp-tab td { padding: 5px 7px; font-size: .92rem; } }
+
+
+
+/* ---------- grille de choix : un choix par ligne (SP.PARTIES.grille) ---------- */
+.sp-grille { display: flex; flex-direction: column; gap: 8px; }
+.sp-grille-l { background: var(--paper); border-radius: 16px; padding: 10px 12px; transition: background .15s, box-shadow .15s; }
+.sp-grille-l.ok { background: var(--success-bg); box-shadow: inset 0 0 0 2px var(--success); }
+.sp-grille-l.ko { background: var(--danger-bg); box-shadow: inset 0 0 0 2px var(--danger); }
+.sp-grille-nom { font-weight: 800; margin-bottom: 8px; line-height: 1.4; }
+.sp-grille-desc { font-weight: 500; color: var(--ink-2); font-size: .92rem; }
+.sp-grille-ch { display: flex; flex-wrap: wrap; gap: 6px; }
+.sp-grille-b {
+  min-height: 46px; padding: 8px 16px; border: none; border-radius: 999px; background: var(--sheet); color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 700 .95rem var(--font-sans); cursor: pointer; transition: background .15s, box-shadow .15s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.sp-grille-b:hover:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.sp-grille-b[aria-pressed="true"] { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.sp-grille-l.ok .sp-grille-b[aria-pressed="true"] { background: var(--success-text); }
+.sp-grille-b:disabled { cursor: default; }
+.sp-grille-b:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sp-grille-apres { margin-top: 8px; padding-top: 8px; border-top: 1.5px dashed var(--paper-3); }
+
+/* ============================================================
+   PROPRE AU CHAPITRE 17
+   ============================================================ */
+/* figures (signal, spectre) dessinées à la largeur disponible (SP.fig) */
+.sp-fig .fo-svg { margin: 0 auto; }
+.sp-figs { display: grid; gap: 10px; margin: 8px 0; }
+@media (min-width: 760px) { .sp-figs.deux { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.sp-fig-leg { font-size: .85rem; color: var(--ink-2); text-align: center; margin-top: 2px !important; }
+/* page du simulateur : étapes guidées révélées une à une, bilan */
+.sp-etape[hidden], .sp-bilan[hidden] { display: none; }
+.sp-etape > .cours-titre:first-child { margin-top: 0; }
+.sp-bilan .cle { margin: 10px 0; }
+.sp-sim-carte { padding-left: 14px; padding-right: 14px; }
+@media (max-width: 520px) { .sp-sim-carte { padding-left: 6px; padding-right: 6px; } }
+/* état du simulateur vérifié en direct (consigne d'une étape) */
+.sp-etat { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 4px; }
+.sp-etat span { display: inline-block; padding: 4px 10px; border-radius: 999px; background: var(--paper); font-size: .88rem; font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.sp-etat span.ok { background: var(--success-bg); color: var(--success-text); }
+.sp-etat span.ok::before { content: '✓'; font-weight: 800; margin-right: 4px; }
+.sp-remonter { margin-top: 6px; }
+/* défis : spectre de l'exercice à reproduire */
+.sp-defi-doc { background: var(--paper); border-radius: 14px; padding: 8px; margin: 6px 0 10px; }
+.sp-reussi { font-weight: 800; color: var(--success-text); }
+/* outil « lire un spectre » */
+.sp-lire .fo-svg [data-raie] { cursor: pointer; }
+.sp-lire-choix { font-size: .92rem; color: var(--ink-2); margin: 4px 0 8px !important; min-height: 1.4em; }
+.sp-lire-choix b { color: var(--accent-ink); }
+.sp-raie-choisie { stroke: var(--cle-bg); stroke-width: 18; }
+/* outil « mesurer une période » */
+.sp-mesure-n { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0; }
+.sp-mesure-n .ph-lab { font-size: 1.05rem; }
+/* bouton « Voir ce signal dans le simulateur » (exercices) */
+.sp-voir { margin: 10px 0 0; }
+.sp-voir-zone { margin-top: 10px; }
+.sp-mini-sim { margin: 4px 0 8px; }

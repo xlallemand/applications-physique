@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : rang d'un harmonique — Chapitre 17 : Spectre d'un signal périodique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="sp.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 2 / 2</span>
+    <h2 class="er-titre">Rang d'un harmonique</h2>
+    <p class="er-contexte">Les harmoniques ne peuvent être qu'aux fréquences <b>multiples du fondamental</b> : f<sub>n</sub> = n × f<sub>1</sub>. Le <b>rang</b> d'une raie est donc n = f<sub>n</sub> / f<sub>1</sub>, un nombre entier.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 2 du module 2 : fₙ = n × f1 et n = fₙ / f1 ; harmoniques
+   absents (amplitude nulle) et raies impossibles (pas multiples de f1),
+   sur le spectre de l'exercice 9.
+   Erreurs diagnostiquées : division et multiplication inversées,
+   rang compté à partir de la raie à 0 Hz, rang = position sur le dessin.
+   Valeurs (vérifiées par un script) : 5 × 200 = 1 000 Hz ;
+   1 800 / 200 = 9 ; 7 × 50 = 350 Hz ; 175 / 50 = 3,5 ; 7 × 150 = 1 050 Hz ;
+   500 / 200 = 2,5.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, fmt, proche, fr } = SP;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const an = n => `a<sub>${n}</sub>`;
+
+/* ---------- 1. fₙ = n × f1 ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Fréquence et rang d\'un harmonique');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Relation entre les harmoniques et le fondamental.</b> Pour l'harmonique de rang n :</p>
+        <p class="crs-formule">f<sub>n</sub> = n × f<sub>1</sub> &nbsp; ; &nbsp; donc &nbsp; n = ${fr('f<sub>n</sub>', 'f<sub>1</sub>')}</p></div>
+    </div>
+    ${exemple(`<p>Exemple du cours : f<sub>1</sub> = 150 Hz.</p>
+      ${calc(`Harmonique de rang 3 : f<sub>3</sub> = 3 × 150 Hz = ${c('450 Hz')}`)}
+      ${calc(`Raie à 600 Hz : n = ${fr('600 Hz', '150 Hz')} = ${c('4')} (c'est ${an(4)})`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Fréquence d\'un harmonique', enonce: '<p>Le fondamental d\'un signal a pour fréquence f<sub>1</sub> = 200 Hz.</p>', parties: [
+      { type: 'nombre', q: 'Quelle est la fréquence de l\'harmonique de rang 5 ?', label: 'f<sub>5</sub> =', valeur: 1000, unite: 'Hz', signe: false,
+        diag: v => (proche(v, 40) ? 'On <b>multiplie</b> f<sub>1</sub> par le rang : 5 × 200.' : proche(v, 205) ? 'On multiplie par le rang, on n\'ajoute pas.' : 'f<sub>n</sub> = n × f<sub>1</sub>.'),
+        solution: calc(`f<sub>5</sub> = 5 × 200 Hz = ${c('1 000 Hz')}`) },
+      { type: 'nombre', q: 'Quel est le rang de l\'harmonique de fréquence 1 800 Hz ?', label: 'n =', valeur: 9, unite: '', signe: false,
+        diag: v => (proche(v, 360000) ? 'On <b>divise</b> : n = f<sub>n</sub> / f<sub>1</sub>.' : proche(v, 8) ? 'Le fondamental est le rang 1 : n = 1 800 / 200.' : 'n = f<sub>n</sub> / f<sub>1</sub>.'),
+        solution: calc(`n = ${fr('1 800 Hz', '200 Hz')} = ${c('9')}`) }] },
+    { titre: 'Un autre signal', enonce: '<p>Le fondamental d\'un signal a pour fréquence f<sub>1</sub> = 150 Hz.</p>', parties: [
+      { type: 'nombre', q: 'Quelle est la fréquence de l\'harmonique de rang 7 ?', label: 'f<sub>7</sub> =', valeur: 1050, unite: 'Hz', signe: false,
+        diag: v => (proche(v, 150 / 7, .02) ? 'On multiplie par le rang.' : 'f<sub>7</sub> = 7 × f<sub>1</sub>.'), solution: calc(`f<sub>7</sub> = 7 × 150 Hz = ${c('1 050 Hz')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Harmoniques absents, raies impossibles ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Harmoniques absents, raies impossibles');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Un harmonique peut <b>manquer</b> : son amplitude est nulle, il n'y a pas de raie à sa fréquence. Mais une raie ne peut être <b>qu'à un multiple</b> de f<sub>1</sub> : si f / f<sub>1</sub> n'est pas un nombre entier, la raie est <b>impossible</b>.</p></div>
+    </div>
+    ${exemple(`<p>Spectre de l'exercice 9 : f<sub>1</sub> = 50 Hz.</p>
+      ${SP.figSpectre(SP.DOCS.ex9.raies, Object.assign({ Wmax: 560 }, SP.DOCS.ex9.opts))}
+      <ul class="er-liste"><li>pas de raie à 150 Hz = 3 × 50 Hz : l'harmonique de rang 3 manque, ${an(3)} = 0 ;</li>
+        <li>l'harmonique de rang 7, absent du spectre, aurait pour fréquence 7 × 50 = ${c('350 Hz')} ;</li>
+        <li>une raie à 175 Hz est impossible : 175 / 50 = 3,5 n'est pas un nombre entier.</li></ul>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Raies possibles ?', enonce: '<p>Un signal a un fondamental de fréquence f<sub>1</sub> = 200 Hz.</p>', parties: [
+      { type: 'choix', q: 'Une raie à 500 Hz peut-elle apparaître dans son spectre ?', options: [o('non', 'Non : 500 / 200 = 2,5 n\'est pas un entier'), o('oui', 'Oui : 500 Hz est plus grand que 200 Hz'), o('rang', 'Oui : c\'est l\'harmonique de rang 3')], bonne: 'non', melanger: false, colonne: true,
+        indices: { oui: 'Il ne suffit pas d\'être au-dessus de f<sub>1</sub> : il faut être un <b>multiple</b> de f<sub>1</sub>.', rang: 'Le rang 3 est à 3 × 200 = 600 Hz.' },
+        solution: '<p>500 / 200 = 2,5 : ce n\'est pas un entier, cette raie est impossible. Les raies possibles sont à 400, 600, 800… Hz.</p>' },
+      { type: 'choix', q: 'Une raie à 1 400 Hz ?', options: [o('oui', 'Oui : c\'est l\'harmonique de rang 7'), o('non', 'Non : elle est trop loin du fondamental')], bonne: 'oui', melanger: false, colonne: true,
+        indices: { non: 'Il n\'y a pas de limite : calcule 1 400 / 200.' },
+        solution: '<p>1 400 / 200 = 7 : c\'est l\'harmonique de rang 7.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Harmonique de rang n : <b>f<sub>n</sub> = n × f<sub>1</sub></b> ; rang d'une raie : <b>n = f<sub>n</sub> / f<sub>1</sub></b> (un entier).</p></div>
+    <div class="cle"><p>Un harmonique absent a une amplitude nulle. Une raie dont la fréquence n'est pas un multiple de f<sub>1</sub> est impossible.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur le spectre →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3a_cours.html">Module 3 : exploiter les graphiques</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#rang">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+SP.menu('module_2b_cours');
+</script>
+</body>
+</html>

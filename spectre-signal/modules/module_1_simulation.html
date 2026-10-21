@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : simulateur, synthèse de Fourier — Chapitre 17 : Spectre d'un signal périodique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="sp.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · SIMULATION</span>
+    <h2 class="er-titre">Synthèse de Fourier</h2>
+    <p class="er-contexte">Un son, une tension, un courant : beaucoup de signaux se répètent sans être des sinusoïdes. On peut pourtant les fabriquer en <b>additionnant des sinusoïdes</b>. Le simulateur montre le <b>signal</b> u(t) en haut et son <b>spectre</b> en dessous : une raie par sinusoïde. Suis les six étapes sous le simulateur.</p>
+  </div>
+
+  <!-- ============ Le simulateur ============ -->
+  <section class="er-card sp-sim-carte" id="sim-carte">
+    <h3 class="cours-titre" style="margin-top:0">Le simulateur</h3>
+    <p class="er-petit" style="margin-bottom:10px">Fais glisser la <b>poignée en haut d'une raie</b> pour régler son amplitude (ou touche la raie, puis utilise le réglage précis). Touche une raie ou une pastille de la légende : l'harmonique correspondant est mis en valeur sur le signal.</p>
+    <div id="sim"></div>
+  </section>
+
+  <!-- ============ Étape 1 ============ -->
+  <section class="er-card sp-etape" id="e1">
+    <h3 class="cours-titre">1. Une seule sinusoïde</h3>
+    <p class="er-contexte">Commence par le signal le plus simple : <b>une seule sinusoïde</b>, de fréquence f<sub>1</sub> et d'amplitude a<sub>1</sub>.</p>
+    <div class="ph-question" id="q1"></div>
+  </section>
+
+  <!-- ============ Étape 2 ============ -->
+  <section class="er-card sp-etape" id="e2" hidden>
+    <h3 class="cours-titre">2. La composante continue</h3>
+    <p class="er-contexte">On ajoute maintenant une tension constante a<sub>0</sub> : la <b>composante continue</b>.</p>
+    <div class="ph-question" id="q2"></div>
+  </section>
+
+  <!-- ============ Étape 3 ============ -->
+  <section class="er-card sp-etape" id="e3" hidden>
+    <h3 class="cours-titre">3. Ajouter un harmonique</h3>
+    <p class="er-contexte">Une sinusoïde de fréquence 2 f<sub>1</sub>, 3 f<sub>1</sub>… s'appelle un <b>harmonique</b>. Ajoutons-en au fondamental.</p>
+    <div class="ph-question" id="q3"></div>
+  </section>
+
+  <!-- ============ Étape 4 ============ -->
+  <section class="er-card sp-etape" id="e4" hidden>
+    <h3 class="cours-titre">4. Construire un créneau</h3>
+    <p class="er-contexte">Un signal <b>créneau</b> passe brusquement d'une valeur haute à une valeur basse. On peut l'approcher avec des sinusoïdes : seulement des harmoniques de <b>rang impair</b>, d'amplitude a<sub>n</sub> = a<sub>1</sub> / n.</p>
+    <div class="ph-question" id="q4"></div>
+  </section>
+
+  <!-- ============ Étape 5 ============ -->
+  <section class="er-card sp-etape" id="e5" hidden>
+    <h3 class="cours-titre">5. Retirer des harmoniques : la bande passante</h3>
+    <p class="er-contexte">Un câble, un haut-parleur, un amplificateur ne transmettent bien que les fréquences de leur <b>bande passante</b>. Ici elle va de 0 à 700 Hz (zone grisée du spectre) : les harmoniques au-dessus de 700 Hz sont perdus.</p>
+    <div class="ph-question" id="q5"></div>
+  </section>
+
+  <!-- ============ Étape 6 ============ -->
+  <section class="er-card sp-etape" id="e6" hidden>
+    <h3 class="cours-titre">6. Défis</h3>
+    <p class="er-contexte">Un <b>signal cible</b> s'affiche en gris dans le simulateur. Lis le spectre donné, règle f<sub>1</sub>, a<sub>0</sub> et les amplitudes pour que ta courbe se pose sur le signal gris, sans utiliser les signaux prédéfinis.</p>
+    <div class="ph-question" id="q6"></div>
+  </section>
+
+  <!-- ============ Bilan ============ -->
+  <section class="er-card sp-bilan" id="bilan" hidden>
+    <span class="er-badge">BILAN</span>
+    <h3 class="er-titre">✍ Complète ton cours</h3>
+    <div class="cle"><p><b class="cle-titre">Analyse de Fourier.</b> Tout signal périodique est la somme :</p>
+      <ul class="er-liste"><li>d'une <b>composante continue</b> a<sub>0</sub>, qui est la <b>valeur moyenne</b> du signal ;</li>
+        <li>d'une sinusoïde de fréquence f<sub>1</sub>, le <b>fondamental</b> : f<sub>1</sub> est la <b>fréquence du signal</b> ;</li>
+        <li>de sinusoïdes de fréquences f<sub>n</sub> = n × f<sub>1</sub>, les <b>harmoniques</b> de rang n.</li></ul></div>
+    <div class="cle"><p class="ph-formule">s(t) = a<sub>0</sub> + Σ a<sub>n</sub> × sin(n × ω × t + φ<sub>n</sub>) &nbsp; avec &nbsp; ω = 2πf</p></div>
+    <div class="cle"><p><b class="cle-titre">Spectre.</b> Le spectre donne l'<b>amplitude</b> a<sub>n</sub> de chaque sinusoïde en fonction de sa <b>fréquence</b> : une raie à 0 Hz pour a<sub>0</sub>, une raie à f<sub>1</sub> pour le fondamental, des raies à 2 f<sub>1</sub>, 3 f<sub>1</sub>… pour les harmoniques.</p></div>
+    <div class="cle"><p>Ajouter ou retirer des harmoniques change la <b>forme</b> du signal, pas sa <b>fréquence</b>, qui reste celle du fondamental.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_1_cours.html">Le cours du module 1 →</a>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   Simulateur « Synthèse de Fourier » (assets/fourier.js : le spectre
+   sous le signal, pas de déphasage, composante continue a0) et
+   cheminement guidé en six étapes : une sinusoïde, la composante
+   continue, un harmonique, un créneau, la bande passante, trois défis
+   (exercice 6, exercice 13, exemple du cours). Chaque consigne vérifie
+   l'état du simulateur en direct ; questions sans points (mode
+   'cours') ; le bilan « ✍ Complète ton cours » marque la simulation
+   comme faite.
+   Valeurs (vérifiées par un script) : f1 = 400 Hz → T = 2,5 ms ;
+   f1 = 200 Hz → T = 5 ms ; créneau a1 = 1,5 V : a3 = 0,5 V,
+   a5 = 0,3 V, a7 ≈ 0,21 V, a9 ≈ 0,17 V.
+   ============================================================ */
+const { o, fmt, proche, el, SPEC, DOCS } = SP;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const an = n => `a<sub>${n}</sub>`;
+// au départ : un signal qui n'est pas une sinusoïde (celui de l'exemple du cours)
+const sim = FOURIER.monter(document.getElementById('sim'), { f1: 150, a0: 1, a: [1.5, 1, .67, .17] });
+const TOL = .031;
+const egal = (x, y, t) => Math.abs(x - y) <= (t == null ? 1e-6 : t);
+// toutes les amplitudes nulles sauf celles des rangs donnés
+const autresNulles = (e, rangs) => e.a.every((v, i) => rangs.indexOf(i + 1) !== -1 || v === 0);
+
+// affiche l'étape suivante, crée ses questions (leurs consignes agissent sur le simulateur :
+// elles ne doivent exister qu'une fois l'étape ouverte) et l'amène à l'écran
+const ETAPES = {};
+function ouvrir(id) {
+  const e = document.getElementById(id);
+  e.hidden = false;
+  if (ETAPES[id]) ETAPES[id]();
+  setTimeout(() => e.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+}
+// lien pour remonter au simulateur (sous chaque consigne à réaliser)
+const remonter = '<p class="sp-remonter"><a href="#sim-carte" class="btn-small" style="text-decoration:none">↑ Voir le simulateur</a></p>';
+
+/* Partie qui attend un état du simulateur : conditions(e) → [[texte, juste], …] affichés en direct ;
+   la partie est réussie quand tout est juste. « Afficher la réponse » règle le simulateur (regl). */
+function attendre(q, conditions, regl, solution, auDebut) {
+  return {
+    type: 'perso', aide: true, q: q + remonter, solution,
+    monter(zone, api) {
+      if (auDebut) auDebut();
+      const p = el('div', 'sp-etat');
+      zone.appendChild(p);
+      let fini = false;
+      // état affiché en direct (une pastille par condition, ✓ quand elle est remplie)
+      const afficher = e => {
+        const l = conditions(e);
+        p.innerHTML = l.map(([t, ok]) => `<span class="${ok ? 'ok' : ''}">${t}</span>`).join('');
+        return l.every(x => x[1]);
+      };
+      const maj = e => {
+        if (fini) return;
+        if (afficher(e) && !api.fini()) { fini = true; api.reussi(); }
+      };
+      sim.surChange(maj);
+      maj(sim.etat());
+      return { montrer() { fini = true; sim.regler(regl); afficher(sim.etat()); } };
+    },
+  };
+}
+
+/* ---------- 1. Une seule sinusoïde ---------- */
+const parties1 = () => [
+  attendre(`Touche le bouton « Sinusoïde pure » (ou règle ${an(1)} = 1 V, toutes les autres amplitudes à 0 et ${an(0)} = 0).`,
+    e => [[`${an(1)} non nulle`, e.a[0] > 0], ['autres amplitudes nulles', autresNulles(e, [1])], [`${an(0)} = 0`, e.a0 === 0]],
+    { predef: 'sinus' }, '<p>Le signal est une sinusoïde.</p>'),
+  { type: 'choix', q: 'Combien de raies le spectre a-t-il ?', options: [o('1', '1'), o('2', '2'), o('10', '10')], bonne: '1', melanger: false,
+    indices: { 2: 'Compte les raies dessinées (les petits cercles en pointillés au pied de l\'axe sont des amplitudes nulles).', 10: 'Les cercles en pointillés sont des raies d\'amplitude nulle : elles ne comptent pas.' },
+    solution: `<p>Une seule raie, à la fréquence f<sub>1</sub> de la sinusoïde. Sa hauteur est l'amplitude ${an(1)}.</p>` },
+  attendre('Fais varier f<sub>1</sub> avec son curseur : observe la raie et le signal. Termine sur f<sub>1</sub> = 400 Hz.',
+    e => [['f<sub>1</sub> = 400 Hz', e.f1 === 400], [`seule ${an(1)} non nulle`, e.a[0] > 0 && autresNulles(e, [1]) && e.a0 === 0]],
+    { f1: 400, a0: 0, a: [Math.max(sim.etat().a[0], 1)] }, '<p>Pendant que tu fais glisser le curseur, la raie se déplace le long de l\'axe des fréquences ; quand tu le lâches, l\'axe se recale.</p>'),
+  { type: 'choix', colonne: true, q: 'Quand f<sub>1</sub> augmente :',
+    options: [o('ok', 'la raie va vers la droite et la période T du signal diminue'), o('grand', 'la raie grandit et la période augmente'), o('fixe', 'la raie ne bouge pas, seul le signal change')], bonne: 'ok',
+    indices: { grand: 'La hauteur de la raie, c\'est l\'amplitude : elle ne dépend pas de f<sub>1</sub>. Compte les périodes affichées.', fixe: 'Regarde les graduations de l\'axe des fréquences sous la raie.' },
+    solution: '<p>La raie est à la fréquence f<sub>1</sub> ; la période T = 1 / f<sub>1</sub> diminue quand f<sub>1</sub> augmente : le signal oscille plus vite.</p>' },
+  { type: 'nombre', q: 'Coche « Curseurs de mesure », fais glisser les deux curseurs sur deux sommets voisins, et lis la période T pour f<sub>1</sub> = 400 Hz.', label: 'T =', valeur: 2.5, unite: 'ms', tol: .1, signe: false,
+    diag: v => (proche(v, .0025, .05) ? 'La durée est affichée en <b>ms</b>.' : proche(v, 5, .05) ? 'Tu as encadré deux périodes : divise par 2, ou place les curseurs sur deux sommets <b>voisins</b>.' : 'Place les curseurs sur deux sommets voisins et lis Δt.'),
+    solution: calc(`T = ${SP.fr('1', 'f<sub>1</sub>')} = ${SP.fr('1', '400 Hz')} = 0,002 5 s = ${c('2,5 ms')}`) + '<p>Les curseurs le confirment.</p>' },
+  attendre(`Fais varier ${an(1)} en faisant glisser la poignée en haut de la raie. Termine sur ${an(1)} = 1,5 V.`,
+    e => [[`${an(1)} = 1,5 V`, egal(e.a[0], 1.5, .001)], ['autres amplitudes nulles', autresNulles(e, [1])]],
+    { a: [1.5], a0: 0 }, ''),
+  { type: 'choix', colonne: true, q: 'Que devient le signal ?',
+    options: [o('ok', 'Il oscille entre −1,5 V et +1,5 V : son amplitude est la hauteur de la raie'), o('vite', 'Il oscille plus vite'), o('haut', 'Il se décale vers le haut sans changer d\'amplitude')], bonne: 'ok',
+    indices: { vite: 'La vitesse d\'oscillation dépend de f<sub>1</sub>, que tu n\'as pas changée.', haut: 'Regarde le minimum : il descend aussi.' },
+    solution: `<p>La hauteur de la raie est l'<b>amplitude</b> de la sinusoïde : ${an(1)} = 1,5 V, le signal va de −1,5 V à +1,5 V.</p>` },
+];
+ETAPES.e1 = () => SP.question(document.getElementById('q1'), { parties: parties1() }, { fin() { ouvrir('e2'); } }, 'cours');
+
+/* ---------- 2. La composante continue ---------- */
+const parties2 = () => [
+  attendre(`Garde la sinusoïde (${an(1)} = 1,5 V) et règle la composante continue ${an(0)} = 1 V avec son curseur.`,
+    e => [[`${an(0)} = 1 V`, egal(e.a0, 1, .001)], [`${an(1)} = 1,5 V`, egal(e.a[0], 1.5, .001)], ['autres amplitudes nulles', autresNulles(e, [1])]],
+    { a0: 1, a: [1.5] }, ''),
+  { type: 'choix', colonne: true, q: 'Qu\'est-il arrivé au signal ?',
+    options: [o('ok', 'Il est monté de 1 V sans changer de forme'), o('forme', 'Il a changé de forme'), o('per', 'Sa période a changé')], bonne: 'ok',
+    indices: { forme: 'Compare avec la sinusoïde d\'avant : c\'est la même courbe, déplacée.', per: 'Les sommets sont aux mêmes instants qu\'avant.' },
+    solution: '<p>Ajouter une tension constante décale tout le signal vers le haut (ou vers le bas si a<sub>0</sub> &lt; 0), sans changer sa forme ni sa période.</p>' },
+  { type: 'choix', colonne: true, q: `Où apparaît ${an(0)} dans le spectre ?`,
+    options: [o('ok', 'Une raie à 0 Hz, de hauteur 1 V'), o('f1', 'La raie à f<sub>1</sub> devient plus haute'), o('non', 'Il n\'apparaît pas dans le spectre')], bonne: 'ok',
+    indices: { f1: 'La raie à f<sub>1</sub> mesure toujours 1,5 V. Regarde contre l\'axe vertical.', non: 'Regarde contre l\'axe vertical, à la fréquence 0 Hz.' },
+    solution: '<p>Une tension constante ne varie pas : sa fréquence est nulle. a<sub>0</sub> est la raie à <b>0 Hz</b>.</p>' },
+  attendre('Coche « Afficher la valeur moyenne ».', e => [['valeur moyenne affichée', e.moyenne]], { moyenne: true }, ''),
+  { type: 'choix', q: 'La droite en pointillés est la valeur moyenne du signal. Que vaut-elle ?',
+    options: [o('ok', `${an(0)} = 1 V`), o('a1', `${an(1)} = 1,5 V`), o('max', '2,5 V'), o('zero', '0 V')], bonne: 'ok', melanger: false,
+    indices: { a1: '1,5 V est l\'amplitude de la sinusoïde. Regarde où est la droite en pointillés.', max: '2,5 V est le maximum du signal, pas sa moyenne.', zero: 'La sinusoïde a été décalée : sa moyenne n\'est plus nulle.' },
+    solution: `<p>La sinusoïde est autant au-dessus qu'en dessous de la droite : la valeur moyenne est ${an(0)} = 1 V.</p><p class="sp-complete"><b>✍ Complète ton cours :</b> la composante continue ${an(0)} est la valeur moyenne du signal.</p>` },
+];
+ETAPES.e2 = () => SP.question(document.getElementById('q2'), { parties: parties2() }, { fin() { ouvrir('e3'); } }, 'cours');
+
+/* ---------- 3. Ajouter un harmonique ---------- */
+const parties3 = () => [
+  attendre(`Règle ${an(0)} = 0, f<sub>1</sub> = 200 Hz, ${an(1)} = 1 V, puis ajoute l'harmonique de rang 2 : ${an(2)} = 0,5 V.`,
+    e => [[`${an(0)} = 0`, e.a0 === 0], ['f<sub>1</sub> = 200 Hz', e.f1 === 200], [`${an(1)} = 1 V`, egal(e.a[0], 1, .001)], [`${an(2)} = 0,5 V`, egal(e.a[1], .5, .001)], ['autres amplitudes nulles', autresNulles(e, [1, 2])]],
+    { a0: 0, f1: 200, a: [1, .5] }, ''),
+  { type: 'choix', q: 'La forme du signal a-t-elle changé ?', options: [o('ok', 'Oui : ce n\'est plus une sinusoïde'), o('non', 'Non')], bonne: 'ok', melanger: false,
+    indices: { non: 'Compare avec la sinusoïde du début : les bosses ne sont plus symétriques.' },
+    solution: '<p>La somme de deux sinusoïdes de fréquences différentes n\'est plus une sinusoïde.</p>' },
+  { type: 'nombre', q: 'Mesure la période T avec les curseurs : place-les sur deux points identiques du motif qui se répète (encadre plusieurs périodes, puis divise).', label: 'T =', valeur: 5, unite: 'ms', tol: .15, signe: false,
+    diag: v => (proche(v, 2.5, .06) ? 'Tu as mesuré la période de l\'harmonique 2. La période du signal est la durée du <b>motif entier</b> qui se répète : deux sommets les plus hauts.' : 'Place les deux curseurs sur deux sommets les plus hauts voisins.'),
+    solution: calc(`T = ${SP.fr('1', 'f<sub>1</sub>')} = ${SP.fr('1', '200 Hz')} = 0,005 s = ${c('5 ms')}`) },
+  { type: 'choix', colonne: true, q: 'Mesure T : a-t-elle changé en ajoutant l\'harmonique ?',
+    options: [o('ok', 'Non : T = 5 ms = 1 / f<sub>1</sub>, la période reste celle du fondamental'), o('d2', 'Oui : elle est divisée par 2'), o('x2', 'Oui : elle est multipliée par 2')], bonne: 'ok',
+    indices: { d2: 'L\'harmonique a une période deux fois plus petite, mais le motif complet se répète toujours toutes les 5 ms.', x2: 'Mesure de nouveau entre deux sommets les plus hauts.' },
+    solution: '<p>Le fondamental impose la période du signal : la fréquence du signal est celle du fondamental, f<sub>1</sub>.</p>' },
+  attendre(`Ajoute maintenant l'harmonique de rang 3 : ${an(3)} = 0,5 V.`,
+    e => [[`${an(3)} = 0,5 V`, egal(e.a[2], .5, .001)], [`${an(1)} = 1 V et ${an(2)} = 0,5 V`, egal(e.a[0], 1, .001) && egal(e.a[1], .5, .001)], ['f<sub>1</sub> = 200 Hz', e.f1 === 200]],
+    { a: [1, .5, .5], f1: 200 }, ''),
+  { type: 'choix', colonne: true, q: 'Avec f<sub>1</sub> = 200 Hz, à quelles fréquences peut-on placer une raie dans le spectre ?',
+    options: [o('ok', 'Seulement à 400 Hz, 600 Hz, 800 Hz… (2 f<sub>1</sub>, 3 f<sub>1</sub>…)'), o('300', 'À n\'importe quelle fréquence, par exemple 300 Hz'), o('bas', 'Seulement en dessous de 200 Hz')], bonne: 'ok',
+    indices: { 300: 'Touche les raies une à une et lis leur fréquence : 300 Hz n\'est pas un multiple de 200 Hz.', bas: 'Les harmoniques sont à droite du fondamental.' },
+    solution: '<p>Les harmoniques sont aux fréquences multiples du fondamental : f<sub>n</sub> = n × f<sub>1</sub>.</p>' },
+];
+ETAPES.e3 = () => SP.question(document.getElementById('q3'), { parties: parties3() }, { fin() { ouvrir('e4'); sim.regler({ forme: 'creneau' }, true); } }, 'cours');
+
+/* ---------- 4. Construire un créneau ---------- */
+const CREN = [1.5, 0, .5, 0, .3, 0, 1.5 / 7, 0, 1.5 / 9];
+const parties4 = () => [
+  attendre(`Touche « Tout à zéro », puis règle f<sub>1</sub> = 200 Hz et ${an(1)} = 1,5 V.`,
+    e => [['f<sub>1</sub> = 200 Hz', e.f1 === 200], [`${an(1)} = 1,5 V`, egal(e.a[0], 1.5, .001)], [`${an(0)} et autres amplitudes nulles`, e.a0 === 0 && autresNulles(e, [1])]],
+    { f1: 200, a0: 0, a: [1.5], forme: 'creneau' }, '', () => sim.regler({ forme: 'creneau' }, true)),
+  attendre(`Un créneau ne contient que des harmoniques <b>impairs</b>, avec a<sub>n</sub> = ${an(1)} / n. Place ${an(3)} = ${an(1)} / 3 = 1,5 / 3 = 0,5 V.`,
+    e => [[`${an(3)} = 0,5 V`, egal(e.a[2], .5, TOL)], [`${an(1)} = 1,5 V`, egal(e.a[0], 1.5, .001)], ['harmoniques pairs nuls', e.a.every((v, i) => i % 2 === 0 || v === 0)]],
+    { a: CREN.slice(0, 3) }, ''),
+  attendre(`Continue : ${an(5)} = 1,5 / 5 = 0,3 V ; ${an(7)} = 1,5 / 7 ≈ 0,21 V ; ${an(9)} = 1,5 / 9 ≈ 0,17 V. (Touche la raie, puis écris la valeur dans le réglage précis.)`,
+    e => [5, 7, 9].map(n => [`${an(n)}`, egal(e.a[n - 1], 1.5 / n, TOL)]).concat([['harmoniques pairs nuls', e.a.every((v, i) => i % 2 === 0 || v === 0)]]),
+    { a: CREN.map(v => Math.round(v * 100) / 100) }, ''),
+  attendre('Coche « Afficher la forme idéale » : le créneau apparaît en pointillés gris.', e => [['forme idéale affichée', e.ideale]], { ideale: true, forme: 'creneau' }, ''),
+  { type: 'choix', colonne: true, q: 'Que remarques-tu ? (Tu peux remettre à 0 les derniers harmoniques, puis les remettre.)',
+    options: [o('ok', 'Plus on ajoute d\'harmoniques impairs, plus la somme se rapproche du créneau'), o('a1', 'Le fondamental seul donne déjà exactement le créneau'), o('pairs', 'Il faudrait aussi des harmoniques pairs')], bonne: 'ok',
+    indices: { a1: 'Avec a<sub>1</sub> seul, c\'est une sinusoïde : les fronts ne sont pas verticaux.', pairs: 'Essaie : ajoute a<sub>2</sub>, la courbe s\'éloigne du créneau.' },
+    solution: '<p>Chaque harmonique impair ajouté rend les fronts plus raides et les paliers plus plats : avec une infinité d\'harmoniques, on obtiendrait le créneau.</p>' },
+];
+ETAPES.e4 = () => SP.question(document.getElementById('q4'), { parties: parties4() }, { fin() { ouvrir('e5'); sim.regler({ bande: [0, 700] }); } }, 'cours');
+
+/* ---------- 5. La bande passante ---------- */
+const parties5 = () => [
+  attendre('Touche « Créneau » (garde f<sub>1</sub> = 200 Hz), puis mets à zéro les harmoniques qui ne sont pas dans la bande passante (au-dessus de 700 Hz).',
+    e => [['f<sub>1</sub> = 200 Hz', e.f1 === 200], [`${an(1)} et ${an(3)} gardés`, e.a[0] > 0 && e.a[2] > 0], ['harmoniques au-dessus de 700 Hz nuls', e.a.every((v, i) => (i + 1) * e.f1 <= 700 || v === 0)], ['harmoniques pairs nuls', e.a.every((v, i) => i % 2 === 0 || v === 0)]],
+    { f1: 200, a: [1.27, 0, .42], forme: 'creneau', bande: [0, 700] }, '', () => sim.regler({ bande: [0, 700] }, true)),
+  { type: 'choix', colonne: true, q: 'La forme du signal transmis :',
+    options: [o('ok', 'S\'éloigne du créneau : les fronts sont moins raides'), o('meme', 'Ne change pas'), o('mieux', 'Se rapproche encore plus du créneau')], bonne: 'ok',
+    indices: { meme: 'Compare avec la forme idéale (coche-la de nouveau si besoin).', mieux: 'On a retiré des harmoniques : la somme s\'éloigne du créneau.' },
+    solution: '<p>Les harmoniques perdus changent la forme du signal transmis.</p>' },
+  { type: 'nombre', q: 'Mesure la période du signal transmis.', label: 'T =', valeur: 5, unite: 'ms', tol: .15, signe: false,
+    diag: v => (proche(v, 5 / 3, .06) ? 'Tu as mesuré la période de l\'harmonique 3 : mesure entre deux sommets les plus hauts.' : 'Encadre une ou plusieurs périodes du motif qui se répète.'),
+    solution: calc(`T = ${c('5 ms')} = ${SP.fr('1', '200 Hz')}`) },
+  { type: 'choix', colonne: true, q: 'La fréquence du signal a-t-elle changé ?',
+    options: [o('ok', 'Non : elle reste celle du fondamental, f<sub>1</sub> = 200 Hz'), o('plus', 'Oui : elle a diminué car il manque des harmoniques'), o('700', 'Oui : elle vaut maintenant 700 Hz')], bonne: 'ok',
+    indices: { plus: 'Tu viens de mesurer T = 5 ms, comme avant : f = 1 / T n\'a pas changé.', '700': '700 Hz est la limite de la bande passante, pas la fréquence du signal.' },
+    solution: '<p>Supprimer des harmoniques change la <b>forme</b> du signal, pas sa <b>fréquence</b>, qui est celle du fondamental (c\'est la question d de l\'exercice 12).</p>' },
+];
+ETAPES.e5 = () => SP.question(document.getElementById('q5'), { parties: parties5() }, { fin() { sim.regler({ bande: null, ideale: false }); ouvrir('e6'); } }, 'cours');
+
+/* ---------- 6. Défis ---------- */
+// le simulateur reproduit-il la cible ? (f1 exacte, a0 et amplitudes à 0,05 V près)
+function defi(titre, doc, cible, regl) {
+  return attendre(`<b>${titre}</b><div class="sp-defi-doc">${doc}</div>Règle le simulateur pour reproduire ce signal (en gris).`,
+    e => {
+      const l = [['f<sub>1</sub>', e.f1 === cible.f1], [an(0), egal(e.a0, cible.a0, .051)]];
+      const rangs = cible.a.map((v, i) => i + 1).filter(n => cible.a[n - 1]);
+      rangs.forEach(n => l.push([an(n), egal(e.a[n - 1], cible.a[n - 1], .051)]));
+      l.push(['autres amplitudes nulles', e.a.every((v, i) => cible.a[i] || v <= .05)]);
+      return l;
+    },
+    Object.assign({ f1: cible.f1, a0: cible.a0, a: cible.a }, regl),
+    '<p class="sp-reussi">Réussi ! Ta courbe se pose sur le signal cible.</p>',
+    () => sim.regler(Object.assign({ cible }, regl || {}), true));
+}
+const parties6 = () => [
+  defi('Défi 1 : le signal de l\'exercice 6.', SP.figSpectre(DOCS.ex6.raies, Object.assign({ Wmax: 520, H: 190 }, DOCS.ex6.opts)), SPEC.ex6),
+  defi('Défi 2 : le son du moteur de la Porsche 911 (exercice 13). Les amplitudes vont jusqu\'à 4 V : l\'échelle du spectre passe à 5 V.', SP.figSpectre(DOCS.ex13.raies, Object.assign({ Wmax: 520, H: 190 }, DOCS.ex13.opts)), SPEC.ex13, { amax: 5, ymax: 6 }),
+  defi('Défi 3 : l\'exemple du cours. Attention, ce spectre est en mV (1 000 mV = 1 V).', SP.figSpectre(SP.COURS_RAIES_MV(), Object.assign({ Wmax: 520, H: 190 }, SP.COURS_OPTS_SPECTRE)), SP.COURS_EX, { amax: 2, ymax: 4 }),
+];
+ETAPES.e6 = () => SP.question(document.getElementById('q6'), { parties: parties6() }, {
+  fin() {
+    sim.regler({ cible: null });
+    ouvrir('bilan');
+    SP.marquer({ fait: true });                                      // simulation faite (sommaire, accueil)
+  },
+}, 'cours');
+
+ETAPES.e1();
+SP.menu('module_1_simulation');
+</script>
+</body>
+</html>
