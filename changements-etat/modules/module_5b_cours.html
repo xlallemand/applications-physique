@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 : plusieurs étapes — Chapitre 11 : Changements d'état et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ce.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ce.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 5 · COURS 2 / 3</span>
+    <h2 class="er-titre">Plusieurs étapes</h2>
+    <p class="er-contexte">Le schéma des étapes marche pour toutes les transformations : par exemple <b>quatre étapes</b> pour faire passer de la glace à la vapeur.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Quatre étapes : l'exercice 14 (250 g de glace à −23 °C → vapeur
+      à 100 °C ; Q₁ ≈ 1,13 × 10⁴ J, Q₂ ≈ 8,35 × 10⁴ J, Q₃ ≈ 1,05 × 10⁵ J,
+      Q₄ ≈ 5,64 × 10⁵ J ; Q ≈ 7,64 × 10⁵ J), données du manuel.
+   « À toi » : 400 g de glace à −10 °C → eau à 50 °C (Q ≈ 2,26 × 10⁵ J).
+   Le refroidissement est dans module_5c_cours.html.
+   Valeurs vérifiées par un script.
+   ============================================================ */
+const { exemple } = COURS;
+const { probleme, resolu, schemaPb, calculEtape, etapes, versCours, sci, PROBLEMES } = CE;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const methode = pb => etapes(pb).map(versCours);
+const item = (titre, def) => { const pb = probleme(def); return { titre, enonce: pb.enonce, parties: methode(pb) }; };
+// calculs de chaque flèche puis somme
+const somme = pb => pb.etapes.map(e => calculEtape(pb, e)).join('') +
+  calc(`Q = ${pb.etapes.map(e => CE.nomQ(pb, e.k)).join(' + ')} = ${pb.etapes.map(e => sci(e.Q, 3)).join(' + ').replace(/\+ −/g, '− ')} ≈ <span class="c">${sci(pb.Q, 3)} J</span>`);
+
+/* ---------- 1. Quatre étapes ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Quatre étapes : de la glace à la vapeur');
+  const pb = resolu(PROBLEMES.ex14());
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> On passe par <b>chaque température de changement d'état</b> : la glace chauffe jusqu'à 0 °C, fond, l'eau chauffe jusqu'à 100 °C, se vaporise… Une flèche par étape, une formule par flèche.</p>
+        <p>Le bon c est celui de la <b>bulle</b> (glace, eau, vapeur) ; le bon L est celui de la <b>flèche</b> (fusion, vaporisation).</p></div>
+    </div>
+    ${exemple(`<p>On veut faire évaporer 250 g de glace prise à −23 °C (c<sub>glace</sub> = 1 970, c<sub>eau liquide</sub> = 4 180 J·kg<sup>−1</sup>·K<sup>−1</sup> ; L<sub>fus</sub> = 334 kJ·kg<sup>−1</sup> ; L<sub>vap</sub> = 2 257 kJ·kg<sup>−1</sup>).</p>
+      ${schemaPb(pb)}${somme(pb)}<p>Q > 0 : la glace reçoit 7,64 × 10<sup>5</sup> J.</p>`, 'Exemple : l\'exercice 14 (Mike Horn et son thé)')}`);
+  c.aToi(carte, [item('Trois étapes', { corps: 'eau', m: .4, mTxt: '400 g', ei: 's', ti: -10, ef: 'l', tf: 50 })]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>On passe par chaque température de changement d'état : une bulle par état, une flèche par étape. Le c est celui de la bulle, le L celui de la flèche.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_5c_cours.html">Cours : refroidissement →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_5.html#plusieurs">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+CE.menu('module_5b_cours');
+</script>
+</body>
+</html>

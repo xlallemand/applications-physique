@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur les états de la matière — Chapitre 11 : Changements d'état et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ce.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ce.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : nom d'un changement d'état (3),
+   état d'une représentation microscopique (2), liaison hydrogène :
+   bonne représentation, propriétés de l'eau (2), signe de la chaleur
+   latente L (3).
+   Erreurs diagnostiquées : sens du changement d'état inversé
+   (fusion / solidification…), sublimation et condensation confondues
+   avec vaporisation et liquéfaction, liquide et solide confondus,
+   liaison H–H ou H–O dans une même molécule, signe de L.
+   ============================================================ */
+const { o, fq, hasard, melanger, dessin, fmt } = CE;
+const sup = s => `<sup>${s}</sup>`;
+const NOMS = { fus: 'fusion', sol: 'solidification', vap: 'vaporisation', liq: 'liquéfaction', sub: 'sublimation', con: 'condensation' };
+const SENS = { fus: 'solide → liquide', sol: 'liquide → solide', vap: 'liquide → gaz', liq: 'gaz → liquide', sub: 'solide → gaz', con: 'gaz → solide' };
+// changement d'état inverse (erreur classique : le sens)
+const INV = { fus: 'sol', sol: 'fus', vap: 'liq', liq: 'vap', sub: 'con', con: 'sub' };
+const recoit = t => t === 'fus' || t === 'vap' || t === 'sub';
+
+// options : la bonne réponse, l'inverse, et deux autres changements d'état
+function optionsNom(t) {
+  const autres = melanger(Object.keys(NOMS).filter(x => x !== t && x !== INV[t])).slice(0, 2);
+  return melanger([t, INV[t]].concat(autres)).map(x => o(x, NOMS[x]));
+}
+function indicesNom(t) {
+  const ind = {};
+  Object.keys(NOMS).forEach(x => {
+    if (x === t) return;
+    ind[x] = x === INV[t] ? `La ${NOMS[x]}, c'est le sens inverse (${SENS[x]}).` : `La ${NOMS[x]}, c'est ${SENS[x]} ; ici : ${SENS[t]}.`;
+  });
+  return ind;
+}
+
+/* ---------- Groupe 1 : nom d'un changement d'état ---------- */
+const SITUATIONS = [
+  ['fus', 'Un glaçon posé sur la table devient de l\'eau liquide.'],
+  ['sol', 'L\'eau d\'un bac à glaçons placé au congélateur devient de la glace.'],
+  ['vap', 'L\'eau d\'une casserole bout et devient de la vapeur.'],
+  ['liq', 'De la buée (gouttelettes d\'eau) se forme sur un miroir froid, à partir de la vapeur d\'eau de la salle de bain.'],
+  ['sub', 'Au soleil d\'hiver, la neige disparaît directement en vapeur, sans fondre.'],
+  ['con', 'Par une nuit froide, du givre (glace) se forme sur une vitre, directement à partir de la vapeur d\'eau de l\'air.'],
+  ['sol', 'Le métal liquide versé dans un moule devient solide en refroidissant.'],
+  ['fus', 'Du chocolat placé au bain-marie devient liquide.'],
+  ['liq', 'Dans le condenseur d\'une pompe à chaleur, le fluide gazeux devient liquide.'],
+  ['vap', 'Dans l\'évaporateur d\'un climatiseur, le fluide liquide devient gazeux.'],
+];
+function qSituation() {
+  const [t, txt] = hasard(SITUATIONS);
+  return { theme: 'Nom d\'un changement d\'état', enonce: `<p>${txt}</p>`,
+    parties: [fq.choix('Quel changement d\'état se produit ?', optionsNom(t), t, { melanger: false, indices: indicesNom(t),
+      solution: `<p>${SENS[t]} : c'est une <b>${NOMS[t]}</b>.</p>` })] };
+}
+function qSens() {
+  const t = hasard(Object.keys(NOMS));
+  return { theme: 'Nom d\'un changement d\'état', enonce: `<p>Un corps pur passe de l'état <b>${SENS[t].replace(' → ', '</b> à l\'état <b>')}</b>.</p>`,
+    parties: [fq.choix('Comment s\'appelle ce changement d\'état ?', optionsNom(t), t, { melanger: false, indices: indicesNom(t),
+      solution: `<p>${SENS[t]} : <b>${NOMS[t]}</b>.</p>` })] };
+}
+function qNomInverse() {
+  const t = hasard(['fus', 'vap', 'sub']);
+  return { theme: 'Changement d\'état inverse', enonce: `<p>Quel est le changement d'état inverse de la <b>${NOMS[t]}</b> (${SENS[t]}) ?</p>`,
+    parties: [fq.choix('Changement d\'état inverse :', optionsNom(INV[t]).filter(x => x.id !== t).concat([o(t, NOMS[t])]), INV[t], { melanger: false,
+      indices: Object.assign(indicesNom(INV[t]), { [t]: 'C\'est le même changement d\'état : on cherche le sens inverse.' }),
+      solution: `<p>Le sens inverse, ${SENS[INV[t]]}, est la <b>${NOMS[INV[t]]}</b>.</p>` })] };
+}
+
+/* ---------- Groupe 2 : état d'une représentation microscopique ---------- */
+const IND_ETAT = {
+  s: { l: 'Les molécules sont rangées régulièrement : ce n\'est pas le désordre d\'un liquide.', g: 'Les molécules sont serrées : dans un gaz, elles sont très éloignées.' },
+  l: { s: 'Les molécules sont serrées mais en désordre : dans un solide, elles sont rangées.', g: 'Les molécules sont serrées : dans un gaz, elles sont très éloignées.' },
+  g: { s: 'Les molécules sont très éloignées : ce n\'est pas un solide.', l: 'Dans un liquide, les molécules sont serrées ; ici, elles sont très éloignées.' },
+};
+const DESC = { s: 'serrées et rangées : <b>solide</b>', l: 'serrées et en désordre : <b>liquide</b>', g: 'très éloignées : <b>gaz</b>' };
+function qMicro(e) {
+  return { theme: 'Représentation microscopique', enonce: dessin('micro', { ordre: [e] }),
+    parties: [fq.choix('Dans quel état est l\'eau représentée ?', [o('s', 'solide'), o('l', 'liquide'), o('g', 'gaz')], e, { melanger: false, indices: IND_ETAT[e],
+      solution: `<p>Molécules ${DESC[e]}.</p>` })] };
+}
+function qMicro3() {
+  const ordre = melanger(['s', 'l', 'g']), e = hasard(['s', 'l', 'g']), k = ordre.indexOf(e);
+  return { theme: 'Représentations microscopiques', enonce: dessin('micro', { ordre, numeros: true }),
+    parties: [fq.choix(`Quelle représentation correspond à l'état <b>${CE.NOM_ETAT[e]}</b> ?`, [1, 2, 3].map(n => o(String(n), 'représentation ' + n)), String(k + 1), { melanger: false,
+      indices: Object.fromEntries([1, 2, 3].filter(n => n !== k + 1).map(n => [String(n), `Représentation ${n} : molécules ${DESC[ordre[n - 1]].replace(/<\/?b>/g, '')}.`])),
+      solution: `<p>Représentation ${k + 1} : molécules ${DESC[e]}.</p>` })] };
+}
+
+/* ---------- Groupe 3 : liaison hydrogène ---------- */
+function qRepresentation() {
+  return { theme: 'Liaison hydrogène', enonce: '<p>Quelle est la bonne représentation de la liaison hydrogène entre molécules d\'eau ?</p>',
+    parties: [fq.choix('Choisis le bon dessin.', [1, 2, 3].map(r => o(String(r), dessin('liaisonH', { rep: r }))), '1', {
+      indices: { 2: 'Ici, deux atomes H (tous deux δ<sup>+</sup>) sont reliés : des charges de même signe se repoussent.', 3: 'Ici, les deux H d\'une même molécule sont reliés : la liaison hydrogène relie deux molécules différentes.' },
+      solution: '<p>La liaison hydrogène relie un H (δ<sup>+</sup>) d\'une molécule au O (2δ<sup>−</sup>) d\'une <b>autre</b> molécule.</p>' })] };
+}
+function qProprietes() {
+  return hasard([
+    () => ({ theme: 'Liaison hydrogène', enonce: '<p>On met un glaçon dans un verre d\'eau.</p>',
+      parties: [fq.choix('Que fait le glaçon, et pourquoi ?', [o('ok', 'il flotte : la glace est moins dense que l\'eau liquide'), o('coule', 'il coule : la glace est plus dense que l\'eau liquide'), o('air', 'il flotte parce qu\'il contient de l\'air')], 'ok',
+        { melanger: false, colonne: true, indices: { coule: 'L\'eau fait exception : à cause des liaisons hydrogène, la glace est moins dense que l\'eau liquide.', air: 'Même sans bulles d\'air, la glace flotte : c\'est l\'arrangement des molécules (liaisons hydrogène) qui compte.' },
+          solution: '<p>Les liaisons hydrogène rangent les molécules de la glace en laissant des espaces : la glace est <b>moins dense</b>, elle flotte.</p>' })] }),
+    () => ({ theme: 'Liaison hydrogène', enonce: '<p>Dans la molécule d\'eau H<sub>2</sub>O, l\'atome O attire les électrons des liaisons O–H.</p>',
+      parties: [fq.choix('Quelles sont les charges partielles ?', [o('ok', 'δ<sup>+</sup> sur chaque H, 2δ<sup>−</sup> sur O'), o('inv', 'δ<sup>−</sup> sur chaque H, 2δ<sup>+</sup> sur O'), o('rien', 'aucune : la molécule est neutre')], 'ok',
+        { melanger: false, colonne: true, indices: { inv: 'L\'atome O attire les électrons (charges négatives) : c\'est lui qui porte la charge négative.', rien: 'La molécule est neutre au total, mais les charges sont mal réparties : 2δ<sup>−</sup> + 2 × δ<sup>+</sup> = 0.' },
+          solution: '<p>O attire les électrons : <b>2δ<sup>−</sup></b> sur O, <b>δ<sup>+</sup></b> sur chaque H (la molécule reste neutre).</p>' })] }),
+    () => ({ theme: 'Liaison hydrogène', enonce: '<p>On approche une règle frottée (électrisée) d\'un mince filet d\'eau qui coule d\'un robinet.</p>',
+      parties: [fq.choix('Que se passe-t-il ?', [o('ok', 'le filet d\'eau est dévié vers la règle'), o('rien', 'rien : l\'eau n\'est pas chargée'), o('repousse', 'le filet est toujours repoussé par la règle')], 'ok',
+        { melanger: false, colonne: true, indices: { rien: 'La molécule est neutre, mais elle a un côté δ<sup>+</sup> et un côté δ<sup>−</sup> : elle est attirée par un objet chargé.', repousse: 'Les molécules se tournent pour présenter à la règle leur côté de charge opposée : il y a attraction.' },
+          solution: '<p>Le filet est <b>dévié vers la règle</b> : les molécules d\'eau ont des charges partielles δ<sup>+</sup> et δ<sup>−</sup>.</p>' })] }),
+  ])();
+}
+
+/* ---------- Groupe 4 : signe de L ---------- */
+const ARTICLE = { eau: 'l\'eau', 'éthanol': 'l\'éthanol', aluminium: 'l\'aluminium', 'fluide R22': 'le fluide R22' };
+const CHALEURS = [['eau', 'fus', 334], ['eau', 'vap', 2257], ['éthanol', 'vap', 855], ['aluminium', 'fus', 397], ['éthanol', 'fus', 108], ['fluide R22', 'vap', 233.7]];
+function qLInverse() {
+  const [corps, t, L] = hasard(CHALEURS), inv = INV[t];
+  const ok = `−${fmt(L)} kJ·kg${sup('−1')}`;
+  return { theme: 'Signe de la chaleur latente', enonce: `<p>Pour ${ARTICLE[corps]}, L<sub>${NOMS[t]}</sub> = ${fmt(L)} kJ·kg${sup('−1')}.</p>`,
+    parties: [fq.choix(`Que vaut L<sub>${NOMS[inv]}</sub> ?`, [o('m', ok), o('p', `${fmt(L)} kJ·kg${sup('−1')}`), o('z', '0 kJ·kg' + sup('−1'))], 'm', { melanger: false,
+      indices: { p: `La ${NOMS[inv]} est l'inverse de la ${NOMS[t]} : le corps cède l'énergie qu'il avait reçue, L est négative.`, z: 'Le corps cède de l\'énergie en changeant d\'état : L n\'est pas nulle.' },
+      solution: `<p>L<sub>${NOMS[inv]}</sub> = −L<sub>${NOMS[t]}</sub> = <b>${ok}</b>.</p>` })] };
+}
+function qLSigne() {
+  const t = hasard(Object.keys(NOMS)), r = recoit(t);
+  return { theme: 'Signe de la chaleur latente', enonce: `<p>Un corps pur subit une <b>${NOMS[t]}</b> (${SENS[t]}).</p>`,
+    parties: [fq.choix('Que fait le corps, et quel est le signe de L ?', [o('r', 'il reçoit de l\'énergie : L > 0'), o('c', 'il cède de l\'énergie : L < 0')], r ? 'r' : 'c', { melanger: false,
+      indices: r ? { c: `Pour passer à l'état ${SENS[t].split(' → ')[1]}, il faut lui apporter de l'énergie (le chauffer).` } : { r: `C'est l'inverse de la ${NOMS[INV[t]]} : le corps rend l'énergie, il la cède.` },
+      solution: `<p>${cap(NOMS[t])} : le corps <b>${r ? 'reçoit' : 'cède'}</b> de l'énergie, L ${r ? '> 0' : '< 0'}.</p>` })] };
+}
+function qLQuels() {
+  return { theme: 'Signe de la chaleur latente', enonce: '<p>Pour quels changements d\'état la chaleur latente L est-elle <b>positive</b> ?</p>',
+    parties: [fq.choix('Choisis la bonne liste.', [o('ok', 'fusion, vaporisation, sublimation'), o('inv', 'solidification, liquéfaction, condensation'), o('mix', 'fusion, liquéfaction, condensation')], 'ok', { melanger: false, colonne: true,
+      indices: { inv: 'Pour ces changements d\'état, le corps cède de l\'énergie : L < 0.', mix: 'La liquéfaction et la condensation se font en refroidissant : le corps cède de l\'énergie.' },
+      solution: '<p>L > 0 quand le corps reçoit de l\'énergie : <b>fusion, vaporisation, sublimation</b> (vers un état plus désordonné).</p>' })] };
+}
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// tirage : 3 + 2 + 2 + 3 questions
+function tirage() {
+  return [qSens(), qMicro(hasard(['s', 'l', 'g'])), qSituation(), qLSigne(), qRepresentation(), qSituation(), qMicro3(), qLInverse(), qProprietes(), hasard([qLQuels, qNomInverse])()];
+}
+
+CE.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'États de la matière et liaison hydrogène',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : nom des changements d\'état, représentations microscopiques, liaison hydrogène, signe de la chaleur latente L.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2a_cours.html', label: 'Module 2 : diagramme d\'état →' },
+});
+CE.menu('module_1_questions');
+</script>
+</body>
+</html>
