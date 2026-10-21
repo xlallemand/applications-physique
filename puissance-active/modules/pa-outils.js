@@ -121,8 +121,8 @@
   /* ============================================================
      TABLEAU DE PROPORTIONNALITÉ (durée ↔ angle), écrit en colonnes
      (voir la charte) : une colonne par grandeur, une ligne pour la
-     période (T ↔ 2π), une pour le décalage (Δt ↔ ?)
-     o = { unite: 's' | 'ms' | 'cm', T, dt, phi } : textes des cases (phi : « ? » par défaut)
+     période (T ↔ 2π), une pour le décalage (Δt ↔ φ)
+     o = { unite: 's' | 'ms' | 'cm', T, dt, phi, phiConnu } : textes des cases (phi : « φ » par défaut)
          fiche : true sur une fiche récapitulative (tableau .som-tab)
      ============================================================ */
   function tabProp(o) {
@@ -132,7 +132,7 @@
       <thead><tr><th>${grandeur} (${o.unite || 'ms'})</th><th>Angle (rad)</th></tr></thead>
       <tbody>
         <tr><td>${o.T}</td><td>2π</td></tr>
-        <tr><td>${o.dt}</td><td>${o.phi || '?'}</td></tr>
+        <tr><td>${o.dt}</td><td${o.phiConnu ? '' : ' class="pa-inconnue"'}>${o.phi || 'φ'}</td></tr>
       </tbody></table></div>`;
   }
 
@@ -362,7 +362,7 @@
           <thead><tr><th>Distance mesurée (cm)</th><th>Angle (rad)</th></tr></thead>
           <tbody>
             <tr><td>${champ('T', 'T', 'Période T mesurée, en cm')}</td><td>2π</td></tr>
-            <tr><td>${champ('dt', 'Δt', 'Décalage Δt mesuré, en cm')}</td><td class="pa-inconnue">?</td></tr>
+            <tr><td>${champ('dt', 'Δt', 'Décalage Δt mesuré, en cm')}</td><td class="pa-inconnue">φ</td></tr>
           </tbody></table></div>
         <div class="ph-valeur pa-phi-ligne"><span class="ph-lab">φ = 2π × Δt / T =</span>
           <input type="text" class="lg-input pa-phi-champ" data-x="phi" inputmode="decimal" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Déphasage φ, en radians">

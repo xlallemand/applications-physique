@@ -42,8 +42,9 @@ const duNom = f => (voyelle(f) ? 'de l\'' : 'du ') + nom(f);
 const deNom = f => (voyelle(f) ? 'd\'' : 'de ') + nom(f);
 const leNom = f => (voyelle(f) ? 'l\'' : 'le ') + nom(f);
 const egal = (a, b) => COURS.proche(a, b, .005);
-// tableau de proportionnalité : une colonne par grandeur (énergie, masse) ; « ? » : valeur cherchée
+// tableau de proportionnalité : une colonne par grandeur (énergie, masse) ; x : valeur cherchée
 const table = (l1, l2) => `<div class="crs-defile"><table class="crs-tab"><thead><tr><th>E (MJ)</th><th>m (kg)</th></tr></thead><tbody>${l1.map((v, k) => `<tr><td>${v}</td><td>${l2[k]}</td></tr>`).join('')}</tbody></table></div>`;
+const x = t => `<b class="x">${t}</b>`;
 const pcTxt = f => `PC(${nom(f)}) = ${fmt(PC(f))} MJ/kg`;
 
 // Erreurs fréquentes sur E = PC × m : division au lieu du produit, PC recopié, masse en g
@@ -99,7 +100,7 @@ function etape2(c) {
         <p class="co-legende"><b>E</b> : énergie en <span class="co-unite-tag">MJ</span> · <b>PC</b> : pouvoir calorifique en <span class="co-unite-tag">MJ/kg</span> · <b>m</b> : masse en <span class="co-unite-tag">kg</span></p></div>
     </div>
     ${exemple(`<p>On brûle 3 kg de méthane, PC = 50 MJ/kg :</p>
-      ${table(['50', '?'], ['1', '3'])}
+      ${table(['50', x('E')], ['1', '3'])}
       <p class="crs-calc">E = PC × m = 50 × 3 = <span class="c">150 MJ</span></p>`)}`);
   // masses choisies pour que E tombe juste
   const f1 = hasard(['C3H8', 'C4H10']), m1 = hasard([2, 3, 5]);
@@ -108,7 +109,7 @@ function etape2(c) {
     titre, enonce: `<p>On brûle ${fmt(m)} kg ${deNom(f)}. ${pcTxt(f)}.</p>`,
     parties: [{ type: 'nombre', q: 'Quelle énergie est libérée ?', label: 'E =', unite: 'MJ', valeur: PC(f) * m, signe: false,
       diag: v => diagE(v, PC(f), m),
-      solution: `${table([fmt(PC(f)), '?'], ['1', fmt(m)])}<p class="crs-calc">E = ${fmt(PC(f))} × ${fmt(m)} = <span class="c">${fmt(PC(f) * m)} MJ</span></p>` }],
+      solution: `${table([fmt(PC(f)), x('E')], ['1', fmt(m)])}<p class="crs-calc">E = ${fmt(PC(f))} × ${fmt(m)} = <span class="c">${fmt(PC(f) * m)} MJ</span></p>` }],
   });
   c.aToi(carte, [item('Quelques kilogrammes', f1, m1), item('Une masse non entière', f2, m2)]);
   return carte;
@@ -122,7 +123,7 @@ function etape3(c) {
       <div class="cle"><p><b>1 kg = 1 000 g</b> : m (en kg) = m (en g) ÷ 1 000. Pour les énergies : <b>1 MJ = 1 000 kJ</b>.</p></div>
     </div>
     ${exemple(`<p>PC(éthanol) = 28,8 MJ/kg. Énergie libérée par la combustion de 23 g = 0,023 kg d'éthanol :</p>
-      ${table(['28,8', '?'], ['1', '0,023'])}
+      ${table(['28,8', x('E')], ['1', '0,023'])}
       <p class="crs-calc">E = 28,8 × 0,023 ≈ <span class="c">0,66 MJ</span></p>`, 'Exemple : l\'exercice type')}`);
   const g1 = hasard([250, 1500, 80, 400]);
   const f2 = hasard(['C3H8', 'C4H10', 'C7H16']), g2 = hasard([200, 500, 300]), m2 = g2 / 1000, E2 = PC(f2) * m2;
@@ -161,7 +162,7 @@ function etape4(c) {
       <p class="co-legende" style="margin-top:10px">E en MJ, PC en MJ/kg, <b>m en kg</b>. Vérification avec les unités : MJ ÷ (MJ/kg) = kg.</p>
     </div>
     ${exemple(`<p>Pour obtenir 23 MJ avec du propane, PC = 46 MJ/kg :</p>
-      ${table(['46', '23'], ['1', '?'])}
+      ${table(['46', '23'], ['1', x('m')])}
       <p class="crs-calc">m = ${frac('E', 'PC')} = ${frac('23', '46')} = <span class="c">0,5 kg</span> = 500 g</p>`)}`);
   // masses choisies pour que le résultat tombe juste
   const f2 = hasard(['C7H16', 'C4H10', 'C6H14']), m2 = hasard([2, 4, 3]), E2 = PC(f2) * m2;
@@ -181,7 +182,7 @@ function etape4(c) {
         diag: v => (egal(v, E2 * PC(f2)) ? 'Tu as multiplié : la masse à brûler est m = E / PC.'
           : egal(v, PC(f2) / E2) ? 'Tu as calculé PC / E : c\'est l\'énergie qu\'on divise par le pouvoir calorifique, m = E / PC.'
             : 'Applique m = E / PC : le résultat est en kg.'),
-        solution: `${table([fmt(PC(f2)), fmt(E2)], ['1', '?'])}<p class="crs-calc">m = ${frac(fmt(E2), fmt(PC(f2)))} = <span class="c">${fmt(m2)} kg</span></p>` }] },
+        solution: `${table([fmt(PC(f2)), fmt(E2)], ['1', x('m')])}<p class="crs-calc">m = ${frac(fmt(E2), fmt(PC(f2)))} = <span class="c">${fmt(m2)} kg</span></p>` }] },
     { titre: 'La masse en grammes', enonce: `<p>On veut obtenir ${fmt(E3)} MJ en brûlant du méthane. ${pcTxt('CH4')}.</p>`,
       parties: [{ type: 'nombre', q: 'Quelle masse de méthane faut-il brûler ? Donne-la en grammes.', label: 'm =', unite: 'g', valeur: m3 * 1000, signe: false,
         diag: v => (egal(v, m3) ? `${fmt(m3)}, c'est la masse en kg. Convertis-la en grammes : × 1 000.`

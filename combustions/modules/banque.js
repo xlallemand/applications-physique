@@ -205,14 +205,14 @@
   /* ============================================================
      MODULE 5 : énergie libérée
      ============================================================ */
-  // tableau de proportionnalité : une colonne par grandeur (énergie, masse) ; « ? » : valeur cherchée
+  // tableau de proportionnalité : une colonne par grandeur (énergie, masse)
   const table = (l1, l2) => `<div class="ph-defile"><table class="ph-tableau"><thead><tr><th>E (MJ)</th><th>m (kg)</th></tr></thead><tbody>${l1.map((v, k) => `<tr><td>${v}</td><td>${l2[k]}</td></tr>`).join('')}</tbody></table></div>`;
   const pE = (f, mkg) => {
     const PC = COMB[f].PC, E = PC * mkg;
     return {
       type: 'valeur', q: 'Calcule l\'énergie libérée.', label: 'E =', valeur: E, unite: 'MJ', unites: ['MJ', 'kg', 'MJkg'],
       indice: `Le pouvoir calorifique est l'énergie libérée par 1 kg : E = PC × m, avec m en kg.`,
-      solution: `${table([fmt(PC), '?'], ['1', fmt(mkg)])}E = ${fmt(PC)} × ${fmt(mkg)} = ${fmt(E)} MJ`,
+      solution: `${table([fmt(PC), '<b class="x">E</b>'], ['1', fmt(mkg)])}E = ${fmt(PC)} × ${fmt(mkg)} = ${fmt(E)} MJ`,
     };
   };
   const pConv = g => ({
@@ -224,7 +224,7 @@
     return {
       type: 'valeur', q: `Calcule la masse ${deDu(f)} à brûler.`, label: 'm =', valeur: m, unite: 'kg', unites: unites || ['kg', 'MJ', 'MJkg'],
       indice: `1 kg libère ${fmt(PC)} MJ : m = E / PC, résultat en kg.`,
-      solution: `${table([fmt(PC), fmt(E)], ['1', '?'])}m = ${fmt(E)} / ${fmt(PC)} = ${fmt(m)} kg${m < 1 ? ` = ${fmt(m * 1000)} g` : ''}`,
+      solution: `${table([fmt(PC), fmt(E)], ['1', '<b class="x">m</b>'])}m = ${fmt(E)} / ${fmt(PC)} = ${fmt(m)} kg${m < 1 ? ` = ${fmt(m * 1000)} g` : ''}`,
     };
   };
   const pcTxt = f => `Pouvoir calorifique : PC(${nom(f)}) = ${fmt(COMB[f].PC)} MJ/kg.`;

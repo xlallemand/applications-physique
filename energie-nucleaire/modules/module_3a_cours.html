@@ -38,7 +38,7 @@
 const { exemple } = COURS;
 const { o, versCours, diagN, diagEtot, diagJ, MEV } = NUC;
 const sci = (q, label, valeur, unite, diag, solution, opts) => versCours(Object.assign({ type: 'sci', q, label, valeur, unite, diag, solution, rel: .01, cs: 3 }, opts));
-// tableau de proportionnalité (voir la charte) : en-têtes « grandeur (unité) », une ligne par couple de valeurs, « ? » : valeur cherchée
+// tableau de proportionnalité (voir la charte) : en-têtes « grandeur (unité) », une ligne par couple de valeurs
 const prop = (entetes, lignes) => `<div class="crs-defile"><table class="crs-tab"><thead><tr>${entetes.map(e => `<th>${e}</th>`).join('')}</tr></thead><tbody>${lignes.map(l => `<tr>${l.map(x => `<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 const mU = 3.902170e-25, mD = 3.3436e-27;
 
@@ -53,7 +53,7 @@ function etape1(c) {
     ${exemple(`<p>Nombre de noyaux d'hélium 4 dans 10 g d'hélium, avec m(⁴He) = 6,6447 × 10<sup>−27</sup> kg.</p>
       <p class="crs-calc">m = 10 g = 10 × 10<sup>−3</sup> kg</p>
       <p class="crs-calc">N = 10 × 10<sup>−3</sup> / 6,6447 × 10<sup>−27</sup> = <span class="c">1,505 × 10<sup>24</sup> noyaux</span></p>
-      <p><span class="nuc-ou">OU</span></p>${prop(['N (noyaux)', 'm (kg)'], [['1', '6,6447 × 10<sup>−27</sup>'], ['?', '10 × 10<sup>−3</sup>']])}
+      <p><span class="nuc-ou">OU</span></p>${prop(['N (noyaux)', 'm (kg)'], [['1', '6,6447 × 10<sup>−27</sup>'], ['N', '10 × 10<sup>−3</sup>']])}
       <p class="crs-calc">N = 1 × 10 × 10<sup>−3</sup> / 6,6447 × 10<sup>−27</sup> = 1,505 × 10<sup>24</sup></p>`, 'Exemple du cours')}`);
   c.aToi(carte, [
     { titre: 'Convertir en kg', parties: [
@@ -75,7 +75,7 @@ function etape2(c) {
     </div>
     ${exemple(`<p>Énergie libérée par la formation de 10 g d'hélium 4 (fusion 4 ¹H → ⁴He + 2 e<sup>+</sup>), chaque réaction libérant 3,9436 × 10<sup>−12</sup> J.</p>
       <p class="crs-calc">E = 1,505 × 10<sup>24</sup> × 3,9436 × 10<sup>−12</sup> = <span class="c">5,93 × 10<sup>12</sup> J</span></p>
-      <p><span class="nuc-ou">OU</span></p>${prop(['N (noyaux)', 'E (J)'], [['1', '3,9436 × 10<sup>−12</sup>'], ['1,505 × 10<sup>24</sup>', '?']])}`)}`);
+      <p><span class="nuc-ou">OU</span></p>${prop(['N (noyaux)', 'E (J)'], [['1', '3,9436 × 10<sup>−12</sup>'], ['1,505 × 10<sup>24</sup>', 'E']])}`)}`);
   const NU = 1e-3 / mU, ND = 2e-3 / mD;
   c.aToi(carte, [
     { titre: 'L\'énergie de 1 g d\'uranium', enonce: '<p>1,00 g d\'uranium 235 contient 2,563 × 10<sup>21</sup> noyaux. La fission d\'un noyau libère 2,971 × 10<sup>−11</sup> J.</p>', parties: [
