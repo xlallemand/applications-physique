@@ -873,7 +873,8 @@
       s += txt(x0 - 7, Y(0) + 4, '0', 'ph-graduation', 'end') + txt(x0 - 7, Y(100) + 4, '100', 'ph-graduation', 'end') + txt(x0 - 7, Y(-20) + 4, '−20', 'ph-graduation', 'end');
       s += `<path d="${pts.map((p, k) => (k ? 'L' : 'M') + f1(X(p[0])) + ',' + f1(Y(p[1]))).join('')}" class="ce-courbe"/>`;
       if (!o.sans) {
-        s += txt(X(.2), Y(-2), 'glace', 'ce-t-l') + txt(X(2.3), Y(0) - 10, 'glace + eau', 'ce-t-l', 'middle');
+        // (« glace » sous la montée : ni sur la courbe, ni sur les pointillés de 0 °C)
+        s += txt(X(.85), Y(-22), 'glace', 'ce-t-l') + txt(X(2.3), Y(0) - 10, 'glace + eau', 'ce-t-l', 'middle');
         s += txt(X(3.9) - 8, Y(55), 'eau', 'ce-t-l', 'end') + txt(X(6.8), Y(100) - 10, 'eau + vapeur', 'ce-t-l', 'middle');
         s += txt(X(9.1), Y(120) - 8, 'vapeur', 'ce-t-l', 'middle');
         if (!o.etapes) s += txt(X(2.3), Y(0) + 20, 'fusion', 'ce-t-p', 'middle') + txt(X(6.8), Y(100) + 20, 'ébullition', 'ce-t-p', 'middle');
@@ -959,7 +960,7 @@
      Échelles non respectées : les axes sont étirés de façon régulière (fonctions
      monotones), et seules les valeurs particulières sont graduées. Les courbes
      passent par le point triple (0,01 °C ; 0,006 bar), par (0 °C ; 1 bar) et
-     (100 °C ; 1 bar), et par le point critique (374 °C ; 221 bar, soit 218 atm).
+     (100 °C ; 1 bar), et par le point critique (374 °C ; 221 bar).
      Les points proposés aux élèves ont été vérifiés par un script : l'état lu sur
      ce diagramme est le même que l'état réel de l'eau, loin des courbes.
      ============================================================ */
@@ -1041,9 +1042,19 @@
     if (e === 'l') return chemin(C.fus.concat([[G.xu(CP[0]), haut]], C.vap.slice().reverse())) + 'Z';
     return chemin([[gauche, bas]].concat(C.sub, C.vap, [[G.xu(CP[0]), haut], [droite, haut], [droite, bas]])) + 'Z';
   }
+  // nom d'une courbe écrit le long de la courbe : pts (points en pixels), f (position du milieu du texte, de 0 à 1),
+  // d (décalage perpendiculaire : > 0 du côté « haut » du texte, < 0 de l'autre côté)
+  function nomCourbe(pts, f, d, t, cls) {
+    const k = Math.max(1, Math.min(pts.length - 2, Math.round(f * (pts.length - 1))));
+    const dx = pts[k + 1][0] - pts[k - 1][0], dy = pts[k + 1][1] - pts[k - 1][1], n = Math.hypot(dx, dy) || 1;
+    const x = pts[k][0] + d * dy / n, y = pts[k][1] - d * dx / n, a = Math.atan2(dy, dx) * 180 / Math.PI;
+    return `<text class="${cls || 'ce-t-courbe'}" x="0" y="0" text-anchor="middle" transform="translate(${f1(x)},${f1(y)}) rotate(${a.toFixed(1)})">${t}</text>`;
+  }
   /* SVG du diagramme : o = { noms (zones nommées, true par défaut), zone ('s'|'l'|'g' : zone mise en valeur),
      point: { T, P } (avec repères), fleche: { P, T1, T2, etiquettes: [textes aux croisements] },
-     reperes (1 bar, 0 °C, 100 °C : true par défaut), mobile (point déplaçable) } */
+     reperes (1 bar, 0 °C, 100 °C : true par défaut), mobile (point déplaçable),
+     courbes (noms des trois courbes), critique (valeurs du point critique écrites),
+     points: [{ T, P, nom }] et valeurs (valeurs de ces points écrites sur les axes) } */
   function svgDiag(G, o) {
     o = o || {};
     const C = courbesDiag(G);
@@ -1072,7 +1083,12 @@
     // points triple et critique
     s += `<circle cx="${f1(G.xu(TP[0]))}" cy="${f1(G.yv(TP[1]))}" r="4.5" class="ce-pt-fixe"/><circle cx="${f1(G.xu(CP[0]))}" cy="${f1(G.yv(CP[1]))}" r="4.5" class="ce-pt-fixe"/>`;
     s += txt(G.xu(TP[0]) + 8, G.yv(TP[1]) + 16, 'point triple', 'ce-t-pt');
-    s += txt(G.xu(CP[0]) + 2, G.yv(CP[1]) - (o.livre ? 9 : 24), 'point critique', 'ce-t-pt', 'end') + (o.livre ? '' : txt(G.xu(CP[0]) + 2, G.yv(CP[1]) - 9, '(374 °C ; 221 bar)', 'ce-t-p', 'end'));
+    s += txt(G.xu(CP[0]) + 2, G.yv(CP[1]) - (o.critique ? 24 : 9), 'point critique', 'ce-t-pt', 'end') + (o.critique ? txt(G.xu(CP[0]) + 2, G.yv(CP[1]) - 9, '(374 °C ; 221 bar)', 'ce-t-p', 'end') : '');
+    // noms des courbes (fusion : à droite de la courbe ; vaporisation : en dessous ; sublimation : au-dessus)
+    if (o.courbes) {
+      const p = G.W < 440, cc = p ? 'ce-t-courbe petit' : 'ce-t-courbe';
+      s += nomCourbe(C.fus, .74, -14, 'fusion', cc) + nomCourbe(C.vap, .7, -14, 'vaporisation', cc) + nomCourbe(C.sub, p ? .56 : .5, 5, 'sublimation', cc);
+    }
     // noms des zones
     if (o.noms !== false) {
       // (écran étroit : noms plus petits, « solide » tient entre l'axe et la courbe de fusion)
@@ -1091,11 +1107,12 @@
     }
     // numéros des cases posées sur le diagramme (écran étroit : les cases passent dessous)
     (o.nums || []).forEach(([u, v, n]) => { s += `<g class="ce-pose-num"><circle cx="${f1(G.xu(u))}" cy="${f1(G.yv(v))}" r="14"/>${txt(G.xu(u), G.yv(v) + 5, n, '', 'middle')}</g>`; });
-    // points nommés (exemples du cours) : o.points = [{ T, P, nom }]
+    // points nommés (exemples du cours) : o.points = [{ T, P, nom, gauche (nom à gauche du point) }]
     (o.points || []).forEach(q => {
       const x = G.X(q.T), y = G.Y(q.P);
       s += `<path d="M${f1(x0)},${f1(y)} H${f1(x)} V${f1(y0)}" class="ce-lecture ce-lecture-fine"/><circle cx="${f1(x)}" cy="${f1(y)}" r="6" class="ce-pt"/>` +
-        txt(x + 9, y - 7, q.nom, 'ce-t-crois');
+        (q.gauche ? txt(x - 9, y - 7, q.nom, 'ce-t-crois', 'end') : txt(x + 9, y - 7, q.nom, 'ce-t-crois'));
+      if (o.valeurs) s += txt(x, y0 + 17, fmt(q.T), 'ph-graduation', 'middle') + txt(x0 - 6, y + 4, fmtP(q.P), 'ph-graduation', 'end');
     });
     // point (T, P) et ses repères
     if (o.point) {
@@ -1120,6 +1137,43 @@
         return `<div class="ce-pose-case" style="left:${(G.xu(u) / G.W * 100).toFixed(2)}%;top:${(G.yv(v) / G.H * 100).toFixed(2)}%"><span class="ce-num">${n}</span>${contenus[id]}</div>`;
       }).join('')}</div></div></div>`;
   }
+
+  /* Diagramme d'état d'une espèce chimique quelconque (schématique, sans valeurs) : la courbe
+     de fusion penche vers la droite (cas le plus courant, contrairement à l'eau).
+     o = { noms (zones nommées), nums: { s, l, g } (numéros des zones), courbes (noms des courbes) } */
+  const TPE = [.30, .26], CPE = [.82, .80];
+  const SUBE = u => .03 + (TPE[1] - .03) * Math.pow(u / TPE[0], 2);
+  const FUSE = v => TPE[0] + .12 * (v - TPE[1]) / (1 - TPE[1]);
+  const VAPE = u => TPE[1] + (CPE[1] - TPE[1]) * Math.pow((u - TPE[0]) / (CPE[0] - TPE[0]), 1.5);
+  const ZONES_E = { s: [.13, .62], l: [.53, .60], g: [.72, .30] };
+  function svgEspece(W, o) {
+    o = o || {};
+    const G = geoDiag(W), x0 = G.xu(0), y0 = G.yv(0);
+    const sub = [], vap = [], fus = [];
+    for (let k = 0; k <= 30; k++) { const u = TPE[0] * k / 30; sub.push([G.xu(u), G.yv(SUBE(u))]); }
+    for (let k = 0; k <= 50; k++) { const u = TPE[0] + (CPE[0] - TPE[0]) * k / 50; vap.push([G.xu(u), G.yv(VAPE(u))]); }
+    for (let k = 0; k <= 20; k++) { const v = TPE[1] + (1 - TPE[1]) * k / 20; fus.push([G.xu(FUSE(v)), G.yv(v)]); }
+    let s = `<path d="${chemin(sub)}" class="ce-courbe"/><path d="${chemin(vap)}" class="ce-courbe"/><path d="${chemin(fus)}" class="ce-courbe"/>`;
+    s += ligne(x0, y0, G.xu(1) + 6, y0, 'ph-axe') + ligne(x0, y0, x0, G.yv(1) - 6, 'ph-axe');
+    s += `<path d="M${f1(G.xu(1) + 12)},${f1(y0)} l-9,-4.5 v9 Z M${f1(x0)},${f1(G.yv(1) - 12)} l-4.5,9 h9 Z" class="ph-fleche"/>`;
+    s += txt(G.W - 4, G.H - 4, 'température T', 'ph-axe-nom', 'end') + txt(x0 + 8, G.yv(1) + 6, 'pression P', 'ph-axe-nom');
+    s += `<circle cx="${f1(G.xu(TPE[0]))}" cy="${f1(G.yv(TPE[1]))}" r="4.5" class="ce-pt-fixe"/><circle cx="${f1(G.xu(CPE[0]))}" cy="${f1(G.yv(CPE[1]))}" r="4.5" class="ce-pt-fixe"/>`;
+    s += txt(G.xu(TPE[0]) + 8, G.yv(TPE[1]) + 16, 'point triple', 'ce-t-pt') + txt(G.xu(CPE[0]) + 2, G.yv(CPE[1]) - 9, 'point critique', 'ce-t-pt', 'end');
+    if (o.courbes) {
+      const cc = G.W < 440 ? 'ce-t-courbe petit' : 'ce-t-courbe';
+      s += nomCourbe(fus, .62, 5, 'fusion', cc) + nomCourbe(vap, .66, -14, 'vaporisation', cc) + nomCourbe(sub, .6, 5, 'sublimation', cc);
+    }
+    const cz = G.W < 440 ? 'ce-t-zone petit' : 'ce-t-zone';
+    ['s', 'l', 'g'].forEach(e => {
+      const [u, v] = ZONES_E[e];
+      if (o.nums) s += `<g class="ce-pose-num"><circle cx="${f1(G.xu(u))}" cy="${f1(G.yv(v))}" r="14"/>${txt(G.xu(u), G.yv(v) + 5, o.nums[e], '', 'middle')}</g>`;
+      else if (o.noms) s += txt(G.xu(u), G.yv(v), NOMS_EAU[e], cz, 'middle');
+    });
+    const aria = 'Diagramme d\'état d\'une espèce chimique, schématique, sans valeurs : trois zones séparées par les courbes de sublimation, de fusion (qui penche vers la droite) et de vaporisation ; ' +
+      (o.nums ? `zone ${o.nums.s} en haut à gauche, zone ${o.nums.l} en haut au milieu, zone ${o.nums.g} en bas à droite` : o.noms ? 'solide en haut à gauche, liquide en haut au milieu, gaz en bas à droite' : 'zones sans nom');
+    return `<svg viewBox="0 0 ${G.W} ${G.H}" class="ce-diag" role="img" aria-label="${aria}">${s}</svg>`;
+  }
+  const figEspece = o => figure(W => svgEspece(W, o), 'ce-fig-diag');
 
   /* Outil : placer un point (T, P) sur le diagramme, puis dire l'état de l'eau.
      o = { T, P (point demandé), placer (false : point déjà placé), q, solution } */
@@ -1400,13 +1454,14 @@
           `<span class="ce-sf-val">${v != null ? sci(v, 3) + ESP + 'J' : ''}</span></div>`;
       }
       const tete = `${pb.pression ? pb.pression + ', ' : ''}${b.t == null ? '? °C' : deg(b.t)}`;
-      const dedans = `<span class="ce-sb-e">${b.e == null ? '?' : pb.noms[b.e]}</span>${k === 0 && o.masse !== false ? `<span class="ce-sb-m">m = ${pb.mKg}</span>` : ''}`;
-      const cls = `ce-sb ce-sb-${b.e || 'x'}${o.sel === k ? ' sel' : ''}${o.ko === k ? ' ko' : ''}`;
+      const avecM = k === 0 && o.masse !== false;
+      const dedans = `<span class="ce-sb-e">${b.e == null ? '?' : pb.noms[b.e]}</span>${avecM ? `<span class="ce-sb-m">m = ${pb.mKg}</span>` : ''}`;
+      const cls = `ce-sb ce-sb-${b.e || 'x'}${avecM ? ' avec-m' : ''}${o.sel === k ? ' sel' : ''}${o.ko === k ? ' ko' : ''}`;
       h += `<div class="ce-sb-col"><span class="ce-sb-t">${tete}</span>${o.edit
         ? `<button type="button" class="${cls}" data-k="${k}" aria-label="Bulle ${k + 1} : ${b.e == null ? 'état à choisir' : pb.noms[b.e]}, ${b.t == null ? 'température à choisir' : deg(b.t)}">${dedans}</button>`
         : `<div class="${cls}">${dedans}</div>`}</div>`;
     });
-    const min = bulles.length * 112 + (bulles.length - 1) * 74 + 8;
+    const min = bulles.length * 116 + (bulles.length - 1) * 70 + 16;
     const aria = 'Schéma des étapes : ' + bulles.map(b => (b.e == null ? '?' : pb.noms[b.e]) + ' à ' + (b.t == null ? '?' : fmt(b.t)) + ' °C').join(', puis ');
     return `<div class="ce-ligne-cont"><div class="ce-sch" data-min="${min}" role="${o.edit ? 'group' : 'img'}" aria-label="${aria}">${h}</div></div>`;
   }
@@ -1724,7 +1779,8 @@
       sousModules: true,
       parties: [
         { nom: 'Une ou deux étapes', slug: 'deux', cours: 'module_5a_cours', noms: { cours: 'Cours : une ou deux étapes' } },
-        { nom: 'Plusieurs étapes', slug: 'plusieurs', cours: 'module_5b_cours', noms: { cours: 'Cours : plusieurs étapes, refroidissement' } },
+        { nom: 'Plusieurs étapes', slug: 'plusieurs', cours: 'module_5b_cours', noms: { cours: 'Cours : plusieurs étapes' } },
+        { nom: 'Refroidissement', slug: 'refroidissement', cours: 'module_5c_cours', noms: { cours: 'Cours : refroidissement' } },
         { nom: 'Entraînement', entrainement: 'module_5_entrainement', noms: { entrainement: 'Entraînement : problèmes au hasard' } },
         { nom: 'Schéma des étapes', questions: 'module_5_questions' }] },
     { n: 6, titre: 'Exercices', desc: 'Exercices 13, 14, 10, 15, 7, 8 et 17 de la feuille, exercice de bac blanc « Dégivrage »', exercices: 'module_6', exNom: 'Exercices de la feuille', nbEx: 8 },
@@ -1738,7 +1794,7 @@
     MOINS, fmt, cs, sci, lire, proche, fr, o, fq, el, secouer, melanger, hasard, entre, champ, boutonValider, PARTIES, versCours,
     question, serie, confettis, slot, fl, pchip,
     ESP, UC, UCk, UL, ULk, deg, par, figure, dessin, schemaPose, ENERGIES, chaineEnergie,
-    XU, yP, etatDiag, croisements, T_LISTE, P_LISTE, fmtP, figDiag, partieDiag, svgDiag, geoDiag, schemaDiag,
+    XU, yP, etatDiag, croisements, T_LISTE, P_LISTE, fmtP, figDiag, partieDiag, svgDiag, geoDiag, schemaDiag, figEspece, ZONES,
     COURBES, psatEau, tVap, figPT,
     CORPS, NOMS_TRANS, NOM_ETAT, probleme, chaineCanon, diagChaine, chaineHTML, schemaPb, nomQ, bulleTxt, calculEtape,
     partieConstruire, partieNature, partieFleche, partieSomme, partieSens, etapes, hasardProbleme, PROBLEMES, resolu,

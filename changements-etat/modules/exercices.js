@@ -51,7 +51,7 @@
       ${donnees(['énergie massique de solidification de l\'eau : L = −334 J·g<sup>−1</sup>'])}`,
     parties: () => [
       nombre('a) À quelle température l\'eau se solidifie-t-elle (pression atmosphérique) ?', 'T =', 0, '°C', '<p>À la pression atmosphérique, l\'eau se solidifie à <b>0 °C</b> (comme la glace fond à 0 °C).</p>',
-        { tol: .5, signe: true, diag: v => (Math.abs(v - 100) < 1 ? '100 °C, c\'est l\'ébullition : la solidification est le passage liquide → solide.' : Math.abs(v - 273.15) < 1 ? 'La question attend des °C : 273,15 K = 0 °C.' : 'La solidification de l\'eau se fait à la même température que la fusion de la glace.') }),
+        { tol: .5, signe: true, diag: v => (Math.abs(v - 100) < 1 ? '100 °C, c\'est l\'ébullition : la solidification est le passage liquide → solide.' : Math.abs(v - 273) < 1 ? 'La question attend des °C : 273 K = 0 °C.' : 'La solidification de l\'eau se fait à la même température que la fusion de la glace.') }),
       choix('b) Quel type de liaisons deviennent effectives ?', [o('h', 'des liaisons hydrogène entre les molécules'), o('cov', 'des liaisons covalentes O–H'), o('ion', 'des liaisons ioniques')], 'h',
         '<p>En se solidifiant, les molécules d\'eau se rangent : les <b>liaisons hydrogène</b> entre un H d\'une molécule et le O d\'une autre deviennent effectives.</p>',
         { indices: { cov: 'Les liaisons covalentes O–H sont à l\'intérieur de chaque molécule : elles existent déjà dans l\'eau liquide.', ion: 'L\'eau est faite de molécules, pas d\'ions.' } }),
@@ -86,15 +86,16 @@
         { indices: { crit: 'Ça, c\'est le point critique.', fus: 'À 101,3 kPa, la glace fond à 0 °C ; le point triple est à une pression beaucoup plus faible.' } }),
       nombre('Pression du point triple de l\'eau, en Pa.', 'P =', 611, 'Pa', calc(`P = ${c('611 Pa')} (la correction écrit 610,6 Pa), soit 0,006 bar.`),
         { tol: 1.5, diag: v => (pr(v, .611) || pr(v, .006) ? 'La pression est demandée en Pa : 611 Pa = 0,611 kPa = 0,006 bar.' : pr(v, 101300) || pr(v, 101.3) ? '101,3 kPa, c\'est la pression atmosphérique.' : 'Revois le cours : P ≈ 611 Pa.') }),
-      nombre('Température du point triple de l\'eau, en K.', 'T =', 273.16, 'K', calc(`T = 0,01 + 273,15 = ${c('273,16 K')}`),
-        { tol: .006, dec: 2, diag: v => (Math.abs(v - .01) < .02 ? 'C\'est la valeur en °C : T(K) = T(°C) + 273,15.' : Math.abs(v - 273.15) < .006 ? '273,15 K, c\'est 0 °C ; le point triple est à 0,01 °C.' : 'T = 0,01 °C + 273,15.') }),
+      // conversion °C → K avec 273 (273,15 accepté : 273,16 K)
+      nombre('Température du point triple de l\'eau, en K.', 'T =', 273.01, 'K', calc(`T = 0,01 + 273 ≈ ${c('273 K')}`),
+        { tol: .2, affiche: '273', diag: v => (Math.abs(v - .01) < .02 ? 'C\'est la valeur en °C : T (K) = θ (°C) + 273.' : 'Le point triple de l\'eau est à 0,01 °C : T = 0,01 + 273.') }),
       choix('Qu\'est-ce que le point critique ?', [o('ok', 'le point où s\'arrête la courbe de vaporisation : plus de distinction entre liquide et gaz'), o('tri', 'le point où les trois états coexistent'), o('eb', 'le point d\'ébullition de l\'eau à 101,3 kPa')], 'ok',
         '<p>Point critique : point où <b>s\'arrête la courbe de vaporisation</b> ; au-delà, il n\'y a plus de distinction entre les états liquide et gazeux.</p>',
         { indices: { tri: 'Ça, c\'est le point triple.', eb: 'À 101,3 kPa, l\'eau bout à 100 °C : ce n\'est pas le point critique.' } }),
-      nombre('Pression du point critique de l\'eau, en MPa (une décimale).', 'P<sub>c</sub> =', 22.1, 'MPa', calc(`P<sub>c</sub> ≈ ${c('22,1 MPa')} (218 atm ≈ 221 bar)`),
-        { tol: .15, dec: 1, diag: v => (pr(v, 221) || pr(v, 218) ? 'En MPa : 1 MPa = 10 bar, donc 221 bar = 22,1 MPa.' : pr(v, 22100) ? 'En MPa, pas en kPa : 22 100 kPa = 22,1 MPa.' : 'Revois le cours : 218 atm ≈ 221 bar.') }),
+      nombre('Pression du point critique de l\'eau, en MPa (une décimale).', 'P<sub>c</sub> =', 22.1, 'MPa', calc(`P<sub>c</sub> ≈ 221 bar = ${c('22,1 MPa')}`),
+        { tol: .15, dec: 1, diag: v => (pr(v, 221) || pr(v, 218) ? 'En MPa : 1 MPa = 10 bar, donc 221 bar = 22,1 MPa.' : pr(v, 22100) ? 'En MPa, pas en kPa : 22 100 kPa = 22,1 MPa.' : 'Revois le cours : P<sub>c</sub> ≈ 221 bar.') }),
       nombre('Température du point critique de l\'eau, en K.', 'T<sub>c</sub> =', 647, 'K', calc(`T<sub>c</sub> = 374 + 273 ≈ ${c('647 K')}`) + '<p>Attention : 374 est la valeur en °C (la correction écrit 374,15 K, c\'est une erreur).</p>',
-        { tol: 1.5, diag: v => (Math.abs(v - 374) < 1.5 ? '374 est la température en °C : T(K) = T(°C) + 273,15.' : 'T<sub>c</sub> = 374 °C, à convertir en kelvins.') }),
+        { tol: 1.5, diag: v => (Math.abs(v - 374) < 1.5 ? '374 est la température en °C : T (K) = θ (°C) + 273.' : 'T<sub>c</sub> = 374 °C, à convertir en kelvins.') }),
       { type: 'schema', titrePalette: 'États', q: 'b) Place les états sur le diagramme : fais glisser chaque étiquette dans sa zone.',
         schema: schemaDiag({ s: slot('s'), l: slot('l'), g: slot('g') }, { livre: true }),
         etiquettes: [
@@ -102,10 +103,11 @@
           { id: 'l', label: 'liquide', cible: 'l', indice: 'Le liquide est au-dessus de la courbe de vaporisation (forte pression), à droite de la courbe de fusion.' },
           { id: 'g', label: 'gaz', cible: 'g', indice: 'Le gaz est à basse pression et haute température : sous la courbe de vaporisation.' }],
         correction: `<p>Solide à gauche (basses températures), liquide en haut au milieu, gaz en bas à droite (basses pressions).</p>${figDiag({ livre: true })}` },
-      nombre('c) Température de fusion de l\'eau à 101,3 kPa, en K (deux décimales).', 'T<sub>fus</sub> =', 273.15, 'K', calc(`T<sub>fus</sub> = 0 °C = ${c('273,15 K')}`),
-        { tol: .2, dec: 2, diag: v => (Math.abs(v) < .5 ? 'Le diagramme est en kelvins : 0 °C = 273,15 K.' : Math.abs(v - 373.15) < .5 ? 'Ça, c\'est l\'ébullition ; la fusion est le croisement avec la courbe de fusion.' : 'Fusion de la glace à la pression atmosphérique : 0 °C.') }),
-      nombre('Température d\'ébullition de l\'eau à 101,3 kPa, en K (deux décimales).', 'T<sub>éb</sub> =', 373.15, 'K', calc(`T<sub>éb</sub> = 100 °C = ${c('373,15 K')}`) + '<p>À la pression atmosphérique (101,3 kPa) : fusion à 0 °C (273,15 K), ébullition à 100 °C (373,15 K).</p>',
-        { tol: .2, dec: 2, diag: v => (Math.abs(v - 100) < .5 ? 'Le diagramme est en kelvins : 100 °C = 373,15 K.' : 'Ébullition de l\'eau à la pression atmosphérique : 100 °C.') }),
+      // conversions °C → K avec 273 (273,15 et 373,15 K acceptés)
+      nombre('c) Température de fusion de l\'eau à 101,3 kPa, en K.', 'T<sub>fus</sub> =', 273, 'K', calc(`T<sub>fus</sub> = 0 °C = 0 + 273 = ${c('273 K')}`),
+        { tol: .2, dec: 0, diag: v => (Math.abs(v) < .5 ? 'Le diagramme est en kelvins : T (K) = θ (°C) + 273.' : Math.abs(v - 373) < .5 ? 'Ça, c\'est l\'ébullition ; la fusion est le croisement avec la courbe de fusion.' : 'Fusion de la glace à la pression atmosphérique : 0 °C.') }),
+      nombre('Température d\'ébullition de l\'eau à 101,3 kPa, en K.', 'T<sub>éb</sub> =', 373, 'K', calc(`T<sub>éb</sub> = 100 °C = 100 + 273 = ${c('373 K')}`) + '<p>À la pression atmosphérique (101,3 kPa) : fusion à 0 °C (273 K), ébullition à 100 °C (373 K).</p>',
+        { tol: .2, dec: 0, diag: v => (Math.abs(v - 100) < .5 ? 'Le diagramme est en kelvins : T (K) = θ (°C) + 273.' : 'Ébullition de l\'eau à la pression atmosphérique : 100 °C.') }),
     ],
   };
 

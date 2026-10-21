@@ -221,6 +221,7 @@ SOM.init({ nom: 'pH', id: 'ph', cleEx: 'ph-exercices', plan: PLAN });
 - Module à une seule partie : ses trois pages directement sous le module. Module d'exercices : une page « Exercices 1 à 16 ».
 - Module découpé en sous-modules de cours (`sousModules: true`) : une seule liste de pages sous le module, dans l'ordre (« Cours : … » de chaque sous-module, atelier, Questions), puis la Fiche ; sur l'accueil, une seule carte avec ces pages en liste.
 - Les pages sont de simples liens `<a>` (retour arrière du navigateur correct). La Fiche d'une partie ouvre `fiche_N.html#<slug-de-la-partie>` ; sur la fiche, le sommaire suit l'ancre (`hashchange`).
+- **Lien vers une autre application** (rappel de méthode, cours d'un autre chapitre, dans un encadré `ph-lien-app` ou dans le texte) : il s'ouvre dans une **nouvelle fenêtre**, avec `target="_blank" rel="noopener"`, pour que l'élève garde sa page en cours. Les liens à l'intérieur de l'application et le lien vers le portail restent dans la même fenêtre.
 - Tout est accessible à tout moment : aucun verrouillage entre modules ou parties.
 - Seuil téléphone / ordinateur : **900 px** de large.
 
@@ -339,7 +340,7 @@ Avec Playwright / Chromium (déjà installé, ne pas relancer `playwright instal
 3. Mode « Afficher tout le cours » : tout se déplie, la position du bouton ne bouge pas, les réponses ne sont pas affichées.
 4. Aucune erreur dans la console, aucun défilement horizontal de la page.
 5. Navigation : la page en cours est encadrée dans le sommaire, déplier un autre module ne change pas de page, chaque lien du sommaire mène à la bonne page, ancres de fiche, sommaire du téléphone (ouverture, fermeture, voile), bouton Reprendre, ✓ et notes (profil persistant), lien vers le portail.
-6. Tous les liens internes pointent vers des pages existantes.
+6. Tous les liens internes pointent vers des pages existantes. Les liens vers une autre application s'ouvrent dans une nouvelle fenêtre.
 7. Tracés de vecteurs : glisser à la souris, au doigt (CDP), flèches ; valeur affichée en direct.
 8. Longueur : aucun cours ne dépasse la longueur de référence (§4, « Longueur d'un cours ») ; sinon, des sous-modules.
 

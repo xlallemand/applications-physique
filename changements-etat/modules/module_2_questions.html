@@ -18,16 +18,17 @@
 <script>
 /* ============================================================
    10 questions tirées au hasard : état de l'eau pour (T, P) avec
-   l'outil du diagramme (4 : trois points à placer, un point déjà
-   placé), fusion et ébullition à 1 bar (1), point triple ou critique
-   (1), flèche de chauffage à pression constante (1), lecture d'une
-   courbe P(T) de vaporisation, eau ou R22 (2), influence de la
-   pression (1).
+   l'outil du diagramme (3 points à placer), placer les trois états
+   sur un diagramme (1), fusion et ébullition à 1 bar (1), point
+   triple ou critique (1), flèche de chauffage à pression constante
+   (1), lecture d'une courbe P(T) de vaporisation, eau ou R22 (2),
+   influence de la pression (1).
+   Conversions °C → K : T (K) = θ (°C) + 273 (273,15 accepté).
    Points du diagramme : choisis loin des courbes ; l'état lu sur le
    diagramme schématique est l'état réel de l'eau (vérifié par un
    script avec les formules de l'IAPWS).
    ============================================================ */
-const { o, fq, fmt, hasard, melanger, figDiag, partieDiag, figPT, COURBES, tVap, deg, fmtP } = CE;
+const { o, fq, fmt, hasard, melanger, figDiag, figEspece, ZONES, partieDiag, figPT, COURBES, tVap, deg, fmtP } = CE;
 const POINTS = {
   s: [[-10, 1], [-20, 1], [-40, .5], [-20, 10], [-40, .006]],
   l: [[20, 1], [50, 1], [80, 1], [120, 2], [150, 10], [200, 50], [250, 100], [150, 20]],
@@ -45,12 +46,13 @@ function qEtat(e, placer) {
 function qFusEb() {
   const K = hasard([false, true]);
   return { theme: 'Températures de changement d\'état', enonce: `<p>On chauffe de la glace sous la pression atmosphérique (1 bar).</p>${figDiag({ fleche: { P: 1, T1: -20, T2: 130 } })}`,
-    parties: [fq.nombre(`a) À quelle température la glace fond-elle${K ? ', en kelvins' : ''} ?`, 'T<sub>fus</sub> =', K ? 273.15 : 0, K ? 'K' : '°C', { tol: K ? .2 : .5, dec: K ? 2 : 0,
-        diag: v => (K && Math.abs(v) < .5 ? 'En kelvins : T(K) = T(°C) + 273,15.' : K && Math.abs(v - 373.15) < .5 ? 'Ça, c\'est l\'ébullition. La flèche croise d\'abord la courbe de fusion.' : !K && Math.abs(v - 100) < .5 ? 'Ça, c\'est l\'ébullition : la flèche croise d\'abord la courbe de fusion.' : 'Premier croisement de la flèche : la courbe de fusion.'),
-        solution: `<p>La flèche croise la courbe de fusion à <b>0 °C${K ? ' = 273,15 K' : ''}</b>.</p>` }),
-      fq.nombre(`b) À quelle température l'eau bout-elle${K ? ', en kelvins' : ''} ?`, 'T<sub>éb</sub> =', K ? 373.15 : 100, K ? 'K' : '°C', { tol: K ? .2 : .5, dec: K ? 2 : 0, signe: false,
-        diag: v => (K && Math.abs(v - 100) < .5 ? 'En kelvins : T(K) = T(°C) + 273,15.' : 'Deuxième croisement : la courbe de vaporisation, à la pression atmosphérique.'),
-        solution: `<p>La flèche croise la courbe de vaporisation à <b>100 °C${K ? ' = 373,15 K' : ''}</b>.</p>` })] };
+    // en kelvins : 273 et 373 K (273,15 et 373,15 K acceptés)
+    parties: [fq.nombre(`a) À quelle température la glace fond-elle${K ? ', en kelvins' : ''} ?`, 'T<sub>fus</sub> =', K ? 273 : 0, K ? 'K' : '°C', { tol: K ? .2 : .5, dec: 0,
+        diag: v => (K && Math.abs(v) < .5 ? 'En kelvins : T (K) = θ (°C) + 273.' : K && Math.abs(v - 373) < .5 ? 'Ça, c\'est l\'ébullition. La flèche croise d\'abord la courbe de fusion.' : !K && Math.abs(v - 100) < .5 ? 'Ça, c\'est l\'ébullition : la flèche croise d\'abord la courbe de fusion.' : 'Premier croisement de la flèche : la courbe de fusion.'),
+        solution: `<p>La flèche croise la courbe de fusion à <b>0 °C${K ? ', soit 0 + 273 = 273 K' : ''}</b>.</p>` }),
+      fq.nombre(`b) À quelle température l'eau bout-elle${K ? ', en kelvins' : ''} ?`, 'T<sub>éb</sub> =', K ? 373 : 100, K ? 'K' : '°C', { tol: K ? .2 : .5, dec: 0, signe: false,
+        diag: v => (K && Math.abs(v - 100) < .5 ? 'En kelvins : T (K) = θ (°C) + 273.' : 'Deuxième croisement : la courbe de vaporisation, à la pression atmosphérique.'),
+        solution: `<p>La flèche croise la courbe de vaporisation à <b>100 °C${K ? ', soit 100 + 273 = 373 K' : ''}</b>.</p>` })] };
 }
 
 /* ---------- Groupe 3 : point triple, point critique ---------- */
@@ -59,16 +61,44 @@ function qPoints() {
     () => ({ theme: 'Point triple', enonce: figDiag({}),
       parties: [fq.choix('Que représente le point triple ?', [o('ok', 'le seul point où les trois états coexistent'), o('crit', 'le point où s\'arrête la courbe de vaporisation'), o('atm', 'la fusion de la glace à la pression atmosphérique')], 'ok',
         { melanger: false, colonne: true, indices: { crit: 'Ça, c\'est le point critique.', atm: 'À la pression atmosphérique, la glace fond à 0 °C ; le point triple est à 0,006 bar.' },
-          solution: '<p>Au point triple (eau : 611 Pa ; 273,16 K), les trois états <b>coexistent</b>.</p>' })] }),
+          solution: '<p>Au point triple (eau : proche de 0 bar et de 0 °C), les trois états <b>coexistent</b>.</p>' })] }),
     () => ({ theme: 'Point critique', enonce: figDiag({}),
       parties: [fq.choix('Que se passe-t-il au-delà du point critique ?', [o('ok', 'on ne distingue plus le liquide du gaz'), o('tri', 'les trois états coexistent'), o('sol', 'l\'eau ne peut plus être liquide')], 'ok',
         { melanger: false, colonne: true, indices: { tri: 'Ça, c\'est le point triple.', sol: 'Le point critique est la fin de la courbe de vaporisation : au-delà, plus de frontière entre liquide et gaz.' },
-          solution: '<p>Le point critique (eau : 218 atm ; 374 °C) est la fin de la courbe de vaporisation : au-delà, plus de distinction liquide / gaz.</p>' })] }),
+          solution: '<p>Le point critique est la fin de la courbe de vaporisation : au-delà, plus de distinction liquide / gaz.</p>' })] }),
     () => ({ theme: 'Point triple', enonce: '<p>Le point triple de l\'eau est à 611 Pa et 0,01 °C.</p>',
-      parties: [fq.nombre('Quelle est sa température en kelvins ?', 'T =', 273.16, 'K', { signe: false, tol: .006, dec: 2,
-        diag: v => (Math.abs(v - 273.15) < .006 ? 'Tu as converti 0 °C : ajoute 273,15 à 0,01 °C.' : Math.abs(v - 273) < .1 ? 'T(K) = T(°C) + 273,15 : garde les centièmes.' : 'T = 0,01 + 273,15.'),
-        solution: '<p class="ph-calc">T = 0,01 + 273,15 = <span class="c">273,16 K</span></p>' })] }),
+      // 0,01 + 273 ≈ 273 K (273,01 ; 273,15 et 273,16 K acceptés)
+      parties: [fq.nombre('Quelle est sa température en kelvins ?', 'T =', 273.01, 'K', { signe: false, tol: .2, affiche: '273',
+        diag: v => (Math.abs(v - .01) < .02 ? 'C\'est la valeur en °C : pour passer en kelvins, on ajoute 273.' : Math.abs(v + 272.99) < .2 ? 'Des °C aux kelvins, on <b>ajoute</b> 273.' : 'T (K) = θ (°C) + 273.'),
+        solution: '<p class="ph-calc">T = 0,01 + 273 ≈ <span class="c">273 K</span></p>' })] }),
   ])();
+}
+
+/* ---------- Groupe 3 bis : placer les trois états sur un diagramme ---------- */
+const ETATS3 = [o('s', 'solide'), o('l', 'liquide'), o('g', 'gaz')];
+const IND_ZONE = {
+  s: 'En haut à gauche : forte pression et basse température, c\'est l\'état le plus ordonné.',
+  l: 'Au milieu, en haut : plus ordonné que le gaz (pression plus forte), moins que le solide (température plus haute).',
+  g: 'En bas à droite : faible pression et haute température, c\'est l\'état le plus désordonné.',
+};
+const AIDE_ETATS = 'Si P augmente, on passe vers un état plus ordonné ; si T augmente, vers un état plus désordonné.';
+function qPlacer() {
+  const cas = hasard(['espece', 'eau', 'regle']);
+  if (cas === 'regle') {
+    const P = hasard([true, false]);
+    return { theme: 'Placer les états', enonce: `<p>On ${P ? 'augmente la pression' : 'augmente la température'} d'une espèce chimique, ${P ? 'à température constante' : 'à pression constante'}.</p>`,
+      parties: [fq.choix('Vers quel état va-t-elle ?', [o('ord', 'vers un état plus ordonné'), o('des', 'vers un état plus désordonné'), o('pas', 'son état ne peut pas changer')], P ? 'ord' : 'des', { melanger: false,
+        indices: P ? { des: 'Quand P augmente, on monte sur le diagramme : vers le liquide et le solide.', pas: 'En montant sur le diagramme, on finit par croiser une courbe : changement d\'état.' }
+          : { ord: 'Quand T augmente, on va vers la droite du diagramme : vers le liquide et le gaz.', pas: 'En allant vers la droite, on finit par croiser une courbe : changement d\'état.' },
+        solution: P ? '<p>Si P augmente, on passe vers un état <b>plus ordonné</b> (gaz → liquide → solide).</p>' : '<p>Si T augmente, on passe vers un état <b>plus désordonné</b> (solide → liquide → gaz).</p>' })] };
+  }
+  // numéros des zones tirés au hasard
+  const n = melanger([1, 2, 3]), nums = { s: n[0], l: n[1], g: n[2] };
+  const fig = cas === 'espece' ? figEspece({ nums }) : figDiag({ noms: false, nums: ['s', 'l', 'g'].map(e => [ZONES[e][0], ZONES[e][1], nums[e]]) });
+  const lignes = ['s', 'l', 'g'].sort((a, b) => nums[a] - nums[b]).map(e => ({ id: 'z' + nums[e], label: 'zone ' + nums[e], bonne: e, indice: IND_ZONE[e] }));
+  return { theme: 'Placer les états', enonce: `<p>Voici le diagramme d'état ${cas === 'espece' ? 'd\'une espèce chimique' : 'de l\'eau'} (schématique).</p>${fig}`,
+    parties: [{ type: 'grille', q: 'Quel est l\'état de l\'espèce dans chaque zone ?', options: ETATS3, lignes, diag: () => AIDE_ETATS,
+      solution: `<p>${lignes.map(l => `Zone ${l.label.slice(5)} : <b>${{ s: 'solide', l: 'liquide', g: 'gaz' }[l.bonne]}</b>`).join(' ; ')}. Solide en haut à gauche, gaz en bas à droite, liquide entre les deux.</p>` }] };
 }
 
 /* ---------- Groupe 4 : flèche de chauffage à pression constante ---------- */
@@ -129,16 +159,16 @@ function qPression() {
       solution: '<p>La température de vaporisation <b>augmente</b> avec la pression (cocotte-minute : l\'eau bout au-dessus de 100 °C).</p>' })] };
 }
 
-// tirage : états (4), fusion et ébullition, points, flèche, lectures (2), pression
+// tirage : états (3), fusion et ébullition, points, flèche, placer les états, lectures (2), pression
 function tirage() {
   const e = melanger(['s', 'l', 'g']);
-  return [qEtat(e[0]), qFusEb(), qEtat(e[1]), qPoints(), qFleche(), qEtat(e[2]), qLectureEau(), qEtat(hasard(['s', 'l', 'g']), false), qLectureR22(), qPression()];
+  return [qEtat(e[0]), qFusEb(), qEtat(e[1]), qPoints(), qFleche(), qEtat(e[2]), qLectureEau(), qPlacer(), qLectureR22(), qPression()];
 }
 
 CE.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 2 · QUESTIONS', titre: 'Diagramme d\'état',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : état de l\'eau sur le diagramme (P, T), point triple et point critique, chauffage à pression constante, lecture d\'une courbe de vaporisation.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : état de l\'eau sur le diagramme (P, T), placer les trois états, point triple et point critique, chauffage à pression constante, lecture d\'une courbe de vaporisation.</p>',
   questions: tirage,
   revoir: { href: 'module_2a_cours.html', label: 'Revoir le cours' },
   suite: { href: 'module_3_cours.html', label: 'Module 3 : énergie et changement de température →' },

@@ -17,14 +17,20 @@
 
 <script>
 /* ============================================================
-   10 questions tirées au hasard : énergie de fusion (2), de
-   vaporisation (2), de solidification (2, négative), de liquéfaction
-   (1, négative), conversions d'unités de L (2 : kJ·kg⁻¹ → J·kg⁻¹,
-   J·g⁻¹ → J·kg⁻¹), température pendant un changement d'état (1).
-   Erreurs diagnostiquées : signe de L, masse en g, L en kJ non
-   converti, facteur de conversion.
+   10 questions tirées au hasard : énergie de fusion (1), de
+   vaporisation (1), de solidification (1, négative), choix de la
+   bonne valeur de L parmi trois données L_fus, L_vap, L_sub (4 : deux
+   transformations données, deux transformations inverses où l'élève
+   change lui-même le signe, ex. L_sol = −L_fus), conversions d'unités
+   de L (2 : kJ·kg⁻¹ → J·kg⁻¹, J·g⁻¹ → J·kg⁻¹), température pendant un
+   changement d'état (1).
+   Erreurs diagnostiquées : signe de L, mauvaise chaleur latente,
+   masse en g, L en kJ non converti, facteur de conversion.
+   Diiode I₂ (M = 253,8 g·mol⁻¹) : ΔfusH = 15,5 kJ·mol⁻¹ → 61 kJ·kg⁻¹ ;
+   ΔvapH = 41,6 kJ·mol⁻¹ → 164 kJ·kg⁻¹ ; ΔsubH = 62,4 kJ·mol⁻¹ → 246 kJ·kg⁻¹.
+   Eau : L_sub = 2 834 kJ·kg⁻¹ (à 0 °C).
    ============================================================ */
-const { o, fq, fmt, sci, hasard, proche } = CE;
+const { o, fq, fmt, sci, hasard, melanger, proche } = CE;
 const calc = h => `<p class="ph-calc">${h}</p>`;
 const c_ = h => `<span class="c">${h}</span>`;
 const pr = (a, b) => proche(a, b, .015);
@@ -34,7 +40,6 @@ const MASSES = [[.25, '250 g', '0,250 kg'], [.5, '500 g', '0,500 kg'], [.2, '200
 const FUS = [['glace', 334, 'On fait fondre {m} de glace à 0 °C.'], ['aluminium', 397, 'On fait fondre {m} d\'aluminium à 660 °C.'], ['plomb', 23, 'On fait fondre {m} de plomb à 327 °C.']];
 const VAP = [['eau', 2257, 'On vaporise {m} d\'eau à 100 °C.'], ['éthanol', 855, 'On vaporise {m} d\'éthanol à 78 °C.']];
 const SOL = [['eau', 334, '{m} d\'eau liquide se solidifient à 0 °C.', 'L<sub>fus</sub>'], ['aluminium', 397, '{m} d\'aluminium liquide se solidifient à 660 °C.', 'L<sub>fus</sub>'], ['cire', 210, '{m} de cire de bougie se solidifient.', 'L<sub>fus</sub>']];
-const LIQ = [['vapeur d\'eau', 2257, '{m} de vapeur d\'eau se liquéfient à 100 °C.', 'L<sub>vap</sub>'], ['fluide R22', 233.7, '{m} de fluide R22 gazeux se liquéfient dans le condenseur d\'un climatiseur.', 'L<sub>vap</sub>']];
 
 function diagL(v, Q) {
   if (pr(v, -Q)) return Q > 0 ? 'Le corps reçoit de l\'énergie pour ce changement d\'état : Q > 0.' : 'Pour ce changement d\'état, le corps cède de l\'énergie : L < 0, donc Q < 0.';
@@ -46,14 +51,55 @@ function qL(theme, liste, signe, nomL) {
   const [, L, phrase, nl] = hasard(liste), [m, mTxt, mKg] = hasard(MASSES), Q = signe * m * L * 1000;
   const sym = nomL || nl;
   return { theme, enonce: `<p>${phrase.replace('{m}', mTxt)}</p><p class="ph-donnees">Donnée : ${sym} = ${fmt(L)} ${ULk}.</p>`,
-    parties: [fq.sci('Calcule l\'énergie Q échangée (3 chiffres significatifs, signe compris).', 'Q =', Q, 'J', { cs: 3, rel: .01, diag: v => diagL(v, Q),
+    parties: [fq.sci('Calcule l\'énergie Q reçue (3 chiffres significatifs, signe compris).', 'Q =', Q, 'J', { cs: 3, rel: .01, diag: v => diagL(v, Q),
       solution: (mKg ? calc(`m = ${mTxt} = ${mKg}`) : '') + calc(`Q = m × ${signe < 0 ? `(−${sym})` : sym} = ${fmt(m)} × ${signe < 0 ? `(−${fmt(L)} × 10<sup>3</sup>)` : `${fmt(L)} × 10<sup>3</sup>`}`) +
         calc(`Q = ${c_(sci(Q, 3) + ' J')}`) + (signe < 0 ? '<p>Q < 0 : le corps cède cette énergie.</p>' : '') })] };
 }
 const qFus = () => qL('Énergie de fusion', FUS.map(x => [x[0], x[1], x[2], 'L<sub>fus</sub>']), 1);
 const qVap = () => qL('Énergie de vaporisation', VAP.map(x => [x[0], x[1], x[2], 'L<sub>vap</sub>']), 1);
 const qSol = () => qL('Énergie de solidification', SOL, -1);
-const qLiq = () => qL('Énergie de liquéfaction', LIQ, -1);
+/* ---------- Choisir la bonne valeur de L parmi trois données ---------- */
+// transformations : nom, états de départ et d'arrivée, chaleur latente donnée utilisée (dir), signe
+const TRANS = {
+  fus: { nom: 'fusion', de: 'solide', vers: 'liquide', dir: 'fus', s: 1 },
+  vap: { nom: 'vaporisation', de: 'liquide', vers: 'gaz', dir: 'vap', s: 1 },
+  sub: { nom: 'sublimation', de: 'solide', vers: 'gaz', dir: 'sub', s: 1 },
+  sol: { nom: 'solidification', de: 'liquide', vers: 'solide', dir: 'fus', s: -1 },
+  liq: { nom: 'liquéfaction', de: 'gaz', vers: 'liquide', dir: 'vap', s: -1 },
+  cond: { nom: 'condensation', de: 'gaz', vers: 'solide', dir: 'sub', s: -1 },
+};
+const SYM = { fus: 'L<sub>fus</sub>', vap: 'L<sub>vap</sub>', sub: 'L<sub>sub</sub>', sol: 'L<sub>sol</sub>', liq: 'L<sub>liq</sub>', cond: 'L<sub>cond</sub>' };
+// corps : L données (kJ·kg⁻¹) et phrase de chaque transformation
+const CORPS3 = [
+  { nom: 'eau', L: { fus: 334, vap: 2257, sub: 2834 }, phrases: {
+    fus: 'On fait fondre {m} de glace à 0 °C.', vap: 'On vaporise {m} d\'eau liquide à 100 °C.', sub: 'En haute montagne, {m} de neige se subliment au soleil, sans fondre.',
+    sol: '{m} d\'eau liquide gèlent à 0 °C.', liq: '{m} de vapeur d\'eau se liquéfient à 100 °C.', cond: '{m} de vapeur d\'eau se condensent en givre (solide) sur une vitre glacée.' } },
+  { nom: 'diiode', L: { fus: 61, vap: 164, sub: 246 }, phrases: {
+    fus: 'On fait fondre {m} de diiode solide à 114 °C.', vap: 'On vaporise {m} de diiode liquide à 184 °C.', sub: 'On chauffe doucement {m} de diiode solide : il se sublime.',
+    sol: '{m} de diiode liquide se solidifient à 114 °C.', liq: '{m} de vapeur de diiode se liquéfient à 184 °C.', cond: '{m} de vapeur de diiode se condensent en cristaux (solide) sur une paroi froide.' } },
+];
+function qChoixL(t) {
+  const T = TRANS[t], corps = hasard(CORPS3), [m, mTxt, mKg] = hasard(MASSES);
+  const L = T.s * corps.L[T.dir], Q = m * L * 1000;
+  const autres = ['fus', 'vap', 'sub'].filter(x => x !== T.dir);
+  const inv = T.s < 0 ? `La ${T.nom} est la transformation inverse de la ${TRANS[T.dir].nom} : ${SYM[t]} = −${SYM[T.dir]}.` : '';
+  const diagL1 = v => {
+    if (pr(v, -L)) return T.s < 0 ? `${inv} Vers un état plus ordonné, le corps cède de l'énergie : L < 0.` : `La ${T.nom} a besoin d'énergie (vers un état plus désordonné) : L > 0.`;
+    const x = autres.find(a => pr(Math.abs(v), corps.L[a]));
+    if (x) return `Ça, c'est ${SYM[x]} (${TRANS[x].nom}). Ici, c'est une ${T.nom} : ${T.de} → ${T.vers}.`;
+    return `Ici, c'est une ${T.nom} (${T.de} → ${T.vers}) : choisis la bonne chaleur latente dans les données${T.s < 0 ? ' (ou celle de la transformation inverse)' : ''}.`;
+  };
+  return { theme: 'Choisir la bonne valeur de L',
+    enonce: `<p>${corps.phrases[t].replace('{m}', mTxt)}</p><p class="ph-donnees">Données (${corps.nom}) : L<sub>fus</sub> = ${fmt(corps.L.fus)} ${ULk} ; L<sub>vap</sub> = ${fmt(corps.L.vap)} ${ULk} ; L<sub>sub</sub> = ${fmt(corps.L.sub)} ${ULk}.</p>`,
+    parties: [
+      fq.nombre(`a) Quelle est la valeur de la chaleur latente de ${T.nom}, ${SYM[t]} ?`, SYM[t] + ' =', L, ULk, { signe: true, tol: .5, affiche: fmt(L), diag: diagL1,
+        solution: `<p>${T.s < 0 ? inv : `La ${T.nom} est donnée :`} ${SYM[t]} = ${c_(fmt(L) + ' ' + ULk)}${T.s < 0 ? ' : même valeur, signe opposé.' : '.'}</p>` }),
+      fq.sci('b) Calcule l\'énergie Q reçue (3 chiffres significatifs, signe compris).', 'Q =', Q, 'J', { cs: 3, rel: .01, diag: v => diagL(v, Q),
+        solution: (mKg ? calc(`m = ${mTxt} = ${mKg}`) : '') + calc(`Q = m × ${SYM[t]} = ${fmt(m)} × ${L < 0 ? '(' : ''}${fmt(L)} × 10<sup>3</sup>${L < 0 ? ')' : ''}`) +
+          calc(`Q = ${c_(sci(Q, 3) + ' J')}`) + (L < 0 ? '<p>Q < 0 : le corps cède cette énergie.</p>' : '') }),
+    ] };
+}
+
 function qConvK() {
   const L = hasard([334, 2257, 855, 397, 233.7]);
   return { theme: 'Conversion de L', enonce: `<p>Une chaleur latente vaut L = ${fmt(L)} ${ULk}.</p>`,
@@ -81,15 +127,16 @@ function qPalier() {
   ])();
 }
 
-// tirage : 10 questions
+// tirage : 10 questions ; choix de L : deux transformations données, deux transformations inverses
 function tirage() {
-  return [qFus(), qVap(), qSol(), qConvK(), qFus(), qLiq(), qPalier(), qVap(), qSol(), qConvG()];
+  const t = melanger(melanger(['fus', 'vap', 'sub']).slice(0, 2).concat(melanger(['sol', 'liq', 'cond']).slice(0, 2)));
+  return [qFus(), qChoixL(t[0]), qVap(), qChoixL(t[1]), qConvK(), qSol(), qChoixL(t[2]), qPalier(), qChoixL(t[3]), qConvG()];
 }
 
 CE.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 4 · QUESTIONS', titre: 'Énergie et changement d\'état',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : énergie Q = m × L de fusion, de vaporisation, de solidification et de liquéfaction (signe de L), conversions d\'unités de L, palier de température.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : énergie Q = m × L de fusion, de vaporisation, de solidification, choix de la bonne valeur de L parmi les données (signe de L), conversions d\'unités de L, palier de température.</p>',
   questions: tirage,
   revoir: { href: 'module_4_cours.html', label: 'Revoir le cours' },
   suite: { href: 'module_5a_cours.html', label: 'Module 5 : le schéma des étapes →' },
