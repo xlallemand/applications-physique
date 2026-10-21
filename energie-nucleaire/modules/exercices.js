@@ -125,12 +125,12 @@
       scient('4. a) Le nombre de noyaux d\'hélium 3 dans 5,00 g.', 'N =', N3, 'noyaux',
         `<p>E est l'énergie libérée lors de la formation d'<b>un</b> noyau d'hélium : il faut compter les noyaux d'hélium dans 5,00 g.</p>
           ${calc(`N = m / m(1 noyau) = 5,00 × 10<sup>−3</sup> kg / 5,0064 × 10<sup>−27</sup> kg = ${c('9,99 × 10<sup>23</sup> noyaux')}`)}
-          <p><span class="nuc-ou">OU</span></p><table class="nuc-prop"><tr><td>1 noyau</td><td>5,0064 × 10<sup>−27</sup> kg</td></tr><tr><td>N</td><td>5 g = 5 × 10<sup>−3</sup> kg</td></tr></table>`,
+          <p><span class="nuc-ou">OU</span></p><div class="ph-defile"><table class="ph-tableau"><thead><tr><th>N (noyaux)</th><th>m (kg)</th></tr></thead><tbody><tr><td>1</td><td>5,0064 × 10<sup>−27</sup></td></tr><tr><td>?</td><td>5 g = 5 × 10<sup>−3</sup> kg</td></tr></tbody></table></div>`,
         { diag: v => diagN(v, 5, 5.0064e-27, '5,00 g') }),
       scient('4. b) L\'énergie libérée lors de la formation de 5,00 g d\'hélium 3.', 'E =', N3 * E3, 'J',
         calc(`E<sub>5 g</sub> = N × E = 9,99 × 10<sup>23</sup> × 8,64 × 10<sup>−13</sup> J = ${c('8,63 × 10<sup>11</sup> J')}`), { diag: v => diagEtot(v, N3, E3) }),
       nombre('5. La masse de pétrole qui libère la même énergie.', 'm =', N3 * E3 / PC, 'kg',
-        `<table class="nuc-prop"><tr><td>1 kg</td><td>42 MJ = 42 × 10<sup>6</sup> J</td></tr><tr><td>m</td><td>8,63 × 10<sup>11</sup> J</td></tr></table>
+        `<div class="ph-defile"><table class="ph-tableau"><thead><tr><th>m (kg)</th><th>E (J)</th></tr></thead><tbody><tr><td>1</td><td>42 MJ = 42 × 10<sup>6</sup> J</td></tr><tr><td>?</td><td>8,63 × 10<sup>11</sup></td></tr></tbody></table></div>
           ${calc(`m<sub>pétrole</sub> = 1 × 8,63 × 10<sup>11</sup> / 42 × 10<sup>6</sup> = ${c('2,05 × 10<sup>4</sup> kg')}`)}<p>Soit 20,5 tonnes de pétrole !</p>`,
         { cs: 3, diag: v => diagPetrole(v, N3 * E3) }),
     ],

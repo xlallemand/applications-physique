@@ -707,38 +707,43 @@
 
   /* ============================================================
      TABLEAU DE PROPORTIONNALITÉ À REMPLIR (partie 'perso')
-     Les unités sont en tête de ligne, comme dans les corrections :
-         Wh | 130 | ?
-         kg |  1  | 0,020
-     o = { lignes: [[unité, case, case], [unité, case, case]],
+     Une colonne par grandeur, la grandeur et son unité en tête de
+     colonne, une ligne par couple de valeurs (voir la charte) :
+         E (Wh) | m (kg)
+           130  |   1
+            ?   | 0,020
+     o = { entetes: ['E (Wh)', 'm (kg)'], lignes: [[case, case], [case, case]],
            case : nombre (écrit), '?' (l'inconnue, calculée ensuite)
                   ou { v, tol, rel } (case à remplir par l'élève),
            diag(valeurs) → diagnostic, q, solution }
      ============================================================ */
   function partieTableau(o) {
     const cases = [];
-    o.lignes.forEach(l => l.slice(1).forEach(c => { if (c && typeof c === 'object') cases.push(c.v); }));
-    return { type: 'perso', cases, q: o.q || 'Complète le tableau de proportionnalité (les unités sont en tête de ligne).', solution: o.solution,
+    o.lignes.forEach(l => l.forEach(c => { if (c && typeof c === 'object') cases.push(c.v); }));
+    return { type: 'perso', cases, q: o.q || 'Complète le tableau de proportionnalité (chaque grandeur et son unité sont en tête de colonne).', solution: o.solution,
       monter: (zone, api) => tableauProp(zone, o, api) };
   }
   function tableauProp(zone, o, api) {
     const d = el('div', 'pa2-prop');
-    const tab = el('table', 'pa2-prop-tab'), champs = [];
+    const tab = el('table', 'ph-tableau pa2-prop-tab'), champs = [];
+    const tete = document.createElement('tr');
+    o.entetes.forEach(e => tete.appendChild(el('th', null, e)));
+    tab.appendChild(el('thead')).appendChild(tete);
+    const corps = tab.appendChild(el('tbody'));
     o.lignes.forEach(l => {
       const tr = document.createElement('tr');
-      tr.appendChild(el('th', null, l[0]));
-      l.slice(1).forEach(c => {
+      l.forEach((c, k) => {
         const td = document.createElement('td');
         if (c === '?') { td.className = 'pa2-prop-inc'; td.textContent = '?'; }
         else if (c && typeof c === 'object') {
-          const ch = champ({ petit: true, signe: false, aria: `Case de la ligne ${l[0].replace(/<[^>]+>/g, '')}` });
+          const ch = champ({ petit: true, signe: false, aria: `Case de la colonne ${o.entetes[k].replace(/<[^>]+>/g, '')}` });
           ch.m = c; champs.push(ch); td.appendChild(ch.el);
         } else td.textContent = fmt(c);
         tr.appendChild(td);
       });
-      tab.appendChild(tr);
+      corps.appendChild(tr);
     });
-    const defile = el('div', 'pa2-defile');
+    const defile = el('div', 'ph-defile');
     defile.appendChild(tab);
     d.appendChild(defile);
     zone.appendChild(d);
@@ -759,7 +764,7 @@
       const oks = champs.map((c, k) => juste(vals[k], { valeur: c.m.v, tol: c.m.tol, rel: c.m.rel }));
       if (oks.every(Boolean)) { champs.forEach(c => c.desactiver(true)); bVal.fermer(); api.reussi(); return; }
       champs.forEach((c, k) => c.el.classList.toggle('ko', !oks[k]));
-      api.erreur((o.diag && o.diag(vals)) || (oks.filter(x => !x).length > 1 ? 'Les cases en rouge sont fausses.' : 'La case en rouge est fausse.') + ' Chaque nombre va dans la ligne de son unité.');
+      api.erreur((o.diag && o.diag(vals)) || (oks.filter(x => !x).length > 1 ? 'Les cases en rouge sont fausses.' : 'La case en rouge est fausse.') + ' Chaque nombre va dans la colonne de son unité.');
       secouer(d);
     }
     bVal.onclick = valider;

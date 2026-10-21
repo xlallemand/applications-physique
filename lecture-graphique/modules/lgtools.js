@@ -623,11 +623,10 @@
         <h3 class="lg-etape-titre">Étape 1 · Tableau de proportionnalité</h3>
         <div class="lg-palette lg-palette-ligne" id="lgPalUni"><span class="lg-palette-titre">Unités :</span>${unitesAxe.map(u => etiquette(u, { type: 'unite', u: u, home: 'lgPalUni' }, 'lg-chip-unite')).join('')}</div>
         <div class="lg-table-wrap"><table class="lg-table">
-          <colgroup><col class="lg-col-titre"><col><col></colgroup>
-          <thead><tr><th></th><th>Distance<br>${caseVide('uD', 'lg-slot-unite')}</th><th>${ax.libelle}<br>${caseVide('uV', 'lg-slot-unite')}</th></tr></thead>
+          <thead><tr><th>Distance<br>${caseVide('uD', 'lg-slot-unite')}</th><th>${ax.libelle}<br>${caseVide('uV', 'lg-slot-unite')}</th></tr></thead>
           <tbody>
-            <tr><th>Échelle</th><td>${saisie('lgED', 'mesure')}</td><td>${saisie('lgEV', 'valeur')}</td></tr>
-            <tr><th>${A.ligne}</th><td>${saisie('lgMD', 'mesure')}</td><td class="lg-inconnue">?</td></tr>
+            <tr><td>${saisie('lgED', 'échelle')}</td><td>${saisie('lgEV', 'échelle')}</td></tr>
+            <tr><td>${saisie('lgMD', 'mesure')}</td><td class="lg-inconnue">?</td></tr>
           </tbody>
         </table></div>
         ${window.numpadWidget ? numpadWidget() : ''}
@@ -681,7 +680,7 @@
       if (okMD) {
         trouve = A.liste.find(x => Math.abs(v.mD * 10 - x.mm) <= TOL) || null;
         if (!trouve) { okMD = false; err.push(A.erreur); }
-      } else err.push('Ligne « ' + A.ligne + ' » : écris la distance mesurée pour la grandeur recherchée, en cm.');
+      } else err.push('2<sup>e</sup> ligne (' + A.ligne.toLowerCase() + ') : écris la distance mesurée pour la grandeur recherchée, en cm.');
       marquerCase('mD', okMD);
 
       const msg = $('msg1');

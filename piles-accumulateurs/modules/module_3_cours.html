@@ -28,16 +28,16 @@
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
    Trois méthodes montrées par le professeur, au choix de l'élève :
-   l'analyse des unités, le tableau de proportionnalité (unités en
-   tête de ligne, produit en croix), la formule que l'on isole.
+   l'analyse des unités, le tableau de proportionnalité (grandeurs et
+   unités en tête de colonne, produit en croix), la formule que l'on isole.
    Le tableau à remplir est un outil 'perso' (PA2.partieTableau).
    ============================================================ */
 const { fmt, hasard, exemple } = COURS;
 const { fr, proche, sci, partieTableau } = PA2;
 const c = h => `<span class="c">${h}</span>`;
 const r3 = v => +v.toPrecision(3);
-// tableau de proportionnalité écrit (exemples) : unités en tête de ligne
-const tab = (l1, l2) => `<div class="pa2-defile"><table class="pa2-prop-tab"><tr><th>${l1[0]}</th><td>${l1[1]}</td><td>${l1[2]}</td></tr><tr><th>${l2[0]}</th><td>${l2[1]}</td><td>${l2[2]}</td></tr></table></div>`;
+// tableau de proportionnalité écrit (exemples) : en-têtes « grandeur (unité) », une ligne par couple de valeurs
+const tab = (entetes, lignes) => `<div class="crs-defile"><table class="crs-tab"><thead><tr>${entetes.map(e => `<th>${e}</th>`).join('')}</tr></thead><tbody>${lignes.map(l => `<tr>${l.map(x => `<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 const OU = '<p class="pa2-ou">OU</p>';
 
 /* ---------- 1. L'énergie massique ---------- */
@@ -50,7 +50,7 @@ function etape1(c_) {
     ${exemple(`<p>Quelle énergie contient une pile de masse m = 20 g et d'énergie massique E<sub>m</sub> = 130 Wh·kg<sup>−1</sup> ? D'abord : m = 20 g = 0,020 kg.</p>
       <p><b>Méthode 1 : les unités.</b> Wh/kg × kg = Wh, donc :</p><p class="crs-calc">E = 130 × 0,020 = <span class="c">2,6 Wh</span></p>
       ${OU}<p><b>Méthode 2 : le tableau de proportionnalité.</b> 130 Wh pour 1 kg ; ? Wh pour 0,020 kg :</p>
-      ${tab(['Wh', '130', '?'], ['kg', '1', '0,020'])}<p class="crs-calc">? = ${fr('130 × 0,020', '1')} = <span class="c">2,6 Wh</span> (produit en croix)</p>
+      ${tab(['E (Wh)', 'm (kg)'], [['130', '1'], ['?', '0,020']])}<p class="crs-calc">? = ${fr('130 × 0,020', '1')} = <span class="c">2,6 Wh</span> (produit en croix)</p>
       ${OU}<p><b>Méthode 3 : la formule.</b></p><p class="crs-calc">E<sub>m</sub> = ${fr('E', 'm')} donc E = E<sub>m</sub> × m = 130 Wh/kg × 0,020 kg = <span class="c">2,6 Wh</span></p>`)}
     <div class="ph-lien-app"><p>Besoin de revoir les tableaux de proportionnalité ?</p><a class="btn-small" href="../../proportionnalite/index.html" target="_blank" rel="noopener">Revois la proportionnalité →</a></div>`);
   const [Em, mg] = hasard([[130, 20], [100, 45], [150, 30], [80, 25], [200, 40]]);
@@ -58,8 +58,8 @@ function etape1(c_) {
   const m = mg / 1000;
   c_.aToi(carte, [
     { titre: 'Avec le tableau', enonce: `<p>Une pile de masse m = ${mg} g a une énergie massique E<sub>m</sub> = ${Em} Wh·kg<sup>−1</sup>. Quelle énergie contient-elle ?</p>`,
-      parties: [partieTableau({ lignes: [['Wh', { v: Em }, '?'], ['kg', 1, { v: m }]],
-          diag: vs => proche(vs[1], mg) ? `La masse doit être en kg : ${mg} g = ${fmt(m)} kg.` : proche(vs[0], m) || proche(vs[1], Em) ? 'Chaque nombre va dans la ligne de son unité : les Wh en haut, les kg en bas.' : '',
+      parties: [partieTableau({ entetes: ['E (Wh)', 'm (kg)'], lignes: [[{ v: Em }, 1], ['?', { v: m }]],
+          diag: vs => proche(vs[1], mg) ? `La masse doit être en kg : ${mg} g = ${fmt(m)} kg.` : proche(vs[0], m) || proche(vs[1], Em) ? 'Chaque nombre va dans la colonne de son unité : les Wh à gauche, les kg à droite.' : '',
           solution: `<p>${Em} Wh pour 1 kg, ? Wh pour ${fmt(m)} kg.</p>` }),
         { type: 'nombre', q: 'Calcule la case « ? » (produit en croix).', label: 'E =', valeur: Em * m, unite: 'Wh', signe: false, rel: .01,
           diag: v => proche(v, Em * mg) ? `La masse doit être en kg (${fmt(m)} kg).` : proche(v, Em / m, .02) ? 'Produit en croix : on multiplie les deux nombres de la diagonale, puis on divise par le troisième (1).' : `E = ${Em} × ${fmt(m)} / 1.`,
@@ -135,7 +135,7 @@ function etape4(c_) {
 function aRetenir(c_) {
   const carte = c_.carte('À retenir');
   c_.ajouter(carte, `<div class="cle"><p class="crs-formule">E<sub>m</sub> = ${fr('E', 'm')} &nbsp;·&nbsp; E<sub>V</sub> = ${fr('E', 'V')}</p><p>E<sub>m</sub> en Wh/kg, E<sub>V</sub> en Wh/m<sup>3</sup>, E en Wh, m en kg, V en m<sup>3</sup>.</p></div>
-    <div class="cle"><p>Trois méthodes : les unités (Wh/kg × kg = Wh), le tableau de proportionnalité (unités en tête de ligne, produit en croix), la formule que l'on isole.</p></div>
+    <div class="cle"><p>Trois méthodes : les unités (Wh/kg × kg = Wh), le tableau de proportionnalité (grandeurs et unités en tête de colonne, produit en croix), la formule que l'on isole.</p></div>
     <div class="cle"><p>Volume d'un pavé : dimensions converties en m, puis V = L × l × h.</p></div>
     <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur les énergies massique et volumique →</a>
       <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Module 4 : branchements</a>

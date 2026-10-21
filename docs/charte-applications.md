@@ -143,7 +143,7 @@ Chaque étape = une carte `.er-card.er-etape` :
 - `.cours-exemple` (fond blanc) avec `.cours-exemple-t` (« Exemple ») : un exemple traité (`COURS.exemple(html)`) ;
 - formules : `.crs-formule` (centrées, grandes) ; calculs : `.crs-calc` (résultat en `.c`) ;
 - avertissement : `.crs-attention` ou `callout-danger` avec `cle-titre` ;
-- tableaux : `.crs-tab` dans un `.crs-defile` ; figures : SVG ou image de l'application ;
+- tableaux : `.crs-tab` dans un `.crs-defile` (tableau de proportionnalité : voir « Tableau de proportionnalité » plus bas) ; figures : SVG ou image de l'application ;
 - puis le bloc **« À toi »** (`c.aToi(carte, items)`, voir §6), puis le bouton « Continuer → » (`btn-primary`, aligné à droite) qui n'apparaît qu'une fois le « À toi » réussi. Une étape sans « À toi » appelle `c.continuer(carte)`.
 
 Parties de question du moteur (`p.type`) : `'choix'` (QCM, `indices` par mauvais choix), `'nombre'` (champ ±, `tol` ou `rel`, `diag(v)`), `'champs'` (plusieurs nombres validés ensemble, cases fausses en rouge), `'sci'` (a × 10<sup>n</sup>), `'texte'` (formule, mot), `'perso'` (outil propre à l'application : `monter(zone, api)` appelle `api.reussi()` / `api.erreur(diagnostic)` et renvoie `{ montrer() }`). Toutes ont `q`, `solution`, et `aide: true` quand aucune erreur ne peut être validée (réaction réglée en direct) : « Afficher la réponse » est alors proposé tout de suite. Un outil `perso` doit pouvoir exister en **plusieurs exemplaires** dans la page (pas d'`id` fixe ni d'état global) : avec « Afficher tout le cours », tous les « À toi » sont affichés en même temps.
@@ -183,6 +183,38 @@ Pas de lien « Fiche récapitulative » en haut du cours (la fiche est dans le s
 - Une ancre `id="<slug>"` sur la première section de chaque partie du module, pour que le lien Fiche du sommaire ouvre la fiche à la bonne partie.
 - Bas de page : `.er-actions.som-fiche-liens` avec « Revoir le cours » et « Questions sur… ».
 - En fin de cours, un lien vers la fiche du module.
+
+### Tableau de proportionnalité
+
+Dans toutes les applications et sur toutes les pages (cours, exemples, « À toi », fiches, séries, exercices, corrections), un tableau de proportionnalité a **toujours la même forme** :
+
+| d (m) | t (s) |
+|:---:|:---:|
+| 25 × 10³ | 3 600 |
+| 52 | ? |
+
+- **Une colonne par grandeur**, deux colonnes côte à côte. Jamais une ligne par grandeur (unités en tête de ligne), jamais de colonne de titres de lignes à gauche (« Échelle », « Période »…), jamais de tableau « en croix » sans en-tête.
+- **Ligne d'en-tête** (`<thead>`, cases `<th>`) : le **symbole de la grandeur puis son unité entre parenthèses** : `d (m)`, `t (s)`, `P (bar)`, `V (L)`, `E (Wh)`, `m (kg)`, `N (noyaux)`. Si aucun symbole simple ne convient, le nom court : `Distance (cm)`, `angle (rad)`. L'unité est toujours dans l'en-tête.
+- **Une ligne par couple de valeurs qui se correspondent** : la première ligne porte les deux valeurs connues qui vont ensemble (25 × 10³ m sont parcourus en 3 600 s) ; la seconde, la troisième valeur connue, dans la colonne de sa grandeur, et **« ? »** dans la case de la valeur cherchée (jamais une lettre ni une case vide). Un tableau de valeurs (pour reconnaître une proportionnalité) a autant de lignes que de couples de valeurs.
+- **Dans les cases** : les nombres seuls, dans l'unité de l'en-tête (`25 × 10<sup>3</sup>`, `3 600`, `0,020`), écrits comme au §7 (virgule, espace des milliers, `× 10<sup>n</sup>`). Quand l'exemple montre une conversion, la case peut l'écrire avec ses unités (`25 km = 25 × 10<sup>3</sup> m`, `1 h = 3 600 s`).
+- **Calcul juste en dessous** (`.crs-calc` dans un cours, texte ou `.som-formule` sur une fiche) : produit en croix `? = (c × b) / a` en proportionnalité directe, `? = (a × b) / c` en proportionnalité inverse (le produit d'une ligne est constant). Exemple : `? = (3 600 × 52) / 25 000 ≈ 7,49 s` (ou `t = …` avec le symbole de la grandeur).
+- **Présentation** : sobre, comme un tableau du cours. En-tête sur fond `--paper`, texte `--ink` en gras ; cases sur le fond de la carte, texte normal ; filets fins `--paper-3` sur toutes les cases ; tout est centré, sans retour à la ligne (`white-space: nowrap`), chiffres `tabular-nums`. **Pas d'en-tête coloré** (ni accent ni texte blanc), pas de trait épais, pas d'arrondi, pas d'ombre. Le tableau est centré dans un cours, une série ou un exercice, aligné à gauche sur une fiche (`.som-tab`).
+- **Classes à utiliser** (déjà définies, ne pas en créer d'autres pour un tableau écrit) :
+  - cours : `<div class="crs-defile"><table class="crs-tab">` (`assets/cours.css`) ;
+  - fiche : `<div class="som-defile"><table class="som-tab">` (`assets/sommaire.css`) ;
+  - série de questions, exercice, correction (pages sans `cours.css`) : `<div class="ph-defile"><table class="ph-tableau">`, le bloc `.ph-tableau` / `.ph-defile` de `cinematique/modules/cin.css` recopié dans le CSS de l'application.
+- **Tableau à compléter** (étiquettes à glisser, champs de saisie, unités à placer dans l'en-tête) : la même forme et la même présentation. Les étiquettes ou les champs vont dans les cases (au moins 96 px de large) ; la case « ? » est mise en valeur : gras 800, `1.15rem`, `--accent-ink`. Le texte d'attente d'un champ peut dire ce qu'on y écrit (`T`, `Δt`, `échelle`, `mesure`). Les diagnostics parlent de **colonnes** pour les grandeurs et les unités, de **lignes** pour les couples de valeurs (« 50 Wh correspondent à 1 kg : même ligne que le 1 »).
+
+Code d'un tableau dans un cours (sur une fiche : `som-defile` et `som-tab` ; dans une série ou un exercice : `ph-defile` et `ph-tableau`) :
+
+```html
+<div class="crs-defile"><table class="crs-tab">
+  <thead><tr><th>d (m)</th><th>t (s)</th></tr></thead>
+  <tbody><tr><td>25 × 10<sup>3</sup></td><td>3 600</td></tr>
+         <tr><td>52</td><td>?</td></tr></tbody>
+</table></div>
+<p class="crs-calc">? = <span class="som-fr"><span>3 600 × 52</span><span>25 000</span></span> ≈ <span class="c">7,49 s</span></p>
+```
 
 ## 5. Navigation
 
