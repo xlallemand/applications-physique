@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : fiche récapitulative — Chapitre 12 : Radioactivité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rad.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rad.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Demi-vie</h2>
+  </div>
+<!-- Fiche récapitulative du module 4 : définition de la demi-vie (ancre « definition »), lecture graphique (ancre « graphique »). -->
+
+  <section class="er-card" id="definition">
+    <h3 class="cours-titre">Demi-vie</h3>
+    <div class="cle"><p>La <b>demi-vie</b> t<sub>1/2</sub> (ou période radioactive) est la durée au bout de laquelle le nombre de noyaux radioactifs est <b>divisé par 2</b>. De même pour l'activité A ou la masse m.</p>
+      <p>Après <b>n demi-vies</b>, il reste <b>N<sub>0</sub> / 2<sup>n</sup></b>.</p>
+      <p>Au bout de <b>10 demi-vies</b>, l'activité est négligeable.</p></div>
+    <div id="fig1"></div>
+    <p class="cours-exemple-t">Exemple</p>
+    <p>N<sub>0</sub> = 10 000 noyaux, t<sub>1/2</sub> = 55 s : au bout de 165 s (3 demi-vies), N = 10 000 / 8 = 1 250 noyaux.</p>
+  </section>
+
+  <section class="er-card" id="graphique">
+    <h3 class="cours-titre">Lire t<sub>1/2</sub> sur un graphique</h3>
+    <div class="cle"><ol class="er-liste"><li>diviser par 2 la valeur initiale sur l'axe des ordonnées ;</li><li>reporter sur la courbe ;</li><li>reporter sur l'axe des abscisses : on lit t<sub>1/2</sub>.</li></ol>
+      <p><b>Âge</b> d'un échantillon : placer la valeur mesurée sur l'axe des ordonnées, reporter sur la courbe, puis sur l'axe des temps.</p></div>
+    <div id="fig2"></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_4a_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_4_questions.html">Questions sur la demi-vie</a>
+  </div>
+</div>
+<script>
+const sub0 = s => `${s}<tspan dy="3" font-size="9">0</tspan>`;
+document.getElementById('fig1').innerHTML = RAD.figCourbe({ f: t => 8 * Math.pow(2, -t), margeG: 50,
+  x: { max: 4.4, pas: 1, fin: .5, titre: 't', etiq: v => ['0', 't<tspan dy="3" font-size="9">1/2</tspan>', '2t<tspan dy="3" font-size="9">1/2</tspan>', '3t<tspan dy="3" font-size="9">1/2</tspan>', '4t<tspan dy="3" font-size="9">1/2</tspan>'][v] || '' },
+  y: { max: 9, pas: 1, fin: .5, titre: 'N(t)', etiq: v => ({ 8: sub0('N'), 4: sub0('N') + '<tspan dy="-3">/2</tspan>', 2: sub0('N') + '<tspan dy="-3">/4</tspan>', 1: sub0('N') + '<tspan dy="-3">/8</tspan>' })[v] || '' },
+  reperes: [{ y: 4 }, { y: 2 }, { y: 1 }] }, 'N₀/2 à t½, N₀/4 à 2t½, N₀/8 à 3t½');
+document.getElementById('fig2').innerHTML = RAD.figCourbe({ f: t => 10000 * Math.pow(2, -t / 55), grilleFine: true, margeG: 58,
+  x: { max: 200, pas: 20, fin: 5, titre: 'Date (en s)' }, y: { max: 10000, pas: 1000, fin: 500, titre: 'Nombre d\'atomes restants' },
+  reperes: [{ y: 5000, txt: '÷ 2 : 5 000', txtT: 't½ = 55 s' }] }, 'Lecture de la demi-vie : 5 000 atomes à 55 s');
+RAD.menu('fiche_4');
+</script>
+</body>
+</html>

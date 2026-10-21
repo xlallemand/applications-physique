@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : activité d'un échantillon — Chapitre 12 : Radioactivité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rad.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rad.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS</span>
+    <h2 class="er-titre">Activité d'un échantillon</h2>
+    <p class="er-contexte">L'<b>activité</b> d'un échantillon radioactif compte ses désintégrations <b>par seconde</b>, en <b>becquerels</b>. Tu vas la relier au nombre de noyaux restants, A = −dN/dt, puis convertir des activités en becquerels.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Définition : nombre moyen de désintégrations par seconde, Bq
+   2. A = −dN/dt = −N′ (opposé de la dérivée du nombre de noyaux restants)
+   3. Conversions : désintégrations par minute → Bq (÷ 60) ; kBq, MBq, TBq
+   ============================================================ */
+const { exemple } = COURS;
+const { o, fmt } = RAD;
+
+/* ---------- 1. Définition ---------- */
+function etape1(c) {
+  const carte = c.carte('1. L\'activité et le becquerel');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> L'<b>activité</b> d'un échantillon radioactif, notée <b>A</b>, est le <b>nombre moyen de désintégrations par seconde</b> de noyaux dans l'échantillon.</p>
+        <p>Unité : le <b>becquerel</b> (Bq). <b>1 Bq = une désintégration par seconde.</b></p></div>
+    </div>
+    ${exemple('<p class="crs-calc">Un compteur enregistre en moyenne 350 désintégrations chaque seconde : A = <span class="c">350 Bq</span>.</p><p>Un litre de lait a une activité d\'environ 70 Bq : 70 désintégrations par seconde.</p>')}`);
+  c.aToi(carte, [
+    { parties: [{ type: 'choix', q: 'L\'activité d\'un échantillon est :', colonne: true,
+      options: [o('ok', 'le nombre moyen de désintégrations par seconde'), o('n', 'le nombre de noyaux radioactifs'), o('min', 'le nombre de désintégrations par minute')], bonne: 'ok',
+      indices: { n: 'L\'activité compte des désintégrations pendant une durée, pas des noyaux.', min: 'Le becquerel compte les désintégrations par seconde.' },
+      solution: 'Le nombre moyen de désintégrations par seconde, en becquerels.' }] },
+    { parties: [{ type: 'nombre', q: 'Un échantillon de terre subit en moyenne 8 000 désintégrations par seconde. Quelle est son activité ?', label: 'A =', valeur: 8000, unite: 'Bq', tol: 0, signe: false,
+      diag: v => (v === 8 ? 'Le résultat est demandé en Bq, pas en kBq.' : 'Une désintégration par seconde, c\'est 1 Bq.'),
+      solution: '8 000 désintégrations par seconde : A = 8 000 Bq.' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. A = −dN/dt ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Activité et nombre de noyaux restants');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Chaque désintégration fait disparaître un noyau radioactif : le nombre N de noyaux restants diminue, d'autant plus vite que l'activité est grande.</p>
+      <div class="cle"><p class="crs-formule">A = −${RAD.fr('dN', 'dt')} = −N′</p>
+        <p>L'activité est l'<b>opposé de la dérivée</b> du nombre de noyaux restants par rapport au temps. N diminue, donc N′ &lt; 0 : avec le signe −, l'activité est <b>positive</b>.</p></div>
+    </div>
+    ${exemple('<p>En 1 seconde, le nombre de noyaux restants passe de 1 000 000 à 999 650 : il diminue de 350.</p><p class="crs-calc">N′ ≈ −350 noyaux par seconde, donc A = −N′ ≈ <span class="c">350 Bq</span></p>')}`);
+  c.aToi(carte, [
+    { parties: [{ type: 'nombre', q: 'En 2 secondes, le nombre de noyaux restants d\'un échantillon diminue de 1 200. Quelle est son activité ?', label: 'A ≈', valeur: 600, unite: 'Bq', tol: 0,
+      diag: v => (v === 1200 ? 'Ces 1 200 désintégrations ont lieu en 2 secondes : combien par seconde ?' : v === -600 ? 'L\'activité est positive : A = −N′, avec N′ négatif.' : v === 2400 ? 'On divise par la durée : 1 200 / 2.' : 'Nombre de désintégrations par seconde : 1 200 / 2.'),
+      solution: '1 200 / 2 = 600 désintégrations par seconde : A ≈ 600 Bq.' }] },
+    { parties: [{ type: 'choix', q: 'Pourquoi y a-t-il un signe − dans A = −dN/dt ?', colonne: true,
+      options: [o('ok', 'N diminue, sa dérivée est négative : le signe − rend l\'activité positive'), o('neg', 'Parce que l\'activité est négative'), o('e', 'À cause de la charge de l\'électron')], bonne: 'ok',
+      indices: { neg: 'Une activité compte des désintégrations : elle est positive.', e: 'Le signe vient de la dérivée : N diminue avec le temps.' },
+      solution: 'N diminue, donc dN/dt &lt; 0 ; A = −dN/dt est positive.' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Conversions ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Exprimer une activité en becquerels');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> On ramène à <b>une seconde</b> :</p>
+        <ul class="er-liste"><li>désintégrations par minute : on divise par <b>60</b> ;</li>
+          <li>désintégrations pendant une durée : on divise par cette durée <b>en secondes</b>.</li></ul>
+        <p>Multiples : 1 kBq = 10<sup>3</sup> Bq ; 1 MBq = 10<sup>6</sup> Bq ; 1 TBq = 10<sup>12</sup> Bq.</p></div>
+      <div class="ph-lien-app"><p>Revoir les préfixes et les conversions</p><a class="btn-small" href="../../conversions/index.html" target="_blank" rel="noopener">Conversions ↗</a></div>
+    </div>
+    ${exemple(`<p class="crs-calc">300 désintégrations par minute : A = ${RAD.fr('300', '60')} = <span class="c">5,0 Bq</span></p>
+      <p class="crs-calc">4 millions de désintégrations en 10 minutes : A = ${RAD.fr('4 × 10<sup>6</sup>', '10 × 60')} ≈ <span class="c">6,7 × 10<sup>3</sup> Bq</span></p>
+      <p class="crs-calc">2,5 MBq = 2,5 × 10<sup>6</sup> Bq</p>`, 'Exemples')}`);
+  c.aToi(carte, [
+    { titre: 'Par minute', parties: [{ type: 'nombre', q: '900 désintégrations par minute.', label: 'A =', valeur: 15, unite: 'Bq', rel: .01, signe: false,
+      diag: v => (Math.abs(v - 54000) < 1 ? 'Une minute dure 60 s : on divise par 60, on ne multiplie pas.' : Math.abs(v - 900) < 1 ? 'Le becquerel compte par seconde : divise par 60.' : '900 / 60.'),
+      solution: 'A = 900 / 60 = 15 Bq.' }] },
+    { titre: 'Pendant une durée', parties: [{ type: 'nombre', q: '7 200 désintégrations en 2 minutes.', label: 'A =', valeur: 60, unite: 'Bq', rel: .01, signe: false,
+      diag: v => (Math.abs(v - 3600) < 1 ? 'Ça, c\'est par minute : divise encore par 60.' : Math.abs(v - 120) < 1 ? '2 minutes = 120 s : 7 200 / 120.' : '2 min = 2 × 60 = 120 s ; A = 7 200 / 120.'),
+      solution: '2 min = 120 s ; A = 7 200 / 120 = 60 Bq.' }] },
+    { titre: 'Avec un préfixe', parties: [{ type: 'nombre', q: 'Une source a une activité de 4,2 kBq.', label: 'A =', valeur: 4200, unite: 'Bq', rel: .001, signe: false,
+      diag: v => (Math.abs(v - 4.2e6) < 1 ? 'k (kilo) vaut 10<sup>3</sup>, pas 10<sup>6</sup>.' : Math.abs(v - .0042) < 1e-6 ? 'Un kBq vaut 1 000 Bq : on multiplie.' : '1 kBq = 10<sup>3</sup> Bq.'),
+      solution: '4,2 kBq = 4,2 × 10<sup>3</sup> Bq = 4 200 Bq.' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Activité A.</b> Nombre moyen de désintégrations par seconde, en becquerels : 1 Bq = 1 désintégration par seconde.</p></div>
+    <div class="cle"><p><b class="cle-titre">Lien avec N.</b> A = −dN/dt = −N′ : l'opposé de la dérivée du nombre de noyaux restants.</p></div>
+    <div class="cle"><p><b class="cle-titre">Conversions.</b> Par minute : ÷ 60 ; pendant une durée : ÷ la durée en secondes. kBq = 10<sup>3</sup> Bq, MBq = 10<sup>6</sup> Bq, TBq = 10<sup>12</sup> Bq.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur l'activité →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_4a_cours.html">Module 4 : demi-vie</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+RAD.menu('module_3_cours');
+</script>
+</body>
+</html>

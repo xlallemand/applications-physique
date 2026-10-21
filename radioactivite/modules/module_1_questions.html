@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur le noyau — Chapitre 12 : Radioactivité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rad.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rad.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : composition d'un noyau (3),
+   nombre de nucléons (1), symbole à partir de Z et A (2), isotopes
+   ou non (2), une ligne de tableau comme l'exercice 7 (1), rôle de
+   Z, A ou définition des isotopes (1).
+   Erreurs diagnostiquées : A et Z inversés, neutrons = A au lieu de
+   A − Z (ou A + Z), A pris pour le nombre de neutrons, isotopes
+   confondus avec « même A ».
+   ============================================================ */
+const { o, nuc, n, hasard, melanger, entre, cap, nomDe, symboleDe, partieTableau } = RAD;
+const L = h => `<span class="rad-lisible">${h}</span>`;
+const POOL = [n(16, 8), n(23, 11), n(35, 17), n(59, 27), n(131, 53), n(137, 55), n(226, 88), n(239, 94), n(40, 19), n(90, 38), n(206, 82), n(197, 79), n(63, 29), n(127, 53), n(32, 15), n(60, 27)];
+
+// composition : protons et neutrons
+function qCompo() {
+  const x = hasard(POOL), N = x.A - x.Z;
+  return { theme: 'Composition d\'un noyau', enonce: `<p class="ph-calc">${L(nuc(x.A, x.Z, x.s))} (${nomDe(x.Z)} ${x.A})</p>`,
+    parties: [{ type: 'gabarit', q: 'Combien ce noyau contient-il de protons et de neutrons ?', morceaux: ['protons :', { v: x.Z, aria: 'Nombre de protons' }, ' neutrons :', { v: N, aria: 'Nombre de neutrons' }],
+      diag: v => (v[0] === x.A ? 'Le nombre de protons est Z, le nombre du bas.' : v[1] === x.A ? 'A compte tous les nucléons : pour les neutrons, calcule A − Z.' : v[1] === x.A + x.Z ? 'Neutrons = A − Z, pas A + Z.' : 'Protons : Z ; neutrons : A − Z.'),
+      solution: `<p>${x.Z} protons et ${x.A} − ${x.Z} = <b>${N} neutrons</b>.</p>` }] };
+}
+// nombre de nucléons
+function qNucleons() {
+  const x = hasard(POOL), N = x.A - x.Z;
+  return { theme: 'Nombre de nucléons', enonce: `<p>Un noyau de ${nomDe(x.Z)} contient ${x.Z} protons et ${N} neutrons.</p>`,
+    parties: [{ type: 'nombre', q: 'Combien a-t-il de nucléons ?', label: 'A =', valeur: x.A, tol: 0, signe: false,
+      diag: v => (v === N - x.Z || v === x.Z - N ? 'A = protons + neutrons : on additionne.' : v === N ? 'Les neutrons ne sont qu\'une partie des nucléons : ajoute les protons.' : 'Les nucléons sont les protons et les neutrons.'),
+      solution: `<p>A = ${x.Z} + ${N} = <b>${x.A}</b> nucléons : c'est le noyau ${L(nuc(x.A, x.Z, x.s))}.</p>` }] };
+}
+// symbole à partir de la composition
+function qSymbole() {
+  const x = hasard(POOL), N = x.A - x.Z;
+  return { theme: 'Symbole d\'un noyau', enonce: `<p>Un noyau de ${nomDe(x.Z)} (${x.s}) contient ${x.Z} protons et ${N} neutrons.</p>`,
+    parties: [{ type: 'choix', q: 'Quel est son symbole ?',
+      options: [o('ok', L(nuc(x.A, x.Z, x.s))), o('inv', L(nuc(x.Z, x.A, x.s))), o('n', L(nuc(N, x.Z, x.s))), o('nz', L(nuc(x.A, N, x.s)))], bonne: 'ok',
+      indices: { inv: 'A (les nucléons) s\'écrit en haut, Z (les protons) en bas.', n: `En haut, on écrit A, le nombre de nucléons : ${x.Z} + ${N}.`, nz: 'En bas, on écrit Z, le nombre de protons.' },
+      solution: `<p>A = ${x.Z} + ${N} = ${x.A} en haut, Z = ${x.Z} en bas : ${L(nuc(x.A, x.Z, x.s))}.</p>` }] };
+}
+// isotopes ou non
+const PAIRES = [[n(12, 6), n(14, 6), true], [n(235, 92), n(238, 92), true], [n(1, 1), n(3, 1), true], [n(16, 8), n(18, 8), true], [n(35, 17), n(37, 17), true], [n(54, 26), n(56, 26), true],
+  [n(14, 6), n(14, 7), false], [n(40, 19), n(40, 18), false], [n(60, 27), n(60, 28), false], [n(3, 1), n(3, 2), false], [n(137, 55), n(137, 56), false]];
+function qIsotopes() {
+  const [a, b, oui] = hasard(PAIRES);
+  return { theme: 'Isotopes', enonce: `<p class="ph-calc">${L(nuc(a.A, a.Z, a.s))} et ${L(nuc(b.A, b.Z, b.s))}</p>`,
+    parties: [{ type: 'choix', q: 'Ces deux noyaux sont-ils isotopes ?', melanger: false, options: [o('oui', 'Oui'), o('non', 'Non')], bonne: oui ? 'oui' : 'non',
+      indices: { oui: 'Des isotopes ont le même Z (le nombre du bas) : ici, les Z sont différents, ce n\'est pas le même élément.', non: 'Même Z, donc même élément, et A différents : ce sont des isotopes.' },
+      solution: oui ? `<p>Même Z = ${a.Z}, A différents (${a.A} et ${b.A}) : ce sont des isotopes du ${nomDe(a.Z)}.</p>` : `<p>Même A, mais Z différents (${a.Z} et ${b.Z}) : ${nomDe(a.Z)} et ${nomDe(b.Z)} sont deux éléments différents, pas des isotopes.</p>` }] };
+}
+// isotope d'un noyau donné, parmi d'autres noyaux
+function qIsotopeDe() {
+  const [a, b] = hasard(PAIRES.filter(p => p[2]));
+  const x1 = n(a.A, a.Z + 1), x2 = n(a.A + 1, a.Z + 1);
+  return { theme: 'Isotopes', enonce: `<p>Parmi ces noyaux, lequel est un isotope de ${L(nuc(a.A, a.Z, a.s))} ?</p>`,
+    parties: [{ type: 'choix', q: '',
+      options: [o('ok', L(nuc(b.A, b.Z, b.s))), o('memeA', L(nuc(x1.A, x1.Z, x1.s))), o('autre', L(nuc(x2.A, x2.Z, x2.s)))], bonne: 'ok',
+      indices: { memeA: 'Même A ne suffit pas : des isotopes ont le même Z.', autre: 'Z est différent : ce n\'est pas le même élément.' },
+      solution: `<p>${L(nuc(b.A, b.Z, b.s))} : même Z = ${a.Z}, A différent.</p>` }] };
+}
+// une ou deux lignes de tableau, comme l'exercice 7
+const LIGNES = [{ A: 12, Z: 6 }, { A: 14, Z: 6 }, { A: 16, Z: 8 }, { A: 17, Z: 8 }, { A: 35, Z: 17 }, { A: 37, Z: 17 }, { A: 235, Z: 92 }, { A: 238, Z: 92 }, { A: 1, Z: 1 }, { A: 2, Z: 1, surnom: 'deutérium' }, { A: 3, Z: 1, surnom: 'tritium' }, { A: 59, Z: 27 }, { A: 60, Z: 27 }];
+function qTableau() {
+  const [l1, l2] = melanger(LIGNES);
+  // cases à trouver : comme les lignes de l'ex. 7 (nom donné ; symbole donné ; Z et A donnés ; Z et neutrons donnés…)
+  const lignes = [Object.assign({ inc: hasard(['sZAN', 'nZN', 'nsN']) }, l1), Object.assign({ inc: hasard(['nAN', 'sZA', 'nsA']) }, l2)];
+  const elts = Array.from(new Set([symboleDe(l1.Z), symboleDe(l2.Z), 'C', 'O', 'Cl', 'U', 'H', 'Co'])).sort();
+  const donnees = elts.map(s => `${s} : Z = ${RAD.zDe(s)}`).join(' ; ');
+  return { theme: 'Tableau (comme l\'exercice 7)', consigne: 'Complète les deux lignes du tableau, l\'une après l\'autre.', enonce: `<p class="ph-donnees">Données : ${donnees}.</p>`,
+    parties: [partieTableau(lignes, { elements: elts, donnees: true })] };
+}
+// rôle de Z et de A, définition des isotopes
+function qDef() {
+  return hasard([
+    { theme: 'Le symbole ᴬ<sub>Z</sub>X', parties: [{ type: 'choix', q: 'Que représente Z dans le symbole <sup>A</sup><sub>Z</sub>X ?',
+      options: [o('p', 'le nombre de protons'), o('n', 'le nombre de neutrons'), o('nuc', 'le nombre de nucléons')], bonne: 'p',
+      indices: { n: 'Le nombre de neutrons n\'est pas écrit : on le calcule, A − Z.', nuc: 'Le nombre de nucléons, c\'est A, en haut.' },
+      solution: '<p>Z est le nombre de protons : c\'est lui qui fixe l\'élément.</p>' }] },
+    { theme: 'Le symbole ᴬ<sub>Z</sub>X', parties: [{ type: 'choix', q: 'Que représente A dans le symbole <sup>A</sup><sub>Z</sub>X ?',
+      options: [o('nuc', 'le nombre de nucléons (protons + neutrons)'), o('n', 'le nombre de neutrons'), o('p', 'le nombre de protons')], bonne: 'nuc',
+      indices: { n: 'A compte aussi les protons.', p: 'Le nombre de protons, c\'est Z, en bas.' },
+      solution: '<p>A est le nombre de nucléons : protons et neutrons.</p>' }] },
+    { theme: 'Isotopes', parties: [{ type: 'choix', q: 'Deux isotopes ont :',
+      options: [o('ok', 'le même Z et des A différents'), o('memeA', 'le même A et des Z différents'), o('tout', 'le même A et le même Z')], bonne: 'ok',
+      indices: { memeA: 'Avec des Z différents, ce sont deux éléments différents.', tout: 'Même A et même Z : c\'est le même noyau.' },
+      solution: '<p>Des isotopes ont le même nombre de protons Z (même élément) et des nombres de nucléons A différents.</p>' }] },
+    { theme: 'Radioactivité naturelle', parties: [{ type: 'choix', q: 'Qui a découvert la radioactivité, phénomène naturel, à la fin du XIX<sup>e</sup> siècle ?',
+      options: [o('b', 'Henri Becquerel'), o('e', 'Albert Einstein'), o('p', 'Max Planck')], bonne: 'b',
+      indices: { e: 'L\'unité de l\'activité porte le nom du découvreur.', p: 'Planck a donné son nom à la constante h de E = h × f.' },
+      solution: '<p>Henri Becquerel, en 1896 ; l\'unité de l\'activité, le becquerel, porte son nom.</p>' }] },
+  ]);
+}
+
+function tirage() {
+  return [qCompo(), qSymbole(), qIsotopes(), qCompo(), qNucleons(), qTableau(), hasard([qIsotopes, qIsotopeDe])(), qSymbole(), qCompo(), qDef()];
+}
+
+RAD.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Noyau et isotopes',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : composition d\'un noyau <sup>A</sup><sub>Z</sub>X, symbole à partir de Z et A, isotopes, tableau comme l\'exercice 7.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2a_cours.html', label: 'Module 2 : types de radioactivité →' },
+});
+RAD.menu('module_1_questions');
+</script>
+</body>
+</html>

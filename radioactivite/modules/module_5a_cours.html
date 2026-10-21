@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 : la loi de décroissance — Chapitre 12 : Radioactivité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rad.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rad.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 5 · COURS 1 / 3</span>
+    <h2 class="er-titre">La loi de décroissance</h2>
+    <p class="er-contexte">La décroissance radioactive suit une <b>loi exponentielle</b> : N(t) = N<sub>0</sub> e<sup>−λt</sup>. Tu vas calculer N à une date donnée avec la touche <b>e<sup>x</sup></b>, puis en déduire l'activité A(t) = A<sub>0</sub> e<sup>−λt</sup>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. N(t) = N₀ e^(−λt), λ constante radioactive ; calculer N (touche eˣ)
+   2. A = −dN/dt, (e^(ax))′ = a e^(ax) : A(t) = λ N₀ e^(−λt) = A₀ e^(−λt)
+      avec A₀ = λ N₀ (exercice 11)
+   Valeurs vérifiées : 5,0 × 10⁶ × e^(−1) ≈ 1,84 × 10⁶ ;
+   1,0 × 10⁸ × e^(−0,0866 × 10) ≈ 4,21 × 10⁷ ; 2,0 × 10⁶ × e^(−0,0126 × 100) ≈ 5,67 × 10⁵ ;
+   0,010 × 5,0 × 10⁵ = 5,0 × 10³ Bq ; 800 × e^(−0,0866 × 8) ≈ 400 Bq.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, fmt, sci, proche, fr } = RAD;
+const M = RAD.MOINS;
+const pr = (a, b) => proche(a, b, .02);
+
+// calcul de N = N₀ e^(−λt), avec les erreurs classiques
+function calculN(N0, N0t, l, lt, t, tt, titre) {
+  const N = N0 * Math.exp(-l * t);
+  return { titre, enonce: `<p>N<sub>0</sub> = ${N0t} noyaux ; λ = ${lt} ; t = ${tt}.</p>`, parties: [{ type: 'sci', q: 'Calcule N (3 chiffres significatifs).', label: 'N =', valeur: N, cs: 3, rel: .01,
+    diag: v => (pr(v, N0 * Math.exp(l * t)) ? `Le signe − de l'exposant est oublié : N ne peut pas dépasser N<sub>0</sub>.` : pr(v, N0 * Math.exp(-l) * t) ? `L'exposant est tout le produit −λt : calcule d'abord ${M}λ × t.` : pr(v, N0 * Math.pow(10, -l * t)) ? 'C\'est la touche e<sup>x</sup>, pas 10<sup>x</sup>.' : `N = N<sub>0</sub> × e<sup>${M}λt</sup> : calcule ${M}λ × t, puis e<sup>x</sup>, puis multiplie par N<sub>0</sub>.`),
+    solution: `${M}λt = ${M}${fmt(l)} × ${fmt(t)} = ${fmt(+(-l * t).toPrecision(4))} ; N = ${N0t} × e<sup>${fmt(+(-l * t).toPrecision(4))}</sup> ≈ ${sci(N, 3)} noyaux.` }] };
+}
+
+/* ---------- 1. N(t) = N₀ e^(−λt) ---------- */
+function etape1(c) {
+  const carte = c.carte('1. La décroissance exponentielle');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>La décroissance radioactive suit une loi exponentielle :</p>
+      <div class="cle"><p class="crs-formule">N(t) = N<sub>0</sub> e<sup>${M}λt</sup></p>
+        <p>avec <b>N<sub>0</sub></b> le nombre initial de noyaux et <b>λ</b> la <b>constante radioactive</b> : elle est liée à la demi-vie et représente la <b>probabilité de désintégration d'un noyau</b> par unité de temps (en s<sup>${M}1</sup>, ou en jour<sup>${M}1</sup>, an<sup>${M}1</sup>…).</p>
+        <p><b>Calculer N</b> : touche <b>e<sup>x</sup></b> de la calculatrice. λ et t doivent être dans la même unité de temps.</p></div>
+    </div>
+    ${exemple(`<p>N<sub>0</sub> = 5,0 × 10<sup>6</sup> noyaux, λ = 0,020 s<sup>${M}1</sup>, t = 50 s :</p>
+      <p class="crs-calc">${M}λt = ${M}0,020 × 50 = ${M}1,0 ; N = 5,0 × 10<sup>6</sup> × e<sup>${M}1,0</sup> ≈ <span class="c">1,84 × 10<sup>6</sup> noyaux</span></p>
+      <p>À la calculatrice : 5,0E6 × e<sup>x</sup>(${M}0,020 × 50).</p>`)}`);
+  c.aToi(carte, [
+    calculN(1e8, '1,0 × 10<sup>8</sup>', .0866, `0,0866 jour<sup>${M}1</sup> (iode 131)`, 10, '10 jours', 'Calculer N'),
+    calculN(2e6, '2,0 × 10<sup>6</sup>', .0126, `0,0126 s<sup>${M}1</sup> (radon 220)`, 100, '100 s'),
+  ]);
+  return carte;
+}
+
+/* ---------- 2. A(t) = A₀ e^(−λt) ---------- */
+function etape2(c) {
+  const carte = c.carte('2. L\'activité suit la même loi');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>L'activité est l'opposé de la dérivée de N (module 3) : A = ${M}${fr('dN', 'dt')}. La dérivée de la fonction exponentielle est (e<sup>ax</sup>)′ = a e<sup>ax</sup> ; ici a = ${M}λ :</p>
+      <p class="crs-calc">A = ${M}N<sub>0</sub> × (${M}λ) × e<sup>${M}λt</sup> = λ N<sub>0</sub> e<sup>${M}λt</sup> (= λN)</p>
+      <div class="cle"><p class="crs-formule">A(t) = A<sub>0</sub> e<sup>${M}λt</sup> &nbsp; avec &nbsp; A<sub>0</sub> = λ N<sub>0</sub></p>
+        <p>A<sub>0</sub> est l'activité initiale ; pour l'avoir en Bq, λ doit être en s<sup>${M}1</sup>.</p></div>
+    </div>
+    ${exemple(`<p>N<sub>0</sub> = 5,0 × 10<sup>5</sup> noyaux, λ = 0,010 s<sup>${M}1</sup> :</p>
+      <p class="crs-calc">A<sub>0</sub> = λ N<sub>0</sub> = 0,010 × 5,0 × 10<sup>5</sup> = <span class="c">5,0 × 10<sup>3</sup> Bq</span></p>`)}`);
+  c.aToi(carte, [
+    { titre: 'La dérivée (exercice 11)', parties: [{ type: 'choix', q: `Quelle est la dérivée de N(t) = N<sub>0</sub> e<sup>${M}λt</sup> ?`,
+      options: [o('ok', `${M}λ N<sub>0</sub> e<sup>${M}λt</sup>`), o('meme', `N<sub>0</sub> e<sup>${M}λt</sup>`), o('signe', `λ N<sub>0</sub> e<sup>${M}λt</sup>`)], bonne: 'ok',
+      indices: { meme: '(e<sup>ax</sup>)′ = a e<sup>ax</sup> : il faut multiplier par a = −λ.', signe: `a = ${M}λ : la dérivée garde le signe −. C'est A = ${M}N′ qui est positive.` },
+      solution: `N′ = N<sub>0</sub> × (${M}λ) e<sup>${M}λt</sup> = ${M}λ N<sub>0</sub> e<sup>${M}λt</sup>, donc A = ${M}N′ = λ N<sub>0</sub> e<sup>${M}λt</sup>.` }] },
+    { titre: 'Activité initiale', parties: [{ type: 'sci', q: `N<sub>0</sub> = 2,0 × 10<sup>9</sup> noyaux, λ = 3,0 × 10<sup>${M}4</sup> s<sup>${M}1</sup>. Calcule A<sub>0</sub>.`, label: 'A<sub>0</sub> =', valeur: 6e5, unite: 'Bq', cs: 2, rel: .01,
+      diag: v => (pr(v, 2e9 / 3e-4) ? 'On multiplie λ par N<sub>0</sub>.' : pr(v, 2e9) ? 'A<sub>0</sub> = λ × N<sub>0</sub>.' : 'A<sub>0</sub> = λ N<sub>0</sub> : multiplie les puissances de 10.'),
+      solution: `A<sub>0</sub> = λ N<sub>0</sub> = 3,0 × 10<sup>${M}4</sup> × 2,0 × 10<sup>9</sup> = 6,0 × 10<sup>5</sup> Bq.` }] },
+    { titre: 'Activité à une date', parties: [{ type: 'nombre', q: `Iode 131 : A<sub>0</sub> = 800 Bq, λ = 0,0866 jour<sup>${M}1</sup>. Calcule A au bout de 8 jours.`, label: 'A ≈', valeur: 800 * Math.exp(-.0866 * 8), unite: 'Bq', rel: .01, signe: false,
+      diag: v => (pr(v, 800 * Math.exp(.0866 * 8)) ? 'Le signe − de l\'exposant est oublié : l\'activité diminue.' : `A = A<sub>0</sub> e<sup>${M}λt</sup> = 800 × e<sup>${M}0,0866 × 8</sup>.`),
+      solution: `A = 800 × e<sup>${M}0,0866 × 8</sup> = 800 × e<sup>${M}0,693</sup> ≈ 400 Bq : 8 jours, c'est justement la demi-vie de l'iode 131.` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Loi de décroissance.</b> N(t) = N<sub>0</sub> e<sup>${M}λt</sup>, λ constante radioactive (probabilité de désintégration d'un noyau par unité de temps). Calcul de N : touche e<sup>x</sup>.</p></div>
+    <div class="cle"><p><b class="cle-titre">Activité.</b> A = ${M}dN/dt = λN, donc A(t) = A<sub>0</sub> e<sup>${M}λt</sup> avec A<sub>0</sub> = λ N<sub>0</sub>.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_5b_cours.html">Cours : isoler t avec ln →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_5.html#loi">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+RAD.menu('module_5a_cours');
+</script>
+</body>
+</html>
