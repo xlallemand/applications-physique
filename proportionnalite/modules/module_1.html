@@ -33,8 +33,9 @@
 const { fmt, hasard, exemple } = COURS;
 const proche = (a, b) => COURS.proche(a, b, .01);
 const fr = (a, b) => `<span class="som-fr"><span>${a}</span><span>${b}</span></span>`;
-// tableau de valeurs en lignes : [['t (h)', 1, 2, 3], ['d (km)', 90, 180, 270]]
-const tabLignes = lignes => `<div class="crs-defile"><table class="crs-tab"><tbody>${lignes.map(l => `<tr><th>${l[0]}</th>${l.slice(1).map(x => `<td>${typeof x === 'number' ? fmt(x) : x}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+// tableau de valeurs, une colonne par grandeur (en-tête : grandeur et unité, voir la charte) :
+// [['t (h)', 1, 2, 3], ['d (km)', 90, 180, 270]] → colonnes t (h) et d (km), une ligne par couple de valeurs
+const tabValeurs = grandeurs => `<div class="crs-defile"><table class="crs-tab"><thead><tr>${grandeurs.map(g => `<th>${g[0]}</th>`).join('')}</tr></thead><tbody>${grandeurs[0].slice(1).map((_, i) => `<tr>${grandeurs.map(g => { const x = g[i + 1]; return `<td>${typeof x === 'number' ? fmt(x) : x}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>`;
 // QCM « directe / inverse / aucune » (les trois réponses dans le même ordre à chaque fois)
 const OPTS3 = [{ id: 'dir', label: 'Proportionnalité directe' }, { id: 'inv', label: 'Proportionnalité inverse' }, { id: 'auc', label: 'Aucune des deux' }];
 const qcm3 = (titre, enonce, q, bonne, indices, solution) => ({ titre, enonce, parties: [{ type: 'choix', q, options: OPTS3, bonne, indices, solution, melanger: false }] });
@@ -48,7 +49,7 @@ function etape1(c) {
         <p>Quand x double, y double ; quand x est divisé par 3, y est divisé par 3, etc. Dans un tableau de valeurs, tous les rapports ${fr('y', 'x')} sont égaux (à k).</p></div>
     </div>
     ${exemple(`<p>Une voiture roule à vitesse constante : 90 km/h signifie qu'elle parcourt 90 km en 1 h, et <b>deux fois plus</b> (180 km) en 2 h, <b>trois fois plus</b> (270 km) en 3 h…</p>
-      ${tabLignes([['t (h)', 1, 2, 3], ['d (km)', 90, 180, 270]])}
+      ${tabValeurs([['t (h)', 1, 2, 3], ['d (km)', 90, 180, 270]])}
       <p class="crs-calc">${fr('d', 't')} = ${fr('90', '1')} = ${fr('180', '2')} = ${fr('270', '3')} = <span class="c">90 km/h</span></p>
       <p>La distance parcourue est <b>directement proportionnelle</b> à la durée du trajet.</p>`)}`);
   // rapport d'un tableau : valeurs tirées au hasard, rapport entier
@@ -65,14 +66,14 @@ function etape1(c) {
         auc: 'Calcule le rapport volume / durée : 6 L / 2 min = 3 L/min et 15 L / 5 min = 3 L/min. Il est constant.' },
       '<p>Le rapport volume / durée vaut toujours 3 L/min (le débit) : le volume est <b>directement proportionnel</b> à la durée.</p>'),
     { titre: 'Le rapport d\'un tableau',
-      enonce: `<p>Un objet se déplace à vitesse constante. On relève la distance d parcourue au cours du temps :</p>${tabLignes([['t (s)', ...ts], ['d (m)', ...ts.map(t => v * t)]])}`,
-      parties: [{ type: 'nombre', q: 'Calcule le rapport d / t (il est le même pour chaque colonne).', label: 'd / t =', unite: 'm/s', valeur: v, signe: false,
+      enonce: `<p>Un objet se déplace à vitesse constante. On relève la distance d parcourue au cours du temps :</p>${tabValeurs([['t (s)', ...ts], ['d (m)', ...ts.map(t => v * t)]])}`,
+      parties: [{ type: 'nombre', q: 'Calcule le rapport d / t (il est le même pour chaque ligne).', label: 'd / t =', unite: 'm/s', valeur: v, signe: false,
         diag: x => (ts.some(t => proche(x, t / (v * t))) ? 'Tu as calculé t / d. Le rapport demandé est d / t : la distance divisée par la durée.'
           : ts.some(t => proche(x, v * t * t)) ? 'Tu as multiplié d par t. Le rapport d / t est une division.'
-          : `Prends une colonne du tableau et divise la distance par la durée, par exemple ${fmt(v * ts[0])} / ${ts[0]}.`),
+          : `Prends une ligne du tableau et divise la distance par la durée, par exemple ${fmt(v * ts[0])} / ${ts[0]}.`),
         solution: `<p class="crs-calc">${ts.map(t => fr(fmt(v * t), t)).join(' = ')} = <span class="c">${v} m/s</span></p><p>C'est la vitesse : le coefficient de proportionnalité entre d et t.</p>` }] },
     { titre: 'Un tableau de proportionnalité ?',
-      enonce: tabLignes([['x', ...xs], ['y', ...ys]]),
+      enonce: tabValeurs([['x', ...xs], ['y', ...ys]]),
       parties: [{ type: 'choix', q: 'Ce tableau est-il un tableau de proportionnalité ?', colonne: true, melanger: false,
         options: [{ id: 'oui', label: 'Oui : les rapports y / x sont tous égaux' }, { id: 'non', label: 'Non : les rapports y / x ne sont pas tous égaux' }, { id: 'aug', label: 'Oui : y augmente quand x augmente' }],
         bonne: 'non',
@@ -93,7 +94,7 @@ function etape2(c) {
       <div class="crs-attention"><p><b class="cle-titre">Attention.</b> Ce n'est pas la même chose que « les deux grandeurs varient en sens contraire » : il faut que le produit soit <b>exactement</b> constant.</p></div>
     </div>
     ${exemple(`<p>Loi de Boyle-Mariotte : à température constante, si on divise par 2 le volume V d'un gaz (on le comprime), sa pression P est multipliée par 2 ; si on divise le volume par 3, la pression est multipliée par 3.</p>
-      ${tabLignes([['V (L)', 6, 3, 2], ['P (bar)', 1, 2, 3]])}
+      ${tabValeurs([['V (L)', 6, 3, 2], ['P (bar)', 1, 2, 3]])}
       <p class="crs-calc">P × V = 1 × 6 = 2 × 3 = 3 × 2 = <span class="c">6 bar·L</span></p>
       <p>P et V sont <b>inversement proportionnelles</b>.</p>`)}`);
   // produit d'un tableau : valeurs choisies pour que P soit entier
@@ -109,13 +110,13 @@ function etape2(c) {
         auc: 'Le produit R × I reste constant (il vaut la tension U, fixée) : c\'est justement une proportionnalité inverse.' },
       '<p>R × I = U reste constant : l\'intensité est <b>inversement proportionnelle</b> à la résistance.</p>'),
     { titre: 'Le produit d\'un tableau',
-      enonce: `<p>On comprime un gaz à température constante :</p>${tabLignes([['V (L)', ...Vs], ['P (bar)', ...Ps]])}`,
-      parties: [{ type: 'nombre', q: 'Calcule le produit P × V (il est le même pour chaque colonne).', label: 'P × V =', unite: 'bar·L', valeur: k2, signe: false,
+      enonce: `<p>On comprime un gaz à température constante :</p>${tabValeurs([['V (L)', ...Vs], ['P (bar)', ...Ps]])}`,
+      parties: [{ type: 'nombre', q: 'Calcule le produit P × V (il est le même pour chaque ligne).', label: 'P × V =', unite: 'bar·L', valeur: k2, signe: false,
         diag: x => (Vs.some((V, i) => proche(x, Ps[i] / V) || proche(x, V / Ps[i])) ? 'Tu as fait une division. Pour une proportionnalité inverse, c\'est le <b>produit</b> P × V qui est constant.'
-          : `Prends une colonne du tableau et multiplie la pression par le volume, par exemple ${fmt(Ps[0])} × ${Vs[0]}.`),
+          : `Prends une ligne du tableau et multiplie la pression par le volume, par exemple ${fmt(Ps[0])} × ${Vs[0]}.`),
         solution: `<p class="crs-calc">${Vs.map((V, i) => `${fmt(Ps[i])} × ${V}`).join(' = ')} = <span class="c">${k2} bar·L</span></p>` }] },
     { titre: 'En sens contraire',
-      enonce: tabLignes([['x', ...t3[0]], ['y', ...t3[1]]]),
+      enonce: tabValeurs([['x', ...t3[0]], ['y', ...t3[1]]]),
       parties: [{ type: 'choix', q: 'Quand x augmente, y diminue. Quelle est la relation entre x et y ?', options: OPTS3, melanger: false, bonne: 'auc',
         indices: { inv: `y diminue bien quand x augmente, mais calcule les produits : ${pr3}. Ils ne sont pas tous égaux.`,
           dir: 'y diminue quand x augmente : ce ne peut pas être une proportionnalité directe.' },
@@ -176,7 +177,7 @@ function etape4(c) {
       </ul></div>
     </div>
     ${exemple(`<p>Une course de taxi coûte 2,50 € de prise en charge, puis 1,20 € par km parcouru : prix = 2,50 + 1,20 × d.</p>
-      ${tabLignes([['d (km)', 1, 2, 4], ['prix (€)', '3,70', '4,90', '7,30']])}
+      ${tabValeurs([['d (km)', 1, 2, 4], ['prix (€)', '3,70', '4,90', '7,30']])}
       <p>Si d double, le prix ne double pas (à cause des 2,50 € fixes) : ce <b>n'est pas</b> une situation de proportionnalité.</p>`)}`);
   // eau chauffée : température de départ non nulle (situation affine)
   const th0 = hasard([15, 18, 20]), pente = hasard([4, 5]), tmin = [0, 2, 4];
@@ -191,7 +192,7 @@ function etape4(c) {
       { dir: 'Sans masse, le ressort mesure déjà 10 cm : si la masse double, la longueur ne double pas (10 + 2 = 12 cm, puis 10 + 4 = 14 cm).',
         inv: 'La longueur augmente quand la masse augmente : ce ne peut pas être une proportionnalité inverse.' },
       '<p>La longueur vaut 10 cm, plus 2 cm par tranche de 100 g : situation <b>affine</b>, pas de proportionnalité. En revanche, l\'<b>allongement</b> (longueur − 10 cm) est proportionnel à la masse.</p>'),
-    qcm3('L\'eau chauffée', `<p>On chauffe de l'eau et on relève sa température θ au cours du temps :</p>${tabLignes([['t (min)', ...tmin], ['θ (°C)', ...tmin.map(t => th0 + pente * t)]])}`,
+    qcm3('L\'eau chauffée', `<p>On chauffe de l'eau et on relève sa température θ au cours du temps :</p>${tabValeurs([['t (min)', ...tmin], ['θ (°C)', ...tmin.map(t => th0 + pente * t)]])}`,
       'Quelle est la relation entre la température et la durée de chauffage ?', 'auc',
       { dir: `La température augmente régulièrement, mais à t = 0 elle vaut déjà ${th0} °C : quand la durée double (de 2 à 4 min), la température ne double pas.`,
         inv: 'La température augmente quand la durée augmente : ce ne peut pas être une proportionnalité inverse.' },

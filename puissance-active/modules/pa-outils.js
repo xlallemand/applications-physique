@@ -120,16 +120,19 @@
 
   /* ============================================================
      TABLEAU DE PROPORTIONNALITÉ (durée ↔ angle), écrit en colonnes
-     o = { unite: 'ms' | 'cm', T, dt, phi } : textes des cases
+     (voir la charte) : une colonne par grandeur, une ligne pour la
+     période (T ↔ 2π), une pour le décalage (Δt ↔ φ)
+     o = { unite: 's' | 'ms' | 'cm', T, dt, phi, phiConnu } : textes des cases (phi : « φ » par défaut)
+         fiche : true sur une fiche récapitulative (tableau .som-tab)
      ============================================================ */
   function tabProp(o) {
     const grandeur = o.unite === 'cm' ? 'Distance' : 'Durée';
-    return `<div class="lg-table-wrap"><table class="lg-table pa-prop">
-      <colgroup><col class="lg-col-titre"><col><col></colgroup>
-      <thead><tr><th></th><th>${grandeur} (${o.unite || 'ms'})</th><th>Angle (rad)</th></tr></thead>
+    const [defile, tab] = o.fiche ? ['som-defile', 'som-tab'] : ['ph-defile', 'ph-tableau'];
+    return `<div class="${defile}"><table class="${tab} pa-prop">
+      <thead><tr><th>${grandeur} (${o.unite || 'ms'})</th><th>Angle (rad)</th></tr></thead>
       <tbody>
-        <tr><th>Période</th><td>${o.T}</td><td>2π</td></tr>
-        <tr><th>Décalage</th><td>${o.dt}</td><td class="${o.phiConnu ? '' : 'lg-inconnue'}">${o.phi || 'φ'}</td></tr>
+        <tr><td>${o.T}</td><td>2π</td></tr>
+        <tr><td>${o.dt}</td><td${o.phiConnu ? '' : ' class="pa-inconnue"'}>${o.phi || 'φ'}</td></tr>
       </tbody></table></div>`;
   }
 
@@ -351,15 +354,15 @@
     const o = p.o, def = defPhi(o), R = LG.repere(def);
     const Tmm = o.T * R.mmX, dmm = Math.abs(o.dt) * R.mmX, phiVrai = 2 * Math.PI * dmm / Tmm;
     const d = el('div', 'pa-mesure-phi');
-    const champ = (x, aria) => `<input type="text" class="lg-input lg-cell" data-x="${x}" inputmode="decimal" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="cm" aria-label="${aria}">`;
+    // case à remplir ; le texte d'attente (T, Δt) dit quelle mesure va sur la ligne
+    const champ = (x, ph, aria) => `<input type="text" class="lg-input lg-cell" data-x="${x}" inputmode="decimal" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${ph}" aria-label="${aria}">`;
     d.innerHTML = `<div class="pa-regle" data-x="graphe"></div>
       <div class="pa-mesure-calc">
-        <div class="lg-table-wrap"><table class="lg-table pa-prop">
-          <colgroup><col class="lg-col-titre"><col><col></colgroup>
-          <thead><tr><th></th><th>Distance mesurée (cm)</th><th>Angle (rad)</th></tr></thead>
+        <div class="ph-defile"><table class="ph-tableau pa-prop">
+          <thead><tr><th>Distance mesurée (cm)</th><th>Angle (rad)</th></tr></thead>
           <tbody>
-            <tr><th>Période T</th><td>${champ('T', 'Période T mesurée, en cm')}</td><td>2π</td></tr>
-            <tr><th>Décalage Δt</th><td>${champ('dt', 'Décalage Δt mesuré, en cm')}</td><td class="lg-inconnue">φ</td></tr>
+            <tr><td>${champ('T', 'T', 'Période T mesurée, en cm')}</td><td>2π</td></tr>
+            <tr><td>${champ('dt', 'Δt', 'Décalage Δt mesuré, en cm')}</td><td class="pa-inconnue">φ</td></tr>
           </tbody></table></div>
         <div class="ph-valeur pa-phi-ligne"><span class="ph-lab">φ = 2π × Δt / T =</span>
           <input type="text" class="lg-input pa-phi-champ" data-x="phi" inputmode="decimal" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Déphasage φ, en radians">

@@ -54,8 +54,8 @@ const G1 = [
   function tableau() {
     const [Em, E] = hasard([[50, 5000], [80, 5000], [110, 5000], [30, 600]]);
     return { theme: 'Tableau de proportionnalité', enonce: `<p>Quelle masse d'accumulateurs d'énergie massique ${Em} Wh·kg<sup>−1</sup> faut-il pour stocker ${fmt(E)} Wh ?</p>`,
-      parties: [partieTableau({ lignes: [['Wh', { v: Em }, { v: E }], ['kg', 1, '?']], q: 'a. Complète le tableau (unités en tête de ligne).',
-          diag: vs => proche(vs[0], E) && proche(vs[1], Em) ? `${Em} Wh correspondent à 1 kg : ils vont dans la même colonne que le 1.` : '' }),
+      parties: [partieTableau({ entetes: ['E (Wh)', 'm (kg)'], lignes: [[{ v: Em }, 1], [{ v: E }, '?']], q: 'a. Complète le tableau (grandeurs et unités en tête de colonne).',
+          diag: vs => proche(vs[0], E) && proche(vs[1], Em) ? `${Em} Wh correspondent à 1 kg : ils vont sur la même ligne que le 1.` : '' }),
         fq.nombre('b. Calcule la case « ? » (produit en croix).', 'm =', E / Em, 'kg', { signe: false, rel: .01, affiche: fmt(r3(E / Em)),
           diag: v => proche(v, E * Em, .02) ? `Produit en croix : ${fmt(E)} × 1 / ${Em}.` : 'm = (nombre de la diagonale × 1) / le troisième nombre.',
           solution: calc(`m = ${fr(`${fmt(E)} × 1`, Em)} ≈ ${c(fmt(r3(E / Em)) + ' kg')}`) })] };

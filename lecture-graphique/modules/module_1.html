@@ -19,15 +19,13 @@
   .er-etape ul.er-liste { list-style: disc; }
   .er-etape .er-liste li + li { margin-top: 4px; }
   .er-etape .lg-figure { margin: 12px auto; max-width: 680px; }
-  .er-etape .lg-table-wrap { margin: 10px 0; }
   .lgc-etape-ex + .lgc-etape-ex { margin-top: 14px !important; }
   /* ---------- « À toi » : graphique avec règle, mesures ---------- */
   .er-page .lg-aide-regle { margin: 0 2px 6px; }
   .lgc-regle { margin: 4px 0 12px; }
   .lgc-saisie { margin-top: 10px; }
-  .lgc-mesures .lg-table { max-width: 420px; }
-  .lgc-mesures .lg-table td { padding: 6px 4px; }
-  .lgc-mesures .lg-table td .crs-champ-box { max-width: 100%; }
+  .lgc-mesures .crs-tab td { padding: 6px 4px; min-width: 96px; }
+  .lgc-mesures .crs-tab td .crs-champ-box { max-width: 100%; }
   .lgc-mesures .crs-champ-box.lgc-ok .crs-champ { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); }
   .lgc-mesures .crs-champ-box.lgc-ko .crs-champ { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); }
   .lgc-n { margin-top: 8px; justify-content: center; }
@@ -87,13 +85,12 @@ const R2 = LG.repere(THE), A2 = LG.analyser(THE, R2);
 // graphique seul, sans grandeur repérée en orange (mesure d'une échelle)
 const libre = def => Object.assign({}, def, { type: 'libre' });
 
-// tableau de proportionnalité (même présentation que dans les entraînements)
-// lignes : [titre, distance, valeur, inconnue ?]
+// tableau de proportionnalité (voir la charte) : en-têtes « grandeur (unité) »,
+// lignes [distance, valeur, inconnue ?] (inconnue : la valeur est la grandeur cherchée, mise en valeur)
 function tableau(entetes, lignes) {
-  return `<div class="lg-table-wrap"><table class="lg-table">
-    <colgroup><col class="lg-col-titre"><col><col></colgroup>
-    <thead><tr><th></th><th>${entetes[0]}</th><th>${entetes[1]}</th></tr></thead>
-    <tbody>${lignes.map(l => `<tr><th>${l[0]}</th><td>${l[1]}</td><td${l[3] ? ' class="lg-inconnue"' : ''}>${l[2]}</td></tr>`).join('')}</tbody></table></div>`;
+  return `<div class="crs-defile"><table class="crs-tab">
+    <thead><tr>${entetes.map(e => `<th>${e}</th>`).join('')}</tr></thead>
+    <tbody>${lignes.map(l => `<tr><td>${l[0]}</td><td${l[2] ? ' class="lg-inconnue"' : ''}>${l[1]}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 /* ============================================================
@@ -226,8 +223,8 @@ function questionMethode(def, titre, enonce) {
     monter(zone, api) {
       graphiqueRegle(zone, def);
       const t = el('div', 'lgc-mesures', tableau(['Distance (cm)', lib], [
-        ['Échelle', '<span data-c="eD"></span>', '<span data-c="eV"></span>'],
-        [periode ? 'Période(s)' : 'Point', '<span data-c="mD"></span>', periode ? `n${sym}` : sym, true],
+        ['<span data-c="eD"></span>', '<span data-c="eV"></span>'],
+        ['<span data-c="mD"></span>', periode ? `n${sym}` : sym, true],
       ]));
       zone.appendChild(t);
       const cases = {};
@@ -361,7 +358,7 @@ function etape1(c) {
       <div class="cle"><p><b class="cle-titre">L'idée.</b> Sur un axe gradué régulièrement, la <b>distance</b> mesurée sur le papier est <b>proportionnelle</b> à l'<b>écart de valeurs</b>. Si on connaît la distance qui correspond à une valeur connue (l'<b>échelle</b>), un <b>tableau de proportionnalité</b> donne la valeur qui correspond à n'importe quelle autre distance.</p></div>
     </div>
     ${exemple(`<p>Sur l'axe des temps de ce graphique, <b>15,4 cm</b> correspondent à <b>40 ms</b>. Une distance deux fois plus petite (7,7 cm) correspond à une durée deux fois plus petite (20 ms). Pour une distance quelconque, par exemple 5,0 cm, on fait un produit en croix :</p>
-      ${tableau(['Distance (cm)', 'Durée (ms)'], [['Échelle', '15,4', '40'], ['Mesure', '5,0', 't', true]])}
+      ${tableau(['Distance (cm)', 'Durée (ms)'], [['15,4', '40'], ['5,0', 't', true]])}
       <p class="crs-calc">t = ${fr('5,0 × 40', '15,4')} ≈ <span class="c">13,0 ms</span></p>`)}`);
   // valeurs choisies pour que le résultat tombe juste : r = a / b a au plus une décimale
   const ech1 = hasard([[12, 60], [15, 30], [16, 40], [14, 70], [12, 30]]);
@@ -374,7 +371,7 @@ function etape1(c) {
   const item = (titre, enonce, sym, a, b, cc, unite, label) => ({
     titre, enonce,
     parties: [{ type: 'nombre', label: `${label} =`, unite, valeur: cc * b / a, signe: false,
-      diag: v => diagCroix(v, a, b, cc, unite), solution: tableau(['Distance (cm)', label === 't' ? 'Durée (ms)' : 'Tension (V)'], [['Échelle', fmt(a), fmt(b)], ['Mesure', fmt(cc, 1), sym, true]]) + calculCroix(sym, a, b, cc, unite) }],
+      diag: v => diagCroix(v, a, b, cc, unite), solution: tableau(['Distance (cm)', label === 't' ? 'Durée (ms)' : 'Tension (V)'], [[fmt(a), fmt(b)], [fmt(cc, 1), sym, true]]) + calculCroix(sym, a, b, cc, unite) }],
   });
   c.aToi(carte, [
     item('Une distance deux fois plus petite', `<p>Sur l'axe des temps d'un graphique, ${fmt(ech1[0])} cm correspondent à ${fmt(ech1[1])} ms. À quelle durée t correspond une distance de ${fmt(ech1[0] / 2, 1)} cm ?</p>`,
@@ -420,7 +417,7 @@ function etape3(c) {
       <p class="lgc-etape-ex"><b>Étape 2 · La grandeur.</b> On place le 0 de la règle sur un maximum et on lit la distance jusqu'au maximum situé <b>3 périodes</b> plus loin : <b>13,4 cm</b> pour une durée de 3T.</p>
       ${LG.figure(EX, [{ ox: R.sx(A.tDepart), oy: R.sy(A.f(A.tDepart)), rot: 0, cur: Math.round(3 * 11.6 * R.mmX) }])}
       <p class="lgc-etape-ex"><b>Étape 3 · Le tableau.</b></p>
-      ${tableau(['Distance (cm)', 'Durée (ms)'], [['Échelle', '15,4', '40'], ['3 périodes', '13,4', '3T', true]])}
+      ${tableau(['Distance (cm)', 'Durée (ms)'], [['15,4', '40'], ['13,4', '3T', true]])}
       <p class="lgc-etape-ex"><b>Étape 4 · Le calcul</b> (produit en croix), puis la division par le nombre de périodes :</p>
       <p class="crs-calc">3T = ${fr('13,4 × 40', '15,4')} ≈ 34,8 ms</p>
       <p class="crs-calc">donc T = ${fr('34,8', '3')} = <span class="c">11,6 ms</span></p>`)}`);
@@ -440,13 +437,13 @@ function etape3(c) {
       enonce: `<p>Échelle : ${fmt(e1[0])} cm pour ${fmt(e1[1])} ms. Une période mesure ${fmt(c1, 1)} cm sur le papier.</p>`,
       parties: [{ type: 'nombre', q: 'Quelle est la période T ?', label: 'T =', unite: 'ms', valeur: T1, signe: false,
         diag: v => diagCroix(v, e1[0], e1[1], c1, 'ms'),
-        solution: tableau(['Distance (cm)', 'Durée (ms)'], [['Échelle', fmt(e1[0]), fmt(e1[1])], ['1 période', fmt(c1, 1), 'T', true]]) + calculCroix('T', e1[0], e1[1], c1, 'ms') }] },
+        solution: tableau(['Distance (cm)', 'Durée (ms)'], [[fmt(e1[0]), fmt(e1[1])], [fmt(c1, 1), 'T', true]]) + calculCroix('T', e1[0], e1[1], c1, 'ms') }] },
     { titre: 'Plusieurs périodes mesurées',
       enonce: `<p>Échelle : ${fmt(e2[0])} cm pour ${fmt(e2[1])} ms. Entre deux maximums séparés par ${n2} périodes, on mesure ${fmt(c2, 1)} cm.</p>`,
       parties: [
         { type: 'nombre', q: `Quelle est la durée ${n2}T de ces ${n2} périodes ?`, label: `${n2}T =`, unite: 'ms', valeur: n2 * T2, signe: false,
           diag: v => (proche(v, T2) ? `C'est déjà la période T : la question demande d'abord la durée des ${n2} périodes mesurées.` : diagCroix(v, e2[0], e2[1], c2, 'ms')),
-          solution: tableau(['Distance (cm)', 'Durée (ms)'], [['Échelle', fmt(e2[0]), fmt(e2[1])], [`${n2} périodes`, fmt(c2, 1), `${n2}T`, true]]) + calculCroix(`${n2}T`, e2[0], e2[1], c2, 'ms') },
+          solution: tableau(['Distance (cm)', 'Durée (ms)'], [[fmt(e2[0]), fmt(e2[1])], [fmt(c2, 1), `${n2}T`, true]]) + calculCroix(`${n2}T`, e2[0], e2[1], c2, 'ms') },
         { type: 'nombre', q: 'Quelle est la période T ?', label: 'T =', unite: 'ms', valeur: T2, signe: false,
           diag: v => (proche(v, n2 * n2 * T2) ? `Il faut <b>diviser</b> par ${n2}, pas multiplier.` : proche(v, n2 * T2) ? `C'est la durée des ${n2} périodes : divise-la par ${n2}.` : `Une seule période dure ${n2} fois moins que les ${n2} périodes : T = ${n2}T / ${n2}.`),
           solution: `<p class="crs-calc">T = ${fr(fmt(n2 * T2), n2)} = <span class="c">${fmt(T2)} ms</span></p>` },
@@ -519,7 +516,7 @@ function etape5(c) {
     </div>
     ${exemple(`<p>Température du thé à t = 15 min : l'échelle vaut <b>8,6 cm</b> pour <b>100 °C</b> (de 0 à 100 °C), et le point est à <b>2,8 cm</b> de l'axe des abscisses.</p>
       ${LG.figure(THE, [regleY(R2, 0, 0, 100 * R2.mmY), { ox: R2.sx(15), oy: R2.sy(0), rot: -90, cur: Math.round(A2.exact * R2.mmY) }])}
-      ${tableau(['Distance (cm)', 'Température (°C)'], [['Échelle', '8,6', '100'], ['Point', '2,8', 'θ', true]])}
+      ${tableau(['Distance (cm)', 'Température (°C)'], [['8,6', '100'], ['2,8', 'θ', true]])}
       <p class="crs-calc">θ = ${fr('2,8 × 100', '8,6')} ≈ <span class="c">32,6 °C</span></p>`)}`);
   // valeurs choisies pour que le résultat tombe juste
   const ctxs = [
@@ -538,7 +535,7 @@ function etape5(c) {
       enonce: `<p>${k.nom} ${k.sym} : sur l'axe vertical, l'échelle vaut ${fmt(k.a, 1)} cm pour ${fmt(k.b)} ${k.unite} (à partir de 0). Le point est à ${fmt(dist, 1)} cm de l'axe des abscisses.</p>`,
       parties: [{ type: 'nombre', q: `Quelle est la valeur de ${k.sym} ?`, label: `${k.sym} =`, unite: k.unite, valeur: val, signe: false,
         diag: v => diagCroix(v, k.a, k.b, dist, k.unite),
-        solution: tableau(['Distance (cm)', `${k.nom} (${k.unite})`], [['Échelle', fmt(k.a, 1), fmt(k.b)], ['Point', fmt(dist, 1), k.sym, true]]) + calculCroix(k.sym, k.a, k.b, dist, k.unite) }] },
+        solution: tableau(['Distance (cm)', `${k.nom} (${k.unite})`], [[fmt(k.a, 1), fmt(k.b)], [fmt(dist, 1), k.sym, true]]) + calculCroix(k.sym, k.a, k.b, dist, k.unite) }] },
     { titre: 'Le bon axe',
       parties: [{ type: 'choix', q: 'Pour lire l\'abscisse d\'un point (une durée t), où mesures-tu l\'échelle ?', colonne: true,
         options: [{ id: 'h', label: 'Sur l\'axe horizontal (l\'axe des temps)' }, { id: 'v', label: 'Sur l\'axe vertical' }, { id: 'n', label: 'Sur n\'importe quel axe, puisque les graduations sont régulières' }],

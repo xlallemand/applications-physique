@@ -288,16 +288,16 @@
   /* ---------- Schémas illustratifs du cours (tableau direct / inverse) ---------- */
   function ptCrossDiagramSvg() {
     return `<svg viewBox="0 0 260 150" class="pt-diagram">
-      <rect x="10" y="10" width="120" height="35" fill="var(--accent)"/>
-      <rect x="130" y="10" width="120" height="35" fill="var(--accent)"/>
-      <text x="70" y="32" text-anchor="middle" fill="#fff" font-weight="700" font-size="14">Grandeur A</text>
-      <text x="190" y="32" text-anchor="middle" fill="#fff" font-weight="700" font-size="14">Grandeur B</text>
-      <rect x="10" y="45" width="120" height="45" fill="var(--paper)" stroke="var(--line-strong)"/>
-      <rect x="130" y="45" width="120" height="45" fill="var(--paper)" stroke="var(--line-strong)"/>
+      <rect x="10" y="10" width="120" height="35" fill="var(--paper)" stroke="var(--paper-3)" stroke-width="1.5"/>
+      <rect x="130" y="10" width="120" height="35" fill="var(--paper)" stroke="var(--paper-3)" stroke-width="1.5"/>
+      <text x="70" y="32" text-anchor="middle" fill="var(--ink)" font-weight="800" font-size="14">Grandeur A</text>
+      <text x="190" y="32" text-anchor="middle" fill="var(--ink)" font-weight="800" font-size="14">Grandeur B</text>
+      <rect x="10" y="45" width="120" height="45" fill="var(--sheet)" stroke="var(--paper-3)" stroke-width="1.5"/>
+      <rect x="130" y="45" width="120" height="45" fill="var(--sheet)" stroke="var(--paper-3)" stroke-width="1.5"/>
       <text x="70" y="73" text-anchor="middle" fill="var(--accent-ink)" font-weight="800" font-size="16">a</text>
       <text x="190" y="73" text-anchor="middle" fill="var(--accent-ink)" font-weight="800" font-size="16">b</text>
-      <rect x="10" y="90" width="120" height="45" fill="#fff" stroke="var(--line-strong)"/>
-      <rect x="130" y="90" width="120" height="45" fill="#fff" stroke="var(--line-strong)"/>
+      <rect x="10" y="90" width="120" height="45" fill="var(--sheet)" stroke="var(--paper-3)" stroke-width="1.5"/>
+      <rect x="130" y="90" width="120" height="45" fill="var(--sheet)" stroke="var(--paper-3)" stroke-width="1.5"/>
       <text x="70" y="118" text-anchor="middle" fill="var(--accent-ink)" font-weight="800" font-size="16">c</text>
       <text x="190" y="118" text-anchor="middle" fill="var(--accent-ink)" font-weight="800" font-size="16">?</text>
       <path d="M 190,87 L 70,104 L 70,87 L 176,104 L 182,109" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ptArrow)"/>
@@ -306,16 +306,16 @@
   }
   function ptCrossDiagramInverseSvg() {
     return `<svg viewBox="0 0 260 150" class="pt-diagram">
-      <rect x="10" y="10" width="120" height="35" fill="var(--accent)"/>
-      <rect x="130" y="10" width="120" height="35" fill="var(--accent)"/>
-      <text x="70" y="32" text-anchor="middle" fill="#fff" font-weight="700" font-size="14">Grandeur A</text>
-      <text x="190" y="32" text-anchor="middle" fill="#fff" font-weight="700" font-size="14">Grandeur B</text>
-      <rect x="10" y="45" width="120" height="45" fill="var(--paper)" stroke="var(--line-strong)"/>
-      <rect x="130" y="45" width="120" height="45" fill="var(--paper)" stroke="var(--line-strong)"/>
+      <rect x="10" y="10" width="120" height="35" fill="var(--paper)" stroke="var(--paper-3)" stroke-width="1.5"/>
+      <rect x="130" y="10" width="120" height="35" fill="var(--paper)" stroke="var(--paper-3)" stroke-width="1.5"/>
+      <text x="70" y="32" text-anchor="middle" fill="var(--ink)" font-weight="800" font-size="14">Grandeur A</text>
+      <text x="190" y="32" text-anchor="middle" fill="var(--ink)" font-weight="800" font-size="14">Grandeur B</text>
+      <rect x="10" y="45" width="120" height="45" fill="var(--sheet)" stroke="var(--paper-3)" stroke-width="1.5"/>
+      <rect x="130" y="45" width="120" height="45" fill="var(--sheet)" stroke="var(--paper-3)" stroke-width="1.5"/>
       <text x="70" y="73" text-anchor="middle" fill="var(--accent-ink)" font-weight="800" font-size="16">a</text>
       <text x="190" y="73" text-anchor="middle" fill="var(--accent-ink)" font-weight="800" font-size="16">b</text>
-      <rect x="10" y="90" width="120" height="45" fill="#fff" stroke="var(--line-strong)"/>
-      <rect x="130" y="90" width="120" height="45" fill="#fff" stroke="var(--line-strong)"/>
+      <rect x="10" y="90" width="120" height="45" fill="var(--sheet)" stroke="var(--paper-3)" stroke-width="1.5"/>
+      <rect x="130" y="90" width="120" height="45" fill="var(--sheet)" stroke="var(--paper-3)" stroke-width="1.5"/>
       <text x="70" y="118" text-anchor="middle" fill="var(--accent-ink)" font-weight="800" font-size="16">c</text>
       <text x="190" y="118" text-anchor="middle" fill="var(--accent-ink)" font-weight="800" font-size="16">?</text>
       <path d="M 88 68 L 174 68" fill="none" stroke="#f59e0b" stroke-width="2.5" marker-end="url(#ptArrow2)"/>
@@ -354,17 +354,19 @@
       const headR = opts.reverseCols ? `${opts.labelA} (${opts.unitA})` : `${opts.labelB} (${opts.unitB})`;
       const row1L = opts.reverseCols ? ptSlot('b1_t') : ptSlot('a1_t');
       const row1R = opts.reverseCols ? ptSlot('a1_t') : ptSlot('b1_t');
-      const row2L = opts.reverseCols ? '?' : ptSlot('a2_t');
-      const row2R = opts.reverseCols ? ptSlot('a2_t') : '?';
+      // case de l'inconnue : « ? » mis en valeur, comme dans les « À toi » du cours
+      const inconnue = '<td class="pt-inconnue">?</td>';
+      const row2L = opts.reverseCols ? inconnue : `<td>${ptSlot('a2_t')}</td>`;
+      const row2R = opts.reverseCols ? `<td>${ptSlot('a2_t')}</td>` : inconnue;
       root.innerHTML = `
         <div class="pt-palette">${chipsHtml('_t')}</div>
-        <table class="pt-table">
+        <div class="pt-defile"><table class="pt-table">
           <thead><tr><th>${headL}</th><th>${headR}</th></tr></thead>
           <tbody>
             <tr><td>${row1L}</td><td>${row1R}</td></tr>
-            <tr><td>${row2L}</td><td>${row2R}</td></tr>
+            <tr>${row2L}${row2R}</tr>
           </tbody>
-        </table>
+        </table></div>
         <div class="text-center mt-3"><button type="button" class="btn-primary" id="ptfBtn1">Vérifier le tableau</button></div>
         <p id="ptfMsg1" class="verif-msg"></p>`;
       const eng = ptSlotEngine(root);

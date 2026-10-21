@@ -206,7 +206,7 @@
      MODULE 5 : énergie libérée
      ============================================================ */
   // tableau de proportionnalité : une colonne par grandeur (énergie, masse)
-  const table = (l1, l2) => `<table class="co-prop"><tr><th>Énergie (MJ)</th><th>Masse (kg)</th></tr>${l1.map((v, k) => `<tr><td>${v}</td><td>${l2[k]}</td></tr>`).join('')}</table>`;
+  const table = (l1, l2) => `<div class="ph-defile"><table class="ph-tableau"><thead><tr><th>E (MJ)</th><th>m (kg)</th></tr></thead><tbody>${l1.map((v, k) => `<tr><td>${v}</td><td>${l2[k]}</td></tr>`).join('')}</tbody></table></div>`;
   const pE = (f, mkg) => {
     const PC = COMB[f].PC, E = PC * mkg;
     return {
