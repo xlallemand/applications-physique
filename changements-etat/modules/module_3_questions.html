@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions sur Q = m c ΔT — Chapitre 11 : Changements d'état et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ce.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ce.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : Q pour le chauffage de l'eau liquide
+   (2, masse en g ou en kg), refroidissement (2, Q < 0), le bon c selon
+   l'état (1), glace à température négative (1), vapeur (1), c en kJ (1),
+   Q en kJ (1), énergie reçue ou cédée (1).
+   Erreurs diagnostiquées : Ti − Tf inversé (signe), masse en g, c en kJ
+   non converti, c d'un autre état, T_f seule, températures négatives
+   (0 − (−23) = 23).
+   ============================================================ */
+const { o, fq, fmt, par, sci, hasard, proche } = CE;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c_ = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .015);
+const UC = 'J·kg<sup>−1</sup>·K<sup>−1</sup>', Ti = 'T<sub>i</sub>', Tf = 'T<sub>f</sub>';
+const C = { s: 2090, l: 4180, g: 2010 }, NOM_C = { s: 'c<sub>glace</sub>', l: 'c<sub>eau</sub>', g: 'c<sub>vapeur</sub>' };
+const DONNEES = `<p class="ph-donnees">Données : c<sub>glace</sub> = 2 090 ${UC} ; c<sub>eau</sub> = 4 180 ${UC} ; c<sub>vapeur</sub> = 2 010 ${UC}.</p>`;
+const DE = { s: 'de glace', l: 'd\'eau liquide', g: 'de vapeur d\'eau' };
+const MASSES = [[.25, '250 g', '0,250 kg'], [.5, '500 g', '0,500 kg'], [.2, '200 g', '0,200 kg'], [1.5, '1,5 kg'], [2, '2,0 kg'], [3, '3,0 kg']];
+
+// diagnostics des erreurs classiques sur Q = m c (Tf − Ti)
+function diagQ(v, m, e, ti, tf, kilo) {
+  const c = C[e], Q = m * c * (tf - ti);
+  if (pr(v, -Q)) return `Attention au signe : ${Tf} − ${Ti} = ${fmt(tf)} − ${par(ti)} = ${fmt(tf - ti)} °C${ti < 0 ? ' (avec une température négative, écris les parenthèses)' : ''}.`;
+  if (pr(v, Q * 1000)) return 'La masse doit être en kg : 1 g = 10<sup>−3</sup> kg.';
+  if (pr(v, Q / 1000)) return kilo ? 'Convertis c en J·kg<sup>−1</sup>·K<sup>−1</sup> : 1 kJ = 10<sup>3</sup> J.' : 'Donne Q en joules.';
+  if (pr(v, m * c * tf) || pr(v, m * c * ti)) return `C'est l'écart ${Tf} − ${Ti} qui compte.`;
+  if (ti < 0 && pr(Math.abs(v), Math.abs(m * c * (tf + ti)))) return `Températures négatives : ${fmt(tf)} − ${par(ti)} = ${fmt(tf - ti)}.`;
+  if (Object.keys(C).some(x => x !== e && pr(Math.abs(v), Math.abs(m * C[x] * (tf - ti))))) return `Prends le c de l'état du corps pendant ce changement de température : ${NOM_C[e]}.`;
+  return `Q = m × c × (${Tf} − ${Ti}) avec m en kg.`;
+}
+// question « calcule Q » pour l'eau dans l'état e, de ti à tf
+function qQ(theme, e, ti, tf, mm, intro) {
+  const [m, mTxt, mKg] = mm || hasard(MASSES), Q = m * C[e] * (tf - ti);
+  return { theme, enonce: `<p>${intro || (tf > ti ? 'On chauffe' : 'On refroidit')} ${mTxt} ${DE[e]} de ${CE.deg(ti)} à ${CE.deg(tf)}.</p>${DONNEES}`,
+    parties: [fq.sci('Calcule Q (3 chiffres significatifs, signe compris).', 'Q =', Q, 'J', { cs: 3, rel: .01, diag: v => diagQ(v, m, e, ti, tf),
+      solution: (mKg ? calc(`m = ${mTxt} = ${mKg}`) : '') + calc(`Q = m × ${NOM_C[e]} × (${Tf} − ${Ti}) = ${fmt(m)} × ${fmt(C[e])} × (${fmt(tf)} − ${par(ti)})`) + calc(`Q = ${c_(sci(Q, 3) + ' J')}`) +
+        (Q < 0 ? '<p>Q < 0 : l\'énergie est cédée au milieu extérieur.</p>' : '') })] };
+}
+
+const qChauffe = () => qQ('Chauffage de l\'eau', 'l', hasard([10, 15, 20]), hasard([40, 60, 80, 90]));
+const qRefroid = () => qQ('Refroidissement', 'l', hasard([70, 80, 90]), hasard([20, 25, 30, 40]));
+const qGlace = () => qQ('Glace à température négative', 's', hasard([-30, -25, -18, -12]), hasard([-5, 0]));
+const qVapeur = () => hasard([true, false]) ? qQ('Vapeur d\'eau', 'g', 100, hasard([110, 120, 130])) : qQ('Vapeur d\'eau', 'g', hasard([120, 130, 140]), 100);
+const qGlaceRefroid = () => qQ('Refroidissement de la glace', 's', hasard([0, -5]), hasard([-18, -20, -25]), null, 'Au congélateur, on refroidit');
+function qBonC() {
+  const e = hasard(['s', 'l', 'g']), cas = { s: ['de la glace de −20 °C à −5 °C', 'glace'], l: ['de l\'eau de 20 °C à 60 °C', 'eau liquide'], g: ['de la vapeur de 105 °C à 140 °C', 'vapeur'] }[e];
+  const ind = {};
+  ['s', 'l', 'g'].filter(x => x !== e).forEach(x => { ind[x] = `Pendant ce chauffage, l'eau reste à l'état ${cas[1]} : prends le c de cet état.`; });
+  return { theme: 'Le bon c', enonce: `<p>On chauffe ${cas[0]}.</p>`,
+    parties: [fq.choix('Quelle capacité thermique massique utilises-tu ?', ['s', 'l', 'g'].map(x => o(x, `${NOM_C[x]} = ${fmt(C[x])} ${UC}`)), e, { melanger: false, indices: ind,
+      solution: `<p>L'eau est à l'état ${cas[1]} : ${NOM_C[e]} = ${fmt(C[e])} ${UC}.</p>` })] };
+}
+function qKilo() {
+  const [nom, c, cTxt] = hasard([['de l\'éthanol liquide', 2440, '2,44'], ['de l\'huile', 2000, '2,00'], ['du fluide R22 liquide', 1257, '1,257'], ['du cuivre', 385, '0,385']]);
+  const m = hasard([.5, 2, 1.5]), ti = hasard([15, 20]), tf = hasard([45, 60, 75]), Q = m * c * (tf - ti);
+  return { theme: 'c en kJ', enonce: `<p>On chauffe ${fmt(m)} kg ${nom} de ${CE.deg(ti)} à ${CE.deg(tf)}. On donne c = ${cTxt} kJ·kg<sup>−1</sup>·K<sup>−1</sup>.</p>`,
+    parties: [fq.sci('Calcule Q, en joules (3 chiffres significatifs).', 'Q =', Q, 'J', { cs: 3, rel: .01,
+      diag: v => (pr(v, Q / 1000) ? 'Convertis c en J·kg<sup>−1</sup>·K<sup>−1</sup> : ' + cTxt + ' kJ = ' + fmt(c) + ' J.' : pr(v, -Q) ? 'La température monte : Q > 0.' : `Q = ${fmt(m)} × ${fmt(c)} × (${tf} − ${ti}).`),
+      solution: calc(`c = ${cTxt} kJ·kg<sup>−1</sup>·K<sup>−1</sup> = ${fmt(c)} ${UC}`) + calc(`Q = ${fmt(m)} × ${fmt(c)} × (${tf} − ${ti}) = ${c_(sci(Q, 3) + ' J')}`) })] };
+}
+function qEnKJ() {
+  const m = hasard([2, 5, 10]), ti = hasard([12, 15, 20]), tf = hasard([50, 60, 65]), Q = m * 4180 * (tf - ti);
+  return { theme: 'Q en kilojoules', enonce: `<p>Un chauffe-eau élève la température de ${m} kg d'eau de ${CE.deg(ti)} à ${CE.deg(tf)} (c<sub>eau</sub> = 4 180 ${UC}).</p>`,
+    parties: [fq.nombre('Calcule Q en kJ (au kJ près).', 'Q =', Q / 1000, 'kJ', { tol: Math.max(1, Q / 1e6), affiche: fmt(Math.round(Q / 1000)),
+      diag: v => (pr(v, Q) ? 'Ton résultat est en J : divise par 1 000 pour l\'avoir en kJ.' : pr(v, -Q / 1000) ? 'La température monte : Q > 0.' : `Q = ${m} × 4 180 × (${tf} − ${ti}) J, puis en kJ.`),
+      solution: calc(`Q = ${m} × 4 180 × (${tf} − ${ti}) = ${fmt(Q)} J = ${c_(fmt(Q / 1000) + ' kJ')}`) })] };
+}
+function qSens() {
+  const chauffe = hasard([true, false]), Q = (chauffe ? 1 : -1) * hasard([2.5e4, 8.4e4, 1.2e5, 3.3e5]);
+  return { theme: 'Énergie reçue ou cédée', enonce: `<p>Pour un changement de température d'un morceau de métal, on trouve Q = ${sci(Q, 2)} J.</p>`,
+    parties: [fq.choix('Que fait le métal ?', [o('rc', 'il reçoit de l\'énergie et sa température monte'), o('cb', 'il cède de l\'énergie et sa température baisse'), o('rb', 'il reçoit de l\'énergie et sa température baisse')], chauffe ? 'rc' : 'cb', { melanger: false, colonne: true,
+      indices: chauffe ? { cb: 'Q > 0 : l\'énergie est reçue.', rb: 'Q > 0 et T<sub>f</sub> − T<sub>i</sub> a le même signe que Q : la température monte.' } : { rc: 'Q < 0 : l\'énergie est cédée.', rb: 'Q < 0 : l\'énergie est cédée, pas reçue.' },
+      solution: `<p>Q ${chauffe ? '> 0 : le métal <b>reçoit</b> de l\'énergie, sa température monte' : '< 0 : le métal <b>cède</b> de l\'énergie, sa température baisse'}.</p>` })] };
+}
+
+// tirage : 10 questions
+function tirage() {
+  return [qChauffe(), qBonC(), qRefroid(), qGlace(), qKilo(), qChauffe(), qVapeur(), qSens(), hasard([qRefroid, qGlaceRefroid])(), qEnKJ()];
+}
+
+CE.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Énergie et changement de température',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : Q = m × c × (T<sub>f</sub> − T<sub>i</sub>) pour un chauffage ou un refroidissement, le bon c selon l\'état, conversions g → kg et kJ → J.</p>',
+  questions: tirage,
+  revoir: { href: 'module_3_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4_cours.html', label: 'Module 4 : énergie et changement d\'état →' },
+});
+CE.menu('module_3_questions');
+</script>
+</body>
+</html>

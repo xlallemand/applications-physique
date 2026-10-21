@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 : questions sur le schéma des étapes — Chapitre 11 : Changements d'état et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ce.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ce.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard sur la méthode du schéma des étapes
+   (problèmes CE.hasardProbleme) : construire le schéma (2), nature des
+   flèches (1), une flèche : formule, donnée, calcul (3 : changement de
+   température, changement d'état, refroidissement), somme et
+   interprétation (1), problème complet à une étape (2), à deux étapes (1).
+   Les diagnostics viennent de l'outil (ce.js) : bulles impossibles
+   (glace au-dessus de 0 °C…), changement d'état sans température fixe,
+   mauvais c ou mauvais L, signe, masse en g, kJ non convertis.
+   ============================================================ */
+const { hasard, hasardProbleme, resolu, schemaPb, partieConstruire, partieNature, partieFleche, partieSomme, partieSens, etapes } = CE;
+const enonce = pb => pb.enonce;
+
+const qConstruire = () => { const pb = hasardProbleme(hasard([2, 3, 4])); return { theme: 'Construire le schéma', enonce: enonce(pb), parties: [partieConstruire(pb)] }; };
+const qNature = () => { const pb = hasardProbleme(hasard([3, 4])); return { theme: 'Nature des flèches', enonce: enonce(pb), parties: [partieNature(pb)] }; };
+// une flèche d'un problème, choisie selon sa nature
+function qFleche(type) {
+  let pb, k;
+  for (let essai = 0; essai < 50; essai++) {
+    pb = hasardProbleme(type === 'refroid' ? 4 : hasard([2, 3]));
+    const ks = pb.etapes.filter(e => (type === 'temp' ? e.n === 'temp' : type === 'etat' ? e.n !== 'temp' : true)).map(e => e.k);
+    if (ks.length) { k = hasard(ks); break; }
+  }
+  return { theme: type === 'temp' ? 'Flèche : changement de température' : type === 'etat' ? 'Flèche : changement d\'état' : 'Flèche d\'un refroidissement',
+    enonce: enonce(pb), parties: [partieFleche(pb, k)] };
+}
+function qSomme() {
+  const pb = resolu(hasardProbleme(hasard([2, 3, 4])));
+  return { theme: 'Énergie totale', enonce: `${enonce(pb)}<p>Les énergies de chaque flèche sont écrites sur le schéma.</p>`,
+    parties: [partieSomme(pb), partieSens(pb)] };
+}
+const qComplet = n => { const pb = hasardProbleme(n); return { theme: n === 1 ? 'Problème à une étape' : 'Problème à deux étapes', enonce: enonce(pb), parties: etapes(pb) }; };
+
+// tirage : 10 questions
+function tirage() {
+  return [qComplet(1), qConstruire(), qFleche('temp'), qNature(), qFleche('etat'), qComplet(1), qConstruire(), qFleche('refroid'), qSomme(), qComplet(2)];
+}
+
+CE.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 5 · QUESTIONS', titre: 'Le schéma des étapes',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : construire le schéma des étapes, reconnaître chaque flèche, choisir la formule et la donnée, calculer chaque énergie, puis l\'énergie totale.</p>',
+  questions: tirage,
+  revoir: { href: 'module_5a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_6.html', label: 'Module 6 : exercices →' },
+});
+CE.menu('module_5_questions');
+</script>
+</body>
+</html>

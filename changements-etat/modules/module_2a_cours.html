@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : lire le diagramme d'état — Chapitre 11 : Changements d'état et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ce.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ce.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 1 / 2</span>
+    <h2 class="er-titre">Lire le diagramme d'état</h2>
+    <p class="er-contexte">Le <b>diagramme d'état (P, T)</b> d'un corps pur dit dans quel état il se trouve pour chaque température T et chaque pression P. On y repère le <b>point triple</b> et le <b>point critique</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Le diagramme de l'eau : zones, courbes, point triple
+      (611 Pa ≈ 0,006 bar ; 273,16 K = 0,01 °C), point critique
+      (218 atm ≈ 221 bar ; 374 °C)
+   2. L'état de l'eau pour (T, P) : exemples du cours
+      −10 °C et 1 bar : solide ; 120 °C et 2 bar : liquide ;
+      50 °C et 0,06 bar : gaz. Outil : placer le point, puis dire l'état.
+   Le diagramme est schématique (CE.figDiag, CE.partieDiag) ; les points
+   proposés sont loin des courbes (vérifié par un script).
+   ============================================================ */
+const { exemple } = COURS;
+const { figDiag, partieDiag, versCours, o } = CE;
+
+/* ---------- 1. Le diagramme de l'eau ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Le diagramme d\'état de l\'eau');
+  c.ajouter(carte, `<div class="cours-bloc">
+      ${figDiag({})}
+      <p class="ce-note">Diagramme schématique : les échelles ne sont pas respectées.</p>
+      <div class="cle"><p><b class="cle-titre">Zones et courbes.</b> Trois zones : solide, liquide, gaz. Sur une courbe, deux états coexistent : courbe de <b>fusion</b> (solide / liquide), de <b>vaporisation</b> (liquide / gaz), de <b>sublimation</b> (solide / gaz).</p></div>
+      <div class="cle"><p><b class="cle-titre">Point triple.</b> Les <b>trois états coexistent</b>. Pour l'eau : P = 611 Pa (0,006 bar) et T = 273,16 K (0,01 °C).</p>
+        <p><b class="cle-titre">Point critique.</b> La courbe de vaporisation <b>s'arrête</b> : au-delà, on ne distingue plus le liquide du gaz. Pour l'eau : 218 atm (221 bar) et 374 °C.</p></div>
+    </div>
+    ${exemple(`<p>À la pression atmosphérique (1 bar), on suit la ligne en pointillés : elle coupe la courbe de fusion à <b>0 °C</b> et la courbe de vaporisation à <b>100 °C</b>.</p>
+      <p>La glace fond à 0 °C, l'eau bout à 100 °C.</p>`)}`);
+  c.aToi(carte, [
+    { titre: 'Le point triple',
+      parties: [{ type: 'choix', q: 'Que se passe-t-il au point triple ?', colonne: true, melanger: false,
+        options: [o('ok', 'les états solide, liquide et gazeux coexistent'), o('crit', 'la courbe de vaporisation s\'arrête'), o('fus', 'la glace fond à la pression atmosphérique')], bonne: 'ok',
+        indices: { crit: 'Ça, c\'est le point critique (en haut, au bout de la courbe de vaporisation).', fus: 'À la pression atmosphérique, la glace fond à 0 °C : ce n\'est pas le point triple (0,006 bar).' },
+        solution: '<p>Au point triple, les <b>trois états coexistent</b> : les trois courbes s\'y rejoignent.</p>' },
+      { type: 'nombre', q: 'Quelle est la température du point triple de l\'eau, en kelvins ?', label: 'T =', valeur: 273.16, unite: 'K', signe: false, tol: .006, dec: 2,
+        diag: v => (Math.abs(v - .01) < .02 ? 'C\'est la valeur en °C : T(K) = T(°C) + 273,15.' : Math.abs(v - 273.15) < .006 ? '273,15 K, c\'est 0 °C ; le point triple est à 0,01 °C.' : 'T = 0,01 + 273,15.'),
+        solution: '<p class="crs-calc">T = 0,01 + 273,15 = <span class="c">273,16 K</span></p>' }] },
+    { titre: 'Le point critique',
+      parties: [{ type: 'choix', q: 'Au point critique de l\'eau (374 °C, 221 bar)…', colonne: true, melanger: false,
+        options: [o('ok', 'la courbe de vaporisation s\'arrête : plus de distinction entre liquide et gaz'), o('tri', 'les trois états coexistent'), o('sol', 'l\'eau devient solide')], bonne: 'ok',
+        indices: { tri: 'Ça, c\'est le point triple (en bas, où les trois courbes se rejoignent).', sol: 'Le point critique est au bout de la courbe de vaporisation, loin de la zone solide.' },
+        solution: '<p>Le point critique est la <b>fin de la courbe de vaporisation</b> : au-delà, on ne distingue plus le liquide du gaz.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Dans quel état est l'eau ? ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Dans quel état est l\'eau ?');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> On place le point (T ; P) sur le diagramme : la <b>zone</b> où il tombe donne l'état de l'espèce.</p>
+        <p>Au-dessus de la courbe de vaporisation (forte pression) : liquide ; en dessous (faible pression) : gaz ; à gauche de la courbe de fusion : solide.</p></div>
+    </div>
+    ${exemple(`${figDiag({ points: [{ T: -10, P: 1, nom: 'A' }, { T: 120, P: 2, nom: 'B' }, { T: 50, P: .06, nom: 'C' }] })}
+      <ul class="er-liste"><li>A : −10 °C et 1 bar : <b>solide</b> ;</li><li>B : 120 °C et 2 bar : <b>liquide</b> ;</li><li>C : 50 °C et 0,06 bar : <b>gaz</b>.</li></ul>`, 'Exemples du cours')}`);
+  c.aToi(carte, [
+    { titre: 'Un premier point', parties: [versCours(partieDiag({ T: 20, P: 1 }))] },
+    { titre: 'Sous basse pression', parties: [versCours(partieDiag({ T: 80, P: .1 }))] },
+    { titre: 'À haute pression', parties: [versCours(partieDiag({ T: 200, P: 50 }))] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>Diagramme d'état (P, T) : trois zones (solide, liquide, gaz) séparées par les courbes de fusion, de vaporisation et de sublimation.</p></div>
+    <div class="cle"><p>Point triple : les trois états coexistent (eau : 611 Pa ; 273,16 K). Point critique : fin de la courbe de vaporisation (eau : 218 atm ; 374 °C).</p></div>
+    <div class="cle"><p>On place le point (T ; P) : la zone donne l'état de l'espèce.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2b_cours.html">Cours : changement d'état et pression →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#diagramme">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+CE.menu('module_2a_cours');
+</script>
+</body>
+</html>

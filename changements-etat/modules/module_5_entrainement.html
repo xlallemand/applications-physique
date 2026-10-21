@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 : entraînement, problèmes au hasard — Chapitre 11 : Changements d'état et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ce.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ce.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   Entraînement à la méthode du schéma des étapes : des problèmes tirés
+   au hasard (CE.hasardProbleme), autant qu'on veut, sans note.
+   Corps : eau, éthanol, fluide R22 (18 bar), aluminium ; chauffage ou
+   refroidissement ; masses en g ou en kg.
+   Niveaux : 1 étape, 2 étapes, 3 étapes ou plus, refroidissement, au hasard.
+   Chaque problème : construire le schéma, nature des flèches, formule +
+   donnée + calcul de chaque flèche, somme, énergie reçue ou cédée.
+   La page est marquée faite (sommaire) au premier problème terminé.
+   ============================================================ */
+const app = document.getElementById('app');
+const NIVEAUX = [[1, '1 étape'], [2, '2 étapes'], [3, '3 étapes ou plus'], [4, 'Refroidissement'], [0, 'Au hasard']];
+let niveau = 1, nb = 0;
+
+function afficher() {
+  const pb = CE.hasardProbleme(niveau || null);
+  app.innerHTML = `<div class="er-card"><span class="er-badge">MODULE 5 · ENTRAÎNEMENT</span><h2 class="er-titre">Problèmes au hasard</h2>
+      <p class="er-contexte">Choisis un niveau : un nouveau problème est tiré à chaque fois. Construis le <b>schéma des étapes</b>, puis calcule chaque flèche. Pas de note : entraîne-toi autant que tu veux.</p>
+      <div class="ce-niveaux" role="group" aria-label="Niveau">${NIVEAUX.map(([n, t]) => `<button type="button" class="ce-tg" data-n="${n}" aria-pressed="${n === niveau}">${t}</button>`).join('')}</div>
+      ${nb ? `<p class="er-meta" style="margin-top:10px">Problèmes terminés : <b>${nb}</b></p>` : ''}</div>
+    <div class="er-card ph-question"><p class="er-q-nom">Problème · ${pb.etapes.length} étape${pb.etapes.length > 1 ? 's' : ''}</p>
+      <div class="ph-enonce">${pb.enonce}</div><div data-a="parties"></div><div data-a="bilan"></div></div>`;
+  app.querySelectorAll('[data-n]').forEach(b => { b.onclick = () => { niveau = +b.dataset.n; afficher(); }; });
+  // évite qu'un double appui sur « Nouveau problème » réponde au problème suivant
+  app.style.pointerEvents = 'none';
+  setTimeout(() => { app.style.pointerEvents = ''; }, 350);
+  CE.question(app.querySelector('[data-a="parties"]'), { parties: CE.etapes(pb) }, {
+    fin(_, etat) {
+      nb++;
+      CE.marquer({ fait: true });
+      const pts = etat.details.reduce((s, d) => s + (d.vue ? 0 : d.erreurs ? 1 : 2), 0), max = etat.details.length * 2;
+      const b = app.querySelector('[data-a="bilan"]');
+      b.innerHTML = `<div class="${pts ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${pts ? 'er-ok' : ''}">Problème terminé : ${pts} / ${max}.</b></p>
+          <p>${pts === max ? 'Tout juste du premier coup, bravo !' : 'Relis les réponses, puis essaie un autre problème.'}</p></div>
+        <div class="er-actions"><button type="button" class="btn-primary" data-a="nouveau">Nouveau problème →</button>
+          <a class="btn-secondary" style="text-decoration:none" href="module_5_questions.html">Questions sur le schéma des étapes</a></div>`;
+      b.querySelector('[data-a="nouveau"]').onclick = () => { afficher(); window.scrollTo(0, 0); };
+      if (pts === max) CE.confettis();
+      setTimeout(() => b.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+    },
+  }, 'serie');
+}
+
+afficher();
+CE.menu('module_5_entrainement');
+</script>
+</body>
+</html>

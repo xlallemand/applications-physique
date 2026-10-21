@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : énergie et changement de température — Chapitre 11 : Changements d'état et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ce.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ce.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS</span>
+    <h2 class="er-titre">Énergie et changement de température</h2>
+    <p class="er-contexte">Quand un corps change de température <b>sans changer d'état</b>, il échange l'énergie <b>Q = m × c × (T<sub>f</sub> − T<sub>i</sub>)</b>. La capacité thermique massique c dépend de l'<b>état</b>, et le <b>signe</b> de Q dit si l'énergie est reçue ou cédée.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Q = m c (Tf − Ti) ; conversions g → kg et kJ → J
+   2. c dépend de l'état (glace 2 090, eau 4 180, vapeur 2 010
+      J·kg⁻¹·K⁻¹) ; températures négatives : 0 − (−20) = 20
+   3. Signe : Q > 0 reçue (le corps chauffe), Q < 0 cédée (il refroidit)
+   Valeurs (vérifiées par un script) : 2,0 × 4 180 × 60 ≈ 5,02 × 10⁵ J ;
+   0,500 × 4 180 × 30 ≈ 6,27 × 10⁴ J ; 0,300 × 2 440 × 50 ≈ 3,66 × 10⁴ J ;
+   1,0 × 2 090 × 15 ≈ 3,14 × 10⁴ J ; 0,250 × 2 090 × 18 ≈ 9,41 × 10³ J ;
+   3,0 × 4 180 × (−50) ≈ −6,27 × 10⁵ J ; 1,5 × 4 180 × (−50) ≈ −3,14 × 10⁵ J.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, proche, fr } = CE;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c_ = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .015);
+const Ti = 'T<sub>i</sub>', Tf = 'T<sub>f</sub>', UC = 'J·kg<sup>−1</sup>·K<sup>−1</sup>';
+const DONNEES = `<p class="ph-donnees">c<sub>glace</sub> = 2 090 ${UC} ; c<sub>eau</sub> = 4 180 ${UC} ; c<sub>vapeur</sub> = 2 010 ${UC}</p>`;
+// diagnostics des erreurs classiques sur Q = m c (Tf − Ti)
+function diagQ(v, m, c, ti, tf, autres) {
+  const Q = m * c * (tf - ti);
+  if (pr(v, -Q)) return `Attention au signe : ${Tf} − ${Ti} = ${CE.fmt(tf)} − ${CE.par(ti)} = ${CE.fmt(tf - ti)} °C.`;
+  if (pr(v, Q * 1000)) return 'La masse doit être en kg (1 g = 10<sup>−3</sup> kg).';
+  if (pr(v, Q / 1000)) return 'c doit être en J·kg<sup>−1</sup>·K<sup>−1</sup> : 1 kJ = 10<sup>3</sup> J.';
+  if (pr(v, m * c * tf) || pr(v, m * c * (tf + ti))) return `C'est l'écart ${Tf} − ${Ti} qui compte.`;
+  if ((autres || []).some(c2 => pr(Math.abs(v), Math.abs(m * c2 * (tf - ti))))) return 'Prends la capacité thermique massique de l\'état du corps pendant ce chauffage.';
+  return `Q = m × c × (${Tf} − ${Ti}) = ${CE.fmt(m)} × ${CE.fmt(c)} × (${CE.fmt(tf)} − ${CE.par(ti)}).`;
+}
+
+/* ---------- 1. Q = m c (Tf − Ti) ---------- */
+function etape1(c) {
+  const carte = c.carte('1. L\'énergie pour changer de température');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Formule.</b> Quand une masse m d'un corps passe de la température ${Ti} à ${Tf} <b>sans changer d'état</b>, elle échange l'énergie :</p>
+        <p class="crs-formule">Q = m × c × (${Tf} − ${Ti})</p>
+        <p>Q en <b>J</b>, m en <b>kg</b>, c : capacité thermique massique en ${UC} (ou J·kg<sup>−1</sup>·°C<sup>−1</sup>), ${Tf} − ${Ti} en K ou en °C (un écart est le même dans les deux unités).</p></div>
+    </div>
+    ${exemple(`<p>On chauffe 2,0 kg d'eau liquide de 20 °C à 80 °C (c<sub>eau</sub> = 4 180 ${UC}).</p>
+      ${calc(`Q = m × c × (${Tf} − ${Ti}) = 2,0 kg × 4 180 ${UC} × (80 − 20) K`)}
+      ${calc(`Q = ${c_('5,02 × 10<sup>5</sup> J')}`)}`)}
+    <div class="ph-lien-app"><p>Revois les conversions d'unités.</p><a class="btn-small" href="../../conversions/index.html">Conversions →</a></div>`);
+  c.aToi(carte, [
+    { titre: 'Masse en grammes', enonce: `<p>On chauffe 500 g d'eau liquide de 15 °C à 45 °C (c<sub>eau</sub> = 4 180 ${UC}).</p>`,
+      parties: [{ type: 'sci', q: 'Calcule Q (3 chiffres significatifs).', label: 'Q =', valeur: .5 * 4180 * 30, unite: 'J', cs: 3, rel: .01,
+        diag: v => diagQ(v, .5, 4180, 15, 45),
+        solution: calc('m = 500 g = 0,500 kg') + calc(`Q = 0,500 × 4 180 × (45 − 15) = ${c_('6,27 × 10<sup>4</sup> J')}`) }] },
+    { titre: 'c en kJ', enonce: `<p>On chauffe 300 g d'éthanol liquide de 20 °C à 70 °C. On donne c<sub>éthanol liquide</sub> = 2,44 kJ·kg<sup>−1</sup>·K<sup>−1</sup>.</p>`,
+      parties: [{ type: 'sci', q: 'Calcule Q, en joules (3 chiffres significatifs).', label: 'Q =', valeur: .3 * 2440 * 50, unite: 'J', cs: 3, rel: .01,
+        diag: v => diagQ(v, .3, 2440, 20, 70),
+        solution: calc('c = 2,44 kJ·kg<sup>−1</sup>·K<sup>−1</sup> = 2 440 ' + UC + ' ; m = 0,300 kg') + calc(`Q = 0,300 × 2 440 × (70 − 20) = ${c_('3,66 × 10<sup>4</sup> J')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. c dépend de l'état ---------- */
+function etape2(c) {
+  const carte = c.carte('2. La capacité thermique massique dépend de l\'état');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Un c par état.</b> Pour l'eau :</p>
+        <div class="crs-defile"><table class="crs-tab"><tr><th>état</th><th>glace</th><th>eau liquide</th><th>vapeur</th></tr>
+          <tr><th>c (${UC})</th><td>2 090</td><td>4 180</td><td>2 010</td></tr></table></div>
+        <p>On prend le c de l'état du corps <b>pendant</b> qu'il change de température.</p></div>
+      <div class="crs-attention"><p><b class="cle-titre">Températures négatives.</b> Écris les parenthèses : 0 − (−20) = 0 + 20 = <b>20</b>.</p></div>
+    </div>
+    ${exemple(`<p>On chauffe 1,0 kg de glace de −20 °C à −5 °C : c'est de la <b>glace</b> qui chauffe, on prend c<sub>glace</sub>.</p>
+      ${calc(`Q = m × c<sub>glace</sub> × (${Tf} − ${Ti}) = 1,0 × 2 090 × (−5 − (−20))`)}
+      ${calc(`Q = 1,0 × 2 090 × 15 = ${c_('3,14 × 10<sup>4</sup> J')}`)}`)}`);
+  c.aToi(carte, [
+    { titre: 'Le bon c', enonce: '<p>On chauffe de la vapeur d\'eau de 100 °C à 130 °C.</p>',
+      parties: [{ type: 'choix', q: 'Quelle capacité thermique massique utilises-tu ?', melanger: false,
+        options: [o('g', 'c<sub>vapeur</sub> = 2 010 ' + UC), o('l', 'c<sub>eau</sub> = 4 180 ' + UC), o('s', 'c<sub>glace</sub> = 2 090 ' + UC)], bonne: 'g',
+        indices: { l: 'L\'eau est déjà à l\'état de vapeur pendant ce chauffage : prends le c de la vapeur.', s: 'Au-dessus de 100 °C, ce n\'est pas de la glace.' },
+        solution: '<p>Pendant ce chauffage, l\'eau est à l\'état de <b>vapeur</b> : c<sub>vapeur</sub> = 2 010 ' + UC + '.</p>' }] },
+    { titre: 'De la glace qui chauffe', enonce: `<p>On chauffe 250 g de glace de −18 °C à 0 °C.</p>${DONNEES}`,
+      parties: [{ type: 'sci', q: 'Calcule Q (3 chiffres significatifs).', label: 'Q =', valeur: .25 * 2090 * 18, unite: 'J', cs: 3, rel: .01,
+        diag: v => diagQ(v, .25, 2090, -18, 0, [4180, 2010]),
+        solution: calc('m = 250 g = 0,250 kg') + calc(`Q = 0,250 × 2 090 × (0 − (−18)) = 0,250 × 2 090 × 18 = ${c_('9,41 × 10<sup>3</sup> J')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Énergie reçue ou cédée ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Énergie reçue ou cédée');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Signe de Q.</b></p>
+        <ul class="er-liste"><li>Q > 0 : le corps <b>reçoit</b> de l'énergie, sa température <b>monte</b> (${Tf} > ${Ti}) ;</li>
+          <li>Q < 0 : le corps <b>cède</b> de l'énergie, sa température <b>baisse</b> (${Tf} < ${Ti}).</li></ul></div>
+    </div>
+    ${exemple(`<p>3,0 kg d'eau refroidissent de 80 °C à 30 °C.</p>
+      ${calc(`Q = 3,0 × 4 180 × (30 − 80) = 3,0 × 4 180 × (−50) = ${c_('−6,27 × 10<sup>5</sup> J')}`)}
+      <p>Q < 0 : l'eau <b>cède</b> 6,27 × 10<sup>5</sup> J au milieu extérieur.</p>`)}`);
+  c.aToi(carte, [
+    { titre: 'Un refroidissement', enonce: `<p>Une bouillotte contient 1,5 kg d'eau qui refroidit de 90 °C à 40 °C (c<sub>eau</sub> = 4 180 ${UC}).</p>`,
+      parties: [{ type: 'sci', q: 'Calcule Q (3 chiffres significatifs, signe compris).', label: 'Q =', valeur: 1.5 * 4180 * -50, unite: 'J', cs: 3, rel: .01,
+        diag: v => diagQ(v, 1.5, 4180, 90, 40),
+        solution: calc(`Q = 1,5 × 4 180 × (40 − 90) = ${c_('−3,14 × 10<sup>5</sup> J')}`) },
+      { type: 'choix', q: 'L\'eau de la bouillotte…', melanger: false, options: [o('c', 'cède de l\'énergie'), o('r', 'reçoit de l\'énergie')], bonne: 'c',
+        indices: { r: 'Q < 0 et la température baisse : l\'énergie sort de l\'eau.' },
+        solution: '<p>Q < 0 : l\'eau <b>cède</b> 3,14 × 10<sup>5</sup> J (elle réchauffe le lit).</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p class="crs-formule">Q = m × c × (${Tf} − ${Ti})</p><p>Q en J, m en kg, c en ${UC} ; ${Tf} − ${Ti} en K ou en °C.</p></div>
+    <div class="cle"><p>c dépend de l'état : glace 2 090, eau liquide 4 180, vapeur 2 010 ${UC}. Températures négatives : écris les parenthèses.</p></div>
+    <div class="cle"><p>Q > 0 : énergie reçue (le corps chauffe) ; Q < 0 : énergie cédée (il refroidit).</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur Q = m c ΔT →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Module 4 : énergie et changement d'état</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+CE.menu('module_3_cours');
+</script>
+</body>
+</html>

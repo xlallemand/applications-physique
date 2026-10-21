@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : questions sur Q = m L — Chapitre 11 : Changements d'état et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ce.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ce.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : énergie de fusion (2), de
+   vaporisation (2), de solidification (2, négative), de liquéfaction
+   (1, négative), conversions d'unités de L (2 : kJ·kg⁻¹ → J·kg⁻¹,
+   J·g⁻¹ → J·kg⁻¹), température pendant un changement d'état (1).
+   Erreurs diagnostiquées : signe de L, masse en g, L en kJ non
+   converti, facteur de conversion.
+   ============================================================ */
+const { o, fq, fmt, sci, hasard, proche } = CE;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c_ = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .015);
+const ULk = 'kJ·kg<sup>−1</sup>';
+const MASSES = [[.25, '250 g', '0,250 kg'], [.5, '500 g', '0,500 kg'], [.2, '200 g', '0,200 kg'], [.8, '800 g', '0,800 kg'], [1.5, '1,5 kg'], [2, '2,0 kg']];
+// corps : [nom, transition, L en kJ·kg⁻¹, phrase]
+const FUS = [['glace', 334, 'On fait fondre {m} de glace à 0 °C.'], ['aluminium', 397, 'On fait fondre {m} d\'aluminium à 660 °C.'], ['plomb', 23, 'On fait fondre {m} de plomb à 327 °C.']];
+const VAP = [['eau', 2257, 'On vaporise {m} d\'eau à 100 °C.'], ['éthanol', 855, 'On vaporise {m} d\'éthanol à 78 °C.']];
+const SOL = [['eau', 334, '{m} d\'eau liquide se solidifient à 0 °C.', 'L<sub>fus</sub>'], ['aluminium', 397, '{m} d\'aluminium liquide se solidifient à 660 °C.', 'L<sub>fus</sub>'], ['cire', 210, '{m} de cire de bougie se solidifient.', 'L<sub>fus</sub>']];
+const LIQ = [['vapeur d\'eau', 2257, '{m} de vapeur d\'eau se liquéfient à 100 °C.', 'L<sub>vap</sub>'], ['fluide R22', 233.7, '{m} de fluide R22 gazeux se liquéfient dans le condenseur d\'un climatiseur.', 'L<sub>vap</sub>']];
+
+function diagL(v, Q) {
+  if (pr(v, -Q)) return Q > 0 ? 'Le corps reçoit de l\'énergie pour ce changement d\'état : Q > 0.' : 'Pour ce changement d\'état, le corps cède de l\'énergie : L < 0, donc Q < 0.';
+  if (pr(v, Q * 1000) || pr(v, -Q * 1000)) return 'La masse doit être en kg : 1 g = 10<sup>−3</sup> kg.';
+  if (pr(v, Q / 1000) || pr(v, -Q / 1000)) return 'Convertis L en J·kg<sup>−1</sup> : 1 kJ = 10<sup>3</sup> J.';
+  return 'Q = m × L, avec m en kg et L en J·kg<sup>−1</sup>.';
+}
+function qL(theme, liste, signe, nomL) {
+  const [, L, phrase, nl] = hasard(liste), [m, mTxt, mKg] = hasard(MASSES), Q = signe * m * L * 1000;
+  const sym = nomL || nl;
+  return { theme, enonce: `<p>${phrase.replace('{m}', mTxt)}</p><p class="ph-donnees">Donnée : ${sym} = ${fmt(L)} ${ULk}.</p>`,
+    parties: [fq.sci('Calcule l\'énergie Q échangée (3 chiffres significatifs, signe compris).', 'Q =', Q, 'J', { cs: 3, rel: .01, diag: v => diagL(v, Q),
+      solution: (mKg ? calc(`m = ${mTxt} = ${mKg}`) : '') + calc(`Q = m × ${signe < 0 ? `(−${sym})` : sym} = ${fmt(m)} × ${signe < 0 ? `(−${fmt(L)} × 10<sup>3</sup>)` : `${fmt(L)} × 10<sup>3</sup>`}`) +
+        calc(`Q = ${c_(sci(Q, 3) + ' J')}`) + (signe < 0 ? '<p>Q < 0 : le corps cède cette énergie.</p>' : '') })] };
+}
+const qFus = () => qL('Énergie de fusion', FUS.map(x => [x[0], x[1], x[2], 'L<sub>fus</sub>']), 1);
+const qVap = () => qL('Énergie de vaporisation', VAP.map(x => [x[0], x[1], x[2], 'L<sub>vap</sub>']), 1);
+const qSol = () => qL('Énergie de solidification', SOL, -1);
+const qLiq = () => qL('Énergie de liquéfaction', LIQ, -1);
+function qConvK() {
+  const L = hasard([334, 2257, 855, 397, 233.7]);
+  return { theme: 'Conversion de L', enonce: `<p>Une chaleur latente vaut L = ${fmt(L)} ${ULk}.</p>`,
+    parties: [fq.nombre('Écris-la en J·kg<sup>−1</sup>.', 'L =', L * 1000, 'J·kg<sup>−1</sup>', { signe: false, tol: .5,
+      diag: v => (pr(v, L / 1000) ? '1 kJ = 1 000 J : on multiplie par 1 000.' : pr(v, L * 100) || pr(v, L * 1e4) ? 'Multiplie par 1 000 exactement (10<sup>3</sup>).' : `L = ${fmt(L)} × 10<sup>3</sup> J·kg<sup>−1</sup>.`),
+      solution: calc(`L = ${fmt(L)} × 10<sup>3</sup> = ${c_(fmt(L * 1000) + ' J·kg<sup>−1</sup>')}`) })] };
+}
+function qConvG() {
+  const L = hasard([334, 2257, 108, 855]);
+  return { theme: 'Conversion de L', enonce: `<p>Une chaleur latente vaut L = ${fmt(L)} J·g<sup>−1</sup>.</p>`,
+    parties: [fq.nombre('Écris-la en J·kg<sup>−1</sup>.', 'L =', L * 1000, 'J·kg<sup>−1</sup>', { signe: false, tol: .5,
+      diag: v => (pr(v, L / 1000) ? '1 kg = 1 000 g : pour 1 kg, il faut 1 000 fois plus d\'énergie que pour 1 g.' : `${fmt(L)} J pour 1 g, donc ${fmt(L)} × 1 000 J pour 1 kg.`),
+      solution: calc(`L = ${fmt(L)} J·g<sup>−1</sup> = ${fmt(L)} × 10<sup>3</sup> J·kg<sup>−1</sup> = ${c_(fmt(L * 1000) + ' J·kg<sup>−1</sup>')}`) })] };
+}
+function qPalier() {
+  return hasard([
+    () => ({ theme: 'Température pendant un changement d\'état', enonce: '<p>On chauffe de la glace pilée à 0 °C sous 1 bar. Tant qu\'il reste de la glace…</p>',
+      parties: [fq.choix('… la température du mélange glace + eau :', [o('cst', 'reste à 0 °C'), o('monte', 'monte régulièrement'), o('baisse', 'baisse')], 'cst', { melanger: false,
+        indices: { monte: 'Pendant la fusion d\'un corps pur, l\'énergie reçue sert à changer d\'état : la température reste constante.', baisse: 'On chauffe : la température ne baisse pas.' },
+        solution: '<p>Pendant la fusion, la température <b>reste à 0 °C</b> (palier).</p>' })] }),
+    () => ({ theme: 'Température pendant un changement d\'état', enonce: CE.dessin('palier', { sans: true }),
+      parties: [fq.choix('Que se passe-t-il pendant le palier à 100 °C ?', [o('vap', 'l\'eau bout (vaporisation)'), o('fus', 'la glace fond'), o('temp', 'la vapeur se réchauffe')], 'vap', { melanger: false,
+        indices: { fus: 'La fusion se fait à 0 °C : c\'est le premier palier.', temp: 'Quand la vapeur se réchauffe, sa température monte : ce n\'est pas un palier.' },
+        solution: '<p>Le palier à 100 °C est l\'<b>ébullition</b> (vaporisation) : eau liquide et vapeur coexistent.</p>' })] }),
+  ])();
+}
+
+// tirage : 10 questions
+function tirage() {
+  return [qFus(), qVap(), qSol(), qConvK(), qFus(), qLiq(), qPalier(), qVap(), qSol(), qConvG()];
+}
+
+CE.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 4 · QUESTIONS', titre: 'Énergie et changement d\'état',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : énergie Q = m × L de fusion, de vaporisation, de solidification et de liquéfaction (signe de L), conversions d\'unités de L, palier de température.</p>',
+  questions: tirage,
+  revoir: { href: 'module_4_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_5a_cours.html', label: 'Module 5 : le schéma des étapes →' },
+});
+CE.menu('module_4_questions');
+</script>
+</body>
+</html>

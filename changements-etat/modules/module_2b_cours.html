@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : changement d'état et pression — Chapitre 11 : Changements d'état et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ce.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ce.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 2 / 2</span>
+    <h2 class="er-titre">Changement d'état et pression</h2>
+    <p class="er-contexte">Chauffer à pression constante, c'est suivre une <b>flèche horizontale</b> sur le diagramme d'état : ses croisements avec les courbes donnent les <b>températures de changement d'état</b>, qui dépendent de la <b>pression</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Chauffage à pression constante : flèche horizontale ; à 1 bar,
+      de −10 °C à 120 °C : fusion à 0 °C, ébullition à 100 °C.
+      Sous 0,006 bar (point triple), la glace se sublime.
+      Cette flèche prépare le schéma des étapes (module 5).
+   2. La température de changement d'état dépend de la pression :
+      courbe P(T) de vaporisation de l'eau (2 bar → 120 °C ;
+      0,5 bar → 81 °C) et du R22 (pression relative : par rapport à la
+      pression atmosphérique ; 0 °C → 3,5 bar ; 2 bar → −11 °C).
+   Valeurs lues sur les courbes vérifiées par un script.
+   ============================================================ */
+const { exemple } = COURS;
+const { figDiag, figPT, versCours, o, COURBES, tVap } = CE;
+
+/* ---------- 1. Chauffer à pression constante ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Chauffer à pression constante');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Flèche horizontale.</b> Quand on chauffe (ou refroidit) à pression constante, le point se déplace <b>horizontalement</b> sur le diagramme.</p>
+        <p>Chaque fois que la flèche <b>croise une courbe</b>, il y a un <b>changement d'état</b>, à la température du croisement.</p></div>
+    </div>
+    ${exemple(`${figDiag({ fleche: { P: 1, T1: -10, T2: 120, etiquettes: ['0 °C', '100 °C'] } })}
+      <p>On chauffe de la glace à −10 °C sous 1 bar jusqu'à 120 °C : la flèche croise la courbe de fusion à <b>0 °C</b> (la glace fond), puis la courbe de vaporisation à <b>100 °C</b> (l'eau bout).</p>
+      <p>Glace −10 °C → glace 0 °C → eau 0 °C → eau 100 °C → vapeur 100 °C → vapeur 120 °C : ce sont les bulles du <b>schéma des étapes</b> (module 5).</p>`)}`);
+  c.aToi(carte, [
+    { titre: 'Sous très faible pression', enonce: `${figDiag({ fleche: { P: .003, T1: -40, T2: 50 } })}<p>On chauffe de la glace de −40 °C à 50 °C sous 0,003 bar (en dessous du point triple).</p>`,
+      parties: [{ type: 'choix', q: 'Combien de changements d\'état la flèche rencontre-t-elle, et lequel ?', colonne: true, melanger: false,
+        options: [o('sub', 'un seul : la sublimation (solide → gaz)'), o('deux', 'deux : la fusion puis la vaporisation'), o('fus', 'un seul : la fusion')], bonne: 'sub',
+        indices: { deux: 'La flèche passe sous le point triple : elle ne traverse pas la zone liquide.', fus: 'Sous le point triple, il n\'y a pas de zone liquide : regarde quelle courbe la flèche croise.' },
+        solution: '<p>Sous la pression du point triple, la flèche ne croise que la courbe de <b>sublimation</b> : la glace devient directement de la vapeur.</p>' }] },
+    { titre: 'Dans une cocotte-minute', enonce: `${figDiag({ fleche: { P: 2, T1: 20, T2: 150 } })}<p>On chauffe de l'eau de 20 °C à 150 °C sous 2 bar.</p>`,
+      parties: [{ type: 'choix', q: 'À quelle température l\'eau bout-elle à 2 bar ?', melanger: false,
+        options: [o('plus', 'au-dessus de 100 °C'), o('cent', 'à 100 °C'), o('moins', 'en dessous de 100 °C')], bonne: 'plus',
+        indices: { cent: '100 °C, c\'est à 1 bar. Ici la flèche est plus haute : elle croise la courbe de vaporisation plus à droite.', moins: 'Plus la pression est grande, plus la flèche est haute : elle croise la courbe de vaporisation plus à droite.' },
+        solution: '<p>À 2 bar, la flèche croise la courbe de vaporisation <b>à droite de 100 °C</b> (vers 120 °C) : dans une cocotte-minute, l\'eau bout au-dessus de 100 °C.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. La température de changement d'état dépend de la pression ---------- */
+function etape2(c) {
+  const carte = c.carte('2. La température de changement d\'état dépend de la pression');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Courbe de vaporisation P(T).</b> Elle donne, pour chaque pression, la température de vaporisation (d'ébullition). <b>Plus la pression est grande, plus cette température est grande.</b></p>
+        <p>Lecture : on part de la pression sur l'axe vertical, on rejoint la courbe, on descend lire la température.</p></div>
+    </div>
+    ${exemple(`${figPT('eau', { lecture: { P: 2 }, valeur: true })}
+      <p>À 2 bar, l'eau bout vers <b>120 °C</b> : c'est le principe de la cocotte-minute.</p>`, 'Exemple : l\'eau')}
+    <div class="ph-lien-app"><p>Revois la lecture d'un graphique.</p><a class="btn-small" href="../../lecture-graphique/index.html">Lecture graphique →</a></div>`);
+  const Teb = P => tVap(COURBES.eau, P), r22 = COURBES.r22;
+  c.aToi(carte, [
+    { titre: 'En altitude', enonce: `${figPT('eau', {})}<p>En haute montagne, la pression de l'air est d'environ 0,5 bar.</p>`,
+      parties: [{ type: 'nombre', q: 'Lis la température d\'ébullition de l\'eau à 0,5 bar (au degré près).', label: 'T =', valeur: Teb(.5), unite: '°C', signe: false, tol: 3, affiche: '81',
+        diag: v => (v >= 98 ? 'À 0,5 bar, la pression est plus faible qu\'à 1 bar : l\'eau bout en dessous de 100 °C.' : 'Pars de 0,5 bar sur l\'axe vertical, rejoins la courbe, puis descends lire la température.'),
+        solution: '<p>À 0,5 bar, l\'eau bout vers <b>81 °C</b> : en montagne, les pâtes cuisent moins bien.</p>' }] },
+    { titre: 'Le fluide R22', enonce: `${figPT('r22', {})}<p>Le R22 est un fluide de climatisation. Sa pression est une <b>pression relative</b> : la pression par rapport à la pression atmosphérique (0 bar relatif = pression atmosphérique).</p>`,
+      parties: [{ type: 'nombre', q: 'Lis la pression relative de vaporisation du R22 à 0 °C (une décimale).', label: 'P =', valeur: r22.f(0), unite: 'bar', signe: false, tol: .3, dec: 1,
+        diag: v => (v < .5 ? 'Pars de 0 °C sur l\'axe horizontal, monte jusqu\'à la courbe, puis lis la pression à gauche.' : 'Repère bien les graduations : un petit carreau vaut 1 bar.'),
+        solution: '<p>À 0 °C : P ≈ <b>3,5 bar</b> (pression relative).</p>' },
+      { type: 'nombre', q: 'À quelle température le R22 se vaporise-t-il sous une pression relative de 2 bar ?', label: 'T =', valeur: tVap(r22, 2), unite: '°C', tol: 2.5, affiche: '−11',
+        diag: v => (v > 0 ? 'Sous 2 bar, la température de vaporisation est négative : la courbe passe 2 bar à gauche de 0 °C.' : 'Pars de 2 bar sur l\'axe vertical, rejoins la courbe, puis descends lire la température.'),
+        solution: '<p>Sous 2 bar (relatifs), le R22 se vaporise vers <b>−11 °C</b> ; plus la pression est grande, plus cette température est grande.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>Chauffer à pression constante : flèche horizontale ; ses croisements avec les courbes donnent les températures de changement d'état (eau à 1 bar : fusion 0 °C, ébullition 100 °C).</p></div>
+    <div class="cle"><p>La température de changement d'état dépend de la pression : plus la pression est grande, plus la température de vaporisation est grande (lecture sur la courbe P(T)).</p></div>
+    <div class="cle"><p>Pression relative : pression par rapport à la pression atmosphérique.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur le diagramme d'état →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3_cours.html">Module 3 : énergie et changement de température</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#pression">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+CE.menu('module_2b_cours');
+</script>
+</body>
+</html>

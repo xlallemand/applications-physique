@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : états de la matière et liaison hydrogène — Chapitre 11 : Changements d'état et transferts thermiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ce.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ce.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">États de la matière et liaison hydrogène</h2>
+    <p class="er-contexte">La matière existe sous trois <b>états</b> : solide, liquide et gaz. On passe de l'un à l'autre par six <b>changements d'état</b>, avec une énergie mesurée par la <b>chaleur latente L</b>. Dans l'eau, des <b>liaisons hydrogène</b> relient les molécules.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Les trois états : représentations microscopiques (ex. 8)
+   2. Les six changements d'état ; chaleurs latentes :
+      L_solidification = −L_fusion, L_liquéfaction = −L_vaporisation,
+      L_condensation = −L_sublimation
+   3. La liaison hydrogène : δ+ sur H, 2δ− sur O ; liaison entre un H
+      d'une molécule et le O d'une autre ; la glace flotte ; un filet
+      d'eau est dévié par une règle frottée
+   ============================================================ */
+const { exemple } = COURS;
+const { dessin, o } = CE;
+const sup = s => `<sup>${s}</sup>`;
+
+/* ---------- 1. Les trois états ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Les trois états de la matière');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>À l'échelle microscopique, on représente les molécules (ici des molécules d'eau H<sub>2</sub>O).</p>
+      ${dessin('micro', { ordre: ['s', 'l', 'g'], noms: true })}
+      <div class="cle"><p><b class="cle-titre">Les trois états.</b></p>
+        <ul class="er-liste"><li><b>solide</b> : molécules serrées et <b>rangées</b> régulièrement, elles ne font que vibrer sur place ;</li>
+          <li><b>liquide</b> : molécules serrées mais <b>en désordre</b>, elles glissent les unes sur les autres ;</li>
+          <li><b>gaz</b> : molécules <b>très éloignées</b> les unes des autres, en mouvement désordonné.</li></ul></div>
+    </div>
+    ${exemple(`${dessin('micro', { ordre: ['l'] })}<p>Les molécules se touchent presque, mais elles ne sont pas rangées : c'est l'état <b>liquide</b>.</p>`)}`);
+  const etats = [o('s', 'solide'), o('l', 'liquide'), o('g', 'gaz')];
+  const IND = {
+    s: { l: 'Les molécules sont rangées régulièrement : ce n\'est pas le désordre d\'un liquide.', g: 'Les molécules sont serrées : dans un gaz, elles sont très éloignées.' },
+    g: { s: 'Les molécules sont très éloignées les unes des autres : ce n\'est pas un solide.', l: 'Dans un liquide, les molécules sont serrées ; ici, elles sont très éloignées.' },
+  };
+  c.aToi(carte, [
+    { titre: 'Quel état ?', enonce: dessin('micro', { ordre: ['s'] }),
+      parties: [{ type: 'choix', q: 'Dans quel état est l\'eau représentée ?', options: etats, bonne: 's', melanger: false, indices: IND.s,
+        solution: '<p>Molécules serrées et rangées : état <b>solide</b> (glace).</p>' }] },
+    { titre: 'Et celui-ci ?', enonce: dessin('micro', { ordre: ['g'] }),
+      parties: [{ type: 'choix', q: 'Dans quel état est l\'eau représentée ?', options: etats, bonne: 'g', melanger: false, indices: IND.g,
+        solution: '<p>Molécules très éloignées : état <b>gazeux</b> (vapeur d\'eau).</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Les six changements d'état ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Les six changements d\'état');
+  c.ajouter(carte, `<div class="cours-bloc">
+      ${dessin('transitions')}
+      <div class="cle"><p><b class="cle-titre">Chaleur latente.</b> L'énergie qu'il faut pour faire changer d'état 1 kg d'un corps pur est sa <b>chaleur latente L</b> (en J·kg${sup('−1')}).</p>
+        <p>Dans un sens, le corps <b>reçoit</b> de l'énergie : L > 0 (fusion, vaporisation, sublimation). Dans l'autre sens, il <b>cède</b> la même énergie : L < 0.</p>
+        <p class="crs-formule">L<sub>solidification</sub> = −L<sub>fusion</sub> &nbsp; L<sub>liquéfaction</sub> = −L<sub>vaporisation</sub> &nbsp; L<sub>condensation</sub> = −L<sub>sublimation</sub></p></div>
+    </div>
+    ${exemple(`<p>Pour l'eau : L<sub>fusion</sub> = 334 kJ·kg${sup('−1')} (il faut 334 kJ pour faire fondre 1 kg de glace à 0 °C).</p>
+      <p class="crs-calc">L<sub>solidification</sub> = −L<sub>fusion</sub> = <span class="c">−334 kJ·kg${sup('−1')}</span></p>
+      <p>Quand 1 kg d'eau gèle, il cède 334 kJ.</p>`)}`);
+  const noms = [o('fus', 'fusion'), o('sol', 'solidification'), o('vap', 'vaporisation'), o('liq', 'liquéfaction'), o('sub', 'sublimation'), o('con', 'condensation')];
+  const ligne = (id, label, bonne, ind) => ({ id, label, bonne, indice: ind });
+  c.aToi(carte, [
+    { titre: 'Les noms', parties: [CE.versCours({ type: 'grille', q: 'Donne le nom de chaque changement d\'état.', options: noms,
+      lignes: [ligne('a', 'solide → liquide', 'fus', 'Solide → liquide : la glace fond.'), ligne('b', 'liquide → gaz', 'vap', 'Liquide → gaz : l\'eau bout ou s\'évapore.'),
+        ligne('c', 'gaz → liquide', 'liq', 'Gaz → liquide : la buée sur un miroir.'), ligne('d', 'liquide → solide', 'sol', 'Liquide → solide : l\'eau gèle.'),
+        ligne('e', 'solide → gaz', 'sub', 'Solide → gaz directement : sublimation.'), ligne('f', 'gaz → solide', 'con', 'Gaz → solide directement : condensation (le givre).')],
+      solution: '<p>Fusion (S → L), solidification (L → S), vaporisation (L → G), liquéfaction (G → L), sublimation (S → G), condensation (G → S).</p>' })] },
+    { titre: 'Le signe de L', enonce: `<p>Pour l'eau, L<sub>vaporisation</sub> = 2 257 kJ·kg${sup('−1')}.</p>`,
+      parties: [{ type: 'choix', q: 'Que vaut L<sub>liquéfaction</sub> ?', options: [o('m', `−2 257 kJ·kg${sup('−1')}`), o('p', `2 257 kJ·kg${sup('−1')}`), o('z', '0')], bonne: 'm', melanger: false,
+        indices: { p: 'La liquéfaction est la transformation inverse de la vaporisation : le corps cède l\'énergie qu\'il avait reçue.', z: 'La vapeur cède de l\'énergie en se liquéfiant : L n\'est pas nulle.' },
+        solution: `<p>L<sub>liquéfaction</sub> = −L<sub>vaporisation</sub> = −2 257 kJ·kg${sup('−1')} : la vapeur <b>cède</b> de l'énergie en se liquéfiant.</p>` },
+      { type: 'choix', q: 'Lors d\'une fusion, le corps…', options: [o('r', 'reçoit de l\'énergie (L > 0)'), o('c', 'cède de l\'énergie (L < 0)')], bonne: 'r', melanger: false,
+        indices: { c: 'Pour faire fondre de la glace, il faut la chauffer : elle reçoit de l\'énergie.' },
+        solution: '<p>Pour fondre, un solide <b>reçoit</b> de l\'énergie : L<sub>fusion</sub> > 0.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. La liaison hydrogène ---------- */
+function etape3(c) {
+  const carte = c.carte('3. La liaison hydrogène');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Dans la molécule d'eau, l'atome O attire les électrons des liaisons O–H : il porte une charge partielle <b>2δ${sup('−')}</b>, chaque atome H une charge partielle <b>δ${sup('+')}</b>.</p>
+      ${dessin('liaisonH', { rep: 1, legende: true })}
+      <div class="cle"><p><b class="cle-titre">Liaison hydrogène.</b> Un atome H (δ${sup('+')}) d'une molécule est attiré par l'atome O (2δ${sup('−')}) d'une <b>autre</b> molécule. On la dessine en <b>pointillés</b>.</p>
+        <p>Ces liaisons donnent à l'eau des propriétés particulières : la glace est <b>moins dense</b> que l'eau liquide, les glaçons <b>flottent</b>.</p></div>
+    </div>
+    ${exemple(`<div class="ce-figs">${dessin('filet')}<div><p><b>Expérience.</b> On approche d'un filet d'eau une règle frottée (électrisée) : le filet est <b>dévié</b> vers la règle.</p>
+      <p>Les molécules d'eau ont un côté δ${sup('+')} (les H) et un côté δ${sup('−')} (le O) : la règle chargée les attire.</p></div></div>`, 'Expérience du cours')}`);
+  c.aToi(carte, [
+    { titre: 'Entre quels atomes ?',
+      parties: [{ type: 'choix', q: 'Une liaison hydrogène relie…', colonne: true, melanger: false,
+        options: [o('ok', 'un atome H (δ<sup>+</sup>) d\'une molécule et l\'atome O (2δ<sup>−</sup>) d\'une autre molécule'), o('hh', 'deux atomes H de deux molécules voisines'), o('meme', 'l\'atome O et un atome H d\'une même molécule')],
+        bonne: 'ok', indices: { hh: 'Deux atomes H portent la même charge partielle δ<sup>+</sup> : ils se repoussent.', meme: 'Dans une même molécule, O et H sont reliés par une liaison covalente (trait plein).' },
+        solution: '<p>La liaison hydrogène relie un H (δ<sup>+</sup>) d\'une molécule au O (2δ<sup>−</sup>) d\'une <b>autre</b> molécule.</p>' }] },
+    { titre: 'Les glaçons',
+      parties: [{ type: 'choix', q: 'Pourquoi les glaçons flottent-ils sur l\'eau ?', colonne: true, melanger: false,
+        options: [o('ok', 'la glace est moins dense que l\'eau liquide (liaisons hydrogène)'), o('plus', 'la glace est plus dense que l\'eau liquide'), o('air', 'les glaçons sont remplis d\'air')],
+        bonne: 'ok', indices: { plus: 'Un objet plus dense que l\'eau coule.', air: 'Même sans bulles d\'air, la glace flotte : c\'est l\'arrangement des molécules qui compte.' },
+        solution: '<p>Dans la glace, les liaisons hydrogène rangent les molécules en laissant des espaces : la glace est <b>moins dense</b> que l\'eau liquide, elle flotte.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>Solide : molécules serrées et rangées ; liquide : serrées, en désordre ; gaz : très éloignées.</p></div>
+    <div class="cle"><p>Fusion (S → L), solidification (L → S), vaporisation (L → G), liquéfaction (G → L), sublimation (S → G), condensation (G → S).</p>
+      <p>Chaleur latente L en J·kg${sup('−1')} : L > 0 quand le corps reçoit de l'énergie ; L<sub>solidification</sub> = −L<sub>fusion</sub>, L<sub>liquéfaction</sub> = −L<sub>vaporisation</sub>, L<sub>condensation</sub> = −L<sub>sublimation</sub>.</p></div>
+    <div class="cle"><p>Liaison hydrogène : entre un H (δ${sup('+')}) d'une molécule et le O (2δ${sup('−')}) d'une autre, en pointillés. La glace est moins dense que l'eau liquide.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur les états de la matière →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2a_cours.html">Module 2 : diagramme d'état</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+CE.menu('module_1_cours');
+</script>
+</body>
+</html>
