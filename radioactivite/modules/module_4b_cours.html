@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : lire une demi-vie sur un graphique — Chapitre 12 : Radioactivité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rad.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rad.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 2 / 2</span>
+    <h2 class="er-titre">Lire une demi-vie sur un graphique</h2>
+    <p class="er-contexte">Sur une courbe de décroissance, on lit la demi-vie en trois gestes : <b>diviser par 2</b> la valeur initiale sur l'axe vertical, <b>reporter sur la courbe</b>, puis <b>reporter sur l'axe des temps</b>. La même méthode donne l'<b>âge</b> d'un échantillon.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. La méthode (note du cours) sur la courbe du cours : 10 000 atomes,
+      t½ = 55 s ; outil RAD.partieLecture (placer N₀/2, aller à la
+      courbe, lire t½)
+   2. La même méthode avec l'activité A ou la masse m (unités variées)
+   3. Âge d'un échantillon : placer la valeur mesurée, lire la date
+      (comme l'exercice 6 : 1 000 Bq donne 18 000 ans)
+   ============================================================ */
+const { exemple } = COURS;
+const { figCourbe, partieLecture } = RAD;
+const decroit = (y0, T) => t => y0 * Math.pow(2, -t / T);
+
+// courbe du cours : nombre d'atomes restants, t½ = 55 s
+const COURS_N = { f: decroit(10000, 55), y0: 10000, sym: 'N', grilleFine: true, margeG: 58,
+  x: { max: 200, pas: 20, fin: 5, titre: 'Date (en s)' }, y: { max: 10000, pas: 1000, fin: 500, titre: 'Nombre d\'atomes restants' } };
+
+/* ---------- 1. La méthode ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Mesurer une demi-vie sur un graphique');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b></p>
+        <ol class="er-liste"><li><b>diviser par 2</b> la valeur initiale sur l'axe des ordonnées ;</li>
+          <li><b>reporter sur la courbe</b> ;</li>
+          <li><b>reporter sur l'axe des abscisses</b> : on lit t<sub>1/2</sub>.</li></ol></div>
+    </div>
+    ${exemple(`${figCourbe(Object.assign({}, COURS_N, { reperes: [{ y: 5000, txt: '÷ 2 : 5 000', txtT: 't½ = 55 s' }] }), 'Nombre d\'atomes restants : 10 000 au départ, 5 000 à 55 s')}
+      <p class="crs-calc">N<sub>0</sub> = 10 000 ; N<sub>0</sub>/2 = 5 000 ; on reporte sur la courbe puis sur l'axe des temps : <span class="c">t<sub>1/2</sub> = 55 s</span></p>`)}`);
+  c.aToi(carte, [
+    { titre: 'Refais la lecture', parties: [partieLecture(COURS_N, { q: 'Mesure la demi-vie sur la courbe du cours.', solution: 'N<sub>0</sub>/2 = 10 000 / 2 = 5 000 atomes ; on lit t<sub>1/2</sub> = 55 s.' })] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Avec A ou m ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Avec l\'activité ou la masse');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>La méthode est la même avec l'<b>activité A</b> ou la <b>masse m</b> de l'échantillon radioactif : A<sub>0</sub>/2 ou m<sub>0</sub>/2. Lis bien l'<b>unité</b> de chaque axe.</p></div>
+    </div>
+    ${exemple(`${figCourbe({ f: decroit(8, 6), x: { max: 30, pas: 6, fin: 1, titre: 't (en 10³ ans)' }, y: { max: 9, pas: 2, fin: .5, titre: 'A (en 10³ Bq)' }, reperes: [{ y: 4, txt: 'A₀/2 = 4', txtT: '6' }] }, 'Activité du carbone 14 : 8 × 10³ Bq au départ, 4 × 10³ Bq à 6 × 10³ ans')}
+      <p class="crs-calc">A<sub>0</sub> = 8 × 10<sup>3</sup> Bq ; A<sub>0</sub>/2 = 4 × 10<sup>3</sup> Bq ; on lit 6 sur l'axe en 10<sup>3</sup> ans : <span class="c">t<sub>1/2</sub> = 6 000 ans</span></p>`)}`);
+  c.aToi(carte, [
+    { titre: 'Avec l\'activité (iode 131)', parties: [partieLecture({ f: decroit(600, 8), y0: 600, sym: 'A', grilleFine: true,
+      x: { max: 40, pas: 5, fin: 1, titre: 't (en jours)' }, y: { max: 600, pas: 100, fin: 50, titre: 'A (en Bq)' }, rep: { unite: 'jours' } },
+      { q: 'Mesure la demi-vie de l\'iode 131.', solution: 'A<sub>0</sub>/2 = 600 / 2 = 300 Bq ; on lit t<sub>1/2</sub> = 8 jours.' })] },
+    { titre: 'Avec la masse (césium 137)', parties: [partieLecture({ f: decroit(2, 30), y0: 2, sym: 'm', grilleFine: true,
+      x: { max: 150, pas: 25, fin: 5, titre: 't (en ans)' }, y: { max: 2, pas: .5, fin: .1, titre: 'm (en mg)' }, rep: { unite: 'ans' } },
+      { q: 'Mesure la demi-vie du césium 137.', solution: 'm<sub>0</sub>/2 = 2,0 / 2 = 1,0 mg ; on lit t<sub>1/2</sub> = 30 ans.' })] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Âge d'un échantillon ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Dater un échantillon');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> On mesure l'activité (ou N, ou m) de l'échantillon : on <b>place cette valeur</b> sur l'axe vertical, on reporte sur la courbe, puis sur l'axe des temps : on lit l'<b>âge</b>.</p></div>
+    </div>
+    ${exemple(`${figCourbe({ f: decroit(8, 6), x: { max: 30, pas: 6, fin: 1, titre: 't (en 10³ ans)' }, y: { max: 9, pas: 2, fin: .5, titre: 'A (en 10³ Bq)' }, reperes: [{ y: 1, txt: '1 000 Bq', txtT: '18' }] }, 'Activité du carbone 14 : 1 000 Bq à 18 000 ans')}
+      <p class="crs-calc">Un fossile a une activité de 1 000 Bq = 1 × 10<sup>3</sup> Bq : on lit 18 sur l'axe en 10<sup>3</sup> ans, donc <span class="c">18 000 ans</span>.</p>
+      <p>Vérification : 8 000 → 4 000 → 2 000 → 1 000 Bq, c'est 3 demi-vies, soit 3 × 6 000 = 18 000 ans.</p>`, 'Exemple (exercice 6)')}`);
+  c.aToi(carte, [
+    { titre: 'Quel âge ?', enonce: '<p>Bismuth 210 : un échantillon a une activité de 800 Bq au départ. Il ne lui reste plus que 100 Bq.</p>',
+      parties: [partieLecture({ mode: 'valeur', cible: 100, cibleTxt: 'A = 100 Bq', f: decroit(800, 5), y0: 800, sym: 'A', grilleFine: true,
+        x: { max: 30, pas: 5, fin: 1, titre: 't (en jours)' }, y: { max: 800, pas: 100, fin: 50, titre: 'A (en Bq)' }, rep: { label: 'âge =', unite: 'jours' } },
+        { q: 'Au bout de combien de temps l\'activité vaut-elle 100 Bq ?', solution: 'On lit 15 jours. Vérification : 800 → 400 → 200 → 100 Bq, 3 demi-vies de 5 jours.' })] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Lire t<sub>1/2</sub>.</b> Diviser par 2 la valeur initiale sur l'axe des ordonnées, reporter sur la courbe, reporter sur l'axe des abscisses. Même méthode avec N, A ou m.</p></div>
+    <div class="cle"><p><b class="cle-titre">Âge d'un échantillon.</b> Placer la valeur mesurée sur l'axe des ordonnées, reporter sur la courbe, puis sur l'axe des temps.</p></div>
+    <div class="cle"><p><b class="cle-titre">Unités.</b> Lis l'unité des axes : « t (en 10<sup>3</sup> ans) » : 6 sur l'axe, c'est 6 000 ans.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_4_questions.html">Questions sur la demi-vie →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_5a_cours.html">Module 5 : décroissance exponentielle</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#graphique">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+RAD.menu('module_4b_cours');
+</script>
+</body>
+</html>

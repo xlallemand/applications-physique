@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 : questions sur la décroissance exponentielle — Chapitre 12 : Radioactivité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rad.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rad.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : N à une date donnée (2), t pour
+   atteindre une fraction N/N₀ donnée (3), A(t) (2), t avec A/A₀ (1),
+   A₀ = λN₀ (1), la bonne expression de t (1).
+   Erreurs diagnostiquées : log au lieu de ln, signe de λ oublié
+   (t négatif ou N > N₀), N/N₀ inversé, exposant mal calculé.
+   ============================================================ */
+const { o, fq, fmt, sci, hasard, proche, fr } = RAD;
+const M = RAD.MOINS;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c_ = h => `<span class="c">${h}</span>`;
+const pr = (a, b) => proche(a, b, .015);
+const cs3 = v => fmt(+v.toPrecision(3));
+// radionucléides : λ et son unité (λ = ln 2 / t½)
+const NUCL = [
+  { nom: 'iode 131', l: .0866, lTxt: '0,0866', u: 'jour', us: 'jours' },
+  { nom: 'radon 220', l: .0126, lTxt: '0,0126', u: 's', us: 's' },
+  { nom: 'cobalt 60', l: .131, lTxt: '0,131', u: 'an', us: 'ans' },
+  { nom: 'césium 137', l: .0231, lTxt: '0,0231', u: 'an', us: 'ans' },
+  { nom: 'technétium 99m', l: .115, lTxt: '0,115', u: 'h', us: 'h' },
+  { nom: 'phosphore 32', l: .0485, lTxt: '0,0485', u: 'jour', us: 'jours' },
+];
+const lam = x => `λ = ${x.lTxt} ${x.u}<sup>${M}1</sup>`;
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const diagT = (v, r, l) => (pr(v, Math.log(r) / l) ? `t est négatif : signe de ${M}λ oublié, ou rapport inversé (c'est N/N<sub>0</sub>).` : pr(v, Math.log10(r) / -l) ? 'Tu as utilisé log : c\'est <b>ln</b>, la réciproque de e<sup>x</sup>.' : pr(v, Math.log(r) * -l) || pr(v, Math.log(r) * l) ? `On divise ln(N/N<sub>0</sub>) par ${M}λ.` : `t = ln(N/N<sub>0</sub>) / (${M}λ).`);
+
+// N à une date donnée
+function qN() {
+  const x = hasard(NUCL), [N0, N0t] = hasard([[1e6, '1,0 × 10<sup>6</sup>'], [5e8, '5,0 × 10<sup>8</sup>'], [2e10, '2,0 × 10<sup>10</sup>'], [4e7, '4,0 × 10<sup>7</sup>']]);
+  const t = Math.round(hasard([.5, 1, 1.5, 2.5]) / x.l), N = N0 * Math.exp(-x.l * t);
+  return { theme: 'Calculer N', enonce: `<p>${cap(x.nom)} : ${lam(x)}. Un échantillon contient N<sub>0</sub> = ${N0t} noyaux.</p>`,
+    parties: [fq.sci(`Combien en reste-t-il au bout de ${fmt(t)} ${x.us} ? (3 chiffres significatifs)`, 'N =', N, '', { cs: 3, rel: .015,
+      diag: v => (pr(v, N0 * Math.exp(x.l * t)) ? 'Le signe − de l\'exposant est oublié : N ne peut pas dépasser N<sub>0</sub>.' : pr(v, N0 * Math.pow(10, -x.l * t)) ? 'C\'est la touche e<sup>x</sup>, pas 10<sup>x</sup>.' : pr(v, N0 * Math.exp(-x.l) * t) ? `L'exposant est tout le produit ${M}λt.` : `N = N<sub>0</sub> e<sup>${M}λt</sup>.`),
+      solution: calc(`N = N<sub>0</sub> e<sup>${M}λt</sup> = ${N0t} × e<sup>${M}${x.lTxt} × ${fmt(t)}</sup> ≈ ${c_(sci(N, 3))} noyaux`) })] };
+}
+// t pour une fraction N/N₀ donnée
+function qT() {
+  const x = hasard(NUCL), [r, rTxt] = hasard([[.5, '0,50'], [.25, '0,25'], [.1, '0,10'], [.8, '0,80'], [.6, '0,60'], [.05, '0,050']]);
+  const t = Math.log(r) / -x.l;
+  return { theme: 'Calculer t', enonce: `<p>${cap(x.nom)} : ${lam(x)}.</p>`,
+    parties: [fq.nombre(`Au bout de combien de temps reste-t-il une fraction N/N<sub>0</sub> = ${rTxt} des noyaux ? (3 chiffres significatifs)`, 't =', t, x.us, { rel: .01, signe: false,
+      diag: v => diagT(v, r, x.l),
+      solution: calc(`t = ${fr(`ln(${rTxt})`, `${M}${x.lTxt}`)} ≈ ${c_(cs3(t) + ' ' + x.us)}`) })] };
+}
+// A(t)
+function qA() {
+  const x = hasard(NUCL.filter(n => n.u !== 's')), A0 = hasard([800, 1200, 5000, 41000]);
+  const t = hasard([5, 10, 20]), A = A0 * Math.exp(-x.l * t);
+  return { theme: 'Activité à une date', enonce: `<p>${cap(x.nom)} : ${lam(x)}. Une source a une activité initiale A<sub>0</sub> = ${fmt(A0)} Bq.</p>`,
+    parties: [fq.nombre(`Calcule son activité au bout de ${t} ${x.us} (3 chiffres significatifs).`, 'A =', A, 'Bq', { rel: .015, signe: false,
+      diag: v => (pr(v, A0 * Math.exp(x.l * t)) ? 'Le signe − de l\'exposant est oublié : l\'activité diminue.' : pr(v, A0 * Math.pow(10, -x.l * t)) ? 'C\'est la touche e<sup>x</sup>, pas 10<sup>x</sup>.' : `A = A<sub>0</sub> e<sup>${M}λt</sup>.`),
+      solution: calc(`A = A<sub>0</sub> e<sup>${M}λt</sup> = ${fmt(A0)} × e<sup>${M}${x.lTxt} × ${t}</sup> ≈ ${c_(cs3(A) + ' Bq')}`) })] };
+}
+// t avec l'activité
+function qTA() {
+  const x = hasard(NUCL), [A0, A] = hasard([[800, 200], [1200, 300], [41000, 10250], [600, 450], [5000, 1000]]);
+  const t = Math.log(A / A0) / -x.l;
+  return { theme: 'Calculer t avec l\'activité', enonce: `<p>${cap(x.nom)} : ${lam(x)}. L'activité d'une source passe de A<sub>0</sub> = ${fmt(A0)} Bq à A = ${fmt(A)} Bq.</p>`,
+    parties: [fq.nombre('Combien de temps a-t-il fallu ? (3 chiffres significatifs)', 't =', t, x.us, { rel: .01, signe: false,
+      diag: v => diagT(v, A / A0, x.l),
+      solution: calc(`t = ${fr(`ln(${fmt(A)} / ${fmt(A0)})`, `${M}${x.lTxt}`)} ≈ ${c_(cs3(t) + ' ' + x.us)}`) })] };
+}
+// A₀ = λN₀
+function qA0() {
+  const [l, lTxt] = hasard([[3e-4, '3,0 × 10<sup>−4</sup>'], [2e-6, '2,0 × 10<sup>−6</sup>'], [5e-3, '5,0 × 10<sup>−3</sup>'], [1.2e-5, '1,2 × 10<sup>−5</sup>']]);
+  const [N0, N0t] = hasard([[2e9, '2,0 × 10<sup>9</sup>'], [5e12, '5,0 × 10<sup>12</sup>'], [4e8, '4,0 × 10<sup>8</sup>']]);
+  const A0 = l * N0;
+  return { theme: 'Activité initiale', enonce: `<p>Un échantillon contient N<sub>0</sub> = ${N0t} noyaux ; λ = ${lTxt} s<sup>${M}1</sup>.</p>`,
+    parties: [fq.sci('Calcule son activité initiale A<sub>0</sub>.', 'A<sub>0</sub> =', A0, 'Bq', { cs: 2, rel: .015,
+      diag: v => (pr(v, N0 / l) ? 'A<sub>0</sub> = λ × N<sub>0</sub> : on multiplie.' : 'A<sub>0</sub> = λ N<sub>0</sub> : multiplie les nombres, puis les puissances de 10.'),
+      solution: calc(`A<sub>0</sub> = λ N<sub>0</sub> = ${lTxt} × ${N0t} = ${c_(sci(A0, 2) + ' Bq')}`) })] };
+}
+// la bonne expression de t
+function qExpression() {
+  return { theme: 'Isoler t', enonce: `<p>N<sub>0</sub> e<sup>${M}λt</sup> = N.</p>`,
+    parties: [{ type: 'choix', q: 'Quelle est l\'expression de t ?',
+      options: [o('ok', `t = ${fr('ln(N / N<sub>0</sub>)', `${M}λ`)}`), o('inv', `t = ${fr('ln(N<sub>0</sub> / N)', `${M}λ`)}`), o('log', `t = ${fr('log(N / N<sub>0</sub>)', `${M}λ`)}`), o('fois', `t = ln(N / N<sub>0</sub>) × (${M}λ)`)], bonne: 'ok',
+      indices: { inv: 'Divise d\'abord par N<sub>0</sub> : e<sup>−λt</sup> = N / N<sub>0</sub>. Ce rapport inversé donnerait un t négatif.', log: 'La réciproque de e<sup>x</sup> est ln, pas log.', fois: `${M}λ multiplie t : il passe de l'autre côté en divisant.` },
+      solution: `<p>e<sup>${M}λt</sup> = N/N<sub>0</sub> ⇔ ${M}λt = ln(N/N<sub>0</sub>) ⇔ t = ln(N/N<sub>0</sub>) / (${M}λ).</p>` }] };
+}
+
+function tirage() {
+  return [qN(), qT(), qA0(), qT(), qA(), qExpression(), qTA(), qN(), qT(), qA()];
+}
+
+RAD.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 5 · QUESTIONS', titre: 'Décroissance exponentielle',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : N(t) = N<sub>0</sub> e<sup>−λt</sup>, A(t) = A<sub>0</sub> e<sup>−λt</sup>, A<sub>0</sub> = λN<sub>0</sub>, et calcul de t avec ln. Garde ta calculatrice à portée de main.</p>',
+  questions: tirage,
+  revoir: { href: 'module_5a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_6.html', label: 'Module 6 : exercices →' },
+});
+RAD.menu('module_5_questions');
+</script>
+</body>
+</html>

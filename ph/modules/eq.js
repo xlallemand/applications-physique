@@ -6,7 +6,9 @@
      - tuiles des grandeurs (déplacer, cliquer pour supprimer),
      - barre de fraction ··· / ··· à glisser sur un membre,
      - outils ×(−1), 10ˣ et log à glisser sur UN membre à la fois
-       (une opération se fait toujours sur les deux membres),
+       (une opération se fait toujours sur les deux membres) ;
+       eˣ et ln en plus, sur demande (cfg.outils, application
+       « Chapitre 12 : Radioactivité »),
      - dénominateur à glisser de l'autre côté (il multiplie),
      - ⇄ pour inverser le sens de l'équation,
      - « Vérifier l'étape » : l'équation est testée avec des valeurs
@@ -16,7 +18,7 @@
      produit  { k:'p', neg, f:[facteur…] }    signe − éventuel devant
      facteur  { k:'s', t:[tuile…] }            case de tuiles (produit de grandeurs)
               { k:'f', num, den, croix }       fraction (num et den sont des produits)
-              { k:'fn', fn:'log'|'p10', x }    fonction (contenu figé)
+              { k:'fn', fn:'log'|'p10'|'ln'|'exp', x }    fonction (contenu figé)
      tuile    { id, label, v }                 v : valeur d'une constante (1, 10, 2…)
 
    PH.EQ.{T, S, P, F, FN}   constructeurs
@@ -48,13 +50,15 @@
     if (n.k === 'p') return n.f.some(contientFrac);
     return false;
   }
+  // inline === 'colle' : produit écrit sans × (exposant de e : e^(−λt))
   function statique(n, inline) {
+    const fois = inline === 'colle' ? '' : '<span class="m-x">×</span>';
     switch (n.k) {
       case 'p':
         return (n.neg ? '<span class="m-moins">−</span>' : '') +
-          (n.f.length ? n.f.map(x => statique(x, inline)).join('<span class="m-x">×</span>') : '<span class="m-vide">…</span>');
+          (n.f.length ? n.f.map(x => statique(x, inline)).join(fois) : '<span class="m-vide">…</span>');
       case 's':
-        return n.t.length ? n.t.map(t => `<span class="m-v">${t.label}</span>`).join('<span class="m-x">×</span>') : '<span class="m-vide">…</span>';
+        return n.t.length ? n.t.map(t => `<span class="m-v">${t.label}</span>`).join(fois) : '<span class="m-vide">…</span>';
       case 'f': {
         if (inline) {
           const par = p => p.neg || p.f.length > 1 || (p.f[0] && p.f[0].k === 's' && p.f[0].t.length > 1);
@@ -64,10 +68,11 @@
         return `<span class="m-frac"><span class="m-num">${statique(n.num)}</span><span class="m-den">${statique(n.den)}</span></span>`;
       }
       case 'fn': {
-        if (n.fn === 'log') {
+        if (n.fn === 'log' || n.fn === 'ln') {
           const g = !inline && contientFrac(n.x) ? ' grand' : '';
-          return `<span class="m-fn">log</span><span class="m-par${g}">(</span>${statique(n.x, inline)}<span class="m-par${g}">)</span>`;
+          return `<span class="m-fn">${n.fn}</span><span class="m-par${g}">(</span>${statique(n.x, inline)}<span class="m-par${g}">)</span>`;
         }
+        if (n.fn === 'exp') return `<span class="m-p10">e<sup class="m-exp">${statique(n.x, 'colle')}</sup></span>`;
         return `<span class="m-p10">10<sup class="m-exp">${statique(n.x, true)}</sup></span>`;
       }
     }
@@ -131,13 +136,15 @@
        gauche: () => P(…), droite: () => P(…),
        cible: 'c',                       grandeur à isoler (à gauche, seule)
        valeurs: () => ({ id: valeur }),  valeurs de test des grandeurs
-       outils: ['neg', 'p10', 'log', 'frac'],
+       outils: ['neg', 'p10', 'log', 'frac'],   par défaut ; 'exp' et 'ln' (eˣ et ln) sur demande
        aides: ['…', '…'],                coups de pouce, un par étape attendue
        solution: [{ L, R, op, centre }], étapes de la correction (affichée par montrerSolution)
        onErreur(), onResolu(nbErreurs)
      }
      ============================================================ */
-  const NOMS_OUTILS = { neg: '×(−1)', p10: '10<sup>x</sup>', log: 'log', frac: 'la barre de fraction' };
+  const NOMS_OUTILS = { neg: '×(−1)', p10: '10<sup>x</sup>', log: 'log', exp: 'e<sup>x</sup>', ln: 'ln', frac: 'la barre de fraction' };
+  // fonctions réciproques : chacune annule l'autre
+  const RECIPROQUE = { p10: 'log', log: 'p10', exp: 'ln', ln: 'exp' };
 
   function Editeur(zone, cfg) {
     this.zone = zone;
@@ -476,11 +483,11 @@
     return false;
   }
 
-  // 10ˣ ou log sur un membre : annule la fonction réciproque si elle est seule,
+  // 10ˣ, log, eˣ ou ln sur un membre : annule la fonction réciproque si elle est seule,
   // sinon l'enveloppe ; refusé si la fonction à annuler n'est pas isolée
   Editeur.prototype.outilFonction = function (fn, cote) {
-    const inv = fn === 'p10' ? 'log' : 'p10', m = this.etat[cote];
-    const nomInv = inv === 'log' ? 'log' : '10<sup>x</sup>', nomFn = NOMS_OUTILS[fn];
+    const inv = RECIPROQUE[fn], m = this.etat[cote];
+    const nomInv = NOMS_OUTILS[inv], nomFn = NOMS_OUTILS[fn];
     if (!m.neg && m.f.length === 1 && m.f[0].k === 'fn' && m.f[0].fn === inv) {
       this.etat[cote] = cloner(m.f[0].x);
     } else if (contientFn(m, inv) && (!this.cfg.cible || contientId(m, this.cfg.cible))) {
@@ -523,7 +530,10 @@
       case 'f': return valeur(n.num, v) / valeur(n.den, v);
       case 'fn': {
         const x = valeur(n.x, v);
-        return n.fn === 'log' ? (x > 0 ? Math.log10(x) : NaN) : Math.pow(10, x);
+        if (n.fn === 'log') return x > 0 ? Math.log10(x) : NaN;
+        if (n.fn === 'ln') return x > 0 ? Math.log(x) : NaN;
+        if (n.fn === 'exp') return Math.exp(x);
+        return Math.pow(10, x);
       }
     }
     return NaN;
@@ -534,17 +544,21 @@
     if (n.k === 'f') return vide(n.num) || vide(n.den);
     return false;
   }
-  // fonction appliquée à elle-même (log(log(…)) ou 10^(10^(…))) : mauvais outil réciproque
+  // fonction appliquée à elle-même (log(log(…)), 10^(10^(…)), e^(e^(…))…) : mauvais outil réciproque
   function fnDouble(n) {
     if (n.k === 'fn') {
       const x = n.x;
       if (!x.neg && x.f.length === 1 && x.f[0].k === 'fn' && x.f[0].fn === n.fn) return n.fn;
+      // eˣ (ou ln) appliqué à un membre qui contient déjà une exponentielle (ou un ln), par ex. e^(N₀ × e^(−λt))
+      if ((n.fn === 'exp' || n.fn === 'ln') && contientFn(x, n.fn)) return n.fn;
       return fnDouble(x);
     }
     if (n.k === 'p') { for (const x of n.f) { const r = fnDouble(x); if (r) return r; } }
     if (n.k === 'f') return fnDouble(n.num) || fnDouble(n.den);
     return null;
   }
+  // ce à quoi une fonction a été appliquée deux fois (diagnostic de fnDouble)
+  const DEJA = { log: 'un log', p10: 'une puissance de 10', ln: 'un ln', exp: 'une exponentielle' };
   // seule la grandeur cherchée, sans signe ni autre facteur
   function seule(m, id) {
     return !m.neg && m.f.length === 1 && m.f[0].k === 's' && m.f[0].t.length === 1 && m.f[0].t[0].id === id;
@@ -579,12 +593,12 @@
       if (this.cfg.onErreur) this.cfg.onErreur();
       // opération faite sur un seul des deux membres ?
       const dL = this.outilsDepuis.L, dR = this.outilsDepuis.R;
-      const seul = ['neg', 'p10', 'log'].find(o => ((dL[o] || 0) + (dR[o] || 0)) % 2 === 1 || (dL[o] || 0) % 2 !== (dR[o] || 0) % 2);
+      const seul = ['neg', 'p10', 'log', 'exp', 'ln'].find(o => ((dL[o] || 0) + (dR[o] || 0)) % 2 === 1 || (dL[o] || 0) % 2 !== (dR[o] || 0) % 2);
       let h = '<b class="er-ko">Cette équation n\'est pas juste.</b> ';
       const double = fnDouble(L) || fnDouble(R);
-      if (double) h += `Tu as appliqué ${NOMS_OUTILS[double]} à ${double === 'log' ? 'un log' : 'une puissance de 10'} : pour annuler ${double === 'log' ? 'log' : '10<sup>x</sup>'}, il faut sa <b>fonction réciproque</b>, ${double === 'log' ? '10<sup>x</sup>' : 'log'}. Recommence l'étape avec le bon outil.`;
+      if (double) h += `Tu as appliqué ${NOMS_OUTILS[double]} à ${DEJA[double]} : pour annuler ${NOMS_OUTILS[double]}, il faut sa <b>fonction réciproque</b>, ${NOMS_OUTILS[RECIPROQUE[double]]}. Recommence l'étape avec le bon outil.`;
       else if (seul) h += `Tu as appliqué <b>${NOMS_OUTILS[seul]}</b> à un seul membre : une opération se fait toujours sur <b>les deux membres</b> de l'égalité. Glisse aussi l'outil sur l'autre membre.`;
-      else if (impossible) h += 'Elle contient le log d\'un nombre négatif (ou une division par zéro), ce qui n\'existe pas. Vérifie tes opérations, ou recommence l\'étape.';
+      else if (impossible) h += `Elle contient le ${this.cfg.outils.includes('ln') ? 'ln' : 'log'} d'un nombre négatif (ou une division par zéro), ce qui n'existe pas. Vérifie tes opérations, ou recommence l'étape.`;
       else h += this.cfg.indice || 'Ce qui multiplie d\'un côté passe de l\'autre côté en divisant (et inversement). Vérifie tes déplacements, ou recommence l\'étape.';
       this.message(h, 'ko');
       secouer(this.el.zone);

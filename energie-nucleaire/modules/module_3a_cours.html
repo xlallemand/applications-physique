@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : énergie d'un échantillon — Chapitre 13 : Énergie nucléaire</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="nuc.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="nuc.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 1 / 2</span>
+    <h2 class="er-titre">Énergie d'un échantillon</h2>
+    <p class="er-contexte">Une réaction ne concerne qu'un noyau ; un échantillon de quelques grammes en contient des milliards de milliards. Tu vas compter les <b>noyaux</b> d'un échantillon, puis calculer l'<b>énergie</b> qu'il libère.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. N = m / m(1 noyau), les deux masses en kg ; OU tableau de
+      proportionnalité (1 noyau ↔ m(1 noyau) ; N ↔ m). Exemple du cours :
+      10 g d'hélium 4, N = 1,505 × 10²⁴ ; à toi : 10 g en kg, 1,00 g
+      d'uranium 235 (2,563 × 10²¹), 2,0 g de deutérium (5,98 × 10²³)
+   2. E = N × E(1 noyau) : 10 g d'hélium formés, 5,93 × 10¹² J ; à toi :
+      1,00 g d'uranium 235 (7,61 × 10¹⁰ J), 2,0 g de deutérium
+      (1,05 × 10²⁵ MeV = 1,68 × 10¹² J)
+   ============================================================ */
+const { exemple } = COURS;
+const { o, versCours, diagN, diagEtot, diagJ, MEV } = NUC;
+const sci = (q, label, valeur, unite, diag, solution, opts) => versCours(Object.assign({ type: 'sci', q, label, valeur, unite, diag, solution, rel: .01, cs: 3 }, opts));
+const prop = (a, b, c, d) => `<table class="nuc-prop"><tr><td>${a}</td><td>${b}</td></tr><tr><td>${c}</td><td>${d}</td></tr></table>`;
+const mU = 3.902170e-25, mD = 3.3436e-27;
+
+/* ---------- 1. Nombre de noyaux ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Nombre de noyaux dans un échantillon');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Nombre de noyaux.</b> Dans un échantillon de masse m :</p><p class="crs-formule">N = <span class="fr"><span>m</span><span>m(1 noyau)</span></span></p>
+        <p>Les deux masses dans la <b>même unité</b> : en <b>kg</b>.</p></div>
+      <p style="margin-top:10px"><span class="nuc-ou">OU</span> avec un tableau de proportionnalité : 1 noyau ↔ m(1 noyau) ; N noyaux ↔ m.</p>
+    </div>
+    ${exemple(`<p>Nombre de noyaux d'hélium 4 dans 10 g d'hélium, avec m(⁴He) = 6,6447 × 10<sup>−27</sup> kg.</p>
+      <p class="crs-calc">m = 10 g = 10 × 10<sup>−3</sup> kg</p>
+      <p class="crs-calc">N = 10 × 10<sup>−3</sup> / 6,6447 × 10<sup>−27</sup> = <span class="c">1,505 × 10<sup>24</sup> noyaux</span></p>
+      <p><span class="nuc-ou">OU</span></p>${prop('1 noyau', '6,6447 × 10<sup>−27</sup> kg', 'N', '10 × 10<sup>−3</sup> kg')}
+      <p class="crs-calc">N = 1 × 10 × 10<sup>−3</sup> / 6,6447 × 10<sup>−27</sup> = 1,505 × 10<sup>24</sup></p>`, 'Exemple du cours')}`);
+  c.aToi(carte, [
+    { titre: 'Convertir en kg', parties: [
+      sci('10 g, c\'est combien de kg ?', 'm =', 1e-2, 'kg', v => (Math.abs(v - 1e4) < 1 ? '1 kg = 1 000 g : pour passer des grammes aux kg, on divise par 1 000.' : 'm (kg) = m (g) / 1 000 = m (g) × 10<sup>−3</sup>.'),
+        '<p class="ph-calc">10 g = 10 × 10<sup>−3</sup> kg = 1,0 × 10<sup>−2</sup> kg</p>', { cs: 2 })] },
+    { titre: 'Compter les noyaux', enonce: '<p>Un échantillon de 1,00 g d\'uranium 235 ; m(²³⁵U) = 3,902170 × 10<sup>−25</sup> kg.</p>', parties: [
+      sci('Combien contient-il de noyaux ?', 'N =', 1e-3 / mU, 'noyaux', v => diagN(v, 1, mU), '<p class="ph-calc">N = 1,00 × 10<sup>−3</sup> / 3,902170 × 10<sup>−25</sup> = 2,56 × 10<sup>21</sup> noyaux</p>')] },
+    { enonce: '<p>Un échantillon de 2,0 g de deutérium ; m(²H) = 3,3436 × 10<sup>−27</sup> kg.</p>', parties: [
+      sci('Combien contient-il de noyaux ?', 'N =', 2e-3 / mD, 'noyaux', v => diagN(v, 2, mD), '<p class="ph-calc">N = 2,0 × 10<sup>−3</sup> / 3,3436 × 10<sup>−27</sup> = 5,98 × 10<sup>23</sup> noyaux</p>')] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Énergie libérée par l'échantillon ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Énergie libérée par l\'échantillon');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Énergie totale.</b> Chaque noyau libère la même énergie E(1 noyau) :</p><p class="crs-formule">E = N × E(1 noyau)</p></div>
+    </div>
+    ${exemple(`<p>Énergie libérée par la formation de 10 g d'hélium 4 (fusion 4 ¹H → ⁴He + 2 e<sup>+</sup>), chaque réaction libérant 3,9436 × 10<sup>−12</sup> J.</p>
+      <p class="crs-calc">E = 1,505 × 10<sup>24</sup> × 3,9436 × 10<sup>−12</sup> = <span class="c">5,93 × 10<sup>12</sup> J</span></p>
+      <p><span class="nuc-ou">OU</span></p>${prop('1 noyau', '3,9436 × 10<sup>−12</sup> J', '1,505 × 10<sup>24</sup> noyaux', 'E')}`)}`);
+  const NU = 1e-3 / mU, ND = 2e-3 / mD;
+  c.aToi(carte, [
+    { titre: 'L\'énergie de 1 g d\'uranium', enonce: '<p>1,00 g d\'uranium 235 contient 2,563 × 10<sup>21</sup> noyaux. La fission d\'un noyau libère 2,971 × 10<sup>−11</sup> J.</p>', parties: [
+      sci('Calcule l\'énergie libérée par la fission de tous les noyaux.', 'E =', 2.563e21 * 2.971e-11, 'J', v => diagEtot(v, 2.563e21, 2.971e-11),
+        '<p class="ph-calc">E = 2,563 × 10<sup>21</sup> × 2,971 × 10<sup>−11</sup> = 7,61 × 10<sup>10</sup> J</p>')] },
+    { titre: 'L\'énergie de 2 g de deutérium', enonce: '<p>2,0 g de deutérium contiennent 5,98 × 10<sup>23</sup> noyaux. Chacun fusionne avec un noyau de tritium en libérant 17,6 MeV.</p>', parties: [
+      sci('a) Énergie libérée en MeV.', 'E =', 5.98e23 * 17.6, 'MeV', v => diagEtot(v, 5.98e23, 17.6), '<p class="ph-calc">E = 5,98 × 10<sup>23</sup> × 17,6 = 1,05 × 10<sup>25</sup> MeV</p>'),
+      sci('b) La même énergie en joules (1 MeV = 1,60 × 10<sup>−13</sup> J).', 'E =', 5.98e23 * 17.6 * MEV, 'J', v => diagJ(v, 5.98e23 * 17.6), '<p class="ph-calc">E = 1,053 × 10<sup>25</sup> × 1,60 × 10<sup>−13</sup> = 1,68 × 10<sup>12</sup> J</p>')] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Nombre de noyaux.</b> N = m / m(1 noyau), les deux masses en kg (ou un tableau de proportionnalité : 1 noyau ↔ m(1 noyau), N ↔ m).</p></div>
+    <div class="cle"><p><b class="cle-titre">Énergie de l'échantillon.</b> E = N × E(1 noyau).</p></div>
+    <div class="ph-lien-app"><p>Revoir la proportionnalité</p><a class="btn-small" href="../../proportionnalite/index.html" target="_blank" rel="noopener">Proportionnalité ↗</a></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Cours : comparaison avec le pétrole, activité →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#echantillon">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+NUC.menu('module_3a_cours');
+</script>
+</body>
+</html>

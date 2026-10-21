@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions sur le défaut de masse et l'énergie — Chapitre 13 : Énergie nucléaire</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="nuc.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="nuc.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard, avec les réactions et les masses du
+   cours et des exercices : défaut de masse avec le tableau (2), énergie
+   libérée en joules (2), conversion J ↔ MeV (2), masses en u puis en
+   kg (1), conversion u → kg (1), notions (1), Δm → E en J → E en MeV (1).
+   Erreurs diagnostiquées : coefficient oublié, neutron des réactifs
+   oublié, réactifs − produits, signe gardé dans E, c non élevé au
+   carré, MeV et eV confondus, multiplication au lieu de division,
+   u non converti, puissance de 10.
+   ============================================================ */
+const { o, esp, neutron, helium, equation, lisible, hasard, masse, partieDefaut, sci: sciTxt, sciCourt, fmt, diagE, diagMeV, diagJ, diagKg, C, C_EXACT, MEV, U_KG } = NUC;
+const L = lisible;
+const n = () => neutron();
+const ligne = (x, m) => ({ x, m: masse(m) });
+
+/* ---------- réactions et masses (cours et exercices) ---------- */
+const KG = [
+  () => ({ g: [ligne(esp(1, 1, 'H', 4), '1,6726e-27')], d: [ligne(helium(), '6,6447e-27'), ligne(esp(0, 1, 'e', 2), '9,11e-31')] }),
+  () => ({ g: [ligne(n(), '1,674928e-27'), ligne(esp(235, 92), '3,902170e-25')], d: [ligne(esp(94, 38), '1,559155e-25'), ligne(esp(139, 54), '2,306309e-25'), ligne(neutron(3), '1,674928e-27')] }),
+  () => ({ g: [ligne(esp(1, 1), '1,6726e-27'), ligne(esp(2, 1), '3,3434e-27')], d: [ligne(esp(3, 2), '5,0064e-27')] }),
+  () => ({ g: [ligne(esp(2, 1), '3,3436e-27'), ligne(esp(3, 1), '5,0074e-27')], d: [ligne(helium(), '6,6446e-27'), ligne(n(), '1,6749e-27')] }),
+  () => ({ g: [ligne(esp(238, 94), '3,952073e-25')], d: [ligne(esp(234, 92), '3,885528e-25'), ligne(helium(), '6,644691e-27')] }),
+  () => ({ g: [ligne(esp(2, 1), '3,3436e-27'), ligne(esp(2, 1), '3,3436e-27')], d: [ligne(esp(3, 2), '5,0064e-27'), ligne(n(), '1,6749e-27')] }),
+  () => ({ g: [ligne(esp(3, 1), '5,0074e-27'), ligne(esp(1, 1), '1,6726e-27')], d: [ligne(helium(), '6,6446e-27')] }),
+  () => ({ g: [ligne(esp(3, 2), '5,0064e-27'), ligne(esp(3, 2), '5,0064e-27')], d: [ligne(helium(), '6,6447e-27'), ligne(esp(1, 1, 'H', 2), '1,6726e-27')] }),
+  () => ({ g: [ligne(esp(2, 1), '3,3436e-27'), ligne(esp(3, 2), '5,0064e-27')], d: [ligne(helium(), '6,6446e-27'), ligne(esp(1, 1), '1,6726e-27')] }),
+  () => ({ g: [ligne(n(), '1,674928e-27'), ligne(esp(235, 92), '3,902170e-25')], d: [ligne(esp(94, 38), '1,559155e-25'), ligne(esp(140, 54), '2,322960e-25'), ligne(neutron(2), '1,674928e-27')] }),
+];
+const EN_U = [
+  () => ({ g: [ligne(n(), '1,00867'), ligne(esp(235, 92), '234,99332')], d: [ligne(esp(94, 38), '93,89446'), ligne(esp(140, 54), '139,89194'), ligne(neutron(2), '1,00867')], unite: 'u' }),
+  () => ({ g: [ligne(n(), '1,00867'), ligne(esp(235, 92), '234,99332')], d: [ligne(esp(92, 36), '91,90642'), ligne(esp(141, 56), '140,88368'), ligne(neutron(3), '1,00867')], unite: 'u' }),
+  () => ({ g: [ligne(esp(2, 1), '2,01355'), ligne(esp(3, 1), '3,01550')], d: [ligne(helium(), '4,00151'), ligne(n(), '1,00867')], unite: 'u' }),
+];
+const somme = l => l.reduce((s, m) => s + m.x.k * m.m.v, 0);
+const dmDe = r => somme(r.d) - somme(r.g);
+const eqDe = r => L(equation(r.g.map(m => m.x), r.d.map(m => m.x)));
+const donnees = r => `<p class="ph-donnees">${r.g.concat(r.d).filter((m, i, t) => t.findIndex(u => u.x.A === m.x.A && u.x.Z === m.x.Z && u.x.s === m.x.s) === i)
+  .map(m => `${NUC.mDe(m.x)} = ${m.m.t} ${r.unite || 'kg'}`).join(' ; ')}.</p>`;
+const cDonne = () => (Math.random() < .5 ? { v: C_EXACT, t: 'c = 299 792 458 m·s<sup>−1</sup>' } : { v: C, t: 'La valeur de c n\'est pas donnée.' });
+const sci = (q, label, valeur, unite, diag, correction, opts) => Object.assign({ type: 'sci', q, label, valeur, unite, diag, solution: correction, rel: .01, cs: 3 }, opts);
+const nombre = (q, label, valeur, unite, diag, correction, opts) => Object.assign({ type: 'nombre', q, label, valeur, unite, diag, solution: correction, rel: .01, signe: false }, opts);
+
+// défaut de masse avec le tableau
+function qDm() {
+  const r = hasard(KG)();
+  return { theme: 'Défaut de masse', consigne: 'Calcule le défaut de masse de cette réaction avec le tableau.', enonce: `<p class="ph-calc">${eqDe(r)}</p>${donnees(r)}`,
+    parties: [partieDefaut(r, { q: 'Coefficients (Valider), puis Δm (3 chiffres significatifs au moins).', solution: `<p>Δm = m<sub>produits</sub> − m<sub>réactifs</sub> = ${sciCourt(dmDe(r), 4)} kg.</p>` })] };
+}
+// énergie libérée en joules
+function qE() {
+  const r = hasard(KG)(), dm = dmDe(r), c = cDonne(), E = Math.abs(dm) * c.v * c.v;
+  return { theme: 'Énergie libérée', enonce: `<p class="ph-calc">${eqDe(r)}</p><p>Δm = ${sciCourt(dm, 5)} kg. ${c.t}</p>`,
+    parties: [sci('Calcule l\'énergie libérée en joules.', 'E<sub>lib</sub> =', E, 'J', v => diagE(v, dm, c.v),
+      `<p class="ph-calc">E<sub>lib</sub> = |Δm| × c² = ${sciCourt(Math.abs(dm), 5)} × ${c.v === C ? '(3,00 × 10<sup>8</sup>)²' : '299 792 458²'} = ${sciTxt(E, 3)} J</p>${c.v === C ? '<p>c n\'est pas donné : on prend c = 3,00 × 10<sup>8</sup> m·s<sup>−1</sup>.</p>' : ''}`)] };
+}
+// conversion J → MeV ou MeV → J
+function qMeV() {
+  const r = hasard(KG)(), E = Math.abs(dmDe(r)) * C * C, EJ = +E.toPrecision(3), EM = +(EJ / MEV).toPrecision(3);
+  if (Math.random() < .6) {
+    return { theme: 'Des joules aux MeV', enonce: `<p>Une réaction nucléaire libère E = ${sciTxt(EJ, 3)} J. Donnée : 1 MeV = 1,60 × 10<sup>−13</sup> J.</p>`,
+      parties: [nombre('Convertis cette énergie en MeV (3 chiffres significatifs).', 'E =', EJ / MEV, 'MeV', v => diagMeV(v, EJ), `<p class="ph-calc">E = ${sciTxt(EJ, 3)} / 1,60 × 10<sup>−13</sup> = ${fmt(+(EJ / MEV).toPrecision(3))} MeV</p>`, { cs: 3 })] };
+  }
+  return { theme: 'Des MeV aux joules', enonce: `<p>Une réaction nucléaire libère E = ${fmt(EM)} MeV. Donnée : 1 MeV = 1,60 × 10<sup>−13</sup> J.</p>`,
+    parties: [sci('Convertis cette énergie en joules.', 'E =', EM * MEV, 'J', v => diagJ(v, EM), `<p class="ph-calc">E = ${fmt(EM)} × 1,60 × 10<sup>−13</sup> = ${sciTxt(EM * MEV, 3)} J</p>`)] };
+}
+// masses en u : tableau, puis Δm en kg
+function qU() {
+  const r = hasard(EN_U)(), dm = dmDe(r);
+  return { theme: 'Masses en u', consigne: 'Les masses sont données en unité de masse atomique u (1 u = 1,660539 × 10<sup>−27</sup> kg).', enonce: `<p class="ph-calc">${eqDe(r)}</p>${donnees(r)}`,
+    parties: [partieDefaut(r, { q: 'a) Coefficients (Valider), somme de chaque colonne (Valider), puis Δm en u.', solution: `<p>Δm = ${fmt(+dm.toFixed(5))} u.</p>` }),
+      sci('b) Convertis Δm en kg.', 'Δm =', dm * U_KG, 'kg', v => diagKg(v, dm), `<p class="ph-calc">Δm = ${fmt(+dm.toFixed(5))} × 1,660539 × 10<sup>−27</sup> = ${sciTxt(dm * U_KG, 4)} kg</p>`, { cs: 4, rel: .005 })] };
+}
+// conversion u → kg
+function qConv() {
+  const [nom, m] = hasard([['d\'un noyau d\'uranium 235', 234.99332], ['d\'un noyau de strontium 94', 93.89446], ['d\'un noyau de xénon 140', 139.89194], ['d\'un neutron', 1.00867], ['d\'un noyau d\'hélium 4', 4.00151], ['d\'un noyau de deutérium', 2.01355]]);
+  return { theme: 'Conversion u → kg', enonce: `<p>La masse ${nom} est ${fmt(m)} u. Donnée : 1 u = 1,660539 × 10<sup>−27</sup> kg.</p>`,
+    parties: [sci('Convertis cette masse en kg (4 chiffres significatifs).', 'm =', m * U_KG, 'kg', v => diagKg(v, m), `<p class="ph-calc">m = ${fmt(m)} × 1,660539 × 10<sup>−27</sup> = ${sciTxt(m * U_KG, 4)} kg</p>`, { cs: 4, rel: .003 })] };
+}
+// notions
+function qNotion() {
+  return hasard([
+    { theme: 'Défaut de masse', parties: [{ type: 'choix', q: 'Le défaut de masse d\'une réaction nucléaire est :', colonne: true,
+      options: [o('ok', 'Δm = m<sub>produits</sub> − m<sub>réactifs</sub>'), o('inv', 'Δm = m<sub>réactifs</sub> − m<sub>produits</sub>'), o('som', 'Δm = m<sub>produits</sub> + m<sub>réactifs</sub>')], bonne: 'ok',
+      indices: { inv: 'C\'est l\'inverse : produits moins réactifs (comme toute variation : final − initial).', som: 'C\'est une différence de masses.' },
+      solution: '<p>Δm = m<sub>produits</sub> − m<sub>réactifs</sub>, négatif quand de l\'énergie est libérée.</p>' }] },
+    { theme: 'Valeur de c', parties: [{ type: 'choix', q: 'L\'énoncé ne donne pas la valeur de c. Quelle valeur prends-tu dans E = |Δm| × c² ?', colonne: true,
+      options: [o('ok', 'c = 3,00 × 10<sup>8</sup> m·s<sup>−1</sup>'), o('km', 'c = 3,00 × 10<sup>5</sup> m·s<sup>−1</sup>'), o('son', 'c = 340 m·s<sup>−1</sup>')], bonne: 'ok',
+      indices: { km: '3,00 × 10<sup>5</sup>, c\'est en km·s<sup>−1</sup> : dans la formule, c est en m·s<sup>−1</sup>.', son: '340 m·s<sup>−1</sup> est la vitesse du son dans l\'air : c est la célérité de la lumière.' },
+      solution: '<p>c = 3,00 × 10<sup>8</sup> m·s<sup>−1</sup> (célérité de la lumière dans le vide), quand l\'énoncé ne la donne pas.</p>' }] },
+    { theme: 'Signe de Δm', parties: [{ type: 'choix', q: 'On trouve Δm = −3,2 × 10<sup>−28</sup> kg. L\'énergie libérée est :', colonne: true,
+      options: [o('ok', 'E = 3,2 × 10<sup>−28</sup> × c², positive'), o('neg', 'E = −3,2 × 10<sup>−28</sup> × c², négative'), o('c', 'E = 3,2 × 10<sup>−28</sup> × c')], bonne: 'ok',
+      indices: { neg: 'E = |Δm| × c² : on prend la valeur absolue, l\'énergie libérée est positive.', c: 'c est élevé au carré : E = |Δm| × c².' },
+      solution: '<p>E = |Δm| × c² = 3,2 × 10<sup>−28</sup> × c², positive.</p>' }] },
+    { theme: 'Conversion en MeV', parties: [{ type: 'choix', q: 'Pour convertir une énergie de joules en MeV :', colonne: true,
+      options: [o('ok', 'on divise par 1,60 × 10<sup>−13</sup>'), o('mul', 'on multiplie par 1,60 × 10<sup>−13</sup>'), o('ev', 'on divise par 1,60 × 10<sup>−19</sup>')], bonne: 'ok',
+      indices: { mul: '1 MeV = 1,60 × 10<sup>−13</sup> J : un MeV est une très petite énergie, le nombre de MeV est donc plus grand que le nombre de joules. On divise.', ev: 'Diviser par 1,60 × 10<sup>−19</sup> donne des eV, pas des MeV (1 MeV = 10<sup>6</sup> eV).' },
+      solution: '<p>1 MeV = 1,60 × 10<sup>−13</sup> J : E (MeV) = E (J) / 1,60 × 10<sup>−13</sup>.</p>' }] },
+  ]);
+}
+// Δm donné → E en J → E en MeV
+function qChaine() {
+  const r = hasard(KG)(), dm = dmDe(r), c = cDonne(), E = Math.abs(dm) * c.v * c.v;
+  return { theme: 'Énergie en J puis en MeV', enonce: `<p class="ph-calc">${eqDe(r)}</p><p>Δm = ${sciCourt(dm, 5)} kg. ${c.t} 1 MeV = 1,60 × 10<sup>−13</sup> J.</p>`,
+    parties: [sci('a) L\'énergie libérée en joules.', 'E =', E, 'J', v => diagE(v, dm, c.v), `<p class="ph-calc">E = ${sciCourt(Math.abs(dm), 5)} × ${c.v === C ? '(3,00 × 10<sup>8</sup>)²' : '299 792 458²'} = ${sciTxt(E, 3)} J</p>`),
+      nombre('b) La même énergie en MeV (3 chiffres significatifs).', 'E =', E / MEV, 'MeV', v => diagMeV(v, E), `<p class="ph-calc">E = ${sciTxt(E, 3)} / 1,60 × 10<sup>−13</sup> = ${fmt(+(E / MEV).toPrecision(3))} MeV</p>`, { cs: 3 })] };
+}
+
+function tirage() {
+  return [qDm(), qE(), qMeV(), qNotion(), qDm(), qU(), qE(), qMeV(), qConv(), qChaine()];
+}
+
+NUC.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Défaut de masse et énergie libérée',
+  intro: `<p class="er-contexte">10 questions tirées au hasard, avec les réactions du cours et des exercices : défaut de masse avec le tableau, masses en u, énergie libérée E = |Δm| × c² en joules, conversion en MeV.</p>
+    <div class="ph-lien-app"><p>Revoir les calculs en écriture scientifique</p><a class="btn-small" href="../../puissances-10/index.html" target="_blank" rel="noopener">Puissances de 10 ↗</a></div>`,
+  questions: tirage,
+  revoir: { href: 'module_2a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3a_cours.html', label: 'Module 3 : énergie d\'un échantillon →' },
+});
+NUC.menu('module_2_questions');
+</script>
+</body>
+</html>

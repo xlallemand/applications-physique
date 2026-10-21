@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : noyau et radioactivité — Chapitre 12 : Radioactivité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rad.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rad.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">Noyau et radioactivité</h2>
+    <p class="er-contexte">La radioactivité est un phénomène <b>naturel</b>, qui concerne le <b>noyau</b> des atomes. Tu vas apprendre à lire le symbole <b>ᴬ<sub>Z</sub>X</b> d'un noyau, à trouver sa composition et à reconnaître des <b>isotopes</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Radioactivité naturelle et artificielle (ordres de grandeur)
+   2. Le noyau : nucléons, symbole ᴬ_Z X, composition (A − Z neutrons)
+   3. Les isotopes : même Z, A différents ; tableau de l'ex. 7
+   ============================================================ */
+const { exemple } = COURS;
+const { o, nuc, n, partieTableau } = RAD;
+
+// composition d'un noyau : nombres de protons et de neutrons
+function composition(A, Z, s, titre) {
+  return { titre, enonce: `<p class="crs-calc rad-lisible">Noyau ${nuc(A, Z, s)}</p>`, parties: [{ type: 'champs', q: 'Combien de protons et de neutrons ?', ligne: true,
+    champs: [{ label: 'protons :', valeur: Z, tol: 0, entier: true, signe: false }, { label: 'neutrons :', valeur: A - Z, tol: 0, entier: true, signe: false }],
+    diag: v => (v[0] === A ? 'Le nombre de protons est Z, le nombre du bas.' : v[1] === A ? 'A compte tous les nucléons ; pour les neutrons seuls, retire les protons : A − Z.' : v[1] === A + Z ? 'Neutrons = A − Z, pas A + Z.' : 'Protons : Z ; neutrons : A − Z.'),
+    solution: `<p>${Z} protons et ${A} − ${Z} = <b>${A - Z} neutrons</b>.</p>` }] };
+}
+
+/* ---------- 1. Radioactivité naturelle et artificielle ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Radioactivité naturelle et radioactivité artificielle');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>La radioactivité n'a pas été inventée par l'homme : c'est un <b>phénomène naturel</b>, découvert à la fin du XIX<sup>e</sup> siècle par Henri Becquerel.</p>
+        <p>On distingue la <b>radioactivité naturelle</b> de la <b>radioactivité artificielle</b>, due à des radioéléments fabriqués par l'homme. Les deux ont les <b>mêmes propriétés physiques</b>.</p></div>
+    </div>
+    ${exemple(`<p>Ordres de grandeur de l'activité de quelques sources (en becquerels, Bq : nombre de désintégrations par seconde, voir le module 3).</p>
+      <div class="crs-defile"><table class="crs-tab">
+        <tr><th colspan="4">Sources radioactives naturelles</th></tr>
+        <tr><td>Eau de pluie</td><td>0,5 Bq/L</td><td>Eau de mer</td><td>14 Bq/L</td></tr>
+        <tr><td>Lait</td><td>70 Bq/L</td><td>Poisson</td><td>100 Bq/L</td></tr>
+        <tr><td>Pommes de terre</td><td>150 Bq/kg</td><td>Corps humain</td><td>120 Bq/L</td></tr>
+        <tr><td>Terre sédimentaire</td><td>400 Bq/kg</td><td>Engrais phosphatés</td><td>3 000 Bq/kg</td></tr>
+        <tr><td>Terre granitique</td><td>8 000 Bq/kg</td><td>Uranium 238 (t<sub>1/2</sub> ≈ 4,5 milliards d'années)</td><td>37,2 MBq/kg</td></tr>
+      </table></div>
+      <div class="crs-defile"><table class="crs-tab">
+        <tr><th colspan="2">Sources radioactives artificielles</th></tr>
+        <tr><td>Radium 226 (t<sub>1/2</sub> ≈ 1 600 ans)</td><td>330 TBq/kg</td></tr>
+        <tr><td>Césium 137 (t<sub>1/2</sub> ≈ 30 ans)</td><td>3 200 TBq/kg</td></tr>
+        <tr><td>Plutonium 239 (t<sub>1/2</sub> ≈ environ 24 000 ans)</td><td>2,3 TBq/kg</td></tr>
+      </table></div>
+      <p>Nous sommes radioactifs : un litre de notre corps a une activité d'environ 120 Bq. Les sources artificielles du tableau se comptent en térabecquerels (1 TBq = 10<sup>12</sup> Bq) par kilogramme.</p>`)}`);
+  c.aToi(carte, [
+    { parties: [{ type: 'choix', q: 'La radioactivité a-t-elle été inventée par l\'homme ?', melanger: false,
+      options: [o('non', 'Non, c\'est un phénomène naturel'), o('oui', 'Oui, avec les centrales nucléaires')], bonne: 'non',
+      indices: { oui: 'Becquerel l\'a découverte dans des sels d\'uranium, à la fin du XIX<sup>e</sup> siècle : elle existait avant lui.' },
+      solution: 'C\'est un phénomène naturel ; l\'homme sait aussi fabriquer des radioéléments (radioactivité artificielle).' }] },
+    { parties: [{ type: 'choix', q: 'Un radioélément fabriqué par l\'homme a-t-il les mêmes propriétés physiques qu\'un radioélément naturel ?', melanger: false,
+      options: [o('oui', 'Oui, les mêmes'), o('non', 'Non, il est plus dangereux par nature')], bonne: 'oui',
+      indices: { non: 'Relis la règle : radioactivités naturelle et artificielle ont les mêmes propriétés physiques.' },
+      solution: 'Oui : radioactivité naturelle et radioactivité artificielle ont les mêmes propriétés physiques.' }] },
+    { parties: [{ type: 'choix', q: 'D\'après le tableau, quel litre est le plus actif ?', colonne: false,
+      options: [o('mer', 'un litre d\'eau de mer'), o('lait', 'un litre de lait'), o('pluie', 'un litre d\'eau de pluie')], bonne: 'lait',
+      indices: { mer: '14 Bq/L pour l\'eau de mer : compare avec le lait.', pluie: '0,5 Bq/L : c\'est le moins actif.' },
+      solution: 'Le lait : 70 Bq/L, contre 14 Bq/L pour l\'eau de mer et 0,5 Bq/L pour l\'eau de pluie.' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Le noyau et son symbole ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Le noyau et son symbole');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Un noyau d'atome est constitué de <b>nucléons</b> : les <b>protons</b> et les <b>neutrons</b>.</p>
+      <div class="cle"><p class="crs-formule rad-lisible">${nuc('A', 'Z', 'X')}</p>
+        <ul class="er-liste"><li><b>X</b> : symbole de l'élément ;</li>
+          <li><b>Z</b> : nombre de <b>protons</b> (c'est lui qui fixe le nom de l'élément) ;</li>
+          <li><b>A</b> : nombre de <b>nucléons</b> (protons + neutrons).</li></ul>
+        <p>Nombre de neutrons : <b>A − Z</b>.</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc rad-lisible">${nuc(56, 26, 'Fe')} : 26 protons et 56 − 26 = <span class="c">30 neutrons</span></p>
+      <p class="crs-calc rad-lisible">${nuc(238, 92, 'U')} : 92 protons et 238 − 92 = <span class="c">146 neutrons</span></p>`, 'Exemples du cours')}`);
+  c.aToi(carte, [
+    composition(12, 6, 'C', 'Composition d\'un noyau'),
+    composition(235, 92, 'U'),
+    composition(60, 27, 'Co'),
+    { titre: 'Écrire le symbole', enonce: '<p>Un noyau d\'oxygène (O) contient 8 protons et 9 neutrons.</p>', parties: [
+      { type: 'nombre', q: 'Combien a-t-il de nucléons ?', label: 'A =', valeur: 17, tol: 0, entier: true, signe: false,
+        diag: v => (v === 1 ? 'A = protons + neutrons, pas la différence.' : v === 8 || v === 9 ? 'A compte tous les nucléons : protons et neutrons.' : 'A = 8 + 9.'),
+        solution: 'A = 8 + 9 = 17 nucléons.' },
+      { type: 'choix', q: 'Quel est son symbole ?',
+        options: [o('ok', `<span class="rad-lisible">${nuc(17, 8, 'O')}</span>`), o('inv', `<span class="rad-lisible">${nuc(8, 17, 'O')}</span>`), o('n', `<span class="rad-lisible">${nuc(9, 8, 'O')}</span>`), o('np', `<span class="rad-lisible">${nuc(17, 9, 'O')}</span>`)], bonne: 'ok',
+        indices: { inv: 'A (les nucléons) s\'écrit en haut, Z (les protons) en bas.', n: 'En haut, on écrit A, le nombre de nucléons, pas le nombre de neutrons.', np: 'En bas, on écrit Z, le nombre de protons.' },
+        solution: `<span class="rad-lisible">${nuc(17, 8, 'O')}</span> : A = 17 en haut, Z = 8 en bas.` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Les isotopes ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Les isotopes');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> Des <b>isotopes</b> sont des noyaux qui ont le <b>même nombre de protons Z</b> (le même élément) mais des <b>nombres de nucléons A différents</b> (des nombres de neutrons différents).</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc rad-lisible">${nuc(12, 6, 'C')}, ${nuc(13, 6, 'C')} et ${nuc(14, 6, 'C')} sont trois isotopes du carbone : 6 protons, et 6, 7 ou 8 neutrons.</p>
+      <p class="crs-calc rad-lisible">${nuc(1, 1, 'H')}, ${nuc(2, 1, 'H')} (deutérium) et ${nuc(3, 1, 'H')} (tritium) sont trois isotopes de l'hydrogène.</p>
+      <p class="crs-calc rad-lisible">${nuc(14, 6, 'C')} et ${nuc(14, 7, 'N')} ne sont <b>pas</b> isotopes : même A, mais Z différents (carbone et azote).</p>`)}`);
+  const iso = (a, b, oui, titre) => ({ titre, enonce: `<p class="crs-calc rad-lisible">${nuc(a.A, a.Z, a.s)} et ${nuc(b.A, b.Z, b.s)}</p>`, parties: [{ type: 'choix', q: 'Ces deux noyaux sont-ils isotopes ?', melanger: false,
+    options: [o('oui', 'Oui'), o('non', 'Non')], bonne: oui ? 'oui' : 'non',
+    indices: { oui: a.Z !== b.Z ? 'Regarde les nombres du bas : des isotopes ont le même Z.' : 'Ils ont le même Z mais aussi le même A : c\'est le même noyau.', non: 'Même Z (même élément) et A différents : ce sont des isotopes.' },
+    solution: oui ? `Même Z = ${a.Z}, A différents (${a.A} et ${b.A}) : isotopes.` : `Z différents (${a.Z} et ${b.Z}) : ce ne sont pas des isotopes, pas le même élément.` }] });
+  c.aToi(carte, [
+    iso(n(235, 92), n(238, 92), true, 'Isotopes ou non ?'),
+    iso(n(14, 6), n(14, 7), false),
+    iso(n(40, 19), n(40, 20), false),
+    { titre: 'Compléter un tableau (comme l\'exercice 7)', enonce: '<p>Complète la ligne, puis la suivante : nom, symbole, nombres de protons, de nucléons et de neutrons.</p>',
+      parties: [partieTableau([{ A: 14, Z: 6, inc: 'sZAN' }, { A: 13, Z: 6, inc: 'nAN' }], { elements: ['C', 'N', 'O'], q: '' })] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Radioactivité.</b> Phénomène naturel (Becquerel) ; la radioactivité artificielle, due aux radioéléments fabriqués par l'homme, a les mêmes propriétés.</p></div>
+    <div class="cle"><p><b class="cle-titre">Noyau ${nuc('A', 'Z', 'X')}.</b> Z protons (Z fixe l'élément), A nucléons, A − Z neutrons.</p></div>
+    <div class="cle"><p><b class="cle-titre">Isotopes.</b> Même Z, A différents.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur le noyau →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2a_cours.html">Module 2 : types de radioactivité</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+RAD.menu('module_1_cours');
+</script>
+</body>
+</html>

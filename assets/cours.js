@@ -37,6 +37,10 @@
               par ex. « ✍ Complète ton cours : … »),
               p.aide (true : « Afficher la réponse » proposé tout de suite, pour un outil
               où aucune erreur n'est validée, comme une réaction réglée en direct).
+
+   Outil propre à l'application qui doit se déplier avec « Afficher tout le cours »
+   (par ex. la démonstration étape par étape PH.demo de ph/modules/eq.js) :
+     COURS.vivant(obj) l'inscrit (obj.deplier() sera appelé), COURS.oublier(obj) le retire.
    ============================================================ */
 (function () {
   'use strict';
@@ -78,7 +82,7 @@
     const t = String(s == null ? '' : s).trim().replace(/[\s  ]/g, '').replace(',', '.').replace(/[−–]/g, '-');
     return /^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(t) ? parseFloat(t) : NaN;
   }
-  const proche = (a, b, rel) => Math.abs(a - b) <= (rel == null ? .005 : rel) * Math.abs(b) + 1e-12;
+  const proche = (a, b, rel) => Math.abs(a - b) <= (rel == null ? .005 : rel) * Math.abs(b) + (b === 0 ? 1e-12 : Math.abs(b) * 1e-12);
 
   /* ============================================================
      OUTILS
@@ -519,5 +523,7 @@
     tout: false,
     fmt, sci, lire, proche, el, secouer, melanger, hasard, entre, exemple, cle, champ,
     PARTIES, question, aToi, Cours,
+    vivant: obj => { vivants.add(obj); },
+    oublier: obj => { vivants.delete(obj); },
   };
 })();

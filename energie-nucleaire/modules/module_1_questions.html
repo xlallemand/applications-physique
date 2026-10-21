@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur fission, fusion et radioactivité — Chapitre 13 : Énergie nucléaire</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="nuc.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="nuc.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard dans des réactions réelles :
+   classer une réaction en repérant le plus grand nombre de nucléons
+   (une fission, une fusion, une radioactivité), trouver le nombre x
+   de neutrons puis classer (2), trouver un noyau (A, Z, élément) (2),
+   trouver la particule puis classer (1), réaction chimique ou
+   nucléaire, neutron, définitions (2).
+   Erreurs diagnostiquées : neutron oublié dans la somme des A, neutron
+   compté pour Z = 1, A et Z inversés, élément pris sur le mauvais Z,
+   fission choisie avec un seul réactif, fusion et fission confondues
+   (plus grand A à gauche ou à droite), radioactivité choisie avec
+   deux réactifs.
+   ============================================================ */
+const { o, noyau, esp, neutron, electron, positron, helium, trou, equation, lisible, hasard, melanger, partieReaction, redaction, analyse, explication } = NUC;
+const L = lisible;
+const n = () => neutron();
+
+/* ---------- réactions réelles : [réactifs, produits] ---------- */
+const U = () => esp(235, 92), PU = () => esp(239, 94);
+const FISSIONS = [
+  () => [[n(), U()], [esp(94, 38), esp(140, 54), neutron(2)]],
+  () => [[U(), n()], [esp(85, 35), esp(148, 57), neutron(3)]],
+  () => [[n(), U()], [esp(90, 36), esp(142, 56), neutron(4)]],
+  () => [[n(), PU()], [esp(102, 42), esp(135, 52), neutron(3)]],
+  () => [[n(), U()], [esp(92, 36), esp(141, 56), neutron(3)]],
+  () => [[n(), U()], [esp(95, 38), esp(139, 54), neutron(2)]],
+  () => [[n(), U()], [esp(103, 42), esp(131, 50), neutron(2)]],
+  () => [[n(), PU()], [esp(96, 40), esp(141, 54), neutron(3)]],
+  () => [[n(), U()], [esp(144, 55), esp(90, 37), neutron(2)]],
+];
+const FUSIONS = [
+  () => [[esp(2, 1), esp(3, 1)], [helium(), n()]],
+  () => [[esp(2, 1), esp(2, 1)], [esp(3, 2), n()]],
+  () => [[esp(2, 1), esp(2, 1)], [esp(3, 1), esp(1, 1)]],
+  () => [[esp(1, 1), esp(2, 1)], [esp(3, 2)]],
+  () => [[esp(3, 2), esp(3, 2)], [helium(), esp(1, 1, 'H', 2)]],
+  () => [[esp(14, 7), esp(1, 1)], [esp(15, 8), 'γ']],
+  () => [[esp(12, 6), esp(1, 1)], [esp(13, 7), 'γ']],
+  () => [[esp(2, 1), esp(3, 2)], [helium(), esp(1, 1)]],
+  () => [[esp(3, 2), helium()], [esp(7, 4), 'γ']],
+  () => [[esp(1, 1, 'H', 4)], [helium(), esp(0, 1, 'e', 2)]],
+];
+const RADIOS = [
+  () => [[esp(235, 92)], [esp(231, 90), helium()]],
+  () => [[esp(238, 94)], [esp(234, 92), helium()]],
+  () => [[esp(226, 88)], [esp(222, 86), helium()]],
+  () => [[esp(210, 84)], [esp(206, 82), helium()]],
+  () => [[esp(14, 6)], [electron(), esp(14, 7)]],
+  () => [[esp(60, 27)], [esp(60, 28), electron()]],
+  () => [[esp(90, 38)], [esp(90, 39), electron()]],
+  () => [[esp(137, 55)], [esp(137, 56), electron()]],
+  () => [[esp(15, 8)], [esp(15, 7), positron()]],
+  () => [[esp(18, 9)], [esp(18, 8), positron()]],
+  () => [[esp(22, 11)], [esp(22, 10), positron()]],
+];
+const famille = f => hasard({ fission: FISSIONS, fusion: FUSIONS, radio: RADIOS }[f])();
+const eqHTML = (g, d) => `<p class="ph-calc">${L(equation(g, d))}</p>`;
+
+// classer une réaction (repérer le plus grand A, puis choisir)
+function qClasser(f) {
+  const [g, d] = famille(f);
+  return { theme: 'Fission, fusion ou radioactivité', consigne: 'Classe cette réaction nucléaire avec la méthode du cours.',
+    parties: [partieReaction({ g, d, reperer: true, classer: true }, { q: 'Repère le plus grand nombre de nucléons, puis choisis.', solution: `<p>${explication(analyse(g, d))}</p>` })] };
+}
+// nombre x de neutrons d'une fission (et parfois Z d'un fragment), puis classer
+function qX() {
+  const [g, d] = famille('fission');
+  const dd = d.map(x => (x.s === 'n' ? trou(x, 'k') : x));
+  if (Math.random() < .5) { const i = dd.findIndex(x => x.s !== 'n'); dd[i] = trou(dd[i], 'Z'); }
+  return { theme: 'Nombre de neutrons', consigne: 'Complète l\'équation par conservation, puis classe la réaction.',
+    parties: [partieReaction({ g, d: dd, classer: true }, { q: 'Trouve x (et Z s\'il manque), Valider, puis classe la réaction.', solution: `${redaction(g, dd)}<p>${explication(analyse(g, d))}</p>` })] };
+}
+// un noyau à trouver (A, Z, élément)
+function qNoyau() {
+  const [g, d] = famille(hasard(['fission', 'fusion', 'radio', 'radio']));
+  const dd = d.slice();
+  const ks = dd.map((x, i) => i).filter(i => dd[i] !== 'γ' && dd[i].s !== 'n' && dd[i].s !== 'e');
+  const i = hasard(ks);
+  dd[i] = trou(dd[i], dd[i].k > 1 ? 'Zs' : 'AZs');
+  return { theme: 'Compléter une équation', consigne: 'Complète l\'équation : trouve A et Z par conservation, puis l\'élément d\'après Z.',
+    parties: [partieReaction({ g, d: dd }, { q: 'Trouve les nombres (Valider), puis l\'élément dans la classification.', solution: redaction(g, dd) })] };
+}
+// particule à trouver (neutron, électron, positron), puis classer
+function qParticule() {
+  const [g, d] = hasard([() => famille('radio'), () => hasard([FUSIONS[0], FUSIONS[1]])()])();
+  const i = d.findIndex(x => x !== 'γ' && (x.s === 'e' || x.s === 'n'));
+  if (i < 0) return qParticule();
+  const dd = d.slice();
+  dd[i] = trou(dd[i], 'AZs');
+  return { theme: 'Particule émise', consigne: 'Complète l\'équation : quelle particule est formée ?',
+    parties: [partieReaction({ g, d: dd, classer: true }, { q: 'Trouve A et Z de la particule (Valider), la particule, puis classe la réaction.', solution: `${redaction(g, dd)}<p>${explication(analyse(g, d))}</p>` })] };
+}
+// réaction chimique ou nucléaire ? le neutron ?
+function qNotion() {
+  const [g, d] = famille(hasard(['fission', 'fusion']));
+  return hasard([
+    { theme: 'Réaction nucléaire', enonce: eqHTML(g, d), parties: [{ type: 'choix', q: 'Cette réaction est-elle une réaction chimique ?', colonne: true,
+      options: [o('ok', 'Non : les éléments ne sont pas conservés'), o('oui', 'Oui : A et Z sont conservés'), o('o2', 'Non : il n\'y a pas de dioxygène')], bonne: 'ok',
+      indices: { oui: 'A et Z se conservent, mais les éléments changent : compare les symboles à gauche et à droite.', o2: 'Ce n\'est pas la raison : compare les éléments à gauche et à droite.' },
+      solution: '<p>Ce n\'est pas une réaction chimique : les éléments ne sont pas conservés (un noyau change d\'élément).</p>' }] },
+    { theme: 'Le neutron', enonce: `<p class="ph-calc">${L(noyau(1, 0, 'n'))}</p>`, parties: [{ type: 'choix', q: 'Que signifie cette notation ?', colonne: true,
+      options: [o('ok', 'un neutron : 0 proton et 1 nucléon'), o('p', 'un proton : 1 proton et 0 neutron'), o('inv', 'une particule de 1 proton et 0 nucléon')], bonne: 'ok',
+      indices: { p: 'Le nombre du bas, Z = 0, est le nombre de protons.', inv: 'En haut, A = 1 est le nombre de nucléons ; en bas, Z = 0 le nombre de protons.' },
+      solution: '<p>Z = 0 : aucun proton ; A = 1 : un nucléon, donc 1 − 0 = 1 neutron. C\'est un neutron.</p>' }] },
+  ]);
+}
+// définitions
+function qDef() {
+  return hasard([
+    { theme: 'Définition', parties: [{ type: 'choix', q: 'Une fission, c\'est :', colonne: true,
+      options: [o('ok', 'un noyau lourd qui se scinde en deux noyaux plus légers, sous l\'impact d\'un neutron'), o('fus', 'deux noyaux légers qui s\'associent en un noyau plus lourd'), o('radio', 'un noyau qui émet spontanément une particule α ou β')], bonne: 'ok',
+      indices: { fus: 'Ça, c\'est la fusion.', radio: 'Ça, c\'est la radioactivité.' }, solution: '<p>Un noyau lourd, percuté par un neutron, se scinde en deux noyaux plus légers.</p>' }] },
+    { theme: 'Définition', parties: [{ type: 'choix', q: 'Une fusion, c\'est :', colonne: true,
+      options: [o('ok', 'deux noyaux légers qui s\'associent en un noyau plus lourd'), o('fis', 'un noyau lourd qui se scinde en deux noyaux plus légers'), o('chim', 'une combustion de l\'hydrogène')], bonne: 'ok',
+      indices: { fis: 'Ça, c\'est la fission.', chim: 'Une combustion est une réaction chimique : les noyaux n\'y changent pas.' }, solution: '<p>Deux noyaux légers s\'associent pour former un noyau plus lourd.</p>' }] },
+    { theme: 'Un seul réactif', enonce: eqHTML(...RADIOS[0]()), parties: [{ type: 'choix', q: 'Le plus grand nombre de nucléons (235) est à gauche. Est-ce une fission ?', colonne: true,
+      options: [o('ok', 'Non : un seul réactif, c\'est une radioactivité α'), o('fis', 'Oui : le plus grand nombre de nucléons est à gauche'), o('fus', 'Non : c\'est une fusion')], bonne: 'ok',
+      indices: { fis: 'Pour une fission, il faut deux réactifs : le neutron qui percute le noyau.', fus: 'Un seul noyau à gauche : rien ne fusionne.' },
+      solution: '<p>Un seul réactif, qui émet un noyau d\'hélium : radioactivité α. Pour une fission, il faut le neutron en plus.</p>' }] },
+  ]);
+}
+
+function tirage() {
+  const classer = melanger(['fission', 'fusion', 'radio']);
+  return [qClasser(classer[0]), qX(), qNoyau(), qClasser(classer[1]), qParticule(), qNotion(), qClasser(classer[2]), qX(), qNoyau(), qDef()];
+}
+
+NUC.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Fission, fusion ou radioactivité ?',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : reconnaître une fission, une fusion ou une radioactivité d\'après l\'équation, trouver le nombre x de neutrons, A, Z ou l\'élément par conservation.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2a_cours.html', label: 'Module 2 : défaut de masse →' },
+});
+NUC.menu('module_1_questions');
+</script>
+</body>
+</html>

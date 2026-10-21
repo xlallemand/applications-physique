@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 : calculer t — Chapitre 12 : Radioactivité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rad.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rad.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 5 · COURS 3 / 3</span>
+    <h2 class="er-titre">Calculer t</h2>
+    <p class="er-contexte">Avec t = ln(N/N<sub>0</sub>) / (−λ), on calcule à la calculatrice la date à laquelle il reste une fraction donnée des noyaux, ou une activité donnée. Attention à la touche <b>ln</b>, au signe de <b>−λ</b> et au rapport <b>N/N<sub>0</sub></b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Calculer t avec N/N₀ (application numérique, touche ln)
+   2. Calculer t avec l'activité : t = ln(A/A₀) / (−λ)
+   Erreurs diagnostiquées : log au lieu de ln, signe de λ oublié
+   (t négatif), N/N₀ inversé, unité de λ.
+   Valeurs vérifiées : ln(0,25) / (−0,020) ≈ 69,3 s ; ln(0,5) / (−0,0866) ≈ 8,00 jours ;
+   ln(0,10) / (−0,0126) ≈ 183 s ; ln(10 250 / 41 000) / (−0,131) ≈ 10,6 ans ;
+   ln(150 / 600) / (−0,0866) ≈ 16,0 jours ; ln(0,20) / (−0,0231) ≈ 69,7 ans.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, fr, proche } = RAD;
+const M = RAD.MOINS;
+const pr = (a, b) => proche(a, b, .015);
+
+// diagnostics des erreurs classiques sur t = ln(r) / (−λ)
+function diagT(v, r, l) {
+  const t = Math.log(r) / -l;
+  if (pr(v, -t)) return `t est négatif : as-tu oublié le signe de ${M}λ, ou inversé le rapport (c'est N/N<sub>0</sub>, pas N<sub>0</sub>/N) ?`;
+  if (pr(v, Math.log10(r) / -l)) return 'Tu as utilisé log : c\'est <b>ln</b>, la réciproque de e<sup>x</sup>.';
+  if (pr(v, -Math.log(r) * l) || pr(v, Math.log(r) * l)) return 'On divise ln(N/N<sub>0</sub>) par −λ, on ne multiplie pas.';
+  if (pr(v, r / -l) || pr(v, -r / -l)) return 'Applique d\'abord ln au rapport.';
+  return `t = ln(rapport) / (${M}λ) : calcule le rapport, puis ln, puis divise par ${M}λ.`;
+}
+// question « calcule t » : r = N/N₀ (ou A/A₀), λ avec son unité
+function calculT(enonce, rTxt, r, l, lTxt, unite, titre) {
+  const t = Math.log(r) / -l;
+  return { titre, enonce, parties: [{ type: 'nombre', q: `Calcule t (3 chiffres significatifs).`, label: 't =', valeur: t, unite, rel: .01, signe: false,
+    diag: v => diagT(v, r, l),
+    solution: `t = ${fr(`ln(${rTxt})`, `${M}${lTxt}`)} = ${fr(fmt(+Math.log(r).toPrecision(4)), `${M}${lTxt}`)} ≈ ${fmt(+t.toPrecision(3))} ${unite}` }] };
+}
+
+/* ---------- 1. Calculer t avec N/N₀ ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Calculer t à la calculatrice');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">t = ${fr('ln(N / N<sub>0</sub>)', `${M}λ`)}</p>
+        <p>À la calculatrice : <b>ln(</b>N / N<sub>0</sub><b>)</b>, puis on divise par <b>(${M}λ)</b>, parenthèses comprises. t a l'unité de temps de λ (λ en s<sup>${M}1</sup> donne t en s).</p></div>
+    </div>
+    ${exemple(`<p>N<sub>0</sub> = 1,0 × 10<sup>6</sup> noyaux, λ = 0,020 s<sup>${M}1</sup>. Quand reste-t-il N = 2,5 × 10<sup>5</sup> noyaux ?</p>
+      <p class="crs-calc">N / N<sub>0</sub> = 2,5 × 10<sup>5</sup> / 1,0 × 10<sup>6</sup> = 0,25</p>
+      <p class="crs-calc">t = ${fr('ln(0,25)', `${M}0,020`)} = ${fr(`${M}1,386`, `${M}0,020`)} ≈ <span class="c">69,3 s</span></p>
+      <p>t est positif : les deux signes − s'annulent.</p>`)}`);
+  c.aToi(carte, [
+    calculT(`<p>Iode 131 : λ = 0,0866 jour<sup>${M}1</sup>. Au bout de combien de temps reste-t-il la moitié des noyaux (N/N<sub>0</sub> = 0,5) ?</p>`, '0,5', .5, .0866, '0,0866', 'jours', 'Calculer t'),
+    calculT(`<p>Radon 220 : λ = 0,0126 s<sup>${M}1</sup>. Au bout de combien de temps reste-t-il 10 % des noyaux (N/N<sub>0</sub> = 0,10) ?</p>`, '0,10', .1, .0126, '0,0126', 's'),
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Avec l'activité ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Calculer t avec l\'activité');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">t = ${fr('ln(A / A<sub>0</sub>)', `${M}λ`)}</p>
+        <p>A et A<sub>0</sub> dans la même unité (Bq, kBq…) : le rapport n'a pas d'unité.</p></div>
+    </div>
+    ${exemple(`<p>Cobalt 60 : λ = 0,131 an<sup>${M}1</sup>, A<sub>0</sub> = 41 000 kBq. Quand l'activité vaut-elle 10 250 kBq ?</p>
+      <p class="crs-calc">t = ${fr('ln(10 250 / 41 000)', `${M}0,131`)} = ${fr('ln(0,25)', `${M}0,131`)} ≈ <span class="c">10,6 ans</span></p>
+      <p>Vérification : 0,25 = 1/4, c'est 2 demi-vies du cobalt 60 (2 × 5,3 = 10,6 ans).</p>`)}`);
+  c.aToi(carte, [
+    calculT(`<p>Iode 131 : λ = 0,0866 jour<sup>${M}1</sup>, A<sub>0</sub> = 600 Bq. Au bout de combien de temps l'activité vaut-elle A = 150 Bq ?</p>`, '150 / 600', .25, .0866, '0,0866', 'jours', 'Avec l\'activité'),
+    calculT(`<p>Césium 137 : λ = 0,0231 an<sup>${M}1</sup>. Au bout de combien de temps l'activité est-elle divisée par 5 (A/A<sub>0</sub> = 0,20) ?</p>`, '0,20', .2, .0231, '0,0231', 'ans'),
+  ], 'Ce qu\'il faut retenir →');
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Calculer t.</b> t = ln(N/N<sub>0</sub>) / (${M}λ), ou t = ln(A/A<sub>0</sub>) / (${M}λ). Touche <b>ln</b> (pas log).</p></div>
+    <div class="cle"><p><b class="cle-titre">Vérifier.</b> t est positif (N/N<sub>0</sub> &lt; 1, donc ln(N/N<sub>0</sub>) &lt; 0, divisé par ${M}λ &lt; 0) ; t a l'unité de temps de λ.</p></div>
+    <p class="rad-complete"><b>✍ Complète ton cours :</b> t = ln(N/N<sub>0</sub>) / (${M}λ).</p>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_5_questions.html">Questions sur la décroissance exponentielle →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_6.html">Module 6 : exercices</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_5.html#calcul">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+RAD.menu('module_5c_cours');
+</script>
+</body>
+</html>

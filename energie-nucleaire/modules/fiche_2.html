@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : fiche récapitulative — Chapitre 13 : Énergie nucléaire</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="nuc.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="nuc.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Défaut de masse et énergie libérée</h2>
+  </div>
+<!-- Fiche récapitulative du module 2 : défaut de masse et tableau (ancre « defaut »),
+     énergie libérée et MeV (ancre « energie »). Le tableau rempli est écrit par le script en bas de page. -->
+
+  <section class="er-card" id="defaut">
+    <h3 class="cours-titre">Le défaut de masse</h3>
+    <div class="cle"><p class="som-formule">Δm = m<sub>produits</sub> − m<sub>réactifs</sub></p>
+      <p>Masses en kg. Δm est <b>négatif</b> quand de l'énergie est libérée : les produits sont plus légers que les réactifs.</p></div>
+    <div class="cle"><p><b>Tableau</b> : une colonne pour les réactifs, une pour les produits ; chaque ligne : <b>coefficient × masse</b> ; somme de chaque colonne ; puis la différence. Les neutrons des deux côtés se simplifient en partie (3 n à droite, 1 n à gauche : 2 × m(n) dans Δm).</p></div>
+    <p class="cours-exemple-t" style="margin-top:12px">Exemple du cours</p>
+    <div id="tableau"></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Masses en unité de masse atomique</h3>
+    <div class="cle"><p class="som-formule">1 u = 1,660539 × 10<sup>−27</sup> kg</p>
+      <p>Calcul de Δm en u, puis conversion : Δm (kg) = Δm (u) × 1,660539 × 10<sup>−27</sup>.</p></div>
+  </section>
+
+  <section class="er-card" id="energie">
+    <h3 class="cours-titre">L'énergie libérée</h3>
+    <div class="cle"><p class="som-formule">E<sub>lib</sub> = |Δm| × c²</p>
+      <p>|Δm| en kg, c en m·s<sup>−1</sup>, E<sub>lib</sub> en J (positive). c = 3,00 × 10<sup>8</sup> m·s<sup>−1</sup> si l'énoncé ne la donne pas.</p></div>
+    <div class="cle"><p class="som-formule">1 MeV = 1,60 × 10<sup>−13</sup> J</p>
+      <p>ou 1 eV = 1,602177 × 10<sup>−19</sup> J et 1 MeV = 10<sup>6</sup> eV. E (MeV) = E (J) / 1,60 × 10<sup>−13</sup>.</p></div>
+    <p class="cours-exemple-t" style="margin-top:12px">Exemple du cours</p>
+    <p class="ph-calc">E = 4,3878 × 10<sup>−29</sup> × 299 792 458² = 3,9436 × 10<sup>−12</sup> J</p>
+    <p class="ph-calc">E = 3,9436 × 10<sup>−12</sup> / 1,60 × 10<sup>−13</sup> = 24,6 MeV</p>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_2a_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_2_questions.html">Questions sur le défaut de masse et l'énergie</a>
+  </div>
+</div>
+<script>
+const { esp, helium, masse, tableauDefaut } = NUC;
+const ligne = (x, m) => ({ x, m: masse(m) });
+document.getElementById('tableau').innerHTML = tableauDefaut({ g: [ligne(esp(1, 1, 'H', 4), '1,6726e-27')], d: [ligne(helium(), '6,6447e-27'), ligne(esp(0, 1, 'e', 2), '9,11e-31')] });
+NUC.menu('fiche_2');
+</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : fiche récapitulative — Chapitre 12 : Radioactivité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rad.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rad.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Types de radioactivité et équations</h2>
+  </div>
+<!-- Fiche récapitulative du module 2 : les trois types (ancre « types »), équations et rayonnement γ (ancre « equations »). -->
+
+  <section class="er-card" id="types">
+    <h3 class="cours-titre">Les trois types de radioactivité</h3>
+    <div class="som-defile"><table class="som-tab rad-tab" id="tableau"></table></div>
+    <div class="cle"><p><b>Reconnaître la particule</b> dans une équation : He → α ; e avec −1 → électron, β<sup>−</sup> ; e avec +1 → positron, β<sup>+</sup>.</p></div>
+  </section>
+
+  <section class="er-card" id="equations">
+    <h3 class="cours-titre">Équations de désintégration</h3>
+    <div class="cle"><p><b>Conservation</b> du nombre de nucléons A et du nombre de charge Z : même somme des A, et même somme des Z, à gauche et à droite de la flèche.</p>
+      <p>Pour compléter une équation : A, puis Z par conservation ; l'élément se lit d'après Z dans la classification.</p></div>
+    <p class="cours-exemple-t">Exemple</p>
+    <p class="rad-lisible" id="exemple"></p>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Rayonnement γ</h3>
+    <div class="cle"><p>Onde électromagnétique qui accompagne chaque désintégration : le noyau fils excité se désexcite, <b>Y* → Y + γ</b>. Très pénétrant (une vingtaine de centimètres de plomb pour s'en protéger) et très énergétique : E = h × f.</p></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_2a_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_2_questions.html">Questions sur les types et les équations</a>
+  </div>
+</div>
+<script>
+const { nuc, n, equation } = RAD;
+document.getElementById('tableau').innerHTML = `<tr><th>Type</th><th>Particule émise</th><th>Symbole</th><th>Exemple</th></tr>
+  <tr><td><b>α</b></td><td>noyau d'hélium</td><td>${nuc(4, 2, 'He')}</td><td>${equation([n(235, 92)], [n(4, 2, 'He'), n(231, 90)])}</td></tr>
+  <tr><td><b>β<sup>−</sup></b></td><td>électron</td><td>${nuc(0, -1, 'e')}</td><td>${equation([n(14, 6)], [n(0, -1, 'e'), n(14, 7)])}</td></tr>
+  <tr><td><b>β<sup>+</sup></b></td><td>positron (positon)</td><td>${nuc(0, 1, 'e')}</td><td>${equation([n(15, 8)], [n(0, 1, 'e'), n(15, 7)])}</td></tr>`;
+document.getElementById('exemple').innerHTML = `${equation([n(238, 92)], [n('A', 'Z', 'X'), n(4, 2, 'He')])} : A = 238 − 4 = 234 ; Z = 92 − 2 = 90, c'est le thorium : ${nuc(234, 90, 'Th')}.`;
+RAD.menu('fiche_2');
+</script>
+</body>
+</html>

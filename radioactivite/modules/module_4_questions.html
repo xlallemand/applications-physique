@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : questions sur la demi-vie — Chapitre 12 : Radioactivité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rad.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rad.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : t½ lue sur une courbe générée
+   (N, A ou m, unités variées ; 3), âge d'un échantillon par lecture
+   graphique (1), ce qui reste après n demi-vies (2), durée pour
+   atteindre N₀/4, N₀/8 ou N₀/16 (2), activité négligeable au bout de
+   10 demi-vies (1), définition (1).
+   Erreurs diagnostiquées : valeur initiale non divisée (ou divisée par
+   4), lecture sur le mauvais axe, deux demi-vies au lieu d'une,
+   division par n au lieu de 2ⁿ, 8 demi-vies pour N₀/8.
+   ============================================================ */
+const { o, fq, fmt, hasard, entre, proche, partieLecture } = RAD;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c_ = h => `<span class="c">${h}</span>`;
+const decroit = (y0, T) => t => y0 * Math.pow(2, -t / T);
+
+/* Courbes générées : demi-vie et axe des temps (graduations, pas fin multiple de t½),
+   grandeur tracée (N, A ou m) avec sa valeur initiale et ses graduations */
+const TEMPS = [
+  { T: 55, u: 's', titre: 't (en s)', max: 250, pas: 50, fin: 5 },
+  { T: 8, u: 'jours', titre: 't (en jours)', max: 40, pas: 5, fin: 1 },
+  { T: 30, u: 'ans', titre: 't (en ans)', max: 150, pas: 25, fin: 5 },
+  { T: 6, u: 'h', titre: 't (en h)', max: 30, pas: 5, fin: 1 },
+  { T: 12, u: 'min', titre: 't (en min)', max: 60, pas: 10, fin: 2 },
+  { T: 20, u: 'min', titre: 't (en min)', max: 100, pas: 20, fin: 5 },
+  { T: 5.3, u: 'ans', titre: 't (en ans)', max: 30, pas: 5, fin: .5, tol: .5 },
+];
+const GRANDEURS = [
+  { sym: 'N', u: 'noyaux', titre: 'N (noyaux restants)', y0: 8000, pas: 1000, fin: 500, nom: 'nombre de noyaux restants' },
+  { sym: 'N', u: 'noyaux', titre: 'N (noyaux restants)', y0: 6000, pas: 1000, fin: 500, nom: 'nombre de noyaux restants' },
+  { sym: 'A', u: 'Bq', titre: 'A (en Bq)', y0: 800, pas: 100, fin: 50, nom: 'activité' },
+  { sym: 'A', u: 'kBq', titre: 'A (en kBq)', y0: 40, pas: 5, fin: 2.5, nom: 'activité' },
+  { sym: 'm', u: 'g', titre: 'm (en g)', y0: 4, pas: .5, fin: .25, nom: 'masse' },
+  { sym: 'm', u: 'mg', titre: 'm (en mg)', y0: 3, pas: .5, fin: .25, nom: 'masse' },
+];
+function courbe(tp, gr) {
+  return { f: decroit(gr.y0, tp.T), y0: gr.y0, sym: gr.sym, grilleFine: true, margeG: 54,
+    x: { max: tp.max, pas: tp.pas, fin: tp.fin, titre: tp.titre }, y: { max: gr.y0, pas: gr.pas, fin: gr.fin, titre: gr.titre },
+    rep: { unite: tp.u, tol: tp.tol } };
+}
+// demi-vie lue sur une courbe générée
+function qLecture() {
+  const tp = hasard(TEMPS), gr = hasard(GRANDEURS);
+  return { theme: 'Demi-vie sur un graphique', consigne: `Voici la courbe de décroissance d'un échantillon radioactif (${gr.nom}). Mesure sa demi-vie.`,
+    parties: [partieLecture(courbe(tp, gr), {
+      solution: `<p>${gr.sym}<sub>0</sub> = ${fmt(gr.y0)} ; ${gr.sym}<sub>0</sub>/2 = ${fmt(gr.y0 / 2)} ; on reporte sur la courbe, puis sur l'axe des temps : t<sub>1/2</sub> = ${fmt(tp.T)} ${tp.u}.</p>` })] };
+}
+// âge d'un échantillon : n demi-vies
+function qAge() {
+  const tp = hasard(TEMPS.filter(t => !t.tol)), gr = hasard(GRANDEURS.filter(g => g.y0 / 8 % g.fin === 0 || g.y0 / 4 % g.fin === 0));
+  const k = gr.y0 / 8 % gr.fin === 0 && 3 * tp.T <= tp.max ? hasard([2, 3]) : 2;
+  const cible = gr.y0 / Math.pow(2, k);
+  const def = Object.assign(courbe(tp, gr), { mode: 'valeur', cible, cibleTxt: `${gr.sym} = ${fmt(cible)} ${gr.u}` });
+  def.rep = { label: 't =', unite: tp.u };
+  return { theme: 'Âge d\'un échantillon', consigne: `Au départ, ${gr.sym}<sub>0</sub> = ${fmt(gr.y0)} ${gr.u}. Maintenant, ${gr.sym} = ${fmt(cible)} ${gr.u}. Depuis combien de temps l'échantillon se désintègre-t-il ?`,
+    parties: [partieLecture(def, {
+      solution: `<p>On place ${fmt(cible)} sur l'axe vertical, on reporte sur la courbe puis sur l'axe des temps : t = ${fmt(k * tp.T)} ${tp.u}. Vérification : ${fmt(gr.y0)} divisé ${k} fois par 2 donne ${fmt(cible)}, soit ${k} demi-vies.</p>` })] };
+}
+// ce qui reste après n demi-vies
+function qReste() {
+  const [N0, nom, unite] = hasard([[8000, 'noyaux', ''], [12800, 'noyaux', ''], [1600, 'activité', 'Bq'], [640, 'activité', 'Bq'], [48, 'masse', 'mg']]);
+  const n = entre(2, 4), T = hasard([5, 8, 30, 12]), u = hasard(['jours', 'ans', 'h']);
+  const v = N0 / Math.pow(2, n);
+  const sym = nom === 'noyaux' ? 'N' : nom === 'activité' ? 'A' : 'm';
+  const txt0 = nom === 'noyaux' ? `${fmt(N0)} noyaux radioactifs` : nom === 'activité' ? `une activité de ${fmt(N0)} Bq` : `${fmt(N0)} mg de noyaux radioactifs`;
+  return { theme: 'Après plusieurs demi-vies', enonce: `<p>Un échantillon (t<sub>1/2</sub> = ${T} ${u}) a au départ ${txt0}.</p>`,
+    parties: [fq.nombre(`Que vaut ${sym} au bout de ${fmt(n * T)} ${u} ?`, `${sym} =`, v, nom === 'noyaux' ? '' : unite || 'mg', { rel: .005, signe: false,
+      diag: x => (proche(x, N0 / n, .01) ? `On ne divise pas par ${n} : on divise ${n} fois par 2, soit par 2<sup>${n}</sup> = ${Math.pow(2, n)}.` : proche(x, N0 / Math.pow(2, n - 1), .01) ? `Compte les demi-vies : ${fmt(n * T)} / ${T} = ${n}.` : proche(x, N0 / 2, .01) ? `Il y a ${n} demi-vies, pas une seule.` : proche(x, N0 / (n * T), .01) ? 'On ne divise pas par la durée : compte le nombre de demi-vies.' : `${fmt(n * T)} ${u} = ${n} demi-vies : divise ${n} fois par 2.`),
+      solution: calc(`${fmt(n * T)} / ${T} = ${n} demi-vies ; ${sym} = ${fmt(N0)} / 2<sup>${n}</sup> = ${fmt(N0)} / ${Math.pow(2, n)} = ${c_(fmt(v) + (nom === 'noyaux' ? '' : ' ' + (unite || 'mg')))}`) })] };
+}
+// durée pour atteindre N₀/2ⁿ
+function qDuree() {
+  const n = hasard([2, 3, 4]), d = Math.pow(2, n), [T, u, nom] = hasard([[30, 'ans', 'césium 137'], [8, 'jours', 'iode 131'], [5.3, 'ans', 'cobalt 60'], [6, 'h', 'technétium 99m'], [14, 'ans', 'plutonium 241']]);
+  return { theme: 'Durée de décroissance', enonce: `<p>${nom.charAt(0).toUpperCase() + nom.slice(1)} : t<sub>1/2</sub> = ${fmt(T)} ${u}.</p>`,
+    parties: [fq.nombre(`Au bout de combien de temps le nombre de noyaux est-il divisé par ${d} ?`, 'durée =', n * T, u, { rel: .005, signe: false,
+      diag: x => (proche(x, d * T, .01) ? `Divisé par ${d} = 2<sup>${n}</sup> : ${n} demi-vies, pas ${d}.` : proche(x, T, .01) ? 'Une demi-vie divise seulement par 2.' : proche(x, T * d / 2, .01) ? `${d} = 2<sup>${n}</sup> : il faut ${n} demi-vies.` : `${d} = 2<sup>${n}</sup> : ${n} demi-vies.`),
+      solution: calc(`N<sub>0</sub>/${d} = N<sub>0</sub>/2<sup>${n}</sup> : ${n} demi-vies, soit ${n} × ${fmt(T)} = ${c_(fmt(n * T) + ' ' + u)}`) })] };
+}
+// activité négligeable
+function qNegligeable() {
+  const [T, u, nom] = hasard([[5.3, 'ans', 'cobalt 60'], [8, 'jours', 'iode 131'], [6, 'h', 'technétium 99m'], [74, 'jours', 'iridium 192'], [30, 'ans', 'césium 137']]);
+  return { theme: 'Activité négligeable', enonce: `<p>${nom.charAt(0).toUpperCase() + nom.slice(1)} : t<sub>1/2</sub> = ${fmt(T)} ${u}.</p>`,
+    parties: [fq.nombre('Au bout de combien de temps peut-on considérer son activité comme négligeable ?', 'durée =', 10 * T, u, { rel: .005, signe: false,
+      diag: x => (proche(x, 2 * T, .01) ? 'Au bout de 2 demi-vies, il reste encore le quart.' : proche(x, T, .01) ? 'Au bout d\'une demi-vie, il reste la moitié.' : 'On considère l\'activité négligeable au bout de 10 demi-vies.'),
+      solution: calc(`10 × t<sub>1/2</sub> = 10 × ${fmt(T)} = ${c_(fmt(10 * T) + ' ' + u)}`) })] };
+}
+// définition
+function qDef() {
+  return hasard([
+    { theme: 'Définition', parties: [{ type: 'choix', q: 'La demi-vie d\'un échantillon radioactif est la durée au bout de laquelle :', colonne: true,
+      options: [o('ok', 'le nombre de noyaux radioactifs est divisé par 2'), o('tout', 'tous les noyaux se sont désintégrés'), o('moitie', 'la moitié de la durée de vie de l\'échantillon est écoulée')], bonne: 'ok',
+      indices: { tout: 'Il reste toujours des noyaux : leur nombre est divisé par 2 à chaque demi-vie.', moitie: 'La demi-vie se définit par le nombre de noyaux restants.' },
+      solution: '<p>La demi-vie t<sub>1/2</sub> est la durée au bout de laquelle le nombre de noyaux radioactifs est divisé par 2.</p>' }] },
+    { theme: 'Définition', parties: [{ type: 'choix', q: 'Au bout de deux demi-vies, il reste :', melanger: false,
+      options: [o('q', 'N<sub>0</sub>/4'), o('z', '0'), o('d', 'N<sub>0</sub>/2')], bonne: 'q',
+      indices: { z: 'Une demi-vie de plus divise encore par 2 : il en reste.', d: 'N<sub>0</sub>/2, c\'est après une seule demi-vie.' },
+      solution: '<p>N<sub>0</sub>/2, puis N<sub>0</sub>/4.</p>' }] },
+  ]);
+}
+
+function tirage() {
+  return [qLecture(), qReste(), qDuree(), qLecture(), qDef(), qReste(), qAge(), qDuree(), qNegligeable(), qLecture()];
+}
+
+RAD.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 4 · QUESTIONS', titre: 'Demi-vie',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : demi-vie lue sur une courbe (N, A ou m), âge d\'un échantillon, ce qui reste après n demi-vies, durée pour atteindre N<sub>0</sub>/8, activité négligeable.</p>',
+  questions: tirage,
+  revoir: { href: 'module_4a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_5a_cours.html', label: 'Module 5 : décroissance exponentielle →' },
+});
+RAD.menu('module_4_questions');
+</script>
+</body>
+</html>

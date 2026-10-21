@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : la demi-vie — Chapitre 12 : Radioactivité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rad.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rad.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 1 / 2</span>
+    <h2 class="er-titre">La demi-vie</h2>
+    <p class="er-contexte">Le nombre de noyaux radioactifs d'un échantillon est divisé par 2 toutes les <b>demi-vies</b>. Tu vas calculer ce qui reste après plusieurs demi-vies, et savoir quand l'activité devient <b>négligeable</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Définition de la demi-vie t½ (ou période radioactive) ; courbes
+      N(t) et A(t) avec N₀/2, N₀/4, N₀/8 (même chose avec A ou m)
+   2. Après n demi-vies : N₀ / 2ⁿ ; durée pour atteindre N₀/8
+   3. Règle des sujets : au bout de 10 demi-vies, activité négligeable ;
+      lien vers la simulation decroissance-radioactive (noyau par noyau)
+   ============================================================ */
+const { exemple } = COURS;
+const { o, fmt, figCourbe } = RAD;
+// étiquettes SVG : indice 0, demi-vie
+const sub0 = s => `${s}<tspan dy="3" font-size="9">0</tspan>`;
+const etT = v => ['0', 't<tspan dy="3" font-size="9">1/2</tspan>', '2t<tspan dy="3" font-size="9">1/2</tspan>', '3t<tspan dy="3" font-size="9">1/2</tspan>', '4t<tspan dy="3" font-size="9">1/2</tspan>'][v] || '';
+const etY = s => v => ({ 8: sub0(s), 4: sub0(s) + '<tspan dy="-3">/2</tspan>', 2: sub0(s) + '<tspan dy="-3">/4</tspan>', 1: sub0(s) + '<tspan dy="-3">/8</tspan>' })[v] || '';
+const courbeSym = (s, titre) => ({ f: t => 8 * Math.pow(2, -t), margeG: 50,
+  x: { max: 4.4, pas: 1, fin: .5, titre: 't', etiq: etT }, y: { max: 9, pas: 1, fin: .5, titre, etiq: etY(s) },
+  reperes: [{ y: 4 }, { y: 2 }, { y: 1 }] });
+
+/* ---------- 1. Définition ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Demi-vie d\'un échantillon radioactif');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> La <b>demi-vie</b> t<sub>1/2</sub> (ou <b>période radioactive</b>) est la durée au bout de laquelle le nombre de noyaux radioactifs est <b>divisé par 2</b>.</p></div>
+      <div class="ph-grille2">${figCourbe(courbeSym('N', 'N(t)'), 'Nombre de noyaux restants N(t) : N₀/2 à t½, N₀/4 à 2t½, N₀/8 à 3t½')}${figCourbe(courbeSym('A', 'Activité (Bq)'), 'Activité A(t) : A₀/2 à t½, A₀/4 à 2t½, A₀/8 à 3t½')}</div>
+      <p>L'activité diminue de la même façon : elle est divisée par 2 à chaque demi-vie. Sur un graphique, on peut trouver <b>N</b>, <b>A</b> ou la masse <b>m</b> de l'échantillon radioactif : la demi-vie <b>s'utilise pareil</b>.</p>
+    </div>
+    ${exemple('<p>Un échantillon contient N<sub>0</sub> = 10 000 noyaux de radon 220, de demi-vie t<sub>1/2</sub> = 55 s.</p><p class="crs-calc">Au bout de 55 s, il en reste 10 000 / 2 = <span class="c">5 000</span>.</p>')}`);
+  c.aToi(carte, [
+    { parties: [{ type: 'choix', q: 'Au bout d\'une demi-vie, le nombre de noyaux radioactifs restants est :', melanger: false,
+      options: [o('ok', 'N<sub>0</sub>/2'), o('zero', '0'), o('quart', 'N<sub>0</sub>/4')], bonne: 'ok',
+      indices: { zero: 'Une demi-vie ne fait disparaître que la moitié des noyaux.', quart: 'N<sub>0</sub>/4, c\'est au bout de deux demi-vies.' },
+      solution: 'N<sub>0</sub>/2 : le nombre de noyaux est divisé par 2.' }] },
+    { parties: [{ type: 'nombre', q: 'Une source a une activité A<sub>0</sub> = 640 Bq. Quelle est son activité au bout d\'une demi-vie ?', label: 'A =', valeur: 320, unite: 'Bq', tol: 0, signe: false,
+      diag: v => (v === 0 ? 'Au bout d\'une demi-vie, il reste la moitié.' : v === 160 ? 'C\'est au bout de deux demi-vies : ici, une seule.' : v === 1280 ? 'L\'activité diminue : on divise par 2.' : '640 / 2.'),
+      solution: 'A = 640 / 2 = 320 Bq.' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Après n demi-vies ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Après plusieurs demi-vies');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>À chaque demi-vie, ce qui reste est de nouveau divisé par 2.</p>
+      <div class="crs-defile"><table class="crs-tab">
+        <tr><th>Durée</th><td>0</td><td>t<sub>1/2</sub></td><td>2 t<sub>1/2</sub></td><td>3 t<sub>1/2</sub></td><td>n t<sub>1/2</sub></td></tr>
+        <tr><th>Noyaux restants</th><td>N<sub>0</sub></td><td>N<sub>0</sub>/2</td><td>N<sub>0</sub>/4</td><td>N<sub>0</sub>/8</td><td>N<sub>0</sub>/2<sup>n</sup></td></tr>
+      </table></div>
+      <div class="cle"><p>Après <b>n demi-vies</b>, il reste <b>N<sub>0</sub> / 2<sup>n</sup></b> noyaux (de même pour l'activité ou la masse).</p></div>
+    </div>
+    ${exemple('<p>N<sub>0</sub> = 10 000 noyaux, t<sub>1/2</sub> = 55 s. Au bout de 165 s = 3 × 55 s, soit 3 demi-vies :</p><p class="crs-calc">N = 10 000 / 2<sup>3</sup> = 10 000 / 8 = <span class="c">1 250 noyaux</span></p><p>Et pour que N soit divisé par 8, il faut 3 demi-vies : 3 × 55 = 165 s.</p>')}`);
+  c.aToi(carte, [
+    { titre: 'Ce qui reste', parties: [{ type: 'nombre', q: 'N<sub>0</sub> = 6 400 noyaux. Combien en reste-t-il au bout de 4 demi-vies ?', label: 'N =', valeur: 400, tol: 0, signe: false,
+      diag: v => (v === 1600 ? '6 400 / 4 : c\'est ce qui reste après 2 demi-vies. On divise par 2<sup>4</sup> = 16.' : v === 800 ? 'C\'est après 3 demi-vies : divise par 2 une fois de plus.' : v === 3200 ? 'Une seule division par 2 : il y a 4 demi-vies.' : 'N = N<sub>0</sub> / 2<sup>4</sup> = 6 400 / 16.'),
+      solution: 'N = 6 400 / 2<sup>4</sup> = 6 400 / 16 = 400 noyaux.' }] },
+    { parties: [{ type: 'nombre', q: 'Iode 131 : t<sub>1/2</sub> = 8 jours, A<sub>0</sub> = 800 Bq. Quelle est l\'activité au bout de 24 jours ?', label: 'A =', valeur: 100, unite: 'Bq', tol: 0, signe: false,
+      diag: v => (v === 800 / 24 || Math.abs(v - 33.3) < .1 ? 'On ne divise pas par la durée : compte le nombre de demi-vies, 24 / 8.' : v === 266 || Math.abs(v - 266.7) < 1 ? 'On ne divise pas par 3 : on divise 3 fois par 2.' : v === 200 ? 'C\'est après 2 demi-vies ; 24 jours, c\'est 3 demi-vies.' : '24 jours = 3 demi-vies : A = 800 / 2<sup>3</sup>.'),
+      solution: '24 / 8 = 3 demi-vies ; A = 800 / 2<sup>3</sup> = 800 / 8 = 100 Bq.' }] },
+    { titre: 'Durée pour atteindre N<sub>0</sub>/8', parties: [{ type: 'nombre', q: 'Césium 137 : t<sub>1/2</sub> = 30 ans. Au bout de combien de temps le nombre de noyaux est-il divisé par 8 ?', label: 'durée =', valeur: 90, unite: 'ans', tol: 0, signe: false,
+      diag: v => (v === 240 ? 'Divisé par 8, c\'est 3 demi-vies (2 × 2 × 2), pas 8.' : v === 60 ? '60 ans : divisé par 4 seulement.' : '8 = 2<sup>3</sup> : il faut 3 demi-vies.'),
+      solution: 'N<sub>0</sub>/8 = N<sub>0</sub>/2<sup>3</sup> : 3 demi-vies, soit 3 × 30 = 90 ans.' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Activité négligeable ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Quand l\'activité devient-elle négligeable ?');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Règle des sujets.</b> Au bout de <b>10 demi-vies</b>, on considère que l'activité est <b>négligeable</b> : il reste N<sub>0</sub>/2<sup>10</sup> = N<sub>0</sub>/1 024, soit environ 0,1 % des noyaux.</p></div>
+      <div class="ph-lien-app rad-lien"><p>La décroissance noyau par noyau : chaque noyau a une chance sur deux de se désintégrer pendant une demi-vie.</p><a class="btn-small" href="../../decroissance-radioactive/index.html" target="_blank" rel="noopener">Voir la décroissance noyau par noyau ↗</a></div>
+    </div>
+    ${exemple('<p>Cobalt 60 : t<sub>1/2</sub> = 5,3 ans.</p><p class="crs-calc">10 × 5,3 = <span class="c">53 ans</span> : au bout de 53 ans, l\'activité d\'une source de cobalt 60 est négligeable.</p>')}`);
+  c.aToi(carte, [
+    { parties: [{ type: 'nombre', q: 'Iode 131 : t<sub>1/2</sub> = 8 jours. Au bout de combien de temps son activité est-elle négligeable ?', label: 'durée =', valeur: 80, unite: 'jours', tol: 0, signe: false,
+      diag: v => (v === 16 ? 'Il faut 10 demi-vies, pas 2.' : v === 8 ? 'Au bout d\'une demi-vie, il reste encore la moitié.' : '10 × t<sub>1/2</sub>.'),
+      solution: '10 × 8 = 80 jours.' }] },
+    { parties: [{ type: 'choix', q: 'Plutonium 239 : t<sub>1/2</sub> ≈ 24 000 ans. Ses déchets peuvent-ils être stockés sans précaution après 100 ans ?', colonne: true,
+      options: [o('non', 'Non : il faut 10 × 24 000 = 240 000 ans pour que l\'activité soit négligeable'), o('oui', 'Oui : 100 ans, c\'est très long')], bonne: 'non', melanger: false,
+      indices: { oui: 'Compare 100 ans à 10 demi-vies, 10 × 24 000 ans.' },
+      solution: '10 demi-vies = 240 000 ans : au bout de 100 ans, l\'activité n\'a presque pas changé.' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Demi-vie t<sub>1/2</sub></b> (période radioactive) : durée au bout de laquelle le nombre de noyaux radioactifs est divisé par 2. Même chose pour l'activité A ou la masse m.</p></div>
+    <div class="cle"><p><b class="cle-titre">Après n demi-vies</b>, il reste N<sub>0</sub> / 2<sup>n</sup> : N<sub>0</sub>/2, N<sub>0</sub>/4, N<sub>0</sub>/8…</p></div>
+    <div class="cle"><p><b class="cle-titre">Au bout de 10 demi-vies</b>, l'activité est négligeable.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_4b_cours.html">Cours : lire une demi-vie sur un graphique →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#definition">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+RAD.menu('module_4a_cours');
+</script>
+</body>
+</html>

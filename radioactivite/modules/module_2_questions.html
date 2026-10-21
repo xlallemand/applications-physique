@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions sur les types et les équations — Chapitre 12 : Radioactivité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rad.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rad.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard (noyaux radioactifs réels, RAD.NOYAUX) :
+   type de radioactivité d'une équation (3), particule émise et son
+   symbole (1), noyau fils à compléter puis élément d'après Z (3),
+   particule à compléter puis type (1), conservation de A et Z (1),
+   rayonnement γ (1).
+   Erreurs diagnostiquées : électron et positron confondus (signe de Z),
+   A et Z inversés, somme des A ou des Z fausse, élément pris sur A
+   ou sur le mauvais Z.
+   ============================================================ */
+const { o, nuc, n, equation, hasard, PARTICULES, NOYAUX, desintegration, droiteDe, equationDe, partieEquation, symboleDe, nomDe, signe } = RAD;
+const L = h => `<span class="rad-lisible">${h}</span>`;
+const P = PARTICULES;
+const TYPES = [o('alpha', 'α'), o('moins', 'β<sup>−</sup>'), o('plus', 'β<sup>+</sup>')];
+const IND = { alpha: 'Pour α, on trouve He (noyau d\'hélium) dans l\'équation.', moins: 'Pour β<sup>−</sup>, on trouve e avec −1 en bas : un électron.', plus: 'Pour β<sup>+</sup>, on trouve e avec +1 en bas : un positron.' };
+const tirerType = () => hasard(['alpha', 'moins', 'plus']);
+const tirer = type => desintegration(hasard(NOYAUX[type]), type);
+const nomNoyau = x => `${nomDe(x.Z)} ${x.A}`;
+
+// type de radioactivité d'une équation
+function qType() {
+  const t = tirerType(), d = tirer(t);
+  return { theme: 'Type de radioactivité', enonce: `<p class="ph-calc">${L(equationDe(d))}</p>`,
+    parties: [{ type: 'choix', q: 'Quel est le type de radioactivité ?', options: TYPES, bonne: t, melanger: false, indices: IND,
+      solution: `<p>${{ alpha: 'He : un noyau d\'hélium est émis, radioactivité α.', moins: 'e et −1 : un électron est émis, radioactivité β<sup>−</sup>.', plus: 'e et +1 : un positron est émis, radioactivité β<sup>+</sup>.' }[t]}</p>` }] };
+}
+// nature et symbole de la particule émise
+function qParticule() {
+  const t = tirerType(), p = P[t];
+  return { theme: 'Particule émise', enonce: `<p>Un noyau se désintègre par radioactivité ${p.type}.</p>`,
+    parties: [{ type: 'choix', q: 'Quelle particule est émise ?', colonne: true,
+      options: Object.keys(P).map(k => o(k, `${L(nuc(P[k].A, P[k].Z, P[k].s))} &nbsp;${P[k].nom}`)), bonne: t,
+      indices: { alpha: 'Le noyau d\'hélium est la particule α.', moins: 'L\'électron (charge négative, Z = −1) est la particule β<sup>−</sup>.', plus: 'Le positron (charge positive, Z = +1) est la particule β<sup>+</sup>.' },
+      solution: `<p>Radioactivité ${p.type} : ${p.nom}, ${L(nuc(p.A, p.Z, p.s))}.</p>` }] };
+}
+// noyau fils à compléter
+function qFils() {
+  const t = tirerType(), d = tirer(t), f = d.fils;
+  const fils = Object.assign(n(f.A, f.Z), { inc: 'AZs' });
+  const dr = d.ordre ? [d.part, fils] : [fils, d.part];
+  const opA = `${d.pere.A} − ${d.part.A}`, opZ = d.part.Z < 0 ? `${d.pere.Z} + 1` : `${d.pere.Z} − ${d.part.Z}`;
+  return { theme: 'Noyau fils', consigne: `Le ${nomNoyau(d.pere)} est radioactif ${P[t].type}. Complète l'équation de sa désintégration.`,
+    parties: [partieEquation({ g: [d.pere], d: dr }, { q: 'Trouve A et Z par conservation (Valider), puis l\'élément d\'après Z.',
+      solution: `<p>A = ${opA} = ${f.A} ; Z = ${opZ} = ${f.Z} : Z = ${f.Z}, c'est le ${nomDe(f.Z)}.</p><p class="ph-calc">${L(equation([d.pere], droiteDe(d)))}</p>` })] };
+}
+// particule à compléter, puis type de radioactivité
+function qPartInc() {
+  const t = hasard(['alpha', 'moins', 'plus']), d = tirer(t), p = d.part;
+  const part = Object.assign(n(p.A, p.Z, p.s), { inc: 'AZs' });
+  const dr = d.ordre ? [part, d.fils] : [d.fils, part];
+  return { theme: 'Particule émise', consigne: 'Complète l\'équation : quelle particule est émise ?',
+    parties: [
+      partieEquation({ g: [d.pere], d: dr }, { q: 'Trouve A et Z de la particule par conservation (Valider), puis la particule.',
+        solution: `<p>A = ${d.pere.A} − ${d.fils.A} = ${p.A} ; Z = ${d.pere.Z} − ${d.fils.Z} = ${signe(p.Z)} : c'est ${t === 'alpha' ? 'un noyau d\'hélium' : t === 'moins' ? 'un électron' : 'un positron'}.</p>` }),
+      { type: 'choix', q: 'Quel est le type de radioactivité ?', options: TYPES, bonne: t, melanger: false, indices: IND,
+        solution: `<p>${P[t].nom} émis : radioactivité ${P[t].type}.</p>` }] };
+}
+// conservation : équation juste ou non
+function qConservation() {
+  const t = tirerType(), d = tirer(t), defaut = hasard(['ok', 'z', 'a']);
+  const fils = n(d.fils.A + (defaut === 'a' ? hasard([-1, 1]) * 4 : 0), d.fils.Z + (defaut === 'z' ? hasard(d.fils.Z > 2 ? [-2, 2] : [2]) : 0));
+  const eq = equation([d.pere], d.ordre ? [d.part, fils] : [fils, d.part]);
+  const sA = fils.A + d.part.A, sZ = fils.Z + d.part.Z;
+  return { theme: 'Lois de conservation', enonce: `<p class="ph-calc">${L(eq)}</p>`,
+    parties: [{ type: 'choix', q: 'Cette équation est-elle juste ?', colonne: true, melanger: false,
+      options: [o('ok', 'Oui, A et Z sont conservés'), o('a', 'Non : A n\'est pas conservé'), o('z', 'Non : Z n\'est pas conservé')], bonne: defaut,
+      indices: { ok: `Fais les sommes à droite : A = ${fils.A} + ${d.part.A}, Z = ${signe(fils.Z)} + ${d.part.Z < 0 ? `(${signe(d.part.Z)})` : d.part.Z}.`, a: `Somme des A à droite : ${fils.A} + ${d.part.A} = ${sA}, à comparer avec ${d.pere.A}.`, z: `Somme des Z à droite : ${fils.Z} + ${d.part.Z < 0 ? `(${signe(d.part.Z)})` : d.part.Z} = ${sZ}, à comparer avec ${d.pere.Z}.` },
+      solution: `<p>A : ${d.pere.A} ${sA === d.pere.A ? '=' : '≠'} ${fils.A} + ${d.part.A} ; Z : ${d.pere.Z} ${sZ === d.pere.Z ? '=' : '≠'} ${signe(fils.Z)} + ${d.part.Z < 0 ? `(${signe(d.part.Z)})` : d.part.Z}.</p>` }] };
+}
+// rayonnement γ
+function qGamma() {
+  return hasard([
+    { theme: 'Rayonnement γ', parties: [{ type: 'choix', q: 'Le rayonnement γ qui accompagne une désintégration est émis par :', colonne: true,
+      options: [o('ok', 'le noyau fils excité Y*, qui se désexcite : Y* → Y + γ'), o('pere', 'le noyau père, avant sa désintégration'), o('e', 'l\'électron émis')], bonne: 'ok',
+      indices: { pere: 'Le noyau fils est obtenu dans un état excité : c\'est lui qui émet γ.', e: 'γ est une onde électromagnétique émise par un noyau.' },
+      solution: '<p>Le noyau fils, obtenu dans un état excité Y*, se désexcite : Y* → Y + γ.</p>' }] },
+    { theme: 'Rayonnement γ', parties: [{ type: 'choix', q: 'Le rayonnement γ est :', colonne: true,
+      options: [o('ok', 'une onde électromagnétique très pénétrante et très énergétique'), o('part', 'une particule chargée'), o('faible', 'une onde de faible énergie, arrêtée par une feuille de papier')], bonne: 'ok',
+      indices: { part: 'Ce n\'est pas une particule matérielle : c\'est une onde électromagnétique.', faible: 'Il faut une vingtaine de centimètres de plomb pour s\'en protéger.' },
+      solution: '<p>Une onde électromagnétique de très haute fréquence, donc de grande énergie (E = h × f), très pénétrante.</p>' }] },
+  ]);
+}
+
+function tirage() {
+  return [qType(), qFils(), qParticule(), qType(), qFils(), qConservation(), qPartInc(), qType(), qFils(), qGamma()];
+}
+
+RAD.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Types de radioactivité et équations',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : type de radioactivité, particule émise, noyau fils à compléter par conservation de A et de Z, élément d\'après Z, rayonnement γ.</p>',
+  questions: tirage,
+  revoir: { href: 'module_2a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3_cours.html', label: 'Module 3 : activité →' },
+});
+RAD.menu('module_2_questions');
+</script>
+</body>
+</html>

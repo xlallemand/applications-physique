@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : équations de désintégration — Chapitre 12 : Radioactivité</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rad.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rad.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 2 / 2</span>
+    <h2 class="er-titre">Équations de désintégration</h2>
+    <p class="er-contexte">Dans une équation de désintégration, le nombre de nucléons <b>A</b> et le nombre de charge <b>Z</b> se <b>conservent</b>. Tu vas t'en servir pour compléter une équation, puis trouver l'élément d'après Z. Chaque désintégration s'accompagne d'un <b>rayonnement γ</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Lois de conservation de A et de Z (235 = 4 + 231 ; 92 = 2 + 90 ;
+      14 = 0 + 14 ; 6 = 7 − 1)
+   2. Compléter une équation : outil RAD.partieEquation (A et Z par
+      conservation, puis l'élément d'après Z dans un extrait de la
+      classification)
+   3. Le rayonnement γ : Y* → Y + γ, très pénétrant, E = h f
+   ============================================================ */
+const { exemple } = COURS;
+const { o, nuc, n, equation, partieEquation } = RAD;
+const L = h => `<span class="rad-lisible">${h}</span>`;
+
+/* ---------- 1. Lois de conservation ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Lois de conservation');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Lois de conservation.</b> Au cours d'une désintégration, le <b>nombre de nucléons A</b> et le <b>nombre de charge Z</b> se conservent : la somme des A est la même à gauche et à droite de la flèche, la somme des Z aussi.</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc rad-lisible">${equation([n(235, 92)], [n(4, 2, 'He'), n(231, 90)])}</p><p>A : 235 = 4 + 231 ; Z : 92 = 2 + 90.</p>
+      <p class="crs-calc rad-lisible">${equation([n(14, 6)], [n(0, -1, 'e'), n(14, 7)])}</p><p>A : 14 = 0 + 14 ; Z : 6 = 7 − 1 (l'électron compte pour −1).</p>`, 'Exemples du cours')}`);
+  c.aToi(carte, [
+    { titre: 'Vérifier la conservation', enonce: `<p class="crs-calc rad-lisible">${equation([n(226, 88)], [n(222, 86), n(4, 2, 'He')])}</p>`, parties: [
+      { type: 'nombre', q: 'Somme des A à droite de la flèche ?', label: 'somme des A =', valeur: 226, tol: 0, signe: false,
+        diag: v => (v === 218 ? 'On additionne les A : 222 + 4.' : v === 88 ? 'Ça, c\'est la somme des Z. Les A sont les nombres du haut.' : 'Additionne les nombres du haut, à droite : 222 + 4.'),
+        solution: '222 + 4 = 226 : c\'est le A du radium, à gauche. A est conservé.' },
+      { type: 'nombre', q: 'Somme des Z à droite de la flèche ?', label: 'somme des Z =', valeur: 88, tol: 0, signe: false,
+        diag: v => (v === 84 ? 'On additionne les Z : 86 + 2.' : 'Additionne les nombres du bas, à droite : 86 + 2.'),
+        solution: '86 + 2 = 88 : c\'est le Z du radium. Z est conservé.' }] },
+    { enonce: `<p class="crs-calc rad-lisible">${equation([n(15, 8)], [n(0, 1, 'e'), n(15, 7)])}</p>`, parties: [
+      { type: 'nombre', q: 'Somme des Z à droite de la flèche ?', label: 'somme des Z =', valeur: 8, tol: 0,
+        diag: v => (v === 6 ? 'Le positron a Z = +1 : 1 + 7.' : v === 7 ? 'N\'oublie pas le Z du positron, +1.' : 'Additionne les nombres du bas : 1 + 7.'),
+        solution: '1 + 7 = 8 : c\'est le Z de l\'oxygène. Z est conservé.' }] },
+    { titre: 'Une équation juste ?', enonce: `<p class="crs-calc rad-lisible">${equation([n(60, 27)], [n(60, 28), n(0, 1, 'e')])}</p>`, parties: [
+      { type: 'choix', q: 'Cette équation est-elle juste ?', melanger: false, colonne: true,
+        options: [o('z', 'Non : Z n\'est pas conservé'), o('a', 'Non : A n\'est pas conservé'), o('ok', 'Oui, elle est juste')], bonne: 'z',
+        indices: { a: 'A : 60 = 60 + 0, A est bien conservé. Vérifie Z.', ok: 'Vérifie Z : 28 + 1 = 29, mais 27 à gauche.' },
+        solution: 'A : 60 = 60 + 0, conservé ; Z : 27 ≠ 28 + 1 = 29, pas conservé. Le cobalt 60 émet en fait un électron : Z = 28 − 1 = 27.' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Compléter une équation ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Compléter une équation de désintégration');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b></p>
+        <ol class="er-liste"><li>Conservation de A : on trouve le nombre de nucléons qui manque.</li>
+          <li>Conservation de Z : on trouve le nombre de charge qui manque.</li>
+          <li>On trouve l'élément d'après Z dans la classification périodique (Z fixe l'élément).</li></ol></div>
+    </div>
+    ${exemple(`<p class="crs-calc rad-lisible">${equation([n(238, 92)], [n('A', 'Z', 'X'), n(4, 2, 'He')])}</p>
+      <p class="crs-calc">A : 238 = A + 4, donc A = 238 − 4 = <span class="c">234</span></p>
+      <p class="crs-calc">Z : 92 = Z + 2, donc Z = 92 − 2 = <span class="c">90</span></p>
+      <p>Dans la classification, Z = 90 est le <b>thorium</b> Th : ${L(nuc(234, 90, 'Th'))}.</p>`)}`);
+  const trou = (g, d, sol, titre) => ({ titre, parties: [partieEquation({ g, d }, { q: 'Complète A et Z par conservation (Valider), puis trouve le symbole.', solution: sol })] });
+  c.aToi(carte, [
+    trou([n(226, 88)], [Object.assign(n(222, 86), { inc: 'AZs' }), n(4, 2, 'He')], `226 − 4 = 222 ; 88 − 2 = 86 : Z = 86, c'est le radon : ${L(nuc(222, 86, 'Rn'))}.`, 'Équation à compléter'),
+    trou([n(131, 53)], [Object.assign(n(131, 54), { inc: 'AZs' }), n(0, -1, 'e')], `A : 131 − 0 = 131 ; Z : 53 = Z − 1, donc Z = 54 : c'est le xénon, ${L(nuc(131, 54, 'Xe'))}.`),
+    trou([n(18, 9)], [n(18, 8), Object.assign(n(0, 1, 'e'), { inc: 'AZs' })], `A : 18 − 18 = 0 ; Z : 9 − 8 = 1 : A = 0 et Z = +1, c'est un positron ${L(nuc(0, 1, 'e'))} : radioactivité β<sup>+</sup>.`),
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Le rayonnement γ ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Le rayonnement γ (gamma)');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><ul class="er-liste"><li>Chaque type de radioactivité s'accompagne d'un rayonnement (<b>onde électromagnétique</b>) appelé <b>rayonnement γ</b>.</li>
+        <li>Le noyau fils est obtenu dans un <b>état excité</b> (noté Y*) qui se désexcite en émettant un rayonnement γ : <b>Y* → Y + γ</b>.</li>
+        <li>Le rayonnement γ est <b>très pénétrant</b> et <b>très énergétique</b> : il faut une vingtaine de centimètres de plomb pour s'en protéger.</li></ul></div>
+      <p>Son énergie est celle d'un photon : <b>E = h × f</b> (chapitre 10), avec une fréquence f supérieure à 10<sup>18</sup> Hz.</p>
+      <div class="ph-lien-app"><p>Revoir l'énergie d'un photon</p><a class="btn-small" href="../../energie-lumiere/modules/module_3b_cours.html" target="_blank" rel="noopener">Chapitre 10 : photons ↗</a></div>
+    </div>
+    ${exemple(`<p class="crs-calc rad-lisible">${equation([n(60, 27)], [n(60, 28, 'Ni*'), n(0, -1, 'e')])} &nbsp; puis &nbsp; ${equation([n(60, 28, 'Ni*')], [n(60, 28), 'γ'])}</p>
+      <p>Le cobalt 60 se désintègre (β<sup>−</sup>) en nickel 60 excité, qui se désexcite en émettant un rayonnement γ.</p>`)}`);
+  c.aToi(carte, [
+    { titre: 'Le rayonnement γ', parties: [{ type: 'choix', q: 'Le rayonnement γ est :', colonne: true,
+      options: [o('onde', 'une onde électromagnétique'), o('he', 'un noyau d\'hélium'), o('e', 'un électron')], bonne: 'onde',
+      indices: { he: 'Le noyau d\'hélium est la particule α.', e: 'L\'électron est la particule β<sup>−</sup>.' },
+      solution: 'Une onde électromagnétique, de très grande énergie, qui accompagne chaque désintégration.' }] },
+    { enonce: `<p class="crs-calc rad-lisible">${equation([n(234, 90, 'Th*')], [n(234, 90), '…'])}</p>`, parties: [{ type: 'choix', q: 'Qu\'est-ce qui est émis ?', melanger: false,
+      options: [o('g', 'γ'), o('he', L(nuc(4, 2, 'He'))), o('e', L(nuc(0, -1, 'e')))], bonne: 'g',
+      indices: { he: 'A et Z ne changent pas (234 et 90 des deux côtés) : aucune particule n\'est émise.', e: 'Z ne change pas : aucun électron n\'est émis.' },
+      solution: 'Th* est le noyau excité : il se désexcite en émettant un rayonnement γ, sans changer A ni Z.' }] },
+    { parties: [{ type: 'choix', q: 'Pour se protéger du rayonnement γ, il faut :', colonne: true,
+      options: [o('pb', 'une vingtaine de centimètres de plomb'), o('papier', 'une feuille de papier'), o('rien', 'rien : il n\'est pas dangereux')], bonne: 'pb',
+      indices: { papier: 'Le rayonnement γ est très pénétrant : une feuille de papier ne l\'arrête pas.', rien: 'Il est très énergétique : il peut détruire des cellules.' },
+      solution: 'Il est très pénétrant : il faut une vingtaine de centimètres de plomb.' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Conservation.</b> Même somme des A et même somme des Z à gauche et à droite de la flèche.</p></div>
+    <div class="cle"><p><b class="cle-titre">Compléter une équation.</b> A, puis Z par conservation ; l'élément se trouve d'après Z dans la classification.</p></div>
+    <div class="cle"><p><b class="cle-titre">Rayonnement γ.</b> Onde électromagnétique émise par le noyau fils excité : Y* → Y + γ. Très pénétrant, très énergétique (E = h × f).</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur les types et les équations →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3_cours.html">Module 3 : activité</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#equations">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+RAD.menu('module_2b_cours');
+</script>
+</body>
+</html>
