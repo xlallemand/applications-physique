@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : compléter une équation — Chapitre 13 : Énergie nucléaire</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="nuc.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="nuc.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS 2 / 2</span>
+    <h2 class="er-titre">Compléter une équation</h2>
+    <p class="er-contexte">Comme au chapitre 12, le nombre de nucléons <b>A</b> et le nombre de charge <b>Z</b> se <b>conservent</b>. Avec le <b>neutron</b> en plus, tu vas trouver A, Z, le nombre <b>x</b> de neutrons et l'élément, puis classer la réaction.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Le neutron ¹₀n (0 proton, 1 nucléon) et la conservation de A et
+      de Z ; une réaction nucléaire n'est pas une réaction chimique
+   2. Trouver x, A, Z et l'élément : outil NUC.partieReaction
+   3. Compléter, puis classer (fission, fusion, radioactivité α, β⁻, β⁺)
+   ============================================================ */
+const { exemple } = COURS;
+const { o, noyau, esp, neutron, electron, positron, helium, trou, equation, lisible, partieReaction } = NUC;
+const L = lisible;
+const n = neutron();
+
+/* ---------- 1. Le neutron et les lois de conservation ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Le neutron et les lois de conservation');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Le neutron.</b> ${L(noyau(1, 0, 'n'))} : A = 1 (un nucléon) et Z = 0 (aucun proton). Il a donc 1 − 0 = 1 neutron : c'est un neutron.</p></div>
+      <div class="cle"><p><b class="cle-titre">Lois de conservation.</b> Au cours d'une réaction nucléaire, la somme des nombres de nucléons <b>A</b> et la somme des nombres de charge <b>Z</b> sont les mêmes à gauche et à droite de la flèche. Un coefficient compte : 2 ${L(noyau(1, 0, 'n'))} comptent pour 2 × 1 nucléons.</p></div>
+      <p style="margin-top:10px">Ce n'est <b>pas une réaction chimique</b> : les éléments ne sont pas conservés (l'uranium devient du strontium et du xénon).</p>
+      <div class="ph-lien-app"><p>Revoir les lois de conservation</p><a class="btn-small" href="../../radioactivite/modules/module_2b_cours.html" target="_blank" rel="noopener">Chapitre 12 : équations ↗</a></div>
+    </div>
+    ${exemple(`<p class="crs-calc">${L(equation([n, esp(235, 92)], [esp(94, 38), esp(140, 54), neutron(2)]))}</p>
+      <p class="crs-calc">A : 1 + 235 = 94 + 140 + 2 × 1 = <span class="c">236</span></p>
+      <p class="crs-calc">Z : 0 + 92 = 38 + 54 + 2 × 0 = <span class="c">92</span></p>`)}`);
+  const pu = [n, esp(239, 94)], puD = [esp(102, 42), esp(135, 52), neutron(3)];
+  c.aToi(carte, [
+    { titre: 'Le neutron', enonce: `<p class="crs-calc">${L(noyau(1, 0, 'n'))}</p>`, parties: [
+      { type: 'champs', q: 'Combien de protons, de nucléons et de neutrons ?', ligne: true,
+        champs: [{ label: 'protons', valeur: 0, tol: 0, signe: false, entier: true }, { label: 'nucléons', valeur: 1, tol: 0, signe: false, entier: true }, { label: 'neutrons', valeur: 1, tol: 0, signe: false, entier: true }],
+        diag: v => (v[0] === 1 ? 'Le nombre de protons est Z, en bas : 0.' : 'Protons : Z (en bas) ; nucléons : A (en haut) ; neutrons : A − Z.'),
+        solution: 'Z = 0 : 0 proton ; A = 1 : 1 nucléon ; 1 − 0 = 1 neutron.' }] },
+    { titre: 'Vérifier la conservation de A', enonce: `<p class="crs-calc">${L(equation(pu, puD))}</p>`, parties: [
+      { type: 'nombre', q: 'Somme des A à gauche de la flèche ?', label: 'somme des A =', valeur: 240, tol: 0, signe: false, entier: true,
+        diag: v => (v === 239 ? 'N\'oublie pas le neutron : il compte pour 1 nucléon.' : v === 94 ? 'Ça, c\'est le Z du plutonium. Les A sont les nombres du haut.' : 'Additionne les nombres du haut, à gauche : 1 + 239.'),
+        solution: '1 + 239 = 240.' },
+      { type: 'nombre', q: 'Somme des A à droite de la flèche ?', label: 'somme des A =', valeur: 240, tol: 0, signe: false, entier: true,
+        diag: v => (v === 238 ? 'Il y a 3 neutrons : ils comptent pour 3 × 1 = 3 nucléons.' : v === 237 ? 'N\'oublie pas les 3 neutrons : 3 × 1.' : 'Additionne les nombres du haut, à droite : 102 + 135 + 3 × 1.'),
+        solution: '102 + 135 + 3 × 1 = 240 : A est conservé.' }] },
+    { titre: 'Réaction nucléaire ou chimique ?', parties: [{ type: 'choix', q: 'Pourquoi une réaction nucléaire n\'est-elle pas une réaction chimique ?', colonne: true,
+      options: [o('ok', 'les éléments ne sont pas conservés'), o('o2', 'il n\'y a pas de dioxygène'), o('n', 'elle fait intervenir des neutrons'), o('eq', 'son équation n\'est pas équilibrée')], bonne: 'ok',
+      indices: { o2: 'Une réaction chimique n\'a pas toujours besoin de dioxygène. Compare les éléments à gauche et à droite.', n: 'Les atomes d\'une réaction chimique contiennent aussi des neutrons. Compare les éléments à gauche et à droite.', eq: 'Elle est équilibrée : A et Z sont conservés. Compare les éléments à gauche et à droite.' },
+      solution: 'Les éléments ne sont pas conservés (un noyau change d\'élément) : ce n\'est pas une réaction chimique, où les éléments se conservent.' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Trouver x, A, Z et l'élément ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Trouver x, A, Z et l\'élément');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b></p>
+        <ol class="nuc-methode"><li>Conservation de A : on trouve le nombre de nucléons A, ou le nombre x de neutrons (chaque neutron compte pour 1).</li>
+          <li>Conservation de Z : on trouve le nombre de charge Z (le neutron compte pour 0).</li>
+          <li>Z fixe l'élément : on le trouve dans la classification périodique.</li></ol></div>
+    </div>
+    ${exemple(`<p class="crs-calc">${L(equation([esp(235, 92), n], [esp(85, 35), esp(148, 'Z', 'X'), esp(1, 0, 'n', 'x')]))}</p>
+      <p class="crs-calc">A : 235 + 1 = 85 + 148 + x × 1, donc x = 236 − 233 = <span class="c">3</span></p>
+      <p class="crs-calc">Z : 92 + 0 = 35 + Z, donc Z = 92 − 35 = <span class="c">57</span></p>
+      <p>Dans la classification, Z = 57 est le <b>lanthane</b> La : ${L(noyau(148, 57, 'La'))}.</p>`)}`);
+  const item = (g, d, sol, titre) => ({ titre, parties: [partieReaction({ g, d }, { q: 'Trouve les nombres par conservation (Valider), puis le symbole s\'il manque.', solution: sol })] });
+  c.aToi(carte, [
+    item([n, esp(235, 92)], [esp(90, 36), trou(esp(142, 56), 'Z'), trou(neutron(4), 'k')],
+      `A : 1 + 235 = 90 + 142 + x, donc x = 236 − 232 = 4 ; Z : 0 + 92 = 36 + Z, donc Z = 56.`, 'Équations à compléter'),
+    item([n, esp(239, 94)], [esp(102, 42), trou(esp(135, 52), 'As'), neutron(3)],
+      `A : 1 + 239 = 102 + A + 3 × 1, donc A = 240 − 105 = 135 ; Z = 52 : c'est le tellure, ${L(noyau(135, 52, 'Te'))}.`),
+    item([esp(2, 1), esp(2, 1)], [esp(3, 2), trou(neutron(), 'AZs')],
+      `A : 2 + 2 = 3 + A, donc A = 1 ; Z : 1 + 1 = 2 + Z, donc Z = 0. A = 1 et Z = 0 : c'est un neutron ${L(noyau(1, 0, 'n'))}.`),
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Compléter, puis classer ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Compléter, puis classer');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Une fois l'équation complète</b>, on la classe avec la méthode du cours 1 : plus grand nombre de nucléons à gauche (fission), à droite (fusion) ou le même des deux côtés (radioactivité) ; un seul réactif : radioactivité α, β<sup>−</sup> ou β<sup>+</sup> selon la particule émise.</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc">${L(equation([esp(235, 92)], [helium(), esp('A', 'Z', 'Th')]))}</p>
+      <p class="crs-calc">A : 235 = 4 + A, donc A = <span class="c">231</span> ; Z : 92 = 2 + Z, donc Z = <span class="c">90</span></p>
+      <p>Un seul réactif, qui émet un noyau d'hélium : <b>radioactivité α</b> (pas une fission, il n'y a pas de neutron).</p>`)}`);
+  const item = (g, d, sol, titre) => ({ titre, parties: [partieReaction({ g, d, classer: true }, { q: 'Complète l\'équation, puis classe la réaction.', solution: sol })] });
+  c.aToi(carte, [
+    item([esp(14, 6)], [electron(), trou(esp(14, 7), 'AZs')], `A = 14, Z = 6 + 1 = 7 : azote ${L(noyau(14, 7, 'N'))}. Un seul noyau, qui émet un électron : radioactivité β<sup>−</sup>.`, 'Équations à compléter et à classer'),
+    item([esp(3, 2), esp(3, 2)], [helium(), trou(esp(1, 1, 'H', 2), 'k')], `A : 3 + 3 = 4 + x × 1, donc x = 2. Le plus grand nombre de nucléons (4) est à droite : fusion.`),
+    item([n, esp(235, 92)], [esp(95, 38), trou(esp(139, 54), 'Z'), trou(neutron(2), 'k')], `A : 236 = 95 + 139 + x, donc x = 2 ; Z = 92 − 38 = 54. 235 est à gauche : fission.`),
+    item([esp(18, 9)], [esp(18, 8), trou(positron(), 'AZs')], `A = 18 − 18 = 0 ; Z = 9 − 8 = 1 : positron ${L(noyau(0, 1, 'e'))}. Un seul noyau : radioactivité β<sup>+</sup>.`),
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Neutron.</b> ${L(noyau(1, 0, 'n'))} : 0 proton, 1 nucléon. Il compte pour A = 1 et Z = 0.</p></div>
+    <div class="cle"><p><b class="cle-titre">Conservation.</b> Même somme des A et même somme des Z à gauche et à droite (coefficients compris) : on trouve A, Z ou x, puis l'élément d'après Z.</p></div>
+    <div class="cle"><p><b class="cle-titre">Pas une réaction chimique</b> : les éléments ne sont pas conservés.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions : fission, fusion ou radioactivité →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html#completer">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+NUC.menu('module_1b_cours');
+</script>
+</body>
+</html>

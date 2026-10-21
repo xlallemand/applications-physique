@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : fiche récapitulative — Chapitre 13 : Énergie nucléaire</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="nuc.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="nuc.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Fission, fusion ou radioactivité ?</h2>
+  </div>
+<!-- Fiche récapitulative du module 1 : fission, fusion et méthode pour les reconnaître (ancre « reconnaitre »),
+     neutron et conservation de A et de Z (ancre « completer »). Contenu écrit par le script en bas de page. -->
+
+  <section class="er-card" id="reconnaitre">
+    <h3 class="cours-titre">Fission et fusion</h3>
+    <div class="som-fiche-figs" id="figs"></div>
+    <div class="cle"><p><b>Fission</b> : un noyau lourd, percuté par un neutron, se scinde en deux noyaux plus légers.</p><p class="nuc-lisible" id="exFission"></p></div>
+    <div class="cle"><p><b>Fusion</b> : deux noyaux légers s'associent pour former un noyau plus lourd.</p><p class="nuc-lisible" id="exFusion"></p></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Reconnaître la réaction d'après son équation</h3>
+    <div class="cle"><ol class="nuc-methode"><li>Repérer le <b>plus grand nombre de nucléons A</b>.</li>
+      <li><b>À gauche</b> : <b>fission</b> (un gros noyau donne des noyaux plus petits).</li>
+      <li><b>À droite</b> : <b>fusion</b> (des petits noyaux en donnent un plus gros).</li>
+      <li><b>Le même à gauche et à droite</b> : <b>radioactivité</b>.</li></ol></div>
+    <p class="nuc-lisible" id="remarque" style="margin-top:10px"></p>
+  </section>
+
+  <section class="er-card" id="completer">
+    <h3 class="cours-titre">Compléter une équation</h3>
+    <div class="cle"><p><b>Neutron</b> <span class="nuc-lisible" id="neutron"></span> : 0 proton, 1 nucléon (A = 1, Z = 0).</p>
+      <p><b>Conservation</b> : même somme des A et même somme des Z à gauche et à droite (coefficients compris). On trouve A, Z ou le nombre x de neutrons, puis l'élément d'après Z.</p></div>
+    <p class="cours-exemple-t" style="margin-top:12px">Exemple</p>
+    <p class="nuc-lisible" id="exemple"></p>
+    <p style="margin-top:8px">A : 235 + 1 = 85 + 148 + x × 1, donc x = 3 ; Z : 92 + 0 = 35 + Z, donc Z = 57 : lanthane.</p>
+    <div class="cle"><p>Ce n'est <b>pas une réaction chimique</b> : les éléments ne sont pas conservés.</p></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_1a_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_1_questions.html">Questions : fission, fusion ou radioactivité</a>
+  </div>
+</div>
+<script>
+const { noyau, esp, neutron, helium, equation, figFission, figFusion } = NUC;
+const n = neutron();
+document.getElementById('figs').innerHTML = `<div>${figFission()}</div><div>${figFusion()}</div>`;
+document.getElementById('exFission').innerHTML = equation([n, esp(235, 92)], [esp(94, 38), esp(140, 54), neutron(2)]);
+document.getElementById('exFusion').innerHTML = equation([esp(2, 1), esp(3, 1)], [helium(), n]);
+document.getElementById('remarque').innerHTML = `Un seul réactif : jamais une fission. ${equation([esp(235, 92)], [esp(231, 90), helium()])} est une radioactivité α ; ${equation([esp(14, 6)], [esp(0, -1, 'e'), esp(14, 7)])} une radioactivité β<sup>−</sup>.`;
+document.getElementById('neutron').innerHTML = noyau(1, 0, 'n');
+document.getElementById('exemple').innerHTML = equation([esp(235, 92), n], [esp(85, 35), esp(148, 'Z', 'X'), esp(1, 0, 'n', 'x')]);
+NUC.menu('fiche_1');
+</script>
+</body>
+</html>

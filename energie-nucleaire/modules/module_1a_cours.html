@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : fission et fusion — Chapitre 13 : Énergie nucléaire</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="nuc.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="nuc.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS 1 / 2</span>
+    <h2 class="er-titre">Fission et fusion</h2>
+    <p class="er-contexte">Une centrale nucléaire utilise la <b>fission</b> de gros noyaux ; le Soleil, la <b>fusion</b> de petits noyaux. Tu vas apprendre à reconnaître, d'après son équation, une fission, une fusion ou une <b>radioactivité</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. La fission (figure, n + ²³⁵U → ⁹⁴Sr + ¹⁴⁰Xe + 2 n)
+   2. La fusion (figure, ²H + ³H → ⁴He + n)
+   3. Reconnaître la réaction d'après son équation : la méthode du
+      professeur (plus grand nombre de nucléons à gauche, à droite ou des
+      deux côtés ; un seul réactif) ; outil NUC.partieReaction (repérer,
+      puis classer) sur les exemples du cours
+   ============================================================ */
+const { exemple } = COURS;
+const { o, noyau, esp, neutron, electron, positron, helium, equation, lisible, partieReaction, figFission, figFusion } = NUC;
+const L = lisible;
+const U235 = esp(235, 92), n = neutron();
+
+/* ---------- 1. La fission ---------- */
+function etape1(c) {
+  const carte = c.carte('1. La fission');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Fission.</b> Réaction nucléaire au cours de laquelle un <b>noyau lourd se scinde en deux noyaux plus légers</b>, sous l'impact d'un <b>neutron</b>.</p></div>
+      ${figFission()}
+    </div>
+    ${exemple(`<p class="crs-calc">${L(equation([n, U235], [esp(94, 38), esp(140, 54), neutron(2)]))}</p>
+      <p>Un neutron percute un noyau d'uranium 235 (lourd) : il se scinde en strontium 94 et en xénon 140, plus légers. Deux neutrons sont libérés : ils peuvent à leur tour provoquer des fissions.</p>`)}`);
+  const pu = [n, esp(239, 94)], puD = [esp(102, 42), esp(135, 52), neutron(3)];
+  c.aToi(carte, [
+    { titre: 'La fission', parties: [{ type: 'choix', q: 'Au cours d\'une fission :', colonne: true,
+      options: [o('ok', 'un noyau lourd se scinde en deux noyaux plus légers'), o('fus', 'deux noyaux légers s\'associent en un noyau plus lourd'), o('radio', 'un noyau seul émet spontanément une particule')], bonne: 'ok',
+      indices: { fus: 'Ça, c\'est la fusion (étape suivante).', radio: 'Ça, c\'est la radioactivité (chapitre 12) : dans une fission, un neutron percute le noyau.' },
+      solution: 'Un noyau lourd, percuté par un neutron, se scinde en deux noyaux plus légers.' }] },
+    { titre: 'Une fission du plutonium', enonce: `<p class="crs-calc">${L(equation(pu, puD))}</p>`, parties: [
+      { type: 'choix', q: 'Quel est le noyau lourd qui se scinde ?', melanger: false,
+        options: [o('pu', L(noyau(239, 94, 'Pu'))), o('mo', L(noyau(102, 42, 'Mo'))), o('te', L(noyau(135, 52, 'Te'))), o('n', L(noyau(1, 0, 'n')))], bonne: 'pu',
+        indices: { mo: 'Le molybdène 102 est formé (à droite de la flèche) : c\'est un des noyaux plus légers.', te: 'Le tellure 135 est formé (à droite) : c\'est un des noyaux plus légers.', n: 'Le neutron est le projectile qui percute le noyau lourd.' },
+        solution: 'Le plutonium 239 (239 nucléons) se scinde en molybdène 102 et tellure 135, plus légers.' },
+      { type: 'nombre', q: 'Combien de neutrons sont libérés ?', label: 'neutrons libérés :', valeur: 3, tol: 0, signe: false, entier: true,
+        diag: v => (v === 4 ? 'Le neutron de gauche n\'est pas libéré : c\'est lui qui percute le noyau. Compte seulement les neutrons à droite.' : v === 1 ? 'Le nombre 3 écrit devant ¹₀n compte : 3 neutrons.' : 'Lis le nombre écrit devant le neutron, à droite de la flèche.'),
+        solution: '3 neutrons sont libérés (le 3 devant ¹₀n, à droite).' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. La fusion ---------- */
+function etape2(c) {
+  const carte = c.carte('2. La fusion');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Fusion.</b> Réaction nucléaire au cours de laquelle <b>deux noyaux légers s'associent</b> pour former un <b>noyau plus lourd</b>.</p></div>
+      ${figFusion()}
+    </div>
+    ${exemple(`<p class="crs-calc">${L(equation([esp(2, 1), esp(3, 1)], [helium(), n]))}</p>
+      <p>Un noyau de deutérium et un noyau de tritium (deux isotopes de l'hydrogène) s'associent en un noyau d'hélium 4, plus lourd. C'est la réaction étudiée par le projet ITER ; la fusion est aussi la source de l'énergie rayonnée par le Soleil.</p>`)}`);
+  c.aToi(carte, [
+    { titre: 'La fusion', parties: [{ type: 'choix', q: 'Au cours d\'une fusion :', colonne: true,
+      options: [o('ok', 'deux noyaux légers s\'associent en un noyau plus lourd'), o('fis', 'un noyau lourd se scinde en deux noyaux plus légers'), o('chim', 'des atomes se réarrangent en molécules')], bonne: 'ok',
+      indices: { fis: 'Ça, c\'est la fission.', chim: 'Ça, c\'est une réaction chimique : les noyaux n\'y changent pas.' },
+      solution: 'Deux noyaux légers s\'associent pour former un noyau plus lourd.' }] },
+    { titre: 'Une fusion dans le Soleil', enonce: `<p class="crs-calc">${L(equation([esp(1, 1), esp(2, 1)], [esp(3, 2)]))}</p>`, parties: [
+      { type: 'choix', q: 'Quel noyau est formé ?', melanger: false,
+        options: [o('he', L(noyau(3, 2, 'He'))), o('h1', L(noyau(1, 1, 'H'))), o('h2', L(noyau(2, 1, 'H')))], bonne: 'he',
+        indices: { h1: 'L\'hydrogène 1 est un réactif (à gauche de la flèche).', h2: 'Le deutérium est un réactif (à gauche de la flèche).' },
+        solution: 'L\'hélium 3 (3 nucléons), plus lourd que chacun des deux réactifs.' },
+      { type: 'nombre', q: 'Combien de nucléons a le noyau formé ?', label: 'A =', valeur: 3, tol: 0, signe: false, entier: true,
+        diag: v => (v === 2 ? 'Le nombre de nucléons est en haut : A = 3 pour l\'hélium 3. Le nombre du bas (2) est Z.' : 'Lis le nombre en haut à gauche du symbole He.'),
+        solution: 'A = 3 : plus que chacun des réactifs (1 et 2). Des petits noyaux en donnent un plus gros.' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Reconnaître la réaction ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Fission, fusion ou radioactivité ?');
+  const R = a => `<span class="nuc-rond">${a}</span>`;
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> Pour reconnaître la réaction d'après son équation :</p>
+        <ol class="nuc-methode"><li>repérer le <b>nombre de nucléons A le plus grand</b> ;</li>
+          <li>s'il est <b>à gauche</b> : c'est une <b>fission</b> (un gros noyau donne des noyaux plus petits) ;</li>
+          <li>s'il est <b>à droite</b> : c'est une <b>fusion</b> (des petits noyaux en donnent un plus gros) ;</li>
+          <li>si c'est <b>le même à gauche et à droite</b> : c'est une <b>radioactivité</b>.</li></ol></div>
+      <div class="callout-danger" style="margin-top:12px"><p><b class="cle-titre">Attention.</b> ${L(equation([U235], [esp(231, 90), helium()]))} est une <b>radioactivité α</b> : un seul réactif. Pour une fission, il faut deux réactifs (le neutron qui percute le noyau).</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc">${L(equation([U235, n], [esp(85, 35), esp(148, 57), neutron(3)]).replace('<span>235</span>', `<span>${R(235)}</span>`))}</p><p>235, le plus grand, est à gauche : <b>fission</b>.</p>
+      <p class="crs-calc">${L(equation([esp(3, 2), esp(3, 2)], [helium(), esp(1, 1, 'H', 2)]).replace('<span>4</span>', `<span>${R(4)}</span>`))}</p><p>4, le plus grand, est à droite : <b>fusion</b>.</p>
+      <p class="crs-calc">${L(equation([esp(14, 6)], [electron(), esp(14, 7)]).replace(/<span>14<\/span>/g, `<span>${R(14)}</span>`))}</p><p>14 à gauche et 14 à droite : <b>radioactivité</b>. Un électron est émis : β<sup>−</sup>.</p>`, 'Exemples du cours')}`);
+  const classe = (g, d, titre) => ({ titre, parties: [partieReaction({ g, d, reperer: true, classer: true }, { q: 'Classe cette réaction avec la méthode.' })] });
+  c.aToi(carte, [
+    classe([esp(2, 1), esp(1, 1)], [esp(3, 2)], 'Exemples du cours à classer'),
+    classe([esp(14, 7), esp(1, 1)], [esp(15, 8), 'γ']),
+    classe([U235], [esp(231, 90), helium()]),
+    classe([esp(15, 8)], [esp(15, 7), positron()]),
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Fission.</b> Un noyau lourd, percuté par un neutron, se scinde en deux noyaux plus légers.</p></div>
+    <div class="cle"><p><b class="cle-titre">Fusion.</b> Deux noyaux légers s'associent pour former un noyau plus lourd.</p></div>
+    <div class="cle"><p><b class="cle-titre">Reconnaître la réaction.</b> Plus grand nombre de nucléons à gauche : fission ; à droite : fusion ; le même des deux côtés : radioactivité. Un seul réactif : jamais une fission.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_1b_cours.html">Cours : compléter une équation →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html#reconnaitre">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+NUC.menu('module_1a_cours');
+</script>
+</body>
+</html>

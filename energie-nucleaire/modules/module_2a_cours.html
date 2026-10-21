@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : le défaut de masse — Chapitre 13 : Énergie nucléaire</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="nuc.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="nuc.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 1 / 2</span>
+    <h2 class="er-titre">Le défaut de masse</h2>
+    <p class="er-contexte">Au cours d'une réaction nucléaire, la masse des produits est un peu plus petite que celle des réactifs : c'est le <b>défaut de masse</b> Δm. Tu vas le calculer avec un <b>tableau</b>, en kg puis en <b>unité de masse atomique</b> u.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Δm = m produits − m réactifs (kg), négatif quand de l'énergie est
+      libérée : ²H + ²H → ³He + n (−5,9 × 10⁻³⁰ kg) ; à toi :
+      ³H + ¹H → ⁴He (−3,54 × 10⁻²⁹ kg)
+   2. La méthode du tableau (NUC.partieDefaut) : exemple du cours
+      4 ¹H → ⁴He + 2 e⁺ (−4,3878 × 10⁻²⁹ kg) ; à toi : ³He + ³He →
+      ⁴He + 2 ¹H (−2,29 × 10⁻²⁹ kg), n + ²³⁵U → ⁹⁴Sr + ¹⁴⁰Xe + 2 n
+      (neutrons simplifiés, −3,306 × 10⁻²⁸ kg)
+   3. Masses en u (1 u = 1,660539 × 10⁻²⁷ kg) : ²H + ³H → ⁴He + n
+      (−0,01887 u = −3,133 × 10⁻²⁹ kg) ; à toi : ⁴He en kg, n + ²³⁵U →
+      ⁹²Kr + ¹⁴¹Ba + 3 n (−0,18588 u = −3,087 × 10⁻²⁸ kg)
+   Les saisies de très petits nombres passent par le moteur NUC
+   (NUC.versCours) : sa tolérance est purement relative.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, noyau, esp, neutron, electron, positron, helium, equation, lisible, mDe, masse, partieDefaut, tableauDefaut, versCours, diagKg, U_KG } = NUC;
+const L = lisible;
+const n = neutron();
+// écriture scientifique (moteur NUC, dans le cours)
+const sci = (q, label, valeur, unite, diag, solution, opts) => versCours(Object.assign({ type: 'sci', q, label, valeur, unite, diag, solution, rel: .01, cs: 3 }, opts));
+const ligne = (x, m) => ({ x, m: masse(m) });
+
+/* ---------- 1. Le défaut de masse ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Le défaut de masse');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Défaut de masse.</b></p><p class="crs-formule">Δm = m<sub>produits</sub> − m<sub>réactifs</sub></p>
+        <p>m<sub>produits</sub> : masse totale des produits formés (kg) ; m<sub>réactifs</sub> : masse totale des réactifs (kg) ; Δm en kg.</p></div>
+      <p style="margin-top:10px">Δm est <b>négatif</b> quand la réaction <b>libère de l'énergie</b> : la masse des produits est plus petite que celle des réactifs. La masse « perdue » est transformée en énergie.</p>
+    </div>
+    ${exemple(`<p class="crs-calc">${L(equation([esp(2, 1), esp(2, 1)], [esp(3, 2), n]))}</p>
+      <p>Données : m(²H) = 3,3436 × 10<sup>−27</sup> kg ; m(³He) = 5,0064 × 10<sup>−27</sup> kg ; m(n) = 1,6749 × 10<sup>−27</sup> kg.</p>
+      <p class="crs-calc">Δm = m(³He) + m(n) − m(²H) − m(²H)</p>
+      <p class="crs-calc">Δm = 5,0064 × 10<sup>−27</sup> + 1,6749 × 10<sup>−27</sup> − 3,3436 × 10<sup>−27</sup> − 3,3436 × 10<sup>−27</sup> = <span class="c">−5,9 × 10<sup>−30</sup> kg</span></p>`)}`);
+  const dm = 6.6446e-27 - 5.0074e-27 - 1.6726e-27;
+  c.aToi(carte, [
+    { titre: 'Le signe de Δm', parties: [{ type: 'choix', q: 'Pour une réaction nucléaire, on trouve Δm < 0. Cela signifie :', colonne: true,
+      options: [o('ok', 'la masse des produits est plus petite que celle des réactifs : de l\'énergie est libérée'), o('abs', 'la réaction absorbe de l\'énergie'), o('faux', 'le calcul est faux : une masse est toujours positive')], bonne: 'ok',
+      indices: { abs: 'De la masse disparaît : elle est transformée en énergie, libérée.', faux: 'Δm est une différence de masses : elle peut être négative.' },
+      solution: 'Δm = m<sub>produits</sub> − m<sub>réactifs</sub> < 0 : les produits sont plus légers, la masse perdue est libérée sous forme d\'énergie.' }] },
+    { titre: 'Calculer un défaut de masse', enonce: `<p class="crs-calc">${L(equation([esp(3, 1), esp(1, 1)], [helium()]))}</p>
+        <p>m(³H) = 5,0074 × 10<sup>−27</sup> kg ; m(¹H) = 1,6726 × 10<sup>−27</sup> kg ; m(⁴He) = 6,6446 × 10<sup>−27</sup> kg.</p>`, parties: [
+      sci('Calcule Δm (3 chiffres significatifs).', 'Δm =', dm, 'kg',
+        v => (v > 0 ? 'Δm = m<sub>produits</sub> − m<sub>réactifs</sub> : produits moins réactifs. Ici il est négatif.' : NUC.decale(v, dm) ? 'Vérifie la puissance de 10.' : 'Δm = m(⁴He) − m(³H) − m(¹H).'),
+        '<p class="ph-calc">Δm = 6,6446 × 10<sup>−27</sup> − 5,0074 × 10<sup>−27</sup> − 1,6726 × 10<sup>−27</sup> = −3,54 × 10<sup>−29</sup> kg</p>') ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. La méthode du tableau ---------- */
+function etape2(c) {
+  const carte = c.carte('2. La méthode du tableau');
+  const COURS4H = { g: [ligne(esp(1, 1, 'H', 4), '1,6726e-27')], d: [ligne(helium(), '6,6447e-27'), ligne(esp(0, 1, 'e', 2), '9,11e-31')] };
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> Deux colonnes : les réactifs et les produits.</p>
+        <ol class="nuc-methode"><li>Chaque espèce sur une ligne : son <b>coefficient × sa masse</b>.</li>
+          <li>La <b>somme</b> de chaque colonne : m<sub>réactifs</sub> et m<sub>produits</sub>.</li>
+          <li>Δm = m<sub>produits</sub> − m<sub>réactifs</sub>.</li></ol></div>
+      <p style="margin-top:10px">Des <b>neutrons des deux côtés</b> se simplifient en partie : 3 n à droite et 1 n à gauche laissent 2 × m(n) dans Δm.</p>
+    </div>
+    ${exemple(`${tableauDefaut(COURS4H)}`, 'Exemple du cours (fusion de l\'hydrogène dans le Soleil)')}`);
+  const fission = { g: [ligne(n, '1,674928e-27'), ligne(esp(235, 92), '3,902170e-25')], d: [ligne(esp(94, 38), '1,559155e-25'), ligne(esp(140, 54), '2,322960e-25'), ligne(neutron(2), '1,674928e-27')] };
+  c.aToi(carte, [
+    { titre: 'Remplir le tableau', parties: [versCours(partieDefaut({ g: [ligne(esp(3, 2), '5,0064e-27'), ligne(esp(3, 2), '5,0064e-27')], d: [ligne(helium(), '6,6447e-27'), ligne(esp(1, 1, 'H', 2), '1,6726e-27')] },
+      { q: 'Écris le coefficient de chaque ligne (Valider), puis calcule Δm.', solution: '<p class="ph-calc">Δm = m(⁴He) + 2 × m(¹H) − 2 × m(³He) = −2,29 × 10<sup>−29</sup> kg</p>' }))] },
+    { titre: 'Une fission : des neutrons des deux côtés', parties: [versCours(partieDefaut(fission,
+      { q: 'Coefficients, neutrons à simplifier, puis Δm.', solution: '<p class="ph-calc">Δm = m(Sr) + m(Xe) + 2 × m(n) − m(U) − m(n) = m(Sr) + m(Xe) + m(n) − m(U) = −3,306 × 10<sup>−28</sup> kg</p>' }))] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Masses en unité de masse atomique ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Masses en unité de masse atomique u');
+  const DT = { g: [ligne(esp(2, 1), '2,01355'), ligne(esp(3, 1), '3,01550')], d: [ligne(helium(), '4,00151'), ligne(n, '1,00867')], unite: 'u' };
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Unité de masse atomique.</b> 1 u = 1,660539 × 10<sup>−27</sup> kg (la masse d'un atome de carbone 12 divisée par 12 ; un nucléon a une masse d'environ 1 u).</p>
+        <p>Quand les masses sont données en u, on fait le <b>calcul en u</b>, puis on <b>convertit</b> Δm en kg :</p><p class="crs-formule">Δm (kg) = Δm (u) × 1,660539 × 10<sup>−27</sup></p></div>
+    </div>
+    ${exemple(`${tableauDefaut(DT)}<p class="crs-calc">Δm = −0,01887 × 1,660539 × 10<sup>−27</sup> = <span class="c">−3,133 × 10<sup>−29</sup> kg</span></p>`, 'Exemple : masses en u')}`);
+  const KR = { g: [ligne(n, '1,00867'), ligne(esp(235, 92), '234,99332')], d: [ligne(esp(92, 36), '91,90642'), ligne(esp(141, 56), '140,88368'), ligne(neutron(3), '1,00867')], unite: 'u' };
+  const dmu = 91.90642 + 140.88368 + 3 * 1.00867 - 234.99332 - 1.00867;
+  c.aToi(carte, [
+    { titre: 'Convertir en kg', enonce: '<p>Un noyau d\'hélium 4 a une masse de 4,00151 u.</p>', parties: [
+      sci('Convertis cette masse en kg (5 chiffres significatifs).', 'm(⁴He) =', 4.00151 * U_KG, 'kg', v => diagKg(v, 4.00151),
+        '<p class="ph-calc">m = 4,00151 × 1,660539 × 10<sup>−27</sup> = 6,6447 × 10<sup>−27</sup> kg : la valeur du cours.</p>', { cs: 5, rel: .002 })] },
+    { titre: 'Un tableau en u', parties: [
+      versCours(partieDefaut(KR, { q: 'Coefficients (Valider), somme de chaque colonne en u (Valider), puis Δm en u.',
+        solution: '<p class="ph-calc">m<sub>réactifs</sub> = 1,00867 + 234,99332 = 236,00199 u ; m<sub>produits</sub> = 91,90642 + 140,88368 + 3 × 1,00867 = 235,81611 u ; Δm = −0,18588 u</p>' })),
+      sci('Convertis Δm en kg (4 chiffres significatifs).', 'Δm =', dmu * U_KG, 'kg', v => diagKg(v, dmu),
+        '<p class="ph-calc">Δm = −0,18588 × 1,660539 × 10<sup>−27</sup> = −3,087 × 10<sup>−28</sup> kg</p>', { cs: 4, rel: .005 })] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Défaut de masse.</b> Δm = m<sub>produits</sub> − m<sub>réactifs</sub> (kg). Il est négatif quand de l'énergie est libérée.</p></div>
+    <div class="cle"><p><b class="cle-titre">Tableau.</b> Une colonne pour les réactifs, une pour les produits ; chaque ligne : coefficient × masse ; somme de chaque colonne ; puis la différence. Les neutrons des deux côtés se simplifient en partie.</p></div>
+    <div class="cle"><p><b class="cle-titre">Masses en u.</b> Calcul en u, puis 1 u = 1,660539 × 10<sup>−27</sup> kg.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_2b_cours.html">Cours : l'énergie libérée →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#defaut">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+NUC.menu('module_2a_cours');
+</script>
+</body>
+</html>

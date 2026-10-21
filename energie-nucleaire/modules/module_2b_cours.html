@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : l'énergie libérée — Chapitre 13 : Énergie nucléaire</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="nuc.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="nuc.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 2 / 2</span>
+    <h2 class="er-titre">L'énergie libérée</h2>
+    <p class="er-contexte">La masse perdue au cours d'une réaction nucléaire est transformée en énergie : <b>E<sub>lib</sub> = |Δm| × c²</b>. Tu vas la calculer en <b>joules</b>, puis la convertir en <b>MeV</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. E = |Δm| × c² (c = 3,00 × 10⁸ m·s⁻¹ s'il n'est pas donné) :
+      ³H + ¹H → ⁴He, 3,186 × 10⁻¹² J ; à toi : 5,31 × 10⁻¹³ J (²H + ²H),
+      2,971 × 10⁻¹¹ J (fission, c = 299 792 458 m·s⁻¹)
+   2. Conversion en MeV (1 MeV = 1,60 × 10⁻¹³ J, ou 1 eV =
+      1,602177 × 10⁻¹⁹ J et 1 MeV = 10⁶ eV) : 19,9 MeV ; à toi : 3,32 MeV,
+      185,7 MeV, 17,6 MeV → 2,82 × 10⁻¹² J
+   3. L'exemple du cours en entier : 4 ¹H → ⁴He + 2 e⁺, Δm =
+      −4,3878 × 10⁻²⁹ kg, E = 3,9436 × 10⁻¹² J = 24,6 MeV ; à toi :
+      ²H + ³He → ⁴He + ¹H (−3,28 × 10⁻²⁹ kg, 2,952 × 10⁻¹² J, 18,5 MeV)
+   Erreurs diagnostiquées (NUC.diagE, diagMeV, diagJ) : signe gardé,
+   c non élevé au carré, MeV et eV confondus, multiplication au lieu de
+   division, puissance de 10.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, esp, neutron, helium, equation, lisible, masse, partieDefaut, tableauDefaut, versCours, diagE, diagMeV, diagJ, C, C_EXACT, MEV } = NUC;
+const L = lisible;
+// saisies du moteur NUC dans le cours (tolérance relative, même pour 10⁻¹³ J)
+const sci = (q, label, valeur, unite, diag, solution, opts) => versCours(Object.assign({ type: 'sci', q, label, valeur, unite, diag, solution, rel: .01, cs: 3 }, opts));
+const nombre = (q, label, valeur, unite, diag, solution, opts) => versCours(Object.assign({ type: 'nombre', q, label, valeur, unite, diag, solution, rel: .01, signe: false }, opts));
+const ligne = (x, m) => ({ x, m: masse(m) });
+
+/* ---------- 1. E = |Δm| × c² ---------- */
+function etape1(c) {
+  const carte = c.carte('1. L\'énergie libérée');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Énergie libérée par une réaction nucléaire.</b></p><p class="crs-formule">E<sub>lib</sub> = |Δm| × c²</p>
+        <p>|Δm| : valeur absolue du défaut de masse (kg) ; c : célérité de la lumière dans le vide (m·s<sup>−1</sup>) ; E<sub>lib</sub> en joules (J).</p></div>
+      <p style="margin-top:10px">c = <b>3,00 × 10<sup>8</sup> m·s<sup>−1</sup></b> quand l'énoncé ne donne pas sa valeur ; sinon, on prend celle de l'énoncé (par exemple c = 299 792 458 m·s<sup>−1</sup>).</p>
+    </div>
+    ${exemple(`<p>${L(equation([esp(3, 1), esp(1, 1)], [helium()]))} : Δm = −3,54 × 10<sup>−29</sup> kg (cours précédent).</p>
+      <p class="crs-calc">E<sub>lib</sub> = |Δm| × c² = 3,54 × 10<sup>−29</sup> × (3,00 × 10<sup>8</sup>)² = <span class="c">3,19 × 10<sup>−12</sup> J</span></p>`)}`);
+  const dm1 = -5.9e-30, dm2 = -3.3057e-28;
+  c.aToi(carte, [
+    { titre: 'Calculer E<sub>lib</sub>', enonce: `<p>${L(equation([esp(2, 1), esp(2, 1)], [esp(3, 2), neutron()]))} : Δm = −5,9 × 10<sup>−30</sup> kg. La valeur de c n'est pas donnée.</p>`, parties: [
+      sci('Calcule l\'énergie libérée.', 'E<sub>lib</sub> =', Math.abs(dm1) * C * C, 'J', v => diagE(v, dm1, C),
+        '<p class="ph-calc">E<sub>lib</sub> = 5,9 × 10<sup>−30</sup> × (3,00 × 10<sup>8</sup>)² = 5,31 × 10<sup>−13</sup> J</p>')] },
+    { enonce: `<p>Fission de l'uranium 235 : Δm = −3,3057 × 10<sup>−28</sup> kg ; c = 299 792 458 m·s<sup>−1</sup>.</p>`, parties: [
+      sci('Calcule l\'énergie libérée (4 chiffres significatifs).', 'E<sub>lib</sub> =', Math.abs(dm2) * C_EXACT * C_EXACT, 'J', v => diagE(v, dm2, C_EXACT),
+        '<p class="ph-calc">E<sub>lib</sub> = 3,3057 × 10<sup>−28</sup> × 299 792 458² = 2,971 × 10<sup>−11</sup> J</p>', { cs: 4, rel: .003 })] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Convertir en MeV ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Convertir en MeV');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Le mégaélectronvolt.</b> L'énergie libérée s'exprime souvent en MeV :</p><p class="crs-formule">1 MeV = 1,60 × 10<sup>−13</sup> J</p>
+        <p>ou bien 1 eV = 1,602177 × 10<sup>−19</sup> J et 1 MeV = 10<sup>6</sup> eV. Des joules aux MeV, on <b>divise</b> par 1,60 × 10<sup>−13</sup>.</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc">E = 3,186 × 10<sup>−12</sup> / 1,60 × 10<sup>−13</sup> = <span class="c">19,9 MeV</span></p>
+      <p><span class="nuc-ou">OU</span> avec un tableau de proportionnalité :</p>
+      <table class="nuc-prop"><tr><td>1 MeV</td><td>1,60 × 10<sup>−13</sup> J</td></tr><tr><td>E ?</td><td>3,186 × 10<sup>−12</sup> J</td></tr></table>
+      <p class="crs-calc">E = 1 × 3,186 × 10<sup>−12</sup> / 1,60 × 10<sup>−13</sup> = 19,9 MeV</p>
+      <p><span class="nuc-ou">OU</span> en passant par les eV : 3,186 × 10<sup>−12</sup> / 1,602177 × 10<sup>−19</sup> = 1,99 × 10<sup>7</sup> eV = 19,9 MeV.</p>`)}`);
+  const E1 = 5.31e-13, E2 = 2.971e-11;
+  c.aToi(carte, [
+    { titre: 'Des joules aux MeV', enonce: '<p>E = 5,31 × 10<sup>−13</sup> J.</p>', parties: [
+      nombre('Convertis en MeV (3 chiffres significatifs).', 'E =', E1 / MEV, 'MeV', v => diagMeV(v, E1), '<p class="ph-calc">E = 5,31 × 10<sup>−13</sup> / 1,60 × 10<sup>−13</sup> = 3,32 MeV</p>', { cs: 3 })] },
+    { enonce: '<p>Fission d\'un noyau d\'uranium 235 : E = 2,971 × 10<sup>−11</sup> J.</p>', parties: [
+      nombre('Convertis en MeV (4 chiffres significatifs).', 'E =', E2 / MEV, 'MeV', v => diagMeV(v, E2), '<p class="ph-calc">E = 2,971 × 10<sup>−11</sup> / 1,60 × 10<sup>−13</sup> = 185,7 MeV (185,4 MeV en passant par les eV)</p>', { rel: .005, cs: 4 })] },
+    { titre: 'Des MeV aux joules', enonce: '<p>La fusion d\'un noyau de deutérium et d\'un noyau de tritium libère 17,6 MeV.</p>', parties: [
+      sci('Convertis en joules.', 'E =', 17.6 * MEV, 'J', v => diagJ(v, 17.6), '<p class="ph-calc">E = 17,6 × 1,60 × 10<sup>−13</sup> = 2,82 × 10<sup>−12</sup> J</p>')] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. L'exemple du cours ---------- */
+function etape3(c) {
+  const carte = c.carte('3. L\'exemple du cours, en entier');
+  const COURS4H = { g: [ligne(esp(1, 1, 'H', 4), '1,6726e-27')], d: [ligne(helium(), '6,6447e-27'), ligne(esp(0, 1, 'e', 2), '9,11e-31')] };
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Calculer l'énergie libérée par la réaction de fusion ${L(equation([esp(1, 1, 'H', 4)], [helium(), esp(0, 1, 'e', 2)]))}, en joules puis en MeV.</p>
+      <p style="margin-top:6px">Données : c = 299 792 458 m·s<sup>−1</sup> ; m(¹H) = 1,6726 × 10<sup>−27</sup> kg ; m(⁴He) = 6,6447 × 10<sup>−27</sup> kg ; m(e) = 9,11 × 10<sup>−31</sup> kg ; 1 MeV = 1,60 × 10<sup>−13</sup> J.</p>
+    </div>
+    ${exemple(`<p><b>Défaut de masse</b></p>${tableauDefaut(COURS4H)}
+      <p style="margin-top:10px"><b>Énergie libérée</b></p>
+      <p class="crs-calc">E = |Δm| × c² = 4,3878 × 10<sup>−29</sup> × 299 792 458² = <span class="c">3,9436 × 10<sup>−12</sup> J</span></p>
+      <p class="crs-calc">E = 3,9436 × 10<sup>−12</sup> / 1,60 × 10<sup>−13</sup> = <span class="c">24,6 MeV</span></p>`)}`);
+  const R = { g: [ligne(esp(2, 1), '3,3436e-27'), ligne(esp(3, 2), '5,0064e-27')], d: [ligne(helium(), '6,6446e-27'), ligne(esp(1, 1), '1,6726e-27')] };
+  const dm = 6.6446e-27 + 1.6726e-27 - 3.3436e-27 - 5.0064e-27, E = Math.abs(dm) * C * C;
+  c.aToi(carte, [
+    { titre: 'À toi, en entier', enonce: `<p>${L(equation([esp(2, 1), esp(3, 2)], [helium(), esp(1, 1)]))}. La valeur de c n'est pas donnée.</p>`, parties: [
+      versCours(partieDefaut(R, { q: 'a) Le défaut de masse : coefficients (Valider), puis Δm.', solution: '<p class="ph-calc">Δm = m(⁴He) + m(¹H) − m(²H) − m(³He) = −3,28 × 10<sup>−29</sup> kg</p>' })),
+      sci('b) L\'énergie libérée en joules.', 'E =', E, 'J', v => diagE(v, dm, C), '<p class="ph-calc">E = 3,28 × 10<sup>−29</sup> × (3,00 × 10<sup>8</sup>)² = 2,95 × 10<sup>−12</sup> J</p>'),
+      nombre('c) L\'énergie libérée en MeV (3 chiffres significatifs).', 'E =', E / MEV, 'MeV', v => diagMeV(v, E), '<p class="ph-calc">E = 2,952 × 10<sup>−12</sup> / 1,60 × 10<sup>−13</sup> = 18,5 MeV</p>', { cs: 3 })] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Énergie libérée.</b> E<sub>lib</sub> = |Δm| × c², avec Δm en kg et c = 3,00 × 10<sup>8</sup> m·s<sup>−1</sup> (si l'énoncé ne donne pas c) : E en joules, positive.</p></div>
+    <div class="cle"><p><b class="cle-titre">En MeV.</b> 1 MeV = 1,60 × 10<sup>−13</sup> J (1 eV = 1,602177 × 10<sup>−19</sup> J, 1 MeV = 10<sup>6</sup> eV) : E (MeV) = E (J) / 1,60 × 10<sup>−13</sup>.</p></div>
+    <div class="ph-lien-app"><p>Revoir les calculs en écriture scientifique</p><a class="btn-small" href="../../puissances-10/index.html" target="_blank" rel="noopener">Puissances de 10 ↗</a></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur le défaut de masse et l'énergie →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3a_cours.html">Module 3 : énergie d'un échantillon</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#energie">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+NUC.menu('module_2b_cours');
+</script>
+</body>
+</html>
