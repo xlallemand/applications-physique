@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 7 : Exercices complets — Combustions</title>
+<title>Module 7 : exercices du chapitre — Chapitre 14 : Combustions</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../assets/molecules.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
@@ -11,9 +11,10 @@
 <link rel="stylesheet" href="../../assets/sommaire.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="../../assets/molecules.js"></script>
+<script src="../../assets/dragdrop.js"></script>
 <script src="../../equilibrer-reactions/modules/er.js"></script>
 <script src="co.js"></script>
-<script src="banque.js"></script>
+<script src="exercices.js"></script>
 </head>
 <body>
 <div id="app-nav"></div>
@@ -21,40 +22,84 @@
 
 <script>
 /* ============================================================
-   Un exercice complet à la fois, parmi 10 exercices différents.
-   Les exercices déjà faits sont mémorisés dans le navigateur
-   (si c'est possible) pour proposer d'abord ceux qui restent.
+   Liste des exercices de la feuille (même numérotation : 1 à 4,
+   16, 15 et 21 du manuel) et des deux sujets de bac (A et B), puis
+   un exercice à la fois : énoncé, puis questions successives (la
+   partie calcul commence par le schéma de la méthode, où l'on place
+   les données de l'énoncé). La correction détaillée de chaque
+   question est toujours disponible (0 point pour cette question).
+   Barème par question : 2 points juste du premier coup, 1 point
+   après au moins une erreur, 0 point si la correction est affichée.
+   Les résultats sont gardés dans le navigateur (localStorage).
    ============================================================ */
-const CLE = 'combustions-exercices-faits';
-function lireFaits() { try { return JSON.parse(localStorage.getItem(CLE)) || []; } catch (e) { return []; } }
-function ecrireFaits(t) { try { localStorage.setItem(CLE, JSON.stringify(t)); } catch (e) { /* stockage indisponible */ } }
-let faits = lireFaits(), exo = null, numero = 0;
-function prochain() {
-  let libres = BANQUE.EXERCICES.map((_, i) => i).filter(i => !faits.includes(i));
-  if (!libres.length) { faits = []; libres = BANQUE.EXERCICES.map((_, i) => i); }
-  numero = CO.hasard(libres);
-  faits.push(numero);
-  ecrireFaits(faits);
-  return BANQUE.EXERCICES[numero];
-}
-const donnees = e => `Données : M(C) = 12 g/mol ; M(H) = 1 g/mol ; M(O) = 16 g/mol ; pouvoir calorifique PC(${CO.COMB[e.f].nom}) = ${CO.fmt(CO.COMB[e.f].PC)} MJ/kg.`;
+const app = document.getElementById('app');
+const EX = CO.EXERCICES;
+const CLE = 'combustions-exercices';
 
-CO.serie({
-  app: document.getElementById('app'),
-  badge: 'MODULE 7',
-  titre: 'Exercice complet',
-  nombre: 7,
-  direct: true,
-  bareme: 'un exercice en 5 ou 6 étapes, chacune notée sur 2 points',
-  etiquette: 'Étape', recapNom: 'É', finTitre: 'Exercice terminé !', recommencer: '↺ Nouvel exercice',
-  intro: `<p class="er-contexte">Un exercice complet, étape par étape : équation de la combustion, masse de dioxyde de carbone formé, énergie libérée (ou masse de combustible à brûler). Il y a <b>10 exercices différents</b> : recommence le module pour en faire un nouveau.</p>`,
-  questions: () => { exo = prochain(); return BANQUE.exercice(exo); },
-  contexte: (q, idx) => `<p class="er-q-nom">Exercice ${numero + 1} sur 10 · ${exo.titre}</p>
-    <p class="er-contexte">${exo.texte} ${exo.E ? `On veut ensuite savoir quelle masse de combustible brûler pour obtenir ${CO.fmt(exo.E)} MJ.` : ''}</p>
-    <p class="co-donnees">${donnees(exo)}</p>
-    ${idx > 0 ? `<p class="co-eq">${CO.equation(exo.f)}</p>` : ''}`,
-  suite: { href: '../index.html', label: 'Retour aux modules' },
-});
+function lireResultats() {
+  try { return JSON.parse(localStorage.getItem(CLE)) || {}; } catch (e) { return {}; }
+}
+function noterResultat(id, pts, max) {
+  try {
+    const r = lireResultats();
+    // on garde le meilleur résultat
+    if (!r[id] || pts > r[id].pts) r[id] = { pts, max };
+    localStorage.setItem(CLE, JSON.stringify(r));
+  } catch (e) { /* stockage indisponible : rien à faire */ }
+}
+
+function liste() {
+  const res = lireResultats();
+  app.innerHTML = `<div class="er-card"><span class="er-badge">MODULE 7 · EXERCICES</span><h2 class="er-titre">Exercices du chapitre</h2>
+      <p class="er-contexte">Les exercices de la feuille, avec la même numérotation (1 à 4, puis 16, 15 et 21 du manuel), et deux extraits de <b>sujets de bac</b> (A et B). Dans les exercices de combustion, commence par placer les données de l'énoncé sur le <b>schéma de la méthode</b>. La <b>correction détaillée</b> de chaque question est toujours disponible. Garde ta calculatrice à portée de main.</p>
+      <p class="er-petit" style="margin-top:8px">Barème de chaque question : 2 points juste du premier coup, 1 point après une erreur, 0 point si tu regardes la correction.</p></div>
+    ${CO.GROUPES_EX.map(g => `<div class="er-card ph-ex-groupe"><h3 class="cours-titre">${g.titre}</h3><div class="ph-ex-liste">
+      ${EX.filter(e => e.groupe === g.id).map(e => {
+        const r = res[e.id];
+        return `<button type="button" class="ph-ex-carte${r ? ' fait' : ''}" data-id="${e.id}">
+          <span class="ph-ex-num">${r ? '✓' : e.id}</span>
+          <span><span class="ph-ex-titre" style="display:block">${e.titre}</span><span class="ph-ex-desc" style="display:block">${e.desc}</span>
+          ${r ? `<span class="ph-ex-score" style="display:block">Meilleur score : ${r.pts} / ${r.max}</span>` : ''}</span></button>`;
+      }).join('')}</div></div>`).join('')}`;
+  app.querySelectorAll('.ph-ex-carte').forEach(b => { b.onclick = () => exercice(EX.findIndex(e => e.id === b.dataset.id)); });
+  window.scrollTo(0, 0);
+}
+
+function exercice(i) {
+  const e = EX[i], max = e.parties.length * 2;
+  app.innerHTML = `<div class="er-card"><div class="ph-ex-nav"><span class="er-badge" style="margin:0">MODULE 7 · EXERCICE ${e.id}</span>
+      <button type="button" class="ph-retour-liste" data-a="liste">← Liste des exercices</button></div>
+      <h2 class="er-titre" style="margin-top:8px">${e.titre}</h2></div>
+    <div class="er-card ph-contexte">${e.contexte}</div>
+    <div class="er-card co-question"><div data-a="parties"></div><div data-a="bilan"></div></div>`;
+  window.scrollTo(0, 0);
+  app.querySelector('[data-a="liste"]').onclick = liste;
+  // évite qu'un double appui sur « Exercice suivant » réponde à la nouvelle question
+  app.style.pointerEvents = 'none';
+  setTimeout(() => { app.style.pointerEvents = ''; }, 350);
+  // les parties sont réutilisées si l'exercice est refait : on repart de zéro
+  const parties = e.parties.map(p => Object.assign({}, p));
+  CO.question(app.querySelector('[data-a="parties"]'), { parties }, {
+    fin(_, etat) {
+      const pts = etat.details.reduce((s, d) => s + (d.vue ? 0 : d.erreurs ? 1 : 2), 0);
+      noterResultat(e.id, pts, max);
+      const suivant = EX[i + 1];
+      const b = app.querySelector('[data-a="bilan"]');
+      b.innerHTML = `<div class="${pts ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${pts ? 'er-ok' : ''}">Exercice terminé : ${pts} / ${max} points.</b></p>
+          ${pts === max ? '<p>Tout juste du premier coup, bravo !</p>' : '<p>Relis les corrections, puis refais l\'exercice plus tard pour vérifier.</p>'}</div>
+        <div class="er-actions"><button type="button" class="btn-secondary" data-a="re">↺ Refaire</button>
+          <button type="button" class="btn-secondary" data-a="liste2">Liste des exercices</button>
+          ${suivant ? `<button type="button" class="btn-primary" data-a="suiv">Exercice ${suivant.id} →</button>` : ''}</div>`;
+      b.querySelector('[data-a="re"]').onclick = () => exercice(i);
+      b.querySelector('[data-a="liste2"]').onclick = liste;
+      if (suivant) b.querySelector('[data-a="suiv"]').onclick = () => exercice(i + 1);
+      if (pts === max) ER.confettis();
+      setTimeout(() => b.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+    },
+  }, 'exercice');
+}
+
+liste();
 CO.menu('module_7');
 </script>
 </body>

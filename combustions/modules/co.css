@@ -1,5 +1,5 @@
 /* ============================================================
-   Styles de l'application « Combustions »
+   Styles de l'application « Chapitre 14 : Combustions »
    Complète assets/theme.css, assets/molecules.css et le fichier
    er.css de l'application « Équilibrer une réaction » (cartes,
    réactions, sélecteurs, écran de fin).
@@ -176,3 +176,118 @@ sub, sup { font-size: .7em; line-height: 0; }
 /* Module 2 : raccourcis sous l'en-tête, l'un sous l'autre */
 .co-raccourcis { flex-direction: column; align-items: flex-start; }
 .co-raccourcis .btn-small { text-align: left; }
+
+/* ---------- Écriture scientifique a × 10ⁿ (partie 'sci') ---------- */
+.co-sci-n { display: inline-flex; align-items: flex-start; gap: 4px; flex-wrap: nowrap; }
+.co-sci .co-champ-m { width: 96px; }
+.co-x10 { font-size: 1.15rem; font-weight: 800; align-self: center; white-space: nowrap; }
+.co-expo { display: inline-flex; align-items: center; gap: 3px; margin-top: -16px; }
+.co-sci .co-champ-e { width: 58px; font-size: 16px; padding: 6px 4px; }
+.co-pm {
+  width: 32px; height: 38px; border: none; border-radius: 10px; cursor: pointer; font: 800 1rem var(--font-sans);
+  background: var(--paper); color: var(--ink); touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.co-pm:disabled { opacity: .35; cursor: default; }
+@media (max-width: 380px) { .co-sci .co-champ-m { width: 74px; } .co-sci .co-champ-e { width: 46px; } .co-pm { width: 28px; } }
+
+/* ---------- Schéma de la méthode à compléter (exercices) ---------- */
+.co-schema-donnees { background: var(--sheet); border-radius: 16px; padding: 10px 8px; max-width: 760px; margin: 8px auto; }
+.co-sch-inc { color: var(--accent); }
+.co-sch-lettre { font-style: italic; font-weight: 700; color: var(--accent); }
+.co-sch-rel i { font-weight: 700; color: var(--accent); }
+.co-sch-e { margin-top: 12px; background: var(--paper); border-radius: 12px; padding: 8px 10px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 16px; }
+.co-sch-e-t { font-size: .8rem; font-weight: 800; color: var(--ink-2); width: 100%; }
+.co-sch-e-l { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; }
+.co-sch-e-l > span { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; white-space: nowrap; }
+.co-sch-e-l b { display: inline; }
+.co-schema-donnees .co-sch-v .sc-slot { display: flex; width: 100%; min-width: 0; min-height: 40px; margin-top: 2px; }
+.co-schema-donnees .sc-chip { max-width: 100%; white-space: normal; padding: 4px 6px; font-size: .85rem; }
+.co-schema-donnees .co-sch-v b { overflow-wrap: anywhere; }
+@media (max-width: 480px) { .co-schema-donnees .sc-chip { font-size: .72rem; padding: 3px 3px; } .co-sch-e-l > span { font-size: .9rem; } }
+
+/* cases et étiquettes à placer (même présentation que les schémas de « Transport et distribution de l'électricité ») */
+.sc-slot {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 74px; min-height: 42px; padding: 3px;
+  border: 2px dashed var(--ink-3); border-radius: 12px; background: var(--sheet); transition: background .15s, border-color .15s;
+  vertical-align: middle; touch-action: manipulation;
+}
+.sc-slot-ph { color: var(--ink-3); font-weight: 800; padding: 0 6px; }
+.sc-slot:has(.sc-chip) { border-style: solid; border-color: var(--paper-3); }
+.sc-over, .sc-en-choix .sc-slot:hover { background: var(--cle-bg); border-color: var(--accent); }
+.sc-en-choix .sc-slot { border-color: var(--accent); }
+.sc-slot.ok { border-color: var(--success) !important; background: var(--success-bg) !important; }
+.sc-slot.ko { border-color: var(--danger) !important; background: var(--danger-bg) !important; }
+.sc-chip {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 5px 11px;
+  background: var(--sheet); border: 2px solid var(--accent); border-radius: 10px; color: var(--accent-ink);
+  font: 800 .92rem/1.2 var(--font-sans); cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; text-align: center; font-variant-numeric: tabular-nums;
+}
+.sc-chip > span { display: inline; }
+.sc-chip.dragging { opacity: .35; }
+.sc-chip.sc-choisie { background: var(--accent); color: var(--sheet); box-shadow: 0 0 0 3px var(--cle-line); }
+.sc-fini .sc-chip { cursor: default; border-color: var(--success); color: var(--success-text); }
+.sc-slot:focus-visible, .sc-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sc-palette { background: var(--paper); border: 1.5px dashed var(--line-strong); border-radius: 14px; padding: 8px 10px 10px; margin: 6px 0 4px; touch-action: manipulation; }
+.sc-palette-t { font-size: .8rem; font-weight: 700; color: var(--ink-2); margin-bottom: 6px !important; }
+.sc-palette-t span { font-weight: 500; color: var(--ink-2); }
+.sc-palette-liste { display: flex; flex-wrap: wrap; gap: 6px; min-height: 40px; align-items: center; }
+.sc-palette.vide .sc-palette-liste::before { content: 'Toutes les données sont placées.'; font-size: .85rem; color: var(--ink-2); font-style: italic; }
+.sc-fini .sc-palette { display: none; }
+/* palette visible pendant qu'on fait défiler le schéma (téléphone : sous le bandeau) */
+@media (max-width: 899px) { .sc-exo .sc-palette { position: sticky; top: 62px; z-index: 5; } }
+
+/* ---------- Exercices du chapitre (module 7) ---------- */
+.ph-ex-groupe { margin-bottom: 18px; }
+.ph-ex-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; }
+.ph-ex-carte {
+  display: flex; align-items: center; gap: 12px; text-align: left; width: 100%;
+  background: var(--paper); border: none; border-radius: 18px; padding: 14px 16px; cursor: pointer; font: inherit; color: var(--ink);
+  transition: background .15s;
+}
+.ph-ex-carte:hover { background: var(--paper-2); }
+.ph-ex-carte:focus-visible, .ph-retour-liste:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ph-ex-num { flex-shrink: 0; min-width: 40px; height: 40px; border-radius: 999px; display: grid; place-items: center; background: var(--cle-bg); color: var(--accent-ink); font-weight: 800; font-size: .85rem; padding: 0 6px; }
+.ph-ex-carte.fait .ph-ex-num { background: var(--success-bg); color: var(--success-text); }
+.ph-ex-titre { font-weight: 800; line-height: 1.25; }
+.ph-ex-desc { font-size: .85rem; color: var(--ink-2); margin-top: 2px; line-height: 1.35; }
+.ph-ex-score { font-size: .78rem; font-weight: 700; color: var(--success-text); margin-top: 3px; }
+.ph-contexte { background: var(--cle-bg); border-color: var(--cle-line); }
+.ph-contexte .er-contexte { color: var(--ink); }
+.ph-contexte .er-contexte + .er-contexte { margin-top: 8px; }
+.ph-donnees { margin-top: 8px !important; font-size: .92rem; color: var(--ink-2); line-height: 1.55; }
+.ph-ex-nav { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; }
+.ph-retour-liste { border: none; background: none; font: 700 .9rem var(--font-sans); color: var(--ink-2); cursor: pointer; padding: 6px 0; }
+.ph-retour-liste:hover { color: var(--ink); }
+.ph-bilan { margin-top: 16px; }
+.ph-lien-app {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  background: var(--cle-bg); border-radius: 16px; padding: 10px 12px 10px 16px; margin: 14px 0;
+}
+.ph-lien-app p { font-size: .92rem; color: var(--ink); font-weight: 600; }
+.ph-lien-app a { text-decoration: none; }
+/* correction détaillée d'une partie d'exercice */
+.co-correction > div > * + * { margin-top: 6px; }
+.co-calc { font-size: 1.05rem; line-height: 2; font-variant-numeric: tabular-nums; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.co-calc .c { color: var(--accent-ink); font-weight: 800; }
+@media (max-width: 480px) { .co-calc { font-size: .95rem; } }
+/* encadré du manuel (réactif limitant), figures de l'énoncé */
+.co-encadre { background: var(--sheet); border-radius: 14px; padding: 10px 14px; margin-top: 10px; font-size: .93rem; line-height: 1.55; }
+.co-encadre p + p { margin-top: 6px; }
+.co-fig { display: block; width: 100%; max-width: 520px; height: auto; margin: 10px auto 0; background: var(--sheet); border-radius: 12px; }
+.co-donnees-tab { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* extrait de la classification périodique (exercice 2) */
+.co-classif { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin: 8px 0 0; max-width: 520px; }
+.co-case { position: relative; background: var(--sheet); border-radius: 10px; padding: 16px 4px 6px; text-align: center; font-variant-numeric: tabular-nums; }
+.co-case b { display: block; font-size: 1.35rem; line-height: 1.1; }
+.co-case-z, .co-case-m { position: absolute; top: 3px; font-size: .7rem; font-weight: 700; color: var(--ink-2); }
+.co-case-z { left: 6px; }
+.co-case-m { right: 6px; color: var(--accent-ink); }
+.co-case-nom { display: block; font-size: .66rem; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 480px) { .co-classif { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* document du sujet de bac A (titres de ligne à gauche) */
+.co-doc { width: 100%; }
+.co-doc th, .co-doc td { white-space: normal; text-align: left; }
+.co-doc th { width: 38%; }
+.co-pictos { max-width: 300px; margin: 2px 0; background: none; }
+.co-glycol { max-width: 240px; margin: 6px 0; }

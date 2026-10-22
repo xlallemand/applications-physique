@@ -1,10 +1,10 @@
 /* ============================================================
-   Banque de questions — application « Combustions »
-   BANQUE.equilibrage()   module 1 : 10 combustions à équilibrer
+   Banque de questions — application « Chapitre 14 : Combustions »
+   BANQUE.equilibrage()   entraînement du module 2 : 10 combustions à équilibrer
    BANQUE.module3()       masse, quantité de matière, masse molaire
    BANQUE.module4()       relations stœchiométriques
    BANQUE.module5()       énergie libérée, pouvoir calorifique
-   BANQUE.EXERCICES       module 6 : 10 exercices complets
+   BANQUE.EXERCICES       entraînement du module 6 : 10 exercices complets
    BANQUE.exercice(e)     étapes d'un exercice complet
    ============================================================ */
 (function () {
@@ -23,7 +23,7 @@
   const frac = (a, b) => `<span class="co-frac"><span>${a}</span><span>${b}</span></span>`;
 
   /* ============================================================
-     MODULE 1 : équilibrer des combustions
+     MODULE 2 : équilibrer des combustions (entraînement)
      ============================================================ */
   const ENTIERS_FACILES = ['CH4', 'C2H4', 'C3H8', 'C2H6O'];
   const ENTIERS = ['C5H12', 'C7H16', 'C3H6O', 'C4H10O', 'C6H12O6'];
@@ -269,7 +269,7 @@
   }
 
   /* ============================================================
-     MODULE 6 : exercices complets (10 exercices différents)
+     ENTRAÎNEMENT DU MODULE 6 : exercices complets (10 exercices différents)
      m : masse de combustible (g) ; E : énergie demandée (MJ) si on cherche la masse ;
      extra : 'O2' (n de dioxygène consommé) ou 'H2O' (masse d'eau formée)
      ============================================================ */
