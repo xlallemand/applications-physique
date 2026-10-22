@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : longueur d'onde et fréquence — Chapitre 19 : Ondes électromagnétiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="oem.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="oem.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS 1 / 2</span>
+    <h2 class="er-titre">Longueur d'onde et fréquence</h2>
+    <p class="er-contexte">Une <b>onde électromagnétique</b> peut se propager dans le vide, à la célérité <b>c = 3,00 × 10<sup>8</sup> m·s<sup>−1</sup></b>. Sa <b>longueur d'onde</b> λ et sa <b>fréquence</b> f sont liées par <b>c = λ × f</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 1 du module 1 : onde électromagnétique et célérité,
+   longueur d'onde (période spatiale, lue sur une figure), λ = c / f
+   (f avec un préfixe), f = c / λ (λ en cm, mm ou km).
+   Erreurs diagnostiquées : préfixe non converti, λ = f / c,
+   10³ et 10⁶ confondus, distance totale prise pour λ.
+   Valeurs vérifiées par un script : 100 MHz → 3,00 m ; 0,43 m →
+   7,0 × 10⁸ Hz = 0,70 GHz.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, proche, hasard, melanger, fr, sci, C } = OEM;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const C8 = '3,00 × 10<sup>8</sup>';
+
+/* ---------- 1. Une onde électromagnétique ---------- */
+// figure à lire : n longueurs d'onde sur une distance graduée
+const LIRE = hasard([[3, .4, .1], [4, .5, .1], [2, .8, .2], [5, .2, .1], [3, .6, .2], [4, .25, .1]]);
+function etape1(c_) {
+  const carte = c_.carte('1. Une onde électromagnétique');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>La lumière, les ondes radio, les micro-ondes, les rayons X sont des <b>ondes électromagnétiques</b>. Contrairement au son, elles n'ont pas besoin de matière pour se propager.</p>
+      <div class="cle"><p><b class="cle-titre">Définition.</b> Une onde électromagnétique est une onde qui <b>peut se propager dans le vide</b>. Sa célérité (vitesse de propagation) dans le vide, presque la même dans l'air, est :</p>
+        <p class="crs-formule">c = 3,00 × 10<sup>8</sup> m·s<sup>−1</sup></p></div>
+      <div class="cle"><p>La <b>longueur d'onde</b> λ (lambda) est la <b>période spatiale</b> de l'onde : la distance entre deux points identiques voisins (deux crêtes, par exemple). Elle s'exprime en mètres.</p></div>
+      ${OEM.fig(W => OEM.svgLambda({ W: Math.min(W, 560), n: 3, D: 1.5, pas: .25 }))}
+    </div>
+    ${exemple(`<p>Sur la figure, l'onde fait 3 longueurs d'onde sur 1,5 m :</p>${calc(`λ = ${fr('1,5 m', '3')} = ${c('0,50 m')}`)}<p>Pour mesurer précisément, on mesure plusieurs longueurs d'onde, puis on divise.</p>`)}`);
+  const [n, lam, pas] = LIRE, D = +(n * lam).toFixed(6);
+  c_.aToi(carte, [
+    { titre: 'Se propager', parties: [
+      { type: 'choix', colonne: true, q: 'Une onde électromagnétique peut se propager :',
+        options: [{ id: 'ok', label: 'dans le vide, et aussi dans l\'air, le verre…' }, { id: 'mat', label: 'seulement dans un milieu matériel, comme le son' }, { id: 'cable', label: 'seulement dans un câble' }], bonne: 'ok',
+        indices: { mat: 'La lumière du Soleil nous parvient en traversant le vide de l\'espace.', cable: 'Les ondes radio et la lumière traversent l\'air et l\'espace sans câble.' },
+        solution: '<p>Une onde électromagnétique peut se propager dans le vide : c\'est ce qui la distingue d\'une onde sonore.</p>' }] },
+    { titre: 'Lire une longueur d\'onde', enonce: `<p>Voici une onde électromagnétique dessinée en fonction de la distance.</p>${OEM.fig(W => OEM.svgLambda({ W: Math.min(W, 560), n, D, pas, lambda: false }))}`, parties: [
+      { type: 'nombre', q: 'Quelle est sa longueur d\'onde λ ?', label: 'λ =', valeur: lam, unite: 'm', rel: .01, signe: false,
+        diag: v => (proche(v, D) ? `C'est la distance totale : elle contient ${n} longueurs d'onde. Divise par ${n}.` : proche(v, lam / 2) ? 'λ est la distance entre deux crêtes voisines (pas entre une crête et un creux).'
+          : 'Compte les longueurs d\'onde (de crête à crête) sur toute la figure, puis divise la distance par ce nombre.'),
+        solution: calc(`${n} λ = ${fmt(D)} m, donc λ = ${fr(fmt(D) + ' m', n)} = ${c(fmt(lam) + ' m')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Relation entre λ et f ---------- */
+// f avec un préfixe : [nombre, préfixe, facteur]
+const FL = melanger([[150, 'MHz', 1e6], [600, 'kHz', 1e3], [2.5, 'GHz', 1e9], [50, 'MHz', 1e6], [1.5, 'MHz', 1e6], [750, 'MHz', 1e6], [6, 'GHz', 1e9], [200, 'kHz', 1e3]]).slice(0, 2);
+function etape2(c_) {
+  const carte = c_.carte('2. Relation entre λ et f');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Pendant une période T, l'onde avance d'une longueur d'onde λ. Sa célérité est donc c = λ / T ; comme f = 1 / T :</p>
+      <div class="cle"><p class="crs-formule">c = ${fr('λ', 'T')} = λ × f &nbsp; donc &nbsp; λ = ${fr('c', 'f')} &nbsp; et &nbsp; f = ${fr('c', 'λ')}</p>
+        <p>c en m·s<sup>−1</sup> ; λ en m ; T en s ; f en Hz (1 Hz = 1 s<sup>−1</sup>).</p></div>
+      <div class="crs-attention"><p><b class="cle-titre">Attention aux préfixes.</b> On écrit f en Hz avant de calculer : 1 kHz = 10<sup>3</sup> Hz ; 1 MHz = 10<sup>6</sup> Hz ; 1 GHz = 10<sup>9</sup> Hz.</p></div>
+      <div class="ph-lien-app"><p>Revois les puissances de 10 et les préfixes</p><span class="oem-liens"><a class="btn-small" href="../../puissances-10/index.html" target="_blank" rel="noopener">Puissances de 10 ↗</a> <a class="btn-small" href="../../conversions/index.html" target="_blank" rel="noopener">Conversions ↗</a></span></div>
+    </div>
+    ${exemple(`<p>Une radio FM émet à f = 100 MHz = 100 × 10<sup>6</sup> Hz. Sa longueur d'onde :</p>
+      ${calc(`λ = ${fr('c', 'f')} = ${fr(C8 + ' m·s<sup>−1</sup>', '100 × 10<sup>6</sup> Hz')} = ${c('3,00 m')}`)}`)}`);
+  c_.aToi(carte, FL.map(([nb, pre, k], i) => {
+    const f = nb * k, l = C / f;
+    return { titre: `Calculer λ (${i + 1})`, enonce: `<p>Une onde électromagnétique a pour fréquence f = ${fmt(nb)} ${pre}.</p>`, parties: [
+      { type: 'nombre', q: 'Quelle est sa longueur d\'onde λ ?', label: 'λ =', valeur: l, unite: 'm', rel: .01, signe: false,
+        diag: v => OEM.diagLambda(v, f, nb),
+        solution: calc(`λ = ${fr('c', 'f')} = ${fr(C8, fmt(nb) + ' × 10<sup>' + Math.round(Math.log10(k)) + '</sup>')} = ${c(fmt(+l.toPrecision(3)) + ' m')}`) }] };
+  }));
+  return carte;
+}
+
+/* ---------- 3. Calculer f à partir de λ ---------- */
+// λ avec son unité : [nombre, unité, facteur vers le mètre, unité du résultat, facteur]
+const LF = melanger([[12, 'cm', 1e-2, 'GHz', 1e9], [3, 'km', 1e3, 'kHz', 1e3], [5, 'mm', 1e-3, 'GHz', 1e9], [25, 'cm', 1e-2, 'MHz', 1e6], [600, 'm', 1, 'kHz', 1e3], [2, 'cm', 1e-2, 'GHz', 1e9]]).slice(0, 2);
+function etape3(c_) {
+  const carte = c_.carte('3. Calculer f à partir de λ');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">f = ${fr('c', 'λ')}</p><p>λ en mètres ; f en hertz. On convertit ensuite avec un préfixe si besoin.</p></div>
+    </div>
+    ${exemple(`<p>Une antenne 4G émet des ondes de longueur d'onde λ = 0,43 m :</p>
+      ${calc(`f = ${fr('c', 'λ')} = ${fr(C8 + ' m·s<sup>−1</sup>', '0,43 m')} = ${c('7,0 × 10<sup>8</sup> Hz')} = 700 MHz = 0,70 GHz`)}`)}`);
+  c_.aToi(carte, LF.map(([nb, u, k, uf, kf], i) => {
+    const l = nb * k, f = C / l;
+    return { titre: `Calculer f (${i + 1})`, enonce: `<p>Une onde électromagnétique a pour longueur d'onde λ = ${fmt(nb)} ${u}.</p>`, parties: [
+      { type: 'sci', q: 'Quelle est sa fréquence f, en Hz ? (écriture scientifique)', label: 'f =', valeur: f, unite: 'Hz', rel: .02, cs: 2,
+        diag: v => OEM.diagFreq(v, l, nb),
+        solution: calc(`${u === 'm' ? '' : `λ = ${fmt(nb)} ${u} = ${sci(l, 1)} m ; `}f = ${fr('c', 'λ')} = ${fr(C8, u === 'm' ? fmt(nb) : sci(l, 1))} = ${c(sci(f, 2) + ' Hz')}`) },
+      { type: 'nombre', q: `Écris cette fréquence en ${uf}.`, label: 'f =', valeur: f / kf, unite: uf, rel: .02, signe: false,
+        diag: v => (proche(v, f / kf * 1e3, .02) || proche(v, f / kf / 1e3, .02) ? `1 ${uf} = 10<sup>${Math.round(Math.log10(kf))}</sup> Hz : divise par 10<sup>${Math.round(Math.log10(kf))}</sup>.` : `Divise la valeur en Hz par 10<sup>${Math.round(Math.log10(kf))}</sup>.`),
+        solution: calc(`f = ${sci(f, 2)} Hz = ${c(fmt(+(f / kf).toPrecision(2)) + ' ' + uf)}`) }] };
+  }));
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Une <b>onde électromagnétique</b> peut se propager dans le vide, à la célérité <b>c = 3,00 × 10<sup>8</sup> m·s<sup>−1</sup></b>.</p></div>
+    <div class="cle"><p>La <b>longueur d'onde</b> λ est la période spatiale de l'onde (en m).</p></div>
+    <div class="cle"><p class="crs-formule">c = λ × f &nbsp; ; &nbsp; λ = ${fr('c', 'f')} &nbsp; ; &nbsp; f = ${fr('c', 'λ')}</p><p>λ en m, f en Hz : convertis les préfixes avant de calculer.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1b_cours.html">Cours : domaines des ondes électromagnétiques →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html#lambda">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+OEM.menu('module_1a_cours');
+</script>
+</body>
+</html>

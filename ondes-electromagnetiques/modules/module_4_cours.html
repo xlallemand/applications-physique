@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : antennes — Chapitre 19 : Ondes électromagnétiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="oem.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="oem.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS</span>
+    <h2 class="er-titre">Antennes</h2>
+    <p class="er-contexte">Il faut une antenne pour <b>émettre</b> le signal et une autre pour le <b>recevoir</b>. Pour bien fonctionner, sa taille est liée à la <b>longueur d'onde</b> : en pratique, une <b>demi-onde</b> (L = λ / 2) ou un <b>quart d'onde</b> (L = λ / 4).</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Module 4 : taille d'une antenne (L = λ / n, demi-onde, quart
+   d'onde ; document 3 de l'exercice de bac 1) ; si on donne f :
+   λ = c / f, puis L = λ / 2 ; et l'inverse (f pour une antenne
+   donnée) ; antenne bobinée (nombre de tours = L / périmètre).
+   Erreurs diagnostiquées : λ / 2 oublié, λ × 2 au lieu de λ / 2,
+   préfixe non converti, périmètre en cm non converti en m.
+   Valeurs vérifiées par un script : 3,0 m → 1,5 m et 0,75 m ;
+   100 MHz → 3,00 m → 1,50 m ; 135 kHz → 2 222 m → 1 111 m →
+   5 050 tours sur 22 cm.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, proche, hasard, melanger, fr, sci, C, o } = OEM;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const C8 = '3,00 × 10<sup>8</sup>';
+// diagnostic d'une longueur d'antenne L = λ / n
+const diagL = (v, l, n) => (proche(v, l, .02) ? `C'est λ : l'antenne mesure λ / ${n}.` : proche(v, l * n, .02) ? `On divise λ par ${n} (et non on multiplie).`
+  : proche(v, l / (n === 2 ? 4 : 2), .02) ? `Une antenne ${n === 2 ? 'demi-onde' : 'quart d\'onde'} mesure λ / ${n}.` : `L = λ / ${n}.`);
+
+/* ---------- 1. Taille d'une antenne ---------- */
+const LS = melanger([[2, 'm', 1], [6, 'm', 1], [50, 'cm', 1e-2], [12, 'cm', 1e-2], [300, 'm', 1], [1.2, 'm', 1]]).slice(0, 2);
+function etape1(c_) {
+  const carte = c_.carte('1. Taille d\'une antenne');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>La taille optimale d'une antenne est égale à la longueur d'onde λ. En pratique, on utilise un <b>sous-multiple</b> de λ :</p>
+      <div class="cle"><p class="crs-formule">L = ${fr('λ', 'n')}</p>
+        <div class="crs-defile"><table class="crs-tab"><thead><tr><th>Type d'antenne</th><th>Longueur L</th></tr></thead><tbody>
+          <tr><td>pleine onde</td><td>L = λ</td></tr><tr><td><b>demi-onde</b></td><td><b>L = λ / 2</b></td></tr><tr><td>quart d'onde</td><td>L = λ / 4</td></tr><tr><td>n-ième d'onde</td><td>L = λ / n</td></tr>
+        </tbody></table></div>
+        <p>Le sous-multiple le plus efficace est la demi-onde.</p></div>
+      ${OEM.fig(W => OEM.svgAntenne({ W: Math.min(W, 520), n: 2 }))}
+    </div>
+    ${exemple(`<p>Pour une onde de longueur d'onde λ = 3,0 m :</p>${calc(`demi-onde : L = ${fr('λ', '2')} = ${fr('3,0 m', '2')} = ${c('1,5 m')} &nbsp; ; &nbsp; quart d'onde : L = ${fr('3,0 m', '4')} = ${c('0,75 m')}`)}`)}`);
+  c_.aToi(carte, LS.map(([nb, u], i) => {
+    const n = i ? 4 : 2, nom = n === 2 ? 'demi-onde' : 'quart d\'onde';
+    return { titre: `Antenne ${nom}`, enonce: `<p>Une onde a pour longueur d'onde λ = ${fmt(nb)} ${u}.</p>`, parties: [
+      { type: 'nombre', q: `Quelle est la longueur d'une antenne ${nom} pour cette onde ?`, label: 'L =', valeur: nb / n, unite: u, rel: .01, signe: false,
+        diag: v => diagL(v, nb, n), solution: calc(`L = ${fr('λ', n)} = ${fr(fmt(nb) + ' ' + u, n)} = ${c(fmt(nb / n) + ' ' + u)}`) }] };
+  }));
+  return carte;
+}
+
+/* ---------- 2. Si on donne la fréquence ---------- */
+const FS = hasard([[150, 'MHz', 1e6], [50, 'MHz', 1e6], [1.5, 'GHz', 1e9], [600, 'MHz', 1e6], [75, 'MHz', 1e6]]);
+const LINV = hasard([[15, .15, 1e9, 'GHz'], [75, .75, 2e8, 'MHz'], [6, .06, 2.5e9, 'GHz'], [50, .5, 3e8, 'MHz']]);
+function etape2(c_) {
+  const carte = c_.carte('2. Si on donne la fréquence');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> On calcule d'abord la longueur d'onde <b>λ = c / f</b> (f en Hz), puis la longueur de l'antenne <b>L = λ / 2</b> (ou λ / 4).</p>
+        <p>Inversement, pour une antenne demi-onde de longueur L : λ = 2 L, puis f = c / λ.</p></div>
+    </div>
+    ${exemple(`<p>Antenne demi-onde pour une radio FM à f = 100 MHz :</p>
+      ${calc(`λ = ${fr('c', 'f')} = ${fr(C8, '100 × 10<sup>6</sup>')} = 3,00 m &nbsp; puis &nbsp; L = ${fr('λ', '2')} = ${fr('3,00 m', '2')} = ${c('1,50 m')}`)}`)}`);
+  const [nb, pre, k] = FS, f = nb * k, l = C / f;
+  const [Lcm, Lm, finv, uinv] = LINV;
+  c_.aToi(carte, [
+    { titre: 'De la fréquence à l\'antenne', enonce: `<p>On veut une antenne demi-onde pour émettre à f = ${fmt(nb)} ${pre}.</p>`, parties: [
+      { type: 'nombre', q: 'Calcule d\'abord la longueur d\'onde λ.', label: 'λ =', valeur: l, unite: 'm', rel: .01, signe: false, diag: v => OEM.diagLambda(v, f, nb),
+        solution: calc(`λ = ${fr(C8, fmt(nb) + ' × 10<sup>' + Math.round(Math.log10(k)) + '</sup>')} = ${c(fmt(+l.toPrecision(3)) + ' m')}`) },
+      { type: 'nombre', q: 'Quelle est la longueur L de l\'antenne demi-onde ?', label: 'L =', valeur: l / 2, unite: 'm', rel: .01, signe: false, diag: v => diagL(v, l, 2),
+        solution: calc(`L = ${fr('λ', '2')} = ${fr(fmt(+l.toPrecision(3)) + ' m', '2')} = ${c(fmt(+(l / 2).toPrecision(3)) + ' m')}`) }] },
+    { titre: 'De l\'antenne à la fréquence', enonce: `<p>Une antenne demi-onde mesure L = ${fmt(Lcm)} cm.</p>`, parties: [
+      { type: 'nombre', q: 'Quelle est la longueur d\'onde λ de l\'onde qu\'elle reçoit le mieux ?', label: 'λ =', valeur: 2 * Lm, unite: 'm', rel: .01, signe: false,
+        diag: v => (proche(v, Lm / 2, .02) ? 'L = λ / 2, donc λ = 2 L (on multiplie).' : proche(v, 2 * Lcm, .02) ? 'En mètres : 1 cm = 0,01 m.' : 'λ = 2 L, en mètres.'),
+        solution: calc(`λ = 2 L = 2 × ${fmt(Lm)} m = ${c(fmt(2 * Lm) + ' m')}`) },
+      { type: 'sci', q: 'Quelle est sa fréquence f ?', label: 'f =', valeur: finv, unite: 'Hz', rel: .02, cs: 2, diag: v => OEM.diagFreq(v, 2 * Lm),
+        solution: calc(`f = ${fr('c', 'λ')} = ${fr(C8, fmt(2 * Lm))} = ${c(sci(finv, 2) + ' Hz')} = ${OEM.txtF(finv, 2)}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Antenne bobinée ---------- */
+const BOB = hasard([[11, 8, 5], [11, 6.5, 4.5], [22, 7, 4], [5.5, 6, 5]]);
+function etape3(c_) {
+  const carte = c_.carte('3. Antenne bobinée');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Quand l'antenne doit être très longue dans un petit objet (une carte RFID), on <b>enroule</b> le fil autour d'une surface. Chaque tour a pour longueur le périmètre p de la surface :</p>
+      <div class="cle"><p class="crs-formule">nombre de tours = ${fr('L', 'p')}</p><p>L et p dans la même unité.</p></div>
+      ${OEM.fig(() => OEM.svgCarteRFID())}
+    </div>
+    ${exemple(`<p>Carte RFID à 135 kHz, fil bobiné sur un rectangle de 6,5 cm × 4,5 cm (exercice de bac 1) :</p>
+      ${calc(`λ = ${fr(C8, '135 × 10<sup>3</sup>')} = 2 222 m ; L = ${fr('λ', '2')} = 1 111 m`)}
+      ${calc(`p = 2 × 6,5 + 2 × 4,5 = 22 cm = 0,22 m ; nombre de tours = ${fr('1 111 m', '0,22 m')} ≈ ${c('5 050 tours')}`)}`)}`);
+  const [L, a, b] = BOB, p = 2 * a + 2 * b, n = L / (p / 100);
+  c_.aToi(carte, [{ titre: 'Nombre de tours', enonce: `<p>Une antenne demi-onde doit mesurer L = ${fmt(L)} m. On bobine le fil sur un rectangle de ${fmt(a)} cm × ${fmt(b)} cm.</p>`, parties: [
+    { type: 'nombre', q: 'Quel est le périmètre p d\'un tour ?', label: 'p =', valeur: p, unite: 'cm', rel: .01, signe: false,
+      diag: v => (proche(v, a + b) ? 'Le périmètre d\'un rectangle : 2 × longueur + 2 × largeur.' : proche(v, a * b) ? 'C\'est l\'aire ; le périmètre est 2 × longueur + 2 × largeur.' : 'p = 2 × longueur + 2 × largeur.'),
+      solution: calc(`p = 2 × ${fmt(a)} + 2 × ${fmt(b)} = ${c(fmt(p) + ' cm')}`) },
+    { type: 'nombre', q: 'Combien de tours faut-il bobiner ?', label: 'n ≈', valeur: n, unite: 'tours', rel: .02, signe: false,
+      diag: v => (proche(v, L / p, .03) ? 'Convertis p en mètres (1 cm = 0,01 m) : L et p doivent être dans la même unité.' : proche(v, p / L, .03) || proche(v, p / 100 / L, .03) ? 'Nombre de tours = L / p (et non p / L).' : 'Nombre de tours = L / p, avec L et p en mètres.'),
+      solution: calc(`n = ${fr('L', 'p')} = ${fr(fmt(L) + ' m', fmt(p / 100) + ' m')} ≈ ${c(fmt(Math.round(n)) + ' tours')}`) }] }]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Une antenne pour émettre, une autre pour recevoir. Sa taille est liée à λ : en pratique <b>L = λ / 2</b> (demi-onde) ou <b>L = λ / 4</b> (quart d'onde).</p></div>
+    <div class="cle"><p>Si on donne f : <b>λ = c / f</b> d'abord, puis L = λ / 2.</p></div>
+    <div class="cle"><p>Antenne bobinée : nombre de tours = L / p (p : périmètre d'un tour, même unité que L).</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4_questions.html">Questions du module 4 →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+OEM.menu('module_4_cours');
+</script>
+</body>
+</html>

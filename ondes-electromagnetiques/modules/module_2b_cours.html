@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : usages, portée et débit — Chapitre 19 : Ondes électromagnétiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="oem.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="oem.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 2 / 2</span>
+    <h2 class="er-titre">Usages, portée et débit</h2>
+    <p class="er-contexte">Radio, télévision, téléphonie, Wi-Fi, RFID : chaque usage a sa <b>bande de fréquences</b>. Le choix de la fréquence est un compromis entre la <b>portée</b> et le <b>débit</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 2 du module 2 : placer des usages dans les bandes
+   (outil « étiquettes » : glisser, ou toucher l'étiquette puis la
+   bande ; f = c / λ quand l'étiquette donne λ), puis portée et débit
+   (basses fréquences : grande portée, pénètrent mieux dans les
+   bâtiments ; hautes fréquences : faible portée, meilleur débit),
+   avec la téléphonie mobile (exercice 17 p. 247) et les taux de
+   transfert des puces RFID (exercice de bac 1).
+   ============================================================ */
+const { exemple } = COURS;
+const { o } = OEM;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+
+/* ---------- 1. Placer des usages dans les bandes ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Placer des usages dans les bandes');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Chaque usage des ondes radio occupe une bande : radars en SHF, Wi-Fi et téléphonie en UHF, radio FM en VHF, radio grandes ondes en BF…</p>
+      ${OEM.figBandes({ usages: [{ f: 10e9, lignes: ['Radars'] }, { f: 2.4e9, lignes: ['Wi-Fi', 'micro-ondes', 'téléphonie'] }, { f: 100e6, lignes: ['FM'] }, { f: 162e3, lignes: ['grandes', 'ondes'] }],
+        aria: 'Bandes de fréquences radio et quelques usages : radars vers 10 GHz (SHF), Wi-Fi, micro-ondes et téléphonie vers 2,4 GHz (UHF), radio FM vers 100 MHz (VHF), grandes ondes vers 160 kHz (BF)' })}
+    </div>
+    ${exemple(`<p>Un talkie-walkie émet à 446 MHz : entre 300 MHz et 3 GHz, bande ${c('UHF')}.</p>
+      <p>Une radio des avions émet avec λ = 2,5 m : f = c / λ = 3,00 × 10<sup>8</sup> / 2,5 = 1,2 × 10<sup>8</sup> Hz = 120 MHz, bande ${c('VHF')}.</p>`)}`);
+  c_.aToi(carte, [{ titre: 'Placer des usages', parties: [OEM.partieEtiquettes({ n: 4 })] }]);
+  return carte;
+}
+
+/* ---------- 2. Portée et débit ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Portée et débit');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Basses fréquences</b> (grandes longueurs d'onde) : <b>grande portée</b>, elles pénètrent mieux dans les bâtiments, mais le débit d'information est plus faible.</p>
+        <p><b class="cle-titre">Hautes fréquences</b> (petites longueurs d'onde) : <b>portée plus faible</b>, elles pénètrent moins bien dans les bâtiments, mais elles permettent un <b>meilleur débit</b>.</p></div>
+    </div>
+    ${exemple(`<p>Téléphonie mobile (exercice 17 p. 247) :</p>
+      <ul class="er-liste"><li>à la campagne, on utilise la bande des <b>700 MHz</b> : grande portée, donc peu d'antennes relais pour couvrir le territoire ;</li>
+        <li>en ville, la 5G utilise <b>26 GHz</b> : très bon débit, mais faible portée, donc beaucoup d'antennes relais.</li></ul>
+      <p>Puces RFID (exercice de bac 1) : le taux de transfert passe de 1 kb·s<sup>−1</sup> à 135 kHz à 28 kb·s<sup>−1</sup> à 433 MHz : plus la fréquence est élevée, meilleur est le débit.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'À la campagne', parties: [{ type: 'choix', colonne: true, q: 'Pour couvrir une grande zone rurale avec peu d\'antennes relais, on choisit plutôt :',
+      options: [o('bas', 'une basse fréquence (700 MHz)'), o('haut', 'une haute fréquence (26 GHz)')], bonne: 'bas', melanger: false,
+      indices: { haut: 'Les hautes fréquences ont une faible portée : il faudrait beaucoup d\'antennes.' },
+      solution: '<p>Les basses fréquences portent plus loin : moins d\'antennes relais pour couvrir le territoire.</p>' }] },
+    { titre: 'En ville', parties: [{ type: 'choix', colonne: true, q: 'Pour un très haut débit en ville, on choisit plutôt :',
+      options: [o('haut', 'une haute fréquence'), o('bas', 'une basse fréquence')], bonne: 'haut', melanger: false,
+      indices: { bas: 'Les basses fréquences portent loin, mais leur débit est plus faible.' },
+      solution: '<p>Les hautes fréquences permettent un meilleur débit ; leur faible portée n\'est pas gênante en ville, où l\'on peut multiplier les antennes.</p>' }] },
+    { titre: 'Grande longueur d\'onde', parties: [{ type: 'choix', colonne: true, q: 'Une onde de grande longueur d\'onde :',
+      options: [o('ok', 'porte loin et pénètre bien dans les bâtiments'), o('debit', 'permet le meilleur débit'), o('court', 'a une faible portée')], bonne: 'ok',
+      indices: { debit: 'Grande longueur d\'onde = basse fréquence : débit plus faible.', court: 'Grande longueur d\'onde = basse fréquence : grande portée.' },
+      solution: '<p>Grande λ = basse fréquence : grande portée, bonne pénétration dans les bâtiments, débit plus faible.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>On place un usage dans sa bande à partir de sa fréquence (f = c / λ si on donne λ).</p></div>
+    <div class="cle"><p><b>Basses fréquences</b> : grande portée, bonne pénétration dans les bâtiments. <b>Hautes fréquences</b> : faible portée, meilleur débit.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions du module 2 →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#portee">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+OEM.menu('module_2b_cours');
+</script>
+</body>
+</html>

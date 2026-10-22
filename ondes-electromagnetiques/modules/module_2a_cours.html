@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : bandes de fréquences — Chapitre 19 : Ondes électromagnétiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="oem.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="oem.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 1 / 2</span>
+    <h2 class="er-titre">Bandes de fréquences</h2>
+    <p class="er-contexte">Les ondes radio des télécommunications sont rangées en <b>bandes de fréquences</b>, de EHF (300 GHz) à BF (30 kHz). On place une onde dans sa bande à partir de sa <b>fréquence</b> ; si on donne sa longueur d'onde, on calcule d'abord f = c / λ.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 1 du module 2 : les bandes radio (tableau du cours, de
+   300 GHz à 30 kHz, bornes « 3 × 10ⁿ ») avec les exemples du cours
+   (FM, grandes ondes, AM) ; si on donne λ : f = c / λ d'abord (4G,
+   TNT).
+   Erreurs diagnostiquées : préfixe (bande voisine de 3 rangs), λ
+   comparée directement aux bornes, sens de l'échelle.
+   Valeurs vérifiées par un script : 87,5 et 108 MHz → VHF ; 148,5 et
+   238,5 kHz → BF ; 3,2 et 3,4 MHz → HF ; λ = 0,43 m → 7,0 × 10⁸ Hz,
+   UHF ; λ = 0,38 et 0,64 m → 7,9 × 10⁸ et 4,7 × 10⁸ Hz, UHF.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, proche, hasard, melanger, fr, sci, C, o } = OEM;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+
+// bande d'une fréquence f : question à choix, diagnostic pour chaque mauvaise bande
+function qBande(f, q, viaLambda) {
+  const b = OEM.bande(f), indices = {};
+  OEM.BANDES.forEach(x => { if (x.id !== b.id) indices[x.id] = OEM.diagBande(f, x.id, viaLambda); });
+  return { type: 'choix', q, options: OEM.optionsBande(), bonne: b.id, melanger: false, indices,
+    solution: `<p>${OEM.txtF(f, 2)} est entre ${b.bornes.replace(' à ', ' et ')} : bande <b>${b.id}</b>.</p>` };
+}
+
+/* ---------- 1. Les bandes de fréquences radio ---------- */
+const FREQS = melanger([[2.4e9, '2,4 GHz'], [27e6, '27 MHz'], [700e3, '700 kHz'], [10e9, '10 GHz'], [150e6, '150 MHz'], [60e9, '60 GHz'], [100e3, '100 kHz'], [5e6, '5 MHz']]).slice(0, 2);
+function etape1(c_) {
+  const carte = c_.carte('1. Les bandes de fréquences radio');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Chaque bande va d'une fréquence à une fréquence <b>10 fois plus grande</b> ; les bornes sont des « 3 × 10<sup>n</sup> » Hz.</p>
+      ${OEM.figBandes()}
+      <div class="crs-attention"><p><b class="cle-titre">Attention.</b> Sur cette échelle (comme dans le manuel), les fréquences <b>diminuent</b> de gauche à droite.</p></div>
+    </div>
+    ${exemple(`<p>On place chaque moyen de communication en comparant ses fréquences aux bornes des bandes.</p>
+      <div class="crs-defile"><table class="crs-tab"><thead><tr><th>Moyen de communication</th><th>Fréquences</th><th>Bande</th></tr></thead><tbody>
+        <tr><td>radio FM</td><td>87,5 MHz à 108 MHz</td><td>${c('VHF')} (30 à 300 MHz)</td></tr>
+        <tr><td>radio grandes ondes</td><td>148,5 kHz à 238,5 kHz</td><td>${c('BF')} (30 à 300 kHz)</td></tr>
+        <tr><td>radio AM (ondes courtes)</td><td>3,2 MHz à 3,4 MHz</td><td>${c('HF')} (3 à 30 MHz)</td></tr>
+      </tbody></table></div>`)}`);
+  c_.aToi(carte, FREQS.map(([f, t], i) => ({ titre: `Bande d'une fréquence (${i + 1})`, parties: [qBande(f, `Dans quelle bande est une onde de fréquence f = ${t} ?`)] })));
+  return carte;
+}
+
+/* ---------- 2. Si on donne la longueur d'onde ---------- */
+const LAMBDA = hasard([[.5, '50 cm'], [3, '3,0 m'], [.03, '3,0 cm'], [2000, '2,0 km'], [50, '50 m'], [300, '300 m'], [.005, '5,0 mm']]);
+function etape2(c_) {
+  const carte = c_.carte('2. Si on donne la longueur d\'onde');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> Les bandes sont repérées par leur <b>fréquence</b>. Si on donne λ :</p>
+        <ol class="er-liste"><li>on calcule d'abord <b>f = c / λ</b> (λ en m, f en Hz) ;</li><li>puis on place f entre les bornes des bandes.</li></ol></div>
+    </div>
+    ${exemple(`<p>4G : λ = 0,43 m.</p>${calc(`f = ${fr('c', 'λ')} = ${fr('3,00 × 10<sup>8</sup>', '0,43')} = 7,0 × 10<sup>8</sup> Hz = 700 MHz = 0,70 GHz`)}
+      <p>700 MHz est entre 300 MHz et 3 GHz : bande ${c('UHF')}.</p>
+      <p>Télévision (TNT) : λ entre 0,38 m et 0,64 m.</p>${calc(`${fr('3,00 × 10<sup>8</sup>', '0,38')} = 7,9 × 10<sup>8</sup> Hz &nbsp; ; &nbsp; ${fr('3,00 × 10<sup>8</sup>', '0,64')} = 4,7 × 10<sup>8</sup> Hz`)}
+      <p>De 470 MHz à 790 MHz : bande ${c('UHF')}.</p>`)}`);
+  const [l, t] = LAMBDA, f = C / l, nb = parseFloat(t.replace(',', '.'));
+  c_.aToi(carte, [{ titre: 'Bande d\'une longueur d\'onde', enonce: `<p>Une onde radio a pour longueur d'onde λ = ${t}.</p>`, parties: [
+    { type: 'sci', q: 'Calcule sa fréquence f.', label: 'f =', valeur: f, unite: 'Hz', rel: .02, cs: 2, diag: v => OEM.diagFreq(v, l, nb),
+      solution: calc(`f = ${fr('c', 'λ')} = ${fr('3,00 × 10<sup>8</sup>', sci(l, 2))} = ${c(sci(f, 2) + ' Hz')} = ${OEM.txtF(f, 2)}`) },
+    qBande(f, 'Dans quelle bande est cette onde ?', false)] }]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Bandes radio : <b>EHF</b> (30 à 300 GHz), <b>SHF</b> (3 à 30 GHz), <b>UHF</b> (300 MHz à 3 GHz), <b>VHF</b> (30 à 300 MHz), <b>HF</b> (3 à 30 MHz, ondes courtes), <b>MF</b> (300 kHz à 3 MHz, petites ondes), <b>BF</b> (30 à 300 kHz, grandes ondes).</p></div>
+    <div class="cle"><p>Si on donne λ, on calcule d'abord <b>f = c / λ</b>, puis on compare f aux bornes.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2b_cours.html">Cours : usages, portée et débit →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#bandes">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+OEM.menu('module_2a_cours');
+</script>
+</body>
+</html>

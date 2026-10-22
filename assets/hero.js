@@ -19,6 +19,7 @@
      fluides    château d'eau et niveaux, hauteur h, forces pressantes sur les parois (statique des fluides)
      lumiere    soleil, rayons ondulés (photons) et panneau photovoltaïque incliné (énergie transportée par la lumière)
      spectre    signal périodique non sinusoïdal en haut, raies de son spectre en dessous (spectre d'un signal, ondes sonores)
+     antenne    pylône d'antenne relais qui émet des ondes, onde modulée en amplitude (ondes électromagnétiques)
      fractions  disques et barres partagés
      molecules  modèles moléculaires en boules
      formules:physique | formules:redox | formules:pile | formules:combustion | formules:ph | formules:algebre
@@ -538,6 +539,49 @@
       ctx.font = `500 16px ${police()}`; ctx.globalAlpha = .15;
       ctx.fillText('s(t) = a₀ + Σ aₙ sin(n ω t)', w * .36, h * .4);
       ctx.fillText('f = 1 / T', w * .86, h * .05);
+    },
+
+    // Pylône d'antenne relais qui émet des ondes (arcs), onde modulée en amplitude qui traverse l'en-tête
+    antenne(ctx, w, h, c) {
+      const p = 24;
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineWidth = 1;
+      for (let x = 0, i = 0; x <= w; x += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .11; trait(ctx, x, 0, x, h); }
+      for (let y = 0, i = 0; y <= h; y += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .11; trait(ctx, 0, y, w, y); }
+      // onde modulée en amplitude : porteuse rapide, enveloppe (le signal modulant) en pointillés
+      // (seule la partie haute du canevas est visible : il est plus haut que l'en-tête pour la parallaxe)
+      const ys = h * .17, A = h * .06, per = Math.max(260, w / 3.4), por = 13;
+      const env = x => 1 + .7 * Math.sin(2 * Math.PI * x / per);
+      ctx.globalAlpha = .38; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let x = 0; x <= w; x++) { const y = ys - A * env(x) * Math.sin(2 * Math.PI * x / por); x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+      ctx.stroke();
+      ctx.globalAlpha = .32; ctx.lineWidth = 1.4; ctx.setLineDash([6, 5]);
+      courbe(ctx, x => ys - A * env(x), 0, w); courbe(ctx, x => ys + A * env(x), 0, w);
+      ctx.setLineDash([]);
+      // pylône à droite : treillis, puis arcs d'ondes émis par l'antenne au sommet
+      const xm = w * .84, yb = h * .66, yt = h * .3, lb = Math.min(70, w * .06), lt = 8;
+      ctx.globalAlpha = .5; ctx.lineWidth = 2;
+      trait(ctx, xm - lb, yb, xm - lt, yt); trait(ctx, xm + lb, yb, xm + lt, yt);
+      ctx.lineWidth = 1.2;
+      for (let k = 0; k < 7; k++) {
+        const y1 = yb - (yb - yt) * k / 7, y2 = yb - (yb - yt) * (k + 1) / 7;
+        const l1 = lb - (lb - lt) * k / 7, l2 = lb - (lb - lt) * (k + 1) / 7;
+        trait(ctx, xm - l1, y1, xm + l2, y2); trait(ctx, xm + l1, y1, xm - l2, y2); trait(ctx, xm - l2, y2, xm + l2, y2);
+      }
+      ctx.lineWidth = 3; trait(ctx, xm, yt, xm, yt - h * .07);
+      ctx.lineWidth = 1.8;
+      [26, 50, 76, 104].forEach((r, i) => {
+        ctx.globalAlpha = .5 - i * .1;
+        ctx.beginPath(); ctx.arc(xm, yt - h * .07, r, -Math.PI * .85, -Math.PI * .58); ctx.stroke();
+        ctx.beginPath(); ctx.arc(xm, yt - h * .07, r, -Math.PI * .42, -Math.PI * .15); ctx.stroke();
+      });
+      // formules en filigrane
+      ctx.font = `600 19px ${police()}`; ctx.globalAlpha = .2;
+      ctx.fillText('λ = c / f', w * .06, h * .4);
+      ctx.fillText('L = λ / 2', w * .55, h * .44);
+      ctx.font = `500 16px ${police()}`; ctx.globalAlpha = .15;
+      ctx.fillText('c = 3,00 × 10⁸ m·s⁻¹', w * .3, h * .52);
+      ctx.fillText('bande occupée = 2 fₕ', w * .62, h * .06);
     },
 
     // Formules écrites en quinconce, plus ou moins marquées

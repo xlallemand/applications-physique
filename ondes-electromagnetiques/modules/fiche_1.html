@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : fiche récapitulative — Chapitre 19 : Ondes électromagnétiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="oem.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="oem.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Longueur d'onde et fréquence</h2>
+  </div>
+<!-- Fiche récapitulative du module 1 : une section par sous-module de cours (longueur d'onde et fréquence,
+     domaines des ondes), avec l'ancre de la partie du sommaire. -->
+
+  <section class="er-card" id="lambda">
+    <h3 class="cours-titre">Onde électromagnétique, longueur d'onde et fréquence</h3>
+    <div class="cle"><p>Une <b>onde électromagnétique</b> peut se propager <b>dans le vide</b>, à la célérité :</p>
+      <p class="som-formule">c = 3,00 × 10<sup>8</sup> m·s<sup>−1</sup></p></div>
+    <div class="cle"><p>La <b>longueur d'onde</b> λ est la période spatiale de l'onde : la distance entre deux crêtes voisines.</p></div>
+    <div id="figL"></div>
+    <div class="cle"><p class="som-formule">c = <span class="som-fr"><span>λ</span><span>T</span></span> = λ × f &nbsp; ; &nbsp; λ = <span class="som-fr"><span>c</span><span>f</span></span> &nbsp; ; &nbsp; f = <span class="som-fr"><span>c</span><span>λ</span></span></p>
+      <p>c en m·s<sup>−1</sup> ; λ en m ; T en s ; f en Hz (= s<sup>−1</sup>).</p></div>
+    <div class="cle"><p><b>Préfixes</b> : 1 kHz = 10<sup>3</sup> Hz ; 1 MHz = 10<sup>6</sup> Hz ; 1 GHz = 10<sup>9</sup> Hz ; 1 cm = 10<sup>−2</sup> m ; 1 mm = 10<sup>−3</sup> m ; 1 µm = 10<sup>−6</sup> m ; 1 nm = 10<sup>−9</sup> m.</p></div>
+    <p class="cours-exemple-t">Exemples du cours</p>
+    <p>Radio FM, f = 100 MHz : λ = 3,00 × 10<sup>8</sup> / (100 × 10<sup>6</sup>) = 3,00 m.<br>4G, λ = 0,43 m : f = 3,00 × 10<sup>8</sup> / 0,43 = 7,0 × 10<sup>8</sup> Hz = 0,70 GHz.</p>
+  </section>
+
+  <section class="er-card" id="domaines">
+    <h3 class="cours-titre">Domaines des ondes électromagnétiques</h3>
+    <div id="figEM"></div>
+    <div class="som-defile"><table class="som-tab"><thead><tr><th>Domaine</th><th>λ</th></tr></thead><tbody id="tabDom"></tbody></table></div>
+    <div class="cle"><p>Quand λ augmente, f diminue. Pour trouver le domaine d'une onde dont on connaît f, on calcule d'abord <b>λ = c / f</b>.</p>
+      <p>Les ondes radio des télécommunications vont de 1 mm à 10 km (les micro-ondes en font partie).</p></div>
+    <p class="cours-exemple-t">Exemple du cours</p>
+    <p>Four à micro-ondes, f = 2 450 MHz : λ = 0,122 m = 12,2 cm, entre 1 mm et 30 cm : micro-ondes.</p>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_1a_cours.html">Revoir les cours</a>
+    <a class="btn-secondary" href="module_1_questions.html">Questions : longueur d'onde et fréquence</a>
+  </div>
+</div>
+<script>
+// figures : longueur d'onde, échelle des ondes ; tableau des domaines
+document.getElementById('figL').innerHTML = OEM.fig(W => OEM.svgLambda({ W: Math.min(W, 520), n: 3, D: 1.5, pas: .25 }));
+document.getElementById('figEM').innerHTML = OEM.fig(W => OEM.svgEM({ W: Math.min(W, 760) }));
+document.getElementById('tabDom').innerHTML = OEM.DOMAINES.map(d => `<tr><td>${d.id === 'visible' ? 'lumière visible' : d.nom}</td><td>${OEM.BORNES_DOM[d.id]}</td></tr>`).join('');
+OEM.menu('fiche_1');
+</script>
+</body>
+</html>

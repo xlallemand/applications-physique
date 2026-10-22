@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur la longueur d'onde et la fréquence — Chapitre 19 : Ondes électromagnétiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="oem.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="oem.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : λ à partir de f en MHz (1), en kHz
+   (1), en GHz avec λ en cm (1) ; f à partir de λ en m (1), en cm ou mm
+   (1), en km (1) ; domaine d'une onde de λ donnée (1) ; domaine d'une
+   onde de f donnée (1) ; placer une onde sur l'échelle (1) ; relation
+   entre λ et f (1).
+   Erreurs diagnostiquées : préfixe non converti, λ = f / c, 10³ et 10⁶
+   confondus, résultat dans la mauvaise unité, f placée sur l'axe des λ.
+   Toutes les valeurs tombent juste (c = 3,00 × 10⁸ m·s⁻¹).
+   ============================================================ */
+const { o, fq, fmt, hasard, proche, fr, sci, C } = OEM;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const C8 = '3,00 × 10<sup>8</sup>';
+const p10 = k => `10<sup>${String(Math.round(Math.log10(k))).replace('-', '−')}</sup>`;
+
+// λ à partir de f (nb × préfixe), λ demandée dans l'unité u (facteur ku vers le mètre)
+function qLambda(theme, liste, pre, k, u, ku) {
+  const [nb] = hasard(liste), f = nb * k, l = C / f / ku;
+  return { theme, enonce: `<p>Une onde électromagnétique a pour fréquence f = ${fmt(nb)} ${pre}.</p>`,
+    parties: [fq.nombre('Calcule sa longueur d\'onde λ.', 'λ =', l, u, { rel: .01, signe: false, diag: v => OEM.diagLambda(v, f, nb, u),
+      solution: calc(`λ = ${fr('c', 'f')} = ${fr(C8, fmt(nb) + ' × ' + p10(k))} = ${ku === 1 ? '' : fmt(+(l * ku).toPrecision(3)) + ' m = '}${c(fmt(+l.toPrecision(3)) + ' ' + u)}`) })] };
+}
+const qLambdaMHz = () => qLambda('λ à partir de f (MHz)', [[100], [150], [300], [75], [600], [50], [120], [200]], 'MHz', 1e6, 'm', 1);
+const qLambdaKHz = () => qLambda('λ à partir de f (kHz)', [[150], [300], [600], [200], [100], [1500]], 'kHz', 1e3, 'm', 1);
+const qLambdaGHz = () => qLambda('λ à partir de f (GHz), en cm', [[1], [2], [3], [5], [6], [10], [2.5], [1.5]], 'GHz', 1e9, 'cm', 1e-2);
+
+// f à partir de λ (nb × unité), f demandée avec le préfixe pre (facteur kf)
+function qFreq(theme, liste, u, ku, pre, kf) {
+  const nb = hasard(liste), l = nb * ku, f = C / l / kf;
+  return { theme, enonce: `<p>Une onde électromagnétique a pour longueur d'onde λ = ${fmt(nb)} ${u}.</p>`,
+    parties: [fq.nombre(`Calcule sa fréquence f, en ${pre}.`, 'f =', f, pre, { rel: .01, signe: false, diag: v => OEM.diagFreq(v, l, nb, kf),
+      solution: calc(`${ku === 1 ? '' : `λ = ${fmt(nb)} ${u} = ${fmt(nb)} × ${p10(ku)} m ; `}f = ${fr('c', 'λ')} = ${fr(C8, ku === 1 ? fmt(nb) : fmt(nb) + ' × ' + p10(ku))} = ${sci(f * kf, 2)} Hz = ${c(fmt(+f.toPrecision(3)) + ' ' + pre)}`) })] };
+}
+const qFreqM = () => qFreq('f à partir de λ (m)', [3, 2, .5, 1.5, 6, .75, 10], 'm', 1, 'MHz', 1e6);
+const qFreqCm = () => (Math.random() < .6 ? qFreq('f à partir de λ (cm)', [3, 6, 12, 15, 30, 1], 'cm', 1e-2, 'GHz', 1e9) : qFreq('f à partir de λ (mm)', [5, 3, 10], 'mm', 1e-3, 'GHz', 1e9));
+const qFreqKm = () => qFreq('f à partir de λ (km)', [1, 2, 1.5, 3, .5], 'km', 1e3, 'kHz', 1e3);
+
+function qDomaineL() {
+  const [l, t] = hasard([[5e-7, '500 nm'], [2e-12, '2 × 10<sup>−12</sup> m'], [5e-10, '0,5 nm'], [1e-5, '10 µm'], [.02, '2 cm'], [50, '50 m'], [3e-7, '300 nm'], [1e-4, '0,1 mm'], [1.5, '1,5 m']]);
+  return { theme: 'Domaine d\'une onde', parties: [OEM.partieDomaine(l, t)] };
+}
+function qDomaineF() {
+  const [f, t] = hasard([[6e14, '6,0 × 10<sup>14</sup> Hz'], [3e17, '3,0 × 10<sup>17</sup> Hz'], [3e12, '3,0 × 10<sup>12</sup> Hz'], [3e20, '3,0 × 10<sup>20</sup> Hz'], [1e10, '10 GHz'], [1e6, '1,0 MHz'], [1.5e15, '1,5 × 10<sup>15</sup> Hz']]);
+  const l = C / f, nb = /GHz|MHz/.test(t) ? parseFloat(t.replace(',', '.')) : null;
+  return { theme: 'Domaine à partir de la fréquence', enonce: `<p>Une onde électromagnétique a pour fréquence f = ${t}.</p>`, parties: [
+    { type: 'sci', q: 'Calcule d\'abord sa longueur d\'onde λ.', label: 'λ =', valeur: l, unite: 'm', rel: .02, cs: 2, diag: v => OEM.diagLambda(v, f, nb),
+      solution: calc(`λ = ${fr('c', 'f')} = ${fr(C8, t.replace(' Hz', '').replace(' GHz', ' × 10<sup>9</sup>').replace('1,0 MHz', '1,0 × 10<sup>6</sup>'))} = ${c(sci(l, 2) + ' m')}`) },
+    OEM.partieDomaine(l, sci(l, 2) + ' m', 'Dans quel domaine est cette onde ?')] };
+}
+function qPlacer() {
+  const [v, t, g] = hasard([[1e8, '100 MHz', 'f'], [2.4e9, '2,4 GHz', 'f'], [5e14, '5 × 10<sup>14</sup> Hz', 'f'], [1e17, '10<sup>17</sup> Hz', 'f'], [200e3, '200 kHz', 'f'],
+    [1e-10, '10<sup>−10</sup> m', 'l'], [3e-6, '3 µm', 'l'], [.03, '3 cm', 'l'], [300, '300 m', 'l'], [3e-7, '300 nm', 'l']]);
+  return { theme: 'Placer une onde sur l\'échelle', parties: [OEM.partieEchelle({ donnee: g, valeur: v, texte: t })] };
+}
+function qRelation() {
+  if (Math.random() < .5) {
+    const [k, mot] = hasard([[2, 'double'], [3, 'est multipliée par 3'], [10, 'est multipliée par 10']]);
+    return { theme: 'Relation entre λ et f', parties: [fq.choix(`Si la fréquence d'une onde électromagnétique ${mot}, sa longueur d'onde :`,
+      [o('ok', `est divisée par ${k}`), o('x', `est multipliée par ${k}`), o('id', 'ne change pas')], 'ok',
+      { melanger: false, indices: { x: 'λ = c / f : f est au dénominateur. Quand f augmente, λ diminue.', id: 'λ = c / f, et c ne change pas : λ dépend de f.' },
+        solution: `<p>λ = c / f : λ et f sont inversement proportionnelles. Si f est multipliée par ${k}, λ est divisée par ${k}.</p>` })] };
+  }
+  return { theme: 'Relation entre λ et f', parties: [fq.choix('Quelle relation est juste ? (c : célérité, λ : longueur d\'onde, f : fréquence, T : période)',
+    [o('ok', 'λ = c / f'), o('fc', 'λ = f / c'), o('cf', 'λ = c × f'), o('t', 'λ = c / T')], 'ok',
+    { indices: { fc: 'Vérifie les unités : (s<sup>−1</sup>) / (m·s<sup>−1</sup>) ne donne pas des mètres.', cf: 'c = λ × f, donc λ = c / f.', t: 'c = λ / T, donc λ = c × T (et non c / T).' },
+      solution: '<p>c = λ × f = λ / T, donc λ = c / f = c × T.</p>' })] };
+}
+
+// tirage : une question de chaque sorte, du calcul vers les domaines
+function tirage() {
+  return [qLambdaMHz, qLambdaKHz, qLambdaGHz, qFreqM, qFreqCm, qFreqKm, qDomaineL, qDomaineF, qPlacer, qRelation].map(f => f());
+}
+
+OEM.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Longueur d\'onde et fréquence',
+  intro: '<p class="er-contexte">10 questions : calculer λ = c / f ou f = c / λ avec des préfixes, trouver le domaine d\'une onde, la placer sur l\'échelle. Donnée : c = 3,00 × 10<sup>8</sup> m·s<sup>−1</sup>.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2a_cours.html', label: 'Module 2 : fréquences des télécommunications →' },
+});
+OEM.menu('module_1_questions');
+</script>
+</body>
+</html>
