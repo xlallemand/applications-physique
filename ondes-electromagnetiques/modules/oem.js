@@ -131,7 +131,8 @@
   /* ============================================================
      PARTIES DE QUESTION
      Chaque partie reçoit (zone, p, api) et renvoie { montrer() }.
-     api.reussi(silencieux, note) · api.erreur(indice) · api.effacer() · api.message(h) · api.fini()
+     api.reussi(silencieux, note, sansDefiler) · api.erreur(indice) · api.effacer() · api.message(h) · api.fini()
+     (sansDefiler : la partie suivante apparaît sans que la page défile jusqu'à elle)
      ============================================================ */
 
   // Choix parmi des boutons : p.options [{ id, label }], p.bonne (un id ou une liste d'ids), p.notes[id],
@@ -413,12 +414,12 @@
           api.compterErreur();
           ret.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">Ce n'est pas ça.</b> ${h || ''}</p>${erreursIci >= 2 && mode !== 'cours' ? `<p class="er-petit">Corrige ta réponse, ou ${mode === 'exercice' ? 'regarde la correction' : 'affiche la réponse'} (0 point pour cette ${mode === 'exercice' ? 'partie' : 'question'}).</p>` : ''}</div>`;
         },
-        reussi(silencieux, note) { terminer(false, silencieux, note); },
+        reussi(silencieux, note, sansDefiler) { terminer(false, silencieux, note, sansDefiler); },
       };
       const ctx = PARTIES[p.type](d.querySelector('.ph-partie-zone'), p, api);
       p.ctx = ctx;
       bRep.onclick = () => { if (finie) return; ctx.montrer(); etat.vue = true; terminer(true); };
-      function terminer(vue, silencieux, note) {
+      function terminer(vue, silencieux, note, sansDefiler) {
         if (finie) return;
         finie = true;
         aide.remove();
@@ -436,7 +437,7 @@
           if (!deplie && rendues < n) {
             partie();
             const s = zone.lastElementChild;
-            setTimeout(() => s.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+            if (!sansDefiler) setTimeout(() => s.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
           }
         } else {
           etat.fini = true;

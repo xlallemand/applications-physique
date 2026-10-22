@@ -99,6 +99,8 @@
    spectre AM (raies F ± f_m, bande occupée 2 f_h, deuxième station et
    brouillage), défis (AM ou FM ? modulant, porteuse ou modulé ? bande
    passante). Chaque consigne vérifie l'état du simulateur en direct ;
+   réalisée sur le simulateur, elle fait apparaître le bouton « Retourner à
+   la question » (pas de défilement automatique) ;
    questions sans points (mode 'cours') ; le bilan « ✍ Complète ton
    cours » marque la simulation comme faite.
    Valeurs (vérifiées par un script) : 1 kHz → λ = 3,00 × 10⁵ m =
@@ -114,19 +116,48 @@ const sim = MOD.monter(document.getElementById('sim'), { mode: 'am', Um: .6, fm:
 const egal = (x, y, t) => Math.abs(x - y) <= (t == null ? 1e-6 : t);
 
 // affiche l'étape suivante, crée ses questions (leurs consignes agissent sur le simulateur :
-// elles ne doivent exister qu'une fois l'étape ouverte) et l'amène à l'écran
+// elles ne doivent exister qu'une fois l'étape ouverte) et l'amène à l'écran,
+// sauf si elle s'ouvre après un réglage du simulateur (le bouton « Retourner à la question » y mènera)
 const ETAPES = {};
+let parReglage = false, etapeOuverte = null;
 function ouvrir(id) {
   const e = document.getElementById(id);
   e.hidden = false;
   if (ETAPES[id]) ETAPES[id]();
-  setTimeout(() => e.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+  if (parReglage) etapeOuverte = e;
+  else setTimeout(() => e.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
 }
 // lien pour remonter au simulateur (sous chaque consigne à réaliser)
 const remonter = '<p class="oem-remonter"><a href="#sim-carte" class="btn-small" style="text-decoration:none">↑ Voir le simulateur</a></p>';
 
+/* Bouton « Retourner à la question » (en bas de l'écran) : quand la consigne est réalisée sur le
+   simulateur, la page ne descend plus d'elle-même. Le bouton n'apparaît que si la question n'est pas
+   déjà à l'écran, et disparaît dès qu'elle y arrive. */
+const retour = el('button', 'btn-primary oem-retour-q', '↓ Retourner à la question');
+retour.type = 'button';
+retour.hidden = true;
+document.body.appendChild(retour);
+let guetteur = null;
+function cacherRetour() {
+  retour.hidden = true;
+  if (guetteur) { guetteur.disconnect(); guetteur = null; }
+}
+function proposerRetour(cible, bloc) {
+  cacherRetour();
+  retour.onclick = () => { cacherRetour(); cible.scrollIntoView({ behavior: 'smooth', block: bloc }); };
+  if (!window.IntersectionObserver) { retour.hidden = false; return; }
+  let premier = true;
+  guetteur = new IntersectionObserver(l => {
+    const vue = l.some(x => x.isIntersecting);
+    if (premier) { premier = false; if (!vue) { retour.hidden = false; return; } }
+    if (vue) cacherRetour();
+  }, { rootMargin: '-60px 0px -20% 0px' });        // marge du haut : bandeau du téléphone
+  guetteur.observe(cible);
+}
+
 /* Partie qui attend un état du simulateur : conditions(e) → [[texte, juste], …] affichés en direct ;
-   la partie est réussie quand tout est juste. « Afficher la réponse » règle le simulateur (regl). */
+   la partie est réussie quand tout est juste. « Afficher la réponse » règle le simulateur (regl).
+   Réussite obtenue en touchant le simulateur : pas de défilement, bouton « Retourner à la question ». */
 function attendre(q, conditions, regl, solution) {
   return {
     type: 'perso', aide: true, q: q + remonter, solution,
@@ -140,11 +171,20 @@ function attendre(q, conditions, regl, solution) {
         p.innerHTML = l.map(([t, ok]) => `<span class="${ok ? 'ok' : ''}">${t}</span>`).join('');
         return l.every(x => x[1]);
       };
-      const maj = e => {
+      const maj = (e, reglage) => {
         if (fini) return;
-        if (afficher(e) && !api.fini()) { fini = true; api.reussi(); }
+        if (!afficher(e) || api.fini()) return;
+        fini = true;
+        if (!reglage) { api.reussi(); return; }
+        parReglage = true; etapeOuverte = null;
+        api.reussi(false, null, true);
+        parReglage = false;
+        // la question qui suit : partie suivante, ou étape suivante si celle-ci est finie
+        const ici = zone.closest('.ph-partie');
+        if (etapeOuverte) proposerRetour(etapeOuverte, 'start');
+        else proposerRetour(ici.nextElementSibling || ici, 'nearest');
       };
-      sim.surChange(maj);
+      sim.surChange(e => maj(e, true));
       maj(sim.etat());
       return { montrer() { fini = true; sim.regler(regl); afficher(sim.etat()); } };
     },
@@ -192,7 +232,7 @@ ETAPES.e2 = () => OEM.question(document.getElementById('q2'), { parties: parties
 
 /* ---------- 3. Modulation d'amplitude ---------- */
 const parties3 = () => [
-  attendre(`Touche le gros bouton <b>AM</b>, règle ${Um} = 0,8 V (le taux de modulation m vaut alors 0,8) et ${fm_} = 1 kHz.`,
+  attendre(`Touche le gros bouton <b>AM</b>, règle ${Um} = 0,8 V et ${fm_} = 1 kHz. Le taux de modulation (hors programme) vaut alors m = ${Um} / U<sub>0</sub> = 0,8 V / 1 V = 0,8.`,
     e => [['mode AM', modeAM(e)], [`${Um} = 0,8 V`, egal(e.Um, .8, .001)], [`${fm_} = 1 kHz`, egal(e.fm, 1, .001)]], { mode: 'am', comparer: false, Um: .8, fm: 1 }, ''),
   { type: 'choix', q: 'Qu\'est-ce qui varie dans le signal modulé ?', options: [o('ok', 'Son amplitude'), o('f', 'Sa fréquence'), o('rien', 'Rien')], bonne: 'ok', melanger: false,
     indices: { f: 'Compte les oscillations : elles restent régulièrement espacées. Ce sont les sommets qui montent et descendent.', rien: 'Compare la hauteur des oscillations au cours du temps.' },
@@ -207,11 +247,11 @@ const parties3 = () => [
     options: [o('ok', 'l\'enveloppe reproduit toujours la forme du modulant'), o('sin', 'l\'enveloppe redevient une sinusoïde'), o('rien', 'il n\'y a plus d\'enveloppe')], bonne: 'ok',
     indices: { sin: 'Compare la forme des pointillés avec celle du premier graphique.', rien: 'Les sommets du signal modulé montent et descendent toujours.' },
     solution: '<p>Quelle que soit sa forme, le signal modulant est reproduit par l\'enveloppe.</p>' },
-  attendre(`Augmente ${Um} au-delà de 1 V (taux de modulation m &gt; 1).`, e => [[`${Um} &gt; 1 V`, e.Um > 1 + 1e-9], ['mode AM', modeAM(e)]], { Um: 1.2, mode: 'am', comparer: false }, ''),
+  attendre(`Augmente ${Um} au-delà de 1 V : le taux de modulation (hors programme) m = ${Um} / U<sub>0</sub> dépasse alors 1.`, e => [[`${Um} &gt; 1 V`, e.Um > 1 + 1e-9], ['mode AM', modeAM(e)]], { Um: 1.2, mode: 'am', comparer: false }, ''),
   { type: 'choix', colonne: true, q: 'Que se passe-t-il ?',
     options: [o('ok', 'Surmodulation : l\'enveloppe ne suit plus le modulant, l\'information est déformée'), o('fort', 'Rien de spécial : le signal est seulement plus fort'), o('f', 'La fréquence de la porteuse change')], bonne: 'ok',
     indices: { fort: 'Regarde les pointillés et le signal : là où l\'enveloppe passe sous l\'axe, le signal ne la suit plus.', f: 'Les oscillations restent régulièrement espacées.' },
-    solution: '<p>Au-delà de m = 1, on parle de <b>surmodulation</b> : le récepteur ne retrouve plus le signal modulant. On garde m ≤ 1.</p>' },
+    solution: '<p>Quand le taux de modulation (hors programme) m = U<sub>m</sub> / U<sub>0</sub> dépasse 1, on parle de <b>surmodulation</b> : le récepteur ne retrouve plus le signal modulant. On garde m ≤ 1.</p>' },
   attendre(`Reviens à ${Um} = 0,8 V et au modulant sinusoïdal.`, e => [[`${Um} = 0,8 V`, egal(e.Um, .8, .001)], ['modulant : sinusoïde', e.forme === 'sinus']], { Um: .8, forme: 'sinus' }, ''),
 ];
 ETAPES.e3 = () => OEM.question(document.getElementById('q3'), { parties: parties3() }, { fin() { ouvrir('e4'); } }, 'cours');

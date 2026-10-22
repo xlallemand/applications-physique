@@ -32,6 +32,7 @@
    MOD.monter(zone, opts)                         simulateur (plusieurs exemplaires possibles) :
        trois graphiques empilés sur le même axe des temps (modulant, porteuse, modulé),
        gros boutons AM / FM et « Comparer », curseurs f_m, U_m, F, forme du modulant,
+       définition du taux de modulation m = U_m / U_0 en AM (hors programme),
        spectre AM avec la bande occupée et une deuxième station (brouillage).
        opts = { mode, forme, fm, Um, F, comparer, spectre (bool), station2 (bool), ecart,
                 commandes (bool), ordres (bool : encadré des ordres de grandeur réels) }
@@ -323,13 +324,14 @@
       </div>
       <div class="mod-bloc mod-graphes"><div class="mod-g" data-g="modulant"></div><div class="mod-g" data-g="porteuse"></div>
         <div class="mod-cote"><div class="mod-g" data-g="m1"></div><div class="mod-g" data-g="m2"></div></div></div>
-      <div class="mod-alerte" hidden><b>Surmodulation (m &gt; 1).</b> L'enveloppe du signal modulé ne suit plus le modulant : l'information est déformée.</div>
+      <div class="mod-alerte" hidden><b>Surmodulation (taux de modulation m &gt; 1, hors programme).</b> L'enveloppe du signal modulé ne suit plus le modulant : l'information est déformée.</div>
       <div class="mod-reglages">
         <div class="mod-forme" role="group" aria-label="Forme du signal modulant"><span class="mod-petit-t">Signal modulant</span>
           <button type="button" class="mod-pill" data-forme="sinus" aria-pressed="false">Sinusoïde</button>
           <button type="button" class="mod-pill" data-forme="son" aria-pressed="false">Son (3 harmoniques)</button></div>
         <label class="mod-reglage"><span class="mod-reglage-nom" data-n="fm"></span><input type="range" data-r="fm" min="0.5" max="1.5" step="0.1" aria-label="Fréquence du modulant f_m, en kHz"></label>
-        <label class="mod-reglage"><span class="mod-reglage-nom" data-n="Um"></span><input type="range" data-r="Um" min="0" max="1.2" step="0.05" aria-label="Amplitude du modulant U_m, en volts"></label>
+        <label class="mod-reglage"><span class="mod-reglage-nom" data-n="Um"></span><input type="range" data-r="Um" min="0" max="1.2" step="0.05" aria-label="Amplitude du modulant U_m, en volts">
+          <span class="mod-def-m"><b>Taux de modulation</b> (hors programme) : m = U<sub>m</sub> / U<sub>0</sub>, où U<sub>0</sub> = ${fmt(U0)} V est la tension continue ajoutée au modulant dans le modulateur. Il faut m ≤ 1, sinon il y a surmodulation.</span></label>
         <label class="mod-reglage"><span class="mod-reglage-nom" data-n="F"></span><input type="range" data-r="F" min="10" max="30" step="1" aria-label="Fréquence de la porteuse F, en kHz"></label>
       </div>
       <div class="mod-bloc mod-spectre">
@@ -387,7 +389,8 @@
       $('[data-n="fm"]').innerHTML = `Fréquence du modulant : <b>f<sub>m</sub> = ${fmt(e.fm, 1)} kHz</b>`;
       const fm = e.mode === 'fm' || e.comparer, amv = e.mode === 'am' || e.comparer;
       $('[data-n="Um"]').innerHTML = `Amplitude du modulant : <b>U<sub>m</sub> = ${fmt(e.Um, 2)} V</b>` +
-        (amv ? ` · taux de modulation <b>m = ${fmt(dd.m, 2)}</b>` : '') + (fm ? ` · excursion <b>ΔF = ${fmt(dd.dF, 1)} kHz</b>` : '');
+        (amv ? ` · taux de modulation <b>m = U<sub>m</sub> / U<sub>0</sub> = ${fmt(dd.m, 2)}</b>` : '') + (fm ? ` · excursion <b>ΔF = ${fmt(dd.dF, 1)} kHz</b>` : '');
+      $('.mod-def-m').hidden = !amv;                 // définition du taux de modulation : en AM seulement
       $('[data-n="F"]').innerHTML = `Fréquence de la porteuse : <b>F = ${fmt(e.F)} kHz</b> <span class="mod-ratio">(F / f<sub>m</sub> = ${fmt(+(e.F / e.fm).toFixed(1))})</span>`;
       $('[data-n="ecart"]').innerHTML = `Écart entre les porteuses : <b>F<sub>2</sub> − F = ${fmt(e.ecart)} kHz</b>`;
       $('.mod-alerte').hidden = !(dd.surmod && (e.mode === 'am' || e.comparer));
