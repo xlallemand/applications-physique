@@ -99,8 +99,9 @@
    spectre AM (raies F ± f_m, bande occupée 2 f_h, deuxième station et
    brouillage), défis (AM ou FM ? modulant, porteuse ou modulé ? bande
    passante). Chaque consigne vérifie l'état du simulateur en direct ;
-   réalisée sur le simulateur, elle fait apparaître le bouton « Retourner à
-   la question » (pas de défilement automatique) ;
+   réalisée sur le simulateur, elle ne fait pas défiler la page ; le bouton
+   « Retourner à la question » est là tant que la question en cours est
+   plus bas que l'écran ;
    questions sans points (mode 'cours') ; le bilan « ✍ Complète ton
    cours » marque la simulation comme faite.
    Valeurs (vérifiées par un script) : 1 kHz → λ = 3,00 × 10⁵ m =
@@ -119,41 +120,57 @@ const egal = (x, y, t) => Math.abs(x - y) <= (t == null ? 1e-6 : t);
 // elles ne doivent exister qu'une fois l'étape ouverte) et l'amène à l'écran,
 // sauf si elle s'ouvre après un réglage du simulateur (le bouton « Retourner à la question » y mènera)
 const ETAPES = {};
-let parReglage = false, etapeOuverte = null;
+let parReglage = false;
 function ouvrir(id) {
   const e = document.getElementById(id);
   e.hidden = false;
   if (ETAPES[id]) ETAPES[id]();
-  if (parReglage) etapeOuverte = e;
-  else setTimeout(() => e.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+  if (!parReglage) setTimeout(() => e.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
 }
 // lien pour remonter au simulateur (sous chaque consigne à réaliser)
 const remonter = '<p class="oem-remonter"><a href="#sim-carte" class="btn-small" style="text-decoration:none">↑ Voir le simulateur</a></p>';
 
-/* Bouton « Retourner à la question » (en bas de l'écran) : quand la consigne est réalisée sur le
-   simulateur, la page ne descend plus d'elle-même. Le bouton n'apparaît que si la question n'est pas
-   déjà à l'écran, et disparaît dès qu'elle y arrive. */
+/* Bouton « Retourner à la question » (en bas de l'écran) : affiché chaque fois que la question en cours
+   est plus bas que l'écran (au simulateur, par exemple), une fois qu'on l'a vue. Avec « ↑ Voir le
+   simulateur », il permet les allers-retours entre la question et le simulateur. Quand une consigne
+   est réalisée sur le simulateur, la page ne descend plus d'elle-même : ce bouton y ramène. */
 const retour = el('button', 'btn-primary oem-retour-q', '↓ Retourner à la question');
 retour.type = 'button';
 retour.hidden = true;
 document.body.appendChild(retour);
-let guetteur = null;
-function cacherRetour() {
-  retour.hidden = true;
-  if (guetteur) { guetteur.disconnect(); guetteur = null; }
+let questionVue = false;
+// partie en cours : la dernière de la dernière étape ouverte (aucune une fois le bilan affiché)
+function partieEnCours() {
+  if (!document.getElementById('bilan').hidden) return null;
+  const etapes = document.querySelectorAll('.oem-etape:not([hidden])');
+  const parties = etapes.length ? etapes[etapes.length - 1].querySelectorAll('.ph-partie') : [];
+  return parties.length ? parties[parties.length - 1] : null;
 }
-function proposerRetour(cible, bloc) {
-  cacherRetour();
-  retour.onclick = () => { cacherRetour(); cible.scrollIntoView({ behavior: 'smooth', block: bloc }); };
-  if (!window.IntersectionObserver) { retour.hidden = false; return; }
-  let premier = true;
-  guetteur = new IntersectionObserver(l => {
-    const vue = l.some(x => x.isIntersecting);
-    if (premier) { premier = false; if (!vue) { retour.hidden = false; return; } }
-    if (vue) cacherRetour();
-  }, { rootMargin: '-60px 0px -20% 0px' });        // marge du haut : bandeau du téléphone
-  guetteur.observe(cible);
+function majRetour() {
+  const p = partieEnCours();
+  if (!p) { retour.hidden = true; return; }
+  const r = p.getBoundingClientRect(), h = innerHeight;
+  if (r.top < h - 90 && r.bottom > 60) questionVue = true;      // question à l'écran (60 px : bandeau du téléphone)
+  retour.hidden = !(questionVue && r.top >= h - 90);            // question plus bas que l'écran
 }
+retour.onclick = () => {
+  const p = partieEnCours();
+  if (!p) return;
+  // première partie d'une étape : on montre aussi le titre de l'étape
+  if (p.previousElementSibling) p.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  else p.closest('.oem-etape').scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+// mise à jour au défilement, au changement de taille, après un appui ou un réglage du simulateur
+let majPrevue = false;
+const prevoirMaj = () => {
+  if (majPrevue) return;
+  majPrevue = true;
+  requestAnimationFrame(() => { majPrevue = false; majRetour(); });
+};
+addEventListener('scroll', prevoirMaj, { passive: true });
+addEventListener('resize', prevoirMaj);
+document.addEventListener('click', prevoirMaj);
+sim.surChange(prevoirMaj);
 
 /* Partie qui attend un état du simulateur : conditions(e) → [[texte, juste], …] affichés en direct ;
    la partie est réussie quand tout est juste. « Afficher la réponse » règle le simulateur (regl).
@@ -176,13 +193,9 @@ function attendre(q, conditions, regl, solution) {
         if (!afficher(e) || api.fini()) return;
         fini = true;
         if (!reglage) { api.reussi(); return; }
-        parReglage = true; etapeOuverte = null;
+        parReglage = true;
         api.reussi(false, null, true);
         parReglage = false;
-        // la question qui suit : partie suivante, ou étape suivante si celle-ci est finie
-        const ici = zone.closest('.ph-partie');
-        if (etapeOuverte) proposerRetour(etapeOuverte, 'start');
-        else proposerRetour(ici.nextElementSibling || ici, 'nearest');
       };
       sim.surChange(e => maj(e, true));
       maj(sim.etat());
