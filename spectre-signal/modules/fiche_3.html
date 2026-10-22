@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : fiche récapitulative — Chapitre 17 : Spectre d'un signal périodique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="sp.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Exploiter les graphiques</h2>
+  </div>
+<!-- Fiche récapitulative du module 3 : une section par sous-module de cours (fréquence d'un signal, bande passante),
+     avec l'ancre de la partie du sommaire. -->
+
+  <section class="er-card" id="frequence">
+    <h3 class="cours-titre">Fréquence d'un signal</h3>
+    <div class="cle"><p>On mesure la durée de <b>n périodes</b> (plus précis), puis :</p>
+      <p class="som-formule">T = durée / n &nbsp; ; &nbsp; f = 1 / T &nbsp; (T en s, f en Hz)</p></div>
+    <div class="cle"><p>La fréquence du signal est celle du <b>fondamental</b> : f = f<sub>1</sub>.</p></div>
+    <p class="cours-exemple-t">Exemple du cours</p>
+    <div id="figT"></div>
+    <p>7T = 47 ms, donc T = 47 / 7 = 6,71 ms = 6,71 × 10<sup>−3</sup> s et f = 1 / T = 149 Hz ≈ 150 Hz = f<sub>1</sub>.</p>
+  </section>
+
+  <section class="er-card" id="bande">
+    <h3 class="cours-titre">Intervalle de fréquences, bande passante</h3>
+    <div class="cle"><p>Pour transmettre les harmoniques de rang 1 à n : l'intervalle <b>[f<sub>1</sub> ; n × f<sub>1</sub>]</b>, de largeur n × f<sub>1</sub> − f<sub>1</sub>.</p>
+      <p>Exemple du cours, rangs 1 à 3 : [150 Hz ; 450 Hz], largeur 300 Hz.</p></div>
+    <div class="cle"><p>La <b>bande passante</b> d'un système est l'intervalle des fréquences qu'il transmet avec une bonne qualité : seuls les harmoniques de cette bande sont transmis.</p></div>
+    <div class="cle"><p>Supprimer des harmoniques change la <b>forme</b> du signal, <b>pas sa fréquence</b> (celle du fondamental).</p></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_3a_cours.html">Revoir les cours</a>
+    <a class="btn-secondary" href="module_3_questions.html">Questions : exploiter les graphiques</a>
+  </div>
+</div>
+<script>
+// figure : 7 périodes mesurées sur le signal de l'exemple du cours
+const S0 = SP.premierSommet(SP.COURS_EX);
+document.getElementById('figT').innerHTML = SP.figSignal(SP.COURS_EX, Object.assign({ H: 210, Wmax: 620, mesure: { t1: S0, t2: S0 + 7000 / 150, label: '7T' } }, SP.COURS_OPTS_SIGNAL));
+SP.menu('fiche_3');
+</script>
+</body>
+</html>

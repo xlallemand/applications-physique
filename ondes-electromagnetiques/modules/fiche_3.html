@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : fiche récapitulative — Chapitre 19 : Ondes électromagnétiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="oem.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="modulation.js"></script>
+<script src="oem.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Transposition de fréquence et modulation</h2>
+  </div>
+<!-- Fiche récapitulative du module 3 : une section par sous-module de cours (transposition et modulation,
+     spectre et bande passante), avec l'ancre de la partie du sommaire. -->
+
+  <section class="er-card" id="modulation">
+    <h3 class="cours-titre">Transposition et modulation</h3>
+    <div class="cle"><p><b>Transposition de fréquence</b> : on décale les fréquences du signal à transmettre (voix : 20 Hz à 20 kHz) vers de plus hautes fréquences, car les basses fréquences se transmettent mal (portée très limitée) et pour que des signaux de fréquences différentes ne se brouillent pas. Cela se fait par <b>modulation</b>.</p></div>
+    <div class="cle"><p><b>Signal modulant</b> : l'information à transmettre. <b>Porteuse</b> : onde de haute fréquence F. <b>Signal modulé</b> : la porteuse dont on a modifié une caractéristique.</p></div>
+    <div class="cle"><p><b>Modulation d'amplitude (AM)</b>, radios grandes ondes : l'<b>amplitude</b> de la porteuse varie (l'enveloppe reproduit le modulant).</p>
+      <p><b>Modulation de fréquence (FM)</b>, radios FM : la <b>fréquence</b> de la porteuse varie. En bande FM, les porteuses sont séparées de 0,1 MHz.</p></div>
+    <div class="som-fiche-figs" id="figs"></div>
+  </section>
+
+  <section class="er-card" id="spectre">
+    <h3 class="cours-titre">Spectre et bande passante</h3>
+    <div class="cle"><p>Le signal modulé occupe la bande de <b>F − f<sub>h</sub></b> à <b>F + f<sub>h</sub></b> (bandes latérales inférieure et supérieure) :</p>
+      <p class="som-formule">bande occupée = 2 f<sub>h</sub></p>
+      <p>f<sub>h</sub> : plus haute fréquence du modulant. Le signal modulé encombre plus le spectre que le modulant.</p></div>
+    <div id="figSp"></div>
+    <div class="cle"><p>La <b>bande passante</b> d'un canal (écart entre les porteuses de deux canaux voisins) doit être au moins égale à <b>2 f<sub>max</sub></b>. Nombre de canaux = largeur de la bande / largeur d'un canal.</p></div>
+    <p class="cours-exemple-t">Exemples</p>
+    <p>Porteuse 162 kHz, voix jusqu'à 4,5 kHz : de 157,5 à 166,5 kHz, bande de 9 kHz.<br>Grandes ondes de 148,5 à 238,5 kHz, canaux de 9 kHz : 90 / 9 = 10 canaux.</p>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_3a_cours.html">Revoir les cours</a>
+    <a class="btn-secondary" href="module_3_questions.html">Questions : modulation</a>
+  </div>
+</div>
+<script>
+// figures : les signaux d'une modulation (AM et FM), spectre AM du simulateur (son à 3 harmoniques)
+const E = { fm: .5, F: 12, Um: 1, forme: 'sinus' };
+const fig = (type, o) => OEM.fig(W => MOD.svgSignal(type, E, Object.assign({ W: Math.min(W, 460) }, o)));
+document.getElementById('figs').innerHTML = [['modulant', { titre: 'Signal modulant', axeT: false }], ['porteuse', { titre: 'Porteuse', axeT: false }],
+  ['am', { titre: 'Modulation d\'amplitude (AM)', enveloppe: true }], ['fm', { titre: 'Modulation de fréquence (FM)' }]].map(([t, o]) => `<div>${fig(t, o)}</div>`).join('');
+document.getElementById('figSp').innerHTML = OEM.fig(W => MOD.svgSpectre({ fm: 1, F: 20, Um: .8, forme: 'son' }, { W: Math.min(W, 620) }));
+OEM.menu('fiche_3');
+</script>
+</body>
+</html>

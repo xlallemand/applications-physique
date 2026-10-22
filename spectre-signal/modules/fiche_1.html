@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : fiche récapitulative — Chapitre 17 : Spectre d'un signal périodique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="sp.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Analyse de Fourier</h2>
+  </div>
+<!-- Fiche récapitulative du module 1 : somme de sinusoïdes, écriture mathématique, composante continue. -->
+
+  <section class="er-card">
+    <h3 class="cours-titre">Une somme de sinusoïdes</h3>
+    <div class="cle"><p><b>Partie physique :</b> tout signal périodique peut se décomposer en une <b>somme de fonctions sinusoïdales</b>.</p></div>
+    <div class="som-fiche-figs deux" id="figs"></div>
+    <p>Plus on additionne d'harmoniques, plus la somme se rapproche du signal (ici un créneau, en gris).</p>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Écriture mathématique</h3>
+    <div class="cle"><p class="som-formule">s(t) = a<sub>0</sub> + Σ a<sub>n</sub> × sin(n × ω × t + φ<sub>n</sub>) = a<sub>0</sub> + Σ a<sub>n</sub> × sin(n × 2πf × t + φ<sub>n</sub>)</p>
+      <ul class="er-liste"><li><b>pulsation</b> ω = 2πf (ω en rad/s, f en Hz) ;</li>
+        <li>rang 1 : le <b>fondamental</b>, de fréquence f<sub>1</sub> = f, la fréquence du signal ;</li>
+        <li>rang n ≥ 2 : les <b>harmoniques</b>, de fréquences f<sub>n</sub> = n × f<sub>1</sub>, d'amplitudes a<sub>n</sub>.</li></ul></div>
+    <p class="cours-exemple-t">Exemple</p>
+    <p>f = 50 Hz : ω = 2π × 50 ≈ 314 rad/s ; le terme de rang 3 a pour fréquence 3 × 50 = 150 Hz.</p>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Composante continue</h3>
+    <div class="cle"><p>a<sub>0</sub> = <b>composante continue</b> = <b>valeur moyenne</b> du signal. Sur une figure symétrique par rapport à l'axe des temps, a<sub>0</sub> = 0.</p></div>
+    <div id="figMoy"></div>
+    <p>Ajouter une composante continue décale le signal sans changer sa forme ; ajouter un harmonique change sa forme, pas sa période.</p>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_1_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_1_simulation.html">Le simulateur</a>
+    <a class="btn-secondary" href="module_1_questions.html">Questions sur l'analyse de Fourier</a>
+  </div>
+</div>
+<script>
+// figures : les harmoniques d'un créneau et leur somme ; exemple du cours avec sa valeur moyenne
+const CRENEAU = { f1: 200, a0: 0, a: FOURIER.PREDEFINIS.creneau.a.slice(0, 9) };
+const FIG_C = { tmax: 10, pasT: 1, ymin: -1.5, ymax: 1.5, pasY: .5, nom: 'u', unite: 'V', H: 190, Wmax: 440 };
+document.getElementById('figs').innerHTML =
+  `<div>${SP.figSignal(CRENEAU, Object.assign({ harmoniques: true, somme: false }, FIG_C))}<p class="sp-fig-leg">Les harmoniques</p></div>` +
+  `<div>${SP.figSignal(CRENEAU, Object.assign({ ideale: 'creneau' }, FIG_C))}<p class="sp-fig-leg">Leur somme</p></div>`;
+document.getElementById('figMoy').innerHTML = SP.figSignal(SP.COURS_EX, Object.assign({ moyenne: true, H: 210, Wmax: 600 }, SP.COURS_OPTS_SIGNAL));
+SP.menu('fiche_1');
+</script>
+</body>
+</html>

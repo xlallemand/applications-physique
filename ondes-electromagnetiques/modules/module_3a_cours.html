@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : transposition et modulation — Chapitre 19 : Ondes électromagnétiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="oem.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="modulation.js"></script>
+<script src="oem.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 1 / 2</span>
+    <h2 class="er-titre">Transposition et modulation</h2>
+    <p class="er-contexte">Pour transmettre la voix ou la musique par onde radio, on décale leurs fréquences vers de hautes fréquences : c'est la <b>transposition de fréquence</b>, réalisée par <b>modulation</b> d'amplitude (AM) ou de fréquence (FM).</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 1 du module 3 : pourquoi transposer (portée, taille de
+   l'antenne, brouillage) ; vocabulaire modulant, porteuse, modulé
+   (figure du moteur MOD) ; modulation d'amplitude et de fréquence
+   (figures AM et FM côte à côte, comme le manuel).
+   Erreurs diagnostiquées : modulant et porteuse confondus, AM et FM
+   confondues, préfixe non converti.
+   Valeurs vérifiées : 1 kHz → λ = 300 km, L = 150 km ; 20 kHz →
+   λ = 15 km.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, proche, hasard, melanger, fr, o } = OEM;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+// une figure du moteur MOD à la largeur disponible
+const figure = (type, e, o_) => OEM.fig(W => MOD.svgSignal(type, e, Object.assign({ W: Math.min(W, 640) }, o_)));
+const E = { fm: .5, F: 12, Um: .7, forme: 'sinus' };
+
+/* ---------- 1. Pourquoi transposer ? ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Pourquoi transposer les fréquences ?');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>La voix et la musique ont des fréquences de 20 Hz à 20 kHz : ce sont des <b>basses fréquences</b>.</p>
+      <div class="cle"><p><b class="cle-titre">Transposition de fréquence.</b> On décale les fréquences du signal à transmettre vers de plus hautes fréquences, car :</p>
+        <ul class="er-liste"><li>les basses fréquences se transmettent mal : leur portée est très limitée (et il faudrait des antennes immenses) ;</li>
+          <li>pour que les signaux ne se brouillent pas, il faut les émettre sur des fréquences différentes, qui ne se superposent pas.</li></ul>
+        <p>Cela se fait par <b>modulation</b> (d'amplitude ou de fréquence).</p></div>
+      <div class="ph-lien-app"><p>Découvre la modulation avec le simulateur</p><a class="btn-small" href="module_3_simulation.html">Simulateur AM / FM</a></div>
+    </div>
+    ${exemple(`<p>Un son de 1 kHz, émis directement par une antenne, donnerait une onde de longueur d'onde :</p>
+      ${calc(`λ = ${fr('c', 'f')} = ${fr('3,00 × 10<sup>8</sup>', '1 × 10<sup>3</sup>')} = 3,00 × 10<sup>5</sup> m = ${c('300 km')}`)}
+      <p>Une antenne demi-onde mesurerait 150 km ! Avec une porteuse de 100 MHz, λ = 3,00 m et l'antenne mesure 1,50 m.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Le son le plus aigu', enonce: '<p>Le son le plus aigu que l\'on entend a pour fréquence 20 kHz.</p>', parties: [
+      { type: 'nombre', q: 'Quelle serait la longueur d\'onde d\'une onde électromagnétique de cette fréquence ?', label: 'λ =', valeur: 15, unite: 'km', rel: .01, signe: false,
+        diag: v => (proche(v, 15000, .01) ? 'C\'est en mètres : écris le résultat en km.' : OEM.diagLambda(v, 2e4, 20, 'km')),
+        solution: calc(`λ = ${fr('3,00 × 10<sup>8</sup>', '20 × 10<sup>3</sup>')} = 1,5 × 10<sup>4</sup> m = ${c('15 km')}`) }] },
+    { titre: 'Transposer', parties: [
+      { type: 'choix', colonne: true, q: 'Transposer les fréquences d\'un signal, c\'est :',
+        options: [o('ok', 'décaler ses fréquences vers de plus hautes fréquences'), o('bas', 'décaler ses fréquences vers de plus basses fréquences'), o('amp', 'augmenter son amplitude')], bonne: 'ok',
+        indices: { bas: 'Les basses fréquences portent mal et demandent des antennes immenses.', amp: 'La transposition agit sur les fréquences, pas sur l\'amplitude.' },
+        solution: '<p>On décale les fréquences du signal vers les hautes fréquences, grâce à une porteuse.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Modulant, porteuse, modulé ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Signal modulant, porteuse, signal modulé');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Vocabulaire.</b></p>
+        <ul class="er-liste"><li>le <b>signal modulant</b> est l'information à transmettre (basse fréquence) ;</li>
+          <li>la <b>porteuse</b> est une onde de haute fréquence F, d'amplitude constante ;</li>
+          <li>le <b>signal modulé</b> est la porteuse dont on a modifié une caractéristique (l'amplitude ou la fréquence) au rythme du modulant.</li></ul></div>
+    </div>
+    ${exemple(`<p>Les trois signaux d'une modulation d'amplitude :</p>
+      ${figure('modulant', E, { titre: 'Signal modulant (l\'information)', axeT: false })}${figure('porteuse', E, { titre: 'Porteuse (haute fréquence)', axeT: false })}${figure('am', E, { titre: 'Signal modulé', enveloppe: true, H: 170 })}
+      <p>L'enveloppe du signal modulé (en pointillés) reproduit le signal modulant.</p>`)}`);
+  const ordre = melanger(['modulant', 'porteuse', 'am']), type = hasard(['am', 'fm']);
+  const noms = { modulant: 'le signal modulant', porteuse: 'la porteuse', am: 'le signal modulé' };
+  const e = type === 'am' ? E : { fm: .5, F: 12, Um: 1.1, forme: 'sinus' };
+  c_.aToi(carte, [{ titre: 'Identifier les signaux', enonce: `<div class="oem-signaux">${ordre.map((t, i) => `<p class="oem-signal-t">Signal ${i + 1}</p>${figure(t === 'am' ? type : t, e, { titre: '', axeT: false })}`).join('')}</div>`, parties: [
+    OEM.versCours({ type: 'grille', q: 'Identifie chaque signal.', options: [o('modulant', 'Modulant'), o('porteuse', 'Porteuse'), o('am', 'Modulé')],
+      lignes: ordre.map((t, i) => ({ id: 's' + i, label: `Signal ${i + 1}`, bonne: t,
+        indices: { modulant: 'Le modulant est le signal lent (basse fréquence).', porteuse: 'La porteuse est une sinusoïde rapide d\'amplitude et de fréquence constantes.', am: 'Le signal modulé est rapide, et son amplitude ou sa fréquence varie.' } })),
+      solution: `<p>${ordre.map((t, i) => `Signal ${i + 1} : ${noms[t]}`).join(' ; ')}.</p>` })] }]);
+  return carte;
+}
+
+/* ---------- 3. AM ou FM ---------- */
+function signalAuHasard(mode) {
+  const fm = hasard([.5, .6, .8, 1]), F = Math.round(fm * hasard([16, 20, 24]));
+  return { fm, F, Um: mode === 'am' ? hasard([.6, .7, .8]) : hasard([.9, 1, 1.2]), forme: Math.random() < .3 ? 'son' : 'sinus' };
+}
+function etape3(c_) {
+  const carte = c_.carte('3. Modulation d\'amplitude ou de fréquence');
+  const E2 = { fm: .5, F: 12, Um: .8, forme: 'sinus' };
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b>Modulation d'amplitude (AM)</b>, typique des radios grandes ondes : l'<b>amplitude</b> de la porteuse varie au rythme du signal modulant.</p>
+        <p><b>Modulation de fréquence (FM)</b>, typique des radios FM : la <b>fréquence</b> de la porteuse varie au rythme du signal modulant (son amplitude reste constante).</p></div>
+      <p>En bande FM, les porteuses de deux stations voisines sont séparées de 0,1 MHz pour ne pas se gêner.</p>
+    </div>
+    ${exemple(`<p>Le même signal modulant, en AM et en FM :</p>
+      <div class="oem-figs deux"><div>${figure('am', E2, { titre: 'Modulation d\'amplitude (AM)', enveloppe: true, H: 170 })}</div><div>${figure('fm', E2, { titre: 'Modulation de fréquence (FM)', reperes: true, H: 170 })}</div></div>
+      <p>En AM, les sommets montent et descendent ; en FM, les oscillations se resserrent quand le modulant est haut et s'écartent quand il est bas.</p>`)}`);
+  const modes = melanger(['am', 'fm']);
+  c_.aToi(carte, modes.map((m, i) => {
+    const e = signalAuHasard(m);
+    return { titre: `AM ou FM ? (${i + 1})`, enonce: figure(m, e, { titre: 'Signal modulé' }), parties: [
+      { type: 'choix', q: 'Ce signal est-il modulé en amplitude ou en fréquence ?', options: [o('am', 'AM : modulation d\'amplitude'), o('fm', 'FM : modulation de fréquence')], bonne: m, melanger: false,
+        indices: { am: 'Les sommets sont tous à la même hauteur : l\'amplitude ne varie pas. Regarde l\'écart entre les oscillations.', fm: 'Les oscillations sont régulièrement espacées ; c\'est la hauteur des sommets qui varie.' },
+        solution: m === 'am' ? '<p>L\'amplitude varie : modulation d\'amplitude.</p>' : '<p>L\'amplitude est constante, les oscillations se resserrent et s\'écartent : modulation de fréquence.</p>' }] };
+  }));
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p><b>Transposition de fréquence</b> : on décale les fréquences du signal (20 Hz à 20 kHz pour la voix) vers les hautes fréquences, pour la portée et pour que les émissions ne se brouillent pas.</p></div>
+    <div class="cle"><p><b>Modulant</b> : l'information ; <b>porteuse</b> : onde de haute fréquence F ; <b>signal modulé</b> : la porteuse modifiée par le modulant.</p></div>
+    <div class="cle"><p><b>AM</b> : l'amplitude de la porteuse varie. <b>FM</b> : la fréquence de la porteuse varie.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Cours : spectre et bande passante →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#modulation">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+OEM.menu('module_3a_cours');
+</script>
+</body>
+</html>

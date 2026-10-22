@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : fréquence d'un signal — Chapitre 17 : Spectre d'un signal périodique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="sp.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 1 / 2</span>
+    <h2 class="er-titre">Fréquence d'un signal</h2>
+    <p class="er-contexte">Sur le graphique d'un signal, on mesure la durée de <b>plusieurs périodes</b> nT, on en déduit T, puis la fréquence <b>f = 1 / T</b>. La fréquence du signal est celle du <b>fondamental</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 1 du module 3 : mesure de T sur plusieurs périodes (outil
+   de mesure : deux curseurs à faire glisser), f = 1 / T avec T en s,
+   fréquence du signal = fréquence du fondamental.
+   Exemple du cours (signal calculé à partir de son spectre) :
+   7T = 47 ms, T = 6,71 ms, f = 149 Hz ≈ 150 Hz.
+   Erreurs diagnostiquées : T non converti en s, durée non divisée par n,
+   f = T.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, proche, hasard, fr, entre, melanger } = SP;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+// exemple du cours : 7 périodes à partir du premier sommet
+const S0 = SP.premierSommet(SP.COURS_EX), T0 = 1000 / 150;
+
+/* signal tiré au hasard pour la mesure : fondamental (2 V) et deux harmoniques, de 0 à 20 ms (4 ou 5 périodes : lisible sur un téléphone) */
+function signalMesure() {
+  const f1 = hasard([200, 250]), a = [2, 0, 0, 0];
+  melanger([2, 3, 4]).slice(0, 2).forEach(n => { a[n - 1] = hasard([.5, .75, 1]); });
+  return { f1, a0: 0, a };
+}
+const SM = signalMesure(), TM = 1000 / SM.f1;
+function diagT(v, T) {
+  if (proche(v, T * 1e-3, .03)) return 'Garde T en <b>ms</b> ici (tu convertiras en s pour calculer f).';
+  return 'T = durée mesurée / nombre de périodes encadrées.';
+}
+
+/* ---------- 1. Mesurer T sur plusieurs périodes ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Mesurer la période sur plusieurs périodes');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b> On mesure la durée de <b>n périodes</b> (entre deux points identiques du signal : deux sommets, par exemple), puis :</p>
+        <p class="crs-formule">T = ${fr('durée de n périodes', 'n')} &nbsp; ; &nbsp; f = ${fr('1', 'T')}</p>
+        <p>Mesurer plusieurs périodes est <b>plus précis</b> : l'erreur de lecture est partagée entre les n périodes. Pour calculer f en <b>Hz</b>, T doit être en <b>secondes</b>.</p></div>
+    </div>
+    ${exemple(`<p>Sur le signal de l'exemple du cours, on mesure 7 périodes entre deux sommets :</p>
+      ${SP.figSignal(SP.COURS_EX, Object.assign({ Wmax: 660, H: 220, mesure: { t1: S0, t2: S0 + 7 * T0, label: '7T' } }, SP.COURS_OPTS_SIGNAL))}
+      ${calc(`7T = 47 ms, donc T = ${fr('47 ms', '7')} = ${c('6,71 ms')} = 6,71 × 10<sup>−3</sup> s`)}
+      ${calc(`f = ${fr('1', 'T')} = ${fr('1', '6,71 × 10<sup>−3</sup> s')} = ${c('149 Hz')} ≈ 150 Hz`)}`)}`);
+  const res = {};
+  c_.aToi(carte, [
+    { titre: 'À toi de mesurer', parties: [
+      SP.partieMesure({ spec: SM, tmax: 20, pasT: 1, ymin: -4, ymax: 4, pasY: 1, minN: 3, res,
+        solution: `<p>Le motif se répète toutes les ${fmt(TM)} ms : par exemple, ${Math.floor(19 / TM)} périodes durent ${fmt(Math.floor(19 / TM) * TM)} ms.</p>` }),
+      { type: 'nombre', q: 'Calcule la période T (durée mesurée divisée par n).', label: 'T =', valeur: TM, unite: 'ms', rel: .03, signe: false, diag: v => diagT(v, TM),
+        solution: calc(`T = ${fr('durée', 'n')} ≈ ${c(fmt(TM) + ' ms')}`) },
+      { type: 'nombre', q: 'Calcule la fréquence f du signal.', label: 'f =', valeur: SM.f1, unite: 'Hz', rel: .03, signe: false,
+        diag: v => (proche(v, 1 / TM, .03) ? 'T doit être en <b>secondes</b> : ' + fmt(TM) + ' ms = ' + fmt(TM / 1000) + ' s.' : proche(v, TM, .03) ? 'f = 1 / T.' : 'f = 1 / T, avec T en s.'),
+        solution: calc(`f = ${fr('1', 'T')} = ${fr('1', fmt(TM / 1000) + ' s')} = ${c(fmt(SM.f1) + ' Hz')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Fréquence du signal et fondamental ---------- */
+const T2 = hasard([2.5, 4, 5, 2]), F2 = 1000 / T2, N2 = hasard([2, 3, 4]);
+function etape2(c_) {
+  const carte = c_.carte('2. La fréquence du signal est celle du fondamental');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>La fréquence f mesurée sur le signal est celle du <b>fondamental</b> : <b>f = f<sub>1</sub></b>. Les harmoniques ont des fréquences plus grandes, n × f<sub>1</sub>.</p></div>
+    </div>
+    ${exemple(`<p>Exemple du cours : on mesure f = 149 Hz sur le signal ; le spectre donne un fondamental à f<sub>1</sub> = 150 Hz. Les deux concordent, à la précision de la lecture près.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Du signal au spectre', enonce: `<p>On mesure la période d'un signal : T = ${fmt(T2)} ms.</p>`, parties: [
+      { type: 'nombre', q: 'Quelle est la fréquence f<sub>1</sub> du fondamental de son spectre ?', label: 'f<sub>1</sub> =', valeur: F2, unite: 'Hz', signe: false,
+        diag: v => (proche(v, 1 / T2, .02) ? 'Convertis T en secondes : ' + fmt(T2) + ' ms = ' + fmt(T2 / 1000) + ' s.' : 'f<sub>1</sub> = f = 1 / T, avec T en s.'),
+        solution: calc(`f<sub>1</sub> = f = ${fr('1', fmt(T2 / 1000) + ' s')} = ${c(fmt(F2) + ' Hz')}`) },
+      { type: 'nombre', q: `Quelle est la fréquence de son harmonique de rang ${N2} ?`, label: `f<sub>${N2}</sub> =`, valeur: N2 * F2, unite: 'Hz', signe: false,
+        diag: v => (proche(v, F2 / N2, .02) ? 'On multiplie par le rang.' : `f<sub>${N2}</sub> = ${N2} × f<sub>1</sub>.`), solution: calc(`f<sub>${N2}</sub> = ${N2} × ${fmt(F2)} Hz = ${c(fmt(N2 * F2) + ' Hz')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>On mesure la durée de <b>n périodes</b>, puis T = durée / n (plus précis) et <b>f = 1 / T</b>, avec T en <b>s</b>.</p></div>
+    <div class="cle"><p>La fréquence du signal est celle du <b>fondamental</b> : f = f<sub>1</sub>.</p></div>
+    <div class="ph-lien-app"><p>Revois la lecture d'une période sur un graphique</p><a class="btn-small" href="../../lecture-graphique/index.html" target="_blank" rel="noopener">Lecture graphique ↗</a></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Cours : bande passante →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#frequence">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+SP.menu('module_3a_cours');
+</script>
+</body>
+</html>

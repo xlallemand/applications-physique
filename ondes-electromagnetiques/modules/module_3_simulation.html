@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : simulateur, modulation AM et FM — Chapitre 19 : Ondes électromagnétiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="oem.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="modulation.js"></script>
+<script src="oem.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · SIMULATION</span>
+    <h2 class="er-titre">Modulation AM et FM</h2>
+    <p class="er-contexte">Pour transmettre la voix ou la musique (des signaux de <b>basse fréquence</b>) par une onde radio, on les inscrit dans une onde de <b>haute fréquence</b>, la <b>porteuse</b>. Le simulateur montre le <b>signal modulant</b> (l'information), la <b>porteuse</b> et le <b>signal modulé</b>, sur le même axe des temps. Suis les six étapes sous le simulateur.</p>
+  </div>
+
+  <!-- ============ Le simulateur ============ -->
+  <section class="er-card oem-sim-carte" id="sim-carte">
+    <h3 class="cours-titre" style="margin-top:0">Le simulateur</h3>
+    <p class="er-petit" style="margin-bottom:10px">Choisis <b>AM</b> ou <b>FM</b> avec les gros boutons ; règle le modulant et la porteuse avec les curseurs. Le spectre du signal modulé (AM) est en dessous.</p>
+    <div id="sim"></div>
+  </section>
+
+  <!-- ============ Étape 1 ============ -->
+  <section class="er-card oem-etape" id="e1">
+    <h3 class="cours-titre">1. Le problème : envoyer un son par une antenne</h3>
+    <p class="er-contexte">Un micro transforme la voix en un <b>signal électrique de même fréquence</b>, par exemple f = 1 kHz. Que se passerait-il si on l'envoyait directement dans une antenne, sous forme d'onde électromagnétique de fréquence 1 kHz ? (c = 3,00 × 10<sup>8</sup> m·s<sup>−1</sup>)</p>
+    <div class="ph-question" id="q1"></div>
+  </section>
+
+  <!-- ============ Étape 2 ============ -->
+  <section class="er-card oem-etape" id="e2" hidden>
+    <h3 class="cours-titre">2. La porteuse seule</h3>
+    <p class="er-contexte">La <b>porteuse</b> est une onde sinusoïdale de <b>haute fréquence</b> F. Regardons-la sans signal à transmettre.</p>
+    <div class="ph-question" id="q2"></div>
+  </section>
+
+  <!-- ============ Étape 3 ============ -->
+  <section class="er-card oem-etape" id="e3" hidden>
+    <h3 class="cours-titre">3. Modulation d'amplitude (AM)</h3>
+    <p class="er-contexte">On inscrit maintenant le signal modulant dans la porteuse. Première façon : la <b>modulation d'amplitude</b>, celle des radios grandes ondes.</p>
+    <div class="ph-question" id="q3"></div>
+  </section>
+
+  <!-- ============ Étape 4 ============ -->
+  <section class="er-card oem-etape" id="e4" hidden>
+    <h3 class="cours-titre">4. Modulation de fréquence (FM)</h3>
+    <p class="er-contexte">Deuxième façon : la <b>modulation de fréquence</b>, celle des radios FM.</p>
+    <div class="ph-question" id="q4"></div>
+  </section>
+
+  <!-- ============ Étape 5 ============ -->
+  <section class="er-card oem-etape" id="e5" hidden>
+    <h3 class="cours-titre">5. Le spectre et la bande occupée (AM)</h3>
+    <p class="er-contexte">Le signal modulé n'occupe pas une seule fréquence : son <b>spectre</b> montre la porteuse F et des raies de part et d'autre, les <b>bandes latérales</b>.</p>
+    <div class="ph-question" id="q5"></div>
+  </section>
+
+  <!-- ============ Étape 6 ============ -->
+  <section class="er-card oem-etape" id="e6" hidden>
+    <h3 class="cours-titre">6. Défis</h3>
+    <p class="er-contexte">Reconnais les signaux, puis calcule une bande passante.</p>
+    <div class="ph-question" id="q6"></div>
+  </section>
+
+  <!-- ============ Bilan ============ -->
+  <section class="er-card oem-bilan" id="bilan" hidden>
+    <span class="er-badge">BILAN</span>
+    <h3 class="er-titre">✍ Complète ton cours</h3>
+    <div class="cle"><p><b class="cle-titre">Transposition de fréquence.</b> On décale les fréquences du signal à transmettre (la voix : de 20 Hz à 20 kHz) vers de plus hautes fréquences, car :</p>
+      <ul class="er-liste"><li>les basses fréquences se transmettent mal (portée très limitée, antenne immense) ;</li>
+        <li>des signaux émis sur des fréquences différentes ne se brouillent pas.</li></ul>
+      <p>Cela se fait par <b>modulation</b>.</p></div>
+    <div class="cle"><p><b class="cle-titre">Vocabulaire.</b> Le <b>signal modulant</b> est l'information à transmettre ; la <b>porteuse</b> est une onde de haute fréquence F ; le <b>signal modulé</b> est la porteuse dont on a modifié une caractéristique.</p></div>
+    <div class="cle"><p><b>Modulation d'amplitude (AM)</b> : l'<b>amplitude</b> de la porteuse varie au rythme du signal modulant (son enveloppe reproduit le modulant).</p>
+      <p><b>Modulation de fréquence (FM)</b> : la <b>fréquence</b> de la porteuse varie au rythme du signal modulant ; son amplitude reste constante.</p></div>
+    <div class="cle"><p><b class="cle-titre">Bande occupée.</b> Le signal modulé occupe la bande de F − f<sub>h</sub> à F + f<sub>h</sub>, de largeur <b>2 f<sub>h</sub></b> (f<sub>h</sub> : plus haute fréquence du modulant). Deux stations doivent avoir des porteuses écartées d'au moins 2 f<sub>h</sub> pour ne pas se brouiller.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_3a_cours.html">Cours : transposition et modulation →</a>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   Simulateur « Modulation AM et FM » (modules/modulation.js, objet
+   MOD) et cheminement guidé en six étapes : le problème (antenne de
+   150 km pour un son de 1 kHz), la porteuse seule, la modulation
+   d'amplitude (enveloppe, surmodulation), la modulation de fréquence
+   (oscillations resserrées ou écartées, comparaison AM / FM), le
+   spectre AM (raies F ± f_m, bande occupée 2 f_h, deuxième station et
+   brouillage), défis (AM ou FM ? modulant, porteuse ou modulé ? bande
+   passante). Chaque consigne vérifie l'état du simulateur en direct ;
+   réalisée sur le simulateur, elle ne fait pas défiler la page ; le bouton
+   « Retourner à la question » est là tant que la question en cours est
+   plus bas que l'écran ;
+   questions sans points (mode 'cours') ; le bilan « ✍ Complète ton
+   cours » marque la simulation comme faite.
+   Valeurs (vérifiées par un script) : 1 kHz → λ = 3,00 × 10⁵ m =
+   300 km, L = 150 km ; 100 MHz → λ = 3,00 m, L = 1,50 m ; F = 20 kHz,
+   f_m = 1 kHz : raies à 19, 20 et 21 kHz, bande 2 kHz ; son de 1 à
+   3 kHz : bande 6 kHz ; voix jusqu'à 4,5 kHz : 9 kHz.
+   ============================================================ */
+const { o, fmt, proche, el, fr } = OEM;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const fm_ = 'f<sub>m</sub>', fh = 'f<sub>h</sub>', Um = 'U<sub>m</sub>';
+const sim = MOD.monter(document.getElementById('sim'), { mode: 'am', Um: .6, fm: 1, F: 20 });
+const egal = (x, y, t) => Math.abs(x - y) <= (t == null ? 1e-6 : t);
+
+// affiche l'étape suivante, crée ses questions (leurs consignes agissent sur le simulateur :
+// elles ne doivent exister qu'une fois l'étape ouverte) et l'amène à l'écran,
+// sauf si elle s'ouvre après un réglage du simulateur (le bouton « Retourner à la question » y mènera)
+const ETAPES = {};
+let parReglage = false;
+function ouvrir(id) {
+  const e = document.getElementById(id);
+  e.hidden = false;
+  if (ETAPES[id]) ETAPES[id]();
+  if (!parReglage) setTimeout(() => e.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+}
+// lien pour remonter au simulateur (sous chaque consigne à réaliser)
+const remonter = '<p class="oem-remonter"><a href="#sim-carte" class="btn-small" style="text-decoration:none">↑ Voir le simulateur</a></p>';
+
+/* Bouton « Retourner à la question » (en bas de l'écran) : affiché chaque fois que la question en cours
+   est plus bas que l'écran (au simulateur, par exemple), une fois qu'on l'a vue. Avec « ↑ Voir le
+   simulateur », il permet les allers-retours entre la question et le simulateur. Quand une consigne
+   est réalisée sur le simulateur, la page ne descend plus d'elle-même : ce bouton y ramène. */
+const retour = el('button', 'btn-primary oem-retour-q', '↓ Retourner à la question');
+retour.type = 'button';
+retour.hidden = true;
+document.body.appendChild(retour);
+let questionVue = false;
+// partie en cours : la dernière de la dernière étape ouverte (aucune une fois le bilan affiché)
+function partieEnCours() {
+  if (!document.getElementById('bilan').hidden) return null;
+  const etapes = document.querySelectorAll('.oem-etape:not([hidden])');
+  const parties = etapes.length ? etapes[etapes.length - 1].querySelectorAll('.ph-partie') : [];
+  return parties.length ? parties[parties.length - 1] : null;
+}
+function majRetour() {
+  const p = partieEnCours();
+  if (!p) { retour.hidden = true; return; }
+  const r = p.getBoundingClientRect(), h = innerHeight;
+  if (r.top < h - 90 && r.bottom > 60) questionVue = true;      // question à l'écran (60 px : bandeau du téléphone)
+  retour.hidden = !(questionVue && r.top >= h - 90);            // question plus bas que l'écran
+}
+retour.onclick = () => {
+  const p = partieEnCours();
+  if (!p) return;
+  // première partie d'une étape : on montre aussi le titre de l'étape
+  if (p.previousElementSibling) p.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  else p.closest('.oem-etape').scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+// mise à jour au défilement, au changement de taille, après un appui ou un réglage du simulateur
+let majPrevue = false;
+const prevoirMaj = () => {
+  if (majPrevue) return;
+  majPrevue = true;
+  requestAnimationFrame(() => { majPrevue = false; majRetour(); });
+};
+addEventListener('scroll', prevoirMaj, { passive: true });
+addEventListener('resize', prevoirMaj);
+document.addEventListener('click', prevoirMaj);
+sim.surChange(prevoirMaj);
+
+/* Partie qui attend un état du simulateur : conditions(e) → [[texte, juste], …] affichés en direct ;
+   la partie est réussie quand tout est juste. « Afficher la réponse » règle le simulateur (regl).
+   Réussite obtenue en touchant le simulateur : pas de défilement, bouton « Retourner à la question ». */
+function attendre(q, conditions, regl, solution) {
+  return {
+    type: 'perso', aide: true, q: q + remonter, solution,
+    monter(zone, api) {
+      const p = el('div', 'oem-etat');
+      zone.appendChild(p);
+      let fini = false;
+      // état affiché en direct (une pastille par condition, ✓ quand elle est remplie)
+      const afficher = e => {
+        const l = conditions(e);
+        p.innerHTML = l.map(([t, ok]) => `<span class="${ok ? 'ok' : ''}">${t}</span>`).join('');
+        return l.every(x => x[1]);
+      };
+      const maj = (e, reglage) => {
+        if (fini) return;
+        if (!afficher(e) || api.fini()) return;
+        fini = true;
+        if (!reglage) { api.reussi(); return; }
+        parReglage = true;
+        api.reussi(false, null, true);
+        parReglage = false;
+      };
+      sim.surChange(e => maj(e, true));
+      maj(sim.etat());
+      return { montrer() { fini = true; sim.regler(regl); afficher(sim.etat()); } };
+    },
+  };
+}
+const modeAM = e => e.mode === 'am' && !e.comparer, modeFM = e => e.mode === 'fm' && !e.comparer;
+
+/* ---------- 1. Le problème ---------- */
+const parties1 = () => [
+  { type: 'nombre', q: 'Quelle serait la longueur d\'onde λ d\'une onde électromagnétique de fréquence f = 1 kHz ?', label: 'λ =', valeur: 300, unite: 'km', rel: .01, signe: false,
+    diag: v => (proche(v, 3e5, .01) ? 'C\'est la valeur en mètres : convertis en km (1 km = 1 000 m).' : proche(v, 3e5 * 1e3, .01) || proche(v, 3e8, .01) ? 'Convertis d\'abord f en Hz : 1 kHz = 1 000 Hz.'
+      : proche(v, 1e3 / 3e8 / 1e3, .05) || v < 1e-3 ? 'λ = c / f, et non f / c.' : 'λ = c / f, avec f en Hz.'),
+    solution: calc(`λ = ${fr('c', 'f')} = ${fr('3,00 × 10<sup>8</sup> m·s<sup>−1</sup>', '1 000 Hz')} = 3,00 × 10<sup>5</sup> m = ${c('300 km')}`) },
+  { type: 'nombre', q: 'Une antenne efficace mesure une demi-longueur d\'onde : L = λ / 2. Quelle serait sa longueur ?', label: 'L =', valeur: 150, unite: 'km', rel: .01, signe: false,
+    diag: v => (proche(v, 300, .01) ? 'C\'est λ : l\'antenne mesure la <b>moitié</b> de la longueur d\'onde.' : proche(v, 1.5e5, .01) ? 'En km : 150 000 m = 150 km.' : 'L = λ / 2 = 300 km / 2.'),
+    solution: calc(`L = ${fr('λ', '2')} = ${fr('300 km', '2')} = ${c('150 km')}`) + '<p>Une antenne de 150 km : impossible !</p>' },
+  { type: 'nombre', q: 'Même calcul pour une onde de haute fréquence F = 100 MHz (une porteuse de radio FM) : quelle est sa longueur d\'onde ?', label: 'λ =', valeur: 3, unite: 'm', rel: .01, signe: false,
+    diag: v => (proche(v, 3e6, .01) ? 'Convertis F en Hz : 100 MHz = 100 × 10<sup>6</sup> Hz.' : proche(v, 3e3, .01) ? '1 MHz = 10<sup>6</sup> Hz (et non 10<sup>3</sup> Hz).' : 'λ = c / F, avec F en Hz.'),
+    solution: calc(`λ = ${fr('c', 'F')} = ${fr('3,00 × 10<sup>8</sup>', '100 × 10<sup>6</sup>')} = ${c('3,00 m')}`) },
+  { type: 'nombre', q: 'Et la longueur de l\'antenne demi-onde ?', label: 'L =', valeur: 1.5, unite: 'm', rel: .01, signe: false,
+    diag: v => (proche(v, 3, .01) ? 'L = λ / <b>2</b>.' : 'L = λ / 2 = 3,00 m / 2.'),
+    solution: calc(`L = ${fr('3,00 m', '2')} = ${c('1,50 m')}`) + '<p>Une antenne de 1,5 m : facile à construire.</p>' },
+  { type: 'choix', colonne: true, q: 'Pourquoi n\'émet-on pas directement le signal sonore (basse fréquence) ?',
+    options: [o('ok', 'Il faudrait une antenne immense, la portée serait très faible, et toutes les émissions utiliseraient les mêmes fréquences : elles se brouilleraient'),
+      o('vide', 'Une onde électromagnétique de basse fréquence ne se propage pas dans le vide'), o('vite', 'Le signal électrique irait trop vite pour être capté')], bonne: 'ok',
+    indices: { vide: 'Toutes les ondes électromagnétiques se propagent dans le vide, quelle que soit leur fréquence. Pense à la taille de l\'antenne.', vite: 'Toutes les ondes électromagnétiques vont à la même vitesse c. Pense à la taille de l\'antenne et aux autres émetteurs.' },
+    solution: '<p>On fait une <b>transposition de fréquence</b> : on inscrit le signal basse fréquence dans une onde de haute fréquence, la porteuse. C\'est la <b>modulation</b>.</p>' },
+];
+ETAPES.e1 = () => OEM.question(document.getElementById('q1'), { parties: parties1() }, { fin() { ouvrir('e2'); } }, 'cours');
+
+/* ---------- 2. La porteuse seule ---------- */
+const parties2 = () => [
+  attendre(`Dans le simulateur, règle l'amplitude du modulant ${Um} à 0 V : il n'y a plus de signal à transmettre.`,
+    e => [[`${Um} = 0 V`, e.Um === 0]], { Um: 0 }, ''),
+  { type: 'choix', colonne: true, q: 'Le signal modulé est alors :',
+    options: [o('ok', 'identique à la porteuse : une sinusoïde de fréquence F et d\'amplitude constante'), o('nul', 'nul'), o('mod', 'identique au signal modulant')], bonne: 'ok',
+    indices: { nul: 'Regarde le troisième graphique : il oscille encore.', mod: 'Le modulant est nul (une droite) ; le troisième graphique oscille.' },
+    solution: '<p>Sans modulant, il ne reste que la porteuse.</p>' },
+  { type: 'choix', colonne: true, q: 'La porteuse seule transporte-t-elle une information (la voix, la musique) ?',
+    options: [o('ok', 'Non : rien ne varie dans ce signal, il ne transporte aucune information'), o('oui', 'Oui : sa haute fréquence contient l\'information')], bonne: 'ok', melanger: false,
+    indices: { oui: 'Une sinusoïde toujours identique ne « dit » rien : pour transmettre une information, il faut que quelque chose varie.' },
+    solution: '<p>Pour transmettre l\'information, il faut <b>modifier une caractéristique</b> de la porteuse au rythme du signal modulant : son amplitude ou sa fréquence.</p>' },
+];
+ETAPES.e2 = () => OEM.question(document.getElementById('q2'), { parties: parties2() }, { fin() { ouvrir('e3'); } }, 'cours');
+
+/* ---------- 3. Modulation d'amplitude ---------- */
+const parties3 = () => [
+  attendre(`Touche le gros bouton <b>AM</b>, règle ${Um} = 0,8 V et ${fm_} = 1 kHz. Le taux de modulation (hors programme) vaut alors m = ${Um} / U<sub>0</sub> = 0,8 V / 1 V = 0,8.`,
+    e => [['mode AM', modeAM(e)], [`${Um} = 0,8 V`, egal(e.Um, .8, .001)], [`${fm_} = 1 kHz`, egal(e.fm, 1, .001)]], { mode: 'am', comparer: false, Um: .8, fm: 1 }, ''),
+  { type: 'choix', q: 'Qu\'est-ce qui varie dans le signal modulé ?', options: [o('ok', 'Son amplitude'), o('f', 'Sa fréquence'), o('rien', 'Rien')], bonne: 'ok', melanger: false,
+    indices: { f: 'Compte les oscillations : elles restent régulièrement espacées. Ce sont les sommets qui montent et descendent.', rien: 'Compare la hauteur des oscillations au cours du temps.' },
+    solution: '<p>En AM, l\'<b>amplitude</b> de la porteuse varie ; sa fréquence ne change pas.</p>' },
+  { type: 'choix', colonne: true, q: 'Les pointillés relient les sommets du signal modulé (son <b>enveloppe</b>). Ils ont la même forme que :',
+    options: [o('ok', 'le signal modulant'), o('p', 'la porteuse'), o('rien', 'aucun des deux')], bonne: 'ok', melanger: false,
+    indices: { p: 'La porteuse oscille très vite ; l\'enveloppe varie lentement. Compare avec le premier graphique.', rien: 'Compare l\'enveloppe avec le premier graphique.' },
+    solution: '<p>L\'enveloppe du signal modulé <b>reproduit le signal modulant</b> : l\'information est inscrite dans l\'amplitude de la porteuse. À la réception, on récupère cette enveloppe.</p>' },
+  attendre(`Change ${fm_} (essaie 0,5 kHz puis 1,5 kHz), puis touche « Son (3 harmoniques) ». Termine avec le son et ${fm_} = 1 kHz.`,
+    e => [['modulant : son', e.forme === 'son'], [`${fm_} = 1 kHz`, egal(e.fm, 1, .001)], ['mode AM', modeAM(e)]], { forme: 'son', fm: 1, mode: 'am', comparer: false }, ''),
+  { type: 'choix', colonne: true, q: 'Avec le son (qui n\'est pas une sinusoïde) :',
+    options: [o('ok', 'l\'enveloppe reproduit toujours la forme du modulant'), o('sin', 'l\'enveloppe redevient une sinusoïde'), o('rien', 'il n\'y a plus d\'enveloppe')], bonne: 'ok',
+    indices: { sin: 'Compare la forme des pointillés avec celle du premier graphique.', rien: 'Les sommets du signal modulé montent et descendent toujours.' },
+    solution: '<p>Quelle que soit sa forme, le signal modulant est reproduit par l\'enveloppe.</p>' },
+  attendre(`Augmente ${Um} au-delà de 1 V : le taux de modulation (hors programme) m = ${Um} / U<sub>0</sub> dépasse alors 1.`, e => [[`${Um} &gt; 1 V`, e.Um > 1 + 1e-9], ['mode AM', modeAM(e)]], { Um: 1.2, mode: 'am', comparer: false }, ''),
+  { type: 'choix', colonne: true, q: 'Que se passe-t-il ?',
+    options: [o('ok', 'Surmodulation : l\'enveloppe ne suit plus le modulant, l\'information est déformée'), o('fort', 'Rien de spécial : le signal est seulement plus fort'), o('f', 'La fréquence de la porteuse change')], bonne: 'ok',
+    indices: { fort: 'Regarde les pointillés et le signal : là où l\'enveloppe passe sous l\'axe, le signal ne la suit plus.', f: 'Les oscillations restent régulièrement espacées.' },
+    solution: '<p>Quand le taux de modulation (hors programme) m = U<sub>m</sub> / U<sub>0</sub> dépasse 1, on parle de <b>surmodulation</b> : le récepteur ne retrouve plus le signal modulant. On garde m ≤ 1.</p>' },
+  attendre(`Reviens à ${Um} = 0,8 V et au modulant sinusoïdal.`, e => [[`${Um} = 0,8 V`, egal(e.Um, .8, .001)], ['modulant : sinusoïde', e.forme === 'sinus']], { Um: .8, forme: 'sinus' }, ''),
+];
+ETAPES.e3 = () => OEM.question(document.getElementById('q3'), { parties: parties3() }, { fin() { ouvrir('e4'); } }, 'cours');
+
+/* ---------- 4. Modulation de fréquence ---------- */
+const parties4 = () => [
+  attendre('Touche le gros bouton <b>FM</b>.', e => [['mode FM', modeFM(e)], [`${Um} d'au moins 0,5 V`, e.Um >= .5 - 1e-9]], { mode: 'fm', comparer: false, Um: .8 }, ''),
+  { type: 'choix', colonne: true, q: 'Qu\'est-ce qui varie maintenant dans le signal modulé ?',
+    options: [o('ok', 'Sa fréquence : les oscillations se resserrent et s\'écartent'), o('a', 'Son amplitude'), o('rien', 'Rien')], bonne: 'ok', melanger: false,
+    indices: { a: 'Les sommets sont tous à la même hauteur : l\'amplitude ne change pas. Regarde l\'écart entre les oscillations.', rien: 'Regarde l\'écart entre deux oscillations voisines au cours du temps.' },
+    solution: '<p>En FM, la <b>fréquence</b> de la porteuse varie ; son amplitude reste constante.</p>' },
+  { type: 'choix', colonne: true, q: 'Regarde les repères en pointillés : quand le signal modulant est <b>haut</b>, les oscillations du signal modulé sont :',
+    options: [o('ok', 'resserrées (la fréquence est plus grande)'), o('ec', 'écartées (la fréquence est plus petite)'), o('id', 'les mêmes qu\'ailleurs')], bonne: 'ok', melanger: false,
+    indices: { ec: 'Regarde le repère « haut » du modulant et le repère « resserrées » juste en dessous.', id: 'Compare l\'écart entre les oscillations près des deux repères.' },
+    solution: '<p>La fréquence instantanée du signal modulé suit le modulant : plus grande quand il est haut, plus petite quand il est bas.</p>' },
+  attendre(`Augmente ${Um} jusqu'à 1,2 V : l'excursion de fréquence ΔF augmente.`, e => [[`${Um} = 1,2 V`, egal(e.Um, 1.2, .001)], ['mode FM', modeFM(e)]], { Um: 1.2, mode: 'fm', comparer: false }, ''),
+  { type: 'choix', colonne: true, q: 'Quand l\'amplitude du modulant augmente, en FM :',
+    options: [o('ok', 'les oscillations se resserrent et s\'écartent davantage (ΔF plus grande)'), o('a', 'l\'amplitude du signal modulé augmente'), o('sur', 'il y a surmodulation')], bonne: 'ok',
+    indices: { a: 'En FM, l\'amplitude reste celle de la porteuse.', sur: 'La surmodulation concerne la modulation d\'amplitude.' },
+    solution: '<p>L\'information est inscrite dans la fréquence : plus le modulant est grand, plus la fréquence s\'écarte de F.</p>' },
+  attendre('Touche « Comparer AM et FM ».', e => [['comparaison affichée', e.comparer]], { comparer: true }, ''),
+  { type: 'choix', q: 'Dans quel signal modulé l\'amplitude reste-t-elle constante ?', options: [o('ok', 'En FM'), o('am', 'En AM'), o('2', 'Dans les deux')], bonne: 'ok', melanger: false,
+    indices: { am: 'En AM, c\'est justement l\'amplitude qui porte l\'information.', 2: 'Regarde les sommets du signal AM : ils montent et descendent.' },
+    solution: '<p>En FM, l\'amplitude est constante : un parasite qui modifie l\'amplitude ne gêne pas la réception. C\'est pourquoi la FM est de meilleure qualité.</p>' },
+];
+ETAPES.e4 = () => OEM.question(document.getElementById('q4'), { parties: parties4() }, { fin() { sim.regler({ comparer: false, mode: 'am', Um: .8 }); ouvrir('e5'); } }, 'cours');
+
+/* ---------- 5. Le spectre ---------- */
+const parties5 = () => [
+  attendre(`Règle : AM, modulant sinusoïdal, ${fm_} = 1 kHz, F = 20 kHz, ${Um} = 0,8 V. Regarde le spectre sous les réglages.`,
+    e => [['mode AM', modeAM(e)], ['sinusoïde', e.forme === 'sinus'], [`${fm_} = 1 kHz`, egal(e.fm, 1, .001)], ['F = 20 kHz', e.F === 20], [`${Um} = 0,8 V`, egal(e.Um, .8, .001)]],
+    { mode: 'am', comparer: false, forme: 'sinus', fm: 1, F: 20, Um: .8 }, ''),
+  { type: 'gabarit', q: 'Autour de la porteuse, le spectre du signal modulé a trois raies. Écris leurs fréquences.',
+    morceaux: [`F − ${fm_} =`, { v: 19, tol: .01 }, 'kHz ;', 'F =', { v: 20, tol: .01 }, 'kHz ;', `F + ${fm_} =`, { v: 21, tol: .01 }, 'kHz'],
+    diag: v => (v[0] === 20 - .5 || v[2] === 20.5 ? `L'écart avec F vaut ${fm_} = 1 kHz.` : 'Lis les raies autour de F = 20 kHz (pas les raies du modulant, près de 0).'),
+    solution: calc(`F − ${fm_} = 20 − 1 = ${c('19 kHz')} ; F = ${c('20 kHz')} ; F + ${fm_} = 20 + 1 = ${c('21 kHz')}`) },
+  { type: 'nombre', q: 'Quelle est la largeur de la bande occupée par le signal modulé ?', label: 'bande =', valeur: 2, unite: 'kHz', tol: .01, signe: false,
+    diag: v => (proche(v, 1) ? `La bande va de F − ${fm_} à F + ${fm_} : elle mesure 2 ${fm_}.` : proche(v, 20) || proche(v, 21) ? 'C\'est une fréquence ; la largeur de la bande est l\'écart entre ses deux bords.' : 'Largeur = 21 kHz − 19 kHz.'),
+    solution: calc(`21 kHz − 19 kHz = ${c('2 kHz')} = 2 × ${fm_}`) },
+  attendre('Touche « Son (3 harmoniques) » : le modulant contient maintenant les fréquences 1, 2 et 3 kHz.', e => [['modulant : son', e.forme === 'son'], [`${fm_} = 1 kHz`, egal(e.fm, 1, .001)], ['mode AM', modeAM(e)]],
+    { forme: 'son', fm: 1, mode: 'am', comparer: false }, ''),
+  { type: 'nombre', q: `La plus haute fréquence du modulant est ${fh} = 3 kHz. Quelle est la largeur de la bande occupée ?`, label: 'bande =', valeur: 6, unite: 'kHz', tol: .01, signe: false,
+    diag: v => (proche(v, 2) ? `Avec le son, la bande va de F − ${fh} à F + ${fh}, ${fh} = 3 kHz étant la plus haute fréquence du modulant.` : proche(v, 3) ? 'Il y a une bande latérale de chaque côté de F : multiplie par 2.' : `Bande occupée = 2 ${fh}.`),
+    solution: calc(`2 ${fh} = 2 × 3 kHz = ${c('6 kHz')}, de 17 kHz à 23 kHz`) + '<p>Les deux bandes latérales (BLI et BLS) sont symétriques par rapport à F.</p>' },
+  { type: 'choix', colonne: true, q: 'Le signal modulé occupe :',
+    options: [o('ok', `une bande plus large que le modulant (2 ${fh} au lieu de ${fh}) : il encombre le spectre`), o('F', 'une seule fréquence, F'), o('meme', 'la même bande que le modulant')], bonne: 'ok',
+    indices: { F: 'Compte les raies autour de F.', meme: `Le modulant va jusqu'à ${fh} ; le modulé va de F − ${fh} à F + ${fh}.` },
+    solution: '<p>La transposition de fréquence élargit la bande occupée : 2 f<sub>h</sub>. C\'est ce qui limite le nombre de stations dans une bande.</p>' },
+  attendre('Coche « Afficher une deuxième station » et règle l\'écart entre les porteuses à 4 kHz.', e => [['deuxième station', e.station2], ['écart = 4 kHz', e.ecart === 4], ['mode AM', modeAM(e)]],
+    { station2: true, ecart: 4, mode: 'am', comparer: false }, ''),
+  { type: 'choix', colonne: true, q: 'Que se passe-t-il ?',
+    options: [o('ok', 'Les bandes des deux stations se chevauchent (hachures) : les émissions se brouillent'), o('rien', 'Rien : les porteuses ont des fréquences différentes')], bonne: 'ok', melanger: false,
+    indices: { rien: 'Regarde la zone hachurée : des raies des deux stations y sont mélangées.' },
+    solution: '<p>Le récepteur ne peut pas séparer les raies des deux stations dans la zone commune : c\'est le <b>brouillage</b>.</p>' },
+  attendre('Augmente l\'écart, juste assez pour que les bandes ne se chevauchent plus.', e => [['deuxième station', e.station2], ['plus de chevauchement', e.station2 && !e.chevauche], ['écart le plus petit possible', e.ecart === 6]],
+    { station2: true, ecart: 6 }, ''),
+  { type: 'nombre', q: 'Quel est l\'écart minimal entre les deux porteuses ?', label: 'F<sub>2</sub> − F =', valeur: 6, unite: 'kHz', tol: .01, signe: false,
+    diag: v => (proche(v, 3) ? `Chaque station occupe 2 ${fh} = 6 kHz : la moitié de chaque bande est de chaque côté de sa porteuse.` : `L'écart minimal est la largeur de la bande occupée, 2 ${fh}.`),
+    solution: calc(`F<sub>2</sub> − F ≥ 2 ${fh} = ${c('6 kHz')}`) + '<p>C\'est la <b>bande passante</b> nécessaire à chaque canal.</p>' },
+];
+ETAPES.e5 = () => OEM.question(document.getElementById('q5'), { parties: parties5() }, { fin() { sim.regler({ station2: false, forme: 'sinus' }); ouvrir('e6'); } }, 'cours');
+
+/* ---------- 6. Défis ---------- */
+// signal modulé tiré au hasard (AM ou FM), lisible
+function signalAuHasard(mode) {
+  const fm = OEM.hasard([.5, .6, .8, 1]), F = Math.round(fm * OEM.hasard([16, 20, 24]));
+  return { mode, e: { fm, F, Um: mode === 'am' ? OEM.hasard([.6, .7, .8]) : OEM.hasard([.9, 1, 1.2]), forme: Math.random() < .3 ? 'son' : 'sinus' } };
+}
+const figure = (type, e, titre) => OEM.fig(W => MOD.svgSignal(type, e, { W: Math.min(W, 640), titre, axeT: false }));
+function defiAMFM(n) {
+  const s = signalAuHasard(Math.random() < .5 ? 'am' : 'fm');
+  return { type: 'choix', q: `<b>Défi ${n}</b> : ce signal est-il modulé en amplitude ou en fréquence ?${figure(s.mode, s.e, 'Signal modulé')}`,
+    options: [o('am', 'AM : modulation d\'amplitude'), o('fm', 'FM : modulation de fréquence')], bonne: s.mode, melanger: false,
+    indices: { am: 'Les sommets sont tous à la même hauteur : l\'amplitude ne varie pas. Ce sont les oscillations qui se resserrent et s\'écartent.',
+      fm: 'Les oscillations sont régulièrement espacées : c\'est la hauteur des sommets (l\'amplitude) qui varie.' },
+    solution: s.mode === 'am' ? '<p>L\'amplitude varie, la fréquence reste la même : modulation d\'amplitude.</p>' : '<p>L\'amplitude est constante, les oscillations se resserrent et s\'écartent : modulation de fréquence.</p>' };
+}
+function defiIdentifier() {
+  const e = { fm: .5, F: 12, Um: .7, forme: 'sinus' };
+  const ordre = OEM.melanger(['modulant', 'porteuse', 'am']);
+  const noms = { modulant: 'le signal modulant', porteuse: 'la porteuse', am: 'le signal modulé' };
+  return { type: 'grille', q: `<b>Défi 4</b> (comme l'exercice 12 p. 246) : identifie chaque signal.<div class="oem-signaux">${ordre.map((t, i) => `<p class="oem-signal-t">Signal ${i + 1}</p>${figure(t, e, '')}`).join('')}</div>`,
+    lignes: ordre.map((t, i) => ({ id: 's' + i, label: `Signal ${i + 1}`, bonne: t,
+      indices: { modulant: 'Le modulant est le signal de basse fréquence (lent).', porteuse: 'La porteuse est une sinusoïde de haute fréquence d\'amplitude constante.', am: 'Le signal modulé est la porteuse dont l\'amplitude varie.' } })),
+    options: [o('modulant', 'Modulant'), o('porteuse', 'Porteuse'), o('am', 'Modulé')],
+    solution: `<p>${ordre.map((t, i) => `Signal ${i + 1} : ${noms[t]}`).join(' ; ')}. Le signal modulé est une modulation d'amplitude : son enveloppe reproduit le modulant.</p>` };
+}
+const parties6 = () => [
+  defiAMFM(1), defiAMFM(2), defiAMFM(3), defiIdentifier(),
+  { type: 'nombre', q: `<b>Défi 5</b> : une station AM transmet de la voix jusqu'à ${fh} = 4,5 kHz. Quelle bande de fréquences occupe son signal modulé ?`, label: 'bande =', valeur: 9, unite: 'kHz', tol: .01, signe: false,
+    diag: v => (proche(v, 4.5) ? 'Il y a une bande latérale de chaque côté de la porteuse : 2 f<sub>h</sub>.' : `Bande occupée = 2 ${fh}.`),
+    solution: calc(`2 ${fh} = 2 × 4,5 kHz = ${c('9 kHz')}`) },
+  { type: 'nombre', q: '<b>Défi 6</b> : quel écart minimal faut-il entre sa porteuse et celle de la station voisine ?', label: 'écart =', valeur: 9, unite: 'kHz', tol: .01, signe: false,
+    diag: v => (proche(v, 4.5) ? 'Chaque station occupe 9 kHz : l\'écart entre porteuses doit valoir au moins cette largeur.' : 'Écart ≥ 2 f<sub>h</sub>.'),
+    solution: '<p>Écart ≥ 2 f<sub>h</sub> = <span class="c">9 kHz</span> : c\'est l\'écart utilisé entre les stations grandes ondes.</p>' },
+];
+ETAPES.e6 = () => OEM.question(document.getElementById('q6'), { parties: parties6() }, {
+  fin() {
+    ouvrir('bilan');
+    OEM.marquer({ fait: true });                                      // simulation faite (sommaire, accueil)
+  },
+}, 'cours');
+
+ETAPES.e1();
+OEM.menu('module_3_simulation');
+</script>
+</body>
+</html>

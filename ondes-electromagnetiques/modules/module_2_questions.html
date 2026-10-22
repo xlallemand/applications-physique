@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions sur les fréquences des télécommunications — Chapitre 19 : Ondes électromagnétiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="oem.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="oem.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : bande d'une fréquence en GHz (1),
+   en MHz (1), en kHz (1) ; bande d'une onde de λ donnée en m (1) et en
+   cm ou mm (1) ; étiquettes à placer dans les bandes (1) ; bornes
+   d'une bande (1) ; plus petite longueur d'onde d'une bande (1) ;
+   portée (1) ; débit (1).
+   Erreurs diagnostiquées : préfixe (bande décalée de 3 rangs), λ
+   comparée directement aux bornes, sens de l'échelle, portée et débit
+   inversés, bornes d'une bande voisine.
+   ============================================================ */
+const { o, fq, fmt, hasard, melanger, proche, fr, sci, C } = OEM;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const C8 = '3,00 × 10<sup>8</sup>';
+
+// bande d'une fréquence f : diagnostic pour chaque mauvaise bande
+function partieBande(f, q, viaLambda) {
+  const b = OEM.bande(f), indices = {};
+  OEM.BANDES.forEach(x => { if (x.id !== b.id) indices[x.id] = OEM.diagBande(f, x.id, viaLambda); });
+  return fq.choix(q, OEM.optionsBande(), b.id, { melanger: false, indices, solution: `<p>${OEM.txtF(f, 2)} est entre ${b.bornes.replace(' à ', ' et ')} : bande <b>${b.id}</b>.</p>` });
+}
+function qBandeF(liste, theme) {
+  const [f, t] = hasard(liste);
+  return { theme, enonce: OEM.figBandes(), parties: [partieBande(f, `Dans quelle bande est une onde radio de fréquence f = ${t} ?`)] };
+}
+const qGHz = () => qBandeF([[2.4e9, '2,4 GHz'], [5e9, '5 GHz'], [10e9, '10 GHz'], [26e9, '26 GHz'], [60e9, '60 GHz'], [1.5e9, '1,5 GHz'], [77e9, '77 GHz']], 'Bande d\'une fréquence (GHz)');
+const qMHz = () => qBandeF([[100e6, '100 MHz'], [446e6, '446 MHz'], [27e6, '27 MHz'], [6e6, '6 MHz'], [800e6, '800 MHz'], [150e6, '150 MHz'], [1.2e6, '1,2 MHz'], [13.56e6, '13,56 MHz']], 'Bande d\'une fréquence (MHz)');
+const qKHz = () => qBandeF([[162e3, '162 kHz'], [135e3, '135 kHz'], [77.5e3, '77,5 kHz'], [600e3, '600 kHz'], [1500e3, '1 500 kHz'], [40e3, '40 kHz']], 'Bande d\'une fréquence (kHz)');
+
+// bande d'une onde de longueur d'onde donnée : f = c / λ d'abord
+function qBandeL(liste, theme) {
+  const [l, t] = hasard(liste), f = C / l, nb = parseFloat(t.replace(',', '.'));
+  return { theme, enonce: `<p>Une onde radio a pour longueur d'onde λ = ${t}.</p>${OEM.figBandes()}`, parties: [
+    { type: 'sci', q: 'Calcule sa fréquence f.', label: 'f =', valeur: f, unite: 'Hz', rel: .02, cs: 2, diag: v => OEM.diagFreq(v, l, nb),
+      solution: calc(`f = ${fr('c', 'λ')} = ${fr(C8, sci(l, 2))} = ${c(sci(f, 2) + ' Hz')} = ${OEM.txtF(f, 2)}`) },
+    partieBande(f, 'Dans quelle bande est cette onde ?')] };
+}
+const qLm = () => qBandeL([[3, '3,0 m'], [2000, '2,0 km'], [50, '50 m'], [300, '300 m'], [.5, '0,50 m'], [20, '20 m']], 'Bande à partir de λ (m)');
+const qLcm = () => qBandeL([[.03, '3,0 cm'], [.005, '5,0 mm'], [.5, '50 cm'], [.012, '1,2 cm'], [.2, '20 cm']], 'Bande à partir de λ (cm ou mm)');
+
+function qEtiquettes() {
+  return { theme: 'Usages et bandes', parties: [OEM.partieEtiquettes({ n: 4 })] };
+}
+function qBornes() {
+  const i = Math.floor(Math.random() * 7), b = OEM.BANDES[i];
+  const voisines = [i - 1, i + 1, i + 3, i - 3].filter(k => k >= 0 && k < 7).slice(0, 3);
+  return { theme: 'Bornes d\'une bande', parties: [fq.choix(`Entre quelles fréquences s'étend la bande ${b.id} ?`,
+    [o('ok', b.bornes)].concat(voisines.map(k => o('b' + k, OEM.BANDES[k].bornes))), 'ok',
+    { indice: 'Bandes, de la plus haute fréquence à la plus basse : EHF, SHF, UHF, VHF, HF, MF, BF ; chacune couvre un facteur 10, avec des bornes « 3 × 10<sup>n</sup> ».',
+      solution: `<p>La bande ${b.id} va de ${b.bornes}.</p>` })] };
+}
+function qLambdaMin() {
+  const b = hasard(OEM.BANDES.filter(x => ['UHF', 'VHF', 'HF', 'MF', 'SHF'].includes(x.id))), fmax = b.min * 10, l = C / fmax;
+  return { theme: 'Longueurs d\'onde d\'une bande', enonce: `<p>La bande ${b.id} va de ${b.bornes}.</p>`,
+    parties: [fq.nombre('Quelle est la plus petite longueur d\'onde des ondes de cette bande ?', 'λ<sub>min</sub> =', l, 'm', { rel: .01, signe: false,
+      diag: v => (proche(v, l * 10, .02) ? 'La plus petite longueur d\'onde correspond à la plus <b>grande</b> fréquence de la bande.' : OEM.diagLambda(v, fmax)),
+      solution: calc(`λ<sub>min</sub> = ${fr('c', 'f<sub>max</sub>')} = ${fr(C8, sci(fmax, 1))} = ${c(fmt(+l.toPrecision(3)) + ' m')}`) + '<p>La plus grande fréquence donne la plus petite longueur d\'onde.</p>' })] };
+}
+function qPortee() {
+  const [a, b] = melanger([[700e6, '700 MHz'], [26e9, '26 GHz'], [2.6e9, '2,6 GHz'], [162e3, '162 kHz'], [100e6, '100 MHz']]).slice(0, 2).sort((x, y) => x[0] - y[0]);
+  return { theme: 'Portée', parties: [fq.choix(`Deux émetteurs de même puissance émettent à ${a[1]} et à ${b[1]}. Lequel a la plus grande portée ?`,
+    [o('bas', `Celui à ${a[1]}`), o('haut', `Celui à ${b[1]}`)], 'bas',
+    { melanger: false, indices: { haut: 'Les hautes fréquences ont une faible portée ; ce sont les basses fréquences qui portent loin.' },
+      solution: `<p>La plus basse fréquence (${a[1]}) porte le plus loin et pénètre mieux dans les bâtiments.</p>` })] };
+}
+function qDebit() {
+  const [a, b] = melanger([[800e6, '800 MHz'], [3.5e9, '3,5 GHz'], [26e9, '26 GHz'], [135e3, '135 kHz'], [433e6, '433 MHz']]).slice(0, 2).sort((x, y) => x[0] - y[0]);
+  return { theme: 'Débit', parties: [fq.choix(`Pour transmettre le plus grand débit d'information, vaut-il mieux utiliser ${a[1]} ou ${b[1]} ?`,
+    [o('bas', a[1]), o('haut', b[1])], 'haut',
+    { melanger: false, indices: { bas: 'Les basses fréquences portent loin, mais leur débit est plus faible.' },
+      solution: `<p>La plus haute fréquence (${b[1]}) permet le meilleur débit, avec une portée plus faible.</p>` })] };
+}
+
+// tirage : une question de chaque sorte
+function tirage() {
+  return [qGHz, qMHz, qKHz, qLm, qLcm, qEtiquettes, qBornes, qLambdaMin, qPortee, qDebit].map(f => f());
+}
+
+OEM.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Fréquences des télécommunications',
+  intro: '<p class="er-contexte">10 questions : bande d\'une fréquence ou d\'une longueur d\'onde, usages à placer, portée et débit. Donnée : c = 3,00 × 10<sup>8</sup> m·s<sup>−1</sup>.</p>',
+  questions: tirage,
+  revoir: { href: 'module_2a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3_simulation.html', label: 'Module 3 : modulation →' },
+});
+OEM.menu('module_2_questions');
+</script>
+</body>
+</html>

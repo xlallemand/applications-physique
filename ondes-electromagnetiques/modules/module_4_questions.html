@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : questions sur les antennes — Chapitre 19 : Ondes électromagnétiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="oem.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="oem.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : antenne demi-onde à partir de λ (1),
+   quart d'onde à partir de λ (1), demi-onde à partir de f en MHz
+   (λ puis L) (1), demi-onde à partir de f en GHz, en cm (1), quart
+   d'onde à partir de f en kHz (1), fréquence pour une antenne donnée
+   (1), type d'antenne (1), nombre de tours d'un fil bobiné (1), taille
+   optimale (1), effet d'un changement de fréquence (1).
+   Erreurs diagnostiquées : λ / 2 oublié, λ × 2, demi-onde et quart
+   d'onde confondues, préfixe non converti, L et p dans des unités
+   différentes.
+   ============================================================ */
+const { o, fq, fmt, hasard, proche, fr, sci, C } = OEM;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const C8 = '3,00 × 10<sup>8</sup>';
+const p10 = k => `10<sup>${Math.round(Math.log10(k))}</sup>`;
+const diagL = (v, l, n) => (proche(v, l, .02) ? `C'est λ : l'antenne mesure λ / ${n}.` : proche(v, l * n, .02) ? `On divise λ par ${n} (et non on multiplie).`
+  : proche(v, l / (n === 2 ? 4 : 2), .02) ? `Une antenne ${n === 2 ? 'demi-onde' : 'quart d\'onde'} mesure λ / ${n}.` : '');
+const NOM = { 2: 'demi-onde', 4: 'quart d\'onde' };
+
+// antenne à partir de λ
+function qDepuisL(n) {
+  const [nb, u] = hasard(n === 2 ? [[2, 'm'], [6, 'm'], [300, 'm'], [1.2, 'm'], [80, 'cm']] : [[12, 'cm'], [2, 'm'], [40, 'cm'], [1.2, 'm'], [600, 'm']]);
+  return { theme: `Antenne ${NOM[n]}`, enonce: `<p>Une onde a pour longueur d'onde λ = ${fmt(nb)} ${u}.</p>`, parties: [fq.nombre(`Quelle est la longueur d'une antenne ${NOM[n]} adaptée à cette onde ?`, 'L =', nb / n, u,
+    { rel: .01, signe: false, diag: v => diagL(v, nb, n) || `L = λ / ${n}.`, solution: calc(`L = ${fr('λ', n)} = ${fr(fmt(nb) + ' ' + u, n)} = ${c(fmt(nb / n) + ' ' + u)}`) })] };
+}
+// antenne à partir de f : λ puis L (unité du résultat u, facteur ku vers le mètre)
+function qDepuisF(n, liste, pre, k, u, ku, deux) {
+  const nb = hasard(liste), f = nb * k, l = C / f, L = l / n / ku;
+  const solL = calc(`λ = ${fr('c', 'f')} = ${fr(C8, fmt(nb) + ' × ' + p10(k))} = ${fmt(+l.toPrecision(3))} m`);
+  const partieL = fq.nombre(`Quelle est la longueur L de l'antenne ${NOM[n]} ?`, 'L =', L, u, { rel: .01, signe: false,
+    diag: v => diagL(v, l / ku, n) || (proche(v, l / n, .02) && ku !== 1 ? `Le résultat est demandé en ${u}.` : OEM.diagLambda(v * n, f, nb, u) + ` Puis L = λ / ${n}.`),
+    solution: (deux ? '' : solL) + calc(`L = ${fr('λ', n)} = ${fr(fmt(+l.toPrecision(3)) + ' m', n)} = ${ku === 1 ? c(fmt(+L.toPrecision(3)) + ' m') : `${fmt(+(l / n).toPrecision(3))} m = ${c(fmt(+L.toPrecision(3)) + ' ' + u)}`}`) });
+  const parties = deux ? [fq.nombre('Calcule d\'abord la longueur d\'onde λ.', 'λ =', l, 'm', { rel: .01, signe: false, diag: v => OEM.diagLambda(v, f, nb), solution: solL }), partieL] : [partieL];
+  return { theme: `Antenne ${NOM[n]} à partir de f`, enonce: `<p>On veut une antenne ${NOM[n]} pour une onde de fréquence f = ${fmt(nb)} ${pre}.</p>`, parties };
+}
+const qFMHz = () => qDepuisF(2, [150, 50, 600, 75, 300, 30], 'MHz', 1e6, 'm', 1, true);
+const qFGHz = () => qDepuisF(2, [1, 1.5, 2.5, 3, 5], 'GHz', 1e9, 'cm', 1e-2, false);
+const qFkHz = () => qDepuisF(4, [150, 300, 600, 200], 'kHz', 1e3, 'm', 1, false);
+
+function qInverse() {
+  const [Lcm, f] = hasard([[15, 1e9], [75, 2e8], [6, 2.5e9], [50, 3e8], [25, 6e8], [30, 5e8]]), l = 2 * Lcm / 100;
+  return { theme: 'Fréquence d\'une antenne', enonce: `<p>Une antenne demi-onde mesure L = ${fmt(Lcm)} cm.</p>`, parties: [
+    fq.nombre('Quelle est la longueur d\'onde λ de l\'onde qu\'elle reçoit le mieux ?', 'λ =', l, 'm', { rel: .01, signe: false,
+      diag: v => (proche(v, Lcm / 200, .02) ? 'L = λ / 2, donc λ = 2 L (on multiplie).' : proche(v, 2 * Lcm, .02) ? 'En mètres : 1 cm = 0,01 m.' : 'λ = 2 L, en mètres.'),
+      solution: calc(`λ = 2 L = 2 × ${fmt(Lcm / 100)} m = ${c(fmt(l) + ' m')}`) }),
+    { type: 'sci', q: 'Quelle est sa fréquence f ?', label: 'f =', valeur: f, unite: 'Hz', rel: .02, cs: 2, diag: v => OEM.diagFreq(v, l),
+      solution: calc(`f = ${fr('c', 'λ')} = ${fr(C8, fmt(l))} = ${c(sci(f, 2) + ' Hz')} = ${OEM.txtF(f, 2)}`) }] };
+}
+function qType() {
+  const [l, L, n] = hasard([[2, .5, 4], [2, 1, 2], [3, .75, 4], [3, 1.5, 2], [.6, .3, 2], [.6, .15, 4], [4, 4, 1]]);
+  const nom = { 1: 'pleine onde', 2: 'demi-onde', 4: 'quart d\'onde' };
+  return { theme: 'Type d\'antenne', enonce: `<p>Une antenne de longueur L = ${fmt(L)} m reçoit des ondes de longueur d'onde λ = ${fmt(l)} m.</p>`,
+    parties: [fq.choix('De quel type d\'antenne s\'agit-il ?', [o('1', 'pleine onde (L = λ)'), o('2', 'demi-onde (L = λ / 2)'), o('4', 'quart d\'onde (L = λ / 4)')], String(n),
+      { melanger: false, indice: 'Calcule λ / L : c\'est le nombre n de L = λ / n.', solution: calc(`${fr('λ', 'L')} = ${fr(fmt(l), fmt(L))} = ${n}`) + `<p>Antenne ${nom[n]}.</p>` })] };
+}
+function qBobine() {
+  const [L, a, b] = hasard([[11, 8, 5], [11, 6.5, 4.5], [22, 7, 4], [5.5, 6, 5], [1111, 6.5, 4.5], [44, 8, 3]]), p = 2 * a + 2 * b, n = L / (p / 100);
+  return { theme: 'Antenne bobinée', enonce: `<p>Une antenne demi-onde de longueur L = ${fmt(L)} m est bobinée sur un rectangle de ${fmt(a)} cm × ${fmt(b)} cm.</p>`, parties: [
+    fq.nombre('Combien de tours de fil faut-il bobiner ?', 'n ≈', n, 'tours', { rel: .02, signe: false,
+      diag: v => (proche(v, L / p, .03) ? 'Convertis le périmètre en mètres (1 cm = 0,01 m).' : proche(v, L / ((a + b) / 100), .03) ? 'Le périmètre est 2 × longueur + 2 × largeur.' : 'n = L / p, avec p = 2 × longueur + 2 × largeur, en mètres.'),
+      solution: calc(`p = 2 × ${fmt(a)} + 2 × ${fmt(b)} = ${fmt(p)} cm = ${fmt(p / 100)} m ; n = ${fr(fmt(L) + ' m', fmt(p / 100) + ' m')} ≈ ${c(fmt(Math.round(n)) + ' tours')}`) })] };
+}
+function qOptimale() {
+  return hasard([
+    { theme: 'Taille d\'une antenne', parties: [fq.choix('La taille optimale d\'une antenne est égale :', [o('ok', 'à la longueur d\'onde λ'), o('f', 'à la fréquence f'), o('c', 'à c / λ')], 'ok',
+      { indices: { f: 'Une taille est une longueur : elle se compare à λ, pas à f.', c: 'c / λ est la fréquence.' }, solution: '<p>La taille optimale est λ ; en pratique on prend λ / 2 (demi-onde) ou λ / 4 (quart d\'onde).</p>' })] },
+    { theme: 'Taille d\'une antenne', parties: [fq.choix('En pratique, quel sous-multiple de λ est le plus efficace pour une antenne ?', [o('ok', 'la demi-onde, L = λ / 2'), o('q', 'le quart d\'onde, L = λ / 4'), o('d', 'le dixième d\'onde, L = λ / 10')], 'ok',
+      { indices: { q: 'Le quart d\'onde est plus court, mais moins efficace.', d: 'Plus l\'antenne est petite par rapport à λ, moins elle est efficace.' }, solution: '<p>Le sous-multiple le plus efficace est la demi-longueur d\'onde.</p>' })] },
+  ]);
+}
+function qVariation() {
+  const [k, mot] = hasard([[2, 'double'], [3, 'est multipliée par 3'], [10, 'est multipliée par 10']]);
+  return { theme: 'Fréquence et taille de l\'antenne', parties: [fq.choix(`Si la fréquence ${mot}, la longueur d'une antenne demi-onde :`,
+    [o('ok', `est divisée par ${k}`), o('x', `est multipliée par ${k}`), o('id', 'ne change pas')], 'ok',
+    { melanger: false, indices: { x: 'L = λ / 2 = c / (2 f) : f est au dénominateur.', id: 'L dépend de λ, donc de f.' }, solution: `<p>L = ${fr('c', '2 f')} : si f est multipliée par ${k}, L est divisée par ${k}. Les hautes fréquences ont de petites antennes.</p>` })] };
+}
+
+// tirage : une question de chaque sorte
+function tirage() {
+  return [() => qDepuisL(2), () => qDepuisL(4), qFMHz, qFGHz, qFkHz, qInverse, qType, qBobine, qOptimale, qVariation].map(f => f());
+}
+
+OEM.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 4 · QUESTIONS', titre: 'Antennes',
+  intro: '<p class="er-contexte">10 questions : longueur d\'une antenne demi-onde ou quart d\'onde, à partir de λ ou de f, fréquence d\'une antenne donnée, antenne bobinée. Donnée : c = 3,00 × 10<sup>8</sup> m·s<sup>−1</sup>.</p>',
+  questions: tirage,
+  revoir: { href: 'module_4_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_5.html', label: 'Module 5 : exercices →' },
+});
+OEM.menu('module_4_questions');
+</script>
+</body>
+</html>

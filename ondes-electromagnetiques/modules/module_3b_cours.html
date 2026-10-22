@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : spectre et bande passante — Chapitre 19 : Ondes électromagnétiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="oem.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="modulation.js"></script>
+<script src="oem.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 2 / 2</span>
+    <h2 class="er-titre">Spectre et bande passante</h2>
+    <p class="er-contexte">Le signal modulé occupe une <b>bande de fréquences</b> autour de la porteuse F, de largeur <b>2 f<sub>h</sub></b>. Un canal doit avoir une <b>bande passante</b> au moins égale pour transmettre le signal sans le déformer.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 2 du module 3 : spectre du signal modulé (figure du
+   manuel refaite : composantes du modulant de f_b à f_h, bandes
+   latérales inférieure et supérieure, bande occupée 2 f_h de F − f_h
+   à F + f_h) ; bande passante d'un canal (au moins 2 f_max) et
+   nombre de canaux dans une bande.
+   Erreurs diagnostiquées : f_h au lieu de 2 f_h, bornes F ± 2 f_h,
+   comparaison avec f_max au lieu de 2 f_max.
+   Valeurs vérifiées : 162 kHz et 4,5 kHz → 157,5 à 166,5 kHz, 9 kHz ;
+   (238,5 − 148,5) / 9 = 10 canaux ; (108 − 87,5) / 0,1 = 205 ;
+   (1 606,5 − 526,5) / 9 = 120 ; (446,1 − 446) / 0,012 5 = 8.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, proche, hasard, melanger, fr, o } = OEM;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const fh = 'f<sub>h</sub>', fb = 'f<sub>b</sub>';
+const sub = (t, i) => `${t}<tspan dy="3" font-size="0.75em">${i}</tspan><tspan dy="-3"></tspan>`;
+
+// figure du manuel : composantes du modulant (de f_b à f_h), puis signal modulé autour de F
+function svgSpectreCours(W) {
+  const A = [.55, .7, .62, .5, .38, .3, .22], F = 22, pas = .5, f0 = 1.5, n = A.length;
+  const raies = A.map((a, i) => ({ f: f0 + i * pas, a, cls: 'mod-raie-mod' }));
+  A.forEach((a, i) => { raies.push({ f: F - f0 - i * pas, a: a / 2 }, { f: F + f0 + i * pas, a: a / 2 }); });
+  raies.push({ f: F, a: 1, cls: 'mod-raie-p' });
+  const fhv = f0 + (n - 1) * pas;
+  return MOD.svgRaies({ W, H: W < 480 ? 250 : 270, fmax: 31, pasF: 100, etiqF: [], amax: 1.2, pasA: 100, etiqA: [], haut: 34, titreF: 'Fréquence', titreA: 'Amplitude', raies,
+    aria: 'Spectre : à gauche les composantes du signal modulant, de f_b à f_h ; à droite le signal modulé : porteuse F, bande latérale inférieure de F − f_h à F − f_b, bande latérale supérieure de F + f_b à F + f_h ; bande occupée 2 f_h',
+    avant: g => `<rect class="mod-bande" x="${g.X(F - fhv)}" y="${g.y0}" width="${g.X(F + fhv) - g.X(F - fhv)}" height="${g.y1 - g.y0}"/>`,
+    apres: g => {
+      const t = (x, y, s, a) => `<text class="mod-txt" x="${x}" y="${y}" text-anchor="${a || 'middle'}">${s}</text>`;
+      let s = MOD.accolade(g.X(F - fhv), g.X(F + fhv), g.y0 - 16, `bande occupée : 2 ${sub('f', 'h')}`);
+      s += MOD.accolade(g.X(f0), g.X(fhv), g.Y(.82), W < 480 ? 'modulant' : 'modulant');
+      s += t(g.X(f0), g.y1 + 16, sub('f', 'b')) + t(g.X(fhv), g.y1 + 16, sub('f', 'h'));
+      s += t(g.X(F), g.y1 + 16, 'F') + `<text class="mod-txt-raie" x="${g.X(F)}" y="${g.Y(1) - 6}" text-anchor="middle">porteuse</text>`;
+      if (W >= 480) s += t(g.X(F - fhv), g.y1 + 16, `F − ${sub('f', 'h')}`) + t(g.X(F + fhv), g.y1 + 16, `F + ${sub('f', 'h')}`);
+      s += t((g.X(F - fhv) + g.X(F)) / 2, g.Y(.55), 'BLI') + t((g.X(F + fhv) + g.X(F)) / 2, g.Y(.55), 'BLS');
+      return s;
+    } });
+}
+
+/* ---------- 1. Spectre du signal modulé ---------- */
+const BANDE = hasard([[252, 4], [198, 4.5], [1000, 5], [180, 3], [600, 4.5]]);
+function etape1(c_) {
+  const carte = c_.carte('1. Spectre du signal modulé');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Le signal modulant contient des fréquences de ${fb} (la plus basse) à ${fh} (la plus haute). Après modulation, on trouve autour de la porteuse F deux <b>bandes latérales</b> symétriques : la bande latérale inférieure (BLI), de F − ${fh} à F − ${fb}, et la bande latérale supérieure (BLS), de F + ${fb} à F + ${fh}.</p>
+      ${OEM.fig(W => svgSpectreCours(Math.min(W, 640)))}
+      <div class="cle"><p><b class="cle-titre">Bande occupée.</b> Le signal modulé occupe la bande de <b>F − ${fh}</b> à <b>F + ${fh}</b>, de largeur :</p>
+        <p class="crs-formule">bande occupée = 2 ${fh}</p>
+        <p>Le signal modulé occupe une bande plus large que le modulant : la transposition encombre le spectre électromagnétique.</p></div>
+    </div>
+    ${exemple(`<p>Une radio grandes ondes émet avec une porteuse F = 162 kHz ; la voix transmise va jusqu'à ${fh} = 4,5 kHz.</p>
+      ${calc(`F − ${fh} = 162 − 4,5 = 157,5 kHz ; F + ${fh} = 162 + 4,5 = 166,5 kHz`)}
+      ${calc(`bande occupée = 2 ${fh} = 2 × 4,5 = ${c('9 kHz')}`)}`)}`);
+  const [F, h] = BANDE;
+  c_.aToi(carte, [{ titre: 'Bande occupée', enonce: `<p>Une station AM a pour porteuse F = ${fmt(F)} kHz ; le signal modulant va jusqu'à ${fh} = ${fmt(h)} kHz.</p>`, parties: [
+    { type: 'champs', ligne: true, q: 'Entre quelles fréquences s\'étend le signal modulé ?',
+      champs: [{ label: `F − ${fh} =`, valeur: F - h, tol: .01, unite: 'kHz', signe: false }, { label: `F + ${fh} =`, valeur: F + h, tol: .01, unite: 'kHz', signe: false }],
+      diag: v => (proche(v[0], F - 2 * h) || proche(v[1], F + 2 * h) ? `De chaque côté de F, on ajoute ou on retranche ${fh} (pas 2 ${fh}).` : `Calcule F − ${fh} et F + ${fh}.`),
+      solution: calc(`F − ${fh} = ${fmt(F)} − ${fmt(h)} = ${c(fmt(F - h) + ' kHz')} ; F + ${fh} = ${fmt(F)} + ${fmt(h)} = ${c(fmt(F + h) + ' kHz')}`) },
+    { type: 'nombre', q: 'Quelle est la largeur de la bande occupée ?', label: '2 f<sub>h</sub> =', valeur: 2 * h, unite: 'kHz', tol: .01, signe: false,
+      diag: v => (proche(v, h) ? `Il y a une bande latérale de chaque côté de F : la largeur vaut 2 ${fh}.` : 'Largeur = (F + f<sub>h</sub>) − (F − f<sub>h</sub>).'),
+      solution: calc(`2 ${fh} = 2 × ${fmt(h)} = ${c(fmt(2 * h) + ' kHz')}`) }] }]);
+  return carte;
+}
+
+/* ---------- 2. Bande passante d'un canal ---------- */
+const CAS = melanger([[12.5, 4.2, true], [9, 5, false], [25, 10, true], [10, 6, false], [9, 4.5, true], [20, 12, false]]).slice(0, 1);
+const CANAUX = hasard([[526.5, 1606.5, 9, 'kHz', 'Petites ondes'], [87.5, 108, .1, 'MHz', 'Bande FM'], [446, 446.1, .0125, 'MHz', 'Talkies-walkies (PMR 446)']]);
+function etape2(c_) {
+  const carte = c_.carte('2. Bande passante d\'un canal');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Bande passante d'un canal.</b> C'est l'écart entre les porteuses de deux canaux voisins. Pour transmettre un signal sans le déformer, elle doit être au moins égale à <b>2 f<sub>max</sub></b> (f<sub>max</sub> : plus haute fréquence du signal à transmettre) :</p>
+        <p class="crs-formule">bande passante ≥ 2 f<sub>max</sub></p></div>
+      <p>Le nombre de canaux d'une bande est la largeur de la bande divisée par la largeur d'un canal.</p>
+    </div>
+    ${exemple(`<p>Des canaux sont espacés de 12,5 kHz ; on veut transmettre un son jusqu'à f<sub>max</sub> = 4,2 kHz :</p>
+      ${calc(`2 f<sub>max</sub> = 2 × 4,2 = 8,4 kHz &nbsp; et &nbsp; 8,4 kHz ≤ 12,5 kHz`)}<p>La bande passante est ${c('suffisante')}.</p>
+      <p>Bande des grandes ondes, de 148,5 kHz à 238,5 kHz, avec des canaux de 9 kHz :</p>
+      ${calc(`${fr('238,5 − 148,5', '9')} = ${fr('90', '9')} = ${c('10 canaux')}`)}`)}`);
+  const [bp, fmax, ok] = CAS[0], [a, b, l, u, nom] = CANAUX, nb = Math.round((b - a) / l);
+  c_.aToi(carte, [
+    { titre: 'Bande passante suffisante ?', enonce: `<p>Des canaux sont espacés de ${fmt(bp)} kHz. On veut transmettre un signal dont la plus haute fréquence est f<sub>max</sub> = ${fmt(fmax)} kHz.</p>`, parties: [
+      { type: 'choix', q: 'La bande passante d\'un canal est-elle suffisante ?', options: [o('oui', 'Oui'), o('non', 'Non')], bonne: ok ? 'oui' : 'non', melanger: false,
+        indices: { oui: `Compare la bande passante à 2 f<sub>max</sub> = ${fmt(2 * fmax)} kHz, pas à f<sub>max</sub>.`, non: `2 f<sub>max</sub> = ${fmt(2 * fmax)} kHz : compare à ${fmt(bp)} kHz.` },
+        solution: calc(`2 f<sub>max</sub> = 2 × ${fmt(fmax)} = ${fmt(2 * fmax)} kHz ${ok ? '≤' : '&gt;'} ${fmt(bp)} kHz`) + `<p>La bande passante est ${c(ok ? 'suffisante' : 'insuffisante')}.</p>` }] },
+    { titre: 'Nombre de canaux', enonce: `<p>${nom} : de ${fmt(a)} ${u} à ${fmt(b)} ${u}, avec des canaux de ${fmt(l)} ${u}.</p>`, parties: [
+      { type: 'nombre', q: 'Combien de canaux peut-on y placer ?', label: 'N =', valeur: nb, unite: 'canaux', tol: .01, signe: false,
+        diag: v => (proche(v, nb + 1) ? 'On compte les canaux (des intervalles), pas les bornes : N = largeur de la bande / largeur d\'un canal.' : 'N = largeur de la bande / largeur d\'un canal, les deux dans la même unité.'),
+        solution: calc(`N = ${fr(fmt(b) + ' − ' + fmt(a), fmt(l))} = ${fr(fmt(+(b - a).toFixed(4)), fmt(l))} = ${c(nb)}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Le signal modulé occupe la bande de <b>F − f<sub>h</sub></b> à <b>F + f<sub>h</sub></b> : bande occupée = <b>2 f<sub>h</sub></b> (f<sub>h</sub> : plus haute fréquence du modulant).</p></div>
+    <div class="cle"><p>La <b>bande passante</b> d'un canal (écart entre les porteuses de deux canaux voisins) doit être au moins égale à <b>2 f<sub>max</sub></b>.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions du module 3 →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#spectre">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+OEM.menu('module_3b_cours');
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : bande passante — Chapitre 17 : Spectre d'un signal périodique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="sp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="sp.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 2 / 2</span>
+    <h2 class="er-titre">Bande passante</h2>
+    <p class="er-contexte">Pour transmettre un signal, il faut transmettre les fréquences de ses harmoniques. Un système ne transmet que les fréquences de sa <b>bande passante</b> : les harmoniques perdus changent la <b>forme</b> du signal, pas sa <b>fréquence</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 2 du module 3 : intervalle de fréquences pour transmettre
+   certains harmoniques (exemple du cours : [150 Hz ; 450 Hz], largeur
+   300 Hz) ; bande passante d'un système (créneau de 200 Hz dans une
+   bande de 0 à 700 Hz : rangs 1 et 3 transmis) ; la fréquence du signal
+   transmis reste celle du fondamental.
+   Valeurs (vérifiées par un script) : [200 ; 1 000] Hz, largeur 800 Hz ;
+   bande [100 ; 700] Hz avec f1 = 150 Hz : rangs 1 à 4.
+   ============================================================ */
+const { exemple } = COURS;
+const { o, fmt, proche } = SP;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const CRENEAU = { f1: 200, a0: 0, a: FOURIER.PREDEFINIS.creneau.a.slice(0, 9) };
+const TRANSMIS = { f1: 200, a0: 0, a: CRENEAU.a.slice(0, 3) };
+const FIG = { tmax: 10, pasT: 1, ymin: -1.5, ymax: 1.5, pasY: .5, nom: 'u', unite: 'V', H: 190, Wmax: 440 };
+
+/* ---------- 1. Intervalle de fréquences ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Intervalle de fréquences à transmettre');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Pour transmettre des harmoniques, il faut transmettre l'<b>intervalle de fréquences</b> qui va du plus bas au plus haut d'entre eux. Sa <b>largeur</b> est la différence de ses bornes.</p></div>
+    </div>
+    ${exemple(`<p>Exemple du cours (f<sub>1</sub> = 150 Hz) : pour transmettre le fondamental et les harmoniques de rangs 2 et 3, il faut transmettre les fréquences de f<sub>1</sub> = 150 Hz à f<sub>3</sub> = 3 × 150 = 450 Hz.</p>
+      ${calc(`Intervalle : ${c('[150 Hz ; 450 Hz]')} ; largeur : 450 − 150 = ${c('300 Hz')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Un autre signal', enonce: '<p>Un signal a un fondamental de fréquence f<sub>1</sub> = 200 Hz. On veut transmettre le fondamental et les harmoniques jusqu\'au rang 5.</p>', parties: [
+      { type: 'champs', ligne: true, q: 'Quel intervalle de fréquences faut-il transmettre ?',
+        champs: [{ label: '[', valeur: 200, unite: 'Hz ;', signe: false }, { label: '', valeur: 1000, unite: 'Hz ]', signe: false }],
+        diag: v => (proche(v[1], 1200) || proche(v[1], 205) ? 'La borne haute est la fréquence du rang 5 : 5 × 200 Hz.' : proche(v[0], 0) ? 'La borne basse est la fréquence du fondamental (il n\'y a pas de composante continue à transmettre).' : 'Du fondamental (rang 1) au rang 5 : de f<sub>1</sub> à 5 × f<sub>1</sub>.'),
+        solution: calc(`De f<sub>1</sub> = 200 Hz à f<sub>5</sub> = 5 × 200 = 1 000 Hz : ${c('[200 Hz ; 1 000 Hz]')}`) },
+      { type: 'nombre', q: 'Quelle est la largeur de cet intervalle ?', label: 'Δf =', valeur: 800, unite: 'Hz', signe: false,
+        diag: v => (proche(v, 1000) ? 'La largeur est la différence des bornes : 1 000 − 200.' : proche(v, 1200) ? 'On soustrait les bornes, on ne les ajoute pas.' : 'Δf = borne haute − borne basse.'),
+        solution: calc(`Δf = 1 000 − 200 = ${c('800 Hz')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Bande passante d'un système ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. Bande passante d\'un système');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> La <b>bande passante</b> d'un système (câble, amplificateur, haut-parleur…) est l'intervalle des fréquences qu'il transmet avec une bonne qualité. Seuls les harmoniques de cette bande sont transmis.</p></div>
+      <div class="cle"><p>Supprimer des harmoniques change la <b>forme</b> du signal, mais <b>pas sa fréquence</b>, qui est celle du fondamental.</p></div>
+    </div>
+    ${exemple(`<p>Un créneau de fréquence 200 Hz traverse un système de bande passante 0 à 700 Hz : seuls le fondamental (200 Hz) et l'harmonique de rang 3 (600 Hz) passent.</p>
+      ${SP.figSpectre(FOURIER.raies(CRENEAU), { Wmax: 560, H: 190, fmax: 2000, pasF: 100, etiqF: [0, 500, 1000, 1500, 2000], amax: 1.5, pasA: .25, etiqA: [0, .5, 1, 1.5], bande: [0, 700], etiquettes: true })}
+      <div class="sp-figs deux"><div>${SP.figSignal(CRENEAU, FIG)}<p class="sp-fig-leg">Signal à l'entrée</p></div>
+        <div>${SP.figSignal(TRANSMIS, FIG)}<p class="sp-fig-leg">Signal transmis : même période (5 ms), autre forme</p></div></div>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Quels harmoniques passent ?', enonce: '<p>Un signal de fréquence f<sub>1</sub> = 150 Hz contient tous les harmoniques jusqu\'au rang 8. Il traverse un système de bande passante [100 Hz ; 700 Hz].</p>', parties: [
+      { type: 'choix', colonne: true, q: 'Quels rangs sont transmis ?',
+        options: [o('ok', 'Les rangs 1, 2, 3 et 4 (150, 300, 450 et 600 Hz)'), o('5', 'Les rangs 1 à 5'), o('7', 'Les rangs 1 à 7 (jusqu\'à 700 Hz)'), o('2', 'Les rangs 2 à 4 seulement')], bonne: 'ok',
+        indices: { 5: 'Le rang 5 est à 5 × 150 = 750 Hz : au-dessus de 700 Hz.', 7: '700 Hz est une fréquence, pas un rang : calcule n × 150 Hz pour chaque rang.', 2: 'Le fondamental est à 150 Hz : il est bien dans [100 Hz ; 700 Hz].' },
+        solution: '<p>150, 300, 450 et 600 Hz sont dans la bande ; 750 Hz (rang 5) et au-delà sont coupés.</p>' },
+      { type: 'choix', colonne: true, q: 'Quelle est la fréquence du signal transmis ?',
+        options: [o('ok', '150 Hz, comme le signal d\'entrée'), o('600', '600 Hz, le dernier harmonique transmis'), o('700', '700 Hz, la limite de la bande passante')], bonne: 'ok',
+        indices: { 600: 'La fréquence d\'un signal est celle de son fondamental.', 700: 'La bande passante limite les harmoniques transmis, elle ne fixe pas la fréquence du signal.' },
+        solution: '<p>Le fondamental est transmis : la fréquence reste 150 Hz. Seule la forme change.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Pour transmettre les harmoniques de rang 1 à n : l'intervalle <b>[f<sub>1</sub> ; n × f<sub>1</sub>]</b>, de largeur n × f<sub>1</sub> − f<sub>1</sub>.</p></div>
+    <div class="cle"><p>Un système ne transmet que les harmoniques de sa <b>bande passante</b>. Les harmoniques perdus changent la forme du signal, <b>pas sa fréquence</b> (celle du fondamental).</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions : exploiter les graphiques →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_4.html">Module 4 : exercices</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#bande">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+SP.menu('module_3b_cours');
+</script>
+</body>
+</html>

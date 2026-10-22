@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : domaines des ondes électromagnétiques — Chapitre 19 : Ondes électromagnétiques</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="oem.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="oem.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS 2 / 2</span>
+    <h2 class="er-titre">Domaines des ondes électromagnétiques</h2>
+    <p class="er-contexte">Rayons γ, rayons X, ultraviolet, visible, infrarouge, micro-ondes, ondes radio : ce sont toutes des ondes électromagnétiques, rangées en <b>domaines</b> selon leur <b>longueur d'onde</b> (ou leur fréquence).</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 2 du module 1 : l'échelle des ondes électromagnétiques
+   (domaines, λ et f), domaine d'une onde (λ donnée, ou f à convertir) ;
+   outil « placer une onde sur l'échelle » (repère à glisser, saisie
+   de f ou de λ), puis « À toi » : placer une onde donnée.
+   Erreurs diagnostiquées : f placée sur l'axe des λ, préfixe faux,
+   micro-ondes confondues avec les ondes radio.
+   Valeur vérifiée : 2,45 GHz → λ = 0,122 m (micro-ondes).
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, proche, hasard, melanger, fr, sci, C, o } = OEM;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+
+const qDomaine = OEM.partieDomaine;
+
+/* ---------- 1. L'échelle des ondes électromagnétiques ---------- */
+const ONDES = melanger([[6e-7, '600 nm'], [1e-5, '10 µm'], [2, '2 m'], [.05, '5 cm'], [1e-9, '1 nm'], [2e-7, '200 nm'], [1e-12, '10<sup>−12</sup> m'], [500, '500 m']]).slice(0, 2);
+const ONDE_F = hasard([[1e15, '1,0 × 10<sup>15</sup> Hz'], [1e8, '100 MHz'], [1e18, '1,0 × 10<sup>18</sup> Hz'], [3e13, '3,0 × 10<sup>13</sup> Hz']]);
+function etape1(c_) {
+  const carte = c_.carte('1. L\'échelle des ondes électromagnétiques');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Les ondes électromagnétiques sont rangées selon leur longueur d'onde. L'échelle est <b>logarithmique</b> : chaque graduation est une puissance de 10. On lit λ en haut et f = c / λ en bas.</p>
+      ${OEM.fig(W => OEM.svgEM({ W: Math.min(W, 760) }))}
+      <div class="cle"><p><b class="cle-titre">Domaines.</b></p>
+        <div class="crs-defile"><table class="crs-tab"><thead><tr><th>Domaine</th><th>λ</th></tr></thead><tbody>
+          ${OEM.DOMAINES.map(d => `<tr><td>${d.id === 'visible' ? 'lumière visible' : d.nom}</td><td>${OEM.BORNES_DOM[d.id]}</td></tr>`).join('')}
+        </tbody></table></div>
+        <p>Les ondes radio utilisées en télécommunications vont de 1 mm à 10 km (les micro-ondes en font partie).</p>
+        <p>Quand λ augmente, f diminue (f = c / λ) : les rayons γ ont les plus grandes fréquences, les ondes radio les plus petites.</p></div>
+      <div class="ph-lien-app"><p>Revois le spectre de la lumière et l'énergie des photons</p><a class="btn-small" href="../../energie-lumiere/index.html" target="_blank" rel="noopener">Chapitre 10 ↗</a></div>
+    </div>
+    ${exemple(`<p>Un four à micro-ondes émet à f = 2 450 MHz = 2,45 × 10<sup>9</sup> Hz :</p>
+      ${calc(`λ = ${fr('c', 'f')} = ${fr('3,00 × 10<sup>8</sup>', '2,45 × 10<sup>9</sup>')} = ${c('0,122 m')} = 12,2 cm`)}
+      <p>12,2 cm est entre 1 mm et 30 cm : ce sont bien des <b>micro-ondes</b>.</p>`)}`);
+  const lf = C / ONDE_F[0];
+  c_.aToi(carte, ONDES.map(([l, t], i) => ({ titre: `Domaine d'une onde (${i + 1})`, parties: [qDomaine(l, t)] })).concat([
+    { titre: 'À partir de la fréquence', enonce: `<p>Une onde a pour fréquence f = ${ONDE_F[1]}.</p>`, parties: [
+      { type: 'sci', q: 'Calcule sa longueur d\'onde.', label: 'λ =', valeur: lf, unite: 'm', rel: .02, cs: 2, diag: v => OEM.diagLambda(v, ONDE_F[0]),
+        solution: calc(`λ = ${fr('c', 'f')} = ${fr('3,00 × 10<sup>8</sup>', ONDE_F[1].replace(' Hz', '').replace('100 MHz', '100 × 10<sup>6</sup>'))} = ${c(sci(lf, 2) + ' m')}`) },
+      qDomaine(lf, sci(lf, 2) + ' m', 'Dans quel domaine est cette onde ?')] },
+  ]));
+  return carte;
+}
+
+/* ---------- 2. Placer une onde sur l'échelle ---------- */
+const PLACER = [
+  hasard([[1e8, '100 MHz', 'f'], [2.4e9, '2,4 GHz', 'f'], [5e14, '5 × 10<sup>14</sup> Hz', 'f'], [1e17, '10<sup>17</sup> Hz', 'f'], [200e3, '200 kHz', 'f']]),
+  hasard([[1e-10, '10<sup>−10</sup> m', 'l'], [3e-6, '3 µm', 'l'], [.03, '3 cm', 'l'], [300, '300 m', 'l'], [3e-7, '300 nm', 'l']]),
+];
+function etape2(c_) {
+  const carte = c_.carte('2. Placer une onde sur l\'échelle');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>Pour placer une onde : on repère sa longueur d'onde sur l'axe du haut, <b>ou</b> sa fréquence sur l'axe du bas. Une graduation = une puissance de 10 ; 3 × 10<sup>n</sup> est un peu avant le milieu entre 10<sup>n</sup> et 10<sup>n+1</sup>.</p>
+    </div>
+    ${exemple(`<p>Fais glisser le repère sur l'échelle (ou utilise le curseur) : λ, f et le domaine s'affichent. Tu peux aussi écrire une fréquence ou une longueur d'onde, puis toucher « Placer sur l'échelle ». Essaie avec f = 2 450 MHz (le four à micro-ondes).</p>
+      ${OEM.outil(d => OEM.monterEchelle(d, { saisie: true, lg: Math.log10(.122) }))}`)}`);
+  c_.aToi(carte, PLACER.map(([v, t, g], i) => ({ titre: `Place cette onde (${i + 1})`, parties: [OEM.partieEchelle({ donnee: g, valeur: v, texte: t })] })));
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Des plus petites aux plus grandes longueurs d'onde : rayons <b>γ</b>, rayons <b>X</b>, <b>ultraviolet</b>, <b>visible</b> (400 à 800 nm), <b>infrarouge</b>, <b>micro-ondes</b> (1 mm à 30 cm), <b>ondes radio</b>.</p></div>
+    <div class="cle"><p>Quand λ augmente, la fréquence f = c / λ diminue. Pour trouver le domaine d'une onde dont on connaît f, on calcule d'abord λ = c / f.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions du module 1 →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html#domaines">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+OEM.menu('module_1b_cours');
+</script>
+</body>
+</html>
