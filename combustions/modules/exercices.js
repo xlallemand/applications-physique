@@ -130,15 +130,12 @@
       </g>
     </svg>`;
 
-  // pictogrammes de sécurité du kérosène (sujet de bac A), le premier est entouré
-  const losange = (x, h, entoure) => `<g transform="translate(${x},0)">${entoure ? '<rect x="2" y="2" width="76" height="76" rx="6" fill="none" stroke="#0a7d57" stroke-width="3"/>' : ''}
-      <path d="M40,8 L72,40 L40,72 L8,40 Z" fill="#ffffff" stroke="#16181d" stroke-width="3.5" stroke-linejoin="round"/>${h}</g>`;
-  const pictos = `<svg class="co-fig co-pictos" viewBox="0 0 340 80" role="img" aria-label="Quatre pictogrammes de sécurité : une flamme (entourée), un point d'exclamation, un buste avec une étoile sur la poitrine (danger pour la santé), un arbre mort et un poisson (danger pour l'environnement)">
-      ${losange(0, '<path d="M40,58 c-10,0 -14,-8 -10,-16 c2,4 4,5 6,5 c-3,-8 2,-16 8,-20 c-1,7 4,9 6,14 c2,-2 3,-5 3,-8 c5,7 5,25 -13,25 z" fill="#16181d"/><line x1="26" y1="61" x2="54" y2="61" stroke="#16181d" stroke-width="3"/>', true)}
-      ${losange(86, '<rect x="36" y="22" width="8" height="26" rx="3" fill="#16181d"/><circle cx="40" cy="56" r="4.5" fill="#16181d"/>')}
-      ${losange(172, '<circle cx="40" cy="26" r="6" fill="#16181d"/><path d="M27,58 c0,-16 5,-24 13,-24 c8,0 13,8 13,24 z" fill="#16181d"/><path d="M40,38 l2.5,6 l6,0.5 l-4.6,4 l1.5,6 l-5.4,-3.2 l-5.4,3.2 l1.5,-6 l-4.6,-4 l6,-0.5 z" fill="#ffffff"/>')}
-      ${losange(258, '<path d="M28,56 V32 M28,40 l-7,-7 M28,44 l7,-8 M28,36 l5,-6" stroke="#16181d" stroke-width="2.5" fill="none"/><path d="M38,54 c4,-6 14,-6 18,0 c-4,6 -14,6 -18,0 z M56,54 l6,-5 v10 z" fill="#16181d"/><line x1="20" y1="60" x2="62" y2="60" stroke="#16181d" stroke-width="2"/>')}
-    </svg>`;
+  // pictogrammes de sécurité du kérosène (sujet de bac A), le premier est entouré ;
+  // images communes : assets/pictogrammes/ (le texte de remplacement décrit le dessin sans donner sa signification)
+  const PICTO = '../../assets/pictogrammes/';
+  const picto = (nom, alt, entoure) => `<span class="co-picto${entoure ? ' entoure' : ''}"><img src="${PICTO}${nom}.png" alt="${alt}" width="62" height="62"></span>`;
+  const pictos = `<span class="co-pictos">${picto('inflammable', 'pictogramme entouré : une flamme', true)}${picto('nocif-irritant', 'pictogramme : un point d\'exclamation')}
+      ${picto('danger-sante', 'pictogramme : un buste avec une étoile sur la poitrine')}${picto('danger-environnement', 'pictogramme : un arbre mort et un poisson')}</span>`;
 
   // formule semi-développée du propylène glycol (sujet de bac B)
   const glycol = `<svg class="co-fig co-glycol" viewBox="0 0 220 84" role="img" aria-label="Formule semi-développée du propylène glycol : CH2 – CH – CH3, un groupe OH lié au premier carbone et un groupe OH lié au deuxième carbone">
@@ -424,7 +421,8 @@
           <b>5.</b> Calculer la masse m<sub>CO<sub>2</sub></sub> de dioxyde de carbone rejetée durant ce vol de 24 h. <b>6.</b> En déduire la masse de dioxyde de carbone qu'aurait rejetée un avion consommant du kérosène, en nombre entier de tonnes.</p>`,
       parties: [
         choix('1. Que signifie le pictogramme entouré (la flamme) ?', [o('comb', 'comburant'), o('ok', 'inflammable'), o('expl', 'explosif'), o('tox', 'toxique')], 'ok',
-          '<p>La flamme seule signifie <b>inflammable</b>.</p>',
+          `<div class="co-pictos co-pictos-legende"><span>${picto('inflammable', 'pictogramme inflammable')}<b>inflammable</b></span><span>${picto('comburant', 'pictogramme comburant')}<b>comburant</b></span></div>
+          <p>La flamme seule signifie <b>inflammable</b>. À ne pas confondre avec « comburant » : une flamme au-dessus d'un cercle.</p>`,
           { indices: { comb: 'Le pictogramme « comburant » montre une flamme <b>au-dessus d\'un cercle</b> ; ici, la flamme est seule.', expl: 'Le pictogramme « explosif » montre une bombe qui éclate.', tox: 'Le pictogramme « toxique » montre une tête de mort.' } }),
         choix('Quelles précautions faut-il prendre ?', [
           o('ok', 'manipuler le kérosène loin de toute flamme ou étincelle et le conserver à l\'abri de la chaleur'),

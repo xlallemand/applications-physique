@@ -606,8 +606,13 @@
       parties: [{ nom: 'La méthode', cours: 'module_1' }] },
     { n: 2, titre: 'Équilibrer une combustion', desc: 'Rappel sur l\'équilibrage, méthode C, H puis O, entraînement noté', fiche: 'fiche_2',
       parties: [{ nom: 'Équilibrer une combustion', cours: 'module_2_cours', entrainement: 'module_2' }] },
-    { n: 3, titre: 'Masse, quantité de matière, masse molaire', desc: 'n = m / M, masse molaire d\'une molécule', fiche: 'fiche_3',
-      parties: [{ nom: 'Masse et quantité de matière', cours: 'module_3_cours', questions: 'module_3' }] },
+    { n: 3, titre: 'Masse, quantité de matière, masse molaire', desc: 'n = m / M, masse molaire d\'une molécule ; avec un volume, m = ρ × V et n = c × V', fiche: 'fiche_3',
+      // deux sous-modules de cours (avec une masse, avec un volume), puis les questions et la fiche
+      sousModules: true,
+      parties: [
+        { nom: 'Avec une masse', slug: 'masse', cours: 'module_3a_cours', noms: { cours: 'Cours : avec une masse' } },
+        { nom: 'Avec un volume', slug: 'volume', cours: 'module_3b_cours', noms: { cours: 'Cours : avec un volume' } },
+        { nom: 'Masse et quantité de matière', questions: 'module_3' }] },
     { n: 4, titre: 'Les relations stœchiométriques', desc: 'Quantités consommées et formées, proportionnelles aux nombres stœchiométriques', fiche: 'fiche_4',
       parties: [{ nom: 'Relations stœchiométriques', cours: 'module_4_cours', questions: 'module_4' }] },
     { n: 5, titre: 'L\'énergie libérée', desc: 'Pouvoir calorifique, E = PC × m', fiche: 'fiche_5',
