@@ -1,0 +1,160 @@
+/* ============================================================
+   Styles de l'application « Rappels de 1ère STI2D » (chimie) :
+   questions et exercices (repris de « Chapitre 13 : Énergie
+   nucléaire »), puis formules semi-développées (atomes à entourer,
+   groupes entourés) et pictogrammes de sécurité.
+   Complète assets/theme.css, le fichier er.css de l'application
+   « Équilibrer une réaction » (cartes, boutons, écran de fin) et
+   assets/sommaire.css (navigation, accueil, fiches).
+   ============================================================ */
+
+.er-page button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.er-page p { margin: 0; }
+sub, sup { font-size: .7em; line-height: 0; }
+
+/* (blocs communs avec l'application « pH » : cours, « À toi », questions, graphiques, exercices) */
+/* ---------- Cours ---------- */
+.er-etape .cle { margin: 12px 0; }
+.cle p + p, .cours-bloc p + p, .cours-exemple p + p { margin-top: 8px; }
+.cours-bloc { margin: 0 0 12px; }
+.cours-bloc .cle { margin: 12px 0 0; }
+.cours-exemple { line-height: 1.6; }
+.cours-exemple-t { font-size: .8rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px !important; }
+.ph-formule { text-align: center; font-size: 1.35rem; font-weight: 700; margin: 10px 0 !important; color: var(--ink); line-height: 1.5; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ph-formule.grand { font-size: 1.6rem; }
+@media (max-width: 480px) { .ph-formule { font-size: 1.12rem; } .ph-formule.grand { font-size: 1.3rem; } }
+.ph-calc { font-size: 1.1rem; line-height: 2.1; font-variant-numeric: tabular-nums; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ph-calc .c { color: var(--accent-ink); font-weight: 800; }
+@media (max-width: 480px) { .ph-calc { font-size: 1rem; } }
+.ph-r { color: var(--accent-ink); font-weight: 800; }
+.ph-lien-app {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  background: var(--cle-bg); border-radius: 16px; padding: 10px 12px 10px 16px; margin: 14px 0;
+}
+.ph-lien-app p { font-size: .92rem; color: var(--ink); font-weight: 600; }
+.ph-lien-app a { text-decoration: none; }
+.ph-grille2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 640px) { .ph-grille2 { grid-template-columns: 1fr; } }
+.ph-tableau { border-collapse: collapse; margin: 10px auto; font-variant-numeric: tabular-nums; }
+.ph-tableau th, .ph-tableau td { border: 1.5px solid var(--paper-3); padding: 6px 12px; text-align: center; white-space: nowrap; }
+.ph-tableau th { background: var(--paper); font-weight: 700; }
+.ph-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 480px) { .ph-tableau th, .ph-tableau td { padding: 5px 7px; font-size: .9rem; } }
+
+
+/* ---------- Questions ---------- */
+.ph-enonce { margin-bottom: 12px; line-height: 1.55; }
+.ph-partie + .ph-partie { margin-top: 16px; padding-top: 14px; border-top: 1.5px dashed var(--paper-3); }
+.ph-partie-q { font-weight: 700; color: var(--ink); margin-bottom: 10px !important; line-height: 1.5; }
+.ph-partie-aide { margin-top: 10px; }
+.ph-partie-aide .btn-small { color: var(--ink-2); }
+.ph-msg { margin-top: 10px !important; font-size: .92rem; color: var(--ink-2); font-weight: 600; }
+.ph-ok { margin-top: 8px !important; color: var(--success-text); font-weight: 800; }
+.ph-actions-partie { margin-top: 10px; }
+.ph-bilan { margin-top: 16px; }
+.ph-solution { line-height: 1.6; }
+.ph-solution .ph-calc { font-size: 1.02rem; line-height: 1.9; }
+.ph-question .er-consigne { margin-bottom: 8px !important; }
+
+/* Choix */
+.ph-choix { display: flex; flex-wrap: wrap; gap: 8px; }
+.ph-choix-col { flex-direction: column; align-items: stretch; }
+.ph-choix button { min-height: 46px; text-align: left; line-height: 1.4; border-radius: 16px; padding: 10px 18px; }
+.ph-choix button:disabled { cursor: default; opacity: 1; }
+.ph-choix button.juste { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); color: var(--success-text); }
+.ph-choix button.faux { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+.ph-choix svg { display: block; width: 150px; max-width: 100%; height: auto; }
+
+/* Valeur numérique */
+
+/* ---------- Exercices (module 6) ---------- */
+.ph-ex-groupe { margin-bottom: 18px; }
+.ph-ex-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; }
+.ph-ex-carte {
+  display: flex; align-items: center; gap: 12px; text-align: left; width: 100%;
+  background: var(--paper); border: none; border-radius: 18px; padding: 14px 16px; cursor: pointer; font: inherit; color: var(--ink);
+  transition: background .15s;
+}
+.ph-ex-carte:hover { background: var(--paper-2); }
+.ph-ex-num { flex-shrink: 0; min-width: 40px; height: 40px; border-radius: 999px; display: grid; place-items: center; background: var(--cle-bg); color: var(--accent-ink); font-weight: 800; font-size: .85rem; padding: 0 6px; }
+.ph-ex-carte.fait .ph-ex-num { background: var(--success-bg); color: var(--success-text); }
+.ph-ex-titre { font-weight: 800; line-height: 1.25; }
+.ph-ex-desc { font-size: .85rem; color: var(--ink-2); margin-top: 2px; line-height: 1.35; }
+.ph-ex-score { font-size: .78rem; font-weight: 700; color: var(--success-text); margin-top: 3px; }
+.ph-contexte { background: var(--cle-bg); border-color: var(--cle-line); }
+.ph-contexte .er-contexte { color: var(--ink); }
+.ph-donnees { margin-top: 8px !important; font-size: .92rem; color: var(--ink-2); line-height: 1.55; }
+.ph-ex-nav { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; }
+.ph-retour-liste { border: none; background: none; font: 700 .9rem var(--font-sans); color: var(--ink-2); cursor: pointer; padding: 6px 0; }
+.ph-retour-liste:hover { color: var(--ink); }
+.ph-ex-carte:focus-visible, .ph-retour-liste:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- Formule semi-développée : une colonne par atome et par liaison ---------- */
+.rp-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 8px 0; text-align: center; }
+.rp-mol { position: relative; display: inline-grid; grid-auto-columns: auto; align-items: center; justify-items: center; margin: 0 auto;
+  font-size: 1.25rem; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; padding: 4px 10px; }
+.rp-at { display: inline-flex; align-items: center; justify-content: center; padding: 4px 6px; border-radius: 999px; line-height: 1.1; white-space: nowrap; }
+.rp-lh { width: 22px; height: 2px; background: var(--ink); }
+.rp-lv { width: 2px; height: 16px; background: var(--ink); }
+.rp-lv.double { width: 8px; background: none; border-left: 2px solid var(--ink); border-right: 2px solid var(--ink); }
+/* outil « entourer » : chaque atome est un bouton */
+.rp-mol-outil .rp-at { min-width: 44px; min-height: 44px; border: none; background: none; font: inherit; color: inherit; cursor: pointer;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: background .15s, box-shadow .15s; }
+.rp-mol-outil .rp-at:hover { background: var(--paper-2); }
+.rp-mol-outil .rp-at:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rp-mol-outil .rp-at.choisi { background: var(--cle-bg); box-shadow: inset 0 0 0 2.5px var(--accent); color: var(--accent-ink); }
+.rp-mol-outil .rp-at:disabled { cursor: default; background: none; }
+.rp-outil { background: var(--sheet); border-radius: 16px; }
+/* groupes entourés, numérotés comme sur la correction */
+.rp-cercle { position: absolute; border: 2.5px solid var(--accent); border-radius: 50%; pointer-events: none; }
+.rp-cercle.large { border-radius: 22px; }
+.rp-cercle i { position: absolute; top: -9px; right: -9px; min-width: 19px; height: 19px; padding: 0 4px; border-radius: 999px; background: var(--accent); color: var(--sheet);
+  font: 800 .7rem/19px var(--font-sans); font-style: normal; text-align: center; }
+.rp-legende { list-style: none; padding: 0; margin: 4px 0 0; display: flex; flex-direction: column; gap: 4px; font-size: .95rem; }
+.rp-legende i { display: inline-block; min-width: 19px; height: 19px; border-radius: 999px; background: var(--accent); color: var(--sheet); font: 800 .7rem/19px var(--font-sans); font-style: normal; text-align: center; }
+@media (max-width: 480px) { .rp-mol { font-size: 1.08rem; padding: 4px 4px; } .rp-lh { width: 14px; } .rp-mol-outil .rp-at { min-width: 40px; } }
+
+/* tableau des deux groupes (cours, fiche) */
+.rp-groupes { border-collapse: collapse; margin: 10px auto; }
+.rp-groupes th, .rp-groupes td { border: 1.5px solid var(--paper-3); padding: 6px 12px; text-align: center; vertical-align: middle; }
+.rp-groupes th { background: var(--paper); font-weight: 700; }
+.rp-groupes .rp-mol { font-size: 1.05rem; }
+.rp-groupes .rp-defile { padding: 0; }
+
+/* ---------- Pictogrammes de sécurité ---------- */
+.rp-picto { display: block; width: 72px; height: 72px; }
+.rp-picto-fig { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.rp-picto-fig figcaption { font-size: .85rem; font-weight: 700; line-height: 1.25; max-width: 120px; }
+.rp-pictos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 10px; margin: 10px auto; max-width: 460px; }
+.rp-pictos-ligne { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 8px 0; }
+.rp-pictos-groupe { font-size: .78rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent-ink); margin: 12px 0 2px !important; text-align: center; }
+.rp-picto-seul { display: flex; justify-content: center; margin: 6px 0 10px; }
+.rp-picto-seul .rp-picto { width: 96px; height: 96px; }
+.rp-picto-entoure { display: inline-flex; padding: 3px; border-radius: 12px; box-shadow: inset 0 0 0 3px var(--accent); }
+/* choix dont les options sont des pictogrammes */
+.rp-choix-images { justify-content: center; }
+.rp-choix-images button { padding: 8px; border-radius: 16px; }
+.rp-choix-images button .rp-picto { width: 64px; height: 64px; }
+/* tableau des pictogrammes, danger et précautions (fiche) */
+.rp-tab-pictos { border-collapse: collapse; width: 100%; }
+.rp-tab-pictos th, .rp-tab-pictos td { border: 1.5px solid var(--paper-3); padding: 6px 8px; text-align: left; vertical-align: middle; font-size: .92rem; line-height: 1.4; }
+.rp-tab-pictos th { background: var(--paper); font-weight: 700; }
+.rp-tab-pictos td:first-child { text-align: center; }
+.rp-tab-pictos .rp-picto { width: 54px; height: 54px; margin: 0 auto; }
+@media (max-width: 480px) { .rp-pictos { gap: 10px 6px; } .rp-picto-fig figcaption { font-size: .78rem; } .rp-tab-pictos th, .rp-tab-pictos td { font-size: .84rem; padding: 5px; } }
+/* exemples corrigés de la fiche */
+.rp-fiche-ex + .rp-fiche-ex { margin-top: 12px; padding-top: 10px; border-top: 1.5px dashed var(--paper-3); }
+.rp-pictos .rp-picto-fig { justify-self: center; }
+/* tableau des deux groupes : plus serré sur téléphone, pour tenir dans la largeur */
+@media (max-width: 480px) {
+  .rp-groupes th, .rp-groupes td { padding: 5px 5px; font-size: .86rem; }
+  .rp-groupes .rp-mol { font-size: .92rem; padding: 2px; }
+  .rp-groupes .rp-lh { width: 10px; }
+}
+/* texte d'un atome : dans un span, les indices restent sous la ligne ; le C d'un atome qui porte un substituant
+   est repéré (.rp-c) : la liaison verticale est décalée sur lui (RP.aligner) */
+.rp-txt { display: inline; }
+.rp-vide { width: 0; }
+/* groupe carboxyle complet pendant la sélection : un seul cercle autour du groupe */
+.rp-mol-outil .rp-at.choisi.dans-groupe { box-shadow: none; }
+.rp-cercle.provisoire { border-style: solid; }

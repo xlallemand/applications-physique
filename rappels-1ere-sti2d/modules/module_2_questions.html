@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions sur les pictogrammes de sécurité — Rappels de 1ère STI2D</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rp.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : signification d'un pictogramme (4),
+   pictogramme d'un danger (2), inflammable ou comburant (1),
+   précautions (2), étiquette à plusieurs pictogrammes (1).
+   Mauvais choix : les pictogrammes qui se ressemblent (RP.PROCHES).
+   ============================================================ */
+const { o, fq, PICTOS, PICTO, picto, partieSens, partieImage, partiePrecaution, hasard, melanger } = RP;
+const seul = id => `<div class="rp-picto-seul">${picto(id)}</div>`;
+
+// signification (image donnée)
+const qSens = id => ({ theme: 'Signification', enonce: seul(id), parties: [partieSens(id)], bilan: `${PICTO(id).nom} : ${PICTO(id).danger}.` });
+// pictogramme (danger donné)
+const qImage = id => ({ theme: 'Reconnaître le pictogramme', parties: [partieImage(id)], bilan: `${PICTO(id).nom} : ${PICTO(id).dessin}.` });
+// précaution
+const qPrecaution = id => ({ theme: 'Précautions', enonce: seul(id),
+  parties: [partieSens(id), partiePrecaution(id)], bilan: `${PICTO(id).nom} : ${PICTO(id).precaution}.` });
+// inflammable ou comburant ?
+function qFeu() {
+  return hasard([
+    { theme: 'Inflammable ou comburant ?', consigne: 'Le dioxygène pur ne brûle pas lui-même, mais il fait brûler les autres produits beaucoup plus vite.',
+      parties: [partieImage('comburant', 'Quel pictogramme porte une bouteille de dioxygène ?')], bilan: 'Comburant : une flamme au-dessus d\'un cercle.' },
+    { theme: 'Inflammable ou comburant ?', consigne: 'L\'éthanol (alcool à brûler) prend feu au contact d\'une flamme.',
+      parties: [partieImage('inflammable', 'Quel pictogramme porte un flacon d\'éthanol ?')], bilan: 'Inflammable : une flamme seule.' },
+  ]);
+}
+// étiquette : lequel de ces dangers n'est pas signalé ?
+function qEtiquette() {
+  const ids = melanger(PICTOS.map(x => x.id)), sur = ids.slice(0, 3), absent = ids[3];
+  return { theme: 'Lire une étiquette', consigne: 'L\'étiquette d\'un produit porte ces trois pictogrammes :',
+    enonce: `<div class="rp-pictos-ligne">${sur.map(id => picto(id)).join('')}</div>`,
+    parties: [fq.choix('Lequel de ces dangers n\'est <b>pas</b> signalé ?', sur.concat([absent]).map(id => o(id, PICTO(id).nom)), absent, {
+      colonne: true,
+      indices: Object.fromEntries(sur.map(id => [id, `${PICTO(id).nom} est bien signalé : c'est ${PICTO(id).dessin}.`])),
+      solution: `<div class="rp-pictos-ligne">${sur.map(id => picto(id, { legende: true })).join('')}</div><p>Le danger « ${PICTO(absent).nom} » n'est pas signalé.</p>` })] };
+}
+
+function tirage() {
+  const ids = melanger(PICTOS.map(x => x.id));
+  // sens : 4 pictogrammes différents ; image : 2 autres ; précautions : 2 autres
+  return [qSens(ids[0]), qSens(ids[1]), qImage(ids[2]), qFeu(), qSens(ids[3]), qPrecaution(ids[4]), qImage(ids[5]), qSens(ids[6]), qPrecaution(ids[7]), qEtiquette()];
+}
+
+RP.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Les pictogrammes de sécurité',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : la signification d\'un pictogramme, le pictogramme d\'un danger, les précautions à prendre et la lecture d\'une étiquette.</p>',
+  questions: tirage,
+  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3.html', label: 'Module 3 : exercices →' },
+});
+RP.menu('module_2_questions');
+</script>
+</body>
+</html>

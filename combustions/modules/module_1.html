@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 1 : L'exercice type et la méthode — Combustions</title>
+<title>Module 1 : l'exercice type et la méthode — Chapitre 14 : Combustions</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../assets/molecules.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
@@ -38,13 +38,16 @@ const { fmt, hasard, melanger, exemple } = COURS;
 const fH = CO.fH;
 const frac = (a, b) => `<span class="co-frac"><span>${a}</span><span>${b}</span></span>`;
 
-// Situations des « À toi » de l'étape 1 (mêmes situations que les exercices du module 7)
+// Situations des « À toi » de l'étape 1 : d'autres combustions que l'exemple
+// (mêmes situations que l'entraînement du module 6)
 const SITUATIONS = [
-  { f: 'CH4', nom: 'le méthane', texte: `Une gazinière brûle 80 g de méthane ${fH('CH4')}.` },
-  { f: 'C3H8', nom: 'le propane', texte: `Un barbecue au gaz brûle 220 g de propane ${fH('C3H8')}.` },
-  { f: 'C4H10', nom: 'le butane', texte: `Un réchaud de camping brûle 29 g de butane ${fH('C4H10')}.` },
-  { f: 'C8H18', nom: 'l\'octane', texte: `Un moteur à essence brûle 1 140 g d'octane ${fH('C8H18')}.` },
+  { f: 'CH4', nom: 'le méthane', de: 'de méthane', m: '80 g', texte: `Une gazinière brûle 80 g de méthane ${fH('CH4')}.` },
+  { f: 'C3H8', nom: 'le propane', de: 'de propane', m: '220 g', texte: `Un barbecue au gaz brûle 220 g de propane ${fH('C3H8')}.` },
+  { f: 'C4H10', nom: 'le butane', de: 'de butane', m: '29 g', texte: `Un réchaud de camping brûle 29 g de butane ${fH('C4H10')}.` },
+  { f: 'C8H18', nom: 'l\'octane', de: 'd\'octane', m: '1 140 g', texte: `Un moteur à essence brûle 1 140 g d'octane ${fH('C8H18')}.` },
 ];
+// énoncé d'une autre combustion, encadré pour le distinguer de l'exemple (23 g d'éthanol)
+const autreEnonce = (n, s, question) => `<div class="co-autre"><p class="co-autre-t">Autre combustion n° ${n} · un autre combustible que l'éthanol</p><p>${s.texte} ${question}</p></div>`;
 
 /* ---------- 1. L'exercice type ---------- */
 function etape1(c) {
@@ -56,33 +59,45 @@ function etape1(c) {
     ${exemple(`<p>Dans l'exercice type :</p>
       <ul class="er-liste"><li>le <b>combustible</b> est l'éthanol ${fH('C2H6O')} : il brûle en réagissant avec le dioxygène ${fH('O2')} de l'air ;</li>
         <li>la <b>donnée</b> est la masse de combustible brûlé : m = 23 g ;</li>
-        <li>on <b>cherche</b> la masse de ${fH('CO2')} formé, puis l'énergie libérée.</li></ul>`)}`);
+        <li>on <b>cherche</b> la masse de ${fH('CO2')} formé, puis l'énergie libérée.</li></ul>`)}
+    <p class="co-guide">Dans les questions « À toi », ce n'est plus l'éthanol : ce sont <b>d'autres combustions</b>. Dans chaque nouvel énoncé, repère le combustible, le rôle du ${fH('CO2')}, la donnée et ce qu'on cherche.</p>`);
   const [a, b] = melanger(SITUATIONS);
   c.aToi(carte, [
-    { titre: 'Le combustible',
-      enonce: `<p>${a.texte} Calcule la masse de dioxyde de carbone formé.</p>`,
-      parties: [{ type: 'choix', q: 'Quel est le combustible ?',
-        options: [{ id: 'ok', label: `${a.nom} ${fH(a.f)}` }, { id: 'O2', label: `le dioxygène ${fH('O2')}` },
-          { id: 'CO2', label: `le dioxyde de carbone ${fH('CO2')}` }, { id: 'H2O', label: `l'eau ${fH('H2O')}` }],
-        bonne: 'ok',
-        indices: {
-          O2: 'Le dioxygène de l\'air est l\'autre réactif : il fait brûler le combustible, mais ce n\'est pas lui qu\'on brûle.',
-          CO2: 'Le dioxyde de carbone est <b>formé</b> par la combustion : c\'est un produit, pas le combustible.',
-          H2O: 'L\'eau est <b>formée</b> par la combustion : c\'est un produit, pas le combustible.',
-        },
-        solution: `<p>Le combustible est ${a.nom} : c'est lui qui brûle, en réagissant avec le dioxygène de l'air. Le dioxyde de carbone et l'eau sont les produits.</p>` }] },
-    { titre: 'La donnée et l\'inconnue',
-      enonce: `<p>${b.texte} Quelle masse de dioxyde de carbone rejette-t-il ?</p>`,
+    { titre: 'Autre combustion n° 1 : le combustible et le CO<sub>2</sub>',
+      enonce: autreEnonce(1, a, 'Calcule la masse de dioxyde de carbone formé.'),
+      parties: [
+        { type: 'choix', q: 'Dans cet énoncé, quel est le combustible ?',
+          options: [{ id: 'ok', label: `${a.nom} ${fH(a.f)}` }, { id: 'O2', label: `le dioxygène ${fH('O2')}` },
+            { id: 'CO2', label: `le dioxyde de carbone ${fH('CO2')}` }, { id: 'H2O', label: `l'eau ${fH('H2O')}` }],
+          bonne: 'ok',
+          indices: {
+            O2: 'Le dioxygène de l\'air est l\'autre réactif : il fait brûler le combustible, mais ce n\'est pas lui qu\'on brûle.',
+            CO2: 'Le dioxyde de carbone est <b>formé</b> par la combustion : c\'est un produit, pas le combustible.',
+            H2O: 'L\'eau est <b>formée</b> par la combustion : c\'est un produit, pas le combustible.',
+          },
+          solution: `<p>Le combustible est ${a.nom} : c'est lui qui brûle, en réagissant avec le dioxygène de l'air.</p>` },
+        { type: 'choix', q: `Et le dioxyde de carbone ${fH('CO2')}, dans cet énoncé ?`, colonne: true,
+          options: [{ id: 'donnee', label: 'c\'est une donnée de l\'énoncé' }, { id: 'ok', label: 'c\'est un produit de la combustion : on cherche sa masse' },
+            { id: 'reactif', label: 'c\'est un réactif, consommé par la combustion' }],
+          bonne: 'ok',
+          indices: {
+            donnee: `L'énoncé ne donne aucune valeur pour le ${fH('CO2')} : il demande de <b>calculer</b> sa masse.`,
+            reactif: `Le ${fH('CO2')} n'est pas consommé : il est <b>formé</b> quand le combustible brûle (avec l'eau).`,
+          },
+          solution: `<p>Le ${fH('CO2')} est un <b>produit</b> : il est formé par la combustion ${a.de}, et c'est sa masse qu'on cherche.</p>` },
+      ] },
+    { titre: 'Autre combustion n° 2 : la donnée et l\'inconnue',
+      enonce: autreEnonce(2, b, 'Quelle masse de dioxyde de carbone rejette-t-il ?'),
       parties: [
         { type: 'choix', q: 'Quelle grandeur l\'énoncé donne-t-il ?', colonne: true,
-          options: [{ id: 'ok', label: 'la masse de combustible brûlé' }, { id: 'n', label: 'la quantité de matière (en mol) de combustible' },
-            { id: 'mCO2', label: 'la masse de dioxyde de carbone formé' }],
+          options: [{ id: 'ok', label: `la masse ${b.de} brûlé : m = ${b.m}` }, { id: 'n', label: `la quantité de matière ${b.de} : n = ${b.m}` },
+            { id: 'mCO2', label: `la masse de dioxyde de carbone formé : m = ${b.m}` }],
           bonne: 'ok',
           indices: {
             n: 'La donnée est en grammes : c\'est une <b>masse</b>. La quantité de matière (en mol), il faudra la calculer.',
-            mCO2: 'C\'est ce qu\'on cherche : l\'énoncé demande de la calculer.',
+            mCO2: `${b.m}, c'est ce qui brûle : la masse de <b>combustible</b>. La masse de ${fH('CO2')}, on la cherche.`,
           },
-          solution: '<p>L\'énoncé donne la masse de combustible brûlé, en g.</p>' },
+          solution: `<p>L'énoncé donne la masse de combustible brûlé : m = ${b.m} ${b.de}.</p>` },
         { type: 'choix', q: 'Que cherche-t-on ?', colonne: true,
           options: [{ id: 'ok', label: 'la masse de dioxyde de carbone formé' }, { id: 'O2', label: 'la masse de dioxygène consommé' },
             { id: 'E', label: 'l\'énergie libérée' }],
@@ -91,7 +106,7 @@ function etape1(c) {
             O2: 'Relis la question : elle porte sur le dioxyde de carbone rejeté, pas sur le dioxygène.',
             E: 'L\'énergie libérée est souvent demandée en plus, mais pas ici : la question porte sur le dioxyde de carbone rejeté.',
           },
-          solution: '<p>On cherche la masse de dioxyde de carbone formé (rejeté) : c\'est l\'exercice type.</p>' },
+          solution: '<p>On cherche la masse de dioxyde de carbone formé (rejeté) : c\'est l\'exercice type, avec un autre combustible.</p>' },
       ] },
   ]);
   return carte;
@@ -147,9 +162,9 @@ function etape3(c) {
   c.ajouter(carte, `<div class="cours-bloc"><p>On suit toujours les mêmes étapes. Chacune est travaillée dans un module de l'application.</p></div>
     <ol class="co-methode">
       <li><b>Écrire et équilibrer l'équation de la combustion</b><span>combustible + O<sub>2</sub> → CO<sub>2</sub> + H<sub>2</sub>O : elle donne les proportions en moles.</span><a class="co-lien" href="module_2_cours.html">Module 2 · équilibrer une combustion →</a></li>
-      <li><b>Calculer n(combustible)</b><span>n = m / M, avec la masse molaire calculée à partir des atomes.</span><a class="co-lien" href="module_3_cours.html">Module 3 · masse, quantité de matière, masse molaire →</a></li>
+      <li><b>Calculer n(combustible)</b><span>n = m / M, avec la masse molaire calculée à partir des atomes.</span><a class="co-lien" href="module_3a_cours.html">Module 3 · masse, quantité de matière, masse molaire →</a></li>
       <li><b>Calculer n(CO<sub>2</sub>) formé</b><span>avec la relation stœchiométrique : n(combustible) / a = n(CO<sub>2</sub>) / c.</span><a class="co-lien" href="module_4_cours.html">Module 4 · relations stœchiométriques →</a></li>
-      <li><b>Calculer m(CO<sub>2</sub>)</b><span>m = n × M(CO<sub>2</sub>).</span><a class="co-lien" href="module_3_cours.html">Module 3 · masse, quantité de matière, masse molaire →</a></li>
+      <li><b>Calculer m(CO<sub>2</sub>)</b><span>m = n × M(CO<sub>2</sub>).</span><a class="co-lien" href="module_3a_cours.html">Module 3 · masse, quantité de matière, masse molaire →</a></li>
       <li class="co-methode-e"><b>Souvent en plus : l'énergie libérée</b><span>E = PC × m (m en kg), avec le pouvoir calorifique PC.</span><a class="co-lien" href="module_5_cours.html">Module 5 · l'énergie libérée →</a></li>
     </ol>
     ${exemple(`<p>Sur l'exercice type (23 g d'éthanol, M = 46 g/mol, PC = 28,8 MJ/kg) :</p>
@@ -244,7 +259,7 @@ function aRetenir(c) {
       <ol class="er-liste"><li>Écrire et équilibrer l'équation de la combustion.</li><li>n(combustible) = m / M.</li>
         <li>n(CO<sub>2</sub>) avec la relation stœchiométrique.</li><li>m(CO<sub>2</sub>) = n × M(CO<sub>2</sub>).</li>
         <li>Souvent en plus : l'énergie libérée E = PC × m (m en kg).</li></ol></div>
-    <div class="cours-bloc"><p><b>Et ensuite ?</b> Modules 2 à 5 : chaque étape en détail. <a class="co-lien-txt" href="module_6.html">Module 6</a> : l'exemple du cours résolu pas à pas, puis un deuxième exemple. <a class="co-lien-txt" href="module_7.html">Module 7</a> : exercices complets (10 exercices différents).</p></div>
+    <div class="cours-bloc"><p><b>Et ensuite ?</b> Modules 2 à 5 : chaque étape en détail. <a class="co-lien-txt" href="module_6.html">Module 6</a> : l'exemple du cours résolu pas à pas, un deuxième exemple, puis un <a class="co-lien-txt" href="module_6_entrainement.html">entraînement</a> sur des exercices complets (10 exercices différents). <a class="co-lien-txt" href="module_7.html">Module 7</a> : les exercices du chapitre.</p></div>
     <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_cours.html">Module 2 : équilibrer une combustion →</a>
       <a class="btn-secondary" style="text-decoration:none" href="module_6.html">Module 6 : l'exemple du cours, pas à pas</a>
       <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);

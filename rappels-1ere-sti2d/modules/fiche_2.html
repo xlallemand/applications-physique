@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : fiche récapitulative — Rappels de 1ère STI2D</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rp.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Les pictogrammes de sécurité</h2>
+  </div>
+<!-- Fiche récapitulative du module 2 : les neuf pictogrammes (images communes assets/pictogrammes/),
+     puis danger et précautions de chacun. Contenu écrit par le script en bas de page. -->
+
+  <section class="er-card">
+    <h3 class="cours-titre">Connaître les pictogrammes de sécurité</h3>
+    <div class="rp-pictos" data-x="pictos"></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Danger et précautions</h3>
+    <div class="ph-defile" data-x="tableau"></div>
+    <div class="cle"><p>Ne pas confondre : inflammable (flamme) et comburant (flamme sur un cercle) ; toxicité aiguë (tête de mort), nocif ou irritant (point d'exclamation) et danger pour la santé (buste étoilé).</p></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_2_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_2_questions.html">Questions sur les pictogrammes</a>
+  </div>
+</div>
+<script>
+const { PICTOS, picto } = RP;
+// même ordre que la fiche de révision : trois lignes de trois
+document.querySelector('[data-x="pictos"]').innerHTML = PICTOS.map(x => picto(x.id, { legende: true })).join('');
+document.querySelector('[data-x="tableau"]').innerHTML = `<table class="rp-tab-pictos"><thead><tr><th>Pictogramme</th><th>Danger</th><th>Précautions</th></tr></thead>
+  <tbody>${PICTOS.map(x => `<tr><td>${picto(x.id, { taille: 54 })}<b>${x.nom}</b></td><td>${x.danger}</td><td>${x.precaution}</td></tr>`).join('')}</tbody></table>`;
+RP.menu('fiche_2');
+</script>
+</body>
+</html>

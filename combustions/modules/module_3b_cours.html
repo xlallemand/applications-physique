@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : avec un volume — Chapitre 14 : Combustions</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../assets/molecules.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="co.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/molecules.js"></script>
+<script src="../../equilibrer-reactions/modules/er.js"></script>
+<script src="co.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 2 / 2</span>
+    <h2 class="er-titre">Avec un volume : m = ρ × V et n = c × V</h2>
+    <p class="er-contexte">On ne connaît pas toujours la masse : l'énoncé donne parfois un <b>volume</b>. Pour un liquide, on calcule sa masse avec la <b>masse volumique</b> ; pour une espèce dissoute, sa quantité de matière avec la <b>concentration</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Module 3, cours 2 / 2 : avec un volume.
+   1. La masse volumique : m = ρ × V, puis n = m / M
+   2. Une espèce dissoute : n = c × V      · À retenir
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Cours 1 / 2 (avec une masse) : module_3a_cours.html.
+   ============================================================ */
+const { fmt, hasard, exemple } = COURS;
+const fH = CO.fH;
+const frac = (a, b) => `<span class="co-frac"><span>${a}</span><span>${b}</span></span>`;
+
+// liquides (masse volumique en g/mL)
+const LIQUIDES = [{ nom: 'd\'éthanol', rho: 0.79 }, { nom: 'd\'octane', rho: 0.70 }, { nom: 'de pentane', rho: 0.63 }, { nom: 'd\'heptane', rho: 0.68 }];
+
+// Erreurs fréquentes : quotient au lieu du produit, volume oublié en mL au lieu de L, volume pris pour une masse
+function diagRho(v, rho, V) {
+  if (CO.egal(v, V / rho)) return 'Tu as divisé le volume par la masse volumique. La masse volumique est la masse d\'un millilitre : m = ρ × V, on <b>multiplie</b>.';
+  if (CO.egal(v, rho / V)) return 'Tu as divisé ρ par V. La masse est m = ρ × V.';
+  return 'Applique m = ρ × V, avec ρ en g/mL et V en mL.';
+}
+function diagN(v, m, M) {
+  if (CO.egal(v, m * M)) return 'Tu as multiplié m par M. La quantité de matière est n = m / M : on <b>divise</b> la masse par la masse molaire.';
+  if (CO.egal(v, M / m)) return 'Tu as calculé M / m. C\'est la masse qu\'on divise : n = m / M.';
+  return 'Applique n = m / M, avec m en g et M en g/mol.';
+}
+function diagC(v, c, VL) {
+  if (CO.egal(v, c * VL * 1000)) return 'Le volume doit être en <b>litres</b>, comme dans l\'unité de c (mol/L) : 1 mL = 10<sup>−3</sup> L.';
+  if (CO.egal(v, c / VL) || CO.egal(v, VL / c)) return 'La quantité de matière est n = c × V : on <b>multiplie</b> la concentration par le volume.';
+  return 'Applique n = c × V, avec c en mol/L et V en L.';
+}
+
+/* ---------- 1. La masse volumique ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Un liquide : la masse volumique');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Pour un liquide, l'énoncé donne souvent son <b>volume</b> V et sa <b>masse volumique</b> ρ (lettre grecque « rhô »), la masse d'un millilitre (ou d'un litre). On calcule d'abord la masse, puis la quantité de matière avec n = m / M.</p>
+      <div class="cle"><p class="co-formule">ρ = ${frac('m', 'V')} &nbsp;donc&nbsp; m = ρ × V</p>
+        <p class="co-legende"><b>m</b> en <span class="co-unite-tag">g</span> · <b>ρ</b> en <span class="co-unite-tag">g/mL</span> · <b>V</b> en <span class="co-unite-tag">mL</span> (le même volume que dans l'unité de ρ). Eau : ρ = 1 g/mL, soit 1 kg/L.</p></div>
+    </div>
+    ${exemple(`<p>2,0 mL d'éthanol ${fH('C2H6O')}, de masse volumique ρ = 0,79 g/mL et de masse molaire M = 46 g/mol :</p>
+      <p class="crs-calc">m = ρ × V = 0,79 × 2,0 = 1,58 g, puis n = ${frac('m', 'M')} = ${frac('1,58', '46')} = <span class="c">0,034 mol</span></p>`)}`);
+  const l = hasard(LIQUIDES), V1 = hasard([10, 20, 50, 100]);
+  const V2 = hasard([23, 46, 92]), m2 = 0.79 * V2;
+  c.aToi(carte, [
+    { titre: 'Du volume à la masse',
+      enonce: `<p>On prélève V = ${V1} mL ${l.nom}, de masse volumique ρ = ${fmt(l.rho)} g/mL.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est la masse du liquide prélevé ?', label: 'm =', unite: 'g', valeur: l.rho * V1, signe: false, rel: .01,
+        diag: v => diagRho(v, l.rho, V1), solution: `<p class="crs-calc">m = ρ × V = ${fmt(l.rho)} × ${V1} = <span class="c">${fmt(l.rho * V1)} g</span></p>` }] },
+    { titre: 'Du volume à la quantité de matière',
+      enonce: `<p>On brûle V = ${V2} mL d'éthanol ${fH('C2H6O')} : ρ = 0,79 g/mL et M = 46 g/mol.</p>`,
+      parties: [
+        { type: 'nombre', q: 'Calcule d\'abord la masse d\'éthanol.', label: 'm =', unite: 'g', valeur: m2, signe: false, rel: .01,
+          diag: v => diagRho(v, 0.79, V2), solution: `<p class="crs-calc">m = ρ × V = 0,79 × ${V2} = <span class="c">${fmt(m2)} g</span></p>` },
+        { type: 'nombre', q: 'Puis la quantité de matière d\'éthanol.', label: 'n =', unite: 'mol', valeur: m2 / 46, signe: false, rel: .02,
+          diag: v => (CO.egal(v, V2 / 46) ? 'Tu as utilisé le volume à la place de la masse : n = m / M, avec la masse calculée juste avant.' : diagN(v, m2, 46)),
+          solution: `<p class="crs-calc">n = ${frac('m', 'M')} = ${frac(fmt(m2), '46')} = <span class="c">${fmt(+(m2 / 46).toPrecision(3))} mol</span></p>` },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Une espèce dissoute ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Une espèce dissoute : la concentration');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Pour une espèce <b>dissoute</b> dans une solution, l'énoncé donne sa <b>concentration</b> c (en quantité de matière) et le volume V de la solution. La quantité de matière se calcule directement :</p>
+      <div class="cle"><p class="co-formule">n = c × V</p>
+        <p class="co-legende"><b>n</b> en <span class="co-unite-tag">mol</span> · <b>c</b> en <span class="co-unite-tag">mol/L</span> · <b>V</b> en <span class="co-unite-tag">L</span> (un volume en mL se convertit d'abord : 1 mL = 10<sup>−3</sup> L)</p></div>
+    </div>
+    ${exemple(`<p>0,50 L d'une solution de concentration c = 0,20 mol/L :</p>
+      <p class="crs-calc">n = c × V = 0,20 × 0,50 = <span class="c">0,10 mol</span></p>`)}`);
+  const c1 = hasard([0.1, 0.2, 0.5]), V1 = hasard([0.5, 1.5, 2]);
+  const c2 = hasard([0.1, 0.2, 0.4]), V2 = hasard([250, 200, 50]);
+  c.aToi(carte, [
+    { titre: 'Une solution',
+      enonce: `<p>On dispose de V = ${fmt(V1)} L d'une solution de concentration c = ${fmt(c1)} mol/L.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle quantité de matière de l\'espèce dissoute contient-elle ?', label: 'n =', unite: 'mol', valeur: c1 * V1, signe: false, rel: .01,
+        diag: v => diagC(v, c1, V1), solution: `<p class="crs-calc">n = c × V = ${fmt(c1)} × ${fmt(V1)} = <span class="c">${fmt(c1 * V1)} mol</span></p>` }] },
+    { titre: 'Un volume en millilitres',
+      enonce: `<p>On prélève V = ${V2} mL d'une solution de concentration c = ${fmt(c2)} mol/L.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle quantité de matière de l\'espèce dissoute a-t-on prélevée ?', label: 'n =', unite: 'mol', valeur: c2 * V2 / 1000, signe: false, rel: .01,
+        diag: v => diagC(v, c2, V2 / 1000),
+        solution: `<p class="crs-calc">V = ${V2} mL = ${fmt(V2 / 1000)} L, donc n = c × V = ${fmt(c2)} × ${fmt(V2 / 1000)} = <span class="c">${fmt(c2 * V2 / 1000)} mol</span></p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p class="co-formule">m = ρ × V</p>
+      <p class="co-legende">Un liquide : m en g, ρ en g/mL, V en mL ; puis n = m / M.</p></div>
+    <div class="cle"><p class="co-formule">n = c × V</p>
+      <p class="co-legende">Une espèce dissoute : n en mol, c en mol/L, V en L.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3.html">Questions sur la quantité de matière →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Module 4 : relations stœchiométriques</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#volume">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+CO.menu('module_3b_cours');
+</script>
+</body>
+</html>
