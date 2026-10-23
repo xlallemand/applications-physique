@@ -138,6 +138,8 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
   .app-d { margin: 3px 0 0; font-size: .86rem; color: var(--ink-2); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .app-f { flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--sheet); color: var(--ink); transition: background .15s, color .15s; }
   .app-f svg { width: 16px; height: 16px; }
+  /* avancement de l'application (x/y), comme les compteurs de l'accueil de l'application */
+  .app-n { flex-shrink: 0; font-size: .78rem; font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .app:hover .app-f { background: var(--c); color: #fff; }
   @media (max-width: 640px) { .app-d { display: none; } .app { padding: 11px 10px 11px 16px; } .app-f { width: 32px; height: 32px; } }
 </style>
@@ -177,6 +179,7 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
 
 <footer class="pied"><div class="wrap"><div>Applications d'entraînement en Physique-Chimie · Niveau lycée</div></div></footer>
 
+<script src="assets/avancement.js"></script>
 <script>
 /* ============================================================
    Portail — données et fonctions
@@ -191,6 +194,7 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
    ACC.surChangement(fn)      fn() est appelée à chaque changement du tri
    ACC.chambre(canvas, graine) dessine le cliché de chambre à bulles
    ACC.parallaxe()            met en place l'image qui descend moins vite que la page
+   ACC.rafraichir()           redessine la liste (avancement x/y à jour) ; posée par le script de la liste
 
    Principe du tri : par défaut aucune étiquette n'est choisie et tout
    est affiché ; choisir une étiquette ne garde que les applications qui
@@ -493,6 +497,12 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
     if (b.dataset.id) ACC.basculer(b.dataset.g, b.dataset.id); else ACC.toutAfficher(b.dataset.g);
   });
 
+  /* ---------- Avancement d'une application : x/y (assets/avancement.js) ---------- */
+  function avancement(app) {
+    const av = window.AV && AV.avancement(app.dossier);
+    return av ? `<span class="app-n" title="Avancement : ${av.fait} sur ${av.total}">${av.fait}/${av.total}</span>` : '';
+  }
+
   /* ---------- Liste regroupée par domaine ---------- */
   function liste() {
     const vis = APPS.filter(ACC.visible);
@@ -509,6 +519,7 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
                   <div class="app-t"><b>${a.titre}</b>${ACC.etiquettes(a)}</div>
                   <p class="app-d">${a.desc}</p>
                 </div>
+                ${avancement(a)}
                 <span class="app-f">${ACC.fleche}</span>
               </a>`).join('')}
           </div>
@@ -533,6 +544,10 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
     if (haut < 0) scrollTo({ top: scrollY + haut, behavior: 'auto' });
   });
   maj();
+  // avancement à jour après une reprise de progression (assets/progression.js)
+  ACC.rafraichir = liste;
+  // retour arrière depuis une application : la page revient du cache, l'avancement a pu changer
+  addEventListener('pageshow', e => { if (e.persisted) liste(); });
 
   /* ---------- La barre perd ses coins arrondis quand elle est collée en haut ---------- */
   const tri = document.getElementById('tri');
