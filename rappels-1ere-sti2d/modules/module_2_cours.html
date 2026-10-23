@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : les pictogrammes de sécurité — Rappels de 1ère STI2D</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rp.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Les pictogrammes de sécurité</h2>
+    <p class="er-contexte">Sur l'étiquette d'un produit chimique, des <b>pictogrammes</b> signalent ses dangers. Au bac, on demande souvent la <b>signification</b> d'un pictogramme et les <b>précautions</b> à prendre, comme pour le kérosène d'un avion.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Les neuf pictogrammes     2. Ne pas confondre
+   3. Les précautions           · À retenir
+   Images : assets/pictogrammes/ (RP.picto).
+   ============================================================ */
+const { PICTOS, PICTO, picto, partieSens, partieImage, partiePrecaution, hasard, melanger } = RP;
+const { exemple } = COURS;
+const GROUPES = [['physique', 'Dangers physiques'], ['sante', 'Dangers pour la santé'], ['environnement', 'Danger pour l\'environnement']];
+// les neuf pictogrammes, rangés par sorte de danger
+const TOUS = GROUPES.map(([t, titre]) => `<p class="rp-pictos-groupe">${titre}</p>
+  <div class="rp-pictos-ligne">${PICTOS.filter(x => x.type === t).map(x => picto(x.id, { legende: true })).join('')}</div>`).join('');
+// étiquette du kérosène (sujet de bac)
+const KEROSENE = ['inflammable', 'nocif-irritant', 'danger-sante', 'danger-environnement'];
+
+/* ---------- 1. Les neuf pictogrammes ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Les neuf pictogrammes de danger');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Chaque pictogramme est un <b>losange à bord rouge</b> avec un dessin noir. Il y en a neuf : quatre pour les dangers physiques (feu, explosion), quatre pour la santé, un pour l'environnement.</p>
+      ${TOUS}
+    </div>
+    ${exemple(`<p>L'étiquette du kérosène (carburant des avions) porte quatre pictogrammes :</p>
+      <div class="rp-pictos-ligne">${KEROSENE.map(id => picto(id, { legende: true })).join('')}</div>
+      <p>Le kérosène est inflammable, nocif ou irritant, dangereux pour la santé (on ne doit pas l'avaler ni respirer ses vapeurs) et pour l'environnement.</p>`)}`);
+  const ids = melanger(PICTOS.map(x => x.id)).slice(0, 3);
+  c.aToi(carte, ids.map((id, k) => ({ titre: `Pictogramme n° ${k + 1}`, enonce: `<div class="rp-picto-seul">${picto(id)}</div>`, parties: [partieSens(id)] })));
+  return carte;
+}
+
+/* ---------- 2. Ne pas confondre ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Ne pas confondre');
+  const paire = (ids, txt) => `<div class="cle"><div class="rp-pictos-ligne">${ids.map(id => picto(id, { legende: true })).join('')}</div><p>${txt}</p></div>`;
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Certains pictogrammes se ressemblent. Regarde bien le dessin :</p>
+      ${paire(['inflammable', 'comburant'], '<b>Inflammable</b> : une flamme seule, le produit peut prendre feu. <b>Comburant</b> : une flamme au-dessus d\'un <b>cercle</b>, le produit fait brûler les autres (comme le dioxygène).')}
+      ${paire(['explosif', 'gaz-sous-pression'], '<b>Explosif</b> : une bombe qui éclate. <b>Gaz sous pression</b> : une bouteille de gaz, qui peut exploser si on la chauffe.')}
+      ${paire(['toxique', 'nocif-irritant', 'danger-sante'], '<b>Toxicité aiguë</b> : la tête de mort, un poison qui peut tuer rapidement. <b>Nocif ou irritant</b> : le point d\'exclamation, un danger moins grave. <b>Danger pour la santé</b> : le buste étoilé, des effets graves souvent à long terme (cancer…).')}
+    </div>
+    ${exemple(`<p>Un flacon d'eau oxygénée concentrée porte une flamme au-dessus d'un cercle :</p>
+      <div class="rp-pictos-ligne">${picto('comburant', { legende: true })}</div>
+      <p>Il n'est pas inflammable lui-même, mais il peut provoquer ou aggraver un incendie : on le tient loin des produits qui peuvent brûler.</p>`)}`);
+  c.aToi(carte, [
+    { titre: 'Feu', parties: [partieImage(hasard(['inflammable', 'comburant']))] },
+    { titre: 'Santé', parties: [partieImage(hasard(['toxique', 'nocif-irritant', 'danger-sante']))] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Les précautions ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Les précautions');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Chaque pictogramme indique un danger, et donc les précautions à prendre :</p>
+      <div class="ph-defile"><table class="rp-tab-pictos"><thead><tr><th>Pictogramme</th><th>Danger</th><th>Précautions</th></tr></thead>
+        <tbody>${PICTOS.map(x => `<tr><td>${picto(x.id, { taille: 54 })}<b>${x.nom}</b></td><td>${x.danger}</td><td>${x.precaution}</td></tr>`).join('')}</tbody></table></div>
+    </div>
+    ${exemple(`<p>Le pictogramme entouré sur l'étiquette du kérosène :</p>
+      <div class="rp-pictos-ligne"><span class="rp-picto-entoure">${picto('inflammable')}</span></div>
+      <p>Il signifie <b>inflammable</b>. Il faut donc <b>manipuler le kérosène loin de toute flamme ou étincelle</b> et le <b>conserver à l'abri de la chaleur</b>.</p>`)}`);
+  const ids = melanger(PICTOS.map(x => x.id).filter(x => x !== 'inflammable')).slice(0, 2);
+  c.aToi(carte, ids.map(id => ({ titre: PICTO(id).nom, enonce: `<div class="rp-picto-seul">${picto(id)}</div>`, parties: [partiePrecaution(id, `Ce produit est « ${PICTO(id).nom} ». Quelle précaution faut-il prendre ?`)] })));
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>Neuf pictogrammes de danger : connaître le nom de chacun, le danger et les précautions qu'il impose.</p></div>
+    ${TOUS}
+    <div class="cle"><p>Ne pas confondre : inflammable (flamme) et comburant (flamme sur un cercle) ; toxicité aiguë (tête de mort), nocif ou irritant (point d'exclamation) et danger pour la santé (buste étoilé).</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur les pictogrammes →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3.html">Module 3 : exercices</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+RP.menu('module_2_cours');
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+</script>
+</body>
+</html>

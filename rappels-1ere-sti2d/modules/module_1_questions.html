@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur les groupes caractéristiques — Rappels de 1ère STI2D</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rp.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : définition (1), avec ou sans
+   groupe caractéristique (1), formule d'un groupe (1), famille d'un
+   alcool et d'un acide (2), entourer et nommer dans un alcool, un
+   acide, un diol et une molécule qui a les deux groupes (4), nombre
+   de groupes (1).
+   Erreurs diagnostiquées : atome de la chaîne carbonée entouré, OH
+   d'un carboxyle pris pour un hydroxyle, carboxyle entouré en partie,
+   groupe oublié, groupe et famille mal associés, deux O du carboxyle
+   comptés comme deux groupes.
+   Les molécules des exemples de la fiche sont gardées pour les exercices.
+   ============================================================ */
+const { o, fq, MOL, leNom, formule, corrigee, partieEntourer, partiesNommer, groupes, hasard, melanger } = RP;
+const O2 = { t: 'O', double: true };
+const ALCOOLS = [MOL.methanol, MOL.ethanol, MOL.propan1ol, MOL.propan2ol, MOL.butan2ol];
+const ACIDES = [MOL.methanoique, MOL.ethanoique, MOL.propanoique, MOL.butanoique];
+const FAM = [o('hydroxyle', 'les alcools'), o('carboxyle', 'les acides carboxyliques'), o('aucune', 'aucune : pas de groupe caractéristique')];
+
+// définition
+function qDef() {
+  return hasard([
+    { theme: 'Définition', parties: [fq.choix('Un groupe caractéristique, c\'est :', [
+      o('ok', 'un enchaînement d\'atomes dont au moins un n\'est ni du carbone ni de l\'hydrogène'),
+      o('ch', 'un enchaînement d\'atomes de carbone et d\'hydrogène'), o('mol', 'une molécule qui contient de l\'oxygène')], 'ok', {
+      colonne: true,
+      indices: { ch: 'Les atomes C et H forment la chaîne carbonée : un groupe caractéristique contient un autre atome, comme O.', mol: 'Le groupe caractéristique est une <b>partie</b> de la molécule, pas toute la molécule.' },
+      solution: '<p>Un enchaînement particulier d\'atomes, au sein d\'une molécule organique, dont au moins un n\'est ni C ni H.</p>' })] },
+    { theme: 'Famille chimique', parties: [fq.choix('Des molécules qui ont le même groupe caractéristique…', [
+      o('ok', 'ont des propriétés semblables : elles forment une famille chimique'), o('meme', 'sont la même molécule'), o('masse', 'ont la même masse molaire')], 'ok', {
+      colonne: true,
+      indices: { meme: 'Leur chaîne carbonée peut être différente : ce sont des molécules différentes.', masse: 'Leur chaîne peut être plus ou moins longue : leurs masses molaires sont différentes.' },
+      solution: '<p>Le groupe caractéristique donne des propriétés spécifiques : les molécules qui le possèdent forment une famille chimique.</p>' })] },
+  ]);
+}
+// avec ou sans groupe caractéristique
+function qAvecSans() {
+  const m = hasard([MOL.propane, MOL.butane, MOL.ethanol, MOL.propan1ol]), oui = groupes(m).length > 0;
+  return { theme: leNom(m, true), enonce: formule(m),
+    parties: [fq.choix('Cette molécule possède-t-elle un groupe caractéristique ?', [o('oui', 'oui : elle contient un atome qui n\'est ni C ni H'), o('non', 'non : elle ne contient que des atomes C et H')], oui ? 'oui' : 'non', {
+      colonne: true, melanger: false,
+      indices: oui ? { non: 'Regarde bien : il y a un atome d\'oxygène O.' } : { oui: 'Cherche un atome qui n\'est ni C ni H : il n\'y en a pas ici.' },
+      solution: oui ? `<p>Oui : le groupe OH contient un atome d'oxygène.</p>${corrigee(m)}` : '<p>Non : il n\'y a que des atomes de carbone et d\'hydrogène.</p>' })],
+    bilan: 'Un groupe caractéristique contient au moins un atome qui n\'est ni C ni H.' };
+}
+// formule d'un groupe
+function qFormule() {
+  const carbo = formule({ chaine: [{ t: '—C', haut: O2 }, { t: 'OH' }] });
+  const OPTS = [o('hydroxyle', '<b>—OH</b>'), o('carboxyle', carbo), o('ch3', '<b>—CH<sub>3</sub></b>')];
+  const type = hasard(['hydroxyle', 'carboxyle']);
+  return { theme: 'Formule d\'un groupe', parties: [fq.choix(`Quelle est la formule du groupe ${type} ?`, OPTS, type, {
+    indices: { [type === 'hydroxyle' ? 'carboxyle' : 'hydroxyle']: type === 'hydroxyle' ? 'Celui-ci, C lié à =O et à OH, c\'est le groupe carboxyle.' : 'Celui-ci, −OH seul, c\'est le groupe hydroxyle.',
+      ch3: '−CH<sub>3</sub> ne contient que C et H : ce n\'est pas un groupe caractéristique.' },
+    solution: type === 'hydroxyle' ? '<p>Groupe hydroxyle : −OH (famille des alcools).</p>' : `<p>Groupe carboxyle : un C lié à un =O et à un OH (famille des acides carboxyliques).</p>${carbo}` })],
+    bilan: 'Hydroxyle : −OH ; carboxyle : C lié à =O et à OH.' };
+}
+// famille d'une molécule
+function qFamille(m, type) {
+  return { theme: leNom(m, true), enonce: formule(m),
+    parties: [fq.choix('À quelle famille cette molécule appartient-elle ?', FAM, type, {
+      colonne: true, melanger: false,
+      indices: type === 'hydroxyle'
+        ? { carboxyle: 'Le OH est lié à un carbone qui ne porte pas de =O : c\'est un groupe hydroxyle.', aucune: 'Il y a un atome d\'oxygène : cherche le groupe OH.' }
+        : { hydroxyle: 'Le carbone qui porte le OH porte aussi un =O : c\'est un groupe carboxyle, pas un hydroxyle.', aucune: 'Il y a des atomes d\'oxygène : cherche le C lié à =O et à OH.' },
+      solution: `${corrigee(m)}<p>${type === 'hydroxyle' ? 'Groupe hydroxyle : famille des <b>alcools</b>.' : 'Groupe carboxyle : famille des <b>acides carboxyliques</b>.'}</p>` })],
+    bilan: type === 'hydroxyle' ? 'Groupe hydroxyle → alcool.' : 'Groupe carboxyle → acide carboxylique.' };
+}
+// entourer et nommer
+function qEntourer(m) {
+  return { theme: leNom(m, true), consigne: 'Entoure les groupes caractéristiques de cette molécule, puis nomme-les.',
+    parties: [partieEntourer(m)].concat(partiesNommer(m)), bilan: corrigee(m) };
+}
+// nombre de groupes caractéristiques
+function qNombre() {
+  const m = hasard([MOL.ethanoique, MOL.methanoique, MOL.glycerol, MOL.lactique, MOL.ethanediol]), nb = groupes(m).length;
+  const nO = RP.pieces(m).filter(p => /O/.test(p.t)).length;
+  return { theme: leNom(m, true), enonce: formule(m),
+    parties: [fq.choix('Combien de groupes caractéristiques cette molécule possède-t-elle ?', ['1', '2', '3', '4'].map(x => o(x, x)), String(nb), {
+      melanger: false,
+      indices: Object.assign({}, nO !== nb ? { [String(nO)]: 'Tu as compté les atomes d\'oxygène. Le C, le =O et le OH d\'un carboxyle forment <b>un seul</b> groupe.' } : {}),
+      indice: 'Repère chaque OH : est-il seul (hydroxyle), ou lié à un carbone qui porte aussi un =O (carboxyle, un seul groupe) ?',
+      solution: `${corrigee(m)}<p>${nb} groupe${nb > 1 ? 's' : ''} caractéristique${nb > 1 ? 's' : ''}.</p>` })] };
+}
+
+function tirage() {
+  const al = melanger(ALCOOLS), ac = melanger(ACIDES);
+  return [qDef(), qAvecSans(), qFormule(), qFamille(al[0], 'hydroxyle'), qFamille(ac[0], 'carboxyle'),
+    qEntourer(al[1]), qEntourer(ac[1]), qEntourer(hasard([MOL.ethanediol, MOL.glycerol])), qEntourer(hasard([MOL.lactique, MOL.glycolique])), qNombre()];
+}
+
+RP.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Les groupes caractéristiques',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : reconnaître un groupe caractéristique, sa formule et sa famille, puis <b>entourer</b> et <b>nommer</b> les groupes de plusieurs molécules (touche les atomes pour les entourer).</p>',
+  questions: tirage,
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2_cours.html', label: 'Module 2 : les pictogrammes de sécurité →' },
+});
+RP.menu('module_1_questions');
+</script>
+</body>
+</html>

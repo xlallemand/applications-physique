@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : les groupes caractéristiques — Rappels de 1ère STI2D</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rp.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">Les groupes caractéristiques</h2>
+    <p class="er-contexte">Au bac, on demande souvent d'<b>entourer</b> et de <b>nommer</b> les groupes caractéristiques d'une molécule, par exemple le propylène glycol d'un fluide caloporteur. Deux groupes sont à connaître : <b>hydroxyle</b> et <b>carboxyle</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Qu'est-ce qu'un groupe caractéristique ?
+   2. Les groupes hydroxyle et carboxyle, les familles
+   3. Entourer et nommer (outil RP.partieEntourer)     · À retenir
+   ============================================================ */
+const { o, fq, MOL, leNom, formule, corrigee, partieEntourer, partiesNommer, hasard, melanger } = RP;
+const { exemple } = COURS;
+const O2 = { t: 'O', double: true };
+
+// formule du groupe carboxyle seul (tableau des groupes)
+const CARBOXYLE = formule({ chaine: [{ t: '—C', haut: O2 }, { t: 'OH' }] });
+const TABLEAU = `<div class="ph-defile"><table class="rp-groupes"><thead><tr><th>Groupe caractéristique</th><th>Hydroxyle</th><th>Carboxyle</th></tr></thead>
+  <tbody><tr><th>Formule</th><td><b>—OH</b></td><td>${CARBOXYLE}</td></tr>
+  <tr><th>Famille</th><td>alcool</td><td>acide carboxylique</td></tr></tbody></table></div>`;
+
+/* ---------- 1. Qu'est-ce qu'un groupe caractéristique ? ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Qu\'est-ce qu\'un groupe caractéristique ?');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Une molécule organique est faite d'une chaîne d'atomes de <b>carbone</b> C, liés à des atomes d'<b>hydrogène</b> H… et parfois à d'autres atomes, comme l'<b>oxygène</b> O.</p>
+      <div class="cle"><p><b class="cle-titre">Groupe caractéristique</b> · Au sein d'une molécule organique, c'est un enchaînement particulier d'atomes dont <b>au moins un n'est ni du carbone ni de l'hydrogène</b>.</p>
+        <p>Le groupe caractéristique donne des propriétés spécifiques aux molécules qui le possèdent : ces molécules forment une <b>famille chimique</b>.</p></div>
+    </div>
+    ${exemple(`<p>L'éthanol :</p>${corrigee(MOL.ethanol)}
+      <p>H<sub>3</sub>C et CH<sub>2</sub> ne contiennent que des atomes C et H : ce n'est pas un groupe caractéristique. Le groupe <b>OH</b> contient un atome d'oxygène : c'est un groupe caractéristique.</p>
+      <p>Le propane ${formule(MOL.propane)} ne contient que des atomes C et H : il n'a <b>aucun</b> groupe caractéristique.</p>`)}`);
+  const avec = hasard([MOL.methanol, MOL.propan1ol, MOL.butan2ol]), sans = MOL.butane;
+  const item = (m, oui) => ({ titre: leNom(m, true), enonce: formule(m),
+    parties: [fq.choix('Cette molécule possède-t-elle un groupe caractéristique ?', [o('oui', 'oui : elle contient un atome qui n\'est ni C ni H'), o('non', 'non : elle ne contient que des atomes C et H')], oui ? 'oui' : 'non', {
+      colonne: true, melanger: false,
+      indices: oui ? { non: 'Regarde bien : il y a un atome d\'oxygène O dans le groupe OH.' } : { oui: 'Cherche un atome qui n\'est ni C ni H : il n\'y en a pas ici.' },
+      solution: oui ? `<p>Oui : le groupe OH contient un atome d'oxygène.</p>${corrigee(m)}` : '<p>Non : il n\'y a que des atomes de carbone et d\'hydrogène.</p>' })] });
+  c.aToi(carte, melanger([item(avec, true), item(sans, false)]).concat([
+    { titre: 'La définition',
+      parties: [fq.choix('Un groupe caractéristique contient au moins un atome…', [o('ok', 'qui n\'est ni du carbone ni de l\'hydrogène'), o('C', 'de carbone'), o('H', 'd\'hydrogène')], 'ok', {
+        indices: { C: 'Toutes les molécules organiques contiennent du carbone : ce n\'est pas ce qui fait un groupe caractéristique.', H: 'L\'hydrogène est partout dans la chaîne carbonée : cherche un autre atome, comme l\'oxygène.' },
+        solution: '<p>Au moins un atome qui n\'est ni C ni H, par exemple l\'oxygène O.</p>' })] },
+  ]));
+  return carte;
+}
+
+/* ---------- 2. Les groupes hydroxyle et carboxyle ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Les groupes hydroxyle et carboxyle');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Deux groupes caractéristiques sont à connaître. Chacun donne une famille chimique :</p>
+      ${TABLEAU}
+      <div class="cle"><p><b class="cle-titre">Hydroxyle</b> · −OH, lié à un carbone : famille des <b>alcools</b>.</p>
+        <p><b class="cle-titre">Carboxyle</b> · un carbone lié à la fois à un O par une <b>double liaison</b> et à un OH (−COOH) : famille des <b>acides carboxyliques</b>.</p></div>
+    </div>
+    ${exemple(`<p>L'acide éthanoïque (dans le vinaigre) :</p>${corrigee(MOL.ethanoique)}
+      <p>Le C, le =O et le OH forment <b>un seul groupe</b>, le groupe carboxyle : l'acide éthanoïque est un acide carboxylique.</p>
+      <p class="crs-attention">Attention : le OH d'un groupe carboxyle n'est pas un groupe hydroxyle. Il fait partie du groupe carboxyle.</p>`)}`);
+  const alcool = hasard([MOL.propan2ol, MOL.propan1ol, MOL.butan2ol]), acide = hasard([MOL.propanoique, MOL.butanoique, MOL.methanoique]);
+  const FAM = [o('hydroxyle', 'les alcools'), o('carboxyle', 'les acides carboxyliques'), o('aucune', 'aucune : pas de groupe caractéristique')];
+  const famille = (m, type) => ({ titre: leNom(m, true), enonce: formule(m),
+    parties: [fq.choix('À quelle famille cette molécule appartient-elle ?', FAM, type, {
+      colonne: true, melanger: false,
+      indices: type === 'hydroxyle'
+        ? { carboxyle: 'Le OH est lié à un carbone qui ne porte pas de =O : c\'est un groupe hydroxyle.', aucune: 'Il y a un atome d\'oxygène : cherche le groupe OH.' }
+        : { hydroxyle: 'Le carbone qui porte le OH porte aussi un =O : c\'est un groupe carboxyle, pas un hydroxyle.', aucune: 'Il y a des atomes d\'oxygène : cherche le C lié à =O et à OH.' },
+      solution: `${corrigee(m)}<p>${type === 'hydroxyle' ? 'Groupe hydroxyle : famille des <b>alcools</b>.' : 'Groupe carboxyle : famille des <b>acides carboxyliques</b>.'}</p>` })] });
+  c.aToi(carte, [famille(alcool, 'hydroxyle'), famille(acide, 'carboxyle'),
+    { titre: 'Le OH d\'un acide', enonce: formule(MOL.ethanoique),
+      parties: [fq.choix('Dans l\'acide éthanoïque, le OH est-il un groupe hydroxyle ?', [o('non', 'non : il fait partie du groupe carboxyle'), o('oui', 'oui : tout OH est un groupe hydroxyle')], 'non', {
+        colonne: true, melanger: false,
+        indices: { oui: 'Ce OH est lié à un carbone qui porte aussi un =O : avec eux, il forme le groupe carboxyle.' },
+        solution: '<p>Non : C, =O et OH forment ensemble le groupe carboxyle.</p>' })] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Entourer et nommer ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Entourer et nommer les groupes');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode</b></p>
+        <ol class="er-liste" style="margin:0"><li>Repérer chaque atome d'oxygène O.</li>
+          <li>Un carbone lié à un <b>=O</b> et à un <b>OH</b> : entourer <b>ensemble</b> le C, le =O et le OH → groupe <b>carboxyle</b>, famille des acides carboxyliques.</li>
+          <li>Un <b>OH</b> lié à un carbone sans =O : entourer le OH seul → groupe <b>hydroxyle</b>, famille des alcools.</li></ol></div>
+    </div>
+    ${exemple(`<p>L'acide lactique (dans le lait fermenté) :</p>${corrigee(MOL.lactique)}
+      <p>Le C de droite porte =O et OH : groupe carboxyle (n° 2). L'autre OH est lié à un carbone sans =O : groupe hydroxyle (n° 1).</p>`)}`);
+  const deux = hasard([MOL.ethanediol, MOL.glycerol]);
+  c.aToi(carte, [
+    { titre: leNom(deux, true), enonce: '<p>Entoure les groupes caractéristiques, puis nomme-les.</p>', parties: [partieEntourer(deux)].concat(partiesNommer(deux)) },
+    { titre: 'L\'acide glycolique', enonce: '<p>Entoure les groupes caractéristiques, puis nomme-les.</p>', parties: [partieEntourer(MOL.glycolique)].concat(partiesNommer(MOL.glycolique)) },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Groupe caractéristique</b> · Enchaînement d'atomes dont au moins un n'est ni C ni H ; il définit une famille chimique.</p></div>
+    ${TABLEAU}
+    <div class="cle"><p>Entourer le groupe carboxyle en entier (C, =O et OH) ; entourer le OH seul quand son carbone ne porte pas de =O.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur les groupes caractéristiques →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2_cours.html">Module 2 : les pictogrammes de sécurité</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+RP.menu('module_1_cours');
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+</script>
+</body>
+</html>

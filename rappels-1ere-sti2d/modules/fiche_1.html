@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : fiche récapitulative — Rappels de 1ère STI2D</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="rp.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="rp.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Les groupes caractéristiques</h2>
+  </div>
+<!-- Fiche récapitulative du module 1 : définition, les deux groupes, méthode, exemples de la fiche corrigés.
+     Les formules sont écrites par le script en bas de page (RP.formule, groupes entourés). -->
+
+  <section class="er-card">
+    <h3 class="cours-titre">Groupe caractéristique et famille</h3>
+    <div class="cle"><p><b class="cle-titre">Groupe caractéristique</b> · Au sein d'une molécule organique, enchaînement particulier d'atomes dont <b>au moins un n'est ni du carbone ni de l'hydrogène</b>.</p>
+      <p>Il donne des propriétés spécifiques aux molécules qui le possèdent : elles forment une <b>famille chimique</b>.</p></div>
+    <div data-x="tableau"></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Entourer et nommer</h3>
+    <div class="cle"><ol class="er-liste" style="margin:0"><li>Repérer chaque atome d'oxygène O.</li>
+      <li>Un carbone lié à un <b>=O</b> et à un <b>OH</b> : entourer ensemble C, =O et OH → groupe <b>carboxyle</b>, famille des acides carboxyliques.</li>
+      <li>Un <b>OH</b> lié à un carbone sans =O : entourer le OH seul → groupe <b>hydroxyle</b>, famille des alcools.</li></ol></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Les exemples de la fiche, corrigés</h3>
+    <div data-x="exemples"></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_1_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_1_questions.html">Questions sur les groupes caractéristiques</a>
+  </div>
+</div>
+<script>
+const { formule, corrigee, MOL } = RP;
+const carbo = formule({ chaine: [{ t: '—C', haut: { t: 'O', double: true } }, { t: 'OH' }] });
+document.querySelector('[data-x="tableau"]').innerHTML = `<div class="ph-defile"><table class="rp-groupes"><thead><tr><th>Groupe caractéristique</th><th>Hydroxyle</th><th>Carboxyle</th></tr></thead>
+  <tbody><tr><th>Formule</th><td><b>—OH</b></td><td>${carbo}</td></tr><tr><th>Famille</th><td>alcool</td><td>acide carboxylique</td></tr></tbody></table></div>`;
+document.querySelector('[data-x="exemples"]').innerHTML = [MOL.diol23, MOL.hydroxy3, MOL.ethanoiqueBas, MOL.hydroxy4]
+  .map((m, k) => `<div class="rp-fiche-ex"><p><b>Exemple ${k + 1}</b></p>${corrigee(m)}</div>`).join('');
+RP.menu('fiche_1');
+</script>
+</body>
+</html>

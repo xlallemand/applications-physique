@@ -413,6 +413,7 @@
           <tr><th>Formule brute</th><td>Mélange d'hydrocarbures. La formule chimique sera assimilée à ${fH('C10H22')}.</td></tr>
           <tr><th>État physique à 15 °C</th><td>Liquide</td></tr><tr><th>Masse molaire moléculaire M</th><td>142 g·mol<sup>−1</sup></td></tr>
           <tr><th>Pictogrammes de sécurité</th><td>${pictos}</td></tr></tbody></table></div>
+        ${lienApp('../../rappels-1ere-sti2d/modules/module_2_cours.html', 'Revoir les pictogrammes de sécurité : application « Rappels de 1ère STI2D », module 2.', 'Pictogrammes')}
         <p class="er-contexte">En considérant un vol identique en tous points (durée, vitesse, énergie nécessaire à la propulsion), on estime à <b>500 kg</b> la masse de kérosène nécessaire pour un vol de <b>24 h</b>.
           La durée de vol effective de <i>Solar Impulse 2</i> lors de son tour du monde a été de <b>560 h</b>.</p>
         ${donnees('masses molaires atomiques M(C) = 12,0 g·mol<sup>−1</sup> ; M(O) = 16,0 g·mol<sup>−1</sup>.')}
@@ -464,6 +465,7 @@
           <b>2.3.</b> Expliquer pourquoi la valeur trouvée est très supérieure à celle donnée par l'ADEME. Expliquer l'intérêt écologique d'avoir installé un poêle à bois au refuge plutôt qu'un autre système de chauffage (fioul ou gaz).</p>
         <p class="er-contexte"><b>3. Aspect « thermique » des panneaux.</b> Les panneaux solaires thermiques fonctionnent grâce à un fluide caloporteur (mélange eau-propylène glycol) qui y circule et est chauffé par le rayonnement solaire. Cette énergie thermique est ensuite fournie au ballon d'eau chaude.</p>
         <p class="er-contexte">Formule semi-développée de la molécule de propylène glycol :</p>${glycol}${tableGlycol}
+        ${lienApp('../../rappels-1ere-sti2d/modules/module_1_cours.html', 'Revoir les groupes caractéristiques : application « Rappels de 1ère STI2D », module 1.', 'Groupes caractéristiques')}
         <p class="er-contexte"><b>3.1.</b> Recopier la formule semi-développée de la molécule de propylène glycol et entourer les groupes caractéristiques. Nommer ce(s) groupe(s). <b>3.2.</b> Expliquer pourquoi on ne peut pas utiliser l'eau pure comme fluide caloporteur, notamment dans le cas d'un refuge de montagne, et préciser l'intérêt d'employer le propylène glycol.</p>`,
       parties: [
         schema('C6H10O5', { m0: '?', n0: '#n0', n2: '?', m2: '?', E: [['E', '#e'], ['PC', '#pc']], formuleE: 'E = PC × m, donc m = E / PC' }, [
