@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portail — maquette · Des applications pour s'entraîner en Physique-Chimie</title>
+<link rel="stylesheet" href="../../../assets/theme.css">
+<style>
+/* ============================================================
+   Portail — styles de base (après assets/theme.css)
+   - couleurs de domaine (--c, --c-ink, --c-bg) sur .d-physique, .d-chimie, .d-maths
+   - bandeau d'accueil avec image en parallaxe (.hero.plx)
+   - feuille blanche qui recouvre l'image (.feuille)
+   - pastilles de tri (.puce)
+   ============================================================ */
+
+/* Couleur de chaque domaine : mêmes valeurs que data-matiere dans theme.css
+   (le thème ne les pose que sur <html>, il faut ici les porter par élément) */
+.d-physique { --c: #5a3fc4; --c-ink: #3f2a93; --c-bg: #ebe7f8; }
+.d-chimie   { --c: #0a7d57; --c-ink: #075c40; --c-bg: #e2f1ea; }
+.d-maths    { --c: #2952c8; --c-ink: #1c3782; --c-bg: #e6ecf9; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--sheet); line-height: 1.5; }
+.wrap { max-width: 1160px; margin: 0 auto; padding-left: 16px; padding-right: 16px; }
+@media (min-width: 760px) { .wrap { padding-left: 32px; padding-right: 32px; } }
+
+/* ---------- Bandeau d'accueil (image en parallaxe) ---------- */
+.plx { position: relative; overflow: hidden; }
+.plx canvas { position: absolute; left: 0; width: 100%; display: block; will-change: transform; }
+.hero { height: clamp(420px, 66vh, 640px); display: flex; flex-direction: column; background: var(--paper); }
+.hero::after {
+  /* voile pour garantir la lisibilité du titre */
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--paper) 97%, transparent) 0%, color-mix(in srgb, var(--paper) 85%, transparent) 32%, transparent 68%),
+    linear-gradient(0deg, color-mix(in srgb, var(--paper) 90%, transparent) 0%, transparent 30%);
+}
+.hero > .wrap { position: relative; z-index: 1; width: 100%; }
+.hero-nav { display: flex; align-items: center; height: 72px; }
+.marque { font-weight: 800; letter-spacing: -.02em; font-size: 1.05rem; color: var(--ink); text-decoration: none; }
+.hero-texte { margin-top: auto; padding-bottom: clamp(60px, 9vh, 96px); }
+.hero h1 { margin: 0; font-size: clamp(3rem, 9vw, 6.6rem); line-height: .92; letter-spacing: -.05em; font-weight: 800; color: var(--ink); }
+.hero .lead { margin: 18px 0 0; font-size: clamp(1.02rem, 2vw, 1.25rem); color: var(--ink-2); max-width: 32ch; }
+.legende { position: absolute; z-index: 1; right: 16px; bottom: 40px; margin: 0; font-size: .78rem; color: var(--ink-3); }
+@media (max-width: 760px) {
+  /* téléphone : image moins haute pour que la liste arrive vite */
+  .hero { height: clamp(300px, 46svh, 380px); }
+  .hero-nav { height: 60px; }
+  .hero-texte { padding-bottom: 48px; }
+  .legende { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .plx canvas { transform: none !important; } }
+
+/* ---------- Feuille blanche qui recouvre l'image ---------- */
+.feuille { position: relative; z-index: 2; background: var(--sheet); border-radius: 28px 28px 0 0; margin-top: -28px; }
+
+/* ---------- Pastilles de tri ---------- */
+.puce {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 14px;
+  border: none; border-radius: 999px; background: var(--sheet); color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3);
+  font: 700 .86rem/1 var(--font-sans); white-space: nowrap; cursor: pointer;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  transition: background .15s, box-shadow .15s, color .15s;
+}
+.puce:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.puce[aria-pressed="true"] { background: var(--ink); color: #fff; box-shadow: none; }
+.puce:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+/* pastille de domaine : petit rond de la couleur du domaine, fond teinté quand choisie */
+.puce .rond-c { width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
+.puce.d-physique[aria-pressed="true"], .puce.d-chimie[aria-pressed="true"], .puce.d-maths[aria-pressed="true"] {
+  background: var(--c-bg); color: var(--c-ink); box-shadow: inset 0 0 0 1.5px var(--c);
+}
+
+/* Étiquettes de niveau d'une application */
+.niv { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .7rem; font-weight: 700; line-height: 1.5;
+  background: var(--paper); color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.niv.ici { background: var(--c-bg); color: var(--c-ink); }
+
+/* Message quand le tri ne laisse rien */
+.vide { padding: 28px 20px; border-radius: 20px; background: var(--paper); text-align: center; color: var(--ink-2); }
+.vide p { margin: 0 0 12px; }
+
+.pied { color: var(--ink-3); font-size: .85rem; padding: 32px 0 40px; }
+.pied .wrap > div { border-top: 1px solid var(--line); padding-top: 18px; }
+</style>
+<style>
+  /* ============================================================
+     PORTAIL — liste des applications
+     L'image, puis une barre de tri collée en haut de l'écran
+     (domaines, niveaux) et une liste compacte en lignes,
+     regroupée par domaine.
+     ============================================================ */
+
+  /* ---------- Barre de tri, collée en haut pendant le défilement ---------- */
+  .tri { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--sheet) 94%, transparent);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 28px 28px 0 0; }
+  .tri.colle { border-radius: 0; border-bottom: 1px solid var(--line); }
+  .tri .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 28px; padding-top: 22px; padding-bottom: 14px; }
+  .groupe { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .groupe-lab { flex-shrink: 0; margin-right: 4px; font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); }
+  .compteur { margin-left: auto; font-size: .85rem; font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .compteur button { margin-left: 8px; }
+  @media (max-width: 760px) {
+    /* téléphone : une ligne par groupe, qui défile de côté */
+    .tri .wrap { display: block; padding: 14px 0 4px; }
+    .groupe { overflow-x: auto; padding: 0 16px 8px; scrollbar-width: none; }
+    .groupe .puce { height: 34px; padding: 0 13px; }
+    .groupe::-webkit-scrollbar { display: none; }
+    .groupe-lab { display: none; }
+    /* le compteur n'apparaît sur téléphone que si un tri est en cours */
+    .compteur { display: none; align-items: center; justify-content: space-between; margin: 0 16px 6px; font-size: .8rem; }
+    .compteur.trie { display: flex; }
+  }
+
+  /* ---------- Liste ---------- */
+  #liste { padding-top: 14px; padding-bottom: 8px; }
+  .dom { padding: 16px 0 10px; scroll-margin-top: 140px; }
+  .dom-t { display: flex; align-items: baseline; gap: 10px; margin: 0 0 10px; padding: 0 4px; }
+  .dom-t h2 { margin: 0; font-size: 1.35rem; font-weight: 800; letter-spacing: -.03em; color: var(--c-ink); }
+  .dom-t span { font-size: .85rem; font-weight: 600; color: var(--ink-3); }
+  .lignes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 760px) { .lignes { grid-template-columns: 1fr; gap: 6px; } .dom-t h2 { font-size: 1.15rem; } }
+
+  .app {
+    display: flex; align-items: center; gap: 14px; padding: 13px 14px 13px 18px; border-radius: 18px;
+    background: var(--paper); color: var(--ink); text-decoration: none; position: relative;
+    transition: background .15s;
+  }
+  .app::before { content: ''; position: absolute; left: 0; top: 16px; bottom: 16px; width: 4px; border-radius: 0 4px 4px 0; background: var(--c); }
+  .app:hover { background: var(--paper-2); }
+  .app:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+  .app-c { flex: 1; min-width: 0; }
+  .app-t { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+  .app .niv { background: var(--sheet); }
+  .app-t b { font-size: 1.02rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.25; margin-right: 2px; }
+  .app-d { margin: 3px 0 0; font-size: .86rem; color: var(--ink-2); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .app-f { flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--sheet); color: var(--ink); transition: background .15s, color .15s; }
+  .app-f svg { width: 16px; height: 16px; }
+  /* avancement de l'application (x/y), comme les compteurs de l'accueil de l'application */
+  .app-n { flex-shrink: 0; font-size: .78rem; font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .app:hover .app-f { background: var(--c); color: #fff; }
+  @media (max-width: 640px) { .app-d { display: none; } .app { padding: 11px 10px 11px 16px; } .app-f { width: 32px; height: 32px; } }
+</style>
+<link rel="stylesheet" href="../../../assets/progression.css">
+<link rel="stylesheet" href="fc.css">
+</head>
+<body>
+
+<!-- ====== Bandeau d'accueil avec image en parallaxe ====== -->
+<header class="hero plx" data-graine="7">
+  <canvas aria-hidden="true"></canvas>
+  <div class="wrap"><nav class="hero-nav"><a class="marque" href="#">Physique-Chimie</a>
+    <a class="btn-small fc-nav" href="revisions.html" style="margin-left:auto">Révisions <i>8</i></a>
+    <!-- Enregistrer / reprendre la progression : assets/progression.js -->
+    <div class="prog-actions" style="margin-left:0">
+      <button type="button" class="btn-small" id="prog-enregistrer">Enregistrer ma progression</button>
+      <button type="button" class="prog-lien" id="prog-reprendre">Reprendre depuis un fichier</button>
+      <input type="file" id="prog-fichier" class="prog-cache" accept=".html,.htm,text/html" tabindex="-1" aria-hidden="true">
+    </div>
+  </nav></div>
+  <div class="wrap hero-texte">
+    <h1>Physique<br>Chimie</h1>
+    <p class="lead">Applications d'entraînement, niveau lycée, de la seconde à la terminale.</p>
+  </div>
+  <p class="legende">Traces de particules chargées dans une chambre à bulles.</p>
+</header>
+
+<!-- ====== Feuille de contenu ====== -->
+<main class="feuille">
+  <!-- MAQUETTE : bandeau du jour, seulement quand des cartes sont à réviser -->
+  <div class="wrap" style="padding-top:22px">
+    <div class="fc-auj"><span class="fc-auj-t"><small>Révisions</small><b>8 flashcards à réviser aujourd'hui</b><span class="fc-auj-d">Chapitre 11 · environ 4 min</span></span>
+      <a class="fc-sec" href="revisions.html">Ma boîte</a><a class="fc-go" href="seance.html">Réviser →</a></div>
+  </div>
+  <div class="tri" id="tri">
+    <div class="wrap">
+      <div class="groupe" role="group" aria-label="Domaine" id="g-dom"></div>
+      <div class="groupe" role="group" aria-label="Niveau" id="g-niv"></div>
+      <div class="compteur" id="compteur" aria-live="polite"></div>
+    </div>
+  </div>
+  <div class="wrap" id="liste"></div>
+</main>
+
+<footer class="pied"><div class="wrap"><div>Applications d'entraînement en Physique-Chimie · Niveau lycée</div></div></footer>
+
+<script src="../../../assets/avancement.js"></script>
+<script>
+/* ============================================================
+   Portail — données et fonctions
+   ------------------------------------------------------------
+   ACC.DOMAINES  liste des domaines (Physique, Chimie, Outils mathématiques)
+   ACC.NIVEAUX   liste des niveaux (Collège, 2de, 1re, Tle spé, Tle STI2D)
+   ACC.APPS      liste des applications avec leurs étiquettes
+   ACC.filtre    état du tri : { dom: Set, niv: Set } (ensemble vide = tout afficher)
+   ACC.basculer(groupe, id)   ajoute / retire une étiquette du tri
+   ACC.toutAfficher(groupe)   vide le tri d'un groupe (ou des deux)
+   ACC.visible(app)           l'application passe-t-elle le tri ?
+   ACC.surChangement(fn)      fn() est appelée à chaque changement du tri
+   ACC.chambre(canvas, graine) dessine le cliché de chambre à bulles
+   ACC.parallaxe()            met en place l'image qui descend moins vite que la page
+   ACC.rafraichir()           redessine la liste (avancement x/y à jour) ; posée par le script de la liste
+
+   Principe du tri : par défaut aucune étiquette n'est choisie et tout
+   est affiché ; choisir une étiquette ne garde que les applications qui
+   la portent, en choisir d'autres les ajoute. Les deux groupes
+   (domaine, niveau) se combinent.
+   ============================================================ */
+(function () {
+  'use strict';
+
+  const DOMAINES = [
+    { id: 'physique', nom: 'Physique', court: 'Physique' },
+    { id: 'chimie', nom: 'Chimie', court: 'Chimie' },
+    { id: 'maths', nom: 'Outils mathématiques', court: 'Outils maths' }
+  ];
+
+  // court : étiquette des pastilles ; abr : en-tête de colonne étroite
+  const NIVEAUX = [
+    { id: 'col', nom: 'Collège', court: 'Collège', abr: 'Coll.' },
+    { id: '2de', nom: 'Seconde', court: '2de', abr: '2de' },
+    { id: '1re', nom: 'Première', court: '1re', abr: '1re' },
+    { id: 'spe', nom: 'Terminale spécialité', court: 'Tle spé', abr: 'Spé' },
+    { id: 'sti', nom: 'Terminale STI2D', court: 'Tle STI2D', abr: 'STI2D' }
+  ];
+
+  // Lycée complet (outils mathématiques)
+  const LYCEE = ['2de', '1re', 'spe', 'sti'];
+
+  const APPS = [
+    // ---- Physique ----
+    { titre: 'Désintégration radioactive', dom: 'physique', niv: ['spe'], dossier: 'decroissance-radioactive',
+      desc: 'Simulation interactive de la loi de décroissance radioactive.' },
+    { titre: 'Chapitre 1 : Énergie et puissance', dom: 'physique', niv: ['sti'], dossier: 'energie-puissance',
+      desc: 'Rendement, puissance moyenne et instantanée, énergie et aire sous la courbe.' },
+    { titre: 'Chapitre 2 : Piles et accumulateurs', dom: 'physique', niv: ['sti'], dossier: 'piles-accumulateurs',
+      desc: 'Capacité, énergie disponible, énergies massique et volumique, branchements.' },
+    { titre: 'Chapitre 3 : Puissances active et apparente', dom: 'physique', niv: ['sti'], dossier: 'puissance-active',
+      desc: 'Valeur efficace, déphasage, puissance active et facteur de puissance en régime sinusoïdal.' },
+    { titre: "Chapitre 4 : Transport et distribution de l'électricité", dom: 'physique', niv: ['sti'], dossier: 'transport-electricite',
+      desc: 'Pertes par effet Joule, transformateur, risque électrique, exercices de synthèse.' },
+    { titre: 'Chapitre 5 : Flux et transferts thermiques', dom: 'physique', niv: ['sti'], dossier: 'transferts-thermiques',
+      desc: 'Kelvin, modes de transfert, flux thermique, résistance thermique d\'une paroi.' },
+    { titre: 'Chapitre 6 : Principe fondamental de la dynamique', dom: 'physique', niv: ['sti'], dossier: 'principe-dynamique',
+      desc: 'Bilan des forces, accélération, Σ F⃗ = m a⃗ et principe d\'inertie.' },
+    { titre: "Chapitre 7 : Théorème de l'énergie cinétique", dom: 'physique', niv: ['sti'], dossier: 'energie-cinetique',
+      desc: 'Frottements, travail d\'une force, énergie cinétique et théorème de l\'énergie cinétique.' },
+    { titre: 'Chapitre 8 : Mouvements de rotation', dom: 'physique', niv: ['sti'], dossier: 'mouvements-rotation',
+      desc: 'Vitesse angulaire, tr/min et rad/s, moment d\'une force, couple, point de fonctionnement d\'un moteur.' },
+    { titre: 'Chapitre 9 : Statique des fluides', dom: 'physique', niv: ['sti'], dossier: 'statique-fluides',
+      desc: 'Pression et force pressante, pression relative, principe fondamental de l\'hydrostatique.' },
+    { titre: 'Chapitre 10 : Énergie transportée par la lumière', dom: 'physique', niv: ['sti'], dossier: 'energie-lumiere',
+      desc: 'Capteurs photothermiques et photovoltaïques, photon E = h f, caractéristique d\'un panneau solaire.' },
+    { titre: "Chapitre 11 : Changements d'état et transferts thermiques", dom: 'physique', niv: ['sti'], dossier: 'changements-etat',
+      desc: 'Chaleur latente, Q = m c ΔT et Q = m L, diagramme d\'état, schéma des étapes d\'un chauffage.' },
+    { titre: 'Chapitre 12 : Radioactivité', dom: 'physique', niv: ['sti'], dossier: 'radioactivite',
+      desc: 'Noyau, α, β⁻, β⁺, γ, activité, demi-vie, N(t) = N₀ e^(−λt) et calcul de t.' },
+    { titre: 'Chapitre 13 : Énergie nucléaire', dom: 'physique', niv: ['sti'], dossier: 'energie-nucleaire',
+      desc: 'Fission, fusion, défaut de masse, E = |Δm| c², énergie d\'un échantillon.' },
+    { titre: "Chapitre 17 : Spectre d'un signal périodique", dom: 'physique', niv: ['sti'], dossier: 'spectre-signal',
+      desc: 'Décomposition de Fourier, composante continue, fondamental et harmoniques, lecture d\'un spectre.' },
+    { titre: 'Chapitre 19 : Ondes électromagnétiques', dom: 'physique', niv: ['sti'], dossier: 'ondes-electromagnetiques',
+      desc: 'Longueur d\'onde et fréquence, domaines des télécommunications, modulation AM et FM, antennes.' },
+    { titre: 'Spectres et étoiles', dom: 'physique', niv: ['2de'], dossier: 'spectres-etoiles',
+      desc: "Spectres d'émission et d'absorption, température et composition chimique d'une étoile." },
+    { titre: 'Cinématique', dom: 'physique', niv: ['spe'], dossier: 'cinematique',
+      desc: 'Référentiel, vecteurs position, vitesse et accélération, repère de Frenet.' },
+    // ---- Chimie ----
+    { titre: 'Rappels de 1ère STI2D', dom: 'chimie', niv: ['sti'], dossier: 'rappels-1ere-sti2d',
+      desc: 'Groupes caractéristiques hydroxyle et carboxyle, pictogrammes de sécurité.' },
+    { titre: 'Chapitre 14 : Combustions', dom: 'chimie', niv: ['sti'], dossier: 'combustions',
+      desc: 'Équilibrer une combustion, masse de CO₂ formé et énergie libérée.' },
+    { titre: 'Oxydoréduction', dom: 'chimie', niv: ['sti'], dossier: 'oxydoreduction-STI2D',
+      desc: "Apprendre à écrire les réactions d'oxydoréduction." },
+    { titre: 'Oxydoréduction', dom: 'chimie', niv: ['1re', 'spe'], dossier: 'oxydoreduction-spe',
+      desc: "Équilibrer les demi-équations avec H₂O, H⁺ et e⁻, puis écrire les réactions d'oxydoréduction." },
+    { titre: "Schéma d'une pile", dom: 'chimie', niv: ['spe', 'sti'], dossier: 'pile',
+      desc: "Compléter le schéma et le fonctionnement d'une pile électrochimique." },
+    { titre: 'Équilibrer une réaction', dom: 'chimie', niv: LYCEE, dossier: 'equilibrer-reactions',
+      desc: 'Conservation des atomes et nombres stœchiométriques.' },
+    { titre: "Avancement d'une réaction", dom: 'chimie', niv: ['2de', '1re'], dossier: 'avancement-reaction',
+      desc: "Réactif limitant et tableau d'avancement, des molécules aux moles." },
+    { titre: 'pH', dom: 'chimie', niv: ['spe'], dossier: 'ph',
+      desc: 'Logarithme décimal et relation entre le pH et la concentration en ions H₃O⁺.' },
+    // ---- Outils mathématiques ----
+    { titre: 'Puissances de 10', dom: 'maths', niv: LYCEE, dossier: 'puissances-10',
+      desc: 'Utiliser les puissances de 10, indispensables pour les conversions.' },
+    { titre: 'Conversions', dom: 'maths', niv: LYCEE, dossier: 'conversions',
+      desc: 'Réaliser facilement des conversions avec les puissances de 10.' },
+    { titre: 'Équations en physique', dom: 'maths', niv: LYCEE, dossier: 'equations-en-physique',
+      desc: 'Exprimer une grandeur en fonction des autres.' },
+    { titre: 'Équations en physique (avec aide)', dom: 'maths', niv: LYCEE, dossier: 'equations-en-physique-avec-aide',
+      desc: 'Même entraînement, avec explication de la règle en cas d’erreur.' },
+    { titre: 'Proportionnalité', dom: 'maths', niv: LYCEE, dossier: 'proportionnalite',
+      desc: 'Reconnaître, calculer et lire une proportionnalité sur un graphique.' },
+    { titre: 'Lecture graphique', dom: 'maths', niv: LYCEE, dossier: 'lecture-graphique',
+      desc: 'Lire précisément une valeur sur un graphique.' },
+    { titre: 'Équations du 1er degré', dom: 'maths', niv: ['col'], dossier: 'equations-college',
+      desc: 'Résoudre des équations étape par étape.' },
+    { titre: 'Fractions', dom: 'maths', niv: ['col'], dossier: 'fractions-college',
+      desc: 'Simplifier, multiplier, diviser, additionner et soustraire des fractions.' }
+  ];
+
+  /* ---------- Tri : afficher / masquer ---------- */
+  const filtre = { dom: new Set(), niv: new Set() };
+  const abonnes = [];
+  const prevenir = () => abonnes.forEach(fn => fn());
+
+  function basculer(groupe, id) {
+    const s = filtre[groupe];
+    if (s.has(id)) s.delete(id); else s.add(id);
+    // toutes les étiquettes choisies = aucune : on revient à « Tous »
+    const total = groupe === 'dom' ? DOMAINES.length : NIVEAUX.length;
+    if (s.size === total) s.clear();
+    prevenir();
+  }
+  function toutAfficher(groupe) {
+    if (groupe) filtre[groupe].clear(); else { filtre.dom.clear(); filtre.niv.clear(); }
+    prevenir();
+  }
+  function visible(app) {
+    const okDom = !filtre.dom.size || filtre.dom.has(app.dom);
+    const okNiv = !filtre.niv.size || app.niv.some(n => filtre.niv.has(n));
+    return okDom && okNiv;
+  }
+  // Une étiquette est « allumée » quand elle est choisie ; « Tous » quand le groupe est vide
+  const choisi = (groupe, id) => filtre[groupe].has(id);
+  const actif = () => filtre.dom.size > 0 || filtre.niv.size > 0;
+
+  /* ---------- Image : cliché de chambre à bulles ----------
+     Chaque trace est une suite de petites bulles. Une particule chargée
+     décrit un arc de cercle ; en perdant de l'énergie son rayon diminue,
+     d'où les spirales (électrons). */
+  function graine(seed) {
+    return function () {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function chambre(canvas, seed) {
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    const rnd = graine(seed);
+    const E = Math.max(w, h) / 1400;           // échelle des motifs
+    const css = getComputedStyle(document.documentElement);
+    const papier = css.getPropertyValue('--paper').trim() || '#f3f1ec';
+
+    ctx.fillStyle = papier; ctx.fillRect(0, 0, w, h);
+
+    // Repères (croix) gravés sur la fenêtre de la chambre
+    ctx.strokeStyle = 'rgba(22,24,29,.12)'; ctx.lineWidth = 1;
+    const pasCroix = 190 * E;
+    for (let x = pasCroix / 2; x < w; x += pasCroix) for (let y = pasCroix / 2; y < h; y += pasCroix) {
+      ctx.beginPath(); ctx.moveTo(x - 5, y); ctx.lineTo(x + 5, y); ctx.moveTo(x, y - 5); ctx.lineTo(x, y + 5); ctx.stroke();
+    }
+
+    // Trace d'une particule : k = courbure (rad/px), perte = croissance de k à chaque pas
+    function trace(x, y, a, k, perte, longueur, taille, alpha) {
+      const pas = 2.1 * E;
+      ctx.fillStyle = `rgba(22,24,29,${alpha})`;
+      for (let s = 0; s < longueur; s += pas) {
+        x += Math.cos(a) * pas; y += Math.sin(a) * pas;
+        a += k * pas; k *= perte;
+        if (rnd() < .6) {
+          ctx.beginPath();
+          ctx.arc(x + (rnd() - .5) * .9, y + (rnd() - .5) * .9, taille * (.55 + rnd() * .7), 0, 7);
+          ctx.fill();
+        }
+        if (Math.abs(k) > .5 / E || x < -300 || x > w + 300 || y < -300 || y > h + 300) break;
+      }
+      return { x, y, a };
+    }
+    const signe = () => (rnd() < .5 ? -1 : 1);
+
+    // Faisceau incident : traces presque rectilignes venant de la gauche
+    const nFaisceau = 9;
+    for (let i = 0; i < nFaisceau; i++) {
+      const y0 = h * (.08 + .86 * (i + rnd() * .6) / nFaisceau);
+      const a0 = (rnd() - .5) * .04;
+      const k0 = signe() * 2e-5 / E;
+      const interaction = rnd() < .6;
+      const L = interaction ? w * (.35 + rnd() * .55) : w * 1.3;
+      const fin = trace(-40, y0, a0, k0, 1, L, 1.05 * E + .35, .55);
+
+      if (interaction) {
+        // Vertex d'interaction : gerbe de particules secondaires
+        const n = 2 + Math.floor(rnd() * 4);
+        for (let j = 0; j < n; j++) {
+          trace(fin.x, fin.y, fin.a + (rnd() - .5) * 1.6, signe() * (4e-4 + rnd() * 2.2e-3) / E,
+                1 + rnd() * .0025, (300 + rnd() * 900) * E, .95 * E + .35, .5);
+        }
+      }
+      // Électrons arrachés (rayons delta) : petites spirales serrées
+      if (rnd() < .7) {
+        const px = w * (.1 + rnd() * .7), py = y0 + Math.tan(a0) * px;
+        trace(px, py, rnd() * 6.28, signe() * (.01 + rnd() * .02) / E, 1.006, 700 * E, .8 * E + .3, .45);
+      }
+    }
+
+    // Désintégrations « en V » d'une particule neutre (aucune trace incidente)
+    for (let i = 0; i < 3; i++) {
+      const vx = w * (.45 + rnd() * .5), vy = h * (.15 + rnd() * .7), a = (rnd() - .5) * .8;
+      trace(vx, vy, a - .25, 1.2e-3 / E, 1.001, 700 * E, .95 * E + .35, .5);
+      trace(vx, vy, a + .25, -1.4e-3 / E, 1.001, 650 * E, .95 * E + .35, .5);
+    }
+
+    // Quelques grandes spirales isolées
+    for (let i = 0; i < 4; i++) {
+      trace(w * (.3 + rnd() * .7), h * rnd(), rnd() * 6.28, signe() * (.003 + rnd() * .004) / E,
+            1.0035, 2600 * E, .85 * E + .3, .42);
+    }
+  }
+
+  /* ---------- Parallaxe : l'image descend à 60 % de la vitesse du scroll ---------- */
+  function parallaxe() {
+    const F = 0.4;                                   // retard de l'image
+    const reduit = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const boites = [...document.querySelectorAll('.plx')];
+
+    function dimensionner() {
+      boites.forEach(b => {
+        const cv = b.querySelector('canvas');
+        const hb = b.offsetHeight;
+        const hautMax = Math.min(b.getBoundingClientRect().top + scrollY, innerHeight);
+        const f = reduit ? 0 : F;
+        cv.style.top = (-f * hautMax) + 'px';
+        cv.style.height = (hb + f * (hautMax + hb)) + 'px';
+        chambre(cv, +b.dataset.graine);
+      });
+      deplacer();
+    }
+    function deplacer() {
+      if (reduit) return;
+      boites.forEach(b => {
+        const r = b.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > innerHeight) return;       // hors écran : rien à faire
+        b.querySelector('canvas').style.transform = `translate3d(0, ${-r.top * F}px, 0)`;
+      });
+    }
+
+    dimensionner();
+    let attente = false;
+    addEventListener('scroll', () => {
+      if (!attente) { attente = true; requestAnimationFrame(() => { deplacer(); attente = false; }); }
+    }, { passive: true });
+    let minuterie, largeur = innerWidth;
+    addEventListener('resize', () => {
+      clearTimeout(minuterie);
+      // sur mobile, la barre d'adresse change la hauteur : on ne redessine que si la largeur change
+      minuterie = setTimeout(() => { if (innerWidth !== largeur) { largeur = innerWidth; dimensionner(); } else deplacer(); }, 200);
+    });
+    document.fonts && document.fonts.ready.then(dimensionner);
+  }
+
+  /* ---------- Petits utilitaires d'affichage ---------- */
+  const domaine = id => DOMAINES.find(d => d.id === id);
+  const niveau = id => NIVEAUX.find(n => n.id === id);
+  const fleche = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  const pluriel = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
+
+  // Étiquettes de niveau d'une application : « Lycée » remplace les quatre niveaux du lycée
+  function etiquettes(app) {
+    const lycee = LYCEE.every(n => app.niv.includes(n));
+    const liste = lycee ? [{ texte: 'Lycée', ids: LYCEE }] : [];
+    app.niv.filter(n => !lycee || !LYCEE.includes(n)).forEach(n => liste.push({ texte: niveau(n).court, ids: [n] }));
+    return liste.map(e => `<span class="niv${e.ids.some(n => filtre.niv.has(n)) ? ' ici' : ''}" title="${e.ids.map(n => niveau(n).nom).join(', ')}">${e.texte}</span>`).join('');
+  }
+
+  window.ACC = {
+    DOMAINES, NIVEAUX, APPS, filtre, basculer, toutAfficher, visible, choisi, actif,
+    surChangement: fn => abonnes.push(fn),
+    chambre, parallaxe, domaine, niveau, fleche, pluriel, etiquettes
+  };
+})();
+</script>
+<script>
+(function () {
+  'use strict';
+  const { DOMAINES, NIVEAUX, APPS } = ACC;
+
+  /* ---------- Pastilles de tri ---------- */
+  function pastilles() {
+    document.getElementById('g-dom').innerHTML =
+      '<span class="groupe-lab">Domaine</span>' +
+      `<button type="button" class="puce" data-g="dom" data-id="" aria-pressed="${!ACC.filtre.dom.size}">Tous</button>` +
+      DOMAINES.map(d => `<button type="button" class="puce d-${d.id}" data-g="dom" data-id="${d.id}" aria-pressed="${ACC.choisi('dom', d.id)}"><span class="rond-c"></span>${d.court}</button>`).join('');
+    document.getElementById('g-niv').innerHTML =
+      '<span class="groupe-lab">Niveau</span>' +
+      `<button type="button" class="puce" data-g="niv" data-id="" aria-pressed="${!ACC.filtre.niv.size}">Tous</button>` +
+      NIVEAUX.map(n => `<button type="button" class="puce" data-g="niv" data-id="${n.id}" aria-pressed="${ACC.choisi('niv', n.id)}" title="${n.nom}">${n.court}</button>`).join('');
+  }
+  document.getElementById('tri').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.tout) return ACC.toutAfficher();
+    if (b.dataset.id) ACC.basculer(b.dataset.g, b.dataset.id); else ACC.toutAfficher(b.dataset.g);
+  });
+
+  /* ---------- Avancement d'une application : x/y (assets/avancement.js) ---------- */
+  function avancement(app) {
+    const av = window.AV && AV.avancement(app.dossier);
+    return av ? `<span class="app-n" title="Avancement : ${av.fait} sur ${av.total}">${av.fait}/${av.total}</span>` : '';
+  }
+
+  /* ---------- Liste regroupée par domaine ---------- */
+  function liste() {
+    const vis = APPS.filter(ACC.visible);
+    const html = DOMAINES.map(d => {
+      const apps = vis.filter(a => a.dom === d.id);
+      if (!apps.length) return '';
+      return `
+        <section class="dom d-${d.id}" id="${d.id}">
+          <div class="dom-t"><h2>${d.nom}</h2><span>${ACC.pluriel(apps.length, 'application')}</span></div>
+          <div class="lignes">
+            ${apps.map(a => `
+              <a class="app" href="${a.dossier === 'changements-etat' ? 'appli.html' : '#'}">
+                <div class="app-c">
+                  <div class="app-t"><b>${a.titre}</b>${ACC.etiquettes(a)}</div>
+                  <p class="app-d">${a.desc}</p>
+                </div>
+                ${avancement(a)}
+                <span class="app-f">${ACC.fleche}</span>
+              </a>`).join('')}
+          </div>
+        </section>`;
+    }).join('');
+    document.getElementById('liste').innerHTML = html ||
+      '<div class="vide"><p>Aucune application pour ce choix.</p><button type="button" class="btn-small" id="vider">Tout afficher</button></div>';
+    const v = document.getElementById('vider');
+    if (v) v.onclick = () => ACC.toutAfficher();
+    document.getElementById('compteur').classList.toggle('trie', ACC.actif());
+    document.getElementById('compteur').innerHTML = ACC.actif()
+      ? `<span>${vis.length} / ${APPS.length} applications</span><button type="button" class="btn-small" data-tout="1">Tout afficher</button>`
+      : `${APPS.length} applications`;
+  }
+
+  function maj() { pastilles(); liste(); }
+  ACC.surChangement(() => {
+    // après un tri, on ramène le haut de la liste sous la barre si on l'avait dépassé
+    const tri = document.getElementById('tri');
+    const haut = tri.parentElement.getBoundingClientRect().top;
+    maj();
+    if (haut < 0) scrollTo({ top: scrollY + haut, behavior: 'auto' });
+  });
+  maj();
+  // avancement à jour après une reprise de progression (assets/progression.js)
+  ACC.rafraichir = liste;
+  // retour arrière depuis une application : la page revient du cache, l'avancement a pu changer
+  addEventListener('pageshow', e => { if (e.persisted) liste(); });
+
+  /* ---------- La barre perd ses coins arrondis quand elle est collée en haut ---------- */
+  const tri = document.getElementById('tri');
+  const coller = () => tri.classList.toggle('colle', tri.getBoundingClientRect().top <= 0 && tri.parentElement.getBoundingClientRect().top < 0);
+  addEventListener('scroll', coller, { passive: true });
+  coller();
+
+  ACC.parallaxe();
+})();
+</script>
+<script src="../../../assets/progression.js"></script>
+</body>
+</html>

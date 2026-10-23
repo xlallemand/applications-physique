@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<title>Révision — maquette</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../../assets/theme.css">
+<link rel="stylesheet" href="../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../../changements-etat/modules/ce.css">
+<link rel="stylesheet" href="../../../assets/sommaire.css">
+<link rel="stylesheet" href="fc.css">
+<script src="../../../assets/sommaire.js"></script>
+<script src="../../../changements-etat/modules/ce.js"></script>
+<script src="fc-demo.js"></script>
+</head>
+<body>
+<!-- MAQUETTE : séance de révision (les cartes dues aujourd'hui, toutes applications) -->
+<div class="er-page" id="zone"></div>
+<script>
+// #libre-<paquet> : révision libre d'un paquet (juste après l'ajout, ou « Tout réviser ») ; sinon : les cartes du jour
+const libre = location.hash.match(/^#libre-(\w+)/);
+if (libre) {
+  const p = FC.PAQUETS.find(x => x.id === libre[1]);
+  const cartes = p ? p.cartes : FC.toutes();
+  FC.seance(document.getElementById("zone"), cartes, { app: true, libre: true, limite: 0, retour: "cartes.html" });
+} else FC.seance(document.getElementById("zone"), FC.dues(), { app: true, retour: "revisions.html" });
+</script>
+</body>
+</html>

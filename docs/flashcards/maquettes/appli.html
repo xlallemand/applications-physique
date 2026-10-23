@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapitre 11 : accueil — maquette</title>
+<link rel="stylesheet" href="../../../assets/theme.css">
+<link rel="stylesheet" href="../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../../changements-etat/modules/ce.css">
+<link rel="stylesheet" href="../../../assets/sommaire.css">
+<link rel="stylesheet" href="fc.css">
+<script src="fc-demo.js"></script>
+<script>FC.demoStockage({ 'changements-etat-progression': FC.PROG_DEMO });</script>
+<script src="../../../assets/hero.js"></script>
+<script src="../../../assets/sommaire.js"></script>
+<script src="../../../changements-etat/modules/ce.js"></script>
+</head>
+<body>
+<!-- MAQUETTE : accueil de l'application avec le bloc « Flashcards »
+     (progression fictive : cours des modules 1 à 4 terminés) -->
+<div id="app-nav"></div>
+
+<div class="er-page">
+  <header class="app-hero" data-dessin="molecules" style="margin-top:-24px">
+    <canvas aria-hidden="true"></canvas>
+    <div class="app-hero-in">
+      <p class="app-hero-kicker">Physique · Terminale STI2D</p>
+      <h1>Chapitre 11 : Changements d'état et transferts thermiques</h1>
+      <p class="app-hero-lead">États de la matière et liaison hydrogène, diagramme d'état (P, T), Q = m c (T<sub>f</sub> − T<sub>i</sub>), Q = m L et la méthode du schéma des étapes</p>
+    </div>
+    <div class="app-hero-edge"></div>
+  </header>
+
+  <main class="som-accueil" id="accueil"></main>
+</div>
+
+<script>
+CE.menu('accueil');
+CE.accueil(document.getElementById('accueil'));
+// maquette : liens vers le portail et les pages de l'application
+document.querySelector('.app-topbar .som-pilule').href = 'portail.html';
+document.querySelectorAll('#accueil a[href^="modules/"]').forEach(a => { a.href = '../../../changements-etat/' + a.getAttribute('href'); });
+
+// 1. bloc « Flashcards » sous « Reprendre »
+const actives = FC.actives(), dues = FC.dues();
+document.querySelector('.som-reprendre').insertAdjacentHTML('afterend',
+  `<div class="fc-bloc"><span class="fc-bloc-t"><small>Flashcards du chapitre</small><b>${dues.length} cartes à réviser aujourd'hui</b><span>${actives.length} cartes dans tes révisions · 4 à ajouter (module 4)</span></span>${FC.mini(actives)}<a class="btn-primary" href="seance.html" style="text-decoration:none">Réviser →</a><a class="btn-small" href="cartes.html" style="text-decoration:none">Toutes les cartes</a></div>`);
+
+// 2. un bouton « Flashcards » dans chaque module, à côté de la fiche
+const BT = {
+  1: '<a class="som-bt fait" href="cartes.html">Flashcards ✓</a>',
+  2: '<a class="som-bt fait" href="cartes.html">Flashcards ✓</a>',
+  3: '<a class="som-bt fait" href="cartes.html">Flashcards ✓</a>',
+  4: '<a class="som-bt ici" href="cartes.html">+ Ajouter les 4 flashcards</a>',
+  5: '<a class="som-bt" href="cartes.html">Flashcards (après le cours)</a>',
+};
+Object.keys(BT).forEach(n => {
+  const reg = document.getElementById('som-m' + n), l = reg && reg.querySelectorAll('.som-actions');
+  if (l && l.length) l[l.length - 1].insertAdjacentHTML('beforeend', BT[n]);
+});
+
+// 3. une ligne « Flashcards » en bas de la liste des modules
+document.querySelector('.som-modules').insertAdjacentHTML('beforeend',
+  `<div class="som-module"><a class="som-ligne" href="cartes.html" style="text-decoration:none;color:inherit"><span class="som-badge">⧉</span><span class="som-ligne-t">Flashcards<small>28 cartes pour retenir l'essentiel du chapitre</small></span><span class="som-ligne-n">${actives.length}/28</span><span class="som-chev" aria-hidden="true">›</span></a></div>`);
+</script>
+</body>
+</html>

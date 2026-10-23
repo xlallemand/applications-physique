@@ -1,0 +1,271 @@
+/* ============================================================
+   MAQUETTE — styles des flashcards (préfixe fc-)
+   Carte recto / verso, séance de révision, boîte à cases,
+   prochains jours, lignes d'application, liste des cartes.
+   Couleurs uniquement via les variables de assets/theme.css.
+   ============================================================ */
+
+/* ---------- La carte (fiche bristol) ---------- */
+.fc-scene { perspective: 1600px; }
+.fc-carte { display: grid; transform-style: preserve-3d; transition: transform .45s ease; }
+.fc-carte.retournee { transform: rotateY(180deg); }
+.fc-face {
+  grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  background: var(--sheet); border: 1px solid var(--line-strong); border-radius: 22px;
+  padding: 18px 24px 16px; min-height: 340px; display: flex; flex-direction: column; gap: 14px;
+}
+.fc-verso { transform: rotateY(180deg); }
+/* en-tête de la fiche : comme la ligne de titre d'une fiche bristol */
+.fc-tete {
+  display: flex; align-items: center; gap: 8px; padding-bottom: 10px;
+  border-bottom: 2px solid var(--cle-line); font-size: .8rem; font-weight: 700; color: var(--ink-2);
+}
+.fc-tete .fc-ou { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fc-type {
+  flex-shrink: 0; background: var(--cle-bg); color: var(--accent-ink); border-radius: 999px;
+  padding: 3px 10px; font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+}
+.fc-sens { flex-shrink: 0; color: var(--ink-2); font-weight: 800; }
+.fc-corps { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px; min-width: 0; }
+.fc-q { font-size: 1.32rem; font-weight: 700; line-height: 1.35; letter-spacing: -.01em; text-align: center; text-wrap: balance; }
+.fc-q small { display: block; margin-top: 6px; font-size: .9rem; font-weight: 600; color: var(--ink-2); }
+.fc-rappel { font-size: .88rem; font-weight: 600; color: var(--ink-2); line-height: 1.4; }
+.fc-rep { font-size: 1.05rem; line-height: 1.5; }
+.fc-rep p + p { margin-top: 6px; }
+.fc-rep ol { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; }
+.fc-formule { font-size: 1.45rem; font-weight: 800; text-align: center; letter-spacing: -.01em; padding: 10px; background: var(--cle-bg); border-radius: 14px; }
+.fc-unites { text-align: center; color: var(--ink-2); font-size: .95rem; }
+.fc-fig { max-width: 520px; width: 100%; margin: 0 auto; }
+.fc-fig svg { max-width: 100%; height: auto; }
+.fc-pied { display: flex; justify-content: space-between; gap: 8px; font-size: .78rem; font-weight: 700; color: var(--ink-3); }
+.fc-tab { border-collapse: collapse; font-size: .92rem; margin: 0 auto; }
+.fc-tab td, .fc-tab th { border: 1px solid var(--paper-3); padding: 6px 10px; text-align: left; }
+.fc-tab th { background: var(--paper); }
+@media (max-width: 600px) {
+  .fc-face { padding: 14px 16px 12px; min-height: 300px; border-radius: 18px; }
+  .fc-q { font-size: 1.15rem; }
+  .fc-formule { font-size: 1.2rem; }
+}
+@media (prefers-reduced-motion: reduce) { .fc-carte { transition: none; } }
+
+/* ---------- Séance de révision ---------- */
+.fc-seance { max-width: 46rem; margin: 0 auto; }
+.fc-haut { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.fc-haut .fc-compte { font-weight: 800; font-variant-numeric: tabular-nums; }
+.fc-haut .fc-score { margin-left: auto; font-size: .85rem; font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.fc-barre { height: 6px; background: var(--paper-2); border-radius: 999px; overflow: hidden; margin-bottom: 14px; }
+.fc-barre i { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width .25s; }
+.fc-place { font-size: .82rem; font-weight: 700; color: var(--ink-2); text-align: center; margin: 12px 0 0; }
+.fc-place b { color: var(--accent-ink); }
+.fc-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.fc-actions.une { grid-template-columns: 1fr; }
+.fc-bt {
+  border: none; border-radius: 999px; min-height: 58px; padding: 10px 18px; cursor: pointer;
+  font: inherit; font-weight: 800; font-size: 1.02rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: transform .1s, box-shadow .15s;
+}
+.fc-bt:active { transform: scale(.98); }
+.fc-bt small { font-size: .74rem; font-weight: 700; opacity: .85; }
+.fc-bt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.fc-bt-voir { background: var(--ink); color: #fff; }
+.fc-bt-ko { background: var(--danger-bg); color: var(--danger-text); }
+.fc-bt-ok { background: var(--success-bg); color: var(--success-text); }
+.fc-bt-ko:hover { box-shadow: inset 0 0 0 1.5px var(--danger); }
+.fc-bt-ok:hover { box-shadow: inset 0 0 0 1.5px var(--success); }
+.fc-clavier { text-align: center; font-size: .75rem; color: var(--ink-3); margin-top: 8px; }
+.fc-clavier kbd { font: inherit; font-weight: 700; border: 1px solid var(--paper-3); border-radius: 6px; padding: 0 5px; }
+@media (hover: none) { .fc-clavier { display: none; } }
+/* téléphone : les boutons restent sous le pouce */
+@media (max-width: 600px) {
+  .fc-seance { padding-bottom: 96px; }
+  .fc-actions { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; margin: 0; padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--sheet); border-top: 1px solid var(--line); }
+}
+
+/* fin de séance */
+.fc-fin { text-align: center; }
+.fc-fin-chiffres { display: flex; justify-content: center; gap: 28px; margin: 14px 0 6px; }
+.fc-fin-chiffres div { display: flex; flex-direction: column; }
+.fc-fin-chiffres b { font-size: 2.2rem; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.fc-fin-chiffres span { font-size: .82rem; font-weight: 700; color: var(--ink-2); }
+.fc-fin .ok { color: var(--success-text); }
+.fc-fin .ko { color: var(--danger-text); }
+
+/* ---------- Boîte à cases (vue « paquets ») ---------- */
+.fc-boite {
+  display: grid; grid-template-columns: repeat(var(--n, 9), minmax(0, 1fr)); gap: 0;
+  background: var(--paper); border: 1.5px solid var(--line-strong); border-radius: 16px; padding: 0 4px 0; overflow: hidden;
+}
+.fc-case { display: flex; flex-direction: column; align-items: center; min-width: 0; padding: 0 2px 10px; border-right: 1.5px dashed var(--paper-3); }
+.fc-case:last-child { border-right: none; }
+.fc-case.horsboite { background: var(--sheet); }
+/* intercalaire : l'onglet qui dépasse avec le délai de la case */
+.fc-onglet {
+  margin-top: 8px; background: var(--sheet); border: 1px solid var(--paper-3); border-radius: 8px 8px 2px 2px;
+  padding: 3px 4px; font-size: .74rem; font-weight: 800; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+}
+.fc-case.horsboite .fc-onglet { background: var(--paper); }
+.fc-tas { height: 112px; width: 100%; max-width: 58px; display: flex; flex-direction: column-reverse; gap: 2px; padding-top: 6px; }
+.fc-tas i { display: block; height: 5px; border-radius: 2px; background: var(--sheet); box-shadow: inset 0 0 0 1px var(--line-strong); flex-shrink: 0; }
+.fc-tas i.du { background: var(--accent); box-shadow: none; }
+.fc-tas i.neuve { background: var(--paper-2); box-shadow: inset 0 0 0 1px var(--paper-3); }
+.fc-tas i.ok { background: var(--success-bg); box-shadow: inset 0 0 0 1px var(--success); }
+.fc-nb { font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 4px; }
+.fc-du { font-size: .72rem; font-weight: 800; color: var(--accent-ink); min-height: 1.1em; white-space: nowrap; }
+.fc-legende { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .78rem; color: var(--ink-2); margin-top: 8px; }
+.fc-legende span::before { content: ''; display: inline-block; width: 14px; height: 6px; border-radius: 2px; margin-right: 6px; vertical-align: middle; background: var(--sheet); box-shadow: inset 0 0 0 1px var(--line-strong); }
+.fc-legende .l-du::before { background: var(--accent); box-shadow: none; }
+.fc-legende .l-neuve::before { background: var(--paper-2); }
+.fc-legende .l-ok::before { background: var(--success-bg); box-shadow: inset 0 0 0 1px var(--success); }
+.fc-defile { overflow-x: auto; }
+@media (max-width: 600px) {
+  .fc-onglet { font-size: .66rem; padding: 2px 3px; }
+  .fc-tas { height: 84px; }
+  .fc-nb { font-size: 1.05rem; }
+  .fc-du { font-size: .64rem; }
+}
+
+/* ---------- Prochains jours ---------- */
+.fc-jours { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; align-items: end; }
+.fc-jour { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.fc-jour .b { width: 100%; max-width: 40px; background: var(--paper-2); border-radius: 6px 6px 2px 2px; }
+.fc-jour.auj .b { background: var(--accent); }
+.fc-jour b { font-size: .9rem; font-variant-numeric: tabular-nums; }
+.fc-jour span { font-size: .72rem; font-weight: 700; color: var(--ink-2); white-space: nowrap; }
+
+/* ---------- Carte « Aujourd'hui » (noire, comme « Reprendre ») ---------- */
+.fc-auj { display: flex; align-items: center; gap: 12px 16px; background: var(--ink); color: #fff; border-radius: 22px; padding: 16px 18px 16px 22px; }
+.fc-auj small { display: block; color: var(--line-strong); font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.fc-auj b { font-size: 1.2rem; letter-spacing: -.01em; }
+.fc-auj .fc-auj-t { flex: 1; min-width: 0; }
+.fc-auj .fc-auj-d { display: block; color: var(--line-strong); font-size: .88rem; margin-top: 2px; }
+.fc-auj .fc-go { flex-shrink: 0; background: #fff; color: var(--ink); border-radius: 999px; padding: 13px 22px; font-weight: 800; white-space: nowrap; text-decoration: none; }
+.fc-auj .fc-go:hover { background: var(--paper-2); }
+.fc-auj .fc-sec { flex-shrink: 0; color: #fff; font-size: .85rem; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.fc-auj.ajour { background: var(--success-bg); color: var(--success-text); }
+.fc-auj.ajour small, .fc-auj.ajour .fc-auj-d, .fc-auj.ajour .fc-sec { color: var(--success-text); }
+@media (max-width: 520px) {
+  .fc-auj { flex-wrap: wrap; padding: 16px; }
+  .fc-auj .fc-auj-t { flex-basis: 100%; }
+  .fc-auj .fc-go { flex: 1; text-align: center; }
+}
+
+/* ---------- Bloc « Flashcards » sur l'accueil d'une application ---------- */
+.fc-bloc { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; background: var(--cle-bg); border-radius: 20px; padding: 14px 16px 14px 18px; }
+.fc-bloc-t { flex: 1; min-width: 14rem; }
+.fc-bloc-t small { display: block; color: var(--accent-ink); font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.fc-bloc-t b { display: block; font-size: 1.05rem; }
+.fc-bloc-t span { display: block; font-size: .84rem; color: var(--ink-2); margin-top: 2px; }
+.fc-bloc .fc-mini i { background: var(--cle-line); }
+.fc-bloc .fc-mini i.du { background: var(--accent); }
+.fc-nav { margin-right: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.fc-nav i { font-style: normal; background: var(--ink); color: #fff; border-radius: 999px; min-width: 20px; height: 20px; padding: 0 5px; font-size: .74rem; display: inline-flex; align-items: center; justify-content: center; }
+
+/* ---------- Lignes d'application (page Révisions) ---------- */
+.fc-apps { display: flex; flex-direction: column; gap: 8px; }
+.fc-app {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 14px;
+  background: var(--paper); border-radius: 18px; padding: 12px 14px 12px 18px; text-decoration: none; color: var(--ink);
+}
+.fc-app:hover { background: var(--paper-2); }
+.fc-app-t b { display: block; font-weight: 800; line-height: 1.25; }
+.fc-app-t small { display: block; font-size: .8rem; font-weight: 600; color: var(--ink-2); margin-top: 2px; }
+.fc-mini { display: flex; align-items: flex-end; gap: 2px; height: 28px; }
+.fc-mini i { width: 7px; background: var(--line-strong); border-radius: 2px 2px 0 0; }
+.fc-mini i.du { background: var(--accent); }
+.fc-mini i.ok { background: var(--success); }
+.fc-chip { border-radius: 999px; padding: 6px 12px; font-size: .82rem; font-weight: 800; white-space: nowrap; }
+.fc-chip.du { background: var(--ink); color: #fff; }
+.fc-chip.rien { background: var(--sheet); color: var(--ink-2); box-shadow: inset 0 0 0 1.5px var(--paper-3); }
+@media (max-width: 600px) {
+  .fc-app { grid-template-columns: minmax(0, 1fr) auto; }
+  .fc-app .fc-mini { display: none; }
+}
+
+/* ---------- Méthodes ---------- */
+.fc-methodes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.fc-methode { background: var(--paper); border-radius: 18px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }
+.fc-methode h4 { margin: 0; font-size: 1.08rem; font-weight: 800; }
+.fc-methode p { font-size: .93rem; line-height: 1.5; color: var(--ink); }
+.fc-methode ol { margin: 0; padding-left: 1.2em; font-size: .9rem; line-height: 1.5; display: grid; gap: 2px; }
+.fc-methode svg { width: 100%; height: auto; }
+@media (max-width: 900px) { .fc-methodes { grid-template-columns: 1fr; } }
+
+/* ---------- Liste des cartes d'une application ---------- */
+.fc-paquet { border-top: 1px solid var(--line); padding-top: 14px; margin-top: 14px; }
+.fc-paquet:first-of-type { border-top: none; margin-top: 4px; padding-top: 0; }
+.fc-paquet-h { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 10px; cursor: pointer; list-style: none; }
+.fc-paquet-h::-webkit-details-marker { display: none; }
+.fc-paquet-h::before { content: '›'; font-size: 1.3rem; font-weight: 700; color: var(--ink-3); transition: transform .15s; }
+.fc-paquet[open] > .fc-paquet-h::before { transform: rotate(90deg); }
+.fc-paquet:not([open]) > .fc-paquet-h { margin-bottom: 0; }
+.fc-paquet-h small .fc-du { display: inline; font-size: inherit; }
+.fc-paquet-h h4 { margin: 0; font-size: 1.05rem; font-weight: 800; flex: 1; min-width: 12rem; }
+.fc-paquet-h h4 small { display: block; font-size: .8rem; font-weight: 600; color: var(--ink-2); }
+.fc-etat { font-size: .82rem; font-weight: 700; color: var(--ink-2); }
+.fc-etat.ok { color: var(--success-text); }
+.fc-ajout { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; background: var(--cle-bg); border-radius: 16px; padding: 12px 14px; margin-bottom: 10px; }
+.fc-ajout p { flex: 1; min-width: 12rem; font-size: .92rem; }
+.fc-ajout.attente { background: var(--paper); }
+.fc-lien { background: none; border: none; padding: 0; font: inherit; font-size: .82rem; font-weight: 700; color: var(--ink-2); text-decoration: underline; cursor: pointer; }
+.fc-lignes { display: flex; flex-direction: column; gap: 6px; }
+.fc-ligne {
+  display: grid; grid-template-columns: 7.5rem minmax(0, 1fr) 4.2rem 7.5rem; align-items: center; gap: 12px;
+  background: var(--paper); border-radius: 14px; padding: 10px 14px; border: none; text-align: left; font: inherit; color: var(--ink); cursor: pointer; width: 100%;
+}
+.fc-ligne:hover { background: var(--paper-2); }
+.fc-ligne .ty { font-size: .7rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent-ink); }
+.fc-ligne .txt { font-size: .93rem; font-weight: 600; line-height: 1.35; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.fc-ligne .cs { font-size: .78rem; font-weight: 800; color: var(--ink-2); white-space: nowrap; }
+.fc-ligne .qd { font-size: .82rem; font-weight: 700; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+.fc-ligne .qd.du { color: var(--accent-ink); }
+.fc-ligne.inactive { background: var(--sheet); box-shadow: inset 0 0 0 1px var(--line); }
+.fc-ligne.inactive .qd { color: var(--ink-3); }
+@media (max-width: 640px) {
+  .fc-ligne { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; }
+  .fc-ligne .ty { grid-column: 1; }
+  .fc-ligne .txt { grid-column: 1 / -1; grid-row: 2; }
+  .fc-ligne .cs { grid-column: 2; grid-row: 1; }
+  .fc-ligne .qd { grid-column: 1 / -1; text-align: left; }
+}
+
+/* aperçu d'une carte (recto et verso côte à côte) */
+.fc-apercu { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 4px 0 8px; }
+.fc-apercu .fc-face { grid-area: auto; min-height: 0; backface-visibility: visible; transform: none; }
+.fc-apercu .fc-q { font-size: 1.05rem; }
+@media (max-width: 760px) { .fc-apercu { grid-template-columns: 1fr; } }
+
+/* ---------- Divers ---------- */
+.fc-h { font-size: 1.15rem; font-weight: 800; margin: 0 0 10px; letter-spacing: -.01em; }
+.fc-h small { font-weight: 600; font-size: .85rem; color: var(--ink-2); margin-left: 6px; }
+.fc-deux { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 900px) { .fc-deux { grid-template-columns: 1fr; } }
+.fc-note { font-size: .85rem; color: var(--ink-2); line-height: 1.5; }
+.fc-pastille { display: inline-flex; align-items: center; gap: 6px; background: var(--ink); color: #fff; border-radius: 999px; padding: 3px 10px 3px 4px; font-size: .78rem; font-weight: 800; }
+.fc-pastille i { font-style: normal; background: #fff; color: var(--ink); border-radius: 999px; min-width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
+.fc-haut a { text-decoration: none; }
+@media (max-width: 900px) { .fc-avant { order: -1; } }
+.fc-type-bloc + .fc-type-bloc { margin-top: 26px; }
+.fc-sens-lab { font-size: .8rem; font-weight: 800; color: var(--ink-2); margin: 10px 0 6px; }
+
+/* séance : réglage du nombre de cartes, révision libre, geste au doigt */
+.fc-limite { font-size: .8rem; font-weight: 700; color: var(--ink-2); display: inline-flex; align-items: center; gap: 4px; }
+.fc-limite select { font: inherit; font-size: 16px; border: 1.5px solid var(--paper-3); border-radius: 999px; padding: 2px 8px; background: var(--sheet); color: var(--ink); }
+.fc-libre { font-size: .75rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; background: var(--paper); border-radius: 999px; padding: 4px 10px; }
+.fc-scene { position: relative; touch-action: pan-y; cursor: pointer; }
+.fc-scene[data-geste]:not([data-geste=""])::after {
+  position: absolute; top: 22px; z-index: 5; border-radius: 999px; padding: 8px 16px; font-weight: 800; letter-spacing: .03em; pointer-events: none;
+}
+.fc-scene[data-geste="ok"]::after { content: 'JE SAVAIS ✓'; left: 18px; background: var(--success-bg); color: var(--success-text); box-shadow: inset 0 0 0 2px var(--success); }
+.fc-scene[data-geste="ko"]::after { content: '✗ JE NE SAVAIS PAS'; right: 18px; background: var(--danger-bg); color: var(--danger-text); box-shadow: inset 0 0 0 2px var(--danger); }
+.fc-geste { display: none; text-align: center; font-size: .8rem; font-weight: 700; color: var(--ink-2); margin-top: 8px; }
+@media (hover: none) { .fc-geste { display: block; } }
+@media (max-width: 600px) { .fc-haut { flex-wrap: wrap; row-gap: 6px; } .fc-limite { order: 5; } }
+
+/* page Révisions : réglage du nombre de cartes, minuteur Pomodoro */
+.fc-reglage { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 16px; font-size: .85rem; font-weight: 700; color: var(--ink-2); }
+.fc-reglage span { margin-right: 4px; }
+.fc-reglage button[aria-pressed="true"], .fc-pomo-modes button[aria-pressed="true"] { background: var(--ink); color: #fff; box-shadow: none; }
+.fc-pomo { display: flex; flex-direction: column; align-items: center; gap: 8px; background: var(--sheet); border-radius: 16px; padding: 12px; margin-top: auto; }
+.fc-pomo-modes { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.fc-pomo-t { font-size: 2.6rem; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1; }
+.fc-pomo-bt { display: flex; gap: 8px; align-items: center; }
