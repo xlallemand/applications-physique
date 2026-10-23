@@ -46,6 +46,7 @@ Ne change ni le contenu scientifique ni les fonctionnalités propres à une appl
   - `dom` : `'physique'`, `'chimie'` ou `'maths'` (outils mathématiques, collège compris) ;
   - `niv` : liste parmi `'col'` (collège), `'2de'`, `'1re'`, `'spe'` (terminale spécialité), `'sti'` (terminale STI2D) ; `LYCEE` pour les quatre niveaux du lycée ;
   - `desc` : une phrase courte (une ligne sur ordinateur, masquée sur téléphone).
+- Déclarer aussi ses pages dans `AVANCEMENT` de `assets/avancement.js` (avancement x/y du portail) : `'<dossier>': { pages: [...], ex }`, toutes les pages comptées du `PLAN` dans l'ordre et la somme des `nbEx`. **À mettre à jour à chaque changement du `PLAN`** : le total doit être la somme des compteurs `n/m` des modules de l'accueil de l'application.
 - Un nouveau dessin d'en-tête s'ajoute dans `assets/hero.js` (objet `dessins` + liste commentée en tête de fichier).
 
 ## 3. Style visuel (design « Chambre à bulles »)
@@ -104,7 +105,7 @@ Tout vient de `assets/theme.css`. N'écris **aucune couleur en dur** dans les CS
 
 1. En-tête illustré « Physique Chimie » (cliché de chambre à bulles en parallaxe), puis une feuille blanche qui le recouvre au défilement.
 2. **Barre de tri** collée en haut de l'écran : pastilles **Domaine** (Tous, Physique, Chimie, Outils maths) et **Niveau** (Tous, Collège, 2de, 1re, Tle spé, Tle STI2D), compteur d'applications et « Tout afficher » quand un tri est en cours. Par défaut, « Tous » : tout est affiché. Choisir une pastille ne garde que les applications qui la portent, en choisir d'autres les ajoute ; domaine et niveau se combinent. Le tri n'est pas mémorisé.
-3. **Liste compacte** regroupée par domaine (couleur du domaine) : une ligne par application avec titre, étiquettes de niveau (« Lycée » quand les quatre niveaux du lycée sont concernés ; celles du tri en cours sont mises en valeur), description sur une ligne et flèche. Deux colonnes sur ordinateur, une sur téléphone (description masquée sous 640 px, pastilles sur une ligne qui défile de côté).
+3. **Liste compacte** regroupée par domaine (couleur du domaine) : une ligne par application avec titre, étiquettes de niveau (« Lycée » quand les quatre niveaux du lycée sont concernés ; celles du tri en cours sont mises en valeur), description sur une ligne, avancement `x/y` (même décompte que l'accueil de l'application, `assets/avancement.js` ; rien pour une simulation sans plan) et flèche. Deux colonnes sur ordinateur, une sur téléphone (description masquée sous 640 px, pastilles sur une ligne qui défile de côté).
 4. Pas de sommaire sur le portail.
 
 ### Page de module (cours, questions, fiche, exercices)
@@ -434,3 +435,4 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 | Accueil de l'application | `cinematique/index.html` |
 | Dessins d'en-tête | `assets/hero.js` |
 | Portail (liste des applications, tri par domaine et niveau) | `index.html` (racine) : `DOMAINES`, `NIVEAUX`, `APPS` |
+| Avancement x/y de chaque application sur le portail | `assets/avancement.js` : `AVANCEMENT` |

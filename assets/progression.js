@@ -34,7 +34,7 @@
      PROG.importer(paquet)    fusionne { v, date, donnees } ; renvoie le bilan
                               { etat: 'ok' | 'rien' | 'abime' | 'stockage', maj, deja }
      PROG.fichier(paquet, apps)  texte HTML du fichier téléchargé
-   Dépend du portail : ACC.APPS, ACC.niveau.
+   Dépend du portail : ACC.APPS, ACC.niveau, ACC.rafraichir (avancement x/y après une reprise).
    ============================================================ */
 (function () {
   'use strict';
@@ -770,6 +770,8 @@
   /* ---------- Messages au retour sur le portail ---------- */
   function montrerBilan(b) {
     const env = detecter(), N = nomNav(env);
+    // progression ajoutée : l'avancement x/y de la liste du portail change
+    if (b.etat === 'ok' && window.ACC && typeof ACC.rafraichir === 'function') ACC.rafraichir();
     if (b.etat === 'ok') {
       afficher('Progression restaurée.', [
         b.maj.length ? el('p', null, '**Mises à jour** : ' + listeNoms(b.maj) + '.') : null,
