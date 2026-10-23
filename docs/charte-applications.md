@@ -287,6 +287,29 @@ SOM.init({ nom: 'pH', id: 'ph', cleEx: 'ph-exercices', plan: PLAN });
 - Cours terminé = dernière étape atteinte (`fait`). Série terminée = note sur 20 ; **on garde la meilleure**.
 - Toujours dans un `try/catch` : l'application fonctionne si le stockage est indisponible.
 - La progression **informe** (✓, `n/m`, notes) et n'interdit rien.
+- **Toute nouvelle clé `localStorage` d'une application commence par `<dossier>-`** (`dossier` : sa valeur dans `APPS` du portail, qui est aussi l'`id` de `SOM.init`) : sinon elle n'est pas enregistrée dans le fichier de progression. La valeur est du JSON.
+
+### Enregistrer et reprendre la progression (portail)
+
+Code : `assets/progression.js` et `assets/progression.css`, chargés **par le portail seulement** (aucun bouton dans les applications). Sans compte, sans serveur, sans service extérieur.
+
+- **Enregistrer** : le bouton « Enregistrer ma progression » du bandeau du portail ouvre une fenêtre (ce qui va se passer, ce qui sera enregistré, « Où vas-tu reprendre ton travail ? »), puis télécharge `progression-physique-chimie-AAAA-MM-JJ.html` et affiche la marche à suivre adaptée à l'appareil actuel et à l'appareil choisi.
+- **Le fichier** : page HTML autonome (styles en ligne, aucune ressource extérieure) avec les données dans `<script type="application/json" id="progression">`, un vrai lien « Reprendre ma progression » et un script qui l'ouvre aussitôt : `…/index.html#reprise=<données>` (`{ v: 1, date, donnees }` en JSON, UTF-8, base64url). Le passage par l'adresse est obligatoire : un fichier ouvert depuis l'ordinateur n'a pas accès au stockage du site.
+- **Reprendre** : au chargement (ou sur `hashchange`), le portail lit `#reprise=`, vérifie tout (taille, version, clés autorisées, forme de chaque valeur), **ajoute** la progression à celle du navigateur, retire l'ancre de l'adresse et affiche le résultat. Tout ou rien : en cas d'erreur, rien n'est modifié. Reprise de secours : « Reprendre depuis un fichier » (choix du fichier `.html`).
+- **Clés enregistrées** : celles qui commencent par `<dossier>-` pour un dossier de `APPS` (préfixe le plus long : `equations-en-physique-avec-aide-…` n'appartient pas à `equations-en-physique`), plus `equamath_v2` (Équations du 1er degré). Les autres clés de l'origine (autres dépôts) ne sont ni enregistrées ni reprises.
+- **Fusion : on garde toujours le meilleur**, ouvrir un vieux fichier n'écrase jamais une progression plus récente, rouvrir le même fichier ne change plus rien :
+
+| Donnée | Règle |
+|---|---|
+| `pages[<page>].fait` | vrai si vrai d'un côté ou de l'autre |
+| `pages[<page>].note` | la plus haute |
+| `derniere` | celle du navigateur si elle existe, sinon celle du fichier |
+| `<dossier>-exercices[<id>]` | le meilleur résultat (`pts / max` le plus haut) |
+| `combustions-exercices-faits`, `principe-dynamique-atelier` | réunion, sans doublon |
+| `equamath_v2` | `results` : l'entrée au meilleur `bestScore`, `attempts` le plus grand ; `xp` le plus grand ; `showKb` du navigateur |
+| autre clé `<dossier>-…` | copiée si absente du navigateur, sinon celle du navigateur est gardée |
+
+- Une nouvelle forme de donnée (autre que `-progression` et `-exercices`) est donc copiée telle quelle seulement si le navigateur ne l'a pas encore : pour la fusionner finement, ajoute son type dans `nettoyer`, `significatif` et `fusionner` de `assets/progression.js`.
 
 ## 6. Pédagogie
 
@@ -398,6 +421,7 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 | Variables, boutons, encarts, bandeau, en-tête illustré | `assets/theme.css` |
 | Cartes, écrans de fin, confettis | `equilibrer-reactions/modules/er.css` |
 | Sommaire, accueil en lignes, progression, fiches (module commun `SOM`) | `assets/sommaire.js`, `assets/sommaire.css` |
+| Enregistrer / reprendre la progression | `assets/progression.js` (+ `assets/progression.css`) |
 | Exemple de `PLAN` (pages séparées / une seule page) | `ph/modules/ph.js` / `puissances-10/index.html` |
 | Cours par étapes, « À toi », « Afficher tout le cours » (moteur commun `COURS`) | `assets/cours.js`, `assets/cours.css` |
 | Exemple de cours avec le moteur commun (pages séparées / une seule page / outils `perso`) | `combustions/modules/module_3_cours.html` / `puissances-10/index.html` / `equilibrer-reactions/modules/module_1.html` |
