@@ -283,6 +283,8 @@
     lactique: { nom: 'acide lactique', chaine: [{ t: 'H3C' }, { t: 'CH', haut: { t: 'OH' } }, { t: 'C', haut: O2 }, { t: 'OH' }] },
     glycolique: { nom: 'acide glycolique', chaine: [{ t: 'HO' }, { t: 'CH2' }, { t: 'C', haut: O2 }, { t: 'OH' }] },
     propane: { nom: 'propane', chaine: [{ t: 'H3C' }, { t: 'CH2' }, { t: 'CH3' }] },
+    // le groupe carboxyle seul (tableau des groupes) : le premier élément vide laisse la liaison —C
+    carboxyle: { nom: 'groupe carboxyle', chaine: [{ t: '' }, { t: 'C', haut: O2 }, { t: 'OH' }] },
     butane: { nom: 'butane', chaine: [{ t: 'H3C' }, { t: 'CH2' }, { t: 'CH2' }, { t: 'CH3' }] },
   };
 
@@ -291,7 +293,7 @@
     const l = [];
     m.chaine.forEach((it, k) => {
       if (it.haut) l.push({ id: k + ':h', t: it.haut.t, k });
-      l.push({ id: String(k), t: it.t, k });
+      if (it.t) l.push({ id: String(k), t: it.t, k });
       if (it.bas) l.push({ id: k + ':b', t: it.bas.t, k });
     });
     return l;
@@ -333,49 +335,78 @@
     o = o || {};
     const haut = m.chaine.some(x => x.haut), bas = m.chaine.some(x => x.bas);
     const r0 = haut ? 2 : 0;                                        // ligne de la chaîne (1 et 2 : au-dessus)
-    const cell = (r, c, h, cls) => `<span class="${cls}" style="grid-row:${r};grid-column:${c}">${h}</span>`;
-    const atome = (id, t, r, c) => (o.boutons
-      ? `<button type="button" class="rp-at" data-p="${id}" style="grid-row:${r};grid-column:${c}" aria-label="${texte(t)}" aria-pressed="false">${ecrire(t)}</button>`
-      : `<span class="rp-at" data-p="${id}" style="grid-row:${r};grid-column:${c}">${ecrire(t)}</span>`);
+    const cell = (r, c, h, cls, sous) => `<span class="${cls}"${sous || ''} style="grid-row:${r};grid-column:${c}">${h}</span>`;
+    // texte de l'atome : dans un span, pour que les indices restent à leur place (le bouton est une boîte flexible) ;
+    // ancre : dans un atome qui porte un substituant, le C est repéré (.rp-c) : aligner() y place la liaison verticale
+    function etiquette(t, ancre) {
+      const i = t.indexOf('C');
+      if (!ancre || i < 0) return `<span class="rp-txt">${ecrire(t)}</span>`;
+      return `<span class="rp-txt">${ecrire(t.slice(0, i))}<span class="rp-c">C</span>${ecrire(t.slice(i + 1))}</span>`;
+    }
+    const atome = (id, t, r, c, ancre, sous) => (!t ? `<span class="rp-vide" style="grid-row:${r};grid-column:${c}"></span>` : o.boutons
+      ? `<button type="button" class="rp-at" data-p="${id}"${sous} style="grid-row:${r};grid-column:${c}" aria-label="${texte(t)}" aria-pressed="false">${etiquette(t, ancre)}</button>`
+      : `<span class="rp-at" data-p="${id}"${sous} style="grid-row:${r};grid-column:${c}">${etiquette(t, ancre)}</span>`);
     let h = '';
     m.chaine.forEach((it, k) => {
-      const c = 2 * k + 1;
-      h += atome(String(k), it.t, r0 + 1, c);
+      const c = 2 * k + 1, sous = ` data-sous="${k}"`;          // liaison et atome portés par l'élément k de la chaîne
+      h += atome(String(k), it.t, r0 + 1, c, !!(it.haut || it.bas), '');
       if (k < m.chaine.length - 1) h += cell(r0 + 1, c + 1, '', 'rp-lh');
-      if (it.haut) { h += atome(k + ':h', it.haut.t, 1, c); h += cell(2, c, '', 'rp-lv' + (it.haut.double ? ' double' : '')); }
-      if (it.bas) { h += cell(r0 + 2, c, '', 'rp-lv' + (it.bas.double ? ' double' : '')); h += atome(k + ':b', it.bas.t, r0 + 3, c); }
+      if (it.haut) { h += atome(k + ':h', it.haut.t, 1, c, false, sous); h += cell(2, c, '', 'rp-lv' + (it.haut.double ? ' double' : ''), sous); }
+      if (it.bas) { h += cell(r0 + 2, c, '', 'rp-lv' + (it.bas.double ? ' double' : ''), sous); h += atome(k + ':b', it.bas.t, r0 + 3, c, false, sous); }
     });
     // (outil « entourer » : sans le nom de la molécule, qui donnerait sa famille)
     const desc = `Formule semi-développée${m.nom && !o.boutons ? ' : ' + m.nom : ''}`;
     return `<div class="rp-defile"><div class="rp-mol${o.boutons ? ' rp-mol-outil' : ''}"${o.entoure ? ` data-entoure="${m.cle || ''}"` : ''} role="${o.boutons ? 'group' : 'img'}" aria-label="${desc}">${h}</div></div>`;
   }
 
-  // entoure les groupes (union des pièces de chaque groupe) dans une formule déjà affichée ; redessiné si la taille change
+  /* Place la liaison verticale et l'atome lié au-dessus (au-dessous) juste sur le C de l'atome qui les porte
+     (« CH », « CH2 » : le C n'est pas au milieu du texte). Le texte garde son espacement ; on mesure l'écart
+     entre le milieu du C et le milieu de la colonne, et on décale d'autant la liaison et l'atome lié. */
+  function aligner(grille) {
+    grille.querySelectorAll('.rp-c').forEach(cs => {
+      const at = cs.closest('.rp-at'), r = at.getBoundingClientRect(), c = cs.getBoundingClientRect();
+      if (!r.width) return;
+      const dx = Math.round(((c.left + c.width / 2) - (r.left + r.width / 2)) * 10) / 10;
+      grille.querySelectorAll(`[data-sous="${at.dataset.p}"]`).forEach(e => { e.style.transform = dx ? `translateX(${dx}px)` : ''; });
+    });
+  }
+  // cercle autour d'un groupe (union des rectangles de ses pièces) ; numero : pastille du numéro (rien : cercle provisoire)
+  function cercle(grille, g, numero) {
+    const g0 = grille.getBoundingClientRect();
+    if (!g0.width) return;
+    const rs = g.pieces.map(id => grille.querySelector(`[data-p="${id}"]`).getBoundingClientRect());
+    const x0 = Math.min(...rs.map(r => r.left)), x1 = Math.max(...rs.map(r => r.right));
+    const y0 = Math.min(...rs.map(r => r.top)), y1 = Math.max(...rs.map(r => r.bottom));
+    const c = el('span', 'rp-cercle' + (g.pieces.length > 1 ? ' large' : '') + (numero ? '' : ' provisoire'), numero ? `<i>${numero}</i>` : '');
+    c.setAttribute('aria-hidden', 'true');
+    Object.assign(c.style, { left: (x0 - g0.left - 3) + 'px', top: (y0 - g0.top - 3) + 'px', width: (x1 - x0 + 6) + 'px', height: (y1 - y0 + 6) + 'px' });
+    grille.appendChild(c);
+  }
+  // entoure les groupes dans une formule déjà affichée ; redessiné si la taille change
   function cercles(grille, gs) {
     const tracer = () => {
+      aligner(grille);
       grille.querySelectorAll('.rp-cercle').forEach(x => x.remove());
-      const g0 = grille.getBoundingClientRect();
-      if (!g0.width) return;
-      gs.forEach(g => {
-        const rs = g.pieces.map(id => grille.querySelector(`[data-p="${id}"]`).getBoundingClientRect());
-        const x0 = Math.min(...rs.map(r => r.left)), x1 = Math.max(...rs.map(r => r.right));
-        const y0 = Math.min(...rs.map(r => r.top)), y1 = Math.max(...rs.map(r => r.bottom));
-        const c = el('span', 'rp-cercle' + (g.pieces.length > 1 ? ' large' : ''), `<i>${g.n}</i>`);
-        c.setAttribute('aria-hidden', 'true');
-        Object.assign(c.style, { left: (x0 - g0.left - 3) + 'px', top: (y0 - g0.top - 3) + 'px', width: (x1 - x0 + 6) + 'px', height: (y1 - y0 + 6) + 'px' });
-        grille.appendChild(c);
-      });
+      gs.forEach(g => cercle(grille, g, g.n));
     };
     tracer();
     if (window.ResizeObserver && !grille.dataset.observe) { grille.dataset.observe = '1'; new ResizeObserver(tracer).observe(grille); }
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(tracer);
   }
-  // formules écrites avec o.entoure : leurs groupes sont entourés dès qu'elles arrivent dans la page
+  // formules arrivées dans la page : liaisons verticales alignées sur le C (aussi quand la taille change ou que
+  // la police est chargée) ; formules écrites avec o.entoure : leurs groupes sont entourés
   function chercherFormules(racine) {
     if (!racine || !racine.querySelectorAll) return;
-    const l = racine.matches && racine.matches('.rp-mol[data-entoure]') ? [racine] : [];
-    racine.querySelectorAll('.rp-mol[data-entoure]').forEach(x => l.push(x));
-    l.forEach(x => { if (!x.dataset.trace && MOL[x.dataset.entoure]) { x.dataset.trace = '1'; cercles(x, groupes(MOL[x.dataset.entoure])); } });
+    const l = racine.matches && racine.matches('.rp-mol') ? [racine] : [];
+    racine.querySelectorAll('.rp-mol').forEach(x => l.push(x));
+    l.forEach(x => {
+      if (x.dataset.vu) return;
+      x.dataset.vu = '1';
+      if (x.dataset.entoure && MOL[x.dataset.entoure]) { cercles(x, groupes(MOL[x.dataset.entoure])); return; }   // (cercles() aligne aussi)
+      aligner(x);
+      if (window.ResizeObserver) new ResizeObserver(() => aligner(x)).observe(x);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => aligner(x));
+    });
   }
   new MutationObserver(ms => ms.forEach(mu => mu.addedNodes.forEach(nd => chercherFormules(nd)))).observe(document.documentElement, { childList: true, subtree: true });
   document.addEventListener('DOMContentLoaded', () => chercherFormules(document.body));
@@ -411,7 +442,19 @@
         zone.appendChild(act);
         const choisis = new Set();
         let fige = false;
-        const bouton = id => grille.querySelector(`[data-p="${id}"]`);
+        // groupe carboxyle dont les trois parties sont touchées : entouré en entier, comme après Valider (sans numéro)
+        const carbos = gs.filter(g => g.type === 'carboxyle');
+        function provisoires() {
+          if (fige) return;
+          aligner(grille);
+          grille.querySelectorAll('.rp-cercle.provisoire').forEach(x => x.remove());
+          grille.querySelectorAll('.rp-at.dans-groupe').forEach(b => b.classList.remove('dans-groupe'));
+          carbos.filter(g => g.pieces.every(x => choisis.has(x))).forEach(g => {
+            g.pieces.forEach(x => grille.querySelector(`[data-p="${x}"]`).classList.add('dans-groupe'));
+            cercle(grille, g);
+          });
+        }
+        if (window.ResizeObserver) new ResizeObserver(provisoires).observe(grille);
         grille.querySelectorAll('.rp-at').forEach(b => {
           b.onclick = () => {
             if (fige || api.fini()) return;
@@ -419,13 +462,14 @@
             if (choisis.has(id)) choisis.delete(id); else choisis.add(id);
             b.classList.toggle('choisi', choisis.has(id));
             b.setAttribute('aria-pressed', String(choisis.has(id)));
+            provisoires();
             api.effacer();
           };
         });
         function fermer() {
           fige = true;
           act.remove();
-          grille.querySelectorAll('.rp-at').forEach(b => { b.disabled = true; b.classList.remove('choisi'); });
+          grille.querySelectorAll('.rp-at').forEach(b => { b.disabled = true; b.classList.remove('choisi', 'dans-groupe'); });
           grille.classList.add('rp-fini');
           cercles(grille, gs);
         }
