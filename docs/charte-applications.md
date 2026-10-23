@@ -33,6 +33,8 @@ Ne change ni le contenu scientifique ni les fonctionnalités propres à une appl
     fiche_N.html                  fiche récapitulative du module N
     module_6.html                 page d'exercices (liste puis un exercice à la fois)
     exercices.js                  données des exercices
+    flashcards.js                 flashcards de l'application (si elle en a, voir §13)
+    flashcards.html               page Flashcards de l'application (gabarit commun, §13)
     images/                       images (jpg, svg)
 ```
 
@@ -297,7 +299,7 @@ Code : `assets/progression.js` et `assets/progression.css`, chargés **par le po
 - **Enregistrer** : le bouton « Enregistrer ma progression » du bandeau du portail ouvre une fenêtre (ce qui va se passer, ce qui sera enregistré, « Où vas-tu reprendre ton travail ? »), puis télécharge `progression-physique-chimie-AAAA-MM-JJ.html` et affiche la marche à suivre adaptée à l'appareil actuel et à l'appareil choisi.
 - **Le fichier** : page HTML autonome (styles en ligne, aucune ressource extérieure) avec les données dans `<script type="application/json" id="progression">`, un vrai lien « Reprendre ma progression » et un script qui l'ouvre aussitôt : `…/index.html#reprise=<données>` (`{ v: 1, date, donnees }` en JSON, UTF-8, base64url). Le passage par l'adresse est obligatoire : un fichier ouvert depuis l'ordinateur n'a pas accès au stockage du site.
 - **Reprendre** : au chargement (ou sur `hashchange`), le portail lit `#reprise=`, vérifie tout (taille, version, clés autorisées, forme de chaque valeur), **ajoute** la progression à celle du navigateur, retire l'ancre de l'adresse et affiche le résultat. Tout ou rien : en cas d'erreur, rien n'est modifié. Reprise de secours : « Reprendre depuis un fichier » (choix du fichier `.html`).
-- **Clés enregistrées** : celles qui commencent par `<dossier>-` pour un dossier de `APPS` (préfixe le plus long : `equations-en-physique-avec-aide-…` n'appartient pas à `equations-en-physique`), plus `equamath_v2` (Équations du 1er degré). Les autres clés de l'origine (autres dépôts) ne sont ni enregistrées ni reprises.
+- **Clés enregistrées** : celles qui commencent par `<dossier>-` pour un dossier de `APPS` (préfixe le plus long : `equations-en-physique-avec-aide-…` n'appartient pas à `equations-en-physique`), plus `equamath_v2` (Équations du 1er degré) et `revisions-reglages` (réglage des flashcards, rattaché à aucune application : il n'apparaît pas dans la liste des applications de la fenêtre). Les autres clés de l'origine (autres dépôts) ne sont ni enregistrées ni reprises.
 - **Fusion : on garde toujours le meilleur**, ouvrir un vieux fichier n'écrase jamais une progression plus récente, rouvrir le même fichier ne change plus rien :
 
 | Donnée | Règle |
@@ -308,9 +310,11 @@ Code : `assets/progression.js` et `assets/progression.css`, chargés **par le po
 | `<dossier>-exercices[<id>]` | le meilleur résultat (`pts / max` le plus haut) |
 | `combustions-exercices-faits`, `principe-dynamique-atelier` | réunion, sans doublon |
 | `equamath_v2` | `results` : l'entrée au meilleur `bestScore`, `attempts` le plus grand ; `xp` le plus grand ; `showKb` du navigateur |
+| `<dossier>-flashcards` | `ajouts` : réunion (date la plus ancienne) ; chaque carte : l'état **revu le plus récemment** (`v` le plus grand ; à égalité, `n` le plus grand ; une carte jamais revue perd contre une carte revue) ; une carte présente d'un seul côté est copiée |
+| `revisions-reglages` | celui du navigateur (copié s'il est absent) |
 | autre clé `<dossier>-…` | copiée si absente du navigateur, sinon celle du navigateur est gardée |
 
-- Une nouvelle forme de donnée (autre que `-progression` et `-exercices`) est donc copiée telle quelle seulement si le navigateur ne l'a pas encore : pour la fusionner finement, ajoute son type dans `nettoyer`, `significatif` et `fusionner` de `assets/progression.js`.
+- Une nouvelle forme de donnée (autre que `-progression`, `-exercices` et `-flashcards`) est donc copiée telle quelle seulement si le navigateur ne l'a pas encore : pour la fusionner finement, ajoute son type dans `nettoyer`, `significatif` et `fusionner` de `assets/progression.js`.
 
 ## 6. Pédagogie
 
@@ -436,3 +440,62 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 | Dessins d'en-tête | `assets/hero.js` |
 | Portail (liste des applications, tri par domaine et niveau) | `index.html` (racine) : `DOMAINES`, `NIVEAUX`, `APPS` |
 | Avancement x/y de chaque application sur le portail | `assets/avancement.js` : `AVANCEMENT` |
+| Flashcards : moteur, planning, séances, page Révisions, page Flashcards, intégrations (objet `REV`) | `assets/revisions.js`, `assets/revisions.css`, `revisions.html` |
+| Flashcards d'une application (exemple) | `changements-etat/modules/flashcards.js`, `changements-etat/modules/flashcards.html` |
+| Écrire les flashcards d'une application ; outil de relecture de l'enseignant | `docs/flashcards/prompt-generation.md` ; `docs/flashcards/relecture/` |
+| Maquettes validées des flashcards | `docs/flashcards/maquettes/` |
+
+## 13. Flashcards (révisions espacées)
+
+### Principe
+
+Une application peut proposer des **flashcards** : une question au recto, la réponse au verso. L'élève les range dans une **boîte de révision à 7 cases**, comme une boîte de fiches bristol : une carte sue avance d'une case et revient plus tard, une carte ratée recule d'une case et revient plus vite (révisions espacées). Le vocabulaire est celui de la boîte en papier (cases, intercalaires, « à revoir dans 4 j ») pour que l'élève puisse faire la même chose avec des cartes en papier ; « Imprimer les cartes » les donne au format bristol. Les flashcards ne comptent pas dans l'avancement (`n/m`, x/y).
+
+- **Paquet** : les cartes d'un cours (le module, ou chaque sous-module de cours), avec ses **prérequis** `apres` (pages du `PLAN` à avoir faites). L'élève l'ajoute d'un clic : **première révision le lendemain**. Avant le cours : « Disponible après : Cours … » et un lien « Ajouter quand même » (rien n'est interdit).
+- **Sens** : une carte à deux faces (définition, formule) est révisée une fois dans un sens, la fois suivante dans l'autre.
+- **Séance** : les cartes dues ; **révision libre** (« Tout réviser », « Les réviser maintenant ») : mêmes écrans, la boîte ne change pas.
+
+### Planning
+
+| Règle | Détail |
+|---|---|
+| Cases | 1, 2, 4, 7, 14, 30 et 60 jours ; après la 7ᵉ case, la carte est **sue** (sortie du planning, encore visible et révisable en révision libre) |
+| « Je savais » | case + 1 ; « Je ne savais pas » : case − 1 (jamais sous la case 1) |
+| Délai | compté **du jour de la révision** : prochaine révision = aujourd'hui + délai de la nouvelle case |
+| Carte ratée en séance | elle revient à la fin de la séance jusqu'à « Je savais » ; sa case ne change qu'à la **première** réponse |
+| Dates | jours civils **locaux** `AAAA-MM-JJ` (jamais `toISOString()`, en UTC) |
+| Choix des cartes | les cartes dues, par case croissante puis retard décroissant ; **20 par séance** par défaut (10, 20, 30 ou sans limite, réglable sur la page Révisions et pendant la séance) ; puis mélangées, sans deux cartes de la même application d'affilée quand c'est possible ; « Continuer » propose les suivantes |
+| Durée affichée | 30 s par carte, arrondie à la minute supérieure |
+
+Réponse : deux boutons « ✗ Je ne savais pas » / « ✓ Je savais », avec la conséquence écrite dessous. Ordinateur : Espace (voir la réponse), → (je savais), ← (je ne savais pas). Téléphone : toucher la carte la retourne, la glisser à droite = je savais, à gauche = je ne savais pas.
+
+### Fichiers
+
+| Fichier | Rôle |
+|---|---|
+| `assets/revisions.js`, `assets/revisions.css` | moteur commun (objet `REV`, classes `rev-`) : planning, état, séance, page Révisions, page Flashcards, impression, minuteur, intégrations |
+| `revisions.html` (racine) | page Révisions ; écrans par ancre : `#reviser` (toutes applications), `#reviser-<dossier>`, `#libre-<dossier>`, `#libre-<dossier>-<paquet>` |
+| `<dossier>/modules/flashcards.js` | les cartes : `REV.paquets(info, paquets)` (format en tête de `assets/revisions.js`), chargé par une balise `<script>` |
+| `<dossier>/modules/flashcards.html` | page Flashcards de l'application : gabarit commun (`SOM.menu('flashcards')` puis `REV.pageApplication(zone)`) ; `#imprimer` : impression A4 recto verso, 8 cartes par feuille |
+| `docs/flashcards/` | prompts (mise en œuvre, génération des cartes), maquettes validées, outil de relecture de l'enseignant |
+
+Contenu d'une carte : HTML écrit selon §7 ; classes `rev-formule`, `rev-unites`, `rev-fig`, `rev-tab` ; figures en **SVG autonome** (attributs de présentation, aucune classe d'une application : la page Révisions ne charge pas les moteurs des applications). L'`id` d'une carte est unique dans le dépôt et ne change jamais (l'avancement de l'élève y est attaché).
+
+### Clés `localStorage`
+
+- `<dossier>-flashcards` = `{ ajouts: { <paquet>: date }, cartes: { <id>: { c, d, s, v, n, ok } } }` : `c` case (1 à 7, 8 : sue), `d` prochaine révision (absente si sue), `s` face de la prochaine révision, `v` dernière révision, `n` nombre de révisions, `ok` nombre de « Je savais ». Enregistrée avec la progression (§5).
+- `revisions-reglages` = `{ parSeance: 10 | 20 | 30 | 0 }` : commun à toutes les applications.
+- Toujours dans un `try/catch` : sans stockage, tout s'affiche et marche pour la page en cours, un message discret le signale.
+
+### Points d'entrée
+
+- **Portail** : pilule « Révisions » dans le bandeau (nombre de cartes dues) ; carte noire « N flashcards à réviser aujourd'hui » au-dessus de la barre de tri, seulement s'il y en a.
+- **Accueil de l'application** : bloc « Flashcards du chapitre » sous « Reprendre », bouton « Flashcards » dans chaque module déplié (« + Ajouter les N flashcards » quand ses cours sont faits : l'ajout se fait sans changer de page), ligne « ⧉ Flashcards » en bas de la liste.
+- **Sommaire** : entrée « ⧉ Flashcards » en bas de l'arbre, comme un module sans numéro.
+- **Fin du cours** : dans la carte « À retenir », « Ajouter les N cartes à mes révisions », puis « Les réviser maintenant » (moteur commun : `assets/cours.js` ; moteur propre : appeler `REV.finCours(carte, cle)`).
+- **Page Flashcards** : boîte du chapitre, « Réviser », « Tout réviser (sans changer mon planning) », « Imprimer les cartes », les cartes cours par cours avec leur case et leur date.
+- **Page Révisions** : aujourd'hui, réglage du nombre de cartes, boîte de toutes les applications, 7 prochains jours, applications, cartes prêtes à ajouter, méthodes (feuille blanche, révisions espacées, Pomodoro avec minuteur), boîte en papier.
+
+### Règle pour une application avec des cartes
+
+Elle déclare **`flashcards: true` dans `SOM.init`** et son dossier dans **`REV.APPLIS`** (`assets/revisions.js`, dans l'ordre du portail) ; `assets/sommaire.js` charge alors `assets/revisions.js` et les cartes sur l'accueil, la page Flashcards et les pages de module. Les cartes s'écrivent avec **`docs/flashcards/prompt-generation.md`** (deux validations par l'enseignant dans l'outil de relecture).

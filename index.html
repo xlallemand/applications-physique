@@ -144,6 +144,7 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
   @media (max-width: 640px) { .app-d { display: none; } .app { padding: 11px 10px 11px 16px; } .app-f { width: 32px; height: 32px; } }
 </style>
 <link rel="stylesheet" href="assets/progression.css">
+<link rel="stylesheet" href="assets/revisions.css">
 </head>
 <body>
 
@@ -151,6 +152,8 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
 <header class="hero plx" data-graine="7">
   <canvas aria-hidden="true"></canvas>
   <div class="wrap"><nav class="hero-nav"><a class="marque" href="#">Physique-Chimie</a>
+    <!-- Révisions (flashcards) : nombre de cartes à réviser aujourd'hui, assets/revisions.js -->
+    <a class="btn-small rev-nav" id="rev-nav" href="revisions.html">Révisions</a>
     <!-- Enregistrer / reprendre la progression : assets/progression.js -->
     <div class="prog-actions">
       <button type="button" class="btn-small" id="prog-enregistrer">Enregistrer ma progression</button>
@@ -167,6 +170,8 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
 
 <!-- ====== Feuille de contenu ====== -->
 <main class="feuille">
+  <!-- carte du jour, seulement quand des flashcards sont à réviser (assets/revisions.js) -->
+  <div class="wrap rev-portail" id="rev-portail" hidden></div>
   <div class="tri" id="tri">
     <div class="wrap">
       <div class="groupe" role="group" aria-label="Domaine" id="g-dom"></div>
@@ -556,6 +561,19 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
   coller();
 
   ACC.parallaxe();
+})();
+</script>
+<script src="assets/revisions.js"></script>
+<script>
+/* Révisions (assets/revisions.js) : pilule du bandeau et carte du jour,
+   mises à jour après une reprise de progression et au retour arrière */
+(function () {
+  'use strict';
+  const maj = () => REV.portail({ pilule: document.getElementById('rev-nav'), carte: document.getElementById('rev-portail'), apps: ACC.APPS });
+  maj();
+  const liste = ACC.rafraichir;
+  ACC.rafraichir = () => { liste(); maj(); };
+  addEventListener('pageshow', e => { if (e.persisted) maj(); });
 })();
 </script>
 <script src="assets/progression.js"></script>

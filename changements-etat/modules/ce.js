@@ -1785,7 +1785,7 @@
         { nom: 'Schéma des étapes', questions: 'module_5_questions' }] },
     { n: 6, titre: 'Exercices', desc: 'Exercices 13, 14, 10, 15, 7, 8 et 17 de la feuille, exercice de bac blanc « Dégivrage »', exercices: 'module_6', exNom: 'Exercices de la feuille', nbEx: 8 },
   ];
-  window.SOM.init({ nom: 'Chapitre 11 : Changements d\'état et transferts thermiques', id: 'changements-etat', cleEx: 'changements-etat-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 11 : Changements d\'état et transferts thermiques', id: 'changements-etat', cleEx: 'changements-etat-exercices', plan: PLAN, flashcards: true });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);

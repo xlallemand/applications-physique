@@ -18,7 +18,8 @@
          return carte;
        }
      Une étape sans « À toi » appelle c.continuer(carte) elle-même.
-     La dernière étape (« À retenir ») marque le cours comme fait dans le sommaire.
+     La dernière étape (« À retenir ») marque le cours comme fait dans le sommaire ;
+     dans une application avec flashcards, elle propose d'ajouter les cartes du cours (REV.finCours).
 
    Parties de question (p.type) :
      'choix'   p.options [{ id, label }], p.bonne (un id, ou une liste d'ids si plusieurs réponses sont justes),
@@ -464,6 +465,8 @@
       this.toutEstAffiche();
       vivants.delete(this);
       if (window.SOM) window.SOM.marquer({ fait: true }, this.opts.cle);
+      // flashcards de ce cours (application avec flashcards) : les ranger dans la boîte de révision
+      if (c && window.SOM && window.SOM.flashcards) window.SOM.flashcards(REV => REV.finCours(c, this.opts.cle));
     }
     return c;
   };

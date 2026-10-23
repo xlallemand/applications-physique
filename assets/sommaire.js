@@ -10,12 +10,16 @@
        id: 'ph',                     clé de progression : localStorage « ph-progression »
        cleEx: 'ph-exercices',        (facultatif) résultats des exercices { id: { pts, max } }
        spa: false,                   true : application en une seule page, les pages sont des ancres (#cle)
+       flashcards: false,            true : l'application a des flashcards (modules/flashcards.js, voir assets/revisions.js) :
+                                     entrée « Flashcards » du sommaire ; sur l'accueil, le bloc, les boutons des modules et la ligne
        plan: PLAN,
      });
      SOM.menu(cle)        cle = 'accueil' (bandeau avec le lien vers le portail)
                           ou la clé d'une page du plan (sommaire)
      SOM.accueil(zone)    liste des modules en lignes dépliables, carte « Reprendre »
      SOM.marquer(info)    { fait: true } (cours terminé…) ou { note } (note sur 20, on garde la meilleure)
+     SOM.flashcards(fn)   (application avec flashcards) charge assets/revisions.js et les cartes, puis fn(REV, app)
+     SOM.contexte()       { id, nom, spa, racine, adresse(cle), nomPage(cle) } : chemins depuis la page en cours
 
    PLAN = [{ n, titre, desc, fiche,          fiche : clé de la fiche récapitulative (s'il y a un cours)
              parties: [{ nom, slug, simulation, cours, exemple, questions, entrainement, noms }],
@@ -31,12 +35,15 @@
 (function () {
   'use strict';
 
-  const C = { nom: '', id: 'app', cleEx: null, spa: false, plan: [] };
+  const C = { nom: '', id: 'app', cleEx: null, spa: false, flashcards: false, plan: [] };
 
   // types de pages d'une partie, dans l'ordre d'affichage
   const ONGLETS = ['simulation', 'cours', 'exemple', 'questions', 'entrainement'];
   const NOMS = { simulation: 'Simulation', cours: 'Cours', exemple: 'Exemple', questions: 'Questions', entrainement: 'Entraînement', fiche: 'Fiche récapitulative', exercices: 'Exercices' };
   const ICONES = { simulation: '▸', cours: 'C', exemple: 'Ex', questions: 'Q', entrainement: 'E', fiche: '≡', exercices: '#' };
+  // page Flashcards (application avec flashcards) : comme un module sans numéro, en bas du sommaire
+  const FC = { n: '⧉', titre: 'Flashcards', cle: 'flashcards' };
+  let compteFc = '';                     // « cartes ajoutées / total », connu une fois les cartes chargées
 
   const fmt = v => String(v).replace('.', ',');
 
@@ -73,6 +80,7 @@
 
   /* ---------- Où se trouve-t-on ? ---------- */
   function situer(cle) {
+    if (C.flashcards && cle === FC.cle) return { m: FC, onglet: 'flashcards' };
     for (const m of C.plan) {
       if (m.exercices === cle) return { m, onglet: 'exercices' };
       if (m.fiche && m.fiche === cle) {
@@ -105,6 +113,36 @@
     if (s.onglet === 'exercices') return `Module ${s.m.n} · ${s.m.exNom || 'Exercices'}`;
     const quoi = s.onglet === 'fiche' ? NOMS.fiche : nomPage(s.p, s.onglet);
     return !plat(s.m) && s.onglet !== 'fiche' ? `Module ${s.m.n} · ${s.p.nom} · ${quoi}` : `Module ${s.m.n} · ${quoi}`;
+  }
+
+  // nom d'une page pour l'élève : « Cours du module 1 », « Cours : lire le diagramme d'état » (flashcards : « Disponible après »)
+  function nomPageEleve(cle) {
+    const s = situer(cle);
+    if (!s || !s.p) return cle;
+    return (s.p.noms && s.p.noms[s.onglet]) || `${NOMS[s.onglet]} du module ${s.m.n}`;
+  }
+
+  /* ---------- Flashcards (assets/revisions.js) ---------- */
+  // chemins depuis la page en cours : accueil (ou application en une seule page) ou page d'un module (dossier modules/)
+  function contexte() {
+    const dansModules = !C.spa && /\/modules\/[^/]*$/.test(location.pathname);
+    return { id: C.id, nom: C.nom, spa: C.spa, racine: dansModules ? '../../' : '../', adresse: cle => adresse(cle, !dansModules), nomPage: nomPageEleve };
+  }
+  // charge assets/revisions.js (+ revisions.css) et les cartes de l'application, puis fn(REV, app)
+  function flashcards(fn) {
+    if (!C.flashcards) return false;
+    const ctx = contexte();
+    const suite = () => window.REV.charger(C.id, (ctx.racine === '../../' ? '' : 'modules/') + 'flashcards.js', app => { if (app) fn(window.REV, app); });
+    if (window.REV) { suite(); return true; }
+    if (!document.querySelector('link[href$="revisions.css"]')) {
+      const l = document.createElement('link');
+      l.rel = 'stylesheet'; l.href = ctx.racine + 'assets/revisions.css';
+      document.head.appendChild(l);
+    }
+    let s = document.querySelector('script[src$="revisions.js"]');
+    if (!s) { s = document.createElement('script'); s.src = ctx.racine + 'assets/revisions.js'; document.head.appendChild(s); }
+    s.addEventListener('load', suite);
+    return true;
   }
 
   /* ---------- Avancement d'un module (sommaire et accueil) ---------- */
@@ -148,7 +186,14 @@
       return `<div class="som-smod${ici ? ' ici' : ''}"><button type="button" class="som-sligne" aria-expanded="${ici}" aria-controls="som-s${m.n}">` +
         `<span class="som-snum${fini ? ' fait' : ''}">${fini ? '✓' : m.n}</span><span class="som-st">${m.titre}</span><span class="som-sn">${n}/${t}</span>${chev}</button>` +
         `<div class="som-senf" id="som-s${m.n}"${ici ? '' : ' hidden'}>${enfants}</div></div>`;
-    }).join('');
+    }).join('') + (C.flashcards ? sommaireFc(s) : '');
+  }
+  // entrée « ⧉ Flashcards » : comme un module sans numéro, la page encadrée sur flashcards.html
+  function sommaireFc(s) {
+    const ici = s.m === FC;
+    return `<div class="som-smod${ici ? ' ici' : ''}"><button type="button" class="som-sligne" aria-expanded="${ici}" aria-controls="som-sfc">` +
+      `<span class="som-snum">${FC.n}</span><span class="som-st">${FC.titre}</span><span class="som-sn" data-rev-compte>${compteFc}</span>${chev}</button>` +
+      `<div class="som-senf" id="som-sfc"${ici ? '' : ' hidden'}><div class="som-spages">${feuille(adresse(FC.cle), FC.n, FC.titre, '', ici)}</div></div></div>`;
   }
 
   /* ---------- Navigation d'une page ---------- */
@@ -175,17 +220,17 @@
       return;
     }
     const prog = lireProg();
-    prog.derniere = cle; ecrireProg(prog);                       // pour « Reprendre » sur l'accueil
+    if (cle !== FC.cle) { prog.derniere = cle; ecrireProg(prog); }   // pour « Reprendre » sur l'accueil
     html.classList.add('som-nav');
     // (re)construit le bandeau et le sommaire ; sur une fiche, la partie dépend de l'ancre
     function rendre() {
       const s = situer(cle), pages = lireProg().pages || {}, ex = lireExercices();
-      const multi = !plat(s.m);
-      const ou = s.onglet === 'exercices' ? (s.m.exNom || NOMS.exercices) : s.onglet === 'fiche' ? NOMS.fiche
+      const multi = !plat(s.m), fc = s.m === FC;
+      const ou = fc ? FC.titre : s.onglet === 'exercices' ? (s.m.exNom || NOMS.exercices) : s.onglet === 'fiche' ? NOMS.fiche
         : multi ? `${s.p.nom} · ${nomPage(s.p, s.onglet)}` : nomPage(s.p, s.onglet);
       racine.innerHTML =
-        `<div class="som-barre"><button type="button" class="som-ou" aria-expanded="false" aria-controls="som-som" aria-label="Sommaire : module ${s.m.n}, ${ou}">` +
-        `<span class="som-snum">${s.m.n}</span><span class="som-ou-t"><small>${s.m.titre}</small><b>${ou}</b></span><span class="som-ou-chev" aria-hidden="true">▾</span></button></div>` +
+        `<div class="som-barre"><button type="button" class="som-ou" aria-expanded="false" aria-controls="som-som" aria-label="Sommaire : ${fc ? '' : 'module ' + s.m.n + ', '}${ou}">` +
+        `<span class="som-snum">${s.m.n}</span><span class="som-ou-t"><small>${fc ? C.nom : s.m.titre}</small><b>${ou}</b></span><span class="som-ou-chev" aria-hidden="true">▾</span></button></div>` +
         '<div class="som-barre-esp"></div><div class="som-voile"></div>' +
         `<aside class="som-som" id="som-som" aria-label="Sommaire"><div class="som-tete"><a class="som-app" href="${accueilApp()}">${C.nom}</a>` +
         `<a class="som-pilule" href="${portail()}"><span aria-hidden="true">⌂</span>Accueil</a></div>` +
@@ -205,6 +250,11 @@
       if (ici && col.scrollHeight > col.clientHeight) col.scrollTop = ici.offsetTop - col.clientHeight / 2;
     }
     rendre();
+    // flashcards : compteur de l'entrée du sommaire, une fois les cartes chargées
+    flashcards((REV, app) => {
+      compteFc = REV.compte(app);
+      racine.querySelectorAll('[data-rev-compte]').forEach(x => { x.textContent = compteFc; });
+    });
     const s = situer(cle);
     if (C.spa || s.onglet !== 'fiche') return;
     // fiche : la partie choisie est donnée par l'ancre de la page (#slug)
@@ -245,10 +295,15 @@
         `<span class="som-ligne-t">${m.titre}<small>${m.desc}</small></span><span class="som-ligne-n">${n}/${t}</span><span class="som-chev" aria-hidden="true">›</span></button>` +
         `<div class="som-ouvert" id="som-m${m.n}" role="region" aria-labelledby="som-b${m.n}"${ouv ? '' : ' hidden'}>${corps}</div></div>`;
     };
+    // ligne « Flashcards » en bas de la liste (description et compteur : assets/revisions.js)
+    const ligneFc = C.flashcards ? `<div class="som-module"><a class="som-ligne" href="${adresse(FC.cle, true)}"><span class="som-badge">${FC.n}</span>` +
+      `<span class="som-ligne-t">${FC.titre}<small data-rev-desc>Des cartes pour retenir l'essentiel du chapitre</small></span><span class="som-ligne-n" data-rev-compte></span><span class="som-chev" aria-hidden="true">›</span></a></div>` : '';
     zone.innerHTML = (derniere ? `<a class="som-reprendre" href="${adresse(derniere, true)}"><small>Reprendre</small><b>${libelle(derniere)} →</b></a>` : '') +
-      `<div class="som-modules">${C.plan.map(module).join('')}</div>`;
+      `<div class="som-modules">${C.plan.map(module).join('')}${ligneFc}</div>`;
+    // flashcards : bloc sous « Reprendre », bouton dans chaque module, compteur de la ligne
+    flashcards(REV => REV.accueil(zone, REV.app(C.id)));
     // un seul module déplié à la fois
-    const lignes = zone.querySelectorAll('.som-ligne');
+    const lignes = zone.querySelectorAll('button.som-ligne');
     lignes.forEach(b => b.addEventListener('click', () => {
       const ouvrirLigne = b.getAttribute('aria-expanded') !== 'true';
       lignes.forEach(x => { x.setAttribute('aria-expanded', 'false'); document.getElementById(x.getAttribute('aria-controls')).hidden = true; });
@@ -261,7 +316,7 @@
   }
 
   // (chaque appel remplace toute la configuration : une page qui charge le moteur d'une autre application la reconfigure)
-  function init(opts) { Object.assign(C, { nom: '', id: 'app', cleEx: null, spa: false, plan: [] }, opts); return window.SOM; }
+  function init(opts) { Object.assign(C, { nom: '', id: 'app', cleEx: null, spa: false, flashcards: false, plan: [] }, opts); compteFc = ''; return window.SOM; }
 
-  window.SOM = { init, menu, accueil, marquer, situer, libelle, lireProg, NOMS };
+  window.SOM = { init, menu, accueil, marquer, situer, libelle, lireProg, NOMS, contexte, flashcards };
 })();

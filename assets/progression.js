@@ -21,7 +21,8 @@
    en JSON, puis UTF-8, puis base64url, après #reprise=.
    Clés enregistrées : celles qui commencent par « <dossier>- » pour un
    dossier de la liste APPS du portail (préfixe le plus long), plus
-   equamath_v2 (Équations du 1er degré). Les autres clés du navigateur
+   equamath_v2 (Équations du 1er degré) et revisions-reglages (réglage des
+   flashcards, rattaché à aucune application). Les autres clés du navigateur
    (autres sites de la même adresse) ne sont ni enregistrées ni reprises.
    Tout ce qui arrive est non fiable : taille plafonnée, forme de chaque
    valeur vérifiée, aucun texte inséré en HTML (textContent seulement).
@@ -58,6 +59,9 @@
   const APPS = (window.ACC && window.ACC.APPS) || [];
   // dossiers du plus long au plus court : le premier qui convient est le préfixe le plus long
   const DOSSIERS = APPS.map(a => a.dossier).sort((x, y) => y.length - x.length);
+  const CLE_REGLAGES = 'revisions-reglages';         // flashcards : { parSeance } (assets/revisions.js)
+  const DATE = /^\d{4}-\d{2}-\d{2}$/;
+  const estDate = v => typeof v === 'string' && DATE.test(v);
   const appDe = dossier => APPS.find(a => a.dossier === dossier);
 
   /* ---------- Petits utilitaires ---------- */
@@ -82,15 +86,17 @@
   const pluriel = (n, mot) => n + ' ' + mot + (n > 1 ? 's' : '');
 
   /* ---------- Quelles clés enregistrer ? ---------- */
-  // { dossier, type } pour une clé à enregistrer, null sinon
+  // { dossier, type } pour une clé à enregistrer, null sinon (dossier null : clé rattachée à aucune application)
   function typeDeCle(cle) {
     if (typeof cle !== 'string' || !NOM_CLE.test(cle)) return null;
     if (cle === 'equamath_v2') return appDe('equations-college') ? { dossier: 'equations-college', type: 'equamath' } : null;
+    if (cle === CLE_REGLAGES) return { dossier: null, type: 'reglages' };
     const dossier = DOSSIERS.find(d => cle.length > d.length + 1 && cle.slice(0, d.length + 1) === d + '-');
     if (!dossier) return null;
     const reste = cle.slice(dossier.length + 1);
     if (reste === 'progression') return { dossier, type: 'progression' };
     if (reste === 'exercices') return { dossier, type: 'exercices' };
+    if (reste === 'flashcards') return { dossier, type: 'flashcards' };
     if (cle === 'combustions-exercices-faits') return { dossier, type: 'liste' };
     if (cle === 'principe-dynamique-atelier') return { dossier, type: 'atelier' };
     return { dossier, type: 'inconnue' };
@@ -170,6 +176,38 @@
         }
         return r;
       }
+      // flashcards : { ajouts: { <paquet>: date }, cartes: { <id>: { c, d, s, v, n, ok } } }
+      //   c case 1 à 8 (8 : sue, sans d), s face 0 ou 1, v dernière révision, n révisions, ok « Je savais » (0 à n)
+      case 'flashcards': {
+        if (!ok(estObjet(v))) return undefined;
+        const r = { ajouts: {}, cartes: {} };
+        cles(v).forEach(k => ok(k === 'ajouts' || k === 'cartes'));
+        if (propre(v, 'ajouts') && ok(estObjet(v.ajouts) && cles(v.ajouts).length <= MAX_ENTREES)) {
+          cles(v.ajouts).forEach(p => { if (ok(nomOk(p) && estDate(v.ajouts[p]))) r.ajouts[p] = v.ajouts[p]; });
+        }
+        if (propre(v, 'cartes') && ok(estObjet(v.cartes) && cles(v.cartes).length <= MAX_ENTREES)) {
+          cles(v.cartes).forEach(id => {
+            const e = v.cartes[id];
+            if (!ok(nomOk(id) && estObjet(e) && cles(e).every(k => ['c', 'd', 's', 'v', 'n', 'ok'].indexOf(k) >= 0))) return;
+            const entier = (x, min, max) => typeof x === 'number' && Math.floor(x) === x && x >= min && x <= max;
+            const bon = entier(e.c, 1, 8) && (e.c === 8 ? !propre(e, 'd') : estDate(e.d)) && entier(e.s, 0, 1) &&
+              (!propre(e, 'v') || estDate(e.v)) && entier(e.n, 0, 1e6) && entier(e.ok, 0, e.n);
+            if (!ok(bon)) return;
+            const x = { c: e.c };
+            if (e.c < 8) x.d = e.d;
+            x.s = e.s;
+            if (propre(e, 'v')) x.v = e.v;
+            x.n = e.n; x.ok = e.ok;
+            r.cartes[id] = x;
+          });
+        }
+        return r;
+      }
+      // réglage des flashcards : { parSeance: 0 | 10 | 20 | 30 }
+      case 'reglages': {
+        if (!ok(estObjet(v) && cles(v).every(k => k === 'parSeance'))) return undefined;
+        return propre(v, 'parSeance') && ok([0, 10, 20, 30].indexOf(v.parSeance) >= 0) ? { parSeance: v.parSeance } : {};
+      }
       // clé d'une application, de forme inconnue : seule la taille est vérifiée
       default: {
         let t = null;
@@ -187,6 +225,8 @@
       case 'progression': return !!v.pages && cles(v.pages).length > 0;
       case 'liste': return v.length > 0;
       case 'equamath': return v.xp > 0 || (!!v.results && cles(v.results).length > 0);
+      case 'flashcards': return cles(v.ajouts).length > 0;          // au moins un paquet ajouté
+      case 'reglages': return propre(v, 'parSeance');
       case 'inconnue': return v !== '' && v !== false && !(Array.isArray(v) && !v.length) && !(estObjet(v) && !cles(v).length);
       default: return cles(v).length > 0;      // exercices, atelier
     }
@@ -249,7 +289,23 @@
         }
         return r;
       }
-      default: return a;          // clé inconnue déjà présente : on garde celle du navigateur
+      case 'flashcards': {
+        // paquets ajoutés : réunion (date la plus ancienne) ; chaque carte : l'état revu le plus récemment
+        // (v le plus grand ; à égalité, n le plus grand ; une carte jamais revue perd contre une carte revue)
+        const r = estObjet(a) ? copie(a) : {};
+        if (!estObjet(r.ajouts)) r.ajouts = {};
+        if (!estObjet(r.cartes)) r.cartes = {};
+        cles(b.ajouts).forEach(p => { if (!(estDate(r.ajouts[p]) && r.ajouts[p] <= b.ajouts[p])) r.ajouts[p] = b.ajouts[p]; });
+        const plusRecent = (x, y) => {                       // y (fichier) l'emporte-t-il sur x (navigateur) ?
+          if (!estObjet(x)) return true;
+          const vx = estDate(x.v) ? x.v : '', vy = y.v || '';
+          if (vy !== vx) return vy > vx;
+          return y.n > (typeof x.n === 'number' ? x.n : -1);
+        };
+        cles(b.cartes).forEach(id => { if (plusRecent(r.cartes[id], b.cartes[id])) r.cartes[id] = copie(b.cartes[id]); });
+        return r;
+      }
+      default: return a;          // clé inconnue déjà présente, réglages : on garde ceux du navigateur
     }
   }
 
@@ -279,7 +335,7 @@
       v = nettoyer(t.type, v, false);
       if (!significatif(t.type, v)) return;
       donnees[cle] = v;
-      dossiers[t.dossier] = true;
+      if (t.dossier) dossiers[t.dossier] = true;
     });
     return { donnees, apps: APPS.filter(a => dossiers[a.dossier]) };
   }
@@ -313,8 +369,8 @@
       let avant;
       try { avant = avantTexte === null ? undefined : JSON.parse(avantTexte); } catch (e) { avant = undefined; }
       const apresTexte = JSON.stringify(fusionner(x.type, avant, x.valeur));
-      vues[x.dossier] = true;
-      if (apresTexte !== avantTexte) { ecritures.push({ cle: x.cle, avantTexte, apresTexte }); maj[x.dossier] = true; }
+      if (x.dossier) vues[x.dossier] = true;
+      if (apresTexte !== avantTexte) { ecritures.push({ cle: x.cle, avantTexte, apresTexte }); if (x.dossier) maj[x.dossier] = true; }
     });
     try {
       ecritures.forEach(e => s.setItem(e.cle, e.apresTexte));
