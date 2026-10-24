@@ -35,7 +35,8 @@
      REV.portail(o)                   portail : pilule « Révisions » et carte noire du jour
      REV.pageRevisions(zone)          page Révisions (revisions.html) : #reviser, #reviser-<dossier>,
                                       #libre-<dossier>, #libre-<dossier>-<paquet>[,<paquet>…]
-     REV.pageApplication(zone)        page Flashcards d'une application (modules/flashcards.html, #imprimer)
+     REV.pageApplication(zone)        page Flashcards d'une application (modules/flashcards.html, #imprimer,
+                                      export vers Anki : assets/anki.js)
      REV.accueil(zone, app)           accueil de l'application : bloc, boutons des modules, ligne Flashcards
      REV.compte(app)                  « cartes ajoutées / total » (sommaire, accueil)
      REV.finCours(carte, cle)         fin d'un cours : ranger les cartes de ce cours dans la boîte
@@ -1072,6 +1073,8 @@
           <button type="button" class="btn-secondary" data-a="tout" aria-expanded="false" aria-controls="rev-choix">Tout réviser (sans changer mon planning)</button>
           <div class="rev-choix" id="rev-choix" hidden><p>Les cours à réviser :</p>${choix}<a class="btn-primary" data-a="libre" href="${rev}#libre-${d}">Commencer →</a></div>
           <a class="btn-secondary" href="#imprimer" data-a="imprimer">Imprimer les cartes</a>
+          <button type="button" class="btn-secondary" data-a="anki">Exporter les cartes sous Anki</button>
+          <p class="rev-note" data-z="anki" role="status" hidden></p>
         </div>`;
       const z = zone.querySelector('[data-z="auj"]'), bt = z.querySelector('[data-a="tout"]'), ch = z.querySelector('#rev-choix'), go = z.querySelector('[data-a="libre"]');
       bt.addEventListener('click', () => { const oui = ch.hidden; ch.hidden = !oui; bt.setAttribute('aria-expanded', oui); });
@@ -1085,6 +1088,7 @@
         history.pushState({ revImp: 1 }, '', '#imprimer');
         router();
       });
+      z.querySelector('[data-a="anki"]').addEventListener('click', ev => exporterAnki(app, ctx, ev.currentTarget, z.querySelector('[data-z="anki"]')));
     }
     // les paquets : résumé, bloc d'ajout, une ligne par carte (aperçu au clic)
     function majPaquets() {
@@ -1205,6 +1209,37 @@
       });
     }
     addEventListener('beforeprint', () => { if (ecran === 'imp') ajuster(); });
+  }
+
+  /* ---------- Export vers Anki : fichier .apkg de toutes les cartes de l'application
+     (assets/anki.js, chargé au premier export) ---------- */
+  function exporterAnki(app, ctx, bouton, info) {
+    const echec = () => { info.textContent = 'L\'export n\'a pas pu se faire : recharge la page et réessaie.'; bouton.disabled = false; };
+    bouton.disabled = true;
+    info.hidden = false;
+    info.textContent = 'Préparation du fichier…';
+    function telecharger() {
+      let octets;
+      try { octets = window.ANKI.paquet(app); } catch (e) { echec(); return; }
+      const nom = window.ANKI.nomFichier(app);
+      const url = URL.createObjectURL(new Blob([octets], { type: 'application/octet-stream' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nom;
+      a.hidden = true;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      info.innerHTML = `<b>✓ ${nom}</b> téléchargé. Ouvre-le avec Anki (ou, dans Anki : Fichier › Importer).`;
+      bouton.disabled = false;
+    }
+    if (window.ANKI) { telecharger(); return; }
+    const s = document.createElement('script');
+    s.src = ctx.racine + 'assets/anki.js';
+    s.onload = () => { if (window.ANKI) telecharger(); else echec(); };
+    s.onerror = echec;
+    document.head.appendChild(s);
   }
 
   window.REV = {

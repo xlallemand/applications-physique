@@ -474,6 +474,7 @@ Réponse : deux boutons « ✗ Je ne savais pas » / « ✓ Je savais », avec l
 | Fichier | Rôle |
 |---|---|
 | `assets/revisions.js`, `assets/revisions.css` | moteur commun (objet `REV`, classes `rev-`) : planning, état, séance, page Révisions, page Flashcards, impression, minuteur, intégrations |
+| `assets/anki.js` | export vers Anki (objet `ANKI`), chargé au premier clic sur « Exporter les cartes sous Anki » : fichier `.apkg` (collection au schéma 11, lisible par toutes les versions d'Anki) avec toutes les cartes de l'application, une note par carte (une carte Anki par sens), paquet `Physique-Chimie::<titre de l'application>`, figures SVG en fichiers joints, cartes nouvelles ; l'`id` de la carte donne l'identifiant de la note (réimporter met à jour, sans doublon) |
 | `revisions.html` (racine) | page Révisions ; écrans par ancre : `#reviser` (toutes applications), `#reviser-<dossier>`, `#libre-<dossier>`, `#libre-<dossier>-<paquet>` |
 | `<dossier>/modules/flashcards.js` | les cartes : `REV.paquets(info, paquets)` (format en tête de `assets/revisions.js`), chargé par une balise `<script>` |
 | `<dossier>/modules/flashcards.html` | page Flashcards de l'application : gabarit commun (`SOM.menu('flashcards')` puis `REV.pageApplication(zone)`) ; `#imprimer` : impression A4 recto verso, 8 cartes par feuille |
@@ -493,7 +494,7 @@ Contenu d'une carte : HTML écrit selon §7 ; classes `rev-formule`, `rev-unites
 - **Accueil de l'application** : bloc « Flashcards du chapitre » sous « Reprendre », bouton « Flashcards » dans chaque module déplié (« + Ajouter les N flashcards » quand ses cours sont faits : l'ajout se fait sans changer de page), ligne « ⧉ Flashcards » en bas de la liste.
 - **Sommaire** : entrée « ⧉ Flashcards » en bas de l'arbre, comme un module sans numéro.
 - **Fin du cours** : dans la carte « À retenir », « Ajouter les N cartes à mes révisions », puis « Les réviser maintenant » (moteur commun : `assets/cours.js` ; moteur propre : appeler `REV.finCours(carte, cle)`).
-- **Page Flashcards** : boîte du chapitre, « Réviser », « Tout réviser (sans changer mon planning) », « Imprimer les cartes », les cartes cours par cours avec leur case et leur date.
+- **Page Flashcards** : boîte du chapitre, « Réviser », « Tout réviser (sans changer mon planning) », « Imprimer les cartes », « Exporter les cartes sous Anki », les cartes cours par cours avec leur case et leur date.
 - **Page Révisions** : aujourd'hui, réglage du nombre de cartes, boîte de toutes les applications, 7 prochains jours, applications, cartes prêtes à ajouter, méthodes (feuille blanche, révisions espacées, Pomodoro avec minuteur), boîte en papier.
 
 ### Règle pour une application avec des cartes
