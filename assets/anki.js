@@ -387,7 +387,7 @@
       '.pc-carte .rev-q small { display: block; margin-top: 6px; font-size: .9rem; font-weight: 600; color: var(--ink-2); }',
       '.pc-carte .rev-q .rev-formule { margin-bottom: 8px; }',
       '.pc-carte .rev-outils { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 10px 0 0; font-size: .85rem; font-weight: 700; color: var(--ink-2); }',
-      '.pc-carte .rev-outils img { width: 26px; height: 26px; }',
+      '.pc-carte .rev-outils img { width: 30px; height: 30px; }',
       // rappel de la question au verso : son texte seul, sans figure ni tableau (comme REV.texteQ)
       '.pc-carte .rev-rappel { font-size: .88rem; font-weight: 600; color: var(--ink-2); line-height: 1.4; }',
       '.pc-carte .rev-rappel p, .pc-carte .rev-rappel div, .pc-carte .rev-rappel ol, .pc-carte .rev-rappel ul, .pc-carte .rev-rappel li { display: inline; margin: 0; padding: 0; }',

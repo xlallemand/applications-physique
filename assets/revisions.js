@@ -63,8 +63,9 @@
   const TYPES = { definition: 'Définition', formule: 'Formule', savoir: 'À savoir', schema: 'Schéma', graphique: 'Lecture graphique', methode: 'Méthode', reflexe: 'Réflexe' };
   // ce qu'il faut prendre pour répondre à une carte : icônes SVG autonomes (couleur du texte), avec leur nom
   const OUTILS = {
-    crayon: ['un crayon', '<g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M18.6 1.6 22.4 5.4 9.4 18.4 5.6 14.6Z"/><path d="M5.6 14.6 9.4 18.4 3 21Z"/></g>' +
-      '<g fill="currentColor"><circle cx="10.6" cy="14" r="2.2"/><circle cx="12.7" cy="11.9" r="2.2"/><circle cx="14.8" cy="9.8" r="2.2"/><ellipse cx="15.6" cy="15.2" rx="5.2" ry="4" transform="rotate(-45 15.6 15.2)"/><path d="M16.5 19.5 21 15 24 18 24 24 21.5 24Z"/></g>'],
+    crayon: ['un crayon', '<g transform="rotate(-45 12 12)"><path d="M7 7.8H21V10.6H7L2.5 9.2Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>' +
+      '<g fill="currentColor"><path d="M10 5.2h5.5a1.3 1.3 0 0 1 0 2.6H10a1.3 1.3 0 0 1 0-2.6Z"/><path d="M8.6 11.2h5.6v2.6H8.6a1.3 1.3 0 0 1 0-2.6Z"/><path d="M9.2 14.4h5v2.6h-5a1.3 1.3 0 0 1 0-2.6Z"/>' +
+      '<path d="M10.2 17.6h4v2.6h-4a1.3 1.3 0 0 1 0-2.6Z"/><path d="M14.8 11.2h1.6c1.3 0 2.5.6 3.3 1.6L24 18v8h-6l-3.2-3.6Z"/></g></g>'],
     calculatrice: ['une calculatrice', '<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="2" width="15" height="20" rx="2.5"/><rect x="7.5" y="5" width="9" height="4" rx="1"/>' +
       '<path d="M8 13h.01M12 13h.01M16 13h.01M8 16.5h.01M12 16.5h.01M16 16.5h.01M8 20h.01M12 20h.01M16 20h.01" stroke-width="2.6"/></g>'],
   };
@@ -322,7 +323,7 @@
     const l = (f.outils || c.outils || []).filter(k => OUTILS[k]);
     if (!l.length) return '';
     return '<p class="rev-outils"><span>Utiliser</span>' +
-      l.map(k => `<svg viewBox="0 0 24 24" width="26" height="26" role="img" aria-label="${OUTILS[k][0]}">${OUTILS[k][1]}</svg>`).join('') + '</p>';
+      l.map(k => `<svg viewBox="0 0 24 24" width="30" height="30" role="img" aria-label="${OUTILS[k][0]}">${OUTILS[k][1]}</svg>`).join('') + '</p>';
   }
   // une face : o = { chapitre (écrire le chapitre), etat (case affichée en pied), pied: false, cache (aria-hidden) }
   function face(c, sens, cote, o) {

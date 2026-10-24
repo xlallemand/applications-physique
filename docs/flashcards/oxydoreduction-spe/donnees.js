@@ -1,5 +1,5 @@
 /* Relecture des flashcards de l'application « Oxydoréduction » (oxydoreduction-spe)
-   Tour 3 : les cartes, après les retours du tour 2 (voir docs/flashcards/prompt-generation.md)
+   Tour 4 : les cartes, après les retours du tour 3 (voir docs/flashcards/prompt-generation.md)
    Le module 4 (Écrire les réactions) reprend tous les autres : pas de paquet.
    Prérequis : chaque paquet après son cours (choix de l'enseignant, tour 1). */
 (function () {
@@ -36,7 +36,7 @@
 
   RELECTURE({
     dossier: 'oxydoreduction-spe', titre: 'Oxydoréduction', court: 'Oxydoréduction', matiere: 'chimie',
-    tour: 3, etape: 'cartes',
+    tour: 4, etape: 'cartes',
     // pages de cours de l'application (prérequis possibles)
     cours: [
       { cle: 'module_1a_cours', nom: 'Cours : oxydant et réducteur' },
@@ -58,12 +58,12 @@
           { id: 'c4', texte: 'Trouver le nombre d\'électrons échangés à partir des deux charges (exercice-type : Sn²⁺ devient Sn⁴⁺)', types: ['methode'], source: 'cours 1a · « Compter les électrons »' },
         ],
         cartes: [
-          { id: 'ox-1a-oxydant', type: 'definition', competence: 'c1', statut: 'modifiee', faces: [
+          { id: 'ox-1a-oxydant', type: 'definition', competence: 'c1', statut: 'validee', faces: [
             { q: '<p>Qu\'est-ce qu\'un oxydant ?</p>',
               r: '<p>Une espèce chimique capable de <b>capter</b> un ou plusieurs électrons.</p>' },
             { q: '<p>Comment s\'appelle une espèce chimique capable de capter un ou plusieurs électrons ?</p>',
               r: '<p>Un <b>oxydant</b>.</p>' }] },
-          { id: 'ox-1a-reducteur', type: 'definition', competence: 'c2', statut: 'modifiee', faces: [
+          { id: 'ox-1a-reducteur', type: 'definition', competence: 'c2', statut: 'validee', faces: [
             { q: '<p>Qu\'est-ce qu\'un réducteur ?</p>',
               r: '<p>Une espèce chimique capable de <b>céder</b> un ou plusieurs électrons.</p>' },
             { q: '<p>Comment s\'appelle une espèce chimique capable de céder un ou plusieurs électrons ?</p>',
@@ -71,7 +71,7 @@
           { id: 'ox-1a-charge', type: 'savoir', competence: 'c3', statut: 'validee', faces: [
             { q: '<p>Une espèce capte n électrons : que devient sa charge ? Et si elle en cède ?</p>',
               r: '<p><b>Capter</b> n électrons : la charge <b>diminue</b> de n.</p><p><b>Céder</b> n électrons : la charge <b>augmente</b> de n.</p><p>Un électron porte la charge −1.</p>' }] },
-          { id: 'ox-1a-compter', type: 'methode', competence: 'c4', statut: 'modifiee', faces: [
+          { id: 'ox-1a-compter', type: 'methode', competence: 'c4', statut: 'validee', faces: [
             { q: `<p>${Sn2} devient ${Sn4}. Combien d'électrons échange-t-il ?</p><small>Démarche</small>`,
               r: `<ol><li>Lire les deux charges : +2, puis +4.</li><li>Faire leur <b>différence</b> : la charge augmente de <b>2</b>.</li><li>Elle augmente : ${Sn2} <b>cède 2 électrons</b>.</li></ol>` }] },
         ] },
@@ -105,7 +105,7 @@
           { id: 'c5', texte: 'Reconnaître une oxydation ou une réduction sur une demi-équation orientée (place des électrons)', types: ['methode'], source: 'cours 1c · « Reconnaître » ; série 1 · Oxydation ou réduction' },
         ],
         cartes: [
-          { id: 'ox-1c-sens', type: 'schema', competence: 'c3', statut: 'modifiee', faces: [
+          { id: 'ox-1c-sens', type: 'schema', competence: 'c3', statut: 'validee', faces: [
             { q: '<p>Nomme les transformations ① et ②.</p>' + fig(sens('num')),
               r: fig(sens('leg')) + '<p>① <b>réduction</b> : formation du réducteur. ② <b>oxydation</b> : formation de l\'oxydant.</p>' },
             { q: '<p>Pour cette demi-équation, qu\'est-ce qu\'une oxydation ?</p>' + fig(sens('eq')),
@@ -141,7 +141,7 @@
           { id: 'c6', texte: 'Écrire la demi-équation du couple MnO₄⁻ / Mn²⁺ (exercice-type, démarche étape par étape)', types: ['methode'], source: 'fiche_2 · exemple ; méthode express · bloc B' },
         ],
         cartes: [
-          { id: 'ox-2a-etapes', type: 'methode', competence: 'c1', statut: 'modifiee', faces: [
+          { id: 'ox-2a-etapes', type: 'methode', competence: 'c1', statut: 'validee', faces: [
             { q: '<p>Équilibrer la demi-équation d\'un couple Ox / Red : quelles sont les 4 étapes, dans l\'ordre ?</p>',
               r: `<ol><li>Oxydant à gauche, réducteur à droite ; équilibrer les éléments <b>autres que O et H</b>.</li><li>Équilibrer <b>O</b> en ajoutant ${EAU}.</li><li>Équilibrer <b>H</b> en ajoutant ${HP}.</li><li>Équilibrer les <b>charges</b> en ajoutant ${E}.</li></ol>` }] },
           { id: 'ox-2a-sifaut', type: 'savoir', competence: 'c3', statut: 'validee', faces: [
@@ -185,10 +185,10 @@
           { id: 'ox-3-simplifier', type: 'methode', competence: 'c5', statut: 'validee', faces: [
             { q: `<p>Après l'addition des deux demi-équations : ${n(16, HP)} à gauche, ${n(10, HP)} à droite. Que fais-tu ?</p>`,
               r: `<p>Simplifier : retirer ${n(10, HP)} de chaque côté. Il en reste <b>${n(6, HP)} à gauche</b>.</p><p>Même chose pour ${EAU} s'il figure des deux côtés.</p>` }] },
-          { id: 'ox-3-boncouple', type: 'reflexe', competence: 'c7', statut: 'modifiee', faces: [
+          { id: 'ox-3-boncouple', type: 'reflexe', competence: 'c7', statut: 'validee', faces: [
             { q: `<p>${H2O2} appartient à deux couples : ${H2O2} / ${EAU} et ${O2} / ${H2O2}. Il réagit avec ${MnO4} du couple ${MnO4} / ${Mn2}. Quel couple utilises-tu pour ${H2O2} ?</p>`,
               r: `<p><b>${O2} / ${H2O2}</b> : ${MnO4} est un oxydant, il réagit avec un <b>réducteur</b>. ${H2O2} est le réducteur de ce couple (écrit en second).</p><p>Dans ${H2O2} / ${EAU}, ${H2O2} est l'oxydant : ce couple ne sert pas.</p>` }] },
-          { id: 'ox-3-mno4h2o2', type: 'methode', competence: 'c8', statut: 'nouvelle', outils: ['crayon'], faces: [
+          { id: 'ox-3-mno4h2o2', type: 'methode', competence: 'c8', statut: 'modifiee', outils: ['crayon'], faces: [
             { q: `<p>Écris l'équation de la réaction entre ${MnO4} et ${H2O2}. Couples : ${MnO4} / ${Mn2} et ${O2} / ${H2O2}.</p>`,
               r: `<ol><li>${MnO4} + ${n(8, HP)} + ${n(5, E)} = ${Mn2} + ${n(4, EAU)}<br>${H2O2} = ${O2} + ${n(2, HP)} + ${n(2, E)}</li><li>2 × la première, 5 × la seconde : ${n(10, E)} chacune.</li><li>Additionner : ${n(16, HP)} à gauche, 10 à droite : il en reste 6 à gauche.</li></ol>${formule(`${n(2, MnO4)} + ${n(5, H2O2)} + ${n(6, HP)} → ${n(2, Mn2)} + ${n(5, O2)} + ${n(8, EAU)}`)}` }] },
         ] },
