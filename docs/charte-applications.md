@@ -495,7 +495,7 @@ Contenu d'une carte : HTML écrit selon §7 ; classes `rev-formule`, `rev-unites
 - **Sommaire** : entrée « ⧉ Flashcards » en bas de l'arbre, comme un module sans numéro.
 - **Fin du cours** : dans la carte « À retenir », « Ajouter les N cartes à mes révisions », puis « Les réviser maintenant » (moteur commun : `assets/cours.js` ; moteur propre : appeler `REV.finCours(carte, cle)`).
 - **Page Flashcards** : boîte du chapitre, « Réviser », « Tout réviser (sans changer mon planning) », « Imprimer les cartes », « Exporter les cartes sous Anki », les cartes cours par cours avec leur case et leur date.
-- **Page Révisions** : aujourd'hui, réglage du nombre de cartes, boîte de toutes les applications, 7 prochains jours, applications, cartes prêtes à ajouter, méthodes (feuille blanche, révisions espacées, Pomodoro avec minuteur), boîte en papier.
+- **Page Révisions** : aujourd'hui, réglage du nombre de cartes, boîte de toutes les applications, 7 prochains jours, applications, cartes prêtes à ajouter, méthodes (feuille blanche, révisions espacées, Pomodoro avec minuteur), boîte en papier (chaque case révisée à jours fixes : rien à écrire sur les cartes ; « Ma semaine de révision »).
 
 ### Règle pour une application avec des cartes
 

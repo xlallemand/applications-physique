@@ -777,28 +777,46 @@
     </div>
   </section>`;
 
-  /* ---------- Fabrique ta boîte en papier ---------- */
+  /* ---------- Fabrique ta boîte en papier : chaque case est révisée à jours fixes ---------- */
   const PAPIER = (function () {
-    const noms = ['1 j', '2 j', '4 j', '1 sem', '2 sem', '1 mois', '2 mois', 'sues'], nb = [3, 6, 5, 4, 2, 1, 0, 2];
-    let s = '<rect x="6" y="70" width="328" height="70" rx="8" fill="#ebe8e1" stroke="#c9c4b9" stroke-width="1.5"/>';
-    noms.forEach((n, i) => {
-      const x0 = 12 + i * 40.5;
-      for (let k = 0; k < nb[i]; k++) s += `<rect x="${x0 + 4 + k * 4}" y="${50 - (k % 2) * 3}" width="30" height="40" rx="2" fill="#ffffff" stroke="#c9c4b9"/>`;
-      s += `<rect x="${x0}" y="34" width="36" height="22" rx="4" fill="${i === 7 ? '#e7f3ed' : '#ffffff'}" stroke="#8d8f94"/><text x="${x0 + 18}" y="49" font-size="9.5" font-weight="700" text-anchor="middle" fill="#16181d">${n}</text>`;
-    });
-    s += '<rect x="6" y="88" width="328" height="52" rx="8" fill="#f3f1ec" stroke="#c9c4b9" stroke-width="1.5"/><text x="170" y="120" font-size="11" font-weight="700" text-anchor="middle" fill="#55585f">la boîte : on avance d\'une case quand on sait</text>';
-    const dessin = `<svg viewBox="0 0 340 146" role="img" aria-label="Boîte de fiches avec 8 intercalaires : 1 j, 2 j, 4 j, 1 sem, 2 sem, 1 mois, 2 mois, sues" style="width:100%;height:auto">${s}</svg>`;
+    // la boîte vue de dessus : un intercalaire par case (onglet : numéro et jours de révision), les cartes devant lui ;
+    // du fond (sues) vers l'avant (case 1) ; nb : cartes dessinées
+    const sup = t => `<tspan baseline-shift="super" font-size="7">${t}</tspan>`;
+    const tabs = [['1', 'chaque jour'], ['2', 'lun, mer, ven'], ['3', 'mar, sam'], ['4', 'dimanche'], ['5', `2${sup('e')} et 4${sup('e')} dimanches`],
+      ['6', `1${sup('er')} dimanche du mois`], ['7', 'vacances scolaires'], ['✓', 'sues']];
+    const nb = [3, 5, 4, 3, 2, 1, 0, 2], BAS = 300;
+    let s = `<rect x="4" y="26" width="332" height="${BAS - 26}" rx="10" fill="#ebe8e1" stroke="#c9c4b9" stroke-width="1.5"/>`;
+    for (let k = 7; k >= 0; k--) {
+      const y = 8 + (7 - k) * 30, xt = k % 2 ? 20 : 176;
+      s += `<path d="M14 ${y + 20}H${xt}V${y + 4}q0 -4 4 -4H${xt + 140}q4 0 4 4V${y + 20}H326V${BAS}H14Z" fill="${k === 7 ? '#e7f3ed' : '#ffffff'}" stroke="#8d8f94"/>` +
+        `<text x="${xt + 10}" y="${y + 14}" font-size="10" font-weight="800" fill="#16181d">${tabs[k][0]}</text>` +
+        `<text x="${xt + 24}" y="${y + 14}" font-size="10" font-weight="600" fill="#55585f">${tabs[k][1]}</text>`;
+      for (let j = 0; j < nb[k]; j++) s += `<rect x="${22 + j * 2}" y="${y + 25 + j * 3}" width="292" height="60" rx="2" fill="#ffffff" stroke="#c9c4b9"/>`;
+    }
+    s += `<rect x="4" y="262" width="332" height="${BAS - 262 + 2}" rx="8" fill="#f3f1ec" stroke="#c9c4b9" stroke-width="1.5"/><text x="170" y="286" font-size="11" font-weight="700" text-anchor="middle" fill="#55585f">la boîte : on avance d'une case quand on sait</text>`;
+    const dessin = `<svg class="rev-papier-fig" viewBox="0 0 340 304" role="img" aria-label="Boîte de fiches vue de dessus, avec 8 intercalaires : case 1 chaque jour, case 2 lundi, mercredi, vendredi, case 3 mardi, samedi, case 4 dimanche, case 5 2e et 4e dimanches, case 6 1er dimanche du mois, case 7 vacances scolaires, cartes sues">${s}</svg>`;
+    // les cases à réviser chaque jour, de la plus grande à la plus petite
+    const semaine = [['Lundi', '2 puis 1'], ['Mardi', '3 puis 1'], ['Mercredi', '2 puis 1'], ['Jeudi', '1'], ['Vendredi', '2 puis 1'], ['Samedi', '3 puis 1'],
+      ['1<sup>er</sup> dimanche du mois', '6, 4 puis 1'], ['2<sup>e</sup> et 4<sup>e</sup> dimanches', '5, 4 puis 1'], ['Autres dimanches', '4 puis 1'],
+      ['Début des vacances scolaires', '7, puis les cases du jour']];
     return `<section class="er-card">
     <h3 class="rev-h">Fabrique ta boîte en papier</h3>
     <div class="rev-deux">
-      <ol class="rev-papier">
+      <div><ol class="rev-papier">
         <li><b>Des fiches bristol</b> : une question au recto, la réponse au verso. Une seule idée par carte, avec tes mots et un schéma si besoin.</li>
-        <li><b>Une boîte avec 7 intercalaires</b> : 1 j, 2 j, 4 j, 1 sem, 2 sem, 1 mois, 2 mois, et une case « sues ».</li>
-        <li>Une nouvelle carte va dans la case <b>1 j</b>. Note au crayon, dans un coin, la <b>date</b> de sa prochaine révision.</li>
-        <li>Chaque jour, sors les cartes dont la date est passée. <b>Sue</b> : case suivante. <b>Ratée</b> : case précédente. Efface et écris la nouvelle date.</li>
+        <li><b>Une boîte avec 7 intercalaires</b>, chacun marqué de ses <b>jours de révision</b> (voir « Ma semaine de révision »), et une case « sues ».</li>
+        <li>Une nouvelle carte va dans la case <b>1</b>. Rien à écrire dessus : c'est sa case qui dit quand la revoir.</li>
+        <li>Chaque jour, révise les cases du jour, <b>en commençant par la plus grande</b>. <b>Sue</b> : case suivante. <b>Ratée</b> : case précédente. Ainsi, une carte qui vient de monter n'est pas revue le même jour.</li>
         <li>Carte dans les deux sens (formule, définition) : une fois sur deux, lis le <b>verso</b> et retrouve le recto.</li>
-      </ol>
-      <div>${dessin}<p class="rev-note" style="margin-top:8px">Ce site fait exactement la même chose avec tes cartes de physique-chimie. Pour passer au papier : « Imprimer les cartes » sur la page Flashcards de chaque chapitre.</p></div>
+      </ol>${dessin}</div>
+      <div>
+        <h4 class="rev-semaine-t">Ma semaine de révision <small>à recopier sur ta boîte</small></h4>
+        <div class="rev-defile"><table class="rev-tab rev-semaine">
+          <thead><tr><th>Jour</th><th>Cases à réviser</th></tr></thead>
+          <tbody>${semaine.map(l => `<tr><td>${l[0]}</td><td>${l[1]}</td></tr>`).join('')}</tbody>
+        </table></div>
+        <p class="rev-note" style="margin-top:8px">Ce site suit le même principe avec tes cartes de physique-chimie, avec une date exacte pour chaque carte. Pour passer au papier : « Imprimer les cartes » sur la page Flashcards de chaque chapitre.</p>
+      </div>
     </div>
   </section>`;
   })();
