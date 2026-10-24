@@ -59,16 +59,16 @@
     /* ---------- Module 1 · Couple et demi-équation ---------- */
     { id: 'm1b', module: 1, titre: 'Couple et demi-équation', apres: ['module_1b_cours'], cartes: [
         { id: 'ox-1b-demi', type: 'formule', competence: 'Écrire la demi-équation d\'un couple : Oxydant + n e⁻ = Réducteur', faces: [
-          { q: '<p>Demi-équation d\'un couple Ox / Red ?</p><small>Écriture générale et un exemple</small>',
+          { q: '<p>Demi-équation d\'un couple Ox&nbsp;/&nbsp;Red ?</p><small>Écriture générale et un exemple</small>',
             r: `${formule(`Oxydant + n ${E} = Réducteur`)}<p>Les électrons du côté de l'<b>oxydant</b> : c'est lui qui les capte.</p><p>${Cu2} + ${n(2, E)} = Cu</p>` },
           { q: `${formule(`Oxydant + n ${E} = Réducteur`)}<p>Comment s'appelle cette écriture ? Que représente n ? Que signifie le signe = ?</p>`,
-            r: '<p>La <b>demi-équation</b> du couple Ox / Red.</p><p>n : le nombre d\'électrons échangés. Le signe = : l\'échange peut se faire dans les deux sens.</p>' }] },
+            r: '<p>La <b>demi-équation</b> du couple Ox&nbsp;/&nbsp;Red.</p><p>n : le nombre d\'électrons échangés. Le signe = : l\'échange peut se faire dans les deux sens.</p>' }] },
         { id: 'ox-1b-phrase', type: 'methode', competence: 'Écrire le couple à partir d\'une phrase (« Cu²⁺ peut être réduit en Cu », « Fe²⁺ peut être oxydé en Fe³⁺ »)', faces: [
           { q: `<p>« ${Fe2} peut être oxydé en ${Fe3}. » Comment écris-tu le couple ?</p><small>Démarche</small>`,
-            r: `<ol><li>Oxydé : ${Fe2} <b>cède</b> des électrons, c'est le <b>réducteur</b>.</li><li>Il devient ${Fe3}, l'<b>oxydant</b>.</li><li>L'oxydant en premier : <b>${Fe3} / ${Fe2}</b>.</li></ol>` }] },
+            r: `<ol><li>Oxydé : ${Fe2} <b>cède</b> des électrons, c'est le <b>réducteur</b>.</li><li>Il devient ${Fe3}, l'<b>oxydant</b>.</li><li>L'oxydant en premier : <b>${Fe3}&nbsp;/&nbsp;${Fe2}</b>.</li></ol>` }] },
         { id: 'ox-1b-hplus', type: 'reflexe', competence: 'Trouver l\'oxydant dans une demi-équation avec H⁺ et H₂O (H⁺ n\'est pas l\'oxydant)', faces: [
           { q: `${formule(`${Cr2O7} + ${n(14, HP)} + ${n(6, E)} = ${n(2, Cr3)} + ${n(7, EAU)}`)}<p>Dans cette demi-équation, quel est l'oxydant du couple ?</p>`,
-            r: `<p><b>${Cr2O7}</b> : l'espèce du couple écrite <b>du côté des électrons</b>. Couple ${Cr2O7} / ${Cr3}.</p><p>${HP} n'est pas l'oxydant : il sert seulement à équilibrer l'élément H.</p>` }] },
+            r: `<p><b>${Cr2O7}</b> : l'espèce du couple écrite <b>du côté des électrons</b>. Couple ${Cr2O7}&nbsp;/&nbsp;${Cr3}.</p><p>${HP} n'est pas l'oxydant : il sert seulement à équilibrer l'élément H.</p>` }] },
       ] },
 
     /* ---------- Module 1 · Oxydation et réduction ---------- */
@@ -92,20 +92,20 @@
           { q: '<p>Un réducteur peut-il céder des électrons s\'il n\'y a pas d\'oxydant pour les capter ? Pourquoi ?</p>',
             r: '<p><b>Non</b> : les électrons ne restent jamais libres dans une solution.</p><p>Les électrons cédés par le réducteur sont captés par l\'oxydant : la réaction est un <b>transfert d\'électrons</b>.</p>' }] },
         { id: 'ox-1d-produits', type: 'methode', competence: 'Trouver les produits d\'une réaction à partir des réactifs et des couples (exercice-type : Ag⁺ et Cu)', faces: [
-          { q: `<p>On met en présence ${Ag1} et Cu. Couples : ${Ag1} / Ag et ${Cu2} / Cu. Quels sont les produits ?</p><small>Démarche</small>`,
+          { q: `<p>On met en présence ${Ag1} et Cu. Couples : ${Ag1}&nbsp;/&nbsp;Ag et ${Cu2}&nbsp;/&nbsp;Cu. Quels sont les produits ?</p><small>Démarche</small>`,
             r: `<ol><li>${Ag1}, l'oxydant, est <b>réduit</b> : il devient le réducteur de son couple, <b>Ag</b>.</li><li>Cu, le réducteur, est <b>oxydé</b> : il devient l'oxydant de son couple, <b>${Cu2}</b>.</li></ol><p>${Ag1} + Cu → Ag + ${Cu2} (nombres stœchiométriques non écrits)</p>` }] },
       ] },
 
     /* ---------- Module 2 · La méthode en 4 étapes ---------- */
     { id: 'm2a', module: 2, titre: 'La méthode en 4 étapes', apres: ['module_2a_cours'], cartes: [
         { id: 'ox-2a-etapes', type: 'methode', competence: 'Citer dans l\'ordre les 4 étapes pour équilibrer une demi-équation', faces: [
-          { q: '<p>Équilibrer la demi-équation d\'un couple Ox / Red : quelles sont les 4 étapes, dans l\'ordre ?</p>',
+          { q: '<p>Équilibrer la demi-équation d\'un couple Ox&nbsp;/&nbsp;Red : quelles sont les 4 étapes, dans l\'ordre ?</p>',
             r: `<ol><li>Oxydant à gauche, réducteur à droite ; équilibrer les éléments <b>autres que O et H</b>.</li><li>Équilibrer <b>O</b> en ajoutant ${EAU}.</li><li>Équilibrer <b>H</b> en ajoutant ${HP}.</li><li>Équilibrer les <b>charges</b> en ajoutant ${E}.</li></ol>` }] },
         { id: 'ox-2a-sifaut', type: 'savoir', competence: 'N\'ajouter H₂O et H⁺ que s\'il en faut (I₂ / I⁻, O₂ / H₂O₂)', faces: [
           { q: `<p>Faut-il toujours ajouter ${EAU} et ${HP} dans une demi-équation ?</p><small>Règle et un exemple</small>`,
             r: `<p><b>Non</b> : ${EAU} seulement s'il <b>manque des atomes O</b>, ${HP} seulement s'il <b>manque des atomes H</b>.</p><p>${I2} + ${n(2, E)} = ${n(2, Im)} : ni O ni H, on n'ajoute rien.</p>` }] },
         { id: 'ox-2a-mno4', type: 'methode', competence: 'Écrire la demi-équation du couple MnO₄⁻ / Mn²⁺ (exercice-type, démarche étape par étape)', faces: [
-          { q: `<p>Écris la demi-équation du couple ${MnO4} / ${Mn2}.</p><small>Démarche, étape par étape</small>`,
+          { q: `<p>Écris la demi-équation du couple ${MnO4}&nbsp;/&nbsp;${Mn2}.</p><small>Démarche, étape par étape</small>`,
             r: `<ol><li>Mn : 1 de chaque côté.</li><li>4 O à gauche : ${n(4, EAU)} à droite.</li><li>8 H à droite : ${n(8, HP)} à gauche.</li><li>Charges +7 et +2 : ${n(5, E)} à gauche.</li></ol>${formule(`${MnO4} + ${n(8, HP)} + ${n(5, E)} = ${Mn2} + ${n(4, EAU)}`)}` }] },
       ] },
 
@@ -131,10 +131,10 @@
           { q: `<p>Après l'addition des deux demi-équations : ${n(16, HP)} à gauche, ${n(10, HP)} à droite. Que fais-tu ?</p>`,
             r: `<p>Simplifier : retirer ${n(10, HP)} de chaque côté. Il en reste <b>${n(6, HP)} à gauche</b>.</p><p>Même chose pour ${EAU} s'il figure des deux côtés.</p>` }] },
         { id: 'ox-3-boncouple', type: 'reflexe', competence: 'Choisir le bon couple quand un réactif appartient à deux couples (H₂O₂ avec MnO₄⁻, avec Fe²⁺)', faces: [
-          { q: `<p>${H2O2} appartient à deux couples : ${H2O2} / ${EAU} et ${O2} / ${H2O2}. Il réagit avec ${MnO4} du couple ${MnO4} / ${Mn2}. Quel couple utilises-tu pour ${H2O2} ?</p>`,
-            r: `<p><b>${O2} / ${H2O2}</b> : ${MnO4} est un oxydant, il réagit avec un <b>réducteur</b>. ${H2O2} est le réducteur de ce couple (écrit en second).</p><p>Dans ${H2O2} / ${EAU}, ${H2O2} est l'oxydant : ce couple ne sert pas.</p>` }] },
+          { q: `<p>${H2O2} appartient à deux couples : ${H2O2}&nbsp;/&nbsp;${EAU} et ${O2}&nbsp;/&nbsp;${H2O2}. Il réagit avec ${MnO4} du couple ${MnO4}&nbsp;/&nbsp;${Mn2}. Quel couple utilises-tu pour ${H2O2} ?</p>`,
+            r: `<p><b>${O2}&nbsp;/&nbsp;${H2O2}</b> : ${MnO4} est un oxydant, il réagit avec un <b>réducteur</b>. ${H2O2} est le réducteur de ce couple (écrit en second).</p><p>Dans ${H2O2}&nbsp;/&nbsp;${EAU}, ${H2O2} est l'oxydant : ce couple ne sert pas.</p>` }] },
         { id: 'ox-3-mno4h2o2', type: 'methode', competence: 'Écrire l\'équation de la réaction entre MnO₄⁻ et H₂O₂, avec des H⁺ à simplifier (exercice-type, avec un crayon)', outils: ['crayon'], faces: [
-          { q: `<p>Écris l'équation de la réaction entre ${MnO4} et ${H2O2}. Couples : ${MnO4} / ${Mn2} et ${O2} / ${H2O2}.</p>`,
+          { q: `<p>Écris l'équation de la réaction entre ${MnO4} et ${H2O2}. Couples : ${MnO4}&nbsp;/&nbsp;${Mn2} et ${O2}&nbsp;/&nbsp;${H2O2}.</p>`,
             r: `<ol><li>${MnO4} + ${n(8, HP)} + ${n(5, E)} = ${Mn2} + ${n(4, EAU)}<br>${H2O2} = ${O2} + ${n(2, HP)} + ${n(2, E)}</li><li>2 × la première, 5 × la seconde : ${n(10, E)} chacune.</li><li>Additionner : ${n(16, HP)} à gauche, 10 à droite : il en reste 6 à gauche.</li></ol>${formule(`${n(2, MnO4)} + ${n(5, H2O2)} + ${n(6, HP)} → ${n(2, Mn2)} + ${n(5, O2)} + ${n(8, EAU)}`)}` }] },
       ] },
   ]);
