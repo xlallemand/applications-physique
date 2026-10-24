@@ -1,5 +1,6 @@
 /* Relecture des flashcards de l'application « Oxydoréduction » (oxydoreduction-spe)
-   Tour 4 : les cartes, après les retours du tour 3 (voir docs/flashcards/prompt-generation.md)
+   Tour 4 : toutes les cartes validées par l'enseignant le 2026-10-24 (voir docs/flashcards/prompt-generation.md)
+   Mises en place dans oxydoreduction-spe/modules/flashcards.js
    Le module 4 (Écrire les réactions) reprend tous les autres : pas de paquet.
    Prérequis : chaque paquet après son cours (choix de l'enseignant, tour 1). */
 (function () {
@@ -188,7 +189,7 @@
           { id: 'ox-3-boncouple', type: 'reflexe', competence: 'c7', statut: 'validee', faces: [
             { q: `<p>${H2O2} appartient à deux couples : ${H2O2} / ${EAU} et ${O2} / ${H2O2}. Il réagit avec ${MnO4} du couple ${MnO4} / ${Mn2}. Quel couple utilises-tu pour ${H2O2} ?</p>`,
               r: `<p><b>${O2} / ${H2O2}</b> : ${MnO4} est un oxydant, il réagit avec un <b>réducteur</b>. ${H2O2} est le réducteur de ce couple (écrit en second).</p><p>Dans ${H2O2} / ${EAU}, ${H2O2} est l'oxydant : ce couple ne sert pas.</p>` }] },
-          { id: 'ox-3-mno4h2o2', type: 'methode', competence: 'c8', statut: 'modifiee', outils: ['crayon'], faces: [
+          { id: 'ox-3-mno4h2o2', type: 'methode', competence: 'c8', statut: 'validee', outils: ['crayon'], faces: [
             { q: `<p>Écris l'équation de la réaction entre ${MnO4} et ${H2O2}. Couples : ${MnO4} / ${Mn2} et ${O2} / ${H2O2}.</p>`,
               r: `<ol><li>${MnO4} + ${n(8, HP)} + ${n(5, E)} = ${Mn2} + ${n(4, EAU)}<br>${H2O2} = ${O2} + ${n(2, HP)} + ${n(2, E)}</li><li>2 × la première, 5 × la seconde : ${n(10, E)} chacune.</li><li>Additionner : ${n(16, HP)} à gauche, 10 à droite : il en reste 6 à gauche.</li></ol>${formule(`${n(2, MnO4)} + ${n(5, H2O2)} + ${n(6, HP)} → ${n(2, Mn2)} + ${n(5, O2)} + ${n(8, EAU)}`)}` }] },
         ] },

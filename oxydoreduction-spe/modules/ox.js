@@ -581,7 +581,7 @@
     { n: 4, titre: 'Écrire les réactions', desc: 'La méthode express en une infographie (progression rapide), puis 10 réactions : l\'aide diminue',
       parties: [{ nom: 'Écrire les réactions', cours: 'module_4_cours', entrainement: 'module_4', noms: { cours: 'Méthode express' } }] },
   ];
-  window.SOM.init({ nom: 'Oxydoréduction', id: 'oxydoreduction-spe', plan: PLAN });
+  window.SOM.init({ nom: 'Oxydoréduction', id: 'oxydoreduction-spe', plan: PLAN, flashcards: true });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);
