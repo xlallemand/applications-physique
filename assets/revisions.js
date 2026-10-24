@@ -12,7 +12,9 @@
      <dossier>/modules/flashcards.js     les cartes : REV.paquets(info, paquets), chargé par une balise <script>
        info    = { dossier, titre, court, matiere, spa }   (spa : application en une seule page)
        paquets = [{ id, module, titre, apres: [clés des pages à avoir faites],
-                    cartes: [{ id, type, competence, faces: [{ q, r }, { q, r }] }] }]
+                    cartes: [{ id, type, competence, outils, faces: [{ q, r, outils }, { q, r, outils }] }] }]
+       outils  (facultatif) ['crayon', 'calculatrice'] : à prendre pour répondre, indiqué au recto par des
+               icônes (« Utiliser ✎ ▦ ») ; celui d'une face remplace celui de la carte
      localStorage <dossier>-flashcards    { ajouts: { <paquet>: date }, cartes: { <id>: { c, d, s, v, n, ok } } }
        c case (1 à 7, 8 : sue), d prochaine révision (absente si sue), s face de la prochaine révision,
        v dernière révision, n nombre de révisions, ok nombre de « Je savais »
@@ -29,6 +31,7 @@
      REV.ajouter(dossier, ids)        range des paquets dans la boîte : première révision demain
      REV.repondre(carte, ok)          réponse en séance : la carte change de case
      REV.face(carte, sens, cote, o)   HTML d'une face ('recto' ou 'verso')
+     REV.outils(carte, sens)          HTML de la ligne « Utiliser » (crayon, calculatrice) d'un recto, ou ''
      REV.boite(lignes, o), REV.jours(lignes), REV.mini(lignes)   vues de la boîte
      REV.lignes(app)                  état de chaque carte d'une application
      REV.seance(zone, o)              séance de révision ou révision libre
@@ -58,6 +61,13 @@
   const COURT = ['1 j', '2 j', '4 j', '7 j', '14 j', '30 j', '60 j'];
   const LONG = ['1 jour', '2 jours', '4 jours', '1 semaine', '2 semaines', '1 mois', '2 mois'];
   const TYPES = { definition: 'Définition', formule: 'Formule', savoir: 'À savoir', schema: 'Schéma', graphique: 'Lecture graphique', methode: 'Méthode', reflexe: 'Réflexe' };
+  // ce qu'il faut prendre pour répondre à une carte : icônes SVG autonomes (couleur du texte), avec leur nom
+  const OUTILS = {
+    crayon: ['un crayon', '<g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M18.6 1.6 22.4 5.4 9.4 18.4 5.6 14.6Z"/><path d="M5.6 14.6 9.4 18.4 3 21Z"/></g>' +
+      '<g fill="currentColor"><circle cx="10.6" cy="14" r="2.2"/><circle cx="12.7" cy="11.9" r="2.2"/><circle cx="14.8" cy="9.8" r="2.2"/><ellipse cx="15.6" cy="15.2" rx="5.2" ry="4" transform="rotate(-45 15.6 15.2)"/><path d="M16.5 19.5 21 15 24 18 24 24 21.5 24Z"/></g>'],
+    calculatrice: ['une calculatrice', '<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="2" width="15" height="20" rx="2.5"/><rect x="7.5" y="5" width="9" height="4" rx="1"/>' +
+      '<path d="M8 13h.01M12 13h.01M16 13h.01M8 16.5h.01M12 16.5h.01M16 16.5h.01M8 20h.01M12 20h.01M16 20h.01" stroke-width="2.6"/></g>'],
+  };
   const LIMITES = [10, 20, 30, 0];                        // cartes par séance (0 : sans limite)
   const PAR_DEFAUT = 20;
   const CLE_REGLAGES = 'revisions-reglages';
@@ -306,6 +316,14 @@
     f.querySelectorAll('p, div, li, ol, ul, br').forEach(x => x.replaceWith(...Array.from(x.childNodes), document.createTextNode(' ')));
     return t.innerHTML.replace(/\s+/g, ' ').trim();
   }
+  // ligne « Utiliser » d'un recto : icônes du crayon, de la calculatrice (outils de la face, sinon de la carte)
+  function outils(c, sens) {
+    const f = c.faces[Math.min(sens || 0, c.faces.length - 1)] || {};
+    const l = (f.outils || c.outils || []).filter(k => OUTILS[k]);
+    if (!l.length) return '';
+    return '<p class="rev-outils"><span>Utiliser</span>' +
+      l.map(k => `<svg viewBox="0 0 24 24" width="26" height="26" role="img" aria-label="${OUTILS[k][0]}">${OUTILS[k][1]}</svg>`).join('') + '</p>';
+  }
   // une face : o = { chapitre (écrire le chapitre), etat (case affichée en pied), pied: false, cache (aria-hidden) }
   function face(c, sens, cote, o) {
     o = o || {};
@@ -316,7 +334,7 @@
     const tete = `<div class="rev-tete"><span class="rev-ou">${ou}</span>${deuxSens}<span class="rev-type">${TYPES[c.type] || c.type}</span></div>`;
     const cas = o.etat && o.etat.c <= MAX ? `Case ${o.etat.c} · revue après ${LONG[o.etat.c - 1]}` : '';
     const pied = o.pied === false ? '' : `<div class="rev-pied"><span>${cote === 'recto' ? 'Question' : 'Réponse'}</span><span>${cas}</span></div>`;
-    const corps = cote === 'recto' ? `<div class="rev-q">${f.q}</div>` : `<div class="rev-rappel">${texteQ(f.q)}</div><div class="rev-rep">${f.r}</div>`;
+    const corps = cote === 'recto' ? `<div class="rev-q">${f.q}</div>${outils(c, sens)}` : `<div class="rev-rappel">${texteQ(f.q)}</div><div class="rev-rep">${f.r}</div>`;
     return `<div class="rev-face rev-${cote}"${o.cache ? ' aria-hidden="true"' : ''}>${tete}<div class="rev-corps">${corps}</div>${pied}</div>`;
   }
   // boîte à cases : o.nouvelles = colonne « + » des cartes pas encore ajoutées
@@ -1191,7 +1209,8 @@
       const feuilles = zone.querySelector('.rev-feuilles');
       const ab = s => s.replace(/^Chapitre /, 'Ch. ');
       const tete = c => `<div class="rev-imp-tete"><span>${ab(app.court)} · Module ${c.paquet.module}</span><span>${TYPES[c.type] || c.type}${c.faces.length > 1 ? ' ⇄' : ''}</span></div>`;
-      const carte = (c, cote) => (c ? `<div class="rev-imp-carte rev-imp-${cote}">${tete(c)}<div class="rev-imp-corps">${cote === 'recto' ? c.faces[0].q : c.faces[0].r}</div></div>` : '<div class="rev-imp-carte"></div>');
+      // contenu dans un bloc .rev-imp-in : le texte et ses <sub>, <sup> restent sur les mêmes lignes (le corps est en flex)
+      const carte = (c, cote) => (c ? `<div class="rev-imp-carte rev-imp-${cote}">${tete(c)}<div class="rev-imp-corps"><div class="rev-imp-in">${cote === 'recto' ? c.faces[0].q + outils(c, 0) : c.faces[0].r}</div></div></div>` : '<div class="rev-imp-carte"></div>');
       function dessiner() {
         const ids = Array.from(zone.querySelectorAll('.rev-imp-choix input:checked')).map(i => i.value);
         const cartes = app.paquets.filter(p => ids.indexOf(p.id) >= 0).reduce((l, p) => l.concat(p.cartes), []);
@@ -1265,6 +1284,6 @@
     paquets: declarer, lier, charger, chargerTout, app: d => DONNEES[d] || null,
     etat, lignes, ajouter, repondre, dues, parSeance, reglerParSeance,
     aujourdhui, plus, ecart, dans, jourCourt, texteQ,
-    face, boite, jours, mini, compte, seance, portail, pageRevisions, pageApplication, accueil, finCours,
+    face, outils, boite, jours, mini, compte, seance, portail, pageRevisions, pageApplication, accueil, finCours,
   };
 })();

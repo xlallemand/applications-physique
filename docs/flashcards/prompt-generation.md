@@ -47,6 +47,7 @@ L'enseignant valide dans une **page de relecture** (`docs/flashcards/<dossier>/r
 Pour chaque paquet, la liste des **capacités** qu'un élève doit retenir ou savoir faire, chacune avec :
 - le texte (verbe à l'infinitif : « Nommer les six changements d'état », « Lire l'état de l'eau sur le diagramme (P, T) ») ;
 - le ou les types de cartes prévus, et « deux sens » pour une définition ou une formule ;
+- s'il faut un crayon ou une calculatrice pour y répondre ;
 - la source (« fiche_1 · Les six changements d'état », « série 3 · diagnostic signe de Q », « exercice 14 »).
 
 Couverture visée : **toutes les capacités** des fiches et des « À retenir », les méthodes qui reviennent dans les exercices, les outils des simulations, les erreurs typiques des diagnostics ; **4 à 8 cartes par cours** (25 à 35 par chapitre environ).
@@ -86,6 +87,8 @@ Pose la question des prérequis **dans le message même**, pas seulement dans la
 - Mêmes notations, mêmes mots et mêmes valeurs que le cours de l'application. Rien qui ne soit dans le cours, sauf une base connue de l'élève.
 - Charte §7 : virgule décimale, `×` et `10<sup>n</sup>`, moins `−`, unités `J·kg<sup>−1</sup>`, indices `<sub>`. Tutoiement.
 - Taille : la carte doit tenir **imprimée sur 99 × 70 mm** (§8, vérification 4) : environ 250 caractères de réponse plus une figure.
+- Au recto, le texte de la question est dans un `<p>` (une formule `rev-formule`, une figure `rev-fig` ou un `<small>` peuvent l'entourer).
+- **Crayon, calculatrice** : une carte à laquelle on ne peut pas répondre de tête (équation à écrire, schéma à dessiner, calcul) porte `outils: ['crayon']`, `['calculatrice']` ou les deux ; le recto affiche « Utiliser » et leurs icônes. Pour une carte à deux sens, `outils` peut se mettre sur une seule face. L'enseignant peut aussi le demander dans ses retours.
 
 ### Les types
 

@@ -21,6 +21,7 @@
      l'application         → le paquet « Physique-Chimie::<titre de l'application> »
      le module             → l'étiquette « Physique-Chimie::<dossier>::Module_<n> »
      les figures SVG       → des fichiers joints (images .svg autonomes)
+     ses outils            → la ligne « Utiliser » (crayon, calculatrice) à la fin de la question
    Les cartes arrivent comme nouvelles : Anki les planifie avec son propre algorithme.
    Présentation : celle des fiches du site, couleurs et police lues dans assets/theme.css.
 
@@ -385,10 +386,12 @@
       '.pc-carte .rev-q { font-size: 1.32rem; font-weight: 700; line-height: 1.35; letter-spacing: -.01em; text-align: center; text-wrap: balance; }',
       '.pc-carte .rev-q small { display: block; margin-top: 6px; font-size: .9rem; font-weight: 600; color: var(--ink-2); }',
       '.pc-carte .rev-q .rev-formule { margin-bottom: 8px; }',
+      '.pc-carte .rev-outils { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 10px 0 0; font-size: .85rem; font-weight: 700; color: var(--ink-2); }',
+      '.pc-carte .rev-outils img { width: 26px; height: 26px; }',
       // rappel de la question au verso : son texte seul, sans figure ni tableau (comme REV.texteQ)
       '.pc-carte .rev-rappel { font-size: .88rem; font-weight: 600; color: var(--ink-2); line-height: 1.4; }',
       '.pc-carte .rev-rappel p, .pc-carte .rev-rappel div, .pc-carte .rev-rappel ol, .pc-carte .rev-rappel ul, .pc-carte .rev-rappel li { display: inline; margin: 0; padding: 0; }',
-      '.pc-carte .rev-rappel .rev-fig, .pc-carte .rev-rappel .rev-defile, .pc-carte .rev-rappel img, .pc-carte .rev-rappel table, .pc-carte .rev-rappel small { display: none; }',
+      '.pc-carte .rev-rappel .rev-fig, .pc-carte .rev-rappel .rev-defile, .pc-carte .rev-rappel img, .pc-carte .rev-rappel table, .pc-carte .rev-rappel small, .pc-carte .rev-rappel .rev-outils { display: none; }',
       '.pc-carte .rev-rappel .rev-formule { display: inline; padding: 0; background: none; font: inherit; }',
       '.pc-carte .rev-rappel .rev-formule::after { content: " : "; }',
       '.pc-carte #answer { margin: 0; border: none; border-top: 1px dashed var(--line-strong); }',
@@ -481,9 +484,11 @@
     let idCarte = maintenant;
     app.cartes.forEach((c, i) => {
       const f = c.faces, champ = h => joindreFigures(h || '', app.dossier, medias, th.base['font-sans']);
-      const valeurs = [champ(f[0].q), champ(f[0].r), f[1] ? champ(f[1].q) : '', f[1] ? champ(f[1].r) : '',
+      // ligne « Utiliser » (crayon, calculatrice) à la fin de la question : icônes en fichiers joints, couleur du thème
+      const outils = s => (window.REV && window.REV.outils ? window.REV.outils(c, s).replace(/currentColor/g, th.base['ink-2']) : '');
+      const valeurs = [champ(f[0].q + outils(0)), champ(f[0].r), f[1] ? champ(f[1].q + outils(1)) : '', f[1] ? champ(f[1].r) : '',
         app.court, 'Module ' + c.paquet.module, c.paquet.titre, types[c.type] || c.type, c.competence || '', app.matiere || ''];
-      const tri = texteBrut(valeurs[0]), nid = maintenant + i + 1;
+      const tri = texteBrut(champ(f[0].q)), nid = maintenant + i + 1;
       const etiquettes = ' ' + RACINE + '::' + app.dossier + '::Module_' + c.paquet.module + ' ';
       // notes : id, guid, mid, mod, usn, tags, flds, sfld, csum, flags, data
       notes.push([nid, [null, 'physique-chimie:' + c.id, ID_TYPE, s, 0, etiquettes, valeurs.join('\x1f'), tri, parseInt(sha1(utf8(tri)).slice(0, 8), 16), 0, '']]);
