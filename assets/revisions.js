@@ -815,7 +815,7 @@
           <thead><tr><th>Jour</th><th>Cases à réviser</th></tr></thead>
           <tbody>${semaine.map(l => `<tr><td>${l[0]}</td><td>${l[1]}</td></tr>`).join('')}</tbody>
         </table></div>
-        <p class="rev-note" style="margin-top:8px">Ce site suit le même principe avec tes cartes de physique-chimie, avec une date exacte pour chaque carte. Pour passer au papier : « Imprimer les cartes » sur la page Flashcards de chaque chapitre.</p>
+        <p class="rev-note" style="margin-top:8px">Ce site suit le même principe avec tes cartes de physique-chimie, avec une date exacte pour chaque carte. Pour passer au papier : « Imprimer les cartes » sur la page Flashcards de chaque chapitre. Si tu veux plus de précisions sur ce système et optimiser les dates de révision de ta boîte, intéresse-toi au système Leitner.</p>
       </div>
     </div>
   </section>`;
