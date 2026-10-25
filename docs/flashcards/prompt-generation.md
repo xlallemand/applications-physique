@@ -8,7 +8,7 @@ Prérequis : le système de révision existe (prompt [`prompt-mise-en-oeuvre.md`
 
 ## 1. Objectif
 
-Écrire les flashcards de l'application `<dossier>` : des cartes qui couvrent **toutes les capacités** de l'application, que l'enseignant valide en deux temps, puis les mettre en place pour les élèves.
+Écrire les flashcards de l'application `<dossier>` : des cartes pour **toutes les définitions et toutes les formules** du cours, plus quelques cartes sur les capacités les plus importantes, que l'enseignant valide en deux temps, puis les mettre en place pour les élèves.
 
 Le travail se fait en **cinq étapes, dont deux validations par l'enseignant**. À chaque validation, **arrête-toi et attends sa réponse** : ne passe jamais à l'étape suivante sans elle.
 
@@ -50,7 +50,10 @@ Pour chaque paquet, la liste des **capacités** qu'un élève doit retenir ou sa
 - s'il faut un crayon ou une calculatrice pour y répondre ;
 - la source (« fiche_1 · Les six changements d'état », « série 3 · diagnostic signe de Q », « exercice 14 »).
 
-Couverture visée : **toutes les capacités** des fiches et des « À retenir », les méthodes qui reviennent dans les exercices, les outils des simulations, les erreurs typiques des diagnostics ; **4 à 8 cartes par cours** (25 à 35 par chapitre environ).
+Couverture visée : **environ 20 cartes par chapitre**.
+
+- **Définitions et formules : toutes**, autant qu'il en faut (chaque mot défini dans les fiches et les « À retenir », chaque formule, y compris les formules réarrangées que la fiche donne, comme R = ΔT / Φ). Ne les réduis jamais pour tenir le compte : le total peut alors dépasser 20.
+- **Autres types** (`savoir`, `schema`, `graphique`, `methode`, `reflexe`) : **peu**, seulement les capacités les plus importantes (une règle centrale du cours, la méthode qui revient dans les exercices, l'erreur la plus fréquente des diagnostics) ; **une ou deux par cours au plus**, pour rester près de 20 cartes au total.
 
 ### Ce que tu produis
 
@@ -95,7 +98,7 @@ Pose la question des prérequis **dans le message même**, pas seulement dans la
 | Type | Recto | Verso | Sens |
 |---|---|---|---|
 | `definition` | le mot (« Qu'est-ce que la chaleur latente L ? Unité ? ») | la définition | **deux** : face 2 = « Comment s'appelle… ? Symbole, unité ? » |
-| `formule` | la situation (« Énergie Q pour… ? Formule et unités ») | la formule (`rev-formule`) et les unités (`rev-unites`) | **deux** : face 2 = la formule, « Que calcule-t-on ? Que représente chaque lettre ? » |
+| `formule` | « La formule qui donne Φ ? », ou « La formule qui donne Φ en fonction de Q et Δt ? » quand le cours a plusieurs formules pour cette grandeur ; « Unités de chaque grandeur » (`<small>`) | la formule (`rev-formule`) et l'unité de chaque grandeur (`rev-unites`) | **deux** : face 2 = les données d'un exercice, avec leur nom et leur unité (« Données : l'énergie thermique Q, en J, qui traverse une paroi pendant une durée Δt, en s. Que peux-tu calculer ? Avec quelle formule ? ») ; réponse : la grandeur, son unité et la formule |
 | `savoir` | une question sur une règle, une propriété | la règle | un, ou deux si l'inverse a du sens |
 | `schema` | un schéma à légender (cases numérotées ①②…) | le schéma légendé, la liste des légendes | un |
 | `graphique` | un graphique ou un diagramme avec une question (lire un état, une valeur, une période et en déduire la fréquence…) | la réponse et le graphique annoté (lecture en pointillés) | un |
