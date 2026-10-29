@@ -91,7 +91,7 @@ Pose la question des prérequis **dans le message même**, pas seulement dans la
 - Charte §7 : virgule décimale, `×` et `10<sup>n</sup>`, moins `−`, unités `J·kg<sup>−1</sup>`, indices `<sub>`. Tutoiement.
 - Taille : la carte doit tenir **imprimée sur 99 × 70 mm** (§8, vérification 4) : environ 250 caractères de réponse plus une figure.
 - Au recto, le texte de la question est dans un `<p>` (une formule `rev-formule`, une figure `rev-fig` ou un `<small>` peuvent l'entourer).
-- **Crayon, calculatrice** : une carte à laquelle on ne peut pas répondre de tête (équation à écrire, schéma à dessiner, calcul) porte `outils: ['crayon']`, `['calculatrice']` ou les deux ; le recto affiche « Utiliser » et leurs icônes. Pour une carte à deux sens, `outils` peut se mettre sur une seule face. L'enseignant peut aussi le demander dans ses retours.
+- **Crayon, calculatrice** : une carte à laquelle on ne peut pas répondre de tête (équation à écrire, schéma à dessiner, calcul) porte `outils: ['crayon']`, `['calculatrice']` ou les deux ; le recto affiche leurs icônes (sans texte). Pour une carte à deux sens, `outils` peut se mettre sur une seule face. L'enseignant peut aussi le demander dans ses retours.
 
 ### Les types
 

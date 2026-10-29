@@ -21,7 +21,7 @@
      l'application         → le paquet « Physique-Chimie::<titre de l'application> »
      le module             → l'étiquette « Physique-Chimie::<dossier>::Module_<n> »
      les figures SVG       → des fichiers joints (images .svg autonomes)
-     ses outils            → la ligne « Utiliser » (crayon, calculatrice) à la fin de la question
+     ses outils            → la ligne des outils (icônes du crayon, de la calculatrice) à la fin de la question
    Les cartes arrivent comme nouvelles : Anki les planifie avec son propre algorithme.
    Présentation : celle des fiches du site, couleurs et police lues dans assets/theme.css.
 
@@ -484,7 +484,7 @@
     let idCarte = maintenant;
     app.cartes.forEach((c, i) => {
       const f = c.faces, champ = h => joindreFigures(h || '', app.dossier, medias, th.base['font-sans']);
-      // ligne « Utiliser » (crayon, calculatrice) à la fin de la question : icônes en fichiers joints, couleur du thème
+      // ligne des outils (icônes du crayon, de la calculatrice) à la fin de la question : icônes en fichiers joints, couleur du thème
       const outils = s => (window.REV && window.REV.outils ? window.REV.outils(c, s).replace(/currentColor/g, th.base['ink-2']) : '');
       const valeurs = [champ(f[0].q + outils(0)), champ(f[0].r), f[1] ? champ(f[1].q + outils(1)) : '', f[1] ? champ(f[1].r) : '',
         app.court, 'Module ' + c.paquet.module, c.paquet.titre, types[c.type] || c.type, c.competence || '', app.matiere || ''];

@@ -14,7 +14,7 @@
        paquets = [{ id, module, titre, apres: [clés des pages à avoir faites],
                     cartes: [{ id, type, competence, outils, faces: [{ q, r, outils }, { q, r, outils }] }] }]
        outils  (facultatif) ['crayon', 'calculatrice'] : à prendre pour répondre, indiqué au recto par des
-               icônes (« Utiliser ✎ ▦ ») ; celui d'une face remplace celui de la carte
+               icônes (« ✎ ▦ ») ; celui d'une face remplace celui de la carte
      localStorage <dossier>-flashcards    { ajouts: { <paquet>: date }, cartes: { <id>: { c, d, s, v, n, ok } } }
        c case (1 à 7, 8 : sue), d prochaine révision (absente si sue), s face de la prochaine révision,
        v dernière révision, n nombre de révisions, ok nombre de « Je savais »
@@ -31,7 +31,7 @@
      REV.ajouter(dossier, ids)        range des paquets dans la boîte : première révision demain
      REV.repondre(carte, ok)          réponse en séance : la carte change de case
      REV.face(carte, sens, cote, o)   HTML d'une face ('recto' ou 'verso')
-     REV.outils(carte, sens)          HTML de la ligne « Utiliser » (crayon, calculatrice) d'un recto, ou ''
+     REV.outils(carte, sens)          HTML de la ligne des outils (icônes du crayon, de la calculatrice) d'un recto, ou ''
      REV.boite(lignes, o), REV.jours(lignes), REV.mini(lignes)   vues de la boîte
      REV.lignes(app)                  état de chaque carte d'une application
      REV.seance(zone, o)              séance de révision ou révision libre
@@ -316,13 +316,13 @@
     f.querySelectorAll('p, div, li, ol, ul, br').forEach(x => x.replaceWith(...Array.from(x.childNodes), document.createTextNode(' ')));
     return t.innerHTML.replace(/\s+/g, ' ').trim();
   }
-  // ligne « Utiliser » d'un recto : icônes du crayon, de la calculatrice (outils de la face, sinon de la carte)
+  // ligne des outils d'un recto : icônes seules du crayon, de la calculatrice (outils de la face, sinon de la carte)
   function outils(c, sens) {
     const f = c.faces[Math.min(sens || 0, c.faces.length - 1)] || {};
     const l = (f.outils || c.outils || []).filter(k => OUTILS[k]);
     if (!l.length) return '';
-    return '<p class="rev-outils"><span>Utiliser</span>' +
-      l.map(k => `<svg viewBox="0 0 24 24" width="30" height="30" role="img" aria-label="${OUTILS[k][0]}">${OUTILS[k][1]}</svg>`).join('') + '</p>';
+    return '<p class="rev-outils">' +
+      l.map(k => `<svg viewBox="0 0 24 24" width="30" height="30" role="img" aria-label="Utiliser ${OUTILS[k][0]}">${OUTILS[k][1]}</svg>`).join('') + '</p>';
   }
   // une face : o = { chapitre (écrire le chapitre), etat (case affichée en pied), pied: false, cache (aria-hidden) }
   function face(c, sens, cote, o) {

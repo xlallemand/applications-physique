@@ -480,7 +480,7 @@ Réponse : deux boutons « ✗ Je ne savais pas » / « ✓ Je savais », avec l
 | `<dossier>/modules/flashcards.html` | page Flashcards de l'application : gabarit commun (`SOM.menu('flashcards')` puis `REV.pageApplication(zone)`) ; `#imprimer` : impression A4 recto verso, 8 cartes par feuille |
 | `docs/flashcards/` | prompts (mise en œuvre, génération des cartes), maquettes validées, outil de relecture de l'enseignant |
 
-Contenu d'une carte : HTML écrit selon §7 ; classes `rev-formule`, `rev-unites`, `rev-fig`, `rev-tab` ; texte de la question dans un `<p>` ; `outils: ['crayon', 'calculatrice']` (carte ou face) quand il faut écrire ou calculer pour répondre : « Utiliser » et leurs icônes au recto (écran, impression, Anki) ; figures en **SVG autonome** (attributs de présentation, aucune classe d'une application : la page Révisions ne charge pas les moteurs des applications). L'`id` d'une carte est unique dans le dépôt et ne change jamais (l'avancement de l'élève y est attaché).
+Contenu d'une carte : HTML écrit selon §7 ; classes `rev-formule`, `rev-unites`, `rev-fig`, `rev-tab` ; texte de la question dans un `<p>` ; `outils: ['crayon', 'calculatrice']` (carte ou face) quand il faut écrire ou calculer pour répondre : leurs icônes seules au recto (écran, impression, Anki) ; figures en **SVG autonome** (attributs de présentation, aucune classe d'une application : la page Révisions ne charge pas les moteurs des applications). L'`id` d'une carte est unique dans le dépôt et ne change jamais (l'avancement de l'élève y est attaché).
 
 ### Clés `localStorage`
 
