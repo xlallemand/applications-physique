@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : atelier, changer d'écriture — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · ATELIER</span>
+    <h2 class="er-titre">Changer d'écriture</h2>
+    <p class="er-contexte">Dix molécules à passer d'une écriture à l'autre. <b>Étapes guidées</b> : tu appliques les trois phrases du cours sur le dessin. Sans guidage : tu dessines directement l'écriture demandée.</p>
+  </div>
+
+  <div class="er-card">
+    <h3 class="cours-titre">Réglages</h3>
+    <div class="nom-reglages">
+      <div class="orga-seg" role="group" aria-label="Conversion" id="choixConv">
+        <button type="button" class="orga-pil" data-c="developpee-semi">Développée → semi</button>
+        <button type="button" class="orga-pil" data-c="semi-topo">Semi → topologique</button>
+        <button type="button" class="orga-pil" data-c="topo-semi">Topologique → semi</button>
+        <button type="button" class="orga-pil" data-c="developpee-topo">Développée → topologique</button>
+      </div>
+    </div>
+    <div class="nom-reglages">
+      <label class="nom-interr"><input type="checkbox" id="guide" checked> Étapes guidées</label>
+      <label class="nom-interr"><input type="checkbox" id="compter"> Faire compter les H (développée → semi)</label>
+    </div>
+  </div>
+
+  <div class="er-card ph-question" id="tache"></div>
+
+  <div id="bilan" class="er-card" hidden>
+    <span class="er-badge">BILAN</span>
+    <h3 class="er-titre">✍ Complète ton cours</h3>
+    <div class="cle"><p><b class="cle-titre">Développée → semi-développée.</b> « On enlève les liaisons des H et on les regroupe sur leur atome. »</p></div>
+    <div class="cle"><p><b class="cle-titre">Vers la topologique.</b> « On efface tous les CH. » Puis on met la chaîne en zigzag.</p></div>
+    <div class="cle"><p><b class="cle-titre">Depuis la topologique.</b> « On ajoute un C avec le bon nombre de H au bout de chaque trait, s'il n'y a pas déjà un autre atome. » Nombre de H = 4 − nombre de traits.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur le module 1 →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Atelier « Changer d'écriture » (sous-module 2) : dix molécules variées
+   (toutes les familles, ramifications, doubles liaisons, 3 à 7 C).
+   Réglages : la conversion, « Étapes guidées » (outil ORGA.conversion :
+   les trois phrases du cours appliquées sur le dessin) ou sans guidage
+   (l'élève dessine l'écriture demandée dans l'éditeur, validation par
+   ORGA.meme), « Faire compter les H » (développée → semi).
+   Une molécule convertie compte comme faite, quelle que soit la conversion.
+   ============================================================ */
+const MOLS = ['CCC(C)O', 'CC(C)CC=O', 'CC=CC(C)C', 'CCC(=O)CC', 'CCCC(N)=O', 'CC(C)C(=O)O', 'CCC(Cl)CC(C)C', 'CCNC(C)C', 'CCOC(=O)CC', 'CCCC(C)(O)CC'];
+const NOMS_EC = { developpee: 'développée', semi: 'semi-développée', topo: 'topologique' };
+const reg = { c: 'developpee-semi', guide: true, compter: false };
+let courant = 0;
+
+function tache(k) {
+  courant = k;
+  const s = MOLS[k], [de, vers] = reg.c.split('-');
+  const ecDessin = vers === 'topo' ? 'topo' : 'semi';
+  return reg.guide
+    ? { titre: `De la formule ${NOMS_EC[de]} à la formule ${NOMS_EC[vers]}`,
+        parties: [ORGA.partieConversion(s, de, vers, { compterH: reg.compter && de === 'developpee' })] }
+    : { titre: `De la formule ${NOMS_EC[de]} à la formule ${NOMS_EC[vers]}`,
+        enonce: `<p>Dessine cette molécule en formule <b>${NOMS_EC[vers]}</b>, puis valide.</p>${NOM.dessin(s, { ecriture: de, label: 'Formule ' + NOMS_EC[de] })}`,
+        parties: [ORGA.partieDessin(s, { ecriture: ecDessin, q: '' })] };
+}
+const liste = MOLS.map((s, k) => () => tache(k));
+const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'conversion', taches: liste, bilan: document.getElementById('bilan'), nomTache: 'Molécule' });
+
+// réglages : on reprend la même molécule avec la nouvelle conversion
+function majReglages() {
+  document.querySelectorAll('#choixConv [data-c]').forEach(b => b.setAttribute('aria-pressed', b.dataset.c === reg.c));
+  document.getElementById('compter').disabled = !reg.c.startsWith('developpee') || !reg.guide;
+}
+document.getElementById('choixConv').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-c]');
+  if (!b) return;
+  reg.c = b.dataset.c; majReglages(); at.tache(courant, false);
+});
+document.getElementById('guide').addEventListener('change', ev => { reg.guide = ev.target.checked; majReglages(); at.tache(courant, false); });
+document.getElementById('compter').addEventListener('change', ev => { reg.compter = ev.target.checked; at.tache(courant, false); });
+majReglages();
+NOM.menu('module_1_conversion');
+</script>
+</body>
+</html>

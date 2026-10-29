@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : atelier, dessiner une molécule — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · ATELIER</span>
+    <h2 class="er-titre">Dessiner une molécule</h2>
+    <p class="er-contexte">Prends en main l'<b>éditeur de molécules</b> : douze petites tâches, d'abord en <b>semi-développée</b>, puis les mêmes en <b>topologique</b>. Ensuite, dessine librement.</p>
+  </div>
+
+  <div class="er-card">
+    <h3 class="cours-titre">Mode d'emploi</h3>
+    <div class="cle"><ul class="er-liste">
+      <li><b>Tire un trait</b> depuis un atome (doigt ou souris) : il s'aimante à la direction la plus proche ; au lâcher, un nouvel atome apparaît.</li>
+      <li>Un <b>appui court</b> sur un atome montre les places libres autour (celle qui continue le zigzag est mise en valeur) : touche une place pour y ajouter l'atome.</li>
+      <li>Choisis l'<b>élément</b> ajouté (C, N, O, F, Cl, Br, I) et la <b>liaison</b> (–, =, ≡). Avec « = » ou « ≡ », toucher une liaison la change.</li>
+      <li><b>⌫ Gomme</b> : touche un atome ou une liaison pour l'effacer. <b>↶ Annuler</b>, <b>Tout effacer</b>.</li>
+      <li><b>H à compléter</b> : outil « H », touche un atome et choisis C, CH, CH₂, CH₃…</li>
+    </ul></div>
+  </div>
+
+  <div class="er-card ph-question" id="tache"></div>
+
+  <div class="er-card">
+    <h3 class="cours-titre">Dessin libre</h3>
+    <p class="er-contexte">Dessine ce que tu veux ; la formule brute s'affiche en direct. Change d'écriture pour voir la même molécule autrement.</p>
+    <div id="libre" style="margin-top:12px"></div>
+  </div>
+
+  <div id="bilan" class="er-card" hidden>
+    <span class="er-badge">BILAN</span>
+    <h3 class="er-titre">✍ Complète ton cours</h3>
+    <div class="cle"><p><b class="cle-titre">Dessiner une molécule.</b> Chaque atome a son nombre de liaisons : C 4, N 3, O 2, Cl 1, H 1. En semi-développée, chaque atome porte ses H (CH₃, CH₂, OH, NH₂).</p></div>
+    <div class="cle"><p><b class="cle-titre">En topologique</b>, la chaîne est en zigzag (angles de 120°) ; chaque sommet et chaque bout de trait est un C ; on n'écrit que les autres atomes, avec leurs H. Une double liaison : un second trait, à l'intérieur de l'angle.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_1_conversion.html">Atelier : changer d'écriture →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Atelier « Dessiner une molécule » (sous-module 1, éditeur ORGA) :
+   tâches courtes de prise en main (NOM.atelier : reproduire une formule
+   dessinée dans l'éditeur, validation par ORGA.meme), d'abord en
+   semi-développée (la première avec les H à compléter), puis les mêmes
+   en topologique ; puis dessin libre avec la formule brute en direct.
+   L'atelier est fait quand la liste des tâches est terminée.
+   ============================================================ */
+const TACHES = [
+  ['CCCC', 'une chaîne de 4 C', 'eleve'], ['CC(C)CC', 'une ramification'], ['C=CCC', 'une double liaison'],
+  ['CC(O)CC', 'un O'], ['CCCN', 'un N'], ['CC(Cl)C', 'un Cl'],
+];
+const liste = [];
+['semi', 'topo'].forEach(ec => TACHES.forEach(([s, quoi, h]) => {
+  const eleve = h === 'eleve' && ec === 'semi';
+  liste.push(() => ({
+    titre: `${quoi.charAt(0).toUpperCase() + quoi.slice(1)}, en ${ec === 'semi' ? 'semi-développée' : 'topologique'}`,
+    enonce: `<p>Reproduis cette formule ${ec === 'semi' ? 'semi-développée' : 'topologique'} dans l'éditeur${eleve ? ', <b>en écrivant toi-même les H</b>' : ''}, puis valide.</p>${NOM.dessin(s, { ecriture: ec, label: 'Formule à reproduire' })}`,
+    parties: [ORGA.partieDessin(s, { ecriture: ec, hydrogenes: eleve ? 'eleve' : 'auto', q: '' })],
+  }));
+}));
+NOM.atelier({ zone: document.getElementById('tache'), cle: 'dessin', taches: liste, bilan: document.getElementById('bilan') });
+
+// dessin libre : toutes les écritures, H automatiques ou à compléter, formule brute en direct
+ORGA.editeur(document.getElementById('libre'), { ecriture: 'semi', hydrogenes: 'auto' });
+NOM.menu('module_1_dessin');
+</script>
+</body>
+</html>

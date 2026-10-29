@@ -22,6 +22,7 @@
      antenne    pylône d'antenne relais qui émet des ondes, onde modulée en amplitude (ondes électromagnétiques)
      fractions  disques et barres partagés
      molecules  modèles moléculaires en boules
+     topologique  formules topologiques en zigzag, avec quelques OH, =O, NH₂, Cl, comme écrites au tableau (nomenclature)
      formules:physique | formules:redox | formules:pile | formules:combustion | formules:ph | formules:algebre
    ============================================================ */
 (function () {
@@ -214,6 +215,57 @@
     },
 
     // Spectres de raies (bandes traversées de raies) et étoiles
+    topologique(ctx, w, h, c, rnd) {
+      const L = 24, cx = L * Math.cos(Math.PI / 6), cy = L / 2;
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      const f = police();
+      // trait un peu tremblé, comme à la craie
+      const main = (x1, y1, x2, y2) => { ctx.beginPath(); ctx.moveTo(x1 + (rnd() - .5), y1 + (rnd() - .5)); ctx.quadraticCurveTo((x1 + x2) / 2 + (rnd() - .5) * 1.6, (y1 + y2) / 2 + (rnd() - .5) * 1.6, x2 + (rnd() - .5), y2 + (rnd() - .5)); ctx.stroke(); };
+      // étiquette d'atome (indice plus petit et plus bas : NH₂)
+      const etiq = (t, x, y) => {
+        const m = t.match(/^([A-Za-z]+)(\d?)$/);
+        ctx.font = `600 14px ${f}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        const w1 = ctx.measureText(m[1]).width;
+        ctx.fillText(m[1], x + (m[2] ? -3 : 0), y);
+        if (m[2]) { ctx.font = `600 10px ${f}`; ctx.fillText(m[2], x - 3 + w1 / 2 + 3, y + 5); }
+      };
+      for (let ligne = 0, y0 = 42; y0 < h + 40; y0 += 92, ligne++) {
+        for (let x0 = 16 + (ligne % 2) * 70 - rnd() * 24; x0 < w + 30; x0 += 175 + rnd() * 55) {
+          ctx.globalAlpha = .4 + rnd() * .35; ctx.lineWidth = 1.6;
+          const n = 3 + Math.floor(rnd() * 4);
+          let s = rnd() < .5 ? 1 : -1;
+          const pts = [[x0, y0]];
+          for (let k = 0; k < n; k++) { const [x, y] = pts[k]; pts.push([x + cx, y - s * cy]); s = -s; }
+          for (let k = 0; k < n; k++) main(pts[k][0], pts[k][1], pts[k + 1][0], pts[k + 1][1]);
+          // double liaison : second trait à l'intérieur de l'angle
+          if (rnd() < .35) {
+            const k = 1 + Math.floor(rnd() * (n - 2)), [x1, y1] = pts[k], [x2, y2] = pts[k + 1], [xp, yp] = pts[k - 1];
+            // décalé vers l'intérieur de l'angle (côté du sommet précédent), un peu plus court
+            let nx = -(y2 - y1) / L, ny = (x2 - x1) / L;
+            if ((xp - (x1 + x2) / 2) * nx + (yp - (y1 + y2) / 2) * ny < 0) { nx = -nx; ny = -ny; }
+            const ux = (x2 - x1) / L, uy = (y2 - y1) / L;
+            main(x1 + 5 * nx + 4 * ux, y1 + 5 * ny + 4 * uy, x2 + 5 * nx - 4 * ux, y2 + 5 * ny - 4 * uy);
+          }
+          // ramification sur un sommet intérieur
+          if (n > 3 && rnd() < .65) {
+            const k = 1 + Math.floor(rnd() * (n - 2)), [x, y] = pts[k], haut = y < pts[k - 1][1] ? -1 : 1;
+            main(x, y, x, y + haut * L);
+          }
+          // groupe en bout de chaîne : OH, NH₂, Cl, ou =O sur l'avant-dernier sommet
+          const g = ['OH', 'O', 'NH2', 'Cl', 'OH', 'O'][Math.floor(rnd() * 6)];
+          const [xe, ye] = pts[n];
+          if (g === 'O') {
+            const [xa, ya] = pts[n - 1], haut = ya < pts[n - 2][1] ? -1 : 1;
+            main(xa - 2.5, ya, xa - 2.5, ya + haut * (L - 7)); main(xa + 2.5, ya, xa + 2.5, ya + haut * (L - 7));
+            etiq('O', xa, ya + haut * (L + 2));
+          } else {
+            const xg = xe + cx, yg = ye - s * cy;
+            main(xe, ye, xg - cx * .3, yg + s * cy * .3);
+            etiq(g, xg + 6, yg);
+          }
+        }
+      }
+    },
     spectres(ctx, w, h, c, rnd) {
       ctx.fillStyle = c; ctx.strokeStyle = c;
       for (let y = 22, ligne = 0; y < h; y += 62, ligne++) {

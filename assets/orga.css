@@ -11,6 +11,7 @@
 .orga-mol .orga-pt { fill: var(--ink-3); }
 .orga-mol .orga-num { fill: var(--orga-chaine); font-weight: 800; }
 .orga-mol .orga-ent { fill: none; stroke: var(--orga-groupe); stroke-width: 2.2; }
+.orga-mol .orga-ent-prov { stroke-dasharray: 5 4; }
 .orga-mol .orga-ent-n { fill: var(--orga-groupe); }
 .orga-mol .orga-ent-t { fill: var(--sheet); font-weight: 800; font-size: 12px; }
 .orga-mol .orga-at { transition: opacity .25s; }
@@ -99,6 +100,89 @@
 .orga-conv-actions:empty { display: none; }
 .orga-conv-actions { margin-top: 0; }
 
+/* topologique → semi-développée : redresser est facultatif */
+.orga-facultatif { font-weight: 500; color: var(--ink-2); }
+
+/* ---------- Éditeur : glisser, nom en direct, structure figée ---------- */
+.orga-ed-glisser .orga-cible-a { touch-action: none; }
+.orga-ed-nom { display: block; margin-top: 4px; color: var(--ink-2); }
+.orga-ed-nom .orga-nom { font-size: 1.08rem; }
+.orga-ed-h-seul .orga-ed-barre, .orga-ed-h-seul .orga-ed-ecritures { display: none; }
+.orga-ed-fige .orga-ed-barre, .orga-ed-fige .orga-ed-ecritures, .orga-ed-fige .orga-ed-mode { display: none; }
+.orga-ed-fige .orga-ed-svg { pointer-events: none; }
+
+/* ---------- Étiquettes condensées (C₂H₅…) et bulles d'aide ⓘ ---------- */
+.orga-cond { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: center; margin: 4px 0 0 !important; font-size: .92rem; color: var(--ink-2); }
+.orga-cond-t { display: inline-flex; align-items: center; gap: 2px; font-weight: 700; color: var(--ink); }
+.orga-info {
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 36px; height: 36px; padding: 0; margin: 0 1px;
+  border: none; background: none; cursor: pointer; vertical-align: middle; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.orga-info span {
+  display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 999px;
+  border: 1.5px solid var(--accent); color: var(--accent-ink); font: italic 800 .8rem/1 var(--font-sans); transition: background .15s, color .15s;
+}
+.orga-info:hover span, .orga-info[aria-expanded="true"] span { background: var(--accent); color: var(--sheet); }
+.orga-info:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; border-radius: 999px; }
+.orga-bulle-info {
+  position: absolute; z-index: 60; max-width: min(320px, calc(100vw - 16px)); padding: 10px 14px; border-radius: 14px;
+  background: var(--sheet); border: 1.5px solid var(--cle-line); color: var(--ink); font: 400 .92rem/1.5 var(--font-sans);
+  animation: er-apparait .15s ease;
+}
+.orga-bulle-info b { color: var(--accent-ink); }
+
+/* ---------- Dessin à toucher (entourer, chaîne, ramifications) ---------- */
+.orga-actif { margin: 4px 0; }
+.orga-actif-zone svg { display: block; margin: 0 auto; touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+.orga-mol .orga-choisi { fill: var(--cle-bg); stroke: var(--accent); stroke-width: 2.2; }
+.orga-actions-partie { margin-top: 10px; align-items: center; }
+.orga-note { font-size: .92rem; color: var(--ink-2); margin-top: 6px !important; }
+.orga-sol-nom { text-align: center; font-size: 1.08rem; margin: 6px 0 0 !important; }
+
+/* ---------- Nommer : aides, étapes, nom découpé ---------- */
+.orga-nommer { display: flex; flex-direction: column; gap: 8px; }
+.orga-aides { background: var(--paper); border-radius: 14px; padding: 0 12px; }
+.orga-aides summary { cursor: pointer; font-weight: 800; min-height: 44px; display: flex; align-items: center; color: var(--ink); }
+.orga-aides-l { display: flex; flex-direction: column; gap: 2px; padding-bottom: 8px; }
+.orga-interr { display: flex; align-items: center; gap: 10px; min-height: 40px; cursor: pointer; font-size: .95rem; line-height: 1.3; }
+.orga-interr input { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--ink); }
+.orga-nommer-consigne { margin: 0; font-weight: 700; line-height: 1.45; }
+.orga-nommer-consigne:empty { display: none; }
+.orga-ram-liste { display: flex; flex-wrap: wrap; gap: 6px; }
+.orga-ram-liste:empty { display: none; }
+.orga-ram { padding: 4px 12px; border-radius: 999px; background: var(--paper); font-weight: 700; font-size: .92rem; }
+.orga-choix-box { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.orga-choix-box button { min-height: 46px; text-align: left; line-height: 1.4; border-radius: 16px; padding: 10px 18px; }
+.orga-choix-box button.juste { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); color: var(--success-text); }
+.orga-choix-box button.faux { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+.orga-morceaux { display: flex; flex-direction: column; gap: 8px; }
+.orga-mx {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding: 8px 10px 8px 14px; border-radius: 14px;
+  background: var(--paper); border-left: 5px solid var(--mc, var(--ink-3)); transition: opacity .15s;
+}
+.orga-mx-t { flex-basis: 100%; font-size: .78rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--mc, var(--ink-2)); }
+.orga-mx input { font-size: 16px; color: var(--mc, var(--ink)); font-weight: 700; }
+.orga-mx .orga-mx-num { width: 78px; }
+.orga-mx .orga-mx-nom, .orga-mx .orga-mx-chaine { width: 150px; max-width: 100%; }
+.orga-mx-mult .orga-pil { min-width: 44px; padding: 0 10px; }
+.orga-mx.attend { opacity: .45; }
+.orga-mx.ok { box-shadow: inset 0 0 0 2px var(--mc); }
+.orga-mx.ko { box-shadow: inset 0 0 0 2px var(--danger); }
+.orga-nom-complet { margin: 2px 0 0 !important; font-size: 1.05rem; color: var(--ink-2); overflow-wrap: anywhere; }
+.orga-nom-complet:empty { display: none; }
+.orga-nom-libre { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.orga-champ-nom { width: min(340px, 100%); font-size: 16px; }
+
 @media (prefers-reduced-motion: reduce) {
+  .orga-bulle-info, .orga-mx { animation: none; transition: none; }
   .orga-mol .orga-at, .orga-pil, .orga-bulle { transition: none; animation: none; }
 }
+
+/* champs de saisie des outils (même style que les champs des cours) */
+.orga-champ {
+  min-height: 44px; padding: 8px 12px; border: none; border-radius: 12px; background: var(--sheet);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 700 16px var(--font-sans); color: var(--ink);
+}
+.orga-champ:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.orga-champ:disabled { background: var(--paper); -webkit-text-fill-color: currentColor; opacity: 1; }
+.orga-nom-libre .orga-champ { background: var(--sheet); }

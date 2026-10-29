@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : les trois écritures — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS 2 / 3</span>
+    <h2 class="er-titre">Les trois écritures</h2>
+    <p class="er-contexte">Une même molécule s'écrit de trois façons : formule <b>développée</b>, <b>semi-développée</b> et <b>topologique</b>. La semi-développée est la plus utilisée ; la topologique est la plus difficile : on la travaillera beaucoup.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 2 du module 1 : formules développée et semi-développée
+   (écritures abrégées C₂H₅, (CH₂)₅… expliquées par une bulle ⓘ),
+   formule topologique (compter les C, formule brute : piège des H
+   implicites), puis les trois molécules de la page 1 du cours dans les
+   trois écritures et reconnaître une écriture.
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { o, molHTML, trois, video, partieBrute, EC } = NOM;
+
+const TROIS = ['CC(C)C(O)CN', 'ClCC(C)OC=N', 'BrCC(=O)OCC#C'];
+const DIVERSES = ['CC(C)CC(C)O', 'CCC(=O)OC', 'CC=CC(C)C', 'CCCC(N)=O', 'CC(Cl)CC', 'CCC(C)CC=O', 'CCNCC', 'CC(C)CC(=O)O', 'CCCC(C)(C)O', 'C=CC(C)CC'];
+const OPTS_EC = [o('developpee', 'développée'), o('semi', 'semi-développée'), o('topo', 'topologique')];
+const IND_EC = {
+  developpee: 'En développée, on voit <b>tous</b> les atomes, H compris, et toutes les liaisons.',
+  semi: 'En semi-développée, les H sont regroupés sur leur atome : CH₃, CH₂, OH…',
+  topo: 'En topologique, les C ne sont pas écrits : chaque sommet, chaque bout de trait est un C.',
+};
+// reconnaître l'écriture d'une molécule tirée au hasard
+function reconnaitre(titre) {
+  const ec = hasard(['developpee', 'semi', 'topo']), s = hasard(DIVERSES);
+  return { titre, enonce: `<div class="nom-fig">${ORGA.dessinHTML(NOM.mol(s), { ecriture: ec, label: 'Formule à reconnaître' })}</div>`,
+    parties: [{ type: 'choix', q: 'Quelle est cette écriture ?', options: OPTS_EC, bonne: ec, melanger: false,
+      indices: Object.fromEntries(OPTS_EC.filter(x => x.id !== ec).map(x => [x.id, IND_EC[ec]])), solution: `<p>Formule <b>${EC[ec].toLowerCase()}</b>.</p>` }] };
+}
+
+/* ---------- 1. Développée et semi-développée ---------- */
+// ex. 3 d de la feuille : C₂H₅ écrit en abrégé (bulle d'aide sous le dessin)
+const EX3D = ORGA.condenser(NOM.mol('CC(=O)CC(CC)CC'), [{ atomes: [5, 6], texte: 'C2H5' }]).mol;
+function etape1(c) {
+  const carte = c.carte('1. Formules développée et semi-développée');
+  c.ajouter(carte, `${video('https://www.youtube.com/watch?v=mObSA3j3svA', 'formules brute, développée, semi-développée')}
+    <div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Formule développée</b> (formule de Lewis) : on écrit <b>tous les atomes</b> et <b>tous les doublets</b>, liants (les liaisons) et non liants. C'est la moins pratique.</p></div>
+      <div class="cle"><p><b class="cle-titre">Formule semi-développée</b> : on <b>regroupe les H</b> sur l'atome auquel ils sont liés : CH₃, CH₂, CH, OH, NH₂. C'est la plus utilisée.</p></div>
+      <p>On écrit parfois un groupe d'atomes en abrégé : C₂H₅ pour –CH₂–CH₃, (CH₂)₅ pour cinq –CH₂– à la suite. Touche le bouton ⓘ pour l'explication.</p>
+    </div>
+    ${exemple(`<div class="nom-mols">${molHTML(TROIS[0], { titre: 'Développée', ecriture: 'developpee' })}${molHTML(TROIS[0], { titre: 'Semi-développée', ecriture: 'semi' })}</div>
+      <p>La même molécule. En développée, chaque H et chaque doublet non liant de O et de N est dessiné ; en semi-développée, les H sont regroupés : H₃C, CH, OH, CH₂, NH₂.</p>
+      <div class="nom-fig">${ORGA.dessinHTML(EX3D, { ecriture: 'semi', label: 'Formule semi-développée avec C2H5 écrit en abrégé' })}</div>
+      <p>Ici, C₂H₅ remplace –CH₂–CH₃ : la molécule a 8 C.</p>`)}`);
+  const m = hasard(['CC(C)CC(C)(C)C', 'CCC(C)C(C)O', 'CC(C)(C)CN']);
+  c.aToi(carte, [
+    reconnaitre('Écriture 1'),
+    { titre: 'Écriture abrégée', enonce: `<div class="nom-fig">${ORGA.dessinHTML(EX3D, { ecriture: 'semi', label: 'Formule semi-développée avec C2H5' })}</div>`,
+      parties: [{ type: 'nombre', q: 'Combien d\'atomes de carbone a cette molécule ?', label: 'Nombre de C :', valeur: 8, entier: true, signe: false, tol: 0,
+        diag: v => (v === 7 ? 'C₂H₅ contient <b>deux</b> C (touche ⓘ).' : v === 6 ? 'N\'oublie pas les 2 C de C₂H₅ (touche ⓘ).' : 'Compte les C écrits, et les 2 C de C₂H₅.'), solution: '<p>6 C écrits + 2 C dans C₂H₅ : <b>8 C</b>.</p>' },
+        partieBrute(NOM.mol('CC(=O)CC(CC)CC'), { ecriture: 'semi', partie: { q: 'Écris sa formule brute.' } })] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. La formule topologique ---------- */
+function etape2(c) {
+  const carte = c.carte('2. La formule topologique');
+  c.ajouter(carte, `${video('https://www.youtube.com/watch?v=OMv3DIvZFYU', 'la formule topologique (1)')}${video('https://www.youtube.com/watch?v=PSQ_g8mJQzs', 'la formule topologique (2)')}
+    <div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Formule topologique.</b> On ne représente <b>ni les atomes de carbone</b>, <b>ni les atomes d'hydrogène liés à des carbones</b>. La chaîne est dessinée en <b>zigzag</b> ; <b>chaque sommet et chaque bout de trait est un C</b>. Les autres atomes (O, N, Cl…) sont écrits, avec leurs H : OH, NH₂.</p></div>
+      <p>Chaque C a 4 liaisons : ses H, qu'on ne voit pas, complètent (4 − nombre de traits). C'est l'écriture la plus difficile.</p>
+    </div>
+    ${exemple(`<div class="nom-mols">${molHTML(TROIS[0], { titre: 'Semi-développée', ecriture: 'semi' })}${molHTML(TROIS[0], { titre: 'Topologique', ecriture: 'topo' })}</div>
+      <p>5 sommets et bouts de trait sans lettre : 5 C. Le C qui porte OH a 3 traits : il porte 1 H. Formule brute : C<sub>5</sub>H<sub>13</sub>NO.</p>`)}`);
+  const [a, b] = melanger(['CC(C)CC(C)C', 'CCC(C)CO', 'CC(C)C=CC', 'CCCC(C)C(=O)O', 'CC(N)CC(C)C', 'CCC(=O)CC(C)C']).slice(0, 2);
+  const nC = s => NOM.mol(s).atomes.filter(x => x.el === 'C').length;
+  c.aToi(carte, [
+    { titre: 'Compter les C', enonce: `<div class="nom-fig">${ORGA.dessinHTML(NOM.mol(a), { ecriture: 'topo', label: 'Formule topologique' })}</div>`,
+      parties: [{ type: 'nombre', q: 'Combien d\'atomes de carbone a cette molécule ?', label: 'Nombre de C :', valeur: nC(a), entier: true, signe: false, tol: 0,
+        diag: v => (v < nC(a) ? 'Tu as oublié des C : <b>chaque bout de trait</b> est aussi un C, pas seulement les sommets.' : 'Compte une seule fois chaque sommet et chaque bout de trait sans lettre.'), solution: `<p><b>${nC(a)} C</b> (sommets et bouts de trait).</p>` }] },
+    { titre: 'Formule brute', enonce: `<div class="nom-fig">${ORGA.dessinHTML(NOM.mol(b), { ecriture: 'topo', label: 'Formule topologique' })}</div>`,
+      parties: [partieBrute(NOM.mol(b), { ecriture: 'topo', partie: { q: 'Écris la formule brute de cette molécule (les H ne sont pas dessinés !).' } })] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Les trois écritures côte à côte ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Les trois écritures côte à côte');
+  c.ajouter(carte, `<div class="cours-bloc"><p>Les trois molécules du tableau du cours, chacune dans les trois écritures.</p></div>
+    ${exemple(TROIS.map(s => trois(s)).join(''))}`);
+  c.aToi(carte, [reconnaitre('Écriture 1'), reconnaitre('Écriture 2'), reconnaitre('Écriture 3')]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b>Développée</b> : tous les atomes, toutes les liaisons et les doublets non liants.</p></div>
+    <div class="cle"><p><b>Semi-développée</b> : les H regroupés sur leur atome (CH₃, CH₂, OH, NH₂). La plus utilisée. Écritures abrégées : C₂H₅ = –CH₂–CH₃ ; (CH₂)₅ = cinq –CH₂– à la suite.</p></div>
+    <div class="cle"><p><b>Topologique</b> : ni les C, ni les H liés aux C ; zigzag ; chaque sommet et chaque bout de trait est un C ; les autres atomes écrits avec leurs H.</p></div>
+    ${trois(TROIS[0])}
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1c_cours.html">Cours : passer d'une écriture à l'autre →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html#ecritures">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+NOM.menu('module_1b_cours');
+</script>
+</body>
+</html>

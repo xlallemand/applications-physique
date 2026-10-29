@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : liaisons et doublets d'un atome,
+   position dans la classification, H manquants d'une semi-développée,
+   reconnaître une écriture, formule brute d'une topologique et d'une
+   semi-développée avec une écriture abrégée (C₂H₅, bulle ⓘ), formule
+   impossible, conversions (guidées, ou dans l'éditeur).
+   Erreurs diagnostiquées : en topologique, oublier les C des bouts de
+   traits, oublier les H implicites ; effacer le H d'un OH ; ajouter un C
+   au bout d'un trait qui porte déjà O ou N ; C à 3 ou 5 liaisons.
+   ============================================================ */
+const { o, hasard, melanger, entre, partieBrute, EC } = NOM;
+const mol = NOM.mol;
+
+const ATOMES = [['H', 'un atome d\'hydrogène H', 1, 0], ['C', 'un atome de carbone C', 4, 0], ['N', 'un atome d\'azote N', 3, 1], ['O', 'un atome d\'oxygène O', 2, 2], ['Cl', 'un atome de chlore Cl', 1, 3], ['Br', 'un atome de brome Br', 1, 3], ['F', 'un atome de fluor F', 1, 3]];
+const POSITIONS = [['S', 'Le soufre S est juste sous l\'oxygène dans la classification', 2], ['P', 'Le phosphore P est juste sous l\'azote', 3], ['Si', 'Le silicium Si est juste sous le carbone', 4], ['I', 'L\'iode I est dans la même colonne que le chlore', 1], ['Se', 'Le sélénium Se est dans la même colonne que l\'oxygène', 2]];
+const DIVERSES = ['CC(C)CC(C)O', 'CCC(=O)OC', 'CC=CC(C)C', 'CCCC(N)=O', 'CC(Cl)CC', 'CCC(C)CC=O', 'CCNCC', 'CC(C)CC(=O)O', 'CCCC(C)(C)O', 'C=CC(C)CC'];
+const TOPOS = ['CC(C)CC(C)C', 'CCC(C)CO', 'CC(C)C=CC', 'CCCC(C)C(=O)O', 'CC(N)CC(C)C', 'CCC(=O)CC(C)C', 'CC(C)(C)CCO', 'CCC(C)CC(Cl)C', 'C=C(C)CCC', 'CC(C)CNC'];
+// semi-développées avec un éthyle écrit C₂H₅ (atomes de l'éthyle)
+const CONDENSEES = [['CCC(CC)CO', [3, 4]], ['CC(CC)CC(C)O', [2, 3]], ['CCC(=O)OCC', [5, 6]], ['CC(NCC)C', [3, 4]], ['CCC(CC)C(=O)O', [3, 4]], ['CC(C)C(CC)CC', [4, 5]]];
+const CONV = ['CCC(C)O', 'CC(C)CC=O', 'CC=CC(C)C', 'CCC(=O)CC', 'CCCC(N)=O', 'CC(C)C(=O)O', 'CCC(Cl)C', 'CCNC(C)C', 'CCOC(=O)C', 'CC(C)(O)CC', 'CC(C)CCN'];
+const fig = (m, op) => `<div class="nom-fig">${ORGA.dessinHTML(m, op)}</div>`;
+
+const G = {
+  // liaisons et doublets non liants d'un atome
+  liaisons() {
+    const [x, nom, l, nl] = hasard(ATOMES);
+    const parties = [{ type: 'choix', q: `Combien de liaisons fait ${nom} dans une molécule ?`, options: [o('1', '1'), o('2', '2'), o('3', '3'), o('4', '4')], bonne: String(l), melanger: false,
+      indice: 'Règle de l\'octet (4 doublets en tout), duet pour H : H 1 liaison, C 4, N 3, O 2, halogènes 1.', solution: `<p>${x} : <b>${l} liaison${l > 1 ? 's' : ''}</b>.</p>` }];
+    if (x !== 'H') parties.push({ type: 'choix', q: 'Combien de doublets non liants porte-t-il ?', options: [o('0', '0'), o('1', '1'), o('2', '2'), o('3', '3')], bonne: String(nl), melanger: false,
+      indice: `4 doublets en tout, dont ${l} liant${l > 1 ? 's' : ''}.`, solution: `<p>4 − ${l} = <b>${nl}</b> doublet${nl > 1 ? 's' : ''} non liant${nl > 1 ? 's' : ''}.</p>` });
+    return { theme: 'Liaisons et doublets', parties };
+  },
+  // position dans la classification
+  classif() {
+    const [x, phrase, n] = hasard(POSITIONS);
+    return { theme: 'Liaisons et classification', enonce: `<p>${phrase}.</p>`, parties: [{ type: 'choix', q: `Combien de liaisons fait ${x} ?`, options: [o('1', '1'), o('2', '2'), o('3', '3'), o('4', '4')], bonne: String(n), melanger: false,
+      indice: 'Même colonne, même nombre de liaisons : compte les cases jusqu\'à la colonne des gaz nobles.', solution: `<p>Même colonne que l'atome du dessus : <b>${n} liaison${n > 1 ? 's' : ''}</b>.</p>` }] };
+  },
+  // H manquants d'une semi-développée
+  h() {
+    const s = hasard(DIVERSES);
+    return { theme: 'Compléter les H', consigne: 'Écris les H de chaque atome de cette formule semi-développée.', parties: [ORGA.partieH(s, { q: '' })] };
+  },
+  // reconnaître une écriture
+  ecriture() {
+    const ec = hasard(['developpee', 'semi', 'topo']), s = hasard(DIVERSES);
+    const OPTS = [o('developpee', 'développée'), o('semi', 'semi-développée'), o('topo', 'topologique')];
+    const IND = { developpee: 'Tous les atomes et toutes les liaisons sont dessinés, H compris : développée.', semi: 'Les H sont regroupés sur leur atome (CH₃, CH₂…) : semi-développée.', topo: 'Les C ne sont pas écrits (sommets et bouts de traits) : topologique.' };
+    return { theme: 'Reconnaître une écriture', enonce: fig(mol(s), { ecriture: ec, label: 'Formule à reconnaître' }),
+      parties: [{ type: 'choix', q: 'Quelle est cette écriture ?', options: OPTS, bonne: ec, melanger: false, indice: IND[ec], solution: `<p>Formule <b>${EC[ec].toLowerCase()}</b>.</p>` }] };
+  },
+  // formule brute d'une topologique (C des bouts de traits, H implicites)
+  bruteTopo() {
+    const m = mol(hasard(TOPOS));
+    return { theme: 'Formule brute', enonce: fig(m, { ecriture: 'topo', label: 'Formule topologique' }), parties: [partieBrute(m, { ecriture: 'topo', partie: { q: 'Écris la formule brute de cette molécule.' } })] };
+  },
+  // formule brute d'une semi-développée avec C₂H₅
+  bruteCondensee() {
+    const [s, at] = hasard(CONDENSEES), m = mol(s), r = ORGA.condenser(m, [{ atomes: at, texte: 'C2H5' }]).mol;
+    return { theme: 'Formule brute', enonce: `${fig(r, { ecriture: 'semi' })}<p class="nom-avert">Touche ⓘ pour savoir ce que veut dire C₂H₅.</p>`,
+      parties: [partieBrute(m, { ecriture: 'semi', partie: { q: 'Écris la formule brute de cette molécule.' } })] };
+  },
+  // formule impossible : un atome avec trop (ou pas assez) de liaisons
+  impossible() {
+    const m = mol(hasard(DIVERSES)), h = m.atomes.map((a, i) => ORGA.nbH(m, i));
+    const cas = hasard(['ok', 'trop', 'trop', 'manque']);
+    let i = null;
+    if (cas !== 'ok') {
+      i = hasard(m.atomes.map((a, j) => j).filter(j => (cas === 'trop' ? !ORGA.HALOGENES.includes(m.atomes[j].el) : h[j] > 0)));
+      h[i] += cas === 'trop' ? 1 : -1;
+    }
+    const ex = i == null ? 'Chaque atome a le bon nombre de liaisons, H compris.' : `${ORGA.etiquetteH(m.atomes[i].el, h[i], true)} : ${ORGA.somme(m, i) + h[i]} liaisons au lieu de ${ORGA.valence(m.atomes[i].el)}.`;
+    return { theme: 'Formule impossible', enonce: fig(m, { ecriture: 'semi', h, label: 'Formule à juger' }),
+      parties: [{ type: 'choix', q: 'Cette formule semi-développée est-elle possible ?', options: [o('ok', 'oui, elle est possible'), o('trop', 'non : un atome a trop de liaisons'), o('manque', 'non : il manque des liaisons à un atome')], bonne: cas, melanger: false,
+        indice: 'Compte les liaisons de chaque atome, H compris : C 4, N 3, O 2.', solution: `<p>${ex}</p>` }] };
+  },
+  // conversion guidée par les gestes du cours
+  conversion() {
+    const [de, vers] = hasard([['developpee', 'semi'], ['semi', 'topo'], ['topo', 'semi'], ['topo', 'semi'], ['semi', 'topo']]);
+    return { theme: 'Changer d\'écriture', consigne: `De la formule ${EC[de].toLowerCase()} à la formule ${EC[vers].toLowerCase()}.`,
+      parties: [ORGA.partieConversion(hasard(CONV), de, vers, { compterH: de === 'developpee' })] };
+  },
+  // conversion sans guidage : dessiner l'écriture demandée
+  dessin() {
+    const s = hasard(CONV), [de, vers] = hasard([['semi', 'topo'], ['topo', 'semi'], ['developpee', 'topo']]);
+    return { theme: 'Changer d\'écriture', consigne: `Dessine cette molécule en formule ${EC[vers].toLowerCase()}.`, enonce: fig(mol(s), { ecriture: de, label: 'Formule ' + EC[de].toLowerCase() }),
+      parties: [ORGA.partieDessin(s, { ecriture: vers, q: '' })] };
+  },
+};
+
+function tirage() {
+  return [hasard([G.liaisons, G.classif])(), G.h(), G.ecriture(), G.bruteTopo(), G.bruteCondensee(), G.impossible(), G.conversion(), G.conversion(), G.dessin(), hasard([G.liaisons, G.classif, G.bruteTopo])()];
+}
+
+NOM.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Représenter les molécules',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : liaisons et doublets d\'un atome, compléter les H, reconnaître une écriture, formule brute, formule impossible, et des <b>conversions</b> d\'une écriture à l\'autre.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1b_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2a_cours.html', label: 'Module 2 : nommer les alcanes →' },
+});
+NOM.menu('module_1_questions');
+</script>
+</body>
+</html>

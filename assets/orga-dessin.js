@@ -18,11 +18,24 @@
                     ou [{ atomes, avecH, numero }]
        o.doublets   false : pas de doublets non liants en développée
        o.label      texte de aria-label (défaut : formule brute)
+       atomes { el, etiq } (ORGA.condenser) : étiquette condensée (C₂H₅…), expliquée sous le dessin (bulle ⓘ)
      ORGA.nomHTML(parties)             nom en couleurs : [['2-', 'r1'], ['méthyl', 'r1'], ['pentane', 'chaine']]
      ORGA.legendeHTML(groupes)         « groupe hydroxyle (alcools) », numérotés
-     ORGA.editeur(zone, o)             éditeur de molécules (voir plus bas)
+     ORGA.editeur(zone, o)             éditeur de molécules (voir plus bas) ; façon d'ajouter un atome : ORGA.GLISSER
      ORGA.conversion(zone, o)          passer d'une écriture à l'autre par les gestes du cours
      ORGA.bulle(conteneur, x, y, options, choisir)   bulle de choix (au toucher)
+     ORGA.info(html, label)            bouton ⓘ qui ouvre une bulle d'aide au toucher ; ORGA.BULLES : règles du cours
+     ORGA.dessinActif(zone, mol, o)    dessin dont on touche les atomes (outils ci-dessous)
+
+   Parties de question 'perso' (p.monter(zone, api) : api.reussi(note), api.erreur(h), api.message(h),
+   api.effacer(), api.compterErreur(), api.fini() ; renvoie { montrer() }) :
+     ORGA.partieEntourer(mol, o)       entourer les groupes caractéristiques (toucher les atomes, Valider)
+     ORGA.partiesNommerGroupes(mol)    parties 'choix' : « groupe … · famille des … » pour chaque sorte de groupe
+     ORGA.partieChaine(mol, o)         toucher la chaîne principale
+     ORGA.partieNom(mol, o)            nommer, avec les aides (couleurs, nom découpé, bulles) ; o.cleAides : clé localStorage
+     ORGA.partieDessin(mol, o)         dessiner dans l'éditeur (o.nom : du nom au dessin, nom en direct)
+     ORGA.partieH(mol, o)              compléter les H d'une formule
+     ORGA.partieConversion(mol, de, vers, o)   changer d'écriture par les gestes du cours
    ============================================================ */
 (function () {
   'use strict';
@@ -401,6 +414,23 @@
   const LARG = { C: .68, N: .74, O: .78, F: .58, Cl: .92, Br: .98, I: .32, H: .74 };
   const LARG_IND = .44;
 
+  // texte d'une étiquette condensée (C2H5, (CH2)5…) : morceaux [texte, indice ?]
+  function morceauxEtiq(t) {
+    const r = [];
+    for (const m of String(t).match(/\d+|[^\d]+/g) || []) {
+      const ind = /^\d/.test(m) && r.length && /[A-Za-z)]$/.test(r[r.length - 1][0]);
+      r.push([m, ind]);
+    }
+    return r;
+  }
+  const largeurEtiq = (t, f) => morceauxEtiq(t).reduce((s, [m, ind]) => s + [...m].reduce((a, c) => a + (ind ? LARG_IND : /[()]/.test(c) ? .36 : LARG[c] || (/[a-z]/.test(c) ? .5 : .7)), 0), 0) * f;
+  // formule écrite en HTML : C2H5 → C<sub>2</sub>H<sub>5</sub>
+  const formuleHTML = t => morceauxEtiq(t).map(([m, ind]) => (ind ? `<sub>${m}</sub>` : m)).join('');
+  function boiteEtiq(t, f) {
+    const w = largeurEtiq(t, f), ind = morceauxEtiq(t).some(x => x[1]);
+    return { x1: -w / 2, x2: w / 2, y1: -.42 * f, y2: (ind ? .62 : .4) * f, we: w, ex1: -w / 2, ex2: w / 2, ey1: -.42 * f, ey2: .4 * f };
+  }
+
   function boite(el, nh, cote, f) {
     const we = (LARG[el] || .72) * f, wh = nh ? (LARG.H + (nh > 1 ? LARG_IND : 0)) * f : 0;
     const y1 = -.42 * f, y2 = (nh > 1 ? .62 : .4) * f, e = { ex1: -we / 2, ex2: we / 2, ey1: -.42 * f, ey2: .4 * f };
@@ -439,9 +469,17 @@
     const ech = o.echelle || ECHELLES[usage][ec];
     const pos = o.px ? null : (o.pos || disposer(mol, ec, Object.assign({}, o, { echelle: ech })));
     const px = o.px ? o.px.map(p => ({ x: p.x, y: p.y })) : pos.map(p => ({ x: p.x * ech.x, y: -p.y * ech.y }));
+    // étiquette condensée plus large qu'une case : on écarte les atomes de part et d'autre
+    if (!o.px && ec !== 'topo') mol.atomes.forEach((a, i) => {
+      if (!a.etiq) return;
+      const extra = largeurEtiq(a.etiq, f) - .5 * ech.x;
+      if (extra <= 0) return;
+      const x0 = px[i].x;
+      px.forEach((q, j) => { if (j !== i) { if (q.x > x0 + 1) q.x += extra / 2; else if (q.x < x0 - 1) q.x -= extra / 2; } });
+    });
     const adj = O.adjacence(mol);
     const dev = ec === 'developpee';
-    const hDe = i => (o.h ? (o.h[i] == null ? null : o.h[i]) : O.nbH(mol, i));
+    const hDe = i => (mol.atomes[i].etiq ? 0 : o.h ? (o.h[i] == null ? null : o.h[i]) : O.nbH(mol, i));
 
     // ensembles colorés
     const ens = {};
@@ -459,14 +497,16 @@
     for (let i = 0; i < n; i++) {
       const el = mol.atomes[i].el;
       const replie = dev && o.replies && o.replies.has(i);
-      let visible = !(ec === 'topo' && el === 'C' && adj[i].length && !(o.etiqueter && o.etiqueter.has(i)));
+      let visible = !!mol.atomes[i].etiq || !(ec === 'topo' && el === 'C' && adj[i].length && !(o.etiqueter && o.etiqueter.has(i)));
       if (o.masquer && o.masquer.has(i)) visible = false;
       if (!visible) continue;
       let nh = dev && !replie ? 0 : hDe(i);
       const manque = nh == null;
       if (manque) nh = 0;
       const cote = coteH(px, adj, i);
-      etiq[i] = { el, nh, cote, manque, boite: boite(el, nh, cote, f), classe: classeAt(i) };
+      const t = mol.atomes[i].etiq;
+      etiq[i] = t ? { el, nh: 0, cote: 'd', manque: false, texte: t, boite: boiteEtiq(t, f), classe: classeAt(i) }
+        : { el, nh, cote, manque, boite: boite(el, nh, cote, f), classe: classeAt(i) };
     }
 
     // H et doublets non liants de la développée
@@ -477,6 +517,7 @@
       for (let i = 0; i < n; i++) {
         if (o.replies && o.replies.has(i)) continue;
         const nh = hDe(i) || 0;
+        if (mol.atomes[i].etiq) continue;
         const occ = adj[i].map(v => angleDe(px[i], px[v.j]));
         for (let h = 0; h < nh; h++) {
           let best = null, bs = -Infinity;
@@ -491,12 +532,12 @@
           }
           if (!best) break;
           occ.push(best.a); pris.push(best.q);
-          H.push({ x: best.q.x, y: best.q.y, de: i, a: best.a, classe: classeAt(i) === 'groupe' ? 'groupe' : '' });
+          H.push({ x: best.q.x, y: best.q.y, de: i, a: best.a, classe: classeAt(i) });
         }
         // doublets non liants : N 1, O 2, halogènes 3
         const el = mol.atomes[i].el;
         if (o.doublets !== false && (el === 'N' || el === 'O' || O.HALOGENES.includes(el))) {
-          const nl = Math.max(0, (8 - 2 * (O.somme(mol, i) + nh)) / 2);
+          const nl = 4 - O.valence(el);          // N 1, O 2, halogènes 3 (même si les H ne sont pas encore écrits)
           const bt = etiq[i] ? etiq[i].boite : boite(el, 0, 'd', f);
           const unSeul = occ.length === 1 && nl === 2 && occ[0] % 90 === 0;
           for (let d = 0; d < nl; d++) {
@@ -610,7 +651,20 @@
       });
       doublets.filter(d => e.atomes.includes(d.de)).forEach(d => { pts.push({ x: d.x1, y: d.y1 }); pts.push({ x: d.x2, y: d.y2 }); });
       (e.avecH || []).forEach(i => H.filter(h => h.de === i).forEach(h => [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sy]) => pts.push({ x: h.x + sx * .37 * f, y: h.y + sy * .5 * f }))));
-      return Object.assign({ d: cheminArrondi(pts, 6), pts: enveloppe(pts) }, e);
+      // cadre arrondi qui n'épouse pas le groupe (comme on entoure à la main) ; ellipse autour d'un seul atome écrit
+      const xs = pts.map(q => q.x), ys = pts.map(q => q.y);
+      const b = { x1: Math.min(...xs), x2: Math.max(...xs), y1: Math.min(...ys), y2: Math.max(...ys) };
+      const seul = e.atomes.length === 1 && etiq[e.atomes[0]] && !(e.avecH || []).some(i => H.some(h => h.de === i));
+      let cadre;
+      if (seul) {
+        const rx = (b.x2 - b.x1) / 2 * 1.2 + 4, ry = (b.y2 - b.y1) / 2 * 1.3 + 4, cx = (b.x1 + b.x2) / 2, cy = (b.y1 + b.y2) / 2;
+        cadre = { ellipse: true, cx, cy, rx, ry, x1: cx - rx, x2: cx + rx, y1: cy - ry, y2: cy + ry };
+      } else {
+        const m = 7;
+        cadre = { x1: b.x1 - m, x2: b.x2 + m, y1: b.y1 - m, y2: b.y2 + m };
+        cadre.r = Math.min(14, (cadre.y2 - cadre.y1) / 2, (cadre.x2 - cadre.x1) / 2);
+      }
+      return Object.assign({ cadre, pts: [{ x: cadre.x1, y: cadre.y1 }, { x: cadre.x2, y: cadre.y1 }, { x: cadre.x1, y: cadre.y2 }, { x: cadre.x2, y: cadre.y2 }] }, e);
     });
 
     // cadre
@@ -623,38 +677,10 @@
     H.forEach(h => { ajout(h.x - .4 * f, h.y - .55 * f); ajout(h.x + .4 * f, h.y + .55 * f); });
     doublets.forEach(d => { ajout(d.x1, d.y1); ajout(d.x2, d.y2); });
     numeros.forEach(m => { ajout(m.x - .45 * f, m.y - .45 * f); ajout(m.x + .45 * f, m.y + .45 * f); });
-    entourages.forEach(e => e.pts.forEach(p => { ajout(p.x - 8, p.y - 8); ajout(p.x + 8, p.y + 8); if (e.numero) ajout(p.x + 16, p.y - 16); }));
+    entourages.forEach(e => { const c = e.cadre; ajout(c.x1 - 3, c.y1 - 3); ajout(c.x2 + 3, c.y2 + 3); if (e.numero) { ajout(c.x2 + 10, c.y1 - 10); } });
     if (!isFinite(bx.x1)) { bx.x1 = bx.y1 = 0; bx.x2 = bx.y2 = 1; }
 
     return { mol, ec, f, ech, pos, px, adj, etiq, H, liensH, doublets, liaisons, numeros, entourages, cadre: bx };
-  }
-
-  /* ---------- Contour arrondi (enveloppe convexe élargie) ---------- */
-  function enveloppe(pts) {
-    const p = pts.slice().sort((a, b) => a.x - b.x || a.y - b.y);
-    if (p.length < 3) return p;
-    const cr = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
-    const bas = [], haut = [];
-    for (const q of p) { while (bas.length >= 2 && cr(bas[bas.length - 2], bas[bas.length - 1], q) <= 0) bas.pop(); bas.push(q); }
-    for (let i = p.length - 1; i >= 0; i--) { const q = p[i]; while (haut.length >= 2 && cr(haut[haut.length - 2], haut[haut.length - 1], q) <= 0) haut.pop(); haut.push(q); }
-    haut.pop(); bas.pop();
-    return bas.concat(haut);
-  }
-
-  function cheminArrondi(pts, r) {
-    const h = enveloppe(pts);
-    if (h.length === 1) return `M${r1(h[0].x - r)} ${r1(h[0].y)}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
-    let d = '', premier = null;
-    for (let i = 0; i < h.length; i++) {
-      const a = h[i], b = h[(i + 1) % h.length];
-      const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy) || 1;
-      const nx = dy / L, ny = -dx / L;
-      const p1 = { x: a.x + nx * r, y: a.y + ny * r }, p2 = { x: b.x + nx * r, y: b.y + ny * r };
-      if (!premier) { premier = p1; d += `M${r1(p1.x)} ${r1(p1.y)}`; }
-      else d += `A${r} ${r} 0 0 1 ${r1(p1.x)} ${r1(p1.y)}`;
-      d += `L${r1(p2.x)} ${r1(p2.y)}`;
-    }
-    return d + `A${r} ${r} 0 0 1 ${r1(premier.x)} ${r1(premier.y)}Z`;
   }
 
   /* ============================================================
@@ -664,6 +690,15 @@
 
   function texteEtiquette(e, x, y, f) {
     const base = r1(y + .36 * f), d = r1(.26 * f), t = r1(.72 * f);
+    if (e.texte) {
+      let h = '', bas = false;
+      for (const [m, ind] of morceauxEtiq(e.texte)) {
+        if (ind && !bas) { h += `<tspan dy="${d}" font-size="${t}">${m}</tspan>`; bas = true; }
+        else if (!ind && bas) { h += `<tspan dy="${-d}">${m}</tspan>`; bas = false; }
+        else h += ind ? `<tspan font-size="${t}">${m}</tspan>` : m;
+      }
+      return `<text class="orga-t${cl(e.classe)}" x="${r1(x - e.boite.we / 2)}" y="${base}">${h}</text>`;
+    }
     const ind = e.nh > 1 ? `<tspan dy="${d}" font-size="${t}">${e.nh}</tspan>` : '';
     if (e.cote === 'g') {
       const h = e.nh ? 'H' + ind + (e.nh > 1 ? `<tspan dy="${-d}">${e.el}</tspan>` : e.el) : e.el;
@@ -700,10 +735,12 @@
       out.push('</g>');
     }
     sc.entourages.forEach(e => {
-      out.push(`<path class="orga-ent" d="${e.d}"/>`);
+      const c = e.cadre, cls = 'orga-ent' + (e.provisoire ? ' orga-ent-prov' : '');
+      out.push(c.ellipse ? `<ellipse class="${cls}" cx="${r1(c.cx)}" cy="${r1(c.cy)}" rx="${r1(c.rx)}" ry="${r1(c.ry)}"/>`
+        : `<rect class="${cls}" x="${r1(c.x1)}" y="${r1(c.y1)}" width="${r1(c.x2 - c.x1)}" height="${r1(c.y2 - c.y1)}" rx="${r1(c.r)}"/>`);
       if (e.numero) {
-        const p = e.pts.reduce((b, q) => (q.x - q.y > b.x - b.y ? q : b), e.pts[0]);
-        out.push(`<circle class="orga-ent-n" cx="${r1(p.x + 7)}" cy="${r1(p.y - 7)}" r="9"/><text class="orga-ent-t" x="${r1(p.x + 7)}" y="${r1(p.y - 3)}" text-anchor="middle">${e.numero}</text>`);
+        const x = c.ellipse ? c.cx + c.rx * .7 : c.x2, y = c.ellipse ? c.cy - c.ry * .7 : c.y1;
+        out.push(`<circle class="orga-ent-n" cx="${r1(x)}" cy="${r1(y)}" r="9"/><text class="orga-ent-t" x="${r1(x)}" y="${r1(y + 4)}" text-anchor="middle">${e.numero}</text>`);
       }
     });
     out.push('</g>');
@@ -716,9 +753,16 @@
     const sc = scene(mol, ec, Object.assign({ chaine: o.numeros || undefined }, o));
     const m = 8, b = sc.cadre;
     const x = Math.floor(b.x1 - m), y = Math.floor(b.y1 - m), w = Math.ceil(b.x2 - b.x1 + 2 * m), h = Math.ceil(b.y2 - b.y1 + 2 * m);
-    const label = (o.label || O.formuleBrute(mol)).replace(/"/g, '&quot;');
+    const label = (o.label || (mol.atomes.some(a => a.etiq) ? NOM_EC[ec] : O.formuleBrute(mol))).replace(/"/g, '&quot;');
     const mini = Math.round(w * .6);
-    return `<div class="orga-defile"><svg class="orga-mol orga-${ec}" viewBox="${x} ${y} ${w} ${h}" width="${w}" height="${h}" style="width:${w}px;max-width:100%;min-width:${mini}px;height:auto" role="img" aria-label="${label}">${svgCorps(sc, o)}</svg></div>`;
+    return `<div class="orga-defile"><svg class="orga-mol orga-${ec}" viewBox="${x} ${y} ${w} ${h}" width="${w}" height="${h}" style="width:${w}px;max-width:100%;min-width:${mini}px;height:auto" role="img" aria-label="${label}">${svgCorps(sc, o)}</svg></div>${o.sansAide ? '' : aidesCondensees(mol)}`;
+  }
+
+  // étiquettes condensées d'un dessin (C₂H₅…), chacune avec sa bulle d'aide ⓘ
+  function aidesCondensees(mol) {
+    const ts = [...new Set(mol.atomes.filter(a => a.etiq).map(a => a.etiq))];
+    if (!ts.length) return '';
+    return `<p class="orga-cond">${ts.map(t => `<span class="orga-cond-t">${formuleHTML(t)} ${info(O.AIDES_CONDENSEES[t] || 'Écriture abrégée d\'un groupe d\'atomes.', 'Que veut dire ' + t + ' ?')}</span>`).join('')}</p>`;
   }
 
   function dessiner(zone, mol, o) {
@@ -732,9 +776,6 @@
     return '<span class="orga-nom">' + parties.map(([t, c]) => (c ? `<span class="orga-n-${c}">${t}</span>` : t)).join('') + '</span>';
   }
 
-  function legendeHTML(gs) {
-    return '<ul class="orga-legende">' + gs.map((g, k) => `<li>${gs.length > 1 ? `<i>${k + 1}</i> ` : ''}<b>${g.nomGroupe}</b> (${g.familles}${g.classe && g.cle === 'amine' ? ', ' + g.classe : ''})</li>`).join('') + '</ul>';
-  }
 
   /* ============================================================
      BULLE DE CHOIX (au toucher, dans un conteneur en position relative)
@@ -800,20 +841,100 @@
        choixH     true : interrupteur H automatiques / à compléter affiché
        elements   éléments de la palette
        depart     molécule ou SMILES de départ (défaut 'C')
-       ajout      façon d'ajouter un atome : objet { nom, installer(ed), calque(ed, sc), clic(ed, cible), apres(ed) }
+       ajout      façon d'ajouter un atome (défaut : ORGA.GLISSER, la maquette C retenue) :
+                  objet { nom, installer(ed), calque(ed, sc), clic(ed, cible), apres(ed) }
+       nomDirect  true : le nom de la molécule dessinée s'affiche en direct, en couleurs (dessin compris)
+       brute      false : pas de formule brute sous le dessin
+       structure  false : molécule figée (seul l'outil H reste : compléter les H d'une formule)
        surChange  fonction (ed) appelée à chaque modification
      })
      Renvoie ed : ed.mol, ed.ec, ed.sel, ed.libres(i), ed.prefere(i), ed.ajouter(i, angle),
                   ed.charger(mol, o), ed.changerEcriture(ec), ed.changerH(mode), ed.hJustes(), ed.rendre()…
      ============================================================ */
+  /* ---------- Façon d'ajouter un atome retenue (maquette C « Glisser ») ----------
+     On tire un trait depuis un atome : il s'aimante à la direction permise la plus proche ;
+     au lâcher, un nouvel atome. Un appui court sur un atome montre ses emplacements voisins
+     (celui qui continue le zigzag mis en valeur) : les toucher fait pareil. */
+  function emplacements(ed, sc) {
+    if (ed.sel == null || !sc.px[ed.sel]) return '';
+    const pref = ed.prefere(ed.sel);
+    let h = '';
+    for (const d of ed.libres(ed.sel)) {
+      const c = d.cible != null ? sc.px[d.cible] : ed.px(d.q), p = d.a === pref;
+      if (d.cible != null) h += `<circle class="orga-empl orga-empl-fermer" cx="${r1(c.x)}" cy="${r1(c.y)}" r="15"/>`;
+      else h += `<circle class="orga-empl${p ? ' orga-empl-pref' : ''}" cx="${r1(c.x)}" cy="${r1(c.y)}" r="${p ? 8 : 6}"/>`;
+      h += `<circle class="orga-cible" data-cible="e${d.a}" cx="${r1(c.x)}" cy="${r1(c.y)}" r="22"/>`;
+    }
+    return h;
+  }
+  const GLISSER = {
+    nom: 'glisser',
+    installer(ed) {
+      ed.racine.classList.add('orga-ed-glisser');
+      const svg = ed.svg;
+      let g = null;
+      const fantome = () => {
+        const cal = svg.querySelector('.orga-calque');
+        if (!cal) return;
+        cal.querySelectorAll('.orga-glisse').forEach(x => x.remove());
+        if (!g || g.a == null) return;
+        const d = ed.libres(g.i).find(x => x.a === g.a);
+        if (!d) return;
+        const p = ed.sc.px[g.i], c = d.cible != null ? ed.sc.px[d.cible] : ed.px(d.q);
+        const t = ed.el !== 'C' || ed.ec !== 'topo' ? `<text class="orga-empl-t" x="${r1(c.x)}" y="${r1(c.y + 4.5)}" text-anchor="middle">${ed.el}</text>` : '';
+        cal.insertAdjacentHTML('beforeend', `<g class="orga-glisse"><line class="orga-fantome" x1="${r1(p.x)}" y1="${r1(p.y)}" x2="${r1(c.x)}" y2="${r1(c.y)}"/><circle class="orga-fantome-at" cx="${r1(c.x)}" cy="${r1(c.y)}" r="${d.cible != null ? 18 : 12}"/>${t}</g>`);
+      };
+      svg.addEventListener('pointerdown', ev => {
+        if (ed.fige || ed.outil !== 'dessin' || (ev.pointerType === 'mouse' && ev.button !== 0)) return;
+        const c = ed.cibleDe(ev.target);
+        if (c.type !== 'atome') return;
+        g = { i: +c.v, id: ev.pointerId, a: null, bouge: false };
+      });
+      svg.addEventListener('pointermove', ev => {
+        if (!g || ev.pointerId !== g.id) return;
+        const p = versSVG(svg, ev), c = ed.sc.px[g.i];
+        const dx = p.x - c.x, dy = p.y - c.y, L = Math.hypot(dx, dy);
+        if (L < 14) { if (g.a != null) { g.a = null; fantome(); } return; }
+        // le glisser commence : pointeur capturé (pas avant : un appui court reste un clic sur l'atome)
+        if (!g.bouge) { try { svg.setPointerCapture(ev.pointerId); } catch (e) { /* rien */ } }
+        g.bouge = true;
+        const ang = n360(Math.atan2(-dy, dx) / RAD);
+        let best = null;
+        for (const d of ed.libres(g.i)) if (!best || ecart(d.a, ang) < ecart(best.a, ang)) best = d;
+        const a = best && ecart(best.a, ang) < 50 ? best.a : null;
+        if (a !== g.a) { g.a = a; fantome(); }
+      });
+      const fin = ev => {
+        if (!g || ev.pointerId !== g.id) return;
+        const { i, a, bouge } = g;
+        g = null;
+        if (bouge) ed.ignorerClic = Date.now();
+        if (a != null) ed.ajouter(i, a);
+        else if (bouge) ed.rendre();
+      };
+      svg.addEventListener('pointerup', fin);
+      svg.addEventListener('pointercancel', ev => { if (g && ev.pointerId === g.id) { g = null; ed.rendre(); } });
+      // iOS : pas de défilement de la page pendant le glisser
+      svg.addEventListener('touchmove', ev => { if (g && g.bouge) ev.preventDefault(); }, { passive: false });
+    },
+    calque: (ed, sc) => emplacements(ed, sc),
+    clic(ed, cible) {
+      if (cible.type !== 'empl' || ed.sel == null) return false;
+      ed.ajouter(ed.sel, +cible.v);
+      return true;
+    },
+  };
+
   const ELEMENTS = ['C', 'N', 'O', 'F', 'Cl', 'Br', 'I'];
   const DIRS = { topo: [30, 90, 150, 210, 270, 330], semi: [0, 90, 180, 270], developpee: [0, 90, 180, 270] };
 
   function editeur(zone, opts) {
-    const o = Object.assign({ ecriture: 'semi', ecritures: ['semi', 'topo', 'developpee'], hydrogenes: 'auto', choixH: true, elements: ELEMENTS, depart: 'C' }, opts);
-    const mode = o.ajout || {};
+    // (une option non précisée garde sa valeur par défaut)
+    const o = Object.assign({ ecriture: 'semi', ecritures: ['semi', 'topo', 'developpee'], hydrogenes: 'auto', choixH: true, elements: ELEMENTS, depart: 'C', brute: true, structure: true },
+      Object.fromEntries(Object.entries(opts || {}).filter(([, v]) => v !== undefined)));
+    const mode = o.ajout || GLISSER;
     const racine = document.createElement('div');
-    racine.className = 'orga-ed';
+    racine.className = 'orga-ed' + (o.structure ? '' : ' orga-ed-h-seul');
     const seg = (cls, label, items) => `<div class="orga-seg ${cls}" role="group" aria-label="${label}">${items}</div>`;
     racine.innerHTML = `
       ${o.ecritures.length > 1 ? seg('orga-ed-ecritures', 'Écriture', o.ecritures.map(e => `<button type="button" class="orga-pil" data-ec="${e}">${NOM_EC[e]}</button>`).join('')) : ''}
@@ -838,7 +959,7 @@
 
     const ed = {
       o, racine, svg, zoneSvg, mode,
-      ec: o.ecriture, hydro: o.hydrogenes, el: 'C', ordre: 1, outil: 'dessin',
+      ec: o.ecriture, hydro: o.hydrogenes, el: 'C', ordre: 1, outil: o.structure ? 'dessin' : 'h',
       mol: null, pos: [], h: [], sel: 0, pile: [], vue: null, sc: null,
     };
 
@@ -851,7 +972,7 @@
       ed.mol = molDe(m || o.depart);
       ed.pos = disposer(ed.mol, ed.ec, { echelle: ECHELLES.editeur[ed.ec] });
       ed.h = ed.mol.atomes.map(() => undefined);
-      ed.sel = 0; ed.pile = []; ed.vue = null;
+      ed.sel = o.structure ? 0 : null; ed.pile = []; ed.vue = null;
       message('');
       changement(true);
     }
@@ -1035,10 +1156,10 @@
     ed.px = q => ({ x: q.x * ECHELLES.editeur[ed.ec].x, y: -q.y * ECHELLES.editeur[ed.ec].y });
     ed.rendre = function () {
       const eleve = ed.hydro === 'eleve' && ed.ec !== 'topo';
-      const sc = scene(ed.mol, ed.ec, { editeur: true, pos: ed.pos, h: eleve ? ed.h : null });
+      const sc = scene(ed.mol, ed.ec, { editeur: true, pos: ed.pos, h: eleve ? ed.h : null, couleurs: o.nomDirect && ed.nom && !ed.nom.horsProgramme ? ed.nom.couleurs : null });
       ed.sc = sc;
       const L = ECHELLES.editeur[ed.ec].x;
-      const b = sc.cadre, marge = 1.25 * L;
+      const b = sc.cadre, marge = (o.structure ? 1.25 : .5) * L;
       const W0 = Math.max(300, zoneSvg.clientWidth || 320), H0 = ed.ec === 'topo' ? 230 : 250;
       if (!ed.vue) {
         const cx = (b.x1 + b.x2) / 2, cy = (b.y1 + b.y2) / 2;
@@ -1058,7 +1179,8 @@
       const w = Math.round(v.x2 - v.x1), h = Math.round(v.y2 - v.y1);
       svg.setAttribute('viewBox', `${r1(v.x1)} ${r1(v.y1)} ${w} ${h}`);
       svg.setAttribute('width', w); svg.setAttribute('height', h);
-      svg.style.width = w + 'px'; svg.style.height = h + 'px';
+      // la zone peut rétrécir un peu le dessin (jusqu'à 80 %) avant de défiler
+      Object.assign(svg.style, { width: w + 'px', maxWidth: '100%', minWidth: Math.round(w * (o.structure ? .8 : .6)) + 'px', height: 'auto' });
       // sélection, sommets, cibles tactiles
       let sel = '';
       if (ed.sel != null && sc.px[ed.sel]) {
@@ -1096,13 +1218,17 @@
     };
 
     function changement(premier) {
-      if (ed.outil === 'h' && (ed.hydro !== 'eleve' || ed.ec === 'topo')) ed.outil = 'dessin';
+      if (ed.outil === 'h' && (ed.hydro !== 'eleve' || ed.ec === 'topo') && o.structure) ed.outil = 'dessin';
+      ed.nom = o.nomDirect ? O.nommer(ed.mol) : null;
       ed.rendre();
       const eleve = ed.hydro === 'eleve' && ed.ec !== 'topo';
       const fb = O.formuleBrute(ed.mol, { html: true });
-      info.innerHTML = eleve
+      let h = '';
+      if (o.brute) h = eleve
         ? `Formule brute avec tes H : <b>${O.formuleBrute(ed.mol, { html: true, h: ed.h.map(x => x || 0) })}</b>${ed.hJustes() ? ' ✓' : ''}`
         : `Formule brute : <b>${fb}</b>`;
+      if (ed.nom) h += `<span class="orga-ed-nom">Ta molécule : ${ed.nom.horsProgramme ? `<i>nom hors programme</i> (${ed.nom.horsProgramme})` : nomHTML(ed.nom.parties)}</span>`;
+      info.innerHTML = h;
       if (!premier || o.surChangeDebut) { if (o.surChange) o.surChange(ed); }
     }
     ed.changement = changement;
@@ -1123,11 +1249,13 @@
       changement();
     };
     ed.charger = charger;
+    // éditeur figé : plus de modification (réponse affichée, partie terminée)
+    ed.figer = function () { ed.fige = true; racine.classList.add('orga-ed-fige'); ed.sel = null; ed.outil = 'aucun'; ed.rendre(); };
 
     /* ----- événements ----- */
     racine.addEventListener('click', ev => {
       const b = ev.target.closest('button');
-      if (!b || !racine.contains(b) || b.closest('.orga-bulle')) return;
+      if (ed.fige || !b || !racine.contains(b) || b.closest('.orga-bulle') || b.classList.contains('orga-info')) return;
       if (b.dataset.ec) ed.changerEcriture(b.dataset.ec);
       else if (b.dataset.el) { ed.el = b.dataset.el; if (ed.outil !== 'dessin') ed.outil = 'dessin'; ed.rendre(); }
       else if (b.dataset.ordre) { ed.ordre = +b.dataset.ordre; if (ed.outil !== 'dessin') ed.outil = 'dessin'; ed.rendre(); }
@@ -1152,6 +1280,7 @@
     svg.addEventListener('click', ev => {
       // clic qui suit un glisser (maquette C) : ignoré une seule fois
       if (ed.ignorerClic) { const recent = Date.now() - ed.ignorerClic < 300; ed.ignorerClic = 0; if (recent) return; }
+      if (ed.fige) return;
       const cible = cibleDe(ev.target);
       if (ed.outil === 'gomme') return gommer(cible);
       if (ed.outil === 'h') return outilH(cible);
@@ -1162,18 +1291,23 @@
 
     if (mode.installer) mode.installer(ed);
     charger(o.depart, {});
+    if (!o.structure) message(ed.ec === 'developpee' ? 'Touche un atome pour lui ajouter un H, touche un H pour l\'enlever.' : 'Touche chaque atome et choisis ses H.', 'info');
     racine.__ed = ed;           // accès depuis la page (tests, outils)
     return ed;
   }
 
   /* ============================================================
      CONVERSION : passer d'une écriture à l'autre par les gestes du cours
-     ORGA.conversion(zone, { mol, de, vers, compterH, surFin })
+     ORGA.conversion(zone, { mol, de, vers, compterH, surFin, surErreur })
        de → vers : 'developpee' → 'semi'   « on enlève les liaisons des H et on les regroupe sur leur atome »
                    'semi' → 'topo'         « on efface tous les CH »
                    'topo' → 'semi'         « on ajoute un C avec le bon nombre de H au bout de chaque trait… »
                    'developpee' → 'topo'   les deux premières à la suite
        compterH : l'élève choisit le nombre de H (CH₃, CH₂…) au lieu d'un repli automatique
+       phrase   : false : la phrase du cours n'est pas rappelée au-dessus du dessin
+       surFin() : conversion faite ; surErreur(message) : geste faux (pour compter les erreurs)
+       Topologique → semi-développée : la conversion est finie quand tous les C sont écrits ;
+       « Redresser en semi-développée » est proposé ensuite, facultatif.
      ============================================================ */
   const PHRASES = {
     replier: 'On enlève les liaisons des H et on les regroupe sur leur atome.',
@@ -1208,6 +1342,7 @@
     const message = (t, type) => {
       msg.innerHTML = t ? (type ? '' : '<b>Ce n\'est pas ça.</b> ') + t : '';
       msg.className = 'orga-ed-msg' + (t ? (type === 'ok' ? ' callout-success' : type === 'info' ? ' callout' : ' callout-danger') : '');
+      if (t && !type && o.surErreur) o.surErreur(t);
     };
     const ph = () => phases[st.phase];
 
@@ -1255,11 +1390,21 @@
 
     function rendre() {
       const p = ph();
+      racine.querySelector('.orga-conv-phrase').hidden = o.phrase === false;
       racine.querySelector('.orga-conv-phrase').innerHTML = `<b class="cle-titre">${p === 'replier' ? 'Développée → semi-développée' : p === 'effacer' ? 'Semi-développée → topologique' : 'Topologique → semi-développée'}.</b> « ${PHRASES[p]} »`;
       racine.querySelector('.orga-conv-consigne').textContent = st.fini ? '' : CONSIGNES[p];
       if (p === 'replier') st.sc = dessin('developpee', PX.developpee, { replies: st.replies });
       else if (p === 'effacer') st.sc = dessin('semi', PX.semi, { masquer: st.effaces });
       else st.sc = dessin('topo', PX.topo, { etiqueter: st.ajoutes });
+    }
+    // réponse affichée : la conversion faite d'un coup
+    function montrer() {
+      if (st.anime) return;
+      st.fini = true; st.cadre = null; actions.innerHTML = '';
+      racine.querySelector('.orga-conv-consigne').textContent = '';
+      const fin = o.vers === 'topo' ? 'topo' : 'semi';
+      dessin(fin, fin === 'topo' ? PX.topo : PX.semi, {});
+      message('Voici la formule ' + (fin === 'topo' ? 'topologique.' : 'semi-développée.'), 'info');
     }
 
     // animation des positions (et de l'écartement) d'une écriture à l'autre
@@ -1290,16 +1435,19 @@
         actions.innerHTML = '<button type="button" class="btn-primary orga-conv-zz">Mettre en zigzag</button>';
         message('Tous les C sont effacés : il reste les traits et les autres atomes.', 'info');
       } else {
-        actions.innerHTML = '<button type="button" class="btn-primary orga-conv-sd">Redresser en semi-développée</button>';
-        message('Tous les C sont écrits avec leurs H.', 'info');
+        // tous les C sont écrits : c'est déjà une formule semi-développée (redresser est facultatif)
+        rendre();
+        terminer('Tous les C sont écrits avec leurs H : c\'est la formule semi-développée.', true);
       }
     }
 
-    function terminer(t) {
+    function terminer(t, redresser) {
       st.fini = true;
-      actions.innerHTML = '<button type="button" class="btn-secondary orga-conv-refaire">↺ Recommencer</button>';
+      racine.querySelector('.orga-conv-consigne').textContent = '';
+      actions.innerHTML = (redresser ? '<button type="button" class="btn-secondary orga-conv-sd">Redresser en semi-développée <span class="orga-facultatif">(facultatif)</span></button>' : '') +
+        (o.refaire === false ? '' : '<button type="button" class="btn-secondary orga-conv-refaire">↺ Recommencer</button>');
       message(t, 'ok');
-      if (o.surFin) o.surFin();
+      if (o.surFin && !st.finSignalee) { st.finSignalee = true; o.surFin(); }
     }
 
     actions.addEventListener('click', ev => {
@@ -1311,9 +1459,9 @@
       } else if (b.classList.contains('orga-conv-sd')) {
         actions.innerHTML = ''; message('');
         const tous = new Set(mol.atomes.map((a, i) => i));
-        transition('topo', PX.topo, PX.semi, { etiqueter: tous }, () => { st.cadre = null; st.fini = true; dessin('semi', PX.semi, {}); terminer('Voici la formule semi-développée.'); });
+        transition('topo', PX.topo, PX.semi, { etiqueter: tous }, () => { st.cadre = null; st.fini = true; dessin('semi', PX.semi, {}); terminer('Voici la formule semi-développée, redressée.'); });
       } else if (b.classList.contains('orga-conv-refaire')) {
-        Object.assign(st, { phase: 0, replies: new Set(), effaces: new Set(), ajoutes: new Set(), fini: false, cadre: null });
+        Object.assign(st, { phase: 0, replies: new Set(), effaces: new Set(), ajoutes: new Set(), fini: false, cadre: null, redresse: false });
         actions.innerHTML = ''; message('');
         rendre();
       }
@@ -1378,11 +1526,761 @@
     });
 
     rendre();
-    return { racine, recommencer: () => actions.querySelector('.orga-conv-refaire') };
+    return { racine, montrer, recommencer: () => actions.querySelector('.orga-conv-refaire') };
+  }
+
+  /* ============================================================
+     BULLES D'AIDE ⓘ (au toucher, pas au survol)
+     info(html, label) → bouton ⓘ suivi de son texte caché ; un appui ouvre la bulle,
+     un autre appui (ou ailleurs, ou Échap) la ferme. Plusieurs bulles par page.
+     ============================================================ */
+  function info(html, label) {
+    return `<button type="button" class="orga-info" aria-label="${(label || 'Aide').replace(/"/g, '&quot;')}" aria-expanded="false"><span aria-hidden="true">i</span></button><span class="orga-info-txt" hidden>${html}</span>`;
+  }
+  let bulleInfo = null;
+  function fermerInfo() {
+    if (!bulleInfo) return;
+    bulleInfo.b.setAttribute('aria-expanded', 'false');
+    bulleInfo.el.remove();
+    bulleInfo = null;
+  }
+  document.addEventListener('click', ev => {
+    const b = ev.target.closest && ev.target.closest('.orga-info');
+    if (!b) return;
+    ev.preventDefault();
+    if (bulleInfo && bulleInfo.b === b) { fermerInfo(); return; }
+    fermerInfo();
+    const t = b.nextElementSibling && b.nextElementSibling.classList.contains('orga-info-txt') ? b.nextElementSibling.innerHTML : '';
+    const el = document.createElement('div');
+    el.className = 'orga-bulle-info';
+    el.setAttribute('role', 'note');
+    el.innerHTML = t;
+    document.body.appendChild(el);
+    const r = b.getBoundingClientRect(), w = el.offsetWidth;
+    el.style.left = (Math.max(8, Math.min(document.documentElement.clientWidth - w - 8, r.left + r.width / 2 - w / 2)) + window.scrollX) + 'px';
+    el.style.top = (r.bottom + 6 + window.scrollY) + 'px';
+    b.setAttribute('aria-expanded', 'true');
+    bulleInfo = { b, el };
+  });
+  document.addEventListener('pointerdown', ev => { if (bulleInfo && !bulleInfo.el.contains(ev.target) && !bulleInfo.b.contains(ev.target)) fermerInfo(); }, true);
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape') fermerInfo(); });
+
+  // règles du cours avec un mini-exemple (bulles des outils de nomenclature)
+  const BULLES = {
+    chaine: '<b>La chaîne la plus longue</b> donne le nom. Elle n\'est pas toujours dessinée en ligne droite : suis tous les chemins d\'un bout à l\'autre. À longueur égale, on prend celle qui porte le plus de ramifications.',
+    chaineGroupe: '<b>La chaîne principale contient le groupe caractéristique</b> : pour une C=C, ses deux C ; sinon le C qui porte le groupe.',
+    ramif: '<b>Nom d\'une ramification</b> : le nom de l\'alcane, en remplaçant « ane » par « yl ». –CH₃ : méthyl ; –CH₂–CH₃ : éthyl ; –CH₂–CH₂–CH₃ : propyl.',
+    numeros: '<b>Numérotation</b> : on numérote la chaîne principale par la droite ou par la gauche, pour que les numéros soient les plus petits possibles. Exemple : 2-méthylpentane, pas 4-méthylpentane.',
+    groupeNum: '<b>Le n° est celui de l\'atome de carbone qui porte le groupe caractéristique.</b> Il a le plus petit numéro possible. Exemple : butan-2-ol. Pour -al, -oïque, -oate, -amide, ce C est le n° 1 (on ne l\'écrit pas).',
+    multi: '<b>Ramifications identiques</b> : di (2), tri (3), tétra (4), penta (5), hexa (6), avec un numéro pour chacune. 2,3,5-triméthyl : un –CH₃ sur les carbones 2, 3 et 5.',
+    alpha: '<b>Ordre alphabétique</b> : é avant m (éthyl avant méthyl) ; di, tri… ne comptent pas. Exemple : 3-éthyl-2,2-diméthylhexane.',
+    tirets: '<b>Tirets et virgules</b> : une virgule entre deux chiffres (2,3), un tiret entre un chiffre et une lettre (2-méthyl, butan-2-ol), rien entre deux lettres (méthylpentane). Pas d\'espace, sauf « acide … » et « … de … ».',
+    racines: '<b>Nombre de C de la chaîne</b> : méth 1, éth 2, prop 3, but 4, pent 5, hex 6, hept 7, oct 8, non 9, déc 10. Alcane : …ane (hexane).',
+    suffixes: '<b>Terminaisons</b> : alcane -ane ; alcène -ène (but-2-ène) ; alcool -ol (butan-2-ol) ; aldéhyde -al (butanal) ; cétone -one (butan-2-one) ; acide carboxylique acide …-oïque (acide butanoïque) ; ester …oate de …yle ; amine -amine (butan-1-amine) ; amide -amide (butanamide). Devant une voyelle, « ane » perd son e : butan-2-ol.',
+    ester: '<b>Ester « alcanoate d\'alkyle »</b> : la chaîne qui porte le C=O donne l\'alcanoate (son C est le n° 1) ; la chaîne liée à l\'O donne l\'alkyle, numérotée à partir du C lié à l\'O. Exemple : CH₃–COO–CH₂–CH₂–CH₂–CH₃, éthanoate de butyle.',
+    N: '<b>N-</b> : la ramification est accrochée sur le N (pas sur un C). Exemple : N-éthyléthanamine : sur le N, il y a un éthyle accroché.',
+    entourer: '<b>Un groupe caractéristique</b> contient un atome autre que C et H (O, N, halogène), ou une double liaison C=C. Entoure tous ses atomes : C=O et OH sur le même C forment un seul groupe, le groupe carboxyle.',
+    familles: '<b>Familles</b> : C=C alcène ; –OH (hydroxyle) alcool ; C=O (carbonyle) au bout de la chaîne aldéhyde, entre deux C cétone ; –COOH (carboxyle) acide carboxylique ; –COO–C (ester) ester ; N (amine) amine ; –CO–N (amide) amide ; F, Cl, Br, I (halogéno) halogénoalcane.',
+    depart: '<b>Le n° 1</b> est à un bout de la chaîne principale : celui qui donne les plus petits numéros (d\'abord au groupe caractéristique, puis aux ramifications).',
+  };
+
+  /* ============================================================
+     DESSIN À TOUCHER (outils : entourer, chaîne, ramifications)
+     dessinActif(zone, mol, { ecriture, hCibles }) → d
+       d.rendre({ choisis: Set d'atomes, choisisH: Set de H, couleurs, numeros, entourer })
+       d.surToucher = c => …   c : { type: 'atome', i } ou { type: 'h', k, de }
+     Disposition fixe (calculée une fois) ; cadre stable (il ne fait que grandir).
+     ============================================================ */
+  function dessinActif(zone, mol, o) {
+    o = o || {};
+    const ec = o.ecriture || 'semi', f = 18;
+    const racine = document.createElement('div');
+    racine.className = 'orga-actif';
+    racine.innerHTML = '<div class="orga-conv-zone orga-actif-zone"><svg class="orga-mol" role="img"></svg></div>';
+    zone.appendChild(racine);
+    const svg = racine.querySelector('svg');
+    const px = scene(mol, ec, { police: f, chaine: o.chaine }).px;
+    let cadre = null;
+    const d = {
+      racine, svg, mol, ec, px, sc: null,
+      rendre(x) {
+        x = x || {};
+        const sc = scene(mol, ec, { px, police: f, couleurs: x.couleurs, numeros: x.numeros, entourer: x.entourer, doublets: o.doublets });
+        d.sc = sc;
+        const b = sc.cadre, m = 24;
+        if (!cadre) cadre = { x1: b.x1 - m, y1: b.y1 - m, x2: b.x2 + m, y2: b.y2 + m };
+        cadre.x1 = Math.min(cadre.x1, b.x1 - m); cadre.y1 = Math.min(cadre.y1, b.y1 - m); cadre.x2 = Math.max(cadre.x2, b.x2 + m); cadre.y2 = Math.max(cadre.y2, b.y2 + m);
+        const w = Math.round(cadre.x2 - cadre.x1), h = Math.round(cadre.y2 - cadre.y1);
+        svg.setAttribute('viewBox', `${r1(cadre.x1)} ${r1(cadre.y1)} ${w} ${h}`);
+        svg.setAttribute('width', w); svg.setAttribute('height', h);
+        Object.assign(svg.style, { width: w + 'px', maxWidth: '100%', minWidth: Math.round(Math.min(w, w * .8)) + 'px', height: 'auto' });
+        // atomes choisis : fond sous l'étiquette ou cercle autour du sommet
+        let sous = '';
+        (x.choisis || new Set()).forEach(i => {
+          const p = sc.px[i], e = sc.etiq[i];
+          if (!p) return;
+          if (!e) sous += `<circle class="orga-choisi" cx="${r1(p.x)}" cy="${r1(p.y)}" r="12"/>`;
+          else { const bt = e.boite, mm = 5; sous += `<rect class="orga-choisi" x="${r1(p.x + bt.x1 - mm)}" y="${r1(p.y + bt.y1 - mm)}" width="${r1(bt.x2 - bt.x1 + 2 * mm)}" height="${r1(bt.y2 - bt.y1 + 2 * mm)}" rx="10"/>`; }
+        });
+        (x.choisisH || new Set()).forEach(k => { const hh = sc.H[k]; if (hh) sous += `<circle class="orga-choisi" cx="${r1(hh.x)}" cy="${r1(hh.y)}" r="11"/>`; });
+        let cibles = '';
+        if (!x.fige) {
+          sc.px.forEach((p, i) => { cibles += `<circle class="orga-cible" data-cible="a${i}" cx="${r1(p.x)}" cy="${r1(p.y)}" r="22"/>`; });
+          if (o.hCibles) sc.H.forEach((hh, k) => { cibles += `<circle class="orga-cible" data-cible="h${k}" cx="${r1(hh.x)}" cy="${r1(hh.y)}" r="13"/>`; });
+        }
+        svg.innerHTML = svgCorps(sc, { sous, points: ec === 'topo' && !x.fige }) + `<g class="orga-cibles">${cibles}</g>`;
+        svg.setAttribute('aria-label', x.label || o.label || NOM_EC[ec]);
+        racine.classList.toggle('orga-actif-fige', !!x.fige);
+      },
+    };
+    svg.addEventListener('click', ev => {
+      const c = ev.target.closest('[data-cible]');
+      if (!c || !d.surToucher) return;
+      const v = c.dataset.cible, k = +v.slice(1);
+      d.surToucher(v[0] === 'a' ? { type: 'atome', i: k } : { type: 'h', k, de: d.sc.H[k] && d.sc.H[k].de });
+    });
+    return d;
+  }
+
+  // petit élément HTML
+  function el(tag, cls, html) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html != null) e.innerHTML = html;
+    return e;
+  }
+  const secouer = e => { if (!e) return; e.classList.remove('er-secoue'); void e.offsetWidth; e.classList.add('er-secoue'); };
+  const molDe = m => (typeof m === 'string' ? O.lire(m) : m);
+  // désignation d'un atome dessiné dans un message : « CH₂ », « C₂H₅ », « ce sommet »
+  function nomAtome(mol, i, ec) {
+    const a = mol.atomes[i];
+    if (a.etiq) return formuleHTML(a.etiq);
+    if (ec === 'topo' && a.el === 'C') return 'Ce sommet (un C avec ses H)';
+    return O.etiquetteH(a.el, ec === 'developpee' ? 0 : O.nbH(mol, i), true);
+  }
+
+  /* ============================================================
+     ENTOURER LES GROUPES CARACTÉRISTIQUES
+     (repris de rappels-1ere-sti2d/ RP.partieEntourer, étendu à toutes les familles et aux trois écritures)
+     partieEntourer(mol, { ecriture, condenser, q }) → partie 'perso' :
+       l'élève touche les atomes (et les H en développée), puis Valider ; groupes entourés et numérotés.
+     partiesNommerGroupes(mol) → une partie 'choix' par sorte de groupe : « groupe … · famille des … »
+     ============================================================ */
+  function prepGroupes(mol, o) {
+    const cond = o && o.condenser ? O.condenser(mol, o.condenser) : null;
+    const md = cond ? cond.mol : mol;
+    const map = i => (cond ? cond.vers.get(i) : i);
+    const gs = O.groupes(mol).map(g => Object.assign({}, g, { at: [...new Set(g.atomes.map(map))], aH: g.avecH.map(map) }));
+    return { md, gs };
+  }
+  const entouresDe = gs => gs.map((g, k) => ({ atomes: g.at, avecH: g.aH, numero: gs.length > 1 ? k + 1 : null }));
+  function legendeHTML(gs) {
+    return '<ul class="orga-legende">' + gs.map((g, k) => `<li>${gs.length > 1 ? `<i>${k + 1}</i> ` : ''}<b>${g.nomGroupe === 'C=C' ? 'double liaison C=C' : g.nomGroupe}</b> (${g.familles}${g.classe && g.cle === 'amine' ? ', ' + g.classe : ''})</li>`).join('') + '</ul>';
+  }
+  // correction : le dessin avec ses groupes entourés, puis la légende
+  function corrigeGroupes(mol, o) {
+    const { md, gs } = prepGroupes(mol, o || {});
+    return dessinHTML(md, { ecriture: (o && o.ecriture) || 'semi', entourer: entouresDe(gs), sansAide: true }) + legendeHTML(gs);
+  }
+
+  // diagnostic d'un entourage (atomes et H choisis) ; null si c'est juste
+  function diagEntourer(md, gs, choisis, hPar, ec) {
+    const attendus = new Set(gs.flatMap(g => g.at));
+    if (!choisis.size) return 'Touche les atomes à entourer : ils se marquent. Touche-les à nouveau pour les libérer.';
+    const intrus = [...choisis].find(i => !attendus.has(i));
+    if (intrus != null) {
+      const a = md.atomes[intrus];
+      if (a.el === 'C' || a.etiq) return `${nomAtome(md, intrus, ec)} ne contient que des atomes de carbone et d'hydrogène : ce n'est pas un groupe caractéristique (il faut un atome O, N, un halogène, ou une double liaison C=C).`;
+      return 'Entoure seulement les atomes des groupes caractéristiques.';
+    }
+    const hIntrus = hPar.find(de => !attendus.has(de));
+    if (hIntrus != null) return 'Ce H est lié à un atome qui ne fait pas partie d\'un groupe caractéristique.';
+    for (const g of gs) {
+      const pris = g.at.filter(i => choisis.has(i));
+      if (!pris.length || pris.length === g.at.length) continue;
+      const el = i => md.atomes[i].el;
+      const que = els => pris.every(i => els.includes(el(i)));
+      if (g.cle === 'acide') return que(['O']) && pris.length === 1 && O.nbH(md, pris[0]) === 1
+        ? 'Ce OH est sur un C qui porte aussi un =O : C, =O et OH forment ensemble un <b>groupe carboxyle</b> (acide ≠ alcool). Entoure les trois.'
+        : 'Le groupe carboxyle est formé du C, du O lié par une double liaison et du OH, sur le même C : entoure-les tous.';
+      if (g.cle === 'ester') return 'Le groupe ester est formé du C, du =O et du O lié à un autre C, sur le même C : entoure les trois (ester ≠ cétone).';
+      if (g.cle === 'amide') return que(['N']) ? 'Ce N est lié au C d\'un C=O : C, =O et N forment ensemble un <b>groupe amide</b> (amide ≠ amine). Entoure les trois.'
+        : 'Le N lié au C du C=O fait partie du groupe : C, =O et N forment ensemble un <b>groupe amide</b> (amide ≠ cétone). Entoure les trois.';
+      if (g.cle === 'aldehyde' || g.cle === 'cetone') return 'Le groupe carbonyle, c\'est le C et le O liés par la double liaison : entoure les deux.';
+      if (g.cle === 'alcene') return 'Pour la double liaison C=C, entoure ses deux atomes de carbone.';
+    }
+    const oublie = gs.find(g => !g.at.some(i => choisis.has(i)));
+    if (oublie) return `Il manque ${gs.length > 1 ? 'au moins un' : 'le'} groupe caractéristique : repère les atomes O, N, les halogènes et les doubles liaisons C=C.`;
+    return null;
+  }
+
+  function partieEntourer(mol0, o) {
+    o = o || {};
+    const mol = molDe(mol0), ec = o.ecriture || 'semi';
+    const { md, gs } = prepGroupes(mol, o);
+    return Object.assign({
+      type: 'perso',
+      q: o.q != null ? o.q : 'Touche les atomes qui forment les groupes caractéristiques pour les entourer, puis valide.',
+      // la légende (noms des groupes) seulement sur demande : elle donnerait la réponse des questions suivantes
+      solution: o.legende ? legendeHTML(gs) : `<p>${gs.length > 1 ? `Les ${gs.length} groupes caractéristiques sont entourés et numérotés.` : 'Le groupe caractéristique est entouré.'}</p>`,
+      monter(zone, api) {
+        const da = dessinActif(zone, md, { ecriture: ec, hCibles: ec === 'developpee' });
+        if (md.atomes.some(a => a.etiq)) zone.insertAdjacentHTML('beforeend', aidesCondensees(md));
+        const act = el('div', 'er-actions orga-actions-partie', `<button type="button" class="btn-primary">Valider</button>${info(BULLES.entourer, 'Aide : entourer un groupe')}`);
+        zone.appendChild(act);
+        const choisis = new Set(), choisisH = new Set();
+        let fige = false;
+        // groupe dont tous les atomes sont touchés : entouré tout de suite, sans numéro
+        const rendre = () => da.rendre(fige ? { entourer: entouresDe(gs), fige: true }
+          : { choisis, choisisH, entourer: gs.filter(g => g.at.every(i => choisis.has(i))).map(g => ({ atomes: g.at, avecH: [], provisoire: true })) });
+        da.surToucher = c => {
+          if (fige || api.fini()) return;
+          const s = c.type === 'atome' ? choisis : choisisH, k = c.type === 'atome' ? c.i : c.k;
+          if (s.has(k)) s.delete(k); else s.add(k);
+          api.effacer();
+          rendre();
+        };
+        const fermer = () => { fige = true; act.remove(); rendre(); };
+        act.querySelector('.btn-primary').onclick = () => {
+          if (fige || api.fini()) return;
+          const d = diagEntourer(md, gs, choisis, [...choisisH].map(k => da.sc.H[k].de), ec);
+          if (!d) { fermer(); api.reussi(); return; }
+          secouer(da.racine);
+          if (!choisis.size) api.message(d); else api.erreur(d);
+        };
+        rendre();
+        return { montrer() { choisis.clear(); choisisH.clear(); fermer(); } };
+      },
+    }, o.partie);
+  }
+
+  // propositions « groupe … · famille des … » : la bonne et trois confusions classiques
+  const CONFUSIONS = {
+    alcool: [['alcool', 'acide', 'Le groupe hydroxyle –OH, sur un C qui ne porte pas de =O, donne la famille des <b>alcools</b>.'], ['acide', 'acide', 'Ce OH est sur un C qui ne porte pas de =O : c\'est un groupe <b>hydroxyle</b>.'], ['cetone', 'cetone', 'Pas de C=O ici : le O est lié à un H, c\'est –OH.']],
+    aldehyde: [['aldehyde', 'cetone', 'Le C du C=O est au bout de la chaîne et porte un H : famille des <b>aldéhydes</b>.'], ['alcool', 'alcool', 'Le O est lié au C par une double liaison : C=O, groupe <b>carbonyle</b>.'], ['acide', 'acide', 'Pas de OH sur ce C : ce n\'est pas un carboxyle.']],
+    cetone: [['cetone', 'aldehyde', 'Le C du C=O est entre deux C (il ne porte pas de H) : famille des <b>cétones</b>.'], ['alcool', 'alcool', 'Le O est lié au C par une double liaison : C=O, groupe <b>carbonyle</b>.'], ['ester', 'ester', 'Il n\'y a pas de second O sur ce C : ce n\'est pas un ester.']],
+    acide: [['alcool', 'alcool', 'Acide ≠ alcool : le OH est sur un C qui porte aussi un =O ; ensemble, c\'est un groupe <b>carboxyle</b>.'], ['cetone', 'cetone', 'Acide ≠ cétone : le C du C=O porte aussi un OH ; ensemble, c\'est un groupe <b>carboxyle</b>.'], ['ester', 'ester', 'Le O lié au C=O porte un H, pas un C : ce n\'est pas un ester.']],
+    ester: [['acide', 'acide', 'Ester ≠ acide : le O lié au C=O est lié à un C, pas à un H.'], ['cetone', 'cetone', 'Le C du C=O porte aussi un O lié à un C : groupe <b>ester</b>.'], ['alcool', 'alcool', 'Aucun O ne porte de H ici : pas de groupe hydroxyle.']],
+    amine: [['amide', 'amide', 'Le N n\'est pas lié au C d\'un C=O : c\'est un groupe <b>amine</b>.'], ['amine', 'amide', 'Le groupe amine donne la famille des <b>amines</b>.'], ['alcool', 'alcool', 'L\'atome entouré est un N, pas un O.']],
+    amide: [['amine', 'amine', 'Amide ≠ amine : le N est lié au C d\'un C=O ; ensemble, c\'est un groupe <b>amide</b>.'], ['cetone', 'cetone', 'Amide ≠ cétone : le C du C=O porte aussi un N ; ensemble, c\'est un groupe <b>amide</b>.'], ['amide', 'amine', 'Le groupe amide donne la famille des <b>amides</b>.']],
+    alcene: [['alcene', 'alcane', 'Une double liaison C=C donne la famille des <b>alcènes</b> (les alcanes n\'ont que des liaisons simples).'], ['cetone', 'cetone', 'C=C : deux atomes de carbone, pas de O.'], ['alcool', 'alcool', 'Il n\'y a pas de O dans ce groupe.']],
+    halogeno: [['halogeno', 'alcane', 'Un halogène (F, Cl, Br, I) sur la chaîne donne la famille des <b>halogénoalcanes</b>.'], ['alcool', 'alcool', 'L\'atome entouré est un halogène, pas un O.'], ['amine', 'amine', 'L\'atome entouré est un halogène, pas un N.']],
+  };
+  const NOM_GROUPE = c => (c === 'alcene' ? 'double liaison C=C' : c === 'alcane' ? '' : O.FAMILLES[c].nomGroupe);
+  const FAMILLES_TXT = c => (c === 'alcane' ? 'alcanes' : O.FAMILLES[c].familles);
+  const combo = (g, f) => `${NOM_GROUPE(g)} · famille des ${FAMILLES_TXT(f)}`;
+  const melanger = t => { const a = t.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  function partieNommerGroupe(cle, q, numeros) {
+    const conf = CONFUSIONS[cle];
+    const options = [{ id: 'ok', label: combo(cle, cle) }].concat(conf.map((c, k) => ({ id: 'c' + k, label: combo(c[0], c[1]) })));
+    const indices = {};
+    conf.forEach((c, k) => { indices['c' + k] = c[2]; });
+    return {
+      type: 'choix', q, options: melanger(options), bonne: 'ok', indices, colonne: true, melanger: false,
+      solution: `<p>Groupe ${numeros ? numeros + ' ' : ''}: <b>${NOM_GROUPE(cle)}</b> (${FAMILLES_TXT(cle)}).</p>`,
+    };
+  }
+  function partiesNommerGroupes(mol0) {
+    const gs = O.groupes(molDe(mol0));
+    const cles = [...new Set(gs.map(g => g.cle))];
+    return cles.map(cle => {
+      const ns = gs.map((g, k) => (g.cle === cle ? k + 1 : 0)).filter(Boolean);
+      const txt = gs.length === 1 ? '' : ns.length > 1 ? `n° ${ns.slice(0, -1).join(', ')} et ${ns[ns.length - 1]}` : `n° ${ns[0]}`;
+      const q = gs.length === 1 ? 'Nomme le groupe entouré et donne sa famille.' : `Nomme le groupe entouré ${txt}${ns.length > 1 ? ' (ils sont identiques)' : ''} et donne sa famille.`;
+      return partieNommerGroupe(cle, q, txt);
+    });
+  }
+
+  /* ============================================================
+     CHAÎNE PRINCIPALE À TOUCHER (séries : « toucher la chaîne la plus longue »)
+     ============================================================ */
+  function partieChaine(mol0, o) {
+    o = o || {};
+    const mol = molDe(mol0), res = O.nommer(mol), ec = o.ecriture || 'semi';
+    return Object.assign({
+      type: 'perso',
+      q: o.q != null ? o.q : 'Touche les C de la chaîne principale (la plus longue), puis valide.',
+      solution: `<p>La chaîne principale a ${res.n} C${res.chaine.length ? '' : ''}.</p>`,
+      monter(zone, api) {
+        const da = dessinActif(zone, mol, { ecriture: ec });
+        const act = el('div', 'er-actions orga-actions-partie', `<button type="button" class="btn-primary">Valider la chaîne</button>${info(BULLES.chaine, 'Aide : chaîne principale')}`);
+        zone.appendChild(act);
+        const choisis = new Set();
+        let fige = false;
+        da.surToucher = c => {
+          if (fige || api.fini() || c.type !== 'atome') return;
+          if (mol.atomes[c.i].el !== 'C') { api.message('La chaîne carbonée ne contient que des atomes de carbone.'); return; }
+          if (choisis.has(c.i)) choisis.delete(c.i); else choisis.add(c.i);
+          api.effacer(); da.rendre({ choisis });
+        };
+        const fermer = ch => { fige = true; act.remove(); da.rendre({ couleurs: { chaine: ch }, fige: true }); };
+        act.querySelector('.btn-primary').onclick = () => {
+          if (fige || api.fini()) return;
+          const r = O.evaluerChaine(mol, res, [...choisis]);
+          if (r.ok) { fermer([...choisis]); api.reussi(); return; }
+          secouer(da.racine);
+          if (!choisis.size) api.message(r.diag); else api.erreur(r.diag);
+        };
+        da.rendre({ choisis });
+        return { montrer() { fermer(res.chaine); } };
+      },
+    }, o.partie);
+  }
+
+  /* ============================================================
+     NOMMER UNE MOLÉCULE, AVEC DES AIDES ACTIVABLES
+     partieNom(mol, { ecriture, cleAides, q, groupe }) → partie 'perso'
+     Aides (interrupteurs gardés dans localStorage[cleAides], toutes activées par défaut) :
+       couleurs : l'élève entoure le groupe (familles), touche la chaîne principale, le n° 1,
+                  puis chaque ramification ; chaque partie prend sa couleur ;
+       decoupe  : le nom en morceaux de la couleur des parties ; la chaîne d'abord ;
+                  tirets et virgules ajoutés tout seuls, nom complet dessous ;
+       bulles   : boutons ⓘ (règles du cours et mini-exemples).
+     ============================================================ */
+  const AIDES_DEFAUT = { couleurs: true, decoupe: true, bulles: true };
+  function lireAides(cle) {
+    if (!cle) return Object.assign({}, AIDES_DEFAUT);
+    try { return Object.assign({}, AIDES_DEFAUT, JSON.parse(localStorage.getItem(cle)) || {}); } catch (e) { return Object.assign({}, AIDES_DEFAUT); }
+  }
+  function ecrireAides(cle, a) { if (!cle) return; try { localStorage.setItem(cle, JSON.stringify(a)); } catch (e) { /* stockage indisponible */ } }
+  let aidesSession = null;   // réglage gardé pendant la page si le stockage est indisponible
+
+  function solutionNom(mol, res, ec) {
+    const ent = res.groupe ? [{ atomes: res.groupe.atomes, avecH: res.groupe.avecH }] : null;
+    const reg = res.variantes.length ? `<p class="orga-note">On regroupe les ramifications identiques, même si l'une est sur le N et l'autre sur un C : ${nomHTML(res.parties)} (on accepte aussi ${res.variantes[0]}).</p>` : '';
+    return `${dessinHTML(mol, { ecriture: ec, couleurs: res.couleurs, numeros: res.cyclo && res.ramifs.length < 2 ? null : res.numeros, entourer: ent })}<p class="orga-sol-nom">${nomHTML(res.parties)}</p>${reg}`;
+  }
+
+  function partieNom(mol0, o) {
+    o = Object.assign({ ecriture: 'semi' }, o);
+    const mol = molDe(mol0), res = O.nommer(mol);
+    return Object.assign({
+      type: 'perso',
+      q: o.q != null ? o.q : 'Donne le nom de cette molécule.',
+      solution: res.horsProgramme ? '' : `<p class="orga-sol-nom">${nomHTML(res.parties)}</p>${res.variantes.length ? `<p class="orga-note">On regroupe les ramifications identiques, même si l'une est sur le N et l'autre sur un C ; on accepte aussi ${res.variantes[0]}.</p>` : ''}`,
+      monter(zone, api) { return outilNom(zone, mol, res, o, api); },
+    }, o.partie);
+  }
+
+  function outilNom(zone, mol, res0, o, api) {
+    const ec = o.ecriture;
+    const racine = el('div', 'orga-nommer');
+    zone.appendChild(racine);
+    let fini = false, ctx = null;
+    const famille = !['alcane'].includes(res0.famille) && O.groupes(mol).length > 0;
+
+    function monter() {
+      racine.innerHTML = '';
+      const aides = aidesSession || lireAides(o.cleAides);
+      const B = (cle, label) => (aides.bulles ? info(BULLES[cle], label) : '');
+      // panneau des aides
+      const panneau = el('details', 'orga-aides');
+      panneau.innerHTML = `<summary>Aides</summary><div class="orga-aides-l">${[['couleurs', 'Couleurs : je repère le groupe, la chaîne, le n° 1 et les ramifications'], ['decoupe', 'Nom découpé : un morceau par partie de la molécule'], ['bulles', 'Bulles ⓘ : les règles du cours']]
+        .map(([k, t]) => `<label class="orga-interr"><input type="checkbox" data-aide="${k}"${aides[k] ? ' checked' : ''}> ${t}</label>`).join('')}</div>`;
+      racine.appendChild(panneau);
+      panneau.addEventListener('change', ev => {
+        const c = ev.target.closest('[data-aide]');
+        if (!c) return;
+        const a = Object.assign({}, aides, { [c.dataset.aide]: c.checked });
+        aidesSession = a; ecrireAides(o.cleAides, a);
+        if (!fini) { monter(); racine.querySelector('.orga-aides').open = true; }
+      });
+      const consigne = el('p', 'orga-nommer-consigne');
+      racine.appendChild(consigne);
+      const da = dessinActif(racine, mol, { ecriture: ec, chaine: res0.chaine });
+      if (mol.atomes.some(a => a.etiq)) racine.insertAdjacentHTML('beforeend', aidesCondensees(mol));
+      const legende = el('div', 'orga-ram-liste');
+      racine.appendChild(legende);
+      const act = el('div', 'er-actions orga-actions-partie');
+      racine.appendChild(act);
+      const champ = el('div', 'orga-nom-champ');
+      racine.appendChild(champ);
+
+      // état de la couleur du dessin
+      const st = { etape: null, choisis: new Set(), groupeFait: false, chaine: null, ordre: null, res: res0, faites: new Set() };
+      const couleursActuelles = () => {
+        const c = {};
+        if (st.groupeFait && st.res.groupe) c.groupe = O.groupes(mol).flatMap(g => g.atomes);
+        if (st.ordre) c.chaine = st.ordre;
+        else if (st.chaine) c.chaine = st.chaine;
+        st.res.ramifs.forEach((r, k) => { if (st.faites.has(k)) (c[r.classe] = c[r.classe] || []).push(...r.atomes); });
+        return c;
+      };
+      const rendre = () => da.rendre({
+        choisis: st.choisis, couleurs: couleursActuelles(), numeros: st.ordre && !(st.res.cyclo && st.res.ramifs.length < 2) ? st.ordre : null,
+        entourer: st.groupeFait ? O.groupes(mol).map(g => ({ atomes: g.atomes, avecH: g.avecH })) : null, fige: fini || st.etape === 'nom' || st.etape === 'groupeNom',
+      });
+      const ramifsATrouver = () => st.res.ramifs.map((r, k) => k).filter(k => !st.res.ramifs[k].halo);
+
+      function etape(e) {
+        st.etape = e; st.choisis.clear(); act.innerHTML = '';
+        if (e === 'groupe') {
+          consigne.innerHTML = `Entoure le groupe caractéristique : touche ses atomes, puis valide. ${B('entourer', 'Aide : groupe caractéristique')}`;
+          act.innerHTML = '<button type="button" class="btn-primary">Valider le groupe</button>';
+          act.querySelector('button').onclick = () => {
+            const gs = O.groupes(mol).map(g => Object.assign({}, g, { at: g.atomes, aH: g.avecH }));
+            const d = diagEntourer(mol, gs, st.choisis, [], ec);
+            if (d) { secouer(da.racine); if (!st.choisis.size) api.message(d); else api.erreur(d); return; }
+            api.effacer(); st.groupeFait = true; etape('groupeNom');
+          };
+        } else if (e === 'groupeNom') {
+          const g = st.res.groupe ? st.res.groupe.cle : 'halogeno';
+          const p = partieNommerGroupe(g, 'Nomme ce groupe et donne la famille de la molécule.');
+          consigne.innerHTML = `${p.q} ${B('familles', 'Aide : les familles')}`;
+          const box = el('div', 'orga-choix-box ph-choix ph-choix-col');
+          p.options.forEach(op => {
+            const b = el('button', 'btn-secondary', op.label);
+            b.type = 'button';
+            b.onclick = () => {
+              if (op.id === p.bonne) { b.classList.add('juste'); api.effacer(); setTimeout(() => etape('chaine'), 250); }
+              else { b.classList.add('faux'); b.disabled = true; api.erreur(p.indices[op.id]); }
+            };
+            box.appendChild(b);
+          });
+          act.appendChild(box);
+        } else if (e === 'chaine') {
+          consigne.innerHTML = `Touche les C de la chaîne principale${famille ? ' (la plus longue qui contient le groupe)' : ' (la plus longue)'}, puis valide. ${B('chaine', 'Aide : chaîne principale')}${famille ? B('chaineGroupe', 'Aide : chaîne et groupe') : ''}`;
+          act.innerHTML = '<button type="button" class="btn-primary">Valider la chaîne</button>';
+          act.querySelector('button').onclick = () => {
+            const r = O.evaluerChaine(mol, res0, [...st.choisis]);
+            if (!r.ok) { secouer(da.racine); if (!st.choisis.size) api.message(r.diag); else api.erreur(r.diag); return; }
+            api.effacer(); st.chaine = [...st.choisis]; etape('depart');
+          };
+        } else if (e === 'depart') {
+          consigne.innerHTML = `Touche le C n° 1 de la chaîne principale. ${B('depart', 'Aide : le n° 1')}${famille ? B('groupeNum', 'Aide : numéro du groupe') : B('numeros', 'Aide : numérotation')}`;
+        } else if (e === 'ramifs') {
+          if (!ramifsATrouver().length) return etape('nom');
+          consigne.innerHTML = `Touche les C de chaque ramification${st.res.famille === 'ester' ? ' (et de l\'alkyle, la chaîne liée à l\'O)' : ''} : elle prend la couleur de son type. ${B('ramif', 'Aide : ramifications')}${st.res.ramifs.some(r => r.pos === 'N') ? B('N', 'Aide : ramification sur le N') : ''}`;
+        } else if (e === 'nom') {
+          consigne.innerHTML = aides.decoupe ? 'Écris le nom, morceau par morceau : commence par la chaîne principale, c\'est la fin du nom.' : 'Écris le nom de la molécule.';
+          champNom(champ, aides);
+        }
+        majLegende();
+        rendre();
+      }
+      // types de ramifications déjà repérés, chacun dans sa couleur
+      function majLegende() {
+        const vus = new Set(), l = [];
+        st.res.ramifs.forEach((r, k) => {
+          if (!st.faites.has(k) || r.halo) return;
+          const cle = r.nom + (r.pos === 'N' ? 'N' : '');
+          if (vus.has(cle)) return;
+          vus.add(cle);
+          l.push(`<span class="orga-ram orga-n-${r.classe}">${r.alkyle ? 'alkyle : ' : ''}${r.nom}${r.pos === 'N' ? ' (sur le N)' : ''}</span>`);
+        });
+        legende.innerHTML = l.join('');
+      }
+
+      da.surToucher = c => {
+        if (fini || api.fini() || c.type !== 'atome') return;
+        const i = c.i, a = mol.atomes[i];
+        if (st.etape === 'groupe' || st.etape === 'chaine') {
+          if (st.etape === 'chaine' && a.el !== 'C') { api.message('La chaîne carbonée ne contient que des atomes de carbone.'); return; }
+          if (st.choisis.has(i)) st.choisis.delete(i); else st.choisis.add(i);
+          api.effacer(); rendre();
+        } else if (st.etape === 'depart') {
+          const r = O.evaluerDepart(mol, res0, st.chaine, i);
+          if (!r.ok) { secouer(da.racine); api.erreur(r.diag); return; }
+          api.effacer();
+          st.ordre = r.chaine;
+          st.res = O.nommer(mol, { chaine: r.chaine });
+          etape('ramifs');
+        } else if (st.etape === 'ramifs') {
+          const k = st.res.ramifs.findIndex(r => r.atomes.includes(i));
+          if (st.ordre.includes(i)) { api.message('Ce C fait partie de la chaîne principale.'); return; }
+          if (k < 0 || st.res.ramifs[k].halo) { api.message(a.el === 'C' ? 'Ce C n\'est pas dans une ramification.' : 'Cet atome fait partie du groupe caractéristique.'); return; }
+          if (st.faites.has(k)) return;
+          if (st.choisis.has(i)) st.choisis.delete(i); else st.choisis.add(i);
+          api.effacer();
+          // une ramification dont tous les C sont touchés prend la couleur de son type
+          st.res.ramifs.forEach((r, j) => {
+            if (st.faites.has(j) || r.halo) return;
+            const cs = r.atomes.filter(x => mol.atomes[x].el === 'C');
+            if (cs.every(x => st.choisis.has(x))) { st.faites.add(j); cs.forEach(x => st.choisis.delete(x)); }
+          });
+          if (ramifsATrouver().every(j => st.faites.has(j))) { etape('nom'); return; }
+          majLegende(); rendre();
+        }
+      };
+
+      // ---------- champ du nom : découpé (morceaux colorés) ou libre ----------
+      function champNom(z, aides) {
+        const res = st.res;
+        if (!aides.decoupe) {
+          z.innerHTML = `<div class="orga-nom-libre"><input type="text" class="orga-champ orga-champ-nom" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Nom de la molécule" placeholder="nom">${B('tirets', 'Aide : tirets et virgules')}${B('alpha', 'Aide : ordre alphabétique')}</div>
+            <div class="er-actions orga-actions-partie"><button type="button" class="btn-primary">Valider</button></div>`;
+          const inp = z.querySelector('input');
+          const valider = () => {
+            if (fini || api.fini()) return;
+            const d = O.diagnostiquerNom(inp.value, res);
+            if (d.vide) { api.message(d.diag); return; }
+            if (!d.ok) { secouer(inp); api.erreur(d.diag); return; }
+            inp.disabled = true; terminer(d.remarque);
+          };
+          inp.addEventListener('input', () => api.effacer());
+          inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); valider(); } });
+          z.querySelector('.btn-primary').onclick = valider;
+          return;
+        }
+        const ms = res.morceaux;
+        let h = '<div class="orga-morceaux">';
+        ms.forEach((m, k) => {
+          const coul = `style="--mc: var(--orga-${m.classe === 'chaine' ? 'chaine' : m.classe === 'groupe' ? 'groupe' : 'ram-' + m.classe.slice(1)})"`;
+          if (m.type === 'ramif') {
+            h += `<div class="orga-mx" data-k="${k}" ${coul}><span class="orga-mx-t">${m.halo ? 'Halogène' : 'Ramification'}</span>
+              <input type="text" class="orga-champ orga-mx-num" data-r="num" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Numéros" placeholder="n°">
+              <span class="orga-seg orga-mx-mult" role="group" aria-label="Préfixe">${['', 'di', 'tri', 'tétra'].map(x => `<button type="button" class="orga-pil" data-mult="${x}" aria-pressed="${x === '' ? 'true' : 'false'}">${x || '–'}</button>`).join('')}</span>
+              <input type="text" class="orga-champ orga-mx-nom" data-r="nom" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Nom de la ramification" placeholder="${m.halo ? 'chloro…' : 'méthyl…'}">
+              ${B(m.halo ? 'multi' : 'ramif', 'Aide : nom de la ramification')}${B('numeros', 'Aide : numéros')}${m.locs.includes('N') ? B('N', 'Aide : N-') : ''}</div>`;
+          } else if (m.type === 'chaine') {
+            h += `<div class="orga-mx" data-k="${k}" ${coul}><span class="orga-mx-t">Chaîne principale</span>
+              <input type="text" class="orga-champ orga-mx-chaine" data-r="chaine" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Chaîne principale" placeholder="${res.famille === 'alcane' || res.famille === 'halogeno' ? 'hexane…' : 'hexan…'}">${B('racines', 'Aide : nombre de C')}</div>`;
+          } else if (m.type === 'groupe') {
+            h += `<div class="orga-mx" data-k="${k}" ${coul}><span class="orga-mx-t">Groupe${m.acide ? ' (acide …)' : ''}</span>
+              <input type="text" class="orga-champ orga-mx-num" data-r="gnum" inputmode="numeric" autocomplete="off" aria-label="Numéro du groupe" placeholder="n°">
+              <input type="text" class="orga-champ orga-mx-nom" data-r="suf" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminaison" placeholder="terminaison">${B('suffixes', 'Aide : terminaisons')}${B('groupeNum', 'Aide : numéro du groupe')}</div>`;
+          } else if (m.type === 'alkyle') {
+            h += `<div class="orga-mx" data-k="${k}" ${coul}><span class="orga-mx-t">Alkyle (sur l'O)</span>
+              <input type="text" class="orga-champ orga-mx-nom" data-r="alk" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Alkyle" placeholder="éthyle…">${B('ester', 'Aide : ester')}</div>`;
+          }
+        });
+        h += `</div><p class="orga-nom-complet" aria-live="polite"></p><div class="er-actions orga-actions-partie"><button type="button" class="btn-primary">Valider</button>${B('alpha', 'Aide : ordre alphabétique')}${B('tirets', 'Aide : tirets et virgules')}</div>`;
+        z.innerHTML = h;
+        const lignes = [...z.querySelectorAll('.orga-mx')];
+        const ligneChaine = lignes.find(l => ms[+l.dataset.k].type === 'chaine');
+        const sa = x => O.sansAccent(String(x || '').trim().toLowerCase());
+        // la chaîne : « hex », « hexane », « hexan » acceptés ; le reste attend qu'elle soit juste
+        const chaineJuste = () => {
+          const m = sa(ligneChaine.querySelector('input').value).match(/^(cyclo)?(meth|eth|prop|but|pent|hex|hept|oct|non|dec)(an|ane)?$/);
+          return !!m && O.RACINES.map(O.sansAccent).indexOf(m[2]) + 1 === res.n && !!m[1] === res.cyclo;
+        };
+        const verrou = () => {
+          const ok = chaineJuste();
+          ligneChaine.classList.toggle('ok', ok);
+          lignes.forEach(l => { if (l !== ligneChaine) { l.classList.toggle('attend', !ok); l.querySelectorAll('input, button').forEach(x => { if (!x.classList.contains('orga-info')) x.disabled = !ok; }); } });
+        };
+        const lire = l => {
+          const v = r => { const x = l.querySelector(`[data-r="${r}"]`); return x ? x.value.trim() : ''; };
+          const mult = l.querySelector('[data-mult][aria-pressed="true"]');
+          return { num: v('num'), nom: v('nom'), chaine: v('chaine'), gnum: v('gnum'), suf: v('suf'), alk: v('alk'), mult: mult ? mult.dataset.mult : '' };
+        };
+        // nom complet assemblé (tirets et virgules ajoutés tout seuls)
+        const assembler = () => {
+          let pref = [], chaine = '', groupe = '', alk = '', acide = false;
+          lignes.forEach(l => {
+            const m = ms[+l.dataset.k], x = lire(l);
+            if (m.type === 'ramif') {
+              const locs = (x.num.match(/\d+|[nN]/g) || []).map(t => (/n/i.test(t) ? 'N' : t));
+              if (x.nom || locs.length) pref.push({ t: (locs.length ? locs.join(',') + '-' : '') + x.mult + x.nom.replace(/^-+|-+$/g, ''), c: m.classe });
+            } else if (m.type === 'chaine') {
+              chaine = chaineJuste() ? m.texte : x.chaine;
+            } else if (m.type === 'groupe') {
+              acide = m.acide;
+              const suf = x.suf.replace(/^[-\s\d]+/, '').replace(/^acide\s*/i, '');
+              const num = (x.gnum.match(/\d+/) || x.suf.match(/\d+/) || [''])[0];
+              groupe = suf ? (num ? `-${num}-${suf}` : suf) : '';
+            } else alk = x.alk;
+          });
+          const de = alk ? (/^[aeiouyhéèê]/i.test(alk) ? ' d\'' : ' de ') : '';
+          const texte = (acide ? 'acide ' : '') + pref.map(p => p.t).join('-') + chaine + groupe + de + alk;
+          const html = (acide ? '<span class="orga-n-groupe">acide </span>' : '') + pref.map(p => `<span class="orga-n-${p.c}">${p.t}</span>`).join('-') +
+            `<span class="orga-n-chaine">${chaine}</span><span class="orga-n-groupe">${groupe}</span>${de}${alk ? `<span class="orga-n-${ms[ms.length - 1].classe}">${alk}</span>` : ''}`;
+          return { texte, html };
+        };
+        const maj = () => { verrou(); const a = assembler(); z.querySelector('.orga-nom-complet').innerHTML = a.texte.trim() ? `Nom : <span class="orga-nom">${a.html}</span>` : ''; };
+        z.addEventListener('input', () => { api.effacer(); lignes.forEach(l => l.classList.remove('ko')); maj(); });
+        z.addEventListener('click', ev => {
+          const b = ev.target.closest('[data-mult]');
+          if (!b || b.disabled) return;
+          b.parentNode.querySelectorAll('[data-mult]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+          api.effacer(); maj();
+        });
+        // morceau faux : bordure rouge
+        const juste = l => {
+          const m = ms[+l.dataset.k], x = lire(l);
+          if (m.type === 'chaine') return chaineJuste();
+          if (m.type === 'ramif') {
+            const locs = (x.num.match(/\d+|[nN]/g) || []).map(t => (/n/i.test(t) ? 'N' : +t));
+            const okLocs = (!locs.length && !m.ecrits) || locs.join() === m.locs.join();
+            return okLocs && sa(x.mult) === sa(m.mult) && sa(x.nom) === sa(m.nom);
+          }
+          if (m.type === 'groupe') {
+            const num = (x.gnum.match(/\d+/) || x.suf.match(/\d+/) || [''])[0];
+            const suf = sa(x.suf.replace(/^[-\s\d]+/, '').replace(/^acide\s*/i, ''));
+            const okNum = num ? +num === (m.loc || 1) : !m.ecrit;
+            return okNum && suf === sa(m.suffixe);
+          }
+          return sa(x.alk) === sa(m.texte);
+        };
+        const valider = () => {
+          if (fini || api.fini()) return;
+          if (!chaineJuste()) {
+            ligneChaine.classList.add('ko'); secouer(ligneChaine);
+            const v = sa(ligneChaine.querySelector('input').value);
+            if (!v) { api.message('Commence par la chaîne principale : c\'est la fin du nom.'); return; }
+            const m = v.match(/^(cyclo)?(meth|eth|prop|but|pent|hex|hept|oct|non|dec)/);
+            const k = m ? O.RACINES.map(O.sansAccent).indexOf(m[2]) + 1 : 0;
+            api.erreur(k ? (m[1] && !res.cyclo ? 'Il n\'y a pas de cycle : pas de « cyclo ».' : !m[1] && res.cyclo ? 'Les C forment un cycle : cyclo… (cyclohexane).' : `« ${O.RACINES[k - 1]} » veut dire ${k} C : la chaîne principale en a ${k > res.n ? 'moins' : 'plus'}. Compte-les.`) : 'Écris le nom de la chaîne principale : méth (1 C), éth (2), prop (3), but (4), pent (5), hex (6)…');
+            return;
+          }
+          const a = assembler();
+          const d = O.diagnostiquerNom(a.texte, res);
+          lignes.forEach(l => l.classList.toggle('ko', !juste(l)));
+          if (!d.ok) { secouer(z.querySelector('.orga-morceaux')); api.erreur(d.diag); return; }
+          z.querySelectorAll('input, [data-mult]').forEach(x => { x.disabled = true; });
+          terminer(d.remarque);
+        };
+        z.querySelector('.orga-actions-partie .btn-primary').onclick = valider;
+        z.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); valider(); } });
+        maj();
+      }
+
+      function terminer(remarque) {
+        fini = true;
+        st.res = st.res || res0;
+        st.ordre = st.ordre || res0.numeros;
+        st.groupeFait = famille;
+        st.res.ramifs.forEach((r, k) => st.faites.add(k));
+        consigne.innerHTML = '';
+        act.innerHTML = '';
+        champ.querySelectorAll('.btn-primary').forEach(b => b.closest('.er-actions').remove());
+        rendre();
+        api.reussi(remarque || undefined);
+      }
+
+      ctx = {
+        montrer() {
+          fini = true;
+          st.res = res0; st.ordre = res0.numeros; st.groupeFait = famille;
+          res0.ramifs.forEach((r, k) => st.faites.add(k));
+          consigne.innerHTML = ''; act.innerHTML = ''; legende.innerHTML = '';
+          champ.innerHTML = `<p class="orga-nom-complet">Nom : ${nomHTML(res0.parties)}</p>`;
+          rendre();
+        },
+      };
+      if (res0.horsProgramme) { consigne.textContent = 'Molécule hors programme.'; return; }
+      if (aides.couleurs) etape(famille ? 'groupe' : 'chaine');
+      else etape('nom');
+    }
+    monter();
+    return { montrer() { if (ctx) ctx.montrer(); } };
+  }
+
+  /* ============================================================
+     DESSINER DANS L'ÉDITEUR (parties 'perso')
+     partieDessin(cible, { ecriture, hydrogenes, q, nom, nomDirect, elements })
+       l'élève dessine la molécule cible dans l'écriture demandée ; validation : même molécule
+       (et H justes si « H à compléter »). o.nom : le nom est donné (du nom au dessin) :
+       le nom de ce qui est dessiné s'affiche en direct et sert au diagnostic.
+     partieH(mol, { ecriture }) : compléter les H d'une formule donnée (structure figée)
+     partieConversion(mol, de, vers, { compterH }) : la conversion guidée par les gestes du cours
+     ============================================================ */
+  function diagDessin(m, cible, o) {
+    if (!m.liaisons.length && m.atomes.length <= 1) return 'Dessine la molécule : tire un trait depuis le C pour ajouter un atome.';
+    const comp = el => m.atomes.filter(a => a.el === el).length, compC = el => cible.atomes.filter(a => a.el === el).length;
+    if (o.nom) {
+      const d = O.nommer(m), e = O.nommer(cible);
+      if (d.horsProgramme) return `Ta molécule n'a pas de nom au programme (${d.horsProgramme}).`;
+      if (d.famille !== e.famille) return `Ta molécule s'appelle ${d.nom} : c'est ${famLe(d.famille)} ; ${o.nom} est ${famLe(e.famille)}.`;
+      if (d.n !== e.n) return `Ta molécule s'appelle ${d.nom} : sa chaîne principale a ${d.n} C, il en faut ${e.n}. Écris d'abord la chaîne principale (la fin du nom), puis place les ramifications.`;
+      return `Ta molécule s'appelle ${d.nom}, pas ${o.nom} : compare les ramifications et leurs numéros.`;
+    }
+    const nc = comp('C'), ncC = compC('C');
+    if (nc !== ncC) {
+      if (o.ecriture === 'topo' && nc < ncC) return `Il manque des C : ta molécule en a ${nc}, il en faut ${ncC}. En topologique, chaque sommet et chaque bout de trait est un C.`;
+      return `Ta molécule a ${nc} C ; il en faut ${ncC}. Compte les C.`;
+    }
+    for (const x of ['O', 'N', 'F', 'Cl', 'Br', 'I']) if (comp(x) !== compC(x)) return `Vérifie les atomes ${x} : il en faut ${compC(x)}${compC(x) ? '' : ' (aucun)'}.`;
+    const d2 = mm => mm.liaisons.filter(l => l.o === 2).length;
+    if (d2(m) !== d2(cible)) return `Vérifie les doubles liaisons : il en faut ${d2(cible)}.`;
+    return 'Même formule brute, mais ce n\'est pas la même molécule : vérifie où sont accrochés les atomes et les ramifications.';
+  }
+  const famLe = f => ({ alcane: 'un alcane', halogeno: 'un halogénoalcane', alcene: 'un alcène', alcool: 'un alcool', aldehyde: 'un aldéhyde', cetone: 'une cétone', acide: 'un acide carboxylique', ester: 'un ester', amine: 'une amine', amide: 'un amide' })[f];
+
+  function partieDessin(cible0, o) {
+    o = Object.assign({ ecriture: 'semi', hydrogenes: 'auto' }, o);
+    const cible = molDe(cible0);
+    const eleve = o.hydrogenes === 'eleve' && o.ecriture !== 'topo';
+    const res = o.nom ? O.nommer(cible) : {};
+    return Object.assign({
+      type: 'perso',
+      q: o.q != null ? o.q : `Dessine la molécule en ${NOM_EC[o.ecriture].toLowerCase()}, puis valide.`,
+      solution: o.nom && !res.horsProgramme ? `<p class="orga-sol-nom">${nomHTML(res.parties)}</p>` : (o.solution || ''),
+      monter(zone, api) {
+        const ed = editeur(zone, { ecriture: o.ecriture, ecritures: o.ecritures || [o.ecriture], hydrogenes: o.hydrogenes, choixH: false, elements: o.elements, nomDirect: !!o.nom, brute: o.brute !== false, surChange: () => api.effacer() });
+        if (eleve) ed.message('Dessine les atomes ; puis, avec l\'outil « H », touche chaque atome et choisis ses H.', 'info');
+        const act = el('div', 'er-actions orga-actions-partie', '<button type="button" class="btn-primary">Valider</button>');
+        zone.appendChild(act);
+        let fige = false;
+        act.querySelector('.btn-primary').onclick = () => {
+          if (fige || api.fini()) return;
+          const m = ed.mol;
+          if (!O.meme(m, cible)) { secouer(ed.zoneSvg); api.erreur(diagDessin(m, cible, o)); return; }
+          if (eleve && ed.ec !== 'topo' && !ed.hJustes()) {
+            const i = m.atomes.findIndex((a, j) => O.diagH(m, j, ed.h[j]));
+            ed.sel = i; ed.rendre();
+            secouer(ed.zoneSvg); api.erreur('Les atomes sont justes, mais pas tous les H. ' + O.diagH(m, i, ed.h[i]));
+            return;
+          }
+          fige = true; act.remove(); ed.message(''); ed.figer(); api.reussi();
+        };
+        return {
+          montrer() {
+            fige = true; act.remove();
+            ed.charger(cible, { ecriture: o.ecriture, hydrogenes: 'auto' });
+            ed.message(''); ed.figer();
+          },
+        };
+      },
+    }, o.partie);
+  }
+
+  function partieH(mol0, o) {
+    o = Object.assign({ ecriture: 'semi' }, o);
+    const mol = molDe(mol0);
+    return Object.assign({
+      type: 'perso',
+      q: o.q != null ? o.q : 'Touche chaque atome et choisis le nombre de H qu\'il porte, puis valide.',
+      solution: o.solution || '',
+      monter(zone, api) {
+        const ed = editeur(zone, { ecriture: o.ecriture, ecritures: [o.ecriture], hydrogenes: 'eleve', choixH: false, depart: mol, structure: false, brute: false, surChange: () => api.effacer() });
+        const act = el('div', 'er-actions orga-actions-partie', '<button type="button" class="btn-primary">Valider</button>');
+        zone.appendChild(act);
+        let fige = false;
+        act.querySelector('.btn-primary').onclick = () => {
+          if (fige || api.fini()) return;
+          const m = ed.mol, i = m.atomes.findIndex((a, j) => O.diagH(m, j, ed.h[j]));
+          if (i >= 0) { ed.sel = i; ed.rendre(); secouer(ed.zoneSvg); api.erreur(O.diagH(m, i, ed.h[i])); return; }
+          fige = true; act.remove(); ed.message(''); ed.figer(); api.reussi();
+        };
+        return { montrer() { fige = true; act.remove(); ed.charger(mol, { hydrogenes: 'auto' }); ed.message(''); ed.figer(); } };
+      },
+    }, o.partie);
+  }
+
+  function partieConversion(mol0, de, vers, o) {
+    o = o || {};
+    const mol = molDe(mol0);
+    const TXT = { semi: 'semi-développée', topo: 'topologique', developpee: 'développée' };
+    return Object.assign({
+      type: 'perso',
+      q: o.q || '',
+      solution: o.solution || '',
+      monter(zone, api) {
+        let fini = false;
+        const cv = conversion(zone, { mol, de, vers, compterH: !!o.compterH, refaire: false, phrase: o.phrase,
+          surErreur: () => { if (!fini) api.compterErreur(); },
+          surFin: () => { if (!fini) { fini = true; api.reussi(); } } });
+        return { montrer() { fini = true; cv.montrer(); } };
+      },
+    }, o.partie);
   }
 
   Object.assign(O, {
-    ECHELLES, NOM_EC, DIRS_EDITEUR: DIRS,
+    ECHELLES, NOM_EC, DIRS_EDITEUR: DIRS, GLISSER, BULLES,
+    info, fermerInfo, formuleHTML, aidesCondensees, dessinActif, corrigeGroupes,
+    partieEntourer, partiesNommerGroupes, partieNommerGroupe, partieChaine, partieNom, partieDessin, partieH, partieConversion, diagDessin,
     disposer, scene, svgCorps, dessinHTML, dessiner, nomHTML, legendeHTML,
     editeur, conversion, bulle, fermerBulle, optionsH, versSVG, versConteneur,
     geo: { vec, angleDe, ecart, dist, n360, n180 },

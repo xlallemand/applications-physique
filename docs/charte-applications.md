@@ -79,7 +79,7 @@ Tout vient de `assets/theme.css`. N'écris **aucune couleur en dur** dans les CS
 
 **Vert et rouge sont réservés au juste / faux** : `--success` `#16a34a`, `--success-bg`, `--success-text` ; `--danger` `#dc2626`, `--danger-bg`, `--danger-text`. Ne jamais les utiliser en décoration. Pas d'autre couleur vive (pas de bleu, violet, orange hors accent de la matière).
 
-**Exception : marquage des molécules** (moteur `ORGA`, comme les constantes SVG `VEC.C`). Une partie de la molécule et la partie du nom qui lui correspond ont la même couleur : `--orga-chaine` `#2952c8` (chaîne principale et ses numéros), `--orga-ram-1` à `--orga-ram-4` `#c2570c`, `#5a3fc4`, `#0e7490`, `#8a6a00` (une couleur par type de ramification), `--orga-groupe` `#b0177f` (groupe caractéristique, entouré). Jamais de vert ni de rouge ; l'information est aussi écrite (numéros, noms).
+**Exception : marquage des molécules** (moteur `ORGA`, comme les constantes SVG `VEC.C`). Une partie de la molécule et la partie du nom qui lui correspond ont la même couleur : `--orga-chaine` `#2952c8` (chaîne principale et ses numéros), `--orga-ram-1` à `--orga-ram-4` `#c2570c` (orange), `#8a6a00` (ocre, bien distinct du bleu de la chaîne), `#0e7490` (bleu pétrole), `#5a3fc4` (violet) (une couleur par type de ramification, dans l'ordre du nom), `--orga-groupe` `#b0177f` (groupe caractéristique et halogènes). En développée, les H prennent la couleur de l'atome qui les porte. Le groupe est entouré d'un cadre arrondi qui n'épouse pas sa forme (ellipse autour d'un seul atome écrit), comme à la main. Jamais de vert ni de rouge ; l'information est aussi écrite (numéros, noms).
 
 ### Forme et typographie
 
@@ -440,7 +440,7 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 | Exemple de cours, de série, de fiche | `module_1_cours.html`, `module_1_questions.html`, `fiche_1.html` |
 | Accueil de l'application | `cinematique/index.html` |
 | Dessins d'en-tête | `assets/hero.js` |
-| Molécules organiques (moteur partagé `ORGA`) : modèle, rendu des trois écritures, éditeur, conversion | `assets/orga.js`, `assets/orga-dessin.js`, `assets/orga.css` ; maquettes `docs/orga/maquettes/` |
+| Molécules organiques (moteur partagé `ORGA`) : modèle, nomenclature, rendu des trois écritures, éditeur (glisser), conversion, outils (entourer, nommer avec aides, dessiner à partir du nom), bulles d'aide ⓘ | `assets/orga.js`, `assets/orga-dessin.js`, `assets/orga.css` ; maquettes `docs/orga/maquettes/` ; application de référence `nomenclature/` |
 | Portail (liste des applications, tri par domaine et niveau) | `index.html` (racine) : `DOMAINES`, `NIVEAUX`, `APPS` |
 | Avancement x/y de chaque application sur le portail | `assets/avancement.js` : `AVANCEMENT` |
 | Flashcards : moteur, planning, séances, page Révisions, page Flashcards, intégrations (objet `REV`) | `assets/revisions.js`, `assets/revisions.css`, `revisions.html` |

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : passer d'une écriture à l'autre — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS 3 / 3</span>
+    <h2 class="er-titre">Passer d'une écriture à l'autre</h2>
+    <p class="er-contexte">Trois phrases suffisent pour passer d'une écriture à l'autre. Tu les appliques ici étape par étape, sur le dessin : <b>regrouper les H</b>, <b>effacer les CH</b>, <b>ajouter les C</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : une étape par phrase du cours,
+   chacune avec l'outil de conversion ORGA.conversion en exemple (essai
+   libre) et en « À toi » (ORGA.partieConversion) :
+     développée → semi : « on enlève les liaisons des H et on les regroupe sur leur atome »
+       (À toi 1 : regroupement au toucher ; À toi 2 : l'élève compte les H) ;
+     semi → topologique : « on efface tous les CH », puis « Mettre en zigzag » ;
+     topologique → semi : « on ajoute un C avec le bon nombre de H au bout de chaque trait,
+       s'il n'y a pas déjà un autre atome » (redresser ensuite est facultatif).
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { molHTML } = NOM;
+
+const PHRASES = {
+  replier: '« On enlève les liaisons des H et on les regroupe sur leur atome. »',
+  effacer: '« On efface tous les CH. »',
+  ajouter: '« On ajoute un C avec le bon nombre de H au bout de chaque trait, s\'il n\'y a pas déjà un autre atome. »',
+};
+// molécules variées (familles, ramifications, doubles liaisons), 3 à 6 C
+const MOLS = ['CC(C)C(O)CN', 'CCC(C)CO', 'CC(=O)CC(C)C', 'CC=CC(C)C', 'CCCC(N)=O', 'CC(C)CC(=O)O', 'CCC(Cl)C', 'CCNCC', 'CC(C)OC(C)=O', 'CCCC(C)C=O'];
+const deux = () => melanger(MOLS).slice(0, 2);
+// un exemple traité : l'outil, à essayer librement
+function essai(carte, mol, de, vers) {
+  const z = carte.querySelector('[data-essai]');
+  ORGA.conversion(z, { mol, de, vers, phrase: false });
+}
+
+/* ---------- 1. Développée → semi-développée ---------- */
+function etape1(c) {
+  const carte = c.carte('1. De la développée à la semi-développée');
+  c.ajouter(carte, `<div class="cours-bloc"><div class="cle nom-cle-phrase"><p><b class="cle-titre">Règle.</b> ${PHRASES.replier}</p></div>
+      <p>CH₃, CH₂, CH, OH, NH₂ : chaque atome porte ses H, sans les traits.</p></div>
+    ${exemple('<p>Touche chaque atome qui porte des H : ses liaisons C–H disparaissent et ses H se regroupent sur lui.</p><div data-essai></div>', 'Exemple à essayer')}`);
+  essai(carte, 'CC(C)C(O)CN', 'developpee', 'semi');
+  const [a, b] = deux();
+  c.aToi(carte, [
+    { titre: 'Regrouper les H', parties: [ORGA.partieConversion(a, 'developpee', 'semi', { phrase: false })] },
+    { titre: 'Compter les H', enonce: '<p>Cette fois, compte les H : touche chaque atome et choisis CH₃, CH₂, CH, OH, NH₂…</p>', parties: [ORGA.partieConversion(b, 'developpee', 'semi', { compterH: true, phrase: false })] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Semi-développée → topologique ---------- */
+function etape2(c) {
+  const carte = c.carte('2. De la semi-développée à la topologique');
+  c.ajouter(carte, `<div class="cours-bloc"><div class="cle nom-cle-phrase"><p><b class="cle-titre">Règle.</b> ${PHRASES.effacer}</p></div>
+      <p>On efface les C et leurs H (CH₃, CH₂, CH, C) ; les traits restent et se rejoignent. Les autres atomes (OH, NH₂, Cl, =O) restent écrits. Puis on met la chaîne en zigzag.</p></div>
+    ${exemple('<p>Touche chaque CH₃, CH₂, CH, C pour l\'effacer, puis « Mettre en zigzag ».</p><div data-essai></div>', 'Exemple à essayer')}`);
+  essai(carte, 'CC(C)C(O)CN', 'semi', 'topo');
+  const [a, b] = deux();
+  c.aToi(carte, [a, b].map((s, k) => ({ titre: `Molécule ${k + 1}`, parties: [ORGA.partieConversion(s, 'semi', 'topo', { phrase: false })] })));
+  return carte;
+}
+
+/* ---------- 3. Topologique → semi-développée ---------- */
+function etape3(c) {
+  const carte = c.carte('3. De la topologique à la semi-développée');
+  c.ajouter(carte, `<div class="cours-bloc"><div class="cle nom-cle-phrase"><p><b class="cle-titre">Règle.</b> ${PHRASES.ajouter}</p></div>
+      <p>Nombre de H d'un C = 4 − nombre de traits : un bout de trait (1 trait) → CH₃ ; un sommet à 2 traits → CH₂ ; 3 traits → CH ; 4 traits → C.</p></div>
+    ${exemple('<p>Touche chaque sommet et chaque bout de trait, et choisis C, CH, CH₂ ou CH₃. On peut ensuite redresser la formule (facultatif).</p><div data-essai></div>', 'Exemple à essayer')}`);
+  essai(carte, 'CC(C)C(O)CN', 'topo', 'semi');
+  const [a, b] = deux();
+  c.aToi(carte, [a, b].map((s, k) => ({ titre: `Molécule ${k + 1}`, parties: [ORGA.partieConversion(s, 'topo', 'semi', { phrase: false })] })));
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b>Développée → semi-développée</b> : ${PHRASES.replier}</p></div>
+    <div class="cle"><p><b>Vers la topologique</b> : ${PHRASES.effacer} Puis le zigzag.</p></div>
+    <div class="cle"><p><b>Depuis la topologique</b> : ${PHRASES.ajouter} (4 − nombre de traits = nombre de H.)</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_dessin.html">Atelier : dessiner une molécule →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_1_questions.html">Questions</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html#passer">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+NOM.menu('module_1c_cours');
+</script>
+</body>
+</html>
