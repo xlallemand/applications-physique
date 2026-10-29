@@ -1,0 +1,104 @@
+/* ============================================================
+   Styles du moteur de chimie organique ORGA (assets/orga.js, assets/orga-dessin.js)
+   Classes orga-* ; couleurs de marquage : variables --orga-* de assets/theme.css.
+   ============================================================ */
+
+/* ---------- Dessin d'une molécule ---------- */
+.orga-defile { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.orga-mol { display: block; margin: 0 auto; overflow: visible; font-family: var(--font-sans); }
+.orga-mol .orga-l, .orga-mol .orga-dl { stroke: var(--ink); stroke-width: 1.7; stroke-linecap: round; fill: none; }
+.orga-mol .orga-t { fill: var(--ink); font-weight: 500; }
+.orga-mol .orga-pt { fill: var(--ink-3); }
+.orga-mol .orga-num { fill: var(--orga-chaine); font-weight: 800; }
+.orga-mol .orga-ent { fill: none; stroke: var(--orga-groupe); stroke-width: 2.2; }
+.orga-mol .orga-ent-n { fill: var(--orga-groupe); }
+.orga-mol .orga-ent-t { fill: var(--sheet); font-weight: 800; font-size: 12px; }
+.orga-mol .orga-at { transition: opacity .25s; }
+
+/* couleurs de marquage : traits (stroke) et textes (fill) */
+.orga-mol line.orga-c-chaine { stroke: var(--orga-chaine); }
+.orga-mol line.orga-c-r1 { stroke: var(--orga-ram-1); }
+.orga-mol line.orga-c-r2 { stroke: var(--orga-ram-2); }
+.orga-mol line.orga-c-r3 { stroke: var(--orga-ram-3); }
+.orga-mol line.orga-c-r4 { stroke: var(--orga-ram-4); }
+.orga-mol line.orga-c-groupe { stroke: var(--orga-groupe); }
+.orga-mol text.orga-c-chaine { fill: var(--orga-chaine); }
+.orga-mol text.orga-c-r1 { fill: var(--orga-ram-1); }
+.orga-mol text.orga-c-r2 { fill: var(--orga-ram-2); }
+.orga-mol text.orga-c-r3 { fill: var(--orga-ram-3); }
+.orga-mol text.orga-c-r4 { fill: var(--orga-ram-4); }
+.orga-mol text.orga-c-groupe { fill: var(--orga-groupe); }
+.orga-mol line[class*="orga-c-"] { stroke-width: 2.3; }
+.orga-mol text[class*="orga-c-"] { font-weight: 700; }
+
+/* ---------- Nom en couleurs, légende des groupes ---------- */
+.orga-nom { font-weight: 700; color: var(--ink); }
+.orga-n-chaine { color: var(--orga-chaine); }
+.orga-n-r1 { color: var(--orga-ram-1); }
+.orga-n-r2 { color: var(--orga-ram-2); }
+.orga-n-r3 { color: var(--orga-ram-3); }
+.orga-n-r4 { color: var(--orga-ram-4); }
+.orga-n-groupe { color: var(--orga-groupe); }
+.orga-legende { list-style: none; padding: 0; margin: 6px 0 0; display: flex; flex-direction: column; gap: 4px; font-size: .95rem; }
+.orga-legende i { display: inline-block; min-width: 19px; height: 19px; border-radius: 999px; background: var(--orga-groupe); color: var(--sheet);
+  font: 800 .7rem/19px var(--font-sans); font-style: normal; text-align: center; }
+
+/* ---------- Boutons des outils ---------- */
+.orga-seg { display: inline-flex; flex-wrap: wrap; gap: 3px; padding: 3px; background: var(--paper); border-radius: 26px; }
+.orga-pil {
+  min-height: 44px; min-width: 44px; padding: 0 14px; border: none; border-radius: 999px; background: transparent;
+  font: 700 .95rem/1 var(--font-sans); color: var(--ink); cursor: pointer;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: background .15s, color .15s;
+}
+.orga-pil:hover:not(:disabled) { background: var(--paper-2); }
+.orga-pil[aria-pressed="true"], .orga-pil[aria-pressed="true"]:hover { background: var(--ink); color: var(--sheet); }
+.orga-pil:disabled { opacity: .35; cursor: not-allowed; }
+.orga-pil:focus-visible, .orga-choix:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.orga-carre { padding: 0; width: 42px; min-width: 42px; font-size: 1.02rem; }
+.orga-ed-ecritures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.orga-ed-ecritures .orga-pil { padding: 4px 8px; line-height: 1.15; }
+
+/* ---------- Éditeur ---------- */
+.orga-ed { display: flex; flex-direction: column; gap: 10px; }
+.orga-ed-zone, .orga-conv-zone { position: relative; overflow: auto; background: var(--paper); border-radius: 16px; -webkit-overflow-scrolling: touch; }
+.orga-ed-svg { display: block; margin: 0 auto; touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+.orga-ed-barre { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.orga-ed-msg { margin: 0; padding: 10px 14px; font-size: .95rem; line-height: 1.45; }
+.orga-ed-msg:empty { display: none; }
+.orga-ed-info { margin: 0; color: var(--ink-2); font-size: 1rem; }
+.orga-ed-info b { color: var(--ink); font-size: 1.08rem; }
+.orga-ed-mode:empty { display: none; }
+.orga-mol .orga-sel { fill: var(--cle-bg); stroke: var(--accent); stroke-width: 2.5; }
+.orga-mol .orga-h-manque { fill: none; stroke: var(--ink-3); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.orga-mol .orga-cible { fill: transparent; stroke: transparent; pointer-events: all; cursor: pointer; }
+.orga-mol .orga-cible-l { stroke-width: 18; stroke-linecap: round; }
+.orga-gomme .orga-cible { cursor: crosshair; }
+
+/* emplacements libres autour de l'atome choisi */
+.orga-mol .orga-empl { fill: var(--sheet); stroke: var(--ink-3); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.orga-mol .orga-empl-pref { stroke: var(--accent); stroke-width: 2.5; stroke-dasharray: none; fill: var(--cle-bg); }
+.orga-mol .orga-empl-fermer { fill: none; }
+.orga-mol .orga-empl-t { fill: var(--ink-2); font-size: 13px; font-weight: 700; pointer-events: none; }
+.orga-mol .orga-fantome { stroke: var(--accent); stroke-width: 2; stroke-dasharray: 5 4; fill: none; }
+.orga-mol .orga-fantome-at { fill: var(--cle-bg); stroke: var(--accent); stroke-width: 2; }
+
+/* bulle de choix (au toucher) */
+.orga-bulle { position: absolute; z-index: 5; display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; max-width: 280px;
+  background: var(--sheet); border: 1.5px solid var(--line-strong); border-radius: 16px; animation: er-apparait .15s ease; }
+.orga-choix { min-width: 52px; min-height: 46px; padding: 0 10px; border: none; border-radius: 12px; background: var(--paper);
+  font: 700 1.05rem/1 var(--font-sans); color: var(--ink); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.orga-choix:hover { background: var(--paper-2); }
+.orga-choix sub { font-size: .7em; }
+
+/* ---------- Conversion d'écriture ---------- */
+.orga-conv { display: flex; flex-direction: column; gap: 10px; }
+.orga-conv-phrase { font-size: 1.02rem; line-height: 1.45; }
+.orga-conv-consigne { margin: 0; font-weight: 600; color: var(--ink); }
+.orga-conv-consigne:empty { display: none; }
+.orga-conv-zone svg { display: block; margin: 0 auto; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+.orga-conv-actions:empty { display: none; }
+.orga-conv-actions { margin-top: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .orga-mol .orga-at, .orga-pil, .orga-bulle { transition: none; animation: none; }
+}

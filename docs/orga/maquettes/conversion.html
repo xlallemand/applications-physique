@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conversion d'écriture — maquettes ORGA</title>
+<link rel="stylesheet" href="../../../assets/theme.css">
+<link rel="stylesheet" href="../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../../assets/orga.css">
+<link rel="stylesheet" href="maquettes.css">
+<script src="../../../assets/orga.js"></script>
+<script src="../../../assets/orga-dessin.js"></script>
+<script src="maquettes.js"></script>
+</head>
+<body>
+<!-- MAQUETTE : les trois gestes de conversion d'écriture (outil ORGA.conversion) -->
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MAQUETTE · CONVERSION</span>
+    <h2 class="er-titre">Passer d'une écriture à l'autre</h2>
+    <p class="er-contexte">L'élève applique <b>les trois phrases du cours</b>, étape par étape, sur le dessin : il regroupe les H, efface les CH, ajoute les C. Les molécules sont celles du tableau de la page 1.</p>
+    <nav class="maq-nav" id="nav" aria-label="Maquettes"></nav>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">Réglages</h3>
+    <div class="maq-reglages" style="margin-bottom:10px">
+      <div class="orga-seg" role="group" aria-label="Molécule" id="choixMol">
+        <button type="button" class="orga-pil" data-m="0">Molécule 1</button>
+        <button type="button" class="orga-pil" data-m="1">Molécule 2</button>
+        <button type="button" class="orga-pil" data-m="2">Molécule 3</button>
+      </div>
+    </div>
+    <div class="maq-reglages">
+      <div class="orga-seg" role="group" aria-label="Conversion" id="choixConv">
+        <button type="button" class="orga-pil" data-c="developpee-semi">Développée → semi</button>
+        <button type="button" class="orga-pil" data-c="semi-topo">Semi → topologique</button>
+        <button type="button" class="orga-pil" data-c="topo-semi">Topologique → semi</button>
+        <button type="button" class="orga-pil" data-c="developpee-topo">Développée → topologique</button>
+      </div>
+      <label class="maq-interr"><input type="checkbox" id="compter"> Faire compter les H (développée → semi)</label>
+    </div>
+  </div>
+
+  <div class="er-card">
+    <div id="conv"></div>
+  </div>
+</div>
+
+<script>
+const MOLS = ['CC(C)C(O)CN', 'ClCC(C)OC=N', 'BrCC(=O)OCC#C'];
+const reg = { m: 0, c: 'developpee-semi', compter: false };
+function lancer() {
+  const z = document.getElementById('conv');
+  z.innerHTML = '';
+  const [de, vers] = reg.c.split('-');
+  ORGA.conversion(z, { mol: MOLS[reg.m], de, vers, compterH: reg.compter });
+  document.querySelectorAll('#choixMol [data-m]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.m === reg.m));
+  document.querySelectorAll('#choixConv [data-c]').forEach(b => b.setAttribute('aria-pressed', b.dataset.c === reg.c));
+}
+document.getElementById('choixMol').addEventListener('click', ev => { const b = ev.target.closest('[data-m]'); if (b) { reg.m = +b.dataset.m; lancer(); } });
+document.getElementById('choixConv').addEventListener('click', ev => { const b = ev.target.closest('[data-c]'); if (b) { reg.c = b.dataset.c; lancer(); } });
+document.getElementById('compter').addEventListener('change', ev => { reg.compter = ev.target.checked; lancer(); });
+MAQ.nav('conversion');
+lancer();
+</script>
+</body>
+</html>

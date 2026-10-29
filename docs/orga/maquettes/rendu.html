@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rendu des trois écritures — maquettes ORGA</title>
+<link rel="stylesheet" href="../../../assets/theme.css">
+<link rel="stylesheet" href="../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../../assets/orga.css">
+<link rel="stylesheet" href="maquettes.css">
+<script src="../../../assets/orga.js"></script>
+<script src="../../../assets/orga-dessin.js"></script>
+<script src="maquettes.js"></script>
+</head>
+<body>
+<!-- MAQUETTE : rendu des trois écritures par le moteur ORGA, couleurs de marquage proposées -->
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MAQUETTE · RENDU</span>
+    <h2 class="er-titre">Rendu des trois écritures</h2>
+    <p class="er-contexte">Toutes les molécules sont dessinées par le moteur, <b>sans aucune coordonnée donnée</b> : seulement leur formule. Disposition automatique : chaîne la plus longue à l'horizontale, ramifications de part et d'autre, <b>zigzag</b> en topologique.</p>
+    <nav class="maq-nav" id="nav" aria-label="Maquettes"></nav>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">Réglages</h3>
+    <div class="maq-reglages">
+      <div class="orga-seg" role="group" aria-label="Écriture" id="choixEc">
+        <button type="button" class="orga-pil" data-ec="trois">Les trois</button>
+        <button type="button" class="orga-pil" data-ec="semi">Semi-développée</button>
+        <button type="button" class="orga-pil" data-ec="topo">Topologique</button>
+        <button type="button" class="orga-pil" data-ec="developpee">Développée</button>
+      </div>
+      <label class="maq-interr"><input type="checkbox" data-r="couleurs" checked> Couleurs</label>
+      <label class="maq-interr"><input type="checkbox" data-r="numeros" checked> Numéros des C</label>
+      <label class="maq-interr"><input type="checkbox" data-r="entourer" checked> Groupe entouré</label>
+      <label class="maq-interr"><input type="checkbox" data-r="doublets" checked> Doublets non liants</label>
+    </div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">1. Les trois écritures <small>Tableau de la page 1 du cours</small></h3>
+    <div id="trois"></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">2. Les alcanes <small>Exemples de la page 2 : chaîne principale, ramifications (une couleur par type), numéros</small></h3>
+    <div class="maq-grille" id="alcanes"></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">3. Une molécule par famille <small>Tableau de la page 3 : groupe entouré, son nom et la famille, nom en couleurs</small></h3>
+    <div class="maq-grille" id="familles"></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">4. Plusieurs groupes <small>Exercice 5 : groupes entourés et numérotés, légende</small></h3>
+    <div class="maq-grille" id="ex5"></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">5. Couleurs de marquage proposées <small>Variables de assets/theme.css ; jamais de vert ni de rouge (juste / faux)</small></h3>
+    <div class="maq-nuancier" id="nuancier"></div>
+    <p class="maq-texte" style="margin-top:12px !important">Les numéros des C prennent la couleur de la chaîne. Dans le nom, chaque numéro prend la couleur de ce qu'il repère (ramification ou groupe). L'information n'est jamais portée par la seule couleur : numéros et noms sont écrits.</p>
+  </div>
+</div>
+
+<script>
+// ---------- Données (atomes numérotés dans l'ordre du SMILES) ----------
+const TROIS = ['CC(C)C(O)CN', 'ClCC(C)OC=N', 'BrCC(=O)OCC#C'];
+
+const ALCANES = [
+  { s: 'CC(C)CCC', ch: [0, 1, 3, 4, 5], r: { r1: [2] }, nom: [['2-', 'r1'], ['méthyl', 'r1'], ['pentane', 'chaine']] },
+  { s: 'CC(C)C(C)CCC', ch: [0, 1, 3, 5, 6, 7], r: { r1: [2, 4] }, nom: [['2,3-', 'r1'], ['diméthyl', 'r1'], ['hexane', 'chaine']] },
+  { s: 'CC(C)C', ch: [0, 1, 3], r: { r1: [2] }, nom: [['méthyl', 'r1'], ['propane', 'chaine']] },
+  { s: 'CCCC(CC)C(C)(C)C', ch: [9, 6, 3, 2, 1, 0], r: { r1: [4, 5], r2: [7, 8] }, nom: [['3-', 'r1'], ['éthyl', 'r1'], ['-'], ['2,2-', 'r2'], ['diméthyl', 'r2'], ['hexane', 'chaine']] },
+  { s: 'CCCCC(C)C(C)(C)CCC', ch: [11, 10, 9, 6, 4, 3, 2, 1, 0], r: { r1: [5, 7, 8] }, nom: [['4,4,5-', 'r1'], ['triméthyl', 'r1'], ['nonane', 'chaine']] },
+  { s: 'CC(C)C(C)(C)C(C)CC', ch: [0, 1, 3, 6, 8, 9], r: { r1: [2, 4, 5, 7] }, nom: [['2,3,3,4-', 'r1'], ['tétraméthyl', 'r1'], ['hexane', 'chaine']] },
+];
+
+const FAMILLES = [
+  { t: 'Alcane (linéaire)', s: 'CCCCC', ch: [0, 1, 2, 3, 4], num: false, nom: [['pentane', 'chaine']] },
+  { t: 'Alcane (ramifié)', s: 'CCC(C)C', ch: [4, 2, 1, 0], r: { r1: [3] }, nom: [['2-', 'r1'], ['méthyl', 'r1'], ['butane', 'chaine']] },
+  { t: 'Alcane (cyclique)', s: 'C1CCCCC1', ch: [0, 1, 2, 3, 4, 5], num: false, nom: [['cyclohexane', 'chaine']] },
+  { t: 'Alcène', s: 'C=CCC(C)C', ch: [0, 1, 2, 3, 5], r: { r1: [4] }, nom: [['4-', 'r1'], ['méthyl', 'r1'], ['pent', 'chaine'], ['-1-ène', 'groupe']] },
+  { t: 'Alcool', s: 'CC(C)(C)O', ch: [0, 1, 3], r: { r1: [2] }, nom: [['2-', 'r1'], ['méthyl', 'r1'], ['propan', 'chaine'], ['-2-ol', 'groupe']] },
+  { t: 'Aldéhyde', s: 'CC=O', ch: [1, 0], nom: [['éthan', 'chaine'], ['al', 'groupe']] },
+  { t: 'Cétone', s: 'CCCC(C)=O', ch: [4, 3, 2, 1, 0], nom: [['pentan', 'chaine'], ['-2-one', 'groupe']] },
+  { t: 'Acide carboxylique', s: 'CC(C)CC(=O)O', ch: [4, 3, 1, 0], r: { r1: [2] }, nom: [['acide ', 'groupe'], ['3-', 'r1'], ['méthyl', 'r1'], ['butan', 'chaine'], ['oïque', 'groupe']] },
+  { t: 'Ester', s: 'CCCCOC(C)=O', ch: [5, 6], r: { r1: [3, 2, 1, 0] }, nom: [['éthan', 'chaine'], ['oate', 'groupe'], [' de '], ['butyle', 'r1']] },
+  { t: 'Amine primaire', s: 'CCCCCN', ch: [4, 3, 2, 1, 0], nom: [['pentan', 'chaine'], ['-1-amine', 'groupe']] },
+  { t: 'Amine secondaire', s: 'CCNCC', ch: [1, 0], r: { r1: [3, 4] }, nom: [['N-éthyl', 'r1'], ['éthan', 'chaine'], ['amine', 'groupe']] },
+  { t: 'Amine tertiaire', s: 'CCCN(C)CC', ch: [2, 1, 0], r: { r1: [5, 6], r2: [4] }, nom: [['N-éthyl', 'r1'], ['-'], ['N-méthyl', 'r2'], ['propan', 'chaine'], ['-1-amine', 'groupe']] },
+  { t: 'Amide', s: 'CCCC(N)=O', ch: [3, 2, 1, 0], nom: [['butan', 'chaine'], ['amide', 'groupe']] },
+  { t: 'Amide (N-substitué)', s: 'CCCCNC(C)=O', ch: [5, 6], r: { r1: [3, 2, 1, 0] }, nom: [['N-butyl', 'r1'], ['éthan', 'chaine'], ['amide', 'groupe']] },
+  { t: 'Halogénoalcane', s: 'CCC(C)CC(C)Br', ch: [6, 5, 4, 2, 1, 0], r: { r1: [3] }, nom: [['2-', 'groupe'], ['bromo', 'groupe'], ['-'], ['4-', 'r1'], ['méthyl', 'r1'], ['hexane', 'chaine']] },
+];
+
+const EX5 = [
+  { t: 'a. Glycine', s: 'NCC(=O)O' },
+  { t: 'b. Sérine', s: 'OCC(N)C(=O)O' },
+  { t: 'c. Asparagine', s: 'NC(=O)CC(N)C(=O)O' },
+  { t: 'd. Phéromone', s: 'CC(=O)CCCCCC=CC(=O)O' },
+  { t: 'e. Cannelle', s: 'C1=CC=CC=C1C=CC=O' },
+];
+
+const NUANCES = [
+  ['--orga-chaine', 'Chaîne principale (et numéros)'],
+  ['--orga-ram-1', '1er type de ramification'],
+  ['--orga-ram-2', '2e type de ramification'],
+  ['--orga-ram-3', '3e type de ramification'],
+  ['--orga-ram-4', '4e type de ramification'],
+  ['--orga-groupe', 'Groupe caractéristique'],
+];
+
+// ---------- Réglages ----------
+const reg = { ec: 'trois', couleurs: true, numeros: true, entourer: true, doublets: true };
+const texteNom = d => d.nom ? d.nom.map(p => p[0]).join('') : '';
+
+function carte(d) {
+  const mol = ORGA.lire(d.s);
+  const gs = ORGA.groupes(mol);
+  const couleurs = reg.couleurs && d.ch
+    ? Object.assign({ chaine: d.ch }, d.r || {}, gs.length ? { groupe: [].concat(...gs.map(g => g.atomes)) } : {})
+    : null;
+  const entourer = reg.entourer && gs.length ? gs.map((g, k) => ({ atomes: g.atomes, avecH: g.avecH, numero: gs.length > 1 ? k + 1 : null })) : null;
+  const ecs = reg.ec === 'trois' ? ['semi', 'topo', 'developpee'] : [reg.ec];
+  const label = texteNom(d) || d.t;
+  const dessins = ecs.map(ec => (ecs.length > 1 ? `<p class="maq-ec">${ORGA.NOM_EC[ec]}</p>` : '') +
+    ORGA.dessinHTML(mol, { ecriture: ec, chaine: d.ch, couleurs, numeros: reg.numeros && d.num !== false ? d.ch : null, entourer, doublets: reg.doublets, label })).join('');
+  const nom = d.nom ? `<div class="maq-mol-nom">${reg.couleurs ? ORGA.nomHTML(d.nom) : '<span class="orga-nom">' + texteNom(d) + '</span>'}</div>` : '';
+  return `<div class="maq-mol">${d.t ? `<div class="maq-mol-t">${d.t}</div>` : ''}<div class="maq-mol-dessin">${dessins}</div>${gs.length ? ORGA.legendeHTML(gs) : ''}${nom}</div>`;
+}
+
+function tout() {
+  // 1. tableau des trois écritures
+  const ecs = ['developpee', 'semi', 'topo'];
+  let h = '<div class="maq-trois">' + ecs.map(ec => `<div class="maq-trois-t maq-entete">${ORGA.NOM_EC[ec]}</div>`).join('');
+  TROIS.forEach(s => {
+    const mol = ORGA.lire(s);
+    ecs.forEach(ec => {
+      h += `<div class="maq-mol"><div class="maq-trois-t maq-trois-l">${ORGA.NOM_EC[ec]}</div><div class="maq-mol-dessin">${ORGA.dessinHTML(mol, { ecriture: ec, doublets: reg.doublets })}</div></div>`;
+    });
+  });
+  document.getElementById('trois').innerHTML = h + '</div>';
+  document.querySelectorAll('.maq-grille').forEach(g => g.classList.toggle('maq-grille-large', reg.ec === 'trois'));
+  document.getElementById('alcanes').innerHTML = ALCANES.map(carte).join('');
+  document.getElementById('familles').innerHTML = FAMILLES.map(carte).join('');
+  document.getElementById('ex5').innerHTML = EX5.map(carte).join('');
+  document.querySelectorAll('#choixEc [data-ec]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ec === reg.ec));
+}
+
+document.getElementById('choixEc').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-ec]');
+  if (b) { reg.ec = b.dataset.ec; tout(); }
+});
+document.querySelectorAll('[data-r]').forEach(c => c.addEventListener('change', () => { reg[c.dataset.r] = c.checked; tout(); }));
+document.getElementById('nuancier').innerHTML = NUANCES.map(([v, t]) =>
+  `<div class="maq-nuance"><span class="maq-pastille" style="background:var(${v})"></span><span>${t}<br><code>${v}</code></span></div>`).join('');
+MAQ.nav('rendu');
+tout();
+</script>
+</body>
+</html>
