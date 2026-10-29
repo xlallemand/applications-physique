@@ -4,6 +4,7 @@
    Tour 5 (docs/flashcards/prompt-ajout.md), à la demande de l'enseignant :
    modifiées ox-1b-demi (sans exemple ni sens 2), ox-1c-sens (sens 2 : oxydation et réduction), ox-2a-mno4 (crayon) ;
    supprimées ox-1b-phrase, ox-2b-negatif, ox-3-simplifier ; aucune carte ajoutée.
+   Validées par l'enseignant le 2026-10-29, mises en place dans flashcards.js.
    Le module 4 (Écrire les réactions) reprend tous les autres : pas de paquet.
    Prérequis : chaque paquet après son cours (choix de l'enseignant, tour 1). */
 (function () {
@@ -87,7 +88,7 @@
           { id: 'c5', texte: 'Trouver l\'oxydant dans une demi-équation avec H⁺ et H₂O (H⁺ n\'est pas l\'oxydant)', types: ['reflexe'], source: 'cours 1b · « L\'oxydant d\'une demi-équation » ; série 1 · diagnostic H⁺' },
         ],
         cartes: [
-          { id: 'ox-1b-demi', type: 'formule', competence: 'c2', statut: 'modifiee', faces: [
+          { id: 'ox-1b-demi', type: 'formule', competence: 'c2', statut: 'validee', faces: [
             { q: '<p>Demi-équation d\'un couple Ox&nbsp;/&nbsp;Red ?</p><small>Écriture générale</small>',
               r: `${formule(`Oxydant + n ${E} = Réducteur`)}<p>Les électrons du côté de l'<b>oxydant</b> : c'est lui qui les capte.</p>` }] },
           { id: 'ox-1b-hplus', type: 'reflexe', competence: 'c5', statut: 'validee', faces: [
@@ -103,7 +104,7 @@
           { id: 'c5', texte: 'Reconnaître une oxydation ou une réduction sur une demi-équation orientée (place des électrons)', types: ['methode'], source: 'cours 1c · « Reconnaître » ; série 1 · Oxydation ou réduction' },
         ],
         cartes: [
-          { id: 'ox-1c-sens', type: 'schema', competence: 'c3', statut: 'modifiee', faces: [
+          { id: 'ox-1c-sens', type: 'schema', competence: 'c3', statut: 'validee', faces: [
             { q: '<p>Nomme les transformations ① et ②.</p>' + fig(sens('num')),
               r: fig(sens('leg')) + '<p>① <b>réduction</b> : formation du réducteur. ② <b>oxydation</b> : formation de l\'oxydant.</p>' },
             { q: '<p>Pour cette demi-équation, qu\'est-ce qu\'une oxydation ? Et une réduction ?</p>' + fig(sens('eq')),
@@ -145,7 +146,7 @@
           { id: 'ox-2a-sifaut', type: 'savoir', competence: 'c3', statut: 'validee', faces: [
             { q: `<p>Faut-il toujours ajouter ${EAU} et ${HP} dans une demi-équation ?</p><small>Règle et un exemple</small>`,
               r: `<p><b>Non</b> : ${EAU} seulement s'il <b>manque des atomes O</b>, ${HP} seulement s'il <b>manque des atomes H</b>.</p><p>${I2} + ${n(2, E)} = ${n(2, Im)} : ni O ni H, on n'ajoute rien.</p>` }] },
-          { id: 'ox-2a-mno4', type: 'methode', competence: 'c6', statut: 'modifiee', outils: ['crayon'], faces: [
+          { id: 'ox-2a-mno4', type: 'methode', competence: 'c6', statut: 'validee', outils: ['crayon'], faces: [
             { q: `<p>Écris la demi-équation du couple ${MnO4}&nbsp;/&nbsp;${Mn2}.</p><small>Démarche, étape par étape</small>`,
               r: `<ol><li>Mn : 1 de chaque côté.</li><li>4 O à gauche : ${n(4, EAU)} à droite.</li><li>8 H à droite : ${n(8, HP)} à gauche.</li><li>Charges +7 et +2 : ${n(5, E)} à gauche.</li></ol>${formule(`${MnO4} + ${n(8, HP)} + ${n(5, E)} = ${Mn2} + ${n(4, EAU)}`)}` }] },
         ] },

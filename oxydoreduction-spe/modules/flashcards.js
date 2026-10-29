@@ -1,5 +1,7 @@
 /* Flashcards de l'application « Oxydoréduction » (oxydoreduction-spe)
    Cartes validées par l'enseignant le 2026-10-24 (docs/flashcards/oxydoreduction-spe/ : relecture et données)
+   Cartes modifiées (ox-1b-demi, ox-1c-sens, ox-2a-mno4) et supprimées (ox-1b-phrase, ox-2b-negatif, ox-3-simplifier),
+   validées par l'enseignant le 2026-10-29
    Format : voir assets/revisions.js, REV.paquets ; figures : SVG autonomes (la page Révisions ne charge pas ox.js).
    Le module 4 (Écrire les réactions) reprend tous les autres : pas de paquet. */
 (function () {
@@ -8,8 +10,8 @@
   const E = 'e<sup>−</sup>', HP = 'H<sup>+</sup>', EAU = 'H<sub>2</sub>O';
   const n = (k, f) => `${k}&nbsp;${f}`;                                  // nombre stœchiométrique devant une espèce
   const MnO4 = 'MnO<sub>4</sub><sup>−</sup>', Mn2 = 'Mn<sup>2+</sup>', Cr2O7 = 'Cr<sub>2</sub>O<sub>7</sub><sup>2−</sup>', Cr3 = 'Cr<sup>3+</sup>';
-  const Fe2 = 'Fe<sup>2+</sup>', Fe3 = 'Fe<sup>3+</sup>', Cu2 = 'Cu<sup>2+</sup>', Zn2 = 'Zn<sup>2+</sup>', Ag1 = 'Ag<sup>+</sup>';
-  const Sn2 = 'Sn<sup>2+</sup>', Sn4 = 'Sn<sup>4+</sup>', S4O6 = 'S<sub>4</sub>O<sub>6</sub><sup>2−</sup>', S2O3 = 'S<sub>2</sub>O<sub>3</sub><sup>2−</sup>';
+  const Cu2 = 'Cu<sup>2+</sup>', Zn2 = 'Zn<sup>2+</sup>', Ag1 = 'Ag<sup>+</sup>';
+  const Sn2 = 'Sn<sup>2+</sup>', Sn4 = 'Sn<sup>4+</sup>';
   const H2O2 = 'H<sub>2</sub>O<sub>2</sub>', O2 = 'O<sub>2</sub>', I2 = 'I<sub>2</sub>', Im = 'I<sup>−</sup>';
   const Ox = i => `Ox<sub>${i}</sub>`, Red = i => `Red<sub>${i}</sub>`;
   const formule = s => `<p class="rev-formule">${s}</p>`;
@@ -17,7 +19,7 @@
   // figures (SVG autonomes : attributs de présentation, couleurs de assets/theme.css, accent chimie)
   const ACC = '#0a7d57', ENC = '#16181d';
   // les deux sens de la demi-équation : flèche du haut vers la droite (1), flèche du bas vers la gauche (2)
-  // mode : 'num' (flèches numérotées), 'leg' (flèches nommées), 'eq' (sans flèche), 'ox' (seulement l'oxydation, nommée)
+  // mode : 'num' (flèches numérotées), 'leg' (flèches nommées), 'eq' (sans flèche)
   function sens(mode) {
     const pastille = (x, y, num) => `<circle cx="${x}" cy="${y}" r="15" fill="${ACC}"/><text x="${x}" y="${y + 6}" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff">${num}</text>`;
     const etiq = (y, num, mot) => (mode === 'num' ? pastille(260, y, num)
@@ -26,11 +28,10 @@
     const bas = `<line x1="380" y1="140" x2="152" y2="140" stroke="${ACC}" stroke-width="3.5"/><polygon points="136,140 154,131 154,149" fill="${ACC}"/>` + etiq(174, '2', 'oxydation');
     const aria = { num: 'Demi-équation Ox + n e⁻ = Red ; flèche 1 de gauche à droite, flèche 2 de droite à gauche',
       leg: 'Demi-équation Ox + n e⁻ = Red ; flèche 1 de gauche à droite : réduction ; flèche 2 de droite à gauche : oxydation',
-      eq: 'Demi-équation Ox + n e⁻ = Red',
-      ox: 'Demi-équation Ox + n e⁻ = Red ; flèche de droite à gauche : oxydation' }[mode];
+      eq: 'Demi-équation Ox + n e⁻ = Red' }[mode];
     return `<svg viewBox="0 0 520 200" width="520" height="200" role="img" aria-label="${aria}">` +
       `<rect x="1" y="1" width="518" height="198" rx="14" fill="#f3f1ec"/>` +
-      (mode === 'num' || mode === 'leg' ? haut : '') + (mode === 'eq' ? '' : bas) +
+      (mode === 'eq' ? '' : haut + bas) +
       `<text x="260" y="111" text-anchor="middle" font-size="30" font-weight="700" fill="${ENC}">Ox + n e⁻ = Red</text></svg>`;
   }
   const fig = s => `<div class="rev-fig">${s}</div>`;
@@ -59,13 +60,8 @@
     /* ---------- Module 1 · Couple et demi-équation ---------- */
     { id: 'm1b', module: 1, titre: 'Couple et demi-équation', apres: ['module_1b_cours'], cartes: [
         { id: 'ox-1b-demi', type: 'formule', competence: 'Écrire la demi-équation d\'un couple : Oxydant + n e⁻ = Réducteur', faces: [
-          { q: '<p>Demi-équation d\'un couple Ox&nbsp;/&nbsp;Red ?</p><small>Écriture générale et un exemple</small>',
-            r: `${formule(`Oxydant + n ${E} = Réducteur`)}<p>Les électrons du côté de l'<b>oxydant</b> : c'est lui qui les capte.</p><p>${Cu2} + ${n(2, E)} = Cu</p>` },
-          { q: `${formule(`Oxydant + n ${E} = Réducteur`)}<p>Comment s'appelle cette écriture ? Que représente n ? Que signifie le signe = ?</p>`,
-            r: '<p>La <b>demi-équation</b> du couple Ox&nbsp;/&nbsp;Red.</p><p>n : le nombre d\'électrons échangés. Le signe = : l\'échange peut se faire dans les deux sens.</p>' }] },
-        { id: 'ox-1b-phrase', type: 'methode', competence: 'Écrire le couple à partir d\'une phrase (« Cu²⁺ peut être réduit en Cu », « Fe²⁺ peut être oxydé en Fe³⁺ »)', faces: [
-          { q: `<p>« ${Fe2} peut être oxydé en ${Fe3}. » Comment écris-tu le couple ?</p><small>Démarche</small>`,
-            r: `<ol><li>Oxydé : ${Fe2} <b>cède</b> des électrons, c'est le <b>réducteur</b>.</li><li>Il devient ${Fe3}, l'<b>oxydant</b>.</li><li>L'oxydant en premier : <b>${Fe3}&nbsp;/&nbsp;${Fe2}</b>.</li></ol>` }] },
+          { q: '<p>Demi-équation d\'un couple Ox&nbsp;/&nbsp;Red ?</p><small>Écriture générale</small>',
+            r: `${formule(`Oxydant + n ${E} = Réducteur`)}<p>Les électrons du côté de l'<b>oxydant</b> : c'est lui qui les capte.</p>` }] },
         { id: 'ox-1b-hplus', type: 'reflexe', competence: 'Trouver l\'oxydant dans une demi-équation avec H⁺ et H₂O (H⁺ n\'est pas l\'oxydant)', faces: [
           { q: `${formule(`${Cr2O7} + ${n(14, HP)} + ${n(6, E)} = ${n(2, Cr3)} + ${n(7, EAU)}`)}<p>Dans cette demi-équation, quel est l'oxydant du couple ?</p>`,
             r: `<p><b>${Cr2O7}</b> : l'espèce du couple écrite <b>du côté des électrons</b>. Couple ${Cr2O7}&nbsp;/&nbsp;${Cr3}.</p><p>${HP} n'est pas l'oxydant : il sert seulement à équilibrer l'élément H.</p>` }] },
@@ -76,8 +72,8 @@
         { id: 'ox-1c-sens', type: 'schema', competence: 'Placer « réduction » et « oxydation » sur les deux sens de Ox + n e⁻ = Red', faces: [
           { q: '<p>Nomme les transformations ① et ②.</p>' + fig(sens('num')),
             r: fig(sens('leg')) + '<p>① <b>réduction</b> : formation du réducteur. ② <b>oxydation</b> : formation de l\'oxydant.</p>' },
-          { q: '<p>Pour cette demi-équation, qu\'est-ce qu\'une oxydation ?</p>' + fig(sens('eq')),
-            r: fig(sens('ox')) + '<p>Le sens qui <b>forme l\'oxydant</b> : <b>vers la gauche</b>.</p>' }] },
+          { q: '<p>Pour cette demi-équation, qu\'est-ce qu\'une oxydation ? Et une réduction ?</p>' + fig(sens('eq')),
+            r: fig(sens('leg')) + '<p><b>Oxydation</b> : une perte d\'électrons, le sens qui <b>forme l\'oxydant</b> (vers la gauche).</p><p><b>Réduction</b> : un gain d\'électrons, le sens qui <b>forme le réducteur</b> (vers la droite).</p>' }] },
         { id: 'ox-1c-oxyde', type: 'savoir', competence: 'Savoir que l\'oxydant est réduit et que le réducteur est oxydé', faces: [
           { q: '<p>Au cours d\'une réaction, l\'oxydant est-il oxydé ou réduit ? Et le réducteur ?</p>',
             r: '<p>L\'oxydant <b>est réduit</b> : il capte des électrons.</p><p>Le réducteur <b>est oxydé</b> : il cède des électrons.</p>' }] },
@@ -104,7 +100,7 @@
         { id: 'ox-2a-sifaut', type: 'savoir', competence: 'N\'ajouter H₂O et H⁺ que s\'il en faut (I₂ / I⁻, O₂ / H₂O₂)', faces: [
           { q: `<p>Faut-il toujours ajouter ${EAU} et ${HP} dans une demi-équation ?</p><small>Règle et un exemple</small>`,
             r: `<p><b>Non</b> : ${EAU} seulement s'il <b>manque des atomes O</b>, ${HP} seulement s'il <b>manque des atomes H</b>.</p><p>${I2} + ${n(2, E)} = ${n(2, Im)} : ni O ni H, on n'ajoute rien.</p>` }] },
-        { id: 'ox-2a-mno4', type: 'methode', competence: 'Écrire la demi-équation du couple MnO₄⁻ / Mn²⁺ (exercice-type, démarche étape par étape)', faces: [
+        { id: 'ox-2a-mno4', type: 'methode', competence: 'Écrire la demi-équation du couple MnO₄⁻ / Mn²⁺ (exercice-type, démarche étape par étape)', outils: ['crayon'], faces: [
           { q: `<p>Écris la demi-équation du couple ${MnO4}&nbsp;/&nbsp;${Mn2}.</p><small>Démarche, étape par étape</small>`,
             r: `<ol><li>Mn : 1 de chaque côté.</li><li>4 O à gauche : ${n(4, EAU)} à droite.</li><li>8 H à droite : ${n(8, HP)} à gauche.</li><li>Charges +7 et +2 : ${n(5, E)} à gauche.</li></ol>${formule(`${MnO4} + ${n(8, HP)} + ${n(5, E)} = ${Mn2} + ${n(4, EAU)}`)}` }] },
       ] },
@@ -114,9 +110,6 @@
         { id: 'ox-2b-cote', type: 'savoir', competence: 'Placer les électrons du côté où la charge est la plus grande, y compris avec des charges négatives (−2 > −4)', faces: [
           { q: '<p>Sans les électrons, les deux membres d\'une demi-équation n\'ont pas la même charge. De quel côté ajoutes-tu les électrons ? Pourquoi ?</p>',
             r: `<p>Du côté où la charge est <b>la plus grande</b> (celui de l'oxydant).</p><p>Un électron porte la charge −1 : ajouter n ${E} fait <b>baisser</b> la charge de n.</p>` }] },
-        { id: 'ox-2b-negatif', type: 'reflexe', competence: 'Placer les électrons du côté où la charge est la plus grande, y compris avec des charges négatives (−2 > −4)', faces: [
-          { q: `${formule(`${S4O6} = ${n(2, S2O3)}`)}<p>Charge −2 à gauche, −4 à droite : de quel côté vont les électrons ?</p>`,
-            r: `<p><b>À gauche</b> : −2 est plus grand que −4 (plus proche de 0).</p><p>${S4O6} + ${n(2, E)} = ${n(2, S2O3)}</p>` }] },
       ] },
 
     /* ---------- Module 3 · Écrire l'équation d'une réaction ---------- */
@@ -127,9 +120,6 @@
         { id: 'ox-3-multiplier', type: 'methode', competence: 'Trouver les multiplicateurs : le plus petit multiple commun des nombres d\'électrons (exercice-type : 5 et 1, 2 et 3)', faces: [
           { q: '<p>Une demi-équation échange 2 électrons, l\'autre 3. Par combien multiplies-tu chacune ?</p><small>Démarche</small>',
             r: '<ol><li>Chercher le <b>plus petit multiple commun</b> de 2 et 3 : <b>6</b>.</li><li>Multiplier la première par <b>3</b> et la seconde par <b>2</b> : 6 électrons chacune.</li></ol><p>Avec 5 et 1 : 1 × la première, 5 × la seconde.</p>' }] },
-        { id: 'ox-3-simplifier', type: 'methode', competence: 'Simplifier les H⁺ et H₂O présents des deux côtés (exercice-type : 16 H⁺ à gauche, 10 à droite)', faces: [
-          { q: `<p>Après l'addition des deux demi-équations : ${n(16, HP)} à gauche, ${n(10, HP)} à droite. Que fais-tu ?</p>`,
-            r: `<p>Simplifier : retirer ${n(10, HP)} de chaque côté. Il en reste <b>${n(6, HP)} à gauche</b>.</p><p>Même chose pour ${EAU} s'il figure des deux côtés.</p>` }] },
         { id: 'ox-3-boncouple', type: 'reflexe', competence: 'Choisir le bon couple quand un réactif appartient à deux couples (H₂O₂ avec MnO₄⁻, avec Fe²⁺)', faces: [
           { q: `<p>${H2O2} appartient à deux couples : ${H2O2}&nbsp;/&nbsp;${EAU} et ${O2}&nbsp;/&nbsp;${H2O2}. Il réagit avec ${MnO4} du couple ${MnO4}&nbsp;/&nbsp;${Mn2}. Quel couple utilises-tu pour ${H2O2} ?</p>`,
             r: `<p><b>${O2}&nbsp;/&nbsp;${H2O2}</b> : ${MnO4} est un oxydant, il réagit avec un <b>réducteur</b>. ${H2O2} est le réducteur de ce couple (écrit en second).</p><p>Dans ${H2O2}&nbsp;/&nbsp;${EAU}, ${H2O2} est l'oxydant : ce couple ne sert pas.</p>` }] },
