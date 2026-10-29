@@ -20,11 +20,12 @@
 
 <script>
 /* ============================================================
-   10 questions tirées au hasard, dont 5 « entourer, nommer le groupe,
-   donner la famille » (une molécule à un groupe en semi-développée, une en
-   topologique, une écrite avec C₂H₅ en abrégé, une à plusieurs groupes) ;
-   distinguer deux familles proches ; famille d'après le nom ; nommer ;
-   dessiner à partir du nom.
+   20 questions tirées au hasard, dont 7 « entourer, nommer le groupe,
+   donner la famille » (molécules à un groupe en semi-développée et en
+   topologique, une écrite avec C₂H₅ en abrégé, deux à plusieurs groupes) ;
+   distinguer deux familles proches ; famille d'après le nom ; nommer avec
+   l'outil ; dessiner à partir du nom ; pour finir, 4 noms à écrire
+   directement, sans l'outil de construction du nom.
    Erreurs diagnostiquées : acide ≠ alcool + cétone, ester ≠ acide,
    amide ≠ amine + cétone, aldéhyde ≠ cétone, atome de la chaîne carbonée
    entouré, groupe oublié ; et celles des noms (voir ORGA.diagnostiquerNom).
@@ -46,50 +47,64 @@ const PAR_NOM = [['acide', 'acide …-oïque'], ['ester', '…oate de …yle'], 
 
 const G = {
   // entourer, nommer le groupe, donner la famille (une molécule à un groupe)
-  entourer(ec) {
-    const x = ORGA.fabriqueFamille(hasard(FAMS), { min: 3, max: 6, ramMax: 1 });
+  entourer(ec, f) {
+    const x = ORGA.fabriqueFamille(f || hasard(FAMS), { min: 3, max: 6, ramMax: 1 });
     return { theme: 'Groupe caractéristique', parties: [ORGA.partieEntourer(x.mol, { ecriture: ec })].concat(ORGA.partiesNommerGroupes(x.mol)) };
   },
   condensee() {
     const [s, at] = hasard(CONDENSEES), m = NOM.mol(s);
     return { theme: 'Groupe caractéristique', consigne: 'C₂H₅ est écrit en abrégé (touche ⓘ).', parties: [ORGA.partieEntourer(m, { condenser: [{ atomes: at, texte: 'C2H5' }] })].concat(ORGA.partiesNommerGroupes(m)) };
   },
-  plusieurs() {
-    const x = NOM.PLUSIEURS[hasard(['glycine', 'serine', 'asparagine', 'lactique', 'malique', 'pheromone', 'cannelle', 'atropine'])];
+  plusieurs(k) {
+    const x = NOM.PLUSIEURS[k || hasard(['glycine', 'serine', 'asparagine', 'lactique', 'malique', 'pheromone', 'cannelle', 'atropine'])];
     return { theme: 'Plusieurs groupes', enonce: `<p><b>${x.titre}</b></p>`, parties: NOM.partiesPlusieurs(x) };
   },
   // distinguer deux familles proches
-  proches() {
-    const [f, autre, explication] = hasard(PROCHES);
+  proches(p) {
+    const [f, autre, explication] = p || hasard(PROCHES);
     const x = ORGA.fabriqueFamille(f, { min: 3, max: 6, ramMax: 1 });
     return { theme: 'Familles proches', enonce: fig(x.mol, { ecriture: hasard(['semi', 'topo']) }),
       parties: [{ type: 'choix', q: 'À quelle famille appartient cette molécule ?', options: melanger([o(f, F[f].famille), o(autre, F[autre].famille)]), bonne: f, melanger: false, indice: explication, solution: `<p>${explication} Famille : <b>${F[f].familles}</b>.</p>` }] };
   },
   // famille d'après le nom
-  parNom() {
-    const f = hasard(FAMS), x = ORGA.fabriqueFamille(f, { min: 3, max: 6, ramMax: 1 });
+  parNom(f0) {
+    const f = f0 || hasard(FAMS), x = ORGA.fabriqueFamille(f, { min: 3, max: 6, ramMax: 1 });
     const autres = melanger(FAMS.filter(k => k !== f)).slice(0, 3);
     return { theme: 'Famille d\'après le nom', parties: [{ type: 'choix', q: `À quelle famille appartient le <b>${x.nom}</b> ?`, options: melanger([f, ...autres].map(k => o(k, F[k].famille))), bonne: f, melanger: false,
       indice: 'La terminaison donne la famille : ' + PAR_NOM.map(([k, t]) => `${t} ${F[k].familles}`).join(' ; ') + '.', solution: `<p>${PAR_NOM.find(p => p[0] === f)[1]} : <b>${F[f].familles}</b>.</p>` }] };
   },
-  nommer(ec) {
-    const x = ORGA.fabriqueFamille(hasard(FAMS), { min: 3, max: 7, ramMax: 1 });
+  nommer(ec, f) {
+    const x = ORGA.fabriqueFamille(f || hasard(FAMS), { min: 3, max: 7, ramMax: 1 });
     return { theme: 'Nommer une molécule', parties: [partieNom(x.mol, { ecriture: ec })] };
   },
-  dessiner(ec) {
-    const x = ORGA.fabriqueFamille(hasard(FAMS), { min: 3, max: 6, ramMax: 1 });
+  // nom écrit directement, sans l'outil de construction du nom
+  libre(ec, f) {
+    const x = ORGA.fabriqueFamille(f || hasard(FAMS), { min: 3, max: 7, ramMax: 1 });
+    return { theme: 'Nommer sans aide', consigne: 'Écris directement le nom de cette molécule.', parties: [partieNom(x.mol, { ecriture: ec, sansAide: true, q: '' })] };
+  },
+  dessiner(ec, f) {
+    const x = ORGA.fabriqueFamille(f || hasard(FAMS), { min: 3, max: 6, ramMax: 1 });
     return { theme: 'Du nom à la formule', consigne: `Dessine en ${NOM.EC[ec].toLowerCase()} : <b>${x.nom}</b>.`, parties: [ORGA.partieDessin(x.mol, { ecriture: ec, nom: x.nom, q: '' })] };
   },
 };
 
 function tirage() {
-  return [G.entourer('semi'), G.entourer('topo'), G.condensee(), G.plusieurs(), G.proches(), G.parNom(), G.nommer('semi'), G.nommer('topo'), G.dessiner('semi'), G.dessiner('topo')];
+  // familles et molécules variées d'une question à l'autre
+  const f = melanger(FAMS).concat(melanger(FAMS), melanger(FAMS), melanger(FAMS));
+  let k = 0;
+  const fam = () => f[k++];
+  const pl = melanger(['glycine', 'serine', 'asparagine', 'lactique', 'malique', 'pheromone', 'cannelle', 'atropine']), pr = melanger(PROCHES), pn = melanger(FAMS);
+  return [G.entourer('semi', fam()), G.entourer('topo', fam()), G.condensee(), G.plusieurs(pl[0]), G.proches(pr[0]), G.parNom(pn[0]),
+    G.entourer('semi', fam()), G.nommer('semi', fam()), G.nommer('topo', fam()), G.plusieurs(pl[1]), G.proches(pr[1]), G.dessiner('semi', fam()),
+    G.entourer('topo', fam()), G.parNom(pn[1]), G.dessiner('topo', fam()), G.nommer(hasard(['semi', 'topo']), fam()),
+    G.libre('semi', fam()), G.libre('topo', fam()), G.libre('semi', fam()), G.libre('topo', fam())];
 }
 
 NOM.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 3 · QUESTIONS', titre: 'Les familles',
-  intro: '<p class="er-contexte">10 questions tirées au hasard, dont la moitié comme au bac : <b>entourer</b> le groupe caractéristique, le <b>nommer</b> et donner la <b>famille</b>. Puis distinguer des familles proches, retrouver la famille d\'après le nom, nommer et dessiner.</p>',
+  intro: '<p class="er-contexte">20 questions tirées au hasard, dont beaucoup comme au bac : <b>entourer</b> le groupe caractéristique, le <b>nommer</b> et donner la <b>famille</b>. Puis distinguer des familles proches, retrouver la famille d\'après le nom, nommer et dessiner ; pour finir, <b>4 noms à écrire directement</b>, sans aide.</p>',
+  nombre: 20,
   questions: tirage,
   revoir: { href: 'module_3a_cours.html', label: 'Revoir le cours' },
   suite: { href: 'module_4.html', label: 'Exercices →' },

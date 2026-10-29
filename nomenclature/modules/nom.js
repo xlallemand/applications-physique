@@ -22,11 +22,14 @@
    NOM.partieNom(smiles, o)           nommer avec l'outil ORGA (aides gardées dans « nomenclature-aides »)
    NOM.enchainer(q, parties, corr.)   plusieurs outils à la suite dans une seule partie (exercices)
    NOM.PLUSIEURS, NOM.partiesPlusieurs(x)   molécules à plusieurs groupes (ex. 5, sujets de bac) : entourer puis nommer
-   NOM.nomsFaux(mol)                  noms faux classiques [{ nom, diag }] (QCM « trouver l'erreur »)
+   NOM.nomsFaux(mol, op)              noms faux classiques [{ nom, diag, type }] (QCM « trouver l'erreur ») ; op.types
+   NOM.aideTopo(mol, op)              aide pas à pas pour lire une topologique (C repérés, H de chaque C)
    NOM.partieBrute(mol, o)            formule brute à écrire (diagnostic : C, H implicites, autres atomes)
    NOM.motif(el, liaisons, doublets)  liaisons et doublets non liants d'un atome (SVG)
    NOM.classif(zone, o)               extrait de la classification : toucher un élément compte les cases jusqu'aux gaz nobles
-   NOM.atelier(o)                     liste de tâches d'un atelier (faites gardées dans « nomenclature-ateliers »)
+   NOM.atelier(o)                     atelier « infini » : une tâche à la fois, au hasard (faites gardées dans « nomenclature-ateliers »)
+   NOM.aidesAtelier(cle), NOM.aidesNommer   aides d'un atelier, activées ou désactivées toutes ensemble
+   NOM.partieAutres(fabriquer, op)    partie à refaire avec une autre molécule (« À toi »)
    NOM.PLAN, NOM.menu(cle), NOM.accueil(zone), NOM.marquer(info)
 
    Les styles des cartes, boutons et écrans de fin viennent de
@@ -335,47 +338,136 @@
   }
 
   /* ============================================================
-     ATELIER : une liste de tâches, une à la fois, faites gardées dans le navigateur
-     atelier({ zone, cle, taches: [{ titre, enonce, parties }], bilan, surFait })
-       les tâches réussies sont gardées dans localStorage « nomenclature-ateliers » ;
-       quand toutes sont faites (ou au bout de la liste), le bilan s'affiche et la page est marquée faite.
+     ATELIER « INFINI » : une seule tâche à la fois, tirée au hasard, sans numéro
+     atelier({ zone, cle, items | tirer, id, tache, bilan, seuil, suivant, aides })
+       items  : liste finie ; tirée au hasard sans refaire deux fois la même, remise à zéro
+                quand toutes ont été faites ;
+       tirer  : () → élément au hasard (fabrique) ; id(élément) : pour ne pas refaire le même ;
+       tache(élément) → { titre, enonce, parties }, construite avec les réglages du moment ;
+       aides  : { actives() → booléen, regler(booléen) } : bouton « activer / désactiver toutes les aides » ;
+       seuil  : tâches faites pour que l'atelier compte comme fait (bilan affiché, page marquée faite) ;
+                par défaut : toute la liste, ou 10 pour une fabrique ;
+       suivant : texte du bouton (« Molécule suivante → »).
+     Renvoie { refaire() (même élément, nouveaux réglages), nouvelle() (un autre élément) }.
+     Gardé dans localStorage « nomenclature-ateliers » : { <cle>: { faits: [id], total }, 'aides:<cle>': booléen }.
      ============================================================ */
   const CLE_ATELIERS = 'nomenclature-ateliers';
+  const memoire = {};          // réglages gardés pendant la page si le stockage est indisponible
   function lireAteliers() { try { return JSON.parse(localStorage.getItem(CLE_ATELIERS)) || {}; } catch (e) { return {}; } }
-  function noterAtelier(cle, k) {
-    try { const r = lireAteliers(); r[cle] = Array.from(new Set((r[cle] || []).concat([k]))); localStorage.setItem(CLE_ATELIERS, JSON.stringify(r)); } catch (e) { /* stockage indisponible */ }
+  function ecrireAteliers(cle, v) {
+    memoire[cle] = v;
+    try { const r = lireAteliers(); r[cle] = v; localStorage.setItem(CLE_ATELIERS, JSON.stringify(r)); } catch (e) { /* stockage indisponible */ }
   }
+  function etatAtelier(cle) {
+    const r = lireAteliers();
+    let x = r[cle] != null ? r[cle] : memoire[cle];
+    if (Array.isArray(x)) x = { faits: [], total: x.length };       // ancienne forme : liste des tâches faites
+    return Object.assign({ faits: [], total: 0 }, x);
+  }
+  // aides d'un atelier (dessin, conversion, entourer) : activées par défaut
+  function aidesAtelier(cle) {
+    const k = 'aides:' + cle;
+    return {
+      actives() { const r = lireAteliers(), v = r[k] != null ? r[k] : memoire[k]; return v == null ? true : !!v; },
+      regler(v) { ecrireAteliers(k, !!v); },
+    };
+  }
+  // aides des outils « nommer » (couleurs, nom découpé, bulles) : toutes ensemble
+  const aidesNommer = {
+    actives() { const a = O.lireAides('nomenclature-aides'); return a.couleurs || a.decoupe || a.bulles; },
+    regler(v) { O.ecrireAides('nomenclature-aides', { couleurs: v, decoupe: v, bulles: v }); },
+  };
+
   function atelier(opts) {
-    const zone = opts.zone, ts = opts.taches, bilan = opts.bilan;
-    const faites = () => new Set(lireAteliers()[opts.cle] || []);
+    const zone = opts.zone, bilan = opts.bilan, items = opts.items;
+    const idDe = opts.id || (x => String(x));
+    const seuil = opts.seuil || (items ? items.length : 10);
+    let courant = null;
     function afficherBilan() {
       if (!bilan || !bilan.hidden) return;
       bilan.hidden = false;
       window.SOM.marquer({ fait: true });                        // atelier fait (sommaire, accueil)
     }
-    function tache(k, defiler) {
-      const t = typeof ts[k] === 'function' ? ts[k]() : ts[k], f = faites();
-      zone.innerHTML = `<p class="er-q-nom">${opts.nomTache || 'Tâche'} ${k + 1} / ${ts.length}</p><h3 class="er-titre" style="margin-top:2px">${t.titre}</h3>
-        <div class="nom-taches" role="group" aria-label="Choisir une tâche">${ts.map((x, i) => `<button type="button" data-k="${i}" class="${f.has(i) ? 'fait' : ''}" aria-current="${i === k}" aria-label="${opts.nomTache || 'Tâche'} ${i + 1}${f.has(i) ? ' (faite)' : ''}">${f.has(i) ? '✓' : i + 1}</button>`).join('')}</div>
+    // élément suivant, au hasard, jamais celui qu'on vient de faire ni un élément déjà fait
+    function tirer() {
+      const st = etatAtelier(opts.cle), faits = new Set(st.faits), idCour = courant == null ? null : idDe(courant);
+      if (items) {
+        let libres = items.filter(x => !faits.has(idDe(x)) && idDe(x) !== idCour);
+        if (!libres.length) {
+          // toutes faites : on recommence la liste
+          ecrireAteliers(opts.cle, Object.assign(st, { faits: [] }));
+          libres = items.filter(x => idDe(x) !== idCour);
+          if (!libres.length) libres = items;
+        }
+        return hasard(libres);
+      }
+      let x = null;
+      for (let k = 0; k < 40; k++) { x = opts.tirer(); if (x && !faits.has(idDe(x)) && idDe(x) !== idCour) break; }
+      return x;
+    }
+    function rendre(defiler) {
+      const t = opts.tache(courant), element = courant;
+      zone.innerHTML = `${opts.aides ? '<div class="nom-aides-barre"><button type="button" class="btn-small" data-a="aides"></button></div>' : ''}
+        <h3 class="er-titre nom-atelier-titre">${t.titre}</h3>
         ${t.enonce ? `<div class="ph-enonce" style="margin-top:12px">${t.enonce}</div>` : ''}<div data-a="parties"></div><div class="er-actions" data-a="suite"></div>`;
-      zone.querySelectorAll('.nom-taches button').forEach(b => { b.onclick = () => tache(+b.dataset.k, true); });
+      if (opts.aides) {
+        const b = zone.querySelector('[data-a="aides"]'), on = opts.aides.actives();
+        b.textContent = on ? 'Désactiver toutes les aides' : 'Activer toutes les aides';
+        b.setAttribute('aria-pressed', String(!on));
+        // même molécule, avec ou sans les aides
+        b.onclick = () => { opts.aides.regler(!opts.aides.actives()); rendre(false); };
+      }
       if (defiler) zone.scrollIntoView({ behavior: 'smooth', block: 'start' });
       question(zone.querySelector('[data-a="parties"]'), t, {
         fin() {
-          noterAtelier(opts.cle, k);
-          const s = zone.querySelector('[data-a="suite"]'), der = k === ts.length - 1;
-          s.innerHTML = der ? (bilan ? '<button type="button" class="btn-primary">Voir le bilan →</button>' : '') : `<button type="button" class="btn-primary">${opts.nomTache || 'Tâche'} ${k + 2} →</button>`;
-          const b = s.querySelector('button');
-          if (b) b.onclick = () => { if (der) { afficherBilan(); bilan.scrollIntoView({ behavior: 'smooth', block: 'start' }); } else tache(k + 1, true); };
-          if (der || ts.every((x, i) => faites().has(i))) afficherBilan();
+          const st = etatAtelier(opts.cle), id = idDe(element);
+          if (!st.faits.includes(id)) st.faits.push(id);
+          if (!items && st.faits.length > 200) st.faits = st.faits.slice(-200);
+          st.total++;
+          ecrireAteliers(opts.cle, st);
+          if (st.total >= seuil) afficherBilan();
+          const s = zone.querySelector('[data-a="suite"]');
+          s.innerHTML = `<button type="button" class="btn-primary">${opts.suivant || 'Molécule suivante →'}</button>`;
+          s.querySelector('button').onclick = () => nouvelle(true);
           setTimeout(() => s.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
         },
       }, 'cours');
     }
-    const f = faites(), premiere = ts.findIndex((x, i) => !f.has(i));
-    tache(premiere < 0 ? 0 : premiere, false);
-    if (premiere < 0) afficherBilan();
-    return { tache };
+    function nouvelle(defiler) { courant = tirer(); rendre(defiler); }
+    nouvelle(false);
+    if (etatAtelier(opts.cle).total >= seuil) afficherBilan();
+    return { refaire: () => rendre(false), nouvelle: () => nouvelle(false) };
+  }
+
+  /* ---------- Partie qu'on peut refaire avec une autre molécule (« À toi » des cours) ----------
+     partieAutres(fabriquer, op) → partie 'perso' ; fabriquer() → { enonce, parties }, une autre molécule à chaque appel.
+     La partie est réussie avec la première molécule ; « ↺ Recommencer avec une autre molécule » en propose ensuite une autre. */
+  function partieAutres(fabriquer, op) {
+    op = op || {};
+    return {
+      type: 'perso', q: op.q || '', solution: '',
+      monter(zone, api) {
+        let premiere = true;
+        function lancer() {
+          zone.innerHTML = '';
+          const t = fabriquer();
+          if (t.enonce) zone.appendChild(el('div', 'ph-enonce', t.enonce));
+          const z = el('div');
+          zone.appendChild(z);
+          question(z, t, {
+            fin() {
+              if (premiere) { premiere = false; api.reussi(); }
+              const a = el('div', 'er-actions nom-autre', '<button type="button" class="btn-secondary">↺ Recommencer avec une autre molécule</button>');
+              zone.appendChild(a);
+              a.querySelector('button').onclick = () => { lancer(); setTimeout(() => zone.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60); };
+            },
+          }, 'cours');
+        }
+        lancer();
+        // « Afficher la réponse » : la réponse de la molécule en cours
+        return { montrer() { premiere = false; const b = zone.querySelector('.ph-partie-aide button'); if (b) b.click(); } };
+      },
+    };
   }
 
   /* ============================================================
@@ -391,7 +483,9 @@
     const r = op.nom === true ? O.nommer(m) : null;
     const autres = Object.assign({}, op);
     if (typeof autres.numeros === 'boolean') delete autres.numeros;      // numeros: false → pas de numéros
-    const d = O.dessinHTML(m, Object.assign({}, r && op.couleurs !== false ? { couleurs: r.couleurs, numeros: op.numeros === false ? null : r.numeros } : {}, autres));
+    // ester : la chaîne de l'alkyle est numérotée aussi (à partir du C lié à l'O), dans sa couleur
+    const alk = r && r.alkyle && op.numeros !== false ? [{ atomes: r.alkyle.chaine, classe: r.alkyle.classe }] : null;
+    const d = O.dessinHTML(m, Object.assign({}, r && op.couleurs !== false ? { couleurs: r.couleurs, numeros: op.numeros === false ? null : r.numeros, autresNumeros: alk } : {}, autres));
     const nom = r ? O.nomHTML(r.parties) : op.nom || '';
     return `<div class="nom-mol">${op.titre ? `<div class="nom-mol-t">${op.titre}</div>` : ''}${d}${nom ? `<div class="nom-mol-n">${nom}</div>` : ''}${op.legende || ''}</div>`;
   }
@@ -451,19 +545,25 @@
   }
 
   /* ---------- Noms faux classiques d'une molécule (QCM « trouver l'erreur ») ----------
-     nomsFaux(m) → [{ nom, diag }] : chaîne trop courte (1-méthyl…, 2-éthyl…), numérotation inversée,
+     nomsFaux(m, op) → [{ nom, diag, type }] : chaîne trop courte (1-méthyl…, 2-éthyl…), numérotation inversée,
      di oublié, ramifications identiques séparées, ordre alphabétique, tirets et virgules ;
-     chaque nom faux avec le diagnostic de ORGA.diagnostiquerNom. */
-  function nomsFaux(m0) {
+     chaque nom faux avec le diagnostic de ORGA.diagnostiquerNom.
+     op.types : seulement ces erreurs : 'chaine', 'numeros' (numérotation), 'multi' (di, tri…), 'alpha', 'format'. */
+  function nomsFaux(m0, op) {
+    const types = op && op.types ? new Set(op.types) : null;
     const m = mol(m0), r = O.nommer(m), S = r.struct, out = new Map();
-    const ajouter = n => { if (!n || n === r.nom || out.has(n)) return; const d = O.diagnostiquerNom(n, r); if (!d.ok) out.set(n, d.diag); };
+    const ajouter = (n, type) => {
+      if ((types && !types.has(type)) || !n || n === r.nom || out.has(n)) return;
+      const d = O.diagnostiquerNom(n, r);
+      if (!d.ok) out.set(n, { diag: d.diag, type });
+    };
     const fin = r.nom.slice(r.nom.lastIndexOf(r.parties.filter(p => p[1] === 'chaine')[0][0]));
     const acide = S.acide ? 'acide ' : '';
     const pref = (gs, ecr) => gs.map(g => (ecr !== false ? g.locs.join(',') + '-' : '') + O.MULT[g.locs.length] + g.nom).join('-');
     // chaîne trop courte : le nom qu'on obtiendrait avec une autre chaîne
     r.chaines.tous.filter(c => c.chaine.length < r.n && !c.subs.some(x => x.complexe)).slice(0, 6).forEach(c => {
       const r2 = O.nommer(m, { chaine: c.chaine });
-      if (!r2.horsProgramme) ajouter(r2.nom);
+      if (!r2.horsProgramme) ajouter(r2.nom, 'chaine');
     });
     const gs = S.prefixes;
     if (gs.length && !S.cyclo && !['aldehyde', 'acide', 'ester', 'amide'].includes(S.famille)) {
@@ -471,18 +571,46 @@
       // numérotation par l'autre bout (le numéro du groupe aussi)
       const mg = r.morceaux.find(x => x.type === 'groupe');
       const finInv = S.gEcrit && mg ? fin.replace(`-${mg.loc}-`, `-${S.famille === 'alcene' ? S.n - mg.loc : S.n + 1 - mg.loc}-`) : fin;
-      ajouter(acide + pref(inv) + finInv);
+      ajouter(acide + pref(inv) + finInv, 'numeros');
     }
     gs.forEach((g, k) => {
       if (g.locs.length < 2) return;
       const sep = gs.slice(0, k).map(x => pref([x])).concat(g.locs.map(l => `${l}-${g.nom}`), gs.slice(k + 1).map(x => pref([x])));
-      ajouter(acide + sep.join('-') + fin);
-      ajouter(acide + gs.map(x => (x === g ? g.locs.join(',') + '-' + g.nom : pref([x]))).join('-') + fin);
-      ajouter(acide + gs.map(x => (x === g ? g.locs.join('-') + '-' + O.MULT[g.locs.length] + g.nom : pref([x]))).join('-') + fin);
+      ajouter(acide + sep.join('-') + fin, 'multi');                                                        // 2-méthyl-3-méthyl…
+      ajouter(acide + gs.map(x => (x === g ? g.locs.join(',') + '-' + g.nom : pref([x]))).join('-') + fin, 'multi');      // 2,3-méthyl…
+      ajouter(acide + gs.map(x => (x === g ? g.locs.slice(0, -1).join(',') + '-' + O.MULT[g.locs.length] + g.nom : pref([x]))).join('-') + fin, 'multi');   // 2-diméthyl, 2,4-triméthyl…
+      ajouter(acide + gs.map(x => (x === g ? g.locs.join('-') + '-' + O.MULT[g.locs.length] + g.nom : pref([x]))).join('-') + fin, 'format');
     });
-    if (gs.length >= 2) ajouter(acide + pref(gs.slice().reverse()) + fin);
-    if (gs.length) ajouter(acide + pref(gs) + '-' + fin);
-    return [...out].map(([nom, diag]) => ({ nom, diag }));
+    if (gs.length >= 2) ajouter(acide + pref(gs.slice().reverse()) + fin, 'alpha');
+    if (gs.length) ajouter(acide + pref(gs) + '-' + fin, 'format');
+    return [...out].map(([nom, x]) => ({ nom, diag: x.diag, type: x.type }));
+  }
+
+  /* ---------- Aide pas à pas pour lire une formule topologique ----------
+     aideTopo(m, op) → HTML : le dessin avec un point et une étiquette (C1, C2…) sur chaque sommet et chaque
+     bout de trait, puis la méthode : 1. compter les C ; 2. les H de chaque C (4 − nombre de traits) ;
+     3. les autres atomes, écrits avec leurs H. op.seulementC : la première étape seulement. */
+  function aideTopo(m0, op) {
+    op = op || {};
+    const m = mol(m0), sc = O.scene(m, 'topo', { echelle: { x: 60, y: 60 } });
+    // les C de gauche à droite (puis de haut en bas)
+    const Cs = m.atomes.map((a, i) => i).filter(i => m.atomes[i].el === 'C').sort((a, b) => sc.px[a].x - sc.px[b].x || sc.px[a].y - sc.px[b].y);
+    const nomC = i => 'C' + (Cs.indexOf(i) + 1);
+    const dessinAide = O.dessinHTML(m, { ecriture: 'topo', echelle: { x: 60, y: 60 }, police: 18, marques: Cs, annotations: Cs.map(i => ({ i, t: nomC(i) })), label: 'Formule topologique : chaque C est repéré par un point' });
+    const lignesH = Cs.map(i => {
+      const nv = O.adjacence(m)[i].length, traits = O.somme(m, i), h = O.nbH(m, i), dbl = traits > nv;
+      const quoi = nv === 1 ? 'bout de trait' : 'sommet';
+      return `<li><b>${nomC(i)}</b> (${quoi}) : ${traits} trait${traits > 1 ? 's' : ''}${dbl ? ' (une double liaison compte pour 2)' : ''} → 4 − ${traits} = <b>${h} H</b></li>`;
+    }).join('');
+    const autres = m.atomes.map((a, i) => i).filter(i => m.atomes[i].el !== 'C');
+    const txtAutres = autres.length ? autres.map(i => { const h = O.nbH(m, i); return `<b>${O.etiquetteH(m.atomes[i].el, h, true)}</b> : 1 ${m.atomes[i].el}${h ? ` et ${h} H` : ''}`; }).join(' ; ') : 'aucun';
+    return `<div class="nom-aide"><p class="nom-aide-t">Aide pas à pas</p>
+      <div class="nom-fig">${dessinAide}</div>
+      <ol class="nom-aide-etapes">
+        <li><b>Compte les C.</b> Chaque sommet et chaque <b>bout de trait</b> est un atome de carbone : ils sont repérés par un point (C1, C2…).</li>
+        ${op.seulementC ? '' : `<li><b>Compte les H des C</b> (on ne les voit pas) : chaque C fait 4 liaisons, ses H complètent : <b>4 − nombre de traits</b>.<ul>${lignesH}</ul>Additionne-les.</li>
+        <li><b>Compte les autres atomes</b>, écrits avec leurs H : ${txtAutres}.</li>`}
+      </ol></div>`;
   }
 
   /* ---------- Liaisons et doublets d'un atome (écritures de la remarque manuscrite du cours) ----------
@@ -626,7 +754,7 @@
         { nom: 'Alcènes, alcools, halogénoalcanes, amines', slug: 'familles', cours: 'module_3a_cours', noms: { cours: 'Cours : alcènes, alcools, halogénoalcanes, amines' } },
         { nom: 'Le groupe carbonyle', slug: 'carbonyle', cours: 'module_3b_cours', noms: { cours: 'Cours : le groupe carbonyle' } },
         { nom: 'Acides carboxyliques, esters, amides', slug: 'acides', cours: 'module_3c_cours', noms: { cours: 'Cours : acides carboxyliques, esters, amides' } },
-        { nom: 'Nommer alcènes, alcools, halogénoalcanes, aldéhydes, cétones, acides', slug: 'nommer', cours: 'module_3d_cours', noms: { cours: 'Cours : nommer alcènes, alcools, aldéhydes, cétones, acides' } },
+        { nom: 'Nommer alcènes, alcools, halogénoalcanes, aldéhydes, cétones, acides carboxyliques', slug: 'nommer', cours: 'module_3d_cours', noms: { cours: 'Cours : nommer alcènes, alcools, aldéhydes, cétones, acides carboxyliques' } },
         { nom: 'Nommer les esters, amines et amides', slug: 'esters', cours: 'module_3e_cours', noms: { cours: 'Cours : nommer les esters, amines et amides' } },
         { nom: 'Entourer les groupes', simulation: 'module_3_entourer', noms: { simulation: 'Atelier : entourer les groupes' } },
         { nom: 'Nommer une molécule', simulation: 'module_3_nommer', noms: { simulation: 'Atelier : nommer une molécule' } },
@@ -641,8 +769,8 @@
 
   window.NOM = Object.assign(window.NOM || {}, {
     MOINS, fmt, lire, el, secouer, melanger, hasard, entre, o, mol, dessin, PARTIES,
-    question, serie, confettis, atelier, CLE_AIDES: 'nomenclature-aides',
-    EC, video, molHTML, trois, partieNom, enchainer, motif, classif, NOMS_EL, diagBrute, partieBrute, nomsFaux, PLUSIEURS, partiesPlusieurs,
+    question, serie, confettis, atelier, aidesAtelier, aidesNommer, partieAutres, CLE_AIDES: 'nomenclature-aides',
+    EC, video, molHTML, trois, partieNom, enchainer, motif, classif, NOMS_EL, diagBrute, partieBrute, nomsFaux, aideTopo, PLUSIEURS, partiesPlusieurs,
     PLAN, menu, accueil, marquer,
   });
 })();

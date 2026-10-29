@@ -33,7 +33,7 @@
    Sous-module 1 du module 2 : les alcanes (hydrocarbures saturés,
    CₙH₂ₙ₊₂), puis les dix alcanes linéaires (tableau du cours, les cinq
    premiers en semi-développée) ; « À toi » : nombre de C ↔ nom ↔ formule
-   brute, dans les deux sens.
+   brute, dans les deux sens, puis un nom à écrire directement (sans aide).
    ============================================================ */
 const { hasard, melanger, exemple } = COURS;
 const { o, molHTML, partieBrute } = NOM;
@@ -70,12 +70,13 @@ function etape2(c) {
         <p>Le début du nom donne le nombre de C : méth 1, éth 2, prop 3, but 4, pent 5, hex 6, hept 7, oct 8, non 9, déc 10.</p></div>
     </div>
     ${exemple(`<p>Les cinq premiers, en semi-développée :</p><div class="nom-mols">${[1, 2, 3, 4, 5].map(n => molHTML(lineaire(n), { titre: NOMS[n - 1], ecriture: 'semi', label: NOMS[n - 1] })).join('')}</div>`)}`);
-  const [a, b, d] = melanger([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).slice(0, 3);
+  const [a, b, d, e] = melanger([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).slice(0, 4);
   const opts = n => melanger([n, ...melanger([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].filter(x => x !== n)).slice(0, 3)]).map(x => o(String(x), NOMS[x - 1]));
   c.aToi(carte, [
     { titre: 'Du nombre de C au nom', parties: [{ type: 'choix', q: `Comment s'appelle l'alcane linéaire à ${a} C ?`, options: opts(a), bonne: String(a), melanger: false, indice: 'méth 1, éth 2, prop 3, but 4, pent 5, hex 6, hept 7, oct 8, non 9, déc 10.', solution: `<p>${a} C : <b>${NOMS[a - 1]}</b>, ${brute(a)}.</p>` }] },
     { titre: 'Du nom à la formule', parties: [partieBrute(NOM.mol(lineaire(b)), { ecriture: 'semi', partie: { q: `Écris la formule brute du ${NOMS[b - 1]}.` } })] },
     { titre: 'De la formule au nom', parties: [{ type: 'choix', q: `Quel alcane a pour formule brute ${brute(d)} ?`, options: opts(d), bonne: String(d), melanger: false, indice: 'Le nombre de C donne le nom : méth 1, éth 2, prop 3, but 4, pent 5…', solution: `<p>${d} C : <b>${NOMS[d - 1]}</b>.</p>` }] },
+    { titre: 'Sans aide', parties: [NOM.partieNom(lineaire(e), { sansAide: true, q: 'Écris directement le nom de cet alcane.' })] },
   ]);
   return carte;
 }

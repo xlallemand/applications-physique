@@ -22,7 +22,7 @@
   <div class="er-card">
     <span class="er-badge">MODULE 1 · COURS 2 / 3</span>
     <h2 class="er-titre">Les trois écritures</h2>
-    <p class="er-contexte">Une même molécule s'écrit de trois façons : formule <b>développée</b>, <b>semi-développée</b> et <b>topologique</b>. La semi-développée est la plus utilisée ; la topologique est la plus difficile : on la travaillera beaucoup.</p>
+    <p class="er-contexte">Une même molécule s'écrit de trois façons : formule <b>développée</b>, <b>semi-développée</b> et <b>topologique</b>. La semi-développée est la plus utilisée cette année ; la topologique est la plus difficile (mais la plus pratique par la suite) : on la travaillera beaucoup.</p>
   </div>
   <div id="etapes"></div>
 </div>
@@ -33,7 +33,8 @@
    Sous-module 2 du module 1 : formules développée et semi-développée
    (écritures abrégées C₂H₅, (CH₂)₅… expliquées par une bulle ⓘ),
    formule topologique (compter les C, formule brute : piège des H
-   implicites), puis les trois molécules de la page 1 du cours dans les
+   implicites ; aide pas à pas visible, NOM.aideTopo : C repérés, H de
+   chaque C = 4 − nombre de traits, autres atomes), puis les trois molécules de la page 1 du cours dans les
    trois écritures et reconnaître une écriture.
    ============================================================ */
 const { hasard, melanger, exemple } = COURS;
@@ -63,7 +64,7 @@ function etape1(c) {
   c.ajouter(carte, `${video('https://www.youtube.com/watch?v=mObSA3j3svA', 'formules brute, développée, semi-développée')}
     <div class="cours-bloc">
       <div class="cle"><p><b class="cle-titre">Formule développée</b> (formule de Lewis) : on écrit <b>tous les atomes</b> et <b>tous les doublets</b>, liants (les liaisons) et non liants. C'est la moins pratique.</p></div>
-      <div class="cle"><p><b class="cle-titre">Formule semi-développée</b> : on <b>regroupe les H</b> sur l'atome auquel ils sont liés : CH₃, CH₂, CH, OH, NH₂. C'est la plus utilisée.</p></div>
+      <div class="cle"><p><b class="cle-titre">Formule semi-développée</b> : on <b>regroupe les H</b> sur l'atome auquel ils sont liés : CH₃, CH₂, CH, OH, NH₂. C'est la plus utilisée cette année.</p></div>
       <p>On écrit parfois un groupe d'atomes en abrégé : C₂H₅ pour –CH₂–CH₃, (CH₂)₅ pour cinq –CH₂– à la suite. Touche le bouton ⓘ pour l'explication.</p>
     </div>
     ${exemple(`<div class="nom-mols">${molHTML(TROIS[0], { titre: 'Développée', ecriture: 'developpee' })}${molHTML(TROIS[0], { titre: 'Semi-développée', ecriture: 'semi' })}</div>
@@ -87,18 +88,19 @@ function etape2(c) {
   c.ajouter(carte, `${video('https://www.youtube.com/watch?v=OMv3DIvZFYU', 'la formule topologique (1)')}${video('https://www.youtube.com/watch?v=PSQ_g8mJQzs', 'la formule topologique (2)')}
     <div class="cours-bloc">
       <div class="cle"><p><b class="cle-titre">Formule topologique.</b> On ne représente <b>ni les atomes de carbone</b>, <b>ni les atomes d'hydrogène liés à des carbones</b>. La chaîne est dessinée en <b>zigzag</b> ; <b>chaque sommet et chaque bout de trait est un C</b>. Les autres atomes (O, N, Cl…) sont écrits, avec leurs H : OH, NH₂.</p></div>
-      <p>Chaque C a 4 liaisons : ses H, qu'on ne voit pas, complètent (4 − nombre de traits). C'est l'écriture la plus difficile.</p>
+      <p>Chaque C a 4 liaisons : ses H, qu'on ne voit pas, complètent (4 − nombre de traits).</p>
     </div>
     ${exemple(`<div class="nom-mols">${molHTML(TROIS[0], { titre: 'Semi-développée', ecriture: 'semi' })}${molHTML(TROIS[0], { titre: 'Topologique', ecriture: 'topo' })}</div>
       <p>5 sommets et bouts de trait sans lettre : 5 C. Le C qui porte OH a 3 traits : il porte 1 H. Formule brute : C<sub>5</sub>H<sub>13</sub>NO.</p>`)}`);
   const [a, b] = melanger(['CC(C)CC(C)C', 'CCC(C)CO', 'CC(C)C=CC', 'CCCC(C)C(=O)O', 'CC(N)CC(C)C', 'CCC(=O)CC(C)C']).slice(0, 2);
   const nC = s => NOM.mol(s).atomes.filter(x => x.el === 'C').length;
+  // aide pas à pas, visible : chaque C repéré sur le dessin, puis le calcul des H de chaque C
   c.aToi(carte, [
-    { titre: 'Compter les C', enonce: `<div class="nom-fig">${ORGA.dessinHTML(NOM.mol(a), { ecriture: 'topo', label: 'Formule topologique' })}</div>`,
+    { titre: 'Compter les C', enonce: NOM.aideTopo(a, { seulementC: true }),
       parties: [{ type: 'nombre', q: 'Combien d\'atomes de carbone a cette molécule ?', label: 'Nombre de C :', valeur: nC(a), entier: true, signe: false, tol: 0,
         diag: v => (v < nC(a) ? 'Tu as oublié des C : <b>chaque bout de trait</b> est aussi un C, pas seulement les sommets.' : 'Compte une seule fois chaque sommet et chaque bout de trait sans lettre.'), solution: `<p><b>${nC(a)} C</b> (sommets et bouts de trait).</p>` }] },
-    { titre: 'Formule brute', enonce: `<div class="nom-fig">${ORGA.dessinHTML(NOM.mol(b), { ecriture: 'topo', label: 'Formule topologique' })}</div>`,
-      parties: [partieBrute(NOM.mol(b), { ecriture: 'topo', partie: { q: 'Écris la formule brute de cette molécule (les H ne sont pas dessinés !).' } })] },
+    { titre: 'Formule brute', enonce: NOM.aideTopo(b),
+      parties: [partieBrute(NOM.mol(b), { ecriture: 'topo', partie: { q: 'Écris la formule brute de cette molécule : d\'abord les C, puis les H (additionne les H de chaque C, sans oublier ceux des autres atomes), puis les autres atomes.' } })] },
   ]);
   return carte;
 }
@@ -116,7 +118,7 @@ function etape3(c) {
 function aRetenir(c) {
   const carte = c.carte('À retenir');
   c.ajouter(carte, `<div class="cle"><p><b>Développée</b> : tous les atomes, toutes les liaisons et les doublets non liants.</p></div>
-    <div class="cle"><p><b>Semi-développée</b> : les H regroupés sur leur atome (CH₃, CH₂, OH, NH₂). La plus utilisée. Écritures abrégées : C₂H₅ = –CH₂–CH₃ ; (CH₂)₅ = cinq –CH₂– à la suite.</p></div>
+    <div class="cle"><p><b>Semi-développée</b> : les H regroupés sur leur atome (CH₃, CH₂, OH, NH₂). La plus utilisée cette année. Écritures abrégées : C₂H₅ = –CH₂–CH₃ ; (CH₂)₅ = cinq –CH₂– à la suite.</p></div>
     <div class="cle"><p><b>Topologique</b> : ni les C, ni les H liés aux C ; zigzag ; chaque sommet et chaque bout de trait est un C ; les autres atomes écrits avec leurs H.</p></div>
     ${trois(TROIS[0])}
     <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1c_cours.html">Cours : passer d'une écriture à l'autre →</a>

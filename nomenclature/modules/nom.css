@@ -158,13 +158,11 @@ sub, sup { font-size: .7em; line-height: 0; }
 .nom-case:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .nom-classif-res { text-align: center; font-weight: 700; min-height: 1.5em; margin-top: 6px !important; }
 
-/* ateliers : liste des tâches, réglages */
-.nom-taches { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
-.nom-taches button {
-  min-width: 44px; height: 44px; border: none; border-radius: 999px; background: var(--paper); font: 800 .9rem var(--font-sans); color: var(--ink-2); cursor: pointer;
-}
-.nom-taches button.fait { background: var(--success-bg); color: var(--success-text); }
-.nom-taches button[aria-current="true"] { background: var(--ink); color: var(--sheet); }
+/* ateliers : bouton des aides, réglages ; « À toi » à refaire avec une autre molécule */
+.nom-aides-barre { display: flex; justify-content: flex-end; margin-bottom: 6px; }
+.nom-aides-barre .btn-small[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
+.nom-atelier-titre { margin-top: 2px; }
+.nom-autre { margin-top: 12px; }
 .nom-reglages { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin: 8px 0; }
 .nom-interr { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; min-height: 44px; cursor: pointer; }
 .nom-interr input { width: 20px; height: 20px; accent-color: var(--ink); }
@@ -187,4 +185,45 @@ sub, sup { font-size: .7em; line-height: 0; }
 .nom-case-n { position: absolute; top: 2px; right: 4px; font-style: normal; font-size: .66rem; font-weight: 800; color: var(--accent-ink); }
 .er-card > .cours-titre:first-child { margin-top: 0; }
 .nom-mol-g { text-align: center; font-weight: 700; font-size: .92rem; margin: 0 !important; }
-.nom-taches { margin-bottom: 12px; }
+
+/* aide pas à pas d'une formule topologique : C repérés, H de chaque C */
+.nom-aide { background: var(--cle-bg); border-radius: 16px; padding: 10px 14px 12px; margin: 8px 0; }
+.nom-aide-t { font-size: .8rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent-ink); }
+.nom-aide .nom-fig { margin: 8px 0; }
+.nom-aide-etapes { margin: 6px 0 0; padding-left: 22px; line-height: 1.55; }
+.nom-aide-etapes > li + li { margin-top: 6px; }
+.nom-aide-etapes ul { margin: 4px 0; padding-left: 18px; }
+
+/* fiche : une carte par atome (liaisons simples et multiples, doublets non liants), deux par ligne */
+.nom-atomes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 14px 0; }
+@media (max-width: 640px) { .nom-atomes { grid-template-columns: minmax(0, 1fr); } }
+.nom-atome { background: var(--paper); border-radius: 16px; padding: 12px 10px 10px; text-align: center; display: flex; flex-direction: column; }
+.nom-atome-t { font-weight: 800; font-size: 1.05rem; color: var(--ink); }
+.nom-atome-d { font-size: .9rem; color: var(--accent-ink); font-weight: 700; margin-top: 2px !important; }
+.nom-atome-m { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 4px 18px; margin-top: 6px; flex: 1; }
+
+/* familles et groupes caractéristiques côte à côte (à apprendre par cœur) */
+.nom-familles { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+.nom-fam-tete, .nom-fam { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 10px; align-items: center; }
+.nom-fam-tete { font-size: .76rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-2); padding: 0 12px; }
+.nom-fam { background: var(--sheet); border-radius: 14px; padding: 10px 12px; }
+.nom-fam-f { font-size: 1.12rem; font-weight: 800; color: var(--accent-ink); letter-spacing: -.01em; }
+.nom-fam-g { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.nom-fam-x { flex-shrink: 0; min-width: 62px; text-align: center; padding: 6px 10px; border: 2.2px solid var(--orga-groupe); border-radius: 12px;
+  color: var(--orga-groupe); font-weight: 800; font-size: 1.15rem; white-space: nowrap; }
+.nom-fam-n { display: flex; flex-direction: column; line-height: 1.3; }
+.nom-fam-n small { color: var(--ink-2); font-size: .82rem; }
+@media (max-width: 480px) {
+  .nom-fam-tete, .nom-fam { grid-template-columns: auto minmax(0, 1fr); gap: 8px; }
+  .nom-fam-tete, .nom-fam { padding-left: 10px; padding-right: 10px; }
+  .nom-fam-f { font-size: .95rem; }
+  .nom-fam-g { gap: 6px; }
+  .nom-fam-x { min-width: 48px; font-size: 1rem; padding: 3px 7px; }
+}
+
+/* extraits de semi-développées (seulement le groupe caractéristique) dans une liste */
+.nom-extraits { list-style: none; padding: 0; margin: 8px 0; display: flex; flex-direction: column; gap: 8px; }
+.nom-extraits li { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.nom-extrait { flex: 0 0 auto; background: var(--sheet); border-radius: 12px; padding: 4px 10px; }
+.nom-extrait .orga-defile { overflow: visible; }
+.nom-extraits li > span:last-child { flex: 1 1 200px; }

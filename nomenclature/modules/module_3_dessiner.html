@@ -20,7 +20,7 @@
   <div class="er-card">
     <span class="er-badge">MODULE 3 · ATELIER</span>
     <h2 class="er-titre">Dessiner une molécule à partir de son nom</h2>
-    <p class="er-contexte">Dix noms fabriqués au hasard : dessine chaque molécule dans l'éditeur. Commence par la <b>chaîne principale</b> et le <b>groupe</b> (la fin du nom), puis place les ramifications. Le nom de ce que tu dessines s'affiche en direct, en couleurs.</p>
+    <p class="er-contexte">Des noms fabriqués au hasard, un à la fois : dessine chaque molécule dans l'éditeur. Commence par la <b>chaîne principale</b> et le <b>groupe</b> (la fin du nom), puis place les ramifications. Avec les <b>aides</b>, le nom de ce que tu dessines s'affiche en direct, en couleurs.</p>
   </div>
   <div class="er-card">
     <h3 class="cours-titre">Réglages</h3>
@@ -44,28 +44,29 @@
 <script>
 /* ============================================================
    Atelier « Dessiner une molécule à partir de son nom » (sous-module 4) :
-   fabriques par famille ; l'éditeur affiche en direct le nom de ce qui est
-   dessiné (ORGA.partieDessin avec o.nom) ; validation par ORGA.meme, sinon
-   diagnostic à partir des deux noms.
+   fabriques par famille, une molécule à la fois (NOM.atelier) ; aides
+   (bouton) : l'éditeur affiche en direct le nom de ce qui est dessiné et la
+   formule brute (ORGA.partieDessin avec o.nom) ; validation par ORGA.meme,
+   sinon diagnostic à partir des deux noms.
    ============================================================ */
 const FAMS = ['alcene', 'alcool', 'halogeno', 'aldehyde', 'cetone', 'acide', 'ester', 'amine', 'amide'];
 const reg = { f: 'toutes', ec: 'semi' };
-let courant = 0, at = null;
+const AIDES = NOM.aidesAtelier('dessiner');
 function majReglages() {
   document.querySelectorAll('#choixFam [data-f]').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === reg.f));
   document.querySelectorAll('#choixEc [data-ec]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ec === reg.ec));
 }
-document.getElementById('choixFam').addEventListener('click', ev => { const b = ev.target.closest('[data-f]'); if (b) { reg.f = b.dataset.f; majReglages(); at.tache(courant, false); } });
-document.getElementById('choixEc').addEventListener('click', ev => { const b = ev.target.closest('[data-ec]'); if (b) { reg.ec = b.dataset.ec; majReglages(); at.tache(courant, false); } });
-// une molécule fabriquée de la famille choisie (chaîne de 2 à 8 C, 0 à 2 ramifications)
-const fabrique = () => ORGA.fabriqueFamille(reg.f === 'toutes' ? NOM.hasard(FAMS) : reg.f, { min: 2, max: 8, ramMax: 2 });
+// une molécule fabriquée de la famille choisie (chaîne de 2 à 8 C, 0 à 2 ramifications) ; l'écriture « au hasard » est tirée avec elle
+const fabrique = () => Object.assign(ORGA.fabriqueFamille(reg.f === 'toutes' ? NOM.hasard(FAMS) : reg.f, { min: 2, max: 8, ramMax: 2 }), { ecH: NOM.hasard(['semi', 'topo']) });
 majReglages();
-at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'dessiner', nomTache: 'Molécule', bilan: document.getElementById('bilan'),
-  taches: Array.from({ length: 10 }, (x, k) => () => {
-    courant = k;
-    const m = fabrique(), ec = reg.ec === 'hasard' ? NOM.hasard(['semi', 'topo']) : reg.ec;
-    return { titre: m.nom, enonce: `<p>Dessine en ${NOM.EC[ec].toLowerCase()} : <b>${m.nom}</b>.</p>`, parties: [ORGA.partieDessin(m.mol, { ecriture: ec, nom: m.nom, q: '' })] };
-  }) });
+const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'dessiner', bilan: document.getElementById('bilan'), aides: AIDES,
+  tirer: fabrique, id: x => x.nom,
+  tache(x) {
+    const ec = reg.ec === 'hasard' ? x.ecH : reg.ec;
+    return { titre: x.nom, enonce: `<p>Dessine en ${NOM.EC[ec].toLowerCase()} : <b>${x.nom}</b>.</p>`, parties: [ORGA.partieDessin(x.mol, { ecriture: ec, nom: x.nom, sansAide: !AIDES.actives(), q: '' })] };
+  } });
+document.getElementById('choixFam').addEventListener('click', ev => { const b = ev.target.closest('[data-f]'); if (b) { reg.f = b.dataset.f; majReglages(); at.nouvelle(); } });
+document.getElementById('choixEc').addEventListener('click', ev => { const b = ev.target.closest('[data-ec]'); if (b) { reg.ec = b.dataset.ec; majReglages(); at.refaire(); } });
 NOM.menu('module_3_dessiner');
 </script>
 </body>

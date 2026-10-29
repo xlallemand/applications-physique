@@ -20,7 +20,7 @@
   <div class="er-card">
     <span class="er-badge">MODULE 2 · ATELIER</span>
     <h2 class="er-titre">Dessiner un alcane</h2>
-    <p class="er-contexte">Dix noms d'alcanes fabriqués au hasard : dessine chaque molécule dans l'écriture de ton choix. Commence par la <b>chaîne principale</b> (la fin du nom), puis place les ramifications : le nom de ce que tu dessines s'affiche en direct, en couleurs.</p>
+    <p class="er-contexte">Des noms d'alcanes fabriqués au hasard, un à la fois : dessine chaque molécule dans l'écriture de ton choix. Commence par la <b>chaîne principale</b> (la fin du nom), puis place les ramifications. Avec les <b>aides</b>, le nom de ce que tu dessines s'affiche en direct, en couleurs.</p>
   </div>
   <div class="er-card">
     <h3 class="cours-titre">Écriture</h3>
@@ -41,22 +41,24 @@
 <script>
 /* ============================================================
    Atelier « Dessiner un alcane » (sous-module 3) : fabrique d'alcanes
-   (ORGA.fabriqueAlcane), l'élève dessine la molécule à partir de son nom
-   dans l'éditeur ; le nom de ce qu'il dessine s'affiche en direct, en
-   couleurs (ORGA.partieDessin avec o.nom) ; validation par ORGA.meme.
-   L'atelier est fait quand les dix tâches sont faites.
+   (ORGA.fabriqueAlcane), un à la fois (NOM.atelier) ; l'élève dessine la
+   molécule à partir de son nom dans l'éditeur ; aides (bouton) : le nom de
+   ce qu'il dessine s'affiche en direct, en couleurs, et la formule brute
+   (ORGA.partieDessin avec o.nom) ; validation par ORGA.meme.
+   L'atelier est fait après dix alcanes.
    ============================================================ */
 const reg = { ec: 'semi' };
-let courant = 0;
-const liste = Array.from({ length: 10 }, (x, k) => () => {
-  courant = k;
-  const m = ORGA.fabriqueAlcane({ min: 4, max: 10, ramMin: 1, ramMax: 3 });
-  const ec = reg.ec === 'hasard' ? NOM.hasard(['semi', 'topo']) : reg.ec;
-  return { titre: m.nom, enonce: `<p>Dessine en ${NOM.EC[ec].toLowerCase()} le <b>${m.nom}</b>.</p>`, parties: [ORGA.partieDessin(m.mol, { ecriture: ec, nom: m.nom, q: '' })] };
-});
-const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'dessiner-alcane', taches: liste, bilan: document.getElementById('bilan'), nomTache: 'Alcane' });
+const AIDES = NOM.aidesAtelier('dessiner-alcane');
+const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'dessiner-alcane', bilan: document.getElementById('bilan'), suivant: 'Alcane suivant →',
+  aides: AIDES,
+  tirer: () => Object.assign(ORGA.fabriqueAlcane({ min: 4, max: 10, ramMin: 1, ramMax: 3 }), { ecH: NOM.hasard(['semi', 'topo']) }),
+  id: x => x.nom,
+  tache(x) {
+    const ec = reg.ec === 'hasard' ? x.ecH : reg.ec;
+    return { titre: x.nom, enonce: `<p>Dessine en ${NOM.EC[ec].toLowerCase()} le <b>${x.nom}</b>.</p>`, parties: [ORGA.partieDessin(x.mol, { ecriture: ec, nom: x.nom, sansAide: !AIDES.actives(), q: '' })] };
+  } });
 const maj = () => document.querySelectorAll('#choixEc [data-ec]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ec === reg.ec));
-document.getElementById('choixEc').addEventListener('click', ev => { const b = ev.target.closest('[data-ec]'); if (b) { reg.ec = b.dataset.ec; maj(); at.tache(courant, false); } });
+document.getElementById('choixEc').addEventListener('click', ev => { const b = ev.target.closest('[data-ec]'); if (b) { reg.ec = b.dataset.ec; maj(); at.refaire(); } });
 maj();
 NOM.menu('module_2_dessiner');
 </script>

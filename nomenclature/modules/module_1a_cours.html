@@ -33,7 +33,9 @@
    Sous-module 1 du module 1 : règles du duet et de l'octet (liaisons et
    doublets non liants de H, C, N, O et des halogènes), lien avec la
    classification (outil NOM.classif), puis s'en servir : compléter les H
-   d'une formule développée (ORGA.partieH), repérer une formule impossible.
+   d'une formule semi-développée (ORGA.partieH, comme dans la série : un
+   atome qui a déjà toutes ses liaisons reste sans H), repérer une formule
+   impossible.
    ============================================================ */
 const { hasard, melanger, exemple } = COURS;
 const { o, motif, classif, molHTML } = NOM;
@@ -65,6 +67,8 @@ function etape1(c) {
         <div class="crs-defile"><table class="crs-tab"><thead><tr><th>Atome</th><th>Liaisons</th><th>Doublets non liants</th></tr></thead>
         <tbody><tr><td>H</td><td>1</td><td>0</td></tr><tr><td>C</td><td>4</td><td>0</td></tr><tr><td>N</td><td>3</td><td>1</td></tr><tr><td>O</td><td>2</td><td>2</td></tr><tr><td>F, Cl, Br, I</td><td>1</td><td>3</td></tr></tbody></table></div>
         <p>Liaisons = doublets liants. F, Cl, Br, I sont les halogènes. Une double liaison compte pour 2, une triple pour 3.</p></div>
+      <div class="cle"><p><b class="cle-titre">Doublets non liants.</b> Nombre de doublets non liants = <b>4 − nombre de doublets liants</b> : on complète par des doublets non liants pour avoir <b>4 doublets</b> autour de l'atome. Cela fait bien 4 × 2 = <b>8 électrons</b> en tout : c'est la règle de l'<b>octet</b>.</p>
+        <p>Exemple : O fait 2 liaisons (2 doublets liants) ; 4 − 2 = 2 doublets non liants.</p></div>
     </div>
     ${exemple(`<p>Les mêmes règles, écrites avec les doublets non liants (petits traits) :</p>${MOTIFS}
       <p>Un C fait toujours 4 liaisons : 4 simples, ou 1 double et 2 simples, ou 1 triple et 1 simple. Un O fait 2 liaisons et garde 2 doublets non liants.</p>`)}`);
@@ -124,7 +128,8 @@ function etape3(c) {
   const OPTS_J = [o('ok', 'oui, elle est possible'), o('trop', 'non : un atome a trop de liaisons'), o('manque', 'non : il manque des liaisons à un atome')];
   const ex = jug.i == null ? '' : `${ORGA.etiquetteH(jug.m.atomes[jug.i].el, jug.h[jug.i], true)} : ${ORGA.somme(jug.m, jug.i) + jug.h[jug.i]} liaisons au lieu de ${ORGA.valence(jug.m.atomes[jug.i].el)}.`;
   c.aToi(carte, [
-    { titre: 'Compléter les H', parties: [ORGA.partieH(hasard(A_COMPLETER), { ecriture: 'developpee', q: 'Touche chaque atome pour lui ajouter un H (touche un H pour l\'enlever), puis valide.' })] },
+    { titre: 'Compléter les H', enonce: '<p>Formule semi-développée : écris les H de chaque atome. Un atome qui a déjà toutes ses liaisons ne porte aucun H.</p>',
+      parties: [ORGA.partieH(hasard(A_COMPLETER), { q: 'Touche chaque atome et choisis le nombre de H qu\'il porte, puis valide.' })] },
     { titre: 'Formule possible ?', enonce: `<div class="nom-fig">${ORGA.dessinHTML(jug.m, { ecriture: 'semi', h: jug.h, label: 'Formule semi-développée à juger' })}</div>`,
       parties: [{ type: 'choix', q: 'Cette formule semi-développée est-elle possible ?', options: OPTS_J, bonne: jug.cas, melanger: false,
         indice: 'Compte les liaisons de chaque atome, H compris : C 4, N 3, O 2, Cl 1.', solution: `<p>${jug.cas === 'ok' ? 'Chaque atome a le bon nombre de liaisons, H compris.' : ex}</p>` }] },
@@ -136,6 +141,7 @@ function etape3(c) {
 function aRetenir(c) {
   const carte = c.carte('À retenir');
   c.ajouter(carte, `<div class="cle"><p><b>Nombre de liaisons</b> : H 1, C 4, N 3 (+ 1 doublet non liant), O 2 (+ 2 doublets non liants), halogènes F, Cl, Br, I 1 (+ 3 doublets non liants).</p></div>
+    <div class="cle"><p><b>Doublets non liants</b> = 4 − doublets liants : on complète pour avoir 4 doublets, soit 8 électrons (règle de l'octet).</p></div>
     <div class="cle"><p>Dans la classification : nombre de liaisons = nombre de cases vers la droite jusqu'à la colonne des gaz nobles.</p></div>
     <div class="cle"><p>Les H complètent les liaisons de chaque atome. Un atome avec trop (ou pas assez) de liaisons : formule impossible.</p></div>
     <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1b_cours.html">Cours : les trois écritures →</a>

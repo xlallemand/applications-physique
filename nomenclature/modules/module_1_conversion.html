@@ -20,7 +20,7 @@
   <div class="er-card">
     <span class="er-badge">MODULE 1 · ATELIER</span>
     <h2 class="er-titre">Changer d'écriture</h2>
-    <p class="er-contexte">Dix molécules à passer d'une écriture à l'autre. <b>Étapes guidées</b> : tu appliques les trois phrases du cours sur le dessin. Sans guidage : tu dessines directement l'écriture demandée.</p>
+    <p class="er-contexte">Des molécules tirées au hasard, une à la fois, à passer d'une écriture à l'autre. Avec les <b>aides</b> (étapes guidées), tu appliques les trois phrases du cours sur le dessin. Sans aide, tu dessines directement l'écriture demandée.</p>
   </div>
 
   <div class="er-card">
@@ -34,8 +34,7 @@
       </div>
     </div>
     <div class="nom-reglages">
-      <label class="nom-interr"><input type="checkbox" id="guide" checked> Étapes guidées</label>
-      <label class="nom-interr"><input type="checkbox" id="compter"> Faire compter les H (développée → semi)</label>
+      <label class="nom-interr"><input type="checkbox" id="compter"> Faire compter les H (développée → semi, étapes guidées)</label>
     </div>
   </div>
 
@@ -55,45 +54,44 @@
 
 <script>
 /* ============================================================
-   Atelier « Changer d'écriture » (sous-module 2) : dix molécules variées
-   (toutes les familles, ramifications, doubles liaisons, 3 à 7 C).
-   Réglages : la conversion, « Étapes guidées » (outil ORGA.conversion :
-   les trois phrases du cours appliquées sur le dessin) ou sans guidage
-   (l'élève dessine l'écriture demandée dans l'éditeur, validation par
-   ORGA.meme), « Faire compter les H » (développée → semi).
-   Une molécule convertie compte comme faite, quelle que soit la conversion.
+   Atelier « Changer d'écriture » (sous-module 2) : molécules variées
+   (toutes les familles, ramifications, doubles liaisons, 3 à 7 C), une à
+   la fois, tirée au hasard (NOM.atelier).
+   Réglages : la conversion, « Faire compter les H » (développée → semi).
+   Aides (bouton) : étapes guidées (outil ORGA.conversion : les trois
+   phrases du cours appliquées sur le dessin) ; sans aide, l'élève dessine
+   l'écriture demandée dans l'éditeur (validation par ORGA.meme).
    ============================================================ */
 const MOLS = ['CCC(C)O', 'CC(C)CC=O', 'CC=CC(C)C', 'CCC(=O)CC', 'CCCC(N)=O', 'CC(C)C(=O)O', 'CCC(Cl)CC(C)C', 'CCNC(C)C', 'CCOC(=O)CC', 'CCCC(C)(O)CC'];
 const NOMS_EC = { developpee: 'développée', semi: 'semi-développée', topo: 'topologique' };
-const reg = { c: 'developpee-semi', guide: true, compter: false };
-let courant = 0;
+const reg = { c: 'developpee-semi', compter: false };
+const AIDES = NOM.aidesAtelier('conversion');
 
-function tache(k) {
-  courant = k;
-  const s = MOLS[k], [de, vers] = reg.c.split('-');
+function tache(s) {
+  const [de, vers] = reg.c.split('-');
   const ecDessin = vers === 'topo' ? 'topo' : 'semi';
-  return reg.guide
+  return AIDES.actives()
     ? { titre: `De la formule ${NOMS_EC[de]} à la formule ${NOMS_EC[vers]}`,
         parties: [ORGA.partieConversion(s, de, vers, { compterH: reg.compter && de === 'developpee' })] }
     : { titre: `De la formule ${NOMS_EC[de]} à la formule ${NOMS_EC[vers]}`,
         enonce: `<p>Dessine cette molécule en formule <b>${NOMS_EC[vers]}</b>, puis valide.</p>${NOM.dessin(s, { ecriture: de, label: 'Formule ' + NOMS_EC[de] })}`,
         parties: [ORGA.partieDessin(s, { ecriture: ecDessin, q: '' })] };
 }
-const liste = MOLS.map((s, k) => () => tache(k));
-const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'conversion', taches: liste, bilan: document.getElementById('bilan'), nomTache: 'Molécule' });
+// une molécule convertie compte comme faite, quelle que soit la conversion
+const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'conversion', items: MOLS, tache, bilan: document.getElementById('bilan'),
+  aides: { actives: AIDES.actives, regler(v) { AIDES.regler(v); majReglages(); } } });
 
 // réglages : on reprend la même molécule avec la nouvelle conversion
 function majReglages() {
   document.querySelectorAll('#choixConv [data-c]').forEach(b => b.setAttribute('aria-pressed', b.dataset.c === reg.c));
-  document.getElementById('compter').disabled = !reg.c.startsWith('developpee') || !reg.guide;
+  document.getElementById('compter').disabled = !reg.c.startsWith('developpee') || !AIDES.actives();
 }
 document.getElementById('choixConv').addEventListener('click', ev => {
   const b = ev.target.closest('[data-c]');
   if (!b) return;
-  reg.c = b.dataset.c; majReglages(); at.tache(courant, false);
+  reg.c = b.dataset.c; majReglages(); at.refaire();
 });
-document.getElementById('guide').addEventListener('change', ev => { reg.guide = ev.target.checked; majReglages(); at.tache(courant, false); });
-document.getElementById('compter').addEventListener('change', ev => { reg.compter = ev.target.checked; at.tache(courant, false); });
+document.getElementById('compter').addEventListener('change', ev => { reg.compter = ev.target.checked; at.refaire(); });
 majReglages();
 NOM.menu('module_1_conversion');
 </script>

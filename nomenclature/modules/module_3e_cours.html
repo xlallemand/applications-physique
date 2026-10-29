@@ -31,17 +31,20 @@
 /* ============================================================
    Cours par étapes (assets/cours.js) : nommer les esters (alcanoate
    d'alkyle, deux couleurs comme les annotations du cours), les amines et
-   les amides (ramifications sur le N : N-). « À toi » : l'outil de
-   nomenclature (aides activées).
+   les amides (ramifications sur le N : N-). Sur les dessins des esters, les
+   deux chaînes sont numérotées (l'alkyle à partir du C lié à l'O). « À toi » :
+   l'outil de nomenclature (aides activées), puis un nom à écrire directement
+   (sans aide). « pentan-1-oate de butyle » : signalé comme faux (pas de 1),
+   le bon nom est affiché et l'exemple est validé.
    ============================================================ */
 const { hasard, melanger, exemple } = COURS;
 const { o, molHTML, video } = NOM;
 // une molécule en couleurs, groupe entouré, avec son nom
 const ex = (s, ec, note) => molHTML(s, { nom: true, ecriture: ec || 'semi', entourer: ORGA.groupes(NOM.mol(s)).map(g => ({ atomes: g.atomes, avecH: g.avecH })), legende: note ? `<p class="nom-avert">${note}</p>` : '' });
-// « À toi » : nommer une molécule fabriquée d'une famille (aides activées)
-const aToiNom = (cle, titre, ec) => {
+// « À toi » : nommer une molécule fabriquée d'une famille (aides activées ; sansAide : nom écrit directement)
+const aToiNom = (cle, titre, ec, sansAide) => {
   const x = ORGA.fabriqueFamille(cle, { min: 3, max: 6, ramMax: 1 });
-  return { titre, parties: [NOM.partieNom(x.mol, { ecriture: ec || hasard(['semi', 'topo']) })] };
+  return { titre, parties: [NOM.partieNom(x.mol, sansAide ? { ecriture: ec || hasard(['semi', 'topo']), sansAide: true, q: 'Écris directement le nom de cette molécule.' } : { ecriture: ec || hasard(['semi', 'topo']) })] };
 };
 
 function etape1(c) {
@@ -52,8 +55,9 @@ function etape1(c) {
         <li>la chaîne liée à l'O donne l'<b>alkyle</b>, numérotée à partir du C lié à l'O (1-méthyléthyle, 2-méthylpropyle) ;</li>
         <li>« d' » devant une voyelle : éthanoate d'éthyle.</li></ul></div>
     </div>
-    ${exemple(`<div class="nom-mols">${ex('CCCCOC(C)=O')}${ex('CCC(=O)OC(C)C', 'topo')}</div>`)}`);
-  c.aToi(carte, [aToiNom('ester', 'Ester 1', 'semi'), aToiNom('ester', 'Ester 2', 'topo')]);
+    ${exemple(`<div class="nom-mols">${ex('CCCCOC(C)=O')}${ex('CCC(=O)OC(C)C', 'topo')}</div>
+      <p>Les deux chaînes sont numérotées : l'alcanoate à partir du C du groupe (n° 1), l'alkyle à partir du C lié à l'O.</p>`)}`);
+  c.aToi(carte, [aToiNom('ester', 'Ester 1', 'semi'), aToiNom('ester', 'Ester 2', 'topo'), aToiNom('ester', 'Sans aide', null, true)]);
   return carte;
 }
 function etape2(c) {
@@ -63,7 +67,7 @@ function etape2(c) {
         <p><b class="cle-titre">Amides.</b> …an<b>amide</b> (butanamide) : la chaîne du C=O donne le nom ; les chaînes sur le N : <b>N-</b>.</p></div>
     </div>
     ${exemple(`<div class="nom-mols">${ex('CCCCCN')}${ex('CCNCC', 'semi', 'N-éthyléthanamine : sur le N, il y a un éthyle accroché.')}${ex('CCCN(C)CC')}${ex('CCCC(N)=O')}${ex('CCCCNC(C)=O')}</div>`)}`);
-  c.aToi(carte, [aToiNom('amine', 'Molécule 1'), aToiNom('amide', 'Molécule 2')]);
+  c.aToi(carte, [aToiNom('amine', 'Molécule 1'), aToiNom('amide', 'Molécule 2'), aToiNom(hasard(['amine', 'amide']), 'Sans aide', null, true)]);
   return carte;
 }
 function aRetenir(c) {

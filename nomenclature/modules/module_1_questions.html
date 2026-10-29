@@ -20,11 +20,13 @@
 
 <script>
 /* ============================================================
-   10 questions tirées au hasard : liaisons et doublets d'un atome,
+   20 questions tirées au hasard : liaisons et doublets d'un atome,
    position dans la classification, H manquants d'une semi-développée,
    reconnaître une écriture, formule brute d'une topologique et d'une
    semi-développée avec une écriture abrégée (C₂H₅, bulle ⓘ), formule
-   impossible, conversions (guidées, ou dans l'éditeur).
+   impossible, conversions guidées, et 8 molécules à dessiner directement
+   dans l'éditeur en développée, semi-développée ou topologique, avec les
+   H automatiques ou à écrire soi-même.
    Erreurs diagnostiquées : en topologique, oublier les C des bouts de
    traits, oublier les H implicites ; effacer le H d'un OH ; ajouter un C
    au bout d'un trait qui porte déjà O ou N ; C à 3 ou 5 liaisons.
@@ -39,6 +41,8 @@ const TOPOS = ['CC(C)CC(C)C', 'CCC(C)CO', 'CC(C)C=CC', 'CCCC(C)C(=O)O', 'CC(N)CC
 // semi-développées avec un éthyle écrit C₂H₅ (atomes de l'éthyle)
 const CONDENSEES = [['CCC(CC)CO', [3, 4]], ['CC(CC)CC(C)O', [2, 3]], ['CCC(=O)OCC', [5, 6]], ['CC(NCC)C', [3, 4]], ['CCC(CC)C(=O)O', [3, 4]], ['CC(C)C(CC)CC', [4, 5]]];
 const CONV = ['CCC(C)O', 'CC(C)CC=O', 'CC=CC(C)C', 'CCC(=O)CC', 'CCCC(N)=O', 'CC(C)C(=O)O', 'CCC(Cl)C', 'CCNC(C)C', 'CCOC(=O)C', 'CC(C)(O)CC', 'CC(C)CCN'];
+// petites molécules pour la développée (les H s'y écrivent un par un)
+const PETITES = ['CCO', 'CC=O', 'CCN', 'CC(C)O', 'CCCl', 'CC(=O)O', 'C=CC', 'CNC', 'CC(N)=O', 'CCC'];
 const fig = (m, op) => `<div class="nom-fig">${ORGA.dessinHTML(m, op)}</div>`;
 
 const G = {
@@ -71,8 +75,8 @@ const G = {
       parties: [{ type: 'choix', q: 'Quelle est cette écriture ?', options: OPTS, bonne: ec, melanger: false, indice: IND[ec], solution: `<p>Formule <b>${EC[ec].toLowerCase()}</b>.</p>` }] };
   },
   // formule brute d'une topologique (C des bouts de traits, H implicites)
-  bruteTopo() {
-    const m = mol(hasard(TOPOS));
+  bruteTopo(s) {
+    const m = mol(s || hasard(TOPOS));
     return { theme: 'Formule brute', enonce: fig(m, { ecriture: 'topo', label: 'Formule topologique' }), parties: [partieBrute(m, { ecriture: 'topo', partie: { q: 'Écris la formule brute de cette molécule.' } })] };
   },
   // formule brute d'une semi-développée avec C₂H₅
@@ -96,27 +100,43 @@ const G = {
         indice: 'Compte les liaisons de chaque atome, H compris : C 4, N 3, O 2.', solution: `<p>${ex}</p>` }] };
   },
   // conversion guidée par les gestes du cours
-  conversion() {
+  conversion(s) {
     const [de, vers] = hasard([['developpee', 'semi'], ['semi', 'topo'], ['topo', 'semi'], ['topo', 'semi'], ['semi', 'topo']]);
     return { theme: 'Changer d\'écriture', consigne: `De la formule ${EC[de].toLowerCase()} à la formule ${EC[vers].toLowerCase()}.`,
-      parties: [ORGA.partieConversion(hasard(CONV), de, vers, { compterH: de === 'developpee' })] };
+      parties: [ORGA.partieConversion(s || hasard(CONV), de, vers, { compterH: de === 'developpee' })] };
   },
-  // conversion sans guidage : dessiner l'écriture demandée
-  dessin() {
-    const s = hasard(CONV), [de, vers] = hasard([['semi', 'topo'], ['topo', 'semi'], ['developpee', 'topo']]);
-    return { theme: 'Changer d\'écriture', consigne: `Dessine cette molécule en formule ${EC[vers].toLowerCase()}.`, enonce: fig(mol(s), { ecriture: de, label: 'Formule ' + EC[de].toLowerCase() }),
-      parties: [ORGA.partieDessin(s, { ecriture: vers, q: '' })] };
+  // dessiner directement la molécule dans l'écriture demandée ; hydro : 'auto' (H automatiques) ou 'eleve' (H à écrire)
+  dessin(s, de, vers, hydro) {
+    const eleve = hydro === 'eleve' && vers !== 'topo';
+    const h = vers === 'topo' ? '' : eleve ? `, <b>en écrivant toi-même les H</b> (outil « H »${vers === 'developpee' ? ' : touche un atome pour lui ajouter un H' : ' : touche un atome et choisis ses H'})` : ' (les H se placent tout seuls)';
+    return { theme: 'Dessiner une molécule', consigne: `Dessine cette molécule en formule ${EC[vers].toLowerCase()}${h}.`, enonce: fig(mol(s), { ecriture: de, label: 'Formule ' + EC[de].toLowerCase() }),
+      parties: [ORGA.partieDessin(s, { ecriture: vers, hydrogenes: eleve ? 'eleve' : 'auto', q: '' })] };
   },
 };
 
 function tirage() {
-  return [hasard([G.liaisons, G.classif])(), G.h(), G.ecriture(), G.bruteTopo(), G.bruteCondensee(), G.impossible(), G.conversion(), G.conversion(), G.dessin(), hasard([G.liaisons, G.classif, G.bruteTopo])()];
+  // molécules différentes d'une question à l'autre
+  const conv = melanger(CONV), petites = melanger(PETITES), topos = melanger(TOPOS);
+  let c = 0;
+  const sC = () => conv[c++ % conv.length];
+  return [G.liaisons(), G.classif(), G.h(), G.ecriture(), G.bruteTopo(topos[0]), G.bruteCondensee(), G.impossible(), G.ecriture(),
+    G.conversion(sC()), G.conversion(sC()),
+    G.dessin(sC(), 'semi', 'topo'),
+    G.dessin(sC(), 'topo', 'semi', 'auto'),
+    G.dessin(petites[0], 'semi', 'developpee', 'auto'),
+    G.dessin(sC(), 'topo', 'semi', 'eleve'),
+    G.dessin(sC(), 'developpee', 'topo'),
+    G.dessin(petites[1], 'topo', 'developpee', 'eleve'),
+    G.dessin(sC(), 'developpee', 'semi', 'eleve'),
+    G.dessin(sC(), 'semi', 'topo'),
+    G.bruteTopo(topos[1]), hasard([G.liaisons, G.classif])()];
 }
 
 NOM.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 1 · QUESTIONS', titre: 'Représenter les molécules',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : liaisons et doublets d\'un atome, compléter les H, reconnaître une écriture, formule brute, formule impossible, et des <b>conversions</b> d\'une écriture à l\'autre.</p>',
+  intro: '<p class="er-contexte">20 questions tirées au hasard : liaisons et doublets d\'un atome, compléter les H, reconnaître une écriture, formule brute, formule impossible, des <b>conversions</b> d\'une écriture à l\'autre et des molécules à <b>dessiner</b> directement, avec ou sans H automatiques.</p>',
+  nombre: 20,
   questions: tirage,
   revoir: { href: 'module_1b_cours.html', label: 'Revoir le cours' },
   suite: { href: 'module_2a_cours.html', label: 'Module 2 : nommer les alcanes →' },

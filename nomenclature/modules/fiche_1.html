@@ -25,10 +25,9 @@
 
   <section class="er-card" id="liaisons">
     <h3 class="cours-titre">Combien de liaisons ?</h3>
-    <div class="cle"><p>Règle du <b>duet</b> pour H (un doublet, liant) ; règle de l'<b>octet</b> pour les autres (4 doublets).</p></div>
-    <div class="som-defile"><table class="som-tab"><thead><tr><th>Atome</th><th>Liaisons</th><th>Doublets non liants</th></tr></thead>
-      <tbody><tr><td>H</td><td>1</td><td>0</td></tr><tr><td>C</td><td>4</td><td>0</td></tr><tr><td>N</td><td>3</td><td>1</td></tr><tr><td>O</td><td>2</td><td>2</td></tr><tr><td>F, Cl, Br, I</td><td>1</td><td>3</td></tr></tbody></table></div>
-    <div id="motifs"></div>
+    <div class="cle"><p>Règle du <b>duet</b> pour H (un doublet, liant : 1 liaison) ; règle de l'<b>octet</b> pour les autres (4 doublets).</p>
+      <p><b>Doublets non liants = 4 − doublets liants</b> : on complète par des doublets non liants pour avoir 4 doublets, soit 8 électrons (règle de l'octet).</p></div>
+    <div class="nom-atomes" id="motifs"></div>
     <div class="cle"><p>Dans la classification : nombre de liaisons = nombre de cases à parcourir vers la droite jusqu'à la colonne des <b>gaz nobles</b>.</p></div>
     <div class="cle"><p>Les H complètent les liaisons de chaque atome. Un atome avec trop (ou pas assez) de liaisons : formule <b>impossible</b>.</p></div>
   </section>
@@ -36,7 +35,7 @@
   <section class="er-card" id="ecritures">
     <h3 class="cours-titre">Les trois écritures</h3>
     <div class="cle"><p><b>Développée</b> (formule de Lewis) : tous les atomes, toutes les liaisons, les doublets non liants.</p></div>
-    <div class="cle"><p><b>Semi-développée</b> : les H regroupés sur leur atome (CH₃, CH₂, CH, OH, NH₂). La plus utilisée. Écritures abrégées : C₂H₅ = –CH₂–CH₃ ; (CH₂)₅ = cinq –CH₂– à la suite ; C₆H₅ = cycle benzénique qui porte 5 H.</p></div>
+    <div class="cle"><p><b>Semi-développée</b> : les H regroupés sur leur atome (CH₃, CH₂, CH, OH, NH₂). La plus utilisée cette année. Écritures abrégées : C₂H₅ = –CH₂–CH₃ ; (CH₂)₅ = cinq –CH₂– à la suite ; C₆H₅ = cycle benzénique qui porte 5 H.</p></div>
     <div class="cle"><p><b>Topologique</b> : ni les C, ni les H liés aux C ; zigzag ; <b>chaque sommet et chaque bout de trait est un C</b> ; les autres atomes écrits avec leurs H (OH, NH₂).</p></div>
     <div id="trois"></div>
   </section>
@@ -56,11 +55,23 @@
 <script>
 // écritures des liaisons et doublets, puis les trois molécules du tableau du cours dans les trois écritures
 const m = NOM.motif;
-document.getElementById('motifs').innerHTML = `<div class="nom-motifs">
-  <span class="nom-motif-l">${m('C', [[0, 1], [90, 1], [180, 1], [270, 1]], [], 'C avec quatre liaisons simples')}C</span>
-  <span class="nom-motif-l">${m('N', [[180, 1], [0, 1], [270, 1]], [90], 'N avec trois liaisons et un doublet non liant')}N</span>
-  <span class="nom-motif-l">${m('O', [[180, 1], [0, 1]], [90, 270], 'O avec deux liaisons et deux doublets non liants')}O</span>
-  <span class="nom-motif-l">${m('Cl', [[180, 1]], [90, 0, 270], 'halogène avec une liaison et trois doublets non liants')}halogène</span></div>`;
+// une carte par atome : ses liaisons simples et multiples, ses doublets non liants (comme dans le cours)
+const carteAtome = (titre, detail, motifs) => `<div class="nom-atome"><p class="nom-atome-t">${titre}</p><p class="nom-atome-d">${detail}</p>
+  <div class="nom-atome-m">${motifs.map(([svg, leg]) => `<span class="nom-motif-l">${svg}${leg}</span>`).join('')}</div></div>`;
+document.getElementById('motifs').innerHTML = [
+  carteAtome('Carbone C', '4 liaisons, 0 doublet non liant', [
+    [m('C', [[0, 1], [90, 1], [180, 1], [270, 1]], [], 'C avec quatre liaisons simples'), '4 simples'],
+    [m('C', [[180, 2], [30, 1], [-30, 1]], [], 'C avec une double liaison et deux simples'), '1 double, 2 simples'],
+    [m('C', [[180, 3], [0, 1]], [], 'C avec une triple liaison et une simple'), '1 triple, 1 simple']]),
+  carteAtome('Azote N', '3 liaisons, 1 doublet non liant', [
+    [m('N', [[180, 1], [0, 1], [270, 1]], [90], 'N avec trois liaisons simples et un doublet non liant'), '3 simples'],
+    [m('N', [[0, 3]], [180], 'N avec une triple liaison et un doublet non liant'), '1 triple']]),
+  carteAtome('Oxygène O', '2 liaisons, 2 doublets non liants', [
+    [m('O', [[180, 1], [0, 1]], [90, 270], 'O avec deux liaisons simples et deux doublets non liants'), '2 simples'],
+    [m('O', [[0, 2]], [90, 270], 'O avec une double liaison et deux doublets non liants'), '1 double']]),
+  carteAtome('Halogènes F, Cl, Br, I', '1 liaison, 3 doublets non liants', [
+    [m('Cl', [[180, 1]], [90, 0, 270], 'halogène avec une liaison et trois doublets non liants'), '1 simple']]),
+].join('');
 document.getElementById('trois').innerHTML = ['CC(C)C(O)CN', 'ClCC(C)OC=N', 'BrCC(=O)OCC#C'].map(s => NOM.trois(s)).join('');
 NOM.menu('fiche_1');
 </script>

@@ -20,7 +20,7 @@
   <div class="er-card">
     <span class="er-badge">MODULE 2 · ATELIER</span>
     <h2 class="er-titre">Nommer un alcane</h2>
-    <p class="er-contexte">Dix alcanes fabriqués au hasard (chaîne de 4 à 10 C, 1 à 3 ramifications) à nommer, dans l'écriture de ton choix. Les <b>aides</b> (couleurs, nom découpé, bulles ⓘ) se désactivent une à une quand tu te sens prêt.</p>
+    <p class="er-contexte">Des alcanes fabriqués au hasard (chaîne de 4 à 10 C, 1 à 3 ramifications), un à la fois, à nommer dans l'écriture de ton choix. Les <b>aides</b> (couleurs, nom découpé, bulles ⓘ) se désactivent une à une, ou toutes d'un coup, quand tu te sens prêt.</p>
   </div>
   <div class="er-card">
     <h3 class="cours-titre">Écriture</h3>
@@ -43,20 +43,22 @@
 /* ============================================================
    Atelier « Nommer un alcane » (sous-module 3) : fabrique d'alcanes
    (ORGA.fabriqueAlcane : chaîne de 4 à 10 C, 1 à 3 ramifications méthyl,
-   éthyl, propyl), outil de nomenclature avec ses aides (NOM.partieNom).
-   L'atelier est fait quand les dix tâches sont faites.
+   éthyl, propyl), un à la fois (NOM.atelier), outil de nomenclature avec
+   ses aides (NOM.partieNom) ; le bouton des aides les règle toutes d'un coup.
+   L'atelier est fait après dix alcanes.
    ============================================================ */
 const reg = { ec: 'semi' };
-let courant = 0;
-const liste = Array.from({ length: 10 }, (x, k) => () => {
-  courant = k;
-  const m = ORGA.fabriqueAlcane({ min: 4, max: 10, ramMin: 1, ramMax: 3 });
-  const ec = reg.ec === 'hasard' ? NOM.hasard(['semi', 'topo', 'developpee']) : reg.ec;
-  return { titre: `Un alcane en ${NOM.EC[ec].toLowerCase()}`, parties: [NOM.partieNom(m.mol, { ecriture: ec, q: '' })] };
-});
-const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'nommer-alcane', taches: liste, bilan: document.getElementById('bilan'), nomTache: 'Alcane' });
+const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'nommer-alcane', bilan: document.getElementById('bilan'), suivant: 'Alcane suivant →',
+  aides: NOM.aidesNommer,
+  // l'écriture « au hasard » est tirée avec la molécule (elle ne change pas quand on règle les aides)
+  tirer: () => Object.assign(ORGA.fabriqueAlcane({ min: 4, max: 10, ramMin: 1, ramMax: 3 }), { ecH: NOM.hasard(['semi', 'topo', 'developpee']) }),
+  id: x => x.nom,
+  tache(x) {
+    const ec = reg.ec === 'hasard' ? x.ecH : reg.ec;
+    return { titre: `Un alcane en ${NOM.EC[ec].toLowerCase()}`, parties: [NOM.partieNom(x.mol, { ecriture: ec, q: '' })] };
+  } });
 const maj = () => document.querySelectorAll('#choixEc [data-ec]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ec === reg.ec));
-document.getElementById('choixEc').addEventListener('click', ev => { const b = ev.target.closest('[data-ec]'); if (b) { reg.ec = b.dataset.ec; maj(); at.tache(courant, false); } });
+document.getElementById('choixEc').addEventListener('click', ev => { const b = ev.target.closest('[data-ec]'); if (b) { reg.ec = b.dataset.ec; maj(); at.refaire(); } });
 maj();
 NOM.menu('module_2_nommer');
 </script>

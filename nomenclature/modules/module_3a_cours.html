@@ -30,8 +30,10 @@
 <script>
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
-   Sous-module 1 du module 3 : les groupes sans C=O (C=C, hydroxyle,
-   halogéno, amine), exemples du tableau des familles du cours ;
+   Sous-module 1 du module 3 : vocabulaire (famille et groupe caractéristique,
+   ou classe fonctionnelle et groupe fonctionnel) ; les groupes sans C=O
+   (C=C, hydroxyle, halogéno, amine) à apprendre par cœur, familles et
+   groupes côte à côte, exemples du tableau des familles du cours ;
    amines primaire, secondaire, tertiaire. « À toi » : entourer le groupe
    (ORGA.partieEntourer), puis le nommer et donner la famille
    (ORGA.partiesNommerGroupes).
@@ -51,12 +53,14 @@ function etape1(c) {
   const carte = c.carte('1. Quatre groupes sans C=O');
   c.ajouter(carte, `${video('https://www.youtube.com/watch?v=1OQyiSniTgI', 'nomenclature en chimie organique (1)')}${video('https://www.youtube.com/watch?v=l2jxhqaL330', 'nomenclature en chimie organique (2)')}
     <div class="cours-bloc">
+      <p><b>Vocabulaire</b> : on parle de <b>famille</b> et de <b>groupe caractéristique</b> (le plus utilisé) ; on trouve aussi <b>classe fonctionnelle</b> et <b>groupe fonctionnel</b>.</p>
       <div class="cle"><p><b class="cle-titre">À apprendre par cœur.</b></p>
-        <div class="crs-defile"><table class="crs-tab"><thead><tr><th>Famille</th><th>Groupe caractéristique</th><th>Nom du groupe</th></tr></thead>
-        <tbody><tr><td>alcène</td><td>C=C</td><td>double liaison C=C</td></tr>
-        <tr><td>alcool</td><td>–OH (sur un C sans =O)</td><td>hydroxyle</td></tr>
-        <tr><td>halogénoalcane</td><td>–X (F, Cl, Br, I)</td><td>halogéno</td></tr>
-        <tr><td>amine</td><td>N lié à des C (sans C=O)</td><td>amine</td></tr></tbody></table></div>
+        <div class="nom-familles">
+          <div class="nom-fam-tete"><span>Famille</span><span>Groupe caractéristique</span></div>
+          ${[['alcènes', 'C=C', 'double liaison C=C', ''], ['alcools', '–OH', 'groupe hydroxyle', 'sur un C qui ne porte pas de =O'],
+            ['halogénoalcanes', '–X', 'groupe halogéno', 'X = F, Cl, Br ou I'], ['amines', '–N', 'groupe amine', 'N lié seulement à des C (et à des H), sans C=O']]
+            .map(([f, x, g, note]) => `<div class="nom-fam"><span class="nom-fam-f">${f}</span><span class="nom-fam-g"><span class="nom-fam-x">${x}</span><span class="nom-fam-n"><b>${g}</b>${note ? `<small>${note}</small>` : ''}</span></span></div>`).join('')}
+        </div>
         <p>On <b>entoure</b> le groupe : tous ses atomes (avec ou sans les H qui leur sont liés), et rien d'autre. Puis on écrit son nom et la famille entre parenthèses.</p></div>
     </div>
     ${exemple(`<div class="nom-mols">${ent('C=CCC(C)C')}${ent('CC(C)(C)O')}${ent('CCC(C)CC(C)Br')}${ent('CCCCCN')}</div>`)}`);

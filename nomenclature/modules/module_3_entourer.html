@@ -20,7 +20,7 @@
   <div class="er-card">
     <span class="er-badge">MODULE 3 · ATELIER</span>
     <h2 class="er-titre">Entourer les groupes</h2>
-    <p class="er-contexte">La question classique du bac : sur une molécule qui a <b>plusieurs groupes caractéristiques</b>, <b>entourer</b> chaque groupe, le <b>nommer</b> et donner la <b>famille</b>. Les molécules de l'exercice 5 et des sujets de bac.</p>
+    <p class="er-contexte">La question classique du bac : sur une molécule qui a <b>plusieurs groupes caractéristiques</b>, <b>entourer</b> chaque groupe, le <b>nommer</b> et donner la <b>famille</b>. Les molécules de l'exercice 5 et des sujets de bac, une à la fois, au hasard.</p>
   </div>
   <div class="er-card ph-question" id="tache"></div>
   <div id="bilan" class="er-card" hidden>
@@ -36,12 +36,14 @@
    Atelier « Entourer les groupes » (question type bac) : molécules à
    plusieurs groupes (ex. 5 de la feuille, avec ses écritures abrégées
    (CH₂)₅ et C₆H₅ ; acides lactique et malique, frambinone, atropine,
-   voir competences.md) : entourer chaque groupe (ORGA.partieEntourer),
-   puis nommer chaque groupe et donner la famille (NOM.partiesPlusieurs).
+   voir competences.md), une à la fois, tirée au hasard (NOM.atelier) :
+   entourer chaque groupe (ORGA.partieEntourer), puis nommer chaque groupe
+   et donner la famille (NOM.partiesPlusieurs). Aides (bouton) : bulles ⓘ.
    ============================================================ */
 const MOLS = ['glycine', 'serine', 'asparagine', 'pheromone', 'cannelle', 'lactique', 'malique', 'frambinone', 'atropine'].map(k => NOM.PLUSIEURS[k]);
-NOM.atelier({ zone: document.getElementById('tache'), cle: 'entourer', nomTache: 'Molécule', bilan: document.getElementById('bilan'),
-  taches: MOLS.map(x => () => ({ titre: x.titre, parties: NOM.partiesPlusieurs(x) })) });
+const AIDES = NOM.aidesAtelier('entourer');
+NOM.atelier({ zone: document.getElementById('tache'), cle: 'entourer', items: MOLS, id: x => x.titre, bilan: document.getElementById('bilan'), aides: AIDES,
+  tache: x => ({ titre: x.titre, parties: NOM.partiesPlusieurs(x, { bulles: AIDES.actives() }) }) });
 NOM.menu('module_3_entourer');
 </script>
 </body>

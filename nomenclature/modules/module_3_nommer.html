@@ -20,7 +20,7 @@
   <div class="er-card">
     <span class="er-badge">MODULE 3 · ATELIER</span>
     <h2 class="er-titre">Nommer une molécule</h2>
-    <p class="er-contexte">Dix molécules fabriquées au hasard, de la famille de ton choix. L'outil commence par le <b>groupe caractéristique</b> (l'entourer, le nommer, donner la famille), puis la chaîne, le n° 1, les ramifications et le nom. Les aides se désactivent une à une.</p>
+    <p class="er-contexte">Des molécules fabriquées au hasard, une à la fois, de la famille de ton choix. L'outil commence par le <b>groupe caractéristique</b> (l'entourer, le nommer, donner la famille), puis la chaîne, le n° 1, les ramifications et le nom. Les aides se désactivent une à une, ou toutes d'un coup.</p>
   </div>
   <div class="er-card">
     <h3 class="cours-titre">Réglages</h3>
@@ -44,27 +44,28 @@
 <script>
 /* ============================================================
    Atelier « Nommer une molécule » (sous-module 4) : fabriques par famille
-   (ORGA.fabriqueFamille : chaîne de 2 à 8 C, 0 à 2 ramifications), outil
-   de nomenclature avec l'étape « groupe » en tête (NOM.partieNom).
+   (ORGA.fabriqueFamille : chaîne de 2 à 8 C, 0 à 2 ramifications), une
+   molécule à la fois (NOM.atelier), outil de nomenclature avec l'étape
+   « groupe » en tête (NOM.partieNom) ; le bouton des aides les règle toutes.
    ============================================================ */
 const FAMS = ['alcene', 'alcool', 'halogeno', 'aldehyde', 'cetone', 'acide', 'ester', 'amine', 'amide'];
 const reg = { f: 'toutes', ec: 'semi' };
-let courant = 0, at = null;
 function majReglages() {
   document.querySelectorAll('#choixFam [data-f]').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === reg.f));
   document.querySelectorAll('#choixEc [data-ec]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ec === reg.ec));
 }
-document.getElementById('choixFam').addEventListener('click', ev => { const b = ev.target.closest('[data-f]'); if (b) { reg.f = b.dataset.f; majReglages(); at.tache(courant, false); } });
-document.getElementById('choixEc').addEventListener('click', ev => { const b = ev.target.closest('[data-ec]'); if (b) { reg.ec = b.dataset.ec; majReglages(); at.tache(courant, false); } });
-// une molécule fabriquée de la famille choisie (chaîne de 2 à 8 C, 0 à 2 ramifications)
-const fabrique = () => ORGA.fabriqueFamille(reg.f === 'toutes' ? NOM.hasard(FAMS) : reg.f, { min: 2, max: 8, ramMax: 2 });
+// une molécule fabriquée de la famille choisie (chaîne de 2 à 8 C, 0 à 2 ramifications) ; l'écriture « au hasard » est tirée avec elle
+const fabrique = () => Object.assign(ORGA.fabriqueFamille(reg.f === 'toutes' ? NOM.hasard(FAMS) : reg.f, { min: 2, max: 8, ramMax: 2 }), { ecH: NOM.hasard(['semi', 'topo', 'developpee']) });
 majReglages();
-at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'nommer', nomTache: 'Molécule', bilan: document.getElementById('bilan'),
-  taches: Array.from({ length: 10 }, (x, k) => () => {
-    courant = k;
-    const m = fabrique(), ec = reg.ec === 'hasard' ? NOM.hasard(['semi', 'topo', 'developpee']) : reg.ec;
-    return { titre: `Une molécule en ${NOM.EC[ec].toLowerCase()}`, parties: [NOM.partieNom(m.mol, { ecriture: ec, q: '' })] };
-  }) });
+const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'nommer', bilan: document.getElementById('bilan'), aides: NOM.aidesNommer,
+  tirer: fabrique, id: x => x.nom,
+  tache(x) {
+    const ec = reg.ec === 'hasard' ? x.ecH : reg.ec;
+    return { titre: `Une molécule en ${NOM.EC[ec].toLowerCase()}`, parties: [NOM.partieNom(x.mol, { ecriture: ec, q: '' })] };
+  } });
+// nouvelle famille : une autre molécule ; nouvelle écriture : la même molécule
+document.getElementById('choixFam').addEventListener('click', ev => { const b = ev.target.closest('[data-f]'); if (b) { reg.f = b.dataset.f; majReglages(); at.nouvelle(); } });
+document.getElementById('choixEc').addEventListener('click', ev => { const b = ev.target.closest('[data-ec]'); if (b) { reg.ec = b.dataset.ec; majReglages(); at.refaire(); } });
 NOM.menu('module_3_nommer');
 </script>
 </body>

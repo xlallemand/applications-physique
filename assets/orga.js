@@ -40,7 +40,8 @@
                                     une autre donne le nom faux qu'on obtiendrait avec elle)
                                     { nom, variantes (autres écritures acceptées), parties [[texte, classe]] (nom en couleurs),
                                       morceaux (nom découpé), ramifs, couleurs (atomes par classe), famille, groupe,
-                                      chaine / numeros (chaîne principale numérotée), struct, chaines }
+                                      chaine / numeros (chaîne principale numérotée), alkyle (ester : { chaine, classe }),
+                                      struct, chaines }
                                     ou { horsProgramme: raison }
      ORGA.evaluerChaine(mol, res, atomes)       la chaîne touchée est-elle la chaîne principale ? { ok, diag, orientations }
      ORGA.evaluerDepart(mol, res, chaine, i)    le C touché est-il le n° 1 ? { ok, chaine, diag }
@@ -48,7 +49,9 @@
      ORGA.analyserNom(nom)          nom → structure (préfixes, chaîne, terminaison…)
      ORGA.diagnostiquerNom(saisie, mol ou nommer(mol))
                                     { ok, remarque } ou { ok: false, diag } (chaîne trop courte, numérotation,
-                                    ordre alphabétique, di/tri, tirets et virgules, terminaison, N-, ester…)
+                                    ordre alphabétique, di/tri, tirets et virgules, terminaison, N-, ester…) ;
+                                    { ok: true, numeroUn: true, diag } : « pentan-1-oate », « butan-1-al » (le 1 en trop :
+                                    faux, mais la bonne molécule)
      ORGA.fabriqueAlcane(o)         { mol, nom, res, smiles } : chaîne de o.min à o.max C, o.ramMin à o.ramMax ramifications
      ORGA.fabriqueFamille(cle, o)   idem pour une famille ('alcene', 'alcool', 'aldehyde', 'cetone', 'acide', 'ester',
                                     'amine', 'amide', 'halogeno')
@@ -395,6 +398,8 @@
   function diagH(mol, i, h) {
     const el = mol.atomes[i].el, v = valence(el), s = somme(mol, i), faut = Math.max(0, v - s);
     if (h === faut) return null;
+    // atome qui a déjà toutes ses liaisons : on n'a pas à y toucher (aucun H)
+    if (h == null && !faut) return null;
     const besoin = faut ? `il lui faut ${faut} H (${v} liaisons en tout)` : `il ne lui faut aucun H (il a déjà ses ${v} liaisons)`;
     if (h == null) return `${cap(CE(el))} n'a pas encore ses H : il a ${liaisonsTxt(s)}, ${besoin}.`;
     return `${cap(CE(el))} a ${liaisonsTxt(s)} : ${besoin}.`;
@@ -615,6 +620,8 @@
       mol, nom, variantes, parties, morceaux, ramifs, couleurs,
       famille: fam, groupe: x.f || null, cyclo: !!x.cyclo, n,
       chaine: b.chaine.slice(), numeros: b.chaine.slice(), locG,
+      // ester : chaîne de l'alkyle, numérotée à partir du C lié à l'O (pour la numéroter sur le dessin)
+      alkyle: x.alkyle ? { chaine: x.alkyle.chaine.slice(), classe: classeAlk } : null,
       struct: {
         famille: fam, acide, cyclo: !!x.cyclo, n, locG, gEcrit,
         prefixes: gs.map(g => ({ nom: g.nom, locs: g.locs.slice(), ecrits: g.ecrits, halo: !!g.halo, k: g.k })),
@@ -741,11 +748,12 @@
     const deg = i => adj[i].filter(v => S.has(v.j)).length;
     const relies = branche(adj, [...S][0], new Set(mol.atomes.map((a, i) => i).filter(i => !S.has(i))));
     if (relies.length !== S.size) return { ok: false, diag: 'Ces C ne sont pas tous reliés : la chaîne est une suite de C liés les uns aux autres.' };
-    if ([...S].some(i => deg(i) > 2) || (S.size > 1 && [...S].filter(i => deg(i) === 1).length !== 2)) return { ok: false, diag: 'Ces C ne forment pas une seule chaîne : une chaîne n\'a pas d\'embranchement, elle va d\'un bout à l\'autre.' };
+    // alcane cyclique : la chaîne principale est le cycle (ses C n'ont pas de bout : on le teste avant la forme d'une chaîne)
     if (res.cyclo) {
       const ok = res.chaine.length === S.size && res.chaine.every(i => S.has(i));
-      return ok ? { ok: true, orientations: res.chaines.optimales.map(c => c.chaine) } : { ok: false, diag: 'Dans un alcane cyclique, la chaîne principale est le cycle : touche tous ses C.' };
+      return ok ? { ok: true, orientations: res.chaines.optimales.map(c => c.chaine) } : { ok: false, diag: 'Dans un alcane cyclique, la chaîne principale est le cycle : touche tous ses C, et seulement eux.' };
     }
+    if ([...S].some(i => deg(i) > 2) || (S.size > 1 && [...S].filter(i => deg(i) === 1).length !== 2)) return { ok: false, diag: 'Ces C ne forment pas une seule chaîne : une chaîne n\'a pas d\'embranchement, elle va d\'un bout à l\'autre.' };
     const ch = res.chaines;
     if (res.famille === 'ester' && !S.has(ch.depart)) return { ok: false, diag: 'La chaîne principale d\'un ester est celle qui porte le C=O (elle donne l\'alcanoate) : la chaîne liée à l\'O donne l\'alkyle.' };
     if (res.famille === 'amine' && ![...S].some(i => adj[i].some(v => mol.atomes[v.j].el === 'N'))) return { ok: false, diag: 'La chaîne principale d\'une amine est liée au N.' };
@@ -1171,10 +1179,16 @@
     // dernière vérification : le nom décrit bien la molécule
     const r = construireNom(an.st);
     if (!r.mol || !meme(r.mol, molDe(mol))) return { ok: false, diag: 'Ce nom ne correspond pas à cette molécule : relis la chaîne principale et les ramifications.' };
+    // « pentan-1-oate », « butan-1-al » : faux (on n'écrit pas le 1), mais la molécule est la bonne :
+    // l'outil le signale comme une erreur, affiche le bon nom et valide quand même
+    if (an.st.loc === 1 && TERMINAUX.includes(att.famille)) {
+      return { ok: true, numeroUn: true, diag: `Le C du groupe ${TXT_UN[att.famille]} est toujours le n° 1 : on n'écrit pas ce « 1 ». Le nom juste est <b>${att.nom}</b>.` };
+    }
     const acc = sansAccent(s) === s && att.nom !== sansAccent(att.nom);
     return { ok: true, remarque: acc ? remarqueAccents(s, att) : '' };
   }
   const molDe = m => (m && m.atomes ? m : m && m.mol);
+  const TXT_UN = { aldehyde: 'd\'un aldéhyde (…al)', acide: 'd\'un acide carboxylique (acide …oïque)', ester: 'd\'un ester (…oate)', amide: 'd\'un amide (…amide)' };
 
   /* ============================================================
      FABRIQUES (questions aléatoires)

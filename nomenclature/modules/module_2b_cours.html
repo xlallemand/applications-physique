@@ -33,16 +33,20 @@
    Sous-module 2 du module 2 : étape 1, chaîne la plus longue et nom des
    ramifications (« À toi » : toucher la chaîne, ORGA.partieChaine) ;
    étape 2, numérotation et di, tri… (« À toi » : le bon nom parmi des
-   noms faux classiques, NOM.nomsFaux) ; étape 3, ordre alphabétique,
-   tirets et virgules (« À toi » : l'outil de nomenclature, aides activées).
+   noms faux de numérotation et de di, tri… seulement, NOM.nomsFaux ; trois
+   molécules en semi-développée et trois en topologique, « Recommencer avec
+   une autre molécule ») ; étape 3, ordre alphabétique, tirets et virgules
+   (« À toi » : l'outil de nomenclature, aides activées, puis sans aide).
    Exemples du cours en couleurs : chaîne principale, ramifications, numéros.
    ============================================================ */
 const { hasard, melanger, exemple } = COURS;
 const { o, molHTML, video, nomsFaux } = NOM;
 
-// le bon nom parmi trois noms faux classiques (chacun avec son diagnostic)
-function bonNom(s, q) {
-  const r = ORGA.nommer(NOM.mol(s)), faux = melanger(nomsFaux(s)).slice(0, 3);
+// le bon nom parmi trois noms faux classiques (chacun avec son diagnostic) ; types : erreurs proposées
+function bonNom(s, q, types) {
+  const r = ORGA.nommer(NOM.mol(s)), tous = nomsFaux(s, types ? { types } : null);
+  // étape 2 : une erreur de numérotation et deux erreurs de di, tri… (jamais de tiret, de virgule ni d'ordre alphabétique)
+  const faux = types ? melanger(tous.filter(f => f.type === 'numeros')).slice(0, 1).concat(melanger(tous.filter(f => f.type === 'multi'))).slice(0, 3) : melanger(tous).slice(0, 3);
   const options = melanger([o('ok', r.nom), ...faux.map((f, k) => o('f' + k, f.nom))]);
   return { type: 'choix', q, options, bonne: 'ok', melanger: false, indices: Object.fromEntries(faux.map((f, k) => ['f' + k, f.diag])), solution: `<p>${ORGA.nomHTML(r.parties)}</p>` };
 }
@@ -76,9 +80,18 @@ function etape2(c) {
     </div>
     ${exemple(`<div class="nom-mols">${molHTML('CC(C)C(C)CCC', { nom: true })}${molHTML('CCCCC(C)C(C)(C)CCC', { nom: true })}${molHTML('CC(C)C(C)(C)C(C)CC', { nom: true })}</div>
       <p>2,3-diméthylhexane : en numérotant par l'autre bout, on aurait 4,5 : plus grands. Deux méthyl sur le même C : deux numéros (4,4).</p>`)}`);
-  const [a, b] = melanger(['CC(C)CCCC', 'CCC(C)CCC(C)C', 'CC(C)CC(C)CC', 'CCC(C)(C)CC(C)C', 'CCCC(C)CC(C)C']).slice(0, 2);
-  c.aToi(carte, [{ titre: 'Le bon nom', enonce: NOM.dessin(a), parties: [bonNom(a, 'Quel est le nom de cette molécule ?')] },
-    { titre: 'Le bon nom', enonce: NOM.dessin(b, { ecriture: 'topo' }), parties: [bonNom(b, 'Quel est le nom de cette molécule ?')] }]);
+  // trois molécules en semi-développée, trois en topologique : « Recommencer avec une autre molécule » passe à la suivante
+  // (seulement des méthyls : l'ordre alphabétique de l'étape 3 n'intervient pas)
+  const tour = (liste, ec) => {
+    const l = melanger(liste);
+    let k = 0;
+    return () => {
+      const s = l[k++ % l.length];
+      return { enonce: NOM.dessin(s, { ecriture: ec }), parties: [bonNom(s, 'Quel est le nom de cette molécule ?', ['numeros', 'multi'])] };
+    };
+  };
+  c.aToi(carte, [{ titre: 'Le bon nom (semi-développée)', parties: [NOM.partieAutres(tour(['CC(C)CC(C)CC', 'CCC(C)CCC(C)C', 'CCC(C)(C)CC(C)C'], 'semi'))] },
+    { titre: 'Le bon nom (topologique)', parties: [NOM.partieAutres(tour(['CC(C)(C)CCC', 'CC(C)CC(C)(C)C', 'CC(C)C(C)CC'], 'topo'))] }]);
   return carte;
 }
 
@@ -92,7 +105,9 @@ function etape3(c) {
     ${exemple(`<div class="nom-mols">${molHTML('CCCC(CC)C(C)(C)C', { nom: true })}</div>
       <p>3-éthyl-2,2-diméthylhexane : éthyl avant méthyl (é avant m, le « di » ne compte pas). Chaque partie du nom a la couleur de la partie de la molécule qu'elle décrit.</p>`)}`);
   const xs = [ORGA.fabriqueAlcane({ min: 5, max: 7, ramMin: 2, ramMax: 2 }), ORGA.fabriqueAlcane({ min: 5, max: 8, ramMin: 2, ramMax: 3 })];
-  c.aToi(carte, xs.map((x, k) => ({ titre: `Molécule ${k + 1}`, parties: [NOM.partieNom(x.mol, { ecriture: k ? 'topo' : 'semi', q: 'Donne le nom de cette molécule. Les aides peuvent être désactivées.' })] })));
+  const y = ORGA.fabriqueAlcane({ min: 5, max: 7, ramMin: 2, ramMax: 2 });
+  c.aToi(carte, xs.map((x, k) => ({ titre: `Molécule ${k + 1}`, parties: [NOM.partieNom(x.mol, { ecriture: k ? 'topo' : 'semi', q: 'Donne le nom de cette molécule. Les aides peuvent être désactivées.' })] }))
+    .concat([{ titre: 'Sans aide', parties: [NOM.partieNom(y.mol, { ecriture: 'semi', sansAide: true, q: 'Écris directement le nom de cette molécule.' })] }]));
   return carte;
 }
 

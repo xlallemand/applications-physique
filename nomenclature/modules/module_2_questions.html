@@ -20,12 +20,13 @@
 
 <script>
 /* ============================================================
-   10 questions tirées au hasard : alcanes linéaires (nom ↔ nombre de C ↔
-   CₙH₂ₙ₊₂), toucher la chaîne la plus longue, nommer (semi-développée,
-   topologique, développée, et une semi-développée avec C₂H₅ écrit en
-   abrégé : la chaîne passe par lui), alcane cyclique, dessiner à partir
-   du nom, trouver l'erreur dans un nom (1-méthylbutane, 2-éthylpentane,
-   numérotation inversée, ordre alphabétique, di oublié, tirets).
+   20 questions tirées au hasard : alcanes linéaires (nom ↔ nombre de C ↔
+   CₙH₂ₙ₊₂), toucher la chaîne la plus longue, nommer avec l'outil
+   (semi-développée, topologique, développée, et une semi-développée avec
+   C₂H₅ écrit en abrégé : la chaîne passe par lui), alcane cyclique,
+   dessiner à partir du nom, trouver l'erreur dans un nom (1-méthylbutane,
+   2-éthylpentane, numérotation inversée, ordre alphabétique, di oublié,
+   tirets) ; pour finir, 4 noms à écrire directement, sans l'outil.
    ============================================================ */
 const { o, hasard, melanger, entre, partieBrute, partieNom, nomsFaux } = NOM;
 const NOMS = ['méthane', 'éthane', 'propane', 'butane', 'pentane', 'hexane', 'heptane', 'octane', 'nonane', 'décane'];
@@ -49,8 +50,8 @@ const G = {
     const n = entre(3, 10);
     return { theme: 'Alcanes linéaires', parties: [partieBrute(NOM.mol('C'.repeat(n)), { ecriture: 'semi', partie: { q: `Écris la formule brute du ${NOMS[n - 1]}.`, diag: v => `${NOMS[n - 1]} : ${n} C ; C<sub>n</sub>H<sub>2n+2</sub>.` } })] };
   },
-  chaine() {
-    return { theme: 'La chaîne la plus longue', parties: [ORGA.partieChaine(hasard(CHAINES), { ecriture: hasard(['semi', 'topo']) })] };
+  chaine(s, ec) {
+    return { theme: 'La chaîne la plus longue', parties: [ORGA.partieChaine(s || hasard(CHAINES), { ecriture: ec || hasard(['semi', 'topo']) })] };
   },
   nommer(ec) {
     const x = ORGA.fabriqueAlcane(ec === 'developpee' ? { min: 4, max: 5, ramMin: 1, ramMax: 2 } : { min: 5, max: 8, ramMin: 1, ramMax: 3 });
@@ -60,8 +61,13 @@ const G = {
     const [s, at] = hasard(CONDENSEES);
     return { theme: 'Nommer un alcane', consigne: 'Attention : C₂H₅ est écrit en abrégé (touche ⓘ).', parties: [partieNom(s, { condenser: [{ atomes: at, texte: 'C2H5' }] })] };
   },
-  cycle() {
-    return { theme: 'Alcane cyclique', parties: [partieNom(hasard(CYCLES), { ecriture: 'topo' })] };
+  cycle(s) {
+    return { theme: 'Alcane cyclique', parties: [partieNom(s || hasard(CYCLES), { ecriture: 'topo' })] };
+  },
+  // nom écrit directement, sans l'outil de construction du nom (s : alcane cyclique)
+  libre(ec, s) {
+    const m = s || ORGA.fabriqueAlcane({ min: 5, max: 8, ramMin: 1, ramMax: 3 }).mol;
+    return { theme: 'Nommer sans aide', consigne: 'Écris directement le nom de cette molécule.', parties: [partieNom(m, { ecriture: ec, sansAide: true, q: '' })] };
   },
   dessiner(ec) {
     const x = ORGA.fabriqueAlcane({ min: 4, max: 7, ramMin: 1, ramMax: 2 });
@@ -79,14 +85,19 @@ const G = {
 };
 
 function tirage() {
-  return [G.lineaireNom(), hasard([G.lineaireBrute, G.lineaireNom])(), G.chaine(), G.nommer('semi'), G.nommer('topo'), hasard([() => G.nommer('developpee'), G.cycle])(),
-    G.condensee(), G.dessiner('semi'), G.dessiner('topo'), G.erreur()];
+  // molécules différentes d'une question à l'autre
+  const chaines = melanger(CHAINES), cycles = melanger(CYCLES);
+  return [G.lineaireNom(), G.lineaireBrute(), G.chaine(chaines[0], 'semi'), G.chaine(chaines[1], 'topo'),
+    G.nommer('semi'), G.nommer('topo'), G.nommer('developpee'), G.condensee(), G.cycle(cycles[0]),
+    G.dessiner('semi'), G.dessiner('topo'), G.erreur(), G.nommer('semi'), G.erreur(), G.dessiner(hasard(['semi', 'topo'])), G.nommer('topo'),
+    G.libre('semi'), G.libre('topo'), G.libre('semi'), G.libre('topo', cycles[1])];
 }
 
 NOM.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 2 · QUESTIONS', titre: 'Nommer les alcanes',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : alcanes linéaires, chaîne la plus longue, <b>nommer</b> un alcane (les aides restent disponibles), <b>dessiner</b> à partir du nom, trouver l\'erreur dans un nom.</p>',
+  intro: '<p class="er-contexte">20 questions tirées au hasard : alcanes linéaires, chaîne la plus longue, <b>nommer</b> un alcane (les aides restent disponibles), <b>dessiner</b> à partir du nom, trouver l\'erreur dans un nom ; pour finir, <b>4 noms à écrire directement</b>, sans aide.</p>',
+  nombre: 20,
   questions: tirage,
   revoir: { href: 'module_2b_cours.html', label: 'Revoir le cours' },
   suite: { href: 'module_3a_cours.html', label: 'Module 3 : les familles →' },

@@ -32,7 +32,8 @@
    Cours (assets/cours.js) : cyclo + nom de l'alcane ; un seul substituant :
    pas de numéro ; plusieurs : les plus petits numéros, le premier dans
    l'ordre alphabétique a le n° 1 (tableau des familles du cours, ex. 10).
-   « À toi » : l'outil de nomenclature (aides activées).
+   « À toi » : l'outil de nomenclature (aides activées ; la chaîne principale
+   à toucher est le cycle), puis un nom à écrire directement (sans aide).
    ============================================================ */
 const { hasard, melanger, exemple } = COURS;
 const { molHTML } = NOM;
@@ -41,12 +42,14 @@ function etape1(c) {
   const carte = c.carte('1. Nommer un alcane cyclique');
   c.ajouter(carte, `<div class="cours-bloc">
       <div class="cle"><p><b class="cle-titre">Règle.</b> Nom = <b>cyclo</b> + nom de l'alcane qui a le même nombre de C (cyclohexane : 6 C en cycle).</p>
-        <p>Un seul substituant : <b>pas de numéro</b> (éthylcyclohexane). Plusieurs : on numérote le cycle pour avoir les <b>plus petits numéros</b> ; à égalité, la ramification qui vient la <b>première dans l'ordre alphabétique</b> a le n° 1.</p></div>
+        <p>La <b>chaîne principale</b> est le <b>cycle</b>. Un seul substituant : <b>pas de numéro</b> (éthylcyclohexane). Plusieurs : on numérote le cycle pour avoir les <b>plus petits numéros</b> ; à égalité, la ramification qui vient la <b>première dans l'ordre alphabétique</b> a le n° 1.</p></div>
     </div>
     ${exemple(`<div class="nom-mols">${molHTML('C1CCCC1', { nom: true, ecriture: 'semi' })}${molHTML('C1CCCCC1', { nom: true, ecriture: 'topo' })}${molHTML('CCC1CCCCC1', { nom: true, ecriture: 'topo', numeros: false })}${molHTML('CCC1CCCC(C)C1', { nom: true, ecriture: 'topo' })}</div>
       <p>1-éthyl-3-méthylcyclohexane : les numéros 1 et 3 dans les deux sens ; éthyl vient avant méthyl, il a le n° 1 (pas 3-éthyl-1-méthylcyclohexane).</p>`)}`);
   const [a, b] = melanger(['CC1CCCCC1', 'CCC1CCCC1', 'CC1CCC(C)CC1', 'CC1CC(CC)CCC1', 'CC1CCCC1C', 'CCCC1CCCCC1']).slice(0, 2);
-  c.aToi(carte, [a, b].map((s, k) => ({ titre: `Molécule ${k + 1}`, parties: [NOM.partieNom(s, { ecriture: 'topo' })] })));
+  const d = hasard(['C1CCCC1', 'CC1CCCC1', 'CCC1CCCCC1', 'CC1CCCC(C)C1', 'CCC1CCC(C)C1'].filter(x => x !== a && x !== b));
+  c.aToi(carte, [a, b].map((s, k) => ({ titre: `Molécule ${k + 1}`, parties: [NOM.partieNom(s, { ecriture: 'topo' })] }))
+    .concat([{ titre: 'Sans aide', parties: [NOM.partieNom(d, { ecriture: 'topo', sansAide: true, q: 'Écris directement le nom de cette molécule.' })] }]));
   return carte;
 }
 

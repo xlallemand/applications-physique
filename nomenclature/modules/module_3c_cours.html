@@ -22,7 +22,7 @@
   <div class="er-card">
     <span class="er-badge">MODULE 3 · COURS 3 / 5</span>
     <h2 class="er-titre">Acides carboxyliques, esters, amides</h2>
-    <p class="er-contexte">Trois familles où le C du C=O porte <b>un autre atome</b> : un OH (acides carboxyliques), un O lié à un C (esters), un N (amides). Ce sont les familles qu'on confond le plus.</p>
+    <p class="er-contexte">Trois familles où le C du C=O porte <b>un autre atome</b> : un OH (acides carboxyliques), un O lié à un C (esters), un N (amides).</p>
   </div>
   <div id="etapes"></div>
 </div>
@@ -33,12 +33,15 @@
    même C : acide carboxylique (OH), ester (O lié à un C), amide (N) ;
    les confusions classiques (acide ≠ alcool + cétone, ester ≠ acide,
    amide ≠ amine + cétone, aldéhyde ≠ cétone) sont les diagnostics de
-   l'outil d'entourage et des choix « groupe · famille ».
+   l'outil d'entourage et des choix « groupe · famille ». Les groupes
+   carboxyle et ester sont dessinés en extrait de semi-développée.
    ============================================================ */
 const { hasard, melanger, exemple } = COURS;
 const { o, molHTML, video } = NOM;
 const groupeLegende = s => ORGA.legendeHTML(ORGA.groupes(NOM.mol(s)));
 const ent = (s, ec) => molHTML(s, { ecriture: ec || 'semi', entourer: true, legende: groupeLegende(s) });
+// extrait d'une semi-développée : seulement le groupe caractéristique (les traits vers le reste de la molécule restent)
+const extrait = (s, masquer, label, h) => `<span class="nom-extrait">${ORGA.dessinHTML(NOM.mol(s), { ecriture: 'semi', masquer: new Set(masquer), h, label, sansAide: true })}</span>`;
 // « À toi » : entourer puis nommer le groupe d'une molécule fabriquée
 function aToiGroupe(cle, titre) {
   const x = ORGA.fabriqueFamille(cle, { min: 3, max: 6, ramMax: 1 });
@@ -49,8 +52,8 @@ function etape1(c) {
   const carte = c.carte('1. Acides carboxyliques et esters');
   c.ajouter(carte, `<div class="cours-bloc">
       <div class="cle"><p><b class="cle-titre">Le C=O et un O sur le même C.</b></p>
-        <ul class="er-liste"><li>–COOH, le O porte un H : groupe <b>carboxyle</b>, famille des <b>acides carboxyliques</b> ;</li>
-        <li>–COO–C, le O est lié à un autre C : groupe <b>ester</b>, famille des <b>esters</b>.</li></ul>
+        <ul class="nom-extraits"><li>${extrait('CC(=O)O', [0], 'groupe carboxyle : C, =O et OH')}<span>le O porte un H : groupe <b>carboxyle</b>, famille des <b>acides carboxyliques</b> ;</span></li>
+        <li>${extrait('CC(=O)OC', [0], 'groupe ester : C, =O et O lié à un autre C', [0, 0, 0, 0, 0])}<span>le O est lié à un autre C : groupe <b>ester</b>, famille des <b>esters</b>.</span></li></ul>
         <p>On entoure les trois : C, =O et O (avec son H pour l'acide). <b>Acide ≠ alcool + cétone</b> : le OH et le =O sur le même C forment un seul groupe.</p></div>
     </div>
     ${exemple(`<div class="nom-mols">${ent('CC(C)CC(=O)O')}${ent('CCCCOC(C)=O')}</div>`)}`);
@@ -72,7 +75,7 @@ function aRetenir(c) {
   const carte = c.carte('À retenir');
   c.ajouter(carte, `<div class="cle"><p><b>–COOH</b> (groupe carboxyle) : acides carboxyliques ; <b>–COO–C</b> (groupe ester) : esters ; <b>–CO–N</b> (groupe amide) : amides.</p></div>
     <div class="cle"><p>Acide ≠ alcool + cétone ; ester ≠ acide ; amide ≠ amine + cétone ; aldéhyde ≠ cétone.</p></div>
-    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3d_cours.html">Cours : nommer alcènes, alcools, aldéhydes, cétones, acides →</a>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3d_cours.html">Cours : nommer alcènes, alcools, aldéhydes, cétones, acides carboxyliques →</a>
       <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#acides">Fiche récapitulative</a></div>`);
   return carte;
 }
