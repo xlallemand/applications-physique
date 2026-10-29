@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Imprimer les cartes — maquette</title>
+<link rel="stylesheet" href="../../../assets/theme.css">
+<link rel="stylesheet" href="../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../../changements-etat/modules/ce.css">
+<link rel="stylesheet" href="../../../assets/sommaire.css">
+<link rel="stylesheet" href="fc.css">
+<script src="../../../assets/sommaire.js"></script>
+<script src="../../../changements-etat/modules/ce.js"></script>
+<script src="fc-demo.js"></script>
+<style>
+/* MAQUETTE : impression des cartes, A4 recto verso, 8 cartes par feuille (format bristol A7 environ) */
+.imp-defile { overflow-x: auto; padding-bottom: 8px; }
+.imp-feuilles { display: flex; gap: 24px; width: max-content; }
+.imp-feuille { width: 210mm; height: 297mm; background: #fff; border: 1px solid var(--line-strong); padding: 7.5mm 6mm; display: grid; grid-template-columns: repeat(2, 99mm); grid-template-rows: repeat(4, 70.5mm); flex-shrink: 0; }
+.imp-feuille h4 { position: absolute; }
+.imp-carte { border: 1px dashed var(--ink-3); padding: 3mm 4mm; display: flex; flex-direction: column; gap: 2mm; overflow: hidden; font-size: 10pt; line-height: 1.3; }
+.imp-tete { display: flex; justify-content: space-between; gap: 2mm; font-size: 7pt; font-weight: 700; color: var(--ink-2); border-bottom: 1.5px solid var(--cle-line); padding-bottom: 1mm; }
+.imp-corps { flex: 1; display: flex; flex-direction: column; justify-content: safe center; gap: 1.5mm; min-height: 0; }
+.imp-corps svg { display: block; max-height: 30mm; width: auto; max-width: 100%; margin: 0 auto; }
+.imp-recto .imp-corps { text-align: center; font-weight: 700; font-size: 11pt; }
+.imp-corps p { margin: 0; }
+.imp-corps ol { margin: 0; padding-left: 1.2em; }
+.imp-corps .fc-formule { font-size: 12pt; padding: 1.5mm; }
+.imp-corps .fc-fig { max-width: 62mm; }
+.imp-corps .fc-fig svg { max-height: 30mm; }
+.imp-corps .fc-tab { font-size: 8pt; }
+.imp-corps .fc-tab td, .imp-corps .fc-tab th { padding: 1mm 2mm; }
+.imp-lab { font-size: .85rem; font-weight: 800; color: var(--ink-2); margin: 0 0 6px; }
+@media print {
+  @page { size: A4; margin: 0; }
+  body * { visibility: hidden; }
+  .imp-feuilles, .imp-feuilles * { visibility: visible; }
+  .imp-feuilles { position: absolute; left: 0; top: 0; display: block; }
+  .imp-feuille { border: none; break-after: page; }
+  .imp-feuilles > div:last-child .imp-feuille { break-after: auto; }
+  .imp-lab { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="er-page" style="max-width:none">
+  <div class="er-card" style="max-width:60rem;margin-left:auto;margin-right:auto">
+    <span class="er-badge">IMPRIMER LES CARTES</span>
+    <h2 class="er-titre">Chapitre 11 : cartes à imprimer</h2>
+    <p class="er-contexte">Imprime en <b>recto verso</b> (retournement sur le <b>bord long</b>), sur papier épais si possible. Découpe en suivant les pointillés : <b>8 cartes</b> de 99 × 70 mm par feuille. Les versos sont placés en miroir pour tomber derrière leur recto.</p>
+    <div class="er-actions"><label class="btn-small"><input type="checkbox" checked> Module 1</label><label class="btn-small"><input type="checkbox"> Module 2</label><label class="btn-small"><input type="checkbox"> Module 3</label><button type="button" class="btn-primary" onclick="window.print()">Imprimer</button></div>
+  </div>
+  <div class="imp-defile"><div class="imp-feuilles" id="feuilles"></div></div>
+</div>
+<script>
+const v = x => (typeof x === 'function' ? x() : x);
+const cartes = FC.toutes().slice(0, 8);
+const tete = c => `<div class="imp-tete"><span>Ch. 11 · Module ${c.paquet.module}</span><span>${FC.TYPES[c.type]}${c.faces.length > 1 ? ' ⇄' : ''}</span></div>`;
+const recto = c => `<div class="imp-carte imp-recto">${tete(c)}<div class="imp-corps">${v(c.faces[0].q)}</div></div>`;
+const verso = c => `<div class="imp-carte imp-verso">${tete(c)}<div class="imp-corps">${v(c.faces[0].r)}</div></div>`;
+// verso : les deux colonnes échangées, pour que chaque réponse tombe derrière sa question
+const miroir = [1, 0, 3, 2, 5, 4, 7, 6].map(k => cartes[k]);
+document.getElementById('feuilles').innerHTML =
+  `<div><p class="imp-lab">Feuille 1 · recto (questions)</p><div class="imp-feuille">${cartes.map(recto).join('')}</div></div>` +
+  `<div><p class="imp-lab">Feuille 1 · verso (réponses, en miroir)</p><div class="imp-feuille">${miroir.map(c => c ? verso(c) : '<div class="imp-carte"></div>').join('')}</div></div>`;
+</script>
+</body>
+</html>

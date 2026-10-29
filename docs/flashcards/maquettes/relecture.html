@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relecture des flashcards — maquette</title>
+<link rel="stylesheet" href="../../../assets/theme.css">
+<link rel="stylesheet" href="../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../../changements-etat/modules/ce.css">
+<link rel="stylesheet" href="../../../assets/sommaire.css">
+<link rel="stylesheet" href="fc.css">
+<script src="../../../assets/sommaire.js"></script>
+<script src="../../../changements-etat/modules/ce.js"></script>
+<script src="fc-demo.js"></script>
+<style>
+/* MAQUETTE : page de relecture pour l'enseignant (générée par le prompt, dans docs/flashcards/<app>/) */
+.rl-onglets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.rl-onglets button[aria-pressed="true"] { background: var(--ink); color: #fff; box-shadow: none; }
+.rl-bilan { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .88rem; font-weight: 700; color: var(--ink-2); margin-top: 8px; }
+.rl-bilan b { color: var(--ink); }
+.rl-comp { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 12px; align-items: start; padding: 10px 0; border-top: 1px dashed var(--paper-3); }
+.rl-comp input[type=checkbox] { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--ink); }
+.rl-comp .t { font-weight: 700; }
+.rl-comp .t small { display: block; font-weight: 600; color: var(--ink-2); font-size: .82rem; margin-top: 2px; }
+.rl-note { grid-column: 2 / -1; width: 100%; font: inherit; font-size: 16px; border: 1.5px solid var(--paper-3); border-radius: 12px; padding: 8px 10px; min-height: 42px; }
+.rl-pre { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; background: var(--paper); border-radius: 14px; padding: 10px 12px; margin: 6px 0 10px; font-size: .9rem; }
+.rl-pre label { display: inline-flex; align-items: center; gap: 6px; background: var(--sheet); border-radius: 999px; padding: 6px 12px; font-weight: 700; cursor: pointer; }
+.rl-carte { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
+.rl-carte-h { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 6px; }
+.rl-carte-h .id { font-size: .78rem; font-weight: 800; color: var(--ink-2); flex: 1; min-width: 10rem; }
+.rl-carte-h .id b { color: var(--ink); font-size: .9rem; }
+.rl-dec { display: flex; gap: 6px; }
+.rl-dec button { border: none; border-radius: 999px; padding: 8px 14px; font: inherit; font-size: .85rem; font-weight: 800; cursor: pointer; background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3); }
+.rl-dec button.on[data-d="ok"] { background: var(--success-bg); color: var(--success-text); box-shadow: none; }
+.rl-dec button.on[data-d="mod"] { background: var(--cle-bg); color: var(--accent-ink); box-shadow: none; }
+.rl-dec button.on[data-d="sup"] { background: var(--danger-bg); color: var(--danger-text); box-shadow: none; }
+.rl-carte.sup .fc-apercu { opacity: .4; }
+.rl-bas { position: sticky; bottom: 0; background: var(--sheet); border-top: 1px solid var(--line); padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px)); display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; z-index: 20; }
+.rl-bas p { flex: 1; min-width: 12rem; font-size: .88rem; color: var(--ink-2); }
+.rl-demandes { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--paper-3); font-size: .9rem; }
+.rl-dem { display: flex; gap: 6px; align-items: flex-start; width: 100%; }
+.rl-dem .rl-note { flex: 1; }
+.rl-sortie { width: 100%; min-height: 180px; font: .85rem/1.45 ui-monospace, monospace; border: 1.5px solid var(--paper-3); border-radius: 12px; padding: 10px; }
+</style>
+</head>
+<body>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">RELECTURE · CHAPITRE 11</span>
+    <h2 class="er-titre">Flashcards de « Changements d'état »</h2>
+    <p class="er-contexte">Étape 1 : valide les <b>compétences</b> et les <b>cours à faire</b> avant chaque paquet. Étape 2 : valide chaque <b>carte</b>. Puis <b>Copier mes retours</b> et colle-les dans la conversation.</p>
+    <div class="rl-bilan" id="bilan"></div>
+  </div>
+  <div class="rl-onglets"><button type="button" class="btn-small" data-o="comp" aria-pressed="false">1. Compétences et paquets</button><button type="button" class="btn-small" data-o="cartes" aria-pressed="true">2. Cartes (28)</button>
+    <span style="flex:1"></span><button type="button" class="btn-small" data-f="tout" aria-pressed="true">Toutes</button><button type="button" class="btn-small" data-f="voir" aria-pressed="false">À voir</button><button type="button" class="btn-small" data-f="mod" aria-pressed="false">À modifier</button></div>
+  <div id="zone"></div>
+  <div class="rl-bas"><p id="resume"></p><button type="button" class="btn-primary" id="copier">Copier mes retours</button></div>
+  <div class="er-card" id="sortie-carte" hidden><h3 class="fc-h">Texte copié <small>à coller dans la conversation</small></h3><textarea class="rl-sortie" id="sortie" readonly></textarea></div>
+</div>
+<script>
+// compétence couverte par chaque carte (étape 1)
+const COMP = {
+  'ce-1-etats': 'Décrire les trois états à l\'échelle microscopique', 'ce-1-six': 'Nommer les six changements d\'état',
+  'ce-1-subli': 'Sublimation et condensation', 'ce-1-L': 'Définir la chaleur latente et son unité', 'ce-1-signeL': 'Signe de L selon le changement d\'état',
+  'ce-1-liaisonH': 'Décrire la liaison hydrogène', 'ce-1-conseq': 'Conséquences de la liaison hydrogène',
+  'ce-2-zones': 'Placer les zones du diagramme d\'état', 'ce-2-triple': 'Définir le point triple', 'ce-2-critique': 'Définir le point critique',
+  'ce-2-lire': 'Lire l\'état d\'une espèce pour (T ; P)', 'ce-2-courbe': 'Signification d\'une courbe du diagramme',
+  'ce-2-fleche': 'Trouver les températures de changement d\'état à P donnée', 'ce-2-pression': 'Influence de la pression sur la température d\'ébullition',
+  'ce-2-lirePT': 'Lire une température d\'ébullition sur la courbe P(T)', 'ce-2-relative': 'Définir la pression relative',
+  'ce-3-formule': 'Q = m c (Tf − Ti) et ses unités', 'ce-3-c': 'Capacité thermique massique', 'ce-3-signe': 'Signe de Q : énergie reçue ou cédée', 'ce-3-reflexe': 'Conversions et températures négatives',
+  'ce-4-formule': 'Q = m L et ses unités', 'ce-4-palier': 'Palier de température pendant un changement d\'état', 'ce-4-astuce': 'Astuce du signe de L', 'ce-4-unites': 'Unités de L',
+  'ce-5-methode': 'Les étapes de la méthode du schéma', 'ce-5-choix': 'Choisir la formule pour chaque flèche', 'ce-5-schema': 'Dessiner le schéma d\'un problème à deux étapes', 'ce-5-refroid': 'Refroidissement : signes des énergies',
+};
+// cours proposés comme prérequis de chaque paquet
+const COURS = { m1: ['Cours (module 1)'], m2a: ['Cours : lire le diagramme d\'état'], m2b: ['Cours : changement d\'état et pression'], m3: ['Cours (module 3)'], m4: ['Cours (module 4)'], m5: ['Cours : une ou deux étapes', 'Cours : plusieurs étapes', 'Cours : refroidissement'] };
+const dec = {}, notes = {};
+// demandes : plusieurs par module ; comp = compétences à ajouter (étape 1), carte = nouvelles cartes (étape 2)
+const demandes = { comp: {}, carte: { m2b: ['Une carte « lire la pression dans une cocotte-minute en pression relative » (avec un manomètre).', 'Une carte inverse de ce-2-pression : « à 120 °C, sous quelle pression l\'eau bout-elle ? »'] } };
+const blocDemandes = (genre, pid) => {
+  const l = demandes[genre][pid] || [], quoi = genre === 'comp' ? 'compétence' : 'carte';
+  return `<div class="rl-demandes"><b>${genre === 'comp' ? 'Compétences à ajouter' : 'Nouvelles cartes demandées'}${l.length ? ' (' + l.length + ')' : ''}</b>` +
+    l.map((t, k) => `<div class="rl-dem"><textarea class="rl-note" data-g="${genre}" data-p="${pid}" data-k="${k}" placeholder="Décris la ${quoi}">${t}</textarea><button type="button" class="btn-small" data-suppr="${genre}|${pid}|${k}" aria-label="Retirer cette demande">✕</button></div>`).join('') +
+    `<button type="button" class="btn-small" data-ajout="${genre}|${pid}">+ ${genre === 'comp' ? 'Ajouter une compétence' : 'Demander une carte'}</button></div>`;
+};
+function brancherDemandes(z) {
+  z.querySelectorAll('[data-ajout]').forEach(b => b.addEventListener('click', () => { const [g, pid] = b.dataset.ajout.split('|'); (demandes[g][pid] = demandes[g][pid] || []).push(''); rendre(); const t = z.querySelectorAll(`[data-g="${g}"][data-p="${pid}"]`); if (t.length) t[t.length - 1].focus(); }));
+  z.querySelectorAll('[data-suppr]').forEach(b => b.addEventListener('click', () => { const [g, pid, k] = b.dataset.suppr.split('|'); demandes[g][pid].splice(+k, 1); rendre(); }));
+  z.querySelectorAll('[data-g]').forEach(t => t.addEventListener('input', () => { demandes[t.dataset.g][t.dataset.p][+t.dataset.k] = t.value; }));
+}
+FC.toutes().forEach((c, i) => { dec[c.id] = i < 22 ? 'ok' : i === 24 ? 'mod' : ''; });
+notes['ce-4-palier'] = 'Ajouter la valeur 100 °C sur le second palier du schéma.';
+let onglet = 'cartes', filtre = 'tout';
+
+function bilan() {
+  const v = Object.values(dec), n = k => v.filter(x => x === k).length;
+  document.getElementById('bilan').innerHTML = `<span><b>${v.length}</b> cartes</span><span><b>${n('ok')}</b> validées</span><span><b>${n('mod')}</b> à modifier</span><span><b>${n('sup')}</b> supprimées</span><span><b>${n('')}</b> à voir</span>`;
+  const r = n('mod') + n('sup');
+  document.getElementById('resume').textContent = `${r} retour${r > 1 ? 's' : ''} · ${n('')} carte${n('') > 1 ? 's' : ''} encore à voir`;
+  document.querySelectorAll('[data-f]').forEach(b => { b.hidden = onglet !== 'cartes'; });
+}
+function rendre() {
+  const z = document.getElementById('zone');
+  if (onglet === 'comp') {
+    z.innerHTML = FC.PAQUETS.map(p => `<section class="er-card"><h3 class="fc-h">Module ${p.module} · ${p.titre} <small>paquet « ${p.id} » · ${p.cartes.length} cartes</small></h3>
+      <div class="rl-pre"><b>Disponible après :</b>${COURS[p.id].map((c, i) => `<label><input type="checkbox" ${i === 0 ? 'checked' : ''}> ${c}</label>`).join('')}</div>
+      ${p.cartes.map(c => `<div class="rl-comp"><input type="checkbox" checked aria-label="Garder"><span class="t">${COMP[c.id]}<small>${FC.TYPES[c.type]}${c.faces.length > 1 ? ' ⇄ (deux sens)' : ''}</small></span><button type="button" class="btn-small">✎</button></div>`).join('')}
+      ${blocDemandes('comp', p.id)}${blocDemandes('carte', p.id)}</section>`).join('');
+    brancherDemandes(z);
+    return;
+  }
+  z.innerHTML = FC.PAQUETS.map(p => {
+    const cartes = p.cartes.filter(c => filtre === 'tout' || (filtre === 'voir' ? !dec[c.id] : dec[c.id] === 'mod'));
+    if (!cartes.length) return '';
+    return `<section class="er-card"><div class="rl-carte-h"><h3 class="fc-h" style="flex:1;margin:0">Module ${p.module} · ${p.titre}</h3><button type="button" class="btn-small" data-tout="${p.id}">✓ Tout valider</button></div>` +
+      cartes.map(c => `<div class="rl-carte${dec[c.id] === 'sup' ? ' sup' : ''}" id="rl-${c.id}"><div class="rl-carte-h"><span class="id"><b>${COMP[c.id]}</b> · ${c.id}</span>
+        <span class="rl-dec">${[['ok', '✓ Valider'], ['mod', '✎ Modifier'], ['sup', '✕ Supprimer']].map(([d, t]) => `<button type="button" data-id="${c.id}" data-d="${d}" class="${dec[c.id] === d ? 'on' : ''}">${t}</button>`).join('')}</span></div>
+        ${c.faces.map((f, s) => `<div class="fc-apercu">${FC.face(c, s, 'recto', { pied: false })}${FC.face(c, s, 'verso', { pied: false })}</div>`).join('')}
+        ${dec[c.id] === 'mod' ? `<textarea class="rl-note" data-note="${c.id}" placeholder="Ce qu'il faut changer">${notes[c.id] || ''}</textarea>` : ''}</div>`).join('') +
+      `<div class="rl-carte">${blocDemandes('carte', p.id)}</div></section>`;
+  }).join('');
+  brancherDemandes(z);
+  z.querySelectorAll('.rl-dec button').forEach(b => b.addEventListener('click', () => { dec[b.dataset.id] = dec[b.dataset.id] === b.dataset.d ? '' : b.dataset.d; rendre(); bilan(); }));
+  z.querySelectorAll('[data-tout]').forEach(b => b.addEventListener('click', () => { FC.PAQUETS.find(p => p.id === b.dataset.tout).cartes.forEach(c => { if (!dec[c.id]) dec[c.id] = 'ok'; }); rendre(); bilan(); }));
+  z.querySelectorAll('[data-note]').forEach(t => t.addEventListener('input', () => { notes[t.dataset.note] = t.value; }));
+}
+document.querySelectorAll('[data-o]').forEach(b => b.addEventListener('click', () => { onglet = b.dataset.o; document.querySelectorAll('[data-o]').forEach(x => x.setAttribute('aria-pressed', x === b)); rendre(); bilan(); }));
+document.querySelectorAll('[data-f]').forEach(b => b.addEventListener('click', () => { filtre = b.dataset.f; onglet = 'cartes'; document.querySelectorAll('[data-f]').forEach(x => x.setAttribute('aria-pressed', x === b)); rendre(); }));
+// les retours, en texte, à coller dans la conversation
+document.getElementById('copier').addEventListener('click', () => {
+  const ids = k => Object.keys(dec).filter(id => dec[id] === k);
+  const txt = `# Retours flashcards — changements-etat — étape 2 (cartes)\n\n## À modifier\n${ids('mod').map(id => `- ${id} : ${notes[id] || '(préciser)'}`).join('\n') || '(aucune)'}\n\n## À supprimer\n${ids('sup').map(id => '- ' + id).join('\n') || '(aucune)'}\n\n## Nouvelles cartes demandées\n${Object.keys(demandes.carte).map(pid => demandes.carte[pid].filter(t => t.trim()).map(t => `- ${pid} : ${t}`).join('\n')).filter(Boolean).join('\n') || '(aucune)'}\n\n## Validées (${ids('ok').length})\n${ids('ok').join(', ')}\n\n## Encore à voir (${ids('').length})\n${ids('').join(', ')}\n`;
+  document.getElementById('sortie').value = txt;
+  document.getElementById('sortie-carte').hidden = false;
+  try { navigator.clipboard.writeText(txt).catch(() => {}); } catch (e) { /* copie manuelle depuis la zone de texte */ }
+  document.getElementById('sortie-carte').scrollIntoView({ behavior: 'smooth' });
+});
+bilan(); rendre();
+</script>
+</body>
+</html>

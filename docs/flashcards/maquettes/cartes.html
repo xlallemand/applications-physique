@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flashcards — Chapitre 11 — maquette</title>
+<link rel="stylesheet" href="../../../assets/theme.css">
+<link rel="stylesheet" href="../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../../changements-etat/modules/ce.css">
+<link rel="stylesheet" href="../../../assets/sommaire.css">
+<link rel="stylesheet" href="fc.css">
+<script src="fc-demo.js"></script>
+<script>FC.demoStockage({ 'changements-etat-progression': FC.PROG_DEMO });</script>
+<script src="../../../assets/sommaire.js"></script>
+<script src="../../../changements-etat/modules/ce.js"></script>
+</head>
+<body>
+<!-- MAQUETTE : page « Flashcards » de l'application (liste des cartes, état, ajout par cours) -->
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">FLASHCARDS</span>
+    <h2 class="er-titre">Flashcards du chapitre 11</h2>
+    <p class="er-contexte">28 cartes pour retenir l'essentiel. Quand tu as fini un cours, <b>ajoute ses cartes à tes révisions</b> : elles reviendront au bon moment.</p>
+  </div>
+
+  <div class="fc-deux">
+    <section class="er-card">
+      <h3 class="fc-h">Ma boîte <small>ce chapitre</small></h3>
+      <div id="boite"></div>
+    </section>
+    <section class="er-card fc-avant">
+      <h3 class="fc-h">Aujourd'hui</h3>
+      <p id="auj" style="font-size:1.05rem;margin-bottom:12px"></p>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:stretch">
+        <a class="btn-primary" href="seance.html" style="text-align:center;text-decoration:none" id="bt-rev"></a>
+        <a class="btn-secondary" href="seance.html#libre-tout" style="text-align:center;text-decoration:none">Tout réviser (sans changer mon planning)</a>
+        <a class="btn-secondary" href="impression.html" style="text-align:center;text-decoration:none">Imprimer les cartes</a>
+      </div>
+    </section>
+  </div>
+
+  <section class="er-card"><h3 class="fc-h">Les cartes, cours par cours <small>touche une carte pour la voir</small></h3><div id="paquets"></div></section>
+</div>
+<script>
+// maquette : le sommaire avec une entrée « Flashcards » en bas
+const plan = CE.PLAN.concat([{ n: 7, titre: 'Flashcards', desc: '', exercices: 'cartes', exNom: 'Flashcards', nbEx: 0 }]);
+SOM.init({ nom: 'Chapitre 11 : Changements d\'état et transferts thermiques', id: 'changements-etat', plan });
+SOM.menu('cartes');
+document.querySelectorAll('#app-nav a').forEach(a => {
+  const h = a.getAttribute('href');
+  if (h === '../index.html') a.href = 'appli.html';
+  else if (h === '../../index.html') a.href = 'portail.html';
+  else if (h !== 'cartes.html') a.href = '../../../changements-etat/modules/' + h;
+});
+document.querySelectorAll('#app-nav .som-snum').forEach(x => { if (x.textContent === '7') x.textContent = '⧉'; });
+document.querySelectorAll('#app-nav .som-sn').forEach(x => { if (x.textContent === '0/1') x.textContent = '20/28'; });
+
+function majHaut() {
+  const n = FC.dues().length;
+  document.getElementById('boite').innerHTML = FC.boite(FC.toutes(), { nouvelles: true });
+  document.getElementById('auj').innerHTML = `<b>${n} cartes</b> à réviser · ${FC.actives().length} cartes dans tes révisions.`;
+  document.getElementById('bt-rev').textContent = `Réviser les ${n} cartes →`;
+}
+FC.apresAjout = majHaut;
+majHaut();
+FC.paquets(document.getElementById('paquets'));
+</script>
+</body>
+</html>

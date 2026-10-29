@@ -1,0 +1,391 @@
+/* ============================================================
+   Révisions espacées par flashcards (assets/revisions.js, préfixe rev-)
+   Repris des maquettes validées (docs/flashcards/maquettes/fc.css).
+   - la carte (fiche bristol), recto / verso, et son contenu (formule, unités, figure, tableau)
+   - séance de révision (réponse, geste au doigt, fin de séance)
+   - boîte à cases, 7 prochains jours, mini-boîte
+   - carte « Aujourd'hui », bloc de l'accueil, lignes d'application, méthodes, minuteur
+   - liste des cartes d'une application, ajout d'un paquet, fin de cours
+   - impression A4 (8 cartes par feuille)
+   - portail : pilule « Révisions » et carte du jour
+   Couleurs uniquement via les variables de assets/theme.css
+   (blanc des textes sur fond encre, comme les boutons du thème).
+   ============================================================ */
+
+/* ---------- La carte (fiche bristol) ---------- */
+.rev-scene { perspective: 1600px; }
+.rev-carte { display: grid; transform-style: preserve-3d; transition: transform .45s ease; }
+.rev-carte.retournee { transform: rotateY(180deg); }
+.rev-face {
+  grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  background: var(--sheet); border: 1px solid var(--line-strong); border-radius: 22px;
+  padding: 18px 24px 16px; min-height: 340px; display: flex; flex-direction: column; gap: 14px; min-width: 0;
+}
+.rev-verso { transform: rotateY(180deg); }
+/* en-tête de la fiche : comme la ligne de titre d'une fiche bristol */
+.rev-tete {
+  display: flex; align-items: center; gap: 8px; padding-bottom: 10px;
+  border-bottom: 2px solid var(--cle-line); font-size: .8rem; font-weight: 700; color: var(--ink-2);
+}
+.rev-tete .rev-ou { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rev-type {
+  flex-shrink: 0; background: var(--cle-bg); color: var(--accent-ink); border-radius: 999px;
+  padding: 3px 10px; font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+}
+.rev-sens { flex-shrink: 0; color: var(--ink-2); font-weight: 800; }
+.rev-corps { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 12px; min-width: 0; }
+.rev-q { font-size: 1.32rem; font-weight: 700; line-height: 1.35; letter-spacing: -.01em; text-align: center; text-wrap: balance; }
+.rev-q small { display: block; margin-top: 6px; font-size: .9rem; font-weight: 600; color: var(--ink-2); }
+.rev-q .rev-formule { margin-bottom: 8px; }
+/* ce qu'il faut prendre pour répondre (crayon, calculatrice) */
+.rev-outils { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 0; font-size: .85rem; font-weight: 700; color: var(--ink-2); }
+.rev-outils svg { flex-shrink: 0; }
+.rev-rappel { font-size: .88rem; font-weight: 600; color: var(--ink-2); line-height: 1.4; }
+.rev-rep { font-size: 1.05rem; line-height: 1.5; }
+.rev-rep p { margin: 0; }
+.rev-rep p + p { margin-top: 6px; }
+.rev-rep ol, .rev-rep ul { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; }
+.rev-formule { font-size: 1.45rem; font-weight: 800; text-align: center; letter-spacing: -.01em; padding: 10px; background: var(--cle-bg); border-radius: 14px; margin: 0; }
+.rev-unites { text-align: center; color: var(--ink-2); font-size: .95rem; }
+.rev-fig { max-width: 520px; width: 100%; margin: 0 auto; }
+.rev-fig svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+.rev-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+.rev-tab { border-collapse: collapse; font-size: .92rem; margin: 0 auto; }
+.rev-tab td, .rev-tab th { border: 1px solid var(--paper-3); padding: 6px 10px; text-align: left; }
+.rev-tab th { background: var(--paper); }
+.rev-pied { display: flex; justify-content: space-between; gap: 8px; font-size: .78rem; font-weight: 700; color: var(--ink-3); }
+@media (max-width: 600px) {
+  .rev-face { padding: 14px 16px 12px; min-height: 300px; border-radius: 18px; }
+  .rev-q { font-size: 1.15rem; }
+  .rev-formule { font-size: 1.2rem; }
+}
+@media (prefers-reduced-motion: reduce) { .rev-carte { transition: none !important; } }
+
+/* ---------- Séance de révision ---------- */
+html.rev-en-seance .app-topbar, html.rev-en-seance .app-topbar-spacer { display: none; }
+.rev-seance { max-width: 46rem; margin: 0 auto; }
+.rev-haut { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.rev-haut .rev-compte { font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rev-haut .rev-score { margin-left: auto; font-size: .85rem; font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rev-haut .btn-small { white-space: nowrap; }
+.rev-barre { height: 6px; background: var(--paper-2); border-radius: 999px; overflow: hidden; margin-bottom: 14px; }
+.rev-barre i { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width .25s; }
+.rev-place { font-size: .82rem; font-weight: 700; color: var(--ink-2); text-align: center; margin: 12px 0 0; min-height: 1.2em; }
+.rev-place b { color: var(--accent-ink); }
+.rev-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.rev-actions.une { grid-template-columns: 1fr; }
+.rev-bt {
+  border: none; border-radius: 999px; min-height: 58px; padding: 10px 18px; cursor: pointer;
+  font: inherit; font-weight: 800; font-size: 1.02rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: transform .1s, box-shadow .15s;
+}
+.rev-bt:active { transform: scale(.98); }
+.rev-bt small { font-size: .74rem; font-weight: 700; opacity: .85; }
+.rev-bt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rev-bt-voir { background: var(--ink); color: #fff; }
+.rev-bt-ko { background: var(--danger-bg); color: var(--danger-text); }
+.rev-bt-ok { background: var(--success-bg); color: var(--success-text); }
+.rev-bt-ko:hover { box-shadow: inset 0 0 0 1.5px var(--danger); }
+.rev-bt-ok:hover { box-shadow: inset 0 0 0 1.5px var(--success); }
+.rev-clavier { text-align: center; font-size: .75rem; color: var(--ink-3); margin-top: 8px; }
+.rev-clavier kbd { font: inherit; font-weight: 700; border: 1px solid var(--paper-3); border-radius: 6px; padding: 0 5px; }
+/* le rappel du clavier : seulement sur ordinateur (souris) */
+.rev-clavier { display: none; }
+@media (hover: hover) { .rev-clavier { display: block; } }
+/* téléphone : les boutons restent sous le pouce */
+@media (max-width: 600px) {
+  .rev-seance { padding-bottom: 96px; }
+  .rev-actions { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; margin: 0; padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--sheet); border-top: 1px solid var(--line); }
+}
+
+/* fin de séance */
+.rev-fin-seance { text-align: center; }
+.rev-fin-seance .er-actions { justify-content: center; }
+.rev-fin-seance .er-actions a { text-decoration: none; }
+.rev-fin-chiffres { display: flex; justify-content: center; gap: 28px; margin: 14px 0 6px; }
+.rev-fin-chiffres div { display: flex; flex-direction: column; }
+.rev-fin-chiffres b { font-size: 2.2rem; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.rev-fin-chiffres span { font-size: .82rem; font-weight: 700; color: var(--ink-2); }
+.rev-fin-seance .ok { color: var(--success-text); }
+.rev-fin-seance .ko { color: var(--danger-text); }
+
+/* réglage du nombre de cartes, révision libre, geste au doigt */
+.rev-limite { font-size: .8rem; font-weight: 700; color: var(--ink-2); display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.rev-limite select { font: inherit; font-size: 16px; border: 1.5px solid var(--paper-3); border-radius: 999px; padding: 2px 8px; background: var(--sheet); color: var(--ink); }
+.rev-limite select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rev-libre { font-size: .75rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; background: var(--paper); border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+.rev-scene { position: relative; touch-action: pan-y; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.rev-scene:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 22px; }
+.rev-scene[data-geste]:not([data-geste=""])::after {
+  position: absolute; top: 22px; z-index: 5; border-radius: 999px; padding: 8px 16px; font-weight: 800; letter-spacing: .03em; pointer-events: none;
+}
+.rev-scene[data-geste="ok"]::after { content: 'JE SAVAIS ✓'; left: 18px; background: var(--success-bg); color: var(--success-text); box-shadow: inset 0 0 0 2px var(--success); }
+.rev-scene[data-geste="ko"]::after { content: '✗ JE NE SAVAIS PAS'; right: 18px; background: var(--danger-bg); color: var(--danger-text); box-shadow: inset 0 0 0 2px var(--danger); }
+.rev-geste { display: none; text-align: center; font-size: .8rem; font-weight: 700; color: var(--ink-2); margin-top: 8px; }
+@media (hover: none) { .rev-geste { display: block; } }
+@media (max-width: 600px) { .rev-haut { flex-wrap: wrap; row-gap: 6px; } .rev-limite, .rev-libre { order: 5; } }
+
+/* ---------- Boîte à cases (vue « paquets ») ---------- */
+.rev-boite {
+  display: grid; grid-template-columns: repeat(var(--n, 9), minmax(0, 1fr)); gap: 0;
+  background: var(--paper); border: 1.5px solid var(--line-strong); border-radius: 16px; padding: 0 4px 0; overflow: hidden;
+}
+.rev-case { display: flex; flex-direction: column; align-items: center; min-width: 0; padding: 0 2px 10px; border-right: 1.5px dashed var(--paper-3); }
+.rev-case:last-child { border-right: none; }
+.rev-case.horsboite { background: var(--sheet); }
+/* intercalaire : l'onglet qui dépasse avec le délai de la case */
+.rev-onglet {
+  margin-top: 8px; background: var(--sheet); border: 1px solid var(--paper-3); border-radius: 8px 8px 2px 2px;
+  padding: 3px 4px; font-size: .74rem; font-weight: 800; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+}
+.rev-case.horsboite .rev-onglet { background: var(--paper); }
+.rev-tas { height: 112px; width: 100%; max-width: 58px; display: flex; flex-direction: column-reverse; gap: 2px; padding-top: 6px; overflow: hidden; }
+.rev-tas i { display: block; height: 5px; border-radius: 2px; background: var(--sheet); box-shadow: inset 0 0 0 1px var(--line-strong); flex-shrink: 0; }
+.rev-tas i.du { background: var(--accent); box-shadow: none; }
+.rev-tas i.neuve { background: var(--paper-2); box-shadow: inset 0 0 0 1px var(--paper-3); }
+.rev-tas i.ok { background: var(--success-bg); box-shadow: inset 0 0 0 1px var(--success); }
+.rev-nb { font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 4px; }
+.rev-du { font-size: .72rem; font-weight: 800; color: var(--accent-ink); min-height: 1.1em; white-space: nowrap; }
+.rev-legende { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .78rem; color: var(--ink-2); margin-top: 8px; }
+.rev-legende span::before { content: ''; display: inline-block; width: 14px; height: 6px; border-radius: 2px; margin-right: 6px; vertical-align: middle; background: var(--sheet); box-shadow: inset 0 0 0 1px var(--line-strong); }
+.rev-legende .l-du::before { background: var(--accent); box-shadow: none; }
+.rev-legende .l-neuve::before { background: var(--paper-2); }
+.rev-legende .l-ok::before { background: var(--success-bg); box-shadow: inset 0 0 0 1px var(--success); }
+@media (max-width: 600px) {
+  .rev-onglet { font-size: .66rem; padding: 2px 3px; }
+  .rev-tas { height: 84px; }
+  .rev-nb { font-size: 1.05rem; }
+  .rev-du { font-size: .64rem; }
+}
+
+/* ---------- Prochains jours ---------- */
+.rev-jours { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; align-items: end; }
+.rev-jour { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.rev-jour .b { width: 100%; max-width: 40px; background: var(--paper-2); border-radius: 6px 6px 2px 2px; }
+.rev-jour.auj .b { background: var(--accent); }
+.rev-jour b { font-size: .9rem; font-variant-numeric: tabular-nums; }
+.rev-jour span { font-size: .72rem; font-weight: 700; color: var(--ink-2); white-space: nowrap; }
+
+/* ---------- Carte « Aujourd'hui » (noire, comme « Reprendre ») ---------- */
+.rev-auj { display: flex; align-items: center; gap: 12px 16px; background: var(--ink); color: #fff; border-radius: 22px; padding: 16px 18px 16px 22px; }
+.rev-auj small { display: block; color: var(--line-strong); font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.rev-auj b { font-size: 1.2rem; letter-spacing: -.01em; }
+.rev-auj .rev-auj-t { flex: 1; min-width: 0; }
+.rev-auj .rev-auj-d { display: block; color: var(--line-strong); font-size: .88rem; margin-top: 2px; }
+.rev-auj .rev-go { flex-shrink: 0; background: #fff; color: var(--ink); border: none; border-radius: 999px; padding: 13px 22px; font: inherit; font-weight: 800; white-space: nowrap; text-decoration: none; cursor: pointer; touch-action: manipulation; }
+.rev-auj .rev-go:hover { background: var(--paper-2); }
+.rev-auj .rev-sec { flex-shrink: 0; color: #fff; font-size: .85rem; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.rev-auj a:focus-visible, .rev-auj button:focus-visible { outline: 2px solid var(--line-strong); outline-offset: 2px; }
+.rev-auj.ajour { background: var(--success-bg); color: var(--success-text); }
+.rev-auj.ajour small, .rev-auj.ajour .rev-auj-d, .rev-auj.ajour .rev-sec { color: var(--success-text); }
+.rev-auj.vide { background: var(--paper); color: var(--ink); flex-wrap: wrap; }
+.rev-auj.vide small, .rev-auj.vide .rev-auj-d { color: var(--ink-2); }
+.rev-auj.vide ul { flex-basis: 100%; margin: 0; padding-left: 1.2em; font-size: .92rem; display: grid; gap: 4px; }
+.rev-auj.vide ul a { color: var(--ink); font-weight: 700; }
+@media (max-width: 520px) {
+  .rev-auj { flex-wrap: wrap; padding: 16px; }
+  .rev-auj .rev-auj-t { flex-basis: 100%; }
+  .rev-auj .rev-go { flex: 1; text-align: center; }
+}
+
+/* ---------- Bloc « Flashcards » sur l'accueil d'une application ---------- */
+.rev-bloc { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; background: var(--cle-bg); border-radius: 20px; padding: 14px 16px 14px 18px; }
+.rev-bloc-t { flex: 1; min-width: 14rem; }
+.rev-bloc-t small { display: block; color: var(--accent-ink); font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.rev-bloc-t b { display: block; font-size: 1.05rem; }
+.rev-bloc-t span { display: block; font-size: .84rem; color: var(--ink-2); margin-top: 2px; }
+.rev-bloc-t span a { color: var(--accent-ink); font-weight: 700; }
+.rev-bloc .rev-mini i { background: var(--cle-line); }
+.rev-bloc .rev-mini i.du { background: var(--accent); }
+.rev-bloc .rev-mini i.ok { background: var(--success); }
+.rev-bloc a { text-decoration: none; }
+/* message sous un module après l'ajout de ses cartes */
+.rev-msg { margin: 0; padding: 10px 14px; border-radius: 14px; background: var(--success-bg); color: var(--success-text); font-size: .88rem; font-weight: 600; }
+.rev-msg a { color: var(--success-text); font-weight: 800; white-space: nowrap; }
+.rev-bt-fc { font: 700 .84rem/1.2 var(--font-sans); cursor: pointer; border: none; }
+
+/* ---------- Lignes d'application (page Révisions) ---------- */
+.rev-apps { display: flex; flex-direction: column; gap: 8px; }
+.rev-app {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 14px;
+  background: var(--paper); border-radius: 18px; padding: 12px 14px 12px 18px; text-decoration: none; color: var(--ink);
+}
+.rev-app:hover { background: var(--paper-2); }
+.rev-app:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rev-app-t b { display: block; font-weight: 800; line-height: 1.25; }
+.rev-app-t small { display: block; font-size: .8rem; font-weight: 600; color: var(--ink-2); margin-top: 2px; }
+.rev-mini { display: flex; align-items: flex-end; gap: 2px; height: 28px; }
+.rev-mini i { width: 7px; background: var(--line-strong); border-radius: 2px 2px 0 0; }
+.rev-mini i.du { background: var(--accent); }
+.rev-mini i.ok { background: var(--success); }
+.rev-chip { border-radius: 999px; padding: 6px 12px; font-size: .82rem; font-weight: 800; white-space: nowrap; }
+.rev-chip.du { background: var(--ink); color: #fff; }
+.rev-chip.rien { background: var(--sheet); color: var(--ink-2); box-shadow: inset 0 0 0 1.5px var(--paper-3); }
+.rev-prets { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.rev-prets a { text-decoration: none; margin-left: 4px; }
+@media (max-width: 600px) {
+  .rev-app { grid-template-columns: minmax(0, 1fr) auto; }
+  .rev-app .rev-mini { display: none; }
+}
+
+/* ---------- Méthodes ---------- */
+.rev-methodes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.rev-methode { background: var(--paper); border-radius: 18px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.rev-methode h4 { margin: 0; font-size: 1.08rem; font-weight: 800; }
+.rev-methode p { font-size: .93rem; line-height: 1.5; color: var(--ink); }
+.rev-methode ol { margin: 0; padding-left: 1.2em; font-size: .9rem; line-height: 1.5; display: grid; gap: 2px; }
+.rev-methode svg { width: 100%; height: auto; }
+@media (max-width: 900px) { .rev-methodes { grid-template-columns: 1fr; } }
+
+/* minuteur Pomodoro */
+.rev-pomo { display: flex; flex-direction: column; align-items: center; gap: 8px; background: var(--sheet); border-radius: 16px; padding: 12px; margin-top: auto; }
+.rev-pomo-modes { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.rev-pomo-t { font-size: 2.6rem; font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1; }
+.rev-pomo-bt { display: flex; gap: 8px; align-items: center; }
+
+/* réglage du nombre de cartes par séance (page Révisions) */
+.rev-reglage { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 0 16px; font-size: .85rem; font-weight: 700; color: var(--ink-2); }
+.rev-reglage span { margin-right: 4px; }
+.rev-reglage button[aria-pressed="true"], .rev-pomo-modes button[aria-pressed="true"] { background: var(--ink); color: #fff; box-shadow: none; }
+.rev-reglage button:focus-visible, .rev-pomo button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- Liste des cartes d'une application ---------- */
+.rev-paquet { border-top: 1px solid var(--line); padding-top: 14px; margin-top: 14px; }
+.rev-paquet:first-of-type { border-top: none; margin-top: 4px; padding-top: 0; }
+.rev-paquet-h { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 10px; cursor: pointer; list-style: none; border-radius: 12px; }
+.rev-paquet-h::-webkit-details-marker { display: none; }
+.rev-paquet-h::before { content: '›'; font-size: 1.3rem; font-weight: 700; color: var(--ink-3); transition: transform .15s; }
+.rev-paquet[open] > .rev-paquet-h::before { transform: rotate(90deg); }
+.rev-paquet:not([open]) > .rev-paquet-h { margin-bottom: 0; }
+.rev-paquet-h:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rev-paquet-h small .rev-du { display: inline; font-size: inherit; }
+.rev-paquet-h h4 { margin: 0; font-size: 1.05rem; font-weight: 800; flex: 1; min-width: 12rem; }
+.rev-paquet-h h4 small { display: block; font-size: .8rem; font-weight: 600; color: var(--ink-2); }
+.rev-etat { font-size: .82rem; font-weight: 700; color: var(--ink-2); }
+.rev-etat.ok { color: var(--success-text); }
+.rev-ajout { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; background: var(--cle-bg); border-radius: 16px; padding: 12px 14px; margin-bottom: 10px; }
+.rev-ajout p { flex: 1; min-width: 12rem; font-size: .92rem; margin: 0; }
+.rev-ajout.attente { background: var(--paper); }
+.rev-ajout a { text-decoration: none; }
+.rev-lien { background: none; border: none; padding: 0; font: inherit; font-size: .82rem; font-weight: 700; color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; touch-action: manipulation; }
+.rev-lien:hover { color: var(--ink); }
+.rev-lien:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rev-lignes { display: flex; flex-direction: column; gap: 6px; }
+.rev-ligne {
+  display: grid; grid-template-columns: 7.5rem minmax(0, 1fr) 4.2rem 7.5rem; align-items: center; gap: 12px;
+  background: var(--paper); border-radius: 14px; padding: 10px 14px; border: none; text-align: left; font: inherit; color: var(--ink); cursor: pointer; width: 100%;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.rev-ligne:hover { background: var(--paper-2); }
+.rev-ligne:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rev-ligne .ty { font-size: .7rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent-ink); }
+.rev-ligne .txt { font-size: .93rem; font-weight: 600; line-height: 1.35; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.rev-ligne .cs { font-size: .78rem; font-weight: 800; color: var(--ink-2); white-space: nowrap; }
+.rev-ligne .qd { font-size: .82rem; font-weight: 700; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+.rev-ligne .qd.du { color: var(--accent-ink); }
+.rev-ligne .qd.ok { color: var(--success-text); }
+.rev-ligne.inactive { background: var(--sheet); box-shadow: inset 0 0 0 1px var(--line); }
+.rev-ligne.inactive .qd { color: var(--ink-2); }
+@media (max-width: 640px) {
+  .rev-ligne { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; }
+  .rev-ligne .ty { grid-column: 1; }
+  .rev-ligne .txt { grid-column: 1 / -1; grid-row: 2; }
+  .rev-ligne .cs { grid-column: 2; grid-row: 1; }
+  .rev-ligne .qd { grid-column: 1 / -1; text-align: left; }
+}
+
+/* aperçu d'une carte (recto et verso côte à côte) */
+.rev-apercu { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 4px 0 8px; }
+.rev-apercu[hidden] { display: none; }
+.rev-apercu .rev-face { grid-area: auto; min-height: 0; backface-visibility: visible; transform: none; }
+.rev-apercu .rev-q { font-size: 1.05rem; }
+.rev-sens-lab { grid-column: 1 / -1; font-size: .8rem; font-weight: 800; color: var(--ink-2); margin: 6px 0 -4px; }
+@media (max-width: 760px) { .rev-apercu { grid-template-columns: 1fr; } }
+
+/* « Tout réviser » : choix des modules */
+.rev-choix { display: flex; flex-direction: column; gap: 8px; background: var(--paper); border-radius: 16px; padding: 12px 14px; }
+.rev-choix[hidden] { display: none; }
+.rev-choix p { font-size: .88rem; font-weight: 700; color: var(--ink-2); }
+.rev-choix label { display: flex; align-items: center; gap: 8px; font-size: .92rem; font-weight: 600; cursor: pointer; min-height: 32px; }
+.rev-choix input { width: 20px; height: 20px; accent-color: var(--ink); flex-shrink: 0; }
+.rev-choix .btn-primary { text-align: center; text-decoration: none; }
+.rev-choix .btn-primary[aria-disabled="true"] { opacity: .4; pointer-events: none; }
+
+/* ---------- Fin d'un cours : ranger les cartes du cours ---------- */
+.rev-fin { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; background: var(--cle-bg); border-radius: 16px; padding: 14px 16px; margin-top: 14px; }
+.rev-fin.attente { background: var(--paper); }
+.rev-fin p { flex: 1; min-width: 14rem; font-size: .95rem; margin: 0; line-height: 1.45; }
+.rev-fin p small { display: block; font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent-ink); }
+.rev-fin a { text-decoration: none; }
+.rev-fin a.rev-lien { text-decoration: underline; }
+
+/* ---------- Divers ---------- */
+.rev-h { font-size: 1.15rem; font-weight: 800; margin: 0 0 10px; letter-spacing: -.01em; }
+.rev-h small { font-weight: 600; font-size: .85rem; color: var(--ink-2); margin-left: 6px; }
+.rev-deux { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; }
+.rev-deux > .er-card { margin-bottom: 16px; min-width: 0; }
+@media (max-width: 900px) { .rev-deux { grid-template-columns: 1fr; gap: 0; } }
+.rev-note { font-size: .85rem; color: var(--ink-2); line-height: 1.5; }
+@media (max-width: 900px) { .rev-avant { order: -1; } }
+.rev-boutons { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.rev-boutons a, .rev-boutons button { text-align: center; text-decoration: none; }
+/* stockage indisponible : message discret */
+.rev-stockage { font-size: .82rem; color: var(--ink-2); background: var(--paper); border-radius: 12px; padding: 8px 12px; margin: 0 0 12px; }
+/* boîte en papier */
+.rev-papier { font-size: .95rem; margin: 0; padding-left: 1.3em; display: grid; gap: 6px; line-height: 1.5; align-content: start; }
+.rev-papier-fig { display: block; width: 100%; max-width: 360px; height: auto; margin-top: 16px; }
+.rev-semaine-t { margin: 0 0 8px; font-size: 1rem; font-weight: 800; }
+@media (max-width: 900px) { .rev-semaine-t { margin-top: 18px; } }
+.rev-semaine-t small { font-weight: 600; font-size: .85rem; color: var(--ink-2); margin-left: 6px; }
+.rev-semaine { margin: 0; width: 100%; font-variant-numeric: tabular-nums; }
+.rev-semaine td + td { font-weight: 700; }
+
+/* ---------- Impression : A4, 8 cartes par feuille (99 × 70,5 mm) ---------- */
+.rev-imp-choix { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.rev-imp-choix label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.rev-imp-choix input { width: 18px; height: 18px; accent-color: var(--ink); }
+.rev-imp-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
+.rev-feuilles { display: flex; flex-direction: column; gap: 24px; width: max-content; }
+.rev-imp-lab { font-size: .85rem; font-weight: 800; color: var(--ink-2); margin: 0 0 6px; }
+.rev-feuille {
+  width: 210mm; height: 297mm; background: var(--sheet); border: 1px solid var(--line-strong); padding: 7.5mm 6mm;
+  display: grid; grid-template-columns: repeat(2, 99mm); grid-template-rows: repeat(4, 70.5mm); box-sizing: border-box;
+}
+.rev-imp-carte { border: 1px dashed var(--ink-3); margin: -.5px; padding: 3mm 4mm; display: flex; flex-direction: column; gap: 2mm; overflow: hidden; font-size: 10pt; line-height: 1.3; color: var(--ink); min-width: 0; box-sizing: border-box; }
+.rev-imp-tete { display: flex; justify-content: space-between; gap: 2mm; font-size: 7pt; font-weight: 700; color: var(--ink-2); border-bottom: 1.5px solid var(--cle-line); padding-bottom: 1mm; flex-shrink: 0; }
+.rev-imp-corps { flex: 1; display: flex; flex-direction: column; justify-content: safe center; gap: 1.5mm; min-height: 0; overflow: hidden; }
+.rev-imp-recto .rev-imp-corps { text-align: center; font-weight: 700; font-size: 11pt; }
+.rev-imp-corps .rev-imp-in > * + * { margin-top: 1.5mm; }
+.rev-imp-corps p { margin: 0; }
+.rev-imp-corps p + p { margin-top: 1mm; }
+.rev-imp-corps ol, .rev-imp-corps ul { margin: 0; padding-left: 1.2em; }
+.rev-imp-corps small { display: block; font-size: .85em; font-weight: 600; color: var(--ink-2); }
+.rev-imp-corps .rev-formule { font-size: 1.15em; padding: 1.5mm; border-radius: 2mm; }
+.rev-imp-corps .rev-unites { font-size: .9em; }
+.rev-imp-corps .rev-fig { max-width: 70mm; }
+.rev-imp-corps svg { display: block; max-height: 30mm; width: auto; max-width: 100%; margin: 0 auto; }
+.rev-imp-corps .rev-outils { gap: 1.5mm; font-size: .8em; }
+.rev-imp-corps .rev-outils svg { width: 5mm; height: 5mm; margin: 0; }
+.rev-imp-corps .rev-tab { font-size: .8em; }
+.rev-imp-corps .rev-tab td, .rev-imp-corps .rev-tab th { padding: .8mm 1.6mm; }
+@media print {
+  @page { size: A4; margin: 0; }
+  html.rev-imprimer, html.rev-imprimer body { background: #fff; padding: 0 !important; margin: 0 !important; }
+  html.rev-imprimer body * { visibility: hidden; }
+  html.rev-imprimer .rev-feuilles, html.rev-imprimer .rev-feuilles * { visibility: visible; }
+  html.rev-imprimer .rev-feuilles { position: absolute; left: 0; top: 0; display: block; gap: 0; }
+  html.rev-imprimer .rev-feuille { border: none; break-after: page; page-break-after: always; }
+  html.rev-imprimer .rev-feuilles > div:last-child .rev-feuille { break-after: auto; page-break-after: auto; }
+  html.rev-imprimer .rev-imp-lab { display: none; }
+  html.rev-imprimer .rev-imp-carte { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+/* ---------- Portail : pilule « Révisions » et carte du jour ---------- */
+.hero-nav .rev-nav { margin-right: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; min-height: 38px; flex-shrink: 0; touch-action: manipulation; }
+.rev-nav i { font-style: normal; background: var(--ink); color: #fff; border-radius: 999px; min-width: 20px; height: 20px; padding: 0 5px; font-size: .74rem; display: inline-flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
+.rev-nav:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.rev-portail { padding-top: 22px; }
+.rev-portail[hidden] { display: none; }
+@media (max-width: 600px) {
+  .hero-nav .rev-nav { margin-right: 8px; min-height: 36px; padding: 8px 12px; font-size: .82rem; }
+}

@@ -38,7 +38,6 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
 }
 .hero > .wrap { position: relative; z-index: 1; width: 100%; }
 .hero-nav { display: flex; align-items: center; height: 72px; }
-.marque { font-weight: 800; letter-spacing: -.02em; font-size: 1.05rem; color: var(--ink); text-decoration: none; }
 .hero-texte { margin-top: auto; padding-bottom: clamp(60px, 9vh, 96px); }
 .hero h1 { margin: 0; font-size: clamp(3rem, 9vw, 6.6rem); line-height: .92; letter-spacing: -.05em; font-weight: 800; color: var(--ink); }
 .hero .lead { margin: 18px 0 0; font-size: clamp(1.02rem, 2vw, 1.25rem); color: var(--ink-2); max-width: 32ch; }
@@ -144,17 +143,20 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
   @media (max-width: 640px) { .app-d { display: none; } .app { padding: 11px 10px 11px 16px; } .app-f { width: 32px; height: 32px; } }
 </style>
 <link rel="stylesheet" href="assets/progression.css">
+<link rel="stylesheet" href="assets/revisions.css">
 </head>
 <body>
 
 <!-- ====== Bandeau d'accueil avec image en parallaxe ====== -->
 <header class="hero plx" data-graine="7">
   <canvas aria-hidden="true"></canvas>
-  <div class="wrap"><nav class="hero-nav"><a class="marque" href="#">Physique-Chimie</a>
+  <div class="wrap"><nav class="hero-nav">
+    <!-- Révisions (flashcards) : nombre de cartes à réviser aujourd'hui, assets/revisions.js -->
+    <a class="btn-small rev-nav" id="rev-nav" href="revisions.html">Révisions</a>
     <!-- Enregistrer / reprendre la progression : assets/progression.js -->
     <div class="prog-actions">
       <button type="button" class="btn-small" id="prog-enregistrer">Enregistrer ma progression</button>
-      <button type="button" class="prog-lien" id="prog-reprendre">Reprendre depuis un fichier</button>
+      <button type="button" class="btn-small" id="prog-reprendre">Reprendre depuis un fichier</button>
       <input type="file" id="prog-fichier" class="prog-cache" accept=".html,.htm,text/html" tabindex="-1" aria-hidden="true">
     </div>
   </nav></div>
@@ -167,6 +169,8 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
 
 <!-- ====== Feuille de contenu ====== -->
 <main class="feuille">
+  <!-- carte du jour, seulement quand des flashcards sont à réviser (assets/revisions.js) -->
+  <div class="wrap rev-portail" id="rev-portail" hidden></div>
   <div class="tri" id="tri">
     <div class="wrap">
       <div class="groupe" role="group" aria-label="Domaine" id="g-dom"></div>
@@ -556,6 +560,19 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
   coller();
 
   ACC.parallaxe();
+})();
+</script>
+<script src="assets/revisions.js"></script>
+<script>
+/* Révisions (assets/revisions.js) : pilule du bandeau et carte du jour,
+   mises à jour après une reprise de progression et au retour arrière */
+(function () {
+  'use strict';
+  const maj = () => REV.portail({ pilule: document.getElementById('rev-nav'), carte: document.getElementById('rev-portail'), apps: ACC.APPS });
+  maj();
+  const liste = ACC.rafraichir;
+  ACC.rafraichir = () => { liste(); maj(); };
+  addEventListener('pageshow', e => { if (e.persisted) maj(); });
 })();
 </script>
 <script src="assets/progression.js"></script>

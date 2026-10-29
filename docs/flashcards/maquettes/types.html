@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Types de cartes — maquette</title>
+<link rel="stylesheet" href="../../../assets/theme.css">
+<link rel="stylesheet" href="../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../../changements-etat/modules/ce.css">
+<link rel="stylesheet" href="../../../assets/sommaire.css">
+<link rel="stylesheet" href="fc.css">
+<script src="../../../assets/sommaire.js"></script>
+<script src="../../../changements-etat/modules/ce.js"></script>
+<script src="fc-demo.js"></script>
+</head>
+<body>
+<!-- MAQUETTE : les types de cartes, avec un exemple du chapitre 11 (recto | verso) -->
+<div class="er-page" id="zone"></div>
+<script>
+const TYPES = [
+  ['ce-1-L', 'Définition', 'Un mot ↔ sa définition. Révisée dans les deux sens, une fois sur deux.'],
+  ['ce-3-formule', 'Formule', 'Une situation ↔ la formule, avec ses grandeurs et leurs unités. Dans les deux sens.'],
+  ['ce-1-signeL', 'À savoir', 'Une règle, une propriété, un résultat à connaître.'],
+  ['ce-1-six', 'Schéma', 'Un schéma à légender ou à compléter.'],
+  ['ce-2-lire', 'Lecture graphique', 'Utiliser un outil : lire un état, une valeur, une période sur un graphique.'],
+  ['ce-2-fleche', 'Méthode', 'Les étapes d\'une technique à maîtriser.'],
+  ['ce-5-schema', 'Méthode (exercice-type)', 'Un énoncé court qui revient souvent : retrouver la démarche, pas faire les calculs.'],
+  ['ce-3-reflexe', 'Réflexe', 'Ce qu\'il faut vérifier avant de calculer : unités, signes, pièges classiques.'],
+];
+document.getElementById('zone').innerHTML = TYPES.map(([id, nom, desc]) => {
+  const c = FC.toutes().find(x => x.id === id);
+  const sens = c.faces.map((f, s) => (c.faces.length > 1 ? `<p class="fc-sens-lab">Sens ${s + 1}${s ? ' : la révision suivante' : ''}</p>` : '') +
+    `<div class="fc-apercu">${FC.face(c, s, 'recto', { pied: false })}${FC.face(c, s, 'verso', { pied: false })}</div>`).join('');
+  return `<section class="er-card fc-type-bloc"><h3 class="fc-h">${nom}${c.faces.length > 1 ? ' ⇄' : ''} <small>${desc}</small></h3>${sens}</section>`;
+}).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Révisions — maquette</title>
+<link rel="stylesheet" href="../../../assets/theme.css">
+<link rel="stylesheet" href="../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../../changements-etat/modules/ce.css">
+<link rel="stylesheet" href="../../../assets/sommaire.css">
+<link rel="stylesheet" href="fc.css">
+<script src="../../../assets/sommaire.js"></script>
+<script src="../../../changements-etat/modules/ce.js"></script>
+<script src="fc-demo.js"></script>
+</head>
+<body>
+<!-- MAQUETTE : page Révisions (lien depuis le portail) -->
+<div class="app-topbar"><a class="som-pilule" href="portail.html"><span aria-hidden="true">←</span><span class="som-court">Applications</span><span class="som-long">Toutes les applications</span></a>
+  <div class="app-topbar-title"><span class="app-name">Révisions</span></div></div>
+<div class="app-topbar-spacer"></div>
+
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">RÉVISIONS</span>
+    <h2 class="er-titre">Mes flashcards</h2>
+    <p class="er-contexte">Les cartes de tous tes chapitres, revues au bon moment : une carte sue revient de plus en plus tard, une carte ratée revient plus vite.</p>
+  </div>
+
+  <!-- aujourd'hui : l'action principale -->
+  <div class="fc-auj" style="margin-bottom:16px">
+    <span class="fc-auj-t"><small>Aujourd'hui</small><b id="nb-auj"></b><span class="fc-auj-d" id="det-auj"></span></span>
+    <a class="fc-go" href="seance.html">Réviser maintenant →</a>
+  </div>
+  <!-- réglage : nombre de cartes par séance (modifiable aussi pendant la séance) -->
+  <div class="fc-reglage" role="group" aria-label="Cartes par séance"><span>Cartes par séance</span>
+    <button type="button" class="btn-small" aria-pressed="false">10</button><button type="button" class="btn-small" aria-pressed="true">20</button><button type="button" class="btn-small" aria-pressed="false">30</button><button type="button" class="btn-small" aria-pressed="false">Sans limite</button></div>
+
+  <div class="fc-deux">
+    <section class="er-card">
+      <h3 class="fc-h">Ma boîte <small>toutes applications</small></h3>
+      <div id="boite"></div>
+    </section>
+    <section class="er-card">
+      <h3 class="fc-h">Les 7 prochains jours</h3>
+      <div id="jours"></div>
+      <p class="fc-note" style="margin-top:12px">Un jour sans réviser ? Les cartes t'attendent : elles passent en premier la fois suivante, par séances de 20 cartes au plus.</p>
+    </section>
+  </div>
+
+  <section class="er-card">
+    <h3 class="fc-h">Par application</h3>
+    <div class="fc-apps" id="apps"></div>
+    <p class="fc-note" style="margin-top:10px">À ajouter quand tu auras fini le cours : <b>Chapitre 11</b>, module 4 (4 cartes) <a class="btn-small" href="cartes.html" style="margin-left:6px">Voir</a></p>
+  </section>
+
+  <section class="er-card">
+    <h3 class="fc-h">Bien réviser</h3>
+    <div class="fc-methodes">
+      <div class="fc-methode">
+        <h4>La feuille blanche</h4>
+        <p>Relire donne l'impression de savoir. Ce qui fait retenir, c'est d'aller <b>chercher</b> l'information dans sa mémoire.</p>
+        <ol><li>Cours fermé, prends une feuille blanche.</li><li>Écris tout ce dont tu te souviens : définitions, formules, schémas, méthodes.</li><li>Ouvre la fiche et complète d'une autre couleur ce qui manquait.</li><li>Ce qui est en couleur : à revoir en priorité.</li></ol>
+      </div>
+      <div class="fc-methode">
+        <h4>Les révisions espacées</h4>
+        <p>On oublie vite ce qu'on vient d'apprendre. Chaque fois qu'on s'en souvient à nouveau, on oublie <b>moins vite</b> : on peut attendre plus longtemps avant de revoir.</p>
+        <div id="oubli"></div>
+        <p>C'est le principe des flashcards : 1 jour, 2 jours, 4 jours, 1 semaine…</p>
+      </div>
+      <div class="fc-methode">
+        <h4>La méthode Pomodoro</h4>
+        <ol><li>Une seule tâche, téléphone dans une autre pièce.</li><li><b>25 min</b> de travail sans interruption.</li><li><b>5 min</b> de vraie pause : bouge, bois.</li><li>Après 4 pomodoros : pause de 15 à 30 min.</li></ol>
+        <p>Une séance de flashcards tient dans un pomodoro.</p>
+        <div class="fc-pomo" id="pomo">
+          <div class="fc-pomo-modes" role="group" aria-label="Durée"><button type="button" class="btn-small" data-m="25" aria-pressed="true">Travail 25 min</button><button type="button" class="btn-small" data-m="5" aria-pressed="false">Pause 5 min</button></div>
+          <b class="fc-pomo-t" aria-live="polite">25:00</b>
+          <div class="fc-pomo-bt"><button type="button" class="btn-primary" data-a="go">Démarrer</button><button type="button" class="btn-small" data-a="raz">↺</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="fc-h">Fabrique ta boîte en papier</h3>
+    <div class="fc-deux">
+      <ol class="fc-rep" style="font-size:.95rem">
+        <li><b>Des fiches bristol</b> : une question au recto, la réponse au verso. Une seule idée par carte, avec tes mots et un schéma si besoin.</li>
+        <li><b>Une boîte avec 7 intercalaires</b> : 1 j, 2 j, 4 j, 1 sem, 2 sem, 1 mois, 2 mois, et une case « sues ».</li>
+        <li>Une nouvelle carte va dans la case <b>1 j</b>. Note au crayon, dans un coin, la <b>date</b> de sa prochaine révision.</li>
+        <li>Chaque jour, sors les cartes dont la date est passée. <b>Sue</b> : case suivante. <b>Ratée</b> : case précédente. Efface et écris la nouvelle date.</li>
+        <li>Carte dans les deux sens (formule, définition) : une fois sur deux, lis le <b>verso</b> et retrouve le recto.</li>
+      </ol>
+      <div><div id="boite-papier"></div><p class="fc-note" style="margin-top:8px">Ce site fait exactement la même chose avec tes cartes de physique-chimie. Pour passer au papier : « Imprimer les cartes » sur la page Flashcards de chaque chapitre.</p></div>
+    </div>
+  </section>
+</div>
+
+<script>
+// boîte globale : cartes du chapitre 11 + comptes fictifs des autres applications
+const ch11 = FC.actives(), toutes = ch11.concat(FC.cartesAutres()), dues = FC.dues();
+document.getElementById('nb-auj').textContent = dues.length + ' cartes à réviser';
+document.getElementById('det-auj').textContent = 'Chapitre 11 · environ ' + Math.ceil(dues.length * 0.5) + ' min';
+document.getElementById('boite').innerHTML = FC.boite(toutes);
+document.getElementById('jours').innerHTML = FC.jours(ch11, [0, 0, 0, 0, 0, 0, 0].map((v, j) => FC.cartesAutres().filter(c => c.e.d === j && j > 0).length));
+// une ligne par application : un clic lance la révision de l'application
+const ligne = (titre, cartes, du, suivant, href) => `<a class="fc-app" href="${href}"><span class="fc-app-t"><b>${titre}</b><small>${cartes.length} cartes · ${cartes.filter(c => c.e.c > FC.MAX).length} sues</small></span>${FC.mini(cartes)}<span class="fc-chip ${du ? 'du' : 'rien'}">${du ? 'Réviser ' + du + ' →' : 'À jour ✓ · ' + suivant}</span></a>`;
+document.getElementById('apps').innerHTML =
+  ligne('Chapitre 11 : Changements d\'état et transferts thermiques', ch11, dues.length, '', 'seance.html') +
+  FC.AUTRES.map(a => ligne(a.titre, a.cartes, 0, FC.dans(a.prochaine), '#')).join('');
+// courbe de l'oubli : sans révision / avec révisions espacées (J1, J3, J7, J14)
+(function () {
+  const W = 300, H = 130, x = t => 28 + t * 15.5, y = r => 12 + (1 - r) * 92;
+  let sans = '', avec = '', S = 1.2, t0 = 0;
+  const rev = [1, 3, 7, 14];
+  for (let t = 0; t <= 17; t += .1) sans += (t ? 'L' : 'M') + x(t).toFixed(1) + ',' + y(Math.exp(-t / 1.2)).toFixed(1);
+  for (let t = 0; t <= 17; t += .1) {
+    if (rev.length && t >= rev[0]) { avec += 'L' + x(rev[0]).toFixed(1) + ',' + y(1); t0 = rev.shift(); S *= 2.6; }
+    avec += (t ? 'L' : 'M') + x(t).toFixed(1) + ',' + y(Math.exp(-(t - t0) / S)).toFixed(1);
+  }
+  document.getElementById('oubli').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Courbe de l'oubli : sans révision, le souvenir s'effondre en quelques jours ; avec des révisions à J1, J3, J7 et J14, il reste haut">
+    <line x1="28" y1="104" x2="292" y2="104" stroke="#16181d"/><line x1="28" y1="104" x2="28" y2="8" stroke="#16181d"/>
+    <text x="24" y="16" font-size="11" text-anchor="end" fill="#55585f">100 %</text><text x="292" y="118" font-size="11" text-anchor="end" fill="#55585f">jours</text>
+    ${[1, 3, 7, 14].map(t => `<text x="${x(t)}" y="118" font-size="11" text-anchor="middle" fill="#55585f">J${t}</text>`).join('')}
+    <path d="${sans}" fill="none" stroke="#8d8f94" stroke-width="2" stroke-dasharray="4 3"/>
+    <path d="${avec}" fill="none" stroke="#5a3fc4" stroke-width="2.2"/>
+    <text x="112" y="94" font-size="11" fill="#55585f">sans révision</text><text x="150" y="62" font-size="11" fill="#3f2a93" font-weight="700">avec révisions</text></svg>`;
+})();
+// réglage du nombre de cartes par séance (maquette : rien n'est enregistré)
+document.querySelectorAll('.fc-reglage button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.fc-reglage button').forEach(x => x.setAttribute('aria-pressed', x === b));
+}));
+// minuteur Pomodoro : 25 min de travail, puis 5 min de pause (passage automatique)
+(function () {
+  const z = document.getElementById('pomo'), t = z.querySelector('.fc-pomo-t'), go = z.querySelector('[data-a="go"]');
+  let duree = 25, restant = 25 * 60, minuteur = null;
+  const ecrire = () => { t.textContent = String(Math.floor(restant / 60)).padStart(2, '0') + ':' + String(restant % 60).padStart(2, '0'); };
+  const mode = m => { duree = m; restant = m * 60; z.querySelectorAll('[data-m]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.m === m)); ecrire(); };
+  const arreter = () => { clearInterval(minuteur); minuteur = null; go.textContent = 'Démarrer'; };
+  go.addEventListener('click', () => {
+    if (minuteur) return arreter();
+    go.textContent = 'Pause';
+    minuteur = setInterval(() => {
+      restant--; ecrire();
+      if (restant <= 0) { arreter(); mode(duree === 25 ? 5 : 25); }
+    }, 1000);
+  });
+  z.querySelector('[data-a="raz"]').addEventListener('click', () => { arreter(); mode(duree); });
+  z.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { arreter(); mode(+b.dataset.m); }));
+})();
+// boîte en papier : intercalaires avec leur délai, fiches rangées derrière
+(function () {
+  const noms = ['1 j', '2 j', '4 j', '1 sem', '2 sem', '1 mois', '2 mois', 'sues'], nb = [3, 6, 5, 4, 2, 1, 0, 2];
+  let s = '<rect x="6" y="70" width="328" height="70" rx="8" fill="#ebe8e1" stroke="#c9c4b9" stroke-width="1.5"/>';
+  noms.forEach((n, i) => {
+    const x0 = 12 + i * 40.5;
+    for (let k = 0; k < nb[i]; k++) s += `<rect x="${x0 + 4 + k * 4}" y="${50 - (k % 2) * 3}" width="30" height="40" rx="2" fill="#fff" stroke="#c9c4b9"/>`;
+    s += `<rect x="${x0}" y="34" width="36" height="22" rx="4" fill="${i === 7 ? '#e7f3ed' : '#fff'}" stroke="#8d8f94"/><text x="${x0 + 18}" y="49" font-size="9.5" font-weight="700" text-anchor="middle" fill="#16181d">${n}</text>`;
+    s += `<rect x="${x0}" y="56" width="36" height="34" fill="none"/>`;
+  });
+  s += '<rect x="6" y="88" width="328" height="52" rx="8" fill="#f3f1ec" stroke="#c9c4b9" stroke-width="1.5"/><text x="170" y="120" font-size="11" font-weight="700" text-anchor="middle" fill="#55585f">la boîte : on avance d\'une case quand on sait</text>';
+  document.getElementById('boite-papier').innerHTML = `<svg viewBox="0 0 340 146" role="img" aria-label="Boîte de fiches avec 8 intercalaires : 1 j, 2 j, 4 j, 1 sem, 2 sem, 1 mois, 2 mois, sues" style="width:100%;height:auto">${s}</svg>`;
+})();
+</script>
+</body>
+</html>
