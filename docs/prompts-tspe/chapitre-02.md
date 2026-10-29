@@ -81,6 +81,13 @@ Tout outil doit pouvoir exister en **plusieurs exemplaires** dans une page (pas 
 
   Pour valider un entourage : il contient les atomes du groupe, avec ou sans les H qui leur sont liés, et rien d'autre.
 
+- **Outil existant pour entourer les groupes** : le cours « Les groupes caractéristiques » de l'application `rappels-1ere-sti2d/` (`modules/module_1_cours.html`, série `module_1_questions.html`) a déjà un outil d'entourage, `RP.partieEntourer(m)` dans `modules/rp.js` (partie `perso`, styles `rp-at`, `rp-cercle` dans `modules/rp.css`) :
+  - l'élève touche les atomes pour les marquer (ou les libérer), puis Valider ;
+  - les groupes sont alors entourés et numérotés, avec une légende « groupe … : famille des … » (`RP.legende`), puis nommés par QCM groupe · famille (`RP.partiesNommer`) ;
+  - diagnostics : atome de la chaîne carbonée (« ne contient que C et H »), OH d'un carboxyle entouré seul, carboxyle incomplet, groupe oublié.
+
+  Il ne connaît que les groupes hydroxyle et carboxyle, sur sa propre formule semi-développée en grille HTML. **Reprends son fonctionnement (gestes, cercles numérotés, légende, diagnostics) dans `ORGA`**, étendu à toutes les familles et aux trois écritures. Ne modifie pas `rappels-1ere-sti2d/`.
+
 ### Nomenclature (`orga.js`)
 
 `ORGA.nommer(mol)` renvoie le nom **et ses parties** (chaîne principale et ses atomes, numérotation, ramifications avec leurs numéros et leurs atomes, groupe et son numéro), pour colorer le dessin et le nom de la même façon ; ou `{ horsProgramme: raison }`. `ORGA.lireNom(nom)` fait l'inverse. Règles du cours (niveau lycée) :
@@ -327,7 +334,7 @@ Reconnaître avant de nommer : c'est le plus important. Le tableau du cours (pag
 
 **Cours 3e : nommer les esters, amines et amides** : « alcanoate d'alkyle » ; N- ; exemples du tableau du cours avec les annotations du professeur.
 
-**Atelier « Entourer les groupes »** (page `simulation`, question type bac) : molécules à plusieurs groupes (ex. 5 et molécules des sujets : acide lactique, acide malique, atropine, frambinone, voir `competences.md` §2) ; entourer chaque groupe, le nommer, donner la famille. Pour un cycle benzénique, on ne demande que les groupes du programme.
+**Atelier « Entourer les groupes »** (page `simulation`, question type bac) : molécules à plusieurs groupes (ex. 5 et molécules des sujets : acide lactique, acide malique, atropine, frambinone, voir `competences.md` §2) ; entourer chaque groupe, le nommer, donner la famille (outil repris de `rappels-1ere-sti2d/`, voir « Moteur `ORGA` »). Pour un cycle benzénique, on ne demande que les groupes du programme.
 
 **Atelier « Nommer une molécule »** et **atelier « Dessiner une molécule à partir de son nom »** (sous-module 4, pages `simulation`).
 
