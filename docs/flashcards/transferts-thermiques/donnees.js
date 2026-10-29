@@ -8,7 +8,8 @@
    tt-3-sens (question), tt-3-unites (conversion de S), tt-4-isolant (crayon et calculatrice) ;
    supprimées tt-1-deltaT, tt-3-isolerR, tt-4-methode.
    Tour 5 : tt-1-feu modifiée (sans schéma au recto ; mains du schéma plus réalistes) ; toutes les autres validées.
-   Tour 6 : tt-1-feu modifiée (pouce retiré de la main qui tient la tige). */
+   Tour 6 : tt-1-feu modifiée (pouce retiré de la main qui tient la tige).
+   Toutes les cartes validées par l'enseignant le 2026-10-29, mises en place dans transferts-thermiques/modules/flashcards.js. */
 (function () {
   // couleurs de assets/theme.css (accent physique)
   const ENC = '#16181d', ENC2 = '#55585f', PAP3 = '#dfdbd2', ACC = '#5a3fc4', ACC2 = '#3f2a93';
@@ -137,7 +138,7 @@
           { id: 'tt-1-sens', type: 'savoir', competence: 'c8', statut: 'validee', faces: [
             { q: '<p>Dans quel sens se fait toujours un transfert thermique ? Quand s\'arrête-t-il ?</p>',
               r: '<p><b>Du corps le plus chaud vers le corps le plus froid.</b></p><p>Il s\'arrête quand les deux corps sont à la même température. Le « froid » ne se transfère pas.</p>' }] },
-          { id: 'tt-1-feu', type: 'savoir', competence: 'c6', statut: 'modifiee', faces: [
+          { id: 'tt-1-feu', type: 'savoir', competence: 'c6', statut: 'validee', faces: [
             { q: '<p>Quels sont les trois modes de transfert thermique ? Comment interviennent-ils autour d\'un feu ?</p>',
               r: fig(feu()) + '<p>① <b>Conduction</b> : la tige chauffe de proche en proche jusqu\'à la main.</p><p>② <b>Convection</b> : l\'air chauffé par le feu monte.</p><p>③ <b>Rayonnement</b> : les mains devant le feu chauffent, sans contact.</p>' }] },
         ] },
