@@ -109,7 +109,7 @@
       'module_1', 'module_2', 'module_3', 'module_4', 'module_5', 'module_6', 'module_7',
       'module_7_entrainement'] },
     'nomenclature': { ex: 9, pages: [
-      'module_1a_cours', 'module_1b_cours', 'module_1c_cours', 'module_1_dessin', 'module_1_conversion', 'module_1_questions',
+      'module_1a_cours', 'module_1b_cours', 'module_1c_cours', 'module_1_dessin', 'module_1_libre', 'module_1_conversion', 'module_1_questions',
       'module_2a_cours', 'module_2b_cours', 'module_2c_cours', 'module_2d_cours', 'module_2_nommer', 'module_2_dessiner', 'module_2_questions',
       'module_3a_cours', 'module_3b_cours', 'module_3c_cours', 'module_3d_cours', 'module_3e_cours', 'module_3_entourer', 'module_3_nommer', 'module_3_dessiner', 'module_3_questions'] },
     'ph': { ex: 17, pages: ['module_1_cours', 'module_1_questions', 'module_2_cours', 'module_2_questions'] },

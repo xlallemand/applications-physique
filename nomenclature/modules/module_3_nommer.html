@@ -20,7 +20,7 @@
   <div class="er-card">
     <span class="er-badge">MODULE 3 · ATELIER</span>
     <h2 class="er-titre">Nommer une molécule</h2>
-    <p class="er-contexte">Des molécules fabriquées au hasard, une à la fois, de la famille de ton choix. L'outil commence par le <b>groupe caractéristique</b> (l'entourer, le nommer, donner la famille), puis la chaîne, le n° 1, les ramifications et le nom. Les aides se désactivent une à une, ou toutes d'un coup.</p>
+    <p class="er-contexte">Des molécules fabriquées au hasard, une à la fois, de la famille de ton choix. L'outil commence par le <b>groupe caractéristique</b> (l'entourer, le nommer, donner la famille), puis la chaîne, le n° 1, les ramifications et le nom. Les aides se désactivent une à une dans les réglages.</p>
   </div>
   <div class="er-card">
     <h3 class="cours-titre">Réglages</h3>
@@ -32,6 +32,7 @@
     <div class="nom-reglages"><div class="orga-seg" role="group" aria-label="Écriture" id="choixEc">
       <button type="button" class="orga-pil" data-ec="semi">Semi-développée</button><button type="button" class="orga-pil" data-ec="topo">Topologique</button><button type="button" class="orga-pil" data-ec="developpee">Développée</button><button type="button" class="orga-pil" data-ec="hasard">Au hasard</button>
     </div></div>
+    <div class="nom-reglages" id="aides"></div>
   </div>
   <div class="er-card ph-question" id="tache"></div>
   <div id="bilan" class="er-card" hidden>
@@ -46,10 +47,12 @@
    Atelier « Nommer une molécule » (sous-module 4) : fabriques par famille
    (ORGA.fabriqueFamille : chaîne de 2 à 8 C, 0 à 2 ramifications), une
    molécule à la fois (NOM.atelier), outil de nomenclature avec l'étape
-   « groupe » en tête (NOM.partieNom) ; le bouton des aides les règle toutes.
+   « groupe » en tête (NOM.partieNom) ; aides réglées une à une dans
+   « Réglages » (pas de panneau « Aides » dans l'outil).
    ============================================================ */
 const FAMS = ['alcene', 'alcool', 'halogeno', 'aldehyde', 'cetone', 'acide', 'ester', 'amine', 'amide'];
 const reg = { f: 'toutes', ec: 'semi' };
+const AIDES = NOM.aidesNommer([['couleurs', 'Couleurs : je repère le groupe, la chaîne, le n° 1 et les ramifications'], ['decoupe', 'Nom découpé : un morceau par partie de la molécule'], ['bulles', 'Bulles ⓘ : les règles du cours']]);
 function majReglages() {
   document.querySelectorAll('#choixFam [data-f]').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === reg.f));
   document.querySelectorAll('#choixEc [data-ec]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ec === reg.ec));
@@ -57,12 +60,14 @@ function majReglages() {
 // une molécule fabriquée de la famille choisie (chaîne de 2 à 8 C, 0 à 2 ramifications) ; l'écriture « au hasard » est tirée avec elle
 const fabrique = () => Object.assign(ORGA.fabriqueFamille(reg.f === 'toutes' ? NOM.hasard(FAMS) : reg.f, { min: 2, max: 8, ramMax: 2 }), { ecH: NOM.hasard(['semi', 'topo', 'developpee']) });
 majReglages();
-const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'nommer', bilan: document.getElementById('bilan'), aides: NOM.aidesNommer,
+const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'nommer', bilan: document.getElementById('bilan'),
   tirer: fabrique, id: x => x.nom,
   tache(x) {
     const ec = reg.ec === 'hasard' ? x.ecH : reg.ec;
-    return { titre: `Une molécule en ${NOM.EC[ec].toLowerCase()}`, parties: [NOM.partieNom(x.mol, { ecriture: ec, q: '' })] };
+    return { titre: `Une molécule en ${NOM.EC[ec].toLowerCase()}`, parties: [NOM.partieNom(x.mol, { ecriture: ec, panneau: false, q: '' })] };
   } });
+// une aide réglée : la même molécule, avec ou sans l'aide
+NOM.reglagesAides(document.getElementById('aides'), AIDES, () => at.refaire());
 // nouvelle famille : une autre molécule ; nouvelle écriture : la même molécule
 document.getElementById('choixFam').addEventListener('click', ev => { const b = ev.target.closest('[data-f]'); if (b) { reg.f = b.dataset.f; majReglages(); at.nouvelle(); } });
 document.getElementById('choixEc').addEventListener('click', ev => { const b = ev.target.closest('[data-ec]'); if (b) { reg.ec = b.dataset.ec; majReglages(); at.refaire(); } });

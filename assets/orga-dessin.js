@@ -840,8 +840,10 @@
      ORGA.editeur(zone, {
        ecriture   'semi' | 'topo' | 'developpee'    écriture de départ
        ecritures  écritures proposées (défaut : les trois)
-       hydrogenes 'auto' | 'eleve'                   H complétés seuls ou par l'élève
+       hydrogenes 'auto' | 'eleve'                   H complétés seuls ou par l'élève (en topologique :
+                                                     seulement ceux des atomes autres que C, OH, NH₂…)
        choixH     true : interrupteur H automatiques / à compléter affiché
+       verifierH  true : bouton « Vérifier les H » (défaut : comme choixH)
        elements   éléments de la palette
        depart     molécule ou SMILES de départ (défaut 'C')
        ajout      façon d'ajouter un atome (défaut : ORGA.GLISSER, la maquette C retenue) :
@@ -935,6 +937,7 @@
     // (une option non précisée garde sa valeur par défaut)
     const o = Object.assign({ ecriture: 'semi', ecritures: ['semi', 'topo', 'developpee'], hydrogenes: 'auto', choixH: true, elements: ELEMENTS, depart: 'C', brute: true, structure: true },
       Object.fromEntries(Object.entries(opts || {}).filter(([, v]) => v !== undefined)));
+    if (o.verifierH == null) o.verifierH = o.choixH;
     const mode = o.ajout || GLISSER;
     const racine = document.createElement('div');
     racine.className = 'orga-ed' + (o.structure ? '' : ' orga-ed-h-seul');
@@ -945,15 +948,16 @@
       <p class="orga-ed-msg" role="status" aria-live="polite"></p>
       <div class="orga-ed-mode"></div>
       <div class="orga-ed-barre">
-        ${seg('orga-ed-el', 'Élément ajouté', o.elements.map(e => `<button type="button" class="orga-pil orga-carre" data-el="${e}" aria-label="Ajouter ${e}">${e}</button>`).join(''))}
+        ${seg('orga-ed-el', 'Élément ajouté', o.elements.map(e => `<button type="button" class="orga-pil orga-carre" data-el="${e}" aria-label="Ajouter ${e}">${e}</button>`).join('') +
+          '<button type="button" class="orga-pil orga-carre" data-outil="h" aria-label="Écrire les H">H</button>')}
         ${seg('orga-ed-ordre', 'Liaison', [[1, '–', 'simple'], [2, '=', 'double'], [3, '≡', 'triple']].map(([k, t, a]) => `<button type="button" class="orga-pil orga-carre" data-ordre="${k}" aria-label="Liaison ${a}">${t}</button>`).join(''))}
       </div>
       <div class="orga-ed-barre">
-        ${seg('orga-ed-outil', 'Outil', `<button type="button" class="orga-pil" data-outil="dessin">✎ Dessiner</button><button type="button" class="orga-pil" data-outil="h">H</button><button type="button" class="orga-pil" data-outil="gomme">⌫ Gomme</button>`)}
+        ${seg('orga-ed-outil', 'Outil', `<button type="button" class="orga-pil" data-outil="dessin">✎ Dessiner</button><button type="button" class="orga-pil" data-outil="gomme">⌫ Gomme</button>`)}
         <button type="button" class="btn-small orga-ed-annuler">↶ Annuler</button>
         <button type="button" class="btn-small orga-ed-effacer">Tout effacer</button>
       </div>
-      ${o.choixH ? `<div class="orga-ed-barre orga-ed-hbarre">${seg('orga-ed-hmode', 'Hydrogènes', `<button type="button" class="orga-pil" data-h="auto">H automatiques</button><button type="button" class="orga-pil" data-h="eleve">H à compléter</button>`)}
+      ${o.choixH || o.verifierH ? `<div class="orga-ed-barre orga-ed-hbarre">${o.choixH ? seg('orga-ed-hmode', 'Hydrogènes', `<button type="button" class="orga-pil" data-h="auto">H automatiques</button><button type="button" class="orga-pil" data-h="eleve">H à compléter</button>`) : ''}
         <button type="button" class="btn-small orga-ed-verif">Vérifier les H</button></div>` : ''}
       <p class="orga-ed-info"></p>`;
     zone.appendChild(racine);
@@ -1124,10 +1128,10 @@
     // outil H (H à compléter)
     function outilH(cible) {
       if (ed.hydro !== 'eleve') return message('Les H se complètent seuls : choisis « H à compléter » pour les écrire toi-même.', 'info');
-      if (ed.ec === 'topo') return message('En topologique, on n\'écrit pas les H des atomes de carbone.', 'info');
       if (cible.type === 'h') { memoriser(); ed.h[+cible.v] -= 1; return changement(); }
       if (cible.type !== 'atome') return;
       const i = +cible.v, el = ed.mol.atomes[i].el;
+      if (ed.ec === 'topo' && el === 'C') return message('En topologique, on n\'écrit pas les H des atomes de carbone : seulement ceux des autres atomes (OH, NH₂…).', 'info');
       ed.sel = i;
       if (O.HALOGENES.includes(el)) { ed.rendre(); return message(`Un ${el} ne porte jamais d'H : il ne fait qu'une liaison.`, 'info'); }
       if (ed.ec === 'developpee') {
@@ -1140,10 +1144,15 @@
       bulle(zoneSvg, p.x, p.y, optionsH(el), k => { memoriser(); ed.h[i] = optionsH(el)[k].h; message(''); changement(); });
     }
 
-    ed.hJustes = () => ed.mol.atomes.every((a, i) => !O.diagH(ed.mol, i, ed.h[i]));
+    // atome dont l'élève écrit les H (en topologique, pas les C)
+    const hAEcrire = i => ed.ec !== 'topo' || ed.mol.atomes[i].el !== 'C';
+    ed.hAEcrire = hAEcrire;
+    ed.hJustes = () => ed.mol.atomes.every((a, i) => !hAEcrire(i) || !O.diagH(ed.mol, i, ed.h[i]));
+    // H affichés : ceux de l'élève ; en topologique, ceux des C se comptent seuls (formule brute)
+    const hEleve = () => ed.h.map((x, i) => (hAEcrire(i) ? x : O.nbH(ed.mol, i)));
     function verifierH() {
       if (ed.hydro !== 'eleve') return message('Les H sont complétés automatiquement.', 'info');
-      const i = ed.mol.atomes.findIndex((a, j) => O.diagH(ed.mol, j, ed.h[j]));
+      const i = ed.mol.atomes.findIndex((a, j) => hAEcrire(j) && O.diagH(ed.mol, j, ed.h[j]));
       if (i < 0) return message(`Juste ! Tous les H sont à leur place : ${O.formuleBrute(ed.mol, { html: true })}.`, 'ok');
       ed.sel = i; ed.rendre();
       message(O.diagH(ed.mol, i, ed.h[i]), 'faux');
@@ -1158,8 +1167,8 @@
     /* ----- rendu ----- */
     ed.px = q => ({ x: q.x * ECHELLES.editeur[ed.ec].x, y: -q.y * ECHELLES.editeur[ed.ec].y });
     ed.rendre = function () {
-      const eleve = ed.hydro === 'eleve' && ed.ec !== 'topo';
-      const sc = scene(ed.mol, ed.ec, { editeur: true, pos: ed.pos, h: eleve ? ed.h : null, couleurs: o.nomDirect && ed.nom && !ed.nom.horsProgramme ? ed.nom.couleurs : null });
+      const eleve = ed.hydro === 'eleve';
+      const sc = scene(ed.mol, ed.ec, { editeur: true, pos: ed.pos, h: eleve ? hEleve() : null, couleurs: o.nomDirect && ed.nom && !ed.nom.horsProgramme ? ed.nom.couleurs : null });
       ed.sc = sc;
       const L = ECHELLES.editeur[ed.ec].x;
       const b = sc.cadre, marge = (o.structure ? 1.25 : .5) * L;
@@ -1207,28 +1216,28 @@
       svg.innerHTML = svgCorps(sc, { sous: sel, points: true }) + cibles + `<g class="orga-calque">${calque}</g>`;
       // boutons
       racine.querySelectorAll('[data-ec]').forEach(b2 => b2.setAttribute('aria-pressed', b2.dataset.ec === ed.ec));
-      racine.querySelectorAll('[data-el]').forEach(b2 => b2.setAttribute('aria-pressed', b2.dataset.el === ed.el));
+      racine.querySelectorAll('[data-el]').forEach(b2 => b2.setAttribute('aria-pressed', b2.dataset.el === ed.el && ed.outil !== 'h'));
       racine.querySelectorAll('[data-ordre]').forEach(b2 => b2.setAttribute('aria-pressed', +b2.dataset.ordre === ed.ordre));
       racine.querySelectorAll('[data-outil]').forEach(b2 => b2.setAttribute('aria-pressed', b2.dataset.outil === ed.outil));
       racine.querySelectorAll('[data-h]').forEach(b2 => b2.setAttribute('aria-pressed', b2.dataset.h === ed.hydro));
       const bH = racine.querySelector('[data-outil="h"]');
-      if (bH) bH.disabled = ed.hydro !== 'eleve' || ed.ec === 'topo';
+      if (bH) bH.disabled = ed.hydro !== 'eleve';
       const bV = racine.querySelector('.orga-ed-verif');
-      if (bV) bV.hidden = ed.hydro !== 'eleve' || ed.ec === 'topo';
+      if (bV) bV.hidden = ed.hydro !== 'eleve';
       racine.querySelector('.orga-ed-annuler').disabled = !ed.pile.length;
       svg.classList.toggle('orga-gomme', ed.outil === 'gomme');
       if (mode.apres) mode.apres(ed, sc);
     };
 
     function changement(premier) {
-      if (ed.outil === 'h' && (ed.hydro !== 'eleve' || ed.ec === 'topo') && o.structure) ed.outil = 'dessin';
+      if (ed.outil === 'h' && ed.hydro !== 'eleve' && o.structure) ed.outil = 'dessin';
       ed.nom = o.nomDirect ? O.nommer(ed.mol) : null;
       ed.rendre();
-      const eleve = ed.hydro === 'eleve' && ed.ec !== 'topo';
+      const eleve = ed.hydro === 'eleve';
       const fb = O.formuleBrute(ed.mol, { html: true });
       let h = '';
       if (o.brute) h = eleve
-        ? `Formule brute avec tes H : <b>${O.formuleBrute(ed.mol, { html: true, h: ed.h.map(x => x || 0) })}</b>${ed.hJustes() ? ' ✓' : ''}`
+        ? `Formule brute avec tes H : <b>${O.formuleBrute(ed.mol, { html: true, h: hEleve().map(x => x || 0) })}</b>${ed.hJustes() ? ' ✓' : ''}`
         : `Formule brute : <b>${fb}</b>`;
       if (ed.nom) h += `<span class="orga-ed-nom">Ta molécule : ${ed.nom.horsProgramme ? `<i>nom hors programme</i> (${ed.nom.horsProgramme})` : nomHTML(ed.nom.parties)}</span>`;
       info.innerHTML = h;
@@ -1247,7 +1256,7 @@
     };
     ed.changerH = function (m) {
       ed.hydro = m;
-      if (m === 'eleve' && ed.ec !== 'topo') message('Choisis l\'outil « H », puis touche chaque atome pour écrire ses H.', 'info');
+      if (m === 'eleve') message(ed.ec === 'topo' ? 'Choisis « H », puis touche chaque atome autre que C pour écrire ses H.' : 'Choisis « H », puis touche chaque atome pour écrire ses H.', 'info');
       else message('');
       changement();
     };
@@ -1264,7 +1273,7 @@
       else if (b.dataset.ordre) { ed.ordre = +b.dataset.ordre; if (ed.outil !== 'dessin') ed.outil = 'dessin'; ed.rendre(); }
       else if (b.dataset.outil) {
         ed.outil = b.dataset.outil;
-        message(ed.outil === 'gomme' ? 'Touche un atome ou une liaison pour l\'effacer (une double liaison redevient simple).' : ed.outil === 'h' ? (ed.ec === 'developpee' ? 'Touche un atome pour lui ajouter un H, touche un H pour l\'enlever.' : 'Touche un atome et choisis ses H.') : '', 'info');
+        message(ed.outil === 'gomme' ? 'Touche un atome ou une liaison pour l\'effacer (une double liaison redevient simple).' : ed.outil === 'h' ? (ed.ec === 'developpee' ? 'Touche un atome pour lui ajouter un H, touche un H pour l\'enlever.' : ed.ec === 'topo' ? 'Touche un atome autre que C (O, N…) et choisis ses H.' : 'Touche un atome et choisis ses H.') : '', 'info');
         ed.rendre();
       } else if (b.dataset.h) ed.changerH(b.dataset.h);
       else if (b.classList.contains('orga-ed-annuler')) annuler();
@@ -1859,8 +1868,9 @@
 
   /* ============================================================
      NOMMER UNE MOLÉCULE, AVEC DES AIDES ACTIVABLES
-     partieNom(mol, { ecriture, cleAides, q, groupe, sansAide }) → partie 'perso'
+     partieNom(mol, { ecriture, cleAides, q, groupe, sansAide, panneau }) → partie 'perso'
      sansAide : aucune aide ni panneau, le nom s'écrit directement dans un seul champ
+     panneau  : false : pas de panneau « Aides » dans l'outil (les aides se règlent ailleurs : réglages d'un atelier)
      Aides (interrupteurs gardés dans localStorage[cleAides], toutes activées par défaut) :
        couleurs : l'élève entoure le groupe (familles), touche la chaîne principale, le n° 1,
                   puis chaque ramification ; chaque partie prend sa couleur ;
@@ -1875,7 +1885,7 @@
     if (!cle) return Object.assign({}, AIDES_DEFAUT);
     try { return Object.assign({}, AIDES_DEFAUT, JSON.parse(localStorage.getItem(cle)) || {}); } catch (e) { return Object.assign({}, AIDES_DEFAUT); }
   }
-  // réglage des aides (panneau « Aides » de l'outil, ou bouton « toutes les aides » d'un atelier)
+  // réglage des aides (panneau « Aides » de l'outil, ou réglages d'un atelier)
   function ecrireAides(cle, a) {
     aidesSession = Object.assign({}, AIDES_DEFAUT, a);
     if (!cle) return;
@@ -1915,7 +1925,7 @@
       if (md !== mol) aides.couleurs = false;      // écriture abrégée : pas de couleurs sur le dessin
       const B = (cle, label) => (aides.bulles ? info(BULLES[cle], label) : '');
       // panneau des aides
-      if (!o.sansAide) {
+      if (!o.sansAide && o.panneau !== false) {
         const panneau = el('details', 'orga-aides');
         panneau.innerHTML = `<summary>Aides</summary><div class="orga-aides-l">${[['couleurs', 'Couleurs : je repère le groupe, la chaîne, le n° 1 et les ramifications'], ['decoupe', 'Nom découpé : un morceau par partie de la molécule'], ['bulles', 'Bulles ⓘ : les règles du cours']]
           .map(([k, t]) => `<label class="orga-interr"><input type="checkbox" data-aide="${k}"${aides[k] ? ' checked' : ''}${k === 'couleurs' && md !== mol ? ' disabled' : ''}> ${t}${k === 'couleurs' && md !== mol ? ' (pas avec une écriture abrégée)' : ''}</label>`).join('')}</div>`;
@@ -2238,10 +2248,11 @@
 
   /* ============================================================
      DESSINER DANS L'ÉDITEUR (parties 'perso')
-     partieDessin(cible, { ecriture, hydrogenes, q, nom, nomDirect, elements, sansAide })
+     partieDessin(cible, { ecriture, hydrogenes, q, nom, nomDirect, brute, elements, sansAide })
        l'élève dessine la molécule cible dans l'écriture demandée ; validation : même molécule
-       (et H justes si « H à compléter »). o.nom : le nom est donné (du nom au dessin) :
-       le nom de ce qui est dessiné s'affiche en direct et sert au diagnostic ;
+       (et H justes si « H à compléter » ; en topologique, les H des atomes autres que C). o.nom : le nom
+       est donné (du nom au dessin) : le nom de ce qui est dessiné s'affiche en direct et sert au diagnostic ;
+       nomDirect : false : pas de nom en direct ; brute : false : pas de formule brute sous le dessin ;
        sansAide : ni nom en direct, ni formule brute sous le dessin.
      partieH(mol, { ecriture }) : compléter les H d'une formule donnée (structure figée)
      partieConversion(mol, de, vers, { compterH }) : la conversion guidée par les gestes du cours
@@ -2271,15 +2282,16 @@
   function partieDessin(cible0, o) {
     o = Object.assign({ ecriture: 'semi', hydrogenes: 'auto' }, o);
     const cible = molDe(cible0);
-    const eleve = o.hydrogenes === 'eleve' && o.ecriture !== 'topo';
+    const eleve = o.hydrogenes === 'eleve';
     const res = o.nom ? O.nommer(cible) : {};
     return Object.assign({
       type: 'perso',
       q: o.q != null ? o.q : `Dessine la molécule en ${NOM_EC[o.ecriture].toLowerCase()}, puis valide.`,
       solution: o.nom && !res.horsProgramme ? `<p class="orga-sol-nom">${nomHTML(res.parties)}</p>` : (o.solution || ''),
       monter(zone, api) {
-        const ed = editeur(zone, { ecriture: o.ecriture, ecritures: o.ecritures || [o.ecriture], hydrogenes: o.hydrogenes, choixH: false, elements: o.elements, nomDirect: !!o.nom && !o.sansAide, brute: o.brute !== false && !o.sansAide, surChange: () => api.effacer() });
-        if (eleve) ed.message(o.ecriture === 'developpee' ? 'Dessine les atomes ; puis, avec l\'outil « H », touche chaque atome pour lui ajouter ses H un par un (touche un H pour l\'enlever).' : 'Dessine les atomes ; puis, avec l\'outil « H », touche chaque atome et choisis ses H.', 'info');
+        const ed = editeur(zone, { ecriture: o.ecriture, ecritures: o.ecritures || [o.ecriture], hydrogenes: o.hydrogenes, choixH: false, elements: o.elements, nomDirect: !!o.nom && !o.sansAide && o.nomDirect !== false, brute: o.brute !== false && !o.sansAide, surChange: () => api.effacer() });
+        if (eleve) ed.message(o.ecriture === 'developpee' ? 'Dessine les atomes ; puis choisis « H » et touche chaque atome pour lui ajouter ses H un par un (touche un H pour l\'enlever).'
+          : o.ecriture === 'topo' ? 'Dessine les atomes ; puis choisis « H », touche chaque atome autre que C (O, N…) et choisis ses H.' : 'Dessine les atomes ; puis choisis « H », touche chaque atome et choisis ses H.', 'info');
         const act = el('div', 'er-actions orga-actions-partie', '<button type="button" class="btn-primary">Valider</button>');
         zone.appendChild(act);
         let fige = false;
@@ -2287,8 +2299,8 @@
           if (fige || api.fini()) return;
           const m = ed.mol;
           if (!O.meme(m, cible)) { secouer(ed.zoneSvg); api.erreur(diagDessin(m, cible, o)); return; }
-          if (eleve && ed.ec !== 'topo' && !ed.hJustes()) {
-            const i = m.atomes.findIndex((a, j) => O.diagH(m, j, ed.h[j]));
+          if (eleve && !ed.hJustes()) {
+            const i = m.atomes.findIndex((a, j) => ed.hAEcrire(j) && O.diagH(m, j, ed.h[j]));
             ed.sel = i; ed.rendre();
             secouer(ed.zoneSvg); api.erreur('Les atomes sont justes, mais pas tous les H. ' + O.diagH(m, i, ed.h[i]));
             return;

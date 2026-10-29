@@ -39,7 +39,7 @@
    (ORGA.partiesNommerGroupes).
    ============================================================ */
 const { hasard, melanger, exemple } = COURS;
-const { o, molHTML, video } = NOM;
+const { o, molHTML, video, familles } = NOM;
 const groupeLegende = s => ORGA.legendeHTML(ORGA.groupes(NOM.mol(s)));
 const ent = (s, ec) => molHTML(s, { ecriture: ec || 'semi', entourer: true, legende: groupeLegende(s) });
 // « À toi » : entourer puis nommer le groupe d'une molécule fabriquée
@@ -55,12 +55,7 @@ function etape1(c) {
     <div class="cours-bloc">
       <p><b>Vocabulaire</b> : on parle de <b>famille</b> et de <b>groupe caractéristique</b> (le plus utilisé) ; on trouve aussi <b>classe fonctionnelle</b> et <b>groupe fonctionnel</b>.</p>
       <div class="cle"><p><b class="cle-titre">À apprendre par cœur.</b></p>
-        <div class="nom-familles">
-          <div class="nom-fam-tete"><span>Famille</span><span>Groupe caractéristique</span></div>
-          ${[['alcènes', 'C=C', 'double liaison C=C', ''], ['alcools', '–OH', 'groupe hydroxyle', 'sur un C qui ne porte pas de =O'],
-            ['halogénoalcanes', '–X', 'groupe halogéno', 'X = F, Cl, Br ou I'], ['amines', '–N', 'groupe amine', 'N lié seulement à des C (et à des H), sans C=O']]
-            .map(([f, x, g, note]) => `<div class="nom-fam"><span class="nom-fam-f">${f}</span><span class="nom-fam-g"><span class="nom-fam-x">${x}</span><span class="nom-fam-n"><b>${g}</b>${note ? `<small>${note}</small>` : ''}</span></span></div>`).join('')}
-        </div>
+        ${familles(['alcene', 'alcool', 'halogeno', 'amine'])}
         <p>On <b>entoure</b> le groupe : tous ses atomes (avec ou sans les H qui leur sont liés), et rien d'autre. Puis on écrit son nom et la famille entre parenthèses.</p></div>
     </div>
     ${exemple(`<div class="nom-mols">${ent('C=CCC(C)C')}${ent('CC(C)(C)O')}${ent('CCC(C)CC(C)Br')}${ent('CCCCCN')}</div>`)}`);
@@ -86,7 +81,8 @@ function etape2(c) {
 /* ---------- À retenir ---------- */
 function aRetenir(c) {
   const carte = c.carte('À retenir');
-  c.ajouter(carte, `<div class="cle"><p><b>C=C</b> : alcènes ; <b>–OH</b> (groupe hydroxyle) : alcools ; <b>–X</b> (groupe halogéno) : halogénoalcanes ; <b>N</b> (groupe amine) : amines, primaires, secondaires ou tertiaires (1, 2 ou 3 C sur le N).</p></div>
+  c.ajouter(carte, `<div class="cle">${familles(['alcene', 'alcool', 'halogeno', 'amine'])}
+      <p>Amines <b>primaires</b>, <b>secondaires</b> ou <b>tertiaires</b> : 1, 2 ou 3 C sur le N.</p></div>
     <div class="cle"><p>On entoure le groupe, on écrit son nom, puis la famille entre parenthèses : « groupe hydroxyle (alcools) ».</p></div>
     <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Cours : le groupe carbonyle →</a>
       <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#familles">Fiche récapitulative</a></div>`);

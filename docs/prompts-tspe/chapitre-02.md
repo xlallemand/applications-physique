@@ -245,7 +245,11 @@ Reprends la maquette validée et les remarques du professeur (données dans le m
 
 **Cours 1c : passer d'une écriture à l'autre** : une étape par phrase (les trois phrases ci-dessus, en `.cle`), chacune avec l'outil de conversion en exemple et en « À toi ». « À retenir » : les trois phrases.
 
-**Atelier « Dessiner une molécule »** (sous-module 1, page `simulation`) : prise en main de l'éditeur par des tâches courtes (chaîne de 4 C en semi-développée avec H à compléter, une ramification, une double liaison, un O, un N, un Cl, puis les mêmes en topologique), puis dessin libre avec formule brute en direct.
+**Atelier « Prise en main de l'outil de dessin des molécules »** (sous-module 1, page `simulation`) : toujours la même suite de six molécules, dans l'ordre, une par outil de l'éditeur (tirer un trait, appui court pour une ramification, un autre atome, double liaison, triple liaison, topologique). Pas de bilan.
+
+**Atelier « Dessin libre de molécules »** (sous-module 1, page `simulation`) : l'éditeur, toutes les écritures, « Vérifier les H ».
+
+Dans tous les ateliers où l'on dessine, les H s'écrivent toujours à la main (outil « H », dans la barre des atomes ; en topologique, seulement ceux des atomes autres que C). Dans les ateliers où l'on dessine ou nomme, chaque aide s'active ou se désactive dans la carte « Réglages » (pas de bouton « toutes les aides »).
 
 **Atelier « Changer d'écriture »** (sous-module 2, page `simulation`) : une dizaine de molécules par conversion, étapes guidées puis sans guidage. Molécules variées (toutes les familles, ramifications, doubles liaisons), chaîne de 3 à 7 C.
 

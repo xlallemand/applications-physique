@@ -20,16 +20,17 @@
   <div class="er-card">
     <span class="er-badge">MODULE 2 · ATELIER</span>
     <h2 class="er-titre">Nommer un alcane</h2>
-    <p class="er-contexte">Des alcanes fabriqués au hasard (chaîne de 4 à 10 C, 1 à 3 ramifications), un à la fois, à nommer dans l'écriture de ton choix. Les <b>aides</b> (couleurs, nom découpé, bulles ⓘ) se désactivent une à une, ou toutes d'un coup, quand tu te sens prêt.</p>
+    <p class="er-contexte">Des alcanes fabriqués au hasard (chaîne de 4 à 10 C, 1 à 3 ramifications), un à la fois, à nommer dans l'écriture de ton choix. Les <b>aides</b> (couleurs, nom découpé, bulles ⓘ) se désactivent une à une dans les réglages, quand tu te sens prêt.</p>
   </div>
   <div class="er-card">
-    <h3 class="cours-titre">Écriture</h3>
-    <div class="orga-seg" role="group" aria-label="Écriture" id="choixEc">
+    <h3 class="cours-titre">Réglages</h3>
+    <div class="nom-reglages"><div class="orga-seg" role="group" aria-label="Écriture" id="choixEc">
       <button type="button" class="orga-pil" data-ec="semi">Semi-développée</button>
       <button type="button" class="orga-pil" data-ec="topo">Topologique</button>
       <button type="button" class="orga-pil" data-ec="developpee">Développée</button>
       <button type="button" class="orga-pil" data-ec="hasard">Au hasard</button>
-    </div>
+    </div></div>
+    <div class="nom-reglages" id="aides"></div>
   </div>
   <div class="er-card ph-question" id="tache"></div>
   <div id="bilan" class="er-card" hidden>
@@ -44,19 +45,22 @@
    Atelier « Nommer un alcane » (sous-module 3) : fabrique d'alcanes
    (ORGA.fabriqueAlcane : chaîne de 4 à 10 C, 1 à 3 ramifications méthyl,
    éthyl, propyl), un à la fois (NOM.atelier), outil de nomenclature avec
-   ses aides (NOM.partieNom) ; le bouton des aides les règle toutes d'un coup.
+   ses aides (NOM.partieNom), réglées une à une dans « Réglages » (pas de
+   panneau « Aides » dans l'outil).
    L'atelier est fait après dix alcanes.
    ============================================================ */
 const reg = { ec: 'semi' };
+const AIDES = NOM.aidesNommer([['couleurs', 'Couleurs : je repère la chaîne, le n° 1 et les ramifications'], ['decoupe', 'Nom découpé : un morceau par partie de la molécule'], ['bulles', 'Bulles ⓘ : les règles du cours']]);
 const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'nommer-alcane', bilan: document.getElementById('bilan'), suivant: 'Alcane suivant →',
-  aides: NOM.aidesNommer,
   // l'écriture « au hasard » est tirée avec la molécule (elle ne change pas quand on règle les aides)
   tirer: () => Object.assign(ORGA.fabriqueAlcane({ min: 4, max: 10, ramMin: 1, ramMax: 3 }), { ecH: NOM.hasard(['semi', 'topo', 'developpee']) }),
   id: x => x.nom,
   tache(x) {
     const ec = reg.ec === 'hasard' ? x.ecH : reg.ec;
-    return { titre: `Un alcane en ${NOM.EC[ec].toLowerCase()}`, parties: [NOM.partieNom(x.mol, { ecriture: ec, q: '' })] };
+    return { titre: `Un alcane en ${NOM.EC[ec].toLowerCase()}`, parties: [NOM.partieNom(x.mol, { ecriture: ec, panneau: false, q: '' })] };
   } });
+// une aide réglée : le même alcane, avec ou sans l'aide
+NOM.reglagesAides(document.getElementById('aides'), AIDES, () => at.refaire());
 const maj = () => document.querySelectorAll('#choixEc [data-ec]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ec === reg.ec));
 document.getElementById('choixEc').addEventListener('click', ev => { const b = ev.target.closest('[data-ec]'); if (b) { reg.ec = b.dataset.ec; maj(); at.refaire(); } });
 maj();

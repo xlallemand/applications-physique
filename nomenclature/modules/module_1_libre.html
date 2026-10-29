@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : atelier, dessin libre de molécules — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · ATELIER</span>
+    <h2 class="er-titre">Dessin libre de molécules</h2>
+    <p class="er-contexte">Dessine ce que tu veux, dans l'écriture de ton choix. Écris toi-même les <b>H</b> (choisis H dans la barre des atomes) ; « Vérifier les H » te dit s'ils sont justes. Change d'écriture pour voir la même molécule autrement.</p>
+  </div>
+
+  <div class="er-card">
+    <h3 class="cours-titre">Réglages</h3>
+    <div class="nom-reglages" id="aides"></div>
+  </div>
+
+  <div class="er-card">
+    <div id="libre"></div>
+  </div>
+
+  <div class="er-actions">
+    <a class="btn-secondary" style="text-decoration:none" href="module_1_conversion.html">Atelier : changer d'écriture →</a>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Atelier « Dessin libre de molécules » (sous-module 1, éditeur ORGA) :
+   toutes les écritures, H toujours écrits par l'élève (outil H, bouton
+   « Vérifier les H »). Aide (réglages) : la formule brute avec ses H sous
+   le dessin, affichée ou masquée sans effacer le dessin.
+   L'atelier compte comme fait dès que l'élève a dessiné quelque chose.
+   ============================================================ */
+const AIDES = NOM.aidesAtelier('libre', [['brute', 'Formule brute avec tes H, sous le dessin']]);
+let marque = false;
+const ed = ORGA.editeur(document.getElementById('libre'), { ecriture: 'semi', hydrogenes: 'eleve', choixH: false, verifierH: true, brute: AIDES.active('brute'),
+  surChange() { if (!marque) { marque = true; NOM.marquer({ fait: true }); } } });
+NOM.reglagesAides(document.getElementById('aides'), AIDES, (a, on) => { ed.o.brute = on; ed.changement(true); });
+NOM.menu('module_1_libre');
+</script>
+</body>
+</html>

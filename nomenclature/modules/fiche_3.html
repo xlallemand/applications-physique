@@ -22,12 +22,12 @@
     <h2 class="er-titre">Les familles</h2>
   </div>
 <!-- Fiche récapitulative du module 3 (ancres : familles, carbonyle, acides, nommer, esters) :
-     le tableau des familles du cours, à apprendre par cœur, avec un exemple dessiné par famille -->
+     le tableau des familles du cours (présentation du cours 3a), à apprendre par cœur, avec un exemple dessiné par famille -->
 
   <section class="er-card" id="familles">
     <h3 class="cours-titre">Familles et groupes caractéristiques (par cœur)</h3>
     <div class="cle"><p>On trouve deux vocabulaires : <b>famille</b> et <b>groupe caractéristique</b> (le plus utilisé), ou <b>classe fonctionnelle</b> et <b>groupe fonctionnel</b>. On <b>entoure</b> le groupe, on écrit son <b>nom</b>, puis la <b>famille</b> entre parenthèses.</p></div>
-    <div class="nom-mols" id="tableau"></div>
+    <div class="cle" id="tableau"></div>
     <div class="cle"><p>Amines : <b>primaire</b>, <b>secondaire</b>, <b>tertiaire</b> (1, 2 ou 3 C liés au N).</p></div>
   </section>
 
@@ -61,16 +61,9 @@
 </div>
 
 <script>
-// tableau des familles du cours : un exemple dessiné, groupe entouré, nom en couleurs
-const LIGNES = [['alcane', 'aucun (C et H, liaisons simples)', 'CCC(C)C'], ['alcène', 'C=C (double liaison C=C)', 'C=CCC(C)C'], ['alcool', '–OH (hydroxyle)', 'CC(C)(C)O'],
-  ['halogénoalcane', '–X : F, Cl, Br, I (halogéno)', 'CCC(C)CC(C)Br'], ['aldéhyde', 'C=O en bout de chaîne (carbonyle)', 'CC=O'], ['cétone', 'C=O entre deux C (carbonyle)', 'CCCC(C)=O'],
-  ['acide carboxylique', '–COOH (carboxyle)', 'CC(C)CC(=O)O'], ['ester', '–COO–C (ester)', 'CCCCOC(C)=O'], ['amine', 'N lié à des C (amine)', 'CCCCCN'], ['amide', '–CO–N (amide)', 'CCCC(N)=O']];
-const ex = s => {
-  const m = NOM.mol(s), r = ORGA.nommer(m);
-  return `${ORGA.dessinHTML(m, { ecriture: 'topo', couleurs: r.couleurs, entourer: ORGA.groupes(m).map(g => ({ atomes: g.atomes, avecH: g.avecH })) })}<div class="nom-mol-n">${ORGA.nomHTML(r.parties)}</div>`;
-};
-// une carte par famille : famille, groupe et son nom, exemple
-document.getElementById('tableau').innerHTML = LIGNES.map(([f, g, s]) => `<div class="nom-mol"><div class="nom-mol-t">${f}</div><p class="nom-mol-g">${g}</p>${ex(s)}</div>`).join('');
+// tableau des familles du cours (présentation du cours 3a) : une ligne par famille, avec un exemple en topologique,
+// groupe entouré, nom en couleurs
+document.getElementById('tableau').innerHTML = `<p><b class="cle-titre">À apprendre par cœur.</b></p>${NOM.familles(['alcane', 'alcene', 'alcool', 'halogeno', 'aldehyde', 'cetone', 'acide', 'ester', 'amine', 'amide'], { exemples: true })}`;
 document.getElementById('ex-esters').innerHTML = ['CCCCOC(C)=O', 'CCNCC', 'CCCN(C)CC', 'CCCCNC(C)=O'].map(s => NOM.molHTML(s, { nom: true })).join('');
 NOM.menu('fiche_3');
 </script>
