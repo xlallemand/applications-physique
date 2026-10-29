@@ -762,7 +762,7 @@
   function aidesCondensees(mol) {
     const ts = [...new Set(mol.atomes.filter(a => a.etiq).map(a => a.etiq))];
     if (!ts.length) return '';
-    return `<p class="orga-cond">${ts.map(t => `<span class="orga-cond-t">${formuleHTML(t)} ${info(O.AIDES_CONDENSEES[t] || 'Écriture abrégée d\'un groupe d\'atomes.', 'Que veut dire ' + t + ' ?')}</span>`).join('')}</p>`;
+    return `<p class="orga-cond">${ts.map(t => `<span class="orga-cond-t"><span>${formuleHTML(t)}</span>${info(O.AIDES_CONDENSEES[t] || 'Écriture abrégée d\'un groupe d\'atomes.', 'Que veut dire ' + t + ' ?')}</span>`).join('')}</p>`;
   }
 
   function dessiner(zone, mol, o) {
@@ -1599,7 +1599,7 @@
     racine.innerHTML = '<div class="orga-conv-zone orga-actif-zone"><svg class="orga-mol" role="img"></svg></div>';
     zone.appendChild(racine);
     const svg = racine.querySelector('svg');
-    const px = scene(mol, ec, { police: f, chaine: o.chaine }).px;
+    const px = scene(mol, ec, { police: f, chaine: o.chaine, pos: o.pos }).px;    // o.pos : positions données (molécule compliquée)
     let cadre = null;
     const d = {
       racine, svg, mol, ec, px, sc: null,
@@ -1680,7 +1680,7 @@
   // correction : le dessin avec ses groupes entourés, puis la légende
   function corrigeGroupes(mol, o) {
     const { md, gs } = prepGroupes(mol, o || {});
-    return dessinHTML(md, { ecriture: (o && o.ecriture) || 'semi', entourer: entouresDe(gs), sansAide: true }) + legendeHTML(gs);
+    return dessinHTML(md, { ecriture: (o && o.ecriture) || 'semi', entourer: entouresDe(gs), sansAide: true, pos: o && o.pos }) + legendeHTML(gs);
   }
 
   // diagnostic d'un entourage (atomes et H choisis) ; null si c'est juste
@@ -1724,7 +1724,7 @@
       // la légende (noms des groupes) seulement sur demande : elle donnerait la réponse des questions suivantes
       solution: o.legende ? legendeHTML(gs) : `<p>${gs.length > 1 ? `Les ${gs.length} groupes caractéristiques sont entourés et numérotés.` : 'Le groupe caractéristique est entouré.'}</p>`,
       monter(zone, api) {
-        const da = dessinActif(zone, md, { ecriture: ec, hCibles: ec === 'developpee' });
+        const da = dessinActif(zone, md, { ecriture: ec, hCibles: ec === 'developpee', pos: o.pos });
         if (md.atomes.some(a => a.etiq)) zone.insertAdjacentHTML('beforeend', aidesCondensees(md));
         const act = el('div', 'er-actions orga-actions-partie', `<button type="button" class="btn-primary">Valider</button>${info(BULLES.entourer, 'Aide : entourer un groupe')}`);
         zone.appendChild(act);
@@ -1855,6 +1855,8 @@
   function partieNom(mol0, o) {
     o = Object.assign({ ecriture: 'semi' }, o);
     const mol = molDe(mol0), res = O.nommer(mol);
+    // écriture abrégée (C₂H₅…) : on dessine la molécule réduite, on nomme la molécule complète
+    if (o.condenser) o.dessinee = O.condenser(mol, o.condenser).mol;
     return Object.assign({
       type: 'perso',
       q: o.q != null ? o.q : 'Donne le nom de cette molécule.',
@@ -1864,7 +1866,7 @@
   }
 
   function outilNom(zone, mol, res0, o, api) {
-    const ec = o.ecriture;
+    const ec = o.ecriture, md = o.dessinee || mol;
     const racine = el('div', 'orga-nommer');
     zone.appendChild(racine);
     let fini = false, ctx = null;
@@ -1872,12 +1874,13 @@
 
     function monter() {
       racine.innerHTML = '';
-      const aides = aidesSession || lireAides(o.cleAides);
+      const aides = Object.assign({}, aidesSession || lireAides(o.cleAides));
+      if (md !== mol) aides.couleurs = false;      // écriture abrégée : pas de couleurs sur le dessin
       const B = (cle, label) => (aides.bulles ? info(BULLES[cle], label) : '');
       // panneau des aides
       const panneau = el('details', 'orga-aides');
       panneau.innerHTML = `<summary>Aides</summary><div class="orga-aides-l">${[['couleurs', 'Couleurs : je repère le groupe, la chaîne, le n° 1 et les ramifications'], ['decoupe', 'Nom découpé : un morceau par partie de la molécule'], ['bulles', 'Bulles ⓘ : les règles du cours']]
-        .map(([k, t]) => `<label class="orga-interr"><input type="checkbox" data-aide="${k}"${aides[k] ? ' checked' : ''}> ${t}</label>`).join('')}</div>`;
+        .map(([k, t]) => `<label class="orga-interr"><input type="checkbox" data-aide="${k}"${aides[k] ? ' checked' : ''}${k === 'couleurs' && md !== mol ? ' disabled' : ''}> ${t}${k === 'couleurs' && md !== mol ? ' (pas avec une écriture abrégée)' : ''}</label>`).join('')}</div>`;
       racine.appendChild(panneau);
       panneau.addEventListener('change', ev => {
         const c = ev.target.closest('[data-aide]');
@@ -1888,8 +1891,8 @@
       });
       const consigne = el('p', 'orga-nommer-consigne');
       racine.appendChild(consigne);
-      const da = dessinActif(racine, mol, { ecriture: ec, chaine: res0.chaine });
-      if (mol.atomes.some(a => a.etiq)) racine.insertAdjacentHTML('beforeend', aidesCondensees(mol));
+      const da = dessinActif(racine, md, { ecriture: ec, chaine: md === mol ? res0.chaine : undefined });
+      if (md.atomes.some(a => a.etiq)) racine.insertAdjacentHTML('beforeend', aidesCondensees(md));
       const legende = el('div', 'orga-ram-liste');
       racine.appendChild(legende);
       const act = el('div', 'er-actions orga-actions-partie');
@@ -1907,10 +1910,11 @@
         st.res.ramifs.forEach((r, k) => { if (st.faites.has(k)) (c[r.classe] = c[r.classe] || []).push(...r.atomes); });
         return c;
       };
-      const rendre = () => da.rendre({
+      // (écriture abrégée : les indices de la molécule complète ne sont pas ceux du dessin, pas de couleurs)
+      const rendre = () => (md !== mol ? da.rendre({ fige: fini || st.etape === 'nom' }) : da.rendre({
         choisis: st.choisis, couleurs: couleursActuelles(), numeros: st.ordre && !(st.res.cyclo && st.res.ramifs.length < 2) ? st.ordre : null,
         entourer: st.groupeFait ? O.groupes(mol).map(g => ({ atomes: g.atomes, avecH: g.avecH })) : null, fige: fini || st.etape === 'nom' || st.etape === 'groupeNom',
-      });
+      }));
       const ramifsATrouver = () => st.res.ramifs.map((r, k) => k).filter(k => !st.res.ramifs[k].halo);
 
       function etape(e) {

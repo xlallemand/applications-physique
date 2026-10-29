@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : les alcanes à chaîne linéaire — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 1 / 4</span>
+    <h2 class="er-titre">Les alcanes à chaîne linéaire</h2>
+    <p class="er-contexte">Les <b>alcanes</b> ne contiennent que des atomes de carbone et d'hydrogène, liés par des liaisons simples. Les noms des <b>dix premiers</b> sont à connaître par cœur : ils servent à nommer toutes les molécules.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 1 du module 2 : les alcanes (hydrocarbures saturés,
+   CₙH₂ₙ₊₂), puis les dix alcanes linéaires (tableau du cours, les cinq
+   premiers en semi-développée) ; « À toi » : nombre de C ↔ nom ↔ formule
+   brute, dans les deux sens.
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { o, molHTML, partieBrute } = NOM;
+
+const NOMS = ['méthane', 'éthane', 'propane', 'butane', 'pentane', 'hexane', 'heptane', 'octane', 'nonane', 'décane'];
+const brute = n => `C${n > 1 ? `<sub>${n}</sub>` : ''}H<sub>${2 * n + 2}</sub>`;
+const lineaire = n => 'C'.repeat(n);
+
+/* ---------- 1. Les alcanes ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Les alcanes : CₙH₂ₙ₊₂');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> Un <b>alcane</b> est un hydrocarbure <b>saturé</b> : il ne contient que des atomes C et H, liés par des <b>liaisons simples</b>. Sa formule brute est <b>C<sub>n</sub>H<sub>2n+2</sub></b> (n : nombre de C).</p></div>
+    </div>
+    ${exemple(`<div class="nom-mols">${molHTML('CCC', { titre: 'Propane', ecriture: 'semi' })}</div>
+      <p>Le propane a 3 C : 2 × 3 + 2 = 8 H, formule brute C<sub>3</sub>H<sub>8</sub>. On le vérifie : 3 + 2 + 3 = 8 H.</p>`)}`);
+  const [a, b] = melanger([4, 5, 6, 7, 8]).slice(0, 2);
+  c.aToi(carte, [
+    { titre: `Un alcane à ${a} C`, parties: [partieBrute(NOM.mol(lineaire(a)), { ecriture: 'semi', partie: { q: `Écris la formule brute de l'alcane qui a ${a} atomes de carbone.`,
+      diag: v => (/H/.test(v) && !v.includes(String(2 * a + 2)) ? `H : 2 × ${a} + 2.` : `C<sub>n</sub>H<sub>2n+2</sub> avec n = ${a}.`) } })] },
+    { titre: 'Combien de C ?', parties: [{ type: 'nombre', q: `Un alcane a pour formule brute C<sub>n</sub>H<sub>${2 * b + 2}</sub>. Combien a-t-il d'atomes de carbone ?`, label: 'n =', valeur: b, entier: true, signe: false, tol: 0,
+      diag: v => (v === 2 * b + 2 ? 'Ça, c\'est le nombre de H.' : `2n + 2 = ${2 * b + 2}, donc 2n = ${2 * b}.`), solution: `<p>2n + 2 = ${2 * b + 2} : n = <b>${b}</b>.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Les dix alcanes linéaires ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Les dix alcanes linéaires, par cœur');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">À connaître par cœur.</b></p>
+        <div class="crs-defile"><table class="crs-tab"><thead><tr><th>Formule</th><th>Nom</th><th>Formule</th><th>Nom</th></tr></thead>
+        <tbody>${[0, 1, 2, 3, 4].map(k => `<tr><td>${brute(k + 1)}</td><td>${NOMS[k]}</td><td>${brute(k + 6)}</td><td>${NOMS[k + 5]}</td></tr>`).join('')}</tbody></table></div>
+        <p>Le début du nom donne le nombre de C : méth 1, éth 2, prop 3, but 4, pent 5, hex 6, hept 7, oct 8, non 9, déc 10.</p></div>
+    </div>
+    ${exemple(`<p>Les cinq premiers, en semi-développée :</p><div class="nom-mols">${[1, 2, 3, 4, 5].map(n => molHTML(lineaire(n), { titre: NOMS[n - 1], ecriture: 'semi', label: NOMS[n - 1] })).join('')}</div>`)}`);
+  const [a, b, d] = melanger([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).slice(0, 3);
+  const opts = n => melanger([n, ...melanger([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].filter(x => x !== n)).slice(0, 3)]).map(x => o(String(x), NOMS[x - 1]));
+  c.aToi(carte, [
+    { titre: 'Du nombre de C au nom', parties: [{ type: 'choix', q: `Comment s'appelle l'alcane linéaire à ${a} C ?`, options: opts(a), bonne: String(a), melanger: false, indice: 'méth 1, éth 2, prop 3, but 4, pent 5, hex 6, hept 7, oct 8, non 9, déc 10.', solution: `<p>${a} C : <b>${NOMS[a - 1]}</b>, ${brute(a)}.</p>` }] },
+    { titre: 'Du nom à la formule', parties: [partieBrute(NOM.mol(lineaire(b)), { ecriture: 'semi', partie: { q: `Écris la formule brute du ${NOMS[b - 1]}.` } })] },
+    { titre: 'De la formule au nom', parties: [{ type: 'choix', q: `Quel alcane a pour formule brute ${brute(d)} ?`, options: opts(d), bonne: String(d), melanger: false, indice: 'Le nombre de C donne le nom : méth 1, éth 2, prop 3, but 4, pent 5…', solution: `<p>${d} C : <b>${NOMS[d - 1]}</b>.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>Un <b>alcane</b> : C et H, liaisons simples ; formule brute <b>C<sub>n</sub>H<sub>2n+2</sub></b>.</p></div>
+    <div class="cle"><p>Méthane, éthane, propane, butane, pentane, hexane, heptane, octane, nonane, décane : 1 à 10 C.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2b_cours.html">Cours : nommer un alcane ramifié →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#lineaires">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+NOM.menu('module_2a_cours');
+</script>
+</body>
+</html>

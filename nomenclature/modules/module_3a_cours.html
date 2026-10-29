@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : alcènes, alcools, halogénoalcanes, amines — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 1 / 5</span>
+    <h2 class="er-titre">Alcènes, alcools, halogénoalcanes, amines</h2>
+    <p class="er-contexte">Une molécule appartient à une <b>famille</b> (classe fonctionnelle) selon son <b>groupe caractéristique</b> (groupe fonctionnel). Savoir <b>entourer</b> le groupe, le <b>nommer</b> et donner la <b>famille</b> : c'est le plus important du chapitre, et une question classique du bac.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 1 du module 3 : les groupes sans C=O (C=C, hydroxyle,
+   halogéno, amine), exemples du tableau des familles du cours ;
+   amines primaire, secondaire, tertiaire. « À toi » : entourer le groupe
+   (ORGA.partieEntourer), puis le nommer et donner la famille
+   (ORGA.partiesNommerGroupes).
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { o, molHTML, video } = NOM;
+const groupeLegende = s => ORGA.legendeHTML(ORGA.groupes(NOM.mol(s)));
+const ent = (s, ec) => molHTML(s, { ecriture: ec || 'semi', entourer: true, legende: groupeLegende(s) });
+// « À toi » : entourer puis nommer le groupe d'une molécule fabriquée
+function aToiGroupe(cle, titre) {
+  const x = ORGA.fabriqueFamille(cle, { min: 3, max: 6, ramMax: 1 });
+  return { titre, parties: [ORGA.partieEntourer(x.mol, { ecriture: hasard(['semi', 'topo']) })].concat(ORGA.partiesNommerGroupes(x.mol)) };
+}
+
+/* ---------- 1. Les groupes sans C=O ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Quatre groupes sans C=O');
+  c.ajouter(carte, `${video('https://www.youtube.com/watch?v=1OQyiSniTgI', 'nomenclature en chimie organique (1)')}${video('https://www.youtube.com/watch?v=l2jxhqaL330', 'nomenclature en chimie organique (2)')}
+    <div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">À apprendre par cœur.</b></p>
+        <div class="crs-defile"><table class="crs-tab"><thead><tr><th>Famille</th><th>Groupe caractéristique</th><th>Nom du groupe</th></tr></thead>
+        <tbody><tr><td>alcène</td><td>C=C</td><td>double liaison C=C</td></tr>
+        <tr><td>alcool</td><td>–OH (sur un C sans =O)</td><td>hydroxyle</td></tr>
+        <tr><td>halogénoalcane</td><td>–X (F, Cl, Br, I)</td><td>halogéno</td></tr>
+        <tr><td>amine</td><td>N lié à des C (sans C=O)</td><td>amine</td></tr></tbody></table></div>
+        <p>On <b>entoure</b> le groupe : tous ses atomes (avec ou sans les H qui leur sont liés), et rien d'autre. Puis on écrit son nom et la famille entre parenthèses.</p></div>
+    </div>
+    ${exemple(`<div class="nom-mols">${ent('C=CCC(C)C')}${ent('CC(C)(C)O')}${ent('CCC(C)CC(C)Br')}${ent('CCCCCN')}</div>`)}`);
+  c.aToi(carte, melanger(['alcene', 'alcool', 'halogeno', 'amine']).slice(0, 2).map((cle, k) => aToiGroupe(cle, `Molécule ${k + 1}`)));
+  return carte;
+}
+
+/* ---------- 2. Amines primaires, secondaires, tertiaires ---------- */
+const AMINES = [['CCCN', 'primaire'], ['CC(N)CC', 'primaire'], ['CCNCC', 'secondaire'], ['CCCNC', 'secondaire'], ['CCN(C)CC', 'tertiaire'], ['CCCN(C)C', 'tertiaire']];
+function etape2(c) {
+  const carte = c.carte('2. Amines primaires, secondaires, tertiaires');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Règle.</b> Le N d'une amine est lié à <b>1</b> C (amine <b>primaire</b>, –NH₂), <b>2</b> C (<b>secondaire</b>, –NH–) ou <b>3</b> C (<b>tertiaire</b>).</p></div>
+    </div>
+    ${exemple(`<div class="nom-mols">${molHTML('CCCCCN', { titre: 'Primaire' })}${molHTML('CCNCC', { titre: 'Secondaire' })}${molHTML('CCCN(C)CC', { titre: 'Tertiaire' })}</div>`)}`);
+  const [a, b] = melanger(AMINES).slice(0, 2);
+  const OPTS = [o('primaire', 'primaire'), o('secondaire', 'secondaire'), o('tertiaire', 'tertiaire')];
+  c.aToi(carte, [a, b].map(([s, t], k) => ({ titre: `Amine ${k + 1}`, enonce: NOM.dessin(s, { ecriture: hasard(['semi', 'topo']) }),
+    parties: [{ type: 'choix', q: 'Cette amine est-elle primaire, secondaire ou tertiaire ?', options: OPTS, bonne: t, melanger: false, indice: 'Compte les C liés au N : 1 primaire, 2 secondaire, 3 tertiaire.', solution: `<p>Amine <b>${t}</b>.</p>` }] })));
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b>C=C</b> : alcènes ; <b>–OH</b> (groupe hydroxyle) : alcools ; <b>–X</b> (groupe halogéno) : halogénoalcanes ; <b>N</b> (groupe amine) : amines, primaires, secondaires ou tertiaires (1, 2 ou 3 C sur le N).</p></div>
+    <div class="cle"><p>On entoure le groupe, on écrit son nom, puis la famille entre parenthèses : « groupe hydroxyle (alcools) ».</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Cours : le groupe carbonyle →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#familles">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+NOM.menu('module_3a_cours');
+</script>
+</body>
+</html>

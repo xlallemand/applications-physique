@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : les alcanes cycliques — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 4 / 4</span>
+    <h2 class="er-titre">Les alcanes cycliques</h2>
+    <p class="er-contexte">Quand la chaîne se referme sur elle-même, c'est un <b>alcane cyclique</b> : on ajoute « <b>cyclo</b> » devant le nom.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours (assets/cours.js) : cyclo + nom de l'alcane ; un seul substituant :
+   pas de numéro ; plusieurs : les plus petits numéros, le premier dans
+   l'ordre alphabétique a le n° 1 (tableau des familles du cours, ex. 10).
+   « À toi » : l'outil de nomenclature (aides activées).
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { molHTML } = NOM;
+
+function etape1(c) {
+  const carte = c.carte('1. Nommer un alcane cyclique');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Règle.</b> Nom = <b>cyclo</b> + nom de l'alcane qui a le même nombre de C (cyclohexane : 6 C en cycle).</p>
+        <p>Un seul substituant : <b>pas de numéro</b> (éthylcyclohexane). Plusieurs : on numérote le cycle pour avoir les <b>plus petits numéros</b> ; à égalité, la ramification qui vient la <b>première dans l'ordre alphabétique</b> a le n° 1.</p></div>
+    </div>
+    ${exemple(`<div class="nom-mols">${molHTML('C1CCCC1', { nom: true, ecriture: 'semi' })}${molHTML('C1CCCCC1', { nom: true, ecriture: 'topo' })}${molHTML('CCC1CCCCC1', { nom: true, ecriture: 'topo', numeros: false })}${molHTML('CCC1CCCC(C)C1', { nom: true, ecriture: 'topo' })}</div>
+      <p>1-éthyl-3-méthylcyclohexane : les numéros 1 et 3 dans les deux sens ; éthyl vient avant méthyl, il a le n° 1 (pas 3-éthyl-1-méthylcyclohexane).</p>`)}`);
+  const [a, b] = melanger(['CC1CCCCC1', 'CCC1CCCC1', 'CC1CCC(C)CC1', 'CC1CC(CC)CCC1', 'CC1CCCC1C', 'CCCC1CCCCC1']).slice(0, 2);
+  c.aToi(carte, [a, b].map((s, k) => ({ titre: `Molécule ${k + 1}`, parties: [NOM.partieNom(s, { ecriture: 'topo' })] })));
+  return carte;
+}
+
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b>Cyclo</b> + nom de l'alcane ; un substituant : pas de numéro ; plusieurs : plus petits numéros, le premier dans l'ordre alphabétique a le n° 1.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_nommer.html">Atelier : nommer un alcane →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2_questions.html">Questions</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#cycliques">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, aRetenir]);
+NOM.menu('module_2d_cours');
+</script>
+</body>
+</html>

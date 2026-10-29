@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard, dont 5 « entourer, nommer le groupe,
+   donner la famille » (une molécule à un groupe en semi-développée, une en
+   topologique, une écrite avec C₂H₅ en abrégé, une à plusieurs groupes) ;
+   distinguer deux familles proches ; famille d'après le nom ; nommer ;
+   dessiner à partir du nom.
+   Erreurs diagnostiquées : acide ≠ alcool + cétone, ester ≠ acide,
+   amide ≠ amine + cétone, aldéhyde ≠ cétone, atome de la chaîne carbonée
+   entouré, groupe oublié ; et celles des noms (voir ORGA.diagnostiquerNom).
+   ============================================================ */
+const { o, hasard, melanger, partieNom } = NOM;
+const FAMS = ['alcene', 'alcool', 'halogeno', 'aldehyde', 'cetone', 'acide', 'ester', 'amine', 'amide'];
+const fig = (m, op) => `<div class="nom-fig">${ORGA.dessinHTML(m, op || {})}</div>`;
+const F = ORGA.FAMILLES;
+// formules avec un éthyle écrit C₂H₅ (comme dans l'ex. 3 de la feuille)
+const CONDENSEES = [['CCC(=O)OCC', [5, 6]], ['CC(NCC)C', [3, 4]], ['CC(=O)CC(CC)CC', [5, 6]], ['CCCC(=O)NCC', [6, 7]], ['CCC(CC)C=O', [3, 4]]];
+// familles proches : [famille de la molécule, famille confondue, explication]
+const PROCHES = [['acide', 'alcool', 'Le OH est sur un C qui porte aussi un =O : ensemble, groupe carboxyle (acide ≠ alcool + cétone).'],
+  ['ester', 'acide', 'Le O lié au C=O est lié à un autre C, pas à un H : ester (ester ≠ acide).'],
+  ['amide', 'amine', 'Le N est lié au C d\'un C=O : groupe amide (amide ≠ amine + cétone).'],
+  ['aldehyde', 'cetone', 'Le C=O est au bout de la chaîne, son C porte un H : aldéhyde.'],
+  ['cetone', 'aldehyde', 'Le C=O est entre deux C : cétone.'],
+  ['amine', 'amide', 'Le N n\'est pas lié à un C=O : amine.']];
+const PAR_NOM = [['acide', 'acide …-oïque'], ['ester', '…oate de …yle'], ['aldehyde', '…al'], ['cetone', '…-n-one'], ['alcool', '…-n-ol'], ['amine', '…-n-amine'], ['amide', '…amide'], ['alcene', '…-n-ène'], ['halogeno', 'chloro…, bromo…']];
+
+const G = {
+  // entourer, nommer le groupe, donner la famille (une molécule à un groupe)
+  entourer(ec) {
+    const x = ORGA.fabriqueFamille(hasard(FAMS), { min: 3, max: 6, ramMax: 1 });
+    return { theme: 'Groupe caractéristique', parties: [ORGA.partieEntourer(x.mol, { ecriture: ec })].concat(ORGA.partiesNommerGroupes(x.mol)) };
+  },
+  condensee() {
+    const [s, at] = hasard(CONDENSEES), m = NOM.mol(s);
+    return { theme: 'Groupe caractéristique', consigne: 'C₂H₅ est écrit en abrégé (touche ⓘ).', parties: [ORGA.partieEntourer(m, { condenser: [{ atomes: at, texte: 'C2H5' }] })].concat(ORGA.partiesNommerGroupes(m)) };
+  },
+  plusieurs() {
+    const x = NOM.PLUSIEURS[hasard(['glycine', 'serine', 'asparagine', 'lactique', 'malique', 'pheromone', 'cannelle', 'atropine'])];
+    return { theme: 'Plusieurs groupes', enonce: `<p><b>${x.titre}</b></p>`, parties: NOM.partiesPlusieurs(x) };
+  },
+  // distinguer deux familles proches
+  proches() {
+    const [f, autre, explication] = hasard(PROCHES);
+    const x = ORGA.fabriqueFamille(f, { min: 3, max: 6, ramMax: 1 });
+    return { theme: 'Familles proches', enonce: fig(x.mol, { ecriture: hasard(['semi', 'topo']) }),
+      parties: [{ type: 'choix', q: 'À quelle famille appartient cette molécule ?', options: melanger([o(f, F[f].famille), o(autre, F[autre].famille)]), bonne: f, melanger: false, indice: explication, solution: `<p>${explication} Famille : <b>${F[f].familles}</b>.</p>` }] };
+  },
+  // famille d'après le nom
+  parNom() {
+    const f = hasard(FAMS), x = ORGA.fabriqueFamille(f, { min: 3, max: 6, ramMax: 1 });
+    const autres = melanger(FAMS.filter(k => k !== f)).slice(0, 3);
+    return { theme: 'Famille d\'après le nom', parties: [{ type: 'choix', q: `À quelle famille appartient le <b>${x.nom}</b> ?`, options: melanger([f, ...autres].map(k => o(k, F[k].famille))), bonne: f, melanger: false,
+      indice: 'La terminaison donne la famille : ' + PAR_NOM.map(([k, t]) => `${t} ${F[k].familles}`).join(' ; ') + '.', solution: `<p>${PAR_NOM.find(p => p[0] === f)[1]} : <b>${F[f].familles}</b>.</p>` }] };
+  },
+  nommer(ec) {
+    const x = ORGA.fabriqueFamille(hasard(FAMS), { min: 3, max: 7, ramMax: 1 });
+    return { theme: 'Nommer une molécule', parties: [partieNom(x.mol, { ecriture: ec })] };
+  },
+  dessiner(ec) {
+    const x = ORGA.fabriqueFamille(hasard(FAMS), { min: 3, max: 6, ramMax: 1 });
+    return { theme: 'Du nom à la formule', consigne: `Dessine en ${NOM.EC[ec].toLowerCase()} : <b>${x.nom}</b>.`, parties: [ORGA.partieDessin(x.mol, { ecriture: ec, nom: x.nom, q: '' })] };
+  },
+};
+
+function tirage() {
+  return [G.entourer('semi'), G.entourer('topo'), G.condensee(), G.plusieurs(), G.proches(), G.parNom(), G.nommer('semi'), G.nommer('topo'), G.dessiner('semi'), G.dessiner('topo')];
+}
+
+NOM.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Les familles',
+  intro: '<p class="er-contexte">10 questions tirées au hasard, dont la moitié comme au bac : <b>entourer</b> le groupe caractéristique, le <b>nommer</b> et donner la <b>famille</b>. Puis distinguer des familles proches, retrouver la famille d\'après le nom, nommer et dessiner.</p>',
+  questions: tirage,
+  revoir: { href: 'module_3a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4.html', label: 'Exercices →' },
+});
+NOM.menu('module_3_questions');
+</script>
+</body>
+</html>

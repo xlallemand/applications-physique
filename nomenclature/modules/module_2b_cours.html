@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : nommer un alcane ramifié — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 2 / 4</span>
+    <h2 class="er-titre">Nommer un alcane ramifié</h2>
+    <p class="er-contexte">Le nom d'un alcane ramifié se construit en trois étapes : trouver la <b>chaîne la plus longue</b> (elle donne la fin du nom), <b>numéroter</b>, puis écrire les <b>ramifications</b> dans l'ordre alphabétique.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 2 du module 2 : étape 1, chaîne la plus longue et nom des
+   ramifications (« À toi » : toucher la chaîne, ORGA.partieChaine) ;
+   étape 2, numérotation et di, tri… (« À toi » : le bon nom parmi des
+   noms faux classiques, NOM.nomsFaux) ; étape 3, ordre alphabétique,
+   tirets et virgules (« À toi » : l'outil de nomenclature, aides activées).
+   Exemples du cours en couleurs : chaîne principale, ramifications, numéros.
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { o, molHTML, video, nomsFaux } = NOM;
+
+// le bon nom parmi trois noms faux classiques (chacun avec son diagnostic)
+function bonNom(s, q) {
+  const r = ORGA.nommer(NOM.mol(s)), faux = melanger(nomsFaux(s)).slice(0, 3);
+  const options = melanger([o('ok', r.nom), ...faux.map((f, k) => o('f' + k, f.nom))]);
+  return { type: 'choix', q, options, bonne: 'ok', melanger: false, indices: Object.fromEntries(faux.map((f, k) => ['f' + k, f.diag])), solution: `<p>${ORGA.nomHTML(r.parties)}</p>` };
+}
+
+/* ---------- 1. La chaîne la plus longue et les ramifications ---------- */
+function etape1(c) {
+  const carte = c.carte('1. La chaîne la plus longue et les ramifications');
+  c.ajouter(carte, `${video('https://www.youtube.com/watch?v=9LPnknbY0ds', 'nommer un alcane ramifié')}
+    <div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Étape 1.</b> On trouve la <b>chaîne carbonée la plus longue</b> : elle donne la fin du nom. Elle n'est <b>pas forcément dessinée en ligne droite</b>.</p>
+        <p>Les autres C forment les <b>ramifications</b> : leur nom est celui de l'alcane, en remplaçant « ane » par « yl » : –CH₃ <b>méthyl</b>, –CH₂–CH₃ <b>éthyl</b>, –CH₂–CH₂–CH₃ <b>propyl</b>.</p></div>
+    </div>
+    ${exemple(`<div class="nom-mols">${molHTML('CC(C)CCC', { nom: true })}${molHTML('CC(C)C', { nom: true, legende: '<p class="nom-avert">Si le méthyl est ailleurs (au bout), c\'est du butane.</p>' })}</div>
+      <p>Chaîne la plus longue en bleu ; la ramification (méthyl) en orange.</p>`)}`);
+  const [a, b] = melanger(['CCCC(C)CC', 'CC(C)CC(C)C', 'CCC(CC)CC', 'CC(CC)CCC', 'CCC(C)(CC)C', 'CCCC(CCC)C']).slice(0, 2);
+  c.aToi(carte, [
+    { titre: 'Chaîne principale', parties: [ORGA.partieChaine(a, { q: 'Touche les C de la chaîne la plus longue, puis valide.' })] },
+    { titre: 'Chaîne principale', parties: [ORGA.partieChaine(b, { ecriture: 'topo', q: 'En topologique : touche les sommets et les bouts de traits de la chaîne la plus longue.' })] },
+    { titre: 'Nom d\'une ramification', parties: [{ type: 'choix', q: 'Comment s\'appelle la ramification –CH₂–CH₂–CH₃ ?', options: [o('propyl', 'propyl'), o('propane', 'propane'), o('ethyl', 'éthyl'), o('butyl', 'butyl')], bonne: 'propyl', melanger: false,
+      indices: { propane: 'Une ramification : « ane » devient « yl ».', ethyl: 'Compte les C : il y en a 3.', butyl: 'Compte les C : il y en a 3 (prop).' }, solution: '<p>3 C : prop + yl, <b>propyl</b>.</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Numéroter ; di, tri, tétra ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Numéroter, regrouper les ramifications identiques');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Étape 2.</b> On numérote la chaîne principale <b>par la droite ou par la gauche</b>, pour que les numéros des ramifications soient <b>les plus petits possibles</b>.</p>
+        <p>Les ramifications identiques sont regroupées : <b>di</b> (2), <b>tri</b> (3), <b>tétra</b> (4), <b>penta</b>, <b>hexa</b>, avec un numéro pour chacune. 2,3,5-triméthyl… = un –CH₃ sur les carbones 2, 3 et 5.</p></div>
+    </div>
+    ${exemple(`<div class="nom-mols">${molHTML('CC(C)C(C)CCC', { nom: true })}${molHTML('CCCCC(C)C(C)(C)CCC', { nom: true })}${molHTML('CC(C)C(C)(C)C(C)CC', { nom: true })}</div>
+      <p>2,3-diméthylhexane : en numérotant par l'autre bout, on aurait 4,5 : plus grands. Deux méthyl sur le même C : deux numéros (4,4).</p>`)}`);
+  const [a, b] = melanger(['CC(C)CCCC', 'CCC(C)CCC(C)C', 'CC(C)CC(C)CC', 'CCC(C)(C)CC(C)C', 'CCCC(C)CC(C)C']).slice(0, 2);
+  c.aToi(carte, [{ titre: 'Le bon nom', enonce: NOM.dessin(a), parties: [bonNom(a, 'Quel est le nom de cette molécule ?')] },
+    { titre: 'Le bon nom', enonce: NOM.dessin(b, { ecriture: 'topo' }), parties: [bonNom(b, 'Quel est le nom de cette molécule ?')] }]);
+  return carte;
+}
+
+/* ---------- 3. Ordre alphabétique, tirets et virgules ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Ordre alphabétique, tirets et virgules');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Étape 3.</b> Les ramifications s'écrivent dans l'<b>ordre alphabétique</b> : é avant m ; di, tri… ne comptent pas.</p>
+        <p>Une <b>virgule</b> entre deux chiffres (2,3), un <b>tiret</b> entre un chiffre et une lettre (2-méthyl), rien entre deux lettres (méthylhexane).</p></div>
+    </div>
+    ${exemple(`<div class="nom-mols">${molHTML('CCCC(CC)C(C)(C)C', { nom: true })}</div>
+      <p>3-éthyl-2,2-diméthylhexane : éthyl avant méthyl (é avant m, le « di » ne compte pas). Chaque partie du nom a la couleur de la partie de la molécule qu'elle décrit.</p>`)}`);
+  const xs = [ORGA.fabriqueAlcane({ min: 5, max: 7, ramMin: 2, ramMax: 2 }), ORGA.fabriqueAlcane({ min: 5, max: 8, ramMin: 2, ramMax: 3 })];
+  c.aToi(carte, xs.map((x, k) => ({ titre: `Molécule ${k + 1}`, parties: [NOM.partieNom(x.mol, { ecriture: k ? 'topo' : 'semi', q: 'Donne le nom de cette molécule. Les aides peuvent être désactivées.' })] })));
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b>1.</b> La chaîne la plus longue donne la fin du nom (pas forcément en ligne droite) ; ramifications : « ane » → « yl ».</p></div>
+    <div class="cle"><p><b>2.</b> Numérotation : les plus petits numéros ; ramifications identiques : di, tri, tétra…</p></div>
+    <div class="cle"><p><b>3.</b> Ordre alphabétique (di, tri… ne comptent pas) ; virgule entre deux chiffres, tiret entre chiffre et lettre.</p></div>
+    <div class="nom-mols">${molHTML('CCCC(CC)C(C)(C)C', { nom: true })}</div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2c_cours.html">Cours : du nom à la formule →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#ramifie">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+NOM.menu('module_2b_cours');
+</script>
+</body>
+</html>

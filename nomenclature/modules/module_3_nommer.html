@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : atelier, nommer une molécule — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · ATELIER</span>
+    <h2 class="er-titre">Nommer une molécule</h2>
+    <p class="er-contexte">Dix molécules fabriquées au hasard, de la famille de ton choix. L'outil commence par le <b>groupe caractéristique</b> (l'entourer, le nommer, donner la famille), puis la chaîne, le n° 1, les ramifications et le nom. Les aides se désactivent une à une.</p>
+  </div>
+  <div class="er-card">
+    <h3 class="cours-titre">Réglages</h3>
+    <div class="nom-reglages"><div class="orga-seg" role="group" aria-label="Famille" id="choixFam">
+      <button type="button" class="orga-pil" data-f="toutes">Toutes</button><button type="button" class="orga-pil" data-f="alcene">Alcènes</button><button type="button" class="orga-pil" data-f="alcool">Alcools</button>
+      <button type="button" class="orga-pil" data-f="halogeno">Halogénoalcanes</button><button type="button" class="orga-pil" data-f="aldehyde">Aldéhydes</button><button type="button" class="orga-pil" data-f="cetone">Cétones</button>
+      <button type="button" class="orga-pil" data-f="acide">Acides</button><button type="button" class="orga-pil" data-f="ester">Esters</button><button type="button" class="orga-pil" data-f="amine">Amines</button><button type="button" class="orga-pil" data-f="amide">Amides</button>
+    </div></div>
+    <div class="nom-reglages"><div class="orga-seg" role="group" aria-label="Écriture" id="choixEc">
+      <button type="button" class="orga-pil" data-ec="semi">Semi-développée</button><button type="button" class="orga-pil" data-ec="topo">Topologique</button><button type="button" class="orga-pil" data-ec="developpee">Développée</button><button type="button" class="orga-pil" data-ec="hasard">Au hasard</button>
+    </div></div>
+  </div>
+  <div class="er-card ph-question" id="tache"></div>
+  <div id="bilan" class="er-card" hidden>
+    <span class="er-badge">BILAN</span>
+    <h3 class="er-titre">✍ Complète ton cours</h3>
+    <div class="cle"><p><b class="cle-titre">Nommer une molécule.</b> La chaîne principale est la plus longue qui contient le groupe ; le n° est celui de l'atome de carbone qui porte le groupe caractéristique, le plus petit possible ; la terminaison donne la famille (-ène, -ol, -al, -one, acide …-oïque, …oate de …yle, -amine, -amide) ; halogènes et ramifications dans l'ordre alphabétique.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_dessiner.html">Atelier : dessiner à partir du nom →</a></div>
+  </div>
+</div>
+<script>
+/* ============================================================
+   Atelier « Nommer une molécule » (sous-module 4) : fabriques par famille
+   (ORGA.fabriqueFamille : chaîne de 2 à 8 C, 0 à 2 ramifications), outil
+   de nomenclature avec l'étape « groupe » en tête (NOM.partieNom).
+   ============================================================ */
+const FAMS = ['alcene', 'alcool', 'halogeno', 'aldehyde', 'cetone', 'acide', 'ester', 'amine', 'amide'];
+const reg = { f: 'toutes', ec: 'semi' };
+let courant = 0, at = null;
+function majReglages() {
+  document.querySelectorAll('#choixFam [data-f]').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === reg.f));
+  document.querySelectorAll('#choixEc [data-ec]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ec === reg.ec));
+}
+document.getElementById('choixFam').addEventListener('click', ev => { const b = ev.target.closest('[data-f]'); if (b) { reg.f = b.dataset.f; majReglages(); at.tache(courant, false); } });
+document.getElementById('choixEc').addEventListener('click', ev => { const b = ev.target.closest('[data-ec]'); if (b) { reg.ec = b.dataset.ec; majReglages(); at.tache(courant, false); } });
+// une molécule fabriquée de la famille choisie (chaîne de 2 à 8 C, 0 à 2 ramifications)
+const fabrique = () => ORGA.fabriqueFamille(reg.f === 'toutes' ? NOM.hasard(FAMS) : reg.f, { min: 2, max: 8, ramMax: 2 });
+majReglages();
+at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'nommer', nomTache: 'Molécule', bilan: document.getElementById('bilan'),
+  taches: Array.from({ length: 10 }, (x, k) => () => {
+    courant = k;
+    const m = fabrique(), ec = reg.ec === 'hasard' ? NOM.hasard(['semi', 'topo', 'developpee']) : reg.ec;
+    return { titre: `Une molécule en ${NOM.EC[ec].toLowerCase()}`, parties: [NOM.partieNom(m.mol, { ecriture: ec, q: '' })] };
+  }) });
+NOM.menu('module_3_nommer');
+</script>
+</body>
+</html>

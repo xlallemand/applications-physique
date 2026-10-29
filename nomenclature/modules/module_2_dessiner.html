@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : atelier, dessiner un alcane — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · ATELIER</span>
+    <h2 class="er-titre">Dessiner un alcane</h2>
+    <p class="er-contexte">Dix noms d'alcanes fabriqués au hasard : dessine chaque molécule dans l'écriture de ton choix. Commence par la <b>chaîne principale</b> (la fin du nom), puis place les ramifications : le nom de ce que tu dessines s'affiche en direct, en couleurs.</p>
+  </div>
+  <div class="er-card">
+    <h3 class="cours-titre">Écriture</h3>
+    <div class="orga-seg" role="group" aria-label="Écriture" id="choixEc">
+      <button type="button" class="orga-pil" data-ec="semi">Semi-développée</button>
+      <button type="button" class="orga-pil" data-ec="topo">Topologique</button>
+      <button type="button" class="orga-pil" data-ec="hasard">Au hasard</button>
+    </div>
+  </div>
+  <div class="er-card ph-question" id="tache"></div>
+  <div id="bilan" class="er-card" hidden>
+    <span class="er-badge">BILAN</span>
+    <h3 class="er-titre">✍ Complète ton cours</h3>
+    <div class="cle"><p><b class="cle-titre">Du nom à la formule.</b> On dessine à l'envers du nom : 1. la chaîne principale (la fin du nom) ; 2. sa numérotation ; 3. les ramifications sur les C dont on lit les numéros ; 4. les H.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur les alcanes →</a></div>
+  </div>
+</div>
+<script>
+/* ============================================================
+   Atelier « Dessiner un alcane » (sous-module 3) : fabrique d'alcanes
+   (ORGA.fabriqueAlcane), l'élève dessine la molécule à partir de son nom
+   dans l'éditeur ; le nom de ce qu'il dessine s'affiche en direct, en
+   couleurs (ORGA.partieDessin avec o.nom) ; validation par ORGA.meme.
+   L'atelier est fait quand les dix tâches sont faites.
+   ============================================================ */
+const reg = { ec: 'semi' };
+let courant = 0;
+const liste = Array.from({ length: 10 }, (x, k) => () => {
+  courant = k;
+  const m = ORGA.fabriqueAlcane({ min: 4, max: 10, ramMin: 1, ramMax: 3 });
+  const ec = reg.ec === 'hasard' ? NOM.hasard(['semi', 'topo']) : reg.ec;
+  return { titre: m.nom, enonce: `<p>Dessine en ${NOM.EC[ec].toLowerCase()} le <b>${m.nom}</b>.</p>`, parties: [ORGA.partieDessin(m.mol, { ecriture: ec, nom: m.nom, q: '' })] };
+});
+const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'dessiner-alcane', taches: liste, bilan: document.getElementById('bilan'), nomTache: 'Alcane' });
+const maj = () => document.querySelectorAll('#choixEc [data-ec]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ec === reg.ec));
+document.getElementById('choixEc').addEventListener('click', ev => { const b = ev.target.closest('[data-ec]'); if (b) { reg.ec = b.dataset.ec; maj(); at.tache(courant, false); } });
+maj();
+NOM.menu('module_2_dessiner');
+</script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : du nom à la formule — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS 3 / 4</span>
+    <h2 class="er-titre">Du nom à la formule</h2>
+    <p class="er-contexte">Pour dessiner une molécule à partir de son nom, on lit le nom <b>à l'envers</b> : on commence par la <b>chaîne principale</b> (la fin du nom), puis on place les <b>ramifications</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : la méthode (chaîne principale,
+   numérotation, ramifications, H), exemple pas à pas du
+   3-éthyl-2,2-diméthylhexane ; « À toi » : l'éditeur, le nom de la
+   molécule dessinée s'affiche en direct (ORGA.partieDessin avec o.nom),
+   en semi-développée puis en topologique.
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { molHTML } = NOM;
+
+// les étapes du dessin du 3-éthyl-2,2-diméthylhexane
+const M = NOM.mol('CCCC(CC)C(C)(C)C'), R = ORGA.nommer(M);
+const CH = NOM.mol('CCCCCC');
+const zero = m => m.atomes.map(() => 0);
+const etapeDessin = (t, d) => `<div class="nom-mol"><div class="nom-mol-t">${t}</div>${d}</div>`;
+const PAS = `<div class="nom-mols">
+  ${etapeDessin('1. La chaîne : hexane, 6 C', ORGA.dessinHTML(CH, { h: zero(CH), couleurs: { chaine: [0, 1, 2, 3, 4, 5] }, label: 'chaîne de 6 C' }))}
+  ${etapeDessin('2. On la numérote', ORGA.dessinHTML(CH, { h: zero(CH), couleurs: { chaine: [0, 1, 2, 3, 4, 5] }, numeros: [5, 4, 3, 2, 1, 0], label: 'chaîne de 6 C numérotée' }))}
+  ${etapeDessin('3. Les ramifications', ORGA.dessinHTML(M, { h: zero(M), couleurs: R.couleurs, numeros: R.numeros, label: 'chaîne et ramifications' }))}
+  ${etapeDessin('4. On complète les H', ORGA.dessinHTML(M, { couleurs: R.couleurs, numeros: R.numeros, label: R.nom }))}
+</div>`;
+
+/* ---------- 1. La méthode ---------- */
+function etape1(c) {
+  const carte = c.carte('1. On dessine à l\'envers du nom');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode.</b></p><ol class="er-liste">
+        <li>On lit la <b>fin du nom</b> et on écrit la <b>chaîne principale</b> (…hexane : 6 C) ;</li>
+        <li>on la <b>numérote</b> ;</li>
+        <li>on place les <b>ramifications</b> sur les C dont on lit les numéros (3-éthyl : un –CH₂–CH₃ sur le C n° 3 ; 2,2-diméthyl : deux –CH₃ sur le C n° 2) ;</li>
+        <li>on <b>complète les H</b> (C : 4 liaisons).</li></ol></div>
+    </div>
+    ${exemple(`<p class="nom-mol-n">${ORGA.nomHTML(R.parties)}</p>${PAS}`, 'Exemple pas à pas')}`);
+  const xs = [ORGA.fabriqueAlcane({ min: 5, max: 6, ramMin: 1, ramMax: 2 }), ORGA.fabriqueAlcane({ min: 5, max: 7, ramMin: 2, ramMax: 2 })];
+  c.aToi(carte, xs.map((x, k) => ({ titre: `Molécule ${k + 1}`, enonce: `<p>Dessine en semi-développée le <b>${x.nom}</b>. Le nom de ce que tu dessines s'affiche en direct.</p>`,
+    parties: [ORGA.partieDessin(x.mol, { ecriture: 'semi', nom: x.nom, q: '' })] })));
+  return carte;
+}
+
+/* ---------- 2. En topologique ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Du nom à la formule topologique');
+  c.ajouter(carte, `<div class="cours-bloc"><p>Même méthode : on dessine d'abord le zigzag de la chaîne principale (un trait de moins que de C), on numérote, puis on place les ramifications sur les sommets.</p></div>
+    ${exemple(`<div class="nom-mols">${molHTML(M, { nom: true, ecriture: 'topo' })}</div>
+      <p>La chaîne de 6 C : 5 traits en zigzag. Un trait de 2 C (éthyl) sur le C n° 3, deux traits (méthyl) sur le C n° 2.</p>`)}`);
+  const x = ORGA.fabriqueAlcane({ min: 5, max: 7, ramMin: 1, ramMax: 2 });
+  c.aToi(carte, [{ titre: 'En topologique', enonce: `<p>Dessine en topologique le <b>${x.nom}</b>.</p>`, parties: [ORGA.partieDessin(x.mol, { ecriture: 'topo', nom: x.nom, q: '' })] }]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b>On dessine à l'envers du nom</b> : 1. la chaîne principale (la fin du nom) ; 2. sa numérotation ; 3. les ramifications ; 4. les H.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2d_cours.html">Cours : les alcanes cycliques →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html#formule">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+NOM.menu('module_2c_cours');
+</script>
+</body>
+</html>

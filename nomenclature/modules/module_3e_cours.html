@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : nommer les esters, amines et amides — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 5 / 5</span>
+    <h2 class="er-titre">Nommer les esters, amines et amides</h2>
+    <p class="er-contexte">Les esters ont un nom en deux morceaux (<b>alcanoate d'alkyle</b>) ; dans les amines et les amides, les ramifications accrochées sur le N sont notées <b>N-</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : nommer les esters (alcanoate
+   d'alkyle, deux couleurs comme les annotations du cours), les amines et
+   les amides (ramifications sur le N : N-). « À toi » : l'outil de
+   nomenclature (aides activées).
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { o, molHTML, video } = NOM;
+// une molécule en couleurs, groupe entouré, avec son nom
+const ex = (s, ec, note) => molHTML(s, { nom: true, ecriture: ec || 'semi', entourer: ORGA.groupes(NOM.mol(s)).map(g => ({ atomes: g.atomes, avecH: g.avecH })), legende: note ? `<p class="nom-avert">${note}</p>` : '' });
+// « À toi » : nommer une molécule fabriquée d'une famille (aides activées)
+const aToiNom = (cle, titre, ec) => {
+  const x = ORGA.fabriqueFamille(cle, { min: 3, max: 6, ramMax: 1 });
+  return { titre, parties: [NOM.partieNom(x.mol, { ecriture: ec || hasard(['semi', 'topo']) })] };
+};
+
+function etape1(c) {
+  const carte = c.carte('1. Les esters : alcanoate d\'alkyle');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Règle.</b> Un ester se nomme « <b>alcanoate d'alkyle</b> » :</p>
+        <ul class="er-liste"><li>la chaîne qui porte le C=O donne l'<b>alcanoate</b> (son C est le n° 1) ;</li>
+        <li>la chaîne liée à l'O donne l'<b>alkyle</b>, numérotée à partir du C lié à l'O (1-méthyléthyle, 2-méthylpropyle) ;</li>
+        <li>« d' » devant une voyelle : éthanoate d'éthyle.</li></ul></div>
+    </div>
+    ${exemple(`<div class="nom-mols">${ex('CCCCOC(C)=O')}${ex('CCC(=O)OC(C)C', 'topo')}</div>`)}`);
+  c.aToi(carte, [aToiNom('ester', 'Ester 1', 'semi'), aToiNom('ester', 'Ester 2', 'topo')]);
+  return carte;
+}
+function etape2(c) {
+  const carte = c.carte('2. Amines et amides : N-');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Amines.</b> …an-n-<b>amine</b> (butan-1-amine) : la chaîne la plus longue liée au N donne le nom. Les autres chaînes liées au N sont des ramifications, notées <b>N-</b>.</p>
+        <p><b class="cle-titre">Amides.</b> …an<b>amide</b> (butanamide) : la chaîne du C=O donne le nom ; les chaînes sur le N : <b>N-</b>.</p></div>
+    </div>
+    ${exemple(`<div class="nom-mols">${ex('CCCCCN')}${ex('CCNCC', 'semi', 'N-éthyléthanamine : sur le N, il y a un éthyle accroché.')}${ex('CCCN(C)CC')}${ex('CCCC(N)=O')}${ex('CCCCNC(C)=O')}</div>`)}`);
+  c.aToi(carte, [aToiNom('amine', 'Molécule 1'), aToiNom('amide', 'Molécule 2')]);
+  return carte;
+}
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b>Ester</b> : alcanoate (chaîne du C=O) d'alkyle (chaîne liée à l'O) : éthanoate de butyle.</p></div>
+    <div class="cle"><p><b>Amine</b> : …an-n-amine ; <b>amide</b> : …anamide ; les ramifications sur le N : N- (N-éthyl-N-méthylpropan-1-amine).</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_entourer.html">Atelier : entourer les groupes →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3_questions.html">Questions</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#esters">Fiche récapitulative</a></div>`);
+  return carte;
+}
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+NOM.menu('module_3e_cours');
+</script>
+</body>
+</html>

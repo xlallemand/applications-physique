@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : nommer alcènes, alcools, aldéhydes, cétones, acides — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 4 / 5</span>
+    <h2 class="er-titre">Nommer alcènes, alcools, halogénoalcanes, aldéhydes, cétones, acides</h2>
+    <p class="er-contexte">Même méthode que pour les alcanes, avec deux règles de plus : la chaîne principale <b>contient le groupe</b>, et le <b>numéro du groupe</b> est le plus petit possible. La terminaison donne la famille.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : nommer les molécules qui ont un
+   groupe (alcènes, alcools, halogénoalcanes, aldéhydes, cétones, acides) :
+   la chaîne principale contient le groupe, le n° est celui du C qui porte
+   le groupe ; terminaisons et préfixes. Exemples du tableau du cours et de
+   l'ex. 9 ; « À toi » : l'outil de nomenclature (aides activées, étape
+   « groupe » en tête).
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { o, molHTML, video } = NOM;
+// une molécule en couleurs, groupe entouré, avec son nom
+const ex = (s, ec, note) => molHTML(s, { nom: true, ecriture: ec || 'semi', entourer: ORGA.groupes(NOM.mol(s)).map(g => ({ atomes: g.atomes, avecH: g.avecH })), legende: note ? `<p class="nom-avert">${note}</p>` : '' });
+// « À toi » : nommer une molécule fabriquée d'une famille (aides activées)
+const aToiNom = (cle, titre, ec) => {
+  const x = ORGA.fabriqueFamille(cle, { min: 3, max: 6, ramMax: 1 });
+  return { titre, parties: [NOM.partieNom(x.mol, { ecriture: ec || hasard(['semi', 'topo']) })] };
+};
+
+function etape1(c) {
+  const carte = c.carte('1. La chaîne contient le groupe ; le numéro du groupe');
+  c.ajouter(carte, `${video('https://www.youtube.com/watch?v=d-w-bRSgWgg', 'nommer les molécules (plus longue, elle prend le temps d\'expliquer)', 'Attention : dans la vidéo, il met des tirets partout ; il n\'y a des tirets qu\'entre les lettres et les chiffres.')}
+    <div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Règles.</b> La <b>chaîne principale</b> est la plus longue qui <b>contient le groupe caractéristique</b> (pour une C=C, ses deux C).</p>
+        <p><b>Le n° est celui de l'atome de carbone qui porte le groupe caractéristique</b> : il doit être le plus petit possible, puis viennent les ramifications. Il s'écrit juste devant la terminaison : propan-2-ol, pent-1-ène (n° du premier C de la double liaison).</p></div>
+    </div>
+    ${exemple(`<div class="nom-mols">${ex('C=CCC(C)C')}${ex('CC(C)(C)O')}${ex('C=C(CC)CC(C)C', 'topo', 'La chaîne la plus longue a 6 C, mais elle ne contient pas la C=C : la chaîne principale a 5 C.')}</div>`)}`);
+  c.aToi(carte, [aToiNom('alcool', 'Molécule 1', 'semi'), aToiNom('alcene', 'Molécule 2', 'topo')]);
+  return carte;
+}
+function etape2(c) {
+  const carte = c.carte('2. Les terminaisons et les halogènes');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><div class="crs-defile"><table class="crs-tab"><thead><tr><th>Famille</th><th>Nom</th><th>Exemple</th></tr></thead><tbody>
+        <tr><td>alcène</td><td>…-n-<b>ène</b></td><td>but-2-ène</td></tr>
+        <tr><td>alcool</td><td>…an-n-<b>ol</b></td><td>butan-2-ol</td></tr>
+        <tr><td>aldéhyde</td><td>…an<b>al</b></td><td>butanal</td></tr>
+        <tr><td>cétone</td><td>…an-n-<b>one</b></td><td>butan-2-one</td></tr>
+        <tr><td>acide carboxylique</td><td><b>acide</b> …an<b>oïque</b></td><td>acide butanoïque</td></tr>
+        <tr><td>halogénoalcane</td><td><b>fluoro, chloro, bromo, iodo</b></td><td>2-chlorobutane</td></tr></tbody></table></div>
+        <p>-al, -oïque : le C du groupe est le n° 1 ; on n'écrit pas son numéro. Devant une voyelle, « ane » perd son e : butan<b>-2-ol</b>, butan<b>al</b>. Les halogènes se rangent avec les ramifications, dans l'ordre alphabétique.</p></div>
+    </div>
+    ${exemple(`<div class="nom-mols">${ex('CC=O')}${ex('CCCC(C)=O')}${ex('CC(C)CC(=O)O')}${ex('CCC(C)CC(C)Br')}</div>`)}`);
+  c.aToi(carte, [aToiNom(hasard(['aldehyde', 'cetone']), 'Molécule 1'), aToiNom(hasard(['acide', 'halogeno']), 'Molécule 2')]);
+  return carte;
+}
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>La chaîne principale <b>contient le groupe</b> ; le n° est celui du C qui porte le groupe, le plus petit possible.</p></div>
+    <div class="cle"><p>-ène, -ol, -al, -one, acide …-oïque ; halogènes en préfixe (fluoro, chloro, bromo, iodo), dans l'ordre alphabétique avec les ramifications.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3e_cours.html">Cours : nommer les esters, amines et amides →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#nommer">Fiche récapitulative</a></div>`);
+  return carte;
+}
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+NOM.menu('module_3d_cours');
+</script>
+</body>
+</html>

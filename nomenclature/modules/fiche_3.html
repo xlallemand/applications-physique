@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : fiche récapitulative — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Les familles</h2>
+  </div>
+<!-- Fiche récapitulative du module 3 (ancres : familles, carbonyle, acides, nommer, esters) :
+     le tableau des familles du cours, à apprendre par cœur, avec un exemple dessiné par famille -->
+
+  <section class="er-card" id="familles">
+    <h3 class="cours-titre">Familles et groupes caractéristiques (par cœur)</h3>
+    <div class="cle"><p>Famille = classe fonctionnelle ; groupe caractéristique = groupe fonctionnel. On <b>entoure</b> le groupe, on écrit son <b>nom</b>, puis la <b>famille</b> entre parenthèses.</p></div>
+    <div class="nom-mols" id="tableau"></div>
+    <div class="cle"><p>Amines : <b>primaire</b>, <b>secondaire</b>, <b>tertiaire</b> (1, 2 ou 3 C liés au N).</p></div>
+  </section>
+
+  <section class="er-card" id="carbonyle">
+    <h3 class="cours-titre">Le groupe carbonyle</h3>
+    <div class="cle"><p>C=O en <b>bout de chaîne</b> (le C porte un H) : <b>aldéhyde</b> ; C=O <b>entre deux C</b> : <b>cétone</b>.</p></div>
+  </section>
+
+  <section class="er-card" id="acides">
+    <h3 class="cours-titre">Acides carboxyliques, esters, amides</h3>
+    <div class="cle"><p>Le C du C=O porte aussi un OH (<b>acide carboxylique</b>), un O lié à un C (<b>ester</b>) ou un N (<b>amide</b>).</p>
+      <p>Acide ≠ alcool + cétone ; ester ≠ acide ; amide ≠ amine + cétone ; aldéhyde ≠ cétone.</p></div>
+  </section>
+
+  <section class="er-card" id="nommer">
+    <h3 class="cours-titre">Nommer : alcènes, alcools, halogénoalcanes, aldéhydes, cétones, acides</h3>
+    <div class="cle"><p>La chaîne principale <b>contient le groupe</b> ; <b>le n° est celui de l'atome de carbone qui porte le groupe caractéristique</b>, le plus petit possible ; il s'écrit devant la terminaison.</p>
+      <p>-ène (but-2-ène), -ol (butan-2-ol), -al (butanal), -one (butan-2-one), acide …-oïque (acide butanoïque) ; halogènes en préfixe (2-chlorobutane), dans l'ordre alphabétique avec les ramifications. Devant une voyelle, « ane » perd son e.</p></div>
+  </section>
+
+  <section class="er-card" id="esters">
+    <h3 class="cours-titre">Nommer : esters, amines, amides</h3>
+    <div class="cle"><p><b>Ester</b> : alcanoate (chaîne du C=O, son C est le n° 1) d'alkyle (chaîne liée à l'O, numérotée à partir du C lié à l'O).</p>
+      <p><b>Amine</b> : …an-n-amine, la chaîne la plus longue liée au N donne le nom. <b>Amide</b> : …anamide. Les ramifications sur le N : <b>N-</b> (N-éthyléthanamine : sur le N, il y a un éthyle accroché).</p></div>
+    <div class="nom-mols" id="ex-esters"></div>
+    <div class="er-actions som-fiche-liens">
+      <a class="btn-secondary" style="text-decoration:none" href="module_3a_cours.html">Revoir le cours</a>
+      <a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur les familles →</a>
+    </div>
+  </section>
+</div>
+
+<script>
+// tableau des familles du cours : un exemple dessiné, groupe entouré, nom en couleurs
+const LIGNES = [['alcane', 'aucun (C et H, liaisons simples)', 'CCC(C)C'], ['alcène', 'C=C (double liaison C=C)', 'C=CCC(C)C'], ['alcool', '–OH (hydroxyle)', 'CC(C)(C)O'],
+  ['halogénoalcane', '–X : F, Cl, Br, I (halogéno)', 'CCC(C)CC(C)Br'], ['aldéhyde', 'C=O en bout de chaîne (carbonyle)', 'CC=O'], ['cétone', 'C=O entre deux C (carbonyle)', 'CCCC(C)=O'],
+  ['acide carboxylique', '–COOH (carboxyle)', 'CC(C)CC(=O)O'], ['ester', '–COO–C (ester)', 'CCCCOC(C)=O'], ['amine', 'N lié à des C (amine)', 'CCCCCN'], ['amide', '–CO–N (amide)', 'CCCC(N)=O']];
+const ex = s => {
+  const m = NOM.mol(s), r = ORGA.nommer(m);
+  return `${ORGA.dessinHTML(m, { ecriture: 'topo', couleurs: r.couleurs, entourer: ORGA.groupes(m).map(g => ({ atomes: g.atomes, avecH: g.avecH })) })}<div class="nom-mol-n">${ORGA.nomHTML(r.parties)}</div>`;
+};
+// une carte par famille : famille, groupe et son nom, exemple
+document.getElementById('tableau').innerHTML = LIGNES.map(([f, g, s]) => `<div class="nom-mol"><div class="nom-mol-t">${f}</div><p class="nom-mol-g">${g}</p>${ex(s)}</div>`).join('');
+document.getElementById('ex-esters').innerHTML = ['CCCCOC(C)=O', 'CCNCC', 'CCCN(C)CC', 'CCCCNC(C)=O'].map(s => NOM.molHTML(s, { nom: true })).join('');
+NOM.menu('fiche_3');
+</script>
+</body>
+</html>

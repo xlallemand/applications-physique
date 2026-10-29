@@ -36,7 +36,8 @@
      ORGA.etiquetteH(el, n, html)   'CH3' (ou 'CH<sub>3</sub>')
 
    Nomenclature (règles du cours : une seule fonction, ramifications alkyles et halogènes, cycloalcanes)
-     ORGA.nommer(mol, o)            o.chaine : chaîne principale imposée (une des meilleures, dans l'ordre de la numérotation)
+     ORGA.nommer(mol, o)            o.chaine : chaîne principale imposée, dans l'ordre de la numérotation (une des meilleures ;
+                                    une autre donne le nom faux qu'on obtiendrait avec elle)
                                     { nom, variantes (autres écritures acceptées), parties [[texte, classe]] (nom en couleurs),
                                       morceaux (nom découpé), ramifs, couleurs (atomes par classe), famille, groupe,
                                       chaine / numeros (chaîne principale numérotée), struct, chaines }
@@ -501,7 +502,7 @@
     const optimales = r.filter(c => cmpCles(c.cle, r[0].cle) === 0);
     optimales.forEach(c => { c.optimale = true; });
     // chaîne imposée (celle que l'élève a choisie, si elle est aussi bonne)
-    const impose = force && optimales.find(c => c.chaine.join() === force.join());
+    const impose = force && (optimales.find(c => c.chaine.join() === force.join()) || cands.find(c => c.chaine.join() === force.join()));
     return { meilleur: impose || r[0], optimales, L, S, tous: cands };
   }
 

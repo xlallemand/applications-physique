@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : fiche récapitulative — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Nommer les alcanes</h2>
+  </div>
+<!-- Fiche récapitulative du module 2 (une section par cours, ancres : lineaires, ramifie, formule, cycliques) -->
+
+  <section class="er-card" id="lineaires">
+    <h3 class="cours-titre">Les alcanes à chaîne linéaire</h3>
+    <div class="cle"><p><b>Alcane</b> : hydrocarbure saturé (C et H, liaisons simples), formule brute <b>C<sub>n</sub>H<sub>2n+2</sub></b>.</p></div>
+    <div class="som-defile"><table class="som-tab"><thead><tr><th>Formule</th><th>Nom</th><th>Formule</th><th>Nom</th></tr></thead><tbody id="dix"></tbody></table></div>
+  </section>
+
+  <section class="er-card" id="ramifie">
+    <h3 class="cours-titre">Nommer un alcane ramifié</h3>
+    <div class="cle"><p><b>1.</b> La <b>chaîne la plus longue</b> donne la fin du nom (elle n'est pas forcément en ligne droite). Ramifications : « ane » → « yl » (méthyl, éthyl, propyl).</p></div>
+    <div class="cle"><p><b>2.</b> On numérote pour avoir les <b>plus petits numéros</b> ; ramifications identiques : di, tri, tétra… (un numéro pour chacune).</p></div>
+    <div class="cle"><p><b>3.</b> <b>Ordre alphabétique</b> (é avant m ; di, tri… ne comptent pas). Virgule entre deux chiffres, tiret entre chiffre et lettre, rien entre deux lettres.</p></div>
+    <div class="nom-mols" id="exemples"></div>
+  </section>
+
+  <section class="er-card" id="formule">
+    <h3 class="cours-titre">Du nom à la formule</h3>
+    <div class="cle"><p>On dessine <b>à l'envers du nom</b> : 1. la chaîne principale (la fin du nom) ; 2. sa numérotation ; 3. les ramifications ; 4. les H.</p></div>
+  </section>
+
+  <section class="er-card" id="cycliques">
+    <h3 class="cours-titre">Les alcanes cycliques</h3>
+    <div class="cle"><p><b>Cyclo</b> + nom de l'alcane. Un substituant : pas de numéro ; plusieurs : plus petits numéros, le premier dans l'ordre alphabétique a le n° 1.</p></div>
+    <div class="nom-mols" id="cycles"></div>
+    <div class="er-actions som-fiche-liens">
+      <a class="btn-secondary" style="text-decoration:none" href="module_2b_cours.html">Revoir le cours</a>
+      <a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur les alcanes →</a>
+    </div>
+  </section>
+</div>
+
+<script>
+// tableau des dix alcanes, exemples du cours en couleurs, alcanes cycliques
+const NOMS = ['méthane', 'éthane', 'propane', 'butane', 'pentane', 'hexane', 'heptane', 'octane', 'nonane', 'décane'];
+const brute = n => `C${n > 1 ? `<sub>${n}</sub>` : ''}H<sub>${2 * n + 2}</sub>`;
+document.getElementById('dix').innerHTML = [0, 1, 2, 3, 4].map(k => `<tr><td>${brute(k + 1)}</td><td>${NOMS[k]}</td><td>${brute(k + 6)}</td><td>${NOMS[k + 5]}</td></tr>`).join('');
+document.getElementById('exemples').innerHTML = ['CC(C)CCC', 'CC(C)C', 'CC(C)C(C)CCC', 'CCCC(CC)C(C)(C)C'].map(s => NOM.molHTML(s, { nom: true })).join('');
+document.getElementById('cycles').innerHTML = ['C1CCCCC1', 'CCC1CCCCC1', 'CCC1CCCC(C)C1'].map(s => NOM.molHTML(s, { nom: true, ecriture: 'topo', numeros: s === 'CCC1CCCC(C)C1' })).join('');
+NOM.menu('fiche_2');
+</script>
+</body>
+</html>

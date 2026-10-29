@@ -21,6 +21,8 @@
    NOM.trois(smiles, o)               la molécule dans les trois écritures, côte à côte
    NOM.partieNom(smiles, o)           nommer avec l'outil ORGA (aides gardées dans « nomenclature-aides »)
    NOM.enchainer(q, parties, corr.)   plusieurs outils à la suite dans une seule partie (exercices)
+   NOM.PLUSIEURS, NOM.partiesPlusieurs(x)   molécules à plusieurs groupes (ex. 5, sujets de bac) : entourer puis nommer
+   NOM.nomsFaux(mol)                  noms faux classiques [{ nom, diag }] (QCM « trouver l'erreur »)
    NOM.partieBrute(mol, o)            formule brute à écrire (diagnostic : C, H implicites, autres atomes)
    NOM.motif(el, liaisons, doublets)  liaisons et doublets non liants d'un atome (SVG)
    NOM.classif(zone, o)               extrait de la classification : toucher un élément compte les cases jusqu'aux gaz nobles
@@ -387,7 +389,9 @@
     op = op || {};
     const m = mol(s);
     const r = op.nom === true ? O.nommer(m) : null;
-    const d = O.dessinHTML(m, Object.assign({}, r && op.couleurs !== false ? { couleurs: r.couleurs, numeros: op.numeros === false ? null : r.numeros } : {}, op));
+    const autres = Object.assign({}, op);
+    if (typeof autres.numeros === 'boolean') delete autres.numeros;      // numeros: false → pas de numéros
+    const d = O.dessinHTML(m, Object.assign({}, r && op.couleurs !== false ? { couleurs: r.couleurs, numeros: op.numeros === false ? null : r.numeros } : {}, autres));
     const nom = r ? O.nomHTML(r.parties) : op.nom || '';
     return `<div class="nom-mol">${op.titre ? `<div class="nom-mol-t">${op.titre}</div>` : ''}${d}${nom ? `<div class="nom-mol-n">${nom}</div>` : ''}${op.legende || ''}</div>`;
   }
@@ -416,6 +420,70 @@
   }
   const partieBrute = (m, op) => Object.assign({ type: 'texte', label: 'Formule brute :', reponses: [O.formuleBrute(mol(m))], casse: true, largeur: 150,
     affiche: O.formuleBrute(mol(m)), diag: v => diagBrute(v, mol(m), op), solution: `<p>Formule brute : <b>${O.formuleBrute(mol(m), { html: true })}</b>.</p>` }, op && op.partie);
+
+  /* ---------- Molécules à plusieurs groupes (ex. 5 de la feuille, sujets de bac) ----------
+     { titre, s (SMILES), ecriture, condenser (étiquettes de l'énoncé), pos (coordonnées données), note } */
+  const POS_ATROPINE = [[0, .15], [0, 1], [-.87, .5], [-.6, 1.6], [.6, 1.6], [.87, .5], [.87, -.5], [0, -1], [-.87, -.5], [0, -2], [.87, -2.5], [.87, -3.5],
+    [1.73, -2], [1.73, -1], [2.6, -.5], [2.6, -2.5], [3.47, -2], [4.34, -2.5], [4.34, -3.5], [3.47, -4], [2.6, -3.5]].map(([x, y]) => ({ x, y }));
+  const PLUSIEURS = {
+    glycine: { titre: 'Glycine', s: 'NCC(=O)O' },
+    serine: { titre: 'Sérine', s: 'OCC(N)C(=O)O' },
+    asparagine: { titre: 'Asparagine', s: 'NC(=O)CC(N)C(=O)O' },
+    pheromone: { titre: 'Phéromone de la reine chez les abeilles', s: 'CC(=O)CCCCCC=CC(=O)O', condenser: [{ atomes: [3, 4, 5, 6, 7], texte: '(CH2)5' }] },
+    cannelle: { titre: 'Arôme de cannelle', s: 'C1=CC=CC=C1C=CC=O', condenser: [{ atomes: [0, 1, 2, 3, 4, 5], texte: 'C6H5' }] },
+    lactique: { titre: 'Acide lactique (lait, muscles)', s: 'CC(O)C(=O)O' },
+    malique: { titre: 'Acide malique (pomme)', s: 'OC(=O)CC(O)C(=O)O' },
+    frambinone: { titre: 'Frambinone (arôme de framboise)', s: 'CC(=O)CCC1=CC=C(O)C=C1', ecriture: 'topo',
+      note: 'Le OH porté par le cycle benzénique est un groupe hydroxyle, mais la molécule n\'est pas un alcool : c\'est un phénol, famille hors programme.' },
+    atropine: { titre: 'Atropine (médicament, belladone)', s: 'CN1C2CCC1CC(C2)OC(=O)C(CO)C3=CC=CC=C3', ecriture: 'topo', pos: POS_ATROPINE },
+  };
+  // parties d'une molécule à plusieurs groupes : entourer, puis nommer chaque sorte de groupe (sauf un OH sur un cycle benzénique)
+  function partiesPlusieurs(x, op) {
+    const m = mol(x.s), gs = O.groupes(m);
+    const ent = O.partieEntourer(m, Object.assign({ ecriture: x.ecriture || 'semi', condenser: x.condenser, pos: x.pos }, op));
+    const noms = gs.some(g => g.classe === 'phénol')
+      ? [...new Set(gs.filter(g => g.classe !== 'phénol').map(g => g.cle))].map(cle => {
+        const ns = gs.map((g, k) => (g.cle === cle && g.classe !== 'phénol' ? k + 1 : 0)).filter(Boolean);
+        return Object.assign(O.partieNommerGroupe(cle, `Nomme le groupe entouré n° ${ns.join(' et ')} et donne sa famille.`, 'n° ' + ns.join(' et ')), { solution: `<p>Groupe n° ${ns.join(' et ')} : <b>${O.FAMILLES[cle].nomGroupe}</b> (${O.FAMILLES[cle].familles}). ${x.note || ''}</p>` });
+      })
+      : O.partiesNommerGroupes(m);
+    return [ent].concat(noms);
+  }
+
+  /* ---------- Noms faux classiques d'une molécule (QCM « trouver l'erreur ») ----------
+     nomsFaux(m) → [{ nom, diag }] : chaîne trop courte (1-méthyl…, 2-éthyl…), numérotation inversée,
+     di oublié, ramifications identiques séparées, ordre alphabétique, tirets et virgules ;
+     chaque nom faux avec le diagnostic de ORGA.diagnostiquerNom. */
+  function nomsFaux(m0) {
+    const m = mol(m0), r = O.nommer(m), S = r.struct, out = new Map();
+    const ajouter = n => { if (!n || n === r.nom || out.has(n)) return; const d = O.diagnostiquerNom(n, r); if (!d.ok) out.set(n, d.diag); };
+    const fin = r.nom.slice(r.nom.lastIndexOf(r.parties.filter(p => p[1] === 'chaine')[0][0]));
+    const acide = S.acide ? 'acide ' : '';
+    const pref = (gs, ecr) => gs.map(g => (ecr !== false ? g.locs.join(',') + '-' : '') + O.MULT[g.locs.length] + g.nom).join('-');
+    // chaîne trop courte : le nom qu'on obtiendrait avec une autre chaîne
+    r.chaines.tous.filter(c => c.chaine.length < r.n && !c.subs.some(x => x.complexe)).slice(0, 6).forEach(c => {
+      const r2 = O.nommer(m, { chaine: c.chaine });
+      if (!r2.horsProgramme) ajouter(r2.nom);
+    });
+    const gs = S.prefixes;
+    if (gs.length && !S.cyclo && !['aldehyde', 'acide', 'ester', 'amide'].includes(S.famille)) {
+      const inv = gs.map(g => ({ nom: g.nom, locs: g.locs.map(l => (l === 'N' ? l : S.n + 1 - l)).sort((a, b) => a - b) }));
+      // numérotation par l'autre bout (le numéro du groupe aussi)
+      const mg = r.morceaux.find(x => x.type === 'groupe');
+      const finInv = S.gEcrit && mg ? fin.replace(`-${mg.loc}-`, `-${S.famille === 'alcene' ? S.n - mg.loc : S.n + 1 - mg.loc}-`) : fin;
+      ajouter(acide + pref(inv) + finInv);
+    }
+    gs.forEach((g, k) => {
+      if (g.locs.length < 2) return;
+      const sep = gs.slice(0, k).map(x => pref([x])).concat(g.locs.map(l => `${l}-${g.nom}`), gs.slice(k + 1).map(x => pref([x])));
+      ajouter(acide + sep.join('-') + fin);
+      ajouter(acide + gs.map(x => (x === g ? g.locs.join(',') + '-' + g.nom : pref([x]))).join('-') + fin);
+      ajouter(acide + gs.map(x => (x === g ? g.locs.join('-') + '-' + O.MULT[g.locs.length] + g.nom : pref([x]))).join('-') + fin);
+    });
+    if (gs.length >= 2) ajouter(acide + pref(gs.slice().reverse()) + fin);
+    if (gs.length) ajouter(acide + pref(gs) + '-' + fin);
+    return [...out].map(([nom, diag]) => ({ nom, diag }));
+  }
 
   /* ---------- Liaisons et doublets d'un atome (écritures de la remarque manuscrite du cours) ----------
      motif(el, liaisons [[angle, ordre]], doublets [angles], label) → SVG : l'atome, ses liaisons (vers rien)
@@ -574,7 +642,7 @@
   window.NOM = Object.assign(window.NOM || {}, {
     MOINS, fmt, lire, el, secouer, melanger, hasard, entre, o, mol, dessin, PARTIES,
     question, serie, confettis, atelier, CLE_AIDES: 'nomenclature-aides',
-    EC, video, molHTML, trois, partieNom, enchainer, motif, classif, NOMS_EL, diagBrute, partieBrute,
+    EC, video, molHTML, trois, partieNom, enchainer, motif, classif, NOMS_EL, diagBrute, partieBrute, nomsFaux, PLUSIEURS, partiesPlusieurs,
     PLAN, menu, accueil, marquer,
   });
 })();

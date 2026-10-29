@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions — Chapitre 2 : Nomenclature</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : alcanes linéaires (nom ↔ nombre de C ↔
+   CₙH₂ₙ₊₂), toucher la chaîne la plus longue, nommer (semi-développée,
+   topologique, développée, et une semi-développée avec C₂H₅ écrit en
+   abrégé : la chaîne passe par lui), alcane cyclique, dessiner à partir
+   du nom, trouver l'erreur dans un nom (1-méthylbutane, 2-éthylpentane,
+   numérotation inversée, ordre alphabétique, di oublié, tirets).
+   ============================================================ */
+const { o, hasard, melanger, entre, partieBrute, partieNom, nomsFaux } = NOM;
+const NOMS = ['méthane', 'éthane', 'propane', 'butane', 'pentane', 'hexane', 'heptane', 'octane', 'nonane', 'décane'];
+const brute = n => `C${n > 1 ? `<sub>${n}</sub>` : ''}H<sub>${2 * n + 2}</sub>`;
+const fig = (m, op) => `<div class="nom-fig">${ORGA.dessinHTML(m, op || {})}</div>`;
+const opts = n => melanger([n, ...melanger([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].filter(x => x !== n)).slice(0, 3)]).map(x => o(String(x), NOMS[x - 1]));
+// C₂H₅ écrit en abrégé : la chaîne principale passe souvent par lui
+const CONDENSEES = [['CCC(CC)CC', [3, 4]], ['CC(C)C(CC)C', [4, 5]], ['CCC(C)(CC)C', [4, 5]], ['CC(CC)CCC', [2, 3]], ['CC(CC)C(C)C', [2, 3]]];
+const CHAINES = ['CCCC(C)CC', 'CC(C)CC(C)C', 'CCC(CC)CC', 'CC(CC)CCC', 'CCC(C)(CC)C', 'CCCC(CCC)C', 'CC(C)C(CC)CC'];
+const CYCLES = ['CC1CCCCC1', 'CCC1CCCC1', 'CC1CCC(C)CC1', 'CC1CC(CC)CCC1', 'CC1CCCC1C', 'CCCC1CCCCC1'];
+
+const G = {
+  lineaireNom() {
+    const n = entre(1, 10);
+    return hasard([
+      { theme: 'Alcanes linéaires', parties: [{ type: 'choix', q: `Comment s'appelle l'alcane linéaire à ${n} atome${n > 1 ? 's' : ''} de carbone ?`, options: opts(n), bonne: String(n), melanger: false, indice: 'méth 1, éth 2, prop 3, but 4, pent 5, hex 6, hept 7, oct 8, non 9, déc 10.', solution: `<p><b>${NOMS[n - 1]}</b>, ${brute(n)}.</p>` }] },
+      { theme: 'Alcanes linéaires', parties: [{ type: 'choix', q: `Quel alcane a pour formule brute ${brute(n)} ?`, options: opts(n), bonne: String(n), melanger: false, indice: 'Le nombre de C donne le nom.', solution: `<p>${n} C : <b>${NOMS[n - 1]}</b>.</p>` }] },
+    ]);
+  },
+  lineaireBrute() {
+    const n = entre(3, 10);
+    return { theme: 'Alcanes linéaires', parties: [partieBrute(NOM.mol('C'.repeat(n)), { ecriture: 'semi', partie: { q: `Écris la formule brute du ${NOMS[n - 1]}.`, diag: v => `${NOMS[n - 1]} : ${n} C ; C<sub>n</sub>H<sub>2n+2</sub>.` } })] };
+  },
+  chaine() {
+    return { theme: 'La chaîne la plus longue', parties: [ORGA.partieChaine(hasard(CHAINES), { ecriture: hasard(['semi', 'topo']) })] };
+  },
+  nommer(ec) {
+    const x = ORGA.fabriqueAlcane(ec === 'developpee' ? { min: 4, max: 5, ramMin: 1, ramMax: 2 } : { min: 5, max: 8, ramMin: 1, ramMax: 3 });
+    return { theme: 'Nommer un alcane', parties: [partieNom(x.mol, { ecriture: ec })] };
+  },
+  condensee() {
+    const [s, at] = hasard(CONDENSEES);
+    return { theme: 'Nommer un alcane', consigne: 'Attention : C₂H₅ est écrit en abrégé (touche ⓘ).', parties: [partieNom(s, { condenser: [{ atomes: at, texte: 'C2H5' }] })] };
+  },
+  cycle() {
+    return { theme: 'Alcane cyclique', parties: [partieNom(hasard(CYCLES), { ecriture: 'topo' })] };
+  },
+  dessiner(ec) {
+    const x = ORGA.fabriqueAlcane({ min: 4, max: 7, ramMin: 1, ramMax: 2 });
+    return { theme: 'Du nom à la formule', consigne: `Dessine en ${NOM.EC[ec].toLowerCase()} le <b>${x.nom}</b>.`, parties: [ORGA.partieDessin(x.mol, { ecriture: ec, nom: x.nom, q: '' })] };
+  },
+  erreur() {
+    const x = ORGA.fabriqueAlcane({ min: 5, max: 7, ramMin: 2, ramMax: 3 });
+    const f = hasard(nomsFaux(x.mol));
+    const OPTS = [o('chaine', 'la chaîne principale n\'est pas la plus longue'), o('numero', 'la numérotation part du mauvais bout'), o('regroupe', 'les ramifications identiques ne sont pas regroupées (di, tri…)'), o('alpha', 'l\'ordre alphabétique n\'est pas respecté'), o('ecriture', 'les tirets ou les virgules sont mal placés')];
+    const d = f.diag;
+    const bonne = /chaîne a|prolonge/.test(d) ? 'chaine' : /autre bout/.test(d) ? 'numero' : /regroupent|on écrit|veut dire|préfixe/.test(d) ? 'regroupe' : /alphabétique/.test(d) ? 'alpha' : 'ecriture';
+    return { theme: 'Trouver l\'erreur', enonce: `${fig(x.mol)}<p>Un élève a nommé cette molécule <b>${f.nom}</b>.</p>`,
+      parties: [{ type: 'choix', q: 'Quelle est son erreur ?', options: OPTS, bonne, colonne: true, melanger: false, indice: d, solution: `<p>${d} Le nom juste : ${ORGA.nomHTML(x.res.parties)}.</p>` }] };
+  },
+};
+
+function tirage() {
+  return [G.lineaireNom(), hasard([G.lineaireBrute, G.lineaireNom])(), G.chaine(), G.nommer('semi'), G.nommer('topo'), hasard([() => G.nommer('developpee'), G.cycle])(),
+    G.condensee(), G.dessiner('semi'), G.dessiner('topo'), G.erreur()];
+}
+
+NOM.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Nommer les alcanes',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : alcanes linéaires, chaîne la plus longue, <b>nommer</b> un alcane (les aides restent disponibles), <b>dessiner</b> à partir du nom, trouver l\'erreur dans un nom.</p>',
+  questions: tirage,
+  revoir: { href: 'module_2b_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3a_cours.html', label: 'Module 3 : les familles →' },
+});
+NOM.menu('module_2_questions');
+</script>
+</body>
+</html>
