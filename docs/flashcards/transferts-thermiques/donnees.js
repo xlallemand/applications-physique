@@ -7,7 +7,8 @@
    modifiées tt-1-kelvin (sans sens 2), tt-3-isolerL et tt-3-isolerE (exprimer λ, e à partir de R_th = e / (λ × S), un sens),
    tt-3-sens (question), tt-3-unites (conversion de S), tt-4-isolant (crayon et calculatrice) ;
    supprimées tt-1-deltaT, tt-3-isolerR, tt-4-methode.
-   Tour 5 : tt-1-feu modifiée (sans schéma au recto ; mains du schéma plus réalistes) ; toutes les autres validées. */
+   Tour 5 : tt-1-feu modifiée (sans schéma au recto ; mains du schéma plus réalistes) ; toutes les autres validées.
+   Tour 6 : tt-1-feu modifiée (pouce retiré de la main qui tient la tige). */
 (function () {
   // couleurs de assets/theme.css (accent physique)
   const ENC = '#16181d', ENC2 = '#55585f', PAP3 = '#dfdbd2', ACC = '#5a3fc4', ACC2 = '#3f2a93';
@@ -43,14 +44,12 @@
       return `<g transform="${tr}"><path d="${d}" fill="#ffffff" stroke="${ENC2}" stroke-width="2" stroke-linejoin="round"/>` +
         `<path d="M-6,10 C-2,4 -2,-4 -4,-10" fill="none" stroke="#8d8f94" stroke-width="1"/></g>`;
     }
-    /* main qui tient une tige (tige le long de l'axe x, vers x < 0 ; poignet vers +x) : poing vu de côté, pouce sur la tige */
+    /* main qui tient une tige (tige le long de l'axe x, vers x < 0 ; poignet vers +x) : poing vu de côté (sans pouce) */
     function mainTige(tr) {
       const poing = 'M40,-10 L18,-12 C8,-19 -10,-19 -17,-10 C-22,-3 -21,8 -15,14 ' +
         'Q-11,19 -7,15 Q-3,19 1,15 Q5,19 9,15 Q13,19 18,12 L40,9 Z';
-      const pouce = 'M16,-9 C6,-14 -8,-13 -18,-6 C-22,-3 -20,2 -15,0 C-6,-4 4,-4 16,-3 Z';
       return `<g transform="${tr}"><path d="${poing}" fill="#ffffff" stroke="${ENC2}" stroke-width="2" stroke-linejoin="round"/>` +
-        `<path d="M-7,15 C-8,9 -8,4 -6,0 M1,15 C0,9 0,4 2,0 M9,15 C8,9 8,4 10,0" fill="none" stroke="#8d8f94" stroke-width="1.2"/>` +
-        `<path d="${pouce}" fill="#ffffff" stroke="${ENC2}" stroke-width="2" stroke-linejoin="round"/></g>`;
+        `<path d="M-7,15 C-8,9 -8,4 -6,0 M1,15 C0,9 0,4 2,0 M9,15 C8,9 8,4 10,0" fill="none" stroke="#8d8f94" stroke-width="1.2"/></g>`;
     }
     const pastille = (x, y, num, mot) => `<circle cx="${x}" cy="${y}" r="15" fill="${ACC}"/><text x="${x}" y="${y + 6}" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">${num}</text>` +
       `<text x="${x + 20}" y="${y + 6}" font-size="19" font-weight="800" fill="${ACC2}">${mot}</text>`;
@@ -93,7 +92,7 @@
 
   RELECTURE({
     dossier: 'transferts-thermiques', titre: 'Chapitre 5 : Flux et transferts thermiques', court: 'Chapitre 5', matiere: 'physique',
-    tour: 5, etape: 'cartes',
+    tour: 6, etape: 'cartes',
     // pages de cours de l'application (prérequis possibles)
     cours: [
       { cle: 'module_1_cours', nom: 'Cours : température et modes de transfert' },
