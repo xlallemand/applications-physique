@@ -6,7 +6,8 @@
    Tour 4, à la demande de l'enseignant : ajoutée tt-1-feu (les trois modes autour d'un feu, schéma du cours papier) ;
    modifiées tt-1-kelvin (sans sens 2), tt-3-isolerL et tt-3-isolerE (exprimer λ, e à partir de R_th = e / (λ × S), un sens),
    tt-3-sens (question), tt-3-unites (conversion de S), tt-4-isolant (crayon et calculatrice) ;
-   supprimées tt-1-deltaT, tt-3-isolerR, tt-4-methode. */
+   supprimées tt-1-deltaT, tt-3-isolerR, tt-4-methode.
+   Tour 5 : tt-1-feu modifiée (sans schéma au recto ; mains du schéma plus réalistes) ; toutes les autres validées. */
 (function () {
   // couleurs de assets/theme.css (accent physique)
   const ENC = '#16181d', ENC2 = '#55585f', PAP3 = '#dfdbd2', ACC = '#5a3fc4', ACC2 = '#3f2a93';
@@ -23,9 +24,9 @@
     .replace(/\^\{([^}]*)\}/g, '<tspan dy="-6" font-size="75%">$1</tspan><tspan dy="6">​</tspan>');
   // pointe de flèche en (x, y), vers la droite (d = 1) ou vers la gauche (d = −1)
   const CLE = '#ebe7f8';
-  /* Feu de camp (comme le schéma du cours) : ① conduction dans une tige tenue à la main,
-     ② convection de l'air au-dessus du feu, ③ rayonnement vers des mains tendues ; noms = true : nom à côté du numéro */
-  function feu(noms) {
+  /* Feu de camp (comme le schéma du cours), légendé : ① conduction dans une tige tenue à la main,
+     ② convection de l'air au-dessus du feu, ③ rayonnement vers des mains tendues */
+  function feu() {
     // pointe de flèche en (x, y), orientée selon l'angle a (degrés, 0 = vers la droite)
     const pointe = (x, y, a) => { const r = a * Math.PI / 180, c = Math.cos(r), s = Math.sin(r);
       return `<polygon points="${[[x, y], [x - 12 * c - 6 * s, y - 12 * s + 6 * c], [x - 12 * c + 6 * s, y - 12 * s - 6 * c]].map(q => q.map(v => v.toFixed(1)).join(',')).join(' ')}" fill="${ACC}"/>`; };
@@ -33,11 +34,26 @@
     // flamme de hauteur h posée en (x, y)
     const flamme = (x, y, h) => { const w = .34 * h, p = (k, H) => `M${x},${y} C${x - k},${y - .37 * H} ${x - k / 2},${y - .68 * H} ${x},${y - H} C${x + k / 2},${y - .68 * H} ${x + k},${y - .37 * H} ${x},${y} Z`;
       return `<path d="${p(w, h)}" fill="${CLE}" stroke="${ACC}" stroke-width="2.5"/><path d="${p(w * .5, h * .55)}" fill="${ACC}" opacity=".55"/>`; };
-    // poing fermé (comme dans le cours de l'application) ; sens = -1 : tourné vers la gauche
-    const main = (x, y, sens) => `<g transform="translate(${x},${y}) scale(${sens || 1},1)"><rect x="-17" y="-13" width="34" height="26" rx="11" fill="#ffffff" stroke="${ENC2}" stroke-width="1.8"/>` +
-      `<ellipse cx="-4" cy="-11" rx="11" ry="5" fill="#ffffff" stroke="${ENC2}" stroke-width="1.8"/><path d="M-3,-3 h16 M-3,2 h17 M-3,7 h15" fill="none" stroke="#8d8f94" stroke-width="1.2"/></g>`;
-    const pastille = (x, y, num, mot, cote) => `<circle cx="${x}" cy="${y}" r="15" fill="${ACC}"/><text x="${x}" y="${y + 6}" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">${num}</text>` +
-      (noms ? `<text x="${x + 20 * cote}" y="${y + 6}" text-anchor="${cote > 0 ? 'start' : 'end'}" font-size="19" font-weight="800" fill="${ACC2}">${mot}</text>` : '');
+    /* main ouverte, doigts vers +x (paume vue de face, pouce en haut), poignet en x < 0 ; tr : position, rotation, symétrie */
+    function mainOuverte(tr) {
+      const d = 'M-30,-11 L-12,-13 C-7,-16 -2,-25 5,-29 C10,-31 14,-27 11,-22 C8,-18 5,-15 5,-14 ' +   // poignet, pouce
+        'L30,-14 C34,-14 34,-7 30,-7 L15,-7 L35,-6 C39,-6 39,1 35,1 L15,1 ' +                         // index, majeur
+        'L33,2 C37,2 37,9 33,9 L14,9 L27,10 C30.5,10 30.5,16.5 27,16.5 L10,17 ' +                    // annulaire, auriculaire
+        'C2,19 -8,17 -14,13 L-30,11 Z';                                                              // paume
+      return `<g transform="${tr}"><path d="${d}" fill="#ffffff" stroke="${ENC2}" stroke-width="2" stroke-linejoin="round"/>` +
+        `<path d="M-6,10 C-2,4 -2,-4 -4,-10" fill="none" stroke="#8d8f94" stroke-width="1"/></g>`;
+    }
+    /* main qui tient une tige (tige le long de l'axe x, vers x < 0 ; poignet vers +x) : poing vu de côté, pouce sur la tige */
+    function mainTige(tr) {
+      const poing = 'M40,-10 L18,-12 C8,-19 -10,-19 -17,-10 C-22,-3 -21,8 -15,14 ' +
+        'Q-11,19 -7,15 Q-3,19 1,15 Q5,19 9,15 Q13,19 18,12 L40,9 Z';
+      const pouce = 'M16,-9 C6,-14 -8,-13 -18,-6 C-22,-3 -20,2 -15,0 C-6,-4 4,-4 16,-3 Z';
+      return `<g transform="${tr}"><path d="${poing}" fill="#ffffff" stroke="${ENC2}" stroke-width="2" stroke-linejoin="round"/>` +
+        `<path d="M-7,15 C-8,9 -8,4 -6,0 M1,15 C0,9 0,4 2,0 M9,15 C8,9 8,4 10,0" fill="none" stroke="#8d8f94" stroke-width="1.2"/>` +
+        `<path d="${pouce}" fill="#ffffff" stroke="${ENC2}" stroke-width="2" stroke-linejoin="round"/></g>`;
+    }
+    const pastille = (x, y, num, mot) => `<circle cx="${x}" cy="${y}" r="15" fill="${ACC}"/><text x="${x}" y="${y + 6}" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">${num}</text>` +
+      `<text x="${x + 20}" y="${y + 6}" font-size="19" font-weight="800" fill="${ACC2}">${mot}</text>`;
     // ondes du rayonnement
     const onde = y => { let d = `M244,${y}`; for (let x = 244; x < 320; x += 4) d += ` L${x + 4},${(y + 4 * Math.sin((x + 4 - 244) / 19 * 2 * Math.PI)).toFixed(1)}`; return fl(d) + pointe(326, y, 0); };
     const s =
@@ -47,14 +63,14 @@
       flamme(168, 226, 52) + flamme(214, 226, 58) + flamme(191, 226, 84) +
       // ① conduction : tige posée dans le feu, tenue à la main
       `<line x1="198" y1="198" x2="290" y2="70" stroke="${ENC2}" stroke-width="10" stroke-linecap="round"/><line x1="198" y1="198" x2="290" y2="70" stroke="${PAP3}" stroke-width="6" stroke-linecap="round"/>` +
-      main(302, 60, 1) + fl('M232,124 L256,91') + pointe(261, 84, -54) +
+      mainTige('translate(294,68) rotate(-54) scale(.85)') + fl('M232,124 L256,91') + pointe(261, 84, -54) +
       // ② convection : l'air chauffé monte (trait plein), l'air froid revient vers le feu (tirets)
-      fl('M186,128 C182,86 150,58 104,54') + pointe(98, 54, 182) + main(70, 50, -1) +
+      fl('M186,128 C182,86 150,58 104,54') + pointe(98, 54, 182) + mainOuverte('translate(56,50) scale(.9)') +
       fl('M48,82 C34,150 70,214 128,222', true) + pointe(136, 223, 6) +
       // ③ rayonnement vers des mains tendues
-      onde(168) + onde(192) + onde(216) + main(358, 192, -1) +
-      pastille(noms ? 214 : 250, 36, '1', 'conduction', 1) + pastille(noms ? 58 : 72, noms ? 150 : 128, '2', 'convection', 1) + pastille(noms ? 232 : 290, 246, '3', 'rayonnement', 1);
-    return `<svg viewBox="0 0 400 266" width="400" height="266" role="img" aria-label="Feu de camp : ${noms ? 'conduction' : '1'} dans une tige tenue à la main, ${noms ? 'convection' : '2'} de l'air qui monte au-dessus du feu, ${noms ? 'rayonnement' : '3'} vers des mains tendues">` +
+      onde(168) + onde(192) + onde(216) + mainOuverte('translate(368,192) scale(-.9,.9)') +
+      pastille(274, 128, '1', 'conduction') + pastille(58, 150, '2', 'convection') + pastille(232, 246, '3', 'rayonnement');
+    return `<svg viewBox="0 0 400 266" width="400" height="266" role="img" aria-label="Feu de camp : conduction dans une tige tenue à la main, convection de l'air qui monte au-dessus du feu, rayonnement vers des mains tendues">` +
       `<rect x="1" y="1" width="398" height="264" rx="14" fill="#f3f1ec"/>${s}</svg>`;
   }
   const pointe = (x, y, d) => `<polygon points="${x},${y} ${x - 12 * d},${y - 6} ${x - 12 * d},${y + 6}" fill="${ACC}"/>`;
@@ -77,7 +93,7 @@
 
   RELECTURE({
     dossier: 'transferts-thermiques', titre: 'Chapitre 5 : Flux et transferts thermiques', court: 'Chapitre 5', matiere: 'physique',
-    tour: 4, etape: 'cartes',
+    tour: 5, etape: 'cartes',
     // pages de cours de l'application (prérequis possibles)
     cours: [
       { cle: 'module_1_cours', nom: 'Cours : température et modes de transfert' },
@@ -96,7 +112,7 @@
           { id: 'c8', texte: 'Donner le sens du transfert thermique : du chaud vers le froid', types: ['savoir'], source: 'fiche_1 · sens du transfert ; À retenir' },
         ],
         cartes: [
-          { id: 'tt-1-kelvin', type: 'formule', competence: 'c1', statut: 'modifiee', faces: [
+          { id: 'tt-1-kelvin', type: 'formule', competence: 'c1', statut: 'validee', faces: [
             { q: '<p>La formule qui donne la température absolue T à partir de la température θ en degrés Celsius ?</p>' + UNITES,
               r: formule('T = θ + 273') + unites('T en kelvins (K) ; θ en degrés Celsius (°C)') + '<p>Exemple : 20 °C → 293 K.</p>' }] },
           { id: 'tt-1-zero', type: 'definition', competence: 'c2', statut: 'validee', faces: [
@@ -122,9 +138,9 @@
           { id: 'tt-1-sens', type: 'savoir', competence: 'c8', statut: 'validee', faces: [
             { q: '<p>Dans quel sens se fait toujours un transfert thermique ? Quand s\'arrête-t-il ?</p>',
               r: '<p><b>Du corps le plus chaud vers le corps le plus froid.</b></p><p>Il s\'arrête quand les deux corps sont à la même température. Le « froid » ne se transfère pas.</p>' }] },
-          { id: 'tt-1-feu', type: 'savoir', competence: 'c6', statut: 'nouvelle', faces: [
-            { q: '<p>Quels sont les trois modes de transfert thermique ? Comment interviennent-ils autour d\'un feu ?</p>' + fig(feu(false)),
-              r: fig(feu(true)) + '<p>① <b>Conduction</b> : la tige chauffe de proche en proche jusqu\'à la main.</p><p>② <b>Convection</b> : l\'air chauffé par le feu monte.</p><p>③ <b>Rayonnement</b> : les mains devant le feu chauffent, sans contact.</p>' }] },
+          { id: 'tt-1-feu', type: 'savoir', competence: 'c6', statut: 'modifiee', faces: [
+            { q: '<p>Quels sont les trois modes de transfert thermique ? Comment interviennent-ils autour d\'un feu ?</p>',
+              r: fig(feu()) + '<p>① <b>Conduction</b> : la tige chauffe de proche en proche jusqu\'à la main.</p><p>② <b>Convection</b> : l\'air chauffé par le feu monte.</p><p>③ <b>Rayonnement</b> : les mains devant le feu chauffent, sans contact.</p>' }] },
         ] },
 
       /* ---------- Module 2 · Flux thermique ---------- */
@@ -188,17 +204,17 @@
               r: formule('R<sub>th</sub> = e / (λ × S)') + unites(`e en m ; S en m<sup>2</sup> ; λ en ${LAM} ; R<sub>th</sub> en ${KW}`) },
             { q: `<p>Données : l'épaisseur e d'une paroi, en m, sa surface S, en m<sup>2</sup>, et la conductivité thermique λ de son matériau, en ${LAM}.` + QUOI,
               r: `<p>La <b>résistance thermique R<sub>th</sub></b> de la paroi, en ${KW} :</p>` + formule('R<sub>th</sub> = e / (λ × S)') }] },
-          { id: 'tt-3-isolerL', type: 'formule', competence: 'c7', statut: 'modifiee', faces: [
+          { id: 'tt-3-isolerL', type: 'formule', competence: 'c7', statut: 'validee', faces: [
             { q: '<p>À partir de la formule qui donne la résistance thermique R<sub>th</sub> en fonction de e, λ et S, exprime la conductivité thermique λ.</p>',
               r: '<p>R<sub>th</sub> = e / (λ × S), donc :</p>' + formule('λ = e / (R<sub>th</sub> × S)') + unites(`λ en ${LAM} ; e en m ; R<sub>th</sub> en ${KW} ; S en m<sup>2</sup>`) }] },
-          { id: 'tt-3-isolerE', type: 'formule', competence: 'c7', statut: 'modifiee', faces: [
+          { id: 'tt-3-isolerE', type: 'formule', competence: 'c7', statut: 'validee', faces: [
             { q: '<p>À partir de la formule qui donne la résistance thermique R<sub>th</sub> en fonction de e, λ et S, exprime l\'épaisseur e.</p>',
               r: '<p>R<sub>th</sub> = e / (λ × S), donc :</p>' + formule('e = R<sub>th</sub> × λ × S') + unites(`e en m ; R<sub>th</sub> en ${KW} ; λ en ${LAM} ; S en m<sup>2</sup>`) }] },
-          { id: 'tt-3-sens', type: 'graphique', competence: 'c4', statut: 'modifiee', outils: ['calculatrice'], faces: [
+          { id: 'tt-3-sens', type: 'graphique', competence: 'c4', statut: 'validee', outils: ['calculatrice'], faces: [
             { q: fig(bureau(null, 'Mur d\'un bureau climatisé : intérieur à 24 °C, extérieur à 34 °C ; résistance thermique 0,050 K·W⁻¹')) + '<p>Donne le sens du transfert et calcule Φ.</p><small>Φ compté positivement, comme en STI2D</small>',
               r: fig(bureau({ sens: 2, txt: 'Φ = 200 W' }, 'Le même mur : flèche du flux de 200 W de l\'extérieur vers l\'intérieur')) +
                 '<p><b>De l\'extérieur vers l\'intérieur</b> : du chaud vers le froid.</p><p>ΔT = T<sub>ext</sub> − T<sub>int</sub> = 34 − 24 = 10 K ; Φ = 10 / 0,050 = <b>200 W</b>.</p>' }] },
-          { id: 'tt-3-unites', type: 'reflexe', competence: 'c8', statut: 'modifiee', faces: [
+          { id: 'tt-3-unites', type: 'reflexe', competence: 'c8', statut: 'validee', faces: [
             { q: '<p>Une plaque a 4 cm d\'épaisseur et une surface de 100 cm<sup>2</sup>. Que fais-tu avant de calculer R = e / (λ × S) ?</p>',
               r: '<p><b>Convertir e en m et S en m<sup>2</sup>.</b></p><p>e = 4 cm = 4 × 10<sup>−2</sup> m ; S = 100 cm<sup>2</sup> = 100 × (10<sup>−2</sup>)<sup>2</sup> = 100 × 10<sup>−4</sup> = 0,01 m<sup>2</sup>.</p>' }] },
         ] },
@@ -216,7 +232,7 @@
               r: formule('R = R<sub>1</sub> + R<sub>2</sub> + R<sub>3</sub>') + unites(`toutes en ${KW} ; R<sub>i</sub> = e<sub>i</sub> / (λ<sub>i</sub> × S)`) + '<p>Toutes les couches ont la <b>même surface S</b>.</p>' },
             { q: `<p>Données : les résistances thermiques R<sub>1</sub>, R<sub>2</sub> et R<sub>3</sub>, en ${KW}, de trois couches accolées d'une paroi.` + QUOI,
               r: `<p>La <b>résistance thermique totale R</b> de la paroi, en ${KW} :</p>` + formule('R = R<sub>1</sub> + R<sub>2</sub> + R<sub>3</sub>') }] },
-          { id: 'tt-4-isolant', type: 'methode', competence: 'c6', statut: 'modifiee', outils: ['crayon', 'calculatrice'], faces: [
+          { id: 'tt-4-isolant', type: 'methode', competence: 'c6', statut: 'validee', outils: ['crayon', 'calculatrice'], faces: [
             { q: `<p>Un mur de béton de 10 m<sup>2</sup> a une résistance de 0,016 ${KW}. On veut R = 0,50 ${KW} avec de la laine de verre (λ = 0,040). Quelle épaisseur de laine ?</p><small>Démarche</small>`,
               r: `<ol><li>R<sub>laine</sub> = R − R<sub>béton</sub> = 0,50 − 0,016 = 0,484 ${KW}.</li><li>e = R<sub>laine</sub> × λ × S = 0,484 × 0,040 × 10 ≈ <b>0,19 m = 19 cm</b>.</li></ol>` }] },
         ] },
