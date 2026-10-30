@@ -1,4 +1,4 @@
-# Chapitre 2 : Nomenclature (prompt de génération)
+# Nomenclature (prompt de génération)
 
 Lis d'abord `docs/prompts-tspe/00-commun.md` (sources, charte, structure, maquettes, livraison).
 
@@ -11,7 +11,7 @@ Le message de la session dit quelle étape exécuter. Lis tout ce fichier dans l
 
 ## Application
 
-- Dossier `nomenclature/`, nom « Chapitre 2 : Nomenclature », `data-matiere="chimie"`, préfixe `nom`.
+- Dossier `nomenclature/`, nom « Nomenclature », `data-matiere="chimie"`, préfixe `nom`.
 - Portail : desc « Formules développée, semi-développée et topologique, noms des alcanes et des familles. » ; `niv: ['spe']`.
 - Dessin d'en-tête : **nouveau dessin `topologique`** dans `assets/hero.js` (formules topologiques en zigzag, quelques OH, O, NH₂, Cl, comme écrites au tableau).
 - **Moteur partagé de chimie organique `ORGA`** (`assets/orga.js`, `assets/orga-dessin.js`, `assets/orga.css`) : il resservira dans d'autres chapitres de Tle spécialité (acides et bases, spectroscopie, titrages).

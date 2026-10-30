@@ -20,7 +20,7 @@ Le nom de chaque application est le titre du chapitre avec son numéro (celui de
 
 | Nom de l'application | Fichier | Dossier | Modules particuliers |
 |---|---|---|---|
-| Chapitre 2 : Nomenclature | `chapitre-02.md` | `nomenclature/` | **en deux étapes** : maquettes puis application ; **moteur de dessin des molécules** `ORGA` (`assets/orga*.js`) |
+| Nomenclature | `chapitre-02.md` | `nomenclature/` | **en deux étapes** : maquettes puis application ; **moteur de dessin des molécules** `ORGA` (`assets/orga*.js`) |
 
 Les autres chapitres s'ajoutent à ce tableau quand leur cours est dans `Cours-TSpe` : un prompt par chapitre, sur le plan de `chapitre-02.md`.
 

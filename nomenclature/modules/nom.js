@@ -1,5 +1,5 @@
 /* ============================================================
-   Moteur de l'application « Chapitre 2 : Nomenclature » (Terminale
+   Moteur de l'application « Nomenclature » (Terminale
    spécialité ; même moteur de questions que « Cinématique » et
    « Chapitre 6 : Principe fondamental de la dynamique » ; navigation
    commune assets/sommaire.js, cours avec assets/cours.js ; molécules :
@@ -819,7 +819,7 @@
         { nom: 'Les familles', questions: 'module_3_questions' }] },
     { n: 4, titre: 'Exercices', desc: 'Exercices 2 à 10 de la feuille, guidés pas à pas', exercices: 'module_4', exNom: 'Exercices 2 à 10', nbEx: 9 },
   ];
-  window.SOM.init({ nom: 'Chapitre 2 : Nomenclature', id: 'nomenclature', cleEx: 'nomenclature-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Nomenclature', id: 'nomenclature', cleEx: 'nomenclature-exercices', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);

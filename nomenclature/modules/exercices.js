@@ -1,5 +1,5 @@
 /* ============================================================
-   Exercices du module 4 (application « Chapitre 2 : Nomenclature ») :
+   Exercices du module 4 (application « Nomenclature ») :
    ceux de la feuille, dans le même ordre et avec la même numérotation,
    « Exercices 2 à 10 » (sans 1 : exercices en ligne, remplacés par les
    séries ; sans 8 : isomères, hors de cette application ; le 4 est fait
