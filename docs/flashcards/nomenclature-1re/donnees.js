@@ -2,7 +2,9 @@
    (voir docs/flashcards/prompt-generation.md)
    Application de 1re spécialité tirée de « Nomenclature » (terminale) : cartes de terminale au programme de 1re
    reprises avec un nouvel id (nom1-…), cartes adaptées (sans formule topologique) et quelques cartes ajoutées.
-   Tour 1 : 21 cartes, compétences et cartes à valider ensemble (onglets 1 et 2).
+   Tour 1 : 21 cartes, compétences et cartes à valider ensemble (onglets 1 et 2) : 20 validées, 1 à modifier.
+   Tour 2 : nom1-2a-alcane modifiée, validée par l'enseignant le 2026-11-01 : toutes les cartes sont validées,
+   mises en place dans nomenclature-1re/modules/flashcards.js.
    Un paquet par sous-module de cours ; le module 4 (Exercices) n'a pas de cours ; le module 5 (formule
    topologique, hors programme) n'a pas de carte. */
 (function () {
@@ -113,7 +115,7 @@
           { id: 'c3', texte: 'Nommer les dix alcanes linéaires, de 1 à 10 C : méthane… décane', types: ['savoir'], source: 'reprise de la carte de terminale nom-2a-dix (validée) ; fiche_2 · tableau des dix alcanes' },
         ],
         cartes: [
-          { id: 'nom1-2a-alcane', type: 'definition', competence: 'c1', statut: 'modifiee', faces: [
+          { id: 'nom1-2a-alcane', type: 'definition', competence: 'c1', statut: 'validee', faces: [
             { q: '<p>Qu\'est-ce qu\'un alcane ?</p>',
               r: '<p><b>Un hydrocarbure saturé</b> : il ne contient que des atomes C et H, liés par des liaisons simples.</p><p><b>Saturé</b> : sans double ni triple liaison.</p>' },
             { q: '<p>Comment s\'appelle un hydrocarbure saturé (sans double ni triple liaison) : seulement des atomes C et H, liés par des liaisons simples ?</p>',

@@ -841,7 +841,7 @@
         { nom: 'Les trois écritures', simulation: 'module_5_conversion', noms: { simulation: 'Atelier : changer d\'écriture (les trois écritures)' } },
         { nom: 'La formule topologique', questions: 'module_5_questions' }] },
   ];
-  window.SOM.init({ nom: 'Nomenclature (Structure des entités organiques)', id: 'nomenclature-1re', cleEx: 'nomenclature-1re-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Nomenclature (Structure des entités organiques)', id: 'nomenclature-1re', cleEx: 'nomenclature-1re-exercices', plan: PLAN, flashcards: true });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);
