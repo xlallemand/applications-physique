@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : atelier, dessiner un alcane — Nomenclature (Structure des entités organiques)</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · ATELIER</span>
+    <h2 class="er-titre">Dessiner un alcane</h2>
+    <p class="er-contexte">Des noms d'alcanes fabriqués au hasard, un à la fois : dessine chaque molécule en formule semi-développée. Commence par la <b>chaîne principale</b> (la fin du nom), puis place les ramifications, puis écris toi-même les <b>H</b>. Avec les <b>aides</b> (dans les réglages), le nom de ce que tu dessines s'affiche en direct, en couleurs.</p>
+  </div>
+  <div class="er-card">
+    <h3 class="cours-titre">Réglages</h3>
+    <div class="nom-reglages" id="aides"></div>
+  </div>
+  <div class="er-card ph-question" id="tache"></div>
+  <div id="bilan" class="er-card" hidden>
+    <span class="er-badge">BILAN</span>
+    <h3 class="er-titre">✍ Complète ton cours</h3>
+    <div class="cle"><p><b class="cle-titre">Du nom à la formule.</b> On dessine à l'envers du nom : 1. la chaîne principale (la fin du nom) ; 2. sa numérotation ; 3. les ramifications sur les C dont on lit les numéros ; 4. les H.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur les alcanes →</a></div>
+  </div>
+</div>
+<script>
+/* ============================================================
+   Atelier « Dessiner un alcane » (sous-module 3) : fabrique d'alcanes
+   (ORGA.fabriqueAlcane), un à la fois (NOM.atelier) ; l'élève dessine la
+   molécule à partir de son nom dans l'éditeur, H écrits par lui ; aides
+   (réglées une à une dans « Réglages ») : le nom de ce qu'il dessine en
+   direct, en couleurs, et la formule brute (ORGA.partieDessin avec o.nom) ;
+   validation par ORGA.meme. En semi-développée seulement (pas de
+   topologique : hors programme de 1re).
+   L'atelier est fait après dix alcanes.
+   ============================================================ */
+const AIDES = NOM.aidesAtelier('dessiner-alcane', [['nom', 'Nom en direct : le nom de ce que tu dessines, en couleurs'], ['brute', 'Formule brute avec tes H, sous le dessin']]);
+const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'dessiner-alcane', bilan: document.getElementById('bilan'), suivant: 'Alcane suivant →',
+  tirer: () => ORGA.fabriqueAlcane({ min: 4, max: 10, ramMin: 1, ramMax: 3 }),
+  id: x => x.nom,
+  tache(x) {
+    return { titre: x.nom, enonce: `<p>Dessine en semi-développée le <b>${x.nom}</b>.</p>`, parties: [ORGA.partieDessin(x.mol, { ecriture: 'semi', nom: x.nom, hydrogenes: 'eleve', nomDirect: AIDES.active('nom'), brute: AIDES.active('brute'), q: '' })] };
+  } });
+// une aide réglée : le même alcane, avec ou sans l'aide
+NOM.reglagesAides(document.getElementById('aides'), AIDES, () => at.refaire());
+NOM.menu('module_2_dessiner');
+</script>
+</body>
+</html>

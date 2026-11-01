@@ -23,6 +23,7 @@
      fractions  disques et barres partagés
      molecules  modèles moléculaires en boules
      topologique  formules topologiques en zigzag, avec quelques OH, =O, NH₂, Cl, comme écrites au tableau (nomenclature)
+     semidev    formules semi-développées CH₃–CH₂–CH(OH)…, avec quelques OH, =O, COOH, comme écrites au tableau (nomenclature de 1re)
      formules:physique | formules:redox | formules:pile | formules:combustion | formules:ph | formules:algebre
    ============================================================ */
 (function () {
@@ -263,6 +264,61 @@
             main(xe, ye, xg - cx * .3, yg + s * cy * .3);
             etiq(g, xg + 6, yg);
           }
+        }
+      }
+    },
+    // Formules semi-développées écrites au tableau : CH₃–CH₂–CH(OH)–…, ramifications au-dessus ou au-dessous,
+    // C=O (cétone), OH ou COOH en bout de chaîne
+    semidev(ctx, w, h, c, rnd) {
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineCap = 'round';
+      const f = police(), B = 13;                     // B : longueur d'une liaison
+      // trait un peu tremblé, comme à la craie
+      const main = (x1, y1, x2, y2) => { ctx.beginPath(); ctx.moveTo(x1 + (rnd() - .5), y1 + (rnd() - .5)); ctx.quadraticCurveTo((x1 + x2) / 2 + (rnd() - .5) * 1.4, (y1 + y2) / 2 + (rnd() - .5) * 1.4, x2 + (rnd() - .5), y2 + (rnd() - .5)); ctx.stroke(); };
+      // largeur d'un groupe d'atomes (chiffres en indice, plus petits)
+      const morceaux = t => t.match(/[A-Za-z]+|\d/g);
+      const largeur = t => morceaux(t).reduce((l, m) => { ctx.font = /\d/.test(m) ? `600 10px ${f}` : `600 14px ${f}`; return l + ctx.measureText(m).width; }, 0);
+      // écrit un groupe à partir de x (bord gauche), centré verticalement sur y ; renvoie sa largeur
+      const groupe = (t, x, y) => {
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        let xc = x;
+        morceaux(t).forEach(m => {
+          const ind = /\d/.test(m);
+          ctx.font = ind ? `600 10px ${f}` : `600 14px ${f}`;
+          ctx.fillText(m, xc, ind ? y + 5 : y);
+          xc += ctx.measureText(m).width;
+        });
+        return xc - x;
+      };
+      // largeur de la première lettre (pour centrer une liaison verticale sur l'atome)
+      const l1 = t => { ctx.font = `600 14px ${f}`; return ctx.measureText(t[0]).width; };
+      for (let ligne = 0, y0 = 44; y0 < h + 40; y0 += 96, ligne++) {
+        for (let x0 = 14 + (ligne % 2) * 60 - rnd() * 30; x0 < w + 30; x0 += 50 + rnd() * 50) {
+          ctx.globalAlpha = .4 + rnd() * .35; ctx.lineWidth = 1.5;
+          const n = 3 + Math.floor(rnd() * 3), haut = rnd() < .5 ? -1 : 1;
+          // la chaîne : CH₃ au début, puis CH₂ ou CH (ramifié par un CH₃), puis le bout ; un seul groupe
+          // caractéristique : C=O ou CH–OH dans la chaîne, ou OH (après un CH₂) ou COOH au bout
+          const ch = ['CH3'];
+          for (let k = 1; k < n - 1; k++) ch.push(rnd() < .7 ? 'CH2' : 'CH');
+          const g = Math.floor(rnd() * 4), k0 = 1 + Math.floor(rnd() * (n - 2));
+          if (g === 0) ch[k0] = 'C';
+          if (g === 1) ch[k0] = 'CHOH';
+          ch.push(g === 2 && ch[n - 2] === 'CH2' ? 'OH' : g === 3 ? 'COOH' : 'CH3');
+          let x = x0;
+          ch.forEach((t, k) => {
+            const ecrit = t === 'CHOH' ? 'CH' : t, l = largeur(ecrit), xm = x + l1(t) / 2;
+            groupe(ecrit, x, y0);
+            // ramification d'un CH (CH₃, ou OH pour CHOH), double liaison C=O d'un C
+            if (t === 'CH' || t === 'C' || t === 'CHOH') {
+              const y1 = y0 + haut * 10, y2 = y0 + haut * (10 + B);
+              if (t === 'C') { main(xm - 2.5, y1, xm - 2.5, y2); main(xm + 2.5, y1, xm + 2.5, y2); }
+              else main(xm, y1, xm, y2);
+              const r = t === 'C' ? 'O' : t === 'CHOH' ? 'OH' : 'CH3';
+              groupe(r, xm - l1(r) / 2, y2 + haut * 9);
+            }
+            x += l;
+            if (k < ch.length - 1) { main(x + 2, y0, x + 2 + B, y0); x += B + 4; }
+          });
+          x0 = x;
         }
       }
     },

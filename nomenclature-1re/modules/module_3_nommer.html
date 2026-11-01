@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : atelier, nommer une molécule — Nomenclature (Structure des entités organiques)</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · ATELIER</span>
+    <h2 class="er-titre">Nommer une molécule</h2>
+    <p class="er-contexte">Des molécules fabriquées au hasard, une à la fois, de la famille de ton choix. L'outil commence par le <b>groupe caractéristique</b> (l'entourer, le nommer, donner la famille), puis la chaîne, le n° 1, les ramifications et le nom. Les aides se désactivent une à une dans les réglages.</p>
+  </div>
+  <div class="er-card">
+    <h3 class="cours-titre">Réglages</h3>
+    <div class="nom-reglages"><div class="orga-seg" role="group" aria-label="Famille" id="choixFam">
+      <button type="button" class="orga-pil" data-f="toutes">Toutes</button><button type="button" class="orga-pil" data-f="alcool">Alcools</button>
+      <button type="button" class="orga-pil" data-f="aldehyde">Aldéhydes</button><button type="button" class="orga-pil" data-f="cetone">Cétones</button><button type="button" class="orga-pil" data-f="acide">Acides</button>
+    </div></div>
+    <div class="nom-reglages"><div class="orga-seg" role="group" aria-label="Écriture" id="choixEc">
+      <button type="button" class="orga-pil" data-ec="semi">Semi-développée</button><button type="button" class="orga-pil" data-ec="developpee">Développée</button><button type="button" class="orga-pil" data-ec="hasard">Au hasard</button>
+    </div></div>
+    <div class="nom-reglages" id="aides"></div>
+  </div>
+  <div class="er-card ph-question" id="tache"></div>
+  <div id="bilan" class="er-card" hidden>
+    <span class="er-badge">BILAN</span>
+    <h3 class="er-titre">✍ Complète ton cours</h3>
+    <div class="cle"><p><b class="cle-titre">Nommer une molécule.</b> La chaîne principale est la plus longue qui contient le groupe ; le n° est celui de l'atome de carbone qui porte le groupe caractéristique, le plus petit possible ; la terminaison donne la famille (-ol, -al, -one, acide …-oïque) ; ramifications dans l'ordre alphabétique.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_dessiner.html">Atelier : dessiner à partir du nom →</a></div>
+  </div>
+</div>
+<script>
+/* ============================================================
+   Atelier « Nommer une molécule » (sous-module 4) : fabriques par famille
+   (ORGA.fabriqueFamille : chaîne de 2 à 8 C, 0 à 2 ramifications), une
+   molécule à la fois (NOM.atelier), outil de nomenclature avec l'étape
+   « groupe » en tête (NOM.partieNom) ; aides réglées une à une dans
+   « Réglages » (pas de panneau « Aides » dans l'outil). Familles au
+   programme de 1re ; semi-développée ou développée (pas de topologique).
+   ============================================================ */
+const FAMS = NOM.FAMS;          // familles au programme de 1re
+const reg = { f: 'toutes', ec: 'semi' };
+const AIDES = NOM.aidesNommer([['couleurs', 'Couleurs : je repère le groupe, la chaîne, le n° 1 et les ramifications'], ['decoupe', 'Nom découpé : un morceau par partie de la molécule'], ['bulles', 'Bulles ⓘ : les règles du cours']]);
+function majReglages() {
+  document.querySelectorAll('#choixFam [data-f]').forEach(b => b.setAttribute('aria-pressed', b.dataset.f === reg.f));
+  document.querySelectorAll('#choixEc [data-ec]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ec === reg.ec));
+}
+// une molécule fabriquée de la famille choisie (chaîne de 2 à 8 C, 0 à 2 ramifications) ; l'écriture « au hasard » est tirée avec elle
+const fabrique = () => Object.assign(ORGA.fabriqueFamille(reg.f === 'toutes' ? NOM.hasard(FAMS) : reg.f, { min: 2, max: 8, ramMax: 2 }), { ecH: NOM.hasard(['semi', 'semi', 'developpee']) });
+majReglages();
+const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'nommer', bilan: document.getElementById('bilan'),
+  tirer: fabrique, id: x => x.nom,
+  tache(x) {
+    const ec = reg.ec === 'hasard' ? x.ecH : reg.ec;
+    return { titre: `Une molécule en ${NOM.EC[ec].toLowerCase()}`, parties: [NOM.partieNom(x.mol, { ecriture: ec, panneau: false, q: '' })] };
+  } });
+// une aide réglée : la même molécule, avec ou sans l'aide
+NOM.reglagesAides(document.getElementById('aides'), AIDES, () => at.refaire());
+// nouvelle famille : une autre molécule ; nouvelle écriture : la même molécule
+document.getElementById('choixFam').addEventListener('click', ev => { const b = ev.target.closest('[data-f]'); if (b) { reg.f = b.dataset.f; majReglages(); at.nouvelle(); } });
+document.getElementById('choixEc').addEventListener('click', ev => { const b = ev.target.closest('[data-ec]'); if (b) { reg.ec = b.dataset.ec; majReglages(); at.refaire(); } });
+NOM.menu('module_3_nommer');
+</script>
+</body>
+</html>

@@ -34,6 +34,8 @@
    api.effacer(), api.compterErreur(), api.fini() ; renvoie { montrer() }) :
      ORGA.partieEntourer(mol, o)       entourer les groupes caractéristiques (toucher les atomes, Valider)
      ORGA.partiesNommerGroupes(mol)    parties 'choix' : « groupe … · famille des … » pour chaque sorte de groupe
+                                       (confusions proposées : ORGA.CONFUSIONS ; textes des diagnostics d'entourage : ORGA.TEXTES,
+                                       adaptables au programme d'une application, comme ORGA.BULLES)
      ORGA.partieChaine(mol, o)         toucher la chaîne principale
      ORGA.partieNom(mol, o)            nommer, avec les aides (couleurs, nom découpé, bulles) ; o.cleAides : clé localStorage ;
                                        o.sansAide : nom écrit directement ; ORGA.lireAides(cle), ORGA.ecrireAides(cle, aides)
@@ -1721,6 +1723,12 @@
     return dessinHTML(md, { ecriture: (o && o.ecriture) || 'semi', entourer: entouresDe(gs), sansAide: true, pos: o && o.pos }) + legendeHTML(gs);
   }
 
+  // textes des diagnostics d'entourage : ce qui forme un groupe caractéristique
+  // (une application peut les adapter à son programme : ORGA.TEXTES)
+  const TEXTES = {
+    pasUnGroupe: 'il faut un atome O, N, un halogène, ou une double liaison C=C',
+    groupeOublie: 'repère les atomes O, N, les halogènes et les doubles liaisons C=C',
+  };
   // diagnostic d'un entourage (atomes et H choisis) ; null si c'est juste
   function diagEntourer(md, gs, choisis, hPar, ec) {
     const attendus = new Set(gs.flatMap(g => g.at));
@@ -1728,7 +1736,7 @@
     const intrus = [...choisis].find(i => !attendus.has(i));
     if (intrus != null) {
       const a = md.atomes[intrus];
-      if (a.el === 'C' || a.etiq) return `${nomAtome(md, intrus, ec)} ne contient que des atomes de carbone et d'hydrogène : ce n'est pas un groupe caractéristique (il faut un atome O, N, un halogène, ou une double liaison C=C).`;
+      if (a.el === 'C' || a.etiq) return `${nomAtome(md, intrus, ec)} ne contient que des atomes de carbone et d'hydrogène : ce n'est pas un groupe caractéristique (${TEXTES.pasUnGroupe}).`;
       return 'Entoure seulement les atomes des groupes caractéristiques.';
     }
     const hIntrus = hPar.find(de => !attendus.has(de));
@@ -1748,7 +1756,7 @@
       if (g.cle === 'alcene') return 'Pour la double liaison C=C, entoure ses deux atomes de carbone.';
     }
     const oublie = gs.find(g => !g.at.some(i => choisis.has(i)));
-    if (oublie) return `Il manque ${gs.length > 1 ? 'au moins un' : 'le'} groupe caractéristique : repère les atomes O, N, les halogènes et les doubles liaisons C=C.`;
+    if (oublie) return `Il manque ${gs.length > 1 ? 'au moins un' : 'le'} groupe caractéristique : ${TEXTES.groupeOublie}.`;
     return null;
   }
 
@@ -1793,6 +1801,7 @@
   }
 
   // propositions « groupe … · famille des … » : la bonne et trois confusions classiques
+  // (une application peut les adapter à son programme : ORGA.CONFUSIONS)
   const CONFUSIONS = {
     alcool: [['alcool', 'acide', 'Le groupe hydroxyle –OH, sur un C qui ne porte pas de =O, donne la famille des <b>alcools</b>.'], ['acide', 'acide', 'Ce OH est sur un C qui ne porte pas de =O : c\'est un groupe <b>hydroxyle</b>.'], ['cetone', 'cetone', 'Pas de C=O ici : le O est lié à un H, c\'est –OH.']],
     aldehyde: [['aldehyde', 'cetone', 'Le C du C=O est au bout de la chaîne et porte un H : famille des <b>aldéhydes</b>.'], ['alcool', 'alcool', 'Le O est lié au C par une double liaison : C=O, groupe <b>carbonyle</b>.'], ['acide', 'acide', 'Pas de OH sur ce C : ce n\'est pas un carboxyle.']],
@@ -2363,7 +2372,7 @@
   }
 
   Object.assign(O, {
-    ECHELLES, NOM_EC, DIRS_EDITEUR: DIRS, GLISSER, BULLES,
+    ECHELLES, NOM_EC, DIRS_EDITEUR: DIRS, GLISSER, BULLES, TEXTES, CONFUSIONS,
     info, fermerInfo, formuleHTML, aidesCondensees, dessinActif, corrigeGroupes, lireAides, ecrireAides,
     partieEntourer, partiesNommerGroupes, partieNommerGroupe, partieChaine, partieNom, partieDessin, partieH, partieConversion, diagDessin,
     disposer, scene, svgCorps, dessinHTML, dessiner, nomHTML, legendeHTML,
