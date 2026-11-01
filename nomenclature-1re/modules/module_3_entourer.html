@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : atelier, entourer les groupes — Nomenclature (Structure des entités organiques)</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · ATELIER</span>
+    <h2 class="er-titre">Entourer les groupes</h2>
+    <p class="er-contexte">La question classique : sur une molécule qui a <b>plusieurs groupes caractéristiques</b>, <b>entourer</b> chaque groupe, le <b>nommer</b> et donner la <b>famille</b>. Des molécules de la vie courante (celles de l'exercice 2 et d'autres), une à la fois, au hasard.</p>
+    <div class="cle nom-mode">
+      <p><b class="cle-titre">Pour t'entraîner, sans fin.</b> Il n'y a pas de nombre de questions fixé : les molécules arrivent au hasard, une après l'autre, sans fin (quand toutes sont passées, elles reviennent dans un autre ordre), et rien n'est noté. Fais-en autant que tu veux, et arrête-toi dès que tu es satisfait.</p>
+      <ul class="er-liste">
+        <li><b>Pour commencer</b> : touche les atomes de chaque groupe pour l'entourer en entier, puis valide ; choisis ensuite, pour chaque groupe, son nom et sa famille. Garde l'aide <b>bulles ⓘ</b> cochée et touche-les dès que tu hésites : elles rappellent comment reconnaître chaque groupe.</li>
+        <li><b>Ensuite</b> : décoche les bulles : tu repères seul les groupes et leurs familles.</li>
+        <li><b>En cas d'erreur</b> : un message t'explique ce qui ne va pas ; corrige, puis valide de nouveau. Si tu bloques, « Afficher la réponse » te montre la solution : lis-la, puis passe à la suivante.</li>
+        <li><b>C'est bon</b> quand tu entoures et nommes <b>tous les groupes de 3 molécules de suite du premier coup, sans les bulles</b>. Passe alors à l'atelier « Nommer une molécule ».</li>
+        <li><b>Repère</b> : après 8 molécules, la carte « À retenir » s'affiche en bas de la page et l'atelier est coché dans le sommaire. Ce n'est pas une fin : continue tant que tu en as besoin.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="er-card">
+    <h3 class="cours-titre">Réglages</h3>
+    <div class="nom-reglages" id="aides"></div>
+  </div>
+  <div class="er-card ph-question" id="tache"></div>
+  <div id="bilan" class="er-card" hidden>
+    <span class="er-badge">BILAN</span>
+    <h3 class="er-titre">À retenir</h3>
+    <div class="cle"><p><b class="cle-titre">Entourer les groupes.</b> On repère les atomes autres que C et H (ici, les O). On entoure chaque groupe en entier : C, =O et OH sur le même C forment un seul groupe, le groupe carboxyle. Puis on écrit son nom et la famille entre parenthèses : « groupe carboxyle (acides carboxyliques) ».</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_nommer.html">Atelier : nommer une molécule →</a></div>
+  </div>
+</div>
+<script>
+/* ============================================================
+   Atelier « Entourer les groupes » : molécules à plusieurs groupes
+   (hydroxyle, carbonyle, carboxyle : familles au programme de 1re ;
+   NOM.PLUSIEURS), une à la fois, tirée au hasard (NOM.atelier) :
+   entourer chaque groupe (ORGA.partieEntourer), puis nommer chaque groupe
+   et donner la famille (NOM.partiesPlusieurs). Aide (réglages) : bulles ⓘ.
+   ============================================================ */
+const MOLS = Object.values(NOM.PLUSIEURS);
+const AIDES = NOM.aidesAtelier('entourer', [['bulles', 'Bulles ⓘ : les règles du cours']]);
+const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'entourer', items: MOLS, id: x => x.titre, bilan: document.getElementById('bilan'),
+  tache: x => ({ titre: x.titre, parties: NOM.partiesPlusieurs(x, { bulles: AIDES.active('bulles') }) }) });
+// aide réglée : la même molécule, avec ou sans les bulles
+NOM.reglagesAides(document.getElementById('aides'), AIDES, () => at.refaire());
+NOM.menu('module_3_entourer');
+</script>
+</body>
+</html>

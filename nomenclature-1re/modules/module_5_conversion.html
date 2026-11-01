@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 : changer d'écriture — Nomenclature (Structure des entités organiques)</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 5 · ATELIER</span>
+    <h2 class="er-titre">Changer d'écriture : les trois écritures</h2>
+    <p class="er-contexte">Des molécules tirées au hasard, une à la fois, à passer d'une écriture à l'autre, entre les formules développée, semi-développée et topologique (choix de la conversion dans les réglages).</p>
+    <div class="cle nom-mode">
+      <p><b class="cle-titre">Pour t'entraîner, sans fin.</b> Il n'y a pas de nombre de questions fixé : les molécules arrivent au hasard, une après l'autre, sans fin, et rien n'est noté. Fais-en autant que tu veux, et arrête-toi dès que tu es satisfait.</p>
+      <ul class="er-liste">
+        <li><b>Pour commencer</b> : choisis « Développée → semi » et garde l'aide <b>étapes guidées</b> cochée : tu appliques sur le dessin la phrase du cours, « On enlève les liaisons des H et on les regroupe sur leur atome ». Fais ensuite « Semi → topologique » (« On efface tous les CH ») et « Topologique → semi » (« On ajoute un C avec le bon nombre de H au bout de chaque trait »), toujours guidé.</li>
+        <li><b>Ensuite</b> : décoche les étapes guidées : tu dessines directement l'écriture demandée dans l'éditeur, en écrivant toi-même les <b>H</b> (en topologique, seulement le H des OH), puis tu valides. Essaie les quatre conversions.</li>
+        <li><b>En cas d'erreur</b> : un message t'explique ce qui ne va pas ; corrige, puis valide de nouveau. Si tu bloques, « Afficher la réponse » te montre la solution : lis-la, puis passe à la suivante.</li>
+        <li><b>C'est bon</b> quand tu réussis <b>3 molécules de suite du premier coup, sans étapes guidées</b>, pour chaque conversion. Passe alors aux questions du module 5.</li>
+        <li><b>Repère</b> : après 10 molécules, la carte « À retenir » s'affiche en bas de la page et l'atelier est coché dans le sommaire. Ce n'est pas une fin : continue tant que tu en as besoin.</li>
+      </ul>
+    </div>
+    <div class="callout nom-hp"><p><b>Hors programme de 1re.</b> Ce module est là pour te préparer à la terminale.</p></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="cours-titre">Réglages</h3>
+    <div class="nom-reglages">
+      <div class="orga-seg" role="group" aria-label="Conversion" id="choixConv">
+        <button type="button" class="orga-pil" data-c="developpee-semi">Développée → semi</button>
+        <button type="button" class="orga-pil" data-c="semi-topo">Semi → topologique</button>
+        <button type="button" class="orga-pil" data-c="topo-semi">Topologique → semi</button>
+        <button type="button" class="orga-pil" data-c="developpee-topo">Développée → topologique</button>
+      </div>
+    </div>
+    <div class="nom-reglages" id="aides"></div>
+    <div class="nom-reglages">
+      <label class="nom-interr"><input type="checkbox" id="compter"> Faire compter les H (développée → semi, étapes guidées)</label>
+    </div>
+  </div>
+
+  <div class="er-card ph-question" id="tache"></div>
+
+  <div id="bilan" class="er-card" hidden>
+    <span class="er-badge">BILAN</span>
+    <h3 class="er-titre">À retenir</h3>
+    <div class="cle"><p><b class="cle-titre">Développée → semi-développée.</b> « On enlève les liaisons des H et on les regroupe sur leur atome. »</p></div>
+    <div class="cle"><p><b class="cle-titre">Vers la topologique.</b> « On efface tous les CH. » Puis on met la chaîne en zigzag.</p></div>
+    <div class="cle"><p><b class="cle-titre">Depuis la topologique.</b> « On ajoute un C avec le bon nombre de H au bout de chaque trait, s'il n'y a pas déjà un autre atome. » Nombre de H = 4 − nombre de traits.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_5_questions.html">Questions sur la formule topologique →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Atelier « Changer d'écriture : les trois écritures » (module 5, hors
+   programme de 1re ; atelier du module 1 de terminale) : molécules variées
+   (familles au programme de 1re, ramifications, 3 à 7 C), une à la fois,
+   tirée au hasard (NOM.atelier).
+   Réglages : la conversion, l'aide « étapes guidées » (outil ORGA.conversion :
+   les trois phrases du cours appliquées sur le dessin), « Faire compter
+   les H » (développée → semi) ; sans aide, l'élève dessine l'écriture
+   demandée dans l'éditeur, H écrits par lui (validation par ORGA.meme).
+   ============================================================ */
+const MOLS = ['CCC(C)O', 'CC(C)CC=O', 'CC(C)CC(C)C', 'CCC(=O)CC', 'CCCC(O)C', 'CC(C)C(=O)O', 'CCC(C)CC(C)C', 'CCC(C)C=O', 'CC(C)C(C)=O', 'CCCC(C)(O)CC'];
+const NOMS_EC = { developpee: 'développée', semi: 'semi-développée', topo: 'topologique' };
+const reg = { c: 'developpee-semi', compter: false };
+const AIDES = NOM.aidesAtelier('conversion-topo', [['guidees', 'Étapes guidées : les trois phrases du cours appliquées sur le dessin']]);
+
+function tache(s) {
+  const [de, vers] = reg.c.split('-');
+  const ecDessin = vers === 'topo' ? 'topo' : 'semi';
+  return AIDES.active('guidees')
+    ? { titre: `De la formule ${NOMS_EC[de]} à la formule ${NOMS_EC[vers]}`,
+        parties: [ORGA.partieConversion(s, de, vers, { compterH: reg.compter && de === 'developpee' })] }
+    : { titre: `De la formule ${NOMS_EC[de]} à la formule ${NOMS_EC[vers]}`,
+        enonce: `<p>Dessine cette molécule en formule <b>${NOMS_EC[vers]}</b>, puis valide.</p>${NOM.dessin(s, { ecriture: de, label: 'Formule ' + NOMS_EC[de] })}`,
+        parties: [ORGA.partieDessin(s, { ecriture: ecDessin, hydrogenes: 'eleve', q: '' })] };
+}
+// une molécule convertie compte comme faite, quelle que soit la conversion
+const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'conversion-topo', items: MOLS, tache, bilan: document.getElementById('bilan') });
+
+// réglages : on reprend la même molécule avec la nouvelle conversion
+function majReglages() {
+  document.querySelectorAll('#choixConv [data-c]').forEach(b => b.setAttribute('aria-pressed', b.dataset.c === reg.c));
+  document.getElementById('compter').disabled = !reg.c.startsWith('developpee') || !AIDES.active('guidees');
+}
+// aide réglée : la même molécule, avec ou sans les étapes guidées
+NOM.reglagesAides(document.getElementById('aides'), AIDES, () => { majReglages(); at.refaire(); });
+document.getElementById('choixConv').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-c]');
+  if (!b) return;
+  reg.c = b.dataset.c; majReglages(); at.refaire();
+});
+document.getElementById('compter').addEventListener('change', ev => { reg.compter = ev.target.checked; at.refaire(); });
+majReglages();
+NOM.menu('module_5_conversion');
+</script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 : questions — Nomenclature (Structure des entités organiques)</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   Série du module 5 (hors programme de 1re, pour se préparer à la
+   terminale) : 20 questions tirées au hasard sur la formule topologique.
+   Reconnaître une écriture parmi les trois, formule brute d'une
+   topologique, conversions guidées par les phrases du cours (semi →
+   topo, topo → semi, développée → topo), molécules à dessiner
+   directement d'une écriture à l'autre, chaîne la plus longue, nommer,
+   entourer le groupe et dessiner à partir du nom, en topologique.
+   Molécules : alcanes et familles au programme de 1re (NOM.FAMS).
+   Erreurs diagnostiquées : oublier les C des bouts de traits, les H des
+   C (4 − nombre de traits), effacer le H d'un OH.
+   ============================================================ */
+const { o, hasard, melanger, partieBrute, partieNom, EC } = NOM;
+const mol = NOM.mol;
+const FAMS = NOM.FAMS;          // familles au programme de 1re
+
+// formules brutes à lire sur une topologique
+const TOPOS = ['CC(C)CC(C)C', 'CCC(C)CO', 'CCCC(C)C(=O)O', 'CCC(=O)CC(C)C', 'CC(C)(C)CCO', 'CCC(C)CC=O', 'CCCC(C)(O)CC', 'CC(C)CCC(C)=O'];
+// molécules variées pour reconnaître une écriture
+const DIVERSES = ['CC(C)CC(C)O', 'CCC(=O)CC', 'CC(C)CC(C)C', 'CCCC(C)=O', 'CCC(C)CC=O', 'CC(C)CC(=O)O', 'CCCC(C)(C)O', 'CCC(C)C(=O)O', 'CC(C)CCO'];
+// conversions et dessins d'une écriture à l'autre
+const CONV = ['CCC(C)O', 'CC(C)CC=O', 'CC(C)CC(C)C', 'CCC(=O)CC', 'CCCC(O)C', 'CC(C)C(=O)O', 'CCC(C)CCO', 'CC(C)(O)CC', 'CC(C)CC(C)=O', 'CCC(C)C=O', 'CCCCC(=O)O'];
+// petites molécules pour la développée (les H s'y écrivent un par un)
+const PETITES = ['CCO', 'CC=O', 'CC(C)O', 'CC(=O)O', 'CC(C)=O', 'CCCO', 'CCC=O', 'CC(C)C'];
+// alcanes : chaîne la plus longue
+const CHAINES = ['CCCC(C)CC', 'CC(C)CC(C)C', 'CCC(CC)CC', 'CC(CC)CCC', 'CCC(C)(CC)C', 'CCCC(CCC)C', 'CC(C)C(CC)CC'];
+const fig = (m, op) => `<div class="nom-fig">${ORGA.dessinHTML(m, op || {})}</div>`;
+
+const G = {
+  // reconnaître une écriture parmi les trois
+  ecriture(ec0) {
+    const ec = ec0 || hasard(['developpee', 'semi', 'topo']), s = hasard(DIVERSES);
+    const OPTS = [o('developpee', 'développée'), o('semi', 'semi-développée'), o('topo', 'topologique')];
+    const IND = { developpee: 'Tous les atomes et toutes les liaisons sont dessinés, H compris : développée.', semi: 'Les H sont regroupés sur leur atome (CH₃, CH₂…) : semi-développée.', topo: 'Les C ne sont pas écrits (sommets et bouts de traits) : topologique.' };
+    return { theme: 'Reconnaître une écriture', enonce: fig(mol(s), { ecriture: ec, label: 'Formule à reconnaître' }),
+      parties: [{ type: 'choix', q: 'Quelle est cette écriture ?', options: OPTS, bonne: ec, melanger: false, indice: IND[ec], solution: `<p>Formule <b>${EC[ec].toLowerCase()}</b>.</p>` }] };
+  },
+  // formule brute d'une topologique (C des bouts de traits, H implicites)
+  bruteTopo(s) {
+    const m = mol(s || hasard(TOPOS));
+    return { theme: 'Formule brute', enonce: fig(m, { ecriture: 'topo', label: 'Formule topologique' }), parties: [partieBrute(m, { ecriture: 'topo', partie: { q: 'Écris la formule brute de cette molécule.' } })] };
+  },
+  // conversion guidée par les phrases du cours
+  conversion(s, de, vers) {
+    return { theme: 'Changer d\'écriture', consigne: `De la formule ${EC[de].toLowerCase()} à la formule ${EC[vers].toLowerCase()}.`,
+      parties: [ORGA.partieConversion(s || hasard(CONV), de, vers, { compterH: de === 'developpee' })] };
+  },
+  // dessiner directement la molécule dans l'écriture demandée ; hydro : 'auto' (H automatiques) ou 'eleve' (H à écrire)
+  dessin(s, de, vers, hydro) {
+    const eleve = hydro === 'eleve' && vers !== 'topo';
+    const h = vers === 'topo' ? '' : eleve ? `, <b>en écrivant toi-même les H</b> (outil « H »${vers === 'developpee' ? ' : touche un atome pour lui ajouter un H' : ' : touche un atome et choisis ses H'})` : ' (les H se placent tout seuls)';
+    return { theme: 'Dessiner une molécule', consigne: `Dessine cette molécule en formule ${EC[vers].toLowerCase()}${h}.`, enonce: fig(mol(s), { ecriture: de, label: 'Formule ' + EC[de].toLowerCase() }),
+      parties: [ORGA.partieDessin(s, { ecriture: vers, hydrogenes: eleve ? 'eleve' : 'auto', q: '' })] };
+  },
+  // chaîne la plus longue d'un alcane en topologique
+  chaine(s) {
+    return { theme: 'La chaîne la plus longue', parties: [ORGA.partieChaine(s || hasard(CHAINES), { ecriture: 'topo' })] };
+  },
+  // nommer un alcane ramifié en topologique
+  nommerAlcane() {
+    const x = ORGA.fabriqueAlcane({ min: 5, max: 7, ramMin: 1, ramMax: 2 });
+    return { theme: 'Nommer un alcane', parties: [partieNom(x.mol, { ecriture: 'topo' })] };
+  },
+  // nommer une molécule d'une famille au programme, en topologique
+  nommer(f) {
+    const x = ORGA.fabriqueFamille(f || hasard(FAMS), { min: 3, max: 6, ramMax: 1 });
+    return { theme: 'Nommer une molécule', parties: [partieNom(x.mol, { ecriture: 'topo' })] };
+  },
+  // entourer, nommer le groupe, donner la famille, en topologique
+  entourer(f) {
+    const x = ORGA.fabriqueFamille(f || hasard(FAMS), { min: 3, max: 6, ramMax: 1 });
+    return { theme: 'Groupe caractéristique', parties: [ORGA.partieEntourer(x.mol, { ecriture: 'topo' })].concat(ORGA.partiesNommerGroupes(x.mol)) };
+  },
+  // du nom à la formule topologique
+  dessiner(f) {
+    const x = ORGA.fabriqueFamille(f || hasard(FAMS), { min: 3, max: 6, ramMax: 1 });
+    return { theme: 'Du nom à la formule', consigne: `Dessine en topologique : <b>${x.nom}</b>.`, parties: [ORGA.partieDessin(x.mol, { ecriture: 'topo', nom: x.nom, q: '' })] };
+  },
+};
+
+function tirage() {
+  // molécules et familles différentes d'une question à l'autre
+  const conv = melanger(CONV), petites = melanger(PETITES), topos = melanger(TOPOS);
+  const f = melanger(FAMS).concat(melanger(FAMS));
+  let c = 0, k = 0;
+  const sC = () => conv[c++ % conv.length];
+  const fam = () => f[k++ % f.length];
+  const ec = melanger(['developpee', 'semi', 'topo']);
+  return [G.ecriture(ec[0]), G.bruteTopo(topos[0]),
+    G.conversion(sC(), 'semi', 'topo'), G.conversion(sC(), 'topo', 'semi'),
+    G.dessin(sC(), 'semi', 'topo'), G.dessin(sC(), 'topo', 'semi', 'auto'),
+    G.chaine(), G.nommerAlcane(), G.entourer(fam()),
+    G.ecriture(ec[1]), G.bruteTopo(topos[1]),
+    G.conversion(sC(), 'developpee', 'topo'), G.dessin(sC(), 'developpee', 'topo'),
+    G.dessin(sC(), 'topo', 'semi', 'eleve'), G.nommer(fam()), G.entourer(fam()),
+    G.dessin(petites[0], 'topo', 'developpee', 'eleve'), G.dessin(sC(), 'semi', 'topo'),
+    G.bruteTopo(topos[2]), G.dessiner(fam())];
+}
+
+NOM.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 5 · QUESTIONS', titre: 'La formule topologique',
+  intro: '<div class="callout nom-hp"><p><b>Hors programme de 1re.</b> Pour te préparer à la terminale.</p></div><p class="er-contexte">20 questions tirées au hasard : reconnaître une écriture, formule brute d\'une topologique, des <b>conversions</b> guidées par les phrases du cours, des molécules à <b>dessiner</b> d\'une écriture à l\'autre ; puis, en topologique, chaîne la plus longue, nommer, entourer le groupe caractéristique et dessiner à partir du nom.</p>',
+  nombre: 20,
+  questions: tirage,
+  revoir: { href: 'module_5a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'fiche_5.html', label: 'Fiche récapitulative →' },
+});
+NOM.menu('module_5_questions');
+</script>
+</body>
+</html>

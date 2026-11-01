@@ -53,7 +53,7 @@
      RÉGLAGES
      ============================================================ */
   // applications qui ont des cartes : dossiers, dans l'ordre du portail
-  const APPLIS = ['transferts-thermiques', 'changements-etat', 'nomenclature', 'oxydoreduction-spe'];
+  const APPLIS = ['transferts-thermiques', 'changements-etat', 'nomenclature-1re', 'nomenclature', 'oxydoreduction-spe'];
 
   const INTERVALLES = [1, 2, 4, 7, 14, 30, 60];          // jours avant la révision suivante, case 1 à 7
   const MAX = INTERVALLES.length;                         // dernière case

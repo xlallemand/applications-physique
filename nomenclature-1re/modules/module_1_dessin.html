@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : atelier, prise en main de l'outil de dessin des molécules — Nomenclature (Structure des entités organiques)</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/orga.css">
+<link rel="stylesheet" href="nom.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/orga.js"></script>
+<script src="../../assets/orga-dessin.js"></script>
+<script src="nom.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · ATELIER</span>
+    <h2 class="er-titre">Prise en main de l'outil de dessin des molécules</h2>
+    <p class="er-contexte">Cinq molécules à reproduire, <b>dans l'ordre</b> : chacune te fait découvrir un outil de l'éditeur. Les <b>H</b> ne se placent jamais tout seuls : tu les écris toi-même.</p>
+  </div>
+
+  <div class="er-card">
+    <h3 class="cours-titre">Mode d'emploi</h3>
+    <div class="cle"><ul class="er-liste">
+      <li><b>Tire un trait</b> depuis un atome (doigt ou souris) : il s'aimante à la direction la plus proche ; au lâcher, un nouvel atome apparaît.</li>
+      <li>Un <b>appui court</b> sur un atome montre les places libres autour (celle qui continue le zigzag est mise en valeur) : touche une place pour y ajouter l'atome.</li>
+      <li>Choisis l'<b>atome</b> ajouté (C, N, O, F, Cl, Br, I) et la <b>liaison</b> (–, =, ≡). Avec « = » ou « ≡ », toucher une liaison la change.</li>
+      <li><b>H</b> (dans la barre des atomes) : touche un atome et choisis C, CH, CH₂, CH₃… En développée, touche un atome pour lui ajouter un H, touche un H pour l'enlever.</li>
+      <li><b>⌫ Gomme</b> : touche un atome ou une liaison pour l'effacer. <b>↶ Annuler</b>, <b>Tout effacer</b>.</li>
+    </ul></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="cours-titre">Réglages</h3>
+    <div class="nom-reglages" id="aides"></div>
+  </div>
+
+  <div class="er-card ph-question" id="tache"></div>
+
+  <div class="er-actions">
+    <a class="btn-secondary" style="text-decoration:none" href="module_1_libre.html">Atelier : dessin libre de molécules →</a>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Atelier « Prise en main de l'outil de dessin des molécules »
+   (sous-module 1, éditeur ORGA) : toujours la même suite de cinq
+   molécules, dans l'ordre (NOM.atelier, ordre: true ; on reprend à la
+   première pas encore faite), chacune pour un outil de l'éditeur :
+   tirer un trait, appui court (ramification), autre atome, double
+   liaison, formule développée (pas de topologique : hors programme de 1re). Reproduire une formule dessinée,
+   validation par ORGA.meme ; les H toujours écrits par l'élève (outil H).
+   Aide (réglages) : la formule brute avec ses H sous le dessin.
+   L'atelier est fait quand les cinq molécules sont faites.
+   ============================================================ */
+const TACHES = [
+  { s: 'CCC', ec: 'semi', titre: 'Tirer un trait',
+    consigne: 'Tire un trait depuis le C : au lâcher, un nouveau C apparaît. Dessine la chaîne de 3 C, puis choisis <b>H</b> dans la barre des atomes, touche chaque C et choisis ses H.' },
+  { s: 'CC(C)C', ec: 'semi', titre: 'Une ramification',
+    consigne: 'Fais un <b>appui court</b> sur un atome, sans glisser : les places libres apparaissent autour. Touche une place pour y ajouter un C. Puis écris les H.' },
+  { s: 'CCO', ec: 'semi', titre: 'Un autre atome',
+    consigne: 'Choisis <b>O</b> dans la barre des atomes, puis tire un trait depuis un C. Écris aussi le H de l\'O. Une erreur : <b>⌫ Gomme</b> ou <b>↶ Annuler</b>.' },
+  { s: 'CCC=O', ec: 'semi', titre: 'Une double liaison',
+    consigne: 'Choisis <b>O</b> et <b>=</b>, puis tire un trait depuis le dernier C ; ou, « = » choisi, touche une liaison déjà dessinée pour la changer. Reviens à <b>–</b> pour une liaison simple. Le O n\'a plus de place pour un H.' },
+  { s: 'CCO', ec: 'developpee', titre: 'En développée',
+    consigne: 'En développée, on écrit chaque H avec sa liaison : choisis <b>H</b>, puis touche un atome pour lui ajouter un H (touche un H pour l\'enlever). Les doublets non liants du O se placent tout seuls.' },
+];
+const AIDES = NOM.aidesAtelier('prise-en-main', [['brute', 'Formule brute avec tes H, sous le dessin']]);
+const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'prise-en-main', items: TACHES, id: x => x.ec + ':' + x.s, ordre: true,
+  suivant: 'Molécule suivante →',
+  tache(x) {
+    const k = TACHES.indexOf(x) + 1, nomEc = x.ec === 'semi' ? 'semi-développée' : 'développée';
+    return {
+      titre: `${k} / ${TACHES.length} · ${x.titre}`,
+      enonce: `<p>${x.consigne}</p><p>Reproduis cette formule ${nomEc}, puis valide.</p>${NOM.dessin(x.s, { ecriture: x.ec, label: 'Formule à reproduire' })}`,
+      parties: [ORGA.partieDessin(x.s, { ecriture: x.ec, hydrogenes: 'eleve', brute: AIDES.active('brute'), q: '' })],
+    };
+  } });
+// une aide réglée : la même molécule, avec ou sans l'aide
+NOM.reglagesAides(document.getElementById('aides'), AIDES, () => at.refaire());
+NOM.menu('module_1_dessin');
+</script>
+</body>
+</html>
