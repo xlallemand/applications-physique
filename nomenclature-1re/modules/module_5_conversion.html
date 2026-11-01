@@ -46,7 +46,7 @@
     </div>
     <div class="nom-reglages" id="aides"></div>
     <div class="nom-reglages">
-      <label class="nom-interr"><input type="checkbox" id="compter"> Faire compter les H (développée → semi, étapes guidées)</label>
+      <label class="nom-interr"><input type="checkbox" id="regrouperH" checked> Regroupement automatique des H : ils se rangent tout seuls sur leur atome, sans avoir à les compter (développée → semi, étapes guidées)</label>
     </div>
   </div>
 
@@ -71,13 +71,13 @@
    (familles au programme de 1re, ramifications, 3 à 7 C), une à la fois,
    tirée au hasard (NOM.atelier).
    Réglages : la conversion, l'aide « étapes guidées » (outil ORGA.conversion :
-   les trois phrases du cours appliquées sur le dessin), « Faire compter
-   les H » (développée → semi) ; sans aide, l'élève dessine l'écriture
+   les trois phrases du cours appliquées sur le dessin), « Regroupement
+   automatique des H » (développée → semi ; décochée : l'élève compte les H) ; sans aide, l'élève dessine l'écriture
    demandée dans l'éditeur, H écrits par lui (validation par ORGA.meme).
    ============================================================ */
 const MOLS = ['CCC(C)O', 'CC(C)CC=O', 'CC(C)CC(C)C', 'CCC(=O)CC', 'CCCC(O)C', 'CC(C)C(=O)O', 'CCC(C)CC(C)C', 'CCC(C)C=O', 'CC(C)C(C)=O', 'CCCC(C)(O)CC'];
 const NOMS_EC = { developpee: 'développée', semi: 'semi-développée', topo: 'topologique' };
-const reg = { c: 'developpee-semi', compter: false };
+const reg = { c: 'developpee-semi', regrouperH: true };   // case cochée : les H se regroupent tout seuls
 const AIDES = NOM.aidesAtelier('conversion-topo', [['guidees', 'Étapes guidées : les trois phrases du cours appliquées sur le dessin']]);
 
 function tache(s) {
@@ -85,7 +85,7 @@ function tache(s) {
   const ecDessin = vers === 'topo' ? 'topo' : 'semi';
   return AIDES.active('guidees')
     ? { titre: `De la formule ${NOMS_EC[de]} à la formule ${NOMS_EC[vers]}`,
-        parties: [ORGA.partieConversion(s, de, vers, { compterH: reg.compter && de === 'developpee' })] }
+        parties: [ORGA.partieConversion(s, de, vers, { compterH: !reg.regrouperH && de === 'developpee' })] }
     : { titre: `De la formule ${NOMS_EC[de]} à la formule ${NOMS_EC[vers]}`,
         enonce: `<p>Dessine cette molécule en formule <b>${NOMS_EC[vers]}</b>, puis valide.</p>${NOM.dessin(s, { ecriture: de, label: 'Formule ' + NOMS_EC[de] })}`,
         parties: [ORGA.partieDessin(s, { ecriture: ecDessin, hydrogenes: 'eleve', q: '' })] };
@@ -96,7 +96,7 @@ const at = NOM.atelier({ zone: document.getElementById('tache'), cle: 'conversio
 // réglages : on reprend la même molécule avec la nouvelle conversion
 function majReglages() {
   document.querySelectorAll('#choixConv [data-c]').forEach(b => b.setAttribute('aria-pressed', b.dataset.c === reg.c));
-  document.getElementById('compter').disabled = !reg.c.startsWith('developpee') || !AIDES.active('guidees');
+  document.getElementById('regrouperH').disabled = !reg.c.startsWith('developpee') || !AIDES.active('guidees');
 }
 // aide réglée : la même molécule, avec ou sans les étapes guidées
 NOM.reglagesAides(document.getElementById('aides'), AIDES, () => { majReglages(); at.refaire(); });
@@ -105,7 +105,8 @@ document.getElementById('choixConv').addEventListener('click', ev => {
   if (!b) return;
   reg.c = b.dataset.c; majReglages(); at.refaire();
 });
-document.getElementById('compter').addEventListener('change', ev => { reg.compter = ev.target.checked; at.refaire(); });
+// case décochée : l'élève compte lui-même les H de chaque atome
+document.getElementById('regrouperH').addEventListener('change', ev => { reg.regrouperH = ev.target.checked; at.refaire(); });
 majReglages();
 NOM.menu('module_5_conversion');
 </script>
