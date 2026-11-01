@@ -12,7 +12,8 @@
    Tour 3 : 23 cartes. Retours : 20 validées ; modifiées nom-1c-topo-dev (doublets non liants dans la correction),
    nom-3a-groupe et, dans toutes les cartes, espace insécable avant : ; ? ! et dans les guillemets ; nom-3d-alcool et
    toutes les cartes « famille » : « famille des … » dans la réponse.
-   Tour 4 : les trois cartes modifiées, à valider.
+   Tour 4 : les trois cartes modifiées validées par l'enseignant le 2026-11-01 : toutes les cartes sont validées,
+   mises en place dans nomenclature/modules/flashcards.js.
    Un paquet par sous-module de cours qui a des cartes ; le module 4 (Exercices) n'a pas de cours : pas de paquet. */
 (function () {
   // figures : SVG autonomes (attributs de présentation, couleurs de assets/theme.css) ;
@@ -124,7 +125,7 @@
             { q: `<p>Écris la formule topologique de cette molécule.</p>${fig(F.conv2q)}`,
               r: `<p><b>Formule topologique :</b></p>${fig(F.conv2r)}` },
           ] },
-          { id: 'nom-1c-topo-dev', type: 'methode', competence: 'c4', statut: 'modifiee', outils: ['crayon'], faces: [
+          { id: 'nom-1c-topo-dev', type: 'methode', competence: 'c4', statut: 'validee', outils: ['crayon'], faces: [
             { q: `<p>Écris la formule développée de cette molécule.</p>${fig(F.conv3q)}`,
               r: `<p><b>Formule développée :</b></p>${fig(F.conv3r)}<p>Attention aux doublets non liants : 2 sur le O, 1 sur le N.</p>` },
           ] },
@@ -197,7 +198,7 @@
           { id: 'c1', texte: 'Donner les synonymes de famille (classe fonctionnelle) et de groupe fonctionnel (groupe caractéristique)', types: ['definition'], source: 'fiche_3 · Familles et groupes caractéristiques ; cours 3a · introduction ; retour de l\'enseignant (tour 2)' },
         ],
         cartes: [
-          { id: 'nom-3a-groupe', type: 'definition', competence: 'c1', statut: 'modifiee', faces: [
+          { id: 'nom-3a-groupe', type: 'definition', competence: 'c1', statut: 'validee', faces: [
             { q: '<p>Quel autre nom pour une <b>famille</b> de molécules ? Et pour un <b>groupe fonctionnel</b> ?</p>',
               r: '<p>Famille = <b>classe fonctionnelle</b>.</p><p>Groupe fonctionnel = <b>groupe caractéristique</b> (le plus utilisé).</p>' },
             { q: '<p>Quel autre nom pour une <b>classe fonctionnelle</b> ? Et pour un <b>groupe caractéristique</b> ?</p>',

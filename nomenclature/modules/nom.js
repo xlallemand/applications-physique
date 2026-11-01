@@ -819,7 +819,7 @@
         { nom: 'Les familles', questions: 'module_3_questions' }] },
     { n: 4, titre: 'Exercices', desc: 'Exercices 2 à 10 de la feuille, guidés pas à pas', exercices: 'module_4', exNom: 'Exercices 2 à 10', nbEx: 9 },
   ];
-  window.SOM.init({ nom: 'Nomenclature', id: 'nomenclature', cleEx: 'nomenclature-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Nomenclature', id: 'nomenclature', cleEx: 'nomenclature-exercices', plan: PLAN, flashcards: true });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);
