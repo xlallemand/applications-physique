@@ -26,7 +26,7 @@
    NOM.FAMS                           les familles au programme de 1re (clés de ORGA.FAMILLES)
    NOM.partieNom(smiles, o)           nommer avec l'outil ORGA (aides gardées dans « nomenclature-1re-aides »)
    NOM.enchainer(q, parties, corr.)   plusieurs outils à la suite dans une seule partie (exercices)
-   NOM.PLUSIEURS, NOM.partiesPlusieurs(x)   molécules à plusieurs groupes (ex. 5, atelier « entourer ») : entourer puis nommer
+   NOM.PLUSIEURS, NOM.partiesPlusieurs(x)   molécules à plusieurs groupes (ex. 2, atelier « entourer ») : entourer puis nommer
    NOM.nomsFaux(mol, op)              noms faux classiques [{ nom, diag, type }] (QCM « trouver l'erreur ») ; op.types
    NOM.aideTopo(mol, op)              aide pas à pas pour lire une topologique (C repérés, H de chaque C)
    NOM.partieBrute(mol, o)            formule brute à écrire (diagnostic : C, H implicites, autres atomes)
@@ -593,7 +593,7 @@
   const partieBrute = (m, op) => Object.assign({ type: 'texte', label: 'Formule brute :', reponses: [O.formuleBrute(mol(m))], casse: true, largeur: 150,
     affiche: O.formuleBrute(mol(m)), diag: v => diagBrute(v, mol(m), op), solution: `<p>Formule brute : <b>${O.formuleBrute(mol(m), { html: true })}</b>.</p>` }, op && op.partie);
 
-  /* ---------- Molécules à plusieurs groupes (ex. 5, atelier « entourer ») ----------
+  /* ---------- Molécules à plusieurs groupes (ex. 2, atelier « entourer ») ----------
      Seulement des groupes hydroxyle, carbonyle et carboxyle (programme de 1re), en semi-développée.
      { titre, s (SMILES), ecriture, condenser (étiquettes de l'énoncé), pos (coordonnées données), note } */
   const PLUSIEURS = {
@@ -832,13 +832,14 @@
         { nom: 'Nommer une molécule', simulation: 'module_3_nommer', noms: { simulation: 'Atelier : nommer une molécule' } },
         { nom: 'Dessiner à partir du nom', simulation: 'module_3_dessiner', noms: { simulation: 'Atelier : dessiner une molécule à partir de son nom' } },
         { nom: 'Les familles', questions: 'module_3_questions' }] },
-    { n: 4, titre: 'Exercices', desc: 'Exercices 4, 5, 6, 9 et 10 de la feuille, guidés pas à pas', exercices: 'module_4', exNom: 'Exercices 4 à 10', nbEx: 5 },
+    { n: 4, titre: 'Exercices', desc: 'Cinq exercices guidés pas à pas', exercices: 'module_4', exNom: 'Exercices 1 à 5', nbEx: 5 },
     { n: 5, titre: 'Pour aller plus loin : la formule topologique', desc: 'Hors programme, pour te préparer à la terminale : lire une formule topologique, passer d\'une écriture à l\'autre', fiche: 'fiche_5',
       sousModules: true,
       parties: [
         { nom: 'La formule topologique', slug: 'topologique', cours: 'module_5a_cours', noms: { cours: 'Cours : la formule topologique' } },
         { nom: 'Passer d\'une écriture à l\'autre', slug: 'passer', cours: 'module_5b_cours', noms: { cours: 'Cours : passer d\'une écriture à l\'autre' } },
-        { nom: 'Les trois écritures', simulation: 'module_5_conversion', noms: { simulation: 'Atelier : changer d\'écriture (les trois écritures)' } }] },
+        { nom: 'Les trois écritures', simulation: 'module_5_conversion', noms: { simulation: 'Atelier : changer d\'écriture (les trois écritures)' } },
+        { nom: 'La formule topologique', questions: 'module_5_questions' }] },
   ];
   window.SOM.init({ nom: 'Nomenclature (Structure des entités organiques)', id: 'nomenclature-1re', cleEx: 'nomenclature-1re-exercices', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);

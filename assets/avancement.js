@@ -116,7 +116,7 @@
       'module_1a_cours', 'module_1b_cours', 'module_1_dessin', 'module_1_libre', 'module_1_conversion', 'module_1_questions',
       'module_2a_cours', 'module_2b_cours', 'module_2c_cours', 'module_2d_cours', 'module_2_nommer', 'module_2_dessiner', 'module_2_questions',
       'module_3a_cours', 'module_3b_cours', 'module_3_entourer', 'module_3_nommer', 'module_3_dessiner', 'module_3_questions',
-      'module_5a_cours', 'module_5b_cours', 'module_5_conversion'] },
+      'module_5a_cours', 'module_5b_cours', 'module_5_conversion', 'module_5_questions'] },
     'ph': { ex: 17, pages: ['module_1_cours', 'module_1_questions', 'module_2_cours', 'module_2_questions'] },
     'puissances-10': { pages: ['course-1', 'training-1', 'course-2', 'training-2', 'course-3', 'training-3', 'training-4'] },
     'conversions': { pages: [
