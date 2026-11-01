@@ -45,7 +45,7 @@
   // sens 2, le nom → formule semi-développée, groupe entouré, nom du groupe, famille
   function famille(id, competence, cle, du, nom, groupe, familles, statut) {
     const rep = `${fig(F[cle + 'R'])}<p><b>${groupe}</b> (famille des ${familles})</p><p>Nom : <b>${nom}</b></p>`;
-    return { id, type: 'savoir', competence, statut: statut || 'nouvelle', outils: ['crayon'], faces: [
+    return { id, type: 'savoir', competence, statut: statut || 'validee', outils: ['crayon'], faces: [
       { q: `<p>Entoure le groupe caractéristique de cette molécule, nomme-le, donne la famille, puis le nom de la molécule.</p>${fig(F[cle])}`, r: rep },
       { q: `<p>Écris la formule semi-développée ${du}. Entoure son groupe caractéristique, nomme-le et donne la famille.</p>`, r: rep },
     ] };
@@ -53,7 +53,7 @@
 
   RELECTURE({
     dossier: 'nomenclature-1re', titre: 'Nomenclature (Structure des entités organiques)', court: 'Nomenclature 1re', matiere: 'chimie',
-    tour: 1, etape: 'cartes',
+    tour: 2, etape: 'cartes',
     // pages de cours de l'application (prérequis possibles)
     cours: [
       { cle: 'module_1a_cours', nom: 'Cours : combien de liaisons ?' },
@@ -75,11 +75,11 @@
           { id: 'c2', texte: 'Retrouver le nombre de liaisons avec la classification : cases vers la droite jusqu\'à la colonne des gaz nobles', types: ['savoir'], source: 'reprise de la carte de terminale nom-1a-classif (validée) ; fiche_1 · Combien de liaisons ? ; série 1 · position dans la classification' },
         ],
         cartes: [
-          { id: 'nom1-1a-liaisons', type: 'savoir', competence: 'c1', statut: 'nouvelle', outils: ['crayon'], faces: [
+          { id: 'nom1-1a-liaisons', type: 'savoir', competence: 'c1', statut: 'validee', outils: ['crayon'], faces: [
             { q: '<p>Dessine les formes de Lewis de H, C, N, O et des halogènes : leurs liaisons et leurs doublets non liants.</p>',
               r: fig(F.lewis) },
           ] },
-          { id: 'nom1-1a-classif', type: 'savoir', competence: 'c2', statut: 'nouvelle', faces: [
+          { id: 'nom1-1a-classif', type: 'savoir', competence: 'c2', statut: 'validee', faces: [
             { q: `<p>Comment retrouver le nombre de liaisons d'un atome avec la classification périodique ?</p>${fig(F.classifSans)}`,
               r: `<p><b>Nombre de liaisons = nombre de cases vers la droite jusqu'à la colonne des gaz nobles.</b></p>${fig(F.classif)}<p>C : 4 cases jusqu'au néon, 4 liaisons.</p>` },
           ] },
@@ -91,15 +91,15 @@
           { id: 'c5', texte: 'Écrire la formule brute d\'une molécule donnée en formule semi-développée', types: ['methode'], source: 'nouvelle ; cours 1b · étape 3 ; série 1 · formule brute (diagnostic : H oubliés)' },
         ],
         cartes: [
-          { id: 'nom1-1b-ecritures', type: 'schema', competence: 'c3', statut: 'nouvelle', faces: [
+          { id: 'nom1-1b-ecritures', type: 'schema', competence: 'c3', statut: 'validee', faces: [
             { q: `<p>Une même molécule, dessinée deux fois : comment s'appelle chaque écriture ① et ② ?</p>${fig(F.deux)}`,
               r: `${fig(F.deuxNoms)}<p>① formule <b>semi-développée</b> ; ② formule <b>développée</b> (de Lewis).</p>` },
           ] },
-          { id: 'nom1-1b-dev-semi', type: 'methode', competence: 'c4', statut: 'nouvelle', outils: ['crayon'], faces: [
+          { id: 'nom1-1b-dev-semi', type: 'methode', competence: 'c4', statut: 'validee', outils: ['crayon'], faces: [
             { q: `<p>Écris la formule semi-développée de cette molécule.</p>${fig(F.devQ)}`,
               r: `<p><b>On enlève les liaisons des H et on les regroupe sur leur atome :</b></p>${fig(F.devR)}` },
           ] },
-          { id: 'nom1-1b-brute', type: 'methode', competence: 'c5', statut: 'nouvelle', faces: [
+          { id: 'nom1-1b-brute', type: 'methode', competence: 'c5', statut: 'validee', faces: [
             { q: `<p>Écris la formule brute de cette molécule.</p>${fig(F.brute)}`,
               r: `${formule('C<sub>5</sub>H<sub>10</sub>O<sub>2</sub>')}<p>5 C ; H : 3 + 1 + 3 + 2 + 1 (OH) = 10 ; 2 O. D'abord les C, puis les H, puis les O.</p>` },
           ] },
@@ -113,19 +113,19 @@
           { id: 'c3', texte: 'Nommer les dix alcanes linéaires, de 1 à 10 C : méthane… décane', types: ['savoir'], source: 'reprise de la carte de terminale nom-2a-dix (validée) ; fiche_2 · tableau des dix alcanes' },
         ],
         cartes: [
-          { id: 'nom1-2a-alcane', type: 'definition', competence: 'c1', statut: 'nouvelle', faces: [
+          { id: 'nom1-2a-alcane', type: 'definition', competence: 'c1', statut: 'modifiee', faces: [
             { q: '<p>Qu\'est-ce qu\'un alcane ?</p>',
-              r: '<p><b>Un hydrocarbure saturé</b> : il ne contient que des atomes C et H, liés par des liaisons simples.</p>' },
-            { q: '<p>Comment s\'appelle un hydrocarbure saturé : seulement des atomes C et H, liés par des liaisons simples ?</p>',
+              r: '<p><b>Un hydrocarbure saturé</b> : il ne contient que des atomes C et H, liés par des liaisons simples.</p><p><b>Saturé</b> : sans double ni triple liaison.</p>' },
+            { q: '<p>Comment s\'appelle un hydrocarbure saturé (sans double ni triple liaison) : seulement des atomes C et H, liés par des liaisons simples ?</p>',
               r: '<p><b>Un alcane.</b></p>' },
           ] },
-          { id: 'nom1-2a-brute', type: 'formule', competence: 'c2', statut: 'nouvelle', faces: [
+          { id: 'nom1-2a-brute', type: 'formule', competence: 'c2', statut: 'validee', faces: [
             { q: '<p>La formule brute d\'un alcane ?</p><small>Que représente n ?</small>',
               r: `${formule('C<sub>n</sub>H<sub>2n+2</sub>')}<p class="rev-unites">n : nombre d'atomes de carbone</p><p>Exemple : pentane, n = 5 : C<sub>5</sub>H<sub>12</sub>.</p>` },
             { q: '<p>Données : un alcane à n atomes de carbone. Que peux-tu écrire ? Avec quelle formule ?</p>',
               r: `<p><b>Sa formule brute</b>, avec 2n + 2 atomes H :</p>${formule('C<sub>n</sub>H<sub>2n+2</sub>')}` },
           ] },
-          { id: 'nom1-2a-dix', type: 'savoir', competence: 'c3', statut: 'nouvelle', faces: [
+          { id: 'nom1-2a-dix', type: 'savoir', competence: 'c3', statut: 'validee', faces: [
             { q: '<p>Les noms des dix alcanes linéaires, de 1 à 10 atomes de carbone ?</p>',
               r: '<table class="rev-tab"><tr><td>CH<sub>4</sub></td><td><b>méthane</b></td><td>C<sub>6</sub>H<sub>14</sub></td><td><b>hexane</b></td></tr>' +
                 '<tr><td>C<sub>2</sub>H<sub>6</sub></td><td><b>éthane</b></td><td>C<sub>7</sub>H<sub>16</sub></td><td><b>heptane</b></td></tr>' +
@@ -140,11 +140,11 @@
           { id: 'c5', texte: 'Nommer un alcane ramifié donné en formule semi-développée (chaîne la plus longue, plus petits numéros, di, ordre alphabétique)', types: ['methode'], source: 'reprise de la carte de terminale nom-2b-nommer (validée) ; série 2 · nommer un alcane' },
         ],
         cartes: [
-          { id: 'nom1-2b-ramif', type: 'savoir', competence: 'c4', statut: 'nouvelle', faces: [
+          { id: 'nom1-2b-ramif', type: 'savoir', competence: 'c4', statut: 'validee', faces: [
             { q: '<p>Comment s\'appellent les ramifications –CH<sub>3</sub>, –CH<sub>2</sub>–CH<sub>3</sub> et –CH<sub>2</sub>–CH<sub>2</sub>–CH<sub>3</sub> ?</p>',
               r: '<p>Le nom de l\'alcane, « ane » devient « <b>yl</b> » :</p><p>–CH<sub>3</sub> <b>méthyl</b> ; –CH<sub>2</sub>–CH<sub>3</sub> <b>éthyl</b> ; –CH<sub>2</sub>–CH<sub>2</sub>–CH<sub>3</sub> <b>propyl</b>.</p>' },
           ] },
-          { id: 'nom1-2b-nommer', type: 'methode', competence: 'c5', statut: 'nouvelle', faces: [
+          { id: 'nom1-2b-nommer', type: 'methode', competence: 'c5', statut: 'validee', faces: [
             { q: `<p>Donne le nom de cet alcane.</p>${fig(F.alc2b)}`,
               r: `${fig(F.alc2bR)}<p><b>2,4-diméthylhexane</b></p>` },
           ] },
@@ -154,7 +154,7 @@
           { id: 'c6', texte: 'Exercice-type : dessiner la formule semi-développée d\'un alcane ramifié à partir de son nom (3-éthyl-2,2-diméthylhexane, exemple du cours)', types: ['methode'], source: 'adaptée de la carte de terminale nom-2c-dessiner (semi-développée au lieu de topologique) ; cours 2c ; série 2 · du nom à la formule · ✎ crayon' },
         ],
         cartes: [
-          { id: 'nom1-2c-dessiner', type: 'methode', competence: 'c6', statut: 'nouvelle', outils: ['crayon'], faces: [
+          { id: 'nom1-2c-dessiner', type: 'methode', competence: 'c6', statut: 'validee', outils: ['crayon'], faces: [
             { q: '<p>Dessine la formule semi-développée du <b>3-éthyl-2,2-diméthylhexane</b>.</p>',
               r: '<ol><li>On lit la fin du nom : hexane, chaîne de 6 C ;</li><li>on la numérote de 1 à 6 ;</li>' +
                 `<li>un éthyle sur le C n° 3, deux méthyles sur le C n° 2 ;</li><li>on complète les H (4 liaisons par C).</li></ol>${fig(F.semiHex)}` },
@@ -165,7 +165,7 @@
           { id: 'c7', texte: 'Nommer un alcane cyclique donné en formule semi-développée (cyclo + nom de l\'alcane ; plusieurs substituants : plus petits numéros, le premier dans l\'ordre alphabétique a le n° 1)', types: ['methode'], source: 'adaptée de la carte de terminale nom-2d-cyclo (semi-développée au lieu de topologique) ; fiche_2 · Les alcanes cycliques' },
         ],
         cartes: [
-          { id: 'nom1-2d-cyclo', type: 'methode', competence: 'c7', statut: 'nouvelle', faces: [
+          { id: 'nom1-2d-cyclo', type: 'methode', competence: 'c7', statut: 'validee', faces: [
             { q: `<p>Donne le nom de cet alcane cyclique.</p>${fig(F.cyc)}`,
               r: `${fig(F.cycR)}<p><b>1-éthyl-3-méthylcyclohexane</b></p>` },
           ] },
@@ -179,17 +179,17 @@
           { id: 'c3', texte: 'Reconnaître le groupe carboxyle : acide ≠ alcool + cétone', types: ['reflexe'], source: 'nouvelle ; cours 3a · étape 3 ; série 3 · familles proches (diagnostic acide ≠ alcool + cétone)' },
         ],
         cartes: [
-          { id: 'nom1-3a-groupe', type: 'definition', competence: 'c1', statut: 'nouvelle', faces: [
+          { id: 'nom1-3a-groupe', type: 'definition', competence: 'c1', statut: 'validee', faces: [
             { q: '<p>Quel autre nom pour une <b>famille</b> de molécules ? Et pour un <b>groupe fonctionnel</b> ?</p>',
               r: '<p>Famille = <b>classe fonctionnelle</b>.</p><p>Groupe fonctionnel = <b>groupe caractéristique</b> (le plus utilisé).</p>' },
             { q: '<p>Quel autre nom pour une <b>classe fonctionnelle</b> ? Et pour un <b>groupe caractéristique</b> ?</p>',
               r: '<p>Classe fonctionnelle = <b>famille</b>.</p><p>Groupe caractéristique = <b>groupe fonctionnel</b>.</p>' },
           ] },
-          { id: 'nom1-3a-carbonyle', type: 'reflexe', competence: 'c2', statut: 'nouvelle', faces: [
+          { id: 'nom1-3a-carbonyle', type: 'reflexe', competence: 'c2', statut: 'validee', faces: [
             { q: '<p>Une molécule a un groupe carbonyle C=O. Comment sais-tu si c\'est un aldéhyde ou une cétone ?</p>',
               r: `<p>On regarde <b>où est le C=O</b> : <b>au bout de la chaîne</b> (le C porte un H) : <b>aldéhyde</b> ; <b>entre deux C</b> : <b>cétone</b>.</p>${fig(F.ald)}${fig(F.cet)}` },
           ] },
-          { id: 'nom1-3a-carboxyle', type: 'reflexe', competence: 'c3', statut: 'nouvelle', faces: [
+          { id: 'nom1-3a-carboxyle', type: 'reflexe', competence: 'c3', statut: 'validee', faces: [
             { q: `<p>Un élève voit un OH et un =O dans cette molécule : « un alcool et une cétone ». A-t-il raison ?</p>${fig(F.acideQ)}`,
               r: `<p><b>Non.</b> Le =O et le OH sont <b>sur le même C</b> : ensemble, ils forment un seul groupe, le <b>groupe carboxyle</b> (famille des acides carboxyliques).</p>${fig(F.acideE)}` },
           ] },
@@ -205,13 +205,13 @@
           famille('nom1-3b-aldehyde', 'c4', 'aldehyde', 'du <b>3-méthylbutanal</b>', '3-méthylbutanal', 'Groupe carbonyle', 'aldéhydes'),
           famille('nom1-3b-cetone', 'c4', 'cetone', 'de la <b>4-méthylpentan-2-one</b>', '4-méthylpentan-2-one', 'Groupe carbonyle', 'cétones'),
           famille('nom1-3b-acide', 'c4', 'acide', 'de l\'<b>acide 3-méthylbutanoïque</b>', 'acide 3-méthylbutanoïque', 'Groupe carboxyle', 'acides carboxyliques'),
-          { id: 'nom1-3b-tableau', type: 'savoir', competence: 'c5', statut: 'nouvelle', outils: ['crayon'], faces: [
+          { id: 'nom1-3b-tableau', type: 'savoir', competence: 'c5', statut: 'validee', outils: ['crayon'], faces: [
             { q: '<p>Comment se termine le nom d\'une molécule de chaque famille ? Alcool, aldéhyde, cétone, acide carboxylique.</p>',
               r: '<table class="rev-tab"><tr><th>Famille</th><th>Nom</th></tr>' +
                 '<tr><td>alcool</td><td>…an-n-<b>ol</b></td></tr><tr><td>aldéhyde</td><td>…an<b>al</b></td></tr>' +
                 '<tr><td>cétone</td><td>…an-n-<b>one</b></td></tr><tr><td>acide carboxylique</td><td><b>acide</b> …an<b>oïque</b></td></tr></table>' },
           ] },
-          { id: 'nom1-3b-chaine', type: 'reflexe', competence: 'c6', statut: 'nouvelle', faces: [
+          { id: 'nom1-3b-chaine', type: 'reflexe', competence: 'c6', statut: 'validee', faces: [
             { q: `<p>Quelle est la chaîne principale de cette molécule ? Donne son nom.</p>${fig(F.chaine)}`,
               r: `<p>La chaîne la plus longue a 6 C, mais elle ne passe pas par le C du OH : la chaîne principale est la plus longue <b>qui contient le groupe</b>, 5 C.</p>${fig(F.chaineR)}<p><b>2-éthylpentan-1-ol</b></p>` },
           ] },
