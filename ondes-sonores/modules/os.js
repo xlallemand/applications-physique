@@ -1366,6 +1366,7 @@
     { n: 4, titre: 'Audiogramme et atténuation', desc: 'Seuil d\'audibilité, seuil de la douleur, échelle logarithmique, perte d\'auditivité, atténuation par une paroi', fiche: 'fiche_4',
       sousModules: true,
       parties: [
+        { nom: 'Passer un audiogramme', simulation: 'module_4_simulation', noms: { simulation: 'Simulateur : passer un audiogramme' } },
         { nom: 'L\'audiogramme', slug: 'audiogramme', cours: 'module_4a_cours', noms: { cours: 'Cours : l\'audiogramme' } },
         { nom: 'Atténuation par une paroi', slug: 'attenuation', cours: 'module_4b_cours', noms: { cours: 'Cours : atténuation par une paroi' } },
         { nom: 'Audiogramme et atténuation', questions: 'module_4_questions' }] },

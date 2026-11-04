@@ -86,8 +86,8 @@
       'module_2_questions', 'module_3a_cours', 'module_3b_cours', 'module_3_questions'] },
     'ondes-sonores': { ex: 8, pages: [
       'module_1_cours', 'module_1_questions', 'module_2_simulation', 'module_2_cours', 'module_2_questions',
-      'module_3a_cours', 'module_3b_cours', 'module_3_questions', 'module_4a_cours', 'module_4b_cours',
-      'module_4_questions'] },
+      'module_3a_cours', 'module_3b_cours', 'module_3_questions', 'module_4_simulation', 'module_4a_cours',
+      'module_4b_cours', 'module_4_questions'] },
     'ondes-electromagnetiques': { ex: 7, pages: [
       'module_1a_cours', 'module_1b_cours', 'module_1_questions', 'module_2a_cours', 'module_2b_cours',
       'module_2_questions', 'module_3_simulation', 'module_3a_cours', 'module_3b_cours',

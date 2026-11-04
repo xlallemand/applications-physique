@@ -435,3 +435,62 @@ sub, sup { font-size: .7em; line-height: 0; }
 /* rappel d'un chapitre précédent, discret (module 1 : longueur d'onde) */
 .os-rappel { margin: 10px 0 0; padding: 8px 12px; border-left: 3px solid var(--line-strong); background: var(--paper-2); border-radius: 0 8px 8px 0; color: var(--ink-2); font-size: .95rem; }
 .os-rappel p { margin: 0; }
+
+/* ============================================================
+   SIMULATEUR « PASSER UN AUDIOGRAMME » (module 4, préfixe os-au-)
+   ============================================================ */
+/* déroulé du test chez l'ORL : illustration et étapes */
+.os-au-orl { display: grid; gap: 14px; align-items: center; }
+@media (min-width: 760px) { .os-au-orl { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.os-au-pas { margin: 0; padding-left: 22px; line-height: 1.55; }
+.os-au-pas li + li { margin-top: 6px; }
+.os-au-pers { fill: none; stroke: var(--ink-2); stroke-linecap: round; stroke-linejoin: round; }
+.os-au-tete { fill: var(--ink-2); }
+.os-au-casque { fill: none; stroke: var(--ink); stroke-width: 5; stroke-linecap: round; }
+.os-au-ecouteur { fill: var(--ink); }
+.os-au-mousse { fill: none; stroke: var(--ink-3); stroke-width: 1.4; stroke-linejoin: round; }
+.os-au-interieur { fill: var(--sheet); }
+.os-au-vitre { fill: var(--cle-bg); stroke: var(--ink-2); stroke-width: 1.5; }
+.os-au-fil { fill: none; stroke: var(--ink-3); stroke-width: 1.6; stroke-dasharray: 4 3; }
+.os-au-appareil { fill: var(--sheet); stroke: var(--ink-2); stroke-width: 2; }
+.os-au-ecran { fill: var(--cle-bg); stroke: var(--accent); stroke-width: 1.2; }
+.os-au-bouton { fill: var(--accent); stroke: var(--sheet); stroke-width: 1.5; }
+.os-au-leg { font-size: 13px; font-weight: 700; fill: var(--ink); }
+.os-au-trait { stroke: var(--ink-3); stroke-width: 1.2; }
+
+/* réglage du son : curseur large avec − et + (au doigt comme à la souris) */
+.os-au-reglage { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; margin: 10px 0 0; }
+.os-au-pm {
+  width: 46px; height: 46px; border-radius: 50%; border: none; background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3);
+  font: inherit; font-size: 1.3rem; font-weight: 800; color: var(--ink); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.os-au-pm:hover:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.os-au-pm:disabled { opacity: .4; cursor: not-allowed; }
+.os-au-pm:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.os-au-reglage .fo-reglage { min-height: 46px; }
+.os-au-bornes { display: flex; justify-content: space-between; font-size: .82rem; color: var(--ink-2); font-weight: 600; margin: -4px 56px 0; }
+.os-au-valider { justify-content: flex-end; }
+.os-au-ok { color: var(--success-text); font-weight: 800; }
+.os-au-valider [hidden], .os-au-actions [hidden] { display: none; }
+
+/* le test : avancement, fréquence et niveau affichés en continu, bouton « J'entends » */
+.os-au-tete-test { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; margin-bottom: 8px; }
+.os-au-avance { font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.os-au-avance .progress-bar { width: 140px; display: inline-block; vertical-align: middle; margin-left: 8px; }
+.os-au-avance .progress-fill { display: block; }
+.os-au-mesures { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px; }
+.os-au-mesure { background: var(--cle-bg); border-radius: 16px; padding: 8px 14px; }
+.os-au-mesure small { display: block; font-size: .8rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent-ink); }
+.os-au-mesure b { font-size: 1.7rem; font-weight: 800; letter-spacing: -.02em; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 480px) { .os-au-mesure b { font-size: 1.35rem; } .os-au-mesure { padding: 7px 11px; } }
+.os-au-tete-test[hidden], .os-au-mesures[hidden], .os-au-fin[hidden], .os-au-intro[hidden] { display: none; }
+.os-au-graphe .fo-svg { display: block; margin: 0 auto; touch-action: pan-y; }
+.os-au-curseur { fill: var(--sheet); stroke: var(--accent); stroke-width: 3; }
+.os-au-actions { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 10px; }
+.os-au-entends { min-width: min(100%, 320px); min-height: 64px; font-size: 1.25rem !important; -webkit-user-select: none; user-select: none; }
+.os-au-msg { font-size: .92rem; font-weight: 600; color: var(--ink-2); text-align: center; min-height: 1.4em; }
+.os-au-fin { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+/* fin du test : la courbe se trace de gauche à droite, puis son nom apparaît */
+.os-au-nom { opacity: 0; transition: opacity .4s; }
+.os-au-nom.visible { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .os-au-nom { transition: none; } }
