@@ -1247,7 +1247,9 @@
      ONDE QUI FRAPPE UNE PAROI : incidente, réfléchie, transmise, absorbée
      o = { noms (true : mots écrits ; sinon numéros 1 à 4) }
      ============================================================ */
-  const NOMS_PAROI = { inc: 'onde incidente', ref: 'onde réfléchie', tra: 'onde transmise', abs: 'énergie absorbée' };
+  // I avec le nom en indice (décalage dy, compris par tous les navigateurs), comme sur la figure du cours
+  const indiceI = n => `I<tspan dy="5" font-size="78%">${n}</tspan>`;
+  const NOMS_PAROI = { inc: indiceI('incidente'), ref: indiceI('réfléchie'), tra: indiceI('transmise'), abs: indiceI('absorbée') };
   function svgParoi(o) {
     o = o || {};
     const s = [], lab = (k, n, x, y, anc) => (o.noms
@@ -1349,7 +1351,7 @@
      PLAN DE L'APPLICATION ET NAVIGATION (voir assets/sommaire.js)
      ============================================================ */
   const PLAN = [
-    { n: 1, titre: 'L\'onde sonore', desc: 'Onde mécanique, compressions et dilatations de l\'air, vitesse du son, λ = v / f', fiche: 'fiche_1',
+    { n: 1, titre: 'L\'onde sonore', desc: 'Onde mécanique, compressions et dilatations de l\'air, vitesse du son', fiche: 'fiche_1',
       parties: [{ nom: 'L\'onde sonore', cours: 'module_1_cours', questions: 'module_1_questions' }] },
     { n: 2, titre: 'Son pur, son complexe', desc: 'Spectre d\'un son, hauteur (note) et timbre, mesure de la fréquence', fiche: 'fiche_2',
       parties: [{ nom: 'Son pur, son complexe', simulation: 'module_2_simulation', cours: 'module_2_cours', questions: 'module_2_questions', noms: { simulation: 'Simulateur : notes et instruments' } }] },
@@ -1360,7 +1362,7 @@
         { nom: 'Niveau sonore', slug: 'niveau', cours: 'module_3a_cours', noms: { cours: 'Cours : niveau sonore' } },
         { nom: 'Additionner des sons', slug: 'addition', cours: 'module_3b_cours', noms: { cours: 'Cours : additionner des sons' } },
         { nom: 'Intensité et niveau sonores', questions: 'module_3_questions' }] },
-    { n: 4, titre: 'Audiogramme et atténuation', desc: 'Seuil d\'audibilité, seuil de la douleur, échelle logarithmique, atténuation par une paroi', fiche: 'fiche_4',
+    { n: 4, titre: 'Audiogramme et atténuation', desc: 'Seuil d\'audibilité, seuil de la douleur, échelle logarithmique, perte d\'auditivité, atténuation par une paroi', fiche: 'fiche_4',
       sousModules: true,
       parties: [
         { nom: 'L\'audiogramme', slug: 'audiogramme', cours: 'module_4a_cours', noms: { cours: 'Cours : l\'audiogramme' } },

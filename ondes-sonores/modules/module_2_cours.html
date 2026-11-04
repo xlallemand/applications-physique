@@ -32,9 +32,12 @@
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
    1. Son pur, son complexe (signal et spectre, bouton « Écouter ») ;
    2. mesurer la fréquence d'un son (sur le signal : nT, T, f = 1/T ;
-   sur le spectre : f1) ; 3. hauteur, timbre et notes.
+   sur le spectre : f1) ; 3. fréquences des harmoniques fn = n × f1
+   (fréquence d'un rang, rang d'une raie quand un harmonique manque) ;
+   4. hauteur, timbre et notes.
    Erreurs diagnostiquées : T en ms dans f = 1 / T, harmonique pris
-   pour le fondamental, hauteur et timbre confondus.
+   pour le fondamental, f1 + n au lieu de n × f1, rang pris pour la
+   position de la raie, hauteur et timbre confondus.
    Valeurs vérifiées par un script : la₃ = 440 Hz, 4T = 9,09 ms,
    T = 2,27 ms.
    ============================================================ */
@@ -64,7 +67,7 @@ function etape1(c_) {
   const carte = c_.carte('1. Son pur, son complexe');
   c_.ajouter(carte, `<div class="cours-bloc">
       <div class="cle"><p><b class="cle-titre">Son pur.</b> Son dont le signal est <b>sinusoïdal</b>, de fréquence f<sub>1</sub>. Son spectre n'a qu'<b>une seule raie</b>.</p></div>
-      <div class="cle"><p><b class="cle-titre">Son complexe.</b> Son dont le signal est périodique mais <b>non sinusoïdal</b>. Son spectre a <b>plusieurs raies</b> : le <b>fondamental</b> f<sub>1</sub> et les <b>harmoniques</b> f<sub>n</sub> = n × f<sub>1</sub>.</p></div>
+      <div class="cle"><p><b class="cle-titre">Son complexe</b> (on dit aussi <b>son composé</b>). Son dont le signal est périodique mais <b>non sinusoïdal</b>. Son spectre a <b>plusieurs raies</b> : le <b>fondamental</b> f<sub>1</sub> et les <b>harmoniques</b> f<sub>n</sub> = n × f<sub>1</sub>.</p></div>
     </div>
     ${exemple(`<p>La note la<sub>3</sub> (440 Hz) jouée par un diapason, puis par une flûte (spectres simplifiés).</p>
       <div class="os-figs deux"><div><p class="os-fig-leg"><b>Diapason : son pur</b></p>${figSig(440, I.diapason.a)}${figSpe(440, I.diapason.a)}${ecouter(440, I.diapason.a, 'Écouter le diapason')}</div>
@@ -104,7 +107,39 @@ function etape2(c_) {
   return carte;
 }
 
-/* ---------- 3. Hauteur et timbre ---------- */
+/* ---------- 3. Les fréquences des harmoniques ---------- */
+// À toi 1 : fréquence de l'harmonique de rang n ; À toi 2 : rang d'une raie quand un harmonique manque
+const F31 = hasard([125, 196, 220, 262, 330, 440]), N31 = hasard([2, 3, 4, 5]);
+const F32 = hasard([100, 150, 200, 250]), R32 = hasard([[1, 2, 4], [1, 3, 4], [1, 2, 5], [1, 3, 5]]);
+// rangs absents entre le fondamental et la troisième raie
+const MANQUE32 = Array.from({ length: R32[2] - 2 }, (_, k) => k + 2).filter(n => R32.indexOf(n) === -1);
+function etapeHarm(c_) {
+  const carte = c_.carte('3. Les fréquences des harmoniques');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Relation.</b> La fréquence de l'harmonique de rang n est un <b>multiple</b> de celle du fondamental :</p>
+        <p class="crs-formule">f<sub>n</sub> = n × f<sub>1</sub></p>
+        <p>Par exemple, f<sub>3</sub> = 3 × f<sub>1</sub>.</p></div>
+      <div class="cle"><p><b class="cle-titre">Retrouver le rang.</b> n = f<sub>n</sub> / f<sub>1</sub> (un nombre entier). Un harmonique peut <b>manquer</b> dans le spectre : le rang se calcule avec la fréquence, ce n'est pas la position de la raie.</p></div>
+    </div>
+    ${exemple(`<p>Un son a pour fondamental f<sub>1</sub> = 200 Hz. Ses raies sont à 200 Hz, 400 Hz et 800 Hz.</p>
+      ${figSpe(200, [1.5, .9, 0, .6], { Wmax: 560, fmax: 1200, pasF: 100, etiqF: [0, 200, 400, 600, 800, 1000, 1200] })}
+      ${calc(`f<sub>2</sub> = 2 × 200 = 400 Hz ; f<sub>3</sub> = 3 × 200 = 600 Hz : pas de raie à 600 Hz, l'harmonique de rang 3 manque ; ${fr('800', '200')} = 4 : la troisième raie est l'harmonique de ${c('rang 4')}.`)}`)}`);
+  const fr32 = R32.map(n => n * F32);
+  c_.aToi(carte, [
+    { titre: 'Fréquence d\'un harmonique', enonce: `<p>Le fondamental d'un son a pour fréquence f<sub>1</sub> = ${fmt(F31)} Hz.</p>`, parties: [
+      { type: 'nombre', q: `Calcule la fréquence f<sub>${N31}</sub> de l'harmonique de rang ${N31}.`, label: `f<sub>${N31}</sub> =`, valeur: N31 * F31, unite: 'Hz', tol: .5, signe: false,
+        diag: v => (Math.abs(v - (F31 + N31)) < .5 ? 'On <b>multiplie</b> la fréquence du fondamental par le rang : f<sub>n</sub> = n × f<sub>1</sub>.' : proche(v, F31 / N31, .01) ? 'Un harmonique a une fréquence plus grande que le fondamental : on multiplie.' : Math.abs(v - (N31 - 1) * F31) < .5 ? `Le rang ${N31} correspond à ${N31} × f<sub>1</sub>.` : 'f<sub>n</sub> = n × f<sub>1</sub>.'),
+        solution: calc(`f<sub>${N31}</sub> = ${N31} × f<sub>1</sub> = ${N31} × ${fmt(F31)} Hz = ${c(fmt(N31 * F31) + ' Hz')}`) }] },
+    { titre: 'Retrouver un rang', enonce: `<p>Voici le spectre d'un son. Ses raies sont à ${fr32.map(f => fmt(f) + ' Hz').join(', ').replace(/, ([^,]*)$/, ' et $1')}.</p>
+        ${figSpe(F32, R32.reduce((a, n) => { a[n - 1] = [1.5, .8, .6][R32.indexOf(n)]; return a; }, Array(R32[2]).fill(0)), { Wmax: 560, fmax: 1400, pasF: 100, etiqF: [0, 200, 400, 600, 800, 1000, 1200, 1400], etiquettes: false })}`, parties: [
+      { type: 'nombre', q: 'Quel est le rang n de la troisième raie ?', label: 'n =', valeur: R32[2], tol: .01, entier: true, signe: false,
+        diag: v => (v === 3 ? 'Le rang n\'est pas la position de la raie : un harmonique manque. Calcule n = f<sub>n</sub> / f<sub>1</sub>.' : 'n = f<sub>n</sub> / f<sub>1</sub>, avec f<sub>1</sub> la fréquence de la première raie.'),
+        solution: calc(`n = ${fr('f<sub>n</sub>', 'f<sub>1</sub>')} = ${fr(fmt(fr32[2]), fmt(F32))} = ${c(String(R32[2]))}`) + `<p>${MANQUE32.length > 1 ? `Les harmoniques de rangs ${MANQUE32.join(' et ')} manquent` : `L'harmonique de rang ${MANQUE32[0]} manque`} dans ce spectre.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Hauteur et timbre ---------- */
 // paire de sons : même note ou non, même instrument ou non (jamais les deux identiques)
 const PAIRES = [[true, false], [false, true], [false, false]];
 const [memeH, memeT] = hasard(PAIRES);
@@ -113,7 +148,7 @@ const fA = hasard([262, 330, 392, 440]), fB = memeH ? fA : hasard([262, 330, 392
 const NOTES_TAB = [['la<sub>3</sub>', 440], ['La<sub>4</sub>', 880], ['Si<sub>4</sub>', 988], ['Do<sub>5</sub>', 1046], ['Ré<sub>5</sub>', 1174]];
 const N3 = hasard(NOTES_TAB.slice(1));
 function etape3(c_) {
-  const carte = c_.carte('3. Hauteur et timbre');
+  const carte = c_.carte('4. Hauteur et timbre');
   c_.ajouter(carte, `<div class="cours-bloc">
       <div class="cle"><p><b class="cle-titre">Hauteur.</b> La hauteur d'un son, c'est la <b>fréquence de son fondamental</b> f<sub>1</sub> : c'est la <b>note</b>. Plus f<sub>1</sub> est grande, plus le son est <b>aigu</b> ; plus elle est petite, plus il est <b>grave</b>.</p></div>
       <div class="cle"><p><b class="cle-titre">Timbre.</b> Le timbre dépend de la <b>richesse du son en harmoniques</b> (leur nombre et leurs amplitudes) : c'est la <b>forme du signal</b>.</p></div>
@@ -144,6 +179,7 @@ function aRetenir(c_) {
   const carte = c_.carte('À retenir');
   c_.ajouter(carte, `<div class="cle"><p><b>Son pur</b> : signal sinusoïdal, une seule raie. <b>Son complexe</b> : signal non sinusoïdal, plusieurs raies (fondamental f<sub>1</sub> et harmoniques f<sub>n</sub> = n × f<sub>1</sub>).</p></div>
     <div class="cle"><p>Fréquence d'un son : sur le signal, <b>f = 1 / T</b> (mesurer plusieurs périodes) ; sur le spectre, <b>f = f<sub>1</sub></b>.</p></div>
+    <div class="cle"><p>Harmoniques : <b>f<sub>n</sub> = n × f<sub>1</sub></b> (par exemple f<sub>3</sub> = 3 × f<sub>1</sub>) ; rang d'une raie : n = f<sub>n</sub> / f<sub>1</sub>.</p></div>
     <div class="cle"><p><b>Hauteur</b> = fréquence du fondamental = note (grande fréquence : son aigu). <b>Timbre</b> = harmoniques = forme du signal. Même note sur deux instruments : même hauteur, timbres différents.</p></div>
     <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur le son pur et le son complexe →</a>
       <a class="btn-secondary" style="text-decoration:none" href="module_3a_cours.html">Module 3 : intensité et niveau sonores</a>
@@ -151,7 +187,7 @@ function aRetenir(c_) {
   return carte;
 }
 
-new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etapeHarm, etape3, aRetenir]);
 OS.menu('module_2_cours');
 </script>
 </body>

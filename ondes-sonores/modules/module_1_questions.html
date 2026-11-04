@@ -20,10 +20,12 @@
 <script>
 /* ============================================================
    10 questions tirées au hasard : vrai ou faux sur la propagation
-   (vide, matière, énergie) (2), situation (1), longueur d'onde et
-   fréquence (3), compressions et dilatations (2), λ et fréquence (2).
-   Erreurs diagnostiquées : λ = f / v, λ = v × f, T en ms dans f = 1 / T,
-   compression et dilatation confondues, air transporté avec le son.
+   (vide, matière, énergie, vitesse) (3, sans affirmation répétée),
+   situations (2), vitesse du son (2), compressions et dilatations (2),
+   longueur d'onde λ = v / f, simple rappel du chapitre 10 (1).
+   Erreurs diagnostiquées : λ = f / v, λ = v × f, vitesse de la lumière
+   ou mauvaise unité pour celle du son, compression et dilatation
+   confondues, air transporté avec le son.
    ============================================================ */
 const { o, fq, fmt, cs, hasard, melanger, proche, fr } = OS;
 const calc = h => `<p class="ph-calc">${h}</p>`;
@@ -43,9 +45,12 @@ const AFFIRMATIONS = [
   ['Le son se propage dans l\'eau.', 'vrai', 'L\'eau est un support matériel : le son s\'y propage (les dauphins communiquent ainsi).'],
   ['Dans une zone de compression, la pression de l\'air est plus faible.', 'faux', 'Compression : l\'air est plus serré, la pression est plus <b>forte</b>.'],
   ['Chaque portion d\'air oscille autour de sa position quand le son passe.', 'vrai', 'Elle va et vient sur place.'],
+  ['Dans l\'air, le son se propage à environ 340 m·s<sup>−1</sup>.', 'vrai', 'C\'est la vitesse du son dans l\'air à retenir.'],
+  ['Le son se propage plus vite que la lumière.', 'faux', 'Le son (340 m·s<sup>−1</sup>) est beaucoup plus lent que la lumière (3,00 × 10<sup>8</sup> m·s<sup>−1</sup>).'],
+  ['Une onde mécanique peut se propager dans le vide.', 'faux', 'Une onde mécanique a besoin d\'un support matériel.'],
 ];
-function vraiFaux() {
-  const l = melanger(AFFIRMATIONS).slice(0, 4);
+// l : 4 affirmations (tirées dans tirage(), sans répétition d'une question à l'autre)
+function vraiFaux(l) {
   return { theme: 'Vrai ou faux', consigne: 'Pour chaque affirmation, choisis vrai ou faux.',
     parties: [{ type: 'grille', options: [o('vrai', 'Vrai'), o('faux', 'Faux')],
       lignes: l.map((a, k) => ({ id: 'l' + k, label: a[0], bonne: a[1], indice: a[2], apres: `<span class="er-petit">${a[2]}</span>` })),
@@ -67,34 +72,15 @@ const SITUATIONS = [
     { colonne: true, indices: { vide: 'Il n\'y a pas de vide entre le bateau et le nageur, il y a de l\'eau.', rien: 'Le son se propage dans tout support matériel : gaz, liquide ou solide.' },
       solution: '<p>Le son se propage dans les gaz, les liquides et les solides : tout support matériel.</p>' }),
 ];
-const situation = () => ({ theme: 'Propagation du son', parties: [hasard(SITUATIONS)()] });
+const situation = f => ({ theme: 'Propagation du son', parties: [f()] });
 
-/* ---------- Groupe 3 : longueur d'onde et fréquence ---------- */
+/* ---------- Groupe 3 : longueur d'onde (rappel du chapitre 10 : une seule question) ---------- */
 function longueurOnde() {
   const f = hasard([170, 262, 440, 523, 850, 1000, 1700, 3400]);
-  return { theme: 'Longueur d\'onde', enonce: `<p>Un son de fréquence f = ${fmt(f)} Hz se propage dans l'air (v = 340 m·s<sup>−1</sup>).</p>`,
+  return { theme: 'Longueur d\'onde', enonce: `<p>Un son de fréquence f = ${fmt(f)} Hz se propage dans l'air (v = 340 m·s<sup>−1</sup>). Rappel : λ = v / f.</p>`,
     parties: [fq.nombre('Calcule sa longueur d\'onde λ.', 'λ =', V / f, 'm', { rel: .01, signe: false, affiche: cs(V / f, 3), diag: v => diagL(v, f),
       solution: calc(`λ = ${fr('v', 'f')} = ${fr('340 m·s<sup>−1</sup>', fmt(f) + ' Hz')} ≈ ${c(cs(V / f, 3) + ' m')}`) })] };
 }
-function frequence() {
-  const L = hasard([.2, .34, .5, .68, 1, 1.7, 2, 3.4]);
-  return { theme: 'Fréquence d\'un son', enonce: `<p>Un son a une longueur d'onde λ = ${fmt(L)} m dans l'air (v = 340 m·s<sup>−1</sup>).</p>`,
-    parties: [fq.nombre('Quelle est sa fréquence f ?', 'f =', V / L, 'Hz', { rel: .01, signe: false, affiche: fmt(Math.round(V / L)),
-      diag: v => (proche(v, L / V, .02) ? 'f = v / λ : la vitesse est au numérateur.' : proche(v, V * L, .02) ? 'f = v / λ : on <b>divise</b>.' : 'λ = v / f, donc f = v / λ.'),
-      solution: calc(`f = ${fr('v', 'λ')} = ${fr('340 m·s<sup>−1</sup>', fmt(L) + ' m')} = ${c(fmt(Math.round(V / L)) + ' Hz')}`) })] };
-}
-function periode() {
-  const T = hasard([1, 2, 2.5, 4, 5]), f = 1000 / T;
-  return { theme: 'Période et longueur d\'onde', enonce: `<p>Le signal d'un son a une période T = ${fmt(T)} ms.</p>`,
-    parties: [
-      fq.nombre('Calcule sa fréquence f.', 'f =', f, 'Hz', { rel: .01, signe: false,
-        diag: v => (proche(v, 1 / T, .02) ? 'T doit être en <b>secondes</b> : ' + fmt(T) + ' ms = ' + fmt(T / 1000) + ' s.' : 'f = 1 / T, avec T en s.'),
-        solution: calc(`f = ${fr('1', 'T')} = ${fr('1', fmt(T / 1000) + ' s')} = ${c(fmt(f) + ' Hz')}`) }),
-      fq.nombre('Déduis-en sa longueur d\'onde dans l\'air.', 'λ =', V / f, 'm', { rel: .01, signe: false, affiche: cs(V / f, 3), diag: v => (proche(v, V * T, .02) ? 'T est en ms : λ = v × T avec T en s, ou λ = v / f.' : diagL(v, f)),
-        solution: calc(`λ = ${fr('v', 'f')} = ${fr('340', fmt(f))} = ${c(cs(V / f, 3) + ' m')} (ou λ = v × T = 340 × ${fmt(T / 1000)})`) }),
-    ] };
-}
-const G3 = [longueurOnde, frequence, periode];
 
 /* ---------- Groupe 4 : compressions et dilatations ---------- */
 // rangées de points d'air figées : zones A et B (une compression, une dilatation)
@@ -124,29 +110,29 @@ const QUI_AVANCE = () => ({ theme: 'Ce qui se propage', parties: [fq.choix('Quan
   { colonne: true, indices: { air: 'Chaque portion d\'air oscille autour de sa position : elle n\'avance pas.', vent: 'Le son ne fait pas de vent : il n\'y a pas de transport de matière.' },
     solution: '<p>La variation de pression avance ; l\'air oscille sur place. L\'onde transporte de l\'énergie, pas de matière.</p>' })] });
 
-/* ---------- Groupe 5 : λ et fréquence ---------- */
+/* ---------- Groupe 5 : vitesse du son ---------- */
 const G5 = [
-  () => ({ theme: 'Longueur d\'onde', parties: [fq.choix('Si la fréquence d\'un son est multipliée par 2, sa longueur d\'onde dans l\'air est :',
-    [o('ok', 'divisée par 2'), o('x2', 'multipliée par 2'), o('meme', 'inchangée')], 'ok',
-    { melanger: false, indices: { x2: 'λ = v / f : f est au dénominateur.', meme: 'λ = v / f dépend de f.' }, solution: '<p>λ = v / f : si f double, λ est divisée par 2 (v ne change pas).</p>' })] }),
-  () => {
-    const f1 = hasard([200, 340, 500]), f2 = f1 * hasard([2, 4]);
-    return { theme: 'Comparer deux sons', enonce: `<p>Deux sons se propagent dans l'air : le son 1 a pour fréquence ${fmt(f1)} Hz, le son 2 ${fmt(f2)} Hz.</p>`,
-      parties: [fq.choix('Lequel a la plus grande longueur d\'onde ?', [o('ok', 'Le son 1'), o('2', 'Le son 2'), o('eg', 'Ils ont la même')], 'ok',
-        { melanger: false, indices: { 2: 'λ = v / f : plus f est grande, plus λ est petite.', eg: 'Ils ont la même vitesse, mais pas la même fréquence : λ = v / f.' },
-          solution: `<p>λ<sub>1</sub> = 340 / ${fmt(f1)} = ${cs(V / f1, 3)} m ; λ<sub>2</sub> = 340 / ${fmt(f2)} = ${cs(V / f2, 3)} m. La plus petite fréquence a la plus grande longueur d'onde.</p>` })] };
-  },
+  () => ({ theme: 'Vitesse du son', parties: [fq.choix('Quelle est la vitesse du son dans l\'air ?',
+    [o('ok', '340 m·s<sup>−1</sup>'), o('lum', '3,00 × 10<sup>8</sup> m·s<sup>−1</sup>'), o('km', '340 km·s<sup>−1</sup>'), o('34', '34 m·s<sup>−1</sup>')], 'ok',
+    { indices: { lum: 'C\'est la vitesse de la lumière : le son est beaucoup plus lent.', km: 'Attention à l\'unité : 340 <b>mètres</b> par seconde.', 34: 'C\'est 10 fois trop petit.' },
+      solution: '<p>Dans l\'air, le son se propage à <b>v = 340 m·s<sup>−1</sup></b>.</p>' })] }),
+  () => ({ theme: 'Vitesse du son', parties: [fq.choix('Pendant un orage, on voit l\'éclair avant d\'entendre le tonnerre. Pourquoi ?',
+    [o('ok', 'Le son (340 m·s<sup>−1</sup>) est beaucoup plus lent que la lumière'), o('apres', 'Le tonnerre est produit après l\'éclair'), o('lent', 'La lumière est plus lente que le son')], 'ok',
+    { colonne: true, indices: { apres: 'L\'éclair et le tonnerre sont produits en même temps : c\'est le trajet jusqu\'à toi qui ne dure pas le même temps.', lent: 'C\'est l\'inverse : la lumière (3,00 × 10<sup>8</sup> m·s<sup>−1</sup>) arrive presque instantanément.' },
+      solution: '<p>Éclair et tonnerre sont produits en même temps. La lumière arrive presque instantanément ; le son, à 340 m·s<sup>−1</sup>, met plus de temps : on l\'entend après.</p>' })] }),
 ];
 
-// tirage : 2 + 1 + 3 + 2 + 2 questions
+// tirage : 3 vrai ou faux (12 affirmations différentes) + 2 situations + 2 vitesse + 2 compressions + 1 longueur d'onde
 function tirage() {
-  return [vraiFaux(), vraiFaux(), situation()].concat(G3.map(f => f()), [zonesAB(), QUI_AVANCE()], G5.map(f => f()));
+  const a = melanger(AFFIRMATIONS), s = melanger(SITUATIONS);
+  return [vraiFaux(a.slice(0, 4)), vraiFaux(a.slice(4, 8)), vraiFaux(a.slice(8, 12)), situation(s[0]), situation(s[1])]
+    .concat(G5.map(f => f()), [zonesAB(), QUI_AVANCE(), longueurOnde()]);
 }
 
 OS.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 1 · QUESTIONS', titre: 'L\'onde sonore',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : propagation du son (vide, matière, énergie), compressions et dilatations, longueur d\'onde λ = v / f.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : propagation du son (vide, matière, énergie), vitesse du son, compressions et dilatations, et un rappel sur la longueur d\'onde λ = v / f.</p>',
   questions: tirage,
   revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
   suite: { href: 'module_2_simulation.html', label: 'Module 2 : son pur, son complexe →' },

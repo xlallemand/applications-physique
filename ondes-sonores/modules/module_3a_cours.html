@@ -28,10 +28,11 @@
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
    Sous-module 1 du module 3 : intensité sonore et distance (A, 4A,
-   9A), niveau sonore L = 10 log(I / I0), réciproque I = I0 × 10^(L/10),
+   9A, sans calcul : seulement la figure du cours), niveau sonore L = 10 log(I / I0), réciproque I = I0 × 10^(L/10),
    audible ou non (L > 0 dB).
    Erreurs diagnostiquées : I0 oublié, log et ln confondus, facteur 10
-   oublié, L/10 oublié dans 10^(L/10), distance et surface confondues.
+   oublié, L/10 oublié dans 10^(L/10), distance et surface confondues
+   (lecture de la figure).
    Valeurs vérifiées par un script : 10 log(3,2 × 10⁷) ≈ 75 dB ;
    10⁻¹² × 10⁶ = 1,0 × 10⁻⁶ W·m⁻² ; 10 log(0,5) ≈ −3 dB.
    ============================================================ */
@@ -51,25 +52,29 @@ function diagL(v, I) {
 }
 
 /* ---------- 1. L'intensité sonore ---------- */
-const I1 = hasard([4, 8, 1.2, 3.6]) * 1e-3;
+// intensité et distance : seulement qualitatif (le cours donne la figure A, 4A, 9A, sans calcul)
 function etape1(c_) {
   const carte = c_.carte('1. L\'intensité sonore');
   c_.ajouter(carte, `<div class="cours-bloc">
-      <div class="cle"><p><b class="cle-titre">Intensité sonore.</b> L'intensité sonore I est la <b>puissance</b> sonore reçue par <b>unité de surface</b> : elle s'exprime en <b>W·m<sup>−2</sup></b>.</p></div>
-      <p>En s'éloignant de la source, la même puissance se répartit sur une surface plus grande : l'intensité sonore <b>diminue</b>. À une distance 2 fois plus grande, la surface est 4 fois plus grande ; à une distance 3 fois plus grande, 9 fois plus grande.</p>
+      <div class="cle"><p><b class="cle-titre">Intensité sonore.</b> L'intensité sonore I est la <b>puissance</b> d'un son par <b>unité de surface</b> : elle s'exprime en <b>W·m<sup>−2</sup></b>. On dit aussi <b>intensité acoustique</b>.</p></div>
+      <p>En s'éloignant de la source, la même puissance se répartit sur une <b>surface plus grande</b> (A à la distance r, 4A à 2r, 9A à 3r sur la figure) : l'intensité sonore <b>diminue</b>.</p>
       ${OS.svgDistance()}
     </div>
-    ${exemple(`<p>À 1 m d'une enceinte, I = 8,0 × 10<sup>−3</sup> W·m<sup>−2</sup>. À 2 m, la puissance traverse une surface 4 fois plus grande :</p>
-      ${calc(`I = ${fr('8,0 × 10<sup>−3</sup>', '4')} = ${c('2,0 × 10<sup>−3</sup> W·m<sup>−2</sup>')}`)}`)}`);
+    ${exemple(`<p>Au premier rang d'un concert, le son est plus intense qu'au fond de la salle : au fond, la puissance des enceintes s'est répartie sur une surface bien plus grande.</p>`)}`);
   c_.aToi(carte, [
     { titre: 'L\'intensité et la distance', parties: [
-      { type: 'choix', colonne: true, q: 'On se place 3 fois plus loin de la source. L\'intensité sonore est :',
-        options: [o('ok', 'divisée par 9'), o('3', 'divisée par 3'), o('x9', 'multipliée par 9')], bonne: 'ok', melanger: false,
-        indices: { 3: 'La puissance se répartit sur une <b>surface</b> : à 3r, elle vaut 9A (3 × 3), pas 3A.', x9: 'En s\'éloignant, le son est moins intense.' },
-        solution: '<p>À 3r, la surface est 9A : la même puissance se répartit sur 9 fois plus de surface, I est divisée par 9.</p>' },
-      { type: 'sci', q: `À 1 m d'une source, I = ${sci(I1, 2)} W·m<sup>−2</sup>. Quelle est l'intensité sonore à 2 m ?`, label: 'I =', valeur: I1 / 4, unite: 'W·m<sup>−2</sup>', cs: 2,
-        diag: v => (proche(v, I1 / 2, .03) ? 'La distance double, la <b>surface</b> est multipliée par 4 : on divise I par 4.' : proche(v, I1 * 4, .03) ? 'Plus loin, l\'intensité diminue : on <b>divise</b> par 4.' : 'À 2 m, la surface est 4 fois plus grande : I est divisée par 4.'),
-        solution: calc(`I = ${fr(sci(I1, 2), '4')} = ${c(sci(I1 / 4, 2) + ' W·m<sup>−2</sup>')}`) },
+      { type: 'choix', colonne: true, q: 'On s\'éloigne d\'une enceinte. L\'intensité sonore reçue :',
+        options: [o('ok', 'diminue'), o('aug', 'augmente'), o('meme', 'ne change pas')], bonne: 'ok', melanger: false,
+        indices: { aug: 'Plus loin, le son est moins intense.', meme: 'La puissance se répartit sur une surface de plus en plus grande.' },
+        solution: '<p>Plus on est loin, plus la puissance est répartie sur une grande surface : l\'intensité sonore diminue.</p>' },
+      { type: 'choix', colonne: true, q: 'D\'après la figure, à la distance 2r, sur quelle surface la puissance de la source se répartit-elle ?',
+        options: [o('ok', '4A'), o('2', '2A'), o('1', 'A')], bonne: 'ok', melanger: false,
+        indices: { 2: 'Lis la figure : la surface à 2r est formée de 4 carreaux A, pas 2.', 1: 'À 2r, la surface est plus grande qu\'à r : compte les carreaux A.' },
+        solution: '<p>À 2r, la puissance traverse une surface 4A : elle est plus répartie, l\'intensité sonore est plus faible qu\'à r.</p>' },
+      { type: 'choix', colonne: true, q: 'Pourquoi l\'intensité sonore diminue-t-elle quand on s\'éloigne de la source ?',
+        options: [o('ok', 'La même puissance se répartit sur une surface plus grande'), o('lent', 'Le son ralentit en s\'éloignant'), o('vide', 'L\'air arrête le son au bout de quelques mètres')], bonne: 'ok', melanger: false,
+        indices: { lent: 'La vitesse du son dans l\'air ne change pas : 340 m·s<sup>−1</sup>.', vide: 'On entend des sons lointains : le son se propage loin dans l\'air.' },
+        solution: '<p>I est une puissance par unité de surface : la même puissance répartie sur une plus grande surface donne une intensité plus faible.</p>' },
     ] },
   ]);
   return carte;
@@ -124,7 +129,7 @@ function etape3(c_) {
 /* ---------- À retenir ---------- */
 function aRetenir(c_) {
   const carte = c_.carte('À retenir');
-  c_.ajouter(carte, `<div class="cle"><p><b>Intensité sonore</b> I : puissance reçue par unité de surface, en W·m<sup>−2</sup>. Elle diminue quand on s'éloigne de la source (2 fois plus loin : 4 fois plus faible).</p></div>
+  c_.ajouter(carte, `<div class="cle"><p><b>Intensité sonore</b> I : puissance reçue par unité de surface, en W·m<sup>−2</sup>. On dit aussi intensité acoustique. Elle diminue quand on s'éloigne de la source.</p></div>
     <div class="cle"><p><b>Niveau sonore</b> : L = 10 log(I / I<sub>0</sub>) en dB, avec I<sub>0</sub> = 1,0 × 10<sup>−12</sup> W·m<sup>−2</sup> ; réciproque : I = I<sub>0</sub> × 10<sup>L/10</sup>.</p></div>
     <div class="cle"><p>L &gt; 0 dB (I &gt; I<sub>0</sub>) : le son peut être entendu.</p></div>
     <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Cours : additionner des sons →</a>

@@ -32,7 +32,8 @@
    Sous-module 2 du module 4 : onde incidente, réfléchie, transmise,
    absorbée (schéma de la paroi à compléter par glisser-déposer,
    assets/dragdrop.js) ; atténuation A = L(incidente) − L(transmise) ;
-   courbes d'atténuation de deux vitrages (choix selon la fréquence).
+   courbes d'atténuation de deux vitrages (choix selon la fréquence ;
+   courbes simplifiées, données comme exemple).
    Erreurs diagnostiquées : soustraction inversée, niveaux additionnés,
    lecture de la mauvaise courbe.
    ============================================================ */
@@ -55,7 +56,7 @@ function etape1(c_) {
     </div>
     ${exemple(`<p>Le bruit de la rue arrive sur une fenêtre (onde incidente). Une partie repart vers la rue (réfléchie), une partie fait vibrer et chauffe très légèrement la vitre (absorbée), une partie entre dans la pièce (transmise) : c'est elle qu'on entend.</p>`)}`);
   c_.aToi(carte, [
-    { titre: 'Compléter le schéma', parties: [OS.versCours(OS.partieParoi(null, '<p>1 : incidente ; 2 : réfléchie ; 3 : transmise ; 4 : absorbée.</p>'))] },
+    { titre: 'Compléter le schéma', parties: [OS.versCours(OS.partieParoi(null, '<p>1 : onde incidente (I<sub>incidente</sub>) ; 2 : réfléchie (I<sub>réfléchie</sub>) ; 3 : transmise (I<sub>transmise</sub>) ; 4 : absorbée (I<sub>absorbée</sub>).</p>'))] },
   ]);
   return carte;
 }
@@ -71,7 +72,7 @@ function etape2(c_) {
         <p class="crs-formule">A = L<sub>incidente</sub> − L<sub>transmise</sub></p>
         <p>A en dB. Plus A est grande, mieux la paroi isole.</p></div>
       <p>L'atténuation dépend du <b>matériau</b> et de la <b>fréquence</b> du son : on la donne par une courbe A(f), avec un axe des fréquences en échelle logarithmique.</p>
-      ${vitrages()}
+      ${vitrages()}<p class="os-fig-leg">Courbes simplifiées (exemple)</p>
     </div>
     ${exemple(`<p>Dehors, la rue produit 85 dB ; derrière la fenêtre, on mesure 40 dB :</p>
       ${calc(`A = L<sub>incidente</sub> − L<sub>transmise</sub> = 85 dB − 40 dB = ${c('45 dB')}`)}

@@ -32,22 +32,18 @@
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
    1. Onde, onde mécanique (vide, matière, énergie) ; 2. l'onde sonore
    dans l'air (animation des points d'air : compressions, dilatations,
-   SON.air) ; 3. vitesse du son et longueur d'onde λ = v / f.
-   Erreurs diagnostiquées : λ = f / v, λ = v × f, f et λ inversés.
+   SON.air) ; 3. vitesse du son, avec un simple rappel de la longueur
+   d'onde λ = v / f (chapitre 10, absente du cours de ce chapitre).
    Valeur vérifiée par un script : la₃, 440 Hz → λ = 340 / 440 ≈ 0,773 m.
    ============================================================ */
 const { exemple } = COURS;
-const { fmt, proche, hasard, fr } = OS;
-const calc = h => `<p class="crs-calc">${h}</p>`;
-const c = h => `<span class="c">${h}</span>`;
 const o = (id, label) => ({ id, label });
-const V = 340;
 
 /* ---------- 1. Qu'est-ce qu'une onde ? ---------- */
 function etape1(c_) {
   const carte = c_.carte('1. Qu\'est-ce qu\'une onde ?');
   c_.ajouter(carte, `<div class="cours-bloc">
-      <div class="cle"><p><b class="cle-titre">Définition.</b> Une <b>onde</b> est la propagation d'une perturbation : elle réalise un <b>transfert d'énergie sans transport de matière</b>.</p></div>
+      <div class="cle"><p><b class="cle-titre">Définition.</b> Une <b>onde</b> est un <b>transfert d'énergie sans transport de matière</b>.</p></div>
       <div class="cle"><p><b class="cle-titre">Onde mécanique.</b> Elle a besoin d'un <b>support matériel</b> (air, eau, solide) pour se propager : elle <b>ne se propage pas dans le vide</b>. Le son est une onde mécanique.</p></div>
     </div>
     ${exemple(`<p>Un bouchon flotte sur l'eau. Quand une vague passe, il monte et redescend, mais il n'avance pas avec la vague : l'eau n'est pas transportée. L'énergie, elle, l'est : la vague fait bouger un bateau loin de l'endroit où elle est née.</p>
@@ -100,28 +96,16 @@ function etape2(c_) {
   return carte;
 }
 
-/* ---------- 3. Vitesse du son et longueur d'onde ---------- */
-const F3 = hasard([262, 330, 523, 680, 880, 1000, 2000]), L3 = hasard([.5, .85, 1.7, 3.4, .2]);
+/* ---------- 3. Vitesse du son (et rappel sur la longueur d'onde) ---------- */
+// étape sans « À toi » : elle appelle c.continuer elle-même
 function etape3(c_) {
-  const carte = c_.carte('3. Vitesse du son et longueur d\'onde');
+  const carte = c_.carte('3. Vitesse du son');
   c_.ajouter(carte, `<div class="cours-bloc">
-      <div class="cle"><p><b class="cle-titre">Vitesse du son.</b> Dans l'air, le son se propage à <b>v = 340 m·s<sup>−1</sup></b> (environ).</p></div>
-      <div class="cle"><p><b class="cle-titre">Longueur d'onde.</b> La longueur d'onde λ est la distance parcourue par l'onde pendant une période T. Dans l'animation, c'est la distance entre deux compressions voisines.</p>
-        <p class="crs-formule">λ = v × T = <span class="som-fr"><span>v</span><span>f</span></span></p>
-        <p>λ en m, v en m·s<sup>−1</sup>, T en s, f en Hz.</p></div>
-    </div>
-    ${exemple(`<p>Le diapason donne la note la<sub>3</sub>, de fréquence f = 440 Hz. Sa longueur d'onde dans l'air :</p>
-      ${calc(`λ = <span class="som-fr"><span>v</span><span>f</span></span> = <span class="som-fr"><span>340 m·s<sup>−1</sup></span><span>440 Hz</span></span> ≈ ${c('0,773 m')}`)}`)}`);
-  c_.aToi(carte, [
-    { titre: 'Calculer une longueur d\'onde', enonce: `<p>Un son a pour fréquence f = ${fmt(F3)} Hz. Il se propage dans l'air (v = 340 m·s<sup>−1</sup>).</p>`, parties: [
-      { type: 'nombre', q: 'Calcule sa longueur d\'onde λ (3 chiffres significatifs).', label: 'λ =', valeur: V / F3, unite: 'm', rel: .01, signe: false,
-        diag: v => (proche(v, F3 / V, .02) ? 'λ = v / f : la vitesse est au <b>numérateur</b>.' : proche(v, V * F3, .02) ? 'On <b>divise</b> la vitesse par la fréquence : λ = v / f.' : 'λ = v / f, avec v = 340 m·s<sup>−1</sup> et f en Hz.'),
-        solution: calc(`λ = <span class="som-fr"><span>v</span><span>f</span></span> = <span class="som-fr"><span>340 m·s<sup>−1</sup></span><span>${fmt(F3)} Hz</span></span> ≈ ${c(OS.cs(V / F3, 3) + ' m')}`) }] },
-    { titre: 'Retrouver la fréquence', enonce: `<p>Un son a une longueur d'onde λ = ${fmt(L3)} m dans l'air.</p>`, parties: [
-      { type: 'nombre', q: 'Quelle est sa fréquence f ?', label: 'f =', valeur: V / L3, unite: 'Hz', rel: .01, signe: false,
-        diag: v => (proche(v, L3 / V, .02) ? 'λ = v / f, donc f = v / λ : la vitesse est au numérateur.' : proche(v, V * L3, .02) ? 'f = v / λ : on <b>divise</b>.' : 'λ = v / f, donc f = v / λ.'),
-        solution: calc(`λ = <span class="som-fr"><span>v</span><span>f</span></span> donc f = <span class="som-fr"><span>v</span><span>λ</span></span> = <span class="som-fr"><span>340 m·s<sup>−1</sup></span><span>${fmt(L3)} m</span></span> = ${c(fmt(Math.round(V / L3)) + ' Hz')}`) }] },
-  ]);
+      <div class="cle"><p><b class="cle-titre">Vitesse du son.</b> Dans l'air, le son se propage à <b>v = 340 m·s<sup>−1</sup></b>.</p></div>
+      <p>C'est beaucoup moins vite que la lumière (3,00 × 10<sup>8</sup> m·s<sup>−1</sup>) : pendant un orage, on voit l'éclair avant d'entendre le tonnerre.</p>
+      <div class="os-rappel"><p><b>Rappel (chapitre 10).</b> La longueur d'onde λ est la distance entre deux compressions voisines : <b>λ = v / f</b> (λ en m, v en m·s<sup>−1</sup>, f en Hz). Par exemple, pour le la<sub>3</sub> du diapason (440 Hz) : λ = 340 / 440 ≈ 0,773 m.</p></div>
+    </div>`);
+  c_.continuer(carte);
   return carte;
 }
 
@@ -130,7 +114,7 @@ function aRetenir(c_) {
   const carte = c_.carte('À retenir');
   c_.ajouter(carte, `<div class="cle"><p>Une <b>onde</b> transporte de l'<b>énergie</b> sans transporter de matière. Une <b>onde mécanique</b> a besoin d'un support matériel : elle ne se propage pas dans le vide.</p></div>
     <div class="cle"><p>Dans l'air, le son est la propagation d'une <b>variation de pression</b> : compressions et dilatations. L'air oscille sur place.</p></div>
-    <div class="cle"><p>Vitesse du son dans l'air : <b>v = 340 m·s<sup>−1</sup></b>. Longueur d'onde : <b>λ = v / f</b>.</p></div>
+    <div class="cle"><p>Vitesse du son dans l'air : <b>v = 340 m·s<sup>−1</sup></b>.</p></div>
     <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur l'onde sonore →</a>
       <a class="btn-secondary" style="text-decoration:none" href="module_2_simulation.html">Module 2 : son pur, son complexe</a>
       <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);

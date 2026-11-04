@@ -101,14 +101,14 @@ function transmis() {
 function vitrage() {
   const f = hasard([200, 1000, 1500, 2000, 3000, 4000]);
   const s = interpLog(VITRAGES.simple.pts, f), d = interpLog(VITRAGES.double.pts, f), b = d > s ? 'double' : 'simple';
-  return { theme: 'Choisir un matériau', enonce: `<p>Atténuation de deux vitrages en fonction de la fréquence :</p>${OS.fig(W => OS.svgVitrages({ W: Math.min(W, 640), H: W < 480 ? 250 : 270 }))}`,
+  return { theme: 'Choisir un matériau', enonce: `<p>Atténuation de deux vitrages en fonction de la fréquence :</p>${OS.fig(W => OS.svgVitrages({ W: Math.min(W, 640), H: W < 480 ? 250 : 270 }))}<p class="os-fig-leg">Courbes simplifiées (exemple)</p>`,
     parties: [fq.choix(`Pour atténuer un bruit de ${fmtHz(f)}, quel vitrage vaut-il mieux choisir ?`, [o('simple', 'Le simple vitrage'), o('double', 'Le double vitrage')], b,
       { melanger: false, indices: { simple: `À ${fmtHz(f)}, la courbe du double vitrage est au-dessus.`, double: `À ${fmtHz(f)}, la courbe du simple vitrage est au-dessus.` },
         solution: `<p>À ${fmtHz(f)} : simple vitrage ≈ ${Math.round(s)} dB, double vitrage ≈ ${Math.round(d)} dB. Le ${b} vitrage atténue le plus.</p>` })] };
 }
 
 /* ---------- Groupe 5 : vocabulaire de la paroi ---------- */
-const paroi = () => ({ theme: 'Onde et paroi', consigne: 'Une onde sonore frappe une paroi.', parties: [OS.partieParoi(null, '<p>1 : incidente ; 2 : réfléchie ; 3 : transmise ; 4 : absorbée.</p>')] });
+const paroi = () => ({ theme: 'Onde et paroi', consigne: 'Une onde sonore frappe une paroi.', parties: [OS.partieParoi(null, '<p>1 : onde incidente (I<sub>incidente</sub>) ; 2 : réfléchie (I<sub>réfléchie</sub>) ; 3 : transmise (I<sub>transmise</sub>) ; 4 : absorbée (I<sub>absorbée</sub>).</p>')] });
 
 // tirage : 2 + 2 + 2 + 3 + 1 questions
 function tirage() {

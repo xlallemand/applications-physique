@@ -18,7 +18,8 @@
 <script>
 /* ============================================================
    10 questions tirées au hasard : L à partir de I (2), I à partir de
-   L (2), audible ou non (1), intensité et distance (1), deux sources
+   L (2), audible ou non (1), intensité et distance (1, qualitatif :
+   lecture de la figure A, 4A, 9A), deux sources
    identiques (1), niveaux qui ne s'additionnent pas (1), deux sources
    différentes en trois parties (2).
    Erreurs diagnostiquées : niveaux additionnés, I0 oublié, log et ln
@@ -66,14 +67,19 @@ function audible() {
         solution: calc(`L = 10 log${fr(sci(I, 1), I0f)} ≈ ${c(fmt(niveau(I), 1) + ' dB')}`) + `<p>${aud ? 'L &gt; 0 dB : le son peut être entendu.' : 'L &lt; 0 dB (I &lt; I<sub>0</sub>) : le son est trop faible pour être entendu.'}</p>` })] };
 }
 
-/* ---------- Groupe 4 : intensité et distance ---------- */
-function distance() {
-  const k = hasard([2, 3]), I1 = hasard([1.8, 3.6, 7.2, 9]) * 1e-4;
-  return { theme: 'Intensité et distance', enonce: `<p>À 2 m d'un haut-parleur, l'intensité sonore vaut ${sci(I1, 2)} W·m<sup>−2</sup>. On se place à ${2 * k} m.</p>${OS.svgDistance()}`,
-    parties: [{ type: 'sci', q: `Quelle est l'intensité sonore à ${2 * k} m ?`, label: 'I =', valeur: I1 / (k * k), unite: 'W·m<sup>−2</sup>', cs: 2,
-      diag: v => (proche(v, I1 / k, .03) ? `La distance est multipliée par ${k}, la <b>surface</b> par ${k * k} : on divise I par ${k * k}.` : proche(v, I1 * k * k, .03) ? 'Plus loin, l\'intensité <b>diminue</b>.' : `Distance × ${k}, surface × ${k * k}.`),
-      solution: calc(`Distance × ${k} : surface × ${k * k}, donc I = ${fr(sci(I1, 2), String(k * k))} = ${c(sci(I1 / (k * k), 2) + ' W·m<sup>−2</sup>')}`) }] };
-}
+/* ---------- Groupe 4 : intensité et distance (qualitatif, figure du cours) ---------- */
+const DISTANCE = [
+  () => fq.choix('On se place plus loin du haut-parleur. L\'intensité sonore reçue :', [o('ok', 'diminue'), o('aug', 'augmente'), o('meme', 'ne change pas')], 'ok',
+    { melanger: false, indices: { aug: 'Plus loin, le son est moins intense.', meme: 'La même puissance se répartit sur une surface de plus en plus grande.' },
+      solution: '<p>Plus loin, la puissance se répartit sur une plus grande surface : l\'intensité sonore diminue.</p>' }),
+  () => fq.choix('D\'après la figure, à la distance 3r, sur quelle surface la puissance de la source se répartit-elle ?', [o('ok', '9A'), o('3', '3A'), o('1', 'A')], 'ok',
+    { melanger: false, indices: { 3: 'Lis la figure : la surface à 3r est formée de 9 carreaux A, pas 3.', 1: 'À 3r, la surface est bien plus grande qu\'à r.' },
+      solution: '<p>À 3r, la puissance traverse une surface 9A : l\'intensité sonore y est la plus faible.</p>' }),
+  () => fq.choix('Pourquoi l\'intensité sonore diminue-t-elle quand on s\'éloigne de la source ?', [o('ok', 'La même puissance se répartit sur une surface plus grande'), o('lent', 'Le son ralentit en s\'éloignant'), o('vide', 'L\'air arrête le son au bout de quelques mètres')], 'ok',
+    { melanger: false, colonne: true, indices: { lent: 'La vitesse du son dans l\'air ne change pas : 340 m·s<sup>−1</sup>.', vide: 'On entend des sons lointains : le son se propage loin dans l\'air.' },
+      solution: '<p>I est une puissance par unité de surface : répartie sur une plus grande surface, la même puissance donne une intensité plus faible.</p>' }),
+];
+const distance = () => ({ theme: 'Intensité et distance', enonce: OS.svgDistance(), parties: [hasard(DISTANCE)()] });
 
 /* ---------- Groupe 5 : sources identiques, niveaux qui ne s'additionnent pas ---------- */
 function identiques() {
