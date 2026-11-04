@@ -20,7 +20,7 @@
                                   avec volume, et des mots « hauteur (note) », « timbre », « son pur »,
                                   « son complexe ». Plusieurs exemplaires possibles.
        opts = { note ('la3'), libre (bool), f1, instrument ('diapason'), a, fmax, mesure, cases,
-                clavier (true), instruments (true), N (8 harmoniques), tmax (10 ms), aria }
+                clavier (true), instruments (true), N (8 harmoniques), tmax (10 ms), amax (2 V), aria }
        → { el, fourier, etat(), regler(r, silencieux), surChange(f), jouer() }
        etat() = { f1, a, note, libre, instrument, nature, ecoutes: [{ note, f1, instrument, a }], mesure, t1, t2, fmax }
        regler accepte note, libre, f1, instrument, a, et les réglages de FOURIER (fmax, mesure, cible…)
@@ -62,8 +62,10 @@
      ============================================================ */
   const INSTRUMENTS = {
     diapason: { label: 'Diapason', a: [1.5], desc: 'son pur : une seule raie' },
-    flute: { label: 'Flûte', a: [1.6, .45, .3, .15], desc: 'fondamental fort, trois harmoniques faibles' },
-    violon: { label: 'Violon', a: [1, 1.5, .35, .25], desc: 'a<sub>2</sub> plus grand que a<sub>1</sub>, a<sub>3</sub> et a<sub>4</sub> faibles' },
+    // flûte : rapports des raies du la₄ de l'exercice A (1 ; 0,30 ; 0,08)
+    flute: { label: 'Flûte', a: [1.6, .48, .13], desc: 'fondamental fort, deux harmoniques faibles' },
+    // violon : rapports des pics du sujet de bac (0,098 ; 0,139 ; 0,012 ; 0,014 ; 0,004 V)
+    violon: { label: 'Violon', a: [1, 1.42, .12, .14, .04], desc: 'a<sub>2</sub> plus grand que a<sub>1</sub>, a<sub>3</sub> et a<sub>4</sub> faibles' },
     clarinette: { label: 'Clarinette', a: [1.5, .1, 1, .05, .6, .05, .35], desc: 'surtout les harmoniques impairs' },
     orgue: { label: 'Orgue', a: [1.4, 1.45], desc: 'fondamental et rang 2' },
     guitare: { label: 'Guitare', a: [1.2, 1.15, 0, 1.15, .25, 0, .3], desc: 'harmoniques jusqu\'au rang 7' },
@@ -188,7 +190,7 @@
     zone.appendChild(racine);
     const $ = a => racine.querySelector(`[data-a="${a}"]`);
     const fo = F().monter($('fourier'), {
-      N: o.N, f1: f1Initial, a0: 0, a: aInitial, amax: 2, nom: 'u', unite: 'V', titreY: 'u(t) (en V) : signal du micro',
+      N: o.N, f1: f1Initial, a0: 0, a: aInitial, amax: o.amax || 2, nom: 'u', unite: 'V', titreY: 'u(t) (en V) : signal du micro',
       predefinis: false, reglages: false, sansA0: true, cases: o.cases, tmax: o.tmax, fmax: o.fmax, mesure: o.mesure,
       aria: o.aria,
     });

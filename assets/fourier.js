@@ -8,8 +8,10 @@
    bibliothèque, aucun fetch. Pas d'animation (prefers-reduced-motion
    respecté d'office).
 
-   Un signal (« spec ») : { f1 (Hz), a0, a: [a1, a2, …] }
-     s(t) = a0 + Σ aₙ × sin(n × 2π f1 × t)   (toutes les phases sont nulles)
+   Un signal (« spec ») : { f1 (Hz), a0, a: [a1, a2, …], phi (facultatif) }
+     s(t) = a0 + Σ aₙ × sin(n × 2π f1 × t + φₙ)
+     phi = [φ1, φ2, …] en radians, seulement pour redessiner un document
+     (signal enregistré) ; sans phi, toutes les phases sont nulles (simulateur)
 
    FOURIER.valeur(spec, t)        s(t), t en secondes
    FOURIER.raies(spec, opts)      raies du spectre [{ f, a, n }] (la raie à 0 Hz si a0 ≠ 0,
@@ -109,15 +111,17 @@
   /* ============================================================
      CALCUL
      ============================================================ */
-  // s(t) = a0 + Σ aₙ sin(2π n f1 t), t en secondes
+  // phase φₙ de l'harmonique de rang n (0 si spec.phi n'est pas donné)
+  const phase = (spec, n) => (spec.phi && spec.phi[n - 1]) || 0;
+  // s(t) = a0 + Σ aₙ sin(2π n f1 t + φₙ), t en secondes
   function valeur(spec, t) {
     let s = spec.a0 || 0;
     const w = 2 * Math.PI * spec.f1 * t;
-    (spec.a || []).forEach((a, i) => { if (a) s += a * Math.sin((i + 1) * w); });
+    (spec.a || []).forEach((a, i) => { if (a) s += a * Math.sin((i + 1) * w + phase(spec, i + 1)); });
     return s;
   }
-  // une seule composante : n = 0 → a0 ; n ≥ 1 → aₙ sin(2π n f1 t)
-  const composante = (spec, n, t) => (n === 0 ? spec.a0 || 0 : (spec.a[n - 1] || 0) * Math.sin(2 * Math.PI * n * spec.f1 * t));
+  // une seule composante : n = 0 → a0 ; n ≥ 1 → aₙ sin(2π n f1 t + φₙ)
+  const composante = (spec, n, t) => (n === 0 ? spec.a0 || 0 : (spec.a[n - 1] || 0) * Math.sin(2 * Math.PI * n * spec.f1 * t + phase(spec, n)));
   // forme idéale dont la série approche : créneau (aₙ = 4A/(nπ), n impair) ou dent de scie (aₙ = 2A/(nπ))
   function ideale(spec, forme, t) {
     const a1 = spec.a[0] || 0, u = ((spec.f1 * t) % 1 + 1) % 1;

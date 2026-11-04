@@ -83,8 +83,8 @@ function exercice(i) {
     const z = app.querySelector('.os-voir-zone');
     z.innerHTML = `<div class="os-voir-l">${e.sons.map((s, k) => `<button type="button" class="btn-secondary" data-son="${k}">▶ ${s.label}</button>`).join('')}</div><div class="os-voir-sim"></div>`;
     const s0 = e.sons[0];
-    // axe des temps de 32 ms : quatre périodes de 8 ms, comme sur l'enregistrement
-    const sim = SON.monter(z.querySelector('.os-voir-sim'), { libre: true, f1: s0.f1, a: s0.a, instruments: false, clavier: false, tmax: 32 });
+    // axe des temps de 25 ms comme sur l'enregistrement ; amplitudes des raies jusqu'à 6 V comme sur les spectres
+    const sim = SON.monter(z.querySelector('.os-voir-sim'), { libre: true, f1: s0.f1, a: s0.a, instruments: false, clavier: false, tmax: 25, amax: 6 });
     z.querySelectorAll('[data-son]').forEach(b => {
       b.onclick = () => { const s = e.sons[+b.dataset.son]; sim.regler({ libre: true, f1: s.f1, a: s.a }); sim.jouer(); };
     });

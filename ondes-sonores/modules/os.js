@@ -796,7 +796,11 @@
   // v fait-il partie de la liste l ? (comparaison tolérante pour les décimaux)
   const dans = (l, v) => l.some(x => Math.abs(x - v) < 1e-6 * Math.max(1, Math.abs(v)));
   const figSignal = (spec, o) => fig(W => F().svgSignal(spec, Object.assign({}, o, { W: Math.min(W, (o && o.Wmax) || 720) })));
-  const figSpectre = (liste, o) => fig(W => F().svgSpectre(liste, Object.assign({}, o, { W: Math.min(W, (o && o.Wmax) || 720) })));
+  // o.etiqFEtroit : fréquences écrites à la place de o.etiqF sur un écran étroit (moins de 420 px)
+  const figSpectre = (liste, o) => fig(W => {
+    const w = Math.min(W, (o && o.Wmax) || 720);
+    return F().svgSpectre(liste, Object.assign({}, o, { W: w }, o && o.etiqFEtroit && w < 420 ? { etiqF: o.etiqFEtroit } : {}));
+  });
   // raies d'un son : fondamental f1 et amplitudes a1, a2… (un son n'a pas de composante continue)
   const raiesSon = (f1, a) => F().raies({ f1, a0: 0, a });
 
@@ -910,7 +914,7 @@
      (audiogramme, perte auditive, atténuation d'une paroi, bouchons d'oreilles)
      o = { W, H, fmin, fmax, ymin, ymax, pasY, etiqY, inverse (axe vertical vers le bas),
            titreY (SVG), titreF, etiqF (fréquences écrites), ml (marge gauche),
-           courbes: [{ pts: [[f, y]…], cls, label, lf, ly, ancre }],
+           courbes: [{ pts: [[f, y]…], cls, droit (ligne brisée), label, lf, ly, dy, ancre, clsT }],
            ellipses: [{ lf, y, rf (en décades), ry, cls, label }],
            points: [{ f, y, label, cls, dx, dy, ancre }], reperes: [{ f } | { y }] (lignes de lecture),
            textes: [{ f, y, t, cls, ancre }], extra(g) (SVG ajouté), aria }
@@ -994,7 +998,11 @@
       if (r.f != null) s.push(`<line class="os-repere" x1="${g.X(r.f)}" y1="${g.y0}" x2="${g.X(r.f)}" y2="${g.y1}"/>`);
       if (r.y != null) s.push(`<line class="os-repere" x1="${g.x0}" y1="${g.Y(r.y)}" x2="${g.x1}" y2="${g.Y(r.y)}"/>`);
     });
-    (o.courbes || []).forEach(c => s.push(`<path class="${c.cls || 'os-courbe'}" d="${lisse(c.pts.map(([f, v]) => [g.X(f), g.Y(v)]))}"/>`));
+    // courbe lisse, ou ligne brisée (c.droit) comme sur un audiogramme médical
+    (o.courbes || []).forEach(c => {
+      const p = c.pts.map(([f, v]) => [g.X(f), g.Y(v)]);
+      s.push(`<path class="${c.cls || 'os-courbe'}" d="${c.droit ? 'M' + p.map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join('L') : lisse(p)}"/>`);
+    });
     s.push('</g>');
     // étiquettes des zones, des courbes, textes et points
     (o.ellipses || []).forEach(e => { if (e.label) s.push(`<text class="os-txt-zone" x="${g.X(Math.pow(10, e.lf + (e.dlf || 0)))}" y="${g.Y(e.y + (e.dy || 0)) + 4}" text-anchor="middle">${e.label}</text>`); });
@@ -1023,7 +1031,8 @@
      ============================================================ */
   const SEUIL = [[20, 74], [30, 59], [50, 43], [70, 34], [100, 27], [150, 20], [200, 15], [300, 10], [500, 5], [700, 2], [1000, 0], [1500, -1],
     [2000, -2], [3000, -5], [4000, -5], [5000, -3], [6000, 0], [8000, 9], [10000, 13], [12000, 17], [15000, 28], [18000, 52], [20000, 72]];
-  const DOULEUR = [[20, 128], [50, 125], [100, 122], [300, 120], [1000, 120], [3000, 115], [5000, 116], [10000, 120], [20000, 128]];
+  // seuil de la douleur d'après la courbe du cours (≈ 128 dB vers 100 Hz, 122 dB à 1 000 Hz, ≈ 116 dB vers 3 000-4 000 Hz)
+  const DOULEUR = [[20, 129], [100, 128], [300, 126], [1000, 122], [2000, 118], [3000, 116], [4000, 116], [5000, 118], [7000, 124], [10000, 128], [20000, 133]];
   const seuil = f => interpLog(SEUIL, f);
   const douleur = f => interpLog(DOULEUR, f);
   const estAudible = (f, L) => L > seuil(f);
@@ -1311,16 +1320,29 @@
 
   /* ============================================================
      SUJET DE BAC « ÉTUDE DU SON D'UN VIOLON » (Polynésie 2022)
-     Documents redessinés d'après les valeurs de la correction :
-     signal du violon (7 motifs en 18,25 ms : T ≈ 2,6 ms, f ≈ 384 Hz),
-     spectre du violon (pics A ≈ 390 Hz, B ≈ 770 Hz, C ≈ 1 160 Hz) et
-     spectre du son du microcontrôleur (≈ 390, 810 et 1 200 Hz).
+     Documents redessinés d'après le sujet :
+     doc. 1 : signal du violon (de −0,6 à 0,4 V sur 20 ms), série de
+       Fourier ajustée sur le chronogramme du sujet (amplitudes et
+       phases) : sommets à 1,17 ms et 19,42 ms, 7 motifs en 18,25 ms,
+       T ≈ 2,6 ms, f ≈ 384 Hz ;
+     doc. 2 : spectre du violon, pics A ≈ 390 Hz (0,098 V),
+       B ≈ 770 Hz (0,139 V), C ≈ 1 160 Hz (0,012 V), puis deux petits
+       pics vers 1 555 et 1 945 Hz (positions de la correction pour A, B, C) ;
+     doc. 3 : spectre du son du microcontrôleur (en V, valeurs de l'ordre
+       de 10⁻³ V) : grands pics à 390, 810 et 1 200 Hz, petits pics voisins.
      ============================================================ */
   const BAC = {
-    signal: { f1: 7 / 18.25e-3, a0: 0, a: [.6, 1, .35] },
-    violon: [{ f: 390, a: .6, nom: 'A' }, { f: 770, a: 1, nom: 'B' }, { f: 1160, a: .35, nom: 'C' }],
-    micro: [{ f: 390, a: .7, n: 1 }, { f: 810, a: .9, n: 2 }, { f: 1200, a: .3, n: 3 }],
-    optsSpectre: { unite: '', titreA: 'Amplitude', amax: 1.2, pasA: .2, etiqA: [0, .2, .4, .6, .8, 1, 1.2], fmax: 1500, pasF: 50, etiqF: [0, 250, 500, 750, 1000, 1250, 1500], Wmax: 460, H: 190 },
+    signal: { f1: 7 / 18.25e-3, a0: 0, a: [.186, .282, .029, .029, .009, .023, .018, .01], phi: [-2.43, 2.38, 1.43, -1.77, -1.98, 1.87, .65, -.32] },
+    // nom ' ' : pic sans lettre sur le document
+    violon: [{ f: 390, a: .098, nom: 'A' }, { f: 770, a: .139, nom: 'B' }, { f: 1160, a: .0115, nom: 'C' }, { f: 1555, a: .0135, nom: ' ' }, { f: 1945, a: .004, nom: ' ' }],
+    micro: [{ f: 360, a: .000225 }, { f: 390, a: .00112 }, { f: 420, a: .00072 }, { f: 810, a: .00109 }, { f: 1140, a: .00015 }, { f: 1168, a: .00034 },
+      { f: 1200, a: .000615 }, { f: 1262, a: .000095 }, { f: 1950, a: .000215 }, { f: 1985, a: .000205 }],
+    optsViolon: { unite: 'V', titreA: 'Amplitude de la tension (en V)', amax: .15, gradA: [0, .02, .04, .06, .08, .1, .12, .14], fmax: 2000, pasF: 50,
+      etiqF: [0, 250, 500, 750, 1000, 1250, 1500, 1750, 2000], etiqFEtroit: [0, 500, 1000, 1500, 2000], Wmax: 560, H: 210, etiquettes: true,
+      aria: 'Spectre d\'amplitude de l\'enregistrement du violon : pics A, B et C' },
+    optsMicro: { unite: 'V', titreA: 'Amplitude de la tension (en V)', amax: .0012, gradA: [0, .0002, .0004, .0006, .0008, .001], fmax: 2000, pasF: 50,
+      etiqF: [0, 250, 500, 750, 1000, 1250, 1500, 1750, 2000], etiqFEtroit: [0, 500, 1000, 1500, 2000], Wmax: 560, H: 210,
+      aria: 'Spectre d\'amplitude du son produit par le microcontrôleur' },
   };
 
   /* ============================================================
