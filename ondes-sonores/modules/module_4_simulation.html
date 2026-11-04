@@ -102,6 +102,8 @@
       niveau AFFICHÉ part de −10 dB et monte de 7 dB par seconde ;
       « J'entends » (ou la barre d'espace) inscrit un point (f, L)
       sur l'audiogramme, puis le son suivant, plus aigu, commence.
+      Le premier son est affiché à 50 Hz mais joué à 80 Hz : un son
+      de 50 Hz passe mal sur la plupart des haut-parleurs et casques.
       À la fin, la courbe du seuil d'audibilité se trace en passant
       par les points, puis son nom apparaît ; la simulation est
       marquée comme faite.
@@ -109,8 +111,8 @@
    le niveau affiché est à plus de 4 dB sous le seuil d'audibilité
    habituel S(f) (OS.seuil) ; ensuite le son apparaît faiblement et
    augmente vite : gain (dB) = réglage + correction(f) + 2,2 × (L − S),
-   soit le niveau du réglage quand L = S. La correction(f) = S(f) − S(1 000 Hz)
-   compense la moindre sensibilité de l'oreille aux graves et aux
+   soit le niveau du réglage quand L = S. La correction(f) = S(fs) − S(1 000 Hz),
+   où fs est la fréquence du son joué (80 Hz pour 50 Hz affichés), compense la moindre sensibilité de l'oreille aux graves et aux
    aigus. Gain plafonné à 30 dB au-dessus de ce niveau et à une
    amplitude de 0,5. Appui pendant le silence : « trop tôt », pas de
    point. Pas de réponse 40 dB après l'apparition du son : pas de
@@ -121,7 +123,9 @@
 const { fmt, seuil, interpLog } = OS;
 
 /* ---------- réglages du test ---------- */
-const FREQS = [50, 125, 250, 500, 1000, 2000, 4000, 8000];   // du plus grave au plus aigu (Hz)
+const FREQS = [50, 125, 250, 500, 1000, 2000, 4000, 8000];   // fréquences affichées, du plus grave au plus aigu (Hz)
+// fréquence du son réellement joué : 80 Hz pour 50 Hz affichés (50 Hz passe mal sur les haut-parleurs et casques)
+const JOUEE = f => (f === 50 ? 80 : f);
 const L_DEPART = -10;          // niveau affiché au début de chaque son (dB)
 const VITESSE = 7;             // montée du niveau affiché (dB par seconde)
 const ATTENTE = 600;           // durée (ms) au niveau de départ avant la montée
@@ -350,7 +354,7 @@ function ecran(phase) {
 function amplitudeTest(f, L) {
   const S = seuil(f);
   if (L < S - APPARITION) return 0;                                 // silence : niveaux trop faibles
-  const base = reglageDB() + (S - seuil(1000));                     // niveau du réglage, corrigé selon la fréquence
+  const base = reglageDB() + (seuil(JOUEE(f)) - seuil(1000));       // niveau du réglage, corrigé selon la fréquence jouée
   return amp(Math.min(base + MARGE, base + PENTE * (L - S)));
 }
 
@@ -375,7 +379,7 @@ function lancerSon(k) {
   etat.L = L_DEPART;
   etat.pause = false;
   if (etat.son) etat.son.arreter();
-  etat.son = AUDIO.sonPur(FREQS[k]);
+  etat.son = AUDIO.sonPur(JOUEE(FREQS[k]));
   if (!etat.son) { sansSon(); interrompre(); return; }
   afficherSon();
   afficherNiveau(false);
