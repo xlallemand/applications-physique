@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 5 : exercices — Chapitre 18 : Ondes sonores</title>
+<title>Module 5 : exercices — Chapitre 18 : Ondes sonores</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="os.css">
@@ -52,15 +52,15 @@ function noterResultat(id, pts, max) {
 function liste() {
   const res = lireResultats();
   app.innerHTML = `<div class="er-card"><span class="er-badge">MODULE 5 · EXERCICES</span><h2 class="er-titre">Les exercices de la feuille</h2>
-      <p class="er-contexte">Les exercices de la feuille, avec la numérotation du manuel : 6 p. 230, 8 p. 231, 10 et 11 p. 232, 17 p. 233, l'exercice A (audiogramme et bouchons d'oreilles), 16 p. 233, puis le sujet de bac « Étude du son d'un violon ». Chaque exercice est guidé question par question ; la <b>correction détaillée</b> est toujours disponible. Garde ta calculatrice à portée de main.</p>
-      <p class="er-petit" style="margin-top:8px">Barème de chaque question : 2 points juste du premier coup, 1 point après une erreur, 0 point si tu regardes la correction.</p></div>
+      <p class="er-contexte">Les exercices de la feuille, avec la numérotation du manuel : 6 p. 230, 8 p. 231, 10 et 11 p. 232, 17 p. 233, l'exercice A (audiogramme et bouchons d'oreilles), 16 p. 233, puis le sujet de bac « Étude du son d'un violon ». Chaque exercice est guidé question par question ; la <b>correction détaillée</b> est toujours disponible. Garde ta calculatrice à portée de main.</p>
+      <p class="er-petit" style="margin-top:8px">Barème de chaque question : 2 points juste du premier coup, 1 point après une erreur, 0 point si tu regardes la correction.</p></div>
     ${OS.GROUPES_EX.map(g => `<div class="er-card ph-ex-groupe"><h3 class="cours-titre">${g.titre}</h3><div class="ph-ex-liste">
       ${EX.filter(e => e.groupe === g.id).map(e => {
         const r = res[e.id];
         return `<button type="button" class="ph-ex-carte${r ? ' fait' : ''}" data-id="${e.id}">
           <span class="ph-ex-num">${r ? '✓' : e.id}</span>
           <span><span class="ph-ex-titre" style="display:block">${e.titre}</span><span class="ph-ex-desc" style="display:block">${e.desc}</span>
-          ${r ? `<span class="ph-ex-score" style="display:block">Meilleur score : ${r.pts} / ${r.max}</span>` : ''}</span></button>`;
+          ${r ? `<span class="ph-ex-score" style="display:block">Meilleur score : ${r.pts} / ${r.max}</span>` : ''}</span></button>`;
       }).join('')}</div></div>`).join('')}`;
   app.querySelectorAll('.ph-ex-carte').forEach(b => { b.onclick = () => exercice(EX.findIndex(e => e.id === b.dataset.id)); });
   window.scrollTo(0, 0);
@@ -99,8 +99,8 @@ function exercice(i) {
       noterResultat(e.id, pts, max);
       const suivant = EX[i + 1];
       const b = app.querySelector('[data-a="bilan"]');
-      b.innerHTML = `<div class="${pts ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${pts ? 'er-ok' : ''}">Exercice terminé : ${pts} / ${max} points.</b></p>
-          ${pts === max ? '<p>Tout juste du premier coup, bravo !</p>' : '<p>Relis les corrections, puis refais l\'exercice plus tard pour vérifier.</p>'}</div>
+      b.innerHTML = `<div class="${pts ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${pts ? 'er-ok' : ''}">Exercice terminé : ${pts} / ${max} points.</b></p>
+          ${pts === max ? '<p>Tout juste du premier coup, bravo !</p>' : '<p>Relis les corrections, puis refais l\'exercice plus tard pour vérifier.</p>'}</div>
         <div class="er-actions"><button type="button" class="btn-secondary" data-a="re">↺ Refaire</button>
           <button type="button" class="btn-secondary" data-a="liste2">Liste des exercices</button>
           ${suivant ? `<button type="button" class="btn-primary" data-a="suiv">Exercice ${suivant.id === 'Bac' ? 'de bac' : suivant.id} →</button>` : ''}</div>`;

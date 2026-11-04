@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 4 : l'audiogramme — Chapitre 18 : Ondes sonores</title>
+<title>Module 4 : l'audiogramme — Chapitre 18 : Ondes sonores</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="os.css">
@@ -56,24 +56,24 @@ function pointAuHasard(aud) {
 
 /* ---------- 1. La courbe de sensibilité de l'oreille ---------- */
 const PA = pointAuHasard(Math.random() < .5), PB = pointAuHasard(!estAudible(PA.f, PA.L));
-const choixAud = p => ({ type: 'choix', q: `Le son de fréquence ${fmtHz(p.f)} et de niveau ${fmt(p.L)} dB (point P) est-il audible ?`, options: [o('a', 'Audible'), o('i', 'Inaudible')], bonne: estAudible(p.f, p.L) ? 'a' : 'i', melanger: false,
-  indices: { a: 'Le point P est <b>sous</b> la courbe du seuil d\'audibilité : le son est trop faible à cette fréquence.', i: 'Le point P est <b>au-dessus</b> du seuil d\'audibilité (et sous le seuil de la douleur).' },
-  solution: `<p>P est ${estAudible(p.f, p.L) ? 'au-dessus' : 'en dessous'} du seuil d'audibilité : le son est <b>${estAudible(p.f, p.L) ? 'audible' : 'inaudible'}</b>.</p>` });
+const choixAud = p => ({ type: 'choix', q: `Le son de fréquence ${fmtHz(p.f)} et de niveau ${fmt(p.L)} dB (point P) est-il audible ?`, options: [o('a', 'Audible'), o('i', 'Inaudible')], bonne: estAudible(p.f, p.L) ? 'a' : 'i', melanger: false,
+  indices: { a: 'Le point P est <b>sous</b> la courbe du seuil d\'audibilité : le son est trop faible à cette fréquence.', i: 'Le point P est <b>au-dessus</b> du seuil d\'audibilité (et sous le seuil de la douleur).' },
+  solution: `<p>P est ${estAudible(p.f, p.L) ? 'au-dessus' : 'en dessous'} du seuil d'audibilité : le son est <b>${estAudible(p.f, p.L) ? 'audible' : 'inaudible'}</b>.</p>` });
 function etape1(c_) {
   const carte = c_.carte('1. La courbe de sensibilité de l\'oreille');
   c_.ajouter(carte, `<div class="cours-bloc">
-      <div class="cle"><p><b class="cle-titre">Audiogramme.</b> Il donne, en fonction de la fréquence :</p>
-        <ul class="er-liste"><li>le <b>seuil d'audibilité</b> : le niveau sonore minimal pour entendre ; <b>sous</b> cette courbe, le son est <b>inaudible</b> ;</li>
-          <li>le <b>seuil de la douleur</b> : au-dessus, le son fait mal (vers 120 dB) ;</li>
-          <li>entre les deux, le son est <b>audible</b> ; on y place les zones de la <b>conversation</b> et de la <b>musique</b>.</li></ul></div>
-      <p>L'oreille est la plus sensible vers 3 000-4 000 Hz (le seuil y est le plus bas) ; elle entend mal les sons graves et très aigus.</p>
+      <div class="cle"><p><b class="cle-titre">Audiogramme.</b> Il donne, en fonction de la fréquence :</p>
+        <ul class="er-liste"><li>le <b>seuil d'audibilité</b> : le niveau sonore minimal pour entendre ; <b>sous</b> cette courbe, le son est <b>inaudible</b> ;</li>
+          <li>le <b>seuil de la douleur</b> : au-dessus, le son fait mal (vers 120 dB) ;</li>
+          <li>entre les deux, le son est <b>audible</b> ; on y place les zones de la <b>conversation</b> et de la <b>musique</b>.</li></ul></div>
+      <p>L'oreille est la plus sensible vers 3 000-4 000 Hz (le seuil y est le plus bas) ; elle entend mal les sons graves et très aigus.</p>
     </div>
-    ${exemple(`<p>Deux sons de même niveau, 20 dB :</p>
+    ${exemple(`<p>Deux sons de même niveau, 20 dB :</p>
       ${audio({ points: [{ f: 100, y: 20, label: 'A' }, { f: 4000, y: 20, label: 'B' }] })}
-      <ul class="er-liste"><li>A, 100 Hz et 20 dB : le point est <b>sous</b> le seuil d'audibilité, le son est <b>inaudible</b> ;</li>
-        <li>B, 4 000 Hz et 20 dB : le point est <b>au-dessus</b> du seuil, le son est <b>audible</b>.</li></ul>`)}`);
+      <ul class="er-liste"><li>A, 100 Hz et 20 dB : le point est <b>sous</b> le seuil d'audibilité, le son est <b>inaudible</b> ;</li>
+        <li>B, 4 000 Hz et 20 dB : le point est <b>au-dessus</b> du seuil, le son est <b>audible</b>.</li></ul>`)}`);
   c_.aToi(carte, [
-    { titre: 'Audible ou non ?', enonce: audio({ points: [{ f: PA.f, y: PA.L, label: 'P' }] }), parties: [choixAud(PA)] },
+    { titre: 'Audible ou non ?', enonce: audio({ points: [{ f: PA.f, y: PA.L, label: 'P' }] }), parties: [choixAud(PA)] },
     { titre: 'Un autre son', enonce: audio({ points: [{ f: PB.f, y: PB.L, label: 'P' }] }), parties: [choixAud(PB)] },
   ]);
   return carte;
@@ -100,17 +100,17 @@ const PL = { f: hasard([300, 400, 700, 3000, 4000, 6000]), L: hasard([30, 40, 60
 function etape2(c_) {
   const carte = c_.carte('2. Une échelle logarithmique');
   c_.ajouter(carte, `<div class="cours-bloc">
-      <div class="cle"><p><b class="cle-titre">Échelle logarithmique.</b> Sur l'axe des fréquences, chaque fois qu'on avance de la même longueur, la fréquence est <b>multipliée par 10</b> : de 100 à 1 000 Hz, puis de 1 000 à 10 000 Hz, même longueur. Ce n'est <b>pas une échelle régulière</b>.</p></div>
-      <p>Entre 100 et 1 000 Hz, les traits valent 200, 300, 400… 900 Hz : ils se <b>resserrent</b> vers la droite. Entre 1 000 et 10 000 Hz, ils valent 2 000, 3 000… 9 000 Hz.</p>
+      <div class="cle"><p><b class="cle-titre">Échelle logarithmique.</b> Sur l'axe des fréquences, chaque fois qu'on avance de la même longueur, la fréquence est <b>multipliée par 10</b> : de 100 à 1 000 Hz, puis de 1 000 à 10 000 Hz, même longueur. Ce n'est <b>pas une échelle régulière</b>.</p></div>
+      <p>Entre 100 et 1 000 Hz, les traits valent 200, 300, 400… 900 Hz : ils se <b>resserrent</b> vers la droite. Entre 1 000 et 10 000 Hz, ils valent 2 000, 3 000… 9 000 Hz.</p>
       ${OS.fig(W => axeLog(Math.min(W, 620)))}
     </div>
-    ${exemple(`<p>Pour lire 4 000 Hz : on part de 1 000 Hz et on compte les traits, 2 000 (1<sup>er</sup>), 3 000 (2<sup>e</sup>), 4 000 (3<sup>e</sup>). Le trait de 4 000 Hz est plus près de 10 000 que de 1 000 en valeur, mais pas en longueur : il est presque au milieu.</p>`)}`);
+    ${exemple(`<p>Pour lire 4 000 Hz : on part de 1 000 Hz et on compte les traits, 2 000 (1<sup>er</sup>), 3 000 (2<sup>e</sup>), 4 000 (3<sup>e</sup>). Le trait de 4 000 Hz est plus près de 10 000 que de 1 000 en valeur, mais pas en longueur : il est presque au milieu.</p>`)}`);
   c_.aToi(carte, [
     { titre: 'Lire un point', parties: [OS.partieAudiogramme({ mode: 'lire', f: PL.f, L: PL.L })] },
     { titre: 'Au milieu', parties: [
-      { type: 'choix', q: 'Sur l\'axe, le milieu (en longueur) entre 100 Hz et 1 000 Hz correspond à environ :', options: [o('ok', '300 Hz'), o('550', '550 Hz'), o('500', '500 Hz')], bonne: 'ok', melanger: false,
-        indices: { 550: '550 Hz serait le milieu sur une échelle <b>régulière</b>. Ici l\'échelle est logarithmique : regarde où est le trait de 500 Hz sur l\'axe ci-dessus.', 500: 'Le trait de 500 Hz est nettement après le milieu : les traits se resserrent vers la droite.' },
-        solution: '<p>Le milieu correspond à environ 316 Hz (√(100 × 1 000)), soit à peu près le trait de 300 Hz.</p>' }] },
+      { type: 'choix', q: 'Sur l\'axe, le milieu (en longueur) entre 100 Hz et 1 000 Hz correspond à environ :', options: [o('ok', '300 Hz'), o('550', '550 Hz'), o('500', '500 Hz')], bonne: 'ok', melanger: false,
+        indices: { 550: '550 Hz serait le milieu sur une échelle <b>régulière</b>. Ici l\'échelle est logarithmique : regarde où est le trait de 500 Hz sur l\'axe ci-dessus.', 500: 'Le trait de 500 Hz est nettement après le milieu : les traits se resserrent vers la droite.' },
+        solution: '<p>Le milieu correspond à environ 316 Hz (√(100 × 1 000)), soit à peu près le trait de 300 Hz.</p>' }] },
   ]);
   return carte;
 }
@@ -120,9 +120,9 @@ const P3a = pointAuHasard(Math.random() < .5), P3b = pointAuHasard(!estAudible(P
 function etape3(c_) {
   const carte = c_.carte('3. Placer un son sur l\'audiogramme');
   c_.ajouter(carte, `<div class="cours-bloc">
-      <p>Pour placer un son de fréquence f et de niveau L : on repère le trait vertical de la fréquence f (en comptant les traits depuis une graduation écrite), puis on monte jusqu'au niveau L. On compare ensuite la position du point avec le seuil d'audibilité.</p>
+      <p>Pour placer un son de fréquence f et de niveau L : on repère le trait vertical de la fréquence f (en comptant les traits depuis une graduation écrite), puis on monte jusqu'au niveau L. On compare ensuite la position du point avec le seuil d'audibilité.</p>
     </div>
-    ${exemple(`<p>Son P de 200 Hz et 10 dB : le trait de 200 Hz est le premier après 100 Hz ; à 200 Hz, le seuil d'audibilité est vers 15 dB. Le point est en dessous : le son est <b>inaudible</b>.</p>
+    ${exemple(`<p>Son P de 200 Hz et 10 dB : le trait de 200 Hz est le premier après 100 Hz ; à 200 Hz, le seuil d'audibilité est vers 15 dB. Le point est en dessous : le son est <b>inaudible</b>.</p>
       ${audio({ points: [{ f: 200, y: 10, label: 'P', dx: 10, dy: 16 }], reperes: [{ f: 200 }] })}`)}`);
   c_.aToi(carte, [
     { titre: 'Placer un son', parties: [OS.partieAudiogramme({ mode: 'placer', f: P3a.f, L: P3a.L })] },
@@ -142,20 +142,20 @@ const K4 = hasard([3, 4, 5, 6]);
 function etape4(c_) {
   const carte = c_.carte('4. L\'audiogramme médical');
   c_.ajouter(carte, `<div class="cours-bloc">
-      <div class="cle"><p><b class="cle-titre">Perte d'auditivité.</b> L'audiogramme médical d'une personne donne sa <b>perte d'auditivité</b> (ou perte auditive), en dB, à chaque fréquence : de combien un son doit être plus fort que pour une oreille normale pour qu'elle l'entende.</p>
-        <p><b>0 dB : audition normale.</b> L'axe vertical est orienté <b>vers le bas</b> : plus le point est bas, plus la perte est grande.</p></div>
-      <p>Les fréquences sont en échelle logarithmique : 125, 250, 500, 1 000, 2 000, 4 000 et 8 000 Hz (la fréquence double d'un trait au suivant).</p>
+      <div class="cle"><p><b class="cle-titre">Perte d'auditivité.</b> L'audiogramme médical d'une personne donne sa <b>perte d'auditivité</b> (ou perte auditive), en dB, à chaque fréquence : de combien un son doit être plus fort que pour une oreille normale pour qu'elle l'entende.</p>
+        <p><b>0 dB : audition normale.</b> L'axe vertical est orienté <b>vers le bas</b> : plus le point est bas, plus la perte est grande.</p></div>
+      <p>Les fréquences sont en échelle logarithmique : 125, 250, 500, 1 000, 2 000, 4 000 et 8 000 Hz (la fréquence double d'un trait au suivant).</p>
     </div>
     ${exemple(`${figPerte(EX4)}
-      <p>À 4 000 Hz, le point est à <b>40 dB</b> : pour l'entendre, un son de 4 000 Hz doit être 40 dB plus fort que pour une oreille normale. Les pertes sont plus grandes à droite : cette personne entend moins bien les <b>sons aigus</b>.</p>`)}`);
+      <p>À 4 000 Hz, le point est à <b>40 dB</b> : pour l'entendre, un son de 4 000 Hz doit être 40 dB plus fort que pour une oreille normale. Les pertes sont plus grandes à droite : cette personne entend moins bien les <b>sons aigus</b>.</p>`)}`);
   c_.aToi(carte, [
     { titre: 'Lire une perte', enonce: `<p>Voici l'audiogramme médical d'une personne.</p>${figPerte(P4)}`, parties: [
-      { type: 'nombre', q: `Quelle est sa perte d'auditivité à ${fmtHz(OS.OCTAVES[K4])} ?`, label: 'perte =', valeur: P4[K4], unite: 'dB', tol: 2.5, signe: false,
-        diag: v => (P4.some((x, j) => j !== K4 && Math.abs(x - v) < 1 && Math.abs(P4[K4] - v) > 2.5) ? `C'est la perte à une autre fréquence : repère le trait de ${fmtHz(OS.OCTAVES[K4])}.` : 'L\'axe vertical est orienté vers le bas : 0 dB en haut, un trait tous les 10 dB.'),
-        solution: `<p>À ${fmtHz(OS.OCTAVES[K4])}, le point est à <b>${P4[K4]} dB</b> : un son de cette fréquence doit être ${P4[K4]} dB plus fort que pour une oreille normale.</p>` },
-      { type: 'choix', q: 'Quels sons cette personne entend-elle le moins bien ?', options: [o('aigus', 'Les sons aigus'), o('graves', 'Les sons graves'), o('tous', 'Tous les sons de la même façon')], bonne: 'aigus', melanger: false,
+      { type: 'nombre', q: `Quelle est sa perte d'auditivité à ${fmtHz(OS.OCTAVES[K4])} ?`, label: 'perte =', valeur: P4[K4], unite: 'dB', tol: 2.5, signe: false,
+        diag: v => (P4.some((x, j) => j !== K4 && Math.abs(x - v) < 1 && Math.abs(P4[K4] - v) > 2.5) ? `C'est la perte à une autre fréquence : repère le trait de ${fmtHz(OS.OCTAVES[K4])}.` : 'L\'axe vertical est orienté vers le bas : 0 dB en haut, un trait tous les 10 dB.'),
+        solution: `<p>À ${fmtHz(OS.OCTAVES[K4])}, le point est à <b>${P4[K4]} dB</b> : un son de cette fréquence doit être ${P4[K4]} dB plus fort que pour une oreille normale.</p>` },
+      { type: 'choix', q: 'Quels sons cette personne entend-elle le moins bien ?', options: [o('aigus', 'Les sons aigus'), o('graves', 'Les sons graves'), o('tous', 'Tous les sons de la même façon')], bonne: 'aigus', melanger: false,
         indices: { graves: 'À gauche (sons graves, petites fréquences), la perte est faible.', tous: 'La perte n\'est pas la même à toutes les fréquences.' },
-        solution: '<p>La perte est la plus grande aux hautes fréquences : les <b>sons aigus</b> sont les moins bien entendus.</p>' },
+        solution: '<p>La perte est la plus grande aux hautes fréquences : les <b>sons aigus</b> sont les moins bien entendus.</p>' },
     ] },
   ]);
   return carte;
@@ -164,10 +164,10 @@ function etape4(c_) {
 /* ---------- À retenir ---------- */
 function aRetenir(c_) {
   const carte = c_.carte('À retenir');
-  c_.ajouter(carte, `<div class="cle"><p>L'<b>audiogramme</b> donne le <b>seuil d'audibilité</b> et le <b>seuil de la douleur</b> en fonction de la fréquence. Sous le seuil d'audibilité, le son est <b>inaudible</b> ; au-dessus, il est <b>audible</b>.</p></div>
-    <div class="cle"><p>L'axe des fréquences est en <b>échelle logarithmique</b> : même longueur de 100 à 1 000 Hz que de 1 000 à 10 000 Hz ; les traits 200, 300… se resserrent.</p></div>
-    <div class="cle"><p>L'<b>audiogramme médical</b> donne la <b>perte d'auditivité</b> (en dB) à chaque fréquence : 0 dB = audition normale ; axe vers le bas, plus le point est bas, plus la perte est grande.</p></div>
-    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4b_cours.html">Cours : atténuation par une paroi →</a>
+  c_.ajouter(carte, `<div class="cle"><p>L'<b>audiogramme</b> donne le <b>seuil d'audibilité</b> et le <b>seuil de la douleur</b> en fonction de la fréquence. Sous le seuil d'audibilité, le son est <b>inaudible</b> ; au-dessus, il est <b>audible</b>.</p></div>
+    <div class="cle"><p>L'axe des fréquences est en <b>échelle logarithmique</b> : même longueur de 100 à 1 000 Hz que de 1 000 à 10 000 Hz ; les traits 200, 300… se resserrent.</p></div>
+    <div class="cle"><p>L'<b>audiogramme médical</b> donne la <b>perte d'auditivité</b> (en dB) à chaque fréquence : 0 dB = audition normale ; axe vers le bas, plus le point est bas, plus la perte est grande.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4b_cours.html">Cours : atténuation par une paroi →</a>
       <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#audiogramme">Fiche récapitulative</a></div>`);
   return carte;
 }

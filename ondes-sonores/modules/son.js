@@ -34,7 +34,8 @@
   'use strict';
 
   const F = () => window.FOURIER;
-  const fmt = (v, d) => F().fmt(v, d);
+  // nombre écrit par FOURIER, milliers séparés par une espace insécable (1 046 Hz ne se coupe pas)
+  const fmt = (v, d) => F().fmt(v, d).replace(/ /g, '\u00a0');
   function el(tag, cls, html) {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -61,7 +62,7 @@
      d'un micro), à présenter comme tels
      ============================================================ */
   const INSTRUMENTS = {
-    diapason: { label: 'Diapason', a: [1.5], desc: 'son pur : une seule raie' },
+    diapason: { label: 'Diapason', a: [1.5], desc: 'son pur : une seule raie' },
     // flûte : rapports des raies du la₄ de l'exercice A (1 ; 0,30 ; 0,08)
     flute: { label: 'Flûte', a: [1.6, .48, .13], desc: 'fondamental fort, deux harmoniques faibles' },
     // violon : rapports des pics du sujet de bac (0,098 ; 0,139 ; 0,012 ; 0,014 ; 0,004 V)
@@ -132,7 +133,7 @@
       return true;
     } catch (err) { indispo = true; return false; }
   }
-  const MSG_INDISPO = 'Le son n\'est pas disponible dans ce navigateur : le reste fonctionne normalement.';
+  const MSG_INDISPO = 'Le son n\'est pas disponible dans ce navigateur : le reste fonctionne normalement.';
 
   // bouton « ▶ Écouter » placé dans du HTML (énoncé, fiche) ; un clic joue le son décrit
   const bouton = (spec, libelle) => `<button type="button" class="btn-secondary son-ecouter" data-son='${JSON.stringify({ f1: spec.f1, a: spec.a })}'>▶ ${libelle || 'Écouter'}</button>`;
@@ -167,10 +168,10 @@
       <div class="son-barre">
         <button type="button" class="btn-primary son-jouer" data-a="jouer">▶ Écouter</button>
         <label class="son-vol"><span>Volume</span><input type="range" min="0" max="100" step="5" value="60" data-a="vol" aria-label="Volume du son"></label>
-        <p class="son-aide" data-a="aide">Le son dure 1,5 s. Rien entendu ? Monte le volume de l'appareil et coupe le mode silencieux.</p>
+        <p class="son-aide" data-a="aide">Le son dure 1,5 s. Rien entendu ? Monte le volume de l'appareil et coupe le mode silencieux.</p>
       </div>
       ${o.clavier ? `<div class="son-bloc">
-        <div class="son-entete"><span class="fo-petit-t">Note jouée : hauteur</span>
+        <div class="son-entete"><span class="fo-petit-t">Note jouée : hauteur</span>
           <span class="son-mode" role="group" aria-label="Choix de la fréquence">
             <button type="button" class="son-pill" data-mode="clavier" aria-pressed="true">Clavier</button>
             <button type="button" class="son-pill" data-mode="libre" aria-pressed="false">Fréquence libre</button></span></div>
@@ -182,7 +183,7 @@
           <input type="range" min="100" max="1500" step="5" data-a="f1" aria-label="Fréquence du fondamental f1, en hertz"></label>
       </div>` : ''}
       ${o.instruments ? `<div class="son-bloc">
-        <div class="son-entete"><span class="fo-petit-t">Instrument : timbre</span><span class="son-note-simpl">spectres simplifiés</span></div>
+        <div class="son-entete"><span class="fo-petit-t">Instrument : timbre</span><span class="son-note-simpl">spectres simplifiés</span></div>
         <div class="son-instr" role="group" aria-label="Instruments">${Object.keys(INSTRUMENTS).map(k => `<button type="button" class="son-pill son-pill-g" data-instr="${k}" aria-pressed="false">${INSTRUMENTS[k].label}</button>`).join('')}</div>
         <p class="son-instr-desc" data-a="idesc"></p>
       </div>` : ''}
@@ -190,7 +191,7 @@
     zone.appendChild(racine);
     const $ = a => racine.querySelector(`[data-a="${a}"]`);
     const fo = F().monter($('fourier'), {
-      N: o.N, f1: f1Initial, a0: 0, a: aInitial, amax: o.amax || 2, nom: 'u', unite: 'V', titreY: 'u(t) (en V) : signal du micro',
+      N: o.N, f1: f1Initial, a0: 0, a: aInitial, amax: o.amax || 2, nom: 'u', unite: 'V', titreY: 'u(t) (en V) : signal du micro',
       predefinis: false, reglages: false, sansA0: true, cases: o.cases, tmax: o.tmax, fmax: o.fmax, mesure: o.mesure,
       aria: o.aria,
     });
@@ -212,7 +213,7 @@
       bande.innerHTML = `<span class="son-b-h"><span class="son-b-t">Hauteur (note)</span> <b>${n ? n.nom : 'fréquence libre'}</b> · f<sub>1</sub> = <b>${fmt(e.f1)} Hz</b></span>
         <span class="son-b-nat${nat === 'pur' ? ' pur' : ''}">${lib}</span>
         <span class="son-b-h"><span class="son-b-t">Timbre</span> <b>${k ? INSTRUMENTS[k].label.toLowerCase() : 'réglage personnel'}</b></span>
-        ${e.a[0] === 0 && nat !== 'muet' ? '<span class="son-b-att">a<sub>1</sub> = 0 : la raie la plus basse n\'est plus à f<sub>1</sub>, la note entendue change.</span>' : ''}`;
+        ${e.a[0] === 0 && nat !== 'muet' ? '<span class="son-b-att">a<sub>1</sub> = 0 : la raie la plus basse n\'est plus à f<sub>1</sub>, la note entendue change.</span>' : ''}`;
       racine.querySelectorAll('[data-note]').forEach(b => b.setAttribute('aria-pressed', String(!etat.libre && b.dataset.note === etat.note)));
       racine.querySelectorAll('[data-instr]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.instr === k)));
       racine.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.mode === 'libre') === etat.libre)));
@@ -229,7 +230,7 @@
       }
       if (li) { li.hidden = !etat.libre; $('f1').value = e.f1; $('vf1').textContent = `${fmt(e.f1)} Hz`; }
       const d = $('idesc');
-      if (d) d.innerHTML = k ? `${INSTRUMENTS[k].label} : ${INSTRUMENTS[k].desc}. Tu peux ensuite modifier les raies et écouter.` : 'Réglage personnel : les raies ne correspondent à aucun préréglage.';
+      if (d) d.innerHTML = k ? `${INSTRUMENTS[k].label} : ${INSTRUMENTS[k].desc}. Tu peux ensuite modifier les raies et écouter.` : 'Réglage personnel : les raies ne correspondent à aucun préréglage.';
     }
     const signaler = () => { const e = copie(); ecouteurs.forEach(f => f(e)); };
     fo.surChange(() => { maj(); signaler(); });

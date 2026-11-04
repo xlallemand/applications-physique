@@ -50,7 +50,8 @@
       const neg = s[0] === '-';
       if (neg) s = s.slice(1);
       let [e, d] = s.split('.');
-      e = e.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+      // milliers séparés par une espace insécable : 1 000 ne se coupe pas en fin de ligne
+      e = e.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
       return (neg ? MOINS : '') + (d ? e + ',' + d : e);
     }
     let s = (Math.abs(v) < Math.pow(10, -dec) / 2 ? 0 : v).toFixed(dec);
@@ -496,7 +497,7 @@
       const videsATort = inconnues ? slots.filter(s => !s.querySelector('.sc-chip') && !estInconnue(s)) : [];
       if (videsATort.length >= 2) {
         secouer(d.querySelector('.sc-palette'));
-        api.message(`Il reste ${videsATort.length} cases à remplir : seule la case de l'inconnue reste vide.`);
+        api.message(`Il reste ${videsATort.length} cases à remplir : seule la case de l'inconnue reste vide.`);
         return;
       }
       // étiquettes mal placées, puis case laissée vide à tort (ce n'est pas une inconnue)
@@ -512,8 +513,8 @@
         .concat(videsATort.map(s => (p.indicesCases && p.indicesCases[s.dataset.slot]) || '').filter(Boolean));
       const phr = [];
       if (fausses.length) phr.push(`${fausses.length > 1 ? `${fausses.length} étiquettes sont mal placées` : 'Une étiquette est mal placée'} (case rouge)`);
-      if (videsATort.length) phr.push('la case vide en rouge n\'est pas une inconnue : sa valeur est connue, place-la');
-      const txt = phr.join(' ; ');
+      if (videsATort.length) phr.push('la case vide en rouge n\'est pas une inconnue : sa valeur est connue, place-la');
+      const txt = phr.join(' ; ');
       api.erreur(txt.charAt(0).toUpperCase() + txt.slice(1) + '.' + (indices.length ? '<br>' + indices.map(t => '☛ ' + t).join('<br>') : ''));
       secouer(d.querySelector('.os-sch') || d);
     };
@@ -598,7 +599,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue || note) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -637,8 +638,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -650,7 +651,7 @@
       const q = qs[idx];
       window.OS.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -670,7 +671,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -685,10 +686,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -862,7 +863,7 @@
           f1: spec.f1, a0: spec.a0 || 0, a: spec.a, tmax: o.tmax, pasT: o.pasT, ymin: o.ymin, ymax: o.ymax, pasY: o.pasY, nom: o.nom || 'u', unite: o.unite || 'V', titreY: o.titreY });
         sim.surChange(() => api.effacer());
         const v = el('div', 'os-mesure-n');
-        v.innerHTML = '<span class="ph-lab">Nombre de périodes entre les curseurs : n =</span>';
+        v.innerHTML = '<span class="ph-lab">Nombre de périodes entre les curseurs : n =</span>';
         const cn = champ({ signe: false, aria: 'Nombre de périodes encadrées' });
         v.appendChild(cn.el);
         d.appendChild(v);
@@ -877,14 +878,14 @@
           const tmaxAxe = F().axesSignal(spec, { tmax: o.tmax }).tmax, tol = Math.max(2 * F().pasJoli(tmaxAxe, 100), .015 * n * T);
           const k = dt / T;
           if (Math.abs(dt - n * T) <= tol) {
-            if (n < minN) { api.erreur(`C'est juste, mais encadre au moins <b>${minN} périodes</b> : la mesure est plus précise.`); return; }
+            if (n < minN) { api.erreur(`C'est juste, mais encadre au moins <b>${minN} périodes</b> : la mesure est plus précise.`); return; }
             res.dt = dt; res.n = n;
             cn.desactiver(true); bVal.fermer(); api.reussi();
             return;
           }
           api.erreur(Math.abs(k - Math.round(k)) * T <= tol && Math.round(k) >= 1
             ? `Tes curseurs encadrent ${Math.round(k)} période${Math.round(k) > 1 ? 's' : ''}, pas ${n}. Compte les motifs qui se répètent entre les curseurs.`
-            : 'Tes curseurs n\'encadrent pas un nombre entier de périodes : place-les sur deux points <b>identiques</b> du signal (deux sommets les plus hauts, par exemple).');
+            : 'Tes curseurs n\'encadrent pas un nombre entier de périodes : place-les sur deux points <b>identiques</b> du signal (deux sommets les plus hauts, par exemple).');
           secouer(v);
         }
         bVal.onclick = valider;
@@ -1052,7 +1053,7 @@
         { pts: DOULEUR, cls: 'os-c-douleur', label: noms ? 'seuil de la douleur' : '', lf: 1000, dy: -8 },
       ],
       textes: noms && o.textes !== false ? [{ f: 32, y: 16, t: 'inaudible', cls: 'os-txt-zone os-txt-pale', ancre: 'middle' }, { f: 45, y: 95, t: 'audible', cls: 'os-txt-zone os-txt-pale' }] : [],
-      aria: 'Audiogramme : seuil d\'audibilité et seuil de la douleur en fonction de la fréquence, zones de la conversation et de la musique',
+      aria: 'Audiogramme : seuil d\'audibilité et seuil de la douleur en fonction de la fréquence, zones de la conversation et de la musique',
     }, o));
   }
   // fréquences des traits verticaux de l'audiogramme (sur lesquels on place les points)
@@ -1074,12 +1075,12 @@
   function partieAudiogramme(o) {
     const mode = o.mode || 'placer', f = o.f, L = o.L, aud = estAudible(f, L);
     const solution = o.solution || (mode === 'placer'
-      ? `<p>Le point (${fmtHz(f)} ; ${fmt(L)} dB) est ${aud ? '<b>au-dessus</b>' : '<b>en dessous</b>'} du seuil d'audibilité : le son est <b>${aud ? 'audible' : 'inaudible'}</b>.</p>`
+      ? `<p>Le point (${fmtHz(f)} ; ${fmt(L)} dB) est ${aud ? '<b>au-dessus</b>' : '<b>en dessous</b>'} du seuil d'audibilité : le son est <b>${aud ? 'audible' : 'inaudible'}</b>.</p>`
       : `<p>Le point est sur le trait de ${fmtHz(f)} et à L = ${fmt(L)} dB.</p>`);
     return {
       type: 'perso', solution,
       q: o.q || (mode === 'placer'
-        ? `Place le son de fréquence <b>f = ${fmtHz(f)}</b> et de niveau <b>L = ${fmt(L)} dB</b> : fais glisser le point (ou utilise les flèches). Valide, puis dis s'il est audible.`
+        ? `Place le son de fréquence <b>f = ${fmtHz(f)}</b> et de niveau <b>L = ${fmt(L)} dB</b> : fais glisser le point (ou utilise les flèches). Valide, puis dis s'il est audible.`
         : 'Lis la fréquence et le niveau sonore du point placé sur l\'audiogramme.'),
       monter(zone, api) {
         const d = el('div', 'os-ag');
@@ -1107,7 +1108,7 @@
             svg = svg.replace('</svg>', `<g class="fo-tire os-ag-tire" data-pt="1"><circle cx="${x}" cy="${y}" r="24" fill="transparent"/><circle class="os-pt-mobile" cx="${x}" cy="${y}" r="9"/></g></svg>`);
           }
           zf.innerHTML = svg;
-          if (mode === 'placer') lect.innerHTML = `Ton point : <b>f = ${fmtHz(fp())}</b> ; <b>L = ${fmt(pt.L)} dB</b>`;
+          if (mode === 'placer') lect.innerHTML = `Ton point : <b>f = ${fmtHz(fp())}</b> ; <b>L = ${fmt(pt.L)} dB</b>`;
         }
         const point = e => {
           const svg = zf.querySelector('svg'), r = svg.getBoundingClientRect(), k = (+svg.getAttribute('width')) / r.width;
@@ -1149,7 +1150,7 @@
           const v = el('div', 'ph-valeur');
           v.innerHTML = '<span class="ph-lab">f =</span>';
           const cf = champ({ signe: false, aria: 'Fréquence du point, en hertz' }), cl = champ({ aria: 'Niveau sonore du point, en décibels' });
-          v.appendChild(cf.el); v.appendChild(el('span', 'ph-unite', 'Hz ;')); v.appendChild(el('span', 'ph-lab', 'L =')); v.appendChild(cl.el); v.appendChild(el('span', 'ph-unite', 'dB'));
+          v.appendChild(cf.el); v.appendChild(el('span', 'ph-unite', 'Hz ;')); v.appendChild(el('span', 'ph-lab', 'L =')); v.appendChild(cl.el); v.appendChild(el('span', 'ph-unite', 'dB'));
           d.appendChild(v);
           const bVal = boutonValider(d);
           [cf, cl].forEach(c => { c.input.addEventListener('input', () => api.effacer()); c.input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); valider(); } }); });
@@ -1164,10 +1165,10 @@
             if (!okF) {
               const a = Math.pow(10, Math.floor(Math.log10(f) + 1e-9));
               m.push(proche(vf, lectureLineaire(f), .12) && !proche(vf, f, .1)
-                ? `Tu as lu la fréquence comme sur une échelle régulière. L'échelle est <b>logarithmique</b> : entre ${fmtHz(a)} et ${fmtHz(10 * a)}, les traits valent ${fmt(2 * a)}, ${fmt(3 * a)}, ${fmt(4 * a)}… et se resserrent vers la droite. Compte les traits depuis ${fmtHz(a)}.`
-                : `Fréquence : descends du point jusqu'à l'axe et compte les traits depuis la graduation écrite la plus proche (entre ${fmtHz(a)} et ${fmtHz(10 * a)}, un trait tous les ${fmtHz(a)}).`);
+                ? `Tu as lu la fréquence comme sur une échelle régulière. L'échelle est <b>logarithmique</b> : entre ${fmtHz(a)} et ${fmtHz(10 * a)}, les traits valent ${fmt(2 * a)}, ${fmt(3 * a)}, ${fmt(4 * a)}… et se resserrent vers la droite. Compte les traits depuis ${fmtHz(a)}.`
+                : `Fréquence : descends du point jusqu'à l'axe et compte les traits depuis la graduation écrite la plus proche (entre ${fmtHz(a)} et ${fmtHz(10 * a)}, un trait tous les ${fmtHz(a)}).`);
             }
-            if (!okL) m.push('Niveau : va du point jusqu\'à l\'axe vertical (un trait tous les 10 dB).');
+            if (!okL) m.push('Niveau : va du point jusqu\'à l\'axe vertical (un trait tous les 10 dB).');
             api.erreur(m.join('<br>'));
             secouer(v);
           }
@@ -1182,7 +1183,7 @@
           phase = 2; dessiner();
           d.querySelector('.os-ag-fleches').hidden = true;
           ch = el('div', 'os-ag-ch');
-          ch.innerHTML = `<p class="ph-partie-q" style="margin:10px 0 8px !important">Ce son est-il audible ?</p>
+          ch.innerHTML = `<p class="ph-partie-q" style="margin:10px 0 8px !important">Ce son est-il audible ?</p>
             <div class="ph-choix"><button type="button" class="btn-secondary" data-r="1">Audible</button><button type="button" class="btn-secondary" data-r="0">Inaudible</button></div>`;
           d.appendChild(ch);
           ch.querySelectorAll('button').forEach(b => {
@@ -1190,8 +1191,8 @@
               if (api.fini() || b.disabled) return;
               if ((b.dataset.r === '1') === aud) { b.classList.add('juste'); ch.querySelectorAll('button').forEach(x => { x.disabled = true; }); phase = 3; api.reussi(); return; }
               b.classList.add('faux'); b.disabled = true;
-              api.erreur(aud ? 'Ton point est <b>au-dessus</b> de la courbe du seuil d\'audibilité (et sous le seuil de la douleur) : l\'oreille entend ce son.'
-                : 'Ton point est <b>en dessous</b> de la courbe du seuil d\'audibilité : le son est trop faible pour être entendu à cette fréquence.');
+              api.erreur(aud ? 'Ton point est <b>au-dessus</b> de la courbe du seuil d\'audibilité (et sous le seuil de la douleur) : l\'oreille entend ce son.'
+                : 'Ton point est <b>en dessous</b> de la courbe du seuil d\'audibilité : le son est trop faible pour être entendu à cette fréquence.');
             };
           });
           setTimeout(() => ch.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60);
@@ -1203,9 +1204,9 @@
           const m = [];
           if (!okF) {
             const a = Math.pow(10, Math.floor(Math.log10(f) + 1e-9));
-            m.push(`Fréquence : ton point est à ${fmtHz(fp())}. L'échelle est <b>logarithmique</b> : entre ${fmtHz(a)} et ${fmtHz(10 * a)}, les traits valent ${fmt(2 * a)}, ${fmt(3 * a)}, ${fmt(4 * a)}… et se resserrent vers la droite. Compte-les à partir de ${fmtHz(a)}.`);
+            m.push(`Fréquence : ton point est à ${fmtHz(fp())}. L'échelle est <b>logarithmique</b> : entre ${fmtHz(a)} et ${fmtHz(10 * a)}, les traits valent ${fmt(2 * a)}, ${fmt(3 * a)}, ${fmt(4 * a)}… et se resserrent vers la droite. Compte-les à partir de ${fmtHz(a)}.`);
           }
-          if (!okL) m.push(`Niveau : ton point est à ${fmt(pt.L)} dB, il faut ${fmt(L)} dB (un trait tous les 10 dB ; les flèches ↑ ↓ font des pas de 5 dB).`);
+          if (!okL) m.push(`Niveau : ton point est à ${fmt(pt.L)} dB, il faut ${fmt(L)} dB (un trait tous les 10 dB ; les flèches ↑ ↓ font des pas de 5 dB).`);
           api.erreur(m.join('<br>'));
           secouer(zf);
         };
@@ -1286,9 +1287,9 @@
       <span class="os-paroi-l"><span class="os-num">3</span>${slot('tra')}</span>
       <span class="os-paroi-l"><span class="os-num">4</span>${slot('abs')}</span></div></div>`;
   const ETIQ_PAROI = [
-    { id: 'inc', label: 'incidente', cible: 'inc', indice: 'L\'onde <b>incidente</b> est celle qui arrive sur la paroi (la plus épaisse : toute l\'énergie).' },
+    { id: 'inc', label: 'incidente', cible: 'inc', indice: 'L\'onde <b>incidente</b> est celle qui arrive sur la paroi (la plus épaisse : toute l\'énergie).' },
     { id: 'ref', label: 'réfléchie', cible: 'ref', indice: 'L\'onde <b>réfléchie</b> repart du même côté que l\'onde incidente, comme un écho.' },
-    { id: 'tra', label: 'transmise', cible: 'tra', indice: 'L\'onde <b>transmise</b> traverse la paroi : elle continue de l\'autre côté, plus faible.' },
+    { id: 'tra', label: 'transmise', cible: 'tra', indice: 'L\'onde <b>transmise</b> traverse la paroi : elle continue de l\'autre côté, plus faible.' },
     { id: 'abs', label: 'absorbée', cible: 'abs', indice: 'L\'énergie <b>absorbée</b> reste dans la paroi (elle la chauffe très légèrement).' },
   ];
   const partieParoi = (q, solution) => ({ type: 'schema', q: q || 'Fais glisser chaque mot dans la case du numéro qui convient (ou touche un mot, puis une case).',
@@ -1318,7 +1319,7 @@
      ============================================================ */
   const OCTAVES = [125, 250, 500, 1000, 2000, 4000, 8000];
   const svgPerte = o => svgLog(Object.assign({ fmin: 100, fmax: 10000, ymin: 0, ymax: 80, pasY: 10, inverse: true, H: 270, etiqF: OCTAVES,
-    titreY: 'Perte auditive (en dB)', aria: 'Perte auditive en fonction de la fréquence (échelle logarithmique) ; la perte augmente vers le bas' }, o));
+    titreY: 'Perte auditive (en dB)', aria: 'Perte auditive en fonction de la fréquence (échelle logarithmique) ; la perte augmente vers le bas' }, o));
 
   /* ============================================================
      SUJET DE BAC « ÉTUDE DU SON D'UN VIOLON » (Polynésie 2022)
@@ -1341,7 +1342,7 @@
       { f: 1200, a: .000615 }, { f: 1262, a: .000095 }, { f: 1950, a: .000215 }, { f: 1985, a: .000205 }],
     optsViolon: { unite: 'V', titreA: 'Amplitude de la tension (en V)', amax: .15, gradA: [0, .02, .04, .06, .08, .1, .12, .14], fmax: 2000, pasF: 50,
       etiqF: [0, 250, 500, 750, 1000, 1250, 1500, 1750, 2000], etiqFEtroit: [0, 500, 1000, 1500, 2000], Wmax: 560, H: 210, etiquettes: true,
-      aria: 'Spectre d\'amplitude de l\'enregistrement du violon : pics A, B et C' },
+      aria: 'Spectre d\'amplitude de l\'enregistrement du violon : pics A, B et C' },
     optsMicro: { unite: 'V', titreA: 'Amplitude de la tension (en V)', amax: .0012, gradA: [0, .0002, .0004, .0006, .0008, .001], fmax: 2000, pasF: 50,
       etiqF: [0, 250, 500, 750, 1000, 1250, 1500, 1750, 2000], etiqFEtroit: [0, 500, 1000, 1500, 2000], Wmax: 560, H: 210,
       aria: 'Spectre d\'amplitude du son produit par le microcontrôleur' },
@@ -1354,23 +1355,23 @@
     { n: 1, titre: 'L\'onde sonore', desc: 'Onde mécanique, compressions et dilatations de l\'air, vitesse du son', fiche: 'fiche_1',
       parties: [{ nom: 'L\'onde sonore', cours: 'module_1_cours', questions: 'module_1_questions' }] },
     { n: 2, titre: 'Son pur, son complexe', desc: 'Spectre d\'un son, hauteur (note) et timbre, mesure de la fréquence', fiche: 'fiche_2',
-      parties: [{ nom: 'Son pur, son complexe', simulation: 'module_2_simulation', cours: 'module_2_cours', questions: 'module_2_questions', noms: { simulation: 'Simulateur : notes et instruments' } }] },
+      parties: [{ nom: 'Son pur, son complexe', simulation: 'module_2_simulation', cours: 'module_2_cours', questions: 'module_2_questions', noms: { simulation: 'Simulateur : notes et instruments' } }] },
     { n: 3, titre: 'Intensité et niveau sonores', desc: 'Intensité I en W·m<sup>−2</sup>, niveau L = 10 log(I / I<sub>0</sub>) en dB, les intensités s\'additionnent', fiche: 'fiche_3',
       // deux sous-modules de cours, puis une seule série de questions et la fiche
       sousModules: true,
       parties: [
-        { nom: 'Niveau sonore', slug: 'niveau', cours: 'module_3a_cours', noms: { cours: 'Cours : niveau sonore' } },
-        { nom: 'Additionner des sons', slug: 'addition', cours: 'module_3b_cours', noms: { cours: 'Cours : additionner des sons' } },
+        { nom: 'Niveau sonore', slug: 'niveau', cours: 'module_3a_cours', noms: { cours: 'Cours : niveau sonore' } },
+        { nom: 'Additionner des sons', slug: 'addition', cours: 'module_3b_cours', noms: { cours: 'Cours : additionner des sons' } },
         { nom: 'Intensité et niveau sonores', questions: 'module_3_questions' }] },
     { n: 4, titre: 'Audiogramme et atténuation', desc: 'Seuil d\'audibilité, seuil de la douleur, échelle logarithmique, perte d\'auditivité, atténuation par une paroi', fiche: 'fiche_4',
       sousModules: true,
       parties: [
-        { nom: 'L\'audiogramme', slug: 'audiogramme', cours: 'module_4a_cours', noms: { cours: 'Cours : l\'audiogramme' } },
-        { nom: 'Atténuation par une paroi', slug: 'attenuation', cours: 'module_4b_cours', noms: { cours: 'Cours : atténuation par une paroi' } },
+        { nom: 'L\'audiogramme', slug: 'audiogramme', cours: 'module_4a_cours', noms: { cours: 'Cours : l\'audiogramme' } },
+        { nom: 'Atténuation par une paroi', slug: 'attenuation', cours: 'module_4b_cours', noms: { cours: 'Cours : atténuation par une paroi' } },
         { nom: 'Audiogramme et atténuation', questions: 'module_4_questions' }] },
     { n: 5, titre: 'Exercices', desc: 'Exercices 6, 8, 10, 11, 17 et 16 du manuel, exercice A (audiogramme et bouchons), sujet de bac (violon)', exercices: 'module_5', exNom: 'Exercices 6 à 17, A et bac', nbEx: 8 },
   ];
-  window.SOM.init({ nom: 'Chapitre 18 : Ondes sonores', id: 'ondes-sonores', cleEx: 'ondes-sonores-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 18 : Ondes sonores', id: 'ondes-sonores', cleEx: 'ondes-sonores-exercices', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);

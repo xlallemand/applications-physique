@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 4 : questions sur l'audiogramme et l'atténuation — Chapitre 18 : Ondes sonores</title>
+<title>Module 4 : questions sur l'audiogramme et l'atténuation — Chapitre 18 : Ondes sonores</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="os.css">
@@ -44,9 +44,9 @@ function pointAuHasard(aud) {
 function audible(aud) {
   const p = pointAuHasard(aud);
   return { theme: 'Audible ou non', enonce: `<p>Le point P représente un son de fréquence ${fmtHz(p.f)} et de niveau sonore ${fmt(p.L)} dB.</p>${audio({ points: [{ f: p.f, y: p.L, label: 'P' }] })}`,
-    parties: [fq.choix('Ce son est-il audible ?', [o('a', 'Audible'), o('i', 'Inaudible')], aud ? 'a' : 'i',
+    parties: [fq.choix('Ce son est-il audible ?', [o('a', 'Audible'), o('i', 'Inaudible')], aud ? 'a' : 'i',
       { melanger: false, indices: { a: 'P est <b>sous</b> la courbe du seuil d\'audibilité.', i: 'P est <b>au-dessus</b> du seuil d\'audibilité (et sous le seuil de la douleur).' },
-        solution: `<p>P est ${aud ? 'au-dessus' : 'en dessous'} du seuil d'audibilité : le son est <b>${aud ? 'audible' : 'inaudible'}</b>.</p>` })] };
+        solution: `<p>P est ${aud ? 'au-dessus' : 'en dessous'} du seuil d'audibilité : le son est <b>${aud ? 'audible' : 'inaudible'}</b>.</p>` })] };
 }
 
 /* ---------- Groupe 2 : placer, lire ---------- */
@@ -70,45 +70,45 @@ const figPerte = pertes => OS.fig(W => OS.svgPerte({ W: Math.min(W, 640), H: W <
   courbes: [{ pts: OCTAVES.map((f, k) => [f, pertes[k]]), cls: 'os-courbe' }], points: OCTAVES.map((f, k) => ({ f, y: pertes[k] })) }));
 function perte() {
   const pertes = profil(), k = hasard([3, 4, 5, 6]), f = OCTAVES[k];
-  return { theme: 'Perte auditive', enonce: `<p>L'audiogramme médical d'une personne donne sa perte auditive à chaque fréquence (0 dB : audition normale).</p>${figPerte(pertes)}`,
-    parties: [fq.nombre(`Quelle est sa perte auditive à ${fmtHz(f)} ?`, 'perte =', pertes[k], 'dB', { tol: 2.5, signe: false,
-      diag: v => (pertes.some((x, j) => j !== k && Math.abs(x - v) < 1 && Math.abs(pertes[k] - v) > 2.5) ? `Tu as lu la perte à une autre fréquence : repère le trait de ${fmtHz(f)} (graduations 125, 250, 500, 1 000, 2 000, 4 000, 8 000 Hz).` : 'L\'axe vertical est orienté vers le bas : 0 dB en haut, une ligne tous les 10 dB.'),
-      solution: `<p>À ${fmtHz(f)}, le point est à ${c(pertes[k] + ' dB')} : pour être entendu, un son de cette fréquence doit être ${pertes[k]} dB plus fort que pour une oreille normale.</p>` })] };
+  return { theme: 'Perte auditive', enonce: `<p>L'audiogramme médical d'une personne donne sa perte auditive à chaque fréquence (0 dB : audition normale).</p>${figPerte(pertes)}`,
+    parties: [fq.nombre(`Quelle est sa perte auditive à ${fmtHz(f)} ?`, 'perte =', pertes[k], 'dB', { tol: 2.5, signe: false,
+      diag: v => (pertes.some((x, j) => j !== k && Math.abs(x - v) < 1 && Math.abs(pertes[k] - v) > 2.5) ? `Tu as lu la perte à une autre fréquence : repère le trait de ${fmtHz(f)} (graduations 125, 250, 500, 1 000, 2 000, 4 000, 8 000 Hz).` : 'L\'axe vertical est orienté vers le bas : 0 dB en haut, une ligne tous les 10 dB.'),
+      solution: `<p>À ${fmtHz(f)}, le point est à ${c(pertes[k] + ' dB')} : pour être entendu, un son de cette fréquence doit être ${pertes[k]} dB plus fort que pour une oreille normale.</p>` })] };
 }
 function perteZone() {
   const pertes = [hasard([0, 5]), 5, 5, 10, hasard([20, 25]), hasard([40, 45]), hasard([50, 55])];
-  return { theme: 'Perte auditive', enonce: `<p>Voici l'audiogramme médical d'une personne âgée (0 dB : audition normale).</p>${figPerte(pertes)}`,
-    parties: [fq.choix('Quels sons cette personne entend-elle le moins bien ?', [o('ok', 'Les sons aigus'), o('grave', 'Les sons graves'), o('tous', 'Tous les sons de la même façon')], 'ok',
+  return { theme: 'Perte auditive', enonce: `<p>Voici l'audiogramme médical d'une personne âgée (0 dB : audition normale).</p>${figPerte(pertes)}`,
+    parties: [fq.choix('Quels sons cette personne entend-elle le moins bien ?', [o('ok', 'Les sons aigus'), o('grave', 'Les sons graves'), o('tous', 'Tous les sons de la même façon')], 'ok',
       { melanger: false, indices: { grave: 'À gauche (sons graves, petites fréquences), la perte est faible.', tous: 'La perte n\'est pas la même à toutes les fréquences.' },
-        solution: '<p>La perte est la plus grande aux hautes fréquences : les sons aigus sont les moins bien entendus.</p>' })] };
+        solution: '<p>La perte est la plus grande aux hautes fréquences : les sons aigus sont les moins bien entendus.</p>' })] };
 }
 
 /* ---------- Groupe 4 : atténuation ---------- */
 function attenuation() {
   const Li = hasard([70, 75, 80, 85, 90, 100]), A = hasard([18, 25, 32, 38, 45]), Lt = Li - A;
-  return { theme: 'Atténuation', enonce: `<p>Devant une porte, le niveau sonore est ${Li} dB ; derrière, on mesure ${Lt} dB.</p>`,
+  return { theme: 'Atténuation', enonce: `<p>Devant une porte, le niveau sonore est ${Li} dB ; derrière, on mesure ${Lt} dB.</p>`,
     parties: [fq.nombre('Calcule l\'atténuation A de la porte.', 'A =', A, 'dB', { tol: .01,
-      diag: v => (v === -A ? 'A = L<sub>incidente</sub> − L<sub>transmise</sub> : le niveau incident est le plus grand.' : v === Li + Lt ? 'C\'est une <b>différence</b>.' : 'A = L<sub>incidente</sub> − L<sub>transmise</sub>.'),
+      diag: v => (v === -A ? 'A = L<sub>incidente</sub> − L<sub>transmise</sub> : le niveau incident est le plus grand.' : v === Li + Lt ? 'C\'est une <b>différence</b>.' : 'A = L<sub>incidente</sub> − L<sub>transmise</sub>.'),
       solution: calc(`A = L<sub>incidente</sub> − L<sub>transmise</sub> = ${Li} − ${Lt} = ${c(A + ' dB')}`) })] };
 }
 function transmis() {
   const Li = hasard([75, 82, 88, 95]), A = hasard([22, 30, 36, 41]);
   return { theme: 'Niveau transmis', enonce: `<p>Un mur a une atténuation A = ${A} dB. Le bruit d'une route arrive dessus avec un niveau de ${Li} dB.</p>`,
-    parties: [fq.nombre('Quel niveau sonore entend-on derrière le mur ?', 'L<sub>transmise</sub> =', Li - A, 'dB', { tol: .01, signe: false,
-      diag: v => (v === Li + A ? 'Le mur <b>atténue</b> : le niveau transmis est plus petit.' : 'L<sub>transmise</sub> = L<sub>incidente</sub> − A.'),
+    parties: [fq.nombre('Quel niveau sonore entend-on derrière le mur ?', 'L<sub>transmise</sub> =', Li - A, 'dB', { tol: .01, signe: false,
+      diag: v => (v === Li + A ? 'Le mur <b>atténue</b> : le niveau transmis est plus petit.' : 'L<sub>transmise</sub> = L<sub>incidente</sub> − A.'),
       solution: calc(`L<sub>transmise</sub> = L<sub>incidente</sub> − A = ${Li} − ${A} = ${c((Li - A) + ' dB')}`) })] };
 }
 function vitrage() {
   const f = hasard([200, 1000, 1500, 2000, 3000, 4000]);
   const s = interpLog(VITRAGES.simple.pts, f), d = interpLog(VITRAGES.double.pts, f), b = d > s ? 'double' : 'simple';
-  return { theme: 'Choisir un matériau', enonce: `<p>Atténuation de deux vitrages en fonction de la fréquence :</p>${OS.fig(W => OS.svgVitrages({ W: Math.min(W, 640), H: W < 480 ? 250 : 270 }))}<p class="os-fig-leg">Courbes simplifiées (exemple)</p>`,
-    parties: [fq.choix(`Pour atténuer un bruit de ${fmtHz(f)}, quel vitrage vaut-il mieux choisir ?`, [o('simple', 'Le simple vitrage'), o('double', 'Le double vitrage')], b,
+  return { theme: 'Choisir un matériau', enonce: `<p>Atténuation de deux vitrages en fonction de la fréquence :</p>${OS.fig(W => OS.svgVitrages({ W: Math.min(W, 640), H: W < 480 ? 250 : 270 }))}<p class="os-fig-leg">Courbes simplifiées (exemple)</p>`,
+    parties: [fq.choix(`Pour atténuer un bruit de ${fmtHz(f)}, quel vitrage vaut-il mieux choisir ?`, [o('simple', 'Le simple vitrage'), o('double', 'Le double vitrage')], b,
       { melanger: false, indices: { simple: `À ${fmtHz(f)}, la courbe du double vitrage est au-dessus.`, double: `À ${fmtHz(f)}, la courbe du simple vitrage est au-dessus.` },
-        solution: `<p>À ${fmtHz(f)} : simple vitrage ≈ ${Math.round(s)} dB, double vitrage ≈ ${Math.round(d)} dB. Le ${b} vitrage atténue le plus.</p>` })] };
+        solution: `<p>À ${fmtHz(f)} : simple vitrage ≈ ${Math.round(s)} dB, double vitrage ≈ ${Math.round(d)} dB. Le ${b} vitrage atténue le plus.</p>` })] };
 }
 
 /* ---------- Groupe 5 : vocabulaire de la paroi ---------- */
-const paroi = () => ({ theme: 'Onde et paroi', consigne: 'Une onde sonore frappe une paroi.', parties: [OS.partieParoi(null, '<p>1 : onde incidente (I<sub>incidente</sub>) ; 2 : réfléchie (I<sub>réfléchie</sub>) ; 3 : transmise (I<sub>transmise</sub>) ; 4 : absorbée (I<sub>absorbée</sub>).</p>')] });
+const paroi = () => ({ theme: 'Onde et paroi', consigne: 'Une onde sonore frappe une paroi.', parties: [OS.partieParoi(null, '<p>1 : onde incidente (I<sub>incidente</sub>) ; 2 : réfléchie (I<sub>réfléchie</sub>) ; 3 : transmise (I<sub>transmise</sub>) ; 4 : absorbée (I<sub>absorbée</sub>).</p>')] });
 
 // tirage : 2 + 2 + 2 + 3 + 1 questions
 function tirage() {
@@ -119,10 +119,10 @@ function tirage() {
 OS.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 4 · QUESTIONS', titre: 'Audiogramme et atténuation',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : audible ou non, échelle logarithmique, perte auditive, atténuation par une paroi, choix d\'un vitrage selon la fréquence.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : audible ou non, échelle logarithmique, perte auditive, atténuation par une paroi, choix d\'un vitrage selon la fréquence.</p>',
   questions: tirage,
   revoir: { href: 'module_4a_cours.html', label: 'Revoir les cours' },
-  suite: { href: 'module_5.html', label: 'Module 5 : exercices →' },
+  suite: { href: 'module_5.html', label: 'Module 5 : exercices →' },
 });
 OS.menu('module_4_questions');
 </script>
