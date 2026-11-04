@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : simulateur, passer un audiogramme — maquette</title>
+<link rel="stylesheet" href="../../../assets/theme.css">
+<link rel="stylesheet" href="../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../../ondes-sonores/modules/os.css">
+<link rel="stylesheet" href="../../../assets/sommaire.css">
+<link rel="stylesheet" href="../../../assets/fourier.css">
+<script src="../../../assets/sommaire.js"></script>
+<script src="../../../ondes-sonores/modules/os.js"></script>
+<style>
+/* ============================================================
+   MAQUETTE (non fonctionnelle) du simulateur « Passer un audiogramme »
+   Styles propres au simulateur (préfixe os-au-, à reporter dans os.css)
+   et styles des notes de maquette (préfixe maq-, à ne pas reporter).
+   ============================================================ */
+/* notes de maquette : ce qui se passe à l'écran, non visible dans l'application */
+.maq-etat { display: inline-block; margin: 18px 0 6px; padding: 4px 12px; border-radius: 999px; background: var(--ink); color: var(--sheet); font-size: .78rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.maq-note { border: 1.5px dashed var(--ink-3); border-radius: 14px; padding: 10px 14px; margin: 10px 0 0; font-size: .86rem; color: var(--ink-2); line-height: 1.5; }
+.maq-note b { color: var(--ink); }
+.maq-note ul { margin: 4px 0 0; padding-left: 18px; }
+
+/* déroulé du test chez l'ORL : illustration et étapes */
+.os-au-orl { display: grid; gap: 14px; align-items: center; }
+@media (min-width: 760px) { .os-au-orl { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.os-au-pas { margin: 0; padding-left: 22px; line-height: 1.55; }
+.os-au-pas li + li { margin-top: 6px; }
+.os-au-pers { fill: none; stroke: var(--ink-2); stroke-linecap: round; stroke-linejoin: round; }
+.os-au-tete { fill: var(--ink-2); }
+.os-au-casque { fill: none; stroke: var(--ink); stroke-width: 5; stroke-linecap: round; }
+.os-au-ecouteur { fill: var(--ink); }
+.os-au-mousse { fill: none; stroke: var(--ink-3); stroke-width: 1.4; stroke-linejoin: round; }
+.os-au-vitre { fill: var(--cle-bg); stroke: var(--ink-2); stroke-width: 1.5; }
+.os-au-fil { fill: none; stroke: var(--ink-3); stroke-width: 1.6; stroke-dasharray: 4 3; }
+.os-au-appareil { fill: var(--sheet); stroke: var(--ink-2); stroke-width: 2; }
+.os-au-ecran { fill: var(--cle-bg); stroke: var(--accent); stroke-width: 1.2; }
+.os-au-bouton { fill: var(--accent); stroke: var(--sheet); stroke-width: 1.5; }
+.os-au-leg { font-size: 13px; font-weight: 700; fill: var(--ink); }
+.os-au-trait { stroke: var(--ink-3); stroke-width: 1.2; }
+
+/* réglage du son */
+.os-au-reglage { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; margin: 10px 0 0; }
+.os-au-pm { width: 46px; height: 46px; border-radius: 50%; border: none; background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3); font: inherit; font-size: 1.3rem; font-weight: 800; color: var(--ink); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.os-au-pm:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.os-au-reglage .fo-reglage { min-height: 46px; }
+.os-au-bornes { display: flex; justify-content: space-between; font-size: .82rem; color: var(--ink-2); font-weight: 600; margin: -4px 56px 0; }
+.os-au-ok { color: var(--success-text); font-weight: 800; }
+
+/* le test : fréquence et niveau affichés en continu, avancement, bouton « J'entends » */
+.os-au-tete-test { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; margin-bottom: 8px; }
+.os-au-avance { font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.os-au-avance .progress-bar { width: 140px; display: inline-block; vertical-align: middle; margin-left: 8px; }
+.os-au-mesures { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px; }
+.os-au-mesure { background: var(--cle-bg); border-radius: 16px; padding: 8px 14px; }
+.os-au-mesure small { display: block; font-size: .8rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent-ink); }
+.os-au-mesure b { font-size: 1.7rem; font-weight: 800; letter-spacing: -.02em; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.os-au-mesure.vide b { color: var(--ink-2); }
+@media (max-width: 480px) { .os-au-mesure b { font-size: 1.35rem; } .os-au-mesure { padding: 7px 11px; } }
+.os-au-graphe .fo-svg { display: block; margin: 0 auto; touch-action: pan-y; }
+.os-au-curseur { fill: var(--sheet); stroke: var(--accent); stroke-width: 3; }
+.os-au-actions { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 10px; }
+.os-au-entends { min-width: min(100%, 320px); min-height: 64px; font-size: 1.25rem !important; }
+.os-au-msg { font-size: .92rem; font-weight: 600; color: var(--ink-2); text-align: center; min-height: 1.4em; }
+.os-au-fin { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+</style>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+
+  <!-- ============ En-tête de la page ============ -->
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · SIMULATION</span>
+    <h2 class="er-titre">Passer un audiogramme</h2>
+    <p class="er-contexte">Chez l'<b>ORL</b> (le médecin des oreilles), un <b>audiogramme</b> mesure, pour chaque fréquence, le niveau sonore à partir duquel tu entends un son. Passe le test comme dans son cabinet : tu obtiendras ta courbe du <b>seuil d'audibilité</b>.</p>
+  </div>
+
+  <!-- ============ 1. Le test chez l'ORL ============ -->
+  <section class="er-card">
+    <h3 class="cours-titre" style="margin-top:0">1. Comment se passe le test chez l'ORL</h3>
+    <div class="os-au-orl">
+      <div id="illus"></div>
+      <ol class="os-au-pas">
+        <li>Tu es assis dans une <b>cabine insonorisée</b> : aucun bruit de l'extérieur ne te parvient.</li>
+        <li>Tu portes un <b>casque</b>. L'ORL envoie des <b>sons purs</b>, un à la fois, dans une oreille puis dans l'autre.</li>
+        <li>Pour chaque son, le <b>niveau sonore augmente</b> peu à peu. <b>Dès que tu l'entends</b>, tu appuies sur le bouton du côté de l'oreille qui entend.</li>
+        <li>L'ORL note ce niveau sur l'audiogramme, puis recommence avec un son <b>plus aigu</b>.</li>
+      </ol>
+    </div>
+    <div class="callout-accent" style="margin-top:14px">
+      <p><b class="cle-titre">Ici, c'est une simulation.</b> On ne distingue pas l'oreille droite et l'oreille gauche : un seul bouton, <b>« J'entends »</b>, sur lequel tu appuies dès que tu entends le son.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. Régler le son ============ -->
+  <section class="er-card">
+    <h3 class="cours-titre" style="margin-top:0">2. Régler le son</h3>
+    <p class="er-contexte">Mets un <b>casque</b> ou des <b>écouteurs</b>. Ton ordinateur ou ton téléphone n'est pas réglé comme l'appareil de l'ORL : ce réglage adapte les sons du test à ton volume.</p>
+    <ol class="os-au-pas" style="margin-top:10px">
+      <li>Lance le son de réglage (un son de 1 000 Hz, joué en continu).</li>
+      <li>Fais glisser le curseur jusqu'à ce que le son soit <b>faible, mais que tu l'entendes bien</b>.</li>
+    </ol>
+    <div class="er-actions" style="margin-top:12px">
+      <button type="button" class="btn-secondary">■ Arrêter le son de réglage</button>
+    </div>
+    <div class="os-au-reglage">
+      <button type="button" class="os-au-pm" aria-label="Plus faible">−</button>
+      <label class="fo-reglage"><input type="range" min="0" max="100" value="38" aria-label="Volume du son de réglage"></label>
+      <button type="button" class="os-au-pm" aria-label="Plus fort">+</button>
+    </div>
+    <div class="os-au-bornes"><span>plus faible</span><span>plus fort</span></div>
+    <div class="er-actions" style="justify-content:flex-end">
+      <button type="button" class="btn-primary">C'est réglé ✓</button>
+    </div>
+    <p class="maq-note"><b>Maquette.</b> « ▶ Lancer le son de réglage » devient « ■ Arrêter… » pendant le son. Après « C'est réglé ✓ », le son s'arrête, le bouton est remplacé par <span class="os-au-ok">✓ Son réglé</span> (on peut régler à nouveau) et « Démarrer le test » devient actif.</p>
+  </section>
+
+  <!-- ============ 3. Le test : état 1, avant le test ============ -->
+  <span class="maq-etat">État 1 · avant le test</span>
+  <section class="er-card">
+    <h3 class="cours-titre" style="margin-top:0">3. Le test</h3>
+    <p class="er-petit" style="margin-bottom:8px">7 sons, de 125 Hz à 8 000 Hz, du plus grave au plus aigu. Le test dure moins d'une minute.</p>
+    <div class="os-au-graphe" id="g1"></div>
+    <div class="os-au-actions">
+      <button type="button" class="btn-primary os-au-entends">▶ Démarrer le test</button>
+    </div>
+    <p class="maq-note"><b>Maquette.</b> Audiogramme vide : axes et quadrillage seulement (fréquence en échelle logarithmique de 20 Hz à 20 000 Hz, niveau sonore de −10 à 80 dB). « Démarrer le test » est grisé tant que le son n'est pas réglé.</p>
+  </section>
+
+  <!-- ============ 3. Le test : état 2, pendant le test ============ -->
+  <span class="maq-etat">État 2 · pendant le test (3ᵉ son)</span>
+  <section class="er-card">
+    <h3 class="cours-titre" style="margin-top:0">3. Le test</h3>
+    <div class="os-au-tete-test">
+      <span class="os-au-avance">Son 3 / 7<span class="progress-bar"><span class="progress-fill" style="width:28.6%;display:block"></span></span></span>
+    </div>
+    <div class="os-au-mesures">
+      <div class="os-au-mesure"><small>Fréquence</small><b>500 Hz</b></div>
+      <div class="os-au-mesure"><small>Niveau sonore</small><b>4 dB ↑</b></div>
+    </div>
+    <div class="os-au-graphe" id="g2"></div>
+    <div class="os-au-actions">
+      <button type="button" class="btn-primary os-au-entends">J'entends</button>
+      <p class="os-au-msg">Appuie dès que tu entends le son.</p>
+    </div>
+    <div class="maq-note"><b>Maquette.</b>
+      <ul>
+        <li>Fréquence et niveau sonore affichés <b>en continu</b> ; le niveau monte d'environ 7 dB par seconde à partir de −10 dB. Sur l'audiogramme, le cercle monte le long du trait de la fréquence en cours.</li>
+        <li>« J'entends » : un point est inscrit à (fréquence, niveau) ; après une courte pause, son suivant, plus aigu (125, 250, 500, 1 000, 2 000, 4 000, 8 000 Hz).</li>
+        <li><b>Son émis</b> (sans rapport avec le niveau affiché) : silence pour les niveaux faibles ; le son apparaît faiblement quelques dB avant le seuil d'audibilité habituel à cette fréquence, puis il augmente vite (au réglage de l'étape 2 au seuil, puis au-dessus). Il est donc toujours entendu en une à deux secondes, quel que soit le volume de l'appareil.</li>
+        <li>Appui trop tôt (pendant le silence) : pas de point, message « Tu as appuyé trop tôt : appuie seulement quand tu entends le son. ». Pas de réponse au bout de 40 dB de montée : message « Pas de réponse à 500 Hz : vérifie le réglage du son. », pas de point, son suivant.</li>
+        <li>Sur ordinateur, la barre d'espace fait aussi « J'entends ».</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 3. Le test : état 3, fin du test ============ -->
+  <span class="maq-etat">État 3 · fin du test</span>
+  <section class="er-card">
+    <h3 class="cours-titre" style="margin-top:0">3. Le test</h3>
+    <div class="os-au-tete-test">
+      <span class="os-au-avance">Test terminé : 7 / 7<span class="progress-bar"><span class="progress-fill" style="width:100%;display:block"></span></span></span>
+    </div>
+    <div class="os-au-graphe" id="g3"></div>
+    <p class="os-au-msg" style="margin-top:6px">Ta courbe du seuil d'audibilité passe par tes 7 points.</p>
+    <div class="os-au-fin">
+      <button type="button" class="btn-secondary">↺ Refaire le test</button>
+      <a class="btn-primary" style="text-decoration:none" href="#">Le cours : l'audiogramme →</a>
+    </div>
+    <p class="maq-note"><b>Maquette.</b> La courbe se trace progressivement de gauche à droite en passant par les points, puis son nom « seuil d'audibilité » apparaît. La simulation est alors marquée comme faite dans le sommaire.</p>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   Maquette : sommaire de l'application avec la nouvelle page
+   (identifiant à part : la progression de l'application n'est pas
+   modifiée) et dessins statiques des trois états de l'audiogramme.
+   ============================================================ */
+const PLAN = OS.PLAN.map(m => m.n !== 4 ? m : Object.assign({}, m, {
+  parties: [{ nom: 'Passer un audiogramme', simulation: 'module_4_simulation', noms: { simulation: 'Simulateur : passer un audiogramme' } }].concat(m.parties),
+}));
+SOM.init({ nom: 'Chapitre 18 : Ondes sonores', id: 'maquette-audiogramme', plan: PLAN });
+SOM.menu('module_4_simulation');
+
+// axes de l'audiogramme du simulateur
+const AXES = { fmin: 20, fmax: 20000, ymin: -10, ymax: 80, pasY: 10, titreY: 'L (en dB)', titreF: 'f (en Hz) · échelle logarithmique', aria: 'Audiogramme' };
+const graphe = (id, o) => OS.monter(document.getElementById(id), W => OS.svgLog(Object.assign({ W: Math.min(W, 680), H: W < 480 ? 290 : 330 }, AXES, o)));
+// points mesurés (fictifs) : 125, 250, 500, 1 000, 2 000, 4 000 et 8 000 Hz
+const MESURES = [[125, 26], [250, 16], [500, 9], [1000, 4], [2000, 2], [4000, -1], [8000, 13]];
+const pts = l => l.map(([f, y]) => ({ f, y }));
+
+graphe('g1', {});
+graphe('g2', {
+  points: pts(MESURES.slice(0, 2)),
+  reperes: [{ f: 500 }],
+  extra: g => `<circle class="os-au-curseur" cx="${g.X(500)}" cy="${g.Y(4)}" r="8"/>`,
+});
+graphe('g3', {
+  points: pts(MESURES),
+  courbes: [{ pts: MESURES, cls: 'os-c-seuil', label: 'seuil d\'audibilité', lf: 700, ly: 22, dy: 0 }],
+});
+
+/* ---------- illustration : cabine insonorisée, casque, bouton, audiomètre ---------- */
+(function () {
+  // mousse anti-bruit : dents le long des parois intérieures de la cabine
+  const dents = (x0, y0, x1, y1, n, sens) => {
+    let d = `M${x0},${y0}`;
+    for (let i = 1; i <= n; i++) {
+      const u = (i - .5) / n, v = i / n;
+      const xm = x0 + (x1 - x0) * u + (sens === 'h' ? 0 : 7 * (sens === 'd' ? -1 : 1)), ym = y0 + (y1 - y0) * u + (sens === 'h' ? 7 : 0);
+      d += `L${xm.toFixed(1)},${ym.toFixed(1)}L${(x0 + (x1 - x0) * v).toFixed(1)},${(y0 + (y1 - y0) * v).toFixed(1)}`;
+    }
+    return `<path class="os-au-mousse" d="${d}"/>`;
+  };
+  const svg = `<svg class="os-svg" viewBox="0 0 520 250" role="img" aria-label="Test chez l'ORL : la personne est assise dans une cabine insonorisée, un casque sur les oreilles et un bouton à la main ; l'ORL est derrière la vitre avec l'audiomètre">
+    <!-- cabine : parois épaisses, mousse, vitre -->
+    <rect class="os-paroi" x="16" y="30" width="300" height="200" rx="10"/>
+    <rect x="30" y="44" width="272" height="186" fill="var(--sheet)"/>
+    <rect class="os-paroi-bord" x="16" y="30" width="300" height="200" rx="10"/>
+    ${dents(30, 44, 302, 44, 17, 'h')}${dents(30, 44, 30, 230, 12, 'g')}${dents(302, 44, 302, 120, 5, 'd')}${dents(302, 176, 302, 230, 3, 'd')}
+    <rect class="os-au-vitre" x="300" y="120" width="18" height="56"/>
+    <line class="os-paroi-bord" x1="16" y1="230" x2="510" y2="230"/>
+    <!-- tabouret -->
+    <path class="os-au-pers" style="stroke-width:5" d="M120,182 L170,182 M132,182 L124,230 M158,182 L166,230"/>
+    <!-- personne assise de profil, tournée vers la vitre -->
+    <path class="os-au-pers" style="stroke-width:16" d="M142,122 L146,176 L196,178 L198,224"/>
+    <path class="os-au-pers" style="stroke-width:10" d="M146,132 L176,152 L200,146"/>
+    <circle class="os-au-tete" cx="146" cy="96" r="22"/>
+    <!-- casque et sons purs dans l'écouteur -->
+    <path class="os-au-casque" d="M124,94 A23,26 0 0 1 168,92"/>
+    <rect class="os-au-ecouteur" x="137" y="84" width="16" height="26" rx="7"/>
+    <path class="os-ondule" style="stroke-width:2" d="M118,90 a8,8 0 0 0 0,14 M110,84 a14,14 0 0 0 0,26"/>
+    <!-- bouton tenu en main -->
+    <rect class="os-au-appareil" x="198" y="138" width="22" height="16" rx="4"/>
+    <circle class="os-au-bouton" cx="209" cy="138" r="6"/>
+    <!-- audiomètre de l'ORL, relié au casque et au bouton -->
+    <path class="os-au-fil" d="M145,110 C150,130 136,200 100,226 L330,226 L420,206 M220,148 C250,170 300,200 330,226"/>
+    <rect class="os-au-appareil" x="360" y="160" width="130" height="50" rx="8"/>
+    <rect class="os-au-ecran" x="372" y="170" width="58" height="30" rx="4"/>
+    <circle class="os-au-bouton" cx="448" cy="185" r="7"/><circle class="os-au-tete" cx="472" cy="185" r="7"/>
+    <!-- légendes -->
+    <text class="os-au-leg" x="166" y="20" text-anchor="middle">cabine insonorisée</text>
+    <text class="os-au-leg" x="62" y="74" text-anchor="middle">casque</text><line class="os-au-trait" x1="80" y1="78" x2="130" y2="88"/>
+    <text class="os-au-leg" x="250" y="112" text-anchor="middle">bouton</text><line class="os-au-trait" x1="246" y1="117" x2="214" y2="134"/>
+    <text class="os-au-leg" x="425" y="148" text-anchor="middle">audiomètre (l'ORL)</text>
+  </svg>`;
+  document.getElementById('illus').innerHTML = svg;
+})();
+</script>
+</body>
+</html>
