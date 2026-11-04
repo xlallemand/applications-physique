@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : l'onde sonore — Chapitre 18 : Ondes sonores</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="os.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="os.js"></script>
+<script src="son.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · COURS</span>
+    <h2 class="er-titre">L'onde sonore</h2>
+    <p class="er-contexte">Le son est une <b>onde mécanique</b> : une <b>variation de pression</b> de l'air qui se propage, avec des <b>compressions</b> et des <b>dilatations</b>. Il transporte de l'<b>énergie</b>, pas de matière.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Onde, onde mécanique (vide, matière, énergie) ; 2. l'onde sonore
+   dans l'air (animation des points d'air : compressions, dilatations,
+   SON.air) ; 3. vitesse du son et longueur d'onde λ = v / f.
+   Erreurs diagnostiquées : λ = f / v, λ = v × f, f et λ inversés.
+   Valeur vérifiée par un script : la₃, 440 Hz → λ = 340 / 440 ≈ 0,773 m.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, proche, hasard, fr } = OS;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const o = (id, label) => ({ id, label });
+const V = 340;
+
+/* ---------- 1. Qu'est-ce qu'une onde ? ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Qu\'est-ce qu\'une onde ?');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définition.</b> Une <b>onde</b> est la propagation d'une perturbation : elle réalise un <b>transfert d'énergie sans transport de matière</b>.</p></div>
+      <div class="cle"><p><b class="cle-titre">Onde mécanique.</b> Elle a besoin d'un <b>support matériel</b> (air, eau, solide) pour se propager : elle <b>ne se propage pas dans le vide</b>. Le son est une onde mécanique.</p></div>
+    </div>
+    ${exemple(`<p>Un bouchon flotte sur l'eau. Quand une vague passe, il monte et redescend, mais il n'avance pas avec la vague : l'eau n'est pas transportée. L'énergie, elle, l'est : la vague fait bouger un bateau loin de l'endroit où elle est née.</p>
+      <p>La lumière n'est pas une onde mécanique : elle se propage aussi dans le vide (elle nous arrive du Soleil).</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Onde et matière', parties: [
+      { type: 'choix', colonne: true, q: 'Sur la Lune, il n\'y a pas d\'air. Un astronaute frappe un rocher avec un marteau. Un autre astronaute, à 10 m, sans radio :',
+        options: [o('ok', 'n\'entend rien : le son ne se propage pas dans le vide'), o('entend', 'entend le choc comme sur Terre'), o('retard', 'entend le choc, mais avec du retard')], bonne: 'ok',
+        indices: { entend: 'Le son est une onde mécanique : il lui faut un support matériel. Y a-t-il de l\'air entre les deux astronautes ?', retard: 'Le son n\'arrive pas du tout : sans air, rien ne le transporte.' },
+        solution: '<p>Le son a besoin d\'un support matériel : dans le vide, il ne se propage pas.</p>' },
+      { type: 'choix', colonne: true, q: 'Pendant un concert, le son d\'une enceinte arrive jusqu\'à toi. Qu\'est-ce qui voyage de l\'enceinte jusqu\'à ton oreille ?',
+        options: [o('ok', 'De l\'énergie, sans transport de matière'), o('air', 'De l\'air, poussé par l\'enceinte'), o('rien', 'Rien : le son est fabriqué dans l\'oreille')], bonne: 'ok',
+        indices: { air: 'Si l\'air était poussé jusqu\'à toi, tu sentirais un courant d\'air ! Une onde ne transporte pas de matière.', rien: 'Ton tympan est mis en mouvement : il reçoit de l\'énergie.' },
+        solution: '<p>Une onde transporte de l\'énergie (elle fait vibrer ton tympan), pas de matière.</p>' },
+      { type: 'choix', q: 'Laquelle de ces ondes n\'est <b>pas</b> une onde mécanique ?',
+        options: [o('lum', 'la lumière'), o('son', 'le son'), o('vague', 'une vague'), o('seisme', 'une onde sismique')], bonne: 'lum',
+        indices: { son: 'Le son ne se propage pas dans le vide : il lui faut un support matériel.', vague: 'Une vague a besoin de l\'eau pour se propager.', seisme: 'Une onde sismique se propage dans le sol : elle a besoin d\'un support matériel.' },
+        solution: '<p>La lumière se propage dans le vide : ce n\'est pas une onde mécanique (c\'est une onde électromagnétique).</p>' },
+    ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. L'onde sonore dans l'air ---------- */
+function etape2(c_) {
+  const carte = c_.carte('2. L\'onde sonore dans l\'air');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <p>La membrane d'un haut-parleur vibre : elle pousse puis tire l'air qui la touche, qui pousse et tire à son tour l'air voisin…</p>
+      <div class="cle"><p><b class="cle-titre">Onde sonore.</b> Dans l'air, une onde sonore est la propagation d'une <b>variation de pression</b> : une succession de <b>compressions</b> (air plus serré, pression plus forte) et de <b>dilatations</b> (air plus espacé, pression plus faible).</p></div>
+      <p>Chaque portion d'air <b>oscille autour de sa position</b> : elle n'avance pas avec le son.</p>
+    </div>
+    ${exemple(`<p>Animation très ralentie : chaque point représente une portion d'air. Suis le point violet : il va et vient autour de sa position de repos (trait en pointillés). Les compressions <b>C</b> et les dilatations <b>D</b>, elles, avancent jusqu'à l'oreille.</p>
+      ${OS.outil(d => SON.air(d))}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Observer l\'animation', enonce: '<p>Observe l\'animation ci-dessus (le bouton « Pas à pas » avance d\'un huitième de période).</p>', parties: [
+      { type: 'choix', colonne: true, q: 'Le point d\'air suivi (en violet) :',
+        options: [o('ok', 'oscille autour de sa position, sans avancer'), o('avance', 'avance du haut-parleur vers l\'oreille'), o('fixe', 'reste immobile')], bonne: 'ok',
+        indices: { avance: 'Compare sa position avec le trait en pointillés : il revient toujours au même endroit.', fixe: 'Regarde-le bien (ou utilise « Pas à pas ») : il bouge un peu à gauche et à droite.' },
+        solution: '<p>Il oscille autour de sa position de repos : l\'air n\'est pas transporté.</p>' },
+      { type: 'choix', colonne: true, q: 'Qu\'est-ce qui avance du haut-parleur vers l\'oreille ?',
+        options: [o('ok', 'Les zones de compression et de dilatation : la variation de pression'), o('air', 'Les points d\'air'), o('hp', 'La membrane du haut-parleur')], bonne: 'ok',
+        indices: { air: 'Les points d\'air vont et viennent sur place, tu viens de le voir.', hp: 'La membrane vibre sur place, elle aussi.' },
+        solution: '<p class="os-complete"><b>✍ Complète ton cours :</b> le son est une <b>variation de pression</b> qui se propage : les compressions et les dilatations avancent, l\'air oscille sur place.</p>' },
+      { type: 'choix', colonne: true, q: 'Dans une zone de compression, l\'air est :',
+        options: [o('ok', 'plus serré : la pression y est plus forte'), o('esp', 'plus espacé : la pression y est plus faible'), o('vide', 'absent')], bonne: 'ok',
+        indices: { esp: 'Ça, c\'est une dilatation. Regarde les points sous la lettre C.', vide: 'Il y a toujours de l\'air : il est seulement plus ou moins serré.' },
+        solution: '<p>Compression : air serré, surpression. Dilatation : air espacé, dépression.</p>' },
+    ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Vitesse du son et longueur d'onde ---------- */
+const F3 = hasard([262, 330, 523, 680, 880, 1000, 2000]), L3 = hasard([.5, .85, 1.7, 3.4, .2]);
+function etape3(c_) {
+  const carte = c_.carte('3. Vitesse du son et longueur d\'onde');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Vitesse du son.</b> Dans l'air, le son se propage à <b>v = 340 m·s<sup>−1</sup></b> (environ).</p></div>
+      <div class="cle"><p><b class="cle-titre">Longueur d'onde.</b> La longueur d'onde λ est la distance parcourue par l'onde pendant une période T. Dans l'animation, c'est la distance entre deux compressions voisines.</p>
+        <p class="crs-formule">λ = v × T = <span class="som-fr"><span>v</span><span>f</span></span></p>
+        <p>λ en m, v en m·s<sup>−1</sup>, T en s, f en Hz.</p></div>
+    </div>
+    ${exemple(`<p>Le diapason donne la note la<sub>3</sub>, de fréquence f = 440 Hz. Sa longueur d'onde dans l'air :</p>
+      ${calc(`λ = <span class="som-fr"><span>v</span><span>f</span></span> = <span class="som-fr"><span>340 m·s<sup>−1</sup></span><span>440 Hz</span></span> ≈ ${c('0,773 m')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Calculer une longueur d\'onde', enonce: `<p>Un son a pour fréquence f = ${fmt(F3)} Hz. Il se propage dans l'air (v = 340 m·s<sup>−1</sup>).</p>`, parties: [
+      { type: 'nombre', q: 'Calcule sa longueur d\'onde λ (3 chiffres significatifs).', label: 'λ =', valeur: V / F3, unite: 'm', rel: .01, signe: false,
+        diag: v => (proche(v, F3 / V, .02) ? 'λ = v / f : la vitesse est au <b>numérateur</b>.' : proche(v, V * F3, .02) ? 'On <b>divise</b> la vitesse par la fréquence : λ = v / f.' : 'λ = v / f, avec v = 340 m·s<sup>−1</sup> et f en Hz.'),
+        solution: calc(`λ = <span class="som-fr"><span>v</span><span>f</span></span> = <span class="som-fr"><span>340 m·s<sup>−1</sup></span><span>${fmt(F3)} Hz</span></span> ≈ ${c(OS.cs(V / F3, 3) + ' m')}`) }] },
+    { titre: 'Retrouver la fréquence', enonce: `<p>Un son a une longueur d'onde λ = ${fmt(L3)} m dans l'air.</p>`, parties: [
+      { type: 'nombre', q: 'Quelle est sa fréquence f ?', label: 'f =', valeur: V / L3, unite: 'Hz', rel: .01, signe: false,
+        diag: v => (proche(v, L3 / V, .02) ? 'λ = v / f, donc f = v / λ : la vitesse est au numérateur.' : proche(v, V * L3, .02) ? 'f = v / λ : on <b>divise</b>.' : 'λ = v / f, donc f = v / λ.'),
+        solution: calc(`λ = <span class="som-fr"><span>v</span><span>f</span></span> donc f = <span class="som-fr"><span>v</span><span>λ</span></span> = <span class="som-fr"><span>340 m·s<sup>−1</sup></span><span>${fmt(L3)} m</span></span> = ${c(fmt(Math.round(V / L3)) + ' Hz')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Une <b>onde</b> transporte de l'<b>énergie</b> sans transporter de matière. Une <b>onde mécanique</b> a besoin d'un support matériel : elle ne se propage pas dans le vide.</p></div>
+    <div class="cle"><p>Dans l'air, le son est la propagation d'une <b>variation de pression</b> : compressions et dilatations. L'air oscille sur place.</p></div>
+    <div class="cle"><p>Vitesse du son dans l'air : <b>v = 340 m·s<sup>−1</sup></b>. Longueur d'onde : <b>λ = v / f</b>.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_1_questions.html">Questions sur l'onde sonore →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_2_simulation.html">Module 2 : son pur, son complexe</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+OS.menu('module_1_cours');
+</script>
+</body>
+</html>

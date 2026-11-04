@@ -31,10 +31,13 @@
        curseurs de mesure) ; toucher une raie ou la légende met l'harmonique en valeur.
        opts = { N (10), f1, a0, a, amax (2), ymax, nom, unite, commandes, predefinis, legende, cases
                 (true ou liste parmi 'harmoniques', 'ideale', 'moyenne', 'mesure'), mesure (bool :
-                curseurs affichés au départ), signal, spectre, tmax, pasT, ymin, Hs, Hf, aria }
+                curseurs affichés au départ), signal, spectre, tmax, pasT, ymin, Hs, Hf, aria,
+                reglages (false : sans les curseurs f1 et a0, les raies restent réglables),
+                sansA0 (true : pas de raie à 0 Hz, a0 reste nul : un son), fmax (axe des fréquences fixe) }
        → instance { el, etat(), regler(r, silencieux), charger(nom), surChange(f), periode(), valeur(t) }
        regler accepte f1, a0, a (liste, ou objet { rang: valeur }), amax, ymax, forme, harmoniques,
-       ideale, moyenne, mesure, t1, t2, sel, surligne, cible (spec ou null), bande ([fa, fb] ou null)
+       ideale, moyenne, mesure, t1, t2, sel, surligne, cible (spec ou null), bande ([fa, fb] ou null),
+       fmax (axe des fréquences fixe, ou null : ajusté à f1)
    FOURIER.geomSignal, geomSpectre, geomSpectreDe(raies, o), axesSignal
                                   géométrie des graphiques (outils qui s'y superposent)
    FOURIER.PREDEFINIS             signaux prédéfinis : sinus, creneau, scie, cours, ex6, zero
@@ -364,12 +367,12 @@
 
   function monter(zone, opts) {
     const o = Object.assign({ N: 10, f1: 200, a0: 0, a: [], amax: 2, nom: 'u', unite: 'V', commandes: true, predefinis: true, cases: true,
-      signal: true, spectre: true, Hs: null, Hf: null }, opts);
+      signal: true, spectre: true, Hs: null, Hf: null, reglages: true, sansA0: false }, opts);
     const remplir = l => Array.from({ length: o.N }, (_, i) => +(l && l[i]) || 0);
     const etat = {
       f1: o.f1, a0: o.a0, a: remplir(o.a), amax: o.amax, ymax: o.ymax || null, forme: o.forme || null,
       harmoniques: !!o.harmoniques, ideale: !!o.ideale, moyenne: !!o.moyenne, mesure: !!o.mesure, t1: o.t1 == null ? null : o.t1, t2: o.t2 == null ? null : o.t2,
-      sel: 1, surligne: false, cible: o.cible || null, bande: o.bande || null,
+      sel: 1, surligne: false, cible: o.cible || null, bande: o.bande || null, fmax: o.fmax || null,
     };
     const cases = o.cases === true ? ['harmoniques', 'ideale', 'moyenne', 'mesure'] : (o.cases || []);
     const ecouteurs = [];
@@ -390,7 +393,7 @@
           <span class="fo-fin-l"><button type="button" class="fo-mini" data-a="moins" aria-label="Diminuer de 0,05">−</button>
           <button type="button" class="fo-mini" data-a="plus" aria-label="Augmenter de 0,05">+</button></span>
         </div>` : ''}</div>` : ''}
-      ${o.commandes ? `<div class="fo-reglages">
+      ${o.commandes && o.reglages ? `<div class="fo-reglages">
         <label class="fo-reglage"><span class="fo-reglage-nom">Fondamental f<sub>1</sub> = <b data-a="vf1"></b></span>
           <input type="range" min="50" max="1000" step="10" data-r="f1" aria-label="Fréquence du fondamental f1, en hertz"></label>
         <label class="fo-reglage"><span class="fo-reglage-nom">Composante continue a<sub>0</sub> = <b data-a="va0"></b></span>
@@ -406,7 +409,7 @@
     const spec = () => ({ f1: etat.f1, a0: etat.a0, a: etat.a });
     const periode = () => 1000 / etat.f1;           // en ms
     const fmaxFitte = () => (o.N + .6) * etat.f1;
-    const fmaxAff = () => gelF || fmaxFitte();
+    const fmaxAff = () => etat.fmax || gelF || fmaxFitte();
     const largeur = d => Math.max(240, Math.round(d.clientWidth || zone.clientWidth || 600));
     const hauteur = (h, W) => h || (W < 520 ? 205 : 235);
     // axes du signal (les mêmes pour le dessin et pour le glisser des curseurs)
@@ -452,7 +455,8 @@
       const W = largeur(gf), H = o.Hf || (W < 520 ? 195 : 215), fmax = fmaxAff();
       const g = geomSpectreDe([], { W, H, fmax, amax: etat.amax });
       const coulR = n => (etat.harmoniques || (etat.surligne && etat.sel === n) ? coulDe(n) : null);
-      const liste = raies(spec(), { zeros: true }).map(r => Object.assign(r, { coul: coulR(r.n) }));
+      // (sansA0 : pas de raie à 0 Hz, même d'amplitude nulle)
+      const liste = raies(spec(), { zeros: true }).filter(r => !(o.sansA0 && r.n === 0)).map(r => Object.assign(r, { coul: coulR(r.n) }));
       let svg = svgSpectre(liste, { W, H, fmax, amax: etat.amax, unite: o.unite, etiquettes: false, bande: etat.bande, aria: 'Spectre du signal : fais glisser la poignée en haut d\'une raie pour régler son amplitude' });
       // ajouts interactifs : étiquettes, colonnes à toucher, poignées
       const esp = (g.X(etat.f1) - g.X(0));
@@ -508,7 +512,7 @@
     function regler(r, silencieux) {
       r = r || {};
       if (r.predef) { charger(r.predef, true); }
-      ['f1', 'a0', 'amax', 'ymax', 'forme', 'harmoniques', 'ideale', 'moyenne', 'mesure', 't1', 't2', 'sel', 'surligne', 'cible', 'bande'].forEach(k => { if (k in r) etat[k] = r[k]; });
+      ['f1', 'a0', 'amax', 'ymax', 'forme', 'harmoniques', 'ideale', 'moyenne', 'mesure', 't1', 't2', 'sel', 'surligne', 'cible', 'bande', 'fmax'].forEach(k => { if (k in r) etat[k] = r[k]; });
       if ('f1' in r) gelF = null;
       if (Array.isArray(r.a)) etat.a = remplir(r.a);
       else if (r.a) Object.keys(r.a).forEach(n => { etat.a[n - 1] = +r.a[n]; });
@@ -622,7 +626,12 @@
       };
       fV.addEventListener('change', valider);
       fV.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); valider(); fV.blur(); } });
-      const changerSel = d => { etat.sel = (etat.sel + d + o.N + 1) % (o.N + 1); etat.surligne = true; dessiner(); signaler(); };
+      // raie précédente ou suivante (sansA0 : de a1 à aN seulement)
+      const changerSel = d => {
+        const k = o.sansA0 ? 1 : 0, m = o.N + 1 - k;
+        etat.sel = (etat.sel - k + d + m) % m + k;
+        etat.surligne = true; dessiner(); signaler();
+      };
       $('prec').onclick = () => changerSel(-1);
       $('suiv').onclick = () => changerSel(1);
       $('moins').onclick = () => { const n = etat.sel; fixerAmpl(n, (n ? etat.a[n - 1] : etat.a0) - pas(n)); dessiner(); signaler(); };

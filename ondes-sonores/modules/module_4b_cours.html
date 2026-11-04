@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : atténuation par une paroi — Chapitre 18 : Ondes sonores</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="os.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="os.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS 2 / 2</span>
+    <h2 class="er-titre">Atténuation par une paroi</h2>
+    <p class="er-contexte">Une onde sonore qui frappe une paroi est en partie <b>réfléchie</b>, <b>absorbée</b> et <b>transmise</b>. L'<b>atténuation</b> A (en dB) mesure ce que la paroi retient ; elle dépend du matériau et de la fréquence.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 2 du module 4 : onde incidente, réfléchie, transmise,
+   absorbée (schéma de la paroi à compléter par glisser-déposer,
+   assets/dragdrop.js) ; atténuation A = L(incidente) − L(transmise) ;
+   courbes d'atténuation de deux vitrages (choix selon la fréquence).
+   Erreurs diagnostiquées : soustraction inversée, niveaux additionnés,
+   lecture de la mauvaise courbe.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, hasard, interpLog, VITRAGES } = OS;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const o = (id, label) => ({ id, label });
+const vitrages = opts => OS.fig(W => OS.svgVitrages(Object.assign({ W: Math.min(W, 640), H: W < 480 ? 250 : 270 }, opts)));
+
+/* ---------- 1. Une onde qui frappe une paroi ---------- */
+function etape1(c_) {
+  const carte = c_.carte('1. Une onde qui frappe une paroi');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Vocabulaire.</b> L'onde (ou l'intensité, ou l'énergie) qui arrive sur la paroi est l'onde <b>incidente</b>. Elle se partage en trois :</p>
+        <ul class="er-liste"><li>une partie <b>réfléchie</b>, renvoyée du même côté (l'écho) ;</li>
+          <li>une partie <b>absorbée</b> par la paroi (elle la chauffe très légèrement) ;</li>
+          <li>une partie <b>transmise</b>, qui traverse la paroi et continue de l'autre côté.</li></ul>
+        <p>Énergie incidente = énergie réfléchie + énergie absorbée + énergie transmise.</p></div>
+    </div>
+    ${exemple(`<p>Le bruit de la rue arrive sur une fenêtre (onde incidente). Une partie repart vers la rue (réfléchie), une partie fait vibrer et chauffe très légèrement la vitre (absorbée), une partie entre dans la pièce (transmise) : c'est elle qu'on entend.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Compléter le schéma', parties: [OS.versCours(OS.partieParoi(null, '<p>1 : incidente ; 2 : réfléchie ; 3 : transmise ; 4 : absorbée.</p>'))] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. L'atténuation ---------- */
+const Li = hasard([75, 80, 85, 90, 95]), At = hasard([25, 30, 35, 40, 45]), Lt = Li - At;
+const Li2 = hasard([70, 80, 90]), A2 = hasard([20, 28, 33, 42]);
+const F3 = hasard([200, 1000, 2000, 3000, 4000]), meilleur = interpLog(VITRAGES.double.pts, F3) > interpLog(VITRAGES.simple.pts, F3) ? 'double' : 'simple';
+function etape2(c_) {
+  const carte = c_.carte('2. L\'atténuation');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Atténuation.</b> L'atténuation A d'une paroi est la différence entre le niveau sonore de l'onde incidente et celui de l'onde transmise :</p>
+        <p class="crs-formule">A = L<sub>incidente</sub> − L<sub>transmise</sub></p>
+        <p>A en dB. Plus A est grande, mieux la paroi isole.</p></div>
+      <p>L'atténuation dépend du <b>matériau</b> et de la <b>fréquence</b> du son : on la donne par une courbe A(f), avec un axe des fréquences en échelle logarithmique.</p>
+      ${vitrages()}
+    </div>
+    ${exemple(`<p>Dehors, la rue produit 85 dB ; derrière la fenêtre, on mesure 40 dB :</p>
+      ${calc(`A = L<sub>incidente</sub> − L<sub>transmise</sub> = 85 dB − 40 dB = ${c('45 dB')}`)}
+      <p>À 1 000 Hz, le double vitrage atténue d'environ 38 dB, le simple vitrage d'environ 31 dB : le double vitrage isole mieux à cette fréquence.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Calculer une atténuation', enonce: `<p>Un bruit de ${Li} dB arrive sur un mur ; de l'autre côté, on mesure ${Lt} dB.</p>`, parties: [
+      { type: 'nombre', q: 'Calcule l\'atténuation A du mur.', label: 'A =', valeur: At, unite: 'dB', tol: .01,
+        diag: v => (v === -At ? 'A = L<sub>incidente</sub> − L<sub>transmise</sub> : on retire le niveau transmis (le plus petit) au niveau incident.' : v === Li + Lt ? 'On fait une <b>différence</b>, pas une somme.' : 'A = L<sub>incidente</sub> − L<sub>transmise</sub>.'),
+        solution: calc(`A = ${Li} dB − ${Lt} dB = ${c(At + ' dB')}`) }] },
+    { titre: 'Le niveau transmis', enonce: `<p>Une cloison a une atténuation A = ${A2} dB. Un son de ${Li2} dB arrive sur elle.</p>`, parties: [
+      { type: 'nombre', q: 'Quel niveau sonore mesure-t-on de l\'autre côté ?', label: 'L<sub>transmise</sub> =', valeur: Li2 - A2, unite: 'dB', tol: .01, signe: false,
+        diag: v => (v === Li2 + A2 ? 'La paroi <b>atténue</b> : le niveau transmis est plus petit que le niveau incident.' : 'L<sub>transmise</sub> = L<sub>incidente</sub> − A.'),
+        solution: calc(`A = L<sub>incidente</sub> − L<sub>transmise</sub>, donc L<sub>transmise</sub> = L<sub>incidente</sub> − A = ${Li2} − ${A2} = ${c((Li2 - A2) + ' dB')}`) }] },
+    { titre: 'Choisir un vitrage', enonce: `<p>On veut isoler une chambre d'un bruit de fréquence ${fmt(F3)} Hz. Utilise les courbes ci-dessus.</p>`, parties: [
+      { type: 'choix', q: 'Quel vitrage atténue le plus ce bruit ?', options: [o('simple', 'le simple vitrage'), o('double', 'le double vitrage')], bonne: meilleur, melanger: false,
+        indices: { simple: `À ${fmt(F3)} Hz, la courbe du double vitrage est au-dessus : son atténuation est plus grande.`, double: `À ${fmt(F3)} Hz, c'est la courbe du simple vitrage qui est au-dessus.` },
+        solution: `<p>À ${fmt(F3)} Hz : simple vitrage ≈ ${Math.round(interpLog(VITRAGES.simple.pts, F3))} dB, double vitrage ≈ ${Math.round(interpLog(VITRAGES.double.pts, F3))} dB. Le ${meilleur} vitrage atténue le plus ce bruit.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Onde <b>incidente</b> = onde <b>réfléchie</b> + onde <b>absorbée</b> + onde <b>transmise</b> (en énergie).</p></div>
+    <div class="cle"><p><b>Atténuation</b> : A = L<sub>incidente</sub> − L<sub>transmise</sub> (en dB). Elle dépend du matériau et de la fréquence.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_4_questions.html">Questions sur l'audiogramme et l'atténuation →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html#attenuation">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+OS.menu('module_4b_cours');
+</script>
+</body>
+</html>

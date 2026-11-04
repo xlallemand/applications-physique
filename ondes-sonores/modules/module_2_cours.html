@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : son pur, son complexe — Chapitre 18 : Ondes sonores</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="os.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="os.js"></script>
+<script src="son.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Son pur, son complexe</h2>
+    <p class="er-contexte">Un <b>son pur</b> a un signal sinusoïdal et une seule raie ; un <b>son complexe</b> a plusieurs raies. La <b>hauteur</b> d'un son est la fréquence de son fondamental ; son <b>timbre</b> dépend de ses harmoniques.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Son pur, son complexe (signal et spectre, bouton « Écouter ») ;
+   2. mesurer la fréquence d'un son (sur le signal : nT, T, f = 1/T ;
+   sur le spectre : f1) ; 3. hauteur, timbre et notes.
+   Erreurs diagnostiquées : T en ms dans f = 1 / T, harmonique pris
+   pour le fondamental, hauteur et timbre confondus.
+   Valeurs vérifiées par un script : la₃ = 440 Hz, 4T = 9,09 ms,
+   T = 2,27 ms.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, proche, hasard, melanger, fr } = OS;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const o = (id, label) => ({ id, label });
+const I = SON.INSTRUMENTS;
+const SIG = { tmax: 10, pasT: 1, ymin: -4, ymax: 4, pasY: 1, nom: 'u', unite: 'V', H: 190, Wmax: 520 };
+// signal u(t) et spectre d'un son (amplitudes en V) à la largeur disponible
+const figSig = (f1, a, opt) => OS.figSignal({ f1, a0: 0, a }, Object.assign({}, SIG, opt));
+const figSpe = (f1, a, opt) => OS.figSpectre(OS.raiesSon(f1, a), Object.assign({ unite: 'V', amax: 2, pasA: .5, fmax: 2400, pasF: 200, etiqF: [0, 400, 800, 1200, 1600, 2000, 2400], H: 180, Wmax: 520, etiquettes: true }, opt));
+const ecouter = (f1, a, lib) => `<div class="os-ecouter-l">${SON.bouton({ f1, a }, lib)}</div>`;
+// un son tiré au hasard : note (fréquence) et instrument
+const NOTES_Q = [262, 294, 330, 349, 392, 440, 494, 523];
+const sonAuHasard = pur => ({ f1: hasard(NOTES_Q), k: pur ? 'diapason' : hasard(['flute', 'violon', 'clarinette', 'orgue', 'guitare']) });
+
+/* ---------- 1. Son pur, son complexe ---------- */
+const P1 = melanger([true, false]);
+const S1a = sonAuHasard(P1[0]), S1b = sonAuHasard(P1[1]);
+const choixPur = (pur, ou) => ({ type: 'choix', q: `D'après ${ou}, ce son est :`, options: [o('pur', 'un son pur'), o('cplx', 'un son complexe')], bonne: pur ? 'pur' : 'cplx', melanger: false,
+  indices: { pur: ou === 'son signal' ? 'Le signal n\'est pas une sinusoïde : ses bosses ne sont pas toutes identiques et arrondies.' : 'Il y a plusieurs raies dans le spectre.',
+    cplx: ou === 'son signal' ? 'Le signal est une sinusoïde.' : 'Il n\'y a qu\'une seule raie dans le spectre.' },
+  solution: `<p>${pur ? (ou === 'son signal' ? 'Signal sinusoïdal' : 'Une seule raie') + ' : <b>son pur</b>.' : (ou === 'son signal' ? 'Signal périodique non sinusoïdal' : 'Plusieurs raies (fondamental et harmoniques)') + ' : <b>son complexe</b>.'}</p>` });
+function etape1(c_) {
+  const carte = c_.carte('1. Son pur, son complexe');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Son pur.</b> Son dont le signal est <b>sinusoïdal</b>, de fréquence f<sub>1</sub>. Son spectre n'a qu'<b>une seule raie</b>.</p></div>
+      <div class="cle"><p><b class="cle-titre">Son complexe.</b> Son dont le signal est périodique mais <b>non sinusoïdal</b>. Son spectre a <b>plusieurs raies</b> : le <b>fondamental</b> f<sub>1</sub> et les <b>harmoniques</b> f<sub>n</sub> = n × f<sub>1</sub>.</p></div>
+    </div>
+    ${exemple(`<p>La note la<sub>3</sub> (440 Hz) jouée par un diapason, puis par une flûte (spectres simplifiés).</p>
+      <div class="os-figs deux"><div><p class="os-fig-leg"><b>Diapason : son pur</b></p>${figSig(440, I.diapason.a)}${figSpe(440, I.diapason.a)}${ecouter(440, I.diapason.a, 'Écouter le diapason')}</div>
+        <div><p class="os-fig-leg"><b>Flûte : son complexe</b></p>${figSig(440, I.flute.a)}${figSpe(440, I.flute.a)}${ecouter(440, I.flute.a, 'Écouter la flûte')}</div></div>`)}`);
+  c_.aToi(carte, [
+    { titre: 'D\'après le signal', enonce: `<p>Voici le signal d'un son.</p>${figSig(S1a.f1, I[S1a.k].a, { Wmax: 560 })}`, parties: [choixPur(S1a.k === 'diapason', 'son signal')] },
+    { titre: 'D\'après le spectre', enonce: `<p>Voici le spectre d'un autre son.</p>${figSpe(S1b.f1, I[S1b.k].a, { Wmax: 560, fmax: 4000, pasF: 250, etiqF: [0, 1000, 2000, 3000, 4000] })}`, parties: [choixPur(S1b.k === 'diapason', 'son spectre')] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Mesurer la fréquence d'un son ---------- */
+const S2 = sonAuHasard(false), spec2 = { f1: S2.f1, a0: 0, a: I[S2.k].a }, res2 = {};
+const EX = { f1: 440, a0: 0, a: I.flute.a }, t1Ex = OS.premierSommet(EX);
+function etape2(c_) {
+  const carte = c_.carte('2. Mesurer la fréquence d\'un son');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Sur le signal.</b> On mesure la durée de <b>plusieurs périodes</b> (plus précis), on en déduit la période T, puis la fréquence <b>f = 1 / T</b> (T en s, f en Hz).</p></div>
+      <div class="cle"><p><b class="cle-titre">Sur le spectre.</b> La fréquence du son est celle du <b>fondamental</b> f<sub>1</sub> : la première raie.</p></div>
+    </div>
+    ${exemple(`<p>Signal de la flûte qui joue la<sub>3</sub> : on lit 4T ≈ 9,1 ms entre deux sommets.</p>
+      ${OS.fig(W => FOURIER.svgSignal(EX, Object.assign({}, SIG, { W: Math.min(W, 560), mesure: { t1: t1Ex, t2: t1Ex + 4000 / 440, label: '4T ≈ 9,1 ms' } })))}
+      ${calc(`T = ${fr('9,1 ms', '4')} ≈ 2,27 ms = 2,27 × 10<sup>−3</sup> s ; f = ${fr('1', 'T')} = ${fr('1', '2,27 × 10<sup>−3</sup> s')} ≈ ${c('440 Hz')}`)}
+      <p>Sur le spectre de la flûte (étape 1), la première raie est bien à f<sub>1</sub> = 440 Hz.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Sur le signal', enonce: `<p>Voici le signal d'un son. Mesure sa période avec les curseurs.</p>`, parties: [
+      OS.partieMesure({ spec: spec2, tmax: 10, pasT: 1, ymin: -4, ymax: 4, pasY: 1, res: res2, minN: 2,
+        solution: '<p>Plus on encadre de périodes, plus la mesure est précise.</p>' }),
+      { type: 'nombre', q: 'Déduis-en la fréquence f de ce son (T = durée mesurée / n, en s).', label: 'f =', valeur: S2.f1, unite: 'Hz', rel: .03, signe: false,
+        diag: v => (proche(v, S2.f1 / 1000, .04) ? 'T doit être en <b>secondes</b> : 1 ms = 10<sup>−3</sup> s.' : proche(v, 1000 / S2.f1, .05) ? 'C\'est la période (en ms) : la fréquence est f = 1 / T.' : 'T = Δt / n, puis f = 1 / T avec T en s.'),
+        solution: calc(`T = ${fr('1', 'f')} ≈ ${OS.cs(1000 / S2.f1, 3)} ms, donc f = ${fr('1', OS.cs(1 / S2.f1 * 1000, 3) + ' × 10<sup>−3</sup> s')} ≈ ${c(fmt(S2.f1) + ' Hz')}`) }] },
+    { titre: 'Sur le spectre', enonce: `<p>Voici le spectre du même son.</p>${figSpe(S2.f1, I[S2.k].a, { Wmax: 560, fmax: 3000, pasF: 100, etiqF: [0, 500, 1000, 1500, 2000, 2500, 3000], etiquettes: false })}`, parties: [
+      { type: 'nombre', q: 'Quelle est la fréquence de ce son ?', label: 'f =', valeur: S2.f1, unite: 'Hz', tol: 25, signe: false, affiche: fmt(S2.f1),
+        diag: v => (proche(v, 2 * S2.f1, .05) || proche(v, 3 * S2.f1, .05) ? 'C\'est un harmonique : la fréquence du son est celle du <b>fondamental</b>, la première raie.' : 'Lis la fréquence de la première raie (une ligne verticale tous les 100 Hz).'),
+        solution: `<p>La première raie est à f<sub>1</sub> ≈ ${c(fmt(S2.f1) + ' Hz')} : on retrouve la fréquence mesurée sur le signal.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Hauteur et timbre ---------- */
+// paire de sons : même note ou non, même instrument ou non (jamais les deux identiques)
+const PAIRES = [[true, false], [false, true], [false, false]];
+const [memeH, memeT] = hasard(PAIRES);
+const kA = hasard(['flute', 'violon', 'clarinette', 'guitare']), kB = memeT ? kA : hasard(['flute', 'violon', 'clarinette', 'guitare'].filter(k => k !== kA));
+const fA = hasard([262, 330, 392, 440]), fB = memeH ? fA : hasard([262, 330, 392, 440].filter(f => f !== fA));
+const NOTES_TAB = [['la<sub>3</sub>', 440], ['La<sub>4</sub>', 880], ['Si<sub>4</sub>', 988], ['Do<sub>5</sub>', 1046], ['Ré<sub>5</sub>', 1174]];
+const N3 = hasard(NOTES_TAB.slice(1));
+function etape3(c_) {
+  const carte = c_.carte('3. Hauteur et timbre');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Hauteur.</b> La hauteur d'un son, c'est la <b>fréquence de son fondamental</b> f<sub>1</sub> : c'est la <b>note</b>. Plus f<sub>1</sub> est grande, plus le son est <b>aigu</b> ; plus elle est petite, plus il est <b>grave</b>.</p></div>
+      <div class="cle"><p><b class="cle-titre">Timbre.</b> Le timbre dépend de la <b>richesse du son en harmoniques</b> (leur nombre et leurs amplitudes) : c'est la <b>forme du signal</b>.</p></div>
+      <div class="cle"><p>Deux instruments différents qui jouent la même note ont la <b>même hauteur</b> mais pas le <b>même timbre</b>.</p></div>
+      <div class="crs-defile"><table class="crs-tab"><thead><tr><th>Note</th>${NOTES_TAB.map(n => `<th>${n[0]}</th>`).join('')}</tr></thead>
+        <tbody><tr><td>f (Hz)</td>${NOTES_TAB.map(n => `<td>${fmt(n[1])}</td>`).join('')}</tr></tbody></table></div>
+    </div>
+    ${exemple(`<p>Un violon et une flûte jouent la<sub>3</sub> : même fondamental (440 Hz), donc <b>même hauteur</b> ; harmoniques différents, donc <b>timbres différents</b>.</p>
+      <div class="os-figs deux"><div>${figSpe(440, I.violon.a)}<p class="os-fig-leg">Violon</p>${ecouter(440, I.violon.a, 'Écouter')}</div>
+        <div>${figSpe(440, I.flute.a)}<p class="os-fig-leg">Flûte</p>${ecouter(440, I.flute.a, 'Écouter')}</div></div>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Comparer deux sons', enonce: `<div class="os-figs deux"><div>${figSpe(fA, I[kA].a, { fmax: 2800, pasF: 100, etiqF: [0, 500, 1000, 1500, 2000, 2500] })}<p class="os-fig-leg">Son A</p></div>
+        <div>${figSpe(fB, I[kB].a, { fmax: 2800, pasF: 100, etiqF: [0, 500, 1000, 1500, 2000, 2500] })}<p class="os-fig-leg">Son B</p></div></div>`, parties: [
+      OS.versCours({ type: 'grille', q: 'Compare les sons A et B.', options: [o('oui', 'Oui'), o('non', 'Non')],
+        lignes: [{ id: 'h', label: 'Même hauteur ?', bonne: memeH ? 'oui' : 'non', indice: 'Compare les fréquences des fondamentaux (premières raies).' },
+          { id: 't', label: 'Même timbre ?', bonne: memeT ? 'oui' : 'non', indice: 'Compare la suite des amplitudes des raies (rang par rang), pas leurs fréquences.' }],
+        solution: `<p>Fondamentaux : ${fmt(fA)} Hz et ${fmt(fB)} Hz : ${memeH ? 'même hauteur' : 'hauteurs différentes'}. Amplitudes des harmoniques : ${memeT ? 'les mêmes, rang par rang : même timbre' : 'différentes : timbres différents'}.</p>` })] },
+    { titre: 'Quelle note ?', enonce: `<p>Voici le spectre d'un son joué par un orgue.</p>${figSpe(N3[1], I.orgue.a, { Wmax: 560, fmax: 2600, pasF: 100, etiqF: [0, 500, 1000, 1500, 2000, 2500] })}`, parties: [
+      { type: 'choix', q: 'D\'après le tableau des notes, quelle note joue-t-il ?', options: NOTES_TAB.slice(1).map(n => o(String(n[1]), n[0])), bonne: String(N3[1]), melanger: false,
+        indices: Object.fromEntries(NOTES_TAB.slice(1).map(n => [String(n[1]), n[1] === 2 * N3[1] ? 'C\'est la fréquence de l\'harmonique de rang 2. La note est donnée par le fondamental, la première raie.' : 'Lis la fréquence de la première raie et cherche la note la plus proche dans le tableau.'])),
+        solution: `<p>Le fondamental est à f<sub>1</sub> ≈ ${fmt(N3[1])} Hz : c'est ${N3[0]}.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p><b>Son pur</b> : signal sinusoïdal, une seule raie. <b>Son complexe</b> : signal non sinusoïdal, plusieurs raies (fondamental f<sub>1</sub> et harmoniques f<sub>n</sub> = n × f<sub>1</sub>).</p></div>
+    <div class="cle"><p>Fréquence d'un son : sur le signal, <b>f = 1 / T</b> (mesurer plusieurs périodes) ; sur le spectre, <b>f = f<sub>1</sub></b>.</p></div>
+    <div class="cle"><p><b>Hauteur</b> = fréquence du fondamental = note (grande fréquence : son aigu). <b>Timbre</b> = harmoniques = forme du signal. Même note sur deux instruments : même hauteur, timbres différents.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2_questions.html">Questions sur le son pur et le son complexe →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3a_cours.html">Module 3 : intensité et niveau sonores</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+OS.menu('module_2_cours');
+</script>
+</body>
+</html>
