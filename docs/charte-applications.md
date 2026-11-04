@@ -431,7 +431,7 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 | Enregistrer / reprendre la progression | `assets/progression.js` (+ `assets/progression.css`) |
 | Exemple de `PLAN` (pages séparées / une seule page) | `ph/modules/ph.js` / `puissances-10/index.html` |
 | Cours par étapes, « À toi », « Afficher tout le cours » (moteur commun `COURS`) | `assets/cours.js`, `assets/cours.css` |
-| Exemple de cours avec le moteur commun (pages séparées / une seule page / outils `perso`) | `combustions/modules/module_3_cours.html` / `puissances-10/index.html` / `equilibrer-reactions/modules/module_1.html` |
+| Exemple de cours avec le moteur commun (pages séparées / une seule page / outils `perso`) | `combustions/modules/module_3_cours.html` / `puissances-10/index.html` / `equilibrer-reactions/modules/module_2.html` |
 | Questions, graphiques, exercices | `cinematique/modules/cin.css` |
 | Moteur de questions, séries | `cinematique/modules/cin.js` |
 | Repère et tracé de vecteurs, écritures vectorielles | `cinematique/modules/vecteurs.js` |
