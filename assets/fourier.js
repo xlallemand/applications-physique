@@ -8,8 +8,10 @@
    bibliothèque, aucun fetch. Pas d'animation (prefers-reduced-motion
    respecté d'office).
 
-   Un signal (« spec ») : { f1 (Hz), a0, a: [a1, a2, …] }
-     s(t) = a0 + Σ aₙ × sin(n × 2π f1 × t)   (toutes les phases sont nulles)
+   Un signal (« spec ») : { f1 (Hz), a0, a: [a1, a2, …], phi (facultatif) }
+     s(t) = a0 + Σ aₙ × sin(n × 2π f1 × t + φₙ)
+     phi = [φ1, φ2, …] en radians, seulement pour redessiner un document
+     (signal enregistré) ; sans phi, toutes les phases sont nulles (simulateur)
 
    FOURIER.valeur(spec, t)        s(t), t en secondes
    FOURIER.raies(spec, opts)      raies du spectre [{ f, a, n }] (la raie à 0 Hz si a0 ≠ 0,
@@ -31,10 +33,13 @@
        curseurs de mesure) ; toucher une raie ou la légende met l'harmonique en valeur.
        opts = { N (10), f1, a0, a, amax (2), ymax, nom, unite, commandes, predefinis, legende, cases
                 (true ou liste parmi 'harmoniques', 'ideale', 'moyenne', 'mesure'), mesure (bool :
-                curseurs affichés au départ), signal, spectre, tmax, pasT, ymin, Hs, Hf, aria }
+                curseurs affichés au départ), signal, spectre, tmax, pasT, ymin, Hs, Hf, aria,
+                reglages (false : sans les curseurs f1 et a0, les raies restent réglables),
+                sansA0 (true : pas de raie à 0 Hz, a0 reste nul : un son), fmax (axe des fréquences fixe) }
        → instance { el, etat(), regler(r, silencieux), charger(nom), surChange(f), periode(), valeur(t) }
        regler accepte f1, a0, a (liste, ou objet { rang: valeur }), amax, ymax, forme, harmoniques,
-       ideale, moyenne, mesure, t1, t2, sel, surligne, cible (spec ou null), bande ([fa, fb] ou null)
+       ideale, moyenne, mesure, t1, t2, sel, surligne, cible (spec ou null), bande ([fa, fb] ou null),
+       fmax (axe des fréquences fixe, ou null : ajusté à f1)
    FOURIER.geomSignal, geomSpectre, geomSpectreDe(raies, o), axesSignal
                                   géométrie des graphiques (outils qui s'y superposent)
    FOURIER.PREDEFINIS             signaux prédéfinis : sinus, creneau, scie, cours, ex6, zero
@@ -65,7 +70,7 @@
     const neg = s[0] === '-';
     if (neg) s = s.slice(1);
     let [e, d] = s.split('.');
-    e = e.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    e = e.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');   // espace insécable entre les milliers
     return (neg ? MOINS : '') + (d ? e + ',' + d : e);
   }
   // lecture d'une saisie : « 0,75 », « −1 »
@@ -106,15 +111,17 @@
   /* ============================================================
      CALCUL
      ============================================================ */
-  // s(t) = a0 + Σ aₙ sin(2π n f1 t), t en secondes
+  // phase φₙ de l'harmonique de rang n (0 si spec.phi n'est pas donné)
+  const phase = (spec, n) => (spec.phi && spec.phi[n - 1]) || 0;
+  // s(t) = a0 + Σ aₙ sin(2π n f1 t + φₙ), t en secondes
   function valeur(spec, t) {
     let s = spec.a0 || 0;
     const w = 2 * Math.PI * spec.f1 * t;
-    (spec.a || []).forEach((a, i) => { if (a) s += a * Math.sin((i + 1) * w); });
+    (spec.a || []).forEach((a, i) => { if (a) s += a * Math.sin((i + 1) * w + phase(spec, i + 1)); });
     return s;
   }
-  // une seule composante : n = 0 → a0 ; n ≥ 1 → aₙ sin(2π n f1 t)
-  const composante = (spec, n, t) => (n === 0 ? spec.a0 || 0 : (spec.a[n - 1] || 0) * Math.sin(2 * Math.PI * n * spec.f1 * t));
+  // une seule composante : n = 0 → a0 ; n ≥ 1 → aₙ sin(2π n f1 t + φₙ)
+  const composante = (spec, n, t) => (n === 0 ? spec.a0 || 0 : (spec.a[n - 1] || 0) * Math.sin(2 * Math.PI * n * spec.f1 * t + phase(spec, n)));
   // forme idéale dont la série approche : créneau (aₙ = 4A/(nπ), n impair) ou dent de scie (aₙ = 2A/(nπ))
   function ideale(spec, forme, t) {
     const a1 = spec.a[0] || 0, u = ((spec.f1 * t) % 1 + 1) % 1;
@@ -329,7 +336,7 @@
       s.push(`<line class="fo-raie" x1="${x}" y1="${g.y1}" x2="${x}" y2="${g.Y(Math.min(r.a, amax))}" stroke-width="${r.f ? o.epais : o.epais + 2.5}"${coul}/>`);
       if (o.etiquettes) s.push(`<text class="fo-txt fo-txt-raie" x="${r.f ? x : x + 5}" y="${g.Y(Math.min(r.a, amax)) - 6}" text-anchor="${r.f ? 'middle' : 'start'}">${r.nom || sub('a', r.n)}</text>`);
     });
-    return `<svg class="fo-svg" viewBox="0 0 ${o.W} ${g.H}" width="${o.W}" height="${g.H}" role="img" aria-label="${o.aria || 'Spectre en amplitude : raies verticales en fonction de la fréquence'}">${s.join('')}</svg>`;
+    return `<svg class="fo-svg" viewBox="0 0 ${o.W} ${g.H}" width="${o.W}" height="${g.H}" role="img" aria-label="${o.aria || 'Spectre en amplitude : raies verticales en fonction de la fréquence'}">${s.join('')}</svg>`;
   }
 
   /* ============================================================
@@ -364,12 +371,12 @@
 
   function monter(zone, opts) {
     const o = Object.assign({ N: 10, f1: 200, a0: 0, a: [], amax: 2, nom: 'u', unite: 'V', commandes: true, predefinis: true, cases: true,
-      signal: true, spectre: true, Hs: null, Hf: null }, opts);
+      signal: true, spectre: true, Hs: null, Hf: null, reglages: true, sansA0: false }, opts);
     const remplir = l => Array.from({ length: o.N }, (_, i) => +(l && l[i]) || 0);
     const etat = {
       f1: o.f1, a0: o.a0, a: remplir(o.a), amax: o.amax, ymax: o.ymax || null, forme: o.forme || null,
       harmoniques: !!o.harmoniques, ideale: !!o.ideale, moyenne: !!o.moyenne, mesure: !!o.mesure, t1: o.t1 == null ? null : o.t1, t2: o.t2 == null ? null : o.t2,
-      sel: 1, surligne: false, cible: o.cible || null, bande: o.bande || null,
+      sel: 1, surligne: false, cible: o.cible || null, bande: o.bande || null, fmax: o.fmax || null,
     };
     const cases = o.cases === true ? ['harmoniques', 'ideale', 'moyenne', 'mesure'] : (o.cases || []);
     const ecouteurs = [];
@@ -390,7 +397,7 @@
           <span class="fo-fin-l"><button type="button" class="fo-mini" data-a="moins" aria-label="Diminuer de 0,05">−</button>
           <button type="button" class="fo-mini" data-a="plus" aria-label="Augmenter de 0,05">+</button></span>
         </div>` : ''}</div>` : ''}
-      ${o.commandes ? `<div class="fo-reglages">
+      ${o.commandes && o.reglages ? `<div class="fo-reglages">
         <label class="fo-reglage"><span class="fo-reglage-nom">Fondamental f<sub>1</sub> = <b data-a="vf1"></b></span>
           <input type="range" min="50" max="1000" step="10" data-r="f1" aria-label="Fréquence du fondamental f1, en hertz"></label>
         <label class="fo-reglage"><span class="fo-reglage-nom">Composante continue a<sub>0</sub> = <b data-a="va0"></b></span>
@@ -406,7 +413,7 @@
     const spec = () => ({ f1: etat.f1, a0: etat.a0, a: etat.a });
     const periode = () => 1000 / etat.f1;           // en ms
     const fmaxFitte = () => (o.N + .6) * etat.f1;
-    const fmaxAff = () => gelF || fmaxFitte();
+    const fmaxAff = () => etat.fmax || gelF || fmaxFitte();
     const largeur = d => Math.max(240, Math.round(d.clientWidth || zone.clientWidth || 600));
     const hauteur = (h, W) => h || (W < 520 ? 205 : 235);
     // axes du signal (les mêmes pour le dessin et pour le glisser des curseurs)
@@ -435,7 +442,7 @@
         lm.hidden = !etat.mesure;
         if (etat.mesure) {
           const d = decMes(ax.tmax);
-          lm.innerHTML = `Curseurs : t<sub>1</sub> = ${fmt(Math.min(etat.t1, etat.t2), d)} ms ; t<sub>2</sub> = ${fmt(Math.max(etat.t1, etat.t2), d)} ms ; durée entre les curseurs <b>Δt = ${fmt(Math.abs(etat.t2 - etat.t1), d)} ms</b>`;
+          lm.innerHTML = `Curseurs : t<sub>1</sub> = ${fmt(Math.min(etat.t1, etat.t2), d)} ms ; t<sub>2</sub> = ${fmt(Math.max(etat.t1, etat.t2), d)} ms ; durée entre les curseurs <b>Δt = ${fmt(Math.abs(etat.t2 - etat.t1), d)} ms</b>`;
         }
       }
       // légende : une pastille par composante non nulle (la toucher met la composante en valeur)
@@ -444,7 +451,7 @@
         const l = raies(spec());
         leg.innerHTML = l.length ? l.map(r => `<button type="button" class="fo-leg${etat.surligne && etat.sel === r.n ? ' actif' : ''}" data-n="${r.n}" aria-pressed="${etat.surligne && etat.sel === r.n}">
             <svg width="18" height="10" aria-hidden="true"><line x1="1" y1="5" x2="17" y2="5" stroke="${coulDe(r.n)}" stroke-width="3"/></svg><span>${nomH(r.n)} · ${etiq(r.f)} Hz</span></button>`).join('')
-          : '<span class="fo-leg-vide">Toutes les amplitudes sont nulles : le signal est nul.</span>';
+          : '<span class="fo-leg-vide">Toutes les amplitudes sont nulles : le signal est nul.</span>';
       }
     }
     function dessinerSpectre() {
@@ -452,8 +459,9 @@
       const W = largeur(gf), H = o.Hf || (W < 520 ? 195 : 215), fmax = fmaxAff();
       const g = geomSpectreDe([], { W, H, fmax, amax: etat.amax });
       const coulR = n => (etat.harmoniques || (etat.surligne && etat.sel === n) ? coulDe(n) : null);
-      const liste = raies(spec(), { zeros: true }).map(r => Object.assign(r, { coul: coulR(r.n) }));
-      let svg = svgSpectre(liste, { W, H, fmax, amax: etat.amax, unite: o.unite, etiquettes: false, bande: etat.bande, aria: 'Spectre du signal : fais glisser la poignée en haut d\'une raie pour régler son amplitude' });
+      // (sansA0 : pas de raie à 0 Hz, même d'amplitude nulle)
+      const liste = raies(spec(), { zeros: true }).filter(r => !(o.sansA0 && r.n === 0)).map(r => Object.assign(r, { coul: coulR(r.n) }));
+      let svg = svgSpectre(liste, { W, H, fmax, amax: etat.amax, unite: o.unite, etiquettes: false, bande: etat.bande, aria: 'Spectre du signal : fais glisser la poignée en haut d\'une raie pour régler son amplitude' });
       // ajouts interactifs : étiquettes, colonnes à toucher, poignées
       const esp = (g.X(etat.f1) - g.X(0));
       const s = [], dessous = [];
@@ -476,10 +484,10 @@
     }
     // texte de lecture d'une raie : f₃ = 3 × f₁ = 450 Hz ; a₃ = 0,67 V
     function texteRaie(n) {
-      if (n === 0) return `f = 0 Hz : <b>composante continue</b> ${nomH(0)} = ${fmt(etat.a0)} ${o.unite} (valeur moyenne du signal)`;
+      if (n === 0) return `f = 0 Hz : <b>composante continue</b> ${nomH(0)} = ${fmt(etat.a0)} ${o.unite} (valeur moyenne du signal)`;
       const a = etat.a[n - 1];
-      if (n === 1) return `f<sub>1</sub> = ${fmt(etat.f1)} Hz : <b>fondamental</b> ; ${nomH(1)} = ${fmt(a)} ${o.unite}`;
-      return `f<sub>${n}</sub> = ${n} × f<sub>1</sub> = ${n} × ${fmt(etat.f1)} = ${fmt(n * etat.f1)} Hz : <b>harmonique de rang ${n}</b> ; ${nomH(n)} = ${fmt(a)} ${o.unite}`;
+      if (n === 1) return `f<sub>1</sub> = ${fmt(etat.f1)} Hz : <b>fondamental</b> ; ${nomH(1)} = ${fmt(a)} ${o.unite}`;
+      return `f<sub>${n}</sub> = ${n} × f<sub>1</sub> = ${n} × ${fmt(etat.f1)} = ${fmt(n * etat.f1)} Hz : <b>harmonique de rang ${n}</b> ; ${nomH(n)} = ${fmt(a)} ${o.unite}`;
     }
     function majTextes() {
       const lec = $('lec');
@@ -508,7 +516,7 @@
     function regler(r, silencieux) {
       r = r || {};
       if (r.predef) { charger(r.predef, true); }
-      ['f1', 'a0', 'amax', 'ymax', 'forme', 'harmoniques', 'ideale', 'moyenne', 'mesure', 't1', 't2', 'sel', 'surligne', 'cible', 'bande'].forEach(k => { if (k in r) etat[k] = r[k]; });
+      ['f1', 'a0', 'amax', 'ymax', 'forme', 'harmoniques', 'ideale', 'moyenne', 'mesure', 't1', 't2', 'sel', 'surligne', 'cible', 'bande', 'fmax'].forEach(k => { if (k in r) etat[k] = r[k]; });
       if ('f1' in r) gelF = null;
       if (Array.isArray(r.a)) etat.a = remplir(r.a);
       else if (r.a) Object.keys(r.a).forEach(n => { etat.a[n - 1] = +r.a[n]; });
@@ -622,7 +630,12 @@
       };
       fV.addEventListener('change', valider);
       fV.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); valider(); fV.blur(); } });
-      const changerSel = d => { etat.sel = (etat.sel + d + o.N + 1) % (o.N + 1); etat.surligne = true; dessiner(); signaler(); };
+      // raie précédente ou suivante (sansA0 : de a1 à aN seulement)
+      const changerSel = d => {
+        const k = o.sansA0 ? 1 : 0, m = o.N + 1 - k;
+        etat.sel = (etat.sel - k + d + m) % m + k;
+        etat.surligne = true; dessiner(); signaler();
+      };
       $('prec').onclick = () => changerSel(-1);
       $('suiv').onclick = () => changerSel(1);
       $('moins').onclick = () => { const n = etat.sel; fixerAmpl(n, (n ? etat.a[n - 1] : etat.a0) - pas(n)); dessiner(); signaler(); };

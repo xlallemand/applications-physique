@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions sur le son pur et le son complexe — Chapitre 18 : Ondes sonores</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="os.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="os.js"></script>
+<script src="son.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard : pur ou complexe d'après un signal
+   et d'après un spectre (2), hauteur lue sur un spectre et sur un
+   signal (2), note jouée (1), même hauteur / même timbre entre deux
+   spectres (2), fréquences et rang des harmoniques (2), vocabulaire (1).
+   Erreurs diagnostiquées : harmonique pris pour le fondamental, T en
+   ms dans f = 1 / T, période prise pour un nombre de motifs,
+   hauteur et timbre confondus, rang = position de la raie.
+   ============================================================ */
+const { o, fq, fmt, cs, hasard, melanger, proche, entre, fr } = OS;
+const calc = h => `<p class="ph-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const I = SON.INSTRUMENTS, CPLX = ['flute', 'violon', 'clarinette', 'orgue', 'guitare'];
+const SIG = { tmax: 10, pasT: 1, ymin: -4, ymax: 4, pasY: 1, nom: 'u', unite: 'V', H: 200, Wmax: 560 };
+const figSig = (f1, a, opt) => OS.figSignal({ f1, a0: 0, a }, Object.assign({}, SIG, opt));
+const figSpe = (f1, a, opt) => OS.figSpectre(OS.raiesSon(f1, a), Object.assign({ unite: 'V', amax: 2, pasA: .5, H: 190, Wmax: 560 }, opt));
+// axe des fréquences : une ligne tous les 100 Hz, graduations écrites tous les 500 Hz
+const axeF = fmax => ({ fmax, pasF: 100, etiqF: Array.from({ length: Math.floor(fmax / 500) + 1 }, (_, k) => 500 * k) });
+
+/* ---------- Groupe 1 : pur ou complexe ---------- */
+function purSignal() {
+  const pur = Math.random() < .5, k = pur ? 'diapason' : hasard(CPLX), f = hasard([262, 330, 392, 440, 523]);
+  return { theme: 'Son pur ou complexe', enonce: `<p>Voici le signal d'un son capté par un micro.</p>${figSig(f, I[k].a)}`,
+    parties: [fq.choix('Ce son est :', [o('pur', 'un son pur'), o('cplx', 'un son complexe')], pur ? 'pur' : 'cplx',
+      { melanger: false, indices: { pur: 'Le signal est périodique mais ce n\'est pas une sinusoïde.', cplx: 'Le signal est une sinusoïde.' },
+        solution: `<p>${pur ? 'Signal sinusoïdal : son pur.' : 'Signal périodique non sinusoïdal : son complexe.'}</p>` })] };
+}
+function purSpectre() {
+  const pur = Math.random() < .5, k = pur ? 'diapason' : hasard(CPLX), f = hasard([200, 300, 400, 500]);
+  return { theme: 'Son pur ou complexe', enonce: `<p>Voici le spectre d'un son.</p>${figSpe(f, I[k].a, axeF(4000))}`,
+    parties: [fq.choix('Ce son est :', [o('pur', 'un son pur'), o('cplx', 'un son complexe')], pur ? 'pur' : 'cplx',
+      { melanger: false, indices: { pur: 'Il y a plusieurs raies.', cplx: 'Il n\'y a qu\'une seule raie.' },
+        solution: `<p>${pur ? 'Une seule raie : son pur.' : 'Plusieurs raies (fondamental et harmoniques) : son complexe.'}</p>` })] };
+}
+
+/* ---------- Groupe 2 : hauteur ---------- */
+function hauteurSpectre() {
+  const f = hasard([200, 300, 400, 500, 600, 700]), k = hasard(['violon', 'guitare', 'clarinette', 'flute']);
+  return { theme: 'Hauteur d\'un son', enonce: `<p>Voici le spectre d'un son.</p>${figSpe(f, I[k].a, axeF(Math.ceil((f * (I[k].a.length + .5)) / 500) * 500))}`,
+    parties: [fq.nombre('Quelle est la hauteur de ce son (la fréquence de son fondamental) ?', 'f<sub>1</sub> =', f, 'Hz', { tol: 20, signe: false,
+      diag: v => (proche(v, 2 * f, .05) ? 'C\'est l\'harmonique de rang 2 (la raie la plus haute, peut-être). La hauteur est donnée par le <b>fondamental</b> : la première raie.' : 'Lis la fréquence de la première raie (une ligne verticale tous les 100 Hz).'),
+      solution: `<p>La première raie est à ${c(fmt(f) + ' Hz')} : c'est la fréquence du fondamental, la hauteur du son.</p>` })] };
+}
+function hauteurSignal() {
+  const T = hasard([2, 2.5, 4, 5]), f = 1000 / T, k = hasard(['violon', 'clarinette', 'flute']), n = Math.floor(10 / T);
+  return { theme: 'Fréquence d\'un son', enonce: `<p>Voici le signal d'un son (une ligne verticale par milliseconde).</p>${figSig(f, I[k].a)}`,
+    parties: [fq.nombre('Quelle est la période T du signal ? (Lis la durée de plusieurs motifs, puis divise.)', 'T =', T, 'ms', { tol: .1, signe: false,
+      diag: v => (proche(v, n * T) ? `C'est la durée de ${n} périodes : divise par ${n}.` : v > T ? 'C\'est plus que la durée d\'un motif : compte les motifs qui se répètent.' : 'Le motif complet se répète : cherche deux sommets les plus hauts voisins.'),
+      solution: calc(`${n} motifs durent ${fmt(n * T)} ms : T = ${fr(fmt(n * T) + ' ms', n)} = ${c(fmt(T) + ' ms')}`) }),
+      fq.nombre('Calcule la fréquence f de ce son.', 'f =', f, 'Hz', { rel: .01, signe: false,
+        diag: v => (proche(v, 1 / T, .02) ? 'T doit être en <b>secondes</b> : ' + fmt(T) + ' ms = ' + fmt(T / 1000) + ' s.' : 'f = 1 / T, avec T en s.'),
+        solution: calc(`f = ${fr('1', 'T')} = ${fr('1', fmt(T / 1000) + ' s')} = ${c(fmt(f) + ' Hz')}`) })] };
+}
+
+/* ---------- Groupe 3 : note jouée ---------- */
+const NOTES_TAB = [['la<sub>3</sub>', 440], ['La<sub>4</sub>', 880], ['Si<sub>4</sub>', 988], ['Do<sub>5</sub>', 1046], ['Ré<sub>5</sub>', 1174]];
+function note() {
+  const N = hasard(NOTES_TAB), k = hasard(['orgue', 'violon', 'flute']);
+  return { theme: 'Note jouée', enonce: `<p>Voici le spectre d'un son, et les fréquences de quelques notes.</p>${figSpe(N[1], I[k].a, axeF(Math.ceil(N[1] * (I[k].a.length + .5) / 500) * 500))}
+      <div class="ph-defile"><table class="ph-tableau"><thead><tr><th>Note</th>${NOTES_TAB.map(n => `<th>${n[0]}</th>`).join('')}</tr></thead><tbody><tr><td>f (Hz)</td>${NOTES_TAB.map(n => `<td>${fmt(n[1])}</td>`).join('')}</tr></tbody></table></div>`,
+    parties: [fq.choix('Quelle note est jouée ?', NOTES_TAB.map(n => o(String(n[1]), n[0])), String(N[1]),
+      { melanger: false, indices: Object.fromEntries(NOTES_TAB.map(n => [String(n[1]), n[1] === 2 * N[1] ? 'C\'est la fréquence de l\'harmonique de rang 2 : la note est donnée par le fondamental (première raie).' : 'Lis la fréquence de la première raie, puis cherche la note la plus proche.'])),
+        solution: `<p>Fondamental à ${fmt(N[1])} Hz : c'est ${N[0]}.</p>` })] };
+}
+
+/* ---------- Groupe 4 : même hauteur ? même timbre ? ---------- */
+function comparer(memeH, memeT) {
+  const L = ['flute', 'violon', 'clarinette', 'guitare'], kA = hasard(L), kB = memeT ? kA : hasard(L.filter(k => k !== kA));
+  const F = [200, 300, 400, 500], fA = hasard(F), fB = memeH ? fA : hasard(F.filter(f => f !== fA));
+  const ax = axeF(3500);
+  return { theme: 'Hauteur et timbre', enonce: `<p>Voici les spectres de deux sons A et B.</p><div class="os-figs deux"><div>${figSpe(fA, I[kA].a, Object.assign({ Wmax: 460, H: 180 }, ax))}<p class="os-fig-leg">Son A</p></div><div>${figSpe(fB, I[kB].a, Object.assign({ Wmax: 460, H: 180 }, ax))}<p class="os-fig-leg">Son B</p></div></div>`,
+    parties: [{ type: 'grille', q: 'Compare les sons A et B.', options: [o('oui', 'Oui'), o('non', 'Non')],
+      lignes: [{ id: 'h', label: 'Même hauteur ?', bonne: memeH ? 'oui' : 'non', indice: 'La hauteur est la fréquence du fondamental (première raie) : compare-les.' },
+        { id: 't', label: 'Même timbre ?', bonne: memeT ? 'oui' : 'non', indice: 'Le timbre dépend des amplitudes des harmoniques, rang par rang : compare la suite des hauteurs des raies.' }],
+      solution: `<p>Fondamentaux : ${fmt(fA)} Hz et ${fmt(fB)} Hz, donc ${memeH ? '<b>même hauteur</b>' : '<b>hauteurs différentes</b>'}. Amplitudes des harmoniques ${memeT ? 'identiques rang par rang : <b>même timbre</b>' : 'différentes : <b>timbres différents</b>'}.</p>` }] };
+}
+const G4 = () => melanger([[true, false], [false, true], [false, false]]).slice(0, 2).map(p => comparer(p[0], p[1]));
+
+/* ---------- Groupe 5 : harmoniques ---------- */
+function harmoniques() {
+  const f = hasard([110, 125, 196, 220, 262, 330, 440]);
+  return { theme: 'Fréquences des harmoniques', enonce: `<p>Un instrument joue une note de fréquence f<sub>1</sub> = ${fmt(f)} Hz.</p>`,
+    parties: [{ type: 'gabarit', q: 'Quelles sont les fréquences de ses harmoniques de rangs 2, 3 et 4 ?', morceaux: ['f<sub>2</sub> =', { v: 2 * f }, 'Hz ; f<sub>3</sub> =', { v: 3 * f }, 'Hz ; f<sub>4</sub> =', { v: 4 * f }, 'Hz'],
+      diag: v => (proche(v[0], f + 2) || proche(v[1], f + 3) ? 'On multiplie par le rang : f<sub>n</sub> = n × f<sub>1</sub>.' : proche(v[0], f / 2) ? 'Les harmoniques ont des fréquences <b>plus grandes</b> que le fondamental : f<sub>n</sub> = n × f<sub>1</sub>.' : 'f<sub>n</sub> = n × f<sub>1</sub>.'),
+      solution: calc(`f<sub>2</sub> = 2 × ${fmt(f)} = ${c(fmt(2 * f) + ' Hz')} ; f<sub>3</sub> = 3 × ${fmt(f)} = ${c(fmt(3 * f) + ' Hz')} ; f<sub>4</sub> = 4 × ${fmt(f)} = ${c(fmt(4 * f) + ' Hz')}`) }] };
+}
+function rang() {
+  const f = hasard([100, 125, 200, 250]), n = entre(3, 9);
+  return { theme: 'Rang d\'un harmonique', enonce: `<p>Le fondamental d'un son est à ${fmt(f)} Hz. Son spectre a une raie à ${fmt(n * f)} Hz.</p>`,
+    parties: [fq.nombre('Quel est le rang de cet harmonique ?', 'n =', n, '', { tol: .01, signe: false,
+      diag: v => (proche(v, n * f) ? 'Le rang est un nombre sans unité : n = f<sub>n</sub> / f<sub>1</sub>.' : 'n = f<sub>n</sub> / f<sub>1</sub>.'),
+      solution: calc(`n = ${fr('f<sub>n</sub>', 'f<sub>1</sub>')} = ${fr(fmt(n * f) + ' Hz', fmt(f) + ' Hz')} = ${c(String(n))}`) })] };
+}
+
+/* ---------- Groupe 6 : vocabulaire ---------- */
+const VOCAB = [
+  () => fq.choix('Deux instruments différents jouent la même note. Leurs sons ont :', [o('ok', 'la même hauteur et des timbres différents'), o('inv', 'des hauteurs différentes et le même timbre'), o('tout', 'la même hauteur et le même timbre')], 'ok',
+    { colonne: true, indices: { inv: 'Même note = même fondamental = même hauteur.', tout: 'On reconnaît pourtant chaque instrument : les harmoniques diffèrent.' }, solution: '<p>Même note : même hauteur. Instruments différents : harmoniques différents, timbres différents.</p>' }),
+  () => fq.choix('Un son est d\'autant plus aigu que :', [o('ok', 'la fréquence de son fondamental est grande'), o('amp', 'son amplitude est grande'), o('harm', 'il a beaucoup d\'harmoniques')], 'ok',
+    { colonne: true, indices: { amp: 'L\'amplitude donne un son plus fort, pas plus aigu.', harm: 'Les harmoniques changent le timbre, pas la hauteur.' }, solution: '<p>Son aigu : grande fréquence du fondamental. Son grave : petite fréquence.</p>' }),
+  () => fq.choix('Le timbre d\'un son dépend :', [o('ok', 'de ses harmoniques (nombre et amplitudes), donc de la forme du signal'), o('f1', 'de la fréquence de son fondamental'), o('T', 'de la période du signal')], 'ok',
+    { colonne: true, indices: { f1: 'La fréquence du fondamental, c\'est la hauteur.', T: 'La période donne la fréquence, donc la hauteur.' }, solution: '<p>Le timbre est la richesse du son en harmoniques : il se voit sur la forme du signal.</p>' }),
+];
+const vocab = () => ({ theme: 'Vocabulaire', parties: [hasard(VOCAB)()] });
+
+// tirage : 2 + 2 + 1 + 2 + 2 + 1 questions
+function tirage() {
+  return [purSignal(), purSpectre(), hauteurSpectre(), hauteurSignal(), note()].concat(G4(), [harmoniques(), rang(), vocab()]);
+}
+
+OS.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Son pur, son complexe',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : son pur ou complexe, hauteur (fréquence du fondamental), note jouée, timbre, fréquences des harmoniques.</p>',
+  questions: tirage,
+  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3a_cours.html', label: 'Module 3 : intensité et niveau sonores →' },
+});
+OS.menu('module_2_questions');
+</script>
+</body>
+</html>

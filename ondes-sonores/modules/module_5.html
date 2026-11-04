@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 5 : exercices — Chapitre 18 : Ondes sonores</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="os.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/fourier.js"></script>
+<script src="os.js"></script>
+<script src="son.js"></script>
+<script src="exercices.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   Liste des exercices de la feuille, dans son ordre et avec la
+   numérotation du manuel (6 p. 230, 8 p. 231, 10 et 11 p. 232,
+   17 p. 233, exercice A, 16 p. 233), puis le sujet de bac « violon » ;
+   un exercice à la fois : énoncé (graphiques redessinés en SVG), puis
+   questions successives. Exercice 16 : bouton « Écouter » avec les
+   deux spectres chargés dans le simulateur musical (modules/son.js).
+   La correction détaillée de chaque question est toujours disponible
+   (0 point pour cette question).
+   Barème par question : 2 points juste du premier coup, 1 point
+   après au moins une erreur, 0 point si la correction est affichée.
+   Les résultats sont gardés dans le navigateur (localStorage).
+   ============================================================ */
+const app = document.getElementById('app');
+const EX = OS.EXERCICES;
+const CLE = 'ondes-sonores-exercices';
+
+function lireResultats() {
+  try { return JSON.parse(localStorage.getItem(CLE)) || {}; } catch (e) { return {}; }
+}
+function noterResultat(id, pts, max) {
+  try {
+    const r = lireResultats();
+    // on garde le meilleur résultat
+    if (!r[id] || pts > r[id].pts) r[id] = { pts, max };
+    localStorage.setItem(CLE, JSON.stringify(r));
+  } catch (e) { /* stockage indisponible : rien à faire */ }
+}
+
+function liste() {
+  const res = lireResultats();
+  app.innerHTML = `<div class="er-card"><span class="er-badge">MODULE 5 · EXERCICES</span><h2 class="er-titre">Les exercices de la feuille</h2>
+      <p class="er-contexte">Les exercices de la feuille, avec la numérotation du manuel : 6 p. 230, 8 p. 231, 10 et 11 p. 232, 17 p. 233, l'exercice A (audiogramme et bouchons d'oreilles), 16 p. 233, puis le sujet de bac « Étude du son d'un violon ». Chaque exercice est guidé question par question ; la <b>correction détaillée</b> est toujours disponible. Garde ta calculatrice à portée de main.</p>
+      <p class="er-petit" style="margin-top:8px">Barème de chaque question : 2 points juste du premier coup, 1 point après une erreur, 0 point si tu regardes la correction.</p></div>
+    ${OS.GROUPES_EX.map(g => `<div class="er-card ph-ex-groupe"><h3 class="cours-titre">${g.titre}</h3><div class="ph-ex-liste">
+      ${EX.filter(e => e.groupe === g.id).map(e => {
+        const r = res[e.id];
+        return `<button type="button" class="ph-ex-carte${r ? ' fait' : ''}" data-id="${e.id}">
+          <span class="ph-ex-num">${r ? '✓' : e.id}</span>
+          <span><span class="ph-ex-titre" style="display:block">${e.titre}</span><span class="ph-ex-desc" style="display:block">${e.desc}</span>
+          ${r ? `<span class="ph-ex-score" style="display:block">Meilleur score : ${r.pts} / ${r.max}</span>` : ''}</span></button>`;
+      }).join('')}</div></div>`).join('')}`;
+  app.querySelectorAll('.ph-ex-carte').forEach(b => { b.onclick = () => exercice(EX.findIndex(e => e.id === b.dataset.id)); });
+  window.scrollTo(0, 0);
+}
+
+function exercice(i) {
+  // les parties sont refaites à chaque fois (on repart de zéro)
+  const e = EX[i], ps = typeof e.parties === 'function' ? e.parties() : e.parties, max = ps.length * 2;
+  app.innerHTML = `<div class="er-card"><div class="ph-ex-nav"><span class="er-badge" style="margin:0">MODULE 5 · EXERCICE ${e.id === 'Bac' ? 'BAC' : e.id}</span>
+      <button type="button" class="ph-retour-liste" data-a="liste">← Liste des exercices</button></div>
+      <h2 class="er-titre" style="margin-top:8px">${e.titre}</h2></div>
+    <div class="er-card ph-contexte">${e.contexte}${e.sons ? `<div class="os-voir"><button type="button" class="btn-secondary" data-a="voir">▶ Écouter les deux sons dans le simulateur</button><div class="os-voir-zone"></div></div>` : ''}</div>
+    <div class="er-card ph-question"><div data-a="parties"></div><div data-a="bilan"></div></div>`;
+  window.scrollTo(0, 0);
+  app.querySelector('[data-a="liste"]').onclick = liste;
+  // exercice 16 : les deux spectres chargés dans un exemplaire du simulateur musical (une seule fois)
+  const bVoir = app.querySelector('[data-a="voir"]');
+  if (bVoir) bVoir.onclick = () => {
+    bVoir.remove();
+    const z = app.querySelector('.os-voir-zone');
+    z.innerHTML = `<div class="os-voir-l">${e.sons.map((s, k) => `<button type="button" class="btn-secondary" data-son="${k}">▶ ${s.label}</button>`).join('')}</div><div class="os-voir-sim"></div>`;
+    const s0 = e.sons[0];
+    // axe des temps de 25 ms comme sur l'enregistrement ; amplitudes des raies jusqu'à 6 V comme sur les spectres
+    const sim = SON.monter(z.querySelector('.os-voir-sim'), { libre: true, f1: s0.f1, a: s0.a, instruments: false, clavier: false, tmax: 25, amax: 6 });
+    z.querySelectorAll('[data-son]').forEach(b => {
+      b.onclick = () => { const s = e.sons[+b.dataset.son]; sim.regler({ libre: true, f1: s.f1, a: s.a }); sim.jouer(); };
+    });
+  };
+  // évite qu'un double appui sur « Exercice suivant » réponde à la nouvelle question
+  app.style.pointerEvents = 'none';
+  setTimeout(() => { app.style.pointerEvents = ''; }, 350);
+  const parties = ps.map(p => Object.assign({}, p));
+  OS.question(app.querySelector('[data-a="parties"]'), { parties }, {
+    fin(_, etat) {
+      const pts = etat.details.reduce((s, d) => s + (d.vue ? 0 : d.erreurs ? 1 : 2), 0);
+      noterResultat(e.id, pts, max);
+      const suivant = EX[i + 1];
+      const b = app.querySelector('[data-a="bilan"]');
+      b.innerHTML = `<div class="${pts ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${pts ? 'er-ok' : ''}">Exercice terminé : ${pts} / ${max} points.</b></p>
+          ${pts === max ? '<p>Tout juste du premier coup, bravo !</p>' : '<p>Relis les corrections, puis refais l\'exercice plus tard pour vérifier.</p>'}</div>
+        <div class="er-actions"><button type="button" class="btn-secondary" data-a="re">↺ Refaire</button>
+          <button type="button" class="btn-secondary" data-a="liste2">Liste des exercices</button>
+          ${suivant ? `<button type="button" class="btn-primary" data-a="suiv">Exercice ${suivant.id === 'Bac' ? 'de bac' : suivant.id} →</button>` : ''}</div>`;
+      b.querySelector('[data-a="re"]').onclick = () => exercice(i);
+      b.querySelector('[data-a="liste2"]').onclick = liste;
+      if (suivant) b.querySelector('[data-a="suiv"]').onclick = () => exercice(i + 1);
+      if (pts === max) OS.confettis();
+      setTimeout(() => b.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+    },
+  }, 'exercice');
+}
+
+liste();
+OS.menu('module_5');
+</script>
+</body>
+</html>

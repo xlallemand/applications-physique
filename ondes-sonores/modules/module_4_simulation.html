@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : simulateur, passer un audiogramme — Chapitre 18 : Ondes sonores</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="os.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/fourier.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="os.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · SIMULATION</span>
+    <h2 class="er-titre">Passer un audiogramme</h2>
+    <p class="er-contexte">Chez l'<b>ORL</b>, un <b>audiogramme</b> mesure, pour chaque fréquence, le niveau sonore à partir duquel tu entends un son. Passe le test comme dans son cabinet : tu obtiendras ta courbe du <b>seuil d'audibilité</b>.</p>
+  </div>
+
+  <!-- ============ 1. Le test chez l'ORL ============ -->
+  <section class="er-card">
+    <h3 class="cours-titre" style="margin-top:0">1. Comment se passe le test chez l'ORL</h3>
+    <div class="os-au-orl">
+      <div id="illus"></div>
+      <ol class="os-au-pas">
+        <li>Tu es assis dans une <b>cabine insonorisée</b> : aucun bruit de l'extérieur ne te parvient.</li>
+        <li>Tu portes un <b>casque</b>. L'ORL envoie des <b>sons purs</b>, un à la fois, dans une oreille puis dans l'autre.</li>
+        <li>Pour chaque son, le <b>niveau sonore augmente</b> peu à peu. <b>Dès que tu l'entends</b>, tu appuies sur le bouton du côté de l'oreille qui entend.</li>
+        <li>L'ORL note ce niveau sur l'audiogramme, puis recommence avec un son <b>plus aigu</b>.</li>
+      </ol>
+    </div>
+    <div class="callout-accent" style="margin-top:14px">
+      <p><b class="cle-titre">Ici, c'est une simulation.</b> On ne distingue pas l'oreille droite et l'oreille gauche : un seul bouton, <b>« J'entends »</b>, sur lequel tu appuies dès que tu entends le son.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. Régler le son ============ -->
+  <section class="er-card" id="reglage">
+    <h3 class="cours-titre" style="margin-top:0">2. Régler le son</h3>
+    <p class="er-contexte">Ton ordinateur ou ton téléphone n'est pas réglé comme l'appareil de l'ORL : ce réglage adapte les sons du test à ton volume.</p>
+    <ol class="os-au-pas" style="margin-top:10px">
+      <li>Lance le son de réglage (un son de 1 000 Hz, joué en continu).</li>
+      <li>Fais glisser le curseur jusqu'à ce que le son soit <b>faible, mais que tu l'entendes bien</b>.</li>
+    </ol>
+    <div class="er-actions" style="margin-top:12px">
+      <button type="button" class="btn-secondary" id="reg-jouer">▶ Lancer le son de réglage</button>
+    </div>
+    <div class="os-au-reglage">
+      <button type="button" class="os-au-pm" id="reg-moins" aria-label="Plus faible" title="Plus faible">−</button>
+      <label class="fo-reglage"><input type="range" id="reg-curseur" min="0" max="100" step="1" value="30" aria-label="Volume du son de réglage"></label>
+      <button type="button" class="os-au-pm" id="reg-plus" aria-label="Plus fort" title="Plus fort">+</button>
+    </div>
+    <div class="os-au-bornes"><span>plus faible</span><span>plus fort</span></div>
+    <div class="er-actions os-au-valider">
+      <button type="button" class="btn-primary" id="reg-ok" disabled>C'est réglé ✓</button>
+      <span class="os-au-ok" id="reg-fait" hidden>✓ Son réglé</span>
+    </div>
+    <div class="callout-danger" id="reg-indispo" style="margin-top:12px" hidden>
+      <p><b class="cle-titre">Pas de son.</b> Ton navigateur ne peut pas jouer de sons : le test n'est pas possible ici. Ouvre la page dans un autre navigateur.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. Le test ============ -->
+  <section class="er-card" id="test">
+    <h3 class="cours-titre" style="margin-top:0">3. Le test</h3>
+    <p class="er-petit os-au-intro" id="au-intro" style="margin-bottom:8px">8 sons, de 50 Hz à 8 000 Hz, du plus grave au plus aigu. Le test dure moins d'une minute.</p>
+    <div class="os-au-tete-test" id="au-tete" hidden>
+      <span class="os-au-avance"><span id="au-avance">Son 1 / 8</span><span class="progress-bar"><span class="progress-fill" id="au-barre" style="width:0"></span></span></span>
+    </div>
+    <div class="os-au-mesures" id="au-mesures" hidden>
+      <div class="os-au-mesure"><small>Fréquence</small><b id="au-f" aria-live="polite">50 Hz</b></div>
+      <div class="os-au-mesure"><small>Niveau sonore</small><b id="au-L">−10 dB</b></div>
+    </div>
+    <div class="os-au-graphe" id="au-graphe"></div>
+    <div class="os-au-actions">
+      <button type="button" class="btn-primary os-au-entends" id="au-demarrer" disabled>▶ Démarrer le test</button>
+      <button type="button" class="btn-primary os-au-entends" id="au-entends" hidden>J'entends</button>
+      <p class="os-au-msg" id="au-msg" aria-live="polite">Règle d'abord le son (étape 2).</p>
+    </div>
+    <div class="os-au-fin" id="au-fin" hidden>
+      <button type="button" class="btn-secondary" id="au-refaire">↺ Refaire le test</button>
+      <a class="btn-primary" style="text-decoration:none" href="module_4a_cours.html">Le cours : l'audiogramme →</a>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   Simulateur « Passer un audiogramme » (module 4, avant le cours
+   sur l'audiogramme).
+   1. Déroulé du test chez l'ORL (illustration : cabine insonorisée,
+      casque, bouton, audiomètre).
+   2. Réglage du son : un son pur de 1 000 Hz joué en continu ; l'élève
+      règle le curseur pour qu'il soit faible mais bien audible. Ce
+      réglage sert de référence : le test marche de la même façon quel
+      que soit le volume de l'appareil.
+   3. Le test : 8 sons purs (50 Hz → 8 000 Hz). Pour chaque son, le
+      niveau AFFICHÉ part de −10 dB et monte de 7 dB par seconde ;
+      « J'entends » (ou la barre d'espace) inscrit un point (f, L)
+      sur l'audiogramme, puis le son suivant, plus aigu, commence.
+      Le premier son est affiché à 50 Hz mais joué à 80 Hz : un son
+      de 50 Hz passe mal sur la plupart des haut-parleurs et casques.
+      À la fin, la courbe du seuil d'audibilité se trace en passant
+      par les points, puis son nom apparaît ; la simulation est
+      marquée comme faite.
+   Son ÉMIS (sans rapport avec le niveau affiché) : silence tant que
+   le niveau affiché est à plus de 4 dB sous le seuil d'audibilité
+   habituel S(f) (OS.seuil) ; ensuite le son apparaît faiblement et
+   augmente vite : gain (dB) = réglage + correction(f) + 2,2 × (L − S),
+   soit le niveau du réglage quand L = S. La correction(f) = S(fs) − S(1 000 Hz),
+   où fs est la fréquence du son joué (80 Hz pour 50 Hz affichés), compense la moindre sensibilité de l'oreille aux graves et aux
+   aigus. Gain plafonné à 30 dB au-dessus de ce niveau et à une
+   amplitude de 0,5. Appui pendant le silence : « trop tôt », pas de
+   point. Pas de réponse 40 dB après l'apparition du son : pas de
+   point, son suivant.
+   Durée : environ 40 s (montées silencieuses ≈ 19 s, plus une
+   seconde de réaction et 1,6 s de pauses par son).
+   ============================================================ */
+const { fmt, seuil, interpLog } = OS;
+
+/* ---------- réglages du test ---------- */
+const FREQS = [50, 125, 250, 500, 1000, 2000, 4000, 8000];   // fréquences affichées, du plus grave au plus aigu (Hz)
+// fréquence du son réellement joué : 80 Hz pour 50 Hz affichés (50 Hz passe mal sur les haut-parleurs et casques)
+const JOUEE = f => (f === 50 ? 80 : f);
+const L_DEPART = -10;          // niveau affiché au début de chaque son (dB)
+const VITESSE = 7;             // montée du niveau affiché (dB par seconde)
+const ATTENTE = 600;           // durée (ms) au niveau de départ avant la montée
+const PAUSE = 1000;            // pause (ms) entre un appui et le son suivant
+const PAUSE_SANS = 2200;       // pause (ms) après un son resté sans réponse (le temps de lire le message)
+const APPARITION = 4;          // le son apparaît 4 dB (affichés) sous le seuil habituel
+const PENTE = 2.2;             // dB réels par dB affiché, une fois le son apparu
+const MARGE = 30;              // gain maximal : 30 dB au-dessus du niveau du réglage (corrigé)
+const AMP_MAX = .5;            // amplitude maximale du son (protection des oreilles)
+const MONTEE_MAX = 40;         // dB affichés sans réponse après l'apparition du son : son suivant
+// axes de l'audiogramme : fréquence de 20 Hz à 20 kHz (échelle logarithmique), niveau de −10 à 80 dB
+const AXES = { fmin: 20, fmax: 20000, ymin: -10, ymax: 80, pasY: 10, ml: 50, titreY: 'L (en dB)', titreF: 'f (en Hz) · échelle logarithmique' };
+// curseur de réglage (0 à 100) → niveau du son de référence, de −75 dB à −5 dB (pleine échelle)
+const curseur = document.getElementById('reg-curseur');
+const reglageDB = () => -75 + .7 * (+curseur.value);
+const amp = dB => Math.min(AMP_MAX, Math.pow(10, dB / 20));
+const bougerMoins = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ============================================================
+   SON (Web Audio API) : sons purs, démarrés par un geste de l'élève
+   (fonctionne en file://)
+   ============================================================ */
+const AUDIO = (function () {
+  let ctx = null, indispo = !(window.AudioContext || window.webkitAudioContext);
+  function contexte() {
+    if (indispo) return null;
+    try {
+      if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === 'suspended' && ctx.resume) ctx.resume();
+      return ctx;
+    } catch (e) { indispo = true; return null; }
+  }
+  // son pur de fréquence f, muet au départ ; regler(a) change son amplitude en douceur
+  function sonPur(f) {
+    const c = contexte();
+    if (!c) return null;
+    try {
+      const osc = c.createOscillator(), g = c.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      g.gain.value = 0;
+      osc.connect(g);
+      g.connect(c.destination);
+      osc.start();
+      let fini = false;
+      return {
+        regler(a) { if (!fini) g.gain.setTargetAtTime(Math.min(AMP_MAX, Math.max(0, a)), c.currentTime, .03); },
+        arreter() {
+          if (fini) return;
+          fini = true;
+          try { const t = c.currentTime; g.gain.cancelScheduledValues(t); g.gain.setTargetAtTime(0, t, .015); osc.stop(t + .15); } catch (e) { /* déjà arrêté */ }
+        },
+      };
+    } catch (e) { return null; }
+  }
+  return { sonPur, disponible: () => !indispo };
+})();
+
+/* ============================================================
+   ILLUSTRATION : cabine insonorisée, casque, bouton, audiomètre
+   ============================================================ */
+(function () {
+  // mousse anti-bruit : dents le long des parois intérieures de la cabine
+  const dents = (x0, y0, x1, y1, n, sens) => {
+    let d = `M${x0},${y0}`;
+    for (let i = 1; i <= n; i++) {
+      const u = (i - .5) / n, v = i / n;
+      const xm = x0 + (x1 - x0) * u + (sens === 'h' ? 0 : 7 * (sens === 'd' ? -1 : 1)), ym = y0 + (y1 - y0) * u + (sens === 'h' ? 7 : 0);
+      d += `L${xm.toFixed(1)},${ym.toFixed(1)}L${(x0 + (x1 - x0) * v).toFixed(1)},${(y0 + (y1 - y0) * v).toFixed(1)}`;
+    }
+    return `<path class="os-au-mousse" d="${d}"/>`;
+  };
+  document.getElementById('illus').innerHTML = `<svg class="os-svg" viewBox="0 0 520 250" role="img" aria-label="Test chez l'ORL : la personne est assise dans une cabine insonorisée, un casque sur les oreilles et un bouton à la main ; l'ORL est derrière la vitre avec l'audiomètre">
+    <!-- cabine : parois épaisses, mousse, vitre -->
+    <rect class="os-paroi" x="16" y="30" width="300" height="200" rx="10"/>
+    <rect class="os-au-interieur" x="30" y="44" width="272" height="186"/>
+    <rect class="os-paroi-bord" x="16" y="30" width="300" height="200" rx="10"/>
+    ${dents(30, 44, 302, 44, 17, 'h')}${dents(30, 44, 30, 230, 12, 'g')}${dents(302, 44, 302, 120, 5, 'd')}${dents(302, 176, 302, 230, 3, 'd')}
+    <rect class="os-au-vitre" x="300" y="120" width="18" height="56"/>
+    <line class="os-paroi-bord" x1="16" y1="230" x2="510" y2="230"/>
+    <!-- tabouret -->
+    <path class="os-au-pers" style="stroke-width:5" d="M120,182 L170,182 M132,182 L124,230 M158,182 L166,230"/>
+    <!-- personne assise de profil, tournée vers la vitre -->
+    <path class="os-au-pers" style="stroke-width:16" d="M142,122 L146,176 L196,178 L198,224"/>
+    <path class="os-au-pers" style="stroke-width:10" d="M146,132 L176,152 L200,146"/>
+    <circle class="os-au-tete" cx="146" cy="96" r="22"/>
+    <!-- casque et son pur dans l'écouteur -->
+    <path class="os-au-casque" d="M124,94 A23,26 0 0 1 168,92"/>
+    <rect class="os-au-ecouteur" x="137" y="84" width="16" height="26" rx="7"/>
+    <path class="os-ondule" style="stroke-width:2" d="M118,90 a8,8 0 0 0 0,14 M110,84 a14,14 0 0 0 0,26"/>
+    <!-- bouton tenu en main -->
+    <rect class="os-au-appareil" x="198" y="138" width="22" height="16" rx="4"/>
+    <circle class="os-au-bouton" cx="209" cy="138" r="6"/>
+    <!-- audiomètre de l'ORL, relié au casque et au bouton -->
+    <path class="os-au-fil" d="M145,110 C150,130 136,200 100,226 L330,226 L420,206 M220,148 C250,170 300,200 330,226"/>
+    <rect class="os-au-appareil" x="360" y="160" width="130" height="50" rx="8"/>
+    <rect class="os-au-ecran" x="372" y="170" width="58" height="30" rx="4"/>
+    <circle class="os-au-bouton" cx="448" cy="185" r="7"/><circle class="os-au-tete" cx="472" cy="185" r="7"/>
+    <!-- légendes -->
+    <text class="os-au-leg" x="166" y="20" text-anchor="middle">cabine insonorisée</text>
+    <text class="os-au-leg" x="62" y="74" text-anchor="middle">casque</text><line class="os-au-trait" x1="80" y1="78" x2="130" y2="88"/>
+    <text class="os-au-leg" x="250" y="112" text-anchor="middle">bouton</text><line class="os-au-trait" x1="246" y1="117" x2="214" y2="134"/>
+    <text class="os-au-leg" x="425" y="148" text-anchor="middle">audiomètre (l'ORL)</text>
+  </svg>`;
+})();
+
+/* ============================================================
+   2. RÉGLAGE DU SON (son de référence à 1 000 Hz, en continu)
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const bJouer = $('reg-jouer'), bOk = $('reg-ok'), bMoins = $('reg-moins'), bPlus = $('reg-plus');
+let sonReglage = null, regle = false;
+function majReglage() {
+  bJouer.textContent = sonReglage ? '■ Arrêter le son de réglage' : '▶ Lancer le son de réglage';
+  bOk.hidden = regle && !sonReglage;
+  $('reg-fait').hidden = !bOk.hidden;
+}
+function arreterReglage() {
+  if (sonReglage) { sonReglage.arreter(); sonReglage = null; }
+  majReglage();
+}
+bJouer.addEventListener('click', () => {
+  if (sonReglage) { arreterReglage(); return; }
+  sonReglage = AUDIO.sonPur(1000);
+  if (!sonReglage) { sansSon(); return; }
+  sonReglage.regler(amp(reglageDB()));
+  bOk.disabled = false;                                   // on ne valide qu'après avoir écouté
+  majReglage();
+});
+// curseur et boutons − / + : le son de réglage suit en direct
+const appliquer = () => { if (sonReglage) sonReglage.regler(amp(reglageDB())); };
+curseur.addEventListener('input', appliquer);
+const pas = d => { curseur.value = Math.max(0, Math.min(100, +curseur.value + d)); appliquer(); };
+bMoins.addEventListener('click', () => pas(-3));
+bPlus.addEventListener('click', () => pas(3));
+bOk.addEventListener('click', () => {
+  regle = true;
+  arreterReglage();
+  bDemarrer.disabled = false;
+  if (etat.phase === 'pret') message('');
+});
+// navigateur sans Web Audio : test impossible, on le dit
+function sansSon() {
+  $('reg-indispo').hidden = false;
+  [bJouer, bOk, bMoins, bPlus, curseur].forEach(b => { b.disabled = true; });
+  bDemarrer.disabled = true;
+  message('Ton navigateur ne peut pas jouer de sons.');
+}
+
+/* ============================================================
+   3. LE TEST
+   ============================================================ */
+const zoneG = $('au-graphe'), bDemarrer = $('au-demarrer'), bEntends = $('au-entends');
+const etat = {
+  phase: 'pret',          // 'pret' (avant le test), 'test', 'fin'
+  k: 0,                   // rang du son en cours dans FREQS
+  t0: 0,                  // début du son en cours (performance.now)
+  L: L_DEPART,            // niveau affiché
+  pause: false,           // entre deux sons : l'appui ne compte pas
+  son: null,              // son pur en cours
+  points: [],             // points inscrits : { f, L }
+  minuteur: null,
+  boucle: 0,              // image d'animation demandée
+  trace: false,           // courbe finale déjà animée
+};
+let geo = null, rond = null, largeur = 0;
+const message = h => { $('au-msg').innerHTML = h; };
+const MSG_TEST = 'Appuie dès que tu entends le son.';
+
+// audiogramme à la largeur disponible : points inscrits, trait de la fréquence en cours
+// et cercle du niveau en cours (pendant le test), courbe du seuil (à la fin)
+function tracer() {
+  const W = Math.round(zoneG.clientWidth);
+  if (!W) return;
+  largeur = W;
+  const o = Object.assign({ W: Math.min(W, 680), H: W < 480 ? 290 : 330 }, AXES);
+  geo = OS.geomLog(o);
+  const enTest = etat.phase === 'test', f = FREQS[etat.k];
+  let courbes = [];
+  if (etat.phase === 'fin' && etat.points.length >= 2) {
+    const pts = etat.points.map(p => [p.f, p.L]);
+    // nom écrit au-dessus de la courbe, autour de 1 400 Hz, sans toucher la courbe sur toute sa largeur
+    const lf = 1400, demi = Math.pow(10, 70 / geo.decade);
+    let haut = -Infinity;
+    for (let i = 0; i <= 20; i++) haut = Math.max(haut, interpLog(pts, lf / demi * Math.pow(demi * demi, i / 20)));
+    const parDB = (geo.y1 - geo.y0) / (AXES.ymax - AXES.ymin);
+    courbes = [{ pts, cls: 'os-c-seuil os-au-trace', label: 'seuil d\'audibilité', lf, ly: Math.min(AXES.ymax - 4, haut + 9 / parDB), dy: 0, clsT: 'os-au-nom' + (etat.trace ? ' visible' : '') }];
+  }
+  zoneG.innerHTML = OS.svgLog(Object.assign(o, {
+    points: etat.points.map(p => ({ f: p.f, y: p.L })),
+    courbes,
+    reperes: enTest ? [{ f }] : [],
+    extra: g => enTest && !etat.pause ? `<circle class="os-au-curseur" cx="${g.X(f)}" cy="${g.Y(etat.L)}" r="8"/>` : '',
+    aria: 'Audiogramme : niveau sonore L (en dB) en fonction de la fréquence f (en Hz, échelle logarithmique)' +
+      (etat.points.length ? ' ; points inscrits : ' + etat.points.map(p => `${fmt(p.f)} Hz et ${fmt(p.L)} dB`).join(', ') : ''),
+  }));
+  rond = zoneG.querySelector('.os-au-curseur');
+}
+if (window.ResizeObserver) new ResizeObserver(() => { if (Math.round(zoneG.clientWidth) !== largeur) tracer(); }).observe(zoneG);
+else addEventListener('resize', tracer);
+
+// affichage de l'avancement, de la fréquence et du niveau
+function afficherSon() {
+  const f = FREQS[etat.k];
+  $('au-avance').textContent = `Son ${etat.k + 1} / ${FREQS.length}`;
+  $('au-barre').style.width = (100 * etat.k / FREQS.length) + '%';
+  $('au-f').textContent = `${fmt(f)} Hz`;
+}
+function afficherNiveau(monte) {
+  $('au-L').textContent = `${fmt(Math.round(etat.L))} dB${monte ? ' ↑' : ''}`;
+}
+// état de l'écran : 'pret', 'test' ou 'fin'
+function ecran(phase) {
+  etat.phase = phase;
+  $('au-intro').hidden = phase !== 'pret';
+  $('au-tete').hidden = phase === 'pret';
+  $('au-mesures').hidden = phase !== 'test';
+  bDemarrer.hidden = phase !== 'pret';
+  bEntends.hidden = phase !== 'test';
+  $('au-fin').hidden = phase !== 'fin';
+  // pas de son de réglage pendant le test
+  bJouer.disabled = phase === 'test' || !AUDIO.disponible();
+}
+
+// gain du son émis pour la fréquence f quand le niveau affiché vaut L (voir l'en-tête)
+function amplitudeTest(f, L) {
+  const S = seuil(f);
+  if (L < S - APPARITION) return 0;                                 // silence : niveaux trop faibles
+  const base = reglageDB() + (seuil(JOUEE(f)) - seuil(1000));       // niveau du réglage, corrigé selon la fréquence jouée
+  return amp(Math.min(base + MARGE, base + PENTE * (L - S)));
+}
+
+// début du test (ou « Refaire le test »)
+function demarrer() {
+  if (!AUDIO.disponible()) { sansSon(); return; }
+  arreterReglage();
+  clearTimeout(etat.minuteur);
+  etat.points = [];
+  etat.trace = false;
+  ecran('test');
+  lancerSon(0);
+  cancelAnimationFrame(etat.boucle);
+  etat.boucle = requestAnimationFrame(boucle);
+  if (matchMedia('(hover: hover)').matches) bEntends.focus({ preventScroll: true });
+  $('test').scrollIntoView({ block: 'nearest', behavior: bougerMoins ? 'auto' : 'smooth' });
+}
+// son de rang k : niveau affiché à −10 dB, son muet, puis montée
+function lancerSon(k) {
+  etat.k = k;
+  etat.t0 = performance.now();
+  etat.L = L_DEPART;
+  etat.pause = false;
+  if (etat.son) etat.son.arreter();
+  etat.son = AUDIO.sonPur(JOUEE(FREQS[k]));
+  if (!etat.son) { sansSon(); interrompre(); return; }
+  afficherSon();
+  afficherNiveau(false);
+  message(MSG_TEST);
+  tracer();
+}
+// à chaque image : niveau affiché, son émis, cercle sur l'audiogramme
+function boucle(t) {
+  if (etat.phase !== 'test') return;
+  if (!etat.pause) {
+    const f = FREQS[etat.k], dt = Math.max(0, (t - etat.t0 - ATTENTE) / 1000);
+    etat.L = L_DEPART + VITESSE * dt;
+    if (etat.L >= seuil(f) - APPARITION + MONTEE_MAX) { sansReponse(); }
+    else {
+      etat.son.regler(amplitudeTest(f, etat.L));
+      afficherNiveau(dt > 0);
+      if (rond && geo) rond.setAttribute('cy', geo.Y(etat.L).toFixed(1));
+    }
+  }
+  etat.boucle = requestAnimationFrame(boucle);
+}
+// « J'entends » : un point si le son est émis, sinon « trop tôt »
+function entendre() {
+  if (etat.phase !== 'test' || etat.pause) return;
+  const f = FREQS[etat.k];
+  if (etat.L < seuil(f) - APPARITION) { message('Tu as appuyé trop tôt : appuie seulement quand tu entends le son.'); return; }
+  etat.son.arreter();
+  etat.pause = true;
+  etat.points.push({ f, L: Math.round(etat.L) });
+  afficherNiveau(false);
+  $('au-barre').style.width = (100 * (etat.k + 1) / FREQS.length) + '%';
+  message(MSG_TEST);
+  tracer();
+  etat.minuteur = setTimeout(suivant, PAUSE);
+}
+// pas de réponse 40 dB après l'apparition du son : pas de point, son suivant
+function sansReponse() {
+  etat.son.arreter();
+  etat.pause = true;
+  afficherNiveau(false);
+  $('au-barre').style.width = (100 * (etat.k + 1) / FREQS.length) + '%';
+  message(`Pas de réponse à ${fmt(FREQS[etat.k])} Hz : vérifie le réglage du son.`);
+  tracer();
+  etat.minuteur = setTimeout(suivant, PAUSE_SANS);
+}
+function suivant() {
+  if (etat.phase !== 'test') return;
+  if (etat.k + 1 < FREQS.length) lancerSon(etat.k + 1);
+  else terminer();
+}
+// fin : la courbe se trace de gauche à droite en passant par les points, puis son nom apparaît
+function terminer() {
+  if (etat.son) { etat.son.arreter(); etat.son = null; }
+  ecran('fin');
+  const n = etat.points.length;
+  $('au-avance').textContent = `Test terminé : ${n} / ${FREQS.length}`;
+  $('au-barre').style.width = '100%';
+  message(n >= 2 ? `Ta courbe du seuil d'audibilité passe par tes ${n} points.`
+    : 'Trop peu de réponses pour tracer la courbe : vérifie le réglage du son, puis refais le test.');
+  tracer();
+  if (n < 2) return;
+  const chemin = zoneG.querySelector('.os-au-trace');
+  const montrerNom = () => { etat.trace = true; const x = zoneG.querySelector('.os-au-nom'); if (x) x.classList.add('visible'); };
+  if (bougerMoins || !chemin || !chemin.getTotalLength) montrerNom();
+  else {
+    const lg = chemin.getTotalLength();
+    chemin.style.strokeDasharray = lg;
+    chemin.style.strokeDashoffset = lg;
+    void chemin.getBoundingClientRect();
+    chemin.style.transition = 'stroke-dashoffset 1.6s ease-in-out';
+    chemin.style.strokeDashoffset = '0';
+    setTimeout(montrerNom, 1600);
+  }
+  OS.marquer({ fait: true });                                      // simulation faite (sommaire, accueil)
+}
+// test interrompu (page cachée, son impossible) : retour à l'écran de départ
+function interrompre() {
+  clearTimeout(etat.minuteur);
+  if (etat.son) { etat.son.arreter(); etat.son = null; }
+  etat.points = [];
+  ecran('pret');
+  tracer();
+}
+
+bDemarrer.addEventListener('click', demarrer);
+$('au-refaire').addEventListener('click', demarrer);
+// « J'entends » dès l'appui (souris, doigt) ; le clic qui suit est ignoré, celui du clavier compte
+let parPointeur = false;
+bEntends.addEventListener('pointerdown', e => {
+  if (e.button > 0) return;
+  parPointeur = true;
+  setTimeout(() => { parPointeur = false; }, 1000);
+  entendre();
+});
+bEntends.addEventListener('click', () => { if (parPointeur) { parPointeur = false; return; } entendre(); });
+// barre d'espace = « J'entends » pendant le test (sur le bouton lui-même, son clic suffit)
+document.addEventListener('keydown', e => {
+  if (etat.phase !== 'test' || e.key !== ' ' || e.target === bEntends) return;
+  e.preventDefault();
+  if (!e.repeat) entendre();
+});
+// page cachée (autre onglet, téléphone en veille) : plus aucun son
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) return;
+  arreterReglage();
+  if (etat.phase === 'test') { interrompre(); message('Test interrompu : recommence-le.'); if (regle) bDemarrer.disabled = false; }
+});
+
+ecran('pret');
+tracer();
+if (!AUDIO.disponible()) sansSon();
+OS.menu('module_4_simulation');
+</script>
+</body>
+</html>

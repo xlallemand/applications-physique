@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : niveau sonore — Chapitre 18 : Ondes sonores</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="os.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="os.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 1 / 2</span>
+    <h2 class="er-titre">Niveau sonore</h2>
+    <p class="er-contexte">L'<b>intensité sonore</b> I (en W·m<sup>−2</sup>) mesure la puissance reçue par unité de surface. Le <b>niveau sonore</b> L (en dB) se calcule à partir de I avec un logarithme.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 1 du module 3 : intensité sonore et distance (A, 4A,
+   9A, sans calcul : seulement la figure du cours), niveau sonore L = 10 log(I / I0), réciproque I = I0 × 10^(L/10),
+   audible ou non (L > 0 dB).
+   Erreurs diagnostiquées : I0 oublié, log et ln confondus, facteur 10
+   oublié, L/10 oublié dans 10^(L/10), distance et surface confondues
+   (lecture de la figure).
+   Valeurs vérifiées par un script : 10 log(3,2 × 10⁷) ≈ 75 dB ;
+   10⁻¹² × 10⁶ = 1,0 × 10⁻⁶ W·m⁻² ; 10 log(0,5) ≈ −3 dB.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, cs, sci, proche, hasard, fr, niveau, intensite } = OS;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+const o = (id, label) => ({ id, label });
+const I0txt = '1,0 × 10<sup>−12</sup> W·m<sup>−2</sup>';
+// diagnostic d'un niveau sonore calculé à partir de I
+function diagL(v, I) {
+  const L = niveau(I);
+  if (Math.abs(v - 10 * Math.log10(I)) < .6) return 'Tu as oublié de diviser par I<sub>0</sub> : L = 10 log(I / I<sub>0</sub>), avec I<sub>0</sub> = 10<sup>−12</sup> W·m<sup>−2</sup>.';
+  if (Math.abs(v - 10 * Math.log(I / 1e-12)) < .6) return 'Tu as utilisé la touche <b>ln</b> : il faut la touche <b>log</b> (logarithme décimal).';
+  if (Math.abs(v - L / 10) < .06) return 'Il manque le facteur 10 : L = <b>10</b> × log(I / I<sub>0</sub>).';
+  return 'L = 10 log(I / I<sub>0</sub>) : calcule d\'abord I / I<sub>0</sub>, puis son log, puis multiplie par 10.';
+}
+
+/* ---------- 1. L'intensité sonore ---------- */
+// intensité et distance : seulement qualitatif (le cours donne la figure A, 4A, 9A, sans calcul)
+function etape1(c_) {
+  const carte = c_.carte('1. L\'intensité sonore');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Intensité sonore.</b> L'intensité sonore I est la <b>puissance</b> d'un son par <b>unité de surface</b> : elle s'exprime en <b>W·m<sup>−2</sup></b>. On dit aussi <b>intensité acoustique</b>.</p></div>
+      <p>En s'éloignant de la source, la même puissance se répartit sur une <b>surface plus grande</b> (A à la distance r, 4A à 2r, 9A à 3r sur la figure) : l'intensité sonore <b>diminue</b>.</p>
+      ${OS.svgDistance()}
+    </div>
+    ${exemple(`<p>Au premier rang d'un concert, le son est plus intense qu'au fond de la salle : au fond, la puissance des enceintes s'est répartie sur une surface bien plus grande.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'L\'intensité et la distance', parties: [
+      { type: 'choix', colonne: true, q: 'On s\'éloigne d\'une enceinte. L\'intensité sonore reçue :',
+        options: [o('ok', 'diminue'), o('aug', 'augmente'), o('meme', 'ne change pas')], bonne: 'ok', melanger: false,
+        indices: { aug: 'Plus loin, le son est moins intense.', meme: 'La puissance se répartit sur une surface de plus en plus grande.' },
+        solution: '<p>Plus on est loin, plus la puissance est répartie sur une grande surface : l\'intensité sonore diminue.</p>' },
+      { type: 'choix', colonne: true, q: 'D\'après la figure, à la distance 2r, sur quelle surface la puissance de la source se répartit-elle ?',
+        options: [o('ok', '4A'), o('2', '2A'), o('1', 'A')], bonne: 'ok', melanger: false,
+        indices: { 2: 'Lis la figure : la surface à 2r est formée de 4 carreaux A, pas 2.', 1: 'À 2r, la surface est plus grande qu\'à r : compte les carreaux A.' },
+        solution: '<p>À 2r, la puissance traverse une surface 4A : elle est plus répartie, l\'intensité sonore est plus faible qu\'à r.</p>' },
+      { type: 'choix', colonne: true, q: 'Pourquoi l\'intensité sonore diminue-t-elle quand on s\'éloigne de la source ?',
+        options: [o('ok', 'La même puissance se répartit sur une surface plus grande'), o('lent', 'Le son ralentit en s\'éloignant'), o('vide', 'L\'air arrête le son au bout de quelques mètres')], bonne: 'ok', melanger: false,
+        indices: { lent: 'La vitesse du son dans l\'air ne change pas : 340 m·s<sup>−1</sup>.', vide: 'On entend des sons lointains : le son se propage loin dans l\'air.' },
+        solution: '<p>I est une puissance par unité de surface : la même puissance répartie sur une plus grande surface donne une intensité plus faible.</p>' },
+    ] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Le niveau sonore ---------- */
+const tirerI = () => hasard([1, 2, 2.5, 4, 5, 6.3]) * Math.pow(10, hasard([-9, -8, -7, -6, -5, -4, -3, -2]));
+const IA = tirerI(), IB = tirerI();
+const itemL = (I, titre) => ({ titre, enonce: `<p>Un son a une intensité sonore I = ${sci(I, 2)} W·m<sup>−2</sup>.</p>`, parties: [
+  { type: 'nombre', q: 'Calcule son niveau sonore L (au dixième).', label: 'L =', valeur: niveau(I), unite: 'dB', tol: .15, signe: false, affiche: fmt(niveau(I), 1), diag: v => diagL(v, I),
+    solution: calc(`L = 10 log${fr('I', 'I<sub>0</sub>')} = 10 log${fr(sci(I, 2), '1,0 × 10<sup>−12</sup>')} = 10 log(${sci(I / 1e-12, 2)}) ≈ ${c(fmt(niveau(I), 1) + ' dB')}`) }] });
+function etape2(c_) {
+  const carte = c_.carte('2. Le niveau sonore en décibels');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Niveau sonore.</b> Le niveau sonore L s'exprime en <b>décibels</b> (dB) :</p>
+        <p class="crs-formule">L = 10 log${fr('I', 'I<sub>0</sub>')}</p>
+        <p>I en W·m<sup>−2</sup> ; I<sub>0</sub> = ${I0txt} : l'intensité du <b>seuil d'audibilité</b> (le son le plus faible que l'oreille entend).</p></div>
+      <p>Cette formule est <b>toujours donnée</b> dans les sujets : il faut savoir l'utiliser. À la calculatrice, utilise la touche <b>log</b> (logarithme décimal), pas ln.</p>
+    </div>
+    ${exemple(`<p>Une rue animée : I = 3,2 × 10<sup>−5</sup> W·m<sup>−2</sup>.</p>
+      ${calc(`L = 10 log${fr('I', 'I<sub>0</sub>')} = 10 log${fr('3,2 × 10<sup>−5</sup> W·m<sup>−2</sup>', '1,0 × 10<sup>−12</sup> W·m<sup>−2</sup>')} = 10 log(3,2 × 10<sup>7</sup>) ≈ ${c('75 dB')}`)}`)}`);
+  c_.aToi(carte, [itemL(IA, 'Calculer un niveau sonore'), itemL(IB, 'Un autre son')]);
+  return carte;
+}
+
+/* ---------- 3. Retrouver l'intensité à partir du niveau ---------- */
+const LC = hasard([35, 45, 55, 72, 85, 90, 105, 110]);
+const IF = hasard([2, 5, 8]) * 1e-13;
+function etape3(c_) {
+  const carte = c_.carte('3. Retrouver l\'intensité ; audible ou non');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Réciproque.</b> Connaissant le niveau sonore L (en dB) :</p>
+        <p class="crs-formule">I = I<sub>0</sub> × 10<sup>L/10</sup></p>
+        <p>Elle aussi est toujours donnée. À la calculatrice : touche <b>10<sup>x</sup></b> (souvent 2nde log).</p></div>
+      <div class="cle"><p><b class="cle-titre">Audible ou non.</b> Si I &gt; I<sub>0</sub>, c'est-à-dire <b>L &gt; 0 dB</b>, le son peut être entendu. Si L &lt; 0 dB, il est trop faible.</p></div>
+    </div>
+    ${exemple(`<p>Une conversation : L = 60 dB.</p>
+      ${calc(`I = I<sub>0</sub> × 10<sup>L/10</sup> = 1,0 × 10<sup>−12</sup> × 10<sup>60/10</sup> = 10<sup>−12</sup> × 10<sup>6</sup> = ${c('1,0 × 10<sup>−6</sup> W·m<sup>−2</sup>')}`)}`)}`);
+  c_.aToi(carte, [
+    { titre: 'Calculer une intensité', enonce: `<p>Un son a un niveau sonore L = ${LC} dB.</p>`, parties: [
+      { type: 'sci', q: 'Calcule son intensité sonore I.', label: 'I =', valeur: intensite(LC), unite: 'W·m<sup>−2</sup>', cs: 2,
+        diag: v => (proche(v, Math.pow(10, LC / 10), .03) ? 'Il manque I<sub>0</sub> : I = I<sub>0</sub> × 10<sup>L/10</sup>.' : proche(v, 1e-12 * Math.pow(10, LC), .03) ? 'L\'exposant est <b>L / 10</b>, pas L.' : 'I = 10<sup>−12</sup> × 10<sup>L/10</sup>.'),
+        solution: calc(`I = I<sub>0</sub> × 10<sup>L/10</sup> = 1,0 × 10<sup>−12</sup> × 10<sup>${LC}/10</sup> = ${c(sci(intensite(LC), 2) + ' W·m<sup>−2</sup>')}`) }] },
+    { titre: 'Audible ?', enonce: `<p>Dans un studio d'enregistrement, on mesure un bruit de fond d'intensité I = ${sci(IF, 1)} W·m<sup>−2</sup>.</p>`, parties: [
+      { type: 'choix', q: 'Ce bruit est-il audible ?', options: [o('non', 'Non : I &lt; I<sub>0</sub>, donc L &lt; 0 dB'), o('oui', 'Oui : tout son est audible')], bonne: 'non', melanger: false,
+        indices: { oui: `Compare I à I<sub>0</sub> = 1,0 × 10<sup>−12</sup> W·m<sup>−2</sup> : ${sci(IF, 1)} est plus petit.` },
+        solution: calc(`L = 10 log${fr(sci(IF, 1), '1,0 × 10<sup>−12</sup>')} = 10 log(${fmt(IF / 1e-12)}) ≈ ${c(fmt(niveau(IF), 1) + ' dB')} &lt; 0 dB : inaudible`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p><b>Intensité sonore</b> I : puissance reçue par unité de surface, en W·m<sup>−2</sup>. On dit aussi intensité acoustique. Elle diminue quand on s'éloigne de la source.</p></div>
+    <div class="cle"><p><b>Niveau sonore</b> : L = 10 log(I / I<sub>0</sub>) en dB, avec I<sub>0</sub> = 1,0 × 10<sup>−12</sup> W·m<sup>−2</sup> ; réciproque : I = I<sub>0</sub> × 10<sup>L/10</sup>.</p></div>
+    <div class="cle"><p>L &gt; 0 dB (I &gt; I<sub>0</sub>) : le son peut être entendu.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Cours : additionner des sons →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#niveau">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+OS.menu('module_3a_cours');
+</script>
+</body>
+</html>

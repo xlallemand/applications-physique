@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : additionner des sons — Chapitre 18 : Ondes sonores</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="os.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="os.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 2 / 2</span>
+    <h2 class="er-titre">Additionner des sons</h2>
+    <p class="er-contexte">Quand plusieurs sources émettent en même temps, ce sont les <b>intensités</b> qui s'additionnent, <b>pas les niveaux</b>. Deux sources identiques : <b>+ 3 dB</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Sous-module 2 du module 3 : les intensités s'additionnent (deux
+   sources identiques : + 3 dB), méthode pour deux sources différentes
+   en trois parties (I de chaque source, somme, niveau total).
+   Erreurs diagnostiquées : niveaux additionnés, I0 oublié, log et ln
+   confondus, L/10 oublié.
+   Valeurs vérifiées par un script : 80 dB → 1,0 × 10⁻⁴ ; 2,0 × 10⁻⁴
+   → 83 dB ; 70 dB et 75 dB : 1,0 × 10⁻⁵ + 3,2 × 10⁻⁵ = 4,2 × 10⁻⁵
+   W·m⁻², L ≈ 76,2 dB.
+   ============================================================ */
+const { exemple } = COURS;
+const { fmt, sci, proche, hasard, fr, niveau, intensite } = OS;
+const calc = h => `<p class="crs-calc">${h}</p>`;
+const c = h => `<span class="c">${h}</span>`;
+// diagnostic d'une intensité calculée à partir de L
+const diagI = (v, L) => (proche(v, Math.pow(10, L / 10), .03) ? 'Il manque I<sub>0</sub> : I = I<sub>0</sub> × 10<sup>L/10</sup>.' : proche(v, 1e-12 * Math.pow(10, L), .03) ? 'L\'exposant est <b>L / 10</b>, pas L.' : 'I = 10<sup>−12</sup> × 10<sup>L/10</sup>.');
+
+/* ---------- 1. Les intensités s'additionnent ---------- */
+const L1 = hasard([60, 65, 70, 75, 80, 85, 90]);
+function etape1(c_) {
+  const carte = c_.carte('1. Les intensités s\'additionnent, pas les niveaux');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Règle.</b> Quand deux sources émettent en même temps, ce sont les <b>intensités sonores</b> qui s'additionnent : I = I<sub>1</sub> + I<sub>2</sub>. Les <b>niveaux sonores ne s'additionnent pas</b>.</p></div>
+      <div class="cle"><p><b class="cle-titre">Deux sources identiques.</b> L'intensité double : le niveau sonore augmente de <b>3 dB</b>.</p></div>
+    </div>
+    ${exemple(`<p>Un scooter produit un niveau sonore de 80 dB. Deux scooters identiques :</p>
+      ${calc(`I<sub>1</sub> = I<sub>0</sub> × 10<sup>L/10</sup> = 10<sup>−12</sup> × 10<sup>8</sup> = 1,0 × 10<sup>−4</sup> W·m<sup>−2</sup>`)}
+      ${calc(`I = 2 × I<sub>1</sub> = 2,0 × 10<sup>−4</sup> W·m<sup>−2</sup>`)}
+      ${calc(`L = 10 log${fr('2,0 × 10<sup>−4</sup>', '1,0 × 10<sup>−12</sup>')} = 10 log(2,0 × 10<sup>8</sup>) ≈ ${c('83 dB')}`)}
+      <p>Et non 160 dB : 80 + 3 = 83 dB.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Deux sources identiques', enonce: `<p>Une machine produit un niveau sonore de ${L1} dB. On en met une deuxième, identique, à côté.</p>`, parties: [
+      { type: 'nombre', q: 'Quel est le niveau sonore des deux machines ensemble ?', label: 'L =', valeur: niveau(2 * intensite(L1)), unite: 'dB', tol: .2, signe: false, affiche: fmt(L1 + 3),
+        diag: v => (Math.abs(v - 2 * L1) < .5 ? '<b>Les niveaux ne s\'additionnent pas</b> : ce sont les intensités. Quand l\'intensité double, le niveau augmente de 3 dB.' : Math.abs(v - L1) < .5 ? 'Deux machines font plus de bruit qu\'une seule : l\'intensité double.' : 'L\'intensité double : le niveau augmente de 3 dB.'),
+        solution: calc(`L = 10 log${fr('2 × I<sub>1</sub>', 'I<sub>0</sub>')} = ${L1} + 10 log 2 ≈ ${c(fmt(L1 + 3) + ' dB')}`) }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Deux sources différentes : la méthode ---------- */
+const LA = hasard([55, 60, 65, 70]), LB = LA + hasard([3, 5, 8, 10]);
+const IA = intensite(LA), IB = intensite(LB), It = IA + IB, Lt = niveau(It);
+function etape2(c_) {
+  const carte = c_.carte('2. Deux sources différentes : la méthode');
+  c_.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Méthode en trois parties.</b></p>
+        <ol class="er-liste"><li>L'intensité de chaque source : I<sub>1</sub> = I<sub>0</sub> × 10<sup>L<sub>1</sub>/10</sup> et I<sub>2</sub> = I<sub>0</sub> × 10<sup>L<sub>2</sub>/10</sup>.</li>
+          <li>L'intensité totale : I = I<sub>1</sub> + I<sub>2</sub>.</li>
+          <li>Le niveau sonore total : L = 10 log(I / I<sub>0</sub>).</li></ol></div>
+    </div>
+    ${exemple(`<p>Une source à L<sub>1</sub> = 70 dB et une source à L<sub>2</sub> = 75 dB.</p>
+      ${calc(`I<sub>1</sub> = 10<sup>−12</sup> × 10<sup>70/10</sup> = 1,0 × 10<sup>−5</sup> W·m<sup>−2</sup> ; I<sub>2</sub> = 10<sup>−12</sup> × 10<sup>75/10</sup> ≈ 3,2 × 10<sup>−5</sup> W·m<sup>−2</sup>`)}
+      ${calc(`I = I<sub>1</sub> + I<sub>2</sub> ≈ 4,2 × 10<sup>−5</sup> W·m<sup>−2</sup>`)}
+      ${calc(`L = 10 log${fr('4,2 × 10<sup>−5</sup>', '1,0 × 10<sup>−12</sup>')} ≈ ${c('76,2 dB')}`)}
+      <p>Le total est un peu plus grand que le plus fort des deux niveaux : rien à voir avec 70 + 75 = 145 dB.</p>`)}`);
+  c_.aToi(carte, [
+    { titre: 'Deux sources différentes', enonce: `<p>Deux sources sonores produisent, seules, des niveaux L<sub>1</sub> = ${LA} dB et L<sub>2</sub> = ${LB} dB.</p>`, parties: [
+      { type: 'sci', q: '1. Calcule l\'intensité sonore I<sub>1</sub> de la première source.', label: 'I<sub>1</sub> =', valeur: IA, unite: 'W·m<sup>−2</sup>', cs: 2, diag: v => diagI(v, LA),
+        solution: calc(`I<sub>1</sub> = 10<sup>−12</sup> × 10<sup>${LA}/10</sup> = ${c(sci(IA, 2) + ' W·m<sup>−2</sup>')}`) },
+      { type: 'sci', q: 'Puis celle de la deuxième, I<sub>2</sub>.', label: 'I<sub>2</sub> =', valeur: IB, unite: 'W·m<sup>−2</sup>', cs: 2, diag: v => diagI(v, LB),
+        solution: calc(`I<sub>2</sub> = 10<sup>−12</sup> × 10<sup>${LB}/10</sup> ≈ ${c(sci(IB, 2) + ' W·m<sup>−2</sup>')}`) },
+      { type: 'sci', q: '2. Calcule l\'intensité sonore totale I.', label: 'I =', valeur: It, unite: 'W·m<sup>−2</sup>', cs: 2,
+        diag: v => (proche(v, intensite(LA + LB), .05) ? 'Ce sont les intensités qui s\'additionnent, pas les niveaux : I = I<sub>1</sub> + I<sub>2</sub>.' : proche(v, IA * IB, .05) ? 'On <b>additionne</b> les intensités.' : 'I = I<sub>1</sub> + I<sub>2</sub> : attention aux puissances de 10.'),
+        solution: calc(`I = ${sci(IA, 2)} + ${sci(IB, 2)} ≈ ${c(sci(It, 2) + ' W·m<sup>−2</sup>')}`) },
+      { type: 'nombre', q: '3. Déduis-en le niveau sonore total (au dixième).', label: 'L =', valeur: Lt, unite: 'dB', tol: .15, signe: false, affiche: fmt(Lt, 1),
+        diag: v => (Math.abs(v - (LA + LB)) < .5 ? '<b>Les niveaux ne s\'additionnent pas</b> : calcule L = 10 log(I / I<sub>0</sub>) avec l\'intensité totale.' : Math.abs(v - 10 * Math.log(It / 1e-12)) < .6 ? 'Touche <b>log</b>, pas ln.' : 'L = 10 log(I / I<sub>0</sub>) avec I l\'intensité totale.'),
+        solution: calc(`L = 10 log${fr(sci(It, 2), '1,0 × 10<sup>−12</sup>')} ≈ ${c(fmt(Lt, 1) + ' dB')}`) },
+    ] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c_) {
+  const carte = c_.carte('À retenir');
+  c_.ajouter(carte, `<div class="cle"><p>Les <b>intensités</b> s'additionnent : I = I<sub>1</sub> + I<sub>2</sub>. Les <b>niveaux ne s'additionnent pas</b>.</p></div>
+    <div class="cle"><p>Deux sources identiques : l'intensité double, le niveau augmente de <b>3 dB</b>.</p></div>
+    <div class="cle"><p>Deux sources différentes : I<sub>1</sub> et I<sub>2</sub> (I = I<sub>0</sub> × 10<sup>L/10</sup>), puis I = I<sub>1</sub> + I<sub>2</sub>, puis L = 10 log(I / I<sub>0</sub>).</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur l'intensité et le niveau sonores →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#addition">Fiche récapitulative</a></div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+OS.menu('module_3b_cours');
+</script>
+</body>
+</html>
