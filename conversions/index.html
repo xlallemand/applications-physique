@@ -82,6 +82,13 @@
   .cv-fig-bord { fill: none; stroke: var(--accent); stroke-width: 2; }
   .cv-fig-t { font-family: var(--font-sans); font-size: 13px; font-weight: 600; fill: var(--ink); }
   .cv-fig-t.fort { font-weight: 800; fill: var(--accent-ink); }
+  /* lien vers une autre application (nouvelle fenêtre), bien visible */
+  .ph-lien-app {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+    background: var(--cle-bg); border: 2px solid var(--accent); border-radius: 16px; padding: 12px 14px 12px 16px; margin: 14px 0 0;
+  }
+  .ph-lien-app p { font-size: 1rem; color: var(--ink); font-weight: 600; margin: 0; }
+  .ph-lien-app a { text-decoration: none; }
 </style>
 </head>
 <body>
@@ -118,6 +125,8 @@
     <span class="er-badge">MODULE 1 · COURS</span>
     <h2 class="er-titre">Les préfixes et la méthode</h2>
     <p class="er-contexte">Les <b>préfixes</b> (k, m, µ…) placés devant une unité sont des <b>puissances de 10</b>. Tu vas apprendre le tableau des préfixes, puis une <b>méthode</b> pour convertir n'importe quelle valeur d'une unité à une autre.</p>
+    <!-- lien vers l'application puissances-10 (nouvelle fenêtre) -->
+    <div class="ph-lien-app"><p>Tu n'es pas à l'aise avec les puissances de 10&nbsp;? Entraîne-toi d'abord à les manipuler.</p><a class="btn-primary" href="../puissances-10/index.html" target="_blank" rel="noopener">Puissances de 10 ↗</a></div>
   </div>
   <div id="etapes-cours"></div>
 </div>
@@ -1498,8 +1507,9 @@ const CV = (function () {
   // valeur décimale quand elle reste lisible : « = 0,45 mA »
   const simple = (v, vers) => (v >= 1e-3 && v < 1e7 ? ` = ${nb(+v.toPrecision(6))}&nbsp;${vers}` : '');
   const COEFS = [1.5, 2, 2.5, 3, 3.2, 4, 4.5, 5, 6, 6.4, 7, 7.5, 8, 9];
-  // boutons de fin de cours : le premier est le bouton principal
-  const liens = l => `<div class="er-actions">${l.map(([h, t], i) => `<a class="${i ? 'btn-secondary' : 'btn-primary'}" style="text-decoration:none" href="#${h}">${t}</a>`).join('\n')}</div>`;
+  // boutons de fin de cours : le premier est le bouton principal ;
+  // [url, texte, true] : lien vers une autre application, ouvert dans une nouvelle fenêtre
+  const liens = l => `<div class="er-actions">${l.map(([h, t, ext], i) => `<a class="${i ? 'btn-secondary' : 'btn-primary'}" style="text-decoration:none" href="${ext ? h : '#' + h}"${ext ? ' target="_blank" rel="noopener"' : ''}>${t}</a>`).join('\n')}</div>`;
 
   /* ---------- Une conversion à faire (« À toi ») ----------
      o.x × 10^o.p dans l'unité o.de, à convertir en o.vers ;
@@ -1684,7 +1694,7 @@ const CV = (function () {
         <p class="cv-regle">(puissance du préfixe de départ) − (puissance du préfixe d'arrivée)</p>
         <p>Une unité sans préfixe a la puissance 0. Attention aux signes.</p></div>
       <div class="cle"><p>Si le nombre a déjà une puissance de 10, on <b>ajoute</b> les exposants.</p></div>
-      ${liens([['prefixes', 'Apprendre les préfixes →'], ['astuces', 'Astuces de mémorisation'], ['niveau-1', 'Module 2 : s\'entraîner à convertir'], ['fiche-1', 'Fiche récapitulative']])}`);
+      ${liens([['prefixes', 'Apprendre les préfixes →'], ['astuces', 'Astuces de mémorisation'], ['niveau-1', 'Module 2 : s\'entraîner à convertir'], ['fiche-1', 'Fiche récapitulative'], ['../puissances-10/index.html', 'Puissances de 10 ↗', true]])}`);
     return carte;
   }
 
