@@ -70,7 +70,7 @@
     const neg = s[0] === '-';
     if (neg) s = s.slice(1);
     let [e, d] = s.split('.');
-    e = e.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    e = e.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');   // espace insécable entre les milliers
     return (neg ? MOINS : '') + (d ? e + ',' + d : e);
   }
   // lecture d'une saisie : « 0,75 », « −1 »
@@ -336,7 +336,7 @@
       s.push(`<line class="fo-raie" x1="${x}" y1="${g.y1}" x2="${x}" y2="${g.Y(Math.min(r.a, amax))}" stroke-width="${r.f ? o.epais : o.epais + 2.5}"${coul}/>`);
       if (o.etiquettes) s.push(`<text class="fo-txt fo-txt-raie" x="${r.f ? x : x + 5}" y="${g.Y(Math.min(r.a, amax)) - 6}" text-anchor="${r.f ? 'middle' : 'start'}">${r.nom || sub('a', r.n)}</text>`);
     });
-    return `<svg class="fo-svg" viewBox="0 0 ${o.W} ${g.H}" width="${o.W}" height="${g.H}" role="img" aria-label="${o.aria || 'Spectre en amplitude : raies verticales en fonction de la fréquence'}">${s.join('')}</svg>`;
+    return `<svg class="fo-svg" viewBox="0 0 ${o.W} ${g.H}" width="${o.W}" height="${g.H}" role="img" aria-label="${o.aria || 'Spectre en amplitude : raies verticales en fonction de la fréquence'}">${s.join('')}</svg>`;
   }
 
   /* ============================================================
@@ -442,7 +442,7 @@
         lm.hidden = !etat.mesure;
         if (etat.mesure) {
           const d = decMes(ax.tmax);
-          lm.innerHTML = `Curseurs : t<sub>1</sub> = ${fmt(Math.min(etat.t1, etat.t2), d)} ms ; t<sub>2</sub> = ${fmt(Math.max(etat.t1, etat.t2), d)} ms ; durée entre les curseurs <b>Δt = ${fmt(Math.abs(etat.t2 - etat.t1), d)} ms</b>`;
+          lm.innerHTML = `Curseurs : t<sub>1</sub> = ${fmt(Math.min(etat.t1, etat.t2), d)} ms ; t<sub>2</sub> = ${fmt(Math.max(etat.t1, etat.t2), d)} ms ; durée entre les curseurs <b>Δt = ${fmt(Math.abs(etat.t2 - etat.t1), d)} ms</b>`;
         }
       }
       // légende : une pastille par composante non nulle (la toucher met la composante en valeur)
@@ -451,7 +451,7 @@
         const l = raies(spec());
         leg.innerHTML = l.length ? l.map(r => `<button type="button" class="fo-leg${etat.surligne && etat.sel === r.n ? ' actif' : ''}" data-n="${r.n}" aria-pressed="${etat.surligne && etat.sel === r.n}">
             <svg width="18" height="10" aria-hidden="true"><line x1="1" y1="5" x2="17" y2="5" stroke="${coulDe(r.n)}" stroke-width="3"/></svg><span>${nomH(r.n)} · ${etiq(r.f)} Hz</span></button>`).join('')
-          : '<span class="fo-leg-vide">Toutes les amplitudes sont nulles : le signal est nul.</span>';
+          : '<span class="fo-leg-vide">Toutes les amplitudes sont nulles : le signal est nul.</span>';
       }
     }
     function dessinerSpectre() {
@@ -461,7 +461,7 @@
       const coulR = n => (etat.harmoniques || (etat.surligne && etat.sel === n) ? coulDe(n) : null);
       // (sansA0 : pas de raie à 0 Hz, même d'amplitude nulle)
       const liste = raies(spec(), { zeros: true }).filter(r => !(o.sansA0 && r.n === 0)).map(r => Object.assign(r, { coul: coulR(r.n) }));
-      let svg = svgSpectre(liste, { W, H, fmax, amax: etat.amax, unite: o.unite, etiquettes: false, bande: etat.bande, aria: 'Spectre du signal : fais glisser la poignée en haut d\'une raie pour régler son amplitude' });
+      let svg = svgSpectre(liste, { W, H, fmax, amax: etat.amax, unite: o.unite, etiquettes: false, bande: etat.bande, aria: 'Spectre du signal : fais glisser la poignée en haut d\'une raie pour régler son amplitude' });
       // ajouts interactifs : étiquettes, colonnes à toucher, poignées
       const esp = (g.X(etat.f1) - g.X(0));
       const s = [], dessous = [];
@@ -484,10 +484,10 @@
     }
     // texte de lecture d'une raie : f₃ = 3 × f₁ = 450 Hz ; a₃ = 0,67 V
     function texteRaie(n) {
-      if (n === 0) return `f = 0 Hz : <b>composante continue</b> ${nomH(0)} = ${fmt(etat.a0)} ${o.unite} (valeur moyenne du signal)`;
+      if (n === 0) return `f = 0 Hz : <b>composante continue</b> ${nomH(0)} = ${fmt(etat.a0)} ${o.unite} (valeur moyenne du signal)`;
       const a = etat.a[n - 1];
-      if (n === 1) return `f<sub>1</sub> = ${fmt(etat.f1)} Hz : <b>fondamental</b> ; ${nomH(1)} = ${fmt(a)} ${o.unite}`;
-      return `f<sub>${n}</sub> = ${n} × f<sub>1</sub> = ${n} × ${fmt(etat.f1)} = ${fmt(n * etat.f1)} Hz : <b>harmonique de rang ${n}</b> ; ${nomH(n)} = ${fmt(a)} ${o.unite}`;
+      if (n === 1) return `f<sub>1</sub> = ${fmt(etat.f1)} Hz : <b>fondamental</b> ; ${nomH(1)} = ${fmt(a)} ${o.unite}`;
+      return `f<sub>${n}</sub> = ${n} × f<sub>1</sub> = ${n} × ${fmt(etat.f1)} = ${fmt(n * etat.f1)} Hz : <b>harmonique de rang ${n}</b> ; ${nomH(n)} = ${fmt(a)} ${o.unite}`;
     }
     function majTextes() {
       const lec = $('lec');
