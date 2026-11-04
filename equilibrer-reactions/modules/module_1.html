@@ -3,389 +3,201 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 1 : Comment équilibrer une réaction — Équilibrer une réaction</title>
+<title>Module 1 : Compter les atomes — Équilibrer une réaction</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../assets/molecules.css">
 <link rel="stylesheet" href="er.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
 <link rel="stylesheet" href="../../assets/cours.css">
+<style>
+  /* trois éléments à compter tiennent sur une ligne de téléphone */
+  @media (max-width: 480px) { .crs-atoi .er-reps { gap: 6px; } .crs-atoi .er-rep { padding-right: 7px; } }
+</style>
 <script src="../../assets/sommaire.js"></script>
 <script src="../../assets/molecules.js"></script>
 <script src="er.js"></script>
 <script src="../../assets/cours.js"></script>
-<style>
-  /* tableaux bilan « avant / après » d'un exemple, côte à côte quand la place le permet */
-  .er1-bilans { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 28px; margin: 6px 0 10px; }
-  .er1-bilans > div { text-align: center; }
-  .er1-bilans .er-bilan { margin-top: 4px; }
-  .er1-legende { font-size: .85rem; font-weight: 700; color: var(--ink-2); }
-  .er-etape .er-eq { text-align: center; }
-  .er-etape .crs-attention .er-comparaison { margin-top: 10px; }
-  /* une équation écrite dans une phrase ne se coupe pas */
-  .er1-l { white-space: nowrap; }
-  /* trois éléments à compter tiennent sur une ligne de téléphone */
-  @media (max-width: 480px) { .crs-atoi .er-reps { gap: 6px; } .crs-atoi .er-rep { padding-right: 7px; } }
-</style>
 </head>
 <body>
 <div id="app-nav"></div>
-<div class="er-page er-avec-aide">
+<div class="er-page">
+  <div id="retourBar"></div>
   <div class="er-card">
     <span class="er-badge">MODULE 1 · COURS</span>
-    <h2 class="er-titre">Comment équilibrer une réaction chimique</h2>
-    <p class="er-contexte">Les atomes se conservent au cours d'une transformation chimique. Tu vas voir comment l'écrire dans une équation de réaction, avec les <b>nombres stœchiométriques</b>, puis équilibrer trois réactions.</p>
+    <h2 class="er-titre">Compter les atomes</h2>
+    <p class="er-contexte">Pour équilibrer une réaction, il faut savoir compter les atomes dans une molécule. Tu vas voir les règles une à une : l'<b>indice</b>, le <b>nombre stœchiométrique</b>, puis les <b>parenthèses</b>.</p>
   </div>
   <div id="etapes"></div>
 </div>
 
-<!-- Lien vers le module 2, accessible à tout moment (retour au même endroit, voir plus bas) -->
-<a class="er-aide-flottante" href="module_2.html" data-m2><span>?</span>Du mal à compter les atomes ?</a>
-
 <script>
 /* ============================================================
-   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
-   Les réactions à équilibrer et les atomes à compter sont des outils
-   de er.js (ER.partieEquilibrer, ER.partieCompter, ER.partieRegler).
-
-   Retour du module 2 au même endroit : en partant vers le module 2,
-   on note dans l'adresse de retour l'état du cours (étape atteinte,
-   questions déjà faites, nombres réglés et dessins de chaque outil,
-   tirages au hasard, position dans la page). Au retour, le cours est
-   reconstruit en rejouant les étapes et les questions déjà faites.
+   Cours par étapes (assets/cours.js) : pour chaque règle, la règle,
+   un exemple dessiné, puis des espèces dont il faut compter les
+   atomes (ER.partieCompter), tirées au hasard : une moyenne, puis
+   une plus difficile.
+   Venu du module 2 (?retour=…), un bandeau ramène au module 2,
+   exactement où l'élève en était.
    ============================================================ */
-const { exemple } = COURS;
+const { exemple, hasard } = COURS;
 const fH = ER.formuleHTML;
-const zone = document.getElementById('etapes');
 
-/* ---------- État lu dans l'adresse (#{…}) au retour du module 2 ---------- */
-let depart = {};
-try {
-  const h = decodeURIComponent(location.hash.slice(1));
-  if (h[0] === '{') depart = JSON.parse(h) || {};
-} catch (e) { depart = {}; }
-const rejeu = typeof depart.n === 'number';
-const objet = o => (o && typeof o === 'object' && !Array.isArray(o) ? o : {});
-const faits = objet(depart.f);                 // { 'étape.question.partie': 1 réussie, 2 réponse affichée }
-const memoires = objet(depart.m);              // état de chaque outil : { c: nombres, d: dessins, v: validé }
-const tirages = Array.isArray(depart.r) ? depart.r : [];
-const memoire = cle => (memoires[cle] = objet(memoires[cle]));
-
-// Tirage au hasard, rejoué à l'identique au retour du module 2
-let nTirage = 0;
-function tirer(liste) {
-  const k = nTirage++;
-  if (!(Number.isInteger(tirages[k]) && tirages[k] >= 0 && tirages[k] < liste.length)) tirages[k] = Math.floor(Math.random() * liste.length);
-  return liste[tirages[k]];
+/* ---------- Retour au module 2, là où l'élève en était ---------- */
+const retour = new URLSearchParams(location.search).get('retour');
+// seule une adresse vers le module 2 est acceptée
+const retourOk = !!retour && /^module_2\.html(#[\w=&.,%-]*)?$/.test(retour);
+if (retourOk) {
+  document.getElementById('retourBar').innerHTML = `<div class="er-retour-bar">
+      <p>Tu viens du module 2.</p>
+      <a href="${retour}">← Revenir où j'en étais</a>
+    </div>`;
 }
 
-// Au retour du module 2, les questions déjà faites sont remontées faites :
-// réussies (réponse en place, « Juste ! ») ou réponse affichée (appui rejoué sur « Afficher la réponse »)
-const MUET = { fini: () => true, effacer() {}, message() {}, erreur() {}, compterErreur() {}, reussi() {} };
-let enAttente = 0;                             // appuis rejoués pas encore faits
-function rejouable(e, items) {
-  if (!rejeu) return items;
-  return items.map((it, i) => Object.assign({}, it, {
-    parties: it.parties.map((p, k) => {
-      const f = faits[`${e}.${i}.${k}`];
-      if (f !== 1 && f !== 2) return p;
-      const monterPartie = (z, api) => (p.type === 'perso' ? p.monter(z, api) : COURS.PARTIES[p.type](z, p, api)) || {};
-      return {
-        type: 'perso', q: p.q, solution: p.solution,
-        monter(z, api) {
-          if (f === 2) {
-            const ctx = monterPartie(z, api);
-            enAttente++;
-            // le moteur relie le bouton « Afficher la réponse » juste après le montage
-            queueMicrotask(() => {
-              enAttente--;
-              const b = z.parentNode.querySelector('.crs-partie-aide button');
-              if (b) b.click();
-            });
-            return ctx;
-          }
-          const ctx = monterPartie(z, MUET);
-          if (ctx.montrer) ctx.montrer();
-          api.reussi();
-          return {};
-        },
-      };
-    }),
-  }));
+/* ---------- Les quatre règles ---------- */
+const REGLES = [
+  `<b class="cle-titre">L'indice</b>, écrit en petit en bas à droite, donne le nombre d'atomes de l'élément <b>juste avant lui</b>. Un élément sans indice compte pour <b>1 atome</b>.`,
+  `<b class="cle-titre">Le nombre stœchiométrique</b>, écrit devant la formule, donne le nombre de molécules. Il multiplie <b>toute</b> la molécule :`,
+  `<b class="cle-titre">Un indice porte sur ce qu'il y a juste avant lui.</b> Si c'est une <b>parenthèse</b>, il porte sur <b>tout ce qu'elle contient</b>.`,
+  `On combine les deux règles : on compte d'abord les atomes d'<b>une</b> molécule (indices et parenthèses), puis on multiplie par le <b>nombre stœchiométrique</b>.`,
+];
+const FORMULE = '<p class="er-formule-cle">nombre d\'atomes = nombre stœchiométrique × indice</p>';
+// rappels courts donnés quand l'erreur n'est pas reconnue
+const RAPPELS = [
+  'L\'indice donne le nombre d\'atomes de l\'élément juste avant lui ; un élément sans indice compte pour 1 atome.',
+  'Le nombre stœchiométrique multiplie toute la molécule : nombre d\'atomes = nombre stœchiométrique × indice.',
+  'Un indice écrit après une parenthèse porte sur tout ce qu\'elle contient.',
+  'Compte les atomes d\'une molécule (indices et parenthèses), puis multiplie par le nombre stœchiométrique.',
+];
+
+// Les dessins restent affichés (ou masqués) d'une question à l'autre, comme l'élève les a laissés
+const PREF = { dessins: false };
+const ecrire = (f, c) => (c > 1 ? c + ' ' : '') + fH(f);
+// une espèce dont il faut compter les atomes
+const compter = (titre, f, c, regle) => ({ titre, parties: [ER.partieCompter({
+  formule: f, coef: c, regle,
+  dessins: () => PREF.dessins, onDessins: b => { PREF.dessins = b; },
+  q: `Combien y a-t-il d'atomes de chaque élément dans <b>${ecrire(f, c)}</b> ?`,
+})] });
+// exemple dessiné (espèce fixe, molécules et atomes en boules)
+function dessin(carte, f, c) {
+  new ER.Reaction(carte.querySelector('[data-x="ex"]'), { reactifs: [f], produits: [], coefs: [c], selecteurs: false, dessins: true });
 }
 
-/* ---------- État du cours, noté en partant vers le module 2 ---------- */
-function etatActuel() {
-  const f = {};
-  zone.querySelectorAll('.er-etape').forEach((carte, e) => {
-    carte.querySelectorAll('.crs-atoi-q').forEach((q, i) => {
-      q.querySelectorAll('.crs-partie').forEach((p, k) => {
-        if (p.querySelector('.crs-partie-aide')) return;                         // pas encore faite
-        f[`${e}.${i}.${k}`] = p.querySelector('.crs-partie-retour .callout.crs-solution') ? 2 : 1;
-      });
-    });
-  });
-  return { n: cours.n, t: COURS.tout ? 1 : 0, f, m: memoires, r: tirages, y: Math.round(window.scrollY) };
-}
-document.addEventListener('click', e => {
-  const a = e.target.closest('[data-m2]');
-  if (!a) return;
-  e.preventDefault();
-  const h = encodeURIComponent(JSON.stringify(etatActuel()));
-  // l'état est aussi gardé dans l'adresse de cette page : le retour arrière du navigateur ramène au même endroit
-  try { history.replaceState(null, '', '#' + h); } catch (_) { /* adresse inchangée */ }
-  window.location.href = 'module_2.html?retour=' + encodeURIComponent('module_1.html#' + h);
-});
-
-/* ---------- Petits outils de mise en page ---------- */
-const eq = (r, p, c) => `<p class="er-eq">${ER.equationHTML(r, p, c)}</p>`;
-const bilan = (r, p, c) => ER.bilanHTML(ER.verifier(r, p, c).bilan);
-const choix = (q, options, bonne, indices, solution, colonne) => ({ type: 'choix', q, options, bonne, indices, solution, colonne, melanger: true });
-
-/* ============================================================
-   LES ÉTAPES
-   ============================================================ */
-
-/* ---------- 1. Le principe ---------- */
-function principe(c) {
-  const carte = c.carte('1. Le principe');
+/* ---------- 1. L'indice ---------- */
+function indice(c) {
+  const carte = c.carte('1. L\'indice');
   c.ajouter(carte, `<div class="cours-bloc">
-      <p>Au cours d'une transformation chimique, les atomes des réactifs se réarrangent pour former les produits. <b>Aucun atome ne disparaît, aucun atome n'apparaît.</b></p>
-      <div class="cle"><p><b class="cle-titre">Conservation des éléments.</b> Pour chaque élément, il y a autant d'atomes dans les réactifs que dans les produits. On dit alors que l'équation de la réaction est <b>équilibrée</b>.</p></div>
-      <p>Pour équilibrer une équation, on écrit devant chaque formule un <b>nombre stœchiométrique</b> : c'est le nombre de molécules de cette espèce. Le nombre 1 ne s'écrit pas.</p>
+      <p>Une formule chimique indique les atomes d'une molécule : chaque élément y est écrit avec son symbole (H, C, O, N…).</p>
+      <div class="cle"><p>${REGLES[0]}</p></div>
     </div>
-    ${exemple(`<p class="er-consigne">Essaie : change le nombre stœchiométrique devant H<sub>2</sub>O avec les flèches et observe le nombre d'atomes.</p>
-      <div data-x="switch"></div><div data-x="r"></div>
-      <p class="er-guide">2 H<sub>2</sub>O, ce sont 2 molécules d'eau : 2 × 2 = 4 atomes H et 2 × 1 = 2 atomes O.</p>`)}
-    <div class="crs-attention">
-      <p><b class="cle-titre">Attention : on ne modifie jamais les indices.</b> Changer un indice change la molécule, donc l'espèce chimique.</p>
-      <div class="er-comparaison">
-        <div><span class="er-formule">2 H<sub>2</sub>O</span><div class="er-mols">${ER.molecule('H2O').repeat(2)}</div><p>2 molécules d'<b>eau</b></p></div>
-        <div><span class="er-formule">H<sub>2</sub>O<sub>2</sub></span><div class="er-mols">${ER.molecule('H2O2')}</div><p>1 molécule d'<b>eau oxygénée</b> : une autre espèce !</p></div>
-      </div>
-    </div>`);
-  // démonstration : une seule espèce, nombre réglable, calcul écrit dessous
-  const mem = memoire('demo');
-  const dessins = mem.d == null ? true : !!mem.d;
-  const r = new ER.Reaction(carte.querySelector('[data-x="r"]'), {
-    reactifs: ['H2O'], produits: [], comptes: true, detail: true, dessins, max: 9,
-    coefs: Number.isInteger(mem.c) && mem.c >= 1 && mem.c <= 9 ? [mem.c] : [1],
-    onChange: v => { mem.c = v[0]; },
-  });
-  carte.querySelector('[data-x="switch"]').replaceWith(ER.interrupteur(dessins, b => { mem.d = b ? 1 : 0; r.options({ dessins: b }); }));
-
-  // espèce et nombre d'atomes à obtenir (le nombre stœchiométrique attendu est entier)
-  const R = tirer([
-    { f: 'CO2', el: 'O', cible: 6 }, { f: 'NH3', el: 'H', cible: 9 }, { f: 'H2O', el: 'H', cible: 8 },
-    { f: 'CH4', el: 'H', cible: 8 }, { f: 'O2', el: 'O', cible: 10 },
-  ]);
-  c.aToi(carte, rejouable(c.n, [
-    { titre: 'Qu\'est-ce qui se conserve ?',
-      parties: [choix('Une équation de réaction est équilibrée quand…', [
-        { id: 'atomes', label: 'pour chaque élément, il y a autant d\'atomes dans les réactifs que dans les produits' },
-        { id: 'molecules', label: 'il y a autant de molécules dans les réactifs que dans les produits' },
-        { id: 'especes', label: 'les mêmes espèces chimiques sont présentes avant et après la transformation' },
-      ], 'atomes', {
-        molecules: 'Le nombre de molécules peut changer : dans <span class="er1-l">2 H<sub>2</sub> + O<sub>2</sub> → 2 H<sub>2</sub>O</span>, 3 molécules en donnent 2. Ce sont les <b>atomes</b> de chaque élément qui se conservent.',
-        especes: 'Au contraire : les réactifs disparaissent et de nouvelles espèces, les produits, se forment. Ce sont les <b>atomes</b> qui se conservent.',
-      }, '<p>Les atomes se réarrangent sans disparaître ni apparaître : pour chaque élément, autant d\'atomes de chaque côté de la flèche.</p>', true)] },
-    { titre: 'Indice ou nombre stœchiométrique ?',
-      parties: [choix('On veut écrire 2 molécules d\'eau H<sub>2</sub>O. Quelle écriture est juste ?', [
-        { id: 'bon', label: '2 H<sub>2</sub>O' },
-        { id: 'h4o2', label: 'H<sub>4</sub>O<sub>2</sub>' },
-        { id: 'h2o2', label: 'H<sub>2</sub>O<sub>2</sub>' },
-      ], 'bon', {
-        h4o2: 'Tu as multiplié les indices : H<sub>4</sub>O<sub>2</sub> serait <b>une seule</b> molécule avec 4 H et 2 O, ce n\'est plus de l\'eau. Le nombre de molécules s\'écrit <b>devant</b> la formule.',
-        h2o2: 'H<sub>2</sub>O<sub>2</sub> est une autre espèce, l\'eau oxygénée. On ne modifie jamais les indices : le nombre de molécules s\'écrit devant la formule.',
-      }, '<p>Le nombre stœchiométrique 2, écrit devant, compte les molécules ; la formule H<sub>2</sub>O ne change pas.</p>')] },
-    { titre: 'Règle le nombre stœchiométrique',
-      parties: [ER.partieRegler({
-        formule: R.f, el: R.el, cible: R.cible, memoire: memoire('regler'),
-        q: `Règle le nombre stœchiométrique devant ${fH(R.f)} pour avoir <b>${R.cible} atomes ${R.el}</b> en tout.`,
-      })] },
-  ]));
-  return carte;
-}
-
-/* ---------- 2. Une première réaction ---------- */
-function premiere(c) {
-  const carte = c.carte('2. Une première réaction');
-  c.ajouter(carte, `<div class="cours-bloc">
-      <p>Pour équilibrer une équation, on compte les atomes de chaque élément dans les réactifs et dans les produits, puis on ajuste les nombres stœchiométriques.</p>
-      <div class="cle"><p><b class="cle-titre">Équilibrer une équation.</b> Pour chaque élément, compare le nombre d'atomes dans les réactifs et dans les produits. S'il en manque d'un côté, augmente le nombre stœchiométrique devant une espèce de ce côté qui contient cet élément.</p></div>
-    </div>
-    ${exemple(`<p>Dans un moteur, le diazote N<sub>2</sub> et le dioxygène O<sub>2</sub> de l'air forment du monoxyde d'azote NO.</p>
-      <div class="er1-bilans">
-        <div><p class="er1-legende">N<sub>2</sub> + O<sub>2</sub> → NO</p>${bilan(['N2', 'O2'], ['NO'], [1, 1, 1])}</div>
-        <div><p class="er1-legende">N<sub>2</sub> + O<sub>2</sub> → 2 NO</p>${bilan(['N2', 'O2'], ['NO'], [1, 1, 2])}</div>
-      </div>
-      <p>Il manque 1 atome N et 1 atome O dans les produits : on écrit 2 devant NO. 2 NO, ce sont 2 × 1 = 2 atomes N et 2 × 1 = 2 atomes O, autant que dans les réactifs.</p>
-      ${eq(['N2', 'O2'], ['NO'], [1, 1, 2])}`)}`);
-  c.aToi(carte, rejouable(c.n, [
-    { titre: 'Synthèse du chlorure d\'hydrogène',
-      enonce: '<p>Le dihydrogène H<sub>2</sub> réagit avec le dichlore Cl<sub>2</sub> pour former du chlorure d\'hydrogène HCl. Écrite ainsi, l\'équation n\'est pas équilibrée.</p>',
-      parties: [ER.partieEquilibrer({
-        r: ['H2', 'Cl2'], p: ['HCl'], solution: [1, 1, 2], ordre: ['H', 'Cl'], direct: true, dessins: true, memoire: memoire('r1'),
-        q: 'Ajuste les nombres stœchiométriques pour avoir autant d\'atomes de chaque élément des deux côtés de la flèche. Le tableau compare les atomes des réactifs et des produits.',
-        bravo: 'Le nombre 2 devant HCl indique 2 molécules HCl : 2 × 1 = 2 atomes H et 2 × 1 = 2 atomes Cl, autant que dans les réactifs.',
-      })] },
-    { titre: 'Une autre façon d\'équilibrer ?',
-      parties: [choix('Un élève équilibre la même réaction en écrivant <span class="er1-l">H<sub>2</sub> + Cl<sub>2</sub> → H<sub>2</sub>Cl<sub>2</sub></span>. A-t-il raison ?', [
-        { id: 'non', label: 'Non : on ne modifie jamais les indices, il faut écrire <span class="er1-l">H<sub>2</sub> + Cl<sub>2</sub> → 2 HCl</span>.' },
-        { id: 'oui', label: 'Oui : il y a 2 atomes H et 2 atomes Cl de chaque côté.' },
-        { id: 'plus', label: 'Non : il y a plus d\'atomes dans les réactifs que dans les produits.' },
-      ], 'non', {
-        oui: 'Les atomes sont bien conservés, mais H<sub>2</sub>Cl<sub>2</sub> n\'est pas la formule du chlorure d\'hydrogène HCl : en changeant les indices, l\'élève a changé d\'espèce.',
-        plus: 'Compte-les : 2 H et 2 Cl de chaque côté. Le problème est ailleurs : H<sub>2</sub>Cl<sub>2</sub> n\'est pas la formule du chlorure d\'hydrogène.',
-      }, '<p>Le produit est le chlorure d\'hydrogène HCl : sa formule ne change pas. On écrit 2 <b>devant</b> HCl pour avoir 2 molécules.</p>', true)] },
-  ]));
-  return carte;
-}
-
-/* ---------- 3. Compter sans dessiner ---------- */
-function compter(c) {
-  const carte = c.carte('3. Compter sans dessiner');
-  c.ajouter(carte, `<div class="cours-bloc">
-      <p>Dessiner les molécules prend du temps. Inutile de compter les boules une par une : on calcule directement.</p>
-      <div class="cle"><p class="er-formule-cle">nombre d'atomes = nombre stœchiométrique × indice</p></div>
-    </div>
-    ${exemple(`<p>Regarde les atomes de 3 H<sub>2</sub>O : il y a 3 groupes de 2 atomes H, et 3 groupes de 1 atome O.</p>
+    ${exemple(`<p>Combien d'atomes de chaque élément dans <b>H<sub>2</sub>O</b> ?</p>
       <div style="margin:10px 0" data-x="ex"></div>
-      <p class="crs-calc">3 H<sub>2</sub>O : 3 × 2 = <span class="c">6 H</span> et 3 × 1 = <span class="c">3 O</span></p>`)}
-    <div class="er-lien-m2"><p>Tu as du mal à compter les atomes dans une molécule ?</p>
-      <a class="btn-small" style="text-decoration:none" href="module_2.html" data-m2>S'entraîner (module 2) →</a></div>`);
-  new ER.Reaction(carte.querySelector('[data-x="ex"]'), { reactifs: ['H2O'], produits: [], coefs: [3], selecteurs: false, dessins: true });
-  const regle = 'Multiplie le nombre stœchiométrique par l\'indice de chaque élément.';
-  const item = (titre, f, coef, dessins, cle) => ({ titre, parties: [ER.partieCompter({
-    formule: f, coef, dessins, regle, memoire: memoire(cle),
-    q: `Combien y a-t-il d'atomes de chaque élément dans <b>${coef} ${fH(f)}</b> ? Calcule, puis valide.`,
-  })] });
-  c.aToi(carte, rejouable(c.n, [
-    item('Avec le dessin', 'NH3', 2, true, 'k1'),
-    item('Sans le dessin (tu peux l\'afficher pour vérifier)', 'CO2', 3, false, 'k2'),
-    item('Sans le dessin', 'C2H6', 2, false, 'k3'),
-  ]));
+      <p>L'indice 2 est juste après H : il porte sur H. Le O n'a pas d'indice : il compte pour 1 atome.</p>
+      <p class="crs-calc">H<sub>2</sub>O : <span class="c">2 H</span> et <span class="c">1 O</span></p>`)}`);
+  dessin(carte, 'H2O', 1);
+  c.aToi(carte, [
+    { titre: 'Sur quoi porte l\'indice ?',
+      parties: [{ type: 'choix', q: 'Dans CO<sub>2</sub>, sur quel élément porte l\'indice 2 ?',
+        options: [{ id: 'O', label: 'Sur O' }, { id: 'C', label: 'Sur C' }, { id: 'CO', label: 'Sur C et sur O' }],
+        bonne: 'O',
+        indices: {
+          C: 'L\'indice est écrit juste après O : il porte sur l\'élément juste avant lui, O. C n\'a pas d\'indice : 1 atome.',
+          CO: 'Un indice ne porte que sur l\'élément juste avant lui (sauf après une parenthèse). Ici, c\'est O ; C n\'a pas d\'indice.',
+        },
+        solution: '<p class="crs-calc">CO<sub>2</sub> : <span class="c">1 C</span> et <span class="c">2 O</span></p>' }] },
+    compter('Une molécule simple', hasard(['CH4', 'NH3', 'H2O2']), 1, RAPPELS[0]),
+    compter('Une molécule plus grande', hasard(['C6H12O6', 'C2H6O', 'H2SO4', 'C3H8']), 1, RAPPELS[0]),
+  ]);
   return carte;
 }
 
-/* ---------- 4. Deux nombres à trouver ---------- */
-function methode(c) {
-  const carte = c.carte('4. Deux nombres à trouver');
+/* ---------- 2. Le nombre stœchiométrique ---------- */
+function stoechiometrique(c) {
+  const carte = c.carte('2. Le nombre stœchiométrique');
   c.ajouter(carte, `<div class="cours-bloc">
-      <p>Quand il faut changer plusieurs nombres stœchiométriques, l'ordre dans lequel on traite les éléments compte.</p>
-      <div class="cle"><p><b class="cle-titre">Méthode</b></p>
-        <ol class="er-liste">
-          <li>Commence par un élément présent dans <b>une seule espèce</b> de chaque côté.</li>
-          <li>Termine par l'élément présent <b>seul</b> dans une espèce (O<sub>2</sub>, H<sub>2</sub>…).</li>
-          <li>Vérifie tous les éléments à la fin : modifier un nombre peut déséquilibrer un élément déjà équilibré.</li>
-        </ol></div>
+      <p>Dans une équation de réaction, il y a souvent plusieurs molécules de la même espèce.</p>
+      <div class="cle"><p>${REGLES[1]}</p>${FORMULE}</div>
     </div>
-    ${exemple(`<p>Le diazote N<sub>2</sub> réagit avec le dihydrogène H<sub>2</sub> pour former de l'ammoniac NH<sub>3</sub> : <span class="er1-l">N<sub>2</sub> + H<sub>2</sub> → NH<sub>3</sub></span>.</p>
-      <ol class="er-liste">
-        <li><b>N</b> est dans une seule espèce de chaque côté : N<sub>2</sub> contient 2 atomes N, il faut donc 2 NH<sub>3</sub> (2 × 1 = 2 N).</li>
-        <li><b>H</b> est seul dans H<sub>2</sub> : on le garde pour la fin. 2 NH<sub>3</sub> contiennent 2 × 3 = 6 H, il faut donc 3 H<sub>2</sub> (3 × 2 = 6 H).</li>
-        <li>Vérification : 2 N et 6 H de chaque côté.</li>
-      </ol>
-      ${eq(['N2', 'H2'], ['NH3'], [1, 3, 2])}`)}`);
-  c.aToi(carte, rejouable(c.n, [
-    { titre: 'Par où finir ?',
-      parties: [choix('Pour équilibrer la combustion du propane, <span class="er1-l">C<sub>3</sub>H<sub>8</sub> + O<sub>2</sub> → CO<sub>2</sub> + H<sub>2</sub>O</span>, par quel élément termine-t-on ?', [
-        { id: 'O', label: 'Par O' }, { id: 'C', label: 'Par C' }, { id: 'H', label: 'Par H' },
-      ], 'O', {
-        C: 'C n\'est que dans C<sub>3</sub>H<sub>8</sub> et dans CO<sub>2</sub> : une seule espèce de chaque côté, on commence par lui.',
-        H: 'H n\'est que dans C<sub>3</sub>H<sub>8</sub> et dans H<sub>2</sub>O : une seule espèce de chaque côté, on le traite au début.',
-      }, '<p>O est dans O<sub>2</sub>, CO<sub>2</sub> et H<sub>2</sub>O, et il est seul dans O<sub>2</sub> : on le garde pour la fin et on termine en réglant le nombre devant O<sub>2</sub>.</p>')] },
-    { titre: 'Combustion du méthane',
-      enonce: '<p>Le méthane CH<sub>4</sub> (gaz de ville) brûle dans le dioxygène O<sub>2</sub> : il se forme du dioxyde de carbone CO<sub>2</sub> et de l\'eau H<sub>2</sub>O.</p>',
-      parties: [ER.partieEquilibrer({
-        r: ['CH4', 'O2'], p: ['CO2', 'H2O'], solution: [1, 2, 1, 2], ordre: ['C', 'H', 'O'], direct: true, dessins: false, memoire: memoire('r2'),
-        q: 'Équilibre la réaction. Les dessins sont masqués : sous chaque formule, le calcul nombre stœchiométrique × indice est écrit pour toi.',
-        bravo: 'C est équilibré dès le départ (1 de chaque côté). Pour H, il faut 2 H<sub>2</sub>O (4 H). Il y a alors 2 + 2 = 4 atomes O dans les produits : il faut 2 O<sub>2</sub>.',
-      })] },
-  ]));
+    ${exemple(`<p>Combien d'atomes de chaque élément dans <b>3 H<sub>2</sub>O</b> ?</p>
+      <div style="margin:10px 0" data-x="ex"></div>
+      <p>3 H<sub>2</sub>O, ce sont 3 molécules H<sub>2</sub>O. Chacune contient 2 H et 1 O : on multiplie par 3.</p>
+      <p class="crs-calc">3 H<sub>2</sub>O : 3 × 2 = <span class="c">6 H</span> et 3 × 1 = <span class="c">3 O</span></p>`)}`);
+  dessin(carte, 'H2O', 3);
+  const m = hasard([{ f: 'CH4', c: 2 }, { f: 'NH3', c: 4 }, { f: 'CO2', c: 3 }, { f: 'O2', c: 5 }]);
+  const d = hasard([{ f: 'C6H12O6', c: 2 }, { f: 'C2H6O', c: 3 }, { f: 'H2SO4', c: 2 }, { f: 'C3H8', c: 4 }]);
+  c.aToi(carte, [
+    compter('Plusieurs molécules', m.f, m.c, RAPPELS[1]),
+    compter('Plusieurs molécules plus grandes', d.f, d.c, RAPPELS[1]),
+  ]);
   return carte;
 }
 
-/* ---------- 5. À toi de calculer ---------- */
-function calculer(c) {
-  const carte = c.carte('5. À toi de calculer');
+/* ---------- 3. Des parenthèses ---------- */
+function parentheses(c) {
+  const carte = c.carte('3. Des parenthèses');
   c.ajouter(carte, `<div class="cours-bloc">
-      <p>Cette fois, le nombre d'atomes n'est plus écrit sous les formules : tu le calcules toi-même (nombre stœchiométrique × indice).</p>
-      <div class="cle"><p><b class="cle-titre">Les plus petits entiers.</b> Une équation s'écrit avec les plus petits nombres entiers possibles : si tous les nombres peuvent être divisés par un même nombre, on les divise.</p></div>
+      <p>Certaines formules contiennent un groupe d'atomes entre parenthèses, suivi d'un indice.</p>
+      <div class="cle"><p>${REGLES[2]}</p></div>
     </div>
-    ${exemple(`<p>Le cuivre Cu réagit avec le dioxygène O<sub>2</sub> pour former de l'oxyde de cuivre CuO : <span class="er1-l">Cu + O<sub>2</sub> → CuO</span>.</p>
-      <ol class="er-liste">
-        <li><b>Cu</b> : 1 de chaque côté, c'est bon pour l'instant.</li>
-        <li><b>O</b> : 2 dans O<sub>2</sub>, 1 dans CuO. Il faut 2 CuO (2 × 1 = 2 O).</li>
-        <li>On vérifie : 2 CuO contiennent 2 Cu, il faut donc 2 Cu.</li>
-      </ol>
-      ${eq(['Cu', 'O2'], ['CuO'], [2, 1, 2])}
-      <p><span class="er1-l">4 Cu + 2 O<sub>2</sub> → 4 CuO</span> est aussi équilibrée, mais tous les nombres peuvent être divisés par 2 : on ne l'écrit pas ainsi.</p>`)}`);
-  c.aToi(carte, rejouable(c.n, [
-    { titre: 'Synthèse de l\'eau',
-      enonce: '<p>Le dihydrogène H<sub>2</sub> brûle dans le dioxygène O<sub>2</sub> en formant de l\'eau H<sub>2</sub>O.</p>',
-      parties: [ER.partieEquilibrer({
-        r: ['H2', 'O2'], p: ['H2O'], solution: [2, 1, 2], ordre: ['O', 'H'], direct: false, comptes: false, dessins: false, memoire: memoire('r3'),
-        q: 'Le nombre d\'atomes n\'est plus écrit : calcule-le toi-même (nombre stœchiométrique × indice), puis valide.',
-        bravo: 'On a équilibré O avec 2 H<sub>2</sub>O (2 O), ce qui donne 4 H dans les produits ; puis H avec 2 H<sub>2</sub> (4 H).',
-      })] },
-    { titre: 'Bien écrite ?',
-      parties: [choix('Laquelle de ces équations est écrite correctement ?', [
-        { id: 'bon', label: '2 CO + O<sub>2</sub> → 2 CO<sub>2</sub>' },
-        { id: 'double', label: '4 CO + 2 O<sub>2</sub> → 4 CO<sub>2</sub>' },
-        { id: 'non', label: 'CO + O<sub>2</sub> → CO<sub>2</sub>' },
-        { id: 'o', label: 'CO + O → CO<sub>2</sub>' },
-      ], 'bon', {
-        double: 'Elle est équilibrée, mais tous les nombres peuvent être divisés par 2 : on écrit les plus petits entiers possibles.',
-        non: 'Compte les atomes O : 1 + 2 = 3 dans les réactifs, 2 dans les produits. Elle n\'est pas équilibrée.',
-        o: 'Le dioxygène s\'écrit O<sub>2</sub> : on ne modifie pas la formule d\'une espèce pour équilibrer.',
-      }, '<p>2 CO + O<sub>2</sub> → 2 CO<sub>2</sub> : 2 C et 4 O de chaque côté, avec les plus petits entiers possibles.</p>', true)] },
-  ]), 'Ce qu\'il faut retenir →');
+    ${exemple(`<p>Combien d'atomes de chaque élément dans <b>Cu(OH)<sub>2</sub></b> ?</p>
+      <div style="margin:10px 0" data-x="ex"></div>
+      <p>Cu(OH)<sub>2</sub> contient 2 fois le groupe OH : (OH)<sub>2</sub> = OH + OH. L'indice 2 est juste après la parenthèse : il porte sur O et sur H. Le Cu n'a pas d'indice : 1 atome.</p>
+      <p class="crs-calc">Cu(OH)<sub>2</sub> : <span class="c">1 Cu</span>, 2 × 1 = <span class="c">2 O</span> et 2 × 1 = <span class="c">2 H</span></p>`)}`);
+  dessin(carte, 'Cu(OH)2', 1);
+  c.aToi(carte, [
+    { titre: 'Sur quoi porte l\'indice ?',
+      parties: [{ type: 'choix', q: 'Dans Ca(OH)<sub>2</sub>, sur quoi porte l\'indice 2 ?',
+        options: [{ id: 'OH', label: 'Sur O et sur H' }, { id: 'H', label: 'Sur H seulement' }, { id: 'tout', label: 'Sur Ca, O et H' }],
+        bonne: 'OH',
+        indices: {
+          H: 'L\'indice est écrit juste après la parenthèse, pas juste après H : il porte sur tout ce qu\'elle contient, O et H.',
+          tout: 'Ca est en dehors de la parenthèse : l\'indice ne porte pas sur lui. Ca n\'a pas d\'indice, il compte pour 1 atome.',
+        },
+        solution: '<p class="crs-calc">Ca(OH)<sub>2</sub> : <span class="c">1 Ca</span>, <span class="c">2 O</span> et <span class="c">2 H</span></p>' }] },
+    compter('Une parenthèse', hasard(['Al(OH)3', 'Fe(OH)3', 'Mg(NO3)2']), 1, RAPPELS[2]),
+    compter('Plus difficile', hasard(['CH2=C(CH3)2', 'Ca3(PO4)2', 'CH3-C(CH3)2-CH3', 'Al2(SO4)3']), 1, RAPPELS[2]),
+  ]);
+  return carte;
+}
+
+/* ---------- 4. Parenthèses et nombre stœchiométrique ---------- */
+function lesDeux(c) {
+  const carte = c.carte('4. Parenthèses et nombre stœchiométrique');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Une espèce dont la formule a des parenthèses peut aussi avoir un nombre stœchiométrique.</p>
+      <div class="cle"><p>${REGLES[3]}</p></div>
+    </div>
+    ${exemple(`<p>Combien d'atomes de chaque élément dans <b>2 Cu(OH)<sub>2</sub></b> ?</p>
+      <div style="margin:10px 0" data-x="ex"></div>
+      <p>Une molécule Cu(OH)<sub>2</sub> contient 1 Cu, 2 O et 2 H. Le nombre 2 devant indique 2 molécules : on multiplie par 2.</p>
+      <p class="crs-calc">2 Cu(OH)<sub>2</sub> : 2 × 1 = <span class="c">2 Cu</span>, 2 × 2 = <span class="c">4 O</span> et 2 × 2 = <span class="c">4 H</span></p>`)}`);
+  dessin(carte, 'Cu(OH)2', 2);
+  const m = hasard([{ f: 'Ca(OH)2', c: 3 }, { f: 'Al(OH)3', c: 2 }, { f: 'Fe(OH)3', c: 2 }]);
+  const d = hasard([{ f: 'Mg(NO3)2', c: 3 }, { f: 'CH2=C(CH3)2', c: 2 }, { f: 'Ca3(PO4)2', c: 2 }]);
+  c.aToi(carte, [
+    compter('Parenthèse et nombre stœchiométrique', m.f, m.c, RAPPELS[3]),
+    compter('Plus difficile', d.f, d.c, RAPPELS[3]),
+  ]);
   return carte;
 }
 
 /* ---------- À retenir ---------- */
 function aRetenir(c) {
   const carte = c.carte('À retenir');
-  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Conservation des éléments.</b> Une équation est équilibrée quand, pour chaque élément, il y a autant d'atomes dans les réactifs que dans les produits.</p></div>
-    <div class="cle"><p><b class="cle-titre">Nombre stœchiométrique.</b> Écrit devant la formule, il donne le nombre de molécules. On ne modifie jamais les indices.</p>
-      <p class="er-formule-cle">nombre d'atomes = nombre stœchiométrique × indice</p></div>
-    <div class="cle"><p><b class="cle-titre">Méthode.</b> Commencer par les éléments présents dans une seule espèce de chaque côté, finir par ceux présents seuls (O<sub>2</sub>, H<sub>2</sub>…), puis tout vérifier.</p></div>
-    <div class="cle"><p><b class="cle-titre">Les plus petits entiers.</b> On choisit les plus petits nombres entiers possibles : <span class="er1-l">2 H<sub>2</sub> + O<sub>2</sub> → 2 H<sub>2</sub>O</span>, et non <span class="er1-l">4 H<sub>2</sub> + 2 O<sub>2</sub> → 4 H<sub>2</sub>O</span>.</p></div>
+  c.ajouter(carte, `<div class="cle"><p>${REGLES[0]}</p><p>H<sub>2</sub>O : 2 H et 1 O.</p></div>
+    <div class="cle"><p>${REGLES[1]}</p>${FORMULE}<p>3 H<sub>2</sub>O : 6 H et 3 O.</p></div>
+    <div class="cle"><p>${REGLES[2]}</p><p>Cu(OH)<sub>2</sub> contient 2 fois le groupe OH : 1 Cu, 2 O et 2 H.</p></div>
+    <div class="cle"><p><b class="cle-titre">Les deux règles ensemble.</b> On compte d'abord les atomes d'<b>une</b> molécule (indices et parenthèses), puis on multiplie par le <b>nombre stœchiométrique</b>.</p><p>2 Cu(OH)<sub>2</sub> : 2 Cu, 4 O et 4 H.</p></div>
     <div class="er-actions">
-      <a class="btn-primary" style="text-decoration:none" href="module_3.html">Module 3 : s'entraîner →</a>
-      <a class="btn-secondary" style="text-decoration:none" href="module_2.html">Module 2 : compter les atomes</a>
+      ${retourOk ? `<a class="btn-primary" style="text-decoration:none" href="${retour}">← Revenir au module 2, où j'en étais</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_3.html">Module 3 : s'entraîner</a>`
+        : '<a class="btn-primary" style="text-decoration:none" href="module_2.html">Module 2 : comment équilibrer une réaction →</a>'}
       <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a>
     </div>`);
   return carte;
 }
 
-const ETAPES = [principe, premiere, compter, methode, calculer, aRetenir];
-const cours = new COURS.Cours(zone, ETAPES);
-
-/* ---------- Retour du module 2 : on rejoue jusqu'à l'étape atteinte, puis on revient à la même position ---------- */
-if (rejeu) {
-  // pas de défilement automatique pendant qu'on rejoue
-  const defiler = Element.prototype.scrollIntoView;
-  Element.prototype.scrollIntoView = function () {};
-  if (depart.t === 1) cours.toutAfficher();
-  const cible = Math.min(ETAPES.length - 1, Math.max(0, depart.n | 0));
-  let garde = 0;
-  (function pas() {
-    if (garde++ < 200) {
-      if (enAttente) { setTimeout(pas, 0); return; }
-      if (cours.attente && cours.n < cible) { cours.suivante(false); setTimeout(pas, 0); return; }
-    }
-    setTimeout(() => {
-      Element.prototype.scrollIntoView = defiler;
-      const y = Math.max(0, depart.y | 0), aller = () => window.scrollTo(0, y);
-      aller();
-      requestAnimationFrame(aller);
-      if (document.fonts) document.fonts.ready.then(aller);
-    }, 120);
-  })();
-  try { history.replaceState(null, '', location.pathname); } catch (_) { /* adresse inchangée */ }
-}
-
+new COURS.Cours(document.getElementById('etapes'), [indice, stoechiometrique, parentheses, lesDeux, aRetenir]);
 ER.menu('module_1');
 </script>
 </body>

@@ -29,7 +29,7 @@ Ce fichier est lu au début de chaque session qui fabrique l'application d'un ch
    - `cinematique/` : référence de la charte (moteur `cin.js`, exercices `exercices.js` + `module_6.html`) ;
    - `combustions/` : chimie avec le moteur de cours commun `COURS`, sous-modules de cours (`module_3a_cours.html`, `module_3b_cours.html`), exercices par étapes ;
    - `principe-dynamique/` : module découpé en sous-modules (`sousModules: true`), atelier en page `simulation` (`module_2_simulation.html`) avec un outil `perso` en plusieurs exemplaires ;
-   - `equilibrer-reactions/modules/module_1.html` : outils `perso` dans un cours.
+   - `equilibrer-reactions/modules/module_2.html` : outils `perso` dans un cours.
 3. Les applications de Tle spécialité déjà en ligne (`ph/`, `cinematique/`, `oxydoreduction-spe/`, `pile/`, `decroissance-radioactive/`) : à citer en lien quand le chapitre s'en sert, sans refaire leur contenu.
 4. Ne lis que les fichiers utiles à ton chapitre (le prompt du chapitre les nomme).
 

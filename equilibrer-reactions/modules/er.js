@@ -337,7 +337,7 @@
       if (score === max) msg = 'Tu sais équilibrer ces réactions.';
       else if (pct >= 70) msg = 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.';
       else if (pct >= 50) msg = 'Pas mal ! Recommence pour progresser : les réactions changent à chaque fois.';
-      else msg = 'Continue à t\'entraîner. Tu peux revoir le module 1 pour la méthode.';
+      else msg = 'Continue à t\'entraîner. Tu peux revoir le module 2 pour la méthode.';
       app.innerHTML = `<div class="er-card er-fin">
           <span class="er-badge">${opts.badge}</span>
           <h2 class="er-titre">Entraînement terminé !</h2>
@@ -380,7 +380,7 @@
        dessins: false,            état initial de l'interrupteur
        regle: '…',                rappel donné après la 1re erreur
        resolu: false,             affiche directement la réponse (retour en arrière)
-       valeurs: [1, 1],           valeurs de départ des flèches (retour du module 2)
+       valeurs: [1, 1],           valeurs de départ des flèches (retour du module 1)
        onValeurs(valeurs),        appelé à chaque réglage
        onReussi(nbErreurs)
      }
@@ -439,7 +439,7 @@
   }
 
   /* ============================================================
-     INDICE pour équilibrer (module 1) : premier élément non conservé,
+     INDICE pour équilibrer (module 2) : premier élément non conservé,
      dans l'ordre conseillé par la méthode
      ============================================================ */
   function indice(reactifs, produits, coefs, ordre) {
@@ -513,7 +513,7 @@
      cfg.memoire (facultatif) : objet où l'outil garde son état
        { c: nombres choisis, d: 1 si les dessins sont affichés, v: 1 si la réponse
          en place a déjà été validée } ; il y est relu au montage (retour du
-       module 2 au même endroit, voir module_1.html).
+       module 1 au même endroit, voir module_2.html).
      cfg.dessins : dessins affichés au départ (booléen ou fonction) ; cfg.onDessins(b).
      ============================================================ */
   function creer(tag, cls, html) {
@@ -600,7 +600,7 @@
           secouer($('reps'));
         }
         act.querySelector('button').onclick = valider;
-        if (mem.v && depart) valider();                       // retour du module 2 : réponse déjà validée
+        if (mem.v && depart) valider();                       // retour du module 1 : réponse déjà validée
         return { montrer: fermer };
       },
     };
@@ -707,7 +707,7 @@
           act.querySelector('button').onclick = valider;
         }
         if (cfg.direct) maj();
-        else if (mem.v) valider();                            // retour du module 2 : réponse déjà validée
+        else if (mem.v) valider();                            // retour du module 1 : réponse déjà validée
         return { montrer() { if (!fini) r.fixer(cfg.solution); fermer(); } };
       },
     };
@@ -715,10 +715,10 @@
 
   /* ---------- Plan de l'application et navigation (voir assets/sommaire.js) ---------- */
   const PLAN = [
-    { n: 1, titre: 'Comment équilibrer une réaction', desc: 'Conservation des atomes, nombres stœchiométriques, la méthode sur trois réactions', fiche: 'fiche_1',
-      parties: [{ nom: 'Comment équilibrer', cours: 'module_1' }] },
-    { n: 2, titre: 'Compter les atomes', desc: 'Indices, nombre stœchiométrique, parenthèses comme dans Cu(OH)<sub>2</sub>', fiche: 'fiche_2',
-      parties: [{ nom: 'Compter les atomes', cours: 'module_2' }] },
+    { n: 1, titre: 'Compter les atomes', desc: 'Indices, nombre stœchiométrique, parenthèses comme dans Cu(OH)<sub>2</sub>', fiche: 'fiche_1',
+      parties: [{ nom: 'Compter les atomes', cours: 'module_1' }] },
+    { n: 2, titre: 'Comment équilibrer une réaction', desc: 'Conservation des atomes, nombres stœchiométriques, la méthode sur trois réactions', fiche: 'fiche_2',
+      parties: [{ nom: 'Comment équilibrer', cours: 'module_2' }] },
     { n: 3, titre: 'Entraînement : réactions faciles', desc: '10 réactions de difficulté croissante, notées sur 20',
       parties: [{ nom: 'Réactions faciles', entrainement: 'module_3' }] },
     { n: 4, titre: 'Entraînement : réactions moins faciles', desc: 'Combustions, grands nombres stœchiométriques, parenthèses, notées sur 20',
