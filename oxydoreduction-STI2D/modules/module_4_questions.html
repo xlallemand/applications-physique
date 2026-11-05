@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : questions sur les piles et les accumulateurs — Chapitre 15 : Oxydoréduction (piles et accumulateurs)</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ox.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard :
+   définitions (pile, batterie, pile à combustible, tension à vide),
+   chaîne énergétique de décharge ou de charge, capacité en A·h,
+   capacité en C (A·h ou mA·h), capacité d'après I et Δt en minutes,
+   durée de fonctionnement Δt = Q / I, énergie en W·h, énergie en J,
+   durée de fonctionnement Δt = E / P, puissance P = U × I.
+   Erreurs diagnostiquées : 1 h = 60 s, mA·h non convertis, minutes non
+   converties, J et W·h confondus, divisions inversées.
+   ============================================================ */
+const { o, fmt, cs, sci, fr, hasard, melanger, egal, chaine, CHAINES } = OX;
+const nombre = (q, label, valeur, unite, diag, solution, opts) => Object.assign({ type: 'nombre', q, label, valeur, unite, rel: .01, signe: false, diag, solution }, opts);
+
+// définitions
+function qDef() {
+  return hasard([
+    { theme: 'Définition', parties: [{ type: 'choix', q: 'Une batterie (accumulateur) se distingue d\'une pile parce que :', colonne: true,
+      options: [o('ok', 'on peut la recharger en inversant le sens de la réaction'), o('o2', 'un de ses réactifs est le dioxygène'), o('tension', 'elle a une tension à vide plus grande')], bonne: 'ok',
+      indices: { o2: 'Ça, c\'est la pile à combustible.', tension: 'La tension ne dit rien : ce qui compte, c\'est qu\'on peut la recharger.' },
+      solution: '<p>Une batterie se <b>recharge</b> : on inverse le sens de la réaction en lui fournissant de l\'énergie électrique.</p>' }] },
+    { theme: 'Définition', parties: [{ type: 'choix', q: 'Dans une pile à combustible :', colonne: true,
+      options: [o('ok', 'un des réactifs est le dioxygène et elle produit de l\'eau'), o('comb', 'on brûle un combustible pour chauffer de l\'eau'), o('rech', 'on inverse la réaction pour la recharger')], bonne: 'ok',
+      indices: { comb: 'Il n\'y a pas de combustion avec flamme : c\'est une réaction d\'oxydoréduction qui produit directement de l\'énergie électrique.', rech: 'Ça, c\'est une batterie.' },
+      solution: '<p>Un des réactifs est O<sub>2</sub> (celui de l\'air) et la pile produit H<sub>2</sub>O.</p>' }] },
+    { theme: 'Définition', parties: [{ type: 'choix', q: 'La tension à vide d\'une pile est la tension à ses bornes :', colonne: true,
+      options: [o('ok', 'quand elle ne débite pas de courant'), o('vide', 'quand elle est complètement déchargée'), o('max', 'quand elle débite le plus grand courant')], bonne: 'ok',
+      indices: { vide: '« À vide » ne veut pas dire « vidée » : la pile ne débite pas.', max: 'C\'est l\'inverse : à vide, la pile ne débite aucun courant.' },
+      solution: '<p>La tension à vide est mesurée quand la pile ne débite pas.</p>' }] },
+    { theme: 'Définition', parties: [{ type: 'choix', q: 'Une pile convertit :', options: [o('ok', 'de l\'énergie chimique en énergie électrique'), o('inv', 'de l\'énergie électrique en énergie chimique'), o('th', 'de l\'énergie chimique en énergie thermique')], bonne: 'ok', colonne: true,
+      indices: { inv: 'Ça, c\'est une batterie pendant sa charge.', th: 'Une pile produit du courant : l\'énergie utile est électrique (une partie seulement est perdue en chaleur).' },
+      solution: '<p>Une pile convertit l\'énergie chimique en énergie électrique.</p>' }] },
+  ]);
+}
+// chaîne énergétique de décharge ou de charge
+function qChaine() {
+  const sens = hasard(['decharge', 'charge']), ok = CHAINES[sens];
+  const inv = sens === 'decharge' ? ['Réactifs', 'énergie électrique', 'Batterie', 'énergie chimique', 'Appareil'] : ['Chargeur', 'énergie chimique', 'Batterie', 'énergie électrique', 'Réactifs'];
+  const autre = CHAINES[sens === 'decharge' ? 'charge' : 'decharge'];
+  return { theme: 'Chaîne énergétique', consigne: `Quelle est la chaîne énergétique de la batterie pendant sa <b>${sens === 'decharge' ? 'décharge (elle alimente un appareil)' : 'charge'}</b> ?`,
+    parties: [{ type: 'choix', colonne: true, q: 'Choisis la bonne chaîne.', options: [o('ok', chaine(ok)), o('inv', chaine(inv)), o('autre', chaine(autre))], bonne: 'ok',
+      indices: { inv: sens === 'decharge' ? 'Les réactifs stockent de l\'énergie <b>chimique</b> ; la batterie fournit de l\'énergie <b>électrique</b> à l\'appareil.' : 'Le chargeur fournit de l\'énergie <b>électrique</b> ; la batterie la stocke sous forme <b>chimique</b>.',
+        autre: sens === 'decharge' ? 'Ça, c\'est la charge : le chargeur fournit de l\'énergie. Pendant la décharge, la batterie alimente un appareil.' : 'Ça, c\'est la décharge : la batterie alimente un appareil. Pendant la charge, le chargeur lui fournit de l\'énergie.' },
+      solution: `<p>${sens === 'decharge' ? 'Décharge' : 'Charge'} :</p>${chaine(ok)}` }] };
+}
+// capacité en A·h
+function qQAh() {
+  const I = hasard([0.20, 0.50, 1.5, 2.5]), t = hasard([3, 4, 6, 10]);
+  return { theme: 'Capacité', enonce: `<p>Un accumulateur débite I = ${fmt(I)} A pendant Δt = ${t} h.</p>`,
+    parties: [nombre('Quelle charge Q a-t-il débitée ?', 'Q =', I * t, 'A·h', v => (egal(v, I * t * 3600) ? 'Ça, c\'est Q en C. Avec Δt en heures, Q = I × Δt est en A·h.' : egal(v, I / t) || egal(v, t / I) ? 'Q = I × Δt : on multiplie.' : `Q = ${fmt(I)} × ${t}.`),
+      `<p class="ph-calc">Q = I × Δt = ${fmt(I)} A × ${t} h = <span class="c">${fmt(I * t)} A·h</span></p>`)] };
+}
+// capacité en C (A·h ou mA·h)
+function qQC() {
+  const mAh = Math.random() < .5, Q = mAh ? hasard([1500, 2000, 2500, 4000]) : hasard([1.6, 2.4, 5.0, 40]);
+  const QAh = mAh ? Q / 1000 : Q;
+  return { theme: 'Capacité en coulombs', enonce: `<p>Capacité d'une batterie : ${fmt(Q)} ${mAh ? 'mA·h' : 'A·h'}.</p>`,
+    parties: [nombre('Quelle est sa capacité en coulombs ?', 'Q =', QAh * 3600, 'C',
+      v => (egal(v, QAh * 60) ? '1 h = 3 600 s : 1 A·h = 3 600 C.' : mAh && egal(v, Q * 3600) ? 'Convertis d\'abord les mA·h en A·h : on divise par 1 000.' : egal(v, QAh / 3600) ? 'On multiplie par 3 600.' : `${mAh ? `${fmt(Q)} mA·h = ${fmt(QAh)} A·h, puis ` : ''}1 A·h = 3 600 C.`),
+      `${mAh ? `<p>${fmt(Q)} mA·h = ${fmt(QAh)} A·h.</p>` : ''}<p class="ph-calc">Q = ${fmt(QAh)} × 3 600 = <span class="c">${fmt(QAh * 3600)} C</span></p>`)] };
+}
+// capacité d'après I et une durée en minutes
+function qQmin() {
+  const I = hasard([0.10, 0.25, 0.50, 2.0]), min = hasard([10, 20, 30, 45]);
+  return { theme: 'Charge en coulombs', enonce: `<p>Une pile débite I = ${fmt(I)} A pendant ${min} min.</p>`,
+    parties: [nombre('Quelle charge a-t-elle débitée, en coulombs ?', 'Q =', I * min * 60, 'C',
+      v => (egal(v, I * min) ? 'Convertis la durée en secondes : 1 min = 60 s.' : egal(v, I * min / 60) ? 'Ça, c\'est Q en A·h. En coulombs, Δt doit être en secondes.' : `Q = I × Δt avec Δt = ${min} × 60 s.`),
+      `<p>Δt = ${min} min = ${min * 60} s.</p><p class="ph-calc">Q = I × Δt = ${fmt(I)} A × ${min * 60} s = <span class="c">${fmt(I * min * 60)} C</span></p>`)] };
+}
+// durée de fonctionnement d'après Q et I
+function qDuree() {
+  const Q = hasard([1200, 2400, 3000, 5000]), I = hasard([100, 200, 250, 500]);
+  return { theme: 'Durée de fonctionnement', enonce: `<p>Une batterie de capacité ${fmt(Q)} mA·h alimente un appareil qui consomme ${I} mA.</p>`,
+    parties: [nombre('Pendant combien de temps peut-elle fonctionner ?', 'Δt =', Q / I, 'h',
+      v => (egal(v, Q * I) ? 'Δt = Q / I : on divise.' : egal(v, I / Q) ? 'Tu as inversé : Δt = Q / I.' : `Δt = ${fmt(Q)} / ${I}.`),
+      `<p class="ph-calc">Δt = ${fr('Q', 'I')} = ${fr(`${fmt(Q)} mA·h`, `${I} mA`)} = <span class="c">${fmt(Q / I)} h</span></p>`)] };
+}
+// énergie en W·h
+function qEWh() {
+  const Q = hasard([1.6, 2.0, 3.0, 60]), U = hasard([1.2, 3.7, 12]);
+  return { theme: 'Énergie disponible', enonce: `<p>Une batterie de capacité Q = ${fmt(Q)} A·h fonctionne sous U = ${fmt(U)} V.</p>`,
+    parties: [nombre('Quelle énergie peut-elle fournir ?', 'E =', Q * U, 'W·h',
+      v => (egal(v, Q * U * 3600) ? 'Ça, c\'est E en J. Avec Q en A·h, E = Q × U est en W·h.' : `E = Q × U = ${fmt(Q)} × ${fmt(U)}.`),
+      `<p class="ph-calc">E = Q × U = ${fmt(Q)} A·h × ${fmt(U)} V = <span class="c">${fmt(Q * U)} W·h</span></p>`)] };
+}
+// énergie en J
+function qEJ() {
+  const Q = hasard([0.5, 1.6, 2.0]), U = hasard([1.2, 1.5, 3.7]);
+  const E = Q * 3600 * U;
+  return { theme: 'Énergie disponible', enonce: `<p>Une pile de capacité Q = ${fmt(Q)} A·h a une tension U = ${fmt(U)} V.</p>`,
+    parties: [nombre('Quelle énergie peut-elle fournir, en joules ?', 'E =', E, 'J',
+      v => (egal(v, Q * U) ? 'Ça, c\'est E en W·h. En joules, Q doit être en coulombs : 1 A·h = 3 600 C.' : egal(v, Q * 60 * U) ? '1 A·h = 3 600 C, pas 60 C.' : `Q = ${fmt(Q)} × 3 600 C, puis E = Q × U.`),
+      `<p>Q = ${fmt(Q)} × 3 600 = ${fmt(Q * 3600)} C.</p><p class="ph-calc">E = Q × U = ${fmt(Q * 3600)} C × ${fmt(U)} V = <span class="c">${fmt(E)} J</span></p>`, { affiche: fmt(E) })] };
+}
+// durée d'après E et P
+function qDureeP() {
+  const E = hasard([10, 20, 36, 60]), P = hasard([0.5, 2, 5]);
+  return { theme: 'Durée de fonctionnement', enonce: `<p>Une batterie stocke E = ${fmt(E)} W·h. Elle alimente un appareil de puissance P = ${fmt(P)} W.</p>`,
+    parties: [nombre('Pendant combien de temps peut-elle l\'alimenter ?', 'Δt =', E / P, 'h',
+      v => (egal(v, E * P) ? 'E = P × Δt, donc Δt = E / P.' : egal(v, P / E) ? 'Tu as inversé : Δt = E / P.' : `Δt = ${fmt(E)} / ${fmt(P)}.`),
+      `<p class="ph-calc">Δt = ${fr('E', 'P')} = ${fr(`${fmt(E)} W·h`, `${fmt(P)} W`)} = <span class="c">${fmt(E / P)} h</span></p>`)] };
+}
+// puissance P = U × I
+function qP() {
+  const U = hasard([1.5, 3.7, 12]), I = hasard([0.20, 0.50, 2.0]);
+  return { theme: 'Puissance', enonce: `<p>Une batterie de tension U = ${fmt(U)} V débite un courant I = ${fmt(I)} A.</p>`,
+    parties: [nombre('Quelle puissance fournit-elle ?', 'P =', U * I, 'W',
+      v => (egal(v, U / I) || egal(v, I / U) ? 'P = U × I : on multiplie.' : `P = ${fmt(U)} × ${fmt(I)}.`),
+      `<p class="ph-calc">P = U × I = ${fmt(U)} V × ${fmt(I)} A = <span class="c">${fmt(U * I)} W</span></p>`)] };
+}
+
+function tirage() { return [qDef(), qChaine(), qQAh(), qQC(), qQmin(), qDuree(), qEWh(), qEJ(), qDureeP(), qP()]; }
+
+OX.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 4 · QUESTIONS', titre: 'Piles, accumulateurs, capacité et énergie',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : définitions, chaînes énergétiques, capacité en A·h et en C, énergie en J et en W·h, durée de fonctionnement.</p>',
+  questions: tirage,
+  revoir: { href: 'module_4_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_5_cours.html', label: 'Module 5 : schéma d\'une pile →' },
+});
+OX.menu('module_4_questions');
+</script>
+</body>
+</html>

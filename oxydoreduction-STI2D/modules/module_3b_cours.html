@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : électrons échangés et charge — Chapitre 15 : Oxydoréduction (piles et accumulateurs)</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/schema-methode.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/schema-methode.js"></script>
+<script src="ox.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 2 / 2</span>
+    <h2 class="er-titre">Électrons échangés et charge électrique</h2>
+    <p class="er-contexte">Dans une pile, les électrons échangés circulent dans le circuit : c'est le <b>courant électrique</b>. La <b>demi-équation</b> donne la quantité de matière d'électrons, puis la <b>charge</b> Q = n(e<sup>−</sup>) × F.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Électrons échangés : n(e⁻) d'après la demi-équation (colonne e⁻ du schéma)
+   2. Charge électrique : Q = n(e⁻) × F, n(e⁻) = Q / F · À retenir
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { fmt } = OX;   // nombres : espace insécable entre les milliers
+const { CP, methode, diagRel, egal, fr, cs, sci, nE, UNITE, FARADAY } = OX;
+const E = 'e<sup>−</sup>';
+const ecr = v => (v < 0.01 || v >= 1e5 ? sci(v, 3) : cs(v, 3));
+// demi-équation d'un métal, sens de l'oxydation : métal = ion + n e⁻ (colonnes du schéma)
+const colonnes = cp => [{ f: cp.red, coef: 1, nom: cp.nom }, { f: cp.ox, coef: 1, nom: `ions ${cp.nom}` }, { f: E, coef: cp.n, nom: 'électrons' }];
+const METAUX = ['Zn', 'Al', 'Ag', 'Cu', 'Fe'].map(k => CP[k]);
+
+/* ---------- 1. Électrons échangés ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Électrons échangés : n(e<sup>−</sup>)');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>La demi-équation se lit comme une équation : ses nombres stœchiométriques relient la quantité de matière d'électrons échangés à celle d'une espèce du couple.</p>
+      <div class="cle"><p>Avec Cu<sup>2+</sup> + 2 ${E} = Cu :</p>
+        <p class="crs-formule">${fr(`n(${E})`, 2)} = ${fr('n(Cu)', 1)} &nbsp;donc&nbsp; n(${E}) = 2 n(Cu)</p>
+        <p>Sur le schéma de la méthode, les électrons ont leur propre colonne, prise dans la demi-équation.</p></div>
+    </div>
+    ${exemple(`<p>Dans une pile à combustible, le dihydrogène est oxydé : H<sub>2</sub> = 2 H<sup>+</sup> + 2 ${E}. On consomme n(H<sub>2</sub>) = 10 mol. Quelle quantité d'électrons circule ?</p>
+      ${SCHM.schema({ especes: [{ f: 'H<sub>2</sub>', coef: 1 }, { f: 'H<sup>+</sup>', coef: 2 }, { f: E, coef: 2 }], produits: 1, signe: '=', depart: { k: 0, n: ['n(H<sub>2</sub>)', '10 mol'] }, cible: { k: 2, n: '20 mol' }, autres: [1] })}
+      <p class="crs-calc">${fr('n(H<sub>2</sub>)', 1)} = ${fr(`n(${E})`, 2)} donc n(${E}) = 2 n(H<sub>2</sub>) = 2 × 10 = <span class="c">20 mol</span></p>`)}`);
+  const [X, Y] = melanger(METAUX.filter(m => m.n > 1));
+  const nX = hasard([0.0200, 0.0500, 0.100]), neY = hasard([0.0600, 0.120, 0.300]);
+  c.aToi(carte, [
+    { titre: 'La relation', enonce: `<p class="crs-calc">${X.red} = ${X.ox} + ${nE(X.n)}</p>`,
+      parties: [SCHM.choixRelation({ especes: colonnes(X), depart: { k: 0 }, cible: { k: 2 } })] },
+    { titre: 'Les électrons cédés', enonce: `<p class="crs-calc">${X.red} = ${X.ox} + ${nE(X.n)}</p><p>Il est consommé n(${X.red}) = ${cs(nX, 3)} mol.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle quantité d\'électrons est cédée ?', label: `n(${E}) =`, unite: 'mol', valeur: nX * X.n, rel: .01, signe: false, affiche: cs(nX * X.n, 3),
+        diag: v => diagRel(v, nX, 1, X.n, X.red, E),
+        solution: `<p class="crs-calc">n(${E}) = ${X.n} × n(${X.red}) = ${X.n} × ${cs(nX, 3)} = <span class="c">${cs(nX * X.n, 3)} mol</span></p>` }] },
+    { titre: 'Dans l\'autre sens', enonce: `<p class="crs-calc">${Y.red} = ${Y.ox} + ${nE(Y.n)}</p><p>Il a circulé n(${E}) = ${cs(neY, 3)} mol d'électrons.</p>`,
+      parties: [{ type: 'nombre', q: `Quelle quantité de ${Y.red} a été consommée ?`, label: `n(${Y.red}) =`, unite: 'mol', valeur: neY / Y.n, rel: .01, signe: false, affiche: cs(neY / Y.n, 3),
+        diag: v => diagRel(v, neY, Y.n, 1, E, Y.red),
+        solution: `<p class="crs-calc">n(${Y.red}) = ${fr(`n(${E})`, Y.n)} = ${fr(cs(neY, 3), Y.n)} = <span class="c">${cs(neY / Y.n, 3)} mol</span></p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Charge électrique ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Charge électrique : Q = n(e<sup>−</sup>) × F');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Une mole d'électrons porte une charge de 96 500 coulombs : c'est la constante de Faraday F. La charge Q qui a circulé dans le circuit est donc :</p>
+      <div class="cle"><p class="crs-formule">Q = n(${E}) × F &nbsp;&nbsp;&nbsp; n(${E}) = ${fr('Q', 'F')}</p>
+        <p>Q en C (coulombs), n(${E}) en mol, F = 96 500 ${UNITE.F}.</p></div>
+      <p>La capacité d'une pile ou d'un accumulateur est cette charge Q. Elle est souvent donnée en A·h : 1 A·h = 3 600 C (module 4).</p>
+    </div>
+    ${exemple(`<p>Il circule n(${E}) = 0,20 mol d'électrons :</p>
+      <p class="crs-calc">Q = n(${E}) × F = 0,20 mol × 96 500 ${UNITE.F} = <span class="c">19 300 C</span></p>
+      <p>Une charge Q = 9 650 C a circulé :</p>
+      <p class="crs-calc">n(${E}) = ${fr('Q', 'F')} = ${fr('9 650 C', `96 500 ${UNITE.F}`)} = <span class="c">0,100 mol</span></p>`, 'Exemples')}`);
+  const ne = hasard([0.0500, 0.150, 0.400, 1.20]), Q = hasard([1930, 4825, 28950, 57900]);
+  // toute la chaîne : masse de zinc consommée → n(Zn) → n(e⁻) → Q
+  const X = hasard([CP.Zn, CP.Al, CP.Cu]), nX = hasard([0.0100, 0.0200, 0.0400]), mX = +(nX * X.M).toPrecision(3);
+  const M = methode({ especes: colonnes(X), produits: 1, signe: '=', depart: { k: 0, m: mX, M: X.M }, cible: { k: 2, quoi: 'Q' }, autres: [1], sans: ['schema'] });
+  c.aToi(carte, [
+    { titre: 'Calculer la charge', enonce: `<p>Il circule n(${E}) = ${cs(ne, 3)} mol d'électrons.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle charge électrique a circulé ?', label: 'Q =', unite: 'C', valeur: ne * FARADAY, rel: .01, signe: false, affiche: fmt(ne * FARADAY),
+        diag: v => (egal(v, ne / FARADAY) ? 'Q = n × F : on multiplie par F.' : egal(v, ne) ? 'Multiplie n(e<sup>−</sup>) par F = 96 500 C·mol<sup>−1</sup>.' : `Q = ${cs(ne, 3)} × 96 500.`),
+        solution: `<p class="crs-calc">Q = n(${E}) × F = ${cs(ne, 3)} × 96 500 = <span class="c">${fmt(ne * FARADAY)} C</span></p>` }] },
+    { titre: 'Retrouver n(e<sup>−</sup>)', enonce: `<p>Une charge Q = ${fmt(Q)} C a circulé.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle quantité d\'électrons a circulé ?', label: `n(${E}) =`, unite: 'mol', valeur: Q / FARADAY, rel: .01, signe: false, affiche: cs(Q / FARADAY, 3),
+        diag: v => (egal(v, Q * FARADAY) ? 'n = Q / F : on divise la charge par F.' : egal(v, FARADAY / Q) ? 'Tu as inversé la division : n = Q / F, la charge en haut.' : `n = ${fmt(Q)} / 96 500.`),
+        solution: `<p class="crs-calc">n(${E}) = ${fr('Q', 'F')} = ${fr(`${fmt(Q)} C`, `96 500 ${UNITE.F}`)} = <span class="c">${cs(Q / FARADAY, 3)} mol</span></p>` }] },
+    { titre: 'De la masse à la charge',
+      enonce: `<p>Dans une pile, ${fmt(mX)} g de ${X.nom} sont oxydés : ${X.red} = ${X.ox} + ${nE(X.n)}. M(${X.red}) = ${fmt(X.M)} ${UNITE.M}.</p>`,
+      parties: M.parties.concat([]) },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Électrons échangés.</b> La demi-équation relie n(${E}) à n(espèce) : avec Cu<sup>2+</sup> + 2 ${E} = Cu, n(${E}) = 2 n(Cu).</p></div>
+    <div class="cle"><p><b class="cle-titre">Charge électrique.</b> Q = n(${E}) × F, avec F = 96 500 ${UNITE.F} ; donc n(${E}) = Q / F.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur le module 3 →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_4_cours.html">Module 4 : piles et accumulateurs</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#electrons">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+OX.menu('module_3b_cours');
+</script>
+</body>
+</html>
