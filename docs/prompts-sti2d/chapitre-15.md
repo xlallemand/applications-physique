@@ -15,7 +15,7 @@ Deux modules du chapitre sont déjà développés :
 - **Le schéma de la pile devient le module 5.** Sors le moteur de `pile/index.html` dans `pile/pile.js` (+ `pile/pile.css`), sans changer son comportement. `pile/index.html` et la page du module 5 le chargent tous les deux : une seule source, l'application `pile/` reste en place pour la spécialité.
   - Le moteur doit pouvoir monter dans une zone donnée ; vérifie qu'il marche encore seul.
   - Passe ses boutons aux classes de la charte (`btn-primary` / `btn-secondary` / `btn-small` : jamais de bouton coloré, §3), pour les deux usages.
-- **Anciennes adresses** : redirige `oxydoreduction-STI2D/index.html#course`, `#training`, `#reactions`, `#fiche` vers les nouvelles pages (petit script sur l'accueil), pour garder les favoris des élèves. L'ancienne progression (`localStorage`) peut être perdue : dis-le dans le compte rendu.
+- **Anciennes adresses** : pas besoin de garder les favoris des élèves, ni leurs progressions.
 - **Portail** :
   - titre « Chapitre 15 : Oxydoréduction (piles et accumulateurs) » (nom de l'application, voir `00-commun.md` §3) ;
   - desc « Oxydants, réducteurs, équations, quantités de matière, piles : schéma et capacité. » ;
