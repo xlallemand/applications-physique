@@ -42,12 +42,12 @@ Ignore les `.docx` et `Chap16-Cours-Exercices.pdf` (version vierge).
 - **Principe** : l'acide d'un couple donne un proton à la base d'un autre couple.
   
   Exemple : H<sub>3</sub>O⁺ + CH<sub>3</sub>COO⁻ → H<sub>2</sub>O + CH<sub>3</sub>COOH. Note : « donne H⁺ », « H⁺ vient se coller ici ».
-- **Trois méthodes du cours** :
-  1. **directe** : on déplace un H⁺ de l'acide vers la base ;
-  2. **demi-équations** : on écrit les deux demi-équations dans le bon sens et on les additionne, comme en oxydoréduction (lien vers `oxydoreduction-STI2D/`) ;
-  3. **règle du gamma γ** : les deux couples écrits l'un sous l'autre (acide<sub>1</sub>/base<sub>1</sub> au-dessus de acide<sub>2</sub>/base<sub>2</sub>). On entoure les deux réactifs ; le tracé en γ relie chaque réactif à ce qu'il devient.
+- **Deux méthodes du cours** :
+  1. **directe** : on déplace un H⁺ de l'acide vers la base
+  2. **règle du gamma γ** : les deux couples écrits l'un sous l'autre (acide<sub>1</sub>/base<sub>1</sub> au-dessus de acide<sub>2</sub>/base<sub>2</sub>). On entoure les deux réactifs ; le tracé en γ relie chaque réactif à ce qu'il devient.
      - NH<sub>3</sub> + CH<sub>3</sub>COOH → NH<sub>4</sub>⁺ + CH<sub>3</sub>COO⁻ ;
      - NH<sub>4</sub>⁺ + H<sub>2</sub>O → H<sub>3</sub>O⁺ + NH<sub>3</sub>.
+  3. **Remarque** : Le cours donne une autre règle, qu'il ne faut pas reprendre ici (demi-équations : on écrit les deux demi-équations dans le bon sens et on les additionne, comme en oxydoréduction) ;
 - **Outil `perso` « règle du gamma »** : deux couples empilés. L'élève touche les deux réactifs ; le γ se dessine (SVG), puis il complète l'équation par glisser-déposer des espèces. Diagnostics :
   - « deux acides ne réagissent pas ensemble » ;
   - « le réactif d'un couple devient son conjugué ».
