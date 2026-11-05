@@ -189,6 +189,55 @@ sub, sup { font-size: .7em; line-height: 0; }
 .ox-figure { margin: 10px auto; max-width: 640px; }
 .ox-svg { display: block; width: 100%; height: auto; font-family: var(--font-sans); }
 
+/* infographie : sens de circulation des charges dans une pile (OX.infoCharges)
+   dessin de la boucle à gauche, fils puis pont salin à droite, règle de continuité dessous ;
+   une seule colonne sur téléphone */
+.ox-charges { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 10px 16px; align-items: center; margin-top: 12px; }
+.ox-charges-fig { grid-row: span 2; background: var(--sheet); border-radius: 12px; padding: 8px; }
+.ox-charges-bloc, .ox-charges-regle { background: var(--sheet); border-radius: 12px; padding: 10px 14px; line-height: 1.5; }
+.ox-charges-regle { grid-column: 1 / -1; box-shadow: inset 0 0 0 2px var(--accent); }
+.er-page .ox-charges-t { font-weight: 800; color: var(--accent-ink); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.ox-charges-n { flex: none; width: 24px; height: 24px; border-radius: 999px; background: var(--cle-bg); color: var(--accent-ink);
+  display: inline-flex; align-items: center; justify-content: center; font-size: .85rem; font-weight: 800; }
+.ox-charges-ligne { display: flex; align-items: flex-start; gap: 10px; }
+.ox-charges-signe { flex: none; width: 28px; height: 28px; border-radius: 999px; background: var(--ink); color: var(--sheet);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; line-height: 1; }
+.ox-charges-ligne.neg .ox-charges-signe { background: var(--accent); }
+.ox-charges-ligne.neg b { color: var(--accent-ink); }
+@media (max-width: 760px) {
+  .ox-charges { grid-template-columns: minmax(0, 1fr); }
+  .ox-charges-fig { grid-row: auto; width: 100%; max-width: 400px; margin: 0 auto; }
+}
+
+/* fiche : schéma de la pile entouré des explications 1 à 4 (OX.infoPile)
+   ordinateur : 1 et 2 au-dessus, 3 et 4 dessous ; téléphone : le schéma puis 1 à 4 */
+.ox-pinfo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px 12px;
+  grid-template-areas: "b1 b2" "fig fig" "b3 b4"; }
+.ox-pinfo-b1 { grid-area: b1; } .ox-pinfo-b2 { grid-area: b2; } .ox-pinfo-b3 { grid-area: b3; } .ox-pinfo-b4 { grid-area: b4; }
+.ox-pinfo-fig { grid-area: fig; }
+.ox-pinfo-fig .ox-figure { margin: 0 auto; }
+@media (max-width: 640px) {
+  .ox-pinfo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "fig" "b1" "b2" "b3" "b4"; }
+}
+
+/* animation : électrons produits ou consommés (OX.animPile) */
+.ox-anim { margin-top: 4px; }
+.ox-anim-ex { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-bottom: 8px; }
+.ox-anim-ex .btn-small[aria-pressed="true"] { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.ox-anim-svg svg { display: block; width: 100%; max-width: 480px; height: auto; margin: 0 auto; font-family: var(--font-sans); touch-action: pan-y; }
+.ox-anim-eqs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; max-width: 480px; margin: 4px auto 0; text-align: center; line-height: 1.4; }
+.er-page .ox-anim-eqs p + p { margin-top: 2px; }
+.ox-anim-nom { font-size: .85rem; font-weight: 700; color: var(--ink-2); }
+.ox-anim-demi { font-weight: 700; white-space: nowrap; }
+.ox-anim-e { border-radius: 999px; padding: 0 5px; transition: background .15s, color .15s; }
+.ox-anim-e.on { background: var(--accent); color: var(--sheet); }
+.ox-anim-tag { font-size: .88rem; color: var(--accent-ink); visibility: hidden; }
+.ox-anim-tag.on { visibility: visible; }
+.er-page .ox-anim-legende { min-height: 4.6em; background: var(--paper); border-radius: 12px; padding: 8px 12px; margin-top: 10px; }
+.ox-anim .er-actions { justify-content: center; margin-top: 10px; }
+@media (max-width: 400px) { .ox-anim-demi { font-size: .92rem; } }
+@media (prefers-reduced-motion: reduce) { .ox-anim-e { transition: none; } }
+
 /* chaîne énergétique */
 .ox-chaine { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 4px; margin: 10px 0; }
 .ox-ch-b { border: 2px solid var(--ink); border-radius: 12px; padding: 8px 12px; font-weight: 800; background: var(--sheet); min-width: 84px; text-align: center; }

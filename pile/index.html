@@ -3,66 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oxydo-réduction : schéma d'une pile</title>
+<title>Schéma d'une pile</title>
 <link rel="stylesheet" href="../assets/theme.css">
 <link rel="stylesheet" href="../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="../assets/sommaire.css">
-<link rel="stylesheet" href="pile.css">
-<script src="../assets/sommaire.js"></script>
 <script src="../assets/hero.js"></script>
-<script src="../assets/dragdrop.js"></script>
-<script src="pile.js"></script>
-<style>
-* { box-sizing: border-box; }
-body { font-family: var(--font-sans); background: var(--sheet); min-height: 100vh; }
-.pile-progression { max-width: 1000px; margin: 8px auto; padding: 0 16px; }
-.pile-progression > div { background: var(--line-strong); border-radius: 999px; height: 6px; }
-.pile-progression > div > div { background: var(--accent); height: 6px; border-radius: 999px; width: 10%; transition: width 0.4s; }
-</style>
+<script src="../assets/sommaire.js"></script>
+<script src="modules/pi.js"></script>
 </head>
 <body>
 <div id="app-nav"></div>
 
-<!-- En-tête illustré (image en parallaxe, voir assets/hero.js) -->
-<header class="app-hero app-hero-compact" data-dessin="formules:pile">
-  <canvas aria-hidden="true"></canvas>
-  <div class="app-hero-in" style="max-width:1000px">
-    <p class="app-hero-kicker">Chimie</p>
-    <div class="app-hero-row">
+<div class="er-page">
+  <!-- En-tête illustré (image en parallaxe, voir assets/hero.js) -->
+  <header class="app-hero" data-dessin="formules:pile" style="margin-top:-24px">
+    <canvas aria-hidden="true"></canvas>
+    <div class="app-hero-in">
+      <p class="app-hero-kicker">Chimie · Terminale spécialité</p>
       <h1>Schéma d'une pile</h1>
-      <!-- Question et score -->
-      <div class="app-hero-stats">
-        <div><span>Question</span><strong id="hdr-q">1 / 10</strong></div>
-        <div><span>Score</span><strong id="hdr-score">0 / 20</strong></div>
-      </div>
+      <p class="app-hero-lead">Anode et cathode, sens de circulation des charges dans les fils et dans le pont salin, sens du courant et des électrons, équation de la pile</p>
     </div>
-  </div>
-  <div class="app-hero-edge"></div>
-</header>
+    <div class="app-hero-edge"></div>
+  </header>
 
-<!-- PROGRESS -->
-<div class="pile-progression"><div><div id="prog-bar"></div></div></div>
-
-<!-- MAIN : l'outil est construit par pile.js (moteur partagé avec le chapitre 15 de Terminale STI2D) -->
-<div style="max-width:1000px;margin:0 auto;padding:8px 12px 40px;" id="app"></div>
+  <!-- une ligne dépliable par module (voir assets/sommaire.js) -->
+  <main class="som-accueil" id="accueil"></main>
+</div>
 
 <script>
-// =============================================
-// Navigation : bandeau avec le lien vers le portail des applications
-// (application d'un seul écran, sans modules : pas de sommaire, voir assets/sommaire.js)
-// =============================================
-SOM.init({ nom: "Schéma d'une pile", id: 'pile', plan: [] });
-SOM.menu('accueil');
-
-// 10 questions tirées au hasard ; la question et le score sont affichés dans l'en-tête
-PILE.monter(document.getElementById('app'), {
-  surProgression(info) {
-    document.getElementById('hdr-q').textContent = `${Math.min(info.question, info.total)} / ${info.total}`;
-    document.getElementById('hdr-score').textContent = `${info.score} / ${info.total * 2}`;
-    document.getElementById('prog-bar').style.width = `${Math.min(info.question, info.total) / info.total * 100}%`;
-  },
-  fin() { document.getElementById('prog-bar').style.width = '100%'; },
-});
+// bandeau avec le lien vers le portail des applications, puis la liste des modules
+PI.menu('accueil');
+PI.accueil(document.getElementById('accueil'));
 </script>
 </body>
 </html>

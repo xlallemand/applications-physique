@@ -19,6 +19,9 @@
                                            espèces dans l'ordre de l'équation, équation écrite
      OX.equation(reactifs, produits)       équation écrite : [[k, formule], …]
      OX.figPile(o)                         schéma d'une pile annoté (SVG)
+     OX.infoCharges()                      infographie : sens de circulation des charges (fils, pont salin)
+     OX.infoPile()                         fiche : schéma de la pile entouré des explications 1 à 4
+     OX.animPile(zone)                     animation : électrons produits (ils partent) ou consommés (ils arrivent)
      OX.chaine(etapes)                     chaîne énergétique (réservoirs, convertisseurs, transferts)
      OX.diagNm, diagNcV, diagRel, diagMasse, diagC   diagnostics des erreurs classiques des calculs
      OX.methode(def)                       méthode pas à pas : schéma à compléter, n, relation, n, grandeur
@@ -644,7 +647,10 @@
      o.g, o.d      couples des demi-piles gauche et droite (clés de CP, métal / ion du métal)
      o.anode       'g' ou 'd' : demi-pile où le métal est oxydé (borne −)
      o.appareil    'V' (voltmètre) ou 'A' (ampèremètre), avec sa borne COM côté −
-     o.voir        ce qui est dessiné : { pol, e, I, ions, roles, demi } (tout par défaut) */
+     o.voir        ce qui est dessiné : { pol, e, I, ions, roles, demi } (tout par défaut)
+     o.demiGen     sous les demi-piles, au lieu des demi-équations : « production d'électrons :
+                   red = ox + n e⁻ » (anode) et « consommation d'électrons : ox + n e⁻ = red » (cathode)
+     o.reperes     repères numérotés 1 à 4 (fils, ions du pont salin, pont salin, électrodes) : fiche */
   function figPile(o) {
     const id = 'oxp' + (++nFigPile);
     const v = Object.assign({ pol: true, e: true, I: true, ions: true, roles: true, demi: true, com: true }, o.voir || {});
@@ -702,13 +708,259 @@
     if (v.roles) {
       s += t(xg, 304, anG ? 'anode (−)' : 'cathode (+)', { s: 13, c: ACCI }) + t(xd, 304, anG ? 'cathode (+)' : 'anode (−)', { s: 13, c: ACCI });
     }
-    if (v.demi) {
+    if (v.demi && o.demiGen) {
+      // écriture générale : les électrons sont produits à l'anode, consommés à la cathode
+      const prod = ['production d\'électrons :', `red = ox + n ${ELEC}`], cons = ['consommation d\'électrons :', `ox + n ${ELEC} = red`];
+      const [g1, g2] = anG ? [prod, cons] : [cons, prod];
+      s += t(xg, 330, g1[0], { s: 13, w: 700, c: ACCI }) + t(xd, 330, g2[0], { s: 13, w: 700, c: ACCI });
+      s += t(xg, 352, g1[1], { s: 13, w: 600 }) + t(xd, 352, g2[1], { s: 13, w: 600 });
+    } else if (v.demi) {
       const eqA = `${A.red} = ${A.ox} + ${nE(A.n)}`, eqC = `${C.ox} + ${nE(C.n)} = ${C.red}`;
       s += t(xg, 330, anG ? eqA : eqC, { s: 13, w: 600 }) + t(xd, 330, anG ? eqC : eqA, { s: 13, w: 600 });
       s += t(xg, 352, anG ? 'oxydation' : 'réduction', { s: 12, w: 500, c: INK2 }) + t(xd, 352, anG ? 'réduction' : 'oxydation', { s: 12, w: 500, c: INK2 });
     }
+    // repères des explications de la fiche : 1 fils, 2 ions du pont salin, 3 pont salin, 4 électrodes
+    if (o.reperes) {
+      [[262, 28, 1], [320, 84, 2], [320, 184, 3], [320, 340, 4]].forEach(([x, y, n]) => {
+        s += `<circle cx="${x}" cy="${y}" r="11" fill="#e2f1ea" stroke="${ACC}" stroke-width="2"/>` + t(x, y + 5, String(n), { s: 13, w: 800, c: ACCI });
+      });
+    }
     const aria = o.aria || `Schéma de la pile ${texte(A.red)} / ${texte(C.red)} : l'électrode de ${A.nom} est l'anode (borne −), celle de ${C.nom} la cathode (borne +) ; les électrons vont de ${A.nom} vers ${C.nom} dans les fils, le courant en sens inverse ; dans le pont salin, les anions vont vers l'anode et les cations vers la cathode.`;
     return `<div class="ox-figure"><svg viewBox="0 0 640 ${H}" class="ox-svg" role="img" aria-label="${aria.replace(/"/g, '&quot;')}">${s}</svg></div>`;
+  }
+
+  let nCharges = 0;
+  /* Infographie : sens de circulation des charges dans une pile (cours et fiche « Schéma d'une pile »)
+     Le circuit est dessiné comme une boucle : anode (−) à gauche, cathode (+) à droite,
+     fils en haut, pont salin en bas. Charges négatives (électrons, anions) en couleur d'accent,
+     elles tournent dans un sens ; charges positives (sens de I, cations) en encre, dans l'autre.
+     À côté du dessin : ce qui circule dans les fils, puis dans le pont salin ;
+     dessous : la règle de continuité du sens de circulation des charges. */
+  function infoCharges() {
+    const id = 'oxc' + (++nCharges);
+    const INK = '#16181d', INK2 = '#55585f', ACC = '#0a7d57', ACCI = '#075c40', GRIS = '#8d8f94', PONT = '#dfdbd2';
+    const t = (x, y, h, opt) => `<text x="${x}" y="${y}" text-anchor="${(opt && opt.a) || 'middle'}" font-size="${(opt && opt.s) || 14}" font-weight="${(opt && opt.w) || 700}" fill="${(opt && opt.c) || INK}">${svgTxt(h, (opt && opt.s) || 14)}</text>`;
+    const fl = (x1, y, x2, col, m) => `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${col}" stroke-width="2.5" marker-end="url(#${id}-${m})"/>`;
+    // flèche de rotation (3/4 de tour, ouverte en bas) avec le signe des charges au centre
+    const rot = (cx, cy, r, horaire, col, m, signe) => {
+      const a0 = (horaire ? 150 : 30) * Math.PI / 180, a1 = a0 + (horaire ? 1 : -1) * 1.5 * Math.PI;
+      const p = a => `${(cx + r * Math.cos(a)).toFixed(1)} ${(cy + r * Math.sin(a)).toFixed(1)}`;
+      return `<path d="M${p(a0)} A${r} ${r} 0 1 ${horaire ? 1 : 0} ${p(a1)}" fill="none" stroke="${col}" stroke-width="2.5" marker-end="url(#${id}-${m})"/>` +
+        t(cx, cy + 6, signe, { s: 18, w: 800, c: col });
+    };
+    const xa = 48, xc = 312, yFil = 34, yPont = 216;          // abscisses des électrodes, hauteurs des fils et du pont salin
+    let s = `<defs>
+      <marker id="${id}-a" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="10" refX="10" refY="5" orient="auto"><path d="M0 0 L11 5 L0 10 z" fill="${ACC}"/></marker>
+      <marker id="${id}-i" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="10" refX="10" refY="5" orient="auto"><path d="M0 0 L11 5 L0 10 z" fill="${INK}"/></marker></defs>`;
+    // fils (en haut) et pont salin (en bas, tube large) : la boucle du circuit
+    s += `<path d="M${xa} 96 V${yFil} H${xc} V96" fill="none" stroke="${INK}" stroke-width="2.5"/>`;
+    s += `<path d="M${xa} 156 V${yPont} H${xc} V156" fill="none" stroke="${GRIS}" stroke-width="17" stroke-linejoin="round"/>
+      <path d="M${xa} 156 V${yPont} H${xc} V156" fill="none" stroke="${PONT}" stroke-width="14" stroke-linejoin="round"/>`;
+    // demi-piles : anode (−) à gauche, cathode (+) à droite
+    [[xa, 'anode', 'borne −'], [xc, 'cathode', 'borne +']].forEach(([x, nom, borne]) => {
+      s += `<rect x="${x - 40}" y="96" width="80" height="60" rx="12" fill="#fff" stroke="${INK}" stroke-width="1.5"/>`;
+      s += t(x, 122, nom, { s: 15, w: 800 }) + t(x, 142, borne, { s: 13, w: 600, c: INK2 });
+    });
+    // dans les fils : électrons de l'anode vers la cathode (dessus), I en sens inverse (dessous)
+    s += fl(135, 16, 225, ACC, 'a') + t(127, 21, 'e<sup>−</sup>', { a: 'end', s: 15, w: 800, c: ACCI });
+    s += fl(225, 52, 135, INK, 'i') + t(233, 57, 'I', { a: 'start', s: 15, w: 800 });
+    s += t(180, 80, 'fils : des électrons', { s: 13, w: 600, c: INK2 });
+    // dans le pont salin : anions vers l'anode (dedans), cations vers la cathode (dessous)
+    s += t(180, 182, 'pont salin : des ions', { s: 13, w: 600, c: INK2 });
+    s += fl(225, 198, 135, ACC, 'a') + t(233, 203, 'anions (−)', { a: 'start', s: 13, w: 700, c: ACCI });
+    s += fl(135, 236, 225, INK, 'i') + t(127, 241, 'cations (+)', { a: 'end', s: 13, w: 700 });
+    // les charges − tournent dans un sens (horaire), les charges + dans l'autre
+    s += rot(152, 128, 19, true, ACC, 'a', '−') + rot(208, 128, 19, false, INK, 'i', '+');
+    const aria = 'Boucle du circuit d\'une pile : anode (borne −) à gauche, cathode (borne +) à droite. Dans les fils, les électrons vont de l\'anode vers la cathode et le courant I de la cathode vers l\'anode. Dans le pont salin, les anions vont vers l\'anode et les cations vers la cathode : les charges négatives tournent toutes dans un sens, les charges positives dans l\'autre.';
+    return `<div class="ox-charges">
+      <div class="ox-charges-fig"><svg viewBox="0 0 360 252" class="ox-svg" role="img" aria-label="${aria}">${s}</svg></div>
+      <div class="ox-charges-bloc">
+        <p class="ox-charges-t"><span class="ox-charges-n">1</span>Dans les fils : des électrons</p>
+        <p>Les <b>électrons</b> (charges −) vont de l'<b>anode (−)</b> vers la <b>cathode (+)</b>.</p>
+        <p>Le <b>courant I</b> va en sens inverse, du + vers le − : c'est le sens de circulation qu'aurait une <b>charge positive</b> s'il en existait une dans le fil.</p>
+      </div>
+      <div class="ox-charges-bloc">
+        <p class="ox-charges-t"><span class="ox-charges-n">2</span>Dans le pont salin : des ions</p>
+        <p>Des <b>anions</b> (charges −) et des <b>cations</b> (charges +) se déplacent : le pont salin <b>ferme le circuit</b>.</p>
+        <p>Leur sens se déduit de la <b>continuité du sens de circulation des charges</b> dans la boucle.</p>
+      </div>
+      <div class="ox-charges-regle">
+        <p class="ox-charges-t">Continuité du sens de circulation des charges</p>
+        <p class="ox-charges-ligne neg"><span class="ox-charges-signe" aria-hidden="true">−</span><span>Les <b>anions</b> circulent dans le <b>même sens que les électrons</b> (charges négatives) : ils vont vers l'<b>anode</b>.</span></p>
+        <p class="ox-charges-ligne pos"><span class="ox-charges-signe" aria-hidden="true">+</span><span>Les <b>cations</b> circulent dans le <b>même sens que I</b> (sens d'une charge positive, s'il en existait une dans le fil) : ils vont vers la <b>cathode</b>.</span></p>
+      </div>
+    </div>`;
+  }
+
+  /* Fiche « Schéma de fonctionnement d'une pile » : schéma de la pile zinc-cuivre (OX.figPile,
+     écriture générale sous les demi-piles, repères 1 à 4) entouré des quatre explications.
+     Ordinateur : 1 et 2 au-dessus du schéma, 3 et 4 dessous ; téléphone : le schéma puis 1 à 4. */
+  function infoPile() {
+    const E = ELEC, bloc = (n, titre, html) => `<div class="ox-charges-bloc ox-pinfo-b${n}">
+        <p class="ox-charges-t"><span class="ox-charges-n">${n}</span>${titre}</p>${html}</div>`;
+    return `<div class="ox-pinfo">
+      ${bloc(1, 'Dans les fils', `<p>Les <b>électrons (−)</b> vont de la <b>borne −</b> vers la <b>borne +</b>.</p><p><b>I</b> va de la <b>borne +</b> vers la <b>borne −</b>.</p>`)}
+      ${bloc(2, 'Dans le pont salin : les ions', `<p>Les <b>anions (−)</b> vont dans le même sens que les <b>électrons (−)</b> et les <b>cations (+)</b> vont dans le même sens que <b>I</b>.</p>`)}
+      <div class="ox-charges-fig ox-pinfo-fig">${figPile({ g: 'Zn', d: 'Cu', anode: 'g', appareil: 'A', demiGen: true, reperes: true })}</div>
+      ${bloc(3, 'Rôle du pont salin', `<p>Le pont salin permet de <b>fermer le circuit</b>.</p>`)}
+      ${bloc(4, 'Aux électrodes', `<p><b>Borne −</b> : production d'${E}, donc red = ox + n ${E}.</p><p><b>Borne +</b> : consommation d'${E}, donc ox + n ${E} = red.</p>`)}
+    </div>`;
+  }
+
+  /* ============================================================
+     ANIMATION : électrons produits ou consommés (cours « Schéma de fonctionnement d'une pile »)
+     OX.animPile(zone)   construit l'animation dans zone (plusieurs exemplaires possibles :
+                         aucun identifiant fixe, aucun état global)
+     Une pile, anode à gauche. À l'anode, un atome du métal devient un ion qui passe en solution
+     et laisse ses électrons dans l'électrode : red = ox + n e⁻, électrons PRODUITS. Ils partent
+     par le fil et arrivent sur l'autre électrode, où des ions de la solution les captent et
+     se déposent : ox + n e⁻ = red, électrons CONSOMMÉS. Trois exemples au choix (anode à 2 e⁻).
+     Les demi-équations sont écrites sous le dessin ; le terme en électrons s'allume quand
+     ils sont produits, puis consommés. Une légende (aria-live) explique chaque phase.
+     Mouvement réduit (prefers-reduced-motion) : les objets passent d'une position à l'autre sans glisser.
+     ============================================================ */
+  const ANIM_EX = [['Zn', 'Cu'], ['Cu', 'Ag'], ['Fe', 'Ag']];
+  // début de chaque phase (ms) : oxydation, trajet dans le fil, réduction, bilan, fin
+  const TA = { ox: 0, fil: 1700, red: 4700, bilan: 6700, fin: 7500 };
+  function animPile(zone) {
+    const INK = '#16181d', INK2 = '#55585f', ACC = '#0a7d57', GRIS = '#8d8f94', METAL = '#c9c4b9';
+    const reduit = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const xA = 100, xC = 300, yF = 24;                       // électrodes, fil du haut
+    let ex = 0, t0 = 0, t = -1, raf = 0, phase = '';
+    zone.classList.add('ox-anim');
+    zone.innerHTML = `
+      <div class="ox-anim-ex" role="group" aria-label="Exemple de pile">${ANIM_EX.map(([a, c], k) =>
+        `<button type="button" class="btn-small" data-ex="${k}" aria-pressed="${k === 0}">${CP[a].nom} – ${CP[c].nom}</button>`).join('')}</div>
+      <div class="ox-anim-svg"></div>
+      <div class="ox-anim-eqs"></div>
+      <p class="ox-anim-legende" aria-live="polite"></p>
+      <div class="er-actions"><button type="button" class="btn-secondary" data-act="jouer">▶ Lancer l'animation</button></div>`;
+    const bJouer = zone.querySelector('[data-act=jouer]');
+    const leg = zone.querySelector('.ox-anim-legende');
+    let P = {};                                              // éléments du dessin de l'exemple en cours
+
+    // particule : disque et une ou deux étiquettes (forme réduite, forme oxydée)
+    const lab = (h, cls) => `<text class="${cls}" x="0" y="4" text-anchor="middle" font-size="11" font-weight="800" fill="${INK}">${svgTxt(h, 11)}</text>`;
+    const particule = (cls, red, ox, metal) => `<g class="${cls}"><circle r="15" fill="${metal ? METAL : '#fff'}" stroke="${INK}" stroke-width="1.5"/>${red ? lab(red, 'l-red') : ''}${ox ? lab(ox, 'l-ox') : ''}</g>`;
+
+    // dessin d'un exemple : demi-piles, pont salin, fil et lampe, particules
+    function dessiner() {
+      const [ka, kc] = ANIM_EX[ex], A = CP[ka], C = CP[kc];
+      const L = lcm(A.n, C.n), k = L / C.n;                  // électrons échangés, ions réduits
+      let s = '';
+      [36, 236].forEach(x => { s += `<rect x="${x}" y="136" width="128" height="96" fill="#e2f1ea"/>`; });
+      s += `<path d="M148 200 V92 H252 V200" fill="none" stroke="${GRIS}" stroke-width="15"/><path d="M148 200 V92 H252 V200" fill="none" stroke="#dfdbd2" stroke-width="12"/>`;
+      s += `<text x="200" y="78" text-anchor="middle" font-size="11" font-weight="600" fill="${INK2}">pont salin</text>`;
+      [36, 236].forEach(x => { s += `<path d="M${x} 112 V232 H${x + 128} V112" fill="none" stroke="${INK}" stroke-width="2"/>`; });
+      s += `<path d="M${xA} 70 V${yF} H${xC} V70" fill="none" stroke="${INK}" stroke-width="2"/>`;
+      s += `<circle cx="200" cy="${yF}" r="11" fill="#fff" stroke="${INK}" stroke-width="2"/><path d="M192 16 L208 32 M208 16 L192 32" stroke="${INK}" stroke-width="1.5"/>`;
+      [xA, xC].forEach(x => { s += `<rect x="${x - 8}" y="70" width="16" height="140" rx="2" fill="${METAL}" stroke="${INK}" stroke-width="1.5"/>`; });
+      s += `<text x="${xA - 14}" y="96" text-anchor="end" font-size="14" font-weight="800" fill="${INK}">${svgTxt(A.red, 14)}</text>`;
+      s += `<text x="${xC + 14}" y="96" text-anchor="start" font-size="14" font-weight="800" fill="${INK}">${svgTxt(C.red, 14)}</text>`;
+      // ions déjà présents dans chaque solution (décor)
+      s += `<g transform="translate(124 214)">${particule('', '', A.ox)}</g><g transform="translate(274 212)">${particule('', '', C.ox)}</g>`;
+      // bornes, affichées au bilan
+      s += `<g class="pol" opacity="0">${[[xA - 30, '−'], [xC + 30, '+']].map(([x, sg]) => `<circle cx="${x}" cy="58" r="11" fill="#fff" stroke="${INK}" stroke-width="1.5"/><text x="${x}" y="63.5" text-anchor="middle" font-size="16" font-weight="800" fill="${INK}">${sg}</text>`).join('')}</g>`;
+      // atome oxydé, ions réduits, électrons
+      s += particule('at', A.red, A.ox, true);
+      for (let i = 0; i < k; i++) s += particule('io io' + i, C.red, C.ox, false);
+      for (let i = 0; i < L; i++) s += `<g class="el el${i}" opacity="0"><circle r="7" fill="${ACC}"/><text x="0" y="4.5" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">−</text></g>`;
+      zone.querySelector('.ox-anim-svg').innerHTML = `<svg viewBox="0 0 400 244" role="img" aria-label="Pile ${A.nom} – ${C.nom} : à l'électrode de ${A.nom}, un atome ${texte(A.red)} devient un ion ${texte(A.ox)} et laisse ${L} électrons, qui partent par le fil vers l'électrode de ${C.nom}, où des ions ${texte(C.ox)} les captent et se déposent.">${s}</svg>`;
+      zone.querySelector('.ox-anim-eqs').innerHTML = `
+        <div><p class="ox-anim-nom">Électrode de ${A.nom}</p><p class="ox-anim-demi">${A.red} = ${A.ox} + <span class="ox-anim-e eA">${nE(A.n)}</span></p>
+          <p class="ox-anim-tag tA">électrons <b>produits</b> : ils <b>partent</b> de l'électrode</p></div>
+        <div><p class="ox-anim-nom">Électrode de ${C.nom}</p><p class="ox-anim-demi">${C.ox} + <span class="ox-anim-e eC">${nE(C.n)}</span> = ${C.red}</p>
+          <p class="ox-anim-tag tC">électrons <b>consommés</b> : ils <b>arrivent</b> sur l'électrode</p></div>`;
+      const q = c => zone.querySelector(c);
+      // trajets : atome de la surface vers la solution ; ions de la solution vers l'électrode ;
+      // électrons de l'anode, par le fil, jusqu'à l'ion qui les capte
+      const yIon = i => (k === 1 ? 186 : [190, 158][i]);
+      P = { A, C, L, k, at: q('.at'), pol: q('.pol'), eA: q('.eA'), eC: q('.eC'), tA: q('.tA'), tC: q('.tC'),
+        atDe: [xA - 8, 186], atA: [62, 212],
+        io: Array.from({ length: k }, (_, i) => ({ g: q('.io' + i), de: [342, k === 1 ? 210 : [212, 166][i]], a: [xC + 8 + 15, yIon(i)] })),
+        el: Array.from({ length: L }, (_, i) => {
+          const de = [xA, 178 + (i % 2) * 14], fin = [xC, yIon(Math.floor(i / C.n)) + (C.n > 1 ? (i % 2 ? 7 : -7) : 0)];
+          return { g: q('.el' + i), pts: [de, [xA, yF], [xC, yF], fin] };
+        }) };
+      t = -1; rendre();
+    }
+
+    // avancement d'un mouvement entre les instants a et b (adouci ; en mouvement réduit : saut)
+    const av = (a, b) => { if (t < a) return 0; if (t >= b) return 1; if (reduit) return 1; const u = (t - a) / (b - a); return u * u * (3 - 2 * u); };
+    const pose = (g, x, y) => g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+    const entre2 = (p, q, u) => [p[0] + (q[0] - p[0]) * u, p[1] + (q[1] - p[1]) * u];
+    // point à la fraction u d'une ligne brisée
+    function surTrajet(pts, u) {
+      const seg = pts.slice(1).map((q, i) => Math.hypot(q[0] - pts[i][0], q[1] - pts[i][1]));
+      let d = u * seg.reduce((x, y) => x + y, 0);
+      for (let i = 0; i < seg.length; i++) { if (d <= seg[i] || i === seg.length - 1) return entre2(pts[i], pts[i + 1], Math.min(1, d / seg[i])); d -= seg[i]; }
+      return pts[pts.length - 1];
+    }
+    // état du dessin à l'instant t (t < 0 : avant le lancement)
+    function etiquette(g, oxyde, metal) {
+      g.querySelector('circle').setAttribute('fill', metal ? METAL : '#fff');
+      const r = g.querySelector('.l-red'), o = g.querySelector('.l-ox');
+      if (r) r.style.display = oxyde ? 'none' : ''; if (o) o.style.display = oxyde ? '' : 'none';
+    }
+    function rendre() {
+      const { A, C, L, k } = P;
+      // oxydation : l'atome quitte l'électrode et devient un ion
+      const ua = av(TA.ox + 200, TA.ox + 1400);
+      pose(P.at, ...entre2(P.atDe, P.atA, ua));
+      etiquette(P.at, t >= TA.ox + 800, t < TA.ox + 800);
+      // électrons : apparaissent dans l'électrode, suivent le fil, sont captés
+      P.el.forEach((e, i) => {
+        const debut = TA.fil + i * 260, u = av(debut, debut + 2400);
+        pose(e.g, ...surTrajet(e.pts, u));
+        const vis = t < 0 ? 0 : t < TA.ox + 900 ? av(TA.ox + 500, TA.ox + 900) : 1 - av(TA.red + 1000, TA.red + 1500);
+        e.g.setAttribute('opacity', reduit ? (t >= TA.ox + 500 && t < TA.red + 1000 ? 1 : 0) : vis.toFixed(2));
+      });
+      // réduction : les ions viennent sur l'électrode, captent les électrons et se déposent
+      P.io.forEach(io => {
+        pose(io.g, ...entre2(io.de, io.a, av(TA.red, TA.red + 1000)));
+        const depose = t >= TA.red + 1250;
+        etiquette(io.g, !depose, depose);
+      });
+      P.pol.setAttribute('opacity', t >= TA.bilan ? 1 : 0);
+      P.eA.classList.toggle('on', t >= TA.ox && t < TA.fil + 2900);
+      P.tA.classList.toggle('on', t >= TA.ox);
+      P.eC.classList.toggle('on', t >= TA.red);
+      P.tC.classList.toggle('on', t >= TA.red);
+      // légende de la phase en cours (mise à jour seulement quand la phase change)
+      const ph = t < 0 ? 'avant' : t < TA.fil ? 'ox' : t < TA.red ? 'fil' : t < TA.bilan ? 'red' : 'bilan';
+      if (ph !== phase) {
+        phase = ph;
+        const demiA = `${A.red} = ${A.ox} + ${nE(A.n)}`, demiC = `${C.ox} + ${nE(C.n)} = ${C.red}`;
+        leg.innerHTML = {
+          avant: `Lance l'animation et regarde où sont écrits les électrons dans chaque demi-équation, puis où ils vont.`,
+          ox: `<b>Électrode de ${A.nom} :</b> ${demiA}. Les électrons sont écrits à droite du =, avec les produits : ils sont <b>produits</b>. L'atome ${A.red} devient un ion ${A.ox}, qui passe en solution, et laisse ${nE(L)} dans l'électrode.`,
+          fil: `Les électrons produits ne restent pas dans l'électrode de ${A.nom} : ils en <b>partent</b> par le fil et vont vers l'électrode de ${C.nom}.`,
+          red: `<b>Électrode de ${C.nom} :</b> ${demiC}. Les électrons sont écrits à gauche du =, avec les réactifs : ils sont <b>consommés</b>, ils doivent donc <b>arriver</b> sur l'électrode. ${k === 1 ? `Un ion ${C.ox} capte ${nE(C.n)} et devient ${C.red}, qui se dépose.` : `${k} ions ${C.ox} captent chacun ${C.n === 1 ? 'un électron' : nE(C.n)} et deviennent ${C.red}, qui se dépose.`}`,
+          bilan: `<b>Bilan :</b> les électrons partent de l'électrode où ils sont produits (${A.nom}) : c'est la <b>borne −</b> (anode, oxydation). Ils arrivent sur l'électrode où ils sont consommés (${C.nom}) : c'est la <b>borne +</b> (cathode, réduction).`,
+        }[ph];
+      }
+    }
+    function boucle(now) {
+      t = now - t0;
+      rendre();
+      if (t < TA.fin) raf = requestAnimationFrame(boucle);
+      else { raf = 0; bJouer.disabled = false; bJouer.textContent = '↺ Rejouer l\'animation'; }
+    }
+    function arreter() { if (raf) cancelAnimationFrame(raf); raf = 0; bJouer.disabled = false; bJouer.textContent = '▶ Lancer l\'animation'; }
+    bJouer.onclick = () => {
+      arreter(); phase = '';
+      bJouer.disabled = true; bJouer.textContent = 'Animation en cours…';
+      t0 = performance.now(); raf = requestAnimationFrame(boucle);
+    };
+    zone.querySelectorAll('[data-ex]').forEach(b => {
+      b.onclick = () => {
+        ex = +b.dataset.ex; arreter(); phase = '';
+        zone.querySelectorAll('[data-ex]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+        dessiner();
+      };
+    });
+    dessiner();
+    return { arreter };
   }
 
   /* Chaîne énergétique : etapes = ['Réactifs', 'énergie chimique', 'Batterie', 'énergie électrique', 'Appareil']
@@ -869,7 +1121,7 @@
     MOINS, fmt, cs, sci, lire, proche, fr, o, fq, el, secouer, melanger, hasard, entre, champ, boutonValider, PARTIES, versCours,
     question, serie, confettis, figure,
     ESP, ELEC, nE, kE, sPl, texte, charge, R, gcd, lcm, egal, CP, demi, reduc, oxyd, couple, equation, REACTIONS, reaction,
-    diagNm, diagNcV, diagRel, diagMasse, diagC, svgTxt, figPile, chaine, CHAINES, FARADAY, UNITE, methode,
+    diagNm, diagNcV, diagRel, diagMasse, diagC, svgTxt, figPile, infoCharges, infoPile, animPile, chaine, CHAINES, FARADAY, UNITE, methode,
     PLAN, menu, accueil, marquer,
   });
 })();

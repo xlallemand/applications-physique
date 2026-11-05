@@ -20,7 +20,7 @@
                compte quand elle a une note, une autre page quand elle est terminée
    À METTRE À JOUR quand le PLAN d'une application change.
    Une application absente de la liste (simulation sans plan :
-   pile, décroissance radioactive) n'affiche pas d'avancement.
+   décroissance radioactive) n'affiche pas d'avancement.
 
    Progression lue dans le navigateur (jamais écrite) :
      localStorage <dossier>-progression = { pages: { <page>: { fait, note } } }
@@ -110,6 +110,7 @@
     'acides-bases': { ex: 10, pages: [
       'module_1_cours', 'module_1_questions', 'module_2_cours', 'module_2_questions', 'module_3a_cours',
       'module_3b_cours', 'module_3c_cours', 'module_3_questions', 'module_4_cours', 'module_4_questions'] },
+    'pile': { pages: ['module_1_cours', 'module_1_pile'] },
     'oxydoreduction-spe': { pages: [
       'module_1a_cours', 'module_1b_cours', 'module_1c_cours', 'module_1d_cours', 'module_1_questions',
       'module_2a_cours', 'module_2b_cours', 'module_2_questions', 'module_3_cours', 'module_3_questions',
