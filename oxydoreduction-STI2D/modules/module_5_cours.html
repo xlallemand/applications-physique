@@ -27,11 +27,11 @@
 <script>
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
-   1. Anode et cathode (moyens mnémotechniques, demi-équations, équation de la pile ;
-      lire une demi-équation : électrons produits ou consommés, animation OX.animPile)
+   1. Anode et cathode (moyens mnémotechniques, demi-équations, équation de la pile)
    2. Sens de circulation des charges, dans les fils et dans le pont salin
       (infographie OX.infoCharges : électrons et I, puis ions ; continuité du sens des charges)
-   3. Placer I et les électrons : deux méthodes (multimètre, espèce consommée)
+   3. Placer I et les électrons : deux méthodes (multimètre, espèce consommée ;
+      avec la chimie, lire une demi-équation : électrons produits ou consommés, animation OX.animPile)
    · À retenir, puis l'outil « Schéma d'une pile » (pile/pile.js, page module_5_pile)
    Exemple : pile Zn / Cu, schéma OX.figPile.
    ============================================================ */
@@ -47,45 +47,21 @@ const zinc = CP.Zn, cuivre = CP.Cu;
 /* ---------- 1. Anode et cathode ---------- */
 function etape1(c) {
   const carte = c.carte('1. Anode et cathode');
-  const bloc = c.ajouter(carte, `<div class="cours-bloc">
+  c.ajouter(carte, `<div class="cours-bloc">
       <div class="cle"><p><b class="cle-titre">Moyens mnémotechniques.</b> <b>R</b>éduction à la <b>C</b>athode (consonne – consonne) ; <b>O</b>xydation à l'<b>A</b>node (voyelle – voyelle).</p></div>
       <div class="cle"><p>À la <b>cathode</b>, une <b>réduction</b> : des électrons y <b>arrivent</b>. &nbsp;ox<sub>1</sub> + ${E} = red<sub>1</sub></p>
         <p>À l'<b>anode</b>, une <b>oxydation</b> : des électrons en <b>partent</b>. &nbsp;red<sub>2</sub> = ox<sub>2</sub> + ${E}</p>
         <p>Équation de fonctionnement de la pile, sans électrons :</p>
         <p class="crs-formule">ox<sub>1</sub> + red<sub>2</sub> → ox<sub>2</sub> + red<sub>1</sub></p></div>
-      <div class="cle"><p><b class="cle-titre">Lire une demi-équation.</b> Des électrons écrits du côté des <b>produits</b> (à droite du =) sont <b>produits</b> à l'électrode : ils en <b>partent</b>. Des électrons écrits du côté des <b>réactifs</b> (à gauche du =) sont <b>consommés</b> : ils doivent y <b>arriver</b>.</p></div>
     </div>
-    ${exemple(`<div class="ox-anim-zone"></div>
-      <p>Quelques demi-équations lues de la même façon :</p>
-      <div class="crs-defile"><table class="crs-tab">
-        <thead><tr><th>Demi-équation</th><th>Électrons</th><th>À l'électrode</th></tr></thead>
-        <tbody><tr><td>Zn = Zn<sup>2+</sup> + 2 ${E}</td><td>produits</td><td>ils partent : borne −</td></tr>
-          <tr><td>Cu<sup>2+</sup> + 2 ${E} = Cu</td><td>consommés</td><td>ils arrivent : borne +</td></tr>
-          <tr><td>Ag<sup>+</sup> + ${E} = Ag</td><td>consommés</td><td>ils arrivent : borne +</td></tr>
-          <tr><td>Cu = Cu<sup>2+</sup> + 2 ${E}</td><td>produits</td><td>ils partent : borne −</td></tr></tbody>
-      </table></div>
-      <p>Le cuivre peut faire les deux : dans la pile zinc-cuivre, les ions Cu<sup>2+</sup> captent des électrons (borne +) ; dans la pile cuivre-argent, le cuivre métal en produit (borne −). C'est le côté du = où sont écrits les électrons qui compte.</p>`, 'Exemples : électrons produits ou consommés ?')}
     ${exemple(`<p>Pile zinc-cuivre : le zinc est consommé, du cuivre se dépose.</p>
       ${figPile({ g: 'Zn', d: 'Cu', anode: 'g', appareil: 'A', voir: { pol: false, e: false, I: false, ions: false, com: false } })}
       <p class="crs-calc">Anode (oxydation) : Zn = Zn<sup>2+</sup> + 2 ${E}<br>Cathode (réduction) : Cu<sup>2+</sup> + 2 ${E} = Cu</p>
       <p class="crs-calc"><span class="c">Zn + Cu<sup>2+</sup> → Zn<sup>2+</sup> + Cu</span></p>`, 'Exemple : la pile zinc-cuivre')}`);
-  animPile(bloc.querySelector('.ox-anim-zone'));                 // animation : électrons produits ou consommés
-  // « À toi » 1 : trois demi-équations à lire, au moins une de chaque sorte (électrons produits / consommés)
-  const lire = melanger(['Zn', 'Cu', 'Ag', 'Fe', 'Pb', 'Ni', 'Al']).slice(0, 3), produits = melanger([true, false, Math.random() < .5]);
-  const lignesLire = lire.map((k, i) => {
-    const P = CP[k], prod = produits[i];
-    return { id: 'l' + i, label: prod ? demiA(P) : demiC(P), bonne: prod ? 'prod' : 'cons',
-      indice: prod ? `${demiA(P)} : les électrons sont à droite du =, avec les produits. Ils sont produits, ils partent de l'électrode.`
-                   : `${demiC(P)} : les électrons sont à gauche du =, avec les réactifs. Ils sont consommés, ils arrivent sur l'électrode.`,
-      apres: `<p class="crs-calc">${prod ? 'oxydation : anode, borne −' : 'réduction : cathode, borne +'}</p>` };
-  });
   const [kA, kC] = hasard(PILES), A = CP[kA], C = CP[kC];
   const [kA2, kC2] = hasard(PILES.filter(p => p[0] !== kA || p[1] !== kC)), A2 = CP[kA2], C2 = CP[kC2];
   const R2 = reaction(kC2, kA2);
   c.aToi(carte, [
-    { titre: 'Électrons produits ou consommés ?', parties: [versCours({ type: 'grille', q: 'Pour chaque demi-équation, les électrons sont-ils produits ou consommés à l\'électrode ?',
-      options: [o('prod', 'produits : ils partent'), o('cons', 'consommés : ils arrivent')], lignes: lignesLire,
-      solution: '<p>Électrons à droite du = (produits) : ils partent de l\'électrode, c\'est la borne −. Électrons à gauche du = (réactifs) : ils arrivent sur l\'électrode, c\'est la borne +.</p>' })] },
     { titre: 'Anode ou cathode ?', enonce: `<p>Pile ${A.nom} – ${C.nom}. On observe que l'électrode de ${A.nom} est consommée et qu'un dépôt de ${C.nom} se forme sur l'électrode de ${C.nom}.</p>`,
       parties: [versCours({ type: 'grille', q: 'Indique ce qui se passe à chaque électrode.',
         options: [o('anode', 'anode (oxydation)'), o('cathode', 'cathode (réduction)')],
@@ -136,12 +112,33 @@ function etape2(c) {
 /* ---------- 3. Placer I et les électrons ---------- */
 function etape3(c) {
   const carte = c.carte('3. Placer I et les électrons : deux méthodes');
-  c.ajouter(carte, `<div class="cours-bloc">
+  const bloc = c.ajouter(carte, `<div class="cours-bloc">
       <div class="cle"><p><b class="cle-titre">Si on connaît l'électricité</b> (un multimètre affiche une valeur positive) : la borne <b>COM</b> est branchée sur le <b>−</b>. On place + et − ; I va du + vers le − dans le circuit extérieur, les ${E} du − vers le +. On en déduit le sens des demi-équations : au −, les électrons partent, c'est l'oxydation (anode).</p></div>
       <div class="cle"><p><b class="cle-titre">Si on connaît la chimie</b> (l'espèce consommée ou formée) : à l'électrode où red<sub>2</sub> = ox<sub>2</sub> + ${E}, les électrons <b>partent</b> : c'est le <b>−</b>. On en déduit le +, et le sens de I.</p></div>
+      <div class="cle"><p><b class="cle-titre">Lire une demi-équation.</b> Des électrons écrits du côté des <b>produits</b> (à droite du =) sont <b>produits</b> à l'électrode : ils en <b>partent</b>. Des électrons écrits du côté des <b>réactifs</b> (à gauche du =) sont <b>consommés</b> : ils doivent y <b>arriver</b>.</p></div>
     </div>
     ${exemple(`<p>Pile zinc-cuivre : l'ampèremètre affiche une valeur positive, sa borne COM est reliée au zinc. Le zinc est donc la borne −, le cuivre la borne + ; les électrons vont du zinc vers le cuivre dans les fils, le courant du cuivre vers le zinc.</p>
-      ${figPile({ g: 'Zn', d: 'Cu', anode: 'g', appareil: 'A' })}`)}`);
+      ${figPile({ g: 'Zn', d: 'Cu', anode: 'g', appareil: 'A' })}`)}
+    ${exemple(`<div class="ox-anim-zone"></div>
+      <p>Quelques demi-équations lues de la même façon :</p>
+      <div class="crs-defile"><table class="crs-tab">
+        <thead><tr><th>Demi-équation</th><th>Électrons</th><th>À l'électrode</th></tr></thead>
+        <tbody><tr><td>Zn = Zn<sup>2+</sup> + 2 ${E}</td><td>produits</td><td>ils partent : borne −</td></tr>
+          <tr><td>Cu<sup>2+</sup> + 2 ${E} = Cu</td><td>consommés</td><td>ils arrivent : borne +</td></tr>
+          <tr><td>Ag<sup>+</sup> + ${E} = Ag</td><td>consommés</td><td>ils arrivent : borne +</td></tr>
+          <tr><td>Cu = Cu<sup>2+</sup> + 2 ${E}</td><td>produits</td><td>ils partent : borne −</td></tr></tbody>
+      </table></div>
+      <p>Le cuivre peut faire les deux : dans la pile zinc-cuivre, les ions Cu<sup>2+</sup> captent des électrons (borne +) ; dans la pile cuivre-argent, le cuivre métal en produit (borne −). C'est le côté du = où sont écrits les électrons qui compte.</p>`, 'Exemples avec la chimie : électrons produits ou consommés ?')}`);
+  animPile(bloc.querySelector('.ox-anim-zone'));                 // animation : électrons produits ou consommés
+  // « À toi » « Avec la chimie » : d'abord trois demi-équations à lire, au moins une de chaque sorte (électrons produits / consommés)
+  const lire = melanger(['Zn', 'Cu', 'Ag', 'Fe', 'Pb', 'Ni', 'Al']).slice(0, 3), produits = melanger([true, false, Math.random() < .5]);
+  const lignesLire = lire.map((k, i) => {
+    const P = CP[k], prod = produits[i];
+    return { id: 'l' + i, label: prod ? demiA(P) : demiC(P), bonne: prod ? 'prod' : 'cons',
+      indice: prod ? `${demiA(P)} : les électrons sont à droite du =, avec les produits. Ils sont produits, ils partent de l'électrode.`
+                   : `${demiC(P)} : les électrons sont à gauche du =, avec les réactifs. Ils sont consommés, ils arrivent sur l'électrode.`,
+      apres: `<p class="crs-calc">${prod ? 'oxydation : anode, borne −' : 'réduction : cathode, borne +'}</p>` };
+  });
   const [kA, kC] = hasard(PILES), A = CP[kA], C = CP[kC], comG = Math.random() < .5;
   const [kA2, kC2] = hasard(PILES.filter(p => p[0] !== kA || p[1] !== kC)), A2 = CP[kA2], C2 = CP[kC2];
   // méthode 1 : la borne COM (valeur positive) est sur l'anode
@@ -157,6 +154,9 @@ function etape3(c) {
           indices: { CA: 'C\'est le sens du courant I. Les électrons vont dans l\'autre sens : du − vers le +.' },
           solution: `<p>Les électrons vont du − vers le + : de ${A.nom} vers ${C.nom}. Le courant va de ${C.nom} vers ${A.nom}.</p>` },
       ] },
+    { titre: 'Électrons produits ou consommés ?', parties: [versCours({ type: 'grille', q: 'Pour chaque demi-équation, les électrons sont-ils produits ou consommés à l\'électrode ?',
+      options: [o('prod', 'produits : ils partent'), o('cons', 'consommés : ils arrivent')], lignes: lignesLire,
+      solution: '<p>Électrons à droite du = (produits) : ils partent de l\'électrode, c\'est la borne −. Électrons à gauche du = (réactifs) : ils arrivent sur l\'électrode, c\'est la borne +.</p>' })] },
     { titre: 'Avec la chimie', enonce: `<p>Pile ${A2.nom} – ${C2.nom}. On observe qu'un dépôt de ${C2.nom} se forme et que l'électrode de ${A2.nom} est consommée.</p>`,
       parties: [{ type: 'choix', q: 'Quelle électrode est la borne − ?', melanger: false, options: [o('A', `l'électrode de ${A2.nom}`), o('C', `l'électrode de ${C2.nom}`)], bonne: 'A',
         indices: { C: `À l'électrode de ${C2.nom}, les ions ${C2.ox} captent des électrons (${demiC(C2)}) : les électrons y arrivent, c'est le +.` },
