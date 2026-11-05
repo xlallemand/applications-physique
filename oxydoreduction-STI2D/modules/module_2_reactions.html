@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : écrire les réactions (entraînement) — Chapitre 15 : Oxydoréduction (piles et accumulateurs)</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="ox.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+// =====================================================================
+// MODULE 2 : ÉCRIRE LES RÉACTIONS (20 questions, l'aide diminue)
+// Repris de l'ancienne application en une seule page : mêmes questions,
+// mêmes vérifications, mêmes indices ; seule la présentation suit la charte.
+// Niveau 1 (questions 1 à 5) : inverser et multiplier les demi-équations
+// avec les boutons, l'affichage développe le résultat ; niveau 2 (6 à 10) :
+// mêmes boutons, affichage « k × ( … ) » ; niveau 3 (11 à 20) : sans aide.
+// Barème : 1 point par réaction juste à la première vérification.
+// =====================================================================
+var rIdx=0, rScore=0, rState={}, rFailed=false, rRecap=[];
+var RQ=[
+  {halfEq1:{ox:'Cu<span class="sup">2+</span>',red:'Cu',e:2},halfEq2:{ox:'Ag<span class="sup">+</span>',red:'Ag',e:1},reactants:['Cu','Ag<span class="sup">+</span>'],help:'full'},
+  {halfEq1:{ox:'Fe<span class="sup">3+</span>',red:'Fe<span class="sup">2+</span>',e:1},halfEq2:{ox:'Zn<span class="sup">2+</span>',red:'Zn',e:2},reactants:['Zn','Fe<span class="sup">3+</span>'],help:'full'},
+  {halfEq1:{ox:'Al<span class="sup">3+</span>',red:'Al',e:3},halfEq2:{ox:'Cu<span class="sup">2+</span>',red:'Cu',e:2},reactants:['Al','Cu<span class="sup">2+</span>'],help:'full'},
+  {halfEq1:{ox:'I<span class="sub">2</span>',red:'2I<span class="sup">−</span>',e:2},halfEq2:{ox:'Fe<span class="sup">3+</span>',red:'Fe<span class="sup">2+</span>',e:1},reactants:['I<span class="sup">−</span>','Fe<span class="sup">3+</span>'],help:'full'},
+  {halfEq1:{ox:'Cl<span class="sub">2</span>',red:'2Cl<span class="sup">−</span>',e:2},halfEq2:{ox:'Br<span class="sub">2</span>',red:'2Br<span class="sup">−</span>',e:2},reactants:['Br<span class="sup">−</span>','Cl<span class="sub">2</span>'],help:'full'},
+  {halfEq1:{ox:'Fe<span class="sup">2+</span>',red:'Fe',e:2},halfEq2:{ox:'Ag<span class="sup">+</span>',red:'Ag',e:1},reactants:['Fe','Ag<span class="sup">+</span>'],help:'medium'},
+  {halfEq1:{ox:'Pb<span class="sup">2+</span>',red:'Pb',e:2},halfEq2:{ox:'Zn<span class="sup">2+</span>',red:'Zn',e:2},reactants:['Zn','Pb<span class="sup">2+</span>'],help:'medium'},
+  {halfEq1:{ox:'Sn<span class="sup">4+</span>',red:'Sn<span class="sup">2+</span>',e:2},halfEq2:{ox:'Fe<span class="sup">3+</span>',red:'Fe<span class="sup">2+</span>',e:1},reactants:['Sn<span class="sup">2+</span>','Fe<span class="sup">3+</span>'],help:'medium'},
+  {halfEq1:{ox:'Ni<span class="sup">2+</span>',red:'Ni',e:2},halfEq2:{ox:'Al<span class="sup">3+</span>',red:'Al',e:3},reactants:['Al','Ni<span class="sup">2+</span>'],help:'medium'},
+  {halfEq1:{ox:'2H<span class="sup">+</span>',red:'H<span class="sub">2</span>',e:2},halfEq2:{ox:'Zn<span class="sup">2+</span>',red:'Zn',e:2},reactants:['Zn','H<span class="sup">+</span>'],help:'medium'},
+  {halfEq1:{ox:'Ag<span class="sup">+</span>',red:'Ag',e:1},halfEq2:{ox:'Zn<span class="sup">2+</span>',red:'Zn',e:2},reactants:['Zn','Ag<span class="sup">+</span>'],help:'none'},
+  {halfEq1:{ox:'Cr<span class="sup">3+</span>',red:'Cr',e:3},halfEq2:{ox:'Cu<span class="sup">2+</span>',red:'Cu',e:2},reactants:['Cr','Cu<span class="sup">2+</span>'],help:'none'},
+  {halfEq1:{ox:'Pb<span class="sup">2+</span>',red:'Pb',e:2},halfEq2:{ox:'Ag<span class="sup">+</span>',red:'Ag',e:1},reactants:['Pb','Ag<span class="sup">+</span>'],help:'none'},
+  {halfEq1:{ox:'Sn<span class="sup">4+</span>',red:'Sn<span class="sup">2+</span>',e:2},halfEq2:{ox:'I<span class="sub">2</span>',red:'2I<span class="sup">−</span>',e:2},reactants:['I<span class="sup">−</span>','Sn<span class="sup">4+</span>'],help:'none'},
+  {halfEq1:{ox:'Fe<span class="sup">2+</span>',red:'Fe',e:2},halfEq2:{ox:'2H<span class="sup">+</span>',red:'H<span class="sub">2</span>',e:2},reactants:['Fe','H<span class="sup">+</span>'],help:'none'},
+  {halfEq1:{ox:'Br<span class="sub">2</span>',red:'2Br<span class="sup">−</span>',e:2},halfEq2:{ox:'Sn<span class="sup">4+</span>',red:'Sn<span class="sup">2+</span>',e:2},reactants:['Sn<span class="sup">2+</span>','Br<span class="sub">2</span>'],help:'none'},
+  {halfEq1:{ox:'Ag<span class="sup">+</span>',red:'Ag',e:1},halfEq2:{ox:'Al<span class="sup">3+</span>',red:'Al',e:3},reactants:['Al','Ag<span class="sup">+</span>'],help:'none'},
+  {halfEq1:{ox:'Fe<span class="sup">3+</span>',red:'Fe<span class="sup">2+</span>',e:1},halfEq2:{ox:'Br<span class="sub">2</span>',red:'2Br<span class="sup">−</span>',e:2},reactants:['Br<span class="sup">−</span>','Fe<span class="sup">3+</span>'],help:'none'},
+  {halfEq1:{ox:'Sn<span class="sup">2+</span>',red:'Sn',e:2},halfEq2:{ox:'Cu<span class="sup">2+</span>',red:'Cu',e:2},reactants:['Sn','Cu<span class="sup">2+</span>'],help:'none'},
+  {halfEq1:{ox:'Cr<span class="sup">3+</span>',red:'Cr',e:3},halfEq2:{ox:'Zn<span class="sup">2+</span>',red:'Zn',e:2},reactants:['Zn','Cr<span class="sup">3+</span>'],help:'none'}
+];
+
+var app=document.getElementById('app');
+
+// --- Pure helpers ---
+function gcd(a,b){return b===0?a:gcd(b,a%b);}
+function lcm(a,b){return (a*b)/gcd(a,b);}
+function stripTags(s){return s.replace(/<[^>]*>/g,'');}
+
+// Coefficient en tête d'une espèce écrite en HTML : "2I<sup>−</sup>" -> {coef:2, rest:"I<sup>−</sup>"}
+function parseLeadingCoef(html){
+  var m=html.match(/^(\d+)(.*)/);
+  return m?{coef:parseInt(m[1]),rest:m[2].trim()}:{coef:1,rest:html};
+}
+
+// Espèce en texte (éventuellement "2 I−") -> {coef, name}
+function parseSpecies(str){
+  var c=stripTags(str).trim();
+  var m=c.match(/^(\d+)\s+(.+)$/)||c.match(/^(\d+)(.+)$/);
+  return m?{coef:parseInt(m[1]),name:m[2].trim()}:{coef:1,name:c};
+}
+
+// Espèce multipliée : "2I<sup>−</sup>" * 3 -> "6 I<sup>−</sup>"
+function multiplySpecies(html,mult){
+  var p=parseLeadingCoef(html);
+  var n=p.coef*mult;
+  return n>1?n+' '+p.rest:p.rest;
+}
+
+// HTML d'une espèce d'après son nom (sans le coefficient des données)
+function getBareHTML(name,q){
+  var all=[q.halfEq1.ox,q.halfEq1.red,q.halfEq2.ox,q.halfEq2.red];
+  for(var i=0;i<all.length;i++){
+    if(stripTags(all[i]).replace(/^\d+\s*/,'').trim()===name){
+      return parseLeadingCoef(all[i]).rest;
+    }
+  }
+  return name;
+}
+
+// Espèces différentes (sans coefficient) pour la construction et la banque
+function uniqueSpecies(q){
+  var raw=[q.halfEq1.ox,q.halfEq1.red,q.halfEq2.ox,q.halfEq2.red];
+  var seen={},res=[];
+  raw.forEach(function(s){var k=s.replace(/^\d+\s*/,'');if(!seen[k]){seen[k]=true;res.push(k);}});
+  return res;
+}
+
+// --- Affichage des demi-équations ---
+function fmtHalfEq(eq,flipped,mult,help){
+  var eStr=eq.e+' e<span class="sup">−</span>';
+  if(help==='none') return eq.ox+' + '+eStr+' = '+eq.red;
+  var left =flipped?eq.red         :eq.ox+' + '+eStr;
+  var right=flipped?eq.ox+' + '+eStr:eq.red;
+  if(mult===1) return left+' = '+right;
+  if(help==='full'){
+    function ms(side){return side.split(' + ').map(function(t){return multiplySpecies(t.trim(),mult);}).join(' + ');}
+    return ms(left)+' = '+ms(right);
+  }
+  return mult+' &times; ( '+left+' = '+right+' )';
+}
+function updateDisplays(){
+  var q=RQ[rIdx];
+  document.getElementById('eq1-display').innerHTML=fmtHalfEq(q.halfEq1,rState.f1,rState.m1,q.help);
+  document.getElementById('eq2-display').innerHTML=fmtHalfEq(q.halfEq2,rState.f2,rState.m2,q.help);
+}
+function flipEq(n){rState['f'+n]=!rState['f'+n];updateDisplays();}
+function chgMult(n,d){rState['m'+n]=Math.max(1,rState['m'+n]+d);document.getElementById('mult'+n).value=rState['m'+n];updateDisplays();}
+function updMult(n){rState['m'+n]=Math.max(1,parseInt(document.getElementById('mult'+n).value)||1);document.getElementById('mult'+n).value=rState['m'+n];updateDisplays();}
+
+// --- Construction de l'interface ---
+function halfEqUI(num,eq,help){
+  if(help==='none') return '<div class="ox-demi"><span id="eq'+num+'-display" class="ox-demi-eq"></span></div>';
+  return '<div class="ox-demi">'+
+    '<span id="eq'+num+'-display" class="ox-demi-eq"></span>'+
+    '<button type="button" class="btn-small" data-flip="'+num+'">&#x21C4; Inverser</button>'+
+    '<span class="ox-mult-l">× par :'+
+    '<span class="ox-mult"><button type="button" data-mult="'+num+'" data-d="-1" aria-label="Diminuer le multiplicateur">&#8722;</button>'+
+    '<input type="text" inputmode="numeric" id="mult'+num+'" value="1" autocomplete="off" aria-label="Multiplicateur de la demi-équation '+num+'">'+
+    '<button type="button" data-mult="'+num+'" data-d="1" aria-label="Augmenter le multiplicateur">+</button></span></span>'+
+    '</div>';
+}
+// Nombre stœchiométrique avec ses propres boutons ▲ ▼ (les flèches natives
+// d'un champ numérique sont absentes ou peu fiables au toucher)
+function coefStepperHTML(id){
+  return '<div class="ox-coef">'+
+    '<button type="button" data-coef="'+id+'" data-d="1" aria-label="Augmenter le nombre stœchiométrique">&#9650;</button>'+
+    '<input type="text" inputmode="numeric" id="coef-'+id+'" value="1" autocomplete="off" aria-label="Nombre stœchiométrique">'+
+    '<button type="button" data-coef="'+id+'" data-d="-1" aria-label="Diminuer le nombre stœchiométrique">&#9660;</button>'+
+    '</div>';
+}
+function stepCoef(id,delta){
+  var inp=document.getElementById('coef-'+id);
+  inp.value=Math.max(1,(parseInt(inp.value)||1)+delta);
+}
+function buildBuilder(q){
+  var sp=uniqueSpecies(q), nz=Math.max(2,Math.ceil(sp.length/2)), html='';
+  for(var i=0;i<nz;i++){
+    html+='<div class="ox-terme">'+coefStepperHTML('r'+i)+'<div class="ox-dz" id="zone-r'+i+'" data-side="reactant"></div></div>';
+    if(i<nz-1)html+='<span class="ox-signe">+</span>';
+  }
+  html+='<span class="ox-fleche">&#8594;</span>';
+  for(var j=0;j<nz;j++){
+    html+='<div class="ox-terme">'+coefStepperHTML('p'+j)+'<div class="ox-dz" id="zone-p'+j+'" data-side="product"></div></div>';
+    if(j<nz-1)html+='<span class="ox-signe">+</span>';
+  }
+  document.getElementById('builder-zone').innerHTML=html;
+}
+function buildBank(q){
+  var bank=document.getElementById('species-bank'); bank.innerHTML='';
+  uniqueSpecies(q).forEach(function(sp){
+    var el=document.createElement('span');
+    el.className='ox-esp';el.innerHTML=sp;el.dataset.species=sp;
+    bank.appendChild(el);
+    enableSpDrag(el);
+  });
+}
+
+// --- Glisser-déposer (Pointer Events communs, compatibles tactile : assets/dragdrop.js) ---
+function enableSpDrag(item){
+  DragDrop.enable(item, {
+    zoneSelector: '.ox-dz, #species-bank',
+    dragOverClass: 'over',
+    onDrop: function(dragged, zone){ if (zone) dropSp(dragged, zone); },
+  });
+}
+function dropSp(item, zone){
+  var origin = item.parentElement;
+  if (zone.id === 'species-bank') {
+    zone.appendChild(item);
+  } else if (zone !== origin) {
+    var occupant = zone.querySelector('.ox-esp');
+    if (occupant) document.getElementById('species-bank').appendChild(occupant);
+    zone.appendChild(item);
+    zone.classList.add('filled');
+  } else {
+    zone.classList.add('filled');
+  }
+  if (origin && origin.classList.contains('ox-dz') && origin !== zone && !origin.querySelector('.ox-esp')) {
+    origin.classList.remove('filled');
+  }
+}
+
+// --- Chimie ---
+function calcExpected(q){
+  var rs={};
+  q.reactants.forEach(function(r){rs[stripTags(r).replace(/^\d+\s*/,'').trim()]=true;});
+  var f1=!!rs[stripTags(q.halfEq1.red).replace(/^\d+\s*/,'').trim()];
+  var f2=!!rs[stripTags(q.halfEq2.red).replace(/^\d+\s*/,'').trim()];
+  var L=lcm(q.halfEq1.e,q.halfEq2.e),m1=L/q.halfEq1.e,m2=L/q.halfEq2.e;
+  var R={},P={};
+  function add(map,sp,m){var p=parseSpecies(sp);map[p.name]=(map[p.name]||0)+p.coef*m;}
+  add(f1?R:P,q.halfEq1.red,m1);add(f1?P:R,q.halfEq1.ox,m1);
+  add(f2?R:P,q.halfEq2.red,m2);add(f2?P:R,q.halfEq2.ox,m2);
+  return {
+    reactants:Object.keys(R).map(function(k){return{name:k,coef:R[k]};}),
+    products: Object.keys(P).map(function(k){return{name:k,coef:P[k]};})
+  };
+}
+function getStudent(){
+  var R={},P={};
+  document.querySelectorAll('.ox-dz.filled').forEach(function(z){
+    var side=z.dataset.side,idx=z.id.slice(-1);
+    var inp=document.getElementById('coef-'+side.charAt(0)+idx);
+    if(!inp)return;
+    var name=stripTags(z.querySelector('.ox-esp').dataset.species).trim();
+    var coef=parseInt(inp.value)||1;
+    var map=side==='reactant'?R:P;
+    map[name]=(map[name]||0)+coef;
+  });
+  return {
+    reactants:Object.keys(R).map(function(k){return{name:k,coef:R[k]};}),
+    products: Object.keys(P).map(function(k){return{name:k,coef:P[k]};})
+  };
+}
+// Normalise l'équation ENTIÈRE (réactifs + produits ensemble) par leur pgcd global,
+// pour éviter qu'une simplification partielle masque un déséquilibre stœchiométrique.
+function normEq(reactants,products){
+  var all=reactants.concat(products);
+  if(!all.length)return{reactants:[],products:[]};
+  var g=all.reduce(function(a,b){return gcd(a,b.coef);},all[0].coef);
+  function sn(list){return list.map(function(s){return{name:s.name,coef:s.coef/g};}).sort(function(a,b){return a.name.localeCompare(b.name);});}
+  return{reactants:sn(reactants),products:sn(products)};
+}
+function rxEqual(exp,stu){
+  var nExp=normEq(exp.reactants,exp.products);
+  var nStu=normEq(stu.reactants,stu.products);
+  return JSON.stringify(nExp.reactants)===JSON.stringify(nStu.reactants)&&
+         JSON.stringify(nExp.products)===JSON.stringify(nStu.products);
+}
+function renderList(list,q){
+  // la liste est déjà normalisée globalement par normEq
+  return list.map(function(s){
+    return (s.coef>1?s.coef+' ':'')+getBareHTML(s.name,q);
+  }).join(' + ');
+}
+
+// --- Analyse des erreurs ---
+function analyzeErrors(exp,stu,q){
+  var errs=[];
+  var nE=normEq(exp.reactants,exp.products);
+  var nS=normEq(stu.reactants,stu.products);
+  var nER=nE.reactants,nEP=nE.products;
+  var mR={},mP={};
+  nS.reactants.forEach(function(s){mR[s.name]=s.coef;});
+  nS.products.forEach(function(s){mP[s.name]=s.coef;});
+  if(stu.reactants.length===0&&stu.products.length===0){
+    errs.push("Aucune espèce n'a été placée dans l'équation.");
+    return errs;
+  }
+  nER.forEach(function(e){
+    var h='<strong>'+getBareHTML(e.name,q)+'</strong>';
+    if(mP[e.name]!==undefined) errs.push(h+' est du mauvais côté : c\'est un <em>réactif</em>, pas un produit.');
+    else if(mR[e.name]===undefined) errs.push(h+' est absent : il doit figurer comme réactif.');
+    else if(mR[e.name]!==e.coef) errs.push('Nombre stœchiométrique de '+h+' incorrect.');
+  });
+  nEP.forEach(function(e){
+    var h='<strong>'+getBareHTML(e.name,q)+'</strong>';
+    if(mR[e.name]!==undefined) errs.push(h+' est du mauvais côté : c\'est un <em>produit</em>, pas un réactif.');
+    else if(mP[e.name]===undefined) errs.push(h+' est absent : il doit figurer comme produit.');
+    else if(mP[e.name]!==e.coef) errs.push('Nombre stœchiométrique de '+h+' incorrect.');
+  });
+  return errs;
+}
+
+// --- Indices ---
+function generateHints(q){
+  var hints=[];
+  var rs={};
+  q.reactants.forEach(function(r){rs[stripTags(r).replace(/^\d+\s*/,'').trim()]=true;});
+  var f1=!!rs[stripTags(q.halfEq1.red).replace(/^\d+\s*/,'').trim()];
+  var f2=!!rs[stripTags(q.halfEq2.red).replace(/^\d+\s*/,'').trim()];
+  var L=lcm(q.halfEq1.e,q.halfEq2.e),m1=L/q.halfEq1.e,m2=L/q.halfEq2.e;
+  var d1=f1?'une <strong>oxydation</strong> (Réducteur &rarr; Oxydant + e<sup>−</sup>)':'une <strong>réduction</strong> (Oxydant + e<sup>−</sup> &rarr; Réducteur)';
+  var d2=f2?'une <strong>oxydation</strong> (Réducteur &rarr; Oxydant + e<sup>−</sup>)':'une <strong>réduction</strong> (Oxydant + e<sup>−</sup> &rarr; Réducteur)';
+  if(q.help!=='none'){
+    hints.push('La 1<sup>re</sup> demi-équation joue le rôle d\''+d1+(f1?' : clique sur &#x21C4; Inverser.':' : pas besoin de l\'inverser.'));
+    hints.push('La 2<sup>e</sup> demi-équation joue le rôle d\''+d2+(f2?' : clique sur &#x21C4; Inverser.':' : pas besoin de l\'inverser.'));
+    if(m1>1||m2>1) hints.push('Pour égaliser les électrons (plus petit multiple commun : '+L+' e<sup>−</sup>), règle : &times;'+m1+' pour la 1<sup>re</sup>, &times;'+m2+' pour la 2<sup>e</sup>.');
+    else hints.push('Les deux demi-équations échangent déjà '+L+' e<sup>−</sup> : aucun multiplicateur n\'est nécessaire.');
+  } else {
+    hints.push('Repère dans quelle demi-équation figure chaque réactif : c\'est elle qui doit être orientée dans le sens de la transformation.');
+    hints.push('La 1<sup>re</sup> demi-équation intervient comme '+d1+'.');
+    hints.push('La 2<sup>e</sup> demi-équation intervient comme '+d2+'.');
+    if(m1>1||m2>1) hints.push('Multiplie la 1<sup>re</sup> demi-équation par '+m1+' et la 2<sup>e</sup> par '+m2+' (plus petit multiple commun : '+L+' e<sup>−</sup>), puis additionne membre à membre.');
+    else hints.push('Les deux demi-équations échangent le même nombre d\'électrons ('+L+' e<sup>−</sup>) : additionne-les directement.');
+  }
+  return hints;
+}
+
+// --- Écrans ---
+var NIVEAUX={full:'Niveau 1 · aide complète',medium:'Niveau 2 · aide partielle',none:'Niveau 3 · sans aide'};
+function intro(){
+  app.innerHTML='<div class="er-card"><span class="er-badge">MODULE 2 · ENTRAÎNEMENT</span><h2 class="er-titre">Écrire les réactions</h2>'+
+    '<p class="er-contexte">20 réactions à écrire à partir des deux demi-équations données. L\'<b>aide diminue</b> au fil des questions : '+
+    'au niveau 1 (réactions 1 à 5), tu inverses et multiplies les demi-équations avec les boutons et le résultat s\'affiche développé ; '+
+    'au niveau 2 (6 à 10), les mêmes boutons ; au niveau 3 (11 à 20), sans aide.</p>'+
+    '<div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · 20 réactions, notées sur 20 : <b>1 point</b> par réaction juste à la première vérification ; 0 point après une erreur ou si tu affiches la solution.</p></div>'+
+    '<button type="button" class="btn-primary" id="btn-go">Commencer →</button></div>';
+  document.getElementById('btn-go').onclick=initReactions;
+  window.scrollTo(0,0);
+}
+function initReactions(){rIdx=0;rScore=0;rRecap=[];loadRQ();}
+function loadRQ(){
+  if(rIdx>=RQ.length){showRResults();return;}
+  var q=RQ[rIdx];
+  rState={m1:1,m2:1,f1:false,f2:false}; rFailed=false;  // nouvelle question : pas encore d'erreur
+  app.innerHTML=
+    '<div class="er-card"><span class="er-badge">MODULE 2 · ENTRAÎNEMENT</span><h2 class="er-titre">Écrire les réactions</h2>'+
+    '<p class="er-meta">Question '+(rIdx+1)+'/'+RQ.length+' · Score : <b id="rScore">'+rScore+' / '+rIdx+'</b></p>'+
+    '<div class="progress-bar"><div class="progress-fill" style="width:'+Math.round(rIdx/RQ.length*100)+'%"></div></div></div>'+
+    '<div class="er-card ph-question">'+
+    '<p class="er-badge ox-niveau">'+NIVEAUX[q.help]+'</p>'+
+    '<div class="ox-reactifs">Réactifs : <span>'+q.reactants.join(' et ')+'</span></div>'+
+    '<p class="ox-demis-t">Demi-équations :</p>'+
+    halfEqUI(1,q.halfEq1,q.help)+halfEqUI(2,q.halfEq2,q.help)+
+    '<div class="ox-constr"><p class="ox-constr-t">Construis l\'équation de la réaction :</p>'+
+    '<div class="ox-constr-ligne" id="builder-zone"></div>'+
+    '<p class="ox-aide-l">Fais glisser les espèces depuis la banque vers les cases, et indique les nombres stœchiométriques.</p>'+
+    '<div class="ox-banque" id="species-bank"></div></div>'+
+    '<div id="feedback-area"></div>'+
+    '<div class="er-actions">'+
+    '<button type="button" class="btn-primary" id="btn-check-reaction">Vérifier ma réaction</button>'+
+    '<button type="button" class="btn-primary" id="btn-next-reaction" hidden>Question suivante →</button></div></div>';
+  buildBuilder(q);buildBank(q);updateDisplays();
+  document.getElementById('btn-check-reaction').onclick=checkReactionAnswer;
+  document.getElementById('btn-next-reaction').onclick=nextReactionQuestion;
+  // évite qu'un double appui sur « Question suivante » réponde à la nouvelle question
+  app.style.pointerEvents='none';
+  setTimeout(function(){app.style.pointerEvents='';},350);
+  window.scrollTo(0,0);
+}
+// boutons de la question (délégation : inverser, multiplier, nombres stœchiométriques)
+app.addEventListener('click',function(e){
+  var b=e.target.closest('button'); if(!b)return;
+  if(b.dataset.flip) flipEq(+b.dataset.flip);
+  else if(b.dataset.mult) chgMult(+b.dataset.mult,+b.dataset.d);
+  else if(b.dataset.coef) stepCoef(b.dataset.coef,+b.dataset.d);
+});
+app.addEventListener('change',function(e){
+  var m=e.target.id&&e.target.id.match(/^mult(\d)$/);
+  if(m) updMult(+m[1]);
+});
+
+// --- Vérifier / réessayer / solution ---
+function montrerSuivant(){
+  var b=document.getElementById('btn-next-reaction');
+  b.textContent=rIdx>=RQ.length-1?'Voir mon score →':'Question suivante →';
+  b.hidden=false; b.disabled=true;
+  setTimeout(function(){b.disabled=false;},450);
+}
+function checkReactionAnswer(){
+  var q=RQ[rIdx];
+  var exp=calcExpected(q),stu=getStudent();
+  var ok=rxEqual(exp,stu);
+  document.getElementById('btn-check-reaction').hidden=true;
+  var fb=document.getElementById('feedback-area');
+  if(ok){
+    if(!rFailed){rScore++;}            // point seulement sans erreur préalable
+    rRecap.push(rFailed?0:1); updRScore();
+    fb.innerHTML='<div class="callout-success er-retour"><p><b class="er-ok">'+(rFailed?'C\'est juste.':'Juste !')+'</b> '+(rFailed?'(0 point : il y a eu une erreur avant.)':'+1 point.')+'</p></div>';
+    montrerSuivant();
+  } else {
+    rFailed=true;                      // plus de point possible pour cette question
+    var errs=analyzeErrors(exp,stu,q);
+    var hints=generateHints(q);
+    fb.innerHTML=
+      '<div class="callout-danger er-retour ox-retour"><p><b class="er-ko">Ce n\'est pas ça.</b> Vérifie les points ci-dessous.</p>'+
+      '<h4>Erreurs repérées</h4><ul>'+errs.map(function(e){return '<li>'+e+'</li>';}).join('')+'</ul>'+
+      '<h4>Indices pour corriger</h4><ul>'+hints.map(function(h){return '<li>'+h+'</li>';}).join('')+'</ul></div>'+
+      '<div class="er-actions" id="fb-actions"><button type="button" class="btn-secondary" id="btn-retry">Réessayer</button>'+
+      '<button type="button" class="btn-small" id="btn-sol">Voir la solution (0 point)</button></div>';
+    document.getElementById('btn-retry').onclick=retryQ;
+    document.getElementById('btn-sol').onclick=showSol;
+  }
+  setTimeout(function(){fb.scrollIntoView({behavior:'smooth',block:'nearest'});},80);
+}
+function retryQ(){
+  document.getElementById('feedback-area').innerHTML='';
+  document.getElementById('btn-check-reaction').hidden=false;
+  document.getElementById('btn-next-reaction').hidden=true;
+}
+function showSol(){
+  var q=RQ[rIdx];
+  var exp=calcExpected(q);
+  // normalisation globale pour afficher la vraie solution équilibrée
+  var nExp=normEq(exp.reactants,exp.products);
+  var rH=renderList(nExp.reactants,q), pH=renderList(nExp.products,q);
+  var act=document.getElementById('fb-actions');
+  if(act){
+    act.outerHTML='<div class="callout er-retour"><p><b>Réponse</b></p><p class="ph-calc">'+rH+' &rarr; '+pH+'</p></div>';
+  }
+  rRecap.push(0); updRScore();
+  montrerSuivant();
+}
+function nextReactionQuestion(){rIdx++;loadRQ();}
+function updRScore(){
+  var s=document.getElementById('rScore');
+  if(s) s.textContent=rScore+' / '+(rIdx+1);
+}
+function showRResults(){
+  var note=Math.round(rScore/RQ.length*20*2)/2, pct=Math.round(rScore/RQ.length*100);
+  SOM.marquer({ note: note });   // meilleure note sur 20 (sommaire, accueil)
+  var msg=rScore===RQ.length?'Tout est juste : bravo !':pct>=70?'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+    :pct>=50?'Pas mal ! Recommence pour progresser.':'Continue à t\'entraîner : relis le cours, puis recommence.';
+  app.innerHTML='<div class="er-card er-fin"><span class="er-badge">MODULE 2 · ENTRAÎNEMENT</span><h2 class="er-titre">Entraînement terminé !</h2>'+
+    (rScore===RQ.length?'<p class="er-trophee">🏆 Sans-faute !</p>':'')+
+    '<div class="er-score">'+OX.fmt(note)+' / 20</div><p class="er-score-pct">'+pct+' %</p><p class="er-contexte">'+msg+'</p>'+
+    '<div class="er-recap">'+rRecap.map(function(p,k){return '<div class="'+(p?'ok':'ko')+'">Q'+(k+1)+'<b>'+p+'/1</b></div>';}).join('')+'</div>'+
+    '<div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" id="btn-re">↺ Recommencer</button>'+
+    '<a class="btn-secondary" style="text-decoration:none" href="module_2_cours.html">Revoir le cours</a>'+
+    '<a class="btn-primary" style="text-decoration:none" href="module_3a_cours.html">Module 3 : quantités de matière →</a></div></div>';
+  document.getElementById('btn-re').onclick=initReactions;
+  window.scrollTo(0,0);
+  if(rScore===RQ.length) OX.confettis();
+}
+
+intro();
+OX.menu('module_2_reactions');
+</script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : quantités consommées ou produites — Chapitre 15 : Oxydoréduction (piles et accumulateurs)</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/schema-methode.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/schema-methode.js"></script>
+<script src="ox.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 1 / 2</span>
+    <h2 class="er-titre">Quantités de matière consommées ou produites</h2>
+    <p class="er-contexte">On connaît la masse ou la concentration d'un réactif ; on cherche ce qui est <b>consommé</b> ou <b>formé</b> pour une autre espèce. Tu vas suivre la même méthode qu'au chapitre 14 (combustions) : <b>quantité de matière</b>, <b>relation stœchiométrique</b>, puis la grandeur demandée, sur le <b>schéma de la méthode</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. De la donnée à la quantité de matière (n = m / M, n = c × V)
+   2. Les relations stœchiométriques (schéma de la méthode)
+   3. La grandeur demandée (m = n × M, c = n / V) : toute la méthode
+   · À retenir
+   Exemple suivi : Zn + 2 Ag⁺ → Zn²⁺ + 2 Ag (3,27 g de zinc).
+   Schéma de la méthode : assets/schema-methode.js (SCHM).
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { fmt } = OX;   // nombres : espace insécable entre les milliers
+const { CP, reaction, methode, diagNm, diagNcV, diagRel, diagC, egal, fr, cs, sci, UNITE } = OX;
+const ecr = v => (v < 0.01 ? sci(v, 3) : cs(v, 3));
+// métaux des « À toi » : symbole, nom, M (g/mol)
+const METAUX = ['Cu', 'Fe', 'Zn', 'Ag', 'Al'].map(k => CP[k]);
+// réactions entre un métal (consommé) et un ion métallique (le métal formé est un autre métal)
+const PAIRES = [['Cu', 'Fe'], ['Cu', 'Zn'], ['Ag', 'Cu'], ['Ag', 'Zn'], ['Ag', 'Fe'], ['Cu', 'Al'], ['Ag', 'Al'], ['Fe', 'Zn']];
+const NS = [0.0200, 0.0400, 0.0500, 0.100, 0.150];
+const r3 = v => +v.toPrecision(3);
+
+/* ---------- 1. De la donnée à la quantité de matière ---------- */
+function etape1(c) {
+  const carte = c.carte('1. De la donnée à la quantité de matière');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Les nombres stœchiométriques de l'équation comptent des entités (atomes, ions), donc des <b>moles</b>. On commence donc toujours par calculer la <b>quantité de matière n</b> de l'espèce connue.</p>
+      <div class="cle"><p><b class="cle-titre">Formules.</b></p>
+        <p class="crs-formule">n = ${fr('m', 'M')} &nbsp;&nbsp;&nbsp; n = c × V</p>
+        <p>m en g, M en ${UNITE.M}, n en mol ; c en ${UNITE.c}, V en <b>L</b>. La masse molaire d'un ion est celle de l'atome (les électrons ont une masse négligeable) : M(Cu<sup>2+</sup>) ≈ M(Cu).</p></div>
+      <p class="crs-attention"><b>Attention :</b> un volume en mL se convertit en L avant le calcul : 50 mL = 0,050 L.</p>
+    </div>
+    <div class="ph-lien-app"><p>Revois les conversions de volume (mL → L)</p><a class="btn-small" href="../../conversions/index.html" target="_blank" rel="noopener">Conversions ↗</a></div>
+    ${exemple(`<p>2,54 g de cuivre Cu, M(Cu) = 63,5 ${UNITE.M} :</p>
+      <p class="crs-calc">n(Cu) = ${fr('m', 'M')} = ${fr('2,54 g', `63,5 ${UNITE.M}`)} = <span class="c">0,0400 mol</span></p>
+      <p>50 mL d'une solution d'ions Ag<sup>+</sup> à c = 0,10 ${UNITE.c} : V = 50 mL = 0,050 L.</p>
+      <p class="crs-calc">n(Ag<sup>+</sup>) = c × V = 0,10 ${UNITE.c} × 0,050 L = <span class="c">5,0 × 10<sup>−3</sup> mol</span></p>`, 'Exemples')}`);
+  // avec une masse : n tiré dans NS, m = n × M arrondie
+  const X = hasard(METAUX), n1 = hasard(NS), m1 = r3(n1 * X.M);
+  // avec une concentration et un volume en mL
+  const ion = hasard([CP.Cu, CP.Fe, CP.Zn, CP.Ag, CP.Fe3]), cc = hasard([0.10, 0.20, 0.25, 0.50]), VmL = hasard([20, 40, 50, 100, 200]);
+  c.aToi(carte, [
+    { titre: 'Avec une masse',
+      enonce: `<p>On dispose de ${fmt(m1)} g de ${X.nom} ${X.red}. M(${X.red}) = ${fmt(X.M)} ${UNITE.M}.</p>`,
+      parties: [{ type: 'nombre', q: `Quelle est la quantité de matière de ${X.red} ?`, label: `n(${X.red}) =`, unite: 'mol', valeur: m1 / X.M, rel: .01, signe: false, affiche: cs(m1 / X.M, 3),
+        diag: v => diagNm(v, m1, X.M),
+        solution: `<p class="crs-calc">n = ${fr('m', 'M')} = ${fr(`${fmt(m1)} g`, `${fmt(X.M)} ${UNITE.M}`)} = <span class="c">${ecr(m1 / X.M)} mol</span></p>` }] },
+    { titre: 'Avec une concentration et un volume',
+      enonce: `<p>Une solution d'ions ${ion.ox} a une concentration c = ${fmt(cc)} ${UNITE.c} ; on en prélève V = ${VmL} mL.</p>`,
+      parties: [{ type: 'nombre', q: `Quelle est la quantité de matière d'ions ${ion.ox} prélevée ?`, label: `n(${ion.ox}) =`, unite: 'mol', valeur: cc * VmL / 1000, rel: .01, signe: false, affiche: cs(cc * VmL / 1000, 3),
+        diag: v => diagNcV(v, cc, VmL),
+        solution: `<p>V = ${VmL} mL = ${fmt(VmL / 1000)} L.</p><p class="crs-calc">n = c × V = ${fmt(cc)} ${UNITE.c} × ${fmt(VmL / 1000)} L = <span class="c">${ecr(cc * VmL / 1000)} mol</span></p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Les relations stœchiométriques ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Les relations stœchiométriques');
+  const ex = reaction('Ag', 'Zn');            // 2 Ag⁺ + Zn → 2 Ag + Zn²⁺
+  const E = ex.especes;
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Les quantités de matière consommées et formées sont <b>proportionnelles aux nombres stœchiométriques</b>. Pour une réaction a A + b B → c C + d D :</p>
+      <div class="cle"><p class="crs-formule">${fr('n<sub>A</sub>', 'a')} = ${fr('n<sub>B</sub>', 'b')} = ${fr('n<sub>C</sub>', 'c')} = ${fr('n<sub>D</sub>', 'd')}</p>
+        <p>Chaque quantité de matière est divisée par <b>son propre</b> nombre stœchiométrique, celui écrit devant l'espèce.</p></div>
+      <p>On le résume sur le <b>schéma de la méthode</b> : l'équation en tête, une colonne par espèce ; la donnée et n sous l'espèce connue, la ligne des relations, puis n sous l'espèce cherchée. Flèches pleines : le chemin du calcul ; pointillés : les autres espèces.</p>
+    </div>
+    ${exemple(`<p>Zn + 2 Ag<sup>+</sup> → Zn<sup>2+</sup> + 2 Ag. On consomme n(Zn) = 0,0500 mol de zinc. Quelle quantité d'argent se forme-t-il ?</p>
+      ${SCHM.schema({ especes: [E[1], E[0], E[3], E[2]], produits: 2, depart: { k: 0, n: [`n(Zn)`, '0,0500 mol'] }, cible: { k: 3, n: '0,100 mol' }, autres: [{ k: 1, n: '0,100 mol' }, { k: 2, n: '0,0500 mol' }] })}
+      <p class="crs-calc">${fr('n(Zn)', 1)} = ${fr('n(Ag)', 2)} donc n(Ag) = 2 × n(Zn) = 2 × 0,0500 = <span class="c">0,100 mol</span></p>
+      <p class="crs-attention">Erreur classique : écrire n(Ag) = n(Zn) / 2. Il se forme 2 Ag pour 1 Zn consommé : il y a <b>plus</b> d'argent formé que de zinc consommé.</p>`)}`);
+  // relation à choisir puis n à calculer, sur deux autres réactions
+  const [p1, p2] = melanger(PAIRES.filter(p => CP[p[0]].n !== CP[p[1]].n));
+  const R1 = reaction(...p1), R2 = reaction(...p2);
+  // espèces : la connue et la cherchée n'ont pas le même nombre stœchiométrique
+  const choix = R => { const ks = melanger([0, 1, 2, 3]); const i = ks[0]; const j = ks.find(k => k !== i && R.especes[k].coef !== R.especes[i].coef); return [i, j]; };
+  const [i1, j1] = choix(R1), [i2, j2] = choix(R2);
+  const nA = hasard([0.0300, 0.0600, 0.120]), A2 = R2.especes[i2], B2 = R2.especes[j2], nB = nA * B2.coef / A2.coef;
+  c.aToi(carte, [
+    { titre: 'Choisir la relation', enonce: `<p class="crs-calc">${R1.equation}</p>`,
+      parties: [SCHM.choixRelation({ especes: R1.especes, depart: { k: i1 }, cible: { k: j1 } })] },
+    { titre: 'Calculer la quantité formée ou consommée',
+      enonce: `<p class="crs-calc">${R2.equation}</p><p>Il ${i2 < 2 ? 'est consommé' : 'se forme'} n(${A2.f}) = ${cs(nA, 3)} mol.</p>`,
+      parties: [{ type: 'nombre', q: `Quelle quantité de ${B2.f} ${j2 < 2 ? 'est consommée' : 'se forme'} ?`, label: `n(${B2.f}) =`, unite: 'mol', valeur: nB, rel: .01, signe: false, affiche: cs(nB, 3),
+        diag: v => diagRel(v, nA, A2.coef, B2.coef, A2.f, B2.f),
+        solution: `<p class="crs-calc">${fr(`n(${A2.f})`, A2.coef)} = ${fr(`n(${B2.f})`, B2.coef)} donc n(${B2.f}) = ${B2.coef === 1 ? '' : B2.coef + ' × '}${A2.coef === 1 ? cs(nA, 3) : fr(cs(nA, 3), A2.coef)} = <span class="c">${ecr(nB)} mol</span></p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. La grandeur demandée : toute la méthode ---------- */
+function etape3(c) {
+  const carte = c.carte('3. La grandeur demandée : toute la méthode');
+  const ex = reaction('Ag', 'Zn'), E = ex.especes;
+  const vue = [E[1], E[0], E[3], E[2]];        // Zn + 2 Ag⁺ → Zn²⁺ + 2 Ag
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>On termine dans la colonne de l'espèce cherchée, avec n et la formule qui donne la grandeur demandée :</p>
+      <div class="cle"><p class="crs-formule">m = n × M &nbsp;&nbsp;&nbsp; c = ${fr('n', 'V')}</p>
+        <p><b class="cle-titre">La méthode.</b> 1. l'équation en tête, une colonne par espèce ; 2. sous l'espèce connue, la donnée (m, ou c et V) puis n ; 3. la relation stœchiométrique ; 4. sous l'espèce cherchée, n puis la grandeur demandée.</p></div>
+    </div>
+    ${exemple(`<p>3,27 g de zinc réagissent avec des ions Ag<sup>+</sup> en excès. Quelle masse d'argent se forme-t-il ? M(Zn) = 65,4 ${UNITE.M} ; M(Ag) = 108 ${UNITE.M}.</p>
+      ${SCHM.schema({ especes: vue, produits: 2, depart: { k: 0, donnees: [['m(Zn)', '3,27 g'], ['M(Zn)', `65,4 ${UNITE.M}`]], n: ['n = m / M', '0,0500 mol'] },
+        cible: { k: 3, n: '0,100 mol', donnees: [['M(Ag)', `108 ${UNITE.M}`]], grandeur: ['m = n × M', '10,8 g'] }, autres: [1, 2] })}
+      <p class="crs-calc">n(Zn) = ${fr('m(Zn)', 'M(Zn)')} = ${fr('3,27 g', `65,4 ${UNITE.M}`)} = 0,0500 mol</p>
+      <p class="crs-calc">${fr('n(Zn)', 1)} = ${fr('n(Ag)', 2)} donc n(Ag) = 2 × 0,0500 = 0,100 mol</p>
+      <p class="crs-calc">m(Ag) = n(Ag) × M(Ag) = 0,100 mol × 108 ${UNITE.M} = <span class="c">10,8 g</span></p>
+      <p>Si la solution a un volume V = 200 mL, la concentration des ions Zn<sup>2+</sup> formés est c = ${fr('0,0500 mol', '0,200 L')} = 0,250 ${UNITE.c}.</p>`, 'Exemple')}`);
+  // toute la méthode sur une autre réaction : métal consommé (masse) → métal formé (masse)
+  const p = hasard(PAIRES.filter(x => !(x[0] === 'Ag' && x[1] === 'Zn')));
+  const R = reaction(...p), Es = R.especes;
+  const nA = hasard(NS), mA = r3(nA * Es[1].M);
+  const M = methode({ especes: Es, produits: 2, depart: { k: 1, m: mA, M: Es[1].M }, cible: { k: 2, quoi: 'm', M: Es[2].M }, autres: [0, 3] });
+  // concentration d'un ion formé
+  const nc = hasard([0.0100, 0.0200, 0.0250]), Vc = hasard([50, 100, 250]);
+  c.aToi(carte, [
+    { titre: 'Toute la méthode',
+      enonce: `<p class="crs-calc">${R.equation}</p><p>On plonge ${fmt(mA)} g de ${Es[1].nom} dans une solution d'ions ${Es[0].f} en excès. M(${Es[1].f}) = ${fmt(Es[1].M)} ${UNITE.M} ; M(${Es[2].f}) = ${fmt(Es[2].M)} ${UNITE.M}. Quelle masse de ${Es[2].nom} se forme-t-il ?</p>`,
+      parties: M.parties },
+    { titre: 'Une concentration',
+      enonce: `<p>Il s'est formé ${cs(nc, 3)} mol d'ions ${Es[3].f} dans V = ${Vc} mL de solution.</p>`,
+      parties: [{ type: 'nombre', q: `Quelle est la concentration des ions ${Es[3].f} ?`, label: `c(${Es[3].f}) =`, unite: UNITE.c, valeur: nc / (Vc / 1000), rel: .01, signe: false, affiche: cs(nc / (Vc / 1000), 3),
+        diag: v => diagC(v, nc, Vc),
+        solution: `<p>V = ${Vc} mL = ${fmt(Vc / 1000)} L.</p><p class="crs-calc">c = ${fr('n', 'V')} = ${fr(`${cs(nc, 3)} mol`, `${fmt(Vc / 1000)} L`)} = <span class="c">${cs(nc / (Vc / 1000), 3)} ${UNITE.c}</span></p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Formules.</b> n = m / M ; n = c × V (V en L) ; m = n × M ; c = n / V. M d'un ion ≈ M de l'atome.</p></div>
+    <div class="cle"><p><b class="cle-titre">Relations stœchiométriques.</b> Pour a A + b B → c C + d D : n<sub>A</sub> / a = n<sub>B</sub> / b = n<sub>C</sub> / c = n<sub>D</sub> / d.</p></div>
+    <div class="cle"><p><b class="cle-titre">Le schéma de la méthode.</b> L'équation en tête, une colonne par espèce ; sous l'espèce connue : la donnée puis n ; la ligne des relations ; sous l'espèce cherchée : n puis la grandeur demandée.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Cours : électrons échangés et charge →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#quantites">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+OX.menu('module_3a_cours');
+</script>
+</body>
+</html>

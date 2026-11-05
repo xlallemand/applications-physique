@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : questions sur les quantités de matière — Chapitre 15 : Oxydoréduction (piles et accumulateurs)</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/schema-methode.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/schema-methode.js"></script>
+<script src="ox.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions tirées au hasard, couples Cu²⁺/Cu, Fe²⁺/Fe, Fe³⁺/Fe²⁺,
+   Ag⁺/Ag, Zn²⁺/Zn, Al³⁺/Al :
+   n d'après une masse, n d'après c et V (mL), relation stœchiométrique,
+   n consommé ou formé, masse formée, concentration formée,
+   méthode complète masse → masse (avec le schéma à compléter),
+   méthode complète c et V → masse, électrons échangés, charge Q.
+   Erreurs diagnostiquées : n = m × M, mL non convertis, nombres
+   stœchiométriques oubliés ou inversés (n(Fe³⁺) = 2 n(Cu²⁺) et non
+   n(Cu²⁺) / 2), masse molaire de la mauvaise espèce, Q = n / F.
+   ============================================================ */
+const { o, fmt, cs, sci, fr, hasard, melanger, egal, CP, reaction, methode, diagNm, diagNcV, diagRel, diagMasse, diagC, nE, UNITE, FARADAY } = OX;
+const E = 'e<sup>−</sup>';
+const ecr = v => (v < 0.01 || v >= 1e5 ? sci(v, 3) : cs(v, 3));
+const r3 = v => +v.toPrecision(3);
+const NS = [0.0200, 0.0400, 0.0500, 0.100, 0.150, 0.250];
+const METAUX = ['Cu', 'Fe', 'Zn', 'Ag', 'Al'].map(k => CP[k]);
+const IONS = [CP.Cu, CP.Fe, CP.Zn, CP.Ag, CP.Fe3, CP.Al];
+// réactions entre deux métaux (l'un consommé, l'autre formé) et réactions avec Fe³⁺/Fe²⁺
+const METAL_METAL = [['Cu', 'Fe'], ['Cu', 'Zn'], ['Ag', 'Cu'], ['Ag', 'Zn'], ['Ag', 'Fe'], ['Cu', 'Al'], ['Ag', 'Al'], ['Fe', 'Zn'], ['Fe', 'Al']];
+const TOUTES = METAL_METAL.concat([['Fe3', 'Cu'], ['Fe3', 'Zn']]);
+const nombre = (q, label, valeur, unite, diag, solution, n) => ({ type: 'nombre', q, label, valeur, unite, rel: .02, signe: false, cs: n || 3, affiche: cs(valeur, n || 3), diag, solution });
+const eqHTML = R => `<p class="ph-calc">${R.equation}</p>`;
+
+// n d'après une masse
+function qNm() {
+  const X = hasard(METAUX), n = hasard(NS), m = r3(n * X.M);
+  return { theme: 'Quantité de matière', enonce: `<p>On pèse ${fmt(m)} g de ${X.nom} ${X.red}. M(${X.red}) = ${fmt(X.M)} ${UNITE.M}.</p>`,
+    parties: [nombre(`Quelle est la quantité de matière de ${X.red} ?`, `n(${X.red}) =`, m / X.M, 'mol', v => diagNm(v, m, X.M),
+      `<p class="ph-calc">n = ${fr('m', 'M')} = ${fr(`${fmt(m)} g`, `${fmt(X.M)} ${UNITE.M}`)} = <span class="c">${ecr(m / X.M)} mol</span></p>`)] };
+}
+// n d'après c et V (en mL)
+function qNcV() {
+  const X = hasard(IONS), c = hasard([0.050, 0.10, 0.20, 0.25, 0.50]), V = hasard([10, 20, 25, 50, 100, 250]);
+  return { theme: 'Quantité de matière', enonce: `<p>On prélève V = ${V} mL d'une solution d'ions ${X.ox} de concentration c = ${fmt(c)} ${UNITE.c}.</p>`,
+    parties: [nombre(`Quelle est la quantité de matière d'ions ${X.ox} prélevée ?`, `n(${X.ox}) =`, c * V / 1000, 'mol', v => diagNcV(v, c, V),
+      `<p>V = ${V} mL = ${fmt(V / 1000)} L.</p><p class="ph-calc">n = c × V = ${fmt(c)} × ${fmt(V / 1000)} = <span class="c">${ecr(c * V / 1000)} mol</span></p>`)] };
+}
+// choisir la relation stœchiométrique
+function qRelation() {
+  const R = reaction(...hasard(TOUTES.filter(p => CP[p[0]].n !== CP[p[1]].n)));
+  const i = hasard([0, 1, 2, 3]), j = hasard([0, 1, 2, 3].filter(k => R.especes[k].coef !== R.especes[i].coef));
+  return { theme: 'Relation stœchiométrique', enonce: eqHTML(R), parties: [SCHM.choixRelation({ especes: R.especes, depart: { k: i }, cible: { k: j } })] };
+}
+// n consommé ou formé d'après une autre quantité de matière
+function qNB() {
+  const R = reaction(...hasard(TOUTES.filter(p => CP[p[0]].n !== CP[p[1]].n)));
+  const i = hasard([0, 1, 2, 3]), j = hasard([0, 1, 2, 3].filter(k => k !== i && R.especes[k].coef !== R.especes[i].coef));
+  const A = R.especes[i], B = R.especes[j], nA = hasard([0.0300, 0.0600, 0.0900, 0.120]), nB = nA * B.coef / A.coef;
+  return { theme: 'Quantité consommée ou formée', enonce: `${eqHTML(R)}<p>Il ${i < 2 ? 'est consommé' : 'se forme'} n(${A.f}) = ${cs(nA, 3)} mol.</p>`,
+    parties: [nombre(`Quelle quantité de ${B.f} ${j < 2 ? 'est consommée' : 'se forme'} ?`, `n(${B.f}) =`, nB, 'mol', v => diagRel(v, nA, A.coef, B.coef, A.f, B.f),
+      `<p class="ph-calc">${fr(`n(${A.f})`, A.coef)} = ${fr(`n(${B.f})`, B.coef)} donc n(${B.f}) = ${B.coef === 1 ? '' : B.coef + ' × '}${A.coef === 1 ? cs(nA, 3) : fr(cs(nA, 3), A.coef)} = <span class="c">${ecr(nB)} mol</span></p>`)] };
+}
+// masse formée d'après n
+function qMasse() {
+  const X = hasard(METAUX), n = hasard(NS);
+  return { theme: 'Masse formée', enonce: `<p>Il s'est déposé n = ${cs(n, 3)} mol de ${X.nom} ${X.red}. M(${X.red}) = ${fmt(X.M)} ${UNITE.M}.</p>`,
+    parties: [nombre(`Quelle masse de ${X.nom} s'est déposée ?`, `m(${X.red}) =`, n * X.M, 'g', v => diagMasse(v, n, X.M),
+      `<p class="ph-calc">m = n × M = ${cs(n, 3)} mol × ${fmt(X.M)} ${UNITE.M} = <span class="c">${ecr(n * X.M)} g</span></p>`)] };
+}
+// concentration d'un ion formé
+function qC() {
+  const X = hasard(IONS), n = hasard([0.00500, 0.0100, 0.0150, 0.0200]), V = hasard([50, 100, 200, 250]);
+  return { theme: 'Concentration', enonce: `<p>Il s'est formé ${ecr(n)} mol d'ions ${X.ox} dans V = ${V} mL de solution.</p>`,
+    parties: [nombre(`Quelle est la concentration des ions ${X.ox} ?`, `c(${X.ox}) =`, n / (V / 1000), UNITE.c, v => diagC(v, n, V),
+      `<p>V = ${V} mL = ${fmt(V / 1000)} L.</p><p class="ph-calc">c = ${fr('n', 'V')} = ${fr(`${ecr(n)} mol`, `${fmt(V / 1000)} L`)} = <span class="c">${cs(n / (V / 1000), 3)} ${UNITE.c}</span></p>`)] };
+}
+// méthode complète : masse de métal consommé → masse de métal formé (schéma à compléter)
+function qChaineMasse() {
+  const R = reaction(...hasard(METAL_METAL)), Es = R.especes;
+  const nA = hasard(NS), mA = r3(nA * Es[1].M);
+  const M = methode({ especes: Es, produits: 2, depart: { k: 1, m: mA, M: Es[1].M }, cible: { k: 2, quoi: 'm', M: Es[2].M }, autres: [0, 3] });
+  return { theme: 'Toute la méthode', enonce: `${eqHTML(R)}<p>On plonge ${fmt(mA)} g de ${Es[1].nom} dans une solution d'ions ${Es[0].f} en excès. Quelle masse de ${Es[2].nom} se forme-t-il ? M(${Es[1].f}) = ${fmt(Es[1].M)} ${UNITE.M} ; M(${Es[2].f}) = ${fmt(Es[2].M)} ${UNITE.M}.</p>`,
+    parties: M.parties };
+}
+// méthode complète : c et V d'un ion consommé → masse d'un métal (consommé ou formé)
+function qChaineC() {
+  const R = reaction(...hasard(METAL_METAL)), Es = R.especes;
+  const c = hasard([0.10, 0.20, 0.25, 0.50]), V = hasard([20, 40, 50, 100]), k = hasard([1, 2]);
+  const M = methode({ especes: Es, produits: 2, depart: { k: 0, c, V }, cible: { k, quoi: 'm', M: Es[k].M }, autres: [1, 2, 3].filter(x => x !== k), sans: ['schema'] });
+  return { theme: 'Toute la méthode', enonce: `${eqHTML(R)}<p>V = ${V} mL d'une solution d'ions ${Es[0].f} à ${fmt(c)} ${UNITE.c} réagissent entièrement. Quelle masse de ${Es[k].nom} ${k === 1 ? 'est consommée' : 'se forme'} ? M(${Es[k].f}) = ${fmt(Es[k].M)} ${UNITE.M}.</p>`,
+    parties: M.parties };
+}
+// électrons échangés d'après la demi-équation
+function qNe() {
+  const X = hasard([CP.Zn, CP.Al, CP.Cu, CP.Fe, CP.Ag]), n = hasard([0.0200, 0.0500, 0.100]);
+  return { theme: 'Électrons échangés', enonce: `<p class="ph-calc">${X.red} = ${X.ox} + ${nE(X.n)}</p><p>Il est consommé n(${X.red}) = ${cs(n, 3)} mol.</p>`,
+    parties: [nombre('Quelle quantité d\'électrons est cédée ?', `n(${E}) =`, n * X.n, 'mol', v => diagRel(v, n, 1, X.n, X.red, E),
+      `<p class="ph-calc">${fr(`n(${X.red})`, 1)} = ${fr(`n(${E})`, X.n)} donc n(${E}) = ${X.n === 1 ? '' : X.n + ' × '}${cs(n, 3)} = <span class="c">${cs(n * X.n, 3)} mol</span></p>`)] };
+}
+// charge électrique
+function qQ() {
+  return hasard([
+    () => { const n = hasard([0.0500, 0.150, 0.400, 1.20]);
+      return { theme: 'Charge électrique', enonce: `<p>Il circule n(${E}) = ${cs(n, 3)} mol d'électrons. F = 96 500 ${UNITE.F}.</p>`,
+        parties: [nombre('Quelle charge électrique a circulé ?', 'Q =', n * FARADAY, 'C', v => (egal(v, n / FARADAY) ? 'Q = n × F : on multiplie par F.' : egal(v, n) ? 'Multiplie n(e<sup>−</sup>) par F.' : `Q = ${cs(n, 3)} × 96 500.`),
+          `<p class="ph-calc">Q = n(${E}) × F = ${cs(n, 3)} × 96 500 = <span class="c">${fmt(n * FARADAY)} C</span></p>`)] }; },
+    () => { const Q = hasard([1930, 4825, 9650, 28950]);
+      return { theme: 'Charge électrique', enonce: `<p>Une charge Q = ${fmt(Q)} C a circulé. F = 96 500 ${UNITE.F}.</p>`,
+        parties: [nombre('Quelle quantité d\'électrons a circulé ?', `n(${E}) =`, Q / FARADAY, 'mol', v => (egal(v, Q * FARADAY) ? 'n = Q / F : on divise par F.' : egal(v, FARADAY / Q) ? 'Tu as inversé : n = Q / F.' : `n = ${fmt(Q)} / 96 500.`),
+          `<p class="ph-calc">n(${E}) = ${fr('Q', 'F')} = ${fr(fmt(Q), '96 500')} = <span class="c">${cs(Q / FARADAY, 3)} mol</span></p>`)] }; },
+  ])();
+}
+
+function tirage() {
+  return [qNm(), qNcV(), qRelation(), qNB(), qMasse(), qC(), qChaineMasse(), qChaineC(), qNe(), qQ()];
+}
+
+OX.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 3 · QUESTIONS', titre: 'Quantités de matière consommées ou produites',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : quantité de matière, relations stœchiométriques, masse et concentration, méthode complète avec le schéma, électrons échangés et charge. Garde ta calculatrice à portée de main.</p>',
+  questions: tirage,
+  revoir: { href: 'module_3a_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_4_cours.html', label: 'Module 4 : piles et accumulateurs →' },
+});
+OX.menu('module_3_questions');
+</script>
+</body>
+</html>

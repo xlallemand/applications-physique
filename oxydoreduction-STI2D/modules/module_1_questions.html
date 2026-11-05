@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : questions sur les oxydants et les réducteurs — Chapitre 15 : Oxydoréduction (piles et accumulateurs)</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ox.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions (les dix questions de l'entraînement de l'ancienne
+   application, avec des espèces tirées au hasard) :
+   ce que forment une oxydation et une réduction (2), reconnaître une
+   oxydation et une réduction (2), l'oxydant et le réducteur d'un couple (2),
+   sens d'écriture et place des électrons (vrai / faux, 2), électrons dans
+   l'équation d'une réaction, transfert d'électrons.
+   Erreurs diagnostiquées : oxydation et réduction confondues, électrons
+   lus du mauvais côté de la flèche, couple lu à l'envers, électrons
+   additionnés au lieu d'être éliminés.
+   ============================================================ */
+const { o, hasard, melanger, nE, CP, demi, reduc, oxyd, couple } = OX;
+const VF = [o('vrai', '✓ Vrai'), o('faux', '✗ Faux')];
+
+// une oxydation (ou une réduction) forme…
+function qForme(sens) {
+  const ox = sens === 'oxyd';
+  return { theme: ox ? 'Oxydation' : 'Réduction',
+    parties: [{ type: 'choix', q: `Une ${ox ? 'oxydation' : 'réduction'} est une transformation qui forme :`, melanger: false,
+      options: [o('ox', 'l\'oxydant'), o('red', 'le réducteur')], bonne: ox ? 'ox' : 'red',
+      indices: ox ? { red: 'C\'est la réduction qui forme le réducteur. Une oxydation : le réducteur cède des électrons et devient l\'oxydant.' }
+                  : { ox: 'C\'est l\'oxydation qui forme l\'oxydant. Une réduction : l\'oxydant capte des électrons et devient le réducteur.' },
+      solution: ox ? '<p>Une oxydation forme <b>l\'oxydant</b> : Réducteur → Oxydant + n e<sup>−</sup>.</p>'
+                   : '<p>Une réduction forme <b>le réducteur</b> : Oxydant + n e<sup>−</sup> → Réducteur.</p>' }] };
+}
+// reconnaître une oxydation ou une réduction écrite avec une flèche
+function qReconnaitre(sens, cp) {
+  return { theme: 'Oxydation ou réduction ?', enonce: `<p class="ph-calc">Transformation : ${sens === 'oxyd' ? oxyd(cp) : reduc(cp)}</p>`,
+    parties: [{ type: 'choix', q: 'Est-ce une oxydation ou une réduction ?', melanger: false,
+      options: [o('oxyd', 'Oxydation'), o('reduc', 'Réduction')], bonne: sens,
+      indices: {
+        reduc: `Les électrons sont après la flèche : ${cp.red} les cède. Céder des électrons, c'est une oxydation : elle forme l'oxydant ${cp.ox}.`,
+        oxyd: `Les électrons sont avant la flèche : ${cp.ox} les capte. Capter des électrons, c'est une réduction : elle forme le réducteur ${cp.red}.` },
+      solution: sens === 'oxyd' ? `<p>${cp.red} cède ${nE(cp.n)} et forme l'oxydant ${cp.ox} : c'est une <b>oxydation</b>.</p>`
+                                : `<p>${cp.ox} capte ${nE(cp.n)} et forme le réducteur ${cp.red} : c'est une <b>réduction</b>.</p>` }] };
+}
+// l'oxydant ou le réducteur d'un couple
+function qCouple(quoi, cp) {
+  return { theme: 'Lire un couple',
+    parties: [{ type: 'choix', q: `Dans le couple ${couple(cp)}, quel est ${quoi === 'ox' ? 'l\'oxydant' : 'le réducteur'} ?`, melanger: false,
+      options: [o('ox', cp.ox), o('red', cp.red)], bonne: quoi,
+      indices: { red: `Un couple s'écrit Oxydant / Réducteur : l'oxydant est écrit en premier. ${cp.red} est le réducteur.`,
+                 ox: `Un couple s'écrit Oxydant / Réducteur : le réducteur est écrit en second. ${cp.ox} est l'oxydant.` },
+      solution: `<p>Couple Oxydant / Réducteur : l'oxydant est ${cp.ox}, le réducteur est ${cp.red}. Demi-équation : ${demi(cp)}.</p>` }] };
+}
+// sens d'écriture d'une oxydation ou d'une réduction (vrai / faux)
+function qSens() {
+  const v = hasard([
+    { t: 'Pour une oxydation, on écrit la demi-équation dans le sens Réducteur → Oxydant + n e<sup>−</sup>.', ok: true },
+    { t: 'Pour une réduction, on écrit la demi-équation dans le sens Oxydant + n e<sup>−</sup> → Réducteur.', ok: true },
+    { t: 'Pour une oxydation, on écrit la demi-équation dans le sens Oxydant + n e<sup>−</sup> → Réducteur.', ok: false },
+    { t: 'Pour une réduction, on écrit la demi-équation dans le sens Réducteur → Oxydant + n e<sup>−</sup>.', ok: false },
+  ]);
+  return { theme: 'Vrai ou faux', enonce: `<p>${v.t}</p>`,
+    parties: [{ type: 'choix', q: 'Cette affirmation est-elle vraie ?', melanger: false, options: VF, bonne: v.ok ? 'vrai' : 'faux',
+      indice: 'Une oxydation forme l\'oxydant (Réducteur → Oxydant + n e<sup>−</sup>) ; une réduction forme le réducteur (Oxydant + n e<sup>−</sup> → Réducteur).',
+      solution: `<p>${v.ok ? 'Vrai' : 'Faux'} : une oxydation s'écrit Réducteur → Oxydant + n e<sup>−</sup>, une réduction Oxydant + n e<sup>−</sup> → Réducteur.</p>` }] };
+}
+// place des électrons dans une demi-équation (vrai / faux)
+function qElectrons() {
+  const v = hasard([
+    { t: 'Dans une demi-équation, les électrons figurent toujours du côté du réducteur.', ok: false },
+    { t: 'Dans une demi-équation, les électrons figurent toujours du côté de l\'oxydant.', ok: true },
+  ]);
+  const cp = CP[hasard(['Cu', 'Ag', 'Zn', 'Fe3', 'Al'])];
+  return { theme: 'Vrai ou faux', enonce: `<p>${v.t}</p>`,
+    parties: [{ type: 'choix', q: 'Cette affirmation est-elle vraie ?', melanger: false, options: VF, bonne: v.ok ? 'vrai' : 'faux',
+      indice: `Regarde une demi-équation, par exemple ${demi(cp)} : c'est l'oxydant ${cp.ox} qui capte les électrons, ils sont écrits avec lui.`,
+      solution: `<p>${v.ok ? 'Vrai' : 'Faux'} : les électrons sont toujours <b>du côté de l'oxydant</b>, qui les capte : ${demi(cp)}.</p>` }] };
+}
+// électrons échangés dans l'équation d'une réaction
+function qBilan() {
+  return { theme: 'Équation d\'une réaction',
+    parties: [{ type: 'choix', q: 'Pour écrire l\'équation d\'une réaction d\'oxydoréduction, que fait-on avec les électrons échangés ?', colonne: true,
+      options: [o('ok', 'On s\'assure qu\'ils sont en nombre égal dans les deux demi-équations, pour les éliminer'), o('add', 'On les additionne et on les écrit dans l\'équation'), o('ign', 'On les ignore')],
+      bonne: 'ok',
+      indices: { add: 'Les électrons cédés par le réducteur sont tous captés par l\'oxydant : ils n\'apparaissent jamais dans l\'équation de la réaction.',
+                 ign: 'On ne peut pas les ignorer : il faut d\'abord en avoir autant dans les deux demi-équations (on les multiplie), sinon l\'équation est fausse.' },
+      solution: '<p>Tous les électrons cédés sont captés : on multiplie les demi-équations pour en avoir <b>autant des deux côtés</b>, puis ils s\'éliminent quand on additionne.</p>' }] };
+}
+// transfert d'électrons
+function qTransfert() {
+  return { theme: 'Réaction d\'oxydoréduction',
+    parties: [{ type: 'choix', q: 'Une réaction d\'oxydoréduction est un transfert :',
+      options: [o('p', 'de protons'), o('a', 'd\'atomes'), o('e', 'd\'électrons')], bonne: 'e',
+      indices: { p: 'Les espèces échangent des charges négatives : ce sont des électrons, pas des protons.', a: 'Les atomes sont conservés : ce qui passe d\'une espèce à l\'autre, ce sont des électrons.' },
+      solution: '<p>Une réaction d\'oxydoréduction est un <b>transfert d\'électrons</b> : le réducteur d\'un couple cède des électrons à l\'oxydant d\'un autre couple.</p>' }] };
+}
+
+function tirage() {
+  const formes = melanger(['oxyd', 'reduc']), sens = melanger(['oxyd', 'reduc']);
+  const ks = melanger(['Ag', 'Fe3', 'Cu', 'Pb', 'Ni', 'Fe', 'Zn', 'Sn', 'Al', 'Cr', 'I']);
+  return [qForme(formes[0]), qForme(formes[1]), qReconnaitre(sens[0], CP[ks[0]]), qReconnaitre(sens[1], CP[ks[1]]),
+    qCouple('ox', CP[ks[2]]), qCouple('red', CP[ks[3]]), qSens(), qElectrons(), qBilan(), qTransfert()];
+}
+
+OX.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 1 · QUESTIONS', titre: 'Oxydants et réducteurs',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : oxydant et réducteur, couple et demi-équation, oxydation et réduction.</p>',
+  questions: tirage,
+  revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_2_cours.html', label: 'Module 2 : écrire une réaction →' },
+});
+OX.menu('module_1_questions');
+</script>
+</body>
+</html>

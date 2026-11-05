@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : fiche récapitulative — Chapitre 15 : Oxydoréduction (piles et accumulateurs)</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/schema-methode.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/schema-methode.js"></script>
+<script src="ox.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<!-- Fiche récapitulative du module 3 : formules, relations stœchiométriques et schéma de la méthode (ancre « quantites »),
+     électrons échangés et charge (ancre « electrons »). Les schémas sont écrits par le script en bas de page. -->
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Quantités de matière consommées ou produites</h2>
+  </div>
+
+  <section class="er-card" id="quantites">
+    <h3 class="cours-titre">Formules</h3>
+    <div class="cle"><p class="som-formule">n = <span class="som-fr"><span>m</span><span>M</span></span> &nbsp;&nbsp; n = c × V &nbsp;&nbsp; m = n × M &nbsp;&nbsp; c = <span class="som-fr"><span>n</span><span>V</span></span></p>
+      <p>m en g ; M en g·mol<sup>−1</sup> ; n en mol ; c en mol·L<sup>−1</sup> ; V en <b>L</b> (50 mL = 0,050 L). La masse molaire d'un ion est celle de l'atome.</p></div>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Relations stœchiométriques</h3>
+    <div class="cle"><p>Pour a A + b B → c C + d D :</p>
+      <p class="som-formule"><span class="som-fr"><span>n<sub>A</sub></span><span>a</span></span> = <span class="som-fr"><span>n<sub>B</sub></span><span>b</span></span> = <span class="som-fr"><span>n<sub>C</sub></span><span>c</span></span> = <span class="som-fr"><span>n<sub>D</sub></span><span>d</span></span></p></div>
+    <p>Avec Cu<sup>2+</sup> + 2 Fe<sup>2+</sup> → Cu + 2 Fe<sup>3+</sup> : n(Fe<sup>3+</sup>) = 2 n(Cu<sup>2+</sup>), et non n(Cu<sup>2+</sup>) / 2.</p>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">Le schéma de la méthode</h3>
+    <p>L'équation en tête, une colonne par espèce ; sous l'espèce connue : la donnée puis n ; la ligne des relations ; sous l'espèce cherchée : n puis la grandeur demandée. Exemple : 3,27 g de zinc réagissent avec des ions Ag<sup>+</sup> en excès.</p>
+    <div id="schema1"></div>
+  </section>
+
+  <section class="er-card" id="electrons">
+    <h3 class="cours-titre">Électrons échangés et charge</h3>
+    <div class="cle"><p>La demi-équation relie n(e<sup>−</sup>) à n(espèce) : avec H<sub>2</sub> = 2 H<sup>+</sup> + 2 e<sup>−</sup>, n(e<sup>−</sup>) = 2 n(H<sub>2</sub>).</p>
+      <p class="som-formule">Q = n(e<sup>−</sup>) × F &nbsp;&nbsp; F = 96 500 C·mol<sup>−1</sup></p></div>
+    <div id="schema2"></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_3a_cours.html">Revoir le cours</a>
+    <a class="btn-secondary" href="module_3_questions.html">Questions sur les quantités de matière</a>
+  </div>
+</div>
+<script>
+// schémas de la méthode (assets/schema-methode.js)
+const M = 'g·mol<sup>−1</sup>';
+document.getElementById('schema1').innerHTML = SCHM.schema({
+  especes: [{ f: 'Zn', coef: 1 }, { f: 'Ag<sup>+</sup>', coef: 2 }, { f: 'Zn<sup>2+</sup>', coef: 1 }, { f: 'Ag', coef: 2 }], produits: 2,
+  depart: { k: 0, donnees: [['m(Zn)', '3,27 g'], ['M(Zn)', `65,4 ${M}`]], n: ['n = m / M', '0,0500 mol'] },
+  cible: { k: 3, n: '0,100 mol', donnees: [['M(Ag)', `108 ${M}`]], grandeur: ['m = n × M', '10,8 g'] }, autres: [1, 2] });
+document.getElementById('schema2').innerHTML = SCHM.schema({
+  especes: [{ f: 'H<sub>2</sub>', coef: 1 }, { f: 'H<sup>+</sup>', coef: 2 }, { f: 'e<sup>−</sup>', coef: 2 }], produits: 1, signe: '=',
+  depart: { k: 0, n: ['n(H<sub>2</sub>)', '10 mol'] }, cible: { k: 2, n: '20 mol', grandeur: ['Q = n × F', '1,93 × 10<sup>6</sup> C'] }, autres: [1] });
+OX.menu('fiche_3');
+</script>
+</body>
+</html>

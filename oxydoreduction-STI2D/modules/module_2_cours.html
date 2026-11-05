@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : écrire une réaction d'oxydoréduction — Chapitre 15 : Oxydoréduction (piles et accumulateurs)</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ox.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · COURS</span>
+    <h2 class="er-titre">Écrire une réaction d'oxydoréduction</h2>
+    <p class="er-contexte">Tu vas apprendre à trouver <b>qui réagit avec qui</b>, puis à écrire l'<b>équation d'une réaction d'oxydoréduction</b> à partir des deux <b>demi-équations</b> données, y compris avec des ions H<sup>+</sup> et de l'eau, et dans le cas d'une <b>dismutation</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Qui réagit avec qui ? Orienter les demi-équations
+   2. Égaliser les électrons et additionner
+   (étapes 4 et 5 du cours de l'ancienne application, avec « qui réagit
+   avec qui » en plus)
+   3. Avec H⁺ et H₂O ; la dismutation · À retenir
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { nE, kE, sPl, texte, R, lcm, CP, demi, reduc, oxyd, couple } = OX;
+
+// Réactions des « À toi » : [couple dont l'oxydant réagit, couple dont le réducteur réagit]
+// (l'oxydant le plus fort réagit avec le réducteur le plus fort)
+const ORIENTER = [['Cu', 'Zn'], ['Ag', 'Cu'], ['Pb', 'Zn'], ['Cu', 'Fe'], ['Ag', 'Zn'], ['Ni', 'Zn'], ['Cu', 'Al'], ['Fe3', 'Cu'], ['Ag', 'Ni']];
+const EGALISER_1 = [['Ag', 'Cu'], ['Ag', 'Zn'], ['Ag', 'Pb'], ['Ag', 'Fe'], ['Ag', 'Ni'], ['Fe3', 'Cu'], ['Fe3', 'Ni']];   // 1 et 2 électrons
+const EGALISER_2 = [['Cu', 'Al'], ['Ni', 'Al'], ['Fe', 'Al'], ['Pb', 'Al'], ['Zn', 'Al'], ['Ag', 'Al']];                  // avec 3 électrons
+
+/* ---------- 1. Qui réagit avec qui ? Orienter les demi-équations ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Qui réagit avec qui ? Orienter les demi-équations');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Une <b>réaction d'oxydoréduction</b> est un <b>transfert d'électrons</b> : le réducteur d'un couple cède des électrons à l'oxydant d'un autre couple. On écrit son équation à partir des demi-équations des deux couples, qui sont toujours données.</p>
+      <div class="cle"><p><b class="cle-titre">Qui réagit avec qui ?</b> L'<b>oxydant d'un couple</b> réagit avec le <b>réducteur de l'autre couple</b>. Avec les couples ox<sub>1</sub> / red<sub>1</sub> et ox<sub>2</sub> / red<sub>2</sub> :</p>
+        <p class="crs-formule">ox<sub>1</sub> + red<sub>2</sub> → ox<sub>2</sub> + red<sub>1</sub> &nbsp;ou&nbsp; red<sub>1</sub> + ox<sub>2</sub> → ox<sub>1</sub> + red<sub>2</sub></p>
+        <p>Écris les deux couples l'un sous l'autre et entoure les deux réactifs : ils sont toujours en diagonale. Par exemple, Cu<sup>2+</sup> et Fe<sup>2+</sup> réagissent :</p>
+        <p class="ox-couples"><span class="ox-entoure">Cu<sup>2+</sup></span><span>/</span><span>Cu</span><span>Fe<sup>3+</sup></span><span>/</span><span class="ox-entoure">Fe<sup>2+</sup></span></p>
+        <p>Cu<sup>2+</sup>, oxydant du premier couple, réagit avec Fe<sup>2+</sup>, réducteur du second : ils forment Cu et Fe<sup>3+</sup>.</p></div>
+      <div class="cle"><p><b class="cle-titre">Méthode, étapes 1 et 2.</b></p>
+        <ol class="er-liste"><li><b>Identifier les réactifs</b> et les repérer dans les demi-équations.</li>
+          <li><b>Orienter les demi-équations</b> : une des deux doit être inversée pour que le réactif soit à gauche. La flèche part du réactif vers le produit.</li></ol></div>
+    </div>
+    ${exemple(`<p>Réaction entre ${R('Fe<sup>3+</sup>')} et ${R('Zn')}. Demi-équations données :</p>
+      <p class="crs-calc">${R('Fe<sup>3+</sup>')} + e<sup>−</sup> = Fe<sup>2+</sup><br>Zn<sup>2+</sup> + 2 e<sup>−</sup> = ${R('Zn')}</p>
+      <p><b>1.</b> Fe<sup>3+</sup> est à gauche de sa demi-équation, Zn est à droite de la sienne.</p>
+      <p><b>2.</b> On garde la première dans son sens, on inverse la seconde pour avoir Zn à gauche :</p>
+      <p class="crs-calc">${R('Fe<sup>3+</sup>')} + e<sup>−</sup> → Fe<sup>2+</sup> &nbsp;(réduction)<br>${R('Zn')} → Zn<sup>2+</sup> + 2 e<sup>−</sup> &nbsp;(oxydation)</p>`)}`);
+  const orienter = (paire, titre) => {
+    const a = CP[paire[0]], b = CP[paire[1]];          // a : son oxydant réagit ; b : son réducteur réagit
+    return { titre,
+      enonce: `<p>Réaction entre ${R(a.ox)} et ${R(b.red)}. Demi-équations données :</p><p class="crs-calc">${melanger([a, b]).map(demi).join('<br>')}</p>`,
+      parties: [
+        { type: 'choix', colonne: true, q: `Comment écris-tu la demi-équation du couple ${couple(a)}&nbsp;?`, bonne: 'ok',
+          options: [{ id: 'ok', label: reduc(a) }, { id: 'inv', label: oxyd(a) }, { id: 'cote', label: `${a.ox} → ${a.red} + ${nE(a.n)}` }],
+          indices: { inv: `Le réactif est ${a.ox} : il doit être à gauche de la flèche. Ici, pas besoin d'inverser la demi-équation.`,
+                     cote: `Les électrons sont du mauvais côté : on garde la demi-équation dans son sens, les électrons restent avec ${a.ox}.` },
+          solution: `<p>${a.ox} est déjà à gauche : on garde le sens. <b>${reduc(a)}</b> : c'est une réduction.</p>` },
+        { type: 'choix', colonne: true, q: `Et la demi-équation du couple ${couple(b)}&nbsp;?`, bonne: 'ok',
+          options: [{ id: 'ok', label: oxyd(b) }, { id: 'inv', label: reduc(b) }, { id: 'cote', label: `${b.red} + ${nE(b.n)} → ${b.ox}` }],
+          indices: { inv: `Le réactif est ${b.red} : il doit être à gauche de la flèche. Il faut inverser la demi-équation.`,
+                     cote: `Les électrons sont du mauvais côté : quand on inverse la demi-équation, les électrons passent à droite, avec ${b.ox}.` },
+          solution: `<p>On inverse pour avoir ${b.red} à gauche : <b>${oxyd(b)}</b> : c'est une oxydation.</p>` },
+      ] };
+  };
+  // deux réactions sans couple commun
+  const [p1, ...autres] = melanger(ORIENTER);
+  const p2 = autres.find(p => !p.some(k => p1.includes(k)));
+  // qui réagit avec qui : l'oxydant d'un couple avec le réducteur de l'autre (un troisième couple pour les choix)
+  const qui = (paire) => {
+    const a = CP[paire[0]], b = CP[paire[1]], parLOx = Math.random() < .5;
+    const X = parLOx ? a.ox : b.red;
+    return { titre: 'Qui réagit avec qui ?',
+      enonce: `<p>Couples ${couple(a)} et ${couple(b)}. On met ${X} en présence des espèces de l'autre couple.</p>`,
+      parties: [{ type: 'choix', q: `Avec quelle espèce ${X} réagit-il ?`,
+        options: parLOx ? [{ id: 'ok', label: b.red }, { id: 'ox', label: b.ox }] : [{ id: 'ok', label: a.ox }, { id: 'red', label: a.red }],
+        bonne: 'ok',
+        indices: { ox: `${X} est un oxydant : il réagit avec un <b>réducteur</b>, celui de l'autre couple. ${b.ox} est l'oxydant de l'autre couple.`,
+                   red: `${X} est un réducteur : il réagit avec un <b>oxydant</b>, celui de l'autre couple. ${a.red} est le réducteur de l'autre couple.` },
+        solution: `<p>${X} est ${parLOx ? 'l\'oxydant' : 'le réducteur'} de son couple : il réagit avec ${parLOx ? `le réducteur ${b.red}` : `l'oxydant ${a.ox}`} de l'autre couple.</p>` }] };
+  };
+  const p3 = melanger(ORIENTER).find(p => !p.some(k => p1.includes(k) || p2.includes(k))) || p2;
+  c.aToi(carte, [qui(p3), orienter(p1), orienter(p2)]);
+  return carte;
+}
+
+/* ---------- 5. Égaliser les électrons et additionner ---------- */
+// multiplicateurs : m1 × n1 = m2 × n2 = L (plus petit multiple commun)
+const mult = (a, b) => { const L = lcm(a.n, b.n); return { L, m1: L / a.n, m2: L / b.n }; };
+function partieMult(a, b) {
+  const { L, m1, m2 } = mult(a, b);
+  return { type: 'champs', ligne: true, q: 'Par combien multiplies-tu chaque demi-équation pour avoir autant d\'électrons des deux côtés&nbsp;?',
+    champs: [{ unite: `× ( ${reduc(a)} )`, valeur: m1, entier: true, signe: false, aria: 'Multiplicateur de la première demi-équation' },
+             { unite: `× ( ${oxyd(b)} )`, valeur: m2, entier: true, signe: false, aria: 'Multiplicateur de la seconde demi-équation' }],
+    diag: vs => {
+      if (vs.some(v => v < 1)) return 'Un multiplicateur est un nombre entier, au moins égal à 1.';
+      const e1 = vs[0] * a.n, e2 = vs[1] * b.n;
+      if (e1 === e2) return `Les électrons sont bien égaux (${e1} de chaque côté), mais prends les plus petits multiplicateurs : ${L} électrons suffisent.`;
+      if (vs[0] === m2 && vs[1] === m1) return `Tu as échangé les multiplicateurs : avec tes valeurs, la première demi-équation échange ${e1} électron${sPl(e1)} et la seconde ${e2}.`;
+      return `Avec tes valeurs, la première demi-équation échange ${e1} électron${sPl(e1)} et la seconde ${e2}. Il en faut autant des deux côtés : cherche le plus petit multiple commun de ${a.n} et ${b.n}.`;
+    },
+    solution: `<p>${m1} × ${a.n} = ${m2} × ${b.n} = ${L} électrons : on multiplie la première par ${m1}, la seconde par ${m2}.</p>` };
+}
+function partieEquation(a, b) {
+  const { m1, m2 } = mult(a, b);
+  const esp = [a.ox, b.red, a.red, b.ox];
+  return { type: 'champs', ligne: true, q: 'Écris l\'équation de la réaction : complète les coefficients (écris 1 quand il n\'y a pas de coefficient).',
+    champs: [{ valeur: m1, unite: `${a.ox} +` }, { valeur: m2, unite: `${b.red} →` }, { valeur: m1, unite: `${a.red} +` }, { valeur: m2, unite: b.ox }]
+      .map((ch, i) => Object.assign(ch, { entier: true, signe: false, aria: 'Coefficient de ' + texte(esp[i]) })),
+    diag: vs => {
+      if (vs.some(v => v < 1)) return 'Un coefficient est un nombre entier, au moins égal à 1.';
+      if (vs[0] !== vs[2] || vs[1] !== vs[3]) return `L'oxydant et le réducteur d'un même couple viennent de la même demi-équation : ils ont le même coefficient (${a.ox} et ${a.red} ; ${b.red} et ${b.ox}).`;
+      const e1 = vs[0] * a.n, e2 = vs[1] * b.n;
+      if (e1 !== e2) return `Les électrons ne s'éliminent pas : avec ces coefficients, ${a.ox} capte ${e1} électron${sPl(e1)} et ${b.red} en cède ${e2}.`;
+      return 'L\'équation est équilibrée mais pas simplifiée : prends les plus petits coefficients possibles.';
+    },
+    solution: `<p class="crs-calc">${m1} × ( ${reduc(a)} )<br>${m2} × ( ${oxyd(b)} )</p>
+      <p class="crs-calc"><span class="c">${kE(m1, a.ox)} + ${kE(m2, b.red)} → ${kE(m1, a.red)} + ${kE(m2, b.ox)}</span></p>` };
+}
+function etape2(c) {
+  const carte = c.carte('2. Égaliser les électrons et additionner');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Tous les électrons cédés par le réducteur sont captés par l'oxydant : il en faut <b>autant</b> dans les deux demi-équations.</p>
+      <div class="cle"><p><b class="cle-titre">Méthode, étapes 3 et 4.</b></p>
+        <ol class="er-liste" start="3"><li><b>Égaliser les électrons</b> : multiplier chaque demi-équation par le bon coefficient.</li>
+          <li><b>Additionner</b> membre à membre : les électrons s'éliminent.</li></ol></div>
+    </div>
+    ${exemple(`<p>Suite de l'exemple : la première demi-équation échange 1 électron, la seconde 2. On multiplie la première par 2.</p>
+      <p class="crs-calc"><b>2 ×</b> ( Fe<sup>3+</sup> + e<sup>−</sup> → Fe<sup>2+</sup> )<br><b>1 ×</b> ( Zn → Zn<sup>2+</sup> + 2 e<sup>−</sup> )</p>
+      <p>On additionne membre à membre : les 2 électrons s'éliminent.</p>
+      <p class="crs-calc">2 Fe<sup>3+</sup> + <del>2 e<sup>−</sup></del> → 2 Fe<sup>2+</sup><br>Zn → Zn<sup>2+</sup> + <del>2 e<sup>−</sup></del></p>
+      <p class="crs-calc"><span class="c">2 Fe<sup>3+</sup> + Zn → 2 Fe<sup>2+</sup> + Zn<sup>2+</sup></span></p>`)}`);
+  const p1 = hasard(EGALISER_1), p2 = hasard(EGALISER_2);
+  const a1 = CP[p1[0]], b1 = CP[p1[1]], a2 = CP[p2[0]], b2 = CP[p2[1]];
+  c.aToi(carte, [
+    { titre: 'Pas à pas',
+      enonce: `<p>Réaction entre ${R(a1.ox)} et ${R(b1.red)}. Demi-équations orientées :</p><p class="crs-calc">${reduc(a1)}<br>${oxyd(b1)}</p>`,
+      parties: [partieMult(a1, b1), partieEquation(a1, b1)] },
+    { titre: 'Toute la méthode',
+      enonce: `<p>Réaction entre ${R(a2.ox)} et ${R(b2.red)}. Demi-équations données :</p><p class="crs-calc">${melanger([a2, b2]).map(demi).join('<br>')}</p>`,
+      parties: [partieEquation(a2, b2)] },
+  ]);
+  return carte;
+}
+
+
+/* ---------- 3. Avec H⁺ et H₂O ; la dismutation ---------- */
+const H = 'H<sup>+</sup>', EAU = 'H<sub>2</sub>O', E = 'e<sup>−</sup>';
+// réactions en milieu acide (« À toi ») : demi-équations orientées, multiplicateurs, équation finale
+// esp : [formule, coefficient] dans l'ordre de l'équation ; g : nombre de réactifs
+const ACIDES = [
+  { titre: 'MnO<sub>4</sub><sup>−</sup> et Fe<sup>2+</sup>', reactifs: ['MnO<sub>4</sub><sup>−</sup>', 'Fe<sup>2+</sup>'],
+    demis: [`MnO<sub>4</sub><sup>−</sup> + 8 ${H} + 5 ${E} = Mn<sup>2+</sup> + 4 ${EAU}`, `Fe<sup>3+</sup> + ${E} = Fe<sup>2+</sup>`],
+    orientees: [`1 × ( MnO<sub>4</sub><sup>−</sup> + 8 ${H} + 5 ${E} → Mn<sup>2+</sup> + 4 ${EAU} )`, `5 × ( Fe<sup>2+</sup> → Fe<sup>3+</sup> + ${E} )`],
+    esp: [['MnO<sub>4</sub><sup>−</sup>', 1], [H, 8], ['Fe<sup>2+</sup>', 5], ['Mn<sup>2+</sup>', 1], [EAU, 4], ['Fe<sup>3+</sup>', 5]], g: 3 },
+  { titre: 'NO<sub>3</sub><sup>−</sup> et Cu', reactifs: ['NO<sub>3</sub><sup>−</sup>', 'Cu'],
+    demis: [`NO<sub>3</sub><sup>−</sup> + 4 ${H} + 3 ${E} = NO + 2 ${EAU}`, `Cu<sup>2+</sup> + 2 ${E} = Cu`],
+    orientees: [`2 × ( NO<sub>3</sub><sup>−</sup> + 4 ${H} + 3 ${E} → NO + 2 ${EAU} )`, `3 × ( Cu → Cu<sup>2+</sup> + 2 ${E} )`],
+    esp: [['NO<sub>3</sub><sup>−</sup>', 2], [H, 8], ['Cu', 3], ['NO', 2], [EAU, 4], ['Cu<sup>2+</sup>', 3]], g: 3 },
+  { titre: 'H<sub>2</sub>O<sub>2</sub> et Fe<sup>2+</sup>', reactifs: ['H<sub>2</sub>O<sub>2</sub>', 'Fe<sup>2+</sup>'],
+    demis: [`H<sub>2</sub>O<sub>2</sub> + 2 ${H} + 2 ${E} = 2 ${EAU}`, `Fe<sup>3+</sup> + ${E} = Fe<sup>2+</sup>`],
+    orientees: [`1 × ( H<sub>2</sub>O<sub>2</sub> + 2 ${H} + 2 ${E} → 2 ${EAU} )`, `2 × ( Fe<sup>2+</sup> → Fe<sup>3+</sup> + ${E} )`],
+    esp: [['H<sub>2</sub>O<sub>2</sub>', 1], [H, 2], ['Fe<sup>2+</sup>', 2], [EAU, 2], ['Fe<sup>3+</sup>', 2]], g: 3 },
+  { titre: 'Zn et H<sup>+</sup>', reactifs: ['Zn', H],
+    demis: [`2 ${H} + 2 ${E} = H<sub>2</sub>`, `Zn<sup>2+</sup> + 2 ${E} = Zn`],
+    orientees: [`1 × ( 2 ${H} + 2 ${E} → H<sub>2</sub> )`, `1 × ( Zn → Zn<sup>2+</sup> + 2 ${E} )`],
+    esp: [[H, 2], ['Zn', 1], ['H<sub>2</sub>', 1], ['Zn<sup>2+</sup>', 1]], g: 2 },
+];
+// équation écrite à partir de esp, avec ou sans nombres stœchiométriques
+const eqAcide = r => r.esp.slice(0, r.g).map(([f, k]) => kE(k, f)).join(' + ') + ' → ' + r.esp.slice(r.g).map(([f, k]) => kE(k, f)).join(' + ');
+// partie : les nombres stœchiométriques de l'équation (un champ par espèce, sur une ligne)
+function partieAcide(r) {
+  const vrais = r.esp.map(x => x[1]);
+  return { type: 'champs', ligne: true, q: 'Complète les nombres stœchiométriques de l\'équation (écris 1 quand il n\'y a pas de nombre).',
+    champs: r.esp.map(([f, k], i) => ({ valeur: k, unite: f + (i === r.esp.length - 1 ? '' : i === r.g - 1 ? ' →' : ' +'), entier: true, signe: false, aria: 'Nombre stœchiométrique de ' + texte(f) })),
+    diag: vs => {
+      if (vs.some(v => v < 1)) return 'Un nombre stœchiométrique est un nombre entier, au moins égal à 1.';
+      const k = vs[0] / vrais[0];
+      if (k > 1 && vs.every((v, i) => v === vrais[i] * k)) return 'L\'équation est équilibrée mais pas simplifiée : prends les plus petits nombres possibles.';
+      return `Multiplie d'abord les demi-équations pour avoir autant d'électrons des deux côtés : ${r.orientees.join(' ; ')}. Puis additionne : ${H} et ${EAU} gardent le nombre écrit dans leur demi-équation, multiplié.`;
+    },
+    solution: `<p class="crs-calc">${r.orientees.join('<br>')}</p><p class="crs-calc"><span class="c">${eqAcide(r)}</span></p>` };
+}
+function etape3(c) {
+  const carte = c.carte('3. Avec H<sup>+</sup> et H<sub>2</sub>O ; la dismutation');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Dans une solution acide, certaines demi-équations contiennent des ions H<sup>+</sup> et des molécules d'eau H<sub>2</sub>O. La méthode ne change pas, avec une dernière étape.</p>
+      <div class="cle"><p><b class="cle-titre">Méthode, étape 5.</b> <b>Simplifier</b> : si H<sup>+</sup> ou H<sub>2</sub>O apparaissent <b>des deux côtés</b> de la flèche après l'addition, on enlève le même nombre de chaque côté.</p></div>
+      <div class="cle"><p><b class="cle-titre">Dismutation.</b> Une même espèce est l'<b>oxydant d'un couple</b> et le <b>réducteur de l'autre</b> : elle réagit avec elle-même. C'est le seul réactif de la réaction.</p></div>
+    </div>
+    ${exemple(`<p>Réaction entre ${R('MnO<sub>4</sub><sup>−</sup>')} et ${R('H<sub>2</sub>O<sub>2</sub>')}. Demi-équations données :</p>
+      <p class="crs-calc">${R('MnO<sub>4</sub><sup>−</sup>')} + 8 ${H} + 5 ${E} = Mn<sup>2+</sup> + 4 ${EAU}<br>O<sub>2</sub> + 2 ${H} + 2 ${E} = ${R('H<sub>2</sub>O<sub>2</sub>')}</p>
+      <p>On oriente, on multiplie (10 électrons) et on additionne :</p>
+      <p class="crs-calc"><b>2 ×</b> ( MnO<sub>4</sub><sup>−</sup> + 8 ${H} + 5 ${E} → Mn<sup>2+</sup> + 4 ${EAU} )<br><b>5 ×</b> ( H<sub>2</sub>O<sub>2</sub> → O<sub>2</sub> + 2 ${H} + 2 ${E} )</p>
+      <p class="crs-calc">2 MnO<sub>4</sub><sup>−</sup> + 16 ${H} + 5 H<sub>2</sub>O<sub>2</sub> → 2 Mn<sup>2+</sup> + 8 ${EAU} + 5 O<sub>2</sub> + 10 ${H}</p>
+      <p>Il y a des ${H} des deux côtés : on enlève 10 ${H} de chaque côté (16 − 10 = 6).</p>
+      <p class="crs-calc"><span class="c">2 MnO<sub>4</sub><sup>−</sup> + 6 ${H} + 5 H<sub>2</sub>O<sub>2</sub> → 2 Mn<sup>2+</sup> + 8 ${EAU} + 5 O<sub>2</sub></span></p>
+      <p><b>Dismutation</b> de l'ion Cu<sup>+</sup> : couples Cu<sup>2+</sup> / Cu<sup>+</sup> (Cu<sup>2+</sup> + ${E} = Cu<sup>+</sup>) et Cu<sup>+</sup> / Cu (Cu<sup>+</sup> + ${E} = Cu). Cu<sup>+</sup> est à la fois oxydant et réducteur :</p>
+      <p class="crs-calc">Cu<sup>+</sup> → Cu<sup>2+</sup> + ${E}<br>Cu<sup>+</sup> + ${E} → Cu</p>
+      <p class="crs-calc"><span class="c">2 Cu<sup>+</sup> → Cu<sup>2+</sup> + Cu</span></p>`, 'Exemples')}`);
+  // simplifier : l'équation additionnée est donnée, on retire les H⁺ (et H₂O) en trop
+  const simp = hasard([
+    { avant: `Cr<sub>2</sub>O<sub>7</sub><sup>2−</sup> + 14 ${H} + 3 H<sub>2</sub>O<sub>2</sub> → 2 Cr<sup>3+</sup> + 7 ${EAU} + 3 O<sub>2</sub> + 6 ${H}`,
+      champs: [{ label: 'Cr<sub>2</sub>O<sub>7</sub><sup>2−</sup> +', valeur: 8, unite: `${H} + 3 H<sub>2</sub>O<sub>2</sub> → 2 Cr<sup>3+</sup> + 7 ${EAU} + 3 O<sub>2</sub>` }],
+      apres: `Cr<sub>2</sub>O<sub>7</sub><sup>2−</sup> + 8 ${H} + 3 H<sub>2</sub>O<sub>2</sub> → 2 Cr<sup>3+</sup> + 7 ${EAU} + 3 O<sub>2</sub>`, calc: '14 − 6 = 8 H<sup>+</sup> à gauche',
+      diag: vs => (vs[0] === 14 ? `Il y a aussi 6 ${H} à droite : enlève-les des deux côtés.` : vs[0] === 20 ? 'On enlève le même nombre de chaque côté : on ne les ajoute pas.' : `Enlève 6 ${H} de chaque côté : 14 − 6.`) },
+    { avant: `2 MnO<sub>4</sub><sup>−</sup> + 16 ${H} + 5 SO<sub>2</sub> + 10 ${EAU} → 2 Mn<sup>2+</sup> + 8 ${EAU} + 5 SO<sub>4</sub><sup>2−</sup> + 20 ${H}`,
+      champs: [{ label: '2 MnO<sub>4</sub><sup>−</sup> + 5 SO<sub>2</sub> +', valeur: 2, unite: `${EAU} → 2 Mn<sup>2+</sup> + 5 SO<sub>4</sub><sup>2−</sup> +` }, { valeur: 4, unite: H }],
+      apres: `2 MnO<sub>4</sub><sup>−</sup> + 5 SO<sub>2</sub> + 2 ${EAU} → 2 Mn<sup>2+</sup> + 5 SO<sub>4</sub><sup>2−</sup> + 4 ${H}`, calc: `10 − 8 = 2 ${EAU} à gauche ; 20 − 16 = 4 ${H} à droite`,
+      diag: vs => (vs[0] === 10 || vs[1] === 20 ? `Simplifie aussi : 8 ${EAU} à droite et 16 ${H} à gauche s'enlèvent des deux côtés.` : `Enlève 8 ${EAU} et 16 ${H} de chaque côté : il reste 10 − 8 ${EAU} à gauche et 20 − 16 ${H} à droite.`) },
+  ]);
+  const acide = hasard(ACIDES);
+  c.aToi(carte, [
+    { titre: 'Simplifier',
+      enonce: `<p>Après l'addition des deux demi-équations, on obtient :</p><p class="crs-calc">${simp.avant}</p>`,
+      parties: [{ type: 'champs', ligne: true, q: 'Écris l\'équation simplifiée : complète le nombre qui reste.',
+        champs: simp.champs.map(ch => Object.assign({ entier: true, signe: false, aria: 'Nombre stœchiométrique' }, ch)),
+        diag: simp.diag, solution: `<p>${simp.calc} :</p><p class="crs-calc"><span class="c">${simp.apres}</span></p>` }] },
+    { titre: 'Toute la méthode, avec des ions H<sup>+</sup>',
+      enonce: `<p>Réaction entre ${R(acide.reactifs[0])} et ${R(acide.reactifs[1])}. Demi-équations données :</p><p class="crs-calc">${acide.demis.join('<br>')}</p>`,
+      parties: [partieAcide(acide)] },
+    { titre: 'Une dismutation',
+      enonce: `<p>Couples Au<sup>3+</sup> / Au<sup>+</sup> : Au<sup>3+</sup> + 2 ${E} = Au<sup>+</sup> ; Au<sup>+</sup> / Au : Au<sup>+</sup> + ${E} = Au. L'ion or(I) Au<sup>+</sup> n'est pas stable en solution : il se dismute.</p>`,
+      parties: [
+        { type: 'choix', q: 'Quelle espèce est à la fois oxydant et réducteur ?', options: [{ id: 'ok', label: 'Au<sup>+</sup>' }, { id: 'ox', label: 'Au<sup>3+</sup>' }, { id: 'red', label: 'Au' }], bonne: 'ok',
+          indices: { ox: 'Au<sup>3+</sup> n\'est l\'oxydant que d\'un seul couple. Cherche l\'espèce qui apparaît dans les deux couples.',
+                     red: 'Au n\'est le réducteur que d\'un seul couple. Cherche l\'espèce qui apparaît dans les deux couples.' },
+          solution: '<p>Au<sup>+</sup> est le réducteur du couple Au<sup>3+</sup> / Au<sup>+</sup> et l\'oxydant du couple Au<sup>+</sup> / Au : c\'est le seul réactif.</p>' },
+        { type: 'champs', ligne: true, q: 'Écris l\'équation de la dismutation.',
+          champs: [{ valeur: 3, unite: 'Au<sup>+</sup> →' }, { valeur: 1, unite: 'Au<sup>3+</sup> +' }, { valeur: 2, unite: 'Au' }].map(ch => Object.assign(ch, { entier: true, signe: false, aria: 'Nombre stœchiométrique' })),
+          diag: vs => (vs[0] === 2 ? 'Compte les Au<sup>+</sup> : il en faut 1 pour l\'oxydation et 2 pour les deux réductions (2 électrons cédés, 1 capté à chaque fois).'
+            : vs[1] === 1 && vs[2] === 1 ? 'Les électrons ne s\'éliminent pas : l\'oxydation de Au<sup>+</sup> en cède 2, la réduction n\'en capte qu\'un. Multiplie la réduction par 2.'
+              : 'Oxydation : Au<sup>+</sup> → Au<sup>3+</sup> + 2 e<sup>−</sup> ; réduction, multipliée par 2 : 2 Au<sup>+</sup> + 2 e<sup>−</sup> → 2 Au. Additionne.'),
+          solution: `<p class="crs-calc">Au<sup>+</sup> → Au<sup>3+</sup> + 2 ${E}<br>2 × ( Au<sup>+</sup> + ${E} → Au )</p><p class="crs-calc"><span class="c">3 Au<sup>+</sup> → Au<sup>3+</sup> + 2 Au</span></p>` },
+      ] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b>Qui réagit avec qui ?</b> L'oxydant d'un couple réagit avec le réducteur de l'autre :</p>
+      <p class="crs-formule">ox<sub>1</sub> + red<sub>2</sub> → ox<sub>2</sub> + red<sub>1</sub></p></div>
+    <div class="cle"><p><b>Écrire une réaction d'oxydoréduction</b> (les demi-équations sont données) :</p>
+      <ol class="er-liste"><li>repérer les réactifs dans les deux demi-équations ;</li>
+        <li>orienter chaque demi-équation : le réactif à gauche ;</li>
+        <li>multiplier les demi-équations pour avoir le même nombre d'électrons ;</li>
+        <li>additionner membre à membre : les électrons s'éliminent ;</li>
+        <li>simplifier H<sup>+</sup> et H<sub>2</sub>O s'il y en a des deux côtés.</li></ol></div>
+    <div class="cle"><p><b>Dismutation</b> : une même espèce, oxydant d'un couple et réducteur de l'autre, réagit avec elle-même.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_2_reactions.html">S'entraîner : 20 réactions →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3a_cours.html">Module 3 : quantités de matière</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+OX.menu('module_2_cours');
+</script>
+</body>
+</html>

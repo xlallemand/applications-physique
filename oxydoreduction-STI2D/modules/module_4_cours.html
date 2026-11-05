@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : piles, accumulateurs, capacité et énergie — Chapitre 15 : Oxydoréduction (piles et accumulateurs)</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ox.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ox.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS</span>
+    <h2 class="er-titre">Piles, accumulateurs, capacité et énergie</h2>
+    <p class="er-contexte">Une pile convertit l'énergie chimique d'une réaction d'oxydoréduction en énergie électrique. Tu vas distinguer <b>pile</b>, <b>batterie</b> et <b>pile à combustible</b>, puis calculer la <b>capacité</b> Q = I × Δt et l'<b>énergie disponible</b> E = Q × U.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Pile, batterie, pile à combustible ; chaînes énergétiques, tension à vide
+   2. Capacité : Q = I × Δt, en A·h ou en C (1 A·h = 3 600 C)
+   3. Énergie disponible : E = Q × U = U × I × Δt = P × Δt · À retenir
+   Lien vers « Chapitre 2 : Piles et accumulateurs » (nouvelle fenêtre).
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { fmt } = OX;   // nombres : espace insécable entre les milliers
+const { o, egal, fr, cs, chaine, CHAINES, versCours } = OX;
+const lien = (texte, page, bouton) => `<div class="ph-lien-app"><p>${texte}</p><a class="btn-small" href="../../piles-accumulateurs/modules/${page}" target="_blank" rel="noopener">${bouton} ↗</a></div>`;
+
+/* ---------- 1. Pile, batterie, pile à combustible ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Pile, batterie, pile à combustible');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">Définitions.</b> Une <b>pile</b> convertit l'énergie chimique en énergie électrique.</p>
+        <p>Une <b>batterie</b> (un accumulateur) se <b>recharge</b> : on inverse le sens de la réaction en lui fournissant de l'énergie électrique.</p>
+        <p>Dans une <b>pile à combustible</b>, un des réactifs est le dioxygène O<sub>2</sub> ; elle produit de l'eau H<sub>2</sub>O.</p>
+        <p>La <b>tension à vide</b> est la tension aux bornes de la pile quand elle ne débite pas de courant.</p></div>
+      <p>Les deux sens de fonctionnement d'une batterie : la décharge (elle alimente un appareil) et la charge (elle est rechargée).</p>
+    </div>
+    ${lien('Revois « Pile ou accumulateur » (chapitre 2)', 'module_1_cours.html', 'Chapitre 2')}
+    ${exemple(`<p><b>Décharge</b> : la réaction chimique libère de l'énergie, la batterie la convertit en énergie électrique pour l'appareil.</p>
+      ${chaine(CHAINES.decharge, 'Décharge : réactifs, énergie chimique, batterie, énergie électrique, appareil')}
+      <p><b>Charge</b> : le chargeur fournit de l'énergie électrique, la batterie la stocke sous forme d'énergie chimique en reformant les réactifs.</p>
+      ${chaine(CHAINES.charge, 'Charge : chargeur, énergie électrique, batterie, énergie chimique, réactifs')}`, 'Exemple : les deux chaînes énergétiques')}`);
+  c.aToi(carte, [
+    { titre: 'Pile, batterie ou pile à combustible ?',
+      parties: [versCours({ type: 'grille', q: 'Classe chaque générateur.',
+        options: [o('pile', 'pile'), o('bat', 'batterie'), o('comb', 'pile à combustible')],
+        lignes: melanger([
+          { id: 'tel', label: 'La batterie lithium-ion d\'un téléphone, qu\'on recharge chaque soir', bonne: 'bat', indice: 'Elle se recharge : c\'est une batterie (un accumulateur).' },
+          { id: 'tele', label: 'La pile alcaline d\'une télécommande, qu\'on jette quand elle est usée', bonne: 'pile', indice: 'Elle ne se recharge pas : c\'est une pile.' },
+          { id: 'h2', label: 'Le générateur d\'une voiture à hydrogène : il consomme H<sub>2</sub> et le dioxygène de l\'air, il rejette de l\'eau', bonne: 'comb', indice: 'Un réactif est O<sub>2</sub> et il produit de l\'eau : c\'est une pile à combustible.' },
+        ]),
+        solution: '<p>Rechargeable : batterie. Non rechargeable : pile. Un réactif est O<sub>2</sub>, de l\'eau est produite : pile à combustible.</p>' })] },
+    { titre: 'La charge',
+      parties: [{ type: 'choix', q: 'Pendant la charge, sous quelle forme la batterie stocke-t-elle l\'énergie reçue du chargeur ?',
+        options: [o('chim', 'énergie chimique'), o('elec', 'énergie électrique'), o('th', 'énergie thermique')], bonne: 'chim',
+        indices: { elec: 'Elle <b>reçoit</b> de l\'énergie électrique du chargeur, mais elle la stocke autrement : en reformant les réactifs.', th: 'Un peu d\'énergie est perdue en chaleur, mais l\'énergie stockée est dans les réactifs reformés.' },
+        solution: `${chaine(CHAINES.charge)}<p>La batterie stocke l'énergie sous forme d'<b>énergie chimique</b> : la réaction est inversée, les réactifs sont reformés.</p>` }] },
+    { titre: 'La tension à vide',
+      parties: [{ type: 'choix', q: 'La tension à vide d\'une pile, c\'est la tension à ses bornes :', colonne: true,
+        options: [o('ok', 'quand elle ne débite pas de courant'), o('vide', 'quand elle est complètement déchargée'), o('max', 'quand elle débite le plus grand courant possible')], bonne: 'ok',
+        indices: { vide: '« À vide » ne veut pas dire « vidée » : la pile n\'est reliée à rien, elle ne débite pas.', max: 'C\'est l\'inverse : à vide, la pile ne débite aucun courant.' },
+        solution: '<p>La tension à vide est mesurée quand la pile <b>ne débite pas</b> (aucun appareil branché, seulement un voltmètre).</p>' }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Capacité ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Capacité : Q = I × Δt');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>La <b>capacité</b> d'une pile ou d'une batterie est la charge électrique Q qu'elle peut débiter. Une batterie qui débite un courant I pendant une durée Δt fournit :</p>
+      <div class="cle"><p class="crs-formule">Q = I × Δt</p>
+        <p>Q en <b>A·h</b> avec I en A et Δt en h, <b>ou</b> Q en <b>C</b> avec I en A et Δt en s : 1 C = 1 A × 1 s.</p>
+        <p class="crs-formule">1 A·h = 1 A × 3 600 s = 3 600 C</p></div>
+      <p>Une capacité est souvent donnée en mA·h : 3 000 mA·h = 3,0 A·h.</p>
+    </div>
+    ${lien('Revois « Capacité et énergie disponible » (chapitre 2)', 'module_2_cours.html', 'Chapitre 2')}
+    ${exemple(`<p>Une batterie débite I = 2,0 A pendant Δt = 3,0 h :</p>
+      <p class="crs-calc">Q = I × Δt = 2,0 A × 3,0 h = <span class="c">6,0 A·h</span></p>
+      <p class="crs-calc">Q = 6,0 × 3 600 = <span class="c">21 600 C</span> &nbsp;(ou 2,0 A × 10 800 s)</p>
+      <p>Avec cette capacité, sous un courant de 0,50 A, elle fonctionne Δt = Q / I = 6,0 / 0,50 = <b>12 h</b>.</p>`)}`);
+  const I1 = hasard([0.50, 1.5, 2.5, 4.0]), t1 = hasard([2, 4, 6, 8]);
+  const Q2 = hasard([1.6, 2.2, 4.5, 60]);
+  const Qm = hasard([2000, 3000, 4500]), Im = hasard([200, 250, 500]);
+  c.aToi(carte, [
+    { titre: 'En A·h', enonce: `<p>Une batterie débite I = ${fmt(I1)} A pendant Δt = ${t1} h.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle charge Q a-t-elle débitée ?', label: 'Q =', unite: 'A·h', valeur: I1 * t1, rel: .01, signe: false,
+        diag: v => (egal(v, I1 * t1 * 3600) ? 'Ça, c\'est Q en coulombs. Ici, avec Δt en heures, Q est en A·h.' : egal(v, I1 / t1) ? 'Q = I × Δt : on multiplie.' : `Q = I × Δt = ${fmt(I1)} × ${t1}.`),
+        solution: `<p class="crs-calc">Q = I × Δt = ${fmt(I1)} A × ${t1} h = <span class="c">${fmt(I1 * t1)} A·h</span></p>` }] },
+    { titre: 'En coulombs', enonce: `<p>La capacité d'une batterie est Q = ${fmt(Q2)} A·h.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle est sa capacité en coulombs ?', label: 'Q =', unite: 'C', valeur: Q2 * 3600, rel: .01, signe: false,
+        diag: v => (egal(v, Q2 * 60) ? '1 h = 3 600 s, pas 60 s : 1 A·h = 3 600 C.' : egal(v, Q2 / 3600) ? 'On multiplie par 3 600 : 1 A·h = 3 600 C.' : `1 A·h = 3 600 C, donc Q = ${fmt(Q2)} × 3 600.`),
+        solution: `<p class="crs-calc">Q = ${fmt(Q2)} × 3 600 = <span class="c">${fmt(Q2 * 3600)} C</span></p>` }] },
+    { titre: 'La durée de fonctionnement', enonce: `<p>Une batterie de capacité ${fmt(Qm)} mA·h alimente un appareil qui consomme I = ${Im} mA.</p>`,
+      parties: [{ type: 'nombre', q: 'Pendant combien de temps peut-elle fonctionner ?', label: 'Δt =', unite: 'h', valeur: Qm / Im, rel: .01, signe: false,
+        diag: v => (egal(v, Qm * Im) ? 'Δt = Q / I : on divise.' : egal(v, Im / Qm) ? 'Tu as inversé : Δt = Q / I.' : `Δt = ${fr('Q', 'I')} = ${fr(`${fmt(Qm)} mA·h`, `${Im} mA`)}.`),
+        solution: `<p class="crs-calc">Δt = ${fr('Q', 'I')} = ${fr(`${fmt(Qm)} mA·h`, `${Im} mA`)} = <span class="c">${fmt(Qm / Im)} h</span></p><p>(mA·h et mA : les « m » se simplifient, il reste des heures.)</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Énergie disponible ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Énergie disponible : E = Q × U');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>L'énergie électrique que peut fournir une batterie de capacité Q, sous la tension U :</p>
+      <div class="cle"><p class="crs-formule">E = Q × U = U × I × Δt = P × Δt</p>
+        <p>E en <b>J</b> avec Q en C et U en V ; E en <b>W·h</b> avec Q en A·h. 1 W·h = 3 600 J. La puissance P = U × I (W).</p></div>
+    </div>
+    ${exemple(`<p>Une batterie de téléphone : Q = 3,0 A·h, U = 3,7 V.</p>
+      <p class="crs-calc">E = Q × U = 3,0 A·h × 3,7 V = <span class="c">11,1 W·h</span></p>
+      <p class="crs-calc">E = 11,1 × 3 600 ≈ <span class="c">4,0 × 10<sup>4</sup> J</span> &nbsp;(ou 10 800 C × 3,7 V)</p>
+      <p>Le téléphone consomme en moyenne P = 0,50 W : Δt = E / P = 11,1 / 0,50 ≈ <b>22 h</b>.</p>`)}`);
+  const Q = hasard([1.2, 2.0, 2.5, 4.0]), U = hasard([1.2, 3.6, 3.7, 12]);
+  const Qc = hasard([3600, 7200, 18000]), Uc = hasard([1.5, 3.7, 12]);
+  const E3 = hasard([12, 24, 50]), P3 = hasard([0.5, 2, 4]);
+  c.aToi(carte, [
+    { titre: 'En W·h', enonce: `<p>Une batterie a une capacité Q = ${fmt(Q)} A·h sous une tension U = ${fmt(U)} V.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle énergie peut-elle fournir ?', label: 'E =', unite: 'W·h', valeur: Q * U, rel: .01, signe: false,
+        diag: v => (egal(v, Q * U * 3600) ? 'Ça, c\'est E en joules. Avec Q en A·h, E = Q × U est en W·h.' : egal(v, Q / U) || egal(v, U / Q) ? 'E = Q × U : on multiplie.' : `E = Q × U = ${fmt(Q)} × ${fmt(U)}.`),
+        solution: `<p class="crs-calc">E = Q × U = ${fmt(Q)} A·h × ${fmt(U)} V = <span class="c">${fmt(Q * U)} W·h</span></p>` }] },
+    { titre: 'En joules', enonce: `<p>Une pile a une capacité Q = ${fmt(Qc)} C sous une tension U = ${fmt(Uc)} V.</p>`,
+      parties: [{ type: 'nombre', q: 'Quelle énergie peut-elle fournir ?', label: 'E =', unite: 'J', valeur: Qc * Uc, rel: .01, signe: false,
+        diag: v => (egal(v, Qc * Uc / 3600) ? 'Ça, c\'est E en W·h. Avec Q en coulombs, E = Q × U est en joules.' : `E = Q × U = ${fmt(Qc)} × ${fmt(Uc)}.`),
+        solution: `<p class="crs-calc">E = Q × U = ${fmt(Qc)} C × ${fmt(Uc)} V = <span class="c">${fmt(Qc * Uc)} J</span></p>` }] },
+    { titre: 'La durée de fonctionnement', enonce: `<p>Une batterie stocke E = ${fmt(E3)} W·h. L'appareil qu'elle alimente consomme P = ${fmt(P3)} W.</p>`,
+      parties: [{ type: 'nombre', q: 'Pendant combien de temps peut-elle l\'alimenter ?', label: 'Δt =', unite: 'h', valeur: E3 / P3, rel: .01, signe: false,
+        diag: v => (egal(v, E3 * P3) ? 'E = P × Δt, donc Δt = E / P : on divise.' : egal(v, P3 / E3) ? 'Tu as inversé : Δt = E / P.' : `Δt = ${fr('E', 'P')} = ${fr(fmt(E3), fmt(P3))}.`),
+        solution: `<p class="crs-calc">E = P × Δt donc Δt = ${fr('E', 'P')} = ${fr(`${fmt(E3)} W·h`, `${fmt(P3)} W`)} = <span class="c">${fmt(E3 / P3)} h</span></p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Générateurs.</b> Pile : énergie chimique → énergie électrique. Batterie (accumulateur) : rechargeable, en inversant le sens de la réaction. Pile à combustible : un réactif est O<sub>2</sub>, elle produit H<sub>2</sub>O. Tension à vide : tension quand la pile ne débite pas.</p></div>
+    <div class="cle"><p><b class="cle-titre">Capacité.</b> Q = I × Δt, en A·h (A, h) ou en C (A, s) ; 1 A·h = 3 600 C.</p></div>
+    <div class="cle"><p><b class="cle-titre">Énergie.</b> E = Q × U = U × I × Δt = P × Δt, en J (Q en C) ou en W·h (Q en A·h).</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_4_questions.html">Questions sur ce cours →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_5_cours.html">Module 5 : schéma d'une pile</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+OX.menu('module_4_cours');
+</script>
+</body>
+</html>

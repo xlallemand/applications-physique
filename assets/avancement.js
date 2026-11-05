@@ -103,7 +103,10 @@
     'combustions': { ex: 9, pages: [
       'module_1', 'module_2_cours', 'module_2', 'module_3a_cours', 'module_3b_cours', 'module_3',
       'module_4_cours', 'module_4', 'module_5_cours', 'module_5', 'module_6', 'module_6_entrainement'] },
-    'oxydoreduction-STI2D': { pages: ['course', 'training', 'reactions'] },
+    'oxydoreduction-STI2D': { ex: 11, pages: [
+      'module_1_cours', 'module_1_questions', 'module_2_cours', 'module_2_reactions', 'module_3a_cours',
+      'module_3b_cours', 'module_3_questions', 'module_4_cours', 'module_4_questions', 'module_5_cours',
+      'module_5_pile'] },
     'oxydoreduction-spe': { pages: [
       'module_1a_cours', 'module_1b_cours', 'module_1c_cours', 'module_1d_cours', 'module_1_questions',
       'module_2a_cours', 'module_2b_cours', 'module_2_questions', 'module_3_cours', 'module_3_questions',
