@@ -22,6 +22,7 @@
                      donnees: [[étiquette, valeur], …] (écrites dans la case de la grandeur, ex. M) }
        o.autres    colonnes calculables en plus (pointillés) : [k, …] ou [{ k, n }]
        o.lettres   true : nombres stœchiométriques écrits en lettres (équation à écrire)
+       o.relations false : pas de ligne des relations (seulement la donnée et n de l'espèce connue)
        o.titre     texte de l'attribut aria-label
        Une valeur est un texte HTML, '?' (inconnue) ou '#id' (case vide où glisser une
        donnée, voir SCHM.partieDonnees) ; une case absente n'est pas dessinée.
@@ -98,10 +99,13 @@
       const dn = Array.isArray(dep.n) ? dep.n : [nDe(esp[dep.k].f), def(dep.n) ? dep.n : '?'];
       h += cell(dep.k, lig(dn[0], dn[1]), 'schm-v');
     }
-    // la ligne des relations stœchiométriques
-    h += fl([dep.k, cib.k].filter(def), kA);
-    r++;
-    h += esp.map((e, k) => cell(k, e.rel === false ? '' : frac(nDe(e.f), o.lettres ? `<i>${e.coef}</i>` : e.coef), 'schm-rel', k ? ' data-op="="' : '')).join('');
+    // la ligne des relations stœchiométriques (o.relations === false : pas de ligne,
+    // quand on ne calcule que n de l'espèce connue)
+    if (o.relations !== false) {
+      h += fl([dep.k, cib.k].filter(def), kA);
+      r++;
+      h += esp.map((e, k) => cell(k, e.rel === false ? '' : frac(nDe(e.f), o.lettres ? `<i>${e.coef}</i>` : e.coef), 'schm-rel', k ? ' data-op="="' : '')).join('');
+    }
     // sous l'espèce cherchée : n, puis la grandeur demandée ; autres colonnes en pointillés
     const bas = def(cib.k) ? [cib.k] : [];
     const autresN = autres.filter(a => def(a.n));

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : questions sur les réactions acido-basiques — Chapitre 16 : Acides et bases</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ab.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="ab.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions, réactions tirées au hasard :
+   principe d'une réaction acido-basique, réactions à écrire avec la
+   règle du gamma (2), autoprotolyse de l'eau (2 H₂O → H₃O⁺ + HO⁻),
+   qui réagit avec un acide donné, produits à choisir, méthode directe
+   (+ H⁺ / − H⁺), acides et bases d'une réaction, couples d'une
+   réaction, réaction ou demi-équation.
+   Erreurs diagnostiquées : deux acides (ou deux bases) qui réagissent,
+   réactif qui ne devient pas son conjugué, H⁺ dans l'équation,
+   transfert de H⁺ à l'envers, charge oubliée, couple formé de deux réactifs.
+   ============================================================ */
+const { o, hasard, melanger, H, f, esp, conj, CP, couple, demi, equation, partieConjugue, partieGamma } = AB;
+const REAC = [['MET', 'NH4'], ['HF', 'H3O'], ['H3O', 'ACE'], ['ACE', 'NH4'], ['NH4', 'H3O'], ['HNO3', 'NH4'], ['HNO3', 'H3O'],
+  ['ACE', 'EAU'], ['MET', 'EAU'], ['NH4', 'EAU'], ['HCL', 'H3O'], ['H3O', 'NH4'], ['HF', 'NH4'], ['NH4', 'HPO4'], ['H3O', 'MET'],
+  ['H3O', 'EAU'], ['SULF', 'H3O'], ['HCLO', 'EAU']];
+const avecEau = r => ['H3O', 'EAU'].includes(r[0]) || ['H3O', 'EAU'].includes(r[1]);
+
+// principe
+function qPrincipe() {
+  return { theme: 'Réaction acido-basique',
+    parties: [{ type: 'choix', q: 'Lors d\'une réaction acido-basique :', colonne: true,
+      options: [o('ok', `l'acide d'un couple donne un proton ${H} à la base d'un autre couple`), o('inv', `la base d'un couple donne un proton ${H} à l'acide d'un autre couple`),
+        o('el', 'l\'acide d\'un couple donne un électron à la base d\'un autre couple'), o('meme', `un acide donne un proton ${H} à sa propre base conjuguée`)],
+      bonne: 'ok',
+      indices: { inv: 'Une base capte un proton, elle ne le donne pas.', el: 'Les électrons, c\'est l\'oxydoréduction. Ici, c\'est un proton H<sup>+</sup> qui est transféré.',
+        meme: 'Un acide et sa base conjuguée forment un même couple : ils ne réagissent pas ensemble. La réaction met en jeu deux couples.' },
+      solution: `<p>Une réaction acido-basique est un <b>transfert de proton ${H}</b> de l'acide d'un couple vers la base d'un autre couple.</p>` }] };
+}
+// réaction à écrire avec la règle du gamma (couple de l'acide en haut ou en bas)
+function qGamma([ka, kb]) {
+  const ca = CP[ka], cb = CP[kb], eq = equation(ca, cb), enHaut = Math.random() < .5;
+  const def = enHaut ? { haut: ca, bas: cb, reactifs: ['a1', 'b2'] } : { haut: cb, bas: ca, reactifs: ['b1', 'a2'] };
+  return { theme: 'Règle du gamma', consigne: `<p>Écris la réaction entre ${f(ca.a)} et ${f(cb.b)}. Couples : ${couple(ca)} et ${couple(cb)}.</p>`,
+    parties: [partieGamma(def, { solution: `<p class="ph-calc">${eq.texte}</p>` })] };
+}
+// autoprotolyse de l'eau
+function qAutoprotolyse() {
+  return { theme: 'L\'eau réagit avec l\'eau', consigne: `<p>Une molécule d'eau réagit avec une autre molécule d'eau. Couples : ${couple(CP.H3O)} et ${couple(CP.EAU)}.</p>`,
+    parties: [partieGamma({ haut: CP.H3O, bas: CP.EAU, reactifs: ['b1', 'a2'] },
+      { solution: '<p class="ph-calc">H<sub>2</sub>O + H<sub>2</sub>O → H<sub>3</sub>O<sup>+</sup> + HO<sup>−</sup>, que l\'on écrit 2 H<sub>2</sub>O → H<sub>3</sub>O<sup>+</sup> + HO<sup>−</sup></p><p>L\'eau est un ampholyte : une molécule joue le rôle d\'acide, l\'autre celui de base.</p>' })] };
+}
+// avec qui un acide peut-il réagir ?
+function qAvecQui() {
+  const [ca, cb, cc] = melanger(['ACE', 'NH4', 'MET', 'HF', 'HNO3', 'HCL', 'MA']).slice(0, 3).map(k => CP[k]);
+  return { theme: 'Qui réagit avec qui ?',
+    parties: [{ type: 'choix', q: `Avec quelle espèce l'acide ${f(ca.a)} peut-il réagir ?`,
+      options: [o('ok', f(cb.b)), o('acide', f(cc.a)), o('conj', f(ca.b))], bonne: 'ok',
+      indices: { acide: `${f(cc.a)} est un acide : <b>deux acides ne réagissent pas ensemble</b>.`,
+        conj: `${f(ca.b)} est la base conjuguée de ${f(ca.a)} : ils forment un même couple, ils ne réagissent pas ensemble.` },
+      solution: `<p>${f(ca.a)} donne son proton à une base d'un autre couple : <b>${f(cb.b)}</b> (couple ${couple(cb)}).</p>` }] };
+}
+// produits d'une réaction à choisir : transfert à l'envers, charge oubliée
+function qProduits([ka, kb]) {
+  const ca = CP[ka], cb = CP[kb], eq = equation(ca, cb);
+  const R = `${f(ca.a)} + ${f(cb.b)} → `;
+  const sansQ = e => f(esp(e.pre, e.h, e.post, e.q));
+  return { theme: 'Écrire la réaction',
+    parties: [{ type: 'choix', q: `Quelle est l'équation de la réaction entre l'acide ${f(ca.a)} et la base ${f(cb.b)} ?`, colonne: true,
+      options: [o('ok', eq.texte), o('inv', R + `${f(conj(ca.a, 1))} + ${f(conj(cb.b, -1))}`),
+        o('q', R + `${sansQ(esp(ca.b.pre, ca.b.h, ca.b.post, ca.a.q))} + ${sansQ(esp(cb.a.pre, cb.a.h, cb.a.post, cb.b.q))}`)],
+      bonne: 'ok',
+      indices: { inv: `Le proton va dans l'autre sens : l'acide ${f(ca.a)} le <b>perd</b>, la base ${f(cb.b)} le <b>gagne</b>.`,
+        q: 'Les charges n\'ont pas changé : l\'espèce qui perd H<sup>+</sup> perd aussi une charge +, celle qui le gagne en gagne une.' },
+      solution: `<p class="ph-calc">${eq.texte}</p>` }] };
+}
+// méthode directe : construire les deux produits
+function qDirecte([ka, kb]) {
+  const ca = CP[ka], cb = CP[kb], eq = equation(ca, cb);
+  return { theme: 'Méthode directe', consigne: `<p>L'acide ${f(ca.a)} réagit avec la base ${f(cb.b)}.</p>`,
+    parties: [partieConjugue({ lignes: [
+      { depart: ca.a, cible: ca.b, label: `L'acide ${f(ca.a)} donne son ${H} : que devient-il ?` },
+      { depart: cb.b, cible: cb.a, label: `La base ${f(cb.b)} capte ce ${H} : que devient-elle ?` }] },
+      { q: 'Construis les deux produits de la réaction.', solution: `<p class="ph-calc">${eq.texte}</p>` })] };
+}
+// acides et bases d'une réaction (grille)
+function qEtiquettes([ka, kb]) {
+  const ca = CP[ka], cb = CP[kb], eq = equation(ca, cb, Math.random() < .5);
+  const acide = e => e === ca.a || e === cb.a;
+  return { theme: 'Acides et bases d\'une réaction', enonce: `<p class="ph-calc">${eq.texte}</p>`,
+    parties: [{ type: 'grille', q: 'Indique pour chaque espèce si c\'est un acide ou une base.', options: [o('a', 'acide'), o('b', 'base')],
+      lignes: eq.reactifs.concat(eq.produits).map((e, i) => ({ id: 'l' + i, label: `${f(e)} <span class="ab-lib">(${i < 2 ? 'réactif' : 'produit'})</span>`, bonne: acide(e) ? 'a' : 'b',
+        indice: acide(e) ? `${f(e)} a un H de plus que son conjugué : c'est un acide.` : `${f(e)} a un H de moins que son conjugué : c'est une base.` })),
+      solution: `<p>Acides : ${f(ca.a)} et ${f(cb.a)} ; bases : ${f(cb.b)} et ${f(ca.b)}.</p>` }] };
+}
+// couples d'une réaction
+function qCouples([ka, kb]) {
+  const ca = CP[ka], cb = CP[kb], eq = equation(ca, cb, Math.random() < .5);
+  return { theme: 'Couples d\'une réaction', enonce: `<p class="ph-calc">${eq.texte}</p>`,
+    parties: [{ type: 'choix', q: 'Quels sont les deux couples acide / base mis en jeu ?', colonne: true,
+      options: [o('ok', `${couple(ca)} et ${couple(cb)}`), o('reac', `${f(ca.a)} / ${f(cb.b)} et ${f(cb.a)} / ${f(ca.b)}`), o('inv', `${f(ca.b)} / ${f(ca.a)} et ${f(cb.b)} / ${f(cb.a)}`)],
+      bonne: 'ok',
+      indices: { reac: 'Les deux réactifs ne forment pas un couple : un couple, c\'est un réactif et le produit qu\'il devient.', inv: 'Dans un couple, on écrit l\'acide en premier.' },
+      solution: `<p>Couples <b>${couple(ca)}</b> et <b>${couple(cb)}</b>.</p>` }] };
+}
+// réaction ou demi-équation ?
+function qDemiOuReaction() {
+  const estDemi = Math.random() < .5, c3 = CP[hasard(['H2CO3', 'HF', 'NH4', 'ACE', 'HNO3', 'HCO3', 'H2PO4'])];
+  const [kx, ky] = hasard(REAC.filter(r => r[0] !== 'H3O' || r[1] !== 'EAU')), eq = equation(CP[kx], CP[ky]);
+  return { theme: 'Réaction ou demi-équation ?', enonce: `<p class="ph-calc">${estDemi ? demi(c3) : eq.texte}</p>`,
+    parties: [{ type: 'choix', q: 'Cette écriture est :', colonne: true, melanger: false,
+      options: [o('demi', 'une demi-équation (un seul couple)'), o('reac', 'une réaction acido-basique (deux couples)')], bonne: estDemi ? 'demi' : 'reac',
+      indices: estDemi ? { reac: `${H} apparaît et il n'y a qu'un couple, ${couple(c3)} : c'est une demi-équation.` }
+        : { demi: `Il y a deux couples et ${H} n'apparaît pas : c'est une réaction.` },
+      solution: estDemi ? `<p>Demi-équation du couple ${couple(c3)}.</p>` : `<p>Réaction entre deux couples : ${couple(CP[kx])} et ${couple(CP[ky])}.</p>` }] };
+}
+
+function tirage() {
+  const sans = melanger(REAC.filter(r => !avecEau(r))), avec = melanger(REAC.filter(r => avecEau(r) && !(r[0] === 'H3O' && r[1] === 'EAU')));
+  return [qPrincipe(), qGamma(sans[0]), qGamma(avec[0]), qAutoprotolyse(), qAvecQui(), qProduits(sans.filter(r => r !== sans[0] && CP[r[1]].b.h >= 1)[0]),
+    qDirecte(avec[1]), qEtiquettes(sans[2]), qCouples(avec[2]), qDemiOuReaction()];
+}
+
+AB.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 2 · QUESTIONS', titre: 'Réactions acido-basiques',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : écrire une réaction (règle du gamma, méthode directe), autoprotolyse de l\'eau, retrouver les couples d\'une réaction.</p>',
+  questions: tirage,
+  revoir: { href: 'module_2_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_3a_cours.html', label: 'Module 3 : le pH →' },
+});
+AB.menu('module_2_questions');
+</script>
+</body>
+</html>

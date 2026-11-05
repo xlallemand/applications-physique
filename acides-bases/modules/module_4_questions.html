@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : questions sur les quantités de matière — Chapitre 16 : Acides et bases</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ab.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/schema-methode.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/schema-methode.js"></script>
+<script src="ab.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page" id="app"></div>
+
+<script>
+/* ============================================================
+   10 questions, valeurs tirées au hasard :
+   formule de n(H₃O⁺), conversion m³ → L, n(H₃O⁺) d'un volume de pH donné (2),
+   n = m / M, relation stœchiométrique, n(H₃O⁺) formé par un acide dans l'eau,
+   masse de réactif (CaCO₃) à partir de n(H₃O⁺), m = n × M, volume de
+   solution à ajouter (V = n / c).
+   Erreurs diagnostiquées : volume non converti (m³, mL), division au lieu
+   de multiplication, nombres stœchiométriques inversés ou oubliés, signe −
+   oublié dans 10⁻ᵖᴴ.
+   ============================================================ */
+const { o, hasard, melanger, fmt, sci, cs, fr, f, CH, H3O, UNITE, CP, Hde, diagH, diagNm, diagNcV, diagMasse, diagV, methode, EQS, eqTexte, ecrire } = AB;
+const num = (v, opts) => Object.assign(v < 0.01 || v >= 1e5 ? { type: 'sci', valeur: v, cs: 2, rel: .03 } : { type: 'nombre', valeur: v, rel: .03, signe: false, affiche: cs(v, 2) }, opts);
+
+// formule de n(H3O+)
+function qFormule() {
+  return { theme: 'Formule',
+    parties: [{ type: 'choix', q: `La quantité de matière d'ions ${H3O} dans un volume V de solution est :`,
+      options: [o('ok', `n = ${CH} × V`), o('div', `n = ${CH} / V`), o('inv', `n = V / ${CH}`), o('ph', 'n = pH × V')], bonne: 'ok',
+      indices: { div: `${CH} est en mol·L<sup>−1</sup> (des moles <b>par</b> litre) : on multiplie par le volume en L.`, inv: 'Vérifie les unités : (mol·L<sup>−1</sup>) × L donne des mol.',
+        ph: `On utilise la concentration ${CH} = 10<sup>−pH</sup>, pas le pH lui-même.` },
+      solution: `<p>n(${H3O}) = ${CH} × V, comme n = c × V.</p>` }] };
+}
+// conversion m³ → L
+function qConversion() {
+  const v = hasard([0.5, 2, 12, 60, 200]);
+  return { theme: 'Conversion', enonce: `<p>Un bassin contient V = ${fmt(v)} m<sup>3</sup> d'eau.</p>`,
+    parties: [{ type: 'nombre', q: 'Convertis ce volume en litres.', label: 'V =', unite: 'L', valeur: v * 1000, rel: .001, signe: false,
+      diag: x => (Math.abs(x - v * 1e6) < 1 ? '1 m<sup>3</sup> = 1 000 L (et non 10<sup>6</sup> L).' : Math.abs(x - v / 1000) < 1e-9 ? 'On multiplie par 1 000 : 1 m<sup>3</sup> = 1 000 L, un litre est bien plus petit qu\'un mètre cube.' : '1 m<sup>3</sup> = 1 000 L.'),
+      solution: `<p>1 m<sup>3</sup> = 1 000 L, donc V = ${fmt(v)} × 1 000 = <b>${fmt(v * 1000)} L</b>.</p>` }] };
+}
+// n(H3O+) d'un volume de pH donné (V en L, mL ou m³)
+function qNH3O() {
+  const ph = hasard([1.0, 2.0, 2.5, 3.0, 4.0, 5.6, 6.0]), u = hasard(['L', 'mL', 'm3']);
+  const V0 = u === 'L' ? hasard([2, 5, 10, 200]) : u === 'mL' ? hasard([50, 100, 250, 500]) : hasard([2, 10, 60]);
+  const V = u === 'L' ? V0 : u === 'mL' ? V0 / 1000 : V0 * 1000, Ut = u === 'm3' ? UNITE.m3 : u;
+  const H = +Hde(ph).toPrecision(2), n = H * V;
+  return { theme: `Ions ${H3O} d'une solution`, enonce: `<p>On dispose de V = ${fmt(V0)} ${Ut} d'une solution de pH ${fmt(ph)}.</p>`,
+    parties: [
+      { type: 'sci', q: `Calcule ${CH} (deux chiffres significatifs).`, label: `${CH} =`, unite: UNITE.c, valeur: Hde(ph), cs: 2, diag: v => diagH(v, ph),
+        solution: `<p class="ph-calc">${CH} = 10<sup>−${fmt(ph)}</sup> ≈ ${sci(H, 2)} ${UNITE.c}</p>` },
+      num(n, { q: `Calcule la quantité de matière d'ions ${H3O}${u === 'L' ? '' : ' (V en litres)'}.`, label: `n(${H3O}) =`, unite: 'mol',
+        diag: v => diagNcV(v, H, V, { v: V0, u: Ut }),
+        solution: `${u === 'L' ? '' : `<p>V = ${fmt(V0)} ${Ut} = ${fmt(V)} L.</p>`}<p class="ph-calc">n = ${CH} × V = ${sci(H, 2)} × ${fmt(V)} ≈ <span class="c">${ecrire(n)} mol</span></p>` }),
+    ] };
+}
+// n = m / M
+function qNm() {
+  const x = hasard([{ c: CP.SULF, M: 97 }, { c: CP.ACE, M: 60 }, { c: CP.MET, M: 46 }, { c: CP.HNO3, M: 63 }]), m = hasard([0.50, 1.0, 2.5, 4.0]);
+  return { theme: 'Quantité de matière', enonce: `<p>On pèse m = ${fmt(m)} g de ${x.c.nomA} ${f(x.c.a)}, de masse molaire M = ${x.M} ${UNITE.M}.</p>`,
+    parties: [num(m / x.M, { q: `Calcule la quantité de matière de ${f(x.c.a)}.`, label: 'n =', unite: 'mol', diag: v => diagNm(v, m, x.M),
+      solution: `<p class="ph-calc">n = ${fr('m', 'M')} = ${fr(`${fmt(m)} g`, `${x.M} ${UNITE.M}`)} ≈ <span class="c">${ecrire(m / x.M)} mol</span></p>` })] };
+}
+// relation stœchiométrique
+function qRelation() {
+  const D = hasard([EQS.detartrage(), EQS.calcaire(), EQS.neutralisation()]);
+  const prod = D.length === 3 ? 1 : 2;
+  const ks = D.map((_, k) => k);
+  let i, j;
+  do { [i, j] = melanger(ks).slice(0, 2); } while (D.length > 3 && D[i].coef === D[j].coef && Math.random() < .7);
+  return { theme: 'Relation stœchiométrique', enonce: `<p class="ph-calc">${eqTexte(D, prod)}</p>`,
+    parties: [SCHM.choixRelation({ especes: D, depart: { k: i }, cible: { k: j } })] };
+}
+// n(H3O+) formé par un acide dans l'eau (schéma de la méthode)
+function qAcideEau() {
+  const x = hasard([{ c: CP.SULF, M: 97 }, { c: CP.HNO3, M: 63 }, { c: CP.HCL, M: 36.5 }]), m = hasard([0.50, 1.0, 2.0]);
+  const E = EQS.acideEau(x.c);
+  const M = methode({ especes: E, produits: 2, autres: [1, 2], depart: { k: 0, m, M: x.M }, cible: { k: 3, quoi: 'n' }, sans: ['relation'] });
+  return { theme: `Ions ${H3O} formés`, enonce: `<p class="ph-calc">${eqTexte(E, 2)}</p><p>On dissout m = ${fmt(m)} g de ${x.c.nomA} dans l'eau (M = ${fmt(x.M)} ${UNITE.M}). Quelle quantité d'ions ${H3O} se forme-t-il ?</p>`,
+    parties: M.parties };
+}
+// masse de CaCO3 éliminée par n(H3O+) donné
+function qMasse() {
+  const D = EQS.detartrage(), n = hasard([0.010, 0.020, 0.040, 0.050]);
+  const M = methode({ especes: D, produits: 2, autres: [2, 3, 4], depart: { k: 1, n, nTxt: `${ecrire(n)} mol` }, cible: { k: 0, quoi: 'm', M: 100 }, sans: ['schema'] });
+  return { theme: 'Masse de tartre éliminée', enonce: `<p class="ph-calc">${eqTexte(D, 2)}</p><p>Un détartrant apporte n(${H3O}) = ${ecrire(n)} mol. Quelle masse de tartre CaCO<sub>3</sub> (M = 100 ${UNITE.M}) élimine-t-il ?</p>`,
+    parties: M.parties };
+}
+// m = n × M
+function qmnM() {
+  const n = hasard([0.15, 0.80, 1.3, 2.5]);
+  return { theme: 'Masse', enonce: `<p>Il faut n = ${fmt(n)} mol de carbonate de calcium CaCO<sub>3</sub>. M(Ca) = 40 ; M(C) = 12 ; M(O) = 16 ${UNITE.M}.</p>`,
+    parties: [
+      { type: 'nombre', q: 'Calcule la masse molaire de CaCO<sub>3</sub>.', label: 'M =', unite: UNITE.M, valeur: 100, tol: .01, signe: false,
+        diag: v => (Math.abs(v - 68) < .1 ? 'Il y a 3 atomes d\'oxygène : 3 × 16.' : 'M = M(Ca) + M(C) + 3 × M(O).'), solution: '<p class="ph-calc">M = 40 + 12 + 3 × 16 = 100 g·mol<sup>−1</sup></p>' },
+      num(n * 100, { q: 'Calcule la masse de carbonate de calcium.', label: 'm =', unite: 'g', diag: v => diagMasse(v, n, 100),
+        solution: `<p class="ph-calc">m = n × M = ${fmt(n)} mol × 100 ${UNITE.M} = <span class="c">${fmt(n * 100)} g</span></p>` }),
+    ] };
+}
+// volume de solution à ajouter
+function qVolume() {
+  const n = hasard([6.3e-5, 2.0e-3, 5.0e-3, 1.5e-2]), c = hasard([1.0e-2, 0.10, 0.50]), V = n / c;
+  return { theme: 'Volume à verser', enonce: `<p>Il faut apporter n = ${ecrire(n)} mol d'ions ${H3O} avec une solution d'acide chlorhydrique de concentration ${CH} = ${ecrire(c)} ${UNITE.c}.</p>`,
+    parties: [num(V, { q: 'Quel volume de solution faut-il ajouter, en litres ?', label: 'V =', unite: 'L', diag: v => diagV(v, n, c),
+      solution: `<p class="ph-calc">V = ${fr('n', 'c')} = ${fr(`${ecrire(n)} mol`, `${ecrire(c)} ${UNITE.c}`)} ≈ <span class="c">${ecrire(V)} L</span> = ${cs(V * 1000, 2)} mL</p>` })] };
+}
+
+function tirage() {
+  return [hasard([qFormule, qConversion])(), qNH3O(), qNH3O(), qNm(), qRelation(), qAcideEau(), qMasse(), qmnM(), qVolume(), hasard([qFormule, qConversion, qRelation])()];
+}
+
+AB.serie({
+  app: document.getElementById('app'),
+  badge: 'MODULE 4 · QUESTIONS', titre: 'Quantités de matière',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : ions H<sub>3</sub>O<sup>+</sup> d\'une solution de pH donné, masse d\'un réactif, volume de solution à ajouter, relations stœchiométriques.</p>',
+  questions: tirage,
+  revoir: { href: 'module_4_cours.html', label: 'Revoir le cours' },
+  suite: { href: 'module_5.html', label: 'Module 5 : exercices →' },
+});
+AB.menu('module_4_questions');
+</script>
+</body>
+</html>

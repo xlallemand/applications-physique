@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : du pH à [H3O+] — Chapitre 16 : Acides et bases</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../ph/modules/ph.css">
+<link rel="stylesheet" href="ab.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="ab.js"></script>
+<script src="../../ph/modules/eq.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 2 / 3</span>
+    <h2 class="er-titre">Du pH à [H<sub>3</sub>O<sup>+</sup>]</h2>
+    <p class="er-contexte">Pour calculer la concentration en ions oxonium quand on connaît le pH, on <b>isole [H<sub>3</sub>O<sup>+</sup>]</b> dans pH = −log([H<sub>3</sub>O<sup>+</sup>]) avec la fonction <b>10<sup>x</sup></b>, réciproque de log : <b>[H<sub>3</sub>O<sup>+</sup>] = 10<sup>−pH</sup></b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   Même méthode que le cours du module 2 de l'application « pH »
+   (démonstration PH.demo, puis éditeur d'équation PH.Editeur de
+   ph/modules/eq.js, outils ×(−1), 10ˣ et log), mais sans c° :
+   pH = −log([H₃O⁺]) ⇔ [H₃O⁺] = 10^(−pH). Les tuiles de l'éditeur sont
+   seulement pH et [H₃O⁺] (aucune modification de eq.js).
+   1. 10ˣ, réciproque de log
+   2. Isoler [H₃O⁺] (démonstration, puis éditeur)
+   3. Calculer [H₃O⁺] (exemples du cours : pH 3 → 10⁻³ ; 8 → 10⁻⁸ ;
+      2,5 → 3,2 × 10⁻³ ; 9,4 → 4,0 × 10⁻¹⁰) · À retenir
+   ============================================================ */
+const { hasard, exemple } = COURS;
+const { fmt, sci, CH, H3O, UNITE, Hde, diagH } = AB;
+const { T, S, P, FN } = PH.EQ;
+
+// « Afficher tout le cours » : la démonstration PH.demo se déplie avec le moteur de cours commun
+PH.vivant = COURS.vivant;
+PH.oublier = COURS.oublier;
+Object.defineProperty(PH, 'tout', { get: () => COURS.tout, configurable: true });
+
+// grandeurs de la relation (sans c°)
+const tH = T('c', CH), tp = T('pH', 'pH');
+const logH = () => FN('log', P(S(tH)));
+// valeurs de test : [H3O+] varie, le pH s'en déduit
+function valeurs() {
+  const c = Math.pow(10, -1 - Math.random() * 11);
+  return { c, pH: -Math.log10(c) };
+}
+// étapes de la démonstration : du pH vers [H3O+]
+const DEMO = [
+  { L: P(S(tp)), R: P(logH(), true) },
+  { op: '×(−1)', L: P(S(tp), true), R: P(logH()), texte: 'On multiplie les deux membres par (−1) : le signe − devant log disparaît.' },
+  { centre: '⇄', L: P(logH()), R: P(S(tp), true), texte: 'On inverse le sens de l\'égalité, pour avoir log à gauche.' },
+  { op: '10<sup>x</sup>', L: P(FN('p10', P(logH()))), R: P(FN('p10', P(S(tp), true))), texte: 'On applique aux deux membres la fonction 10<sup>x</sup>, réciproque de log.' },
+  { centre: 'car 10<sup>log a</sup> = a', L: P(S(tH)), R: P(FN('p10', P(S(tp), true))), final: true, texte: '10<sup>x</sup> annule log : il reste ' + CH + ' seul.' },
+];
+const MODE_EMPLOI = `<p class="eq-consigne"><b>Comment faire :</b> glisse un outil (×(−1), 10<sup>x</sup>, log) sur <b>un membre</b> de l'équation, puis sur l'autre membre : une opération se fait toujours des deux côtés. Glisse une grandeur pour la déplacer, touche-la pour la supprimer. ⇄ inverse les deux membres. Après chaque étape : « Vérifier l'étape ».</p>`;
+const GAGNER = '<p class="eq-consigne"><b>Pour gagner du temps</b>, tu peux faire plusieurs manipulations à la suite, puis cliquer une seule fois sur « Vérifier l\'étape ».</p>';
+const LIEN_PH = `<div class="ph-lien-app"><p>Pour aller plus loin : la définition complète du pH, avec la concentration standard c°.</p>
+  <a class="btn-small" href="../../ph/modules/module_2_cours.html" target="_blank" rel="noopener">Application pH ↗</a></div>`;
+
+// éditeur d'équation : partie « perso » d'un « À toi » (réussie quand [H3O+] est isolée)
+function partieEditeur() {
+  return { type: 'perso', solution: `${CH} = 10<sup>−pH</sup>`,
+    monter(zone, api) {
+      const d = document.createElement('div');
+      zone.appendChild(d);
+      const ed = new PH.Editeur(d, {
+        tuiles: [tp, tH], cible: 'c', cibleNom: CH, valeurs,
+        gauche: () => P(S(tp)), droite: () => P(logH(), true),
+        aides: [
+          'Commence par enlever le signe − devant log : glisse l\'outil ×(−1) sur le membre de gauche, puis sur celui de droite, et vérifie l\'étape.',
+          'Applique aux deux membres la fonction réciproque de log : glisse l\'outil 10<sup>x</sup> à gauche, puis à droite.',
+          `Inverse le sens de l'équation avec ⇄ pour avoir ${CH} à gauche.`,
+        ],
+        solution: DEMO,
+        onErreur: () => api.compterErreur(),
+        onResolu: () => api.reussi(),
+      });
+      return { montrer() { ed.montrerSolution(); } };
+    } };
+}
+
+/* ---------- 1. 10ˣ, réciproque de log ---------- */
+function etape1(c) {
+  const carte = c.carte('1. La fonction 10<sup>x</sup>, réciproque de log');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Dans pH = −log(${CH}), la grandeur cherchée ${CH} est « dans » la fonction log. Pour l'en faire sortir, on applique la fonction qui annule log : sa <b>fonction réciproque</b>, <b>10<sup>x</sup></b> (touche 10<sup>x</sup> de la calculatrice).</p>
+      <div class="cle"><p class="crs-formule">10<sup>log a</sup> = a &nbsp; et &nbsp; log(10<sup>a</sup>) = a</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc">log(x) = −3 &nbsp;donne&nbsp; x = 10<sup>−3</sup> = <span class="c">0,001</span></p>`)}`);
+  const n = hasard([2, 4, 5, 6]);
+  c.aToi(carte, [
+    { parties: [{ type: 'choix', q: 'Quelle fonction annule log&nbsp;?', melanger: false,
+      options: [{ id: 'p10', label: '10<sup>x</sup>' }, { id: 'log', label: 'log' }, { id: 'neg', label: '×(−1)' }], bonne: 'p10',
+      indices: { log: 'Appliquer log une deuxième fois ne l\'annule pas : il faut sa fonction réciproque.', neg: '×(−1) change seulement le signe.' },
+      solution: '<p><b>10<sup>x</sup></b> : 10<sup>log a</sup> = a.</p>' }] },
+    { parties: [{ type: 'sci', q: `log(x) = −${n}. Que vaut x&nbsp;?`, label: 'x =', valeur: Math.pow(10, -n), cs: 1,
+      diag: v => (Math.abs(v - Math.pow(10, n)) / Math.pow(10, n) < .03 ? 'Attention au signe : x = 10<sup>−' + n + '</sup>.' : 'x = 10<sup>log x</sup> = 10<sup>−' + n + '</sup>.'),
+      solution: `<p class="crs-calc">x = 10<sup>−${n}</sup></p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Isoler [H3O+] ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Exprimer ' + CH + ' en fonction du pH');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Pour calculer ${CH} quand on connaît le pH, il faut l'<b>isoler</b> dans pH = −log(${CH}). On utilise la fonction réciproque de log, la fonction <b>10<sup>x</sup></b> : 10<sup>log a</sup> = a. À chaque étape, <b>la même opération sur les deux membres</b>.</p>
+    </div>
+    <p class="er-consigne">Suis la démonstration, étape par étape.</p>`);
+  const zone = c.ajouter(carte, '');
+  PH.demo(zone, {
+    etapes: DEMO,
+    onFini: () => {
+      c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Les deux formules :</b></p>
+          <p class="crs-formule">pH = −log(${CH}) &nbsp;⇔&nbsp; ${CH} = 10<sup>−pH</sup></p></div>
+        <p class="ab-complete"><b>✍ Complète ton cours :</b> pH = −log(${CH}) ⇔ −pH = log(${CH}) ⇔ 10<sup>−pH</sup> = 10<sup>log(${CH})</sup> ⇔ ${CH} = 10<sup>−pH</sup>.</p>
+        ${LIEN_PH}`);
+      c.aToi(carte, [{ titre: 'Refais la manipulation', enonce: `<p class="er-consigne">Isole ${CH} dans pH = −log(${CH}).</p>${MODE_EMPLOI}${GAGNER}`, parties: [partieEditeur()] }]);
+    },
+  });
+  return carte;
+}
+
+/* ---------- 3. Calculer [H3O+] ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Calculer ' + CH);
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p class="crs-formule">${CH} = 10<sup>−pH</sup></p>
+        <p>À la calculatrice : touche <b>10<sup>x</sup></b>, puis <b>(−)</b> et la valeur du pH. On donne ${CH} en <b>${UNITE.c}</b>, en écriture scientifique avec <b>deux chiffres significatifs</b>.</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc">pH = 3 : ${CH} = 10<sup>−3</sup> ${UNITE.c}</p>
+      <p class="crs-calc">pH = 8 : ${CH} = 10<sup>−8</sup> ${UNITE.c}</p>
+      <p class="crs-calc">pH = 2,5 : ${CH} = 10<sup>−2,5</sup> = 3,16… × 10<sup>−3</sup> ≈ <span class="c">3,2 × 10<sup>−3</sup> ${UNITE.c}</span></p>
+      <p class="crs-calc">pH = 9,4 : ${CH} = 10<sup>−9,4</sup> = 3,98… × 10<sup>−10</sup> ≈ <span class="c">4,0 × 10<sup>−10</sup> ${UNITE.c}</span></p>`, 'Exemples du cours')}`);
+  const p1 = hasard([1.5, 2.2, 3.7, 4.3, 5.8]), p2 = hasard([7.6, 8.3, 9.1, 10.5, 11.8, 12.4]);
+  const calc = ph => ({ enonce: `<p>Une solution a un pH de ${fmt(ph)}.</p>`,
+    parties: [{ type: 'sci', q: `Calcule ${CH} (deux chiffres significatifs).`, label: `${CH} =`, unite: UNITE.c, valeur: Hde(ph), cs: 2,
+      diag: v => diagH(v, ph),
+      solution: `<p class="crs-calc">${CH} = 10<sup>−${fmt(ph)}</sup> ≈ <span class="c">${sci(Hde(ph), 2)} ${UNITE.c}</span></p>` }] });
+  c.aToi(carte, [calc(p1), calc(p2)]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p class="crs-formule">pH = −log(${CH}) &nbsp;⇔&nbsp; ${CH} = 10<sup>−pH</sup></p>
+      <p>On passe de l'une à l'autre avec ×(−1) et 10<sup>x</sup>, réciproque de log. ${CH} en ${UNITE.c}, deux chiffres significatifs.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_3c_cours.html">Cours : évolution du pH →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#reciproque">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+AB.menu('module_3b_cours');
+</script>
+</body>
+</html>
