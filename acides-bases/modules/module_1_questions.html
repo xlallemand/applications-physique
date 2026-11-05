@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 1 : questions sur les acides, les bases et les couples — Chapitre 16 : Acides et bases</title>
+<title>Module 1 : questions sur les acides, les bases et les couples — Chapitre 16 : Acides et bases</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <link rel="stylesheet" href="ab.css">
@@ -31,75 +31,75 @@ const POOL = ['ACE', 'NH4', 'MET', 'HF', 'HNO3', 'H3PO4', 'H2PO4', 'HPO4', 'MA',
 // définition d'un acide (ou d'une base) selon Brønsted
 function qDefinition(acide) {
   return { theme: 'Définition',
-    parties: [{ type: 'choix', q: `${acide ? 'Un acide' : 'Une base'} est une espèce chimique capable de :`, colonne: true,
+    parties: [{ type: 'choix', q: `${acide ? 'Un acide' : 'Une base'} est une espèce chimique capable de :`, colonne: true,
       options: [o('lib', `libérer un proton ${H}`), o('cap', `capter un proton ${H}`), o('el', 'céder un électron'), o('ox', 'capter un électron')],
       bonne: acide ? 'lib' : 'cap',
       indices: acide
-        ? { cap: 'C\'est la définition d\'une base. Un acide AH libère un proton : AH → A<sup>−</sup> + H<sup>+</sup>.', el: 'Les électrons, c\'est l\'oxydoréduction (chapitre 15). Ici, on échange des protons H<sup>+</sup>.', ox: 'Les électrons, c\'est l\'oxydoréduction (chapitre 15). Ici, on échange des protons H<sup>+</sup>.' }
-        : { lib: 'C\'est la définition d\'un acide. Une base A<sup>−</sup> capte un proton : A<sup>−</sup> + H<sup>+</sup> → AH.', el: 'Les électrons, c\'est l\'oxydoréduction (chapitre 15). Ici, on échange des protons H<sup>+</sup>.', ox: 'Les électrons, c\'est l\'oxydoréduction (chapitre 15). Ici, on échange des protons H<sup>+</sup>.' },
+        ? { cap: 'C\'est la définition d\'une base. Un acide AH libère un proton : AH → A<sup>−</sup> + H<sup>+</sup>.', el: 'Les électrons, c\'est l\'oxydoréduction (chapitre 15). Ici, on échange des protons H<sup>+</sup>.', ox: 'Les électrons, c\'est l\'oxydoréduction (chapitre 15). Ici, on échange des protons H<sup>+</sup>.' }
+        : { lib: 'C\'est la définition d\'un acide. Une base A<sup>−</sup> capte un proton : A<sup>−</sup> + H<sup>+</sup> → AH.', el: 'Les électrons, c\'est l\'oxydoréduction (chapitre 15). Ici, on échange des protons H<sup>+</sup>.', ox: 'Les électrons, c\'est l\'oxydoréduction (chapitre 15). Ici, on échange des protons H<sup>+</sup>.' },
       solution: acide ? `<p>Un acide est une espèce capable de <b>libérer un proton ${H}</b>.</p>` : `<p>Une base est une espèce capable de <b>capter un proton ${H}</b>.</p>` }] };
 }
 // « X peut libérer (capter) un H⁺ » : acide ou base ?
 function qRole(c, acide) {
   const X = acide ? f(c.a) : f(c.b), Y = acide ? f(c.b) : f(c.a);
-  return { theme: 'Acide ou base ?', enonce: `<p>${X} peut ${acide ? 'libérer' : 'capter'} un proton ${H} pour devenir ${Y}.</p>`,
-    parties: [{ type: 'choix', q: `${X} est :`, melanger: false, options: [o('a', 'un acide'), o('b', 'une base')], bonne: acide ? 'a' : 'b',
-      indices: { b: `${X} libère un proton : c'est un acide.`, a: `${X} capte un proton : c'est une base.` },
-      solution: `<p>${X} ${acide ? 'libère' : 'capte'} un proton ${H} : c'est ${acide ? 'un <b>acide</b>' : 'une <b>base</b>'}.</p>` }] };
+  return { theme: 'Acide ou base ?', enonce: `<p>${X} peut ${acide ? 'libérer' : 'capter'} un proton ${H} pour devenir ${Y}.</p>`,
+    parties: [{ type: 'choix', q: `${X} est :`, melanger: false, options: [o('a', 'un acide'), o('b', 'une base')], bonne: acide ? 'a' : 'b',
+      indices: { b: `${X} libère un proton : c'est un acide.`, a: `${X} capte un proton : c'est une base.` },
+      solution: `<p>${X} ${acide ? 'libère' : 'capte'} un proton ${H} : c'est ${acide ? 'un <b>acide</b>' : 'une <b>base</b>'}.</p>` }] };
 }
 // l'acide (ou la base) d'un couple, espèces données dans un ordre au hasard
 function qDansCouple(c, quoi) {
   const paire = melanger([c.a, c.b]);
   return { theme: 'Lire un couple', enonce: `<p>${f(paire[0])} et ${f(paire[1])} forment un couple acide / base.</p>`,
-    parties: [{ type: 'choix', q: `Quelle est ${quoi === 'a' ? 'l\'espèce acide' : 'l\'espèce basique'} ?`, melanger: false,
+    parties: [{ type: 'choix', q: `Quelle est ${quoi === 'a' ? 'l\'espèce acide' : 'l\'espèce basique'} ?`, melanger: false,
       options: paire.map(e => o(f(e) === f(c.a) ? 'a' : 'b', f(e))), bonne: quoi,
-      indices: { b: `L'acide est celui qui a le plus de H : ${f(c.a)}.`, a: `La base est celle qui a un H de moins : ${f(c.b)}.` },
-      solution: `<p>L'acide a un H de plus que sa base : couple <b>${couple(c)}</b>.</p>` }] };
+      indices: { b: `L'acide est celui qui a le plus de H : ${f(c.a)}.`, a: `La base est celle qui a un H de moins : ${f(c.b)}.` },
+      solution: `<p>L'acide a un H de plus que sa base : couple <b>${couple(c)}</b>.</p>` }] };
 }
 // demi-équation d'un couple : H⁺ du mauvais côté, acide et base inversés, charge oubliée
 function qDemi(c) {
   const sansCharge = f(esp(c.b.pre, c.b.h, c.b.post, c.a.q));
   return { theme: 'Demi-équation',
-    parties: [{ type: 'choix', q: `Quelle est la demi-équation du couple ${couple(c)} ?`, colonne: true,
+    parties: [{ type: 'choix', q: `Quelle est la demi-équation du couple ${couple(c)} ?`, colonne: true,
       options: [o('ok', demi(c)), o('cote', `${f(c.a)} + ${H} = ${f(c.b)}`), o('inv', `${f(c.b)} = ${f(c.a)} + ${H}`), o('q', `${f(c.a)} = ${sansCharge} + ${H}`)],
       bonne: 'ok',
       indices: {
-        cote: `${H} est du mauvais côté : l'acide le libère, il s'écrit à droite, avec la base (AH = A<sup>−</sup> + ${H}).`,
-        inv: `Acide et base sont inversés : l'acide ${f(c.a)} (le plus de H) s'écrit à gauche.`,
-        q: `La charge n'est pas conservée : en libérant ${H}, l'acide perd une charge + : sa base a une charge diminuée de 1.` },
+        cote: `${H} est du mauvais côté : l'acide le libère, il s'écrit à droite, avec la base (AH = A<sup>−</sup> + ${H}).`,
+        inv: `Acide et base sont inversés : l'acide ${f(c.a)} (le plus de H) s'écrit à gauche.`,
+        q: `La charge n'est pas conservée : en libérant ${H}, l'acide perd une charge + : sa base a une charge diminuée de 1.` },
       solution: `<p><b>${demi(c)}</b></p>` }] };
 }
 // couple d'une demi-équation écrite à l'envers (ex. 7.2)
 function qDemiInv(c) {
   return { theme: 'Retrouver le couple', enonce: `<p class="ph-calc">${demiInv(c)}</p>`,
-    parties: [{ type: 'choix', q: 'Quel est le couple acide / base ?', options: [o('ok', couple(c)), o('inv', `${f(c.b)} / ${f(c.a)}`)], bonne: 'ok',
-      indices: { inv: `On écrit l'acide en premier : ${f(c.a)}, celui qui a le plus de H. La demi-équation est seulement écrite dans l'autre sens.` },
-      solution: `<p>${f(c.b)} capte ${H} : c'est la base. Couple <b>${couple(c)}</b>.</p>` }] };
+    parties: [{ type: 'choix', q: 'Quel est le couple acide / base ?', options: [o('ok', couple(c)), o('inv', `${f(c.b)} / ${f(c.a)}`)], bonne: 'ok',
+      indices: { inv: `On écrit l'acide en premier : ${f(c.a)}, celui qui a le plus de H. La demi-équation est seulement écrite dans l'autre sens.` },
+      solution: `<p>${f(c.b)} capte ${H} : c'est la base. Couple <b>${couple(c)}</b>.</p>` }] };
 }
 // espèce conjuguée construite avec les boutons + H⁺ / − H⁺
 function qConstruire(c, base) {
   const dep = base ? c.a : c.b, cib = base ? c.b : c.a;
   return { theme: base ? 'Base conjuguée' : 'Acide conjugué',
     parties: [partieConjugue({ lignes: [{ depart: dep, cible: cib, label: base ? `Construis la base conjuguée de l'acide ${f(dep)}.` : `Construis l'acide conjugué de la base ${f(dep)}.` }] },
-      { solution: `<p>${base ? 'On enlève' : 'On ajoute'} un ${H} : <b>${f(cib)}</b> (couple ${couple(c)}).</p>` })] };
+      { solution: `<p>${base ? 'On enlève' : 'On ajoute'} un ${H} : <b>${f(cib)}</b> (couple ${couple(c)}).</p>` })] };
 }
 // base conjuguée à choisir : charge oubliée, H⁺ ajouté au lieu d'être enlevé
 function qChoisirConj(c) {
   const opts = [o('ok', f(c.b)), o('q', f(esp(c.b.pre, c.b.h, c.b.post, c.a.q))), o('plus', f(conj(c.a, 1)))];
   return { theme: 'Base conjuguée',
-    parties: [{ type: 'choix', q: `Quelle est la base conjuguée de ${f(c.a)} ?`, options: opts, bonne: 'ok',
-      indices: { q: `Il manque le changement de charge : en perdant ${H}, la charge diminue de 1.`,
-                 plus: `Tu as ajouté ${H} : c'est l'acide conjugué qu'on obtient ainsi. Pour la base conjuguée, on enlève ${H}.` },
-      solution: `<p>On enlève ${H} à ${f(c.a)} : un H de moins, charge − 1, <b>${f(c.b)}</b>.</p>` }] };
+    parties: [{ type: 'choix', q: `Quelle est la base conjuguée de ${f(c.a)} ?`, options: opts, bonne: 'ok',
+      indices: { q: `Il manque le changement de charge : en perdant ${H}, la charge diminue de 1.`,
+                 plus: `Tu as ajouté ${H} : c'est l'acide conjugué qu'on obtient ainsi. Pour la base conjuguée, on enlève ${H}.` },
+      solution: `<p>On enlève ${H} à ${f(c.a)} : un H de moins, charge − 1, <b>${f(c.b)}</b>.</p>` }] };
 }
 // ampholyte : une espèce qui est acide dans un couple et base dans un autre
 function qAmpholyte() {
   const amph = hasard([CP.EAU.a, CP.HCO3.a, CP.HPO4.a, CP.H2PO4.a]);
   const autres = melanger([CP.NH4.a, CP.HNO3.b, CP.HF.b, CP.ACE.a, CP.H3O.a, CP.MET.b]).slice(0, 3);
   return { theme: 'Ampholyte',
-    parties: [{ type: 'choix', q: 'Laquelle de ces espèces est un ampholyte ?', options: [o('ok', f(amph))].concat(autres.map((e, i) => o('n' + i, f(e)))), bonne: 'ok',
-      indice: 'Un ampholyte est l\'acide d\'un couple et la base d\'un autre : il peut à la fois libérer et capter un proton. Cherche l\'espèce qui peut perdre un H<sup>+</sup> et en gagner un.',
-      solution: `<p><b>${f(amph)}</b> peut libérer un proton (${f(conj(amph, -1))}) et en capter un (${f(conj(amph, 1))}) : c'est un ampholyte.</p>` }] };
+    parties: [{ type: 'choix', q: 'Laquelle de ces espèces est un ampholyte ?', options: [o('ok', f(amph))].concat(autres.map((e, i) => o('n' + i, f(e)))), bonne: 'ok',
+      indice: 'Un ampholyte est l\'acide d\'un couple et la base d\'un autre : il peut à la fois libérer et capter un proton. Cherche l\'espèce qui peut perdre un H<sup>+</sup> et en gagner un.',
+      solution: `<p><b>${f(amph)}</b> peut libérer un proton (${f(conj(amph, -1))}) et en capter un (${f(conj(amph, 1))}) : c'est un ampholyte.</p>` }] };
 }
 
 function tirage() {
@@ -112,10 +112,10 @@ function tirage() {
 AB.serie({
   app: document.getElementById('app'),
   badge: 'MODULE 1 · QUESTIONS', titre: 'Acides, bases et couples',
-  intro: '<p class="er-contexte">10 questions tirées au hasard : acide et base, couple et demi-équation, espèce conjuguée, ampholyte.</p>',
+  intro: '<p class="er-contexte">10 questions tirées au hasard : acide et base, couple et demi-équation, espèce conjuguée, ampholyte.</p>',
   questions: tirage,
   revoir: { href: 'module_1_cours.html', label: 'Revoir le cours' },
-  suite: { href: 'module_2_cours.html', label: 'Module 2 : réactions acido-basiques →' },
+  suite: { href: 'module_2_cours.html', label: 'Module 2 : réactions acido-basiques →' },
 });
 AB.menu('module_1_questions');
 </script>

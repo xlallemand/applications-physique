@@ -666,10 +666,10 @@
     function diag(s) {
       const att = s.l.cible.h - s.l.depart.h, fait = s.e.h - s.l.depart.h, X = f(s.l.depart);
       const acide = att < 0;
-      if (fait === 0) return `${X} n'a pas changé : ${acide ? `l'acide ${X} <b>libère</b> un H<sup>+</sup>, enlève-le` : `la base ${X} <b>capte</b> un H<sup>+</sup>, ajoute-le`}.`;
+      if (fait === 0) return `${X} n'a pas changé : ${acide ? `l'acide ${X} <b>libère</b> un H<sup>+</sup>, enlève-le` : `la base ${X} <b>capte</b> un H<sup>+</sup>, ajoute-le`}.`;
       if (Math.sign(fait) !== Math.sign(att)) {
-        return acide ? `${X} est un acide : il <b>libère</b> un H<sup>+</sup>. On <b>enlève</b> donc un H<sup>+</sup> (un H de moins, et la charge baisse de 1).`
-          : `${X} est une base : elle <b>capte</b> un H<sup>+</sup>. On <b>ajoute</b> donc un H<sup>+</sup> (un H de plus, et la charge augmente de 1).`;
+        return acide ? `${X} est un acide : il <b>libère</b> un H<sup>+</sup>. On <b>enlève</b> donc un H<sup>+</sup> (un H de moins, et la charge baisse de 1).`
+          : `${X} est une base : elle <b>capte</b> un H<sup>+</sup>. On <b>ajoute</b> donc un H<sup>+</sup> (un H de plus, et la charge augmente de 1).`;
       }
       return `Un acide et sa base conjuguée ne diffèrent que d'<b>un seul</b> H<sup>+</sup>. Reviens au départ et ${acide ? 'enlève' : 'ajoute'} un seul H<sup>+</sup>.`;
     }
@@ -758,7 +758,7 @@
   function gammaFig(haut, bas, reactifs) {
     const k = String(++nGamFig);
     GAMS.set(k, { haut, bas, reactifs });
-    const aria = `Règle du gamma : ${texte(couple(haut))} écrit au-dessus de ${texte(couple(bas))} ; les réactifs entourés sont ${reactifs.map(p => texte(f({ a1: haut.a, b1: haut.b, a2: bas.a, b2: bas.b }[p]))).join(' et ')}.`;
+    const aria = `Règle du gamma : ${texte(couple(haut))} écrit au-dessus de ${texte(couple(bas))} ; les réactifs entourés sont ${reactifs.map(p => texte(f({ a1: haut.a, b1: haut.b, a2: bas.a, b2: bas.b }[p]))).join(' et ')}.`;
     return `<div class="ab-gam-fig" data-gk="${k}" role="img" aria-label="${aria.replace(/"/g, '&quot;')}"></div>`;
   }
   function chercherGammas(racine) {
@@ -813,10 +813,10 @@
       const [x, y] = choisis, juste = R.every(p => choisis.includes(p));
       if (juste) { reactifsTrouves(); return; }
       let h;
-      if (x[0] === 'a' && y[0] === 'a') h = `${N(x)} et ${N(y)} sont deux acides : <b>deux acides ne réagissent pas ensemble</b>. Un acide donne son H<sup>+</sup> à une base.`;
-      else if (x[0] === 'b' && y[0] === 'b') h = `${N(x)} et ${N(y)} sont deux bases : <b>deux bases ne réagissent pas ensemble</b>. Une base capte le H<sup>+</sup> d'un acide.`;
-      else if (x[1] === y[1]) h = `${N(x)} et ${N(y)} forment un même couple : <b>le réactif d'un couple devient son conjugué</b>, ils ne réagissent pas ensemble. Les deux réactifs sont dans deux couples différents, en diagonale.`;
-      else h = `Ce ne sont pas les réactifs de la réaction : elle a lieu entre ${N(R[0])} et ${N(R[1])}.`;
+      if (x[0] === 'a' && y[0] === 'a') h = `${N(x)} et ${N(y)} sont deux acides : <b>deux acides ne réagissent pas ensemble</b>. Un acide donne son H<sup>+</sup> à une base.`;
+      else if (x[0] === 'b' && y[0] === 'b') h = `${N(x)} et ${N(y)} sont deux bases : <b>deux bases ne réagissent pas ensemble</b>. Une base capte le H<sup>+</sup> d'un acide.`;
+      else if (x[1] === y[1]) h = `${N(x)} et ${N(y)} forment un même couple : <b>le réactif d'un couple devient son conjugué</b>, ils ne réagissent pas ensemble. Les deux réactifs sont dans deux couples différents, en diagonale.`;
+      else h = `Ce ne sont pas les réactifs de la réaction : elle a lieu entre ${N(R[0])} et ${N(R[1])}.`;
       choisis.forEach(q => G.bouton(q).classList.add('ko'));
       api.erreur(h);
       secouer(G.div);
@@ -828,7 +828,7 @@
       POS.forEach(q => { const b = G.bouton(q); b.disabled = true; b.classList.remove('ko'); b.setAttribute('aria-pressed', String(R.includes(q))); });
       G.div.classList.add('ab-gam-fait');
       G.tracer(R);
-      consigne.innerHTML = `Les réactifs sont entourés : ${N(R[0])} devient ${f(P[0])}, ${N(R[1])} devient ${f(P[1])}.`;
+      consigne.innerHTML = `Les réactifs sont entourés : ${N(R[0])} devient ${f(P[0])}, ${N(R[1])} devient ${f(P[1])}.`;
       if (def.equation === false) { fini = true; api.reussi(); return; }
       api.message('✓ Réactifs trouvés. Complète maintenant l\'équation de la réaction.');
       monterEquation();
@@ -901,14 +901,14 @@
         if (okR && okP) { finEquation(); api.reussi(); return; }
         const acides = [N('a1'), N('a2')], bases = [N('b1'), N('b2')];
         let h;
-        if (v.includes('H+')) h = 'H<sup>+</sup> ne s\'écrit pas dans l\'équation de la réaction : il passe directement de l\'acide à la base.';
+        if (v.includes('H+')) h = 'H<sup>+</sup> ne s\'écrit pas dans l\'équation de la réaction : il passe directement de l\'acide à la base.';
         else if (!okR) {
           const [x, y] = v;
-          if (acides.includes(x) && acides.includes(y) && !(bases.includes(x) && bases.includes(y))) h = '<b>Deux acides ne réagissent pas ensemble.</b> Les réactifs sont les deux espèces entourées : un acide et une base.';
-          else if (bases.includes(x) && bases.includes(y) && !(acides.includes(x) && acides.includes(y))) h = '<b>Deux bases ne réagissent pas ensemble.</b> Les réactifs sont les deux espèces entourées : un acide et une base.';
-          else h = `Les réactifs, à gauche de la flèche, sont les deux espèces entourées : ${N(R[0])} et ${N(R[1])}.`;
+          if (acides.includes(x) && acides.includes(y) && !(bases.includes(x) && bases.includes(y))) h = '<b>Deux acides ne réagissent pas ensemble.</b> Les réactifs sont les deux espèces entourées : un acide et une base.';
+          else if (bases.includes(x) && bases.includes(y) && !(acides.includes(x) && acides.includes(y))) h = '<b>Deux bases ne réagissent pas ensemble.</b> Les réactifs sont les deux espèces entourées : un acide et une base.';
+          else h = `Les réactifs, à gauche de la flèche, sont les deux espèces entourées : ${N(R[0])} et ${N(R[1])}.`;
         } else {
-          h = `<b>Le réactif d'un couple devient son conjugué</b> : ${N(R[0])} devient ${f(P[0])} et ${N(R[1])} devient ${f(P[1])}. Les produits sont les deux espèces non entourées.`;
+          h = `<b>Le réactif d'un couple devient son conjugué</b> : ${N(R[0])} devient ${f(P[0])} et ${N(R[1])} devient ${f(P[1])}. Les produits sont les deux espèces non entourées.`;
         }
         api.erreur(h);
         secouer(eq);
@@ -947,17 +947,17 @@
   // diagnostic d'un pH calculé à partir de [H3O+] = c
   function diagPH(v, c) {
     const ph = pHde(c);
-    if (Math.abs(v + ph) < .06) return `Tu as oublié le signe − : pH = −log(${CH}). Le log d'une concentration inférieure à 1 est négatif ; le pH, lui, est positif.`;
-    if (Math.abs(v + Math.log(c)) < .06 || Math.abs(v - Math.log(c)) < .06) return 'Tu as utilisé la touche ln : le pH se calcule avec <b>log</b> (logarithme décimal).';
-    if (Math.abs(v - Math.pow(10, -c)) < .01 || Math.abs(v - Math.pow(10, c)) < .01) return `Tu as utilisé 10<sup>x</sup> : pour passer de ${CH} au pH, c'est la touche <b>log</b> (10<sup>x</sup> sert dans l'autre sens).`;
-    return `pH = −log(${CH}) = −log(${sci(c, 2)}) : tape « −log( » puis la concentration, et arrondis à une décimale.`;
+    if (Math.abs(v + ph) < .06) return `Tu as oublié le signe − : pH = −log(${CH}). Le log d'une concentration inférieure à 1 est négatif ; le pH, lui, est positif.`;
+    if (Math.abs(v + Math.log(c)) < .06 || Math.abs(v - Math.log(c)) < .06) return 'Tu as utilisé la touche ln : le pH se calcule avec <b>log</b> (logarithme décimal).';
+    if (Math.abs(v - Math.pow(10, -c)) < .01 || Math.abs(v - Math.pow(10, c)) < .01) return `Tu as utilisé 10<sup>x</sup> : pour passer de ${CH} au pH, c'est la touche <b>log</b> (10<sup>x</sup> sert dans l'autre sens).`;
+    return `pH = −log(${CH}) = −log(${sci(c, 2)}) : tape « −log( » puis la concentration, et arrondis à une décimale.`;
   }
   // diagnostic d'une concentration [H3O+] calculée à partir du pH
   function diagH(v, ph) {
-    if (egal(v, Math.pow(10, ph), .04)) return `Tu as oublié le signe − : ${CH} = 10<sup>−pH</sup> = 10<sup>−${fmt(ph)}</sup>.`;
-    if (Math.abs(Math.abs(v) - Math.abs(Math.log10(ph))) < .01) return `Tu as utilisé log : pour revenir à ${CH}, on applique <b>10<sup>x</sup></b>, la réciproque de log.`;
-    if (egal(v, Math.exp(-ph), .04)) return 'Tu as utilisé e<sup>x</sup> : c\'est la touche <b>10<sup>x</sup></b>.';
-    return `${CH} = 10<sup>−pH</sup> = 10<sup>−${fmt(ph)}</sup> : touche 10<sup>x</sup> de la calculatrice, sans oublier le signe −.`;
+    if (egal(v, Math.pow(10, ph), .04)) return `Tu as oublié le signe − : ${CH} = 10<sup>−pH</sup> = 10<sup>−${fmt(ph)}</sup>.`;
+    if (Math.abs(Math.abs(v) - Math.abs(Math.log10(ph))) < .01) return `Tu as utilisé log : pour revenir à ${CH}, on applique <b>10<sup>x</sup></b>, la réciproque de log.`;
+    if (egal(v, Math.exp(-ph), .04)) return 'Tu as utilisé e<sup>x</sup> : c\'est la touche <b>10<sup>x</sup></b>.';
+    return `${CH} = 10<sup>−pH</sup> = 10<sup>−${fmt(ph)}</sup> : touche 10<sup>x</sup> de la calculatrice, sans oublier le signe −.`;
   }
   // nature d'une solution d'après son pH (à 25 °C)
   const nature = ph => (ph < 7 ? 'acide' : ph > 7 ? 'basique' : 'neutre');
@@ -1017,7 +1017,7 @@
         s += T(Math.min(w - 30, Math.max(30, x(pt.pH))), yA - 31, pt.label, { s: petit, w: 700, c: COUL.ACCI });
       });
       const Ht = y + 6;
-      const aria = o.aria || `Échelle de pH de 0 à 14 : solution acide pour un pH inférieur à 7, neutre à 7, basique au-dessus de 7${pts.length ? ' ; ' + pts.map(pt => `${pt.label} : pH ${fmt(pt.pH)}`).join(', ') : ''}${o.conc ? ' ; en dessous, la concentration en ions oxonium, de 1 à 10 puissance −14 mol par litre : quand le pH augmente de 1, elle est divisée par 10' : ''}.`;
+      const aria = o.aria || `Échelle de pH de 0 à 14 : solution acide pour un pH inférieur à 7, neutre à 7, basique au-dessus de 7${pts.length ? ' ; ' + pts.map(pt => `${pt.label} : pH ${fmt(pt.pH)}`).join(', ') : ''}${o.conc ? ' ; en dessous, la concentration en ions oxonium, de 1 à 10 puissance −14 mol par litre : quand le pH augmente de 1, elle est divisée par 10' : ''}.`;
       return `<svg viewBox="0 0 ${w} ${Ht}" width="${w}" height="${Ht}" class="ab-svg" role="img" aria-label="${aria.replace(/"/g, '&quot;')}">${s}</svg>`;
     }, 'ab-fig-echelle');
   }
@@ -1027,7 +1027,7 @@
   const SURVIE = [
     { t: 'Mort des crustacés, des gastéropodes et d\'autres mollusques', fin: 5.9, qui: 'les crevettes (crustacés)' },
     { t: 'Mort des saumons, des ombles chevaliers et des gardons', fin: 5.7, qui: 'les saumons' },
-    { t: 'Mort des insectes sensibles, du phytoplancton et du zooplancton sensibles', fin: 5.7, qui: 'les insectes sensibles' },
+    { t: 'Mort des insectes et du plancton sensibles', fin: 5.7, qui: 'les insectes sensibles' },
     { t: 'Mort des corégones et des lavarets', fin: 5.5, qui: 'les corégones' },
     { t: 'Mort des perches et des brochets', fin: 5.0, qui: 'les brochets' },
     { t: 'Mort des anguilles et des ombles de fontaine', fin: 4.4, qui: 'les anguilles' },
@@ -1058,9 +1058,9 @@
         s += `<rect x="${x(7.5)}" y="${y + 8}" width="${x(b.fin) - x(7.5)}" height="20" fill="${COUL.CLE}" stroke="${COUL.ACC}" stroke-width="1"/>`;
         s += `<line x1="${x(b.fin)}" y1="${y + 5}" x2="${x(b.fin)}" y2="${y + 31}" stroke="${COUL.ACC}" stroke-width="3"/>`;
       });
-      const aria = 'Échelle de survie : ' + barres.map(b => `${b.t.toLowerCase()} quand le pH descend en dessous de ${fmt(b.fin, 1)}`).join(' ; ') + '. Les dommages apparaissent sous un pH de 6,5 ; toute forme de vie « normale » disparaît sous un pH de 5.';
+      const aria = 'Échelle de survie : ' + barres.map(b => `${b.t.toLowerCase()} quand le pH descend en dessous de ${fmt(b.fin, 1)}`).join(' ; ') + '. Les dommages apparaissent sous un pH de 6,5 ; toute forme de vie « normale » disparaît sous un pH de 5.';
       return `<svg viewBox="0 0 ${w} ${H}" width="${w}" height="${H}" class="ab-svg" role="img" aria-label="${aria.replace(/"/g, '&quot;')}">${s}</svg>
-        <p class="ab-fig-note">Pointillés : les dommages apparaissent lorsque le pH descend en dessous de 6,5 ; toute forme de vie « normale » disparaît à un pH inférieur à 5. Graduations tous les 0,1.</p>`;
+        <p class="ab-fig-note">Pointillés : les dommages apparaissent lorsque le pH descend en dessous de 6,5 ; toute forme de vie « normale » disparaît à un pH inférieur à 5. Graduations tous les 0,1.</p>`;
     }, 'ab-fig-survie');
   }
 
@@ -1070,33 +1070,33 @@
   const ecrire = v => (Math.abs(v) < 0.01 || Math.abs(v) >= 1e5 ? sci(v, 2) : fmt(v));
   // n = m / M
   function diagNm(v, m, M) {
-    if (egal(v, m * M)) return `Tu as multiplié : n = m / M (la masse divisée par la masse molaire). Les unités le rappellent : M en ${UNITE.M}, ce sont des grammes <b>par</b> mole.`;
-    if (egal(v, M / m)) return 'Tu as inversé la division : n = m / M, la masse en haut.';
+    if (egal(v, m * M)) return `Tu as multiplié : n = m / M (la masse divisée par la masse molaire). Les unités le rappellent : M en ${UNITE.M}, ce sont des grammes <b>par</b> mole.`;
+    if (egal(v, M / m)) return 'Tu as inversé la division : n = m / M, la masse en haut.';
     return `n = m / M = ${fmt(m)} / ${fmt(M)}.`;
   }
   // n = c × V (V en L) ; Vd = { v, u } : le volume tel qu'il est donné (mL, m³), s'il faut le convertir
   function diagNcV(v, c, V, Vd) {
-    if (Vd && Vd.u !== 'L' && egal(v, c * Vd.v)) return `Le volume doit être en litres : ${fmt(Vd.v)} ${Vd.u} = ${fmt(V)} L${Vd.u === UNITE.m3 ? ' (1 m<sup>3</sup> = 1 000 L)' : ''}.`;
-    if (egal(v, c / V) || (Vd && egal(v, c / Vd.v))) return 'n = c × V : on <b>multiplie</b> la concentration par le volume.';
+    if (Vd && Vd.u !== 'L' && egal(v, c * Vd.v)) return `Le volume doit être en litres : ${fmt(Vd.v)} ${Vd.u} = ${fmt(V)} L${Vd.u === UNITE.m3 ? ' (1 m<sup>3</sup> = 1 000 L)' : ''}.`;
+    if (egal(v, c / V) || (Vd && egal(v, c / Vd.v))) return 'n = c × V : on <b>multiplie</b> la concentration par le volume.';
     return `n = c × V = ${ecrire(c)} × ${fmt(V)}, avec V en litres.`;
   }
   // relation stœchiométrique : nB = nA × b / a
   function diagRel(v, nA, a, b, fA, fB) {
-    if (a !== b && egal(v, nA * a / b)) return `Tu as inversé les nombres stœchiométriques : ${fr(`n(${fB})`, b)} = ${fr(`n(${fA})`, a)}, donc n(${fB}) = ${b === 1 ? '' : b + ' × '}n(${fA})${a === 1 ? '' : ' / ' + a}.`;
-    if (a !== b && egal(v, nA)) return `Tu as oublié les nombres stœchiométriques : il y a ${a} devant ${fA} et ${b} devant ${fB} dans l'équation.`;
+    if (a !== b && egal(v, nA * a / b)) return `Tu as inversé les nombres stœchiométriques : ${fr(`n(${fB})`, b)} = ${fr(`n(${fA})`, a)}, donc n(${fB}) = ${b === 1 ? '' : b + ' × '}n(${fA})${a === 1 ? '' : ' / ' + a}.`;
+    if (a !== b && egal(v, nA)) return `Tu as oublié les nombres stœchiométriques : il y a ${a} devant ${fA} et ${b} devant ${fB} dans l'équation.`;
     return `Utilise la relation ${fr(`n(${fA})`, a)} = ${fr(`n(${fB})`, b)}.`;
   }
   // m = n × M
   function diagMasse(v, n, M) {
-    if (egal(v, n / M)) return 'm = n × M : on <b>multiplie</b> la quantité de matière par la masse molaire.';
+    if (egal(v, n / M)) return 'm = n × M : on <b>multiplie</b> la quantité de matière par la masse molaire.';
     if (egal(v, n)) return 'Ça, c\'est la quantité de matière (en mol). Multiplie-la par la masse molaire pour avoir la masse.';
     return `m = n × M = ${ecrire(n)} × ${fmt(M)}.`;
   }
   // V = n / c (en L)
   function diagV(v, n, c) {
-    if (egal(v, n * c)) return 'V = n / c : on <b>divise</b> la quantité de matière par la concentration.';
-    if (egal(v, c / n)) return 'Tu as inversé la division : V = n / c, la quantité de matière en haut.';
-    if (egal(v, n / c * 1000)) return 'Le volume est demandé en litres : ne convertis pas en mL ici.';
+    if (egal(v, n * c)) return 'V = n / c : on <b>divise</b> la quantité de matière par la concentration.';
+    if (egal(v, c / n)) return 'Tu as inversé la division : V = n / c, la quantité de matière en haut.';
+    if (egal(v, n / c * 1000)) return 'Le volume est demandé en litres : ne convertis pas en mL ici.';
     return `V = n / c = ${ecrire(n)} / ${ecrire(c)}.`;
   }
 
@@ -1106,7 +1106,7 @@
      données placées sur le schéma → n de l'espèce connue → relation
      stœchiométrique → n de l'espèce cherchée → grandeur demandée.
      def.especes  [{ f, coef, nom }] dans l'ordre de l'équation ; def.produits
-     def.depart   { k, m, M } | { k, c, V } | { k, pH, V } | { k, H, V } | { k, n, nTxt } : la donnée
+     def.depart   { k, m, M, mTxt } | { k, c, V } | { k, pH, V } | { k, H, V } | { k, n, nTxt } : la donnée
                   V en L ; Vd = { v, u } : le volume tel que l'énoncé le donne (mL, m³), à convertir
      def.cible    { k, quoi: 'n' | 'm' | 'V', M, c } (absent : seulement n de l'espèce connue)
      def.cs       chiffres significatifs des réponses (2 par défaut)
@@ -1118,7 +1118,7 @@
     const E = def.especes, d = def.depart, c = def.cible || null, A = E[d.k], B = c ? E[c.k] : null;
     const n0 = def.cs || 2, sans = def.sans || [], qs = def.q || {};
     const prod = def.produits != null ? def.produits : Math.ceil(E.length / 2);
-    const ecr = v => (Math.abs(v) < 0.01 || Math.abs(v) >= 1e5 ? sci(v, n0) : cs(v, n0));
+    const ecr = v => (Math.abs(v) < 0.05 || Math.abs(v) >= 1e5 ? sci(v, n0) : cs(v, n0));   // 1,0 × 10⁻² mol, comme les corrections
     const typeD = d.m != null ? 'm' : d.pH != null ? 'pH' : d.H != null ? 'H' : d.c != null ? 'c' : 'n';
     // [H3O+] arrondie comme dans les corrections (10⁻⁵·⁶ ≈ 2,5 × 10⁻⁶ mol/L), puis n = [H3O+] × V
     const Hc = typeD === 'pH' ? +Hde(d.pH).toPrecision(n0) : d.H;
@@ -1138,25 +1138,25 @@
     let nLab = 'n = m / M';
     if (typeD === 'm') {
       donneesD.push([`m(${A.f})`, '#m'], [`M(${A.f})`, '#M']);
-      etiq('m', `${fmt(d.m)} g`, `La masse de ${nom(A)} se place en haut de la colonne de ${A.f}.`);
-      etiq('M', `${fmt(d.M)} ${UNITE.M}`, `${fmt(d.M)} ${UNITE.M} est la masse molaire de ${nom(A)} : colonne de ${A.f}, avec sa masse.`);
+      etiq('m', `${d.mTxt || fmt(d.m)} g`, `La masse de ${nom(A)} se place en haut de la colonne de ${A.f}.`);
+      etiq('M', `${fmt(d.M)} ${UNITE.M}`, `${fmt(d.M)} ${UNITE.M} est la masse molaire de ${nom(A)} : colonne de ${A.f}, avec sa masse.`);
     } else if (typeD === 'c') {
       donneesD.push([`c(${A.f})`, '#c'], ['V', '#V']);
-      etiq('c', `${ecrire(d.c)} ${UNITE.c}`, `La concentration est celle de ${A.f} : colonne de ${A.f}.`);
-      etiq('V', Vtxt, `Le volume est celui de la solution de ${A.f} : colonne de ${A.f}, avec sa concentration.`);
+      etiq('c', `${ecrire(d.c)} ${UNITE.c}`, `La concentration est celle de ${A.f} : colonne de ${A.f}.`);
+      etiq('V', Vtxt, `Le volume est celui de la solution de ${A.f} : colonne de ${A.f}, avec sa concentration.`);
       nLab = 'n = c × V';
     } else if (typeD === 'pH') {
       donneesD.push(['pH', '#pH'], [`${CH} = 10<sup>−pH</sup>`, '?'], ['V', '#V']);
-      etiq('pH', `pH = ${fmt(d.pH)}`, `Le pH donne la concentration en ions ${H3O} : colonne de ${A.f}.`);
-      etiq('V', Vtxt, `Le volume est celui de la solution où se trouvent les ions ${H3O} : colonne de ${A.f}.`);
+      etiq('pH', `pH = ${fmt(d.pH)}`, `Le pH donne la concentration en ions ${H3O} : colonne de ${A.f}.`);
+      etiq('V', Vtxt, `Le volume est celui de la solution où se trouvent les ions ${H3O} : colonne de ${A.f}.`);
       nLab = `n = ${CH} × V`;
     } else if (typeD === 'H') {
       donneesD.push([CH, '#H'], ['V', '#V']);
-      etiq('H', `${ecrire(d.H)} ${UNITE.c}`, `C'est la concentration en ions ${H3O} : colonne de ${H3O}.`);
-      etiq('V', Vtxt, `Le volume est celui de la solution où se trouvent les ions ${H3O} : colonne de ${A.f}.`);
+      etiq('H', `${ecrire(d.H)} ${UNITE.c}`, `C'est la concentration en ions ${H3O} : colonne de ${H3O}.`);
+      etiq('V', Vtxt, `Le volume est celui de la solution où se trouvent les ions ${H3O} : colonne de ${A.f}.`);
       nLab = `n = ${CH} × V`;
     } else {
-      etiq('n', d.nTxt || `${ecr(d.n)} mol`, `La quantité de matière connue est celle de ${A.f} : place-la dans sa colonne.`);
+      etiq('n', d.nTxt || `${ecr(d.n)} mol`, `La quantité de matière connue est celle de ${A.f} : place-la dans sa colonne.`);
     }
     const sch = { especes: E, produits: prod, autres: def.autres,
       depart: { k: d.k, donnees: donneesD, n: typeD === 'n' ? [`n(${A.f})`, '#n'] : [nLab, '?'] } };
@@ -1165,11 +1165,11 @@
     if (c && c.quoi === 'm') {
       sch.cible.grandeur = ['m = n × M', '?'];
       sch.cible.donnees = [[`M(${B.f})`, '#MB']];
-      etiq('MB', `${fmt(c.M)} ${UNITE.M}`, `${fmt(c.M)} ${UNITE.M} est la masse molaire de ${nom(B)} : elle sert à la fin, dans la colonne de ${B.f}.`);
+      etiq('MB', `${fmt(c.M)} ${UNITE.M}`, `${fmt(c.M)} ${UNITE.M} est la masse molaire de ${nom(B)} : elle sert à la fin, dans la colonne de ${B.f}.`);
     } else if (c && c.quoi === 'V') {
       sch.cible.grandeur = ['V = n / c', '?'];
       sch.cible.donnees = [[`c(${B.f})`, '#cB']];
-      etiq('cB', `${ecrire(c.c)} ${UNITE.c}`, `Cette concentration est celle de la solution de ${B.f} à verser : colonne de ${B.f}.`);
+      etiq('cB', `${ecrire(c.c)} ${UNITE.c}`, `Cette concentration est celle de la solution de ${B.f} à verser : colonne de ${B.f}.`);
     }
     // le même schéma, rempli (correction)
     const val = id => (et.find(e => e.id === id) || {}).label;
@@ -1186,13 +1186,13 @@
     const schemaPlein = window.SCHM.schema(plein);
 
     const parties = [];
-    const num = (v, label, unite, q, diag, solution) => (Math.abs(v) < 0.01 || Math.abs(v) >= 1e5
+    const num = (v, label, unite, q, diag, solution) => (Math.abs(v) < 0.05 || Math.abs(v) >= 1e5
       ? { type: 'sci', q, label, valeur: v, unite, rel: .03, cs: n0, diag, solution, correction: solution }
       : { type: 'nombre', q, label, valeur: v, unite, rel: .03, signe: false, cs: n0, affiche: cs(v, n0), diag, solution, correction: solution });
     if (!sans.includes('schema')) {
       const sol = `<p>Chaque donnée se place dans la colonne de son espèce.</p>${schemaPlein}`;
       parties.push(window.SCHM.partieDonnees({ schema: sch, etiquettes: et }, {
-        q: qs.schema || 'Place les données de l\'énoncé sur le schéma de la méthode. Les « ? » sont les grandeurs à calculer.',
+        q: qs.schema || 'Place les données de l\'énoncé sur le schéma de la méthode. Les « ? » sont les grandeurs à calculer.',
         solution: sol, correction: sol }));
     }
     if (typeD === 'pH' && !sans.includes('H')) {
@@ -1201,7 +1201,7 @@
         rel: .03, cs: n0, diag: v => diagH(v, d.pH), solution: sol, correction: sol });
     }
     if (typeD !== 'n' && !sans.includes('nA')) {
-      const calc = typeD === 'm' ? `n(${A.f}) = ${fr(`m(${A.f})`, `M(${A.f})`)} = ${fr(`${fmt(d.m)} g`, `${fmt(d.M)} ${UNITE.M}`)} ≈ <span class="c">${ecr(nA)} mol</span>`
+      const calc = typeD === 'm' ? `n(${A.f}) = ${fr(`m(${A.f})`, `M(${A.f})`)} = ${fr(`${d.mTxt || fmt(d.m)} g`, `${fmt(d.M)} ${UNITE.M}`)} ≈ <span class="c">${ecr(nA)} mol</span>`
         : typeD === 'c' ? `n(${A.f}) = c × V = ${ecrire(d.c)} ${UNITE.c} × ${fmt(d.V)} L ≈ <span class="c">${ecr(nA)} mol</span>`
           : `n(${A.f}) = ${CH} × V = ${sci(Hc, n0)} ${UNITE.c} × ${fmt(d.V)} L ≈ <span class="c">${ecr(nA)} mol</span>`;
       parties.push(num(nA, `n(${A.f}) =`, 'mol', qs.nA || `Calcule la quantité de matière de ${A.f}${c ? ' ' + verbe(d.k) : ''}${conv ? ' (V en litres)' : ''}.`,
@@ -1257,15 +1257,15 @@
     { n: 3, titre: 'Le pH', desc: 'pH-mètre et échelle de pH, pH = −log([H<sub>3</sub>O<sup>+</sup>]) et [H<sub>3</sub>O<sup>+</sup>] = 10<sup>−pH</sup>, évolution du pH', fiche: 'fiche_3',
       sousModules: true,
       parties: [
-        { nom: 'Mesure et définition du pH', slug: 'definition', cours: 'module_3a_cours', noms: { cours: 'Cours : mesure et définition du pH' } },
-        { nom: 'Du pH à [H₃O⁺]', slug: 'reciproque', cours: 'module_3b_cours', noms: { cours: 'Cours : du pH à [H₃O⁺]' } },
-        { nom: 'Évolution du pH', slug: 'evolution', cours: 'module_3c_cours', noms: { cours: 'Cours : évolution du pH' } },
+        { nom: 'Mesure et définition du pH', slug: 'definition', cours: 'module_3a_cours', noms: { cours: 'Cours : mesure et définition du pH' } },
+        { nom: 'Du pH à [H₃O⁺]', slug: 'reciproque', cours: 'module_3b_cours', noms: { cours: 'Cours : du pH à [H₃O⁺]' } },
+        { nom: 'Évolution du pH', slug: 'evolution', cours: 'module_3c_cours', noms: { cours: 'Cours : évolution du pH' } },
         { nom: 'Le pH', questions: 'module_3_questions' }] },
     { n: 4, titre: 'Quantités de matière', desc: 'n = m / M, n = c × V, n(H<sub>3</sub>O<sup>+</sup>) = [H<sub>3</sub>O<sup>+</sup>] × V, relations stœchiométriques, schéma de la méthode', fiche: 'fiche_4',
       parties: [{ nom: 'Quantités de matière', cours: 'module_4_cours', questions: 'module_4_questions' }] },
     { n: 5, titre: 'Exercices', desc: 'Exercices 7 à 20 de la feuille, sujet de bac (maraîcher) et extrait de bac (carottes de glace)', exercices: 'module_5', exNom: 'Exercices de la feuille', nbEx: 10 },
   ];
-  window.SOM.init({ nom: 'Chapitre 16 : Acides et bases', id: 'acides-bases', cleEx: 'acides-bases-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 16 : Acides et bases', id: 'acides-bases', cleEx: 'acides-bases-exercices', plan: PLAN });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);
