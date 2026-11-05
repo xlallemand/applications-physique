@@ -5,6 +5,8 @@
      - oxydoreduction-STI2D/modules/module_5_pile.html (Chapitre 15, module 5) ;
      - oxydoreduction-STI2D/modules/module_6.html (exercices 8 et 9, en partie d'exercice).
    Styles : pile/pile.css. Glisser-déposer : assets/dragdrop.js (à charger avant).
+   Schéma : même dessin que la figure du cours (OX.figPile), à la largeur disponible
+   (300 à 640 px). Une étiquette se glisse sur sa case, ou se touche puis on touche la case.
 
    API (objet PILE) :
      PILE.monter(zone, opts) → { recommencer(), montrer() }
@@ -29,11 +31,6 @@
    ============================================================ */
 (function () {
   'use strict';
-
-  // =============================================
-  // COULEUR COMMUNE e- et I (figure)
-  // =============================================
-  const EI_COLOR = '#2563eb';   // bleu unique pour e- et I
 
   // =============================================
   // COUPLES REDOX (nom et « de … » : énoncés des exercices)
@@ -191,7 +188,7 @@
     // =============================================
     // ÉCRANS (question, fin)
     // =============================================
-    const titreBloc = t => `<div class="pile-bloc-t">${t}</div>`;
+    const titreBloc = (n, t) => `<h3 class="pile-bloc-t"><span class="pile-num">${n}</span>${t}</h3>`;
     const sousTitre = t => `<div class="pile-banque-t">${t}</div>`;
     root.classList.add('pile-app');
     root.innerHTML = `
@@ -207,7 +204,7 @@
         <div class="pile-consignes-t">Consignes</div>
         <ul>
           <li><span class="pile-num">1</span>
-            <span><strong>Schéma de la pile :</strong> glisse les entités chimiques (métaux, ions, polarités, sens des électrons et du courant, ions du pont salin…) aux bons emplacements sur le schéma.</span></li>
+            <span><strong>Schéma de la pile :</strong> place les entités chimiques (métaux, ions, polarités, sens des électrons et du courant, ions du pont salin…) aux bons emplacements sur le schéma.</span></li>
           <li><span class="pile-num">2</span>
             <span><strong>Demi-piles :</strong> dépose la demi-équation dans chaque demi-pile, puis utilise le bouton <span class="pile-ex-flip">⇌</span> pour l'orienter dans le <strong class="pile-acc">bon sens de fonctionnement</strong>. Indique aussi le type de réaction et le nom de l'électrode.</span></li>
           <li><span class="pile-num">3</span>
@@ -215,6 +212,7 @@
           <li><span class="pile-num">4</span>
             <span><strong>Vérification :</strong> tu peux vérifier, corriger tes réponses et vérifier encore autant de fois que tu veux. ${enPartie ? 'Tout juste à la première vérification : 2 points ; sinon : 1 point ; correction affichée : 0 point.' : 'Si tout est juste dès la première vérification, tu gagnes 2 points. Sinon, tu gagnes 1 point. Si tu affiches la réponse, tu ne gagnes pas de point.'}</span></li>
         </ul>
+        <p class="pile-astuce">Glisse chaque étiquette à sa place, ou touche-la puis touche sa place. Touche une case remplie pour la vider.</p>
       </div>
 
       <!-- DATA -->
@@ -223,41 +221,37 @@
         <div id="${P}data-wrap" class="pile-donnees-c"></div>
       </div>
 
-      <!-- PILE SCHEMA (banque intégrée dedans) -->
+      <!-- 1. SCHÉMA : étiquettes, schéma, vérification du schéma -->
       <div class="pile-bloc">
-        ${titreBloc('Schéma de la pile')}
+        ${titreBloc(1, 'Schéma de la pile')}
         <div class="pile-banque">
-          ${sousTitre('Glisser sur le schéma')}
+          ${sousTitre('Étiquettes à placer sur le schéma')}
           <div id="${P}bank-schema" class="pile-banque-l"></div>
         </div>
         <div id="${P}schema-wrap" class="pile-defile"></div>
+        <div class="pile-actions">
+          <button type="button" class="btn-secondary" data-act="checkSchema">Vérifier le schéma</button>
+        </div>
+        <div id="${P}hints-schema" class="pile-retour"></div>
       </div>
 
-      <!-- BOUTON VÉRIFICATION SCHÉMA + résultat -->
-      <div class="pile-actions">
-        <button type="button" class="btn-secondary" data-act="checkSchema">Vérifier le schéma</button>
-      </div>
-      <div id="${P}hints-schema" class="pile-retour"></div>
-
-      <!-- LOWER ZONES (banque intégrée dedans) -->
+      <!-- 2. DEMI-PILES : étiquettes, deux colonnes, vérification des demi-piles -->
       <div class="pile-bloc">
-        ${titreBloc('Demi-piles')}
+        ${titreBloc(2, 'Demi-piles')}
         <div class="pile-banque">
-          ${sousTitre('Glisser sous les demi-piles')}
+          ${sousTitre('Étiquettes à placer sous les demi-piles')}
           <div id="${P}bank-lower" class="pile-banque-l"></div>
         </div>
         <div id="${P}lower-wrap"></div>
+        <div class="pile-actions">
+          <button type="button" class="btn-secondary" data-act="checkDemiPiles">Vérifier les demi-piles</button>
+        </div>
+        <div id="${P}hints-demipiles" class="pile-retour"></div>
       </div>
 
-      <!-- BOUTON VÉRIFICATION DEMI-PILES + résultat -->
-      <div class="pile-actions">
-        <button type="button" class="btn-secondary" data-act="checkDemiPiles">Vérification des demi-piles</button>
-      </div>
-      <div id="${P}hints-demipiles" class="pile-retour"></div>
-
-      <!-- EQUATION (banque d'espèces intégrée dedans) -->
+      <!-- 3. ÉQUATION DE FONCTIONNEMENT (espèces à placer dans le bloc) -->
       <div class="pile-bloc">
-        ${titreBloc('Équation de fonctionnement de la pile')}
+        ${titreBloc(3, 'Équation de fonctionnement de la pile')}
         <div id="${P}eq-wrap"></div>
       </div>
 
@@ -294,6 +288,9 @@
       }
     });
 
+    // le schéma suit la largeur disponible (rotation du téléphone, fenêtre redimensionnée)
+    if (window.ResizeObserver) new ResizeObserver(() => placer()).observe($('schema-wrap'));
+
     // progression : en-tête de l'outil et/ou page qui l'accueille
     function progression() {
       const info = { question: qIdx + 1, total: NB(), score: totalScore };
@@ -315,21 +312,58 @@
     const dropzoneRegistry = new Map(); // élément de zone -> { accept, onDrop }
 
     function makeDraggable(el, data) {
+      let x0 = 0, y0 = 0;                                     // point d'appui : distingue un toucher d'un glisser
+      el.addEventListener('pointerdown', e => { x0 = e.clientX; y0 = e.clientY; });
       window.DragDrop.enable(el, {
-        zoneSelector: '.dz, .heq-dz, .eq-side',
+        zoneSelector: '.dz:not(.given), .heq-dz:not(.given), .eq-side',
         dragOverClass: 'over',
         onStart: () => { dragging = data; },
-        onDrop: (item, zone) => {
+        onDrop: (item, zone, e) => {
           if (zone && !locked) {
             const handler = dropzoneRegistry.get(zone);
             if (handler && dragging && handler.accept(dragging)) {
               handler.onDrop(dragging);
             }
+            deselectionner();
+          } else if (!zone && !locked && e && Math.hypot(e.clientX - x0, e.clientY - y0) < 10) {
+            // simple toucher (ou clic) : l'étiquette est choisie, on touche ensuite sa case
+            if (choisie && choisie.el === el) deselectionner(); else choisir(el, data);
           }
           dragging = null;
         },
       });
     }
+
+    // =============================================
+    // POSER SANS GLISSER : toucher une étiquette, puis la case
+    // (les cases qui l'acceptent sont mises en valeur)
+    // =============================================
+    let choisie = null;                                       // { el, data } : étiquette choisie
+    function choisir(el, data) {
+      deselectionner();
+      choisie = { el, data };
+      el.classList.add('pile-choisie');
+      el.setAttribute('aria-pressed', 'true');
+      dropzoneRegistry.forEach((h, z) => { if (h.accept(data)) z.classList.add('pile-cible'); });
+    }
+    function deselectionner() {
+      if (choisie) { choisie.el.classList.remove('pile-choisie'); choisie.el.setAttribute('aria-pressed', 'false'); }
+      choisie = null;
+      root.querySelectorAll('.pile-cible').forEach(z => z.classList.remove('pile-cible'));
+    }
+    // toucher une case quand une étiquette est choisie : elle y est posée
+    // (phase de capture : passe avant le « toucher pour vider » de la case)
+    root.addEventListener('click', e => {
+      if (!choisie || e.target.closest('.drag-item')) return;
+      if (e.target.closest('button')) { deselectionner(); return; }    // ⇌, ✕, ▲ ▼ : bouton normal
+      const z = e.target.closest('.dz, .heq-dz, .eq-side');
+      const h = z && dropzoneRegistry.get(z);
+      if (h && !locked && h.accept(choisie.data)) {
+        e.stopPropagation();
+        h.onDrop(choisie.data);
+      }
+      deselectionner();
+    }, true);
 
     function makeDropzone(el, accept, onDrop) {
       dropzoneRegistry.set(el, { accept, onDrop });
@@ -381,6 +415,7 @@
       hasError = false;
       locked = false;
       dragging = null;
+      choisie = null;
       dropzoneRegistry.clear();
 
       progression();
@@ -398,198 +433,148 @@
     }
 
     // =============================================
-    // SCHEMA SVG
+    // SCHÉMA DE LA PILE : dessin SVG + cases de dépôt posées dessus
+    // Même dessin que la figure du cours (oxydoreduction-STI2D, OX.figPile) :
+    // béchers ouverts, solutions teintées, pont salin en tube, électrodes,
+    // appareil de mesure sur le fil du haut. Couleurs : variables du thème (pile.css).
+    // La largeur suit la place disponible (300 à 640 px) : sur téléphone, le
+    // schéma tient dans l'écran et les cases gardent leur taille.
     // =============================================
+    const SCH = {
+      H: 336,          // hauteur du schéma
+      yF: 46,          // fil du haut (circuit extérieur)
+      yE: 104, yE2: 250,   // haut et bas des électrodes
+      yB: 166, yB2: 306,   // haut et fond des béchers
+      ySol: 200,           // surface des solutions
+      yT: 145, yT2: 244,   // axe du haut du pont salin, bas de ses branches
+      yI: 128,             // flèches des ions du pont salin
+      yN: 328,             // noms des demi-piles
+    };
+    // classe de chaque case du schéma (forme et taille du texte)
+    const CASES = {
+      'dz-electrons': 'pile-z-fl', 'dz-current': 'pile-z-fl',
+      'dz-com-left': 'pile-z-com', 'dz-com-right': 'pile-z-com',
+      'dz-pol-l': 'pile-z-pol', 'dz-pol-r': 'pile-z-pol',
+      'dz-metal-l': 'pile-z-esp', 'dz-metal-r': 'pile-z-esp',
+      'dz-ion-l': 'pile-z-esp', 'dz-ion-r': 'pile-z-esp',
+      'dz-pont-left': 'pile-z-pont', 'dz-pont-right': 'pile-z-pont',
+    };
+    let largeurSchema = 0;
+
+    // géométrie pour une largeur W : interpolée entre le schéma compact (300 px) et le schéma du cours (640 px)
+    function geometrie(W) {
+      const t = Math.max(0, Math.min(1, (W - 300) / 340));
+      const marge = 6 + 64 * t, bw = 120 + 40 * t;   // marge extérieure, largeur d'un bécher
+      const xg = marge + bw / 2, xd = W - xg;         // électrodes gauche et droite
+      return {
+        W, t, bw, xg, xd, cx: W / 2,
+        R: 20 + 4 * t,                 // rayon de l'appareil de mesure
+        zp: 66 + 18 * t,               // largeur des cases du pont salin
+        tube: marge + bw - 14 - 4 * t, // branche gauche du pont salin (dans le bécher gauche, près de la paroi)
+        Lion: 46 + 14 * t,             // longueur des flèches des ions
+      };
+    }
+
+    // dessin SVG
+    function dessin(g) {
+      const { W, bw, xg, xd, cx, R, tube, Lion } = g, H = SCH.H;
+      const r = v => Math.round(v * 10) / 10;
+      const fleche = (x1, y1, x2, y2, cl, m) => `<line class="${cl}" x1="${r(x1)}" y1="${y1}" x2="${r(x2)}" y2="${y2}" marker-end="url(#${P}${m})"/>`;
+      const app = Q.appareil === 'A' ? 'ampèremètre' : 'voltmètre';
+      let s = `<defs>
+        <marker id="${P}m-fl" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="10" refX="10" refY="5" orient="auto"><path class="ps-tete" d="M0 0 L11 5 L0 10 z"/></marker>
+        <marker id="${P}m-ion" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="10" refX="10" refY="5" orient="auto"><path class="ps-tete-ion" d="M0 0 L11 5 L0 10 z"/></marker></defs>`;
+      // solutions et béchers (ouverts en haut)
+      [xg, xd].forEach(x => {
+        const x0 = r(x - bw / 2);
+        s += `<rect class="ps-sol" x="${x0}" y="${SCH.ySol}" width="${r(bw)}" height="${SCH.yB2 - SCH.ySol}"/>`;
+        s += `<path class="ps-bk" d="M${x0} ${SCH.yB} V${SCH.yB2} H${r(x0 + bw)} V${SCH.yB}"/>`;
+      });
+      // pont salin : tube en U renversé plongé dans les deux solutions
+      const a = r(tube), b = r(W - tube);
+      s += `<path class="ps-tube" d="M${a} ${SCH.yT2} V${SCH.yT} H${b} V${SCH.yT2}"/>`;
+      s += `<path class="ps-tube-b" d="M${a - 7} ${SCH.yT2} V${SCH.yT - 7} H${b + 7} V${SCH.yT2} M${a + 7} ${SCH.yT2} V${SCH.yT + 7} H${b - 7} V${SCH.yT2}"/>`;
+      // nom du pont salin sous le tube, sur deux lignes si le tube est étroit (téléphone)
+      s += b - a - 14 >= 84 ? `<text class="ps-t2" x="${r(cx)}" y="${SCH.yT + 28}">pont salin</text>`
+        : `<text class="ps-t2" x="${r(cx)}" y="${SCH.yT + 26}">pont<tspan x="${r(cx)}" dy="14">salin</tspan></text>`;
+      // électrodes
+      [xg, xd].forEach(x => { s += `<rect class="ps-elec" x="${r(x - 9)}" y="${SCH.yE}" width="18" height="${SCH.yE2 - SCH.yE}" rx="2"/>`; });
+      // circuit extérieur et appareil de mesure
+      s += `<path class="ps-fil" d="M${r(xg)} ${SCH.yE} V${SCH.yF} H${r(cx - R)} M${r(cx + R)} ${SCH.yF} H${r(xd)} V${SCH.yE}"/>`;
+      s += `<circle class="ps-app" cx="${r(cx)}" cy="${SCH.yF}" r="${r(R)}"/><text class="ps-app-t" x="${r(cx)}" y="${SCH.yF + 7}">${Q.appareil || 'V'}</text>`;
+      // flèches à nommer sur les fils (e⁻ ou I), toutes deux tournées vers l'appareil
+      const mg = (xg + cx - R) / 2, md = (cx + R + xd) / 2;
+      s += fleche(mg - 14, SCH.yF, mg + 14, SCH.yF, 'ps-fl', 'm-fl') + fleche(md + 14, SCH.yF, md - 14, SCH.yF, 'ps-fl', 'm-fl');
+      // flèches des ions dans le pont salin (vers chaque bécher)
+      s += fleche(cx - 8, SCH.yI, cx - 8 - Lion, SCH.yI, 'ps-fl-ion', 'm-ion') + fleche(cx + 8, SCH.yI, cx + 8 + Lion, SCH.yI, 'ps-fl-ion', 'm-ion');
+      // noms des demi-piles
+      s += `<text class="ps-t2" x="${r(xg)}" y="${SCH.yN}">Demi-pile gauche</text><text class="ps-t2" x="${r(xd)}" y="${SCH.yN}">Demi-pile droite</text>`;
+      return `<svg class="pile-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Schéma d'une pile : deux demi-piles, gauche et droite, reliées par un pont salin et par un circuit extérieur avec un ${app} ; les cases à compléter sont posées sur le schéma.">${s}</svg>`;
+    }
+
+    // position de chaque case du schéma : [gauche, haut, largeur, hauteur] en px
+    function positions(g) {
+      const { W, xg, xd, cx, R, zp } = g, anG = Q.anodeSide === 'L';
+      const mg = (xg + cx - R) / 2, md = (cx + R + xd) / 2;
+      return {
+        // e⁻ du côté de l'anode, I du côté de la cathode (au-dessus des flèches des fils)
+        'dz-electrons': [(anG ? mg : md) - 26, 6, 52, 30],
+        'dz-current':   [(anG ? md : mg) - 26, 6, 52, 30],
+        // bornes de l'appareil, sous le fil
+        'dz-com-left':  [cx - R - 56, 54, 50, 26],
+        'dz-com-right': [cx + R + 6, 54, 50, 26],
+        // polarités, à côté du haut des électrodes
+        'dz-pol-l': [xg - 50, 70, 34, 34],
+        'dz-pol-r': [xd + 16, 70, 34, 34],
+        // métaux (à côté des électrodes) et ions (dans les solutions)
+        'dz-metal-l': [Math.max(2, xg - 64), 116, 52, 30],
+        'dz-metal-r': [Math.min(W - 54, xd + 12), 116, 52, 30],
+        'dz-ion-l': [xg - 30, 262, 60, 30],
+        'dz-ion-r': [xd - 30, 262, 60, 30],
+        // ions du pont salin, au-dessus des flèches
+        'dz-pont-left':  [cx - 3 - zp, 90, zp, 28],
+        'dz-pont-right': [cx + 3, 90, zp, 28],
+      };
+    }
+
     function renderSchema() {
-      const W = 660, H = 360;
-
-      const BW = 160, BH = 145;
-      const BYtop = 140;
-      const LBX = 50;
-      const RBX = W - LBX - BW;
-      const LBcx = LBX + BW/2;
-      const RBcx = RBX + BW/2;
-
-      const EW = 16, EH = 105;
-      const EYtop = BYtop - 35;
-      const LEX = LBcx - EW/2;
-      const REX = RBcx - EW/2;
-
-      const WireY = 52;
-      const MX = W/2, MY = WireY, MR = 28;
-
-      // Pont salin
-      const BridgeInset = 20;
-      const BridgeY = BYtop - 3;
-      const PontMid = (LBX + BW - BridgeInset + RBX + BridgeInset) / 2;
-      const BridgeDescend = 36;
-
-      // Positions des flèches sur le pont salin
-      const CatArrowX = PontMid + 40;
-      const AnArrowX  = PontMid - 40;
-
-      const anodeSide = Q.anodeSide;
-
-      const LeftWireMid  = LBcx + (MX - MR - LBcx) / 2;
-      const RightWireMid = (MX + MR + RBcx) / 2;
-
-      let eArrowZoneX, iArrowZoneX;
-      let eArrow_x1, eArrow_x2, iArrow_x1, iArrow_x2;
-
-      if (anodeSide === 'L') {
-        eArrowZoneX = LeftWireMid;
-        eArrow_x1 = LeftWireMid - 12;
-        eArrow_x2 = LeftWireMid + 1;
-        iArrowZoneX = RightWireMid;
-        iArrow_x1 = RightWireMid + 12;
-        iArrow_x2 = RightWireMid - 1;
-      } else {
-        eArrowZoneX = RightWireMid;
-        eArrow_x1 = RightWireMid + 12;
-        eArrow_x2 = RightWireMid - 1;
-        iArrowZoneX = LeftWireMid;
-        iArrow_x1 = LeftWireMid - 12;
-        iArrow_x2 = LeftWireMid + 1;
-      }
-
-      let catX1, catX2, anX1, anX2;
-      if (anodeSide === 'L') {
-        catX1 = CatArrowX - 1; catX2 = CatArrowX;
-        anX1 = AnArrowX + 1;   anX2 = AnArrowX;
-      } else {
-        catX1 = AnArrowX + 1; catX2 = AnArrowX;
-        anX1 = CatArrowX - 1; anX2 = CatArrowX;
-      }
-
-      const PONTCOLOR = '#0d9488';
-      const LBColor = '#e0f2fe', LBStroke = '#0284c7';
-      const RBColor = '#fef3c7', RBStroke = '#d97706';
-
-      // Couleur unique bleue pour e- et I
-      const EI_COL = EI_COLOR;
-
-      const svg = `<svg width="${W}" height="${H}" style="display:block;margin:0 auto;overflow:visible;" role="img" aria-label="Schéma d'une pile : deux demi-piles reliées par un pont salin et par un circuit extérieur avec un ${Q.appareil === 'A' ? 'ampèremètre' : 'voltmètre'}">
-      <defs>
-        <marker id="${P}arr-e" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
-          <polygon points="0 0, 10 4, 0 8" fill="${EI_COL}"/>
-        </marker>
-        <marker id="${P}arr-i" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
-          <polygon points="0 0, 10 4, 0 8" fill="${EI_COL}"/>
-        </marker>
-        <marker id="${P}arr-cat" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
-          <polygon points="0 0, 10 4, 0 8" fill="${PONTCOLOR}"/>
-        </marker>
-        <marker id="${P}arr-an" markerWidth="10" markerHeight="8" refX="10" refY="4" orient="auto">
-          <polygon points="0 0, 10 4, 0 8" fill="${PONTCOLOR}"/>
-        </marker>
-      </defs>
-
-      <!-- Bécher gauche -->
-      <rect x="${LBX}" y="${BYtop}" width="${BW}" height="${BH}" rx="4" fill="${LBColor}" stroke="${LBStroke}" stroke-width="2"/>
-      <!-- Bécher droit -->
-      <rect x="${RBX}" y="${BYtop}" width="${BW}" height="${BH}" rx="4" fill="${RBColor}" stroke="${RBStroke}" stroke-width="2"/>
-
-      <!-- Électrode gauche -->
-      <rect x="${LEX}" y="${EYtop}" width="${EW}" height="${EH}" rx="3" fill="#94a3b8" stroke="#475569" stroke-width="1.5"/>
-      <!-- Électrode droite -->
-      <rect x="${REX}" y="${EYtop}" width="${EW}" height="${EH}" rx="3" fill="#94a3b8" stroke="#475569" stroke-width="1.5"/>
-
-      <!-- Circuit extérieur : fils -->
-      <line x1="${LBcx}" y1="${EYtop}" x2="${LBcx}" y2="${WireY}" stroke="#1e293b" stroke-width="2.5"/>
-      <line x1="${LBcx}" y1="${WireY}" x2="${MX-MR}" y2="${WireY}" stroke="#1e293b" stroke-width="2.5"/>
-      <line x1="${MX+MR}" y1="${WireY}" x2="${RBcx}" y2="${WireY}" stroke="#1e293b" stroke-width="2.5"/>
-      <line x1="${RBcx}" y1="${WireY}" x2="${RBcx}" y2="${EYtop}" stroke="#1e293b" stroke-width="2.5"/>
-
-      <!-- Appareil de mesure (fixe) : voltmètre, ou ampèremètre dans un exercice -->
-      <circle cx="${MX}" cy="${MY}" r="${MR}" fill="white" stroke="#1e293b" stroke-width="2.5"/>
-      <text x="${MX}" y="${MY+7}" text-anchor="middle" font-size="19" font-weight="900" fill="#1e293b">${Q.appareil || 'V'}</text>
-
-      <!-- Flèche e- (bleu) -->
-      <line x1="${eArrow_x1}" y1="${WireY}" x2="${eArrow_x2}" y2="${WireY}" stroke="${EI_COL}" stroke-width="2.5" marker-end="url(#${P}arr-e)"/>
-
-      <!-- Flèche I (bleu, même couleur que e-) -->
-      <line x1="${iArrow_x1}" y1="${WireY}" x2="${iArrow_x2}" y2="${WireY}" stroke="${EI_COL}" stroke-width="2.5" marker-end="url(#${P}arr-i)"/>
-
-      <!-- Pont salin -->
-      <line x1="${LBX+BW-BridgeInset}" y1="${BridgeY}" x2="${LBX+BW-BridgeInset}" y2="${BridgeY+BridgeDescend}" stroke="${PONTCOLOR}" stroke-width="3"/>
-      <line x1="${LBX+BW-BridgeInset}" y1="${BridgeY}" x2="${RBX+BridgeInset}" y2="${BridgeY}" stroke="${PONTCOLOR}" stroke-width="3"/>
-      <line x1="${RBX+BridgeInset}" y1="${BridgeY}" x2="${RBX+BridgeInset}" y2="${BridgeY+BridgeDescend}" stroke="${PONTCOLOR}" stroke-width="3"/>
-
-      <!-- Label "pont salin" -->
-      <text x="${PontMid}" y="${BridgeY + BridgeDescend + 12}" text-anchor="middle" font-size="10" fill="${PONTCOLOR}" font-style="italic" font-weight="700">pont salin</text>
-
-      <!-- Flèche cation sur pont salin -->
-      <line x1="${catX1}" y1="${BridgeY}" x2="${catX2}" y2="${BridgeY}" stroke="${PONTCOLOR}" stroke-width="2" marker-end="url(#${P}arr-cat)"/>
-      <!-- Flèche anion sur pont salin -->
-      <line x1="${anX1}" y1="${BridgeY}" x2="${anX2}" y2="${BridgeY}" stroke="${PONTCOLOR}" stroke-width="2" marker-end="url(#${P}arr-an)"/>
-
-      <!-- Labels demi-piles -->
-      <text x="${LBcx}" y="${BYtop + BH + 18}" text-anchor="middle" font-size="12" fill="${LBStroke}" font-weight="700">Demi-pile gauche</text>
-      <text x="${RBcx}" y="${BYtop + BH + 18}" text-anchor="middle" font-size="12" fill="${RBStroke}" font-weight="700">Demi-pile droite</text>
-      </svg>`;
-
       const wrap = $('schema-wrap');
-      wrap.style.position = 'relative';
-      wrap.innerHTML = `<div style="position:relative;width:${W}px;height:${H+10}px;margin:0 auto;">` + svg + `</div>`;
-
-      const container = wrap.querySelector('div');
-
-      function addDZ(id, style, content='') {
+      wrap.innerHTML = `<div class="pile-schema" id="${P}schema-box"></div>`;
+      const box = $('schema-box');
+      Object.keys(CASES).forEach(id => {
         const d = document.createElement('div');
         d.id = P + id;
-        d.className = 'dz';
-        d.style.cssText = `position:absolute;${style}`;
-        d.innerHTML = content;
-        container.appendChild(d);
-        return d;
-      }
-
-      // COM LEFT / RIGHT
-      addDZ('dz-com-left',  `left:${MX-MR-52}px;top:${MY-12}px;width:46px;height:24px;font-size:10px;`);
-      addDZ('dz-com-right', `left:${MX+MR+6}px;top:${MY-12}px;width:46px;height:24px;font-size:10px;`);
-
-      // ELECTRONS zone — couleur bleue commune
-      {
-        const ex = eArrowZoneX;
-        const dze = addDZ('dz-electrons', `left:${ex-28}px;top:${WireY-36}px;width:56px;height:22px;font-size:12px;`);
-        dze.style.borderColor = EI_COLOR;
-        dze.style.background = '#eff6ff';
-        dze.style.color = EI_COLOR;
-      }
-
-      // CURRENT zone — même couleur bleue
-      {
-        const ix = iArrowZoneX;
-        const dzi = addDZ('dz-current', `left:${ix-28}px;top:${WireY-36}px;width:56px;height:22px;font-size:12px;`);
-        dzi.style.borderColor = EI_COLOR;
-        dzi.style.background = '#eff6ff';
-        dzi.style.color = EI_COLOR;
-      }
-
-      // POLARITY
-      addDZ('dz-pol-l', `left:${LBcx-38}px;top:${EYtop-26}px;width:28px;height:28px;border-radius:50%;font-size:16px;`);
-      addDZ('dz-pol-r', `left:${RBcx+10}px;top:${EYtop-26}px;width:28px;height:28px;border-radius:50%;font-size:16px;`);
-
-      // METAL / ION LEFT
-      addDZ('dz-metal-l', `left:${LBX+8}px;top:${BYtop+8}px;width:44px;height:26px;font-size:13px;`);
-      addDZ('dz-ion-l',   `left:${LBX+8}px;top:${BYtop+105}px;width:52px;height:26px;font-size:12px;`);
-
-      // METAL / ION RIGHT
-      addDZ('dz-metal-r', `left:${RBX+BW-56}px;top:${BYtop+8}px;width:44px;height:26px;font-size:13px;`);
-      addDZ('dz-ion-r',   `left:${RBX+BW-60}px;top:${BYtop+105}px;width:52px;height:26px;font-size:12px;`);
-
-      // ZONES PONT SALIN
-      {
-        const leftPontX  = Math.min(CatArrowX, AnArrowX);
-        const rightPontX = Math.max(CatArrowX, AnArrowX);
-        const dz1 = addDZ('dz-pont-left',  `left:${leftPontX-36}px;top:${BridgeY-42}px;width:72px;height:22px;font-size:10px;`);
-        dz1.style.borderColor = PONTCOLOR; dz1.style.background = '#f0fdfa'; dz1.style.color = '#0f766e';
-        const dz2 = addDZ('dz-pont-right', `left:${rightPontX-36}px;top:${BridgeY-42}px;width:72px;height:22px;font-size:10px;`);
-        dz2.style.borderColor = PONTCOLOR; dz2.style.background = '#f0fdfa'; dz2.style.color = '#0f766e';
-      }
-
+        d.className = 'dz ' + CASES[id];
+        box.appendChild(d);
+      });
+      largeurSchema = 0;
+      placer();
       setupSchemaZones();
       applyGiven();
+    }
+
+    // (re)dessine le schéma à la largeur disponible et place les cases (leur contenu est conservé)
+    function placer() {
+      const wrap = $('schema-wrap'), box = $('schema-box');
+      if (!box || !Q.anode) return;
+      const W = Math.max(300, Math.min(640, Math.floor(wrap.clientWidth || 640)));
+      if (W === largeurSchema) return;
+      largeurSchema = W;
+      const g = geometrie(W);
+      box.style.width = W + 'px';
+      box.style.height = SCH.H + 'px';
+      const tmp = document.createElement('div');
+      tmp.innerHTML = dessin(g);
+      const ancien = box.querySelector('svg');
+      if (ancien) ancien.replaceWith(tmp.firstElementChild); else box.prepend(tmp.firstElementChild);
+      const pos = positions(g);
+      Object.keys(pos).forEach(id => {
+        const el = $(id);
+        if (!el) return;
+        const [l, t, w, h] = pos[id];
+        el.style.left = Math.round(l) + 'px'; el.style.top = t + 'px';
+        el.style.width = Math.round(w) + 'px'; el.style.height = h + 'px';
+      });
     }
 
     // =============================================
@@ -607,7 +592,7 @@
 
         makeDropzone(el, d => acceptIds.includes(d.id), d => {
           if (el.dataset.dragId) unmarkUsed(el.dataset.dragId);
-          el.innerHTML = makeContent(d);
+          el.innerHTML = `<span>${makeContent(d)}</span>`;
           el.classList.add('filled');
           el.dataset.filled = '1';
           el.dataset.dragId = d.id;
@@ -625,7 +610,7 @@
             const comR = dz('dz-com-right');
             if (comR) { comR.innerHTML=''; comR.classList.remove('filled'); delete comR.dataset.filled; delete comR.dataset.dragId; unmarkUsed('com'); }
           }
-          comLEl.innerHTML = `<span style="font-size:10px;font-weight:700;">COM</span>`;
+          comLEl.innerHTML = `COM`;
           comLEl.classList.add('filled'); comLEl.dataset.filled='1'; comLEl.dataset.dragId='com';
           F['com'] = 'L'; markUsed('com');
         });
@@ -640,7 +625,7 @@
             const comL = dz('dz-com-left');
             if (comL) { comL.innerHTML=''; comL.classList.remove('filled'); delete comL.dataset.filled; delete comL.dataset.dragId; unmarkUsed('com'); }
           }
-          comREl.innerHTML = `<span style="font-size:10px;font-weight:700;">COM</span>`;
+          comREl.innerHTML = `COM`;
           comREl.classList.add('filled'); comREl.dataset.filled='1'; comREl.dataset.dragId='com';
           F['com'] = 'R'; markUsed('com');
         });
@@ -657,8 +642,8 @@
           const isE = d.id === 'd-e';
           // Même couleur bleue pour e- et I
           el.innerHTML = isE
-            ? `<span style="font-weight:700;color:${EI_COLOR};">e⁻</span>`
-            : `<span style="font-weight:700;color:${EI_COLOR};">I</span>`;
+            ? `e⁻`
+            : `I`;
           el.classList.add('filled');
           el.dataset.filled = '1';
           el.dataset.dragId = d.id;
@@ -674,22 +659,22 @@
       // POLARITY
       const polNeed = hint !== 'polarity';
       simpleZone('dz-pol-l','pol_l',['d-plus','d-minus'],
-        d => `<span style="font-size:16px;font-weight:900;">${d.label}</span>`, polNeed);
+        d => `${d.label}`, polNeed);
       simpleZone('dz-pol-r','pol_r',['d-plus','d-minus'],
-        d => `<span style="font-size:16px;font-weight:900;">${d.label}</span>`, polNeed);
+        d => `${d.label}`, polNeed);
 
       // METAL / ION
       const allMIds = ['ml-'+leftCouple.id, 'ml-'+rightCouple.id];
       const allIIds = ['il-'+leftCouple.id, 'il-'+rightCouple.id];
 
       simpleZone('dz-metal-l','metal_l', allMIds,
-        d => `<span style="font-size:13px;font-weight:700;">${d.label}</span>`, !gML);
+        d => `${d.label}`, !gML);
       simpleZone('dz-ion-l','ion_l', allIIds,
-        d => `<span style="font-size:12px;font-weight:700;">${d.labelH}</span>`, !gIL);
+        d => `${d.labelH}`, !gIL);
       simpleZone('dz-metal-r','metal_r', allMIds,
-        d => `<span style="font-size:13px;font-weight:700;">${d.label}</span>`, !gMR);
+        d => `${d.label}`, !gMR);
       simpleZone('dz-ion-r','ion_r', allIIds,
-        d => `<span style="font-size:12px;font-weight:700;">${d.labelH}</span>`, !gIR);
+        d => `${d.labelH}`, !gIR);
 
       // PONT SALIN
       const pontAccept = ['d-cat','d-an'];
@@ -699,7 +684,7 @@
         makeDropzone(el, d => pontAccept.includes(d.id), d => {
           if (el.dataset.dragId) unmarkUsed(el.dataset.dragId);
           const lbl = d.id === 'd-cat' ? 'cation +' : 'anion −';
-          el.innerHTML = `<span style="font-size:10px;font-weight:700;">${lbl}</span>`;
+          el.innerHTML = `${lbl}`;
           el.classList.add('filled'); el.dataset.filled='1'; el.dataset.dragId=d.id;
           F[fkey] = d.id;
           markUsed(d.id);
@@ -719,7 +704,7 @@
       function setGiven(id, html, fkey, fval) {
         const el = $(id);
         if (!el) return;
-        el.innerHTML = html;
+        el.innerHTML = `<span>${html}</span>`;
         el.classList.add('given');
         el.dataset.given = '1';
         el.dataset.filled = '1';
@@ -727,30 +712,30 @@
       }
 
       if (hint === 'electrons') {
-        setGiven('dz-electrons',`<span style="font-weight:700;color:${EI_COLOR};">e⁻</span>`,'electrons','d-e');
+        setGiven('dz-electrons',`e⁻`,'electrons','d-e');
       }
       if (hint === 'current') {
-        setGiven('dz-current',`<span style="font-weight:700;color:${EI_COLOR};">I</span>`,'current','d-i');
+        setGiven('dz-current',`I`,'current','d-i');
       }
       if (hint === 'polarity') {
         const minusSide = anodeSide === 'L' ? 'l' : 'r';
         const plusSide  = anodeSide === 'L' ? 'r' : 'l';
-        setGiven(`dz-pol-${minusSide}`,'<span style="font-size:16px;font-weight:900;">−</span>',`pol_${minusSide}`,'d-minus');
-        setGiven(`dz-pol-${plusSide}`, '<span style="font-size:16px;font-weight:900;">+</span>', `pol_${plusSide}`,'d-plus');
+        setGiven(`dz-pol-${minusSide}`,'−',`pol_${minusSide}`,'d-minus');
+        setGiven(`dz-pol-${plusSide}`, '+', `pol_${plusSide}`,'d-plus');
       }
       if (hint === 'meter') {
         const comSide = anodeSide === 'L' ? 'left' : 'right';
         const otherSide = anodeSide === 'L' ? 'right' : 'left';
         const comVal = anodeSide === 'L' ? 'L' : 'R';
-        setGiven(`dz-com-${comSide}`,'<span style="font-size:10px;font-weight:700;">COM</span>','com', comVal);
+        setGiven(`dz-com-${comSide}`,'COM','com', comVal);
         const otherEl = $(`dz-com-${otherSide}`);
-        if (otherEl) { otherEl.innerHTML=''; otherEl.dataset.given='1'; }
+        if (otherEl) { otherEl.innerHTML=''; otherEl.dataset.given='1'; otherEl.classList.add('pile-z-masque'); }
       }
 
-      if (gML) setGiven('dz-metal-l',`<span style="font-size:13px;font-weight:700;">${leftCouple.metal}</span>`,'metal_l','ml-'+leftCouple.id);
-      if (gIL) setGiven('dz-ion-l',`<span style="font-size:12px;font-weight:700;">${leftCouple.ionH}</span>`,'ion_l','il-'+leftCouple.id);
-      if (gMR) setGiven('dz-metal-r',`<span style="font-size:13px;font-weight:700;">${rightCouple.metal}</span>`,'metal_r','ml-'+rightCouple.id);
-      if (gIR) setGiven('dz-ion-r',`<span style="font-size:12px;font-weight:700;">${rightCouple.ionH}</span>`,'ion_r','il-'+rightCouple.id);
+      if (gML) setGiven('dz-metal-l',`${leftCouple.metal}`,'metal_l','ml-'+leftCouple.id);
+      if (gIL) setGiven('dz-ion-l',`${leftCouple.ionH}`,'ion_l','il-'+leftCouple.id);
+      if (gMR) setGiven('dz-metal-r',`${rightCouple.metal}`,'metal_r','ml-'+rightCouple.id);
+      if (gIR) setGiven('dz-ion-r',`${rightCouple.ionH}`,'ion_r','il-'+rightCouple.id);
     }
 
     // =============================================
@@ -763,29 +748,28 @@
       const items = [];
 
       if (hint !== 'meter') {
-        items.push({ id:'com', label:'COM', bg:'#475569', title:'Borne COM' });
+        items.push({ id:'com', label:'COM', title:'Borne COM' });
       }
       // e- et I en bleu commun
-      if (hint !== 'electrons') items.push({ id:'d-e', label:'e⁻', bg: EI_COLOR, title:'Sens des électrons' });
-      if (hint !== 'current')   items.push({ id:'d-i', label:'I',  bg: EI_COLOR, title:'Sens du courant' });
+      if (hint !== 'electrons') items.push({ id:'d-e', label:'e⁻', title:'Sens des électrons' });
+      if (hint !== 'current')   items.push({ id:'d-i', label:'I', title:'Sens du courant' });
       if (hint !== 'polarity') {
-        items.push({ id:'d-plus',  label:'+', bg:'#b45309', title:'Borne positive' });
-        items.push({ id:'d-minus', label:'−', bg:'#7c3aed', title:'Borne négative' });
+        items.push({ id:'d-plus',  label:'+', title:'Borne positive' });
+        items.push({ id:'d-minus', label:'−', title:'Borne négative' });
       }
 
-      items.push({ id:'d-cat', label:'cation +', bg:'#0d9488', title:'Cation (pont salin)' });
-      items.push({ id:'d-an',  label:'anion −',  bg:'#0d9488', title:'Anion (pont salin)' });
+      items.push({ id:'d-cat', label:'cation +', title:'Cation (pont salin)' });
+      items.push({ id:'d-an',  label:'anion −', title:'Anion (pont salin)' });
 
-      if (!gML) items.push({ id:'ml-'+leftCouple.id,  label: leftCouple.metal,  labelH: leftCouple.metal,  bg:'#065f46', title:'Métal gauche' });
-      if (!gIL) items.push({ id:'il-'+leftCouple.id,  label: leftCouple.ion,    labelH: leftCouple.ionH,   bg:'#065f46', title:'Ion gauche' });
-      if (!gMR) items.push({ id:'ml-'+rightCouple.id, label: rightCouple.metal, labelH: rightCouple.metal, bg:'#065f46', title:'Métal droit' });
-      if (!gIR) items.push({ id:'il-'+rightCouple.id, label: rightCouple.ion,   labelH: rightCouple.ionH,  bg:'#065f46', title:'Ion droit' });
+      if (!gML) items.push({ id:'ml-'+leftCouple.id,  label: leftCouple.metal,  labelH: leftCouple.metal, title:'Métal gauche' });
+      if (!gIL) items.push({ id:'il-'+leftCouple.id,  label: leftCouple.ion,    labelH: leftCouple.ionH, title:'Ion gauche' });
+      if (!gMR) items.push({ id:'ml-'+rightCouple.id, label: rightCouple.metal, labelH: rightCouple.metal, title:'Métal droit' });
+      if (!gIR) items.push({ id:'il-'+rightCouple.id, label: rightCouple.ion,   labelH: rightCouple.ionH, title:'Ion droit' });
 
       bank.innerHTML = items.map(item => `
         <div class="drag-item" data-id="${item.id}"
-             style="background:${item.bg || 'var(--accent-ink)'};${(item.id==='d-plus'||item.id==='d-minus')?'font-size:17px;':''}"
-             title="${item.title || ''}">
-          ${item.labelH || item.label}
+             title="${item.title || ''}" role="button" aria-label="${item.title || ''} : ${item.label}">
+          <span>${item.labelH || item.label}</span>
         </div>`).join('');
 
       bank.querySelectorAll('.drag-item').forEach(el => {
@@ -804,20 +788,19 @@
       const items = [];
 
       if (hint !== 'half_eqs_placed') {
-        items.push({ id:'heq-anode',   labelH: anode.eqStdH,   bg:'#0c4a6e', title:'Demi-équation anode',   type:'heq', couple: anode });
-        items.push({ id:'heq-cathode', labelH: cathode.eqStdH, bg:'#0c4a6e', title:'Demi-équation cathode', type:'heq', couple: cathode });
+        items.push({ id:'heq-anode',   labelH: anode.eqStdH, title:'Demi-équation anode',   type:'heq', couple: anode });
+        items.push({ id:'heq-cathode', labelH: cathode.eqStdH, title:'Demi-équation cathode', type:'heq', couple: cathode });
       }
 
-      items.push({ id:'d-ox',     label:'Oxydation', bg:'#7c3aed', title:'Oxydation' });
-      items.push({ id:'d-red',    label:'Réduction', bg:'#7c3aed', title:'Réduction' });
-      items.push({ id:'d-anode',  label:'Anode',     bg:'#92400e', title:'Anode' });
-      items.push({ id:'d-cathode',label:'Cathode',   bg:'#92400e', title:'Cathode' });
+      items.push({ id:'d-ox',     label:'Oxydation', title:'Oxydation' });
+      items.push({ id:'d-red',    label:'Réduction', title:'Réduction' });
+      items.push({ id:'d-anode',  label:'Anode', title:'Anode' });
+      items.push({ id:'d-cathode',label:'Cathode', title:'Cathode' });
 
       bank.innerHTML = items.map(item => `
-        <div class="drag-item" data-id="${item.id}"
-             style="background:${item.bg || 'var(--accent-ink)'};${item.type==='heq'?'font-size:12px;':''}"
-             title="${item.title || ''}">
-          ${item.labelH || item.label}
+        <div class="drag-item${item.type==='heq' ? ' pile-heq' : ''}" data-id="${item.id}"
+             title="${item.title || ''}" role="button" aria-label="${item.title || ''}">
+          <span>${item.labelH || item.label}</span>
         </div>`).join('');
 
       bank.querySelectorAll('.drag-item').forEach(el => {
@@ -835,13 +818,13 @@
       const { anode, cathode } = Q;
       const wrap = $('lower-wrap');
       const colonne = (cote, nom) => `
-        <div>
+        <div class="pile-demi">
           <div class="pile-demi-t">Demi-pile ${nom}</div>
-          <div style="margin-bottom:10px;">
+          <div class="pile-champ">
             <div class="pile-zone-t">Demi-équation</div>
             <div id="${P}dz-heq-${cote}" class="heq-dz"><span class="pile-ph">${PH_HEQ}</span></div>
           </div>
-          <div style="margin-bottom:10px;">
+          <div class="pile-champ">
             <div class="pile-zone-t">Type de réaction</div>
             <div id="${P}dz-oxred-${cote}" class="dz pile-dz-bas"><span class="pile-ph">Oxydation / Réduction ?</span></div>
           </div>
@@ -854,10 +837,10 @@
 
       setupHalfEqZone('dz-heq-l', 'l');
       setupHalfEqZone('dz-heq-r', 'r');
-      setupSimpleLowerZone('dz-oxred-l','oxred_l',['d-ox','d-red'], d=>`<span style="font-size:13px;font-weight:700;">${d.label}</span>`);
-      setupSimpleLowerZone('dz-oxred-r','oxred_r',['d-ox','d-red'], d=>`<span style="font-size:13px;font-weight:700;">${d.label}</span>`);
-      setupSimpleLowerZone('dz-elec-l','elec_l',['d-anode','d-cathode'], d=>`<span style="font-size:13px;font-weight:700;">${d.label}</span>`);
-      setupSimpleLowerZone('dz-elec-r','elec_r',['d-anode','d-cathode'], d=>`<span style="font-size:13px;font-weight:700;">${d.label}</span>`);
+      setupSimpleLowerZone('dz-oxred-l','oxred_l',['d-ox','d-red'], d=>`${d.label}`);
+      setupSimpleLowerZone('dz-oxred-r','oxred_r',['d-ox','d-red'], d=>`${d.label}`);
+      setupSimpleLowerZone('dz-elec-l','elec_l',['d-anode','d-cathode'], d=>`${d.label}`);
+      setupSimpleLowerZone('dz-elec-r','elec_r',['d-anode','d-cathode'], d=>`${d.label}`);
 
       if (Q.hint === 'half_eqs_placed') {
         const leftIsAnode = Q.anodeSide === 'L';
@@ -890,7 +873,7 @@
                  : (dir === 'red') ? couple.eqRedH
                  : couple.eqStdH;
       el.innerHTML = `
-        <span id="${P}heq-txt-${side}" style="flex:1;font-size:13px;font-weight:600;">${eqH}</span>
+        <span id="${P}heq-txt-${side}" class="pile-heq-txt">${eqH}</span>
         <button type="button" class="btn-small pile-flip" data-act="flipHEQ" data-side="${side}" data-couple="${couple.id}" aria-label="Changer le sens de la demi-équation" title="Changer le sens">⇌</button>
         <button type="button" class="pile-retirer" data-act="rmHEQ" data-side="${side}" aria-label="Retirer la demi-équation" title="Retirer">✕</button>`;
       el.classList.add('filled');
@@ -905,7 +888,7 @@
       const el = $(dzId);
       if (!el) return;
       const eqH = dir === 'ox' ? couple.eqOxH : couple.eqRedH;
-      el.innerHTML = `<span style="font-size:13px;font-weight:600;color:var(--ink);">${eqH}</span>`;
+      el.innerHTML = `<span class="pile-heq-txt">${eqH}</span>`;
       el.classList.add('given');
       el.dataset.given='1'; el.dataset.filled='1';
       el.dataset.coupleId = couple.id; el.dataset.dir = dir;
@@ -950,7 +933,7 @@
       if (!el) return;
       makeDropzone(el, d => acceptIds.includes(d.id), d => {
         if (el.dataset.dragId) unmarkUsed(el.dataset.dragId);
-        el.innerHTML = mkHtml(d);
+        el.innerHTML = `<span>${mkHtml(d)}</span>`;
         el.classList.add('filled'); el.dataset.filled='1'; el.dataset.dragId=d.id;
         F[fkey] = d.id;
         markUsed(d.id);
@@ -986,9 +969,9 @@
       const wrap = $('eq-wrap');
       wrap.innerHTML = `
         <div class="pile-banque">
-          ${sousTitre('Glisser dans l\'équation')}
+          ${sousTitre('Espèces à placer dans l\'équation')}
           <div class="pile-banque-l">
-            ${allSp.map(s=>`<div class="drag-item" data-id="${s.id}" data-type="sp" style="background:var(--accent);font-size:13px;" title="${s.label}">${s.html}</div>`).join('')}
+            ${allSp.map(s=>`<div class="drag-item" data-id="${s.id}" data-type="sp" title="${s.label}" role="button" aria-label="Espèce ${s.label}"><span>${s.html}</span></div>`).join('')}
           </div>
         </div>
         <div class="pile-eq-ligne">
@@ -1036,7 +1019,7 @@
             <span class="coeff-disp">${sp.coeff}</span>
             <button type="button" class="pile-coef-btn" data-act="chgCoeff" data-side="${side}" data-i="${i}" data-delta="-1" aria-label="Diminuer le nombre stœchiométrique">▼</button>
           </div>
-          <span style="margin:0 4px;">${sp.html}</span>
+          <span class="pile-esp">${sp.html}</span>
           <button type="button" class="pile-retirer" data-act="rmFromEq" data-side="${side}" data-i="${i}" aria-label="Retirer cette espèce" title="Retirer">✕</button>
         </div>
         ${i < arr.length-1 ? '<span class="pile-plus">+</span>' : ''}`).join('');
@@ -1417,43 +1400,43 @@
       function force(id, html, fkey, fval) {
         const el = $(id);
         if (!el || el.dataset.given) return;
-        el.innerHTML = html;
+        el.innerHTML = `<span>${html}</span>`;
         el.classList.remove('incorrect');
         el.classList.add('filled','correct');
         el.dataset.filled = '1';
         if (fkey) F[fkey] = fval;
       }
 
-      if (hint !== 'electrons') force('dz-electrons',`<span style="font-weight:700;color:${EI_COLOR};">e⁻</span>`,'electrons','d-e');
-      if (hint !== 'current')   force('dz-current',  `<span style="font-weight:700;color:${EI_COLOR};">I</span>`,'current','d-i');
+      if (hint !== 'electrons') force('dz-electrons',`e⁻`,'electrons','d-e');
+      if (hint !== 'current')   force('dz-current',  `I`,'current','d-i');
 
       if (hint !== 'meter') {
         const comSide   = anodeSide === 'L' ? 'left' : 'right';
         const otherSide = anodeSide === 'L' ? 'right' : 'left';
         const comVal    = anodeSide === 'L' ? 'L' : 'R';
-        force(`dz-com-${comSide}`,'<span style="font-size:10px;font-weight:700;">COM</span>','com', comVal);
+        force(`dz-com-${comSide}`,'COM','com', comVal);
         const otherEl = $(`dz-com-${otherSide}`);
-        if (otherEl && !otherEl.dataset.given) { otherEl.innerHTML=''; otherEl.classList.remove('filled','correct','incorrect'); }
+        if (otherEl && !otherEl.dataset.given) { otherEl.innerHTML=''; otherEl.classList.remove('filled','correct','incorrect'); otherEl.classList.add('pile-z-masque'); }
       }
 
       if (hint !== 'polarity') {
         const minusSide = anodeSide === 'L' ? 'l' : 'r';
         const plusSide  = anodeSide === 'L' ? 'r' : 'l';
-        force(`dz-pol-${minusSide}`,'<span style="font-size:16px;font-weight:900;">−</span>',`pol_${minusSide}`,'d-minus');
-        force(`dz-pol-${plusSide}`, '<span style="font-size:16px;font-weight:900;">+</span>', `pol_${plusSide}`,'d-plus');
+        force(`dz-pol-${minusSide}`,'−',`pol_${minusSide}`,'d-minus');
+        force(`dz-pol-${plusSide}`, '+', `pol_${plusSide}`,'d-plus');
       }
 
       const catZone = anodeSide === 'L' ? 'dz-pont-right' : 'dz-pont-left';
       const anZone  = anodeSide === 'L' ? 'dz-pont-left'  : 'dz-pont-right';
       const catFkey = catZone === 'dz-pont-right' ? 'pont_right' : 'pont_left';
       const anFkey  = anZone  === 'dz-pont-right' ? 'pont_right' : 'pont_left';
-      force(catZone,'<span style="font-size:10px;font-weight:700;">cation +</span>',catFkey,'d-cat');
-      force(anZone, '<span style="font-size:10px;font-weight:700;">anion −</span>', anFkey, 'd-an');
+      force(catZone,'cation +',catFkey,'d-cat');
+      force(anZone, 'anion −', anFkey, 'd-an');
 
-      if (!Q.gML) force('dz-metal-l',`<span style="font-size:13px;font-weight:700;">${leftCouple.metal}</span>`,'metal_l','ml-'+leftCouple.id);
-      if (!Q.gIL) force('dz-ion-l',  `<span style="font-size:12px;font-weight:700;">${leftCouple.ionH}</span>`,'ion_l','il-'+leftCouple.id);
-      if (!Q.gMR) force('dz-metal-r',`<span style="font-size:13px;font-weight:700;">${rightCouple.metal}</span>`,'metal_r','ml-'+rightCouple.id);
-      if (!Q.gIR) force('dz-ion-r',  `<span style="font-size:12px;font-weight:700;">${rightCouple.ionH}</span>`,'ion_r','il-'+rightCouple.id);
+      if (!Q.gML) force('dz-metal-l',`${leftCouple.metal}`,'metal_l','ml-'+leftCouple.id);
+      if (!Q.gIL) force('dz-ion-l',  `${leftCouple.ionH}`,'ion_l','il-'+leftCouple.id);
+      if (!Q.gMR) force('dz-metal-r',`${rightCouple.metal}`,'metal_r','ml-'+rightCouple.id);
+      if (!Q.gIR) force('dz-ion-r',  `${rightCouple.ionH}`,'ion_r','il-'+rightCouple.id);
 
       if (hint !== 'half_eqs_placed') {
         ['l','r'].forEach(side => {
@@ -1462,7 +1445,7 @@
           const couple = side === 'l' ? leftCouple : rightCouple;
           const dir = (side === 'l') ? (anodeSide === 'L' ? 'ox' : 'red') : (anodeSide === 'L' ? 'red' : 'ox');
           const eqH = dir === 'ox' ? couple.eqOxH : couple.eqRedH;
-          el.innerHTML = `<span style="font-size:13px;font-weight:600;">${eqH}</span>`;
+          el.innerHTML = `<span class="pile-heq-txt">${eqH}</span>`;
           el.classList.add('filled','correct'); el.dataset.filled='1';
           F['heq_'+side] = { coupleId: couple.id, dir };
         });
@@ -1477,10 +1460,10 @@
       const elecLFval     = anodeSide === 'L' ? 'd-anode' : 'd-cathode';
       const elecRFval     = anodeSide === 'L' ? 'd-cathode' : 'd-anode';
 
-      force('dz-oxred-l',`<span style="font-size:13px;font-weight:700;">${oxredLCorrect}</span>`,'oxred_l',oxredLFval);
-      force('dz-oxred-r',`<span style="font-size:13px;font-weight:700;">${oxredRCorrect}</span>`,'oxred_r',oxredRFval);
-      force('dz-elec-l', `<span style="font-size:13px;font-weight:700;">${elecLLabel}</span>`,   'elec_l', elecLFval);
-      force('dz-elec-r', `<span style="font-size:13px;font-weight:700;">${elecRLabel}</span>`,   'elec_r', elecRFval);
+      force('dz-oxred-l',`${oxredLCorrect}`,'oxred_l',oxredLFval);
+      force('dz-oxred-r',`${oxredRCorrect}`,'oxred_r',oxredRFval);
+      force('dz-elec-l', `${elecLLabel}`,   'elec_l', elecLFval);
+      force('dz-elec-r', `${elecRLabel}`,   'elec_r', elecRFval);
 
       // Équation : forcer l'affichage et masquer les items de la banque
       const L2 = lcm(anode.n, cathode.n);

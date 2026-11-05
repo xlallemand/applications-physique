@@ -2,178 +2,207 @@
    Styles du moteur « Schéma d'une pile » (pile/pile.js)
    Chargés par pile/index.html et par les pages du chapitre 15
    (oxydoreduction-STI2D : module 5 et exercices 8, 9).
-   Couleurs : variables de assets/theme.css ; les couleurs en dur
-   restantes sont celles de la figure (béchers, pont salin, e⁻ et I)
-   et des étiquettes à glisser.
+   Couleurs : uniquement les variables de assets/theme.css.
+   Le schéma reprend la figure du cours (OX.figPile) : solutions --cle-bg,
+   pont salin --paper-3, électrodes --line-strong, flèches --accent.
+   Étiquettes et cases : même présentation que les autres glisser-déposer
+   (assets/schema-methode.css, ox.css).
    ============================================================ */
 
 .pile-app { font-family: var(--font-sans); color: var(--ink); }
 .pile-app sup { font-size: 0.72em; vertical-align: super; line-height: 0; }
 .pile-app sub { font-size: 0.72em; vertical-align: sub; line-height: 0; }
+.pile-app *, .pile-app *::before, .pile-app *::after { box-sizing: border-box; }
 
-/* ===== Consignes, données, blocs ===== */
+/* ===== Consignes, données ===== */
 .pile-consignes { margin-bottom: 12px; }
-.pile-consignes-t { font-size: 14px; font-weight: 900; color: var(--ink); margin-bottom: 10px; }
+.pile-consignes-t { font-size: 15px; font-weight: 800; color: var(--accent-ink); margin-bottom: 10px; }
 .pile-consignes ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
-.pile-consignes li { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--ink); }
-.pile-num { background: var(--accent); color: #fff; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; flex-shrink: 0; margin-top: 1px; }
+.pile-consignes li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.5; color: var(--ink); }
+.pile-astuce { margin: 10px 0 0 32px !important; font-size: 13px; color: var(--ink-2); }
+.pile-num {
+  background: var(--accent); color: var(--sheet); border-radius: 50%; width: 22px; height: 22px; flex-shrink: 0; margin-top: 1px;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800;
+}
 .pile-ex-flip { background: var(--sheet); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--paper-3); border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 700; }
 .pile-acc { color: var(--accent-ink); }
 .pile-donnees { background: var(--paper); border-radius: 20px; padding: 16px 18px; margin-bottom: 12px; }
-.pile-donnees-t { font-size: 13px; font-weight: 800; color: var(--accent-ink); margin-bottom: 8px; }
-.pile-donnees-c { font-size: 13px; color: var(--ink); line-height: 1.8; }
+.pile-donnees-t { font-size: 14px; font-weight: 800; color: var(--accent-ink); margin-bottom: 8px; }
+.pile-donnees-c { font-size: 14px; color: var(--ink); line-height: 1.7; }
 .pile-couples { list-style: disc; padding-left: 20px; margin: 0 0 8px; }
-.pile-bloc { background: var(--sheet); border-radius: 22px; border: 1px solid var(--line); padding: 18px; margin-bottom: 12px; }
-.pile-bloc-t { font-size: 14px; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
-.pile-banque { border-top: 1px solid var(--line); padding-top: 8px; margin-bottom: 10px; }
-.pile-banque-t { font-size: 11px; font-weight: 700; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-.pile-banque-l { display: flex; flex-wrap: wrap; gap: 4px; min-height: 36px; }
-.pile-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.pile-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 8px; }
-.pile-retour { margin-bottom: 12px; }
-.pile-ph { color: var(--ink-2); font-size: 12px; font-weight: 500; }
-.pile-zone-t { font-size: 11px; color: var(--ink-2); font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
-.pile-demi-t { font-size: 13px; font-weight: 800; color: var(--accent-ink); margin-bottom: 10px; padding-bottom: 4px; border-bottom: 2px solid var(--cle-bg); }
-.pile-dz-bas { min-width: 120px; min-height: 32px; }
 
-/* ===== DROP ZONES ===== */
-.dz {
-  border: 2px dashed var(--ink-3);
-  border-radius: 6px;
-  background: var(--paper);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
-  transition: all 0.15s;
-  cursor: default;
-  position: relative;
-  user-select: none;
+/* ===== Blocs numérotés (schéma, demi-piles, équation) ===== */
+.pile-bloc { background: var(--sheet); border: 1px solid var(--line); border-radius: 22px; padding: 18px 20px; margin-bottom: 14px; }
+.pile-bloc-t { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 800; color: var(--ink); margin: 0 0 12px; letter-spacing: -.01em; }
+.pile-bloc-t .pile-num { margin-top: 0; width: 26px; height: 26px; font-size: 13px; }
+.pile-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 14px; }
+.pile-bloc .pile-actions { margin-bottom: 0; }
+.pile-retour:empty { display: none; }
+.pile-retour { margin-top: 10px; }
+.pile-ph { color: var(--ink-2); font-size: 13px; font-weight: 500; }
+@media (max-width: 480px) {
+  .pile-bloc { padding: 14px 10px; border-radius: 18px; }
+  .pile-bloc-t { font-size: 16px; padding: 0 4px; }
+  .pile-donnees { padding: 14px; }
+  .pile-astuce { margin-left: 0 !important; }
 }
-.dz.over { border-color: var(--accent) !important; background: var(--paper-2) !important; transform: scale(1.04); }
-.dz.correct { border-color: var(--success) !important; background: var(--success-bg) !important; color: var(--success-text) !important; border-style: solid !important; }
-.dz.incorrect { border-color: var(--danger) !important; background: var(--danger-bg) !important; color: var(--danger-text) !important; border-style: solid !important; }
-.dz.filled { border-style: solid; border-color: var(--ink-2); background: var(--line); }
-.dz.given { border-style: solid !important; border-color: var(--accent) !important; background: var(--paper-2) !important; color: var(--ink) !important; }
 
-/* ===== DRAG ITEMS (le fantôme du glisser est ajouté au corps de page : classe non imbriquée) ===== */
+/* ===== Réserve d'étiquettes (au-dessus de chaque zone de travail) ===== */
+.pile-banque { background: var(--paper); border: 1.5px dashed var(--line-strong); border-radius: 14px; padding: 8px 10px 10px; margin-bottom: 12px; touch-action: manipulation; }
+.pile-banque-t { font-size: 13px; font-weight: 700; color: var(--ink-2); margin-bottom: 6px; }
+.pile-banque-l { display: flex; flex-wrap: wrap; gap: 6px; min-height: 38px; align-items: center; }
+/* téléphone, tablette : la réserve reste visible (sous le bandeau) pendant qu'on fait défiler sa zone de travail */
+@media (max-width: 899px) { .pile-banque { position: sticky; top: 62px; z-index: 5; } }
+
+/* ===== Étiquettes à glisser (le fantôme du glisser est ajouté au corps de page : classe non imbriquée) ===== */
 .drag-item {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px 12px;
-  background: var(--accent-ink);
-  color: #fff;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  font-family: var(--font-sans);
-  cursor: grab;
-  user-select: none;
-  margin: 3px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-  transition: transform 0.1s, box-shadow 0.1s;
-  white-space: nowrap;
-  border: 2px solid rgba(255,255,255,0.2);
+  display: inline-flex; align-items: center; justify-content: center; min-height: 38px; min-width: 40px; padding: 4px 12px;
+  background: var(--sheet); border: 2px solid var(--accent); border-radius: 10px; color: var(--accent-ink);
+  font: 800 15px/1.2 var(--font-sans); white-space: nowrap; cursor: grab; box-sizing: border-box;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+  transition: background .15s, opacity .15s;
 }
 .drag-item sup { font-size: 0.72em; vertical-align: super; line-height: 0; }
-.drag-item:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-.drag-item.dragging { opacity: 0.35; cursor: grabbing; }
-.drag-item.used { opacity: 0.25; pointer-events: none; filter: grayscale(0.5); }
+.drag-item.pile-heq { font-size: 14px; font-weight: 700; }
+@media (hover: hover) { .drag-item:hover { background: var(--cle-bg); } }
+.drag-item.pile-choisie { background: var(--accent); color: var(--sheet); box-shadow: 0 0 0 3px var(--cle-line); }
+.drag-item.dragging { opacity: .35; cursor: grabbing; }
+.drag-item.drag-ghost { opacity: .95; }
+.drag-item.used { opacity: .3; pointer-events: none; border-style: dashed; }
 .drag-item.hidden-sp { display: none; }
 
-/* ===== HALF-EQ DROP ZONES ===== */
-.heq-dz {
-  border: 2px dashed var(--ink-3);
-  border-radius: 8px;
-  min-height: 38px;
-  min-width: 220px;
-  padding: 5px 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--paper);
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.15s;
-  cursor: default;
-}
-.heq-dz.over { border-color: var(--accent); background: var(--paper-2); }
-.heq-dz.filled { border-style: solid; border-color: var(--ink-2); background: var(--line); }
-.heq-dz.correct { border-color: var(--success); background: var(--success-bg); border-style: solid; }
-.heq-dz.incorrect { border-color: var(--danger); background: var(--danger-bg); border-style: solid; }
-.heq-dz.given { border-style: solid; border-color: var(--accent); background: var(--paper-2); }
+/* ===== Schéma de la pile : dessin SVG et cases posées dessus ===== */
+.pile-defile { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.pile-schema { position: relative; margin: 0 auto; }
+.pile-svg { position: absolute; left: 0; top: 0; display: block; font-family: var(--font-sans); overflow: visible; }
+.pile-svg .ps-sol { fill: var(--cle-bg); }
+.pile-svg .ps-bk { fill: none; stroke: var(--ink); stroke-width: 2; }
+.pile-svg .ps-tube { fill: none; stroke: var(--paper-3); stroke-width: 14; }
+.pile-svg .ps-tube-b { fill: none; stroke: var(--ink-3); stroke-width: 1.5; }
+.pile-svg .ps-elec { fill: var(--line-strong); stroke: var(--ink); stroke-width: 1.5; }
+.pile-svg .ps-fil { fill: none; stroke: var(--ink); stroke-width: 2; }
+.pile-svg .ps-app { fill: var(--sheet); stroke: var(--ink); stroke-width: 2; }
+.pile-svg .ps-app-t { fill: var(--ink); font-size: 18px; font-weight: 800; text-anchor: middle; }
+.pile-svg .ps-fl { stroke: var(--accent); stroke-width: 2.5; }
+.pile-svg .ps-tete { fill: var(--accent); }
+.pile-svg .ps-fl-ion { stroke: var(--ink-2); stroke-width: 2.5; }
+.pile-svg .ps-tete-ion { fill: var(--ink-2); }
+.pile-svg .ps-t2 { fill: var(--ink-2); font-size: 12px; font-weight: 600; text-anchor: middle; }
 
-/* ===== DEMI-PILES : 2 colonnes, empilées sur petit écran ===== */
-.pile-lower-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+/* ===== Cases de dépôt (schéma et demi-piles) ===== */
+.dz {
+  display: flex; align-items: center; justify-content: center; text-align: center; box-sizing: border-box;
+  border: 2px dashed var(--ink-3); border-radius: 10px; background: var(--sheet);
+  font-family: var(--font-sans); font-size: 14px; font-weight: 800; line-height: 1.1; color: var(--accent-ink);
+  -webkit-user-select: none; user-select: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  transition: background .15s, border-color .15s;
+}
+.pile-schema .dz { position: absolute; padding: 0 2px; white-space: nowrap; }
+.dz.filled { border-style: solid; border-color: var(--accent); cursor: pointer; }
+.dz.over, .dz.pile-cible { border-color: var(--accent); background: var(--cle-bg); }
+.dz.pile-cible { cursor: pointer; }
+.dz.correct { border-style: solid; border-color: var(--success); background: var(--success-bg); color: var(--success-text); }
+.dz.incorrect { border-style: solid; border-color: var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+/* donnée de l'énoncé : écrite sur le schéma comme dans la figure du cours */
+.dz.given { border-color: transparent; background: transparent; color: var(--ink); cursor: default; }
+.pile-z-masque { visibility: hidden; }
+
+/* forme et taille du texte de chaque case du schéma */
+.pile-z-fl { font-size: 17px; }                                   /* e⁻ ou I, au-dessus des flèches des fils */
+.pile-z-fl.given { color: var(--accent-ink); }
+.pile-z-com { font-size: 12px; border-radius: 8px; }              /* borne COM de l'appareil */
+.pile-z-com.given { color: var(--ink-2); }
+.pile-z-pol { border-radius: 50%; font-size: 20px; padding: 0 !important; }   /* polarité */
+.pile-z-pol.given { border: 1.5px solid var(--ink); background: var(--sheet); }
+.pile-z-esp { font-size: 15px; }                                  /* métal, ion */
+.pile-z-pont { font-size: 13px; }                                 /* ions du pont salin */
+
+/* ===== Demi-piles : deux colonnes, empilées sur petit écran ===== */
+.pile-lower-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.pile-demi { background: var(--paper); border-radius: 16px; padding: 12px 14px 14px; min-width: 0; }
+.pile-demi-t { font-size: 15px; font-weight: 800; color: var(--accent-ink); margin-bottom: 10px; }
+.pile-champ { margin-bottom: 10px; }
+.pile-zone-t { font-size: 12px; color: var(--ink-2); font-weight: 700; margin-bottom: 4px; }
+.pile-dz-bas { min-height: 44px; width: 100%; padding: 4px 8px; }
 @media (max-width: 560px) {
-  .pile-lower-grid { grid-template-columns: 1fr; gap: 16px; }
-  .heq-dz { min-width: 0; }
+  .pile-lower-grid { grid-template-columns: 1fr; gap: 12px; }
+  .pile-demi { padding: 10px 10px 12px; }
 }
 
-/* ===== EQUATION BUILDER ===== */
-.pile-eq-ligne { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
-.pile-eq-fleche { font-size: 28px; font-weight: 900; color: var(--ink-2); }
-.pile-plus { font-weight: 700; color: var(--ink-2); font-size: 16px; }
+/* demi-équation : case large, boutons « changer le sens » et « retirer » */
+.heq-dz {
+  display: flex; align-items: center; gap: 6px; min-height: 48px; padding: 5px 6px 5px 12px; box-sizing: border-box;
+  border: 2px dashed var(--ink-3); border-radius: 12px; background: var(--sheet);
+  font-size: 15px; font-weight: 700; color: var(--ink); touch-action: manipulation;
+  transition: background .15s, border-color .15s;
+}
+.heq-dz.filled { border-style: solid; border-color: var(--accent); }
+.heq-dz.over, .heq-dz.pile-cible { border-color: var(--accent); background: var(--cle-bg); }
+.heq-dz.correct { border-style: solid; border-color: var(--success); background: var(--success-bg); }
+.heq-dz.incorrect { border-style: solid; border-color: var(--danger); background: var(--danger-bg); }
+.heq-dz.given { border: 2px solid var(--paper-3); background: var(--sheet); }
+.pile-heq-txt { flex: 1; min-width: 0; font-size: 15px; font-weight: 700; color: var(--ink); }
+
+/* ===== Équation de fonctionnement ===== */
+.pile-eq-ligne { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: end; }
+.pile-eq-fleche { font-size: 28px; font-weight: 800; color: var(--ink-2); line-height: 1; padding-bottom: 14px; text-align: center; }
+.pile-plus { font-weight: 800; color: var(--ink-2); font-size: 18px; }
 .eq-side {
-  border: 2px dashed var(--ink-3);
-  border-radius: 8px;
-  min-height: 42px;
-  min-width: 160px;
-  padding: 5px 8px;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
-  background: var(--paper);
-  transition: all 0.15s;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px; min-height: 58px; padding: 6px 8px; box-sizing: border-box;
+  border: 2px dashed var(--ink-3); border-radius: 12px; background: var(--sheet); touch-action: manipulation;
+  transition: background .15s, border-color .15s;
 }
-.eq-side.over { border-color: var(--accent); background: var(--paper-2); }
-.eq-side.correct { border-color: var(--success); background: var(--success-bg); border-style: solid; }
-.eq-side.incorrect { border-color: var(--danger); background: var(--danger-bg); border-style: solid; }
+.eq-side.over, .eq-side.pile-cible { border-color: var(--accent); background: var(--cle-bg); }
+.eq-side.correct { border-style: solid; border-color: var(--success); background: var(--success-bg); }
+.eq-side.incorrect { border-style: solid; border-color: var(--danger); background: var(--danger-bg); }
+@media (max-width: 560px) {
+  .pile-eq-ligne { grid-template-columns: 1fr; gap: 4px; }
+  .pile-eq-fleche { justify-self: center; transform: rotate(90deg); padding: 2px 0; pointer-events: none; }
+}
 
+/* espèce placée dans l'équation : nombre stœchiométrique (▲ ▼), formule, ✕ */
 .eq-chip {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: var(--ink);
-  color: #fff;
-  border-radius: 5px;
-  padding: 3px 6px;
-  font-size: 12px;
-  font-weight: 700;
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 4px 3px 4px;
+  background: var(--sheet); border: 2px solid var(--accent); border-radius: 10px; color: var(--accent-ink);
 }
-.eq-chip .coeff-disp { min-width: 16px; text-align: center; font-size: 13px; font-weight: 800; }
-/* Flèches des nombres stœchiométriques */
-.pile-coef-stepper { display: flex; flex-direction: column; align-items: center; gap: 1px; }
-.pile-coef-btn { width: 26px; height: 18px; padding: 0; line-height: 1; border: 1.5px solid var(--line-strong); border-radius: 4px; background: var(--paper); color: var(--ink); font-size: .6rem; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-.pile-coef-btn:hover { background: var(--line); }
+.pile-esp { font-size: 16px; font-weight: 800; margin: 0 2px; }
+.eq-chip .coeff-disp { min-width: 18px; text-align: center; font-size: 16px; font-weight: 800; color: var(--ink); line-height: 1.1; }
+.pile-coef-stepper { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.pile-coef-btn {
+  width: 32px; height: 22px; padding: 0; line-height: 1; border: none; border-radius: 6px; cursor: pointer;
+  background: var(--paper); color: var(--ink); font-size: .65rem; font-family: var(--font-sans);
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) { .pile-coef-btn:hover { background: var(--paper-3); } }
 .pile-coef-btn:active { background: var(--line-strong); }
 
 /* Boutons de la demi-équation (changer le sens, retirer) et des espèces : sans couleur (charte §3) */
-.pile-flip { padding: 4px 12px !important; min-height: 32px; font-size: 14px !important; }
+.pile-flip { padding: 4px 12px !important; min-height: 34px; font-size: 15px !important; flex-shrink: 0; }
 .pile-retirer {
-  width: 26px; height: 26px; flex-shrink: 0; border: none; border-radius: 999px; padding: 0; cursor: pointer;
+  width: 28px; height: 28px; flex-shrink: 0; border: none; border-radius: 999px; padding: 0; cursor: pointer;
   background: var(--sheet); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--paper-3);
   font: 700 11px/1 var(--font-sans); display: inline-flex; align-items: center; justify-content: center;
   touch-action: manipulation; -webkit-tap-highlight-color: transparent;
 }
-.pile-retirer:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
-.eq-chip .pile-retirer { width: 20px; height: 20px; font-size: 9px; }
+@media (hover: hover) { .pile-retirer:hover { box-shadow: inset 0 0 0 1.5px var(--ink); } }
+.eq-chip .pile-retirer { width: 24px; height: 24px; font-size: 10px; }
 .pile-app button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ===== Résultats des vérifications ===== */
-.pile-hint { border-radius: 16px; padding: 12px 16px; margin-top: 8px; font-size: 13px; line-height: 1.6; }
-.pile-hint ul { padding-left: 18px; list-style: disc; margin: 6px 0 0; font-size: 13px; }
+.pile-hint { border-radius: 16px; padding: 12px 16px; font-size: 14px; line-height: 1.6; }
+.pile-hint ul { padding-left: 18px; list-style: disc; margin: 6px 0 0; font-size: 14px; }
 .pile-hint-ok { background: var(--success-bg); color: var(--success-text); }
 .pile-hint-err { background: var(--danger-bg); color: var(--danger-text); }
 .pile-hint-ans { background: var(--cle-bg); color: var(--ink); }
 .pile-hint-ans strong { color: var(--accent-ink); }
-.pile-parts { margin-top: 12px; display: flex; gap: 12px; flex-wrap: wrap; }
-.pile-part { border-radius: 10px; padding: 12px 16px; flex: 1; min-width: 180px; background: var(--sheet); border: 2px solid; }
+.pile-parts { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+.pile-part { border-radius: 14px; padding: 12px 14px; flex: 1; min-width: 180px; background: var(--sheet); border: 2px solid; }
 .pile-part-ok { border-color: var(--success); color: var(--success-text); }
 .pile-part-ko { border-color: var(--danger); color: var(--danger-text); }
-.pile-part-t { font-weight: 800; font-size: 13px; }
-.pile-part-l { font-size: 12px; margin-top: 4px; }
+.pile-part-t { font-weight: 800; font-size: 14px; }
+.pile-part-l { font-size: 13px; margin-top: 4px; }
 .pile-part-l ul { padding-left: 16px; list-style: disc; margin: 2px 0 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .drag-item, .dz, .heq-dz, .eq-side { transition: none; }
+}
