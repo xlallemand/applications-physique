@@ -28,13 +28,14 @@
 /* ============================================================
    Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
    1. Anode et cathode (moyens mnémotechniques, demi-équations, équation de la pile)
-   2. Dans les fils et dans le pont salin (électrons, ions ; sens des ions)
+   2. Sens de circulation des charges, dans les fils et dans le pont salin
+      (infographie OX.infoCharges : électrons et I, puis ions ; continuité du sens des charges)
    3. Placer I et les électrons : deux méthodes (multimètre, espèce consommée)
    · À retenir, puis l'outil « Schéma d'une pile » (pile/pile.js, page module_5_pile)
    Exemple : pile Zn / Cu (exercice 8), schéma OX.figPile.
    ============================================================ */
 const { hasard, melanger, exemple } = COURS;
-const { o, CP, nE, reaction, figPile, versCours } = OX;
+const { o, CP, nE, reaction, figPile, infoCharges, versCours } = OX;
 const E = 'e<sup>−</sup>';
 // piles des « À toi » : [métal oxydé à l'anode, métal de la cathode]
 const PILES = [['Fe', 'Cu'], ['Zn', 'Ag'], ['Cu', 'Ag'], ['Pb', 'Ag'], ['Ni', 'Cu'], ['Zn', 'Pb'], ['Al', 'Cu'], ['Fe', 'Ag'], ['Zn', 'Ni']];
@@ -77,12 +78,13 @@ function etape1(c) {
   return carte;
 }
 
-/* ---------- 2. Dans les fils et dans le pont salin ---------- */
+/* ---------- 2. Sens de circulation des charges, dans les fils et dans le pont salin ---------- */
 function etape2(c) {
-  const carte = c.carte('2. Dans les fils et dans le pont salin');
+  const carte = c.carte('2. Sens de circulation des charges, dans les fils et dans le pont salin');
   c.ajouter(carte, `<div class="cours-bloc">
       <p>Dans les <b>fils</b> du circuit extérieur, ce sont des <b>électrons</b> qui circulent. Dans les solutions et dans le <b>pont salin</b>, ce sont des <b>ions</b> : le pont salin <b>ferme le circuit</b>.</p>
-      <div class="cle"><p><b class="cle-titre">Pont salin.</b> Les <b>anions</b> se déplacent dans le <b>même sens que les électrons</b> (vers l'anode) ; les <b>cations</b> dans le <b>même sens que le courant I</b> (vers la cathode).</p></div>
+      <div class="cle"><p><b class="cle-titre">Sens de circulation des charges.</b> Le circuit de la pile est une boucle fermée : les fils d'un côté, le pont salin de l'autre.</p>
+        ${infoCharges()}</div>
       <p class="crs-attention"><b>Attention :</b> le sens des ions est à l'inverse de l'intuition. Les anions (négatifs) vont vers la borne <b>−</b>, les cations (positifs) vers la borne <b>+</b>.</p>
     </div>
     ${exemple(`<p>Dans la pile zinc-cuivre, les électrons partent du zinc (anode, −) et arrivent au cuivre (cathode, +) par les fils. Dans le pont salin, les anions vont vers le zinc, les cations vers le cuivre.</p>

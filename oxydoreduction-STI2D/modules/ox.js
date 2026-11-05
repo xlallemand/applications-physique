@@ -19,6 +19,7 @@
                                            espèces dans l'ordre de l'équation, équation écrite
      OX.equation(reactifs, produits)       équation écrite : [[k, formule], …]
      OX.figPile(o)                         schéma d'une pile annoté (SVG)
+     OX.infoCharges()                      infographie : sens de circulation des charges (fils, pont salin)
      OX.chaine(etapes)                     chaîne énergétique (réservoirs, convertisseurs, transferts)
      OX.diagNm, diagNcV, diagRel, diagMasse, diagC   diagnostics des erreurs classiques des calculs
      OX.methode(def)                       méthode pas à pas : schéma à compléter, n, relation, n, grandeur
@@ -711,6 +712,69 @@
     return `<div class="ox-figure"><svg viewBox="0 0 640 ${H}" class="ox-svg" role="img" aria-label="${aria.replace(/"/g, '&quot;')}">${s}</svg></div>`;
   }
 
+  let nCharges = 0;
+  /* Infographie : sens de circulation des charges dans une pile (cours et fiche « Schéma d'une pile »)
+     Le circuit est dessiné comme une boucle : anode (−) à gauche, cathode (+) à droite,
+     fils en haut, pont salin en bas. Charges négatives (électrons, anions) en couleur d'accent,
+     elles tournent dans un sens ; charges positives (sens de I, cations) en encre, dans l'autre.
+     À côté du dessin : ce qui circule dans les fils, puis dans le pont salin ;
+     dessous : la règle de continuité du sens de circulation des charges. */
+  function infoCharges() {
+    const id = 'oxc' + (++nCharges);
+    const INK = '#16181d', INK2 = '#55585f', ACC = '#0a7d57', ACCI = '#075c40', GRIS = '#8d8f94', PONT = '#dfdbd2';
+    const t = (x, y, h, opt) => `<text x="${x}" y="${y}" text-anchor="${(opt && opt.a) || 'middle'}" font-size="${(opt && opt.s) || 14}" font-weight="${(opt && opt.w) || 700}" fill="${(opt && opt.c) || INK}">${svgTxt(h, (opt && opt.s) || 14)}</text>`;
+    const fl = (x1, y, x2, col, m) => `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${col}" stroke-width="2.5" marker-end="url(#${id}-${m})"/>`;
+    // flèche de rotation (3/4 de tour, ouverte en bas) avec le signe des charges au centre
+    const rot = (cx, cy, r, horaire, col, m, signe) => {
+      const a0 = (horaire ? 150 : 30) * Math.PI / 180, a1 = a0 + (horaire ? 1 : -1) * 1.5 * Math.PI;
+      const p = a => `${(cx + r * Math.cos(a)).toFixed(1)} ${(cy + r * Math.sin(a)).toFixed(1)}`;
+      return `<path d="M${p(a0)} A${r} ${r} 0 1 ${horaire ? 1 : 0} ${p(a1)}" fill="none" stroke="${col}" stroke-width="2.5" marker-end="url(#${id}-${m})"/>` +
+        t(cx, cy + 6, signe, { s: 18, w: 800, c: col });
+    };
+    const xa = 48, xc = 312, yFil = 34, yPont = 216;          // abscisses des électrodes, hauteurs des fils et du pont salin
+    let s = `<defs>
+      <marker id="${id}-a" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="10" refX="10" refY="5" orient="auto"><path d="M0 0 L11 5 L0 10 z" fill="${ACC}"/></marker>
+      <marker id="${id}-i" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="10" refX="10" refY="5" orient="auto"><path d="M0 0 L11 5 L0 10 z" fill="${INK}"/></marker></defs>`;
+    // fils (en haut) et pont salin (en bas, tube large) : la boucle du circuit
+    s += `<path d="M${xa} 96 V${yFil} H${xc} V96" fill="none" stroke="${INK}" stroke-width="2.5"/>`;
+    s += `<path d="M${xa} 156 V${yPont} H${xc} V156" fill="none" stroke="${GRIS}" stroke-width="17" stroke-linejoin="round"/>
+      <path d="M${xa} 156 V${yPont} H${xc} V156" fill="none" stroke="${PONT}" stroke-width="14" stroke-linejoin="round"/>`;
+    // demi-piles : anode (−) à gauche, cathode (+) à droite
+    [[xa, 'anode', 'borne −'], [xc, 'cathode', 'borne +']].forEach(([x, nom, borne]) => {
+      s += `<rect x="${x - 40}" y="96" width="80" height="60" rx="12" fill="#fff" stroke="${INK}" stroke-width="1.5"/>`;
+      s += t(x, 122, nom, { s: 15, w: 800 }) + t(x, 142, borne, { s: 13, w: 600, c: INK2 });
+    });
+    // dans les fils : électrons de l'anode vers la cathode (dessus), I en sens inverse (dessous)
+    s += fl(135, 16, 225, ACC, 'a') + t(127, 21, 'e<sup>−</sup>', { a: 'end', s: 15, w: 800, c: ACCI });
+    s += fl(225, 52, 135, INK, 'i') + t(233, 57, 'I', { a: 'start', s: 15, w: 800 });
+    s += t(180, 80, 'fils : des électrons', { s: 13, w: 600, c: INK2 });
+    // dans le pont salin : anions vers l'anode (dedans), cations vers la cathode (dessous)
+    s += t(180, 182, 'pont salin : des ions', { s: 13, w: 600, c: INK2 });
+    s += fl(225, 198, 135, ACC, 'a') + t(233, 203, 'anions (−)', { a: 'start', s: 13, w: 700, c: ACCI });
+    s += fl(135, 236, 225, INK, 'i') + t(127, 241, 'cations (+)', { a: 'end', s: 13, w: 700 });
+    // les charges − tournent dans un sens (horaire), les charges + dans l'autre
+    s += rot(152, 128, 19, true, ACC, 'a', '−') + rot(208, 128, 19, false, INK, 'i', '+');
+    const aria = 'Boucle du circuit d\'une pile : anode (borne −) à gauche, cathode (borne +) à droite. Dans les fils, les électrons vont de l\'anode vers la cathode et le courant I de la cathode vers l\'anode. Dans le pont salin, les anions vont vers l\'anode et les cations vers la cathode : les charges négatives tournent toutes dans un sens, les charges positives dans l\'autre.';
+    return `<div class="ox-charges">
+      <div class="ox-charges-fig"><svg viewBox="0 0 360 252" class="ox-svg" role="img" aria-label="${aria}">${s}</svg></div>
+      <div class="ox-charges-bloc">
+        <p class="ox-charges-t"><span class="ox-charges-n">1</span>Dans les fils : des électrons</p>
+        <p>Les <b>électrons</b> (charges −) vont de l'<b>anode (−)</b> vers la <b>cathode (+)</b>.</p>
+        <p>Le <b>courant I</b> va en sens inverse, du + vers le − : c'est le sens de circulation qu'aurait une <b>charge positive</b> s'il en existait une dans le fil.</p>
+      </div>
+      <div class="ox-charges-bloc">
+        <p class="ox-charges-t"><span class="ox-charges-n">2</span>Dans le pont salin : des ions</p>
+        <p>Des <b>anions</b> (charges −) et des <b>cations</b> (charges +) se déplacent : le pont salin <b>ferme le circuit</b>.</p>
+        <p>Leur sens se déduit de la <b>continuité du sens de circulation des charges</b> dans la boucle.</p>
+      </div>
+      <div class="ox-charges-regle">
+        <p class="ox-charges-t">Continuité du sens de circulation des charges</p>
+        <p class="ox-charges-ligne neg"><span class="ox-charges-signe" aria-hidden="true">−</span><span>Les <b>anions</b> circulent dans le <b>même sens que les électrons</b> (charges négatives) : ils vont vers l'<b>anode</b>.</span></p>
+        <p class="ox-charges-ligne pos"><span class="ox-charges-signe" aria-hidden="true">+</span><span>Les <b>cations</b> circulent dans le <b>même sens que I</b> (sens d'une charge positive, s'il en existait une dans le fil) : ils vont vers la <b>cathode</b>.</span></p>
+      </div>
+    </div>`;
+  }
+
   /* Chaîne énergétique : etapes = ['Réactifs', 'énergie chimique', 'Batterie', 'énergie électrique', 'Appareil']
      (cases et transferts alternés ; une valeur '#id' laisse un emplacement vide pour une étiquette) */
   function chaine(etapes, aria) {
@@ -869,7 +933,7 @@
     MOINS, fmt, cs, sci, lire, proche, fr, o, fq, el, secouer, melanger, hasard, entre, champ, boutonValider, PARTIES, versCours,
     question, serie, confettis, figure,
     ESP, ELEC, nE, kE, sPl, texte, charge, R, gcd, lcm, egal, CP, demi, reduc, oxyd, couple, equation, REACTIONS, reaction,
-    diagNm, diagNcV, diagRel, diagMasse, diagC, svgTxt, figPile, chaine, CHAINES, FARADAY, UNITE, methode,
+    diagNm, diagNcV, diagRel, diagMasse, diagC, svgTxt, figPile, infoCharges, chaine, CHAINES, FARADAY, UNITE, methode,
     PLAN, menu, accueil, marquer,
   });
 })();

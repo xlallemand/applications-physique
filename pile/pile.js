@@ -1,7 +1,7 @@
 /* ============================================================
    Moteur « Schéma d'une pile » (pile électrochimique)
    Source unique, chargée par :
-     - pile/index.html (application « Schéma d'une pile », Tle spécialité) ;
+     - pile/modules/module_1_pile.html (application « Schéma d'une pile », Tle spécialité, module 1) ;
      - oxydoreduction-STI2D/modules/module_5_pile.html (Chapitre 15, module 5) ;
      - oxydoreduction-STI2D/modules/module_6.html (exercices 8 et 9, en partie d'exercice).
    Styles : pile/pile.css. Glisser-déposer : assets/dragdrop.js (à charger avant).
