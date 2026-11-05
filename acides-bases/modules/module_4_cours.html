@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : quantités de matière — Chapitre 16 : Acides et bases</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ab.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/schema-methode.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="../../assets/schema-methode.js"></script>
+<script src="ab.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · COURS</span>
+    <h2 class="er-titre">Quantités de matière</h2>
+    <p class="er-contexte">Combien d'ions H<sub>3</sub>O<sup>+</sup> dans un bassin, quelle masse de tartre éliminée ? On suit la <b>même méthode qu'au chapitre 14</b> : <b>quantité de matière</b>, <b>relation stœchiométrique</b>, puis la grandeur demandée, sur le <b>schéma de la méthode</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Calculer une quantité de matière : n = m / M, n = c × V,
+      n(H₃O⁺) = [H₃O⁺] × V, 1 m³ = 1 000 L (exemples : acide sulfamique, bassin)
+   2. Relation stœchiométrique et schéma de la méthode (acide sulfamique + eau)
+   3. Toute la méthode (détartrage : CaCO₃ + 2 H₃O⁺ → CO₂ + 3 H₂O + Ca²⁺) · À retenir
+   Schéma de la méthode : assets/schema-methode.js (SCHM), parties AB.methode.
+   Valeurs vérifiées : 1,0 / 97 = 1,03 × 10⁻² ≈ 1,0 × 10⁻² mol ; 10⁻⁵·⁶ = 2,51 × 10⁻⁶ ;
+   2,5 × 10⁻⁶ × 60 000 = 0,15 mol ; 1,0 × 10⁻² / 2 = 5,0 × 10⁻³ mol ; × 100 = 0,50 g.
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { fmt, sci, cs, fr, CH, H3O, UNITE, CP, Hde, diagH, diagNm, diagNcV, diagRel, diagV, methode, EQS, eqTexte, ecrire } = AB;
+const R2 = v => +(+v).toPrecision(2);
+
+/* ---------- 1. Calculer une quantité de matière ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Calculer une quantité de matière');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Les nombres stœchiométriques d'une équation comptent des entités, donc des <b>moles</b> : on commence toujours par calculer la <b>quantité de matière n</b> de l'espèce connue.</p>
+      <div class="cle"><p><b class="cle-titre">Formules.</b></p>
+        <p class="crs-formule">n = ${fr('m', 'M')} &nbsp;&nbsp;&nbsp; n = c × V &nbsp;&nbsp;&nbsp; n(${H3O}) = ${CH} × V</p>
+        <p>m en g, M en ${UNITE.M}, n en mol ; c et ${CH} en ${UNITE.c}, V en <b>L</b>. À l'inverse, V = ${fr('n', 'c')}.</p></div>
+      <p class="crs-attention"><b>Attention aux volumes :</b> 1 m<sup>3</sup> = 1 000 L ; 1 mL = 10<sup>−3</sup> L. Si on connaît le pH, on calcule d'abord ${CH} = 10<sup>−pH</sup>.</p>
+    </div>
+    <div class="ph-lien-app"><p>Revois les conversions de volume (m<sup>3</sup>, L, mL)</p><a class="btn-small" href="../../conversions/index.html" target="_blank" rel="noopener">Conversions ↗</a></div>
+    ${exemple(`<p>Un sachet de détartrant contient m = 1,0 g d'acide sulfamique NH<sub>2</sub>SO<sub>3</sub>H, de masse molaire M = 97 ${UNITE.M} :</p>
+      <p class="crs-calc">n = ${fr('m', 'M')} = ${fr('1,0 g', `97 ${UNITE.M}`)} = 1,03 × 10<sup>−2</sup> ≈ <span class="c">1,0 × 10<sup>−2</sup> mol</span></p>
+      <p>Un bassin contient V = 60 m<sup>3</sup> d'eau de pH 5,6 :</p>
+      <p class="crs-calc">${CH} = 10<sup>−5,6</sup> ≈ 2,5 × 10<sup>−6</sup> ${UNITE.c} ; V = 60 m<sup>3</sup> = 60 000 L</p>
+      <p class="crs-calc">n(${H3O}) = ${CH} × V = 2,5 × 10<sup>−6</sup> ${UNITE.c} × 60 000 L = <span class="c">0,15 mol</span></p>`, 'Exemples')}`);
+  // n(H3O+) d'un volume de pH donné ; n d'une masse d'acide
+  const ph = hasard([2.0, 3.0, 4.0, 5.0, 6.0]), Vm3 = hasard([2, 5, 10, 20]);
+  const H = Hde(ph), n = H * Vm3 * 1000;
+  const acide = hasard([{ c: CP.SULF, M: 97 }, { c: CP.ACE, M: 60 }, { c: CP.MET, M: 46 }]);
+  const m = hasard([0.50, 1.2, 2.0, 3.0]);
+  c.aToi(carte, [
+    { titre: 'Les ions oxonium d\'une cuve',
+      enonce: `<p>Une cuve contient V = ${Vm3} m<sup>3</sup> d'une solution de pH ${fmt(ph)}.</p>`,
+      parties: [
+        { type: 'sci', q: `Calcule ${CH}.`, label: `${CH} =`, unite: UNITE.c, valeur: H, cs: 2, diag: v => diagH(v, ph),
+          solution: `<p class="crs-calc">${CH} = 10<sup>−${fmt(ph)}</sup> = ${sci(H, 2)} ${UNITE.c}</p>` },
+        { type: n < 0.01 || n >= 1e5 ? 'sci' : 'nombre', q: `Calcule la quantité de matière d'ions ${H3O} dans la cuve (V en litres).`, label: `n(${H3O}) =`, unite: 'mol', valeur: n, rel: .03, cs: 2, signe: false, affiche: n < 0.01 ? undefined : cs(n, 2),
+          diag: v => diagNcV(v, H, Vm3 * 1000, { v: Vm3, u: UNITE.m3 }),
+          solution: `<p>V = ${Vm3} m<sup>3</sup> = ${fmt(Vm3 * 1000)} L.</p><p class="crs-calc">n = ${CH} × V = ${sci(H, 2)} × ${fmt(Vm3 * 1000)} = <span class="c">${ecrire(n)} mol</span></p>` },
+      ] },
+    { titre: 'Une masse d\'acide',
+      enonce: `<p>On dissout m = ${fmt(m)} g de ${acide.c.nomA} ${AB.f(acide.c.a)} (M = ${acide.M} ${UNITE.M}).</p>`,
+      parties: [{ type: 'sci', q: `Calcule la quantité de matière de ${AB.f(acide.c.a)} (deux chiffres significatifs).`, label: 'n =', unite: 'mol', valeur: m / acide.M, cs: 2,
+        diag: v => diagNm(v, m, acide.M),
+        solution: `<p class="crs-calc">n = ${fr('m', 'M')} = ${fr(`${fmt(m)} g`, `${acide.M} ${UNITE.M}`)} ≈ <span class="c">${sci(m / acide.M, 2)} mol</span></p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Relation stœchiométrique et schéma de la méthode ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Relation stœchiométrique et schéma de la méthode');
+  const E = EQS.acideEau(CP.SULF);
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Les quantités de matière consommées et formées sont <b>proportionnelles aux nombres stœchiométriques</b>. Pour a A + b B → c C + d D :</p>
+      <div class="cle"><p class="crs-formule">${fr('n<sub>A</sub>', 'a')} = ${fr('n<sub>B</sub>', 'b')} = ${fr('n<sub>C</sub>', 'c')} = ${fr('n<sub>D</sub>', 'd')}</p>
+        <p>Chaque quantité de matière est divisée par <b>son propre</b> nombre stœchiométrique.</p></div>
+      <p>Le <b>schéma de la méthode</b> résume le calcul : l'équation en tête, une colonne par espèce ; sous l'espèce connue, la donnée puis n ; la ligne des relations ; sous l'espèce cherchée, n.</p>
+    </div>
+    ${exemple(`<p>L'acide sulfamique réagit avec l'eau : ${eqTexte(E, 2)}. Quelle quantité d'ions ${H3O} forme 1,0 g d'acide sulfamique ?</p>
+      ${SCHM.schema({ especes: E, produits: 2, depart: { k: 0, donnees: [['m', '1,0 g'], ['M', `97 ${UNITE.M}`]], n: ['n = m / M', '1,0 × 10<sup>−2</sup> mol'] },
+        cible: { k: 3, n: '1,0 × 10<sup>−2</sup> mol' }, autres: [1, 2] })}
+      <p class="crs-calc">${fr('n(NH<sub>2</sub>SO<sub>3</sub>H)', 1)} = ${fr(`n(${H3O})`, 1)} donc n(${H3O}) = n(NH<sub>2</sub>SO<sub>3</sub>H) = <span class="c">1,0 × 10<sup>−2</sup> mol</span></p>`)}`);
+  // relation à choisir, puis quantité à calculer, avec le détartrage (nombres stœchiométriques différents)
+  const D = EQS.detartrage();
+  const paire = hasard([[1, 0], [0, 1], [1, 4], [1, 3]]), A = D[paire[0]], B = D[paire[1]];
+  const nA = hasard([0.010, 0.020, 0.030, 0.060]), nB = nA * B.coef / A.coef;
+  c.aToi(carte, [
+    { titre: 'Choisir la relation', enonce: `<p class="crs-calc">${eqTexte(D, 2)}</p>`,
+      parties: [SCHM.choixRelation({ especes: D, depart: { k: paire[0] }, cible: { k: paire[1] } })] },
+    { titre: 'Calculer la quantité',
+      enonce: `<p>Il ${paire[0] < 2 ? 'est consommé' : 'se forme'} n(${A.f}) = ${ecrire(nA)} mol.</p>`,
+      parties: [{ type: nB < 0.01 ? 'sci' : 'nombre', q: `Quelle quantité de ${B.f} ${paire[1] < 2 ? 'est consommée' : 'se forme'}&nbsp;?`, label: `n(${B.f}) =`, unite: 'mol', valeur: nB, rel: .02, cs: 2, signe: false, affiche: nB < 0.01 ? undefined : cs(nB, 2),
+        diag: v => diagRel(v, nA, A.coef, B.coef, A.f, B.f),
+        solution: `<p class="crs-calc">${fr(`n(${A.f})`, A.coef)} = ${fr(`n(${B.f})`, B.coef)} donc n(${B.f}) = ${B.coef === 1 ? '' : B.coef + ' × '}${A.coef === 1 ? ecrire(nA) : fr(ecrire(nA), A.coef)} = <span class="c">${ecrire(nB)} mol</span></p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 3. Toute la méthode ---------- */
+function etape3(c) {
+  const carte = c.carte('3. Toute la méthode');
+  const D = EQS.detartrage();
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p><b class="cle-titre">La méthode.</b></p>
+        <ol class="ab-methode"><li>l'équation en tête, une colonne par espèce ;</li>
+          <li>sous l'espèce connue, la donnée (m, ou c et V, ou ${CH} et V) puis n ;</li>
+          <li>la relation stœchiométrique ;</li>
+          <li>sous l'espèce cherchée, n puis la grandeur demandée : m = n × M, ou V = n / c.</li></ol></div>
+    </div>
+    ${exemple(`<p>Le tartre est surtout du carbonate de calcium CaCO<sub>3</sub> (M = 100 ${UNITE.M}). Les ions ${H3O} formés par 1,0 g d'acide sulfamique, n(${H3O}) = 1,0 × 10<sup>−2</sup> mol, l'éliminent : ${eqTexte(D, 2)}. Quelle masse de tartre est éliminée ?</p>
+      ${SCHM.schema({ especes: D, produits: 2, depart: { k: 1, n: [`n(${H3O})`, '1,0 × 10<sup>−2</sup> mol'] },
+        cible: { k: 0, n: '5,0 × 10<sup>−3</sup> mol', donnees: [['M', `100 ${UNITE.M}`]], grandeur: ['m = n × M', '0,50 g'] }, autres: [2, 3, 4] })}
+      <p class="crs-calc">${fr('n(CaCO<sub>3</sub>)', 1)} = ${fr(`n(${H3O})`, 2)} donc n(CaCO<sub>3</sub>) = ${fr('1,0 × 10<sup>−2</sup>', 2)} = 5,0 × 10<sup>−3</sup> mol</p>
+      <p class="crs-calc">m(CaCO<sub>3</sub>) = n × M = 5,0 × 10<sup>−3</sup> mol × 100 ${UNITE.M} = <span class="c">0,50 g</span></p>
+      <p>M(CaCO<sub>3</sub>) = M(Ca) + M(C) + 3 × M(O) = 40 + 12 + 3 × 16 = 100 ${UNITE.M}.</p>`, 'Exemple : le détartrage')}`);
+  // toute la méthode : un détartrant de pH et de volume donnés élimine du tartre
+  const ph = hasard([1.0, 1.3, 1.5, 2.0]), VmL = hasard([100, 200, 250, 500]);
+  const M = methode({ especes: D, produits: 2, autres: [2, 3, 4],
+    depart: { k: 1, pH: ph, V: VmL / 1000, Vd: { v: VmL, u: 'mL' } }, cible: { k: 0, quoi: 'm', M: 100 } });
+  // volume de solution à verser : V = n / c
+  const nV = hasard([2.0e-3, 5.0e-3, 1.0e-2]), cV = hasard([0.10, 0.20, 0.50]), V = nV / cV;
+  c.aToi(carte, [
+    { titre: 'Toute la méthode',
+      enonce: `<p class="crs-calc">${eqTexte(D, 2)}</p><p>Un détartrant a un pH de ${fmt(ph)}. On en verse V = ${VmL} mL sur du tartre CaCO<sub>3</sub> (M = 100 ${UNITE.M}), en excès. Quelle masse de tartre est éliminée ?</p>`,
+      parties: M.parties },
+    { titre: 'Un volume à verser',
+      enonce: `<p>Pour neutraliser une solution, il faut lui apporter n = ${ecrire(nV)} mol d'ions ${H3O}. On dispose d'acide chlorhydrique de concentration ${CH} = ${fmt(cV)} ${UNITE.c}.</p>`,
+      parties: [{ type: 'sci', q: 'Quel volume d\'acide chlorhydrique faut-il verser, en litres&nbsp;?', label: 'V =', unite: 'L', valeur: V, cs: 2,
+        diag: v => diagV(v, nV, cV),
+        solution: `<p class="crs-calc">V = ${fr('n', 'c')} = ${fr(`${ecrire(nV)} mol`, `${fmt(cV)} ${UNITE.c}`)} = <span class="c">${sci(V, 2)} L</span> = ${fmt(V * 1000)} mL</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Formules.</b> n = m / M ; n = c × V ; n(${H3O}) = ${CH} × V avec ${CH} = 10<sup>−pH</sup> ; V = n / c ; m = n × M. V en L : 1 m<sup>3</sup> = 1 000 L.</p></div>
+    <div class="cle"><p><b class="cle-titre">Relations stœchiométriques.</b> Pour a A + b B → c C + d D : n<sub>A</sub> / a = n<sub>B</sub> / b = n<sub>C</sub> / c = n<sub>D</sub> / d.</p></div>
+    <div class="cle"><p><b class="cle-titre">Le schéma de la méthode.</b> L'équation en tête, une colonne par espèce ; sous l'espèce connue : la donnée puis n ; la ligne des relations ; sous l'espèce cherchée : n puis la grandeur demandée.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_4_questions.html">Questions sur ce cours →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_5.html">Module 5 : exercices</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, etape3, aRetenir]);
+AB.menu('module_4_cours');
+</script>
+</body>
+</html>

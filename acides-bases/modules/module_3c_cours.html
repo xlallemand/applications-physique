@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : évolution du pH — Chapitre 16 : Acides et bases</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ab.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ab.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 3 / 3</span>
+    <h2 class="er-titre">Évolution du pH</h2>
+    <p class="er-contexte">Le pH et la concentration en ions oxonium varient <b>en sens inverse</b>. Tu vas prévoir comment évolue le pH quand on ajoute un <b>acide</b>, une <b>base</b>, ou quand on <b>dilue</b> une solution.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. [H₃O⁺] et pH varient en sens inverse (axe double pH / [H₃O⁺] en SVG)
+   2. Ajouter un acide, une base, diluer (le pH tend vers 7) · À retenir
+   Erreur visée : « plus acide = pH plus grand ».
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { o, fmt, CH, H3O, UNITE, figEchelle } = AB;
+
+/* ---------- 1. Sens de variation ---------- */
+function etape1(c) {
+  const carte = c.carte('1. ' + CH + ' et pH varient en sens inverse');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Avec pH = −log(${CH}) : plus il y a d'ions ${H3O}, plus le pH est petit.</p>
+      <div class="cle"><p>Quand ${CH} <b>augmente</b>, le pH <b>diminue</b> (et inversement).</p>
+        <p>Quand ${CH} est <b>multipliée par 10</b>, le pH <b>diminue de 1</b>. Plus une solution est acide, plus son pH est <b>petit</b>.</p></div>
+    </div>
+    ${figEchelle({ conc: true, fleches: true })}
+    ${exemple(`<p>Solution A : pH = 3, ${CH} = 10<sup>−3</sup> ${UNITE.c}. Solution B : pH = 5, ${CH} = 10<sup>−5</sup> ${UNITE.c}.</p>
+      <p>A contient 100 fois plus d'ions ${H3O} que B : A est <b>plus acide</b>, et son pH est <b>plus petit</b>.</p>`)}`);
+  const [a, b] = melanger([1.8, 2.6, 3.4, 4.1, 5.2, 6.3]).slice(0, 2);
+  const p0 = hasard([3, 4, 5, 9, 10]);
+  c.aToi(carte, [
+    { parties: [{ type: 'choix', q: `Si ${CH} augmente, le pH :`, melanger: false,
+      options: [o('aug', 'augmente'), o('dim', 'diminue'), o('meme', 'ne change pas')], bonne: 'dim',
+      indices: { aug: `pH = −log(${CH}) : à cause du signe −, le pH varie en sens inverse de ${CH}.`, meme: `Le pH se calcule à partir de ${CH} : s'il change, le pH change aussi.` },
+      solution: `<p>${CH} augmente, donc le pH <b>diminue</b>.</p>` }] },
+    { enonce: `<p>Solution A : pH = ${fmt(a)} ; solution B : pH = ${fmt(b)}.</p>`,
+      parties: [{ type: 'choix', q: 'Quelle solution est la plus acide&nbsp;?', melanger: false,
+        options: [o('A', 'la solution A'), o('B', 'la solution B')], bonne: a < b ? 'A' : 'B',
+        indice: 'Attention : plus une solution est acide, plus son pH est <b>petit</b> (elle contient plus d\'ions H<sub>3</sub>O<sup>+</sup>).',
+        solution: `<p>La plus acide a le pH le plus petit : la solution <b>${a < b ? 'A' : 'B'}</b> (pH = ${fmt(Math.min(a, b))}).</p>` }] },
+    { enonce: `<p>Une solution a un pH de ${p0}. On multiplie ${CH} par 10.</p>`,
+      parties: [{ type: 'nombre', q: 'Que vaut le nouveau pH&nbsp;?', label: 'pH =', valeur: p0 - 1, tol: .01, signe: false,
+        diag: v => (Math.abs(v - (p0 + 1)) < .01 ? `${CH} augmente : le pH diminue. Il baisse de 1.` : Math.abs(v - p0 * 10) < .01 || Math.abs(v - p0 / 10) < .01 ? `Le pH ne se multiplie pas : quand ${CH} est multipliée par 10, le pH diminue de 1.` : 'Quand [H<sub>3</sub>O<sup>+</sup>] est multipliée par 10, le pH diminue de 1.'),
+        solution: `<p>10<sup>−${p0}</sup> × 10 = 10<sup>−${p0 - 1}</sup> : le nouveau pH vaut <b>${p0 - 1}</b>.</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Ajouter un acide, une base, diluer ---------- */
+const CAS = [
+  { t: 'On ajoute de l\'acide chlorhydrique (un acide) dans de l\'eau.', bonne: 'dim', expl: 'L\'acide apporte des ions H<sub>3</sub>O<sup>+</sup> : [H<sub>3</sub>O<sup>+</sup>] augmente, le pH <b>diminue</b>.' },
+  { t: 'On ajoute du vinaigre (un acide) dans une solution.', bonne: 'dim', expl: 'L\'acide apporte des ions H<sub>3</sub>O<sup>+</sup> : le pH <b>diminue</b>.' },
+  { t: 'On ajoute de la soude (une base) dans une solution.', bonne: 'aug', expl: 'La base consomme des ions H<sub>3</sub>O<sup>+</sup> : [H<sub>3</sub>O<sup>+</sup>] diminue, le pH <b>augmente</b>.' },
+  { t: 'On répand du carbonate de calcium (une base) sur un sol trop acide.', bonne: 'aug', expl: 'La base consomme des ions H<sub>3</sub>O<sup>+</sup> : le pH <b>augmente</b>.' },
+  { t: 'On dilue une solution acide de pH 3 en ajoutant de l\'eau.', bonne: 'aug', expl: 'La dilution rapproche la solution de l\'eau pure : le pH se rapproche de 7, il <b>augmente</b>.' },
+  { t: 'On dilue une solution basique de pH 11 en ajoutant de l\'eau.', bonne: 'dim', expl: 'La dilution rapproche la solution de l\'eau pure : le pH se rapproche de 7, il <b>diminue</b>.' },
+];
+function etape2(c) {
+  const carte = c.carte('2. Ajouter un acide, une base, diluer');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <div class="cle"><p>Ajouter un <b>acide</b> : il forme des ions ${H3O}, ${CH} augmente, le pH <b>diminue</b>.</p>
+        <p>Ajouter une <b>base</b> : elle consomme des ions ${H3O}, ${CH} diminue, le pH <b>augmente</b>.</p>
+        <p><b>Diluer</b> (ajouter de l'eau) : la solution se rapproche de l'eau pure, le pH <b>tend vers 7</b>. Il augmente pour une solution acide, il diminue pour une solution basique, sans dépasser 7.</p></div>
+    </div>
+    ${exemple(`<p>Du vinaigre de pH 2,9 est dilué 10 fois : son pH augmente et se rapproche de 7 ; il reste inférieur à 7, la solution reste acide.</p>
+      <p>Un maraîcher épand du carbonate de calcium (une base) sur un sol trop acide de pH 6,1 : le pH du sol augmente.</p>`)}`);
+  const [k1, k2] = melanger([0, 1, 2, 3]), k3 = hasard([4, 5]);
+  const cas = x => ({ enonce: `<p>${x.t}</p>`,
+    parties: [{ type: 'choix', q: 'Le pH de la solution :', melanger: false, options: [o('aug', 'augmente'), o('dim', 'diminue'), o('meme', 'ne change pas')], bonne: x.bonne,
+      indice: x.bonne === 'aug' ? 'Pense aux ions H<sub>3</sub>O<sup>+</sup> : leur concentration diminue ; le pH varie en sens inverse.' : 'Pense aux ions H<sub>3</sub>O<sup>+</sup> : leur concentration augmente ; le pH varie en sens inverse.',
+      solution: `<p>${x.expl}</p>` }] });
+  c.aToi(carte, [cas(CAS[k1]), cas(CAS[k2]), cas(CAS[k3]),
+    { parties: [{ type: 'choix', q: 'On dilue beaucoup une solution acide. Son pH :', colonne: true,
+      options: [o('7', 'se rapproche de 7 sans le dépasser'), o('14', 'augmente jusqu\'à 14'), o('0', 'diminue vers 0')], bonne: '7',
+      indices: { 14: 'En diluant, on se rapproche de l\'eau pure, qui est neutre : une solution acide ne devient pas basique en ajoutant de l\'eau.', 0: 'Diluer diminue [H<sub>3</sub>O<sup>+</sup>] : le pH augmente, il ne diminue pas.' },
+      solution: '<p>Le pH augmente et <b>tend vers 7</b>, celui de l\'eau pure.</p>' }] }]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>${CH} et pH varient en <b>sens inverse</b> : ${CH} × 10, pH − 1. Plus une solution est acide, plus son pH est petit.</p></div>
+    <div class="cle"><p>Ajout d'un acide : le pH diminue. Ajout d'une base : le pH augmente. Dilution : le pH tend vers 7.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_3_questions.html">Questions sur le pH →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#evolution">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+AB.menu('module_3c_cours');
+</script>
+</body>
+</html>

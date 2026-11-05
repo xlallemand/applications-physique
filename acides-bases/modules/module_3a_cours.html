@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : mesure et définition du pH — Chapitre 16 : Acides et bases</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="ab.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="ab.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS 1 / 3</span>
+    <h2 class="er-titre">Mesure et définition du pH</h2>
+    <p class="er-contexte">Le <b>pH</b> indique si une solution est <b>acide</b>, <b>neutre</b> ou <b>basique</b>. Il se mesure avec un <b>pH-mètre</b> et se calcule à partir de la concentration en ions oxonium : <b>pH = −log([H<sub>3</sub>O<sup>+</sup>])</b>.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. Mesurer le pH, échelle de pH (figure AB.figEchelle)
+   2. pH = −log([H₃O⁺]) (exemples du cours : 0,05 → 1,3 ; 3 × 10⁻² → 1,5 ;
+      10⁻⁵ → 5 ; 1,0 × 10⁻⁴ → 4) · À retenir
+   Dans ce chapitre : [H₃O⁺], sans c° (la définition avec c° est dans l'application pH).
+   ============================================================ */
+const { hasard, melanger, exemple } = COURS;
+const { o, fmt, sci, CH, H3O, UNITE, pHde, diagPH, nature, figEchelle } = AB;
+
+// concentration « propre » : mantisse × 10⁻ⁿ
+const concentration = () => hasard([1.0, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 8.0]) * Math.pow(10, -hasard([2, 3, 4, 5, 6, 8, 9, 10, 11]));
+
+/* ---------- 1. Mesurer le pH ---------- */
+function etape1(c) {
+  const carte = c.carte('1. Mesurer le pH : l\'échelle de pH');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Le pH d'une solution se mesure avec un <b>pH-mètre</b> : on plonge sa sonde dans la solution et on lit la valeur. Le papier pH en donne seulement une valeur approchée.</p>
+      <div class="cle"><p><b class="cle-titre">Échelle de pH</b> (à 25 °C) : le pH est compris entre 0 et 14.</p>
+        <p>pH &lt; 7 : solution <b>acide</b> ; pH = 7 : solution <b>neutre</b> ; pH &gt; 7 : solution <b>basique</b>.</p></div>
+    </div>
+    ${figEchelle({ points: [{ pH: 2.5, label: 'soda' }, { pH: 7, label: 'eau pure : neutre' }, { pH: 12, label: 'soude' }] })}
+    ${exemple('<p>Un soda de pH 2,5 est acide ; l\'eau pure (pH 7) est neutre ; une solution de soude de pH 12 est basique.</p>')}`);
+  const vals = melanger([hasard([1.2, 3.4, 4.8, 5.6, 6.2]), hasard([7.8, 8.5, 9.4, 11.3, 13.0])]);
+  const nat = v => ({ enonce: `<p>Une solution a un pH de ${fmt(v)}.</p>`,
+    parties: [{ type: 'choix', q: 'Cette solution est :', melanger: false, options: [o('acide', 'acide'), o('neutre', 'neutre'), o('basique', 'basique')], bonne: nature(v),
+      indices: { acide: `${fmt(v)} est plus grand que 7 : la solution est basique.`, basique: `${fmt(v)} est plus petit que 7 : la solution est acide.`, neutre: 'Une solution neutre a un pH égal à 7.' },
+      solution: `<p>pH = ${fmt(v)} ${v < 7 ? '&lt; 7 : solution <b>acide</b>' : '&gt; 7 : solution <b>basique</b>'}.</p>` }] });
+  c.aToi(carte, [nat(vals[0]), nat(vals[1]),
+    { parties: [{ type: 'choix', q: 'Avec quel appareil mesure-t-on précisément le pH d\'une solution&nbsp;?',
+      options: [o('ph', 'un pH-mètre'), o('v', 'un voltmètre'), o('t', 'un thermomètre'), o('c', 'un conductimètre')], bonne: 'ph',
+      indice: 'Son nom contient le nom de la grandeur mesurée.', solution: '<p>Le pH se mesure avec un <b>pH-mètre</b>.</p>' }] }]);
+  return carte;
+}
+
+/* ---------- 2. pH = −log([H3O+]) ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Calculer le pH');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Le pH se calcule à partir de la <b>concentration en ions oxonium</b> ${H3O}, notée ${CH} dans ce chapitre (et pas c(${H3O})).</p>
+      <div class="cle"><p><b class="cle-titre">Définition.</b></p>
+        <p class="crs-formule">pH = −log(${CH})</p>
+        <p>Le pH n'a <b>pas d'unité</b> ; ${CH} est en <b>${UNITE.c}</b>. À la calculatrice : touches <b>(−) log</b>, puis la concentration. On donne le pH avec <b>une décimale</b>.</p></div>
+    </div>
+    ${exemple(`<p class="crs-calc">${CH} = 0,05 ${UNITE.c} : pH = −log(0,05) = 1,30… ≈ <span class="c">1,3</span></p>
+      <p class="crs-calc">${CH} = 3 × 10<sup>−2</sup> ${UNITE.c} : pH = −log(3 × 10<sup>−2</sup>) = 1,52… ≈ <span class="c">1,5</span></p>
+      <p class="crs-calc">${CH} = 10<sup>−5</sup> ${UNITE.c} : pH = −log(10<sup>−5</sup>) = <span class="c">5</span></p>
+      <p class="crs-calc">${CH} = 1,0 × 10<sup>−4</sup> ${UNITE.c} : pH = −log(1,0 × 10<sup>−4</sup>) = <span class="c">4</span></p>
+      <p>Quand ${CH} = 10<sup>−n</sup> ${UNITE.c}, le pH vaut n.</p>`, 'Exemples du cours')}`);
+  const c1 = concentration(), c2 = concentration();
+  const calc = v => ({ enonce: `<p>${CH} = ${sci(v, 2)} ${UNITE.c}.</p>`,
+    parties: [{ type: 'nombre', q: 'Calcule le pH de cette solution (une décimale).', label: 'pH =', valeur: pHde(v), tol: .051, dec: 1,
+      diag: x => diagPH(x, v),
+      solution: `<p class="crs-calc">pH = −log(${sci(v, 2)}) ≈ <span class="c">${fmt(pHde(v), 1)}</span></p>` }] });
+  c.aToi(carte, [calc(c1), calc(c2)]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>Le pH se mesure avec un <b>pH-mètre</b>. pH &lt; 7 : acide ; pH = 7 : neutre ; pH &gt; 7 : basique.</p></div>
+    <div class="cle"><p class="crs-formule">pH = −log(${CH})</p><p>pH sans unité, ${CH} en ${UNITE.c}, résultat avec une décimale.</p></div>
+    <div class="er-actions">
+      <a class="btn-primary" style="text-decoration:none" href="module_3b_cours.html">Cours : du pH à [H<sub>3</sub>O<sup>+</sup>] →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html#definition">Fiche récapitulative</a>
+    </div>`);
+  return carte;
+}
+
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+AB.menu('module_3a_cours');
+</script>
+</body>
+</html>

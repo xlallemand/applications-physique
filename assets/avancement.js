@@ -107,6 +107,9 @@
       'module_1_cours', 'module_1_questions', 'module_2_cours', 'module_2_reactions', 'module_3a_cours',
       'module_3b_cours', 'module_3_questions', 'module_4_cours', 'module_4_questions', 'module_5_cours',
       'module_5_pile'] },
+    'acides-bases': { ex: 10, pages: [
+      'module_1_cours', 'module_1_questions', 'module_2_cours', 'module_2_questions', 'module_3a_cours',
+      'module_3b_cours', 'module_3c_cours', 'module_3_questions', 'module_4_cours', 'module_4_questions'] },
     'oxydoreduction-spe': { pages: [
       'module_1a_cours', 'module_1b_cours', 'module_1c_cours', 'module_1d_cours', 'module_1_questions',
       'module_2a_cours', 'module_2b_cours', 'module_2_questions', 'module_3_cours', 'module_3_questions',
