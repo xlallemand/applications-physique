@@ -209,6 +209,35 @@ sub, sup { font-size: .7em; line-height: 0; }
   .ox-charges-fig { grid-row: auto; width: 100%; max-width: 400px; margin: 0 auto; }
 }
 
+/* fiche : schéma de la pile entouré des explications 1 à 4 (OX.infoPile)
+   ordinateur : 1 et 2 au-dessus, 3 et 4 dessous ; téléphone : le schéma puis 1 à 4 */
+.ox-pinfo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px 12px;
+  grid-template-areas: "b1 b2" "fig fig" "b3 b4"; }
+.ox-pinfo-b1 { grid-area: b1; } .ox-pinfo-b2 { grid-area: b2; } .ox-pinfo-b3 { grid-area: b3; } .ox-pinfo-b4 { grid-area: b4; }
+.ox-pinfo-fig { grid-area: fig; }
+.ox-pinfo-fig .ox-figure { margin: 0 auto; }
+@media (max-width: 640px) {
+  .ox-pinfo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "fig" "b1" "b2" "b3" "b4"; }
+}
+
+/* animation : électrons produits ou consommés (OX.animPile) */
+.ox-anim { margin-top: 4px; }
+.ox-anim-ex { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-bottom: 8px; }
+.ox-anim-ex .btn-small[aria-pressed="true"] { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.ox-anim-svg svg { display: block; width: 100%; max-width: 480px; height: auto; margin: 0 auto; font-family: var(--font-sans); touch-action: pan-y; }
+.ox-anim-eqs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; max-width: 480px; margin: 4px auto 0; text-align: center; line-height: 1.4; }
+.er-page .ox-anim-eqs p + p { margin-top: 2px; }
+.ox-anim-nom { font-size: .85rem; font-weight: 700; color: var(--ink-2); }
+.ox-anim-demi { font-weight: 700; white-space: nowrap; }
+.ox-anim-e { border-radius: 999px; padding: 0 5px; transition: background .15s, color .15s; }
+.ox-anim-e.on { background: var(--accent); color: var(--sheet); }
+.ox-anim-tag { font-size: .88rem; color: var(--accent-ink); visibility: hidden; }
+.ox-anim-tag.on { visibility: visible; }
+.er-page .ox-anim-legende { min-height: 4.6em; background: var(--paper); border-radius: 12px; padding: 8px 12px; margin-top: 10px; }
+.ox-anim .er-actions { justify-content: center; margin-top: 10px; }
+@media (max-width: 400px) { .ox-anim-demi { font-size: .92rem; } }
+@media (prefers-reduced-motion: reduce) { .ox-anim-e { transition: none; } }
+
 /* chaîne énergétique */
 .ox-chaine { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 4px; margin: 10px 0; }
 .ox-ch-b { border: 2px solid var(--ink); border-radius: 12px; padding: 8px 12px; font-weight: 800; background: var(--sheet); min-width: 84px; text-align: center; }
