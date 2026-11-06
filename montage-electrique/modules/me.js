@@ -9,6 +9,7 @@
    ME.simulateur(zone)      module 1 : simulateur, montage choisi dans une liste de schémas
    ME.lire(zone)            module 2 : repérer la boucle principale, les nœuds et les dérivations
    ME.multimetre(zone)      module 3 : brancher, régler un voltmètre et un ampèremètre, mesurer
+   ME.oscilloscope(zone)    module 3 : brancher les voies et la masse d'un oscilloscope
    ME.SCHEMAS               fabriques de schémas
    ============================================================ */
 (function () {
@@ -21,8 +22,9 @@
                 { nom: 'Simulateur', simulation: 'module_1b_simulateur', noms: { simulation: 'Simulateur : montages au choix' } }] },
     { n: 2, titre: 'Repérer la boucle principale et les dérivations', desc: 'Sur un schéma : boucle principale, nœuds et dérivations',
       parties: [{ nom: 'Repérer sur un schéma', entrainement: 'module_2_manip', noms: { entrainement: 'Repérer sur un schéma' } }] },
-    { n: 3, titre: 'Brancher un multimètre', desc: 'Voltmètre et ampèremètre : branchement, calibre, mesure',
-      parties: [{ nom: 'Brancher un multimètre', entrainement: 'module_3_manip', noms: { entrainement: 'Brancher et régler un multimètre' } }] },
+    { n: 3, titre: 'Brancher un multimètre ou un oscilloscope', desc: 'Voltmètre et ampèremètre : branchement, calibre, mesure ; oscilloscope : voies et masse', sousModules: true,
+      parties: [{ nom: 'Brancher un multimètre', entrainement: 'module_3_manip', noms: { entrainement: 'Brancher et régler un multimètre' } },
+                { nom: 'Brancher un oscilloscope', entrainement: 'module_3b_oscilloscope', noms: { entrainement: 'Brancher un oscilloscope' } }] },
   ];
   SOM.init({ nom: 'Réaliser un montage électrique', id: 'montage-electrique', plan: PLAN });
 
@@ -31,6 +33,7 @@
   const LIENS = {
     reperer: { href: 'module_2_manip.html', texte: 'Revoir : repérer la boucle principale (module 2)' },
     multimetre: { href: 'module_3_manip.html', texte: 'Revoir : brancher un multimètre (module 3)' },
+    oscilloscope: { href: 'module_3b_oscilloscope.html', texte: 'Revoir : brancher un oscilloscope (module 3)' },
   };
 
   /* ============================================================
@@ -38,9 +41,12 @@
      C(def, chemin, …) : un chemin est une suite d'extrémités et de coins :
        'G.a'      borne d'un dipôle ;  'n1'  nœud ;  'R1.a>b'  dipôle traversé (entrée a, sortie b) ;
        [x, y]     coin d'un fil. Un fil est créé entre deux extrémités successives.
+     Oscilloscope : une voie est un dipôle 'voie' (Y1, Y2) placé au point de sa flèche, de borne 'a' ce point
+     et de borne 'b' la masse (def.masse : un nœud du schéma) ; chemin : ['n1', 'Y1.a>b', 'nm'].
      ============================================================ */
   function C(def, ...chemins) {
     def = Object.assign({ noeuds: [], intensites: [], tensions: [], croisements: [] }, def);
+    def.dipoles.forEach(d => { if (d.type === 'voie') d.masse = [def.masse.x, def.masse.y]; });
     const pos = e => {
       const n = def.noeuds.find(x => x.id === e);
       if (n) return [n.x, n.y];
@@ -48,7 +54,7 @@
       return MONTAGE.borneSchema(def.dipoles.find(d => d.id === id), t).map(v => Math.round(v * 10) / 10);
     };
     const fils = [];
-    chemins.forEach(seq => {
+    chemins.filter(Boolean).forEach(seq => {
       let prec = null, coins = [];
       seq.filter(x => x != null && x !== false).forEach(e => {
         if (Array.isArray(e)) { coins.push(e); return; }
@@ -62,6 +68,8 @@
     return def;
   }
   const D = (id, type, x, y, rot, o) => Object.assign({ id, type, x, y, rot: rot || 0 }, o || {});
+  // voie k de l'oscilloscope : flèche depuis le point (x, y) dans la direction dir
+  const Y = (k, x, y, dir) => D('Y' + k, 'voie', x, y, 0, { voie: k, dir });
   const L1 = { nom: 'la lampe L₁', lab: 'L₁' }, L2 = { nom: 'la lampe L₂', lab: 'L₂' };
 
   const S = {
@@ -193,10 +201,41 @@
       noeuds: [{ id: 'n1', x: 50, y: 116 }, { id: 'n2', x: 230, y: 116 }],
       intensites: [{ nom: 'I', x: 50, y: 48, dir: 'bas' }], tensions: [{ nom: 'U', x1: 163, y1: 100, x2: 117, y2: 100, cote: 'haut' }] },
       ['G.a', [50, 32], 'A.a>b', 'n1', 'R.a>b', 'n2', [230, 32], 'G.b'], ['n1', [50, 170], 'V.a>b', [230, 170], 'n2']),
+
+    // ----- oscilloscope : masse à la borne − du générateur -----
+    // générateur et lampe ; CH1 à la borne + du générateur
+    oscL: () => C({ vb: [250, 196], tension: 6, masse: { x: 210, y: 150 },
+      dipoles: [D('G', 'generateur', 125, 40), D('L', 'lampe', 125, 150), Y(1, 40, 95, 'gauche')],
+      noeuds: [{ id: 'n1', x: 40, y: 95 }, { id: 'nm', x: 210, y: 150 }] },
+      ['G.a', [40, 40], 'n1', [40, 150], 'L.a>b', 'nm', [210, 40], 'G.b'], ['n1', 'Y1.a>b', 'nm']),
+    // deux résistances en série (390 Ω puis 100 Ω) ; o.deux : CH1 à la borne + du générateur et CH2 entre les
+    // résistances ; sinon CH1 seule, entre les résistances
+    oscRR: o => {
+      const deux = o && o.deux, k = deux ? 2 : 1;
+      return C({ vb: [320, 216], tension: 8, masse: { x: 280, y: 170 }, table: ['R2', 'R1'],
+        dipoles: [D('G', 'generateur', 160, 40), D('R1', 'resistance', 105, 170, 0, { valeur: 390 }), D('R2', 'resistance', 215, 170, 0, { valeur: 100 }), Y(k, 160, 170, 'bas')]
+          .concat(deux ? [Y(1, 40, 105, 'gauche')] : []),
+        noeuds: [{ id: 'n2', x: 160, y: 170 }, { id: 'nm', x: 280, y: 170 }].concat(deux ? [{ id: 'n1', x: 40, y: 105 }] : []) },
+        ['G.a', [40, 40], deux ? 'n1' : [40, 105], [40, 170], 'R1.a>b', 'n2', 'R2.a>b', 'nm', [280, 40], 'G.b'],
+        ['n2', 'Y' + k + '.a>b', 'nm'], deux && ['n1', 'Y1.a>b', 'nm']);
+    },
+    // résistance de protection et DEL en série ; CH1 à la borne + du générateur, CH2 aux bornes de la DEL
+    oscDR: () => C({ vb: [320, 216], tension: 6, masse: { x: 280, y: 170 }, table: ['D', 'R'],
+      dipoles: [D('G', 'generateur', 160, 40), D('R', 'resistance', 105, 170, 0, { valeur: 390 }), D('D', 'del', 215, 170), Y(1, 40, 105, 'gauche'), Y(2, 160, 170, 'bas')],
+      noeuds: [{ id: 'n1', x: 40, y: 105 }, { id: 'n2', x: 160, y: 170 }, { id: 'nm', x: 280, y: 170 }] },
+      ['G.a', [40, 40], 'n1', [40, 170], 'R.a>b', 'n2', 'D.a>b', 'nm', [280, 40], 'G.b'], ['n1', 'Y1.a>b', 'nm'], ['n2', 'Y2.a>b', 'nm']),
+    // lampe en dérivation avec une branche résistance + DEL ; CH1 à la borne + du générateur, CH2 aux bornes de la DEL
+    oscDeriv: () => C({ vb: [300, 226], tension: 6, masse: { x: 260, y: 180 }, table: ['D', 'L', 'R'],
+      dipoles: [D('G', 'generateur', 150, 36), D('L', 'lampe', 150, 110), D('R', 'resistance', 100, 180, 0, { valeur: 390 }), D('D', 'del', 210, 180),
+        Y(1, 40, 72, 'gauche'), Y(2, 158, 180, 'bas')],
+      noeuds: [{ id: 'nc', x: 40, y: 72 }, { id: 'n1', x: 40, y: 110 }, { id: 'n2', x: 260, y: 110 }, { id: 'n3', x: 158, y: 180 }, { id: 'nm', x: 260, y: 180 }] },
+      ['G.a', [40, 36], 'nc', 'n1', 'L.a>b', 'n2', [260, 36], 'G.b'], ['n1', [40, 180], 'R.a>b', 'n3', 'D.a>b', 'nm', 'n2'],
+      ['nc', 'Y1.a>b', 'nm'], ['n3', 'Y2.a>b', 'nm']),
   };
 
   const RAPPEL_A = '<b>L\'ampèremètre se branche en série</b> : on débranche un fil et il prend sa place, le courant doit le traverser. Bornes <b>10A et COM</b> (calibre 10 A), puis <b>mA</b> si l\'intensité est petite. L\'indication est positive quand le courant sort par COM.';
   const RAPPEL_V = '<b>Le voltmètre se branche en dérivation</b>, sur les bornes du dipôle, sans modifier le circuit : bornes <b>V et COM</b>. Il indique une tension positive si sa borne COM est reliée du côté de la borne − du générateur.';
+  const RAPPEL_OSC = '<b>L\'oscilloscope se branche en dérivation</b>, comme un voltmètre, sans débrancher aucun fil. Chaque voie a sa fiche : borne <b>rouge</b> au point où arrive la flèche de la voie (CH1 ou CH2) sur le schéma, borne <b>noire</b> au point marqué du symbole de masse. Les deux bornes noires sont reliées dans l\'appareil : elles vont au même point du circuit.';
   const RAPPEL_CAL = '<b>Calibre</b> : on commence par le plus grand, puis on choisit le plus petit calibre qui reste plus grand que la valeur mesurée. « 1 » à gauche de l\'écran : la valeur dépasse le calibre.';
 
   // en-tête d'une page de manipulation : titre, rappel ⓘ, numéro
@@ -244,6 +283,9 @@
     { titre: 'Deux résistances en dérivation et trois ampèremètres', circuit: () => S.derivation({ A: [1, 2, 3] }) },
     { titre: 'Deux lampes et un moteur en dérivation, avec un ampèremètre', circuit: S.trois },
     { titre: 'Deux résistances en dérivation et trois voltmètres', circuit: S.derivationV },
+    { titre: 'Une lampe et un oscilloscope', circuit: S.oscL },
+    { titre: 'Deux résistances en série, oscilloscope à deux voies', circuit: () => S.oscRR({ deux: true }) },
+    { titre: 'Une lampe en dérivation avec une DEL et sa résistance, oscilloscope à deux voies', circuit: S.oscDeriv },
   ];
   // schémas réussis, gardés dans le navigateur (clé « montage-electrique-simulateur »)
   const CLE_SIM = 'montage-electrique-simulateur';
@@ -271,13 +313,14 @@
       zone.querySelectorAll('.me-carte-fig').forEach((el, i) => MONTAGE.schema(el, MONTAGES[i].circuit(), {}));
     }
     function poste(k) {
-      const s = MONTAGES[k - 1], der = k === MONTAGES.length;
+      const s = MONTAGES[k - 1], der = k === MONTAGES.length, c = s.circuit();
+      const rappel = c.dipoles.some(d => d.type === 'voie') ? RAPPEL_OSC : RAPPEL_A + '<br><br>' + RAPPEL_V;
       zone.innerHTML = `<p class="me-retour-liste"><a class="btn-small" href="#">← Liste des schémas</a></p>
-        ${tete(s.titre, `Schéma ${k} / ${MONTAGES.length}`, RAPPEL_A + '<br><br>' + RAPPEL_V)}
+        ${tete(s.titre, `Schéma ${k} / ${MONTAGES.length}`, rappel)}
         <div class="me-poste"></div><div class="me-bilan" aria-live="polite"></div>
         <div class="er-actions"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
           <a class="btn-primary" style="text-decoration:none" href="${der ? '#' : '#schema-' + (k + 1)}">${der ? 'Liste des schémas' : 'Schéma suivant →'}</a></div>`;
-      ME.posteEnCours = MONTAGE.monter(zone.querySelector('.me-poste'), s.circuit(), {
+      ME.posteEnCours = MONTAGE.monter(zone.querySelector('.me-poste'), c, {
         boucle: false, com: true, liens: LIENS,
         onFin() {
           noterFait(k);
@@ -433,7 +476,7 @@
       zone.innerHTML = `${tete(s.titre, `Situation ${k + 1} / ${MESURES.length}`, s.rappel + '<br><br>' + RAPPEL_CAL)}
         <div class="me-poste"></div><div class="me-bilan" aria-live="polite"></div>
         <div class="er-actions"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
-          <button type="button" class="btn-primary" data-a="suite" disabled>${k < MESURES.length - 1 ? 'Situation suivante →' : 'Accueil de l\'application'}</button></div>`;
+          <button type="button" class="btn-primary" data-a="suite" disabled>${k < MESURES.length - 1 ? 'Situation suivante →' : 'Brancher un oscilloscope →'}</button></div>`;
       const c = s.circuit();
       ME.posteEnCours = MONTAGE.monter(zone.querySelector('.me-poste'), c, {
         mode: 'mesurer', mesurer: s.mesurer, com: true,
@@ -448,11 +491,54 @@
       });
       zone.querySelector('[data-a="re"]').onclick = afficher;
       zone.querySelector('[data-a="suite"]').onclick = () => {
-        if (k < MESURES.length - 1) { k++; afficher(); window.scrollTo(0, 0); } else location.href = '../index.html';
+        if (k < MESURES.length - 1) { k++; afficher(); window.scrollTo(0, 0); } else location.href = 'module_3b_oscilloscope.html';
       };
     }
     afficher();
   }
 
-  window.ME = { PLAN, SCHEMAS: S, priseEnMain, simulateur, lire, multimetre, LECTURES, MONTAGES, MESURES };
+  /* ============================================================
+     MODULE 3 : BRANCHER UN OSCILLOSCOPE
+     Le circuit est monté et allumé : on branche chaque voie (borne rouge au point
+     de sa flèche, borne noire à la masse) ; l'écran affiche les tensions.
+     ============================================================ */
+  const OSCILLOS = [
+    { titre: 'Tension aux bornes du générateur', circuit: S.oscL, mesurer: ['Y1'],
+      bilan: 'La voie CH1 affiche la tension entre la borne + du générateur et la masse, reliée à sa borne − : c\'est la tension aux bornes du générateur.' },
+    { titre: 'Tension aux bornes d\'une résistance', circuit: () => S.oscRR(), mesurer: ['Y1'],
+      bilan: 'La masse est reliée à la borne − du générateur : la voie CH1 affiche la tension aux bornes de la résistance de 100 Ω.' },
+    { titre: 'Deux tensions à la fois', circuit: () => S.oscRR({ deux: true }), mesurer: ['Y1', 'Y2'],
+      bilan: 'Les deux bornes noires sont au même point, la masse : CH1 affiche la tension aux bornes du générateur, CH2 la tension aux bornes de la résistance de 100 Ω.' },
+    { titre: 'Une DEL et sa résistance de protection', circuit: S.oscDR, mesurer: ['Y1', 'Y2'],
+      bilan: 'Les deux bornes noires sont au même point, la masse : CH1 affiche la tension aux bornes du générateur, CH2 la tension aux bornes de la DEL.' },
+  ];
+
+  function oscilloscope(zone) {
+    let k = 0;
+    const faits = new Set();
+    function afficher() {
+      const s = OSCILLOS[k];
+      zone.innerHTML = `${tete(s.titre, `Situation ${k + 1} / ${OSCILLOS.length}`, RAPPEL_OSC)}
+        <div class="me-poste"></div><div class="me-bilan" aria-live="polite"></div>
+        <div class="er-actions"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
+          <button type="button" class="btn-primary" data-a="suite" disabled>${k < OSCILLOS.length - 1 ? 'Situation suivante →' : 'Accueil de l\'application'}</button></div>`;
+      ME.posteEnCours = MONTAGE.monter(zone.querySelector('.me-poste'), s.circuit(), {
+        mode: 'mesurer', mesurer: s.mesurer,
+        onFin() {
+          zone.querySelector('.me-bilan').innerHTML = bravo(s.bilan);
+          zone.querySelector('[data-a="suite"]').disabled = false;
+          faits.add(k);
+          if (faits.size === OSCILLOS.length) SOM.marquer({ fait: true });
+          defiler(zone.querySelector('.me-bilan'));
+        },
+      });
+      zone.querySelector('[data-a="re"]').onclick = afficher;
+      zone.querySelector('[data-a="suite"]').onclick = () => {
+        if (k < OSCILLOS.length - 1) { k++; afficher(); window.scrollTo(0, 0); } else location.href = '../index.html';
+      };
+    }
+    afficher();
+  }
+
+  window.ME = { PLAN, SCHEMAS: S, priseEnMain, simulateur, lire, multimetre, oscilloscope, LECTURES, MONTAGES, MESURES, OSCILLOS };
 })();

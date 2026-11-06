@@ -81,6 +81,8 @@ Tout vient de `assets/theme.css`. N'écris **aucune couleur en dur** dans les CS
 
 **Exception : marquage des molécules** (moteur `ORGA`, comme les constantes SVG `VEC.C`). Une partie de la molécule et la partie du nom qui lui correspond ont la même couleur : `--orga-chaine` `#2952c8` (chaîne principale et ses numéros), `--orga-ram-1` à `--orga-ram-4` `#c2570c` (orange), `#8a6a00` (ocre, bien distinct du bleu de la chaîne), `#0e7490` (bleu pétrole), `#5a3fc4` (violet) (une couleur par type de ramification, dans l'ordre du nom), `--orga-groupe` `#b0177f` (groupe caractéristique et halogènes). En développée, les H prennent la couleur de l'atome qui les porte. Le groupe est entouré d'un rectangle arrondi qui n'épouse pas sa forme, même autour d'un seul atome écrit (jamais d'ellipse), comme à la main. Jamais de vert ni de rouge ; l'information est aussi écrite (numéros, noms).
 
+**Exception : oscilloscope** (moteur `MONTAGE`). Les voies ont leur couleur, comme sur l'appareil : `--osc-ch1` `#e8b400` (jaune) pour CH1, `--osc-ch2` `#2f6fe0` (bleu) pour CH2 (écran, boutons, pastilles). Le nom de la voie est toujours écrit.
+
 ### Forme et typographie
 
 - Police : `var(--font-sans)` (Hanken Grotesk, poids 400 à 800). Titres : `letter-spacing: -.02em`. Les nombres des tableaux et calculs : `font-variant-numeric: tabular-nums`.
