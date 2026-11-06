@@ -108,8 +108,9 @@
       ['G.a', [40, 28], 'n1', 'L1.a>b', 'n2', [260, 28], 'G.b'], ['n1', [40, 180], 'L2.a>b', [260, 180], 'n2']),
     // une lampe et une résistance en dérivation, voltmètre aux bornes de la résistance (prise en main)
     lrv: () => C({ vb: [300, 250], tension: 6,
-      dipoles: [D('G', 'generateur', 150, 28), D('L', 'lampe', 150, 110), D('R', 'resistance', 150, 180, 0, { valeur: 100 }), D('V', 'voltmetre', 150, 226, 0, { com: 1 })],
-      noeuds: [{ id: 'n1', x: 40, y: 110 }, { id: 'n2', x: 260, y: 110 }, { id: 'n3', x: 96, y: 180 }, { id: 'n4', x: 204, y: 180 }] },
+      dipoles: [D('G', 'generateur', 150, 28), D('L', 'lampe', 150, 110), D('R', 'resistance', 150, 180, 0, { valeur: 100 }), D('V', 'voltmetre', 150, 226, 0, { com: 1, mesure: 'U_R' })],
+      noeuds: [{ id: 'n1', x: 40, y: 110 }, { id: 'n2', x: 260, y: 110 }, { id: 'n3', x: 96, y: 180 }, { id: 'n4', x: 204, y: 180 }],
+      tensions: [{ nom: 'U_R', x1: 170, y1: 160, x2: 130, y2: 160, cote: 'haut' }] },
       ['G.a', [40, 28], 'n1', 'L.a>b', 'n2', [260, 28], 'G.b'],
       ['n1', [40, 180], 'n3', 'R.a>b', 'n4', [260, 180], 'n2'],
       ['n3', [96, 226], 'V.a>b', [204, 226], 'n4']),
