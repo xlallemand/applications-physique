@@ -1,0 +1,276 @@
+/* ============================================================
+   MONTAGE (assets/montage.js) : table de montage (mt-), schéma
+   normalisé (ms-) et poste de montage. Couleurs : variables du thème.
+   Choix de l'enseignant : borne + du générateur et DEL en rouge ;
+   éléments branchés colorés en vert sur le schéma.
+   ============================================================ */
+
+/* ---------- arrêts des dégradés (assets partagés, voir defs() dans maq-montage.js) ---------- */
+.mt-s-sheet { stop-color: var(--sheet); }
+.mt-s-paper { stop-color: var(--paper); }
+.mt-s-paper2 { stop-color: var(--paper-2); }
+.mt-s-paper3 { stop-color: var(--paper-3); }
+.mt-s-ink { stop-color: var(--ink); }
+.mt-s-ink2 { stop-color: var(--ink-2); }
+.mt-s-ink3 { stop-color: var(--ink-3); }
+.mt-s-cle { stop-color: var(--cle-bg); }
+.mt-s-accent { stop-color: var(--accent); }
+.mt-s-accentink { stop-color: var(--accent-ink); }
+.mt-s-danger { stop-color: var(--danger); }
+.mt-s-dangerbg { stop-color: var(--danger-bg); }
+.mt-s-dangertext { stop-color: var(--danger-text); }
+
+/* ============ TABLE DE MONTAGE ============ */
+.mt-table { position: relative; touch-action: pan-y; -webkit-user-select: none; user-select: none; }
+.mt-svg { display: block; width: 100%; height: auto; overflow: visible; font-family: var(--font-sans); }
+.mt-plateau { fill: var(--paper); }
+
+/* boîtiers et plaquettes */
+.mt-boitier { fill: var(--paper-2); stroke: var(--ink-3); stroke-width: 1; }
+.mt-rendu-relief .mt-boitier { fill: url(#mt-g-boitier); }
+.mt-plaque { fill: var(--paper-2); stroke: var(--ink-3); stroke-width: 1; }
+.mt-rendu-relief .mt-plaque { fill: url(#mt-g-plaque); }
+.mt-chant { fill: var(--paper-3); }
+.mt-rendu-plat .mt-chant { display: none; }
+.mt-marque { font-size: 7.5px; font-weight: 700; letter-spacing: .06em; fill: var(--ink-3); }
+.mt-signe { font-size: 17px; font-weight: 800; fill: var(--ink); }
+.mt-signe-petit { font-size: 14px; font-weight: 800; fill: var(--ink); }
+.mt-valeur { font-size: 11.5px; font-weight: 800; fill: var(--ink); }
+.mt-piste { fill: none; stroke: var(--ink-3); stroke-width: 1.6; }
+
+/* générateur */
+.mt-ecran-gen { fill: var(--ink); }
+.mt-ecran-gen ~ g .mt-seg { fill: var(--cle-bg); }
+.mt-generateur .mt-seg { fill: var(--cle-bg); }
+.mt-generateur .mt-seg-off { fill: var(--sheet); opacity: .07; }
+.mt-ecran-unite { font-size: 10px; font-weight: 800; fill: var(--cle-bg); }
+.mt-bouton-jupe { fill: var(--paper-3); stroke: var(--ink-3); stroke-width: 1; }
+.mt-bouton { fill: var(--sheet); stroke: var(--ink-3); stroke-width: 1; }
+.mt-rendu-relief .mt-bouton { fill: url(#mt-g-bouton); }
+.mt-bouton-trait { stroke: var(--ink); stroke-width: 2.6; stroke-linecap: round; }
+
+/* multimètre */
+.mt-etui { fill: var(--ink-2); }
+.mt-rendu-relief .mt-etui { fill: url(#mt-g-etui); }
+.mt-face { fill: var(--paper-2); }
+.mt-rendu-relief .mt-face { fill: url(#mt-g-boitier); }
+.mt-ecran { fill: var(--paper-3); stroke: var(--ink-3); stroke-width: 1; }
+.mt-rendu-relief .mt-ecran { fill: url(#mt-g-ecran); }
+.mt-seg { fill: var(--ink); }
+.mt-seg-off { fill: var(--ink); opacity: .06; }
+.mt-cadran { fill: var(--paper); stroke: var(--paper-3); stroke-width: 1; }
+.mt-cran { fill: var(--ink-3); }
+.mt-pos { fill: var(--ink-2); font-weight: 600; }
+.mt-pos.ici { fill: var(--accent-ink); font-weight: 800; }
+.mt-zone { fill: var(--ink); font-weight: 800; }
+.mt-arc-zone { fill: none; stroke: var(--ink-3); stroke-width: .8; }
+.mt-arc-zone.ici { stroke: var(--accent); stroke-width: 1.2; }
+.mt-zone.ici { fill: var(--accent-ink); }
+.mt-bouton-barre { fill: var(--paper-2); stroke: var(--ink-3); stroke-width: .8; }
+.mt-rendu-relief .mt-bouton-barre { fill: url(#mt-g-levier); }
+.mt-bouton-index { fill: var(--ink); }
+.mt-b-nom { font-size: 9px; font-weight: 800; fill: var(--ink); }
+.mt-com-cadre { fill: none; stroke: var(--ink); stroke-width: 1; }
+
+/* bornes : douille métallique, anneau de couleur (+ et entrées : accent ; − et COM : encre) */
+.mt-b-douille { fill: var(--paper-3); stroke: var(--ink-3); stroke-width: 1; }
+.mt-rendu-relief .mt-b-douille { fill: url(#mt-g-metal); }
+.mt-b-trou { fill: var(--ink-2); }
+.mt-b-anneau { fill: var(--sheet); stroke-width: 2.6; stroke: var(--ink-3); }
+.mt-b-plus .mt-b-anneau { stroke: var(--danger); }
+.mt-b-entree .mt-b-anneau { stroke: var(--accent); }
+.mt-signe-plus { fill: var(--danger); }
+.mt-b-moins .mt-b-anneau, .mt-b-com .mt-b-anneau { stroke: var(--ink); }
+.mt-b-neutre .mt-b-anneau { stroke: var(--ink-3); stroke-width: 1.6; }
+
+/* résistance */
+.mt-corps { fill: var(--paper-3); stroke: var(--ink-3); stroke-width: 1; }
+.mt-rendu-relief .mt-corps { fill: url(#mt-g-corps); }
+.mt-anneau-r { fill: var(--ink-2); opacity: .55; }
+
+/* lampe */
+.mt-douille-lampe { fill: var(--paper-3); stroke: var(--ink-3); stroke-width: 1; }
+.mt-rendu-relief .mt-douille-lampe { fill: url(#mt-g-metal); }
+.mt-verre { fill: var(--sheet); stroke: var(--ink-3); stroke-width: 1; }
+.mt-rendu-relief .mt-verre { fill: url(#mt-g-verre); }
+.mt-verre.allume { fill: var(--sheet); stroke: var(--accent); }
+.mt-filament { fill: none; stroke: var(--ink-2); stroke-width: 1.3; stroke-linejoin: round; }
+.mt-filament.allume { stroke: var(--accent); stroke-width: 2; }
+.mt-halo { fill: var(--cle-bg); }
+.mt-rendu-relief .mt-halo { fill: url(#mt-g-halo); }
+
+/* interrupteur */
+.mt-contact, .mt-pivot { fill: var(--paper-3); stroke: var(--ink-3); stroke-width: 1; }
+.mt-rendu-relief .mt-contact, .mt-rendu-relief .mt-pivot { fill: url(#mt-g-metal); }
+.mt-lame { fill: var(--paper-3); stroke: var(--ink-2); stroke-width: 1; }
+.mt-rendu-relief .mt-lame { fill: url(#mt-g-levier); }
+.mt-manette { fill: var(--ink-2); stroke: var(--ink); stroke-width: 1; }
+.mt-rivet { fill: var(--ink-2); }
+
+/* DEL (rouge) */
+.mt-del-collerette { fill: var(--paper-3); stroke: var(--ink-3); stroke-width: 1; }
+.mt-del { fill: var(--danger-bg); stroke: var(--danger-text); stroke-width: 1; }
+.mt-rendu-relief .mt-del { fill: url(#mt-g-deloff); }
+.mt-del.allume { fill: var(--danger); stroke: var(--danger-text); }
+.mt-rendu-relief .mt-del.allume { fill: url(#mt-g-del); }
+.mt-halo-del { fill: var(--danger-bg); }
+.mt-rendu-relief .mt-halo-del { fill: url(#mt-g-halo-del); }
+.mt-signe-petit { fill: var(--danger); }
+
+/* moteur et hélice */
+.mt-moteur { fill: var(--paper-3); stroke: var(--ink-3); stroke-width: 1; }
+.mt-rendu-relief .mt-moteur { fill: url(#mt-g-moteur); }
+.mt-pale { fill: var(--ink-2); opacity: .88; }
+.mt-moyeu { fill: var(--ink); }
+.mt-helice.tourne { animation: mt-tourne .5s linear infinite; }
+.mt-helice.tourne.inverse { animation-direction: reverse; }
+@keyframes mt-tourne { to { transform: rotate(360deg); } }
+.mt-sens { fill: none; stroke: var(--accent); stroke-width: 2.2; stroke-linecap: round; }
+.mt-sens-pointe { fill: var(--accent); }
+
+/* fils souples, fiches banane (empilables) */
+.mt-cable { fill: none; stroke: var(--ink-2); stroke-width: 4.6; stroke-linecap: round; }
+.mt-cable-reflet { fill: none; stroke: var(--sheet); stroke-width: 1.2; opacity: .35; stroke-linecap: round; }
+.mt-rendu-plat .mt-cable-reflet { display: none; }
+.mt-cable-halo { fill: none; stroke: none; stroke-width: 13; stroke-linecap: round; }
+.mt-fil.choisi .mt-cable-halo { stroke: var(--accent); opacity: .35; }
+.mt-fiche { fill: var(--ink-2); stroke: var(--ink); stroke-width: 1; }
+.mt-fiche-c { fill: var(--ink-3); }
+.mt-fil-encours .mt-cable { stroke: var(--accent); }
+.mt-fil-encours .mt-fiche { fill: var(--accent); stroke: var(--accent-ink); }
+
+/* zones sensibles (44 px au moins) */
+.mt-cible { fill: transparent; stroke: none; cursor: pointer; touch-action: none; }
+.mt-cible.depart, .mt-cible.survol { fill: var(--accent); fill-opacity: .14; stroke: var(--accent); stroke-width: 2; }
+.mt-cible.depart { animation: mt-pulse 1.1s ease-in-out infinite; }
+.mt-cible.refusee { fill: var(--danger); fill-opacity: .1; stroke: var(--danger-text); stroke-width: 2; stroke-dasharray: 4 3; }
+@keyframes mt-pulse { 50% { fill-opacity: .04; } }
+.mt-cible-fil { fill: none; stroke: transparent; stroke-width: 20; stroke-linecap: round; cursor: pointer; pointer-events: stroke; }
+.mt-cible-cmd { fill: transparent; cursor: pointer; }
+
+/* calque HTML : bouton « Retirer ce fil », bulle de refus, réglages */
+.mt-calque { position: absolute; inset: 0; pointer-events: none; }
+.mt-calque > * { pointer-events: auto; }
+.mt-retirer {
+  position: absolute; transform: translate(-50%, -50%); min-height: 44px; padding: 0 16px; border: none; border-radius: 999px;
+  background: var(--ink); color: var(--sheet); font: 700 .88rem var(--font-sans); cursor: pointer; white-space: nowrap;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.mt-bulle {
+  position: absolute; width: min(300px, 92%); padding: 10px 14px !important; font-size: .9rem; line-height: 1.4; color: var(--danger-text);
+  border-radius: 14px !important;
+}
+.mt-bulle b { color: var(--danger-text); }
+.mt-bulle::before {
+  content: ''; position: absolute; left: calc(var(--fx, 50%) - 8px); width: 16px; height: 16px; background: var(--danger-bg); transform: rotate(45deg);
+}
+.mt-bulle-bas::before { top: -7px; }
+.mt-bulle-haut { transform: translateY(-100%); }
+.mt-bulle-haut::before { bottom: -7px; }
+
+.mt-reglage {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  width: min(330px, 96%); padding: 12px 12px 14px; background: var(--sheet); border-radius: 22px; box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+.mt-rg-tete { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; }
+.mt-rg-tete span { color: var(--accent-ink); font-weight: 800; font-size: .9rem; }
+.mt-rg-ecran { width: 110px; height: auto; margin-bottom: 4px; font-family: var(--font-sans); }
+.mt-rg-svg { width: 100%; max-width: 290px; height: auto; font-family: var(--font-sans); touch-action: none; }
+.mt-cible-pos { fill: transparent; cursor: pointer; }
+.mt-cible-pos:hover { fill: var(--accent); fill-opacity: .12; }
+.mt-cible-rot { fill: transparent; cursor: grab; }
+.mt-grad { stroke: var(--ink-2); stroke-width: 1.4; }
+.mt-rg-fins { display: flex; align-items: center; gap: 8px; }
+.mt-rg-bt {
+  min-width: 58px; height: 46px; padding: 0 10px; border: none; border-radius: 999px; background: var(--paper); color: var(--ink);
+  font: 800 .95rem var(--font-sans); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.mt-rg-bt:hover { background: var(--paper-2); }
+.mt-rg-val { font-weight: 800; font-size: 1rem; min-width: 5.5em; text-align: center; font-variant-numeric: tabular-nums; }
+.mt-rg-ok { min-height: 46px; padding: 0 28px; }
+.mt-etiquette { fill: var(--ink); }
+.mt-etiquette-t { fill: var(--sheet); font-size: 11px; font-weight: 800; }
+
+/* ============ SCHÉMA NORMALISÉ ============ */
+.ms-schema { touch-action: pan-y; }
+.ms-svg { display: block; width: 100%; height: auto; font-family: var(--font-sans); overflow: visible; }
+.ms-trait { fill: none; stroke: var(--ink); stroke-width: 1.6; }
+.ms-trait.ms-fond { fill: var(--sheet); }
+.ms-trait.ms-fin { stroke-width: 1.2; }
+.ms-pt { fill: var(--ink); }
+.ms-lettre { font-size: 12px; font-weight: 700; fill: var(--ink); }
+.ms-valeur { font-size: 9.5px; font-weight: 700; fill: var(--ink); }
+.ms-signe { font-size: 12px; font-weight: 800; fill: var(--ink); }
+.ms-com { font-size: 7px; font-weight: 800; fill: var(--ink-2); }
+.ms-fil { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linejoin: miter; }
+.ms-nom { font-size: 11px; font-weight: 700; fill: var(--ink); }
+.ms-ind { font-size: 8px; }
+.ms-pointe { fill: var(--ink); }
+.ms-tension { fill: none; stroke: var(--ink); stroke-width: 1.2; }
+.ms-noeud { fill: var(--ink); }
+.ms-noeud.allume { fill: var(--success); }
+.ms-noeud-halo { fill: var(--success-bg); stroke: var(--success); stroke-width: 1.2; }
+.ms-halo { fill: var(--cle-bg); }
+/* boucle principale surlignée : accent épais semi-transparent */
+.ms-boucle { fill: none; stroke: var(--accent); stroke-width: 10; opacity: .26; stroke-linecap: round; stroke-linejoin: round; }
+/* élément branché sur la table : vert, bien distinct de la boucle surlignée */
+.ms-fil.branche, .ms-dipole.branche .ms-trait { stroke: var(--success); stroke-width: 3; }
+.ms-dipole.branche .ms-lettre, .ms-dipole.branche .ms-valeur { fill: var(--success-text); }
+.ms-dipole.branche .ms-pt, .ms-dipole.branche .ms-pointe { fill: var(--success); }
+/* élément touché pendant le repérage de la boucle : il s'épaissit */
+.ms-fil.choisi, .ms-dipole.choisi .ms-trait { stroke: var(--accent); stroke-width: 4; }
+.ms-dipole.choisi .ms-lettre { fill: var(--accent-ink); }
+/* dérivation repérée (module 1) */
+.ms-fil.deriv, .ms-dipole.deriv .ms-trait { stroke: var(--accent-ink); stroke-width: 3.4; stroke-dasharray: 6 3; }
+.ms-dipole.deriv .ms-trait.ms-fond { stroke-dasharray: none; }
+.ms-noeud-touche { fill: var(--cle-bg); stroke: var(--accent); stroke-width: 1.5; }
+.ms-cerne { fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-dasharray: 4 3; animation: ms-cligne 1s ease-in-out infinite; }
+@keyframes ms-cligne { 50% { opacity: .25; } }
+.ms-cible-n { fill: transparent; cursor: pointer; }
+.ms-cible { fill: none; stroke: transparent; stroke-width: 18; cursor: pointer; pointer-events: stroke; }
+.ms-cible-d { fill: transparent; cursor: pointer; }
+
+/* ============ POSTE DE MONTAGE : table (≈ 60 %) et schéma côte à côte ; schéma collant en haut sur téléphone ============ */
+.mt-poste { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; align-items: start; }
+.mt-poste-table { grid-column: 1; grid-row: 1; }
+.mt-poste-schema { grid-column: 2; grid-row: 1; position: sticky; top: 16px; display: flex; flex-direction: column; gap: 10px; }
+.mt-poste-schema .ms-schema { background: var(--sheet); border: 1px solid var(--line); border-radius: 14px; padding: 8px; }
+.mt-consigne { background: var(--cle-bg); border-radius: 14px; padding: 10px 14px; font-size: .95rem; line-height: 1.45; }
+.mt-consigne:empty { display: none; }
+.mt-consigne p { margin: 0; }
+.mt-consigne p + p, .mt-consigne p + div, .mt-consigne div + p { margin-top: 8px; }
+.mt-consigne b { color: var(--accent-ink); }
+.mt-consigne .mt-info { color: var(--ink-2); font-size: .9rem; }
+.mt-consigne .mt-ok b { color: var(--success-text); }
+.mt-cons-actions { margin-top: 8px; }
+.mt-cons-actions .btn-small { min-height: 42px; padding: 0 18px; }
+.mt-diag { margin-top: 8px; padding: 10px 12px !important; border-radius: 12px !important; font-size: .92rem; }
+.mt-diag b { color: inherit; }
+.callout-danger.mt-diag { color: var(--danger-text); }
+.mt-choix { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.mt-choix .btn-secondary { min-height: 46px; text-align: left; border-radius: 16px; padding: 8px 14px; }
+.mt-mesures { display: flex; flex-wrap: wrap; gap: 6px 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.mt-mesures span { background: var(--sheet); border-radius: 999px; padding: 4px 12px; }
+.mt-deroule { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; counter-reset: d; }
+.mt-deroule li { display: flex; gap: 10px; align-items: center; background: var(--paper); border-radius: 14px; padding: 8px 12px; counter-increment: d; line-height: 1.4; }
+.mt-deroule li::before { content: counter(d); flex-shrink: 0; width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; background: var(--sheet); font-weight: 800; font-size: .85rem; color: var(--ink-2); }
+.mt-deroule li.fait::before { content: '✓'; background: var(--success-bg); color: var(--success-text); }
+.mt-deroule li.ici { background: var(--cle-bg); font-weight: 700; }
+.mt-deroule li.avenir { color: var(--ink-2); }
+.mt-auto .mt-poste-table { cursor: progress; }
+@media (max-width: 899px) {
+  .mt-poste { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .mt-poste-table, .mt-poste-schema { grid-column: 1; grid-row: auto; }
+  /* schéma au-dessus, collant sous le bandeau du sommaire (54 px), réduit */
+  .mt-poste-schema { top: 54px; z-index: 5; background: var(--sheet); margin: 0 -12px; padding: 8px 12px 10px; gap: 8px; border-bottom: 1px solid var(--line); }
+  .mt-poste-schema .ms-schema { width: min(100%, calc(26vh * var(--ratio, 1.4))); margin: 0 auto; border: none; padding: 0; }
+  .mt-consigne { font-size: .9rem; padding: 8px 12px; }
+  .mt-poste-table { margin: 0 -12px; }
+}
+@media (max-width: 480px) { .mt-poste-schema, .mt-poste-table { margin: 0 -12px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .mt-helice.tourne { animation: none; }
+  .mt-cible.depart, .ms-cerne { animation: none; }
+}
+.ms-lab { font-size: 10px; font-weight: 800; fill: var(--ink-2); }
