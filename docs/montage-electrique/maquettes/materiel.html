@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matériel et symboles — maquette Montage électrique</title>
+<link rel="stylesheet" href="../../../assets/theme.css">
+<link rel="stylesheet" href="../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="maq-montage.css">
+<link rel="stylesheet" href="maquettes.css">
+<script src="maq-montage.js"></script>
+<script src="schemas.js"></script>
+</head>
+<body>
+<!-- Galerie du matériel de la table et des symboles du schéma (maquette, design seulement) -->
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MAQUETTE · MATÉRIEL ET SYMBOLES</span>
+    <h2 class="er-titre">Le matériel de la table et le schéma normalisé</h2>
+    <p class="er-contexte">Tout le matériel du TP dessiné <b>vue de dessus</b>, dans tous ses états, puis les <b>symboles normalisés</b> et les schémas du TP. Choisis le rendu du matériel : les deux sont montrés avec les mêmes couleurs du thème.</p>
+    <nav class="maq-nav" aria-label="Pages de la maquette">
+      <a href="index.html">Présentation</a>
+      <a href="materiel.html" aria-current="page">Matériel et symboles</a>
+      <a href="modules/module_2_manip.html">Page de montage</a>
+    </nav>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">Choix 1 · Rendu du matériel</h3>
+    <div class="maq-choix" id="rendu">
+      <button type="button" data-v="plat"><span class="maq-lettre">A</span>À plat</button>
+      <button type="button" data-v="relief"><span class="maq-lettre">B</span>En relief</button>
+    </div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">Générateur et multimètres <small>Écran à segments ; la position du sélecteur est écrite en accent sur le cadran</small></h3>
+    <div class="maq-galerie maq-galerie-l" id="g-appareils"></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">Dipôles sur leur plaquette <small>Chaque état que l'élève verra</small></h3>
+    <div class="maq-galerie" id="g-dipoles"></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">Fils et bornes <small>Fils souples (Bézier), fiches empilées, fil en cours de tracé, borne de départ, fil choisi, borne refusée</small></h3>
+    <div class="maq-galerie maq-galerie-l" id="g-fils"></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">Symboles normalisés</h3>
+    <div class="maq-galerie" id="g-symboles"></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">États du schéma <small>Repérage de la boucle (module 1), boucle surlignée, montage en cours, nœuds allumés</small></h3>
+    <div class="maq-galerie maq-galerie-l" id="g-etats"></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">Schémas du TP <small>Intensités nommées avec une flèche sur le fil, tensions nommées avec une flèche à côté du dipôle</small></h3>
+    <div class="maq-choix" id="com" style="margin-bottom:12px">
+      <span class="maq-choix-l">Choix 5 · COM sur le schéma</span>
+      <button type="button" data-v="non"><span class="maq-lettre">A</span>Non (comme le TP)</button>
+      <button type="button" data-v="oui"><span class="maq-lettre">B</span>Oui (comme la fiche TP)</button>
+    </div>
+    <div class="maq-galerie maq-galerie-l" id="g-tp"></div>
+  </div>
+</div>
+
+<script>
+// ---------- choix du rendu (gardé dans le navigateur pour toutes les pages de la maquette) ----------
+const lire = (k, d) => { try { return localStorage.getItem('maquette-me-' + k) || d; } catch (e) { return d; } };
+const ecrire = (k, v) => { try { localStorage.setItem('maquette-me-' + k, v); } catch (e) { /* rien */ } };
+let rendu = lire('rendu', 'relief'), com = lire('com', 'non');
+const tables = [], schemas = [];
+
+// une pièce de la galerie : titre, dessin, description
+function piece(parent, titre, desc) {
+  const d = document.createElement('div');
+  d.className = 'maq-piece';
+  d.innerHTML = `<span class="maq-piece-t">${titre}</span><div></div>${desc ? `<p class="maq-piece-d">${desc}</p>` : ''}`;
+  parent.appendChild(d);
+  return d.children[1];
+}
+// une table qui ne contient qu'un objet (marge autour)
+function seul(parent, titre, desc, m, marge, large) {
+  const M = MAQ_TAILLES[m.type], mg = marge || 14;
+  m.x = mg; m.y = mg;
+  const z = piece(parent, titre, desc);
+  z.style.maxWidth = (large || (M[0] + 2 * mg) * 1.25) + 'px';
+  tables.push(MAQ.table(z, { W: M[0] + 2 * mg, H: M[1] + 2 * mg, materiel: [m], fils: [] }, { rendu }));
+}
+const MAQ_TAILLES = { generateur: [180, 124], multimetre: [170, 262], resistance: [112, 76], lampe: [112, 76],
+                      interrupteur: [112, 76], del: [112, 76], moteur: [112, 98] };
+
+// ---------- générateur et multimètres ----------
+const gA = document.getElementById('g-appareils');
+seul(gA, 'Générateur réglé sur 8 V', 'Sortie réglable, écran, bouton de réglage. Borne + cerclée d\'accent, borne − cerclée d\'encre, signes écrits.', { id: 'G', type: 'generateur', tension: 8 });
+seul(gA, 'Ampèremètre · calibre 10 A', 'Fonction A ⎓, calibre 10 A, entrées 10A et COM : lecture peu précise « 0.02 ».', { id: 'A', type: 'multimetre', position: 'A10', affiche: '0.02' });
+seul(gA, 'Ampèremètre · calibre 200 mA', 'Fil passé de 10A à mA, calibre 200 mA : « 16.3 ».', { id: 'A', type: 'multimetre', position: 'A200m', affiche: '16.3' });
+seul(gA, 'Courant qui entre par COM', 'Indication négative.', { id: 'A', type: 'multimetre', position: 'A200m', affiche: '-16.3' });
+seul(gA, 'Voltmètre · calibre 20 V', 'Fonction V ⎓, bornes V et COM.', { id: 'V', type: 'multimetre', position: 'V20', affiche: '6.37' });
+seul(gA, 'Multimètre éteint', 'Sélecteur sur OFF : écran vide.', { id: 'V', type: 'multimetre', position: 'OFF' });
+
+// ---------- dipôles ----------
+const gD = document.getElementById('g-dipoles');
+seul(gD, 'Résistance 100 Ω', 'Valeur imprimée sur la plaquette.', { id: 'R', type: 'resistance', valeur: '100 Ω' });
+seul(gD, 'Résistance 390 Ω', '', { id: 'R', type: 'resistance', valeur: '390 Ω' });
+seul(gD, 'Résistance 470 Ω', '', { id: 'R', type: 'resistance', valeur: '470 Ω' });
+seul(gD, 'Lampe éteinte', 'Ampoule sur son support.', { id: 'L', type: 'lampe', allumee: false });
+seul(gD, 'Lampe allumée', 'Halo de la couleur claire de la matière.', { id: 'L', type: 'lampe', allumee: true }, 30);
+seul(gD, 'Interrupteur ouvert', 'Interrupteur à levier : le toucher l\'ouvre ou le ferme.', { id: 'K', type: 'interrupteur', ferme: false });
+seul(gD, 'Interrupteur fermé', '', { id: 'K', type: 'interrupteur', ferme: true });
+seul(gD, 'DEL éteinte', '+ marqué du côté de l\'anode.', { id: 'D', type: 'del', allumee: false });
+seul(gD, 'DEL allumée', 'Seulement dans le sens passant.', { id: 'D', type: 'del', allumee: true });
+seul(gD, 'Moteur arrêté', 'Moteur vu de dessus, hélice sur l\'axe.', { id: 'M', type: 'moteur', tourne: 0 });
+seul(gD, 'Moteur qui tourne', 'L\'hélice tourne ; une flèche donne le sens.', { id: 'M', type: 'moteur', tourne: 1 });
+seul(gD, 'Sens inverse', 'Polarité inversée : l\'autre sens.', { id: 'M', type: 'moteur', tourne: -1 });
+
+// ---------- fils ----------
+const gF = document.getElementById('g-fils');
+function scene(parent, titre, desc, sc, fn) {
+  const z = piece(parent, titre, desc);
+  z.style.maxWidth = (sc.W * 1.25) + 'px';
+  const t = MAQ.table(z, sc, { rendu });
+  tables.push(t);
+  if (fn) fn(t);
+}
+scene(gF, 'Fils posés', 'Deux fils sur une même borne : les fiches s\'empilent (seulement là où le schéma a un nœud).', {
+  W: 300, H: 214, materiel: [{ id: 'G', type: 'generateur', tension: 8, x: 10, y: 8 }, { id: 'R', type: 'resistance', valeur: '390 Ω', x: 176, y: 128 }, { id: 'L', type: 'lampe', x: 14, y: 132 }],
+  fils: [['G.plus', 'L.1'], ['G.plus', 'R.1'], ['G.moins', 'R.2']] });
+scene(gF, 'Fil en cours de tracé', 'Tiré au doigt depuis la borne + : il suit le doigt, en accent ; la borne de départ est cerclée.', {
+  W: 300, H: 214, materiel: [{ id: 'G', type: 'generateur', tension: 8, x: 10, y: 8 }, { id: 'R', type: 'resistance', valeur: '390 Ω', x: 176, y: 128 }, { id: 'L', type: 'lampe', x: 14, y: 132 }],
+  fils: [] }, t => t.enCours('G.plus', 150, 170));
+scene(gF, 'Fil choisi', 'Toucher un fil le met en valeur et propose « Retirer ce fil ».', {
+  W: 300, H: 214, materiel: [{ id: 'G', type: 'generateur', tension: 8, x: 10, y: 8 }, { id: 'R', type: 'resistance', valeur: '390 Ω', x: 176, y: 128 }, { id: 'L', type: 'lampe', x: 14, y: 132 }],
+  fils: [['G.plus', 'L.1'], ['L.2', 'R.1']] }, t => t.choisirFil(1));
+scene(gF, 'Branchement refusé', 'La borne touchée est marquée, le fil n\'est pas posé, une bulle dit pourquoi.', {
+  W: 300, H: 214, materiel: [{ id: 'G', type: 'generateur', tension: 8, x: 10, y: 8 }, { id: 'R', type: 'resistance', valeur: '390 Ω', x: 176, y: 128 }, { id: 'L', type: 'lampe', x: 14, y: 132 }],
+  fils: [] }, t => t.refus('G.moins', '<b>Ce n\'est pas ça.</b> On part toujours de la borne + du générateur.', 'bulle'));
+
+// ---------- symboles ----------
+const gS = document.getElementById('g-symboles');
+const L = { generateur: 12, amperemetre: 11, voltmetre: 11, moteur: 11, lampe: 10, resistance: 21, interrupteur: 14, del: 12 };
+function sym(titre, d, opt) {
+  const z = piece(gS, titre);
+  z.style.maxWidth = '260px';
+  const l = L[d.type];
+  const sc = { vb: [130, 54], dipoles: [Object.assign({ id: 'd', x: 65, y: 32, rot: 0 }, d)],
+               fils: [{ id: 'a', pts: [[8, 32], [65 - l, 32]] }, { id: 'b', pts: [[65 + l, 32], [122, 32]] }] };
+  schemas.push(MAQ.schema(z, sc, opt));
+}
+sym('Générateur', { type: 'generateur' });
+sym('Résistance', { type: 'resistance', valeur: '390 Ω' });
+sym('Lampe', { type: 'lampe' });
+sym('Lampe allumée', { type: 'lampe', allumee: true });
+sym('Interrupteur ouvert', { type: 'interrupteur', ouvert: true });
+sym('Interrupteur fermé', { type: 'interrupteur', ouvert: false });
+sym('DEL', { type: 'del' });
+sym('Moteur', { type: 'moteur' });
+sym('Ampèremètre', { type: 'amperemetre' });
+sym('Voltmètre', { type: 'voltmetre' });
+
+// ---------- états du schéma ----------
+const gE = document.getElementById('g-etats');
+function etat(titre, desc, sc, opt) {
+  const z = piece(gE, titre, desc);
+  z.style.maxWidth = '380px';
+  schemas.push(MAQ.schema(z, sc, opt));
+}
+const S = SCHEMAS.situation;
+etat('Schéma de départ', 'Rien de surligné, rien de branché.', S, {});
+etat('Repérage de la boucle (module 1)', 'Chaque élément touché s\'épaissit en accent ; le toucher à nouveau l\'enlève. Essaie.', S, { choisis: ['f1', 'A', 'f2'], libre: true });
+etat('Boucle principale validée', 'Accent épais semi-transparent sous le schéma.', S, { boucle: ['f1', 'A', 'f2', 'K', 'f3', 'L', 'f4', 'M', 'f5', 'G'] });
+etat('Montage en cours', 'Chaque fil accepté et chaque dipôle branché se colorent.', S, { boucle: ['f1', 'A', 'f2', 'K', 'f3', 'L', 'f4', 'M', 'f5', 'G'], branches: ['G', 'f1', 'A', 'f2', 'K'] });
+etat('Dérivation : nœuds allumés', 'Les nœuds s\'allument quand la dérivation est branchée (module 3).', SCHEMAS.derivation,
+  { boucle: ['p1', 'A1', 'p2', 'b1', 'A2', 'b2', 'R1', 'b3', 'p3', 'G'], branches: ['G', 'p1', 'A1', 'p2', 'b1', 'A2', 'b2', 'R1', 'b3', 'p3', 'c1', 'A3', 'c2', 'R2', 'c3'], allumes: ['n1', 'n2'] });
+
+// ---------- schémas du TP ----------
+const gT = document.getElementById('g-tp');
+[['Circuit en série', SCHEMAS.serie], ['Circuit en dérivation', SCHEMAS.derivation], ['Loi d\'Ohm', SCHEMAS.ohm]].forEach(([t, sc]) => {
+  const z = piece(gT, t);
+  z.style.maxWidth = '420px';
+  schemas.push(MAQ.schema(z, sc, { com: com === 'oui' }));
+});
+const schemasTP = schemas.slice(-3);
+
+// ---------- boutons de choix ----------
+function boutons(id, val, fn) {
+  const b = document.querySelectorAll(`#${id} button`);
+  const maj = () => b.forEach(x => x.setAttribute('aria-pressed', x.dataset.v === val ? 'true' : 'false'));
+  b.forEach(x => x.addEventListener('click', () => { val = x.dataset.v; maj(); fn(val); }));
+  maj();
+}
+boutons('rendu', rendu, v => { rendu = v; ecrire('rendu', v); tables.forEach(t => t.options({ rendu: v })); });
+boutons('com', com, v => { com = v; ecrire('com', v); schemasTP.forEach(s => s.maj({ com: v === 'oui' })); });
+</script>
+</body>
+</html>
