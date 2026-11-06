@@ -112,7 +112,13 @@ Sources : `10- Electricite/TP circuit electrique complete.pdf` (2 p.) et `Fiche 
 - Tirer un fil à la souris, au doigt (CDP) et en deux appuis ; retirer un fil.
 - À 390 px : le schéma reste visible pendant tout le montage, la table entière tient dans la largeur.
 
-## 8. Hors périmètre
+
+## 8. Plan de travail
+
+- commencer par une maquette avec uniquement le design pour le valider. S'il y a plusierus choix possible, les proposer.
+- une fois le design des outils validé, développer
+
+## 9. Hors périmètre
 
 - Pas de lois des nœuds et des mailles, pas de caractéristique ni de capteur (application `09`).
 - Pas de courant alternatif, pas de court-circuit spectaculaire (un court-circuit est simplement refusé : « Ce fil relierait directement les bornes du générateur. »).
