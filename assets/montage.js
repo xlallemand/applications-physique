@@ -174,7 +174,7 @@
     lireMilli: 'Attention à l\'unité : l\'écran affiche la valeur dans l\'unité du calibre (mA pour un calibre en mA, mV pour un calibre en mV).',
     lireFaux: 'Relis l\'écran du multimètre : écris le nombre affiché, avec l\'unité du calibre.',
     // mode mesurer : oscilloscope
-    cBrancherVoie: k => `Branche la voie <b>CH${k}</b> en dérivation, sans débrancher aucun fil : borne <b>rouge</b> au point où arrive la flèche CH${k} sur le schéma, borne <b>noire</b> (masse) au point marqué du symbole de masse.`,
+    cBrancherVoie: (k, u) => `Branche la voie <b>CH${k}</b>${u ? `, qui mesure la tension <b>${u}</b> (flèche sur le schéma),` : ''} en dérivation, sans débrancher aucun fil : borne <b>rouge</b> au point où arrive la flèche CH${k} sur le schéma, borne <b>noire</b> (masse) au point marqué du symbole de masse.`,
     lieuVoie: k => `Relie la borne rouge de la voie CH${k} au point de la flèche CH${k} et sa borne noire au point de la masse : à une borne de ce point, ou à une borne reliée à elle par un fil.`,
     autreVoie: k => `Sur le schéma, c'est la voie CH${k} : utilise la fiche CH${k} de l'oscilloscope.`,
     ficheFiche: 'Relie la fiche de l\'oscilloscope à un point du circuit.',
@@ -1789,7 +1789,7 @@
       const it = itemDe(E.id), m = it && mat(it), d = sch(E.id);
       let h = '';
       if (E.e === 'debrancher') h = `<p>${T.debrancher(...nomsPont(E.id))}</p>`;
-      else if (E.e === 'brancher') h = `<p>${d.type === 'amperemetre' ? T.cBrancherA(...bornesLiberees(E.id)) : d.type === 'voie' ? T.cBrancherVoie(d.voie) : T.cBrancherV(auxBornes(E.id))}</p>`;
+      else if (E.e === 'brancher') h = `<p>${d.type === 'amperemetre' ? T.cBrancherA(...bornesLiberees(E.id)) : d.type === 'voie' ? T.cBrancherVoie(d.voie, d.mesure && indice(d.mesure)) : T.cBrancherV(auxBornes(E.id))}</p>`;
       else if (E.e === 'cal10') h = `<p>${T.cCal10}</p>`;
       else if (E.e === 'versmA') h = `<p>${T.cVersmA(m.affiche || '0.00')}</p>`;
       else if (E.e === 'calmA') h = `<p>${T.cCalmA}</p>`;
@@ -1844,7 +1844,7 @@
           return { debrancher: 'Débranche le fil à la place duquel se met l\'ampèremètre.', cal10: 'Règle-le sur A⎓, calibre 10 A.',
             versmA: 'Passe la fiche de l\'entrée 10A à l\'entrée mA.', calmA: 'Choisis le calibre en mA le plus adapté.',
             calmax: 'Règle-le sur V⎓, calibre 600 V.', calV: 'Choisis le calibre le plus adapté.', lire: `Lis ${d.type === 'amperemetre' ? 'l\'intensité' : 'la tension'} ${n}.`,
-            brancher: d.type === 'amperemetre' ? 'Branche l\'ampèremètre en série : bornes 10A et COM.' : d.type === 'voie' ? `Branche la voie CH${d.voie} : borne rouge au point de la flèche, borne noire à la masse.` : 'Branche le voltmètre en dérivation : bornes V et COM.' }[E.e];
+            brancher: d.type === 'amperemetre' ? 'Branche l\'ampèremètre en série : bornes 10A et COM.' : d.type === 'voie' ? `Branche la voie CH${d.voie}${d.mesure ? ` (tension ${n})` : ''} : borne rouge au point de la flèche, borne noire à la masse.` : 'Branche le voltmètre en dérivation : bornes V et COM.' }[E.e];
         };
         l = L.map((E, i) => [lab(E), i < st.k, i === st.k]);
       } else {
@@ -1859,7 +1859,8 @@
         const i = l.findIndex(x => !x[1]);
         l = l.map((x, j) => [x[0], x[1], j === i]);
       }
-      ol.innerHTML = l.map(([t, fait, ici]) => `<li class="${fait ? 'fait' : ici ? 'ici' : 'avenir'}">${t}</li>`).join('');
+      // texte dans un span : un indice (<sub>) ne devient pas un élément séparé de la ligne (flex)
+      ol.innerHTML = l.map(([t, fait, ici]) => `<li class="${fait ? 'fait' : ici ? 'ici' : 'avenir'}"><span>${t}</span></li>`).join('');
     }
 
     function init() {

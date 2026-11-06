@@ -68,8 +68,10 @@
     return def;
   }
   const D = (id, type, x, y, rot, o) => Object.assign({ id, type, x, y, rot: rot || 0 }, o || {});
-  // voie k de l'oscilloscope : flèche depuis le point (x, y) dans la direction dir
-  const Y = (k, x, y, dir) => D('Y' + k, 'voie', x, y, 0, { voie: k, dir });
+  // voie k de l'oscilloscope : flèche depuis le point (x, y) dans la direction dir ; mesure : nom de la tension mesurée
+  const Y = (k, x, y, dir, mesure) => D('Y' + k, 'voie', x, y, 0, mesure ? { voie: k, dir, mesure } : { voie: k, dir });
+  // flèches des tensions mesurées par l'oscilloscope (option U) : aux bornes du générateur, d'une résistance, de la DEL
+  const UG = x => ({ nom: 'U_G', x1: x + 40, y1: 14, x2: x - 40, y2: 14, cote: 'haut' });
   const L1 = { nom: 'la lampe L₁', lab: 'L₁' }, L2 = { nom: 'la lampe L₂', lab: 'L₂' };
 
   const S = {
@@ -202,28 +204,37 @@
       intensites: [{ nom: 'I', x: 50, y: 48, dir: 'bas' }], tensions: [{ nom: 'U', x1: 163, y1: 100, x2: 117, y2: 100, cote: 'haut' }] },
       ['G.a', [50, 32], 'A.a>b', 'n1', 'R.a>b', 'n2', [230, 32], 'G.b'], ['n1', [50, 170], 'V.a>b', [230, 170], 'n2']),
 
-    // ----- oscilloscope : masse à la borne − du générateur -----
+    // ----- oscilloscope : masse à la borne − du générateur ; o.U : flèches des tensions mesurées par les voies -----
     // générateur et lampe ; CH1 à la borne + du générateur
-    oscL: () => C({ vb: [250, 196], tension: 6, masse: { x: 210, y: 150 },
-      dipoles: [D('G', 'generateur', 125, 40), D('L', 'lampe', 125, 150), Y(1, 40, 95, 'gauche')],
-      noeuds: [{ id: 'n1', x: 40, y: 95 }, { id: 'nm', x: 210, y: 150 }] },
-      ['G.a', [40, 40], 'n1', [40, 150], 'L.a>b', 'nm', [210, 40], 'G.b'], ['n1', 'Y1.a>b', 'nm']),
+    oscL: o => {
+      const U = o && o.U;
+      return C({ vb: [250, 196], tension: 6, masse: { x: 210, y: 150 },
+        dipoles: [D('G', 'generateur', 125, 40), D('L', 'lampe', 125, 150), Y(1, 40, 95, 'gauche', U && 'U_G')],
+        noeuds: [{ id: 'n1', x: 40, y: 95 }, { id: 'nm', x: 210, y: 150 }], tensions: U ? [UG(125)] : [] },
+        ['G.a', [40, 40], 'n1', [40, 150], 'L.a>b', 'nm', [210, 40], 'G.b'], ['n1', 'Y1.a>b', 'nm']);
+    },
     // deux résistances en série (390 Ω puis 100 Ω) ; o.deux : CH1 à la borne + du générateur et CH2 entre les
     // résistances ; sinon CH1 seule, entre les résistances
     oscRR: o => {
-      const deux = o && o.deux, k = deux ? 2 : 1;
+      const deux = o && o.deux, U = o && o.U, k = deux ? 2 : 1;
       return C({ vb: [320, 216], tension: 8, masse: { x: 280, y: 170 }, table: ['R2', 'R1'],
-        dipoles: [D('G', 'generateur', 160, 40), D('R1', 'resistance', 105, 170, 0, { valeur: 390 }), D('R2', 'resistance', 215, 170, 0, { valeur: 100 }), Y(k, 160, 170, 'bas')]
-          .concat(deux ? [Y(1, 40, 105, 'gauche')] : []),
-        noeuds: [{ id: 'n2', x: 160, y: 170 }, { id: 'nm', x: 280, y: 170 }].concat(deux ? [{ id: 'n1', x: 40, y: 105 }] : []) },
+        dipoles: [D('G', 'generateur', 160, 40), D('R1', 'resistance', 105, 170, 0, { valeur: 390 }), D('R2', 'resistance', 215, 170, 0, { valeur: 100 }), Y(k, 160, 170, 'bas', U && 'U_100')]
+          .concat(deux ? [Y(1, 40, 105, 'gauche', U && 'U_G')] : []),
+        noeuds: [{ id: 'n2', x: 160, y: 170 }, { id: 'nm', x: 280, y: 170 }].concat(deux ? [{ id: 'n1', x: 40, y: 105 }] : []),
+        tensions: U ? (deux ? [UG(160)] : []).concat([{ nom: 'U_100', x1: 236, y1: 152, x2: 194, y2: 152, cote: 'haut' }]) : [] },
         ['G.a', [40, 40], deux ? 'n1' : [40, 105], [40, 170], 'R1.a>b', 'n2', 'R2.a>b', 'nm', [280, 40], 'G.b'],
         ['n2', 'Y' + k + '.a>b', 'nm'], deux && ['n1', 'Y1.a>b', 'nm']);
     },
     // résistance de protection et DEL en série ; CH1 à la borne + du générateur, CH2 aux bornes de la DEL
-    oscDR: () => C({ vb: [320, 216], tension: 6, masse: { x: 280, y: 170 }, table: ['D', 'R'],
-      dipoles: [D('G', 'generateur', 160, 40), D('R', 'resistance', 105, 170, 0, { valeur: 390 }), D('D', 'del', 215, 170), Y(1, 40, 105, 'gauche'), Y(2, 160, 170, 'bas')],
-      noeuds: [{ id: 'n1', x: 40, y: 105 }, { id: 'n2', x: 160, y: 170 }, { id: 'nm', x: 280, y: 170 }] },
-      ['G.a', [40, 40], 'n1', [40, 170], 'R.a>b', 'n2', 'D.a>b', 'nm', [280, 40], 'G.b'], ['n1', 'Y1.a>b', 'nm'], ['n2', 'Y2.a>b', 'nm']),
+    oscDR: o => {
+      const U = o && o.U;
+      return C({ vb: [320, 216], tension: 6, masse: { x: 280, y: 170 }, table: ['D', 'R'],
+        dipoles: [D('G', 'generateur', 160, 40), D('R', 'resistance', 105, 170, 0, { valeur: 390 }), D('D', 'del', 215, 170),
+          Y(1, 40, 105, 'gauche', U && 'U_G'), Y(2, 160, 170, 'bas', U && 'U_DEL')],
+        noeuds: [{ id: 'n1', x: 40, y: 105 }, { id: 'n2', x: 160, y: 170 }, { id: 'nm', x: 280, y: 170 }],
+        tensions: U ? [UG(160), { nom: 'U_DEL', x1: 229, y1: 146, x2: 201, y2: 146, cote: 'haut' }] : [] },
+        ['G.a', [40, 40], 'n1', [40, 170], 'R.a>b', 'n2', 'D.a>b', 'nm', [280, 40], 'G.b'], ['n1', 'Y1.a>b', 'nm'], ['n2', 'Y2.a>b', 'nm']);
+    },
     // lampe en dérivation avec une branche résistance + DEL ; CH1 à la borne + du générateur, CH2 aux bornes de la DEL
     oscDeriv: () => C({ vb: [300, 226], tension: 6, masse: { x: 260, y: 180 }, table: ['D', 'L', 'R'],
       dipoles: [D('G', 'generateur', 150, 36), D('L', 'lampe', 150, 110), D('R', 'resistance', 100, 180, 0, { valeur: 390 }), D('D', 'del', 210, 180),
@@ -283,7 +294,7 @@
     { titre: 'Deux résistances en dérivation et trois ampèremètres', circuit: () => S.derivation({ A: [1, 2, 3] }) },
     { titre: 'Deux lampes et un moteur en dérivation, avec un ampèremètre', circuit: S.trois },
     { titre: 'Deux résistances en dérivation et trois voltmètres', circuit: S.derivationV },
-    { titre: 'Une lampe et un oscilloscope', circuit: S.oscL },
+    { titre: 'Une lampe et un oscilloscope', circuit: () => S.oscL() },
     { titre: 'Deux résistances en série, oscilloscope à deux voies', circuit: () => S.oscRR({ deux: true }) },
     { titre: 'Une lampe en dérivation avec une DEL et sa résistance, oscilloscope à deux voies', circuit: S.oscDeriv },
   ];
@@ -503,14 +514,14 @@
      de sa flèche, borne noire à la masse) ; l'écran affiche les tensions.
      ============================================================ */
   const OSCILLOS = [
-    { titre: 'Tension aux bornes du générateur', circuit: S.oscL, mesurer: ['Y1'],
-      bilan: 'La voie CH1 affiche la tension entre la borne + du générateur et la masse, reliée à sa borne − : c\'est la tension aux bornes du générateur.' },
-    { titre: 'Tension aux bornes d\'une résistance', circuit: () => S.oscRR(), mesurer: ['Y1'],
-      bilan: 'La masse est reliée à la borne − du générateur : la voie CH1 affiche la tension aux bornes de la résistance de 100 Ω.' },
-    { titre: 'Deux tensions à la fois', circuit: () => S.oscRR({ deux: true }), mesurer: ['Y1', 'Y2'],
-      bilan: 'Les deux bornes noires sont au même point, la masse : CH1 affiche la tension aux bornes du générateur, CH2 la tension aux bornes de la résistance de 100 Ω.' },
-    { titre: 'Une DEL et sa résistance de protection', circuit: S.oscDR, mesurer: ['Y1', 'Y2'],
-      bilan: 'Les deux bornes noires sont au même point, la masse : CH1 affiche la tension aux bornes du générateur, CH2 la tension aux bornes de la DEL.' },
+    { titre: 'Tension aux bornes du générateur', circuit: () => S.oscL({ U: true }), mesurer: ['Y1'],
+      bilan: `La voie CH1 mesure la tension entre la borne + du générateur et la masse, reliée à sa borne − : c'est U<sub>G</sub>, la tension aux bornes du générateur.` },
+    { titre: 'Tension aux bornes d\'une résistance', circuit: () => S.oscRR({ U: true }), mesurer: ['Y1'],
+      bilan: `La masse est reliée à la borne − du générateur : la voie CH1 mesure U<sub>100</sub>, la tension aux bornes de la résistance de 100 Ω.` },
+    { titre: 'Deux tensions à la fois', circuit: () => S.oscRR({ deux: true, U: true }), mesurer: ['Y1', 'Y2'],
+      bilan: `Les deux bornes noires sont au même point, la masse : CH1 mesure U<sub>G</sub>, la tension aux bornes du générateur, et CH2 mesure U<sub>100</sub>, la tension aux bornes de la résistance de 100 Ω.` },
+    { titre: 'Une DEL et sa résistance de protection', circuit: () => S.oscDR({ U: true }), mesurer: ['Y1', 'Y2'],
+      bilan: `Les deux bornes noires sont au même point, la masse : CH1 mesure U<sub>G</sub>, la tension aux bornes du générateur, et CH2 mesure U<sub>DEL</sub>, la tension aux bornes de la DEL.` },
   ];
 
   function oscilloscope(zone) {
