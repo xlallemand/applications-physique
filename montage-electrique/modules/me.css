@@ -7,10 +7,7 @@
 .me-sit-num { font-size: .85rem; font-weight: 700; color: var(--ink-2); white-space: nowrap; }
 .me-bilan:empty { display: none; }
 .me-bilan { margin-top: 14px; }
-.me-aide { margin-top: 12px; }
-.me-lecture { margin-top: 14px; padding-top: 14px; border-top: 1.5px dashed var(--paper-3); }
-.me-champ { width: 150px; }
-/* module 1 : schéma et consigne côte à côte, consigne sous le schéma sur téléphone */
+/* module 2 : schéma et consigne côte à côte, consigne sous le schéma sur téléphone */
 .me-lire { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; align-items: start; }
 .me-lire-schema { background: var(--sheet); border: 1px solid var(--line); border-radius: 14px; padding: 10px; }
 .me-lire-cons { position: sticky; top: 16px; }
@@ -18,22 +15,29 @@
   .me-lire { grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .me-lire-schema { border: none; padding: 0; }
 }
-/* questions, champ de saisie (copiés de cinematique/modules/cin.css) */
-.ph-enonce { margin-bottom: 12px; line-height: 1.55; }
-.ph-partie + .ph-partie { margin-top: 16px; padding-top: 14px; border-top: 1.5px dashed var(--paper-3); }
-.ph-partie-q { font-weight: 700; color: var(--ink); margin-bottom: 10px !important; line-height: 1.5; }
-.ph-partie-aide { margin-top: 10px; }
-.ph-partie-aide .btn-small { color: var(--ink-2); }
-.ph-msg { margin-top: 10px !important; font-size: .92rem; color: var(--ink-2); font-weight: 600; }
-.ph-question .er-consigne { margin-bottom: 8px !important; }
-.ph-valeur { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
-.ph-lab { font-size: 1.15rem; font-weight: 800; color: var(--ink); white-space: nowrap; }
-.ph-unite { font-size: 1.1rem; font-weight: 700; color: var(--ink); white-space: nowrap; }
-.ph-champ-box { display: inline-flex; align-items: center; gap: 4px; }
-.ph-champ {
-  width: 120px; font: inherit; font-size: 1.15rem; font-weight: 800; text-align: center; padding: 9px 8px;
-  border: none; border-radius: 12px; box-shadow: inset 0 0 0 1.5px var(--paper-3); background: var(--sheet); color: var(--ink);
-  -webkit-appearance: none; appearance: none;
+/* encadrés de la présentation, liens vers les autres modules */
+.me-cle { margin-top: 12px; }
+.me-cle p { margin: 0; }
+.me-liens { margin-top: 12px; font-size: .95rem; line-height: 1.6; color: var(--ink-2); }
+.me-liens a { color: var(--accent-ink); font-weight: 700; }
+/* simulateur : liste des schémas (cartes avec le schéma en miniature) */
+.me-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.me-carte {
+  position: relative; display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 16px; text-decoration: none; color: var(--ink);
+  background: var(--paper); border: 1.5px solid transparent; transition: background .15s, border-color .15s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
 }
-.ph-champ:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
-.ph-champ:disabled { background: var(--paper); color: var(--ink); -webkit-text-fill-color: var(--ink); opacity: 1; }
+.me-carte:hover { background: var(--paper-2); }
+.me-carte:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.me-carte.ok { border-color: var(--success); }
+.me-carte-num {
+  position: absolute; top: 10px; left: 10px; width: 28px; height: 28px; border-radius: 999px; display: grid; place-items: center;
+  background: var(--sheet); font-weight: 800; font-size: .85rem; color: var(--ink-2);
+}
+.me-carte.ok .me-carte-num { background: var(--success-bg); color: var(--success-text); }
+.me-carte-fig { display: block; background: var(--sheet); border-radius: 12px; padding: 8px 8px 4px 34px; pointer-events: none; }
+.me-carte-fig .ms-svg { max-height: 120px; }
+.me-carte-titre { font-weight: 700; font-size: .95rem; line-height: 1.35; }
+.me-retour-liste { margin: 0 0 12px; }
+.me-retour-liste .btn-small { text-decoration: none; display: inline-flex; align-items: center; min-height: 40px; }
+@media (max-width: 480px) { .me-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } .me-carte { padding: 8px; } .me-carte-fig { padding-left: 8px; padding-top: 30px; } }

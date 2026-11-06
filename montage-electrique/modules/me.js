@@ -1,36 +1,37 @@
 /* ============================================================
    Application « Réaliser un montage électrique » (Physique · Seconde)
-   Moteur ME : plan de l'application, schémas (TP du professeur et
-   situations), pages de manipulation et série notée.
+   Moteur ME : plan de l'application, schémas, pages des modules.
 
    Utilise : assets/sommaire.js (SOM), assets/montage.js (MONTAGE),
-             assets/etapes.js (ETAPES), assets/bulle.js (BULLE).
+             assets/bulle.js (BULLE).
 
-   ME.lire(zone)                 module 1 : boucle principale, nœuds et dérivations sur 6 schémas
-   ME.manip(zone, n)             modules 2 et 3 : situations successives (montage guidé)
-   ME.serie(zone)                module 4 : 10 montages du TP, notés sur 20
-   ME.SCHEMAS                    fabriques de schémas (tpSerie, tpDerivation, ohm…)
+   ME.priseEnMain(zone)     module 1 : prise en main du simulateur (un circuit guidé)
+   ME.simulateur(zone)      module 1 : simulateur, montage choisi dans une liste de schémas
+   ME.lire(zone)            module 2 : repérer la boucle principale, les nœuds et les dérivations
+   ME.multimetre(zone)      module 3 : brancher, régler un voltmètre et un ampèremètre, mesurer
+   ME.SCHEMAS               fabriques de schémas
    ============================================================ */
 (function () {
   'use strict';
 
   /* ---------- Plan de l'application (sommaire, accueil, progression) ---------- */
   const PLAN = [
-    { n: 1, titre: 'Lire le schéma', desc: 'Boucle principale, nœuds et dérivations',
-      parties: [{ nom: 'Lire le schéma', entrainement: 'module_1_manip', noms: { entrainement: 'Manipulation : lire le schéma' } }] },
-    { n: 2, titre: 'Montage en série', desc: 'De la borne du générateur à l\'autre borne, ampèremètre',
-      parties: [{ nom: 'Montage en série', entrainement: 'module_2_manip', noms: { entrainement: 'Manipulation : montage en série' } }] },
-    { n: 3, titre: 'Ajouter des dérivations', desc: 'Une dérivation à la fois, voltmètre',
-      parties: [{ nom: 'Dérivations', entrainement: 'module_3_manip', noms: { entrainement: 'Manipulation : dérivations' } }] },
-    { n: 4, titre: 'Montages du TP', desc: 'Série notée sur 20',
-      parties: [{ nom: 'Montages du TP', questions: 'module_4_questions', noms: { questions: 'Entraînement' } }] },
+    { n: 1, titre: 'Simulateur de montage', desc: 'Prise en main, puis montages au choix', sousModules: true,
+      parties: [{ nom: 'Prise en main du simulateur', entrainement: 'module_1a_manip', noms: { entrainement: 'Prise en main du simulateur' } },
+                { nom: 'Simulateur', simulation: 'module_1b_simulateur', noms: { simulation: 'Simulateur : montages au choix' } }] },
+    { n: 2, titre: 'Repérer la boucle principale et les dérivations', desc: 'Sur un schéma : boucle principale, nœuds et dérivations',
+      parties: [{ nom: 'Repérer sur un schéma', entrainement: 'module_2_manip', noms: { entrainement: 'Repérer sur un schéma' } }] },
+    { n: 3, titre: 'Brancher un multimètre', desc: 'Voltmètre et ampèremètre : branchement, calibre, mesure',
+      parties: [{ nom: 'Brancher un multimètre', entrainement: 'module_3_manip', noms: { entrainement: 'Brancher et régler un multimètre' } }] },
   ];
   SOM.init({ nom: 'Réaliser un montage électrique', id: 'montage-electrique', plan: PLAN });
 
-  const fr = (v, d) => (d == null ? String(+v.toPrecision(4)) : v.toFixed(d)).replace('.', ',').replace('-', '−');
   const ind = n => MONTAGE.indice(n);
-  const hasard = l => l[Math.floor(Math.random() * l.length)];
-  const melanger = l => l.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(x => x[1]);
+  // liens vers les autres modules, ajoutés aux explications du poste de montage
+  const LIENS = {
+    reperer: { href: 'module_2_manip.html', texte: 'Revoir : repérer la boucle principale (module 2)' },
+    multimetre: { href: 'module_3_manip.html', texte: 'Revoir : brancher un multimètre (module 3)' },
+  };
 
   /* ============================================================
      SCHÉMAS
@@ -68,6 +69,15 @@
     gl: () => C({ vb: [240, 176], tension: 6, dipoles: [D('G', 'generateur', 120, 32), D('L', 'lampe', 120, 146)],
       intensites: [{ nom: 'I', x: 40, y: 90, dir: 'bas' }] },
       ['G.a', [40, 32], [40, 146], 'L.a>b', [200, 146], [200, 32], 'G.b']),
+    // générateur et lampe, voltmètre aux bornes de la lampe
+    glV: () => C({ vb: [240, 214], tension: 6, dipoles: [D('G', 'generateur', 120, 32), D('L', 'lampe', 120, 140), D('V', 'voltmetre', 120, 190, 0, { com: 1, mesure: 'U_L' })],
+      noeuds: [{ id: 'n1', x: 60, y: 140 }, { id: 'n2', x: 180, y: 140 }],
+      tensions: [{ nom: 'U_L', x1: 140, y1: 122, x2: 100, y2: 122, cote: 'haut' }] },
+      ['G.a', [30, 32], [30, 140], 'n1', 'L.a>b', 'n2', [210, 140], [210, 32], 'G.b'], ['n1', [60, 190], 'V.a>b', [180, 190], 'n2']),
+    // générateur, ampèremètre et lampe en série
+    gal: () => C({ vb: [240, 176], tension: 6, dipoles: [D('G', 'generateur', 120, 32), D('A', 'amperemetre', 40, 90, 90, { com: 1, mesure: 'I' }), D('L', 'lampe', 120, 146)],
+      intensites: [{ nom: 'I', x: 40, y: 56, dir: 'bas' }] },
+      ['G.a', [40, 32], 'A.a>b', [40, 146], 'L.a>b', [200, 146], [200, 32], 'G.b']),
     // générateur, interrupteur et deux lampes en série
     gkll: () => C({ vb: [300, 214], tension: 6, table: ['L2', 'K', 'L1'],
       dipoles: [D('G', 'generateur', 150, 30), D('K', 'interrupteur', 40, 110, 90), D('L1', 'lampe', 120, 190, 0, L1), D('L2', 'lampe', 200, 190, 0, L2)] },
@@ -92,6 +102,13 @@
       noeuds: [{ id: 'n1', x: 40, y: 110 }, { id: 'n2', x: 260, y: 110 }],
       intensites: o && o.A ? [{ nom: 'I', x: 40, y: 40, dir: 'bas' }] : [] },
       ['G.a', [40, 28], o && o.A && 'A.a>b', 'n1', 'L1.a>b', 'n2', [260, 28], 'G.b'], ['n1', [40, 180], 'L2.a>b', [260, 180], 'n2']),
+    // une lampe et une résistance en dérivation, voltmètre aux bornes de la résistance (prise en main)
+    lrv: () => C({ vb: [300, 250], tension: 6, table: ['R', 'L'],
+      dipoles: [D('G', 'generateur', 150, 28), D('L', 'lampe', 150, 110), D('R', 'resistance', 150, 180, 0, { valeur: 100 }), D('V', 'voltmetre', 150, 226, 0, { com: 1 })],
+      noeuds: [{ id: 'n1', x: 40, y: 110 }, { id: 'n2', x: 260, y: 110 }, { id: 'n3', x: 96, y: 180 }, { id: 'n4', x: 204, y: 180 }] },
+      ['G.a', [40, 28], 'n1', 'L.a>b', 'n2', [260, 28], 'G.b'],
+      ['n1', [40, 180], 'n3', 'R.a>b', 'n4', [260, 180], 'n2'],
+      ['n3', [96, 226], 'V.a>b', [204, 226], 'n4']),
     // interrupteur dans la branche principale, deux dipôles en dérivation (lampes, ou lampe et moteur)
     kxy: o => C({ vb: [300, 214], tension: 6, table: o.table,
       dipoles: [D('G', 'generateur', 150, 28), D('K', 'interrupteur', 40, 70, 90), D(o.x[0], o.x[1], 150, 120, 0, o.x[2]), D(o.y[0], o.y[1], o.A ? 190 : 150, 190, 0, o.y[2])]
@@ -110,39 +127,58 @@
       noeuds: [{ id: 'n1', x: 30, y: 100 }, { id: 'n3', x: 30, y: 160 }, { id: 'n2', x: 270, y: 100 }, { id: 'n4', x: 270, y: 160 }],
       intensites: [{ nom: 'I', x: 30, y: 36, dir: 'bas' }] },
       ['G.a', [30, 26], 'A.a>b', 'n1', 'L1.a>b', 'n2', [270, 26], 'G.b'], ['n1', 'n3'], ['n3', 'L2.a>b', 'n4'], ['n2', 'n4'], ['n3', [30, 216], 'M.a>b', [270, 216], 'n4']),
-    // TP : circuit en série (ampèremètres en I1, I2, I3 ; voltmètres UG, U390, U100)
-    tpSerie(o) {
-      const A = o.A || [], V = !!o.V;
+    // deux résistances en série (390 Ω puis 100 Ω), générateur de 8 V :
+    // o.A : ampèremètres en I1, I2, I3 (1, 2, 3) ; o.V : voltmètres pour UG, U390, U100 ('G', '390', '100')
+    serie(o) {
+      const A = o.A || [], V = o.V || [], VG = V.includes('G'), V1 = V.includes('390'), V2 = V.includes('100');
       const d = [D('G', 'generateur', 170, 70), D('R1', 'resistance', 95, 150, 0, { valeur: 390 }), D('R2', 'resistance', 245, 150, 0, { valeur: 100 })];
       if (A.includes(1)) d.push(D('A1', 'amperemetre', 30, 100, 90, { com: 1, mesure: 'I_1' }));
       if (A.includes(2)) d.push(D('A2', 'amperemetre', 170, 150, 0, { com: 1, mesure: 'I_2' }));
       if (A.includes(3)) d.push(D('A3', 'amperemetre', 310, 100, 90, { com: -1, mesure: 'I_3' }));
-      const noeuds = [];
-      if (V) {
-        d.push(D('VG', 'voltmetre', 170, 16, 0, { com: 1, mesure: 'U_G' }), D('V1', 'voltmetre', 95, 196, 0, { com: 1, mesure: 'U_390' }), D('V2', 'voltmetre', 245, 196, 0, { com: 1, mesure: 'U_100' }));
-        noeuds.push({ id: 'n1', x: 30, y: 70 }, { id: 'n2', x: 310, y: 70 }, { id: 'n3', x: 52, y: 150 }, { id: 'n4', x: 138, y: 150 }, { id: 'n5', x: 202, y: 150 }, { id: 'n6', x: 288, y: 150 });
+      const noeuds = [], tensions = [];
+      if (VG) {
+        d.push(D('VG', 'voltmetre', 170, 16, 0, { com: 1, mesure: 'U_G' }));
+        noeuds.push({ id: 'n1', x: 30, y: 70 }, { id: 'n2', x: 310, y: 70 });
+        tensions.push({ nom: 'U_G', x1: 230, y1: 46, x2: 110, y2: 46, cote: 'haut' });
       }
-      const ch = [['G.a', V ? 'n1' : [30, 70], A.includes(1) && 'A1.a>b', [30, 150], V && 'n3', 'R1.a>b', V && 'n4', A.includes(2) && 'A2.a>b', V && 'n5', 'R2.a>b', V && 'n6',
-        [310, 150], A.includes(3) && 'A3.b>a', V ? 'n2' : [310, 70], 'G.b']];
-      if (V) ch.push(['n1', [30, 16], 'VG.a>b', [310, 16], 'n2'], ['n3', [52, 196], 'V1.a>b', [138, 196], 'n4'], ['n5', [202, 196], 'V2.a>b', [288, 196], 'n6']);
-      return C({ vb: V ? [340, 216] : [0, 44, 340, 130], tension: 8, dipoles: d, noeuds, table: ['R2', 'R1'],
-        intensites: [{ nom: 'I_1', x: 30, y: 80, dir: 'bas' }, { nom: 'I_2', x: 150, y: 150, dir: 'droite' }, { nom: 'I_3', x: 310, y: 132, dir: 'haut', cote: 'droite' }],
-        tensions: V ? [{ nom: 'U_G', x1: 230, y1: 46, x2: 110, y2: 46, cote: 'haut' }, { nom: 'U_390', x1: 117, y1: 167, x2: 73, y2: 167, cote: 'bas' },
-          { nom: 'U_100', x1: 267, y1: 167, x2: 223, y2: 167, cote: 'bas' }] : [] }, ...ch);
+      if (V1) {
+        d.push(D('V1', 'voltmetre', 95, 196, 0, { com: 1, mesure: 'U_390' }));
+        noeuds.push({ id: 'n3', x: 52, y: 150 }, { id: 'n4', x: 138, y: 150 });
+        tensions.push({ nom: 'U_390', x1: 117, y1: 167, x2: 73, y2: 167, cote: 'bas' });
+      }
+      if (V2) {
+        d.push(D('V2', 'voltmetre', 245, 196, 0, { com: 1, mesure: 'U_100' }));
+        noeuds.push({ id: 'n5', x: 202, y: 150 }, { id: 'n6', x: 288, y: 150 });
+        tensions.push({ nom: 'U_100', x1: 267, y1: 167, x2: 223, y2: 167, cote: 'bas' });
+      }
+      const ch = [['G.a', VG ? 'n1' : [30, 70], A.includes(1) && 'A1.a>b', [30, 150], V1 && 'n3', 'R1.a>b', V1 && 'n4', A.includes(2) && 'A2.a>b', V2 && 'n5', 'R2.a>b', V2 && 'n6',
+        [310, 150], A.includes(3) && 'A3.b>a', VG ? 'n2' : [310, 70], 'G.b']];
+      if (VG) ch.push(['n1', [30, 16], 'VG.a>b', [310, 16], 'n2']);
+      if (V1) ch.push(['n3', [52, 196], 'V1.a>b', [138, 196], 'n4']);
+      if (V2) ch.push(['n5', [202, 196], 'V2.a>b', [288, 196], 'n6']);
+      const haut = VG ? 0 : 44, bas = V1 || V2 ? 216 : 174;
+      const intensites = [{ nom: 'I_1', x: 30, y: 80, dir: 'bas' }, { nom: 'I_2', x: 150, y: 150, dir: 'droite' }, { nom: 'I_3', x: 310, y: 132, dir: 'haut', cote: 'droite' }]
+        .filter((x, i) => A.includes(i + 1));
+      return C({ vb: [0, haut, 340, bas - haut], tension: 8, dipoles: d, noeuds, table: ['R2', 'R1'], intensites, tensions }, ...ch);
     },
-    // TP : circuit en dérivation avec les ampèremètres I1 (branche principale), I2 (390 Ω), I3 (100 Ω)
-    tpDerivation(o) {
-      const A = !!(o && o.A);
+    // deux résistances en dérivation (390 Ω et 100 Ω), générateur de 8 V : o.A : ampèremètres I1 (branche
+    // principale), I2 (390 Ω), I3 (100 Ω) ; o.U : flèches de tension UG, U390, U100
+    derivation(o) {
+      const A = (o && o.A) || [];
       const d = [D('G', 'generateur', 190, 40), D('R1', 'resistance', 180, 110, 0, { valeur: 390 }), D('R2', 'resistance', 180, 186, 0, { valeur: 100 })];
-      if (A) d.push(D('A1', 'amperemetre', 60, 72, 90, { com: 1, mesure: 'I_1' }), D('A2', 'amperemetre', 106, 110, 0, { com: 1, mesure: 'I_2' }), D('A3', 'amperemetre', 60, 148, 90, { com: 1, mesure: 'I_3' }));
-      return C({ vb: [300, 206], tension: 8, dipoles: d, noeuds: [{ id: 'n1', x: 60, y: 110 }, { id: 'n2', x: 270, y: 110 }], table: ['R2', 'R1'],
-        intensites: [{ nom: 'I_1', x: 60, y: 96, dir: 'bas' }, { nom: 'I_2', x: 136, y: 110, dir: 'droite' }, { nom: 'I_3', x: 60, y: 172, dir: 'bas' }],
-        tensions: [{ nom: 'U_G', x1: 228, y1: 12, x2: 152, y2: 12, cote: 'haut' }, { nom: 'U_390', x1: 203, y1: 94, x2: 157, y2: 94, cote: 'haut' },
-          { nom: 'U_100', x1: 203, y1: 170, x2: 157, y2: 170, cote: 'haut' }] },
-        ['G.a', [60, 40], A && 'A1.a>b', 'n1', A && 'A2.a>b', 'R1.a>b', 'n2', [270, 40], 'G.b'], ['n1', A && 'A3.a>b', [60, 186], 'R2.a>b', [270, 186], 'n2']);
+      if (A.includes(1)) d.push(D('A1', 'amperemetre', 60, 72, 90, { com: 1, mesure: 'I_1' }));
+      if (A.includes(2)) d.push(D('A2', 'amperemetre', 106, 110, 0, { com: 1, mesure: 'I_2' }));
+      if (A.includes(3)) d.push(D('A3', 'amperemetre', 60, 148, 90, { com: 1, mesure: 'I_3' }));
+      const intensites = [{ nom: 'I_1', x: 60, y: 96, dir: 'bas' }, { nom: 'I_2', x: 136, y: 110, dir: 'droite' }, { nom: 'I_3', x: 60, y: 172, dir: 'bas' }]
+        .filter((x, i) => A.includes(i + 1));
+      return C({ vb: [300, 206], tension: 8, dipoles: d, noeuds: [{ id: 'n1', x: 60, y: 110 }, { id: 'n2', x: 270, y: 110 }], table: ['R2', 'R1'], intensites,
+        tensions: o && o.U ? [{ nom: 'U_G', x1: 228, y1: 12, x2: 152, y2: 12, cote: 'haut' }, { nom: 'U_390', x1: 203, y1: 94, x2: 157, y2: 94, cote: 'haut' },
+          { nom: 'U_100', x1: 203, y1: 170, x2: 157, y2: 170, cote: 'haut' }] : [] },
+        ['G.a', [60, 40], A.includes(1) && 'A1.a>b', 'n1', A.includes(2) && 'A2.a>b', 'R1.a>b', 'n2', [270, 40], 'G.b'],
+        ['n1', A.includes(3) && 'A3.a>b', [60, 186], 'R2.a>b', [270, 186], 'n2']);
     },
-    // TP : circuit en dérivation avec les voltmètres UG, U390, U100
-    tpDerivationV: () => C({ vb: [340, 262], tension: 8, table: ['R2', 'R1'],
+    // deux résistances en dérivation avec les voltmètres UG, U390, U100
+    derivationV: () => C({ vb: [340, 262], tension: 8, table: ['R2', 'R1'],
       dipoles: [D('G', 'generateur', 180, 60), D('VG', 'voltmetre', 180, 10, 0, { com: 1, mesure: 'U_G' }), D('R1', 'resistance', 180, 120, 0, { valeur: 390 }),
         D('V1', 'voltmetre', 180, 152, 0, { com: 1, mesure: 'U_390' }), D('R2', 'resistance', 180, 210, 0, { valeur: 100 }), D('V2', 'voltmetre', 180, 242, 0, { com: 1, mesure: 'U_100' })],
       noeuds: [{ id: 'n0', x: 60, y: 60 }, { id: 'm0', x: 300, y: 60 }, { id: 'n1', x: 60, y: 120 }, { id: 'n2', x: 300, y: 120 },
@@ -151,7 +187,7 @@
         { nom: 'U_100', x1: 205, y1: 194, x2: 155, y2: 194, cote: 'haut' }] },
       ['G.a', 'n0', 'n1', 'n3', 'R1.a>b', 'n4', 'n2', 'm0', 'G.b'], ['n0', [60, 10], 'VG.a>b', [300, 10], 'm0'],
       ['n1', [60, 210], 'n5', 'R2.a>b', 'n6', [300, 210], 'n2'], ['n3', [110, 152], 'V1.a>b', [250, 152], 'n4'], ['n5', [110, 242], 'V2.a>b', [250, 242], 'n6']),
-    // TP : loi d'Ohm (ampèremètre en série, voltmètre en dérivation sur la résistance de 470 Ω)
+    // résistance de 470 Ω : ampèremètre en série, voltmètre en dérivation sur la résistance
     ohm: t => C({ vb: [270, 190], tension: t || 8, dipoles: [D('G', 'generateur', 150, 32), D('A', 'amperemetre', 50, 72, 90, { com: 1, mesure: 'I' }),
       D('R', 'resistance', 140, 116, 0, { valeur: 470 }), D('V', 'voltmetre', 140, 170, 0, { com: 1, mesure: 'U' })],
       noeuds: [{ id: 'n1', x: 50, y: 116 }, { id: 'n2', x: 230, y: 116 }],
@@ -159,19 +195,112 @@
       ['G.a', [50, 32], 'A.a>b', 'n1', 'R.a>b', 'n2', [230, 32], 'G.b'], ['n1', [50, 170], 'V.a>b', [230, 170], 'n2']),
   };
 
-  const RAPPEL_A = '<b>L\'ampèremètre se branche en série</b> : le courant doit le traverser. On commence par les entrées <b>COM et 10A</b> (calibre 10 A), puis on passe à <b>mA</b> si l\'intensité est petite. L\'indication est positive quand le courant sort par COM.';
+  const RAPPEL_A = '<b>L\'ampèremètre se branche en série</b> : on débranche un fil et il prend sa place, le courant doit le traverser. Bornes <b>10A et COM</b> (calibre 10 A), puis <b>mA</b> si l\'intensité est petite. L\'indication est positive quand le courant sort par COM.';
   const RAPPEL_V = '<b>Le voltmètre se branche en dérivation</b>, sur les bornes du dipôle, sans modifier le circuit : bornes <b>V et COM</b>. Il indique une tension positive si sa borne COM est reliée du côté de la borne − du générateur.';
+  const RAPPEL_CAL = '<b>Calibre</b> : on commence par le plus grand, puis on choisit le plus petit calibre qui reste plus grand que la valeur mesurée. « 1 » à gauche de l\'écran : la valeur dépasse le calibre.';
+
+  // en-tête d'une page de manipulation : titre, rappel ⓘ, numéro
+  const tete = (titre, num, rappel) => `<div class="me-sit-tete"><h3 class="me-sit-titre">${titre}${rappel ? BULLE.info(rappel, 'Rappel') : ''}</h3>${num ? `<span class="me-sit-num">${num}</span>` : ''}</div>`;
+  const bravo = t => `<div class="callout-success er-retour"><p><b class="er-ok">Bravo !</b> ${t}</p></div>`;
+  const defiler = el => setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
 
   /* ============================================================
-     MODULE 1 : LIRE LE SCHÉMA
+     MODULE 1 : PRISE EN MAIN DU SIMULATEUR (un seul circuit, guidé)
+     ============================================================ */
+  function priseEnMain(zone) {
+    function afficher() {
+      zone.innerHTML = `${tete('Une lampe et une résistance en dérivation, un voltmètre', '', RAPPEL_V)}
+        <div class="me-poste"></div><div class="me-bilan" aria-live="polite"></div>
+        <div class="er-actions"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
+          <a class="btn-primary" style="text-decoration:none" href="module_1b_simulateur.html">Simulateur →</a></div>`;
+      ME.posteEnCours = MONTAGE.monter(zone.querySelector('.me-poste'), S.lrv(), {
+        boucle: true, com: true, liens: LIENS,
+        textes: { boucleOk: 'Juste ! C\'est une boucle principale : elle part du générateur et y revient. Ici, deux boucles conviennent : celle de la lampe ou celle de la résistance ; jamais celle du voltmètre. Ta boucle reste surlignée pendant le montage.' },
+        onFin() {
+          zone.querySelector('.me-bilan').innerHTML = bravo('Le montage est conforme au schéma : la boucle principale d\'abord, du générateur au générateur, puis les dérivations, une par une. Passe au simulateur pour réaliser d\'autres montages.');
+          SOM.marquer({ fait: true });
+          defiler(zone.querySelector('.me-bilan'));
+        },
+      });
+      zone.querySelector('[data-a="re"]').onclick = afficher;
+    }
+    afficher();
+  }
+
+  /* ============================================================
+     MODULE 1 : SIMULATEUR (montage choisi dans une liste de schémas,
+     du plus simple au plus compliqué)
+     ============================================================ */
+  const MONTAGES = [
+    { titre: 'Une lampe', circuit: S.gl },
+    { titre: 'Deux lampes et un interrupteur en série', circuit: S.gkll },
+    { titre: 'Une DEL et sa résistance de protection', circuit: S.gdr },
+    { titre: 'Lampe, moteur et interrupteur en série, avec un ampèremètre', circuit: S.gaklm },
+    { titre: 'Deux lampes en dérivation', circuit: () => S.ll() },
+    { titre: 'Lampe et moteur en dérivation, interrupteur dans la branche principale', circuit: () => S.kxy({ x: ['L', 'lampe'], y: ['M', 'moteur'], table: ['M', 'K', 'L'] }) },
+    { titre: 'Deux lampes en dérivation et un ampèremètre', circuit: () => S.ll({ A: true }) },
+    { titre: 'Une résistance, un ampèremètre et un voltmètre', circuit: () => S.ohm(8) },
+    { titre: 'Deux résistances en série et trois voltmètres', circuit: () => S.serie({ V: ['G', '390', '100'] }) },
+    { titre: 'Deux résistances en dérivation et trois ampèremètres', circuit: () => S.derivation({ A: [1, 2, 3] }) },
+    { titre: 'Deux lampes et un moteur en dérivation, avec un ampèremètre', circuit: S.trois },
+    { titre: 'Deux résistances en dérivation et trois voltmètres', circuit: S.derivationV },
+  ];
+  // schémas réussis, gardés dans le navigateur (clé « montage-electrique-simulateur »)
+  const CLE_SIM = 'montage-electrique-simulateur';
+  function lireFaits() {
+    try { const o = JSON.parse(localStorage.getItem(CLE_SIM) || '{}'); return new Set(Array.isArray(o.faits) ? o.faits : []); } catch (e) { return new Set(); }
+  }
+  function noterFait(k) {
+    const f = lireFaits(); f.add(k);
+    try { localStorage.setItem(CLE_SIM, JSON.stringify({ faits: Array.from(f).sort((a, b) => a - b) })); } catch (e) { /* stockage indisponible */ }
+    if (MONTAGES.every((m, i) => f.has(i + 1))) SOM.marquer({ fait: true });
+  }
+
+  function simulateur(zone) {
+    // l'adresse #schema-3 ouvre le schéma 3 ; sans ancre : la liste (le retour arrière du navigateur reste correct)
+    function ouvrir() {
+      const m = location.hash.match(/^#schema-(\d+)$/), k = m ? +m[1] : 0;
+      if (k >= 1 && k <= MONTAGES.length) poste(k); else liste();
+    }
+    function liste() {
+      const faits = lireFaits();
+      zone.innerHTML = `${tete('Choisis un schéma', `${faits.size} / ${MONTAGES.length} réussi${faits.size > 1 ? 's' : ''}`)}
+        <div class="me-liste">${MONTAGES.map((s, i) => `<a class="me-carte${faits.has(i + 1) ? ' ok' : ''}" href="#schema-${i + 1}">
+          <span class="me-carte-num">${faits.has(i + 1) ? '✓' : i + 1}</span><span class="me-carte-fig" aria-hidden="true"></span>
+          <span class="me-carte-titre">${s.titre}</span></a>`).join('')}</div>`;
+      zone.querySelectorAll('.me-carte-fig').forEach((el, i) => MONTAGE.schema(el, MONTAGES[i].circuit(), {}));
+    }
+    function poste(k) {
+      const s = MONTAGES[k - 1], der = k === MONTAGES.length;
+      zone.innerHTML = `<p class="me-retour-liste"><a class="btn-small" href="#">← Liste des schémas</a></p>
+        ${tete(s.titre, `Schéma ${k} / ${MONTAGES.length}`, RAPPEL_A + '<br><br>' + RAPPEL_V)}
+        <div class="me-poste"></div><div class="me-bilan" aria-live="polite"></div>
+        <div class="er-actions"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
+          <a class="btn-primary" style="text-decoration:none" href="${der ? '#' : '#schema-' + (k + 1)}">${der ? 'Liste des schémas' : 'Schéma suivant →'}</a></div>`;
+      ME.posteEnCours = MONTAGE.monter(zone.querySelector('.me-poste'), s.circuit(), {
+        boucle: false, com: true, liens: LIENS,
+        onFin() {
+          noterFait(k);
+          zone.querySelector('.me-bilan').innerHTML = bravo('Le montage est conforme au schéma et il fonctionne.');
+          defiler(zone.querySelector('.me-bilan'));
+        },
+      });
+      zone.querySelector('[data-a="re"]').onclick = () => poste(k);
+    }
+    window.addEventListener('hashchange', () => { ouvrir(); window.scrollTo(0, 0); });
+    ouvrir();
+  }
+
+  /* ============================================================
+     MODULE 2 : REPÉRER LA BOUCLE PRINCIPALE ET LES DÉRIVATIONS (sur un schéma)
      ============================================================ */
   const LECTURES = [
     { titre: 'Circuit en série : générateur et lampe', circuit: S.gl },
     { titre: 'Circuit en série avec interrupteur et ampèremètre', circuit: S.gkal },
     { titre: 'Une dérivation', circuit: () => S.kxy({ x: ['L1', 'lampe', L1], y: ['L2', 'lampe', L2] }) },
     { titre: 'Deux dérivations', circuit: S.croise },
-    { titre: 'TP : circuit en série', circuit: () => S.tpSerie({ A: [1, 2, 3], V: true }) },
-    { titre: 'TP : circuit en dérivation', circuit: () => S.tpDerivation({ A: true }) },
+    { titre: 'Deux résistances en série, ampèremètres et voltmètres', circuit: () => S.serie({ A: [1, 2, 3], V: ['G', '390', '100'] }) },
+    { titre: 'Deux résistances en dérivation et trois ampèremètres', circuit: () => S.derivation({ A: [1, 2, 3], U: true }) },
   ];
   // branche hors de la boucle qui contient l'élément touché : on suit fils et dipôles sans franchir un nœud
   function branche(c, id, boucle) {
@@ -201,7 +330,7 @@
         <div class="me-lire"><div class="me-lire-schema"></div><div class="mt-consigne me-lire-cons" aria-live="polite"></div></div>
         <ol class="mt-deroule"></ol><div class="me-bilan"></div>
         <div class="er-actions"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
-          <button type="button" class="btn-primary" data-a="suite" disabled>${k < LECTURES.length - 1 ? 'Schéma suivant →' : 'Module 2 : montage en série →'}</button></div>`;
+          <button type="button" class="btn-primary" data-a="suite" disabled>${k < LECTURES.length - 1 ? 'Schéma suivant →' : 'Module 3 : brancher un multimètre →'}</button></div>`;
       const zs = zone.querySelector('.me-lire-schema');
       zs.style.setProperty('--ratio', (c.vb[c.vb.length - 2] / c.vb[c.vb.length - 1]).toFixed(3));
       const vs = MONTAGE.schema(zs, c, { libre: true, onTouche: toucher });
@@ -271,7 +400,7 @@
       }
       zone.querySelector('[data-a="re"]').onclick = afficher;
       zone.querySelector('[data-a="suite"]').onclick = () => {
-        if (k < LECTURES.length - 1) { k++; afficher(); window.scrollTo(0, 0); } else location.href = 'module_2_manip.html';
+        if (k < LECTURES.length - 1) { k++; afficher(); window.scrollTo(0, 0); } else location.href = 'module_3_manip.html';
       };
       maj();
     }
@@ -279,219 +408,51 @@
   }
 
   /* ============================================================
-     MODULES 2 ET 3 : SITUATIONS DE MONTAGE
+     MODULE 3 : BRANCHER UN MULTIMÈTRE
+     Le circuit est monté et allumé : on ajoute l'appareil (l'ampèremètre à la
+     place d'un fil débranché), on le règle (fonction, calibre), on lit la mesure.
      ============================================================ */
-  const tableauI = r => ['I_1', 'I_2', 'I_3'].filter(n => r[n]).map(n => `${ind(n)} = ${r[n].texte}`).join(' ; ');
-  const SITUATIONS = {
-    2: [
-      { titre: 'Générateur et une lampe', circuit: S.gl, mesures: null,
-        bilan: () => 'La lampe brille : le courant circule dans toute la boucle, du générateur au générateur.' },
-      { titre: 'Générateur, interrupteur et deux lampes', circuit: S.gkll, mesures: null,
-        bilan: () => 'Les deux lampes sont en série : elles brillent seulement quand la boucle est fermée et l\'interrupteur fermé.' },
-      { titre: 'Générateur, ampèremètre, interrupteur, lampe et moteur', circuit: S.gaklm, mesures: 'dixA', com: true, rappel: RAPPEL_A,
-        bilan: (b) => `L'ampèremètre est en série : I = ${b.mesures.I ? b.mesures.I.texte : ''}. Au calibre 10 A la lecture était peu précise ; en mA elle l'est beaucoup plus.` },
-      { titre: 'Générateur, DEL et résistance de protection', circuit: S.gdr, mesures: null,
-        bilan: () => 'La DEL brille : sa borne + est du côté de la borne + du générateur. Elle ne laisse passer le courant que dans ce sens.' },
-      { titre: 'Montage série du TP : ampèremètre en I₁', num: 5, circuit: () => S.tpSerie({ A: [1] }), rappel: RAPPEL_A,
-        bilan: (b, r) => `${tableauI(r)}. Déplace maintenant l'ampèremètre en I₂ (situation suivante).` },
-      { titre: 'Montage série du TP : ampèremètre en I₂', num: 5, circuit: () => S.tpSerie({ A: [2] }), rappel: RAPPEL_A,
-        bilan: (b, r) => `${tableauI(r)}. Dernière mesure : l'ampèremètre en I₃.` },
-      { titre: 'Montage série du TP : ampèremètre en I₃', num: 5, circuit: () => S.tpSerie({ A: [3] }), rappel: RAPPEL_A,
-        bilan: (b, r) => `${tableauI(r)}. Les trois intensités sont égales : dans un circuit en série, l'intensité est la même en tout point (vu au collège).` },
-    ],
-    3: [
-      { titre: 'Deux lampes en dérivation', circuit: () => S.ll(), mesures: null,
-        bilan: () => 'Chaque lampe est sur sa branche, branchée directement aux bornes du générateur : les deux brillent normalement.' },
-      { titre: 'Lampe et moteur en dérivation, interrupteur dans la branche principale', circuit: () => S.kxy({ x: ['L', 'lampe'], y: ['M', 'moteur'], table: ['M', 'K', 'L'] }), mesures: null,
-        bilan: () => 'L\'interrupteur est dans la branche principale : il commande à la fois la lampe et le moteur.' },
-      { titre: 'Dérivation du TP : trois ampèremètres', circuit: () => S.tpDerivation({ A: true }), rappel: RAPPEL_A,
-        bilan: b => `Mesures : ${['I_1', 'I_2', 'I_3'].map(n => b.mesures[n] ? `${ind(n)} = ${b.mesures[n].texte}` : '').filter(Boolean).join(' ; ')}.` },
-      { titre: 'Montage série du TP : trois voltmètres', circuit: () => S.tpSerie({ V: true }), com: true, rappel: RAPPEL_V,
-        bilan: b => `Mesures : ${['U_G', 'U_390', 'U_100'].map(n => b.mesures[n] ? `${ind(n)} = ${b.mesures[n].texte}` : '').filter(Boolean).join(' ; ')}. Chaque voltmètre est une dérivation : le circuit n'a pas été modifié.` },
-      { titre: 'Loi d\'Ohm : ampèremètre en série, voltmètre en dérivation', circuit: () => S.ohm(8), rappel: RAPPEL_V,
-        bilan: b => `Mesures : ${['U', 'I'].map(n => b.mesures[n] ? `${n} = ${b.mesures[n].texte}` : '').filter(Boolean).join(' ; ')}.` },
-    ],
-  };
+  const MESURES = [
+    { titre: 'Tension aux bornes d\'une lampe', circuit: S.glV, mesurer: ['V'], rappel: RAPPEL_V,
+      bilan: 'Le voltmètre est en dérivation : le circuit n\'a pas été modifié, la lampe a brillé tout le temps.' },
+    { titre: 'Intensité du courant dans une lampe', circuit: S.gal, mesurer: ['A'], rappel: RAPPEL_A,
+      bilan: 'Fil débranché, la lampe s\'est éteinte : l\'ampèremètre referme le circuit, le courant le traverse.' },
+    { titre: 'Tension aux bornes d\'une résistance', circuit: () => S.serie({ V: ['100'] }), mesurer: ['V2'], rappel: RAPPEL_V,
+      bilan: 'Le calibre 2 V est le plus petit qui reste plus grand que la tension : il donne la lecture la plus précise.' },
+    { titre: 'Intensité dans une branche en dérivation', circuit: () => S.derivation({ A: [2] }), mesurer: ['A2'], rappel: RAPPEL_A,
+      bilan: 'L\'ampèremètre est dans la branche de la résistance de 390 Ω : il mesure le courant de cette branche seulement.' },
+    { titre: 'Intensité et tension pour une résistance', circuit: () => S.ohm(8), mesurer: ['A', 'V'], rappel: RAPPEL_A + '<br><br>' + RAPPEL_V,
+      bilan: 'L\'ampèremètre est en série, le voltmètre en dérivation : on mesure l\'intensité du courant qui traverse la résistance et la tension à ses bornes.' },
+  ];
 
-  function manip(zone, n) {
-    const L = SITUATIONS[n], total = Math.max(...L.map((s, i) => s.num || i + 1));
-    const suiteModule = n === 2 ? ['module_3_manip.html', 'Module 3 : ajouter des dérivations →'] : ['module_4_questions.html', 'Module 4 : montages du TP →'];
+  function multimetre(zone) {
     let k = 0;
-    const faits = new Set(), resultats = {};
+    const faits = new Set();
     function afficher() {
-      const s = L[k];
-      zone.innerHTML = `<div class="me-sit-tete"><h3 class="me-sit-titre">${s.titre}${s.rappel ? BULLE.info(s.rappel, 'Rappel') : ''}</h3><span class="me-sit-num">Situation ${s.num || k + 1} / ${total}</span></div>
+      const s = MESURES[k];
+      zone.innerHTML = `${tete(s.titre, `Situation ${k + 1} / ${MESURES.length}`, s.rappel + '<br><br>' + RAPPEL_CAL)}
         <div class="me-poste"></div><div class="me-bilan" aria-live="polite"></div>
         <div class="er-actions"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
-          <button type="button" class="btn-primary" data-a="suite" disabled>${k < L.length - 1 ? 'Situation suivante →' : suiteModule[1]}</button></div>`;
+          <button type="button" class="btn-primary" data-a="suite" disabled>${k < MESURES.length - 1 ? 'Situation suivante →' : 'Accueil de l\'application'}</button></div>`;
       const c = s.circuit();
-      const aMesurer = c.dipoles.some(d => d.type === 'amperemetre' || d.type === 'voltmetre');
-      ME.posteEnCours = MONTAGE.monter(zone.querySelector('.me-poste'), c, {      // poste en cours (utile pour vérifier l'application)
-        boucle: true, com: !!s.com, mesures: s.mesures !== undefined ? s.mesures : (aMesurer ? 'lire' : null),
+      ME.posteEnCours = MONTAGE.monter(zone.querySelector('.me-poste'), c, {
+        mode: 'mesurer', mesurer: s.mesurer, com: true,
         onFin(b) {
-          Object.assign(resultats, b.mesures);
-          zone.querySelector('.me-bilan').innerHTML = `<div class="callout-success er-retour"><p><b class="er-ok">Bravo !</b> ${s.bilan(b, resultats)}</p></div>`;
+          const l = Object.keys(b.mesures).map(id => `${ind(c.dipoles.find(d => d.id === id).mesure)} = ${b.mesures[id]}`).join(' ; ');
+          zone.querySelector('.me-bilan').innerHTML = bravo(`${l}. ${s.bilan}`);
           zone.querySelector('[data-a="suite"]').disabled = false;
           faits.add(k);
-          if (faits.size === L.length) SOM.marquer({ fait: true });
-          setTimeout(() => zone.querySelector('.me-bilan').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+          if (faits.size === MESURES.length) SOM.marquer({ fait: true });
+          defiler(zone.querySelector('.me-bilan'));
         },
       });
       zone.querySelector('[data-a="re"]').onclick = afficher;
       zone.querySelector('[data-a="suite"]').onclick = () => {
-        if (k < L.length - 1) { k++; afficher(); window.scrollTo(0, 0); } else location.href = suiteModule[0];
+        if (k < MESURES.length - 1) { k++; afficher(); window.scrollTo(0, 0); } else location.href = '../index.html';
       };
     }
     afficher();
   }
 
-  /* ============================================================
-     MODULE 4 : SÉRIE NOTÉE SUR 20 (10 montages)
-     Chaque question : surligner la boucle, réaliser le montage, lire une mesure.
-     2 points sans refus ; 1 point avec un ou deux refus ; 0 au-delà ou si « Afficher le montage ».
-     ============================================================ */
-  const GROUPES = [
-    () => { const k = hasard([1, 2, 3]); return { theme: 'TP · circuit en série', circuit: S.tpSerie({ A: [1, 2, 3] }), mesure: 'I_' + k }; },
-    () => ({ theme: 'TP · circuit en série', circuit: S.tpSerie({ V: true }), mesure: hasard(['U_G', 'U_390', 'U_100']) }),
-    () => ({ theme: 'TP · circuit en dérivation', circuit: S.tpDerivation({ A: true }), mesure: hasard(['I_1', 'I_2', 'I_3']) }),
-    () => ({ theme: 'TP · circuit en dérivation', circuit: S.tpDerivationV(), mesure: hasard(['U_G', 'U_390', 'U_100']) }),
-    () => ({ theme: 'TP · loi d\'Ohm', circuit: S.ohm(hasard([4, 5, 6, 8, 10])), mesure: hasard(['U', 'I']) }),
-    () => ({ theme: 'Lampes en dérivation', circuit: S.ll({ A: true }), mesure: 'I' }),
-    () => ({ theme: 'Lampe et moteur en dérivation', circuit: S.kxy({ x: ['L', 'lampe'], y: ['M', 'moteur'], A: true }), mesure: 'I_M' }),
-    () => ({ theme: 'Deux dérivations', circuit: S.trois(), mesure: 'I' }),
-  ];
-  function tirage() {
-    const l = melanger(GROUPES.slice()).concat(melanger(GROUPES.slice()).slice(0, 2));
-    return l.slice(0, 10).map(f => f());
-  }
-  // lecture d'une saisie « 16,3 mA » → { v (unités SI), famille 'A' | 'V' } ou null
-  function lireValeur(t) {
-    const m = String(t).trim().replace(/\s+/g, ' ').replace('−', '-').match(/^(-?\d+(?:[.,]\d+)?)\s*(ma|a|mv|v)$/i);
-    if (!m) return null;
-    const v = parseFloat(m[1].replace(',', '.')), u = m[2].toLowerCase();
-    return { v: u.startsWith('m') ? v / 1000 : v, famille: u.endsWith('a') ? 'A' : 'V' };
-  }
-  // valeur vraie mesurée par l'appareil nommé (intensité qui le traverse ou tension à ses bornes)
-  function valeurVraie(poste, nom) {
-    const st = poste.etat, d = poste.circuit.dipoles.find(x => x.mesure === nom), m = st.assign[d.id];
-    if (!m || !st.res) return null;
-    return d.type === 'amperemetre' ? st.res.I[m] || 0 : st.res.V[m + '.V'] - st.res.V[m + '.COM'];
-  }
-
-  function serie(app) {
-    let qs = [], idx = 0, score = 0, recap = [];
-    const pts = v => `${v} pt${v > 1 ? 's' : ''}`;
-    const badge = 'MODULE 4 · ENTRAÎNEMENT', titre = 'Montages du TP';
-    function intro() {
-      app.innerHTML = `<div class="er-card"><span class="er-badge">${badge}</span><h2 class="er-titre">${titre}</h2>
-        <p class="er-contexte">10 montages tirés au hasard : les schémas du TP et des circuits à lampes, interrupteur et moteur. Pour chacun : surligne la <b>boucle principale</b>, réalise le <b>montage</b>, puis <b>lis la mesure</b> demandée.</p>
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · 10 montages, notés sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si aucun branchement n'est refusé et si la lecture est juste du premier coup ;</li>
-          <li><b>1 point</b> avec une ou deux erreurs (branchement refusé ou lecture fausse) ;</li>
-          <li><b>0 point</b> au-delà, ou si tu demandes « Afficher le montage ».</li></ul></div>
-        <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
-      app.querySelector('[data-a="go"]').onclick = demarrer;
-      window.scrollTo(0, 0);
-    }
-    function demarrer() { qs = tirage(); idx = 0; score = 0; recap = []; afficher(); }
-    function afficher() {
-      if (idx >= qs.length) return fin();
-      const q = qs[idx], d = q.circuit.dipoles.find(x => x.mesure === q.mesure), grandeur = d.type === 'amperemetre' ? 'l\'intensité' : 'la tension';
-      app.innerHTML = `<div class="er-card"><span class="er-badge">${badge}</span><h2 class="er-titre">${titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
-          <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
-        <div class="er-card ph-question">
-          <p class="er-q-nom">${q.theme}</p>
-          <div class="er-consigne">Réalise le montage du schéma (générateur réglé sur ${fr(q.circuit.tension)} V), puis lis ${grandeur} <b>${ind(q.mesure)}</b>.</div>
-          <div class="me-poste"></div>
-          <div class="me-aide"><button type="button" class="btn-small" data-a="montrer">Afficher le montage (0 point)</button></div>
-          <div class="me-lecture hidden"></div>
-          <div data-a="retour"></div><div class="er-actions" data-a="suite"></div></div>`;
-      window.scrollTo(0, 0);
-      app.style.pointerEvents = 'none';
-      setTimeout(() => { app.style.pointerEvents = ''; }, 350);
-      let erreursLecture = 0;
-      const poste = MONTAGE.monter(app.querySelector('.me-poste'), q.circuit, {
-        boucle: true, mesures: null, tensionReglee: true, montrerMesures: [q.mesure],
-        onFin() { lecture(); },
-      });
-      ME.posteEnCours = poste;
-      app.querySelector('[data-a="montrer"]').onclick = e => { e.target.disabled = true; poste.montrer(); };
-      function lecture() {
-        const z = app.querySelector('.me-lecture');
-        if (!z.classList.contains('hidden')) return;
-        z.classList.remove('hidden');
-        z.innerHTML = `<p class="ph-partie-q">Règle ${d.type === 'amperemetre' ? 'l\'ampèremètre' : 'le voltmètre'} de ${ind(q.mesure)}, puis écris la valeur lue <b>avec son unité</b> (par exemple ${d.type === 'amperemetre' ? '16,3 mA' : '6,37 V'}).</p>
-          <div class="ph-valeur"><span class="ph-lab">${ind(q.mesure)} =</span><input type="text" class="ph-champ me-champ" inputmode="text" autocomplete="off" spellcheck="false" aria-label="Valeur lue avec son unité">
-          <button type="button" class="btn-primary" data-a="valider">Valider</button></div><div class="me-lecture-retour"></div>`;
-        const ch = z.querySelector('input'), ret = z.querySelector('.me-lecture-retour');
-        const valider = () => {
-          const r = lireValeur(ch.value);
-          if (!r) { ret.innerHTML = '<p class="ph-msg">Écris un nombre suivi de son unité, par exemple 16,3 mA ou 6,37 V.</p>'; return; }
-          const vrai = valeurVraie(poste, q.mesure);
-          const famille = d.type === 'amperemetre' ? 'A' : 'V';
-          let diag = null;
-          if (r.famille !== famille) diag = famille === 'A' ? 'Une intensité s\'exprime en ampères (A ou mA).' : 'Une tension s\'exprime en volts (V ou mV).';
-          else if (Math.abs(Math.abs(r.v) - Math.abs(vrai)) > Math.max(.03 * Math.abs(vrai), 1e-4)) {
-            diag = famille === 'A' && Math.abs(Math.abs(r.v) * 1000 - Math.abs(vrai)) < .03 * Math.abs(vrai) ? 'Attention à l\'unité : l\'écran affiche des mA quand le calibre est en mA.'
-              : 'Relis l\'écran du multimètre : choisis la bonne fonction et le calibre le plus adapté pour une lecture précise.';
-          }
-          if (diag) { erreursLecture++; ret.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">Ce n'est pas ça.</b> ${diag}</p></div>`; return; }
-          ch.disabled = true; z.querySelector('[data-a="valider"]').disabled = true;
-          const err = poste.refus + erreursLecture, p = poste.montre ? 0 : err === 0 ? 2 : err <= 2 ? 1 : 0;
-          terminer(p, err, Math.abs(vrai));
-        };
-        z.querySelector('[data-a="valider"]').onclick = valider;
-        ch.addEventListener('keydown', e => { if (e.key === 'Enter') valider(); });
-        if (matchMedia('(hover: hover)').matches) ch.focus();
-        setTimeout(() => z.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
-      }
-      function terminer(p, err, vrai) {
-        app.querySelector('.me-aide').remove();
-        score += p; recap.push({ n: idx + 1, p });
-        app.querySelector('[data-a="score"]').textContent = pts(score);
-        const t = p === 2 ? 'Bravo, sans erreur !' : poste.montre ? 'Le montage a été affiché.' : `Juste, avec ${err} erreur${err > 1 ? 's' : ''}.`;
-        const unite = d.type === 'amperemetre' ? (vrai < .2 ? `${fr(vrai * 1000, 1)} mA` : `${fr(vrai, 2)} A`) : `${fr(vrai, 2)} V`;
-        app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${t}</b> +${pts(p)}</p><p>${ind(q.mesure)} = ${unite}.</p></div>`;
-        const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
-        s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
-        const b = s.querySelector('button');
-        setTimeout(() => { b.disabled = false; }, 450);
-        b.onclick = () => { idx++; afficher(); };
-        setTimeout(() => s.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
-      }
-    }
-    function fin() {
-      const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
-      SOM.marquer({ note });
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les montages changent à chaque fois.' : 'Continue à t\'entraîner : refais les modules 2 et 3, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
-        <div class="er-score">${fr(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
-        <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
-        <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres montages</button>
-          <a class="btn-secondary" style="text-decoration:none" href="module_3_manip.html">Revoir les dérivations</a>
-          <a class="btn-primary" style="text-decoration:none" href="../index.html">Accueil de l'application</a></div></div>`;
-      app.querySelector('[data-a="re"]').onclick = demarrer;
-      window.scrollTo(0, 0);
-      if (score === max) confettis();
-    }
-    intro();
-  }
-  function confettis() {
-    const col = ['#5a3fc4', '#16a34a', '#e8890c', '#d61f69', '#2952c8'];
-    for (let i = 0; i < 70; i++) {
-      const e = document.createElement('div');
-      e.className = 'er-confetti';
-      e.style.left = (Math.random() * 100) + 'vw';
-      e.style.background = col[i % col.length];
-      e.style.animationDuration = (2.2 + Math.random() * 1.6) + 's';
-      e.style.animationDelay = (Math.random() * 0.8) + 's';
-      document.body.appendChild(e);
-      setTimeout(() => e.remove(), 4800);
-    }
-  }
-
-  window.ME = { PLAN, SCHEMAS: S, lire, manip, serie, lireValeur, LECTURES, SITUATIONS, GROUPES };
+  window.ME = { PLAN, SCHEMAS: S, priseEnMain, simulateur, lire, multimetre, LECTURES, MONTAGES, MESURES };
 })();

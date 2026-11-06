@@ -39,18 +39,27 @@
    MONTAGE.graphe(circuit)                       sommets (points électriques), arêtes (dipôles), jonctions
    MONTAGE.verifierBoucle(circuit, choisis)      { ok, dips, sommets } ou { ok: false, diag, cerne }
    MONTAGE.calculer(scene)                       tensions des bornes, intensités, et état du matériel
+   MONTAGE.lireValeur(texte)                     « 16,3 mA » → { v (unités SI), famille: 'A' | 'V' } ou null
    MONTAGE.monter(zone, circuit, options) → poste de montage complet (schéma, table, consigne, déroulé) :
      options = {
-       boucle: true,              repérer d'abord la boucle principale sur le schéma
+       mode: 'monter',            'monter' : réaliser tout le montage, puis l'allumer pour le vérifier ;
+                                  'mesurer' : le circuit est déjà monté et allumé, on y ajoute les appareils
+                                  de mesure (ampèremètre : à la place d'un fil débranché), on les règle, on lit
+       boucle: false,             (monter) repérer d'abord la boucle principale sur le schéma ; sinon
+                                  la boucle principale est celle que l'élève réalise
+       mesurer: ['A', 'V'],       (mesurer) appareils du schéma à ajouter, dans l'ordre
        com: false,                COM écrit sur le schéma
-       mesures: 'lire' | 'dixA' | null,   lire tous les appareils (calibre adapté) ; ampèremètre en
-                                  10 A puis en mA (première fois) ; ou rien (la page demande la mesure)
-       tensionReglee: false,      vrai : le générateur est déjà réglé sur circuit.tension
+       liens: { reperer, multimetre: { href, texte } },   liens ajoutés à certaines explications
        textes: { … },             remplace des textes de MONTAGE.TEXTES
-       onFin(bilan),              { refus, montre, mesures: { I_1: { v, unite, texte } } }
+       onFin(bilan),              { refus, mesures: { U_L: '6,00 V' } }
        onChange(poste)
      }
-     → { refus, montre, mesure(nom), montrer() (« Afficher le montage »), recommencer(), etapes }
+     → { refus, fini(), mesures(), recommencer(), fil(a, b), retirer(i), commande(id, nom, v),
+         verifier(), toucher(cible), lire(texte), etat, circuit }
+   Règles du montage (mode monter) : on part d'une borne du générateur, on réalise la boucle principale
+   (sans voltmètre) dipôle après dipôle jusqu'à l'autre borne, puis les dérivations une par une ; un fil
+   non conforme au schéma est refusé avec une explication ; n'importe quel fil peut être retiré.
+   Le montage terminé, on allume le générateur : un appareil de mesure ou une DEL à l'envers est signalé.
    ============================================================ */
 (function () {
   'use strict';
@@ -62,50 +71,94 @@
 
   /* ---------- Textes (remplaçables par l'option textes) ---------- */
   const TEXTES = {
+    // repérage de la boucle principale sur le schéma
     vide: 'Touche les fils et les dipôles de la boucle, puis « Vérifier ».',
     sansG: 'La boucle principale contient le générateur : c\'est lui qui fait circuler le courant.',
-    voltBoucle: 'Le voltmètre n\'est pas dans la boucle principale : il se branche en dérivation, une fois la boucle faite.',
+    voltBoucle: 'Le voltmètre n\'est jamais dans la boucle principale : il se branche en dérivation, une fois la boucle faite.',
     ouverte: ou => `Ta boucle s'arrête ${ou} : suis les fils jusqu'à revenir au générateur.`,
     deuxFois: 'Ta boucle passe deux fois par le nœud cerclé sur le schéma : une boucle ne prend qu\'une des branches.',
     morceaux: 'Garde une seule boucle : celle qui part du générateur et y revient.',
     boucleOk: 'Juste ! C\'est la boucle principale : elle part du générateur et y revient. Elle reste surlignée pendant le montage.',
-    boucleDabordSchema: 'Commence par la boucle principale, sur le schéma : touche ses fils et ses dipôles.',
+    boucleDabordSchema: 'Commence par repérer la boucle principale sur le schéma : touche ses fils et ses dipôles, puis « Vérifier ».',
+    // refus d'un fil (mode monter)
     depart: 'On part toujours d\'une borne du générateur : la borne + ou la borne −.',
+    attacher: 'Pars du montage déjà relié au générateur : un nouveau fil part toujours d\'une borne déjà branchée.',
     suivant: (x, y) => `D'après le schéma, après ${x} vient ${y} : relie la borne libre ${de(x)} ${a(y)}.`,
+    suivantOu: (x, l) => `D'après le schéma, après ${x} vient ${ou(l)} : relie la borne libre ${de(x)} à l'un d'eux.`,
     premier: (x, y) => `D'après le schéma, après ${x} vient ${y} : relie ${x} ${a(y)}.`,
+    premierOu: (x, l) => `D'après le schéma, après ${x} vient ${ou(l)} : relie ${x} à l'un d'eux.`,
     fermer: x => `D'après le schéma, après ${x} on revient au générateur : relie la borne libre ${de(x)} à l'autre borne du générateur.`,
-    rejoindre: x => `D'après le schéma, après ${x} la dérivation rejoint le nœud cerclé sur le schéma : relie la borne libre ${de(x)} à une borne de ce nœud.`,
+    rejoindre: x => `D'après le schéma, après ${x} la dérivation rejoint le circuit au point cerclé : relie la borne libre ${de(x)} à une borne de ce point.`,
+    versDeriv: l => `D'après le schéma, une dérivation part de ce point vers ${ou(l)}.`,
+    pasDeDeriv: 'D\'après le schéma, aucune dérivation ne part de ce point.',
+    finirG: x => `On finit la boucle sur l'autre borne du générateur : continue-la d'abord depuis la borne libre ${de(x)}.`,
+    horsBoucle: 'Ce dipôle n\'est pas dans la boucle principale surlignée sur le schéma.',
+    impasse: 'Par ce dipôle, la boucle ne pourrait pas revenir au générateur sans repasser par le même point.',
     dixA: 'On commence par l\'entrée 10A, le plus grand calibre ; on passe à mA ensuite si l\'intensité est petite.',
+    ampBornes: 'L\'ampèremètre se branche sur ses bornes 10A et COM.',
     voltBornes: 'Le voltmètre se branche sur ses bornes V et COM.',
     serieA: 'L\'ampèremètre se branche en série : le courant doit le traverser.',
-    voltSerie: 'Le voltmètre se branche en dérivation, sur les bornes du dipôle, sans modifier le circuit.',
+    voltSerie: 'Le voltmètre se branche en dérivation, sur les bornes du dipôle, sans modifier le circuit : il n\'est jamais dans la boucle principale.',
     boucleDabord: 'Ferme d\'abord la boucle principale ; on ajoute les dérivations ensuite.',
-    ordreDeriv: (n, ou) => `D'après le schéma, la ${n} dérivation part du nœud cerclé sur le schéma${ou ? ` (${ou})` : ''}.`,
+    finirDeriv: x => `Termine d'abord la dérivation commencée : relie la borne libre ${de(x)} à la suite du schéma.`,
     noeud: 'Le schéma n\'a pas de nœud à cet endroit : on ne met deux fils sur une même borne que là où le schéma a un point noir.',
     court: 'Ce fil relierait directement les bornes du générateur.',
+    courtDipole: x => `Ce fil relierait les deux bornes ${de(x)} : le courant ne le traverserait plus.`,
+    memeAppareil: 'Ce fil relierait deux bornes du même appareil.',
+    dejaRelies: 'Ces deux bornes sont déjà reliées.',
+    pasRelies: 'Sur le schéma, ces deux bornes ne sont pas reliées par un fil.',
     fini: 'Le montage est terminé : il n\'y a plus de fil à poser.',
-    retirerDernier: 'On retire les fils en commençant par le dernier posé.',
-    finirDabord: 'Termine d\'abord le montage.',
-    // consignes
+    // vérification, générateur allumé
+    delEnvers: 'La DEL ne s\'éclaire pas : elle est branchée à l\'envers. Elle ne laisse passer le courant que dans un sens : sa borne + doit être du côté de la borne + du générateur. Retire ses deux fils et rebranche-la dans l\'autre sens.',
+    ampEnvers: x => `${cap(x)} est branché à l'envers : le courant doit entrer par la borne 10A et sortir par la borne COM, reliée du côté de la borne − du générateur. Il indiquerait une valeur négative. Retire ses deux fils et inverse-les.`,
+    voltEnvers: x => `${cap(x)} est branché à l'envers : sa borne COM doit être reliée du côté de la borne − du générateur. Il indiquerait une valeur négative. Retire ses deux fils et inverse-les.`,
+    // consignes (mode monter)
     cBoucle: 'Surligne la <b>boucle principale</b> : touche ses fils et ses dipôles sur le schéma, puis « Vérifier ».',
-    cDepart: 'Tire le premier fil depuis une <b>borne du générateur</b> (+ ou −), en suivant la boucle sur le schéma.',
-    cSuite: x => `Continue la boucle : relie la borne libre ${de(x)} au dipôle suivant du schéma.`,
+    cDepart: 'Tire le premier fil depuis une <b>borne du générateur</b> (+ ou −) vers le premier dipôle de la boucle principale.',
+    cSuite: x => `Continue la boucle principale : relie la borne libre ${de(x)} au dipôle suivant du schéma.`,
     cFermer: x => `Ferme la boucle : relie la borne libre ${de(x)} à l'autre borne du générateur.`,
-    cDeriv: n => `Ajoute la ${n} dérivation : pars du nœud du schéma le plus proche du générateur.`,
+    cDeriv: 'Ajoute une <b>dérivation</b> : pars d\'une borne du montage reliée à un nœud du schéma (point noir).',
     cDerivSuite: x => `Continue la dérivation : relie la borne libre ${de(x)} à la suite du schéma.`,
+    cRejoindre: x => `Termine la dérivation : relie la borne libre ${de(x)} au point du circuit où elle arrive sur le schéma.`,
+    cReprendre: 'Rebranche les fils qui manquent, en suivant le schéma.',
+    cVerifier: k => `Le montage est terminé. Vérifie-le : ${k ? 'ferme l\'interrupteur (touche son levier), puis ' : ''}allume le générateur (touche son bouton <b>Marche</b>).`,
     cInterrupteur: 'Ferme l\'interrupteur : touche son levier.',
-    cGenerateur: u => `Règle le générateur sur <b>${fr(u)} V</b> : touche son bouton.`,
-    cDel: 'La DEL ne s\'éclaire pas.',
-    cCal10: 'Règle l\'ampèremètre : touche son sélecteur, choisis la fonction <b>A ⎓</b> et le calibre <b>10 A</b>.',
+    fin: 'Le montage est conforme au schéma et il fonctionne.',
+    // mode mesurer
+    debrancher: (x, y) => `Débranche le fil qui relie ${x} ${a(y)} : l'ampèremètre va prendre sa place (voir le schéma). Touche ce fil, puis « Retirer ce fil ».`,
+    pasCeFil: 'Ce n\'est pas ce fil.',
+    pasToucher: 'Ce fil reste en place : seul le fil remplacé par l\'ampèremètre se débranche.',
+    voltSansDebrancher: 'Le voltmètre se branche en dérivation : on ne débranche aucun fil du circuit.',
+    dejaBien: 'L\'appareil est bien branché : pas besoin de le débrancher.',
+    debrancherDabord: 'Débranche d\'abord le fil dont l\'ampèremètre va prendre la place.',
+    reglerMaintenant: 'L\'appareil est branché : règle-le maintenant (touche son sélecteur).',
+    memeMultimetre: 'Utilise le même multimètre pour ses deux fils.',
+    unFil: 'Cette borne de l\'appareil est déjà branchée.',
+    cBrancherA: (x, y) => `Branche l'ampèremètre <b>en série</b>, à la place du fil retiré : relie sa borne <b>10A</b> ${a(x)} et sa borne <b>COM</b> ${a(y)}. Le courant entre par 10A et sort par COM, du côté de la borne − du générateur.`,
+    cBrancherV: x => `Branche le voltmètre <b>en dérivation</b> aux bornes ${de(x)}, sans débrancher aucun fil : borne <b>V</b> du côté de la borne + du générateur, borne <b>COM</b> du côté de la borne −.`,
+    lieuA: (x, y) => `L'ampèremètre se branche en série, à la place du fil retiré : relie-le ${a(x)} et ${a(y)}.`,
+    lieuV: x => `Le voltmètre se branche aux bornes ${de(x)} : relie ses bornes V et COM aux deux bornes ${de(x)}, ou à des bornes reliées à elles par un fil.`,
+    cCal10: 'Règle l\'ampèremètre : touche son sélecteur, choisis la fonction <b>A⎓</b> et le plus grand calibre, <b>10 A</b>.',
     cVersmA: t => `L'écran affiche <b>${t}</b> : ${t.replace('.', ',')} A, lecture peu précise. Passe la fiche de l'entrée <b>10A</b> à l'entrée <b>mA</b> : fais-la glisser d'une borne à l'autre.`,
-    cCalmA: 'Règle le calibre sur <b>200 mA</b> (zone A ⎓).',
-    cMesures: noms => `Règle ${noms.length > 1 ? 'chaque appareil de mesure' : 'l\'appareil de mesure'} (fonction et calibre adapté) et lis ${noms.join(', ').replace(/, ([^,]*)$/, ' et $1')}.`,
-    delQ: 'Pourquoi la DEL ne s\'éclaire-t-elle pas ?',
-    delChoix: ['Elle ne laisse passer le courant que dans un sens.', 'La tension du générateur est trop faible.', 'La résistance empêche le courant de passer.', 'La DEL est grillée.'],
-    delRep: 'Juste : la DEL ne laisse passer le courant que dans un sens. Retire les fils en partant du dernier posé jusqu\'à la DEL, puis rebranche-la dans l\'autre sens (borne + du côté de la borne + du générateur).',
-    delFaux: 'Ce n\'est pas ça. Regarde le symbole de la DEL : le triangle montre le seul sens dans lequel elle laisse passer le courant.',
-    fin: 'Le montage est terminé et il fonctionne.',
+    cCalmA: 'Choisis le calibre en mA le plus adapté : le <b>plus petit calibre qui reste plus grand que l\'intensité</b> mesurée.',
+    cCalmax: 'Règle le voltmètre : touche son sélecteur, choisis la fonction <b>V⎓</b> et le plus grand calibre, <b>600 V</b>.',
+    cCalV: t => `L'écran affiche <b>${t}</b> : lecture peu précise. Choisis le <b>plus petit calibre qui reste plus grand que la tension</b> mesurée.`,
+    cLire: n => `Lis l'écran et écris ${n} avec son unité.`,
+    fonctionA: 'Choisis la fonction <b>A⎓</b> : intensité, courant continu.',
+    fonctionV: 'Choisis la fonction <b>V⎓</b> : tension continue.',
+    commencer10: 'On commence toujours par le plus grand calibre : <b>10 A</b>.',
+    commencer600: 'On commence toujours par le plus grand calibre : <b>600 V</b>.',
+    depasse: 'L\'écran affiche « 1 » à gauche : la valeur dépasse le calibre. Choisis un calibre plus grand.',
+    plusPetit: 'Un calibre plus petit donnerait une lecture plus précise, sans dépasser : essaie-le.',
+    entreeMA: 'La fiche est sur l\'entrée mA : choisis un calibre en mA.',
+    lireFormat: 'Écris un nombre suivi de son unité, par exemple 16,3 mA ou 6,37 V.',
+    lireUniteA: 'Une intensité s\'exprime en ampères (A ou mA).',
+    lireUniteV: 'Une tension s\'exprime en volts (V ou mV).',
+    lireMilli: 'Attention à l\'unité : l\'écran affiche la valeur dans l\'unité du calibre (mA pour un calibre en mA, mV pour un calibre en mV).',
+    lireFaux: 'Relis l\'écran du multimètre : écris le nombre affiché, avec l\'unité du calibre.',
   };
+  const ou = l => l.join(', ').replace(/, ([^,]*)$/, ' ou $1');
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
   const de = n => n.replace(/^le /, 'du ').replace(/^la /, 'de la ').replace(/^l'/, 'de l\'');
   const a = n => n.replace(/^le /, 'au ').replace(/^la /, 'à la ').replace(/^l'/, 'à l\'');
   const NOMS = { generateur: 'le générateur', resistance: d => `la résistance de ${d.valeur} Ω`, lampe: 'la lampe', interrupteur: 'l\'interrupteur',
@@ -244,9 +297,14 @@
   /* ---------- Matériel de la table (coordonnées locales) ---------- */
   // chaque fonction renvoie { w, h, svg, bornes: { nom: { x, y, genre } }, zones: { nom: { x, y, r } } }
   const MAT = {
+    // o.marche : générateur allumé (l'écran affiche la tension) ; o.commande : bouton Marche à toucher ;
+    // o.reglable : bouton de tension à toucher (sinon la tension est déjà réglée)
     generateur(o) {
-      const w = 180, h = 124, t = o.tension || 0, ang = angTension(t);
-      const txt = Math.abs(t) >= 10 ? t.toFixed(1) : t.toFixed(2);
+      const w = 180, h = 124, t = o.tension || 0, ang = angTension(t), on = !!o.marche;
+      const txt = !on ? '' : Math.abs(t) >= 10 ? t.toFixed(1) : t.toFixed(2);
+      const zones = {};
+      if (o.reglable) zones.bouton = { x: 143, y: 46, r: 26 };
+      if (o.commande) zones.marche = { x: 154, y: 100, r: 21 };
       return { w, h, svg: `
         <rect class="mt-boitier" x="0" y="0" width="${w}" height="${h}" rx="12"/>
         <rect class="mt-chant" x="2" y="${h - 7}" width="${w - 4}" height="5" rx="2.5"/>
@@ -254,15 +312,21 @@
         <text class="mt-marque" x="${w - 14}" y="17" text-anchor="end">0 – 12 V ⎓</text>
         <rect class="mt-ecran-gen" x="14" y="25" width="90" height="40" rx="6"/>
         ${afficheur(24, 32, 25, txt, 3, true)}
-        <text class="mt-ecran-unite" x="96" y="58" text-anchor="end">V</text>
+        ${on ? '<text class="mt-ecran-unite" x="96" y="58" text-anchor="end">V</text>' : ''}
         <circle class="mt-bouton-jupe" cx="143" cy="46" r="22"/><circle class="mt-bouton" cx="143" cy="46" r="17"/>
         <line class="mt-bouton-trait" x1="143" y1="46" x2="${pol(143, 46, 13, ang)[0].toFixed(1)}" y2="${pol(143, 46, 13, ang)[1].toFixed(1)}"/>
         <text class="mt-marque" x="143" y="80" text-anchor="middle">TENSION</text>
-        <text class="mt-signe mt-signe-plus" x="40" y="105" text-anchor="middle">+</text>
-        <text class="mt-signe" x="140" y="105" text-anchor="middle">−</text>`,
-        bornes: { plus: { x: 62, y: 100, genre: 'plus' }, moins: { x: 118, y: 100, genre: 'moins' } },
-        zones: { bouton: { x: 143, y: 46, r: 26 } } };
+        <text class="mt-signe mt-signe-plus" x="20" y="105" text-anchor="middle">+</text>
+        <text class="mt-signe" x="116" y="105" text-anchor="middle">−</text>
+        <rect class="mt-bascule" x="136" y="90" width="36" height="20" rx="5"/>
+        <rect class="mt-bascule-appui${on ? ' on' : ''}" x="${on ? 136 : 154}" y="90" width="18" height="20" rx="5"/>
+        <text class="mt-bascule-t${on ? ' on' : ''}" x="145" y="104" text-anchor="middle">I</text>
+        <text class="mt-bascule-t" x="163" y="104" text-anchor="middle">O</text>
+        <text class="mt-marque" x="154" y="119" text-anchor="middle">MARCHE</text>`,
+        bornes: { plus: { x: 42, y: 100, genre: 'plus' }, moins: { x: 94, y: 100, genre: 'moins' } },
+        zones };
     },
+    // o.reglable === false : sélecteur inactif (pas de mesure à prendre)
     multimetre(o) {
       const w = 170, h = 262;
       return { w, h, svg: `
@@ -279,7 +343,7 @@
         ${o.etiquette ? `<rect class="mt-etiquette" x="${w - 46}" y="-12" width="52" height="24" rx="12"/><text class="mt-etiquette-t" x="${w - 20}" y="5" text-anchor="middle">${o.etiquette}</text>` : ''}`,
         bornes: { '10A': { x: 19, y: 236, genre: 'entree' }, mA: { x: 63, y: 236, genre: 'entree' },
                   COM: { x: 107, y: 236, genre: 'com' }, V: { x: 151, y: 236, genre: 'entree' } },
-        zones: { selecteur: { x: 85, y: 142, r: 42 } } };
+        zones: o.reglable === false ? {} : { selecteur: { x: 85, y: 142, r: 42 } } };
     },
     _plaquette(h, yb, dedans, zones) {
       return { w: 112, h, svg: `<rect class="mt-plaque" x="0" y="0" width="112" height="${h}" rx="9"/>${dedans}`,
@@ -534,7 +598,8 @@
       const b = borneAbs(ev.target.dataset.borne);
       st.drag = { id: ev.pointerId, ref: b.ref, de: b, vers: { x: b.x, y: b.y }, x0: ev.clientX, y0: ev.clientY, bouge: false };
       try { svg.setPointerCapture(ev.pointerId); } catch (e) { /* rien */ }
-      dessiner();
+      // redessin à l'image suivante : la borne touchée reste dans la page pour l'événement touchstart qui suit
+      requestAnimationFrame(dessiner);
     });
     svg.addEventListener('pointermove', ev => {
       if (!st.drag || ev.pointerId !== st.drag.id) return;
@@ -557,6 +622,8 @@
       if (a && opt.onFil) opt.onFil(a, b);
     });
     svg.addEventListener('pointercancel', ev => { if (st.drag && ev.pointerId === st.drag.id) { st.drag = null; st.survol = null; dessiner(); } });
+    // au doigt, un fil tiré depuis une borne ne fait pas défiler la page (touch-action n'agit pas sur les formes SVG)
+    svg.addEventListener('touchstart', ev => { if (opt.actif && ev.target.dataset && ev.target.dataset.borne) ev.preventDefault(); }, { passive: false });
     svg.addEventListener('click', ev => {
       if (st.finBorne) { st.finBorne = false; return; }
       if (!opt.actif) return;
@@ -571,7 +638,7 @@
       if (t.dataset.cmd) {
         const [id, nom] = t.dataset.cmd.split('.');
         fermerTout();
-        if (nom === 'levier') { if (opt.onCommande) opt.onCommande(id, 'levier'); }
+        if (nom === 'levier' || nom === 'marche') { if (opt.onCommande) opt.onCommande(id, nom); }
         else st.reglage = id;
         dessiner(); return;
       }
@@ -888,7 +955,7 @@
       if (m.type === 'resistance') resist.push([m.id, m.valeur]);
       if (m.type === 'lampe') resist.push([m.id, R_LAMPE]);
       if (m.type === 'moteur') resist.push([m.id, R_MOTEUR]);
-      if (m.type === 'generateur') sources.push({ id: m.id, p: 'G.plus', q: 'G.moins', e: m.tension || 0 });
+      if (m.type === 'generateur') sources.push({ id: m.id, p: 'G.plus', q: 'G.moins', e: m.marche ? m.tension || 0 : 0 });
       if (m.type === 'multimetre') { const ea = entreeA(scene, m); if (ea && filSur(scene, m.id + '.COM')) sources.push({ id: m.id, p: m.id + '.' + ea, q: m.id + '.COM', e: 0 }); }
     });
     const dels = scene.materiel.filter(m => m.type === 'del'), on = {};
@@ -957,549 +1024,711 @@
   }
 
   /* ============================================================
-     POSTE DE MONTAGE : schéma + table + consigne + déroulé, gestes dans l'ordre (ETAPES)
+     POSTE DE MONTAGE : schéma + table + consigne + déroulé
+     L'état du montage se déduit des fils posés et de l'affectation du
+     matériel de la table aux dipôles du schéma : n'importe quel fil peut
+     être retiré, le montage reprend là où il en est.
      ============================================================ */
+  // ensembles disjoints sur des chaînes (bornes de la table)
+  function unions() {
+    const p = {};
+    const f = x => { if (p[x] == null) p[x] = x; while (p[x] !== x) { p[x] = p[p[x]]; x = p[x]; } return x; };
+    return { f, u: (x, y) => { p[f(x)] = f(y); } };
+  }
+  const autreT = t => (t === 'a' ? 'b' : 'a');
+  const comS = d => (d.com === -1 ? 'a' : 'b');      // borne du schéma côté COM (com : 1 → b, −1 → a)
+  const borneValide = (d, b) => (d.type === 'amperemetre' ? ['10A', 'COM'].includes(b) : d.type === 'voltmetre' ? ['V', 'COM'].includes(b) : true);
+
+  // lecture d'une saisie « 16,3 mA » → { v (unités SI), famille 'A' | 'V' } ou null
+  function lireValeur(t) {
+    const m = String(t).trim().replace(/\s+/g, ' ').replace('−', '-').match(/^(-?\d+(?:[.,]\d+)?)\s*(ma|a|mv|v)$/i);
+    if (!m) return null;
+    const v = parseFloat(m[1].replace(',', '.')), u = m[2].toLowerCase();
+    return { v: u.startsWith('m') ? v / 1000 : v, famille: u.endsWith('a') ? 'A' : 'V' };
+  }
+
   function monter(zone, c, opts) {
-    opts = Object.assign({ boucle: true, com: false, mesures: 'lire', tensionReglee: false, rendu: 'relief' }, opts || {});
+    opts = Object.assign({ mode: 'monter', boucle: false, com: false, mesurer: [], rendu: 'relief', liens: null }, opts || {});
     const T = Object.assign({}, TEXTES, opts.textes || {});
-    const gr = graphe(c);
+    const mesure = opts.mode === 'mesurer';
+    const gr = graphe(c), G = gr.G;
     const sch = id => gr.dip(id);
+    const plusS = G.id + '.' + plusDe(G), moinsS = G.id + '.' + autreT(plusDe(G));
     // nom d'un dipôle du schéma ; « l'ampèremètre » tout court s'il est le seul de son type
     const nomS = id => { const d = sch(id); return ['amperemetre', 'voltmetre'].includes(d.type) && c.dipoles.filter(x => x.type === d.type).length === 1 ? NOMS[d.type]({}) : nomDe(d); };
+    // lien vers un autre module, ajouté à une explication
+    const lien = k => (opts.liens && opts.liens[k] ? ` <a class="mt-lien" href="${opts.liens[k].href}">${opts.liens[k].texte}</a>` : '');
     zone.classList.add('mt-poste-z');
     zone.innerHTML = `<div class="mt-poste">
         <div class="mt-poste-schema"><div class="mt-schema-z"></div><div class="mt-consigne" aria-live="polite"></div></div>
         <div class="mt-poste-table"><div class="mt-table-z"></div></div>
-      </div><ol class="mt-deroule"></ol><div class="mt-resultats"></div>`;
+      </div><ol class="mt-deroule"></ol>`;
     const zSch = zone.querySelector('.mt-schema-z'), zCons = zone.querySelector('.mt-consigne'), zTab = zone.querySelector('.mt-table-z');
     zone.querySelector('.mt-poste-schema').style.setProperty('--ratio', (c.vb[c.vb.length - 2] / c.vb[c.vb.length - 1]).toFixed(3));
 
     // ---------- matériel de la table : un objet par dipôle du schéma ----------
     function materielInitial() {
-      const l = [{ id: 'G', type: 'generateur', tension: opts.tensionReglee ? c.tension : 0, sorte: 'generateur' }];
+      const l = [{ id: 'G', type: 'generateur', tension: c.tension || 0, marche: mesure, commande: !mesure, sorte: 'generateur' }];
       let k = 0;
-      c.dipoles.filter(d => genre(d.type) === 'multimetre').forEach(() => l.push({ id: 'M' + (++k), type: 'multimetre', position: 'OFF', sorte: 'multimetre' }));
+      c.dipoles.filter(d => genre(d.type) === 'multimetre').forEach(() => l.push({ id: 'M' + (++k), type: 'multimetre', position: 'OFF', sorte: 'multimetre', reglable: mesure }));
       let plaq = c.dipoles.filter(d => !['generateur', 'amperemetre', 'voltmetre'].includes(d.type));
       if (c.table) plaq = c.table.map(id => sch(id));
       else plaq = plaq.map(d => [Math.random(), d]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
-      plaq.forEach((d, i) => l.push({ id: 'P' + (i + 1), type: d.type, valeur: d.valeur, ferme: false, sorte: sorte(d) }));
+      plaq.forEach((d, i) => l.push({ id: 'P' + (i + 1), type: d.type, valeur: d.valeur, ferme: mesure, sorte: sorte(d) }));
       return l;
     }
 
-    let st, vSch, vTab, etapes, auto = false;
-
-    function init() {
-      const materiel = materielInitial();
-      st = {
-        phase: opts.boucle ? 'boucle' : 'fils',
-        choisis: [], boucle: [], diagBoucle: null, cerne: null,
-        vx: {}, assign: { [gr.G.id]: 'G' }, rassign: { G: gr.G.id },
-        chaines: [], ci: 0, faitesDeriv: 0, built: new Set(), pos: {},
-        branches: [], allumes: [], histo: [], montre: false, delQ: null, info: null,
-        scene: { W: 360, H: 400, materiel, fils: [] },
-      };
-      st.vx['G.plus'] = gr.plus; st.vx['G.moins'] = gr.moins;
-      if (!opts.boucle) choisirBoucle(verifierBoucle(c, boucleParDefaut(c)));
-      if (vTab) vTab.detruire();
-      vSch = schema(zSch, c, { com: opts.com, libre: opts.boucle, onTouche: toucheSchema });
-      vTab = table(zTab, st.scene, { rendu: opts.rendu, onFil: (p, q) => { if (!auto) fil(p, q); }, onRetirer: i => { if (!auto) retirer(i); }, onFilTouche,
-        onCommande: (id, nom, v) => { if (!auto) commande(id, nom, v); }, retirable: i => i === st.scene.fils.length - 1 && st.phase !== 'boucle' && !st.deplaces?.has(i),
-        onLargeur: l => { const W = l >= 520 ? 540 : 360; if (W !== st.scene.W || !st.scene.place) { st.scene.W = W; st.scene.H = disposer(st.scene.materiel, W); st.scene.place = true; } } });
-      creerEtapes();
-      maj();
-    }
-
-    // ---------- étapes ----------
-    function nbFils() {
-      // chaque chaîne de n dipôles demande n + 1 fils : (arêtes hors générateur) + (nombre de chaînes)
-      const E = c.dipoles.length - 1, Vs = new Set(gr.aretes.flatMap(e => [e.u, e.v])).size;
-      return E + (E + 1 - Vs + 1);
-    }
-    const aMesurer = () => c.dipoles.filter(d => genre(d.type) === 'multimetre');
-    function creerEtapes() {
-      const l = [];
-      const filE = k => ({ id: 'fil' + k, type: 'fil', accepte: g => g.type === 'fil' && g.ok, refus: g => (g.type === 'fil' && g.msg) || null });
-      if (opts.boucle) l.push({ id: 'boucle', accepte: g => g.type === 'boucle' && g.ok, refus: g => (g.type === 'boucle' && g.diag) || (g.type === 'fil' && g.msg) || null });
-      for (let k = 1; k <= nbFils(); k++) l.push(filE(k));
-      const finFils = { refus: g => (g.type === 'fil' && g.msg) || null };
-      if (c.dipoles.some(d => d.type === 'interrupteur')) l.push(Object.assign({ id: 'interrupteur', accepte: () => st.scene.materiel.filter(m => m.type === 'interrupteur').every(m => m.ferme) }, finFils));
-      if (!opts.tensionReglee) l.push(Object.assign({ id: 'generateur', accepte: () => Math.abs((mat('G').tension || 0) - c.tension) < .051 }, finFils));
-      if (c.dipoles.some(d => d.type === 'del')) l.push(Object.assign({ id: 'del', accepte: () => st.scene.materiel.filter(m => m.type === 'del').every(m => m.allumee) }, finFils));
-      if (opts.mesures === 'dixA') {
-        const A = () => mat(st.assign[aMesurer()[0].id]);
-        l.push(Object.assign({ id: 'cal10', accepte: () => A() && A().position === 'A10' && entreeA(st.scene, A()) === '10A' }, finFils));
-        l.push(Object.assign({ id: 'versmA', accepte: () => A() && entreeA(st.scene, A()) === 'mA' }, finFils));
-        l.push(Object.assign({ id: 'calmA', accepte: () => A() && ['A200m', 'A20m'].includes(A().position) && A().mesure && !A().mesure.depasse }, finFils));
-      } else if (opts.mesures === 'lire' && aMesurer().length) {
-        l.push(Object.assign({ id: 'mesures', accepte: () => aMesurer().every(d => lectureValide(d)) }, finFils));
-      }
-      etapes = ETAPES.creer({ etapes: l, onFin: fin });
-    }
-    // lecture correcte : bonne fonction, calibre adapté (ampèremètre : entrée mA s'il le faut ; voltmètre : plus petit calibre possible)
-    // lecture correcte : bonne fonction, sans dépassement, et précise (au moins 3 chiffres significatifs, ou le meilleur calibre possible)
-    function lectureValide(d) {
-      const m = mat(st.assign[d.id]);
-      if (!m || !m.mesure || m.mesure.depasse) return false;
-      const p = posDe(m.position), res = st.res;
-      const chiffres = String(m.affiche).replace(/[-.]/g, '').replace(/^0+/, '').length;
-      if (d.type === 'amperemetre') {
-        if (p.zone !== 'A⎓') return false;
-        const i = Math.abs(res.I[m.id] || 0);
-        return chiffres >= 3 || (i < .2 ? p.entree === 'mA' : p.id === 'A10');
-      }
-      if (p.zone !== 'V⎓') return false;
-      return chiffres >= 3 || p.id === meilleurV(m);
-    }
-    const meilleurV = m => { const u = Math.abs(st.res.V[m.id + '.V'] - st.res.V[m.id + '.COM']); return ['V200m', 'V2', 'V20', 'V200', 'V600'].find(id => { const q = posDe(id); return u * (q.k || 1) < q.max * .9995; }); };
+    let st, vSch, vTab, L = [];
     const mat = id => st.scene.materiel.find(m => m.id === id);
+    const nbFils = ref => st.scene.fils.filter(f => f[0] === ref || f[1] === ref).length;
+    const dipsAff = () => new Set(Object.values(st.aff).map(f => f.dip));
+    const itemDe = dip => Object.keys(st.aff).find(k => st.aff[k].dip === dip);
+    const gen = () => mat('G');
 
-    // ---------- boucle principale (sur le schéma) ----------
+    // ---------- correspondance table ↔ schéma ----------
+    // bornes utilisées d'un objet affecté (multimètre : COM et l'entrée de sa fonction)
+    function bornesItem(id) {
+      const m = mat(id), f = st.aff[id];
+      if (m.type !== 'multimetre') return [id + '.1', id + '.2'];
+      const amp = sch(f.dip).type === 'amperemetre';
+      return [id + '.COM', id + '.' + (amp ? (nbFils(id + '.mA') ? 'mA' : '10A') : 'V')];
+    }
+    // borne du schéma (« L1.a ») qui correspond à une borne de la table, ou null
+    function borneS(ref) {
+      const [id, b] = ref.split('.');
+      if (id === 'G') return b === 'plus' ? plusS : moinsS;
+      const f = st.aff[id];
+      if (!f) return null;
+      if (mat(id).type !== 'multimetre') return f.dip + '.' + (b === '1' ? f.t1 : autreT(f.t1));
+      if (b === 'COM') return f.dip + '.' + f.com;
+      const amp = sch(f.dip).type === 'amperemetre';
+      return (amp ? b === '10A' || b === 'mA' : b === 'V') ? f.dip + '.' + autreT(f.com) : null;
+    }
+    const sommetDe = ref => { const s = borneS(ref); return s ? gr.sommet(s) : null; };
+    // borne de la table qui correspond à une borne du schéma (dipôle déjà sur la table)
+    function refDe(t) {
+      if (t === plusS) return 'G.plus';
+      if (t === moinsS) return 'G.moins';
+      const [id, b] = t.split('.'), it = itemDe(id);
+      if (!it) return null;
+      const f = st.aff[it];
+      if (mat(it).type !== 'multimetre') return it + '.' + (b === f.t1 ? '1' : '2');
+      return b === f.com ? it + '.COM' : bornesItem(it)[1];
+    }
+    // nom d'une borne de la table pour l'élève : « la borne + du générateur », « la lampe L₁ »
+    const nomBorne = ref => (ref === 'G.plus' ? 'la borne + du générateur' : ref === 'G.moins' ? 'la borne − du générateur' : st.aff[ref.split('.')[0]] ? nomS(st.aff[ref.split('.')[0]].dip) : nomDe({ type: mat(ref.split('.')[0]).type === 'multimetre' ? 'voltmetre' : mat(ref.split('.')[0]).type, valeur: mat(ref.split('.')[0]).valeur }));
+    const noeudDe = s => { const n = (c.noeuds || []).find(x => gr.sommet(x.id) === s); return n ? n.id : null; };
+
+    // ---------- analyse de l'état : composantes, boucle fermée, bornes libres ----------
+    function analyse() {
+      const fils = st.scene.fils.filter(f => !f.pont);       // le « pont » (mode mesurer) n'est pas dans le schéma
+      const W = unions(), S = unions(), B = unions();
+      fils.forEach(([p, q]) => { W.u(p, q); S.u(p, q); B.u(p, q); });
+      Object.keys(st.aff).forEach(id => { const [x, y] = bornesItem(id); S.u(x, y); if (sch(st.aff[id].dip).type !== 'voltmetre') B.u(x, y); });
+      const ferme = B.f('G.plus') === B.f('G.moins');
+      const dansG = t => S.f(t) === S.f('G.plus') || S.f(t) === S.f('G.moins');
+      const gp = nbFils('G.plus') > 0, gm = nbFils('G.moins') > 0;
+      // borne du générateur qui sert à fermer la boucle (l'autre est celle du départ) ;
+      // après un fil retiré (réparation), on peut repartir des deux bornes
+      const fermeture = !ferme && gp !== gm && !st.retraits ? (gp ? 'G.moins' : 'G.plus') : null;
+      // bornes libres : extrémité d'un dipôle relié par son autre borne (ou borne libre du générateur)
+      const libres = [], atteints = new Set();
+      Object.keys(st.aff).forEach(id => {
+        const [x, y] = bornesItem(id);
+        if (!dansG(x)) return;
+        atteints.add(sommetDe(x)); atteints.add(sommetDe(y));
+        if (!nbFils(x) && nbFils(y)) libres.push(x); else if (!nbFils(y) && nbFils(x)) libres.push(y);
+      });
+      if (gp) atteints.add(gr.plus);
+      if (gm) atteints.add(gr.moins);
+      if (!ferme) ['G.plus', 'G.moins'].forEach(t => { if (!nbFils(t) && t !== fermeture) libres.push(t); });
+      return { W, S, ferme, dansG, fermeture, libres, atteints };
+    }
+    // point où la boucle doit revenir (borne du générateur qui n'est pas celle du départ)
+    function pointFermeture(x, A) {
+      if (A.fermeture) return sommetDe(A.fermeture);
+      return x === 'G.plus' ? gr.moins : x === 'G.moins' ? gr.plus : null;
+    }
+    // la boucle peut-elle revenir au point f depuis s, par des dipôles pas encore placés (sans voltmètre),
+    // sans repasser par un point déjà atteint ni par le point de départ d ?
+    function revient(s, f, A, exclu, d) {
+      if (f == null || s === f) return true;
+      const used = dipsAff(), vus = new Set([s, d]), file = [s];
+      while (file.length) {
+        const x = file.shift();
+        for (const e of gr.aretes) {
+          if (e.id === G.id || e.id === exclu || used.has(e.id) || sch(e.id).type === 'voltmetre' || (st.imposee && !st.imposee.has(e.id))) continue;
+          const y = e.u === x ? e.v : e.v === x ? e.u : null;
+          if (y == null || vus.has(y)) continue;
+          if (y === f) return true;
+          if (A.atteints.has(y)) continue;
+          vus.add(y); file.push(y);
+        }
+      }
+      return false;
+    }
+    // la dérivation peut-elle rejoindre le circuit depuis s, par des dipôles pas encore placés ?
+    function rejoint(s, A, exclu) {
+      if (A.atteints.has(s)) return true;
+      const used = dipsAff(), vus = new Set([s]), file = [s];
+      while (file.length) {
+        const x = file.shift();
+        for (const e of gr.aretes) {
+          if (e.id === G.id || e.id === exclu || used.has(e.id)) continue;
+          const y = e.u === x ? e.v : e.v === x ? e.u : null;
+          if (y == null || vus.has(y)) continue;
+          if (A.atteints.has(y)) return true;
+          vus.add(y); file.push(y);
+        }
+      }
+      return false;
+    }
+    // dipôles du schéma qui peuvent suivre la borne x : nouveaux, ou déjà sur la table mais pas encore reliés à x
+    function suivants(x, A) {
+      const sx = sommetDe(x), dx = x.startsWith('G.') ? G.id : st.aff[x.split('.')[0]].dip, used = dipsAff();
+      const fv = A.ferme ? null : pointFermeture(x, A);
+      return c.dipoles.filter(d => {
+        if (d.id === G.id || d.id === dx) return false;
+        const ta = gr.sommet(d.id + '.a') === sx, tb = gr.sommet(d.id + '.b') === sx;
+        if (!ta && !tb) return false;
+        if (used.has(d.id)) { const r = refDe(d.id + '.' + (ta ? 'a' : 'b')); return !!r && A.W.f(r) !== A.W.f(x); }
+        const s2 = gr.sommet(d.id + '.' + (ta ? 'b' : 'a'));
+        if (!A.ferme) {
+          if (d.type === 'voltmetre' || (st.imposee && !st.imposee.has(d.id))) return false;
+          if (st.retraits) return true;                   // réparation : les morceaux restants se rejoignent
+          if (fv != null && s2 !== fv && (A.atteints.has(s2) || s2 === sx)) return false;
+          return revient(s2, fv, A, d.id, sx);
+        }
+        return rejoint(s2, A, d.id);
+      });
+    }
+    // le point de x est-il déjà atteint par une autre borne du montage ?
+    const pointAtteint = (x, A) => { const s = sommetDe(x); return ['G.plus', 'G.moins'].concat(...Object.keys(st.aff).map(bornesItem)).some(t => t !== x && A.dansG(t) && (nbFils(t) || !t.startsWith('G.')) && sommetDe(t) === s); };
+
+    // ---------- évaluation d'un fil (mode monter) ----------
+    // explication : ce qui doit suivre la borne x d'après le schéma
+    function conseil(x, A, borne) {
+      const sx = sommetDe(x), nx = nomBorne(x), estG = x.startsWith('G.');
+      if (!A.ferme) {
+        const fv = pointFermeture(x, A);
+        if (fv != null && sx === fv && !estG) return { msg: T.fermer(nx), borne, cerne: G.id };
+      } else if (A.libres.includes(x) && pointAtteint(x, A)) return { msg: T.rejoindre(nx), borne, cerne: noeudDe(sx) };
+      const l = suivants(x, A), noms = l.map(d => nomS(d.id));
+      if (A.ferme && !A.libres.includes(x)) return { msg: l.length ? T.versDeriv(noms) : T.pasDeDeriv, borne, cerne: l.length === 1 ? l[0].id : noeudDe(sx) };
+      if (!l.length) return { msg: A.ferme ? T.rejoindre(nx) : T.boucleDabord, borne };
+      if (l.length === 1) return { msg: estG ? T.premier(nx, noms[0]) : T.suivant(nx, noms[0]), borne, cerne: l[0].id };
+      return { msg: estG ? T.premierOu(nx, noms) : T.suivantOu(nx, noms), borne };
+    }
+    const msgBorne = (d, b) => (d.type === 'amperemetre' ? (b === 'mA' ? T.dixA : T.ampBornes) : T.voltBornes);
+    function evaluer(p, q) {
+      const [ip] = p.split('.'), [iq] = q.split('.');
+      if (ip === iq) return { msg: ip === 'G' ? T.court : mat(ip).type === 'multimetre' ? T.memeAppareil : T.courtDipole(nomBorne(p)), borne: q };
+      if (st.phase === 'boucle') return { msg: T.boucleDabordSchema, borne: q };
+      if (st.phase === 'verif' || st.phase === 'fin') return { msg: T.fini, borne: q };
+      const A = analyse();
+      const affP = ip === 'G' || !!st.aff[ip], affQ = iq === 'G' || !!st.aff[iq];
+      if (!affP && !affQ) return { msg: st.scene.fils.length ? T.attacher : T.depart, borne: q };
+      if (affP && affQ) return evaluerRelie(p, q, A);
+      return affP ? evaluerNouveau(p, q, A) : evaluerNouveau(q, p, A);
+    }
+    // borne d'un appareil déjà branché qui ne convient pas à sa fonction
+    function borneRefusee(ref) {
+      const it = ref.split('.')[0], f = st.aff[it];
+      return f ? msgBorne(sch(f.dip), ref.split('.')[1]) : T.pasRelies;
+    }
+    // fil entre deux objets déjà sur la table : il doit relier deux bornes d'un même point du schéma
+    function evaluerRelie(p, q, A) {
+      const sp = sommetDe(p), sq = sommetDe(q);
+      if (sp == null) return { msg: borneRefusee(p), borne: p };
+      if (sq == null) return { msg: borneRefusee(q), borne: q };
+      for (const t of [p, q]) { const f = st.aff[t.split('.')[0]]; if (f && sch(f.dip).type === 'amperemetre' && t.endsWith('.mA')) return { msg: T.dixA, borne: t }; }
+      if (!A.dansG(p) && !A.dansG(q)) return { msg: T.attacher, borne: q };
+      if ((sp === gr.plus && sq === gr.moins) || (sp === gr.moins && sq === gr.plus)) return { msg: T.court, borne: q };
+      if (sp !== sq) {
+        const x = A.libres.includes(p) ? p : A.libres.includes(q) ? q : null;
+        return x ? conseil(x, A, x === p ? q : p) : { msg: T.pasRelies, borne: q };
+      }
+      if (A.W.f(p) === A.W.f(q)) return { msg: T.dejaRelies, borne: q };
+      for (const t of [p, q]) if (nbFils(t) && !gr.jonction(sp)) return { msg: T.noeud, borne: t };
+      return { ok: true, x: p, y: q };
+    }
+    // fil de la borne x (montage) vers la borne y d'un objet pas encore placé
+    function evaluerNouveau(x, y, A) {
+      const sx = sommetDe(x);
+      if (sx == null) return { msg: borneRefusee(x), borne: x };
+      if (!A.dansG(x)) return { msg: T.attacher, borne: x };
+      if (!A.libres.includes(x)) {
+        const l = A.libres.find(t => !t.startsWith('G.'));
+        if (!A.ferme) return { msg: x === A.fermeture && l ? T.finirG(nomBorne(l)) : T.boucleDabord, borne: y };
+        if (l) return { msg: T.finirDeriv(nomBorne(l)), borne: y };
+      }
+      if (nbFils(x) && !gr.jonction(sx)) return { msg: T.noeud, borne: x };
+      const M = mat(y.split('.')[0]), b = y.split('.')[1], used = dipsAff();
+      const cands = suivants(x, A).filter(d => !used.has(d.id) && sorte(d) === M.sorte);
+      const valides = cands.filter(d => borneValide(d, b));
+      if (valides.length) { const d = valides[0]; return { ok: true, x, y, d: d.id, t: gr.sommet(d.id + '.a') === sx ? 'a' : 'b' }; }
+      if (cands.length) return { msg: msgBorne(cands[0], b), borne: y };
+      // dipôles de même sorte reliés au point de x, mais refusés pour la boucle principale
+      const adj = c.dipoles.filter(d => d.id !== G.id && !used.has(d.id) && sorte(d) === M.sorte && (gr.sommet(d.id + '.a') === sx || gr.sommet(d.id + '.b') === sx));
+      if (!A.ferme && adj.length && A.libres.includes(x)) {
+        if (adj.every(d => d.type === 'voltmetre')) return { msg: T.voltSerie + lien('multimetre'), borne: y, cerne: adj[0].id };
+        const d = adj.find(e => e.type !== 'voltmetre');
+        if (d && st.imposee && !st.imposee.has(d.id)) return { msg: `${T.horsBoucle} ${conseil(x, A).msg}`, borne: y };
+        if (d) return { msg: T.impasse, borne: y };
+      }
+      return conseil(x, A, y);
+    }
+
+    // ---------- état complet, sens des appareils ----------
+    // chaque dipôle (sauf exclus) est sur la table et chaque point du schéma est un seul nœud de la table
+    function complet(A, exclus) {
+      if (st.scene.fils.some(f => f.pont)) return false;
+      const used = dipsAff();
+      if (c.dipoles.some(d => d.id !== G.id && !(exclus && exclus.has(d.id)) && !used.has(d.id))) return false;
+      const grp = {}, refs = ['G.plus', 'G.moins'];
+      Object.keys(st.aff).forEach(id => refs.push(...bornesItem(id)));
+      for (const t of refs) { const s = sommetDe(t), r = A.W.f(t); if (grp[s] == null) grp[s] = r; else if (grp[s] !== r) return false; }
+      return true;
+    }
+    // DEL ou appareil de mesure branché à l'envers
+    function problemesSens(ids) {
+      const l = [];
+      Object.keys(st.aff).forEach(id => {
+        const f = st.aff[id], d = sch(f.dip);
+        if (ids && !ids.includes(d.id)) return;
+        if (d.type === 'del' && f.t1 !== plusDe(d)) l.push({ id: d.id, msg: T.delEnvers });
+        if (genre(d.type) === 'multimetre' && d.com && f.com !== comS(d)) l.push({ id: d.id, msg: d.type === 'amperemetre' ? T.ampEnvers(nomS(d.id)) : T.voltEnvers(nomS(d.id)) + lien('multimetre') });
+      });
+      return l;
+    }
+    const interrupteursOuverts = () => st.scene.materiel.some(m => m.type === 'interrupteur' && !m.ferme);
+
+    // ---------- mode mesurer : circuit déjà monté, appareils à ajouter ----------
+    // Chaque point du schéma est câblé en chaîne (générateur d'abord, appareils en dernier) ; un ampèremètre
+    // à ajouter est remplacé par un seul fil, le « pont », entre les deux points qu'il reliera.
+    function precabler() {
+      const ajout = new Set(opts.mesurer);
+      const mm = st.scene.materiel.filter(m => m.type === 'multimetre'), pl = st.scene.materiel.filter(m => !['generateur', 'multimetre'].includes(m.type));
+      c.dipoles.forEach(d => {
+        if (d.id === G.id || ajout.has(d.id)) return;
+        let m;
+        if (genre(d.type) === 'multimetre') { m = mm.shift(); st.aff[m.id] = { dip: d.id, com: comS(d) }; }
+        else { m = pl.find(x => x.sorte === sorte(d)); pl.splice(pl.indexOf(m), 1); st.aff[m.id] = { dip: d.id, t1: d.type === 'del' ? plusDe(d) : 'a' }; }
+        st.ordre[m.id] = ++st.n;
+      });
+      const pts = {};
+      const ajouter = (s, ref, rang) => (pts[s] = pts[s] || []).push([rang, ref]);
+      ajouter(gr.plus, 'G.plus', 0); ajouter(gr.moins, 'G.moins', 0);
+      Object.keys(st.aff).forEach(id => bornesItem(id).forEach(ref => ajouter(sommetDe(ref), ref, mat(id).type === 'multimetre' ? 2 : 1)));
+      Object.keys(pts).forEach(s => {
+        pts[s] = pts[s].sort((x, y) => x[0] - y[0]).map(x => x[1]);
+        for (let i = 1; i < pts[s].length; i++) st.scene.fils.push(Object.assign([pts[s][i - 1], pts[s][i]], { pre: true }));
+      });
+      opts.mesurer.forEach(id => {
+        if (sch(id).type !== 'amperemetre') return;
+        const u = pts[gr.sommet(id + '.a')], v = pts[gr.sommet(id + '.b')];
+        st.scene.fils.push(Object.assign([u[u.length - 1], v[0]], { pre: true, pont: id }));
+      });
+    }
+    // étapes de chaque appareil ajouté
+    function etapesMesure() {
+      const l = [];
+      opts.mesurer.forEach(id => {
+        if (sch(id).type === 'amperemetre') ['debrancher', 'brancher', 'cal10', 'versmA', 'calmA', 'lire'].forEach(e => l.push({ id, e }));
+        else ['brancher', 'calmax', 'calV', 'lire'].forEach(e => l.push({ id, e }));
+      });
+      return l;
+    }
+    const intensite = m => Math.abs(st.res.I[m.id] || 0);
+    const tension = m => Math.abs(st.res.V[m.id + '.V'] - st.res.V[m.id + '.COM']);
+    const meilleurA = m => ['A2m', 'A20m', 'A200m'].find(id => intensite(m) * 1000 < posDe(id).max * .9995) || 'A10';
+    const meilleurV = m => ['V200m', 'V2', 'V20', 'V200', 'V600'].find(id => { const q = posDe(id); return tension(m) * (q.k || 1) < q.max * .9995; }) || 'V600';
+    const aVenir = E => new Set(opts.mesurer.slice(opts.mesurer.indexOf(E.id) + 1));
+    function etapeFaite(E, A) {
+      const it = itemDe(E.id), m = it && mat(it);
+      if (E.e === 'debrancher') return !st.scene.fils.some(f => f.pont === E.id);
+      if (E.e === 'brancher') return !!m && complet(A, aVenir(E)) && !problemesSens([E.id]).length;
+      if (E.e === 'lire') return !!st.lu[E.id];
+      if (!m) return false;
+      const grand = intensite(m) >= .2;
+      if (E.e === 'cal10') return m.position === 'A10' && entreeA(st.scene, m) === '10A';
+      if (E.e === 'versmA') return grand || entreeA(st.scene, m) === 'mA';
+      if (E.e === 'calmA') return grand || (m.position === meilleurA(m) && !!m.mesure && !m.mesure.depasse);
+      if (E.e === 'calmax') return m.position === 'V600';
+      if (E.e === 'calV') return m.position === meilleurV(m) && !!m.mesure && !m.mesure.depasse;
+      return false;
+    }
+    // conseil pendant un réglage (sans erreur comptée)
+    function indiceReglage(E) {
+      const it = itemDe(E.id), m = it && mat(it);
+      if (!m || m.position === 'OFF') return null;
+      const p = posDe(m.position), dep = m.mesure && m.mesure.depasse;
+      if (E.e === 'cal10') return p.zone !== 'A⎓' ? T.fonctionA : T.commencer10;
+      if (E.e === 'calmA') return p.zone !== 'A⎓' ? T.fonctionA : dep ? T.depasse : p.id === 'A10' ? T.entreeMA : T.plusPetit;
+      if (E.e === 'calmax') return p.zone !== 'V⎓' ? T.fonctionV : T.commencer600;
+      if (E.e === 'calV') return p.zone !== 'V⎓' ? T.fonctionV : dep ? T.depasse : T.plusPetit;
+      return null;
+    }
+    function avancerMesure() {
+      const A = analyse();
+      // calibre changé pendant la lecture : retour au choix du calibre
+      while (L[st.k] && L[st.k].e === 'lire' && !st.lu[L[st.k].id] && st.k > 0 && L[st.k - 1].id === L[st.k].id && !etapeFaite(L[st.k - 1], A)) { st.k--; st.retourLu = null; }
+      while (st.k < L.length && etapeFaite(L[st.k], A)) { st.k++; st.retourLu = null; st.saisie = ''; }
+      const E = L[st.k];
+      st.sensKO = E && E.e === 'brancher' && itemDe(E.id) && complet(A, aVenir(E)) ? problemesSens([E.id]) : null;
+      if (st.sensKO && !st.sensKO.length) st.sensKO = null;
+      if (!E && st.phase !== 'fin') st.phase = 'fin';
+    }
+    // nom des deux bornes reliées par le pont (pour l'élève)
+    const nomsPont = id => { const f = st.scene.fils.find(x => x.pont === id) || st.pontRetire[id]; return f ? [nomBorne(f[0]), nomBorne(f[1])] : ['', '']; };
+    // dipôle aux bornes duquel se branche un voltmètre
+    const auxBornes = id => { const u = gr.sommet(id + '.a'), v = gr.sommet(id + '.b'); const l = c.dipoles.filter(x => x.id !== id && genre(x.type) !== 'multimetre' && [gr.sommet(x.id + '.a'), gr.sommet(x.id + '.b')].sort().join() === [u, v].sort().join());
+      const d = l.find(x => x.id !== G.id) || l[0]; return d ? nomS(d.id) : 'le dipôle'; };
+    // bornes libérées par le pont, côté entrée (10A) et côté COM de l'ampèremètre
+    function bornesLiberees(id) {
+      const f = st.pontRetire[id], d = sch(id);
+      if (!f) return ['', ''];
+      const sCom = gr.sommet(id + '.' + comS(d)), [x, y] = sommetDe(f[0]) === sCom ? [f[1], f[0]] : [f[0], f[1]];
+      return [nomBorne(x), nomBorne(y)];
+    }
+    function evaluerMesure(p, q) {
+      const E = L[st.k];
+      if (!E) return { msg: T.fini, borne: q };
+      if (E.e === 'debrancher') return { msg: T.debrancherDabord, borne: q };
+      if (E.e !== 'brancher') return { msg: T.reglerMaintenant, borne: q };
+      const d = sch(E.id), deja = itemDe(E.id);
+      const estM = t => { const m = mat(t.split('.')[0]); return m.type === 'multimetre' && (!st.aff[m.id] || st.aff[m.id].dip === E.id); };
+      const lieu = () => (d.type === 'amperemetre' ? T.lieuA(...bornesLiberees(E.id)) : T.lieuV(auxBornes(E.id)));
+      if (estM(p) && estM(q)) return { msg: T.memeAppareil, borne: q };
+      if (!estM(p) && !estM(q)) return { msg: lieu(), borne: q };
+      const [x, y] = estM(p) ? [q, p] : [p, q], it = y.split('.')[0], b = y.split('.')[1];
+      if (deja && deja !== it) return { msg: T.memeMultimetre, borne: y };
+      if (!borneValide(d, b)) return { msg: msgBorne(d, b), borne: y };
+      if (nbFils(y)) return { msg: T.unFil, borne: y };
+      const sx = sommetDe(x);
+      if (sx == null) return { msg: lieu(), borne: x };
+      const ta = gr.sommet(E.id + '.a') === sx, tb = gr.sommet(E.id + '.b') === sx;
+      if (!ta && !tb) return { msg: lieu(), borne: x };
+      if (nbFils(x) && !gr.jonction(sx)) return { msg: T.noeud, borne: x };
+      if (!deja) return { ok: true, x, y, d: E.id, t: ta ? 'a' : 'b' };
+      if (sommetDe(y) !== sx) return { msg: lieu(), borne: x };
+      return { ok: true, x, y };
+    }
+    function lireMesure() {
+      const E = L[st.k];
+      if (!E || E.e !== 'lire') return;
+      const m = mat(itemDe(E.id)), d = sch(E.id), r = lireValeur(st.saisie);
+      if (!m.mesure || m.mesure.depasse) { st.retourLu = { msg: T.depasse, faux: true }; maj(); return; }
+      if (!r) { st.retourLu = { msg: T.lireFormat }; maj(); return; }
+      const fam = d.type === 'amperemetre' ? 'A' : 'V', p = posDe(m.position), v = m.mesure.v / (p.k || 1);
+      let diag = null;
+      if (r.famille !== fam) diag = fam === 'A' ? T.lireUniteA : T.lireUniteV;
+      else if (Math.abs(r.v - v) > Math.max(.6 * Math.pow(10, -p.dec) / (p.k || 1), .01 * Math.abs(v))) {
+        diag = [1000, .001].some(k => Math.abs(r.v * k - v) <= .01 * Math.abs(v)) ? T.lireMilli : T.lireFaux;
+      }
+      if (diag) { st.refus++; st.retourLu = { msg: diag, faux: true }; maj(); return; }
+      st.lu[E.id] = m.mesure.texte;
+      apresChangement();
+    }
+
+    // ---------- gestes ----------
     function toucheSchema(cible) {
-      if (auto || st.phase !== 'boucle' || (cible.type !== 'fil' && cible.type !== 'dipole')) return;
+      if (st.phase !== 'boucle' || (cible.type !== 'fil' && cible.type !== 'dipole')) return;
       const i = st.choisis.indexOf(cible.id);
       if (i >= 0) st.choisis.splice(i, 1); else st.choisis.push(cible.id);
       st.diagBoucle = null; st.cerne = null;
       maj();
     }
     function verifier() {
+      if (st.phase !== 'boucle') return;
       const r = verifierBoucle(c, st.choisis, opts.textes);
-      const res = etapes.proposer(Object.assign({ type: 'boucle' }, r));
-      if (!res.accepte) { st.diagBoucle = r.diag; st.cerne = r.cerne || null; maj(); return; }
+      if (!r.ok) { st.refus++; st.diagBoucle = r.diag + lien('reperer'); st.cerne = r.cerne || null; maj(); return; }
       st.diagBoucle = null; st.cerne = null; st.info = T.boucleOk;
-      choisirBoucle(r);
-      maj();
-    }
-    function choisirBoucle(r) {
-      st.boucle = r.choisis;
+      st.imposee = new Set(r.choisis);
       st.phase = 'fils';
-      // chaîne de la boucle : sommets successifs depuis la borne +
-      const dips = r.dips.map(x => x.id), sommets = [gr.plus];
-      let s = gr.plus;
-      dips.forEach(id => { const e = gr.aretes.find(x => x.id === id); s = e.u === s ? e.v : e.u; sommets.push(s); });
-      st.chaines = [{ type: 'boucle', dips, sommets, sens: 0, k: 0, bout: null }];
-      st.ci = 0;
-      sommets.forEach(x => st.built.add(x));
-    }
-    // dérivations restantes : chaînes de dipôles entre deux sommets déjà construits, dans l'ordre du schéma
-    function prochaineDerivation() {
-      const utilises = new Set([gr.G.id].concat(st.chaines.flatMap(ch => ch.dips)));
-      const libres = gr.aretes.filter(e => !utilises.has(e.id));
-      const cands = [];
-      libres.forEach(e0 => [e0.u, e0.v].forEach(s0 => {
-        if (!st.built.has(s0)) return;
-        const dips = [e0.id], sommets = [s0];
-        let s = e0.u === s0 ? e0.v : e0.u, ok = true;
-        while (!st.built.has(s)) {
-          sommets.push(s);
-          const suite = libres.filter(e => !dips.includes(e.id) && (e.u === s || e.v === s));
-          if (suite.length !== 1) { ok = false; break; }
-          dips.push(suite[0].id);
-          s = suite[0].u === s ? suite[0].v : suite[0].u;
-        }
-        sommets.push(s);
-        if (ok) cands.push({ type: 'deriv', dips, sommets, sens: 0, k: 0, bout: null });
-      }));
-      if (!cands.length) return null;
-      const P = x => st.pos[x] == null ? 99 : st.pos[x];
-      // chaque dérivation est orientée depuis son nœud le plus proche de la borne de départ
-      cands.forEach(k => { if (P(k.sommets[0]) > P(k.sommets[k.sommets.length - 1])) { k.dips.reverse(); k.sommets.reverse(); } });
-      const G0 = gr.G;
-      const cle = ch => [Math.min(P(ch.sommets[0]), P(ch.sommets[ch.sommets.length - 1])), Math.max(P(ch.sommets[0]), P(ch.sommets[ch.sommets.length - 1])),
-        Math.min(...ch.dips.map(id => Math.hypot(sch(id).x - G0.x, sch(id).y - G0.y)))];
-      // d'abord le nœud de départ le plus proche de la borne de départ, puis la dérivation la plus proche du générateur sur le schéma
-      cands.sort((x, y) => { const p = cle(x), q = cle(y); return p[0] - q[0] || p[2] - q[2] || p[1] - q[1]; });
-      return cands[0];
-    }
-
-    // ---------- fils proposés sur la table ----------
-    const itemDe = ref => mat(ref.split('.')[0]);
-    const nbFilsSur = ref => st.scene.fils.filter(f => f[0] === ref || f[1] === ref).length;
-    const complement = (ref, type) => {
-      const [t, b] = ref.split('.');
-      if (type === 'amperemetre') return t + '.' + (b === 'COM' ? '10A' : 'COM');
-      if (type === 'voltmetre') return t + '.' + (b === 'COM' ? 'V' : 'COM');
-      return t + '.' + (b === '1' ? '2' : '1');
-    };
-    // la borne y convient-elle pour entrer dans le dipôle id du schéma ?
-    function convient(y, id) {
-      const m = itemDe(y), d = sch(id), b = y.split('.')[1];
-      if (!m || m.type === 'generateur') return { ok: false };
-      if (st.rassign[m.id] ? st.rassign[m.id] !== id : (st.assign[id] ? st.assign[id] !== m.id : m.sorte !== sorte(d))) return { ok: false };
-      if (nbFilsSur(y)) return { ok: false };
-      if (d.type === 'amperemetre' && !['10A', 'COM'].includes(b)) return { ok: false, msg: T.dixA };
-      if (d.type === 'voltmetre' && !['V', 'COM'].includes(b)) return { ok: false, msg: T.voltBornes };
-      return { ok: true };
-    }
-    const ch = () => st.chaines[st.ci];
-    const prochainDip = c0 => (c0.k < c0.dips.length ? (c0.sens === 1 ? c0.dips[c0.k] : c0.dips[c0.dips.length - 1 - c0.k]) : null);
-    const finChaine = c0 => (c0.sens === 1 ? c0.sommets[c0.sommets.length - 1] : c0.sommets[0]);
-    const numDeriv = n => ['première', 'deuxième', 'troisième', 'quatrième'][n] || 'suivante';
-    const nomBout = c0 => { const m = itemDe(c0.bout); return m.type === 'generateur' ? (c0.bout === 'G.plus' ? 'la borne + du générateur' : 'la borne − du générateur') : nomS(st.rassign[m.id]); };
-    // nœud du schéma au sommet s (pour le cercler), et ses voisins dans la boucle
-    function noeudDe(s) { const n = (c.noeuds || []).find(x => gr.sommet(x.id) === s); return n ? n.id : null; }
-    function noeudVers(e) {
-      const estN = x => (c.noeuds || []).some(n => n.id === x), vus = new Set([e]), file = [e];
-      while (file.length) {
-        const x = file.shift();
-        if (estN(x)) return x;
-        c.fils.forEach(w => { const y = w.a === x ? w.b : w.b === x ? w.a : null; if (y && !vus.has(y)) { vus.add(y); file.push(y); } });
-      }
-      return null;
-    }
-    // nœud de départ (sur le schéma) de la dérivation c0
-    const noeudDebut = c0 => { const s0 = c0.sens === -1 ? c0.sommets[c0.sommets.length - 1] : c0.sommets[0], d = c0.sens === -1 ? c0.dips[c0.dips.length - 1] : c0.dips[0];
-      const e = ['a', 'b'].map(t => d + '.' + t).find(x => gr.sommet(x) === s0); return (e && noeudVers(e)) || noeudDe(s0); };
-    function voisins(s) {
-      const b = st.chaines[0], i = b.sommets.indexOf(s);
-      if (i < 0) return '';
-      const av = i === 0 ? 'la borne + du générateur' : nomS(b.dips[i - 1]), ap = i === b.dips.length ? 'la borne − du générateur' : nomS(b.dips[i]);
-      return `entre ${av} et ${ap}`;
-    }
-
-    function evaluer(p, q) {
-      const P = itemDe(p), Q = itemDe(q);
-      // court-circuit
-      const vp = st.vx[p], vq = st.vx[q];
-      const gpm = x => x === gr.plus ? 1 : x === gr.moins ? -1 : 0;
-      if ((p.startsWith('G.') && q.startsWith('G.')) || (vp && vq && gpm(vp) * gpm(vq) === -1)) return { msg: T.court, borne: q };
-      if (st.phase === 'boucle') return { msg: T.boucleDabordSchema, borne: q };
-      if (st.phase !== 'fils') return { msg: T.fini, borne: q };
-      const c0 = ch();
-      if (!c0.bout) {
-        for (const [x, y] of [[p, q], [q, p]]) {
-          for (const sens of [1, -1]) {
-            const s0 = sens === 1 ? c0.sommets[0] : c0.sommets[c0.sommets.length - 1];
-            const d0 = sens === 1 ? c0.dips[0] : c0.dips[c0.dips.length - 1];
-            if (st.vx[x] !== s0) continue;
-            if (c0.type === 'boucle' && !x.startsWith('G.')) continue;
-            const r = convient(y, d0);
-            if (r.ok) return { ok: true, x, y, sens, dip: d0 };
-            if (r.msg) return { msg: r.msg, borne: y };
-          }
-        }
-        return diagnostic(p, q, c0, null);
-      }
-      for (const [x, y] of [[p, q], [q, p]]) {
-        if (x !== c0.bout) continue;
-        const d = prochainDip(c0);
-        if (!d) { if (st.vx[y] === finChaine(c0)) return { ok: true, x, y, fin: true }; continue; }
-        const r = convient(y, d);
-        if (r.ok) return { ok: true, x, y, dip: d };
-        if (r.msg) return { msg: r.msg, borne: y };
-      }
-      return diagnostic(p, q, c0, c0.bout);
-    }
-    function diagnostic(p, q, c0, bout) {
-      const autre = bout === p ? q : bout === q ? p : q;
-      const pas = st.chaines.length && c0.type === 'boucle' && !c0.bout;
-      if (pas && !p.startsWith('G.') && !q.startsWith('G.')) return { msg: T.depart, borne: p };
-      // ampèremètre : un deuxième fil sur une borne déjà reliée le mettrait en dérivation
-      for (const x of [p, q]) {
-        const m = itemDe(x), dId = m && st.rassign[m.id];
-        if (dId && sch(dId).type === 'amperemetre' && x !== bout && nbFilsSur(x)) return { msg: T.serieA, borne: x };
-      }
-      // deux fils sur une borne là où le schéma n'a pas de nœud
-      for (const y of [p, q]) if (y !== bout && nbFilsSur(y) && !gr.jonction(st.vx[y])) return { msg: T.noeud, borne: y };
-      const M = itemDe(autre);
-      // dipôle d'une dérivation pendant la boucle, ou d'une autre dérivation
-      const restants = c0.dips.filter(id => !st.assign[id] || st.assign[id] === M.id).map(id => sorte(sch(id)));
-      if (M.type !== 'generateur' && !restants.includes(M.sorte) && !st.rassign[M.id]) {
-        if (c0.type === 'boucle') {
-          // depuis le bout de la boucle vers un voltmètre : il serait en série ; ailleurs : dérivation commencée trop tôt
-          const volt = M.type === 'multimetre' && c.dipoles.some(d => d.type === 'voltmetre') && bout && [p, q].includes(bout);
-          return { msg: volt ? T.voltSerie : T.boucleDabord, borne: autre };
-        }
-        const s0 = c0.sens === -1 ? c0.sommets[c0.sommets.length - 1] : c0.sommets[0];
-        st.cerne = noeudDebut(c0);
-        return { msg: T.ordreDeriv(numDeriv(st.faitesDeriv), voisins(s0)), borne: autre };
-      }
-      if (c0.type === 'deriv' && !c0.bout) {
-        const s0 = c0.sommets[0];
-        st.cerne = noeudDebut(c0);
-        return { msg: T.ordreDeriv(numDeriv(st.faitesDeriv), voisins(s0)), borne: autre };
-      }
-      if (!bout) {
-        const g = [p, q].find(x => x.startsWith('G.'));
-        if (g && c0.type === 'boucle') {
-          const d0 = g === 'G.plus' ? c0.dips[0] : c0.dips[c0.dips.length - 1];
-          return { msg: T.premier(g === 'G.plus' ? 'la borne + du générateur' : 'la borne − du générateur', nomS(d0)), borne: autre };
-        }
-        return { msg: T.depart, borne: p };
-      }
-      const d = prochainDip(c0), x = nomBout(c0);
-      if (!d) {
-        if (c0.type === 'boucle') return { msg: T.fermer(x), borne: autre };
-        const dl = c0.sens === -1 ? c0.dips[0] : c0.dips[c0.dips.length - 1], el = ['a', 'b'].map(t => dl + '.' + t).find(e => gr.sommet(e) === finChaine(c0));
-        st.cerne = (el && noeudVers(el)) || noeudDe(finChaine(c0));
-        return { msg: T.rejoindre(x), borne: autre };
-      }
-      return { msg: T.suivant(x, nomS(d)), borne: autre };
-    }
-
-    function fil(p, q) {
-      st.info = null; st.cerne = null;
-      // déplacement d'une fiche sur un même multimètre (10A ↔ mA)
-      const [tp, bp] = p.split('.'), [tq, bq] = q.split('.');
-      if (tp === tq && itemDe(p).type === 'multimetre' && ['10A', 'mA'].includes(bp) && ['10A', 'mA'].includes(bq)) {
-        const [de0, vers] = nbFilsSur(p) ? [p, q] : [q, p];
-        if (!nbFilsSur(de0) || nbFilsSur(vers)) return;
-        if (st.phase === 'boucle' || st.phase === 'fils') { vTab.refus(vers, T.finirDabord); return; }
-        // première fois (mesures « dixA ») : on lit d'abord l'intensité au calibre 10 A
-        const e0 = etapes.courante();
-        if (opts.mesures === 'dixA' && vers.endsWith('.mA') && e0 && ['interrupteur', 'generateur', 'del', 'cal10'].includes(e0.id)) { vTab.refus(vers, `<b>Pas encore.</b> ${T.dixA}`); return; }
-        const i = st.scene.fils.findIndex(f => f.includes(de0));
-        st.scene.fils[i] = st.scene.fils[i].map(x => (x === de0 ? vers : x));
-        st.vx[vers] = st.vx[de0]; delete st.vx[de0];
-        st.deplaces = st.deplaces || new Set(); st.deplaces.add(i);
-        apresChangement();
-        return;
-      }
-      const r = evaluer(p, q);
-      const res = etapes.proposer(Object.assign({ type: 'fil' }, r));
-      if (!res.accepte) {
-        if (r.msg) vTab.refus(r.borne, `<b>Ce n'est pas ça.</b> ${r.msg}`);
-        if (opts.onChange) opts.onChange(api);
-        maj();
-        return;
-      }
-      poser(r);
-    }
-    function poser(r) {
-      st.histo.push(JSON.stringify({ vx: st.vx, assign: st.assign, rassign: st.rassign, chaines: st.chaines, ci: st.ci, faitesDeriv: st.faitesDeriv,
-        built: Array.from(st.built), pos: st.pos, branches: st.branches, allumes: st.allumes, phase: st.phase }));
-      const c0 = ch();
-      st.scene.fils.push([r.x, r.y]);
-      // fils du schéma colorés : chemin entre la borne de départ et la borne d'arrivée, au même sommet
-      const sx = st.vx[r.x];
-      const ext = ref => { const m = itemDe(ref), id = st.rassign[m.id]; const d = sch(id); return ['a', 'b'].map(t => id + '.' + t).find(e => gr.sommet(e) === st.vx[ref]) || (d && id + '.a'); };
-      if (r.fin) {
-        st.branches.push(...gr.chemin(ext(r.x), ext(r.y)));
-        if (c0.type === 'deriv') { const n = noeudVers(ext(r.x)); if (n && !st.allumes.includes(n)) st.allumes.push(n); }
-        c0.bout = null; c0.fini = true;
-        if (c0.type === 'deriv') st.faitesDeriv++;
-        // positions des sommets le long de la boucle, depuis la borne de départ
-        if (c0.type === 'boucle') c0.sommets.forEach((s, i) => { st.pos[s] = c0.sens === 1 ? i : c0.sommets.length - 1 - i; });
-        else c0.sommets.slice(1, -1).forEach(s => { st.pos[s] = Math.min(st.pos[c0.sommets[0]], st.pos[c0.sommets[c0.sommets.length - 1]]) + .5; st.built.add(s); });
-        const n = prochaineDerivation();
-        if (n) { st.chaines.push(n); st.ci++; } else st.phase = 'reglages';
-      } else {
-        if (!c0.sens) c0.sens = r.sens;
-        const m = itemDe(r.y);
-        st.assign[r.dip] = m.id; st.rassign[m.id] = r.dip;
-        // sommets : entrée du dipôle (côté départ) et sortie
-        const i = c0.sens === 1 ? c0.k : c0.dips.length - 1 - c0.k;
-        const sEnt = c0.sens === 1 ? c0.sommets[i] : c0.sommets[i + 1], sSor = c0.sens === 1 ? c0.sommets[i + 1] : c0.sommets[i];
-        st.vx[r.y] = sEnt;
-        c0.bout = complement(r.y, sch(r.dip).type);
-        st.vx[c0.bout] = sSor;
-        c0.k++;
-        st.branches.push(r.dip);
-        if (!st.branches.includes(gr.G.id)) st.branches.push(gr.G.id);
-        if (sx != null) {
-          st.branches.push(...gr.chemin(ext(r.x), ext(r.y)));
-          if (c0.type === 'deriv' && c0.k === 1) { const n = noeudVers(ext(r.y)); if (n && !st.allumes.includes(n)) st.allumes.push(n); }
-        }
-      }
-      apresChangement(true);
-    }
-    function retirer(i) {
-      if (i !== st.scene.fils.length - 1 || !st.histo.length) return;
-      const h = JSON.parse(st.histo.pop());
-      Object.assign(st, h, { built: new Set(h.built) });
-      st.scene.fils.pop();
-      etapes.reculer('fil' + (st.scene.fils.length + 1));
-      st.delQ = null;
       apresChangement();
     }
-    function onFilTouche() { st.info = T.retirerDernier; maj(); }
+    // déplacement d'une fiche sur un même multimètre (10A → mA)
+    function deplacerFiche(p, q) {
+      const [tp, bp] = p.split('.'), [tq, bq] = q.split('.');
+      if (tp !== tq || mat(tp).type !== 'multimetre' || !['10A', 'mA'].includes(bp) || !['10A', 'mA'].includes(bq)) return false;
+      const [de0, vers] = nbFils(p) ? [p, q] : [q, p];
+      if (!nbFils(de0) || nbFils(vers)) return true;
+      const E = L[st.k];
+      if (!mesure || !E || E.e !== 'versmA' || !vers.endsWith('.mA')) { vTab.refus(vers, `<b>Pas encore.</b> ${T.dixA}`); return true; }
+      const f = st.scene.fils.find(x => x.includes(de0));
+      f[f.indexOf(de0)] = vers;
+      apresChangement();
+      return true;
+    }
+    function fil(p, q) {
+      if (st.phase === 'fin') return;
+      st.info = null; st.cerne = null;
+      if (deplacerFiche(p, q)) return;
+      const r = mesure ? evaluerMesure(p, q) : evaluer(p, q);
+      if (!r.ok) {
+        st.refus++;
+        if (r.cerne) st.cerne = r.cerne;
+        vTab.refus(r.borne || q, `<b>Ce n'est pas ça.</b> ${r.msg}`);
+        maj();
+        if (opts.onChange) opts.onChange(api);
+        return;
+      }
+      st.scene.fils.push([r.x, r.y]);
+      if (r.d) {
+        const [id, b] = r.y.split('.'), d = sch(r.d);
+        // r.t : borne du schéma reliée à la borne y
+        st.aff[id] = genre(d.type) === 'multimetre' ? { dip: r.d, com: b === 'COM' ? r.t : autreT(r.t) } : { dip: r.d, t1: b === '1' ? r.t : autreT(r.t) };
+        st.ordre[id] = ++st.n;
+      }
+      apresChangement();
+    }
+    function retirable(i) {
+      const f = st.scene.fils[i];
+      if (!f || st.phase === 'fin') return false;
+      if (!mesure) return true;
+      const E = L[st.k];
+      if (f.pont) return !!E && E.e === 'debrancher' && f.pont === E.id;
+      if (f.pre) return false;
+      return !!E && E.e === 'brancher' && [f[0], f[1]].some(t => st.aff[t.split('.')[0]] && st.aff[t.split('.')[0]].dip === E.id);
+    }
+    function filTouche(i) {
+      const f = st.scene.fils[i], E = L[st.k];
+      if (!f || !mesure || !E) return;
+      if (f.pre && E.e === 'debrancher') st.info = `${T.pasCeFil} ${T.debrancher(...nomsPont(E.id))}`;
+      else if (f.pre) st.info = E.e === 'brancher' && sch(E.id).type === 'voltmetre' ? T.voltSansDebrancher : T.pasToucher;
+      else st.info = T.dejaBien;
+      maj();
+    }
+    function retirer(i) {
+      if (!retirable(i)) return;
+      const f = st.scene.fils.splice(i, 1)[0];
+      if (f.pont) st.pontRetire[f.pont] = f;
+      st.retraits++;
+      st.info = null; st.cerne = null;
+      // un objet qui n'a plus de fil redevient libre
+      Object.keys(st.aff).forEach(id => { if (!Object.keys(descMat(mat(id)).bornes).some(b => nbFils(id + '.' + b))) delete st.aff[id]; });
+      apresChangement();
+    }
     function commande(id, nom, v) {
+      if (st.phase === 'fin' && !mesure) return;
       const m = mat(id);
       if (nom === 'levier') m.ferme = !m.ferme;
+      if (nom === 'marche') m.marche = !m.marche;
       if (nom === 'position') m.position = v;
       if (nom === 'tension') m.tension = v;
       apresChangement();
     }
     function apresChangement() {
       st.res = calculer(st.scene);
-      etapes.verifier();
+      if (mesure) avancerMesure();
+      else if (st.phase !== 'boucle' && st.phase !== 'fin') {
+        const A = analyse();
+        if (A.ferme) st.retraits = 0;                   // boucle refermée : fin de la réparation
+        st.phase = complet(A) ? 'verif' : 'fils';
+        st.sensKO = null;
+        if (st.phase === 'verif' && gen().marche && !interrupteursOuverts()) {
+          const pb = problemesSens();
+          if (pb.length) { st.sensKO = pb; st.cerne = pb[0].id; } else st.phase = 'fin';
+        }
+      }
       maj();
       if (opts.onChange) opts.onChange(api);
+      if (st.phase === 'fin' && !st.finSignale) {
+        st.finSignale = true;
+        vTab.actif(false);
+        if (opts.onFin) opts.onFin({ refus: st.refus, mesures: Object.assign({}, st.lu) });
+      }
     }
-    function fin() { maj(); }
 
     // ---------- affichage ----------
-    function maj() {
-      if (!st.res) st.res = calculer(st.scene);
-      // étiquettes des appareils de mesure
-      st.scene.materiel.forEach(m => { if (m.type === 'multimetre') { const d = st.rassign[m.id] && sch(st.rassign[m.id]); m.etiquette = d && d.mesure ? (d.type === 'amperemetre' ? 'A · ' : 'V · ') + indice(d.mesure).replace(/<\/?sub>/g, '') : ''; } });
-      const etats = {};
-      c.dipoles.forEach(d => {
-        const m = st.assign[d.id] && mat(st.assign[d.id]);
-        if (d.type === 'interrupteur') etats[d.id] = { ouvert: !(m && m.ferme) };
-        if (d.type === 'lampe') etats[d.id] = { allumee: !!(m && m.eclat) };
-      });
-      vSch.maj({ libre: st.phase === 'boucle' && !auto, choisis: st.phase === 'boucle' ? st.choisis : [], boucle: st.boucle, branches: st.branches,
-                 allumes: st.allumes, cerne: st.cerne, etats });
-      vTab.dessiner();
-      consigne();
-      deroule();
+    // boucle principale réalisée : la plus ancienne suite de dipôles (ordre de pose) qui relie les deux bornes du générateur
+    function boucleConstruite(A) {
+      const fils = st.scene.fils.filter(f => !f.pont);
+      const items = Object.keys(st.aff).filter(id => sch(st.aff[id].dip).type !== 'voltmetre' && A.dansG(bornesItem(id)[0])).sort((x, y) => st.ordre[x] - st.ordre[y]);
+      const ids = new Set();
+      if (!fils.length) return ids;
+      if (!A.ferme) {
+        ids.add(G.id);
+        items.forEach(id => ids.add(st.aff[id].dip));
+        fils.forEach(([p, q]) => { const a0 = borneS(p), b0 = borneS(q); if ((p.startsWith('G.') || items.includes(p.split('.')[0])) && (q.startsWith('G.') || items.includes(q.split('.')[0])) && a0 && b0) gr.chemin(a0, b0).forEach(x => ids.add(x)); });
+        return ids;
+      }
+      let pris = items;
+      for (let k = 1; k <= items.length; k++) {
+        const U = unions();
+        fils.forEach(([p, q]) => U.u(p, q));
+        items.slice(0, k).forEach(id => { const [x, y] = bornesItem(id); U.u(x, y); });
+        if (U.f('G.plus') === U.f('G.moins')) { pris = items.slice(0, k); break; }
+      }
+      // parcours en largeur de G.plus à G.moins par les fils et les dipôles retenus
+      const voisins = t => {
+        const l = [];
+        fils.forEach(([p, q]) => { if (p === t) l.push([q, null]); else if (q === t) l.push([p, null]); });
+        pris.forEach(id => { const [x, y] = bornesItem(id); if (x === t) l.push([y, id]); else if (y === t) l.push([x, id]); });
+        return l;
+      };
+      const prec = { 'G.plus': null }, file = ['G.plus'];
+      while (file.length) {
+        const t = file.shift();
+        if (t === 'G.moins') break;
+        voisins(t).forEach(([u, id]) => { if (!(u in prec)) { prec[u] = [t, id]; file.push(u); } });
+      }
+      if (!('G.moins' in prec)) return ids;
+      const suite = [];
+      for (let t = 'G.moins'; prec[t]; t = prec[t][0]) if (prec[t][1]) suite.unshift([prec[t][0], t, prec[t][1]]);
+      ids.add(G.id);
+      let sortie = plusS;
+      suite.forEach(([e, s, id]) => { const be = borneS(e); gr.chemin(sortie, be).forEach(x => ids.add(x)); ids.add(st.aff[id].dip); sortie = borneS(s); });
+      gr.chemin(sortie, moinsS).forEach(x => ids.add(x));
+      return ids;
     }
-    function consigne() {
-      const e = etapes.courante();
+    function maj() {
+      const A = analyse();
+      // étiquettes des appareils de mesure
+      st.scene.materiel.forEach(m => {
+        if (m.type !== 'multimetre') return;
+        const f = st.aff[m.id], d = f && sch(f.dip);
+        m.etiquette = d && d.mesure ? (d.type === 'amperemetre' ? 'A · ' : 'V · ') + indice(d.mesure).replace(/<\/?sub>/g, '') : '';
+      });
+      const etats = {};
+      Object.keys(st.aff).forEach(id => {
+        const d = sch(st.aff[id].dip), m = mat(id);
+        if (d.type === 'interrupteur') etats[d.id] = { ouvert: !m.ferme };
+        if (d.type === 'lampe') etats[d.id] = { allumee: !!m.eclat };
+      });
+      // surlignage : éléments branchés (fils du schéma correspondant aux fils de la table) et boucle principale
+      const branches = new Set();
+      if (st.scene.fils.some(f => !f.pont)) branches.add(G.id);
+      Object.values(st.aff).forEach(f => branches.add(f.dip));
+      st.scene.fils.forEach(f => { if (f.pont) return; const a0 = borneS(f[0]), b0 = borneS(f[1]); if (a0 && b0) gr.chemin(a0, b0).forEach(x => branches.add(x)); });
+      const boucle = st.imposee ? st.imposee : mesure ? new Set() : boucleConstruite(A);
+      const allumes = (c.noeuds || []).filter(n => { const inc = c.fils.filter(w => w.a === n.id || w.b === n.id); return inc.length && inc.every(w => branches.has(w.id)); }).map(n => n.id);
+      let cerne = st.cerne;
+      if (mesure && !cerne && L[st.k] && ['debrancher', 'brancher'].includes(L[st.k].e)) cerne = L[st.k].id;
+      vSch.maj({ libre: st.phase === 'boucle', choisis: st.phase === 'boucle' ? st.choisis : [], boucle: Array.from(boucle),
+                 branches: Array.from(branches), allumes, cerne, etats });
+      vTab.dessiner();
+      consigne(A);
+      deroule(A);
+    }
+    function consigneFils(A) {
+      if (!st.scene.fils.length) return T.cDepart;
+      const l = A.libres.filter(t => !t.startsWith('G.'));
+      if (!A.ferme) {
+        if (l.length) return sommetDe(l[0]) === pointFermeture(l[0], A) ? T.cFermer(nomBorne(l[0])) : T.cSuite(nomBorne(l[0]));
+        return A.libres.length && !Object.keys(st.aff).length ? T.cDepart : T.cReprendre;
+      }
+      if (l.length) return pointAtteint(l[0], A) ? T.cRejoindre(nomBorne(l[0])) : T.cDerivSuite(nomBorne(l[0]));
+      return c.dipoles.some(d => d.id !== G.id && !dipsAff().has(d.id)) ? T.cDeriv : T.cReprendre;
+    }
+    function consigneMesure() {
+      const E = L[st.k];
+      if (!E) return '';
+      const it = itemDe(E.id), m = it && mat(it), d = sch(E.id);
       let h = '';
-      if (!e) {
-        h = `<p class="mt-ok"><b>Juste !</b> ${T.fin}</p>${resultatsHTML()}`;
-      } else if (e.id === 'boucle') {
-        h = `<p>${T.cBoucle}</p><div class="mt-cons-actions"><button type="button" class="btn-small" data-a="verifier"${auto ? ' disabled' : ''}>Vérifier</button></div>`;
+      if (E.e === 'debrancher') h = `<p>${T.debrancher(...nomsPont(E.id))}</p>`;
+      else if (E.e === 'brancher') h = `<p>${d.type === 'amperemetre' ? T.cBrancherA(...bornesLiberees(E.id)) : T.cBrancherV(auxBornes(E.id))}</p>`;
+      else if (E.e === 'cal10') h = `<p>${T.cCal10}</p>`;
+      else if (E.e === 'versmA') h = `<p>${T.cVersmA(m.affiche || '0.00')}</p>`;
+      else if (E.e === 'calmA') h = `<p>${T.cCalmA}</p>`;
+      else if (E.e === 'calmax') h = `<p>${T.cCalmax}</p>`;
+      else if (E.e === 'calV') h = `<p>${T.cCalV(m.affiche || '')}</p>`;
+      else if (E.e === 'lire') {
+        const n = d.mesure || (d.type === 'amperemetre' ? 'I' : 'U');
+        h = `<p>${T.cLire((d.type === 'amperemetre' ? 'l\'intensité ' : 'la tension ') + indice(n))}</p>
+          <div class="mt-lecture"><span class="mt-lab">${indice(n)} =</span><input type="text" class="mt-champ" inputmode="text" autocomplete="off" spellcheck="false"
+            aria-label="Valeur lue avec son unité" placeholder="${d.type === 'amperemetre' ? '16,3 mA' : '6,37 V'}"><button type="button" class="btn-primary mt-lire-ok" data-a="lire">Valider</button></div>`;
+        if (st.retourLu) h += `<div class="${st.retourLu.faux ? 'callout-danger' : 'callout'} mt-diag">${st.retourLu.faux ? '<b>Ce n\'est pas ça.</b> ' : ''}${st.retourLu.msg}</div>`;
+      }
+      const ind = ['cal10', 'calmA', 'calmax', 'calV'].includes(E.e) ? indiceReglage(E) : null;
+      if (ind) h += `<p class="mt-indice">${ind}</p>`;
+      return h;
+    }
+    function consigne(A) {
+      const actif = document.activeElement && document.activeElement.classList.contains('mt-champ') && zCons.contains(document.activeElement);
+      let h = '';
+      if (st.phase === 'boucle') {
+        h = `<p>${T.cBoucle}</p><div class="mt-cons-actions"><button type="button" class="btn-small" data-a="verifier">Vérifier</button></div>`;
         if (st.diagBoucle) h += `<div class="callout-danger mt-diag"><b>Ce n'est pas ça.</b> ${st.diagBoucle}</div>`;
-      } else if (e.type === 'fil') {
-        const c0 = ch();
-        if (!c0) h = '';
-        else if (c0.type === 'boucle') h = !c0.bout ? T.cDepart : prochainDip(c0) ? T.cSuite(nomBout(c0)) : T.cFermer(nomBout(c0));
-        else h = !c0.bout ? T.cDeriv(numDeriv(st.faitesDeriv)) : T.cDerivSuite(nomBout(c0));
-        h = `<p>${h}</p>`;
-      } else if (e.id === 'interrupteur') h = `<p>${T.cInterrupteur}</p>`;
-      else if (e.id === 'generateur') h = `<p>${T.cGenerateur(c.tension)}</p>`;
-      else if (e.id === 'del') h = delHTML();
-      else if (e.id === 'cal10') h = `<p>${T.cCal10}</p>`;
-      else if (e.id === 'versmA') { const m = mat(st.assign[aMesurer()[0].id]); h = `<p>${T.cVersmA(m.affiche)}</p>`; }
-      else if (e.id === 'calmA') h = `<p>${T.cCalmA}</p>`;
-      else if (e.id === 'mesures') h = `<p>${T.cMesures(aMesurer().map(d => indice(d.mesure || '')))}</p>${resultatsHTML(true)}`;
+      } else if (st.phase === 'fin') h = `<p class="mt-ok"><b>Juste !</b> ${mesure ? 'Les mesures sont faites.' : T.fin}</p>`;
+      else if (mesure) h = consigneMesure();
+      else if (st.phase === 'verif') {
+        if (st.sensKO) h = st.sensKO.map(p => `<div class="callout-danger mt-diag"><b>Ce n'est pas ça.</b> ${p.msg}</div>`).join('');
+        else if (gen().marche && interrupteursOuverts()) h = `<p>${T.cInterrupteur}</p>`;
+        else h = `<p>${T.cVerifier(interrupteursOuverts())}</p>`;
+      } else h = `<p>${consigneFils(A)}</p>`;
+      if (mesure && st.sensKO) h += st.sensKO.map(p => `<div class="callout-danger mt-diag"><b>Ce n'est pas ça.</b> ${p.msg}</div>`).join('');
+      const lus = Object.keys(st.lu).map(id => `<span>${indice(sch(id).mesure || id)} = ${st.lu[id]}</span>`);
+      if (lus.length) h += `<p class="mt-mesures">${lus.join('')}</p>`;
       if (st.info) h = `<p class="mt-info">${st.info}</p>` + h;
       zCons.innerHTML = h;
       const b = zCons.querySelector('[data-a="verifier"]');
       if (b) b.onclick = verifier;
-      zCons.querySelectorAll('[data-del]').forEach(x => { x.onclick = () => { st.delQ = +x.dataset.del; maj(); }; });
+      const ch = zCons.querySelector('.mt-champ');
+      if (ch) {
+        ch.value = st.saisie;
+        ch.addEventListener('input', () => { st.saisie = ch.value; });
+        ch.addEventListener('keydown', ev => { if (ev.key === 'Enter') lireMesure(); });
+        zCons.querySelector('[data-a="lire"]').onclick = lireMesure;
+        if (actif || (st.focusLire !== st.k && matchMedia('(hover: hover)').matches)) { st.focusLire = st.k; ch.focus({ preventScroll: true }); }
+      }
     }
-    function delHTML() {
-      if (st.delQ === 0) return `<div class="callout-success mt-diag">${T.delRep}</div>`;
-      return `<p><b>${T.cDel}</b> ${T.delQ}</p><div class="mt-choix">${T.delChoix.map((t, i) => `<button type="button" class="btn-secondary" data-del="${i}">${t}</button>`).join('')}</div>
-        ${st.delQ ? `<div class="callout-danger mt-diag">${T.delFaux}</div>` : ''}`;
+    function deroule(A) {
+      const ol = zone.querySelector('.mt-deroule');
+      let l = [];
+      if (mesure) {
+        const lab = E => {
+          const d = sch(E.id), n = indice(d.mesure || (d.type === 'amperemetre' ? 'I' : 'U'));
+          return { debrancher: 'Débranche le fil à la place duquel se met l\'ampèremètre.', cal10: 'Règle-le sur A⎓, calibre 10 A.',
+            versmA: 'Passe la fiche de l\'entrée 10A à l\'entrée mA.', calmA: 'Choisis le calibre en mA le plus adapté.',
+            calmax: 'Règle-le sur V⎓, calibre 600 V.', calV: 'Choisis le calibre le plus adapté.', lire: `Lis ${d.type === 'amperemetre' ? 'l\'intensité' : 'la tension'} ${n}.`,
+            brancher: d.type === 'amperemetre' ? 'Branche l\'ampèremètre en série : bornes 10A et COM.' : 'Branche le voltmètre en dérivation : bornes V et COM.' }[E.e];
+        };
+        l = L.map((E, i) => [lab(E), i < st.k, i === st.k]);
+      } else {
+        const deriv = Object.values(gr.deg).some(n => n >= 3), fini = st.phase === 'verif' || st.phase === 'fin';
+        const bl = A.libres.filter(t => !t.startsWith('G.'));
+        const boucleFaite = A.ferme || fini || (bl.length === 1 && sommetDe(bl[0]) === pointFermeture(bl[0], A));
+        if (opts.boucle) l.push(['Surligne la boucle principale sur le schéma.', st.phase !== 'boucle']);
+        l.push(['Réalise la boucle principale : pars d\'une borne du générateur et suis les dipôles dans l\'ordre du schéma.', boucleFaite]);
+        l.push(['Ferme la boucle sur l\'autre borne du générateur.', A.ferme || fini]);
+        if (deriv) l.push(['Ajoute les dérivations, une par une.', fini]);
+        l.push([c.dipoles.some(d => d.type === 'interrupteur') ? 'Ferme l\'interrupteur et allume le générateur : le montage est vérifié.' : 'Allume le générateur : le montage est vérifié.', st.phase === 'fin']);
+        const i = l.findIndex(x => !x[1]);
+        l = l.map((x, j) => [x[0], x[1], j === i]);
+      }
+      ol.innerHTML = l.map(([t, fait, ici]) => `<li class="${fait ? 'fait' : ici ? 'ici' : 'avenir'}">${t}</li>`).join('');
     }
-    function mesures() {
-      const o = {};
-      aMesurer().forEach(d => { const m = mat(st.assign[d.id]); if (m && m.mesure && !m.mesure.depasse) o[d.mesure || d.id] = m.mesure; });
-      return o;
-    }
-    function resultatsHTML(partiel) {
-      const l = aMesurer().filter(d => { const m = mat(st.assign[d.id]); return d.mesure && m && m.mesure && !m.mesure.depasse && (!partiel || lectureValide(d)); })
-        .map(d => `<span>${indice(d.mesure)} = ${mat(st.assign[d.id]).mesure.texte}</span>`);
-      return l.length ? `<p class="mt-mesures">${l.join('')}</p>` : '';
-    }
-    function deroule() {
-      const ol = zone.querySelector('.mt-deroule'), faites = new Set(etapes.faites()), cour = etapes.courante();
-      const nf = nbFils(), nb = st.chaines.length ? st.chaines[0].dips.length + 1 : (boucleParDefautN || nf);
-      const grp = [];
-      if (opts.boucle) grp.push(['Surligne la boucle principale sur le schéma.', ['boucle']]);
-      const ids = k => Array.from({ length: k }, (_, i) => 'fil' + (i + 1));
-      grp.push(['Réalise la boucle principale en partant d\'une borne du générateur (+ ou −), dans l\'ordre du schéma.', ids(nb - 1)]);
-      grp.push(['Ferme la boucle sur l\'autre borne du générateur.', ['fil' + nb]]);
-      if (nf > nb) grp.push(['Ajoute les dérivations une par une, dans l\'ordre du schéma.', ids(nf).slice(nb)]);
-      const et = { interrupteur: 'Ferme l\'interrupteur.', generateur: `Règle le générateur sur ${fr(c.tension)} V.`, del: 'Vérifie que la DEL s\'éclaire.',
-        cal10: 'Règle l\'ampèremètre sur le calibre 10 A et lis l\'intensité.', versmA: 'Passe la fiche de l\'entrée 10A à l\'entrée mA.', calmA: 'Règle le calibre sur 200 mA et lis l\'intensité.',
-        mesures: 'Règle les appareils de mesure et lis les valeurs.' };
-      Object.keys(et).forEach(id => { if (etapesIds.includes(id)) grp.push([et[id], [id]]); });
-      ol.innerHTML = grp.filter(g => g[1].length).map(([t, l]) => {
-        const fait = l.every(id => faites.has(id)), ici = cour && l.includes(cour.id);
-        return `<li class="${fait ? 'fait' : ici ? 'ici' : 'avenir'}">${t}</li>`;
-      }).join('');
-    }
-    let etapesIds = [], boucleParDefautN = 0;
 
-    // ---------- « Afficher le montage » : tout se fait seul, fil par fil, au ralenti ----------
-    function solutionSuivante() {
-      if (st.phase === 'boucle') return () => { st.choisis = boucleParDefaut(c); maj(); setTimeout(verifier, 300); };
-      if (st.phase === 'fils') {
-        const c0 = ch();
-        if (!c0.bout) {
-          const sens = 1, s0 = c0.sommets[0], d0 = c0.dips[0];
-          const x = c0.type === 'boucle' ? 'G.plus' : Object.keys(st.vx).find(b => st.vx[b] === s0 && !b.startsWith('G.') || (b === 'G.plus' && s0 === gr.plus) || (b === 'G.moins' && s0 === gr.moins));
-          const y = bornePour(d0, sens);
-          return () => fil(x, y);
-        }
-        const d = prochainDip(c0);
-        if (!d) { const f0 = finChaine(c0); const y = Object.keys(st.vx).find(b => st.vx[b] === f0 && b !== c0.bout); return () => fil(c0.bout, y); }
-        return () => fil(c0.bout, bornePour(d, c0.sens));
-      }
-      const e = etapes.courante();
-      if (!e) {
-        const d = (opts.montrerMesures || []).map(n => c.dipoles.find(x => x.mesure === n)).find(x => x && !lectureValide(x));
-        return d ? reglerMesure(d) : null;
-      }
-      if (e.id === 'interrupteur') { const k = st.scene.materiel.find(m => m.type === 'interrupteur' && !m.ferme); return () => commande(k.id, 'levier'); }
-      if (e.id === 'generateur') return () => commande('G', 'tension', c.tension);
-      if (e.id === 'cal10') return () => commande(st.assign[aMesurer()[0].id], 'position', 'A10');
-      if (e.id === 'versmA') { const m = st.assign[aMesurer()[0].id]; return () => fil(m + '.10A', m + '.mA'); }
-      if (e.id === 'calmA') return () => commande(st.assign[aMesurer()[0].id], 'position', 'A200m');
-      if (e.id === 'mesures') { const d = aMesurer().find(x => !lectureValide(x)); return d ? reglerMesure(d) : null; }
-      return null;
-    }
-    // réglage d'un appareil de mesure : une action à la fois (fonction et calibre, fiche 10A → mA)
-    function reglerMesure(d) {
-      {
-        const m = mat(st.assign[d.id]);
-        if (d.type === 'voltmetre') return () => commande(m.id, 'position', meilleurV(m));
-        if (Math.abs(st.res.I[m.id] || 0) >= .2) return () => commande(m.id, 'position', 'A10');
-        if (entreeA(st.scene, m) === '10A') return () => fil(m.id + '.10A', m.id + '.mA');
-        return () => commande(m.id, 'position', 'A200m');
-      }
-      return null;
-    }
-    // borne d'entrée choisie pour l'affichage automatique : 10A pour l'ampèremètre, V pour le voltmètre (COM du côté −),
-    // anode de la DEL du côté +
-    function bornePour(id, sens) {
-      const d = sch(id);
-      const m = st.assign[id] ? mat(st.assign[id]) : st.scene.materiel.find(x => !st.rassign[x.id] && x.sorte === sorte(d));
-      const avant = sens === 1;
-      if (d.type === 'amperemetre') return m.id + '.' + (avant ? '10A' : 'COM');
-      if (d.type === 'voltmetre') return m.id + '.' + (avant ? 'V' : 'COM');
-      if (d.type === 'del') return m.id + '.' + (avant ? '1' : '2');
-      return m.id + '.1';
-    }
-    function montrer() {
-      if (auto) return;
-      auto = true; st.montre = true;
-      vTab.actif(false);
-      zone.classList.add('mt-auto');
-      const pas = () => {
-        const f = solutionSuivante();
-        if (!f) { auto = false; zone.classList.remove('mt-auto'); vTab.actif(true); maj(); return; }
-        f();
-        setTimeout(pas, 750);
-      };
-      maj();
-      setTimeout(pas, 300);
+    function init() {
+      st = { phase: mesure ? 'mesure' : opts.boucle ? 'boucle' : 'fils', choisis: [], imposee: null, diagBoucle: null, cerne: null, info: null,
+             aff: {}, ordre: {}, n: 0, refus: 0, retraits: 0, sensKO: null, finSignale: false,
+             k: 0, lu: {}, saisie: '', retourLu: null, pontRetire: {}, focusLire: -1,
+             scene: { W: 360, H: 400, materiel: materielInitial(), fils: [] } };
+      L = mesure ? etapesMesure() : [];
+      if (mesure) precabler();
+      if (vTab) vTab.detruire();
+      vSch = schema(zSch, c, { com: opts.com, libre: opts.boucle, onTouche: toucheSchema });
+      vTab = table(zTab, st.scene, { rendu: opts.rendu, onFil: fil, onRetirer: retirer, onFilTouche: filTouche, onCommande: commande, retirable,
+        onLargeur: l => { const W = l >= 520 ? 540 : 360; if (W !== st.scene.W || !st.scene.place) { st.scene.W = W; st.scene.H = disposer(st.scene.materiel, W); st.scene.place = true; } } });
+      apresChangement();
     }
 
     const api = {
-      get refus() { return etapes.refus; },
-      get montre() { return st.montre; },
-      fini: () => etapes.fini(),
-      mesures,
-      mesure: nom => mesures()[nom] || null,
-      montrer,
-      recommencer() { init(); },
-      get etapes() { return etapes; },
+      get refus() { return st.refus; },
+      fini: () => st.phase === 'fin',
+      mesures: () => Object.assign({}, st.lu),
+      recommencer: init,
+      fil, retirer, commande, verifier,
+      toucher: toucheSchema,
+      lire(t) { st.saisie = t; lireMesure(); },
       get etat() { return st; },
       circuit: c,
     };
-    // fin du montage : bilan
-    const fin0 = fin;
-    fin = function () { fin0(); if (opts.onFin) opts.onFin({ refus: etapes.refus, montre: st.montre, mesures: mesures() }); };
     init();
-    etapesIds = etapes ? (function () { const l = []; ['interrupteur', 'generateur', 'del', 'cal10', 'versmA', 'calmA', 'mesures'].forEach(id => { if (aEtape(id)) l.push(id); }); return l; })() : [];
-    function aEtape(id) {
-      if (id === 'interrupteur') return c.dipoles.some(d => d.type === 'interrupteur');
-      if (id === 'generateur') return !opts.tensionReglee;
-      if (id === 'del') return c.dipoles.some(d => d.type === 'del');
-      if (['cal10', 'versmA', 'calmA'].includes(id)) return opts.mesures === 'dixA';
-      if (id === 'mesures') return opts.mesures === 'lire' && aMesurer().length > 0;
-      return false;
-    }
-    boucleParDefautN = (verifierBoucle(c, boucleParDefaut(c)).dips || []).length + 1;
-    maj();
     return api;
   }
 
-  window.MONTAGE = { TEXTES, POSITIONS, libellePosition, schema, table, graphe, verifierBoucle, boucleParDefaut, calculer, lecture, monter, disposer, afficheur, MAT, nomDe, indice, borneSchema };
+  window.MONTAGE = { TEXTES, POSITIONS, libellePosition, schema, table, graphe, verifierBoucle, boucleParDefaut, calculer, lecture, lireValeur, monter, disposer, afficheur, MAT, nomDe, indice, borneSchema };
 })();
