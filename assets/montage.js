@@ -32,7 +32,7 @@
      masse: { x, y },                           point où est dessiné le symbole de masse de l'oscilloscope (une seule fois)
      sens: [2, 2],                              sensibilités des voies de l'oscilloscope (V/div)
      tension: 8,                                tension à régler sur le générateur (V)
-     table: ['L2', 'K', 'L1'],                  ordre des plaquettes sur la table (sinon au hasard)
+     table: ['L2', 'K', 'L1'],                  ordre des plaquettes sur la table (sinon l'ordre du circuit, voir ordreSchema)
    }
 
    ---------- API ----------
@@ -1185,10 +1185,28 @@
         [1, 2].forEach(v => l.push({ id: 'O' + v, type: 'fiche', voie: v, sorte: 'fiche' + v }));
       }
       let plaq = c.dipoles.filter(d => !['generateur', 'amperemetre', 'voltmetre', 'voie'].includes(d.type));
-      if (c.table) plaq = c.table.map(id => sch(id));
-      else plaq = plaq.map(d => [Math.random(), d]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
+      plaq = c.table ? c.table.map(id => sch(id)) : ordreSchema(plaq);
       plaq.forEach((d, i) => l.push({ id: 'P' + (i + 1), type: d.type, valeur: d.valeur, ferme: mesure, sorte: sorte(d) }));
       return l;
+    }
+
+    // plaquettes dans l'ordre du schéma, pour que les fils se croisent peu : en suivant le circuit depuis la
+    // borne + du générateur (rang : nombre de dipôles traversés ; un ampèremètre compte pour 0 ; ni voltmètre
+    // ni oscilloscope), puis dans l'ordre de la description du schéma
+    function ordreSchema(plaq) {
+      const dist = { [gr.plus]: 0 };
+      for (let change = true; change;) {
+        change = false;
+        gr.aretes.forEach(e => {
+          if (e.id === G.id || enDerivation(sch(e.id).type)) return;
+          const w = sch(e.id).type === 'amperemetre' ? 0 : 1;
+          [[e.u, e.v], [e.v, e.u]].forEach(([x, y]) => {
+            if (dist[x] != null && (dist[y] == null || dist[x] + w < dist[y])) { dist[y] = dist[x] + w; change = true; }
+          });
+        });
+      }
+      const rang = d => Math.min(...['a', 'b'].map(t => { const v = dist[gr.sommet(d.id + '.' + t)]; return v == null ? 99 : v; }));
+      return plaq.map((d, i) => [rang(d), i, d]).sort((x, y) => x[0] - y[0] || x[1] - y[1]).map(x => x[2]);
     }
 
     let st, vSch, vTab, L = [];
