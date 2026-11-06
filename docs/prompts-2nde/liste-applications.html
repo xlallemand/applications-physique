@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Applications de 2nde — liste à valider</title>
+<!-- ============================================================
+     Outil de l'enseignant (pas une application du portail) :
+     liste des applications de 2nde proposées, à valider, modifier
+     ou supprimer, puis « Copier mes retours » à coller dans la
+     conversation (étape 2 de docs/prompts-2nde/liste-applications.md).
+
+     Données : tableaux en tête de script (VERSION, APPS, OUTILS…).
+     Choix gardés dans le navigateur : clé liste-2nde-v<VERSION>.
+     Couleurs uniquement via les variables de assets/theme.css.
+     ============================================================ -->
+<link rel="stylesheet" href="../../assets/theme.css">
+<style>
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-sans); line-height: 1.5; }
+button { font-family: var(--font-sans); touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lp-page { max-width: 980px; margin: 0 auto; padding: 24px 24px 0; }
+.lp-page .btn-small { min-height: 44px; }
+.lp-page .btn-primary { min-height: 46px; }
+
+/* ---------- En-tête et bandeau ---------- */
+.lp-tete { background: var(--sheet); border: 1px solid var(--line); border-radius: 22px; padding: 24px; margin-bottom: 14px; }
+.lp-sur { display: inline-block; background: var(--cle-bg); color: var(--accent-ink); border-radius: 999px; padding: 4px 12px; font-size: .74rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.lp-tete h1 { font-size: 1.7rem; line-height: 1.2; margin: 10px 0 8px; letter-spacing: -.02em; }
+.lp-consigne { color: var(--ink-2); margin: 0 0 10px; }
+.lp-couverture { font-size: .88rem; color: var(--ink-2); margin: 0; }
+.lp-couverture b { color: var(--ink); }
+.lp-bilan { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .92rem; font-weight: 700; color: var(--ink-2); margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--paper-3); }
+.lp-bilan b { color: var(--ink); }
+.lp-filtres { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 6px; }
+.lp-filtres + .lp-filtres { margin-bottom: 14px; }
+.lp-filtres .lp-lab { font-size: .74rem; font-weight: 800; color: var(--ink-2); text-transform: uppercase; letter-spacing: .05em; margin-right: 4px; min-width: 3.6rem; }
+.lp-filtres .lp-esp { flex: 1; }
+.lp-pill { background: var(--sheet); color: var(--ink); border: none; border-radius: 999px; padding: 8px 14px; min-height: 40px; font-size: .85rem; font-weight: 700; cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--paper-3); transition: box-shadow .15s; }
+.lp-pill:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.lp-pill[aria-pressed="true"] { background: var(--ink); color: var(--sheet); box-shadow: none; }
+
+/* ---------- Cartes des applications ---------- */
+.lp-theme-t { font-size: 1.15rem; margin: 26px 4px 10px; color: var(--accent-ink); letter-spacing: -.02em; }
+.lp-theme-t small { color: var(--ink-2); font-weight: 600; font-size: .85rem; }
+.lp-carte { background: var(--sheet); border: 1px solid var(--line); border-radius: 22px; padding: 16px 20px; margin-bottom: 12px; }
+.lp-carte-h { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.lp-plier { flex: 1 1 280px; display: flex; align-items: center; gap: 8px; background: none; border: none; padding: 6px 0; min-height: 44px; text-align: left; font-size: 1rem; color: var(--ink); cursor: pointer; }
+.lp-chevron { display: inline-block; width: 1em; flex: 0 0 auto; color: var(--ink-3); font-weight: 800; transition: transform .15s; }
+[aria-expanded="true"] > .lp-chevron { transform: rotate(90deg); }
+.lp-id { flex: 0 0 auto; font-size: .78rem; font-weight: 800; color: var(--accent-ink); background: var(--cle-bg); border-radius: 999px; padding: 2px 9px; }
+.lp-nom { font-size: 1.12rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.3; }
+.lp-dec { display: flex; flex-wrap: wrap; gap: 6px; }
+.lp-dec button { border: none; border-radius: 999px; padding: 8px 14px; min-height: 44px; font-size: .86rem; font-weight: 800; cursor: pointer; background: var(--sheet); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--paper-3); }
+.lp-dec button:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.lp-dec button[aria-pressed="true"][data-dec="ok"] { background: var(--success-bg); color: var(--success-text); box-shadow: none; }
+.lp-dec button[aria-pressed="true"][data-dec="mod"] { background: var(--cle-bg); color: var(--accent-ink); box-shadow: none; }
+.lp-dec button[aria-pressed="true"][data-dec="sup"] { background: var(--danger-bg); color: var(--danger-text); box-shadow: none; }
+.lp-badges { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; padding-left: calc(1em + 8px); }
+.lp-badge { display: inline-block; border-radius: 999px; padding: 2px 10px; font-size: .74rem; font-weight: 800; background: var(--paper); color: var(--ink-2); }
+.lp-badge-ind { background: var(--ink); color: var(--sheet); }
+.lp-badge-dom { background: var(--cle-bg); color: var(--accent-ink); }
+.lp-note { margin-top: 10px; }
+.lp-zone { display: block; width: 100%; font-family: var(--font-sans); font-size: 16px; color: var(--ink); background: var(--sheet); border: 1.5px solid var(--paper-3); border-radius: 12px; padding: 8px 10px; min-height: 44px; resize: vertical; }
+textarea.lp-zone { min-height: 70px; }
+.lp-etiq { display: block; font-size: .8rem; font-weight: 800; color: var(--ink-2); margin-bottom: 4px; }
+.lp-carte.etat-sup .lp-nom { text-decoration: line-through; color: var(--ink-2); }
+.lp-carte.etat-sup .lp-corps { opacity: .5; }
+.lp-corps { margin-top: 8px; }
+.lp-resume { margin: 6px 0 12px; }
+.lp-infos { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: 6px 14px; font-size: .92rem; margin: 0 0 6px; }
+.lp-infos dt { font-weight: 800; color: var(--ink-2); }
+.lp-infos dd { margin: 0; overflow-wrap: anywhere; }
+.lp-infos ul { margin: 0; padding-left: 1.1rem; }
+.lp-infos li { margin: 0 0 3px; }
+.lp-code { font-family: var(--font-sans); font-weight: 700; background: var(--paper); border-radius: 6px; padding: 1px 6px; overflow-wrap: anywhere; }
+.lp-h { font-size: .8rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--accent-ink); margin: 16px 0 4px; }
+
+/* Modules dépliables */
+.lp-module { border-top: 1px dashed var(--paper-3); }
+.lp-module-h { display: flex; align-items: center; gap: 10px; }
+.lp-garder { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; min-height: 44px; font-size: .8rem; font-weight: 700; color: var(--ink-2); cursor: pointer; }
+.lp-garder input { width: 20px; height: 20px; margin: 0; accent-color: var(--ink); cursor: pointer; }
+.lp-module-t { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; background: none; border: none; padding: 10px 0; min-height: 44px; text-align: left; font-size: .95rem; color: var(--ink); cursor: pointer; }
+.lp-module-t .lp-mt { flex: 1 1 12rem; min-width: 0; }
+.lp-module-t b { color: var(--accent-ink); margin-right: 4px; }
+.lp-type { flex: 0 1 auto; font-size: .72rem; font-weight: 800; color: var(--accent-ink); background: var(--cle-bg); border-radius: 999px; padding: 2px 8px; }
+.lp-module.retire .lp-mt { text-decoration: line-through; color: var(--ink-2); }
+.lp-module-c { padding: 0 0 12px calc(20px + 16px); font-size: .93rem; }
+.lp-module-c ul { margin: 0 0 10px; padding-left: 1.1rem; }
+.lp-module-c li { margin: 0 0 5px; overflow-wrap: anywhere; }
+
+/* Questions à trancher */
+.lp-questions { margin: 0; padding-left: 1.3rem; }
+.lp-questions > li { margin: 0 0 12px; }
+.lp-questions p { margin: 4px 0 6px; font-weight: 700; }
+.lp-choix { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.lp-choix button { border: none; border-radius: 16px; padding: 8px 14px; min-height: 44px; text-align: left; font-size: .9rem; font-weight: 600; line-height: 1.35; background: var(--sheet); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--paper-3); cursor: pointer; }
+.lp-choix button:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.lp-choix button[aria-pressed="true"] { background: var(--cle-bg); color: var(--accent-ink); box-shadow: inset 0 0 0 2px var(--accent); }
+
+/* Blocs de fin de page */
+.lp-bloc { background: var(--sheet); border: 1px solid var(--line); border-radius: 22px; padding: 18px 20px; margin: 12px 0; }
+.lp-bloc h2 { font-size: 1.15rem; margin: 0 0 8px; letter-spacing: -.02em; }
+.lp-bloc > p { margin: 0 0 10px; color: var(--ink-2); font-size: .93rem; }
+.lp-outil { border-top: 1px dashed var(--paper-3); padding: 10px 0; font-size: .93rem; }
+.lp-outil p { margin: 2px 0 0; overflow-wrap: anywhere; }
+.lp-outil .lp-meta { color: var(--ink-2); font-size: .85rem; }
+.lp-ordre { margin: 0; padding-left: 1.4rem; font-size: .93rem; }
+.lp-ordre li { margin: 0 0 6px; }
+.lp-liste-simple { margin: 0; padding-left: 1.1rem; font-size: .93rem; }
+.lp-liste-simple li { margin: 0 0 6px; overflow-wrap: anywhere; }
+.lp-ajout { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 8px; }
+.lp-ajout .lp-zone { flex: 1; }
+.lp-vide { color: var(--ink-2); font-style: italic; }
+
+/* Barre du bas (toujours visible) et sortie */
+.lp-bas { position: sticky; bottom: 0; z-index: 20; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 16px -24px 0; padding: 10px 24px calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--sheet); border-top: 1px solid var(--line); }
+.lp-bas p { flex: 1 1 8rem; margin: 0; font-size: .86rem; color: var(--ink-2); }
+.lp-effacer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--paper-3); }
+.lp-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: .9rem; font-weight: 700; }
+.lp-nowrap { white-space: nowrap; }
+.lp-sortie textarea { display: block; width: 100%; min-height: 240px; font: .88rem/1.45 var(--font-sans); color: var(--ink); border: 1.5px solid var(--paper-3); border-radius: 12px; padding: 10px; resize: vertical; }
+.lp-copie { font-size: .88rem; font-weight: 700; color: var(--success-text); margin: 0 0 8px; }
+.lp-copie.refus { color: var(--ink-2); }
+.lp-fin { height: 24px; }
+
+@media (max-width: 640px) {
+  .lp-page { padding: 16px 16px 0; }
+  .lp-tete, .lp-carte, .lp-bloc { border-radius: 18px; padding: 16px; }
+  .lp-tete h1 { font-size: 1.4rem; }
+  .lp-infos { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .lp-infos dt { margin-top: 8px; }
+  .lp-module-c { padding-left: 4px; }
+  .lp-badges { padding-left: 0; }
+  .lp-bas { margin: 16px -16px 0; padding-left: 16px; padding-right: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lp-chevron, .lp-pill { transition: none; }
+}
+</style>
+</head>
+<body>
+<main class="lp-page" id="lp"></main>
+
+<script>
+/* ============================================================
+   Données de la liste (version 1)
+   Une entrée par application : identifiant stable (A01…), thème du
+   programme, priorité, indispensables couverts (I1 à I9), sources,
+   capacités exigibles, résumé, modules (identifiants A01-M1…),
+   outils, dépendances, taille, questions à trancher.
+   Les textes peuvent contenir <sub>, <sup>, <b> (rendus en HTML ;
+   dans le texte copié : _ et ^).
+   ============================================================ */
+const VERSION = 1;
+
+const THEMES = [
+  { id: 'matiere', nom: "Constitution et transformations de la matière", court: "Matière" },
+  { id: 'mouvement', nom: "Mouvement et interactions", court: "Mouvement" },
+  { id: 'ondes', nom: "Ondes et signaux", court: "Ondes et signaux" },
+];
+
+const INDISPENSABLES = {
+  I1: "Période et fréquence", I2: "Réfraction", I3: "Chromatographie", I4: "Configuration électronique",
+  I5: "Ions", I6: "Classification périodique", I7: "Formules de Lewis", I8: "Lentille convergente", I9: "Montage électrique",
+};
+
+const TAILLES = { S: "1 ou 2 modules simples", M: "3 ou 4 modules, outils existants", L: "4 modules ou un outil partagé à créer" };
+
+const APPS = [
+  /* ---------- Constitution et transformations de la matière ---------- */
+  {
+    id: 'A01', theme: 'matiere', nom: "Chromatographie sur couche mince", dossier: 'chromatographie', domaine: 'chimie',
+    priorite: 'indispensable', couvre: ['I3'], taille: 'M',
+    chapitres: ["2- Corps purs et melanges/ : cours p. 2 (analyser un chromatogramme « en justifiant toujours »), TP2 - CCM, exercices et correction, devoir", "13- Synthese/ : comparer une espèce synthétisée et une espèce naturelle"],
+    capacites: ["« Réaliser une chromatographie sur couche mince […] pour identifier une espèce chimique et, le cas échéant, qualifier l'échantillon de mélange »", "« Distinguer un mélange d'un corps pur à partir de données expérimentales »", "« Réaliser le schéma légendé […] d'une chromatographie sur couche mince »"],
+    resume: "L'élève réalise une CCM pas à pas : ligne de dépôt au crayon, dépôts, plaque dans la cuve avec l'éluant sous la ligne, puis il regarde le front de l'éluant monter et entraîner chaque espèce à sa vitesse. Il exploite ensuite des chromatogrammes en touchant les taches et en construisant sa conclusion avec des expressions à piocher ; l'application vérifie la justification et explique l'erreur.",
+    modules: [
+      { titre: "Réaliser une CCM", type: "animation", deroule: [
+        "Choisir les dépôts (espèces pures, mélanges) : colorants alimentaires sur papier Whatman, médicaments et aspirine sur plaque de silice, comme au TP2.",
+        "Tracer la ligne de dépôt au crayon, placer les dépôts, verser l'éluant, poser la plaque : si l'éluant dépasse la ligne de dépôt, les dépôts s'y dissolvent (message, on recommence).",
+        "Lecture, pause, vitesse, recommencer : le front de l'éluant monte, chaque espèce le suit à sa propre vitesse ; on sort la plaque et on repère le front.",
+        "Révélation sous lampe UV pour les espèces incolores : l'élève entoure les taches qui apparaissent.",
+        "Légender le schéma du dispositif avec des étiquettes à glisser : cuve, couvercle, plaque, ligne de dépôt, dépôts, éluant, front de l'éluant.",
+      ] },
+      { titre: "Lire un chromatogramme", type: "manipulation guidée", deroule: [
+        "Questions types : ce dépôt est-il un corps pur ? quels sont ses constituants ? telle espèce est-elle présente ?",
+        "L'élève touche une ou plusieurs taches ; un trait en pointillés relie les taches situées à la même hauteur, comme dans le cours.",
+        "Il construit sa conclusion avec des expressions à piocher : « corps pur », « mélange », « une seule tache », « plusieurs taches », « taches à la même hauteur que… », « contient l'espèce … », « ne contient pas l'espèce … », « espèce non identifiée », « car ».",
+        "Erreurs diagnostiquées : hauteurs comparées depuis le bas de la plaque au lieu de la ligne de dépôt, tache d'un mélange attribuée à une espèce absente des références, conclusion sans justification.",
+      ] },
+      { titre: "Entraînement", type: "entraînement noté sur 20", deroule: [
+        "10 chromatogrammes tirés au hasard (colorants, médicaments, arômes), avec 2 à 4 références et 1 à 3 dépôts à analyser.",
+        "Mêmes gestes qu'au module 2 ; après une erreur, l'explication puis la bonne réponse.",
+      ] },
+    ],
+    outils: { reutilises: ["assets/dragdrop.js (étiquettes et expressions à piocher)"], crees: ["chromatographie/modules/ccm.js : dessin et animation de la plaque (SVG), données des espèces ; exposé pour A07"] },
+    dependances: "Aucune. A07 (synthèse) réutilise le chromatogramme.",
+    questions: [
+      { cle: "espèces", q: "Espèces des dépôts :", choix: ["Colorants et médicaments du TP, avec leurs vrais noms", "Espèces fictives (A, B, C…)", "Vrais noms dans l'animation, espèces fictives dans l'entraînement"] },
+      { cle: "rapport frontal", q: "Rapport frontal R<sub>f</sub> (ni dans le cours, ni exigible) :", choix: ["Pas de R<sub>f</sub> : comparaison des hauteurs seulement", "R<sub>f</sub> en complément facultatif"] },
+      { cle: "phase stationnaire", q: "Phase stationnaire :", choix: ["Papier Whatman (colorants) et plaque de silice (médicaments, UV), comme au TP2", "Plaque de silice seulement"] },
+    ],
+  },
+  {
+    id: 'A02', theme: 'matiere', nom: "Atome et ions", dossier: 'atome-ions', domaine: 'chimie',
+    priorite: 'indispensable', couvre: ['I4', 'I5'], taille: 'L',
+    chapitres: ["03- Atomes et ions/ : Chap04-Cours complete (constituants, écriture du noyau, ions), Chap04-Fiche1-ions complete, TP1 - modeles atome complete, exercices et correction", "04- Entites plus stables/ : cours p. 1 à 3 (couches, sous-couches, configuration, règle de stabilité, formation des ions)"],
+    capacites: ["« Déterminer les électrons de valence d'un atome (Z ⩽ 18) à partir de sa configuration électronique à l'état fondamental »", "« Établir l'écriture conventionnelle d'un noyau à partir de sa composition et inversement »", "« Établir le lien entre stabilité chimique et configuration électronique de valence d'un gaz noble »", "« Déterminer la charge électrique d'ions monoatomiques courants » ; « Nommer les ions : H⁺, Na⁺, K⁺, Ca²⁺, Mg²⁺, Cl⁻, F⁻ »"],
+    resume: "L'élève construit l'atome électron par électron : les couches n = 1, 2, 3 se remplissent dans l'ordre 1s, 2s, 2p, 3s, 3p et la configuration s'écrit en direct. Il retire ou ajoute ensuite des électrons de la couche externe : les charges + et − se compensent deux à deux, la charge restante apparaît et la formule de l'ion s'écrit ; le noyau ne change pas.",
+    modules: [
+      { titre: "Construire un atome", type: "simulation", deroule: [
+        "Choisir un élément (Z ⩽ 18) : le noyau s'affiche avec Z protons et A − Z neutrons, et son écriture conventionnelle.",
+        "Ajouter les électrons un à un : ils se placent sur les couches n = 1, 2, 3 et dans les cases 1s, 2s, 2p, 3s, 3p ; la configuration s'écrit en direct (1s² 2s² 2p⁶ 3s¹).",
+        "La couche externe et les électrons de valence sont entourés, comme dans le cours.",
+        "Refus expliqués : sous-couche pleine (s : 2, p : 6), sous-couche sautée (ordre de remplissage), plus d'électrons que de protons (l'atome deviendrait un ion : voir module 3).",
+      ] },
+      { titre: "Configuration électronique", type: "entraînement noté sur 20", deroule: [
+        "De Z ou de l'écriture du noyau à la configuration : l'élève pose les sous-couches dans l'ordre et règle les exposants, puis donne le nombre d'électrons de valence.",
+        "Dans l'autre sens : de la configuration à Z et au nom de l'élément.",
+        "Erreurs diagnostiquées : ordre de remplissage, nombre maximal d'électrons par sous-couche, total différent de Z, A pris pour Z.",
+      ] },
+      { titre: "Former un ion", type: "simulation", deroule: [
+        "L'atome est dessiné avec ses charges + (protons du noyau) et − (électrons), qui se compensent deux à deux.",
+        "L'élève retire ou ajoute des électrons sur la couche externe : la charge restante apparaît (+e, +2e, −e…) et la formule s'écrit (Na⁺, Mg²⁺, Cl⁻, O²⁻) ; le noyau ne change pas.",
+        "Prévoir la charge : obtenir la configuration du gaz noble le plus proche (finir en 1s² comme He, ou en ns² np⁶ comme Ne et Ar) ; pourquoi Na perd 1 électron plutôt que d'en gagner 7.",
+        "Cation, anion ; noms des ions à connaître.",
+      ] },
+      { titre: "Ions : entraînement", type: "entraînement noté sur 20", deroule: [
+        "Prévoir l'ion stable d'un élément, écrire sa formule et sa configuration.",
+        "Nombres de protons, d'électrons et de neutrons d'un atome ou d'un ion (tableau de la fiche 1) ; cation ou anion.",
+        "Selon la question 3 : formule d'un composé ionique par l'électroneutralité (chlorure de sodium, fluorure de calcium…).",
+      ] },
+    ],
+    outils: { reutilises: ["assets/dragdrop.js", "assets/hero.js (nouveau dessin « atome »)"], crees: ["assets/atome.js (ATOME) : données des éléments Z ⩽ 20 (symbole, nom, Z, A usuel, famille, ion stable, liaisons), dessin en couches, écriture de la configuration ; réutilisé par A03 et A04"] },
+    dependances: "Crée ATOME, dont dépendent A03 et A04.",
+    questions: [
+      { cle: "dessin de l'atome", q: "Dessin de l'atome :", choix: ["Cercles n = 1, 2, 3 autour du noyau, comme le cours (chapitre 4, p. 1)", "Cases des sous-couches (1s, 2s, 2p…) seulement", "Les deux côte à côte, qui se remplissent ensemble"] },
+      { cle: "K et Ca", q: "K et Ca (Z = 19 et 20) font partie des ions à connaître (K⁺, Ca²⁺) :", choix: ["Les inclure, configuration jusqu'à 4s", "Les inclure pour l'ion seulement, sans configuration", "Z ⩽ 18 strictement"] },
+      { cle: "composés ioniques", q: "Formules des composés ioniques (électroneutralité, chapitre 3 p. 4) :", choix: ["Dans le module 4", "Pas dans cette application"] },
+    ],
+  },
+  {
+    id: 'A03', theme: 'matiere', nom: "Classification périodique", dossier: 'classification-periodique', domaine: 'chimie',
+    priorite: 'indispensable', couvre: ['I6'], taille: 'M',
+    chapitres: ["04- Entites plus stables/ : cours p. 2 à 4 (tableau, ions et liaisons « en comptant les cases »), TP1 - Mendeleiev complete, TP2 - Molecules complete, exercices et correction, devoir"],
+    capacites: ["« Déterminer la position de l'élément dans le tableau périodique à partir de la donnée de la configuration électronique de l'atome à l'état fondamental »", "« Déterminer les électrons de valence d'un atome […] à partir de […] sa position dans le tableau périodique »", "« Associer la notion de famille chimique à l'existence de propriétés communes et identifier la famille des gaz nobles »", "« Déterminer la charge électrique d'ions monoatomiques courants à partir du tableau périodique »"],
+    resume: "Un tableau interactif des éléments étudiés : toucher un élément montre puis fait retrouver ses liens avec la structure électronique. Ligne ↔ couche externe, colonne ↔ électrons de valence, nombre de cases jusqu'à la dernière colonne ↔ ion formé et nombre de liaisons.",
+    modules: [
+      { titre: "Explorer le tableau", type: "simulation", deroule: [
+        "Toucher un élément : sa configuration (la couche externe donne la ligne), ses électrons de valence (colonnes 1 et 2, puis 13 à 18 : 1 et 2, puis 3 à 8).",
+        "Son ion : compter les cases vers la droite ou vers la gauche jusqu'à la dernière colonne, comme le cours (une case vers la droite = un électron en plus).",
+        "Ses liaisons dans une molécule et ses doublets non liants (tableau « atome et ses liaisons » du TP2).",
+        "Familles surlignées : alcalins, halogènes, gaz nobles (stables, ne participent à aucune réaction).",
+      ] },
+      { titre: "Retrouver les liens", type: "manipulation guidée", deroule: [
+        "D'après une configuration, glisser l'élément dans sa case ; d'après une case, écrire la configuration.",
+        "Erreurs diagnostiquées : ligne prise pour le nombre d'électrons de valence, colonne 3 au lieu de 13, couche externe mal repérée.",
+      ] },
+      { titre: "Défis", type: "entraînement noté sur 20", deroule: [
+        "Placer un élément d'après sa configuration, prévoir l'ion d'un élément d'une colonne, prévoir le nombre de liaisons, reconnaître une famille.",
+        "10 défis tirés au hasard, mélange des quatre sortes.",
+      ] },
+      { titre: "Le jeu de Mendeleïev", type: "manipulation guidée", deroule: [
+        "Ranger les cartes des 18 premiers éléments par masse croissante, en revenant à la ligne pour aligner les propriétés semblables, comme au TP1.",
+        "Ajouter Z sur chaque carte : l'ordre actuel est celui de Z.",
+      ] },
+    ],
+    outils: { reutilises: ["ATOME (créé par A02)", "assets/dragdrop.js"], crees: [] },
+    dependances: "A02 (ATOME). Liens « Revois… » vers A02 et A04.",
+    questions: [
+      { cle: "regroupements", q: "Regroupements possibles (ATOME est commun aux trois) :", choix: ["Trois applications : A02, A03, A04", "A02 + A03 : « Atomes, ions et classification »", "A03 + A04 : « Classification et molécules »", "Une seule application de 8 à 12 modules"] },
+      { cle: "éléments", q: "Éléments du tableau :", choix: ["Z = 1 à 18", "Z = 1 à 20 (avec K et Ca)", "Z = 1 à 18, plus Br et I (halogènes du TP1)"] },
+      { cle: "nombre de liaisons", q: "Nombre de liaisons d'un atome, formulation à employer :", choix: ["« Cases vers la droite jusqu'à la colonne 18 » (cours p. 4)", "« Électrons à gagner pour avoir la configuration d'un gaz noble » (TP2)", "Les deux, l'une en rappel de l'autre"] },
+    ],
+  },
+  {
+    id: 'A04', theme: 'matiere', nom: "Schémas de Lewis", dossier: 'lewis', domaine: 'chimie',
+    priorite: 'indispensable', couvre: ['I7'], taille: 'L',
+    chapitres: ["04- Entites plus stables/ : cours p. 3-4 (liaison covalente, doublet non liant, schéma de Lewis, liaisons multiples), fiche « formation des ions et des molécules », TP2 - Molecules complete (règles du duet et de l'octet), exercices et correction"],
+    capacites: ["« Décrire et exploiter le schéma de Lewis d'une molécule pour justifier la stabilisation de cette entité, en référence aux gaz nobles, par rapport aux atomes isolés (Z ⩽ 18) »", "« Associer qualitativement l'énergie d'une liaison entre deux atomes à l'énergie nécessaire pour rompre cette liaison »"],
+    resume: "L'élève vérifie des schémas de Lewis atome par atome (duet pour H, octet pour les autres) et dit pourquoi un schéma est faux. Il complète des schémas incomplets, puis construit des molécules en reliant les liaisons de chaque atome, comme dans le cours (H– et –O– avec ses deux doublets non liants donnent H–O–H).",
+    modules: [
+      { titre: "De l'atome à la molécule", type: "manipulation guidée", deroule: [
+        "Chaque atome arrive avec ses liaisons à former (traits libres) et ses doublets non liants, comme dans le cours.",
+        "L'élève relie les traits libres deux à deux en glissant de l'un à l'autre ; liaisons doubles et triples (CO₂, N₂).",
+        "Molécules : H₂, Cl₂, HCl, H₂O, NH₃, CH₄, H₂S, CO₂, N₂, O₂, puis C₂H₆, CH₄O, C₂H₃Cl… (TP2).",
+      ] },
+      { titre: "Ce schéma est-il juste ?", type: "manipulation guidée", deroule: [
+        "Un schéma est affiché ; l'élève touche chaque atome et compte les électrons autour (2 par doublet, liant ou non liant).",
+        "Il conclut « juste » ou « faux, car … » avec des expressions à piocher : « l'atome … a … électrons au lieu de 8 », « H a 4 électrons au lieu de 2 », « doublet non liant manquant », « liaison en trop ».",
+        "Exemples du cours : schéma faux de C₄H₁₀O (application 1) et ses variantes.",
+      ] },
+      { titre: "Compléter un schéma", type: "manipulation guidée", deroule: [
+        "Ajouter les doublets non liants manquants (toucher l'atome, boutons + et −) ou une liaison manquante.",
+        "Vérification atome par atome ; diagnostic sur l'atome fautif.",
+      ] },
+      { titre: "Entraînement", type: "entraînement noté sur 20", deroule: [
+        "10 molécules : vérifier, compléter ou construire.",
+      ] },
+    ],
+    outils: { reutilises: ["ORGA de nomenclature/ : assets/orga.js, assets/orga-dessin.js, assets/orga.css (écriture « developpee » avec doublets, ORGA.editeur, ORGA.dessinActif, ORGA.partieH)", "ATOME (A02) : électrons de valence"], crees: ["Extension compatible d'ORGA à vérifier : H dessinés dans les molécules sans carbone (H₂, HCl, H₂O, NH₃, H₂S), élément S, molécules O₂, N₂, Cl₂, CO₂ ; retester nomenclature/ et nomenclature-1re/"] },
+    dependances: "A02 (ATOME), ORGA.",
+    questions: [
+      { cle: "doublets non liants", q: "Dessin des doublets non liants :", choix: ["Un trait, comme le cours", "Deux points"] },
+      { cle: "énergie de liaison", q: "Énergie de liaison (programme : rompre une liaison demande de l'énergie) :", choix: ["Rappel court dans le module 1", "Rien : pas dans le cours"] },
+      { cle: "semi-développées", q: "Formules semi-développées (TP2, partie IV « hors programme ») :", choix: ["Non", "En complément facultatif dans le module 1"] },
+    ],
+  },
+  {
+    id: 'A05', theme: 'matiere', nom: "Dissolution, dilution et échelle de teinte", dossier: 'solutions', domaine: 'chimie',
+    priorite: 'proposée', couvre: [], taille: 'L',
+    chapitres: ["08- Solutions aqueuses/ : cours-exercices, TP1 dissolution-dilution, TP1 fiches méthode, résolution de problème, idée d'échelle de teinte, devoir"],
+    capacites: ["« Déterminer la valeur de la concentration en masse d'un soluté à partir du mode opératoire de préparation d'une solution par dissolution ou par dilution »", "« Choisir et utiliser la verrerie adaptée pour préparer une solution par dissolution ou par dilution »", "« Déterminer la valeur d'une concentration en masse à l'aide d'une gamme d'étalonnage (échelle de teinte […]) »", "« Identifier le soluté et le solvant »"],
+    resume: "Une paillasse virtuelle : l'élève prépare une solution mère par dissolution, puis des solutions filles par dilution, geste par geste, dans l'ordre des fiches méthode du TP. Un geste hors de l'ordre ou une verrerie inadaptée est refusé avec une explication ; les concentrations se calculent à chaque étape, puis une échelle de teinte donne la concentration du Dakin.",
+    modules: [
+      { titre: "Dissolution", type: "manipulation guidée", deroule: [
+        "Ordre imposé (fiche méthode) : peser dans une coupelle, transvaser avec l'entonnoir, rincer la coupelle puis l'entonnoir à l'eau distillée, compléter en dessous du trait de jauge, agiter jusqu'à dissolution totale, ajuster au trait de jauge (bas du ménisque, œil au niveau), boucher et agiter.",
+        "Verrerie à choisir : fiole jaugée, et non bécher ou éprouvette ; refus expliqué.",
+        "Calcul : c<sub>m</sub> = m / V<sub>fiole</sub>, avec la conversion des mL en L.",
+      ] },
+      { titre: "Dilution", type: "manipulation guidée", deroule: [
+        "Ordre imposé : réserve dans un bécher, rincer la pipette jaugée (eau distillée puis solution), prélever, verser dans la fiole jaugée, compléter à moitié, agiter, ajuster au trait, homogénéiser.",
+        "Choisir pipette et fiole pour un facteur de dilution donné (deux dilutions par 10, comme au TP).",
+        "Calcul : f = V₁ / V₀ et c₁ = c₀ / f (notations : question 1).",
+      ] },
+      { titre: "Échelle de teinte", type: "simulation", deroule: [
+        "Ranger les tubes de la gamme par concentration, placer le tube inconnu (Dakin) entre deux teintes et encadrer sa concentration.",
+      ] },
+      { titre: "Calculs", type: "entraînement noté sur 20", deroule: [
+        "c<sub>m</sub> = m / V, m = c<sub>m</sub> × V, V = m / c<sub>m</sub> ; facteur de dilution ; volume à prélever ; masse volumique ou concentration en masse ; soluté et solvant.",
+      ] },
+    ],
+    outils: { reutilises: ["assets/dragdrop.js", "equations-en-physique/ et conversions/ (liens « Revois… »)"], crees: ["assets/paillasse.js (PAILLASSE) : verrerie dessinée, niveaux et ménisques, gestes à faire dans l'ordre avec refus expliqué ; réutilisée par A06 et A07"] },
+    dependances: "Crée PAILLASSE (A06, A07).",
+    questions: [
+      { cle: "notations de la dilution", q: "Notations de la dilution (le cours et les fiches diffèrent) :", choix: ["c₀, V₀ et c₁, V₁ (fiche méthode du TP)", "c<sub>pipette</sub>, V<sub>pipette</sub> et c<sub>fiole</sub>, V<sub>fiole</sub> (cours)", "c<sub>initiale</sub>, V<sub>initial</sub> et c<sub>finale</sub>, V<sub>final</sub> (exemples du cours)"] },
+      { cle: "espèce colorée", q: "Espèce de l'échelle de teinte :", choix: ["Permanganate de potassium (Dakin, TP1)", "Ions Fe³⁺ et thiocyanate (idée de TP)", "Les deux"] },
+      { cle: "geste hors de l'ordre", q: "Geste hors de l'ordre :", choix: ["Refusé tout de suite, avec l'explication (comme en électricité)", "Accepté, puis diagnostic à la fin (concentration fausse)"] },
+    ],
+  },
+  {
+    id: 'A06', theme: 'matiere', nom: "Identifier une espèce chimique", dossier: 'identifier-especes', domaine: 'chimie',
+    priorite: 'proposée', couvre: [], taille: 'L',
+    chapitres: ["2- Corps purs et melanges/ : cours (masse volumique, température de changement d'état, tests), activités 1 et 2, TP1 - Masse volumique, TP3 - tests ions, exercices, devoir"],
+    capacites: ["« Identifier, à partir de valeurs de référence, une espèce chimique par ses températures de changement d'état, sa masse volumique ou par des tests chimiques »", "« Citer des tests chimiques courants de présence d'eau, de dihydrogène, de dioxygène, de dioxyde de carbone »", "« Distinguer un mélange d'un corps pur à partir de données expérimentales »", "« Citer la composition approchée de l'air » ; « Établir la composition d'un échantillon à partir de données expérimentales »"],
+    resume: "Des enquêtes de laboratoire, comme aux TP1 et TP3 : l'élève mesure une masse et un volume, suit un changement d'état ou réalise des tests, puis compare aux valeurs de référence pour identifier l'espèce ou conclure à un mélange.",
+    modules: [
+      { titre: "Masse volumique", type: "simulation", deroule: [
+        "Précision de la verrerie (TP1) : peser 25 mL d'eau mesurés au bécher, à l'éprouvette, à la fiole jaugée ; lire le bas du ménisque.",
+        "Identifier un liquide ou un métal : peser le récipient vide puis plein (ou le solide, volume par déplacement d'eau), calculer la masse volumique, comparer au tableau de données.",
+        "Erreurs diagnostiquées : masse du récipient non retirée, unités, lecture du ménisque.",
+      ] },
+      { titre: "Changement d'état", type: "simulation", deroule: [
+        "Chauffer ou refroidir un échantillon : la température en fonction du temps se trace ; palier : corps pur ; pas de palier : mélange (eau salée, cours p. 4).",
+        "Lire la température du palier et identifier l'espèce ; noms des changements d'état (fusion, solidification, vaporisation, liquéfaction, sublimation, condensation).",
+      ] },
+      { titre: "Tests chimiques", type: "manipulation guidée", deroule: [
+        "Eau et gaz : sulfate de cuivre anhydre, flamme (dihydrogène), bûchette incandescente (dioxygène), eau de chaux (dioxyde de carbone).",
+        "Ions (TP3, tableau des réactifs fourni) : retrouver les quatre solutions injectables (Na⁺ et Cl⁻, Al³⁺ et SO₄²⁻, Cu²⁺ et SO₄²⁻, Fe³⁺ et Cl⁻).",
+      ] },
+      { titre: "Composition d'un mélange", type: "entraînement noté sur 20", deroule: [
+        "Proportions en masse et en volume (activité 2), composition de l'air (environ 78 % de diazote et 21 % de dioxygène), corps pur, mélange homogène ou hétérogène (activité 1).",
+      ] },
+    ],
+    outils: { reutilises: ["PAILLASSE (A05)", "lecture-graphique/modules/lgtools.js (lire la température du palier)", "assets/dragdrop.js"], crees: [] },
+    dependances: "A05 (PAILLASSE). Lien vers A01 pour la CCM.",
+    questions: [
+      { cle: "tests des ions", q: "Tests des ions (TP3) :", choix: ["Les inclure", "Eau et gaz seulement (capacité exigible)"] },
+      { cle: "masse volumique", q: "Notation et unités de la masse volumique :", choix: ["ρ en g/mL", "ρ en g/mL et en kg/m³", "Autre notation (préciser)"] },
+    ],
+  },
+  {
+    id: 'A07', theme: 'matiere', nom: "Synthèse et montage à reflux", dossier: 'synthese', domaine: 'chimie',
+    priorite: 'proposée', couvre: [], taille: 'M',
+    chapitres: ["13- Synthese/ : TP synthèse de l'éthanoate de linalyle (montage à reflux, relargage, ampoule à décanter)", "2- Corps purs et melanges/ : TP2 - CCM"],
+    capacites: ["« Réaliser le schéma légendé d'un montage à reflux et d'une chromatographie sur couche mince »", "« Mettre en œuvre un montage à reflux pour synthétiser une espèce chimique présente dans la nature »", "« Mettre en œuvre une chromatographie sur couche mince pour comparer une espèce synthétisée et une espèce extraite de la nature »"],
+    resume: "L'élève assemble le montage à reflux dans l'ordre, lance le chauffage et voit les vapeurs se condenser dans le réfrigérant et retomber dans le ballon. Il sépare ensuite les phases dans l'ampoule à décanter d'après les données, puis compare par CCM l'espèce synthétisée et l'huile essentielle naturelle.",
+    modules: [
+      { titre: "Assembler le montage", type: "manipulation guidée", deroule: [
+        "Ordre imposé : support élévateur, chauffe-ballon, ballon sec avec les réactifs et les billes de verre, réfrigérant à boules, tuyaux (l'eau entre par le bas), circulation d'eau avant le chauffage.",
+        "Refus expliqués : eau qui entre par le haut, montage bouché, pas de billes, ballon posé sans support élévateur.",
+      ] },
+      { titre: "Chauffer à reflux", type: "animation", deroule: [
+        "Ébullition douce, vapeurs qui montent, se condensent et retombent : on chauffe pour accélérer la transformation, le reflux évite de perdre des espèces.",
+        "Légender le schéma avec des étiquettes à glisser.",
+      ] },
+      { titre: "Séparer et identifier", type: "manipulation guidée", deroule: [
+        "Ampoule à décanter : placer les phases et les espèces d'après les densités et les solubilités du tableau du TP.",
+        "CCM : produit synthétisé, huile essentielle naturelle, référence ; conclure avec les expressions de A01.",
+      ] },
+    ],
+    outils: { reutilises: ["PAILLASSE (A05)", "Chromatogramme de A01 (ccm.js)", "assets/dragdrop.js"], crees: [] },
+    dependances: "A05 (PAILLASSE), A01 (CCM).",
+    questions: [
+      { cle: "synthèse support", q: "Synthèse support (le TP s'intitule « acétate d'isoamyle » mais décrit l'éthanoate de linalyle) :", choix: ["Éthanoate de linalyle (lavande)", "Acétate d'isoamyle (banane)"] },
+      { cle: "quantités de matière", q: "Partie « futurs spécialité » (quantités de matière, réactif limitant) :", choix: ["Non", "En complément facultatif"] },
+    ],
+  },
+  {
+    id: 'A08', theme: 'matiere', nom: "La mole : compter par paquets", dossier: 'mole', domaine: 'chimie',
+    priorite: 'proposée', couvre: [], taille: 'M',
+    chapitres: ["09- Mole et transformation chimique/ : cours p. 1-2 (mole, N<sub>A</sub>, quantité de matière, masse molaire), activité grains de sable, exercices et correction, devoir"],
+    capacites: ["« Déterminer la masse d'une entité à partir de sa formule brute et de la masse des atomes qui la composent »", "« Déterminer le nombre d'entités et la quantité de matière (en mol) d'une espèce dans une masse d'échantillon »"],
+    resume: "L'élève compte des objets par paquets, puis passe aux paquets de 6,02 × 10²³. Il estime étape par étape la hauteur d'une mole de grains de sable étalée sur la France (activité du cours), puis calcule masses d'entités, nombres d'entités et quantités de matière.",
+    modules: [
+      { titre: "Compter par paquets", type: "manipulation guidée", deroule: [
+        "Regrouper des objets en paquets (douzaines, rames) : le nombre de paquets est la quantité de matière n ; n = N / N<sub>A</sub>.",
+      ] },
+      { titre: "Une mole de grains de sable", type: "manipulation guidée", deroule: [
+        "Les étapes de l'activité, chacune avec son schéma : taille d'un grain, surface de la France, grains par couche, nombre de couches, hauteur ; puissances de 10 à chaque étape.",
+      ] },
+      { titre: "Masse d'une entité, masse molaire", type: "manipulation guidée", deroule: [
+        "Assembler une molécule en boules : sa masse est la somme des masses de ses atomes ; masse molaire M en additionnant les masses molaires atomiques (H₂O).",
+        "n = m / M en précisant l'espèce, comme le cours.",
+      ] },
+      { titre: "Entraînement", type: "entraînement noté sur 20", deroule: [
+        "N, n, m, M dans les deux sens, en écriture scientifique.",
+      ] },
+    ],
+    outils: { reutilises: ["assets/molecules.js (MOL.boules)", "puissances-10/ et avancement-reaction/ (liens « Revois… »)"], crees: [] },
+    dependances: "Aucune.",
+    questions: [
+      { cle: "puissances de 10", q: "Écriture des puissances de 10 :", choix: ["6,02 × 10²³ (écriture des applications)", "6,02.10²³ (cours)"] },
+      { cle: "masse d'une entité", q: "Masse d'une entité (programme) : le cours passe directement à la masse molaire.", choix: ["Masse d'une entité, puis masse molaire", "Masse molaire seulement, comme le cours"] },
+    ],
+  },
+
+  /* ---------- Mouvement et interactions ---------- */
+  {
+    id: 'A09', theme: 'mouvement', nom: "Forces et principe d'inertie", dossier: 'forces', domaine: 'physique',
+    priorite: 'proposée', couvre: [], taille: 'L',
+    chapitres: ["07- Forces/ : cours (interaction gravitationnelle, poids, principe d'inertie et contraposée), fiche 1 « Faire un bilan des forces » (correction), exercices et correction, devoir"],
+    capacites: ["« Modéliser l'action d'un système extérieur sur le système étudié par une force. Représenter une force par un vecteur »", "« Distinguer actions à distance et actions de contact » ; « Exploiter le principe des actions réciproques »", "« Utiliser l'expression vectorielle de la force d'interaction gravitationnelle » et du poids", "« Exploiter le principe d'inertie ou sa contraposée » ; chute libre à une dimension"],
+    resume: "L'élève fait le bilan des forces avec la méthode de la fiche 1 : diagramme objets-interactions, puis forces dessinées (point d'application, direction, sens). Il applique le principe des actions réciproques et le principe d'inertie à des situations animées, dont la chute libre.",
+    modules: [
+      { titre: "Diagramme objets-interactions", type: "manipulation guidée", deroule: [
+        "Situations de la fiche (ballon avant, pendant et après la frappe, barque et rame…) : l'élève glisse autour du système les objets en interaction et les relie (contact ou à distance).",
+        "Erreurs diagnostiquées : objet sans interaction avec le système, Terre oubliée, contact et distance confondus.",
+      ] },
+      { titre: "Dessiner les forces", type: "manipulation guidée", deroule: [
+        "Pour chaque interaction, poser la flèche : au centre du système pour une force à distance, au point de contact pour une force de contact ; choisir direction et sens.",
+        "Action d'un support dans des cas simples de statique ; reprise du bilan des forces de principe-dynamique/.",
+      ] },
+      { titre: "Actions réciproques et gravitation", type: "manipulation guidée", deroule: [
+        "Forces de A sur B et de B sur A : même droite d'action, sens opposés, même valeur (la barque qui recule).",
+        "F = G × m<sub>A</sub> × m<sub>B</sub> / d², puis P = m × g, avec les puissances de 10.",
+      ] },
+      { titre: "Principe d'inertie", type: "simulation", deroule: [
+        "Situations animées (camion après la pente, palet, chute libre) : forces qui se compensent ⇔ immobile ou rectiligne uniforme ; contraposée.",
+        "Série notée sur 20 : « les forces se compensent-elles ? » et « quel mouvement ? ».",
+      ] },
+    ],
+    outils: { reutilises: ["principe-dynamique/ (bilan des forces)", "cinematique/ (VEC : flèches)", "puissances-10/ (lien « Revois… »)"], crees: [] },
+    dependances: "Aucune.",
+    questions: [
+      { cle: "notation des forces", q: "Notation des forces :", choix: ["F⃗<sub>A/B</sub> (fiche 1)", "F⃗<sub>A sur B</sub> (cours)", "Noms usuels : P⃗, R⃗, T⃗…"] },
+      { cle: "traits du diagramme", q: "Diagramme objets-interactions :", choix: ["Trait plein pour le contact, pointillés pour la distance", "Autre convention (préciser)"] },
+      { cle: "couleur des forces", q: "La fiche dessine les forces en rouge ; les applications réservent le rouge au faux :", choix: ["Couleur d'accent de la physique (violet)", "Encre noire"] },
+    ],
+  },
+  {
+    id: 'A10', theme: 'mouvement', nom: "Décrire un mouvement", dossier: 'mouvement', domaine: 'physique',
+    priorite: 'proposée', couvre: [], taille: 'L',
+    chapitres: ["06- Description des mouvements/ : cours-exercices (référentiels, trajectoire, vitesse, vecteur vitesse), TP1 - Vitesse, ressource chronophotographie, exercices et correction"],
+    capacites: ["« Choisir un référentiel pour décrire le mouvement d'un système » ; « Expliquer, dans le cas de la translation, l'influence du choix du référentiel »", "« Caractériser différentes trajectoires » ; « Caractériser un mouvement rectiligne uniforme ou non uniforme »", "« Approcher le vecteur vitesse d'un point à l'aide du vecteur déplacement MM′ […] ; le représenter »"],
+    resume: "Le même mouvement vu depuis deux référentiels (« l'endroit où on pose la caméra ») : l'élève change de référentiel et voit la trajectoire changer. Sur des chronophotographies, il décrit le mouvement, calcule une vitesse en un point et trace le vecteur vitesse.",
+    modules: [
+      { titre: "Changer de référentiel", type: "simulation", deroule: [
+        "Animations : passager d'un train, valve d'une roue de vélo, Lune autour de la Terre ; boutons « caméra au sol », « caméra dans le train »… ; la trajectoire se trace dans chaque référentiel.",
+        "Référentiels terrestre, géocentrique, héliocentrique : lequel choisir.",
+      ] },
+      { titre: "Décrire un mouvement", type: "entraînement noté sur 20", deroule: [
+        "Chronophotographie → deux mots : forme de la trajectoire (rectiligne, circulaire, curviligne) et vitesse (uniforme, accéléré, ralenti).",
+        "Erreurs diagnostiquées : écart entre les points mal interprété, « accéléré » confondu avec « rapide ».",
+      ] },
+      { titre: "Vitesse en un point", type: "manipulation guidée", deroule: [
+        "Mesurer M₂M₃ à la règle virtuelle, convertir avec l'échelle, v₂ = M₂M₃ / (t₃ − t₂) ; conversions m/s ↔ km/h.",
+      ] },
+      { titre: "Vecteur vitesse", type: "manipulation guidée", deroule: [
+        "Tracer le vecteur vitesse en M₂ : direction de M₂M₃, sens du mouvement, longueur à l'échelle (glisser la pointe et flèches, comme Cinématique) ; décrire comment il varie.",
+      ] },
+    ],
+    outils: { reutilises: ["cinematique/ (CIN, VEC : repère, tracé de vecteurs en mode mixte)", "lecture-graphique/modules/lgtools.js (règle)", "assets/hero.js (dessin « cinematique »)"], crees: [] },
+    dependances: "Aucune.",
+    questions: [
+      { cle: "vitesse en un point", q: "Vitesse au point M₂ :", choix: ["v₂ = M₂M₃ / (t₃ − t₂), comme le cours", "v₂ = M₁M₃ / (t₃ − t₁)"] },
+      { cle: "pointage vidéo", q: "Pointage d'une vidéo (TP1 avec Regressi) :", choix: ["Chronophotographies seulement", "Ajouter un pointage simplifié sur une animation"] },
+    ],
+  },
+
+  /* ---------- Ondes et signaux ---------- */
+  {
+    id: 'A11', theme: 'ondes', nom: "Période et fréquence d'un signal", dossier: 'periode-frequence', domaine: 'physique',
+    priorite: 'indispensable', couvre: ['I1'], taille: 'M',
+    chapitres: ["01- Signaux sonores/ : cours p. 1-2 (période mesurée avec l'échelle et un produit en croix, f = 1 / T, domaine audible, hauteur et timbre), TP 1 - frequence complete (diapason, trompette), exercices et correction, devoir"],
+    capacites: ["« Définir et déterminer la période et la fréquence d'un signal sonore notamment à partir de sa représentation temporelle » ; « Mesurer la période d'un signal sonore périodique »", "« Citer les domaines de fréquences des sons audibles, des infrasons et des ultrasons » ; « Relier qualitativement la fréquence à la hauteur d'un son audible »", "Capacité mathématique : « identifier une fonction périodique et déterminer sa période »"],
+    resume: "Sur des signaux « papier » (note de clarinette, diapason, électrocardiogramme…), l'élève repère le motif élémentaire, mesure plusieurs périodes à la règle virtuelle, convertit avec l'échelle, divise par le nombre de périodes, puis calcule f = 1 / T. Variante sur écran d'oscilloscope : nombre de divisions × base de temps.",
+    modules: [
+      { titre: "Le motif élémentaire", type: "manipulation guidée", deroule: [
+        "Toucher le début puis la fin d'un motif élémentaire, à partir de n'importe quel point du signal.",
+        "Erreurs diagnostiquées : demi-motif (signal non sinusoïdal), deux motifs, portion qui ne se répète pas à l'identique.",
+      ] },
+      { titre: "Mesurer T et calculer f", type: "manipulation guidée", deroule: [
+        "Outil de Lecture graphique : règle virtuelle sur n périodes, échelle (cm ↔ ms) en tableau de proportionnalité et produit en croix, T = Δt / n.",
+        "f = 1 / T avec la conversion ms → s ; résultat en Hz avec un nombre adapté de chiffres significatifs.",
+      ] },
+      { titre: "Écran d'oscilloscope", type: "manipulation guidée", deroule: [
+        "Compter les divisions de n périodes, multiplier par la base de temps (ms/div) ; changer la base de temps et voir le signal se dilater, la période ne change pas.",
+      ] },
+      { titre: "Entraînement", type: "entraînement noté sur 20", deroule: [
+        "10 signaux (sons, électrocardiogramme, écrans d'oscilloscope) ; domaine audible (20 Hz à 20 kHz), infrasons, ultrasons ; son grave ou aigu.",
+      ] },
+    ],
+    outils: { reutilises: ["lecture-graphique/modules/lgtools.js et lgtools.css, chargés depuis leur dossier comme puissance-active/ (LG.figure, règle virtuelle, étiquettes, déroulé « division par le nombre de périodes »)"], crees: ["Extension compatible de LG si besoin : formes de signaux réels (clarinette, électrocardiogramme) dans les formes de LG, écran quadrillé d'oscilloscope ; retester lecture-graphique/ et puissance-active/"] },
+    dependances: "lecture-graphique/ (LG).",
+    questions: [
+      { cle: "méthode de mesure", q: "Le cours mesure une seule période à l'échelle ; ton prompt demande plusieurs périodes :", choix: ["Plusieurs périodes, puis T = Δt / n", "Une seule période, comme le cours", "Une période d'abord, puis plusieurs pour gagner en précision"] },
+      { cle: "échelle", q: "Passage des cm aux ms :", choix: ["Tableau de proportionnalité et produit en croix (cours)", "Coefficient de l'échelle (ms par cm)"] },
+      { cle: "sons", q: "Faire entendre les sons :", choix: ["Oui : sons synthétisés et fichier trompette du TP1", "Non"] },
+    ],
+  },
+  {
+    id: 'A12', theme: 'ondes', nom: "Réfraction et loi de Snell-Descartes", dossier: 'refraction', domaine: 'physique',
+    priorite: 'indispensable', couvre: ['I2'], taille: 'L',
+    chapitres: ["02- Lumiere/ : cours p. 1-2 (réflexion, réfraction, i₁ et i₂ mesurés depuis la normale, n₁ sin(i₁) = n₂ sin(i₂)), fiche méthode, TP1-refraction_complete (air et plexiglas, demi-cylindre), exercices et exercices supplémentaires (+ corrections), devoir, interro"],
+    capacites: ["« Exploiter les lois de Snell-Descartes pour la réflexion et la réfraction »", "« Tester les lois de Snell-Descartes à partir d'une série de mesures et déterminer l'indice de réfraction d'un milieu »"],
+    resume: "Pour une situation (air → eau, verre → air, demi-cylindre du TP…), l'élève place sur le schéma le point d'incidence, la normale, les rayons et les angles i₁ et i₂ mesurés depuis la normale, puis écrit la loi de Descartes avec les indices des milieux (n<sub>air</sub> × sin(i₁) = n<sub>eau</sub> × sin(i₂)). Un simulateur montre ensuite le rayon réfracté quand i₁ varie et sert aux calculs d'angle et d'indice.",
+    modules: [
+      { titre: "Placer les éléments", type: "manipulation guidée", deroule: [
+        "Situations : air → eau, eau → air, air → verre, verre → air, demi-cylindre du TP, incidence normale ; surface horizontale, verticale ou inclinée ; lumière venant de différents côtés.",
+        "L'élève touche le point d'incidence I, trace la normale (perpendiculaire en I), désigne rayon incident et rayon réfracté, place i₁ et i₂, glisse les étiquettes milieu 1 (n₁) et milieu 2 (n₂).",
+        "Erreurs diagnostiquées : angle mesuré depuis la surface, indices inversés, rayon réfracté du mauvais côté de la normale, rayon qui se rapproche de la normale alors qu'il devrait s'en éloigner (et l'inverse).",
+      ] },
+      { titre: "Écrire la loi de Descartes", type: "manipulation guidée", deroule: [
+        "Étiquettes à glisser : n<sub>air</sub>, n<sub>eau</sub>, sin(i₁), sin(i₂), ×, = ; notations accordées aux milieux de la situation.",
+        "Puis l'expression littérale de la grandeur cherchée (sin(i₂) = …, n<sub>verre</sub> = …), comme la fiche méthode.",
+      ] },
+      { titre: "Simulateur", type: "simulation", deroule: [
+        "Faire varier i₁ (glisser la source, boutons ± 1°) et lire i₂ au rapporteur ; rayon réfléchi (i₁ = i₂, loi de la réflexion) ; changer les milieux.",
+        "Tableau i₁, i₂, sin(i₁), sin(i₂) et graphique de sin(i₁) en fonction de sin(i₂), comme au TP1 : droite passant par l'origine.",
+      ] },
+      { titre: "Calculer un angle ou un indice", type: "entraînement noté sur 20", deroule: [
+        "Méthode de la fiche : schéma, formule adaptée, expression littérale, application numérique, sin⁻¹, chiffres significatifs.",
+        "Valeurs du cours : n<sub>air</sub> = 1,00 ; n<sub>eau</sub> = 1,33 ; n<sub>verre</sub> = 1,50 ; n<sub>plexi</sub> = 1,51.",
+      ] },
+    ],
+    outils: { reutilises: ["assets/dragdrop.js", "lecture-graphique/modules/lgtools.js (graphique du TP, facultatif)", "assets/hero.js (nouveau dessin « rayons »)"], crees: ["assets/optique.js et assets/optique.css (OPT) : milieux et dioptres (plan, demi-cylindre), point d'incidence, normale, rayons incident, réfléchi et réfracté, angles depuis la normale, rapporteur ; réutilisé par A13 et A17"] },
+    dependances: "Crée OPT (A13, A17).",
+    questions: [
+      { cle: "indices", q: "Indices dans la loi pour une situation donnée :", choix: ["n<sub>air</sub>, n<sub>eau</sub>… à la place de n₁, n₂ (fiche méthode)", "n₁ et n₂ gardés, avec « milieu 1 : air (n₁ = 1,00) »"] },
+      { cle: "réflexion totale", q: "Au-delà de l'angle limite (milieu plus réfringent vers moins réfringent), il n'y a plus de rayon réfracté (hors programme) :", choix: ["Éviter ces situations", "Le montrer dans le simulateur, avec une bulle « hors programme »"] },
+      { cle: "indice du verre", q: "Indice du verre :", choix: ["1,50 (exercices)", "1,51 (fiche méthode)", "Selon la situation, comme les énoncés"] },
+    ],
+  },
+  {
+    id: 'A13', theme: 'ondes', nom: "Image par une lentille convergente", dossier: 'lentilles', domaine: 'physique',
+    priorite: 'indispensable', couvre: ['I8'], taille: 'L',
+    chapitres: ["05- Lentilles minces convergentes/ : cours-exercices (O, F, F′, f′ = OF′, trois rayons issus de B, γ = A′B′ / AB = OA′ / OA, œil), fiche 1 construction, TP1, TP2 (banc d'optique, f′ = 10 cm), exercices et corrections, devoir, construction image lentille.pps, Liens.txt"],
+    capacites: ["« Caractériser les foyers d'une lentille mince convergente à l'aide du modèle du rayon lumineux »", "« Utiliser le modèle du rayon lumineux pour déterminer graphiquement la position, la taille et le sens de l'image réelle d'un objet plan réel donnée par une lentille mince convergente »", "« Définir et déterminer géométriquement un grandissement » ; « Modéliser l'œil »"],
+    resume: "L'élève trace lui-même, en glissant, les rayons issus de B (par O, parallèle à l'axe puis par F′, par F puis parallèle à l'axe) ; chaque rayon est vérifié, B′ apparaît à l'intersection, puis A′ à la verticale sur l'axe. Un banc d'optique virtuel (TP2) permet ensuite de déplacer lentille et écran jusqu'à l'image nette, de mesurer et de calculer le grandissement.",
+    modules: [
+      { titre: "Les rayons particuliers", type: "manipulation guidée", deroule: [
+        "Axe optique, O, F et F′ symétriques par rapport à O, f′ = OF′.",
+        "Tracer un rayon à la fois en glissant ; diagnostics : rayon parallèle qui ressort par F au lieu de F′, rayon passant par F qui ne ressort pas parallèle, rayon par O dévié.",
+      ] },
+      { titre: "Construire l'image A′B′", type: "entraînement noté sur 20", deroule: [
+        "Objets à différentes distances (au-delà de 2f′, entre f′ et 2f′) ; pas d'objet entre F et O (hors programme d'après le cours).",
+        "Tracer les rayons, placer B′ puis A′ ; donner la position (OA′), la taille (A′B′) et le sens (droite ou renversée) en lisant le quadrillage à l'échelle.",
+      ] },
+      { titre: "Banc d'optique", type: "simulation", deroule: [
+        "Objet « d » éclairé, lentille de f′ = 10 cm, écran ; déplacer lentille et écran (glisser et flèches) jusqu'à l'image nette.",
+        "Mesurer AB, A′B′, OA, OA′ ; γ = A′B′ / AB = OA′ / OA ; A′B′ = γ × AB.",
+      ] },
+      { titre: "L'œil", type: "simulation", deroule: [
+        "Modèle de l'œil réduit (iris, cristallin, rétine) ; accommodation : l'objet se rapproche, la distance focale du cristallin diminue pour garder l'image sur la rétine.",
+      ] },
+    ],
+    outils: { reutilises: ["OPT (créé par A12), étendu aux lentilles minces", "assets/dragdrop.js", "Inspiration sans copie : construction image lentille.pps, lien GeoGebra de Liens.txt"], crees: ["Extension d'OPT : lentille mince, rayons particuliers, intersection, netteté sur l'écran"] },
+    dependances: "A12 (OPT).",
+    questions: [
+      { cle: "objet entre F et O", q: "Objet entre F et O (image virtuelle) :", choix: ["Exclu, comme le cours (vu en 1re spécialité)", "Visible dans le simulateur seulement, avec une bulle « hors programme »"] },
+      { cle: "nombre de rayons", q: "Rayons exigés pour placer B′ :", choix: ["Deux suffisent", "Les trois, comme le cours"] },
+      { cle: "vergence", q: "Vergence (TP1 : v = 1 / f′ en dioptries) :", choix: ["L'utiliser (lentille « de 10 δ » du TP2)", "Non : f′ seulement"] },
+    ],
+  },
+  {
+    id: 'A14', theme: 'ondes', nom: "Réaliser un montage électrique", dossier: 'montage-electrique', domaine: 'physique',
+    priorite: 'indispensable', couvre: ['I9'], taille: 'L',
+    chapitres: ["10- Electricite/ : TP circuit electrique complete (générateur réglé sur 8 V, résistances de 100 Ω, 390 Ω et 470 Ω, série, dérivation, loi d'Ohm), Fiche TP (ampèremètre en série : COM et 10 A puis mA ; voltmètre en dérivation : V et COM)"],
+    capacites: ["« Mesurer une tension et une intensité »", "Préparation de « Exploiter la loi des mailles et la loi des nœuds dans un circuit électrique comportant au plus deux mailles »", "Collège : circuits série et dérivation, boucle"],
+    resume: "À partir d'un schéma normalisé, l'élève réalise le montage sur une table de TP dessinée de façon réaliste, toujours avec la même méthode : surligner la boucle principale, partir d'une borne du générateur, suivre dans l'ordre les fils et les dipôles en série, puis ajouter les dérivations une à une. Chaque élément branché se colore sur le schéma ; un branchement hors de l'ordre est refusé avec une explication, et le circuit ne fonctionne que s'il est conforme.",
+    modules: [
+      { titre: "Lire le schéma", type: "manipulation guidée", deroule: [
+        "Surligner la boucle principale (celle qui contient le générateur) en touchant ses fils et ses dipôles ; repérer nœuds et dérivations.",
+        "Erreurs diagnostiquées : boucle sans le générateur, dérivation prise pour la boucle principale.",
+      ] },
+      { titre: "Montage en série", type: "manipulation guidée", deroule: [
+        "Table de montage (dipôles réalistes) et schéma normalisé côte à côte sur ordinateur, l'un sous l'autre sur téléphone.",
+        "Partir de la borne du générateur, relier fil par fil les dipôles dans l'ordre du schéma ; chaque élément branché se colore sur le schéma.",
+        "Progression : circuit série simple, puis avec interrupteur et ampèremètre (bornes COM et 10 A, en série).",
+      ] },
+      { titre: "Ajouter des dérivations", type: "manipulation guidée", deroule: [
+        "Pas de dérivation avant que la boucle principale soit fermée ; une dérivation, puis plusieurs, dans l'ordre du schéma ; voltmètre en dérivation.",
+        "Le circuit ne fonctionne (mesures affichées, lampes allumées s'il y en a) que s'il est conforme au schéma.",
+      ] },
+      { titre: "Montages du TP", type: "entraînement noté sur 20", deroule: [
+        "Les schémas du TP (série 390 Ω et 100 Ω avec trois ampèremètres puis trois voltmètres, dérivation, montage de la loi d'Ohm avec 470 Ω) ; la note tient compte des branchements refusés.",
+      ] },
+    ],
+    outils: { reutilises: ["assets/dragdrop.js"], crees: ["assets/montage.js et assets/montage.css (MONTAGE) : dipôles réalistes avec leurs bornes, fils tirés au doigt d'une borne à l'autre, schéma normalisé synchronisé, vérification de l'ordre et de la conformité, calcul des intensités et des tensions ; réutilisé par A16"] },
+    dependances: "Crée MONTAGE (A16).",
+    questions: [
+      { cle: "dipôles", q: "Dipôles de la table (le TP n'emploie que des résistances et des multimètres) :", choix: ["Résistances et multimètres seulement, comme le TP", "Ajouter lampes, interrupteur, DEL et moteur pour voir le circuit fonctionner", "Lampes au début, résistances ensuite"] },
+      { cle: "borne de départ", q: "Borne de départ :", choix: ["Borne + du générateur, toujours", "Borne indiquée par chaque exercice"] },
+      { cle: "ampèremètre", q: "Bornes de l'ampèremètre :", choix: ["COM et 10 A, puis passage en mA (fiche TP)", "COM et mA seulement"] },
+    ],
+  },
+  {
+    id: 'A15', theme: 'ondes', nom: "Le son : émission, propagation, vitesse", dossier: 'son', domaine: 'physique',
+    priorite: 'proposée', couvre: [], taille: 'M',
+    chapitres: ["01- Signaux sonores/ : cours p. 2-4 (émission, propagation, v = d / Δt, comparer des vitesses), fiche 2 (émission et propagation), TP 2 - celerite ultrasons complete, TP 3 - celerite son (smartphones), fiche 1 (niveau sonore)"],
+    capacites: ["« Décrire le principe de l'émission d'un signal sonore par la mise en vibration d'un objet et l'intérêt de la présence d'une caisse de résonance »", "« Expliquer le rôle joué par le milieu matériel dans le phénomène de propagation d'un signal sonore »", "« Mesurer la vitesse d'un signal sonore » ; « Citer une valeur approchée de la vitesse de propagation d'un signal sonore dans l'air »", "« Exploiter une échelle de niveau d'intensité sonore et citer les dangers inhérents à l'exposition sonore »"],
+    resume: "Une animation montre un objet qui vibre, l'air qui se comprime et se détend de proche en proche, et le son qui ne passe plus quand on fait le vide. L'élève mesure ensuite la vitesse du son comme en TP : retard Δt entre deux récepteurs R₁ et R₂ à l'oscilloscope, pour plusieurs distances d.",
+    modules: [
+      { titre: "Émission et propagation", type: "animation", deroule: [
+        "Vibration (balafon, diapason) et caisse de résonance ; propagation de proche en proche ; cloche à vide ; v<sub>air</sub> < v<sub>eau</sub> < v<sub>acier</sub>.",
+      ] },
+      { titre: "Mesurer la vitesse du son", type: "simulation", deroule: [
+        "TP2 : déplacer R₂ ; l'oscilloscope montre les deux salves ; mesurer Δt (divisions × base de temps) et d ; série de mesures, graphique, v = d / Δt.",
+        "TP3 : deux smartphones et un clap.",
+      ] },
+      { titre: "Comparer des vitesses", type: "entraînement noté sur 20", deroule: [
+        "v = d / Δt, conversions km/h ↔ m/s, rapport de deux vitesses (« … fois plus grande que … »), méthode du cours ; son et lumière.",
+      ] },
+      { titre: "Niveau sonore", type: "manipulation guidée", deroule: [
+        "Échelle des niveaux (dB) avec exemples, seuil de danger, protections ; intensité multipliée par 2 → niveau augmenté de 3 dB (cours).",
+      ] },
+    ],
+    outils: { reutilises: ["lecture-graphique/modules/lgtools.js (graphique, règle)", "ondes-sonores/ (échelle des niveaux, à adapter sans logarithme)"], crees: [] },
+    dependances: "Aucune.",
+    questions: [
+      { cle: "vocabulaire", q: "Vocabulaire :", choix: ["Vitesse de propagation (cours)", "Célérité (TP)", "Les deux : la célérité est la vitesse de propagation"] },
+      { cle: "regroupement avec A11", q: "Regrouper avec A11 en une application « Signaux sonores » ?", choix: ["Non : deux applications", "Oui : une application de 6 à 8 modules"] },
+    ],
+  },
+  {
+    id: 'A16', theme: 'ondes', nom: "Lois de l'électricité et capteurs", dossier: 'lois-electricite', domaine: 'physique',
+    priorite: 'proposée', couvre: [], taille: 'L',
+    chapitres: ["10- Electricite/ : TP circuit electrique complete (série, dérivation, loi d'Ohm avec 470 Ω de −8 V à +8 V), Fiche TP"],
+    capacites: ["« Exploiter la loi des mailles et la loi des nœuds dans un circuit électrique comportant au plus deux mailles »", "« Exploiter la caractéristique d'un dipôle électrique : point de fonctionnement, modélisation par une relation U = f(I) ou I = g(U) » ; « Utiliser la loi d'Ohm »", "« Mesurer une grandeur physique à l'aide d'un capteur électrique résistif. Produire et utiliser une courbe d'étalonnage »"],
+    resume: "Sur les montages réalisés avec A14, l'élève mesure intensités et tensions avec des multimètres virtuels et retrouve la loi des nœuds et la loi des mailles. Il trace la caractéristique d'une résistance (droite passant par l'origine, U = R × I), puis étalonne un capteur résistif et s'en sert pour mesurer.",
+    modules: [
+      { titre: "Loi des nœuds", type: "manipulation guidée", deroule: [
+        "Montage en dérivation du TP : placer trois ampèremètres, mesurer I₁, I₂, I₃, trouver la relation ; puis calculs dans des circuits à deux mailles au plus.",
+      ] },
+      { titre: "Loi des mailles", type: "manipulation guidée", deroule: [
+        "Montage en série du TP (390 Ω et 100 Ω) : trois voltmètres, U<sub>G</sub> = U₃₉₀ + U₁₀₀ ; puis calculs.",
+      ] },
+      { titre: "Caractéristique et loi d'Ohm", type: "simulation", deroule: [
+        "Régler le générateur de −8 V à +8 V, relever les couples (I ; U), placer les points, tracer la droite ; R = U / I ; point de fonctionnement.",
+      ] },
+      { titre: "Capteur résistif", type: "simulation", deroule: [
+        "Produire la courbe d'étalonnage (résistance en fonction de la température ou de l'éclairement), puis lire la grandeur à partir d'une résistance mesurée.",
+      ] },
+    ],
+    outils: { reutilises: ["MONTAGE (A14)", "lecture-graphique/modules/lgtools.js (graphiques)", "equations-en-physique/ (lien « Revois… »)"], crees: [] },
+    dependances: "A14 (MONTAGE).",
+    questions: [
+      { cle: "tensions", q: "Tensions sur les schémas :", choix: ["Flèches de tension avec leur nom (U<sub>G</sub>, U₃₉₀)", "Noms seulement, comme le TP"] },
+      { cle: "capteur", q: "Capteur résistif :", choix: ["Thermistance", "Photorésistance", "Les deux"] },
+    ],
+  },
+  {
+    id: 'A17', theme: 'ondes', nom: "Dispersion de la lumière par un prisme", dossier: 'dispersion', domaine: 'physique',
+    priorite: 'proposée', couvre: [], taille: 'S',
+    chapitres: ["02- Lumiere/ : cours p. 3 (dispersion, lumière monochromatique, λ), TP2-dispersion_lumiere complete, exercice et devoir du prisme (n = 1,673 pour le bleu, 1,609 pour le rouge)"],
+    capacites: ["« Décrire et expliquer qualitativement le phénomène de dispersion de la lumière par un prisme »", "« Caractériser un rayonnement monochromatique par sa longueur d'onde dans le vide ou dans l'air »"],
+    resume: "Un prisme dans le simulateur de réfraction : l'élève envoie une lumière blanche ou monochromatique, voit les deux réfractions et l'écart entre le bleu, plus dévié, et le rouge. Il calcule l'angle de réfraction des deux radiations avec la loi de Descartes.",
+    modules: [
+      { titre: "Décomposer la lumière", type: "simulation", deroule: [
+        "Lumière blanche ou monochromatique, prisme qu'on tourne, spectre sur l'écran ; une lumière monochromatique n'est pas décomposée.",
+      ] },
+      { titre: "Pourquoi le bleu est plus dévié", type: "manipulation guidée", deroule: [
+        "Loi de Descartes à la première face avec n = 1,673 (bleu) et n = 1,609 (rouge) ; comparer les angles ; lien « Revois… » vers spectres-etoiles/.",
+      ] },
+    ],
+    outils: { reutilises: ["OPT (A12) avec un dioptre prisme", "spectres-etoiles/ (lien « Revois… »)"], crees: [] },
+    dependances: "A12 (OPT).",
+    questions: [
+      { cle: "place", q: "Où mettre la dispersion :", choix: ["Module de A12 (réfraction)", "Application à part", "Extension de spectres-etoiles/"] },
+    ],
+  },
+];
+
+/* Outils partagés (existants ou à créer) */
+const OUTILS = [
+  { nom: "OPT", fichiers: "assets/optique.js, assets/optique.css", cree: "A12", sert: "A13, A17", role: "Moteur de rayons lumineux : milieux et dioptres (plan, demi-cylindre, prisme), normale, rayons incident, réfléchi et réfracté, angles mesurés depuis la normale, rapporteur ; lentille mince (rayons particuliers, foyers, intersection)." },
+  { nom: "ATOME", fichiers: "assets/atome.js", cree: "A02", sert: "A03, A04", role: "Données des éléments (Z ⩽ 20 : symbole, nom, Z, A usuel, famille, ion stable, liaisons), dessin de l'atome en couches, configuration et électrons de valence." },
+  { nom: "MONTAGE", fichiers: "assets/montage.js, assets/montage.css", cree: "A14", sert: "A16", role: "Table de montage réaliste (générateur, résistances, multimètres, fils tirés entre bornes), schéma normalisé synchronisé, vérification de l'ordre et de la conformité, intensités et tensions calculées." },
+  { nom: "PAILLASSE", fichiers: "assets/paillasse.js, assets/paillasse.css", cree: "A05", sert: "A06, A07", role: "Verrerie dessinée (fiole et pipette jaugées, éprouvette, bécher, ballon, réfrigérant…), niveaux et ménisques, gestes à faire dans l'ordre avec refus expliqué. Le principe « étapes dans l'ordre » peut être commun avec MONTAGE." },
+  { nom: "CCM", fichiers: "chromatographie/modules/ccm.js", cree: "A01", sert: "A07", role: "Dessin et animation d'une plaque, données des espèces." },
+  { nom: "ORGA (existant)", fichiers: "assets/orga.js, assets/orga-dessin.js, assets/orga.css", cree: "nomenclature/", sert: "A04", role: "Formules de Lewis (écriture « developpee » avec doublets) ; extension compatible pour les molécules sans carbone et l'élément S ; retester nomenclature/ et nomenclature-1re/." },
+  { nom: "LG (existant)", fichiers: "lecture-graphique/modules/lgtools.js, lgtools.css", cree: "lecture-graphique/", sert: "A11, A06, A10, A15, A16", role: "Graphiques en millimètres « papier », règle virtuelle, étiquettes, déroulé « division par le nombre de périodes » ; chargé depuis son dossier, comme puissance-active/ ; toute extension garde lecture-graphique/ et puissance-active/ intactes." },
+  { nom: "VEC, CIN (existants)", fichiers: "cinematique/modules/", cree: "cinematique/", sert: "A09, A10", role: "Repère, tracé de vecteurs (glisser et flèches), notations vectorielles." },
+  { nom: "Communs (existants)", fichiers: "assets/dragdrop.js, assets/molecules.js, assets/hero.js", cree: "—", sert: "toutes", role: "Glisser-déposer au doigt et à la souris ; boules des molécules (A08) ; dessins d'en-tête (nouveaux à prévoir : rayons, atome, circuit, plaque de CCM, verrerie)." },
+];
+
+/* Ordre de développement conseillé (outils partagés d'abord) */
+const ORDRE = [
+  "A11 Période et fréquence : n'utilise que LG, qui existe ; rapide, valide la façon de travailler.",
+  "A12 Réfraction : crée OPT.",
+  "A13 Lentille convergente : étend OPT.",
+  "A02 Atome et ions : crée ATOME.",
+  "A03 Classification périodique : ATOME.",
+  "A04 Schémas de Lewis : ATOME et extension d'ORGA.",
+  "A01 Chromatographie : crée CCM.",
+  "A14 Montage électrique : crée MONTAGE.",
+  "Proposées retenues : A05 (crée PAILLASSE) avant A06 et A07 ; A16 après A14 ; A17 après A12 ; A08, A09, A10 et A15 sans dépendance.",
+];
+
+/* Pistes du prompt écartées ou intégrées ailleurs, avec la raison */
+const ECARTEES = [
+  { piste: "Transformation nucléaire (conservation de A et de Z)", raison: "Aucun chapitre dans Cours-2nde, peu à manipuler. À proposer si un cours existe." },
+  { piste: "Mesure et incertitudes (histogramme, écart-type)", raison: "Pas de chapitre dans Cours-2nde. Pourrait devenir un module d'un simulateur (série de mesures de A12, A15 ou A16) : à demander dans les remarques." },
+  { piste: "Énergie de changement d'état", raison: "Absente des cours fournis ; le palier de changement d'état est dans A06." },
+  { piste: "Modèle réduit de l'œil", raison: "Intégré à A13 (module 4)." },
+  { piste: "Composition de l'air", raison: "Intégrée à A06 (module 4)." },
+  { piste: "Interaction gravitationnelle", raison: "Intégrée à A09 (module 3)." },
+  { piste: "Équation de réaction, réactif limitant", raison: "Déjà faits : equilibrer-reactions/, avancement-reaction/." },
+  { piste: "Spectres d'émission, corps chaud", raison: "Déjà fait : spectres-etoiles/ ; seule la dispersion par un prisme est proposée (A17)." },
+];
+
+/* Applications déjà faites pour la 2nde (rappel, non modifiable) */
+const DEJA = [
+  { dossier: "spectres-etoiles/", nom: "Spectres et étoiles", contenu: "spectres d'émission et d'absorption, température et composition d'une étoile" },
+  { dossier: "equilibrer-reactions/", nom: "Équilibrer une réaction", contenu: "ajuster une équation de réaction" },
+  { dossier: "avancement-reaction/", nom: "Avancement d'une réaction", contenu: "modules 1 à 4 pour la 2nde : réactif limitant, tableau d'avancement, des molécules aux moles" },
+  { dossier: "lecture-graphique/, conversions/, puissances-10/, proportionnalite/", nom: "Outils mathématiques", contenu: "lecture graphique, conversions, puissances de 10, proportionnalité" },
+  { dossier: "equations-en-physique/, equations-en-physique-avec-aide/", nom: "Équations en physique", contenu: "isoler une grandeur dans une relation" },
+];
+
+/* ============================================================
+   Page : rendu, choix gardés, texte des retours
+   ============================================================ */
+(function () {
+  'use strict';
+
+  const CLE = 'liste-2nde-v' + VERSION;
+  const NBSP = ' ';
+  const DECISIONS = [['ok', 'Valider'], ['mod', 'Modifier'], ['sup', 'Supprimer']];
+  const ETATS = [['tout', 'Toutes'], ['voir', 'À voir'], ['ok', 'Validées'], ['mod', 'Modifiées'], ['sup', 'Supprimées']];
+  const racine = document.getElementById('lp');
+
+  /* ---------- Outils de texte ---------- */
+  // espace insécable avant : ; ? ! » et après « (règle typographique)
+  const typo = s => String(s).replace(/ ([:;?!»])/g, NBSP + '$1').replace(/« /g, '«' + NBSP);
+  const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  // texte brut pour la copie : <sub>x</sub> → _x, <sup>x</sup> → ^x, autres balises retirées
+  const brut = s => String(s).replace(/<sub>(.*?)<\/sub>/g, '_$1').replace(/<sup>(.*?)<\/sup>/g, '^$1').replace(/<[^>]+>/g, '');
+  // texte libre de l'enseignant, sur une seule ligne
+  const ligne = s => String(s || '').trim().replace(/\s*\n+\s*/g, ' / ');
+  const pluriel = (n, un, plusieurs) => n + NBSP + (n > 1 ? plusieurs : un);
+  const idMod = (a, i) => a.id + '-M' + (i + 1);
+  const idQ = (a, i) => a.id + '-Q' + (i + 1);
+
+  /* ---------- Choix de l'enseignant, gardés dans le navigateur ---------- */
+  const vierge = () => ({
+    dec: {}, notes: {}, garder: {}, remMod: {}, rep: {}, libre: {},
+    pliees: {}, modOuverts: {}, filtreEtat: 'tout', filtreTheme: 'tout', ajouts: [''], remarques: '',
+  });
+  let E = vierge();
+  try {
+    const v = JSON.parse(localStorage.getItem(CLE));
+    if (v && typeof v === 'object') E = Object.assign(vierge(), v);
+  } catch (e) { /* rien de gardé ou stockage indisponible */ }
+  if (!Array.isArray(E.ajouts) || !E.ajouts.length) E.ajouts = [''];
+  const garder = () => { try { localStorage.setItem(CLE, JSON.stringify(E)); } catch (e) { /* stockage indisponible : la page marche pour la visite */ } };
+  const dec = id => E.dec[id] || '';
+
+  /* ---------- Squelette de la page ---------- */
+  function couverture() {
+    return Object.keys(INDISPENSABLES).map(k => {
+      const a = APPS.find(x => x.couvre.indexOf(k) >= 0);
+      return `<span class="lp-nowrap"><b>${k}</b>${NBSP}${esc(INDISPENSABLES[k])}${NBSP}→${NBSP}${a ? a.id : '?'}</span>`;
+    }).join(' · ');
+  }
+
+  function squelette() {
+    const nInd = APPS.filter(a => a.priorite === 'indispensable').length;
+    racine.innerHTML = `
+      <header class="lp-tete">
+        <span class="lp-sur">Outil de l'enseignant · 2nde · version ${VERSION}</span>
+        <h1>Applications de 2nde : liste à valider</h1>
+        <p class="lp-consigne">${typo(`${APPS.length} applications : ${nInd} indispensables, ${APPS.length - nInd} proposées. Pour chacune : Valider, Modifier (avec une remarque) ou Supprimer ; décoche les modules à retirer ; réponds aux questions. Puis « Copier mes retours » et colle le texte dans la conversation de l'étape 2. Tes choix restent dans ce navigateur : tu peux t'arrêter et reprendre.`)}</p>
+        <p class="lp-couverture">${typo('Indispensables : ')}${couverture()}</p>
+        <div class="lp-bilan" data-z="bilan" aria-live="polite"></div>
+      </header>
+      <div class="lp-filtres" role="group" aria-label="Filtrer par état">
+        <span class="lp-lab">État</span>
+        ${ETATS.map(([k, t]) => `<button type="button" class="lp-pill" data-fe="${k}">${t}</button>`).join('')}
+        <span class="lp-esp"></span>
+        <button type="button" class="lp-pill" data-a="replier">Tout replier</button>
+      </div>
+      <div class="lp-filtres" role="group" aria-label="Filtrer par thème">
+        <span class="lp-lab">Thème</span>
+        <button type="button" class="lp-pill" data-ft="tout">Tous</button>
+        ${THEMES.map(t => `<button type="button" class="lp-pill" data-ft="${t.id}" title="${esc(t.nom)}">${esc(t.court)}</button>`).join('')}
+      </div>
+      <div data-z="liste"></div>
+      <p class="lp-vide" data-z="aucune" hidden>Aucune application ne correspond à ce filtre.</p>
+      ${blocOutils()}
+      ${blocEcartees()}
+      ${blocDeja()}
+      <section class="lp-bloc" aria-labelledby="t-ajouts">
+        <h2 id="t-ajouts">Applications à ajouter</h2>
+        <p>${typo('Une application par zone : sujet, chapitre, ce que doit faire l\'élève.')}</p>
+        <div data-z="ajouts"></div>
+        <button type="button" class="btn-small" data-a="ajout">+ Ajouter une application</button>
+      </section>
+      <section class="lp-bloc" aria-labelledby="t-rem">
+        <h2 id="t-rem">Remarques générales</h2>
+        <textarea class="lp-zone" data-rem aria-labelledby="t-rem" placeholder="Regroupements, priorités, style, ordre de développement…"></textarea>
+        <div class="lp-effacer">
+          <button type="button" class="btn-small" data-a="effacer">Tout effacer</button>
+          <div class="lp-confirm" data-z="confirm" hidden>
+            <span>${typo('Effacer tous tes choix et tes remarques ?')}</span>
+            <button type="button" class="btn-small" data-a="effacer-oui">Oui, tout effacer</button>
+            <button type="button" class="btn-small" data-a="effacer-non">Annuler</button>
+          </div>
+        </div>
+      </section>
+      <div class="lp-bas">
+        <p data-z="resume" aria-live="polite"></p>
+        <button type="button" class="btn-primary" data-a="copier">Copier mes retours</button>
+      </div>
+      <section class="lp-bloc lp-sortie" data-z="sortie" hidden aria-labelledby="t-sortie">
+        <h2 id="t-sortie">Mes retours</h2>
+        <p class="lp-copie" data-z="copie" aria-live="polite"></p>
+        <textarea readonly aria-label="Retours à copier"></textarea>
+      </section>
+      <div class="lp-fin"></div>`;
+  }
+
+  function blocOutils() {
+    return `<section class="lp-bloc" aria-labelledby="t-outils">
+      <h2 id="t-outils">Outils partagés</h2>
+      <p>${typo('Le premier qui en a besoin le crée (en-tête, API) ; les suivants le réutilisent ; toute application qui l\'emploie déjà est retestée.')}</p>
+      ${OUTILS.map(o => `<div class="lp-outil"><b>${esc(o.nom)}</b> <span class="lp-code">${esc(o.fichiers)}</span>
+        <p class="lp-meta">${typo(`Créé par : ${o.cree} · utilisé par : ${o.sert}`)}</p><p>${typo(o.role)}</p></div>`).join('')}
+      <h3 class="lp-h">Ordre de développement conseillé</h3>
+      <ol class="lp-ordre">${ORDRE.map(t => `<li>${typo(t)}</li>`).join('')}</ol>
+    </section>`;
+  }
+  function blocEcartees() {
+    return `<section class="lp-bloc" aria-labelledby="t-ecartees">
+      <h2 id="t-ecartees">Pistes écartées ou intégrées ailleurs</h2>
+      <ul class="lp-liste-simple">${ECARTEES.map(e => `<li><b>${typo(e.piste)}</b>${typo(' : ' + e.raison)}</li>`).join('')}</ul>
+    </section>`;
+  }
+  function blocDeja() {
+    return `<section class="lp-bloc" aria-labelledby="t-deja">
+      <h2 id="t-deja">Déjà fait pour la 2nde (non modifiable)</h2>
+      <p>${typo('Un complément à l\'une d\'elles peut être demandé dans « Applications à ajouter » (« extension de … »).')}</p>
+      <ul class="lp-liste-simple">${DEJA.map(d => `<li><b>${typo(d.nom)}</b> <span class="lp-code">${esc(d.dossier)}</span>${typo(' : ' + d.contenu)}</li>`).join('')}</ul>
+    </section>`;
+  }
+
+  /* ---------- Une carte par application ---------- */
+  function carteHTML(a) {
+    const ind = a.priorite === 'indispensable';
+    const badges = [
+      ind ? `<span class="lp-badge lp-badge-ind">Indispensable · couvre ${a.couvre.join(', ')}</span>` : '<span class="lp-badge">Proposée</span>',
+      `<span class="lp-badge lp-badge-dom">${a.domaine === 'chimie' ? 'Chimie' : 'Physique'}</span>`,
+      `<span class="lp-badge">${typo('Taille ' + a.taille + ' : ' + TAILLES[a.taille])}</span>`,
+    ].join('');
+    const liste = t => t.length ? `<ul>${t.map(x => `<li>${typo(x)}</li>`).join('')}</ul>` : '—';
+    const outils = []
+      .concat(a.outils.reutilises.map(x => 'Réutilisés : ' + x))
+      .concat(a.outils.crees.map(x => 'À créer ou étendre : ' + x));
+    const modules = a.modules.map((m, i) => {
+      const k = idMod(a, i);
+      return `<div class="lp-module" data-mod="${k}">
+        <div class="lp-module-h">
+          <label class="lp-garder"><input type="checkbox" data-garder="${k}" aria-label="Garder ${k}"> garder</label>
+          <button type="button" class="lp-module-t" data-ouvrir="${k}" aria-expanded="false" aria-controls="mod-${k}">
+            <span class="lp-chevron" aria-hidden="true">›</span><span class="lp-mt"><b>${k}</b>${typo(m.titre)}</span><span class="lp-type">${esc(m.type)}</span>
+          </button>
+        </div>
+        <div class="lp-module-c" id="mod-${k}" hidden>
+          <ul>${m.deroule.map(d => `<li>${typo(d)}</li>`).join('')}</ul>
+          <label class="lp-etiq" for="rm-${k}">Remarque sur ce module (facultative)</label>
+          <textarea class="lp-zone" id="rm-${k}" data-remmod="${k}"></textarea>
+        </div>
+      </div>`;
+    }).join('');
+    const questions = a.questions.map((q, i) => {
+      const k = idQ(a, i);
+      return `<li><p id="q-${k}">${typo(q.q)}</p>
+        <div class="lp-choix" role="group" aria-labelledby="q-${k}">${q.choix.map((c, j) => `<button type="button" data-q="${k}" data-c="${j}" aria-pressed="false">${typo(c)}</button>`).join('')}</div>
+        <input type="text" class="lp-zone" data-libre="${k}" placeholder="Autre réponse ou précision" aria-label="Autre réponse ou précision pour la question ${i + 1} de ${a.id}" autocomplete="off">
+      </li>`;
+    }).join('');
+    return `<article class="lp-carte" data-app="${a.id}" data-theme="${a.theme}">
+      <div class="lp-carte-h">
+        <button type="button" class="lp-plier" data-plier="${a.id}" aria-expanded="true" aria-controls="corps-${a.id}">
+          <span class="lp-chevron" aria-hidden="true">›</span><span class="lp-id">${a.id}</span><span class="lp-nom">${typo(a.nom)}</span>
+        </button>
+        <div class="lp-dec" role="group" aria-label="Décision pour ${a.id}">${DECISIONS.map(([k, t]) => `<button type="button" data-dec="${k}" data-app="${a.id}" aria-pressed="false">${t}</button>`).join('')}</div>
+        <div class="lp-badges">${badges}</div>
+      </div>
+      <div class="lp-note" data-zone-note="${a.id}" hidden>
+        <label class="lp-etiq" for="note-${a.id}">Ce qu'il faut modifier</label>
+        <textarea class="lp-zone" id="note-${a.id}" data-note="${a.id}"></textarea>
+      </div>
+      <div class="lp-corps" id="corps-${a.id}">
+        <p class="lp-resume">${typo(a.resume)}</p>
+        <dl class="lp-infos">
+          <dt>Dossier</dt><dd><span class="lp-code">${esc(a.dossier)}/</span></dd>
+          <dt>Cours-2nde</dt><dd>${liste(a.chapitres)}</dd>
+          <dt>Programme</dt><dd>${liste(a.capacites)}</dd>
+        </dl>
+        <h3 class="lp-h">Modules (${a.modules.length})</h3>
+        <div class="lp-modules">${modules}</div>
+        <dl class="lp-infos" style="margin-top:12px">
+          <dt>Outils</dt><dd>${liste(outils)}</dd>
+          <dt>Dépendances</dt><dd>${typo(a.dependances)}</dd>
+        </dl>
+        <h3 class="lp-h">Questions à trancher</h3>
+        <ol class="lp-questions">${questions}</ol>
+      </div>
+    </article>`;
+  }
+
+  function rendreListe() {
+    const z = racine.querySelector('[data-z="liste"]');
+    z.innerHTML = THEMES.map(t => {
+      const apps = APPS.filter(a => a.theme === t.id);
+      return `<section data-section="${t.id}"><h2 class="lp-theme-t">${esc(t.nom)} <small>${pluriel(apps.length, 'application', 'applications')}</small></h2>${apps.map(carteHTML).join('')}</section>`;
+    }).join('');
+    // valeurs gardées
+    z.querySelectorAll('[data-note]').forEach(t => { t.value = E.notes[t.dataset.note] || ''; });
+    z.querySelectorAll('[data-remmod]').forEach(t => { t.value = E.remMod[t.dataset.remmod] || ''; });
+    z.querySelectorAll('[data-libre]').forEach(t => { t.value = E.libre[t.dataset.libre] || ''; });
+    APPS.forEach(a => majCarte(a.id));
+  }
+
+  // état visuel d'une carte : décision, zone de remarque, pliage, modules, réponses
+  function majCarte(id) {
+    const c = racine.querySelector(`[data-app="${id}"].lp-carte`);
+    if (!c) return;
+    const d = dec(id);
+    c.classList.toggle('etat-ok', d === 'ok');
+    c.classList.toggle('etat-mod', d === 'mod');
+    c.classList.toggle('etat-sup', d === 'sup');
+    c.querySelectorAll('[data-dec]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.dec === d)));
+    c.querySelector(`[data-zone-note="${id}"]`).hidden = d !== 'mod';
+    const plie = !!E.pliees[id];
+    c.querySelector('[data-plier]').setAttribute('aria-expanded', String(!plie));
+    c.querySelector('.lp-corps').hidden = plie;
+    c.querySelectorAll('.lp-module').forEach(m => {
+      const k = m.dataset.mod, ouvert = !!E.modOuverts[k], garde = E.garder[k] !== false;
+      m.classList.toggle('retire', !garde);
+      m.querySelector('[data-garder]').checked = garde;
+      m.querySelector('[data-ouvrir]').setAttribute('aria-expanded', String(ouvert));
+      m.querySelector('.lp-module-c').hidden = !ouvert;
+    });
+    c.querySelectorAll('[data-q]').forEach(b => b.setAttribute('aria-pressed', String(E.rep[b.dataset.q] === Number(b.dataset.c))));
+  }
+
+  /* ---------- Bilan, filtres, pliage ---------- */
+  function bilan() {
+    const n = k => APPS.filter(a => dec(a.id) === k).length;
+    const t = `<span><b>${n('ok')}</b>${NBSP}validée${n('ok') > 1 ? 's' : ''}</span><span><b>${n('mod')}</b>${NBSP}modifiée${n('mod') > 1 ? 's' : ''}</span><span><b>${n('sup')}</b>${NBSP}supprimée${n('sup') > 1 ? 's' : ''}</span><span><b>${n('')}</b>${NBSP}à voir</span>`;
+    racine.querySelector('[data-z="bilan"]').innerHTML = t;
+    racine.querySelector('[data-z="resume"]').innerHTML = `<span class="lp-nowrap">${n('ok') + n('mod') + n('sup')} sur ${APPS.length} traitées</span> · <span class="lp-nowrap">${n('')} à voir</span>`;
+    const replier = racine.querySelector('[data-a="replier"]');
+    replier.textContent = APPS.every(a => E.pliees[a.id]) ? 'Tout déplier' : 'Tout replier';
+  }
+
+  function filtrer() {
+    racine.querySelectorAll('[data-fe]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.fe === E.filtreEtat)));
+    racine.querySelectorAll('[data-ft]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.ft === E.filtreTheme)));
+    let visibles = 0;
+    APPS.forEach(a => {
+      const d = dec(a.id);
+      const okEtat = E.filtreEtat === 'tout' || (E.filtreEtat === 'voir' ? d === '' : d === E.filtreEtat);
+      const okTheme = E.filtreTheme === 'tout' || a.theme === E.filtreTheme;
+      const c = racine.querySelector(`.lp-carte[data-app="${a.id}"]`);
+      c.hidden = !(okEtat && okTheme);
+      if (!c.hidden) visibles++;
+    });
+    racine.querySelectorAll('[data-section]').forEach(s => { s.hidden = !s.querySelector('.lp-carte:not([hidden])'); });
+    racine.querySelector('[data-z="aucune"]').hidden = visibles > 0;
+  }
+
+  function toutReplier() {
+    const tout = APPS.every(a => E.pliees[a.id]);
+    APPS.forEach(a => { E.pliees[a.id] = !tout; });
+    if (!tout) E.modOuverts = {};          // replier aussi les modules
+    garder();
+    APPS.forEach(a => majCarte(a.id));
+    bilan();
+  }
+
+  /* ---------- Ajouts et remarques générales ---------- */
+  function rendreAjouts(focusDernier) {
+    const z = racine.querySelector('[data-z="ajouts"]');
+    z.innerHTML = E.ajouts.map((t, i) => `<div class="lp-ajout">
+      <textarea class="lp-zone" data-ajout="${i}" aria-label="Application à ajouter ${i + 1}" placeholder="Application à ajouter"></textarea>
+      <button type="button" class="btn-small" data-retirer="${i}" aria-label="Retirer la zone ${i + 1}">Retirer</button></div>`).join('');
+    z.querySelectorAll('[data-ajout]').forEach(t => { t.value = E.ajouts[Number(t.dataset.ajout)] || ''; });
+    if (focusDernier) { const l = z.querySelectorAll('[data-ajout]'); l[l.length - 1].focus(); }
+  }
+
+  /* ---------- Texte des retours ---------- */
+  function texteRetours() {
+    const L = [`Retours liste 2nde — version ${VERSION} (${APPS.length} applications)`];
+    const nonTraitees = [];
+    APPS.forEach(a => {
+      const d = dec(a.id), titre = `${a.id} ${brut(a.nom)}`;
+      if (d === 'sup') { L.push(`${titre} : SUPPRIMÉE`); return; }
+      const details = [];
+      a.modules.forEach((m, i) => {
+        const k = idMod(a, i), rq = ligne(E.remMod[k]);
+        if (E.garder[k] === false) details.push(`  ${k} retiré${rq ? ' — remarque : ' + rq : ''}`);
+        else if (rq) details.push(`  ${k} : ${rq}`);
+      });
+      a.questions.forEach((q, i) => {
+        const k = idQ(a, i), c = E.rep[k], lib = ligne(E.libre[k]), parts = [];
+        if (typeof c === 'number' && q.choix[c] != null) parts.push(brut(q.choix[c]));
+        if (lib) parts.push(lib);
+        if (parts.length) details.push(`  Question ${i + 1} (${q.cle}) : ${parts.join(' ; ')}`);
+      });
+      if (d === 'ok') L.push(`${titre} : VALIDÉE`);
+      else if (d === 'mod') L.push(`${titre} : MODIFIÉE — remarque : ${ligne(E.notes[a.id]) || '(à préciser)'}`);
+      else if (details.length) L.push(`${titre} : SANS DÉCISION`);
+      else { nonTraitees.push(a.id); return; }
+      L.push(...details);
+    });
+    if (nonTraitees.length) L.push(`Non traitées : ${nonTraitees.join(', ')}`);
+    const ajouts = E.ajouts.map(ligne).filter(Boolean);
+    if (ajouts.length === 1) L.push(`Ajouts : ${ajouts[0]}`);
+    else if (ajouts.length) L.push('Ajouts :', ...ajouts.map(t => '  - ' + t));
+    const rem = ligne(E.remarques);
+    if (rem) L.push(`Remarques générales : ${rem}`);
+    return L.map(typo).join('\n');
+  }
+
+  // copie : presse-papiers, sinon execCommand, sinon texte sélectionné à copier à la main
+  function copier() {
+    const txt = texteRetours();
+    const sortie = racine.querySelector('[data-z="sortie"]'), zt = sortie.querySelector('textarea'), msg = racine.querySelector('[data-z="copie"]');
+    zt.value = txt;
+    sortie.hidden = false;
+    const reussi = () => { msg.classList.remove('refus'); msg.textContent = typo('✓ Copié : colle-le dans la conversation.'); };
+    const parExec = () => {
+      let ok = false;
+      try { zt.focus(); zt.select(); ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      if (ok) reussi();
+      else { msg.classList.add('refus'); msg.textContent = typo('La copie automatique a été refusée : le texte est sélectionné, copie-le (Ctrl+C ou appui long).'); zt.focus(); zt.select(); }
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(reussi, parExec);
+      else parExec();
+    } catch (e) { parExec(); }
+    sortie.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ---------- Événements (délégués) ---------- */
+  racine.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b || !racine.contains(b)) return;
+    if (b.dataset.dec) {
+      const id = b.dataset.app, k = b.dataset.dec;
+      if (dec(id) === k) delete E.dec[id]; else E.dec[id] = k;
+      garder(); majCarte(id); bilan(); filtrer();
+      if (E.dec[id] === 'mod') { const t = racine.querySelector(`[data-note="${id}"]`); if (t) t.focus(); }
+    } else if (b.dataset.plier) {
+      E.pliees[b.dataset.plier] = !E.pliees[b.dataset.plier];
+      garder(); majCarte(b.dataset.plier); bilan();
+    } else if (b.dataset.ouvrir) {
+      const k = b.dataset.ouvrir;
+      E.modOuverts[k] = !E.modOuverts[k];
+      garder(); majCarte(k.split('-')[0]);
+    } else if (b.dataset.q) {
+      const k = b.dataset.q, c = Number(b.dataset.c);
+      if (E.rep[k] === c) delete E.rep[k]; else E.rep[k] = c;
+      garder(); majCarte(k.split('-')[0]);
+    } else if (b.dataset.fe) {
+      E.filtreEtat = b.dataset.fe; garder(); filtrer();
+    } else if (b.dataset.ft) {
+      E.filtreTheme = b.dataset.ft; garder(); filtrer();
+    } else if (b.dataset.retirer) {
+      E.ajouts.splice(Number(b.dataset.retirer), 1);
+      if (!E.ajouts.length) E.ajouts = [''];
+      garder(); rendreAjouts(false);
+    } else if (b.dataset.a === 'ajout') {
+      E.ajouts.push(''); garder(); rendreAjouts(true);
+    } else if (b.dataset.a === 'replier') {
+      toutReplier();
+    } else if (b.dataset.a === 'copier') {
+      copier();
+    } else if (b.dataset.a === 'effacer') {
+      racine.querySelector('[data-z="confirm"]').hidden = false;
+      racine.querySelector('[data-a="effacer-non"]').focus();
+    } else if (b.dataset.a === 'effacer-non') {
+      racine.querySelector('[data-z="confirm"]').hidden = true;
+    } else if (b.dataset.a === 'effacer-oui') {
+      E = vierge();
+      try { localStorage.removeItem(CLE); } catch (err) { /* stockage indisponible */ }
+      tout();
+      window.scrollTo(0, 0);
+    }
+  });
+
+  racine.addEventListener('input', e => {
+    const t = e.target, ds = t.dataset;
+    if (ds.note) E.notes[ds.note] = t.value;
+    else if (ds.remmod) E.remMod[ds.remmod] = t.value;
+    else if (ds.libre) E.libre[ds.libre] = t.value;
+    else if (ds.ajout !== undefined) E.ajouts[Number(ds.ajout)] = t.value;
+    else if (t.hasAttribute('data-rem')) E.remarques = t.value;
+    else return;
+    garder();
+  });
+
+  racine.addEventListener('change', e => {
+    const t = e.target;
+    if (!t.dataset.garder) return;
+    const k = t.dataset.garder;
+    if (t.checked) delete E.garder[k]; else E.garder[k] = false;
+    garder(); majCarte(k.split('-')[0]);
+  });
+
+  // (re)construit toute la page à partir de l'état E
+  function tout() {
+    squelette();
+    rendreListe();
+    rendreAjouts(false);
+    racine.querySelector('[data-rem]').value = E.remarques || '';
+    bilan();
+    filtrer();
+  }
+  tout();
+
+  // accès pour les vérifications automatiques
+  window.LISTE = { texte: texteRetours, cle: CLE };
+})();
+</script>
+</body>
+</html>

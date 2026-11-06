@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : montage en série — Réaliser un montage électrique (maquette)</title>
+<link rel="stylesheet" href="../../../../assets/theme.css">
+<link rel="stylesheet" href="../../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../maq-montage.css">
+<link rel="stylesheet" href="../maquettes.css">
+<link rel="stylesheet" href="../../../../assets/sommaire.css">
+<script src="../../../../assets/sommaire.js"></script>
+<script src="../maq-montage.js"></script>
+<script src="../schemas.js"></script>
+<style>
+/* ---------- poste de montage : table (≈ 60 %) et schéma côte à côte ; schéma collant en haut sur téléphone ---------- */
+.mt-poste { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; align-items: start; margin-top: 12px; }
+.mt-poste-table { grid-column: 1; grid-row: 1; }
+.mt-poste-schema { grid-column: 2; grid-row: 1; position: sticky; top: 16px; display: flex; flex-direction: column; gap: 10px; }
+.mt-poste-schema .ms-schema { background: var(--sheet); border: 1px solid var(--line); border-radius: 14px; padding: 8px; }
+.mt-consigne { background: var(--cle-bg); border-radius: 14px; padding: 10px 14px; font-size: .95rem; line-height: 1.45; }
+.mt-consigne b { color: var(--accent-ink); }
+.mt-consigne .btn-small { margin-top: 8px; min-height: 40px; }
+.mt-message { padding: 10px 14px !important; border-radius: 14px !important; font-size: .92rem; line-height: 1.45; color: var(--danger-text); }
+.mt-message b { color: var(--danger-text); }
+.mt-situation { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.mt-situation h3 { margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -.02em; }
+.mt-situation span { font-size: .85rem; font-weight: 700; color: var(--ink-2); }
+.mt-deroule { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; counter-reset: d; }
+.mt-deroule li { display: flex; gap: 10px; align-items: center; background: var(--paper); border-radius: 14px; padding: 8px 12px; counter-increment: d; line-height: 1.4; }
+.mt-deroule li::before { content: counter(d); flex-shrink: 0; width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; background: var(--sheet); font-weight: 800; font-size: .85rem; color: var(--ink-2); }
+.mt-deroule li.fait::before { content: '✓'; background: var(--success-bg); color: var(--success-text); }
+.mt-deroule li.ici { background: var(--cle-bg); font-weight: 700; }
+.mt-deroule li.avenir { color: var(--ink-2); }
+.maq-etapes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.maq-etapes button { min-width: 46px; min-height: 46px; }
+.maq-etape-t { font-weight: 800; }
+.maq-etape-d { color: var(--ink-2); font-size: .92rem; flex-basis: 100%; }
+
+@media (max-width: 899px) {
+  .mt-poste { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .mt-poste-table, .mt-poste-schema { grid-column: 1; grid-row: auto; }
+  /* schéma au-dessus, collant sous le bandeau du sommaire (54 px), réduit à 30 % de la hauteur de l'écran */
+  .mt-poste-schema {
+    top: 54px; z-index: 5; background: var(--sheet); margin: 0 -12px; padding: 8px 12px 10px; gap: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .mt-poste-schema .ms-schema { width: min(100%, calc(26vh * var(--ratio, 1.4))); margin: 0 auto; border: none; padding: 0; }
+  .mt-consigne, .mt-message { font-size: .9rem; padding: 8px 12px !important; }
+  /* la table prend aussi la marge intérieure de la carte */
+  .mt-poste-table { margin: 0 -12px; }
+}
+</style>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 2 · MANIPULATION</span>
+    <h2 class="er-titre">Montage en série</h2>
+    <p class="er-contexte">Repère la <b>boucle principale</b> sur le schéma, puis réalise le montage en partant de la <b>borne + du générateur</b> et en suivant les dipôles <b>dans l'ordre</b>.</p>
+  </div>
+
+  <!-- Réglages propres à la maquette : ils ne seront pas dans l'application -->
+  <div class="er-card maq-cadre">
+    <span class="er-badge">MAQUETTE · RÉGLAGES</span>
+    <div class="maq-reglages">
+      <div class="maq-choix" id="c-rendu"><span class="maq-choix-l">1 · Rendu</span>
+        <button type="button" data-v="plat"><span class="maq-lettre">A</span>À plat</button>
+        <button type="button" data-v="relief"><span class="maq-lettre">B</span>En relief</button></div>
+      <div class="maq-choix" id="c-dispo"><span class="maq-choix-l">2 · Disposition</span>
+        <button type="button" data-v="schema"><span class="maq-lettre">A</span>Comme le schéma</button>
+        <button type="button" data-v="rangee"><span class="maq-lettre">B</span>En rangée (paillasse)</button></div>
+      <div class="maq-choix" id="c-message"><span class="maq-choix-l">3 · Refus</span>
+        <button type="button" data-v="bandeau"><span class="maq-lettre">A</span>Sous le schéma</button>
+        <button type="button" data-v="bulle"><span class="maq-lettre">B</span>Bulle sur la table</button></div>
+      <div class="maq-choix" id="c-reglage"><span class="maq-choix-l">4 · Multimètre</span>
+        <button type="button" data-v="molette"><span class="maq-lettre">A</span>Crans ⟲ ⟳</button>
+        <button type="button" data-v="cadran"><span class="maq-lettre">B</span>Cadran agrandi</button></div>
+      <div class="maq-etapes">
+        <button type="button" class="btn-secondary" id="e-prec" aria-label="État précédent">←</button>
+        <span class="maq-etape-t" id="e-num"></span>
+        <button type="button" class="btn-secondary" id="e-suiv" aria-label="État suivant">→</button>
+        <span class="maq-etape-d" id="e-desc"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="er-card">
+    <div class="mt-situation"><h3>Générateur, ampèremètre, interrupteur, lampe et moteur</h3><span>Situation 3 / 5</span></div>
+    <div class="mt-poste">
+      <div class="mt-poste-schema" id="col-schema">
+        <div id="schema"></div>
+        <div class="mt-consigne" id="consigne"></div>
+        <div class="mt-message callout-danger hidden" id="message" role="alert"></div>
+      </div>
+      <div class="mt-poste-table"><div id="table"></div></div>
+    </div>
+    <ol class="mt-deroule" id="deroule"></ol>
+    <div class="er-actions">
+      <button type="button" class="btn-secondary" id="recommencer">↺ Recommencer</button>
+      <button type="button" class="btn-primary" id="suivante" disabled>Situation suivante →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- navigation : le vrai plan de l'application (les autres pages n'existent pas dans la maquette) ----------
+const PLAN = [
+  { n: 1, titre: 'Lire le schéma', desc: 'Boucle principale, nœuds et dérivations',
+    parties: [{ nom: 'Lire le schéma', entrainement: 'module_1_manip', noms: { entrainement: 'Manipulation : lire le schéma' } }] },
+  { n: 2, titre: 'Montage en série', desc: 'Du générateur à la boucle fermée, ampèremètre',
+    parties: [{ nom: 'Montage en série', entrainement: 'module_2_manip', noms: { entrainement: 'Manipulation : montage en série' } }] },
+  { n: 3, titre: 'Ajouter des dérivations', desc: 'Une dérivation à la fois, voltmètre',
+    parties: [{ nom: 'Dérivations', entrainement: 'module_3_manip', noms: { entrainement: 'Manipulation : dérivations' } }] },
+  { n: 4, titre: 'Montages du TP', desc: 'Série notée sur 20',
+    parties: [{ nom: 'Montages du TP', questions: 'module_4_questions', noms: { questions: 'Entraînement' } }] },
+];
+SOM.init({ nom: 'Réaliser un montage électrique', id: 'maquette-me', plan: PLAN });
+SOM.menu('module_2_manip');
+// liens vers des pages absentes de la maquette : vers la présentation ; portail : celui du dépôt
+document.querySelectorAll('#app-nav a[href]').forEach(a => {
+  const h = a.getAttribute('href');
+  if (h === '../../index.html') a.setAttribute('href', '../../../../index.html');
+  else if (/module_[134]_/.test(h)) a.setAttribute('href', '../index.html');
+});
+
+// ---------- choix de la maquette (gardés dans le navigateur) ----------
+const lire = (k, d) => { try { return localStorage.getItem('maquette-me-' + k) || d; } catch (e) { return d; } };
+const ecrire = (k, v) => { try { localStorage.setItem('maquette-me-' + k, v); } catch (e) { /* rien */ } };
+const choix = { rendu: lire('rendu', 'relief'), dispo: lire('dispo', 'schema'), message: lire('message', 'bandeau'), reglage: lire('reglage', 'molette') };
+
+// ---------- disposition du matériel sur la table (largeur 360 : tient dans un téléphone à l'échelle 1) ----------
+const DISPO = {
+  schema: { W: 360, H: 440, pos: { G: [176, 4], A: [18, 28], M: [244, 146], K: [26, 344], L: [196, 344] } },
+  rangee: { W: 360, H: 408, pos: { G: [0, 6], A: [190, 6], M: [0, 296], L: [124, 306], K: [248, 306] } },
+};
+const BOUCLE = ['G', 'f1', 'A', 'f2', 'K', 'f3', 'L', 'f4', 'M', 'f5'];
+const FILS = [['G.plus', 'A.10A'], ['A.COM', 'K.1'], ['K.2', 'L.1'], ['L.2', 'M.1'], ['M.2', 'G.moins']];
+
+// ---------- états montrés pas à pas ----------
+// mat : état du matériel ; fils : nombre de fils posés ; schema : options du schéma ; consigne ; refus ; deroule : étape en cours
+const ETATS = [
+  { t: 'Départ', d: 'Rien n\'est branché. L\'élève commence par la boucle principale, sur le schéma (touche ses fils et ses dipôles).',
+    fils: 0, schema: { choisis: [] }, deroule: 0, verifier: true,
+    consigne: '<b>1.</b> Surligne la <b>boucle principale</b> : touche ses fils et ses dipôles sur le schéma.' },
+  { t: 'Repérage en cours', d: 'Chaque élément touché s\'épaissit en accent.',
+    fils: 0, schema: { choisis: ['f1', 'A', 'f2', 'K'] }, deroule: 0, verifier: true,
+    consigne: '<b>1.</b> Surligne la <b>boucle principale</b> : touche ses fils et ses dipôles sur le schéma.' },
+  { t: 'Boucle validée', d: 'La boucle reste surlignée pendant tout le montage. La borne + attend le premier fil.',
+    fils: 0, schema: { boucle: BOUCLE }, deroule: 1,
+    consigne: '<b>2.</b> Tire un fil depuis la <b>borne + du générateur</b>.' },
+  { t: 'Fil en cours de tracé', d: 'Le fil suit le doigt, en accent. On peut aussi toucher la borne de départ puis la borne d\'arrivée.',
+    fils: 0, encours: ['G.plus', 'A'], schema: { boucle: BOUCLE, branches: ['G'] }, deroule: 1,
+    consigne: '<b>2.</b> Relie la borne + du générateur à l\'<b>entrée 10A</b> de l\'ampèremètre.' },
+  { t: 'Deux fils posés', d: 'Chaque fil accepté et chaque dipôle branché se colorent sur le schéma.',
+    fils: 2, schema: { boucle: BOUCLE, branches: ['G', 'f1', 'A', 'f2', 'K'] }, deroule: 1,
+    consigne: '<b>2.</b> Continue dans l\'ordre du schéma : relie la borne libre de l\'interrupteur à la lampe.' },
+  { t: 'Branchement refusé', d: 'L\'élève a voulu relier l\'interrupteur au moteur : le fil n\'est pas posé, la borne touchée est marquée.',
+    fils: 2, refus: ['M.1', '<b>Ce n\'est pas ça.</b> D\'après le schéma, après l\'interrupteur vient la lampe : relie la borne libre de l\'interrupteur à la lampe.'],
+    schema: { boucle: BOUCLE, branches: ['G', 'f1', 'A', 'f2', 'K'] }, deroule: 1,
+    consigne: '<b>2.</b> Continue dans l\'ordre du schéma : relie la borne libre de l\'interrupteur à la lampe.' },
+  { t: 'Boucle fermée, interrupteur ouvert', d: 'Le montage est conforme mais rien ne fonctionne : l\'interrupteur est ouvert.',
+    fils: 5, schema: { boucle: BOUCLE, branches: BOUCLE }, deroule: 3,
+    consigne: '<b>4.</b> Ferme l\'interrupteur (touche son levier).' },
+  { t: 'Le circuit fonctionne', d: 'Lampe allumée, moteur qui tourne, ampèremètre au calibre 10 A : « 0.08 », lecture peu précise.',
+    fils: 5, mat: { K: { ferme: true }, L: { allumee: true }, M: { tourne: 1 }, A: { position: 'A10', affiche: '0.08' } },
+    schema: { boucle: BOUCLE, branches: BOUCLE, ferme: true }, deroule: 4,
+    consigne: '<b>5.</b> L\'intensité est petite : passe le fil de l\'entrée <b>10A</b> à l\'entrée <b>mA</b>, puis le calibre sur <b>200m</b>. Touche le sélecteur.' },
+  { t: 'Passage en mA', d: 'Fil passé de 10A à mA, calibre 200 mA : « 76.9 ». Le réglage du sélecteur est ouvert (choix 4).',
+    fils: 5, mA: true, reglage: 'A', mat: { K: { ferme: true }, L: { allumee: true }, M: { tourne: 1 }, A: { position: 'A200m', affiche: '76.9' } },
+    schema: { boucle: BOUCLE, branches: BOUCLE, ferme: true }, deroule: 5,
+    consigne: 'Juste ! <b>I = 76,9 mA</b>. Le montage est terminé.' },
+];
+const DEROULE = ['Surligne la boucle principale sur le schéma.', 'Pars de la borne + du générateur et suis les dipôles dans l\'ordre.',
+  'Ferme la boucle sur la borne − du générateur.', 'Ferme l\'interrupteur.', 'Lis l\'intensité, puis passe en mA pour la lire plus précisément.'];
+let n = 0;
+
+// ---------- schéma et table ----------
+const zs = document.getElementById('schema'), zt = document.getElementById('table');
+const S = JSON.parse(JSON.stringify(SCHEMAS.situation));
+document.getElementById('col-schema').style.setProperty('--ratio', (S.vb[0] / S.vb[1]).toFixed(3));
+const schema = MAQ.schema(zs, S, { libre: true });
+let table = null;
+
+function scene(e) {
+  const D = DISPO[choix.dispo], p = D.pos;
+  const m = {
+    G: { id: 'G', type: 'generateur', tension: 6 },
+    A: { id: 'A', type: 'multimetre', position: 'A10', affiche: '0.00' },
+    K: { id: 'K', type: 'interrupteur', ferme: false },
+    L: { id: 'L', type: 'lampe', allumee: false },
+    M: { id: 'M', type: 'moteur', tourne: 0 },
+  };
+  Object.entries(e.mat || {}).forEach(([k, v]) => Object.assign(m[k], v));
+  Object.values(m).forEach(x => { x.x = p[x.id][0]; x.y = p[x.id][1]; });
+  const fils = FILS.slice(0, e.fils).map(f => f.slice());
+  if (e.mA) fils[0][1] = 'A.mA';
+  return { W: D.W, H: D.H, materiel: Object.values(m), fils };
+}
+
+function afficher() {
+  const e = ETATS[n];
+  document.getElementById('e-num').textContent = `État ${n + 1} / ${ETATS.length} · ${e.t}`;
+  document.getElementById('e-desc').textContent = e.d;
+  document.getElementById('e-prec').disabled = n === 0;
+  document.getElementById('e-suiv').disabled = n === ETATS.length - 1;
+  // schéma : interrupteur ouvert ou fermé, lampe allumée
+  S.dipoles.find(d => d.id === 'K').ouvert = !e.schema.ferme;
+  S.dipoles.find(d => d.id === 'L').allumee = !!e.schema.ferme;
+  schema.maj(Object.assign({ boucle: [], branches: [], choisis: [] }, JSON.parse(JSON.stringify(e.schema))));
+  // table
+  if (table) table.detruire();
+  table = MAQ.table(zt, scene(e), { rendu: choix.rendu, libre: true, reglage: choix.reglage });
+  if (e.encours) {
+    const A = table.scene.materiel.find(x => x.id === 'A');
+    table.enCours(e.encours[0], A.x + 40, A.y - 4);
+  }
+  if (e.reglage) table.reglage(e.reglage);
+  // consigne et refus
+  document.getElementById('consigne').innerHTML = e.consigne + (e.verifier ? '<br><button type="button" class="btn-small">Vérifier</button>' : '');
+  // refus : bulle sur la table, ou message à la place de la consigne (la hauteur du bandeau ne change pas)
+  const msg = document.getElementById('message'), cons = document.getElementById('consigne');
+  msg.classList.add('hidden'); cons.classList.remove('hidden');
+  if (e.refus) {
+    if (choix.message === 'bulle') table.refus(e.refus[0], e.refus[1], 'bulle');
+    else { table.refus(e.refus[0], '', 'marque'); msg.innerHTML = e.refus[1]; msg.classList.remove('hidden'); cons.classList.add('hidden'); }
+  }
+  // déroulé guidé
+  document.getElementById('deroule').innerHTML = DEROULE.map((t, i) =>
+    `<li class="${i < e.deroule ? 'fait' : i === e.deroule ? 'ici' : 'avenir'}">${t}</li>`).join('');
+  document.getElementById('suivante').disabled = n !== ETATS.length - 1;
+}
+
+document.getElementById('e-prec').addEventListener('click', () => { if (n > 0) { n--; afficher(); } });
+document.getElementById('e-suiv').addEventListener('click', () => { if (n < ETATS.length - 1) { n++; afficher(); } });
+document.getElementById('recommencer').addEventListener('click', () => { n = 0; afficher(); });
+
+function boutons(id, cle) {
+  const b = document.querySelectorAll(`#${id} button`);
+  const maj = () => b.forEach(x => x.setAttribute('aria-pressed', x.dataset.v === choix[cle] ? 'true' : 'false'));
+  b.forEach(x => x.addEventListener('click', () => { choix[cle] = x.dataset.v; ecrire(cle, x.dataset.v); maj(); afficher(); }));
+  maj();
+}
+boutons('c-rendu', 'rendu'); boutons('c-dispo', 'dispo'); boutons('c-message', 'message'); boutons('c-reglage', 'reglage');
+afficher();
+</script>
+</body>
+</html>
