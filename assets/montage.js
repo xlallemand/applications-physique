@@ -39,7 +39,9 @@
    MONTAGE.schema(zone, circuit, options) → { maj(options), svg }
      options : boucle, branches, choisis, derivs, allumes, touches (identifiants), cerne (nœud ou dipôle
                entouré), com (vrai ou liste d'identifiants), etats ({ K: { ouvert }, L1: { allumee } }),
-               libre (éléments à toucher), onTouche({ type: 'fil'|'dipole'|'noeud'|'croisement', id })
+               libre (éléments à toucher : true pour tous, ou liste de types : ['fil', 'dipole']),
+               onTouche({ type: 'fil'|'dipole'|'noeud'|'croisement', id }) : un appui choisit l'élément le plus
+               proche (nœud ou croisement : seulement dans son cercle)
    MONTAGE.graphe(circuit)                       sommets (points électriques), arêtes (dipôles), jonctions
    MONTAGE.verifierBoucle(circuit, choisis)      { ok, dips, sommets } ou { ok: false, diag, cerne }
    MONTAGE.calculer(scene)                       tensions des bornes, intensités, et état du matériel
@@ -831,6 +833,8 @@
     zone.innerHTML = ''; zone.appendChild(svg);
     const dans = (l, id) => (l || []).includes(id);
     const pts = p => p.map(q => q.join(',')).join(' ');
+    // types d'éléments qu'on peut toucher
+    const permis = type => opt.libre === true || (Array.isArray(opt.libre) && opt.libre.includes(type));
 
     function dessiner() {
       svg.setAttribute('viewBox', c.vb.length === 4 ? c.vb.join(' ') : `0 0 ${c.vb[0]} ${c.vb[1]}`);
@@ -844,7 +848,7 @@
       const etat = id => dans(opt.choisis, id) ? ' choisi' : dans(opt.derivs, id) ? ' deriv' : dans(opt.branches, id) ? ' branche' : '';
       c.fils.forEach(f => {
         haut += `<polyline class="ms-fil${etat(f.id)}" points="${pts(f.pts)}"/>`;
-        if (opt.libre) cibles += `<polyline class="ms-cible" data-type="fil" data-id="${f.id}" points="${pts(f.pts)}"/>`;
+        if (permis('fil')) cibles += `<polyline class="ms-cible" data-type="fil" data-id="${f.id}" points="${pts(f.pts)}"/>`;
       });
       // oscilloscope : une flèche par voie, un seul symbole de masse (surligné dès qu'une voie est branchée)
       const voies = c.dipoles.filter(d => d.type === 'voie');
@@ -869,16 +873,16 @@
         }
         if (d.lab) haut += `<text class="ms-lab" x="${d.x + ((d.rot || 0) % 180 ? 16 : 0)}" y="${d.y + ((d.rot || 0) % 180 ? 0 : -17)}" dy=".35em" text-anchor="${(d.rot || 0) % 180 ? 'start' : 'middle'}">${d.lab}</text>`;
         if (opt.cerne === d.id) haut += `<circle class="ms-cerne" cx="${d.x}" cy="${d.y}" r="${L + 9}"/>`;
-        if (opt.libre) cibles += `<g transform="translate(${d.x} ${d.y}) rotate(${d.rot || 0})"><rect class="ms-cible-d" data-type="dipole" data-id="${d.id}" x="${-L - 4}" y="-15" width="${2 * L + 8}" height="30"/></g>`;
+        if (permis('dipole')) cibles += `<g transform="translate(${d.x} ${d.y}) rotate(${d.rot || 0})"><rect class="ms-cible-d" data-type="dipole" data-id="${d.id}" x="${-L - 4}" y="-15" width="${2 * L + 8}" height="30"/></g>`;
       });
       (c.noeuds || []).forEach(n => {
         if (dans(opt.allumes, n.id)) haut += `<circle class="ms-noeud-halo" cx="${n.x}" cy="${n.y}" r="8"/><circle class="ms-noeud allume" cx="${n.x}" cy="${n.y}" r="3.8"/>`;
         else if (dans(opt.touches, n.id)) haut += `<circle class="ms-noeud-touche" cx="${n.x}" cy="${n.y}" r="8"/><circle class="ms-noeud" cx="${n.x}" cy="${n.y}" r="3.8"/>`;
         else haut += `<circle class="ms-noeud" cx="${n.x}" cy="${n.y}" r="3.4"/>`;
         if (opt.cerne === n.id) haut += `<circle class="ms-cerne" cx="${n.x}" cy="${n.y}" r="11"/>`;
-        if (opt.libre) cibles += `<circle class="ms-cible-n" data-type="noeud" data-id="${n.id}" cx="${n.x}" cy="${n.y}" r="13"/>`;
+        if (permis('noeud')) cibles += `<circle class="ms-cible-n" data-type="noeud" data-id="${n.id}" cx="${n.x}" cy="${n.y}" r="13"/>`;
       });
-      (c.croisements || []).forEach((k, i) => { if (opt.libre) cibles += `<circle class="ms-cible-n" data-type="croisement" data-id="${i}" cx="${k.x}" cy="${k.y}" r="13"/>`; });
+      (c.croisements || []).forEach((k, i) => { if (permis('croisement')) cibles += `<circle class="ms-cible-n" data-type="croisement" data-id="${i}" cx="${k.x}" cy="${k.y}" r="13"/>`; });
       (c.intensites || []).forEach(i => {
         const R = { bas: 90, haut: -90, droite: 0, gauche: 180 }[i.dir] || 0, vert = i.dir === 'bas' || i.dir === 'haut';
         haut += `<g transform="translate(${i.x} ${i.y}) rotate(${R})"><path class="ms-pointe" d="M4 0 L-4 -4 L-4 4 Z"/></g>`;
@@ -895,10 +899,36 @@
       });
       svg.innerHTML = fond + haut + cibles;
     }
+    // ---------- appui : élément le plus proche du point touché (les fils courts restent faciles à toucher) ----------
+    // distance du point p au segment [a, b]
+    const distSeg = (p, a, b) => {
+      const dx = b[0] - a[0], dy = b[1] - a[1], l = dx * dx + dy * dy, t = l ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / l)) : 0;
+      return Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy);
+    };
+    // distance au corps d'un dipôle : rectangle de demi-largeur 8 le long de ses bornes
+    function distDipole(p, d) {
+      const [a, b] = [borneSchema(d, 'a'), borneSchema(d, 'b')], dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1;
+      const t = ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / L, n = Math.abs((p[0] - a[0]) * dy - (p[1] - a[1]) * dx) / L;
+      return Math.hypot(Math.max(0, -t, t - L), Math.max(0, n - 8));
+    }
+    // nœud ou croisement dans son cercle (s'il est permis), sinon fil ou dipôle le plus proche à moins de « seuil »
+    function plusProche(p, seuil) {
+      for (const [type, l] of [['noeud', c.noeuds || []], ['croisement', c.croisements || []]]) {
+        if (!permis(type)) continue;
+        const i = l.findIndex(n => Math.hypot(p[0] - n.x, p[1] - n.y) <= 13);
+        if (i >= 0) return { type, id: type === 'croisement' ? i : l[i].id };
+      }
+      let choix = null, dmin = seuil;
+      if (permis('fil')) c.fils.forEach(f => { for (let k = 1; k < f.pts.length; k++) { const d = distSeg(p, f.pts[k - 1], f.pts[k]); if (d < dmin) { dmin = d; choix = { type: 'fil', id: f.id }; } } });
+      if (permis('dipole')) c.dipoles.forEach(d => { if (d.type === 'voie') return; const e = distDipole(p, d); if (e < dmin) { dmin = e; choix = { type: 'dipole', id: d.id }; } });
+      return choix;
+    }
     svg.addEventListener('click', ev => {
-      const t = ev.target;
-      if (!opt.libre || !t.dataset || !t.dataset.type) return;
-      if (opt.onTouche) opt.onTouche({ type: t.dataset.type, id: t.dataset.type === 'croisement' ? +t.dataset.id : t.dataset.id });
+      const M = svg.getScreenCTM();
+      if (!opt.libre || !opt.onTouche || !M) return;
+      const q = new DOMPoint(ev.clientX, ev.clientY).matrixTransform(M.inverse());
+      const t = plusProche([q.x, q.y], 24 / M.a);          // 24 px à l'écran
+      if (t) opt.onTouche(t);
     });
     dessiner();
     return { maj(o) { Object.assign(opt, o || {}); dessiner(); }, svg, get options() { return opt; } };
@@ -1780,7 +1810,7 @@
       const allumes = (c.noeuds || []).filter(n => { const inc = c.fils.filter(w => w.a === n.id || w.b === n.id); return inc.length && inc.every(w => branches.has(w.id)); }).map(n => n.id);
       let cerne = st.cerne;
       if (mesure && !cerne && L[st.k] && ['debrancher', 'brancher'].includes(L[st.k].e)) cerne = L[st.k].id;
-      vSch.maj({ libre: st.phase === 'boucle', choisis: st.phase === 'boucle' ? st.choisis : [], boucle: Array.from(boucle),
+      vSch.maj({ libre: st.phase === 'boucle' && ['fil', 'dipole'], choisis: st.phase === 'boucle' ? st.choisis : [], boucle: Array.from(boucle),
                  branches: Array.from(branches), allumes, cerne, etats });
       vTab.dessiner();
       consigne(A);
@@ -1889,7 +1919,7 @@
       L = mesure ? etapesMesure() : [];
       if (mesure) precabler();
       if (vTab) vTab.detruire();
-      vSch = schema(zSch, c, { com: opts.com, libre: opts.boucle, onTouche: toucheSchema });
+      vSch = schema(zSch, c, { com: opts.com, libre: opts.boucle && ['fil', 'dipole'], onTouche: toucheSchema });
       vTab = table(zTab, st.scene, { rendu: opts.rendu, onFil: fil, onRetirer: retirer, onFilTouche: filTouche, onCommande: commande, retirable,
         onLargeur: l => { const W = l >= 520 ? 540 : 360; if (W !== st.scene.W || !st.scene.place) { st.scene.W = W; st.scene.H = disposer(st.scene.materiel, W); st.scene.place = true; } } });
       apresChangement();

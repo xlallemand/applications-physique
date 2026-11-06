@@ -378,7 +378,9 @@
           <button type="button" class="btn-primary" data-a="suite" disabled>${k < LECTURES.length - 1 ? 'Schéma suivant →' : 'Module 3 : brancher un multimètre →'}</button></div>`;
       const zs = zone.querySelector('.me-lire-schema');
       zs.style.setProperty('--ratio', (c.vb[c.vb.length - 2] / c.vb[c.vb.length - 1]).toFixed(3));
-      const vs = MONTAGE.schema(zs, c, { libre: true, onTouche: toucher });
+      // éléments qu'on peut toucher : les nœuds seulement à l'étape où on les cherche
+      const libre = () => (st.etape === 'fin' ? false : st.etape === 'noeuds' ? true : ['fil', 'dipole']);
+      const vs = MONTAGE.schema(zs, c, { libre: ['fil', 'dipole'], onTouche: toucher });
       const horsBoucle = () => c.dipoles.filter(d => !st.boucle.includes(d.id)).map(d => d.id);
       function toucher(t) {
         st.diag = null; st.ok = null; st.cerne = null;
@@ -415,7 +417,7 @@
         if (faits.size === LECTURES.length) SOM.marquer({ fait: true });
       }
       function maj() {
-        vs.maj({ libre: st.etape !== 'fin', choisis: st.etape === 'boucle' ? st.choisis : [], boucle: st.boucle, touches: st.touches, derivs: st.derivs, cerne: st.cerne });
+        vs.maj({ libre: libre(), choisis: st.etape === 'boucle' ? st.choisis : [], boucle: st.boucle, touches: st.touches, derivs: st.derivs, cerne: st.cerne });
         const cons = zone.querySelector('.me-lire-cons');
         let h = '';
         if (st.etape === 'boucle') h = '<p>1. Surligne la <b>boucle principale</b>, celle qui contient le générateur : touche ses fils et ses dipôles (toucher à nouveau enlève), puis « Vérifier ».</p><div class="mt-cons-actions"><button type="button" class="btn-small" data-a="verifier">Vérifier</button></div>';
