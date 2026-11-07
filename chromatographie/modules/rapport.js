@@ -3,7 +3,8 @@
    (application « Chromatographie sur couche mince », page module_2_rf)
 
    CC.pageRf({ mesurer, comparer, identifier, fin })
-       les trois parties de la page ; quand les trois sont réussies,
+       les trois parties de la page, affichées l'une après l'autre (chacune
+       dans sa carte, qui apparaît quand la précédente est réussie) ; à la fin,
        la page est faite (SOM.marquer) et la carte fin s'affiche
    CC.mesurerRf(zone, onFini)      deux plaques, même espèce, élutions différentes :
                                    mesurer h et H à la règle, calculer R_f (le même)
@@ -270,18 +271,14 @@
   }
 
   /* ---------- la page ---------- */
+  // les parties apparaissent l'une après l'autre (carte de la partie suivante cachée jusque-là)
   function pageRf(z) {
-    const faites = new Set();
-    const fini = n => () => {
-      faites.add(n);
-      if (faites.size < 3) return;
-      SOM.marquer({ fait: true });
-      z.fin.hidden = false;
-      CC.defiler(z.fin);
-    };
-    mesurerRf(z.mesurer, fini('mesurer'));
-    comparerRf(z.comparer, fini('comparer'));
-    identifierRf(z.identifier, fini('identifier'));
+    const carte = e => e.closest('.er-card') || e;
+    const montrer = e => { carte(e).hidden = false; setTimeout(() => carte(e).scrollIntoView({ behavior: 'smooth', block: 'start' }), 900); };
+    [z.comparer, z.identifier, z.fin].forEach(e => { carte(e).hidden = true; });
+    mesurerRf(z.mesurer, () => { montrer(z.comparer); comparerRf(z.comparer, () => {
+      montrer(z.identifier); identifierRf(z.identifier, () => { SOM.marquer({ fait: true }); montrer(z.fin); });
+    }); });
   }
 
   window.CC = Object.assign(window.CC || {}, { pageRf, mesurerRf, comparerRf, identifierRf });

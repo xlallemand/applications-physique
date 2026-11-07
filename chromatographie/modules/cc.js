@@ -135,6 +135,8 @@
      q = { parties: [p] } ; p = { type, q (texte), figure(zone), solution (HTML affiché après), … }
      mode 'serie' : bouton « Afficher la réponse » (0 point pour la question)
      cb.fin(points) : 2 sans erreur, 1 après au moins une erreur, 0 si une réponse est affichée
+     Plusieurs parties : une seule affichée à la fois ; une partie finie garde son retour,
+     puis « Suite → » l'efface et la partie suivante prend sa place.
      ============================================================ */
   function question(zone, q, cb) {
     const etat = { erreurs: 0, vue: false, fini: false };
@@ -142,7 +144,7 @@
     let rendues = 0, finies = 0;
     function partie() {
       const p = q.parties[rendues++];
-      const d = el('div', 'ph-partie', `${p.q ? `<div class="ph-partie-q">${p.q}</div>` : ''}<div class="ph-partie-fig"></div><div class="ph-partie-zone"></div><div class="ph-partie-retour" aria-live="polite"></div>
+      const d = el('div', 'ph-partie', `${n > 1 ? `<p class="ph-partie-num">Question ${rendues} / ${n}</p>` : ''}${p.q ? `<div class="ph-partie-q">${p.q}</div>` : ''}<div class="ph-partie-fig"></div><div class="ph-partie-zone"></div><div class="ph-partie-retour" aria-live="polite"></div>
         <div class="ph-partie-aide"><button type="button" class="btn-small">Afficher la réponse</button></div>`);
       zone.appendChild(d);
       if (p.figure) p.figure(d.querySelector('.ph-partie-fig'));
@@ -160,10 +162,13 @@
         reussi(silencieux, note) { terminer(false, silencieux, note); },
       };
       const ctx = PARTIES[p.type](d.querySelector('.ph-partie-zone'), p, api);
+      // « Afficher la réponse » sur la rangée des boutons de l'outil, quand il en a une (place gagnée)
+      const rangee = d.querySelector('.ph-partie-zone .er-actions');
+      if (rangee) { rangee.appendChild(bRep); bRep.classList.add('ph-rep-rangee'); aide.hidden = true; }
       bRep.onclick = () => { if (finie) return; ctx.montrer(); etat.vue = true; terminer(true); };
       function terminer(vue, silencieux, note) {
         finie = true;
-        aide.remove();
+        aide.remove(); bRep.remove();
         const titre = vue ? 'Réponse' : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution;
         if (sol || vue || note) {
@@ -173,7 +178,14 @@
         } else ret.innerHTML = '';
         finies++;
         if (finies < n) {
-          if (rendues < n) { partie(); defiler(zone.lastElementChild); }
+          // la partie suivante remplace celle-ci, une fois son retour lu
+          if (rendues < n) {
+            const a = el('div', 'er-actions ph-partie-suite', '<button type="button" class="btn-primary">Suite →</button>');
+            d.appendChild(a);
+            const b = a.querySelector('button');
+            b.onclick = () => { d.remove(); partie(); defiler(zone); };
+            defiler(a);
+          }
         } else {
           etat.fini = true;
           cb.fin(etat.vue ? 0 : etat.erreurs ? 1 : 2, etat);
@@ -207,18 +219,15 @@
       if (idx >= qs.length) return fin();
       const q = qs[idx];
       window.CC.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
-      app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+      // en-tête compact ; question à chromatogramme : énoncé et figure à gauche, sous-question à droite
+      const tete = `${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}${q.consigne ? `<div class="er-consigne">${q.consigne}</div>` : ''}${q.enonce ? `<div class="ph-enonce">${q.enonce}</div>` : ''}`;
+      const droite = '<div data-a="parties"></div><div data-a="retour"></div><div class="er-actions" data-a="suite"></div>';
+      app.innerHTML = `<div class="er-card ph-tete"><div class="cc-tete"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
+            <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p></div>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
-        <div class="er-card ph-question">
-          ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
-          ${q.consigne ? `<div class="er-consigne">${q.consigne}</div>` : ''}
-          ${q.enonce ? `<div class="ph-enonce">${q.enonce}</div>` : ''}
-          <div data-a="fig"></div>
-          <div data-a="parties"></div>
-          <div data-a="retour"></div>
-          <div class="er-actions" data-a="suite"></div>
-        </div>`;
+        <div class="er-card ph-question">${q.figure
+          ? `<div class="ph-cote"><div class="ph-cote-g">${tete}<div data-a="fig"></div></div><div class="ph-cote-d">${droite}</div></div>`
+          : `${tete}<div data-a="fig"></div>${droite}`}</div>`;
       window.scrollTo(0, 0);
       if (q.figure) q.figure(app.querySelector('[data-a="fig"]'));
       // évite qu'un double appui sur « Question suivante » réponde à la nouvelle question
@@ -425,8 +434,11 @@
       cs = [C('contient', { r }), C('pasContient', { r }), C('pur'), C('melange')];
       js = [J('meme', { r }), J('pasMeme', { r }), J('une'), J('plusieurs')];
     } else if (q.type === 'tache') {
-      cs = autres.map(i => C('contient', { r: i })).concat([C('inconnue')]);
-      js = autres.map(i => J('meme', { r: i })).concat([J('aucune'), J('plusieurs')]);
+      // la bonne référence (s'il y en a une) et au plus deux autres : pas plus de 3 références proposées
+      const m = a.refDe(CCM.hauteur(q.espece));
+      const refs = (m != null ? [m] : []).concat(melanger(autres.filter(i => i !== m))).slice(0, 3).sort((x, y) => x - y);
+      cs = refs.map(i => C('contient', { r: i })).concat([C('inconnue')]);
+      js = refs.map(i => J('meme', { r: i })).concat([J('aucune')]);
     } else if (q.type === 'constituants') {
       // toutes les références, dans l'ordre de la plaque, puis les espèces non identifiées
       cs = autres.map(i => C('esp', { r: i })).concat([C('inc1'), C('incN')]);
@@ -546,8 +558,8 @@
     function maj() {
       const t = (tout ? phraseTout : phraseDe)(choix, sit, q.depot);
       boite.innerHTML = choix.length ? `<p>${t.replace(/\.$/, choix[choix.length - 1].g === 'j' ? '.' : ' …')}</p>`
-        : `<p class="cc-phrase-vide">${tout ? 'Touche toutes les espèces que contient le dépôt, puis « car », puis la justification (une ou deux).'
-          : 'Touche les expressions dans l\'ordre : la conclusion, puis « car », puis la justification.'}</p>`;
+        : `<p class="cc-phrase-vide">${tout ? 'Touche les espèces, puis « car », puis la justification (une ou deux).'
+          : 'Touche la conclusion, puis « car », puis la justification.'}</p>`;
       if (tout) zone.querySelectorAll('.cc-pilule[aria-pressed]').forEach(b => {
         const x = (b.dataset.g === 'c' ? cs : js)[+b.dataset.i];
         b.setAttribute('aria-pressed', choix.includes(x));

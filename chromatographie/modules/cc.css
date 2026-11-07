@@ -168,9 +168,12 @@ sub, sup { font-size: .7em; line-height: 0; }
 .cc-fig-lire { max-width: 300px; margin: 0 auto; }
 .cc-legende-noms { list-style: none; margin: 8px 0 0; padding: 0; font-size: .88rem; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 2px 14px; }
 .cc-legende-noms b { color: var(--ink); }
-.cc-questions li { font-size: .9rem; }
-.cc-q { margin-top: 14px; }
+.cc-q { margin-top: 0; }
 .cc-q-t { font-weight: 800; margin-bottom: 10px !important; line-height: 1.45; }
+/* question en cours (une seule affichée) */
+.cc-q-encours { background: var(--cle-bg); border-left: 5px solid var(--accent); border-radius: 14px; padding: 12px 16px; margin-bottom: 12px; }
+.cc-q-num { font-size: .78rem !important; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--accent-ink); margin-bottom: 4px !important; }
+.cc-q-texte { font-size: 1.15rem; font-weight: 800; line-height: 1.4; color: var(--ink); }
 .cc-q-aide { margin-top: 10px; }
 .cc-q-aide .btn-small { color: var(--ink-2); }
 
@@ -247,7 +250,31 @@ sub, sup { font-size: .7em; line-height: 0; }
 .ph-enonce { margin-bottom: 12px; line-height: 1.55; }
 .ph-enonce p + p { margin-top: 6px; }
 .ph-partie + .ph-partie { margin-top: 16px; padding-top: 14px; border-top: 1.5px dashed var(--paper-3); }
-.ph-partie-q { font-weight: 700; color: var(--ink); margin-bottom: 10px !important; line-height: 1.5; }
+.ph-partie { animation: cc-apparait .35s ease-out; }
+@keyframes cc-apparait { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .ph-partie { animation: none; } }
+.ph-partie-num { font-size: .78rem !important; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--accent-ink); margin-bottom: 4px !important; }
+.ph-partie-suite { margin-top: 10px; }
+.ph-rep-rangee { margin-left: auto; color: var(--ink-2); align-self: center; }
+/* série : chromatogramme à gauche, question à droite (dessous sur téléphone) */
+.ph-cote { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.ph-cote-g .cc-serie-fig { margin: 8px 0 0; }
+.ph-cote-g .er-consigne { margin-bottom: 4px !important; }
+.ph-cote-g .ph-enonce { font-size: .92rem; line-height: 1.45; }
+.ph-cote-g .cc-fig-lire .ccm-svg { max-height: clamp(260px, calc(100vh - 470px), 420px); }
+.ph-cote-g .cc-legende-noms { font-size: .84rem; }
+.ph-cote-g .ph-enonce { margin-bottom: 0; }
+.ph-cote-d .ph-partie-q { margin-top: 2px; }
+.ph-cote-d .cc-pioche { gap: 6px; }
+.ph-cote-d .cc-pioche-t { margin-bottom: 2px !important; }
+.ph-cote-d .cc-phrase { min-height: 48px; margin-bottom: 8px; }
+.ph-tete { padding-top: 14px; padding-bottom: 14px; }
+.ph-tete .cc-tete { margin-bottom: 8px; }
+.ph-tete .er-meta { margin: 0 0 0 auto !important; }
+.cc-serie-page { padding-bottom: 16px; }
+.cc-serie-page > .er-card:last-child { margin-bottom: 0; }
+@media (max-width: 899px) { .ph-cote { grid-template-columns: minmax(0, 1fr); gap: 10px; } .ph-tete .er-meta { margin: 0 !important; width: 100%; } }
+.ph-partie-q { font-weight: 800; font-size: 1.08rem; color: var(--ink); margin-bottom: 10px !important; line-height: 1.45; }
 .ph-partie-aide { margin-top: 10px; }
 .ph-partie-aide .btn-small { color: var(--ink-2); }
 .ph-partie-fig:empty { display: none; }

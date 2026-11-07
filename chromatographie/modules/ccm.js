@@ -42,11 +42,12 @@
        regle (vrai : règle graduée à gauche de la plaque),
        arret (cm : hauteur où le front s'arrête de lui-même ; défaut : 1 cm sous le haut ;
               la hauteur de la plaque : le front monte jusqu'au bord),
-       duree (s, à vitesse × 1, pour monter du niveau de l'éluant à arret ; défaut 10),
+       duree (s, à vitesse × 1 : la vitesse de départ est (arret − niveau) / duree ; défaut 10),
+       ralenti (cm sous arret où le front commence à ralentir ; défaut 2),
        marges: { g, d, h } (cm ajoutés à gauche, à droite et au-dessus de la cuve, pour des légendes
               ou des boutons ; plaque seule : d), onFront(front), onFin()
-     Élution : le front monte vite au début, puis de plus en plus lentement (la hauteur parcourue
-     croît comme la racine carrée du temps) ; sans animation, il avance par paliers
+     Élution : le front monte vite, à vitesse constante, puis ralentit nettement dans les derniers
+     centimètres (ralenti) avant arret ; sans animation, il avance par paliers
      (30 %, 60 %, 80 %, 90 %, puis 100 % du chemin jusqu'à arret).
    Contrôleur : {
      svg, etat,                         état courant (lecture)
@@ -325,11 +326,12 @@
       if (!enCours) return;
       const dt = Math.min(.1, (t - (dernier || t)) / 1000);
       dernier = t;
-      // loi de montée par capillarité : (front − départ)² proportionnel au temps,
-      // soit une vitesse inversement proportionnelle au chemin parcouru (EPS : départ sans vitesse infinie)
-      const depart = e.niveau || 0, fin = arret(), D = fin - depart, EPS = .25;
+      // vitesse constante, puis proportionnelle à ce qui reste à monter dans les derniers centimètres
+      // (au moins 15 % de la vitesse de départ, pour arriver à arret)
+      const depart = e.niveau || 0, fin = arret(), Z = e.ralenti || 2;
       let fr = e.front == null ? depart : valFront();
-      fr = Math.min(fin, fr + dt * vit * (D * D / (2 * e.duree)) / (fr - depart + EPS));
+      const v = (fin - depart) / e.duree * Math.max(.15, Math.min(1, (fin - fr) / Z));
+      fr = Math.min(fin, fr + dt * vit * v);
       e.front = fr;
       phase += dt * vit * 3;
       rendre();

@@ -76,7 +76,7 @@
           </div></div>`;
       anim = CCM.animation(zone.querySelector('.cc-scene'), {
         depots: st.depots, largeur: L, hauteur: HP, trait: null, niveau: 0, cuve: false, couvercle: false, regle: true, noms: true,
-        arret: HP, duree: 20, marges: { h: MH },
+        arret: HP, duree: 9, marges: { h: MH },
         aria: 'Plaque de chromatographie et cuve : animation des gestes de la CCM',
         calque, fixe, onFin: auBord,
       });
@@ -460,7 +460,7 @@
       // manipulation ratée : plus d'outils, seulement le bouton pour recommencer (sous le message)
       o.hidden = st.rate || st.echec;
       zone.querySelector('.cc-etape').textContent = `Étape ${st.etape + 1} / 7 · ${ETAPES[st.etape].t}`;
-      zone.querySelector('.cc-consigne').innerHTML = `<p>${ETAPES[st.etape].c}</p><p class="cc-info">${detail()}</p>`;
+      zone.querySelector('.cc-consigne').innerHTML = `<p>${ETAPES[st.etape].c}</p>${detail() ? `<p class="cc-info">${detail()}</p>` : ''}`;
       let h = '';
       if (st.msg) h += `<div class="callout-success cc-diag">${st.msg}</div>`;
       if (st.diag) h += `<div class="callout-danger cc-diag"><b>Ce n'est pas ça.</b> ${st.diag}</div>`;
@@ -474,8 +474,7 @@
         case 0: return `Règle la hauteur avec ▲ ▼ (règle graduée à gauche ; hauteur : ${fmt(st.traitH)} cm), puis glisse le crayon d'un bord à l'autre de la plaque, ou touche « Tracer le trait ».`;
         case 1: return `${pluriel(st.depots.length, 'dépôt')} sur 5 emplacements. A, B, C et D sont des corps purs ; M et N sont des mélanges. A, C et M sont colorés ; B, D et N sont incolores.`;
         case 2: return st.couvercle ? 'Tout est prêt : lance l\'élution.' : st.posee ? 'Ferme maintenant le couvercle.' : `Règle le niveau de l'éluant avec − et + (niveau : ${fmt(st.niveau)} cm), puis pose la plaque.`;
-        case 3: return reduit() ? 'Avance l\'élution étape par étape, et sors la plaque à temps avec le bouton au-dessus de la cuve.'
-          : 'Le front monte vite au début, puis de plus en plus lentement. Sors la plaque à temps avec le bouton au-dessus de la cuve.';
+        case 3: return reduit() ? 'Avance l\'élution étape par étape.' : '';
         case 4: return 'Glisse le trait en pointillés (ou ▲ ▼) jusqu\'à la limite de la partie mouillée, puis touche « Tracer le front ».';
         case 5: {
           const n = st.cercles.length, e = `${pluriel(n, 'tache')} entourée${n > 1 ? 's' : ''}.`;

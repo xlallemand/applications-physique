@@ -40,7 +40,7 @@
       zone.innerHTML = `<div class="cc-sit-tete"><h3 class="cc-sit-titre">${S.titre}</h3><span class="cc-sit-num">Situation ${k + 1} / ${SITUATIONS.length}</span></div>
         <div class="cc-lire">
           <div class="cc-lire-g"><div class="cc-chromato"></div><p class="cc-aide">Touche une tache pour la choisir (encore une fois pour l'enlever) : des pointillés relient les taches choisies de même hauteur.</p></div>
-          <div class="cc-lire-d"><ol class="cc-deroule cc-questions">${S.questions.map(q => `<li><span>${CC.enonce(q, S)}</span></li>`).join('')}</ol><div class="cc-q"></div></div>
+          <div class="cc-lire-d"><div class="cc-q"></div></div>
         </div>
         <div class="er-actions"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
           <button type="button" class="btn-primary" data-a="suite" disabled>${k < SITUATIONS.length - 1 ? 'Situation suivante →' : 'Module 3 : entraînement →'}</button>
@@ -52,10 +52,9 @@
       };
       function poser() {
         const q = S.questions[iq], zq = zone.querySelector('.cc-q');
-        zone.querySelectorAll('.cc-questions li').forEach((li, i) => { li.className = i < iq ? 'fait' : i === iq ? 'ici' : 'avenir'; });
         ch.effacer();
         ch.marquer(q.type === 'tache' ? q.depot + '|' + q.espece : null);
-        zq.innerHTML = `<p class="cc-q-t">${iq + 1}. ${CC.enonce(q, S)}</p><div class="cc-q-outil"></div><div class="cc-q-retour" aria-live="polite"></div><div class="cc-q-aide" hidden><button type="button" class="btn-small">Afficher la réponse</button></div>`;
+        zq.innerHTML = `<div class="cc-q-encours"><p class="cc-q-num">Question ${iq + 1} / ${S.questions.length}</p><p class="cc-q-texte">${CC.enonce(q, S)}</p></div><div class="cc-q-outil"></div><div class="cc-q-retour" aria-live="polite"></div><div class="cc-q-aide" hidden><button type="button" class="btn-small">Afficher la réponse</button></div>`;
         const ret = zq.querySelector('.cc-q-retour'), aide = zq.querySelector('.cc-q-aide');
         let erreurs = 0;
         const outil = CC.phrase(zq.querySelector('.cc-q-outil'), {
@@ -78,7 +77,6 @@
           const der = iq === S.questions.length - 1;
           ret.innerHTML = h + (der ? '' : '<div class="er-actions"><button type="button" class="btn-primary" data-a="qs">Question suivante →</button></div>');
           if (der) {
-            zone.querySelectorAll('.cc-questions li').forEach(li => { li.className = 'fait'; });
             faites.add(k);
             const b = zone.querySelector('[data-a="suite"]'), rf = zone.querySelector('[data-a="rf"]');
             b.disabled = false;
