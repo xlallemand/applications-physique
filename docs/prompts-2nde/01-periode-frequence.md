@@ -47,6 +47,11 @@ Sources : `01- Signaux sonores/Chap01-Cours complete.pdf` p. 1-2, `TP 1 - freque
 - Bilan : « La période T est la durée du motif élémentaire. On peut la mesurer entre deux sommets, deux creux, ou deux points qui se correspondent. »
 
 ### Module 2 : Mesurer T et calculer f (manipulation guidée, `module_2_manip.html`)
+Un outil de mesure sur un graphique (règle) est déjà disponible dans l'application 'lecture-graphique'.
+Pour mesurer un valeur sur un graphique, proposer toujours 2 possibilités : 
+- lecture directe sur le graphique car la mesure tombe sur des valeurs de la grille simples à lire
+- utilisation de la règle et d'un tableau de proportionnalité.
+Une option à cocher permet de choisir entre les deux. Si la valeur lue directement n'est pas suffisamment facile à lire / précise, refuser cette méthode de lecture directe.
 
 Déroulé de `LG.poserQuestion` (règle virtuelle, tableau de proportionnalité, produit en croix, division par le nombre de périodes), en trois temps pour chaque signal :
 1. **Une période** : la règle virtuelle mesure une seule période ; tableau `Distance (cm)` / `t (ms)` : ligne de l'échelle (mesurée sur l'axe), ligne de la mesure, case « T » mise en valeur ; produit en croix ; T avec son unité.
