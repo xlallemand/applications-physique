@@ -1,0 +1,216 @@
+/* ============================================================
+   Styles de l'application « Chromatographie sur couche mince »
+   Complète assets/theme.css et equilibrer-reactions/modules/er.css
+   (cartes, boutons, écran de fin).
+   ccm-…  outil CCM (plaque, taches, cuve) : à charger avec modules/ccm.js
+   ph-…   questions (repris de cinematique/modules/cin.css)
+   cc-…   pages de l'application
+   ============================================================ */
+
+.er-page button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.er-page p { margin: 0; }
+sub, sup { font-size: .7em; line-height: 0; }
+
+/* ============================================================
+   OUTIL CCM : plaque, taches, cuve
+   ============================================================ */
+.ccm-svg { display: block; width: 100%; height: auto; font-family: var(--font-sans); touch-action: pan-y;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+.ccm-interactif { cursor: pointer; }
+.ccm-plaque { fill: var(--sheet); stroke: var(--line); stroke-width: 1.5; }
+.ccm-plaque.uv { fill: var(--cle-bg); stroke: var(--cle-line); }
+.ccm-mouille { fill: var(--paper-2); }
+.ccm-front-bord { fill: none; stroke: var(--ink-3); stroke-width: .8; opacity: .7; }
+.ccm-crayon { stroke: var(--ink-3); stroke-width: 1.6; stroke-linecap: round; fill: none; }
+.ccm-nom { fill: var(--ink-2); font-weight: 700; text-anchor: middle; }
+.ccm-tache-c { fill: var(--accent); }
+.ccm-tache-i { fill: var(--ink-2); }
+.ccm-depot { fill: var(--ink-3); }
+.ccm-cercle { fill: none; stroke: var(--ink-3); stroke-width: 1.4; stroke-linejoin: round; }
+.ccm-cercle-depot { fill: none; stroke: var(--ink-3); stroke-width: 1.2; }
+.ccm-sel { fill: none; stroke: var(--accent-ink); stroke-width: 2.4; }
+.ccm-marque { fill: none; stroke: var(--accent-ink); stroke-width: 2; stroke-dasharray: 4 3; }
+.ccm-pointilles { stroke: var(--ink-2); stroke-width: 1.6; stroke-dasharray: 5 4; }
+.ccm-cuve-fond { fill: var(--sheet); opacity: .55; }
+.ccm-verre { fill: none; stroke: var(--ink-2); stroke-width: 2.2; stroke-linejoin: round; }
+.ccm-eluant { fill: var(--paper-3); opacity: .75; }
+.ccm-eluant-surface { stroke: var(--ink-3); stroke-width: 1.2; }
+.ccm-couvercle { fill: var(--paper-2); stroke: var(--ink-2); stroke-width: 1.6; }
+.ccm-attente { opacity: .35; }
+.ccm-regle { fill: var(--sheet); stroke: var(--ink-3); stroke-width: 1; }
+.ccm-grad { stroke: var(--ink-2); stroke-width: .8; }
+.ccm-grad-t { fill: var(--ink-2); font-weight: 700; text-anchor: middle; }
+.ccm-poignee { fill: transparent; cursor: grab; touch-action: none; }
+
+/* ============================================================
+   PAGES
+   ============================================================ */
+.cc-fig { background: var(--paper); border-radius: 14px; padding: 8px; }
+.cc-titre-carte { margin: 0 0 12px; font-size: 1.15rem; font-weight: 800; letter-spacing: -.02em; }
+.cc-sit-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 6px 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.cc-sit-titre { margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -.02em; }
+.cc-sit-num { font-size: .85rem; font-weight: 700; color: var(--ink-2); white-space: nowrap; }
+.cc-aide { margin-top: 8px !important; font-size: .88rem; color: var(--ink-2); line-height: 1.4; }
+
+/* consigne et déroulé guidé (une étape à la fois) */
+.cc-consigne { background: var(--cle-bg); border-radius: 14px; padding: 10px 14px; font-size: .95rem; line-height: 1.45; }
+.cc-consigne p + p, .cc-consigne p + div, .cc-consigne div + div { margin-top: 8px; }
+.cc-consigne b { color: var(--accent-ink); }
+.cc-consigne .cc-info { color: var(--ink-2); font-size: .9rem; }
+.cc-consigne .cc-ok b { color: var(--success-text); }
+.cc-cons-actions { margin-top: 8px; }
+.cc-cons-actions .btn-small { min-height: 42px; padding: 0 18px; }
+.cc-diag { padding: 10px 12px !important; border-radius: 12px !important; font-size: .92rem; }
+.cc-diag b { color: inherit; }
+.callout-danger.cc-diag { color: var(--danger-text); }
+.callout-success.cc-diag { color: var(--success-text); }
+.cc-deroule { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; counter-reset: d; }
+.cc-deroule li { display: flex; gap: 10px; align-items: center; background: var(--paper); border-radius: 14px; padding: 8px 12px; counter-increment: d; line-height: 1.4; font-size: .93rem; }
+.cc-deroule li::before { content: counter(d); flex-shrink: 0; width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; background: var(--sheet); font-weight: 800; font-size: .85rem; color: var(--ink-2); }
+.cc-deroule li.fait::before { content: '✓'; background: var(--success-bg); color: var(--success-text); }
+.cc-deroule li.ici { background: var(--cle-bg); font-weight: 700; }
+.cc-deroule li.avenir { color: var(--ink-2); }
+
+/* module 1 : scène à gauche, déroulé à droite (dessous sur téléphone) */
+.cc-manip { display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); gap: 16px; align-items: start; }
+.cc-manip-d { position: sticky; top: 16px; }
+.cc-scene { max-width: 420px; margin: 0 auto; }
+.cc-outils { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.cc-outil { border-radius: 14px; padding: 8px 10px; background: var(--paper); border: 1.5px solid transparent; }
+.cc-outil.ici { background: var(--cle-bg); border-color: var(--cle-line); }
+.cc-outil-t { font-size: .78rem !important; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 6px !important; }
+.cc-outil.ici .cc-outil-t { color: var(--accent-ink); }
+.cc-outil-b { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.cc-outil-b + .cc-outil-b { margin-top: 6px; }
+.cc-outil-b .btn-secondary { min-height: 46px; padding: 8px 14px; font-size: .92rem; }
+.cc-outil-b .cc-fl { min-width: 58px; min-height: 50px; font-size: 1.1rem; padding: 0; }
+.cc-val { font-weight: 800; font-variant-numeric: tabular-nums; min-width: 4.2em; text-align: center; }
+.cc-val-t { font-size: .88rem; font-weight: 700; color: var(--ink-2); }
+.cc-vit[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--ink); font-weight: 800; }
+.cc-flacon { gap: 6px; }
+.cc-flacon.choisi { box-shadow: inset 0 0 0 2.5px var(--accent); background: var(--cle-bg); }
+.cc-fiole { display: inline-block; width: 12px; height: 18px; border-radius: 3px 3px 6px 6px; border: 1.5px solid var(--ink-2); background: var(--sheet); margin-right: 6px; vertical-align: middle; }
+.cc-fiole.coloree { background: var(--accent); }
+/* outils dessinés sur la scène */
+.cc-guide { stroke: var(--accent); stroke-width: 1; stroke-dasharray: 3 4; opacity: .7; }
+.cc-crayon-corps { fill: var(--paper-3); stroke: var(--ink-2); stroke-width: 1; }
+.cc-crayon-bois { fill: var(--paper-2); stroke: var(--ink-2); stroke-width: 1; }
+.cc-crayon-mine { fill: var(--ink-2); }
+.cc-empl { fill: transparent; stroke: var(--ink-3); stroke-width: 1.2; stroke-dasharray: 3 3; }
+.cc-empl.actif { stroke: var(--accent); stroke-width: 2; fill: var(--cle-bg); }
+.cc-ligne-front { stroke: var(--accent); stroke-width: 2; stroke-dasharray: 6 4; }
+.cc-poignee-v { fill: var(--sheet); stroke: var(--accent); stroke-width: 2.5; }
+.cc-lampe { fill: var(--ink-2); }
+.cc-lampe-t { fill: var(--sheet); font-weight: 700; text-anchor: middle; }
+.cc-rayon { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 3 4; opacity: .7; }
+
+/* légende du schéma */
+.cc-leg { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.cc-leg-fig { max-width: 340px; margin: 0 auto; width: 100%; }
+.cc-leg-aide { font-size: .9rem; color: var(--ink-2); margin-bottom: 8px !important; }
+.cc-leg-etiq { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.cc-etiq { min-height: 46px; padding: 8px 14px; font-size: .92rem; }
+.cc-etiq.choisie { box-shadow: inset 0 0 0 2.5px var(--accent); background: var(--cle-bg); }
+.cc-etiq.posee { display: none; }
+.cc-leg-cases { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.cc-leg-case {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 46px; padding: 6px 10px; border: none; border-radius: 14px;
+  background: var(--paper); font: inherit; color: var(--ink-2); text-align: left; cursor: pointer;
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.cc-leg-case.survol { box-shadow: inset 0 0 0 2.5px var(--accent); background: var(--cle-bg); }
+.cc-leg-case.pose { color: var(--success-text); background: var(--success-bg); box-shadow: none; font-weight: 700; cursor: default; }
+.cc-leg-case:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cc-leg-num { flex-shrink: 0; width: 28px; height: 28px; border-radius: 999px; display: grid; place-items: center; background: var(--ink); color: var(--sheet); font-weight: 800; font-size: .9rem; }
+.cc-pin { fill: var(--ink); }
+.cc-pin-t { fill: var(--sheet); font-weight: 800; text-anchor: middle; }
+.cc-pin-trait { stroke: var(--ink); stroke-width: 1.2; }
+.cc-pin-bout { fill: var(--ink); }
+.drag-ghost { box-shadow: 0 8px 24px rgba(22, 24, 29, .18); z-index: 1000; pointer-events: none; }
+
+/* bilan du module 1 */
+.cc-bilan { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; align-items: start; }
+.cc-fig-bilan { max-width: 260px; margin: 0 auto; width: 100%; }
+.cc-bilan-t { margin-top: 10px !important; color: var(--ink-2); line-height: 1.5; }
+
+/* module 2 : chromatogramme à gauche, question à droite */
+.cc-lire { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; align-items: start; }
+.cc-fig-lire { max-width: 300px; margin: 0 auto; }
+.cc-legende-noms { list-style: none; margin: 8px 0 0; padding: 0; font-size: .88rem; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 2px 14px; }
+.cc-legende-noms b { color: var(--ink); }
+.cc-questions li { font-size: .9rem; }
+.cc-q { margin-top: 14px; }
+.cc-q-t { font-weight: 800; margin-bottom: 10px !important; line-height: 1.45; }
+.cc-q-aide { margin-top: 10px; }
+.cc-q-aide .btn-small { color: var(--ink-2); }
+
+/* expressions à piocher et phrase construite */
+.cc-phrase { min-height: 54px; display: flex; align-items: center; font-size: 1.02rem; line-height: 1.5; font-weight: 600; margin-bottom: 10px; }
+.cc-phrase.ok { background: var(--success-bg); color: var(--success-text); }
+.cc-phrase-vide { color: var(--ink-2); font-weight: 500; font-size: .92rem; }
+.cc-pioche { display: flex; flex-direction: column; gap: 8px; }
+.cc-pioche-t { font-size: .75rem !important; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 4px !important; }
+.cc-pilules { display: flex; flex-wrap: wrap; gap: 6px; }
+.cc-pilule { min-height: 46px; padding: 8px 16px; font-size: .92rem; line-height: 1.3; text-align: left; white-space: normal; }
+.cc-phrase-actions { margin-top: 10px; }
+
+/* série : chromatogramme centré */
+.cc-serie-fig { margin-bottom: 12px; }
+.cc-serie-fig .cc-fig-lire { max-width: 280px; }
+.cc-serie-fig .cc-legende-noms { justify-content: center; }
+
+/* « Pour aller plus loin » : rapport frontal */
+.cc-rf { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.cc-rf-p { display: flex; flex-direction: column; gap: 8px; }
+.cc-rf-t { font-weight: 800; }
+.cc-rf-fig { max-width: 220px; width: 100%; margin: 0 auto; }
+.cc-rf-champs { display: flex; flex-direction: column; gap: 6px; }
+.cc-rf-c { display: flex; align-items: center; gap: 8px; font-weight: 800; }
+.cc-rf-c span:first-child { min-width: 3.4em; }
+.cc-rf-c .ph-champ { width: 110px; font-size: 1.1rem; }
+.cc-rf-bilan:empty { display: none; }
+.cc-rf-bilan { margin-top: 12px; }
+
+@media (max-width: 899px) {
+  .cc-manip, .cc-lire, .cc-leg, .cc-bilan { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .cc-manip-d { position: static; }
+  .cc-consigne { font-size: .9rem; padding: 8px 12px; }
+}
+@media (max-width: 560px) {
+  .cc-rf { grid-template-columns: minmax(0, 1fr); }
+  .cc-fig { padding: 4px; }
+  .cc-scene, .cc-fig-lire, .cc-serie-fig .cc-fig-lire { max-width: none; }
+  .cc-pilule { font-size: .88rem; padding: 8px 12px; }
+}
+
+/* ============================================================
+   QUESTIONS (repris de cinematique/modules/cin.css)
+   ============================================================ */
+.ph-enonce { margin-bottom: 12px; line-height: 1.55; }
+.ph-enonce p + p { margin-top: 6px; }
+.ph-partie + .ph-partie { margin-top: 16px; padding-top: 14px; border-top: 1.5px dashed var(--paper-3); }
+.ph-partie-q { font-weight: 700; color: var(--ink); margin-bottom: 10px !important; line-height: 1.5; }
+.ph-partie-aide { margin-top: 10px; }
+.ph-partie-aide .btn-small { color: var(--ink-2); }
+.ph-partie-fig:empty { display: none; }
+.ph-msg { margin-top: 10px !important; font-size: .92rem; color: var(--ink-2); font-weight: 600; }
+.ph-ok { margin-top: 8px !important; color: var(--success-text); font-weight: 800; }
+.ph-bilan { margin-top: 16px; }
+.ph-solution { line-height: 1.6; }
+.ph-question .er-consigne { margin-bottom: 8px !important; }
+.ph-choix { display: flex; flex-wrap: wrap; gap: 8px; }
+.ph-choix-col { flex-direction: column; align-items: stretch; }
+.ph-choix button { min-height: 46px; text-align: left; line-height: 1.4; border-radius: 16px; padding: 10px 18px; }
+.ph-choix button:disabled { cursor: default; opacity: 1; }
+.ph-choix button.juste { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); color: var(--success-text); }
+.ph-choix button.faux { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+.ph-champ {
+  width: 120px; font: inherit; font-size: 1.15rem; font-weight: 800; text-align: center; padding: 9px 8px;
+  border: none; border-radius: 12px; box-shadow: inset 0 0 0 1.5px var(--paper-3); background: var(--sheet); color: var(--ink);
+  -webkit-appearance: none; appearance: none;
+}
+.ph-champ:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.ph-champ:disabled { background: var(--paper); color: var(--ink); -webkit-text-fill-color: var(--ink); opacity: 1; }
+.fr { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.15; margin: 0 .12em; font-size: .92em; }
+.fr > span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 .2em .05em; }
+.fr > span:last-child { padding: .05em .2em 0; }
