@@ -56,7 +56,7 @@
         traitH: .5, progres: 0, trait: null,                    // étape 0
         depots: [], flacon: null,                               // étape 1
         niveau: 0, posee: false, couvercle: false,              // étape 2
-        vit: 1,                                                 // étape 3
+        vit: 2,                                                 // étape 3 (vitesse × 2 par défaut)
         front: null, ligne: 7, frontTrait: null,                // étape 4
         uv: false, vuUV: false, cercles: [],                    // étape 5
       };
@@ -80,6 +80,7 @@
         aria: 'Plaque de chromatographie et cuve : animation des gestes de la CCM',
         calque, fixe, onFin: auBord,
       });
+      anim.vitesse(st.vit);
       ecouterScene();
       maj();
     }
