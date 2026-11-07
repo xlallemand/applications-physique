@@ -13,7 +13,6 @@ Lis `docs/prompts-2nde/00-commun.md`, puis exécute ce prompt.
 
 Indispensable I1. Capacités exigibles visées :
 - « Définir et déterminer la période et la fréquence d'un signal sonore notamment à partir de sa représentation temporelle. » ; « Mesurer la période d'un signal sonore périodique. »
-- « Citer les domaines de fréquences des sons audibles, des infrasons et des ultrasons. » ; « Relier qualitativement la fréquence à la hauteur d'un son audible. » ; notion « lien entre forme du signal et timbre ».
 - Capacité mathématique : « Identifier une fonction périodique et déterminer sa période. »
 
 ## 3. Ce que dit le cours
@@ -27,12 +26,11 @@ Sources : `01- Signaux sonores/Chap01-Cours complete.pdf` p. 1-2, `TP 1 - freque
 - **Méthode des corrections (plusieurs périodes)**, exercice 7 : « Échelle : 3,5 cm ↔ 10 ms ; 4T<sub>A</sub> : 3,2 cm ↔ (10 × 3,2) / 3,5 = 9,14 ms ; donc T<sub>A</sub> = 9,14 / 4 = 2,3 ms ; f<sub>A</sub> = 1 / (2,3 × 10<sup>−3</sup>) = 435 Hz ».
 - **Choix de l'enseignant** : on mesure **d'abord une période**, puis **plusieurs périodes pour gagner en précision** (T = Δt / n).
 - **Oscilloscope** (exercice 4 et sa correction) : « T = 4 × 0,5 = 2 ms (4 carreaux) », énoncé « 0,5 ms/carreau et 2 V/carreau ». Vocabulaire : **carreau** (le cours montre aussi un écran « 1.0 ms / div »). Le professeur écrit d'abord le nombre de carreaux, puis le produit par la base de temps.
-- **Domaine audible** : infrasons < 20 Hz, domaine audible de 20 Hz à 20 kHz (20 000 Hz), ultrasons > 20 kHz ; « plus la fréquence est élevée, plus le son est aigu ».
-- **Hauteur et timbre** : « Hauteur = fréquence = note » (la<sub>3</sub> : 440 Hz) ; « Timbre = forme du signal » ; deux instruments qui jouent la même note ont la même hauteur (même période) et des timbres différents (formes différentes) : diapason, guitare, trompette (figure du cours p. 2).
-- Exemples à reprendre : T = 4 ms → f = 250 Hz ; T = 5 ms → 200 Hz ; T = 45 ms → f = 22 Hz, « audible (mais c'est limite) » ; grenouille de 60 à 10 000 Hz : « 10 000 Hz < 20 000 Hz : la grenouille ne perçoit pas les ultrasons ».
+- Exemples à reprendre : T = 4 ms → f = 250 Hz ; T = 5 ms → 200 Hz.
 - Chiffres significatifs : le professeur garde 2 ou 3 chiffres (« T = 2,9 ms », « 435 Hz »).
+- **Ne pas faire référence aux numéros d'exercices, aux TP, au cours**. L'application est indépendante des sources.
 
-À relire seulement pour refaire des signaux : figures de la clarinette et du diapason (cours p. 1), des trois instruments (cours p. 2), des exercices 1, 3, 4 et 7 (`Chap01-Exercices.pdf`).
+À relire seulement pour refaire des signaux : figures de la clarinette et du diapason (cours p. 1), des exercices 1, 3, 4 et 7 (`Chap01-Exercices.pdf`).
 
 ## 4. Plan de l'application (`PLAN`)
 
@@ -81,8 +79,6 @@ Déroulé de `LG.poserQuestion` (règle virtuelle, tableau de proportionnalité,
 - **Signal « papier » à l'échelle** : partie `'perso'` avec `LG` (règle, tableau, n périodes).
 - **Oscilloscope** : carreaux × base de temps, puis f.
 - **T ↔ f** : f à partir de T (ms, µs, s) et T à partir de f (Hz, kHz).
-- **Domaine audible** : audible, infrason ou ultrason (fréquence donnée, ou période donnée comme T = 45 ms) ; animal et domaine de perception (grenouille, chauve-souris, chien, éléphant).
-- **Hauteur et timbre** : deux signaux de même période et de formes différentes (« même hauteur, timbres différents ») ; deux signaux de même forme et de périodes différentes (« le plus aigu est celui de plus petite période ») ; le guitariste accordé ou non (exercice 7).
 
 Chaque question a 2 ou 3 parties ; diagnostics ci-dessus.
 
@@ -106,7 +102,7 @@ Chaque question a 2 ou 3 parties ; diagnostics ci-dessus.
 
 ## 7. Vérifications propres
 
-- Recalculer par script : 13 × 1,65 / 7,4 = 2,90 ms et f = 345 Hz ; 10 × 3,2 / 3,5 = 9,14 ms, T = 2,3 ms, f = 435 Hz ; T = 4 ms → 250 Hz ; T = 5 ms → 200 Hz ; T = 45 ms → 22 Hz ; T du la<sub>3</sub> = 2,27 ms.
+- Recalculer par script : 13 × 1,65 / 7,4 = 2,90 ms et f = 345 Hz ; 10 × 3,2 / 3,5 = 9,14 ms, T = 2,3 ms, f = 435 Hz ; T = 4 ms → 250 Hz ; T = 5 ms → 200 Hz ; T du la<sub>3</sub> = 2,27 ms.
 - Chaque signal généré : n périodes lisibles sous la règle (≤ 160 mm), motif identifiable.
 - Le toucher du début et de la fin d'un motif fonctionne au doigt (CDP) sur chaque forme ; la tolérance accepte un appui à 2 mm près.
 - L'oscilloscope : T affiché constant quand la base de temps change ; nombre de carreaux juste pour chaque base.
@@ -114,5 +110,6 @@ Chaque question a 2 ou 3 parties ; diagnostics ci-dessus.
 
 ## 8. Hors périmètre
 
+- Pas de domaine audible (infrasons, ultrasons), pas de hauteur ni de timbre.
 - Pas de son à écouter, pas de niveau sonore (dB), pas de vitesse de propagation du son (application supprimée), pas de spectre (terminale).
 - Pas de cours ni de fiche.

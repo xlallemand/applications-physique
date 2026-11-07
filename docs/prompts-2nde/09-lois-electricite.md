@@ -33,6 +33,7 @@ Sources : `10- Electricite/TP circuit electrique complete.pdf` et `Fiche TP.pdf`
   - loi des mailles : dans une maille, la tension aux bornes du générateur est égale à la somme des tensions aux bornes des autres dipôles (écriture du TP : U<sub>G</sub> = U<sub>390</sub> + U<sub>100</sub>) ; deux dipôles en dérivation ont la même tension ;
   - loi d'Ohm : **U = R × I** (U en V, R en Ω, I en A) ; la caractéristique d'un conducteur ohmique est une droite qui passe par l'origine (U et I proportionnels, U / I = R).
 - Rédaction des calculs comme dans les autres chapitres : formule littérale, grandeur isolée, application numérique avec les unités, résultat ; conversions (mA → A, kΩ → Ω) dans une étape à part.
+- **Ne pas faire référence aux numéros d'exercices, aux TP, au cours**. L'application est indépendante des sources.
 
 ## 4. Plan de l'application (`PLAN`)
 

@@ -38,6 +38,7 @@ Source : `13- Synthese/TP - synthese ethanoate de linalyle.pdf` (2 p.) ; pour la
 - **Questions du TP** : « Pourquoi chauffe-t-on ? » (pour accélérer la transformation) ; « Quel est le principe du chauffage à reflux ? » (les vapeurs se condensent dans le réfrigérant et retombent dans le ballon : on ne perd pas d'espèces chimiques) ; « Pourquoi le montage est-il disposé sur un support élévateur et non pas directement sur la paillasse ? » (pour pouvoir retirer le chauffage rapidement).
 - **Séparation** : « Lavage à l'eau salée (relargage) : arrêter le chauffage **sans arrêter la circulation d'eau** et abaisser le support élévateur ; retirer le dispositif de chauffage ; ajouter progressivement **30 mL d'eau salée par le haut du réfrigérant** ; refroidir le contenu du ballon en le plaçant (bouché) dans un bain d'eau froide. » « Extraction : verser le mélange dans l'**ampoule à décanter** ; agiter puis laisser décanter. » « L'anhydride éthanoïque a été introduit **en excès** : à la fin de la réaction tout le linalol (ici l'alcool isoamylique) a été consommé et il reste de l'anhydride éthanoïque ; quand on a ajouté de l'eau, tout l'anhydride restant est **transformé en acide éthanoïque**. » Questions : « Donner la liste de toutes les espèces chimiques présentes dans l'ampoule à décanter » ; « Compléter le schéma de l'ampoule à décanter (phases et espèces) avec les données du tableau » ; « Éliminer la phase aqueuse ; récupérer la **phase supérieure** contenant le produit de synthèse » ; « Quelle est la plante dont vous avez synthétisé l'arôme ? » (la banane).
 - **CCM** (TP2, plaque de silice, révélation sous lampe UV) : comparer le produit synthétisé, l'acétate d'isoamyle du commerce (référence) et un arôme naturel de banane (espèce extraite de la nature), avec la rédaction du cours (« … contient … car il donne une tache à la même hauteur que … »).
+- **Ne pas faire référence aux numéros d'exercices, aux TP, au cours**. L'application est indépendante des sources.
 
 ## 4. Plan de l'application (`PLAN`)
 
@@ -89,5 +90,5 @@ Source : `13- Synthese/TP - synthese ethanoate de linalyle.pdf` (2 p.) ; pour la
 ## 8. Hors périmètre
 
 - Pas de quantité de matière, de masse molaire ni de réactif limitant (choix de l'enseignant), pas de rendement.
-- Pas de linalol ni d'éthanoate de linalyle (sauf pour signaler que le TP papier l'utilise, si besoin dans une bulle).
+- Pas de linalol ni d'éthanoate de linalyle.
 - Pas d'hydrodistillation ni d'extraction de l'huile essentielle (seulement l'arôme naturel déposé sur la plaque).

@@ -36,6 +36,7 @@ Sources : `10- Electricite/TP circuit electrique complete.pdf` (2 p.) et `Fiche 
   - « **L'ampèremètre se branche en série.** On règle le calibre sur 10 A (continu), et on branche les entrées **COM et 10A**. Si nécessaire, on change l'entrée 10A pour l'entrée **mA** en diminuant le calibre. » « Pour mesurer l'intensité du courant I circulant de A vers B dans le dipôle AB, on débranche le fil de la borne A du dipôle pour le placer sur l'entrée 10 A ou mA du multimètre, puis on relie avec un autre fil la borne COM à la borne A du dipôle. » « L'indication est positive lorsque le courant **sort** de l'ampèremètre par la borne COM ; elle est négative si le courant entre par la borne COM. »
   - « **Le voltmètre se branche en dérivation.** Pour mesurer la tension U<sub>AB</sub> entre A et B, sans modifier le circuit, on relie le point A à la borne V et B à la borne COM. » « Il indique une tension positive si sa borne COM est reliée vers la borne négative du générateur. »
   - « L'ohmmètre se branche sur le conducteur ohmique seul, hors du circuit. »
+- **Ne pas faire référence aux numéros d'exercices, aux TP, au cours**. L'application est indépendante des sources.
 
 ## 4. Plan de l'application (`PLAN`)
 
@@ -80,7 +81,7 @@ Sources : `10- Electricite/TP circuit electrique complete.pdf` (2 p.) et `Fiche 
   - voltmètre en série (il couperait la boucle) : « Le voltmètre se branche en dérivation, sur les bornes du dipôle, sans modifier le circuit. »
 - Fonctionnement et mesures comme au module 2 ; les nœuds du schéma s'allument quand la dérivation correspondante est branchée.
 
-### Module 4 : Montages du TP (série notée sur 20, `module_4_questions.html`)
+### Module 4 : Montages de mesure (série notée sur 20, `module_4_questions.html`)
 
 - 10 montages tirés parmi : les schémas du TP (série avec I<sub>1</sub>, I<sub>2</sub>, I<sub>3</sub> ; série avec U<sub>G</sub>, U<sub>390</sub>, U<sub>100</sub> ; dérivation avec ampèremètres ; dérivation avec voltmètres ; loi d'Ohm) et des circuits à lampes, interrupteur, DEL et moteur (une ou deux dérivations).
 - Chaque question : surligner la boucle principale, réaliser le montage, puis lire une mesure (champ : valeur avec unité).
