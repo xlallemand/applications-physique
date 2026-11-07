@@ -35,6 +35,7 @@ Sources : `2- Corps purs et melanges/Chap02-Cours complete.pdf` p. 2, `TP2 - CCM
   - « La menthone, le menthol, l'eucalyptol et le menthofuranne sont purs car ils donnent une seule tache. » ; « L'huile essentielle est un mélange constitué de 5 espèces car elle donne 5 taches. »
   - « La pastille contient **au moins** 5 espèces chimiques car elle donne 5 taches. » ; « on peut aussi conclure que S ne contient ni citral ni limonène ».
 - **Espèces réelles des énoncés** (pour l'entraînement) : menthe poivrée (menthone, menthol, eucalyptol, menthofuranne, huile essentielle) ; pastille rafraîchissante (citral, menthol, eucalyptol, limonène) ; huile essentielle d'orange (limonène, carvone, myrcène, citral) ; médicaments du TP2 (Brufen 400 : ibuprofène ; Aspirine UPSA : acide acétylsalicylique, l'aspirine ; Doliprane 500 : paracétamol ; « je suis allergique à l'aspirine : quel(s) médicament(s) puis-je utiliser ? »). Hauteurs des taches : à fixer dans `ccm.js` d'après les figures des exercices (pas de valeurs réelles à respecter, seulement des hauteurs distinctes et lisibles).
+- - **Ne pas faire référence aux numéros d'exercices, aux TP, au cours**. L'application est indépendante des sources.
 
 À relire seulement pour refaire les chromatogrammes : figure du cours p. 2, exercices 1 et 2, devoir exercice 4 (avec les pointillés de la correction).
 
