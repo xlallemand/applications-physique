@@ -111,6 +111,6 @@ Erreurs diagnostiquées : V en mL dans c<sub>m</sub> = m / V ; fraction renvers�
 
 ## 8. Hors périmètre
 
-- Pas de concentration en quantité de matière (mol/L), pas de permanganate (choix de l'enseignant : fer (III) et thiocyanate).
+- Pas de concentration en quantité de matière (mol/L).
 - Pas de spectrophotométrie, pas de loi de Beer-Lambert.
 - Pas de masse volumique mesurée (application `11`), sinon pour la distinguer de la concentration en masse.
