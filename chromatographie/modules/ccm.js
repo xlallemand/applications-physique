@@ -39,9 +39,15 @@
      options de l'animation :
        cuve (vrai : cuve dessinée), dansCuve (vrai : plaque posée dans la cuve ;
        faux : plaque en attente, en transparence), niveau (cm d'éluant), couvercle (vrai : fermé),
-       regle (vrai : règle graduée à gauche de la plaque), duree (s à vitesse × 1, défaut 10),
-       marges: { g, d } (cm ajoutés à gauche et à droite de la cuve, pour des légendes ; plaque seule : d),
-       onFront(front), onFin()
+       regle (vrai : règle graduée à gauche de la plaque),
+       arret (cm : hauteur où le front s'arrête de lui-même ; défaut : 1 cm sous le haut ;
+              la hauteur de la plaque : le front monte jusqu'au bord),
+       duree (s, à vitesse × 1, pour monter du niveau de l'éluant à arret ; défaut 10),
+       marges: { g, d, h } (cm ajoutés à gauche, à droite et au-dessus de la cuve, pour des légendes
+              ou des boutons ; plaque seule : d), onFront(front), onFin()
+     Élution : le front monte vite au début, puis de plus en plus lentement (la hauteur parcourue
+     croît comme la racine carrée du temps) ; sans animation, il avance par paliers
+     (30 %, 60 %, 80 %, 90 %, puis 100 % du chemin jusqu'à arret).
    Contrôleur : {
      svg, etat,                         état courant (lecture)
      maj(options)                       change des options et redessine
@@ -50,7 +56,8 @@
      tacheProche(evt, rayon)            tache la plus proche d'un événement pointeur (rayon en cm, défaut 0,9)
      versPlaque(evt) → { x, y }         point du pointeur en cm sur la plaque
      geo                                { k, px(xcm), py(ycm) } : conversion cm → SVG
-     lecture(), pause(), vitesse(v), recommencer(), etapeSuivante(), enCours(), fini()   (élution)
+     lecture(), pause(), vitesse(v), recommencer(), etapeSuivante(), enCours(), fini()   (élution ;
+                                        fini : le front est arrivé à arret)
      dissoudre(fin)                     les dépôts se dissolvent dans l'éluant (animation)
    }
    CCM.analyser(depots, references) → [{ nom, taches: [h], nbTaches, pur,
@@ -176,9 +183,9 @@
       let gx, gy, W, H;
       if (mode === 'cuve') {
         // marges : règle à gauche, couvercle soulevé en haut
-        const mg = (e.marges && e.marges.g) || 0, md = (e.marges && e.marges.d) || 0;
-        gx = mg + 1.8 + .8; gy = 1.9 + .8; W = (mg + 1.8 + L + 1.6 + .5 + md) * k; H = (1.9 + Hp + .8 + .5) * k;
-        geo.cuve = { x: (mg + 1.8) * k, y: 1.9 * k, w: (L + 1.6) * k, h: (Hp + .8) * k };
+        const mg = (e.marges && e.marges.g) || 0, md = (e.marges && e.marges.d) || 0, mh = (e.marges && e.marges.h) || 0;
+        gx = mg + 1.8 + .8; gy = mh + 1.9 + .8; W = (mg + 1.8 + L + 1.6 + .5 + md) * k; H = (mh + 1.9 + Hp + .8 + .5) * k;
+        geo.cuve = { x: (mg + 1.8) * k, y: (mh + 1.9) * k, w: (L + 1.6) * k, h: (Hp + .8) * k };
       } else {
         gx = e.regle ? 1.4 : .3; gy = .3; W = (gx + L + .3 + ((e.marges && e.marges.d) || 0)) * k; H = (Hp + .6) * k;
       }
@@ -189,6 +196,7 @@
       svg.setAttribute('viewBox', `0 0 ${f(W)} ${f(H)}`);
     }
     const frontFinal = () => e.hauteur - 1;
+    const arret = () => (e.arret != null ? e.arret : frontFinal());
     const valFront = () => (e.front === 'final' ? frontFinal() : e.front);
     const valFrontTrait = () => (e.frontTrait === 'final' ? frontFinal() : e.frontTrait);
     const xDepot = i => (e.depots[i].x != null ? e.depots[i].x : (i + 1) * e.largeur / (e.depots.length + 1));
@@ -317,9 +325,11 @@
       if (!enCours) return;
       const dt = Math.min(.1, (t - (dernier || t)) / 1000);
       dernier = t;
-      const depart = e.niveau || 0, fin = frontFinal();
+      // loi de montée par capillarité : (front − départ)² proportionnel au temps,
+      // soit une vitesse inversement proportionnelle au chemin parcouru (EPS : départ sans vitesse infinie)
+      const depart = e.niveau || 0, fin = arret(), D = fin - depart, EPS = .25;
       let fr = e.front == null ? depart : valFront();
-      fr = Math.min(fin, fr + dt * vit * (fin - depart) / e.duree);
+      fr = Math.min(fin, fr + dt * vit * (D * D / (2 * e.duree)) / (fr - depart + EPS));
       e.front = fr;
       phase += dt * vit * 3;
       rendre();
@@ -348,23 +358,24 @@
       lecture() {
         if (enCours) return;
         if (reduit) { ctrl.etapeSuivante(); return; }
-        if (valFront() != null && valFront() >= frontFinal() - 1e-9) return;
+        if (valFront() != null && valFront() >= arret() - 1e-9) return;
         enCours = true; dernier = 0; raf = requestAnimationFrame(boucle);
       },
       pause() { enCours = false; cancelAnimationFrame(raf); rendre(); },
       vitesse(v) { vit = v; },
       recommencer() { enCours = false; cancelAnimationFrame(raf); e.front = null; rendre(); },
-      // sans animation : le front avance d'un quart du chemin, état final de l'étape
+      // sans animation : le front avance jusqu'au palier suivant, état final de l'étape
       etapeSuivante() {
-        const depart = e.niveau || 0, fin = frontFinal(), pas = (fin - depart) / 4;
+        const depart = e.niveau || 0, fin = arret(), D = fin - depart;
         const fr = e.front == null ? depart : valFront();
-        e.front = Math.min(fin, Math.round((fr + pas - depart) / pas) * pas + depart);
+        const p = [.3, .6, .8, .9, 1].map(x => depart + x * D).find(x => x > fr + 1e-6);
+        e.front = p == null ? fin : p;
         rendre();
         if (e.onFront) e.onFront(e.front);
         if (e.front >= fin - 1e-9 && e.onFin) e.onFin();
       },
       enCours: () => enCours,
-      fini: () => valFront() != null && valFront() >= frontFinal() - 1e-9,
+      fini: () => valFront() != null && valFront() >= arret() - 1e-9,
       // les dépôts s'étalent et disparaissent dans l'éluant
       dissoudre(fin) {
         if (reduit) { e.depots.forEach(d => { d.dissous = 1; }); rendre(); if (fin) fin(); return; }

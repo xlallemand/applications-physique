@@ -9,6 +9,7 @@
 
 .er-page button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .er-page p { margin: 0; }
+.er-page [hidden] { display: none !important; }
 sub, sup { font-size: .7em; line-height: 0; }
 
 /* ============================================================
@@ -71,18 +72,26 @@ sub, sup { font-size: .7em; line-height: 0; }
 .cc-deroule li.ici { background: var(--cle-bg); font-weight: 700; }
 .cc-deroule li.avenir { color: var(--ink-2); }
 
-/* module 1 : scène à gauche, déroulé à droite (dessous sur téléphone) */
-.cc-manip { display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); gap: 16px; align-items: start; }
-.cc-manip-d { position: sticky; top: 16px; }
-.cc-scene { max-width: 420px; margin: 0 auto; }
-.cc-outils { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-.cc-outil { border-radius: 14px; padding: 8px 10px; background: var(--paper); border: 1.5px solid transparent; }
-.cc-outil.ici { background: var(--cle-bg); border-color: var(--cle-line); }
-.cc-outil-t { font-size: .78rem !important; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 6px !important; }
-.cc-outil.ici .cc-outil-t { color: var(--accent-ink); }
+/* module 1 : tout sur un écran d'ordinateur ; scène à gauche, consigne et outils de l'étape à droite */
+.cc-ecran { padding-bottom: 16px; }
+.cc-ecran > .er-card { margin-bottom: 0; }
+.cc-tete { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 14px; margin-bottom: 10px; }
+.cc-tete .er-badge { margin-bottom: 0; }
+.cc-tete .er-titre { margin: 0; }
+.cc-manip { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: start; }
+.cc-scene-cadre { transition: background .4s; }
+.cc-scene-cadre.uv { background: var(--ink); }
+.cc-scene { position: relative; }
+.cc-scene .ccm-svg, .cc-etape-leg .cc-leg-fig .ccm-svg, .cc-fig-bilan .ccm-svg { height: clamp(340px, calc(100vh - 205px), 600px); width: auto; max-width: 100%; margin: 0 auto; }
+.cc-panneau { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.cc-etape { font-size: .78rem !important; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--accent-ink); }
+.cc-outils { display: flex; flex-direction: column; gap: 8px; }
+.cc-outils:empty, .cc-retour:empty { display: none; }
+.cc-retour { display: flex; flex-direction: column; gap: 8px; }
+.cc-pied { margin-top: 2px; }
+.cc-pied .btn-small, .cc-cons-actions .btn-small { min-height: 40px; padding: 0 16px; }
 .cc-outil-b { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.cc-outil-b + .cc-outil-b { margin-top: 6px; }
-.cc-outil-b .btn-secondary { min-height: 46px; padding: 8px 14px; font-size: .92rem; }
+.cc-outil-b .btn-secondary, .cc-outil-b .btn-primary { min-height: 46px; padding: 8px 14px; font-size: .92rem; }
 .cc-outil-b .cc-fl { min-width: 58px; min-height: 50px; font-size: 1.1rem; padding: 0; }
 .cc-val { font-weight: 800; font-variant-numeric: tabular-nums; min-width: 4.2em; text-align: center; }
 .cc-val-t { font-size: .88rem; font-weight: 700; color: var(--ink-2); }
@@ -91,6 +100,20 @@ sub, sup { font-size: .7em; line-height: 0; }
 .cc-flacon.choisi { box-shadow: inset 0 0 0 2.5px var(--accent); background: var(--cle-bg); }
 .cc-fiole { display: inline-block; width: 12px; height: 18px; border-radius: 3px 3px 6px 6px; border: 1.5px solid var(--ink-2); background: var(--sheet); margin-right: 6px; vertical-align: middle; }
 .cc-fiole.coloree { background: var(--accent); }
+/* boutons posés sur la scène, au-dessus de la plaque */
+.cc-sur { position: absolute; inset: 0; pointer-events: none; }
+.cc-sur button { position: absolute; pointer-events: auto; }
+.cc-sur-btn { transform: translate(-50%, -50%); min-height: 44px; padding: 8px 18px; font-size: .92rem; white-space: nowrap; box-shadow: 0 4px 14px rgba(22, 24, 29, .18); }
+.cc-lampe-btn {
+  border: none; border-radius: 12px; background: var(--ink-2); color: var(--sheet); font: inherit; font-weight: 800; font-size: .88rem; line-height: 1.15;
+  padding: 2px 8px; cursor: pointer; box-shadow: inset 0 0 0 2px var(--ink-3), 0 4px 12px rgba(22, 24, 29, .2);
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.cc-lampe-btn::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 999px; background: var(--ink-3); margin-right: 8px; vertical-align: 0; }
+.cc-lampe-btn.on { box-shadow: inset 0 0 0 2px var(--orga-ram-4), 0 0 18px var(--orga-ram-4); }
+.cc-lampe-btn.on::before { background: var(--orga-ram-4); box-shadow: 0 0 8px var(--orga-ram-4); }
+.cc-lampe-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cc-scene-cadre.uv .ccm-plaque.uv { filter: drop-shadow(0 0 7px var(--cle-line)); }
 /* outils dessinés sur la scène */
 .cc-guide { stroke: var(--accent); stroke-width: 1; stroke-dasharray: 3 4; opacity: .7; }
 .cc-crayon-corps { fill: var(--paper-3); stroke: var(--ink-2); stroke-width: 1; }
@@ -100,13 +123,20 @@ sub, sup { font-size: .7em; line-height: 0; }
 .cc-empl.actif { stroke: var(--accent); stroke-width: 2; fill: var(--cle-bg); }
 .cc-ligne-front { stroke: var(--accent); stroke-width: 2; stroke-dasharray: 6 4; }
 .cc-poignee-v { fill: var(--sheet); stroke: var(--accent); stroke-width: 2.5; }
-.cc-lampe { fill: var(--ink-2); }
-.cc-lampe-t { fill: var(--sheet); font-weight: 700; text-anchor: middle; }
-.cc-rayon { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 3 4; opacity: .7; }
+.cc-tube { fill: var(--paper-3); stroke: var(--ink-3); stroke-width: 1; }
+.cc-tube.on { fill: var(--orga-ram-4); stroke: none; }
+.cc-uv-stop { stop-color: var(--orga-ram-4); }
 
 /* légende du schéma */
 .cc-leg { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
 .cc-leg-fig { max-width: 340px; margin: 0 auto; width: 100%; }
+.cc-leg-cote { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.cc-leg-cote .cc-leg-aide, .cc-leg-cote .cc-leg-etiq { margin-bottom: 0 !important; }
+.cc-etape-leg .cc-leg { grid-template-columns: auto minmax(0, 1fr); }
+.cc-etape-leg .cc-leg-fig { max-width: none; width: auto; }
+.cc-etape-leg .cc-leg-cases { gap: 6px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cc-etape-leg .cc-leg-case { min-height: 40px; padding: 4px 10px; }
+.cc-etape-leg .cc-leg-retour:empty { display: none; }
 .cc-leg-aide { font-size: .9rem; color: var(--ink-2); margin-bottom: 8px !important; }
 .cc-leg-etiq { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
 .cc-etiq { min-height: 46px; padding: 8px 14px; font-size: .92rem; }
@@ -129,8 +159,8 @@ sub, sup { font-size: .7em; line-height: 0; }
 .drag-ghost { box-shadow: 0 8px 24px rgba(22, 24, 29, .18); z-index: 1000; pointer-events: none; }
 
 /* bilan du module 1 */
-.cc-bilan { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; align-items: start; }
-.cc-fig-bilan { max-width: 260px; margin: 0 auto; width: 100%; }
+.cc-bilan { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: start; }
+.cc-fig-bilan .ccm-svg { height: clamp(300px, calc(100vh - 215px), 520px); }
 .cc-bilan-t { margin-top: 10px !important; color: var(--ink-2); line-height: 1.5; }
 
 /* module 2 : chromatogramme à gauche, question à droite */
@@ -153,6 +183,7 @@ sub, sup { font-size: .7em; line-height: 0; }
 .cc-pilules { display: flex; flex-wrap: wrap; gap: 6px; }
 .cc-pilule { min-height: 46px; padding: 8px 16px; font-size: .92rem; line-height: 1.3; text-align: left; white-space: normal; }
 .cc-phrase-actions { margin-top: 10px; }
+.cc-pilule[aria-pressed="true"] { box-shadow: inset 0 0 0 2.5px var(--accent); background: var(--cle-bg); color: var(--accent-ink); }
 
 /* série : chromatogramme centré */
 .cc-serie-fig { margin-bottom: 12px; }
@@ -169,17 +200,44 @@ sub, sup { font-size: .7em; line-height: 0; }
 .cc-rf-c span:first-child { min-width: 3.4em; }
 .cc-rf-c .ph-champ { width: 110px; font-size: 1.1rem; }
 .cc-rf-bilan:empty { display: none; }
+.cc-rf-retour:empty { display: none; }
+.cc-rf-retour { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+/* même espèce ? deux plaques cotées */
+.cc-cmp { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 28px; margin: 6px 0 14px; }
+.cc-cmp-p { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.cc-cmp-fig { width: 150px; }
+.cc-cmp-v { font-size: .92rem; color: var(--ink-2); }
+.cc-cmp-v b { color: var(--ink); }
+.cc-cote { stroke: var(--ink); stroke-width: 1.3; }
+.cc-cote-p { fill: var(--ink); }
+.cc-cote-rappel { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 2 3; }
+.cc-cote-t { fill: var(--ink); font-weight: 800; font-style: italic; }
+/* table des R_f */
+.cc-table-rf { margin-top: 12px; }
+.cc-table-l { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.cc-table-b { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 46px; padding: 8px 14px; }
+.cc-table-b b { font-variant-numeric: tabular-nums; }
+.cc-table-b.juste { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); color: var(--success-text); opacity: 1; }
+.cc-table-b.faux { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); color: var(--danger-text); opacity: 1; }
+.cc-table-retour:empty { display: none; }
+.cc-table-retour { margin-top: 10px; }
 .cc-rf-bilan { margin-top: 12px; }
 
 @media (max-width: 899px) {
-  .cc-manip, .cc-lire, .cc-leg, .cc-bilan { grid-template-columns: minmax(0, 1fr); gap: 10px; }
-  .cc-manip-d { position: static; }
+  .cc-manip, .cc-lire, .cc-leg, .cc-bilan, .cc-etape-leg .cc-leg { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .cc-scene .ccm-svg, .cc-etape-leg .cc-leg-fig .ccm-svg { width: 100%; height: auto; }
+  .cc-etape-leg .cc-leg-fig { max-width: 340px; width: 100%; }
+  .cc-etape-leg .cc-leg-cases { grid-template-columns: minmax(0, 1fr); }
+  .cc-fig-bilan { max-width: 300px; width: 100%; margin: 0 auto; }
+  .cc-fig-bilan .ccm-svg { width: 100%; height: auto; }
   .cc-consigne { font-size: .9rem; padding: 8px 12px; }
 }
 @media (max-width: 560px) {
   .cc-rf { grid-template-columns: minmax(0, 1fr); }
   .cc-fig { padding: 4px; }
-  .cc-scene, .cc-fig-lire, .cc-serie-fig .cc-fig-lire { max-width: none; }
+  .cc-fig-lire, .cc-serie-fig .cc-fig-lire { max-width: none; }
+  .cc-sur-btn { font-size: .88rem; padding: 6px 14px; }
+  .cc-lampe-btn { font-size: .8rem; }
   .cc-pilule { font-size: .88rem; padding: 8px 12px; }
 }
 

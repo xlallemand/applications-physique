@@ -14,13 +14,15 @@
                                           relient celles de même hauteur → { plaque, montrer(cles), effacer() }
      situation = { depots: [{ nom, especes, sujet, pronom, contient, pas, hauteur }], refs: [i], legende }
    CC.phrase(zone, o)                     conclusion construite avec des expressions à piocher
-     o = { situation, q: { type: 'pur' | 'contient' | 'tache' | 'nombre', depot, ref, espece },
+     o = { situation, q: { type: 'pur' | 'contient' | 'tache' | 'nombre' | 'constituants', depot, ref, espece },
+           ('constituants' : identifier toutes les espèces du dépôt, en touchant plusieurs espèces)
            montrer(cles), onReussi(texte), onErreur(diag), onMessage(texte) } → { montrer() }
    CC.enonce(q, situation)                texte de la question (« Le dépôt M est-il un corps pur ? »)
    CC.verifier(choix, q, situation)       { format } | { diag, cles } | { ok, texte } (sans affichage)
    CC.reponse(q, situation)               phrase attendue
    CC.legende(zone, o)                    légender le schéma du dispositif (étiquettes à glisser ou à toucher)
-     o = { onReussi(), onErreur(diag), onPose() } → { montrer() }
+     o = { onReussi(), onErreur(diag), onPose(), entete, pied } → { montrer() }
+       entete / pied : code HTML placé au-dessus et au-dessous des étiquettes (à côté du schéma)
    ============================================================ */
 (function () {
   'use strict';
@@ -28,10 +30,13 @@
   /* ---------- Plan de l'application (sommaire, accueil, progression) ---------- */
   const PLAN = [
     { n: 1, titre: 'Réaliser une CCM', desc: 'Les gestes dans l\'ordre, du trait de dépôt au chromatogramme',
-      parties: [{ nom: 'Réaliser une CCM', simulation: 'module_1_simulation', noms: { simulation: 'Animation : réaliser une CCM' } }] },
-    { n: 2, titre: 'Lire un chromatogramme', desc: 'Corps pur ou mélange, espèces identifiées, en justifiant toujours',
-      parties: [{ nom: 'Lire un chromatogramme', entrainement: 'module_2_manip', noms: { entrainement: 'Manipulation : lire un chromatogramme' } }] },
-    { n: 3, titre: 'Entraînement', desc: 'Série notée sur 20 : chromatogrammes, schéma légendé, principe',
+      parties: [{ nom: 'Réaliser une CCM', simulation: 'module_1_simulation', noms: { simulation: 'Animation : réaliser une CCM' } }] },
+    { n: 2, titre: 'Lire un chromatogramme', desc: 'Corps pur ou mélange, espèces identifiées, en justifiant toujours ; pour aller plus loin : le rapport frontal',
+      sousModules: true,
+      parties: [
+        { nom: 'Lire un chromatogramme', entrainement: 'module_2_manip', noms: { entrainement: 'Manipulation : lire un chromatogramme' } },
+        { nom: 'Le rapport frontal', entrainement: 'module_2_rf', noms: { entrainement: 'Pour aller plus loin : le rapport frontal' } }] },
+    { n: 3, titre: 'Entraînement', desc: 'Série notée sur 20 : chromatogrammes, schéma légendé, principe',
       parties: [{ nom: 'Entraînement', questions: 'module_3_questions', noms: { questions: 'Entraînement' } }] },
   ];
   SOM.init({ nom: 'Chromatographie sur couche mince', id: 'chromatographie', plan: PLAN });
@@ -159,7 +164,7 @@
       function terminer(vue, silencieux, note) {
         finie = true;
         aide.remove();
-        const titre = vue ? 'Réponse' : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? 'Réponse' : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution;
         if (sol || vue || note) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -190,8 +195,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -203,7 +208,7 @@
       const q = qs[idx];
       window.CC.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -223,7 +228,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -238,10 +243,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       SOM.marquer({ note });
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : refais la manipulation du module 2, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : refais la manipulation du module 2, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -288,20 +293,21 @@
   function enonce(q, sit) {
     const D = fo(sit, q.depot), P = D.pronom, sujet = D.fictif ? `le dépôt ${D.nom}` : D.sujet[0].toLowerCase() + D.sujet.slice(1);
     const Sujet = sujet[0].toUpperCase() + sujet.slice(1);
-    if (q.type === 'pur') return `${Sujet} est-${P} un corps pur ?`;
-    if (q.type === 'contient') return `${Sujet} contient-${P} ${fo(sit, q.ref).contient} ?`;
-    if (q.type === 'tache') return `Quelle espèce donne la tache entourée (dépôt ${D.nom}) ?`;
-    return `Combien d'espèces ${sujet} contient-${P} ?`;
+    if (q.type === 'pur') return `${Sujet} est-${P} un corps pur ?`;
+    if (q.type === 'contient') return `${Sujet} contient-${P} ${fo(sit, q.ref).contient} ?`;
+    if (q.type === 'tache') return `Quelle espèce donne la tache entourée (dépôt ${D.nom}) ?`;
+    if (q.type === 'constituants') return `Identifie toutes les espèces que contient ${sujet}.`;
+    return `Combien d'espèces ${sujet} contient-${P} ?`;
   }
   const fo = (sit, i) => formes(sit.depots[i]);
 
   function chromato(zone, sit, o) {
     o = o || {};
-    zone.innerHTML = `<div class="cc-fig cc-fig-lire"></div>${sit.legende ? `<ul class="cc-legende-noms">${sit.depots.map(d => `<li><b>${d.nom}</b> : ${d.legende}</li>`).join('')}</ul>` : ''}`;
+    zone.innerHTML = `<div class="cc-fig cc-fig-lire"></div>${sit.legende ? `<ul class="cc-legende-noms">${sit.depots.map(d => `<li><b>${d.nom}</b> : ${d.legende}</li>`).join('')}</ul>` : ''}`;
     const sel = new Set();
     const p = CCM.plaque(zone.querySelector('.cc-fig'), {
       depots: sit.depots, hauteur: sit.hauteur || 8, interactif: true, pointilles: 'selection', marque: o.marque || null,
-      aria: 'Chromatogramme : dépôts ' + sit.depots.map(d => d.nom).join(', ') + '. Touche une tache pour la choisir.',
+      aria: 'Chromatogramme : dépôts ' + sit.depots.map(d => d.nom).join(', ') + '. Touche une tache pour la choisir.',
     });
     p.toucherTache(t => {
       if (sel.has(t.cle)) sel.delete(t.cle); else sel.add(t.cle);
@@ -322,7 +328,7 @@
      Expressions : { g: 'c' | 'car' | 'j', k, r (référence), n }
      ============================================================ */
   // texte d'une expression pour le dépôt d (indice) de la situation
-  function texte(x, sit, d) {
+  function texte(x, sit, d, ctx) {
     const D = fo(sit, d), R = x.r != null ? fo(sit, x.r) : null, P = D.pronom;
     switch (x.k) {
       case 'pur': return `${D.sujet} est un corps pur`;
@@ -339,6 +345,12 @@
       case 'meme': return `${P} donne une tache à la même hauteur que ${R.hauteur}`;
       case 'pasMeme': return `${P} ne donne pas de tache à la même hauteur que ${R.hauteur}`;
       case 'aucune': return 'aucune référence ne donne de tache à cette hauteur';
+      // identifier toutes les espèces (ctx.une : une seule espèce non identifiée dans la phrase)
+      case 'esp': return R.contient;
+      case 'inc1': return 'une espèce non identifiée';
+      case 'incN': return 'plusieurs espèces non identifiées';
+      case 'memes': return `${P} donne des taches aux mêmes hauteurs que ces espèces de référence`;
+      case 'autres': return `aucune référence ne donne de tache à la hauteur de ${ctx && ctx.une ? 'son autre tache' : 'ses autres taches'}`;
     }
     return '';
   }
@@ -351,7 +363,14 @@
     const a = CCM.analyser([sit.depots[q.depot]], refs.map(i => sit.depots[i]))[0];
     const presentes = a.constituants.map(i => refs[i]);
     const refDe = h => refs.find(i => CCM.hauteursDe(sit.depots[i]).some(x => Math.abs(x - h) < 1e-6));
-    return { nb: a.nbTaches, presentes, refs, refDe };
+    // taches qu'aucune référence n'explique : nombre et clés
+    const d = sit.depots[q.depot], vues = [];
+    const clesInc = d.especes.filter(s => {
+      const h = CCM.hauteur(s);
+      if (vues.some(x => Math.abs(x - h) < 1e-6) || !a.inconnues.some(x => Math.abs(x - h) < 1e-6)) return false;
+      vues.push(h); return true;
+    }).map(s => q.depot + '|' + s);
+    return { nb: a.nbTaches, presentes, refs, refDe, inconnues: a.inconnues.length, clesInc };
   }
   // conclusion et justification attendues
   function attendu(q, sit) {
@@ -362,8 +381,17 @@
       const m = a.refDe(CCM.hauteur(q.espece));
       return m != null ? [C('contient', { r: m }), J('meme', { r: m })] : [C('inconnue'), J('aucune')];
     }
+    if (q.type === 'constituants') return attenduListe(q, sit);
     return [C('auMoins', { n: a.nb }), J('n', { n: a.nb })];
   }
+  // phrase attendue complète (liste d'expressions), pour tous les types de questions
+  function attenduListe(q, sit) {
+    if (q.type !== 'constituants') { const [c, j] = attendu(q, sit); return [c, CAR(), j]; }
+    const a = analyse(q, sit), n = a.inconnues;
+    return a.refs.filter(r => a.presentes.includes(r)).map(r => C('esp', { r }))
+      .concat(n ? [C(n > 1 ? 'incN' : 'inc1')] : [], [CAR(), J('memes')], n ? [J('autres')] : []);
+  }
+  const CAR = () => ({ g: 'car', k: 'car' });
   // justifications qui prouvent une conclusion (juste)
   function prouve(c, j, a) {
     switch (c.k) {
@@ -399,6 +427,11 @@
     } else if (q.type === 'tache') {
       cs = autres.map(i => C('contient', { r: i })).concat([C('inconnue')]);
       js = autres.map(i => J('meme', { r: i })).concat([J('aucune'), J('plusieurs')]);
+    } else if (q.type === 'constituants') {
+      // toutes les références, dans l'ordre de la plaque, puis les espèces non identifiées
+      cs = autres.map(i => C('esp', { r: i })).concat([C('inc1'), C('incN')]);
+      js = [J('memes'), J('autres'), J('plusieurs')];
+      return { cs, js: melanger(js) };
     } else {
       cs = [C('exact', { n: a.nb }), C('auMoins', { n: a.nb }), C('melange')];
       js = [J('n', { n: a.nb }), J('plusieurs'), J('une')];
@@ -415,13 +448,14 @@
 
   // vérifie la phrase (liste d'expressions)
   function verifier(choix, q, sit) {
+    if (q.type === 'constituants') return verifierTout(choix, q, sit);
     const D = fo(sit, q.depot), nom = D.sujet, a = analyse(q, sit);
     const cs = choix.filter(x => x.g === 'c'), js = choix.filter(x => x.g === 'j'), cars = choix.filter(x => x.g === 'car');
     if (!choix.length) return { format: 'Touche des expressions pour écrire ta phrase.' };
-    if (!cs.length) return { format: 'Commence par ta conclusion : une expression de la première ligne.' };
-    if (cs.length > 1 || js.length > 1 || cars.length > 1) return { format: 'Une seule conclusion et une seule justification : « conclusion car justification ». Efface et recommence.' };
+    if (!cs.length) return { format: 'Commence par ta conclusion : une expression de la première ligne.' };
+    if (cs.length > 1 || js.length > 1 || cars.length > 1) return { format: 'Une seule conclusion et une seule justification : « conclusion car justification ». Efface et recommence.' };
     if (choix[0].g !== 'c' || (cars.length && choix[1].g !== 'car') || (js.length && choix[choix.length - 1].g !== 'j') || (js.length && !cars.length)) {
-      return { format: 'Dans l\'ordre : la conclusion, puis « car », puis la justification. Efface et recommence.' };
+      return { format: 'Dans l\'ordre : la conclusion, puis « car », puis la justification. Efface et recommence.' };
     }
     const c = cs[0], j = js[0];
     const [cA] = attendu(q, sit);
@@ -431,45 +465,78 @@
       const h = q.type === 'pur' ? `dis si ${nom} est un corps pur ou un mélange.`
         : q.type === 'contient' ? `dis si ${nom} contient ${fo(sit, q.ref).contient} ou non.`
         : q.type === 'tache' ? 'dis quelle espèce donne la tache entourée.' : `dis combien d'espèces ${nom} contient au moins.`;
-      return { diag: `Ta phrase ne répond pas à la question : ${h}` };
+      return { diag: `Ta phrase ne répond pas à la question : ${h}` };
     }
     // la conclusion est-elle juste ?
     if (!egal(c, cA)) {
       if (q.type === 'pur') return c.k === 'pur'
-        ? { diag: `${nom} donne ${a.nb} taches : un corps pur n'en donne qu'une seule, c'est un mélange.` }
-        : { diag: `${nom} ne donne qu'une seule tache : c'est un corps pur.` };
+        ? { diag: `${nom} donne ${a.nb} taches : un corps pur n'en donne qu'une seule, c'est un mélange.` }
+        : { diag: `${nom} ne donne qu'une seule tache : c'est un corps pur.` };
       if (q.type === 'contient') {
         const R = fo(sit, q.ref);
         return c.k === 'contient'
-          ? { diag: `Aucune tache de ${nom} n'est à la même hauteur que celle de ${R.hauteur} : les pointillés ne relient rien.`, cles: cles(sit, q.depot, q.ref) }
-          : { diag: `${nom} donne une tache à la même hauteur que ${R.hauteur} : les pointillés les relient.`, cles: cles(sit, q.depot, q.ref) };
+          ? { diag: `Aucune tache de ${nom} n'est à la même hauteur que celle de ${R.hauteur} : les pointillés ne relient rien.`, cles: cles(sit, q.depot, q.ref) }
+          : { diag: `${nom} donne une tache à la même hauteur que ${R.hauteur} : les pointillés les relient.`, cles: cles(sit, q.depot, q.ref) };
       }
       if (q.type === 'tache') {
-        if (c.k === 'inconnue') return { diag: `La tache de ${fo(sit, cA.r).hauteur} est à la même hauteur que la tache entourée : cette espèce est identifiée.`, cles: [q.depot + '|' + q.espece].concat(cles(sit, cA.r)) };
-        if (cA.k === 'inconnue') return { diag: 'Aucune référence ne donne de tache à cette hauteur : cette espèce n\'est pas identifiée.', cles: [q.depot + '|' + q.espece].concat(cles(sit, c.r)) };
-        return { diag: `La tache entourée n'est pas à la même hauteur que celle de ${fo(sit, c.r).hauteur} : les pointillés ne les relient pas.`, cles: [q.depot + '|' + q.espece].concat(cles(sit, c.r)) };
+        if (c.k === 'inconnue') return { diag: `La tache de ${fo(sit, cA.r).hauteur} est à la même hauteur que la tache entourée : cette espèce est identifiée.`, cles: [q.depot + '|' + q.espece].concat(cles(sit, cA.r)) };
+        if (cA.k === 'inconnue') return { diag: 'Aucune référence ne donne de tache à cette hauteur : cette espèce n\'est pas identifiée.', cles: [q.depot + '|' + q.espece].concat(cles(sit, c.r)) };
+        return { diag: `La tache entourée n'est pas à la même hauteur que celle de ${fo(sit, c.r).hauteur} : les pointillés ne les relient pas.`, cles: [q.depot + '|' + q.espece].concat(cles(sit, c.r)) };
       }
-      if (c.k === 'exact') return { diag: `Deux espèces peuvent monter à la même hauteur : on écrit <b>au moins</b> ${a.nb} espèces.` };
-      return { diag: `Compte les taches de ${nom} : il y en a ${a.nb}.` };
+      if (c.k === 'exact') return { diag: `Deux espèces peuvent monter à la même hauteur : on écrit <b>au moins</b> ${a.nb} espèces.` };
+      return { diag: `Compte les taches de ${nom} : il y en a ${a.nb}.` };
     }
     // la conclusion est justifiée ?
-    if (!j) return { diag: 'Justifie toujours : ajoute « car » et ce que montre le chromatogramme.' };
-    if (!prouve(c, j, a)) return { diag: `Ta conclusion est juste, mais cette justification ne la prouve pas : ${RAISON[c.k]}` };
+    if (!j) return { diag: 'Justifie toujours : ajoute « car » et ce que montre le chromatogramme.' };
+    if (!prouve(c, j, a)) return { diag: `Ta conclusion est juste, mais cette justification ne la prouve pas : ${RAISON[c.k]}` };
     return { ok: true, texte: phraseDe([c, { g: 'car', k: 'car' }, j], sit, q.depot) };
+  }
+  // identifier toutes les espèces : liste des espèces (références présentes, espèces non identifiées), puis justifications
+  function verifierTout(choix, q, sit) {
+    const D = fo(sit, q.depot), nom = D.sujet, P = D.pronom, a = analyse(q, sit), n = a.inconnues;
+    const es = choix.filter(x => x.g === 'c'), js = choix.filter(x => x.g === 'j');
+    if (!es.length) return { format: 'Touche les espèces que contient le dépôt : une ou plusieurs expressions de la première ligne.' };
+    const choisies = es.filter(x => x.k === 'esp').map(x => x.r), inc = es.find(x => x.k !== 'esp');
+    const faux = choisies.find(r => !a.presentes.includes(r));
+    if (faux != null) {
+      const R = fo(sit, faux);
+      return { diag: `Aucune tache de ${nom} n'est à la même hauteur que celle de ${R.hauteur} : les pointillés ne relient rien, ${P} ne contient pas ${R.pas}.`, cles: cles(sit, q.depot, faux) };
+    }
+    const manque = a.presentes.find(r => !choisies.includes(r));
+    if (manque != null) return { diag: `Il manque une espèce : ${nom} donne aussi une tache à la même hauteur que ${fo(sit, manque).hauteur}.`, cles: cles(sit, q.depot, manque) };
+    if (inc && !n) return { diag: `Chaque tache de ${nom} est à la même hauteur qu'une tache de référence : toutes ses espèces sont identifiées.`, cles: cles(sit, q.depot) };
+    if (!inc && n) return { diag: `${n > 1 ? 'Des taches' : 'Une tache'} de ${nom} ${n > 1 ? 'ne sont' : 'n\'est'} à la hauteur d'aucune référence : ${P} contient aussi ${n > 1 ? 'des espèces non identifiées' : 'une espèce non identifiée'}.`, cles: a.clesInc };
+    if (inc && (inc.k === 'incN') !== (n > 1)) return { diag: n > 1 ? `${n} taches de ${nom} ne sont à la hauteur d'aucune référence : écris « plusieurs espèces non identifiées ».` : `Une seule tache de ${nom} n'est à la hauteur d'aucune référence : écris « une espèce non identifiée ».`, cles: a.clesInc };
+    if (!js.length) return { diag: 'Justifie toujours : ajoute « car » et ce que montre le chromatogramme.' };
+    const jm = js.some(x => x.k === 'memes'), ja = js.some(x => x.k === 'autres');
+    if (js.some(x => x.k === 'plusieurs')) return { diag: `« ${P} donne plusieurs taches » montre seulement que ${nom} est un mélange : enlève cette justification.` };
+    if (!jm) return { diag: `Ta liste est juste, mais justifie-la : ${RAISON.contient}` };
+    if (n && !ja) return { diag: `Justifie aussi ${n > 1 ? 'les espèces non identifiées' : 'l\'espèce non identifiée'} : ${RAISON.inconnue}`, cles: a.clesInc };
+    if (!n && ja) return { diag: 'Toutes les taches sont à la hauteur d\'une référence : enlève « aucune référence ne donne de tache… ».' };
+    return { ok: true, texte: phraseTout(choix, sit, q.depot) };
+  }
+  // phrase « identifier toutes les espèces » : « M contient A, C et une espèce non identifiée car …, et … »
+  function phraseTout(l, sit, d) {
+    const es = l.filter(x => x.g === 'c'), js = l.filter(x => x.g === 'j'), ctx = { une: es.some(x => x.k === 'inc1') };
+    const liste = t => (t.length < 2 ? t.join('') : t.slice(0, -1).join(', ') + ' et ' + t[t.length - 1]);
+    let t = es.length ? `${fo(sit, d).sujet} contient ${liste(es.map(x => texte(x, sit, d)))}` : '';
+    if (l.some(x => x.g === 'car')) t += ' car';
+    if (js.length) t += ' ' + js.map(x => texte(x, sit, d, ctx)).join(', et ');
+    return t ? t[0].toUpperCase() + t.slice(1) + '.' : '';
   }
   function phraseDe(l, sit, d) {
     const t = l.map(x => texte(x, sit, d)).join(' ');
     return t ? t[0].toUpperCase() + t.slice(1) + '.' : '';
   }
-  const reponse = (q, sit) => { const [c, j] = attendu(q, sit); return phraseDe([c, { g: 'car', k: 'car' }, j], sit, q.depot); };
+  const reponse = (q, sit) => (q.type === 'constituants' ? phraseTout : phraseDe)(attenduListe(q, sit), sit, q.depot);
 
   function phrase(zone, o) {
-    const sit = o.situation, q = o.q, choix = [];
+    const sit = o.situation, q = o.q, choix = [], tout = q.type === 'constituants';
     const { cs, js } = pioche(q, sit);
-    const pil = (x, i) => `<button type="button" class="btn-secondary cc-pilule" data-g="${x.g}" data-i="${i}">${texte(x, sit, q.depot)}</button>`;
+    const pil = (x, i) => `<button type="button" class="btn-secondary cc-pilule" data-g="${x.g}" data-i="${i}"${tout && x.g !== 'car' ? ' aria-pressed="false"' : ''}>${texte(x, sit, q.depot)}</button>`;
     zone.innerHTML = `<div class="callout cc-phrase" aria-live="polite"></div>
       <div class="cc-pioche">
-        <div class="cc-pioche-g"><p class="cc-pioche-t">Conclusion</p><div class="cc-pilules">${cs.map(pil).join('')}</div></div>
+        <div class="cc-pioche-g"><p class="cc-pioche-t">${tout ? 'Espèces (une ou plusieurs)' : 'Conclusion'}</p><div class="cc-pilules">${cs.map(pil).join('')}</div></div>
         <div class="cc-pioche-g"><p class="cc-pioche-t">Liaison</p><div class="cc-pilules">${pil({ g: 'car', k: 'car' }, 0)}</div></div>
         <div class="cc-pioche-g"><p class="cc-pioche-t">Justification</p><div class="cc-pilules">${js.map(pil).join('')}</div></div>
       </div>
@@ -477,15 +544,33 @@
     const boite = zone.querySelector('.cc-phrase');
     let fini = false;
     function maj() {
-      boite.innerHTML = choix.length ? `<p>${phraseDe(choix, sit, q.depot).replace(/\.$/, choix[choix.length - 1].g === 'j' ? '.' : ' …')}</p>`
-        : '<p class="cc-phrase-vide">Touche les expressions dans l\'ordre : la conclusion, puis « car », puis la justification.</p>';
+      const t = (tout ? phraseTout : phraseDe)(choix, sit, q.depot);
+      boite.innerHTML = choix.length ? `<p>${t.replace(/\.$/, choix[choix.length - 1].g === 'j' ? '.' : ' …')}</p>`
+        : `<p class="cc-phrase-vide">${tout ? 'Touche toutes les espèces que contient le dépôt, puis « car », puis la justification (une ou deux).'
+          : 'Touche les expressions dans l\'ordre : la conclusion, puis « car », puis la justification.'}</p>`;
+      if (tout) zone.querySelectorAll('.cc-pilule[aria-pressed]').forEach(b => {
+        const x = (b.dataset.g === 'c' ? cs : js)[+b.dataset.i];
+        b.setAttribute('aria-pressed', choix.includes(x));
+      });
+    }
+    // identifier toutes les espèces : chaque expression se touche une fois (un second appui l'enlève),
+    // les espèces avant « car », les justifications après
+    function toucherTout(g, x) {
+      const i = choix.indexOf(x), car = choix.some(y => y.g === 'car');
+      if (g === 'car') { if (!car) { if (!choix.length) return 'Commence par les espèces que contient le dépôt.'; choix.push(CAR()); } return ''; }
+      if (i >= 0) { choix.splice(i, 1); if (g === 'c' && !choix.some(y => y.g === 'c')) choix.length = 0; return ''; }
+      if (g === 'c' && car) return 'Les espèces s\'écrivent avant « car » : touche « Effacer » pour changer la liste.';
+      if (g === 'j' && !car) return 'Ajoute d\'abord « car », puis la justification.';
+      if (g === 'c') choix.splice(choix.filter(y => y.g === 'c').length, 0, x); else choix.push(x);
+      return '';
     }
     zone.querySelectorAll('.cc-pilule').forEach(b => {
       b.onclick = () => {
         if (fini) return;
-        const g = b.dataset.g, i = +b.dataset.i;
-        choix.push(g === 'c' ? cs[i] : g === 'j' ? js[i] : { g: 'car', k: 'car' });
-        if (o.onMessage) o.onMessage('');
+        const g = b.dataset.g, i = +b.dataset.i, x = g === 'c' ? cs[i] : g === 'j' ? js[i] : CAR();
+        let m = '';
+        if (tout) m = toucherTout(g, x); else choix.push(x);
+        if (o.onMessage) o.onMessage(m);
         maj();
       };
     });
@@ -503,10 +588,14 @@
     maj();
     return {
       montrer() {
-        const [c, j] = attendu(q, sit);
-        choix.length = 0; choix.push(c, { g: 'car', k: 'car' }, j);
+        const l = attenduListe(q, sit), c = l[0];
+        choix.length = 0;
+        l.forEach(x => choix.push(tout ? (x.g === 'c' ? cs : x.g === 'j' ? js : [x]).find(y => egal(y, x)) || x : x));
         maj(); fermer();
-        if (o.montrer) o.montrer(q.type === 'contient' ? cles(sit, q.depot, q.ref) : q.type === 'tache' && c.r != null ? [q.depot + '|' + q.espece].concat(cles(sit, c.r)) : []);
+        if (o.montrer) {
+          o.montrer(q.type === 'contient' ? cles(sit, q.depot, q.ref) : q.type === 'tache' && c.r != null ? [q.depot + '|' + q.espece].concat(cles(sit, c.r))
+            : tout ? analyse(q, sit).presentes.reduce((t, r) => t.concat(cles(sit, r)), cles(sit, q.depot)) : []);
+        }
       },
     };
   }
@@ -516,13 +605,13 @@
      Étiquettes à glisser sur les numéros, ou à toucher puis toucher le numéro.
      ============================================================ */
   const LEGENDES = [
-    { id: 'couvercle', t: 'couvercle', diag: 'Le couvercle ferme la cuve, en haut : l\'éluant est toxique et s\'évapore.' },
+    { id: 'couvercle', t: 'couvercle', diag: 'Le couvercle ferme la cuve, en haut : l\'éluant est toxique et s\'évapore.' },
     { id: 'cuve', t: 'cuve à élution', diag: 'La cuve à élution est le récipient en verre qui contient l\'éluant et la plaque.' },
-    { id: 'phase', t: 'phase stationnaire', diag: 'La phase stationnaire est la plaque de silice : elle ne bouge pas, l\'éluant monte dedans.' },
+    { id: 'phase', t: 'phase stationnaire', diag: 'La phase stationnaire est la plaque de silice : elle ne bouge pas, l\'éluant monte dedans.' },
     { id: 'front', t: 'front de l\'éluant', diag: 'Le front de l\'éluant est la limite atteinte par l\'éluant, en haut de la partie mouillée de la plaque.' },
     { id: 'depots', t: 'dépôts', diag: 'Les dépôts sont les petites taches déposées sur le trait de dépôt, au début.' },
     { id: 'trait', t: 'trait de dépôt', diag: 'Le trait de dépôt est le trait au crayon, en bas de la plaque, sur lequel on fait les dépôts.' },
-    { id: 'eluant', t: 'éluant (phase mobile)', diag: 'L\'éluant (phase mobile) est le liquide au fond de la cuve : il monte dans la plaque.' },
+    { id: 'eluant', t: 'éluant (phase mobile)', diag: 'L\'éluant (phase mobile) est le liquide au fond de la cuve : il monte dans la plaque.' },
   ];
   function legende(zone, o) {
     o = o || {};
@@ -531,10 +620,11 @@
     const ordre = melanger(LEGENDES);
     zone.innerHTML = `<div class="cc-leg">
         <div class="cc-fig cc-leg-fig"></div>
-        <div class="cc-leg-cote">
+        <div class="cc-leg-cote">${o.entete || ''}
           <p class="cc-leg-aide">Glisse chaque étiquette sur son numéro, ou touche l'étiquette puis le numéro.</p>
           <div class="cc-leg-etiq">${ordre.map(l => `<button type="button" class="btn-secondary cc-etiq" data-id="${l.id}">${l.t}</button>`).join('')}</div>
           <ol class="cc-leg-cases">${LEGENDES.map((l, i) => `<li><button type="button" class="cc-leg-case" data-id="${l.id}" aria-label="Numéro ${i + 1}"><span class="cc-leg-num">${i + 1}</span><span class="cc-leg-t">…</span></button></li>`).join('')}</ol>
+          ${o.pied || ''}
         </div></div>`;
     // le dispositif : cuve fermée, élution commencée, numéros reliés aux éléments
     const depots = [{ nom: '', especes: ['A'] }, { nom: '', especes: ['C'] }, { nom: '', especes: ['A', 'C'] }];
@@ -601,5 +691,5 @@
   }
 
   window.CC = { PLAN, MOINS, fmt, sci, lire, fr, el, secouer, melanger, hasard, entre, defiler, PARTIES, question, serie, confettis,
-    formes, enonce, chromato, phrase, verifier, reponse, attendu, analyse, texte, legende, LEGENDES };
+    formes, enonce, chromato, phrase, verifier, reponse, attendu, attenduListe, analyse, texte, legende, LEGENDES };
 })();
