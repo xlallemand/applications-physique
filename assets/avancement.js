@@ -94,6 +94,7 @@
       'module_3_questions', 'module_4_cours', 'module_4_questions'] },
     'spectres-etoiles': { pages: ['module_1', 'module_2', 'module_3', 'module_4'] },
     'montage-electrique': { pages: ['module_1a_manip', 'module_1b_simulateur', 'module_2_manip', 'module_3_manip', 'module_3b_oscilloscope'] },
+    'chromatographie': { pages: ['module_1_simulation', 'module_2_manip', 'module_2_rf', 'module_3_questions'] },
     'cinematique': { ex: 16, strict: true, pages: [
       'module_1_cours', 'module_1_questions', 'module_2_cours', 'module_2_questions', 'module_2b_cours',
       'module_2b_questions', 'module_3_cours', 'module_3_questions', 'module_4a_cours',

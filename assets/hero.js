@@ -22,6 +22,8 @@
      antenne    pylône d'antenne relais qui émet des ondes, onde modulée en amplitude (ondes électromagnétiques)
      circuit    schéma normalisé (générateur, résistances, ampèremètre, voltmètre, nœuds) et le même circuit
                 recopié sur une table avec des fils souples (réaliser un montage électrique)
+     ccm        plaques de chromatographie (trait de dépôt, taches à différentes hauteurs reliées par des
+                pointillés, front de l'éluant) et une cuve fermée par son couvercle (chromatographie sur couche mince)
      fractions  disques et barres partagés
      molecules  modèles moléculaires en boules
      topologique  formules topologiques en zigzag, avec quelques OH, =O, NH₂, Cl, comme écrites au tableau (nomenclature)
@@ -418,6 +420,60 @@
       ];
       ctx.globalAlpha = .38; ctx.lineWidth = 2.2;
       fils.forEach(l => { ctx.beginPath(); l.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke(); });
+    },
+
+    // Plaques de chromatographie (trait de dépôt, taches reliées par des pointillés, front de l'éluant)
+    // et une cuve à élution fermée par son couvercle (chromatographie sur couche mince)
+    ccm(ctx, w, h, c) {
+      const hb = h / (1 + (reduit ? 0 : F));          // hauteur visible de l'en-tête
+      const p = 26;
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineWidth = 1;
+      for (let x = 0, i = 0; x <= w; x += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .11; trait(ctx, x, 0, x, h); }
+      for (let y = 0, i = 0; y <= h; y += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .11; trait(ctx, 0, y, w, y); }
+      const k = Math.min(1, w / 1100);
+      // ---- trois plaques : dépôts 1, 2 et le mélange 3 (taches de 1 et 2, et une autre espèce) ----
+      const pl = 64 * k + 26, ph = hb * .68, py = hb * .14, x0 = w * (w < 700 ? .5 : .56), ecart = pl + 22 * k + 10;
+      const yT = py + ph - 20, yF = py + 16, H = yT - yF;
+      const taches = [[.78], [.3], [.78, .3, .55]];
+      const pos = [];
+      taches.forEach((l, i) => {
+        const x = x0 + i * ecart;
+        ctx.globalAlpha = .42; ctx.lineWidth = 1.6; ctx.strokeRect(x, py, pl, ph);
+        // trait de dépôt et front de l'éluant, au crayon
+        ctx.globalAlpha = .35; ctx.lineWidth = 1.2; trait(ctx, x + 6, yT, x + pl - 6, yT); trait(ctx, x + 6, yF, x + pl - 6, yF);
+        ctx.font = `700 13px ${police()}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.globalAlpha = .45; ctx.fillText(String(i + 1), x + pl / 2, yT + 11);
+        l.forEach(hr => {
+          const y = yT - hr * H;
+          ctx.globalAlpha = .4; ctx.beginPath(); ctx.ellipse(x + pl / 2, y, 8, 6.5, 0, 0, 7); ctx.fill();
+          pos.push([x + pl / 2, y, hr]);
+        });
+      });
+      // pointillés entre taches de même hauteur
+      ctx.globalAlpha = .4; ctx.lineWidth = 1.4; ctx.setLineDash([5, 5]);
+      [.78, .3].forEach(hr => {
+        const l = pos.filter(q => q[2] === hr);
+        trait(ctx, l[0][0] + 11, l[0][1], l[l.length - 1][0] - 11, l[0][1]);
+      });
+      ctx.setLineDash([]);
+      // ---- la cuve : verre, éluant, plaque en cours d'élution, couvercle ----
+      const cx = x0 + 3 * ecart + 20 * k + 10, cw = pl + 44, cy = hb * .16, ch = hb * .7;
+      ctx.globalAlpha = .45; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy + ch - 10); ctx.quadraticCurveTo(cx, cy + ch, cx + 10, cy + ch);
+      ctx.lineTo(cx + cw - 10, cy + ch); ctx.quadraticCurveTo(cx + cw, cy + ch, cx + cw, cy + ch - 10); ctx.lineTo(cx + cw, cy); ctx.stroke();
+      ctx.globalAlpha = .3; ctx.fillRect(cx - 8, cy - 9, cw + 16, 8);
+      ctx.globalAlpha = .12; ctx.fillRect(cx + 2, cy + ch - 22, cw - 4, 20);
+      const qx = cx + 22, qy = cy + 18, qh = ch - 20;
+      ctx.globalAlpha = .4; ctx.lineWidth = 1.4; ctx.strokeRect(qx, qy, pl, qh);
+      // partie mouillée jusqu'au front ondulé, taches qui montent
+      const yf = qy + qh * .45;
+      ctx.globalAlpha = .1; ctx.beginPath(); ctx.moveTo(qx, qy + qh);
+      for (let x = 0; x <= pl; x += 4) ctx.lineTo(qx + x, yf + 2.5 * Math.sin(x / 7));
+      ctx.lineTo(qx + pl, qy + qh); ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = .35; ctx.lineWidth = 1.2; trait(ctx, qx + 6, qy + qh - 14, qx + pl - 6, qy + qh - 14);
+      [[.3, .25], [.7, .55]].forEach(([fx, hr]) => {
+        ctx.globalAlpha = .4; ctx.beginPath(); ctx.ellipse(qx + pl * fx, qy + qh - 14 - hr * (qy + qh - 14 - yf), 6, 5, 0, 0, 7); ctx.fill();
+      });
     },
 
     // Pylônes à haute tension reliés par des câbles (chaînette), tension sinusoïdale en fond
