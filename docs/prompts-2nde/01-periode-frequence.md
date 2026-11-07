@@ -63,7 +63,7 @@ Déroulé de `LG.poserQuestion` (règle virtuelle, tableau de proportionnalité,
   - division par le nombre de sommets au lieu du nombre de périodes : « Entre le premier et le cinquième sommet, il y a 4 périodes, pas 5. » ;
   - T et f confondus (T = 1 / f écrit f = T) : « f = 1 / T : la fréquence est l'inverse de la période. »
 - Signaux : la clarinette du cours (T = 2,9 ms), le diapason la<sub>3</sub> (T = 2,27 ms, f = 440 Hz), la guitare de l'exercice 7 (T = 2,3 ms), un électrocardiogramme (T de l'ordre de 0,8 s, f en Hz puis « battements par minute » en bilan), une trompette. Valeurs à recalculer par script.
-- Lien « Revois les tableaux de proportionnalité » → `proportionnalite/` ; « Revois les conversions » → `conversions/`.
+- Lien « Revois la lecture graphique » → `lecture-graphique/` ; « Revois les tableaux de proportionnalité » → `proportionnalite/` ; « Revois les conversions » → `conversions/` .
 
 ### Module 3 : Écran d'oscilloscope (simulation, `module_3_simulation.html`)
 
