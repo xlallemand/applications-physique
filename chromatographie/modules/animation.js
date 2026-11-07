@@ -25,7 +25,7 @@
   const L = 6, HP = 10;                                 // plaque : largeur et hauteur (cm)
   const EMPL = [1, 2, 3, 4, 5];                         // emplacements des dépôts sur le trait (cm)
   const MH = .7;                                        // place ajoutée au-dessus de la cuve (cm) : lampe, bouton « Sortir la plaque »
-  const SORTIE = 8.5;                                   // hauteur du front (cm) à partir de laquelle on peut sortir la plaque
+  const SORTIE = 8.5;                                   // hauteur du front (cm) à partir de laquelle la plaque sort à temps
   const FLACONS = [
     { nom: 'A', especes: ['A'], t: 'corps pur coloré' }, { nom: 'B', especes: ['B'], t: 'corps pur incolore' },
     { nom: 'C', especes: ['C'], t: 'corps pur coloré' }, { nom: 'D', especes: ['D'], t: 'corps pur incolore' },
@@ -272,9 +272,14 @@
           elution(); break;
         case 'sortir': {
           if (st.echec) return;
-          const fr = anim.etat.front;
-          if (fr == null || fr < SORTIE) return refuser('Attends que l\'éluant soit presque en haut de la plaque, à environ 1 cm du bord.');
+          // sortir la plaque arrête toujours l'élution ; trop tôt, la CCM est ratée
           anim.pause();
+          const fr = anim.etat.front;
+          if (fr == null || fr < SORTIE) {
+            st.echec = true; st.msg = null;
+            st.diag = 'Plaque sortie trop tôt : l\'éluant n\'est pas monté assez haut et les espèces n\'ont pas eu le temps de bien se séparer. La CCM est ratée : il faut sortir la plaque quand le front est à environ 1 cm du haut.';
+            break;
+          }
           st.front = fr; st.ligne = 7; st.etape = 4;
           dire('Plaque sortie : l\'élution s\'arrête. La partie mouillée montre où l\'éluant est monté : repère vite le front, il va sécher.'); break;
         }

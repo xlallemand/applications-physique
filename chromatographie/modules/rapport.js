@@ -11,8 +11,9 @@
    CC.comparerRf(zone, onFini)     même espèce ? comparer les R_f de deux taches
                                    de plaques différentes (même éluant)
    CC.identifierRf(zone, onFini)   mesurer R_f et trouver l'espèce dans une table
-   Les hauteurs se mesurent depuis le trait de dépôt (à 1 cm du bas de la
-   plaque) ; le front est à 1 cm du haut : H = hauteur de la plaque − 2 cm.
+   Toutes les plaques mesurent HP = 10 cm ; chaque cas donne H, la hauteur
+   où le front est monté, mesurée comme h depuis le trait de dépôt (à 1 cm
+   du bas de la plaque).
    Utilise CCM (ccm.js), CC.lire, CC.fmt, CC.melanger, CC.defiler (cc.js).
    ============================================================ */
 (function () {
@@ -24,20 +25,20 @@
   const ko = d => `<div class="callout-danger er-retour"><p><b class="er-ko">Ce n'est pas ça.</b> ${d}</p></div>`;
   const ok = (t, d) => `<div class="callout-success er-retour"><p><b class="er-ok">${t}</b> ${d}</p></div>`;
   const cm = v => CC.fmt(v, 1);
-  const Hde = hauteur => hauteur - 2;                  // hauteur du front au-dessus du trait (cm)
-  const hDe = (esp, hauteur) => Math.round(CCM.hauteur(esp) * Hde(hauteur) * 10) / 10;
+  const HP = 10;                                       // hauteur de toutes les plaques (cm)
+  const hDe = (esp, H) => Math.round(CCM.hauteur(esp) * H * 10) / 10;   // hauteur de la tache au-dessus du trait (cm)
 
   /* ============================================================
      PLAQUE AVEC UNE RÈGLE GRADUÉE GLISSABLE (▲ ▼ : au mm)
      ============================================================ */
   const blocRegle = () => `<div class="cc-fig cc-rf-fig"></div>
     <div class="cc-outil-b"><button type="button" class="btn-secondary cc-fl" data-a="+" aria-label="Monter la règle d'un millimètre">▲</button><button type="button" class="btn-secondary cc-fl" data-a="-" aria-label="Descendre la règle d'un millimètre">▼</button><span class="cc-val-t">règle : glisse-la, ou règle-la au mm</span></div>`;
-  // bloc : contient blocRegle() ; P = { hauteur, depots, aria }
+  // bloc : contient blocRegle() ; P = { H (front au-dessus du trait, cm), depots, aria }
   function plaqueRegle(bloc, P) {
     let zero = 0;                                       // position du 0 de la règle (cm depuis le bas de la plaque)
-    const La = 2.4, lg = P.hauteur;
+    const La = 2.4, lg = HP;
     const pl = CCM.plaque(bloc.querySelector('.cc-rf-fig'), {
-      depots: P.depots, largeur: La, hauteur: P.hauteur, echelle: 32, marges: { d: 1.5 }, aria: P.aria,
+      depots: P.depots, largeur: La, hauteur: HP, front: 1 + P.H, frontTrait: 1 + P.H, echelle: 32, marges: { d: 1.5 }, aria: P.aria,
       calque(g) {
         const k = g.k, x = g.px(La) + .2 * k, y0 = g.py(zero);
         let s = `<rect class="ccm-regle" x="${x}" y="${y0 - lg * k}" width="${1.05 * k}" height="${lg * k + 3}" rx="3"/>`;
@@ -100,7 +101,7 @@
   /* ============================================================
      1. MESURER LE RAPPORT FRONTAL : même espèce, élutions différentes
      ============================================================ */
-  const PLAQUES = [{ hauteur: 7 }, { hauteur: 9.5 }];
+  const PLAQUES = [{ H: 5 }, { H: 7.5 }];
   function mesurerRf(zone, onFini) {
     zone.innerHTML = `<div class="cc-rf">${PLAQUES.map((P, i) => `<div class="cc-rf-p" data-i="${i}">
         <p class="cc-rf-t">Plaque ${i + 1}</p>${blocRegle()}${champs('plaque ' + (i + 1))}
@@ -109,8 +110,8 @@
       <div class="cc-rf-bilan" aria-live="polite"></div>`;
     const reussies = new Set();
     zone.querySelectorAll('.cc-rf-p').forEach(bloc => {
-      const i = +bloc.dataset.i, P = PLAQUES[i], Hv = Hde(P.hauteur), hv = hDe('F', P.hauteur);
-      plaqueRegle(bloc, { hauteur: P.hauteur, depots: [{ nom: 'F', especes: ['F'] }], aria: `Plaque ${i + 1} : une tache F et le front de l'éluant ; une règle graduée en mm à droite` });
+      const i = +bloc.dataset.i, P = PLAQUES[i], Hv = P.H, hv = hDe('F', P.H);
+      plaqueRegle(bloc, { H: P.H, depots: [{ nom: 'F', especes: ['F'] }], aria: `Plaque ${i + 1} : une tache F et le front de l'éluant ; une règle graduée en mm à droite` });
       const ret = bloc.querySelector('.cc-rf-retour');
       bloc.querySelector('[data-a="ver"]').onclick = () => {
         const r = verifierMesure(bloc, hv, Hv);
@@ -131,9 +132,9 @@
      2. MÊME ESPÈCE ? Deux taches X et Y sur deux plaques (même éluant)
      ============================================================ */
   const CAS = [
-    { p: [{ hauteur: 8, esp: 'aspirine' }, { hauteur: 10, esp: 'aspirine' }] },   // 3,0 / 6,0 et 4,0 / 8,0 : 0,50 et 0,50
-    { p: [{ hauteur: 8, esp: 'aspirine' }, { hauteur: 9.5, esp: 'e5' }] },        // 3,0 / 6,0 et 3,0 / 7,5 : même hauteur, 0,50 et 0,40
-    { p: [{ hauteur: 7, esp: 'e1' }, { hauteur: 9.5, esp: 'e1' }] },              // 4,0 / 5,0 et 6,0 / 7,5 : 0,80 et 0,80
+    { p: [{ H: 6, esp: 'aspirine' }, { H: 8, esp: 'aspirine' }] },   // 3,0 / 6,0 et 4,0 / 8,0 : 0,50 et 0,50
+    { p: [{ H: 6, esp: 'aspirine' }, { H: 7.5, esp: 'e5' }] },        // 3,0 / 6,0 et 3,0 / 7,5 : même hauteur, 0,50 et 0,40
+    { p: [{ H: 5, esp: 'e1' }, { H: 7.5, esp: 'e1' }] },        // 4,0 / 5,0 et 6,0 / 7,5 : 0,80 et 0,80
   ];
   const NOMS = ['X', 'Y'];
   // flèche de cote verticale (de ya à yb, unités SVG)
@@ -145,9 +146,9 @@
   }
   // plaque avec les cotes h (trait → tache) et H (trait → front)
   function plaqueCotee(fig, nom, P) {
-    const La = 1.6, H = Hde(P.hauteur), h = hDe(P.esp, P.hauteur);
+    const La = 1.6, H = P.H, h = hDe(P.esp, H);
     CCM.plaque(fig, {
-      depots: [{ nom, especes: [P.esp] }], largeur: La, hauteur: P.hauteur, echelle: 26, marges: { d: 2 },
+      depots: [{ nom, especes: [P.esp] }], largeur: La, hauteur: HP, front: 1 + H, frontTrait: 1 + H, echelle: 26, marges: { d: 2 },
       aria: `Plaque de la tache ${nom} : h = ${cm(h)} cm, H = ${cm(H)} cm`,
       calque(g) {
         const k = g.k, xp = g.px(La), y0 = g.py(1), yh = g.py(1 + h), yH = g.py(1 + H), x1 = xp + .5 * k, x2 = xp + 1.25 * k;
@@ -214,12 +215,12 @@
      3. IDENTIFIER UNE ESPÈCE AVEC UNE TABLE DE R_f (même éluant)
      ============================================================ */
   const TABLE = ['menthol', 'citral', 'eucalyptol', 'carvone', 'menthone', 'limonene'];
-  const CAS_ID = [{ nom: 'S', hauteur: 8, esp: 'eucalyptol' }, { nom: 'T', hauteur: 9, esp: 'menthone' }];
+  const CAS_ID = [{ nom: 'S', H: 6, esp: 'eucalyptol' }, { nom: 'T', H: 7, esp: 'menthone' }];
   const rfTable = id => Math.round(CCM.hauteur(id) * 100) / 100;
   function identifierRf(zone, onFini) {
     let i = 0;
     function afficher() {
-      const C = CAS_ID[i], Hv = Hde(C.hauteur), hv = hDe(C.esp, C.hauteur);
+      const C = CAS_ID[i], Hv = C.H, hv = hDe(C.esp, C.H);
       zone.innerHTML = `<p class="cc-sit-num">Espèce ${i + 1} / ${CAS_ID.length}</p>
         <div class="cc-rf">
           <div class="cc-rf-p">${blocRegle()}</div>
@@ -236,7 +237,7 @@
           </div>
         </div>`;
       const blocG = zone.querySelectorAll('.cc-rf-p')[0], bloc = zone.querySelectorAll('.cc-rf-p')[1];
-      plaqueRegle(blocG, { hauteur: C.hauteur, depots: [{ nom: C.nom, especes: [C.esp] }], aria: `Plaque de l'espèce ${C.nom} : une tache et le front de l'éluant ; une règle graduée en mm à droite` });
+      plaqueRegle(blocG, { H: C.H, depots: [{ nom: C.nom, especes: [C.esp] }], aria: `Plaque de l'espèce ${C.nom} : une tache et le front de l'éluant ; une règle graduée en mm à droite` });
       const ret = bloc.querySelector('.cc-rf-retour'), table = bloc.querySelector('.cc-table-rf'), retT = bloc.querySelector('.cc-table-retour');
       bloc.querySelector('[data-a="ver"]').onclick = () => {
         const r = verifierMesure(bloc, hv, Hv);
