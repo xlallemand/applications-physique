@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : fiche récapitulative — Oscilloscope</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="os.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="os.js"></script>
+<script src="oscillo.js"></script>
+<script src="intensite.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 4 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Mesurer une intensité</h2>
+  </div>
+
+  <section class="er-card" id="intensite">
+    <h3 class="cours-titre">Le principe</h3>
+    <div class="os-principe">
+      <div class="cle"><p>Un oscilloscope ne mesure que des <b>tensions</b>. Pour visualiser l'intensité <b>i</b>, on place une <b>résistance R</b> en série dans le circuit et on mesure la tension <b>u<sub>R</sub></b> à ses bornes (voie CH1 d'un côté de R, masse de l'autre).</p>
+        <p class="som-formule">u<sub>R</sub> = R × i &nbsp; donc &nbsp; i = <span class="som-fr"><span>u<sub>R</sub></span><span>R</span></span></p>
+        <p>L'intensité est <b>proportionnelle</b> à la tension affichée : la courbe de u<sub>R</sub> a la même forme que celle de i.</p></div>
+      <div class="os-schema" id="schema"></div>
+    </div>
+    <h3 class="cours-titre" style="margin-top:18px">Mesurer I<sub>max</sub></h3>
+    <div class="cle"><ol style="margin:0;padding-left:20px;line-height:1.6">
+      <li>Curseurs de type Y au <b>maximum</b> et au <b>minimum</b> de u<sub>R</sub> : U<sub>max</sub> = ΔY / 2.</li>
+      <li>Diviser par R :</li></ol>
+      <p class="som-formule">I<sub>max</sub> = <span class="som-fr"><span>U<sub>max</sub></span><span>R</span></span> &nbsp;&nbsp; U<sub>max</sub> en V, R en Ω, I<sub>max</sub> en A</p>
+      <p>1 A = 1 000 mA.</p></div>
+    <p class="cours-exemple-t">Exemple : R = 100 Ω</p>
+    <div class="osc-fig" id="figI"></div>
+    <div class="osc-mesures osc-fig" id="mesI"></div>
+    <p>ΔY = 4,70 V, donc U<sub>max</sub> = 4,70 / 2 = 2,35 V, puis I<sub>max</sub> = 2,35 / 100 = 0,0235 A = 23,5 mA.</p>
+  </section>
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_4_intensite.html">Revoir : mesurer une intensité</a>
+    <a class="btn-secondary" href="module_3b_curseurs.html">Revoir : mesurer une tension avec les curseurs</a>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Fiche récapitulative du module 4 : écrans dessinés par OSC
+   ============================================================ */
+SOM.menu('fiche_4');
+document.getElementById('schema').innerHTML = OS.schemaIntensite();
+// u_R : sinus de 2,35 V (CH1 : 1 V/carreau) ; curseurs au maximum et au minimum
+const uR = { voies: [{ signal: { forme: 'sinus', periode: 2, ampl: 2.35, phase: 0.2 }, sens: 1, pos: 0 }], baseTemps: 0.5 };
+const e = { menu: true, mode: 'Manuel', type: 'Y', pos: { X: [2, 8], Y: [1.65, 6.35] } };
+document.getElementById('figI').innerHTML = OSC.svg(uR, e);
+document.getElementById('mesI').innerHTML = OSC.mesures(uR, e);
+</script>
+</body>
+</html>
