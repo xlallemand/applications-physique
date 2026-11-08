@@ -3,10 +3,11 @@
    PF.questionsSerie() → 10 questions tirées dans quatre groupes :
      A. signal à l'axe gradué : T tombe sur des valeurs écrites (une ou plusieurs périodes), puis f ;
      B. signal « papier » à l'échelle : règle, tableau, n périodes, puis f ;
-     C. oscilloscope : carreaux × base de temps, puis f ;
+     C. oscilloscope (simulateur du module 3) : en comptant les carreaux ou avec les curseurs, puis f ;
      D. T ↔ f : f à partir de T (ms, µs), T à partir de f (Hz, kHz).
-   Dans A, B et C, la méthode de mesure est au choix (lecture directe ou règle et tableau),
-   avec la même règle d'acceptation que dans les modules 2 et 3.
+   Dans A et B, la méthode de mesure est au choix (lecture directe ou règle et tableau), avec la même
+   règle d'acceptation que dans le module 2 ; T n'est pas dessinée sur le graphique et le tableau
+   a une case pour n (vide : n = 1).
    ============================================================ */
 (function () {
   'use strict';
@@ -36,7 +37,7 @@
       q: 'Détermine la période T du signal (méthode au choix).',
       monter(zone, api) {
         const lg = LG.poserQuestion(zone, def, {
-          choixMethode: true, methode: o.methode, frequence: true,
+          choixMethode: true, methode: o.methode, frequence: true, lienRegle: PF.revois(['lecture']),
           boutonSuivant: false, boutonPasser: false, sansPoints: true,
           onErreur() { api.compter(); },
           onFini(tot, max, info) { Tval = info.valeur; remplirFrequence(info.valeur); api.reussi(true); },
@@ -45,7 +46,7 @@
           montrer() {
             lg.detruire();
             Tval = T; remplirFrequence(T);
-            zone.innerHTML = `${LG.figure(def, [], false)}<p class="pf-corr">${o.correction}</p>`;
+            zone.innerHTML = `${LG.figure(def, [], true)}<p class="pf-corr">${o.correction}</p>`;
           },
         };
       },
@@ -68,7 +69,7 @@
     const g0 = cas.pas * entre(1, 2), max = cas.pas * Math.ceil((g0 + Math.max(nB, 3) * cas.T + 0.4 * cas.T) / cas.pas);
     const unite = cas.unite || 'ms';
     const def = {
-      type: 'periode', caseNT: true, grandeur: G,
+      type: 'periode', caseN: true, sansReperage: true, grandeur: G,
       axeX: { min: 0, max, pas: cas.pas, nom: 't', unite, libelle: 't' },
       axeY: forme === 'ecg' ? { min: -0.5, max: 1.5, pas: 0.5, nom: 'u', unite: 'mV' } : AY,
       signal: { forme, periode: cas.T, ampl: forme === 'ecg' ? 1.2 : 1.1, phase: PF.phaseSommet(forme, cas.T, g0) },
@@ -102,7 +103,7 @@
       }
     }
     const def = {
-      type: 'periode', caseNT: true, grandeur: G,
+      type: 'periode', caseN: true, sansReperage: true, grandeur: G,
       axeX: { min: 0, max, pas, nom: 't', unite, libelle: 't' },
       axeY: ecg ? { min: -0.5, max: 1.5, pas: 0.5, nom: 'u', unite: 'mV' } : AY,
       signal: { forme, periode: T, ampl: ecg ? 1.2 : 1.1, phase: Math.random() * T * 0.5 },
@@ -118,19 +119,19 @@
     });
   }
 
-  /* ---------- C. Oscilloscope : carreaux × base de temps ---------- */
+  /* ---------- C. Oscilloscope : en comptant les carreaux ou avec les curseurs ---------- */
   function oscilloscope() {
     const base = hasard([0.1, 0.2, 0.5, 1, 5]);
-    // le plus souvent, la période se compte au dixième de carreau ; parfois non (règle et tableau)
+    // le plus souvent, la période se compte au cinquième de carreau ; sinon, seuls les curseurs conviennent
     const net = Math.random() < 0.8;
     const q1 = net ? hasard([2, 2.5, 3, 3.2, 4, 4.4, 5, 6]) : hasard([2.37, 3.63, 4.27, 2.83]);
     const T = +(q1 * base).toPrecision(4), forme = hasard(['sinus', 'clarinette', 'trompette']);
     const c0 = entre(2, 12) / 10;
     const sit = { signal: { forme, periode: T, ampl: entre(5, 9) / 2, phase: PF.phaseSommet(forme, T, c0 * base) }, baseTemps: base, sensibilite: 2 };
-    const k = Math.max(1, Math.floor((10 - c0) / q1 + 1e-9));
+    const u = OSC.unite(base), Tu = OSC.enU(T, u);
     const q = { theme: 'Oscilloscope', consigne: 'Détermine la période T du signal sur l\'écran, puis sa fréquence f.',
-      enonce: `<p>Base de temps : <b>${fmt(base)} ms/carreau</b> ; sensibilité verticale : <b>2 V/carreau</b>.</p>`, parties: [], sit, c0, net };
-    const remplir = v => { const pf = PF.partiesFrequence({ T: +v.toPrecision(3), unite: 'ms', exact: T }); q.parties[1] = pf[0]; q.parties[2] = pf[1]; };
+      enonce: '<p>Réglages affichés sous l\'écran : sensibilité verticale (CH1) à gauche, base de temps (Time) à droite.</p>', parties: [], sit, c0, net };
+    const remplir = v => { const pf = PF.partiesFrequence({ T: +v.toPrecision(3), unite: u, exact: Tu }); q.parties[1] = pf[0]; q.parties[2] = pf[1]; };
     q.parties.push({
       type: 'perso',
       q: 'Mesure la période T (méthode au choix).',
@@ -138,14 +139,20 @@
         const fig = el('div'), ch = el('div');
         zone.appendChild(fig); zone.appendChild(ch);
         const oq = OSC.question({ figure: fig, champs: ch }, sit, {
-          methode: 'directe',
+          methodes: ['carreaux', 'curseurs'], methode: 'carreaux',
           onErreur() { api.compter(); },
-          onFini(t) { remplir(t); api.reussi(true); },
+          onFini(t, info) { remplir(info.Tu); api.reussi(true); },
         });
-        return { montrer() { oq.montrer(); remplir(T); ch.innerHTML = `<p class="pf-corr">${k > 1 ? `${k} périodes occupent ${fmt(+(k * q1).toFixed(2))} carreaux : ${k}T = ${fmt(+(k * q1).toFixed(2))} × ${fmt(base)} = ${PF.court(k * T)} ms, donc ` : `Une période occupe ${fmt(q1)} carreaux : `}<b>T = ${PF.court(T)} ms</b>.</p>`; } };
+        return {
+          montrer() {
+            const r = oq.montrer(), k = r.k, d = +(k * q1 * OSC.enU(base, u)).toPrecision(4);
+            remplir(Tu);
+            ch.innerHTML = `<p class="pf-corr">${k > 1 ? `${k} périodes occupent ${fmt(r.carreaux)} carreaux : ${k}T = ${fmt(r.carreaux)} × ${OSC.baseTexte(base).replace(/,0+ /, ' ')} = ${fmt(d)} ${u}, donc ` : `Une période occupe ${fmt(r.carreaux)} carreaux : `}<b>T = ${PF.court(Tu)} ${u}</b>.</p>`;
+          },
+        };
       },
     }, null, null);
-    q.bilan = `T = ${PF.court(T)} ms et f = 1 / T ${PF.egal(1000 / T)} ${PF.court(1000 / T)} Hz.`;
+    q.bilan = `T = ${PF.court(Tu)} ${u} et f = 1 / T ${PF.egal(1000 / T)} ${PF.court(1000 / T)} Hz.`;
     return q;
   }
 
@@ -166,7 +173,7 @@
     return { theme: 'Période et fréquence', consigne: 'Calcule la période du signal.',
       enonce: `<p>Un signal sonore a une fréquence <b>f = ${fmt(c.f)} ${c.u}</b>.</p>`,
       parties: [
-        { type: 'nombre', sci: true, q: 'Calcule la période T en secondes.', label: 'T = 1 / f =', unite: 's',
+        { type: 'nombre', sci: true, q: 'Calcule la période T en secondes.', label: 'T = 1 / f =', unite: 's', calc: true,
           aide: 'Écris le nombre, puis l\'exposant de 10 (laisse 0 si tu écris un nombre décimal comme 0,002).',
           verifier(v) {
             if (PF.proche(v, Ts, 0.012)) return { ok: true };

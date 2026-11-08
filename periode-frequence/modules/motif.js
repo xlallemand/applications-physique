@@ -134,9 +134,9 @@
           </div>
           <div class="pf-manip-panneau">
             <ol class="pf-deroule">
-              <li data-e="0">Touche le <b>début</b> d'un motif : n'importe quel point du signal.</li>
-              <li data-e="1">Touche la <b>fin</b> de ce motif : le point qui correspond au début, un motif plus loin.</li>
-              <li data-e="2">Vérifie ton motif.</li>
+              <li data-e="0"><span>Touche le <b>début</b> d'un motif : n'importe quel point du signal.</span></li>
+              <li data-e="1"><span>Touche la <b>fin</b> de ce motif : le point qui correspond au début, un motif plus loin.</span></li>
+              <li data-e="2"><span>Vérifie ton motif.</span></li>
             </ol>
             <p class="pf-aide-t">◀ ▶ déplacent le dernier point touché ; un nouvel appui remplace le point le plus proche.</p>
             <div class="er-actions"><button type="button" class="btn-primary" data-a="verif" disabled>Vérifier le motif</button></div>

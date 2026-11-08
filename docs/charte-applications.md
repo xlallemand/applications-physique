@@ -374,6 +374,7 @@ Variantes de l'exemple trouvé par l'élève : quand l'exemple est donné sous f
 - Fractions `CIN.fr`, dérivées `CIN.dd('v')` (`dv/dt`), racines `.racine`, systèmes avec accolade `CIN.sys(...)`.
 - Ne jamais insérer de `${…}` dans du HTML « statique » : seuls les gabarits JavaScript (backticks) les évaluent.
 - Saisie d'un nombre : champ `.crs-champ` (moteur commun ; `.ph-champ` dans Cinématique et pH) + bouton **±** (le clavier numérique des téléphones n'a pas toujours de « − »), `inputmode="decimal"`, `autocomplete="off"`, `spellcheck="false"`. Tolérance relative par défaut 0,5 % (ou absolue `tol`). L'unité est dans l'étiquette du champ ; préciser le nombre de chiffres significatifs attendu.
+- **Icône calculatrice** : à côté d'un champ dont la valeur se **calcule à la calculatrice** (résultat pas évident de tête : 1 / T, quotient ou produit de nombres décimaux, racine, logarithme…), placer après l'unité l'icône `<span class="calc-icone" role="img" aria-label="À calculer à la calculatrice" title="À calculer à la calculatrice"></span>` (classe de `assets/theme.css`, couleur `--ink-2`). Pas d'icône pour une valeur qui se lit, se recopie, se compte ou se calcule de tête (conversion par une puissance de 10, différence de deux graduations, 8 × 0,5…). Règle valable dans toutes les applications, quel que soit le niveau.
 
 ## 8. Tactile, smartphone, souris
 
@@ -385,6 +386,7 @@ Variantes de l'exemple trouvé par l'élève : quand l'exemple est donné sous f
 - Quand une saisie est faite avec des boutons à l'écran (écriture `a i⃗ + b j⃗`), pas de champ texte : le clavier du téléphone ne s'ouvre pas.
 - Protection contre le **double appui** : après « Continuer » ou « Question suivante », `pointer-events: none` pendant ~350 ms sur la zone.
 - Après une réponse, `scrollIntoView({ block: 'nearest', behavior: 'smooth' })` pour amener la partie suivante, sans sauter dans la page.
+- **Jamais remonter pour répondre** : après une validation, la question (ou la partie) suivante doit être visible **sans avoir à faire défiler la page vers le haut**. Si elle se trouve plus haut dans la page (colonne voisine, panneau guidé au-dessus d'un long outil…), la page défile automatiquement pour l'amener à l'écran, sous le bandeau du sommaire. Règle valable dans toutes les applications, quel que soit le niveau.
 - SVG des repères et des courbes : `max-width: 100%`, recalcul à la largeur disponible pour garder graduations lisibles ; sur téléphone le repère prend aussi la marge intérieure de la carte.
 
 ## 9. Accessibilité
@@ -403,6 +405,7 @@ Avec Playwright / Chromium (déjà installé, ne pas relancer `playwright instal
 2. Parcourir **chaque série** (10 questions, note sur 20) et **chaque exercice**.
 3. Mode « Afficher tout le cours » : tout se déplie, la position du bouton ne bouge pas, les réponses ne sont pas affichées.
 4. Aucune erreur dans la console, aucun défilement horizontal de la page.
+   Après chaque validation, la question suivante est visible sans remonter dans la page ; chaque champ dont la valeur se calcule à la calculatrice porte l'icône calculatrice (§7).
 5. Navigation : la page en cours est encadrée dans le sommaire, déplier un autre module ne change pas de page, chaque lien du sommaire mène à la bonne page, ancres de fiche, sommaire du téléphone (ouverture, fermeture, voile), bouton Reprendre, ✓ et notes (profil persistant), lien vers le portail.
 6. Tous les liens internes pointent vers des pages existantes. Les liens vers une autre application s'ouvrent dans une nouvelle fenêtre.
 7. Tracés de vecteurs : glisser à la souris, au doigt (CDP), flèches ; valeur affichée en direct.

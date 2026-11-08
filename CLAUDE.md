@@ -15,4 +15,6 @@ Elle décrit le style, la présentation des pages, la navigation (sommaire de to
 - Police sans empattement, couleurs uniquement via les variables de `assets/theme.css`.
 - Code commenté en français.
 - Fonctionnement à la souris et sur tout écran tactile.
+- Icône calculatrice (`calc-icone`, charte §7) à côté de tout champ dont la valeur se calcule à la calculatrice.
+- Après une validation, jamais besoin de remonter dans la page pour répondre à la question suivante (défilement automatique, charte §8).
 - Ne modifier que ce qui est demandé.

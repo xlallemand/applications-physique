@@ -29,6 +29,9 @@
      unites, unitesCalcul (étiquettes),
      nImpose : 1 (une seule période mesurée) ou 'plusieurs' (au moins deux) — par défaut, toutes,
      caseNT : true → la case cherchée du tableau s'écrit « nT », puis « 4T » une fois la mesure reconnue,
+     nMesure : k → mesure imposée de k périodes exactement : repère orange « kT », case « kT » (« T » si k = 1),
+     caseN : true → la case cherchée contient un champ pour n devant le symbole (« [n] T ») ; vide → n = 1,
+     sansReperage : true → pas de repère orange de la grandeur à mesurer sur le graphique,
      cadre : { x0, x1, yTop, yBot } (mm papier) — zone du graphique, par défaut celle de LG,
      graphe(R, A, def) : dessin propre à l'application (code SVG) à la place du quadrillage et de la courbe }
 
@@ -39,9 +42,11 @@
      sansPoints : true → le résultat n'affiche pas les points,
      frequence : true → rappel de f = 1 / T avec le résultat (question de période),
      choixMethode : true → option à cocher « Lecture directe » / « Règle et tableau » (question de période),
-       methode : 'directe' | 'regle' (choix de départ, 'directe' par défaut).
-       Lecture directe : l'élève touche le début et la fin de la mesure sur la courbe, lit les dates
-       sur l'axe et écrit T. Elle n'est acceptée que si les deux points tombent sur des graduations
+       methode : 'directe' | 'regle' (choix de départ, 'directe' par défaut),
+       methodes : ['directe'] ou ['regle'] → seule cette méthode est sélectionnable (l'autre est grisée),
+       lienRegle : code HTML placé sous le graphique de la règle (lien vers une fiche, par exemple).
+       Lecture directe : l'élève touche le début et la fin de la mesure sur la courbe et écrit la durée
+       Δt = t₂ − t₁ lue sur l'axe (les dates t₁ et t₂ sont données dans le message d'erreur). Elle n'est acceptée que si les deux points tombent sur des graduations
        écrites et que la durée lue vaut exactement n périodes ; sinon un message (sans erreur)
        renvoie vers la règle et le tableau. La règle et le tableau sont toujours acceptés. }
    Le résultat de poserQuestion : { detruire(), methode() }.
@@ -177,7 +182,8 @@
       // toutes les mesures de n périodes tenant sous la règle sont acceptées
       // (def.nImpose : une seule période, ou plusieurs)
       let nLim = Math.max(1, Math.floor((dispo - 1) / Tmm)), nMin = 1;
-      if (def.nImpose === 1) nLim = 1;
+      if (def.nMesure) nLim = nMin = def.nMesure;
+      else if (def.nImpose === 1) nLim = 1;
       else if (def.nImpose === 'plusieurs') nMin = Math.min(2, nLim);
       A.liste = [];
       for (let n = nMin; n <= nLim; n++) A.liste.push({ n: n, mm: n * Tmm });
@@ -208,7 +214,7 @@
     // textes par défaut selon le type de question
     const D = {
       periode: { ligne: cap(g.noms || 'périodes').replace(/s$/, '(s)').replace(/s d'/, "(s) d'"),
-        erreur: `Ta mesure ne correspond pas à ${def.nImpose === 1 ? `une seule ${g.nom || 'période'}` : def.nImpose === 'plusieurs' ? `plusieurs ${g.noms || 'périodes'} (au moins deux)` : `une ou plusieurs ${g.noms || 'périodes'}`} : place le 0 de la règle et le curseur sur deux points équivalents du signal (par exemple deux maximums).` },
+        erreur: `Ta mesure ne correspond pas à ${def.nMesure ? (def.nMesure > 1 ? `${def.nMesure} ${g.noms || 'périodes'}` : `une seule ${g.nom || 'période'}`) : def.nImpose === 1 ? `une seule ${g.nom || 'période'}` : def.nImpose === 'plusieurs' ? `plusieurs ${g.noms || 'périodes'} (au moins deux)` : `une ou plusieurs ${g.noms || 'périodes'}`} : place le 0 de la règle et le curseur sur deux points équivalents du signal (par exemple deux maximums).` },
       max: { ligne: 'Maximum', erreur: "Ta mesure ne correspond pas à la valeur maximale : mesure verticalement la distance entre l'axe des abscisses (valeur 0) et le point le plus haut de la courbe." },
       amplitude: { ligne: 'Amplitude', erreur: "Ta mesure ne correspond pas à l'amplitude : mesure verticalement l'écart entre le minimum et le maximum du signal (crête à crête), ou entre la valeur moyenne et le maximum." },
       lectureY: { ligne: 'Point', erreur: "Ta mesure ne correspond pas au point repéré : mesure verticalement la distance entre l'axe des abscisses (valeur 0) et le point." },
@@ -222,7 +228,7 @@
 
   function dessinerGraphe(def, R, A) {
     // dessin propre à l'application (écran d'oscilloscope…), puis le repère orange
-    if (def.graphe) return def.graphe(R, A, def) + reperageCible(def, R, A);
+    if (def.graphe) return def.graphe(R, A, def) + (def.sansReperage ? '' : reperageCible(def, R, A));
     const P = R.P, ax = def.axeX, ay = def.axeY;
     const nX = Math.round((ax.max - ax.min) / ax.pas), nY = Math.round((ay.max - ay.min) / ay.pas);
     let h = '';
@@ -263,7 +269,7 @@
     else h += trace(A.f, 'var(--accent)');
     // annotations propres à l'application (noms des courbes, repères…), en mm papier
     if (def.annotations) h += `<g pointer-events="none">${def.annotations(R, A)}</g>`;
-    h += reperageCible(def, R, A);
+    if (!def.sansReperage) h += reperageCible(def, R, A);
     return h;
   }
 
@@ -288,11 +294,12 @@
     if (def.type === 'periode') {
       const s = def.signal;
       // premier motif entier visible, repéré entre deux points équivalents
-      const tA = premierPoint(def, phaseMax(def)), tB = tA + s.periode;
+      const k = def.nMesure || 1;
+      const tA = premierPoint(def, phaseMax(def)), tB = tA + k * s.periode;
       const yRef = R.sy(f(tA + 1e-6)), yF = Math.max(P.yTop - 2, yRef - 5);
       const xA = R.sx(tA), xB = R.sx(tB);
       h += tirets(xA, yRef, xA, yF - 2) + tirets(xB, yRef, xB, yF - 2) + fleche(xA, yF, xB, yF);
-      h += etiq((xA + xB) / 2, yF - 1.4, sym);
+      h += etiq((xA + xB) / 2, yF - 1.4, (k > 1 ? k : '') + sym);
     } else if (def.type === 'max') {
       const x = R.sx(A.tMax), y0 = R.sy(0), y1 = R.sy(A.exact);
       h += tirets(P.x0, y1, x, y1) + fleche(x, y0, x, y1) + etiq(x + 2, (y0 + y1) / 2 + 1.5, sym, 'start');
@@ -806,9 +813,18 @@
     const u = 'lg' + (++nQuestion) + '_';             // identifiants propres à cette question
     // option à cocher : lecture directe ou règle et tableau (questions de période)
     const choix = !!(opts.choixMethode && def.type === 'periode');
+    // opts.methodes : méthodes sélectionnables (les autres sont grisées)
+    const permises = choix && opts.methodes && opts.methodes.length ? opts.methodes : ['directe', 'regle'];
     let methode = choix ? (opts.methode === 'regle' ? 'regle' : 'directe') : 'regle';
+    if (permises.indexOf(methode) < 0) methode = permises[0];
     let errD = 0, fini = false;                       // erreurs de la lecture directe ; question terminée
 
+    // case cherchée du tableau : « ? », « nT », « kT » (mesure imposée) ou champ n devant le symbole
+    function caseCherchee() {
+      if (def.caseN) return `<span class="lg-case-n"><input type="text" id="${u}N0" class="lg-input lg-cell lg-cell-n" inputmode="numeric" autocomplete="off" placeholder="n" aria-label="Nombre de ${g.noms || 'périodes'} mesurées" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">${sym}</span>`;
+      if (def.nMesure) return (def.nMesure > 1 ? def.nMesure : '') + sym;
+      return def.caseNT ? `<span data-a="nT">n${sym}</span>` : '?';
+    }
     // case du tableau : saisie au clavier ou au pavé numérique
     const saisie = (id, ph) => `<input type="text" id="${u + id}" class="lg-input lg-cell" inputmode="decimal" autocomplete="off" placeholder="${ph}" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">`;
 
@@ -816,11 +832,12 @@
       ${def.contexte ? `<p class="lg-contexte">${def.contexte}</p>` : ''}
       ${def.cible ? `<div class="lg-cible"><span class="lg-cible-icone">?</span><div>${def.cible}</div></div>` : ''}
       ${choix ? `<div class="lg-methode" role="radiogroup" aria-label="Méthode de mesure"><span class="lg-methode-t">Méthode de mesure :</span>
-          <button type="button" role="radio" class="lg-meth" data-m="directe" aria-checked="false">Lecture directe sur l'axe</button>
-          <button type="button" role="radio" class="lg-meth" data-m="regle" aria-checked="false">Règle et tableau de proportionnalité</button></div>` : ''}
+          <button type="button" role="radio" class="lg-meth" data-m="directe" aria-checked="false"${permises.indexOf('directe') < 0 ? ' disabled' : ''}>Lecture directe sur l'axe</button>
+          <button type="button" role="radio" class="lg-meth" data-m="regle" aria-checked="false"${permises.indexOf('regle') < 0 ? ' disabled' : ''}>Règle et tableau de proportionnalité</button></div>` : ''}
       ${choix ? '<div data-a="blocRegle">' : ''}
       ${htmlOutils()}
       <div class="lg-graph-box">${svgGraphique(def, R, A)}</div>
+      ${choix && opts.lienRegle ? opts.lienRegle : ''}
 
       <div class="lg-etape" data-etape="1">
         <h3 class="lg-etape-titre">Étape 1 · Tableau de proportionnalité</h3>
@@ -829,9 +846,10 @@
           <thead><tr><th>Distance<br>${caseVide('uD', 'lg-slot-unite')}</th><th>${ax.libelle}<br>${caseVide('uV', 'lg-slot-unite')}</th></tr></thead>
           <tbody>
             <tr><td>${saisie('ED', 'échelle')}</td><td>${saisie('EV', 'échelle')}</td></tr>
-            <tr><td>${saisie('MD', 'mesure')}</td><td class="lg-inconnue">${def.caseNT ? `<span data-a="nT">n${sym}</span>` : '?'}</td></tr>
+            <tr><td>${saisie('MD', 'mesure')}</td><td class="lg-inconnue">${caseCherchee()}</td></tr>
           </tbody>
         </table></div>
+        ${def.caseN ? `<p class="lg-note-n">Écris dans la case n le nombre de ${g.noms || 'périodes'} mesurées ; laisse-la vide si tu en mesures une seule.</p>` : ''}
         ${window.numpadWidget ? numpadWidget() : ''}
         <div class="lg-actions">
           ${opts.boutonPasser === false ? '' : '<button type="button" class="btn-small" data-a="passer">Passer →</button>'}
@@ -847,6 +865,7 @@
 
     const eng1 = moteurEtiquettes(root.querySelector('[data-etape="1"]'));
     const cases = { eD: root.querySelector('#' + u + 'ED'), eV: root.querySelector('#' + u + 'EV'), mD: root.querySelector('#' + u + 'MD') };
+    if (def.caseN) cases.n = root.querySelector('#' + u + 'N0');
     Object.keys(cases).forEach(k => {
       cases[k].addEventListener('input', () => cases[k].classList.remove('is-ok', 'is-ko'));
       cases[k].addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('verif1').click(); } });
@@ -886,6 +905,19 @@
         if (!trouve) { okMD = false; err.push(A.erreur); }
       } else err.push('2<sup>e</sup> ligne (' + A.ligne.toLowerCase() + ') : écris la distance mesurée pour la grandeur recherchée, en cm.');
       marquerCase('mD', okMD);
+      // case n (def.caseN) : vide → une seule période ; sinon le nombre de périodes de la mesure
+      if (def.caseN) {
+        const t = cases.n.value.trim(), nS = t === '' ? 1 : lireNombre(t);
+        let okN = nS >= 1 && Math.round(nS) === nS;
+        if (!okN) err.push(`Case n : écris un nombre entier de ${g.noms || 'périodes'} (ou laisse-la vide pour une seule ${g.nom || 'période'}).`);
+        else if (trouve && trouve.n !== nS) {
+          okN = false;
+          err.push(nS === trouve.n + 1 && ORDINAUX[trouve.n]
+            ? `Case n : entre le premier et le ${ORDINAUX[trouve.n]} sommet, il y a ${trouve.n} ${g.noms || 'périodes'}, pas ${nS}.`
+            : `Case n : ${nS === 1 && t === '' ? `la case vide veut dire une seule ${g.nom || 'période'}, ` : ''}compte les ${g.noms || 'périodes'} entières entre le 0 de la règle et le curseur.`);
+        }
+        marquerCase('n', okN);
+      }
 
       const msg = $('msg1');
       if (err.length) {
@@ -1069,7 +1101,7 @@
        ============================================================ */
     let ptr = null;
     function choisir(m) {
-      if (fini) return;
+      if (fini || permises.indexOf(m) < 0) return;
       methode = m;
       root.querySelectorAll('.lg-meth').forEach(b => b.setAttribute('aria-checked', String(b.dataset.m === m)));
       $('blocRegle').hidden = m !== 'regle';
@@ -1091,8 +1123,7 @@
         <div class="lg-graph-box">${svgGraphique(Object.assign({}, def, { type: '_' }), R, A)}</div>
         <div class="lg-etape">
           <h3 class="lg-etape-titre">Lecture directe sur l'axe</h3>
-          <p>Lis sur l'axe les dates t<sub>1</sub> (début) et t<sub>2</sub> (fin), à l'aplomb des points touchés, puis calcule ${sym}.</p>
-          <div class="lg-dl-ligne">${champ('t1', 't₁', 't<sub>1</sub> =', un)}${champ('t2', 't₂', 't<sub>2</sub> =', un)}</div>
+          <p>Lis sur l'axe, à l'aplomb des points touchés, les dates t<sub>1</sub> (début) et t<sub>2</sub> (fin), puis écris ${plusieurs ? 'la durée Δt = t<sub>2</sub> − t<sub>1</sub>' : `${sym} = t<sub>2</sub> − t<sub>1</sub>`}.</p>
           ${plusieurs
             ? `<div class="lg-dl-ligne">${champ('dt', 'Δt', 'Δt = t<sub>2</sub> − t<sub>1</sub> =', un)}${champ('n', 'n', 'n =', noms, true)}</div>
                <div class="lg-dl-ligne">${champ('T', g.symbole, `${sym} = Δt / n =`, un)}</div>`
@@ -1106,7 +1137,7 @@
       $('dPlus').onclick = () => ptr.deplacer(1);
       $('dEffacer').onclick = () => { ptr.effacer(); $('dMsg').innerHTML = ''; };
       const ch = {};
-      ['t1', 't2', 'dt', 'n', 'T'].forEach(k => {
+      ['dt', 'n', 'T'].forEach(k => {
         const e = zone.querySelector('#' + u + 'd' + k);
         if (!e) return;
         ch[k] = e;
@@ -1157,17 +1188,13 @@
         Object.keys(ch).forEach(c => { v[c] = lireNombre(ch[c].value); });
         if (Object.keys(v).some(c => isNaN(v[c]))) { msg.innerHTML = info('Écris un nombre dans chaque case (avec une virgule si besoin).'); return; }
         const err = [], marque = (c, ok) => { ch[c].classList.toggle('is-ok', ok); ch[c].classList.toggle('is-ko', !ok); };
-        const ok1 = proche(v.t1, gA), ok2 = proche(v.t2, gB);
-        marque('t1', ok1); marque('t2', ok2);
-        if (!ok1 || !ok2) {
-          err.push(proche(v.t1, gB) && proche(v.t2, gA) ? 't<sub>1</sub> est la date du début (à gauche), t<sub>2</sub> celle de la fin.'
-            : 't<sub>1</sub> et t<sub>2</sub> se lisent sur l\'axe des temps, à l\'aplomb de chaque point touché (suis les pointillés).');
-        }
-        let delta = v.t2 - v.t1;
+        // durée lue fausse : on donne les deux dates lues sur l'axe
+        const dates = `Les pointillés tombent sur t<sub>1</sub> = ${fmt(gA, 4)} ${un} et t<sub>2</sub> = ${fmt(gB, 4)} ${un}`;
+        let delta = gB - gA;
         if (plusieurs) {
           const okDt = proche(v.dt, delta);
           marque('dt', okDt);
-          if (!okDt) err.push('Δt = t<sub>2</sub> − t<sub>1</sub> : fais la différence des deux dates lues.');
+          if (!okDt) err.push(`${dates} : Δt = t<sub>2</sub> − t<sub>1</sub>.`);
           const okN = v.n === k;
           marque('n', okN);
           if (!okN) err.push(v.n === k + 1 && ORDINAUX[k] ? `Entre le premier et le ${ORDINAUX[k]} sommet, il y a ${k} ${noms}, pas ${k + 1}.` : 'n : compte les motifs entiers entre les deux points touchés.');
@@ -1179,7 +1206,7 @@
         if (!okT) {
           if (plusieurs && nn > 1 && proche(v.T, delta, 0.01)) err.push(`${sym} : tu as donné la durée de ${nn} ${noms}. Divise Δt par n.`);
           else if (plusieurs && proche(v.T, delta * nn, 0.01)) err.push(`${sym} = Δt / n : il faut diviser par n, pas multiplier.`);
-          else err.push(plusieurs ? `${sym} = Δt / n.` : `${sym} = t<sub>2</sub> − t<sub>1</sub>.`);
+          else err.push(plusieurs ? `${sym} = Δt / n.` : `${dates} : ${sym} = t<sub>2</sub> − t<sub>1</sub>.`);
         }
         if (err.length) { errD++; if (opts.onErreur) opts.onErreur(); msg.innerHTML = ko(err); return; }
         // lecture réussie : motif surligné, double flèche « T » ou « 4T »

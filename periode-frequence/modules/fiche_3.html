@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : fiche récapitulative — Période et fréquence d'un signal</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../lecture-graphique/modules/lgtools.css">
+<link rel="stylesheet" href="pf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../lecture-graphique/modules/lgtools.js"></script>
+<script src="pf.js"></script>
+<script src="oscillo.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Utiliser un oscilloscope</h2>
+  </div>
+
+  <section class="er-card" id="carreaux">
+    <h3 class="cours-titre">L'écran de l'oscilloscope</h3>
+    <div class="cle"><p>L'écran est quadrillé : <b>10 carreaux</b> en largeur, <b>8</b> en hauteur. Sur les axes centraux, un petit trait vaut <b>0,2 carreau</b>. Sous l'écran :</p>
+      <ul style="margin:6px 0 0;padding-left:20px;line-height:1.6">
+        <li>à gauche, <b>CH1</b> : la <b>sensibilité verticale</b>, tension représentée par un carreau vertical (en V) ;</li>
+        <li>à droite, <b>Time</b> : la <b>base de temps</b>, durée représentée par un carreau horizontal (en ms ou en µs).</li></ul></div>
+    <h3 class="cours-titre" style="margin-top:18px">Mesurer T en comptant les carreaux</h3>
+    <div class="cle"><p>On compte les carreaux de <b>n périodes</b> (le plus grand nombre possible, entre deux sommets), puis :</p>
+      <p class="som-formule">T = <span class="som-fr"><span>nombre de carreaux × base de temps</span><span>n</span></span></p>
+      <p>On utilise la base de temps (Time), <b>jamais la sensibilité verticale</b> (CH1). Changer la base de temps change l'affichage, pas la période.</p></div>
+    <p class="cours-exemple-t">Exemple</p>
+    <div class="osc-fig" id="figCarreaux"></div>
+    <p>2 périodes occupent 8 carreaux ; Time : 500 µs par carreau.</p>
+    <p class="som-formule">T = <span class="som-fr"><span>8 × 500</span><span>2</span></span> = 2 000 µs = 2,00 ms</p>
+  </section>
+
+  <section class="er-card" id="curseurs">
+    <h3 class="cours-titre">Mesurer T avec les curseurs</h3>
+    <div class="cle"><ol style="margin:0;padding-left:20px;line-height:1.6">
+      <li>Appuyer sur <b>Cursor</b> : le menu des curseurs s'affiche à droite de l'écran.</li>
+      <li>Avec le 1<sup>er</sup> bouton à droite de l'écran, régler <b>Mode : Manuel</b>.</li>
+      <li>Avec le 2<sup>e</sup> bouton, choisir <b>Type : X</b> (curseurs horizontaux, pour mesurer une durée). Le type <b>Y</b> (curseurs verticaux) mesure une tension.</li>
+      <li>Choisir <b>CurA</b> (4<sup>e</sup> bouton) et tourner le <b>bouton de réglage</b> pour placer le curseur A sur un sommet.</li>
+      <li>Choisir <b>CurB</b> (5<sup>e</sup> bouton) et placer le curseur B <b>n périodes</b> plus loin. CurA et CurB choisis ensemble bougent en même temps.</li>
+      <li>Lire <b>ΔX</b>, la durée entre les deux curseurs (ΔY pour des curseurs de type Y).</li></ol>
+      <p class="som-formule">T = <span class="som-fr"><span>ΔX</span><span>n</span></span></p></div>
+    <p class="cours-exemple-t">Exemple : son d'un diapason (la<sub>3</sub>)</p>
+    <div class="osc-fig" id="figCurseurs"></div>
+    <div class="osc-mesures osc-fig" id="mesCurseurs"></div>
+    <p>Entre les curseurs A et B, 2 périodes : T = 4 540 / 2 = 2 270 µs = 2,27 ms.</p>
+  </section>
+
+  <section class="er-card">
+    <h3 class="cours-titre">La fréquence</h3>
+    <div class="cle"><p class="som-formule">f = <span class="som-fr"><span>1</span><span>T</span></span> &nbsp;&nbsp; f en hertz (Hz), T en secondes (s)</p>
+      <p>1 ms = 10<sup>−3</sup> s ; 1 µs = 10<sup>−6</sup> s. Exemple : T = 2,27 ms = 2,27 × 10<sup>−3</sup> s, donc f = 1 / (2,27 × 10<sup>−3</sup>) ≈ 441 Hz.</p></div>
+  </section>
+
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_3a_carreaux.html">Revoir : compter les carreaux</a>
+    <a class="btn-secondary" href="module_3b_curseurs.html">Revoir : utiliser les curseurs</a>
+    <a class="btn-secondary" href="module_4_questions.html">S'entraîner</a>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Fiche récapitulative du module 3 : écrans dessinés par OSC
+   ============================================================ */
+SOM.menu('fiche_3');
+// en comptant les carreaux : 2 périodes de 2 ms (4 carreaux à 500 µs/carreau), premier sommet à 1 carreau
+const car = { signal: { forme: 'sinus', periode: 2, ampl: 4.4, phase: PF.phaseSommet('sinus', 2, 0.5) }, baseTemps: 0.5, sensibilite: 2 };
+document.getElementById('figCarreaux').innerHTML = OSC.svg(car, { motif: OSC.motif(car, 1, 9, '2T') });
+// avec les curseurs : diapason, T = 2,27 ms ; curseurs A et B sur deux sommets, 2 périodes plus loin
+const cur = { signal: { forme: 'sinus', periode: 2.27, ampl: 4.4, phase: PF.phaseSommet('sinus', 2.27, 0.4) }, baseTemps: 0.5, sensibilite: 2 };
+const e = Object.assign(OSC.etatVide(), { menu: true, mode: 'Manuel', type: 'X', selB: true, pos: { X: [0.8, 9.88], Y: [2, 6] } });
+document.getElementById('figCurseurs').innerHTML = OSC.svg(cur, e);
+document.getElementById('mesCurseurs').innerHTML = OSC.mesures(cur, e);
+</script>
+</body>
+</html>

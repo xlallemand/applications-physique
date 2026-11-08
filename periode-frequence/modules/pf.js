@@ -5,10 +5,12 @@
    graphiques, règle et lecture directe avec l'outil LG de lecture-graphique/)
 
    PF.fmt(v, dec), PF.sci(v, c), PF.sciCourt(v), PF.sig(v, c), PF.court(v, c), PF.egal(v, c), PF.lire(s), PF.fr(h, b)   écriture et lecture des nombres
-   PF.el(tag, cls, html), PF.melanger(t), PF.hasard(t), PF.defiler(e)
+   PF.el(tag, cls, html), PF.melanger(t), PF.hasard(t), PF.defiler(e), PF.amener(e) (haut de e amené à l'écran)
    PF.PARTIES                       parties de question :
      'choix'  : p.options [{ id, label }], p.bonne, p.indices[id] ou p.indice
-     'nombre' : p.label, p.unite, p.verifier(v) → { ok } | { diag } | { format } ; p.sci : saisie a × 10ⁿ
+     'nombre' : p.label, p.unite, p.verifier(v) → { ok } | { diag } | { format } ; p.sci : saisie a × 10ⁿ ;
+                p.signe : bouton ± pour la valeur (jamais négative dans cette application : pas de ±) ;
+                p.calc : icône calculatrice (valeur à calculer, pas évidente de tête) ; p.lien : HTML sous la saisie
      'perso'  : p.monter(zone, api) → { montrer() } ; api.reussi(), api.erreur(diag), api.compter() (erreur sans message)
    PF.question(zone, q, cb, mode)   question en parties successives ; mode 'serie' (Afficher la réponse
                                     toujours là, 0 point) ou 'manip' (proposé après 2 erreurs)
@@ -26,10 +28,11 @@
   const PLAN = [
     { n: 1, titre: 'Le motif élémentaire', desc: 'Signal périodique ou non, puis repérer le motif qui se répète',
       parties: [{ nom: 'Le motif élémentaire', entrainement: 'module_1_manip', noms: { entrainement: 'Manipulation : le motif élémentaire' } }] },
-    { n: 2, titre: 'Mesurer T et calculer f', desc: 'Une période, plusieurs périodes, puis la règle et le tableau ; f = 1 / T',
+    { n: 2, titre: 'Mesurer T et calculer f', desc: 'Une période, plusieurs périodes, puis la règle et le tableau ; f = 1 / T', fiche: 'fiche_2',
       parties: [{ nom: 'Mesurer T et calculer f', entrainement: 'module_2_manip', noms: { entrainement: 'Manipulation : mesurer T et calculer f' } }] },
-    { n: 3, titre: 'Écran d\'oscilloscope', desc: 'Compter les carreaux, base de temps, T puis f',
-      parties: [{ nom: 'Écran d\'oscilloscope', simulation: 'module_3_simulation', noms: { simulation: 'Simulateur : écran d\'oscilloscope' } }] },
+    { n: 3, titre: 'Oscilloscope', desc: 'Compter les carreaux, puis utiliser les curseurs ; T puis f', fiche: 'fiche_3', sousModules: true,
+      parties: [{ nom: 'Compter les carreaux', slug: 'carreaux', simulation: 'module_3a_carreaux', noms: { simulation: 'Simulateur : compter les carreaux' } },
+                { nom: 'Utiliser les curseurs', slug: 'curseurs', simulation: 'module_3b_curseurs', noms: { simulation: 'Simulateur : utiliser les curseurs' } }] },
     { n: 4, titre: 'Entraînement', desc: 'Série notée sur 20 : graphiques, signaux à l\'échelle, oscilloscope, T et f',
       parties: [{ nom: 'Entraînement', questions: 'module_4_questions', noms: { questions: 'Entraînement' } }] },
   ];
@@ -112,12 +115,23 @@
   const hasard = t => t[Math.floor(Math.random() * t.length)];
   const defiler = e => setTimeout(() => e && e.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
   const surOrdi = () => matchMedia('(hover: hover)').matches;
+  // amène le haut de e à l'écran (sous le bandeau du sommaire) s'il n'y est pas : on n'a jamais
+  // à remonter dans la page pour répondre à la question suivante
+  function amener(e) {
+    setTimeout(() => {
+      if (!e) return;
+      const r = e.getBoundingClientRect();
+      if (r.top >= 70 && r.top <= innerHeight * 0.6) return;
+      const doux = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollBy({ top: r.top - 80, behavior: doux ? 'smooth' : 'auto' });
+    }, 120);
+  }
 
   // liens « Revois… » vers d'autres applications (nouvelle fenêtre)
   const APPLIS = {
-    lecture: { href: '../../lecture-graphique/index.html', texte: 'Revois la lecture graphique' },
+    lecture: { href: '../../lecture-graphique/modules/fiche_1.html', texte: 'Revois la lecture graphique (fiche)' },
     proportionnalite: { href: '../../proportionnalite/index.html', texte: 'Revois les tableaux de proportionnalité' },
-    conversions: { href: '../../conversions/index.html', texte: 'Revois les conversions' },
+    conversions: { href: '../../conversions/index.html#fiche-1', texte: 'Revois les conversions (fiche)' },
     puissances: { href: '../../puissances-10/index.html', texte: 'Revois les puissances de 10' },
   };
   function revois(liste) {
@@ -153,20 +167,29 @@
     return { montrer() { bs.forEach(({ b, o }) => { b.disabled = true; if (o.id === p.bonne) b.classList.add('juste'); }); } };
   }
 
-  // Saisie d'un nombre : champ + bouton ±, unité ; p.sci : saisie a × 10ⁿ (deux champs)
+  // icône calculatrice (assets/theme.css) : valeur à calculer à la calculatrice
+  const CALC = '<span class="calc-icone" role="img" aria-label="À calculer à la calculatrice" title="À calculer à la calculatrice"></span>';
+
+  // Saisie d'un nombre : champ (± seulement si p.signe), unité ; p.sci : saisie a × 10ⁿ (deux champs,
+  // ± devant l'exposant) ; p.calc : icône calculatrice ; p.lien : lien sous la saisie
   // p.verifier(v) → { ok } | { diag } | { format } ; p.reponse : texte de la réponse (affichée)
   function pNombre(zone, p, api) {
-    const champ = (cls, aria, ph) => `<span class="pf-champ-box"><input type="text" class="ph-champ ${cls}" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="${aria}" placeholder="${ph || ''}"><button type="button" class="pf-pm" aria-label="Changer le signe">±</button></span>`;
+    const input = (cls, aria, ph) => `<input type="text" class="ph-champ ${cls}" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="${aria}" placeholder="${ph || ''}">`;
+    const pm = '<button type="button" class="pf-pm" aria-label="Changer le signe">±</button>';
+    const champ = (cls, aria, ph) => p.signe ? `<span class="pf-champ-box">${input(cls, aria, ph)}${pm}</span>` : input(cls, aria, ph);
+    const fin = (p.unite ? `<span class="pf-unite">${p.unite}</span>` : '') + (p.calc ? CALC : '');
     const box = el('div', 'pf-saisie', `<div class="pf-saisie-l">${p.label ? `<span class="pf-saisie-t">${p.label}</span>` : ''}
-        ${p.sci ? `<span class="pf-sci">${champ('pf-mant', 'Nombre', '')}<span class="pf-puiss"><span class="pf-x10">× 10</span><span class="pf-exp-box">${champ('pf-exp', 'Exposant de 10', '0')}</span>${p.unite ? `<span class="pf-unite">${p.unite}</span>` : ''}</span></span>`
-          : champ('pf-val', p.aria || 'Réponse', '') + (p.unite ? `<span class="pf-unite">${p.unite}</span>` : '')}</div>
+        ${p.sci ? `<span class="pf-sci">${champ('pf-mant', 'Nombre', '')}<span class="pf-puiss"><span class="pf-x10">× 10</span><span class="pf-exp-box"><span class="pf-champ-box">${pm}${input('pf-exp', 'Exposant de 10', '0')}</span></span>${fin}</span></span>`
+          : champ('pf-val', p.aria || 'Réponse', '') + fin}</div>
+      ${p.lien || ''}
       <div class="er-actions"><button type="button" class="btn-primary" data-a="ok">Valider</button></div>
       ${p.aide ? `<p class="pf-aide-saisie">${p.aide}</p>` : ''}`);
     zone.appendChild(box);
     const ins = Array.from(box.querySelectorAll('input'));
     box.querySelectorAll('.pf-pm').forEach(b => {
       b.onclick = () => {
-        const i = b.previousElementSibling;
+        // le champ qui suit (exposant) ou qui précède (valeur) le bouton
+        const i = b.nextElementSibling && b.nextElementSibling.tagName === 'INPUT' ? b.nextElementSibling : b.previousElementSibling;
         i.value = i.value.trim().startsWith(MOINS) || i.value.trim().startsWith('-') ? i.value.trim().slice(1) : MOINS + i.value.trim();
         if (surOrdi()) i.focus();
       };
@@ -374,6 +397,7 @@
         q: `Convertis ${sym} en secondes.`,
         label: `${sym} = ${fmt(o.T)} ${u} =`, unite: 's',
         aide: `Écris le nombre, puis l'exposant de 10 (laisse 0 si tu écris un nombre décimal comme 0,002).`,
+        lien: revois(['conversions']),
         verifier(v) {
           if (proche(v, Ts, 0.012) || proche(v, exS, 0.012)) return { ok: true };
           if (proche(v, o.T * Math.pow(10, -k), 0.02)) return { diag: `${unitePref} : ${sym} en secondes est plus petit que ${sym} en ${u}.` };
@@ -389,7 +413,7 @@
     parties.push({
       type: 'nombre',
       q: `Calcule la fréquence f (2 ou 3 chiffres significatifs).`,
-      label: `f = 1 / ${sym} =`, unite: 'Hz',
+      label: `f = 1 / ${sym} =`, unite: 'Hz', calc: true,
       verifier(v) {
         if (proche(v, fJ, 0.02) || proche(v, fEx, 0.025)) return { ok: true };
         if (k && proche(v, 1 / o.T, 0.03)) return { diag: `Tu as gardé ${sym} en ${u} : dans f = 1 / ${sym}, ${sym} doit être en secondes.` };
@@ -413,5 +437,5 @@
     return tS - uM * T;
   }
 
-  window.PF = { phaseSommet, fmt, sci, sciCourt, sig, court, egal, lire, fr, proche, el, melanger, hasard, defiler, surOrdi, revois, PARTIES, question, serie, partiesFrequence, confettis, PLAN };
+  window.PF = { CALC, phaseSommet, fmt, sci, sciCourt, sig, court, egal, lire, fr, proche, el, melanger, hasard, defiler, amener, surOrdi, revois, PARTIES, question, serie, partiesFrequence, confettis, PLAN };
 })();

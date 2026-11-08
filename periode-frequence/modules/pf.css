@@ -39,7 +39,7 @@ sub, sup { font-size: .7em; line-height: 0; }
 .pf-manip-fig { min-width: 0; }
 .pf-manip-panneau { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .pf-cmd { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
-.pf-fl, .osc-fl { min-width: 58px; min-height: 50px; padding: 0; font-size: 1.1rem; justify-content: center; }
+.pf-fl { min-width: 58px; min-height: 50px; padding: 0; font-size: 1.1rem; justify-content: center; }
 .pf-cmd .btn-small { min-height: 46px; padding: 0 16px; }
 .pf-aide-t, .pf-li-aide { font-size: .86rem; color: var(--ink-2); line-height: 1.4; }
 .pf-deroule { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; counter-reset: d; }
@@ -95,16 +95,47 @@ sub, sup { font-size: .7em; line-height: 0; }
 @media (max-width: 899px) { .ph-tete .er-meta { margin: 0 !important; width: 100%; } }
 
 /* ============================================================
-   ÉCRAN D'OSCILLOSCOPE
+   OSCILLOSCOPE (modules/oscillo.js)
    ============================================================ */
+.osc { min-width: 0; }
+.osc-face { background: var(--paper-2); border: 1.5px solid var(--line-strong); border-radius: 16px; padding: 10px; }
+.osc-corps { display: grid; grid-template-columns: minmax(0, 1fr) 46px auto; gap: 0 8px; align-items: stretch; }
+.osc-ecran { min-width: 0; }
 .osc-svg { display: block; width: 100%; height: auto; font-family: var(--font-sans); touch-action: pan-y;
   -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
-.osc-poignee { cursor: ew-resize; touch-action: none; }
-.osc { background: var(--sheet); border: 1.5px solid var(--line); border-radius: 14px; overflow: hidden; }
-.osc-cmd { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-.osc-cmd-g { display: flex; gap: 6px; }
-.osc-cur-b { min-height: 50px; padding: 0 14px; font-size: .92rem; }
-.osc-cur-b[aria-pressed="true"] { box-shadow: inset 0 0 0 2.5px var(--accent); background: var(--cle-bg); color: var(--accent-ink); font-weight: 800; }
+.osc-sans-curseurs .osc-corps { grid-template-columns: minmax(0, 1fr); }
+.osc-sans-curseurs .osc-soft, .osc-sans-curseurs .osc-panneau { display: none !important; }
+/* les cinq boutons à droite de l'écran, en face des lignes du menu */
+.osc-soft { position: relative; }
+.osc-touche {
+  position: absolute; left: 0; right: 0; border: none; border-radius: 10px; cursor: pointer; padding: 0;
+  background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--line-strong), 0 2px 0 var(--line-strong);
+}
+.osc-touche:active { transform: translateY(1px); box-shadow: inset 0 0 0 1.5px var(--line-strong); }
+.osc-touche:focus-visible, .osc-cursor:focus-visible, .osc-bouton:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.osc-panneau { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 4px 4px 4px 8px; border-left: 1.5px solid var(--line-strong); }
+.osc-groupe { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.osc-groupe-t { font-size: .7rem; font-weight: 800; letter-spacing: .06em; color: var(--ink-2); text-transform: uppercase; }
+.osc-cursor {
+  min-width: 72px; min-height: 44px; border: none; border-radius: 10px; cursor: pointer; font: inherit; font-weight: 800; font-size: .9rem;
+  background: var(--sheet); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line-strong), 0 2px 0 var(--line-strong);
+}
+.osc-cursor:active { transform: translateY(1px); }
+.osc-bouton {
+  position: relative; width: 74px; height: 74px; border-radius: 999px; border: none; cursor: grab; touch-action: none; padding: 0;
+  background: radial-gradient(circle at 40% 35%, var(--sheet), var(--paper-3)); box-shadow: inset 0 0 0 2px var(--line-strong), 0 3px 0 var(--line-strong);
+}
+.osc-bouton-ind { position: absolute; inset: 0; border-radius: 999px; transition: transform .05s linear; }
+.osc-bouton-ind::after { content: ''; position: absolute; left: 50%; top: 7px; width: 5px; height: 16px; margin-left: -2.5px; border-radius: 3px; background: var(--ink-2); }
+.osc-bouton-l { font-size: .9rem; font-weight: 800; color: var(--ink-2); letter-spacing: .3em; }
+.osc-verrou .osc-touche, .osc-verrou .osc-cursor, .osc-verrou .osc-bouton { cursor: default; opacity: .6; }
+/* valeurs des curseurs, sous l'appareil */
+.osc-mesures { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 8px; padding: 8px 12px; border-radius: 12px; background: var(--paper); font-size: .95rem; font-variant-numeric: tabular-nums; min-height: 40px; align-items: center; }
+.osc-mesures:empty { display: none; }
+.osc-mesures b { white-space: nowrap; }
+.osc-delta b { color: var(--accent-ink); }
+.osc-mes-vide { color: var(--ink-2); font-size: .88rem; }
+.osc-fl { min-width: 58px; min-height: 50px; padding: 0; font-size: 1.1rem; justify-content: center; }
 .osc-base, .osc-reglage { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 10px; }
 .osc-reglage { margin-top: 0; }
 .osc-base-t { font-weight: 800; font-size: .92rem; width: 100%; }
@@ -125,14 +156,22 @@ sub, sup { font-size: .7em; line-height: 0; }
 .osc-champs [data-a="msg"] { margin-top: 8px; }
 .osc-champs [data-a="msg"]:empty { display: none; }
 [data-z="1"] [data-a="msg"]:empty { display: none; }
+.osc-q .lg-aide-regle { margin-bottom: 8px; }
+/* fiche : écran statique */
+.osc-fig { max-width: 560px; }
 
 @media (max-width: 899px) {
   .pf-manip { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .pf-tri { grid-template-columns: minmax(0, 1fr); }
 }
+@media (max-width: 640px) {
+  .osc-corps { grid-template-columns: minmax(0, 1fr) 44px; }
+  .osc-panneau { grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 24px; border-left: none; border-top: 1.5px solid var(--line-strong); margin-top: 10px; padding: 10px 0 0; }
+  .osc-groupe { flex-direction: row; }
+}
 @media (max-width: 480px) {
-  .osc { margin: 0 -6px; border-radius: 10px; }
-  .osc-cur-b { padding: 0 10px; }
+  .osc { margin: 0 -8px; }
+  .osc-face { padding: 6px; border-radius: 12px; }
 }
 
 /* ============================================================
@@ -173,3 +212,9 @@ sub, sup { font-size: .7em; line-height: 0; }
 .fr { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1.15; margin: 0 .12em; font-size: .92em; }
 .fr > span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 .2em .05em; }
 .fr > span:last-child { padding: .05em .2em 0; }
+
+/* rappel dans une étape du déroulé (module 2 : f = 1 / T) */
+.pf-li-rappel { display: block; margin-top: 4px; font-weight: 500; }
+.pf-saisie .pf-revois { margin-top: 8px !important; }
+.pf-saisie-l .calc-icone { margin-left: 2px; }
+.pf-fig-large { max-width: 640px; }
