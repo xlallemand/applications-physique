@@ -24,7 +24,7 @@ Sources : `01- Signaux sonores/Chap01-Cours complete.pdf` p. 1-2, `TP 1 - freque
 - **Fréquence** : f = 1 / T, « avec T en seconde (s), f en Hertz (Hz) », 1 Hz = 1 / 1 s = 1 s<sup>−1</sup> ; T = 1 / f ; « la fréquence est le nombre de fois que le motif élémentaire se répète par seconde ».
 - **Méthode du cours (une période, avec l'échelle)**, clarinette p. 1 : « On utilise l'échelle : 7,4 cm ↔ 13 ms ; T : 1,65 cm → (13 × 1,65) / 7,4 = 2,90 ms, soit T = 2,9 ms », puis f = 1 / (2,9 × 10<sup>−3</sup>) = 345 Hz. Le calcul est un produit en croix ; dans l'application il s'écrit dans le **tableau de proportionnalité** de la charte §4 (colonnes `Distance (cm)` et `t (ms)`), choix de l'enseignant.
 - **Méthode des corrections (plusieurs périodes)**, exercice 7 : « Échelle : 3,5 cm ↔ 10 ms ; 4T<sub>A</sub> : 3,2 cm ↔ (10 × 3,2) / 3,5 = 9,14 ms ; donc T<sub>A</sub> = 9,14 / 4 = 2,3 ms ; f<sub>A</sub> = 1 / (2,3 × 10<sup>−3</sup>) = 435 Hz ».
-- **Choix de l'enseignant** : on mesure **d'abord une période**, puis **plusieurs périodes pour gagner en précision** (T = Δt / n).
+- **Choix de l'enseignant** : progressivité de la mesure de T, faite **une seule fois sur l'ensemble de l'application** (module 2), pas répétée pour chaque signal : 1. une période, lue directement sur des valeurs écrites ; 2. plusieurs périodes, lues directement, pour gagner en précision (T = Δt / n) ; 3. valeurs non lisibles directement : règle et tableau de proportionnalité.
 - **Oscilloscope** (exercice 4 et sa correction) : « T = 4 × 0,5 = 2 ms (4 carreaux) », énoncé « 0,5 ms/carreau et 2 V/carreau ». Vocabulaire : **carreau** (le cours montre aussi un écran « 1.0 ms / div »). Le professeur écrit d'abord le nombre de carreaux, puis le produit par la base de temps.
 - Exemples à reprendre : T = 4 ms → f = 250 Hz ; T = 5 ms → 200 Hz.
 - Chiffres significatifs : le professeur garde 2 ou 3 chiffres (« T = 2,9 ms », « 435 Hz »).
@@ -53,27 +53,27 @@ Pour mesurer un valeur sur un graphique, proposer toujours 2 possibilités :
 - utilisation de la règle et d'un tableau de proportionnalité.
 Une option à cocher permet de choisir entre les deux. Si la valeur lue directement n'est pas suffisamment facile à lire / précise, refuser cette méthode de lecture directe.
 
-Déroulé de `LG.poserQuestion` (règle virtuelle, tableau de proportionnalité, produit en croix, division par le nombre de périodes), en trois temps pour chaque signal :
-1. **Une période** : la règle virtuelle mesure une seule période ; tableau `Distance (cm)` / `t (ms)` : ligne de l'échelle (mesurée sur l'axe), ligne de la mesure, case « T » mise en valeur ; produit en croix ; T avec son unité.
-2. **Plusieurs périodes** : même signal, l'élève mesure n périodes (le plus grand nombre lisible), tableau, produit en croix pour nT, puis T = Δt / n. Comparaison affichée : « Une période : T = 2,8 ms ; 4 périodes : T = 2,90 ms. L'erreur de lecture (environ 1 mm) est partagée entre les 4 périodes : la deuxième mesure est plus précise. »
-3. **Fréquence** : conversion de T en s (« T = 2,90 ms = 2,90 × 10<sup>−3</sup> s »), puis f = 1 / T (champ, unité Hz, 3 chiffres significatifs).
+Progressivité en **trois étapes successives** (une seule fois dans le module, pas pour chaque signal ; 6 situations au total, compteur « Situation 2 / 6 ») ; chaque situation se termine par le calcul de f :
+1. **Une période, lecture directe** (situations 1 et 2) : axe des temps gradué, la période tombe sur des valeurs écrites (exemples : T = 4 ms, T = 5 ms). L'élève touche le début et la fin d'une période (comme au module 1), lit les deux dates sur l'axe et écrit T = t<sub>2</sub> − t<sub>1</sub>.
+2. **Plusieurs périodes, lecture directe** (situations 3 et 4) : une période ne tombe pas sur une valeur écrite, mais n périodes oui (exemples : T = 2,5 ms avec 4T = 10 ms ; électrocardiogramme T = 0,8 s avec 5T = 4,0 s, puis « battements par minute » en bilan). L'élève lit n périodes, écrit Δt puis T = Δt / n. Comparaison affichée : « Une période : entre deux graduations, difficile à lire ; 4 périodes : 4T = 10 ms, donc T = 2,5 ms. L'erreur de lecture est partagée entre les 4 périodes : la mesure est plus précise. »
+3. **Règle et tableau de proportionnalité** (situations 5 et 6) : signal « papier » dont les périodes ne tombent pas sur des valeurs simples (clarinette T = 2,9 ms, diapason la<sub>3</sub> T = 2,27 ms). Déroulé de `LG.poserQuestion` : la règle virtuelle mesure n périodes (le plus grand nombre lisible) ; tableau `Distance (cm)` / `t (ms)` : ligne de l'échelle (mesurée sur l'axe), ligne de la mesure, case « nT » mise en valeur ; produit en croix ; T = Δt / n avec son unité. La lecture directe (option cochée) y est refusée : « Les périodes ne tombent pas sur des valeurs écrites : utilise la règle et le tableau de proportionnalité. »
+- **Fréquence** (fin de chaque situation) : conversion de T en s (« T = 2,90 ms = 2,90 × 10<sup>−3</sup> s »), puis f = 1 / T (champ, unité Hz, 2 ou 3 chiffres significatifs).
 - Erreurs à diagnostiquer (en plus de celles de LG) :
   - f calculée avec T en ms (0,345 au lieu de 345) : « Tu as gardé T en ms : dans f = 1 / T, T doit être en secondes. » ;
   - conversion à l'envers (× 10<sup>3</sup>) : « 1 ms = 10<sup>−3</sup> s : T en secondes est plus petit que T en ms. » ;
   - division par le nombre de sommets au lieu du nombre de périodes : « Entre le premier et le cinquième sommet, il y a 4 périodes, pas 5. » ;
   - T et f confondus (T = 1 / f écrit f = T) : « f = 1 / T : la fréquence est l'inverse de la période. »
-- Signaux : la clarinette du cours (T = 2,9 ms), le diapason la<sub>3</sub> (T = 2,27 ms, f = 440 Hz), la guitare de l'exercice 7 (T = 2,3 ms), un électrocardiogramme (T de l'ordre de 0,8 s, f en Hz puis « battements par minute » en bilan), une trompette. Valeurs à recalculer par script.
+- Valeurs à recalculer par script.
 - Lien « Revois la lecture graphique » → `lecture-graphique/` ; « Revois les tableaux de proportionnalité » → `proportionnalite/` ; « Revois les conversions » → `conversions/` .
 
 ### Module 3 : Écran d'oscilloscope (simulation, `module_3_simulation.html`)
 
 - Écran de 10 × 8 carreaux, un signal (sinusoïde ou forme de son), bouton de **base de temps** (0,1 ; 0,2 ; 0,5 ; 1 ; 2 ; 5 ms/carreau, boutons − / + et sélecteur), réglage de la fréquence du signal masqué en mode défi.
 - Déroulé guidé :
-  1. compte les carreaux d'une période (deux curseurs verticaux glissables, aimantés au dixième de carreau, ou boutons ◀ ▶) ;
-  2. T = nombre de carreaux × base de temps (champ) ;
-  3. mesure plusieurs périodes : T = (nombre de carreaux × base de temps) / n ;
-  4. change la base de temps : le signal se dilate ou se resserre, **la période ne change pas** (question « T a-t-elle changé ? ») ;
-  5. f = 1 / T.
+  1. compte les carreaux de n périodes (deux curseurs verticaux glissables, aimantés au dixième de carreau, ou boutons ◀ ▶), méthode du module 2 : le plus grand nombre de périodes lisible ;
+  2. T = (nombre de carreaux × base de temps) / n (champ) ;
+  3. change la base de temps : le signal se dilate ou se resserre, **la période ne change pas** (question « T a-t-elle changé ? ») ;
+  4. f = 1 / T.
 - Erreurs : base de temps oubliée (« tu as donné des carreaux, pas une durée ») ; multiplication par la sensibilité verticale (V/carreau) au lieu de la base de temps ; division par n oubliée.
 - Bilan à cocher : « T = nombre de carreaux × base de temps ».
 
@@ -98,7 +98,7 @@ Chaque question a 2 ou 3 parties ; diagnostics ci-dessus.
 
 - **LG** (existant) : `lecture-graphique/modules/lgtools.js` et `lgtools.css`, chargés depuis leur dossier comme `puissance-active/modules/module_3_cours.html`. API : `LG.figure`, `LG.bacASable`, `LG.poserQuestion(root, def, opts)` (`def.type: 'periode'`, `def.signal: { forme, periode, ampl, phase }`, formes `sinus`, `triangle`, `carre`, `dent`, `complexe`, `ecg`), `LG.fmt`, `LG.lireNombre`.
 - **Extensions compatibles de LG** à faire ici, si elles manquent (valeurs par défaut inchangées) :
-  - imposer le nombre de périodes mesurées (`def.nImpose: 1`, ou `'plusieurs'` : n ≥ 2) pour le déroulé « une période, puis plusieurs » ;
+  - imposer le nombre de périodes mesurées (`def.nImpose: 1`, ou `'plusieurs'` : n ≥ 2) ;
   - formes `clarinette` et `trompette` (fondamental + harmoniques, comme `complexe`) ;
   - rappel au moment de f = 1 / T si `opts.frequence: true`.
   Retester ensuite `lecture-graphique/` et `puissance-active/`.
@@ -107,7 +107,7 @@ Chaque question a 2 ou 3 parties ; diagnostics ci-dessus.
 
 ## 7. Vérifications propres
 
-- Recalculer par script : 13 × 1,65 / 7,4 = 2,90 ms et f = 345 Hz ; 10 × 3,2 / 3,5 = 9,14 ms, T = 2,3 ms, f = 435 Hz ; T = 4 ms → 250 Hz ; T = 5 ms → 200 Hz ; T du la<sub>3</sub> = 2,27 ms.
+- Recalculer par script : chaque situation du module 2 (étapes 1 et 2 : T et n T tombent sur des graduations écrites ; étape 3 : non) ; 13 × 1,65 / 7,4 = 2,90 ms et f = 345 Hz ; 10 × 3,2 / 3,5 = 9,14 ms, T = 2,3 ms, f = 435 Hz ; T = 4 ms → 250 Hz ; T = 5 ms → 200 Hz ; T du la<sub>3</sub> = 2,27 ms.
 - Chaque signal généré : n périodes lisibles sous la règle (≤ 160 mm), motif identifiable.
 - Le toucher du début et de la fin d'un motif fonctionne au doigt (CDP) sur chaque forme ; la tolérance accepte un appui à 2 mm près.
 - L'oscilloscope : T affiché constant quand la base de temps change ; nombre de carreaux juste pour chaque base.
