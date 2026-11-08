@@ -10,6 +10,41 @@
    - les étiquettes à glisser-déposer (mesures, valeurs, unités)
    - le déroulé d'une question : tableau de proportionnalité,
      calcul (produit en croix), division par le nombre de périodes
+
+   API (window.LG) :
+     LG.figure(def, regles, sansCible)    figure statique (code SVG)
+     LG.bacASable(root, def)              graphique + règle, sans tableau
+     LG.poserQuestion(root, def, opts)    déroulé d'une question (règle, tableau, calcul)
+     LG.lancerQuiz(opts)                  enchaînement de questions notées
+     LG.svgGraphique(def, R, A)           code du SVG interactif (scène, outil, loupe)
+     LG.pointeur(svg, def, R, A, o)       toucher des points sur la courbe (voir plus bas)
+     LG.accrocher(def, R, A, t)           date « aimantée » (sommet, creux, graduation) près de t
+     LG.fmt, LG.fmtSig, LG.lireNombre, LG.repere, LG.analyser, LG.confettis, LG.FORMES
+
+   def (graphique) : { type: 'periode' | 'max' | 'amplitude' | 'lectureY' | 'lectureX' | 'libre',
+     contexte, cible (textes, facultatifs), grandeur: { symbole, nom, noms },
+     axeX, axeY: { min, max, pas, nom, unite, libelle },
+     signal: { forme, periode, ampl, phase, decal } ou f(t),
+     formes : sinus, triangle, carre, dent, complexe, ecg, clarinette, trompette,
+     unites, unitesCalcul (étiquettes),
+     nImpose : 1 (une seule période mesurée) ou 'plusieurs' (au moins deux) — par défaut, toutes,
+     caseNT : true → la case cherchée du tableau s'écrit « nT », puis « 4T » une fois la mesure reconnue,
+     cadre : { x0, x1, yTop, yBot } (mm papier) — zone du graphique, par défaut celle de LG,
+     graphe(R, A, def) : dessin propre à l'application (code SVG) à la place du quadrillage et de la courbe }
+
+   opts (poserQuestion) : { onFini(points, max, { valeur, methode, n }), onSuivant(), onPasser(),
+     onErreur() : appelée à chaque vérification fausse (tableau, calcul, division, lecture directe),
+     boutonSuivant : false → pas de bouton « Question suivante » à la fin,
+     boutonPasser : false → pas de bouton « Passer »,
+     sansPoints : true → le résultat n'affiche pas les points,
+     frequence : true → rappel de f = 1 / T avec le résultat (question de période),
+     choixMethode : true → option à cocher « Lecture directe » / « Règle et tableau » (question de période),
+       methode : 'directe' | 'regle' (choix de départ, 'directe' par défaut).
+       Lecture directe : l'élève touche le début et la fin de la mesure sur la courbe, lit les dates
+       sur l'axe et écrit T. Elle n'est acceptée que si les deux points tombent sur des graduations
+       écrites et que la durée lue vaut exactement n périodes ; sinon un message (sans erreur)
+       renvoie vers la règle et le tableau. La règle et le tableau sont toujours acceptés. }
+   Le résultat de poserQuestion : { detruire(), methode() }.
    ============================================================ */
 
 (function () {
@@ -48,7 +83,7 @@
      GRAPHIQUE
      ============================================================ */
   function repere(def) {
-    const P = { x0: 16, x1: 170, yTop: 10, yBot: 96 };
+    const P = def.cadre || { x0: 16, x1: 170, yTop: 10, yBot: 96 };      // def.cadre : zone propre à l'application
     const ax = def.axeX, ay = def.axeY;
     const mmX = (P.x1 - P.x0) / (ax.max - ax.min);
     const mmY = (P.yBot - P.yTop) / (ay.max - ay.min);
@@ -73,6 +108,18 @@
     // électrocardiogramme : ondes P, QRS et T
     ecg: u => { const v = frac(u); return 0.12 * gauss(v, 0.1, 0.03) - 0.12 * gauss(v, 0.265, 0.01) + gauss(v, 0.3, 0.013) - 0.2 * gauss(v, 0.335, 0.012) + 0.25 * gauss(v, 0.55, 0.05); },
   };
+  /* Sons d'instruments (fondamental + harmoniques), ramenés entre −1 et 1 :
+     clarinette : harmoniques impairs dominants, un sommet principal et des sommets secondaires ;
+     trompette : nombreux harmoniques, une pointe étroite par période */
+  function normaliser(g) {
+    let a = 0;
+    for (let i = 0; i < 2000; i++) a = Math.max(a, Math.abs(g(i / 2000)));
+    return u => g(u) / a;
+  }
+  const P2 = 2 * Math.PI;
+  FORMES.clarinette = normaliser(u => Math.sin(P2 * u) + 0.62 * Math.sin(3 * P2 * u + 0.5) + 0.38 * Math.sin(5 * P2 * u + 1.3)
+    + 0.18 * Math.sin(2 * P2 * u + 2.2) + 0.12 * Math.sin(7 * P2 * u + 0.3));
+  FORMES.trompette = normaliser(u => [1, .85, .7, .55, .42, .3, .2].reduce((s, a, i) => s + a * Math.sin((i + 1) * P2 * u - 0.6 * i), 0));
   /* Fonction tracée : signal périodique (def.signal) ou courbe quelconque (def.f) */
   function fonction(def) {
     if (def.f) return def.f;
@@ -128,17 +175,21 @@
       const dispo = Math.min(L, (def.axeX.max - def.axeX.min) * R.mmX);
       A.axe = def.axeX; A.mm = R.mmX; A.exact = T;
       // toutes les mesures de n périodes tenant sous la règle sont acceptées
-      const nLim = Math.max(1, Math.floor((dispo - 1) / Tmm));
+      // (def.nImpose : une seule période, ou plusieurs)
+      let nLim = Math.max(1, Math.floor((dispo - 1) / Tmm)), nMin = 1;
+      if (def.nImpose === 1) nLim = 1;
+      else if (def.nImpose === 'plusieurs') nMin = Math.min(2, nLim);
       A.liste = [];
-      for (let n = 1; n <= nLim; n++) A.liste.push({ n: n, mm: n * Tmm });
+      for (let n = nMin; n <= nLim; n++) A.liste.push({ n: n, mm: n * Tmm });
       // nombre conseillé : le plus grand, entre deux maximums ou deux minimums
-      A.nMax = 1;
+      A.nMax = nMin;
       [1, -1].forEach(k => {
         const t0 = premierPoint(def, phaseMax(def, k));
         const n = Math.min(nLim, Math.floor((def.axeX.max - t0) / T + 1e-9));
         if (n > A.nMax) { A.nMax = n; A.tDepart = t0; }
       });
       if (!A.tDepart) A.tDepart = premierPoint(def, phaseMax(def, 1));
+      A.nLim = nLim;
     } else if (def.type === 'max') {
       const e = extremums(def, f);
       A.axe = def.axeY; A.mm = R.mmY; A.exact = e.max; A.tMax = e.tMax;
@@ -157,7 +208,7 @@
     // textes par défaut selon le type de question
     const D = {
       periode: { ligne: cap(g.noms || 'périodes').replace(/s$/, '(s)').replace(/s d'/, "(s) d'"),
-        erreur: `Ta mesure ne correspond pas à une ou plusieurs ${g.noms || 'périodes'} : place le 0 de la règle et le curseur sur deux points équivalents du signal (par exemple deux maximums).` },
+        erreur: `Ta mesure ne correspond pas à ${def.nImpose === 1 ? `une seule ${g.nom || 'période'}` : def.nImpose === 'plusieurs' ? `plusieurs ${g.noms || 'périodes'} (au moins deux)` : `une ou plusieurs ${g.noms || 'périodes'}`} : place le 0 de la règle et le curseur sur deux points équivalents du signal (par exemple deux maximums).` },
       max: { ligne: 'Maximum', erreur: "Ta mesure ne correspond pas à la valeur maximale : mesure verticalement la distance entre l'axe des abscisses (valeur 0) et le point le plus haut de la courbe." },
       amplitude: { ligne: 'Amplitude', erreur: "Ta mesure ne correspond pas à l'amplitude : mesure verticalement l'écart entre le minimum et le maximum du signal (crête à crête), ou entre la valeur moyenne et le maximum." },
       lectureY: { ligne: 'Point', erreur: "Ta mesure ne correspond pas au point repéré : mesure verticalement la distance entre l'axe des abscisses (valeur 0) et le point." },
@@ -170,6 +221,8 @@
   function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
   function dessinerGraphe(def, R, A) {
+    // dessin propre à l'application (écran d'oscilloscope…), puis le repère orange
+    if (def.graphe) return def.graphe(R, A, def) + reperageCible(def, R, A);
     const P = R.P, ax = def.axeX, ay = def.axeY;
     const nX = Math.round((ax.max - ax.min) / ax.pas), nY = Math.round((ay.max - ay.min) / ay.pas);
     let h = '';
@@ -413,6 +466,7 @@
     function clavier(e) {
       const tag = (e.target && e.target.tagName) || '';
       if (tag === 'INPUT' || tag === 'TEXTAREA' || !document.body.contains(svg) || regleActive !== st) return;
+      if (!svg.getClientRects().length) return;          // graphique masqué (autre méthode choisie)
       const dir = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
       if (!dir) return;
       // flèches actives seulement quand le graphique est visible à l'écran
@@ -455,6 +509,143 @@
         <g class="lg-outil"></g></g>
       <g class="lg-loupe" pointer-events="none"></g>
     </svg>`;
+  }
+
+  /* ============================================================
+     POINTS TOUCHÉS SUR LA COURBE (lecture directe, motif élémentaire)
+     ============================================================ */
+  // étendue de la courbe sur l'axe visible (gardée dans A)
+  function etendue(def, A) {
+    if (A._etendue == null) { const e = extremums(def, A.f); A._etendue = (e.max - e.min) || 1; }
+    return A._etendue;
+  }
+  /* Date « aimantée » près de t : sommet ou creux net à moins de 2 mm, sinon graduation
+     écrite à moins de 1,2 mm, sinon t arrondie au dixième de millimètre */
+  function accrocher(def, R, A, t) {
+    const ax = def.axeX, f = A.f, mm = R.mmX, d = 2 / mm, N = 80, seuil = 0.03 * etendue(def, A);
+    const vs = [];
+    for (let i = 0; i <= N; i++) vs.push(f(t - d + 2 * d * i / N));
+    const bords = Math.max(vs[0], vs[N]), bordsMin = Math.min(vs[0], vs[N]);
+    let iMx = 0, iMn = 0;
+    vs.forEach((v, i) => { if (v > vs[iMx]) iMx = i; if (v < vs[iMn]) iMn = i; });
+    const cands = [];
+    if (iMx > 1 && iMx < N - 1 && vs[iMx] - bords > seuil) cands.push(iMx);
+    if (iMn > 1 && iMn < N - 1 && bordsMin - vs[iMn] > seuil) cands.push(iMn);
+    let res = null;
+    if (cands.length) {
+      const i = cands.sort((a, b) => Math.abs(a - N / 2) - Math.abs(b - N / 2))[0], k = i === iMx ? 1 : -1;
+      // affinage autour de l'échantillon retenu
+      const t0 = t - d + 2 * d * i / N, h = 2 * d / N;
+      let best = t0, bv = k * f(t0);
+      for (let j = -40; j <= 40; j++) { const tt = t0 + h * j / 40, v = k * f(tt); if (v > bv) { bv = v; best = tt; } }
+      res = best;
+      // un sommet tout près d'une graduation est posé dessus (lecture nette)
+      const g = ax.min + Math.round((res - ax.min) / ax.pas) * ax.pas;
+      if (Math.abs(res - g) * mm < 0.05) res = g;
+    } else {
+      const g = ax.min + Math.round((t - ax.min) / ax.pas) * ax.pas;
+      res = Math.abs(t - g) * mm <= 1.2 ? g : ax.min + Math.round((t - ax.min) * mm * 10) / (mm * 10);
+    }
+    return Math.max(ax.min, Math.min(ax.max, res));
+  }
+
+  /* Toucher des points sur la courbe d'un graphique (svg construit par svgGraphique).
+     o = { max: 2, noms: ['début', 'fin'], onChange(points) }
+     → { points() (dates triées), effacer(), deplacer(s) (◀ ▶ : ± 0,5 mm sur le dernier point touché),
+         marquer(i, 'ko' | null), surligner(t1, t2, texte), verrouiller(), poser(dates) }
+     Plusieurs exemplaires possibles sur une page (aucun identifiant, aucun état global). */
+  function pointeur(svg, def, R, A, o) {
+    o = Object.assign({ max: 2, noms: ['début', 'fin'] }, o || {});
+    const P = R.P, ax = def.axeX, f = A.f;
+    const yAxe = (def.axeY.min <= 0 && def.axeY.max >= 0) ? R.sy(0) : P.yBot;
+    const g = document.createElementNS(NS, 'g');
+    g.innerHTML = `<g class="lg-pt-motif" pointer-events="none"></g><g class="lg-pt-traces" pointer-events="none"></g>
+      <rect class="lg-pt-zone" x="${P.x0 - 2}" y="${P.yTop - 6}" width="${P.x1 - P.x0 + 4}" height="${P.yBot - P.yTop + 12}" fill="transparent"/>`;
+    svg.appendChild(g);
+    const zone = g.querySelector('.lg-pt-zone'), traces = g.querySelector('.lg-pt-traces'), motif = g.querySelector('.lg-pt-motif');
+    let pts = [], sel = -1, verrou = false, etats = [];
+    const yC = t => Math.max(P.yTop - 4, Math.min(P.yBot, R.sy(f(t))));
+
+    function dessiner() {
+      let h = '';
+      pts.forEach((t, i) => {
+        const x = R.sx(t), y = yC(t), ko = etats[i] === 'ko';
+        const c = ko ? 'var(--danger)' : 'var(--ink)';
+        h += `<line x1="${x}" y1="${y}" x2="${x}" y2="${yAxe}" stroke="${c}" stroke-width=".35" stroke-dasharray="1.2,.9"/>`;
+        h += `<line x1="${x}" y1="${yAxe - 1.8}" x2="${x}" y2="${yAxe + 1.8}" stroke="${c}" stroke-width=".6"/>`;
+        if (i === sel && !verrou) h += `<circle cx="${x}" cy="${y}" r="2.6" fill="none" stroke="var(--accent)" stroke-width=".6"/>`;
+        h += `<circle cx="${x}" cy="${y}" r="1.35" fill="${c}" stroke="#fff" stroke-width=".4"/>`;
+        const nom = o.noms[i] || '', w = nom.length * 2.1 + 2.4, yt = Math.max(P.yTop - 1, y - 4);
+        h += `<rect x="${x - w / 2}" y="${yt - 3.4}" width="${w}" height="4.4" rx="1" fill="#fff" opacity=".9"/>
+          <text x="${x}" y="${yt}" font-size="3.4" font-weight="800" text-anchor="middle" fill="${c}">${nom}</text>`;
+      });
+      traces.innerHTML = h;
+    }
+    function changer() { dessiner(); if (o.onChange) o.onChange(trie()); }
+    // points triés dans l'ordre des temps ; les noms (début, fin) suivent cet ordre
+    function trie() { return pts.slice().sort((a, b) => a - b); }
+    function ranger() {
+      const t = pts[sel];
+      pts.sort((a, b) => a - b);
+      sel = pts.indexOf(t);
+    }
+    zone.addEventListener('click', e => {
+      if (verrou) return;
+      const m = svg.getScreenCTM();
+      const x = (e.clientX - m.e) / m.a;
+      const t = accrocher(def, R, A, ax.min + (x - P.x0) / R.mmX);
+      if (pts.length < o.max) { pts.push(t); sel = pts.length - 1; }
+      else {
+        // remplace le point le plus proche
+        let j = 0;
+        pts.forEach((p, i) => { if (Math.abs(p - t) < Math.abs(pts[j] - t)) j = i; });
+        pts[j] = t; sel = j;
+      }
+      etats = [];
+      ranger();
+      changer();
+    });
+    return {
+      points: trie,
+      effacer() { if (verrou) return; pts = []; sel = -1; etats = []; motif.innerHTML = ''; changer(); },
+      deplacer(s) {
+        if (verrou || sel < 0) return;
+        let t = pts[sel] + s * 0.5 / R.mmX;
+        const gr = ax.min + Math.round((t - ax.min) / ax.pas) * ax.pas;
+        if (Math.abs(t - gr) * R.mmX <= 0.25) t = gr;
+        pts[sel] = Math.max(ax.min, Math.min(ax.max, t));
+        etats = [];
+        ranger();
+        changer();
+      },
+      marquer(i, etat) { etats[i] = etat; dessiner(); },
+      poser(dates) { pts = dates.slice(); sel = pts.length - 1; etats = []; ranger(); changer(); },
+      verrouiller() { verrou = true; zone.style.cursor = 'default'; dessiner(); },
+      // motif surligné (accent épais, semi-transparent) et double flèche au-dessus
+      surligner(t1, t2, texte) {
+        let d = '', yMin = Infinity;
+        for (let i = 0; i <= 240; i++) {
+          const t = t1 + (t2 - t1) * i / 240, y = yC(t);
+          yMin = Math.min(yMin, y);
+          d += (i ? 'L' : 'M') + R.sx(t).toFixed(2) + ',' + y.toFixed(2);
+        }
+        // au-dessus des étiquettes « début » et « fin » des points touchés
+        const x1 = R.sx(t1), x2 = R.sx(t2), yF = Math.max(P.yTop - 6, yMin - 9.5);
+        const pointe = (x, s) => `M${x},${yF} l${s * 2.2},-1.2 v2.4z`;
+        let h = `<path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-opacity=".35" stroke-linejoin="round" stroke-linecap="round"/>`;
+        h += `<line x1="${x1}" y1="${yF}" x2="${x1}" y2="${yC(t1)}" stroke="var(--accent-ink)" stroke-width=".3" stroke-dasharray="1,.8"/>
+          <line x1="${x2}" y1="${yF}" x2="${x2}" y2="${yC(t2)}" stroke="var(--accent-ink)" stroke-width=".3" stroke-dasharray="1,.8"/>
+          <line x1="${x1 + 1}" y1="${yF}" x2="${x2 - 1}" y2="${yF}" stroke="var(--accent-ink)" stroke-width=".6"/>
+          <path d="${pointe(x1, 1)} ${pointe(x2, -1)}" fill="var(--accent-ink)"/>`;
+        if (texte) {
+          const w = texte.replace(/<[^>]+>/g, '').length * 2.6 + 3;
+          h += `<rect x="${(x1 + x2) / 2 - w / 2}" y="${yF - 5.6}" width="${w}" height="5" rx="1" fill="#fff" opacity=".92"/>
+            <text x="${(x1 + x2) / 2}" y="${yF - 1.7}" font-size="4.2" font-weight="800" text-anchor="middle" fill="var(--accent-ink)">${texte}</text>`;
+        }
+        motif.innerHTML = h;
+      },
+      effacerMotif() { motif.innerHTML = ''; },
+    };
   }
 
   /* Barre de contrôle + graphique avec règle interactive (questions et bac à sable) */
@@ -599,8 +790,11 @@
 
   /* ============================================================
      DÉROULÉ D'UNE QUESTION
-     opts : { onFini(points, max), onPasser() }
+     opts : { onFini(points, max), onSuivant(), onPasser(), boutonSuivant, boutonPasser,
+              sansPoints, frequence, choixMethode, methode } (voir l'en-tête)
      ============================================================ */
+  let nQuestion = 0;
+  const ORDINAUX = ['premier', 'deuxième', 'troisième', 'quatrième', 'cinquième', 'sixième', 'septième', 'huitième', 'neuvième', 'dixième', 'onzième', 'douzième'];
   function poserQuestion(root, def, opts) {
     opts = opts || {};
     const R = repere(def);
@@ -609,46 +803,56 @@
     const unitesAxe = def.unites || ['cm', 'mm', def.axeX.unite, def.axeY.unite].filter((u, i, t) => t.indexOf(u) === i);
     const pts = { tableau: 1, calcul: 1, unite: 1 };
     let res = {};                                     // résultats des étapes
+    const u = 'lg' + (++nQuestion) + '_';             // identifiants propres à cette question
+    // option à cocher : lecture directe ou règle et tableau (questions de période)
+    const choix = !!(opts.choixMethode && def.type === 'periode');
+    let methode = choix ? (opts.methode === 'regle' ? 'regle' : 'directe') : 'regle';
+    let errD = 0, fini = false;                       // erreurs de la lecture directe ; question terminée
 
     // case du tableau : saisie au clavier ou au pavé numérique
-    const saisie = (id, ph) => `<input type="text" id="${id}" class="lg-input lg-cell" inputmode="decimal" autocomplete="off" placeholder="${ph}" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">`;
+    const saisie = (id, ph) => `<input type="text" id="${u + id}" class="lg-input lg-cell" inputmode="decimal" autocomplete="off" placeholder="${ph}" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)">`;
 
     root.innerHTML = `
-      <p class="lg-contexte">${def.contexte}</p>
-      <div class="lg-cible"><span class="lg-cible-icone">?</span><div>${def.cible}</div></div>
+      ${def.contexte ? `<p class="lg-contexte">${def.contexte}</p>` : ''}
+      ${def.cible ? `<div class="lg-cible"><span class="lg-cible-icone">?</span><div>${def.cible}</div></div>` : ''}
+      ${choix ? `<div class="lg-methode" role="radiogroup" aria-label="Méthode de mesure"><span class="lg-methode-t">Méthode de mesure :</span>
+          <button type="button" role="radio" class="lg-meth" data-m="directe" aria-checked="false">Lecture directe sur l'axe</button>
+          <button type="button" role="radio" class="lg-meth" data-m="regle" aria-checked="false">Règle et tableau de proportionnalité</button></div>` : ''}
+      ${choix ? '<div data-a="blocRegle">' : ''}
       ${htmlOutils()}
       <div class="lg-graph-box">${svgGraphique(def, R, A)}</div>
 
       <div class="lg-etape" data-etape="1">
         <h3 class="lg-etape-titre">Étape 1 · Tableau de proportionnalité</h3>
-        <div class="lg-palette lg-palette-ligne" id="lgPalUni"><span class="lg-palette-titre">Unités :</span>${unitesAxe.map(u => etiquette(u, { type: 'unite', u: u, home: 'lgPalUni' }, 'lg-chip-unite')).join('')}</div>
+        <div class="lg-palette lg-palette-ligne" id="${u}PalUni"><span class="lg-palette-titre">Unités :</span>${unitesAxe.map(x => etiquette(x, { type: 'unite', u: x, home: u + 'PalUni' }, 'lg-chip-unite')).join('')}</div>
         <div class="lg-table-wrap"><table class="lg-table">
           <thead><tr><th>Distance<br>${caseVide('uD', 'lg-slot-unite')}</th><th>${ax.libelle}<br>${caseVide('uV', 'lg-slot-unite')}</th></tr></thead>
           <tbody>
-            <tr><td>${saisie('lgED', 'échelle')}</td><td>${saisie('lgEV', 'échelle')}</td></tr>
-            <tr><td>${saisie('lgMD', 'mesure')}</td><td class="lg-inconnue">?</td></tr>
+            <tr><td>${saisie('ED', 'échelle')}</td><td>${saisie('EV', 'échelle')}</td></tr>
+            <tr><td>${saisie('MD', 'mesure')}</td><td class="lg-inconnue">${def.caseNT ? `<span data-a="nT">n${sym}</span>` : '?'}</td></tr>
           </tbody>
         </table></div>
         ${window.numpadWidget ? numpadWidget() : ''}
         <div class="lg-actions">
-          <button type="button" class="btn-small" data-a="passer">Passer →</button>
+          ${opts.boutonPasser === false ? '' : '<button type="button" class="btn-small" data-a="passer">Passer →</button>'}
           <button type="button" class="btn-primary" data-a="verif1">Vérifier le tableau</button>
         </div>
         <div data-a="msg1"></div>
       </div>
+      ${choix ? '</div><div data-a="blocDirecte" hidden></div>' : ''}
       <div data-a="suite"></div>`;
 
     const $ = a => root.querySelector(`[data-a="${a}"]`);
     const regle = brancherOutils(root);
 
     const eng1 = moteurEtiquettes(root.querySelector('[data-etape="1"]'));
-    const cases = { eD: root.querySelector('#lgED'), eV: root.querySelector('#lgEV'), mD: root.querySelector('#lgMD') };
+    const cases = { eD: root.querySelector('#' + u + 'ED'), eV: root.querySelector('#' + u + 'EV'), mD: root.querySelector('#' + u + 'MD') };
     Object.keys(cases).forEach(k => {
       cases[k].addEventListener('input', () => cases[k].classList.remove('is-ok', 'is-ko'));
       cases[k].addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('verif1').click(); } });
     });
     function marquerCase(k, ok) { cases[k].classList.toggle('is-ok', ok); cases[k].classList.toggle('is-ko', !ok); }
-    $('passer').onclick = () => { regle.detruire(); if (opts.onPasser) opts.onPasser(); };
+    if ($('passer')) $('passer').onclick = () => { regle.detruire(); if (opts.onPasser) opts.onPasser(); };
 
     /* ----- Vérification du tableau ----- */
     let fait1 = false;
@@ -686,14 +890,16 @@
       const msg = $('msg1');
       if (err.length) {
         pts.tableau = 0;
+        if (opts.onErreur) opts.onErreur();
         msg.innerHTML = `<div class="lg-msg lg-msg-ko">Le tableau n'est pas encore correct :<ul>${err.map(e => `<li>${e}</li>`).join('')}</ul></div>`;
         return;
       }
       fait1 = true;
-      $('verif1').disabled = true; $('passer').style.display = 'none';
+      $('verif1').disabled = true; if ($('passer')) $('passer').style.display = 'none';
       Object.keys(cases).forEach(k => { cases[k].readOnly = true; });
       root.querySelectorAll('[data-etape="1"] .np-section').forEach(n => n.remove());
       res = { a: v.eD, b: v.eV, c: v.mD, n: trouve.n };
+      if ($('nT')) $('nT').innerHTML = (trouve.n > 1 ? trouve.n : '') + sym;     // case « nT » → « 4T »
       msg.innerHTML = `<div class="lg-msg lg-msg-ok">✓ Tableau correct !</div>` + conseils(v.eD * 10, trouve.n);
       etape2();
     };
@@ -764,7 +970,7 @@
         if (!okN || !okD) { pts.calcul = 0; err.push('Produit en croix : on multiplie les deux valeurs reliées en diagonale à « ? », puis on divise par la troisième.'); }
         if (!okU) { pts.unite = 0; err.push(`Unité : le résultat est une valeur de la colonne « ${ax.libelle} ».`); }
         const msg = div.querySelector('[data-a="msg2"]');
-        if (err.length) { msg.innerHTML = `<div class="lg-msg lg-msg-ko">Pas encore :<ul>${err.map(e => `<li>${e}</li>`).join('')}</ul></div>`; return; }
+        if (err.length) { if (opts.onErreur) opts.onErreur(); msg.innerHTML = `<div class="lg-msg lg-msg-ko">Pas encore :<ul>${err.map(e => `<li>${e}</li>`).join('')}</ul></div>`; return; }
         fait2 = true;
         div.querySelector('[data-a="verif2"]').disabled = true;
         res.r2 = res.c * res.b / res.a;
@@ -789,13 +995,13 @@
         <p>${T3.texte}</p>
         <div class="lg-formule"><span>${sym} =</span>
           <span class="lg-frac"><span class="lg-frac-val">${fmtSig(res.r2, 3)} ${ax.unite}</span><span class="lg-frac-ligne" style="min-width:90px"></span>
-            <input type="text" id="lgN" class="lg-input lg-cell" inputmode="numeric" autocomplete="off" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></span>
+            <input type="text" id="${u}N" class="lg-input lg-cell" inputmode="numeric" autocomplete="off" placeholder="?" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"></span>
           <span class="lg-egal">= <span class="lg-live" data-a="live3">?</span> ${ax.unite}</span></div>
         ${window.numpadWidget ? numpadWidget(false, { decimal: false }) : ''}
         <div class="lg-actions"><button type="button" class="btn-primary" data-a="verif3">Vérifier</button></div>
         <div data-a="msg3"></div>`;
       $('suite').appendChild(div);
-      const inN = div.querySelector('#lgN'), live = div.querySelector('[data-a="live3"]');
+      const inN = div.querySelector('#' + u + 'N'), live = div.querySelector('[data-a="live3"]');
       inN.addEventListener('input', () => {
         inN.classList.remove('is-ok', 'is-ko');
         const k = lireNombre(inN.value);
@@ -810,7 +1016,12 @@
         const msg = div.querySelector('[data-a="msg3"]');
         if (!ok) {
           pts.calcul = 0;
-          msg.innerHTML = `<div class="lg-msg lg-msg-ko">${T3.erreur}</div>`;
+          if (opts.onErreur) opts.onErreur();
+          // erreur fréquente : diviser par le nombre de sommets au lieu du nombre de périodes
+          const k = lireNombre(inN.value);
+          const sommets = !amp && def.type === 'periode' && k === n + 1 && ORDINAUX[n]
+            ? `Pas encore : entre le premier et le ${ORDINAUX[n]} sommet, il y a ${n} ${g.noms || 'périodes'}, pas ${n + 1}.` : null;
+          msg.innerHTML = `<div class="lg-msg lg-msg-ko">${sommets || T3.erreur}</div>`;
           return;
         }
         fait3 = true;
@@ -824,27 +1035,172 @@
       inN.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); verifier3(); } });
     }
 
-    /* ----- Résultat final ----- */
-    function finir(val) {
+    /* ----- Résultat final (direct : lecture directe, valeur exacte) ----- */
+    function finir(val, direct) {
       regle.detruire();
+      fini = true;
+      if (choix) root.querySelectorAll('.lg-meth').forEach(b => { b.disabled = true; });
       const exact = A.exact;
       const ecart = Math.abs(val - exact) / exact * 100;
-      const total = pts.tableau + pts.calcul + pts.unite;
+      // lecture directe : 3 points sans erreur, 2 après une erreur, 1 ensuite ; avec le choix, la méthode la moins réussie compte
+      const ptsD = 3 - Math.min(2, errD), ptsR = pts.tableau + pts.calcul + pts.unite;
+      const total = choix ? Math.min(ptsD, ptsR) : ptsR;
       const div = document.createElement('div');
       div.className = 'lg-resultat';
-      div.innerHTML = `<div>Résultat : <span class="lg-resultat-valeur">${sym} ≈ ${fmtSig(val, 3)} ${ax.unite}</span></div>
-        <div style="margin-top:4px;color:var(--ink-2);font-size:.92rem">Valeur utilisée pour tracer le graphique : ${fmtSig(exact, 3)} ${ax.unite} (écart : ${fmt(ecart, 1)} %).</div>
-        <div style="margin-top:4px;font-weight:700">Points : ${total} / 3</div>`;
+      div.innerHTML = `<div>Résultat : <span class="lg-resultat-valeur">${sym} ${direct ? '=' : '≈'} ${fmtSig(val, 3)} ${ax.unite}</span></div>
+        ${direct ? '' : `<div style="margin-top:4px;color:var(--ink-2);font-size:.92rem">Valeur utilisée pour tracer le graphique : ${fmtSig(exact, 3)} ${ax.unite} (écart : ${fmt(ecart, 1)} %).</div>`}
+        ${opts.sansPoints ? '' : `<div style="margin-top:4px;font-weight:700">Points : ${total} / 3</div>`}`;
       $('suite').appendChild(div);
-      const act = document.createElement('div');
-      act.className = 'lg-actions';
-      act.innerHTML = `<button type="button" class="btn-primary">Question suivante →</button>`;
-      act.querySelector('button').onclick = () => { if (opts.onSuivant) opts.onSuivant(); };
-      $('suite').appendChild(act);
-      if (opts.onFini) opts.onFini(total, 3);
+      if (opts.frequence && def.type === 'periode') {
+        $('suite').insertAdjacentHTML('beforeend', `<div class="lg-info"><span class="lg-info-icone">💡</span><div><b>Pour la fréquence :</b> f = 1 / ${sym}, avec ${sym} en secondes (s) et f en hertz (Hz).</div></div>`);
+      }
+      if (opts.boutonSuivant !== false) {
+        const act = document.createElement('div');
+        act.className = 'lg-actions';
+        act.innerHTML = `<button type="button" class="btn-primary">Question suivante →</button>`;
+        act.querySelector('button').onclick = () => { if (opts.onSuivant) opts.onSuivant(); };
+        $('suite').appendChild(act);
+      }
+      if (opts.onFini) opts.onFini(total, 3, { valeur: val, methode: direct ? 'directe' : 'regle', n: direct ? res.nD : res.n });
     }
 
-    return { detruire: () => regle.detruire() };
+    /* ============================================================
+       LECTURE DIRECTE (option choixMethode, question de période)
+       ============================================================ */
+    let ptr = null;
+    function choisir(m) {
+      if (fini) return;
+      methode = m;
+      root.querySelectorAll('.lg-meth').forEach(b => b.setAttribute('aria-checked', String(b.dataset.m === m)));
+      $('blocRegle').hidden = m !== 'regle';
+      $('blocDirecte').hidden = m !== 'directe';
+      if (m === 'directe' && !ptr) construireDirecte();
+    }
+    function construireDirecte() {
+      const zone = $('blocDirecte'), T = def.signal.periode, mm = R.mmX;
+      const nom = g.nom || 'période', noms = g.noms || 'périodes', un = ax.unite;
+      const plusieurs = def.nImpose !== 1;
+      const champ = (id, ph, lab, unite, entier) => `<label class="lg-dl"><span class="lg-dl-l">${lab}</span><input type="text" id="${u}d${id}" class="lg-input lg-cell" inputmode="${entier ? 'numeric' : 'decimal'}" autocomplete="off" placeholder="${ph}" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"><span class="lg-dl-u">${unite}</span></label>`;
+      zone.innerHTML = `
+        <p class="lg-aide-regle">Touche sur la courbe le <b>début</b>, puis la <b>fin</b> de ta mesure (deux points qui se correspondent) : des pointillés descendent jusqu'à l'axe des temps. ◀ ▶ déplacent le dernier point touché.</p>
+        <div class="lg-outils">
+          <button type="button" class="btn-small lg-fin" data-a="dMoins" aria-label="Reculer le point">◀</button>
+          <button type="button" class="btn-small lg-fin" data-a="dPlus" aria-label="Avancer le point">▶</button>
+          <button type="button" class="btn-small" data-a="dEffacer">Effacer les points</button>
+        </div>
+        <div class="lg-graph-box">${svgGraphique(Object.assign({}, def, { type: '_' }), R, A)}</div>
+        <div class="lg-etape">
+          <h3 class="lg-etape-titre">Lecture directe sur l'axe</h3>
+          <p>Lis sur l'axe les dates t<sub>1</sub> (début) et t<sub>2</sub> (fin), à l'aplomb des points touchés, puis calcule ${sym}.</p>
+          <div class="lg-dl-ligne">${champ('t1', 't₁', 't<sub>1</sub> =', un)}${champ('t2', 't₂', 't<sub>2</sub> =', un)}</div>
+          ${plusieurs
+            ? `<div class="lg-dl-ligne">${champ('dt', 'Δt', 'Δt = t<sub>2</sub> − t<sub>1</sub> =', un)}${champ('n', 'n', 'n =', noms, true)}</div>
+               <div class="lg-dl-ligne">${champ('T', g.symbole, `${sym} = Δt / n =`, un)}</div>`
+            : `<div class="lg-dl-ligne">${champ('T', g.symbole, `${sym} = t<sub>2</sub> − t<sub>1</sub> =`, un)}</div>`}
+          ${window.numpadWidget ? numpadWidget() : ''}
+          <div class="lg-actions"><button type="button" class="btn-primary" data-a="dVerif">Vérifier</button></div>
+          <div data-a="dMsg" aria-live="polite"></div>
+        </div>`;
+      ptr = pointeur(zone.querySelector('.lg-svg'), def, R, A, { onChange() { $('dMsg').innerHTML = ''; } });
+      $('dMoins').onclick = () => ptr.deplacer(-1);
+      $('dPlus').onclick = () => ptr.deplacer(1);
+      $('dEffacer').onclick = () => { ptr.effacer(); $('dMsg').innerHTML = ''; };
+      const ch = {};
+      ['t1', 't2', 'dt', 'n', 'T'].forEach(k => {
+        const e = zone.querySelector('#' + u + 'd' + k);
+        if (!e) return;
+        ch[k] = e;
+        e.addEventListener('input', () => e.classList.remove('is-ok', 'is-ko'));
+        e.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); verifier(); } });
+      });
+      const info = t => `<div class="lg-info"><span class="lg-info-icone">💡</span><div>${t}</div></div>`;
+      const ko = l => `<div class="lg-msg lg-msg-ko">Pas encore :<ul>${l.map(e => `<li>${e}</li>`).join('')}</ul></div>`;
+      const grad = t => ax.min + Math.round((t - ax.min) / ax.pas) * ax.pas;
+      const surGrad = t => Math.abs(t - grad(t)) * mm <= 0.6;
+      const proche = (a, b, r) => Math.abs(a - b) <= (r || 1e-6) * Math.max(1, Math.abs(b));
+      // une lecture directe nette existe-t-elle sur ce graphique ? (n périodes = un nombre entier de graduations)
+      const faisable = A.liste.some(x => { const q = x.n * T / ax.pas; return Math.abs(q - Math.round(q)) * ax.pas * mm <= 0.3; });
+      let finiD = false;
+      function verifier() {
+        if (finiD) return;
+        const msg = $('dMsg');
+        const p = ptr.points();
+        if (p.length < 2) { msg.innerHTML = info("Touche d'abord sur la courbe le <b>début</b>, puis la <b>fin</b> de ta mesure."); return; }
+        const tA = p[0], tB = p[1], d = tB - tA, k = Math.round(d / T), tolM = Math.max(0.02 * T, 2 / mm);
+        // 1. les deux points se correspondent-ils ?
+        if (k < 1 || Math.abs(d - k * T) > tolM) {
+          errD++; if (opts.onErreur) opts.onErreur(); ptr.marquer(1, 'ko');
+          const meme = Math.abs(A.f(tB) - A.f(tA)) <= 0.06 * etendue(def, A);
+          msg.innerHTML = ko([meme
+            ? "Le signal repasse par la même valeur au second point, mais il ne repart pas de la même façon : ce n'est pas un point qui correspond au début. Déplace la fin."
+            : 'Les deux points ne se correspondent pas : la fin doit être au même endroit du motif que le début, une ou plusieurs ' + noms + ' plus loin.']);
+          return;
+        }
+        if (def.nImpose === 1 && k > 1) {
+          errD++; if (opts.onErreur) opts.onErreur(); ptr.marquer(1, 'ko');
+          msg.innerHTML = ko([`Tu as pris ${k} motifs : ici, mesure une seule ${nom} (le plus petit morceau qui se répète).`]);
+          return;
+        }
+        // 2. précision : les deux points tombent-ils sur des graduations écrites, à exactement n périodes ?
+        const gA = grad(tA), gB = grad(tB);
+        if (!surGrad(tA) || !surGrad(tB) || Math.abs((gB - gA) - k * T) * mm > 0.3) {
+          msg.innerHTML = info((faisable
+            ? 'En lecture directe, cette valeur n\'est pas assez précise : choisis deux points qui tombent sur des graduations écrites (en prenant plusieurs ' + noms + ' si besoin), ou utilise la règle et le tableau de proportionnalité.'
+            : 'En lecture directe, cette valeur n\'est pas assez précise : utilise la règle et le tableau de proportionnalité.')
+            + '<br><button type="button" class="btn-small lg-vers-regle">Utiliser la règle et le tableau</button>');
+          const b = msg.querySelector('.lg-vers-regle');
+          if (b) b.onclick = () => choisir('regle');
+          return;
+        }
+        // 3. les valeurs écrites
+        const v = {};
+        Object.keys(ch).forEach(c => { v[c] = lireNombre(ch[c].value); });
+        if (Object.keys(v).some(c => isNaN(v[c]))) { msg.innerHTML = info('Écris un nombre dans chaque case (avec une virgule si besoin).'); return; }
+        const err = [], marque = (c, ok) => { ch[c].classList.toggle('is-ok', ok); ch[c].classList.toggle('is-ko', !ok); };
+        const ok1 = proche(v.t1, gA), ok2 = proche(v.t2, gB);
+        marque('t1', ok1); marque('t2', ok2);
+        if (!ok1 || !ok2) {
+          err.push(proche(v.t1, gB) && proche(v.t2, gA) ? 't<sub>1</sub> est la date du début (à gauche), t<sub>2</sub> celle de la fin.'
+            : 't<sub>1</sub> et t<sub>2</sub> se lisent sur l\'axe des temps, à l\'aplomb de chaque point touché (suis les pointillés).');
+        }
+        let delta = v.t2 - v.t1;
+        if (plusieurs) {
+          const okDt = proche(v.dt, delta);
+          marque('dt', okDt);
+          if (!okDt) err.push('Δt = t<sub>2</sub> − t<sub>1</sub> : fais la différence des deux dates lues.');
+          const okN = v.n === k;
+          marque('n', okN);
+          if (!okN) err.push(v.n === k + 1 && ORDINAUX[k] ? `Entre le premier et le ${ORDINAUX[k]} sommet, il y a ${k} ${noms}, pas ${k + 1}.` : 'n : compte les motifs entiers entre les deux points touchés.');
+          delta = v.dt;
+        }
+        const nn = plusieurs ? (v.n > 0 ? v.n : k) : 1;
+        const okT = proche(v.T, delta / nn, 0.01);
+        marque('T', okT);
+        if (!okT) {
+          if (plusieurs && nn > 1 && proche(v.T, delta, 0.01)) err.push(`${sym} : tu as donné la durée de ${nn} ${noms}. Divise Δt par n.`);
+          else if (plusieurs && proche(v.T, delta * nn, 0.01)) err.push(`${sym} = Δt / n : il faut diviser par n, pas multiplier.`);
+          else err.push(plusieurs ? `${sym} = Δt / n.` : `${sym} = t<sub>2</sub> − t<sub>1</sub>.`);
+        }
+        if (err.length) { errD++; if (opts.onErreur) opts.onErreur(); msg.innerHTML = ko(err); return; }
+        // lecture réussie : motif surligné, double flèche « T » ou « 4T »
+        finiD = true;
+        Object.keys(ch).forEach(c => { ch[c].readOnly = true; });
+        zone.querySelectorAll('.np-section').forEach(n => n.remove());
+        $('dVerif').disabled = true;
+        ptr.surligner(tA, tB, (k > 1 ? k : '') + symS(g.symbole));
+        ptr.verrouiller();
+        msg.innerHTML = '<div class="lg-msg lg-msg-ok">✓ Lecture correcte !</div>';
+        res.nD = k;
+        finir(v.T, true);
+      }
+      $('dVerif').onclick = verifier;
+    }
+    if (choix) {
+      root.querySelectorAll('.lg-meth').forEach(b => { b.onclick = () => choisir(b.dataset.m); });
+      choisir(methode);
+    }
+
+    return { detruire: () => regle.detruire(), methode: () => methode };
   }
 
   /* ============================================================
@@ -926,5 +1282,6 @@
   window.LG = {
     fmt: fmt, fmtSig: fmtSig, lireNombre: lireNombre, repere: repere, analyser: analyser,
     poserQuestion: poserQuestion, lancerQuiz: lancerQuiz, bacASable: bacASable, figure: figure, confettis: confettis,
+    svgGraphique: svgGraphique, pointeur: pointeur, accrocher: accrocher, FORMES: FORMES,
   };
 })();
