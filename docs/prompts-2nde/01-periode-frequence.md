@@ -34,6 +34,12 @@ Sources : `01- Signaux sonores/Chap01-Cours complete.pdf` p. 1-2, `TP 1 - freque
 
 ## 4. Plan de l'application (`PLAN`)
 
+**Méthode de mesure au choix, dans toutes les questions où l'on mesure une durée sur un graphique ou un écran (modules 2, 3 et 4)** : une option à cocher, au-dessus de la figure, propose :
+- **lecture directe** sur l'axe ou la grille (valeurs écrites, carreaux) ;
+- **règle et tableau de proportionnalité** (règle virtuelle déjà développée dans `lecture-graphique/`, `LG`).
+
+La lecture directe n'est acceptée que si la valeur mesurée est assez précise : les deux repères tombent sur des graduations écrites ou sur des carreaux (ou dixièmes de carreau sur l'oscilloscope) nets. Sinon, la réponse n'est pas acceptée, sans compter d'erreur : « En lecture directe, cette valeur n'est pas assez précise : utilise la règle et le tableau de proportionnalité. » La règle et le tableau sont toujours acceptés.
+
 ### Module 1 : Le motif élémentaire (manipulation guidée, `module_1_manip.html`)
 
 - Affichage : un signal « papier » (graphique LG en millimètres, axe des temps en ms) et la consigne.
@@ -47,16 +53,10 @@ Sources : `01- Signaux sonores/Chap01-Cours complete.pdf` p. 1-2, `TP 1 - freque
 - Bilan : « La période T est la durée du motif élémentaire. On peut la mesurer entre deux sommets, deux creux, ou deux points qui se correspondent. »
 
 ### Module 2 : Mesurer T et calculer f (manipulation guidée, `module_2_manip.html`)
-Un outil de mesure sur un graphique (règle) est déjà disponible dans l'application 'lecture-graphique'.
-Pour mesurer un valeur sur un graphique, proposer toujours 2 possibilités : 
-- lecture directe sur le graphique car la mesure tombe sur des valeurs de la grille simples à lire
-- utilisation de la règle et d'un tableau de proportionnalité.
-Une option à cocher permet de choisir entre les deux. Si la valeur lue directement n'est pas suffisamment facile à lire / précise, refuser cette méthode de lecture directe.
-
 Progressivité en **trois étapes successives** (une seule fois dans le module, pas pour chaque signal ; 6 situations au total, compteur « Situation 2 / 6 ») ; chaque situation se termine par le calcul de f :
 1. **Une période, lecture directe** (situations 1 et 2) : axe des temps gradué, la période tombe sur des valeurs écrites (exemples : T = 4 ms, T = 5 ms). L'élève touche le début et la fin d'une période (comme au module 1), lit les deux dates sur l'axe et écrit T = t<sub>2</sub> − t<sub>1</sub>.
 2. **Plusieurs périodes, lecture directe** (situations 3 et 4) : une période ne tombe pas sur une valeur écrite, mais n périodes oui (exemples : T = 2,5 ms avec 4T = 10 ms ; électrocardiogramme T = 0,8 s avec 5T = 4,0 s, puis « battements par minute » en bilan). L'élève lit n périodes, écrit Δt puis T = Δt / n. Comparaison affichée : « Une période : entre deux graduations, difficile à lire ; 4 périodes : 4T = 10 ms, donc T = 2,5 ms. L'erreur de lecture est partagée entre les 4 périodes : la mesure est plus précise. »
-3. **Règle et tableau de proportionnalité** (situations 5 et 6) : signal « papier » dont les périodes ne tombent pas sur des valeurs simples (clarinette T = 2,9 ms, diapason la<sub>3</sub> T = 2,27 ms). Déroulé de `LG.poserQuestion` : la règle virtuelle mesure n périodes (le plus grand nombre lisible) ; tableau `Distance (cm)` / `t (ms)` : ligne de l'échelle (mesurée sur l'axe), ligne de la mesure, case « nT » mise en valeur ; produit en croix ; T = Δt / n avec son unité. La lecture directe (option cochée) y est refusée : « Les périodes ne tombent pas sur des valeurs écrites : utilise la règle et le tableau de proportionnalité. »
+3. **Règle et tableau de proportionnalité** (situations 5 et 6) : signal « papier » dont les périodes ne tombent pas sur des valeurs simples (clarinette T = 2,9 ms, diapason la<sub>3</sub> T = 2,27 ms). Déroulé de `LG.poserQuestion` : la règle virtuelle mesure n périodes (le plus grand nombre lisible) ; tableau `Distance (cm)` / `t (ms)` : ligne de l'échelle (mesurée sur l'axe), ligne de la mesure, case « nT » mise en valeur ; produit en croix ; T = Δt / n avec son unité. La lecture directe n'y est pas acceptée (règle ci-dessus).
 - **Fréquence** (fin de chaque situation) : conversion de T en s (« T = 2,90 ms = 2,90 × 10<sup>−3</sup> s »), puis f = 1 / T (champ, unité Hz, 2 ou 3 chiffres significatifs).
 - Erreurs à diagnostiquer (en plus de celles de LG) :
   - f calculée avec T en ms (0,345 au lieu de 345) : « Tu as gardé T en ms : dans f = 1 / T, T doit être en secondes. » ;
@@ -69,6 +69,7 @@ Progressivité en **trois étapes successives** (une seule fois dans le module, 
 ### Module 3 : Écran d'oscilloscope (simulation, `module_3_simulation.html`)
 
 - Écran de 10 × 8 carreaux, un signal (sinusoïde ou forme de son), bouton de **base de temps** (0,1 ; 0,2 ; 0,5 ; 1 ; 2 ; 5 ms/carreau, boutons − / + et sélecteur), réglage de la fréquence du signal masqué en mode défi.
+- Option à cocher (voir début du §4) : comptage direct des carreaux, ou règle sur l'écran et tableau de proportionnalité (ligne de l'échelle : nombre de carreaux ↔ durée).
 - Déroulé guidé :
   1. compte les carreaux de n périodes (deux curseurs verticaux glissables, aimantés au dixième de carreau, ou boutons ◀ ▶), méthode du module 2 : le plus grand nombre de périodes lisible ;
   2. T = (nombre de carreaux × base de temps) / n (champ) ;
@@ -80,8 +81,9 @@ Progressivité en **trois étapes successives** (une seule fois dans le module, 
 ### Module 4 : Entraînement (série notée sur 20, `module_4_questions.html`)
 
 10 questions tirées dans ces groupes :
-- **Signal à l'axe gradué** (exercices 1 et 3) : lire T directement sur l'axe (repère du motif, plusieurs périodes), puis f.
-- **Signal « papier » à l'échelle** : partie `'perso'` avec `LG` (règle, tableau, n périodes).
+- **Signal à l'axe gradué** (exercices 1 et 3) : T tombe sur des valeurs écrites (une ou plusieurs périodes), puis f.
+- **Signal « papier » à l'échelle** : partie `'perso'` avec `LG` ; valeurs non lisibles directement (règle, tableau, n périodes).
+- Dans ces deux groupes et pour l'oscilloscope, l'option à cocher (lecture directe ou règle + tableau) est proposée, avec la même règle d'acceptation.
 - **Oscilloscope** : carreaux × base de temps, puis f.
 - **T ↔ f** : f à partir de T (ms, µs, s) et T à partir de f (Hz, kHz).
 
@@ -100,7 +102,8 @@ Chaque question a 2 ou 3 parties ; diagnostics ci-dessus.
 - **Extensions compatibles de LG** à faire ici, si elles manquent (valeurs par défaut inchangées) :
   - imposer le nombre de périodes mesurées (`def.nImpose: 1`, ou `'plusieurs'` : n ≥ 2) ;
   - formes `clarinette` et `trompette` (fondamental + harmoniques, comme `complexe`) ;
-  - rappel au moment de f = 1 / T si `opts.frequence: true`.
+  - rappel au moment de f = 1 / T si `opts.frequence: true` ;
+  - option à cocher « lecture directe » / « règle et tableau » (`opts.choixMethode: true`), avec refus de la lecture directe quand la valeur n'est pas assez précise.
   Retester ensuite `lecture-graphique/` et `puissance-active/`.
 - **À créer** : `assets/bulle.js` + `assets/bulle.css` (`BULLE.info(html, label)`), et l'écran d'oscilloscope dans `periode-frequence/modules/oscillo.js` (objet `OSC`, plusieurs exemplaires par page : `OSC.monter(zone, { signal, baseTemps, curseurs })`).
 - `assets/dragdrop.js` si des étiquettes sont à glisser ; `assets/numpad.js` comme LG.
