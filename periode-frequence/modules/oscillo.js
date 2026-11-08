@@ -149,7 +149,7 @@
   // écran complet (figure statique)
   function svg(o, e) {
     e = Object.assign(etatVide(), e || {});
-    return `<svg class="osc-svg" viewBox="0 0 ${W} ${H}" xmlns="${NS}" role="img" aria-label="Écran d'oscilloscope : 10 carreaux en largeur, 8 en hauteur">${dessinFond(o)}${dessinMenu(e)}${dessinCurseurs(e)}${dessinLigne(e)}${e.motif || ''}</svg>`;
+    return `<svg class="osc-svg" viewBox="0 0 ${W} ${H}" xmlns="${NS}" role="img" aria-label="Écran d'oscilloscope : 10 carreaux en largeur, 8 en hauteur">${dessinFond(o)}${dessinMenu(e)}${dessinCurseurs(e)}${dessinLigne(e)}${e.motif || ''}</svg>`;
   }
   // morceau de trace surligné entre deux positions (carreaux) et double flèche au-dessus
   function motif(o, a, b, texte) {
@@ -193,11 +193,11 @@
      OSCILLOSCOPE INTERACTIF
      ============================================================ */
   const TOUCHES = [
-    { nom: 'Mode', aria: 'Bouton 1 du menu : Mode' },
-    { nom: 'Type', aria: 'Bouton 2 du menu : Type de curseurs (X ou Y)' },
-    { nom: 'Source', aria: 'Bouton 3 du menu : Source' },
-    { nom: 'CurA', aria: 'Bouton 4 du menu : sélectionner le curseur A' },
-    { nom: 'CurB', aria: 'Bouton 5 du menu : sélectionner le curseur B' },
+    { nom: 'Mode', aria: 'Bouton 1 du menu : Mode' },
+    { nom: 'Type', aria: 'Bouton 2 du menu : Type de curseurs (X ou Y)' },
+    { nom: 'Source', aria: 'Bouton 3 du menu : Source' },
+    { nom: 'CurA', aria: 'Bouton 4 du menu : sélectionner le curseur A' },
+    { nom: 'CurB', aria: 'Bouton 5 du menu : sélectionner le curseur B' },
   ];
   function monter(zone, o) {
     o = Object.assign({ curseurs: false, trait: false }, o);
@@ -207,12 +207,12 @@
     box.className = 'osc';
     box.innerHTML = `<div class="osc-face">
         <div class="osc-corps">
-          <div class="osc-ecran"><svg class="osc-svg" viewBox="0 0 ${W} ${H}" xmlns="${NS}" role="img" aria-label="Écran d'oscilloscope : 10 carreaux en largeur, 8 en hauteur"></svg></div>
+          <div class="osc-ecran"><svg class="osc-svg" viewBox="0 0 ${W} ${H}" xmlns="${NS}" role="img" aria-label="Écran d'oscilloscope : 10 carreaux en largeur, 8 en hauteur"></svg></div>
           <div class="osc-soft">${TOUCHES.map((t, i) => `<button type="button" class="osc-touche" data-t="${i}" aria-label="${t.aria}" style="top:${((Y0 + i * ME + .6) / H * 100).toFixed(2)}%;height:${((ME - 1.2) / H * 100).toFixed(2)}%"></button>`).join('')}</div>
           <div class="osc-panneau">
             <div class="osc-groupe"><span class="osc-groupe-t">MENU</span><button type="button" class="osc-cursor" data-a="cursor">Cursor</button></div>
             <div class="osc-groupe"><span class="osc-groupe-t">Réglage</span>
-              <button type="button" class="osc-bouton" data-a="bouton" aria-label="Bouton de réglage : tourne-le (ou appuie sur sa moitié gauche ou droite) pour déplacer le curseur sélectionné"><span class="osc-bouton-ind"></span></button>
+              <button type="button" class="osc-bouton" data-a="bouton" aria-label="Bouton de réglage : tourne-le (ou appuie sur sa moitié gauche ou droite) pour déplacer le curseur sélectionné"><span class="osc-bouton-ind"></span></button>
               <span class="osc-bouton-l">↺ ↻</span></div>
           </div>
         </div>
@@ -228,7 +228,7 @@
 
     function peindre() {
       svgE.innerHTML = dessinFond(o) + (o.curseurs ? dessinMenu(e) + dessinCurseurs(e) : '') + (o.trait ? dessinLigne(e) : '') + gMotif;
-      mes.innerHTML = o.curseurs ? (mesuresHTML(o, e) || '<span class="osc-mes-vide">Curseurs fermés : appuie sur Cursor, puis règle le Mode sur Manuel.</span>') : '';
+      mes.innerHTML = o.curseurs ? (mesuresHTML(o, e) || '<span class="osc-mes-vide">Curseurs fermés : appuie sur Cursor, puis règle le Mode sur Manuel.</span>') : '';
       mes.hidden = !o.curseurs;
       box.classList.toggle('osc-sans-curseurs', !o.curseurs);
     }
@@ -384,10 +384,10 @@
     // choix de la méthode (s'il y en a deux), puis l'oscilloscope
     const bloc = document.createElement('div');
     bloc.className = 'osc-q';
-    bloc.innerHTML = `${methodes.length > 1 ? `<div class="lg-methode" role="radiogroup" aria-label="Méthode de mesure"><span class="lg-methode-t">Méthode de mesure :</span>
+    bloc.innerHTML = `${methodes.length > 1 ? `<div class="lg-methode" role="radiogroup" aria-label="Méthode de mesure"><span class="lg-methode-t">Méthode de mesure :</span>
         ${methodes.map(m => `<button type="button" role="radio" class="lg-meth" data-m="${m}" aria-checked="false">${NOMS_M[m]}</button>`).join('')}</div>` : ''}
-      <p class="lg-aide-regle" data-a="aideCar">Touche l'écran (ou fais glisser ton doigt ou la souris) : un trait vertical en pointillés t'aide à repérer où tu es sur l'axe des temps.</p>
-      <p class="lg-aide-regle" data-a="aideCur">Appuie sur <b>Cursor</b>, règle le menu avec les boutons à droite de l'écran (Mode : Manuel, Type : X), choisis <b>CurA</b> et/ou <b>CurB</b>, puis tourne le <b>bouton de réglage</b> (ou appuie sur sa moitié gauche ou droite).</p>
+      <p class="lg-aide-regle" data-a="aideCar">Touche l'écran (ou fais glisser ton doigt ou la souris) : un trait vertical en pointillés t'aide à repérer où tu es sur l'axe des temps.</p>
+      <p class="lg-aide-regle" data-a="aideCur">Appuie sur <b>Cursor</b>, règle le menu avec les boutons à droite de l'écran (Mode : Manuel, Type : X), choisis <b>CurA</b> et/ou <b>CurB</b>, puis tourne le <b>bouton de réglage</b> (ou appuie sur sa moitié gauche ou droite).</p>
       <div data-a="ecran"></div>`;
     zF.appendChild(bloc);
     const $ = a => bloc.querySelector(`[data-a="${a}"]`);
@@ -403,15 +403,15 @@
     const champs = document.createElement('div');
     champs.className = 'osc-champs';
     champs.innerHTML = `<div data-a="pCompte">
-        ${champ('car', 'Nombre de carreaux de n périodes :', 'carreaux')}
-        ${champ('n', 'Nombre de périodes : n =', 'périodes', true)}
+        ${champ('car', 'Nombre de carreaux de n périodes :', 'carreaux')}
+        ${champ('n', 'Nombre de périodes : n =', 'périodes', true)}
         <div class="er-actions"><button type="button" class="btn-primary" data-a="vCompte">Vérifier</button></div></div>
       <div data-a="pT" hidden>
         <p class="osc-rappel" data-a="rappel"></p>
         ${champ('T', 'T = (nombre de carreaux × base de temps) / n =', '', false, true)}
         <div class="er-actions"><button type="button" class="btn-primary" data-a="vT">Vérifier</button></div></div>
       <div data-a="pCur" hidden>
-        ${champ('nc', 'Nombre de périodes entre les curseurs A et B : n =', 'périodes', true)}
+        ${champ('nc', 'Nombre de périodes entre les curseurs A et B : n =', 'périodes', true)}
         ${champ('Tc', 'T = ΔX / n =', '', false, true)}
         <div class="er-actions"><button type="button" class="btn-primary" data-a="vCur">Vérifier</button></div></div>
       <div data-a="msg" aria-live="polite"></div>`;
@@ -436,7 +436,7 @@
     const p = (a, b, r) => Math.abs(a - b) <= (r || 0.01) * Math.abs(b);
     const q1 = () => S.signal.periode / S.baseTemps;                       // carreaux d'une période
     const kMax = () => Math.floor(NX / q1() + 1e-9);
-    const conseil = k => (k < kMax() ? info(`Tu pouvais mesurer ${kMax()} périodes sur l'écran : plus il y a de périodes, plus la mesure est précise.`) : '');
+    const conseil = k => (k < kMax() ? info(`Tu pouvais mesurer ${kMax()} périodes sur l'écran : plus il y a de périodes, plus la mesure est précise.`) : '');
     // durée de k périodes comptable au cinquième de carreau ?
     const comptable = k => Math.abs(k * q1() * 5 - Math.round(k * q1() * 5)) <= 0.25;
     function finir(k, Tu, quoi) {
@@ -452,19 +452,19 @@
     // valeur fausse de T : erreurs reconnues (réunies si une valeur correspond à plusieurs erreurs)
     function diagT(v, c, n, avecCarreaux) {
       const d = [], b = bU(), sv = S.sensibilite;
-      if (avecCarreaux && (p(v, c / n) || p(v, c))) d.push('Tu as donné des carreaux, pas une durée : multiplie le nombre de carreaux par la base de temps (Time).');
-      if (avecCarreaux && (p(v, c * sv / n) || p(v, c * sv))) d.push('Tu as utilisé la sensibilité verticale (CH1, en V/carreau) : pour une durée, on utilise la base de temps (Time).');
+      if (avecCarreaux && (p(v, c / n) || p(v, c))) d.push('Tu as donné des carreaux, pas une durée : multiplie le nombre de carreaux par la base de temps (Time).');
+      if (avecCarreaux && (p(v, c * sv / n) || p(v, c * sv))) d.push('Tu as utilisé la sensibilité verticale (CH1, en V/carreau) : pour une durée, on utilise la base de temps (Time).');
       const duree = avecCarreaux ? c * b : c;
-      if (n > 1 && p(v, duree)) d.push(`Tu as la durée de ${n} périodes : divise par n = ${n}.`);
+      if (n > 1 && p(v, duree)) d.push(`Tu as la durée de ${n} périodes : divise par n = ${n}.`);
       if (n > 1 && p(v, duree * n)) d.push('Il faut diviser par n, pas multiplier.');
-      if (u() === 'µs' && p(v, duree / n / 1000)) d.push('La base de temps est en µs : écris T en µs.');
+      if (u() === 'µs' && p(v, duree / n / 1000)) d.push('La base de temps est en µs : écris T en µs.');
       if (!d.length && avecCarreaux && (p(v, c / b / n) || p(v, c / b))) d.push('On multiplie le nombre de carreaux par la base de temps, on ne divise pas.');
-      if (d.length > 1) return ['T = (nombre de carreaux × base de temps) / n : vérifie les points suivants.', ...d.map(x => '<br>· ' + x)];
-      return [d[0] || (avecCarreaux ? 'T = (nombre de carreaux × base de temps) / n, avec la base de temps lue après « Time ».' : 'T = ΔX / n, avec ΔX lu sous l\'écran.')];
+      if (d.length > 1) return ['T = (nombre de carreaux × base de temps) / n : vérifie les points suivants.', ...d.map(x => '<br>· ' + x)];
+      return [d[0] || (avecCarreaux ? 'T = (nombre de carreaux × base de temps) / n, avec la base de temps lue après « Time ».' : 'T = ΔX / n, avec ΔX lu sous l\'écran.')];
     }
     const versCurseurs = () => (methodes.indexOf('curseurs') >= 0
-      ? info('En comptant les carreaux, cette durée ne se lit pas assez précisément : utilise les curseurs.<br><button type="button" class="btn-small osc-vers-cur">Utiliser les curseurs</button>')
-      : info('Cette durée ne tombe pas sur un nombre exact de cinquièmes de carreau : choisis un autre nombre de périodes.'));
+      ? info('En comptant les carreaux, cette durée ne se lit pas assez précisément : utilise les curseurs.<br><button type="button" class="btn-small osc-vers-cur">Utiliser les curseurs</button>')
+      : info('Cette durée ne tombe pas sur un nombre exact de cinquièmes de carreau : choisis un autre nombre de périodes.'));
 
     /* ----- En comptant les carreaux : étape « compter » ----- */
     function verifierCompte() {
@@ -483,17 +483,17 @@
       const k = Math.round(vc / Q), corr = k >= 1 && Math.abs(vc - k * Q) <= 0.12 && vc <= NX + 0.05;
       const err = [];
       marque('car', corr);
-      if (!corr) err.push('Compte les carreaux entre deux points qui se correspondent (deux sommets, deux creux…), au cinquième de carreau près : sur l\'axe central, un petit trait vaut 0,2 carreau.');
+      if (!corr) err.push('Compte les carreaux entre deux points qui se correspondent (deux sommets, deux creux…), au cinquième de carreau près : sur l\'axe central, un petit trait vaut 0,2 carreau.');
       const okN = corr && vn === k;
       marque('n', okN || !corr);
-      if (corr && !okN) err.push(vn === k + 1 && ORD[k] ? `Entre le premier et le ${ORD[k]} sommet, il y a ${k} périodes, pas ${k + 1}.` : `n : compte les motifs entiers sur les ${fmt(vc)} carreaux.`);
+      if (corr && !okN) err.push(vn === k + 1 && ORD[k] ? `Entre le premier et le ${ORD[k]} sommet, il y a ${k} périodes, pas ${k + 1}.` : `n : compte les motifs entiers sur les ${fmt(vc)} carreaux.`);
       if (err.length) { erreur(err); return; }
       phase = 'T';
       resCompte = { c: vc, n: k };
       ['car', 'n'].forEach(x => { inp(x).disabled = true; });
       refs.vCompte.disabled = true;
       ecran.activerBase(false);
-      refs.rappel.innerHTML = `${k > 1 ? `${k} périodes` : 'Une période'} : ${fmt(vc)} carreaux. Time : ${baseTexte(S.baseTemps)} par carreau ; CH1 : ${sensTexte(S.sensibilite)} par carreau.`;
+      refs.rappel.innerHTML = `${k > 1 ? `${k} périodes` : 'Une période'} : ${fmt(vc)} carreaux. Time : ${baseTexte(S.baseTemps)} par carreau ; CH1 : ${sensTexte(S.sensibilite)} par carreau.`;
       msg(`<p class="ph-ok">✓ Comptage juste.</p>${conseil(k)}`);
       refs.pT.hidden = false;
       if (o.onPhase) o.onPhase('compte');
@@ -517,18 +517,18 @@
     function verifierCurseurs() {
       if (fini) return;
       const m = ecran.mesure();
-      if (!m.actifs || m.type !== 'X') { msg(info('Affiche d\'abord les curseurs de temps : appuie sur <b>Cursor</b>, puis règle <b>Mode : Manuel</b> et <b>Type : X</b>.')); return; }
+      if (!m.actifs || m.type !== 'X') { msg(info('Affiche d\'abord les curseurs de temps : appuie sur <b>Cursor</b>, puis règle <b>Mode : Manuel</b> et <b>Type : X</b>.')); return; }
       const vn = PF.lire(inp('nc').value), v = PF.lire(inp('Tc').value);
       if (isNaN(vn) || isNaN(v)) { msg(info('Écris un nombre dans chaque case (avec une virgule si besoin).')); return; }
       const Q = q1(), k = Math.round(m.d / Q);
       if (k < 1 || Math.abs(m.d - k * Q) > Math.max(0.1, 0.025 * k * Q)) {
-        erreur(['Les curseurs A et B ne sont pas sur deux points qui se correspondent : place-les sur deux sommets (ou deux creux), une ou plusieurs périodes plus loin.']);
+        erreur(['Les curseurs A et B ne sont pas sur deux points qui se correspondent : place-les sur deux sommets (ou deux creux), une ou plusieurs périodes plus loin.']);
         return;
       }
       const err = [];
       const okN = vn === k;
       marque('nc', okN);
-      if (!okN) err.push(vn === k + 1 && ORD[k] ? `Entre le premier et le ${ORD[k]} sommet, il y a ${k} périodes, pas ${k + 1}.` : 'n : compte les motifs entiers entre les curseurs A et B.');
+      if (!okN) err.push(vn === k + 1 && ORD[k] ? `Entre le premier et le ${ORD[k]} sommet, il y a ${k} périodes, pas ${k + 1}.` : 'n : compte les motifs entiers entre les curseurs A et B.');
       // ΔX tel qu'il est affiché sous l'écran
       const dec = decimales(enU(PAS * S.baseTemps, u())), dX = +(m.d * bU()).toFixed(dec);
       const T = dX / k;

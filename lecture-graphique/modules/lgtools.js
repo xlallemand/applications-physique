@@ -214,11 +214,11 @@
     // textes par défaut selon le type de question
     const D = {
       periode: { ligne: cap(g.noms || 'périodes').replace(/s$/, '(s)').replace(/s d'/, "(s) d'"),
-        erreur: `Ta mesure ne correspond pas à ${def.nMesure ? (def.nMesure > 1 ? `${def.nMesure} ${g.noms || 'périodes'}` : `une seule ${g.nom || 'période'}`) : def.nImpose === 1 ? `une seule ${g.nom || 'période'}` : def.nImpose === 'plusieurs' ? `plusieurs ${g.noms || 'périodes'} (au moins deux)` : `une ou plusieurs ${g.noms || 'périodes'}`} : place le 0 de la règle et le curseur sur deux points équivalents du signal (par exemple deux maximums).` },
-      max: { ligne: 'Maximum', erreur: "Ta mesure ne correspond pas à la valeur maximale : mesure verticalement la distance entre l'axe des abscisses (valeur 0) et le point le plus haut de la courbe." },
-      amplitude: { ligne: 'Amplitude', erreur: "Ta mesure ne correspond pas à l'amplitude : mesure verticalement l'écart entre le minimum et le maximum du signal (crête à crête), ou entre la valeur moyenne et le maximum." },
-      lectureY: { ligne: 'Point', erreur: "Ta mesure ne correspond pas au point repéré : mesure verticalement la distance entre l'axe des abscisses (valeur 0) et le point." },
-      lectureX: { ligne: 'Point', erreur: "Ta mesure ne correspond pas au point repéré : mesure horizontalement la distance entre l'axe des ordonnées (valeur 0) et le point." },
+        erreur: `Ta mesure ne correspond pas à ${def.nMesure ? (def.nMesure > 1 ? `${def.nMesure} ${g.noms || 'périodes'}` : `une seule ${g.nom || 'période'}`) : def.nImpose === 1 ? `une seule ${g.nom || 'période'}` : def.nImpose === 'plusieurs' ? `plusieurs ${g.noms || 'périodes'} (au moins deux)` : `une ou plusieurs ${g.noms || 'périodes'}`} : place le 0 de la règle et le curseur sur deux points équivalents du signal (par exemple deux maximums).` },
+      max: { ligne: 'Maximum', erreur: "Ta mesure ne correspond pas à la valeur maximale : mesure verticalement la distance entre l'axe des abscisses (valeur 0) et le point le plus haut de la courbe." },
+      amplitude: { ligne: 'Amplitude', erreur: "Ta mesure ne correspond pas à l'amplitude : mesure verticalement l'écart entre le minimum et le maximum du signal (crête à crête), ou entre la valeur moyenne et le maximum." },
+      lectureY: { ligne: 'Point', erreur: "Ta mesure ne correspond pas au point repéré : mesure verticalement la distance entre l'axe des abscisses (valeur 0) et le point." },
+      lectureX: { ligne: 'Point', erreur: "Ta mesure ne correspond pas au point repéré : mesure horizontalement la distance entre l'axe des ordonnées (valeur 0) et le point." },
     }[def.type] || { ligne: '', erreur: '' };     // type 'libre' : graphique seul, sans grandeur repérée
     A.ligne = g.ligne || D.ligne;
     A.erreur = g.erreurMesure || D.erreur;
@@ -314,12 +314,12 @@
       const x = R.sx(def.x0), y0 = R.sy(0), y1 = R.sy(A.exact);
       h += tirets(x, y0, x, y1) + tirets(x, y1, P.x0, y1);
       h += `<circle cx="${x}" cy="${y1}" r="1.3" fill="${ORANGE}" stroke="#fff" stroke-width=".4"/>`;
-      h += etiq(P.x0 + 1.5, y1 - 1.4, sym + ' = ?', 'start');
+      h += etiq(P.x0 + 1.5, y1 - 1.4, sym + ' = ?', 'start');
     } else if (def.type === 'lectureX') {
       const x = R.sx(A.exact), y = R.sy(def.y0), yAxe = (def.axeY.min <= 0) ? R.sy(0) : P.yBot;
       h += tirets(P.x0, y, x, y) + tirets(x, y, x, yAxe);
       h += `<circle cx="${x}" cy="${y}" r="1.3" fill="${ORANGE}" stroke="#fff" stroke-width=".4"/>`;
-      h += etiq(x + 1.5, yAxe - 1.6, sym + ' = ?', 'start');
+      h += etiq(x + 1.5, yAxe - 1.6, sym + ' = ?', 'start');
     }
     return `<g pointer-events="none">${h}</g>`;
   }
@@ -662,7 +662,7 @@
         <button type="button" class="btn-small" data-a="tourner">↻ Tourner</button>
         <button type="button" class="btn-small lg-fin" data-a="moins" aria-label="Reculer">◀</button>
         <button type="button" class="btn-small lg-fin" data-a="plus" aria-label="Avancer">▶</button>
-        <span class="lg-lecture">Lecture : <span data-a="lecture"></span></span>
+        <span class="lg-lecture">Lecture : <span data-a="lecture"></span></span>
       </div>`;
   }
   function brancherOutils(root, depart) {
@@ -831,7 +831,7 @@
     root.innerHTML = `
       ${def.contexte ? `<p class="lg-contexte">${def.contexte}</p>` : ''}
       ${def.cible ? `<div class="lg-cible"><span class="lg-cible-icone">?</span><div>${def.cible}</div></div>` : ''}
-      ${choix ? `<div class="lg-methode" role="radiogroup" aria-label="Méthode de mesure"><span class="lg-methode-t">Méthode de mesure :</span>
+      ${choix ? `<div class="lg-methode" role="radiogroup" aria-label="Méthode de mesure"><span class="lg-methode-t">Méthode de mesure :</span>
           <button type="button" role="radio" class="lg-meth" data-m="directe" aria-checked="false"${permises.indexOf('directe') < 0 ? ' disabled' : ''}>Lecture directe sur l'axe</button>
           <button type="button" role="radio" class="lg-meth" data-m="regle" aria-checked="false"${permises.indexOf('regle') < 0 ? ' disabled' : ''}>Règle et tableau de proportionnalité</button></div>` : ''}
       ${choix ? '<div data-a="blocRegle">' : ''}
@@ -841,7 +841,7 @@
 
       <div class="lg-etape" data-etape="1">
         <h3 class="lg-etape-titre">Étape 1 · Tableau de proportionnalité</h3>
-        <div class="lg-palette lg-palette-ligne" id="${u}PalUni"><span class="lg-palette-titre">Unités :</span>${unitesAxe.map(x => etiquette(x, { type: 'unite', u: x, home: u + 'PalUni' }, 'lg-chip-unite')).join('')}</div>
+        <div class="lg-palette lg-palette-ligne" id="${u}PalUni"><span class="lg-palette-titre">Unités :</span>${unitesAxe.map(x => etiquette(x, { type: 'unite', u: x, home: u + 'PalUni' }, 'lg-chip-unite')).join('')}</div>
         <div class="lg-table-wrap"><table class="lg-table">
           <thead><tr><th>Distance<br>${caseVide('uD', 'lg-slot-unite')}</th><th>${ax.libelle}<br>${caseVide('uV', 'lg-slot-unite')}</th></tr></thead>
           <tbody>
@@ -849,7 +849,7 @@
             <tr><td>${saisie('MD', 'mesure')}</td><td class="lg-inconnue">${caseCherchee()}</td></tr>
           </tbody>
         </table></div>
-        ${def.caseN ? `<p class="lg-note-n">Écris dans la case n le nombre de ${g.noms || 'périodes'} mesurées ; laisse-la vide si tu en mesures une seule.</p>` : ''}
+        ${def.caseN ? `<p class="lg-note-n">Écris dans la case n le nombre de ${g.noms || 'périodes'} mesurées ; laisse-la vide si tu en mesures une seule.</p>` : ''}
         ${window.numpadWidget ? numpadWidget() : ''}
         <div class="lg-actions">
           ${opts.boutonPasser === false ? '' : '<button type="button" class="btn-small" data-a="passer">Passer →</button>'}
@@ -882,15 +882,15 @@
       const err = [];
       const okUD = !!(u.uD && u.uD.dataset.u === 'cm');
       eng1.marquer('uD', okUD);
-      if (!okUD) err.push('Unité des distances : dans quelle unité est graduée ta règle ?');
+      if (!okUD) err.push('Unité des distances : dans quelle unité est graduée ta règle ?');
       const okUV = !!(u.uV && u.uV.dataset.u === ax.unite);
       eng1.marquer('uV', okUV);
-      if (!okUV) err.push(`Unité de la 2<sup>e</sup> colonne : regarde l'unité indiquée au bout de l'axe « ${ax.nom} ».`);
+      if (!okUV) err.push(`Unité de la 2<sup>e</sup> colonne : regarde l'unité indiquée au bout de l'axe « ${ax.nom} ».`);
 
       // échelle : la distance (cm) et la valeur doivent se correspondre
       let okED = v.eD > 0, okEV = v.eV > 0;
-      if (!okED) err.push('Échelle, distance : écris la distance lue sur la règle, en cm (par exemple 12,5).');
-      if (!okEV) err.push("Échelle, valeur : écris l'écart entre les deux graduations où tu as placé le 0 et le curseur.");
+      if (!okED) err.push('Échelle, distance : écris la distance lue sur la règle, en cm (par exemple 12,5).');
+      if (!okEV) err.push("Échelle, valeur : écris l'écart entre les deux graduations où tu as placé le 0 et le curseur.");
       if (okED && okEV && Math.abs(v.eD * 10 - v.eV * A.mm) > TOL) {
         okED = okEV = false;
         const p = ax.pas;
@@ -903,18 +903,18 @@
       if (okMD) {
         trouve = A.liste.find(x => Math.abs(v.mD * 10 - x.mm) <= TOL) || null;
         if (!trouve) { okMD = false; err.push(A.erreur); }
-      } else err.push('2<sup>e</sup> ligne (' + A.ligne.toLowerCase() + ') : écris la distance mesurée pour la grandeur recherchée, en cm.');
+      } else err.push('2<sup>e</sup> ligne (' + A.ligne.toLowerCase() + ') : écris la distance mesurée pour la grandeur recherchée, en cm.');
       marquerCase('mD', okMD);
       // case n (def.caseN) : vide → une seule période ; sinon le nombre de périodes de la mesure
       if (def.caseN) {
         const t = cases.n.value.trim(), nS = t === '' ? 1 : lireNombre(t);
         let okN = nS >= 1 && Math.round(nS) === nS;
-        if (!okN) err.push(`Case n : écris un nombre entier de ${g.noms || 'périodes'} (ou laisse-la vide pour une seule ${g.nom || 'période'}).`);
+        if (!okN) err.push(`Case n : écris un nombre entier de ${g.noms || 'périodes'} (ou laisse-la vide pour une seule ${g.nom || 'période'}).`);
         else if (trouve && trouve.n !== nS) {
           okN = false;
           err.push(nS === trouve.n + 1 && ORDINAUX[trouve.n]
-            ? `Case n : entre le premier et le ${ORDINAUX[trouve.n]} sommet, il y a ${trouve.n} ${g.noms || 'périodes'}, pas ${nS}.`
-            : `Case n : ${nS === 1 && t === '' ? `la case vide veut dire une seule ${g.nom || 'période'}, ` : ''}compte les ${g.noms || 'périodes'} entières entre le 0 de la règle et le curseur.`);
+            ? `Case n : entre le premier et le ${ORDINAUX[trouve.n]} sommet, il y a ${trouve.n} ${g.noms || 'périodes'}, pas ${nS}.`
+            : `Case n : ${nS === 1 && t === '' ? `la case vide veut dire une seule ${g.nom || 'période'}, ` : ''}compte les ${g.noms || 'périodes'} entières entre le 0 de la règle et le curseur.`);
         }
         marquerCase('n', okN);
       }
@@ -923,7 +923,7 @@
       if (err.length) {
         pts.tableau = 0;
         if (opts.onErreur) opts.onErreur();
-        msg.innerHTML = `<div class="lg-msg lg-msg-ko">Le tableau n'est pas encore correct :<ul>${err.map(e => `<li>${e}</li>`).join('')}</ul></div>`;
+        msg.innerHTML = `<div class="lg-msg lg-msg-ko">Le tableau n'est pas encore correct :<ul>${err.map(e => `<li>${e}</li>`).join('')}</ul></div>`;
         return;
       }
       fait1 = true;
@@ -932,7 +932,7 @@
       root.querySelectorAll('[data-etape="1"] .np-section').forEach(n => n.remove());
       res = { a: v.eD, b: v.eV, c: v.mD, n: trouve.n };
       if ($('nT')) $('nT').innerHTML = (trouve.n > 1 ? trouve.n : '') + sym;     // case « nT » → « 4T »
-      msg.innerHTML = `<div class="lg-msg lg-msg-ok">✓ Tableau correct !</div>` + conseils(v.eD * 10, trouve.n);
+      msg.innerHTML = `<div class="lg-msg lg-msg-ok">✓ Tableau correct !</div>` + conseils(v.eD * 10, trouve.n);
       etape2();
     };
 
@@ -941,16 +941,16 @@
       const out = [];
       const em = echelleMax(ax, A.mm);
       if (eMm < 0.6 * em.mm) {
-        out.push(`Pour l'échelle, tu as mesuré ${fmt(eMm / 10, 1)} cm. Tu pouvais mesurer jusqu'à ${fmt(em.mm / 10, 1)} cm (de ${fmt(em.de, 3)} à ${fmt(em.a, 3)} ${ax.unite}) : plus la distance mesurée est grande, moins l'erreur de lecture (environ 1 mm) compte.`);
+        out.push(`Pour l'échelle, tu as mesuré ${fmt(eMm / 10, 1)} cm. Tu pouvais mesurer jusqu'à ${fmt(em.mm / 10, 1)} cm (de ${fmt(em.de, 3)} à ${fmt(em.a, 3)} ${ax.unite}) : plus la distance mesurée est grande, moins l'erreur de lecture (environ 1 mm) compte.`);
       }
       if (def.type === 'periode' && n < A.nMax) {
         const nom = g.nom || 'période', noms = g.noms || 'périodes';
-        out.push(`Tu as mesuré ${n === 1 ? 'une seule ' + nom : n + ' ' + noms}. On peut en mesurer jusqu'à ${A.nMax} sur ce graphique : en mesurant plusieurs ${noms} puis en divisant par leur nombre, l'erreur de lecture est divisée d'autant.`);
+        out.push(`Tu as mesuré ${n === 1 ? 'une seule ' + nom : n + ' ' + noms}. On peut en mesurer jusqu'à ${A.nMax} sur ce graphique : en mesurant plusieurs ${noms} puis en divisant par leur nombre, l'erreur de lecture est divisée d'autant.`);
       }
       if (def.type === 'amplitude' && n === 1) {
-        out.push("Mesure plutôt l'écart entre le minimum et le maximum (crête à crête), puis divise par 2 : la distance mesurée est deux fois plus grande, l'erreur de lecture compte deux fois moins.");
+        out.push("Mesure plutôt l'écart entre le minimum et le maximum (crête à crête), puis divise par 2 : la distance mesurée est deux fois plus grande, l'erreur de lecture compte deux fois moins.");
       }
-      return out.map(t => `<div class="lg-info"><span class="lg-info-icone">💡</span><div><b>Pour être plus précis :</b> ${t}</div></div>`).join('');
+      return out.map(t => `<div class="lg-info"><span class="lg-info-icone">💡</span><div><b>Pour être plus précis :</b> ${t}</div></div>`).join('');
     }
 
     /* ----- Étape 2 : le calcul ----- */
@@ -962,7 +962,7 @@
       div.className = 'lg-etape';
       div.innerHTML = `
         <h3 class="lg-etape-titre">Étape 2 · Le calcul</h3>
-        <p>Glisse les valeurs du tableau dans le produit en croix. Le résultat s'affiche automatiquement : choisis ensuite son unité.</p>
+        <p>Glisse les valeurs du tableau dans le produit en croix. Le résultat s'affiche automatiquement : choisis ensuite son unité.</p>
         <div class="lg-palettes">
           <div class="lg-palette" id="lgPal2"><span class="lg-palette-titre">Valeurs du tableau</span>
             ${etiquette(fmt(res.a, 2) + ' cm', { id: 'a', v: res.a, home: 'lgPal2' })}
@@ -999,14 +999,14 @@
         const okU = !!(cu && cu.dataset.u === ax.unite);
         eng2.marquer('u', okU);
         const err = [];
-        if (!okN || !okD) { pts.calcul = 0; err.push('Produit en croix : on multiplie les deux valeurs reliées en diagonale à « ? », puis on divise par la troisième.'); }
-        if (!okU) { pts.unite = 0; err.push(`Unité : le résultat est une valeur de la colonne « ${ax.libelle} ».`); }
+        if (!okN || !okD) { pts.calcul = 0; err.push('Produit en croix : on multiplie les deux valeurs reliées en diagonale à « ? », puis on divise par la troisième.'); }
+        if (!okU) { pts.unite = 0; err.push(`Unité : le résultat est une valeur de la colonne « ${ax.libelle} ».`); }
         const msg = div.querySelector('[data-a="msg2"]');
-        if (err.length) { if (opts.onErreur) opts.onErreur(); msg.innerHTML = `<div class="lg-msg lg-msg-ko">Pas encore :<ul>${err.map(e => `<li>${e}</li>`).join('')}</ul></div>`; return; }
+        if (err.length) { if (opts.onErreur) opts.onErreur(); msg.innerHTML = `<div class="lg-msg lg-msg-ko">Pas encore :<ul>${err.map(e => `<li>${e}</li>`).join('')}</ul></div>`; return; }
         fait2 = true;
         div.querySelector('[data-a="verif2"]').disabled = true;
         res.r2 = res.c * res.b / res.a;
-        msg.innerHTML = `<div class="lg-msg lg-msg-ok">✓ Calcul correct : ${nom} = ${fmtSig(res.r2, 3)} ${ax.unite}</div>`;
+        msg.innerHTML = `<div class="lg-msg lg-msg-ok">✓ Calcul correct : ${nom} = ${fmtSig(res.r2, 3)} ${ax.unite}</div>`;
         if (res.n > 1) etape3(); else finir(res.r2);
       };
     }
@@ -1016,10 +1016,10 @@
       const n = res.n;
       const amp = def.type === 'amplitude';
       const T3 = amp
-        ? { titre: "Étape 3 · L'amplitude", texte: `Tu as mesuré l'écart entre le minimum et le maximum (crête à crête). Combien de fois contient-il l'amplitude ${sym} ? Divise par ce nombre.`,
-            erreur: "Pas encore : l'écart crête à crête va du minimum au maximum, soit une amplitude sous la valeur moyenne et une au-dessus." }
+        ? { titre: "Étape 3 · L'amplitude", texte: `Tu as mesuré l'écart entre le minimum et le maximum (crête à crête). Combien de fois contient-il l'amplitude ${sym} ? Divise par ce nombre.`,
+            erreur: "Pas encore : l'écart crête à crête va du minimum au maximum, soit une amplitude sous la valeur moyenne et une au-dessus." }
         : { titre: `Étape 3 · Une seule ${g.nom || 'période'}`, texte: `Tu as mesuré plusieurs ${g.noms || 'périodes'}. Pour trouver ${sym}, divise par le nombre de ${g.noms || 'périodes'} mesurées.`,
-            erreur: `Pas encore : combien de ${g.noms || 'périodes'} y a-t-il entre le 0 de ta règle et le curseur ?` };
+            erreur: `Pas encore : combien de ${g.noms || 'périodes'} y a-t-il entre le 0 de ta règle et le curseur ?` };
       const div = document.createElement('div');
       div.className = 'lg-etape';
       div.innerHTML = `
@@ -1052,14 +1052,14 @@
           // erreur fréquente : diviser par le nombre de sommets au lieu du nombre de périodes
           const k = lireNombre(inN.value);
           const sommets = !amp && def.type === 'periode' && k === n + 1 && ORDINAUX[n]
-            ? `Pas encore : entre le premier et le ${ORDINAUX[n]} sommet, il y a ${n} ${g.noms || 'périodes'}, pas ${n + 1}.` : null;
+            ? `Pas encore : entre le premier et le ${ORDINAUX[n]} sommet, il y a ${n} ${g.noms || 'périodes'}, pas ${n + 1}.` : null;
           msg.innerHTML = `<div class="lg-msg lg-msg-ko">${sommets || T3.erreur}</div>`;
           return;
         }
         fait3 = true;
         inN.readOnly = true;
         div.querySelectorAll('.np-section').forEach(x => x.remove());
-        msg.innerHTML = `<div class="lg-msg lg-msg-ok">✓ Division correcte !</div>`;
+        msg.innerHTML = `<div class="lg-msg lg-msg-ok">✓ Division correcte !</div>`;
         div.querySelector('[data-a="verif3"]').disabled = true;
         finir(res.r2 / n);
       }
@@ -1079,12 +1079,12 @@
       const total = choix ? Math.min(ptsD, ptsR) : ptsR;
       const div = document.createElement('div');
       div.className = 'lg-resultat';
-      div.innerHTML = `<div>Résultat : <span class="lg-resultat-valeur">${sym} ${direct ? '=' : '≈'} ${fmtSig(val, 3)} ${ax.unite}</span></div>
-        ${direct ? '' : `<div style="margin-top:4px;color:var(--ink-2);font-size:.92rem">Valeur utilisée pour tracer le graphique : ${fmtSig(exact, 3)} ${ax.unite} (écart : ${fmt(ecart, 1)} %).</div>`}
-        ${opts.sansPoints ? '' : `<div style="margin-top:4px;font-weight:700">Points : ${total} / 3</div>`}`;
+      div.innerHTML = `<div>Résultat : <span class="lg-resultat-valeur">${sym} ${direct ? '=' : '≈'} ${fmtSig(val, 3)} ${ax.unite}</span></div>
+        ${direct ? '' : `<div style="margin-top:4px;color:var(--ink-2);font-size:.92rem">Valeur utilisée pour tracer le graphique : ${fmtSig(exact, 3)} ${ax.unite} (écart : ${fmt(ecart, 1)} %).</div>`}
+        ${opts.sansPoints ? '' : `<div style="margin-top:4px;font-weight:700">Points : ${total} / 3</div>`}`;
       $('suite').appendChild(div);
       if (opts.frequence && def.type === 'periode') {
-        $('suite').insertAdjacentHTML('beforeend', `<div class="lg-info"><span class="lg-info-icone">💡</span><div><b>Pour la fréquence :</b> f = 1 / ${sym}, avec ${sym} en secondes (s) et f en hertz (Hz).</div></div>`);
+        $('suite').insertAdjacentHTML('beforeend', `<div class="lg-info"><span class="lg-info-icone">💡</span><div><b>Pour la fréquence :</b> f = 1 / ${sym}, avec ${sym} en secondes (s) et f en hertz (Hz).</div></div>`);
       }
       if (opts.boutonSuivant !== false) {
         const act = document.createElement('div');
@@ -1114,7 +1114,7 @@
       const plusieurs = def.nImpose !== 1;
       const champ = (id, ph, lab, unite, entier) => `<label class="lg-dl"><span class="lg-dl-l">${lab}</span><input type="text" id="${u}d${id}" class="lg-input lg-cell" inputmode="${entier ? 'numeric' : 'decimal'}" autocomplete="off" placeholder="${ph}" onfocus="numpadFocus(this.id)" ontouchstart="numpadFocus(this.id)"><span class="lg-dl-u">${unite}</span></label>`;
       zone.innerHTML = `
-        <p class="lg-aide-regle">Touche sur la courbe le <b>début</b>, puis la <b>fin</b> de ta mesure (deux points qui se correspondent) : des pointillés descendent jusqu'à l'axe des temps. ◀ ▶ déplacent le dernier point touché.</p>
+        <p class="lg-aide-regle">Touche sur la courbe le <b>début</b>, puis la <b>fin</b> de ta mesure (deux points qui se correspondent) : des pointillés descendent jusqu'à l'axe des temps. ◀ ▶ déplacent le dernier point touché.</p>
         <div class="lg-outils">
           <button type="button" class="btn-small lg-fin" data-a="dMoins" aria-label="Reculer le point">◀</button>
           <button type="button" class="btn-small lg-fin" data-a="dPlus" aria-label="Avancer le point">▶</button>
@@ -1145,7 +1145,7 @@
         e.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); verifier(); } });
       });
       const info = t => `<div class="lg-info"><span class="lg-info-icone">💡</span><div>${t}</div></div>`;
-      const ko = l => `<div class="lg-msg lg-msg-ko">Pas encore :<ul>${l.map(e => `<li>${e}</li>`).join('')}</ul></div>`;
+      const ko = l => `<div class="lg-msg lg-msg-ko">Pas encore :<ul>${l.map(e => `<li>${e}</li>`).join('')}</ul></div>`;
       const grad = t => ax.min + Math.round((t - ax.min) / ax.pas) * ax.pas;
       const surGrad = t => Math.abs(t - grad(t)) * mm <= 0.6;
       const proche = (a, b, r) => Math.abs(a - b) <= (r || 1e-6) * Math.max(1, Math.abs(b));
@@ -1163,21 +1163,21 @@
           errD++; if (opts.onErreur) opts.onErreur(); ptr.marquer(1, 'ko');
           const meme = Math.abs(A.f(tB) - A.f(tA)) <= 0.06 * etendue(def, A);
           msg.innerHTML = ko([meme
-            ? "Le signal repasse par la même valeur au second point, mais il ne repart pas de la même façon : ce n'est pas un point qui correspond au début. Déplace la fin."
-            : 'Les deux points ne se correspondent pas : la fin doit être au même endroit du motif que le début, une ou plusieurs ' + noms + ' plus loin.']);
+            ? "Le signal repasse par la même valeur au second point, mais il ne repart pas de la même façon : ce n'est pas un point qui correspond au début. Déplace la fin."
+            : 'Les deux points ne se correspondent pas : la fin doit être au même endroit du motif que le début, une ou plusieurs ' + noms + ' plus loin.']);
           return;
         }
         if (def.nImpose === 1 && k > 1) {
           errD++; if (opts.onErreur) opts.onErreur(); ptr.marquer(1, 'ko');
-          msg.innerHTML = ko([`Tu as pris ${k} motifs : ici, mesure une seule ${nom} (le plus petit morceau qui se répète).`]);
+          msg.innerHTML = ko([`Tu as pris ${k} motifs : ici, mesure une seule ${nom} (le plus petit morceau qui se répète).`]);
           return;
         }
         // 2. précision : les deux points tombent-ils sur des graduations écrites, à exactement n périodes ?
         const gA = grad(tA), gB = grad(tB);
         if (!surGrad(tA) || !surGrad(tB) || Math.abs((gB - gA) - k * T) * mm > 0.3) {
           msg.innerHTML = info((faisable
-            ? 'En lecture directe, cette valeur n\'est pas assez précise : choisis deux points qui tombent sur des graduations écrites (en prenant plusieurs ' + noms + ' si besoin), ou utilise la règle et le tableau de proportionnalité.'
-            : 'En lecture directe, cette valeur n\'est pas assez précise : utilise la règle et le tableau de proportionnalité.')
+            ? 'En lecture directe, cette valeur n\'est pas assez précise : choisis deux points qui tombent sur des graduations écrites (en prenant plusieurs ' + noms + ' si besoin), ou utilise la règle et le tableau de proportionnalité.'
+            : 'En lecture directe, cette valeur n\'est pas assez précise : utilise la règle et le tableau de proportionnalité.')
             + '<br><button type="button" class="btn-small lg-vers-regle">Utiliser la règle et le tableau</button>');
           const b = msg.querySelector('.lg-vers-regle');
           if (b) b.onclick = () => choisir('regle');
@@ -1194,19 +1194,19 @@
         if (plusieurs) {
           const okDt = proche(v.dt, delta);
           marque('dt', okDt);
-          if (!okDt) err.push(`${dates} : Δt = t<sub>2</sub> − t<sub>1</sub>.`);
+          if (!okDt) err.push(`${dates} : Δt = t<sub>2</sub> − t<sub>1</sub>.`);
           const okN = v.n === k;
           marque('n', okN);
-          if (!okN) err.push(v.n === k + 1 && ORDINAUX[k] ? `Entre le premier et le ${ORDINAUX[k]} sommet, il y a ${k} ${noms}, pas ${k + 1}.` : 'n : compte les motifs entiers entre les deux points touchés.');
+          if (!okN) err.push(v.n === k + 1 && ORDINAUX[k] ? `Entre le premier et le ${ORDINAUX[k]} sommet, il y a ${k} ${noms}, pas ${k + 1}.` : 'n : compte les motifs entiers entre les deux points touchés.');
           delta = v.dt;
         }
         const nn = plusieurs ? (v.n > 0 ? v.n : k) : 1;
         const okT = proche(v.T, delta / nn, 0.01);
         marque('T', okT);
         if (!okT) {
-          if (plusieurs && nn > 1 && proche(v.T, delta, 0.01)) err.push(`${sym} : tu as donné la durée de ${nn} ${noms}. Divise Δt par n.`);
-          else if (plusieurs && proche(v.T, delta * nn, 0.01)) err.push(`${sym} = Δt / n : il faut diviser par n, pas multiplier.`);
-          else err.push(plusieurs ? `${sym} = Δt / n.` : `${dates} : ${sym} = t<sub>2</sub> − t<sub>1</sub>.`);
+          if (plusieurs && nn > 1 && proche(v.T, delta, 0.01)) err.push(`${sym} : tu as donné la durée de ${nn} ${noms}. Divise Δt par n.`);
+          else if (plusieurs && proche(v.T, delta * nn, 0.01)) err.push(`${sym} = Δt / n : il faut diviser par n, pas multiplier.`);
+          else err.push(plusieurs ? `${sym} = Δt / n.` : `${dates} : ${sym} = t<sub>2</sub> − t<sub>1</sub>.`);
         }
         if (err.length) { errD++; if (opts.onErreur) opts.onErreur(); msg.innerHTML = ko(err); return; }
         // lecture réussie : motif surligné, double flèche « T » ou « 4T »
@@ -1216,7 +1216,7 @@
         $('dVerif').disabled = true;
         ptr.surligner(tA, tB, (k > 1 ? k : '') + symS(g.symbole));
         ptr.verrouiller();
-        msg.innerHTML = '<div class="lg-msg lg-msg-ok">✓ Lecture correcte !</div>';
+        msg.innerHTML = '<div class="lg-msg lg-msg-ok">✓ Lecture correcte !</div>';
         res.nD = k;
         finir(v.T, true);
       }
@@ -1242,7 +1242,7 @@
       return `<div class="lg-card">
           <span class="lg-badge">${opts.badge}</span>
           <h2 class="lg-titre">${opts.titre}</h2>
-          <p class="lg-meta">Question ${idx + 1}/${bank.length} · Score : <b>${score} pt${score > 1 ? 's' : ''}</b></p>
+          <p class="lg-meta">Question ${idx + 1}/${bank.length} · Score : <b>${score} pt${score > 1 ? 's' : ''}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
           <div style="margin-top:12px">${window.numpadToggleBar ? numpadToggleBar() : ''}</div>
         </div>`;
@@ -1275,10 +1275,10 @@
       if (window.SOM) window.SOM.marquer({ note });                 // meilleure note sur 20 (sommaire, accueil)
       if (score === max) confettis();
       app.innerHTML = `<div class="lg-card" style="text-align:center">
-          <h2 class="lg-titre">Entraînement terminé !</h2>
-          ${score === max ? '<p style="font-weight:800;color:var(--accent-ink)">🏆 Sans-faute !</p>' : ''}
+          <h2 class="lg-titre">Entraînement terminé !</h2>
+          ${score === max ? '<p style="font-weight:800;color:var(--accent-ink)">🏆 Sans-faute !</p>' : ''}
           <p class="lg-titre" style="font-size:2.4rem;color:var(--accent)">${fmt(note)} / 20</p>
-          <p class="lg-contexte">Score : ${score} / ${max} points (${pct} %)</p>
+          <p class="lg-contexte">Score : ${score} / ${max} points (${pct} %)</p>
           <div class="lg-actions" style="justify-content:center">
             <button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
             ${opts.suite ? `<a class="btn-primary" style="text-decoration:none;margin-left:0" href="${opts.suite.href}">${opts.suite.label}</a>` : ''}

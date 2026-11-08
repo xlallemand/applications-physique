@@ -85,7 +85,7 @@
     /* ----- Périodique ou non ? Trois signaux ----- */
     function tri(liste, q) {
       const carte = el('div', 'er-card');
-      carte.innerHTML = `<div class="pf-sit-tete"><h3 class="pf-sit-titre">Périodique ou non ?</h3><span class="pf-sit-num">Avant de commencer · question ${q + 1} / 2</span></div>
+      carte.innerHTML = `<div class="pf-sit-tete"><h3 class="pf-sit-titre">Périodique ou non ?</h3><span class="pf-sit-num">Avant de commencer · question ${q + 1} / 2</span></div>
         <div class="pf-consigne"><p>Un signal est <b>périodique</b> s'il se répète à l'identique à intervalle de temps régulier. Sous chaque signal, touche <b>Périodique</b> ou <b>Non périodique</b>.</p></div>
         <div class="pf-tri"></div><div data-a="suite"></div>`;
       zone.appendChild(carte);
@@ -104,13 +104,13 @@
             if (juste) {
               b.classList.add('juste');
               d.querySelectorAll('button').forEach(x => { x.disabled = true; });
-              ret.innerHTML = `<div class="callout-success er-retour"><p><b class="er-ok">Juste !</b> ${s.per ? 'Le même motif revient à intervalle de temps régulier.' : 'Aucune portion ne revient exactement pareille.'}</p></div>`;
+              ret.innerHTML = `<div class="callout-success er-retour"><p><b class="er-ok">Juste !</b> ${s.per ? 'Le même motif revient à intervalle de temps régulier.' : 'Aucune portion ne revient exactement pareille.'}</p></div>`;
               if (--restants === 0) suivant(carte.querySelector('[data-a="suite"]'), q === 0 ? 'Question suivante →' : 'Situation suivante →');
             } else {
               b.classList.add('faux'); b.disabled = true;
               ret.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">Ce n'est pas ça.</b> ${s.per
-                ? 'Ce signal se répète à l\'identique à intervalle de temps régulier : repère le morceau qui revient.'
-                : 'Ce signal ne se répète pas à l\'identique : cherche une portion qui revient exactement pareille.'}</p></div>`;
+                ? 'Ce signal se répète à l\'identique à intervalle de temps régulier : repère le morceau qui revient.'
+                : 'Ce signal ne se répète pas à l\'identique : cherche une portion qui revient exactement pareille.'}</p></div>`;
             }
           };
         });
@@ -134,11 +134,11 @@
           </div>
           <div class="pf-manip-panneau">
             <ol class="pf-deroule">
-              <li data-e="0"><span>Touche le <b>début</b> d'un motif : n'importe quel point du signal.</span></li>
-              <li data-e="1"><span>Touche la <b>fin</b> de ce motif : le point qui correspond au début, un motif plus loin.</span></li>
+              <li data-e="0"><span>Touche le <b>début</b> d'un motif : n'importe quel point du signal.</span></li>
+              <li data-e="1"><span>Touche la <b>fin</b> de ce motif : le point qui correspond au début, un motif plus loin.</span></li>
               <li data-e="2"><span>Vérifie ton motif.</span></li>
             </ol>
-            <p class="pf-aide-t">◀ ▶ déplacent le dernier point touché ; un nouvel appui remplace le point le plus proche.</p>
+            <p class="pf-aide-t">◀ ▶ déplacent le dernier point touché ; un nouvel appui remplace le point le plus proche.</p>
             <div class="er-actions"><button type="button" class="btn-primary" data-a="verif" disabled>Vérifier le motif</button></div>
             <div data-a="retour" aria-live="polite"></div>
             <div data-a="aide" hidden><button type="button" class="btn-small">Afficher la réponse</button></div>
@@ -165,7 +165,7 @@
         ptr.verrouiller();
         deroule(3);
         $('verif').disabled = true; $('aide').hidden = true;
-        $('retour').innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour"><p><b class="${vue ? '' : 'er-ok'}">${vue ? 'Réponse.' : erreurs ? 'C\'est juste.' : 'Juste !'}</b> Ce morceau est le <b>motif élémentaire</b> : il se répète à l'identique juste après. Sa durée est la <b>période T</b>.</p></div>`;
+        $('retour').innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour"><p><b class="${vue ? '' : 'er-ok'}">${vue ? 'Réponse.' : erreurs ? 'C\'est juste.' : 'Juste !'}</b> Ce morceau est le <b>motif élémentaire</b> : il se répète à l'identique juste après. Sa durée est la <b>période T</b>.</p></div>`;
         suivant($('suite'), num < 6 ? 'Situation suivante →' : 'Voir le bilan →');
       }
       $('verif').onclick = () => {
@@ -178,11 +178,11 @@
         let diag;
         if (k >= 1 && Math.abs(d - k * T) <= tol) {
           if (k === 1) { reussir(t1); return; }
-          diag = k === 2 ? 'Tu as pris deux motifs : le motif élémentaire est le plus petit morceau qui se répète.'
-            : `Tu as pris ${k} motifs : le motif élémentaire est le plus petit morceau qui se répète.`;
-        } else if (d < tol) diag = 'Le début et la fin sont presque au même endroit : la fin du motif est plus loin.';
-        else if (Math.abs(d - T / 2) <= tol || (memeValeur && d < T)) diag = 'Le signal repasse par la même valeur, mais il ne repart pas de la même façon : ce n\'est qu\'une partie du motif.';
-        else if (memeValeur) diag = 'Le signal repasse par la même valeur, mais il ne repart pas de la même façon : ce point ne correspond pas au début.';
+          diag = k === 2 ? 'Tu as pris deux motifs : le motif élémentaire est le plus petit morceau qui se répète.'
+            : `Tu as pris ${k} motifs : le motif élémentaire est le plus petit morceau qui se répète.`;
+        } else if (d < tol) diag = 'Le début et la fin sont presque au même endroit : la fin du motif est plus loin.';
+        else if (Math.abs(d - T / 2) <= tol || (memeValeur && d < T)) diag = 'Le signal repasse par la même valeur, mais il ne repart pas de la même façon : ce n\'est qu\'une partie du motif.';
+        else if (memeValeur) diag = 'Le signal repasse par la même valeur, mais il ne repart pas de la même façon : ce point ne correspond pas au début.';
         else diag = 'Le morceau choisi ne se répète pas à l\'identique juste après.';
         erreurs++;
         ptr.marquer(1, 'ko');
@@ -207,7 +207,7 @@
         <div class="cle"><p><b class="cle-titre">À retenir.</b> Un signal <b>périodique</b> se répète à l'identique à intervalle de temps régulier. La <b>période T</b> est la durée du motif élémentaire. On peut la mesurer entre deux sommets, deux creux, ou deux points qui se correspondent.</p></div>
         <div class="er-actions">
           <button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
-          <a class="btn-primary" style="text-decoration:none" href="module_2_manip.html">Module 2 : mesurer T et calculer f →</a>
+          <a class="btn-primary" style="text-decoration:none" href="module_2_manip.html">Module 2 : mesurer T et calculer f →</a>
         </div>`;
       zone.appendChild(carte);
       carte.querySelector('[data-a="re"]').onclick = () => { etape = 0; afficher(); };

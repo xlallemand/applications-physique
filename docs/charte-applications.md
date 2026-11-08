@@ -369,6 +369,7 @@ Variantes de l'exemple trouvé par l'élève : quand l'exemple est donné sous f
 ## 7. Écriture scientifique et typographie
 
 - Français partout. Nombres avec **virgule décimale**, espace insécable pour les milliers (`CIN.fmt`). Moins typographique `−` (U+2212), pas le tiret `-`. Lecture des saisies : accepter `,` ou `.`, `-` ou `−`, espaces (`CIN.lire`).
+- **Espaces insécables** : espace insécable (U+00A0) avant `:` `;` `?` `!` et à l'intérieur des guillemets `« »`, dans tous les textes affichés, y compris ceux produits par JavaScript (messages d'erreur, corrections, `aria-label`, textes SVG). Dans une chaîne JavaScript, écrire le caractère U+00A0 lui-même (`&nbsp;` ne marche que dans du HTML). Règle valable dans toutes les applications, quel que soit le niveau. Outils : `python3 docs/outils/typo.py --corriger DOSSIER` corrige les sources (textes HTML et chaînes JS seulement, jamais le code : `a ? b : c` reste intact) ; `node docs/outils/verif-typo.js DOSSIER` contrôle les pages rendues, et sa constante `SURVEILLANCE` s'injecte dans les tests Playwright pour contrôler aussi les messages qui n'apparaissent qu'après une réponse.
 - Écriture scientifique : `2,3 × 10<sup>5</sup>` (`CIN.sci`). Unités : `m·s<sup>−1</sup>`, `m·s<sup>−2</sup>`. Indices avec `<sub>`.
 - **Vecteurs** : nom surmonté d'une flèche, jamais de gras seul : `VEC.nomHTML('v')` (`.vec-nom`), indice hors de la flèche (`u⃗ₜ`). **Coordonnées en colonne** entre parenthèses : `VEC.colHTML(a, b)` (`.vcol`). Écriture a i⃗ + b j⃗ : `VEC.ijHTML`.
 - Fractions `CIN.fr`, dérivées `CIN.dd('v')` (`dv/dt`), racines `.racine`, systèmes avec accolade `CIN.sys(...)`.
@@ -406,6 +407,7 @@ Avec Playwright / Chromium (déjà installé, ne pas relancer `playwright instal
 3. Mode « Afficher tout le cours » : tout se déplie, la position du bouton ne bouge pas, les réponses ne sont pas affichées.
 4. Aucune erreur dans la console, aucun défilement horizontal de la page.
    Après chaque validation, la question suivante est visible sans remonter dans la page ; chaque champ dont la valeur se calcule à la calculatrice porte l'icône calculatrice (§7).
+   Typographie : `python3 docs/outils/typo.py DOSSIER` ne signale rien, et aucune espace insécable ne manque dans les textes affichés pendant les parcours (`SURVEILLANCE` de `docs/outils/verif-typo.js`, §7).
 5. Navigation : la page en cours est encadrée dans le sommaire, déplier un autre module ne change pas de page, chaque lien du sommaire mène à la bonne page, ancres de fiche, sommaire du téléphone (ouverture, fermeture, voile), bouton Reprendre, ✓ et notes (profil persistant), lien vers le portail.
 6. Tous les liens internes pointent vers des pages existantes. Les liens vers une autre application s'ouvrent dans une nouvelle fenêtre.
 7. Tracés de vecteurs : glisser à la souris, au doigt (CDP), flèches ; valeur affichée en direct.

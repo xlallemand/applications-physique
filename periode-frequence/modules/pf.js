@@ -27,13 +27,13 @@
   /* ---------- Plan de l'application (sommaire, accueil, progression) ---------- */
   const PLAN = [
     { n: 1, titre: 'Le motif élémentaire', desc: 'Signal périodique ou non, puis repérer le motif qui se répète',
-      parties: [{ nom: 'Le motif élémentaire', entrainement: 'module_1_manip', noms: { entrainement: 'Manipulation : le motif élémentaire' } }] },
-    { n: 2, titre: 'Mesurer T et calculer f', desc: 'Une période, plusieurs périodes, puis la règle et le tableau ; f = 1 / T', fiche: 'fiche_2',
-      parties: [{ nom: 'Mesurer T et calculer f', entrainement: 'module_2_manip', noms: { entrainement: 'Manipulation : mesurer T et calculer f' } }] },
-    { n: 3, titre: 'Oscilloscope', desc: 'Compter les carreaux, puis utiliser les curseurs ; T puis f', fiche: 'fiche_3', sousModules: true,
-      parties: [{ nom: 'Compter les carreaux', slug: 'carreaux', simulation: 'module_3a_carreaux', noms: { simulation: 'Simulateur : compter les carreaux' } },
-                { nom: 'Utiliser les curseurs', slug: 'curseurs', simulation: 'module_3b_curseurs', noms: { simulation: 'Simulateur : utiliser les curseurs' } }] },
-    { n: 4, titre: 'Entraînement', desc: 'Série notée sur 20 : graphiques, signaux à l\'échelle, oscilloscope, T et f',
+      parties: [{ nom: 'Le motif élémentaire', entrainement: 'module_1_manip', noms: { entrainement: 'Manipulation : le motif élémentaire' } }] },
+    { n: 2, titre: 'Mesurer T et calculer f', desc: 'Une période, plusieurs périodes, puis la règle et le tableau ; f = 1 / T', fiche: 'fiche_2',
+      parties: [{ nom: 'Mesurer T et calculer f', entrainement: 'module_2_manip', noms: { entrainement: 'Manipulation : mesurer T et calculer f' } }] },
+    { n: 3, titre: 'Oscilloscope', desc: 'Compter les carreaux, puis utiliser les curseurs ; T puis f', fiche: 'fiche_3', sousModules: true,
+      parties: [{ nom: 'Compter les carreaux', slug: 'carreaux', simulation: 'module_3a_carreaux', noms: { simulation: 'Simulateur : compter les carreaux' } },
+                { nom: 'Utiliser les curseurs', slug: 'curseurs', simulation: 'module_3b_curseurs', noms: { simulation: 'Simulateur : utiliser les curseurs' } }] },
+    { n: 4, titre: 'Entraînement', desc: 'Série notée sur 20 : graphiques, signaux à l\'échelle, oscilloscope, T et f',
       parties: [{ nom: 'Entraînement', questions: 'module_4_questions', noms: { questions: 'Entraînement' } }] },
   ];
   SOM.init({ nom: 'Période et fréquence d\'un signal', id: 'periode-frequence', plan: PLAN });
@@ -269,7 +269,7 @@
       function terminer(vue, silencieux, note) {
         finie = true;
         aide.remove();
-        const titre = vue ? 'Réponse' : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? 'Réponse' : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution;
         if (sol || vue || note) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${sol ? `<div>${typeof sol === 'function' ? sol() : sol}</div>` : ''}</div>`;
@@ -307,8 +307,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -320,7 +320,7 @@
       const q = qs[idx];
       window.PF.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card ph-tete"><div class="pf-tete"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-            <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p></div>
+            <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p></div>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}${q.consigne ? `<div class="er-consigne">${q.consigne}</div>` : ''}${q.enonce ? `<div class="ph-enonce">${q.enonce}</div>` : ''}
           <div data-a="parties"></div><div data-a="retour"></div><div class="er-actions" data-a="suite"></div></div>`;
@@ -332,7 +332,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -347,10 +347,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       SOM.marquer({ note });
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : refais les manipulations des modules 2 et 3, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : refais les manipulations des modules 2 et 3, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -400,11 +400,11 @@
         lien: revois(['conversions']),
         verifier(v) {
           if (proche(v, Ts, 0.012) || proche(v, exS, 0.012)) return { ok: true };
-          if (proche(v, o.T * Math.pow(10, -k), 0.02)) return { diag: `${unitePref} : ${sym} en secondes est plus petit que ${sym} en ${u}.` };
-          if (proche(v, o.T, 0.02)) return { diag: `Tu as recopié la valeur en ${u} : convertis-la en secondes (${unitePref}).` };
+          if (proche(v, o.T * Math.pow(10, -k), 0.02)) return { diag: `${unitePref} : ${sym} en secondes est plus petit que ${sym} en ${u}.` };
+          if (proche(v, o.T, 0.02)) return { diag: `Tu as recopié la valeur en ${u} : convertis-la en secondes (${unitePref}).` };
           if (u === 'ms' && proche(v, o.T * 1e-6, 0.02)) return { diag: '1 ms = 10<sup>−3</sup> s (10<sup>−6</sup> s, c\'est 1 µs).' };
           if (u === 'µs' && proche(v, o.T * 1e-3, 0.02)) return { diag: '1 µs = 10<sup>−6</sup> s (10<sup>−3</sup> s, c\'est 1 ms).' };
-          return { diag: `${unitePref} : multiplie ${fmt(o.T)} par 10<sup>${k === -3 ? '−3' : '−6'}</sup>.` };
+          return { diag: `${unitePref} : multiplie ${fmt(o.T)} par 10<sup>${k === -3 ? '−3' : '−6'}</sup>.` };
         },
         solution: `${sym} = ${fmt(o.T)} ${u} = ${sciCourt(Ts)} s`,
         remplir(ins) { ins[0].value = fmt(+(Ts / Math.pow(10, k)).toPrecision(4)); ins[1].value = String(k).replace('-', MOINS); },
@@ -416,11 +416,11 @@
       label: `f = 1 / ${sym} =`, unite: 'Hz', calc: true,
       verifier(v) {
         if (proche(v, fJ, 0.02) || proche(v, fEx, 0.025)) return { ok: true };
-        if (k && proche(v, 1 / o.T, 0.03)) return { diag: `Tu as gardé ${sym} en ${u} : dans f = 1 / ${sym}, ${sym} doit être en secondes.` };
-        if (k && proche(v, 1 / (o.T * Math.pow(10, -k)), 0.03)) return { diag: `${unitePref} : ${sym} en secondes est plus petit que ${sym} en ${u}.` };
-        if (proche(v, Ts, 0.03) || proche(v, o.T, 0.03)) return { diag: `f = 1 / ${sym} : la fréquence est l'inverse de la période.` };
-        if (proche(v, fJ / 1000, 0.03)) return { diag: 'Donne f en hertz (Hz), pas en kilohertz : 1 kHz = 10<sup>3</sup> Hz.' };
-        return { diag: `f = 1 / ${sym}, avec ${sym} en secondes : calcule 1 / ${k ? `(${sciCourt(Ts)})` : fmt(Ts)}.` };
+        if (k && proche(v, 1 / o.T, 0.03)) return { diag: `Tu as gardé ${sym} en ${u} : dans f = 1 / ${sym}, ${sym} doit être en secondes.` };
+        if (k && proche(v, 1 / (o.T * Math.pow(10, -k)), 0.03)) return { diag: `${unitePref} : ${sym} en secondes est plus petit que ${sym} en ${u}.` };
+        if (proche(v, Ts, 0.03) || proche(v, o.T, 0.03)) return { diag: `f = 1 / ${sym} : la fréquence est l'inverse de la période.` };
+        if (proche(v, fJ / 1000, 0.03)) return { diag: 'Donne f en hertz (Hz), pas en kilohertz : 1 kHz = 10<sup>3</sup> Hz.' };
+        return { diag: `f = 1 / ${sym}, avec ${sym} en secondes : calcule 1 / ${k ? `(${sciCourt(Ts)})` : fmt(Ts)}.` };
       },
       solution: () => `f = 1 / ${sym} = 1 / ${k ? `(${sciCourt(Ts)})` : fmt(Ts)} ${egal(fJ)} <b>${court(fJ)} Hz</b>`,
       remplir(ins) { ins[0].value = court(fJ).replace(/\s/g, ''); },

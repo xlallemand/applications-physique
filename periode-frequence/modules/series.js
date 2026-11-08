@@ -80,7 +80,7 @@
       theme: 'Signal à l\'axe gradué', methode: 'directe',
       consigne: 'Détermine la période T, puis la fréquence f du signal.',
       enonce: `<p>Tension délivrée par ${SOURCES[forme]}.</p>`,
-      correction: `${nB > 1 ? `${nB} périodes tombent sur des graduations écrites : ${nB}T = ${fmt(nB * cas.T)} ${unite}, donc T = ${fmt(nB * cas.T)} / ${nB} = ` : 'Une période tombe sur des graduations écrites : T = '}<b>${fmt(cas.T)} ${unite}</b>.`,
+      correction: `${nB > 1 ? `${nB} périodes tombent sur des graduations écrites : ${nB}T = ${fmt(nB * cas.T)} ${unite}, donc T = ${fmt(nB * cas.T)} / ${nB} = ` : 'Une période tombe sur des graduations écrites : T = '}<b>${fmt(cas.T)} ${unite}</b>.`,
       bilan: `T = ${fmt(cas.T)} ${unite} et f = 1 / T ${PF.egal(f)} ${PF.court(f)} Hz.`,
     });
   }
@@ -130,7 +130,7 @@
     const sit = { signal: { forme, periode: T, ampl: entre(5, 9) / 2, phase: PF.phaseSommet(forme, T, c0 * base) }, baseTemps: base, sensibilite: 2 };
     const u = OSC.unite(base), Tu = OSC.enU(T, u);
     const q = { theme: 'Oscilloscope', consigne: 'Détermine la période T du signal sur l\'écran, puis sa fréquence f.',
-      enonce: '<p>Réglages affichés sous l\'écran : sensibilité verticale (CH1) à gauche, base de temps (Time) à droite.</p>', parties: [], sit, c0, net };
+      enonce: '<p>Réglages affichés sous l\'écran : sensibilité verticale (CH1) à gauche, base de temps (Time) à droite.</p>', parties: [], sit, c0, net };
     const remplir = v => { const pf = PF.partiesFrequence({ T: +v.toPrecision(3), unite: u, exact: Tu }); q.parties[1] = pf[0]; q.parties[2] = pf[1]; };
     q.parties.push({
       type: 'perso',
@@ -147,7 +147,7 @@
           montrer() {
             const r = oq.montrer(), k = r.k, d = +(k * q1 * OSC.enU(base, u)).toPrecision(4);
             remplir(Tu);
-            ch.innerHTML = `<p class="pf-corr">${k > 1 ? `${k} périodes occupent ${fmt(r.carreaux)} carreaux : ${k}T = ${fmt(r.carreaux)} × ${OSC.baseTexte(base).replace(/,0+ /, ' ')} = ${fmt(d)} ${u}, donc ` : `Une période occupe ${fmt(r.carreaux)} carreaux : `}<b>T = ${PF.court(Tu)} ${u}</b>.</p>`;
+            ch.innerHTML = `<p class="pf-corr">${k > 1 ? `${k} périodes occupent ${fmt(r.carreaux)} carreaux : ${k}T = ${fmt(r.carreaux)} × ${OSC.baseTexte(base).replace(/,0+ /, ' ')} = ${fmt(d)} ${u}, donc ` : `Une période occupe ${fmt(r.carreaux)} carreaux : `}<b>T = ${PF.court(Tu)} ${u}</b>.</p>`;
           },
         };
       },
@@ -177,18 +177,18 @@
           aide: 'Écris le nombre, puis l\'exposant de 10 (laisse 0 si tu écris un nombre décimal comme 0,002).',
           verifier(v) {
             if (PF.proche(v, Ts, 0.012)) return { ok: true };
-            if (PF.proche(v, fHz, 0.02) || PF.proche(v, c.f, 0.02)) return { diag: 'T = 1 / f : la période est l\'inverse de la fréquence.' };
-            if (c.u === 'kHz' && PF.proche(v, 1 / c.f, 0.02)) return { diag: 'Convertis d\'abord f en hertz : 1 kHz = 10<sup>3</sup> Hz.' };
-            return { diag: `T = 1 / f, avec f en hertz : calcule 1 / ${fmt(fHz)}.` };
+            if (PF.proche(v, fHz, 0.02) || PF.proche(v, c.f, 0.02)) return { diag: 'T = 1 / f : la période est l\'inverse de la fréquence.' };
+            if (c.u === 'kHz' && PF.proche(v, 1 / c.f, 0.02)) return { diag: 'Convertis d\'abord f en hertz : 1 kHz = 10<sup>3</sup> Hz.' };
+            return { diag: `T = 1 / f, avec f en hertz : calcule 1 / ${fmt(fHz)}.` };
           },
           solution: `T = 1 / ${fmt(fHz)} ${Number.isInteger(1e6 / fHz) ? '=' : '≈'} ${PF.sciCourt(Ts)} s`,
           remplir(ins) { const e = Math.floor(Math.log10(Ts)); ins[0].value = fmt(+(Ts / Math.pow(10, e)).toPrecision(3)); ins[1].value = String(e).replace('-', '−'); } },
         { type: 'nombre', q: 'Convertis T en millisecondes.', label: 'T =', unite: 'ms',
           verifier(v) {
             if (PF.proche(v, Ts * 1e3, 0.012)) return { ok: true };
-            if (PF.proche(v, Ts * 1e-3, 0.02)) return { diag: '1 s = 10<sup>3</sup> ms : T en ms est plus grand que T en secondes.' };
-            if (PF.proche(v, Ts, 0.02)) return { diag: 'Tu as recopié la valeur en secondes : 1 s = 10<sup>3</sup> ms.' };
-            return { diag: '1 s = 10<sup>3</sup> ms : multiplie T (en s) par 10<sup>3</sup>.' };
+            if (PF.proche(v, Ts * 1e-3, 0.02)) return { diag: '1 s = 10<sup>3</sup> ms : T en ms est plus grand que T en secondes.' };
+            if (PF.proche(v, Ts, 0.02)) return { diag: 'Tu as recopié la valeur en secondes : 1 s = 10<sup>3</sup> ms.' };
+            return { diag: '1 s = 10<sup>3</sup> ms : multiplie T (en s) par 10<sup>3</sup>.' };
           },
           solution: `T = ${PF.sciCourt(Ts)} s ${PF.egal(Ts * 1e3)} ${PF.court(Ts * 1e3)} ms`,
           remplir(ins) { ins[0].value = PF.court(Ts * 1e3).replace(/\s/g, ''); } },

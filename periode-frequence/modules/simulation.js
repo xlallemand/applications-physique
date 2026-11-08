@@ -51,7 +51,7 @@
       zone.innerHTML = '';
       const carte = el('div', 'er-card');
       carte.innerHTML = `<div class="pf-sit-tete"><div class="pf-mode" role="radiogroup" aria-label="Mode">
-          <button type="button" role="radio" class="lg-meth" data-m="defi" aria-checked="${mode === 'defi'}">Défi : fréquence masquée</button>
+          <button type="button" role="radio" class="lg-meth" data-m="defi" aria-checked="${mode === 'defi'}">Défi : fréquence masquée</button>
           <button type="button" role="radio" class="lg-meth" data-m="libre" aria-checked="${mode === 'libre'}">Réglage libre</button></div>
           ${mode === 'defi' ? '<button type="button" class="btn-small" data-a="nouveau">↺ Nouveau défi</button>' : ''}</div>
         <div data-a="corps"></div>`;
@@ -100,7 +100,7 @@
               <li><span>Calcule <b>T = (nombre de carreaux × base de temps) / n</b>.</span><div class="pf-li-zone" data-z="1"></div></li>
               <li><span>Change la <b>base de temps</b> (boutons − / + sous l'oscilloscope).</span><div class="pf-li-zone" data-z="2"></div></li>
               <li><span>Calcule la fréquence <b>f = 1 / T</b>.</span><div class="pf-li-zone" data-z="3"></div></li>
-              <li><span>Bilan : coche la bonne relation.</span><div class="pf-li-zone" data-z="4"></div></li>
+              <li><span>Bilan : coche la bonne relation.</span><div class="pf-li-zone" data-z="4"></div></li>
             </ol>
             <div data-a="fin"></div>
           </div>
@@ -137,15 +137,15 @@
         const n0 = D.periode / base0, n1 = D.periode / b, u = info.unite;
         PF.question(Z(2), { parties: [{
           type: 'choix', colonne: true,
-          q: `La base de temps vaut maintenant ${OSC.baseTexte(b)} par carreau. La période T du signal a-t-elle changé ?`,
+          q: `La base de temps vaut maintenant ${OSC.baseTexte(b)} par carreau. La période T du signal a-t-elle changé ?`,
           options: [
-            { id: 'non', label: 'Non : T est la même, seul l\'affichage a changé.' },
-            { id: 'plus', label: `Oui : T a ${b > base0 ? 'diminué' : 'augmenté'}, le motif est plus ${b > base0 ? 'serré' : 'étalé'}.` },
-            { id: 'moins', label: `Oui : T a ${b > base0 ? 'augmenté' : 'diminué'}, chaque carreau vaut ${b > base0 ? 'plus' : 'moins'} de temps.` },
+            { id: 'non', label: 'Non : T est la même, seul l\'affichage a changé.' },
+            { id: 'plus', label: `Oui : T a ${b > base0 ? 'diminué' : 'augmenté'}, le motif est plus ${b > base0 ? 'serré' : 'étalé'}.` },
+            { id: 'moins', label: `Oui : T a ${b > base0 ? 'augmenté' : 'diminué'}, chaque carreau vaut ${b > base0 ? 'plus' : 'moins'} de temps.` },
           ],
           bonne: 'non',
-          indice: 'Le signal du générateur n\'a pas changé : seule l\'échelle de l\'écran a changé. Le nombre de carreaux d\'une période change, mais chaque carreau vaut une autre durée.',
-          solution: `Avec ${OSC.baseTexte(base0)} par carreau, une période occupe ${fmt(+n0.toFixed(2))} carreaux ; avec ${OSC.baseTexte(b)} par carreau, ${fmt(+n1.toFixed(2))} carreaux. Dans les deux cas, T = ${PF.court(OSC.enU(D.periode, u))} ${u} : <b>la période ne dépend pas de la base de temps</b>.`,
+          indice: 'Le signal du générateur n\'a pas changé : seule l\'échelle de l\'écran a changé. Le nombre de carreaux d\'une période change, mais chaque carreau vaut une autre durée.',
+          solution: `Avec ${OSC.baseTexte(base0)} par carreau, une période occupe ${fmt(+n0.toFixed(2))} carreaux ; avec ${OSC.baseTexte(b)} par carreau, ${fmt(+n1.toFixed(2))} carreaux. Dans les deux cas, T = ${PF.court(OSC.enU(D.periode, u))} ${u} : <b>la période ne dépend pas de la base de temps</b>.`,
         }] }, { fin() { oq.activerBase(true); etapeA(3); frequence(Z(3), info, D, () => { etapeA(4); bilan(); }); } }, 'manip');
         PF.amener(Z(2));
       }
@@ -154,7 +154,7 @@
       function bilan() {
         PF.question(Z(4), { parties: [{
           type: 'choix', colonne: true,
-          q: 'Quelle relation permet de trouver la période sur un écran d\'oscilloscope ?',
+          q: 'Quelle relation permet de trouver la période sur un écran d\'oscilloscope ?',
           options: [
             { id: 'ok', label: 'T = nombre de carreaux d\'une période × base de temps' },
             { id: 'sens', label: 'T = nombre de carreaux d\'une période × sensibilité verticale' },
@@ -164,13 +164,13 @@
           bonne: 'ok',
           indices: {
             sens: 'La sensibilité verticale (CH1, en V/carreau) sert aux tensions, lues verticalement. Une durée se lit horizontalement, avec la base de temps (Time).',
-            div: 'La base de temps est la durée d\'un carreau : on multiplie le nombre de carreaux par la durée d\'un carreau.',
-            dep: 'Tu viens de le voir : en changeant la base de temps, la période ne change pas.',
+            div: 'La base de temps est la durée d\'un carreau : on multiplie le nombre de carreaux par la durée d\'un carreau.',
+            dep: 'Tu viens de le voir : en changeant la base de temps, la période ne change pas.',
           },
         }] }, {
           fin() {
             etapeA(5);
-            finDefi($('fin'), '<b>T = nombre de carreaux × base de temps</b> (pour une période ; pour n périodes, on divise ensuite par n). La base de temps change l\'affichage, pas le signal. Puis f = 1 / T, avec T en secondes.',
+            finDefi($('fin'), '<b>T = nombre de carreaux × base de temps</b> (pour une période ; pour n périodes, on divise ensuite par n). La base de temps change l\'affichage, pas le signal. Puis f = 1 / T, avec T en secondes.',
               { href: 'module_3b_curseurs.html', label: 'Utiliser les curseurs →' });
           },
         }, 'manip');
@@ -187,11 +187,11 @@
           <div class="pf-manip-fig"><p class="pf-fig-t">Un générateur délivre un signal dont la fréquence est masquée. Mesure sa période avec les curseurs de l'oscilloscope.</p><div data-a="fig"></div></div>
           <div class="pf-manip-panneau">
             <ol class="pf-deroule">
-              <li><span>Appuie sur <b>Cursor</b>, puis règle <b>Mode : Manuel</b> (1<sup>er</sup> bouton à droite de l'écran) et vérifie <b>Type : X</b> (2<sup>e</sup> bouton) : curseurs horizontaux, pour mesurer une durée.</span><div class="pf-li-zone" data-z="0"></div></li>
+              <li><span>Appuie sur <b>Cursor</b>, puis règle <b>Mode : Manuel</b> (1<sup>er</sup> bouton à droite de l'écran) et vérifie <b>Type : X</b> (2<sup>e</sup> bouton) : curseurs horizontaux, pour mesurer une durée.</span><div class="pf-li-zone" data-z="0"></div></li>
               <li><span>Choisis <b>CurA</b> (4<sup>e</sup> bouton) et tourne le <b>bouton de réglage</b> pour placer le curseur A sur un sommet. Choisis ensuite <b>CurB</b> (5<sup>e</sup> bouton) et place le curseur B <b>n périodes</b> plus loin (le plus grand nombre possible). Lis <b>ΔX</b> sous l'écran.</span><div class="pf-li-zone" data-z="1"></div></li>
               <li><span>Calcule la fréquence <b>f = 1 / T</b>.</span><div class="pf-li-zone" data-z="2"></div></li>
             </ol>
-            <p class="pf-li-aide">Astuce : CurA et CurB choisis ensemble bougent en même temps.</p>
+            <p class="pf-li-aide">Astuce : CurA et CurB choisis ensemble bougent en même temps.</p>
             <div data-a="fin"></div>
           </div>
         </div>`;
@@ -207,8 +207,8 @@
           etape = 2; deroule(lis, 2);
           frequence(Z(2), info, D, () => {
             deroule(lis, 3);
-            finDefi($('fin'), 'Avec les curseurs : <b>Cursor</b>, <b>Mode : Manuel</b>, <b>Type : X</b>, puis CurA et CurB sur deux points qui se correspondent, n périodes plus loin. L\'oscilloscope affiche <b>ΔX</b>, la durée entre les curseurs : <b>T = ΔX / n</b>. Puis f = 1 / T, avec T en secondes.',
-              { href: 'module_4_questions.html', label: 'Module 4 : entraînement →' });
+            finDefi($('fin'), 'Avec les curseurs : <b>Cursor</b>, <b>Mode : Manuel</b>, <b>Type : X</b>, puis CurA et CurB sur deux points qui se correspondent, n périodes plus loin. L\'oscilloscope affiche <b>ΔX</b>, la durée entre les curseurs : <b>T = ΔX / n</b>. Puis f = 1 / T, avec T en secondes.',
+              { href: 'module_4_questions.html', label: 'Module 4 : entraînement →' });
           });
         },
       });
@@ -230,7 +230,7 @@
               <span class="osc-val" data-a="f"></span>
               <button type="button" class="btn-secondary osc-fl" data-a="fPlus" aria-label="Fréquence plus grande">+</button></div>
             <div class="callout pf-lecture" data-a="lecture" aria-live="polite"></div>
-            <p class="pf-li-aide">Change la fréquence : le motif se resserre ou s'étale. Change la base de temps : l'affichage change, pas le signal.</p>
+            <p class="pf-li-aide">Change la fréquence : le motif se resserre ou s'étale. Change la base de temps : l'affichage change, pas le signal.</p>
           </div>
         </div>`;
       const $ = a => corps.querySelector(`[data-a="${a}"]`);
@@ -240,8 +240,8 @@
         onBase(b) { st.base = b; lecture(); } });
       function lecture() {
         const T = 1000 / st.f, u = OSC.unite(st.base);
-        $('lecture').innerHTML = `<p>Période du signal : T = 1 / f = <b>${PF.court(OSC.enU(T, u))} ${u}</b>.</p>
-          <p>Base de temps : ${OSC.baseTexte(st.base)} par carreau, donc une période occupe ${fmt(+(T / st.base).toFixed(2))} carreaux.</p>`;
+        $('lecture').innerHTML = `<p>Période du signal : T = 1 / f = <b>${PF.court(OSC.enU(T, u))} ${u}</b>.</p>
+          <p>Base de temps : ${OSC.baseTexte(st.base)} par carreau, donc une période occupe ${fmt(+(T / st.base).toFixed(2))} carreaux.</p>`;
       }
       function maj() { $('f').textContent = fmt(st.f) + ' Hz'; ecran.maj({ signal: sig() }); lecture(); }
       $('forme').onchange = () => { st.forme = $('forme').value; maj(); };
