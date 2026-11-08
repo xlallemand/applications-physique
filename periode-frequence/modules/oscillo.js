@@ -33,7 +33,10 @@
    OSC.question(zones, sit, o) : mesurer T sur l'écran
      zones = { figure, champs } ; sit = { signal, baseTemps, sensibilite }
      o = { methodes: ['carreaux', 'curseurs'] (méthodes proposées), methode (choix de départ),
-           bases, onBase(b), onFini(T (ms), info), onErreur(), onPhase('compte'), onChange(etat de l'oscilloscope) }
+           bases, onBase(b), onFini(T (ms), info), onErreur(), onPhase('compte' | 'recompte'), onChange(etat de l'oscilloscope) }
+     Base de temps modifiable jusqu'à la fin de la mesure : tout se recalcule avec la base affichée ;
+       si elle change après le comptage, le comptage est à refaire (onPhase('recompte')).
+       Si une période entière ne tient pas sur l'écran, l'élève est invité à augmenter la base de temps.
      Carreaux : nombre de carreaux de n périodes et n, puis T = (nombre de carreaux × base de temps) / n ;
        refusé (sans erreur) si la durée ne se compte pas au cinquième de carreau.
      Curseurs : curseurs A et B sur deux points qui se correspondent, n, puis T = ΔX / n.
@@ -210,10 +213,10 @@
           <div class="osc-ecran"><svg class="osc-svg" viewBox="0 0 ${W} ${H}" xmlns="${NS}" role="img" aria-label="Écran d'oscilloscope : 10 carreaux en largeur, 8 en hauteur"></svg></div>
           <div class="osc-soft">${TOUCHES.map((t, i) => `<button type="button" class="osc-touche" data-t="${i}" aria-label="${t.aria}" style="top:${((Y0 + i * ME + .6) / H * 100).toFixed(2)}%;height:${((ME - 1.2) / H * 100).toFixed(2)}%"></button>`).join('')}</div>
           <div class="osc-panneau">
-            <div class="osc-groupe"><span class="osc-groupe-t">MENU</span><button type="button" class="osc-cursor" data-a="cursor">Cursor</button></div>
             <div class="osc-groupe"><span class="osc-groupe-t">Réglage</span>
               <button type="button" class="osc-bouton" data-a="bouton" aria-label="Bouton de réglage : tourne-le (ou appuie sur sa moitié gauche ou droite) pour déplacer le curseur sélectionné"><span class="osc-bouton-ind"></span></button>
               <span class="osc-bouton-l">↺ ↻</span></div>
+            <div class="osc-groupe"><span class="osc-groupe-t">MENU</span><button type="button" class="osc-cursor" data-a="cursor">Cursor</button></div>
           </div>
         </div>
       </div>
@@ -395,7 +398,7 @@
       signal: S.signal, baseTemps: S.baseTemps, sensibilite: S.sensibilite, bases: o.bases,
       curseurs: methode === 'curseurs', trait: methode === 'carreaux',
       onChange(st) { if (!fini && refs.msg && methode === 'curseurs') refs.msg.innerHTML = ''; if (o.onChange) o.onChange(st); },
-      onBase(b) { S.baseTemps = b; majUnites(); if (o.onBase) o.onBase(b); },
+      onBase(b) { S.baseTemps = b; majUnites(); if (!fini && phase === 'T') recompter(); else if (!fini) msg(''); if (o.onBase) o.onBase(b); },
     });
 
     // champs (zone des champs)
@@ -462,14 +465,30 @@
       if (d.length > 1) return ['T = (nombre de carreaux × base de temps) / n : vérifie les points suivants.', ...d.map(x => '<br>· ' + x)];
       return [d[0] || (avecCarreaux ? 'T = (nombre de carreaux × base de temps) / n, avec la base de temps lue après « Time ».' : 'T = ΔX / n, avec ΔX lu sous l\'écran.')];
     }
+    // une période entière ne tient pas sur l'écran : base de temps à augmenter
+    const tropLong = () => {
+      if (kMax() >= 1) return false;
+      msg(info('Une période entière ne tient pas sur l\'écran : augmente la base de temps (Time).'));
+      return true;
+    };
+    // la base de temps a changé après le comptage : le nombre de carreaux aussi
+    function recompter() {
+      phase = 'compte'; resCompte = null;
+      ['car', 'n', 'T'].forEach(x => { inp(x).disabled = false; inp(x).value = ''; inp(x).classList.remove('is-ok', 'is-ko'); });
+      refs.vCompte.disabled = false;
+      refs.pT.hidden = true;
+      if (o.onPhase) o.onPhase('recompte');
+      msg(info('La base de temps a changé : le nombre de carreaux aussi. Recompte les carreaux.'));
+    }
     const versCurseurs = () => (methodes.indexOf('curseurs') >= 0
       ? info('En comptant les carreaux, cette durée ne se lit pas assez précisément : utilise les curseurs.<br><button type="button" class="btn-small osc-vers-cur">Utiliser les curseurs</button>')
-      : info('Cette durée ne tombe pas sur un nombre exact de cinquièmes de carreau : choisis un autre nombre de périodes.'));
+      : info('Cette durée ne tombe pas sur un nombre exact de cinquièmes de carreau : choisis un autre nombre de périodes, ou change la base de temps.'));
 
     /* ----- En comptant les carreaux : étape « compter » ----- */
     function verifierCompte() {
       if (fini || phase !== 'compte') return;
       const vc = PF.lire(inp('car').value), vn = PF.lire(inp('n').value);
+      if (tropLong()) return;
       if (isNaN(vc) || isNaN(vn)) { msg(info('Écris un nombre dans chaque case (avec une virgule si besoin).')); return; }
       if (!(vn >= 1 && Math.round(vn) === vn)) { marque('n', false); erreur(['n est un nombre entier de périodes.']); return; }
       const Q = q1();
@@ -492,7 +511,6 @@
       resCompte = { c: vc, n: k };
       ['car', 'n'].forEach(x => { inp(x).disabled = true; });
       refs.vCompte.disabled = true;
-      ecran.activerBase(false);
       refs.rappel.innerHTML = `${k > 1 ? `${k} périodes` : 'Une période'} : ${fmt(vc)} carreaux. Time : ${baseTexte(S.baseTemps)} par carreau ; CH1 : ${sensTexte(S.sensibilite)} par carreau.`;
       msg(`<p class="ph-ok">✓ Comptage juste.</p>${conseil(k)}`);
       refs.pT.hidden = false;
@@ -518,6 +536,7 @@
       if (fini) return;
       const m = ecran.mesure();
       if (!m.actifs || m.type !== 'X') { msg(info('Affiche d\'abord les curseurs de temps : appuie sur <b>Cursor</b>, puis règle <b>Mode : Manuel</b> et <b>Type : X</b>.')); return; }
+      if (tropLong()) return;
       const vn = PF.lire(inp('nc').value), v = PF.lire(inp('Tc').value);
       if (isNaN(vn) || isNaN(v)) { msg(info('Écris un nombre dans chaque case (avec une virgule si besoin).')); return; }
       const Q = q1(), k = Math.round(m.d / Q);

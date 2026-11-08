@@ -32,7 +32,7 @@
       const pf = PF.partiesFrequence({ T: +v.toPrecision(3), unite: u, exact: T });
       for (let i = 0; i < nFreq; i++) q.parties[1 + i] = pf[i];
     };
-    q.parties.push({
+    const partie = {
       type: 'perso',
       q: 'Détermine la période T du signal (méthode au choix).',
       monter(zone, api) {
@@ -46,11 +46,13 @@
           montrer() {
             lg.detruire();
             Tval = T; remplirFrequence(T);
-            zone.innerHTML = `${LG.figure(def, [], true)}<p class="pf-corr">${o.correction}</p>`;
+            zone.innerHTML = LG.figure(def, [], true);
+            partie.solution = `<p class="pf-corr">${o.correction}</p>`;   // dans l'encadré « Réponse »
           },
         };
       },
-    });
+    };
+    q.parties.push(partie);
     for (let i = 0; i < nFreq; i++) q.parties.push(null);         // remplacées une fois T connue
     q.bilan = o.bilan;
     return q;
@@ -132,7 +134,7 @@
     const q = { theme: 'Oscilloscope', consigne: 'Détermine la période T du signal sur l\'écran, puis sa fréquence f.',
       enonce: '<p>Réglages affichés sous l\'écran : sensibilité verticale (CH1) à gauche, base de temps (Time) à droite.</p>', parties: [], sit, c0, net };
     const remplir = v => { const pf = PF.partiesFrequence({ T: +v.toPrecision(3), unite: u, exact: Tu }); q.parties[1] = pf[0]; q.parties[2] = pf[1]; };
-    q.parties.push({
+    const partie = {
       type: 'perso',
       q: 'Mesure la période T (méthode au choix).',
       monter(zone, api) {
@@ -147,11 +149,13 @@
           montrer() {
             const r = oq.montrer(), k = r.k, d = +(k * q1 * OSC.enU(base, u)).toPrecision(4);
             remplir(Tu);
-            ch.innerHTML = `<p class="pf-corr">${k > 1 ? `${k} périodes occupent ${fmt(r.carreaux)} carreaux : ${k}T = ${fmt(r.carreaux)} × ${OSC.baseTexte(base).replace(/,0+ /, ' ')} = ${fmt(d)} ${u}, donc ` : `Une période occupe ${fmt(r.carreaux)} carreaux : `}<b>T = ${PF.court(Tu)} ${u}</b>.</p>`;
+            ch.innerHTML = '';
+            partie.solution = `<p class="pf-corr">${k > 1 ? `${k} périodes occupent ${fmt(r.carreaux)} carreaux : ${k}T = ${fmt(r.carreaux)} × ${OSC.baseTexte(base).replace(/,0+ /, ' ')} = ${fmt(d)} ${u}, donc ` : `Une période occupe ${fmt(r.carreaux)} carreaux : `}<b>T = ${PF.court(Tu)} ${u}</b>.</p>`;   // dans l'encadré « Réponse »
           },
         };
       },
-    }, null, null);
+    };
+    q.parties.push(partie, null, null);
     q.bilan = `T = ${PF.court(Tu)} ${u} et f = 1 / T ${PF.egal(1000 / T)} ${PF.court(1000 / T)} Hz.`;
     return q;
   }

@@ -3,7 +3,7 @@
    PF.simulation(zone, 'carreaux' | 'curseurs')
 
    'carreaux' (module_3a_carreaux.html) — sans curseur ; un appui sur l'écran trace un trait
-     vertical en pointillés. Défi (fréquence masquée), déroulé guidé :
+     vertical en pointillés. Défi, déroulé guidé :
        1. compter les carreaux de n périodes, et n ;
        2. T = (nombre de carreaux × base de temps) / n ;
        3. changer la base de temps : T ne change pas ;
@@ -13,7 +13,8 @@
        1. Cursor, Mode : Manuel, Type : X ;
        2. curseurs A et B (CurA, CurB, bouton de réglage), n, T = ΔX / n ;
        3. f = 1 / T.
-   Dans les deux simulateurs, un « Réglage libre » : forme et fréquence du signal, base de temps.
+   Dans les deux simulateurs, la base de temps se change à tout moment de la mesure : tout se recalcule
+   avec la base affichée (OSC.question).
    ============================================================ */
 (function () {
   'use strict';
@@ -41,27 +42,19 @@
     { forme: 'sinus', periode: 0.42, base: 0.1, sommet: 0.7 },
     { forme: 'trompette', periode: 6.4, base: 2, sommet: 0.4 },
   ];
-  const FORMES = [{ id: 'sinus', nom: 'Sinusoïde' }, { id: 'clarinette', nom: 'Son de clarinette' }, { id: 'trompette', nom: 'Son de trompette' }];
-  const FREQS = [50, 100, 125, 200, 250, 400, 440, 500, 800, 1000, 1250, 2000, 2500, 5000];
   const deroule = (lis, n) => lis.forEach((li, k) => { li.classList.toggle('fait', k < n); li.classList.toggle('ici', k === n); li.classList.toggle('avenir', k > n); });
 
   function simulation(zone, type) {
-    let mode = 'defi', dernier = -1;
+    let dernier = -1;
     function afficher() {
       zone.innerHTML = '';
       const carte = el('div', 'er-card');
-      carte.innerHTML = `<div class="pf-sit-tete"><div class="pf-mode" role="radiogroup" aria-label="Mode">
-          <button type="button" role="radio" class="lg-meth" data-m="defi" aria-checked="${mode === 'defi'}">Défi : fréquence masquée</button>
-          <button type="button" role="radio" class="lg-meth" data-m="libre" aria-checked="${mode === 'libre'}">Réglage libre</button></div>
-          ${mode === 'defi' ? '<button type="button" class="btn-small" data-a="nouveau">↺ Nouveau défi</button>' : ''}</div>
+      carte.innerHTML = `<div class="pf-sit-tete" style="justify-content:flex-end"><button type="button" class="btn-small" data-a="nouveau">↺ Nouveau défi</button></div>
         <div data-a="corps"></div>`;
       zone.appendChild(carte);
-      carte.querySelectorAll('.lg-meth').forEach(b => { b.onclick = () => { if (mode !== b.dataset.m) { mode = b.dataset.m; afficher(); } }; });
       const corps = carte.querySelector('[data-a="corps"]');
-      if (mode === 'defi') {
-        carte.querySelector('[data-a="nouveau"]').onclick = () => afficher();
-        (type === 'curseurs' ? defiCurseurs : defiCarreaux)(corps);
-      } else libre(corps);
+      carte.querySelector('[data-a="nouveau"]').onclick = () => afficher();
+      (type === 'curseurs' ? defiCurseurs : defiCarreaux)(corps);
     }
     function tirer(liste) {
       let i;
@@ -111,12 +104,18 @@
       const etapeA = n => { etape = n; deroule(lis, n); };
       etapeA(0);
       let info = null;
-      const base0 = D.base;
       const champsZ = el('div');
       Z(0).appendChild(champsZ);
+      let pT = null, msgZ = null;
       const oq = OSC.question({ figure: $('fig'), champs: champsZ }, sit, {
         methodes: ['carreaux'], bases: BASES,
-        onPhase(n) { if (n === 'compte') { etapeA(1); Z(1).appendChild(champsZ.querySelector('[data-a="pT"]')); Z(1).appendChild(champsZ.querySelector('[data-a="msg"]')); } },
+        onPhase(n) {
+          const ch = champsZ.querySelector('.osc-champs');
+          if (!pT) { pT = ch.querySelector('[data-a="pT"]'); msgZ = ch.querySelector('[data-a="msg"]'); }
+          // comptage juste : T se calcule à l'étape 2 ; base changée ensuite : retour au comptage
+          if (n === 'compte') { etapeA(1); Z(1).appendChild(pT); Z(1).appendChild(msgZ); }
+          else if (n === 'recompte') { etapeA(0); ch.appendChild(pT); ch.appendChild(msgZ); PF.amener(Z(0)); }
+        },
         onBase(b) { if (etape === 2) baseChangee(b); },
         onFini(t, inf) {
           info = inf;
@@ -126,7 +125,6 @@
           PF.amener(Z(2));
         },
       });
-      oq.activerBase(false);
 
       /* 3. la base de temps change, pas la période */
       let pose = false;
@@ -134,7 +132,7 @@
         if (pose) return;
         pose = true;
         oq.activerBase(false);
-        const n0 = D.periode / base0, n1 = D.periode / b, u = info.unite;
+        const base0 = info.base, n0 = D.periode / base0, n1 = D.periode / b, u = info.unite;
         PF.question(Z(2), { parties: [{
           type: 'choix', colonne: true,
           q: `La base de temps vaut maintenant ${OSC.baseTexte(b)} par carreau. La période T du signal a-t-elle changé ?`,
@@ -200,7 +198,7 @@
       let etape = 0;
       deroule(lis, 0);
       const oq = OSC.question({ figure: $('fig'), champs: Z(1) }, sit, {
-        methodes: ['curseurs'],
+        methodes: ['curseurs'], bases: BASES,
         // 1. réglages faits : on passe aux curseurs
         onChange(st) { if (etape === 0 && st.menu && st.mode === 'Manuel' && st.type === 'X') { etape = 1; deroule(lis, 1); PF.amener(Z(1)); } },
         onFini(t, info) {
@@ -212,43 +210,8 @@
           });
         },
       });
-      oq.activerBase(false);
     }
 
-    /* ============================================================
-       RÉGLAGE LIBRE
-       ============================================================ */
-    function libre(corps) {
-      const st = { forme: 'sinus', f: 500, base: 0.5 };
-      corps.innerHTML = `<div class="pf-manip pf-manip-osc">
-          <div class="pf-manip-fig"><div data-a="ecran"></div></div>
-          <div class="pf-manip-panneau">
-            <div class="osc-reglage"><span class="osc-base-t">Signal</span>
-              <select class="osc-select" data-a="forme" aria-label="Forme du signal">${FORMES.map(x => `<option value="${x.id}">${x.nom}</option>`).join('')}</select></div>
-            <div class="osc-reglage"><span class="osc-base-t">Fréquence du générateur</span>
-              <button type="button" class="btn-secondary osc-fl" data-a="fMoins" aria-label="Fréquence plus petite">−</button>
-              <span class="osc-val" data-a="f"></span>
-              <button type="button" class="btn-secondary osc-fl" data-a="fPlus" aria-label="Fréquence plus grande">+</button></div>
-            <div class="callout pf-lecture" data-a="lecture" aria-live="polite"></div>
-            <p class="pf-li-aide">Change la fréquence : le motif se resserre ou s'étale. Change la base de temps : l'affichage change, pas le signal.</p>
-          </div>
-        </div>`;
-      const $ = a => corps.querySelector(`[data-a="${a}"]`);
-      const sig = () => ({ forme: st.forme, periode: 1000 / st.f, ampl: 4.4, phase: 0 });
-      const ecran = OSC.monter($('ecran'), { signal: sig(), baseTemps: st.base, sensibilite: SENS, bases: BASES,
-        curseurs: type === 'curseurs', trait: type !== 'curseurs',
-        onBase(b) { st.base = b; lecture(); } });
-      function lecture() {
-        const T = 1000 / st.f, u = OSC.unite(st.base);
-        $('lecture').innerHTML = `<p>Période du signal : T = 1 / f = <b>${PF.court(OSC.enU(T, u))} ${u}</b>.</p>
-          <p>Base de temps : ${OSC.baseTexte(st.base)} par carreau, donc une période occupe ${fmt(+(T / st.base).toFixed(2))} carreaux.</p>`;
-      }
-      function maj() { $('f').textContent = fmt(st.f) + ' Hz'; ecran.maj({ signal: sig() }); lecture(); }
-      $('forme').onchange = () => { st.forme = $('forme').value; maj(); };
-      $('fMoins').onclick = () => { const k = FREQS.indexOf(st.f); if (k > 0) { st.f = FREQS[k - 1]; maj(); } };
-      $('fPlus').onclick = () => { const k = FREQS.indexOf(st.f); if (k < FREQS.length - 1) { st.f = FREQS[k + 1]; maj(); } };
-      maj();
-    }
     afficher();
   }
 
