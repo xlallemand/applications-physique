@@ -100,13 +100,18 @@
         type: 'nombre', label: `Nombre de carreaux${NB}:`, unite: 'carreaux', aria: 'Nombre de carreaux',
         verifier(v) {
           if (Math.abs(v - n[k]) <= 0.12) return { ok: true };
-          if (Math.abs(v - 2 * n[k]) <= 0.15) return { diag: `Tu as compté du minimum au maximum${NB}: c'est deux fois U<sub>max</sub>. Compte depuis le 0${NB}V (l'axe central) jusqu'au maximum.` };
+          if (OSC.dixiemes(v, n[k])) return { diag: OSC.MSG_TRAIT };
+          const zero = OSC.NY / 2 - (ecran.o.voies[k].pos || 0);       // ligne du 0 V de la voie k
+          if (Math.abs(v - 2 * n[k]) <= 0.15) return { diag: `Tu as compté du minimum au maximum${NB}: c'est deux fois U<sub>max</sub>. Compte depuis le 0${NB}V (repère ${k + 1} ▸) jusqu'au maximum.` };
           if (Math.abs(v - n[1 - k]) <= 0.12) return { diag: `C'est le signal ${NOM[1 - k]} (voie ${2 - k}). Compte sur le signal ${NOM[k]} (voie ${k + 1}).` };
-          if (Math.abs(v - (4 - n[k])) <= 0.12) return { diag: `Tu as compté depuis le haut de l'écran. Compte depuis le 0${NB}V (l'axe central) jusqu'au maximum du signal.` };
-          return { diag: `Compte les carreaux entre l'axe central (0${NB}V) et le point le plus haut du signal ${NOM[k]}, au cinquième de carreau près${NB}: sur l'axe vertical central, un petit trait vaut 0,2 carreau.` };
+          if (Math.abs(v - (zero - n[k])) <= 0.12) return { diag: `Tu as compté depuis le haut de l'écran. Compte depuis le 0${NB}V (repère ${k + 1} ▸) jusqu'au maximum du signal.` };
+          return { diag: `Compte les carreaux entre le 0${NB}V (repère ${k + 1} ▸) et le point le plus haut du signal ${NOM[k]}, au cinquième de carreau près${NB}: sur l'axe vertical central, un petit trait vaut 0,2 carreau.` };
         },
         solution: `Du 0${NB}V au maximum du signal ${NOM[k]}${NB}: ${fmt(n[k])} carreaux.`,
-        remplir(ins) { ins[0].value = fmt(n[k]); ecran.fleche(k ? 7.2 : 2.6, 4, 4 - n[k], 'U<tspan baseline-shift="sub" font-size="2.8">max</tspan>'); },
+        remplir(ins) {
+          const zero = OSC.NY / 2 - (ecran.o.voies[k].pos || 0);
+          ins[0].value = fmt(n[k]); ecran.fleche(k ? 7.2 : 2.6, zero, zero - n[k], 'U<tspan baseline-shift="sub" font-size="2.8">max</tspan>');
+        },
       });
       // U_max = nombre de carreaux × sensibilité de la voie k
       const calculer = k => ({

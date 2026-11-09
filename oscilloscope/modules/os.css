@@ -86,8 +86,10 @@ sub, sup { font-size: .7em; line-height: 0; }
 .osc-ecran { min-width: 0; }
 .osc-svg { display: block; width: 100%; height: auto; font-family: var(--font-sans); touch-action: pan-y;
   -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
-.osc-sans-curseurs .osc-corps { grid-template-columns: minmax(0, 1fr); }
-.osc-sans-curseurs .osc-soft, .osc-sans-curseurs .osc-panneau { display: none !important; }
+/* sans curseurs : seul le bouton de position reste (et les boutons du menu s'il y a deux voies) */
+.osc-sans-curseurs .osc-g-cur { display: none !important; }
+.osc-sans-soft .osc-corps { grid-template-columns: minmax(0, 1fr) auto; }
+.osc-sans-soft .osc-soft { display: none !important; }
 /* les cinq boutons à droite de l'écran, en face des lignes du menu */
 .osc-soft { position: relative; }
 .osc-touche {
@@ -96,8 +98,8 @@ sub, sup { font-size: .7em; line-height: 0; }
 }
 .osc-touche:active { transform: translateY(1px); box-shadow: inset 0 0 0 1.5px var(--line-strong); }
 .osc-touche:focus-visible, .osc-cursor:focus-visible, .osc-bouton:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.osc-panneau { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 4px 4px 4px 8px; border-left: 1.5px solid var(--line-strong); }
-.osc-groupe { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.osc-panneau { display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 4px 4px 8px; border-left: 1.5px solid var(--line-strong); }
+.osc-groupe { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .osc-groupe-t { font-size: .7rem; font-weight: 800; letter-spacing: .06em; color: var(--ink-2); text-transform: uppercase; }
 .osc-cursor {
   min-width: 72px; min-height: 44px; border: none; border-radius: 10px; cursor: pointer; font: inherit; font-weight: 800; font-size: .9rem;
@@ -105,11 +107,11 @@ sub, sup { font-size: .7em; line-height: 0; }
 }
 .osc-cursor:active { transform: translateY(1px); }
 .osc-bouton {
-  position: relative; width: 74px; height: 74px; border-radius: 999px; border: none; cursor: grab; touch-action: none; padding: 0;
+  position: relative; width: 64px; height: 64px; border-radius: 999px; border: none; cursor: grab; touch-action: none; padding: 0;
   background: radial-gradient(circle at 40% 35%, var(--sheet), var(--paper-3)); box-shadow: inset 0 0 0 2px var(--line-strong), 0 3px 0 var(--line-strong);
 }
 .osc-bouton-ind { position: absolute; inset: 0; border-radius: 999px; transition: transform .05s linear; }
-.osc-bouton-ind::after { content: ''; position: absolute; left: 50%; top: 7px; width: 5px; height: 16px; margin-left: -2.5px; border-radius: 3px; background: var(--ink-2); }
+.osc-bouton-ind::after { content: ''; position: absolute; left: 50%; top: 6px; width: 5px; height: 14px; margin-left: -2.5px; border-radius: 3px; background: var(--ink-2); }
 .osc-bouton-l { font-size: .9rem; font-weight: 800; color: var(--ink-2); letter-spacing: .3em; }
 .osc-verrou .osc-touche, .osc-verrou .osc-cursor, .osc-verrou .osc-bouton { cursor: default; opacity: .6; }
 /* valeurs des curseurs, sous l'appareil */
@@ -149,7 +151,8 @@ sub, sup { font-size: .7em; line-height: 0; }
 @media (max-width: 640px) {
   .osc-corps { grid-template-columns: minmax(0, 1fr) 44px; }
   .osc-panneau { grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 24px; border-left: none; border-top: 1.5px solid var(--line-strong); margin-top: 10px; padding: 10px 0 0; }
-  .osc-groupe { flex-direction: row; }
+  .osc-groupe { flex-direction: column; justify-content: flex-end; }
+  .osc-sans-soft .osc-corps { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 480px) {
   .osc { margin: 0 -8px; }

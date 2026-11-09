@@ -109,6 +109,7 @@
             const comptable = Math.abs(q * 5 - Math.round(q * 5)) <= 0.25;
             if (!comptable && Math.abs(v - q) <= 0.3) return { format: `Avec cette base de temps, le décalage ne tombe pas sur un nombre exact de cinquièmes de carreau${NB}: change la base de temps (Time).` };
             if (Math.abs(v - q) <= 0.12) { nC = v; return { ok: true }; }
+            if (OSC.dixiemes(v, q)) return { diag: OSC.MSG_TRAIT };
             // erreurs reconnues : on garde la plus proche de la valeur donnée
             const cas = [
               [(REP - D.tau) / b(), `La voie 2 est en retard sur la voie 1${NB}: mesure du départ du signal de la voie 1 jusqu'au départ du signal de la voie 2 <b>qui le suit</b>.`],

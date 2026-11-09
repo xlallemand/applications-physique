@@ -7,7 +7,10 @@
    - voie 1 (CH1) en jaune, voie 2 (CH2) en bleu ; à gauche de l'écran, le repère du 0 V de chaque voie (1 ▸, 2 ▸) ;
    - sous la grille : sensibilités verticales « CH1 » puis « CH2 » à gauche, base de temps « Time » à droite ;
    - à droite de l'écran, le menu des fonctions (affiché sur l'écran) et ses cinq boutons ;
-   - bouton de réglage (déplace le ou les curseurs choisis) au-dessus de la touche « Cursor ».
+   - bouton de réglage (déplace le ou les curseurs choisis) au-dessus de la touche « Cursor » ;
+   - sous la touche « Cursor », bouton de position verticale : il monte ou descend la voie choisie par le
+     3e bouton du menu (« Voie » hors du menu des curseurs, « Source » dans ce menu), toujours actif ;
+   - repères 1 ▸ et 2 ▸ côte à côte (même hauteur) si les deux voies ont leur 0 V au même niveau.
    Menu Cursors : Mode (Fermé / Manuel), Type (X : curseurs horizontaux, mesure du temps ;
    Y : curseurs verticaux, mesure de la tension), Source (CH1 / CH2 : voie dont l'échelle sert aux
    valeurs des curseurs Y), CurA, CurB (sélectionnables ensemble : ils bougent alors en même temps).
@@ -39,6 +42,8 @@
    OSC.premierSommet(sit)    position (carreaux) du premier sommet principal visible
    OSC.xDe(c), OSC.yDe(l)   coordonnées SVG d'une position en carreaux (dessins ajoutés par marquer)
    OSC.reperesX(a, b, y, texte)  deux traits verticaux et une double flèche horizontale (durée affichée)
+   OSC.dixiemes(v, c)        vrai si v est la lecture de c carreaux avec « un petit trait = 0,1 carreau »
+   OSC.MSG_TRAIT             message de cette erreur
 
    OSC.question(zones, sit, o) : mesurer la période T sur l'écran (voie 1 seule)
      zones = { figure, champs } ; sit = { signal, baseTemps, sensibilite }
@@ -71,6 +76,13 @@
   const sensTexte = s => (s < 1 ? `${fr4(s * 1000).replace(/,?0+$/, '')} mV` : `${s.toPrecision(3).replace('.', ',')} V`);
   // nombre de décimales des valeurs des curseurs (pas du bouton dans l'unité affichée)
   const decimales = pasU => Math.max(0, Math.ceil(-Math.log10(pasU) - 1e-9));
+
+  // erreur « un petit trait vaut 0,1 carreau » : c carreaux (entier + k cinquièmes) lus N + k × 0,1
+  function dixiemes(v, c) {
+    const N = Math.floor(c + 1e-6), k = Math.round((c - N) / 0.2);
+    return k >= 1 && k <= 4 && Math.abs(c - N - 0.2 * k) < 0.03 && Math.abs(v - (N + 0.1 * k)) <= 0.03;
+  }
+  const MSG_TRAIT = `Sur les axes centraux, chaque carreau est partagé en 5 par les petits traits${NB}: un petit trait vaut <b>0,2 carreau</b>, pas 0,1.`;
 
   /* ---------- Formes des signaux (entre −1 et 1) ---------- */
   const frac = x => x - Math.floor(x);
@@ -153,24 +165,27 @@
     return `<path d="M${x + 2.2},${y - 1.3} A2.6,2.6 0 1 1 ${x - 1.6},${y - 2.1}" fill="none" stroke="currentColor" stroke-width=".7"/>
       <path d="M${x + 3.3},${y - 2.9} l-.2,2.5 l-2.3,-.9z" fill="currentColor"/>`;
   }
-  function dessinMenu(e) {
-    if (!e.menu) return '';
+  // ligne i du menu : titre, case (valeur ou flèche ↻ des curseurs)
+  function ligneMenu(i, nom, val, coul) {
+    const y = Y0 + i * ME, choisi = val === 'sel';
+    let h = `<text x="${MX + MW / 2}" y="${y + 6}" font-size="4" font-weight="700" text-anchor="middle" fill="var(--paper-3)">${nom}</text>`;
+    h += `<rect x="${MX + 2}" y="${y + 8}" width="${MW - 4}" height="8.4" rx="1.4" fill="${choisi ? 'var(--sheet)' : 'var(--ink)'}" stroke="${choisi ? 'var(--sheet)' : 'var(--ink-3)'}" stroke-width=".4"/>`;
+    if (val === 'sel' || val === 'non') h += `<g color="${choisi ? 'var(--ink)' : 'var(--paper-3)'}">${fleche(MX + MW / 2, y + 13.6)}</g>`;
+    else h += `<text x="${MX + MW / 2}" y="${y + 13.8}" font-size="4.2" font-weight="800" text-anchor="middle" fill="${coul || 'var(--sheet)'}">${val}</text>`;
+    return h;
+  }
+  // voie : vrai → hors du menu Manuel, la ligne « Voie » (3e bouton) reste affichée
+  function dessinMenu(e, voie) {
+    const manuel = e.menu && e.mode === 'Manuel';
+    const v = voie && !manuel ? ligneMenu(2, 'Voie', 'CH' + (e.source + 1), COUL[e.source]) : '';
+    if (!e.menu) return v;
     let h = `<rect x="${MX}" y="1.2" width="${MW}" height="7.3" rx="1.2" fill="var(--sheet)"/>
       <text x="${MX + MW / 2}" y="6.4" font-size="4.2" font-weight="800" text-anchor="middle" fill="var(--ink)">Cursors</text>`;
     const lignes = e.mode === 'Manuel'
       ? [['Mode', 'Manuel'], ['Type', e.type], ['Source', 'CH' + (e.source + 1)], ['CurA', e.selA ? 'sel' : 'non'], ['CurB', e.selB ? 'sel' : 'non']]
       : [['Mode', 'Fermé']];
-    lignes.forEach(([nom, val], i) => {
-      const y = Y0 + i * ME, choisi = val === 'sel';
-      h += `<text x="${MX + MW / 2}" y="${y + 6}" font-size="4" font-weight="700" text-anchor="middle" fill="var(--paper-3)">${nom}</text>`;
-      h += `<rect x="${MX + 2}" y="${y + 8}" width="${MW - 4}" height="8.4" rx="1.4" fill="${choisi ? 'var(--sheet)' : 'var(--ink)'}" stroke="${choisi ? 'var(--sheet)' : 'var(--ink-3)'}" stroke-width=".4"/>`;
-      if (val === 'sel' || val === 'non') h += `<g color="${choisi ? 'var(--ink)' : 'var(--paper-3)'}">${fleche(MX + MW / 2, y + 13.6)}</g>`;
-      else {
-        const coul = nom === 'Source' ? COUL[e.source] : 'var(--sheet)';
-        h += `<text x="${MX + MW / 2}" y="${y + 13.8}" font-size="4.2" font-weight="800" text-anchor="middle" fill="${coul}">${val}</text>`;
-      }
-    });
-    return h;
+    lignes.forEach(([nom, val], i) => { h += ligneMenu(i, nom, val, nom === 'Source' ? COUL[e.source] : null); });
+    return h + v;
   }
   function dessinCurseurs(e) {
     if (!e.menu || e.mode !== 'Manuel') return '';
@@ -209,14 +224,14 @@
     h += '</g>';
     // traces (voie 1 dessinée en dernier : au-dessus)
     for (let k = o.voies.length - 1; k >= 0; k--) h += trace(o, k);
-    // repères du 0 V de chaque voie, à gauche de l'écran (côte à côte si les deux sont à la même hauteur)
+    // repères du 0 V de chaque voie, à gauche de l'écran, à la hauteur du 0 V
+    const yRep = V => Math.max(Y0 + 2.5, Math.min(Y0 + NY * CAR - 2.5, yDe(NY / 2 - (V.pos || 0))));
     o.voies.forEach((V, k) => {
-      let y = Math.max(Y0 + 2.5, Math.min(Y0 + NY * CAR - 2.5, yDe(NY / 2 - (V.pos || 0))));
-      // deux voies au même 0 V : le repère 2 juste sous le repère 1
-      const meme = k && Math.abs((V.pos || 0) - (o.voies[0].pos || 0)) < 0.5;
-      if (meme) y += 5.6;
-      h += `<path d="M.9,${y - 2.6} h1.6 l2.2,2.6 l-2.2,2.6 h-1.6z" fill="${COUL[k]}"/>
-        <text x="2" y="${y + 1.3}" font-size="3.4" font-weight="800" text-anchor="middle" fill="${k ? 'var(--sheet)' : 'var(--ink)'}">${k + 1}</text>`;
+      const y = yRep(V);
+      // deux repères qui se superposeraient : le repère 2 à droite du repère 1, à la même hauteur
+      const dx = k && Math.abs(y - yRep(o.voies[0])) < 5.6 ? 4.4 : 0;
+      h += `<path d="M${.9 + dx},${y - 2.6} h1.6 l2.2,2.6 l-2.2,2.6 h-1.6z" fill="${COUL[k]}"/>
+        <text x="${2 + dx}" y="${y + 1.3}" font-size="3.4" font-weight="800" text-anchor="middle" fill="${k ? 'var(--sheet)' : 'var(--ink)'}">${k + 1}</text>`;
     });
     // sous l'écran : sensibilités verticales (CH1, CH2) à gauche, base de temps (Time) à droite
     let x = X0;
@@ -317,7 +332,7 @@
   const TOUCHES = [
     { nom: 'Mode', aria: `Bouton 1 du menu${NB}: Mode` },
     { nom: 'Type', aria: `Bouton 2 du menu${NB}: Type de curseurs (X ou Y)` },
-    { nom: 'Source', aria: `Bouton 3 du menu${NB}: Source (voie CH1 ou CH2)` },
+    { nom: 'Source', aria: `Bouton 3 du menu${NB}: voie CH1 ou CH2 (Voie, ou Source des curseurs)` },
     { nom: 'CurA', aria: `Bouton 4 du menu${NB}: sélectionner le curseur A` },
     { nom: 'CurB', aria: `Bouton 5 du menu${NB}: sélectionner le curseur B` },
   ];
@@ -332,10 +347,13 @@
           <div class="osc-ecran"><svg class="osc-svg" viewBox="0 0 ${W} ${H}" xmlns="${NS}" role="img" aria-label="Écran d'oscilloscope${NB}: 10 carreaux en largeur, 8 en hauteur"></svg></div>
           <div class="osc-soft">${TOUCHES.map((t, i) => `<button type="button" class="osc-touche" data-t="${i}" aria-label="${t.aria}" style="top:${((Y0 + i * ME + .6) / H * 100).toFixed(2)}%;height:${((ME - 1.2) / H * 100).toFixed(2)}%"></button>`).join('')}</div>
           <div class="osc-panneau">
-            <div class="osc-groupe"><span class="osc-groupe-t">Réglage</span>
+            <div class="osc-groupe osc-g-cur"><span class="osc-groupe-t">Réglage</span>
               <button type="button" class="osc-bouton" data-a="bouton" aria-label="Bouton de réglage${NB}: tourne-le (ou appuie sur sa moitié gauche ou droite) pour déplacer le curseur sélectionné"><span class="osc-bouton-ind"></span></button>
               <span class="osc-bouton-l">↺ ↻</span></div>
-            <div class="osc-groupe"><span class="osc-groupe-t">MENU</span><button type="button" class="osc-cursor" data-a="cursor">Cursor</button></div>
+            <div class="osc-groupe osc-g-cur"><span class="osc-groupe-t">MENU</span><button type="button" class="osc-cursor" data-a="cursor">Cursor</button></div>
+            <div class="osc-groupe"><span class="osc-groupe-t">Position</span>
+              <button type="button" class="osc-bouton" data-a="pos" aria-label="Position verticale${NB}: tourne-le (ou appuie sur sa moitié gauche ou droite) pour descendre ou monter la voie choisie par le 3e bouton du menu"><span class="osc-bouton-ind"></span></button>
+              <span class="osc-bouton-l">▼ ▲</span></div>
           </div>
         </div>
       </div>
@@ -349,17 +367,26 @@
     const mes = box.querySelector('.osc-mesures');
 
     function peindre() {
-      svgE.innerHTML = dessinFond(o) + (o.curseurs ? dessinMenu(e) + dessinCurseurs(e) : '') + (o.trait ? dessinLigne(e, o.trait) : '') + gMotif;
+      const deux = o.voies.length > 1;
+      svgE.innerHTML = dessinFond(o) + (o.curseurs ? dessinMenu(e, deux) + dessinCurseurs(e) : dessinMenu(Object.assign({}, e, { menu: false }), deux))
+        + (o.trait ? dessinLigne(e, o.trait) : '') + gMotif;
       mes.innerHTML = o.curseurs ? (mesuresHTML(o, e) || `<span class="osc-mes-vide">Curseurs fermés${NB}: appuie sur Cursor, puis règle le Mode sur Manuel.</span>`) : '';
       mes.hidden = !o.curseurs;
       box.classList.toggle('osc-sans-curseurs', !o.curseurs);
+      box.classList.toggle('osc-sans-soft', !o.curseurs && !deux);   // une voie sans curseurs : boutons du menu inutiles
     }
     function changer() { peindre(); if (o.onChange) o.onChange(etat()); }
     const etat = () => ({ menu: e.menu, mode: e.mode, type: e.type, source: e.source, selA: e.selA, selB: e.selB, a: e.pos[e.type][0], b: e.pos[e.type][1], ligne: e.ligne });
 
     /* ----- touches ----- */
     function appuyer(i) {
-      if (verrou || !o.curseurs) return;
+      if (verrou) return;
+      // 3e bouton hors du menu Manuel : choix de la voie (bouton de position) ; dans le menu : Source
+      if (i === 2 && !(o.curseurs && e.menu && e.mode === 'Manuel')) {
+        if (o.voies.length > 1) { e.source = 1 - e.source; changer(); }
+        return;
+      }
+      if (!o.curseurs) return;
       if (i === 'cursor') {
         // Cursor : affiche le menu des curseurs ; appuyé de nouveau, change le mode
         if (!e.menu) e.menu = true; else e.mode = e.mode === 'Manuel' ? 'Fermé' : 'Manuel';
@@ -376,8 +403,6 @@
     $('cursor').onclick = () => appuyer('cursor');
 
     /* ----- bouton de réglage ----- */
-    const bouton = $('bouton'), ind = bouton.querySelector('.osc-bouton-ind');
-    let angleVu = 0;
     function tourner(n) {
       if (verrou || !o.curseurs || !e.menu || e.mode !== 'Manuel' || !n) return false;
       const max = e.type === 'X' ? NX : NY, p = e.pos[e.type];
@@ -391,45 +416,61 @@
       changer();
       return true;
     }
-    const tournerVisuel = da => { angleVu += da; ind.style.transform = `rotate(${angleVu}deg)`; };
-    // glisser autour du bouton : 8° = un pas (plus vite si on tourne vite) ; appui bref : moitié gauche −1, droite +1
-    let rot = null;
-    const angle = ev => { const r = bouton.getBoundingClientRect(); return Math.atan2(ev.clientY - (r.top + r.height / 2), ev.clientX - (r.left + r.width / 2)) * 180 / Math.PI; };
-    bouton.addEventListener('pointerdown', ev => {
-      if (ev.pointerType === 'mouse' && ev.button !== 0) return;
-      ev.preventDefault();
-      rot = { id: ev.pointerId, a: angle(ev), acc: 0, tot: 0, t: performance.now(), x: ev.clientX };
-      try { bouton.setPointerCapture(ev.pointerId); } catch (err) { /* sans capture */ }
-    });
-    bouton.addEventListener('pointermove', ev => {
-      if (!rot || ev.pointerId !== rot.id) return;
-      ev.preventDefault();
-      let a = angle(ev), da = a - rot.a;
-      if (da > 180) da -= 360; if (da < -180) da += 360;
-      const t = performance.now(), v = Math.abs(da) / Math.max(1, t - rot.t);
-      rot.a = a; rot.t = t; rot.tot += Math.abs(da);
-      tournerVisuel(da);
-      rot.acc += da * (v > 0.6 ? 5 : v > 0.25 ? 2 : 1);
-      const n = Math.trunc(rot.acc / 8);
-      if (n) { rot.acc -= n * 8; tourner(n); }
-    });
-    const finRot = ev => {
-      if (!rot || ev.pointerId !== rot.id) return;
-      if (rot.tot < 6 && ev.type === 'pointerup') {
-        const r = bouton.getBoundingClientRect(), s = rot.x < r.left + r.width / 2 ? -1 : 1;
-        tournerVisuel(s * 10); tourner(s);
-      }
-      rot = null;
-    };
-    bouton.addEventListener('pointerup', finRot);
-    bouton.addEventListener('pointercancel', finRot);
-    bouton.addEventListener('touchstart', ev => ev.preventDefault(), { passive: false });
-    bouton.addEventListener('keydown', ev => {
-      const s = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 }[ev.key];
-      if (!s) return;
-      ev.preventDefault(); tournerVisuel(s * 10); tourner(s * (ev.shiftKey ? 5 : 1));
-    });
-    bouton.addEventListener('click', ev => ev.preventDefault());
+    /* ----- bouton de position verticale : monte (n > 0) ou descend la voie choisie ----- */
+    function deplacer(n) {
+      if (verrou || !n) return false;
+      const V = o.voies[e.source] || o.voies[0];
+      const p = +Math.max(-NY / 2, Math.min(NY / 2, Math.round(((V.pos || 0) + n * PAS) / PAS) * PAS)).toFixed(2);
+      if (p === (V.pos || 0)) return false;
+      V.pos = p;
+      gMotif = '';                          // dessins de réponse : ils ne suivent pas la trace
+      changer();
+      return true;
+    }
+    // bouton rond : glisser autour (8° = un pas, plus vite si on tourne vite) ; appui bref : moitié gauche −1, droite +1
+    function molette(bouton, agir) {
+      const ind = bouton.querySelector('.osc-bouton-ind');
+      let angleVu = 0, rot = null;
+      const visuel = da => { angleVu += da; ind.style.transform = `rotate(${angleVu}deg)`; };
+      const angle = ev => { const r = bouton.getBoundingClientRect(); return Math.atan2(ev.clientY - (r.top + r.height / 2), ev.clientX - (r.left + r.width / 2)) * 180 / Math.PI; };
+      bouton.addEventListener('pointerdown', ev => {
+        if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+        ev.preventDefault();
+        rot = { id: ev.pointerId, a: angle(ev), acc: 0, tot: 0, t: performance.now(), x: ev.clientX };
+        try { bouton.setPointerCapture(ev.pointerId); } catch (err) { /* sans capture */ }
+      });
+      bouton.addEventListener('pointermove', ev => {
+        if (!rot || ev.pointerId !== rot.id) return;
+        ev.preventDefault();
+        let a = angle(ev), da = a - rot.a;
+        if (da > 180) da -= 360; if (da < -180) da += 360;
+        const t = performance.now(), v = Math.abs(da) / Math.max(1, t - rot.t);
+        rot.a = a; rot.t = t; rot.tot += Math.abs(da);
+        visuel(da);
+        rot.acc += da * (v > 0.6 ? 5 : v > 0.25 ? 2 : 1);
+        const n = Math.trunc(rot.acc / 8);
+        if (n) { rot.acc -= n * 8; agir(n); }
+      });
+      const finRot = ev => {
+        if (!rot || ev.pointerId !== rot.id) return;
+        if (rot.tot < 6 && ev.type === 'pointerup') {
+          const r = bouton.getBoundingClientRect(), s = rot.x < r.left + r.width / 2 ? -1 : 1;
+          visuel(s * 10); agir(s);
+        }
+        rot = null;
+      };
+      bouton.addEventListener('pointerup', finRot);
+      bouton.addEventListener('pointercancel', finRot);
+      bouton.addEventListener('touchstart', ev => ev.preventDefault(), { passive: false });
+      bouton.addEventListener('keydown', ev => {
+        const s = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 }[ev.key];
+        if (!s) return;
+        ev.preventDefault(); visuel(s * 10); agir(s * (ev.shiftKey ? 5 : 1));
+      });
+      bouton.addEventListener('click', ev => ev.preventDefault());
+    }
+    molette($('bouton'), tourner);
+    molette($('pos'), deplacer);
 
     /* ----- trait en pointillés (comptage des carreaux) : vertical ('v') ou horizontal ('h') ----- */
     let glisse = null;
@@ -474,7 +515,7 @@
       el: box,
       o,
       maj(n) { Object.assign(o, n); if (o.bases && n.baseTemps) $('bSel').value = String(o.baseTemps); gMotif = ''; changer(); },
-      etat, appuyer, tourner,
+      etat, appuyer, tourner, deplacer,
       // mesure des curseurs : positions (carreaux), écart d en carreaux
       mesure() { const [a, b] = e.pos[e.type]; return { a, b, d: Math.abs(b - a), type: e.type, source: e.source, actifs: e.menu && e.mode === 'Manuel' }; },
       // valeurs affichées sous l'écran (nombres)
@@ -636,7 +677,9 @@
       const k = Math.round(vc / Q), corr = k >= 1 && Math.abs(vc - k * Q) <= 0.12 && vc <= NX + 0.05;
       const err = [];
       marque('car', corr);
-      if (!corr) err.push('Compte les carreaux entre deux points qui se correspondent (deux sommets, deux creux…), au cinquième de carreau près : sur l\'axe central, un petit trait vaut 0,2 carreau.');
+      // lecture « un petit trait = 0,1 carreau » de k périodes
+      const dix = !corr && [vn].concat(Array.from({ length: NX }, (x, i) => i + 1)).some(j => j >= 1 && dixiemes(vc, j * Q));
+      if (!corr) err.push(dix ? MSG_TRAIT : 'Compte les carreaux entre deux points qui se correspondent (deux sommets, deux creux…), au cinquième de carreau près : sur l\'axe central, un petit trait vaut 0,2 carreau.');
       const okN = corr && vn === k;
       marque('n', okN || !corr);
       if (corr && !okN) err.push(vn === k + 1 && ORD[k] ? `Entre le premier et le ${ORD[k]} sommet, il y a ${k} périodes, pas ${k + 1}.` : `n : compte les motifs entiers sur les ${fmt(vc)} carreaux.`);
@@ -735,5 +778,5 @@
   }
 
 
-  window.OSC = { monter, svg, mesures: (o, e) => mesuresHTML(normal(Object.assign({}, o)), Object.assign(etatVide(), e || {})), motif, reperesX, flecheV, xDe, yDe, f, extremes, etatVide, unite, enU, baseTexte, sensTexte, premierSommet, phaseSommet, question, decimales, CAR, NX, NY, PAS };
+  window.OSC = { monter, svg, mesures: (o, e) => mesuresHTML(normal(Object.assign({}, o)), Object.assign(etatVide(), e || {})), motif, reperesX, flecheV, xDe, yDe, f, extremes, etatVide, unite, enU, baseTexte, sensTexte, premierSommet, phaseSommet, question, decimales, dixiemes, MSG_TRAIT, CAR, NX, NY, PAS };
 })();

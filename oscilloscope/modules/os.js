@@ -167,14 +167,15 @@
   const CALC = '<span class="calc-icone" role="img" aria-label="À calculer à la calculatrice" title="À calculer à la calculatrice"></span>';
 
   // Saisie d'un nombre : champ (± seulement si p.signe), unité ; p.sci : saisie a × 10ⁿ (deux champs,
-  // ± devant l'exposant) ; p.calc : icône calculatrice ; p.lien : lien sous la saisie
+  // ± devant l'exposant) ; p.calc : icône calculatrice ; p.lien : lien sous la saisie ; p.label : texte ou fonction
   // p.verifier(v) → { ok } | { diag } | { format } ; p.reponse : texte de la réponse (affichée)
   function pNombre(zone, p, api) {
     const input = (cls, aria, ph) => `<input type="text" class="ph-champ ${cls}" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="${aria}" placeholder="${ph || ''}">`;
     const pm = '<button type="button" class="os-pm" aria-label="Changer le signe">±</button>';
     const champ = (cls, aria, ph) => p.signe ? `<span class="os-champ-box">${input(cls, aria, ph)}${pm}</span>` : input(cls, aria, ph);
     const fin = (p.unite ? `<span class="os-unite">${p.unite}</span>` : '') + (p.calc ? CALC : '');
-    const box = el('div', 'os-saisie', `<div class="os-saisie-l">${p.label ? `<span class="os-saisie-t">${p.label}</span>` : ''}
+    const lab = typeof p.label === 'function' ? p.label() : p.label;      // libellé calculé à l'affichage
+    const box = el('div', 'os-saisie', `<div class="os-saisie-l">${lab ? `<span class="os-saisie-t">${lab}</span>` : ''}
         ${p.sci ? `<span class="os-sci">${champ('os-mant', 'Nombre', '')}<span class="os-puiss"><span class="os-x10">× 10</span><span class="os-exp-box"><span class="os-champ-box">${pm}${input('os-exp', 'Exposant de 10', '0')}</span></span>${fin}</span></span>`
           : champ('os-val', p.aria || 'Réponse', '') + fin}</div>
       ${p.lien || ''}

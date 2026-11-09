@@ -8,7 +8,7 @@
    Déroulé guidé (signaux périodiques centrés sur 0 V, R et sensibilité qui changent) :
        1. Cursor, Mode : Manuel, Type : Y ;
        2. curseurs au maximum et au minimum de u_R : ΔY, puis U_max = ΔY / 2 ;
-       3. I_max = U_max / R (en mA).
+       3. I_max = U_max / R en A (U_max en V, R en Ω), puis conversion en mA (saisie avec une puissance de 10 possible).
    « ↺ Nouveau signal » sous le déroulé.
    ============================================================ */
 (function () {
@@ -37,7 +37,9 @@
         <rect x="82" y="17" width="36" height="16" rx="1" fill="var(--sheet)"/>
         <rect x="163" y="55" width="14" height="40" rx="1" fill="var(--sheet)"/>
         <path d="M170,40 H206" />
-        <path d="M170,125 H196 V131 M188,131 H204 M191,135 H201 M194,139 H198"/>
+        <path d="M170,125 H196 V131 M187,131 H205"/>
+        <!-- symbole de masse : trait horizontal et hachures obliques -->
+        <path d="M190,131 l-3.5,5 M195,131 l-3.5,5 M200,131 l-3.5,5 M205,131 l-3.5,5" stroke-width="1.3"/>
       </g>
       <path d="M22,76 q4,-7 8,0 t8,0" fill="none" stroke="var(--ink)" stroke-width="1.4"/>
       <text x="8" y="79" ${T} font-size="8" text-anchor="middle" fill="var(--ink-2)">G</text>
@@ -80,7 +82,7 @@
       const etapes = [
         `Appuie sur <b>Cursor</b>, règle <b>Mode${NB}: Manuel</b> (1<sup>er</sup> bouton), puis appuie sur <b>Type</b> (2<sup>e</sup> bouton) pour passer en <b>Y</b>${NB}: curseurs verticaux, pour mesurer une tension.`,
         `Place les curseurs A et B au <b>maximum</b> et au <b>minimum</b> de u<sub>R</sub>. Lis <b>ΔY</b>, puis calcule <b>U<sub>max</sub> = ΔY / 2</b>.`,
-        `Calcule l'intensité maximale <b>I<sub>max</sub> = U<sub>max</sub> / R</b>, avec R = ${ohm(D.R)}.`,
+        `Calcule l'intensité maximale <b>I<sub>max</sub> = U<sub>max</sub> / R</b>, avec R = ${ohm(D.R)}${NB}: U<sub>max</sub> en V et R en Ω donnent I<sub>max</sub> en A. Puis convertis-la en mA.`,
       ];
       corps.innerHTML = `<div class="os-manip os-manip-osc">
           <div class="os-manip-fig"><p class="os-fig-t">La voie 1 affiche la tension u<sub>R</sub> aux bornes de la résistance <b>R = ${ohm(D.R)}</b>. Mesure l'intensité maximale I<sub>max</sub> du courant.</p>
@@ -102,6 +104,13 @@
       });
       const lu = v => { const L = ecran.lecture(); return L.dec ? fmt(v, L.dec) : fmt(v); };
       const pres = (c, l) => Math.abs(c - l) <= 0.1;
+      // nombre écrit a × 10ⁿ dans les deux champs (réponse affichée)
+      const remplirSci = (ins, v) => {
+        let e = Math.floor(Math.log10(Math.abs(v)) + 1e-12), m = +(v / Math.pow(10, e)).toPrecision(3);
+        if (Math.abs(m) >= 10) { m = +(m / 10).toPrecision(3); e++; }
+        ins[0].value = fmt(m).replace(/\s/g, ''); ins[1].value = String(e).replace('-', '−');
+      };
+      let Ia = null;                                       // I_max de l'élève, en A
 
       const parties = [null, [
         {
@@ -110,7 +119,7 @@
             const m = ecran.mesure(), E = ecran.extremes(0);
             if (!m.actifs || m.type !== 'Y') return { format: `Affiche d'abord les curseurs de tension${NB}: appuie sur <b>Cursor</b>, règle <b>Mode${NB}: Manuel</b> et <b>Type${NB}: Y</b>.` };
             if (!((pres(m.a, E.max) && pres(m.b, E.min)) || (pres(m.a, E.min) && pres(m.b, E.max)))) {
-              if ([m.a, m.b].some(c => pres(c, OSC.NY / 2))) return { diag: `Un curseur est sur le 0${NB}V. Place l'un au <b>maximum</b>, l'autre au <b>minimum</b> de u<sub>R</sub>.` };
+              if ([m.a, m.b].some(c => pres(c, OSC.NY / 2 - (ecran.o.voies[0].pos || 0)))) return { diag: `Un curseur est sur le 0${NB}V. Place l'un au <b>maximum</b>, l'autre au <b>minimum</b> de u<sub>R</sub>.` };
               return { diag: 'Place un curseur sur le point le plus haut (maximum) et l\'autre sur le point le plus bas (minimum) de la courbe.' };
             }
             const L = ecran.lecture();
@@ -135,19 +144,34 @@
         },
       ], [
         {
-          type: 'nombre', label: 'I<sub>max</sub> = U<sub>max</sub> / R =', unite: 'mA', calc: true,
-          aide: '1\u00a0A = 1\u00a0000\u00a0mA',
+          type: 'nombre', sci: true, label: 'I<sub>max</sub> = U<sub>max</sub> / R =', unite: 'A', calc: true,
+          aide: `Écris le nombre, puis l'exposant de 10 (laisse 0 si tu écris un nombre décimal comme 0,002).`,
           verifier(v) {
-            const U = Umes || D.A, I = U / D.R * 1000;
-            if (proche(v, I, 0.02) || proche(v, Imax, 0.02)) return { ok: true };
-            if (proche(v, I / 1000, 0.02)) return { diag: `Tu as donné I<sub>max</sub> en ampères. Convertis en milliampères${NB}: 1${NB}A = 1${NB}000${NB}mA.` };
+            const U = Umes || D.A, I = U / D.R;
+            if (proche(v, I, 0.02) || proche(v, Imax / 1000, 0.02)) { Ia = v; return { ok: true }; }
+            if (proche(v, I * 1000, 0.02)) return { diag: `C'est la valeur en mA. Avec U<sub>max</sub> en V et R en Ω, la loi d'Ohm donne I<sub>max</sub> en <b>ampères</b>${NB}: écris-la en A (la conversion vient ensuite).` };
             if (proche(v, U * D.R, 0.02) || proche(v, U * D.R * 1000, 0.02) || proche(v, U * D.R / 1000, 0.02)) return { diag: `i = u<sub>R</sub> / R${NB}: on divise la tension par R, on ne multiplie pas.` };
-            if (proche(v, 2 * I, 0.02) || proche(v, 2 * I / 1000, 0.02)) return { diag: `Tu as divisé ΔY par R. Divise U<sub>max</sub> (= ΔY / 2) par R.` };
-            if (proche(v, D.R / U, 0.02) || proche(v, D.R / U * 1000, 0.02)) return { diag: `I<sub>max</sub> = U<sub>max</sub> / R${NB}: c'est la tension divisée par la résistance.` };
-            return { diag: `I<sub>max</sub> = U<sub>max</sub> / R, avec U<sub>max</sub> en V et R en Ω, donne I<sub>max</sub> en A${NB}; puis 1${NB}A = 1${NB}000${NB}mA.` };
+            if (proche(v, 2 * I, 0.02) || proche(v, 2 * I * 1000, 0.02)) return { diag: `Tu as divisé ΔY par R. Divise U<sub>max</sub> (= ΔY / 2) par R.` };
+            if (proche(v, D.R / U, 0.02) || proche(v, D.R / U / 1000, 0.02)) return { diag: `I<sub>max</sub> = U<sub>max</sub> / R${NB}: c'est la tension divisée par la résistance.` };
+            return { diag: `I<sub>max</sub> = U<sub>max</sub> / R, avec U<sub>max</sub> en V et R en Ω${NB}: le résultat est en A.` };
           },
-          solution: () => { const U = Umes || D.A, I = U / D.R; return `I<sub>max</sub> = ${fmt(U)} / ${fmt(D.R)} ${OS.egal(I)} ${OS.court(I)}${NB}A = <b>${OS.court(I * 1000)}${NB}mA</b>`; },
-          remplir(ins) { ins[0].value = OS.court((Umes || D.A) / D.R * 1000).replace(/\s/g, ''); },
+          solution: () => { const U = Umes || D.A, I = U / D.R; return `I<sub>max</sub> = ${fmt(U)} / ${fmt(D.R)} ${OS.egal(I)} <b>${OS.sciCourt(I)}${NB}A</b> (${OS.court(I)}${NB}A)`; },
+          remplir(ins) { Ia = (Umes || D.A) / D.R; remplirSci(ins, Ia); },
+        },
+        {
+          type: 'nombre', sci: true, q: 'Convertis I<sub>max</sub> en milliampères.',
+          label: () => `I<sub>max</sub> = ${OS.sciCourt(Ia)}${NB}A =`, unite: 'mA',
+          lien: OS.revois(['conversions']),
+          verifier(v) {
+            const I = Ia * 1000;
+            if (proche(v, I, 0.012) || proche(v, Imax, 0.012)) return { ok: true };
+            if (proche(v, Ia / 1000, 0.02)) return { diag: `1${NB}mA = 10<sup>−3</sup>${NB}A${NB}: une intensité en mA s'écrit avec un nombre plus grand qu'en A.` };
+            if (proche(v, Ia, 0.02)) return { diag: 'Tu as recopié la valeur en A : convertis-la en mA (1 mA = 10<sup>−3</sup> A).' };
+            if (proche(v, Ia * 1e6, 0.02)) return { diag: `1${NB}mA = 10<sup>−3</sup>${NB}A (10<sup>−6</sup>${NB}A, c'est 1${NB}µA).` };
+            return { diag: `1${NB}mA = 10<sup>−3</sup>${NB}A${NB}: multiplie la valeur en A par 10<sup>3</sup>.` };
+          },
+          solution: () => `I<sub>max</sub> = ${OS.sciCourt(Ia)}${NB}A = <b>${OS.court(Ia * 1000)}${NB}mA</b>`,
+          remplir(ins) { ins[0].value = OS.court(Ia * 1000).replace(/\s/g, ''); ins[1].value = '0'; },
         },
       ]];
       function passer(i) {
