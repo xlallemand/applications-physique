@@ -37,6 +37,7 @@ Sources : `08- Solutions aqueuses/Chap08-Cours-Exercices complete.pdf` (p. 1-2 c
 - **Idée de TP (retenue)** : ions Fe<sup>3+</sup> à partir de chlorure de fer (III) FeCl<sub>3</sub> ; « dans une fiole de 250 mL, 0,5 g → 0,5 / 0,25 = 2 g/L, puis 2 dilutions par 10 » (0,2 g/L, puis 0,02 g/L = 20 mg/L) ; échelle « autour de 10 mg/L (de 2 à 20 mg/L) » ; « puis ajout de thiocyanate de potassium (SCN<sup>−</sup>) → couleur rouge pour l'échelle de teinte ».
 - **Exercices corrigés** (valeurs) : 0,5 g dans 50 mL → 10 g/L ; 2 g dans 500 mL → 4 g/L ; m = 1,0.10<sup>−2</sup> × 0,033 = 3,3.10<sup>−4</sup> g ; V = 8.10<sup>−2</sup> / 4.10<sup>−1</sup> = 0,2 L ; 10 mL dans 500 mL : f = 50, c′ = 3.10<sup>−2</sup> / 50 = 6.10<sup>−4</sup> g/L ; de 3,0.10<sup>−3</sup> à 1,5.10<sup>−4</sup> g/L dans 200 mL : f = 20, V = 10 mL, « pipette jaugée de 10,0 mL et fiole jaugée de 200,0 mL ». Devoir : choisir dans une liste (éprouvettes, pipettes jaugées de 5, 10, 20 mL, erlenmeyers, fioles de 50 et 100 mL) le matériel pour passer de 1,0.10<sup>−2</sup> à 1,0.10<sup>−3</sup> g/L, 50 mL : pipette de 5 mL et fiole de 50 mL.
 - Précision de la verrerie (TP1 de masse volumique) : bécher très peu précis, éprouvette graduée précise, fiole jaugée très précise.
+- **Ne pas faire référence aux numéros d'exercices, aux TP, au cours**. L'application est indépendante des sources.
 
 ## 4. Plan de l'application (`PLAN`)
 
@@ -110,6 +111,6 @@ Erreurs diagnostiquées : V en mL dans c<sub>m</sub> = m / V ; fraction renvers�
 
 ## 8. Hors périmètre
 
-- Pas de concentration en quantité de matière (mol/L), pas de permanganate (choix de l'enseignant : fer (III) et thiocyanate).
+- Pas de concentration en quantité de matière (mol/L).
 - Pas de spectrophotométrie, pas de loi de Beer-Lambert.
 - Pas de masse volumique mesurée (application `11`), sinon pour la distinguer de la concentration en masse.

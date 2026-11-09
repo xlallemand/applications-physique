@@ -11,8 +11,10 @@ Elle décrit le style, la présentation des pages, la navigation (sommaire de to
 ## Règles permanentes
 
 - Réponses et textes de l'interface en français, tutoiement, ton direct.
-- Espace insécable avant les ponctuations doubles ( : ; ? ! ) et à l'intérieur des guillemets « ».
+- Espace insécable (U+00A0) avant les ponctuations doubles ( : ; ? ! ) et à l'intérieur des guillemets « », y compris dans les textes produits par JavaScript ; avant de livrer, `python3 docs/outils/typo.py --corriger DOSSIER` puis contrôle des pages rendues avec `docs/outils/verif-typo.js` (charte §7 et §10).
 - Police sans empattement, couleurs uniquement via les variables de `assets/theme.css`.
 - Code commenté en français.
 - Fonctionnement à la souris et sur tout écran tactile.
+- Icône calculatrice (`calc-icone`, charte §7) à côté de tout champ dont la valeur se calcule à la calculatrice.
+- Après une validation, jamais besoin de remonter dans la page pour répondre à la question suivante (défilement automatique, charte §8).
 - Ne modifier que ce qui est demandé.

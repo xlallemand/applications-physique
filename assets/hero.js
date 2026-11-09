@@ -20,6 +20,9 @@
      lumiere    soleil, rayons ondulés (photons) et panneau photovoltaïque incliné (énergie transportée par la lumière)
      spectre    signal périodique non sinusoïdal en haut, raies de son spectre en dessous (spectre d'un signal, ondes sonores)
      antenne    pylône d'antenne relais qui émet des ondes, onde modulée en amplitude (ondes électromagnétiques)
+     oscillo    écran d'oscilloscope quadrillé, signal périodique non sinusoïdal (forme de clarinette) qui défile
+                lentement, un motif repassé plus épais et une double flèche « T » au-dessus (période et fréquence) ;
+                dessin animé (immobile si l'utilisateur demande moins d'animations)
      circuit    schéma normalisé (générateur, résistances, ampèremètre, voltmètre, nœuds) et le même circuit
                 recopié sur une table avec des fils souples (réaliser un montage électrique)
      ccm        plaques de chromatographie (trait de dépôt, taches à différentes hauteurs reliées par des
@@ -825,6 +828,53 @@
       ctx.fillText('bande occupée = 2 fₕ', w * .62, h * .06);
     },
 
+    // Écran d'oscilloscope : signal de clarinette qui défile lentement (t : temps en s),
+    // un motif repassé plus épais et la double flèche « T » au-dessus
+    oscillo(ctx, w, h, c, rnd, option, t) {
+      const p = 24;
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineWidth = 1;
+      for (let x = 0, i = 0; x <= w; x += p, i++) { ctx.globalAlpha = i % 5 ? .04 : .09; trait(ctx, x, 0, x, h); }
+      for (let y = 0, i = 0; y <= h; y += p, i++) { ctx.globalAlpha = i % 5 ? .04 : .09; trait(ctx, 0, y, w, y); }
+      // écran (seule la partie haute du canevas est visible : il est plus haut que l'en-tête pour la parallaxe)
+      const car = Math.min(w * .034, h * .055, 30), H = car * 8, L = car * 10;
+      const x0 = w - L - Math.max(20, w * .05), y0 = h * .07, xc = x0 + L / 2, yc = y0 + H / 2;
+      ctx.globalAlpha = .45; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x0 - 6, y0 - 6, L + 12, H + 12, 10) : ctx.rect(x0 - 6, y0 - 6, L + 12, H + 12); ctx.stroke();
+      ctx.lineWidth = 1; ctx.setLineDash([2, 4]); ctx.globalAlpha = .28;
+      for (let i = 1; i < 10; i++) trait(ctx, x0 + i * car, y0, x0 + i * car, y0 + H);
+      for (let j = 1; j < 8; j++) trait(ctx, x0, y0 + j * car, x0 + L, y0 + j * car);
+      ctx.setLineDash([]); ctx.globalAlpha = .4;
+      for (let k = 1; k < 50; k++) { const l = k % 5 ? 3 : 5; trait(ctx, x0 + k * car / 5, yc - l, x0 + k * car / 5, yc + l); }
+      for (let k = 1; k < 40; k++) { const l = k % 5 ? 3 : 5; trait(ctx, xc - l, y0 + k * car / 5, xc + l, y0 + k * car / 5); }
+      // signal : fondamental et harmoniques impairs (clarinette), défilement lent vers la gauche
+      const per = car * 3.6, dec = ((t || 0) * car * .45) % per;
+      const g = u => Math.sin(2 * Math.PI * u) + .62 * Math.sin(6 * Math.PI * u + .5) + .38 * Math.sin(10 * Math.PI * u + 1.3) + .18 * Math.sin(4 * Math.PI * u + 2.2);
+      const y = x => yc - car * 1.25 * g((x - x0 + dec) / per);
+      ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, L, H); ctx.clip();
+      ctx.globalAlpha = .5; ctx.lineWidth = 2; courbe(ctx, y, x0, x0 + L);
+      // motif repassé : de sommet à sommet, le deuxième motif entier de l'écran
+      let uS = 0, best = -Infinity;
+      for (let i = 0; i < 400; i++) { const v = g(i / 400); if (v > best) { best = v; uS = i / 400; } }
+      let xa = x0 + uS * per - dec;
+      while (xa < x0 + per * .35) xa += per;
+      ctx.globalAlpha = .22; ctx.lineWidth = 7; ctx.lineCap = 'round'; courbe(ctx, y, xa, xa + per); ctx.lineCap = 'butt';
+      ctx.restore();
+      // double flèche T au-dessus du motif
+      const yf = yc - car * 1.25 * best - 16, xb = xa + per;
+      ctx.globalAlpha = .5; ctx.lineWidth = 1.5;
+      trait(ctx, xa, yf, xb, yf);
+      ctx.setLineDash([3, 3]); ctx.globalAlpha = .35; trait(ctx, xa, yf, xa, yf + 14); trait(ctx, xb, yf, xb, yf + 14); ctx.setLineDash([]);
+      ctx.globalAlpha = .6;
+      [[xa, 1], [xb, -1]].forEach(([x, s]) => { ctx.beginPath(); ctx.moveTo(x, yf); ctx.lineTo(x + s * 8, yf - 4); ctx.lineTo(x + s * 8, yf + 4); ctx.closePath(); ctx.fill(); });
+      ctx.font = `700 16px ${police()}`; ctx.globalAlpha = .7; ctx.fillText('T', (xa + xb) / 2 - 5, yf - 6);
+      // formules en filigrane
+      ctx.font = `600 19px ${police()}`; ctx.globalAlpha = .2;
+      ctx.fillText('f = 1 / T', w * .06, h * .44);
+      ctx.font = `500 16px ${police()}`; ctx.globalAlpha = .15;
+      ctx.fillText('T = 2,9 ms', w * .3, h * .5);
+      ctx.fillText('1 Hz = 1 s⁻¹', x0, y0 + H + 34);
+    },
+
     // Formules écrites en quinconce, plus ou moins marquées
     formules(ctx, w, h, c, rnd, liste) {
       const f = FORMULES[liste] || FORMULES.physique;
@@ -843,8 +893,11 @@
     }
   };
 
+  // dessins animés : redessinés régulièrement (temps en s passé au dessin), sauf si moins d'animations est demandé
+  const ANIMES = { oscillo: true };
+
   /* ---------- Dessin et parallaxe ---------- */
-  function peindre(hero) {
+  function peindre(hero, t) {
     const cv = hero.querySelector('canvas');
     const hb = hero.offsetHeight;
     if (!cv || !hb) return;                         // en-tête masqué : on dessinera plus tard
@@ -857,7 +910,7 @@
     const st = getComputedStyle(hero);
     ctx.fillStyle = st.getPropertyValue('--paper').trim() || '#f3f1ec'; ctx.fillRect(0, 0, w, h);
     const [nom, option] = (hero.dataset.dessin || 'graphique').split(':');
-    (dessins[nom] || dessins.graphique)(ctx, w, h, st.getPropertyValue('--accent').trim() || '#2952c8', graine(7), option);
+    (dessins[nom] || dessins.graphique)(ctx, w, h, st.getPropertyValue('--accent').trim() || '#2952c8', graine(7), option, t || 0);
     ctx.globalAlpha = 1;
     hero.dataset.peint = innerWidth + 'x' + hb;
   }
@@ -886,6 +939,22 @@
     }, { passive: true });
     addEventListener('resize', () => toutPeindre(false));
     if (document.fonts) document.fonts.ready.then(() => toutPeindre(true));
+    // dessins animés (oscillo) : environ 20 images par seconde, seulement s'ils sont visibles
+    if (!reduit) {
+      let avant = 0;
+      const boucle = now => {
+        if (now - avant > 50) {
+          avant = now;
+          heros().forEach(hero => {
+            if (!ANIMES[(hero.dataset.dessin || '').split(':')[0]]) return;
+            const r = hero.getBoundingClientRect();
+            if (r.bottom > 0 && r.top < innerHeight) peindre(hero, now / 1000);
+          });
+        }
+        requestAnimationFrame(boucle);
+      };
+      if (Array.from(heros()).some(hero => ANIMES[(hero.dataset.dessin || '').split(':')[0]])) requestAnimationFrame(boucle);
+    }
     // en-tête ajouté, masqué puis réaffiché par l'application : on (re)dessine si besoin
     // (on ignore les modifications faites par ce script sur les canvas eux-mêmes)
     new MutationObserver(recs => {

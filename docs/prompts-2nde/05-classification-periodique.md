@@ -35,6 +35,7 @@ Sources : `04- Entites plus stables/Chap04-Cours-fiche-exos complete.pdf` p. 2 �
 - **Familles en plus du cours** : la liste validée ajoute les **alcalins** (Li, Na, K, colonne 1 sans H) ; donne ce nom comme un complément, à côté des deux familles à connaître.
 - Devoir, exercice 1 : configurations a à h (1s<sup>1</sup> ; 1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>6</sup> 3s<sup>2</sup> 3p<sup>6</sup> ; 1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>5</sup> ; 1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>6</sup> ; 1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>6</sup> 3s<sup>1</sup> ; 1s<sup>2</sup> 2s<sup>2</sup> ; 1s<sup>2</sup> 2s<sup>1</sup> ; 1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>6</sup> 3s<sup>2</sup> 3p<sup>5</sup>) : « identifier les atomes d'une même famille », « d'une même période (ligne) », « les halogènes (avant-dernière colonne) », « nom de la famille de la dernière colonne ».
 - Attention : le tableau tapé du cours écrit « Ag » à la place de **Ar** en colonne 18, ligne 3 : écris Ar.
+- **Ne pas faire référence aux numéros d'exercices, aux TP, au cours**. L'application est indépendante des sources.
 
 ## 4. Plan de l'application (`PLAN`)
 

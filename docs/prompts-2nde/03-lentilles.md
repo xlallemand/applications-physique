@@ -34,6 +34,7 @@ Sources : `05- Lentilles minces convergentes/Chap05-Cours-exercices complete.pdf
 - **Œil réduit** (cours p. 2) : diaphragme (trou de taille réglable) = pupille (« permet de faire entrer plus ou moins de lumière ») ; lentille convergente = cristallin ; écran = rétine. **Accommodation** : « pour voir un objet à l'infini, le cristallin est au repos ; l'image se forme sur la rétine. Si l'objet se rapproche, pour que l'image reste sur la rétine, l'œil doit accommoder : le cristallin se déforme pour être plus convergent. La distance focale du cristallin diminue. »
 - **TP2 (banc d'optique)** : objet = lettre « d » éclairée par une lanterne, représentée par une flèche ; objet au zéro du banc ; lentille de 10 δ ; lentille à 40 cm de l'objet, puis à 20 cm ; chercher l'écran qui donne une image nette (« Y a-t-il plusieurs positions de l'écran qui donnent une image nette ? » : non) ; image droite ou renversée ; mesurer AB et A′B′ à la règle, OA et OA′, calculer γ = A′B′ / AB et OA′ / OA, relation entre les deux.
 - **Exercices** : exercice 4 (f′ = 2 cm, construire, taille et sens) ; exercice 8 (construire l'image, ou retrouver l'objet à partir de l'image) ; exercice 9 (AB = 2,0 cm et A′B′ = 1,5 cm : γ = 0,75 ; γ = 0,70 : A′B′ = 1,4 cm) ; exercice 15 (f′ = 3,0 cm, AB = 2,0 cm, OA = 8,0 cm : OA′ = 4,8 cm, A′B′ = 1,2 cm, γ = 0,60).
+- **Ne pas faire référence aux numéros d'exercices, aux TP, au cours**. L'application est indépendante des sources.
 
 À relire seulement pour refaire les figures : fiche 1 (p. 3) et exercices 1 à 8 (p. 4-6).
 

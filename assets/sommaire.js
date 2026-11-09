@@ -229,7 +229,7 @@
       const ou = fc ? FC.titre : s.onglet === 'exercices' ? (s.m.exNom || NOMS.exercices) : s.onglet === 'fiche' ? NOMS.fiche
         : multi ? `${s.p.nom} · ${nomPage(s.p, s.onglet)}` : nomPage(s.p, s.onglet);
       racine.innerHTML =
-        `<div class="som-barre"><button type="button" class="som-ou" aria-expanded="false" aria-controls="som-som" aria-label="Sommaire : ${fc ? '' : 'module ' + s.m.n + ', '}${ou}">` +
+        `<div class="som-barre"><button type="button" class="som-ou" aria-expanded="false" aria-controls="som-som" aria-label="Sommaire : ${fc ? '' : 'module ' + s.m.n + ', '}${ou}">` +
         `<span class="som-snum">${s.m.n}</span><span class="som-ou-t"><small>${fc ? C.nom : s.m.titre}</small><b>${ou}</b></span><span class="som-ou-chev" aria-hidden="true">▾</span></button></div>` +
         '<div class="som-barre-esp"></div><div class="som-voile"></div>' +
         `<aside class="som-som" id="som-som" aria-label="Sommaire"><div class="som-tete"><a class="som-app" href="${accueilApp()}">${C.nom}</a>` +

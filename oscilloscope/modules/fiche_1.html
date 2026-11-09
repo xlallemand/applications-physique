@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : fiche récapitulative — Oscilloscope</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="os.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="os.js"></script>
+<script src="oscillo.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 1 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Mesurer une durée entre deux signaux</h2>
+  </div>
+
+  <section class="er-card" id="carreaux">
+    <h3 class="cours-titre">L'écran et les deux voies</h3>
+    <div class="cle"><p>L'écran est quadrillé : <b>10 carreaux</b> en largeur, <b>8</b> en hauteur. Sur les axes centraux, un petit trait vaut <b>0,2 carreau</b>. Sous l'écran :</p>
+      <ul style="margin:6px 0 0;padding-left:20px;line-height:1.6">
+        <li>à gauche, <b>CH1</b> et <b>CH2</b> : la <b>sensibilité verticale</b> de chaque voie, tension représentée par un carreau vertical (en V ou en mV) ;</li>
+        <li>à droite, <b>Time</b> : la <b>base de temps</b>, durée représentée par un carreau horizontal (en ms ou en µs).</li></ul>
+      <p style="margin-top:6px">La voie 1 (CH1) est en jaune, la voie 2 (CH2) en bleu. À gauche de l'écran, le repère <b>1 ▸</b> ou <b>2 ▸</b> marque le 0 V de chaque voie.</p></div>
+    <h3 class="cours-titre" style="margin-top:18px">Mesurer un décalage en comptant les carreaux</h3>
+    <div class="cle"><p>Le même signal arrive sur la voie 1, puis sur la voie 2 : la voie 2 est <b>en retard</b> de Δt. On compte les carreaux entre deux points qui se correspondent sur les deux signaux : le <b>départ</b> de chaque signal (là où il quitte sa ligne horizontale). Puis :</p>
+      <p class="som-formule">Δt = nombre de carreaux × base de temps</p></div>
+    <p class="cours-exemple-t">Exemple</p>
+    <div class="osc-fig" id="figCarreaux"></div>
+    <p>Entre les deux départs, 3,2 carreaux ; Time : 200 µs par carreau.</p>
+    <p class="som-formule">Δt = 3,2 × 200 = 640 µs</p>
+  </section>
+
+  <section class="er-card" id="curseurs">
+    <h3 class="cours-titre">Mesurer un décalage avec les curseurs</h3>
+    <div class="cle"><ol style="margin:0;padding-left:20px;line-height:1.6">
+      <li>Appuyer sur <b>Cursor</b> : le menu des curseurs s'affiche à droite de l'écran.</li>
+      <li>Avec le 1<sup>er</sup> bouton à droite de l'écran, régler <b>Mode : Manuel</b>.</li>
+      <li>Avec le 2<sup>e</sup> bouton, choisir <b>Type : X</b> (curseurs horizontaux, pour mesurer une durée).</li>
+      <li>Choisir <b>CurA</b> (4<sup>e</sup> bouton) et tourner le <b>bouton de réglage</b> pour placer le curseur A au <b>départ</b> du signal de la voie 1.</li>
+      <li>Choisir <b>CurB</b> (5<sup>e</sup> bouton) et placer le curseur B au <b>départ</b> du signal de la voie 2.</li>
+      <li>Lire <b>ΔX</b>, la durée entre les deux curseurs, sous l'écran.</li></ol>
+      <p class="som-formule">Δt = ΔX</p>
+      <p>Les deux curseurs se placent au <b>même endroit</b> sur les deux signaux : pas au départ de l'un et au maximum de l'autre.</p></div>
+    <p class="cours-exemple-t">Exemple</p>
+    <div class="osc-fig" id="figCurseurs"></div>
+    <div class="osc-mesures osc-fig" id="mesCurseurs"></div>
+    <p>Les curseurs sont aux départs des deux signaux : Δt = ΔX = 528 µs.</p>
+  </section>
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_1a_carreaux.html">Revoir : compter les carreaux</a>
+    <a class="btn-secondary" href="module_1b_curseurs.html">Revoir : utiliser les curseurs</a>
+    <a class="btn-secondary" href="module_2a_carreaux.html">Module 2 : mesurer une fréquence</a>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Fiche récapitulative du module 1 : écrans dessinés par OSC
+   ============================================================ */
+SOM.menu('fiche_1');
+// les deux voies : même salve (ultrasons), la voie 2 en retard ; t1 : départ sur la voie 1, tau : retard (ms)
+const voies = (t1, tau) => [
+  { signal: { forme: 'salve', debut: t1, rep: 1.6, fOsc: 40, ampl: 1.8 }, sens: 1, pos: 1.6 },
+  { signal: { forme: 'salve', debut: t1 + tau, rep: 1.6, fOsc: 40, ampl: 1.5 }, sens: 1, pos: -2 },
+];
+// en comptant les carreaux : départs à 1,2 et 4,4 carreaux (200 µs par carreau)
+document.getElementById('figCarreaux').innerHTML = OSC.svg({ voies: voies(0.24, 0.64), baseTemps: 0.2 }, { motif: OSC.reperesX(1.2, 4.4, 0.9, 'Δt') });
+// avec les curseurs : départs à 1,2 et 3,84 carreaux
+const cur = { voies: voies(0.24, 0.528), baseTemps: 0.2 };
+const e = { menu: true, mode: 'Manuel', type: 'X', selB: true, pos: { X: [1.2, 3.84], Y: [2, 6] } };
+document.getElementById('figCurseurs').innerHTML = OSC.svg(cur, e);
+document.getElementById('mesCurseurs').innerHTML = OSC.mesures(cur, e);
+</script>
+</body>
+</html>

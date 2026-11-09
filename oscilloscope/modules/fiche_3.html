@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : fiche récapitulative — Oscilloscope</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="os.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="os.js"></script>
+<script src="oscillo.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page som-fiche">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · FICHE RÉCAPITULATIVE</span>
+    <h2 class="er-titre">Mesurer une tension</h2>
+  </div>
+
+  <section class="er-card" id="carreaux">
+    <h3 class="cours-titre">Mesurer U<sub>max</sub> en comptant les carreaux</h3>
+    <div class="cle"><p>Pour un signal centré sur 0 V, on compte les carreaux entre le <b>0 V</b> de sa voie (repère 1 ▸ ou 2 ▸) et le <b>maximum</b>, puis :</p>
+      <p class="som-formule">U<sub>max</sub> = nombre de carreaux × sensibilité verticale</p>
+      <p>Chaque voie a <b>sa propre sensibilité</b> : on lit celle de la voie du signal mesuré (CH1 pour le signal jaune, CH2 pour le signal bleu). La base de temps (Time) ne sert pas pour une tension.</p></div>
+    <p class="cours-exemple-t">Exemple</p>
+    <div class="osc-fig" id="figCarreaux"></div>
+    <p>Signal jaune : 3 carreaux du 0 V au maximum, CH1 : 2,00 V par carreau : U<sub>max</sub> = 3 × 2,00 = 6,0 V.</p>
+    <p>Signal bleu : 2,4 carreaux, CH2 : 500 mV = 0,5 V par carreau : U<sub>max</sub> = 2,4 × 0,5 = 1,2 V.</p>
+  </section>
+
+  <section class="er-card" id="curseurs">
+    <h3 class="cours-titre">Mesurer U<sub>max</sub> avec les curseurs</h3>
+    <div class="cle"><ol style="margin:0;padding-left:20px;line-height:1.6">
+      <li>Appuyer sur <b>Cursor</b> : le menu des curseurs s'affiche à droite de l'écran.</li>
+      <li>Avec le 1<sup>er</sup> bouton à droite de l'écran, régler <b>Mode : Manuel</b>.</li>
+      <li>Avec le 2<sup>e</sup> bouton, choisir <b>Type : Y</b> (curseurs verticaux, pour mesurer une tension).</li>
+      <li>Avec le 3<sup>e</sup> bouton, <b>Source</b>, choisir la voie du signal mesuré (CH1 ou CH2) : les valeurs des curseurs sont calculées avec son échelle, depuis son 0 V.</li>
+      <li>Placer un curseur au <b>maximum</b> et l'autre au <b>minimum</b> du signal, puis lire <b>ΔY</b>.</li></ol>
+      <p class="som-formule">U<sub>max</sub> = <span class="som-fr"><span>ΔY</span><span>2</span></span></p>
+      <p>Si le signal est <b>centré sur 0 V</b>, la valeur du curseur placé au maximum est aussi U<sub>max</sub>. S'il n'est pas centré, elle ne l'est plus : U<sub>max</sub> = ΔY / 2 convient toujours.</p></div>
+    <p class="cours-exemple-t">Exemple : signal centré sur 0 V</p>
+    <div class="osc-fig" id="figCentre"></div>
+    <div class="osc-mesures osc-fig" id="mesCentre"></div>
+    <p>CurA au maximum : U<sub>max</sub> = 4,60 V. Avec ΔY : U<sub>max</sub> = 9,20 / 2 = 4,60 V.</p>
+    <p class="cours-exemple-t">Exemple : le même signal, décalé (non centré)</p>
+    <div class="osc-fig" id="figDecale"></div>
+    <div class="osc-mesures osc-fig" id="mesDecale"></div>
+    <p>CurA au maximum vaut 7,00 V : ce n'est <b>pas</b> U<sub>max</sub>. Avec ΔY : U<sub>max</sub> = 9,20 / 2 = 4,60 V.</p>
+  </section>
+  <div class="er-actions som-fiche-liens">
+    <a class="btn-secondary" href="module_3a_carreaux.html">Revoir : compter les carreaux</a>
+    <a class="btn-secondary" href="module_3b_curseurs.html">Revoir : utiliser les curseurs</a>
+    <a class="btn-secondary" href="module_4_intensite.html">Module 4 : mesurer une intensité</a>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Fiche récapitulative du module 3 : écrans dessinés par OSC
+   ============================================================ */
+SOM.menu('fiche_3');
+// en comptant les carreaux : sinus de 6 V (CH1 : 2 V/carreau) et triangle de 1,2 V (CH2 : 500 mV/carreau)
+const deux = { voies: [{ signal: { forme: 'sinus', periode: 2, ampl: 6, phase: 0.3 }, sens: 2, pos: 0 },
+                       { signal: { forme: 'triangle', periode: 1, ampl: 1.2, phase: 0.1 }, sens: 0.5, pos: 0 }], baseTemps: 0.5 };
+document.getElementById('figCarreaux').innerHTML = OSC.svg(deux, { motif: OSC.flecheV(1.6, 4, 1, 'U<tspan baseline-shift="sub" font-size="2.8">max</tspan>') });
+// avec les curseurs : sinus de 4,6 V (CH1 : 2 V/carreau), centré puis décalé de 2,4 V
+const sig = dec => ({ voies: [{ signal: { forme: 'sinus', periode: 2, ampl: 4.6, phase: 0.3, decal: dec }, sens: 2, pos: 0 }], baseTemps: 0.5 });
+const eC = { menu: true, mode: 'Manuel', type: 'Y', pos: { X: [2, 8], Y: [1.7, 6.3] } };
+const eD = { menu: true, mode: 'Manuel', type: 'Y', pos: { X: [2, 8], Y: [0.5, 5.1] } };
+document.getElementById('figCentre').innerHTML = OSC.svg(sig(0), eC);
+document.getElementById('mesCentre').innerHTML = OSC.mesures(sig(0), eC);
+document.getElementById('figDecale').innerHTML = OSC.svg(sig(2.4), eD);
+document.getElementById('mesDecale').innerHTML = OSC.mesures(sig(2.4), eD);
+</script>
+</body>
+</html>
