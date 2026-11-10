@@ -262,9 +262,9 @@ Fin : une `.cle` récapitule la chaîne de calcul de l'élève (« ✍ Recopie t
   Copie par `navigator.clipboard.writeText`, avec repli `document.execCommand('copy')` sur une zone de texte cachée ; si les deux échouent, afficher le texte dans une zone sélectionnée avec « Copie-le (Ctrl + C) ». Message de réussite : « Mesures copiées. Dans Regressi : Fichier → Nouveau → Presse-papier. »
 - **Fiche `fiche_3.html` « Le faire avec Regressi »** (ouverte dans une nouvelle fenêtre depuis les pages des modules 2 et 3, pour garder sa page en cours), étapes numérotées, **mêmes noms de menus et même ordre que le mode d'emploi du professeur** (`Mode_emploi_Regressi.pdf`), avec des schémas simples des boutons et fenêtres (pas de copie d'écran) :
   - `#ouvrir` : « Copier les mesures pour Regressi » dans l'application, puis dans Regressi **Fichier → Nouveau → Presse-papier** ; onglet **Graphe**, **Coord.** : V en abscisse, pH en ordonnée, cocher **Ligne** et **Point** ; lire une valeur avec **Outils gr. → Réticule libre** ;
-  - `#tangentes` : méthode des tangentes avec les outils du graphe du mode d'emploi (**Outils gr. → Tangente**, **Outils gr. → Ligne**, **Réticule libre** pour lire Veq) ;
+  - `#tangentes` : une seule phrase, sans détailler : « Utilise l'outil méthode des tangentes de Regressi. » ;
   - `#derivee` : **créer la grandeur dérivée** : icône **Ajouter**, type de grandeur **« Dérivée »**, nom sans accent ni caractère spécial (`dpHdV`), dérivée de pH par rapport à V, **OK** ; puis onglet **Graphe**, **Coord.**, **Ajouter une courbe** avec `dpHdV` en ordonnée, échelle **à droite** ; repérer l'extrémum avec le **Réticule libre** et lire Veq.
-- Une manipulation qui n'est pas dans le mode d'emploi (ex. détail de l'outil Tangente) : écris-la au mieux et signale-la dans le compte rendu.
+- Une autre manipulation qui n'est pas dans le mode d'emploi : écris-la au mieux et signale-la dans le compte rendu.
 
 ## 7. Méthodes du cours (textes à reprendre)
 
