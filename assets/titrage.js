@@ -856,7 +856,7 @@
        consigne: html,                     consigne au-dessus des commandes
        unite: 'mS/m',                      conductimétrie
        lienRegressi: url,                  bouton « Le faire avec Regressi » (nouvelle fenêtre)
-       etat(prise) → { ok, html }          message sous les commandes (fin du titrage…)
+       etat(prise) → { ok, ko, html }      message sous les commandes (ok : fin du titrage ; ko : encadré rouge et « Recommencer » mis en avant)
        onMesure(prise), onRecommencer(prise)
      ============================================================ */
   function creer(zone, cfg) {
@@ -941,9 +941,17 @@
       R('lecV').textContent = 'V = ' + fmt(v / 10, 1) + ' mL';
       if (Cb) { Cb.maj(pr.mesures); Tb.maj(pr.mesures); }
       const msg = R('msg');
+      let ko = false;
       if (v >= V_MAX) { msg.className = 'ttr-msg'; msg.textContent = `La burette est vide (${fmt(cfg.vMax)} mL).`; }
-      else if (cfg.etat) { const e = cfg.etat(pr, v); msg.className = 'ttr-msg' + (e && e.ok ? ' ok' : ''); msg.innerHTML = e ? e.html : ''; }
+      else if (cfg.etat) {
+        const e = cfg.etat(pr, v);
+        ko = !!(e && e.ko);
+        msg.className = 'ttr-msg' + (e && e.ok ? ' ok' : ko ? ' ko' : '');
+        msg.innerHTML = e ? e.html : '';
+      }
       else { msg.className = 'ttr-msg'; msg.textContent = ''; }
+      // état « ko » (erreur à corriger en recommençant) : bouton « Recommencer » mis en avant
+      R('recommencer').classList.toggle('ttr-avant', ko);
     }
     function verser(d) {
       const v = vAct();

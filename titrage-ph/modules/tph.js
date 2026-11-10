@@ -385,7 +385,7 @@
     hcl:  { html: 'H₃O⁺ + Cl⁻ (acide chlorhydrique)', zone: 'bur_esp', cat: 'esp' },
     soude:{ html: 'S₀' + NB + ': Na⁺ + HO⁻', zone: 'bec_esp', cat: 'esp' },
     ca:   { html: 'c<sub>A</sub> = 0,100 mol·L⁻¹', zone: 'bur_c', cat: 'c' },
-    cb:   { html: 'c<sub>B</sub> inconnue', zone: 'bec_c', cat: 'c' },
+    cb:   { html: 'c<sub>0</sub> inconnue', zone: 'bec_c', cat: 'c' },
     veq:  { html: 'V<sub>eq</sub> (volume versé à la burette graduée)', zone: 'bur_v', cat: 'v' },
     vb:   { html: 'V<sub>B</sub> = 10,0 mL à la pipette jaugée', zone: 'bec_v', cat: 'v' },
     agit: { html: 'agitation', zone: 'agit', cat: 'agit' },
@@ -395,7 +395,7 @@
     const e = ETIQ[id], cz = CAT_ZONE[zone];
     if (e.cat !== cz) return { esp: 'Cette zone attend les espèces de la solution.', c: 'Cette zone attend une concentration.', v: 'Cette zone attend un volume.', agit: 'Sous le bécher' + NB + ': l’agitateur magnétique.' }[cz];
     if (e.cat === 'esp') return 'La burette contient la solution titrante, de concentration connue' + NB + '; le bécher, la solution titrée, prélevée à la pipette jaugée.';
-    if (e.cat === 'c') return 'c<sub>A</sub> est connue' + NB + ': c’est la concentration de la solution titrante, dans la burette. c<sub>B</sub> est inconnue' + NB + ': c’est la solution titrée, dans le bécher.';
+    if (e.cat === 'c') return 'c<sub>A</sub> est connue' + NB + ': c’est la concentration de la solution titrante, dans la burette. c<sub>0</sub> est inconnue' + NB + ': c’est la solution titrée, dans le bécher.';
     if (e.cat === 'v') return 'V<sub>B</sub> est prélevé à la pipette jaugée et versé dans le bécher' + NB + '; V<sub>eq</sub> est le volume versé par la burette graduée.';
     return '';
   }
@@ -582,6 +582,7 @@
        valeurs: [{ id, html, sym, val, v }],   étiquettes : html (étiquette), sym (diagnostics),
                                                val (écrit dans la case), v (nombre ou liste)
        grandeurs: [{ id, nom, tete,          tete : début de ligne à la place de « nom = »
+         intro,                       phrase d'explication avant la consigne (mode cartes)
          prelim: [{ q, cartes: [{ html, juste, diag }] }],   étapes littérales avant la formule (titre massique)
          formules: [{ html, juste, diag, cases: [ids], gabarit(cases) }],   une seule formule juste et imposee : pas de choix
          imposee,                     la formule juste est donnée (après prelim)
@@ -631,7 +632,7 @@
       if (k >= o.grandeurs.length) { o.fini && o.fini(res); return; }
       courante = o.grandeurs[k]; formule = null; erreurs = 0;
       const z = zoneEtape();
-      z.innerHTML = `${o.mode === 'ligne' ? '' : `<p class="tph-etape-t"><span class="tph-num">${k + 1}</span>${courante.titre || `Choisis la formule de ${courante.nom}, puis place les valeurs.`}</p>`}<div data-r="prelim"></div><div data-r="choix"></div>`;
+      z.innerHTML = `${o.mode === 'ligne' ? '' : `${courante.intro ? `<p class="tph-intro">${courante.intro}</p>` : ''}<p class="tph-etape-t"><span class="tph-num">${k + 1}</span>${courante.titre || `Choisis la formule de ${courante.nom}, puis place les valeurs.`}</p>`}<div data-r="prelim"></div><div data-r="choix"></div>`;
       if (courante.prelim) prelim(0); else cartes();
       UI.defiler(z);
     }

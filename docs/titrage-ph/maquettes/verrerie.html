@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maquette verrerie — TP : titrage pH-métrique du Destop</title>
+<link rel="stylesheet" href="../../../assets/theme.css">
+<link rel="stylesheet" href="../../../equilibrer-reactions/modules/er.css">
+<style>
+  /* page de comparaison des dessins de fioles jaugées et de pipettes jaugées */
+  body { margin: 0; font-family: var(--font-sans); background: var(--paper); }
+  .v-grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); gap: 14px; }
+  .v-carte { background: var(--sheet); border-radius: 18px; padding: 14px; box-shadow: inset 0 0 0 1.5px var(--paper-3); }
+  .v-carte h3 { margin: 0 0 4px; font-size: 1.05rem; }
+  .v-carte p { margin: 0 0 8px; color: var(--ink-2); font-size: .88rem; line-height: 1.4; }
+  .v-dessins { display: flex; justify-content: space-around; align-items: flex-end; }
+  .v-dessins svg { width: 25%; max-width: 128px; height: auto; }
+  .v-actuel { opacity: .85; }
+</style>
+</head>
+<body>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MAQUETTE À VALIDER · VERRERIE</span>
+    <h2 class="er-titre">Fioles jaugées et pipettes jaugées : 3 propositions</h2>
+    <p class="er-contexte">Dans chaque carte : fiole de 50 mL, fiole de 100 mL, pipette de 5 mL, pipette de 10 mL, à la taille des cartes du module 1. Le dessin actuel est en dernier pour comparer.</p>
+  </div>
+  <div class="v-grille" id="grille"></div>
+</div>
+<script>
+// Dessins SVG (viewBox 80 × 120) : seule la silhouette change d'une proposition à l'autre
+const V_TRAIT = 'stroke="var(--ink)" stroke-width="1.5" fill="var(--sheet)" stroke-linejoin="round"';
+const V_SOL = 'fill="rgba(170,205,230,.6)" stroke="none"';
+const V_REFLET = 'stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".9" fill="none"';
+const f1 = x => +x.toFixed(2);
+
+// profil gauche : liste de segments cubiques [p0, p1, p2, p3] (une droite = segment dont les points de contrôle sont sur la droite)
+const D = (a, b) => [a, [a[0] + (b[0] - a[0]) / 3, a[1] + (b[1] - a[1]) / 3], [a[0] + 2 * (b[0] - a[0]) / 3, a[1] + 2 * (b[1] - a[1]) / 3], b];
+const miroir = p => [80 - p[0], p[1]];
+const bez = (s, t) => [0, 1].map(k => (1 - t) ** 3 * s[0][k] + 3 * (1 - t) ** 2 * t * s[1][k] + 3 * (1 - t) * t * t * s[2][k] + t ** 3 * s[3][k]);
+// contour complet (gauche puis droite en miroir), du haut du col (yHaut)
+function contour(prof, yHaut) {
+  let d = `M${prof[0][0][0]} ${yHaut} V${prof[0][0][1]}`;
+  prof.forEach(s => { d += ` C${s[1].map(f1)} ${s[2].map(f1)} ${s[3].map(f1)}`; });
+  [...prof].reverse().forEach(s => { const m = [s[2], s[1], s[0]].map(miroir); d += ` C${m[0].map(f1)} ${m[1].map(f1)} ${m[2].map(f1)}`; });
+  return d + ` V${yHaut} Z`;
+}
+// liquide : points du profil sous le niveau yL (échantillonnés), légèrement à l'intérieur de la paroi
+function liquide(prof, yL) {
+  const pts = [];
+  prof.forEach(s => { for (let i = 0; i <= 24; i++) pts.push(bez(s, i / 24)); });
+  const bas = [];
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i], q = pts[i - 1];
+    if (p[1] >= yL) {
+      if (!bas.length && q) { const t = (yL - q[1]) / (p[1] - q[1]); bas.push([q[0] + t * (p[0] - q[0]), yL]); }
+      bas.push(p);
+    }
+  }
+  const g = bas.map(p => [p[0] + 1.2, Math.min(p[1], 110.6)]);
+  const tout = g.concat(g.slice().reverse().map(miroir));
+  return `<path d="M${tout.map(p => p.map(f1).join(' ')).join(' L')} Z" ${V_SOL}/>`;
+}
+function fiole(prof, o) {
+  const yb = prof[0][0][1];
+  return `<rect x="35.5" y="${o.grand ? 4 : 18}" width="9" height="7" rx="2" fill="var(--paper-3)" stroke="var(--ink-2)" stroke-width="1.2"/>
+    ${liquide(prof, o.yL)}
+    <path d="${contour(prof, o.grand ? 11 : 25)}" ${V_TRAIT.replace('fill="var(--sheet)"', 'fill="none"')}/>
+    <ellipse cx="40" cy="${o.grand ? 30 : 40}" rx="4.6" ry="1.4" fill="none" stroke="var(--ink)" stroke-width="1.3"/>
+    <text x="40" y="${o.yT}" text-anchor="middle" style="font:800 ${o.grand ? 9.5 : 8.5}px var(--font-sans)" fill="var(--ink)">${o.V}</text>`;
+}
+function pipette(prof, o) {
+  const poire = `<path d="M40 2 c-7 0 -9 5 -9 9 c0 5 4 8 6 9 v5 h6 v-5 c2 -1 6 -4 6 -9 c0 -4 -2 -9 -9 -9 z" fill="var(--paper-3)" stroke="var(--ink-2)" stroke-width="1.3"/>`;
+  return `${poire}<path d="${contour(prof, 25)}" ${V_TRAIT}/>
+    <ellipse cx="40" cy="33" rx="3.6" ry="1.2" fill="none" stroke="var(--ink)" stroke-width="1.3"/>
+    <text x="${o.xT}" y="${o.yT}" style="font:800 8.5px var(--font-sans)" fill="var(--ink)">${o.V}</text>`;
+}
+// profil gauche d'une pipette : réservoir entre y0 et y0 + h, de demi-largeur r ; forme = fonction du réservoir
+function profPipette(y0, h, r, reservoir) {
+  const t = 38.3;
+  return [D([t, 33], [t, y0]), ...reservoir(y0, h, r, t), D([t, y0 + h], [t, 104]), D([t, 104], [39.6, 116]), D([39.6, 116], [40, 116])];
+}
+
+// ---------- les trois propositions ----------
+const P = {
+  A: {
+    titre: 'A. Lignes droites, épaule serrée',
+    desc: 'Fiole : panse en cône tronqué, épaule à petit rayon, fond plat large. Pipette : réservoir en fuseau (cône, cylindre, cône).',
+    fiole: (yb, w) => [
+      [[36.5, yb], [36.5, yb + 5], [34, yb + 7], [32, yb + 8.5]],
+      D([32, yb + 8.5], [40 - w + 1.5, 106]),
+      [[40 - w + 1.5, 106], [40 - w, 110], [40 - w + 1.5, 112], [40 - w + 5, 112]],
+      D([40 - w + 5, 112], [40, 112])],
+    res: (y0, h, r, t) => [
+      [[t, y0], [t, y0 + 1], [t - 1, y0 + 2], [40 - r + .3, y0 + 11]],
+      [[40 - r + .3, y0 + 11], [40 - r, y0 + 12], [40 - r, y0 + 12.5], [40 - r, y0 + 13]],
+      D([40 - r, y0 + 13], [40 - r, y0 + h - 13]),
+      [[40 - r, y0 + h - 13], [40 - r, y0 + h - 12.5], [40 - r, y0 + h - 12], [40 - r + .3, y0 + h - 11]],
+      [[40 - r + .3, y0 + h - 11], [t - 1, y0 + h - 2], [t, y0 + h - 1], [t, y0 + h]]],
+  },
+  B: {
+    titre: 'B. Flancs verticaux, épaule tendue',
+    desc: 'Fiole : panse basse et large, flancs presque verticaux, épaule en courbe tendue vers le col. Pipette : réservoir cylindrique étroit, raccords courts.',
+    fiole: (yb, w) => [
+      [[36.5, yb], [36.5, yb + 10], [40 - w + 1, yb + 13], [40 - w, yb + 22]],
+      D([40 - w, yb + 22], [40 - w, 108]),
+      [[40 - w, 108], [40 - w, 111], [40 - w + 1.5, 112], [40 - w + 4, 112]],
+      D([40 - w + 4, 112], [40, 112])],
+    res: (y0, h, r, t) => [
+      [[t, y0], [t, y0 + 2], [40 - r, y0 + 2.5], [40 - r, y0 + 5]],
+      D([40 - r, y0 + 5], [40 - r, y0 + h - 5]),
+      [[40 - r, y0 + h - 5], [40 - r, y0 + h - 2.5], [t, y0 + h - 2], [t, y0 + h]]],
+  },
+  C: {
+    titre: 'C. Poire, flancs inclinés',
+    desc: 'Fiole : en poire, le col s’évase longuement, puis flancs droits nettement inclinés jusqu’au fond plat. Pipette : réservoir en olive allongée, effilé aux deux bouts.',
+    fiole: (yb, w) => [
+      [[36.5, yb], [36.5, yb + 6], [36, yb + 9], [40 - w * .45, yb + 13]],
+      [[40 - w * .45, yb + 13], [40 - w * .7, yb + 17], [40 - w * .74, yb + 18], [40 - w * .76, yb + 20]],
+      D([40 - w * .76, yb + 20], [40 - w, 107]),
+      [[40 - w, 107], [40 - w - .6, 110.5], [40 - w + 1.5, 112], [40 - w + 4, 112]],
+      D([40 - w + 4, 112], [40, 112])],
+    res: (y0, h, r, t) => [
+      [[t, y0], [t, y0 + h * .22], [40 - r, y0 + h * .2], [40 - r, y0 + h * .5]],
+      [[40 - r, y0 + h * .5], [40 - r, y0 + h * .8], [t, y0 + h * .78], [t, y0 + h]]],
+  },
+};
+// dimensions : fiole de 50 mL (col jusqu'à y = 66, demi-largeur 20), de 100 mL (y = 56, 26) ; pipettes de 5 et 10 mL
+const DIM = { f50: { yb: 66, w: 20, yL: 92, yT: 102 }, f100: { yb: 56, w: 26, yL: 86, yT: 99 },
+  p5: { y0: 42, h: 34, r: 4.6 }, p10: { y0: 40, h: 44, r: 6 } };
+function dessins(p) {
+  const f = (d, V, grand) => fiole(p.fiole(d.yb, d.w), { V, grand, yL: d.yL, yT: d.yT });
+  const pi = (d, V) => pipette(profPipette(d.y0, d.h, d.r, p.res), { V, xT: 44 + d.r + 1, yT: d.y0 + d.h / 2 + 3 });
+  return [f(DIM.f50, '50 mL', false), f(DIM.f100, '100 mL', true), pi(DIM.p5, '5 mL'), pi(DIM.p10, '10 mL')];
+}
+const svg = s => `<svg viewBox="0 0 80 120" role="img">${s}</svg>`;
+document.getElementById('grille').innerHTML = Object.values(P).map(p => `<div class="v-carte"><h3>${p.titre}</h3><p>${p.desc}</p>
+  <div class="v-dessins">${dessins(p).map(svg).join('')}</div></div>`).join('')
+  + `<div class="v-carte v-actuel"><h3>Dessin actuel</h3><p>Pour comparer.</p><div class="v-dessins" id="actuel"></div></div>`;
+</script>
+<script src="../../../assets/titrage.js"></script>
+<script>
+// dessin actuel, tiré de assets/titrage.js
+document.getElementById('actuel').innerHTML = ['fiole50', 'fiole100', 'pipette5', 'pipette10'].map(i => `<svg viewBox="0 0 80 120">${TITRAGE.verrerie(i)}</svg>`).join('');
+</script>
+</body>
+</html>

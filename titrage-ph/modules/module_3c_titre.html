@@ -49,18 +49,18 @@ const outil = TPH.calcul(document.getElementById('calc'), {
     { id: 'rhoG', html: 'ρ = 1 200 g·L⁻¹', sym: 'ρ en g·L⁻¹', val: '1 200 g·L⁻¹', v: 1200 },
   ],
   grandeurs: [
-    { id: 'c0', nom: c0, calc: v => v[0] * v[1] / v[2], resultat: x => cs(x, n) + ' mol·L⁻¹', etiquette: x => `${c0} = ${cs(x, n)} mol·L⁻¹`,
+    { id: 'c0', nom: c0, intro: `Relation établie au module 1, à l’équivalence${NB}: <b>${c0} × ${VB} = ${cA} × ${Veq}</b>`, calc: v => v[0] * v[1] / v[2], resultat: x => cs(x, n) + ' mol·L⁻¹', etiquette: x => `${c0} = ${cs(x, n)} mol·L⁻¹`,
       formules: [
         { juste: true, html: fr(`${cA} × ${Veq}`, VB), cases: ['cA', 'Veq', 'VB'], gabarit: c => fr(`${c[0]} × ${c[1]}`, c[2]) },
         { html: fr(`${cA} × ${VB}`, Veq), diag: `À l’équivalence ${c0} × ${VB} = ${cA} × ${Veq}${NB}: isole ${c0}, ${Veq} est au numérateur.` },
         { html: fr(cA, `${Veq} × ${VB}`), diag: `À l’équivalence ${c0} × ${VB} = ${cA} × ${Veq}${NB}: un seul volume au dénominateur.` }],
       solution: () => `${VB} et ${Veq} sont dans la même unité (mL / mL)${NB}: pas besoin de convertir.` },
-    { id: 'cD', nom: cD, calc: v => 20 * v[0], resultat: x => cs(x, n) + ' mol·L⁻¹', etiquette: x => `${cD} = ${cs(x, n)} mol·L⁻¹`,
+    { id: 'cD', nom: cD, intro: `S<sub>0</sub> est le Destop dilué 20 fois. Calcule maintenant ${cD}, la concentration du Destop.`, calc: v => 20 * v[0], resultat: x => cs(x, n) + ' mol·L⁻¹', etiquette: x => `${cD} = ${cs(x, n)} mol·L⁻¹`,
       formules: [
         { juste: true, html: `20 × ${c0}`, cases: ['c0'], gabarit: c => `20 × ${c[0]}` },
         { html: fr(c0, '20'), diag: 'Le Destop est plus concentré que la solution diluée.' }],
       solution: () => `Le Destop est 20 fois plus concentré que S<sub>0</sub>.` },
-    { id: 'Cm', nom: Cm, calc: v => v[0] * v[1], resultat: x => cs(x, n) + ' g·L⁻¹', etiquette: x => `${Cm} = ${cs(x, n)} g·L⁻¹`,
+    { id: 'Cm', nom: Cm, intro: `Pour calculer le titre massique, il faut la concentration massique ${Cm} du Destop, en g·L⁻¹.`, calc: v => v[0] * v[1], resultat: x => cs(x, n) + ' g·L⁻¹', etiquette: x => `${Cm} = ${cs(x, n)} g·L⁻¹`,
       formules: [
         { juste: true, html: `${cD} × ${M}`, cases: ['cD', 'M'], gabarit: c => `${c[0]} × ${c[1]}` },
         { html: fr(cD, M), diag: 'mol·L⁻¹ × g·mol⁻¹ = g·L⁻¹' + NB + ': on multiplie par M.' }],
