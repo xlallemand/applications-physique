@@ -380,24 +380,56 @@
   const V_FIN = 'stroke="var(--ink)" stroke-width="1" fill="none" stroke-linecap="round"';
   const V_SOL = 'fill="rgba(170,205,230,.6)" stroke="none"';              // eau, solution incolore
   const V_REFLET = 'stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" opacity=".9" fill="none"';
+  // silhouette symétrique : profil gauche en segments cubiques [p0, p1, p2, p3], le côté droit est son miroir (x → 80 − x)
+  const f2 = x => +x.toFixed(2);
+  const seg = (a, b) => [a, [a[0] + (b[0] - a[0]) / 3, a[1] + (b[1] - a[1]) / 3], [a[0] + 2 * (b[0] - a[0]) / 3, a[1] + 2 * (b[1] - a[1]) / 3], b];   // droite
+  const miroir = p => [80 - p[0], p[1]];
+  const bez = (s, t) => [0, 1].map(i => (1 - t) ** 3 * s[0][i] + 3 * (1 - t) ** 2 * t * s[1][i] + 3 * (1 - t) * t * t * s[2][i] + t ** 3 * s[3][i]);
+  function contour(prof, yHaut) {
+    let d = `M${prof[0][0][0]} ${yHaut} V${prof[0][0][1]}`;
+    prof.forEach(s => { d += ` C${s[1].map(f2)} ${s[2].map(f2)} ${s[3].map(f2)}`; });
+    [...prof].reverse().forEach(s => { const m = [s[2], s[1], s[0]].map(miroir); d += ` C${m[0].map(f2)} ${m[1].map(f2)} ${m[2].map(f2)}`; });
+    return d + ` V${yHaut} Z`;
+  }
+  // liquide : profil échantillonné sous le niveau yL, un peu à l'intérieur de la paroi
+  function liquide(prof, yL) {
+    const pts = [], bas = [];
+    prof.forEach(s => { for (let i = 0; i <= 24; i++) pts.push(bez(s, i / 24)); });
+    pts.forEach((p, i) => {
+      const q = pts[i - 1];
+      if (p[1] < yL) return;
+      if (!bas.length && q) { const t = (yL - q[1]) / (p[1] - q[1]); bas.push([q[0] + t * (p[0] - q[0]), yL]); }
+      bas.push(p);
+    });
+    const g = bas.map(p => [p[0] + 1.2, Math.min(p[1], 110.6)]);
+    return `<path d="M${g.concat(g.slice().reverse().map(miroir)).map(p => p.map(f2).join(' ')).join(' L')} Z" ${V_SOL}/>`;
+  }
   function pipette(V, gros) {
-    // poire à pipeter, tube, trait de jauge (anneau), réservoir, pointe effilée
-    const r = gros ? 9 : 6.5, h = gros ? 30 : 24, y0 = gros ? 40 : 44;
+    // poire à pipeter, tube avec le trait de jauge, réservoir cylindrique étroit à raccords courts, pointe effilée
+    const r = gros ? 6 : 4.6, h = gros ? 44 : 34, y0 = gros ? 40 : 42, t = 38.3;
+    const prof = [seg([t, 33], [t, y0]),
+      [[t, y0], [t, y0 + 2], [40 - r, y0 + 2.5], [40 - r, y0 + 5]],
+      seg([40 - r, y0 + 5], [40 - r, y0 + h - 5]),
+      [[40 - r, y0 + h - 5], [40 - r, y0 + h - 2.5], [t, y0 + h - 2], [t, y0 + h]],
+      seg([t, y0 + h], [t, 104]), seg([t, 104], [39.6, 116]), seg([39.6, 116], [40, 116])];
     return `<path d="M40 2 c-7 0 -9 5 -9 9 c0 5 4 8 6 9 v5 h6 v-5 c2 -1 6 -4 6 -9 c0 -4 -2 -9 -9 -9 z" fill="var(--paper-3)" stroke="var(--ink-2)" stroke-width="1.3"/>
-      <path d="M38.3 25 V${y0} C${40 - r} ${y0 + 3} ${40 - r} ${y0 + 6} ${40 - r} ${y0 + 9} V${y0 + h - 9} C${40 - r} ${y0 + h - 5} ${38.3} ${y0 + h - 3} 38.3 ${y0 + h + 3} V104 L39.6 116 h0.8 L41.7 104 V${y0 + h + 3} C41.7 ${y0 + h - 3} ${40 + r} ${y0 + h - 5} ${40 + r} ${y0 + h - 9} V${y0 + 9} C${40 + r} ${y0 + 6} ${40 + r} ${y0 + 3} 41.7 ${y0} V25 Z" ${V_TRAIT}/>
-      <ellipse cx="40" cy="33" rx="3.6" ry="1.2" fill="none" stroke="var(--ink)" stroke-width="1.3"/>
-      <line x1="${41 - r * .5}" y1="${y0 + 8}" x2="${41 - r * .5}" y2="${y0 + h - 8}" ${V_REFLET}/>
-      <text x="${44 + r}" y="${y0 + h / 2 + 3}" style="font:800 8.5px var(--font-sans)" fill="var(--ink)">${V}</text>`;
+      <path d="${contour(prof, 25)}" ${V_TRAIT}/>
+      <line x1="36.6" x2="43.4" y1="33" y2="33" stroke="var(--ink)" stroke-width="1.3"/>
+      <text x="${45 + r}" y="${y0 + h / 2 + 3}" style="font:800 8.5px var(--font-sans)" fill="var(--ink)">${V}</text>`;
   }
   function fiole(V, grand) {
-    // bouchon, long col avec le trait de jauge (anneau), panse en poire, fond plat
-    const w = grand ? 27 : 21, yb = grand ? 62 : 70;
+    // bouchon, long col avec le trait de jauge, panse en cône tronqué (épaule presque vive), fond plat large
+    const w = grand ? 26 : 20, yb = grand ? 56 : 66, yL = grand ? 86 : 92, yh = grand ? 11 : 25;
+    const prof = [
+      [[36.5, yb], [36.5, yb + 1], [36.3, yb + 1.6], [35.9, yb + 2.4]],
+      seg([35.9, yb + 2.4], [40 - w + 1.5, 106]),
+      [[40 - w + 1.5, 106], [40 - w, 110], [40 - w + 1.5, 112], [40 - w + 5, 112]],
+      seg([40 - w + 5, 112], [40, 112])];
     return `<rect x="35.5" y="${grand ? 4 : 18}" width="9" height="7" rx="2" fill="var(--paper-3)" stroke="var(--ink-2)" stroke-width="1.2"/>
-      <path d="M36.5 ${grand ? 11 : 25} V${yb} C${40 - w} ${yb + 10} ${40 - w} ${yb + 22} ${40 - w} ${yb + 30} C${40 - w} 108 ${40 - w + 3} 112 ${40 - w + 9} 112 H${40 + w - 9} C${40 + w - 3} 112 ${40 + w} 108 ${40 + w} ${yb + 30} C${40 + w} ${yb + 22} ${40 + w} ${yb + 10} 43.5 ${yb} V${grand ? 11 : 25} Z" ${V_TRAIT}/>
-      <path d="M${40 - w + 1.5} ${yb + 28} C${40 - w + 2} 109 ${40 - w + 4} 110.5 ${40 - w + 9} 110.5 H${40 + w - 9} C${40 + w - 4} 110.5 ${40 + w - 2} 109 ${40 + w - 1.5} ${yb + 28} Z" ${V_SOL}/>
-      <ellipse cx="40" cy="${grand ? 30 : 40}" rx="4.6" ry="1.4" fill="none" stroke="var(--ink)" stroke-width="1.3"/>
-      <path d="M${40 - w + 6} ${yb + 18} q-2 10 0 20" ${V_REFLET}/>
-      <text x="40" y="${yb + 26}" text-anchor="middle" style="font:800 ${grand ? 9.5 : 8.5}px var(--font-sans)" fill="var(--ink)">${V}</text>`;
+      <path d="${contour(prof, yh)}" fill="var(--sheet)"/>${liquide(prof, yL)}
+      <path d="${contour(prof, yh)}" ${V_TRAIT.replace('fill="var(--sheet)"', 'fill="none"')}/>
+      <line x1="34.6" x2="45.4" y1="${grand ? 30 : 40}" y2="${grand ? 30 : 40}" stroke="var(--ink)" stroke-width="1.3"/>
+      <text x="40" y="${grand ? 99 : 102}" text-anchor="middle" style="font:800 ${grand ? 9.5 : 8.5}px var(--font-sans)" fill="var(--ink)">${V}</text>`;
   }
   const VERRERIE = {
     becher: `<path d="M18.5 78 V106 c0 3 1.5 4.5 4.5 4.5 h34 c3 0 4.5 -1.5 4.5 -4.5 V78 Z" ${V_SOL}/>
