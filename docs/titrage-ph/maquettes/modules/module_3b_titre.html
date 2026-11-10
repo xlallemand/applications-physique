@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : calculer le titre massique — TP : titrage pH-métrique du Destop (maquette G)</title>
+<link rel="stylesheet" href="../../../../assets/theme.css">
+<link rel="stylesheet" href="../../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../maq-titrage.css">
+<link rel="stylesheet" href="../../../../assets/sommaire.css">
+<script src="../../../../assets/sommaire.js"></script>
+<script src="../../../../assets/titrage.js"></script>
+<script src="../maq-commun.js"></script>
+<script src="../../../../assets/dragdrop.js"></script>
+<script src="../maq-calcul.js"></script>
+</head>
+<body>
+<!-- Maquette G : outil de calcul, formule à choisir puis valeurs à placer (prompt §5.6) -->
+<div id="app-nav"></div>
+<div class="er-page tph-page">
+  <div class="er-card tph-tete">
+    <div class="tph-tete-l"><span class="er-badge">MODULE 3 · ENTRAÎNEMENT</span><h2 class="er-titre">Calculer le titre massique</h2></div>
+    <div class="tph-tete-b">
+      <button type="button" class="btn-small" data-donnees>Données du TP</button>
+      <button type="button" class="btn-small" data-passer>Passer cette partie →</button>
+      <button type="button" class="btn-small maq-ouvrir" data-maq aria-expanded="false">Maquette G · variantes</button>
+    </div>
+    <div class="maq-bar"><span class="maq-bar-t">Maquette G · outil de calcul</span></div>
+  </div>
+  <div class="er-card tph-zone"><div class="tph-corps">
+    <div class="tph-deux g-calc">
+      <div class="tph-col" id="calc"></div>
+      <div class="tph-col" id="fin"></div>
+    </div>
+  </div></div>
+</div>
+<script>
+const R = {};
+const NB = TPHM.NB, fr = TPHM.fr, cs = TPHM.cs, fmt = TPHM.fmt;
+let outil = null;
+// Veq retenu à la page précédente (sinon : extrémum de la dérivée des mesures, sinon 9,0 mL)
+function veqEleve() {
+  const t = TPHM.tp();
+  if (isFinite(t.veqEleve)) return t.veqEleve;
+  return 9.0;
+}
+function construire() {
+  const veq = veqEleve(), n = veq < 10 ? 2 : 3;          // chiffres significatifs : ceux de Veq (au dixième de mL)
+  document.getElementById('fin').innerHTML = `<p class="tph-petit">V<sub>eq</sub> = ${fmt(veq, 1)} mL (repéré à la page précédente). S<sub>0</sub> est le Destop dilué 20 fois.</p>`;
+  outil = TPHM.calcul(document.getElementById('calc'), {
+    mode: R.mode,
+    valeurs: [
+      { id: 'cA', html: 'c<sub>A</sub> = 0,100 mol·L⁻¹', sym: 'c<sub>A</sub>', val: '0,100 mol·L⁻¹', v: 0.100 },
+      { id: 'VB', html: 'V<sub>B</sub> = 10,0 mL', sym: 'V<sub>B</sub>', val: '10,0 mL', v: 10.0 },
+      { id: 'Veq', html: `V<sub>eq</sub> = ${fmt(veq, 1)} mL`, sym: 'V<sub>eq</sub>', val: `${fmt(veq, 1)} mL`, v: veq },
+      { id: 'M', html: 'M<sub>NaOH</sub> = 40 g·mol⁻¹', sym: 'M<sub>NaOH</sub>', val: '40 g·mol⁻¹', v: 40 },
+      { id: 'rhoKg', html: 'ρ = 1,2 kg·L⁻¹', sym: 'ρ en kg·L⁻¹', val: '1,2 kg·L⁻¹', v: 1.2 },
+      { id: 'rhoG', html: 'ρ = 1 200 g·L⁻¹', sym: 'ρ en g·L⁻¹', val: '1 200 g·L⁻¹', v: 1200 },
+    ],
+    grandeurs: [
+      { id: 'c0', nom: 'c<sub>0</sub>', calc: v => v[0] * v[1] / v[2], resultat: x => cs(x, n) + ' mol·L⁻¹', etiquette: x => `c<sub>0</sub> = ${cs(x, n)} mol·L⁻¹`,
+        formules: [
+          { juste: true, html: 'c<sub>A</sub> × V<sub>eq</sub> / V<sub>B</sub>', cases: ['cA', 'Veq', 'VB'], gabarit: c => `${fr(`${c[0]} × ${c[1]}`, c[2])}` },
+          { html: 'c<sub>A</sub> × V<sub>B</sub> / V<sub>eq</sub>', diag: 'À l’équivalence c<sub>0</sub> V<sub>B</sub> = c<sub>A</sub> V<sub>eq</sub> : isole c<sub>0</sub>, V<sub>eq</sub> est au numérateur.' },
+          { html: 'c<sub>A</sub> / (V<sub>eq</sub> × V<sub>B</sub>)', diag: 'À l’équivalence c<sub>0</sub> V<sub>B</sub> = c<sub>A</sub> V<sub>eq</sub> : un seul volume au dénominateur.' }],
+        solution: () => 'V<sub>B</sub> et V<sub>eq</sub> sont dans la même unité (mL / mL) : pas besoin de convertir.' },
+      { id: 'cD', nom: 'c<sub>D</sub>', calc: v => 20 * v[0], resultat: x => cs(x, n) + ' mol·L⁻¹', etiquette: x => `c<sub>D</sub> = ${cs(x, n)} mol·L⁻¹`,
+        formules: [
+          { juste: true, html: '20 × c<sub>0</sub>', cases: ['c0'], gabarit: c => `20 × ${c[0]}` },
+          { html: 'c<sub>0</sub> / 20', diag: 'Le Destop est plus concentré que la solution diluée.' }],
+        solution: () => 'Le Destop est 20 fois plus concentré que S<sub>0</sub>.' },
+      { id: 'Cm', nom: 'C<sub>m</sub>', calc: v => v[0] * v[1], resultat: x => cs(x, n) + ' g·L⁻¹', etiquette: x => `C<sub>m</sub> = ${cs(x, n)} g·L⁻¹`,
+        formules: [
+          { juste: true, html: 'c<sub>D</sub> × M<sub>NaOH</sub>', cases: ['cD', 'M'], gabarit: c => `${c[0]} × ${c[1]}` },
+          { html: 'c<sub>D</sub> / M<sub>NaOH</sub>', diag: 'mol·L⁻¹ × g·mol⁻¹ = g·L⁻¹ : on multiplie par M.' }],
+        solution: () => 'mol·L⁻¹ × g·mol⁻¹ = g·L⁻¹.' },
+      { id: 't', nom: 't', calc: v => v[0] / v[1], resultat: x => `${cs(x, n)} = ${cs(x * 100, n)}${NB}%`, etiquette: x => `t = ${cs(x * 100, n)}${NB}%`,
+        formules: [
+          { juste: true, html: 'C<sub>m</sub> / ρ', cases: ['Cm', 'rhoG'], gabarit: c => fr(c[0], c[1]) },
+          { html: 'ρ / C<sub>m</sub>', diag: 't = m<sub>NaOH</sub> / m<sub>solution</sub> : la masse de NaOH (C<sub>m</sub> × V) est au numérateur.' },
+          { html: 'C<sub>m</sub> × ρ', diag: 't = m<sub>NaOH</sub> / m<sub>solution</sub> : c’est un quotient de masses, sans unité.' }],
+        diagCase: (att, pose) => pose === 'rhoKg' ? 'C<sub>m</sub> est en g·L⁻¹ : ρ doit être en g·L⁻¹.' : null,
+        solution: () => `t = ${fr('m<sub>NaOH</sub>', 'm<sub>solution</sub>')} = ${fr('C<sub>m</sub> × V', 'ρ × V')} = ${fr('C<sub>m</sub>', 'ρ')}` },
+    ],
+    fini: res => {
+      TPHM.tpEcrire({ titre: res.t });
+      SOM.marquer({ fait: true });
+      const f = document.getElementById('fin');
+      f.innerHTML = `<div class="cle tph-cle"><b class="cle-titre">✍ Recopie tes calculs</b>
+        c<sub>0</sub> = ${fr('c<sub>A</sub> × V<sub>eq</sub>', 'V<sub>B</sub>')} = ${fr(`0,100 × ${fmt(veq, 1)}`, '10,0')} = ${cs(res.c0, n)} mol·L⁻¹<br>
+        c<sub>D</sub> = 20 × c<sub>0</sub> = ${cs(res.cD, n)} mol·L⁻¹<br>
+        C<sub>m</sub> = c<sub>D</sub> × M<sub>NaOH</sub> = ${cs(res.cD, n)} × 40 = ${cs(res.Cm, n)} g·L⁻¹<br>
+        t = ${fr('m<sub>NaOH</sub>', 'm<sub>solution</sub>')} = ${fr('C<sub>m</sub> × V', 'ρ × V')} = ${fr(cs(res.Cm, n), '1 200')} = ${cs(res.t, n)} = <b>${cs(res.t * 100, n)}${NB}%</b></div>
+        <p class="tph-suite"><a href="module_4_incertitudes.html">Module 4${NB}: valider le résultat →</a></p>`;
+      TPHM.defiler(f);
+    },
+  });
+}
+TPHM.init('module_3b_titre', { passer: () => outil.remplir() });
+R.mode = TPHM.choix('mode', 'Présentation', [{ v: 'cartes', l: '1', t: 'Cartes de formules, puis cases' }, { v: 'ligne', l: '2', t: 'Tout en lignes' }], 'cartes', v => { R.mode = v; construire(); });
+construire();
+</script>
+</body>
+</html>

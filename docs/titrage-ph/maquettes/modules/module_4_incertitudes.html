@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 4 : incertitudes et compatibilité — TP : titrage pH-métrique du Destop (maquette G)</title>
+<link rel="stylesheet" href="../../../../assets/theme.css">
+<link rel="stylesheet" href="../../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../maq-titrage.css">
+<link rel="stylesheet" href="../../../../assets/sommaire.css">
+<script src="../../../../assets/sommaire.js"></script>
+<script src="../../../../assets/titrage.js"></script>
+<script src="../maq-commun.js"></script>
+<script src="../../../../assets/dragdrop.js"></script>
+<script src="../maq-calcul.js"></script>
+</head>
+<body>
+<!-- Maquette G : tableau des groupes et outil de calcul des incertitudes (prompt §5.7) -->
+<div id="app-nav"></div>
+<div class="er-page tph-page">
+  <div class="er-card tph-tete">
+    <div class="tph-tete-l"><span class="er-badge">MODULE 4 · ENTRAÎNEMENT</span><h2 class="er-titre">Incertitudes et compatibilité</h2></div>
+    <div class="tph-tete-b">
+      <button type="button" class="btn-small" data-donnees>Données du TP</button>
+      <button type="button" class="btn-small" data-passer>Passer cette partie →</button>
+      <button type="button" class="btn-small maq-ouvrir" data-maq aria-expanded="false">Maquette G · variantes</button>
+    </div>
+    <div class="maq-bar"><span class="maq-bar-t">Maquette G · tableau des groupes et outil de calcul</span></div>
+  </div>
+  <div class="er-card tph-zone"><div class="tph-corps">
+    <div class="tph-inc tph-inc-colonnes" id="inc">
+      <div class="tph-inc-tab"><div class="tph-groupes-boite" id="groupes"></div>
+        <div class="tph-actions" style="margin-top:4px"><button type="button" class="btn-small" id="plus">+ Groupe</button><button type="button" class="btn-small" id="moins">− Groupe</button><button type="button" class="btn-small" id="simul">Revenir aux valeurs simulées</button></div>
+        <p class="tph-petit">Tu peux remplacer les V<sub>eq</sub> des autres groupes par les vraies valeurs de ta classe.</p></div>
+      <div class="tph-col" id="calc"></div>
+      <div class="tph-col" id="fin"></div>
+    </div>
+  </div></div>
+</div>
+<script>
+const R = {};
+const NB = TPHM.NB, fr = TPHM.fr, cs = TPHM.cs, fmt = TPHM.fmt, rac = TPHM.rac, abs = TPHM.abs;
+let outil = null;
+// titre (%) d'un groupe à partir de son Veq : t = 20 × cA × Veq × M / (VB × ρ)
+const titre = veq => 20 * 0.100 * veq * 40 / (10.0 * 1200) * 100;
+// groupes : 1 = toi ; 2 à 9 : Veq simulés par le simulateur, tirés une fois et gardés
+function groupes() {
+  const t = TPHM.tp();
+  let g = t.groupes;
+  if (!g || !g.simules) {
+    const sim = []; for (let i = 0; i < 11; i++) sim.push(+TITRAGE.chimie.veqGroupe(9.0, 0.4).toFixed(2));
+    g = { simules: sim, veq: sim.slice(0, 8), n: 9 };
+    TPHM.tpEcrire({ groupes: g });
+  }
+  return g;
+}
+const veqToi = () => { const t = TPHM.tp(); return isFinite(t.veqEleve) ? t.veqEleve : 9.0; };
+function liste() { const g = groupes(); return [veqToi(), ...g.veq.slice(0, g.n - 1)]; }
+function tableau() {
+  const g = groupes(), L = liste(), z = document.getElementById('groupes');
+  const cell = (v, i) => i === 0 ? `<td class="toi">${fmt(v)}</td>` : `<td><input type="text" inputmode="decimal" value="${fmt(v)}" data-g="${i}" aria-label="V_eq du groupe ${i + 1}"></td>`;
+  if (R.tab === 'colonnes') {
+    z.innerHTML = `<table class="tph-groupes"><tbody>
+      <tr><th>Groupe</th>${L.map((v, i) => `<th>${i === 0 ? '1 (toi)' : i + 1}</th>`).join('')}</tr>
+      <tr><th>V<sub>eq</sub> (mL)</th>${L.map(cell).join('')}</tr>
+      <tr><th>t (%)</th>${L.map(v => `<td>${cs(titre(v), 3)}</td>`).join('')}</tr></tbody></table>`;
+  } else {
+    z.innerHTML = `<table class="tph-groupes"><thead><tr><th>Groupe</th><th>V<sub>eq</sub> (mL)</th><th>t (%)</th></tr></thead><tbody>
+      ${L.map((v, i) => `<tr><th>${i === 0 ? '1 (toi)' : i + 1}</th>${cell(v, i)}<td>${cs(titre(v), 3)}</td></tr>`).join('')}</tbody></table>`;
+  }
+  z.querySelectorAll('input').forEach(inp => inp.addEventListener('change', () => {
+    const v = TPHM.lire(inp.value), gg = groupes();
+    if (isFinite(v) && v > 0 && v < 25) { gg.veq[+inp.dataset.g - 1] = v; TPHM.tpEcrire({ groupes: gg }); }
+    construire();
+  }));
+}
+function construire() {
+  tableau();
+  const L = liste().map(titre), n = L.length;
+  document.getElementById('fin').innerHTML = '';
+  const ti = { id: 'ti', html: 't<sub>i</sub> (ligne t du tableau)', sym: 't<sub>i</sub>', val: 't<sub>i</sub>', v: L };
+  outil = TPHM.calcul(document.getElementById('calc'), {
+    mode: R.mode,
+    valeurs: [ti,
+      { id: 'veqi', html: 'V<sub>eq,i</sub> (ligne V<sub>eq</sub>)', sym: 't<sub>i</sub>', val: 'V<sub>eq,i</sub>', v: liste() },
+      { id: 'n', html: `n = ${n}`, sym: 'n', val: String(n), v: n },
+      { id: 'tref10', html: `t<sub>ref</sub> = 10${NB}%`, sym: 't<sub>ref</sub>', val: `10${NB}%`, v: 10 },
+      { id: 'tref6', html: `t<sub>ref</sub> = 6${NB}%`, sym: 't<sub>ref</sub>', val: `6${NB}%`, v: 6 }],
+    grandeurs: [
+      { id: 'tm', nom: 't̄', calc: v => v[1].reduce((a, b) => a + b, 0) / v[0], resultat: x => cs(x, 3) + NB + '%', etiquette: x => `t̄ = ${cs(x, 3)}${NB}%`,
+        formules: [
+          { juste: true, html: `${fr('1', 'n')} Σ t<sub>i</sub>`, cases: ['n', 'ti'], gabarit: c => `${fr('1', c[0])} Σ ${c[1]}` },
+          { html: 'Σ t<sub>i</sub>', diag: 'Il faut diviser la somme par le nombre de valeurs n.' },
+          { html: `${fr('1', 'n − 1')} Σ t<sub>i</sub>`, diag: 'n − 1 sert pour l’écart-type, pas pour la moyenne.' }],
+        diagCase: (a, p) => p === 'veqi' ? 'On calcule la moyenne des titres t<sub>i</sub>, pas des volumes.' : null },
+      { id: 'sig', nom: 'σ', calc: v => { const m = v[2]; return Math.sqrt(v[1].reduce((a, b) => a + (b - m) ** 2, 0) / (v[0] - 1)); },
+        resultat: x => cs(x, 2) + NB + '%', etiquette: x => `σ = ${cs(x, 2)}${NB}%`,
+        formules: [
+          { juste: true, html: rac(`${fr('1', 'n − 1')} Σ (t<sub>i</sub> − t̄)<sup>2</sup>`), cases: ['n', 'ti', 'tm'], gabarit: c => rac(`${fr('1', c[0] + ' − 1')} Σ (${c[1]} − ${c[2]})<sup>2</sup>`) },
+          { html: rac(`${fr('1', 'n')} Σ (t<sub>i</sub> − t̄)<sup>2</sup>`), diag: 'Pour l’écart-type de n mesures, on divise par n − 1 (données du TP).' },
+          { html: `${fr('1', 'n − 1')} Σ (t<sub>i</sub> − t̄)<sup>2</sup>`, diag: 'Sans la racine, c’est la variance : prends la racine carrée.' }],
+        diagCase: (a, p) => p === 'veqi' ? 'On calcule l’écart-type des titres t<sub>i</sub>, pas des volumes.' : null },
+      { id: 'u', nom: 'u(t)', calc: v => v[0] / Math.sqrt(v[1]), resultat: x => cs(x, 2) + NB + '%', etiquette: x => `u(t) = ${cs(x, 2)}${NB}%`,
+        formules: [
+          { juste: true, html: fr('σ', '√n'), cases: ['sig', 'n'], gabarit: c => fr(c[0], '√' + c[1]) },
+          { html: fr('σ', 'n'), diag: 'On divise par √n, pas par n.' },
+          { html: 'σ × √n', diag: 'Plus il y a de mesures, plus l’incertitude est petite : on divise par √n.' },
+          { html: 'σ', diag: 'u(t) = σ / √n : plus il y a de mesures, plus l’incertitude est petite.' }] },
+      compat('z10', 'tref10', 10), compat('z6', 'tref6', 6),
+    ],
+    fini: res => {
+      SOM.marquer({ fait: true });
+      const f = document.getElementById('fin');
+      const conc = z => z <= 2 ? 'compatible' : 'non compatible';
+      f.innerHTML = `<div class="cle tph-cle"><b class="cle-titre">✍ Complète ton compte rendu</b>
+        n = ${n}${NB}; t̄ = ${cs(res.tm, 3)}${NB}%${NB}; σ = ${cs(res.sig, 2)}${NB}%${NB}; u(t) = ${fr('σ', '√n')} = ${cs(res.u, 2)}${NB}%.<br>
+        10${NB}%${NB}: ${fr('|t̄ − 10|', 'u(t)')} = ${cs(res.z10, 2)} ${res.z10 <= 2 ? '≤' : '>'} 2${NB}: ${conc(res.z10)}.<br>
+        6${NB}%${NB}: ${fr('|t̄ − 6|', 'u(t)')} = ${cs(res.z6, 2)} ${res.z6 <= 2 ? '≤' : '>'} 2${NB}: ${conc(res.z6)}.</div>
+        <p class="tph-suite"><a href="module_2_titrage.html">Refaire un titrage (nouvelle prise d'essai) →</a></p>`;
+      TPHM.defiler(f);
+    },
+  });
+}
+// compatibilité avec t_ref, puis conclusion choisie par l'élève
+function compat(id, cref, tref) {
+  return { id, nom: `l’écart à ${tref}${NB}%`, calc: v => Math.abs(v[0] - v[1]) / v[2], resultat: x => cs(x, 2),
+    formules: [
+      { juste: true, html: fr(abs('t̄ − t<sub>ref</sub>'), 'u(t)'), cases: ['tm', cref, 'u'], gabarit: c => fr(abs(`${c[0]} − ${c[1]}`), c[2]) },
+      { html: fr(abs('t̄ − t<sub>ref</sub>'), 'σ'), diag: 'On compare l’écart à l’incertitude u(t), pas à l’écart-type σ.' },
+      { html: abs('t̄ − t<sub>ref</sub>'), diag: 'Il faut diviser l’écart par u(t) pour le comparer à 2.' }],
+    diagCase: (a, p) => (p === 'tref10' || p === 'tref6') ? `Ici, on compare à t<sub>ref</sub> = ${tref}${NB}%.` : null,
+    apres: (x, zr, suite) => {
+      const d = document.createElement('div');
+      d.innerHTML = `<p class="tph-etape-t" style="margin-top:8px !important">Le résultat est-il compatible avec ${tref}${NB}%${NB}?</p>`;
+      zr.appendChild(d);
+      TPHM.qcm(d, [{ html: 'compatible', juste: x <= 2, diag: x <= 2 ? `${cs(x, 2)} ≤ 2.` : `${cs(x, 2)} > 2 : l’écart est trop grand devant u(t).` },
+                   { html: 'non compatible', juste: x > 2, diag: x > 2 ? `${cs(x, 2)} > 2.` : `${cs(x, 2)} ≤ 2 : l’écart est petit devant u(t).` }], () => {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'btn-primary tph-btn'; b.textContent = 'Continuer →'; b.style.marginTop = '8px';
+        b.addEventListener('click', () => { zr.innerHTML = ''; suite(); }); d.appendChild(b); TPHM.defiler(b);
+      });
+      TPHM.defiler(d);
+    } };
+}
+document.getElementById('plus').addEventListener('click', () => { const g = groupes(); if (g.n < 12) { g.n++; while (g.veq.length < g.n - 1) g.veq.push(g.simules[g.veq.length] || 9); TPHM.tpEcrire({ groupes: g }); construire(); } });
+document.getElementById('moins').addEventListener('click', () => { const g = groupes(); if (g.n > 2) { g.n--; TPHM.tpEcrire({ groupes: g }); construire(); } });
+document.getElementById('simul').addEventListener('click', () => { const g = groupes(); g.veq = g.simules.slice(0, 11); TPHM.tpEcrire({ groupes: g }); construire(); });
+TPHM.init('module_4_incertitudes', { passer: () => outil.remplir() });
+R.tab = TPHM.choix('tab', 'Tableau', [{ v: 'colonnes', l: '1', t: 'Une colonne par groupe (TP)' }, { v: 'lignes', l: '2', t: 'Une ligne par groupe' }], 'colonnes', v => { R.tab = v; majDispo(); construire(); });
+R.mode = TPHM.choix('mode', 'Calculs', [{ v: 'cartes', l: 'a', t: 'Cartes de formules, puis cases' }, { v: 'ligne', l: 'b', t: 'Tout en lignes' }], 'cartes', v => { R.mode = v; construire(); });
+function majDispo() { document.getElementById('inc').className = 'tph-inc tph-inc-' + R.tab; }
+majDispo();
+construire();
+</script>
+</body>
+</html>

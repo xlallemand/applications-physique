@@ -1,0 +1,175 @@
+/* ============================================================
+   TITRAGE : styles du simulateur de titrage partagé (assets/titrage.js)
+   Classes préfixées ttr- : montage, courbe, tableau, commandes,
+   outils de repérage (tangentes, dérivée), petits outils d'interface.
+   Couleurs : uniquement les variables de assets/theme.css
+   (couleurs des solutions, du verre et du métal : attributs SVG, voir titrage.js).
+   ============================================================ */
+
+/* ---------- petits outils d'interface ---------- */
+.ttr-consigne { background: var(--cle-bg); border-radius: 14px; padding: 8px 12px; font-size: .92rem; line-height: 1.45; margin: 0; }
+.ttr-consigne b { color: var(--accent-ink); }
+.ttr-petit { font-size: .86rem; color: var(--ink-2); line-height: 1.4; margin: 0; }
+.ttr-retour { margin-top: 8px; padding: 10px 14px !important; border-radius: 14px !important; line-height: 1.45; font-size: .93rem; }
+.ttr-retour b:first-child { margin-right: 4px; }
+.callout-danger.ttr-retour { color: var(--danger-text); }
+.callout-success.ttr-retour b:first-child { color: var(--success-text); }
+.ttr-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+.ttr-btn { min-height: 44px; padding: 10px 22px !important; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.ttr-valeur { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 8px; }
+.ttr-lab { font-size: 1.05rem; font-weight: 800; white-space: nowrap; }
+.ttr-unite { font-size: 1.02rem; font-weight: 700; white-space: nowrap; }
+.ttr-champ-box { display: inline-flex; align-items: center; gap: 4px; }
+.ttr-champ {
+  width: 96px; font: inherit; font-size: 16px; font-weight: 800; text-align: center; padding: 9px 6px;
+  border: none; border-radius: 12px; box-shadow: inset 0 0 0 1.5px var(--paper-3); background: var(--sheet); color: var(--ink);
+  -webkit-appearance: none; appearance: none;
+}
+.ttr-champ:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.ttr-champ:disabled { background: var(--paper); -webkit-text-fill-color: var(--ink); opacity: 1; }
+.ttr-pm {
+  width: 38px; height: 42px; flex-shrink: 0; border: none; border-radius: 12px; cursor: pointer;
+  background: var(--paper); color: var(--ink); font: inherit; font-size: 1.1rem; font-weight: 800; touch-action: manipulation;
+}
+.ttr-btn, .ttr-boutons .btn-small, .ttr-pm { -webkit-tap-highlight-color: transparent; }
+
+/* ---------- montage (SVG) ---------- */
+.ttr-montage { position: relative; min-height: 0; }
+.ttr-montage svg { display: block; width: 100%; height: 100%; font-family: var(--font-sans); }
+.ttr-trait { stroke: var(--ink); stroke-width: 1.6; fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.ttr-fin { stroke: var(--ink-2); stroke-width: 1; fill: none; }
+.ttr-verre { fill: var(--sheet); stroke: var(--ink); stroke-width: 1.6; stroke-linejoin: round; }
+.ttr-support { fill: var(--paper-3); stroke: var(--ink); stroke-width: 1.4; }
+.ttr-appareil { fill: var(--paper); stroke: var(--ink); stroke-width: 1.6; }
+.ttr-ecran { fill: var(--ink); }
+.ttr-ecran-lab { fill: var(--ink); font: 800 11px var(--font-sans); }
+.ttr-txt { fill: var(--ink); font: 700 14px var(--font-sans); }
+.ttr-txt-2 { fill: var(--ink-2); font: 600 13px var(--font-sans); }
+.ttr-acc { fill: var(--accent-ink); font: 800 15px var(--font-sans); font-variant-numeric: tabular-nums; }
+.ttr-grad { stroke: var(--ink); stroke-width: .7; }
+.ttr-grad-txt { fill: var(--ink-2); font: 600 9px var(--font-sans); }
+.ttr-cable { stroke: var(--ink-2); stroke-width: 2; fill: none; stroke-linecap: round; }
+.ttr-barreau { fill: var(--ink); }
+.ttr-tourne { transform-box: fill-box; transform-origin: center; animation: ttr-tourne .6s linear infinite; }
+@keyframes ttr-tourne { from { transform: scaleX(1); } 50% { transform: scaleX(.25); } to { transform: scaleX(1); } }
+.ttr-goutte { fill: var(--accent); opacity: 0; }
+.ttr-goutte.tombe { animation: ttr-goutte .35s ease-in 1; }
+@keyframes ttr-goutte { 0% { opacity: .9; transform: translateY(0); } 100% { opacity: 0; transform: translateY(30px); } }
+@media (prefers-reduced-motion: reduce) { .ttr-tourne, .ttr-goutte.tombe { animation: none; } }
+.ttr-realiste .ttr-support { stroke: var(--ink-2); }
+
+/* schéma à compléter : cadres reliés à la burette et au bécher, zones de dépôt */
+.ttr-cadre { fill: var(--sheet); fill-opacity: .6; stroke: var(--ink); stroke-width: 2; }
+.ttr-relie { stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; }
+.ttr-relie-pt { fill: var(--ink); }
+.ttr-zone {
+  position: absolute; display: flex; align-items: center; justify-content: flex-start; gap: 4px; min-height: 30px;
+  border-radius: 10px; border: 2px dashed var(--line-strong); background: var(--sheet); padding: 2px 6px;
+  font: 700 .78rem/1.2 var(--font-sans); color: var(--ink-2); text-align: left; cursor: pointer;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; transform: translateY(-50%);
+}
+.ttr-zone:hover, .ttr-zone.drag-over, .ttr-zone.cible { border-color: var(--accent); background: var(--cle-bg); color: var(--accent-ink); }
+.ttr-zone.pleine { border-style: solid; border-color: var(--paper-3); color: var(--ink); }
+.ttr-zone.ok { border-color: var(--success); background: var(--success-bg); color: var(--success-text); }
+.ttr-zone.ko { border-color: var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+.ttr-zone:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ttr-zone-vide { color: var(--ink-2); font-weight: 700; font-style: italic; }
+
+/* ---------- courbe ---------- */
+.ttr-courbe { position: relative; min-height: 0; min-width: 0; }
+.ttr-courbe svg { display: block; width: 100%; height: 100%; font-family: var(--font-sans); touch-action: pan-y; -webkit-user-select: none; user-select: none; }
+.ttr-courbe.actif svg { touch-action: none; cursor: crosshair; }
+.ttr-grille { stroke: var(--paper-3); stroke-width: 1; stroke-dasharray: 3 4; }
+.ttr-axe { stroke: var(--ink); stroke-width: 1.5; }
+.ttr-axe-d { stroke: var(--ink-2); }
+.ttr-fleche { fill: var(--ink); }
+.ttr-gradu { font: 600 11px var(--font-sans); fill: var(--ink-2); font-variant-numeric: tabular-nums; }
+.ttr-axe-nom { font: 800 12px var(--font-sans); fill: var(--ink); }
+.ttr-axe-nom-d { fill: var(--ink-2); }
+.ttr-lisse { fill: none; stroke: var(--accent); stroke-width: 2.2; stroke-linejoin: round; }
+.ttr-pt { fill: var(--accent-ink); }
+.ttr-pt-der { fill: var(--sheet); stroke: var(--ink-2); stroke-width: 1.5; }
+.ttr-der { fill: none; stroke: var(--ink-2); stroke-width: 1.8; stroke-dasharray: 5 4; }
+.ttr-droite { stroke: var(--ink); stroke-width: 1.6; }
+.ttr-droite.mobile, .ttr-perp.mobile { stroke: var(--accent-ink); stroke-width: 2.2; }
+.ttr-droite.essai { stroke: var(--accent); stroke-width: 1.6; stroke-dasharray: 6 4; }
+.ttr-perp { stroke: var(--ink-2); stroke-width: 1.6; }
+.ttr-marque { stroke: var(--ink); stroke-width: 1.6; }
+.ttr-poignee { fill: var(--sheet); stroke: var(--accent-ink); stroke-width: 2.5; }
+.ttr-poignee-zone { fill: transparent; cursor: grab; touch-action: none; }
+.ttr-milieu { fill: var(--accent-ink); }
+.ttr-E { fill: var(--accent-ink); stroke: var(--sheet); stroke-width: 2; }
+.ttr-E-txt { font: 800 13px var(--font-sans); fill: var(--accent-ink); }
+.ttr-lecture { stroke: var(--accent-ink); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.ttr-bulle-txt { font: 800 12px var(--font-sans); fill: var(--accent-ink); font-variant-numeric: tabular-nums; }
+.ttr-bulle-fond { fill: var(--sheet); stroke: var(--paper-3); }
+
+/* ---------- tableau de valeurs en petit ---------- */
+.ttr-tab-boite { overflow: auto; min-height: 0; border-radius: 10px; border: 1px solid var(--paper-3); background: var(--sheet); }
+.ttr-tab { border-collapse: collapse; font-size: .75rem; font-variant-numeric: tabular-nums; width: 100%; }
+.ttr-tab th, .ttr-tab td { border: 1px solid var(--paper-3); padding: 2px 6px; text-align: center; white-space: nowrap; }
+.ttr-tab th { background: var(--paper); font-weight: 800; position: sticky; top: 0; z-index: 1; }
+.ttr-tab tr.dernier td { background: var(--cle-bg); font-weight: 800; }
+.ttr-tab-vide { color: var(--ink-2); font-size: .78rem; padding: 6px; text-align: center; }
+
+/* ---------- commandes de versement ---------- */
+.ttr-cmd { display: flex; flex-direction: column; gap: 6px; }
+.ttr-pas { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+.ttr-pastille {
+  min-height: 44px; min-width: 58px; padding: 0 10px; border: none; border-radius: 999px; background: var(--sheet); color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 800 .9rem var(--font-sans); cursor: pointer; font-variant-numeric: tabular-nums;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.ttr-pastille[aria-pressed="true"] { background: var(--accent); color: var(--sheet); box-shadow: none; }
+.ttr-verser { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.ttr-verser .btn-primary { padding: 10px 22px; min-height: 46px; touch-action: manipulation; }
+.ttr-verser-direct {
+  flex: 1; min-width: 86px; padding: 10px 6px !important; min-height: 46px; touch-action: manipulation; font-size: .9rem !important;
+  -webkit-tap-highlight-color: transparent; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.ttr-lecture-v { font-weight: 800; font-size: 1rem; font-variant-numeric: tabular-nums; }
+.ttr-msg { font-size: .85rem; line-height: 1.4; color: var(--ink-2); min-height: 1.2em; margin: 0; }
+.ttr-msg.ok { color: var(--success-text); font-weight: 700; }
+.ttr-msg.ko { color: var(--danger-text); background: var(--danger-bg); border: 2px solid var(--danger); border-radius: 12px; padding: 8px 12px; font-weight: 700; }
+/* bouton mis en avant (même aspect que les boutons pour passer à la suite) */
+.ttr-boutons .btn-small.ttr-avant { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.ttr-msg .btn-primary { display: inline-flex; align-items: center; margin-top: 6px; padding: 10px 18px; min-height: 44px; text-decoration: none; font-size: .92rem; }
+.ttr-boutons { display: flex; flex-wrap: wrap; gap: 6px; }
+.ttr-boutons .btn-small { display: inline-flex; align-items: center; min-height: 40px; padding: 6px 14px; text-decoration: none; touch-action: manipulation; }
+.ttr-copie-zone { width: 100%; height: 80px; font: 12px ui-monospace, monospace; border-radius: 10px; border: 1px solid var(--paper-3); padding: 6px; box-sizing: border-box; }
+
+/* ---------- simulateur : trois colonnes (ordinateur), empilement (téléphone) ---------- */
+.ttr-sim { display: grid; gap: 10px 14px; height: 100%; min-height: 0; }
+.ttr-sim > * { min-width: 0; min-height: 0; }
+.ttr-sim-montage { grid-area: montage; display: flex; justify-content: center; }
+.ttr-sim-montage .ttr-montage { width: 100%; height: 100%; }
+.ttr-sim-cmd { grid-area: cmd; display: flex; flex-direction: column; gap: 6px; }
+.ttr-sim-consigne { grid-area: consigne; font-size: .82rem; padding: 6px 10px; }
+.ttr-sim-courbe { grid-area: courbe; display: flex; flex-direction: column; gap: 6px; }
+.ttr-sim-c { flex: 1; min-height: 0; display: flex; }
+.ttr-sim-c .ttr-courbe { flex: 1; }
+.ttr-sim-tab { grid-area: tab; display: flex; flex-direction: column; }
+.ttr-sim-tab .ttr-tab-boite { flex: 1; }
+@media (min-width: 900px) {
+  /* montage et commandes | courbe (la plus large) | tableau étroit */
+  .ttr-sim-trois { grid-template-columns: minmax(270px, 33%) minmax(0, 1fr) 112px; grid-template-rows: minmax(0, 1fr) auto auto;
+    grid-template-areas: "montage courbe tab" "consigne courbe tab" "cmd courbe tab"; }
+  .ttr-sim-seul { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "montage consigne" "montage cmd"; }
+}
+@media (max-width: 899px) {
+  .ttr-sim { grid-template-columns: minmax(0, 1fr); grid-template-areas: "montage" "consigne" "cmd" "courbe" "tab"; height: auto; }
+  .ttr-sim-montage .ttr-montage { height: 36vh; }
+  /* commandes collées en bas de l'écran : on verse en regardant la courbe */
+  .ttr-sim-cmd { position: sticky; bottom: 0; z-index: 4; background: var(--sheet); padding: 6px 0 8px; border-top: 1px solid var(--line); }
+  .ttr-sim-c .ttr-courbe { aspect-ratio: 4 / 3; max-height: 70vh; }
+  .ttr-sim-tab .ttr-tab-boite { max-height: 220px; }
+}
+
+/* ---------- outils de repérage ---------- */
+.ttr-deroule { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; counter-reset: d; }
+.ttr-deroule li { display: flex; gap: 8px; align-items: flex-start; background: var(--paper); border-radius: 12px; padding: 5px 10px; counter-increment: d; line-height: 1.35; font-size: .84rem; color: var(--ink-2); }
+.ttr-deroule li::before { content: counter(d); flex-shrink: 0; width: 22px; height: 22px; border-radius: 999px; display: grid; place-items: center; background: var(--sheet); font-weight: 800; font-size: .75rem; color: var(--ink-2); }
+.ttr-deroule li.fait::before { content: '✓'; background: var(--success-bg); color: var(--success-text); }
+.ttr-deroule li.ici { background: var(--cle-bg); color: var(--ink); font-weight: 700; }
+.ttr-fleches { display: inline-flex; gap: 4px; }
+.ttr-fleches button { min-width: 58px; min-height: 50px; padding: 0 !important; touch-action: manipulation; }

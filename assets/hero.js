@@ -31,6 +31,8 @@
      molecules  modèles moléculaires en boules
      topologique  formules topologiques en zigzag, avec quelques OH, =O, NH₂, Cl, comme écrites au tableau (nomenclature)
      semidev    formules semi-développées CH₃–CH₂–CH(OH)…, avec quelques OH, =O, COOH, comme écrites au tableau (nomenclature de 1re)
+     titrage    burette graduée au-dessus d'un bécher, courbe de titrage pH = f(V) en S décroissante avec ses deux
+                tangentes parallèles, la parallèle du milieu et le volume équivalent (titrage pH-métrique)
      formules:physique | formules:redox | formules:pile | formules:combustion | formules:ph | formules:algebre
    ============================================================ */
 (function () {
@@ -873,6 +875,69 @@
       ctx.font = `500 16px ${police()}`; ctx.globalAlpha = .15;
       ctx.fillText('T = 2,9 ms', w * .3, h * .5);
       ctx.fillText('1 Hz = 1 s⁻¹', x0, y0 + H + 34);
+    },
+
+    // Titrage : burette graduée au-dessus d'un bécher, courbe de titrage pH = f(V) en S décroissante
+    // avec ses deux tangentes parallèles, la parallèle du milieu et le volume équivalent
+    titrage(ctx, w, h, c) {
+      const hb = h / (1 + (reduit ? 0 : F));          // hauteur visible de l'en-tête
+      const p = 26;
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineWidth = 1;
+      for (let x = 0, i = 0; x <= w; x += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .11; trait(ctx, x, 0, x, h); }
+      for (let y = 0, i = 0; y <= h; y += p, i++) { ctx.globalAlpha = i % 5 ? .05 : .11; trait(ctx, 0, y, w, y); }
+      const etroit = w < 700;
+      // ---- burette (graduations, robinet) au-dessus d'un bécher sur l'agitateur ----
+      const bx = etroit ? w * .8 : w * .6, bw = 12, by = hb * .06, bh = hb * .5;
+      if (!etroit || w > 420) {
+        ctx.globalAlpha = .45; ctx.lineWidth = 1.6;
+        ctx.strokeRect(bx - bw / 2, by, bw, bh);
+        ctx.globalAlpha = .14; ctx.fillRect(bx - bw / 2, by + bh * .3, bw, bh * .7);
+        ctx.globalAlpha = .4; ctx.lineWidth = 1;
+        for (let i = 1; i < 12; i++) trait(ctx, bx - bw / 2, by + i * bh / 12, bx - bw / 2 + (i % 2 ? 4 : 7), by + i * bh / 12);
+        // robinet et pointe
+        ctx.globalAlpha = .45; ctx.lineWidth = 3; trait(ctx, bx - 13, by + bh + 8, bx + 13, by + bh + 8);
+        ctx.lineWidth = 1.6; trait(ctx, bx - 3, by + bh, bx - 1, by + bh + 22); trait(ctx, bx + 3, by + bh, bx + 1, by + bh + 22);
+        // goutte
+        ctx.globalAlpha = .4; ctx.beginPath(); ctx.arc(bx, by + bh + 32, 3, 0, 7); ctx.fill();
+        // bécher et solution
+        const wb = 70, yb = by + bh + 44, hbk = hb * .26;
+        ctx.globalAlpha = .45; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.moveTo(bx - wb / 2 - 4, yb - 3); ctx.lineTo(bx - wb / 2, yb); ctx.lineTo(bx - wb / 2, yb + hbk); ctx.lineTo(bx + wb / 2, yb + hbk); ctx.lineTo(bx + wb / 2, yb); ctx.stroke();
+        ctx.globalAlpha = .12; ctx.fillRect(bx - wb / 2 + 2, yb + hbk * .45, wb - 4, hbk * .55 - 2);
+        ctx.globalAlpha = .45; ctx.fillRect(bx - 10, yb + hbk - 7, 20, 4);
+        ctx.globalAlpha = .3; ctx.strokeRect(bx - wb / 2 - 14, yb + hbk + 2, wb + 28, 14);
+      }
+      // ---- courbe de titrage en S décroissante, tangentes parallèles ----
+      if (!etroit) {
+        const x0 = w * .69, x1 = w * .97, y0 = hb * .1, y1 = hb * .86;
+        ctx.globalAlpha = .45; ctx.lineWidth = 1.5;
+        trait(ctx, x0, y1, x1, y1); trait(ctx, x0, y1, x0, y0);
+        ctx.font = `700 13px ${police()}`; ctx.globalAlpha = .5;
+        ctx.fillText('pH', x0 + 6, y0 + 12); ctx.fillText('V', x1 - 12, y1 - 6);
+        const ue = .56;
+        const f = u => y0 + (y1 - y0) * (.5 + .42 * Math.tanh((u - ue) * 16) + .06 * (u - .5));
+        const X = u => x0 + u * (x1 - x0);
+        ctx.globalAlpha = .55; ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        for (let i = 0; i <= 200; i++) { const u = i / 200; i ? ctx.lineTo(X(u), f(u)) : ctx.moveTo(X(u), f(u)); }
+        ctx.stroke();
+        // tangentes parallèles aux deux arrondis (même pente de part et d'autre du saut)
+        const d = u => (f(u + 1e-3) - f(u - 1e-3)) / (X(u + 1e-3) - X(u - 1e-3));
+        const ua = ue - .075, ub = ue + .075, s = (d(ua) + d(ub)) / 2;
+        const droite = (xp, yp) => { const L = (x1 - x0) * .2; trait(ctx, xp - L, yp - s * L, xp + L, yp + s * L); };
+        ctx.globalAlpha = .4; ctx.lineWidth = 1.4;
+        droite(X(ua), f(ua)); droite(X(ub), f(ub));
+        ctx.setLineDash([6, 5]); droite((X(ua) + X(ub)) / 2, (f(ua) + f(ub)) / 2);
+        // point d'équivalence et lecture de Veq
+        ctx.globalAlpha = .6; ctx.beginPath(); ctx.arc(X(ue), f(ue), 4, 0, 7); ctx.fill();
+        ctx.globalAlpha = .4; ctx.setLineDash([4, 4]); trait(ctx, X(ue), f(ue), X(ue), y1); ctx.setLineDash([]);
+        ctx.globalAlpha = .55; ctx.font = `700 13px ${police()}`; ctx.fillText('Veq', X(ue) - 12, y1 + 16);
+      }
+      // formules en filigrane
+      ctx.font = `600 18px ${police()}`; ctx.globalAlpha = .18;
+      ctx.fillText('H₃O⁺ + HO⁻ → 2 H₂O', w * .06, h * .46);
+      ctx.font = `500 15px ${police()}`; ctx.globalAlpha = .14;
+      ctx.fillText('pH = − log [H₃O⁺]', w * .3, h * .52);
     },
 
     // Formules écrites en quinconce, plus ou moins marquées

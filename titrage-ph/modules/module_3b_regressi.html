@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : le faire avec Regressi — TP : titrage pH-métrique du Destop</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/titrage.css">
+<link rel="stylesheet" href="tph.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/titrage.js"></script>
+<script src="tph.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page tph-page">
+  <div class="er-card tph-tete">
+    <div class="tph-tete-l"><span class="er-badge">MODULE 3 · REGRESSI</span><h2 class="er-titre">Le faire avec Regressi</h2></div>
+    <div class="tph-tete-b">
+      <button type="button" class="btn-small" data-donnees>Données du TP</button>
+    </div>
+  </div>
+  <div class="er-card tph-zone"><div class="tph-corps">
+    <div class="tph-reg">
+      <div class="tph-onglets" role="tablist" aria-label="Étapes dans Regressi">
+        <a class="tph-onglet" role="tab" href="#ouvrir" data-o="ouvrir">1. Ouvrir les mesures</a>
+        <a class="tph-onglet" role="tab" href="#tangentes" data-o="tangentes">2. Méthode des tangentes</a>
+        <a class="tph-onglet" role="tab" href="#derivee" data-o="derivee">3. Courbe dérivée</a>
+      </div>
+
+      <!-- 1. Ouvrir les mesures et tracer pH = f(V) -->
+      <section class="tph-reg-corps" id="ouvrir" data-s="ouvrir" role="tabpanel">
+        <div>
+          <ol class="tph-reg-etapes">
+            <li><span>Dans l'application (modules 2 et 3), touche <b>Copier les mesures pour Regressi</b>.</span></li>
+            <li><span>Dans Regressi : <b>Fichier → Nouveau → Presse-papier</b>. Le tableau des grandeurs V et pH s'affiche.</span></li>
+            <li><span>Clique sur l'onglet <b>Graphe</b>, puis sur <b>Coord.</b> : V en abscisse, pH en ordonnée. Coche <b>Ligne</b> et <b>Point</b>, puis <b>OK</b>.</span></li>
+            <li><span>Pour lire une valeur particulière du graphique : <b>Outils gr. → Réticule libre</b>.</span></li>
+          </ol>
+        </div>
+        <div class="tph-reg-figs">
+          <svg viewBox="0 0 360 112" role="img" aria-label="Menu Fichier, Nouveau, Presse-papier de Regressi">
+            <rect x="1" y="1" width="358" height="24" rx="4" fill="var(--paper)" stroke="var(--paper-3)"/>
+            <rect x="6" y="4" width="54" height="18" rx="3" fill="var(--cle-bg)"/>
+            <text x="12" y="17" style="font:800 12px var(--font-sans)" fill="var(--ink)">Fichier</text>
+            <text x="74" y="17" style="font:600 12px var(--font-sans)" fill="var(--ink-2)">Edition</text>
+            <text x="132" y="17" style="font:600 12px var(--font-sans)" fill="var(--ink-2)">Fenêtre</text>
+            <text x="194" y="17" style="font:600 12px var(--font-sans)" fill="var(--ink-2)">Pages</text>
+            <text x="246" y="17" style="font:600 12px var(--font-sans)" fill="var(--ink-2)">Options</text>
+            <rect x="6" y="25" width="130" height="80" fill="var(--sheet)" stroke="var(--ink-2)"/>
+            <rect x="8" y="29" width="126" height="22" fill="var(--cle-bg)"/>
+            <text x="16" y="44" style="font:800 12px var(--font-sans)" fill="var(--ink)">Nouveau</text><text x="124" y="44" text-anchor="end" style="font:800 12px var(--font-sans)" fill="var(--ink)">▸</text>
+            <text x="16" y="70" style="font:600 12px var(--font-sans)" fill="var(--ink-2)">Ouvrir…</text>
+            <text x="16" y="94" style="font:600 12px var(--font-sans)" fill="var(--ink-2)">Enregistrer</text>
+            <rect x="136" y="29" width="140" height="52" fill="var(--sheet)" stroke="var(--ink-2)"/>
+            <text x="146" y="47" style="font:600 12px var(--font-sans)" fill="var(--ink-2)">Clavier</text>
+            <rect x="138" y="54" width="136" height="24" fill="var(--accent)"/>
+            <text x="146" y="70" style="font:800 12px var(--font-sans)" fill="var(--sheet)">Presse-papier</text>
+          </svg>
+          <svg viewBox="0 0 360 196" role="img" aria-label="Onglet Graphe, bouton Coord. et fenêtre Coordonnées du graphe">
+            <rect x="1" y="1" width="358" height="26" rx="4" fill="var(--paper)" stroke="var(--paper-3)"/>
+            <text x="12" y="19" style="font:600 12px var(--font-sans)" fill="var(--ink-2)">▦ Grandeurs</text>
+            <rect x="100" y="4" width="76" height="20" rx="3" fill="var(--cle-bg)" stroke="var(--accent)"/>
+            <text x="110" y="19" style="font:800 12px var(--font-sans)" fill="var(--ink)">⟋ Graphe</text>
+            <rect x="1" y="30" width="358" height="24" rx="4" fill="var(--paper)" stroke="var(--paper-3)"/>
+            <text x="12" y="47" style="font:600 12px var(--font-sans)" fill="var(--ink-2)">↖ Outils gr. ▾</text>
+            <rect x="104" y="33" width="56" height="18" rx="3" fill="var(--cle-bg)" stroke="var(--accent)"/>
+            <text x="112" y="47" style="font:800 12px var(--font-sans)" fill="var(--ink)">Coord.</text>
+            <text x="176" y="47" style="font:600 12px var(--font-sans)" fill="var(--ink-2)">Auto</text>
+            <rect x="20" y="62" width="320" height="130" rx="6" fill="var(--sheet)" stroke="var(--ink-2)"/>
+            <rect x="20" y="62" width="320" height="20" rx="6" fill="var(--paper)"/>
+            <text x="30" y="76" style="font:700 11px var(--font-sans)" fill="var(--ink)">Coordonnées du graphe</text><text x="328" y="76" text-anchor="end" style="font:700 11px var(--font-sans)" fill="var(--ink-2)">×</text>
+            <text x="32" y="102" style="font:700 11px var(--font-sans)" fill="var(--ink)">Abscisse</text>
+            <rect x="96" y="90" width="56" height="18" rx="3" fill="var(--sheet)" stroke="var(--ink-2)"/><text x="104" y="103" style="font:800 11px var(--font-sans)" fill="var(--accent-ink)">V ▾</text>
+            <text x="32" y="128" style="font:700 11px var(--font-sans)" fill="var(--ink)">Ordonnée</text>
+            <rect x="96" y="116" width="56" height="18" rx="3" fill="var(--sheet)" stroke="var(--ink-2)"/><text x="104" y="129" style="font:800 11px var(--font-sans)" fill="var(--accent-ink)">pH ▾</text>
+            <rect x="32" y="146" width="12" height="12" rx="2" fill="var(--sheet)" stroke="var(--ink)"/><text x="34" y="156" style="font:800 11px var(--font-sans)" fill="var(--accent-ink)">✓</text>
+            <text x="50" y="156" style="font:700 11px var(--font-sans)" fill="var(--ink)">Ligne</text>
+            <rect x="96" y="146" width="12" height="12" rx="2" fill="var(--sheet)" stroke="var(--ink)"/><text x="98" y="156" style="font:800 11px var(--font-sans)" fill="var(--accent-ink)">✓</text>
+            <text x="114" y="156" style="font:700 11px var(--font-sans)" fill="var(--ink)">Point</text>
+            <rect x="222" y="90" width="108" height="20" rx="3" fill="var(--paper)" stroke="var(--paper-3)"/><text x="230" y="104" style="font:700 11px var(--font-sans)" fill="var(--ink-2)">Ajouter une courbe</text>
+            <rect x="222" y="118" width="108" height="20" rx="3" fill="var(--cle-bg)" stroke="var(--accent)"/><text x="262" y="132" style="font:800 11px var(--font-sans)" fill="var(--ink)">✓ OK</text>
+          </svg>
+        </div>
+      </section>
+
+      <!-- 2. Méthode des tangentes : une seule phrase -->
+      <section class="tph-reg-corps" id="tangentes" data-s="tangentes" role="tabpanel">
+        <div>
+          <p class="ttr-consigne">Utilise l'outil méthode des tangentes de Regressi.</p>
+        </div>
+        <div class="tph-reg-figs">
+          <svg viewBox="0 0 300 200" role="img" aria-label="Courbe en S avec deux tangentes parallèles, la perpendiculaire, son milieu et la parallèle passant par le milieu">
+            <line x1="30" y1="180" x2="290" y2="180" stroke="var(--ink)" stroke-width="1.5"/><line x1="30" y1="180" x2="30" y2="10" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="36" y="18" style="font:800 11px var(--font-sans)" fill="var(--ink)">pH</text><text x="286" y="172" text-anchor="end" style="font:800 11px var(--font-sans)" fill="var(--ink)">V (mL)</text>
+            <path d="M30 30 C 110 34, 140 40, 150 70 C 158 95, 160 125, 172 145 C 186 160, 230 164, 290 166" fill="none" stroke="var(--accent)" stroke-width="2.4"/>
+            <line x1="104" y1="18" x2="188" y2="96" stroke="var(--ink)" stroke-width="1.4"/>
+            <line x1="122" y1="96" x2="214" y2="182" stroke="var(--ink)" stroke-width="1.4"/>
+            <line x1="160" y1="70" x2="129.4" y2="102.9" stroke="var(--ink-2)" stroke-width="1.4"/><circle cx="144.7" cy="86.5" r="3" fill="var(--ink)"/>
+            <line x1="110" y1="54.2" x2="200" y2="137.9" stroke="var(--accent-ink)" stroke-width="1.6" stroke-dasharray="6 4"/>
+            <circle cx="155" cy="94" r="4" fill="var(--accent-ink)"/><text x="162" y="92" style="font:800 11px var(--font-sans)" fill="var(--accent-ink)">E</text>
+            <line x1="155" y1="94" x2="155" y2="180" stroke="var(--accent-ink)" stroke-width="1.4" stroke-dasharray="4 4"/>
+            <text x="149" y="194" style="font:800 11px var(--font-sans)" fill="var(--accent-ink)">V<tspan baseline-shift="sub" font-size="8">eq</tspan></text>
+          </svg>
+          <p class="tph-reg-legende">La construction faite à la main au module 3 : deux tangentes parallèles, la perpendiculaire, son milieu, la parallèle passant par le milieu.</p>
+        </div>
+      </section>
+
+      <!-- 3. Courbe dérivée -->
+      <section class="tph-reg-corps" id="derivee" data-s="derivee" role="tabpanel">
+        <div>
+          <ol class="tph-reg-etapes">
+            <li><span>Pour créer la grandeur dérivée, clique sur l'icône <b>Ajouter</b>.</span></li>
+            <li><span>Choisis le type de grandeur <b>Dérivée</b>. Donne-lui un nom sans accent ni caractère spécial : <b>dpHdV</b>.</span></li>
+            <li><span>Dérivée de <b>pH</b> par rapport à <b>V</b>, puis <b>OK</b>.</span></li>
+            <li><span>Onglet <b>Graphe</b>, <b>Coord.</b>, <b>Ajouter une courbe</b> : <b>dpHdV</b> en ordonnée, échelle <b>à droite</b>, puis <b>OK</b>.</span></li>
+            <li><span>Repère l'extrémum de la courbe dérivée avec <b>Outils gr. → Réticule libre</b> et lis V<sub>eq</sub>.</span></li>
+          </ol>
+        </div>
+        <div class="tph-reg-figs">
+          <svg viewBox="0 0 360 150" role="img" aria-label="Fenêtre Création d'une grandeur : type Dérivée, symbole dpHdV">
+            <rect x="1" y="1" width="358" height="146" rx="6" fill="var(--sheet)" stroke="var(--ink-2)"/>
+            <rect x="1" y="1" width="358" height="20" rx="6" fill="var(--paper)"/>
+            <text x="10" y="15" style="font:700 11px var(--font-sans)" fill="var(--ink)">Création d'une grandeur</text><text x="348" y="15" text-anchor="end" style="font:700 11px var(--font-sans)" fill="var(--ink-2)">×</text>
+            <text x="12" y="38" style="font:700 10px var(--font-sans)" fill="var(--ink-2)">Type de grandeur</text>
+            <g style="font:600 11px var(--font-sans)" fill="var(--ink-2)">
+              <circle cx="18" cy="52" r="4.5" fill="none" stroke="var(--ink-2)"/><text x="28" y="56">Variable exp.</text>
+              <circle cx="18" cy="70" r="4.5" fill="none" stroke="var(--ink-2)"/><text x="28" y="74">Paramètre exp.</text>
+              <circle cx="18" cy="88" r="4.5" fill="none" stroke="var(--ink-2)"/><text x="28" y="92">Grandeur calc.</text>
+              <rect x="10" y="97" width="100" height="18" rx="3" fill="var(--cle-bg)"/>
+              <circle cx="18" cy="106" r="4.5" fill="none" stroke="var(--ink)"/><circle cx="18" cy="106" r="2.2" fill="var(--accent-ink)"/><text x="28" y="110" style="font:800 11px var(--font-sans)" fill="var(--ink)">Dérivée</text>
+              <circle cx="18" cy="124" r="4.5" fill="none" stroke="var(--ink-2)"/><text x="28" y="128">Intégrale</text>
+            </g>
+            <text x="128" y="44" style="font:700 11px var(--font-sans)" fill="var(--ink)">Symbole de la grandeur</text>
+            <rect x="268" y="32" width="70" height="18" rx="3" fill="var(--sheet)" stroke="var(--accent)"/><text x="276" y="45" style="font:800 11px var(--font-sans)" fill="var(--accent-ink)">dpHdV</text>
+            <text x="128" y="76" style="font:700 11px var(--font-sans)" fill="var(--ink)">Dérivée de</text>
+            <rect x="196" y="64" width="44" height="18" rx="3" fill="var(--sheet)" stroke="var(--ink-2)"/><text x="204" y="77" style="font:800 11px var(--font-sans)" fill="var(--accent-ink)">pH</text>
+            <text x="248" y="76" style="font:700 11px var(--font-sans)" fill="var(--ink)">par rapport à</text>
+            <rect x="128" y="88" width="44" height="18" rx="3" fill="var(--sheet)" stroke="var(--ink-2)"/><text x="136" y="101" style="font:800 11px var(--font-sans)" fill="var(--accent-ink)">V</text>
+            <rect x="268" y="118" width="70" height="20" rx="3" fill="var(--cle-bg)" stroke="var(--accent)"/><text x="286" y="132" style="font:800 11px var(--font-sans)" fill="var(--ink)">✓ OK</text>
+          </svg>
+          <svg viewBox="0 0 360 96" role="img" aria-label="Fenêtre Coordonnées du graphe : Ajouter une courbe, dpHdV en ordonnée, échelle à droite">
+            <rect x="1" y="1" width="358" height="92" rx="6" fill="var(--sheet)" stroke="var(--ink-2)"/>
+            <rect x="1" y="1" width="358" height="20" rx="6" fill="var(--paper)"/>
+            <text x="10" y="15" style="font:700 11px var(--font-sans)" fill="var(--ink)">Coordonnées du graphe</text>
+            <text x="12" y="44" style="font:700 11px var(--font-sans)" fill="var(--ink)">Ordonnée</text>
+            <rect x="72" y="32" width="64" height="18" rx="3" fill="var(--sheet)" stroke="var(--ink-2)"/><text x="80" y="45" style="font:800 11px var(--font-sans)" fill="var(--accent-ink)">dpHdV ▾</text>
+            <text x="12" y="74" style="font:700 11px var(--font-sans)" fill="var(--ink)">Échelle</text>
+            <rect x="72" y="62" width="76" height="18" rx="3" fill="var(--sheet)" stroke="var(--accent)"/><text x="80" y="75" style="font:800 11px var(--font-sans)" fill="var(--accent-ink)">à droite ▾</text>
+            <rect x="232" y="32" width="116" height="20" rx="3" fill="var(--cle-bg)" stroke="var(--accent)"/><text x="242" y="46" style="font:800 11px var(--font-sans)" fill="var(--ink)">Ajouter une courbe</text>
+            <rect x="232" y="62" width="116" height="20" rx="3" fill="var(--paper)" stroke="var(--paper-3)"/><text x="276" y="76" style="font:700 11px var(--font-sans)" fill="var(--ink-2)">✓ OK</text>
+          </svg>
+        </div>
+      </section>
+    </div>
+  </div></div>
+</div>
+<script>
+// Module 3b : les manipulations dans Regressi, en trois onglets (ancres #ouvrir, #tangentes, #derivee)
+function montrer() {
+  const id = ['ouvrir', 'tangentes', 'derivee'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'ouvrir';
+  document.querySelectorAll('[data-s]').forEach(s => { s.hidden = s.dataset.s !== id; });
+  document.querySelectorAll('[data-o]').forEach(a => a.setAttribute('aria-selected', a.dataset.o === id));
+}
+// un onglet ne fait pas défiler la page jusqu'à l'ancre : on change seulement l'adresse
+document.querySelectorAll('[data-o]').forEach(a => a.addEventListener('click', e => {
+  e.preventDefault();
+  history.replaceState(null, '', '#' + a.dataset.o);
+  montrer();
+}));
+window.addEventListener('hashchange', montrer);
+montrer();
+TPH.init('module_3b_regressi');
+SOM.marquer({ fait: true });
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : simulateur de titrage — TP : titrage pH-métrique du Destop</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/titrage.css">
+<link rel="stylesheet" href="tph.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/titrage.js"></script>
+<script src="tph.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page tph-page">
+  <div class="er-card tph-tete">
+    <div class="tph-tete-l"><span class="er-badge">MODULE 2 · SIMULATION</span><h2 class="er-titre">Simulateur de titrage</h2></div>
+    <div class="tph-tete-b">
+      <button type="button" class="btn-small" data-donnees>Données du TP</button>
+      <button type="button" class="btn-small" data-passer>Passer cette partie →</button>
+    </div>
+  </div>
+  <div class="er-card tph-zone"><div class="tph-corps" id="zone"></div></div>
+</div>
+<script>
+// Module 2 : le simulateur (assets/titrage.js), avec la prise d'essai gardée dans « titrage-ph-tp »
+const NB = TPH.NB;
+const sim = TITRAGE.creer(document.getElementById('zone'), Object.assign(TPH.config(TPH.prise()), {
+  style: 'realiste', commandes: 'boutons',
+  consigne: 'Verse l’acide 1 mL par 1 mL en notant le pH. Près du saut de pH, verse 0,2 mL à la fois, au moins 1 mL avant et 1 mL après le saut. Va jusqu’à 16 mL.',
+  lienRegressi: 'module_3b_regressi.html#ouvrir',
+  onMesure: pr => TPH.tpEcrire({ prise: pr }),
+  // nouvelle prise d'essai : le Veq repéré avant ne vaut plus
+  onRecommencer: pr => { const t = TPH.tp(); delete t.veqEleve; t.prise = pr; TPH.tpEcrire(t); },
+  // fin du titrage : V ≥ 16 mL et au moins 5 points à moins de 1 mL de l'équivalence
+  etat: pr => {
+    const v = pr.mesures.reduce((m, x) => Math.max(m, x[0]), 0);
+    const dansSaut = pr.mesures.filter(x => Math.abs(x[0] / 10 - pr.veq) <= 1).length;
+    if (v >= 160 && dansSaut >= 5) {
+      SOM.marquer({ fait: true });
+      return { ok: true, html: `✓ Titrage terminé.<br><a class="btn-primary" href="module_3a_equivalence.html">Repérer le volume équivalent →</a>` };
+    }
+    if (v >= 160) return { ko: true, html: 'Ajoute des points de 0,2 mL près du saut' + NB + ': la courbe y sera plus précise. Recommence le titrage (nouvelle prise d’essai).' };
+    return null;
+  },
+}));
+TPH.init('module_2_titrage', { passer: () => sim.remplirAuto() });
+</script>
+</body>
+</html>

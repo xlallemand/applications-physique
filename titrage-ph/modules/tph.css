@@ -1,0 +1,245 @@
+/* ============================================================
+   TP : titrage pH-métrique du Destop — styles propres (préfixe tph-)
+   Page qui tient dans l'écran (ordinateur), en-tête compact, étiquettes,
+   QCM, schéma à compléter, outil de calcul, tableau des groupes.
+   Les styles du simulateur sont dans assets/titrage.css (préfixe ttr-).
+   Couleurs : uniquement les variables de assets/theme.css.
+   ============================================================ */
+body { margin: 0; }
+.tph-page [hidden], .tph-panneau [hidden] { display: none !important; }
+.tph-page sub, .tph-page sup, .tph-panneau sub, .tph-panneau sup { font-size: .7em; line-height: 0; }
+
+/* ---------- page qui tient dans l'écran (ordinateur) ---------- */
+.tph-page { max-width: 80rem; padding: 12px 16px 16px; box-sizing: border-box; }
+@media (min-width: 900px) and (min-height: 560px) {
+  .tph-page { height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 10px; }
+  .tph-page > .er-card { margin-bottom: 0; }
+  .tph-page > .tph-zone { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .tph-zone > .tph-corps { flex: 1; min-height: 0; }
+}
+.tph-zone { padding: 14px 16px; }
+@media (max-width: 480px) { .tph-zone { padding: 12px 10px; } }
+
+/* ---------- en-tête compact : badge, titre, boutons ---------- */
+.tph-tete { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 12px 18px; }
+.tph-tete-l { flex: 1; min-width: 220px; }
+.tph-tete .er-badge { margin-bottom: 2px; }
+.tph-tete .er-titre { font-size: 1.3rem; margin: 0; }
+.tph-tete-b { display: flex; flex-wrap: wrap; gap: 6px; }
+.tph-tete-b .btn-small, .tph-btn { min-height: 44px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.tph-btn { padding: 10px 22px; }
+.tph-petit { font-size: .86rem; color: var(--ink-2); line-height: 1.4; margin: 0; }
+.tph-suite { margin: 6px 0 0; }
+.tph-suite .btn-primary { display: inline-flex; align-items: center; min-height: 46px; padding: 10px 22px; text-decoration: none; font-size: .95rem; }
+
+/* ---------- panneau « Données du TP » ---------- */
+.tph-voile { position: fixed; inset: 0; z-index: 3000; background: rgba(22,24,29,.35); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.tph-panneau {
+  position: relative; background: var(--sheet); border-radius: 22px; width: min(46rem, 100%); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px);
+  overflow: auto; padding: 18px 22px; line-height: 1.5; font-size: .93rem; box-sizing: border-box;
+}
+.tph-panneau h3 { margin: 0 0 6px; font-size: 1.15rem; font-weight: 800; color: var(--accent-ink); }
+.tph-panneau h4 { margin: 14px 0 4px; font-size: 1rem; font-weight: 800; }
+.tph-panneau h5 { margin: 10px 0 2px; font-size: .93rem; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+.tph-panneau p { margin: 0 0 4px; }
+.tph-panneau ul { margin: 0 0 4px; padding-left: 20px; }
+.tph-panneau-x {
+  position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; border: none; border-radius: 999px;
+  background: var(--paper); color: var(--ink); font: 800 1.1rem var(--font-sans); cursor: pointer;
+}
+.tph-panneau-x:hover { background: var(--paper-2); }
+.tph-donnees-inc li { margin-top: 6px; }
+.tph-formule-c { text-align: center; margin: 6px 0 !important; font-size: 1.05rem; overflow-x: auto; }
+
+/* ---------- écritures : fraction, racine, valeur absolue, somme ---------- */
+.tph-frac { display: inline-block; vertical-align: middle; text-align: center; margin: 0 .15em; }
+.tph-frac > span { display: block; padding: 2px 4px; }
+.tph-frac > span:first-child { border-bottom: 1.5px solid currentColor; }
+/* racine : le signe (SVG étiré sur toute la hauteur) rejoint la barre du dessus */
+.tph-racine { display: inline-flex; align-items: stretch; vertical-align: middle; margin: 0 .1em; }
+.tph-racine-s { width: .7em; flex: none; overflow: visible; }
+.tph-racine-s path { fill: none; stroke: currentColor; stroke-width: 1.5; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.tph-racine-c { border-top: 1.5px solid currentColor; padding: 3px 4px 0 3px; display: block; }
+.tph-abs { display: inline-block; vertical-align: middle; border-left: 1.5px solid currentColor; border-right: 1.5px solid currentColor; padding: 0 4px; line-height: 1.5; }
+.tph-somme { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1; margin: 0 .15em; }
+.tph-somme > span { font-size: 1.5em; line-height: 1.05; }
+.tph-somme small { font-size: .65em; }
+
+/* ---------- retours, QCM, étapes ---------- */
+.tph-retour { margin-top: 8px; padding: 10px 14px !important; border-radius: 14px !important; line-height: 1.45; font-size: .93rem; }
+.tph-avert b:first-child { color: var(--accent-ink); margin-right: 4px; }
+.tph-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+.tph-qcm { display: flex; flex-direction: column; gap: 6px; }
+.tph-qcm button {
+  min-height: 46px; text-align: left; line-height: 1.35; border-radius: 16px; padding: 6px 16px; border: none; cursor: pointer;
+  background: var(--sheet); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 600 .98rem var(--font-sans);
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.tph-qcm button:hover:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.tph-qcm button.ok { background: var(--success-bg); box-shadow: inset 0 0 0 2px var(--success); }
+.tph-qcm button.ko { background: var(--danger-bg); box-shadow: inset 0 0 0 2px var(--danger); }
+.tph-qcm button:disabled { cursor: default; }
+.tph-intro { margin: 0 0 8px; line-height: 1.45; }
+.tph-intro b { white-space: nowrap; }
+.tph-etape-t { font-weight: 800; font-size: 1rem; line-height: 1.4; margin: 0 0 6px !important; }
+.tph-etape-t .tph-num { display: inline-grid; vertical-align: middle; margin-right: 8px; }
+.tph-num { flex-shrink: 0; width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; background: var(--cle-bg); color: var(--accent-ink); font-size: .8rem; font-weight: 800; }
+.tph-num.fait { background: var(--success-bg); color: var(--success-text); }
+.tph-cle { margin-top: 8px; padding: 12px 16px; border-radius: 18px; line-height: 1.6; }
+.tph-cle .cle-titre { display: block; margin-bottom: 4px; }
+.tph-resume { background: var(--paper); border-radius: 14px; padding: 7px 12px; font-size: .92rem; line-height: 1.5; margin: 0; }
+
+/* ---------- étiquettes à placer, morceaux de phrase ---------- */
+.tph-etiquettes { display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
+.tph-etiq {
+  display: inline-flex; align-items: center; min-height: 40px; padding: 4px 12px; border: none; border-radius: 999px;
+  background: var(--sheet); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 700 .88rem var(--font-sans);
+  cursor: grab; touch-action: none; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none;
+}
+.tph-etiq.touche { touch-action: manipulation; cursor: pointer; }
+.tph-etiq:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.tph-etiq[aria-pressed="true"] { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.tph-etiq.dragging { opacity: .35; }
+.tph-etiq:disabled { opacity: .35; cursor: default; }
+.tph-etiq:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tph-reserve { background: var(--paper); border-radius: 16px; padding: 8px 10px; }
+.tph-reserve-t { font-size: .75rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 6px !important; }
+.tph-phrase {
+  min-height: 52px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 16px;
+  background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3); font-size: 1rem; box-sizing: border-box;
+}
+.tph-phrase.vide::before { content: attr(data-vide); color: var(--ink-2); font-size: .9rem; }
+.tph-phrase .tph-etiq { background: var(--cle-bg); box-shadow: none; }
+.tph-phrase-fixe { font-weight: 800; padding: 0 2px; }
+.tph-phrase.ok { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); font-weight: 700; }
+.tph-phrase.ko { box-shadow: inset 0 0 0 2px var(--danger); }
+.tph-menu {
+  position: absolute; z-index: 50; background: var(--sheet); border: 1px solid var(--paper-3); border-radius: 16px; padding: 6px;
+  display: flex; flex-direction: column; gap: 4px; min-width: 12em;
+}
+.tph-menu button { min-height: 44px; padding: 6px 12px; border: none; border-radius: 12px; background: var(--paper); color: var(--ink); text-align: left; font: 700 .9rem var(--font-sans); cursor: pointer; }
+
+/* ---------- module 1 : deux colonnes ---------- */
+.tph-deux { display: grid; gap: 12px 18px; height: 100%; min-height: 0; }
+.tph-deux > * { min-width: 0; min-height: 0; }
+.tph-col { display: flex; flex-direction: column; gap: 10px; overflow: auto; }
+@media (min-width: 900px) { .tph-deux { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); } }
+@media (max-width: 899px) { .tph-deux { grid-template-columns: minmax(0, 1fr); height: auto; } .tph-col { overflow: visible; } }
+
+/* matériel : cartes */
+.tph-cartes-mat { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 520px) { .tph-cartes-mat { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tph-carte-mat {
+  display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 6px 8px; border: none; border-radius: 14px; cursor: pointer;
+  background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3); color: var(--ink); font: 700 .8rem/1.2 var(--font-sans);
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; text-align: center;
+}
+.tph-carte-mat svg { width: 100%; height: 128px; }
+@media (max-height: 760px) and (min-width: 900px) { .tph-carte-mat svg { height: 120px; } }
+@media (max-width: 520px) { .tph-carte-mat svg { height: 104px; } }
+.tph-carte-mat:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.tph-carte-mat[aria-pressed="true"] { background: var(--cle-bg); box-shadow: inset 0 0 0 2.5px var(--accent); color: var(--accent-ink); }
+.tph-cartes-mat.fini .tph-carte-mat { cursor: default; }
+.tph-cartes-mat.fini .tph-carte-mat[aria-pressed="false"] { opacity: .5; }
+.tph-facteur { font-size: 1.05rem; font-weight: 800; font-variant-numeric: tabular-nums; margin: 0; }
+.tph-facteur > span { color: var(--accent-ink); }
+
+/* schéma à compléter : figure à gauche, questions à droite */
+.tph-schema { display: grid; gap: 12px 16px; height: 100%; min-height: 0; }
+.tph-schema > * { min-width: 0; min-height: 0; }
+.tph-schema-fig { display: flex; justify-content: center; }
+.tph-schema-fig .ttr-montage { height: 100%; aspect-ratio: 320 / 400; max-width: 100%; }
+.tph-schema-cote { display: flex; flex-direction: column; gap: 8px; overflow: auto; }
+@media (min-width: 900px) { .tph-schema { grid-template-columns: minmax(0, 11fr) minmax(0, 10fr); } }
+@media (max-width: 899px) { .tph-schema { grid-template-columns: minmax(0, 1fr); } .tph-schema-fig .ttr-montage { height: auto; width: 100%; } }
+
+/* ---------- module 2 et 3a ---------- */
+.tph-eq { display: grid; gap: 10px 14px; height: 100%; min-height: 0; }
+.tph-eq > * { min-width: 0; min-height: 0; }
+.tph-eq-courbe { display: flex; flex-direction: column; gap: 4px; }
+.tph-eq-courbe .ttr-courbe { flex: 1; }
+.tph-eq-cote { display: flex; flex-direction: column; gap: 8px; overflow: auto; }
+.tph-eq-tab { display: flex; flex-direction: column; }
+.tph-eq-tab .ttr-tab-boite { flex: 1; }
+@media (min-width: 900px) { .tph-eq { grid-template-columns: minmax(0, 1fr) minmax(250px, 31%) 104px; } }
+@media (max-width: 899px) {
+  .tph-eq { grid-template-columns: minmax(0, 1fr); height: auto; }
+  .tph-eq-courbe .ttr-courbe { aspect-ratio: 4 / 3; max-height: 72vh; }
+  .tph-eq-tab .ttr-tab-boite { max-height: 180px; }
+}
+.tph-onglets { display: flex; gap: 4px; flex-wrap: wrap; }
+.tph-onglet {
+  min-height: 44px; padding: 0 14px; border: none; border-radius: 999px; background: var(--paper); color: var(--ink);
+  font: 700 .88rem var(--font-sans); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; text-decoration: none;
+  display: inline-flex; align-items: center;
+}
+.tph-onglet[aria-selected="true"] { background: var(--ink); color: var(--sheet); }
+.tph-onglet:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- outil de calcul ---------- */
+.tph-calc { display: flex; flex-direction: column; gap: 8px; }
+.tph-formules { display: flex; flex-wrap: wrap; gap: 6px; }
+.tph-formule {
+  min-height: 46px; padding: 6px 14px; border: none; border-radius: 16px; background: var(--sheet); color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 700 1rem var(--font-sans); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.tph-formule:hover:not(:disabled) { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.tph-formule.ko { background: var(--danger-bg); box-shadow: inset 0 0 0 2px var(--danger); }
+.tph-q { font-weight: 700; margin: 4px 0 6px; line-height: 1.4; }
+.tph-calc-l { font-size: 1.02rem; font-weight: 700; line-height: 2.4; margin: 0; }
+.tph-calc-l .tph-case { margin: 2px 3px; }
+.tph-calc-n { font-weight: 800; white-space: nowrap; }
+.tph-prelim-l { line-height: 2; background: var(--paper); border-radius: 12px; padding: 0 10px; margin-bottom: 4px; }
+.tph-detail { font-variant-numeric: tabular-nums; }
+.tph-case {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 96px; min-height: 40px; padding: 2px 8px;
+  border-radius: 10px; border: 2px dashed var(--line-strong); background: var(--sheet); color: var(--ink-2);
+  font: 700 .85rem var(--font-sans); cursor: pointer; touch-action: manipulation; vertical-align: middle; box-sizing: border-box;
+}
+.tph-case:hover, .tph-case.drag-over, .tph-case.cible { border-color: var(--accent); background: var(--cle-bg); }
+.tph-case.pleine { border-style: solid; border-color: var(--paper-3); color: var(--ink); font-size: .92rem; }
+.tph-case.ok { border-color: var(--success); background: var(--success-bg); color: var(--success-text); }
+.tph-case.ko { border-color: var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+.tph-res { font-weight: 800; color: var(--accent-ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tph-chaine { display: flex; flex-direction: column; gap: 6px; }
+.tph-chaine-l { background: var(--paper); border-radius: 14px; padding: 4px 12px; }
+.tph-chaine-l.ici { background: var(--cle-bg); }
+.tph-chaine-l.avenir { opacity: .6; }
+.tph-chaine-l .tph-formule { min-height: 44px; padding: 4px 10px; font-size: .95rem; }
+.tph-chaine-l .tph-formules { display: inline-flex; vertical-align: middle; margin-left: 6px; }
+.tph-calc-ligne .tph-calc-l { line-height: 2; }
+.tph-chaine-l.fait .tph-calc-l { font-size: .95rem; line-height: 1.8; }
+
+/* tableau des groupes (module 4) */
+.tph-groupes-boite { overflow-x: auto; }
+.tph-groupes { border-collapse: collapse; font-size: .85rem; font-variant-numeric: tabular-nums; }
+.tph-groupes th, .tph-groupes td { border: 1px solid var(--paper-3); padding: 3px 6px; text-align: center; white-space: nowrap; }
+.tph-groupes th { background: var(--paper); font-weight: 800; }
+.tph-groupes td.toi { background: var(--cle-bg); font-weight: 800; }
+.tph-groupes input { width: 4.2em; font: 700 16px var(--font-sans); text-align: center; border: none; border-radius: 8px; padding: 6px 2px; box-shadow: inset 0 0 0 1.5px var(--paper-3); background: var(--sheet); color: var(--ink); }
+.tph-groupes input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.tph-inc { display: grid; gap: 10px 16px; height: 100%; min-height: 0; }
+.tph-inc > * { min-width: 0; min-height: 0; }
+@media (min-width: 900px) {
+  .tph-inc { grid-template-columns: minmax(0, 3fr) minmax(0, 1.25fr); grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "tab tab" "calc fin"; }
+  .tph-inc-tab { grid-area: tab; } .tph-inc-calc { grid-area: calc; } .tph-inc-fin { grid-area: fin; }
+}
+@media (max-width: 899px) { .tph-inc { grid-template-columns: minmax(0, 1fr); height: auto; } }
+
+/* ---------- module 3b : Regressi ---------- */
+.tph-reg { display: grid; gap: 12px 18px; height: 100%; min-height: 0; grid-template-rows: auto minmax(0, 1fr); }
+.tph-reg-corps { display: grid; gap: 12px 18px; min-height: 0; }
+.tph-reg-corps > * { min-width: 0; min-height: 0; overflow: auto; }
+@media (min-width: 900px) { .tph-reg-corps { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+@media (max-width: 899px) { .tph-reg { height: auto; } }
+.tph-reg-etapes { margin: 0; padding: 0; list-style: none; counter-reset: e; display: flex; flex-direction: column; gap: 6px; }
+.tph-reg-etapes li { counter-increment: e; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 8px; line-height: 1.45; font-size: .95rem; }
+.tph-reg-etapes li::before { content: counter(e); width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; background: var(--cle-bg); color: var(--accent-ink); font-size: .8rem; font-weight: 800; }
+.tph-reg-etapes b { font-weight: 800; }
+.tph-reg-figs { display: flex; flex-direction: column; gap: 10px; }
+.tph-reg-figs svg { display: block; width: 100%; height: auto; max-height: 100%; font-family: var(--font-sans); }
+.tph-reg-legende { font-size: .82rem; color: var(--ink-2); margin: 2px 0 0; text-align: center; }
+
+/* ---------- accueil : carte « Le TP » ---------- */
+.tph-letp { max-width: 48rem; margin: 20px auto 0; box-sizing: border-box; }
+.tph-letp p { margin: 0; line-height: 1.55; }

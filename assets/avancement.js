@@ -134,6 +134,7 @@
       'module_3a_cours', 'module_3b_cours', 'module_3_entourer', 'module_3_nommer', 'module_3_dessiner', 'module_3_questions',
       'module_5a_cours', 'module_5b_cours', 'module_5_conversion', 'module_5_questions'] },
     'ph': { ex: 17, pages: ['module_1_cours', 'module_1_questions', 'module_2_cours', 'module_2_questions'] },
+    'titrage-ph': { pages: ['module_1a_dilution', 'module_1b_montage', 'module_2_titrage', 'module_3a_equivalence', 'module_3b_regressi', 'module_3c_titre', 'module_4_incertitudes'] },
     'puissances-10': { pages: ['course-1', 'training-1', 'course-2', 'training-2', 'course-3', 'training-3', 'training-4'] },
     'conversions': { pages: [
       'cours', 'astuces', 'prefixes', 'niveau-1', 'niveau-2', 'niveau-3', 'niveau-4', 'cours-sq', 'ex-sq',

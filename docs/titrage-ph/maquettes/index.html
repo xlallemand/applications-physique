@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maquettes — TP : titrage pH-métrique du Destop</title>
+<link rel="stylesheet" href="../../../assets/theme.css">
+<link rel="stylesheet" href="../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="maq-titrage.css">
+</head>
+<body>
+<!-- Présentation des maquettes de l'application « TP : titrage pH-métrique du Destop » (étape 1 du prompt docs/titrage-ph/prompt.md) -->
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">CHIMIE · TERMINALE SPÉCIALITÉ · MAQUETTES À VALIDER</span>
+    <h2 class="er-titre">TP : titrage pH-métrique du Destop</h2>
+    <p class="er-contexte">Avant de développer l'application, ces <b>maquettes fonctionnelles</b> montrent les parties difficiles, chacune avec <b>plusieurs choix de design</b>. Elles sont dans les vraies pages (sommaire à gauche sur ordinateur, bandeau en haut sur téléphone) et tiennent dans l'écran d'un ordinateur sans défilement. Essaie-les à la souris et au doigt. Le bouton en pointillés <b>« Maquette · variantes »</b> de chaque page ouvre le panneau des choix ; ce panneau ne sera pas dans l'application.</p>
+    <p class="er-contexte" style="margin-top:8px">Le modèle chimique est déjà le vrai (<code>assets/titrage.js</code>, testé : pH(0) = 12,95, pH(V<sub>eq</sub>) = 7,00, pH(16 mL) = 1,57). Chaque prise d'essai tire son V<sub>eq</sub> (9,00 mL ± 0,40 mL), jamais affiché. Ce que tu fais est gardé d'une page à l'autre, comme dans l'application.</p>
+    <div class="tph-actions"><a class="btn-primary" href="modules/module_1a_dilution.html" style="text-decoration:none">Commencer le parcours →</a>
+      <button type="button" class="btn-small" id="raz">Tout effacer (recommencer les maquettes à zéro)</button></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">Les maquettes</h3>
+    <div class="maq-cartes">
+      <a class="maq-carte" href="modules/module_2_titrage.html"><b><span class="maq-lettre">A</span>Simulateur de titrage</b><span>Module 2. Verser 1 / 0,2 / 0,1 mL, pH-mètre, tableau, courbe. 3 dispositions × 2 styles de montage × 2 formes de commandes.</span></a>
+      <a class="maq-carte" href="modules/module_3a_equivalence.html"><b><span class="maq-lettre">B</span>Méthode des tangentes</b><span>Module 3, onglet « Méthode des tangentes ». 3 façons de déplacer les droites, aimantation ou non, 2 présentations des étapes.</span></a>
+      <a class="maq-carte" href="modules/module_3a_equivalence.html"><b><span class="maq-lettre">C</span>Courbe dérivée</b><span>Module 3, onglet « Courbe dérivée ». Même figure avec un axe à droite, ou deux figures superposées ; toucher l'extrémum, ou glisser un réticule.</span></a>
+      <a class="maq-carte" href="modules/module_1b_montage.html"><b><span class="maq-lettre">D</span>Schéma du montage à compléter</b><span>Module 1. Étiquettes dans une réserve (glisser ou toucher), ou choix dans la zone touchée. Appareil de mesure à placer.</span></a>
+      <a class="maq-carte" href="modules/module_1c_reaction.html"><b><span class="maq-lettre">E</span>Phrase et équation à construire</b><span>Module 1. Morceaux à toucher dans l'ordre, ou trous avec un choix par trou. La phrase est l'étape 2 de la page D ; l'équation est sur la page « Réaction et équivalence ».</span></a>
+      <a class="maq-carte" href="modules/module_1a_dilution.html"><b><span class="maq-lettre">F</span>Matériel de dilution</b><span>Module 1. Paillasse dessinée ou cartes ; facteur de dilution affiché en direct ou après validation. Phrase du protocole écrite toute seule.</span></a>
+      <a class="maq-carte" href="modules/module_3b_titre.html"><b><span class="maq-lettre">G</span>Outil de calcul</b><span>Modules 3 et 4. Formule à choisir puis valeurs à placer, calcul automatique. Une grandeur à la fois, ou tout en lignes ; tableau des groupes en colonnes ou en lignes (<a href="modules/module_4_incertitudes.html">module 4</a>).</span></a>
+    </div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">Ce qui est commun à toutes les pages <small>Déjà conforme au prompt : pas de choix à faire</small></h3>
+    <ul class="maq-liste">
+      <li>Chaque page tient dans l'écran à 1280 × 720 (sommaire compris), à 1366 × 768 et à 1920 × 1080 ; sur téléphone, la page défile (colonnes empilées).</li>
+      <li>En haut de chaque page : « Données du TP » (panneau qui se ferme par ✕, Échap ou le voile) et « Passer cette partie → » (remplit la partie avec la bonne réponse, ou des mesures toutes faites, et donne le lien vers la suite).</li>
+      <li>Retours « Juste ! » / « Ce n'est pas ça. » avec un diagnostic ciblé ; « Afficher la réponse » après deux erreurs (phrase, équation, lecture de V<sub>eq</sub>).</li>
+      <li>Nombres saisis : champ ± de la charte. Tout le reste se fait par boutons, choix et étiquettes : aucun texte à taper.</li>
+      <li>Une étape réussie se replie en une ligne (✓) pour laisser la place à la suivante.</li>
+    </ul>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">A · Simulateur de titrage <small>Page « Réaliser le titrage »</small></h3>
+    <ul class="maq-variantes">
+      <li><b>Disposition 1 · Trois colonnes</b> : montage et commandes à gauche, courbe au centre (la plus large), tableau étroit à droite.</li>
+      <li><b>Disposition 2 · Côte à côte, tableau en bandeau</b> : montage et courbe côte à côte, tableau en deux lignes V / pH sous l'ensemble, comme sur la feuille du TP.</li>
+      <li><b>Disposition 3 · Courbe en grand</b> : montage réduit (sans les espèces écrites) au-dessus du tableau, commandes en barre sous la courbe.</li>
+      <li><b>Montage a · Épuré</b> (au trait, comme les schémas du cours) ou <b>b · Réaliste</b> (verre, métal, écran du pH-mètre).</li>
+      <li><b>Commandes x · Pastilles</b> 1 mL / 0,2 mL / 0,1 mL puis « Verser », ou <b>y · Trois boutons</b> « Verser 1 mL », « Verser 0,2 mL », « Verser 0,1 mL ».</li>
+    </ul>
+    <p class="maq-texte" style="margin-top:8px"><b>À essayer</b> : un titrage complet (1 mL, puis 0,2 mL près du saut, jusqu'à 16 mL), « Recommencer (nouvelle prise d'essai) », « Passer cette partie », « Copier les mesures pour Regressi ». Sur téléphone, les commandes restent collées en bas de l'écran pendant qu'on regarde la courbe.</p>
+    <a class="maq-lien-maq" href="modules/module_2_titrage.html">Ouvrir la maquette A →</a>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">B · Méthode des tangentes et C · Courbe dérivée <small>Page « Repérer le volume équivalent », deux onglets</small></h3>
+    <ul class="maq-variantes">
+      <li><b>Déplacer 1 · Glisser la droite</b> : on attrape la droite elle-même (à moins de 22 px). <b>2 · Poignée</b> : un rond sur la droite (cible de 48 px). <b>3 · Poignée + flèches</b> : en plus, ▲ ▼ (◀ ▶ pour la perpendiculaire) d'un pixel, en continu par appui long.</li>
+      <li><b>Aimantation a · Oui</b> : la parallèle se colle à la bonne position à moins de 6 px, la troisième droite au milieu à moins de 8 px. <b>b · Non</b> : il faut viser à 3 px près.</li>
+      <li><b>Étapes x · Une consigne qui change</b>, ou <b>y · Liste des 5 étapes</b> qui se cochent.</li>
+      <li><b>Dérivée 1 · Même figure</b>, second axe à droite (pointillés gris), ou <b>2 · Deux figures superposées</b> alignées sur V.</li>
+      <li><b>Extrémum a · Toucher</b> : le trait vertical s'aimante au point de la dérivée le plus proche, diagnostic si ce n'est pas le minimum ; <b>b · Réticule à glisser</b>, avec la lecture de V, comme le réticule libre de Regressi.</li>
+      <li><b>Pour essayer</b> : tes mesures du module 2, ou une courbe à pas de 1 mL, ou à pas de 0,2 mL.</li>
+    </ul>
+    <p class="maq-texte" style="margin-top:8px"><b>À essayer</b> : les 5 étapes des tangentes avec chaque façon de déplacer, au doigt et à la souris ; une parallèle qui coupe la courbe ou qui ne la touche pas (« Valider la position ») ; une 1re tangente posée dans le saut ; la même chose sur la courbe à pas de 1 mL (le V<sub>eq</sub> trouvé s'écarte nettement du vrai : c'est la remarque sur la précision).</p>
+    <a class="maq-lien-maq" href="modules/module_3a_equivalence.html">Ouvrir les maquettes B et C →</a>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">D · Schéma du montage, E · Phrase et équation <small>Pages « Schéma du montage » et « Réaction et équivalence »</small></h3>
+    <ul class="maq-variantes">
+      <li><b>D 1 · Réserve</b> : 7 étiquettes mélangées à côté du schéma ; on touche une étiquette puis la zone, ou on la fait glisser. Chaque étiquette juste est l'étiquette fausse d'une autre zone. « Vérifier le schéma » marque chaque zone et donne le diagnostic de la première erreur.</li>
+      <li><b>D 2 · Toucher la zone</b> : un petit menu propose l'étiquette juste et l'erreur classique de cette zone (tableau du prompt).</li>
+      <li>Schéma <b>a · Épuré</b> ou <b>b · Réaliste</b> (le même dessin que le simulateur). Appareil : pH-mètre, conductimètre ou gouttes d'indicateur, à poser dans le cadre en pointillés.</li>
+      <li><b>E x · Morceaux à toucher dans l'ordre</b> (un appui dans la phrase retire le morceau ; pour l'équation, les « + » se placent tout seuls, « → » est un morceau), ou <b>E y · Trous</b> avec un menu par trou.</li>
+    </ul>
+    <a class="maq-lien-maq" href="modules/module_1b_montage.html">Ouvrir les maquettes D et E (phrase) →</a> · <a class="maq-lien-maq" href="modules/module_1c_reaction.html">Maquette E (équation) →</a>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">F · Matériel de dilution <small>Page « Diluer 20 fois le Destop »</small></h3>
+    <ul class="maq-variantes">
+      <li><b>1 · Paillasse dessinée</b> : les 8 objets du matériel disponible, chacun est un bouton (choisi : cadre vert d'accent). <b>2 · Cartes de matériel</b> : une carte par objet avec un petit dessin.</li>
+      <li><b>Facteur a · Affiché en direct</b> dès qu'une fiole et une pipette sont choisies (« F = 100,0 / 5,0 = 20 »), ou <b>b · Après validation</b> seulement.</li>
+    </ul>
+    <a class="maq-lien-maq" href="modules/module_1a_dilution.html">Ouvrir la maquette F →</a>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">G · Outil de calcul <small>Pages « Calculer le titre massique » et « Incertitudes et compatibilité »</small></h3>
+    <ul class="maq-variantes">
+      <li><b>a · Cartes de formules, puis cases</b> : une grandeur à la fois ; une fois la bonne formule choisie, elle s'affiche avec des cases vides ; les grandeurs faites se replient en une ligne.</li>
+      <li><b>b · Tout en lignes</b> : toutes les grandeurs sont visibles dès le début, une ligne chacune (formule et valeurs sur la même ligne).</li>
+      <li>Valeurs à placer : on touche l'étiquette puis la case, ou on la glisse ; elle reste dans la réserve (une valeur peut servir plusieurs fois). Dès que les cases sont remplies, le calcul se fait tout seul et le résultat devient une étiquette.</li>
+      <li>Tableau des groupes <b>1 · Une colonne par groupe</b> (comme le TP) ou <b>2 · Une ligne par groupe</b>. Groupe 1 = ton V<sub>eq</sub> ; groupes 2 à 9 simulés, modifiables (vraies valeurs de la classe), « + Groupe », « − Groupe », « Revenir aux valeurs simulées ».</li>
+    </ul>
+    <a class="maq-lien-maq" href="modules/module_3b_titre.html">Ouvrir la maquette G (titre massique) →</a> · <a class="maq-lien-maq" href="modules/module_4_incertitudes.html">Maquette G (incertitudes) →</a>
+  </div>
+
+  <div class="er-card" id="regressi">
+    <h3 class="maq-h">Regressi <small>La fiche « Le faire avec Regressi » sera écrite à l'étape 2</small></h3>
+    <p class="maq-texte">« Copier les mesures pour Regressi » (modules 2 et 3) copie déjà le texte au format CSV : <code>V;pH</code>, puis une ligne par mesure, point-virgule, virgule décimale. Message : « Mesures copiées. Dans Regressi : Fichier → Nouveau → Presse-papier. » Les liens « Le faire avec Regressi » mènent ici en attendant la fiche (mêmes menus et même ordre que ton mode d'emploi).</p>
+  </div>
+
+  <div class="er-card">
+    <h3 class="maq-h">Questions <small>Indique pour chaque maquette la variante retenue (ou un mélange) et tes remarques</small></h3>
+    <ol class="maq-questions">
+      <li><b>A · Disposition (1, 2 ou 3), montage (a ou b), commandes (x ou y) ?</b>
+        <small>Ma proposition : 1 · a · x. Le tableau en bandeau (2) ressemble à la feuille du TP mais laisse moins de hauteur à la courbe.</small></li>
+      <li><b>A · Fin du titrage.</b>
+        <small>La page est faite quand V ≥ 16 mL et qu'il y a au moins 5 points à moins de 1 mL de l'équivalence. Si l'élève a dépassé le saut à 1 mL près, il ne peut plus ajouter de points : le message lui dit de recommencer une prise d'essai. Ça te va, ou faut-il prévenir dès que le pH commence à chuter ? La mesure à V = 0 est faite toute seule au début (première ligne du tableau) : d'accord ?</small></li>
+      <li><b>B · Façon de déplacer (1, 2 ou 3), aimantation (a ou b), étapes (x ou y) ?</b>
+        <small>Ma proposition : 3 (poignée + flèches) · a · x. Sans aimantation, viser à 3 px près au doigt est difficile.</small></li>
+      <li><b>B · 1re tangente refusée</b> si elle est posée dans le saut (droite à plus de 80° à l'écran) ou trop loin du saut (moins de 12°, ou à plus de 3,5 mL du saut). Ces seuils te conviennent-ils ?</li>
+      <li><b>C · Figure (1 ou 2), extrémum (a ou b) ?</b>
+        <small>Ma proposition : 1 · a (comme la copie d'écran du cours) ; le réticule (b) prépare au réticule libre de Regressi.</small></li>
+      <li><b>D · Étiquettes (1 ou 2), schéma (a ou b) ?</b>
+        <small>La zone « agitation » n'a pas d'étiquette fausse (prompt) : en variante 2, son menu n'a qu'un choix. Faut-il un piège ?</small></li>
+      <li><b>E · Morceaux (x) ou trous (y), pour la phrase et pour l'équation ?</b></li>
+      <li><b>F · Paillasse (1) ou cartes (2), facteur en direct (a) ou après validation (b) ?</b>
+        <small>Un bécher choisi en plus de la pipette de 5,0 mL et de la fiole de 100,0 mL est accepté (on verse un peu de Destop dans un bécher avant de pipeter) : d'accord, ou faut-il le refuser ?</small></li>
+      <li><b>G · Une grandeur à la fois (a) ou tout en lignes (b) ? Tableau des groupes en colonnes (1) ou en lignes (2) ?</b>
+        <small>Chiffres significatifs : ceux de V<sub>eq</sub> (2 si V<sub>eq</sub> &lt; 10 mL, sinon 3) pour c<sub>0</sub>, c<sub>D</sub>, C<sub>m</sub>, t ; 3 pour t̄, 2 pour σ, u(t) et les rapports. L'icône calculatrice est mise à côté des résultats calculés automatiquement (prompt) : la garder ?</small></li>
+      <li><b>Sommaire</b> : la fiche du module 3 s'appelle « Fiche récapitulative » dans le sommaire commun. Faut-il l'appeler « Le faire avec Regressi » (petit ajout à <code>assets/sommaire.js</code>) ?</li>
+      <li><b>Autre chose</b> (vocabulaire, couleurs, taille des textes, ordre des étapes) ?</li>
+    </ol>
+  </div>
+</div>
+<script>
+// remise à zéro des maquettes (mesures, choix, progression)
+document.getElementById('raz').addEventListener('click', e => {
+  try { Object.keys(localStorage).filter(k => k.startsWith('maquette-tph')).forEach(k => localStorage.removeItem(k)); } catch (err) { /* rien */ }
+  e.currentTarget.textContent = 'C’est fait : tout est effacé.';
+});
+</script>
+</body>
+</html>

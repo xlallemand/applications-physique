@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : diluer 20 fois le Destop — TP : titrage pH-métrique du Destop</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/titrage.css">
+<link rel="stylesheet" href="tph.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/titrage.js"></script>
+<script src="tph.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page tph-page">
+  <div class="er-card tph-tete">
+    <div class="tph-tete-l"><span class="er-badge">MODULE 1 · ENTRAÎNEMENT</span><h2 class="er-titre">Diluer 20 fois le Destop</h2></div>
+    <div class="tph-tete-b">
+      <button type="button" class="btn-small" data-donnees>Données du TP</button>
+      <button type="button" class="btn-small" data-passer>Passer cette partie →</button>
+    </div>
+  </div>
+  <div class="er-card tph-zone"><div class="tph-corps">
+    <div class="tph-deux">
+      <div class="tph-col" id="gauche">
+        <p class="tph-petit">Le Destop est trop concentré pour être titré directement : on titre une solution S<sub>0</sub> <b>diluée 20 fois</b>. Le facteur de dilution F est un rapport de volumes.</p>
+        <p class="tph-etape-t"><span class="tph-num">1</span>Quelle relation donne le facteur de dilution F ?</p>
+        <div id="q1"></div>
+        <div id="fin"></div>
+      </div>
+      <div class="tph-col" id="droite">
+        <p class="tph-etape-t"><span class="tph-num">2</span>Choisis le matériel pour diluer 20 fois le Destop (touche un objet pour le prendre ou le reposer).</p>
+        <div id="mat"></div>
+      </div>
+    </div>
+  </div></div>
+</div>
+<script>
+// Module 1a : relation du facteur de dilution, choix du matériel, phrase du protocole
+const NB = TPH.NB, fr = TPH.fr, fmt = TPH.fmt;
+const qcm1 = TPH.qcm(document.getElementById('q1'), [
+  { html: 'F = ' + fr('V<sub>fiole</sub>', 'V<sub>pipette</sub>'), juste: true, diag: 'Le volume final (fiole) est F fois plus grand que le volume prélevé (pipette).' },
+  { html: 'F = ' + fr('V<sub>pipette</sub>', 'V<sub>fiole</sub>'), diag: 'F est plus grand que 1' + NB + ': le volume final (fiole) est au numérateur.' },
+  { html: 'F = V<sub>fiole</sub> × V<sub>pipette</sub>', diag: 'Le facteur de dilution est un rapport de volumes, sans unité.' },
+  { html: 'F = V<sub>fiole</sub> − V<sub>pipette</sub>', diag: 'Le facteur de dilution est un rapport de volumes, sans unité.' },
+], () => {
+  // la question réussie se replie en une ligne ; la suite est à droite
+  setTimeout(() => {
+    document.getElementById('q1').innerHTML = `<p class="tph-resume">✓ F = ${fr('V<sub>fiole</sub>', 'V<sub>pipette</sub>')}</p>`;
+    if (!document.getElementById('fin').innerHTML) TITRAGE.ui.defiler(document.getElementById('droite'));
+  }, 900);
+});
+const outil = TPH.materiel(document.getElementById('mat'), { fini: c => {
+  const p = fmt(c.pipette, 1), f = fmt(c.fiole, 1);
+  const z = document.getElementById('fin');
+  // sur téléphone, le protocole vient sous le matériel (pas besoin de remonter)
+  if (window.matchMedia('(max-width: 899px)').matches) document.getElementById('droite').appendChild(z);
+  // la phrase du protocole s'écrit toute seule à partir du matériel choisi
+  z.innerHTML = `<p class="tph-etape-t"><span class="tph-num fait">3</span>Le protocole</p>
+    <div class="cle tph-cle"><b class="cle-titre">✍ Recopie-la sur ton compte rendu</b>Prélever ${p} mL de Destop à l'aide d'une pipette jaugée de ${p} mL. Les introduire dans une fiole jaugée de ${f} mL et compléter jusqu'au trait de jauge avec de l'eau distillée.</div>
+    <p class="tph-suite"><a class="btn-primary" href="module_1b_montage.html">Partie suivante${NB}: montage et réaction →</a></p>`;
+  SOM.marquer({ fait: true });
+  TITRAGE.ui.defiler(z);
+} });
+TPH.init('module_1a_dilution', { passer: () => { qcm1.montrer(); outil.remplir(); } });
+</script>
+</body>
+</html>

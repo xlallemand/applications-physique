@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : montage et réaction de titrage — TP : titrage pH-métrique du Destop</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/titrage.css">
+<link rel="stylesheet" href="tph.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/titrage.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="tph.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page tph-page">
+  <div class="er-card tph-tete">
+    <div class="tph-tete-l"><span class="er-badge">MODULE 1 · ENTRAÎNEMENT</span><h2 class="er-titre">Montage et réaction de titrage</h2></div>
+    <div class="tph-tete-b">
+      <button type="button" class="btn-small" data-donnees>Données du TP</button>
+      <button type="button" class="btn-small" data-passer>Passer cette partie →</button>
+    </div>
+  </div>
+  <div class="er-card tph-zone"><div class="tph-corps" id="zone"></div></div>
+</div>
+<script>
+// Module 1b : schéma du montage à compléter, puis, à droite du schéma complet :
+// phrase « On trace… », équation de la réaction de titrage, relation à l'équivalence (n, puis c et V)
+const NB = TPH.NB, fr = TPH.fr, UI = TITRAGE.ui;
+let rapide = false;                 // « Passer cette partie » : tout s'enchaîne sans attendre
+const faits = [];                   // lignes des étapes réussies
+const sch = TPH.schema(document.getElementById('zone'), { fini: () => { faits.push('Schéma complet'); setTimeout(() => afficher(0), rapide ? 0 : 900); } });
+const cote = sch.cote;
+const nA = 'n<sub>A</sub>', nB = 'n<sub>B</sub>';
+
+// questions posées à droite du schéma, une à la fois ; une question réussie se replie en une ligne
+const ETAPES = [
+  { q: 'Que trace-t-on pendant ce titrage' + NB + '? Construis la phrase.',
+    resume: 'On trace le pH en fonction du volume V d’acide versé.',
+    monter: (z, fini) => TPH.phrase(z, { fini }) },
+  { q: 'Écris l’équation de la réaction de titrage.',
+    intro: 'On titre les ions HO⁻ de S₀ (Na⁺ + HO⁻) par l’acide chlorhydrique (H₃O⁺ + Cl⁻).',
+    resume: 'H₃O⁺ + HO⁻ → 2 H₂O',
+    monter: (z, fini) => TPH.equation(z, { fini }) },
+  { q: `À l’équivalence, quelle relation lie ${nA} (quantité d’ions H₃O⁺ versés) et ${nB} (quantité d’ions HO⁻ initialement dans le bécher)${NB}?`,
+    resume: `À l’équivalence${NB}: ${fr(nB, '1')} = ${fr(nA, '1')}`, qcm: true,
+    monter: (z, fini) => TPH.qcm(z, [
+      { html: `${fr(nB, '1')} = ${fr(nA, '1')}`, juste: true, diag: `À l’équivalence, les réactifs ont été introduits dans les proportions stœchiométriques${NB}: chaque quantité de matière est divisée par son coefficient dans l’équation (ici 1 et 1).` },
+      { html: `${nB} = ${nA}`, juste: true, diag: 'Les deux coefficients de l’équation valent 1.',
+        avert: 'Écris toujours les coefficients stœchiométriques, ' + fr(nB, 'b') + ' = ' + fr(nA, 'a') + ', même quand ils valent 1' + NB + ': tu ne les oublieras pas le jour où ils ne seront pas égaux à 1.' },
+      { html: `${nB} × 1 = ${nA} × 1`, diag: `On divise chaque quantité de matière par son coefficient${NB}: ${fr(nB, 'b')} = ${fr(nA, 'a')}.` },
+      { html: `${fr(nB, '2')} = ${fr(nA, '1')}`, diag: 'Les coefficients de H₃O⁺ et de HO⁻ dans l’équation valent 1 (le 2 est celui de l’eau).' },
+    ], fini) },
+  { q: 'Écris cette relation avec les concentrations et les volumes.',
+    resume: 'c<sub>0</sub> × V<sub>B</sub> = c<sub>A</sub> × V<sub>eq</sub>', qcm: true,
+    monter: (z, fini) => TPH.qcm(z, [
+      { html: 'c<sub>0</sub> × V<sub>B</sub> = c<sub>A</sub> × V<sub>eq</sub>', juste: true, diag: `n = c × V${NB}: ${nB} = c<sub>0</sub> × V<sub>B</sub> (S₀ prélevée à la pipette) et ${nA} = c<sub>A</sub> × V<sub>eq</sub> (acide versé à l’équivalence).` },
+      { html: 'c<sub>0</sub> × V<sub>eq</sub> = c<sub>A</sub> × V<sub>B</sub>', diag: 'V<sub>eq</sub> est le volume d’acide versé (c<sub>A</sub>)' + NB + '; V<sub>B</sub> est le volume de S₀ (c<sub>0</sub>)' + NB + ': chaque concentration va avec le volume de sa solution.' },
+      { html: `${fr('c<sub>0</sub>', 'V<sub>B</sub>')} = ${fr('c<sub>A</sub>', 'V<sub>eq</sub>')}`, diag: 'Une quantité de matière est un produit' + NB + ': n = c × V.' },
+      { html: 'c<sub>0</sub> × V<sub>B</sub> = 2 c<sub>A</sub> × V<sub>eq</sub>', diag: 'Les coefficients de H₃O⁺ et de HO⁻ dans l’équation valent 1' + NB + ': pas de 2.' },
+    ], fini) },
+];
+let outilEnCours = null;
+function afficher(n) {
+  if (n >= ETAPES.length) { fin(); return; }
+  const E = ETAPES[n];
+  cote.innerHTML = faits.map(r => `<p class="tph-resume">✓ ${r}</p>`).join('') +
+    `<p class="tph-etape-t"><span class="tph-num">${n + 2}</span>${E.q}</p>${E.intro ? `<p class="tph-petit">${E.intro}</p>` : ''}<div data-et></div>`;
+  const z = cote.querySelector('[data-et]');
+  outilEnCours = E.monter(z, () => {
+    const suite = () => { faits.push(E.resume); afficher(n + 1); };
+    if (rapide) { setTimeout(suite, 0); return; }
+    if (!E.qcm) { setTimeout(suite, 900); return; }
+    // QCM : on lit l'explication (et l'avertissement), puis « Continuer »
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'btn-primary tph-btn'; b.textContent = 'Continuer →'; b.style.marginTop = '8px';
+    b.addEventListener('click', suite);
+    z.appendChild(b);
+    UI.defiler(b);
+  });
+  if (rapide) (outilEnCours.remplir || outilEnCours.montrer)();
+  UI.defiler(cote.querySelector('.tph-etape-t'));
+}
+function fin() {
+  cote.innerHTML = `<p class="tph-resume">✓ Schéma, phrase, équation et relation à l’équivalence</p>
+    <div class="cle tph-cle"><b class="cle-titre">✍ Recopie le schéma, la phrase, l’équation et la relation</b>
+      Le schéma ci-contre.<br>On trace le pH en fonction du volume V d’acide versé.<br>
+      Réaction de titrage${NB}: H₃O⁺ + HO⁻ → 2 H₂O<br>
+      À l’équivalence${NB}: ${fr(nB, '1')} = ${fr(nA, '1')}, soit c<sub>0</sub> × V<sub>B</sub> = c<sub>A</sub> × V<sub>eq</sub></div>
+    <p class="tph-suite"><a class="btn-primary" href="module_2_titrage.html">Module 2${NB}: réaliser le titrage →</a></p>`;
+  SOM.marquer({ fait: true });
+  UI.defiler(cote.querySelector('.tph-suite'));
+}
+TPH.init('module_1b_montage', { passer: () => {
+  rapide = true;
+  const cont = cote.querySelector('[data-et] > .btn-primary');      // question déjà réussie : on continue
+  if (!faits.length) sch.remplir();
+  else if (cont) cont.click();
+  else if (outilEnCours) (outilEnCours.remplir || outilEnCours.montrer)();
+} });
+</script>
+</body>
+</html>

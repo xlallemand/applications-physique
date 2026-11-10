@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : repérer le volume équivalent — TP : titrage pH-métrique du Destop</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/titrage.css">
+<link rel="stylesheet" href="tph.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/titrage.js"></script>
+<script src="tph.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page tph-page">
+  <div class="er-card tph-tete">
+    <div class="tph-tete-l"><span class="er-badge">MODULE 3 · ENTRAÎNEMENT</span><h2 class="er-titre">Repérer le volume équivalent</h2></div>
+    <div class="tph-tete-b">
+      <button type="button" class="btn-small" data-donnees>Données du TP</button>
+      <button type="button" class="btn-small" data-passer>Passer cette partie →</button>
+    </div>
+  </div>
+  <div class="er-card tph-zone"><div class="tph-corps">
+    <div class="tph-eq">
+      <div class="tph-eq-courbe" id="courbe"></div>
+      <div class="tph-eq-cote">
+        <div class="tph-onglets" role="tablist" aria-label="Méthode">
+          <button type="button" class="tph-onglet" role="tab" data-m="tangentes">Méthode des tangentes</button>
+          <button type="button" class="tph-onglet" role="tab" data-m="derivee">Courbe dérivée</button>
+        </div>
+        <p class="tph-petit" id="info" hidden></p>
+        <div id="panneau"></div>
+        <div id="suite"></div>
+        <div class="ttr-boutons">
+          <a class="btn-small" id="regressi" href="module_3b_regressi.html#tangentes" target="_blank" rel="noopener">Le faire avec Regressi</a>
+          <button type="button" class="btn-small" id="copier">Copier les mesures pour Regressi</button>
+        </div>
+        <div id="copie"></div>
+      </div>
+      <div class="tph-eq-tab" id="tab"></div>
+    </div>
+  </div></div>
+</div>
+<script>
+// Module 3a : méthode des tangentes (glisser les droites, aimantation, une consigne qui change)
+// ou courbe dérivée (même figure, second axe à droite ; réticule à glisser)
+const NB = TPH.NB, fmt = TPH.fmt;
+let methode = 'tangentes';
+const M = TPH.mesures();
+if (M.auto) {
+  const i = document.getElementById('info');
+  i.hidden = false;
+  i.textContent = 'Tu n’as pas fini le titrage du module 2' + NB + ': voici des mesures toutes faites pour ta prise d’essai.';
+}
+function fini(v) {
+  TPH.tpEcrire({ veqEleve: v });
+  SOM.marquer({ fait: true });
+  const s = document.getElementById('suite');
+  s.innerHTML = `<p class="tph-resume">V<sub>eq</sub> retenu pour la suite${NB}: <b>${fmt(v)} mL</b></p>
+    <p class="tph-suite"><a class="btn-primary" href="module_3c_titre.html">Calculer le titre massique →</a></p>`;
+  TITRAGE.ui.defiler(s.querySelector('.tph-suite'));
+}
+function construire() {
+  const zc = document.getElementById('courbe'), zp = document.getElementById('panneau');
+  zc.innerHTML = ''; document.getElementById('tab').innerHTML = ''; document.getElementById('suite').innerHTML = '';
+  document.querySelectorAll('[data-m]').forEach(b => b.setAttribute('aria-selected', b.dataset.m === methode));
+  document.getElementById('regressi').setAttribute('href', 'module_3b_regressi.html#' + methode);
+  const C = TITRAGE.courbe(zc, { xMax: 20, derivee: methode === 'derivee' ? 'droite' : null });
+  C.maj(M.liste);
+  TITRAGE.tableau(document.getElementById('tab')).maj(M.liste);
+  if (methode === 'tangentes') TITRAGE.tangentes(C, { panneau: zp, deplacement: 'direct', aimant: true, etapes: 'consigne', fini });
+  else TITRAGE.deriveeOutil(C, { panneau: zp, pointer: 'reticule', fini });
+}
+document.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { if (methode !== b.dataset.m) { methode = b.dataset.m; construire(); } }));
+document.getElementById('copier').addEventListener('click', () => TITRAGE.regressi.copier(M.liste, document.getElementById('copie')));
+// « Passer » : Veq = abscisse de l'extrémum de la dérivée des mesures, arrondie à 0,1 mL
+TPH.init('module_3a_equivalence', { passer: () => fini(TPH.veqDerivee(M.liste)) });
+construire();
+</script>
+</body>
+</html>
