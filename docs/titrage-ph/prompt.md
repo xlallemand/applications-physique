@@ -1,12 +1,31 @@
 # Titrage pH-métrique : TP virtuel « Dosage du Destop » (prompt de génération)
 
-Utilisation : ouvre une session cloud sur `applications-physique` et écris seulement :
+## Utilisation
 
-> Lis `docs/titrage-ph/prompt.md` et exécute-le.
+Le travail se fait **en deux sessions** (§10) :
 
-Ce fichier se suffit à lui-même : les données du TP, la correction du professeur et les méthodes du cours sont résumées ci-dessous. Il n'y a **pas d'autre source à lire** (pas de dépôt de cours à attacher).
+1. Ouvre une session cloud sur `applications-physique`, **attache les trois fichiers** de sources (§0) et écris :
+   > Lis `docs/titrage-ph/prompt.md` et exécute l'étape 1.
+2. Après avoir essayé les maquettes, dans une nouvelle session, avec les mêmes fichiers attachés :
+   > Lis `docs/titrage-ph/prompt.md` et exécute l'étape 2. Maquettes retenues : … Remarques : …
+
+Lis tout ce fichier dans les deux cas : les maquettes doivent déjà respecter ce que l'application attend.
 
 ## 0. Avant de commencer
+
+### Sources (attachées au message de la session)
+
+| Fichier | Contenu | À lire |
+|---|---|---|
+| `Chap06-TP6-titrage_Destop_pHmetrique_complete.pdf` (4 p.) | Énoncé du TP, complété à la main par le professeur (correction) | Résumé ci-dessous (§5, §8) ; à relire pour le schéma du montage corrigé (p. 2) et l'allure de la courbe et de sa dérivée (p. 3) |
+| `Chap06_Cours_titrage_complete.pdf` (7 p.) | Cours « Dosage par titrage », annoté à la main | Résumé ci-dessous (§7) ; à relire pour les schémas de montage (p. 1, 4, 6), les courbes et la méthode des tangentes (p. 5) |
+| `Mode_emploi_Regressi.pdf` (2 p.) | Mode d'emploi simplifié de Regressi, avec copies d'écran | **En entier** pour la fiche Regressi (§6) : mêmes noms de menus, même ordre |
+
+- Les PDF ont des annotations manuscrites : lis-les avec `Read` (rendu exact), une page à la fois, une seule fois. `pdftotext` ne voit pas les notes manuscrites.
+- **Ne les ajoute pas au dépôt** (documents du professeur) : l'application se suffit à elle-même.
+- Si une source manque dans la session, les résumés de ce fichier suffisent : dis-le dans le compte rendu.
+
+### À lire dans le dépôt
 
 1. Lis `CLAUDE.md`, puis **en entier** `docs/charte-applications.md`. Elle prime sur tout le reste pour le style, la navigation et l'accessibilité.
 2. Applications de référence à lire (seulement ce qui sert) :
@@ -231,12 +250,21 @@ Fin : une `.cle` récapitule la chaîne de calcul de l'élève (« ✍ Recopie t
 
 ## 6. Regressi
 
-- **Copie automatique** (« Copier les mesures pour Regressi », sur les pages des modules 2 et 3) : texte séparé par des tabulations, première ligne les noms des grandeurs (`V` et `pH`), deuxième ligne les unités (`mL` et rien), puis une ligne par mesure, **virgule décimale**. Copie par `navigator.clipboard.writeText`, avec repli `document.execCommand('copy')` sur une zone de texte cachée ; si les deux échouent, afficher le texte dans une zone sélectionnée avec « Copie-le (Ctrl + C) ». Message de réussite : « Mesures copiées. Dans Regressi : Fichier → Nouveau → Presse-papier. »
-- **Fiche `fiche_3.html` « Le faire avec Regressi »** (ouverte dans une nouvelle fenêtre depuis les pages des modules 2 et 3, pour garder sa page en cours), étapes numérotées avec des schémas simples (pas de copie d'écran) :
-  - `#ouvrir` : copier les mesures dans l'application, puis Regressi : Fichier → Nouveau → Presse-papier ; afficher pH = f(V) (choix des coordonnées : V en abscisse, pH en ordonnée) ;
-  - `#tangentes` : utiliser l'outil de Regressi pour la méthode des tangentes et lire Veq ;
-  - `#derivee` : **créer la grandeur dérivée** dpH/dV (ajouter une grandeur, type dérivée de pH par rapport à V), l'afficher sur le même graphe avec un second axe, repérer son extrémum.
-- Les noms exacts des menus de Regressi ne sont pas dans les sources : écris-les au mieux et **liste-les dans le compte rendu** pour que le professeur les vérifie (de même pour le format du presse-papier).
+- **Copie automatique** (« Copier les mesures pour Regressi », sur les pages des modules 2 et 3) : données au **format CSV**, **séparateur point-virgule**, une colonne par grandeur, **première ligne : les noms des grandeurs, `V` puis `pH`**, puis une ligne par mesure, **virgule décimale**, pas de ligne d'unités :
+
+  ```
+  V;pH
+  0;12,95
+  1;12,87
+  7,2;11,95
+  ```
+
+  Copie par `navigator.clipboard.writeText`, avec repli `document.execCommand('copy')` sur une zone de texte cachée ; si les deux échouent, afficher le texte dans une zone sélectionnée avec « Copie-le (Ctrl + C) ». Message de réussite : « Mesures copiées. Dans Regressi : Fichier → Nouveau → Presse-papier. »
+- **Fiche `fiche_3.html` « Le faire avec Regressi »** (ouverte dans une nouvelle fenêtre depuis les pages des modules 2 et 3, pour garder sa page en cours), étapes numérotées, **mêmes noms de menus et même ordre que le mode d'emploi du professeur** (`Mode_emploi_Regressi.pdf`), avec des schémas simples des boutons et fenêtres (pas de copie d'écran) :
+  - `#ouvrir` : « Copier les mesures pour Regressi » dans l'application, puis dans Regressi **Fichier → Nouveau → Presse-papier** ; onglet **Graphe**, **Coord.** : V en abscisse, pH en ordonnée, cocher **Ligne** et **Point** ; lire une valeur avec **Outils gr. → Réticule libre** ;
+  - `#tangentes` : méthode des tangentes avec les outils du graphe du mode d'emploi (**Outils gr. → Tangente**, **Outils gr. → Ligne**, **Réticule libre** pour lire Veq) ;
+  - `#derivee` : **créer la grandeur dérivée** : icône **Ajouter**, type de grandeur **« Dérivée »**, nom sans accent ni caractère spécial (`dpHdV`), dérivée de pH par rapport à V, **OK** ; puis onglet **Graphe**, **Coord.**, **Ajouter une courbe** avec `dpHdV` en ordonnée, échelle **à droite** ; repérer l'extrémum avec le **Réticule libre** et lire Veq.
+- Une manipulation qui n'est pas dans le mode d'emploi (ex. détail de l'outil Tangente) : écris-la au mieux et signale-la dans le compte rendu.
 
 ## 7. Méthodes du cours (textes à reprendre)
 
@@ -261,7 +289,34 @@ Fin : une `.cle` récapitule la chaîne de calcul de l'élève (« ✍ Recopie t
   - **aucune page ne défile à 1280 × 720** (ni à 1366 × 768, 1920 × 1080) ;
   - parcours complet du TP en répondant juste, puis avec des erreurs (diagnostics), puis uniquement avec « Passer cette partie » : chaque page suivante a ses données ;
   - méthode des tangentes et dérivée **à la souris et au doigt** (CDP), sur une courbe à pas de 1 mL et sur une courbe à pas de 0,2 mL ;
-  - copie Regressi (contenu exact du texte copié) ;
+  - copie Regressi (contenu exact du texte copié : `V;pH`, puis les mesures avec virgule décimale) ;
   - page d'essai des suivis conductimétrique et colorimétrique (scratchpad) ;
   - typographie : `python3 docs/outils/typo.py --corriger titrage-ph assets/titrage.js` (et les autres fichiers de `assets/` que tu as modifiés), puis `docs/outils/verif-typo.js`.
-- Compte rendu court : ce qui est fait ; écarts avec ce prompt et pourquoi ; noms des menus Regressi et format du presse-papier à faire vérifier par le professeur ; ce qui n'est pas testable (Safari iOS).
+- Compte rendu court : ce qui est fait ; écarts avec ce prompt et avec les maquettes retenues, et pourquoi ; manipulations Regressi absentes du mode d'emploi ; ce qui n'est pas testable (Safari iOS).
+
+## 10. Plan de travail : maquettes, puis application
+
+### Étape 1 (première session) : maquettes à valider
+
+Avant tout développement de l'application, des **maquettes fonctionnelles** (on s'en sert vraiment, à la souris et au doigt) des parties difficiles, avec **plusieurs choix de design** pour chacune quand c'est possible (2 ou 3 variantes nettement différentes) :
+
+| Maquette | Ce qui varie entre les choix (exemples) |
+|---|---|
+| **A. Simulateur de titrage** (§4.4), avec le vrai modèle chimique (`TITRAGE.chimie`, §4.2–4.3) : verser 1 / 0,2 / 0,1 mL, tableau, courbe | disposition à l'écran (trois colonnes ; montage + courbe côte à côte et tableau en bandeau ; courbe en grand et montage réduit…) ; style du montage (schéma épuré comme le cours / dessin plus réaliste) ; forme des commandes de volume ; place et taille du tableau |
+| **B. Méthode des tangentes** (§4.5) | façon de déplacer les droites (glisser directement / poignée / poignée + boutons fléchés pour le doigt) ; aimantation ou non ; présentation des étapes |
+| **C. Courbe dérivée** (§4.5) | même figure avec second axe / deux figures superposées alignées sur V ; façon de pointer l'extrémum |
+| **D. Schéma du montage à compléter** et appareil à placer (§5.2) | glisser les étiquettes / toucher l'étiquette puis la zone ; étiquettes autour du schéma / dans une réserve sous le schéma |
+| **E. Phrase à construire** (§5.2, et équation §5.3) | morceaux à toucher dans l'ordre / phrase à trous avec un choix par trou |
+| **F. Choix du matériel de dilution** (§5.1) | paillasse dessinée / cartes de matériel ; facteur affiché en direct ou non |
+| **G. Outil de calcul** : formule à choisir puis valeurs à placer, calcul automatique (§5.6, §5.7) | cartes de formules puis cases / formule et valeurs dans une même ligne ; présentation du tableau des groupes |
+
+- Dossier **`docs/titrage-ph/maquettes/`**, ouvert en `file://`, avec les vraies feuilles de style du dépôt (`assets/theme.css`, etc.) et le thème chimie ; le modèle chimique de la maquette A est déjà celui de `assets/titrage.js` (testé dans Node, §9).
+- Chaque maquette respecte déjà les contraintes du §2 : **elle tient dans l'écran à 1280 × 720** (vérifié avec Playwright), marche au doigt et à la souris, à 390 px aussi.
+- Une page **`docs/titrage-ph/maquettes/index.html`** présente les maquettes : pour chacune, les variantes, ce qui les distingue, ce qu'il faut essayer, et les **questions posées au professeur** (choix à faire, points à trancher).
+- Vérification à 1280 × 720 et à 390 px (tactile émulé) avec Playwright ; commit, push sur `titrage` ; compte rendu avec les chemins. Si l'outil `Artifact` est disponible, publie aussi la page d'index (fichiers joints par `files`) pour que le professeur essaie sur son téléphone.
+
+**Puis arrête-toi** : pas d'application avant la validation des maquettes.
+
+### Étape 2 (session suivante) : l'application
+
+Le professeur indique les variantes retenues et ses remarques. Reproduis-les fidèlement dans l'application (§1 à §9). Les maquettes restent dans `docs/titrage-ph/maquettes/` comme référence.
