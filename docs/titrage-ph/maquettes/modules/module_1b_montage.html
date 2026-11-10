@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : schéma du montage — TP : titrage pH-métrique du Destop (maquettes D et E)</title>
+<link rel="stylesheet" href="../../../../assets/theme.css">
+<link rel="stylesheet" href="../../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../maq-titrage.css">
+<link rel="stylesheet" href="../../../../assets/sommaire.css">
+<script src="../../../../assets/sommaire.js"></script>
+<script src="../../../../assets/titrage.js"></script>
+<script src="../maq-commun.js"></script>
+<script src="../maq-montage.js"></script>
+<script src="../maq-module1.js"></script>
+<script src="../../../../assets/dragdrop.js"></script>
+</head>
+<body>
+<!-- Maquettes D (schéma du montage à compléter, appareil à placer) et E (phrase à construire) : prompt §5.2 -->
+<div id="app-nav"></div>
+<div class="er-page tph-page">
+  <div class="er-card tph-tete">
+    <div class="tph-tete-l"><span class="er-badge">MODULE 1 · ENTRAÎNEMENT</span><h2 class="er-titre">Schéma du montage</h2></div>
+    <div class="tph-tete-b">
+      <button type="button" class="btn-small" data-donnees>Données du TP</button>
+      <button type="button" class="btn-small" data-passer>Passer cette partie →</button>
+      <button type="button" class="btn-small maq-ouvrir" data-maq aria-expanded="false">Maquettes D et E · variantes</button>
+    </div>
+    <div class="maq-bar"><span class="maq-bar-t">Maquette D · schéma à compléter</span></div>
+  </div>
+  <div class="er-card tph-zone"><div class="tph-corps" id="zone"></div></div>
+</div>
+<script>
+const R = {};
+const NB = TPHM.NB;
+let sch = null;
+function construire() {
+  const z = document.getElementById('zone');
+  sch = TPHM.schema(z, { mode: R.mode, style: R.style, fini: etape2 });
+}
+// étape 2 : la phrase, à la place des étiquettes (le schéma complet reste à gauche)
+function etape2() {
+  const cote = document.querySelector('.tph-schema-cote');
+  setTimeout(() => {
+    cote.innerHTML = `<p class="tph-resume">✓ Schéma complet</p>
+      <p class="tph-etape-t"><span class="tph-num">2</span>Que trace-t-on pendant ce titrage${NB}? Construis la phrase.</p><div id="phrase"></div><div id="fin"></div>`;
+    TPHM.phrase(document.getElementById('phrase'), { mode: R.phrase, fini: () => {
+      const f = document.getElementById('fin');
+      f.innerHTML = `<div class="cle tph-cle"><b class="cle-titre">✍ Recopie le schéma et la phrase</b>Le schéma ci-contre, puis${NB}: «${NB}On trace le pH en fonction du volume V d'acide versé.${NB}»</div>
+        <p class="tph-suite"><a href="module_1c_reaction.html">Partie suivante${NB}: réaction et équivalence →</a></p>`;
+      SOM.marquer({ fait: true });
+      TPHM.defiler(f);
+    } });
+    TPHM.defiler(cote);
+  }, 700);
+}
+TPHM.init('module_1b_montage', { passer: () => {
+  if (document.getElementById('phrase')) document.getElementById('phrase').__remplir();
+  else { sch.remplir(); setTimeout(() => document.getElementById('phrase').__remplir(), 800); }
+} });
+R.mode = TPHM.choix('mode', 'Étiquettes', [{ v: 'reserve', l: '1', t: 'Réserve : glisser ou toucher' }, { v: 'zone', l: '2', t: 'Toucher la zone, choisir' }], 'reserve', v => { R.mode = v; construire(); });
+R.style = TPHM.choix('style', 'Schéma', [{ v: 'epure', l: 'a', t: 'Épuré' }, { v: 'realiste', l: 'b', t: 'Réaliste' }], 'epure', v => { R.style = v; construire(); });
+const t2 = document.createElement('span'); t2.className = 'maq-bar-t'; t2.textContent = 'Maquette E · phrase à construire (étape 2)';
+document.querySelector('.maq-bar').insertBefore(t2, document.querySelector('.maq-bar > .btn-small'));
+R.phrase = TPHM.choix('phrase', 'Phrase', [{ v: 'morceaux', l: 'x', t: 'Morceaux à toucher dans l’ordre' }, { v: 'trous', l: 'y', t: 'Phrase à trous' }], 'morceaux', v => { R.phrase = v; if (document.getElementById('phrase')) etape2(); });
+construire();
+</script>
+</body>
+</html>

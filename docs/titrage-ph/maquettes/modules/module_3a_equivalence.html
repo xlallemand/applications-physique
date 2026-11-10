@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : repérer le volume équivalent — TP : titrage pH-métrique du Destop (maquettes B et C)</title>
+<link rel="stylesheet" href="../../../../assets/theme.css">
+<link rel="stylesheet" href="../../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../maq-titrage.css">
+<link rel="stylesheet" href="../../../../assets/sommaire.css">
+<script src="../../../../assets/sommaire.js"></script>
+<script src="../../../../assets/titrage.js"></script>
+<script src="../maq-commun.js"></script>
+<script src="../maq-courbe.js"></script>
+</head>
+<body>
+<!-- Maquettes B (méthode des tangentes) et C (courbe dérivée) : prompt §4.5 -->
+<div id="app-nav"></div>
+<div class="er-page tph-page">
+  <div class="er-card tph-tete">
+    <div class="tph-tete-l"><span class="er-badge">MODULE 3 · ENTRAÎNEMENT</span><h2 class="er-titre">Repérer le volume équivalent</h2></div>
+    <div class="tph-tete-b">
+      <button type="button" class="btn-small" data-donnees>Données du TP</button>
+      <button type="button" class="btn-small" data-passer>Passer cette partie →</button>
+      <button type="button" class="btn-small maq-ouvrir" data-maq aria-expanded="false">Maquettes B et C · variantes</button>
+    </div>
+    <div class="maq-bar"><span class="maq-bar-t">Maquette B · méthode des tangentes</span></div>
+  </div>
+  <div class="er-card tph-zone"><div class="tph-corps">
+    <div class="tph-eq">
+      <div class="tph-eq-courbe" id="courbe"></div>
+      <div class="tph-eq-cote">
+        <div class="tph-onglets" role="tablist">
+          <button type="button" class="tph-onglet" role="tab" data-m="tangentes">Méthode des tangentes</button>
+          <button type="button" class="tph-onglet" role="tab" data-m="derivee">Courbe dérivée</button>
+        </div>
+        <div id="panneau"></div>
+        <div id="suite"></div>
+        <div class="ttr-liens"><a href="../index.html#regressi" target="_blank" rel="noopener">Le faire avec Regressi</a>
+          <button type="button" class="lien" id="copier">Copier les mesures pour Regressi</button></div>
+        <div id="copie"></div>
+      </div>
+      <div class="tph-eq-tab" id="tab"></div>
+    </div>
+  </div></div>
+</div>
+<script>
+const R = {};
+let methode = 'tangentes';
+// mesures : celles de l'élève (module 2) ou, pour essayer, une série à pas de 1 mL ou de 0,2 mL
+function mesures() {
+  const pr = TPHM.prise();
+  if (R.donnees === 'pas1') {
+    const m = TPHM.modele(pr.veq);
+    const L = []; for (let v = 0; v <= 16; v++) L.push([v * 10, TITRAGE.chimie.lecturePH(m.pH(v), pr.decalage)]);
+    return L;
+  }
+  if (R.donnees === 'pas02' || pr.mesures.length < 5) return TPHM.mesuresAuto(pr);
+  return pr.mesures;
+}
+function fini(v) {
+  TPHM.tpEcrire({ veqEleve: v });
+  SOM.marquer({ fait: true });
+  const s = document.getElementById('suite');
+  s.innerHTML = `<p class="tph-suite">V<sub>eq</sub> retenu${TPHM.NB}: <b>${TPHM.fmt(v)} mL</b>. <a href="module_3b_titre.html">Calculer le titre massique →</a></p>`;
+  TPHM.defiler(s);
+}
+function construire() {
+  const zc = document.getElementById('courbe'), zp = document.getElementById('panneau');
+  zc.innerHTML = ''; document.getElementById('tab').innerHTML = ''; document.getElementById('suite').innerHTML = '';
+  document.querySelectorAll('[data-m]').forEach(b => b.setAttribute('aria-selected', b.dataset.m === methode));
+  const m = mesures();
+  const C = TPHM.courbe(zc, { xMax: 20, derivee: methode === 'derivee' ? R.figure : null });
+  C.maj(m);
+  TPHM.tableau(document.getElementById('tab')).maj(m);
+  if (methode === 'tangentes') TPHM.tangentes(C, { panneau: zp, deplacement: R.deplacement, aimant: R.aimant === 'oui', etapes: R.etapes, fini });
+  else TPHM.deriveeOutil(C, { panneau: zp, pointer: R.pointer, fini });
+}
+document.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { methode = b.dataset.m; construire(); }));
+document.getElementById('copier').addEventListener('click', () => TPHM.copierRegressi(mesures().slice().sort((a, b) => a[0] - b[0]), document.getElementById('copie')));
+TPHM.init('module_3a_equivalence', { passer: () => {
+  // Veq = abscisse de l'extrémum de la dérivée des mesures, arrondie à 0,1 mL
+  const m = mesures().slice().sort((a, b) => a[0] - b[0]);
+  const V = m.map(x => x[0] / 10), P = m.map(x => x[1]), D = TITRAGE.outils.derivee(V, P);
+  fini(Math.round(V[TITRAGE.outils.extremum(V, D, -1)] * 10) / 10);
+} });
+const ch = (id, lib, ops, def) => { R[id] = TPHM.choix(id, lib, ops, def, v => { R[id] = v; construire(); }); };
+ch('deplacement', 'Déplacer', [{ v: 'direct', l: '1', t: 'Glisser la droite' }, { v: 'poignee', l: '2', t: 'Poignée' }, { v: 'fleches', l: '3', t: 'Poignée + flèches' }], 'poignee');
+ch('aimant', 'Aimantation', [{ v: 'oui', l: 'a', t: 'Oui' }, { v: 'non', l: 'b', t: 'Non' }], 'oui');
+ch('etapes', 'Étapes', [{ v: 'consigne', l: 'x', t: 'Une consigne qui change' }, { v: 'liste', l: 'y', t: 'Liste des étapes' }], 'consigne');
+const t2 = document.createElement('span'); t2.className = 'maq-bar-t'; t2.textContent = 'Maquette C · courbe dérivée';
+document.querySelector('.maq-bar').insertBefore(t2, document.querySelector('.maq-bar > .btn-small'));
+ch('figure', 'Figure', [{ v: 'droite', l: '1', t: 'Même figure, axe à droite' }, { v: 'dessous', l: '2', t: 'Deux figures superposées' }], 'droite');
+ch('pointer', 'Extrémum', [{ v: 'toucher', l: 'a', t: 'Toucher (aimanté)' }, { v: 'reticule', l: 'b', t: 'Réticule à glisser' }], 'toucher');
+const t3 = document.createElement('span'); t3.className = 'maq-bar-t'; t3.textContent = 'Pour essayer';
+document.querySelector('.maq-bar').insertBefore(t3, document.querySelector('.maq-bar > .btn-small'));
+ch('donnees', 'Mesures', [{ v: 'eleve', l: '·', t: 'Les tiennes (module 2)' }, { v: 'pas1', l: '·', t: 'Pas de 1 mL' }, { v: 'pas02', l: '·', t: 'Pas de 0,2 mL' }], 'eleve');
+construire();
+</script>
+</body>
+</html>

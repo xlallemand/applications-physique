@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : réaction et équivalence — TP : titrage pH-métrique du Destop (maquette E)</title>
+<link rel="stylesheet" href="../../../../assets/theme.css">
+<link rel="stylesheet" href="../../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../maq-titrage.css">
+<link rel="stylesheet" href="../../../../assets/sommaire.css">
+<script src="../../../../assets/sommaire.js"></script>
+<script src="../../../../assets/titrage.js"></script>
+<script src="../maq-commun.js"></script>
+<script src="../maq-montage.js"></script>
+<script src="../maq-module1.js"></script>
+</head>
+<body>
+<!-- Maquette E (équation à construire) et relation à l'équivalence : prompt §5.3 -->
+<div id="app-nav"></div>
+<div class="er-page tph-page">
+  <div class="er-card tph-tete">
+    <div class="tph-tete-l"><span class="er-badge">MODULE 1 · ENTRAÎNEMENT</span><h2 class="er-titre">Réaction et équivalence</h2></div>
+    <div class="tph-tete-b">
+      <button type="button" class="btn-small" data-donnees>Données du TP</button>
+      <button type="button" class="btn-small" data-passer>Passer cette partie →</button>
+      <button type="button" class="btn-small maq-ouvrir" data-maq aria-expanded="false">Maquette E · variantes</button>
+    </div>
+    <div class="maq-bar"><span class="maq-bar-t">Maquette E · équation à construire</span></div>
+  </div>
+  <div class="er-card tph-zone"><div class="tph-corps">
+    <div class="tph-deux">
+      <div class="tph-col"><p class="tph-petit">On titre les ions hydroxyde HO<sup>−</sup> de S<sub>0</sub> (Na<sup>+</sup> + HO<sup>−</sup>) par l'acide chlorhydrique (H<sub>3</sub>O<sup>+</sup> + Cl<sup>−</sup>).</p>
+        <p class="tph-etape-t"><span class="tph-num">1</span>Écris l'équation de la réaction de titrage.</p><div id="eq"></div></div>
+      <div class="tph-col" id="droite"></div>
+    </div>
+  </div></div>
+</div>
+<script>
+const R = {};
+const NB = TPHM.NB;
+let q2 = null;
+function construire() {
+  document.getElementById('droite').innerHTML = '';
+  TPHM.equation(document.getElementById('eq'), { mode: R.mode, fini: etape2 });
+}
+function etape2() {
+  const d = document.getElementById('droite');
+  if (d.innerHTML) return;
+  d.innerHTML = `<p class="tph-etape-t"><span class="tph-num">2</span>Quelle est la relation à l'équivalence${NB}?</p><div id="q2"></div><div id="fin"></div>`;
+  q2 = TPHM.qcm(document.getElementById('q2'), [
+    { html: 'c<sub>B</sub> × V<sub>B</sub> = c<sub>A</sub> × V<sub>eq</sub>', juste: true, diag: ' À l’équivalence, <span class="tph-fr"><span>n<sub>B</sub></span><span>1</span></span> = <span class="tph-fr"><span>n<sub>A</sub></span><span>1</span></span>, soit c<sub>B</sub> V<sub>B</sub> = c<sub>A</sub> V<sub>eq</sub> (coefficients de l’équation : n<sub>A</sub> / a = n<sub>B</sub> / b).' },
+    { html: 'c<sub>B</sub> × V<sub>eq</sub> = c<sub>A</sub> × V<sub>B</sub>', diag: 'V<sub>eq</sub> est le volume d’acide versé (c<sub>A</sub>) ; V<sub>B</sub> est le volume de S<sub>0</sub> (c<sub>B</sub>) : chaque concentration va avec le volume de sa solution.' },
+    { html: '<span class="tph-fr"><span>c<sub>B</sub></span><span>V<sub>B</sub></span></span> = <span class="tph-fr"><span>c<sub>A</sub></span><span>V<sub>eq</sub></span></span>', diag: 'Une quantité de matière est un produit : n = c × V.' },
+    { html: 'c<sub>B</sub> × V<sub>B</sub> = 2 c<sub>A</sub> × V<sub>eq</sub>', diag: 'Les coefficients de H₃O⁺ et HO⁻ dans l’équation valent 1.' },
+  ], () => {
+    SOM.marquer({ fait: true });
+    const f = document.getElementById('fin');
+    f.innerHTML = `<p class="tph-suite"><a href="module_2_titrage.html">Module 2${NB}: réaliser le titrage →</a></p>`;
+  });
+  TPHM.defiler(d);
+}
+TPHM.init('module_1c_reaction', { passer: () => { const e = document.getElementById('eq'); if (e.__remplir) e.__remplir(); etape2(); if (!document.querySelector('#q2 button.ok')) q2.montrer(); } });
+R.mode = TPHM.choix('mode', 'Équation', [{ v: 'morceaux', l: '1', t: 'Morceaux à toucher dans l’ordre' }, { v: 'trous', l: '2', t: 'Équation à trous' }], 'morceaux', v => { R.mode = v; construire(); });
+construire();
+</script>
+</body>
+</html>

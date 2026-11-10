@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 : diluer 20 fois le Destop — TP : titrage pH-métrique du Destop (maquette F)</title>
+<link rel="stylesheet" href="../../../../assets/theme.css">
+<link rel="stylesheet" href="../../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../maq-titrage.css">
+<link rel="stylesheet" href="../../../../assets/sommaire.css">
+<script src="../../../../assets/sommaire.js"></script>
+<script src="../../../../assets/titrage.js"></script>
+<script src="../maq-commun.js"></script>
+<script src="../maq-montage.js"></script>
+<script src="../maq-module1.js"></script>
+</head>
+<body>
+<!-- Maquette F : choix du matériel de dilution (prompt §5.1) -->
+<div id="app-nav"></div>
+<div class="er-page tph-page">
+  <div class="er-card tph-tete">
+    <div class="tph-tete-l"><span class="er-badge">MODULE 1 · ENTRAÎNEMENT</span><h2 class="er-titre">Diluer 20 fois le Destop</h2></div>
+    <div class="tph-tete-b">
+      <button type="button" class="btn-small" data-donnees>Données du TP</button>
+      <button type="button" class="btn-small" data-passer>Passer cette partie →</button>
+      <button type="button" class="btn-small maq-ouvrir" data-maq aria-expanded="false">Maquette F · variantes</button>
+    </div>
+    <div class="maq-bar"><span class="maq-bar-t">Maquette F · choix du matériel de dilution</span></div>
+  </div>
+  <div class="er-card tph-zone"><div class="tph-corps">
+    <div class="tph-deux g-large">
+      <div class="tph-col" id="gauche"></div>
+      <div class="tph-col tph-mat" id="droite"></div>
+    </div>
+  </div></div>
+</div>
+<script>
+const R = {};
+let outil = null, qcm1 = null;
+const NB = TPHM.NB;
+function construire() {
+  const g = document.getElementById('gauche'), d = document.getElementById('droite');
+  g.innerHTML = `<p class="tph-petit">Le dosage se fait sur une solution S<sub>0</sub> <b>diluée 20 fois</b>. Le facteur de dilution F est le rapport des volumes.</p>
+    <p class="tph-etape-t"><span class="tph-num">1</span>Quelle relation donne le facteur de dilution F${NB}?</p><div id="q1"></div>
+    <p class="tph-etape-t"><span class="tph-num">2</span>Choisis le matériel pour diluer 20 fois le Destop (touche un objet pour le prendre ou le reposer).</p>
+    <div id="fin"></div>`;
+  qcm1 = TPHM.qcm(document.getElementById('q1'), [
+    { html: 'F = <span class="tph-fr"><span>V<sub>fiole</sub></span><span>V<sub>pipette</sub></span></span>', juste: true, diag: 'Le volume final (fiole) est F fois plus grand que le volume prélevé (pipette).' },
+    { html: 'F = <span class="tph-fr"><span>V<sub>pipette</sub></span><span>V<sub>fiole</sub></span></span>', diag: 'F est plus grand que 1 : le volume final (fiole) est au numérateur.' },
+    { html: 'F = V<sub>fiole</sub> × V<sub>pipette</sub>', diag: 'Le facteur de dilution est un rapport de volumes, sans unité.' },
+    { html: 'F = V<sub>fiole</sub> − V<sub>pipette</sub>', diag: 'Le facteur de dilution est un rapport de volumes, sans unité.' },
+  ], () => {
+    // l'étape réussie se replie en une ligne
+    setTimeout(() => { document.getElementById('q1').innerHTML = `<p class="tph-resume">✓ F = <span class="tph-fr"><span>V<sub>fiole</sub></span><span>V<sub>pipette</sub></span></span></p>`; }, 900);
+  });
+  d.innerHTML = '';
+  outil = TPHM.materiel(d, { mode: R.mode, direct: R.direct === 'oui', fini: c => {
+    const f = TPHM.fmt(c.pipette, 1), F = TPHM.fmt(c.fiole, 1);
+    const z = document.getElementById('fin');
+    z.innerHTML = `<p class="tph-etape-t"><span class="tph-num fait">3</span>Le protocole</p>
+      <div class="cle tph-cle"><b class="cle-titre">✍ Recopie-la sur ton compte rendu</b>Prélever ${f} mL de Destop à l'aide d'une pipette jaugée de ${f} mL. Les introduire dans une fiole jaugée de ${F} mL et compléter jusqu'au trait de jauge avec de l'eau distillée.</div>
+      <p class="tph-suite"><a href="module_1b_montage.html">Partie suivante${NB}: schéma du montage →</a></p>`;
+    SOM.marquer({ fait: true });
+    TPHM.defiler(z);
+  } });
+}
+TPHM.init('module_1a_dilution', { passer: () => { if (!document.querySelector('#q1 .tph-resume') && !document.querySelector('#q1 button.ok')) qcm1.montrer(); outil.remplir(); } });
+R.mode = TPHM.choix('mode', 'Matériel', [{ v: 'paillasse', l: '1', t: 'Paillasse dessinée' }, { v: 'cartes', l: '2', t: 'Cartes de matériel' }], 'paillasse', v => { R.mode = v; construire(); });
+R.direct = TPHM.choix('direct', 'Facteur F', [{ v: 'oui', l: 'a', t: 'Affiché en direct' }, { v: 'non', l: 'b', t: 'Après validation' }], 'oui', v => { R.direct = v; construire(); });
+construire();
+</script>
+</body>
+</html>

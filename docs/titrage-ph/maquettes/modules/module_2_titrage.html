@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 : simulateur de titrage — TP : titrage pH-métrique du Destop (maquette A)</title>
+<link rel="stylesheet" href="../../../../assets/theme.css">
+<link rel="stylesheet" href="../../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../maq-titrage.css">
+<link rel="stylesheet" href="../../../../assets/sommaire.css">
+<script src="../../../../assets/sommaire.js"></script>
+<script src="../../../../assets/titrage.js"></script>
+<script src="../maq-commun.js"></script>
+<script src="../maq-montage.js"></script>
+<script src="../maq-courbe.js"></script>
+<script src="../maq-simulateur.js"></script>
+</head>
+<body>
+<!-- Maquette A : simulateur de titrage (prompt §4.4) -->
+<div id="app-nav"></div>
+<div class="er-page tph-page">
+  <div class="er-card tph-tete">
+    <div class="tph-tete-l"><span class="er-badge">MODULE 2 · SIMULATION</span><h2 class="er-titre">Simulateur de titrage</h2></div>
+    <div class="tph-tete-b">
+      <button type="button" class="btn-small" data-donnees>Données du TP</button>
+      <button type="button" class="btn-small" data-passer>Passer cette partie →</button>
+      <button type="button" class="btn-small maq-ouvrir" data-maq aria-expanded="false">Maquette A · variantes</button>
+    </div>
+    <div class="maq-bar"><span class="maq-bar-t">Maquette A · simulateur de titrage</span>
+      <p class="maq-note">Essaie chaque combinaison : verser, recommencer, « Passer cette partie », copier pour Regressi. Les mesures sont gardées pour la page « Repérer le volume équivalent ».</p></div>
+  </div>
+  <div class="er-card tph-zone"><div class="tph-corps" id="zone"></div></div>
+</div>
+<script>
+let sim = null;
+const reglages = {};
+function construire() {
+  sim = TPHM.simulateur(document.getElementById('zone'), Object.assign({ fini: () => SOM.marquer({ fait: true }) }, reglages));
+}
+TPHM.init('module_2_titrage', { passer: () => sim.remplirAuto() });
+reglages.disposition = TPHM.choix('dispo', 'Disposition', [
+  { v: 'trois', l: '1', t: 'Trois colonnes' }, { v: 'cote', l: '2', t: 'Côte à côte, tableau en bandeau' }, { v: 'grand', l: '3', t: 'Courbe en grand' }],
+  'trois', v => { reglages.disposition = v; construire(); });
+reglages.style = TPHM.choix('style', 'Montage', [{ v: 'epure', l: 'a', t: 'Épuré' }, { v: 'realiste', l: 'b', t: 'Réaliste' }],
+  'epure', v => { reglages.style = v; construire(); });
+reglages.commandes = TPHM.choix('cmd', 'Commandes', [{ v: 'pastilles', l: 'x', t: 'Pastilles + Verser' }, { v: 'boutons', l: 'y', t: 'Trois boutons' }],
+  'pastilles', v => { reglages.commandes = v; construire(); });
+construire();
+</script>
+</body>
+</html>
