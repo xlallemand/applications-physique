@@ -20,7 +20,7 @@ Elle fait travailler :
 | Emplacement | Dossier `orthographe/` du portail `applications-physique`, charte respectée. |
 | Portail | Nouveau domaine **« Français »** dans `APPS` (sa couleur d'accent, niveau `col`), **sans pastille de filtre** « Français ». |
 | Audio | Synthèse vocale du navigateur (Web Speech API, voix française du système). Aucun fichier audio. |
-| Textes | **Mixte** : extraits courts de dictées officielles du brevet (source citée) + textes rédigés dans le même style. |
+| Textes | **Mixte** : extraits courts de dictées officielles du brevet (source citée) + textes rédigés dans le même style **et** textes courts générés (banque annotée + gabarits). |
 | Génération des dictées | **Banque de phrases annotées + tirage** : chaque mot piège est annoté (règle, formes fautives plausibles) ; le moteur tire les phrases et injecte les fautes selon les notions cochées. En plus, **gabarits combinatoires** (sujet + verbe + complément…) pour multiplier les variantes : il faut un très grand nombre de phrases. |
 | Note | Deux affichages à chaque dictée : **note sur 20 de type brevet** (barème par type de faute, rapporté à la longueur) **et taux de réussite par type d'erreur**. |
 | Suivi | Dans le navigateur (`localStorage`, clés `orthographe-…`), intégré à « Enregistrer / Reprendre ma progression » du portail (fusion dans `assets/progression.js`), avec **bilan imprimable**. |
@@ -45,9 +45,14 @@ Elle fait travailler :
 - Vraie dictée très courte lue par la synthèse vocale : lecture d'ensemble, puis groupes de mots **répétés plusieurs fois**, débit réglable, **pause**, **relire** (le groupe, la phrase, tout le texte), relecture finale.
 - L'élève tape le texte ; comparaison mot à mot, chaque écart classé par type d'erreur, note.
 
+### Dictée brevet complète
+
+- Mode supplémentaire : une dictée de **la vraie longueur du brevet** (environ 600 signes, 20 minutes, déroulé officiel : lecture préalable, dictée avec ponctuation et liaisons, relecture sans ponctuation, mots au tableau).
+- Texte tiré d'une dictée déjà tombée **ou** généré dans le même style.
+
 ### Méthode de relecture (guidée)
 
-Quatre passages successifs, chacun avec sa consigne et ses surlignages :
+Quatre passages successifs, chacun avec sa consigne. Tout se fait **de tête** : on ne demande jamais de souligner, d'entourer ni de tracer des flèches (seule exception : marquer d'un point dans la marge un mot douteux pendant la dictée). Aide à la demande : repérer le verbe puis son sujet (clic sur le verbe, puis clic sur le sujet) :
 
 1. **Accords en genre et en nombre** (déterminant → nom → adjectif) ;
 2. **Conjugaison** (trouver le verbe, son sujet, son temps) ;
@@ -98,6 +103,13 @@ Page `docs/orthographe/validation.html` (ouverte sans serveur) :
 - **export** du résultat (fichier ou texte à copier) à renvoyer à Claude.
 
 Même chose ensuite, plus brièvement, pour les méthodes et un échantillon de dictées.
+
+Résultat (11/11/2026) : les 64 règles, les 4 méthodes et les 3 points à trancher sont **validés**, aucune dictée retirée. Décisions retenues :
+
+- **Barème** : faute grammaticale −1 point sur 10, faute d'usage, d'accent, de majuscule ou de ponctuation −0,5 ; même faute sur le même mot comptée une fois ; note ramenée à la longueur du texte puis sur 20 ; plancher 0.
+- **Mode automatique** : une règle n'est proposée que si ses prérequis sont maîtrisés (80 % de réussite sur les 20 dernières occasions), en commençant par le niveau 1 ; révision espacée des règles maîtrisées.
+- **Rectifications de 1990** : les deux orthographes acceptées, l'orthographe traditionnelle affichée.
+- Majuscules (LX13) : règle essentielle.
 
 ### Étape 5 — Maquettes puis développement
 

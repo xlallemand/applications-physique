@@ -444,11 +444,11 @@
   /* ---------------------------------------------------- méthodes */
   var methodes = [
     { id: 'M1', titre: 'Relecture en 4 passages', essentielle: true,
-      principe: 'On ne relit pas tout en même temps : chaque passage cherche un seul type de faute. On garde 5 minutes de relecture à la fin de la dictée.',
+      principe: 'On ne relit pas tout en même temps : chaque passage cherche un seul type de faute. On garde 5 minutes de relecture à la fin de la dictée. Tout se fait de tête, sans souligner ni tracer de flèches. Dans l’application, une aide à la demande fait repérer le verbe puis son sujet (clic sur le verbe, puis clic sur le sujet).',
       etapes: [
-        { n: 1, nom: 'Accords en genre et en nombre', faire: 'Pour chaque nom, remonte au déterminant et va jusqu’aux adjectifs ; relie-les par une flèche. Vérifie aussi les participes passés employés avec être ou seuls, et les adjectifs attributs.', regles: ['GN1', 'GN2', 'GN3', 'GN4', 'GN5', 'GN6', 'PP1', 'PP2', 'PP4'] },
-        { n: 2, nom: 'Conjugaison des verbes', faire: 'Souligne chaque verbe conjugué, encadre son sujet (« qui est-ce qui ? »), vérifie la terminaison (personne, temps). Pour chaque mot en [é], fais le test de « vendre ».', regles: ['SV1', 'SV2', 'SV3', 'SV4', 'SV5', 'EE1', 'EE2', 'EE3', 'CJ2', 'CJ3', 'CJ6'] },
-        { n: 3, nom: 'Mots particuliers (homophones)', faire: 'Repère chaque a, à, et, est, son, sont, on, ont, ou, où, ce, se, ces, ses, c’est, s’est, la, là, leur, mais, mes… et applique le test de remplacement de chacun.', regles: ['HO1', 'HO2', 'HO3', 'HO4', 'HO5', 'HO6', 'HO7', 'HO8', 'HO9', 'HO10'] },
+        { n: 1, nom: 'Accords en genre et en nombre', faire: 'Pour chaque nom, remonte au déterminant et va jusqu’aux adjectifs ; vérifie de tête que chacun porte le même genre et le même nombre. Vérifie aussi les participes passés employés avec être ou seuls, et les adjectifs attributs.', regles: ['GN1', 'GN2', 'GN3', 'GN4', 'GN5', 'GN6', 'PP1', 'PP2', 'PP4'] },
+        { n: 2, nom: 'Conjugaison des verbes', faire: 'Pour chaque verbe conjugué, trouve de tête son sujet (« qui est-ce qui ? »), vérifie la terminaison (personne, temps). Pour chaque mot en [é], fais le test de « vendre ».', regles: ['SV1', 'SV2', 'SV3', 'SV4', 'SV5', 'EE1', 'EE2', 'EE3', 'CJ2', 'CJ3', 'CJ6'] },
+        { n: 3, nom: 'Mots particuliers (homophones)', faire: 'À chaque a, à, et, est, son, sont, on, ont, ou, où, ce, se, ces, ses, c’est, s’est, la, là, leur, mais, mes… et applique le test de remplacement de chacun.', regles: ['HO1', 'HO2', 'HO3', 'HO4', 'HO5', 'HO6', 'HO7', 'HO8', 'HO9', 'HO10'] },
         { n: 4, nom: 'Lecture à l’envers, mot par mot', faire: 'Pars du dernier mot et remonte jusqu’au premier : sans le sens de la phrase, l’œil voit l’orthographe de chaque mot (doubles consonnes, accents, lettres muettes, mots invariables).', regles: ['LX1', 'LX2', 'LX3', 'LX4', 'LX5', 'LX14'] }
       ] },
     { id: 'M2', titre: 'Tests de remplacement', essentielle: true,
