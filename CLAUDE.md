@@ -17,4 +17,5 @@ Elle décrit le style, la présentation des pages, la navigation (sommaire de to
 - Fonctionnement à la souris et sur tout écran tactile.
 - Icône calculatrice (`calc-icone`, charte §7) à côté de tout champ dont la valeur se calcule à la calculatrice.
 - Après une validation, jamais besoin de remonter dans la page pour répondre à la question suivante (défilement automatique, charte §8).
+- Portail : après l'ajout d'une application ou tout changement d'un `PLAN`, relancer `python3 docs/outils/index-recherche.py` (index de recherche `assets/recherche-index.js`, jamais modifié à la main) ; une nouvelle application reçoit aussi ses mots-clés `mots` dans `APPS` (charte §2 et §4).
 - Ne modifier que ce qui est demandé.

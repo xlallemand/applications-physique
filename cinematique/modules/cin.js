@@ -995,7 +995,9 @@
     const prog = lireProg(), pages = prog.pages || {}, ex = lireExercices();
     const derniere = prog.derniere && situer(prog.derniere) ? prog.derniere : null;
     const total = totalModule, fait = m => faitModule(m, pages, ex);
-    const ouvert = derniere ? situer(derniere).m.n : (PLAN.find(m => fait(m) < total(m)) || PLAN[0]).n;
+    // module demandé par l'adresse (#module-3 : résultat de recherche du portail), sinon celui de la dernière page, sinon le premier non terminé
+    const demande = (/^#module-(\d+)$/.exec(location.hash) || [])[1], mDemande = demande && PLAN.find(m => String(m.n) === demande);
+    const ouvert = mDemande ? mDemande.n : derniere ? situer(derniere).m.n : (PLAN.find(m => fait(m) < total(m)) || PLAN[0]).n;
     const bt = (cle, txt, cls) => `<a class="cin-bt${cls ? ' ' + cls : ''}" href="modules/${cle}.html">${txt}</a>`;
     const btCours = pt => { const a = pages[pt.cours] || {}; return bt(pt.cours, 'Cours' + (a.fait ? ' ✓' : ''), (a.fait ? 'fait ' : '') + (derniere === pt.cours ? 'ici' : '')); };
     const btQuestions = pt => { const a = pages[pt.questions] || {}; return bt(pt.questions, 'Questions' + (a.note != null ? ` <span class="cin-sc">${fmt(a.note)}/20</span>` : ''), (a.note != null ? 'fait ' : '') + (derniere === pt.questions ? 'ici' : '')); };
@@ -1029,6 +1031,8 @@
         setTimeout(() => b.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 30);
       }
     }));
+    // module demandé : sa ligne est amenée au milieu de l'écran
+    if (mDemande) { const b = document.getElementById('cin-b' + mDemande.n); if (b) setTimeout(() => b.scrollIntoView({ block: 'center' }), 60); }
   }
 
   /* ---------- Confettis (sans-faute) ---------- */

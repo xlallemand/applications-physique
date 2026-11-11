@@ -1010,7 +1010,9 @@
     const prog = lireProg(), pages = prog.pages || {}, ex = lireExercices();
     const derniere = prog.derniere && situer(prog.derniere) ? prog.derniere : null;
     const total = totalModule, fait = m => faitModule(m, pages, ex);
-    const ouvert = derniere ? situer(derniere).m.n : (PLAN.find(m => fait(m) < total(m)) || PLAN[0]).n;
+    // module demandé par l'adresse (#module-3 : résultat de recherche du portail), sinon celui de la dernière page, sinon le premier non terminé
+    const demande = (/^#module-(\d+)$/.exec(location.hash) || [])[1], mDemande = demande && PLAN.find(m => String(m.n) === demande);
+    const ouvert = mDemande ? mDemande.n : derniere ? situer(derniere).m.n : (PLAN.find(m => fait(m) < total(m)) || PLAN[0]).n;
     const bt = (cle, txt, cls) => `<a class="te-bt${cls ? ' ' + cls : ''}" href="modules/${cle}.html">${txt}</a>`;
     // bouton d'une page d'une partie : Simulation ✓, Cours ✓, Questions 14/20
     const btPage = (pt, o) => {
@@ -1045,6 +1047,8 @@
         setTimeout(() => b.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 30);
       }
     }));
+    // module demandé : sa ligne est amenée au milieu de l'écran
+    if (mDemande) { const b = document.getElementById('te-b' + mDemande.n); if (b) setTimeout(() => b.scrollIntoView({ block: 'center' }), 60); }
   }
 
   /* ---------- Confettis (sans-faute) ---------- */
