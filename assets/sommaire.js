@@ -16,7 +16,8 @@
      });
      SOM.menu(cle)        cle = 'accueil' (bandeau avec le lien vers le portail)
                           ou la clé d'une page du plan (sommaire)
-     SOM.accueil(zone)    liste des modules en lignes dépliables, carte « Reprendre »
+     SOM.accueil(zone)    liste des modules en lignes dépliables, carte « Reprendre » ;
+                          adresse index.html#module-N (résultat de recherche du portail) : module N déplié
      SOM.marquer(info)    { fait: true } (cours terminé…) ou { note } (note sur 20, on garde la meilleure)
      SOM.flashcards(fn)   (application avec flashcards) charge assets/revisions.js et les cartes, puis fn(REV, app)
      SOM.contexte()       { id, nom, spa, racine, adresse(cle), nomPage(cle) } : chemins depuis la page en cours
@@ -271,7 +272,9 @@
     const prog = lireProg(), pages = prog.pages || {}, ex = lireExercices();
     const derniere = prog.derniere && situer(prog.derniere) ? prog.derniere : null;
     const total = totalModule, fait = m => faitModule(m, pages, ex);
-    const ouvert = derniere ? situer(derniere).m.n : (C.plan.find(m => fait(m) < total(m)) || C.plan[0]).n;
+    // module demandé par l'adresse (#module-3 : résultat de recherche du portail), sinon celui de la dernière page, sinon le premier non terminé
+    const demande = !C.spa && (/^#module-(\d+)$/.exec(location.hash) || [])[1], mDemande = demande && C.plan.find(m => String(m.n) === demande);
+    const ouvert = mDemande ? mDemande.n : derniere ? situer(derniere).m.n : (C.plan.find(m => fait(m) < total(m)) || C.plan[0]).n;
     const bt = (cle, txt, cls) => `<a class="som-bt${cls ? ' ' + cls : ''}" href="${adresse(cle, true)}">${txt}</a>`;
     // bouton d'une page d'une partie : Cours ✓, Questions 14/20…
     const btPage = (pt, o) => {
@@ -313,6 +316,8 @@
         setTimeout(() => b.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 30);
       }
     }));
+    // module demandé : sa ligne est amenée au milieu de l'écran
+    if (mDemande) { const b = document.getElementById('som-b' + mDemande.n); if (b) setTimeout(() => b.scrollIntoView({ block: 'center' }), 60); }
   }
 
   // (chaque appel remplace toute la configuration : une page qui charge le moteur d'une autre application la reconfigure)

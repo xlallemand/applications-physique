@@ -44,10 +44,12 @@ Ne change ni le contenu scientifique ni les fonctionnalités propres à une appl
 - `<title>` d'une page de module : `Module 1 : référentiel — Cinématique` ; accueil : le nom de l'application.
 - Corps de page : `<div id="app-nav"></div>` puis `<div class="er-page">…</div>`. La navigation s'y construit (voir §5).
 - Pour une nouvelle application : partir de `cinematique/modules/cin.js` (moteur de questions) et `cin.css`, renommer l'espace de noms et le préfixe de classes, remplacer les textes ; **la navigation et les cours ne se recopient pas** : déclarer le `PLAN` et utiliser le module commun `assets/sommaire.js` (§5), écrire les cours avec le moteur commun `assets/cours.js` (§4).
-- Déclarer l'application dans la liste `APPS` de `index.html` à la racine (portail) : `{ titre, dom, niv, dossier, desc }`, à la suite des applications du même domaine.
+- Déclarer l'application dans la liste `APPS` de `index.html` à la racine (portail) : `{ titre, dom, niv, dossier, desc, mots }`, à la suite des applications du même domaine.
   - `dom` : `'physique'`, `'chimie'` ou `'maths'` (outils mathématiques, collège compris) ;
   - `niv` : liste parmi `'col'` (collège), `'2de'`, `'1re'` (1re spécialité, étiquette « 1re spé »), `'spe'` (terminale spécialité), `'sti'` (terminale STI2D) ; `LYCEE` pour les quatre niveaux du lycée ;
-  - `desc` : une phrase courte (une ligne sur ordinateur, masquée sur téléphone).
+  - `desc` : une phrase courte (une ligne sur ordinateur, masquée sur téléphone) ;
+  - `mots` : mots-clés de la recherche du portail, ceux qu'un élève peut taper et qui ne sont pas déjà dans le titre ou la description : notions, synonymes, unités, formules, sigles (`['demi-vie', 'becquerel', 'alpha']`). Les titres et descriptions des modules et des pages n'ont pas à y être : ils sont déjà dans l'index.
+- **Index de recherche du portail** : après l'ajout d'une application, et **à chaque changement d'un `PLAN`** (titre, description, parties, noms des pages), relancer `python3 docs/outils/index-recherche.py`, qui régénère `assets/recherche-index.js` (ne jamais modifier ce fichier à la main). Le type de chaque page y est fixé (pastilles « Manipuler » et « Fiches », voir §4 « Portail ») : une page `simulation` nommée « Simulateur… », « Animation : … » ou « Atelier : … » est rangée dans « Manipuler », une « Activité : … » (activité documentaire) ne l'est pas ; les autres écarts se déclarent dans `EXCEPTIONS` en tête du script.
 - Déclarer aussi ses pages dans `AVANCEMENT` de `assets/avancement.js` (avancement x/y du portail) : `'<dossier>': { pages: [...], ex }`, toutes les pages comptées du `PLAN` dans l'ordre et la somme des `nbEx`. **À mettre à jour à chaque changement du `PLAN`** : le total doit être la somme des compteurs `n/m` des modules de l'accueil de l'application.
 - Un nouveau dessin d'en-tête s'ajoute dans `assets/hero.js` (objet `dessins` + liste commentée en tête de fichier).
 
@@ -110,8 +112,11 @@ Tout vient de `assets/theme.css`. N'écris **aucune couleur en dur** dans les CS
 ### Portail (`index.html` à la racine)
 
 1. En-tête illustré « Physique Chimie » (cliché de chambre à bulles en parallaxe), puis une feuille blanche qui le recouvre au défilement.
-2. **Barre de tri** collée en haut de l'écran : pastilles **Domaine** (Tous, Physique, Chimie, Outils maths) et **Niveau** (Tous, Collège, 2de, 1re spé, Tle spé, Tle STI2D), compteur d'applications et « Tout afficher » quand un tri est en cours. Par défaut, « Tous » : tout est affiché. Choisir une pastille ne garde que les applications qui la portent, en choisir d'autres les ajoute ; domaine et niveau se combinent. Le tri n'est pas mémorisé.
-3. **Liste compacte** regroupée par domaine (couleur du domaine) : une ligne par application avec titre, étiquettes de niveau (« Lycée » quand les quatre niveaux du lycée sont concernés ; celles du tri en cours sont mises en valeur), description sur une ligne, avancement `x/y` (même décompte que l'accueil de l'application, `assets/avancement.js` ; rien pour une simulation sans plan) et flèche. Deux colonnes sur ordinateur, une sur téléphone (description masquée sous 640 px, pastilles sur une ligne qui défile de côté).
+2. **Barre collée en haut de l'écran** :
+   - **Recherche** (au-dessus des pastilles) : cherche dans les applications (titre, description, `mots`), leurs modules et leurs pages (index `assets/recherche-index.js`, §2), sans tenir compte des accents ni des indices (`h3o+` trouve H₃O⁺) ; un mot d'une ou deux lettres doit être un mot entier (`ph` ne trouve pas « physique »). Champ vide : **idées de recherche** (pastilles). Pendant la frappe : **suggestions** (les 7 meilleurs résultats : application, module ou page, au clavier avec ↑ ↓ Entrée Échap), et la liste en dessous suit la recherche. Entrée sans suggestion choisie referme les suggestions (et le clavier du téléphone) pour montrer la liste.
+   - **Pastilles** **Domaine** (Tous, Physique, Chimie, Outils maths), **Niveau** (Tous, Collège, 2de, 1re spé, Tle spé, Tle STI2D) et **Type** (Tous, ▸ Manipuler : simulateurs, animations et ateliers ; ≡ Fiches : fiches récapitulatives), compteur des résultats et « Tout afficher » (qui vide aussi la recherche) quand un tri est en cours. Par défaut, « Tous » : tout est affiché. Choisir une pastille ne garde que ce qui la porte, en choisir d'autres les ajoute ; domaine, niveau, type et recherche se combinent. Choisir Manipuler et Fiches ne revient pas à « Tous ». Le tri n'est pas mémorisé.
+   - Sur téléphone, les pastilles se cachent quand on descend dans la liste et reviennent dès qu'on remonte ; la recherche reste visible.
+3. **Liste compacte** regroupée par domaine (couleur du domaine). Sans type ni recherche : une ligne par application avec titre, étiquettes de niveau (« Lycée » quand les quatre niveaux du lycée sont concernés ; celles du tri en cours sont mises en valeur), description sur une ligne, avancement `x/y` (même décompte que l'accueil de l'application, `assets/avancement.js` ; rien pour une simulation sans plan) et flèche. Avec un type ou une recherche, les résultats sont **repliés** : une application dont toutes les pages répondent garde sa ligne (étiquette « Application entière » avec un type) ; sinon une carte de l'application liste ses **modules entiers** (toutes leurs pages répondent : le lien ouvre l'accueil de l'application, module déplié, `index.html#module-N`) et ses **pages** une à une (type et module indiqués). Les fiches ne comptent qu'avec la pastille Fiches ou une recherche qui les nomme (« fiche pile »). Deux colonnes sur ordinateur, une sur téléphone (description masquée sous 640 px, pastilles sur une ligne qui défile de côté).
 4. Pas de sommaire sur le portail.
 
 ### Page de module (cours, questions, fiche, exercices)
@@ -280,6 +285,7 @@ SOM.init({ nom: 'pH', id: 'ph', cleEx: 'ph-exercices', plan: PLAN });
 ### Accueil de l'application
 
 - Bandeau `app-topbar` avec la pilule « ← Toutes les applications » (« ← Applications » sous 520 px) qui renvoie au **portail** (`../index.html`, racine du dépôt). Pas de sommaire sur l'accueil : la liste des modules en tient lieu.
+- Adresse `index.html#module-N` (résultat « module » de la recherche du portail) : le module N est déplié et amené à l'écran (`SOM.accueil`, et `CIN` / `TE`).
 
 ### Accueil : une ligne dépliable par module
 
@@ -412,6 +418,7 @@ Avec Playwright / Chromium (déjà installé, ne pas relancer `playwright instal
 6. Tous les liens internes pointent vers des pages existantes. Les liens vers une autre application s'ouvrent dans une nouvelle fenêtre.
 7. Tracés de vecteurs : glisser à la souris, au doigt (CDP), flèches ; valeur affichée en direct.
 8. Longueur : aucun cours ne dépasse la longueur de référence (§4, « Longueur d'un cours ») ; sinon, des sous-modules.
+9. Portail : `python3 docs/outils/index-recherche.py --verifier` dit l'index de recherche à jour (sinon relancer le script sans `--verifier`) ; sur le portail, une recherche sur le titre d'un module de l'application et la pastille Manipuler (si elle a des simulateurs, animations ou ateliers) le trouvent.
 
 Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire explicitement dans le compte rendu.
 
@@ -448,7 +455,9 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 | Accueil de l'application | `cinematique/index.html` |
 | Dessins d'en-tête | `assets/hero.js` |
 | Molécules organiques (moteur partagé `ORGA`) : modèle, nomenclature, rendu des trois écritures, éditeur (glisser), conversion, outils (entourer, nommer avec aides, dessiner à partir du nom), bulles d'aide ⓘ | `assets/orga.js`, `assets/orga-dessin.js`, `assets/orga.css` ; maquettes `docs/orga/maquettes/` ; application de référence `nomenclature/` |
-| Portail (liste des applications, tri par domaine et niveau) | `index.html` (racine) : `DOMAINES`, `NIVEAUX`, `APPS` |
+| Portail (liste des applications, tri par domaine, niveau et type, recherche) | `index.html` (racine) : `DOMAINES`, `NIVEAUX`, `APPS` (avec `mots`), `TYPES`, `IDEES` |
+| Index de recherche du portail (modules et pages de toutes les applications, type de chaque page) | `assets/recherche-index.js`, généré par `docs/outils/index-recherche.py` (règles de type et `EXCEPTIONS`) |
+| Maquette validée de la recherche et des pastilles de type | `docs/maquettes/recherche-et-types.html` |
 | Avancement x/y de chaque application sur le portail | `assets/avancement.js` : `AVANCEMENT` |
 | Flashcards : moteur, planning, séances, page Révisions, page Flashcards, intégrations (objet `REV`) | `assets/revisions.js`, `assets/revisions.css`, `revisions.html` |
 | Flashcards d'une application (exemple) | `changements-etat/modules/flashcards.js`, `changements-etat/modules/flashcards.html` |

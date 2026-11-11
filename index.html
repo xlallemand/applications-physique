@@ -92,35 +92,83 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
      regroupée par domaine.
      ============================================================ */
 
-  /* ---------- Barre de tri, collée en haut pendant le défilement ---------- */
+  /* ---------- Barre collée en haut pendant le défilement : recherche, puis pastilles de tri ---------- */
   .tri { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--sheet) 94%, transparent);
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 28px 28px 0 0; }
   .tri.colle { border-radius: 0; border-bottom: 1px solid var(--line); }
-  .tri .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 28px; padding-top: 22px; padding-bottom: 14px; }
+  .tri .tri-g { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 28px; padding-top: 14px; padding-bottom: 14px; }
   .groupe { display: flex; align-items: center; gap: 6px; min-width: 0; }
   .groupe-lab { flex-shrink: 0; margin-right: 4px; font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); }
+  /* icône d'une pastille de type (mêmes signes que le sommaire des applications) */
+  .puce .ic { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 3px; border-radius: 6px; background: var(--paper); color: var(--ink-2); font-size: .7rem; font-weight: 800; }
+  .puce[aria-pressed="true"] .ic { background: color-mix(in srgb, var(--sheet) 18%, transparent); color: var(--sheet); }
+  .sep { flex-shrink: 0; width: 1px; height: 22px; background: var(--paper-3); margin: 0 4px; }
   .compteur { margin-left: auto; font-size: .85rem; font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .compteur button { margin-left: 8px; }
   @media (max-width: 760px) {
     /* téléphone : une ligne par groupe, qui défile de côté */
-    .tri .wrap { display: block; padding: 14px 0 4px; }
-    .groupe { overflow-x: auto; padding: 0 16px 8px; scrollbar-width: none; }
-    .groupe .puce { height: 34px; padding: 0 13px; }
+    .tri .tri-g { display: block; padding: 10px 0 4px; }
+    .groupe { overflow-x: auto; padding: 0 16px 6px; scrollbar-width: none; }
+    .groupe .puce { height: 32px; padding: 0 12px; }
     .groupe::-webkit-scrollbar { display: none; }
     .groupe-lab { display: none; }
     /* le compteur n'apparaît sur téléphone que si un tri est en cours */
     .compteur { display: none; align-items: center; justify-content: space-between; margin: 0 16px 6px; font-size: .8rem; }
     .compteur.trie { display: flex; }
+    /* en descendant dans la liste, les pastilles se cachent (la recherche reste) ; elles reviennent dès qu'on remonte */
+    .tri.replie .tri-g { display: none; }
+    .tri.replie .rch { padding-bottom: 10px; }
+  }
+
+  /* ---------- Recherche ---------- */
+  .rch { position: relative; padding-top: 18px; }
+  .rch-champ { position: relative; display: flex; align-items: center; }
+  .rch-champ svg { position: absolute; left: 18px; width: 20px; height: 20px; color: var(--ink-3); pointer-events: none; }
+  .rch input {
+    width: 100%; height: 54px; padding: 0 52px 0 50px; border: none; border-radius: 999px;
+    background: var(--paper); color: var(--ink); font: 600 1.02rem var(--font-sans);
+    box-shadow: inset 0 0 0 1.5px transparent; transition: box-shadow .15s, background .15s;
+    -webkit-appearance: none; appearance: none;
+  }
+  .rch input::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
+  .rch input::placeholder { color: var(--ink-3); font-weight: 500; }
+  .rch input:hover { box-shadow: inset 0 0 0 1.5px var(--paper-3); }
+  .rch input:focus { outline: none; background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .rch-effacer { position: absolute; right: 8px; width: 38px; height: 38px; border: none; border-radius: 50%; background: transparent; color: var(--ink-2);
+    font: 700 1.2rem/1 var(--font-sans); cursor: pointer; touch-action: manipulation; }
+  .rch-effacer:hover { background: var(--paper-2); }
+  /* liste déroulante : idées de recherche (champ vide) ou suggestions */
+  .rch-liste { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 6px); background: var(--sheet); border: 1px solid var(--line-strong);
+    border-radius: 22px; padding: 8px; max-height: min(60vh, 460px); overflow-y: auto; overscroll-behavior: contain; }
+  @media (min-width: 760px) { .rch-liste { left: 32px; right: 32px; } }
+  @media (max-width: 760px) { .rch-liste { left: 16px; right: 16px; } }
+  .rch-titre { margin: 6px 10px; font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); }
+  .rch-idees { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 6px 6px; }
+  .sug { display: flex; align-items: center; gap: 12px; width: 100%; padding: 9px 10px; border: none; border-radius: 14px; background: none;
+    color: var(--ink); text-align: left; text-decoration: none; font-family: var(--font-sans); cursor: pointer; }
+  .sug:hover, .sug.sel { background: var(--paper); }
+  .sug-ic { flex-shrink: 0; min-width: 34px; height: 34px; padding: 0 5px; border-radius: 10px; display: grid; place-items: center; background: var(--c-bg); color: var(--c-ink); font: 800 .82rem/1 var(--font-sans); }
+  .sug-c { min-width: 0; flex: 1; }
+  .sug-c b { display: block; font-size: .95rem; font-weight: 700; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sug-c small { display: block; font-size: .8rem; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sug-tout { justify-content: center; font-weight: 700; font-size: .88rem; color: var(--ink-2); }
+  .rch-rien { margin: 8px 10px 10px; color: var(--ink-2); font-size: .9rem; }
+  /* mots cherchés mis en valeur */
+  .sug mark, .res mark, .app mark { background: var(--c-bg); color: var(--c-ink); border-radius: 3px; padding: 0 1px; }
+  @media (max-width: 760px) {
+    .rch { padding-top: 10px; }
+    .rch input { height: 46px; font-size: 1rem; padding-left: 46px; }
+    .rch-champ svg { left: 15px; }
   }
 
   /* ---------- Liste ---------- */
   #liste { padding-top: 14px; padding-bottom: 8px; }
-  .dom { padding: 16px 0 10px; scroll-margin-top: 140px; }
+  .dom { padding: 16px 0 10px; scroll-margin-top: 230px; }
   .dom-t { display: flex; align-items: baseline; gap: 10px; margin: 0 0 10px; padding: 0 4px; }
   .dom-t h2 { margin: 0; font-size: 1.35rem; font-weight: 800; letter-spacing: -.03em; color: var(--c-ink); }
   .dom-t span { font-size: .85rem; font-weight: 600; color: var(--ink-3); }
   .lignes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-  @media (max-width: 760px) { .lignes { grid-template-columns: 1fr; gap: 6px; } .dom-t h2 { font-size: 1.15rem; } }
+  @media (max-width: 760px) { .lignes { grid-template-columns: minmax(0, 1fr); gap: 6px; } .dom-t h2 { font-size: 1.15rem; } }
 
   .app {
     display: flex; align-items: center; gap: 14px; padding: 13px 14px 13px 18px; border-radius: 18px;
@@ -141,6 +189,27 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
   .app-n { flex-shrink: 0; font-size: .78rem; font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .app:hover .app-f { background: var(--c); color: #fff; }
   @media (max-width: 640px) { .app-d { display: none; } .app { padding: 11px 10px 11px 16px; } .app-f { width: 32px; height: 32px; } }
+  /* étiquette « Application entière » quand un type est choisi */
+  .ent { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .7rem; font-weight: 700; line-height: 1.5; background: var(--ink); color: var(--sheet); white-space: nowrap; }
+
+  /* ---------- Application dont seuls certains modules ou pages répondent : carte avec sous-lignes ---------- */
+  .lignes { align-items: start; }
+  .grp { border-radius: 18px; background: var(--paper); padding: 12px 8px 8px 18px; position: relative; min-width: 0; }
+  .grp::before { content: ''; position: absolute; left: 0; top: 16px; width: 4px; height: 24px; border-radius: 0 4px 4px 0; background: var(--c); }
+  .grp-t { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 2px 6px 8px 0; color: var(--ink); text-decoration: none; }
+  .grp-t b { font-size: .92rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.3; }
+  .grp-t:hover b { text-decoration: underline; }
+  .grp-t .app-n { margin-left: auto; }
+  .grp .niv { background: var(--sheet); }
+  .res { display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: 14px; background: var(--sheet); color: var(--ink); text-decoration: none; margin-top: 4px; transition: background .15s; }
+  .res:hover { background: var(--paper-2); }
+  .res:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+  .res-ic { flex-shrink: 0; min-width: 30px; height: 30px; padding: 0 6px; border-radius: 9px; display: grid; place-items: center; background: var(--c-bg); color: var(--c-ink); font: 800 .78rem/1 var(--font-sans); }
+  .res-c { flex: 1; min-width: 0; }
+  .res-c b { display: block; font-size: .93rem; font-weight: 700; line-height: 1.3; }
+  .res-c small { display: block; font-size: .8rem; color: var(--ink-3); line-height: 1.35; }
+  .res .app-f { width: 30px; height: 30px; background: var(--paper); }
+  .res:hover .app-f { background: var(--c); color: #fff; }
 </style>
 <link rel="stylesheet" href="assets/progression.css">
 <link rel="stylesheet" href="assets/revisions.css">
@@ -171,10 +240,21 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
 <main class="feuille">
   <!-- carte du jour, seulement quand des flashcards sont à réviser (assets/revisions.js) -->
   <div class="wrap rev-portail" id="rev-portail" hidden></div>
+  <!-- barre collée en haut : recherche (assets/recherche-index.js), puis pastilles de tri -->
   <div class="tri" id="tri">
-    <div class="wrap">
+    <div class="wrap rch" id="rch">
+      <div class="rch-champ">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+        <input type="search" id="q" autocomplete="off" spellcheck="false" enterkeyhint="search" placeholder="Cherche une notion, un chapitre, un simulateur…"
+               role="combobox" aria-expanded="false" aria-controls="rch-liste" aria-autocomplete="list" aria-label="Rechercher dans les applications">
+        <button type="button" class="rch-effacer" id="effacer" aria-label="Effacer la recherche" hidden>×</button>
+      </div>
+      <div class="rch-liste" id="rch-liste" role="listbox" aria-label="Suggestions" hidden></div>
+    </div>
+    <div class="wrap tri-g" id="tri-g">
       <div class="groupe" role="group" aria-label="Domaine" id="g-dom"></div>
       <div class="groupe" role="group" aria-label="Niveau" id="g-niv"></div>
+      <div class="groupe" role="group" aria-label="Type" id="g-typ"></div>
       <div class="compteur" id="compteur" aria-live="polite"></div>
     </div>
   </div>
@@ -184,26 +264,46 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
 <footer class="pied"><div class="wrap"><div>Applications d'entraînement en Physique-Chimie · Niveau lycée</div></div></footer>
 
 <script src="assets/avancement.js"></script>
+<!-- index des modules et des pages de toutes les applications (généré : docs/outils/index-recherche.py) -->
+<script src="assets/recherche-index.js"></script>
 <script>
 /* ============================================================
    Portail — données et fonctions
    ------------------------------------------------------------
    ACC.DOMAINES  liste des domaines (Physique, Chimie, Outils mathématiques)
    ACC.NIVEAUX   liste des niveaux (Collège, 2de, 1re spé, Tle spé, Tle STI2D)
-   ACC.APPS      liste des applications avec leurs étiquettes
-   ACC.filtre    état du tri : { dom: Set, niv: Set } (ensemble vide = tout afficher)
+   ACC.APPS      liste des applications avec leurs étiquettes et leurs mots-clés de recherche (mots)
+   ACC.TYPES     pastilles de type : Manipuler (simulateurs, animations, ateliers), Fiches
+   ACC.CATS      libellé de chaque type de page (simulateur, animation, atelier, activite, cours, exercices, fiche)
+   ACC.IDEES     idées de recherche proposées quand le champ est vide
+   ACC.filtre    état du tri : { dom: Set, niv: Set, typ: Set } (ensemble vide = tout afficher)
    ACC.basculer(groupe, id)   ajoute / retire une étiquette du tri
-   ACC.toutAfficher(groupe)   vide le tri d'un groupe (ou des deux)
-   ACC.visible(app)           l'application passe-t-elle le tri ?
-   ACC.surChangement(fn)      fn() est appelée à chaque changement du tri
+   ACC.toutAfficher(groupe)   vide le tri d'un groupe (ou tout, recherche comprise)
+   ACC.chercher(texte)        change le texte cherché ; ACC.requete() le rend
+   ACC.visible(app)           l'application passe-t-elle le tri par domaine et niveau ?
+   ACC.rangees()              résultats repliés (voir plus bas), avec leur score de recherche ;
+                              une ligne « application » porte aussi ses modules et pages qui répondent
+                              par leurs propres textes (details), pour les suggestions
+   ACC.mots()                 mots de la recherche (sans accents) ; ACC.norm(texte) : texte sans accents
+   ACC.surChangement(fn)      fn() est appelée à chaque changement du tri ou de la recherche
    ACC.chambre(canvas, graine) dessine le cliché de chambre à bulles
    ACC.parallaxe()            met en place l'image qui descend moins vite que la page
    ACC.rafraichir()           redessine la liste (avancement x/y à jour) ; posée par le script de la liste
 
    Principe du tri : par défaut aucune étiquette n'est choisie et tout
    est affiché ; choisir une étiquette ne garde que les applications qui
-   la portent, en choisir d'autres les ajoute. Les deux groupes
-   (domaine, niveau) se combinent.
+   la portent, en choisir d'autres les ajoute. Les groupes (domaine,
+   niveau, type) et la recherche se combinent.
+
+   Pages de chaque application : assets/recherche-index.js (objet RECH,
+   généré par docs/outils/index-recherche.py à partir des PLAN).
+   Résultats repliés : on garde les pages qui passent le domaine, le
+   niveau, le type et la recherche ; si toutes les pages d'une
+   application sont gardées → une ligne « application » ; sinon, si
+   toutes les pages d'un module (au moins deux) le sont → une ligne
+   « module » (ouvre l'accueil de l'application, module déplié :
+   index.html#module-N) ; sinon une ligne par page. Les fiches ne
+   comptent que si la pastille Fiches est choisie.
    ============================================================ */
 (function () {
   'use strict';
@@ -229,97 +329,153 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
   const APPS = [
     // ---- Physique ----
     { titre: 'Désintégration radioactive', dom: 'physique', niv: ['spe'], dossier: 'decroissance-radioactive',
-      desc: 'Simulation interactive de la loi de décroissance radioactive.' },
-    { titre: 'Chapitre 1 : Énergie et puissance', dom: 'physique', niv: ['sti'], dossier: 'energie-puissance',
-      desc: 'Rendement, puissance moyenne et instantanée, énergie et aire sous la courbe.' },
-    { titre: 'Chapitre 2 : Piles et accumulateurs', dom: 'physique', niv: ['sti'], dossier: 'piles-accumulateurs',
-      desc: 'Capacité, énergie disponible, énergies massique et volumique, branchements.' },
-    { titre: 'Chapitre 3 : Puissances active et apparente', dom: 'physique', niv: ['sti'], dossier: 'puissance-active',
-      desc: 'Valeur efficace, déphasage, puissance active et facteur de puissance en régime sinusoïdal.' },
-    { titre: "Chapitre 4 : Transport et distribution de l'électricité", dom: 'physique', niv: ['sti'], dossier: 'transport-electricite',
-      desc: 'Pertes par effet Joule, transformateur, risque électrique, exercices de synthèse.' },
-    { titre: 'Chapitre 5 : Flux et transferts thermiques', dom: 'physique', niv: ['sti'], dossier: 'transferts-thermiques',
-      desc: 'Kelvin, modes de transfert, flux thermique, résistance thermique d\'une paroi.' },
-    { titre: 'Chapitre 6 : Principe fondamental de la dynamique', dom: 'physique', niv: ['sti'], dossier: 'principe-dynamique',
-      desc: 'Bilan des forces, accélération, Σ F⃗ = m a⃗ et principe d\'inertie.' },
-    { titre: "Chapitre 7 : Théorème de l'énergie cinétique", dom: 'physique', niv: ['sti'], dossier: 'energie-cinetique',
-      desc: 'Frottements, travail d\'une force, énergie cinétique et théorème de l\'énergie cinétique.' },
-    { titre: 'Chapitre 8 : Mouvements de rotation', dom: 'physique', niv: ['sti'], dossier: 'mouvements-rotation',
-      desc: 'Vitesse angulaire, tr/min et rad/s, moment d\'une force, couple, point de fonctionnement d\'un moteur.' },
-    { titre: 'Chapitre 9 : Statique des fluides', dom: 'physique', niv: ['sti'], dossier: 'statique-fluides',
-      desc: 'Pression et force pressante, pression relative, principe fondamental de l\'hydrostatique.' },
-    { titre: 'Chapitre 10 : Énergie transportée par la lumière', dom: 'physique', niv: ['sti'], dossier: 'energie-lumiere',
-      desc: 'Capteurs photothermiques et photovoltaïques, photon E = h f, caractéristique d\'un panneau solaire.' },
-    { titre: "Chapitre 11 : Changements d'état et transferts thermiques", dom: 'physique', niv: ['sti'], dossier: 'changements-etat',
-      desc: 'Chaleur latente, Q = m c ΔT et Q = m L, diagramme d\'état, schéma des étapes d\'un chauffage.' },
-    { titre: 'Chapitre 12 : Radioactivité', dom: 'physique', niv: ['sti'], dossier: 'radioactivite',
-      desc: 'Noyau, α, β⁻, β⁺, γ, activité, demi-vie, N(t) = N₀ e^(−λt) et calcul de t.' },
-    { titre: 'Chapitre 13 : Énergie nucléaire', dom: 'physique', niv: ['sti'], dossier: 'energie-nucleaire',
-      desc: 'Fission, fusion, défaut de masse, E = |Δm| c², énergie d\'un échantillon.' },
-    { titre: "Chapitre 17 : Spectre d'un signal périodique", dom: 'physique', niv: ['sti'], dossier: 'spectre-signal',
-      desc: 'Décomposition de Fourier, composante continue, fondamental et harmoniques, lecture d\'un spectre.' },
-    { titre: 'Chapitre 18 : Ondes sonores', dom: 'physique', niv: ['sti'], dossier: 'ondes-sonores',
-      desc: 'Son pur, son complexe, hauteur et timbre, niveau sonore en décibels, audiogramme, atténuation.' },
-    { titre: 'Chapitre 19 : Ondes électromagnétiques', dom: 'physique', niv: ['sti'], dossier: 'ondes-electromagnetiques',
-      desc: 'Longueur d\'onde et fréquence, domaines des télécommunications, modulation AM et FM, antennes.' },
+      desc: 'Simulation interactive de la loi de décroissance radioactive.',
+      mots: ['demi-vie', 'noyaux radioactifs', 'N(t)', 'exponentielle', 'hasard'] },
+    { titre: 'Chapitre 1 : Énergie et puissance', dom: 'physique', niv: ['sti'], dossier: 'energie-puissance',
+      desc: 'Rendement, puissance moyenne et instantanée, énergie et aire sous la courbe.',
+      mots: ['rendement', 'watt', 'joule', 'kWh', 'wattheure', 'STEP', 'diagramme énergétique', 'chaîne énergétique'] },
+    { titre: 'Chapitre 2 : Piles et accumulateurs', dom: 'physique', niv: ['sti'], dossier: 'piles-accumulateurs',
+      desc: 'Capacité, énergie disponible, énergies massique et volumique, branchements.',
+      mots: ['batterie', 'capacité', 'ampère-heure', 'Ah', 'mAh', 'énergie massique', 'série', 'parallèle'] },
+    { titre: 'Chapitre 3 : Puissances active et apparente', dom: 'physique', niv: ['sti'], dossier: 'puissance-active',
+      desc: 'Valeur efficace, déphasage, puissance active et facteur de puissance en régime sinusoïdal.',
+      mots: ['valeur efficace', 'déphasage', 'cos φ', 'facteur de puissance', 'puissance apparente', 'VA', 'sinusoïdal', 'alternatif'] },
+    { titre: "Chapitre 4 : Transport et distribution de l'électricité", dom: 'physique', niv: ['sti'], dossier: 'transport-electricite',
+      desc: 'Pertes par effet Joule, transformateur, risque électrique, exercices de synthèse.',
+      mots: ['effet Joule', 'pertes en ligne', 'transformateur', 'haute tension', 'rapport de transformation', 'disjoncteur', 'différentiel', 'sécurité électrique'] },
+    { titre: 'Chapitre 5 : Flux et transferts thermiques', dom: 'physique', niv: ['sti'], dossier: 'transferts-thermiques',
+      desc: 'Kelvin, modes de transfert, flux thermique, résistance thermique d\'une paroi.',
+      mots: ['conduction', 'convection', 'rayonnement', 'flux thermique', 'résistance thermique', 'isolation', 'kelvin', 'conductivité thermique'] },
+    { titre: 'Chapitre 6 : Principe fondamental de la dynamique', dom: 'physique', niv: ['sti'], dossier: 'principe-dynamique',
+      desc: 'Bilan des forces, accélération, Σ F⃗ = m a⃗ et principe d\'inertie.',
+      mots: ['Newton', 'deuxième loi de Newton', 'forces', 'poids', 'accélération', 'inertie', 'diagramme objet-action', 'DOA'] },
+    { titre: "Chapitre 7 : Théorème de l'énergie cinétique", dom: 'physique', niv: ['sti'], dossier: 'energie-cinetique',
+      desc: 'Frottements, travail d\'une force, énergie cinétique et théorème de l\'énergie cinétique.',
+      mots: ['Ec', '½ m v²', 'travail d\'une force', 'frottements', 'traînée', 'distance d\'arrêt', 'freinage'] },
+    { titre: 'Chapitre 8 : Mouvements de rotation', dom: 'physique', niv: ['sti'], dossier: 'mouvements-rotation',
+      desc: 'Vitesse angulaire, tr/min et rad/s, moment d\'une force, couple, point de fonctionnement d\'un moteur.',
+      mots: ['vitesse angulaire', 'rad/s', 'tr/min', 'moment d\'une force', 'couple', 'moteur', 'point de fonctionnement'] },
+    { titre: 'Chapitre 9 : Statique des fluides', dom: 'physique', niv: ['sti'], dossier: 'statique-fluides',
+      desc: 'Pression et force pressante, pression relative, principe fondamental de l\'hydrostatique.',
+      mots: ['pression', 'pascal', 'bar', 'force pressante', 'hydrostatique', 'presse hydraulique', 'baromètre', 'profondeur'] },
+    { titre: 'Chapitre 10 : Énergie transportée par la lumière', dom: 'physique', niv: ['sti'], dossier: 'energie-lumiere',
+      desc: 'Capteurs photothermiques et photovoltaïques, photon E = h f, caractéristique d\'un panneau solaire.',
+      mots: ['photon', 'E = h f', 'photovoltaïque', 'panneau solaire', 'effet photoélectrique', 'rendement', 'longueur d\'onde', 'électronvolt'] },
+    { titre: "Chapitre 11 : Changements d'état et transferts thermiques", dom: 'physique', niv: ['sti'], dossier: 'changements-etat',
+      desc: 'Chaleur latente, Q = m c ΔT et Q = m L, diagramme d\'état, schéma des étapes d\'un chauffage.',
+      mots: ['fusion', 'vaporisation', 'solidification', 'chaleur latente', 'capacité thermique massique', 'Q = m c ΔT', 'liaison hydrogène', 'diagramme de phase'] },
+    { titre: 'Chapitre 12 : Radioactivité', dom: 'physique', niv: ['sti'], dossier: 'radioactivite',
+      desc: 'Noyau, α, β⁻, β⁺, γ, activité, demi-vie, N(t) = N₀ e^(−λt) et calcul de t.',
+      mots: ['demi-vie', 'activité', 'becquerel', 'alpha', 'bêta', 'gamma', 'désintégration', 'isotope', 'lois de Soddy'] },
+    { titre: 'Chapitre 13 : Énergie nucléaire', dom: 'physique', niv: ['sti'], dossier: 'energie-nucleaire',
+      desc: 'Fission, fusion, défaut de masse, E = |Δm| c², énergie d\'un échantillon.',
+      mots: ['fission', 'fusion', 'défaut de masse', 'E = mc²', 'Einstein', 'centrale nucléaire', 'MeV'] },
+    { titre: "Chapitre 17 : Spectre d'un signal périodique", dom: 'physique', niv: ['sti'], dossier: 'spectre-signal',
+      desc: 'Décomposition de Fourier, composante continue, fondamental et harmoniques, lecture d\'un spectre.',
+      mots: ['Fourier', 'harmoniques', 'fondamental', 'composante continue', 'spectre en fréquence'] },
+    { titre: 'Chapitre 18 : Ondes sonores', dom: 'physique', niv: ['sti'], dossier: 'ondes-sonores',
+      desc: 'Son pur, son complexe, hauteur et timbre, niveau sonore en décibels, audiogramme, atténuation.',
+      mots: ['son', 'décibel', 'dB', 'intensité sonore', 'hauteur', 'timbre', 'audiogramme', 'oreille'] },
+    { titre: 'Chapitre 19 : Ondes électromagnétiques', dom: 'physique', niv: ['sti'], dossier: 'ondes-electromagnetiques',
+      desc: 'Longueur d\'onde et fréquence, domaines des télécommunications, modulation AM et FM, antennes.',
+      mots: ['longueur d\'onde', 'radio', 'télécommunications', 'modulation', 'AM', 'FM', 'antenne', 'porteuse'] },
     { titre: 'Spectres et étoiles', dom: 'physique', niv: ['2de'], dossier: 'spectres-etoiles',
-      desc: "Spectres d'émission et d'absorption, température et composition chimique d'une étoile." },
+      desc: "Spectres d'émission et d'absorption, température et composition chimique d'une étoile.",
+      mots: ['spectre d\'émission', 'spectre d\'absorption', 'raies', 'loi de Wien', 'corps noir', 'étoile', 'lumière blanche'] },
     { titre: "Période et fréquence d'un signal", dom: 'physique', niv: ['2de'], dossier: 'periode-frequence',
-      desc: "Repérer le motif, mesurer la période à l'échelle, calculer la fréquence, lire un écran d'oscilloscope." },
+      desc: "Repérer le motif, mesurer la période à l'échelle, calculer la fréquence, lire un écran d'oscilloscope.",
+      mots: ['période', 'fréquence', 'hertz', 'signal périodique', 'motif', 'échelle'] },
     { titre: 'Réaliser un montage électrique', dom: 'physique', niv: ['2de'], dossier: 'montage-electrique',
-      desc: "Du schéma au montage : boucle principale, dipôles en série, puis dérivations, ampèremètre et voltmètre." },
+      desc: "Du schéma au montage : boucle principale, dipôles en série, puis dérivations, ampèremètre et voltmètre.",
+      mots: ['circuit', 'schéma électrique', 'série', 'dérivation', 'ampèremètre', 'voltmètre', 'multimètre', 'générateur'] },
     { titre: 'Oscilloscope', dom: 'physique', niv: LYCEE, dossier: 'oscilloscope',
-      desc: "Mesurer une durée entre deux signaux, une fréquence, une tension et une intensité : carreaux et curseurs." },
+      desc: "Mesurer une durée entre deux signaux, une fréquence, une tension et une intensité : carreaux et curseurs.",
+      mots: ['base de temps', 'sensibilité verticale', 'curseurs', 'décalage temporel', 'période', 'fréquence', 'tension maximale', 'intensité'] },
     { titre: 'Cinématique', dom: 'physique', niv: ['spe'], dossier: 'cinematique',
-      desc: 'Référentiel, vecteurs position, vitesse et accélération, repère de Frenet.' },
+      desc: 'Référentiel, vecteurs position, vitesse et accélération, repère de Frenet.',
+      mots: ['vecteur vitesse', 'vecteur accélération', 'référentiel', 'trajectoire', 'dérivée', 'repère de Frenet', 'mouvement circulaire', 'uniforme'] },
     // ---- Chimie ----
     { titre: 'Rappels de 1ère STI2D', dom: 'chimie', niv: ['sti'], dossier: 'rappels-1ere-sti2d',
-      desc: 'Groupes caractéristiques hydroxyle et carboxyle, pictogrammes de sécurité.' },
-    { titre: 'Chapitre 14 : Combustions', dom: 'chimie', niv: ['sti'], dossier: 'combustions',
-      desc: 'Équilibrer une combustion, masse de CO₂ formé et énergie libérée.' },
+      desc: 'Groupes caractéristiques hydroxyle et carboxyle, pictogrammes de sécurité.',
+      mots: ['hydroxyle', 'carboxyle', 'alcool', 'acide carboxylique', 'pictogrammes', 'sécurité', 'danger'] },
+    { titre: 'Chapitre 14 : Combustions', dom: 'chimie', niv: ['sti'], dossier: 'combustions',
+      desc: 'Équilibrer une combustion, masse de CO₂ formé et énergie libérée.',
+      mots: ['combustion complète', 'CO₂', 'dioxyde de carbone', 'équilibrer', 'masse molaire', 'quantité de matière', 'mole', 'pouvoir calorifique'] },
     { titre: 'Chapitre 15 : Oxydoréduction (piles et accumulateurs)', dom: 'chimie', niv: ['sti'], dossier: 'oxydoreduction-STI2D',
-      desc: 'Oxydants, réducteurs, équations, quantités de matière, piles : schéma et capacité.' },
+      desc: 'Oxydants, réducteurs, équations, quantités de matière, piles : schéma et capacité.',
+      mots: ['oxydant', 'réducteur', 'couple', 'demi-équation', 'électrons', 'pile', 'accumulateur', 'capacité'] },
     { titre: 'Chapitre 16 : Acides et bases', dom: 'chimie', niv: ['sti'], dossier: 'acides-bases',
-      desc: 'Couples acide/base, réactions acido-basiques, pH = −log[H₃O⁺] et quantités de matière.' },
+      desc: 'Couples acide/base, réactions acido-basiques, pH = −log[H₃O⁺] et quantités de matière.',
+      mots: ['acide', 'base', 'couple acide/base', 'pH', 'H₃O⁺', 'H3O+', 'concentration', 'logarithme'] },
     { titre: 'Nomenclature (Structure des entités organiques)', dom: 'chimie', niv: ['1re'], dossier: 'nomenclature-1re',
-      desc: 'Formules développée et semi-développée, noms des alcanes, alcools, aldéhydes, cétones et acides.' },
+      desc: 'Formules développée et semi-développée, noms des alcanes, alcools, aldéhydes, cétones et acides.',
+      mots: ['alcane', 'alcool', 'aldéhyde', 'cétone', 'acide carboxylique', 'formule semi-développée', 'chaîne carbonée', 'groupe caractéristique'] },
     { titre: 'Nomenclature', dom: 'chimie', niv: ['spe'], dossier: 'nomenclature',
-      desc: 'Formules développée, semi-développée et topologique, noms des alcanes et des familles.' },
+      desc: 'Formules développée, semi-développée et topologique, noms des alcanes et des familles.',
+      mots: ['alcane', 'alcool', 'aldéhyde', 'cétone', 'acide carboxylique', 'ester', 'amine', 'amide', 'formule topologique', 'groupe caractéristique'] },
     { titre: 'Oxydoréduction', dom: 'chimie', niv: ['1re', 'spe'], dossier: 'oxydoreduction-spe',
-      desc: "Équilibrer les demi-équations avec H₂O, H⁺ et e⁻, puis écrire les réactions d'oxydoréduction." },
+      desc: "Équilibrer les demi-équations avec H₂O, H⁺ et e⁻, puis écrire les réactions d'oxydoréduction.",
+      mots: ['demi-équation', 'oxydant', 'réducteur', 'électrons', 'H⁺', 'milieu acide', 'couple'] },
     { titre: "Schéma d'une pile", dom: 'chimie', niv: ['spe'], dossier: 'pile',
-      desc: "Compléter le schéma et le fonctionnement d'une pile électrochimique." },
+      desc: "Compléter le schéma et le fonctionnement d'une pile électrochimique.",
+      mots: ['anode', 'cathode', 'électrode', 'pont salin', 'électrons', 'sens du courant'] },
     { titre: 'Équilibrer une réaction', dom: 'chimie', niv: LYCEE, dossier: 'equilibrer-reactions',
-      desc: 'Conservation des atomes et nombres stœchiométriques.' },
+      desc: 'Conservation des atomes et nombres stœchiométriques.',
+      mots: ['équation de réaction', 'coefficients stœchiométriques', 'conservation des atomes', 'nombres stœchiométriques'] },
     { titre: "Avancement d'une réaction", dom: 'chimie', niv: ['2de', '1re'], dossier: 'avancement-reaction',
-      desc: "Réactif limitant et tableau d'avancement, des molécules aux moles." },
+      desc: "Réactif limitant et tableau d'avancement, des molécules aux moles.",
+      mots: ['tableau d\'avancement', 'réactif limitant', 'avancement maximal', 'xmax', 'stœchiométrie', 'mole', 'état final'] },
     { titre: 'Chromatographie sur couche mince', dom: 'chimie', niv: ['2de'], dossier: 'chromatographie',
-      desc: "Réaliser une CCM pas à pas, puis lire un chromatogramme : corps pur, mélange, espèces identifiées." },
+      desc: "Réaliser une CCM pas à pas, puis lire un chromatogramme : corps pur, mélange, espèces identifiées.",
+      mots: ['CCM', 'éluant', 'rapport frontal', 'Rf', 'phase stationnaire', 'corps pur', 'mélange', 'révélation'] },
     { titre: 'pH', dom: 'chimie', niv: ['spe'], dossier: 'ph',
-      desc: 'Logarithme décimal et relation entre le pH et la concentration en ions H₃O⁺.' },
-    { titre: 'TP : titrage pH-métrique du Destop', dom: 'chimie', niv: ['spe'], dossier: 'titrage-ph',
-      desc: 'TP virtuel : dilution, montage, titrage simulé, volume équivalent et incertitudes.' },
+      desc: 'Logarithme décimal et relation entre le pH et la concentration en ions H₃O⁺.',
+      mots: ['logarithme', 'log', 'H₃O⁺', 'H3O+', 'concentration', 'acidité'] },
+    { titre: 'TP : titrage pH-métrique du Destop', dom: 'chimie', niv: ['spe'], dossier: 'titrage-ph',
+      desc: 'TP virtuel : dilution, montage, titrage simulé, volume équivalent et incertitudes.',
+      mots: ['titrage', 'dosage', 'équivalence', 'burette', 'pH-mètre', 'dilution', 'Regressi', 'incertitude', 'titre massique'] },
     // ---- Outils mathématiques ----
     { titre: 'Puissances de 10', dom: 'maths', niv: LYCEE, dossier: 'puissances-10',
-      desc: 'Utiliser les puissances de 10, indispensables pour les conversions.' },
+      desc: 'Utiliser les puissances de 10, indispensables pour les conversions.',
+      mots: ['notation scientifique', 'exposant', 'puissance de dix'] },
     { titre: 'Conversions', dom: 'maths', niv: LYCEE, dossier: 'conversions',
-      desc: 'Réaliser facilement des conversions avec les puissances de 10.' },
+      desc: 'Réaliser facilement des conversions avec les puissances de 10.',
+      mots: ['préfixes', 'unités', 'kilo', 'milli', 'micro', 'nano', 'méga', 'conversion d\'unités'] },
     { titre: 'Équations en physique', dom: 'maths', niv: LYCEE, dossier: 'equations-en-physique',
-      desc: 'Exprimer une grandeur en fonction des autres.' },
+      desc: 'Exprimer une grandeur en fonction des autres.',
+      mots: ['isoler', 'exprimer', 'formule', 'calcul littéral', 'transformer une formule'] },
     { titre: 'Équations en physique (avec aide)', dom: 'maths', niv: LYCEE, dossier: 'equations-en-physique-avec-aide',
-      desc: 'Même entraînement, avec explication de la règle en cas d’erreur.' },
+      desc: 'Même entraînement, avec explication de la règle en cas d’erreur.',
+      mots: ['isoler', 'exprimer', 'formule', 'calcul littéral', 'transformer une formule'] },
     { titre: 'Proportionnalité', dom: 'maths', niv: LYCEE, dossier: 'proportionnalite',
-      desc: 'Reconnaître, calculer et lire une proportionnalité sur un graphique.' },
+      desc: 'Reconnaître, calculer et lire une proportionnalité sur un graphique.',
+      mots: ['coefficient de proportionnalité', 'produit en croix', 'règle de trois', 'tableau', 'droite passant par l\'origine'] },
     { titre: 'Lecture graphique', dom: 'maths', niv: LYCEE, dossier: 'lecture-graphique',
-      desc: 'Lire précisément une valeur sur un graphique.' },
+      desc: 'Lire précisément une valeur sur un graphique.',
+      mots: ['graphique', 'courbe', 'abscisse', 'ordonnée', 'échelle', 'lire une valeur'] },
     { titre: 'Équations du 1er degré', dom: 'maths', niv: ['col'], dossier: 'equations-college',
-      desc: 'Résoudre des équations étape par étape.' },
+      desc: 'Résoudre des équations étape par étape.',
+      mots: ['équation', 'inconnue', 'résoudre'] },
     { titre: 'Fractions', dom: 'maths', niv: ['col'], dossier: 'fractions-college',
-      desc: 'Simplifier, multiplier, diviser, additionner et soustraire des fractions.' }
+      desc: 'Simplifier, multiplier, diviser, additionner et soustraire des fractions.',
+      mots: ['fraction', 'numérateur', 'dénominateur', 'simplifier'] }
   ];
 
+  // Libellé de chaque type de page (index de recherche), et pastilles de type
+  const CATS = {
+    simulateur: 'Simulateur', animation: 'Animation', atelier: 'Atelier', activite: 'Activité documentaire',
+    cours: 'Cours', exercices: 'Exercices', fiche: 'Fiche récapitulative'
+  };
+  const TYPES = [
+    { id: 'manipuler', nom: 'Manipuler', ic: '▸', cats: ['simulateur', 'animation', 'atelier'] },
+    { id: 'fiche', nom: 'Fiches', ic: '≡', cats: ['fiche'] }
+  ];
+  // Idées de recherche (champ vide)
+  const IDEES = ['simulateur', 'demi-vie', 'oscilloscope', 'tableau d\'avancement', 'conversions', 'pH'];
+
   /* ---------- Tri : afficher / masquer ---------- */
-  const filtre = { dom: new Set(), niv: new Set() };
+  const filtre = { dom: new Set(), niv: new Set(), typ: new Set() };
+  let requete = '';
   const abonnes = [];
   const prevenir = () => abonnes.forEach(fn => fn());
 
@@ -327,14 +483,16 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
     const s = filtre[groupe];
     if (s.has(id)) s.delete(id); else s.add(id);
     // toutes les étiquettes choisies = aucune : on revient à « Tous »
-    const total = groupe === 'dom' ? DOMAINES.length : NIVEAUX.length;
+    // (pas pour le type : Manipuler + Fiches ne couvrent pas toutes les pages)
+    const total = groupe === 'dom' ? DOMAINES.length : groupe === 'niv' ? NIVEAUX.length : Infinity;
     if (s.size === total) s.clear();
     prevenir();
   }
   function toutAfficher(groupe) {
-    if (groupe) filtre[groupe].clear(); else { filtre.dom.clear(); filtre.niv.clear(); }
+    if (groupe) filtre[groupe].clear(); else { filtre.dom.clear(); filtre.niv.clear(); filtre.typ.clear(); requete = ''; }
     prevenir();
   }
+  function chercher(texte) { requete = texte; prevenir(); }
   function visible(app) {
     const okDom = !filtre.dom.size || filtre.dom.has(app.dom);
     const okNiv = !filtre.niv.size || app.niv.some(n => filtre.niv.has(n));
@@ -342,7 +500,113 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
   }
   // Une étiquette est « allumée » quand elle est choisie ; « Tous » quand le groupe est vide
   const choisi = (groupe, id) => filtre[groupe].has(id);
-  const actif = () => filtre.dom.size > 0 || filtre.niv.size > 0;
+  const actif = () => filtre.dom.size > 0 || filtre.niv.size > 0 || filtre.typ.size > 0 || mots().length > 0;
+
+  /* ---------- Recherche : texte sans accents ni indices (H₃O⁺ → h3o+), découpé en mots ---------- */
+  const norm = s => (s || '').normalize('NFKD').toLowerCase().replace(/[̀-ͯ]/g, '')
+    .replace(/œ/g, 'oe').replace(/æ/g, 'ae').replace(/[^a-z0-9+]+/g, ' ').trim();
+  const mots = () => norm(requete).split(' ').filter(Boolean);
+
+  /* ---------- Pages de chaque application (index RECH) ----------
+     app.pages : { app, mod, k, ty, l, c, d } ; une application sans PLAN
+     (ou absente de l'index) a une seule page, l'application elle-même. */
+  const RECH = window.RECH || {};
+  APPS.forEach(a => {
+    const r = RECH[a.dossier];
+    a.mods = r && r.m ? r.m.map(m => Object.assign({ app: a }, m)) : [];
+    a.pages = [];
+    if (!a.mods.length) a.pages.push({ app: a, mod: null, k: null, ty: 'seul', l: a.titre, c: (r && r.seul) || 'exercices', d: '' });
+    a.mods.forEach(m => m.p.forEach(p => a.pages.push(Object.assign({ app: a, mod: m }, p))));
+    // textes cherchés, sans accents (poids : titre > mots-clés > description)
+    a.rTitre = norm(a.titre); a.rMots = norm((a.mots || []).join(' ')); a.rDesc = norm(a.desc);
+    a.mods.forEach(m => { m.rTitre = norm(m.t); m.rDesc = norm(m.d); });
+    a.pages.forEach(p => {
+      p.rTitre = p.mod ? norm(p.l) : '';
+      p.rDesc = norm(p.d);
+      // le type est cherché aussi : « simulateur », « atelier », « fiche », « manipuler »…
+      p.rType = norm(CATS[p.c] + (TYPES[0].cats.includes(p.c) ? ' manipuler' : ''));
+    });
+  });
+
+  // Un mot de la recherche est trouvé s'il commence un mot du texte (ou s'y trouve, à partir de 4 lettres) ;
+  // un mot d'une ou deux lettres doit être un mot entier (« ph » ne trouve pas « physique »)
+  function trouve(texte, mot) {
+    if (!texte) return 0;
+    if (mot.length <= 2) return (' ' + texte + ' ').includes(' ' + mot + ' ') ? 1 : 0;
+    if ((' ' + texte).includes(' ' + mot)) return 1;
+    return mot.length >= 4 && texte.includes(mot) ? .6 : 0;
+  }
+  // Score d'une page : chaque mot doit être trouvé dans la page, son module ou son application
+  function scorePage(p, ms) {
+    const a = p.app, m = p.mod;
+    let total = 0;
+    for (const w of ms) {
+      const s = Math.max(
+        3 * trouve(p.rTitre, w), 2 * trouve(p.rType, w), .8 * trouve(p.rDesc, w),
+        m ? Math.max(2.5 * trouve(m.rTitre, w), trouve(m.rDesc, w)) : 0,
+        2.5 * trouve(a.rTitre, w), 2 * trouve(a.rMots, w), trouve(a.rDesc, w));
+      if (!s) return 0;
+      total += s;
+    }
+    return total;
+  }
+  // Score d'une application ou d'un module pour ses propres textes (classement des suggestions)
+  // complet : 0 si un mot manque dans ces textes
+  function scorePropre(textes, ms, complet) {
+    let t = 0;
+    for (const w of ms) {
+      const s = Math.max(...textes.map(([x, k]) => k * trouve(x, w)));
+      if (!s && complet) return 0;
+      t += s;
+    }
+    return t;
+  }
+  // Modules et pages qui répondent par leurs propres textes, dans une application retenue en entier :
+  // proposés aussi dans les suggestions (« demi-vie » → le module « Demi-vie »)
+  function details(a, cand, ms) {
+    if (!ms.length) return [];
+    const res = [];
+    a.mods.forEach(m => {
+      const mc = cand.filter(p => p.mod === m);
+      const s = scorePropre([[m.rTitre, 3], [m.rDesc, 1.2]], ms, true);
+      if (s) res.push({ niveau: 'mod', app: a, mod: m, pages: mc, score: s + .3 });
+      else mc.forEach(p => { const sp = scorePropre([[p.rTitre, 3]], ms, true); if (sp) res.push({ niveau: 'page', app: a, mod: m, page: p, score: sp + .2 }); });
+    });
+    return res;
+  }
+
+  /* ---------- Résultats repliés (voir l'en-tête) ----------
+     [{ niveau: 'app' | 'mod' | 'page', app, mod, page, pages, score }] dans l'ordre de APPS */
+  function rangees() {
+    const cats = new Set();
+    TYPES.forEach(t => { if (filtre.typ.has(t.id)) t.cats.forEach(c => cats.add(c)); });
+    const ms = mots();
+    // les fiches comptent avec la pastille Fiches, ou quand la recherche les demande (« fiche pile »)
+    const avecFiche = cats.has('fiche') || ms.some(w => trouve('fiche fiches recapitulative', w));
+    const res = [];
+    APPS.forEach(a => {
+      if (!visible(a)) return;
+      const cand = a.pages.filter(p => p.c !== 'fiche' || avecFiche);
+      const garde = new Map();
+      cand.forEach(p => {
+        if (cats.size && !cats.has(p.c)) return;
+        const s = ms.length ? scorePage(p, ms) : 1;
+        if (s) garde.set(p, s);
+      });
+      if (!garde.size) return;
+      if (garde.size === cand.length) {
+        res.push({ niveau: 'app', app: a, pages: cand, score: scorePropre([[a.rTitre, 3], [a.rMots, 2.5], [a.rDesc, 1]], ms) + .5, details: details(a, cand, ms) });
+        return;
+      }
+      a.mods.forEach(m => {
+        const mc = cand.filter(p => p.mod === m), mg = mc.filter(p => garde.has(p));
+        if (!mg.length) return;
+        if (mg.length === mc.length && mc.length > 1) res.push({ niveau: 'mod', app: a, mod: m, pages: mg, score: scorePropre([[m.rTitre, 3], [m.rDesc, 1.2]], ms) + .3 });
+        else mg.forEach(p => res.push({ niveau: 'page', app: a, mod: m, page: p, score: garde.get(p) }));
+      });
+    });
+    return res;
+  }
 
   /* ---------- Image : cliché de chambre à bulles ----------
      Chaque trace est une suite de petites bulles. Une particule chargée
@@ -490,16 +754,28 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
   }
 
   window.ACC = {
-    DOMAINES, NIVEAUX, APPS, filtre, basculer, toutAfficher, visible, choisi, actif,
+    DOMAINES, NIVEAUX, APPS, TYPES, CATS, IDEES, filtre, basculer, toutAfficher, chercher, visible, choisi, actif,
+    rangees, mots, norm, requete: () => requete,
     surChangement: fn => abonnes.push(fn),
     chambre, parallaxe, domaine, niveau, fleche, pluriel, etiquettes
   };
 })();
 </script>
 <script>
+/* ============================================================
+   Portail — affichage : pastilles, recherche (suggestions), liste
+   - pastilles Domaine, Niveau, Type (Manipuler, Fiches)
+   - champ de recherche : idées quand il est vide, suggestions pendant
+     la frappe (flèches, Entrée, Échap), la liste suit la recherche
+   - liste regroupée par domaine : ligne « application », ou carte de
+     l'application avec ses modules / pages retenus (ACC.rangees)
+   - barre collée en haut ; sur téléphone, les pastilles se cachent
+     quand on descend dans la liste et reviennent quand on remonte
+   ============================================================ */
 (function () {
   'use strict';
-  const { DOMAINES, NIVEAUX, APPS } = ACC;
+  const { DOMAINES, NIVEAUX, APPS, TYPES, CATS } = ACC;
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
   /* ---------- Pastilles de tri ---------- */
   function pastilles() {
@@ -511,9 +787,14 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
       '<span class="groupe-lab">Niveau</span>' +
       `<button type="button" class="puce" data-g="niv" data-id="" aria-pressed="${!ACC.filtre.niv.size}">Tous</button>` +
       NIVEAUX.map(n => `<button type="button" class="puce" data-g="niv" data-id="${n.id}" aria-pressed="${ACC.choisi('niv', n.id)}" title="${n.nom}">${n.court}</button>`).join('');
+    document.getElementById('g-typ').innerHTML =
+      '<span class="groupe-lab">Type</span>' +
+      `<button type="button" class="puce" data-g="typ" data-id="" aria-pressed="${!ACC.filtre.typ.size}">Tous</button>` +
+      TYPES.map((t, i) => (i ? '<span class="sep" aria-hidden="true"></span>' : '') +
+        `<button type="button" class="puce" data-g="typ" data-id="${t.id}" aria-pressed="${ACC.choisi('typ', t.id)}" title="${t.cats.map(c => CATS[c]).join(', ')}"><span class="ic" aria-hidden="true">${t.ic}</span>${t.nom}</button>`).join('');
   }
   document.getElementById('tri').addEventListener('click', e => {
-    const b = e.target.closest('button');
+    const b = e.target.closest('button[data-g], button[data-tout]');
     if (!b) return;
     if (b.dataset.tout) return ACC.toutAfficher();
     if (b.dataset.id) ACC.basculer(b.dataset.g, b.dataset.id); else ACC.toutAfficher(b.dataset.g);
@@ -522,44 +803,184 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
   /* ---------- Avancement d'une application : x/y (assets/avancement.js) ---------- */
   function avancement(app) {
     const av = window.AV && AV.avancement(app.dossier);
-    return av ? `<span class="app-n" title="Avancement : ${av.fait} sur ${av.total}">${av.fait}/${av.total}</span>` : '';
+    return av ? `<span class="app-n" title="Avancement : ${av.fait} sur ${av.total}">${av.fait}/${av.total}</span>` : '';
   }
 
+  /* ---------- Mots cherchés mis en valeur (comparaison sans accents, caractère par caractère) ---------- */
+  function surligner(texte) {
+    const ms = ACC.mots();
+    if (!ms.length) return esc(texte);
+    const car = [...texte];
+    const chaine = car.map(c => (ACC.norm(c) || ' ')[0]).join('');
+    const marque = new Array(car.length).fill(false);
+    ms.forEach(w => {
+      let i = -1;
+      while ((i = chaine.indexOf(w, i + 1)) >= 0) {
+        if (i === 0 || chaine[i - 1] === ' ' || w.length >= 4) for (let k = i; k < i + w.length; k++) marque[k] = true;
+      }
+    });
+    let html = '', ouvert = false;
+    car.forEach((c, k) => {
+      if (marque[k] !== ouvert) { html += ouvert ? '</mark>' : '<mark>'; ouvert = marque[k]; }
+      html += esc(c);
+    });
+    return html + (ouvert ? '</mark>' : '');
+  }
+
+  /* ---------- Adresses et libellés d'un résultat ---------- */
+  const lienApp = a => `./${a.dossier}/index.html`;
+  const lienMod = m => `./${m.app.dossier}/index.html#module-${m.n}`;     // accueil de l'application, module déplié
+  const lienPage = p => p.mod ? `./${p.app.dossier}/modules/${p.k}.html` : lienApp(p.app);
+  const ICONES = { simulateur: '▸', animation: '▸', atelier: '▸', activite: 'A', cours: 'C', exercices: 'Q', fiche: '≡' };
+  const ctxPage = p => !p.mod ? '' : p.c === 'fiche' ? `Module ${p.mod.n}` : `Module ${p.mod.n} : ${esc(p.mod.t)}`;
+  const typesModule = r => [...new Set(r.pages.map(p => CATS[p.c]))].join(', ');
+
   /* ---------- Liste regroupée par domaine ---------- */
+  function ligneApp(a) {
+    const ent = ACC.filtre.typ.size ? '<span class="ent">Application entière</span>' : '';
+    return `
+      <a class="app" href="${lienApp(a)}">
+        <div class="app-c">
+          <div class="app-t"><b>${surligner(a.titre)}</b>${ACC.etiquettes(a)}${ent}</div>
+          <p class="app-d">${surligner(a.desc)}</p>
+        </div>
+        ${avancement(a)}
+        <span class="app-f">${ACC.fleche}</span>
+      </a>`;
+  }
+  function sousLigne(r) {
+    if (r.niveau === 'mod') {
+      const m = r.mod;
+      return `<a class="res" href="${lienMod(m)}"><span class="res-ic" aria-hidden="true">M${m.n}</span><span class="res-c">
+        <b>Module ${m.n} : ${surligner(m.t)}</b><small>Module entier · ${ACC.pluriel(r.pages.length, 'page')} · ${typesModule(r)}</small></span><span class="app-f">${ACC.fleche}</span></a>`;
+    }
+    const p = r.page, ctx = ctxPage(p);
+    return `<a class="res" href="${lienPage(p)}"><span class="res-ic" aria-hidden="true">${ICONES[p.c]}</span><span class="res-c">
+      <b>${surligner(p.l)}</b><small>${CATS[p.c]}${ctx ? ' · ' + ctx : ''}</small></span><span class="app-f">${ACC.fleche}</span></a>`;
+  }
+
   function liste() {
-    const vis = APPS.filter(ACC.visible);
+    const rs = ACC.rangees();
     const html = DOMAINES.map(d => {
-      const apps = vis.filter(a => a.dom === d.id);
-      if (!apps.length) return '';
+      const dr = rs.filter(r => r.app.dom === d.id);
+      if (!dr.length) return '';
+      const apps = [...new Set(dr.map(r => r.app))];
+      const nApps = dr.filter(r => r.niveau === 'app').length;
+      const compte = nApps === dr.length ? ACC.pluriel(nApps, 'application') : ACC.pluriel(dr.length, 'résultat');
       return `
         <section class="dom d-${d.id}" id="${d.id}">
-          <div class="dom-t"><h2>${d.nom}</h2><span>${ACC.pluriel(apps.length, 'application')}</span></div>
+          <div class="dom-t"><h2>${d.nom}</h2><span>${compte}</span></div>
           <div class="lignes">
-            ${apps.map(a => `
-              <a class="app" href="./${a.dossier}/index.html">
-                <div class="app-c">
-                  <div class="app-t"><b>${a.titre}</b>${ACC.etiquettes(a)}</div>
-                  <p class="app-d">${a.desc}</p>
-                </div>
-                ${avancement(a)}
-                <span class="app-f">${ACC.fleche}</span>
-              </a>`).join('')}
+            ${apps.map(a => {
+              const ar = dr.filter(r => r.app === a);
+              if (ar[0].niveau === 'app') return ligneApp(a);
+              return `<div class="grp"><a class="grp-t" href="${lienApp(a)}"><b>${surligner(a.titre)}</b>${ACC.etiquettes(a)}${avancement(a)}</a>${ar.map(sousLigne).join('')}</div>`;
+            }).join('')}
           </div>
         </section>`;
     }).join('');
     document.getElementById('liste').innerHTML = html ||
-      '<div class="vide"><p>Aucune application pour ce choix.</p><button type="button" class="btn-small" id="vider">Tout afficher</button></div>';
+      `<div class="vide"><p>${ACC.mots().length ? 'Aucun résultat pour cette recherche.' : 'Aucune application pour ce choix.'}</p><button type="button" class="btn-small" id="vider">Tout afficher</button></div>`;
     const v = document.getElementById('vider');
     if (v) v.onclick = () => ACC.toutAfficher();
-    document.getElementById('compteur').classList.toggle('trie', ACC.actif());
-    document.getElementById('compteur').innerHTML = ACC.actif()
-      ? `<span>${vis.length} / ${APPS.length} applications</span><button type="button" class="btn-small" data-tout="1">Tout afficher</button>`
+    // compteur : applications entières, modules, pages (seulement les nombres non nuls)
+    const n = k => rs.filter(r => r.niveau === k).length;
+    const parts = [[n('app'), 'application'], [n('mod'), 'module'], [n('page'), 'page']].filter(x => x[0]).map(x => ACC.pluriel(x[0], x[1]));
+    const c = document.getElementById('compteur');
+    c.classList.toggle('trie', ACC.actif());
+    c.innerHTML = ACC.actif()
+      ? `<span>${parts.join(' + ') || 'Aucun résultat'}</span><button type="button" class="btn-small" data-tout="1">Tout afficher</button>`
       : `${APPS.length} applications`;
   }
 
-  function maj() { pastilles(); liste(); }
+  /* ---------- Champ de recherche et suggestions ---------- */
+  const champ = document.getElementById('q'), boite = document.getElementById('rch-liste'), effacer = document.getElementById('effacer');
+  let sel = -1, sugg = [];
+
+  function fermer() {
+    boite.hidden = true; sel = -1;
+    champ.setAttribute('aria-expanded', 'false'); champ.removeAttribute('aria-activedescendant');
+  }
+  function suggestions() {
+    const ms = ACC.mots();
+    let h;
+    if (!ms.length) {
+      // champ vide : idées de recherche
+      sugg = [];
+      h = '<p class="rch-titre">Idées de recherche</p><div class="rch-idees">' +
+        ACC.IDEES.map(i => `<button type="button" class="puce" data-idee="${esc(i)}">${esc(i)}</button>`).join('') + '</div>';
+    } else {
+      // les meilleurs résultats d'abord (même tri par domaine, niveau et type que la liste)
+      const rs = ACC.rangees();
+      // une application entière peut aussi proposer son module ou sa page la plus précise
+      const tous = rs.concat(...rs.map(r => r.details || [])).sort((x, y) => y.score - x.score);
+      sugg = tous.slice(0, 7);
+      h = !sugg.length ? '<p class="rch-rien">Aucun résultat. Essaie un autre mot (« vitesse », « pile », « simulateur »…).</p>'
+        : '<p class="rch-titre">Suggestions</p>' + sugg.map((r, i) => {
+          const a = r.app;
+          let ic, t, sous, href;
+          if (r.niveau === 'app') { ic = 'App'; t = a.titre; sous = 'Application · ' + ACC.domaine(a.dom).nom; href = lienApp(a); }
+          else if (r.niveau === 'mod') { ic = 'M' + r.mod.n; t = `Module ${r.mod.n} : ${r.mod.t}`; sous = a.titre; href = lienMod(r.mod); }
+          else {
+            // page au nom générique (« Cours », « Entraînement »…) : on ajoute le titre de son module
+            const p = r.page, generique = p.mod && !/[:·]/.test(p.l) && p.l.length < 14;
+            ic = ICONES[p.c]; t = generique ? `${p.l} · ${p.mod.t}` : p.l; sous = CATS[p.c] + ' · ' + a.titre; href = lienPage(p);
+          }
+          return `<a class="sug d-${a.dom}${i === sel ? ' sel' : ''}" role="option" aria-selected="${i === sel}" id="sug-${i}" href="${href}">` +
+            `<span class="sug-ic" aria-hidden="true">${ic}</span><span class="sug-c"><b>${surligner(t)}</b><small>${surligner(sous)}</small></span></a>`;
+        }).join('') + (rs.length > sugg.length ? `<button type="button" class="sug sug-tout" data-voir="1">Voir les ${rs.length} résultats dans la liste</button>` : '');
+    }
+    boite.innerHTML = h;
+    boite.hidden = false;
+    champ.setAttribute('aria-expanded', 'true');
+    if (sel >= 0) champ.setAttribute('aria-activedescendant', 'sug-' + sel); else champ.removeAttribute('aria-activedescendant');
+  }
+  // Entrée sans suggestion choisie, ou « Voir les … résultats » : on referme et on montre la liste
+  function voirListe() {
+    fermer();
+    champ.blur();                        // téléphone : le clavier se ferme, la liste est visible
+  }
+  champ.addEventListener('input', () => { sel = -1; effacer.hidden = !champ.value; ACC.chercher(champ.value); suggestions(); });
+  champ.addEventListener('focus', () => {
+    suggestions();
+    // téléphone : la barre de recherche monte en haut de l'écran, pour laisser la place aux suggestions au-dessus du clavier
+    const haut = document.getElementById('tri').parentElement.getBoundingClientRect().top;
+    if (matchMedia('(max-width: 760px)').matches && haut > 0) scrollTo({ top: scrollY + haut, behavior: 'smooth' });
+  });
+  champ.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (boite.hidden) return suggestions();
+      if (!sugg.length) return;
+      e.preventDefault();
+      // -1 = aucune suggestion choisie (le texte tapé), puis 0 … n-1
+      if (e.key === 'ArrowDown') sel = sel + 1 >= sugg.length ? -1 : sel + 1;
+      else sel = sel - 1 < -1 ? sugg.length - 1 : sel - 1;
+      suggestions();
+      const s = document.getElementById('sug-' + sel);
+      if (s) s.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (sel >= 0 && !boite.hidden) document.getElementById('sug-' + sel).click(); else voirListe();
+    } else if (e.key === 'Escape') fermer();
+  });
+  effacer.addEventListener('click', () => { champ.value = ''; effacer.hidden = true; ACC.chercher(''); champ.focus(); suggestions(); });
+  boite.addEventListener('mousedown', e => e.preventDefault());        // le champ garde le focus
+  boite.addEventListener('click', e => {
+    const i = e.target.closest('[data-idee]');
+    if (i) { champ.value = i.dataset.idee; effacer.hidden = false; ACC.chercher(champ.value); suggestions(); return; }
+    if (e.target.closest('[data-voir]')) voirListe();
+  });
+  // un appui ailleurs referme la liste déroulante
+  document.addEventListener('pointerdown', e => { if (!e.target.closest('#rch')) fermer(); });
+  // le champ suit l'état (« Tout afficher » vide aussi la recherche)
+  function majChamp() {
+    if (champ.value !== ACC.requete()) champ.value = ACC.requete();
+    effacer.hidden = !champ.value;
+  }
+
+  function maj() { pastilles(); majChamp(); liste(); }
   ACC.surChangement(() => {
-    // après un tri, on ramène le haut de la liste sous la barre si on l'avait dépassé
+    // après un tri ou une recherche, on ramène le haut de la liste sous la barre si on l'avait dépassé
     const tri = document.getElementById('tri');
     const haut = tri.parentElement.getBoundingClientRect().top;
     maj();
@@ -569,13 +990,34 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
   // avancement à jour après une reprise de progression (assets/progression.js)
   ACC.rafraichir = liste;
   // retour arrière depuis une application : la page revient du cache, l'avancement a pu changer
-  addEventListener('pageshow', e => { if (e.persisted) liste(); });
+  addEventListener('pageshow', e => { if (e.persisted) { fermer(); liste(); } });
 
-  /* ---------- La barre perd ses coins arrondis quand elle est collée en haut ---------- */
-  const tri = document.getElementById('tri');
-  const coller = () => tri.classList.toggle('colle', tri.getBoundingClientRect().top <= 0 && tri.parentElement.getBoundingClientRect().top < 0);
-  addEventListener('scroll', coller, { passive: true });
-  coller();
+  /* ---------- Barre collée en haut ----------
+     - elle perd ses coins arrondis quand elle est collée ;
+     - téléphone : les pastilles se cachent quand on descend dans la liste
+       et reviennent dès qu'on remonte ; la recherche reste. La hauteur
+       retirée est rendue en marge sous la barre : la liste ne saute pas. */
+  const tri = document.getElementById('tri'), triG = document.getElementById('tri-g');
+  const telephone = matchMedia('(max-width: 760px)');
+  let replie = false, dernierY = scrollY;
+  function replier(oui) {
+    if (oui === replie) return;
+    replie = oui;
+    if (oui) { tri.style.marginBottom = triG.offsetHeight + 'px'; tri.classList.add('replie'); }
+    else { tri.classList.remove('replie'); tri.style.marginBottom = ''; }
+  }
+  function defiler() {
+    const colle = tri.getBoundingClientRect().top <= 0 && tri.parentElement.getBoundingClientRect().top < 0;
+    tri.classList.toggle('colle', colle);
+    const y = scrollY, dy = y - dernierY;
+    if (!telephone.matches || !colle) replier(false);
+    else if (dy > 8) replier(true);
+    else if (dy < -8) replier(false);
+    if (Math.abs(dy) > 8 || !colle) dernierY = y;
+  }
+  addEventListener('scroll', defiler, { passive: true });
+  telephone.addEventListener('change', () => replier(false));
+  defiler();
 
   ACC.parallaxe();
 })();
