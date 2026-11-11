@@ -657,7 +657,7 @@ body { margin: 0; background: var(--paper); line-height: 1.5; }
 .feuille { position: relative; background: var(--sheet); border-radius: 28px 28px 0 0; margin-top: -28px; padding-bottom: 32px; }
 
 /* ---------- Recherche ---------- */
-.rch { position: relative; padding-top: 22px; }
+.rch { position: relative; padding-top: 18px; }
 .rch-champ { position: relative; display: flex; align-items: center; }
 .rch-champ svg { position: absolute; left: 18px; width: 20px; height: 20px; color: var(--ink-3); pointer-events: none; }
 .rch input {
@@ -709,15 +709,21 @@ body { margin: 0; background: var(--paper); line-height: 1.5; }
 .puce[aria-pressed="true"] .ic { background: rgba(255,255,255,.18); color: #fff; }
 .sep { flex-shrink: 0; width: 1px; height: 22px; background: var(--paper-3); margin: 0 4px; }
 
-.tri { position: sticky; top: 52px; z-index: 10; background: color-mix(in srgb, var(--sheet) 94%, transparent);
+/* barre collée en haut : recherche + pastilles (top: 52px = bandeau de la maquette ; 0 sur le portail) */
+.tri { position: sticky; top: 52px; z-index: 10; border-radius: 28px 28px 0 0; background: color-mix(in srgb, var(--sheet) 94%, transparent);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-.tri .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 28px; padding-top: 14px; padding-bottom: 14px; }
+.tri .tri-g { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 28px; padding-top: 14px; padding-bottom: 14px; }
 .groupe { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .groupe-lab { flex-shrink: 0; margin-right: 4px; font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); }
 .compteur { margin-left: auto; font-size: .85rem; font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .compteur button { margin-left: 8px; }
 @media (max-width: 760px) {
-  .tri .wrap { display: block; padding: 10px 0 4px; }
+  .tri .tri-g { display: block; padding: 10px 0 4px; }
+  .rch { padding-top: 10px; }
+  .rch input { height: 44px !important; }
+  .rch-champ svg { left: 15px; }
+  .groupe { padding-bottom: 6px; }
+  .groupe .puce { height: 32px !important; padding: 0 12px !important; }
   .groupe { overflow-x: auto; padding: 0 16px 8px; scrollbar-width: none; }
   .groupe::-webkit-scrollbar { display: none; }
   .groupe .puce { height: 34px; padding: 0 13px; }
@@ -827,7 +833,8 @@ select { height: 34px; border: 1.5px solid var(--paper-3); border-radius: 12px; 
 </div></header>
 
 <main class="feuille">
-  <!-- barre de recherche : au-dessus des pastilles -->
+  <!-- barre collée en haut : recherche, puis pastilles -->
+  <div class="tri" id="tri">
   <div class="wrap rch" id="rch">
     <div class="rch-champ">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
@@ -837,7 +844,7 @@ select { height: 34px; border: 1.5px solid var(--paper-3); border-radius: 12px; 
     </div>
     <div class="rch-liste" id="rch-liste" role="listbox" hidden></div>
   </div>
-  <div class="tri" id="tri"><div class="wrap">
+  <div class="wrap tri-g">
     <div class="groupe" role="group" aria-label="Domaine" id="g-dom"></div>
     <div class="groupe" role="group" aria-label="Niveau" id="g-niv"></div>
     <div class="groupe" role="group" aria-label="Type" id="g-typ"></div>
@@ -849,14 +856,11 @@ select { height: 34px; border: 1.5px solid var(--paper-3); border-radius: 12px; 
 <!-- ====== 2. Classement des pages ====== -->
 <section class="cls" id="classement"><div class="wrap">
   <h2>Classement des pages</h2>
-  <p>Chaque page de chaque application reçoit un type. Les règles s'appliquent par défaut ; tu peux changer une page à la main. L'aperçu au-dessus et le bilan se mettent à jour tout de suite. Tes choix restent dans ce navigateur ; « Copier mes choix » donne un texte à me renvoyer.</p>
+  <p>Chaque page de chaque application reçoit un type. Tes choix sont maintenant la proposition par défaut ; tu peux encore changer une règle ou une page. L'aperçu au-dessus et le bilan se mettent à jour tout de suite. Tes choix restent dans ce navigateur ; « Copier mes choix » donne un texte à me renvoyer.</p>
 
   <div class="carte">
-    <h3>Pastilles</h3>
-    <div class="options">
-      <label><input type="checkbox" id="o-regroupe"> Regrouper Simulateurs, Animations et Ateliers en une seule pastille, nommée <input type="text" id="o-nom" value="Manipuler"></label>
-      <label><input type="checkbox" id="o-fiche"> Pastille « Fiches » (fiches récapitulatives)</label>
-    </div>
+    <h3>Pastilles de type</h3>
+    <p style="margin:0">Deux pastilles seulement : <b>Manipuler</b> (pages classées Simulateur, Animation ou Atelier) et <b>Fiches</b> (fiches récapitulatives). Les autres types (Activité, Cours, Exercices) n'ont pas de pastille ; ils servent aux libellés des résultats de recherche.</p>
   </div>
 
   <div class="carte">
@@ -930,27 +934,30 @@ const DATA = [{"d":"decroissance-radioactive","t":"Désintégration radioactive"
     { id: 'sim-activite', txt: 'Simulation « Activité : … »', def: 'activite' },
     { id: 'sim-autre', txt: 'Autre simulation', def: 'simulateur' },
     { id: 'exemple', txt: 'Exemple', def: 'cours' },
-    { id: 'entrainement', txt: 'Entraînement', def: 'questions' },
+    { id: 'entrainement', txt: 'Entraînement', def: 'exercices' },
     { id: 'seul', txt: 'Application d\'une page (sans plan)', def: 'questions' },
     { id: 'cours', txt: 'Cours', def: 'cours' },
-    { id: 'questions', txt: 'Questions', def: 'questions' },
+    { id: 'questions', txt: 'Questions', def: 'exercices' },
     { id: 'exercices', txt: 'Exercices', def: 'exercices' }
   ];
 
   // Proposition page par page (écarts à la règle) et pages « à trancher » (raison affichée)
   const PROPOSITION = {
     'decroissance-radioactive/seul': 'simulateur',
-    'montage-electrique/module_1a_manip': 'simulateur'
+    'montage-electrique/module_1a_manip': 'simulateur',
+    'principe-dynamique/module_2_simulation': 'atelier',
+    'periode-frequence/module_2_manip': 'atelier',
+    'titrage-ph/module_3a_equivalence': 'atelier'
   };
   const DOUTES = {
     'energie-cinetique/module_1_simulation': 'La traînée : activité documentaire (5 documents sur les frottements de l\'air et la portance d\'un avion, puis questions). Pas de simulateur.',
-    'energie-puissance/module_1_simulation': 'La STEP : activité documentaire (tu la ranges dans le 2e groupe : Activités, ou Questions ?).',
+    'energie-puissance/module_1_simulation': 'La STEP : activité documentaire, hors « Manipuler ».',
     'energie-lumiere/module_1_simulation': 'Activité documentaire (2 documents, schémas énergétiques à compléter).',
     'energie-lumiere/module_3b_simulation': 'Activité documentaire avec calculs (photon, fréquence, longueur d\'onde).',
     'radioactivite/module_1_simulation': 'Activité documentaire (3 documents, puis questions).',
     'transport-electricite/module_2_simulation': 'Manipulation d\'un transformateur virtuel (nombre de spires) : simulateur, même sans le mot dans le titre.',
-    'principe-dynamique/module_2_simulation': 'Titre « Atelier » mais c\'est un exemple de méthode (diagramme objet-action) : Cours ou Atelier ?',
-    'montage-electrique/module_1a_manip': 'Prise en main guidée du simulateur de montage : Simulateur ou Questions ?',
+    'principe-dynamique/module_2_simulation': 'Exemple de méthode (diagramme objet-action) avec le titre « Atelier » : classé Atelier.',
+    'montage-electrique/module_1a_manip': 'Prise en main guidée du simulateur de montage : classée Simulateur.',
     'montage-electrique/module_2_manip': 'Repérer boucle principale et dérivations sur un schéma (interactif).',
     'montage-electrique/module_3_manip': 'Brancher un multimètre dans le simulateur de montage.',
     'montage-electrique/module_3b_oscilloscope': 'Brancher un oscilloscope dans le simulateur de montage.',
@@ -960,10 +967,10 @@ const DATA = [{"d":"decroissance-radioactive","t":"Désintégration radioactive"
     'titrage-ph/module_1a_dilution': 'Étape du TP virtuel : dilution.',
     'titrage-ph/module_1b_montage': 'Étape du TP virtuel : montage du titrage.',
     'titrage-ph/module_3a_equivalence': 'Étape du TP virtuel : repérer l\'équivalence sur la courbe.',
-    'puissances-10/seul': 'Une seule page d\'entraînement : Questions ou Exercices ?',
-    'conversions/seul': 'Une seule page d\'entraînement : Questions ou Exercices ?',
-    'equations-college/seul': 'Une seule page d\'entraînement : Questions ou Exercices ?',
-    'fractions-college/seul': 'Une seule page d\'entraînement : Questions ou Exercices ?'
+    'puissances-10/seul': 'Une seule page d\'entraînement.',
+    'conversions/seul': 'Une seule page d\'entraînement.',
+    'equations-college/seul': 'Une seule page d\'entraînement.',
+    'fractions-college/seul': 'Une seule page d\'entraînement.'
   };
 
   // Mots-clés ajoutés à la main (exemples pour la maquette)
@@ -995,15 +1002,15 @@ const DATA = [{"d":"decroissance-radioactive","t":"Désintégration radioactive"
       m.app = a;
       m.pages.forEach(p => {
         p.app = a; p.mod = m; p.id = a.d + '/' + p.k;
-        p.nom = p.l || (p.ty === 'fiche' ? 'Fiche récapitulative' : NOMS[p.ty] + (p.p && p.p !== m.t ? ' · ' + p.p : ''));
+        p.nom = p.ty === 'fiche' ? 'Fiche : ' + m.t : p.l || (NOMS[p.ty] + (p.p && p.p !== m.t ? ' · ' + p.p : ''));
         a.pages.push(p); PAGES.push(p);
       });
     });
   });
 
   /* ---------- Réglages de la maquette (gardés dans le navigateur) ---------- */
-  const CLE = 'maquette-recherche-types';
-  let reglages = { regroupe: false, nomGroupe: 'Manipuler', fiche: false, regles: {}, choix: {} };
+  const CLE = 'maquette-recherche-types-v2';
+  let reglages = { regles: {}, choix: {} };
   try { Object.assign(reglages, JSON.parse(localStorage.getItem(CLE)) || {}); } catch (e) { /* stockage indisponible */ }
   const sauver = () => { try { localStorage.setItem(CLE, JSON.stringify(reglages)); } catch (e) { /* rien */ } };
 
@@ -1025,14 +1032,11 @@ const DATA = [{"d":"decroissance-radioactive","t":"Désintégration radioactive"
 
   /* ---------- Pastilles de type affichées ---------- */
   function pastillesType() {
-    const utilises = new Set(PAGES.map(typeDe));
-    const liste = [];
-    const g1 = ['simulateur', 'animation', 'atelier'].filter(c => utilises.has(c));
-    if (reglages.regroupe && g1.length) liste.push({ id: 'g1', nom: reglages.nomGroupe || 'Manipuler', ic: '▸', cats: g1, g: 1 });
-    else g1.forEach(c => liste.push({ id: c, nom: CATS[c].nom, ic: CATS[c].ic, cats: [c], g: 1 }));
-    ['activite', 'cours', 'questions', 'exercices'].concat(reglages.fiche ? ['fiche'] : [])
-      .filter(c => utilises.has(c)).forEach(c => liste.push({ id: c, nom: CATS[c].nom, ic: CATS[c].ic, cats: [c], g: 2 }));
-    return liste;
+    // deux pastilles seulement : Manipuler (simulateurs, animations, ateliers) et Fiches
+    return [
+      { id: 'manipuler', nom: 'Manipuler', ic: '▸', cats: ['simulateur', 'animation', 'atelier'], g: 1 },
+      { id: 'fiche', nom: 'Fiches', ic: '≡', cats: ['fiche'], g: 2 }
+    ];
   }
 
   /* ---------- État du tri ---------- */
@@ -1062,7 +1066,7 @@ const DATA = [{"d":"decroissance-radioactive","t":"Désintégration radioactive"
   }
   // Score d'une page : chaque mot doit être trouvé dans la page, son module ou son application
   function scorePage(p, mots) {
-    const a = p.app, m = p.mod, cat = norm(CATS[typeDe(p)].un + ' ' + CATS[typeDe(p)].nom);
+    const a = p.app, m = p.mod, c = typeDe(p), cat = norm(CATS[c].un + ' ' + CATS[c].nom + (CATS[c].g === 1 ? ' manipuler' : ''));
     let total = 0;
     for (const w of mots) {
       const s = Math.max(
@@ -1167,12 +1171,12 @@ const DATA = [{"d":"decroissance-radioactive","t":"Désintégration radioactive"
       const m = r.mod;
       const types = [...new Set(r.pages.map(p => CATS[typeDe(p)].un))].join(', ');
       return `<a class="res" href="${lienMod(m)}"><span class="res-ic">M${m.n}</span><span class="res-c">
-        <b>Module ${m.n} : ${surligner(m.t)}</b><small>Module entier · ${pluriel(r.pages.length, 'page')} · ${types}</small></span><span class="app-f">${fleche}</span></a>`;
+        <b>Module ${m.n} : ${surligner(m.t)}</b><small>Module entier · ${pluriel(r.pages.length, 'page')} · ${types} · ouvre l'accueil, module déplié</small></span><span class="app-f">${fleche}</span></a>`;
     }
     const p = r.page;
-    const ctx = p.mod ? `Module ${p.mod.n} : ${esc(p.mod.t)}` : '';
+    const ctx = !p.mod ? '' : p.ty === 'fiche' ? `Module ${p.mod.n}` : `Module ${p.mod.n} : ${esc(p.mod.t)}`;
     return `<a class="res" href="${lienPage(p)}"><span class="res-ic">${icPage(p)}</span><span class="res-c">
-      <b>${surligner(p.nom)}</b><small>${CATS[typeDe(p)].un}${ctx ? ' · ' + ctx : ''}</small></span><span class="app-f">${fleche}</span></a>`;
+      <b>${surligner(p.nom)}</b><small>${p.ty === 'fiche' ? 'Fiche récapitulative' : CATS[typeDe(p)].un}${ctx ? ' · ' + ctx : ''}</small></span><span class="app-f">${fleche}</span></a>`;
   }
 
   function liste() {
@@ -1193,9 +1197,10 @@ const DATA = [{"d":"decroissance-radioactive","t":"Désintégration radioactive"
     const actif = filtre.dom.size || filtre.niv.size || filtre.typ.size || requete.trim();
     const c = document.getElementById('compteur');
     c.classList.toggle('trie', !!actif);
-    const nApps = rs.filter(r => r.niveau === 'app').length, nAutres = rs.length - nApps;
+    const nApps = rs.filter(r => r.niveau === 'app').length, nMods = rs.filter(r => r.niveau === 'mod').length, nPages = rs.length - nApps - nMods;
+    const parts = [[nApps, 'application'], [nMods, 'module'], [nPages, 'page']].filter(x => x[0]).map(x => pluriel(x[0], x[1]));
     c.innerHTML = actif
-      ? `<span>${pluriel(nApps, 'application')}${nAutres ? ' + ' + nAutres + ' module' + (nAutres > 1 ? 's ou pages' : ' ou page') : ''}</span><button type="button" class="btn-small" data-tout="1">Tout afficher</button>`
+      ? `<span>${parts.join(' + ') || 'Aucun résultat'}</span><button type="button" class="btn-small" data-tout="1">Tout afficher</button>`
       : `${DATA.length} applications`;
   }
 
@@ -1221,7 +1226,8 @@ const DATA = [{"d":"decroissance-radioactive","t":"Désintégration radioactive"
   function basculer(g, id) {
     const s = filtre[g];
     if (s.has(id)) s.delete(id); else s.add(id);
-    const total = g === 'dom' ? DOMAINES.length : g === 'niv' ? NIVEAUX.length : pastillesType().length;
+    // toutes les étiquettes choisies = aucune (domaine, niveau) ; pas pour le type, qui ne couvre pas toutes les pages
+    const total = g === 'dom' ? DOMAINES.length : g === 'niv' ? NIVEAUX.length : Infinity;
     if (s.size === total) s.clear();
     maj();
   }
@@ -1322,11 +1328,12 @@ const DATA = [{"d":"decroissance-radioactive","t":"Désintégration radioactive"
     document.getElementById('bilan').innerHTML = '<tr><th>Pastille</th><th>Applications entières</th><th>Modules entiers</th><th>Pages seules</th><th>Pages en tout</th></tr>' + lignes;
   }
 
-  let vueInv = 'doutes';
+  let vueInv = 'manipuler';
   function inventaire() {
     const nonStd = p => !['cours', 'questions', 'fiche', 'exercices'].includes(p.ty);
     const filtres = [
-      { id: 'doutes', nom: 'À trancher', f: p => DOUTES[p.id] },
+      { id: 'manipuler', nom: 'Dans « Manipuler »', f: p => ['simulateur', 'animation', 'atelier'].includes(typeDe(p)) },
+      { id: 'doutes', nom: 'Commentées', f: p => DOUTES[p.id] },
       { id: 'speciales', nom: 'Simulations, entraînements, exemples', f: nonStd },
       { id: 'changees', nom: 'Changées par toi', f: p => reglages.choix[p.id] },
       { id: 'toutes', nom: 'Toutes', f: p => p.ty !== 'fiche' }
@@ -1352,13 +1359,10 @@ const DATA = [{"d":"decroissance-radioactive","t":"Désintégration radioactive"
     const t = e.target;
     if (t.dataset.regle) reglages.regles[t.dataset.regle] = t.value;
     else if (t.dataset.page) { if (t.value) reglages.choix[t.dataset.page] = t.value; else delete reglages.choix[t.dataset.page]; }
-    else if (t.id === 'o-regroupe') reglages.regroupe = t.checked;
-    else if (t.id === 'o-fiche') reglages.fiche = t.checked;
     else return;
     filtre.typ.clear();
     sauver(); tout();
   });
-  document.getElementById('o-nom').addEventListener('input', e => { reglages.nomGroupe = e.target.value; sauver(); pastilles(); bilan(); });
   classement.addEventListener('click', e => {
     const v = e.target.closest('[data-vue]');
     if (v) { vueInv = v.dataset.vue; inventaire(); return; }
@@ -1371,25 +1375,22 @@ const DATA = [{"d":"decroissance-radioactive","t":"Désintégration radioactive"
     }
   });
   document.getElementById('defaut').addEventListener('click', () => {
-    reglages = { regroupe: false, nomGroupe: 'Manipuler', fiche: false, regles: {}, choix: {} };
-    sauver(); document.getElementById('o-regroupe').checked = false; document.getElementById('o-fiche').checked = false; document.getElementById('o-nom').value = 'Manipuler';
+    reglages = { regles: {}, choix: {} };
+    sauver();
     filtre.typ.clear(); tout();
   });
   // Texte des choix (écarts à la proposition), à copier
   document.getElementById('copier').addEventListener('click', () => {
-    const l = ['Pastilles : ' + pastillesType().map(t => t.nom).join(', ')];
+    const l = [];
     REGLES.forEach(r => { if (reglages.regles[r.id] && reglages.regles[r.id] !== r.def) l.push(`Règle « ${r.txt} » → ${CATS[reglages.regles[r.id]].un}`); });
     PAGES.forEach(p => { if (reglages.choix[p.id] && reglages.choix[p.id] !== typeDefaut(p)) l.push(`${p.app.t} / ${p.nom} → ${CATS[reglages.choix[p.id]].un}`); });
     const zone = document.getElementById('copie');
-    zone.value = l.join('\n'); zone.hidden = false; zone.select();
+    zone.value = l.join('\n') || 'Aucun changement.'; zone.hidden = false; zone.select();
     try { navigator.clipboard.writeText(zone.value); } catch (e) { /* le texte reste sélectionné */ }
   });
 
   function maj() { pastilles(); liste(); }
   function tout() { maj(); regles(); bilan(); inventaire(); }
-  document.getElementById('o-regroupe').checked = reglages.regroupe;
-  document.getElementById('o-fiche').checked = reglages.fiche;
-  document.getElementById('o-nom').value = reglages.nomGroupe;
   tout();
 })();
 </script>
