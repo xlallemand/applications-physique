@@ -70,7 +70,10 @@ window.ORTHO_BANQUE = {
       'La#1 {mer|LX11|mère/maire}#1 {était|SV1}@1 {calme|GN4|calmes} ce matin-là.',
       'Le#1 soleil#1 {se|HO6|ce} {couchait|EE2}@1 derrière les {îles|GN1}.',
       '{Ça|HO17|Sa}#1 {sentait|SV1}@1 le sel {et|HO2} les {algues|GN1}.',
-      'Vous#1 {regardez|EE2|regarder/regardé}@1 la mer depuis la terrasse.'
+      'Vous#1 {regardez|EE2|regarder/regardé}@1 la mer depuis la terrasse.',
+      // majuscule ou minuscule après ! ? … et les guillemets (règle LX13)
+      '« {Attention|LX13|attention}, la#2 {marée|LX7|maré}#2 {monte|SV1|montes/montent}@2 ! » {cria|LX13|Cria}@1 le#1 {vieux|GN2|vieil/vieille}#1 {pêcheur|LX3|pécheur}#1.',
+      '{Quelle|HO15|Quel/Qu’elle} chance ! {Nous|LX13|nous}#1 {avons|CJ6|avions/ont}@1 {vu|PP3|vus/vue}@1 des {dauphins|GN1} près du bateau.'
     ],
 
     /* ------------------------------------------------------------ la ville */
@@ -99,7 +102,10 @@ window.ORTHO_BANQUE = {
       'Les#1 {Français|LX13|français}#1 {aiment|SV2|aime/aimes}@1 flâner sur les {places|GN1} {ombragées|GN2|ombragée/ombragés}.',
       'Le#1 {garçon|LX5|garcon}#1 {reçut|LX5|recut/reçu}@1 une lettre de sa {tante|LX11|tente}.',
       '{Ce|HO6|Se} que je#1 {préférais|SV1}@1, {c’était|HO17|s’était}@2#2 le marché du samedi.',
-      'Vous#1 {traversez|EE2|traverser/traversé}@1 la place {et|HO2} vous#2 {tournez|EE2|tourner/tourné}@2 {à|HO1} droite.'
+      'Vous#1 {traversez|EE2|traverser/traversé}@1 la place {et|HO2} vous#2 {tournez|EE2|tourner/tourné}@2 {à|HO1} droite.',
+      // majuscule ou minuscule après ! ? … et les guillemets (règle LX13)
+      '« Tu#1 {descends|CJ1|descend/descent}@1 au prochain arrêt ? » {demanda|LX13|Demanda}@2 ma#2 voisine#2.',
+      'Le#1 vendeur#1 nous {lança|LX5|lanca}@1 : « {Revenez|LX13|revenez}@2 demain ! »'
     ],
 
     /* ------------------------------------------------------------ la campagne */
@@ -127,7 +133,10 @@ window.ORTHO_BANQUE = {
       'Il#1 {fallait|CJ2|fallaient/fallais}@1 qu’ il#2 {partît|CJ9|partit/partis}@2 avant l’aube.',
       'Le#1 village#1 {comptait|SV1}@1 à peine {mille|GN7|milles/mil} {habitants|GN1}.',
       'La#1 rivière#1 {coulait|EE2}@1 {là|HO8|la/l’a}, tout en bas du pré.',
-      'Les#1 {bourgeons|LX6|bourgons}#1 {éclataient|SV2}@1 sur les {branches|GN1}.'
+      'Les#1 {bourgeons|LX6|bourgons}#1 {éclataient|SV2}@1 sur les {branches|GN1}.',
+      // majuscule ou minuscule après ! ? … et les guillemets (règle LX13)
+      '« {Regarde|LX13|regarde}@1 ces {vaches|GN1} ! » {dit|LX13|Dit}@2 mon#2 {grand-père|LX12|grand père}#2 en {souriant|PP6|sourient}.',
+      'Les#1 {foins|GN1}#1 {étaient|SV2}@1 {rentrés|PP1|rentré/rentrées}@1 ! {Le|LX13|le}#2 fermier#2 {pouvait|SV1|pouvais/pouvaient}@2 enfin se reposer.'
     ],
 
     /* ------------------------------------------------------------ le collège */
@@ -155,7 +164,11 @@ window.ORTHO_BANQUE = {
       'Le#1 professeur#1 {peut|HO13|peu/peux}@1 nous {aider|EE1} si nous#2 le lui {demandons|SV1|demandont/demandions}@2.',
       'Tu#1 {prendras|CJ5|prendrais/prendra}@1 le bus {ou|HO5|où} le vélo ?',
       'Il#1 {portait|SV1}@1 des {chaussettes|GN1} {marron|GN7|marrons}.',
-      'Les#1 {élèves|GN1}#1, {riant|PP6|riants/riantes} {et|HO2} {criant|PP6|criants/criantes}, {sortirent|CJ3|sortires/sortaient}@1 de la classe.'
+      'Les#1 {élèves|GN1}#1, {riant|PP6|riants/riantes} {et|HO2} {criant|PP6|criants/criantes}, {sortirent|CJ3|sortires/sortaient}@1 de la classe.',
+      // majuscule ou minuscule après ! ? … et les guillemets (règle LX13)
+      'Le#1 {professeur|LX2|proffesseur/profeseur}#1 nous {annonça|LX5|annonca}@1 : « {Vous|LX13|vous}#2 {aurez|CJ5|aurai/auriez}@2 une {dictée|LX7|dicté} demain. »',
+      '« Qui#1 {a|HO1|à}@1 {oublié|PP3|oubliée/oublier}@1 son cahier ? » {demanda|LX13|Demanda}@2 la#2 surveillante#2.',
+      '« {À|LX13|A} demain ! » {lança|LX13|Lança}@1 mon#1 ami#1 en {partant|PP6|partent}.'
     ],
 
     /* ------------------------------------------------------------ la maison */
@@ -187,7 +200,10 @@ window.ORTHO_BANQUE = {
       'Le#1 chat#1 {frottait|SV1}@1 {son|HO3} {museau|LX14|musau} contre ma main.',
       'Une#1 {douce|GN3|doux/douces}#1 {nostalgie|LX14|nostaljie}#1 m’{envahissait|SV1}@1 {quand|HO12} je#2 {revoyais|SV1|revoyait/revoyaient}@2 ces photos.',
       'Cette boîte, ma#1 grand-mère#1 {l’a|HO8|la/là}@1 {rangée|PP4|rangé/rangés}@1 {là|HO8|la/l’a}, sur l’étagère.',
-      'Mon#1#2 père#1#2 {essuyait|LX9|essuiait/essuillait}@1 la vaisselle {et|HO2} {chantonnait|SV1}@2.'
+      'Mon#1#2 père#1#2 {essuyait|LX9|essuiait/essuillait}@1 la vaisselle {et|HO2} {chantonnait|SV1}@2.',
+      // majuscule ou minuscule après ! ? … et les guillemets (règle LX13)
+      'Ma#1 mère#1 {appela|LX2|appella}@1 depuis la cuisine : « {Le|LX13|le}#2 {repas|LX4|repa}#2 {est|HO2|et}@2 {prêt|HO19|près/prés} ! »',
+      '« {Éteins|LX13|éteins/Eteins}@1 la lumière ! » {me|LX13|Me} {dit|SV3|dis/disent}@2 mon#2 frère#2.'
     ],
 
     /* ------------------------------------------------------------ la montagne */
@@ -213,7 +229,11 @@ window.ORTHO_BANQUE = {
       'Il#1 {faisait|SV1}@1 {froid|LX4|froi} : nous#2 {avions|CJ2|avons/avaient}@2 {faim|LX11|fin} {et|HO2} soif.',
       'Les#1 {voyageurs|GN1}#1 {étaient|SV2}@1 {prêts|HO19|près/prêt} {à|HO1} {partir|EE1|partire/parti} {dès|LX3|des} l’aube.',
       'Bien qu’ il#1 {fût|CJ9|fut/fus}@1 {tard|LX1}, les#2 {alpinistes|GN1}#2 {continuèrent|CJ3|continuairent/continuaient}@2 leur ascension.',
-      'Nous#1 {mangions|LX6|mangeions/mangons}@1 au refuge {après|LX1} la course.'
+      'Nous#1 {mangions|LX6|mangeions/mangons}@1 au refuge {après|LX1} la course.',
+      // majuscule ou minuscule après ! ? … et les guillemets (règle LX13)
+      '« {Encore|LX13|encore} un effort, le#1 sommet#1 {est|HO2|et}@1 tout {près|HO19|prêt/prés} ! » {lança|LX13|Lança}@2 le#2 guide#2.',
+      'Qui#1 {aurait|CJ5|aurais/aura}@1 cru que la#2 neige#2 {tomberait|CJ5|tomberai/tombera}@2 en juin ? {Pourtant|LX13|pourtant}, les#3 {chalets|GN1}#3 {étaient|SV2}@3 tout {blancs|GN4|blanc/blanche}.',
+      'Nous#1 {avions|CJ2|avons/avont}@1 tout {prévu|PP3|prévus/prévue}@1 : {la|LX13|La} tente, les {cordes|GN1} {et|HO2} la carte.'
     ],
 
     /* ------------------------------------------------------------ la nuit, la forêt */
@@ -238,7 +258,10 @@ window.ORTHO_BANQUE = {
       'Le#1 {crépuscule|LX14|crépuscul}#1 {colorait|EE2}@1 le ciel de rose.',
       'Elle#1 {sent|HO11|sans/s’en}@1 l’odeur des {pins|GN1} {et|HO2} de la mousse {humide|GN2|humides}.',
       'Il#1 {était|SV1}@1 {minuit|LX4|minuie} {quand|HO12|quant} les#2 {loups|GN1}#2 {commencèrent|CJ3|commençèrent/commencairent}@2 {à|HO1} hurler.',
-      'Les#1 {enfants|GN1}#1 se {cachaient|SV2}@1 derrière {ce|HO6|se} grand chêne.'
+      'Les#1 {enfants|GN1}#1 se {cachaient|SV2}@1 derrière {ce|HO6|se} grand chêne.',
+      // majuscule ou minuscule après ! ? … et les guillemets (règle LX13)
+      'Soudain, un#1 {cri|LX4|crie}#1 {déchira|CJ3|déchirat/déchirait}@1 le silence. « Qui#2 {est|HO2|et}@2 {là|HO8|la} ? » {murmura|LX13|Murmura}@3 ma#3 sœur#3.',
+      '« Un loup ! » {s’écria|LX13|S’écria}@1 mon#1 cousin#1. {Ce|LX13|ce} n’était qu’une {vieille|GN2|vieil/vieux} souche.'
     ],
 
     /* ------------------------------------------------------------ le voyage */
@@ -264,7 +287,10 @@ window.ORTHO_BANQUE = {
       'Je#1 {pense|SV1|penses/pensent}@1 {qu’elle|HO15|quelle/quel}#2 {viendra|CJ5|viendrait/viendras}@2 nous voir cet été.',
       'Je#1 {préfère|SV1|préfères/préfèrent}@1 {plutôt|HO19|plus tôt} la mer {à|HO1} la montagne.',
       'Nous#1 {avons|CJ6|avions/ont}@1 {attendu|EE3|attendus/attendut}@1 {quelques|HO18|quelque} minutes sur le quai.',
-      'Je#1 ne {savais|SV1}@1 plus {où|HO5|ou} {aller|EE1}.'
+      'Je#1 ne {savais|SV1}@1 plus {où|HO5|ou} {aller|EE1}.',
+      // majuscule ou minuscule après ! ? … et les guillemets (règle LX13)
+      'Le#1 {contrôleur|LX3|controleur}#1 {passa|CJ3|passat/passait}@1 dans le couloir : « Vos billets, s’il vous plaît ! » {Nous|LX13|nous}#2 les lui {tendîmes|CJ3|tendâmes/tendions}@2.',
+      '« {Enfin|LX13|enfin} la mer ! » {s’exclamèrent|LX13|S’exclamèrent}@1 les#1 {enfants|GN1}#1 en {apercevant|PP6|apercevent} la côte.'
     ]
   },
 

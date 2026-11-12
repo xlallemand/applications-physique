@@ -14,7 +14,7 @@
 
    Stockage (localStorage, toujours dans un try/catch) :
      orthographe-progression  (SOM) { derniere, pages: { <page>: { fait, note } } }
-     orthographe-reglages     { auto, notions: { <règle>: true }, type, rep, corr, longueur, vitesse, lectures, relecture }
+     orthographe-reglages     { auto, notions: { <règle>: true }, type, rep, corr, longueur, vitesse, lectures, relecture, voix }
      orthographe-suivi        { v: 1, r: { <règle>: [[t, ok], …] }, notes: [[t, 'c' | 'b', note], …] }
                               t : date en ms (unique), ok : 1 juste, 0,5 juste au 2e essai, 0 faute
      (fusion fine dans assets/progression.js, type « ortho-suivi »)
@@ -26,7 +26,7 @@
      ORT.enregistrer(occ, note, type)   occasions [{ r, ok }] et note sur 20 ('c' dictée courte, 'b' brevet)
      ORT.statut(id) 'm' maîtrisée | 'f' fragile | 't' à travailler | 'n' pas encore vue | 'v' prérequis à acquérir
      ORT.taux(id) ; ORT.priorites() ; ORT.choixAuto() ; ORT.notes(type)
-     ORT.voix : { dispo(), dire(liste, opts), arreter() }
+     ORT.voix : { dispo(), dire(liste, opts), arreter(), liste(), surChange(fn) }
      ORT.blocRegle(id)             rappel de la règle (élément), lien vers la fiche
      ORT.accueil(zone) ; ORT.pageSuivi(zone) ; ORT.pageFiches(zone)
      ORT.el, ORT.esc, ORT.marque, ORT.virg, ORT.versVue, ORT.R, ORT.NOMC, ORT.PASSAGES
@@ -78,8 +78,9 @@
      Réglages de l'élève
      ===================================================================== */
   const CLE_REG = 'orthographe-reglages';
-  // relecture : 'etapes' (4 passages) ou 'unique' (toutes les fautes d'un seul coup)
-  const S = { auto: true, notions: {}, type: 'texte', rep: 'arep', corr: 'qcm', longueur: 'tc', vitesse: 0.85, lectures: 2, relecture: 'etapes' };
+  // relecture : 'etapes' (4 passages) ou 'unique' (toutes les fautes d'un seul coup) ;
+  // voix : identifiant (voiceURI) de la voix choisie, '' = automatique (la plus naturelle)
+  const S = { auto: true, notions: {}, type: 'texte', rep: 'arep', corr: 'qcm', longueur: 'tc', vitesse: 0.85, lectures: 2, relecture: 'etapes', voix: '' };
   D.regles.forEach(r => { if (r.niveau === 1) S.notions[r.id] = true; });
   (function charger() {
     const v = lire(CLE_REG);
@@ -92,6 +93,7 @@
     if (['tc', 'c'].indexOf(v.longueur) >= 0) S.longueur = v.longueur;
     if ([0.7, 0.85, 1].indexOf(v.vitesse) >= 0) S.vitesse = v.vitesse;
     if ([1, 2, 3].indexOf(v.lectures) >= 0) S.lectures = v.lectures;
+    if (typeof v.voix === 'string' && v.voix.length <= 300) S.voix = v.voix;
     if (['etapes', 'unique'].indexOf(v.relecture) >= 0) S.relecture = v.relecture;
   })();
   const ecoutes = [];
@@ -210,9 +212,27 @@
     s3.appendChild(ligne('Vitesse', segment([[0.7, 'Lente'], [0.85, 'Normale'], [1, 'Rapide']], S.vitesse, v => { changer('vitesse', +v); contenuReglages(z); }, false, 'Vitesse')));
     s3.appendChild(ligne('Lectures par groupe', segment([[1, '1'], [2, '2'], [3, '3']], S.lectures, v => { changer('lectures', +v); contenuReglages(z); }, false, 'Lectures par groupe')));
     if (!voix.dispo()) s3.appendChild(el('p', 'ort-petit', 'La synthèse vocale n’est pas disponible dans ce navigateur.'));
+    else {
+      // choix de la voix : automatique (la plus naturelle) ou une voix française du navigateur, avec un essai
+      const lv = voix.liste();
+      const zv = el('div', 'ort-voix');
+      const sel = el('select', 'ort-select');
+      sel.setAttribute('aria-label', 'Voix');
+      sel.innerHTML = '<option value="">Automatique' + (lv.length ? ' : ' + esc(lv[0].nom) : '') + '</option>' +
+        lv.map(v => '<option value="' + esc(v.uri) + '"' + (v.uri === S.voix ? ' selected' : '') + '>' + esc(v.nom) + (v.bonne ? ' ★' : '') + '</option>').join('');
+      sel.addEventListener('change', () => changer('voix', sel.value));
+      zv.appendChild(sel);
+      zv.appendChild(bouton('btn-small', '▶ Essayer', () => voix.dire(PHRASE_ESSAI, { vitesse: S.vitesse, voix: sel.value }), 'Essayer cette voix'));
+      s3.appendChild(ligne('Voix', zv));
+      s3.appendChild(el('p', 'ort-petit', lv.length
+        ? '★ : voix parmi les plus naturelles. Pour en avoir de meilleures : dans Edge, les voix « Natural » ; dans Chrome, « Google français » (avec Internet) ; sur iPhone, iPad ou Mac, télécharge une voix « améliorée » dans Réglages › Accessibilité › Contenu énoncé › Voix.'
+        : 'Aucune voix française n’est installée : le navigateur lira avec sa voix par défaut.'));
+    }
     z.appendChild(s3);
-    z.appendChild(el('p', 'ort-petit', ORT.noteReglages || 'Un changement de réglage démarre une nouvelle dictée.'));
+    z.appendChild(el('p', 'ort-petit', ORT.noteReglages || 'Un changement de réglage (sauf la voix) démarre une nouvelle dictée.'));
   }
+  // phrase lue par le bouton « Essayer » (une phrase de dictée du brevet)
+  const PHRASE_ESSAI = 'Je suivais la jetée battue par l’eau et le vent, virgule, je regardais les pêcheurs.';
   function ouvrirReglages() {
     fermerSommaire();
     if (panneau) return;
@@ -340,22 +360,58 @@
      Synthèse vocale (Web Speech API, voix française du système)
      ===================================================================== */
   const voix = (function () {
-    let jeton = 0, choisie = null;
+    let jeton = 0;
+    const enPanne = {};                       // voix en ligne qui ont échoué (hors connexion…) : évitées ensuite
+    const ecoutesV = [];                      // fonctions appelées quand la liste des voix change
     const dispo = () => 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
-    function trouver() {
-      if (!dispo()) return null;
-      const l = speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang));
-      return l.find(v => /fr[-_]FR/i.test(v.lang) && v.localService) || l.find(v => /fr[-_]FR/i.test(v.lang)) || l[0] || null;
+    // qualité estimée d'une voix française : plus elle est haute, plus la voix est naturelle
+    function qualite(v) {
+      const n = (v.name || '') + ' ' + (v.voiceURI || '');
+      let q = /^fr[-_]FR/i.test(v.lang) ? 20 : 5;                // français de France d'abord
+      if (/natural|neural/i.test(n)) q += 50;                    // Edge : voix « Natural »
+      if (/premium/i.test(n)) q += 45;                           // Apple : voix premium
+      if (/enhanced|amélior/i.test(n)) q += 40;                  // Apple : voix améliorée
+      if (/siri/i.test(n)) q += 35;
+      if (/google/i.test(n)) q += 30;                            // Chrome : « Google français »
+      if (/online/i.test(n)) q += 5;
+      if (/compact|espeak/i.test(n)) q -= 30;                    // voix compactes ou très mécaniques
+      if (/\b(eddy|flo|grand-mère|grand-père|grandma|grandpa|reed|rocko|sandy|shelley)\b/i.test(n)) q -= 40;   // voix fantaisie d'Apple
+      if (enPanne[v.voiceURI]) q -= 100;
+      return q;
     }
-    if (dispo() && speechSynthesis.addEventListener) speechSynthesis.addEventListener('voiceschanged', () => { choisie = trouver(); });
+    // voix françaises du navigateur, la meilleure en premier
+    function francaises() {
+      if (!dispo()) return [];
+      return speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang))
+        .sort((a, b) => (qualite(b) - qualite(a)) || ((b.localService ? 1 : 0) - (a.localService ? 1 : 0)) || a.name.localeCompare(b.name));
+    }
+    // voix utilisée : celle choisie dans les réglages (uri), sinon la meilleure
+    function trouver(uri) {
+      const l = francaises();
+      const u = uri != null ? uri : S.voix;
+      if (u) { const v = l.find(x => x.voiceURI === u && !enPanne[x.voiceURI]); if (v) return v; }
+      return l[0] || null;
+    }
+    // nom lisible : « Microsoft Denise Online (Natural) - French (France) » → « Denise Online (Natural) »,
+    // « Eddy (français (France)) » → « Eddy »
+    const PAYS = { CA: 'Canada', BE: 'Belgique', CH: 'Suisse', LU: 'Luxembourg' };
+    function nom(v) {
+      const n = v.name.replace(/^Microsoft\s+/i, '').replace(/\s*[-–]\s*(French|Français|Francais)\b.*$/i, '').replace(/\s*\((français|french)\b.*$/i, '').trim() || v.name;
+      const m = /^fr[-_](\w\w)/i.exec(v.lang), pays = m ? PAYS[m[1].toUpperCase()] : null;
+      return n + (pays ? ' (' + pays + ')' : '');
+    }
+    // liste pour les réglages : [{ uri, nom, bonne }] (bonne : voix parmi les plus naturelles)
+    const liste = () => francaises().map(v => ({ uri: v.voiceURI, nom: nom(v), bonne: qualite(v) >= 45 }));
+    if (dispo() && speechSynthesis.addEventListener) speechSynthesis.addEventListener('voiceschanged', () => ecoutesV.forEach(fn => fn()));
     function arreter() { jeton++; if (dispo()) speechSynthesis.cancel(); }
-    // liste : textes (ou { t, pause }) lus l'un après l'autre ; opts : { vitesse, pause (ms), debut(i), fin(complet) }
+    // liste : textes (ou { t, pause }) lus l'un après l'autre ;
+    // opts : { vitesse, pause (ms), voix (uri imposée, pour l'essai), debut(i), fin(complet) }
     function dire(liste, o) {
       o = o || {};
       if (!dispo()) { if (o.fin) o.fin(false); return false; }
       arreter();
       const id = jeton, l = [].concat(liste);
-      let i = 0;
+      let i = 0, reprise = false;
       const suivant = () => {
         if (id !== jeton) return;
         if (i >= l.length) { if (o.fin) o.fin(true); return; }
@@ -363,9 +419,10 @@
         const u = new SpeechSynthesisUtterance(texte);
         u.lang = 'fr-FR';
         u.rate = o.vitesse || S.vitesse;
-        choisie = choisie || trouver();
-        if (choisie) u.voice = choisie;
-        if (o.debut) o.debut(i - 1);
+        const v = trouver(o.voix);
+        if (v) u.voice = v;
+        if (o.debut && !reprise) o.debut(i - 1);
+        reprise = false;
         let fini = false;
         const apres = () => {
           if (fini || id !== jeton) return;
@@ -373,14 +430,25 @@
           const p = typeof item === 'object' && item.pause != null ? item.pause : (o.pause || 0);
           setTimeout(suivant, p);
         };
-        u.onend = apres; u.onerror = apres;
+        u.onend = apres;
+        u.onerror = ev => {
+          // voix en ligne indisponible (pas de connexion…) : mise de côté, le même texte est relu avec une autre voix
+          if (!fini && id === jeton && v && !v.localService && !enPanne[v.voiceURI] && !/interrupted|canceled/.test((ev && ev.error) || '')) {
+            enPanne[v.voiceURI] = true; fini = true; reprise = true; i--;
+            setTimeout(suivant, 0);
+            return;
+          }
+          apres();
+        };
         speechSynthesis.speak(u);
       };
       suivant();
       return true;
     }
-    return { dispo, dire, arreter, parle: () => dispo() && speechSynthesis.speaking };
+    return { dispo, dire, arreter, liste, surChange: fn => ecoutesV.push(fn), parle: () => dispo() && speechSynthesis.speaking };
   })();
+  // les voix du navigateur arrivent parfois après l'ouverture du panneau : liste mise à jour
+  voix.surChange(() => { const c = panneau && panneau.querySelector('.ort-tiroir-c'); if (c && !c.contains(document.activeElement)) contenuReglages(c); });
 
   /* ---------- Rappel d'une règle (sur chaque faute) ---------- */
   function blocRegle(id) {

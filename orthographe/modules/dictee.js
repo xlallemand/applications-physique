@@ -971,7 +971,8 @@
     }
 
     // un changement de réglage démarre une nouvelle dictée
-    ORT.surReglages(() => { ciblage = null; nouvelle(); entete(); rendre(); });
+    // (la voix, elle, s'applique à la lecture suivante sans changer de dictée)
+    ORT.surReglages(cle => { if (cle === 'voix') return; ciblage = null; nouvelle(); entete(); rendre(); });
     ORT.dictee.etat = () => DC;                       // état de la dictée (vérifications automatiques)
     nouvelle();
     entete();
@@ -982,7 +983,7 @@
      DICTÉE BREVET (même déroulé, conditions de l'examen)
      ===================================================================== */
   function brevet(zone) {
-    ORT.noteReglages = 'La vitesse et le nombre de lectures s’appliquent à la lecture suivante. La façon de relire s’applique si ta relecture n’a pas encore commencé.';
+    ORT.noteReglages = 'La voix, la vitesse et le nombre de lectures s’appliquent à la lecture suivante. La façon de relire s’applique si ta relecture n’a pas encore commencé.';
     // étapes : la relecture de l'élève se fait en 4 passages ou d'un seul coup (réglage)
     const etapesBrevet = () => ['ensemble', 'dictee', 'relecture'].concat(relectures(), ['res']);
     let ET = etapesBrevet();
