@@ -311,14 +311,21 @@
     }
     return d;
   }
+  // ajoute du texte à la fin de p, dans le même nœud que le texte précédent
+  // (« » + espace insécable restent ensemble : contrôle typographique, coupures de ligne)
+  function texteA(p, t) {
+    if (!t) return;
+    if (p.lastChild && p.lastChild.nodeType === 3) p.lastChild.appendData(t);
+    else p.appendChild(document.createTextNode(t));
+  }
   // texte corrigé, mots fautifs mis en valeur
   function texteCorrige(toks, ratees, titre) {
     const p = el('p', 'ort-texte ort-corrige');
     p.setAttribute('aria-label', titre || 'Texte corrigé');
     toks.forEach((t, i) => {
-      p.appendChild(document.createTextNode(L.espaceAvant(i ? toks[i - 1].v : null, t.v)));
+      texteA(p, L.espaceAvant(i ? toks[i - 1].v : null, t.v));
       if (ratees.has(i)) { const s = el('span', 'ort-mot ort-rate', esc(t.v)); s.title = 'Erreur sur ce mot'; p.appendChild(s); }
-      else p.appendChild(document.createTextNode(t.v));
+      else texteA(p, t.v);
     });
     return p;
   }
@@ -589,19 +596,29 @@
       const c = document.getElementById('etapes');
       if (c) versVue(c, 'start');
     }
-    // boutons « ← Passage précédent » et « Passage suivant → » / « Terminer et voir ma note → »
+    // texte à corriger : toutes les fautes trouvées et corrigées (ou leur réponse affichée) → le travail est terminé
+    const toutTrouve = () => (DC.m === 'arep' || DC.m === 'reperees') && DC.cibles.length > 0 && DC.cibles.every(corrige);
+    // boutons « ← Passage précédent » et « Passage suivant → » / « Terminer et voir ma note → » ;
+    // travail terminé : message et accès direct au résultat, même avant le dernier passage
     function navBas(z) {
+      const fini = toutTrouve() && etape() !== 'res';
       const n = el('div', 'ort-nav-bas');
       if (DC.k > 0) {
         const p = DC.et[DC.k - 1];
         n.appendChild(bouton('btn-secondary', '← ' + (estPassage(p) ? 'Passage ' + p.slice(1) : esc(NOMS[p])), () => allerEtape(DC.k - 1)));
       } else n.appendChild(el('span'));
-      const s = DC.et[DC.k + 1];
+      const s = fini ? 'res' : DC.et[DC.k + 1];
       const lib = s === 'res' ? 'Terminer et voir ma note →' : estPassage(s) ? 'Passage ' + s.slice(1) + ' : ' + PASS[s][0] + ' →' : esc(NOMS[s]) + ' →';
-      const b = bouton('btn-primary', lib, () => allerEtape(DC.k + 1));
+      const b = bouton('btn-primary' + (fini ? ' ort-attire' : ''), lib, () => allerEtape(fini ? DC.et.indexOf('res') : DC.k + 1));
       b.id = 'suite';
       n.appendChild(b);
-      z.appendChild(n);
+      if (!fini) { z.appendChild(n); return; }
+      const w = el('div', 'ort-termine');
+      w.id = 'fini';
+      const m = el('div', 'callout-success ort-msg', '<b>✓ Toutes les fautes sont trouvées et corrigées.</b> Ton travail est terminé : clique sur « Terminer et voir ma note ».');
+      m.setAttribute('role', 'status');
+      w.appendChild(m); w.appendChild(n);
+      z.appendChild(w);
     }
 
     /* ---------- texte à corriger / fin du mot ---------- */
@@ -639,8 +656,8 @@
     function texte(z, lectureSeule) {
       const p = el('p', 'ort-texte' + (DC.m !== 'fin' || DC.aide ? ' ort-cliquable' : ''));
       DC.toks.forEach((t, i) => {
-        p.appendChild(document.createTextNode(L.espaceAvant(i ? DC.toks[i - 1].v : null, t.v)));
-        if (!t.m) { p.appendChild(document.createTextNode(t.v)); return; }
+        texteA(p, L.espaceAvant(i ? DC.toks[i - 1].v : null, t.v));
+        if (!t.m) { texteA(p, t.v); return; }
         if (DC.m === 'fin' && estCible(i)) {
           if (lectureSeule || DC.aide) {
             const s = el('span', 'ort-mot ort-a-completer' + classesAide(DC.aide, t), esc(t.piege.deb) + '<u>' + esc(DC.fins[i] || '…') + '</u>');
@@ -761,8 +778,9 @@
         const essais = DC.essais[i] || 0;
         const reussi = () => {
           DC.points[i] = essais === 0 ? 1 : essais === 1 ? 0.5 : 0;
-          // vers l'élément utile : la faute suivante à corriger, sinon le texte
+          // vers l'élément utile : le message « travail terminé », la faute suivante à corriger, sinon le texte
           rendre(() => {
+            if (toutTrouve()) return document.getElementById('fini');
             if (DC.m === 'reperees') { const s = DC.cibles.find(j => !corrige(j)); return s != null ? document.getElementById('it-' + s) : document.getElementById('suite'); }
             return zone.querySelector('.ort-texte');
           });
@@ -812,7 +830,7 @@
           k.setAttribute('aria-live', 'polite');
           it.appendChild(k);
           if (essais >= 2) {
-            const a = bouton('btn-small', 'Afficher la réponse', () => { DC.affiche[i] = true; rendre(() => zone.querySelector('.ort-texte')); });
+            const a = bouton('btn-small', 'Afficher la réponse', () => { DC.affiche[i] = true; rendre(() => (toutTrouve() ? document.getElementById('fini') : zone.querySelector('.ort-texte'))); });
             it.appendChild(a);
           }
         }
@@ -844,8 +862,8 @@
           const p = el('p', 'ort-texte ort-cliquable');
           if (!lc.cop.length) p.appendChild(el('span', 'ort-petit', 'Ta copie est vide.'));
           lc.cop.forEach((w, j) => {
-            p.appendChild(document.createTextNode(L.espaceAvant(j ? lc.cop[j - 1].v : null, w.v)));
-            if (!w.m) { p.appendChild(document.createTextNode(w.v)); return; }
+            texteA(p, L.espaceAvant(j ? lc.cop[j - 1].v : null, w.v));
+            if (!w.m) { texteA(p, w.v); return; }
             const i = lc.lien[j] != null ? lc.lien[j] : -1;
             const s = el('span', 'ort-mot' + (i >= 0 ? classesAide(DC.aide, DC.toks[i]) : ''), esc(w.v));
             s.addEventListener('click', () => { clicAide(DC.aide, DC.toks, i, w.v); rendre(); });
@@ -1067,8 +1085,8 @@
           const lc = lienCopie(BV.t.toks, BV.copie);
           const p = el('p', 'ort-texte ort-cliquable');
           lc.cop.forEach((w, j) => {
-            p.appendChild(document.createTextNode(L.espaceAvant(j ? lc.cop[j - 1].v : null, w.v)));
-            if (!w.m) { p.appendChild(document.createTextNode(w.v)); return; }
+            texteA(p, L.espaceAvant(j ? lc.cop[j - 1].v : null, w.v));
+            if (!w.m) { texteA(p, w.v); return; }
             const i = lc.lien[j] != null ? lc.lien[j] : -1;
             const s = el('span', 'ort-mot' + (i >= 0 ? classesAide(BV.aide, BV.t.toks[i]) : ''), esc(w.v));
             s.addEventListener('click', () => { clicAide(BV.aide, BV.t.toks, i, w.v); rendre(); });
