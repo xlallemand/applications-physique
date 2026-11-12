@@ -2,7 +2,7 @@
 
 À donner tel quel à une session, sur le dépôt `xlallemand/applications-physique`, branche `orthographe`.
 
-**État au 12/11/2026 : étapes 1 à 5 terminées, application `orthographe/` développée (section 7). Reste : la reformulation des astuces GN2 et SV4 à valider (section 7, « Points à soumettre »).** Message de lancement qui a servi au développement :
+**État au 12/11/2026 : étapes 1 à 5 terminées, application `orthographe/` développée (section 7). Astuces GN2 et SV4 reformulées (validé le 12/11/2026).** Message de lancement qui a servi au développement :
 
 > Sur la branche `orthographe`, lis `docs/prompt-orthographe.md` en entier, puis développe l'application `orthographe/` selon la section 7 (spécification retenue) et la maquette de référence `docs/maquettes/orthographe-v3.html`, en respectant la charte.
 
@@ -202,7 +202,7 @@ Pastilles des 7 familles en haut (une famille affichée à la fois), puis une ca
 
 ### Points à soumettre à l'enseignant pendant le développement
 
-- Les astuces de **GN2** (« relie-le par une flèche ») et **SV4** (« Barre le pronom ») contredisent la consigne « tout de tête » : proposer une reformulation avant de modifier `regles.js`.
+- Fait (12/11/2026) : les astuces de **GN2** et **SV4** sont reformulées pour la relecture de tête (« remonte de tête vers chaque mot qui s’accorde », « Relis la phrase de tête sans le pronom »), dans `docs/orthographe/donnees/regles.js` et `orthographe/modules/regles.js`.
 
 ### Livraison
 
