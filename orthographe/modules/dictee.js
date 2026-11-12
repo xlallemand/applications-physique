@@ -6,10 +6,12 @@
        thème, choisis pour les règles travaillées ; pièges retenus ;
      - « Dictée courte » (un seul module) : texte à corriger (fautes à
        repérer ou déjà repérées ; choix multiples, saisie ou fin du mot)
-       ou dictée audio ; relecture en 4 passages, vérification immédiate,
-       note sur le nombre de fautes à trouver ;
+       ou dictée audio ; relecture en 4 passages ou d'un seul coup
+       (réglage), vérification immédiate, note sur le nombre de fautes à trouver ;
      - « Dictée brevet » : environ 600 signes, déroulé officiel, chrono
-       de 20 min, note avec le barème du brevet.
+       de 20 min, note avec le barème du brevet ;
+     - groupes de mots dictés : coupures choisies sur toute la phrase,
+       jamais après un mot qui appelle le suivant (« l’ », « de la », « que »).
    Dépend de : ort.js (ORT), langue.js (ORT.L), banque.js, textes-brevet.js.
 
    API :
@@ -29,6 +31,10 @@
     p4: ['À l’envers', 'Lis du dernier mot au premier : sans le sens de la phrase, tu vois l’orthographe de chaque mot.']
   };
   const estPassage = e => /^p\d$/.test(e);
+  // étape où l'élève relit et corrige : un des 4 passages, ou la relecture d'un seul coup ('tout')
+  const estRelecture = e => estPassage(e) || e === 'tout';
+  // étapes de relecture selon le réglage
+  const relectures = () => (S.relecture === 'unique' ? ['tout'] : ['p1', 'p2', 'p3', 'p4']);
   const nbMots = toks => toks.filter(t => t.m).length;
 
   /* =====================================================================
@@ -105,22 +111,101 @@
   const NOMS_PONCT = { ',': 'virgule', '.': 'point', ';': 'point-virgule', ':': 'deux-points', '!': 'point d’exclamation', '?': 'point d’interrogation',
     '…': 'points de suspension', '«': 'ouvrez les guillemets', '»': 'fermez les guillemets', '(': 'ouvrez la parenthèse', ')': 'fermez la parenthèse',
     '–': 'tiret', '—': 'tiret', '-': 'tiret' };
-  // groupes de mots à dicter : coupure à chaque ponctuation, ou après 5 mots
+  /* ---------- Groupes de mots à dicter ----------
+     Coupure à chaque ponctuation. Entre deux ponctuations, les coupures sont choisies sur toute la
+     suite de mots (programmation dynamique) : groupes de 4 à 6 mots de préférence, coupure à un endroit
+     naturel (avant une préposition, une conjonction, un pronom, un déterminant), jamais après un mot
+     qui appelle le suivant (« l’ », « de la », « ce que », « il y avait »…), jamais dans « fins d’après-midi »
+     ni entre deux adjectifs coordonnés (« blanches ou rouges »). */
+  const ens = s => new Set(s.split(' '));
+  const G_DET = ens('le la les un une des du au aux ce cet cette ces mon ton son ma ta sa mes tes ses notre votre nos vos leur leurs quelques plusieurs chaque aucun aucune nul nulle certains certaines tout toute tous toutes quel quelle quels quelles');
+  const G_PREP = ens('à de en dans par pour sur sous avec sans vers chez entre contre pendant depuis devant derrière parmi selon jusque malgré envers dès hors près après avant durant lors');
+  const G_CONJ = ens('et ou mais que qui dont où si comme quand lorsque puisque car ni tandis quoique');
+  const G_PRON = ens('je tu il ils elle elles on me te se nous vous lui y en ne');
+  const G_AUX = ens('ai as a avons avez ont avais avait avions aviez avaient eut eurent aura auront aurait auraient suis es est sommes êtes sont étais était étions étiez étaient fut furent sera seront serait seraient');
+  const G_ADV = ens('très trop assez moins');
+  const elide = w => /’$/.test(w);
+  // un jeton peut contenir une élision (« d’un », « qu’elle ») : début (« d’ ») et fin (« un ») du jeton
+  const tete = w => (w.indexOf('’') >= 0 ? w.slice(0, w.indexOf('’') + 1) : w);
+  const queue = w => w.slice(w.lastIndexOf('’') + 1);
+  // locutions prépositives (« le long de », « au travers de », « autour de »…) : mot → mots possibles juste avant (* : tous)
+  const G_LOC = { long: ['le'], travers: ['au'], milieu: ['au'], bord: ['au'], fond: ['au'], côté: ['à'], cause: ['à'], face: ['en'], lieu: ['au'],
+    autour: '*', loin: '*', quant: '*', 'au-devant': '*', 'au-dessus': '*', 'au-dessous': '*', 'auprès': '*' };
+  // mot après lequel on ne coupe jamais (prev : mot précédent)
+  const appelle = (w, prev) => {
+    const q = queue(w), l = G_LOC[q];
+    return elide(w) || G_DET.has(q) || G_PREP.has(q) || G_CONJ.has(q) || G_PRON.has(q) || G_AUX.has(q) || G_ADV.has(q) ||
+      (l != null && (l === '*' || (prev != null && l.indexOf(queue(prev)) >= 0)));
+  };
+  // pénalité d'une coupure entre les mots w[k] et w[k + 1] (mots en minuscules) ; Infinity : interdite
+  function penCoupure(w, k) {
+    if (appelle(w[k], w[k - 1])) return Infinity;
+    const x = tete(w[k + 1]), y = w[k + 2] != null ? tete(w[k + 2]) : null;
+    // « peu à peu », « pas à pas », « jour après jour », « de rocher en rocher » : on ne sépare pas
+    if (y && queue(w[k]) === y && /^(à|en|par|après)$/.test(x)) return Infinity;
+    const fort = m => m != null && (G_DET.has(m) || G_PREP.has(m) || G_CONJ.has(m) || G_PRON.has(m) || elide(m));
+    if (/^(de|d’|du|des)$/.test(x)) {
+      // complément du nom (« la coque du bateau », « des fins d’après-midi », « le bruit des vagues ») : on ne sépare pas
+      if (w[k - 1] && G_DET.has(queue(w[k - 1]))) return Infinity;
+      return 2;
+    }
+    // sujet | auxiliaire + participe : « ma grand-mère | avait gardées »
+    if (G_AUX.has(x) && y && /([éiu]|ée|ie|ue|is|it|ert|int)(e?s)?$/.test(queue(y))) return 8;
+    if (x === 'et' || x === 'ou') return fort(y) ? 0 : 3;   // « et des taches » / « blanches ou rouges »
+    if (G_PREP.has(x) || G_CONJ.has(x) || /^(qu|lorsqu|puisqu|jusqu)’$/.test(x)) return 0;
+    if (G_PRON.has(x) || /^[jmtsnc]’$/.test(x)) return 1;
+    if (G_DET.has(x) || x === 'l’') return 2;
+    return 6;
+  }
+  // coût d'un groupe de L mots (le mot élidé ne compte pas : « l’imagination » est un mot)
+  const coutLong = L => (L <= 1 ? 20 : L === 2 ? 8 : L === 3 ? 1.5 : L <= 6 ? 0 : L === 7 ? 2.5 : 5 + (L - 8) * 3);
+  // une suite de jetons sans ponctuation forte → listes d'indices (un groupe par liste)
+  function couperSuite(toks, seg) {
+    const W = seg.filter(i => toks[i].m), n = W.length;
+    const w = W.map(i => L.min(toks[i].v)), poids = w.map(m => (elide(m) ? 0 : 1));
+    if (n < 2) return [seg];
+    // meil[j] : meilleur coût pour les j premiers mots ; avant[j] : début du dernier groupe
+    const meil = [0], avant = [0];
+    for (let j = 1; j <= n; j++) {
+      meil[j] = Infinity; avant[j] = 0;
+      let lg = 0;
+      for (let d = j - 1; d >= 0; d--) {
+        lg += poids[d];
+        const pen = d > 0 ? penCoupure(w, d - 1) + 0.5 : 0;
+        const c = meil[d] + coutLong(lg) + pen;
+        if (c < meil[j]) { meil[j] = c; avant[j] = d; }
+      }
+    }
+    // débuts des groupes (indices dans W)
+    const debuts = [];
+    for (let j = n; j > 0; j = avant[j]) debuts.unshift(avant[j]);
+    // coupure des jetons juste après le dernier mot du groupe (« » » et « ) » restent avec lui ;
+    // « « », « ( » et le tiret passent au groupe suivant)
+    const out = [];
+    let de = 0;
+    debuts.slice(1).forEach(d => {
+      let p = seg.indexOf(W[d - 1]) + 1;
+      while (p < seg.length && !toks[seg[p]].m && /^[»)]$/.test(toks[seg[p]].v)) p++;
+      out.push(seg.slice(de, p)); de = p;
+    });
+    out.push(seg.slice(de));
+    return out;
+  }
+  // groupes de mots à dicter : [{ i: indices des jetons, phrase: numéro de la phrase, fin: fin de phrase }]
   function decouperGroupes(toks) {
     const G = [];
-    let cur = [], mots = 0, phrase = 0;
-    const fermer = fin => { if (cur.length) G.push({ i: cur, phrase, fin }); cur = []; mots = 0; if (fin) phrase++; };
+    let seg = [], phrase = 0;
+    const fermer = fin => {
+      if (seg.length) couperSuite(toks, seg).forEach((ix, k, tout) => G.push({ i: ix, phrase, fin: fin && k === tout.length - 1 }));
+      seg = [];
+      if (fin) phrase++;
+    };
     toks.forEach((t, i) => {
-      if (!t.m && (t.v === '»' || t.v === ')') && !cur.length && G.length) { G[G.length - 1].i.push(i); return; }
-      cur.push(i);
-      if (t.m) mots++;
+      // guillemet ou parenthèse fermants juste après une ponctuation : avec le groupe précédent
+      if (!t.m && (t.v === '»' || t.v === ')') && !seg.length && G.length) { G[G.length - 1].i.push(i); return; }
+      seg.push(i);
       if (!t.m && /^[.!?…]$/.test(t.v)) fermer(true);
       else if (!t.m && /^[,;:]$/.test(t.v)) fermer(false);
-      else if (t.m && mots >= 5) {
-        let restants = 0;
-        for (let j = i + 1; j < toks.length && (toks[j].m || !/^[.!?…,;:]$/.test(toks[j].v)); j++) if (toks[j].m) restants++;
-        if (restants > 2) fermer(false);
-      }
     });
     fermer(true);
     return G;
@@ -325,25 +410,30 @@
     });
     return z;
   }
-  // consigne d'un passage de relecture, avec ses aides (verbe → sujet, tests de remplacement)
+  // consigne d'une étape de relecture (un passage, ou « tout » : toutes les fautes d'un seul coup),
+  // avec ses aides (verbe → sujet, tests de remplacement)
   function consignePassage(z, e, suite, etat, refaire) {
-    z.appendChild(el('div', 'cle ort-consigne', '<b class="cle-titre">Passage ' + e.slice(1) + ' · ' + PASS[e][0] + '.</b> ' + PASS[e][1] + ' ' + suite));
-    if (e === 'p2' || e === 'p3') {
+    const tout = e === 'tout';
+    z.appendChild(el('div', 'cle ort-consigne', tout
+      ? '<b class="cle-titre">Ta relecture, d’un seul coup.</b> Corrige toutes les fautes en une fois : les accords dans chaque groupe nominal, le sujet et la terminaison de chaque verbe, les mots particuliers (a, à, et, est, son, sont…). ' + suite
+      : '<b class="cle-titre">Passage ' + e.slice(1) + ' · ' + PASS[e][0] + '.</b> ' + PASS[e][1] + ' ' + suite));
+    if (e === 'p2' || e === 'p3' || tout) {
       const r = el('div', 'ort-rangee');
-      if (e === 'p2') {
+      if (e === 'p2' || tout) {
         const a = bouton('ort-icone', '🧭 Aide : verbe → sujet', () => {
           etat.aide = etat.aide ? null : { verbe: null, trouve: false, msg: 'Touche un verbe conjugué.' };
           refaire();
         });
         a.setAttribute('aria-pressed', !!etat.aide);
         r.appendChild(a);
-      } else {
+      }
+      if (e === 'p3' || tout) {
         const t = bouton('ort-icone', '🔁 Tests de remplacement', () => { etat.tests = !etat.tests; refaire(); });
         t.setAttribute('aria-pressed', !!etat.tests);
         r.appendChild(t);
       }
       z.appendChild(r);
-      if (e === 'p3' && etat.tests) z.appendChild(el('div', 'ort-neutre', tableTests()));
+      if ((e === 'p3' || tout) && etat.tests) z.appendChild(el('div', 'ort-neutre', tableTests()));
     }
   }
 
@@ -418,9 +508,9 @@
     const m0 = /regles=([A-Z0-9,]+)/.exec(location.hash);
     if (m0) { ciblage = m0[1].split(',').filter(id => R[id]); if (!ciblage.length) ciblage = null; }
     const mode = () => (S.type === 'audio' ? 'audio' : S.corr === 'fin' ? 'fin' : S.rep === 'reperees' ? 'reperees' : 'arep');
-    const NOMS = { ecrire: '', corriger: 'Corrige les fautes', res: 'Résultat' };
+    const NOMS = { ecrire: '', corriger: 'Corrige les fautes', tout: 'Relecture', res: 'Résultat' };
     function etapes(m) {
-      const p = ['p1', 'p2', 'p3', 'p4'];
+      const p = relectures();
       if (m === 'audio' || m === 'fin') return ['ecrire'].concat(p, ['res']);
       if (m === 'reperees') return ['corriger', 'res'];
       return p.concat(['res']);
@@ -463,8 +553,10 @@
       if (!n) { n = el('p', 'ort-petit ort-notions'); h.appendChild(n); }
       n.innerHTML = DC && !DC.vide ? 'Règles travaillées : ' + DC.regles.map(id => esc(R[id].titre)).join(' · ') : '';
       const ctx = h.querySelector('.er-contexte');
+      // façon de relire : en 4 passages ou d'un seul coup (réglage)
+      const rel = DC && DC.et && DC.et.indexOf('tout') >= 0 ? 'd’un seul coup' : 'en <b>4 passages</b>';
       if (ctx && DC && !DC.vide) ctx.innerHTML = 'Un texte de <b>' + pluriel(nbMots(DC.toks), 'mot') + '</b> sur tes notions. ' +
-        (DC.m === 'reperees' ? 'Corrige les fautes repérées' : DC.m === 'fin' ? 'Écris la fin des mots, relis en <b>4 passages</b>' : DC.m === 'audio' ? 'Écoute, écris, relis en <b>4 passages</b>' : 'Relis-le en <b>4 passages</b>, corrige') + ', puis obtiens ta <b>note</b>.';
+        (DC.m === 'reperees' ? 'Corrige les fautes repérées' : DC.m === 'fin' ? 'Écris la fin des mots, relis ' + rel : DC.m === 'audio' ? 'Écoute, écris, relis ' + rel : 'Relis-le ' + rel + ', corrige') + ', puis obtiens ta <b>note</b>.';
     }
 
     /* ---------- rendu ---------- */
@@ -531,7 +623,7 @@
       if (DC.aide) { clicAide(DC.aide, DC.toks, i, valeurMot(i)); rendre(); return; }
       if (DC.m === 'fin') return;                          // fin du mot : rien à signaler
       const e = etape();
-      if (DC.m === 'reperees' || !estPassage(e)) {
+      if (DC.m === 'reperees' || !estRelecture(e)) {
         if (estCible(i)) rendre(() => document.getElementById('it-' + i));
         return;
       }
@@ -613,7 +705,7 @@
     }
     function vueTexte(e) {
       const g = el('div', 'ort-deux'), gauche = el('div', 'er-card ort-gauche'), droite = el('div', 'er-card ort-droite');
-      if (estPassage(e)) consignePassage(gauche, e, DC.m === 'fin' ? 'Change tes fins de mots si besoin.' : 'Touche un mot faux pour le signaler.', DC, () => rendre());
+      if (estRelecture(e)) consignePassage(gauche, e, DC.m === 'fin' ? 'Change tes fins de mots si besoin.' : 'Touche un mot faux pour le signaler.', DC, () => rendre());
       else gauche.appendChild(el('div', 'cle ort-consigne', e === 'corriger' ? '<b class="cle-titre">Les fautes sont repérées.</b> Corrige-les dans la liste.'
         : '<b class="cle-titre">Complète la fin des mots.</b> Le 🔊 fait entendre le mot. Tu pourras changer tes réponses pendant la relecture.'));
       if (e === 'p4') {
@@ -746,7 +838,7 @@
         c.appendChild(vueLecteur(lecteur));
       } else {
         consignePassage(c, e, 'Corrige ta copie si besoin.', DC, () => rendre());
-        if (e === 'p2' && DC.aide) {
+        if ((e === 'p2' || e === 'tout') && DC.aide) {
           // les mots de la copie, touchables, reliés aux mots du texte
           const lc = lienCopie(DC.toks, DC.copie);
           const p = el('p', 'ort-texte ort-cliquable');
@@ -890,9 +982,11 @@
      DICTÉE BREVET (même déroulé, conditions de l'examen)
      ===================================================================== */
   function brevet(zone) {
-    ORT.noteReglages = 'La vitesse et le nombre de lectures s’appliquent à la lecture suivante.';
-    const ET = ['ensemble', 'dictee', 'relecture', 'p1', 'p2', 'p3', 'p4', 'res'];
-    const NOMS = { ensemble: 'Lecture d’ensemble', dictee: 'Dictée', relecture: 'Relecture du texte', res: 'Résultat' };
+    ORT.noteReglages = 'La vitesse et le nombre de lectures s’appliquent à la lecture suivante. La façon de relire s’applique si ta relecture n’a pas encore commencé.';
+    // étapes : la relecture de l'élève se fait en 4 passages ou d'un seul coup (réglage)
+    const etapesBrevet = () => ['ensemble', 'dictee', 'relecture'].concat(relectures(), ['res']);
+    let ET = etapesBrevet();
+    const NOMS = { ensemble: 'Lecture d’ensemble', dictee: 'Dictée', relecture: 'Relecture du texte', tout: 'Ta relecture', res: 'Résultat' };
     const DUREE = 20 * 60 * 1000;
     let BV = { phase: 'choix', type: 't', id: '' }, lecteur = null, minuteur = null;
     const textes = window.ORTHO_BREVET;
@@ -926,6 +1020,7 @@
         const toks = L.lirePhrase(x.texte);
         t = { toks, cibles: toks.map((y, i) => (y.piege ? i : -1)).filter(i => i >= 0), oeuvre: x.oeuvre, session: x.session, centre: x.centre, tableau: x.tableau };
       }
+      ET = etapesBrevet();
       BV = Object.assign(BV, { phase: 'etapes', k: 0, t, copie: '', douteux: [], aide: null, tests: false, envers: null, res: null, cumul: 0, depuis: 0, finDictee: false, relu: false });
       lecteur = Lecteur(t.toks, { finDictee: () => { BV.finDictee = true; const b = document.getElementById('suite'); if (b) b.classList.add('ort-attire'); } });
       chrono(true);
@@ -941,7 +1036,7 @@
       const e = ET[BV.k];
       const c0 = el('div', 'er-card ort-etapes-c');
       c0.id = 'etapes';
-      c0.appendChild(barreEtapes(ET, BV.k, { ensemble: NOMS.ensemble, dictee: NOMS.dictee, relecture: NOMS.relecture, res: NOMS.res, groupe: 'Ta relecture' }, j => aller(j), !!BV.res));
+      c0.appendChild(barreEtapes(ET, BV.k, { ensemble: NOMS.ensemble, dictee: NOMS.dictee, relecture: NOMS.relecture, tout: NOMS.tout, res: NOMS.res, groupe: 'Ta relecture' }, j => aller(j), !!BV.res));
       zone.appendChild(c0);
       if (e === 'res') { resultat(); window.scrollTo(0, y); if (apres) versVue(apres()); return; }
       zone.appendChild(tableau());
@@ -967,7 +1062,7 @@
         c.appendChild(el('div', 'cle ort-consigne', '<b class="cle-titre">Relecture du texte.</b> Le texte est relu en entier, sans la ponctuation. Corrige ta copie pendant la lecture. Comme au brevet : pas de question après la relecture du texte.'));
       } else {
         consignePassage(c, e, 'Corrige ta copie si besoin.', BV, () => rendre());
-        if (e === 'p2' && BV.aide) {
+        if ((e === 'p2' || e === 'tout') && BV.aide) {
           const lc = lienCopie(BV.t.toks, BV.copie);
           const p = el('p', 'ort-texte ort-cliquable');
           lc.cop.forEach((w, j) => {
@@ -1078,7 +1173,10 @@
         s.addEventListener('change', () => { BV.id = s.value; });
         l.appendChild(s); c.appendChild(l);
       } else c.appendChild(el('p', 'ort-petit', 'Un texte d’environ 600 signes composé à partir de la banque de phrases, sur toutes les règles.'));
-      c.appendChild(el('div', 'cle ort-consigne', '<b class="cle-titre">Déroulé officiel (20 minutes).</b> Lecture d’ensemble sans écrire ; dictée groupe par groupe avec la ponctuation ; relecture du texte sans la ponctuation ; puis ta relecture en 4 passages. Les noms propres et les mots rares sont écrits au tableau.'));
+      // façon de relire (même réglage que dans le panneau Réglages)
+      c.appendChild(el('p', 'ort-lab', 'Ta relecture'));
+      c.appendChild(segment([['etapes', 'En 4 passages'], ['unique', 'D’un seul coup']], S.relecture, v => ORT.regler('relecture', v), 'Ta relecture'));
+      c.appendChild(el('div', 'cle ort-consigne', '<b class="cle-titre">Déroulé officiel (20 minutes).</b> Lecture d’ensemble sans écrire ; dictée groupe par groupe avec la ponctuation ; relecture du texte sans la ponctuation ; puis ta relecture' + (S.relecture === 'unique' ? ', d’un seul coup' : ' en 4 passages') + '. Les noms propres et les mots rares sont écrits au tableau.'));
       c.appendChild(el('p', 'ort-petit', 'Barème du brevet : faute de grammaire −1 point, faute d’usage, d’accent, de majuscule ou de ponctuation −0,5 (sur 10, puis sur 20). Une même faute sur le même mot n’est comptée qu’une fois.'));
       if (!ORT.voix.dispo()) c.appendChild(messageSansVoix());
       const a = el('div', 'er-actions');
@@ -1086,10 +1184,10 @@
       c.appendChild(a);
       zone.appendChild(c);
     }
-    function segment(ch, val, fn) {
+    function segment(ch, val, fn, label) {
       const s = el('div', 'ort-seg');
       s.setAttribute('role', 'group');
-      s.setAttribute('aria-label', 'Texte');
+      s.setAttribute('aria-label', label || 'Texte');
       ch.forEach(x => { const b = bouton('', esc(x[1]), () => fn(x[0])); b.setAttribute('aria-pressed', x[0] === val); s.appendChild(b); });
       return s;
     }
@@ -1151,6 +1249,12 @@
       zone.appendChild(c2);
     }
     addEventListener('pagehide', () => ORT.voix.arreter());
+    // façon de relire changée : écran de choix redessiné ; pendant la dictée, appliquée si la relecture n'a pas commencé
+    ORT.surReglages(cle => {
+      if (cle !== 'relecture') return;
+      if (BV.phase === 'choix') { ET = etapesBrevet(); rendre(); return; }
+      if (!BV.res && BV.k <= ET.indexOf('relecture')) { ET = etapesBrevet(); rendre(); }
+    });
     ORT.dictee.etat = () => BV;                       // état de la dictée (vérifications automatiques)
     rendre();
   }

@@ -14,14 +14,14 @@
 
    Stockage (localStorage, toujours dans un try/catch) :
      orthographe-progression  (SOM) { derniere, pages: { <page>: { fait, note } } }
-     orthographe-reglages     { auto, notions: { <règle>: true }, type, rep, corr, longueur, vitesse, lectures }
+     orthographe-reglages     { auto, notions: { <règle>: true }, type, rep, corr, longueur, vitesse, lectures, relecture }
      orthographe-suivi        { v: 1, r: { <règle>: [[t, ok], …] }, notes: [[t, 'c' | 'b', note], …] }
                               t : date en ms (unique), ok : 1 juste, 0,5 juste au 2e essai, 0 faute
      (fusion fine dans assets/progression.js, type « ortho-suivi »)
 
    API :
      ORT.menu(cle)                 sommaire (SOM.menu) + bouton Réglages
-     ORT.reglages()                réglages en cours ; ORT.ouvrirReglages() ; ORT.surReglages(fn)
+     ORT.reglages()                réglages en cours ; ORT.regler(cle, val) ; ORT.ouvrirReglages() ; ORT.surReglages(fn)
      ORT.resumeReglages()          étiquettes du résumé des réglages
      ORT.enregistrer(occ, note, type)   occasions [{ r, ok }] et note sur 20 ('c' dictée courte, 'b' brevet)
      ORT.statut(id) 'm' maîtrisée | 'f' fragile | 't' à travailler | 'n' pas encore vue | 'v' prérequis à acquérir
@@ -78,7 +78,8 @@
      Réglages de l'élève
      ===================================================================== */
   const CLE_REG = 'orthographe-reglages';
-  const S = { auto: true, notions: {}, type: 'texte', rep: 'arep', corr: 'qcm', longueur: 'tc', vitesse: 0.85, lectures: 2 };
+  // relecture : 'etapes' (4 passages) ou 'unique' (toutes les fautes d'un seul coup)
+  const S = { auto: true, notions: {}, type: 'texte', rep: 'arep', corr: 'qcm', longueur: 'tc', vitesse: 0.85, lectures: 2, relecture: 'etapes' };
   D.regles.forEach(r => { if (r.niveau === 1) S.notions[r.id] = true; });
   (function charger() {
     const v = lire(CLE_REG);
@@ -91,6 +92,7 @@
     if (['tc', 'c'].indexOf(v.longueur) >= 0) S.longueur = v.longueur;
     if ([0.7, 0.85, 1].indexOf(v.vitesse) >= 0) S.vitesse = v.vitesse;
     if ([1, 2, 3].indexOf(v.lectures) >= 0) S.lectures = v.lectures;
+    if (['etapes', 'unique'].indexOf(v.relecture) >= 0) S.relecture = v.relecture;
   })();
   const ecoutes = [];
   function changer(cle, val) {
@@ -108,6 +110,8 @@
       if (S.corr !== 'fin') t.push(S.rep === 'arep' ? 'fautes à repérer' : 'fautes déjà repérées');
       t.push({ qcm: 'choix multiples', saisie: 'j’écris le mot', fin: 'j’écris la fin du mot' }[S.corr]);
     }
+    // pas de relecture quand les fautes sont déjà repérées
+    if (S.type === 'audio' || S.rep === 'arep' || S.corr === 'fin') t.push(S.relecture === 'unique' ? 'relecture d’un seul coup' : 'relecture en 4 passages');
     t.push(S.longueur === 'tc' ? 'très courte' : 'courte');
     return t;
   }
@@ -193,6 +197,13 @@
     if (tx) s2.appendChild(el('p', 'ort-petit', '« Les fautes » et « Pour corriger » concernent le texte à corriger.'));
     else if (S.corr === 'fin') s2.appendChild(el('p', 'ort-petit', 'Avec « J’écris la fin du mot », les mots à compléter sont déjà repérés.'));
     z.appendChild(s2);
+    // façon de relire (dictée courte et dictée brevet)
+    const s4 = el('div', 'ort-sect');
+    s4.appendChild(el('h4', '', 'Relecture (dictée courte et dictée brevet)'));
+    s4.appendChild(ligne('Ta relecture', segment([['etapes', 'En 4 passages'], ['unique', 'D’un seul coup']], S.relecture, re('relecture'), false, 'Ta relecture')));
+    s4.appendChild(el('p', 'ort-petit', S.relecture === 'unique' ? 'Tu corriges toutes les fautes en une fois, avec les mêmes aides.'
+      : 'Un passage par type de faute : accords, conjugaison, mots particuliers, puis le texte à l’envers.'));
+    z.appendChild(s4);
     // lecture à voix haute
     const s3 = el('div', 'ort-sect');
     s3.appendChild(el('h4', '', 'Lecture à voix haute (dictée audio et dictée brevet)'));
@@ -501,7 +512,7 @@
       const cc = el('div', 'ort-grp-c');
       Lr.slice().sort((x, y) => 'tfmnv'.indexOf(st(x.id)) - 'tfmnv'.indexOf(st(y.id))).forEach(x => {
         const s = st(x.id);
-        const l = el('div', 'ort-ligne-r' + (s === 'v' ? ' ort-plus-tard' : ''), '<span class="ort-pt ort-s-' + s + '" aria-hidden="true"></span><span>' + esc(x.titre) +
+        const l = el('div', 'ort-ligne-r' + (s === 'v' ? ' ort-plus-tard' : ''), '<span class="ort-puce ort-s-' + s + '" aria-hidden="true"></span><span>' + esc(x.titre) +
           ' <span class="ort-sr">(' + LIBS[s].toLowerCase() + ')</span></span><span class="ort-pct">' + (s === 'v' ? 'plus tard' : s === 'n' ? 'pas encore vue'
           : Math.round(taux(x.id) * 100) + ' % <small>(' + pluriel(stats(x.id).n, 'occasion') + ')</small>') + '</span>');
         if (s === 'v') l.title = 'D’abord : ' + x.prerequis.filter(p => st(p) !== 'm').map(p => R[p].titre).join(' ; ');
@@ -510,10 +521,21 @@
       g.appendChild(cc);
       c.appendChild(g);
     });
-    c.appendChild(el('div', 'ort-legende', ['m', 'f', 't', 'n', 'v'].map(s => '<span><span class="ort-pt ort-s-' + s + '" aria-hidden="true"></span>' + LIBS[s] + '</span>').join('')));
+    c.appendChild(el('div', 'ort-legende', ['m', 'f', 't', 'n', 'v'].map(s => '<span><span class="ort-puce ort-s-' + s + '" aria-hidden="true"></span>' + LIBS[s] + '</span>').join('')));
     c.appendChild(el('p', 'ort-petit', 'Maîtrisée : au moins 80 % de réussite sur les 20 dernières occasions (5 occasions au moins). Une règle n’est proposée en mode automatique que si ses prérequis sont maîtrisés.'));
     zone.appendChild(c);
     SOM.marquer({ fait: true });
+    // Firefox, page ouverte depuis l'ordinateur (file://) : chaque page garde ses données pour elle seule
+    if (!nb && location.protocol === 'file:' && /Firefox\//.test(navigator.userAgent)) {
+      zone.insertBefore(el('div', 'callout ort-msg', 'Tes dictées n’apparaissent pas ici ? Avec Firefox, une page ouverte depuis l’ordinateur garde ses données pour elle seule : ton suivi ne peut pas passer d’une page à l’autre. Ouvre l’application avec Chrome ou Edge, ou depuis son adresse en ligne.'), zone.firstChild);
+    }
+    // affichage toujours à jour : page revenue par « Précédent » (cache du navigateur), ou suivi changé dans un autre onglet
+    if (!pageSuivi.ecoute) {
+      pageSuivi.ecoute = true;
+      const maj = () => { menu('suivi'); pageSuivi(zone); };
+      addEventListener('pageshow', e => { if (e.persisted) maj(); });
+      addEventListener('storage', e => { if (e.key === CLE_SUIVI || e.key === null) maj(); });
+    }
   }
 
   /* =====================================================================
@@ -580,7 +602,7 @@
 
   Object.assign(ORT, {
     PLAN, R, NOMC, PASSAGES, el, bouton, esc, marque, virg, pluriel, versVue,
-    menu, reglages: () => S, ouvrirReglages, fermerReglages, surReglages: fn => ecoutes.push(fn), resumeReglages, notionsChoisies,
+    menu, reglages: () => S, regler: changer, ouvrirReglages, fermerReglages, surReglages: fn => ecoutes.push(fn), resumeReglages, notionsChoisies,
     enregistrer, statut: id => statut(id), taux, stats, priorites, choixAuto, notes, voix, blocRegle,
     accueil, pageSuivi, pageFiches
   });
