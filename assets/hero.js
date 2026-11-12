@@ -33,6 +33,7 @@
      semidev    formules semi-développées CH₃–CH₂–CH(OH)…, avec quelques OH, =O, COOH, comme écrites au tableau (nomenclature de 1re)
      titrage    burette graduée au-dessus d'un bécher, courbe de titrage pH = f(V) en S décroissante avec ses deux
                 tangentes parallèles, la parallèle du milieu et le volume équivalent (titrage pH-métrique)
+     lettres    un grand « Aa » et des paires de mots qui se confondent (a / à, et / est…) écrits en quinconce (orthographe)
      formules:physique | formules:redox | formules:pile | formules:combustion | formules:ph | formules:algebre
    ============================================================ */
 (function () {
@@ -938,6 +939,29 @@
       ctx.fillText('H₃O⁺ + HO⁻ → 2 H₂O', w * .06, h * .46);
       ctx.font = `500 15px ${police()}`; ctx.globalAlpha = .14;
       ctx.fillText('pH = − log [H₃O⁺]', w * .3, h * .52);
+    },
+
+    // Lettres : paires de mots qui se confondent, en quinconce, et un grand « Aa » à droite (orthographe)
+    lettres(ctx, w, h, c, rnd) {
+      const mots = ['a / à', 'et / est', 'ces / ses', '-é / -er', 'leur / leurs', 'on / ont', 'ou / où', 'son / sont', 'ce / se',
+        'la / là', 'ils marchent', 'les vagues', 'peu / peut', 'mais / mes', 'c’est / s’est', 'quand / quant'];
+      ctx.fillStyle = c; ctx.textBaseline = 'middle';
+      let i = 0;
+      for (let y = 30, ligne = 0; y < h; y += 56, ligne++) {
+        let x = -rnd() * 140 - (ligne % 2) * 70;
+        while (x < w) {
+          const t = mots[i++ % mots.length], taille = 16 + Math.floor(rnd() * 3) * 5;
+          ctx.font = `${taille > 20 ? 600 : 500} ${taille}px ${police()}`;
+          ctx.globalAlpha = .08 + rnd() * .22;
+          ctx.fillText(t, x, y + (rnd() - .5) * 10);
+          x += ctx.measureText(t).width + 46 + rnd() * 60;
+        }
+      }
+      ctx.globalAlpha = .5;
+      ctx.font = `800 ${Math.round(Math.min(h * .5, w * .2))}px ${police()}`;
+      ctx.textAlign = 'right';
+      ctx.fillText('Aa', w * .94, h * .4);
+      ctx.textAlign = 'left';
     },
 
     // Formules écrites en quinconce, plus ou moins marquées

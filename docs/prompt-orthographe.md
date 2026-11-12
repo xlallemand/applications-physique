@@ -2,7 +2,7 @@
 
 À donner tel quel à une session, sur le dépôt `xlallemand/applications-physique`, branche `orthographe`.
 
-**État au 12/11/2026 : étapes 1 à 4 terminées, maquette v3 validée. Prochaine tâche : le développement (étape 5).** Message de lancement à donner à la nouvelle session :
+**État au 12/11/2026 : étapes 1 à 5 terminées, application `orthographe/` développée (section 7). Reste : la reformulation des astuces GN2 et SV4 à valider (section 7, « Points à soumettre »).** Message de lancement qui a servi au développement :
 
 > Sur la branche `orthographe`, lis `docs/prompt-orthographe.md` en entier, puis développe l'application `orthographe/` selon la section 7 (spécification retenue) et la maquette de référence `docs/maquettes/orthographe-v3.html`, en respectant la charte.
 
@@ -122,7 +122,7 @@ Résultat (11/11/2026) : les 64 règles, les 4 méthodes et les 3 points à tra
 - Simplifications demandées pour la v2 : **un seul menu « Réglages »** pour toutes les options ; **suivi regroupé** (une ligne par groupe, dépliable) ; **un seul module « Dictée courte »** qui enchaîne dictée, relecture en 4 passages et résultat. Plan proposé : Dictée courte, Dictée brevet, Mon suivi, Fiches de règles, plus Réglages.
 - Retenu après la v2 (12/11/2026) : dictée courte avec **vérification immédiate**, suivi **groupé par famille**, réglages en **panneau**, accueil simplifié, dictée brevet au même déroulé. Fiches : une par famille, regroupées, règle dépliée au clic, présentation peu chargée : en v3, pastilles des familles en haut et règles en lignes dépliables (mélange des deux options). Nouvelle maquette demandée avant le développement.
 - **Retenu après la v3 (12/11/2026) — maquette validée** : accueil simplifié, dictée courte avec vérification immédiate, dictée brevet au même déroulé, suivi groupé par famille, fiches en pastilles + lignes, réglages en panneau. Seule remarque : en « J'écris la fin du mot », un **petit haut-parleur** à côté de chaque mot à compléter fait entendre le mot (ajouté dans la v3).
-- Développement : voir la section 7.
+- Développement : fait (12/11/2026), voir la section 7. Les règles validées sont recopiées dans `orthographe/modules/regles.js` (à garder identique à `docs/orthographe/donnees/regles.js`) ; banque de phrases et gabarits : `orthographe/modules/banque.js` ; dictées officielles annotées : `orthographe/modules/textes-brevet.js` ; mots : `orthographe/modules/mots.js`.
 
 ## 5. À lire avant de commencer
 

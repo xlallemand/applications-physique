@@ -40,12 +40,12 @@ Ne change ni le contenu scientifique ni les fonctionnalités propres à une appl
 
 - Feuilles de style chargées dans cet ordre dans **toutes** les pages : `../../assets/theme.css`, `../../equilibrer-reactions/modules/er.css` (cartes, boutons, écrans de fin communs), `<pref>.css`, puis `../../assets/sommaire.css` (sommaire, accueil, fiches). Pages de cours : `../../assets/cours.css` en dernier.
 - Scripts : `../../assets/sommaire.js` (navigation commune, voir §5) **avant** `<pref>.js`, qui déclare le `PLAN` et appelle `SOM.init`. Pages de cours : `../../assets/cours.js` (moteur de cours commun, voir §4) après `<pref>.js`. Sur l'accueil, `../assets/hero.js` puis `../assets/sommaire.js` puis `modules/<pref>.js`.
-- Balise `<html lang="fr" data-matiere="…">` : `maths`, `chimie`, `physique` ou `college`. C'est ce qui fixe la couleur d'accent (voir §3).
+- Balise `<html lang="fr" data-matiere="…">` : `maths`, `chimie`, `physique`, `college` ou `francais`. C'est ce qui fixe la couleur d'accent (voir §3).
 - `<title>` d'une page de module : `Module 1 : référentiel — Cinématique` ; accueil : le nom de l'application.
 - Corps de page : `<div id="app-nav"></div>` puis `<div class="er-page">…</div>`. La navigation s'y construit (voir §5).
 - Pour une nouvelle application : partir de `cinematique/modules/cin.js` (moteur de questions) et `cin.css`, renommer l'espace de noms et le préfixe de classes, remplacer les textes ; **la navigation et les cours ne se recopient pas** : déclarer le `PLAN` et utiliser le module commun `assets/sommaire.js` (§5), écrire les cours avec le moteur commun `assets/cours.js` (§4).
 - Déclarer l'application dans la liste `APPS` de `index.html` à la racine (portail) : `{ titre, dom, niv, dossier, desc, mots }`, à la suite des applications du même domaine.
-  - `dom` : `'physique'`, `'chimie'` ou `'maths'` (outils mathématiques, collège compris) ;
+  - `dom` : `'physique'`, `'chimie'`, `'maths'` (outils mathématiques, collège compris) ou `'francais'` (domaine sans pastille de tri sur le portail) ;
   - `niv` : liste parmi `'col'` (collège), `'2de'`, `'1re'` (1re spécialité, étiquette « 1re spé »), `'spe'` (terminale spécialité), `'sti'` (terminale STI2D) ; `LYCEE` pour les quatre niveaux du lycée ;
   - `desc` : une phrase courte (une ligne sur ordinateur, masquée sur téléphone) ;
   - `mots` : mots-clés de la recherche du portail, ceux qu'un élève peut taper et qui ne sont pas déjà dans le titre ou la description : notions, synonymes, unités, formules, sigles (`['demi-vie', 'becquerel', 'alpha']`). Les titres et descriptions des modules et des pages n'ont pas à y être : ils sont déjà dans l'index.
@@ -78,6 +78,7 @@ Tout vient de `assets/theme.css`. N'écris **aucune couleur en dur** dans les CS
 | chimie | `#0a7d57` | `#075c40` | `#e2f1ea` |
 | physique | `#5a3fc4` | `#3f2a93` | `#ebe7f8` |
 | college | `#c2570c` | `#8f3f08` | `#f8e9dc` |
+| francais (prune) | `#9d2f72` | `#6e1f50` | `#f6e6ef` |
 
 **Vert et rouge sont réservés au juste / faux** : `--success` `#16a34a`, `--success-bg`, `--success-text` ; `--danger` `#dc2626`, `--danger-bg`, `--danger-text`. Ne jamais les utiliser en décoration. Pas d'autre couleur vive (pas de bleu, violet, orange hors accent de la matière).
 
@@ -322,6 +323,7 @@ Code : `assets/progression.js` et `assets/progression.css`, chargés **par le po
 | `equamath_v2` | `results` : l'entrée au meilleur `bestScore`, `attempts` le plus grand ; `xp` le plus grand ; `showKb` du navigateur |
 | `<dossier>-flashcards` | `ajouts` : réunion (date la plus ancienne) ; chaque carte : l'état **revu le plus récemment** (`v` le plus grand ; à égalité, `n` le plus grand ; une carte jamais revue perd contre une carte revue) ; une carte présente d'un seul côté est copiée |
 | `revisions-reglages` | celui du navigateur (copié s'il est absent) |
+| `orthographe-suivi` | occasions de chaque règle et notes : réunion sans doublon (même date) ; les 30 dernières occasions par règle, les 100 dernières notes |
 | autre clé `<dossier>-…` | copiée si absente du navigateur, sinon celle du navigateur est gardée |
 
 - Une nouvelle forme de donnée (autre que `-progression`, `-exercices` et `-flashcards`) est donc copiée telle quelle seulement si le navigateur ne l'a pas encore : pour la fusionner finement, ajoute son type dans `nettoyer`, `significatif` et `fusionner` de `assets/progression.js`.

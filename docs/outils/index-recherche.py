@@ -58,6 +58,7 @@ EXCEPTIONS = {
     'principe-dynamique/module_2_simulation': 'atelier',      # « Atelier : bilan des forces » (page d'exemple)
     'periode-frequence/module_2_manip': 'atelier',            # mesurer T et calculer f
     'titrage-ph/module_3a_equivalence': 'atelier',            # repérer le volume équivalent
+    'orthographe/fiches': 'fiche',                            # « Fiches de règles » (page de cours du PLAN)
 }
 
 # Libellés par défaut des pages (mêmes que NOMS de assets/sommaire.js)
