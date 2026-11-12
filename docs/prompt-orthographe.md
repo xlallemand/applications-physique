@@ -106,16 +106,17 @@ Même chose ensuite, plus brièvement, pour les méthodes et un échantillon de 
 
 Résultat (11/11/2026) : les 64 règles, les 4 méthodes et les 3 points à trancher sont **validés**, aucune dictée retirée. Décisions retenues :
 
-- **Barème** : faute grammaticale −1 point sur 10, faute d'usage, d'accent, de majuscule ou de ponctuation −0,5 ; même faute sur le même mot comptée une fois ; note ramenée à la longueur du texte puis sur 20 ; plancher 0.
+- **Barème** : faute grammaticale −1 point sur 10, faute d'usage, d'accent, de majuscule ou de ponctuation −0,5 ; même faute sur le même mot comptée une fois ; plancher 0. **Dictée brevet** : ce barème, puis sur 20. **Dictées courtes** (décision du 12/11/2026) : note sur le nombre de fautes à trouver, ramenée sur 20 (juste du premier coup 1 point, au 2e essai 0,5, mot juste signalé −0,5 ; dictée audio : mots pièges réussis, autre erreur −0,5).
 - **Mode automatique** : une règle n'est proposée que si ses prérequis sont maîtrisés (80 % de réussite sur les 20 dernières occasions), en commençant par le niveau 1 ; révision espacée des règles maîtrisées.
 - **Rectifications de 1990** : les deux orthographes acceptées, l'orthographe traditionnelle affichée.
 - Majuscules (LX13) : règle essentielle.
 
 ### Étape 5 — Maquettes puis développement
 
-- Maquettes `docs/maquettes/orthographe.html` (v1) et `docs/maquettes/orthographe-v2.html` (v2) : **plusieurs options** d'interface (dictée à corriger, dictée audio, relecture guidée, menu des notions, tableau de suivi, résultat noté), au design de la charte.
+- Maquettes `docs/maquettes/orthographe.html` (v1), `docs/maquettes/orthographe-v2.html` (v2) et `docs/maquettes/orthographe-v3.html` (v3) : **plusieurs options** d'interface (dictée à corriger, dictée audio, relecture guidée, menu des notions, tableau de suivi, résultat noté), au design de la charte.
 - Retenu après la v1 (12/11/2026) : couleur **prune** pour le domaine Français, notions choisies **par famille**, dictée à corriger en **texte + liste des fautes**.
 - Simplifications demandées pour la v2 : **un seul menu « Réglages »** pour toutes les options ; **suivi regroupé** (une ligne par groupe, dépliable) ; **un seul module « Dictée courte »** qui enchaîne dictée, relecture en 4 passages et résultat. Plan proposé : Dictée courte, Dictée brevet, Mon suivi, Fiches de règles, plus Réglages.
+- Retenu après la v2 (12/11/2026) : dictée courte avec **vérification immédiate**, suivi **groupé par famille**, réglages en **panneau**, accueil simplifié, dictée brevet au même déroulé. Fiches : une par famille, regroupées, règle dépliée au clic, présentation peu chargée (deux options en v3). Nouvelle maquette demandée avant le développement.
 - Après validation : développement de `orthographe/`, déclaration dans `APPS`, `AVANCEMENT`, index de recherche, `progression.js` ; vérifications de la charte §10.
 
 ## 5. À lire avant de commencer
