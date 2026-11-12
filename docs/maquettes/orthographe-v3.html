@@ -13,7 +13,7 @@
    suivi groupé par famille, réglages en panneau.
    Nouveautés de la v3 :
      - dictées courtes notées sur le nombre de fautes à trouver ;
-     - fiches de règles regroupées et dépliables (deux présentations).
+     - fiches de règles : pastilles de famille, règles en lignes dépliables.
    Choix validés en v1 : couleur prune, notions par famille,
    texte + liste des fautes.
    Couleurs : variables de assets/theme.css ; seule exception, la teinte
@@ -225,13 +225,6 @@ input[type=checkbox] { width: 20px; height: 20px; flex: none; accent-color: var(
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
 .chips button { border: 1px solid var(--line-strong); background: var(--sheet); border-radius: 99px; padding: 6px 12px; cursor: pointer; font-size: .88rem; min-height: 38px; }
 .chips button.on { background: var(--accent); color: var(--sheet); border-color: var(--accent); }
-.ff { border-top: 1px solid var(--line); scroll-margin-top: 150px; }
-.ff:first-of-type { border-top: 0; }
-.ff-t { display: flex; align-items: center; gap: 10px; padding: 12px 2px; cursor: pointer; }
-.ff-t b { flex: 1; font-weight: 600; }
-.ff-c { display: none; padding: 0 0 12px; }
-.ff.ouvert .ff-c { display: block; }
-.ff.ouvert > .ff-t .chev { transform: rotate(180deg); }
 .intro { color: var(--ink-2); font-size: .9rem; margin: 0 0 8px; }
 .fr { border-radius: 12px; scroll-margin-top: 150px; }
 .fr-t { display: flex; align-items: center; gap: 10px; padding: 9px 10px; cursor: pointer; border-radius: 12px; min-height: 44px; }
@@ -244,11 +237,7 @@ input[type=checkbox] { width: 20px; height: 20px; flex: none; accent-color: var(
 .fr.ouvert > .fr-t { font-weight: 700; color: var(--accent-ink); }
 .fr.ouvert > .fr-t .chev { transform: rotate(180deg); }
 .plus { border: 0; background: none; color: var(--accent-ink); font-weight: 600; padding: 8px 10px; cursor: pointer; min-height: 44px; }
-.tuiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); gap: 8px; }
-.cadre.tel .tuiles { grid-template-columns: 1fr 1fr; }
-.tuiles .fr { border: 1px solid var(--line); background: var(--sheet); }
-.tuiles .fr.ouvert { grid-column: 1 / -1; background: var(--paper); border-color: var(--accent); }
-.tuiles .fr-t { align-items: flex-start; font-size: .92rem; }
+
 
 /* ---------------- validation de la maquette */
 .valid { max-width: 1280px; margin: 0 auto 60px; padding: 0 12px; }
@@ -282,7 +271,7 @@ input[type=checkbox] { width: 20px; height: 20px; flex: none; accent-color: var(
 <div class="valid">
   <div class="carte">
     <span class="badge">Validation de la maquette v3</span>
-    <p>Les choix de la v2 sont appliqués. Seules les <b>Fiches</b> ont encore deux options (barre noire). Pour essayer les différents niveaux de la dictée courte, change les <b>Réglages</b> (bouton ⚙). Laisse un commentaire si besoin, puis télécharge ou copie le résumé.</p>
+    <p>Les choix de la v2 sont appliqués, et les fiches mélangent les deux options de la v3. Pour essayer les différents niveaux de la dictée courte, change les <b>Réglages</b> (bouton ⚙). Laisse un commentaire si besoin, puis télécharge ou copie le résumé.</p>
     <div id="comm-zone"></div>
     <p><b>Remarque générale</b></p>
     <textarea id="comm-gen" placeholder="Idées, oublis, ce qui ne va pas…"></textarea>
@@ -316,9 +305,7 @@ input[type=checkbox] { width: 20px; height: 20px; flex: none; accent-color: var(
     { id: 'courte', nom: 'Dictée courte', page: 'Dictée courte', opts: [['A', 'Vérification immédiate', 'Chaque correction est vérifiée tout de suite (2 essais, puis la réponse). Note sur le nombre de fautes à trouver.']] },
     { id: 'brevet', nom: 'Dictée brevet', page: 'Dictée brevet', opts: [['A', 'Même déroulé', 'Mêmes étapes que la dictée courte, avec le déroulé officiel et le chrono de 20 min.']] },
     { id: 'suivi', nom: 'Mon suivi', page: 'Mon suivi', opts: [['A', 'Groupé par famille', '7 lignes, une par famille de règles ; on déplie pour voir chaque règle.']] },
-    { id: 'fiches', nom: 'Fiches', page: 'Fiches de règles', opts: [
-      ['A', 'Familles dépliables', '7 lignes ; on déplie une famille, puis une règle. L’essentiel d’abord, le reste sous « Pour aller plus loin ».'],
-      ['B', 'Une famille à la fois', 'Pastilles pour choisir la famille, règles en tuiles ; on touche une tuile pour la déplier.']] },
+    { id: 'fiches', nom: 'Fiches', page: 'Fiches de règles', opts: [['A', 'Pastilles + lignes', 'Pastilles pour choisir la famille, règles en lignes ; on touche une règle pour la déplier. L’essentiel d’abord, le reste sous « Pour aller plus loin ».']] },
     { id: 'reglages', nom: 'Réglages', page: 'Réglages', opts: [['A', 'Panneau', 'Le bouton ⚙ ouvre un panneau par-dessus la page en cours, sans la quitter.']] }
   ];
   var PLAN = [
@@ -879,8 +866,8 @@ input[type=checkbox] { width: 20px; height: 20px; flex: none; accent-color: var(
   }
 
   /* =============================================== ÉCRAN : fiches */
-  // une seule famille et une seule règle ouvertes à la fois
-  var FI = { fam: null, regle: null, plus: {}, choix: 'HO' };
+  // une famille affichée, une seule règle ouverte à la fois
+  var FI = { regle: null, plus: {}, choix: 'HO' };
   var NOMP = { 1: 'Accords', 2: 'Conjugaison', 3: 'Mots particuliers', 4: 'À l’envers' };
   function trier(L) { return L.slice().sort(function (a, b) { return a.niveau - b.niveau; }); }
   // une règle : titre seul, dépliée au clic (règle, test, deux exemples)
@@ -906,25 +893,13 @@ input[type=checkbox] { width: 20px; height: 20px; flex: none; accent-color: var(
   }
   function ecranFiches(P) {
     P.appendChild(entete('Fiches de règles', 'Les règles par famille', 'Touche une règle pour l’ouvrir : la règle, son <b>test</b> pour la relecture et deux exemples.'));
-    var c = el('div', 'carte');
-    if (opt('fiches') === 'A') {
-      D.familles.forEach(function (f) {
-        var n = D.regles.filter(function (r) { return r.famille === f.id; }).length;
-        var d = el('div', 'ff' + (FI.fam === f.id ? ' ouvert' : '')); d.id = 'ff-' + f.id;
-        var t = el('div', 'ff-t', '<b>' + esc(NOMC[f.id]) + '</b><span class="petit">' + n + ' règles</span><span class="chev">▾</span>'); t.setAttribute('role', 'button'); t.tabIndex = 0;
-        t.addEventListener('click', function () { FI.fam = FI.fam === f.id ? null : f.id; FI.regle = null; rendre(); if (FI.fam) versVue(document.getElementById('ff-' + f.id), 'start'); });
-        d.appendChild(t);
-        var cc = el('div', 'ff-c'); if (FI.fam === f.id) reglesFamille(cc, f, 'liste-r'); d.appendChild(cc);
-        c.appendChild(d);
-      });
-    } else {
-      var ch = el('div', 'chips');
-      D.familles.forEach(function (f) { var b = el('button', f.id === FI.choix ? 'on' : '', esc(NOMC[f.id])); b.addEventListener('click', function () { FI.choix = f.id; FI.regle = null; rendre(); }); ch.appendChild(b); });
-      P.appendChild(ch);
-      var f = D.familles.filter(function (x) { return x.id === FI.choix; })[0];
-      c.appendChild(el('h3', '', esc(f.nom)));
-      reglesFamille(c, f, 'tuiles');
-    }
+    // pastilles des familles, puis les règles de la famille choisie en lignes dépliables
+    var ch = el('div', 'chips');
+    D.familles.forEach(function (f) { var b = el('button', f.id === FI.choix ? 'on' : '', esc(NOMC[f.id])); b.addEventListener('click', function () { FI.choix = f.id; FI.regle = null; rendre(); }); ch.appendChild(b); });
+    P.appendChild(ch);
+    var c = el('div', 'carte'), f = D.familles.filter(function (x) { return x.id === FI.choix; })[0];
+    c.appendChild(el('h3', '', esc(f.nom)));
+    reglesFamille(c, f, 'liste-r');
     P.appendChild(c);
   }
 
