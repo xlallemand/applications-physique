@@ -14,6 +14,8 @@
        { id, famille, niveau, essentielle, titre, regle, astuce,
          exemples [phrases, mot visé entre [[ ]]],
          fautes [[faux, juste], …], prerequis [ids], passage (1 à 4),
+         cas (facultatif) : [{ titre, l: [[situation, exemple], …] }],
+                  cas particuliers affichés dans la fiche (exemple : mot visé entre [[ ]]),
          brevet : nombre de pièges des dictées aménagées officielles
                   (16 dictées, 160 pièges) classés dans cette règle }
      ORTHO_DONNEES.methodes  : méthode de relecture et astuces de vérification
@@ -428,10 +430,27 @@
       fautes: [['la venue (pour l’avenue)', 'l’avenue'], ['après midi', 'après-midi']],
       prerequis: [], passage: 4, brevet: 1 },
     { id: 'LX13', famille: 'LX', niveau: 2, essentielle: true, titre: 'Majuscules et ponctuation de la dictée',
-      regle: 'Majuscule en début de phrase et aux noms propres (Marseille, Paris, le Rwanda). Les noms de peuples prennent une majuscule (les Français), pas les adjectifs ni les langues (rwandaise, en breton). La ponctuation est dictée : point, virgule, deux-points, point-virgule, guillemets.',
-      astuce: 'Après chaque point, vérifie la majuscule ; recopie toute la ponctuation dictée.',
-      exemples: ['[[Marseille]]', 'la musique [[rwandaise]]', 'en [[breton]] de Paimpol'],
-      fautes: [['marseille', 'Marseille'], ['la musique Rwandaise', 'la musique rwandaise']],
+      regle: 'Majuscule au début d’une phrase, au début d’une parole rapportée entre guillemets, aux noms propres et aux noms de peuples (les Français). Pas de majuscule quand la phrase continue après ! ? ou …, dans l’incise qui suit les guillemets (« Viens ! » cria-t-il), après les deux-points, le point-virgule et la virgule, ni aux adjectifs, aux langues, aux jours et aux mois (la musique rwandaise, en breton, lundi). La majuscule garde son accent (À, É). La ponctuation est dictée : recopie-la toute.',
+      astuce: 'Après ! ? ou …, relis la suite : une nouvelle phrase commence → majuscule ; la même phrase continue (cria-t-il, eux, puis) → minuscule. Devant un nom, demande-toi : est-ce le nom d’une personne, d’un lieu, d’un peuple ? Seulement alors, majuscule.',
+      exemples: ['Les [[Français]] aiment la musique [[rwandaise]].', 'Les imbéciles ! [[eux]], rire de moi !', '« Viens vite ! » [[cria]] ma mère.', 'Il lui dit : « [[Je]] n’ai pas peur de toi. »'],
+      fautes: [['marseille', 'Marseille'], ['la musique Rwandaise', 'la musique rwandaise'], ['Les imbéciles ! Eux, rire de moi !', 'Les imbéciles ! eux, rire de moi !'],
+        ['« Viens vite ! » Cria ma mère.', '« Viens vite ! » cria ma mère.'], ['Il lui dit : « je n’ai pas peur. »', 'Il lui dit : « Je n’ai pas peur. »']],
+      cas: [
+        { titre: 'Majuscule', l: [
+          ['Au début d’une phrase : après un point, et après ! ? ou … quand la phrase est finie.', 'Mais il est six heures du soir. [[La]] nuit vous entre dans les yeux.'],
+          ['Au début d’une parole rapportée entre guillemets, après les deux-points.', 'Un moustique s’approcha d’un lion et lui dit : « [[Je]] n’ai pas peur de toi. »'],
+          ['Aux noms propres : personnes, villes, pays, rues…', '[[Marguerite]], [[Marseille]], le [[Rwanda]], ma rue du [[Dragon]]'],
+          ['Aux noms de peuples et d’habitants.', 'les [[Français]], un [[Parisien]]'],
+          ['Au premier mot d’un titre d’œuvre.', '[[Histoire]] de ma vie, de George Sand'],
+          ['Une majuscule garde son accent.', '[[À]] demain ! [[Écoute]] bien.']] },
+        { titre: 'Pas de majuscule', l: [
+          ['Après ! ou ? quand la phrase continue.', 'Les imbéciles ! [[eux]], rire de moi !'],
+          ['Après des points de suspension au milieu de la phrase.', 'Il hésita… [[puis]] il entra.'],
+          ['Dans l’incise qui suit une parole rapportée, même après ! ou ?', '« Viens vite ! » [[cria]] ma mère. « Tu viens ? » [[demanda]]-t-il.'],
+          ['Après les deux-points (sauf devant une parole entre guillemets), le point-virgule et la virgule.', 'Et le bruit : [[bruit]] de fleuve ou de foule.'],
+          ['Entre guillemets, quand on cite seulement quelques mots dans la phrase.', 'On appelait cette fontaine « [[le]] jet d’eau ».'],
+          ['Aux adjectifs, aux langues, aux jours, aux mois et aux saisons.', 'la musique [[rwandaise]], parler [[anglais]], [[lundi]] 3 [[mars]], en [[automne]]']] }
+      ],
       prerequis: [], passage: 4, brevet: 0 },
     { id: 'LX14', famille: 'LX', niveau: 3, essentielle: false, titre: 'Mots d’usage à mémoriser',
       regle: 'Certains mots ne se devinent pas : il faut les mémoriser par familles et par listes (syllabe, museau, escalier, nostalgie, commande, exposer, automne, monsieur, sculpture…). Les dictées de brevet donnent au tableau les noms propres et les mots rares.',

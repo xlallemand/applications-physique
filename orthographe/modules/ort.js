@@ -562,9 +562,15 @@
       d.appendChild(t);
       if (FI.regle === r.id) {
         d.appendChild(el('div', 'ort-fr-c', '<p>' + esc(r.regle) + '</p><div class="cle"><b class="cle-titre">Test :</b> ' + esc(r.astuce) + '</div>' +
-          '<p class="ort-ex">' + r.exemples.slice(0, 2).map(marque).join('<br>') + '</p>'));
+          '<p class="ort-ex">' + r.exemples.slice(0, 2).map(marque).join('<br>') + '</p>' + casParticuliers(r)));
       }
       return d;
+    }
+    // cas particuliers d'une règle (« Majuscule » / « Pas de majuscule »…) : une situation et son exemple par ligne
+    function casParticuliers(r) {
+      if (!r.cas || !r.cas.length) return '';
+      return '<div class="ort-cas">' + r.cas.map(g => '<div class="ort-cas-g"><p class="ort-cas-t">' + esc(g.titre) + '</p><ul>' +
+        g.l.map(c => '<li><span>' + esc(c[0]) + '</span><span class="ort-ex">' + marque(c[1]) + '</span></li>').join('') + '</ul></div>').join('') + '</div>';
     }
     function dessiner() {
       zone.innerHTML = '';
