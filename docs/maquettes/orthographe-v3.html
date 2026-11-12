@@ -323,7 +323,11 @@ input[type=checkbox] { width: 20px; height: 20px; flex: none; accent-color: var(
   try { var sv = JSON.parse(localStorage.getItem(CLE)); if (sv) { Object.assign(E, sv.E || {}); Object.assign(S, sv.S || {}); } } catch (e) { /* stockage indisponible */ }
   E.tiroir = false;
   function garder() { try { localStorage.setItem(CLE, JSON.stringify({ E: E, S: S })); } catch (e) { /* stockage indisponible */ } }
-  function opt(id) { return E.opt[id] || 'A'; }
+  // option retenue ; une option gardée en mémoire mais disparue de la maquette (ex. fiches « B ») revient à la première
+  function opt(id) {
+    var ec = ECRANS.filter(function (x) { return x.id === id; })[0], o = E.opt[id];
+    return ec && ec.opts.some(function (x) { return x[0] === o; }) ? o : ec ? ec.opts[0][0] : 'A';
+  }
 
   /* ---------------------------------------------- outils */
   function el(t, c, h) { var e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; }
