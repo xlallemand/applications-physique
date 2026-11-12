@@ -113,7 +113,9 @@ Résultat (11/11/2026) : les 64 règles, les 4 méthodes et les 3 points à tra
 
 ### Étape 5 — Maquettes puis développement
 
-- Maquettes dans `docs/maquettes/orthographe/` : **plusieurs options** d'interface (dictée à corriger, dictée audio, relecture guidée, menu des notions, tableau de suivi, résultat noté), au design de la charte.
+- Maquettes `docs/maquettes/orthographe.html` (v1) et `docs/maquettes/orthographe-v2.html` (v2) : **plusieurs options** d'interface (dictée à corriger, dictée audio, relecture guidée, menu des notions, tableau de suivi, résultat noté), au design de la charte.
+- Retenu après la v1 (12/11/2026) : couleur **prune** pour le domaine Français, notions choisies **par famille**, dictée à corriger en **texte + liste des fautes**.
+- Simplifications demandées pour la v2 : **un seul menu « Réglages »** pour toutes les options ; **suivi regroupé** (une ligne par groupe, dépliable) ; **un seul module « Dictée courte »** qui enchaîne dictée, relecture en 4 passages et résultat. Plan proposé : Dictée courte, Dictée brevet, Mon suivi, Fiches de règles, plus Réglages.
 - Après validation : développement de `orthographe/`, déclaration dans `APPS`, `AVANCEMENT`, index de recherche, `progression.js` ; vérifications de la charte §10.
 
 ## 5. À lire avant de commencer
