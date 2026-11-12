@@ -2,6 +2,10 @@
 
 À donner tel quel à une session, sur le dépôt `xlallemand/applications-physique`, branche `orthographe`.
 
+**État au 12/11/2026 : étapes 1 à 4 terminées, maquette v3 validée. Prochaine tâche : le développement (étape 5).** Message de lancement à donner à la nouvelle session :
+
+> Sur la branche `orthographe`, lis `docs/prompt-orthographe.md` en entier, puis développe l'application `orthographe/` selon la section 7 (spécification retenue) et la maquette de référence `docs/maquettes/orthographe-v3.html`, en respectant la charte.
+
 ---
 
 ## 1. Objectif
@@ -117,7 +121,8 @@ Résultat (11/11/2026) : les 64 règles, les 4 méthodes et les 3 points à tra
 - Retenu après la v1 (12/11/2026) : couleur **prune** pour le domaine Français, notions choisies **par famille**, dictée à corriger en **texte + liste des fautes**.
 - Simplifications demandées pour la v2 : **un seul menu « Réglages »** pour toutes les options ; **suivi regroupé** (une ligne par groupe, dépliable) ; **un seul module « Dictée courte »** qui enchaîne dictée, relecture en 4 passages et résultat. Plan proposé : Dictée courte, Dictée brevet, Mon suivi, Fiches de règles, plus Réglages.
 - Retenu après la v2 (12/11/2026) : dictée courte avec **vérification immédiate**, suivi **groupé par famille**, réglages en **panneau**, accueil simplifié, dictée brevet au même déroulé. Fiches : une par famille, regroupées, règle dépliée au clic, présentation peu chargée : en v3, pastilles des familles en haut et règles en lignes dépliables (mélange des deux options). Nouvelle maquette demandée avant le développement.
-- Après validation : développement de `orthographe/`, déclaration dans `APPS`, `AVANCEMENT`, index de recherche, `progression.js` ; vérifications de la charte §10.
+- **Retenu après la v3 (12/11/2026) — maquette validée** : accueil simplifié, dictée courte avec vérification immédiate, dictée brevet au même déroulé, suivi groupé par famille, fiches en pastilles + lignes, réglages en panneau. Seule remarque : en « J'écris la fin du mot », un **petit haut-parleur** à côté de chaque mot à compléter fait entendre le mot (ajouté dans la v3).
+- Développement : voir la section 7.
 
 ## 5. À lire avant de commencer
 
@@ -131,3 +136,74 @@ Résultat (11/11/2026) : les 64 règles, les 4 méthodes et les 3 points à tra
 - Espaces insécables (`docs/outils/typo.py`, `docs/outils/verif-typo.js`).
 - Défilement automatique après chaque validation.
 - Ne modifier que ce qui est demandé.
+
+## 7. Spécification retenue pour le développement
+
+Référence visuelle et fonctionnelle : **`docs/maquettes/orthographe-v3.html`** (ouvrir en `file://`). La barre noire en haut de la maquette (choix d'écran, d'option, d'appareil, commentaires) sert seulement à la maquette : elle ne passe pas dans l'application. Les données affichées dans la maquette (suivi, notes) sont fictives.
+
+### Données déjà prêtes
+
+- `docs/orthographe/donnees/regles.js` : 64 règles validées, 7 familles (`desc`, `passage` de relecture), 4 niveaux, prérequis, champs `essentielle`, `astuce`, `exemples`, contre-exemples, pièges, formes fautives.
+- `docs/orthographe/donnees/dictees-brevet.js` : dictées officielles du brevet (source, année), mots pièges annotés.
+- `docs/orthographe/validation.html` : page de validation (référence, ne pas la livrer dans l'application).
+- À créer : banque de **phrases annotées** et **gabarits combinatoires** (très grand nombre de phrases), mots invariables et mots d'usage.
+
+### Structure
+
+- Sommaire de la charte (à gauche sur ordinateur, bandeau « où suis-je » sur téléphone) : **1. Dictée courte**, **2. Dictée brevet**, **3. Mon suivi**, **4. Fiches de règles**, plus un bouton **⚙ Réglages** (dans le sommaire sur ordinateur, à droite du bandeau sur téléphone).
+- Couleur du domaine Français : prune, à ajouter dans `assets/theme.css` :
+  `html:root[data-matiere="francais"] { --accent: #9d2f72; --accent-ink: #6e1f50; --cle-bg: #f6e6ef; --cle-line: #e7c3d7; }` (vérifier aussi le thème sombre si la charte en prévoit un).
+
+### Accueil (simplifié)
+
+En-tête « Aa · Français · 3e · Orthographe », carte « Reprendre » (dernier module ouvert), ligne « Tes réglages » (résumé en étiquettes + bouton Réglages), puis les 4 modules en lignes dépliables avec la dernière note et « Commencer → » / « Ouvrir → ». Lien vers le portail toujours présent.
+
+### Réglages (panneau)
+
+Panneau latéral qui s'ouvre par-dessus la page (fermeture par « Fermer ✕ », clic sur le voile ou Échap). Un changement de réglage démarre une nouvelle dictée.
+
+- **Ce que tu travailles** : « Automatique (conseillé) » / « Je choisis ». En « Je choisis » : familles dépliables, case par famille (état intermédiaire) et case par règle avec son niveau, compteur de notions cochées.
+- **Dictée courte** : Type (Texte à corriger / Dictée audio) ; Les fautes (Déjà repérées / À repérer) ; Pour corriger (Choix multiples / J'écris le mot / J'écris la fin du mot) ; Longueur (Très courte / Courte). Avec « J'écris la fin du mot », les mots à compléter sont déjà repérés ; « Les fautes » et « Pour corriger » ne concernent que le texte à corriger.
+- **Lecture à voix haute** (dictée audio et dictée brevet) : vitesse (lente 0,7 / normale 0,85 / rapide 1) ; lectures par groupe (1, 2 ou 3).
+
+### Dictée courte (un seul module)
+
+En-tête avec le résumé des réglages en étiquettes, puis une barre d'étapes :
+
+| Réglage | Étapes |
+|---|---|
+| Texte, fautes à repérer | Relecture 1 · 2 · 3 · 4 → Résultat |
+| Texte, fautes déjà repérées | Corrige les fautes → Résultat |
+| Texte, fin du mot | Complète les mots → Relecture 1 · 2 · 3 · 4 → Résultat |
+| Dictée audio | Écoute et écris → Relecture 1 · 2 · 3 · 4 → Résultat |
+
+- **Mise en page** : texte à gauche, liste des fautes à droite (une colonne sur téléphone, défilement automatique vers l'élément utile après chaque action).
+- **Relecture en 4 passages** : une consigne par passage (Accords ; Conjugaison ; Mots particuliers ; À l'envers), tout de tête. Aide « verbe → sujet » à la demande (clic sur le verbe puis sur son sujet). Passage 4 : les mots affichés du dernier au premier, touchables.
+- **Vérification immédiate** : toucher un mot faux l'ajoute à la liste ; toucher un mot juste affiche « … est juste : ce n'est pas une faute (−0,5 point) ». Chaque faute se corrige tout de suite (choix multiples ou saisie) : 2 essais, diagnostic après une erreur, puis bouton pour afficher la réponse. Bouton **📖 Règle** sur chaque faute (rappel de la règle, lien vers la fiche).
+- **J'écris la fin du mot** : le début du mot est donné, une case pour la fin, et un **petit haut-parleur 🔊** juste après la case qui fait entendre le mot à écrire (synthèse vocale, vitesse des réglages). Compteur de mots complétés ; les fins restent modifiables pendant la relecture ; au passage 4, toucher un mot place le curseur dans sa case.
+- **Dictée audio** : lecture d'ensemble, puis groupes de mots (▶ / ⏸, groupe précédent / suivant, relire le groupe, la phrase, tout le texte), nombre de lectures par groupe et vitesse des réglages, ponctuation dite (« virgule », « point »). L'élève tape sa copie (correcteur et majuscule automatique désactivés). Comparaison mot à mot à la fin.
+- **Note (sur le nombre de fautes à trouver, ramenée sur 20, arrondie au demi-point)** : texte à corriger : juste du premier coup 1 point, au 2e essai 0,5, sinon 0 ; mot juste signalé −0,5. Fin de mot : 1 point par mot juste. Dictée audio : 1 point par mot piège juste, −0,5 par autre erreur. Note = 20 × max(0, points) / nombre de fautes. Affichage « X points sur N fautes à trouver », barème rappelé.
+- **Résultat** : note, taux de réussite par type d'erreur, liste des erreurs (écrit → attendu, règle, mention « non repérée », « réponse affichée »…), boutons « Nouvelle dictée » et vers le suivi.
+
+### Dictée brevet (même déroulé)
+
+Environ 600 signes, 20 minutes. Choix du texte : dictée déjà tombée ou texte généré. Étapes : Lecture d'ensemble → Dictée → Relecture du texte → Ta relecture 1 · 2 · 3 · 4 → Résultat. Mots au tableau (et source de l'extrait), chronomètre, boutons Pause, Relire la phrase, « • Mot douteux » (seule marque autorisée). Comme au brevet : pas de question après la relecture du texte. Note avec le **barème du brevet** (grammaire −1, usage −0,5 sur 10, puis sur 20), rappelé à l'écran.
+
+### Mon suivi (groupé par famille)
+
+- Carte « À travailler en priorité » : 3 règles (statut à travailler ou fragile, prérequis maîtrisés ; tri par niveau, puis à travailler avant fragile, puis fréquence au brevet), bouton « Dictée courte sur ces règles → », dernières notes et petite courbe.
+- Carte « Mes compétences » : une ligne par famille, dépliable, avec une barre empilée (Maîtrisée / Fragile / À travailler / Pas encore vue / Prérequis à acquérir) et l'alerte du nombre de règles à travailler ; dépliée : les règles avec statut et pourcentage. Légende des statuts.
+- Statuts : maîtrisée = 80 % de réussite sur les 20 dernières occasions ; une règle n'est proposée que si ses prérequis sont maîtrisés.
+- Bilan imprimable ; données dans « Enregistrer / Reprendre ma progression » (`assets/progression.js`).
+
+### Fiches de règles (pastilles + lignes)
+
+Pastilles des 7 familles en haut (une famille affichée à la fois), puis une carte : nom de la famille, phrase d'introduction avec son passage de relecture, règles **essentielles** d'abord en lignes dépliables (au toucher : la règle, son **Test** dans un encadré, deux exemples), puis bouton « Pour aller plus loin (n) » qui déplie les autres règles. Présentation peu chargée.
+
+### Points à soumettre à l'enseignant pendant le développement
+
+- Les astuces de **GN2** (« relie-le par une flèche ») et **SV4** (« Barre le pronom ») contredisent la consigne « tout de tête » : proposer une reformulation avant de modifier `regles.js`.
+
+### Livraison
+
+Déclaration dans `APPS` du portail (domaine Français, sans pastille de filtre, avec `mots`) et dans `AVANCEMENT` ; `python3 docs/outils/index-recherche.py` ; fusion dans `assets/progression.js` ; `python3 docs/outils/typo.py --corriger orthographe` puis `docs/outils/verif-typo.js` ; toutes les vérifications du §10 de la charte (ordinateur et téléphone, souris et tactile, aucun débordement, aucune erreur dans la console).

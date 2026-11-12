@@ -132,6 +132,8 @@ h3 { margin: 0 0 8px; font-size: 1.05rem; }
 .mot.sujet { background: var(--paper-2); outline: 2px dashed var(--accent); }
 .mot.rate { background: var(--danger-bg); color: var(--danger-text); }
 .fin { display: inline-flex; align-items: baseline; }
+.fin .hp { border: 0; background: none; padding: 0 2px; margin-left: 1px; font-size: 13px; line-height: 1; cursor: pointer; opacity: .75; min-width: 24px; min-height: 24px; }
+.fin .hp:hover { opacity: 1; }
 .fin input { width: 4.4em; font: inherit; font-size: 16px; border: 0; border-bottom: 2px solid var(--accent); background: var(--cle-bg); padding: 0 3px; border-radius: 4px 4px 0 0; color: var(--ink); }
 .liste-t { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .item { border-top: 1px dashed var(--paper-3); padding: 10px 0; scroll-margin-top: 150px; }
@@ -561,7 +563,11 @@ input[type=checkbox] { width: 20px; height: 20px; flex: none; accent-color: var(
         var w = el('span', 'fin'), inp = el('input');
         inp.setAttribute('aria-label', 'Fin du mot ' + t.deb + '…'); inp.autocomplete = 'off'; inp.spellcheck = false; inp.value = DC.fins[t.i] || ''; inp.id = 'fin-' + t.i;
         inp.addEventListener('input', function () { DC.fins[t.i] = inp.value.trim(); var c = document.getElementById('compte-fin'); if (c) c.textContent = nbFins() + '/' + FAUTES.length; });
-        w.appendChild(document.createTextNode(t.deb)); w.appendChild(inp); p.appendChild(w);
+        w.appendChild(document.createTextNode(t.deb)); w.appendChild(inp);
+        // petit haut-parleur : fait entendre le mot à écrire (synthèse vocale)
+        var hp = el('button', 'hp', '🔊'); hp.type = 'button'; hp.setAttribute('aria-label', 'Écouter le mot'); hp.title = 'Écouter le mot';
+        hp.addEventListener('click', function () { dire(t.j); });
+        w.appendChild(hp); p.appendChild(w);
       } else {
         var s = el('span', classeMot(t), esc(valeurMot(t)));
         s.addEventListener('click', function () { signaler(t); });
