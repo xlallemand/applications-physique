@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="francais">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette v2 : Orthographe (3e)</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<style>
+/* =====================================================================
+   Maquette v2 de l'application Orthographe (3e, dictée du brevet)
+   ---------------------------------------------------------------------
+   Simplifications demandées après la v1 :
+     - un seul menu « Réglages » pour toutes les options ;
+     - suivi des compétences regroupé, dépliable ;
+     - un seul module « Dictée courte » : dictée, relecture en
+       4 passages et résultat dans la même page.
+   Choix validés en v1 : couleur prune, notions par famille,
+   texte + liste des fautes.
+   Couleurs : variables de assets/theme.css ; seule exception, la teinte
+   prune du nouveau domaine « Français » (à déclarer dans theme.css).
+   ===================================================================== */
+html:root[data-matiere="francais"] { --accent: #9d2f72; --accent-ink: #6e1f50; --cle-bg: #f6e6ef; --cle-line: #e7c3d7; }
+html { scroll-padding-top: 150px; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper-2); color: var(--ink); font-family: var(--font-sans); line-height: 1.5; }
+button { font: inherit; color: inherit; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+/* ---------------- barre de la maquette (hors application) */
+.mq { position: sticky; top: 0; z-index: 50; background: var(--ink); color: var(--sheet); padding: 8px 12px; }
+.mq-l { display: flex; gap: 6px; align-items: center; overflow-x: auto; padding: 3px 0; scrollbar-width: thin; }
+.mq-l b { font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3); flex: none; margin-right: 4px; }
+.mq-p { flex: none; border: 1px solid var(--ink-2); background: transparent; color: var(--sheet); border-radius: 99px; padding: 5px 11px; font-size: .85rem; cursor: pointer; }
+.mq-p.on { background: var(--sheet); color: var(--ink); border-color: var(--sheet); }
+.mq-desc { font-size: .85rem; color: var(--paper-3); margin: 4px 0 2px; }
+
+/* ---------------- cadre : application simulée */
+.scene { padding: 16px 12px 40px; display: flex; justify-content: center; }
+.scene.reel { padding: 0; }
+.cadre { background: var(--paper); width: 100%; max-width: 1280px; min-height: 80vh; border-radius: 14px; box-shadow: 0 2px 20px rgba(0,0,0,.08); position: relative; overflow: hidden; display: flex; }
+.cadre.tel { max-width: 390px; display: block; border-radius: 28px; border: 8px solid var(--ink); min-height: 780px; }
+.cadre.reel { border: 0; border-radius: 0; max-width: none; min-height: 0; box-shadow: none; }
+.som { width: 264px; flex: none; background: var(--sheet); border-right: 1px solid var(--line); padding: 16px 12px; font-size: .9rem; }
+.cadre.tel .som { display: none; }
+.som-app { font-weight: 800; font-size: 1.05rem; }
+.som-pil { display: flex; gap: 6px; margin: 6px 0 14px; }
+.som-pil span { padding: 3px 10px; border-radius: 99px; background: var(--paper-2); font-size: .8rem; cursor: pointer; }
+.som-pil span.on { outline: 2px solid var(--accent); background: var(--sheet); font-weight: 700; }
+.som-lab { font-size: .72rem; text-transform: uppercase; color: var(--ink-3); letter-spacing: .05em; margin-bottom: 6px; }
+.som-m { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 10px; cursor: pointer; }
+.som-m.on { background: var(--cle-bg); outline: 2px solid var(--accent); font-weight: 700; }
+.som-n { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-size: .75rem; font-weight: 700; flex: none; }
+.som-m.on .som-n { background: var(--accent); color: var(--sheet); }
+.bandeau { display: none; }
+.cadre.tel .bandeau { display: flex; align-items: center; gap: 8px; height: 54px; padding: 0 8px; background: var(--sheet); border-bottom: 1px solid var(--line); }
+.bandeau .pil { flex: 1; display: flex; align-items: center; gap: 8px; background: var(--cle-bg); border-radius: 99px; padding: 5px 12px 5px 6px; min-width: 0; }
+.bandeau .pil small { display: block; color: var(--accent-ink); font-size: .7rem; line-height: 1.1; }
+.bandeau .pil b { display: block; font-size: .88rem; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bandeau .eng { width: 42px; height: 42px; border-radius: 50%; border: 0; background: var(--paper-2); font-size: 1.15rem; cursor: pointer; flex: none; }
+.corps { flex: 1; min-width: 0; padding: 22px 24px 60px; overflow-x: hidden; }
+.cadre.tel .corps { padding: 14px 12px 50px; }
+.page { max-width: 60rem; margin: 0 auto; }
+
+/* ---------------- éléments de l'application (charte) */
+.carte { background: var(--sheet); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; margin: 0 0 14px; }
+.cadre.tel .carte { padding: 14px; }
+.badge { display: inline-block; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; background: var(--cle-bg); color: var(--accent-ink); border-radius: 6px; padding: 2px 8px; }
+h2.titre { margin: 8px 0 4px; font-size: 1.45rem; }
+h3 { margin: 0 0 8px; font-size: 1.05rem; }
+.ctx { color: var(--ink-2); margin: 0; }
+.btn { border: 0; border-radius: 12px; padding: 11px 18px; background: var(--ink); color: var(--sheet); font-weight: 600; cursor: pointer; min-height: 46px; }
+.btn.sec { background: var(--paper-2); color: var(--ink); }
+.btn.acc { background: var(--accent); color: var(--sheet); }
+.btn.pt { padding: 6px 12px; min-height: 38px; font-size: .88rem; border-radius: 10px; }
+.btn:disabled { opacity: .45; cursor: default; }
+.rangee { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.cle { background: var(--cle-bg); border-left: 4px solid var(--accent); border-radius: 10px; padding: 10px 14px; margin: 0 0 10px; }
+.ok { background: var(--success-bg); color: var(--success-text); border-radius: 10px; padding: 10px 14px; margin: 10px 0; }
+.ko { background: var(--danger-bg); color: var(--danger-text); border-radius: 10px; padding: 10px 14px; margin: 10px 0; }
+.neutre { background: var(--paper); border-radius: 10px; padding: 10px 14px; margin: 10px 0; color: var(--ink-2); }
+.petit { font-size: .85rem; color: var(--ink-3); }
+.seg { display: inline-flex; background: var(--paper-2); border-radius: 12px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+.seg button { border: 0; background: transparent; border-radius: 9px; padding: 7px 12px; cursor: pointer; font-size: .88rem; min-height: 38px; }
+.seg button.on { background: var(--sheet); box-shadow: 0 1px 3px rgba(0,0,0,.12); font-weight: 700; }
+.seg.off { opacity: .45; pointer-events: none; }
+.resume-r { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; }
+.tag { background: var(--paper-2); border-radius: 99px; padding: 3px 10px; font-size: .82rem; }
+
+/* ---------------- accueil */
+.hero { background: var(--ink); color: var(--sheet); border-radius: 16px; padding: 26px 22px; margin-bottom: 14px; position: relative; overflow: hidden; }
+.hero small { color: var(--cle-line); text-transform: uppercase; letter-spacing: .08em; font-size: .75rem; }
+.hero h1 { margin: 4px 0 6px; font-size: 1.8rem; }
+.hero p { margin: 0; color: var(--paper-3); }
+.hero .lettres { position: absolute; right: 14px; top: 6px; font-size: 4.5rem; font-weight: 800; color: var(--accent); opacity: .6; letter-spacing: -.04em; }
+.reprendre { background: var(--ink); color: var(--sheet); border-radius: 14px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; cursor: pointer; }
+.mod { background: var(--sheet); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 8px; }
+.mod-t { display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; }
+.mod-t .som-n { width: 30px; height: 30px; font-size: .85rem; }
+.mod-t div { flex: 1; min-width: 0; }
+.mod-t b { display: block; }
+.mod-t span.d { color: var(--ink-2); font-size: .88rem; }
+.cadre.tel .mod-t span.d { display: none; }
+.mod-c { padding: 0 14px 14px 56px; display: none; }
+.cadre.tel .mod-c { padding-left: 14px; }
+.mod.ouvert .mod-c { display: block; }
+
+/* ---------------- étapes de la dictée */
+.etapes { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.et { border: 0; border-radius: 99px; padding: 7px 13px; background: var(--paper-2); font-size: .85rem; cursor: pointer; min-height: 36px; }
+.et.on { background: var(--accent); color: var(--sheet); font-weight: 700; }
+.et.fait { background: var(--cle-bg); color: var(--accent-ink); }
+.et-gr { display: inline-flex; align-items: center; gap: 4px; background: var(--paper-2); border-radius: 99px; padding: 3px 4px 3px 12px; font-size: .85rem; }
+.et-gr.on { background: var(--cle-bg); color: var(--accent-ink); font-weight: 700; }
+.et-n { width: 30px; height: 30px; border-radius: 50%; border: 0; background: var(--sheet); cursor: pointer; font-size: .82rem; font-weight: 700; }
+.et-n.on { background: var(--accent); color: var(--sheet); }
+.et-n.fait { background: var(--cle-line); }
+.zone { scroll-margin-top: 150px; }
+
+/* ---------------- texte de dictée et liste des fautes */
+.deux { display: grid; grid-template-columns: 1.45fr 1fr; gap: 14px; align-items: start; }
+.cadre.tel .deux { grid-template-columns: 1fr; }
+.dictee { font-size: 1.15rem; line-height: 2.2; }
+.cadre.tel .dictee { font-size: 1.05rem; }
+.mot { border-radius: 5px; padding: 1px 2px; }
+.cliquable .mot { cursor: pointer; }
+.cliquable .mot:hover { background: var(--paper-2); }
+.mot.signale { background: var(--cle-bg); border-bottom: 2px dashed var(--accent); }
+.mot.choisi { background: var(--cle-bg); border-bottom: 2px solid var(--accent); font-weight: 600; }
+.mot.juste { background: var(--success-bg); color: var(--success-text); font-weight: 600; }
+.mot.fausse { text-decoration: underline wavy var(--ink-3); }
+.mot.focus { outline: 2px solid var(--accent); }
+.mot.verbe { background: var(--cle-bg); outline: 2px solid var(--accent); }
+.mot.sujet { background: var(--paper-2); outline: 2px dashed var(--accent); }
+.mot.rate { background: var(--danger-bg); color: var(--danger-text); }
+.fin { display: inline-flex; align-items: baseline; }
+.fin input { width: 4.4em; font: inherit; font-size: 16px; border: 0; border-bottom: 2px solid var(--accent); background: var(--cle-bg); padding: 0 3px; border-radius: 4px 4px 0 0; color: var(--ink); }
+.liste-t { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.item { border-top: 1px dashed var(--paper-3); padding: 10px 0; scroll-margin-top: 150px; }
+.item-t { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.item-t b { font-size: 1.05rem; }
+.choix { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+.choix button { min-height: 46px; min-width: 5.5rem; border: 1px solid var(--line-strong); background: var(--sheet); border-radius: 12px; padding: 8px 12px; cursor: pointer; font-size: 1rem; }
+.choix button.choisi { background: var(--cle-bg); border: 2px solid var(--accent); color: var(--accent-ink); font-weight: 700; }
+.choix button.bon { background: var(--success-bg); border-color: var(--success); color: var(--success-text); font-weight: 700; }
+.choix button.mauvais { background: var(--danger-bg); border-color: var(--danger); color: var(--danger-text); }
+input.champ { font: inherit; font-size: 16px; border: 1px solid var(--line-strong); border-radius: 10px; padding: 9px 12px; min-height: 46px; background: var(--sheet); color: var(--ink); width: 11rem; max-width: 100%; }
+.icone { border: 0; background: var(--paper-2); border-radius: 9px; min-width: 38px; height: 34px; cursor: pointer; font-size: .85rem; padding: 0 9px; }
+.icone.on { background: var(--cle-bg); color: var(--accent-ink); font-weight: 700; }
+.regle-pop { background: var(--paper); border-radius: 12px; padding: 10px 12px; margin-top: 8px; font-size: .92rem; }
+.regle-pop h4 { margin: 0 0 4px; }
+.regle-pop p { margin: 4px 0; }
+mark { background: var(--cle-bg); color: var(--accent-ink); font-weight: 700; padding: 0 2px; border-radius: 3px; }
+.envers { display: flex; flex-wrap: wrap; gap: 6px; font-size: 1.15rem; }
+.envers span { background: var(--paper); border-radius: 8px; padding: 4px 10px; cursor: pointer; }
+.envers span.signale { background: var(--cle-bg); outline: 2px dashed var(--accent); }
+.envers span.on { outline: 2px solid var(--accent); background: var(--sheet); font-weight: 700; }
+table.t { border-collapse: collapse; width: 100%; font-size: .9rem; }
+table.t td, table.t th { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.nav-bas { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; margin-top: 14px; }
+
+/* ---------------- audio */
+.lecteur { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.rond { width: 56px; height: 56px; border-radius: 50%; border: 0; background: var(--accent); color: var(--sheet); font-size: 1.35rem; cursor: pointer; }
+.rond.sec { background: var(--paper-2); color: var(--ink); width: 48px; height: 48px; font-size: 1.05rem; }
+.groupes { display: flex; gap: 3px; margin: 10px 0; }
+.groupes i { flex: 1; height: 8px; border-radius: 99px; background: var(--paper-3); cursor: pointer; }
+.groupes i.fait { background: var(--cle-line); }
+.groupes i.on { background: var(--accent); }
+textarea.copie { width: 100%; min-height: 9rem; font: inherit; font-size: 1.1rem; line-height: 2; border: 1px solid var(--line-strong); border-radius: 12px; padding: 10px 14px; background: repeating-linear-gradient(var(--sheet), var(--sheet) 2.15rem, var(--paper-2) 2.2rem); color: var(--ink); }
+.tableau { background: var(--ink); color: var(--sheet); border-radius: 12px; padding: 10px 16px; }
+.chrono { font-size: 2rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* ---------------- résultat */
+.note { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+.note .n { font-size: 3.2rem; font-weight: 800; line-height: 1; }
+.note .n small { font-size: 1.3rem; color: var(--ink-3); }
+.fam-r { display: flex; flex-wrap: wrap; gap: 6px; }
+.fam-r span { border-radius: 99px; padding: 4px 10px; font-size: .85rem; font-weight: 600; }
+.fam-r .tout { background: var(--success-bg); color: var(--success-text); }
+.fam-r .part { background: var(--cle-bg); color: var(--accent-ink); }
+.fam-r .rien { background: var(--danger-bg); color: var(--danger-text); }
+.err { border-top: 1px dashed var(--paper-3); padding: 9px 0; }
+.err s { color: var(--danger-text); }
+.err .att { color: var(--success-text); font-weight: 700; }
+
+/* ---------------- suivi regroupé */
+.grp { border-top: 1px solid var(--line); }
+.grp:first-of-type { border-top: 0; }
+.grp-t { display: grid; grid-template-columns: 1fr 9rem 3.2rem 1rem; gap: 10px; align-items: center; padding: 11px 2px; cursor: pointer; }
+.cadre.tel .grp-t { grid-template-columns: 1fr 5.5rem 2.8rem 1rem; }
+.grp-t b { font-weight: 600; }
+.pile { display: flex; height: 10px; border-radius: 99px; overflow: hidden; background: var(--paper-2); }
+.pile i { display: block; height: 100%; }
+.s-m { background: var(--success); } .s-f { background: var(--accent); } .s-t { background: var(--danger); } .s-n { background: var(--paper-3); } .s-v { background: var(--paper-2); }
+.grp-c { display: none; padding: 0 2px 10px; }
+.grp.ouvert .grp-c { display: block; }
+.grp.ouvert .chev { transform: rotate(180deg); }
+.ligne-r { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: .92rem; }
+.ligne-r .pct { margin-left: auto; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pt-s { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.ligne-r.v { color: var(--ink-3); }
+.legende { display: flex; flex-wrap: wrap; gap: 12px; font-size: .8rem; color: var(--ink-2); margin-top: 8px; }
+.legende span { display: inline-flex; gap: 5px; align-items: center; }
+
+/* ---------------- réglages (panneau ou page) */
+.voile { position: absolute; inset: 0; background: rgba(22,24,29,.35); z-index: 20; }
+.tiroir { position: absolute; top: 0; right: 0; bottom: 0; width: 400px; max-width: 100%; background: var(--sheet); z-index: 21; overflow-y: auto; box-shadow: -4px 0 20px rgba(0,0,0,.12); }
+.cadre.tel .tiroir { top: auto; left: 0; width: auto; max-height: 88%; border-radius: 20px 20px 0 0; }
+.tiroir-t { position: sticky; top: 0; background: var(--sheet); display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--line); z-index: 1; }
+.tiroir-c { padding: 6px 18px 18px; }
+.sect { padding: 14px 0; border-bottom: 1px solid var(--line); }
+.sect:last-child { border-bottom: 0; }
+.sect h4 { margin: 0 0 8px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3); }
+.lig { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; margin: 6px 0; }
+.lig > span { font-size: .9rem; color: var(--ink-2); min-width: 7.5rem; }
+.fam { border: 1px solid var(--line); border-radius: 12px; margin: 6px 0; }
+.fam-t { display: flex; align-items: center; gap: 10px; padding: 9px 12px; cursor: pointer; }
+.fam-t b { flex: 1; font-weight: 600; font-size: .95rem; }
+.fam-c { padding: 0 12px 8px 40px; display: none; }
+.fam.ouvert .fam-c { display: block; }
+label.cb { display: flex; gap: 10px; align-items: flex-start; padding: 5px 0; cursor: pointer; font-size: .92rem; }
+input[type=checkbox] { width: 20px; height: 20px; flex: none; accent-color: var(--accent); margin: 1px 0 0; }
+.niv-pt { font-size: .7rem; border-radius: 5px; padding: 1px 6px; background: var(--paper-2); color: var(--ink-2); margin-left: 4px; white-space: nowrap; }
+
+/* ---------------- fiche */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.chips button { border: 1px solid var(--line-strong); background: var(--sheet); border-radius: 99px; padding: 6px 12px; cursor: pointer; font-size: .88rem; }
+.chips button.on { background: var(--accent); color: var(--sheet); border-color: var(--accent); }
+.fiche h3 { color: var(--accent-ink); margin: 18px 0 4px; }
+.fiche p { margin: 4px 0; }
+
+/* ---------------- validation de la maquette */
+.valid { max-width: 1280px; margin: 0 auto 60px; padding: 0 12px; }
+.valid textarea { width: 100%; font: inherit; font-size: .9rem; border: 1px solid var(--line-strong); border-radius: 10px; padding: 8px; min-height: 3rem; background: var(--sheet); color: var(--ink); }
+.valid textarea.res { min-height: 12rem; font-size: .82rem; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- ================= Barre de la maquette ================= -->
+<div class="mq">
+  <div class="mq-l" id="mq-ecrans"><b>Écran</b></div>
+  <div class="mq-l" id="mq-options"><b>Option</b></div>
+  <div class="mq-l"><b>Appareil</b>
+    <button class="mq-p" data-app="ordi">Ordinateur</button><button class="mq-p" data-app="tel">Téléphone</button>
+  </div>
+  <div class="mq-desc" id="mq-desc"></div>
+</div>
+
+<div class="scene">
+  <div class="cadre" id="cadre">
+    <nav class="som" id="som"></nav>
+    <div class="bandeau" id="bandeau"></div>
+    <main class="corps"><div class="page" id="page"></div></main>
+    <div id="tiroir"></div>
+  </div>
+</div>
+
+<!-- ================= Validation de la maquette ================= -->
+<div class="valid">
+  <div class="carte">
+    <span class="badge">Validation de la maquette v2</span>
+    <p>Pour chaque écran, choisis une option dans la barre noire (elle est retenue) et laisse un commentaire si besoin. Pour essayer les différents niveaux de la dictée courte, change les <b>Réglages</b> (bouton ⚙). Puis télécharge ou copie le résumé.</p>
+    <div id="comm-zone"></div>
+    <p><b>Remarque générale</b></p>
+    <textarea id="comm-gen" placeholder="Idées, oublis, ce qui ne va pas…"></textarea>
+    <div class="rangee" style="margin-top:10px">
+      <button class="btn" id="b-res">Mettre à jour le résumé</button>
+      <button class="btn sec" id="b-cop">Copier</button>
+      <button class="btn sec" id="b-tel">Télécharger (.txt)</button>
+    </div>
+    <textarea class="res" id="res" readonly aria-label="Résumé"></textarea>
+  </div>
+</div>
+
+<script src="../orthographe/donnees/regles.js"></script>
+<script>
+/* =====================================================================
+   Moteur de la maquette v2 (IIFE, exposé sur window.MQ2)
+   E  : état de la maquette (écran, options, appareil, commentaires)
+   S  : réglages de l'élève (le menu Réglages unique)
+   DC : état de la dictée courte en cours
+   État gardé dans localStorage['ortho-maquette-2'].
+   ===================================================================== */
+(function () {
+  'use strict';
+  var D = window.ORTHO_DONNEES, R = {};
+  D.regles.forEach(function (r) { R[r.id] = r; });
+  var NOMC = { GN: 'Groupe nominal', SV: 'Sujet-verbe', EE: '-é, -er, -i, -u', CJ: 'Conjugaison', PP: 'Participe passé', HO: 'Homophones', LX: 'Orthographe d’usage' };
+
+  /* ---------------------------------------------- écrans et options */
+  var ECRANS = [
+    { id: 'accueil', nom: 'Accueil', page: 'Accueil', opts: [['A', 'Accueil simplifié', '4 modules seulement ; les réglages en cours sont rappelés sous « Reprendre ».']] },
+    { id: 'courte', nom: 'Dictée courte', page: 'Dictée courte', opts: [
+      ['A', 'Vérification à la fin', 'Comme au brevet : tu signales et corriges pendant la relecture, tout est vérifié quand tu termines.'],
+      ['B', 'Vérification immédiate', 'Chaque correction est vérifiée tout de suite (2 essais, puis la réponse).']] },
+    { id: 'brevet', nom: 'Dictée brevet', page: 'Dictée brevet', opts: [['A', 'Même déroulé', 'Mêmes étapes que la dictée courte, avec le déroulé officiel et le chrono de 20 min.']] },
+    { id: 'suivi', nom: 'Mon suivi', page: 'Mon suivi', opts: [
+      ['A', 'Groupé par famille', '7 lignes, une par famille de règles ; on déplie pour voir chaque règle.'],
+      ['B', 'Groupé par niveau', '4 lignes : Socle, Essentiel brevet, Approfondissement, Expert ; on déplie pour le détail.']] },
+    { id: 'fiches', nom: 'Fiches', page: 'Fiches de règles', opts: [['A', 'Une fiche par famille', 'Pastilles pour choisir la famille, toutes ses règles dessous.']] },
+    { id: 'reglages', nom: 'Réglages', page: 'Réglages', opts: [
+      ['A', 'Panneau', 'Le bouton ⚙ ouvre un panneau par-dessus la page en cours, sans la quitter.'],
+      ['B', 'Page', 'Le bouton ⚙ mène à une page Réglages.']] }
+  ];
+  var PLAN = [
+    { n: 1, id: 'courte', t: 'Dictée courte', d: 'Un texte court : relis-le en 4 passages, corrige, obtiens ta note.' },
+    { n: 2, id: 'brevet', t: 'Dictée brevet', d: 'Une dictée complète, en conditions réelles (20 min).' },
+    { n: 3, id: 'suivi', t: 'Mon suivi', d: 'Ce que tu maîtrises et ce qu’il faut travailler en priorité.' },
+    { n: 4, id: 'fiches', t: 'Fiches de règles', d: 'Les règles de chaque famille, avec leurs tests.' }
+  ];
+
+  /* ---------------------------------------------- états */
+  var CLE = 'ortho-maquette-2';
+  var E = { ecran: 'accueil', opt: {}, app: 'ordi', comm: {}, gen: '', tiroir: false, retour: 'courte' };
+  var S = { auto: true, notions: {}, type: 'texte', rep: 'arep', corr: 'qcm', longueur: 'tc', vitesse: 0.85, lectures: 2 };
+  D.regles.forEach(function (r) { if (r.niveau <= 2) S.notions[r.id] = true; });
+  try { var sv = JSON.parse(localStorage.getItem(CLE)); if (sv) { Object.assign(E, sv.E || {}); Object.assign(S, sv.S || {}); } } catch (e) { /* stockage indisponible */ }
+  E.tiroir = false;
+  function garder() { try { localStorage.setItem(CLE, JSON.stringify({ E: E, S: S })); } catch (e) { /* stockage indisponible */ } }
+  function opt(id) { return E.opt[id] || 'A'; }
+
+  /* ---------------------------------------------- outils */
+  function el(t, c, h) { var e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function marque(s) { return esc(s).replace(/\[\[(.+?)\]\]/g, '<mark>$1</mark>'); }
+  function versVue(n, bloc) { if (n && n.scrollIntoView) n.scrollIntoView({ block: bloc || 'nearest', behavior: 'smooth' }); }
+  function nu(w) { return String(w).toLowerCase().replace(/[.,;:!?«»"()]/g, ''); }
+  function virg(x) { return String(x).replace('.', ','); }
+  function seg(choix, val, fn, off) {
+    var s = el('div', 'seg' + (off ? ' off' : ''));
+    choix.forEach(function (c) { var b = el('button', String(c[0]) === String(val) ? 'on' : '', c[1]); b.type = 'button'; b.addEventListener('click', function () { fn(c[0]); }); s.appendChild(b); });
+    return s;
+  }
+  function blocRegle(id) {
+    var r = R[id], b = el('div', 'regle-pop');
+    b.innerHTML = '<h4>' + esc(r.titre) + '</h4><p>' + esc(r.regle) + '</p><p><b>Astuce :</b> ' + esc(r.astuce) + '</p><p>' + r.exemples.slice(0, 2).map(marque).join(' · ') + '</p>';
+    return b;
+  }
+
+  /* ---------------------------------------------- dictée d'exemple annotée
+     {juste|faute|règle|début du mot (fin à écrire)|choix séparés par /} */
+  var MODELE = 'Chaque soir, les pêcheurs {rentraient|rentrait|SV2|rentr|rentrait/rentraient/rentrés} au port. ' +
+    'Ils rangeaient {leurs|leur|HO9|leur|leur/leurs} filets sur la {jetée|jeté|LX7|jet|jeté/jetée/jetai} {et|est|HO2||et/est/es} regardaient les vagues ' +
+    'qui se {brisaient|brisait|SV3|bris|brisait/brisaient/briser} contre les rochers. Ma sœur et moi allions les rejoindre pour les aider à ' +
+    '{porter|porté|EE1|port|porté/porter/portait} les paniers.';
+  function analyser(m) {
+    var T = [], re = /\{([^}]*)\}|([^\s{]+)/g, x, i = 0;
+    while ((x = re.exec(m))) {
+      if (x[1]) { var p = x[1].split('|'); T.push({ i: i++, j: p[0], f: p[1], r: p[2], deb: p[3], ch: p[4].split('/'), faute: true }); }
+      else T.push({ i: i++, j: x[2], f: x[2] });
+    }
+    return T;
+  }
+  var DT = analyser(MODELE), FAUTES = DT.filter(function (t) { return t.faute; });
+  var REF = DT.map(function (t) { return t.j; }).join(' ');
+  var GROUPES = ['Chaque soir,', 'les pêcheurs rentraient au port.', 'Ils rangeaient leurs filets', 'sur la jetée', 'et regardaient les vagues', 'qui se brisaient', 'contre les rochers.', 'Ma sœur et moi', 'allions les rejoindre', 'pour les aider', 'à porter les paniers.'];
+  // verbes conjugués du texte et leurs sujets (aide « verbe → sujet »)
+  var VS = { rentraient: ['pêcheurs', 'les pêcheurs'], rentrait: ['pêcheurs', 'les pêcheurs'], rangeaient: ['ils', 'Ils'], regardaient: ['ils', 'Ils'],
+    brisaient: ['qui|vagues', 'qui, mis pour « les vagues »'], brisait: ['qui|vagues', 'qui, mis pour « les vagues »'], allions: ['sœur|moi', 'ma sœur et moi'] };
+  var PASS = {
+    p1: ['Accords', 'Pour chaque nom, vérifie de tête que le déterminant et les adjectifs ont le même genre et le même nombre.'],
+    p2: ['Conjugaison', 'Pour chaque verbe conjugué, trouve son sujet (« qui est-ce qui ? ») et vérifie la terminaison.'],
+    p3: ['Mots particuliers', 'À chaque a, à, et, est, son, sont, ce, se, ces, ses, leur… fais le test de remplacement.'],
+    p4: ['À l’envers', 'Lis du dernier mot au premier : sans le sens de la phrase, tu vois l’orthographe de chaque mot.']
+  };
+
+  /* ---------------------------------------------- dictée courte : état et étapes */
+  var DC;
+  function nouvelleDictee() {
+    DC = { k: 0, signales: {}, fausses: [], rep: {}, fins: {}, essais: {}, bon: {}, affiche: {}, regle: {}, msg: null, aide: null, tests: false, copie: '', focus: null, envers: null };
+  }
+  nouvelleDictee();
+  function etapes() {
+    var p = [['p1'], ['p2'], ['p3'], ['p4']];
+    if (S.type === 'audio') return [['ecrire', 'Écoute et écris']].concat(p, [['res', 'Résultat']]);
+    if (S.corr === 'fin') return [['ecrire', 'Complète les mots']].concat(p, [['res', 'Résultat']]);
+    if (S.rep === 'reperees') return [['corriger', 'Corrige les fautes']].concat([['res', 'Résultat']]);
+    return p.concat([['res', 'Résultat']]);
+  }
+  function etapeId() { return etapes()[DC.k][0]; }
+  function resumeReglages() {
+    var t = [S.auto ? 'Notions : automatique' : 'Notions : ' + Object.keys(S.notions).filter(function (k) { return S.notions[k]; }).length + ' choisies'];
+    if (S.type === 'audio') t.push('Dictée audio', { 0.7: 'lecture lente', 0.85: 'lecture normale', 1: 'lecture rapide' }[S.vitesse], S.lectures + ' lecture' + (S.lectures > 1 ? 's' : '') + ' par groupe');
+    else { t.push('Texte à corriger'); if (S.corr !== 'fin') t.push(S.rep === 'arep' ? 'fautes à repérer' : 'fautes déjà repérées'); t.push({ qcm: 'choix multiples', saisie: 'j’écris le mot', fin: 'j’écris la fin du mot' }[S.corr]); }
+    t.push(S.longueur === 'tc' ? 'très courte' : 'courte');
+    return t;
+  }
+
+  /* ---------------------------------------------- navigation simulée */
+  function ouvrirReglages() {
+    if (opt('reglages') === 'B') { E.retour = E.ecran === 'reglages' ? E.retour : E.ecran; aller('reglages'); }
+    else { E.tiroir = true; rendre(); }
+  }
+  function rendreNav() {
+    var som = document.getElementById('som'); som.innerHTML = '';
+    som.appendChild(el('div', 'som-app', 'Orthographe'));
+    var pil = el('div', 'som-pil'), a = el('span', E.ecran === 'accueil' ? 'on' : '', '⌂ Accueil'), r = el('span', E.ecran === 'reglages' && opt('reglages') === 'B' ? 'on' : '', '⚙ Réglages');
+    a.addEventListener('click', function () { aller('accueil'); }); r.addEventListener('click', ouvrirReglages);
+    pil.appendChild(a); pil.appendChild(r); som.appendChild(pil);
+    som.appendChild(el('div', 'som-lab', 'Sommaire'));
+    var courant = null;
+    PLAN.forEach(function (m) {
+      var on = m.id === E.ecran || (E.ecran === 'reglages' && opt('reglages') === 'A' && m.id === 'courte');
+      if (on) courant = m;
+      var l = el('div', 'som-m' + (on ? ' on' : ''), '<span class="som-n">' + m.n + '</span><span>' + esc(m.t) + '</span>');
+      l.addEventListener('click', function () { aller(m.id); });
+      som.appendChild(l);
+    });
+    var b = document.getElementById('bandeau'); b.innerHTML = '';
+    var p = el('div', 'pil', '<span class="som-n" style="background:var(--accent);color:var(--sheet)">' + (courant ? courant.n : '⌂') + '</span><div style="min-width:0"><small>Orthographe</small><b>' +
+      esc(courant ? courant.t : (E.ecran === 'reglages' ? 'Réglages' : 'Accueil')) + '</b></div><span style="margin-left:auto">▾</span>');
+    var g = el('button', 'eng', '⚙'); g.setAttribute('aria-label', 'Réglages'); g.addEventListener('click', ouvrirReglages);
+    b.appendChild(p); b.appendChild(g);
+  }
+  function aller(id) {
+    if (id === 'reglages' && opt('reglages') === 'A') { E.ecran = 'reglages'; E.tiroir = true; }
+    else { E.ecran = id; E.tiroir = false; }
+    garder(); rendre(); window.scrollTo(0, 0);
+  }
+
+  /* ---------------------------------------------- barre de la maquette */
+  function rendreBarre() {
+    var z = document.getElementById('mq-ecrans'); z.querySelectorAll('button').forEach(function (b) { b.remove(); });
+    ECRANS.forEach(function (ec) { var b = el('button', 'mq-p' + (ec.id === E.ecran ? ' on' : ''), esc(ec.nom)); b.addEventListener('click', function () { aller(ec.id); }); z.appendChild(b); });
+    var o = document.getElementById('mq-options'); o.querySelectorAll('button').forEach(function (b) { b.remove(); });
+    var ec = ECRANS.filter(function (x) { return x.id === E.ecran; })[0];
+    ec.opts.forEach(function (op) {
+      var b = el('button', 'mq-p' + (opt(ec.id) === op[0] ? ' on' : ''), op[0] + ' · ' + esc(op[1]));
+      b.addEventListener('click', function () { E.opt[ec.id] = op[0]; if (ec.id === 'courte') nouvelleDictee(); if (ec.id === 'reglages') { E.tiroir = op[0] === 'A'; } garder(); rendre(); });
+      o.appendChild(b);
+    });
+    document.getElementById('mq-desc').textContent = ec.opts.filter(function (op) { return op[0] === opt(ec.id); })[0][2];
+    document.querySelectorAll('[data-app]').forEach(function (b) { b.classList.toggle('on', b.dataset.app === E.app); });
+    var etroit = window.innerWidth < 900;   // sur un vrai téléphone, la vue téléphone s'impose
+    document.getElementById('cadre').className = 'cadre ' + (etroit ? 'tel reel' : E.app);
+    document.querySelector('.scene').classList.toggle('reel', etroit);
+  }
+  document.querySelectorAll('[data-app]').forEach(function (b) { b.addEventListener('click', function () { E.app = b.dataset.app; garder(); rendre(); }); });
+
+  function entete(badge, titre, ctx) {
+    var c = el('div', 'carte');
+    c.innerHTML = '<span class="badge">' + badge + '</span><h2 class="titre">' + titre + '</h2><p class="ctx">' + ctx + '</p>';
+    return c;
+  }
+  function ligneReglages(c) {
+    var r = el('div', 'resume-r');
+    resumeReglages().forEach(function (t) { r.appendChild(el('span', 'tag', esc(t))); });
+    var b = el('button', 'btn sec pt', '⚙ Réglages'); b.addEventListener('click', ouvrirReglages); r.appendChild(b);
+    c.appendChild(r);
+  }
+
+  /* =============================================== ÉCRAN : accueil */
+  function ecranAccueil(P) {
+    P.appendChild(el('div', 'hero', '<span class="lettres">Aa</span><small>Français · 3e</small><h1>Orthographe</h1><p>Prépare la dictée du brevet : dictées courtes, relecture, suivi.</p>'));
+    var rp = el('div', 'reprendre', '<div><small style="color:var(--paper-3)">Reprendre</small><br><b>Dictée courte</b></div><span>→</span>');
+    rp.addEventListener('click', function () { aller('courte'); }); P.appendChild(rp);
+    var c = el('div', 'carte'); c.appendChild(el('span', 'petit', 'Tes réglages'));
+    ligneReglages(c); P.appendChild(c);
+    PLAN.forEach(function (m, k) {
+      var d = el('div', 'mod' + (k === 0 ? ' ouvert' : ''));
+      var t = el('div', 'mod-t', '<span class="som-n">' + m.n + '</span><div><b>' + esc(m.t) + '</b><span class="d">' + esc(m.d) + '</span></div><span class="petit">' + ['14/20', '11/20', '', ''][k] + '</span><span>▾</span>');
+      t.addEventListener('click', function () { var o = d.classList.contains('ouvert'); P.querySelectorAll('.mod').forEach(function (x) { x.classList.remove('ouvert'); }); if (!o) d.classList.add('ouvert'); });
+      d.appendChild(t);
+      var cc = el('div', 'mod-c'), b = el('button', 'btn', k < 2 ? 'Commencer →' : 'Ouvrir →');
+      b.addEventListener('click', function () { aller(m.id); }); cc.appendChild(b); d.appendChild(cc); P.appendChild(d);
+    });
+    P.appendChild(el('p', 'petit', '← Toutes les applications (lien vers le portail, toujours présent)'));
+  }
+
+  /* =============================================== ÉCRAN : dictée courte */
+  function rendreEtapes(zone) {
+    var ET = etapes(), z = el('div', 'etapes'), gr = null;
+    ET.forEach(function (e, k) {
+      var cl = k === DC.k ? ' on' : (k < DC.k ? ' fait' : '');
+      if (/^p\d$/.test(e[0])) {
+        if (!gr) { gr = el('div', 'et-gr'); gr.appendChild(document.createTextNode('Relecture ')); z.appendChild(gr); }
+        if (k === DC.k) gr.classList.add('on');
+        var n = el('button', 'et-n' + cl, e[0].slice(1)); n.title = PASS[e[0]][0]; n.setAttribute('aria-label', 'Passage ' + e[0].slice(1) + ' : ' + PASS[e[0]][0]);
+        n.addEventListener('click', function () { if (etapeId() !== 'res') { DC.k = k; DC.aide = null; rendre(); } });
+        gr.appendChild(n);
+      } else {
+        var b = el('button', 'et' + cl, esc(e[1]));
+        b.addEventListener('click', function () { if (e[0] !== 'res' && etapeId() !== 'res') { DC.k = k; DC.aide = null; rendre(); } });
+        z.appendChild(b);
+      }
+    });
+    zone.appendChild(z);
+  }
+  function consigne(zone) {
+    var id = etapeId(), txt;
+    if (PASS[id]) {
+      txt = '<b>Passage ' + id.slice(1) + ' · ' + PASS[id][0] + '.</b> ' + PASS[id][1];
+      if (S.type === 'audio') txt += ' Corrige ta copie si besoin.';
+      else if (S.corr === 'fin') txt += ' Change tes fins de mots si besoin.';
+      else txt += ' Touche un mot faux pour le signaler.';
+    } else if (id === 'corriger') txt = '<b>Les fautes sont repérées.</b> Corrige-les dans la liste.';
+    else if (id === 'ecrire') txt = S.type === 'audio' ? '<b>Écoute et écris.</b> Une lecture d’ensemble, puis groupe par groupe avec la ponctuation.' : '<b>Complète la fin des mots.</b> Tu pourras changer tes réponses pendant la relecture.';
+    zone.appendChild(el('div', 'cle', txt));
+    // aides propres aux passages
+    if (id === 'p2' || id === 'p3') {
+      var r = el('div', 'rangee'); r.style.marginBottom = '8px';
+      if (id === 'p2') { var a = el('button', 'icone' + (DC.aide ? ' on' : ''), '🧭 Aide : verbe → sujet'); a.addEventListener('click', function () { DC.aide = DC.aide ? null : { verbe: null, sujet: null, msg: 'Touche un verbe conjugué.' }; rendre(); }); r.appendChild(a); }
+      if (id === 'p3') { var t = el('button', 'icone' + (DC.tests ? ' on' : ''), '🔁 Tests de remplacement'); t.addEventListener('click', function () { DC.tests = !DC.tests; rendre(); }); r.appendChild(t); }
+      zone.appendChild(r);
+      if (id === 'p3' && DC.tests) {
+        var tb = '<table class="t">'; D.methodes[1].liste.forEach(function (l) { tb += '<tr><td><b>' + esc(l[0]) + '</b></td><td>remplace par « ' + esc(l[1]) + ' »</td></tr>'; });
+        zone.appendChild(el('div', 'neutre', tb + '</table>'));
+      }
+    }
+  }
+  // aide « verbe → sujet » : premier clic sur le verbe, second sur le sujet
+  function clicAide(k, mot) {
+    var a = DC.aide, w = nu(mot);
+    if (a.verbe == null || a.sujet != null) {
+      a.sujet = null;
+      if (VS[w]) { a.verbe = k; a.motV = mot; a.msg = '« ' + esc(nu(mot)) + ' » : qui est-ce qui ' + esc(nu(mot)) + ' ? Touche son sujet.'; }
+      else { a.verbe = null; a.msg = '« ' + esc(nu(mot)) + ' » n’est pas un verbe conjugué. Touche un verbe conjugué.'; }
+    } else {
+      var v = VS[nu(a.motV)];
+      if (v[0].split('|').indexOf(w) >= 0) { a.sujet = k; a.msg = '<b>Oui :</b> le sujet de « ' + esc(nu(a.motV)) + ' » est <b>' + esc(v[1]) + '</b>. Vérifie maintenant sa terminaison.'; }
+      else a.msg = '<b>Non :</b> demande-toi qui est-ce qui « ' + esc(nu(a.motV)) + ' ».';
+    }
+    rendre();
+  }
+  function valeurMot(t) {
+    if (!t.faute) return t.f;
+    if (opt('courte') === 'B' && (DC.bon[t.i] || DC.affiche[t.i])) return t.j;
+    return DC.rep[t.i] || t.f;
+  }
+  function classeMot(t) {
+    var c = 'mot';
+    if (DC.aide && DC.aide.verbe === t.i) c += ' verbe';
+    if (DC.aide && DC.aide.sujet === t.i) c += ' sujet';
+    if (DC.fausses.indexOf(t.i) >= 0) c += ' fausse';
+    if (t.faute && (DC.signales[t.i] || S.rep === 'reperees')) {
+      if (opt('courte') === 'B' && (DC.bon[t.i] || DC.affiche[t.i])) c += ' juste';
+      else c += DC.rep[t.i] ? ' choisi' : ' signale';
+    }
+    if (DC.focus === t.i) c += ' focus';
+    return c;
+  }
+  function signaler(t) {
+    if (DC.aide) { clicAide(t.i, t.f); return; }
+    if (S.rep === 'reperees' || !PASS[etapeId()]) { if (t.faute) { DC.focus = t.i; rendre(); versVue(document.getElementById('it-' + t.i)); } return; }
+    if (!t.faute) { if (DC.fausses.indexOf(t.i) < 0) DC.fausses.push(t.i); DC.msg = '« ' + esc(t.f) + ' » est juste : ce n’est pas une faute (−0,5 point).'; DC.focus = null; rendre(); versVue(document.getElementById('msg-liste')); return; }
+    DC.signales[t.i] = true; DC.focus = t.i; DC.msg = null; rendre(); versVue(document.getElementById('it-' + t.i));
+  }
+  function texteDictee(zone) {
+    var p = el('div', 'dictee' + (S.corr !== 'fin' || DC.aide ? ' cliquable' : ''));
+    DT.forEach(function (t, k) {
+      if (t.faute && S.corr === 'fin') {
+        var w = el('span', 'fin'), inp = el('input');
+        inp.setAttribute('aria-label', 'Fin du mot ' + t.deb + '…'); inp.autocomplete = 'off'; inp.spellcheck = false; inp.value = DC.fins[t.i] || ''; inp.id = 'fin-' + t.i;
+        inp.addEventListener('input', function () { DC.fins[t.i] = inp.value.trim(); var c = document.getElementById('compte-fin'); if (c) c.textContent = nbFins() + '/' + FAUTES.length; });
+        w.appendChild(document.createTextNode(t.deb)); w.appendChild(inp); p.appendChild(w);
+      } else {
+        var s = el('span', classeMot(t), esc(valeurMot(t)));
+        s.addEventListener('click', function () { signaler(t); });
+        p.appendChild(s);
+      }
+      if (k < DT.length - 1) p.appendChild(document.createTextNode(' '));
+    });
+    zone.appendChild(p);
+  }
+  function nbFins() { return FAUTES.filter(function (t) { return DC.fins[t.i]; }).length; }
+  // passage 4 : les mots du dernier au premier
+  function envers(zone, mots, surClic) {
+    var z = el('div', 'envers');
+    mots.slice().reverse().forEach(function (m) {
+      var s = el('span', (m.signale ? 'signale' : '') + (DC.envers === m.k ? ' on' : ''), esc(m.w));
+      s.addEventListener('click', function () { DC.envers = m.k; surClic(m); });
+      z.appendChild(s);
+    });
+    zone.appendChild(z);
+  }
+  function itemFaute(t) {
+    var it = el('div', 'item'); it.id = 'it-' + t.i;
+    var immediat = opt('courte') === 'B', fini = immediat && (DC.bon[t.i] || DC.affiche[t.i]);
+    var h = el('div', 'item-t', '<b>« ' + esc(t.f) + ' »</b>' + (fini ? ' → <b style="color:var(--success-text)">' + esc(t.j) + '</b>' : '') + '<span style="flex:1"></span>');
+    var br = el('button', 'icone' + (DC.regle[t.i] ? ' on' : ''), '📖 Règle'); br.setAttribute('aria-label', 'Rappel de la règle');
+    br.addEventListener('click', function () { DC.regle[t.i] = !DC.regle[t.i]; rendre(); });
+    h.appendChild(br); it.appendChild(h);
+    if (!fini) {
+      if (S.corr === 'qcm') {
+        var ch = el('div', 'choix');
+        t.ch.forEach(function (x) {
+          var b = el('button', !immediat && DC.rep[t.i] === x ? 'choisi' : '', esc(x));
+          b.addEventListener('click', function () {
+            if (!immediat) { DC.rep[t.i] = x; DC.focus = t.i; rendre(); versVue(document.querySelector('#zone .dictee')); return; }
+            DC.essais[t.i] = (DC.essais[t.i] || 0) + 1;
+            if (x === t.j) { DC.bon[t.i] = DC.essais[t.i] === 1 ? 2 : 1; rendre(); versVue(document.querySelector('#zone .dictee')); }
+            else { b.classList.add('mauvais'); var m = it.querySelector('.ko') || el('div', 'ko'); m.innerHTML = '<b>Ce n’est pas ça.</b> ' + diag(t); it.appendChild(m); if (DC.essais[t.i] >= 2) ajouterAfficher(it, t); versVue(m); }
+          });
+          ch.appendChild(b);
+        });
+        it.appendChild(ch);
+      } else {
+        var r = el('div', 'rangee'); r.style.marginTop = '8px';
+        var inp = el('input', 'champ'); inp.autocomplete = 'off'; inp.spellcheck = false; inp.value = DC.rep[t.i] || ''; inp.placeholder = 'Mot corrigé'; inp.setAttribute('aria-label', 'Mot corrigé');
+        inp.addEventListener('input', function () { if (!immediat) DC.rep[t.i] = inp.value.trim(); });
+        r.appendChild(inp);
+        if (immediat) {
+          var v = el('button', 'btn pt', 'Valider');
+          var val = function () {
+            DC.essais[t.i] = (DC.essais[t.i] || 0) + 1;
+            if (inp.value.trim() === t.j) { DC.bon[t.i] = DC.essais[t.i] === 1 ? 2 : 1; rendre(); }
+            else { var m = it.querySelector('.ko') || el('div', 'ko'); m.innerHTML = '<b>Ce n’est pas ça.</b> ' + diag(t); it.appendChild(m); if (DC.essais[t.i] >= 2) ajouterAfficher(it, t); versVue(m); }
+          };
+          v.addEventListener('click', val); inp.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') val(); });
+          r.appendChild(v);
+        }
+        it.appendChild(r);
+      }
+    } else it.appendChild(el('div', 'petit', DC.bon[t.i] === 2 ? 'Juste du premier coup.' : DC.bon[t.i] ? 'Juste après une erreur.' : 'Réponse affichée.'));
+    if (DC.regle[t.i]) it.appendChild(blocRegle(t.r));
+    return it;
+  }
+  function ajouterAfficher(it, t) {
+    if (it.querySelector('.aff')) return;
+    var a = el('button', 'btn sec pt aff', 'Afficher la réponse'); a.addEventListener('click', function () { DC.affiche[t.i] = true; rendre(); }); it.appendChild(a);
+  }
+  function diag(t) {
+    return ({ SV2: 'Le sujet est « les pêcheurs » : pluriel → -ent.', HO9: 'Devant un nom au pluriel (filets), leur est un déterminant : il prend un -s.', LX7: 'La jetée est un nom féminin en [é] : -ée.',
+      HO2: 'Remplace par « était » : « était regardaient » ne veut rien dire → et.', SV3: 'Qui est-ce qui se brise ? les vagues (qui = les vagues) → pluriel.', EE1: 'Après « à », remplace par vendre : « à vendre » → infinitif -er.' })[t.r];
+  }
+  function liste(zone) {
+    var id = etapeId();
+    if (S.corr === 'fin') {
+      zone.appendChild(el('div', 'liste-t', '<h3>Mots à compléter</h3><b id="compte-fin">' + nbFins() + '/' + FAUTES.length + '</b>'));
+      zone.appendChild(el('p', 'petit', 'Tes réponses ne sont vérifiées qu’à la fin : profite de la relecture pour les changer.'));
+      FAUTES.forEach(function (t) {
+        var it = el('div', 'item', '<div class="item-t"><b>' + esc(t.deb) + '…</b><span style="flex:1"></span></div>');
+        var br = el('button', 'icone' + (DC.regle[t.i] ? ' on' : ''), '📖 Règle'); br.addEventListener('click', function () { DC.regle[t.i] = !DC.regle[t.i]; rendre(); });
+        it.firstChild.appendChild(br); if (DC.regle[t.i]) it.appendChild(blocRegle(t.r)); zone.appendChild(it);
+      });
+      return;
+    }
+    var L = S.rep === 'reperees' ? FAUTES : FAUTES.filter(function (t) { return DC.signales[t.i]; });
+    zone.appendChild(el('div', 'liste-t', '<h3>' + (S.rep === 'reperees' ? 'Fautes à corriger' : 'Mots signalés') + '</h3><span class="petit">' + L.length + (S.rep === 'reperees' ? '' : ' signalé' + (L.length > 1 ? 's' : '')) + '</span>'));
+    var m = el('div', DC.msg ? 'neutre' : '', DC.msg || ''); m.id = 'msg-liste'; zone.appendChild(m);
+    if (!L.length) zone.appendChild(el('p', 'petit', 'Touche dans le texte un mot qui te semble faux : il s’ajoute ici pour que tu le corriges.'));
+    L.forEach(function (t) { zone.appendChild(itemFaute(t)); });
+  }
+  function navBas(zone) {
+    var ET = etapes(), n = el('div', 'nav-bas');
+    if (DC.k > 0) { var p = el('button', 'btn sec', '← ' + (/^p/.test(ET[DC.k - 1][0]) ? 'Passage ' + ET[DC.k - 1][0].slice(1) : ET[DC.k - 1][1])); p.addEventListener('click', function () { DC.k--; DC.aide = null; rendre(); versVue(document.getElementById('zone'), 'start'); }); n.appendChild(p); }
+    else n.appendChild(el('span'));
+    var suiv = ET[DC.k + 1], lib = suiv[0] === 'res' ? 'Terminer et voir ma note →' : /^p/.test(suiv[0]) ? 'Passage ' + suiv[0].slice(1) + ' : ' + PASS[suiv[0]][0] + ' →' : suiv[1] + ' →';
+    var b = el('button', suiv[0] === 'res' ? 'btn acc' : 'btn', lib);
+    b.addEventListener('click', function () { DC.k++; DC.aide = null; DC.msg = null; rendre(); versVue(document.getElementById('zone'), 'start'); });
+    n.appendChild(b); zone.appendChild(n);
+  }
+  function ecranCourte(P) {
+    var h = entete('Dictée courte', 'Dictée courte', 'Un texte de ' + DT.length + ' mots sur tes notions. Relis-le en <b>4 passages</b>, corrige, puis obtiens ta <b>note</b>.');
+    ligneReglages(h); P.appendChild(h);
+    var c0 = el('div', 'carte'); rendreEtapes(c0); P.appendChild(c0);
+    var zone = el('div', 'zone'); zone.id = 'zone'; P.appendChild(zone);
+    var id = etapeId();
+    if (id === 'res') { resultat(zone); return; }
+    if (S.type === 'audio') { ecranAudio(zone, id); return; }
+    var g = el('div', 'deux'), gauche = el('div', 'carte'), droite = el('div', 'carte');
+    consigne(gauche);
+    if (id === 'p4') {
+      var mots = DT.map(function (t) { return { k: t.i, w: S.corr === 'fin' && t.faute ? t.deb + (DC.fins[t.i] || '…') : valeurMot(t), signale: t.faute && DC.signales[t.i], t: t }; });
+      envers(gauche, mots, function (m) { if (S.corr === 'fin') { DC.envers = m.k; rendre(); var f = document.getElementById('fin-' + m.k); if (f) f.focus(); } else signaler(m.t); });
+      gauche.appendChild(el('p', 'petit', S.corr === 'fin' ? 'Toucher un mot à compléter place le curseur dans sa case.' : 'Touche un mot faux pour le signaler.'));
+      if (S.corr === 'fin') { var dt = el('details', ''); dt.innerHTML = '<summary class="petit" style="cursor:pointer">Voir le texte et les cases</summary>'; texteDictee(dt); dt.open = true; gauche.appendChild(dt); }
+    } else texteDictee(gauche);
+    if (DC.aide) gauche.appendChild(el('div', 'neutre', DC.aide.msg));
+    navBas(gauche);
+    liste(droite);
+    g.appendChild(gauche); g.appendChild(droite); zone.appendChild(g);
+  }
+
+  /* ---------------------------------------------- dictée audio (dans la dictée courte) */
+  var A = { g: -1, lectures: {}, enCours: false, msg: null };
+  function voixFr() { if (!window.speechSynthesis) return null; var v = speechSynthesis.getVoices().filter(function (x) { return /^fr/i.test(x.lang); }); return v[0] || null; }
+  function pourDicter(txt) { return txt.replace(/,/g, ', virgule,').replace(/\.$/, '. point.'); }
+  function dire(txt) {
+    if (!window.speechSynthesis) { A.msg = 'La synthèse vocale n’est pas disponible dans ce navigateur.'; rendre(); return; }
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(txt); u.lang = 'fr-FR'; u.rate = S.vitesse; var v = voixFr(); if (v) u.voice = v;
+    u.onend = function () { A.enCours = false; majAudio(); };
+    A.enCours = true; speechSynthesis.speak(u); majAudio();
+  }
+  function lireGroupe(i) { A.g = i; A.lectures[i] = (A.lectures[i] || 0) + 1; dire(pourDicter(GROUPES[i])); rendre(); }
+  function majAudio() { var b = document.getElementById('b-lire'); if (b) b.textContent = A.enCours ? '⏸' : '▶'; }
+  function lecteur(c) {
+    var r0 = el('div', 'rangee'); var e = el('button', 'btn sec pt', '🔊 Lecture d’ensemble'); e.addEventListener('click', function () { A.g = -1; dire(GROUPES.join(' ')); }); r0.appendChild(e);
+    r0.appendChild(el('span', 'petit', 'Chaque groupe est lu ' + S.lectures + ' fois (réglage).')); c.appendChild(r0);
+    var g = el('div', 'groupes'); GROUPES.forEach(function (_, i) { var x = el('i', i === A.g ? 'on' : (A.lectures[i] ? 'fait' : '')); x.title = 'Groupe ' + (i + 1); x.addEventListener('click', function () { lireGroupe(i); }); g.appendChild(x); }); c.appendChild(g);
+    var l = el('div', 'lecteur');
+    var bp = el('button', 'rond sec', '⏮'); bp.setAttribute('aria-label', 'Groupe précédent'); bp.addEventListener('click', function () { lireGroupe(Math.max(0, A.g - 1)); });
+    var bl = el('button', 'rond', A.enCours ? '⏸' : '▶'); bl.id = 'b-lire'; bl.setAttribute('aria-label', 'Lire ou mettre en pause');
+    bl.addEventListener('click', function () { if (A.enCours) { speechSynthesis.cancel(); A.enCours = false; majAudio(); } else lireGroupe(A.g < 0 ? 0 : A.g); });
+    var br = el('button', 'rond sec', '↻'); br.setAttribute('aria-label', 'Répéter le groupe'); br.addEventListener('click', function () { lireGroupe(Math.max(0, A.g)); });
+    var bs = el('button', 'rond sec', '⏭'); bs.setAttribute('aria-label', 'Groupe suivant'); bs.addEventListener('click', function () { lireGroupe(Math.min(GROUPES.length - 1, A.g + 1)); });
+    [bp, bl, br, bs].forEach(function (x) { l.appendChild(x); });
+    l.appendChild(el('span', 'petit', A.g >= 0 ? 'Groupe ' + (A.g + 1) + '/' + GROUPES.length + ' · lu ' + (A.lectures[A.g] || 0) + ' fois' : 'Appuie sur ▶ pour commencer'));
+    c.appendChild(l);
+    if (A.msg) c.appendChild(el('div', 'neutre', esc(A.msg)));
+  }
+  function ecranAudio(zone, id) {
+    var c = el('div', 'carte');
+    consigne(c);
+    if (id === 'ecrire') lecteur(c);
+    else if (id === 'p2' && DC.aide) {
+      var p = el('div', 'dictee cliquable'), mots = DC.copie.trim() ? DC.copie.trim().split(/\s+/) : [];
+      if (!mots.length) p.appendChild(el('span', 'petit', 'Ta copie est vide.'));
+      mots.forEach(function (w, k) { var s = el('span', 'mot' + (DC.aide.verbe === k ? ' verbe' : '') + (DC.aide.sujet === k ? ' sujet' : ''), esc(w)); s.addEventListener('click', function () { clicAide(k, w); }); p.appendChild(s); p.appendChild(document.createTextNode(' ')); });
+      c.appendChild(p); c.appendChild(el('div', 'neutre', DC.aide.msg));
+    } else if (id === 'p4') {
+      var m2 = DC.copie.trim() ? DC.copie.trim().split(/\s+/).map(function (w, k) { return { k: k, w: w }; }) : [];
+      envers(c, m2, function () { rendre(); });
+    }
+    var ta = el('textarea', 'copie'); ta.spellcheck = false; ta.autocapitalize = 'off'; ta.setAttribute('autocorrect', 'off'); ta.value = DC.copie; ta.setAttribute('aria-label', 'Ta copie');
+    ta.addEventListener('input', function () { DC.copie = ta.value; });
+    c.appendChild(el('b', '', 'Ta copie')); c.appendChild(ta);
+    navBas(c); zone.appendChild(c);
+  }
+  // comparaison mot à mot (distance d'édition sur les mots), erreurs classées par règle
+  function sansAccents(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+  function classer(ref, cop) {
+    var t = FAUTES.filter(function (x) { return nu(x.j) === nu(ref); })[0];
+    if (t && nu(cop) !== nu(ref)) return t.r;
+    if (nu(cop) === nu(ref)) return 'LX13';                                    // majuscule ou ponctuation
+    if (sansAccents(nu(cop)) === sansAccents(nu(ref))) return 'LX3';            // accent
+    return 'LX14';
+  }
+  function comparerCopie() {
+    var ref = REF.split(/\s+/), cop = DC.copie.trim() ? DC.copie.trim().split(/\s+/) : [];
+    var n = ref.length, m = cop.length, d = [], i, j;
+    for (i = 0; i <= n; i++) { d.push([]); for (j = 0; j <= m; j++) d[i][j] = i === 0 ? j : j === 0 ? i : 0; }
+    for (i = 1; i <= n; i++) for (j = 1; j <= m; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (ref[i - 1] === cop[j - 1] ? 0 : 1));
+    var out = []; i = n; j = m;
+    while (i > 0 || j > 0) {
+      if (i > 0 && j > 0 && d[i][j] === d[i - 1][j - 1] + (ref[i - 1] === cop[j - 1] ? 0 : 1)) { out.unshift([ref[i - 1], cop[j - 1]]); i--; j--; }
+      else if (i > 0 && d[i][j] === d[i - 1][j] + 1) { out.unshift([ref[i - 1], null]); i--; }
+      else { out.unshift([null, cop[j - 1]]); j--; }
+    }
+    var err = [];
+    out.forEach(function (x) {
+      if (x[0] === x[1]) return;
+      if (x[0] && x[1]) err.push({ ecrit: x[1], attendu: x[0], r: classer(x[0], x[1]) });
+      else if (x[0]) err.push({ ecrit: '—', attendu: x[0], r: 'LX14', tag: 'mot oublié' });
+      else err.push({ ecrit: x[1], attendu: '—', r: 'LX14', tag: 'mot en trop' });
+    });
+    var occ = {};
+    FAUTES.forEach(function (t) { var f = R[t.r].famille; occ[f] = occ[f] || { n: 0, ok: 0 }; occ[f].n++; if (!err.some(function (e) { return e.r === t.r; })) occ[f].ok++; });
+    return { err: err, occ: occ, fausses: 0 };
+  }
+  function evaluerTexte() {
+    var err = [], occ = {};
+    FAUTES.forEach(function (t) {
+      var f = R[t.r].famille; occ[f] = occ[f] || { n: 0, ok: 0 }; occ[f].n++;
+      var trouve = S.corr === 'fin' || S.rep === 'reperees' || DC.signales[t.i];
+      var val = S.corr === 'fin' ? (DC.fins[t.i] ? t.deb + DC.fins[t.i] : '') : DC.rep[t.i];
+      var ok = opt('courte') === 'B' && S.corr !== 'fin' ? !!DC.bon[t.i] : (trouve && val === t.j);
+      if (ok) occ[f].ok++;
+      else err.push({ ecrit: !trouve ? t.f : (val || (S.corr === 'fin' ? t.deb + '…' : t.f)), attendu: t.j, r: t.r, tag: !trouve ? 'non repérée' : (DC.affiche[t.i] ? 'réponse affichée' : (!val ? 'non corrigée' : '')) });
+    });
+    return { err: err, occ: occ, fausses: DC.fausses.length };
+  }
+  function resultat(zone) {
+    var ev = S.type === 'audio' ? comparerCopie() : evaluerTexte();
+    // barème validé : grammaire −1, usage −0,5 (sur 10), mot juste signalé −0,5, ramené à 600 signes
+    var pts = ev.err.reduce(function (a, e) { return a + (R[e.r].famille === 'LX' ? 0.5 : 1); }, 0) + 0.5 * ev.fausses;
+    var f = 600 / REF.length, n = Math.max(0, Math.round((20 - 2 * pts * f) * 2) / 2);
+    var c = el('div', 'carte');
+    c.innerHTML = '<div class="note"><span class="n">' + virg(n) + '<small>/20</small></span><div><b>' + virg(pts) + ' point' + (pts > 1 ? 's' : '') + ' retiré' + (pts > 1 ? 's' : '') + ' sur 10</b><br><span class="petit">Grammaire −1 · usage −0,5' + (ev.fausses ? ' · mot juste signalé −0,5 (' + ev.fausses + ')' : '') + '<br>Ramené à une dictée de brevet (600 signes) : texte de ' + REF.length + ' signes.</span></div></div>';
+    var fr = el('div', 'fam-r'); fr.style.marginTop = '12px';
+    Object.keys(ev.occ).forEach(function (k) { var o = ev.occ[k]; fr.appendChild(el('span', o.ok === o.n ? 'tout' : o.ok ? 'part' : 'rien', esc(NOMC[k]) + ' ' + o.ok + '/' + o.n)); });
+    c.appendChild(fr); zone.appendChild(c);
+    var c2 = el('div', 'carte'); c2.appendChild(el('h3', '', ev.err.length ? 'Tes erreurs (' + ev.err.length + ')' : 'Aucune erreur !'));
+    ev.err.forEach(function (e, k) {
+      var d = el('div', 'err', '<s>' + esc(e.ecrit) + '</s> → <span class="att">' + esc(e.attendu) + '</span> <span class="petit">· ' + esc(R[e.r].titre) + (e.tag ? ' · ' + e.tag : '') + '</span> ');
+      var b = el('button', 'icone', '📖 Règle'), z = el('div');
+      b.addEventListener('click', function () { if (z.firstChild) { z.innerHTML = ''; b.classList.remove('on'); } else { z.appendChild(blocRegle(e.r)); b.classList.add('on'); } });
+      d.appendChild(b); d.appendChild(z); c2.appendChild(d);
+    });
+    var r = el('div', 'rangee'); r.style.marginTop = '12px';
+    var a = el('button', 'btn acc', 'Nouvelle dictée →'); a.addEventListener('click', function () { nouvelleDictee(); rendre(); window.scrollTo(0, 0); });
+    var s = el('button', 'btn sec', 'Mon suivi'); s.addEventListener('click', function () { aller('suivi'); });
+    r.appendChild(a); r.appendChild(s); c2.appendChild(r);
+    if (S.type !== 'audio') c2.appendChild(el('p', 'petit', 'Dans l’application, la nouvelle dictée est un autre texte.'));
+    zone.appendChild(c2);
+  }
+
+  /* =============================================== ÉCRAN : dictée brevet */
+  function ecranBrevet(P) {
+    var h = entete('Dictée brevet', 'Dictée en conditions réelles', 'Environ <b>600 signes</b>, <b>20 minutes</b>. Texte d’une dictée déjà tombée ou texte généré. Mêmes étapes que la dictée courte, avec le déroulé officiel.');
+    P.appendChild(h);
+    var c0 = el('div', 'carte'), z = el('div', 'etapes');
+    z.appendChild(el('button', 'et fait', 'Lecture d’ensemble')); z.appendChild(el('button', 'et on', 'Dictée'));
+    z.appendChild(el('button', 'et', 'Relecture du texte'));
+    var gr = el('div', 'et-gr', 'Ta relecture '); ['1', '2', '3', '4'].forEach(function (x) { gr.appendChild(el('button', 'et-n', x)); }); z.appendChild(gr);
+    z.appendChild(el('button', 'et', 'Résultat')); c0.appendChild(z); P.appendChild(c0);
+    var c = el('div', 'carte');
+    c.appendChild(el('div', 'rangee', '<span>Texte :</span>')); c.firstChild.appendChild(seg([['t', 'Dictée déjà tombée'], ['g', 'Texte généré']], 't', function () {}));
+    c.appendChild(el('p', '', 'Au tableau :'));
+    c.appendChild(el('div', 'tableau', 'docks · brouhaha · D’après Simone de Beauvoir, <i>La Force de l’âge</i>, 1960'));
+    var r = el('div', 'rangee'); r.style.cssText = 'justify-content:space-between;margin-top:12px';
+    r.appendChild(el('span', 'chrono', '14:32'));
+    var bb = el('div', 'rangee'); ['⏸ Pause', '↻ Relire la phrase', '• Mot douteux'].forEach(function (x) { bb.appendChild(el('button', 'btn sec pt', x)); }); r.appendChild(bb);
+    c.appendChild(r);
+    c.appendChild(el('p', 'petit', 'Comme au brevet : pas de question après la relecture du texte. Vitesse de lecture : celle des Réglages. Après la relecture du texte, les 4 passages de ta relecture s’affichent comme dans la dictée courte.'));
+    var ta = el('textarea', 'copie'); ta.style.lineHeight = '3.2'; ta.value = 'Jamais je ne m’ennuyais : Marseille ne s’épuisait pas. Je suivais la jetée battue par l’eau et le vent, je regardais les pêcheurs, debout entre les blocs de pierre où se brisaient'; ta.setAttribute('aria-label', 'Ta copie');
+    c.appendChild(ta); P.appendChild(c);
+  }
+
+  /* =============================================== ÉCRAN : suivi regroupé */
+  // données fictives : m maîtrisée, f fragile, t à travailler ; n pas encore vue, v prérequis à acquérir
+  var MAI = { GN1: 'm', GN2: 'm', SV1: 'm', SV2: 'f', EE1: 't', EE2: 'f', CJ1: 'm', CJ2: 'm', HO1: 'm', HO2: 'f', HO3: 'm', HO4: 'm', HO5: 'm', LX1: 'f', GN3: 'm', GN4: 'f', SV3: 't', HO6: 'f', HO7: 't', PP1: 'f', LX4: 'm' };
+  function statut(r) { if (MAI[r.id]) return MAI[r.id]; return r.prerequis.every(function (p) { return MAI[p] === 'm'; }) ? 'n' : 'v'; }
+  function pct(r) { var s = statut(r), h = r.id.charCodeAt(2) + r.id.length * 7; return { m: 88 + h % 10, f: 62 + h % 12, t: 35 + h % 15 }[s]; }
+  var LIBS = { m: 'Maîtrisée', f: 'Fragile', t: 'À travailler', n: 'Pas encore vue', v: 'Prérequis à acquérir' };
+  function priorites() {
+    return D.regles.filter(function (r) { var s = statut(r); return (s === 't' || s === 'f') && r.prerequis.every(function (p) { return statut(R[p]) === 'm'; }); })
+      .sort(function (a, b) { return (a.niveau - b.niveau) || ((statut(a) === 't' ? 0 : 1) - (statut(b) === 't' ? 0 : 1)) || (b.brevet - a.brevet); }).slice(0, 3);
+  }
+  var ouvertsS = {};
+  function ecranSuivi(P) {
+    P.appendChild(entete('Mon suivi', 'Où en es-tu ?', 'Calculé sur tes <b>14 dernières dictées</b>. Une règle se débloque quand ses prérequis sont maîtrisés.'));
+    var pr = el('div', 'carte'); pr.style.border = '2px solid var(--accent)';
+    pr.appendChild(el('h3', '', 'À travailler en priorité'));
+    priorites().forEach(function (r, k) { pr.appendChild(el('div', '', '<b>' + (k + 1) + '. ' + esc(r.titre) + '</b> <span class="petit">· ' + LIBS[statut(r)].toLowerCase() + ' · ' + pct(r) + ' %</span>')); });
+    var notes = [9.5, 11, 10.5, 12, 13, 12.5, 14], w = 120, hh = 28, pts = notes.map(function (v, i) { return (2 + i * (w - 4) / (notes.length - 1)) + ',' + (hh - 2 - v / 20 * (hh - 4)); }).join(' ');
+    var r = el('div', 'rangee'); r.style.cssText = 'margin-top:10px;justify-content:space-between';
+    var b = el('button', 'btn acc', 'Dictée courte sur ces règles →'); b.addEventListener('click', function () { aller('courte'); }); r.appendChild(b);
+    r.appendChild(el('span', 'petit', 'Dernières notes : ' + notes.slice(-3).map(virg).join(' · ') + ' /20 <svg width="' + w + '" height="' + hh + '" viewBox="0 0 ' + w + ' ' + hh + '" role="img" aria-label="Notes en hausse" style="vertical-align:middle"><polyline points="' + pts + '" fill="none" stroke-width="2.5" style="stroke:var(--accent)"/></svg>'));
+    pr.appendChild(r); P.appendChild(pr);
+
+    var c = el('div', 'carte'); c.appendChild(el('h3', '', 'Mes compétences'));
+    var groupes = opt('suivi') === 'A'
+      ? D.familles.map(function (f) { return { id: f.id, nom: NOMC[f.id], regles: D.regles.filter(function (r) { return r.famille === f.id; }) }; })
+      : D.niveaux.map(function (n) { return { id: 'n' + n.n, nom: 'Niveau ' + n.n + ' · ' + n.nom, regles: D.regles.filter(function (r) { return r.niveau === n.n; }) }; });
+    groupes.forEach(function (g) {
+      var cpt = { m: 0, f: 0, t: 0, n: 0, v: 0 }; g.regles.forEach(function (r) { cpt[statut(r)]++; });
+      var d = el('div', 'grp' + (ouvertsS[g.id] ? ' ouvert' : ''));
+      var pile = '<span class="pile">' + ['m', 'f', 't', 'n', 'v'].map(function (s) { return cpt[s] ? '<i class="s-' + s + '" style="width:' + (100 * cpt[s] / g.regles.length) + '%"></i>' : ''; }).join('') + '</span>';
+      var alerte = cpt.t ? ' <span class="petit" style="color:var(--danger-text)">· ' + cpt.t + ' à travailler</span>' : (cpt.f ? ' <span class="petit">· ' + cpt.f + ' fragile' + (cpt.f > 1 ? 's' : '') + '</span>' : '');
+      var t = el('div', 'grp-t', '<span><b>' + esc(g.nom) + '</b>' + alerte + '</span>' + pile + '<span class="petit" style="text-align:right">' + cpt.m + '/' + g.regles.length + '</span><span class="chev">▾</span>');
+      t.setAttribute('role', 'button'); t.tabIndex = 0;
+      t.addEventListener('click', function () { ouvertsS[g.id] = !ouvertsS[g.id]; d.classList.toggle('ouvert'); });
+      d.appendChild(t);
+      var cc = el('div', 'grp-c');
+      g.regles.slice().sort(function (a, b) { return 'tfmnv'.indexOf(statut(a)) - 'tfmnv'.indexOf(statut(b)); }).forEach(function (r) {
+        var s = statut(r);
+        cc.appendChild(el('div', 'ligne-r' + (s === 'v' ? ' v' : ''), '<span class="pt-s s-' + s + '"></span><span>' + esc(r.titre) + '</span><span class="pct">' +
+          (s === 'v' ? 'plus tard' : s === 'n' ? 'pas encore vue' : pct(r) + ' %') + '</span>'));
+        if (s === 'v') cc.lastChild.title = 'D’abord : ' + r.prerequis.filter(function (p) { return statut(R[p]) !== 'm'; }).map(function (p) { return R[p].titre; }).join(' ; ');
+      });
+      d.appendChild(cc); c.appendChild(d);
+    });
+    c.appendChild(el('div', 'legende', ['m', 'f', 't', 'n', 'v'].map(function (s) { return '<span><span class="pt-s s-' + s + '"></span>' + LIBS[s] + '</span>'; }).join('')));
+    P.appendChild(c);
+  }
+
+  /* =============================================== ÉCRAN : fiches */
+  var ficheFam = 'HO';
+  function ecranFiches(P) {
+    P.appendChild(entete('Fiches de règles', 'Les règles par famille', 'Choisis une famille. Chaque règle a son <b>test</b> pour vérifier pendant la relecture.'));
+    var c = el('div', 'carte fiche'), ch = el('div', 'chips');
+    D.familles.forEach(function (f) { var b = el('button', f.id === ficheFam ? 'on' : '', esc(NOMC[f.id])); b.addEventListener('click', function () { ficheFam = f.id; rendre(); }); ch.appendChild(b); });
+    c.appendChild(ch);
+    D.regles.filter(function (r) { return r.famille === ficheFam; }).forEach(function (r) {
+      c.appendChild(el('h3', '', esc(r.titre) + ' <span class="niv-pt">niveau ' + r.niveau + '</span>'));
+      c.appendChild(el('p', '', esc(r.regle)));
+      c.appendChild(el('div', 'cle', '<b>Test :</b> ' + esc(r.astuce)));
+      c.appendChild(el('p', 'petit', r.exemples.map(marque).join(' · ')));
+    });
+    P.appendChild(c);
+  }
+
+  /* =============================================== RÉGLAGES (menu unique) */
+  function changer(cle, val) { S[cle] = val; nouvelleDictee(); garder(); rendre(); }
+  var ouvertsF = {};
+  function contenuReglages(z) {
+    var s1 = el('div', 'sect'); s1.appendChild(el('h4', '', 'Ce que tu travailles'));
+    s1.appendChild(seg([[1, 'Automatique (conseillé)'], [0, 'Je choisis']], S.auto ? 1 : 0, function (v) { changer('auto', !!v); }));
+    if (S.auto) s1.appendChild(el('p', 'petit', 'L’application choisit d’après ton suivi : d’abord le socle, puis ce qui te coûte le plus de points.'));
+    else {
+      var cpt = el('p', 'petit');
+      var majC = function () { cpt.textContent = Object.keys(S.notions).filter(function (k) { return S.notions[k]; }).length + ' notions cochées'; };
+      var majG = [];
+      D.familles.forEach(function (f) {
+        var L = D.regles.filter(function (r) { return r.famille === f.id; });
+        var d = el('div', 'fam' + (ouvertsF[f.id] ? ' ouvert' : '')), t = el('div', 'fam-t'), cb = el('input'); cb.type = 'checkbox'; cb.setAttribute('aria-label', 'Toute la famille ' + NOMC[f.id]);
+        var n = el('span', 'petit');
+        t.appendChild(cb); t.appendChild(el('b', '', esc(f.nom))); t.appendChild(n); t.appendChild(el('span', '', '▾'));
+        cb.addEventListener('click', function (ev) { ev.stopPropagation(); });
+        cb.addEventListener('change', function () { L.forEach(function (r) { S.notions[r.id] = cb.checked; }); d.querySelectorAll('.fam-c input').forEach(function (i) { i.checked = cb.checked; }); garder(); majC(); majG.forEach(function (g) { g(); }); });
+        t.addEventListener('click', function () { ouvertsF[f.id] = !ouvertsF[f.id]; d.classList.toggle('ouvert'); });
+        var cc = el('div', 'fam-c');
+        L.forEach(function (r) {
+          var l = el('label', 'cb', '<input type="checkbox"' + (S.notions[r.id] ? ' checked' : '') + '><span>' + esc(r.titre) + '<span class="niv-pt">niv. ' + r.niveau + '</span></span>');
+          l.querySelector('input').addEventListener('change', function (ev) { S.notions[r.id] = ev.target.checked; garder(); majC(); majG.forEach(function (g) { g(); }); });
+          cc.appendChild(l);
+        });
+        d.appendChild(t); d.appendChild(cc); s1.appendChild(d);
+        majG.push(function () { var k = L.filter(function (r) { return S.notions[r.id]; }).length; cb.checked = k === L.length; cb.indeterminate = k > 0 && k < L.length; n.textContent = k + '/' + L.length; });
+      });
+      majG.forEach(function (g) { g(); }); majC(); s1.appendChild(cpt);
+    }
+    z.appendChild(s1);
+    var s2 = el('div', 'sect'); s2.appendChild(el('h4', '', 'Dictée courte'));
+    var l1 = el('div', 'lig'); l1.appendChild(el('span', '', 'Type')); l1.appendChild(seg([['texte', 'Texte à corriger'], ['audio', 'Dictée audio']], S.type, function (v) { changer('type', v); })); s2.appendChild(l1);
+    var tx = S.type !== 'texte';
+    var l2 = el('div', 'lig'); l2.appendChild(el('span', '', 'Les fautes')); l2.appendChild(seg([['reperees', 'Déjà repérées'], ['arep', 'À repérer']], S.rep, function (v) { changer('rep', v); }, tx || S.corr === 'fin')); s2.appendChild(l2);
+    var l3 = el('div', 'lig'); l3.appendChild(el('span', '', 'Pour corriger')); l3.appendChild(seg([['qcm', 'Choix multiples'], ['saisie', 'J’écris le mot'], ['fin', 'J’écris la fin du mot']], S.corr, function (v) { changer('corr', v); }, tx)); s2.appendChild(l3);
+    var l4 = el('div', 'lig'); l4.appendChild(el('span', '', 'Longueur')); l4.appendChild(seg([['tc', 'Très courte'], ['c', 'Courte']], S.longueur, function (v) { changer('longueur', v); })); s2.appendChild(l4);
+    if (tx) s2.appendChild(el('p', 'petit', '« Les fautes » et « Pour corriger » concernent le texte à corriger.'));
+    else if (S.corr === 'fin') s2.appendChild(el('p', 'petit', 'Avec « J’écris la fin du mot », les mots à compléter sont déjà repérés.'));
+    z.appendChild(s2);
+    var s3 = el('div', 'sect'); s3.appendChild(el('h4', '', 'Lecture à voix haute (dictée audio et dictée brevet)'));
+    var l5 = el('div', 'lig'); l5.appendChild(el('span', '', 'Vitesse')); l5.appendChild(seg([[0.7, 'Lente'], [0.85, 'Normale'], [1, 'Rapide']], S.vitesse, function (v) { changer('vitesse', +v); })); s3.appendChild(l5);
+    var l6 = el('div', 'lig'); l6.appendChild(el('span', '', 'Lectures par groupe')); l6.appendChild(seg([[1, '1'], [2, '2'], [3, '3']], S.lectures, function (v) { changer('lectures', +v); })); s3.appendChild(l6);
+    z.appendChild(s3);
+    z.appendChild(el('p', 'petit', 'Un changement de réglage démarre une nouvelle dictée.'));
+  }
+  function rendreTiroir() {
+    var z = document.getElementById('tiroir'); z.innerHTML = '';
+    if (!E.tiroir) return;
+    var v = el('div', 'voile'); v.addEventListener('click', fermerTiroir); z.appendChild(v);
+    var t = el('aside', 'tiroir'); t.setAttribute('aria-label', 'Réglages');
+    var h = el('div', 'tiroir-t', '<b style="font-size:1.1rem">⚙ Réglages</b>'); var f = el('button', 'btn sec pt', 'Fermer ✕'); f.addEventListener('click', fermerTiroir); h.appendChild(f);
+    t.appendChild(h); var c = el('div', 'tiroir-c'); contenuReglages(c); t.appendChild(c); z.appendChild(t);
+  }
+  function fermerTiroir() { E.tiroir = false; if (E.ecran === 'reglages') E.ecran = 'courte'; garder(); rendre(); }
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && E.tiroir) fermerTiroir(); });
+  function ecranReglages(P) {
+    if (opt('reglages') === 'A') { ecranCourte(P); return; }
+    P.appendChild(entete('Réglages', 'Tes réglages', 'Un seul endroit pour toutes les options. Ils s’appliquent à la prochaine dictée.'));
+    var c = el('div', 'carte'); contenuReglages(c); P.appendChild(c);
+    var b = el('button', 'btn', '← Retour'); b.addEventListener('click', function () { aller(E.retour && E.retour !== 'reglages' ? E.retour : 'courte'); }); P.appendChild(b);
+  }
+
+  /* =============================================== rendu général */
+  var RENDUS = { accueil: ecranAccueil, courte: ecranCourte, brevet: ecranBrevet, suivi: ecranSuivi, fiches: ecranFiches, reglages: ecranReglages };
+  function rendre() {
+    var y = window.scrollY, ta = document.querySelector('#tiroir .tiroir'), ty = ta ? ta.scrollTop : 0;
+    rendreBarre(); rendreNav();
+    var P = document.getElementById('page'); P.innerHTML = '';
+    RENDUS[E.ecran](P);
+    rendreTiroir();
+    var nt = document.querySelector('#tiroir .tiroir'); if (nt) nt.scrollTop = ty;
+    window.scrollTo(0, y);
+    rendreComm();
+  }
+
+  /* =============================================== validation de la maquette */
+  function rendreComm() {
+    var z = document.getElementById('comm-zone');
+    if (z.dataset.fait) return; z.dataset.fait = 1;
+    ECRANS.forEach(function (ec) {
+      var l = el('label', '', '<b>' + esc(ec.nom) + '</b>'); l.style.cssText = 'display:block;margin-top:8px';
+      var t = el('textarea'); t.value = E.comm[ec.id] || ''; t.placeholder = 'Commentaire sur « ' + ec.nom + ' »';
+      t.addEventListener('input', function () { E.comm[ec.id] = t.value; garder(); });
+      l.appendChild(t); z.appendChild(l);
+    });
+    var g = document.getElementById('comm-gen'); g.value = E.gen || ''; g.addEventListener('input', function () { E.gen = g.value; garder(); });
+  }
+  function resume() {
+    var L = ['MAQUETTE V2 — Orthographe 3e (' + new Date().toLocaleDateString('fr-FR') + ')', ''];
+    ECRANS.forEach(function (ec) {
+      var o = ec.opts.filter(function (x) { return x[0] === opt(ec.id); })[0];
+      L.push('• ' + ec.nom + ' : ' + (ec.opts.length > 1 ? 'option ' + o[0] + ' (' + o[1] + ')' : o[1]) + (E.comm[ec.id] ? '\n    Commentaire : ' + E.comm[ec.id] : ''));
+    });
+    L.push('', 'Remarque générale : ' + (E.gen || '(aucune)'));
+    return L.join('\n');
+  }
+  document.getElementById('b-res').addEventListener('click', function () { document.getElementById('res').value = resume(); });
+  document.getElementById('b-cop').addEventListener('click', function () { var t = document.getElementById('res'); t.value = resume(); t.select(); try { navigator.clipboard.writeText(t.value); } catch (e) { document.execCommand('copy'); } this.textContent = 'Copié ✓'; });
+  document.getElementById('b-tel').addEventListener('click', function () {
+    var txt = resume(); document.getElementById('res').value = txt;
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'text/plain;charset=utf-8' })); a.download = 'maquette-orthographe-v2.txt'; document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  window.addEventListener('resize', function () { rendreBarre(); });
+  window.MQ2 = { aller: aller, S: S, nouvelleDictee: nouvelleDictee, rendre: rendre };
+  rendre();
+})();
+</script>
+</body>
+</html>
