@@ -323,7 +323,6 @@ Code : `assets/progression.js` et `assets/progression.css`, chargés **par le po
 | `equamath_v2` | `results` : l'entrée au meilleur `bestScore`, `attempts` le plus grand ; `xp` le plus grand ; `showKb` du navigateur |
 | `<dossier>-flashcards` | `ajouts` : réunion (date la plus ancienne) ; chaque carte : l'état **revu le plus récemment** (`v` le plus grand ; à égalité, `n` le plus grand ; une carte jamais revue perd contre une carte revue) ; une carte présente d'un seul côté est copiée |
 | `revisions-reglages` | celui du navigateur (copié s'il est absent) |
-| `orthographe-suivi` | occasions de chaque règle et notes : réunion sans doublon (même date) ; les 30 dernières occasions par règle, les 100 dernières notes |
 | autre clé `<dossier>-…` | copiée si absente du navigateur, sinon celle du navigateur est gardée |
 
 - Une nouvelle forme de donnée (autre que `-progression`, `-exercices` et `-flashcards`) est donc copiée telle quelle seulement si le navigateur ne l'a pas encore : pour la fusionner finement, ajoute son type dans `nettoyer`, `significatif` et `fusionner` de `assets/progression.js`.
