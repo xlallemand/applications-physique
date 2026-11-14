@@ -22,7 +22,9 @@
    Clés enregistrées : celles qui commencent par « <dossier>- » pour un
    dossier de la liste APPS du portail (préfixe le plus long), plus
    equamath_v2 (Équations du 1er degré) et revisions-reglages (réglage des
-   flashcards, rattaché à aucune application). Les autres clés du navigateur
+   flashcards, rattaché à aucune application). fractions-college-suivi (suivi
+   des compétences de l'application Fractions) a sa propre fusion (type
+   « suivi-competences »). Les autres clés du navigateur
    (autres sites de la même adresse) ne sont ni enregistrées ni reprises.
    Tout ce qui arrive est non fiable : taille plafonnée, forme de chaque
    valeur vérifiée, aucun texte inséré en HTML (textContent seulement).
@@ -99,6 +101,7 @@
     if (reste === 'flashcards') return { dossier, type: 'flashcards' };
     if (cle === 'combustions-exercices-faits') return { dossier, type: 'liste' };
     if (cle === 'principe-dynamique-atelier') return { dossier, type: 'atelier' };
+    if (cle === 'fractions-college-suivi') return { dossier, type: 'suivi-competences' };
     return { dossier, type: 'inconnue' };
   }
 
@@ -203,6 +206,26 @@
         }
         return r;
       }
+      // suivi des compétences (Fractions) : { v: 1, r: { <compétence>: [[t, ok], …] }, notes: [[t, 's', note], …] }
+      //   t date en ms (entier), ok 0, 0,5 ou 1 ; note sur 20 ; compétence : EG1, AS2, PR1…
+      case 'suivi-competences': {
+        if (!ok(estObjet(v))) return undefined;
+        const r = { v: 1, r: {}, notes: [] };
+        cles(v).forEach(k => ok(k === 'v' || k === 'r' || k === 'notes'));
+        const date = t => typeof t === 'number' && Math.floor(t) === t && t > 0 && t < 1e14;
+        if (propre(v, 'r') && ok(estObjet(v.r) && cles(v.r).length <= 100)) {
+          cles(v.r).forEach(id => {
+            const l = v.r[id];
+            if (!ok(/^[A-Z]{2}\d{1,2}$/.test(id) && Array.isArray(l) && l.length <= 200)) return;
+            const x = l.filter(e => ok(Array.isArray(e) && e.length === 2 && date(e[0]) && [0, 0.5, 1].indexOf(e[1]) >= 0)).map(e => [e[0], e[1]]);
+            if (x.length) r.r[id] = x;
+          });
+        }
+        if (propre(v, 'notes') && ok(Array.isArray(v.notes) && v.notes.length <= MAX_ENTREES)) {
+          v.notes.forEach(e => { if (ok(Array.isArray(e) && e.length === 3 && date(e[0]) && e[1] === 's' && estNombre(e[2], 0, 20))) r.notes.push([e[0], e[1], e[2]]); });
+        }
+        return r;
+      }
       // réglage des flashcards : { parSeance: 0 | 10 | 20 | 30 }
       case 'reglages': {
         if (!ok(estObjet(v) && cles(v).every(k => k === 'parSeance'))) return undefined;
@@ -227,6 +250,7 @@
       case 'equamath': return v.xp > 0 || (!!v.results && cles(v.results).length > 0);
       case 'flashcards': return cles(v.ajouts).length > 0;          // au moins un paquet ajouté
       case 'reglages': return propre(v, 'parSeance');
+      case 'suivi-competences': return cles(v.r).length > 0 || v.notes.length > 0;
       case 'inconnue': return v !== '' && v !== false && !(Array.isArray(v) && !v.length) && !(estObjet(v) && !cles(v).length);
       default: return cles(v).length > 0;      // exercices, atelier
     }
@@ -303,6 +327,22 @@
           return y.n > (typeof x.n === 'number' ? x.n : -1);
         };
         cles(b.cartes).forEach(id => { if (plusRecent(r.cartes[id], b.cartes[id])) r.cartes[id] = copie(b.cartes[id]); });
+        return r;
+      }
+      case 'suivi-competences': {
+        // réunion des questions de chaque compétence et des notes, sans doublon (même date) ;
+        // on garde les 30 dernières questions par compétence et les 100 dernières notes
+        const r = estObjet(a) ? copie(a) : {};
+        r.v = 1;
+        if (!estObjet(r.r)) r.r = {};
+        if (!Array.isArray(r.notes)) r.notes = [];
+        const reunir = (x, y, max) => {
+          const vu = {}, l = [];
+          (Array.isArray(x) ? x : []).concat(y).forEach(e => { if (Array.isArray(e) && !vu[e[0]]) { vu[e[0]] = true; l.push(e); } });
+          return l.sort((p, q) => p[0] - q[0]).slice(-max);
+        };
+        cles(b.r).forEach(id => { r.r[id] = reunir(r.r[id], b.r[id], 30); });
+        r.notes = reunir(r.notes, b.notes, 100);
         return r;
       }
       default: return a;          // clé inconnue déjà présente, réglages : on garde ceux du navigateur

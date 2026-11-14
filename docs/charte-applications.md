@@ -321,6 +321,7 @@ Code : `assets/progression.js` et `assets/progression.css`, chargés **par le po
 | `combustions-exercices-faits`, `principe-dynamique-atelier` | réunion, sans doublon |
 | `equamath_v2` | `results` : l'entrée au meilleur `bestScore`, `attempts` le plus grand ; `xp` le plus grand ; `showKb` du navigateur |
 | `<dossier>-flashcards` | `ajouts` : réunion (date la plus ancienne) ; chaque carte : l'état **revu le plus récemment** (`v` le plus grand ; à égalité, `n` le plus grand ; une carte jamais revue perd contre une carte revue) ; une carte présente d'un seul côté est copiée |
+| `fractions-college-suivi` (suivi des compétences) | réunion des questions de chaque compétence et des notes, sans doublon (même date) ; les 30 dernières questions par compétence, les 100 dernières notes |
 | `revisions-reglages` | celui du navigateur (copié s'il est absent) |
 | autre clé `<dossier>-…` | copiée si absente du navigateur, sinon celle du navigateur est gardée |
 
