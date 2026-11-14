@@ -40,6 +40,53 @@
 .eq-feuille-s .eq-l { min-height: 0; font-size: 1.1rem; padding: 5px 0; }
 .eq-l-aff { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
 .eq-ex-t { margin-top: 10px; font-size: .78rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+/* ---------- calcul aligné sur le signe = et flèches « même opération des deux côtés » ---------- */
+.eq-mo-bloc { display: flex; justify-content: center; margin: 8px 0; padding: 8px 12px; border-radius: 12px; background: var(--sheet); box-shadow: inset 0 0 0 1px var(--line); overflow-x: auto; }
+.eq-mo { position: relative; display: inline-grid; grid-template-columns: max-content max-content max-content; column-gap: .4em; row-gap: 2px; align-items: center; font-size: 1.15rem; }
+.eq-mo-4 { grid-template-columns: max-content max-content max-content max-content; }
+/* place à gauche et à droite pour les flèches et leurs libellés (--mo-pad calculé selon le plus long libellé) */
+.eq-mo-avec:not(.eq-mo-sans) { padding: 0 var(--mo-pad); }
+.eq-mo .eq-ligne { font-size: inherit; }
+.eq-mo-g { justify-self: end; position: relative; }
+.eq-mo-e { justify-self: center; }
+.eq-mo-d { justify-self: start; position: relative; }
+.eq-mo-l0 { font-weight: 700; }
+.eq-mo-esp { grid-column: 1 / -1; height: 1.2em; }
+.eq-mo-arc-esp { grid-column: 1 / -1; }
+/* flèche de gauche : part du début de l'équation ; flèche de droite : part de la fin */
+.eq-mo-fl { position: absolute; top: calc(100% - .2em); display: flex; align-items: center; gap: 2px; pointer-events: none; color: var(--accent); }
+.eq-mo-fl.g { right: 100%; margin-right: -.3em; }
+.eq-mo-fl.d { left: 100%; margin-left: -.3em; }
+.eq-mo-fl svg { width: 1.5em; height: 1.15em; flex-shrink: 0; }
+.eq-mo-fl.d svg { transform: scaleX(-1); }
+.eq-mo-lab { font-size: .82em; font-weight: 800; white-space: nowrap; }
+.eq-mo-lab .eq-ligne, .eq-mo-lab .eq-c { color: var(--accent); }
+.eq-mo-lab .eq-op { margin: 0 .2em; }
+.eq-mo-lab .eq-c:first-child { margin: 0 .15em 0 0; }
+.eq-mo-sans .eq-mo-fl, .eq-mo-sans .eq-mo-esp { display: none; }
+/* terme qui s'annule (− 5 + 5), terme qui passe de l'autre côté, note sous une ligne */
+.eq-mo-zero { margin-left: .1em; padding: 0 .15em; border-radius: 8px; background: var(--cle-bg); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.eq-mo-dep, .eq-mo-dep .eq-c { color: var(--accent); font-weight: 800; }
+.eq-mo-note { grid-column: 1 / -1; justify-self: center; margin: 0 0 4px !important; font-size: .7em; font-weight: 600; color: var(--accent-ink); }
+.eq-mo-arc { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; color: var(--accent); }
+.eq-mo-etape { font-weight: 800; color: var(--accent-ink); margin: 12px 0 2px !important; }
+.eq-mo-bt[aria-pressed="true"] { background: var(--accent); color: var(--sheet); }
+.eq-mo-bt[aria-pressed="true"]:hover { background: var(--accent-ink); }
+/* feuille de la séance : lignes écrites alignées sur le signe = */
+.eq-mo-z { overflow-x: auto; padding: 6px 0 6px 10px; }
+.eq-mo-z .eq-mo { font-size: 1.3rem; row-gap: 6px; }
+.eq-mo-z .eq-mo-x { min-width: 1.2em; }
+@media (max-width: 480px) {
+  .eq-mo-z .eq-mo { font-size: 1.15rem; } .eq-mo { font-size: 1.05rem; }
+  /* flèches affichées : un peu plus petit, pour que les longues équations tiennent dans l'écran */
+  .eq-mo-z .eq-mo-avec:not(.eq-mo-sans) { font-size: 1rem; }
+  .eq-mo-z { padding-left: 0; }
+  /* libellés sous la ligne, à l'intérieur des flèches : la place réservée sur les côtés se limite aux flèches */
+  .eq-mo-avec:not(.eq-mo-sans) { padding: 0 1.3em; }
+  .eq-mo-fl .eq-mo-lab { position: absolute; top: .55em; }
+  .eq-mo-fl.g .eq-mo-lab { left: 100%; }
+  .eq-mo-fl.d .eq-mo-lab { right: 100%; }
+}
 
 /* ---------- ligne en cours d'écriture (éditeur) ---------- */
 .eq-cour { border-radius: 12px; }

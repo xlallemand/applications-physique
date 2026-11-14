@@ -13,7 +13,9 @@
        question est finie quand la dernière ligne est « x = un nombre »
        (entier, décimal ou fraction irréductible) ;
      - aides toujours disponibles : rappel de la compétence, indices
-       successifs, exemple avec d'autres nombres, solution (0 point) ;
+       successifs, « même opération » (flèches sur la feuille, l'élève tape
+       l'opération à faire des deux côtés : + 7, ÷ 4…), exemple avec
+       d'autres nombres, solution (0 point) ;
      - points : 2 juste sans erreur, 1 juste après erreur, 0 solution affichée ;
        note sur 20 ; suivi enregistré à chaque question (EQ.enregistrer).
    Dépend de : expr.js (EQ.X), competences.js (EQ.C), eq.js (EQ).
@@ -289,6 +291,9 @@
       const p = plan[k], q = C.question(p.comp, niveau(p.comp)), comp = C.R[p.comp];
       EQ.questionEnCours = q;                     // question affichée (tests automatiques)
       let erreurs = 0, fini = false, precedent = X.lire(q.depart), nInd = 0;
+      // lignes écrites (la première : l'équation de départ) ; aide « même opération » : active ?, opération tapée en attente
+      const ecrites = [precedent];
+      let mo = false, enAttente = null;
       zone.innerHTML = '';
       // en-tête : numéro, score, barre de progression
       const t = el('div', 'er-card eq-entete-q');
@@ -302,7 +307,7 @@
       // aides
       const barre = el('div', 'eq-aides');
       barre.setAttribute('role', 'group'); barre.setAttribute('aria-label', 'Aides');
-      const zRap = el('div', 'eq-aide'), zInd = el('div', 'eq-aide'), zEx = el('div', 'eq-aide'), zSol = el('div', 'eq-aide');
+      const zRap = el('div', 'eq-aide'), zInd = el('div', 'eq-aide'), zMo = el('div', 'eq-aide'), zEx = el('div', 'eq-aide'), zSol = el('div', 'eq-aide');
       const bRap = bouton('btn-small', '📖 Rappel', () => {
         const oui = !zRap.firstChild;
         zRap.innerHTML = '';
@@ -322,6 +327,17 @@
         bInd.innerHTML = nInd >= q.indices.length ? '💡 Tous les indices sont affichés' : nInd ? '💡 Indice suivant (' + (nInd + 1) + '/' + q.indices.length + ')' : '💡 Indice';
         bInd.disabled = nInd >= q.indices.length;
       };
+      // aide « même opération » (gratuite) : flèches sur la feuille, l'élève tape l'opération à faire des deux côtés
+      const bMo = bouton('btn-small eq-mo-bt', '⇅ Même opération', () => {
+        mo = !mo;
+        bMo.setAttribute('aria-pressed', mo);
+        if (!mo) enAttente = null;
+        zMo.innerHTML = mo ? '<div class="eq-indice"><b>Même opération.</b> Fais la même opération à gauche et à droite du signe =. ' +
+          'Tape l’opération sur ta ligne (par exemple + 7, − 2x, × 3 ou ÷ 4), puis Vérifier : elle s’écrit des deux côtés, à toi de calculer.</div>' : '';
+        dessinerFeuille();
+        if (mo) EQ.versVue(zMo.firstChild);
+      });
+      bMo.setAttribute('aria-pressed', 'false');
       const bEx = bouton('btn-small', '✎ Exemple', () => montrerExemple());
       function montrerExemple() {
         const e = C.question(q.comp, q.niv);
@@ -341,12 +357,19 @@
         zSol.appendChild(el('div', 'callout', '<b>Réponse.</b> Une résolution détaillée (0 point pour cette question) :' + solutionHTML(q)));
         terminer(0);
       });
-      [bRap, bInd, bEx, bSol].forEach(b => barre.appendChild(b));
+      [bRap, bInd, bMo, bEx, bSol].forEach(b => barre.appendChild(b));
       c.appendChild(barre);
-      c.appendChild(zRap); c.appendChild(zInd); c.appendChild(zEx);
+      c.appendChild(zRap); c.appendChild(zInd); c.appendChild(zMo); c.appendChild(zEx);
       // la feuille : équation de départ, lignes écrites, ligne en cours
       const feuille = el('div', 'eq-feuille');
-      feuille.appendChild(el('div', 'eq-l eq-l0', X.m(q.depart)));
+      // lignes écrites : alignées sur le signe =, flèches « même opération » quand l'aide est active
+      const zLignes = el('div', 'eq-mo-z');
+      feuille.appendChild(zLignes);
+      function dessinerFeuille() {
+        zLignes.innerHTML = X.calcul(ecrites.map((l, i) => ({ l, cls: i ? '' : 'eq-mo-l0', apres: i ? '<span class="eq-coche" aria-label="ligne juste">✓</span>' : '' })),
+          { coche: true, fleches: mo, enAttente: mo ? enAttente : null });
+      }
+      dessinerFeuille();
       const cour = el('div', 'eq-l eq-cour');
       const zEd = el('div');
       cour.appendChild(zEd);
@@ -391,6 +414,29 @@
       function valider() {
         if (fini) return;
         const modele = X.copie(ed.modele);
+        // une opération tapée (+ 7, ÷ 4…) : avec l'aide « même opération », elle s'écrit des deux côtés de la dernière ligne
+        let op = null;
+        try { op = X.lireOp(modele); } catch (e) {
+          retour.innerHTML = '<div class="callout eq-msg">' + e.msg + '</div>';
+          montrer(retour);
+          return;
+        }
+        if (op && !mo) {
+          retour.innerHTML = '<div class="callout eq-msg">Écris une équation : il manque le signe =. Pour faire la même opération des deux côtés, active l’aide « ⇅ Même opération ».</div>';
+          montrer(retour);
+          return;
+        }
+        if (op) {
+          const i = precedent.indexOf('=');
+          enAttente = modele;
+          dessinerFeuille();
+          ed.definir(X.appliquerOp(precedent.slice(0, i), modele).concat(['='], X.appliquerOp(precedent.slice(i + 1), modele)));
+          retour.innerHTML = X.utileOp(precedent, op)
+            ? '<div class="callout-accent eq-msg">L’opération est écrite des deux côtés. Calcule, puis Vérifier.</div>'
+            : '<div class="callout eq-msg">Cette opération est permise, mais elle ne fait rien disparaître. Efface la ligne (✕) et essaie une autre opération.</div>';
+          montrer(zPave.hidden ? cour : retour);
+          return;
+        }
         const v = verifier(q, precedent, modele);
         if (v.type === 'format') {
           retour.innerHTML = '<div class="callout eq-msg">' + v.msg + '</div>';
@@ -406,8 +452,9 @@
           return;
         }
         // ligne juste : elle s'écrit sur la feuille
-        const l = el('div', 'eq-l eq-juste', X.html(modele) + '<span class="eq-coche" aria-label="ligne juste">✓</span>');
-        feuille.insertBefore(l, cour);
+        ecrites.push(modele);
+        enAttente = null;
+        dessinerFeuille();
         precedent = modele;
         if (!v.fini) {
           ed.vider();

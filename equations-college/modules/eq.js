@@ -360,16 +360,41 @@
   const notes = () => suivi.notes.slice();
 
   /* ---------- Rappel d'une compétence (aide pendant une question) ---------- */
+  // exemple de la fiche : calcul aligné sur le signe =, flèches « même opération » masquées au départ
   function exempleHTML(c) {
     const e = c.exemple;
-    const lignes = [e.depart].concat(e.lignes).map((l, i) => '<div class="eq-l-aff' + (i ? '' : ' eq-l0') + '">' + X.m(l) + '</div>').join('');
-    return '<div class="eq-ex-t">Exemple' + (e.consigne ? ' · ' + C.texte(e.consigne) : '') + '</div><div class="eq-feuille-s">' + lignes + '</div>';
+    const lignes = [{ l: e.depart, cls: 'eq-mo-l0' }].concat(e.lignes);
+    return '<div class="eq-ex-t">Exemple' + (e.consigne ? ' · ' + C.texte(e.consigne) : '') + '</div><div class="eq-mo-bloc">' + X.calcul(lignes, { fleches: false }) + '</div>';
+  }
+  // principe illustré (TA1, MU1) : paragraphes, étapes, calculs avec les flèches affichées
+  function principeHTML(c) {
+    return c.principe.map(b => b.etape ? '<p class="eq-mo-etape">' + b.etape + '</p>' : b.p ? '<p>' + C.texte(b.p) + '</p>'
+      : '<div class="eq-mo-bloc">' + X.calcul(b.calcul.map((l, i) => i ? l : Object.assign({ cls: 'eq-mo-l0' }, typeof l === 'string' ? { l } : l)), { sansOps: b.sansOps }) + '</div>').join('');
+  }
+  // bouton qui affiche ou masque les flèches « même opération » de toute une fiche
+  function boutonFleches(racine) {
+    const r = el('div', 'eq-rangee eq-mo-r');
+    const b = bouton('btn-small eq-mo-bt', '⇅ Afficher les flèches', () => {
+      const oui = b.getAttribute('aria-pressed') !== 'true';
+      b.setAttribute('aria-pressed', oui);
+      b.innerHTML = oui ? '⇅ Masquer les flèches' : '⇅ Afficher les flèches';
+      racine.querySelectorAll('.eq-mo').forEach(x => x.classList.toggle('eq-mo-sans', !oui));
+    });
+    b.setAttribute('aria-pressed', 'false');
+    r.appendChild(b);
+    return r;
+  }
+  // contenu d'une compétence (règle, méthode, exemple) ; avec principe : règle et principe illustré
+  function contenuHTML(c) {
+    return '<p>' + C.texte(c.regle) + '</p>' + (c.principe ? principeHTML(c)
+      : '<div class="cle"><b class="cle-titre">Méthode.</b> ' + C.texte(c.methode) + '</div>' + exempleHTML(c));
   }
   function blocRappel(id) {
     const c = R[id], b = el('div', 'eq-rappel');
-    b.innerHTML = '<p class="eq-rappel-t">' + esc(c.titre) + '</p><p>' + C.texte(c.regle) + '</p>' +
-      '<div class="cle">' + C.texte(c.methode) + '</div>' + exempleHTML(c) +
+    b.innerHTML = '<p class="eq-rappel-t">' + esc(c.titre) + '</p>' + contenuHTML(c) +
       '<a class="eq-lien-fiche" href="fiches.html#' + id + '" target="_blank" rel="noopener">Voir la fiche ↗</a>';
+    if (!c.principe) b.insertBefore(boutonFleches(b), b.children[1]);
+    requestAnimationFrame(() => X.tracerArcs(b));                  // flèches des raccourcis, une fois le rappel affiché
     return b;
   }
 
@@ -524,8 +549,8 @@
       d.appendChild(t);
       if (FI.comp === c.id) {
         const pre = c.prerequis.length ? '<p class="eq-petit">Avant : ' + c.prerequis.map(p => '<a class="eq-lien-fiche" href="#' + p + '">' + esc(R[p].titre) + '</a>').join(' · ') + '</p>' : '';
-        const x = el('div', 'eq-fr-c', '<p>' + C.texte(c.regle) + '</p><div class="cle"><b class="cle-titre">Méthode.</b> ' + C.texte(c.methode) + '</div>' +
-          exempleHTML(c) + '<div class="eq-piege"><b class="cle-titre">Attention.</b> ' + C.texte(c.piege) + '</div>' + pre);
+        const x = el('div', 'eq-fr-c', contenuHTML(c) + '<div class="eq-piege"><b class="cle-titre">Attention.</b> ' + C.texte(c.piege) + '</div>' + pre);
+        if (!c.principe) x.insertBefore(boutonFleches(x), x.firstChild);
         const a = el('a', 'btn-secondary eq-pt', 'M’entraîner sur cette compétence →');
         a.href = 'seance.html#comp=' + c.id;
         const r = el('div', 'eq-rangee'); r.appendChild(a); x.appendChild(r);
@@ -551,6 +576,7 @@
       C.liste.filter(x => x.famille === f.id).forEach(x => g.appendChild(ligneComp(x)));
       c.appendChild(g);
       zone.appendChild(c);
+      X.tracerArcs(zone);                                          // flèches des raccourcis (fiche ouverte)
     }
     lireAncre();
     dessiner();

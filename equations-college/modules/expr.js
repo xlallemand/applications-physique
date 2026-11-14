@@ -26,6 +26,11 @@
      EQ.X.FAUTIFS                    développements faux et leur diagnostic
      EQ.X.solution(lg, ld)           { type: 'un', v } | { type: 'tous' } | { type: 'aucune' }
      EQ.X.ecrireLin(L)               écriture compacte de a x + b
+     EQ.X.operation(l1, l2)          opération faite des deux côtés entre deux lignes ({ type: 'add', L } | { type: 'mul', r } | null)
+     EQ.X.libelleOp(op)              « + 5 », « ÷ 4 »… ; EQ.X.lireOp(modele) : opération tapée par l'élève
+     EQ.X.appliquerOp(membre, op)    membre suivi de l'opération tapée ; EQ.X.utileOp(ligne, op) : fait-elle disparaître un terme ?
+     EQ.X.calcul(lignes, opts)       HTML d'un calcul aligné sur le signe =, avec les flèches « même opération »
+     EQ.X.tracerArcs(racine)         flèches courbes des raccourcis (après affichage)
      EQ.X.Q : nombres rationnels (pgcd, ppcm, red, add, sous, mul, div, egal, opp, ecrire)
      new EQ.X.Editeur(zone, { surChange, surValider })   éditeur d'une ligne
      EQ.X.pave(editeur)                                   pavé à l'écran (élément)
@@ -328,13 +333,195 @@
     if (c === 'x') return 'eq-c eq-x';
     return 'eq-c';
   }
+  // un élément de la liste l (caractère ou fraction) ; attrDen : attributs ajoutés au dénominateur (fraction marquée)
+  function elemHTML(l, i, attrDen) {
+    const e = l[i];
+    return typeof e === 'string' ? '<span class="' + classeCar(l, i) + '">' + e + '</span>'
+      : '<span class="eq-f"><span class="eq-n">' + htmlListe(e.num, true) + '</span><span class="eq-d"' + (attrDen || '') + '>' + htmlListe(e.den, true) + '</span></span>';
+  }
   function htmlListe(l, vide) {
     if (!l.length) return vide ? '<span class="eq-vide"></span>' : '';
-    return l.map((e, i) => typeof e === 'string' ? '<span class="' + classeCar(l, i) + '">' + e + '</span>'
-      : '<span class="eq-f"><span class="eq-n">' + htmlListe(e.num, true) + '</span><span class="eq-d">' + htmlListe(e.den, true) + '</span></span>').join('');
+    return l.map((e, i) => elemHTML(l, i)).join('');
   }
   const html = m => '<span class="eq-ligne">' + htmlListe(typeof m === 'string' ? lire(m) : m, false) + '</span>';
   const m = t => html(t);
+
+  /* =====================================================================
+     Calcul aligné sur le signe = et flèches « même opération des deux côtés »
+     ===================================================================== */
+  const lireM = l => typeof l === 'string' ? lire(l) : l;
+  // formes a x + b des deux membres d'une ligne (null si la ligne ne se lit pas)
+  function formes(l) {
+    try { const e = analyserEq(lireM(l)); return { g: lin(e.g), d: lin(e.d) }; } catch (err) { return null; }
+  }
+  const nbParties = p => (p.a.n !== 0 ? 1 : 0) + (p.b.n !== 0 ? 1 : 0);
+  // opération faite des deux côtés pour passer de la ligne l1 à la ligne l2 :
+  // { type: 'add', L } (on ajoute L = a x + b) | { type: 'mul', r } (on multiplie par r) | null (calcul, développement…)
+  function operation(l1, l2) {
+    const A = formes(l1), B = formes(l2);
+    if (!A || !B) return null;
+    try {
+      const dg = sousL(B.g, A.g), dd = sousL(B.d, A.d);
+      if (egalL(dg, dd)) return nbParties(dg) ? { type: 'add', L: dg } : null;
+      const c = [[A.g.a, B.g.a], [A.g.b, B.g.b], [A.d.a, B.d.a], [A.d.b, B.d.b]].find(x => x[0].n !== 0);
+      if (!c) return null;
+      const r = div(c[1], c[0]);
+      if (r.n === 0 || egal(r, UN)) return null;
+      return egalL(foisL(r, A.g), B.g) && egalL(foisL(r, A.d), B.d) ? { type: 'mul', r } : null;
+    } catch (err) { return null; }
+  }
+  // libellé d'une opération (écriture compacte) : « + 5 », « − 2x », « ÷ 4 », « × (−3) », « × [3|4] »
+  function libelleOp(op) {
+    if (op.type === 'add') { const t = ecrireLin(op.L); return t[0] === MOINS ? MOINS + ' ' + t.slice(1) : '+ ' + t; }
+    const r = op.r, neg = r.n < 0, abs = { n: Math.abs(r.n), d: r.d };
+    const par = t => neg ? '(' + MOINS + t + ')' : t;
+    if (r.d === 1) return '× ' + par(String(abs.n));
+    if (abs.n === 1) return '÷ ' + par(String(abs.d));
+    return '× ' + par(ecrire(abs));
+  }
+  // opération tapée par l'élève (« + 7 », « − 2x », « × 3 », « ÷ 4 ») : { type, L | r },
+  // null si la ligne n'est pas une opération ; lève { msg } si l'opération est mal écrite ou impossible
+  function lireOp(l) {
+    const o = l[0];
+    if (!l.length || typeof o !== 'string' || SIGNES.indexOf(o) < 0 || l.indexOf('=') >= 0) return null;
+    const reste = l.slice(1);
+    if (!reste.length) erreur('Écris l’opération en entier, par exemple + 7 ou ÷ 4.');
+    // « − 2x + 6 » : le − ne porte que sur le premier terme (on lit tout, le − étant un signe)
+    const L = lin(analyser(o === MOINS ? l : reste));
+    if (o === '+' || o === MOINS) {
+      if (!nbParties(L)) erreur('Ajouter ou soustraire 0 ne change rien : choisis une autre opération.');
+      return { type: 'add', L };
+    }
+    if (L.a.n !== 0) erreur('On multiplie ou on divise les deux membres par un nombre, pas par une expression avec x.');
+    if (L.b.n === 0) erreur(o === '×' ? 'Multiplier par 0 efface tout : c’est impossible.' : 'On ne peut pas diviser par 0.');
+    const r = o === '×' ? L.b : div(UN, L.b);
+    if (egal(r, UN)) erreur('Multiplier ou diviser par 1 ne change rien : choisis une autre opération.');
+    return { type: 'mul', r };
+  }
+  // le membre M a-t-il plusieurs termes (un + ou un − de soustraction hors parenthèses) ?
+  function plusieursTermes(M) {
+    let p = 0;
+    return M.some((e, i) => {
+      if (e === '(') p++; else if (e === ')') p--;
+      return p === 0 && i > 0 && (e === '+' || (e === MOINS && !estSigne(M, i)));
+    });
+  }
+  // écrit l'opération tapée l (« + 7 », « ÷ 4 »…) à la suite du membre M (modèle)
+  function appliquerOp(M, l) {
+    const o = l[0], reste = copie(l.slice(1)), M2 = copie(M);
+    if (o === '+' || o === MOINS) return M2.concat([o], reste);
+    const facteur = reste[0] === MOINS ? ['('].concat(reste, [')']) : reste;
+    const unique = M2.length === 1 && typeof M2[0] === 'object';                 // le membre est une seule fraction
+    // division par un nombre simple : une fraction (le trait de fraction regroupe tout le membre)
+    if (o === '÷' && !unique && reste.every(e => typeof e === 'string')) return [{ num: M2, den: reste }];
+    return (plusieursTermes(M2) ? ['('].concat(M2, [')']) : M2).concat([o], facteur);
+  }
+  // l'opération fait-elle disparaître quelque chose (un terme, un coefficient devant x, un dénominateur) ?
+  function utileOp(l, op) {
+    const A = formes(l);
+    if (!A) return true;
+    if (op.type === 'add') {
+      const g = addL(A.g, op.L), d = addL(A.d, op.L);
+      return nbParties(g) < nbParties(A.g) || nbParties(d) < nbParties(A.d);
+    }
+    const g = foisL(op.r, A.g), d = foisL(op.r, A.d);
+    const den = (p, q) => ppcm(ppcm(p.a.d, p.b.d), ppcm(q.a.d, q.b.d));
+    return egal(g.a, UN) || egal(d.a, UN) || den(g, d) < den(A.g, A.d);
+  }
+
+  // flèche courbe « même opération » (même dessin que dans « Équations en physique », module 3)
+  const FLECHE = '<svg viewBox="0 0 60 46" aria-hidden="true"><path d="M46,4 Q12,10 16,38" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/><path d="M16,38 L7,26 M16,38 L25,29" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  // un membre avec des marques : { debut, fin, cls } (éléments debut…fin−1 regroupés et encadrés ou colorés),
+  // { debut, den: true, cls } (dénominateur de la fraction n° debut) ; arcDe / arcVers : extrémités d'une flèche de raccourci
+  function htmlMarque(l, marques) {
+    marques = marques || [];
+    const attr = mq => ' class="' + mq.cls + '"' + (mq.arcDe ? ' data-arc-de="' + mq.arcDe + '"' : '') + (mq.arcVers ? ' data-arc-vers="' + mq.arcVers + '"' : '');
+    let h = '', i = 0;
+    while (i < l.length) {
+      const mq = marques.find(x => x.debut === i && !x.den);
+      if (mq) {
+        let r = '';
+        for (let j = i; j < mq.fin; j++) r += elemHTML(l, j);
+        h += '<span' + attr(mq).replace('class="', 'class="eq-ligne ') + '>' + r + '</span>';
+        i = mq.fin;
+        continue;
+      }
+      const md = marques.find(x => x.debut === i && x.den);
+      h += elemHTML(l, i, md ? attr(md) : '');
+      i++;
+    }
+    return '<span class="eq-ligne">' + (h || '<span class="eq-vide"></span>') + '</span>';
+  }
+  // calcul aligné sur le signe = ; lignes : textes, modèles ou { l, cls, marques: { g, d }, note, apres, esp } ;
+  // opts : { fleches: false (flèches masquées), coche: true (4e colonne : apres), sansOps: true (pas de flèches),
+  //          enAttente: opération (texte ou modèle) dont les flèches s'affichent sous la dernière ligne }
+  function calcul(lignes, opts) {
+    opts = opts || {};
+    const LI = lignes.map(x => (typeof x === 'string' || Array.isArray(x)) ? { l: x } : x);
+    const M = LI.map(x => lireM(x.l));
+    const ops = M.map((l, i) => {
+      if (i === M.length - 1) return opts.enAttente ? lireM(opts.enAttente) : null;
+      const op = opts.sansOps ? null : operation(l, M[i + 1]);
+      return op ? lire(libelleOp(op)) : null;
+    });
+    const fl = (lab, cote) => '<span class="eq-mo-fl ' + cote + '" aria-hidden="true">' + (cote === 'g' ? lab + FLECHE : FLECHE + lab) + '</span>';
+    let h = '';
+    M.forEach((l, i) => {
+      const k = l.indexOf('='), x = LI[i], cls = x.cls ? ' ' + x.cls : '', mq = x.marques || {};
+      const lab = ops[i] ? '<span class="eq-mo-lab">' + html(ops[i]) + '</span>' : '';
+      h += '<div class="eq-mo-g' + cls + '">' + htmlMarque(l.slice(0, k), mq.g) + (lab ? fl(lab, 'g') : '') + '</div>' +
+        '<div class="eq-mo-e' + cls + '">' + html(['=']) + '</div>' +
+        '<div class="eq-mo-d' + cls + '">' + htmlMarque(l.slice(k + 1), mq.d) + (lab ? fl(lab, 'd') : '') + '</div>' +
+        (opts.coche ? '<div class="eq-mo-x">' + (x.apres || '') + '</div>' : '') +
+        (x.note ? '<p class="eq-mo-note">' + x.note + '</p>' : '') +
+        (lab ? '<div class="eq-mo-esp"></div>' : '') +
+        (x.esp ? '<div class="eq-mo-arc-esp" style="height:' + x.esp + 'em"></div>' : '');
+    });
+    // place pour les flèches et leurs libellés, de chaque côté (selon le plus long libellé)
+    const n = Math.max(0, ...ops.map(o => o ? o.length : 0));
+    return '<div class="eq-mo' + (opts.coche ? ' eq-mo-4' : '') + (n ? ' eq-mo-avec' : '') + (opts.fleches === false ? ' eq-mo-sans' : '') + '"' +
+      (n ? ' style="--mo-pad:' + (1.6 + 0.45 * n).toFixed(2) + 'em"' : '') + '>' + h + '</div>';
+  }
+  // flèches courbes des raccourcis (terme qui passe de l'autre côté) : tracées après l'affichage, et à chaque
+  // changement de taille (elles dépendent de la position des termes)
+  function tracerArcs(racine) {
+    (racine || document).querySelectorAll('.eq-mo').forEach(c => {
+      c.querySelectorAll(':scope > .eq-mo-arc').forEach(s => s.remove());
+      if (!c.getClientRects().length) return;                        // calcul masqué : tracé à son affichage
+      c.querySelectorAll('[data-arc-de]').forEach(a => {
+        const b = c.querySelector('[data-arc-vers="' + a.dataset.arcDe + '"]');
+        if (!b) return;
+        const r = c.getBoundingClientRect(), ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+        const x1 = ra.left + ra.width / 2 - r.left, y1 = ra.bottom - r.top + 2;
+        let x2 = rb.left + rb.width / 2 - r.left, y2, d, cx, cy;
+        if (b.classList.contains('eq-d') || b.closest('.eq-d')) {
+          // vers un dénominateur : la flèche contourne la ligne d'arrivée par la gauche et par-dessous
+          y2 = rb.bottom - r.top + 2;
+          const bas = y2 + 22;
+          cx = x2 - 20; cy = bas + 18;
+          d = 'M' + x1 + ',' + y1 + ' C' + (x1 - 75) + ',' + (y1 + 45) + ' ' + cx + ',' + cy + ' ' + x2 + ',' + y2;
+        } else {
+          y2 = rb.top - r.top - 2;
+          cx = (x1 + x2) / 2; cy = Math.max(y1, y2) + 4;
+          d = 'M' + x1 + ',' + y1 + ' Q' + cx + ',' + cy + ' ' + x2 + ',' + y2;
+        }
+        // pointe orientée selon la tangente en fin de courbe
+        const ang = Math.atan2(y2 - cy, x2 - cx), P = 8;
+        const p1 = [x2 - P * Math.cos(ang - 0.5), y2 - P * Math.sin(ang - 0.5)], p2 = [x2 - P * Math.cos(ang + 0.5), y2 - P * Math.sin(ang + 0.5)];
+        const sv = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        sv.setAttribute('class', 'eq-mo-arc');
+        sv.setAttribute('width', r.width); sv.setAttribute('height', r.height); sv.setAttribute('aria-hidden', 'true');
+        sv.innerHTML = '<path d="' + d + '" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>' +
+          '<path d="M' + p1 + ' L' + x2 + ',' + y2 + ' L' + p2 + '" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
+        c.appendChild(sv);
+      });
+    });
+  }
+  if (typeof addEventListener === 'function') {
+    let att = 0;
+    addEventListener('resize', () => { clearTimeout(att); att = setTimeout(() => tracerArcs(), 100); });
+    if (typeof document !== 'undefined' && document.fonts) document.fonts.ready.then(() => tracerArcs());
+  }
 
   /* =====================================================================
      Éditeur d'une ligne (curseur, clavier, toucher)
@@ -551,5 +738,6 @@
     return p;
   }
 
-  EQ.X = { lire, texte, copie, html, m, analyser, analyserEq, lin, egalL, solution, ecrireLin, FAUTIFS, termes, Q, Editeur, pave, AIDE_CLAVIER, MOINS };
+  EQ.X = { lire, texte, copie, html, m, analyser, analyserEq, lin, egalL, solution, ecrireLin, FAUTIFS, termes, Q, Editeur, pave, AIDE_CLAVIER, MOINS,
+    operation, libelleOp, lireOp, appliquerOp, utileOp, calcul, tracerArcs };
 })();

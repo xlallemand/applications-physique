@@ -73,7 +73,19 @@
   const liste = [
     /* ---------------- Termes additifs ---------------- */
     { id: 'TA1', famille: 'TA', niveau: 1, prerequis: [], titre: 'Résoudre x + a = b',
-      regle: 'On peut <b>ajouter ou soustraire le même nombre</b> aux deux membres d’une équation. Autrement dit : un terme qui <b>passe de l’autre côté</b> du signe = <b>change de signe</b> (+ devient −, − devient +).',
+      regle: 'Une équation est une égalité. Elle reste vraie si on fait <b>la même opération à gauche et à droite du signe =</b>.',
+      // principe illustré (fiche et rappel) : la même opération des deux côtés, puis le raccourci
+      principe: [
+        { etape: '1. On fait la même opération des deux côtés' },
+        { p: 'Dans {x − 5 = 3}, le « − 5 » gêne pour isoler x. On fait <b>+ 5 à gauche et à droite</b> :' },
+        { calcul: ['x − 5 = 3',
+          { l: 'x − 5 + 5 = 3 + 5', marques: { g: [{ debut: 1, fin: 5, cls: 'eq-mo-zero' }] }, note: '− 5 + 5 = 0 : le − 5 disparaît à gauche.' },
+          'x = 8'] },
+        { etape: '2. Le raccourci' },
+        { p: 'Cela revient à <b>passer le 5 de l’autre côté en changeant son signe</b> : le « − 5 » devient « + 5 ».' },
+        { sansOps: true, calcul: [{ l: 'x − 5 = 3', marques: { g: [{ debut: 1, fin: 3, cls: 'eq-mo-dep', arcDe: 'a' }] }, esp: 1.2 },
+          { l: 'x = 3 + 5', marques: { d: [{ debut: 1, fin: 3, cls: 'eq-mo-dep', arcVers: 'a' }] } }, 'x = 8'] }
+      ],
       methode: 'Repère le nombre ajouté à x (ou soustrait). Fais-le passer dans l’autre membre en changeant son signe, puis calcule.',
       exemple: { consigne: 'Résous', depart: 'x + 5 = 12', lignes: ['x = 12 − 5', 'x = 7'] },
       piege: 'Le signe change : {x + 5 = 12} donne {x = 12 − 5}, pas {x = 12 + 5}.',
@@ -122,7 +134,20 @@
 
     /* ---------------- Termes multiplicatifs ---------------- */
     { id: 'MU1', famille: 'MU', niveau: 1, prerequis: [], titre: 'Résoudre ax = b',
-      regle: 'On peut <b>diviser les deux membres</b> d’une équation par un même nombre non nul. Dans {3x}, x est multiplié par 3 : pour isoler x, on <b>divise</b> les deux membres par 3.',
+      regle: 'Une équation reste vraie si on <b>multiplie ou divise les deux membres par le même nombre</b> (non nul).',
+      principe: [
+        { etape: '1. On fait la même opération des deux côtés' },
+        { p: 'Dans {3x = 12}, x est multiplié par 3. On fait <b>÷ 3 à gauche et à droite</b> :' },
+        { calcul: ['3x = 12',
+          { l: '[3x|3] = [12|3]', marques: { g: [{ debut: 0, fin: 1, cls: 'eq-mo-zero' }] }, note: '3x ÷ 3 = x : le 3 disparaît à gauche.' },
+          'x = 4'] },
+        { etape: '2. Le raccourci' },
+        { p: 'Cela revient à <b>passer le 3 de l’autre côté</b> : il multipliait x, il <b>divise</b> de l’autre côté.' },
+        { sansOps: true, calcul: [{ l: '3x = 12', marques: { g: [{ debut: 0, fin: 1, cls: 'eq-mo-dep', arcDe: 'a' }] }, esp: 0.5 },
+          { l: 'x = [12|3]', marques: { d: [{ debut: 0, den: true, cls: 'eq-mo-dep', arcVers: 'a' }] }, esp: 1.4 }, 'x = 4'] },
+        { p: 'Et si x est <b>divisé</b> par un nombre, on <b>multiplie</b> les deux membres par ce nombre :' },
+        { calcul: ['[x|4] = 5', { l: '[x|4] × 4 = 5 × 4', marques: { g: [{ debut: 0, fin: 3, cls: 'eq-mo-zero' }] } }, 'x = 20'] }
+      ],
       methode: '{ax = b} donne {x = [b|a]}. Calcule ensuite le quotient.',
       exemple: { consigne: 'Résous', depart: '3x = 12', lignes: ['x = [12|3]', 'x = 4'] },
       piege: 'On ne soustrait pas le coefficient : {3x = 12} ne donne pas {x = 12 − 3}. {3x}, c’est {3 × x} : on divise par 3.',
