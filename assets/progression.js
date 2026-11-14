@@ -24,7 +24,8 @@
    equamath_v2 (Équations du 1er degré) et revisions-reglages (réglage des
    flashcards, rattaché à aucune application). fractions-college-suivi (suivi
    des compétences de l'application Fractions) a sa propre fusion (type
-   « suivi-competences »). Les autres clés du navigateur
+   « suivi-competences ») ; fractions-college-sauvegarde (état de la copie de
+   secours propre à l'appareil) n'est jamais enregistrée. Les autres clés du navigateur
    (autres sites de la même adresse) ne sont ni enregistrées ni reprises.
    Tout ce qui arrive est non fiable : taille plafonnée, forme de chaque
    valeur vérifiée, aucun texte inséré en HTML (textContent seulement).
@@ -102,6 +103,7 @@
     if (cle === 'combustions-exercices-faits') return { dossier, type: 'liste' };
     if (cle === 'principe-dynamique-atelier') return { dossier, type: 'atelier' };
     if (cle === 'fractions-college-suivi') return { dossier, type: 'suivi-competences' };
+    if (cle === 'fractions-college-sauvegarde') return null;      // état de la sauvegarde propre à l'appareil : jamais copié
     return { dossier, type: 'inconnue' };
   }
 

@@ -10,6 +10,9 @@
        id: 'ph',                     clé de progression : localStorage « ph-progression »
        cleEx: 'ph-exercices',        (facultatif) résultats des exercices { id: { pts, max } }
        spa: false,                   true : application en une seule page, les pages sont des ancres (#cle)
+       coches: true,                 (facultatif) false : le sommaire n'affiche pas l'avancement (coches, compteurs, notes des pages)
+       liensDirects: false,          (facultatif) true : un module d'une seule page (ni fiche ni exercices) est un lien direct
+                                     vers sa page dans le sommaire, sans sous-menu (application Fractions)
        flashcards: false,            true : l'application a des flashcards (modules/flashcards.js, voir assets/revisions.js) :
                                      entrée « Flashcards » du sommaire ; sur l'accueil, le bloc, les boutons des modules et la ligne
        plan: PLAN,
@@ -36,7 +39,7 @@
 (function () {
   'use strict';
 
-  const C = { nom: '', id: 'app', cleEx: null, spa: false, flashcards: false, plan: [] };
+  const C = { nom: '', id: 'app', cleEx: null, spa: false, coches: true, liensDirects: false, flashcards: false, plan: [] };
 
   // types de pages d'une partie, dans l'ordre d'affichage
   const ONGLETS = ['simulation', 'cours', 'exemple', 'questions', 'entrainement'];
@@ -169,23 +172,29 @@
     `<a class="som-page${ici ? ' ici' : ''}" href="${href}"${ici ? ' aria-current="page"' : ''}><span class="ic" aria-hidden="true">${ic}</span>${lib}${etat ? `<em>${etat}</em>` : ''}</a>`;
   // les pages d'une partie (Cours ✓, Questions 16/20…)
   const feuillesPages = (m, p, s, pages) =>
-    pagesPartie(p).map(o => feuille(lien(m, p, o), ICONES[o], nomPage(p, o), etatPage(p[o], pages), s.m === m && s.p === p && s.onglet === o)).join('');
+    pagesPartie(p).map(o => feuille(lien(m, p, o), ICONES[o], nomPage(p, o), C.coches ? etatPage(p[o], pages) : '', s.m === m && s.p === p && s.onglet === o)).join('');
   // la fiche du module (p : la partie dont la fiche s'ouvre à l'ancre ; null : la fiche entière)
   const feuilleFiche = (m, p, s) => (m.fiche ? feuille(lien(m, p, 'fiche'), ICONES.fiche, 'Fiche', '', s.m === m && s.onglet === 'fiche' && (!p || s.p === p)) : '');
-  const feuilleEx = (m, s, pages) => feuille(lien(m, null, 'exercices'), ICONES.exercices, m.exNom || 'Exercices', m.nbEx ? '' : etatPage(m.exercices, pages), s.m === m && s.onglet === 'exercices');
+  const feuilleEx = (m, s, pages) => feuille(lien(m, null, 'exercices'), ICONES.exercices, m.exNom || 'Exercices', m.nbEx || !C.coches ? '' : etatPage(m.exercices, pages), s.m === m && s.onglet === 'exercices');
   function sommaire(s, pages, ex) {
     return C.plan.map(m => {
-      const ici = s.m === m, n = faitModule(m, pages, ex), t = totalModule(m), fini = n === t;
+      const ici = s.m === m, n = faitModule(m, pages, ex), t = totalModule(m), fini = C.coches && n === t;
+      // (liensDirects) module d'une seule page, ni fiche ni exercices : la ligne est un lien direct vers la page
+      if (C.liensDirects && t === 1 && parties(m).length === 1 && !m.fiche && !m.exercices) {
+        const pt = parties(m)[0];
+        return `<div class="som-smod${ici ? ' ici' : ''}"><a class="som-sligne" href="${lien(m, pt, pagesPartie(pt)[0])}"${ici ? ' aria-current="page"' : ''}>` +
+          `<span class="som-snum${fini ? ' fait' : ''}">${fini ? '✓' : m.n}</span><span class="som-st">${m.titre}</span>${C.coches ? `<span class="som-sn">${n}/${t}</span>` : ''}${chev}</a></div>`;
+      }
       let enfants;
       // une seule liste : les pages de chaque partie (sous-modules compris), puis la fiche
       if (plat(m)) enfants = `<div class="som-spages">${parties(m).map(p => feuillesPages(m, p, s, pages)).join('')}${feuilleFiche(m, null, s)}${m.exercices ? feuilleEx(m, s, pages) : ''}</div>`;
       else enfants = m.parties.map((p, i) => {
         const pici = ici && s.p === p, id = `som-s${m.n}-${i}`;
-        return `<button type="button" class="som-spt${pici ? ' ici' : ''}" aria-expanded="${pici}" aria-controls="${id}">${partieFaite(p, pages) ? '<span class="som-v" aria-label="terminé">✓</span>' : ''}${p.nom}${chev}</button>` +
+        return `<button type="button" class="som-spt${pici ? ' ici' : ''}" aria-expanded="${pici}" aria-controls="${id}">${C.coches && partieFaite(p, pages) ? '<span class="som-v" aria-label="terminé">✓</span>' : ''}${p.nom}${chev}</button>` +
           `<div class="som-spages" id="${id}"${pici ? '' : ' hidden'}>${feuillesPages(m, p, s, pages)}${feuilleFiche(m, p, s)}</div>`;
       }).join('') + (m.exercices ? `<div class="som-spages">${feuilleEx(m, s, pages)}</div>` : '');
       return `<div class="som-smod${ici ? ' ici' : ''}"><button type="button" class="som-sligne" aria-expanded="${ici}" aria-controls="som-s${m.n}">` +
-        `<span class="som-snum${fini ? ' fait' : ''}">${fini ? '✓' : m.n}</span><span class="som-st">${m.titre}</span><span class="som-sn">${n}/${t}</span>${chev}</button>` +
+        `<span class="som-snum${fini ? ' fait' : ''}">${fini ? '✓' : m.n}</span><span class="som-st">${m.titre}</span>${C.coches ? `<span class="som-sn">${n}/${t}</span>` : ''}${chev}</button>` +
         `<div class="som-senf" id="som-s${m.n}"${ici ? '' : ' hidden'}>${enfants}</div></div>`;
     }).join('') + (C.flashcards ? sommaireFc(s) : '');
   }
@@ -237,7 +246,7 @@
         `<a class="som-pilule" href="${portail()}"><span aria-hidden="true">⌂</span>Accueil</a></div>` +
         `<p class="som-lab">Sommaire</p><nav class="som-arbre" aria-label="Modules">${sommaire(s, pages, ex)}</nav></aside>`;
       // déplier / replier un module ou une partie sur place
-      racine.querySelectorAll('.som-sligne, .som-spt').forEach(b => b.addEventListener('click', () => {
+      racine.querySelectorAll('button.som-sligne, .som-spt').forEach(b => b.addEventListener('click', () => {
         const oui = b.getAttribute('aria-expanded') !== 'true';
         b.setAttribute('aria-expanded', oui);
         document.getElementById(b.getAttribute('aria-controls')).hidden = !oui;
@@ -245,7 +254,7 @@
       racine.querySelector('.som-ou').addEventListener('click', () => ouvrir(!html.classList.contains('som-ouvert')));
       racine.querySelector('.som-voile').addEventListener('click', () => ouvrir(false));
       // un lien vers une autre partie de la même page ne recharge pas la page : on referme
-      racine.querySelectorAll('.som-page, .som-pilule, .som-app').forEach(a => a.addEventListener('click', () => ouvrir(false)));
+      racine.querySelectorAll('.som-page, a.som-sligne, .som-pilule, .som-app').forEach(a => a.addEventListener('click', () => ouvrir(false)));
       // ordinateur : la page en cours visible dans la colonne
       const ici = racine.querySelector('.som-page.ici'), col = racine.querySelector('.som-som');
       if (ici && col.scrollHeight > col.clientHeight) col.scrollTop = ici.offsetTop - col.clientHeight / 2;
@@ -321,7 +330,7 @@
   }
 
   // (chaque appel remplace toute la configuration : une page qui charge le moteur d'une autre application la reconfigure)
-  function init(opts) { Object.assign(C, { nom: '', id: 'app', cleEx: null, spa: false, flashcards: false, plan: [] }, opts); compteFc = ''; return window.SOM; }
+  function init(opts) { Object.assign(C, { nom: '', id: 'app', cleEx: null, spa: false, coches: true, liensDirects: false, flashcards: false, plan: [] }, opts); compteFc = ''; return window.SOM; }
 
   window.SOM = { init, menu, accueil, marquer, situer, libelle, lireProg, NOMS, contexte, flashcards };
 })();

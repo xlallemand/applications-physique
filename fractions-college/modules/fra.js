@@ -8,9 +8,9 @@
      - suivi : chaque question enregistrée avec sa compétence, historique
        des notes, statut de chaque compétence, priorités et choix
        automatique et progressif des compétences d'une séance ;
-     - rappel d'une compétence ; accueil ; pages « Mon suivi » et « Fiches » ;
-     - installation de l'application sur un téléphone (application web, voir sw.js).
-   Dépend de : assets/sommaire.js (SOM), expr.js (FRA.X), competences.js (FRA.C).
+     - rappel d'une compétence ; accueil ; pages « Mon suivi » et « Fiches ».
+   Dépend de : assets/sommaire.js (SOM), expr.js (FRA.X), competences.js (FRA.C),
+   sauvegarde.js (facultatif : carte « Ta sauvegarde », rappel après chaque séance notée, installation).
 
    Stockage (localStorage, toujours dans un try/catch) :
      fractions-college-progression  (SOM) { derniere, pages: { <page>: { fait, note } } }
@@ -46,7 +46,8 @@
     { n: 3, titre: 'Fiches des compétences', desc: 'Chaque compétence expliquée : règle, méthode, exemple, piège.',
       parties: [{ nom: 'Fiches des compétences', cours: 'fiches', noms: { cours: 'Fiches des compétences' } }] }
   ];
-  SOM.init({ nom: 'Fractions', id: 'fractions-college', plan: PLAN });
+  // sommaire sans coches (le suivi des compétences suffit), modules d'une seule page en liens directs
+  SOM.init({ nom: 'Fractions', id: 'fractions-college', coches: false, liensDirects: true, plan: PLAN });
 
   /* ---------- Petits outils ---------- */
   function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
@@ -258,15 +259,21 @@
   // occasions : [{ r, ok }] ; note sur 20 (ou null)
   function enregistrer(occasions, note) {
     suivi = lireSuivi();
-    const t0 = Date.now();
+    // dates toujours croissantes et uniques (la fusion des copies retire les doublons de même date)
+    let tmax = 0;
+    Object.keys(suivi.r).forEach(k => suivi.r[k].forEach(x => { if (x[0] > tmax) tmax = x[0]; }));
+    suivi.notes.forEach(x => { if (x[0] > tmax) tmax = x[0]; });
+    const t0 = Math.max(Date.now(), tmax + 1);
     occasions.forEach((o, i) => {
       if (!R[o.r]) return;
       const l = suivi.r[o.r] = suivi.r[o.r] || [];
       l.push([t0 + i, Math.round(o.ok * 2) / 2]);
       if (l.length > 30) l.splice(0, l.length - 30);
     });
-    if (note != null) { suivi.notes.push([t0, 's', note]); if (suivi.notes.length > 100) suivi.notes.splice(0, suivi.notes.length - 100); }
+    if (note != null) { suivi.notes.push([t0 + occasions.length, 's', note]); if (suivi.notes.length > 100) suivi.notes.splice(0, suivi.notes.length - 100); }
     ecrire(CLE_SUIVI, suivi);
+    // séance notée : compteur du rappel de sauvegarde (modules/sauvegarde.js)
+    if (note != null && typeof FRA.apresSeance === 'function') FRA.apresSeance();
   }
   // les dernières questions d'une compétence
   function stats(id) {
@@ -355,58 +362,39 @@
      ===================================================================== */
   const cleDe = m => { const pt = m.parties[0]; return pt.questions || pt.entrainement || pt.cours; };
   function accueil(zone) {
-    const prog = SOM.lireProg();
-    const der = prog.derniere && SOM.situer(prog.derniere) ? SOM.situer(prog.derniere).m : null;
-    const ln = notes();
     zone.innerHTML = '';
-    if (der) {
-      const a = el('a', 'som-reprendre', '<small>Reprendre</small><b>' + esc(der.titre) + ' →</b>');
-      a.href = 'modules/' + cleDe(der) + '.html';
-      zone.appendChild(a);
-    }
-    // ligne « Tes réglages »
-    const c = el('div', 'fra-reglages-ligne');
-    c.appendChild(el('span', 'fra-petit', 'Tes réglages'));
-    const tags = el('div', 'fra-tags');
-    const majTags = () => {
-      tags.innerHTML = resumeReglages().map(t => '<span class="fra-tag">' + esc(t) + '</span>').join('');
-      tags.appendChild(bouton('btn-small', '⚙ Réglages', ouvrirReglages));
-    };
-    majTags(); ecoutes.push(majTags);
-    c.appendChild(tags); zone.appendChild(c);
-    // les modules en lignes dépliables (un seul déplié à la fois)
-    const demande = (/^#module-(\d)$/.exec(location.hash) || [])[1];
-    const ouvert = demande ? +demande : der ? der.n : 1;
-    const memo = {}, nbM = C.liste.filter(x => statut(x.id, memo) === 'm').length;
+    // les modules : chaque ligne ouvre directement la page du module
     const liste = el('div', 'som-modules');
-    PLAN.forEach((m, k) => {
-      const cle = cleDe(m);
-      const etat = k === 0 ? (ln.length ? virg(ln[ln.length - 1][2]) + '/20' : '') : k === 1 ? nbM + '/' + C.liste.length : '';
+    PLAN.forEach(m => {
       const d = el('div', 'som-module');
-      const b = el('button', 'som-ligne', '<span class="som-badge">' + m.n + '</span><span class="som-ligne-t">' + esc(m.titre) + '<small>' + esc(m.desc) + '</small></span>' +
-        '<span class="som-ligne-n">' + etat + '</span><span class="som-chev" aria-hidden="true">›</span>');
-      b.type = 'button'; b.id = 'som-b' + m.n;
-      b.setAttribute('aria-expanded', m.n === ouvert);
-      b.setAttribute('aria-controls', 'som-m' + m.n);
-      const o = el('div', 'som-ouvert');
-      o.id = 'som-m' + m.n; o.setAttribute('role', 'region'); o.setAttribute('aria-labelledby', 'som-b' + m.n);
-      o.hidden = m.n !== ouvert;
-      const act = el('div', 'som-actions');
-      const a = el('a', 'som-bt noir', k === 0 ? 'Commencer une séance →' : 'Ouvrir →');
-      a.href = 'modules/' + cle + '.html';
-      act.appendChild(a);
-      if (k === 1) act.appendChild(el('span', 'fra-petit', pluriel(nbM, 'compétence') + ' maîtrisée' + (nbM > 1 ? 's' : '') + ' sur ' + C.liste.length + '.'));
-      o.appendChild(act);
-      b.addEventListener('click', () => {
-        const oui = b.getAttribute('aria-expanded') !== 'true';
-        liste.querySelectorAll('.som-ligne').forEach(x => { x.setAttribute('aria-expanded', 'false'); document.getElementById(x.getAttribute('aria-controls')).hidden = true; });
-        if (oui) { b.setAttribute('aria-expanded', 'true'); o.hidden = false; setTimeout(() => versVue(b), 30); }
-      });
-      d.appendChild(b); d.appendChild(o); liste.appendChild(d);
+      const a = el('a', 'som-ligne', '<span class="som-badge">' + m.n + '</span><span class="som-ligne-t">' + esc(m.titre) + '<small>' + esc(m.desc) + '</small></span>' +
+        '<span class="som-chev" aria-hidden="true">›</span>');
+      a.href = 'modules/' + cleDe(m) + '.html';
+      d.appendChild(a); liste.appendChild(d);
     });
     zone.appendChild(liste);
-    if (demande) setTimeout(() => { const b = document.getElementById('som-b' + demande); if (b) b.scrollIntoView({ block: 'center' }); }, 60);
-    if (FRA.installer) FRA.installer(zone);
+    // zones dépliables « Ta sauvegarde » (modules/sauvegarde.js) et « Tes réglages » (en dernier), séparées des modules
+    const annexes = el('div', 'fra-annexes');
+    if (typeof FRA.carteSauvegarde === 'function') annexes.appendChild(FRA.carteSauvegarde());
+    const c = el('div', 'fra-zone fra-reglages-ligne');
+    const t = bouton('fra-zone-t', '<span class="fra-zone-nom">Tes réglages</span><span class="fra-zone-chev" aria-hidden="true">›</span>', () => {
+      const oui = t.getAttribute('aria-expanded') !== 'true';
+      t.setAttribute('aria-expanded', String(oui));
+      cc.hidden = !oui;
+    });
+    t.setAttribute('aria-expanded', 'false');
+    t.setAttribute('aria-controls', 'reglages-c');
+    const cc = el('div', 'fra-zone-c');
+    cc.id = 'reglages-c'; cc.hidden = true;
+    // le bouton Réglages, puis le récapitulatif
+    cc.appendChild(bouton('btn-small', '⚙ Réglages', ouvrirReglages));
+    const tags = el('div', 'fra-tags');
+    const majTags = () => { tags.innerHTML = resumeReglages().map(x => '<span class="fra-tag">' + esc(x) + '</span>').join(''); };
+    majTags(); ecoutes.push(majTags);
+    cc.appendChild(tags);
+    c.appendChild(t); c.appendChild(cc);
+    annexes.appendChild(c);
+    zone.appendChild(annexes);
   }
 
   /* =====================================================================
@@ -451,10 +439,6 @@
     const c = el('div', 'er-card');
     const tete = el('div', 'fra-rangee fra-entre');
     tete.appendChild(el('h3', 'fra-h3', 'Mes compétences'));
-    tete.appendChild(bouton('btn-small fra-imprimer', '🖨 Imprimer mon bilan', () => {
-      document.querySelectorAll('.fra-grp').forEach(g => { g.classList.add('ouvert'); g.querySelector('.fra-grp-t').setAttribute('aria-expanded', 'true'); });
-      window.print();
-    }));
     c.appendChild(tete);
     const ordre = ['m', 'e', 'f', 't', 'n', 'v'];
     C.familles.forEach(f => {
