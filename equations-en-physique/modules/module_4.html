@@ -112,11 +112,13 @@
     .ep-op::after { content:' →'; }
     @media (max-width:560px) { .ep-op::after { content:' ↓'; } }
 </style>
+<link rel="stylesheet" href="../tuiles.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
 <link rel="stylesheet" href="../../assets/cours.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
+<script src="../tuiles.js"></script>
 <script src="../aide-rules.js"></script>
 <script src="../../assets/cours.js"></script>
 </head>
@@ -238,7 +240,7 @@ function monterEditeur(hote, cfg, api) {
 
     if (window.DragDrop) DragDrop.cleanupGhosts();
     hote.innerHTML = `<div class="ep-edit" data-ep="${num}">
-        <div class="ep-barre"><button type="button" class="btn-small ep-recommencer">↺ Recommencer</button></div>
+        <div class="ep-barre"><button type="button" class="btn-small ep-annuler" disabled>↶ Annuler</button><button type="button" class="btn-small ep-recommencer">↺ Recommencer</button></div>
         <div class="ep-zone eq-row"></div>
         ${cfg.showPalette ? '<p class="ep-pal-t">Glisse les éléments nécessaires</p><div class="ep-palette"></div>' : ''}
         <div class="er-actions crs-actions-partie ep-actions"><button type="button" class="btn-primary ep-valider">Valider</button></div>
@@ -247,6 +249,13 @@ function monterEditeur(hote, cfg, api) {
     const zoneEq = racine.querySelector('.ep-zone');
     const pal = racine.querySelector('.ep-palette');
     racine.querySelector('.ep-recommencer').addEventListener('click', resetDrill);
+    // « ↶ Annuler » : revient à l'équation d'avant la dernière action (../tuiles.js)
+    const annul = EPT.historique(() => [racine.querySelector('.ep-annuler')]);
+    racine.querySelector('.ep-annuler').addEventListener('click', () => {
+        if (fige) return;
+        const prec = annul.annuler();
+        if (prec) { state = prec; refreshView(); }
+    });
     racine.querySelector('.ep-valider').addEventListener('click', checkDrill);
 
     function getNode(path) {
@@ -321,8 +330,9 @@ function monterEditeur(hote, cfg, api) {
             const node = getNode(path);
             const it = node && node.items[idx];
             if (!it) return;
-            enableTileDrag(el, { type:'move', from:path, idx, id:it.id, label:it.label }, () => deleteItem(path, idx));
-            // croix de la tuile : supprime la tuile sans commencer de glisser
+            enableTileDrag(el, { type:'move', from:path, idx, id:it.id, label:it.label }, EPT.appui);
+            // commande d'effacement de la tuile (masquée : la croix de sélection
+            // de ../tuiles.js la déclenche) ; sans commencer de glisser
             const x = el.querySelector('.tile-del');
             x.addEventListener('pointerdown', e => e.stopPropagation());
             x.addEventListener('click', e => { e.stopPropagation(); deleteItem(path, idx); });
@@ -337,6 +347,7 @@ function monterEditeur(hote, cfg, api) {
         zoneEq.querySelector('.flip-btn').addEventListener('click', flipEquation);
     }
     function refreshView() {
+        annul.noter(state);
         renderEquationZone();
         if (cfg.showPalette) buildDrillPalette();
     }
@@ -432,7 +443,7 @@ function monterEditeur(hote, cfg, api) {
         refreshView();
     }
     // si `onTap` est fourni, un appui sans déplacement (moins de 8 px)
-    // déclenche `onTap` au lieu d'un dépôt (supprime une tuile déjà placée)
+    // déclenche `onTap` au lieu d'un dépôt (un appui sélectionne la tuile : ../tuiles.js)
     function enableTileDrag(el, data, onTap) {
         let startX = 0, startY = 0;
         el.addEventListener('pointerdown', e => { startX = e.clientX; startY = e.clientY; });
@@ -506,6 +517,7 @@ function monterEditeur(hote, cfg, api) {
         if (fige) return;
         if (window.DragDrop) DragDrop.cleanupGhosts();
         state = { left: cfg.left(), right: cfg.right() };
+        annul.vider();
         activeHighlightId = cfg.highlight || null;
         api.effacer();
         refreshView();
@@ -586,7 +598,7 @@ const M_ENTRER = [
             if (setEq(num, ['one','m','v2'])) return 'partial';
             return false;
         },
-        partialMessage: "Le 1 qui était déjà là ne disparaît pas tout seul : il ne reste plus qu'à le retirer toi-même (clique sur sa croix).",
+        partialMessage: "Le 1 qui était déjà là ne disparaît pas tout seul : il ne reste plus qu'à le retirer toi-même (touche-le, puis touche sa croix ✕).",
         diag: st => {
             const pm = chemin(st, 'm'), pv = chemin(st, 'v2');
             if ([pm, pv].some(p => p && p.endsWith('.den'))) return 'm et v² multiplient la fraction : ils vont au numérateur (au-dessus de la barre), pas au dénominateur.';
@@ -610,13 +622,13 @@ const M_ENTRER = [
             if (setEq(den, ['one','two'])) return 'partial';
             return false;
         },
-        partialMessage: "Il ne reste plus qu'à retirer le 1 devenu inutile au dénominateur de la nouvelle fraction (clique sur sa croix, sur la tuile).",
+        partialMessage: "Il ne reste plus qu'à retirer le 1 devenu inutile au dénominateur de la nouvelle fraction (touche-le, puis touche sa croix ✕).",
         diag: st => {
             const R = st.right;
             if (!R.slots.some(s => s.kind === 'frac' && s.num.items.some(t => t.id === 'm'))) return 'Glisse l\'outil fraction (···/···) de la palette sur la case de m et v² : ils deviennent le numérateur d\'une nouvelle fraction.';
             const p2 = chemin(st, 'two');
             if (!p2 || !p2.endsWith('.den') || !R.slots.some(s => s.kind === 'frac' && s.den.items.some(t => t.id === 'two') && s.num.items.some(t => t.id === 'm'))) return 'Le 2 doit aller au dénominateur (en bas) de la nouvelle fraction, sous m et v².';
-            if (R.slots.length > 1) return 'Il doit rester une seule fraction : supprime les restes de l\'ancienne fraction 1/2 (le 1 et son dénominateur) avec leurs croix ✕.';
+            if (R.slots.length > 1) return 'Il doit rester une seule fraction : supprime les restes de l\'ancienne fraction 1/2 (le 1 et son dénominateur) : touche chacun, puis sa croix ✕.';
             return 'La nouvelle fraction doit avoir m et v² en haut et 2 en bas. Clique sur ↺ Recommencer si besoin.';
         },
         solution: () => ({ left: seq([simple([EC])]), right: seq([frac([M, V2], [DEUX])]) }),
@@ -691,7 +703,7 @@ const avantApres = (avant, op, apres) => `<div class="ep-avap">
     <div class="ep-av"><p class="ep-av-t">Avant</p>${avant}</div>
     <p class="ep-op">${op}</p>
     <div class="ep-av"><p class="ep-av-t">Après</p>${apres}</div></div>`;
-const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Fais glisser une tuile (à la souris ou au doigt) pour la déplacer ; un appui sur une tuile ou sur sa croix ✕ la supprime ; ↺ Recommencer remet l'équation de départ. Clique sur <b>Valider</b> quand c'est fait.</p></div>`;
+const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Fais glisser une tuile (à la souris ou au doigt) pour la déplacer. Pour l'effacer, touche-la puis touche sa croix ✕, ou remets-la dans la réserve. ↶ Annuler défait la dernière action ; ↺ Recommencer remet l'équation de départ. Clique sur <b>Valider</b> quand c'est fait.</p></div>`;
 
 /* ---------- 1. Entrer dans une fraction ---------- */
 function etape1(c) {

@@ -10,6 +10,7 @@
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
+<script src="../tuiles.js"></script>
 <script src="../aide-rules.js"></script>
 <style>
     :root {
@@ -212,6 +213,7 @@
     .inline-frac { display:inline-flex; align-items:center; gap:3px; }
     .inline-frac-slash { font-weight:800; color:var(--ink); margin:0 1px; }
 </style>
+<link rel="stylesheet" href="../tuiles.css">
 </head>
 <body class="bg-white min-h-screen">
 <div id="app-nav"></div>
@@ -260,6 +262,13 @@ function buildStaticEq(cfg) {
 // ÉTAT GLOBAL
 // ═══════════════════════════════════════════════════════════════
 let state = { left: emptySeq(), right: emptySeq() };
+// « ↶ Annuler » : revient à l'équation d'avant la dernière action (../tuiles.js)
+const annul = EPT.historique(() => document.querySelectorAll('.ep-annuler'));
+function annulerAction() {
+    if (resolved) return;
+    const prec = annul.annuler();
+    if (prec) { state = prec; refreshView(); }
+}
 let history = [];
 let resolved = false;
 let stepOneValidated = false;
@@ -572,7 +581,7 @@ function attachEqTileHandlers(zone) {
         const node = getNode(path);
         const it = node && node.items[idx];
         if (!it) return;
-        enableTileDrag(el, { type:'move', from:path, idx, id:it.id, label:it.label }, () => deleteItem(path, idx));
+        enableTileDrag(el, { type:'move', from:path, idx, id:it.id, label:it.label }, EPT.appui);
     });
     zone.querySelectorAll('.sum-term.term-draggable').forEach(el => {
         const sumPath = el.dataset.path;
@@ -617,6 +626,7 @@ function updateHint() {
     h.textContent = "Déplace les éléments et utilise les outils de la palette pour isoler la grandeur demandée à gauche.";
 }
 function refreshView() {
+    annul.noter(state);
     renderEquationZone();
     buildPalette();
     updateHint();
@@ -1228,7 +1238,7 @@ function solveEditorHTML() {
     return `
     <div class="flex items-center justify-between mb-2">
         <span class="text-xs font-bold text-gray-400 uppercase">Résolution</span>
-        <button onclick="resetSolveExercise()" class="text-xs font-bold text-red-500 hover:text-red-700">↺ Recommencer</button>
+        <span class="flex gap-4"><button onclick="annulerAction()" class="text-xs font-bold text-red-500 hover:text-red-700 ep-annuler" disabled>↶ Annuler</button><button onclick="resetSolveExercise()" class="text-xs font-bold text-red-500 hover:text-red-700">↺ Recommencer</button></span>
     </div>
     <div id="stepsHistory" class="mb-2"></div>
     <div id="workZone">
@@ -1249,6 +1259,7 @@ function startSolveExercise(cfg) {
     if (window.DragDrop) DragDrop.cleanupGhosts();
     currentExercise = cfg;
     state = { left: cfg.initialLeft(), right: cfg.initialRight() };
+    annul.vider();
     history = [];
     stepOneValidated = true;
     resolved = false;
@@ -1261,6 +1272,7 @@ function resetSolveExercise() {
     if (window.DragDrop) DragDrop.cleanupGhosts();
     if (!currentExercise) return;
     state = { left: currentExercise.initialLeft(), right: currentExercise.initialRight() };
+    annul.vider();
     history = [];
     stepOneValidated = true;
     resolved = false;
@@ -1318,7 +1330,7 @@ function verifyStep() {
         } else if (leftLoose && onesElsewhere > 0) {
             msg = "✓ Étape correcte ! Retire les 1 inutiles.";
         } else if (leftLoose) {
-            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur pour le supprimer.";
+            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : efface le 1 du dénominateur (touche-le, puis touche sa croix ✕).";
         } else if (leftFull && onesElsewhere > 0) {
             msg = "✓ Retire les 1 inutiles.";
         } else {
@@ -1326,6 +1338,7 @@ function verifyStep() {
         }
         showFeedback(msg, true);
         state = JSON.parse(JSON.stringify(state));
+        annul.vider();
         refreshView();
     }
 }
