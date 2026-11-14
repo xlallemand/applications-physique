@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="maths">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maquette : effacer un élément — Équations en physique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<style>
+/* ============================================================
+   Maquette : nouveau visuel des éléments de l'éditeur d'équation
+   (Équations en physique) et quatre façons d'effacer un élément,
+   sans la croix rouge. Couleurs : uniquement les variables de
+   assets/theme.css.
+   ============================================================ */
+body { font-family: var(--font-sans); background: var(--paper); color: var(--ink); margin: 0; }
+.mq-intro { line-height: 1.55; }
+.mq-liste { margin: 10px 0 0; padding-left: 20px; color: var(--ink-2); line-height: 1.55; }
+.mq-liste li + li { margin-top: 6px; }
+.mq-liste b { color: var(--ink); }
+.mq-pour { margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mq-pour > div { background: var(--paper); border-radius: 12px; padding: 10px 14px; font-size: .92rem; line-height: 1.5; color: var(--ink-2); }
+.mq-pour b { display: block; color: var(--ink); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
+@media (max-width: 640px) { .mq-pour { grid-template-columns: 1fr; } }
+.mq-reco { display: inline-block; margin-left: 8px; vertical-align: middle; font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent-ink); background: var(--cle-bg); border-radius: 999px; padding: 3px 10px; }
+
+/* ── Éditeur (nouveau visuel) ── */
+.mq-ed { margin-top: 14px; }
+.mq-barre { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 8px; }
+.mq-barre .btn-small:disabled { opacity: .4; cursor: default; }
+.mq-zone { border: 2px dashed var(--line-strong); border-radius: 16px; background: var(--paper); transition: border-color .15s, background .15s; }
+/* glisser vers l'extérieur (propositions 2 et 4) : le cadre se renforce, on voit sa limite */
+.mq-en-glisse.mq-sortie .mq-zone { border-color: var(--ink-2); }
+.mq-ligne { display: flex; align-items: center; justify-content: center; justify-content: safe center; flex-wrap: nowrap; overflow-x: auto; padding: 26px 12px; min-height: 120px; box-sizing: border-box; }
+.mq-cote { display: flex; align-items: center; flex-shrink: 0; }
+.mq-egal { font-size: 1.8rem; font-weight: 800; margin: 0 14px; flex-shrink: 0; }
+.mq-fois { font-weight: 700; color: var(--ink-2); margin: 0 2px; }
+
+/* case où l'on dépose : discrète au repos, mise en valeur pendant un glisser */
+.mq-case { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 58px; min-height: 58px; padding: 5px; border: 1.5px dashed var(--paper-3); border-radius: 14px; transition: border-color .15s, background .15s; }
+.mq-en-glisse .mq-case { border-color: var(--accent); }
+.mq-case.mq-survol { background: var(--cle-bg); border-style: solid; }
+.mq-vide { color: var(--ink-3); font-weight: 700; font-size: 1.1rem; }
+.mq-frac { display: inline-flex; flex-direction: column; align-items: stretch; margin: 0 6px; flex-shrink: 0; }
+.mq-barre-frac { height: 3px; background: var(--ink); border-radius: 2px; margin: 4px 0; }
+
+/* élément (tuile) : étiquette blanche en léger relief, cible tactile de 46 px */
+.mq-tuile {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  min-width: 46px; min-height: 46px; padding: 4px 14px; box-sizing: border-box;
+  background: var(--sheet); border: 1.5px solid var(--line-strong); border-bottom-width: 4px; border-radius: 12px;
+  font-size: 1.3rem; font-weight: 700; color: var(--ink); line-height: 1;
+  cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+  transition: border-color .15s, background .15s, transform .15s, opacity .15s;
+}
+.mq-lab { white-space: nowrap; }
+.mq-grandeur .mq-lab { font-style: italic; }                 /* grandeur : italique */
+.mq-lab sub, .mq-lab sup { font-style: normal; font-size: .62em; } /* indice, exposant : droits */
+@media (hover: hover) { .mq-tuile:hover { border-color: var(--accent); } }
+.mq-tuile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* grandeur à isoler */
+.mq-tuile.mq-hl { background: var(--cle-bg); border-color: var(--accent); color: var(--accent-ink); }
+/* élément sélectionné (propositions 1 et 4) */
+.mq-tuile.mq-sel { border-color: var(--ink); transform: translateY(-2px); }
+.mq-tuile.mq-sel:focus-visible { outline: none; }   /* la sélection se voit déjà */
+/* élément tenu pendant un glisser : sa place reste marquée */
+.mq-tuile.mq-source { opacity: .3; }
+/* élément qui s'efface, élément qui arrive */
+.mq-tuile.mq-part { opacity: 0; transform: scale(.5); }
+.mq-tuile.mq-arrive { animation: mq-arrive .45s ease-out; }
+@keyframes mq-arrive { from { background: var(--cle-bg); border-color: var(--accent); transform: scale(1.15); } }
+
+/* croix d'effacement : encre (le rouge reste réservé au faux), cible élargie */
+.mq-croix {
+  position: absolute; top: -14px; right: -14px; width: 28px; height: 28px; padding: 0;
+  display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--sheet);
+  background: var(--ink); color: var(--sheet); font: 800 .8rem/1 var(--font-sans);
+  cursor: pointer; touch-action: manipulation; z-index: 2; animation: mq-pop .15s ease-out;
+}
+.mq-croix::before { content: ''; position: absolute; inset: -8px; border-radius: 50%; }
+@keyframes mq-pop { from { transform: scale(.3); opacity: 0; } }
+
+/* fantôme qui suit le doigt : incliné, avec ombre (seule ombre permise par la charte) */
+.mq-fantome {
+  position: fixed; z-index: 1000; margin: 0; pointer-events: none;
+  transform: rotate(-4deg) scale(1.08); border-color: var(--accent);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--ink) 22%, transparent);
+  transition: transform .15s, background .15s, border-color .15s;
+}
+/* fantôme au-dessus d'une zone d'effacement */
+.mq-fantome.mq-efface { transform: rotate(0) scale(.92); background: var(--paper-2); border-color: var(--ink-2); border-style: dashed; }
+.mq-fantome.mq-efface .mq-lab { opacity: .45; text-decoration: line-through; }
+.mq-fantome.mq-efface::after {
+  content: '✕ Lâche pour effacer'; position: absolute; top: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+  white-space: nowrap; font: 700 .78rem/1 var(--font-sans); font-style: normal; color: var(--sheet); background: var(--ink);
+  border-radius: 999px; padding: 6px 12px;
+}
+.mq-fantome.mq-retour { transition: left .2s ease-out, top .2s ease-out, transform .2s, opacity .2s; transform: none; box-shadow: none; }
+.mq-fantome.mq-fond { transition: transform .15s, opacity .15s; transform: scale(.4); opacity: 0; }
+
+/* bouton ⇄ : pilule secondaire ronde */
+.mq-inverser { width: 44px; height: 44px; margin-left: 14px; flex-shrink: 0; border: none; border-radius: 50%; background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3); color: var(--ink); font: 800 1.2rem/1 var(--font-sans); cursor: pointer; touch-action: manipulation; }
+@media (hover: hover) { .mq-inverser:hover { box-shadow: inset 0 0 0 1.5px var(--ink); } }
+
+/* corbeille (proposition 3) */
+.mq-corbeille { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; min-height: 58px; border: 2px dashed var(--line-strong); border-radius: 16px; color: var(--ink-2); font-weight: 700; font-size: .92rem; transition: border-color .15s, background .15s, color .15s; }
+.mq-corbeille svg { width: 22px; height: 22px; flex-shrink: 0; }
+.mq-en-glisse .mq-corbeille { border-color: var(--ink-2); color: var(--ink); }
+.mq-corbeille.mq-survol { background: var(--paper-2); border-style: solid; border-color: var(--ink); }
+
+/* aide sous l'éditeur */
+.mq-aide { margin: 8px 2px 0; font-size: .88rem; color: var(--ink-2); border-radius: 8px; padding: 4px 8px; transition: background .3s; }
+.mq-aide.mq-rappel { background: var(--cle-bg); color: var(--accent-ink); }
+
+/* réserve d'éléments */
+.mq-pal-t { font-size: .75rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); margin: 16px 0 8px; }
+.mq-palette { display: flex; flex-wrap: wrap; gap: 10px; padding: 14px; min-height: 78px; box-sizing: border-box; background: var(--paper); border: 1.5px solid var(--line); border-radius: 14px; transition: border-color .15s, background .15s; }
+.mq-ed[data-mode="corbeille"].mq-en-glisse .mq-palette { border-color: var(--ink-2); border-style: dashed; }
+.mq-palette.mq-survol { background: var(--paper-2); border-color: var(--ink); border-style: solid; }
+.mq-pal-frac { flex-direction: column; padding: 4px 12px; gap: 2px; }
+.mq-pal-frac .mq-points { font-size: .8rem; letter-spacing: 2px; line-height: 1; }
+.mq-pal-frac .mq-barre-frac { width: 28px; height: 2px; margin: 0; }
+
+@media (max-width: 480px) {
+  .mq-tuile { font-size: 1.15rem; min-width: 44px; min-height: 44px; padding: 4px 11px; }
+  .mq-case { min-width: 52px; min-height: 54px; }
+  .mq-egal { font-size: 1.5rem; margin: 0 8px; }
+  .mq-inverser { width: 40px; height: 40px; margin-left: 8px; }
+  .mq-ligne { padding: 26px 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mq-ed *, .mq-fantome { transition: none !important; animation: none !important; }
+}
+
+/* ── Visuel actuel (copie fixe des styles de l'application, pour comparer) ── */
+.av-zone { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 32px 0; border: 2px dashed var(--paper-3); border-radius: 12px; background: var(--paper); margin-top: 14px; overflow-x: auto; }
+.av-case { display: flex; gap: 8px; align-items: center; justify-content: center; min-width: 70px; min-height: 56px; padding: 8px 12px; border: 2px dashed var(--ink-3); border-radius: 10px; background: var(--sheet); }
+.av-tuile { display: inline-flex; align-items: center; gap: 6px; background: var(--paper-2); border: 2px solid var(--line-strong); border-radius: 8px; padding: 9px 13px; min-height: 40px; font-weight: 700; box-sizing: border-box; }
+.av-tuile.av-hl { background: var(--cle-bg); border-color: var(--accent); color: var(--accent-ink); box-shadow: 0 0 0 3px var(--cle-line); }
+.av-del { width: 16px; height: 16px; border-radius: 50%; background: var(--danger); color: var(--sheet); font-size: 10px; line-height: 16px; text-align: center; }
+.av-frac { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; position: relative; margin: 0 8px; }
+.av-frac .mq-barre-frac { align-self: stretch; margin: 0; }
+.av-egal { font-size: 1.8rem; font-weight: 800; margin: 0 16px; }
+.av-fdel { position: absolute; bottom: 46px; right: -9px; width: 20px; height: 20px; border-radius: 50%; background: var(--danger); color: var(--sheet); font-size: 11px; line-height: 16px; text-align: center; border: 2px solid var(--sheet); box-sizing: border-box; }
+</style>
+</head>
+<body>
+<div class="er-page">
+
+  <div class="er-card">
+    <span class="er-badge">MAQUETTE · ÉQUATIONS EN PHYSIQUE</span>
+    <h2 class="er-titre">Effacer un élément sans la croix rouge</h2>
+    <p class="er-contexte">Les quatre éditeurs ci-dessous fonctionnent (souris et doigt) et ont tous le <b>nouveau visuel</b> des éléments. Seule change la façon d'<b>effacer</b> un élément. Essaie dans chacun : efface le 1, déplace t de l'autre côté, puis « ↶ Annuler ».</p>
+  </div>
+
+  <div class="er-card">
+    <h3 class="cours-titre">Aujourd'hui</h3>
+    <p class="mq-intro er-contexte">Une croix rouge sur chaque élément, des éléments gris dans des cases grises : « une boîte dans une boîte ». Un simple appui sur un élément l'efface aussi, ce qui provoque des effacements involontaires.</p>
+    <div class="av-zone">
+      <div class="av-frac">
+        <div class="av-case"><span class="av-tuile av-hl">v <span class="av-del">✕</span></span></div>
+        <div class="mq-barre-frac"></div>
+        <div class="av-case"><span class="av-tuile">1 <span class="av-del">✕</span></span></div>
+        <span class="av-fdel">✕</span>
+      </div>
+      <span class="av-egal">=</span>
+      <div class="av-frac">
+        <div class="av-case"><span class="av-tuile">d <span class="av-del">✕</span></span></div>
+        <div class="mq-barre-frac"></div>
+        <div class="av-case"><span class="av-tuile">t <span class="av-del">✕</span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="cours-titre">Proposition 1 : un appui fait apparaître la croix</h3>
+    <p class="mq-intro er-contexte">Un appui sur un élément le <b>sélectionne</b> et fait apparaître une croix noire ; un appui sur la croix l'efface. Un appui ailleurs (ou Échap) annule la sélection.</p>
+    <div class="mq-pour">
+      <div><b>Pour</b>Aucun effacement par erreur. Facile à trouver : on touche, on voit la croix.</div>
+      <div><b>Contre</b>Deux appuis pour effacer. La croix peut cacher un peu l'élément voisin.</div>
+    </div>
+    <div class="mq-ed" data-mode="croix"></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="cours-titre">Proposition 2 : glisser l'élément hors de l'équation</h3>
+    <p class="mq-intro er-contexte">On fait glisser l'élément <b>hors du cadre</b> de l'équation : dès qu'il sort, il se grise avec « Lâche pour effacer ». Lâché, il disparaît. Un simple appui n'efface plus rien (il rappelle la manière de faire).</p>
+    <div class="mq-pour">
+      <div><b>Pour</b>Un seul geste, le même que pour déplacer. Image naturelle : on « sort » l'élément de l'équation.</div>
+      <div><b>Contre</b>Moins facile à deviner (d'où la phrase d'aide). Sur téléphone, il faut sortir du cadre vers le haut ou le bas.</div>
+    </div>
+    <div class="mq-ed" data-mode="dehors"></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="cours-titre">Proposition 3 : la corbeille</h3>
+    <p class="mq-intro er-contexte">Une <b>corbeille</b> sous l'équation : on y dépose l'élément à effacer. On peut aussi le reposer dans la <b>réserve</b>, d'où il vient (il y réapparaît de toute façon).</p>
+    <div class="mq-pour">
+      <div><b>Pour</b>Très visible : la cible est toujours là. Aucun effacement par erreur.</div>
+      <div><b>Contre</b>Une zone de plus à l'écran. Long trajet du doigt sur téléphone quand l'équation est haute.</div>
+    </div>
+    <div class="mq-ed" data-mode="corbeille"></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="cours-titre">Proposition 4 : les propositions 1 et 2 ensemble <span class="mq-reco">Ma recommandation</span></h3>
+    <p class="mq-intro er-contexte">Un appui fait apparaître la croix <b>et</b> un glisser hors du cadre efface. L'élève qui ne connaît pas le geste trouve la croix ; celui qui le connaît va plus vite.</p>
+    <div class="mq-pour">
+      <div><b>Pour</b>Facile à trouver et rapide. Aucun effacement par erreur.</div>
+      <div><b>Contre</b>Deux façons de faire à expliquer (une phrase sous l'éditeur).</div>
+    </div>
+    <div class="mq-ed" data-mode="mixte"></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="cours-titre">Autres améliorations (présentes dans les quatre éditeurs)</h3>
+    <ol class="mq-liste" type="A">
+      <li><b>Nouveau visuel des éléments</b> : étiquettes blanches en léger relief (bordure plus épaisse en bas), plus grandes (46 px, confortables au doigt). Plus de « boîte dans une boîte » : les cases pointillées restent discrètes et ne se colorent que pendant un glisser, pour montrer où déposer.</li>
+      <li><b>Grandeurs en italique, nombres droits</b>, comme on écrit les grandeurs physiques (v, d, t en italique ; 1, 2 droits ; l'indice de E<sub>c</sub> reste droit).</li>
+      <li><b>Bouton « ↶ Annuler »</b> à côté de « ↺ Recommencer » : annule la dernière action (effacement ou déplacement), sans tout recommencer.</li>
+      <li><b>Retour en place</b> : un élément lâché hors de toute case revient en glissant à sa place, au lieu de réapparaître d'un coup.</li>
+      <li><b>Arrivée signalée</b> : l'élément déposé s'allume brièvement dans sa nouvelle case.</li>
+      <li><b>Fantôme incliné avec ombre</b> pendant le glisser : on voit qu'on tient l'élément.</li>
+      <li><b>Signe × plus lisible</b> entre deux éléments (gris foncé au lieu de gris clair).</li>
+      <li><b>Plus de croix sur le dénominateur égal à 1</b> : on efface le 1 comme n'importe quel élément et la fraction disparaît (règle déjà présente dans l'éditeur). Les consignes du cours qui parlent de « la croix du dénominateur » seront réécrites.</li>
+      <li><b>Clavier</b> : Tab pour aller sur un élément, Suppr pour l'effacer.</li>
+    </ol>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   Maquette de l'éditeur d'équation : une instance par carte.
+   Modes d'effacement (data-mode) :
+     croix      un appui sélectionne, la croix efface
+     dehors     glisser hors du cadre efface
+     corbeille  déposer dans la corbeille (ou la réserve) efface
+     mixte      croix + glisser hors du cadre
+   Règles reprises de l'application : numérateur vidé → 1,
+   dénominateur vidé (ou 1 retiré du dénominateur) → la fraction disparaît.
+   ============================================================ */
+(function () {
+  'use strict';
+
+  const REDUIT = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const SEUIL = 6;   // déplacement (px) au-delà duquel un appui devient un glisser
+
+  const AIDES = {
+    croix: 'Pour effacer un élément : touche-le, puis touche sa croix ✕.',
+    dehors: 'Pour effacer un élément : fais-le glisser hors du cadre.',
+    corbeille: 'Pour effacer un élément : dépose-le dans la corbeille ou dans la réserve.',
+    mixte: 'Pour effacer un élément : touche-le puis touche sa croix ✕, ou fais-le glisser hors du cadre.',
+  };
+  const ICONE_CORBEILLE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>';
+
+  // ── Équation de départ (module 1, première manipulation) ──
+  const T = (id, label) => ({ id, label });
+  const simple = items => ({ kind: 'simple', items });
+  const frac = (n, d) => ({ kind: 'frac', num: simple(n), den: simple(d) });
+  const depart = () => ({ left: frac([T('v', 'v')], [T('one', '1')]), right: frac([T('d', 'd')], [T('t', 't')]) });
+  const RESERVE = [T('one', '1'), T('v', 'v'), T('d', 'd'), T('t', 't')];
+  const REUTILISABLES = new Set(['one']);
+  const estNombre = it => /^[0-9]/.test(it.label);
+
+  function editeur(racine) {
+    const mode = racine.dataset.mode;
+    const avecCroix = mode === 'croix' || mode === 'mixte';
+    const avecSortie = mode === 'dehors' || mode === 'mixte';
+    const avecCorbeille = mode === 'corbeille';
+
+    let etat = depart();
+    let historique = [];      // états précédents (bouton Annuler)
+    let selection = null;     // { chemin, idx } de l'élément sélectionné
+    let arrivee = null;       // objet élément qui vient d'être déposé
+
+    racine.innerHTML = `
+      <div class="mq-barre">
+        <button type="button" class="btn-small mq-annuler" disabled>↶ Annuler</button>
+        <button type="button" class="btn-small mq-recommencer">↺ Recommencer</button>
+      </div>
+      <div class="mq-zone"><div class="mq-ligne"></div></div>
+      ${avecCorbeille ? `<div class="mq-corbeille">${ICONE_CORBEILLE}Dépose ici un élément pour l'effacer</div>` : ''}
+      <p class="mq-aide" aria-live="polite">${AIDES[mode]}</p>
+      <p class="mq-pal-t">Glisse les éléments nécessaires</p>
+      <div class="mq-palette"></div>`;
+    const ligne = racine.querySelector('.mq-ligne');
+    const zone = racine.querySelector('.mq-zone');
+    const palette = racine.querySelector('.mq-palette');
+    const corbeille = racine.querySelector('.mq-corbeille');
+    const aide = racine.querySelector('.mq-aide');
+    const bAnnuler = racine.querySelector('.mq-annuler');
+
+    // ── accès à un nœud par son chemin ('left', 'right.den'…) ──
+    function noeud(chemin) {
+      const p = chemin.split('.');
+      let n = etat[p[0]];
+      for (let i = 1; i < p.length; i++) n = n[p[i]];
+      return n;
+    }
+    function remplacer(chemin, nouveau) {
+      const p = chemin.split('.');
+      if (p.length === 1) { etat[p[0]] = nouveau; return; }
+      noeud(p.slice(0, -1).join('.'))[p[p.length - 1]] = nouveau;
+    }
+    function present(id) {
+      const c = n => n.kind === 'simple' ? n.items.filter(i => i.id === id).length : c(n.num) + c(n.den);
+      return c(etat.left) + c(etat.right) > 0;
+    }
+
+    // ── historique ──
+    function memoriser() { historique.push(JSON.stringify(etat)); bAnnuler.disabled = false; }
+    function annuler() {
+      if (!historique.length) return;
+      etat = JSON.parse(historique.pop());
+      bAnnuler.disabled = !historique.length;
+      selection = null;
+      dessiner();
+    }
+
+    // ── règles de l'éditeur (reprises de l'application) ──
+    function regleVide(chemin, idRetire) {
+      if (!(chemin.endsWith('.num') || chemin.endsWith('.den'))) return;
+      const n = noeud(chemin);
+      if (n.items.length) return;
+      if (chemin.endsWith('.num')) { n.items = [T('one', '1')]; return; }
+      const cf = chemin.slice(0, -4);
+      remplacer(cf, noeud(cf).num);
+      void idRetire;
+    }
+    function retirer(chemin, idx) {
+      const n = noeud(chemin);
+      const it = n.items.splice(idx, 1)[0];
+      if (it) regleVide(chemin, it.id);
+    }
+
+    // ── affichage ──
+    function html(n, chemin) {
+      if (n.kind === 'simple') {
+        const items = n.items.map((it, idx) => {
+          const sel = selection && selection.chemin === chemin && selection.idx === idx;
+          const cl = ['mq-tuile', estNombre(it) ? 'mq-nombre' : 'mq-grandeur', it.id === 'v' ? 'mq-hl' : '', sel ? 'mq-sel' : ''].join(' ');
+          const croix = sel && avecCroix ? `<button type="button" class="mq-croix" aria-label="Effacer ${it.label}">✕</button>` : '';
+          return (idx > 0 ? '<span class="mq-fois">×</span>' : '') +
+            `<span class="${cl}" tabindex="0" data-chemin="${chemin}" data-idx="${idx}" aria-label="${it.label}"><span class="mq-lab">${it.label}</span>${croix}</span>`;
+        }).join('');
+        return `<div class="mq-case" data-chemin="${chemin}">${items || '<span class="mq-vide">…</span>'}</div>`;
+      }
+      return `<div class="mq-frac">${html(n.num, chemin + '.num')}<div class="mq-barre-frac"></div>${html(n.den, chemin + '.den')}</div>`;
+    }
+    function dessiner() {
+      ligne.innerHTML = `<div class="mq-cote">${html(etat.left, 'left')}</div><span class="mq-egal">=</span>` +
+        `<div class="mq-cote">${html(etat.right, 'right')}</div>` +
+        '<button type="button" class="mq-inverser" aria-label="Inverser le sens de l\'équation" title="Inverser le sens de l\'équation">⇄</button>';
+      // élément qui vient d'arriver : il s'allume
+      if (arrivee) {
+        ligne.querySelectorAll('.mq-tuile').forEach(el => {
+          const n = noeud(el.dataset.chemin);
+          if (n.items[+el.dataset.idx] === arrivee) el.classList.add('mq-arrive');
+        });
+        arrivee = null;
+      }
+      palette.innerHTML = '<span class="mq-tuile mq-pal-frac" data-pal="frac" aria-label="Fraction"><span class="mq-points">···</span><span class="mq-barre-frac"></span><span class="mq-points">···</span></span>' +
+        RESERVE.filter(t => REUTILISABLES.has(t.id) || !present(t.id)).map(t =>
+          `<span class="mq-tuile ${estNombre(t) ? 'mq-nombre' : 'mq-grandeur'}" data-pal="${t.id}"><span class="mq-lab">${t.label}</span></span>`).join('');
+    }
+
+    // ── effacer un élément de l'équation (avec une courte animation) ──
+    function effacer(chemin, idx) {
+      const el = ligne.querySelector(`.mq-tuile[data-chemin="${chemin}"][data-idx="${idx}"]`);
+      const faire = () => { memoriser(); retirer(chemin, idx); selection = null; dessiner(); };
+      if (el && !REDUIT) { el.classList.add('mq-part'); setTimeout(faire, 150); } else faire();
+    }
+
+    // ── déposer dans une case ──
+    function deposer(cheminCase, donnee) {
+      const cible = noeud(cheminCase);
+      if (donnee.pal === 'frac') {
+        // la fraction se pose sur un côté entier de l'équation
+        if (cheminCase !== 'left' && cheminCase !== 'right') return false;
+        memoriser();
+        remplacer(cheminCase, frac(cible.items, []));
+        dessiner();
+        return true;
+      }
+      if (donnee.chemin === cheminCase) return false;     // même case : rien ne change
+      memoriser();
+      let it;
+      if (donnee.chemin) {
+        it = noeud(donnee.chemin).items[donnee.idx];
+        retirer(donnee.chemin, donnee.idx);
+      } else {
+        it = T(donnee.pal, RESERVE.find(t => t.id === donnee.pal).label);
+      }
+      cible.items.push(it);   // cible : l'objet, toujours valable après la règle du vide
+      arrivee = it;
+      selection = null;
+      dessiner();
+      return true;
+    }
+
+    // rappel de la manière d'effacer (appui simple dans les modes sans croix)
+    function rappel() {
+      aide.classList.remove('mq-rappel');
+      void aide.offsetWidth;
+      aide.classList.add('mq-rappel');
+      setTimeout(() => aide.classList.remove('mq-rappel'), 1400);
+    }
+
+    // ── geste : appui ou glisser (Pointer Events : souris, doigt, stylet) ──
+    let geste = null;
+    racine.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (e.target.closest('.mq-croix') || geste) return;
+      const el = e.target.closest('.mq-tuile');
+      if (!el || !racine.contains(el)) return;
+      e.preventDefault();
+      geste = {
+        el, x: e.clientX, y: e.clientY, id: e.pointerId, glisse: false, fantome: null, cible: null,
+        donnee: el.dataset.pal ? { pal: el.dataset.pal } : { chemin: el.dataset.chemin, idx: +el.dataset.idx },
+      };
+      document.addEventListener('pointermove', bouger);
+      document.addEventListener('pointerup', lacher);
+      document.addEventListener('pointercancel', lacher);
+    });
+
+    function commencer() {
+      const g = geste;
+      g.glisse = true;
+      // la croix d'une sélection disparaît pendant un glisser
+      if (selection) { selection = null; ligne.querySelectorAll('.mq-croix').forEach(c => c.remove()); ligne.querySelectorAll('.mq-sel').forEach(t => t.classList.remove('mq-sel')); }
+      g.depart = g.el.getBoundingClientRect();
+      g.fantome = g.el.cloneNode(true);
+      g.fantome.classList.remove('mq-sel', 'mq-arrive');
+      g.fantome.classList.add('mq-fantome');
+      Object.assign(g.fantome.style, { width: g.depart.width + 'px', height: g.depart.height + 'px' });
+      document.body.appendChild(g.fantome);
+      g.el.classList.add('mq-source');
+      racine.classList.add('mq-en-glisse');
+    }
+
+    // cible sous le doigt : case, corbeille, réserve, ou « hors du cadre »
+    function cibleEn(x, y) {
+      const sous = document.elementFromPoint(x, y);
+      const d = geste.donnee;
+      const depuisEquation = !!d.chemin;
+      if (sous) {
+        const c = sous.closest('.mq-case');
+        if (c && racine.contains(c)) return { type: 'case', el: c };
+        if (avecCorbeille && depuisEquation) {
+          if (sous.closest('.mq-corbeille') === corbeille) return { type: 'effacer', el: corbeille };
+          if (sous.closest('.mq-palette') === palette) return { type: 'effacer', el: palette };
+        }
+      }
+      if (avecSortie && depuisEquation) {
+        const r = zone.getBoundingClientRect();
+        if (x < r.left || x > r.right || y < r.top || y > r.bottom) return { type: 'effacer', el: null };
+      }
+      return null;
+    }
+
+    function bouger(e) {
+      const g = geste;
+      if (!g || e.pointerId !== g.id) return;
+      if (!g.glisse) {
+        if (Math.hypot(e.clientX - g.x, e.clientY - g.y) < SEUIL) return;
+        commencer();
+      }
+      g.fantome.style.left = (e.clientX - g.depart.width / 2) + 'px';
+      g.fantome.style.top = (e.clientY - g.depart.height / 2) + 'px';
+      const c = cibleEn(e.clientX, e.clientY);
+      if (g.cible && g.cible.el && (!c || c.el !== g.cible.el)) g.cible.el.classList.remove('mq-survol');
+      if (c && c.el) c.el.classList.add('mq-survol');
+      g.cible = c;
+      const efface = !!(c && c.type === 'effacer');
+      g.fantome.classList.toggle('mq-efface', efface);
+      racine.classList.toggle('mq-sortie', efface && !c.el);
+    }
+
+    function finGeste() {
+      document.removeEventListener('pointermove', bouger);
+      document.removeEventListener('pointerup', lacher);
+      document.removeEventListener('pointercancel', lacher);
+      racine.classList.remove('mq-en-glisse', 'mq-sortie');
+      racine.querySelectorAll('.mq-survol').forEach(z => z.classList.remove('mq-survol'));
+      geste = null;
+    }
+
+    function lacher(e) {
+      const g = geste;
+      if (!g || e.pointerId !== g.id) return;
+      finGeste();
+      // appui sans glisser
+      if (!g.glisse) {
+        if (e.type === 'pointercancel' || !g.donnee.chemin) return;
+        if (avecCroix) {
+          const meme = selection && selection.chemin === g.donnee.chemin && selection.idx === g.donnee.idx;
+          selection = meme ? null : { chemin: g.donnee.chemin, idx: g.donnee.idx };
+          dessiner();
+          const t = ligne.querySelector(`.mq-tuile[data-chemin="${g.donnee.chemin}"][data-idx="${g.donnee.idx}"]`);
+          if (t) t.focus({ preventScroll: true });
+        } else rappel();
+        return;
+      }
+      const c = e.type === 'pointercancel' ? null : g.cible;
+      const f = g.fantome;
+      if (c && c.type === 'effacer') {
+        // effacement : le fantôme fond sur place
+        memoriser();
+        retirer(g.donnee.chemin, g.donnee.idx);
+        selection = null;
+        dessiner();
+        f.classList.add('mq-fond');
+        setTimeout(() => f.remove(), REDUIT ? 0 : 160);
+        return;
+      }
+      if (c && c.type === 'case' && deposer(c.el.dataset.chemin, g.donnee)) { f.remove(); return; }
+      // hors de toute case : retour en place
+      g.el.classList.remove('mq-source');
+      if (REDUIT) { f.remove(); return; }
+      f.classList.remove('mq-efface');
+      f.classList.add('mq-retour');
+      requestAnimationFrame(() => { f.style.left = g.depart.left + 'px'; f.style.top = g.depart.top + 'px'; });
+      setTimeout(() => f.remove(), 220);
+    }
+
+    // ── croix, boutons, clavier ──
+    racine.addEventListener('click', e => {
+      if (e.target.closest('.mq-croix') && selection) { effacer(selection.chemin, selection.idx); return; }
+      if (e.target.closest('.mq-inverser')) {
+        memoriser();
+        [etat.left, etat.right] = [etat.right, etat.left];
+        selection = null;
+        dessiner();
+      }
+    });
+    bAnnuler.addEventListener('click', annuler);
+    racine.querySelector('.mq-recommencer').addEventListener('click', () => {
+      etat = depart(); historique = []; bAnnuler.disabled = true; selection = null; dessiner();
+    });
+    racine.addEventListener('keydown', e => {
+      const t = e.target.closest('.mq-tuile[data-chemin]');
+      if (t && (e.key === 'Delete' || e.key === 'Backspace')) { e.preventDefault(); effacer(t.dataset.chemin, +t.dataset.idx); return; }
+      if (t && avecCroix && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        selection = { chemin: t.dataset.chemin, idx: +t.dataset.idx };
+        dessiner();
+        const n = ligne.querySelector(`.mq-tuile[data-chemin="${t.dataset.chemin}"][data-idx="${t.dataset.idx}"]`);
+        if (n) n.focus({ preventScroll: true });
+        return;
+      }
+      if (e.key === 'Escape' && selection) { selection = null; dessiner(); }
+    });
+    // un appui ailleurs annule la sélection
+    document.addEventListener('pointerdown', e => {
+      if (!selection || e.target.closest('.mq-croix')) return;
+      const t = e.target.closest('.mq-tuile[data-chemin]');
+      if (t && racine.contains(t)) return;
+      selection = null;
+      dessiner();
+    });
+
+    dessiner();
+  }
+
+  document.querySelectorAll('.mq-ed').forEach(editeur);
+})();
+</script>
+</body>
+</html>

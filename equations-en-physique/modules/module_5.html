@@ -10,6 +10,7 @@
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
+<script src="../tuiles.js"></script>
 <script src="../aide-rules.js"></script>
 <style>
     :root {
@@ -142,6 +143,7 @@
     }
     body.sqrt-dragging .eq-side.drag-over { background: rgba(139,92,246,.16); border-radius: 10px; }
 </style>
+<link rel="stylesheet" href="../tuiles.css">
 </head>
 <body class="bg-white min-h-screen">
 <div id="app-nav"></div>
@@ -178,6 +180,13 @@ function staticFracHtml(num, den) {
 // ÉTAT GLOBAL
 // ═══════════════════════════════════════════════════════════════
 let state = { left: emptySeq(), right: emptySeq() };
+// « ↶ Annuler » : revient à l'équation d'avant la dernière action (../tuiles.js)
+const annul = EPT.historique(() => document.querySelectorAll('.ep-annuler'));
+function annulerAction() {
+    if (resolved) return;
+    const prec = annul.annuler();
+    if (prec) { state = prec; refreshView(); }
+}
 let history = [];
 let resolved = false;
 let stepOneValidated = false;
@@ -346,7 +355,7 @@ function attachEqTileHandlers(zone) {
         const node = getNode(path);
         const it = node && node.items[idx];
         if (!it) return;
-        enableTileDrag(el, { type:'move', from:path, idx, id:it.id, label:it.label }, () => deleteItem(path, idx));
+        enableTileDrag(el, { type:'move', from:path, idx, id:it.id, label:it.label }, EPT.appui);
     });
 }
 function renderHistory() {
@@ -370,6 +379,7 @@ function updateHint() {
         : "Recopie l'équation ci-dessus. Un terme peut se glisser au numérateur d'une fraction, ou juste à côté d'elle : c'est équivalent.";
 }
 function refreshView() {
+    annul.noter(state);
     renderEquationZone();
     if (viewMode === 'solve') { buildPalette(); updateHint(); }
     else if (viewMode === 'drill' && currentDrillCfg && currentDrillCfg.showPalette) { buildDrillPalette(); }
@@ -503,7 +513,7 @@ function deleteItem(path, idx) {
 
 // active le glisser-déposer sur une tuile ; si `onTap` est fourni, un
 // tap/clic sans déplacement (distance < 8px) déclenche `onTap` au lieu
-// d'un dépôt (utilisé pour supprimer une tuile déjà placée)
+// d'un dépôt (un appui sélectionne la tuile : ../tuiles.js)
 function enableTileDrag(el, data, onTap) {
     let startX = 0, startY = 0;
     el.addEventListener('pointerdown', e => { startX = e.clientX; startY = e.clientY; });
@@ -700,7 +710,7 @@ function solveEditorHTML() {
     return `
     <div class="flex items-center justify-between mb-2">
         <span class="text-xs font-bold text-gray-400 uppercase">Résolution</span>
-        <button onclick="resetSolveExercise()" class="text-xs font-bold text-red-500 hover:text-red-700">↺ Recommencer</button>
+        <span class="flex gap-4"><button onclick="annulerAction()" class="text-xs font-bold text-red-500 hover:text-red-700 ep-annuler" disabled>↶ Annuler</button><button onclick="resetSolveExercise()" class="text-xs font-bold text-red-500 hover:text-red-700">↺ Recommencer</button></span>
     </div>
     <div id="stepsHistory" class="mb-2"></div>
     <div id="workZone">
@@ -730,6 +740,7 @@ function startSolveExercise(cfg) {
     viewMode = 'solve';
     const start = startingState(cfg);
     state = { left: start.left, right: start.right };
+    annul.vider();
     history = [];
     stepOneValidated = start.prefilled;
     resolved = false;
@@ -743,6 +754,7 @@ function resetSolveExercise() {
     if (!currentExercise) return;
     const start = startingState(currentExercise);
     state = { left: start.left, right: start.right };
+    annul.vider();
     history = [];
     stepOneValidated = start.prefilled;
     resolved = false;
@@ -799,9 +811,9 @@ function verifyStep() {
         } else if (rightLoose) {
             msg = "✓ Étape correcte ! Inverse le sens de l'équation avec ⇄, puis retire le dénominateur qui vaut 1.";
         } else if (leftLoose && onesElsewhere > 0) {
-            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur (qui vaut 1) pour le supprimer. Retire les 1 inutiles.";
+            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : efface le 1 du dénominateur (touche-le, puis touche sa croix ✕). Retire les 1 inutiles.";
         } else if (leftLoose) {
-            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur (qui vaut 1) pour le supprimer.";
+            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : efface le 1 du dénominateur (touche-le, puis touche sa croix ✕).";
         } else if (leftFull && onesElsewhere > 0) {
             msg = "✓ Retire les 1 inutiles.";
         } else if (currentExercise.hasSqrt && (isFullyIsolatedSeq(state.left, currentExercise.sqrtTargetId) || isFullyIsolatedSeq(state.right, currentExercise.sqrtTargetId))) {
@@ -811,6 +823,7 @@ function verifyStep() {
         }
         showFeedback(msg, true);
         state = JSON.parse(JSON.stringify(state));
+        annul.vider();
         refreshView();
     }
 }
@@ -823,12 +836,13 @@ function mountDrill(container, drillCfg, explainHtml) {
     currentDrillCfg = drillCfg;
     viewMode = 'drill';
     state = { left: drillCfg.left(), right: drillCfg.right() };
+    annul.vider();
     activeHighlightId = drillCfg.highlight || null;
     currentDrill = { check: drillCfg.check, partialMessage: drillCfg.partialMessage };
     currentDrillOnSuccess = drillCfg.onSuccess;
     container.innerHTML = `
-        <div class="flex items-center justify-end mb-2">
-            <button onclick="resetDrill()" class="text-xs font-bold text-red-500 hover:text-red-700">↺ Recommencer</button>
+        <div class="flex items-center justify-end gap-4 mb-2">
+            <button onclick="annulerAction()" class="text-xs font-bold text-red-500 hover:text-red-700 ep-annuler" disabled>↶ Annuler</button><button onclick="resetDrill()" class="text-xs font-bold text-red-500 hover:text-red-700">↺ Recommencer</button>
         </div>
         <p class="text-gray-700 mb-4">${drillCfg.instruction}</p>
         <div id="currentStepZone" class="eq-row py-8 border-2 border-dashed border-indigo-300 rounded-lg bg-indigo-50" style="min-height:110px;"></div>
@@ -846,6 +860,7 @@ function resetDrill() {
     if (!currentDrillCfg) return;
     viewMode = 'drill';
     state = { left: currentDrillCfg.left(), right: currentDrillCfg.right() };
+    annul.vider();
     activeHighlightId = currentDrillCfg.highlight || null;
     const vBtn = document.getElementById('verifyDrillBtn');
     const nBtn = document.getElementById('nextDrillBtn');

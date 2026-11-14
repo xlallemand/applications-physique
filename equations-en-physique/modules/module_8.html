@@ -82,11 +82,13 @@
     .ep-op::after { content:' →'; }
     @media (max-width:560px) { .ep-op::after { content:' ↓'; } }
 </style>
+<link rel="stylesheet" href="../tuiles.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
 <link rel="stylesheet" href="../../assets/cours.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
+<script src="../tuiles.js"></script>
 <script src="../aide-rules.js"></script>
 <script src="../../assets/cours.js"></script>
 </head>
@@ -211,7 +213,7 @@ function monterEditeur(hote, cfg, api) {
 
     if (window.DragDrop) DragDrop.cleanupGhosts();
     hote.innerHTML = `<div class="ep-edit" data-ep="${num}">
-        <div class="ep-barre"><button type="button" class="btn-small ep-recommencer">↺ Recommencer</button></div>
+        <div class="ep-barre"><button type="button" class="btn-small ep-annuler" disabled>↶ Annuler</button><button type="button" class="btn-small ep-recommencer">↺ Recommencer</button></div>
         ${cfg.opDiagram ? schemaOperation(cfg.left(), cfg.right(), cfg.opDiagram) : ''}
         <div class="ep-zone eq-row"></div>
         <p class="ep-pal-t">Glisse l'outil sur l'équation</p><div class="ep-palette"></div>
@@ -221,6 +223,13 @@ function monterEditeur(hote, cfg, api) {
     const zoneEq = racine.querySelector('.ep-zone');
     const pal = racine.querySelector('.ep-palette');
     racine.querySelector('.ep-recommencer').addEventListener('click', resetDrill);
+    // « ↶ Annuler » : revient à l'équation d'avant la dernière action (../tuiles.js)
+    const annul = EPT.historique(() => [racine.querySelector('.ep-annuler')]);
+    racine.querySelector('.ep-annuler').addEventListener('click', () => {
+        if (fige) return;
+        const prec = annul.annuler();
+        if (prec) { state = prec; refreshView(); }
+    });
     racine.querySelector('.ep-valider').addEventListener('click', checkDrill);
     sizeSqrtHooks(racine);
 
@@ -231,6 +240,7 @@ function monterEditeur(hote, cfg, api) {
         sizeSqrtHooks(zoneEq);
     }
     function refreshView() {
+        annul.noter(state);
         renderEquationZone();
         buildToolPalette(cfg.toolFn);
     }
@@ -265,6 +275,7 @@ function monterEditeur(hote, cfg, api) {
         if (fige) return;
         if (window.DragDrop) DragDrop.cleanupGhosts();
         state = { left: cfg.left(), right: cfg.right() };
+        annul.vider();
         api.effacer();
         refreshView();
     }
@@ -369,7 +380,7 @@ const avantApres = (avant, op, apres) => `<div class="ep-avap">
     <div class="ep-av"><p class="ep-av-t">Avant</p>${avant}</div>
     <p class="ep-op">${op}</p>
     <div class="ep-av"><p class="ep-av-t">Après</p>${apres}</div></div>`;
-const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Glisse l'outil de la palette (à la souris ou au doigt) sur un membre de l'équation : une fois à gauche, puis une fois à droite. ↺ Recommencer remet l'équation de départ. Clique sur <b>Valider</b> quand c'est fait.</p></div>`;
+const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Glisse l'outil de la palette (à la souris ou au doigt) sur un membre de l'équation : une fois à gauche, puis une fois à droite. ↶ Annuler défait la dernière action ; ↺ Recommencer remet l'équation de départ. Clique sur <b>Valider</b> quand c'est fait.</p></div>`;
 // les crochets des racines des exemples se dessinent une fois la carte affichée
 const ajouter = (c, carte, html) => { const d = c.ajouter(carte, html); sizeSqrtHooks(d); return d; };
 

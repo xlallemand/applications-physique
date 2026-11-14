@@ -122,11 +122,13 @@
     @media (max-width:560px) { .ep-op::after { content:' ↓'; } }
     .ep-exemples .ep-avap + .ep-avap { border-top:1.5px dashed var(--paper-3); padding-top:12px; }
 </style>
+<link rel="stylesheet" href="../tuiles.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
 <link rel="stylesheet" href="../../assets/cours.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
+<script src="../tuiles.js"></script>
 <script src="../aide-rules.js"></script>
 <script src="../../assets/cours.js"></script>
 </head>
@@ -249,7 +251,7 @@ function monterEditeur(hote, cfg, api) {
 
     if (window.DragDrop) DragDrop.cleanupGhosts();
     hote.innerHTML = `<div class="ep-edit" data-ep="${num}">
-        <div class="ep-barre"><button type="button" class="btn-small ep-recommencer">↺ Recommencer</button></div>
+        <div class="ep-barre"><button type="button" class="btn-small ep-annuler" disabled>↶ Annuler</button><button type="button" class="btn-small ep-recommencer">↺ Recommencer</button></div>
         ${cfg.opDiagram ? schemaOperation(cfg.left(), cfg.right(), cfg.opDiagram) : ''}
         <div class="ep-zone eq-row"></div>
         ${cfg.showPalette ? '<p class="ep-pal-t">Glisse les éléments nécessaires</p><div class="ep-palette"></div>' : ''}
@@ -259,6 +261,13 @@ function monterEditeur(hote, cfg, api) {
     const zoneEq = racine.querySelector('.ep-zone');
     const pal = racine.querySelector('.ep-palette');
     racine.querySelector('.ep-recommencer').addEventListener('click', resetDrill);
+    // « ↶ Annuler » : revient à l'équation d'avant la dernière action (../tuiles.js)
+    const annul = EPT.historique(() => [racine.querySelector('.ep-annuler')]);
+    racine.querySelector('.ep-annuler').addEventListener('click', () => {
+        if (fige) return;
+        const prec = annul.annuler();
+        if (prec) { state = prec; refreshView(); }
+    });
     racine.querySelector('.ep-valider').addEventListener('click', checkDrill);
 
     function getNode(path) {
@@ -321,8 +330,9 @@ function monterEditeur(hote, cfg, api) {
             const node = getNode(path);
             const it = node && node.items[idx];
             if (!it) return;
-            enableTileDrag(el, { type:'move', from:path, idx, id:it.id, label:it.label }, () => deleteItem(path, idx));
-            // croix de la tuile : supprime la tuile sans commencer de glisser
+            enableTileDrag(el, { type:'move', from:path, idx, id:it.id, label:it.label }, EPT.appui);
+            // commande d'effacement de la tuile (masquée : la croix de sélection
+            // de ../tuiles.js la déclenche) ; sans commencer de glisser
             const x = el.querySelector('.tile-del');
             x.addEventListener('pointerdown', e => e.stopPropagation());
             x.addEventListener('click', e => { e.stopPropagation(); deleteItem(path, idx); });
@@ -336,13 +346,14 @@ function monterEditeur(hote, cfg, api) {
         zoneEq.querySelector('.flip-btn').addEventListener('click', flipEquation);
     }
     function refreshView() {
+        annul.noter(state);
         renderEquationZone();
         if (cfg.showPalette) buildDrillPalette();
     }
 
     // ── Glisser-déposer (Pointer Events communs : assets/dragdrop.js) ──
     // si `onTap` est fourni, un appui sans déplacement (moins de 8 px)
-    // déclenche `onTap` au lieu d'un dépôt (supprime une tuile déjà placée)
+    // déclenche `onTap` au lieu d'un dépôt (un appui sélectionne la tuile : ../tuiles.js)
     function enableTileDrag(el, data, onTap) {
         let startX = 0, startY = 0;
         el.addEventListener('pointerdown', e => { startX = e.clientX; startY = e.clientY; });
@@ -461,6 +472,7 @@ function monterEditeur(hote, cfg, api) {
         if (window.DragDrop) DragDrop.cleanupGhosts();
         denCrossRevealed = false;
         state = { left: cfg.left(), right: cfg.right() };
+        annul.vider();
         activeHighlightId = cfg.highlight || null;
         api.effacer();
         refreshView();
@@ -623,8 +635,8 @@ const M_UN = [
         },
         partialMessage: (st) => (st.right.kind === 'frac' && isSlotEmpty(st.right))
             ? "Ajoute un 1 dans l'espace vide."
-            : "Clique sur la croix du dénominateur pour le supprimer.",
-        diag: st => diagVers(st, 't', 't', 'left.num', 'À droite, il ne doit rester que d : mets un 1 dans le dénominateur vide, puis supprime ce dénominateur avec sa croix ✕.'),
+            : "Efface le 1 du dénominateur (touche-le, puis touche sa croix ✕) : la fraction disparaît.",
+        diag: st => diagVers(st, 't', 't', 'left.num', 'À droite, il ne doit rester que d : mets un 1 dans le dénominateur vide, puis efface ce 1 (touche-le, puis touche sa croix ✕).'),
         solution: () => ({ left: frac([tile('v','v'), tile('t','t')], [ONE]), right: simple([tile('d','d')]) }),
         explication: '<p>Le dénominateur qui vaut 1 se supprime : la fraction disparaît, il reste d.</p>',
     },
@@ -640,8 +652,8 @@ const M_UN = [
             if (st.right.kind === 'frac') return 'partial';
             return st.right.kind === 'simple' && setEq(idsOf(st.right.items), ['d']);
         },
-        partialMessage: "On peut directement supprimer un dénominateur vide, sans passer par le 1 : clique sur sa croix.",
-        diag: st => diagVers(st, 't', 't', 'left.num', 'Seul t doit changer de côté ; ensuite, le dénominateur vide à droite se supprime avec sa croix ✕.'),
+        partialMessage: "On peut directement supprimer un dénominateur vide, sans passer par le 1 : touche la case vide, puis touche sa croix ✕.",
+        diag: st => diagVers(st, 't', 't', 'left.num', 'Seul t doit changer de côté ; ensuite, touche le dénominateur vide à droite, puis sa croix ✕, pour le supprimer.'),
         solution: () => ({ left: frac([tile('v','v'), tile('t','t')], [ONE]), right: simple([tile('d','d')]) }),
         explication: '<p>Un dénominateur vide se supprime directement : il reste d.</p>',
     },
@@ -672,10 +684,10 @@ const M_UN = [
         explication: '<p>Un dénominateur ne reste jamais vide : on y met 1, et v/1 = v.</p>',
     },
     {   titre: 'La grandeur isolée sort de la fraction',
-        instruction: "La grandeur isolée ne doit pas être dans une fraction. S'il y a un « 1 » au dénominateur, il faut l'enlever. Ici, la grandeur à isoler est <b>t</b> : clique sur la croix du dénominateur pour le supprimer.",
+        instruction: "La grandeur isolée ne doit pas être dans une fraction. S'il y a un « 1 » au dénominateur, il faut l'enlever. Ici, la grandeur à isoler est <b>t</b> : efface le 1 du dénominateur (touche-le, puis touche sa croix ✕).",
         left: () => frac([tile('t','t')], [ONE]), right: () => frac([tile('d','d')], [tile('v','v')]),
         check: (st) => st.left.kind === 'simple' && setEq(idsOf(st.left.items), ['t']),
-        diag: () => 't doit rester seul à gauche, sans fraction : clique sur la croix ✕ du dénominateur qui vaut 1 (pas sur t). Clique sur ↺ Recommencer si besoin.',
+        diag: () => 't doit rester seul à gauche, sans fraction : efface le 1 du dénominateur (touche le 1, puis sa croix ✕), pas t. Clique sur ↺ Recommencer si besoin.',
         solution: () => ({ left: simple([tile('t','t')]), right: frac([tile('d','d')], [tile('v','v')]) }),
         explication: '<p>t/1 = t : sans dénominateur, t est complètement isolé.</p>',
     },
@@ -699,8 +711,8 @@ const M_SENS = [
             if (isIsolated(st.left, 't')) return 'partial';
             return false;
         },
-        partialMessage: "C'est bon, mais il faut encore enlever le dénominateur qui vaut 1 (clique sur sa croix) pour que ce soit complet.",
-        diag: () => 'Ne déplace aucune tuile : clique sur ⇄ pour écrire l\'équation dans l\'autre sens, puis supprime le dénominateur qui vaut 1 avec sa croix ✕. Clique sur ↺ Recommencer si besoin.',
+        partialMessage: "C'est bon, mais il faut encore effacer le 1 du dénominateur (touche-le, puis touche sa croix ✕) pour que ce soit complet.",
+        diag: () => 'Ne déplace aucune tuile : clique sur ⇄ pour écrire l\'équation dans l\'autre sens, puis efface le 1 du dénominateur (touche-le, puis touche sa croix ✕). Clique sur ↺ Recommencer si besoin.',
         solution: () => ({ left: simple([tile('t','t')]), right: frac([tile('v','v')], [tile('d','d')]) }),
         explication: '<p>t est isolé à gauche, sans fraction : t = v/d.</p>',
     },
@@ -721,7 +733,7 @@ const avantApres = (avant, op, apres) => `<div class="ep-avap">
     <div class="ep-av"><p class="ep-av-t">Avant</p>${avant}</div>
     <p class="ep-op">${op}</p>
     <div class="ep-av"><p class="ep-av-t">Après</p>${apres}</div></div>`;
-const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Fais glisser une tuile (à la souris ou au doigt) pour la déplacer ; un appui sur une tuile ou sur sa croix ✕ la supprime ; ↺ Recommencer remet l'équation de départ. Clique sur <b>Valider</b> quand c'est fait.</p></div>`;
+const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Fais glisser une tuile (à la souris ou au doigt) pour la déplacer. Pour l'effacer, touche-la puis touche sa croix ✕, ou remets-la dans la réserve. ↶ Annuler défait la dernière action ; ↺ Recommencer remet l'équation de départ. Clique sur <b>Valider</b> quand c'est fait.</p></div>`;
 
 /* ---------- 1. Le signe × ---------- */
 function etape1(c) {
