@@ -7,7 +7,7 @@
      d'un même produit. Égaux : ils se barrent. Sinon, il écrit ce qu'il reste à la place
      de chacun (case vide : 1) ; les deux nombres se barrent, le reste s'écrit au-dessus
      (en haut) ou en dessous (en bas). Chaque paire a sa couleur ; la barre penche dans
-     l'autre sens quand l'un des deux nombres est 7 (sinon elle se confond avec le 7).
+     l'autre sens quand l'un des deux nombres est 2, 4, 6, 7 ou 9 (sinon elle se confond avec la diagonale du chiffre).
    Simplification permise : dans un même produit de fractions et d'entiers (séparé par + − ÷),
    entre un facteur d'un numérateur écrit comme un produit et un facteur d'un dénominateur
    écrit comme un produit. Les nombres barrés ne changent pas la valeur de la ligne :
@@ -301,8 +301,10 @@
     }
     function barrer(th, tb, rh, rb) {
       const p = ligne.paires++;
-      // barre dans l'autre sens si l'un des deux nombres est 7 (elle se confondrait avec le 7)
-      ligne.sens[p] = val(th) === 7 || val(tb) === 7;
+      // barre dans l'autre sens si l'un des deux nombres est 2, 4, 6, 7 ou 9 : ces chiffres ont un trait penché
+      // comme la barre, qui les rendrait illisibles (pour un nombre à plusieurs chiffres, la barre est moins penchée)
+      const penche = n => [2, 4, 6, 7, 9].includes(n);
+      ligne.sens[p] = penche(val(th)) || penche(val(tb));
       th.cols.push(p); th.vals.push(rh);
       tb.cols.push(p); tb.vals.push(rb);
       fermer(); message('');

@@ -19,7 +19,7 @@
    changer VERSION pour que l'ancien cache soit remplacé.
    ============================================================ */
 'use strict';
-const VERSION = 'fractions-v3';
+const VERSION = 'fractions-v4';
 const FICHIERS = [
   './', './index.html', './manifest.webmanifest',
   './modules/seance.html', './modules/suivi.html', './modules/fiches.html',

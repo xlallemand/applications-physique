@@ -98,11 +98,17 @@ button.sim-v:focus-visible { outline: 2px solid var(--accent); outline-offset: 1
 .sim-on .sim-vivant { background: var(--paper-2); }
 @media (hover: hover) { .sim-on .sim-vivant:hover { background: var(--paper-3); } }
 .sim-v.sim-choisi { background: var(--cle-bg); box-shadow: inset 0 0 0 2px var(--accent); }
-/* nombre barré : trait oblique de la couleur de sa paire (dans l'autre sens quand la paire contient un 7) */
+/* nombre barré : trait oblique de la couleur de sa paire, d'un coin à l'autre du nombre
+   (moins penché pour un grand nombre), dans l'autre sens quand la paire contient un 2, 4, 6, 7 ou 9
+   (le trait se confondrait avec la diagonale du chiffre). Masque SVG étiré : épaisseur constante. */
 .sim-barre { color: var(--c); }
-.sim-barre::after { content: ''; position: absolute; left: 10%; right: 10%; top: 50%; height: 2.5px; border-radius: 2px; background: var(--c); transform: rotate(-58deg); }
-.sim-barre.sim-inv::after { transform: rotate(58deg); }
-.sim-vq.sim-barre::after { height: 2px; }
+.sim-barre::after { content: ''; position: absolute; left: .04em; right: .04em; top: .3em; bottom: .3em; background: var(--c); pointer-events: none;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' preserveAspectRatio='none'%3E%3Cline x1='0' y1='10' x2='10' y2='0' stroke='%23000' stroke-width='2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' preserveAspectRatio='none'%3E%3Cline x1='0' y1='10' x2='10' y2='0' stroke='%23000' stroke-width='2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+.sim-barre.sim-inv::after { transform: scaleX(-1); }
+.sim-vq.sim-barre::after { top: .14em; bottom: .14em; /* trait plus fin pour les petits restes */
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' preserveAspectRatio='none'%3E%3Cline x1='0' y1='10' x2='10' y2='0' stroke='%23000' stroke-width='1.5' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' preserveAspectRatio='none'%3E%3Cline x1='0' y1='10' x2='10' y2='0' stroke='%23000' stroke-width='1.5' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
 .sim-non { animation: sim-non .35s; }
 @keyframes sim-non { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 .sim-nouveau { animation: sim-app .35s ease-out; }
