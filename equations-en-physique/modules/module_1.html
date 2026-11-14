@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 1 : méthode — Équations en physique</title>
+<title>Module 1 : méthode — Équations en physique</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <style>
@@ -127,6 +127,7 @@
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
+<script src="../aide-rules.js"></script>
 <script src="../../assets/cours.js"></script>
 </head>
 <body>
@@ -135,7 +136,7 @@
   <div class="er-card">
     <span class="er-badge">MODULE 1 · MÉTHODE</span>
     <h2 class="er-titre">Méthode pour utiliser une équation</h2>
-    <p class="er-contexte">Tu vas apprendre les <b>règles</b> qui permettent d'isoler une grandeur dans une équation : faire passer un terme de l'autre côté du signe =, utiliser le <b>1</b>, écrire l'équation dans l'autre sens. Chaque règle se manipule ensuite dans l'éditeur d'équation, par <b>glisser-déposer</b>.</p>
+    <p class="er-contexte">Tu vas apprendre les <b>règles</b> qui permettent d'isoler une grandeur dans une équation : faire passer un terme de l'autre côté du signe =, utiliser le <b>1</b>, écrire l'équation dans l'autre sens. Chaque règle se manipule ensuite dans l'éditeur d'équation, par <b>glisser-déposer</b>.</p>
   </div>
   <div id="etapes"></div>
 </div>
@@ -147,6 +148,8 @@
    avec la règle (.cle), un exemple traité (avant / après) puis
    un « À toi » dont les items sont les manipulations de l'éditeur
    d'équation (parties 'perso').
+   Version « avec aide » : un déplacement non autorisé est bloqué et la
+   règle à suivre est rappelée (../aide-rules.js), comme une erreur.
    L'éditeur est une instance par manipulation (monterEditeur) :
    en mode « Afficher tout le cours », toutes les manipulations
    sont affichées en même temps et fonctionnent indépendamment.
@@ -384,7 +387,7 @@ function monterEditeur(hote, cfg, api) {
     }
     function processDrop(path, data) {
         if (data.type === 'frac') {
-            if (path !== 'left' && path !== 'right') return;
+            if (!AideRules.isLegalFracTool(path)) { api.erreur(AideRules.MSG_FRAC); return; }
             const node = getNode(path);
             if (!node || node.kind !== 'simple') return;
             const den = cfg.fracAutoOne ? [{ id:'one', label:'1' }] : [];
@@ -395,6 +398,7 @@ function monterEditeur(hote, cfg, api) {
         const node = getNode(path);
         if (!node || node.kind !== 'simple') return;
         if (data.type === 'move') {
+            if (!AideRules.isLegalMove(data.from, path)) { api.erreur(AideRules.MSG_MOVE); return; }
             if (data.from === path) { refreshView(); return; } // dépose au même endroit : rien ne change
             const src = getNode(data.from);
             if (src && src.items[data.idx] && src.items[data.idx].id === data.id) {
@@ -515,10 +519,10 @@ function place(st, id) {
 function diagVers(st, id, lab, cible, reste) {
     const p = place(st, id), [cote, niv] = cible.split('.');
     const ou = (niv === 'den' ? 'au dénominateur (en bas) ' : 'au numérateur (en haut) ') + (cote === 'left' ? 'à gauche' : 'à droite');
-    if (!p) return `${lab} a disparu de l'équation : clique sur ↺ Recommencer.`;
-    if (!p.startsWith(cote)) return `${lab} n'a pas changé de côté : il doit passer de l'autre côté du signe =, ${ou}.`;
-    if (p !== cible && p !== cote) return `${lab} a bien changé de côté, mais pas de position : un terme ${niv === 'den' ? 'du numérateur passe au dénominateur' : 'du dénominateur passe au numérateur'} de l'autre côté. Il doit être ${ou}.`;
-    return reste || 'Le reste de l\'équation ne doit pas changer : clique sur ↺ Recommencer pour repartir de l\'équation de départ.';
+    if (!p) return `${lab} a disparu de l'équation : clique sur ↺ Recommencer.`;
+    if (!p.startsWith(cote)) return `${lab} n'a pas changé de côté : il doit passer de l'autre côté du signe =, ${ou}.`;
+    if (p !== cible && p !== cote) return `${lab} a bien changé de côté, mais pas de position : un terme ${niv === 'den' ? 'du numérateur passe au dénominateur' : 'du dénominateur passe au numérateur'} de l'autre côté. Il doit être ${ou}.`;
+    return reste || 'Le reste de l\'équation ne doit pas changer : clique sur ↺ Recommencer pour repartir de l\'équation de départ.';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -531,7 +535,7 @@ const dSurT = () => frac([tile('d','d')], [tile('t','t')]);
 // Règle 2 : terme multiplicatif au numérateur
 const M_NUM = [
     {   titre: 'Faire passer v de l\'autre côté',
-        instruction: "Voici l'équation v/1 = d/t. Déplace <b>v</b> de l'autre côté : il doit rejoindre le dénominateur (en bas), à droite.",
+        instruction: "Voici l'équation v/1 = d/t. Déplace <b>v</b> de l'autre côté : il doit rejoindre le dénominateur (en bas), à droite.",
         left: vSur1, right: dSurT,
         highlight: 'v',
         opDiagram: { label: '÷v', noteLeft: '(supprime le v en haut)', noteRight: '(ajoute un v en bas)' },
@@ -540,10 +544,10 @@ const M_NUM = [
                     && setEq(idsOf(st.right.num.items), ['d']) && setEq(idsOf(st.right.den.items), ['t','v']),
         diag: st => diagVers(st, 'v', 'v', 'right.den'),
         solution: () => ({ left: frac([ONE], [ONE]), right: frac([tile('d','d')], [tile('t','t'), tile('v','v')]) }),
-        explication: '<p>On a divisé les deux côtés par v : v disparaît en haut à gauche (il y reste 1) et apparaît en bas à droite.</p>',
+        explication: '<p>On a divisé les deux côtés par v : v disparaît en haut à gauche (il y reste 1) et apparaît en bas à droite.</p>',
     },
     {   titre: 'Faire passer d de l\'autre côté',
-        instruction: "Reprenons la même équation v/1 = d/t. Cette fois, déplace <b>d</b> de l'autre côté : il doit rejoindre le dénominateur (en bas), à gauche.",
+        instruction: "Reprenons la même équation v/1 = d/t. Cette fois, déplace <b>d</b> de l'autre côté : il doit rejoindre le dénominateur (en bas), à gauche.",
         left: vSur1, right: dSurT,
         highlight: 'd',
         opDiagram: { label: '÷d', noteLeft: '(ajoute un d en bas)', noteRight: '(supprime le d en haut)' },
@@ -552,14 +556,14 @@ const M_NUM = [
                     && setEq(idsOf(st.left.num.items), ['v']) && setEq(idsOf(st.left.den.items), ['one','d']),
         diag: st => diagVers(st, 'd', 'd', 'left.den'),
         solution: () => ({ left: frac([tile('v','v')], [ONE, tile('d','d')]), right: frac([ONE], [tile('t','t')]) }),
-        explication: '<p>On a divisé les deux côtés par d : d disparaît en haut à droite (il y reste 1) et apparaît en bas à gauche.</p>',
+        explication: '<p>On a divisé les deux côtés par d : d disparaît en haut à droite (il y reste 1) et apparaît en bas à gauche.</p>',
     },
 ];
 
 // Règle 3 : terme multiplicatif au dénominateur
 const M_DEN = [
     {   titre: 'Faire passer t à gauche',
-        instruction: "Équation v/1 = d/t. Déplace <b>t</b> de l'autre côté : il doit rejoindre le numérateur (en haut), à gauche.",
+        instruction: "Équation v/1 = d/t. Déplace <b>t</b> de l'autre côté : il doit rejoindre le numérateur (en haut), à gauche.",
         left: vSur1, right: dSurT,
         highlight: 't',
         opDiagram: { label: '×t', noteLeft: '(ajoute un t en haut)', noteRight: '(supprime le t en bas)' },
@@ -568,10 +572,10 @@ const M_DEN = [
                     && st.left.kind === 'frac' && setEq(idsOf(st.left.num.items), ['v','t']) && setEq(idsOf(st.left.den.items), ['one']),
         diag: st => diagVers(st, 't', 't', 'left.num'),
         solution: () => ({ left: frac([tile('v','v'), tile('t','t')], [ONE]), right: simple([tile('d','d')]) }),
-        explication: '<p>On a multiplié les deux côtés par t : t disparaît en bas à droite (la fraction disparaît, il reste d) et apparaît en haut à gauche.</p>',
+        explication: '<p>On a multiplié les deux côtés par t : t disparaît en bas à droite (la fraction disparaît, il reste d) et apparaît en haut à gauche.</p>',
     },
     {   titre: 'L\'équation écrite dans l\'autre sens',
-        instruction: "Même équation, écrite cette fois dans l'autre sens : d/t = v/1. Déplace <b>t</b> de l'autre côté : il doit rejoindre le numérateur (en haut), à droite.",
+        instruction: "Même équation, écrite cette fois dans l'autre sens : d/t = v/1. Déplace <b>t</b> de l'autre côté : il doit rejoindre le numérateur (en haut), à droite.",
         left: dSurT, right: vSur1,
         highlight: 't',
         opDiagram: { label: '×t', noteLeft: '(supprime le t en bas)', noteRight: '(ajoute un t en haut)' },
@@ -580,14 +584,14 @@ const M_DEN = [
                     && st.right.kind === 'frac' && setEq(idsOf(st.right.num.items), ['v','t']) && setEq(idsOf(st.right.den.items), ['one']),
         diag: st => diagVers(st, 't', 't', 'right.num'),
         solution: () => ({ left: simple([tile('d','d')]), right: frac([tile('v','v'), tile('t','t')], [ONE]) }),
-        explication: '<p>On a multiplié les deux côtés par t : t disparaît en bas à gauche et apparaît en haut à droite.</p>',
+        explication: '<p>On a multiplié les deux côtés par t : t disparaît en bas à gauche et apparaît en haut à droite.</p>',
     },
 ];
 
 // Règle 4 : le rôle du « 1 »
 const M_UN = [
     {   titre: 'Un numérateur vidé',
-        instruction: "Repartons de l'équation v/1 = d/t. Passe <b>v</b> de l'autre côté : il doit rejoindre le dénominateur (en bas), à droite.",
+        instruction: "Repartons de l'équation v/1 = d/t. Passe <b>v</b> de l'autre côté : il doit rejoindre le dénominateur (en bas), à droite.",
         left: vSur1, right: dSurT,
         highlight: 'v',
         noNumAutoOne: true,
@@ -602,10 +606,10 @@ const M_UN = [
         partialMessage: "Ajoute un 1 dans l'espace vide pour pouvoir valider.",
         diag: st => diagVers(st, 'v', 'v', 'right.den', 'La case vidée en haut à gauche doit recevoir un 1 (glisse-le depuis la palette), et rien d\'autre ne doit changer.'),
         solution: () => ({ left: frac([ONE], [ONE]), right: frac([tile('d','d')], [tile('t','t'), tile('v','v')]) }),
-        explication: '<p>Le numérateur vidé ne reste pas vide : on y écrit 1.</p>',
+        explication: '<p>Le numérateur vidé ne reste pas vide : on y écrit 1.</p>',
     },
     {   titre: 'Un dénominateur vidé',
-        instruction: "Repartons encore de v/1 = d/t. Cette fois, passe <b>t</b> de l'autre côté : il doit rejoindre le numérateur (en haut), à gauche.",
+        instruction: "Repartons encore de v/1 = d/t. Cette fois, passe <b>t</b> de l'autre côté : il doit rejoindre le numérateur (en haut), à gauche.",
         left: vSur1, right: dSurT,
         highlight: 't',
         noDenAutoCollapse: true,
@@ -620,9 +624,9 @@ const M_UN = [
         partialMessage: (st) => (st.right.kind === 'frac' && isSlotEmpty(st.right))
             ? "Ajoute un 1 dans l'espace vide."
             : "Clique sur la croix du dénominateur pour le supprimer.",
-        diag: st => diagVers(st, 't', 't', 'left.num', 'À droite, il ne doit rester que d : mets un 1 dans le dénominateur vide, puis supprime ce dénominateur avec sa croix ✕.'),
+        diag: st => diagVers(st, 't', 't', 'left.num', 'À droite, il ne doit rester que d : mets un 1 dans le dénominateur vide, puis supprime ce dénominateur avec sa croix ✕.'),
         solution: () => ({ left: frac([tile('v','v'), tile('t','t')], [ONE]), right: simple([tile('d','d')]) }),
-        explication: '<p>Le dénominateur qui vaut 1 se supprime : la fraction disparaît, il reste d.</p>',
+        explication: '<p>Le dénominateur qui vaut 1 se supprime : la fraction disparaît, il reste d.</p>',
     },
     {   titre: 'Supprimer directement un dénominateur vide',
         instruction: "Repartons une dernière fois de v/1 = d/t. Passe <b>t</b> de l'autre côté, comme dans l'exemple précédent.",
@@ -636,10 +640,10 @@ const M_UN = [
             if (st.right.kind === 'frac') return 'partial';
             return st.right.kind === 'simple' && setEq(idsOf(st.right.items), ['d']);
         },
-        partialMessage: "On peut directement supprimer un dénominateur vide, sans passer par le 1 : clique sur sa croix.",
-        diag: st => diagVers(st, 't', 't', 'left.num', 'Seul t doit changer de côté ; ensuite, le dénominateur vide à droite se supprime avec sa croix ✕.'),
+        partialMessage: "On peut directement supprimer un dénominateur vide, sans passer par le 1 : clique sur sa croix.",
+        diag: st => diagVers(st, 't', 't', 'left.num', 'Seul t doit changer de côté ; ensuite, le dénominateur vide à droite se supprime avec sa croix ✕.'),
         solution: () => ({ left: frac([tile('v','v'), tile('t','t')], [ONE]), right: simple([tile('d','d')]) }),
-        explication: '<p>Un dénominateur vide se supprime directement : il reste d.</p>',
+        explication: '<p>Un dénominateur vide se supprime directement : il reste d.</p>',
     },
     {   titre: 'Écrire un terme sous forme de fraction',
         instruction: "Utilise l'icône fraction de la palette et glisse-la sur <b>v</b> (à gauche) pour le transformer en fraction. Un 1 apparaît automatiquement au dénominateur.",
@@ -649,12 +653,12 @@ const M_UN = [
         check: (st) => st.left.kind === 'frac' && setEq(idsOf(st.left.num.items), ['v']) && setEq(idsOf(st.left.den.items), ['one']),
         diag: st => st.left.kind !== 'frac'
             ? 'Glisse l\'icône fraction (···/···) de la palette sur la case de v, à gauche.'
-            : 'v doit rester seul au numérateur, avec 1 au dénominateur : clique sur ↺ Recommencer.',
+            : 'v doit rester seul au numérateur, avec 1 au dénominateur : clique sur ↺ Recommencer.',
         solution: () => ({ left: frac([tile('v','v')], [ONE]), right: dSurT() }),
-        explication: '<p>v = v/1 : écrire un terme sous forme de fraction ne change pas sa valeur.</p>',
+        explication: '<p>v = v/1 : écrire un terme sous forme de fraction ne change pas sa valeur.</p>',
     },
     {   titre: 'Mettre le 1 toi-même',
-        instruction: "Refais la même manipulation : glisse l'icône fraction sur <b>v</b>. Cette fois, le 1 n'apparaît pas tout seul au dénominateur : va le chercher dans la palette et glisse-le toi-même.",
+        instruction: "Refais la même manipulation : glisse l'icône fraction sur <b>v</b>. Cette fois, le 1 n'apparaît pas tout seul au dénominateur : va le chercher dans la palette et glisse-le toi-même.",
         left: () => simple([tile('v','v')]), right: dSurT,
         showPalette: true,
         fracAutoOne: false,
@@ -662,18 +666,18 @@ const M_UN = [
         check: (st) => st.left.kind === 'frac' && setEq(idsOf(st.left.num.items), ['v']) && setEq(idsOf(st.left.den.items), ['one']),
         diag: st => st.left.kind !== 'frac'
             ? 'Glisse d\'abord l\'icône fraction (···/···) sur la case de v, à gauche.'
-            : (!st.left.den.items.length ? 'Le dénominateur est vide : glisse le 1 de la palette dans la case du bas.'
-                : 'v doit rester seul au numérateur, avec seulement 1 au dénominateur : clique sur ↺ Recommencer.'),
+            : (!st.left.den.items.length ? 'Le dénominateur est vide : glisse le 1 de la palette dans la case du bas.'
+                : 'v doit rester seul au numérateur, avec seulement 1 au dénominateur : clique sur ↺ Recommencer.'),
         solution: () => ({ left: frac([tile('v','v')], [ONE]), right: dSurT() }),
-        explication: '<p>Un dénominateur ne reste jamais vide : on y met 1, et v/1 = v.</p>',
+        explication: '<p>Un dénominateur ne reste jamais vide : on y met 1, et v/1 = v.</p>',
     },
     {   titre: 'La grandeur isolée sort de la fraction',
-        instruction: "La grandeur isolée ne doit pas être dans une fraction. S'il y a un « 1 » au dénominateur, il faut l'enlever. Ici, la grandeur à isoler est <b>t</b> : clique sur la croix du dénominateur pour le supprimer.",
+        instruction: "La grandeur isolée ne doit pas être dans une fraction. S'il y a un « 1 » au dénominateur, il faut l'enlever. Ici, la grandeur à isoler est <b>t</b> : clique sur la croix du dénominateur pour le supprimer.",
         left: () => frac([tile('t','t')], [ONE]), right: () => frac([tile('d','d')], [tile('v','v')]),
         check: (st) => st.left.kind === 'simple' && setEq(idsOf(st.left.items), ['t']),
-        diag: () => 't doit rester seul à gauche, sans fraction : clique sur la croix ✕ du dénominateur qui vaut 1 (pas sur t). Clique sur ↺ Recommencer si besoin.',
+        diag: () => 't doit rester seul à gauche, sans fraction : clique sur la croix ✕ du dénominateur qui vaut 1 (pas sur t). Clique sur ↺ Recommencer si besoin.',
         solution: () => ({ left: simple([tile('t','t')]), right: frac([tile('d','d')], [tile('v','v')]) }),
-        explication: '<p>t/1 = t : sans dénominateur, t est complètement isolé.</p>',
+        explication: '<p>t/1 = t : sans dénominateur, t est complètement isolé.</p>',
     },
 ];
 
@@ -683,9 +687,9 @@ const M_SENS = [
         instruction: "Le terme <b>d</b> est déjà isolé, mais il est à droite. Utilise le bouton ⇄ pour l'amener à gauche.",
         left: () => simple([tile('v','v'), tile('t','t')]), right: () => simple([tile('d','d')]),
         check: (st) => isIsolated(st.left, 'd'),
-        diag: () => 'Ne déplace aucune tuile : le bouton ⇄ écrit l\'équation dans l\'autre sens. Clique sur ↺ Recommencer, puis sur ⇄.',
+        diag: () => 'Ne déplace aucune tuile : le bouton ⇄ écrit l\'équation dans l\'autre sens. Clique sur ↺ Recommencer, puis sur ⇄.',
         solution: () => ({ left: simple([tile('d','d')]), right: simple([tile('v','v'), tile('t','t')]) }),
-        explication: '<p>v × t = d et d = v × t disent la même chose : d est isolé à gauche.</p>',
+        explication: '<p>v × t = d et d = v × t disent la même chose : d est isolé à gauche.</p>',
     },
     {   titre: 'Amener t à gauche',
         instruction: "Le terme <b>t</b> est déjà isolé, mais il est à droite. Utilise le bouton ⇄ pour l'amener à gauche.",
@@ -696,9 +700,9 @@ const M_SENS = [
             return false;
         },
         partialMessage: "C'est bon, mais il faut encore enlever le dénominateur qui vaut 1 (clique sur sa croix) pour que ce soit complet.",
-        diag: () => 'Ne déplace aucune tuile : clique sur ⇄ pour écrire l\'équation dans l\'autre sens, puis supprime le dénominateur qui vaut 1 avec sa croix ✕. Clique sur ↺ Recommencer si besoin.',
+        diag: () => 'Ne déplace aucune tuile : clique sur ⇄ pour écrire l\'équation dans l\'autre sens, puis supprime le dénominateur qui vaut 1 avec sa croix ✕. Clique sur ↺ Recommencer si besoin.',
         solution: () => ({ left: simple([tile('t','t')]), right: frac([tile('v','v')], [tile('d','d')]) }),
-        explication: '<p>t est isolé à gauche, sans fraction : t = v/d.</p>',
+        explication: '<p>t est isolé à gauche, sans fraction : t = v/d.</p>',
     },
 ];
 
@@ -717,32 +721,32 @@ const avantApres = (avant, op, apres) => `<div class="ep-avap">
     <div class="ep-av"><p class="ep-av-t">Avant</p>${avant}</div>
     <p class="ep-op">${op}</p>
     <div class="ep-av"><p class="ep-av-t">Après</p>${apres}</div></div>`;
-const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Fais glisser une tuile (à la souris ou au doigt) pour la déplacer ; un appui sur une tuile ou sur sa croix ✕ la supprime ; ↺ Recommencer remet l'équation de départ. Clique sur <b>Valider</b> quand c'est fait.</p></div>`;
+const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Fais glisser une tuile (à la souris ou au doigt) pour la déplacer ; un appui sur une tuile ou sur sa croix ✕ la supprime ; ↺ Recommencer remet l'équation de départ. Clique sur <b>Valider</b> quand c'est fait.</p></div>`;
 
 /* ---------- 1. Le signe × ---------- */
 function etape1(c) {
     const carte = c.carte('1. Le signe × peut ne pas être écrit');
     c.ajouter(carte, `<div class="cours-bloc">
-        <p>Pour isoler une grandeur, on déplace les termes de l'équation en suivant quelques règles. La première concerne l'écriture : dans une formule, deux grandeurs écrites côte à côte sont <b>multipliées</b>.</p>
-        <div class="cle"><p><b class="cle-titre">Règle 1.</b> Le signe × peut ne pas être écrit entre deux grandeurs : « 2×x » et « 2x » signifient la même chose.</p></div>
+        <p>Pour isoler une grandeur, on déplace les termes de l'équation en suivant quelques règles. La première concerne l'écriture : dans une formule, deux grandeurs écrites côte à côte sont <b>multipliées</b>.</p>
+        <div class="cle"><p><b class="cle-titre">Règle 1.</b> Le signe × peut ne pas être écrit entre deux grandeurs : « 2×x » et « 2x » signifient la même chose.</p></div>
       </div>
-      ${exemple(`<p>La distance parcourue d = v × t s'écrit aussi <b>d = vt</b>. Dans l'éditeur d'équation, deux tuiles placées dans la même case sont multipliées : un petit × s'affiche entre elles.</p>
+      ${exemple(`<p>La distance parcourue d = v × t s'écrit aussi <b>d = vt</b>. Dans l'éditeur d'équation, deux tuiles placées dans la même case sont multipliées : un petit × s'affiche entre elles.</p>
         <div class="ep-avap">${eqStat(simple([T('d')]), simple([T('v'), T('t')]))}</div>`)}`);
     c.aToi(carte, [
         { titre: 'Lire une formule',
-          parties: [{ type: 'choix', q: 'Que signifie P = UI (puissance électrique) ?', melanger: false,
+          parties: [{ type: 'choix', q: 'Que signifie P = UI (puissance électrique) ?', melanger: false,
             options: [{ id: 'fois', label: 'P = U × I' }, { id: 'plus', label: 'P = U + I' }, { id: 'une', label: 'UI est une seule grandeur' }],
             bonne: 'fois',
-            indices: { plus: 'Rien n\'est écrit entre U et I : le signe sous-entendu est ×, pas +.',
-                       une: 'U (la tension) et I (l\'intensité) sont deux grandeurs différentes : écrites côte à côte, elles sont multipliées.' },
+            indices: { plus: 'Rien n\'est écrit entre U et I : le signe sous-entendu est ×, pas +.',
+                       une: 'U (la tension) et I (l\'intensité) sont deux grandeurs différentes : écrites côte à côte, elles sont multipliées.' },
             solution: '<p>P = UI signifie P = U × I.</p>' }] },
         { titre: 'Compter les grandeurs multipliées',
-          parties: [{ type: 'choix', q: 'Dans E<sub>p</sub> = mgh, combien de grandeurs sont multipliées ?', melanger: false,
+          parties: [{ type: 'choix', q: 'Dans E<sub>p</sub> = mgh, combien de grandeurs sont multipliées ?', melanger: false,
             options: [{ id: '1', label: '1' }, { id: '2', label: '2' }, { id: '3', label: '3' }],
             bonne: '3',
-            indices: { '1': 'mgh n\'est pas une seule grandeur : m, g et h sont écrites côte à côte, donc multipliées.',
-                       '2': 'Compte chaque lettre : m, g et h.' },
-            solution: '<p>E<sub>p</sub> = m × g × h : trois grandeurs multipliées.</p>' }] },
+            indices: { '1': 'mgh n\'est pas une seule grandeur : m, g et h sont écrites côte à côte, donc multipliées.',
+                       '2': 'Compte chaque lettre : m, g et h.' },
+            solution: '<p>E<sub>p</sub> = m × g × h : trois grandeurs multipliées.</p>' }] },
     ]);
     return carte;
 }
@@ -752,10 +756,10 @@ function etape2(c) {
     const carte = c.carte('2. Un terme multiplicatif au numérateur');
     c.ajouter(carte, `<div class="cours-bloc">
         <p>Pour enlever un terme multiplicatif qui est au <b>numérateur (en haut)</b>, il faut le faire passer de l'autre côté, au <b>dénominateur (en bas)</b>. On fait cela car cela correspond à diviser par ce terme les deux côtés de l'équation.</p>
-        <p>Pour bien voir le haut et le bas, chaque membre s'écrit sous forme de fraction : ρ = m/V s'écrit ${fr('ρ', '1')} = ${fr('m', 'V')}.</p>
+        <p>Pour bien voir le haut et le bas, chaque membre s'écrit sous forme de fraction : ρ = m/V s'écrit ${fr('ρ', '1')} = ${fr('m', 'V')}.</p>
         <div class="cle"><p><b class="cle-titre">Règle 2.</b> Un terme multiplicatif au numérateur (en haut) passe au dénominateur (en bas) de l'autre côté (cela revient à diviser les deux côtés de l'équation par ce terme).</p></div>
       </div>
-      ${exemple(`<p>Dans ${fr('ρ', '1')} = ${fr('m', 'V')}, on fait passer ρ de l'autre côté :</p>
+      ${exemple(`<p>Dans ${fr('ρ', '1')} = ${fr('m', 'V')}, on fait passer ρ de l'autre côté :</p>
         ${avantApres(eqStat(frac([T('rho', 'ρ')], [ONE]), frac([T('m')], [T('V')])), '÷ρ des deux côtés',
                      eqStat(frac([ONE], [ONE]), frac([T('m')], [T('V'), T('rho', 'ρ')])))}
         <p>ρ quitte le numérateur à gauche (il y reste 1, voir la règle 4) et arrive au dénominateur à droite.</p>`)}
@@ -771,31 +775,31 @@ function etape3(c) {
         <p>Symétriquement, un terme multiplicatif qui est au <b>dénominateur (en bas)</b> passe au <b>numérateur (en haut)</b> de l'autre côté. On fait cela car cela correspond à multiplier par ce terme les deux côtés de l'équation.</p>
         <div class="cle"><p><b class="cle-titre">Règle 3.</b> Un terme multiplicatif au dénominateur (en bas) passe au numérateur (en haut) de l'autre côté (cela revient à multiplier les deux côtés de l'équation par ce terme).</p></div>
       </div>
-      ${exemple(`<p>Dans ${fr('ρ', '1')} = ${fr('m', 'V')}, on fait passer V de l'autre côté :</p>
+      ${exemple(`<p>Dans ${fr('ρ', '1')} = ${fr('m', 'V')}, on fait passer V de l'autre côté :</p>
         ${avantApres(eqStat(frac([T('rho', 'ρ')], [ONE]), frac([T('m')], [T('V')])), '×V des deux côtés',
                      eqStat(frac([T('rho', 'ρ'), T('V')], [ONE]), simple([T('m')])))}
-        <p>V quitte le dénominateur à droite (la fraction disparaît, il reste m) et arrive au numérateur à gauche : ρ × V = m.</p>`)}`);
+        <p>V quitte le dénominateur à droite (la fraction disparaît, il reste m) et arrive au numérateur à gauche : ρ × V = m.</p>`)}`);
     c.aToi(carte, M_DEN.map(manip));
     return carte;
 }
 
 /* ---------- 4. Le rôle du « 1 » ---------- */
 function etape4(c) {
-    const carte = c.carte('4. Le rôle du « 1 »');
+    const carte = c.carte('4. Le rôle du « 1 »');
     c.ajouter(carte, `<div class="cours-bloc">
-        <p>Si on enlève tous les termes d'un numérateur ou d'un dénominateur, il faut écrire un <b>1</b> à la place (comme si on avait « fois 1 »). Si le dénominateur vaut 1, la fraction disparaît. Inversement, on peut toujours écrire un nombre sous forme de fraction en ajoutant un 1 au dénominateur.</p>
-        <div class="cle"><p><b class="cle-titre">Règle 4.</b> Numérateur vidé → on écrit 1. Dénominateur vidé → la fraction disparaît. On peut toujours transformer un terme en fraction avec l'icône « ··· / ··· » de la palette.</p></div>
+        <p>Si on enlève tous les termes d'un numérateur ou d'un dénominateur, il faut écrire un <b>1</b> à la place (comme si on avait « fois 1 »). Si le dénominateur vaut 1, la fraction disparaît. Inversement, on peut toujours écrire un nombre sous forme de fraction en ajoutant un 1 au dénominateur.</p>
+        <div class="cle"><p><b class="cle-titre">Règle 4.</b> Numérateur vidé → on écrit 1. Dénominateur vidé → la fraction disparaît. On peut toujours transformer un terme en fraction avec l'icône « ··· / ··· » de la palette.</p></div>
       </div>
       ${exemple(`<div class="ep-exemples">
         ${avantApres(eqStat(frac([T('R')], [ONE]), frac([T('U')], [T('I')])), 'R passe en bas à droite',
                      eqStat(frac([ONE], [ONE]), frac([T('U')], [T('I'), T('R')])))}
-        <p>Le numérateur de gauche est vidé : on y écrit 1.</p>
+        <p>Le numérateur de gauche est vidé : on y écrit 1.</p>
         ${avantApres(eqStat(frac([T('R')], [ONE]), frac([T('U')], [T('I')])), 'I passe en haut à gauche',
                      eqStat(frac([T('R'), T('I')], [ONE]), simple([T('U')])))}
-        <p>Le dénominateur de droite est vidé : la fraction disparaît, il reste U.</p>
+        <p>Le dénominateur de droite est vidé : la fraction disparaît, il reste U.</p>
         ${avantApres(eqStat(simple([T('U')]), simple([T('R'), T('I')])), 'icône fraction sur U',
                      eqStat(frac([T('U')], [ONE]), simple([T('R'), T('I')])))}
-        <p>U = ${fr('U', '1')} : un 1 au dénominateur ne change rien. À l'inverse, un dénominateur qui vaut 1 se supprime.</p></div>`)}`);
+        <p>U = ${fr('U', '1')} : un 1 au dénominateur ne change rien. À l'inverse, un dénominateur qui vaut 1 se supprime.</p></div>`)}`);
     c.aToi(carte, M_UN.map(manip));
     return carte;
 }
@@ -804,12 +808,12 @@ function etape4(c) {
 function etape5(c) {
     const carte = c.carte('5. Inverser le sens de l\'équation');
     c.ajouter(carte, `<div class="cours-bloc">
-        <p>Si le terme à isoler se retrouve seul mais à droite, il n'y a rien de plus à calculer : il suffit d'écrire l'équation dans l'autre sens avec le bouton ⇄.</p>
+        <p>Si le terme à isoler se retrouve seul mais à droite, il n'y a rien de plus à calculer : il suffit d'écrire l'équation dans l'autre sens avec le bouton ⇄.</p>
         <div class="cle"><p><b class="cle-titre">Règle 5.</b> Le bouton ⇄ permet d'écrire l'équation dans l'autre sens, sans déplacer aucun terme.</p></div>
       </div>
       ${exemple(`${avantApres(eqStat(frac([T('U')], [T('I')]), simple([T('R')])), '⇄',
                               eqStat(simple([T('R')]), frac([T('U')], [T('I')])))}
-        <p>R est maintenant isolé à gauche : R = ${fr('U', 'I')}.</p>`)}`);
+        <p>R est maintenant isolé à gauche : R = ${fr('U', 'I')}.</p>`)}`);
     c.aToi(carte, M_SENS.map(manip));
     return carte;
 }
@@ -817,15 +821,15 @@ function etape5(c) {
 /* ---------- À retenir ---------- */
 function aRetenir(c) {
     const carte = c.carte('À retenir');
-    c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Règle 1.</b> Le signe × peut ne pas être écrit entre deux grandeurs : « 2×x » et « 2x » signifient la même chose.</p></div>
-      <div class="cle"><p><b class="cle-titre">Règle 2.</b> Un terme multiplicatif au <b>numérateur</b> (en haut) passe au <b>dénominateur</b> (en bas) de l'autre côté : on divise les deux membres par ce terme.</p>
+    c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Règle 1.</b> Le signe × peut ne pas être écrit entre deux grandeurs : « 2×x » et « 2x » signifient la même chose.</p></div>
+      <div class="cle"><p><b class="cle-titre">Règle 2.</b> Un terme multiplicatif au <b>numérateur</b> (en haut) passe au <b>dénominateur</b> (en bas) de l'autre côté : on divise les deux membres par ce terme.</p>
         <p class="crs-formule">v × t = d &nbsp;⇔&nbsp; v = ${fr('d', 't')}</p></div>
-      <div class="cle"><p><b class="cle-titre">Règle 3.</b> Un terme multiplicatif au <b>dénominateur</b> (en bas) passe au <b>numérateur</b> (en haut) de l'autre côté : on multiplie les deux membres par ce terme.</p>
+      <div class="cle"><p><b class="cle-titre">Règle 3.</b> Un terme multiplicatif au <b>dénominateur</b> (en bas) passe au <b>numérateur</b> (en haut) de l'autre côté : on multiplie les deux membres par ce terme.</p>
         <p class="crs-formule">v = ${fr('d', 't')} &nbsp;⇔&nbsp; v × t = d</p></div>
       <div class="cle"><p><b class="cle-titre">Règle 4.</b> Numérateur vidé → on écrit <b>1</b>. Dénominateur vidé (ou égal à 1) → la fraction disparaît. On peut toujours écrire un terme sous forme de fraction en ajoutant un 1 au dénominateur.</p></div>
-      <div class="cle"><p><b class="cle-titre">Règle 5.</b> L'équation peut s'écrire dans l'autre sens (bouton ⇄) sans déplacer aucun terme : la grandeur isolée se met à gauche.</p></div>
+      <div class="cle"><p><b class="cle-titre">Règle 5.</b> L'équation peut s'écrire dans l'autre sens (bouton ⇄) sans déplacer aucun terme : la grandeur isolée se met à gauche.</p></div>
       <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_2.html">Exemple d'application →</a>
-        <a class="btn-secondary" style="text-decoration:none" href="module_4.html">Module 2 : les fractions</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_4.html">Module 2 : les fractions</a>
         <a class="btn-secondary" style="text-decoration:none" href="fiche_1.html">Fiche récapitulative</a></div>`);
     return carte;
 }

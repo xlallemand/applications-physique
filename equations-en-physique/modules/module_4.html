@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 2 : méthode — Équations en physique</title>
+<title>Module 2 : méthode — Équations en physique</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <style>
@@ -117,6 +117,7 @@
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
+<script src="../aide-rules.js"></script>
 <script src="../../assets/cours.js"></script>
 </head>
 <body>
@@ -137,6 +138,8 @@
    la règle (.cle), un exemple traité (avant / après) puis un
    « À toi » dont les items sont les manipulations de l'éditeur
    d'équation (parties 'perso').
+   Version « avec aide » : un déplacement non autorisé est bloqué et la
+   règle à suivre est rappelée (../aide-rules.js), comme une erreur.
    L'éditeur est une instance par manipulation (monterEditeur) :
    en mode « Afficher tout le cours », toutes les manipulations
    sont affichées en même temps et fonctionnent indépendamment.
@@ -372,6 +375,7 @@ function monterEditeur(hote, cfg, api) {
     }
     function processDrop(path, data) {
         if (data.type === 'frac') {
+            if (!AideRules.isLegalFracTool(path)) { api.erreur(AideRules.MSG_FRAC); return; }
             const node = getNode(path);
             if (!node || node.kind !== 'simple') return;
             setNode(path, frac(node.items, [{ id:'one', label:'1' }]));
@@ -381,6 +385,7 @@ function monterEditeur(hote, cfg, api) {
         const node = getNode(path);
         if (!node || node.kind !== 'simple') return;
         if (data.type === 'move') {
+            if (!AideRules.isLegalMove(data.from, path)) { api.erreur(AideRules.MSG_MOVE_FRAC); return; }
             if (data.from === path) { refreshView(); return; }
             const src = getNode(data.from);
             if (src && src.items[data.idx] && src.items[data.idx].id === data.id) {
@@ -398,6 +403,10 @@ function monterEditeur(hote, cfg, api) {
         if (!data || data.type === 'frac') return;
         const side = getNode(sidePath);
         if (!side || side.kind !== 'seq') return;
+        if (data.type === 'move' && !AideRules.isLegalInsert(data.from, sidePath)) {
+            api.erreur(AideRules.MSG_INSERT);
+            return;
+        }
         // retirer la tuile de sa zone d'origine AVANT d'insérer la nouvelle zone :
         // insérer au début (unshift) décale les index des zones existantes
         if (data.type === 'move') {
@@ -544,9 +553,9 @@ const dansFraction = p => !!p && /\.(num|den)$/.test(p);
 // m et v² doivent être sortis de la fraction, du côté « cote » ('droite' ou 'gauche')
 function diagSortie(st, cote) {
     const R = st.right, f = R.slots.find(s => s.kind === 'frac');
-    if (f && f.num.items.length === 0) return 'Le numérateur laissé vide doit recevoir un 1 : glisse le 1 de la palette dans la case du haut.';
+    if (f && f.num.items.length === 0) return 'Le numérateur laissé vide doit recevoir un 1 : glisse le 1 de la palette dans la case du haut.';
     const pm = chemin(st, 'm'), pv = chemin(st, 'v2');
-    if ([pm, pv].some(dansFraction)) return `m et v² doivent sortir de la fraction : glisse-les dans la zone qui apparaît juste à ${cote} de la fraction pendant le glisser.`;
+    if ([pm, pv].some(dansFraction)) return `m et v² doivent sortir de la fraction : glisse-les dans la zone qui apparaît juste à ${cote} de la fraction pendant le glisser.`;
     const iFrac = R.slots.findIndex(s => s.kind === 'frac'), iTermes = R.slots.findIndex(s => s.kind === 'simple' && s.items.some(t => t.id === 'm' || t.id === 'v2'));
     if (iFrac >= 0 && iTermes >= 0 && (cote === 'droite') !== (iTermes > iFrac)) return `m et v² doivent aller à ${cote} de la fraction, pas de l'autre côté.`;
     return `À droite du signe =, il faut ${cote === 'droite' ? 'la fraction 1/2 suivie de m × v²' : 'm × v² suivi de la fraction 1/2'} (m et v² dans la même case). Clique sur ↺ Recommencer si besoin.`;
@@ -577,18 +586,18 @@ const M_ENTRER = [
             if (setEq(num, ['one','m','v2'])) return 'partial';
             return false;
         },
-        partialMessage: "Le 1 qui était déjà là ne disparaît pas tout seul : il ne reste plus qu'à le retirer toi-même (clique sur sa croix).",
+        partialMessage: "Le 1 qui était déjà là ne disparaît pas tout seul : il ne reste plus qu'à le retirer toi-même (clique sur sa croix).",
         diag: st => {
             const pm = chemin(st, 'm'), pv = chemin(st, 'v2');
-            if ([pm, pv].some(p => p && p.endsWith('.den'))) return 'm et v² multiplient la fraction : ils vont au numérateur (au-dessus de la barre), pas au dénominateur.';
+            if ([pm, pv].some(p => p && p.endsWith('.den'))) return 'm et v² multiplient la fraction : ils vont au numérateur (au-dessus de la barre), pas au dénominateur.';
             if ([pm, pv].some(p => p && !p.endsWith('.num'))) return 'm et v² doivent tous les deux entrer dans la case du haut de la fraction, au-dessus de la barre.';
-            return 'La fraction doit garder 2 au dénominateur, avec m et v² au numérateur ; rien d\'autre ne change. Clique sur ↺ Recommencer si besoin.';
+            return 'La fraction doit garder 2 au dénominateur, avec m et v² au numérateur ; rien d\'autre ne change. Clique sur ↺ Recommencer si besoin.';
         },
         solution: () => ({ left: seq([simple([EC])]), right: seq([frac([M, V2], [DEUX])]) }),
-        explication: '<p>1/2 × m × v² = (1 × m × v²)/2 = (m × v²)/2 : le 1, devenu inutile, se retire.</p>',
+        explication: '<p>1/2 × m × v² = (1 × m × v²)/2 = (m × v²)/2 : le 1, devenu inutile, se retire.</p>',
     },
     {   titre: 'Créer une nouvelle fraction',
-        instruction: "Repartons de la même équation. Cette fois, garde m et v² à côté de la fraction, mais fais l'inverse : utilise l'outil fraction (les pointillés ···) pour créer une nouvelle fraction avec m et v² au numérateur, puis fais glisser le 2 pour qu'il devienne le dénominateur de cette nouvelle fraction. Termine en supprimant les restes de l'ancienne fraction 1/2.",
+        instruction: "Repartons de la même équation. Cette fois, garde m et v² à côté de la fraction, mais fais l'inverse : utilise l'outil fraction (les pointillés ···) pour créer une nouvelle fraction avec m et v² au numérateur, puis fais glisser le 2 pour qu'il devienne le dénominateur de cette nouvelle fraction. Termine en supprimant les restes de l'ancienne fraction 1/2.",
         left:  m4TutStart.left,
         right: m4TutStart.right,
         showPalette: true,
@@ -604,21 +613,21 @@ const M_ENTRER = [
         partialMessage: "Il ne reste plus qu'à retirer le 1 devenu inutile au dénominateur de la nouvelle fraction (clique sur sa croix, sur la tuile).",
         diag: st => {
             const R = st.right;
-            if (!R.slots.some(s => s.kind === 'frac' && s.num.items.some(t => t.id === 'm'))) return 'Glisse l\'outil fraction (···/···) de la palette sur la case de m et v² : ils deviennent le numérateur d\'une nouvelle fraction.';
+            if (!R.slots.some(s => s.kind === 'frac' && s.num.items.some(t => t.id === 'm'))) return 'Glisse l\'outil fraction (···/···) de la palette sur la case de m et v² : ils deviennent le numérateur d\'une nouvelle fraction.';
             const p2 = chemin(st, 'two');
             if (!p2 || !p2.endsWith('.den') || !R.slots.some(s => s.kind === 'frac' && s.den.items.some(t => t.id === 'two') && s.num.items.some(t => t.id === 'm'))) return 'Le 2 doit aller au dénominateur (en bas) de la nouvelle fraction, sous m et v².';
-            if (R.slots.length > 1) return 'Il doit rester une seule fraction : supprime les restes de l\'ancienne fraction 1/2 (le 1 et son dénominateur) avec leurs croix ✕.';
+            if (R.slots.length > 1) return 'Il doit rester une seule fraction : supprime les restes de l\'ancienne fraction 1/2 (le 1 et son dénominateur) avec leurs croix ✕.';
             return 'La nouvelle fraction doit avoir m et v² en haut et 2 en bas. Clique sur ↺ Recommencer si besoin.';
         },
         solution: () => ({ left: seq([simple([EC])]), right: seq([frac([M, V2], [DEUX])]) }),
-        explication: '<p>On retrouve la même fraction (m × v²)/2 : l\'ancienne fraction 1/2 a disparu, son 2 est passé au dénominateur de la nouvelle.</p>',
+        explication: '<p>On retrouve la même fraction (m × v²)/2 : l\'ancienne fraction 1/2 a disparu, son 2 est passé au dénominateur de la nouvelle.</p>',
     },
 ];
 
 // Sortir d'une fraction
 const M_SORTIR = [
     {   titre: 'Sortir m et v² à droite',
-        instruction: "Cette fois, m et v² sont au numérateur de la fraction. Déplace-les <b>à droite</b> de la fraction (hors de la barre). Le numérateur laissé vide ne se remplit pas tout seul : va chercher un 1 dans la palette et glisse-le toi-même.",
+        instruction: "Cette fois, m et v² sont au numérateur de la fraction. Déplace-les <b>à droite</b> de la fraction (hors de la barre). Le numérateur laissé vide ne se remplit pas tout seul : va chercher un 1 dans la palette et glisse-le toi-même.",
         left:  () => seq([simple([EC])]),
         right: () => seq([frac([M, V2], [DEUX])]),
         showPalette: true,
@@ -628,7 +637,7 @@ const M_SORTIR = [
                     && st.right.slots[1].kind === 'simple' && setEq(idsOf(st.right.slots[1].items), ['m','v2']),
         diag: st => diagSortie(st, 'droite'),
         solution: () => ({ left: seq([simple([EC])]), right: seq([frac([ONE], [DEUX]), simple([M, V2])]) }),
-        explication: '<p>(m × v²)/2 = 1/2 × m × v² : le numérateur vidé reçoit un 1.</p>',
+        explication: '<p>(m × v²)/2 = 1/2 × m × v² : le numérateur vidé reçoit un 1.</p>',
     },
     {   titre: 'Recopier l\'équation',
         instruction: "Recopie simplement l'équation E<sub>c</sub> = 1/2 · m · v² (tu peux placer m et v² au numérateur ou à côté de la fraction, comme tu préfères).",
@@ -647,13 +656,13 @@ const M_SORTIR = [
             return true;
         },
         diag: st => (isSlotEmpty(st.left) || isSlotEmpty(st.right))
-            ? 'Une case est encore vide : complète les deux membres de l\'équation (glisse E<sub>c</sub> à gauche, puis la fraction à droite).'
-            : 'Cette équation n\'est pas E<sub>c</sub> = 1/2 × m × v² : vérifie que 2 est au dénominateur, et que m et v² sont au numérateur ou à côté de la fraction.',
+            ? 'Une case est encore vide : complète les deux membres de l\'équation (glisse E<sub>c</sub> à gauche, puis la fraction à droite).'
+            : 'Cette équation n\'est pas E<sub>c</sub> = 1/2 × m × v² : vérifie que 2 est au dénominateur, et que m et v² sont au numérateur ou à côté de la fraction.',
         solution: () => ({ left: seq([simple([EC])]), right: seq([frac([M, V2], [DEUX])]) }),
-        explication: '<p>E<sub>c</sub> = 1/2 × m × v² = (m × v²)/2 : les deux écritures sont justes.</p>',
+        explication: '<p>E<sub>c</sub> = 1/2 × m × v² = (m × v²)/2 : les deux écritures sont justes.</p>',
     },
     {   titre: 'Sortir m et v² à gauche',
-        instruction: "Ici encore, m et v² sont au numérateur de la fraction. Déplace-les <b>à gauche</b> de la fraction, cette fois. Là encore, le numérateur laissé vide ne se remplit pas tout seul : glisse toi-même un 1 depuis la palette.",
+        instruction: "Ici encore, m et v² sont au numérateur de la fraction. Déplace-les <b>à gauche</b> de la fraction, cette fois. Là encore, le numérateur laissé vide ne se remplit pas tout seul : glisse toi-même un 1 depuis la palette.",
         left:  () => seq([simple([EC])]),
         right: () => seq([frac([M, V2], [DEUX])]),
         showPalette: true,
@@ -663,7 +672,7 @@ const M_SORTIR = [
                     && st.right.slots[1].kind === 'frac' && setEq(idsOf(st.right.slots[1].num.items), ['one']) && setEq(idsOf(st.right.slots[1].den.items), ['two']),
         diag: st => diagSortie(st, 'gauche'),
         solution: () => ({ left: seq([simple([EC])]), right: seq([simple([M, V2]), frac([ONE], [DEUX])]) }),
-        explication: '<p>(m × v²)/2 = m × v² × 1/2 : un terme peut sortir avant ou après la fraction.</p>',
+        explication: '<p>(m × v²)/2 = m × v² × 1/2 : un terme peut sortir avant ou après la fraction.</p>',
     },
 ];
 
@@ -682,19 +691,19 @@ const avantApres = (avant, op, apres) => `<div class="ep-avap">
     <div class="ep-av"><p class="ep-av-t">Avant</p>${avant}</div>
     <p class="ep-op">${op}</p>
     <div class="ep-av"><p class="ep-av-t">Après</p>${apres}</div></div>`;
-const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Fais glisser une tuile (à la souris ou au doigt) pour la déplacer ; un appui sur une tuile ou sur sa croix ✕ la supprime ; ↺ Recommencer remet l'équation de départ. Clique sur <b>Valider</b> quand c'est fait.</p></div>`;
+const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Fais glisser une tuile (à la souris ou au doigt) pour la déplacer ; un appui sur une tuile ou sur sa croix ✕ la supprime ; ↺ Recommencer remet l'équation de départ. Clique sur <b>Valider</b> quand c'est fait.</p></div>`;
 
 /* ---------- 1. Entrer dans une fraction ---------- */
 function etape1(c) {
     const carte = c.carte('1. Faire entrer un terme dans une fraction');
     c.ajouter(carte, `<div class="cours-bloc">
-        <p>Dans ce module, une équation peut comporter plus de deux zones : un terme peut être multiplié par une fraction. Or, placer un terme au numérateur d'une fraction (au-dessus de la barre) ou le placer juste à côté d'elle (avant ou après) revient exactement au même, puisque tout est multiplié.</p>
-        <div class="cle"><p><b class="cle-titre">Règle.</b> Un terme qui multiplie une fraction peut entrer dans son numérateur : ${fr('1', '2')} × m × v² = ${fr('1 × m × v²', '2')} = ${fr('m × v²', '2')}.</p></div>
+        <p>Dans ce module, une équation peut comporter plus de deux zones : un terme peut être multiplié par une fraction. Or, placer un terme au numérateur d'une fraction (au-dessus de la barre) ou le placer juste à côté d'elle (avant ou après) revient exactement au même, puisque tout est multiplié.</p>
+        <div class="cle"><p><b class="cle-titre">Règle.</b> Un terme qui multiplie une fraction peut entrer dans son numérateur : ${fr('1', '2')} × m × v² = ${fr('1 × m × v²', '2')} = ${fr('m × v²', '2')}.</p></div>
       </div>
-      ${exemple(`<p>Dans x = ½ × a × t², on fait entrer a et t² dans la fraction :</p>
+      ${exemple(`<p>Dans x = ½ × a × t², on fait entrer a et t² dans la fraction :</p>
         ${avantApres(eqStat(seq([simple([T('x')])]), seq([frac([ONE], [DEUX]), simple([T('a'), T('t2', 't²')])])), 'a et t² au numérateur',
                      eqStat(seq([simple([T('x')])]), seq([frac([T('a'), T('t2', 't²')], [DEUX])])))}
-        <p>Le 1 du numérateur, devenu inutile (1 × a × t² = a × t²), se retire : x = ${fr('a × t²', '2')}.</p>`)}
+        <p>Le 1 du numérateur, devenu inutile (1 × a × t² = a × t²), se retire : x = ${fr('a × t²', '2')}.</p>`)}
       ${MODE_EMPLOI}`);
     c.aToi(carte, M_ENTRER.map(manip));
     return carte;
@@ -705,12 +714,12 @@ function etape2(c) {
     const carte = c.carte('2. Faire sortir un terme d\'une fraction');
     c.ajouter(carte, `<div class="cours-bloc">
         <p>Dans l'autre sens, un terme du numérateur peut sortir de la fraction et se placer juste avant ou juste après elle. Dès que tu commences à glisser un élément, une petite zone de dépose apparaît à côté de la fraction pour t'y déposer un terme.</p>
-        <div class="cle"><p><b class="cle-titre">Règle.</b> Un terme du numérateur peut sortir à côté de la fraction (avant ou après). Si le numérateur se vide, on y écrit <b>1</b> : ${fr('m × v²', '2')} = ${fr('1', '2')} × m × v².</p></div>
+        <div class="cle"><p><b class="cle-titre">Règle.</b> Un terme du numérateur peut sortir à côté de la fraction (avant ou après). Si le numérateur se vide, on y écrit <b>1</b> : ${fr('m × v²', '2')} = ${fr('1', '2')} × m × v².</p></div>
       </div>
-      ${exemple(`<p>Dans P = ${fr('U²', 'R')}, on fait sortir U² de la fraction, à droite :</p>
+      ${exemple(`<p>Dans P = ${fr('U²', 'R')}, on fait sortir U² de la fraction, à droite :</p>
         ${avantApres(eqStat(seq([simple([T('P')])]), seq([frac([T('U2', 'U²')], [T('R')])])), 'U² sort à droite',
                      eqStat(seq([simple([T('P')])]), seq([frac([ONE], [T('R')]), simple([T('U2', 'U²')])])))}
-        <p>Le numérateur vidé reçoit un 1 : P = ${fr('1', 'R')} × U².</p>`)}`);
+        <p>Le numérateur vidé reçoit un 1 : P = ${fr('1', 'R')} × U².</p>`)}`);
     c.aToi(carte, M_SORTIR.map(manip));
     return carte;
 }
@@ -718,12 +727,12 @@ function etape2(c) {
 /* ---------- À retenir ---------- */
 function aRetenir(c) {
     const carte = c.carte('À retenir');
-    c.ajouter(carte, `<div class="cle"><p>Placer un terme au numérateur d'une fraction ou juste à côté d'elle (avant ou après) revient au même : tout est multiplié. Un numérateur vidé reçoit un 1.</p>
+    c.ajouter(carte, `<div class="cle"><p>Placer un terme au numérateur d'une fraction ou juste à côté d'elle (avant ou après) revient au même : tout est multiplié. Un numérateur vidé reçoit un 1.</p>
         <p class="crs-formule">E<sub>c</sub> = ${fr('1', '2')} × m × v² = ${fr('m × v²', '2')}</p></div>
-      <div class="cle"><p>On applique ensuite les règles du module 1 : par exemple, pour isoler m, v² et 2 changent de côté.</p>
+      <div class="cle"><p>On applique ensuite les règles du module 1 : par exemple, pour isoler m, v² et 2 changent de côté.</p>
         <p class="crs-formule">m = ${fr('2 × E<sub>c</sub>', 'v²')}</p></div>
       <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_5.html">Entraînement →</a>
-        <a class="btn-secondary" style="text-decoration:none" href="module_6.html">Module 3 : les + et les −</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_6.html">Module 3 : les + et les −</a>
         <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
     return carte;
 }

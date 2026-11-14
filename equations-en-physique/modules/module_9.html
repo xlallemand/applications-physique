@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 4 : entraînement — Équations en physique</title>
+<title>Module 4 : entraînement — Équations en physique</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
+<script src="../aide-rules.js"></script>
 <style>
     :root {
         --app-accent-50:  var(--paper);
@@ -663,6 +664,7 @@ function handleEmptied(path, removedId) {
 }
 function processDrop(path, data) {
     if (data.type === 'frac') {
+        if (!AideRules.isLegalFracTool(path)) { hadError = true; showFeedback(AideRules.MSG_FRAC, false); return; }
         const node = getNode(path);
         if (!node) return;
         if (node.kind === 'simple') {
@@ -693,6 +695,7 @@ function processDrop(path, data) {
     const node = getNode(path);
     if (!node || node.kind !== 'simple') return;
     if (data.type === 'move') {
+        if (!AideRules.isLegalMove(data.from, path)) { hadError = true; showFeedback(AideRules.MSG_MOVE_FRAC, false); return; }
         if (data.from === path) { refreshView(); return; }
         const src = getNode(data.from);
         if (src && src.items[data.idx] && src.items[data.idx].id === data.id) {
@@ -706,6 +709,7 @@ function processDrop(path, data) {
 }
 function handleInsertDropAt(sidePath, where, data) {
     if (!data || data.type !== 'move') return;
+    if (!AideRules.isLegalInsert(data.from, sidePath)) { hadError = true; showFeedback(AideRules.MSG_INSERT, false); return; }
     const side = getNode(sidePath);
     if (!side || side.kind !== 'seq') return;
     const src = getNode(data.from);
@@ -839,6 +843,7 @@ function captureEqSignRect() {
 function processSumTermDrop(sidePath, data) {
     if (sidePath !== 'left' && sidePath !== 'right') return;
     if (data.from === sidePath) { refreshView(); return; }
+    if (!AideRules.isLegalSumTerm(data.from, sidePath)) { hadError = true; showFeedback(AideRules.MSG_SUMTERM, false); return; }
     const srcSum = getNode(data.from);
     const srcTerm = srcSum && srcSum.kind === 'sum' ? srcSum.terms[data.termIdx] : null;
     const showVanishGhost = !!(srcTerm && srcTerm.sign === -1);
@@ -882,6 +887,7 @@ function processSumTermDrop(sidePath, data) {
 // multiplicatif, le membre entier de l'autre côté
 function processFracDenDrop(fracPath, destSidePath) {
     if (destSidePath !== 'left' && destSidePath !== 'right') return;
+    if (!AideRules.isLegalSumTerm(fracPath, destSidePath)) { hadError = true; showFeedback(AideRules.MSG_FRACDEN, false); return; }
     const fracNode = getNode(fracPath);
     if (!fracNode || fracNode.kind !== 'frac' || !denHasRealContent(fracNode)) return;
     const denContent = fracNode.den;
@@ -1052,7 +1058,7 @@ function applyFuncTool(toolFn, side) {
         return;
     }
     if (findNonIsolatedReciprocalMatch(s, inverse, currentExercise && currentExercise.targetId)) {
-        showFeedback("✕ Impossible : pour rester simple, une fonction réciproque ne s'utilise que sur la fonction seule, sans rien d'autre autour (pas de signe −, pas de multiplication ni de division). Isole d'abord la fonction.", false);
+        showFeedback("✕ Impossible : pour rester simple, une fonction réciproque ne s'utilise que sur la fonction seule, sans rien d'autre autour (pas de signe −, pas de multiplication ni de division). Isole d'abord la fonction.", false);
         return;
     }
     wrapSideInFunc(side, toolFn);
@@ -1277,7 +1283,7 @@ function verifyStep() {
         if (!isFinite(l) || !isFinite(r) || Math.abs(l - r) > 1e-6 * Math.max(1, Math.abs(r))) equationTrue = false;
     }
     if (!equationTrue) {
-        showFeedback("✕ Cette équation n'est pas correcte : vérifie tes calculs.", false);
+        showFeedback("✕ Cette équation n'est pas correcte : vérifie tes calculs.", false);
         hadError = true;
         return;
     }
@@ -1302,21 +1308,21 @@ function verifyStep() {
         dm.classList.remove('hidden');
         showFeedback('', true);
         if (currentExercise.onSolved) currentExercise.onSolved(dm);
-        else dm.innerHTML = '🎉 Équation résolue !';
+        else dm.innerHTML = '🎉 Équation résolue !';
     } else {
         let msg;
         if (rightFull) {
-            msg = "✓ Étape correcte ! Il ne reste plus qu'à inverser le sens de l'équation avec ⇄.";
+            msg = "✓ Étape correcte ! Il ne reste plus qu'à inverser le sens de l'équation avec ⇄.";
         } else if (rightLoose) {
-            msg = "✓ Étape correcte ! Inverse le sens de l'équation avec ⇄, puis retire le dénominateur qui vaut 1.";
+            msg = "✓ Étape correcte ! Inverse le sens de l'équation avec ⇄, puis retire le dénominateur qui vaut 1.";
         } else if (leftLoose && onesElsewhere > 0) {
-            msg = "✓ Étape correcte ! Retire les 1 inutiles.";
+            msg = "✓ Étape correcte ! Retire les 1 inutiles.";
         } else if (leftLoose) {
-            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur pour le supprimer.";
+            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur pour le supprimer.";
         } else if (leftFull && onesElsewhere > 0) {
             msg = "✓ Retire les 1 inutiles.";
         } else {
-            msg = "✓ Étape correcte, continue !";
+            msg = "✓ Étape correcte, continue !";
         }
         showFeedback(msg, true);
         state = JSON.parse(JSON.stringify(state));
@@ -1337,7 +1343,7 @@ function samplePh() {
     const C = Math.pow(10, -(1 + Math.random() * 12));
     return { pH: -Math.log10(C / C0), C, C0, m1: -1 };
 }
-const phLegend = "pH : potentiel hydrogène (sans unité) · C : concentration en ions H<sub>3</sub>O<sup>+</sup> (mol/L) · C<sub>0</sub> : concentration de référence (C<sub>0</sub> = 1 mol/L)";
+const phLegend = "pH : potentiel hydrogène (sans unité) · C : concentration en ions H<sub>3</sub>O<sup>+</sup> (mol/L) · C<sub>0</sub> : concentration de référence (C<sub>0</sub> = 1 mol/L)";
 const phIntro = "Le pH d'une solution est défini à partir de la concentration en ions oxonium.";
 const phStaticEq = buildStaticEq(m9StartPh);
 const phTiles = [tile('pH','pH'), tile('C','C'), tile('C0','C<sub>0</sub>')];
@@ -1351,7 +1357,7 @@ function sampleDecay() {
     const lambda = 0.01 + Math.random() * 0.5, t = Math.random() * 10, N0 = 100 + Math.random() * 900;
     return { N: N0 * Math.exp(-lambda * t), N0, lambda, t, m1: -1 };
 }
-const decayLegend = "N : nombre de noyaux radioactifs restants · N<sub>0</sub> : nombre initial de noyaux · λ : constante radioactive (s<sup>−1</sup>) · t : durée (s)";
+const decayLegend = "N : nombre de noyaux radioactifs restants · N<sub>0</sub> : nombre initial de noyaux · λ : constante radioactive (s<sup>−1</sup>) · t : durée (s)";
 const decayIntro = "La décroissance radioactive suit une loi exponentielle.";
 const decayStaticEq = buildStaticEq(m9StartDecay);
 const decayTiles = [tile('N','N'), tile('N0','N<sub>0</sub>'), tile('lambda','λ'), tile('t','t')];
@@ -1365,7 +1371,7 @@ function sampleCap() {
     const tau = 0.2 + Math.random() * 5, t = Math.random() * 10, E = 1 + Math.random() * 11;
     return { uc: E * Math.exp(-t / tau), E, t, tau, m1: -1 };
 }
-const capLegend = "u<sub>C</sub> : tension aux bornes du condensateur (V) · E : tension initiale (V) · t : durée (s) · τ : constante de temps (s)";
+const capLegend = "u<sub>C</sub> : tension aux bornes du condensateur (V) · E : tension initiale (V) · t : durée (s) · τ : constante de temps (s)";
 const capIntro = "Lors de la décharge d'un condensateur, la tension à ses bornes décroît exponentiellement.";
 const capStaticEq = buildStaticEq(m9StartCap);
 const capTiles = [tile('uc','u<sub>C</sub>'), tile('E','E'), tile('t','t'), tile('tau','τ')];
@@ -1381,7 +1387,7 @@ function sampleDescartes() {
     const n2 = n1 * Math.sin(i1) / Math.sin(i2);
     return { n1, i1, n2, i2 };
 }
-const descartesLegend = "n<sub>1</sub>, n<sub>2</sub> : indices de réfraction (sans unité) · i<sub>1</sub>, i<sub>2</sub> : angles d'incidence et de réfraction (rad)";
+const descartesLegend = "n<sub>1</sub>, n<sub>2</sub> : indices de réfraction (sans unité) · i<sub>1</sub>, i<sub>2</sub> : angles d'incidence et de réfraction (rad)";
 const descartesIntro = "La loi de Descartes (réfraction de la lumière) relie les indices et les angles de part et d'autre d'un dioptre.";
 const descartesStaticEq = buildStaticEq(m9StartDescartes);
 const descartesTiles = [tile('n1','n<sub>1</sub>'), tile('i1','i<sub>1</sub>'), tile('n2','n<sub>2</sub>'), tile('i2','i<sub>2</sub>')];
@@ -1395,7 +1401,7 @@ function sampleKepler() {
     const k = 0.5 + Math.random() * 2, a = 1 + Math.random() * 9;
     return { T: Math.sqrt(k * a * a * a), k, a };
 }
-const keplerLegend = "T : période de révolution (s) · k : constante regroupant 4π²/(GM) · a : demi-grand axe de l'orbite (m)";
+const keplerLegend = "T : période de révolution (s) · k : constante regroupant 4π²/(GM) · a : demi-grand axe de l'orbite (m)";
 const keplerIntro = "La troisième loi de Kepler relie la période de révolution d'une planète au demi-grand axe de son orbite (k = 4π²/(GM) est ici regroupée en une seule grandeur).";
 const keplerStaticEq = buildStaticEq(m9StartKepler);
 const keplerTiles = [tile('T','T'), tile('k','k'), tile('a','a')];
@@ -1416,7 +1422,7 @@ function sampleSat() {
     const G = 6.674e-11, MT = 5.97e24, MS = 400 + Math.random() * 5000, RT = 6.371e6, h = 3e5 + Math.random() * 3e6;
     return { F: G * MT * MS / ((RT + h) * (RT + h)), G, MT, MS, RT, h };
 }
-const satLegend = "F : force de gravitation (N) · G : constante de gravitation (N·m²/kg²) · M<sub>T</sub>, M<sub>S</sub> : masses de la Terre et du satellite (kg) · R<sub>T</sub> : rayon terrestre (m) · h : altitude du satellite (m)";
+const satLegend = "F : force de gravitation (N) · G : constante de gravitation (N·m²/kg²) · M<sub>T</sub>, M<sub>S</sub> : masses de la Terre et du satellite (kg) · R<sub>T</sub> : rayon terrestre (m) · h : altitude du satellite (m)";
 const satIntro = "La Terre exerce sur un satellite en orbite une force de gravitation qui dépend de son altitude.";
 const satStaticEq = buildStaticEq(m9StartSat);
 const satTiles = [tile('F','F'), tile('G','G'), tile('MT','M<sub>T</sub>'), tile('MS','M<sub>S</sub>'), tile('RT','R<sub>T</sub>'), tile('h','h')];
@@ -1452,8 +1458,8 @@ function renderModule9Intro() {
         <span class="content-module-badge">MODULE 4 · ENTRAÎNEMENT</span>
         <h2 class="text-2xl font-bold text-indigo-900 mb-3">Entraînement</h2>
         <p class="text-gray-700 mb-2">Tu vas résoudre des équations comportant des fonctions (racine carrée, carré, cube, sinus, logarithme...), issues de situations physiques variées. Utilise l'outil de fonction réciproque de la palette pour supprimer une fonction, comme vu au module 8.</p>
-        <p class="text-gray-700 mb-2"><b>Notation :</b> 2 points si l'équation est résolue en plusieurs étapes sans aucune erreur, 1 point s'il y a eu au moins une erreur avant d'y arriver, 0 point en cas d'abandon. La note finale est donnée en pourcentage.</p>
-        <p class="text-gray-700 mb-2"><b>Bonus ultime :</b> si l'équation est résolue en une seule étape, de tête, vous remportez 3 points. La note finale peut alors dépasser 100% !</p>
+        <p class="text-gray-700 mb-2"><b>Notation :</b> 2 points si l'équation est résolue en plusieurs étapes sans aucune erreur, 1 point s'il y a eu au moins une erreur avant d'y arriver, 0 point en cas d'abandon. La note finale est donnée en pourcentage.</p>
+        <p class="text-gray-700 mb-2"><b>Bonus ultime :</b> si l'équation est résolue en une seule étape, de tête, vous remportez 3 points. La note finale peut alors dépasser 100% !</p>
         <button onclick="startModule9Graded()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow mt-2">Commencer →</button>
       </div>`;
 }
@@ -1469,7 +1475,7 @@ function renderModule9Question() {
       <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
         <span class="content-module-badge">MODULE 4 · ENTRAÎNEMENT</span>
         <h2 class="text-2xl font-bold text-indigo-900 mb-1">Entraînement</h2>
-        <p class="text-xs text-gray-400 uppercase font-bold mb-2">Question ${displayNum}/${module9Bank.length} · Score : <span class="score-badge">${m9Score} pt${m9Score>1?'s':''}</span></p>
+        <p class="text-xs text-gray-400 uppercase font-bold mb-2">Question ${displayNum}/${module9Bank.length} · Score : <span class="score-badge">${m9Score} pt${m9Score>1?'s':''}</span></p>
         <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${progressPct}%"></div></div>
       </div>
       <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
@@ -1490,7 +1496,7 @@ function renderModule9Question() {
             const pts = hadError ? 1 : (history.length === 1 ? 3 : 2);
             m9Score += pts;
             m9Answers.push({ num: displayNum, pts, max: 2 });
-            dm.innerHTML = `🎉 Équation résolue ! (+${pts} pt${pts>1?'s':''})<div class="mt-4"><button onclick="nextModule9Question()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">Suivant →</button></div>`;
+            dm.innerHTML = `🎉 Équation résolue ! (+${pts} pt${pts>1?'s':''})<div class="mt-4"><button onclick="nextModule9Question()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">Suivant →</button></div>`;
         }
     });
 }
@@ -1507,10 +1513,10 @@ function finishModule9() {
     const recapHtml = m9Answers.map(a => `<div class="recap-item">Q${a.num}<br><b>${a.pts}/${a.max}</b></div>`).join('');
     document.getElementById('app').innerHTML = `
       <div class="bg-white rounded-xl shadow-lg p-8 text-center">
-        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Entraînement terminé !</h2>
-        ${isMax ? `<p class="text-lg font-bold text-amber-600 mb-2">🏆 Score maximal ! Bravo, c'est un sans-faute parfait !</p>` : ''}
+        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Entraînement terminé !</h2>
+        ${isMax ? `<p class="text-lg font-bold text-amber-600 mb-2">🏆 Score maximal ! Bravo, c'est un sans-faute parfait !</p>` : ''}
         <p style="font-size:2.6rem;font-weight:900;color:var(--accent);letter-spacing:-.03em;line-height:1.1;margin:6px 0 4px">${String(note).replace('.', ',')} / 20</p>
-        <p class="text-lg text-gray-700 mb-4">Score : ${m9Score} / ${m9MaxScore} points (${pct}%)</p>
+        <p class="text-lg text-gray-700 mb-4">Score : ${m9Score} / ${m9MaxScore} points (${pct}%)</p>
         <button onclick="startModule9Graded()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">↺ Recommencer l'entraînement</button>
         <div class="text-sm font-bold text-gray-500 mt-6 mb-2 text-left">Détail des points</div>
         <div class="recap-grid">${recapHtml}</div>

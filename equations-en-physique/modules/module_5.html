@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 2 : entraînement — Équations en physique</title>
+<title>Module 2 : entraînement — Équations en physique</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
+<script src="../aide-rules.js"></script>
 <style>
     :root {
         --app-accent-50:  var(--paper);
@@ -366,7 +367,7 @@ function updateHint() {
     if (!h) return;
     h.textContent = stepOneValidated
         ? "Déplace les termes pour isoler la grandeur demandée à gauche, ou utilise ⇄ pour inverser le sens de l'équation."
-        : "Recopie l'équation ci-dessus. Un terme peut se glisser au numérateur d'une fraction, ou juste à côté d'elle : c'est équivalent.";
+        : "Recopie l'équation ci-dessus. Un terme peut se glisser au numérateur d'une fraction, ou juste à côté d'elle : c'est équivalent.";
 }
 function refreshView() {
     renderEquationZone();
@@ -434,6 +435,7 @@ function handleEmptied(path, removedId) {
 
 function processDrop(path, data) {
     if (data.type === 'frac') {
+        if (!AideRules.isLegalFracTool(path)) { hadError = true; showFeedback(AideRules.MSG_FRAC, false); return; }
         const node = getNode(path);
         if (!node || node.kind !== 'simple') return;
         const f = frac(node.items, []);
@@ -449,6 +451,7 @@ function processDrop(path, data) {
     const node = getNode(path);
     if (!node || node.kind !== 'simple') return;
     if (data.type === 'move') {
+        if (!AideRules.isLegalMove(data.from, path)) { hadError = true; showFeedback(AideRules.MSG_MOVE_FRAC, false); return; }
         if (data.from === path) { refreshView(); return; }
         const src = getNode(data.from);
         if (src && src.items[data.idx] && src.items[data.idx].id === data.id) {
@@ -467,6 +470,10 @@ function handleInsertDropAt(sidePath, where, data) {
     if (!data || data.type === 'frac' || data.type === 'sqrt') return;
     const side = getNode(sidePath);
     if (!side || side.kind !== 'seq') return;
+    if (data.type === 'move' && !AideRules.isLegalInsert(data.from, sidePath)) {
+        hadError = true; showFeedback(AideRules.MSG_INSERT, false);
+        return;
+    }
     // retirer la tuile de sa zone d'origine AVANT d'insérer la nouvelle zone :
     // insérer au début (unshift) décale les index des zones existantes, donc
     // si on retire APRÈS avoir inséré, le chemin d'origine ne pointe plus vers
@@ -758,7 +765,7 @@ function verifyStep() {
         if (!isFinite(l) || !isFinite(r) || Math.abs(l - r) > 1e-6 * Math.max(1, Math.abs(r))) equationTrue = false;
     }
     if (!equationTrue) {
-        showFeedback("✕ Cette équation n'est pas correcte : vérifie tes calculs.", false);
+        showFeedback("✕ Cette équation n'est pas correcte : vérifie tes calculs.", false);
         hadError = true;
         return;
     }
@@ -784,23 +791,23 @@ function verifyStep() {
         dm.classList.remove('hidden');
         showFeedback('', true);
         if (currentExercise.onSolved) currentExercise.onSolved(dm);
-        else dm.innerHTML = '🎉 Équation résolue !';
+        else dm.innerHTML = '🎉 Équation résolue !';
     } else {
         let msg;
         if (rightFull) {
-            msg = "✓ Étape correcte ! Il ne reste plus qu'à inverser le sens de l'équation avec ⇄.";
+            msg = "✓ Étape correcte ! Il ne reste plus qu'à inverser le sens de l'équation avec ⇄.";
         } else if (rightLoose) {
-            msg = "✓ Étape correcte ! Inverse le sens de l'équation avec ⇄, puis retire le dénominateur qui vaut 1.";
+            msg = "✓ Étape correcte ! Inverse le sens de l'équation avec ⇄, puis retire le dénominateur qui vaut 1.";
         } else if (leftLoose && onesElsewhere > 0) {
-            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur (qui vaut 1) pour le supprimer. Retire les 1 inutiles.";
+            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur (qui vaut 1) pour le supprimer. Retire les 1 inutiles.";
         } else if (leftLoose) {
-            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur (qui vaut 1) pour le supprimer.";
+            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur (qui vaut 1) pour le supprimer.";
         } else if (leftFull && onesElsewhere > 0) {
             msg = "✓ Retire les 1 inutiles.";
         } else if (currentExercise.hasSqrt && (isFullyIsolatedSeq(state.left, currentExercise.sqrtTargetId) || isFullyIsolatedSeq(state.right, currentExercise.sqrtTargetId))) {
-            msg = `✓ Étape correcte ! ${currentExercise.sqrtTargetLabel} est isolé(e). Utilise maintenant l'outil racine carrée (√) sur ce membre, puis fais la même chose sur l'autre membre.`;
+            msg = `✓ Étape correcte ! ${currentExercise.sqrtTargetLabel} est isolé(e). Utilise maintenant l'outil racine carrée (√) sur ce membre, puis fais la même chose sur l'autre membre.`;
         } else {
-            msg = "✓ Étape correcte, continue !";
+            msg = "✓ Étape correcte, continue !";
         }
         showFeedback(msg, true);
         state = JSON.parse(JSON.stringify(state));
@@ -851,7 +858,7 @@ function checkDrill() {
     if (!currentDrill) return;
     const result = currentDrill.check(state);
     if (result === true) {
-        showFeedback("✓ Bravo, c'est exactement ça !", true);
+        showFeedback("✓ Bravo, c'est exactement ça !", true);
         document.getElementById('verifyDrillBtn').classList.add('hidden');
         document.getElementById('nextDrillBtn').classList.remove('hidden');
     } else if (result === 'partial') {
@@ -894,19 +901,19 @@ const m4StartFG = {
 
 const module4Bank = [
     // Énergie cinétique Ec = 1/2 · m · v²  (Q1, Q2, Q3)
-    { legend:"E<sub>c</sub> : énergie cinétique (J) · m : masse (kg) · v : vitesse (m/s)",
-      intro:"On étudie l'énergie cinétique d'un objet (les grandeurs sont écrites sans indice ici) :",
+    { legend:"E<sub>c</sub> : énergie cinétique (J) · m : masse (kg) · v : vitesse (m/s)",
+      intro:"On étudie l'énergie cinétique d'un objet (les grandeurs sont écrites sans indice ici) :",
       staticEqHtml:`<span class="eq-tile-static">E<sub>c</sub></span><span class="eq-sign">=</span>${staticFracHtml('1','2')}<span class="eq-tile-static">m</span><span class="eq-tile-static">v²</span>`,
       tiles:[tile('Ec','E<sub>c</sub>'), tile('m','m'), tile('v2','v²'), tile('two','2')], target:'m', ...m4StartEc,
       sample:()=>{ const m=0.5+Math.random()*49.5, v=1+Math.random()*29; return {Ec:0.5*m*v*v, m, v2:v*v, two:2, v}; } },
 
-    { legend:"E<sub>c</sub> : énergie cinétique (J) · m : masse (kg) · v : vitesse (m/s)",
+    { legend:"E<sub>c</sub> : énergie cinétique (J) · m : masse (kg) · v : vitesse (m/s)",
       intro:"On souhaite maintenant exprimer v² (le carré de la vitesse).",
       staticEqHtml:`<span class="eq-tile-static">E<sub>c</sub></span><span class="eq-sign">=</span>${staticFracHtml('1','2')}<span class="eq-tile-static">m</span><span class="eq-tile-static">v²</span>`,
       tiles:[tile('Ec','E<sub>c</sub>'), tile('m','m'), tile('v2','v²'), tile('two','2')], target:'v2', ...m4StartEc,
       sample:()=>{ const m=0.5+Math.random()*49.5, v=1+Math.random()*29; return {Ec:0.5*m*v*v, m, v2:v*v, two:2, v}; } },
 
-    { legend:"E<sub>c</sub> : énergie cinétique (J) · m : masse (kg) · v : vitesse (m/s)",
+    { legend:"E<sub>c</sub> : énergie cinétique (J) · m : masse (kg) · v : vitesse (m/s)",
       intro:"On souhaite exprimer v elle-même. Une fois v² isolé, utilise l'icône racine carrée de la palette.",
       staticEqHtml:`<span class="eq-tile-static">E<sub>c</sub></span><span class="eq-sign">=</span>${staticFracHtml('1','2')}<span class="eq-tile-static">m</span><span class="eq-tile-static">v²</span>`,
       tiles:[tile('Ec','E<sub>c</sub>'), tile('m','m'), tile('v2','v²'), tile('two','2')], target:'v', ...m4StartEc,
@@ -914,25 +921,25 @@ const module4Bank = [
       sample:()=>{ const m=0.5+Math.random()*49.5, v=1+Math.random()*29; return {Ec:0.5*m*v*v, m, v2:v*v, two:2, v}; } },
 
     // Champ de pesanteur g = G · M/R²  (Q4, Q5, Q6, Q7)
-    { legend:"g : champ de pesanteur (N/kg) · G : constante gravitationnelle · M : masse de la Terre (kg) · R : rayon de la Terre (m)",
+    { legend:"g : champ de pesanteur (N/kg) · G : constante gravitationnelle · M : masse de la Terre (kg) · R : rayon de la Terre (m)",
       intro:"On étudie le champ de pesanteur à la surface de la Terre.",
       staticEqHtml:`<span class="eq-tile-static">g</span><span class="eq-sign">=</span><span class="eq-tile-static">G</span>${staticFracHtml('M','R²')}`,
       tiles:[tile('g','g'), tile('G','G'), tile('M','M'), tile('R2','R²')], target:'M', ...m4StartG,
       sample:()=>{ const G=1+Math.random()*9, M=1+Math.random()*99, R=1+Math.random()*19; return {g:G*M/(R*R), G, M, R2:R*R, R}; } },
 
-    { legend:"g : champ de pesanteur (N/kg) · G : constante gravitationnelle · M : masse de la Terre (kg) · R : rayon de la Terre (m)",
+    { legend:"g : champ de pesanteur (N/kg) · G : constante gravitationnelle · M : masse de la Terre (kg) · R : rayon de la Terre (m)",
       intro:"On souhaite maintenant exprimer G.",
       staticEqHtml:`<span class="eq-tile-static">g</span><span class="eq-sign">=</span><span class="eq-tile-static">G</span>${staticFracHtml('M','R²')}`,
       tiles:[tile('g','g'), tile('G','G'), tile('M','M'), tile('R2','R²')], target:'G', ...m4StartG,
       sample:()=>{ const G=1+Math.random()*9, M=1+Math.random()*99, R=1+Math.random()*19; return {g:G*M/(R*R), G, M, R2:R*R, R}; } },
 
-    { legend:"g : champ de pesanteur (N/kg) · G : constante gravitationnelle · M : masse de la Terre (kg) · R : rayon de la Terre (m)",
+    { legend:"g : champ de pesanteur (N/kg) · G : constante gravitationnelle · M : masse de la Terre (kg) · R : rayon de la Terre (m)",
       intro:"On souhaite maintenant exprimer R² (le carré du rayon).",
       staticEqHtml:`<span class="eq-tile-static">g</span><span class="eq-sign">=</span><span class="eq-tile-static">G</span>${staticFracHtml('M','R²')}`,
       tiles:[tile('g','g'), tile('G','G'), tile('M','M'), tile('R2','R²')], target:'R2', ...m4StartG,
       sample:()=>{ const G=1+Math.random()*9, M=1+Math.random()*99, R=1+Math.random()*19; return {g:G*M/(R*R), G, M, R2:R*R, R}; } },
 
-    { legend:"g : champ de pesanteur (N/kg) · G : constante gravitationnelle · M : masse de la Terre (kg) · R : rayon de la Terre (m)",
+    { legend:"g : champ de pesanteur (N/kg) · G : constante gravitationnelle · M : masse de la Terre (kg) · R : rayon de la Terre (m)",
       intro:"On souhaite exprimer R elle-même. Une fois R² isolé, utilise l'icône racine carrée.",
       staticEqHtml:`<span class="eq-tile-static">g</span><span class="eq-sign">=</span><span class="eq-tile-static">G</span>${staticFracHtml('M','R²')}`,
       tiles:[tile('g','g'), tile('G','G'), tile('M','M'), tile('R2','R²')], target:'R', ...m4StartG,
@@ -940,44 +947,44 @@ const module4Bank = [
       sample:()=>{ const G=1+Math.random()*9, M=1+Math.random()*99, R=1+Math.random()*19; return {g:G*M/(R*R), G, M, R2:R*R, R}; } },
 
     // Gaz parfaits P = R · nT/V  (Q8, Q9, Q10)
-    { legend:"P : pression (Pa) · R : constante des gaz parfaits · n : quantité de matière (mol) · T : température (K) · V : volume (m³)",
+    { legend:"P : pression (Pa) · R : constante des gaz parfaits · n : quantité de matière (mol) · T : température (K) · V : volume (m³)",
       intro:"On étudie un gaz parfait.",
       staticEqHtml:`<span class="eq-tile-static">P</span><span class="eq-sign">=</span><span class="eq-tile-static">R</span>${staticFracHtml('nT','V')}`,
       tiles:[tile('P','P'), tile('R','R'), tile('n','n'), tile('T','T'), tile('V','V')], target:'T', ...m4StartP,
       sample:()=>{ const R=1+Math.random()*9, n=0.1+Math.random()*9.9, T=200+Math.random()*200, V=0.01+Math.random()*9.99; return {P:R*n*T/V, R, n, T, V}; } },
 
-    { legend:"P : pression (Pa) · R : constante des gaz parfaits · n : quantité de matière (mol) · T : température (K) · V : volume (m³)",
+    { legend:"P : pression (Pa) · R : constante des gaz parfaits · n : quantité de matière (mol) · T : température (K) · V : volume (m³)",
       intro:"On souhaite maintenant exprimer n.",
       staticEqHtml:`<span class="eq-tile-static">P</span><span class="eq-sign">=</span><span class="eq-tile-static">R</span>${staticFracHtml('nT','V')}`,
       tiles:[tile('P','P'), tile('R','R'), tile('n','n'), tile('T','T'), tile('V','V')], target:'n', ...m4StartP,
       sample:()=>{ const R=1+Math.random()*9, n=0.1+Math.random()*9.9, T=200+Math.random()*200, V=0.01+Math.random()*9.99; return {P:R*n*T/V, R, n, T, V}; } },
 
-    { legend:"P : pression (Pa) · R : constante des gaz parfaits · n : quantité de matière (mol) · T : température (K) · V : volume (m³)",
+    { legend:"P : pression (Pa) · R : constante des gaz parfaits · n : quantité de matière (mol) · T : température (K) · V : volume (m³)",
       intro:"On souhaite maintenant exprimer V.",
       staticEqHtml:`<span class="eq-tile-static">P</span><span class="eq-sign">=</span><span class="eq-tile-static">R</span>${staticFracHtml('nT','V')}`,
       tiles:[tile('P','P'), tile('R','R'), tile('n','n'), tile('T','T'), tile('V','V')], target:'V', ...m4StartP,
       sample:()=>{ const R=1+Math.random()*9, n=0.1+Math.random()*9.9, T=200+Math.random()*200, V=0.01+Math.random()*9.99; return {P:R*n*T/V, R, n, T, V}; } },
 
     // Loi de Coulomb F = k · q1q2/d²  (Q11, Q12, Q13, Q14)
-    { legend:"F : force électrique (N) · k : constante de Coulomb · q<sub>1</sub>, q<sub>2</sub> : charges électriques (C) · d : distance (m)",
+    { legend:"F : force électrique (N) · k : constante de Coulomb · q<sub>1</sub>, q<sub>2</sub> : charges électriques (C) · d : distance (m)",
       intro:"On étudie l'interaction électrique entre deux charges (loi de Coulomb).",
       staticEqHtml:`<span class="eq-tile-static">F</span><span class="eq-sign">=</span><span class="eq-tile-static">k</span>${staticFracHtml('q<sub>1</sub>q<sub>2</sub>','d²')}`,
       tiles:[tile('F','F'), tile('k','k'), tile('q1','q<sub>1</sub>'), tile('q2','q<sub>2</sub>'), tile('d2','d²')], target:'q1', ...m4StartF,
       sample:()=>{ const k=1+Math.random()*9, q1=1+Math.random()*9, q2=1+Math.random()*9, d=1+Math.random()*19; return {F:k*q1*q2/(d*d), k, q1, q2, d2:d*d, d}; } },
 
-    { legend:"F : force électrique (N) · k : constante de Coulomb · q<sub>1</sub>, q<sub>2</sub> : charges électriques (C) · d : distance (m)",
+    { legend:"F : force électrique (N) · k : constante de Coulomb · q<sub>1</sub>, q<sub>2</sub> : charges électriques (C) · d : distance (m)",
       intro:"On souhaite maintenant exprimer k.",
       staticEqHtml:`<span class="eq-tile-static">F</span><span class="eq-sign">=</span><span class="eq-tile-static">k</span>${staticFracHtml('q<sub>1</sub>q<sub>2</sub>','d²')}`,
       tiles:[tile('F','F'), tile('k','k'), tile('q1','q<sub>1</sub>'), tile('q2','q<sub>2</sub>'), tile('d2','d²')], target:'k', ...m4StartF,
       sample:()=>{ const k=1+Math.random()*9, q1=1+Math.random()*9, q2=1+Math.random()*9, d=1+Math.random()*19; return {F:k*q1*q2/(d*d), k, q1, q2, d2:d*d, d}; } },
 
-    { legend:"F : force électrique (N) · k : constante de Coulomb · q<sub>1</sub>, q<sub>2</sub> : charges électriques (C) · d : distance (m)",
+    { legend:"F : force électrique (N) · k : constante de Coulomb · q<sub>1</sub>, q<sub>2</sub> : charges électriques (C) · d : distance (m)",
       intro:"On souhaite maintenant exprimer d² (le carré de la distance).",
       staticEqHtml:`<span class="eq-tile-static">F</span><span class="eq-sign">=</span><span class="eq-tile-static">k</span>${staticFracHtml('q<sub>1</sub>q<sub>2</sub>','d²')}`,
       tiles:[tile('F','F'), tile('k','k'), tile('q1','q<sub>1</sub>'), tile('q2','q<sub>2</sub>'), tile('d2','d²')], target:'d2', ...m4StartF,
       sample:()=>{ const k=1+Math.random()*9, q1=1+Math.random()*9, q2=1+Math.random()*9, d=1+Math.random()*19; return {F:k*q1*q2/(d*d), k, q1, q2, d2:d*d, d}; } },
 
-    { legend:"F : force électrique (N) · k : constante de Coulomb · q<sub>1</sub>, q<sub>2</sub> : charges électriques (C) · d : distance (m)",
+    { legend:"F : force électrique (N) · k : constante de Coulomb · q<sub>1</sub>, q<sub>2</sub> : charges électriques (C) · d : distance (m)",
       intro:"On souhaite exprimer d elle-même. Une fois d² isolé, utilise l'icône racine carrée.",
       staticEqHtml:`<span class="eq-tile-static">F</span><span class="eq-sign">=</span><span class="eq-tile-static">k</span>${staticFracHtml('q<sub>1</sub>q<sub>2</sub>','d²')}`,
       tiles:[tile('F','F'), tile('k','k'), tile('q1','q<sub>1</sub>'), tile('q2','q<sub>2</sub>'), tile('d2','d²')], target:'d', ...m4StartF,
@@ -985,13 +992,13 @@ const module4Bank = [
       sample:()=>{ const k=1+Math.random()*9, q1=1+Math.random()*9, q2=1+Math.random()*9, d=1+Math.random()*19; return {F:k*q1*q2/(d*d), k, q1, q2, d2:d*d, d}; } },
 
     // Force gravitationnelle Terre/satellite F = G · MT·MS/(RT+h)²  (Q15, Q16)
-    { legend:"F : force gravitationnelle (N) · G : constante gravitationnelle · M<sub>T</sub> : masse de la Terre (kg) · M<sub>S</sub> : masse du satellite (kg) · (R<sub>T</sub>+h) : distance au centre de la Terre (m)",
+    { legend:"F : force gravitationnelle (N) · G : constante gravitationnelle · M<sub>T</sub> : masse de la Terre (kg) · M<sub>S</sub> : masse du satellite (kg) · (R<sub>T</sub>+h) : distance au centre de la Terre (m)",
       intro:"On étudie la force exercée par la Terre sur un satellite en orbite. (R<sub>T</sub>+h)² est ici un seul terme, qu'on ne cherche pas à développer.",
       staticEqHtml:`<span class="eq-tile-static">F</span><span class="eq-sign">=</span><span class="eq-tile-static">G</span>${staticFracHtml('M<sub>T</sub>M<sub>S</sub>','(R<sub>T</sub>+h)²')}`,
       tiles:[tile('F','F'), tile('G','G'), tile('MT','M<sub>T</sub>'), tile('MS','M<sub>S</sub>'), tile('Rh2','(R<sub>T</sub>+h)²')], target:'MS', ...m4StartFG,
       sample:()=>{ const G=1+Math.random()*9, MT=10+Math.random()*90, MS=1+Math.random()*19, Rh=5+Math.random()*45; return {F:G*MT*MS/(Rh*Rh), G, MT, MS, Rh2:Rh*Rh, Rh}; } },
 
-    { legend:"F : force gravitationnelle (N) · G : constante gravitationnelle · M<sub>T</sub> : masse de la Terre (kg) · M<sub>S</sub> : masse du satellite (kg) · (R<sub>T</sub>+h) : distance au centre de la Terre (m)",
+    { legend:"F : force gravitationnelle (N) · G : constante gravitationnelle · M<sub>T</sub> : masse de la Terre (kg) · M<sub>S</sub> : masse du satellite (kg) · (R<sub>T</sub>+h) : distance au centre de la Terre (m)",
       intro:"On souhaite exprimer (R<sub>T</sub>+h) elle-même. Une fois (R<sub>T</sub>+h)² isolé, utilise l'icône racine carrée.",
       staticEqHtml:`<span class="eq-tile-static">F</span><span class="eq-sign">=</span><span class="eq-tile-static">G</span>${staticFracHtml('M<sub>T</sub>M<sub>S</sub>','(R<sub>T</sub>+h)²')}`,
       tiles:[tile('F','F'), tile('G','G'), tile('MT','M<sub>T</sub>'), tile('MS','M<sub>S</sub>'), tile('Rh2','(R<sub>T</sub>+h)²')], target:'Rh', ...m4StartFG,
@@ -1016,9 +1023,9 @@ function renderModule4Intro() {
       <div class="bg-white rounded-xl shadow-lg p-6">
         <span class="content-module-badge">MODULE 2 · ENTRAÎNEMENT</span>
         <h2 class="text-2xl font-bold text-indigo-900 mb-3">Entraînement</h2>
-        <p class="text-gray-700 mb-2">Tu vas maintenant résoudre des équations plus complexes, comportant parfois plus de deux zones (un terme multiplié par une fraction entière). Elles sont déjà écrites : il ne reste qu'à déplacer les éléments pour isoler la grandeur demandée.</p>
-        <p class="text-gray-700 mb-2"><b>Notation :</b> 2 points si l'équation est résolue en plusieurs étapes sans aucune erreur, 1 point s'il y a eu au moins une erreur avant d'y arriver, 0 point en cas d'abandon. La note finale est donnée en pourcentage.</p>
-        <p class="text-gray-700 mb-2"><b>Bonus ultime :</b> si l'équation est résolue en une seule étape, de tête (interdiction d'utiliser un crayon et du papier), vous remportez 3 points. La note finale peut alors dépasser 100% !</p>
+        <p class="text-gray-700 mb-2">Tu vas maintenant résoudre des équations plus complexes, comportant parfois plus de deux zones (un terme multiplié par une fraction entière). Elles sont déjà écrites : il ne reste qu'à déplacer les éléments pour isoler la grandeur demandée.</p>
+        <p class="text-gray-700 mb-2"><b>Notation :</b> 2 points si l'équation est résolue en plusieurs étapes sans aucune erreur, 1 point s'il y a eu au moins une erreur avant d'y arriver, 0 point en cas d'abandon. La note finale est donnée en pourcentage.</p>
+        <p class="text-gray-700 mb-2"><b>Bonus ultime :</b> si l'équation est résolue en une seule étape, de tête (interdiction d'utiliser un crayon et du papier), vous remportez 3 points. La note finale peut alors dépasser 100% !</p>
         <button onclick="startModule4Graded()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow mt-2">Commencer →</button>
       </div>`;
 }
@@ -1035,7 +1042,7 @@ function renderModule4Question() {
       <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
         <span class="content-module-badge">MODULE 2 · ENTRAÎNEMENT</span>
         <h2 class="text-2xl font-bold text-indigo-900 mb-1">Entraînement</h2>
-        <p class="text-xs text-gray-400 uppercase font-bold mb-2">Question ${displayNum}/${module4Bank.length} · Score : <span class="score-badge">${m4Score} pt${m4Score>1?'s':''}</span></p>
+        <p class="text-xs text-gray-400 uppercase font-bold mb-2">Question ${displayNum}/${module4Bank.length} · Score : <span class="score-badge">${m4Score} pt${m4Score>1?'s':''}</span></p>
         <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${progressPct}%"></div></div>
       </div>
       <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
@@ -1043,7 +1050,7 @@ function renderModule4Question() {
         <p class="unit-legend mb-2">${q.legend}</p>
         <div class="eq-line-static text-lg md:text-2xl my-4">${q.staticEqHtml}</div>
         <p class="font-bold text-indigo-900">Exprimer ${targetLabel(q)}.</p>
-        ${q.hasSqrt ? `<p class="text-sm text-gray-600 mt-1">Aide : commence par exprimer ${q.sqrtTargetLabel}, comme dans les questions précédentes. Une fois ${q.sqrtTargetLabel} isolé(e), retire le carré avec l'outil racine carrée (√) — mais si tu prends la racine carrée du membre de gauche, il faut faire la même chose sur le membre de droite, sinon l'équation n'est plus valable.</p>` : ''}
+        ${q.hasSqrt ? `<p class="text-sm text-gray-600 mt-1">Aide : commence par exprimer ${q.sqrtTargetLabel}, comme dans les questions précédentes. Une fois ${q.sqrtTargetLabel} isolé(e), retire le carré avec l'outil racine carrée (√) — mais si tu prends la racine carrée du membre de gauche, il faut faire la même chose sur le membre de droite, sinon l'équation n'est plus valable.</p>` : ''}
         <div class="text-right mt-2"><button onclick="abandonQuestion4()" class="text-xs font-bold text-red-500 hover:text-red-700">Abandonner cette question →</button></div>
       </div>
       <div class="bg-white rounded-xl shadow-lg p-6">${solveEditorHTML()}</div>`;
@@ -1055,7 +1062,7 @@ function renderModule4Question() {
             const pts = hadError ? 1 : (history.length === 1 ? 3 : 2);
             m4Score += pts;
             m4Answers.push({ num: displayNum, pts, max: 2 });
-            dm.innerHTML = `🎉 Équation résolue ! (+${pts} pt${pts>1?'s':''})<div class="mt-4"><button onclick="nextModule4Question()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">Suivant →</button></div>`;
+            dm.innerHTML = `🎉 Équation résolue ! (+${pts} pt${pts>1?'s':''})<div class="mt-4"><button onclick="nextModule4Question()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">Suivant →</button></div>`;
         }
     });
 }
@@ -1072,10 +1079,10 @@ function finishModule4() {
     const recapHtml = m4Answers.map(a => `<div class="recap-item">Q${a.num}<br><b>${a.pts}/${a.max}</b></div>`).join('');
     document.getElementById('app').innerHTML = `
       <div class="bg-white rounded-xl shadow-lg p-8 text-center">
-        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Entraînement terminé !</h2>
-        ${isMax ? `<p class="text-lg font-bold text-amber-600 mb-2">🏆 Score maximal ! Bravo, c'est un sans-faute parfait !</p>` : ''}
+        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Entraînement terminé !</h2>
+        ${isMax ? `<p class="text-lg font-bold text-amber-600 mb-2">🏆 Score maximal ! Bravo, c'est un sans-faute parfait !</p>` : ''}
         <p style="font-size:2.6rem;font-weight:900;color:var(--accent);letter-spacing:-.03em;line-height:1.1;margin:6px 0 4px">${String(note).replace('.', ',')} / 20</p>
-        <p class="text-lg text-gray-700 mb-4">Score : ${m4Score} / ${m4MaxScore} points (${pct}%)</p>
+        <p class="text-lg text-gray-700 mb-4">Score : ${m4Score} / ${m4MaxScore} points (${pct}%)</p>
         <button onclick="startModule4Graded()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">↺ Recommencer l'entraînement</button>
         <div class="text-sm font-bold text-gray-500 mt-6 mb-2 text-left">Détail des points</div>
         <div class="recap-grid">${recapHtml}</div>

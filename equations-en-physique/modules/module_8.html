@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 4 : méthode — Équations en physique</title>
+<title>Module 4 : méthode — Équations en physique</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <style>
@@ -87,6 +87,7 @@
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
+<script src="../aide-rules.js"></script>
 <script src="../../assets/cours.js"></script>
 </head>
 <body>
@@ -107,6 +108,8 @@
    la règle (.cle), un exemple traité (avant / après) puis un
    « À toi » dont les items sont les manipulations de l'éditeur
    d'équation (parties 'perso').
+   Version « avec aide » : un déplacement non autorisé est bloqué et la
+   règle à suivre est rappelée (../aide-rules.js), comme une erreur.
    L'éditeur est une instance par manipulation (monterEditeur) :
    en mode « Afficher tout le cours », toutes les manipulations
    sont affichées en même temps et fonctionnent indépendamment.
@@ -295,9 +298,9 @@ function diagFonction(st, m) {
     const sol = m.solution();
     const okG = nodeEq(st.left, sol.left), okD = nodeEq(st.right, sol.right);
     const depG = nodeEq(st.left, m.left()), depD = nodeEq(st.right, m.right());
-    if (okG && depD) return 'Tu as appliqué l\'outil à gauche seulement : applique-le aussi à droite, sinon l\'égalité n\'est plus vraie.';
-    if (okD && depG) return 'Tu as appliqué l\'outil à droite seulement : applique-le aussi à gauche, sinon l\'égalité n\'est plus vraie.';
-    if (depG && depD) return 'Glisse l\'outil de la palette sur chaque membre de l\'équation : une fois à gauche, une fois à droite.';
+    if (okG && depD) return 'Tu as appliqué l\'outil à gauche seulement : applique-le aussi à droite, sinon l\'égalité n\'est plus vraie.';
+    if (okD && depG) return 'Tu as appliqué l\'outil à droite seulement : applique-le aussi à gauche, sinon l\'égalité n\'est plus vraie.';
+    if (depG && depD) return 'Glisse l\'outil de la palette sur chaque membre de l\'équation : une fois à gauche, une fois à droite.';
     return 'Tu as appliqué l\'outil plusieurs fois au même membre. Clique sur ↺ Recommencer, puis applique-le une seule fois à gauche et une seule fois à droite.';
 }
 
@@ -307,46 +310,46 @@ function diagFonction(st, m) {
 const X = tile('x','x'), Y = tile('y','y'), TH = tile('theta','θ');
 const M_RACINE = [
     {   titre: 'Supprimer une racine carrée',
-        instruction: "Voici l'équation v = √(2gh) simplifiée en x = √(y) : la racine carrée s'applique à y, à droite. Pour la supprimer, glisse l'outil <b>x²</b> (le carré, réciproque de la racine carrée) sur le côté gauche, PUIS sur le côté droit.",
+        instruction: "Voici l'équation v = √(2gh) simplifiée en x = √(y) : la racine carrée s'applique à y, à droite. Pour la supprimer, glisse l'outil <b>x²</b> (le carré, réciproque de la racine carrée) sur le côté gauche, PUIS sur le côté droit.",
         left: () => simple([X]),
         right: () => func('sqrt', simple([Y])),
         toolFn: 'sq',
         opDiagram: { label: 'x²', noteLeft:'(applique le carré)', noteRight:'(applique le carré)' },
         check: (st) => nodeEq(st.left, func('sq', simple([X]))) && nodeEq(st.right, simple([Y])),
         solution: () => ({ left: func('sq', simple([X])), right: simple([Y]) }),
-        explication: '<p>Le carré annule la racine carrée : (√y)² = y. À gauche, x devient x² : x² = y.</p>',
+        explication: '<p>Le carré annule la racine carrée : (√y)² = y. À gauche, x devient x² : x² = y.</p>',
     },
     {   titre: 'Supprimer un carré',
-        instruction: "Repartons d'une équation avec un carré : x² = y. Pour supprimer le carré, glisse l'outil <b>√</b> (la racine carrée, réciproque du carré) sur le côté gauche, PUIS sur le côté droit.",
+        instruction: "Repartons d'une équation avec un carré : x² = y. Pour supprimer le carré, glisse l'outil <b>√</b> (la racine carrée, réciproque du carré) sur le côté gauche, PUIS sur le côté droit.",
         left: () => func('sq', simple([X])),
         right: () => simple([Y]),
         toolFn: 'sqrt',
         opDiagram: { label: '√', noteLeft:'(applique la racine)', noteRight:'(applique la racine)' },
         check: (st) => nodeEq(st.left, simple([X])) && nodeEq(st.right, func('sqrt', simple([Y]))),
         solution: () => ({ left: simple([X]), right: func('sqrt', simple([Y])) }),
-        explication: '<p>La racine carrée annule le carré : √(x²) = x (x positif, comme une grandeur physique). À droite, y devient √y : x = √y.</p>',
+        explication: '<p>La racine carrée annule le carré : √(x²) = x (x positif, comme une grandeur physique). À droite, y devient √y : x = √y.</p>',
     },
 ];
 const M_SINUS = [
     {   titre: 'Supprimer un sinus',
-        instruction: "Le sinus a lui aussi une fonction réciproque, notée <b>sin<sup>−1</sup></b> (on dit aussi « arcsinus »). Si sin(θ) = y, alors θ = sin<sup>−1</sup>(y). Glisse l'outil <b>sin<sup>−1</sup></b> sur le côté gauche, PUIS sur le côté droit, pour supprimer le sinus.",
+        instruction: "Le sinus a lui aussi une fonction réciproque, notée <b>sin<sup>−1</sup></b> (on dit aussi « arcsinus »). Si sin(θ) = y, alors θ = sin<sup>−1</sup>(y). Glisse l'outil <b>sin<sup>−1</sup></b> sur le côté gauche, PUIS sur le côté droit, pour supprimer le sinus.",
         left: () => func('sin', simple([TH])),
         right: () => simple([Y]),
         toolFn: 'asin',
         opDiagram: { label: 'sin<sup>−1</sup>', noteLeft:'(applique sin<sup>−1</sup>)', noteRight:'(applique sin<sup>−1</sup>)' },
         check: (st) => nodeEq(st.left, simple([TH])) && nodeEq(st.right, func('asin', simple([Y]))),
         solution: () => ({ left: simple([TH]), right: func('asin', simple([Y])) }),
-        explication: '<p>sin<sup>−1</sup> annule le sinus : sin<sup>−1</sup>(sin(θ)) = θ. À droite, y devient sin<sup>−1</sup>(y) : θ = sin<sup>−1</sup>(y).</p>',
+        explication: '<p>sin<sup>−1</sup> annule le sinus : sin<sup>−1</sup>(sin(θ)) = θ. À droite, y devient sin<sup>−1</sup>(y) : θ = sin<sup>−1</sup>(y).</p>',
     },
     {   titre: 'Supprimer un sin⁻¹',
-        instruction: "Et dans l'autre sens : si l'équation contient déjà un sin<sup>−1</sup>, quelle fonction faut-il appliquer pour l'enlever ? Glisse l'outil <b>sin</b> sur le côté gauche, PUIS sur le côté droit.",
+        instruction: "Et dans l'autre sens : si l'équation contient déjà un sin<sup>−1</sup>, quelle fonction faut-il appliquer pour l'enlever ? Glisse l'outil <b>sin</b> sur le côté gauche, PUIS sur le côté droit.",
         left: () => func('asin', simple([X])),
         right: () => simple([TH]),
         toolFn: 'sin',
         opDiagram: { label: 'sin', noteLeft:'(applique sin)', noteRight:'(applique sin)' },
         check: (st) => nodeEq(st.left, simple([X])) && nodeEq(st.right, func('sin', simple([TH]))),
         solution: () => ({ left: simple([X]), right: func('sin', simple([TH])) }),
-        explication: '<p>sin annule sin<sup>−1</sup> : sin(sin<sup>−1</sup>(x)) = x. À droite, θ devient sin(θ) : x = sin(θ).</p>',
+        explication: '<p>sin annule sin<sup>−1</sup> : sin(sin<sup>−1</sup>(x)) = x. À droite, θ devient sin(θ) : x = sin(θ).</p>',
     },
 ];
 [...M_RACINE, ...M_SINUS].forEach(m => { m.diag = st => diagFonction(st, m); });
@@ -366,7 +369,7 @@ const avantApres = (avant, op, apres) => `<div class="ep-avap">
     <div class="ep-av"><p class="ep-av-t">Avant</p>${avant}</div>
     <p class="ep-op">${op}</p>
     <div class="ep-av"><p class="ep-av-t">Après</p>${apres}</div></div>`;
-const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Glisse l'outil de la palette (à la souris ou au doigt) sur un membre de l'équation : une fois à gauche, puis une fois à droite. ↺ Recommencer remet l'équation de départ. Clique sur <b>Valider</b> quand c'est fait.</p></div>`;
+const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Glisse l'outil de la palette (à la souris ou au doigt) sur un membre de l'équation : une fois à gauche, puis une fois à droite. ↺ Recommencer remet l'équation de départ. Clique sur <b>Valider</b> quand c'est fait.</p></div>`;
 // les crochets des racines des exemples se dessinent une fois la carte affichée
 const ajouter = (c, carte, html) => { const d = c.ajouter(carte, html); sizeSqrtHooks(d); return d; };
 
@@ -374,13 +377,13 @@ const ajouter = (c, carte, html) => { const d = c.ajouter(carte, html); sizeSqrt
 function etape1(c) {
     const carte = c.carte('1. Racine carrée et carré');
     ajouter(c, carte, `<div class="cours-bloc">
-        <p>Certaines équations utilisent des fonctions mathématiques (racine carrée, carré, sinus…) appliquées à une grandeur. Pour supprimer une fonction, il faut appliquer sa <b>fonction réciproque</b> aux deux membres de l'équation : elle annule la fonction du côté où elle s'applique, et apparaît de l'autre côté.</p>
+        <p>Certaines équations utilisent des fonctions mathématiques (racine carrée, carré, sinus…) appliquées à une grandeur. Pour supprimer une fonction, il faut appliquer sa <b>fonction réciproque</b> aux deux membres de l'équation : elle annule la fonction du côté où elle s'applique, et apparaît de l'autre côté.</p>
         <div class="cle"><p><b class="cle-titre">Règle.</b> Pour supprimer une fonction, on applique sa fonction réciproque aux <b>deux membres</b>. La réciproque de la racine carrée √ est le carré x², et inversement.</p></div>
       </div>
-      ${exemple(`<p>Dans v = √(2gh), on applique le carré aux deux membres :</p>
+      ${exemple(`<p>Dans v = √(2gh), on applique le carré aux deux membres :</p>
         ${avantApres(eqStat(simple([T('v')]), func('sqrt', simple([T('2'), T('g'), T('h')]))), 'x² des deux côtés',
                      eqStat(func('sq', simple([T('v')])), simple([T('2'), T('g'), T('h')])))}
-        <p>À droite, le carré annule la racine ; à gauche, v devient v² : v² = 2gh. On peut ensuite isoler h avec les règles du module 1 : h = ${fr('v²', '2g')}.</p>`)}
+        <p>À droite, le carré annule la racine ; à gauche, v devient v² : v² = 2gh. On peut ensuite isoler h avec les règles du module 1 : h = ${fr('v²', '2g')}.</p>`)}
       ${MODE_EMPLOI}`);
     c.aToi(carte, M_RACINE.map(manip));
     return carte;
@@ -390,10 +393,10 @@ function etape1(c) {
 function etape2(c) {
     const carte = c.carte('2. Sinus et sin<sup>−1</sup>');
     ajouter(c, carte, `<div class="cours-bloc">
-        <p>Le sinus a lui aussi une fonction réciproque, notée <b>sin<sup>−1</sup></b> (on dit aussi « arcsinus ») : si sin(θ) = y, alors θ = sin<sup>−1</sup>(y). Sur la calculatrice, c'est la touche sin<sup>−1</sup> (ou asin).</p>
-        <div class="cle"><p><b class="cle-titre">Règle.</b> La réciproque de sin est sin<sup>−1</sup>, et inversement : sin(θ) = y &nbsp;⇔&nbsp; θ = sin<sup>−1</sup>(y).</p></div>
+        <p>Le sinus a lui aussi une fonction réciproque, notée <b>sin<sup>−1</sup></b> (on dit aussi « arcsinus ») : si sin(θ) = y, alors θ = sin<sup>−1</sup>(y). Sur la calculatrice, c'est la touche sin<sup>−1</sup> (ou asin).</p>
+        <div class="cle"><p><b class="cle-titre">Règle.</b> La réciproque de sin est sin<sup>−1</sup>, et inversement : sin(θ) = y &nbsp;⇔&nbsp; θ = sin<sup>−1</sup>(y).</p></div>
       </div>
-      ${exemple(`<p>Un rayon lumineux arrive avec un angle i tel que sin(i) = 0,5. On applique sin<sup>−1</sup> aux deux membres :</p>
+      ${exemple(`<p>Un rayon lumineux arrive avec un angle i tel que sin(i) = 0,5. On applique sin<sup>−1</sup> aux deux membres :</p>
         ${avantApres(eqStat(func('sin', simple([T('i')])), simple([T('0,5')])), 'sin<sup>−1</sup> des deux côtés',
                      eqStat(simple([T('i')]), func('asin', simple([T('0,5')]))))}
         <p>La calculatrice (en degrés) donne i = sin<sup>−1</sup>(0,5) = 30°.</p>`)}`);
@@ -404,7 +407,7 @@ function etape2(c) {
 /* ---------- À retenir ---------- */
 function aRetenir(c) {
     const carte = c.carte('À retenir');
-    c.ajouter(carte, `<div class="cle"><p>Pour supprimer une fonction (racine carrée, carré, sinus…), on applique sa <b>fonction réciproque</b> aux <b>deux membres</b> : elle annule la fonction d'un côté et apparaît de l'autre.</p>
+    c.ajouter(carte, `<div class="cle"><p>Pour supprimer une fonction (racine carrée, carré, sinus…), on applique sa <b>fonction réciproque</b> aux <b>deux membres</b> : elle annule la fonction d'un côté et apparaît de l'autre.</p>
         <div class="crs-defile"><table class="crs-tab">
           <tr><th>Fonction</th><th>Fonction réciproque</th><th>Exemple</th></tr>
           <tr><td>√ (racine carrée)</td><td>x² (carré)</td><td>x = √y &nbsp;⇔&nbsp; x² = y</td></tr>
@@ -412,7 +415,7 @@ function aRetenir(c) {
           <tr><td>sin</td><td>sin<sup>−1</sup> (arcsinus)</td><td>sin(θ) = y &nbsp;⇔&nbsp; θ = sin<sup>−1</sup>(y)</td></tr>
           <tr><td>sin<sup>−1</sup></td><td>sin</td><td>θ = sin<sup>−1</sup>(x) &nbsp;⇔&nbsp; sin(θ) = x</td></tr>
         </table></div></div>
-      <div class="cle"><p>Exemple : v = √(2gh) donne v² = 2gh, puis h = ${fr('v²', '2g')}.</p></div>
+      <div class="cle"><p>Exemple : v = √(2gh) donne v² = 2gh, puis h = ${fr('v²', '2g')}.</p></div>
       <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_9.html">Entraînement →</a>
         <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a></div>`);
     return carte;
