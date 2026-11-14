@@ -22,10 +22,11 @@
    Clés enregistrées : celles qui commencent par « <dossier>- » pour un
    dossier de la liste APPS du portail (préfixe le plus long), plus
    equamath_v2 (Équations du 1er degré) et revisions-reglages (réglage des
-   flashcards, rattaché à aucune application). fractions-college-suivi (suivi
-   des compétences de l'application Fractions) a sa propre fusion (type
-   « suivi-competences ») ; fractions-college-sauvegarde (état de la copie de
-   secours propre à l'appareil) n'est jamais enregistrée. Les autres clés du navigateur
+   flashcards, rattaché à aucune application). fractions-college-suivi et
+   equations-college-suivi (suivi des compétences des applications Fractions
+   et Équations) ont leur propre fusion (type « suivi-competences ») ;
+   fractions-college-sauvegarde et equations-college-sauvegarde (état de la
+   copie de secours propre à l'appareil) ne sont jamais enregistrées. Les autres clés du navigateur
    (autres sites de la même adresse) ne sont ni enregistrées ni reprises.
    Tout ce qui arrive est non fiable : taille plafonnée, forme de chaque
    valeur vérifiée, aucun texte inséré en HTML (textContent seulement).
@@ -102,8 +103,8 @@
     if (reste === 'flashcards') return { dossier, type: 'flashcards' };
     if (cle === 'combustions-exercices-faits') return { dossier, type: 'liste' };
     if (cle === 'principe-dynamique-atelier') return { dossier, type: 'atelier' };
-    if (cle === 'fractions-college-suivi') return { dossier, type: 'suivi-competences' };
-    if (cle === 'fractions-college-sauvegarde') return null;      // état de la sauvegarde propre à l'appareil : jamais copié
+    if (cle === 'fractions-college-suivi' || cle === 'equations-college-suivi') return { dossier, type: 'suivi-competences' };
+    if (cle === 'fractions-college-sauvegarde' || cle === 'equations-college-sauvegarde') return null;      // état de la sauvegarde propre à l'appareil : jamais copié
     return { dossier, type: 'inconnue' };
   }
 
@@ -208,7 +209,7 @@
         }
         return r;
       }
-      // suivi des compétences (Fractions) : { v: 1, r: { <compétence>: [[t, ok], …] }, notes: [[t, 's', note], …] }
+      // suivi des compétences (Fractions, Équations) : { v: 1, r: { <compétence>: [[t, ok], …] }, notes: [[t, 's', note], …] }
       //   t date en ms (entier), ok 0, 0,5 ou 1 ; note sur 20 ; compétence : EG1, AS2, PR1…
       case 'suivi-competences': {
         if (!ok(estObjet(v))) return undefined;
