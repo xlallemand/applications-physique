@@ -29,6 +29,8 @@
      EQ.X.operation(l1, l2)          opération faite des deux côtés entre deux lignes ({ type: 'add', L } | { type: 'mul', r } | null)
      EQ.X.libelleOp(op)              « + 5 », « ÷ 4 »… ; EQ.X.lireOp(modele) : opération tapée par l'élève
      EQ.X.appliquerOp(membre, op)    membre suivi de l'opération tapée ; EQ.X.utileOp(ligne, op) : fait-elle disparaître un terme ?
+     EQ.X.opPertinente(ligne)        une opération des deux côtés est-elle utile maintenant ?
+     EQ.X.faireOp(ligne, opm, op)    ligne suivante : l'opération faite des deux côtés, terme visé simplifié
      EQ.X.calcul(lignes, opts)       HTML d'un calcul aligné sur le signe =, avec les flèches « même opération »
      EQ.X.tracerArcs(racine)         flèches courbes des raccourcis (après affichage)
      EQ.X.Q : nombres rationnels (pgcd, ppcm, red, add, sous, mul, div, egal, opp, ecrire)
@@ -413,7 +415,11 @@
     const facteur = reste[0] === MOINS ? ['('].concat(reste, [')']) : reste;
     const unique = M2.length === 1 && typeof M2[0] === 'object';                 // le membre est une seule fraction
     // division par un nombre simple : une fraction (le trait de fraction regroupe tout le membre)
-    if (o === '÷' && !unique && reste.every(e => typeof e === 'string')) return [{ num: M2, den: reste }];
+    if (o === '÷' && !unique && reste.every(e => typeof e === 'string')) {
+      // ÷ (−3) : sans parenthèses au dénominateur
+      const den = reste[0] === '(' && reste[reste.length - 1] === ')' && reste.indexOf('(', 1) < 0 ? reste.slice(1, -1) : reste;
+      return [{ num: M2, den }];
+    }
     return (plusieursTermes(M2) ? ['('].concat(M2, [')']) : M2).concat([o], facteur);
   }
   // l'opération fait-elle disparaître quelque chose (un terme, un coefficient devant x, un dénominateur) ?
@@ -427,6 +433,78 @@
     const g = foisL(op.r, A.g), d = foisL(op.r, A.d);
     const den = (p, q) => ppcm(ppcm(p.a.d, p.b.d), ppcm(q.a.d, q.b.d));
     return egal(g.a, UN) || egal(d.a, UN) || den(g, d) < den(A.g, A.d);
+  }
+
+  // termes d'un membre, hors parenthèses : [{ s: '+' | '−', corps: [modèle sans le signe] }]
+  function termesHaut(M) {
+    const T = [];
+    let p = 0, cour = { s: '+', corps: [] };
+    M.forEach((e, i) => {
+      if (p === 0 && (e === '+' || e === MOINS)) {
+        if (i === 0) { cour.s = e; return; }                        // signe du premier terme
+        if (!(e === MOINS && estSigne(M, i))) { T.push(cour); cour = { s: e, corps: [] }; return; }
+      }
+      if (e === '(') p++; else if (e === ')') p--;
+      cour.corps.push(e);
+    });
+    T.push(cour);
+    return T;
+  }
+  const valTerme = t => { const v = lin(analyser(t.corps)); return t.s === MOINS ? oppL(v) : v; };
+  function ecrireTermes(T) {
+    const l = [];
+    T.forEach((t, i) => { if (i || t.s === MOINS) l.push(t.s); l.push.apply(l, copie(t.corps)); });
+    return l.length ? l : ['0'];
+  }
+  // un membre est « réduit » s'il n'y a plus rien à calculer ni à développer : pas de parenthèses,
+  // au plus un terme en x et un nombre
+  function reduit(M) {
+    try {
+      if (M.indexOf('(') >= 0) return false;
+      const V = termesHaut(M).map(valTerme);
+      if (V.some(v => nbParties(v) > 1)) return false;
+      return V.filter(v => v.a.n !== 0).length <= 1 && V.filter(v => v.a.n === 0).length <= 1;
+    } catch (e) { return false; }
+  }
+  // une opération des deux côtés est-elle utile maintenant ? (les deux membres réduits, et un terme
+  // ou un coefficient de x à faire disparaître)
+  function opPertinente(l) {
+    l = lireM(l);
+    const k = l.indexOf('=');
+    if (k < 0 || !reduit(l.slice(0, k)) || !reduit(l.slice(k + 1))) return false;
+    const A = formes(l);
+    if (!A) return false;
+    const g = A.g, d = A.d, nz = q => q.n !== 0;
+    const seulX = (p, q) => nz(p.a) && !nz(p.b) && !nz(q.a) && !egal(p.a, UN);
+    return (nz(g.a) && nz(g.b)) || (nz(d.a) && nz(d.b)) || (nz(g.a) && nz(d.a)) || seulX(g, d) || seulX(d, g);
+  }
+  // fait l'opération tapée (modèle opm, lue en op) des deux côtés de la ligne l, avec la simplification du terme visé :
+  // − 7 + 7 disparaît (4x − 7 = 13, + 7 → 4x = 13 + 7) ; 4x ÷ 4 devient x (4x = 20, ÷ 4 → x = [20|4])
+  function faireOp(l, opm, op) {
+    l = lireM(l);
+    const k = l.indexOf('=');
+    const membre = M => {
+      if (op.type === 'add') {
+        const T = termesHaut(M);
+        const parts = [L(op.L.a, ZERO), L(ZERO, op.L.b)].filter(nbParties);
+        parts.forEach(pt => {
+          const j = T.findIndex(t => { try { return !nbParties(addL(valTerme(t), pt)); } catch (e) { return false; } });
+          if (j >= 0) T.splice(j, 1);                                  // le terme opposé disparaît
+          else {
+            const t = ecrireLin(pt);
+            T.push(t[0] === MOINS ? { s: MOINS, corps: lire(t.slice(1)) } : { s: '+', corps: lire(t) });
+          }
+        });
+        return ecrireTermes(T);
+      }
+      // × ou ÷ : un membre d'un seul terme en x devient a x simplifié ; sinon l'opération s'écrit
+      try {
+        const v = foisL(op.r, lin(analyser(M)));
+        if (termesHaut(M).length === 1 && v.a.n !== 0 && v.b.n === 0 && v.a.d === 1) return lire(ecrireLin(v));
+      } catch (e) { /* écriture de l'opération */ }
+      return appliquerOp(M, opm);
+    };
+    return membre(l.slice(0, k)).concat(['='], membre(l.slice(k + 1)));
   }
 
   // flèche courbe « même opération » (même dessin que dans « Équations en physique », module 3)
@@ -454,13 +532,13 @@
   }
   // calcul aligné sur le signe = ; lignes : textes, modèles ou { l, cls, marques: { g, d }, note, apres, esp } ;
   // opts : { fleches: false (flèches masquées), coche: true (4e colonne : apres), sansOps: true (pas de flèches),
-  //          enAttente: opération (texte ou modèle) dont les flèches s'affichent sous la dernière ligne }
+  //          saisie: true (flèches sous la dernière ligne, libellé de gauche .eq-mo-lab-g et case .eq-mo-saisie à droite) }
   function calcul(lignes, opts) {
     opts = opts || {};
     const LI = lignes.map(x => (typeof x === 'string' || Array.isArray(x)) ? { l: x } : x);
     const M = LI.map(x => lireM(x.l));
     const ops = M.map((l, i) => {
-      if (i === M.length - 1) return opts.enAttente ? lireM(opts.enAttente) : null;
+      if (i === M.length - 1) return opts.saisie ? 'saisie' : null;
       const op = opts.sansOps ? null : operation(l, M[i + 1]);
       return op ? lire(libelleOp(op)) : null;
     });
@@ -468,18 +546,20 @@
     let h = '';
     M.forEach((l, i) => {
       const k = l.indexOf('='), x = LI[i], cls = x.cls ? ' ' + x.cls : '', mq = x.marques || {};
-      const lab = ops[i] ? '<span class="eq-mo-lab">' + html(ops[i]) + '</span>' : '';
+      const saisie = ops[i] === 'saisie';
+      const lab = saisie ? '<span class="eq-mo-lab eq-mo-lab-g"></span>' : ops[i] ? '<span class="eq-mo-lab">' + html(ops[i]) + '</span>' : '';
+      const labD = saisie ? '<span class="eq-mo-saisie"></span>' : lab;
       h += '<div class="eq-mo-g' + cls + '">' + htmlMarque(l.slice(0, k), mq.g) + (lab ? fl(lab, 'g') : '') + '</div>' +
         '<div class="eq-mo-e' + cls + '">' + html(['=']) + '</div>' +
-        '<div class="eq-mo-d' + cls + '">' + htmlMarque(l.slice(k + 1), mq.d) + (lab ? fl(lab, 'd') : '') + '</div>' +
+        '<div class="eq-mo-d' + cls + '">' + htmlMarque(l.slice(k + 1), mq.d) + (lab ? fl(labD, 'd') : '') + '</div>' +
         (opts.coche ? '<div class="eq-mo-x">' + (x.apres || '') + '</div>' : '') +
         (x.note ? '<p class="eq-mo-note">' + x.note + '</p>' : '') +
         (lab ? '<div class="eq-mo-esp"></div>' : '') +
         (x.esp ? '<div class="eq-mo-arc-esp" style="height:' + x.esp + 'em"></div>' : '');
     });
     // place pour les flèches et leurs libellés, de chaque côté (selon le plus long libellé)
-    const n = Math.max(0, ...ops.map(o => o ? o.length : 0));
-    return '<div class="eq-mo' + (opts.coche ? ' eq-mo-4' : '') + (n ? ' eq-mo-avec' : '') + (opts.fleches === false ? ' eq-mo-sans' : '') + '"' +
+    const n = Math.max(0, ...ops.map(o => o === 'saisie' ? 8 : o ? o.length : 0));
+    return '<div class="eq-mo' + (opts.coche ? ' eq-mo-4' : '') + (n ? ' eq-mo-avec' : '') + (opts.saisie ? ' eq-mo-avec-saisie' : '') + (opts.fleches === false ? ' eq-mo-sans' : '') + '"' +
       (n ? ' style="--mo-pad:' + (1.6 + 0.45 * n).toFixed(2) + 'em"' : '') + '>' + h + '</div>';
   }
   // flèches courbes des raccourcis (terme qui passe de l'autre côté) : tracées après l'affichage, et à chaque
@@ -739,5 +819,5 @@
   }
 
   EQ.X = { lire, texte, copie, html, m, analyser, analyserEq, lin, egalL, solution, ecrireLin, FAUTIFS, termes, Q, Editeur, pave, AIDE_CLAVIER, MOINS,
-    operation, libelleOp, lireOp, appliquerOp, utileOp, calcul, tracerArcs };
+    operation, libelleOp, lireOp, appliquerOp, utileOp, opPertinente, faireOp, calcul, tracerArcs };
 })();

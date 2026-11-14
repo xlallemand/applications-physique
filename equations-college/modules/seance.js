@@ -291,9 +291,9 @@
       const p = plan[k], q = C.question(p.comp, niveau(p.comp)), comp = C.R[p.comp];
       EQ.questionEnCours = q;                     // question affichée (tests automatiques)
       let erreurs = 0, fini = false, precedent = X.lire(q.depart), nInd = 0;
-      // lignes écrites (la première : l'équation de départ) ; aide « même opération » : active ?, opération tapée en attente
-      const ecrites = [precedent];
-      let mo = false, enAttente = null;
+      // lignes écrites (la première : l'équation de départ) et celles écrites par l'aide ; aide « opération des deux côtés » active ?
+      const ecrites = [precedent], auto = [false];
+      let mo = false;
       zone.innerHTML = '';
       // en-tête : numéro, score, barre de progression
       const t = el('div', 'er-card eq-entete-q');
@@ -327,14 +327,14 @@
         bInd.innerHTML = nInd >= q.indices.length ? '💡 Tous les indices sont affichés' : nInd ? '💡 Indice suivant (' + (nInd + 1) + '/' + q.indices.length + ')' : '💡 Indice';
         bInd.disabled = nInd >= q.indices.length;
       };
-      // aide « même opération » (gratuite) : flèches sur la feuille, l'élève tape l'opération à faire des deux côtés
-      const bMo = bouton('btn-small eq-mo-bt', '⇅ Même opération', () => {
+      // aide « opération des deux côtés » (gratuite) : flèches sur la feuille, l'élève tape l'opération dans la case
+      // à droite de la flèche de droite ; elle se fait des deux côtés et le terme visé disparaît
+      const bMo = bouton('btn-small eq-mo-bt', '↙↘ Opération des deux côtés', () => {
         mo = !mo;
         bMo.setAttribute('aria-pressed', mo);
-        if (!mo) enAttente = null;
-        zMo.innerHTML = mo ? '<div class="eq-indice"><b>Même opération.</b> Fais la même opération à gauche et à droite du signe =. ' +
-          'Tape l’opération sur ta ligne (par exemple + 7, − 2x, × 3 ou ÷ 4), puis Vérifier : elle s’écrit des deux côtés, à toi de calculer.</div>' : '';
+        edOp.vider();
         dessinerFeuille();
+        if (mo && zLignes.querySelector('.eq-mo-saisie')) cibler(edOp, true); else cibler(ed, true);
         if (mo) EQ.versVue(zMo.firstChild);
       });
       bMo.setAttribute('aria-pressed', 'false');
@@ -357,19 +357,32 @@
         zSol.appendChild(el('div', 'callout', '<b>Réponse.</b> Une résolution détaillée (0 point pour cette question) :' + solutionHTML(q)));
         terminer(0);
       });
-      [bRap, bInd, bMo, bEx, bSol].forEach(b => barre.appendChild(b));
+      [bMo, bRap, bInd, bEx, bSol].forEach(b => barre.appendChild(b));
       c.appendChild(barre);
-      c.appendChild(zRap); c.appendChild(zInd); c.appendChild(zMo); c.appendChild(zEx);
+      c.appendChild(zMo); c.appendChild(zRap); c.appendChild(zInd); c.appendChild(zEx);
       // la feuille : équation de départ, lignes écrites, ligne en cours
       const feuille = el('div', 'eq-feuille');
       // lignes écrites : alignées sur le signe =, flèches « même opération » quand l'aide est active
       const zLignes = el('div', 'eq-mo-z');
       feuille.appendChild(zLignes);
-      function dessinerFeuille() {
-        zLignes.innerHTML = X.calcul(ecrites.map((l, i) => ({ l, cls: i ? '' : 'eq-mo-l0', apres: i ? '<span class="eq-coche" aria-label="ligne juste">✓</span>' : '' })),
-          { coche: true, fleches: mo, enAttente: mo ? enAttente : null });
+      // case de l'opération (à droite de la flèche de droite, sous la dernière ligne)
+      const zOp = el('div', 'eq-mo-ed');
+      const edOp = new X.Editeur(zOp, { surValider: () => faireOperation(X.copie(edOp.modele), false), surChange: majLibelle });
+      zOp.setAttribute('aria-label', 'Opération à faire des deux côtés (par exemple + 7 ou ÷ 4). ' + X.AIDE_CLAVIER);
+      // le libellé de la flèche de gauche recopie l'opération tapée
+      function majLibelle() {
+        const g = zLignes.querySelector('.eq-mo-lab-g');
+        if (g) g.innerHTML = edOp.modele.length ? X.html(edOp.modele) : '';
       }
-      dessinerFeuille();
+      function dessinerFeuille() {
+        const saisie = mo && !fini && X.opPertinente(precedent);
+        zLignes.innerHTML = X.calcul(ecrites.map((l, i) => ({ l, cls: i ? '' : 'eq-mo-l0', apres: i && !auto[i] ? '<span class="eq-coche" aria-label="ligne juste">✓</span>' : '' })),
+          { coche: true, fleches: mo, saisie });
+        if (saisie) { zLignes.querySelector('.eq-mo-saisie').appendChild(zOp); majLibelle(); }
+        zMo.innerHTML = !mo ? '' : '<div class="eq-indice"><b>Opération des deux côtés.</b> Quand une opération est utile, deux flèches apparaissent sous ta dernière ligne : ' +
+          'tape l’opération dans la case à droite (par exemple + 7, − 2x, × 3 ou ÷ 4), puis Vérifier. Elle se fait à gauche et à droite du signe =, et le terme visé disparaît ; à toi de calculer le reste.' +
+          (fini || saisie ? '' : '<br><i>Pour l’instant, pas d’opération utile : calcule ou développe d’abord, puis écris la ligne.</i>') + '</div>';
+      }
       const cour = el('div', 'eq-l eq-cour');
       const zEd = el('div');
       cour.appendChild(zEd);
@@ -384,8 +397,23 @@
       c.appendChild(retour);
       c.appendChild(zSol);
       const ed = new X.Editeur(zEd, { surValider: valider, surChange: () => { cour.classList.remove('eq-ko'); garderVisible(); } });
+      // le pavé écrit dans la ligne ou dans la case de l'opération : celle qui a été touchée en dernier
+      const cible = { ed, touche(k) { this.ed.touche(k); }, get actif() { return this.ed.actif; }, get zone() { return this.ed.zone; } };
+      function cibler(e, focus) {
+        cible.ed = e;
+        zEd.classList.toggle('eq-cible', e === ed);
+        zOp.classList.toggle('eq-cible', e === edOp);
+        if (!focus) return;
+        // l'autre case perd le focus (sur un écran tactile, rien ne le reprend)
+        const a = document.activeElement;
+        if ((a === zEd || a === zOp) && a !== e.zone) a.blur();
+        if (matchMedia('(hover: hover)').matches && e.actif && e.zone.isConnected) e.zone.focus({ preventScroll: true });
+      }
+      [ed, edOp].forEach(e => ['focus', 'pointerdown'].forEach(ev => e.zone.addEventListener(ev, () => cibler(e, false))));
+      cibler(ed, false);
+      dessinerFeuille();
       const zPave = el('div', 'eq-pave-z');
-      zPave.appendChild(X.pave(ed));
+      zPave.appendChild(X.pave(cible));
       zPave.hidden = !pave();
       c.appendChild(zPave);
       const act = el('div', 'er-actions eq-suite');
@@ -414,35 +442,13 @@
       function valider() {
         if (fini) return;
         const modele = X.copie(ed.modele);
-        // une opération tapée (+ 7, ÷ 4…) : avec l'aide « même opération », elle s'écrit des deux côtés de la dernière ligne
+        // une opération tapée sur la ligne (+ 7, ÷ 4…) : avec l'aide « opération des deux côtés », elle se fait des deux côtés
         let op = null;
-        try { op = X.lireOp(modele); } catch (e) {
-          retour.innerHTML = '<div class="callout eq-msg">' + e.msg + '</div>';
-          montrer(retour);
-          return;
-        }
-        if (op && !mo) {
-          retour.innerHTML = '<div class="callout eq-msg">Écris une équation : il manque le signe =. Pour faire la même opération des deux côtés, active l’aide « ⇅ Même opération ».</div>';
-          montrer(retour);
-          return;
-        }
-        if (op) {
-          const i = precedent.indexOf('=');
-          enAttente = modele;
-          dessinerFeuille();
-          ed.definir(X.appliquerOp(precedent.slice(0, i), modele).concat(['='], X.appliquerOp(precedent.slice(i + 1), modele)));
-          retour.innerHTML = X.utileOp(precedent, op)
-            ? '<div class="callout-accent eq-msg">L’opération est écrite des deux côtés. Calcule, puis Vérifier.</div>'
-            : '<div class="callout eq-msg">Cette opération est permise, mais elle ne fait rien disparaître. Efface la ligne (✕) et essaie une autre opération.</div>';
-          montrer(zPave.hidden ? cour : retour);
-          return;
-        }
+        try { op = X.lireOp(modele); } catch (e) { message(e.msg); return; }
+        if (op && !mo) { message('Écris une équation : il manque le signe =. Pour faire la même opération des deux côtés, active l’aide « ↙↘ Opération des deux côtés ».'); return; }
+        if (op) { faireOperation(modele, true); return; }
         const v = verifier(q, precedent, modele);
-        if (v.type === 'format') {
-          retour.innerHTML = '<div class="callout eq-msg">' + v.msg + '</div>';
-          montrer(retour);
-          return;
-        }
+        if (v.type === 'format') { message(v.msg); return; }
         if (v.type === 'faux') {
           erreurs++;
           cour.classList.remove('er-secoue'); void cour.offsetWidth; cour.classList.add('er-secoue', 'eq-ko');
@@ -451,14 +457,40 @@
           montrer(retour);
           return;
         }
-        // ligne juste : elle s'écrit sur la feuille
+        ecrireLigne(modele, v, false);
+      }
+      function message(t) {
+        retour.innerHTML = '<div class="callout eq-msg">' + t + '</div>';
+        montrer(retour);
+      }
+      // l'opération tapée (modèle opm) se fait des deux côtés de la dernière ligne : la nouvelle ligne s'écrit sur la feuille
+      function faireOperation(opm, surLaLigne) {
+        if (fini) return;
+        let op;
+        try { op = X.lireOp(opm); } catch (e) { message(e.msg); return; }
+        if (!op) { message('Tape une opération : un signe (+, −, × ou ÷) suivi d’un nombre ou d’un terme en x, par exemple + 7 ou ÷ 4.'); return; }
+        if (!X.utileOp(precedent, op)) {
+          message(op.type === 'add' ? 'Cette opération ne fait disparaître aucun terme. Pour faire disparaître un terme, fais l’opération contraire : « − 7 » disparaît avec « + 7 ».'
+            : 'Cette opération ne fait pas disparaître le nombre qui multiplie x. Divise par ce nombre (ou multiplie par le nombre qui divise x).');
+          return;
+        }
+        const nl = X.faireOp(precedent, opm, op), v = verifier(q, precedent, nl);
+        if (v.type !== 'juste') { message('Cette opération ne peut pas se faire ici. Écris la ligne suivante toi-même.'); return; }
+        edOp.vider();
+        if (surLaLigne) ed.vider();
+        ecrireLigne(nl, v, true);
+      }
+      // ligne juste (de l'élève, ou écrite par l'aide : auto) : elle s'écrit sur la feuille
+      function ecrireLigne(modele, v, estAuto) {
         ecrites.push(modele);
-        enAttente = null;
-        dessinerFeuille();
+        auto.push(estAuto);
         precedent = modele;
+        dessinerFeuille();
         if (!v.fini) {
-          ed.vider();
-          retour.innerHTML = '<div class="callout-accent eq-msg">' + v.msg + '</div>';
+          if (!estAuto) ed.vider();
+          retour.innerHTML = '<div class="callout-accent eq-msg">' + (estAuto ? 'Opération faite des deux côtés. À toi de calculer.' : v.msg) + '</div>';
+          // avec l'aide, la case de l'opération reprend la main quand une opération est utile ; sinon la ligne
+          cibler(mo && zLignes.querySelector('.eq-mo-saisie') ? edOp : ed, true);
           montrer(zPave.hidden ? cour : retour);
           return;
         }
@@ -473,6 +505,8 @@
       // fin de la question : points, suivi, bouton suivant
       function terminer(pts) {
         fini = true;
+        edOp.activer(false);
+        dessinerFeuille();                                         // plus de case pour une opération
         ed.activer(false);
         zPave.hidden = true;
         if (cour.parentNode) cour.remove();

@@ -72,6 +72,15 @@
 .eq-mo-etape { font-weight: 800; color: var(--accent-ink); margin: 12px 0 2px !important; }
 .eq-mo-bt[aria-pressed="true"] { background: var(--accent); color: var(--sheet); }
 .eq-mo-bt[aria-pressed="true"]:hover { background: var(--accent-ink); }
+/* case de l'opération, à droite de la flèche de droite (aide « opération des deux côtés ») */
+.eq-mo-saisie { display: inline-flex; pointer-events: auto; margin-left: 2px; }
+.eq-mo-ed.eq-edit { flex: none; min-width: 4.4em; min-height: 1.9em; padding: 0 6px; border-radius: 8px; font-size: .85em; font-weight: 400; color: var(--ink); }
+.eq-mo-ed.eq-edit .eq-ligne { min-height: 1.6em; }
+.eq-mo-ed .eq-attente::before { content: 'opération'; margin-left: 2px; }
+.eq-mo-lab-g:empty::before { content: '?'; }
+/* deux cases (ligne, opération) : seule celle qui reçoit le pavé montre son curseur */
+.eq-q .eq-edit:not(.eq-cible) .eq-curseur { visibility: hidden; }
+.eq-q .eq-edit.eq-cible { box-shadow: inset 0 0 0 2px var(--accent); }
 /* feuille de la séance : lignes écrites alignées sur le signe = */
 .eq-mo-z { overflow-x: auto; padding: 6px 0 6px 10px; }
 .eq-mo-z .eq-mo { font-size: 1.3rem; row-gap: 6px; }
@@ -86,6 +95,7 @@
   .eq-mo-fl .eq-mo-lab { position: absolute; top: .55em; }
   .eq-mo-fl.g .eq-mo-lab { left: 100%; }
   .eq-mo-fl.d .eq-mo-lab { right: 100%; }
+  .eq-mo-avec-saisie:not(.eq-mo-sans) { padding-right: 6.4em; }
 }
 
 /* ---------- ligne en cours d'écriture (éditeur) ---------- */
