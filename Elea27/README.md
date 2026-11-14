@@ -115,7 +115,7 @@ Elea27/
 
 Générer ou mettre à jour : `python3 Elea27/generer.py <application> …` (Python 3, bibliothèque standard, hors connexion). Les paquets sont reproductibles : seuls ceux dont l'application a changé ont un contenu différent. Les identifiants (`<id>-<page>`) sont ceux de l'essai : les zips de `conversions/scorm/` peuvent remplacer ceux du parcours d'essai déjà restauré sans perdre les notes.
 
-Applications prises en charge (navigation commune `SOM` avec un `PLAN`) : avancement-reaction, combustions, conversions, equations-en-physique, equations-en-physique-avec-aide, equilibrer-reactions, fractions-college, lecture-graphique, oxydoreduction-STI2D, ph, proportionnalite, puissance-active, puissances-10, spectres-etoiles. Non prises en charge : cinematique et transport-electricite (navigation propre `CIN.menu`), equations-college, pile, decroissance-radioactive (pas de `PLAN`).
+Applications prises en charge (navigation commune `SOM` avec un `PLAN`) : avancement-reaction, combustions, conversions, equations-en-physique, equilibrer-reactions, fractions-college, lecture-graphique, oxydoreduction-STI2D, ph, proportionnalite, puissance-active, puissances-10, spectres-etoiles. Non prises en charge : cinematique et transport-electricite (navigation propre `CIN.menu`), equations-college, pile, decroissance-radioactive (pas de `PLAN`).
 
 ## 7. Tests sur un Moodle local (environnement de Claude)
 

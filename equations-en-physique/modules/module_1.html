@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 1 : méthode — Équations en physique</title>
+<title>Module 1 : méthode — Équations en physique (avec aide)</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <style>
@@ -127,6 +127,7 @@
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
+<script src="../aide-rules.js"></script>
 <script src="../../assets/cours.js"></script>
 </head>
 <body>
@@ -147,6 +148,8 @@
    avec la règle (.cle), un exemple traité (avant / après) puis
    un « À toi » dont les items sont les manipulations de l'éditeur
    d'équation (parties 'perso').
+   Version « avec aide » : un déplacement non autorisé est bloqué et la
+   règle à suivre est rappelée (../aide-rules.js), comme une erreur.
    L'éditeur est une instance par manipulation (monterEditeur) :
    en mode « Afficher tout le cours », toutes les manipulations
    sont affichées en même temps et fonctionnent indépendamment.
@@ -384,7 +387,7 @@ function monterEditeur(hote, cfg, api) {
     }
     function processDrop(path, data) {
         if (data.type === 'frac') {
-            if (path !== 'left' && path !== 'right') return;
+            if (!AideRules.isLegalFracTool(path)) { api.erreur(AideRules.MSG_FRAC); return; }
             const node = getNode(path);
             if (!node || node.kind !== 'simple') return;
             const den = cfg.fracAutoOne ? [{ id:'one', label:'1' }] : [];
@@ -395,6 +398,7 @@ function monterEditeur(hote, cfg, api) {
         const node = getNode(path);
         if (!node || node.kind !== 'simple') return;
         if (data.type === 'move') {
+            if (!AideRules.isLegalMove(data.from, path)) { api.erreur(AideRules.MSG_MOVE); return; }
             if (data.from === path) { refreshView(); return; } // dépose au même endroit : rien ne change
             const src = getNode(data.from);
             if (src && src.items[data.idx] && src.items[data.idx].id === data.id) {

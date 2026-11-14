@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 4 : entraînement — Équations en physique</title>
+<title>Module 4 : entraînement — Équations en physique (avec aide)</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
+<script src="../aide-rules.js"></script>
 <style>
     :root {
         --app-accent-50:  var(--paper);
@@ -663,6 +664,7 @@ function handleEmptied(path, removedId) {
 }
 function processDrop(path, data) {
     if (data.type === 'frac') {
+        if (!AideRules.isLegalFracTool(path)) { hadError = true; showFeedback(AideRules.MSG_FRAC, false); return; }
         const node = getNode(path);
         if (!node) return;
         if (node.kind === 'simple') {
@@ -693,6 +695,7 @@ function processDrop(path, data) {
     const node = getNode(path);
     if (!node || node.kind !== 'simple') return;
     if (data.type === 'move') {
+        if (!AideRules.isLegalMove(data.from, path)) { hadError = true; showFeedback(AideRules.MSG_MOVE_FRAC, false); return; }
         if (data.from === path) { refreshView(); return; }
         const src = getNode(data.from);
         if (src && src.items[data.idx] && src.items[data.idx].id === data.id) {
@@ -706,6 +709,7 @@ function processDrop(path, data) {
 }
 function handleInsertDropAt(sidePath, where, data) {
     if (!data || data.type !== 'move') return;
+    if (!AideRules.isLegalInsert(data.from, sidePath)) { hadError = true; showFeedback(AideRules.MSG_INSERT, false); return; }
     const side = getNode(sidePath);
     if (!side || side.kind !== 'seq') return;
     const src = getNode(data.from);
@@ -839,6 +843,7 @@ function captureEqSignRect() {
 function processSumTermDrop(sidePath, data) {
     if (sidePath !== 'left' && sidePath !== 'right') return;
     if (data.from === sidePath) { refreshView(); return; }
+    if (!AideRules.isLegalSumTerm(data.from, sidePath)) { hadError = true; showFeedback(AideRules.MSG_SUMTERM, false); return; }
     const srcSum = getNode(data.from);
     const srcTerm = srcSum && srcSum.kind === 'sum' ? srcSum.terms[data.termIdx] : null;
     const showVanishGhost = !!(srcTerm && srcTerm.sign === -1);
@@ -882,6 +887,7 @@ function processSumTermDrop(sidePath, data) {
 // multiplicatif, le membre entier de l'autre côté
 function processFracDenDrop(fracPath, destSidePath) {
     if (destSidePath !== 'left' && destSidePath !== 'right') return;
+    if (!AideRules.isLegalSumTerm(fracPath, destSidePath)) { hadError = true; showFeedback(AideRules.MSG_FRACDEN, false); return; }
     const fracNode = getNode(fracPath);
     if (!fracNode || fracNode.kind !== 'frac' || !denHasRealContent(fracNode)) return;
     const denContent = fracNode.den;

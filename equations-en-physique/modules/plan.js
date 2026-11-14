@@ -1,5 +1,5 @@
 /* ============================================================
-   Plan de l'application « Équations en physique » et navigation
+   Plan de l'application « Équations en physique (avec aide) » et navigation
    (sommaire et accueil : voir assets/sommaire.js)
      EP.menu(cle)      sommaire de toute l'application ('accueil' : bandeau avec le lien vers le portail)
      EP.accueil(zone)  accueil : une ligne dépliable par module
@@ -18,7 +18,7 @@
     { n: 4, titre: 'Les fonctions réciproques', desc: 'Supprimer une fonction (racine, carré, sinus…) avec sa fonction réciproque', fiche: 'fiche_4',
       parties: [{ nom: 'Les fonctions réciproques', cours: 'module_8', entrainement: 'module_9', noms: { cours: 'Méthode' } }] },
   ];
-  window.SOM.init({ nom: 'Équations en physique', id: 'equations-en-physique', plan: PLAN });
+  window.SOM.init({ nom: 'Équations en physique (avec aide)', id: 'equations-en-physique', plan: PLAN });
   window.EP = {
     PLAN,
     menu: cle => window.SOM.menu(cle),
