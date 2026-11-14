@@ -146,10 +146,8 @@
       'module_1', 'module_2', 'module_3', 'module_4', 'module_5', 'module_6', 'module_7', 'module_8',
       'module_9'] },
     'lecture-graphique': { pages: ['module_1', 'module_2', 'module_3'] },
-    'equations-college': { pages: ['module-1', 'module-2', 'module-3', 'module-4', 'module-5', 'module-6', 'module-7', 'module-8'] },
-    'fractions-college': { pages: [
-      'course-1', 'training-1', 'course-2', 'training-2', 'course-3', 'training-3', 'course-4',
-      'training-4', 'training-5'] }
+    'equations-college': { pages: ['seance', 'suivi', 'fiches'] },
+    'fractions-college': { pages: ['seance', 'suivi', 'fiches'] }
   };
 
   // lecture d'une clé du navigateur (stockage indisponible ou valeur abîmée : objet vide)

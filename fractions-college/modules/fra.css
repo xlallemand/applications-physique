@@ -1,0 +1,351 @@
+/* ============================================================
+   Styles de l'application « Fractions » (préfixe fra-)
+   Complète assets/theme.css, equilibrer-reactions/modules/er.css
+   et assets/sommaire.css. Couleurs : variables du thème uniquement.
+   (réglages, suivi et fiches : même présentation que l'application Orthographe)
+   ============================================================ */
+
+/* ---------- écriture mathématique : fractions, opérations ---------- */
+.fra-ligne { display: inline-flex; align-items: center; flex-wrap: nowrap; font-size: 1.2rem; font-variant-numeric: tabular-nums; line-height: 1.2; white-space: nowrap; }
+.fra-c { display: inline-block; }
+.fra-op { margin: 0 .3em; }
+.fra-signe { margin-right: .06em; }
+.fra-par { margin: 0 .04em; }
+.fra-f { display: inline-flex; flex-direction: column; align-items: stretch; vertical-align: middle; margin: 0 .12em; text-align: center; }
+.fra-n, .fra-d { display: flex; justify-content: center; align-items: center; padding: 0 .18em; min-height: 1.25em; }
+.fra-n { border-bottom: 2px solid currentColor; padding-bottom: .08em; }
+.fra-d { padding-top: .1em; }
+.fra-f .fra-f { font-size: .92em; }
+.fra-l .fra-ligne, .er-consigne .fra-ligne, .fra-rappel .fra-ligne, .fra-indice .fra-ligne, .fra-fr-c .fra-ligne, .fra-msg .fra-ligne { font-size: inherit; }
+.er-consigne .fra-ligne, .fra-msg .fra-ligne, .fra-indice .fra-ligne, .fra-fr-c p .fra-ligne, .fra-piege .fra-ligne, .fra-rappel p .fra-ligne, .cle .fra-ligne { vertical-align: middle; margin: 2px 0; }
+
+/* ---------- la feuille de calcul ---------- */
+.fra-feuille {
+  margin: 14px 0 6px; padding: 10px 14px; border-radius: 16px; overflow-x: auto;
+  background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3);
+}
+.fra-l { display: flex; align-items: center; gap: 10px; min-height: 3.6rem; font-size: 1.3rem; padding: 6px 0; }
+.fra-feuille > .fra-l + .fra-l { border-top: 1.5px dashed var(--paper-2); }
+.fra-li { display: inline-flex; align-items: center; }
+@media (max-width: 480px) { .fra-l { font-size: 1.15rem; gap: 8px; } }
+.fra-pre { flex: none; min-width: 2.4em; text-align: right; font-weight: 700; color: var(--ink-2); white-space: nowrap; }
+.fra-l0 { font-weight: 700; }
+.fra-coche { margin-left: 4px; color: var(--success); font-weight: 800; }
+.fra-feuille-s { margin: 8px 0; padding: 6px 12px; border-radius: 12px; background: var(--sheet); box-shadow: inset 0 0 0 1px var(--line); overflow-x: auto; }
+.fra-feuille-s .fra-l { min-height: 0; font-size: 1.1rem; padding: 5px 0; }
+.fra-l-aff { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+.fra-l-aff .fra-pre { min-width: 1.6em; }
+.fra-ex-t { margin-top: 10px; font-size: .78rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+
+/* ---------- ligne en cours d'écriture (éditeur) ---------- */
+.fra-cour { border-radius: 12px; }
+.fra-edit {
+  flex: 1; min-width: 0; min-height: 3.2rem; display: flex; align-items: center; padding: 4px 10px; border-radius: 12px; cursor: text;
+  background: var(--cle-bg); box-shadow: inset 0 0 0 1.5px var(--cle-line); outline: none; overflow-x: auto; touch-action: manipulation;
+}
+.fra-edit:focus-visible, .fra-edit:focus { box-shadow: inset 0 0 0 2px var(--accent); }
+.fra-edit.off { background: var(--paper); box-shadow: none; cursor: default; }
+.fra-cour.fra-ko .fra-edit { background: var(--danger-bg); box-shadow: inset 0 0 0 2px var(--danger); }
+.fra-edit .fra-ligne { font-size: inherit; min-height: 2.4rem; }
+.fra-attente::before { content: 'écris ici'; color: var(--ink-3); font-size: .85em; font-style: italic; margin-left: 6px; }
+.fra-vide { display: inline-block; min-width: 1.1em; height: 1.15em; margin: 1px 2px; border: 1.5px dashed var(--ink-3); border-radius: 4px; position: relative; }
+.fra-vide.ici { border-color: var(--accent); }
+.fra-curseur { display: inline-block; width: 2px; height: 1.2em; margin: 0 -1px; background: var(--accent); vertical-align: middle; animation: fra-clignote 1s steps(1) infinite; }
+.fra-vide .fra-curseur { position: absolute; left: 3px; top: 50%; transform: translateY(-50%); margin: 0; }
+@keyframes fra-clignote { 50% { opacity: 0; } }
+.fra-vider { flex: none; width: 38px; height: 38px; border: none; border-radius: 999px; background: var(--paper-2); color: var(--ink-2); font-size: .95rem; cursor: pointer; }
+
+/* ---------- pavé de calcul (collé en bas de l'écran pendant la question) ---------- */
+.fra-pave-z { position: sticky; bottom: 0; z-index: 20; margin: 10px -6px 0; padding: 8px 6px calc(8px + env(safe-area-inset-bottom)); background: var(--sheet); border-top: 1px solid var(--line); }
+.fra-pave { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; max-width: 30rem; margin: 0 auto; }
+.fra-t {
+  min-height: 48px; border: none; border-radius: 14px; background: var(--paper); color: var(--ink); font-size: 1.2rem; font-weight: 700;
+  cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; font-variant-numeric: tabular-nums; transition: background .15s;
+}
+@media (hover: hover) { .fra-t:hover { background: var(--paper-2); } }
+.fra-t:active { background: var(--paper-3); }
+.fra-t-op { background: var(--cle-bg); color: var(--accent-ink); }
+.fra-t-nav { background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3); font-size: 1rem; }
+.fra-t-frac { background: var(--cle-bg); }
+.fra-t-ok { grid-column: span 2; background: var(--ink); color: var(--sheet); font-size: 1rem; padding: 0 4px; }
+.fra-t-ok.fra-t-seul { grid-column: span 6; }
+.fra-t-zero { grid-column: span 3; }
+/* touches Décomposer et Simplifier : enfoncées quand le mode est choisi */
+.fra-t-mode { grid-column: span 2; background: var(--paper-2); font-size: .95rem; padding: 0 4px; }
+.fra-t-mode.actif, .fra-modes .actif { background: var(--accent); color: var(--sheet); }
+@media (hover: hover) { .fra-t-mode.actif:hover { background: var(--accent-ink); } }
+@media (hover: hover) { .fra-t-ok:hover { background: var(--ink-2); } }
+.fra-tfrac { display: inline-flex; flex-direction: column; gap: 4px; align-items: center; vertical-align: middle; }
+.fra-tfrac i { display: block; width: 14px; height: 11px; border: 1.8px solid var(--accent-ink); border-radius: 3px; }
+.fra-tfrac i:first-child { position: relative; }
+.fra-tfrac i:first-child::after { content: ''; position: absolute; left: -5px; right: -5px; bottom: -4.5px; border-bottom: 2px solid var(--accent-ink); }
+@media (max-width: 400px) { .fra-pave { gap: 5px; } .fra-t { min-height: 46px; font-size: 1.1rem; border-radius: 12px; } .fra-t-nav { font-size: .9rem; } .fra-t-ok, .fra-t-mode { font-size: .8rem; letter-spacing: -.01em; } }
+
+/* ---------- décomposer et simplifier sur la ligne (modules/simplifier.js) ---------- */
+.sim-ligne .fra-n { align-items: flex-end; }
+.sim-ligne .fra-d { align-items: flex-start; }
+/* signes dans un numérateur ou un dénominateur : à la hauteur des nombres de départ */
+.sim-ligne .fra-n > .fra-c, .sim-ligne .fra-d > .fra-c { height: 1.4em; display: inline-flex; align-items: center; }
+.sim-fac { display: inline-flex; align-items: center; }
+.sim-fac.haut { flex-direction: column-reverse; }
+.sim-fac.bas { flex-direction: column; }
+.sim-v { position: relative; display: inline-flex; align-items: center; justify-content: center; border: none; background: none; margin: 0; padding: 0 .12em;
+  border-radius: 8px; font: inherit; color: inherit; line-height: 1.15; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+button.sim-v { cursor: pointer; }
+.sim-v0 { height: 1.4em; min-width: .9em; }
+.sim-vq { font-size: .68em; font-weight: 800; color: var(--c); padding: 0 .1em; }
+button.sim-v:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.sim-on .sim-vivant { background: var(--paper-2); }
+@media (hover: hover) { .sim-on .sim-vivant:hover { background: var(--paper-3); } }
+.sim-v.sim-choisi { background: var(--cle-bg); box-shadow: inset 0 0 0 2px var(--accent); }
+/* nombre barré : trait oblique de la couleur de sa paire, d'un coin à l'autre du nombre
+   (moins penché pour un grand nombre), dans l'autre sens quand la paire contient un 2, 4, 6, 7 ou 9
+   (le trait se confondrait avec la diagonale du chiffre). Masque SVG étiré : épaisseur constante. */
+.sim-barre { color: var(--c); }
+.sim-barre::after { content: ''; position: absolute; left: .04em; right: .04em; top: .3em; bottom: .3em; background: var(--c); pointer-events: none;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' preserveAspectRatio='none'%3E%3Cline x1='0' y1='10' x2='10' y2='0' stroke='%23000' stroke-width='2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' preserveAspectRatio='none'%3E%3Cline x1='0' y1='10' x2='10' y2='0' stroke='%23000' stroke-width='2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+.sim-barre.sim-inv::after { transform: scaleX(-1); }
+.sim-vq.sim-barre::after { top: .14em; bottom: .14em; /* trait plus fin pour les petits restes */
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' preserveAspectRatio='none'%3E%3Cline x1='0' y1='10' x2='10' y2='0' stroke='%23000' stroke-width='1.5' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+          mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10' preserveAspectRatio='none'%3E%3Cline x1='0' y1='10' x2='10' y2='0' stroke='%23000' stroke-width='1.5' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.sim-non { animation: sim-non .35s; }
+@keyframes sim-non { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.sim-nouveau { animation: sim-app .35s ease-out; }
+@keyframes sim-app { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+/* zone de saisie sous la ligne : décomposition, ou ce qu'il reste en haut et en bas */
+.sim-saisie { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 2px 0 8px; padding: 8px 10px; border-radius: 14px;
+  background: var(--cle-bg); box-shadow: inset 0 0 0 1.5px var(--cle-line); font-size: 1.15rem; font-weight: 700; }
+.sim-saisie small { font-size: .82rem; font-weight: 600; color: var(--ink-2); }
+.sim-case { min-width: 44px; min-height: 38px; padding: 2px 8px; border: none; border-radius: 9px; background: var(--sheet); display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 0 0 1.5px var(--line-strong); font: 700 1.15rem var(--font-sans); color: var(--ink); cursor: pointer; }
+.sim-case.actif { box-shadow: inset 0 0 0 2px var(--accent); }
+.sim-case.actif::after { content: ''; width: 2px; height: 1.1em; background: var(--accent); margin-left: 2px; animation: fra-clignote 1s steps(1) infinite; }
+.sim-mini { display: inline-flex; flex-direction: column; align-items: stretch; gap: 3px; }
+.sim-mini > span { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
+.sim-mini > i { height: 2px; background: var(--ink); border-radius: 2px; }
+.sim-ok { flex: none; width: 40px; height: 40px; border: none; border-radius: 999px; background: var(--ink); color: var(--sheet); font-size: 1.05rem; font-weight: 800; cursor: pointer; }
+.sim-lien { border: none; background: none; padding: 4px 0; color: var(--accent-ink); font: 700 .84rem var(--font-sans); text-decoration: underline; cursor: pointer; }
+.sim-note { flex-basis: 100%; }
+/* touches Décomposer / Simplifier quand le pavé est masqué (ordinateur avec clavier) */
+.fra-modes { display: flex; gap: 8px; margin-top: 8px; }
+.fra-modes:empty, .fra-modes[hidden] { display: none; }
+
+/* ---------- question : aides, retours ---------- */
+.fra-entete-q .fra-score { margin: 8px 0 !important; }
+.fra-aides { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; }
+.fra-aides .btn-small[disabled] { opacity: .55; cursor: default; }
+.fra-aide:empty { display: none; }
+.fra-indice { background: var(--cle-bg); border-radius: 12px; padding: 9px 12px; margin-top: 8px; line-height: 1.6; }
+.fra-retour:empty { display: none; }
+.fra-retour .fra-msg { margin-top: 8px; }
+.fra-suite:empty { display: none; }
+.fra-plan { margin: 6px 0 12px; padding-left: 20px; line-height: 1.7; }
+.fra-bilan { list-style: none; margin: 14px 0 0; padding: 0; text-align: left; }
+.fra-bilan li { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-top: 1px solid var(--line); font-size: .95rem; }
+.fra-piege { background: var(--danger-bg); border-radius: 14px; padding: 10px 14px; margin: 10px 0 6px; line-height: 1.55; }
+.er-score small { font-size: 1.4rem; color: var(--ink-3); }
+
+/* ---------- petits éléments communs ---------- */
+.fra-petit { font-size: .86rem; color: var(--ink-2); line-height: 1.45; }
+.fra-h3 { margin: 0 0 8px; font-size: 1.08rem; font-weight: 800; letter-spacing: -.01em; }
+.fra-lab { display: block; margin: 14px 0 6px; font-size: .78rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+.fra-rangee { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+.fra-entre { justify-content: space-between; }
+.fra-esp { flex: 1; }
+.fra-ok { color: var(--success-text); }
+.fra-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.fra-chev { display: inline-block; transition: transform .15s; color: var(--ink-3); font-weight: 800; }
+[aria-expanded="true"] > .fra-chev, .ouvert > button > .fra-chev { transform: rotate(180deg); }
+.fra-msg { margin-top: 10px; padding: 12px 16px; line-height: 1.5; }
+.fra-msg:empty { display: none; }
+.er-page button, .fra-tiroir button, .fra-reg-rond { touch-action: manipulation; -webkit-tap-highlight-color: transparent; font-family: var(--font-sans); }
+.er-page button:focus-visible, .er-page a:focus-visible, .er-page input:focus-visible, .er-page select:focus-visible, .er-page textarea:focus-visible,
+.fra-tiroir button:focus-visible, .fra-tiroir input:focus-visible, .fra-reg-rond:focus-visible, .fra-reg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn-primary, .btn-secondary, .btn-small { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.btn-primary.fra-pt, .btn-secondary.fra-pt { padding: 10px 18px; font-size: .92rem; }
+
+/* ---------- étiquettes du résumé des réglages ---------- */
+.fra-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 12px; }
+.fra-tag { background: var(--paper); border-radius: 999px; padding: 4px 11px; font-size: .82rem; font-weight: 600; color: var(--ink-2); }
+.fra-notions { margin-top: 8px !important; }
+.fra-notions:empty { display: none; }
+
+/* ---------- accueil : zones dépliables « Sauvegarde » et « Réglages » ---------- */
+/* même allure que les lignes des modules, plus petites, teintées de la couleur du collège, séparées des modules */
+.fra-annexes { display: flex; flex-direction: column; gap: 8px; margin-top: 22px; }
+.fra-zone { background: var(--cle-bg); border-radius: 18px; }
+/* cadres de texte des zones : orange très pâle, entre le blanc et le fond de la zone (blanc si le navigateur ne connaît pas color-mix) */
+.fra-zone-t {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 46px; padding: 8px 16px; border: none; background: none;
+  border-radius: 18px; cursor: pointer; font: inherit; color: var(--ink); text-align: left; transition: background .15s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) { .fra-zone-t:hover { background: var(--cle-line); } }
+.fra-zone-t:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.fra-zone-nom { flex: 1 0 auto; white-space: nowrap; font-weight: 800; font-size: .95rem; letter-spacing: -.01em; color: var(--accent-ink); }
+.fra-zone-alertes { flex: 0 1 auto; min-width: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
+.fra-zone-alerte { border-radius: 999px; padding: 3px 10px; font-size: .74rem; font-weight: 800; background: var(--accent); color: var(--sheet); white-space: nowrap; }
+.fra-zone-chev { flex: none; color: var(--accent-ink); font-weight: 800; font-size: 1.1rem; transition: transform .15s; }
+.fra-zone-t[aria-expanded="true"] .fra-zone-chev { transform: rotate(90deg); }
+.fra-zone-c { padding: 0 16px 14px; }
+.fra-zone-c[hidden] { display: none; }
+.fra-zone .fra-tag { background: var(--sheet); background: color-mix(in srgb, var(--sheet) 55%, var(--cle-bg)); color: var(--accent-ink); }
+.fra-reglages-ligne .fra-tags { margin-top: 10px; }
+
+/* ---------- sauvegarde de la progression (modules/sauvegarde.js) ---------- */
+.sauv-etat { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: .9rem; line-height: 1.45; }
+/* chaque information dans un cadre discret, orange très pâle (boutons en blanc) */
+.sauv-etat li, .sauv-ou { background: var(--sheet); background: color-mix(in srgb, var(--sheet) 55%, var(--cle-bg)); border-radius: 12px; padding: 8px 12px; }
+.sauv-etat li.alerte { color: var(--accent-ink); font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--cle-line); }
+.sauv-boutons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.btn-primary.sauv-pt, .btn-secondary.sauv-pt { padding: 10px 16px; font-size: .9rem; }
+.sauv-aide { margin-top: 10px; padding: 10px 14px; border-radius: 14px; background: var(--sheet); background: color-mix(in srgb, var(--sheet) 55%, var(--cle-bg)); font-size: .9rem; line-height: 1.45; }
+.sauv-aide p { margin: 0; }
+.sauv-aide p + p { margin-top: 6px; }
+.sauv-ou { margin: 10px 0 0 !important; }
+.sauv-carte button, .sauv-toast button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; font-family: var(--font-sans); }
+.sauv-carte button:focus-visible, .sauv-toast button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* bandeau en bas de l'écran : message, rappel de sauvegarde */
+.sauv-toast { position: fixed; z-index: 1200; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  max-width: 520px; margin: 0 auto; box-sizing: border-box; background: var(--sheet); color: var(--ink);
+  border: 1px solid var(--line-strong); border-radius: 18px; padding: 14px 16px; box-shadow: 0 10px 30px rgba(22,24,29,.18); font-family: var(--font-sans); }
+.sauv-toast.ok { border-color: var(--success); }
+.sauv-toast.rappel { border-color: var(--accent); }
+.sauv-toast p { margin: 0; font-size: .92rem; line-height: 1.45; }
+.sauv-toast-b { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+
+
+/* ---------- bouton Réglages : sommaire (ordinateur) et bandeau (téléphone) ---------- */
+.fra-nav-pil { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 4px; }
+.fra-reg { border: none; cursor: pointer; }
+.fra-reg-rond {
+  flex-shrink: 0; width: 42px; height: 42px; margin-left: 8px; border: none; border-radius: 999px; background: var(--paper-2);
+  color: var(--ink); font-size: 1.15rem; cursor: pointer;
+}
+
+/* ---------- panneau des réglages ---------- */
+html.fra-tiroir-ouvert { overflow: hidden; }
+.fra-voile { position: fixed; inset: 0; z-index: 1100; background: rgba(22,24,29,.38); }
+.fra-tiroir {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 1101; width: 420px; max-width: 100%; overflow-y: auto; overscroll-behavior: contain;
+  background: var(--sheet); border-left: 1px solid var(--line); font-family: var(--font-sans); color: var(--ink);
+}
+@media (max-width: 599px) {
+  .fra-tiroir { top: auto; left: 0; width: auto; max-height: 88vh; max-height: 88dvh; border-left: 0; border-radius: 22px 22px 0 0; }
+}
+.fra-tiroir *, .fra-tiroir *::before, .fra-tiroir *::after { box-sizing: border-box; }
+.fra-tiroir-t { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 18px; background: var(--sheet); border-bottom: 1px solid var(--line); }
+.fra-tiroir-t b { font-size: 1.1rem; }
+.fra-tiroir-c { padding: 4px 18px 22px; }
+.fra-sect { padding: 14px 0; border-bottom: 1px solid var(--line); }
+.fra-sect h4 { margin: 0 0 10px; font-size: .75rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-2); }
+.fra-sect .fra-petit { margin: 8px 0 0; }
+.fra-lig { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; margin: 8px 0; }
+.fra-lig > span { font-size: .9rem; color: var(--ink-2); min-width: 8rem; }
+/* choix de la voix : liste déroulante et bouton « Essayer » */
+.fra-voix { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; flex: 1 1 220px; min-width: 0; }
+.fra-voix .fra-select { flex: 1 1 200px; min-width: 0; }
+.fra-seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 16px; background: var(--paper-2); }
+.fra-seg button { border: none; background: transparent; border-radius: 13px; padding: 8px 13px; min-height: 40px; font-size: .88rem; font-weight: 600; color: var(--ink-2); cursor: pointer; }
+.fra-seg button[aria-pressed="true"] { background: var(--sheet); color: var(--ink); font-weight: 800; box-shadow: inset 0 0 0 1.5px var(--ink); }
+.fra-seg.off { opacity: .45; }
+.fra-seg.off button { cursor: default; }
+/* panneau des réglages : nom du réglage au-dessus, choix sur toute la largeur en parts égales
+   (jamais de retour à la ligne entre les choix : un long libellé passe sur deux lignes dans son bouton) */
+.fra-tiroir .fra-lig { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 6px; margin: 12px 0; }
+.fra-tiroir .fra-lig > span { min-width: 0; font-size: .86rem; font-weight: 700; color: var(--accent-ink); }
+.fra-tiroir .fra-seg { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 3px; background: var(--cle-bg); }
+.fra-tiroir .fra-seg button { padding: 7px 6px; line-height: 1.2; text-align: center; color: var(--accent-ink); transition: background .15s; }
+@media (hover: hover) { .fra-tiroir .fra-seg:not(.off) button:hover:not([aria-pressed="true"]) { background: var(--cle-line); } }
+.fra-tiroir .fra-seg button[aria-pressed="true"] { background: var(--accent); color: var(--sheet); box-shadow: none; }
+.fra-fam { border: 1px solid var(--line); border-radius: 14px; margin: 6px 0; }
+.fra-fam-t { display: flex; align-items: center; gap: 10px; padding: 6px 12px; }
+.fra-fam-o { flex: 1; display: flex; align-items: center; gap: 8px; min-height: 40px; border: none; background: none; padding: 0; text-align: left; cursor: pointer; font-size: .95rem; color: var(--ink); }
+.fra-fam-o b { flex: 1; font-weight: 700; }
+.fra-fam-c { padding: 0 12px 8px 42px; }
+.fra-cb { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; cursor: pointer; font-size: .92rem; line-height: 1.35; }
+.fra-tiroir input[type="checkbox"] { width: 20px; height: 20px; flex: none; margin: 1px 0 0; accent-color: var(--accent); }
+.fra-niv { display: inline-block; font-size: .7rem; font-weight: 700; border-radius: 6px; padding: 1px 6px; background: var(--paper-2); color: var(--ink-2); white-space: nowrap; }
+
+/* ---------- rappel de la règle ---------- */
+.fra-rappel { background: var(--paper); border-radius: 14px; padding: 12px 14px; margin-top: 8px; font-size: .93rem; line-height: 1.5; }
+.fra-rappel p { margin: 0 0 6px !important; }
+.fra-rappel-t { font-weight: 800; color: var(--accent-ink); }
+.fra-test { background: var(--cle-bg); border-radius: 12px; padding: 8px 12px; }
+.fra-ex { color: var(--ink-2); }
+.fra-lien-fiche { font-weight: 700; color: var(--accent-ink); text-decoration: none; }
+.fra-lien-fiche:hover { text-decoration: underline; }
+.er-page mark, .fra-tiroir mark { background: var(--cle-bg); color: var(--accent-ink); font-weight: 800; padding: 0 2px; border-radius: 4px; }
+
+/* ---------- Mon suivi ---------- */
+.fra-prio { border: 2px solid var(--accent); }
+.fra-prio-l { margin: 4px 0 8px; padding-left: 22px; line-height: 1.7; }
+.fra-prio-b { justify-content: space-between; }
+.fra-notes { display: inline-flex; align-items: center; gap: 8px; }
+.fra-courbe { vertical-align: middle; }
+.fra-courbe polyline { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.fra-grp { border-top: 1px solid var(--line); }
+.fra-grp-t {
+  width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 9rem 3rem 1rem; gap: 10px; align-items: center; padding: 11px 2px;
+  border: none; background: none; text-align: left; cursor: pointer; font: inherit; color: var(--ink); min-height: 46px;
+}
+@media (max-width: 560px) { .fra-grp-t { grid-template-columns: minmax(0, 1fr) 5rem 2.6rem 1rem; gap: 8px; } }
+.fra-grp-t b { font-weight: 700; }
+.fra-adroite { text-align: right; }
+.fra-alerte { font-size: .84rem; color: var(--danger-text); }
+.fra-pile { display: flex; height: 10px; border-radius: 999px; overflow: hidden; background: var(--paper-2); }
+.fra-pile i { display: block; height: 100%; }
+.fra-s-m { background: var(--success); }
+.fra-s-e { background: var(--success-bg); box-shadow: inset 0 0 0 2px var(--success); }
+.fra-s-f { background: var(--accent); }
+.fra-s-t { background: var(--danger); }
+.fra-s-n { background: var(--paper-3); }
+.fra-s-v { background: var(--paper-2); box-shadow: inset 0 0 0 1.5px var(--paper-3); }
+.fra-grp-c { display: none; padding: 0 2px 10px; }
+.fra-grp.ouvert .fra-grp-c { display: block; }
+.fra-grp.ouvert .fra-grp-t .fra-chev { transform: rotate(180deg); }
+.fra-ligne-r { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: .92rem; }
+.fra-ligne-r.fra-plus-tard { color: var(--ink-2); }
+.fra-pct { margin-left: auto; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fra-pct small { font-size: .78rem; }
+.fra-puce { width: 11px; height: 11px; border-radius: 50%; flex: none; display: inline-block; }
+.fra-legende { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 10px; font-size: .82rem; color: var(--ink-2); }
+.fra-legende > span { display: inline-flex; gap: 6px; align-items: center; }
+
+/* ---------- Fiches de règles ---------- */
+.fra-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
+.fra-chips button {
+  border: none; border-radius: 999px; padding: 8px 14px; min-height: 40px; background: var(--sheet); color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font-size: .88rem; font-weight: 700; cursor: pointer;
+}
+.fra-chips button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.fra-intro { color: var(--ink-2); font-size: .92rem; margin: 0 0 10px !important; line-height: 1.5; }
+.fra-fr { border-radius: 14px; }
+.fra-fr-t {
+  width: 100%; display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 9px 10px; border: none; border-radius: 14px;
+  background: none; text-align: left; cursor: pointer; font: inherit; font-size: .98rem; color: var(--ink);
+}
+.fra-fr-t span:first-child { flex: 1; }
+@media (hover: hover) { .fra-fr-t:hover { background: var(--paper); } }
+.fra-fr.ouvert { background: var(--paper); }
+.fra-fr.ouvert > .fra-fr-t { font-weight: 800; color: var(--accent-ink); }
+.fra-fr-c { padding: 0 12px 12px; line-height: 1.55; }
+.fra-fr-c p { margin: 4px 0 8px !important; }
+.fra-fr-c .cle { padding: 10px 14px; border-radius: 14px; margin: 8px 0; }
+/* cas particuliers d'une règle (Majuscule / Pas de majuscule) : deux colonnes sur ordinateur */
+.fra-cas { display: grid; gap: 10px; margin: 10px 0 4px; }
+@media (min-width: 760px) { .fra-cas { grid-template-columns: 1fr 1fr; align-items: start; } }
+.fra-cas-g { background: var(--sheet); border-radius: 14px; padding: 10px 14px; box-shadow: inset 0 0 0 1px var(--line); }
+.fra-fr-c .fra-cas-t { font-weight: 800; color: var(--accent-ink); margin: 2px 0 4px !important; }
+.fra-cas ul { list-style: none; margin: 0; padding: 0; }
+.fra-cas li { padding: 8px 0; border-top: 1px solid var(--line); }
+.fra-cas li:first-child { border-top: none; }
+.fra-cas li > span { display: block; }
+.fra-cas .fra-ex { font-size: .93rem; margin-top: 2px; }
+.fra-plus { border: none; background: none; color: var(--accent-ink); font-weight: 700; font-size: .92rem; padding: 10px; min-height: 44px; cursor: pointer; }
+
+
+
+@media (prefers-reduced-motion: reduce) { .fra-curseur, .sim-case.actif::after, .sim-non, .sim-nouveau { animation: none; } .fra-t, .fra-chev, .fra-zone-chev { transition: none; } }
+.fra-suite { scroll-margin-bottom: 20px; }
