@@ -272,6 +272,8 @@
       if (!q.affiche) sim.attacher(l0, X.lire(q.depart));
       const act = el('div', 'er-actions fra-suite');
       c.appendChild(act);
+      // un clic sur une aide (ou un bouton dans une aide) ne retire pas le focus de la ligne : on continue à taper au clavier
+      c.addEventListener('mousedown', e => { if (e.target.closest('button') && e.target.closest('.fra-aides, .fra-aide')) e.preventDefault(); });
       zone.appendChild(c);
       majInd();
       if (matchMedia('(hover: hover)').matches) zEd.focus({ preventScroll: true });
