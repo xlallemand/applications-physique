@@ -34,7 +34,8 @@
                                    ni par la sauvegarde du portail)
 
    API :
-     FRA.carteSauvegarde()   zone dépliable « Ta sauvegarde » de l'accueil (élément)
+     FRA.carteSauvegarde()   zone dépliable « Sauvegarde » de l'accueil (élément)
+     FRA.ouvrirSauvegarde()  ouvre cette zone et l'amène à l'écran (lien du sommaire, index.html#sauvegarde)
      FRA.apresSeance()       appelé par FRA.enregistrer à chaque séance notée
      FRA.sauvegarde : { enregistrer(), restaurer(), installer(), paquet(), importer(paquet), fichier(paquet) }
    ============================================================ */
@@ -331,7 +332,7 @@
       '</style>\n</head>\n<body>\n<main>\n<div class="carte">\n' +
       '  <h1>Ma progression en fractions</h1>\n' +
       '  <p class="date">Copie du ' + echapper(dateLongue(d)) + (n ? ' · ' + echapper(pluriel(n, 'séance')) : '') + '</p>\n' +
-      '  <p><b>Sur un téléphone ou une tablette</b> : ouvre l’application Fractions, ouvre « Ta sauvegarde » sur son accueil, touche « Restaurer une copie », puis choisis ce fichier.</p>\n' +
+      '  <p><b>Sur un téléphone ou une tablette</b> : ouvre l’application Fractions, ouvre « Sauvegarde » sur son accueil, touche « Restaurer une copie », puis choisis ce fichier.</p>\n' +
       '  <p><b>Sur un ordinateur</b> : touche le bouton (il faut être connecté à Internet).</p>\n' +
       '  <a class="bouton" id="reprendre" href="' + echapper(lien) + '">Reprendre ma progression</a>\n' +
       '  <p class="aide">Ouvrir une ancienne copie n’efface jamais une progression plus récente : on garde toujours ton meilleur résultat.</p>\n' +
@@ -505,7 +506,7 @@
   }
 
   /* =====================================================================
-     Zone « Ta sauvegarde » de l'accueil (dépliable)
+     Zone « Sauvegarde » de l'accueil (dépliable)
      Repliée : le titre et, s'il le faut, les alertes (progression non protégée,
      pas de copie depuis RAPPEL séances ou plus).
      ===================================================================== */
@@ -523,13 +524,21 @@
     majCarte();
     return carte;
   }
+  // ouvre la zone « Sauvegarde » de l'accueil et l'amène à l'écran (lien « Sauvegarde » du sommaire)
+  function ouvrirSauvegarde() {
+    if (!carte) return;
+    carteOuverte = true;
+    majCarte();
+    carte.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    carteT.focus({ preventScroll: true });
+  }
   function majCarte() {
     if (!carte) return;
     const e = lireEtat(), s = stockage(), p = s ? paquet() : null, inst = installee();
     // en-tête : titre, alertes, chevron
     carteT.innerHTML = '';
     carteT.setAttribute('aria-expanded', String(carteOuverte));
-    carteT.appendChild(el('span', 'fra-zone-nom', 'Ta sauvegarde'));
+    carteT.appendChild(el('span', 'fra-zone-nom', 'Sauvegarde'));
     const al = el('span', 'fra-zone-alertes');
     if (!s) al.appendChild(el('span', 'fra-zone-alerte', 'Non enregistrée'));
     else {
@@ -600,10 +609,16 @@
     if (t) { sessionStorage.removeItem(CLE_MSG); const b = JSON.parse(t); if (estObjet(b)) bilan({ etat: 'ok', date: typeof b.date === 'string' ? b.date : null }); }
   } catch (e) { /* pas de message */ }
   // rappel en attente (séances faites, pas de copie depuis)
+  // arrivée par le lien « Sauvegarde » du sommaire (index.html#sauvegarde) : zone ouverte, ancre retirée
+  addEventListener('DOMContentLoaded', () => {
+    if (location.hash !== '#sauvegarde') return;
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* l'ancre reste : sans effet */ }
+    ouvrirSauvegarde();
+  });
   addEventListener('DOMContentLoaded', () => { if (!toasts.message && /(^|\/)(index\.html)?$/.test(location.pathname)) rappel(); });
 
   Object.assign(FRA, {
-    carteSauvegarde, apresSeance,
+    carteSauvegarde, apresSeance, ouvrirSauvegarde,
     sauvegarde: { enregistrer, restaurer, installer, paquet, importer, fichier, depuisFichier }
   });
 })();

@@ -10,7 +10,7 @@
        automatique et progressif des compétences d'une séance ;
      - rappel d'une compétence ; accueil ; pages « Mon suivi » et « Fiches ».
    Dépend de : assets/sommaire.js (SOM), expr.js (FRA.X), competences.js (FRA.C),
-   sauvegarde.js (facultatif : carte « Ta sauvegarde », rappel après chaque séance notée, installation).
+   sauvegarde.js (facultatif : carte « Sauvegarde », rappel après chaque séance notée, installation).
 
    Stockage (localStorage, toujours dans un try/catch) :
      fractions-college-progression  (SOM) { derniere, pages: { <page>: { fait, note } } }
@@ -20,7 +20,7 @@
      (fusion fine dans assets/progression.js, type « suivi-competences »)
 
    API :
-     FRA.menu(cle)                   sommaire (SOM.menu) + bouton Réglages
+     FRA.menu(cle)                   sommaire (SOM.menu) + pastilles Réglages et Sauvegarde
      FRA.reglages() ; FRA.regler(cle, val) ; FRA.ouvrirReglages() ; FRA.surReglages(fn) ; FRA.resumeReglages()
      FRA.enregistrer(occ, note)      occasions [{ r, ok }] et note sur 20 (ou null)
      FRA.statut(id) 'm' maîtrisée | 'e' en bonne voie (réussie, pas encore assez de questions) | 'f' fragile | 't' à travailler
@@ -235,7 +235,23 @@
     if (!nav) return;
     // ordinateur : dans le sommaire, sous le nom de l'application
     const tete = nav.querySelector('.som-tete');
-    if (tete && !nav.querySelector('.fra-reg')) tete.insertAdjacentElement('afterend', bouton('som-pilule fra-reg', '<span aria-hidden="true">⚙</span>Réglages', ouvrirReglages));
+    if (tete && !nav.querySelector('.fra-reg')) {
+      // pastilles Réglages et Sauvegarde (la sauvegarde s'ouvre sur l'accueil, comme sa zone dépliable)
+      const pil = el('div', 'fra-nav-pil');
+      pil.appendChild(bouton('som-pilule fra-reg', '<span aria-hidden="true">⚙</span>Réglages', ouvrirReglages));
+      const app = tete.querySelector('.som-app');
+      const sur = cle === 'accueil';
+      const a = el('a', 'som-pilule fra-reg', '<span aria-hidden="true">⤓</span>Sauvegarde');
+      a.href = sur ? '#sauvegarde' : (app ? app.getAttribute('href') : '../index.html') + '#sauvegarde';
+      if (sur) a.addEventListener('click', e => {
+        // déjà sur l'accueil : on ouvre la zone sans recharger
+        e.preventDefault();
+        fermerSommaire();
+        if (typeof FRA.ouvrirSauvegarde === 'function') FRA.ouvrirSauvegarde();
+      });
+      pil.appendChild(a);
+      tete.insertAdjacentElement('afterend', pil);
+    }
     // téléphone : à droite du bandeau « où suis-je »
     const barre = nav.querySelector('.som-barre');
     if (barre && !barre.querySelector('.fra-reg-rond')) barre.appendChild(bouton('fra-reg-rond', '<span aria-hidden="true">⚙</span>', ouvrirReglages, 'Réglages'));
@@ -373,11 +389,11 @@
       d.appendChild(a); liste.appendChild(d);
     });
     zone.appendChild(liste);
-    // zones dépliables « Ta sauvegarde » (modules/sauvegarde.js) et « Tes réglages » (en dernier), séparées des modules
+    // zones dépliables « Sauvegarde » (modules/sauvegarde.js) et « Réglages » (en dernier), séparées des modules
     const annexes = el('div', 'fra-annexes');
     if (typeof FRA.carteSauvegarde === 'function') annexes.appendChild(FRA.carteSauvegarde());
     const c = el('div', 'fra-zone fra-reglages-ligne');
-    const t = bouton('fra-zone-t', '<span class="fra-zone-nom">Tes réglages</span><span class="fra-zone-chev" aria-hidden="true">›</span>', () => {
+    const t = bouton('fra-zone-t', '<span class="fra-zone-nom">Réglages</span><span class="fra-zone-chev" aria-hidden="true">›</span>', () => {
       const oui = t.getAttribute('aria-expanded') !== 'true';
       t.setAttribute('aria-expanded', String(oui));
       cc.hidden = !oui;
