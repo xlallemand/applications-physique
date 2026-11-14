@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 3 : méthode — Équations en physique (avec aide)</title>
+<title>Module 3 : méthode — Équations en physique</title>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
 <style>
@@ -197,7 +197,7 @@
   <div class="er-card">
     <span class="er-badge">MODULE 3 · MÉTHODE</span>
     <h2 class="er-titre">Gérer les + et les −</h2>
-    <p class="er-contexte">Un terme relié aux autres par un <b>+</b> ou un <b>−</b> peut lui aussi passer de l'autre côté du signe = : il change alors de <b>signe</b>. Tu vas voir aussi comment traiter une somme multipliée, une grandeur isolée négative et une somme à diviser, puis le faire dans l'éditeur, par glisser-déposer.</p>
+    <p class="er-contexte">Un terme relié aux autres par un <b>+</b> ou un <b>−</b> peut lui aussi passer de l'autre côté du signe = : il change alors de <b>signe</b>. Tu vas voir aussi comment traiter une somme multipliée, une grandeur isolée négative et une somme à diviser, puis le faire dans l'éditeur, par glisser-déposer.</p>
   </div>
   <div id="etapes"></div>
 </div>
@@ -993,9 +993,9 @@ function monterEditeur(hote, cfg, api) {
 // un terme additif (id, nom lab) devait passer du côté « cote » avec le signe « signe »
 function diagTerme(st, id, lab, cote, signe) {
     const ici = findTermSign(st[cote], id), la = findTermSign(st[cote === 'left' ? 'right' : 'left'], id);
-    if (ici === null && la !== null) return `${lab} doit passer de l'autre côté du signe = : glisse-le sur l'autre membre de l'équation.`;
-    if (ici !== null && ici !== signe) return `${lab} a changé de côté : il doit aussi changer de signe.`;
-    return `Seul ${lab} doit changer de côté : les autres termes restent à leur place. Clique sur ↺ Recommencer pour repartir de l'équation de départ.`;
+    if (ici === null && la !== null) return `${lab} doit passer de l'autre côté du signe = : glisse-le sur l'autre membre de l'équation.`;
+    if (ici !== null && ici !== signe) return `${lab} a changé de côté : il doit aussi changer de signe.`;
+    return `Seul ${lab} doit changer de côté : les autres termes restent à leur place. Clique sur ↺ Recommencer pour repartir de l'équation de départ.`;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1026,7 +1026,7 @@ const M_TERME = [
         diag: st => diagTerme(st, 'P2', 'P₂', 'right', -1),
         solution: () => ({ left: seq([sumNode([term1(-1,[simple([P1])])])]),
                            right: seq([sumNode([term1(-1,[simple([P2])]), { sign:1, node: seq([simple([RHO, G]), z1MoinsZ2()]) }])]) }),
-        explication: '<p>On a retiré P<sub>2</sub> aux deux membres : +P<sub>2</sub> disparaît à gauche et −P<sub>2</sub> apparaît à droite.</p>',
+        explication: '<p>On a retiré P<sub>2</sub> aux deux membres : +P<sub>2</sub> disparaît à gauche et −P<sub>2</sub> apparaît à droite.</p>',
     },
     {   titre: 'Faire passer −P₁ de l\'autre côté',
         instruction: "Repartons de la même équation. Cette fois, glisse <b>−P<sub>1</sub></b> vers l'autre côté.",
@@ -1043,14 +1043,14 @@ const M_TERME = [
         diag: st => diagTerme(st, 'P1', 'P₁', 'right', 1),
         solution: () => ({ left: seq([simple([P2])]),
                            right: seq([sumNode([term1(1,[simple([P1])]), { sign:1, node: seq([simple([RHO, G]), z1MoinsZ2()]) }])]) }),
-        explication: '<p>On a ajouté P<sub>1</sub> aux deux membres : −P<sub>1</sub> disparaît à gauche et +P<sub>1</sub> apparaît à droite.</p>',
+        explication: '<p>On a ajouté P<sub>1</sub> aux deux membres : −P<sub>1</sub> disparaît à gauche et +P<sub>1</sub> apparaît à droite.</p>',
     },
 ];
 
 // Une somme multipliée
 const M_SOMME = [
     {   titre: 'Diviser par ρ et g',
-        instruction: "À droite, (z<sub>1</sub>−z<sub>2</sub>) est multiplié par ρ et g : impossible de déplacer z<sub>1</sub> ou z<sub>2</sub> directement. Pour diviser par ρ et g, glisse d'abord l'outil fraction sur <b>P<sub>2</sub></b> (à gauche), puis glisse <b>ρ</b> et <b>g</b> dans le dénominateur de cette fraction.",
+        instruction: "À droite, (z<sub>1</sub>−z<sub>2</sub>) est multiplié par ρ et g : impossible de déplacer z<sub>1</sub> ou z<sub>2</sub> directement. Pour diviser par ρ et g, glisse d'abord l'outil fraction sur <b>P<sub>2</sub></b> (à gauche), puis glisse <b>ρ</b> et <b>g</b> dans le dénominateur de cette fraction.",
         left:  () => seq([simple([P2])]),
         right: () => seq([simple([RHO, G]), z1MoinsZ2()]),
         showFracTool: true,
@@ -1066,14 +1066,14 @@ const M_SOMME = [
         diag: st => {
             const l = st.left;
             if (!(l.slots.length === 1 && l.slots[0].kind === 'frac')) return 'Glisse d\'abord l\'outil fraction (···/···) sur P₂, à gauche.';
-            if (!existsInTree(l.slots[0].den, 'rho') || !existsInTree(l.slots[0].den, 'g')) return 'Glisse maintenant ρ et g dans la case du bas de la fraction, sous P₂ : on divise les deux membres par ρ × g.';
+            if (!existsInTree(l.slots[0].den, 'rho') || !existsInTree(l.slots[0].den, 'g')) return 'Glisse maintenant ρ et g dans la case du bas de la fraction, sous P₂ : on divise les deux membres par ρ × g.';
             return 'À droite, il ne doit rester que la somme z₁ − z₂, et P₂ reste au numérateur. Clique sur ↺ Recommencer si besoin.';
         },
         solution: () => ({ left: seq([frac([P2], [RHO, G])]), right: seq([z1MoinsZ2()]) }),
-        explication: '<p>On a divisé les deux membres par ρ × g : la somme z<sub>1</sub> − z<sub>2</sub> est maintenant seule à droite.</p>',
+        explication: '<p>On a divisé les deux membres par ρ × g : la somme z<sub>1</sub> − z<sub>2</sub> est maintenant seule à droite.</p>',
     },
     {   titre: 'Déplacer −z₂',
-        instruction: "La somme est maintenant isolée à droite : plus rien ne la multiplie. Tu peux déplacer <b>z<sub>1</sub></b> ou <b>z<sub>2</sub></b> librement, comme n'importe quel terme additif. Glisse <b>−z<sub>2</sub></b> à gauche.",
+        instruction: "La somme est maintenant isolée à droite : plus rien ne la multiplie. Tu peux déplacer <b>z<sub>1</sub></b> ou <b>z<sub>2</sub></b> librement, comme n'importe quel terme additif. Glisse <b>−z<sub>2</sub></b> à gauche.",
         left:  () => seq([frac([P2], [RHO, G])]),
         right: () => seq([z1MoinsZ2()]),
         highlight: 'z2',
@@ -1086,14 +1086,14 @@ const M_SOMME = [
         },
         diag: st => diagTerme(st, 'z2', 'z₂', 'left', 1),
         solution: () => ({ left: seq([sumNode([{ sign:1, node: seq([frac([P2], [RHO, G])]) }, term1(1,[simple([Z2])])])]), right: seq([simple([Z1])]) }),
-        explication: '<p>On a ajouté z<sub>2</sub> aux deux membres : −z<sub>2</sub> disparaît à droite et +z<sub>2</sub> apparaît à gauche.</p>',
+        explication: '<p>On a ajouté z<sub>2</sub> aux deux membres : −z<sub>2</sub> disparaît à droite et +z<sub>2</sub> apparaît à gauche.</p>',
     },
 ];
 
 // Une grandeur isolée négative
 const M_NEG = [
     {   titre: 'Multiplier les deux membres par −1',
-        instruction: "Si on repart de P<sub>2</sub> − P<sub>1</sub> = ρ×g×(z<sub>1</sub>−z<sub>2</sub>) et qu'on déplace P<sub>2</sub> vers la droite (comme dans la première manipulation), on obtient <b>−P<sub>1</sub> = ρ×g×(z<sub>1</sub>−z<sub>2</sub>) − P<sub>2</sub></b>. La grandeur isolée à gauche est négative : pour obtenir +P<sub>1</sub>, il faut multiplier les <b>deux membres</b> de l'équation par −1. Glisse l'outil ×(−1) une fois à gauche, puis une fois à droite.",
+        instruction: "Si on repart de P<sub>2</sub> − P<sub>1</sub> = ρ×g×(z<sub>1</sub>−z<sub>2</sub>) et qu'on déplace P<sub>2</sub> vers la droite (comme dans la première manipulation), on obtient <b>−P<sub>1</sub> = ρ×g×(z<sub>1</sub>−z<sub>2</sub>) − P<sub>2</sub></b>. La grandeur isolée à gauche est négative : pour obtenir +P<sub>1</sub>, il faut multiplier les <b>deux membres</b> de l'équation par −1. Glisse l'outil ×(−1) une fois à gauche, puis une fois à droite.",
         left:  () => seq([sumNode([term1(-1,[simple([P1])])])]),
         right: () => seq([simple([RHO, G]), z1MoinsZ2()]),
         showNegTool: true,
@@ -1107,19 +1107,19 @@ const M_NEG = [
         diag: st => {
             const gauche = isFullyIsolatedSeq(st.left, 'P1'), r = st.right;
             const droite = r.slots.length === 1 && r.slots[0].kind === 'sum' && r.slots[0].terms.length === 1 && r.slots[0].terms[0].sign === -1;
-            if (gauche && !droite) return 'Tu as multiplié le membre de gauche par −1 : fais-le aussi à droite, sinon l\'égalité n\'est plus vraie.';
-            if (!gauche && droite) return 'Tu as multiplié le membre de droite par −1 : fais-le aussi à gauche, pour obtenir +P₁.';
-            return 'Glisse l\'outil ×(−1) une seule fois sur chaque membre : une fois à gauche, une fois à droite. Clique sur ↺ Recommencer si besoin.';
+            if (gauche && !droite) return 'Tu as multiplié le membre de gauche par −1 : fais-le aussi à droite, sinon l\'égalité n\'est plus vraie.';
+            if (!gauche && droite) return 'Tu as multiplié le membre de droite par −1 : fais-le aussi à gauche, pour obtenir +P₁.';
+            return 'Glisse l\'outil ×(−1) une seule fois sur chaque membre : une fois à gauche, une fois à droite. Clique sur ↺ Recommencer si besoin.';
         },
         solution: () => ({ left: seq([simple([P1])]), right: seq([sumNode([{ sign:-1, node: seq([simple([RHO, G]), z1MoinsZ2()]) }])]) }),
-        explication: '<p>Les deux membres ont été multipliés par −1 : −P<sub>1</sub> devient P<sub>1</sub>, et tout le membre de droite change de signe.</p>',
+        explication: '<p>Les deux membres ont été multipliés par −1 : −P<sub>1</sub> devient P<sub>1</sub>, et tout le membre de droite change de signe.</p>',
     },
 ];
 
 // Diviser une somme
 const M_DIV = [
     {   titre: 'Mettre une somme dans une fraction',
-        instruction: "On veut maintenant diviser l'équation P<sub>2</sub> − P<sub>1</sub> = ρ×g×(z<sub>1</sub>−z<sub>2</sub>) par ρ×g. Mais (P<sub>2</sub> − P<sub>1</sub>) n'est pas une seule grandeur, c'est une somme : impossible de la glisser directement dans une fraction. Glisse d'abord l'outil <b>( )</b> sur le côté gauche pour en faire un seul bloc, PUIS glisse l'outil fraction dessus.",
+        instruction: "On veut maintenant diviser l'équation P<sub>2</sub> − P<sub>1</sub> = ρ×g×(z<sub>1</sub>−z<sub>2</sub>) par ρ×g. Mais (P<sub>2</sub> − P<sub>1</sub>) n'est pas une seule grandeur, c'est une somme : impossible de la glisser directement dans une fraction. Glisse d'abord l'outil <b>( )</b> sur le côté gauche pour en faire un seul bloc, PUIS glisse l'outil fraction dessus.",
         left: m6Start.left, right: m6Start.right,
         showParenTool: true, showFracTool: true,
         check: (st) => {
@@ -1134,7 +1134,7 @@ const M_DIV = [
             : 'Glisse d\'abord l\'outil ( ) sur le côté gauche pour faire de P₂ − P₁ un seul bloc, puis l\'outil fraction dessus (sans parenthèses, la fraction ne prendrait que P₂). Clique sur ↺ Recommencer si besoin.',
         solution: () => ({ left: seq([{ kind:'frac', num: sumNode([term1(1,[simple([P2])]), term1(-1,[simple([P1])])]), den: simple([]), forceDenCross:true }]),
                            right: m6Start.right() }),
-        explication: '<p>Entre parenthèses, P<sub>2</sub> − P<sub>1</sub> forme un seul bloc : il passe entier au numérateur. Il ne reste plus qu\'à mettre ρ et g au dénominateur.</p>',
+        explication: '<p>Entre parenthèses, P<sub>2</sub> − P<sub>1</sub> forme un seul bloc : il passe entier au numérateur. Il ne reste plus qu\'à mettre ρ et g au dénominateur.</p>',
     },
 ];
 
@@ -1155,7 +1155,7 @@ const avantApres = (avant, op, apres) => `<div class="ep-avap">
     <div class="ep-av"><p class="ep-av-t">Avant</p>${avant}</div>
     <p class="ep-op">${op}</p>
     <div class="ep-av"><p class="ep-av-t">Après</p>${apres}</div></div>`;
-const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Un terme précédé d'un + ou d'un − se glisse (à la souris ou au doigt) sur l'autre membre de l'équation ; les outils de la palette se glissent sur l'équation. ↺ Recommencer remet l'équation de départ. Clique sur <b>Valider</b> quand c'est fait.</p></div>`;
+const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Un terme précédé d'un + ou d'un − se glisse (à la souris ou au doigt) sur l'autre membre de l'équation ; les outils de la palette se glissent sur l'équation. ↺ Recommencer remet l'équation de départ. Clique sur <b>Valider</b> quand c'est fait.</p></div>`;
 // les parenthèses des exemples s'ajustent à la hauteur de leur contenu
 const ajouter = (c, carte, html) => { const d = c.ajouter(carte, html); sizeParens(d); return d; };
 
@@ -1163,13 +1163,13 @@ const ajouter = (c, carte, html) => { const d = c.ajouter(carte, html); sizePare
 function etape1(c) {
     const carte = c.carte('1. Déplacer un terme additif');
     ajouter(c, carte, `<div class="cours-bloc">
-        <p>Dans une équation, un terme additif (relié aux autres par un + ou un −) peut lui aussi passer de l'autre côté du signe =. Contrairement à un terme multiplicatif, il ne change pas de position (haut/bas) : il change de <b>signe</b>.</p>
-        <div class="cle"><p><b class="cle-titre">Règle.</b> Un terme précédé de + ou de − passe de l'autre côté du signe = en changeant de signe : + devient −, et − devient + (on ajoute ou on retire ce terme aux deux membres).</p></div>
+        <p>Dans une équation, un terme additif (relié aux autres par un + ou un −) peut lui aussi passer de l'autre côté du signe =. Contrairement à un terme multiplicatif, il ne change pas de position (haut/bas) : il change de <b>signe</b>.</p>
+        <div class="cle"><p><b class="cle-titre">Règle.</b> Un terme précédé de + ou de − passe de l'autre côté du signe = en changeant de signe : + devient −, et − devient + (on ajoute ou on retire ce terme aux deux membres).</p></div>
       </div>
-      ${exemple(`<p>Dans v = v<sub>0</sub> + a × t, on fait passer v<sub>0</sub> à gauche :</p>
+      ${exemple(`<p>Dans v = v<sub>0</sub> + a × t, on fait passer v<sub>0</sub> à gauche :</p>
         ${avantApres(eqStat(seq([simple([V])]), seq([S([1, V0], [1, A, TT])])), '−v<sub>0</sub> des deux côtés',
                      eqStat(seq([S([1, V], [-1, V0])]), seq([simple([A, TT])])))}
-        <p>+v<sub>0</sub> disparaît à droite et arrive à gauche avec le signe − : v − v<sub>0</sub> = a × t.</p>`)}
+        <p>+v<sub>0</sub> disparaît à droite et arrive à gauche avec le signe − : v − v<sub>0</sub> = a × t.</p>`)}
       ${MODE_EMPLOI}`);
     c.aToi(carte, M_TERME.map(manip));
     return carte;
@@ -1179,13 +1179,13 @@ function etape1(c) {
 function etape2(c) {
     const carte = c.carte('2. Une somme multipliée');
     ajouter(c, carte, `<div class="cours-bloc">
-        <p>Quand une somme est multipliée par d'autres termes, comme ρ × g × (z<sub>1</sub> − z<sub>2</sub>), on ne peut pas en déplacer un terme directement : il faut d'abord la libérer de ce qui la multiplie.</p>
-        <div class="cle"><p><b class="cle-titre">Règle.</b> Une somme multipliée ne se sépare pas : on divise d'abord les deux membres par ce qui la multiplie, puis on déplace ses termes.</p></div>
+        <p>Quand une somme est multipliée par d'autres termes, comme ρ × g × (z<sub>1</sub> − z<sub>2</sub>), on ne peut pas en déplacer un terme directement : il faut d'abord la libérer de ce qui la multiplie.</p>
+        <div class="cle"><p><b class="cle-titre">Règle.</b> Une somme multipliée ne se sépare pas : on divise d'abord les deux membres par ce qui la multiplie, puis on déplace ses termes.</p></div>
       </div>
-      ${exemple(`<div class="ep-exemples"><p>Dans F = k × (L − L<sub>0</sub>), on veut isoler L :</p>
+      ${exemple(`<div class="ep-exemples"><p>Dans F = k × (L − L<sub>0</sub>), on veut isoler L :</p>
         ${avantApres(eqStat(seq([simple([F])]), seq([simple([K]), S([1, L], [-1, L0])])), '÷k des deux côtés',
                      eqStat(seq([frac([F], [K])]), seq([S([1, L], [-1, L0])])))}
-        <p>La somme L − L<sub>0</sub> est maintenant seule : on peut déplacer −L<sub>0</sub>.</p>
+        <p>La somme L − L<sub>0</sub> est maintenant seule : on peut déplacer −L<sub>0</sub>.</p>
         ${avantApres(eqStat(seq([frac([F], [K])]), seq([S([1, L], [-1, L0])])), '+L<sub>0</sub> des deux côtés',
                      eqStat(seq([sumNode([{ sign: 1, node: seq([frac([F], [K])]) }, term1(1, [simple([L0])])])]), seq([simple([L])])))}
         <p>On obtient ${fr('F', 'k')} + L<sub>0</sub> = L.</p></div>`)}`);
@@ -1197,10 +1197,10 @@ function etape2(c) {
 function etape3(c) {
     const carte = c.carte('3. Une grandeur isolée négative');
     ajouter(c, carte, `<div class="cours-bloc">
-        <p>Il arrive que la grandeur isolée soit précédée d'un signe − : −x = … . Pour obtenir +x, on multiplie les <b>deux membres</b> par −1 : chaque terme change de signe, des deux côtés.</p>
-        <div class="cle"><p><b class="cle-titre">Règle.</b> Grandeur isolée négative : on multiplie les <b>deux membres</b> par −1.</p></div>
+        <p>Il arrive que la grandeur isolée soit précédée d'un signe − : −x = … . Pour obtenir +x, on multiplie les <b>deux membres</b> par −1 : chaque terme change de signe, des deux côtés.</p>
+        <div class="cle"><p><b class="cle-titre">Règle.</b> Grandeur isolée négative : on multiplie les <b>deux membres</b> par −1.</p></div>
       </div>
-      ${exemple(`<p>En faisant passer v à droite dans v − v<sub>0</sub> = a × t, on obtient −v<sub>0</sub> = a × t − v :</p>
+      ${exemple(`<p>En faisant passer v à droite dans v − v<sub>0</sub> = a × t, on obtient −v<sub>0</sub> = a × t − v :</p>
         ${avantApres(eqStat(seq([S([-1, V0])]), seq([S([1, A, TT], [-1, V])])), '×(−1) des deux côtés',
                      eqStat(seq([simple([V0])]), seq([S([-1, A, TT], [1, V])])))}
         <p>v<sub>0</sub> = −a × t + v, c'est-à-dire v<sub>0</sub> = v − a × t.</p>`)}`);
@@ -1212,13 +1212,13 @@ function etape3(c) {
 function etape4(c) {
     const carte = c.carte('4. Diviser une somme');
     ajouter(c, carte, `<div class="cours-bloc">
-        <p>Une somme n'est pas une seule grandeur : pour la diviser, il faut d'abord la regrouper en un seul bloc, entre parenthèses, puis la mettre au numérateur d'une fraction.</p>
+        <p>Une somme n'est pas une seule grandeur : pour la diviser, il faut d'abord la regrouper en un seul bloc, entre parenthèses, puis la mettre au numérateur d'une fraction.</p>
         <div class="cle"><p><b class="cle-titre">Règle.</b> Pour diviser une somme, on l'entoure d'abord de parenthèses pour en faire un seul bloc, puis on la met dans une fraction.</p></div>
       </div>
-      ${exemple(`<p>Dans v − v<sub>0</sub> = a × t, on veut isoler a : il faut diviser par t.</p>
+      ${exemple(`<p>Dans v − v<sub>0</sub> = a × t, on veut isoler a : il faut diviser par t.</p>
         ${avantApres(eqStat(seq([S([1, V], [-1, V0])]), seq([simple([A, TT])])), '( ), fraction, puis t en bas',
                      eqStat(seq([{ kind: 'frac', num: S([1, V], [-1, V0]), den: simple([TT]) }]), seq([simple([A])])))}
-        <p>La somme v − v<sub>0</sub> passe entière au numérateur : a = ${fr('v − v<sub>0</sub>', 't')}.</p>`)}`);
+        <p>La somme v − v<sub>0</sub> passe entière au numérateur : a = ${fr('v − v<sub>0</sub>', 't')}.</p>`)}`);
     c.aToi(carte, M_DIV.map(manip));
     return carte;
 }
@@ -1226,14 +1226,14 @@ function etape4(c) {
 /* ---------- À retenir ---------- */
 function aRetenir(c) {
     const carte = c.carte('À retenir');
-    c.ajouter(carte, `<div class="cle"><p>Un terme relié aux autres par un <b>+</b> ou un <b>−</b> peut passer de l'autre côté du signe = : il ne change pas de position (haut / bas), il change de <b>signe</b>.</p>
+    c.ajouter(carte, `<div class="cle"><p>Un terme relié aux autres par un <b>+</b> ou un <b>−</b> peut passer de l'autre côté du signe = : il ne change pas de position (haut / bas), il change de <b>signe</b>.</p>
         <p class="crs-formule">P<sub>2</sub> − P<sub>1</sub> = ρ × g × (z<sub>1</sub> − z<sub>2</sub>) &nbsp;⇔&nbsp; −P<sub>1</sub> = ρ × g × (z<sub>1</sub> − z<sub>2</sub>) − P<sub>2</sub></p></div>
-      <div class="cle"><p><b class="cle-titre">Une somme multipliée</b> ne se sépare pas : on divise d'abord les deux membres par ce qui la multiplie, puis on déplace ses termes.</p>
+      <div class="cle"><p><b class="cle-titre">Une somme multipliée</b> ne se sépare pas : on divise d'abord les deux membres par ce qui la multiplie, puis on déplace ses termes.</p>
         <p class="crs-formule">${fr('P<sub>2</sub> − P<sub>1</sub>', 'ρ × g')} = z<sub>1</sub> − z<sub>2</sub></p></div>
-      <div class="cle"><p><b class="cle-titre">Grandeur isolée négative</b> : on multiplie les <b>deux membres</b> par −1.</p></div>
-      <div class="cle"><p><b class="cle-titre">Diviser une somme</b> : on l'entoure d'abord de parenthèses pour en faire un seul bloc, puis on la met dans une fraction.</p></div>
+      <div class="cle"><p><b class="cle-titre">Grandeur isolée négative</b> : on multiplie les <b>deux membres</b> par −1.</p></div>
+      <div class="cle"><p><b class="cle-titre">Diviser une somme</b> : on l'entoure d'abord de parenthèses pour en faire un seul bloc, puis on la met dans une fraction.</p></div>
       <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_7.html">Entraînement →</a>
-        <a class="btn-secondary" style="text-decoration:none" href="module_8.html">Module 4 : les fonctions réciproques</a>
+        <a class="btn-secondary" style="text-decoration:none" href="module_8.html">Module 4 : les fonctions réciproques</a>
         <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html">Fiche récapitulative</a></div>`);
     return carte;
 }

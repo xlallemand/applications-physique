@@ -1,6 +1,6 @@
 /* ============================================================
    Règles de validation des déplacements — spécifiques à l'application
-   "Équations en Physique (avec aide)".
+   "Équations en Physique".
 
    Un chemin ("path") désigne l'emplacement d'un élément dans l'équation,
    ex. "left", "left.num", "right.0.den". Le dernier segment indique le
@@ -65,12 +65,12 @@
         return level(destPath) === 'flat';
     }
 
-    const MSG_MOVE = "Déplacement non autorisé. Règle à suivre : un terme multiplicatif ne peut passer que de l'autre côté de l'équation, en changeant de position (du numérateur vers le dénominateur, ou du dénominateur vers le numérateur) — cela revient à multiplier ou diviser les deux côtés de l'équation par ce terme.";
-    const MSG_MOVE_FRAC = "Déplacement non autorisé. Règle à suivre : un terme multiplicatif peut rejoindre un numérateur (ou une position à côté d'une fraction) ou un dénominateur déjà présent du même côté ; il ne peut passer d'un numérateur à un dénominateur (ou inversement) qu'en changeant de côté de l'équation.";
-    const MSG_INSERT = "Déplacement non autorisé. Règle à suivre : seul un terme placé au numérateur d'une fraction peut en sortir pour devenir un facteur multiplié à côté d'elle, et il doit rester du même côté de l'équation.";
-    const MSG_SUMTERM = "Déplacement non autorisé. Règle à suivre : un terme précédé de + ou − ne peut que passer de l'autre côté de l'équation ; il change alors de signe (+ devient −, et inversement).";
-    const MSG_FRAC = "Déplacement non autorisé. Règle à suivre : l'outil fraction ne peut être utilisé que sur un emplacement qui n'est pas déjà le numérateur ou le dénominateur d'une fraction.";
-    const MSG_FRACDEN = "Déplacement non autorisé. Règle à suivre : le dénominateur ne peut rejoindre que l'autre côté de l'équation (cela revient à multiplier les deux côtés par ce dénominateur, ce qui le supprime d'un côté et l'ajoute comme facteur de l'autre).";
+    const MSG_MOVE = "Déplacement non autorisé. Règle à suivre : un terme multiplicatif ne peut passer que de l'autre côté de l'équation, en changeant de position (du numérateur vers le dénominateur, ou du dénominateur vers le numérateur) — cela revient à multiplier ou diviser les deux côtés de l'équation par ce terme.";
+    const MSG_MOVE_FRAC = "Déplacement non autorisé. Règle à suivre : un terme multiplicatif peut rejoindre un numérateur (ou une position à côté d'une fraction) ou un dénominateur déjà présent du même côté ; il ne peut passer d'un numérateur à un dénominateur (ou inversement) qu'en changeant de côté de l'équation.";
+    const MSG_INSERT = "Déplacement non autorisé. Règle à suivre : seul un terme placé au numérateur d'une fraction peut en sortir pour devenir un facteur multiplié à côté d'elle, et il doit rester du même côté de l'équation.";
+    const MSG_SUMTERM = "Déplacement non autorisé. Règle à suivre : un terme précédé de + ou − ne peut que passer de l'autre côté de l'équation ; il change alors de signe (+ devient −, et inversement).";
+    const MSG_FRAC = "Déplacement non autorisé. Règle à suivre : l'outil fraction ne peut être utilisé que sur un emplacement qui n'est pas déjà le numérateur ou le dénominateur d'une fraction.";
+    const MSG_FRACDEN = "Déplacement non autorisé. Règle à suivre : le dénominateur ne peut rejoindre que l'autre côté de l'équation (cela revient à multiplier les deux côtés par ce dénominateur, ce qui le supprime d'un côté et l'ajoute comme facteur de l'autre).";
 
     window.AideRules = {
         side, level, isLegalMove, isLegalInsert, isLegalSumTerm, isLegalFracTool,

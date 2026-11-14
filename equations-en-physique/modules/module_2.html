@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 1 : exemple d'application — Équations en physique (avec aide)</title>
+<title>Module 1 : exemple d'application — Équations en physique</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="../../assets/theme.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
@@ -517,7 +517,7 @@ function updateStepIndicator() {
     const steps = currentExercise && currentExercise.steps;
     if (!steps || !steps.length || resolved) { el.textContent = ''; return; }
     const idx = Math.min(history.length, steps.length - 1);
-    el.textContent = `Étape à réaliser : ${steps[idx]}`;
+    el.textContent = `Étape à réaliser : ${steps[idx]}`;
 }
 
 function finishSolveExercise() {
@@ -527,7 +527,7 @@ function finishSolveExercise() {
     dm.classList.remove('hidden');
     showFeedback('', true);
     if (currentExercise.onSolved) currentExercise.onSolved(dm);
-    else dm.innerHTML = '🎉 Équation résolue !';
+    else dm.innerHTML = '🎉 Équation résolue !';
 }
 
 function verifyStep() {
@@ -545,7 +545,7 @@ function verifyStep() {
         if (!isFinite(l) || !isFinite(r) || Math.abs(l - r) > 1e-6 * Math.max(1, Math.abs(r))) equationTrue = false;
     }
     if (!equationTrue) {
-        showFeedback("✕ Cette équation n'est pas correcte : vérifie tes calculs.", false);
+        showFeedback("✕ Cette équation n'est pas correcte : vérifie tes calculs.", false);
         hadError = true;
         return;
     }
@@ -559,7 +559,7 @@ function verifyStep() {
         if (currentExercise.customComplete(state)) {
             finishSolveExercise();
         } else {
-            showFeedback(currentExercise.customProgressMessage ? currentExercise.customProgressMessage(state) : "✓ Étape correcte, continue !", true);
+            showFeedback(currentExercise.customProgressMessage ? currentExercise.customProgressMessage(state) : "✓ Étape correcte, continue !", true);
             state = JSON.parse(JSON.stringify(state));
             refreshView();
         }
@@ -583,17 +583,17 @@ function verifyStep() {
     } else {
         let msg;
         if (rightFull) {
-            msg = "✓ Étape correcte ! Il ne reste plus qu'à inverser le sens de l'équation avec ⇄.";
+            msg = "✓ Étape correcte ! Il ne reste plus qu'à inverser le sens de l'équation avec ⇄.";
         } else if (rightLoose) {
-            msg = "✓ Étape correcte ! Inverse le sens de l'équation avec ⇄, puis retire le dénominateur qui vaut 1.";
+            msg = "✓ Étape correcte ! Inverse le sens de l'équation avec ⇄, puis retire le dénominateur qui vaut 1.";
         } else if (leftLoose && onesElsewhere > 0) {
-            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur (qui vaut 1) pour le supprimer. Retire les 1 inutiles.";
+            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur (qui vaut 1) pour le supprimer. Retire les 1 inutiles.";
         } else if (leftLoose) {
-            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur (qui vaut 1) pour le supprimer.";
+            msg = "✓ Étape correcte ! La grandeur à isoler ne doit plus être dans une fraction : clique sur la croix du dénominateur (qui vaut 1) pour le supprimer.";
         } else if (leftFull && onesElsewhere > 0) {
             msg = "✓ Retire les 1 inutiles.";
         } else {
-            msg = "✓ Étape correcte, continue !";
+            msg = "✓ Étape correcte, continue !";
         }
         showFeedback(msg, true);
         state = JSON.parse(JSON.stringify(state));
@@ -652,7 +652,7 @@ function checkDrill() {
     if (!currentDrill) return;
     const result = currentDrill.check(state);
     if (result === true) {
-        showFeedback("✓ Bravo, c'est exactement ça !", true);
+        showFeedback("✓ Bravo, c'est exactement ça !", true);
         document.getElementById('verifyDrillBtn').classList.add('hidden');
         document.getElementById('nextDrillBtn').classList.remove('hidden');
     } else if (result === 'partial') {
@@ -672,7 +672,7 @@ const m2Initial = () => ({ left: frac([tile('v','v')], [tile('one','1')]), right
 const module2Questions = [
     {
         target: 'dt',
-        intro: "On souhaite exprimer la durée du trajet Δt (la lettre grecque Δ se lit « delta »).",
+        intro: "On souhaite exprimer la durée du trajet Δt (la lettre grecque Δ se lit « delta »).",
         staticEqHtml: `<span class="eq-tile-static">v</span><span class="eq-sign">=</span>${staticFracHtml('d','Δt')}`,
         tiles: [tile('v','v'), tile('d','d'), tile('dt','Δt')],
         sample: () => { const d = 10 + Math.random()*490; const dt = 1 + Math.random()*59; return { v: d/dt, d, dt }; },
@@ -701,8 +701,8 @@ const module2Questions = [
                               && st.right.kind === 'frac' && setEq(idsOf(st.right.num.items), ['one']) && setEq(idsOf(st.right.den.items), ['dt']),
         customEmptyMessage: () => "✕ Place un 1 dans la zone vide.",
         customProgressMessage: (st) => (st.left.kind === 'frac' && st.left.den.items.length > 1)
-            ? "✓ Étape correcte ! Retire le 1 inutile au dénominateur de gauche."
-            : "✓ Étape correcte, continue !"
+            ? "✓ Étape correcte ! Retire le 1 inutile au dénominateur de gauche."
+            : "✓ Étape correcte, continue !"
     }
 ];
 let m2Idx = 0;
@@ -718,7 +718,7 @@ function renderModule2() {
       </div>
       <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
         <p class="text-gray-700 text-lg mb-2">${q.intro}</p>
-        <p class="text-gray-700">Sachant que :</p>
+        <p class="text-gray-700">Sachant que :</p>
         <div class="eq-line-static text-lg md:text-2xl my-4">${q.staticEqHtml}</div>
         <p class="font-bold text-indigo-900">Exprimer ${q.targetLabel || q.tiles.find(t=>t.id===q.target).label}.</p>
       </div>
@@ -729,7 +729,7 @@ function renderModule2() {
         customComplete: q.customComplete, customEmptyMessage: q.customEmptyMessage, customProgressMessage: q.customProgressMessage,
         onSolved: (dm) => {
             const isLast = m2Idx === module2Questions.length - 1;
-            dm.innerHTML = `🎉 Équation résolue !<div class="mt-4"><button onclick="${isLast ? 'finishModule2()' : 'nextModule2Question()'}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">${isLast ? 'Terminer le module' : 'Suivant →'}</button></div>`;
+            dm.innerHTML = `🎉 Équation résolue !<div class="mt-4"><button onclick="${isLast ? 'finishModule2()' : 'nextModule2Question()'}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">${isLast ? 'Terminer le module' : 'Suivant →'}</button></div>`;
         }
     });
 }
@@ -738,7 +738,7 @@ function finishModule2() {
     SOM.marquer({ fait: true });                              // page terminée (sommaire, accueil)
     document.getElementById('app').innerHTML = `
       <div class="bg-white rounded-xl shadow-lg p-8 text-center">
-        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Exemple terminé !</h2>
+        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Exemple terminé !</h2>
         <a href="module_3.html" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">Entraînement →</a>
       </div>`;
 }
