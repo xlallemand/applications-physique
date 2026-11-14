@@ -460,6 +460,7 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 | Index de recherche du portail (modules et pages de toutes les applications, type de chaque page) | `assets/recherche-index.js`, généré par `docs/outils/index-recherche.py` (règles de type et `EXCEPTIONS`) |
 | Maquette validée de la recherche et des pastilles de type | `docs/maquettes/recherche-et-types.html` |
 | Avancement x/y de chaque application sur le portail | `assets/avancement.js` : `AVANCEMENT` |
+| Application installable sur téléphone et hors ligne (PWA, une seule application : Fractions) | `fractions-college/manifest.webmanifest`, `fractions-college/sw.js`, `fractions-college/modules/pwa.js`, `fractions-college/icones/` |
 | Flashcards : moteur, planning, séances, page Révisions, page Flashcards, intégrations (objet `REV`) | `assets/revisions.js`, `assets/revisions.css`, `revisions.html` |
 | Flashcards d'une application (exemple) | `changements-etat/modules/flashcards.js`, `changements-etat/modules/flashcards.html` |
 | Écrire les flashcards d'une application ; outil de relecture de l'enseignant | `docs/flashcards/prompt-generation.md` ; `docs/flashcards/relecture/` |
