@@ -19,11 +19,11 @@
    changer VERSION pour que l'ancien cache soit remplacé.
    ============================================================ */
 'use strict';
-const VERSION = 'fractions-v2';
+const VERSION = 'fractions-v3';
 const FICHIERS = [
   './', './index.html', './manifest.webmanifest',
   './modules/seance.html', './modules/suivi.html', './modules/fiches.html',
-  './modules/sauvegarde.js', './modules/expr.js', './modules/competences.js', './modules/fra.js', './modules/seance.js', './modules/fra.css',
+  './modules/sauvegarde.js', './modules/expr.js', './modules/simplifier.js', './modules/competences.js', './modules/fra.js', './modules/seance.js', './modules/fra.css',
   './icones/apple-touch-icon.png', './icones/favicon-32.png', './icones/icone-192.png', './icones/icone-512.png', './icones/icone-maskable-512.png',
   '../assets/theme.css', '../assets/sommaire.css', '../assets/sommaire.js', '../assets/hero.js',
   '../equilibrer-reactions/modules/er.css'

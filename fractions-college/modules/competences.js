@@ -153,22 +153,22 @@
       } },
     { id: 'MD2', famille: 'MD', niveau: 2, prerequis: ['MD1', 'EG2'], titre: 'Simplifier avant de multiplier',
       regle: 'Dans un produit de fractions, on peut <b>simplifier avant de calculer</b> : un facteur du numérateur et le même facteur du dénominateur s’éliminent.',
-      methode: 'Écris le produit sur une seule fraction sans effectuer les multiplications, décompose les nombres pour faire apparaître les facteurs communs, simplifie, puis calcule.',
+      methode: 'Touche « Simplifier », puis un nombre d’un numérateur et un nombre d’un dénominateur qui ont un diviseur commun : ils se barrent, et tu écris ce qu’il reste à la place de chacun (rien s’il reste 1). « Décomposer » fait apparaître les facteurs (9 = 3 × 3). Quand plus rien ne se simplifie, multiplie ce qui reste.',
       exemple: { consigne: 'Calcule', depart: '[14|15] × [25|21]', prefixe: 'A =', lignes: ['[14×25|15×21]', '[2×7×5×5|3×5×3×7]', '[2×5|3×3]', '[10|9]'] },
-      piege: 'On simplifie un facteur du numérateur avec un facteur du dénominateur, jamais deux facteurs du numérateur entre eux.',
+      piege: 'On simplifie un facteur d’un numérateur avec un facteur d’un dénominateur, jamais deux facteurs du numérateur entre eux. Et seulement dans un produit : dans {[2|3] + [3|4]}, on ne barre pas les 3.',
       gen(niv) {
         const K = niv === 1 ? [2, 3, 5] : niv === 2 ? [2, 3, 5, 7] : [3, 5, 7, 11];
         const v = tirer(() => ({ a: rnd(1, 5), b: rnd(1, 5), c: rnd(1, 5), d: rnd(1, 5), k1: choix(K), k2: choix(K) }),
           v => Q.pgcd(v.a * v.c, v.b * v.d) === 1 && v.b * v.d > 1 && v.a * v.k1 !== v.b * v.k2 && v.c * v.k2 !== v.d * v.k1 && v.k1 !== v.k2);
         const n1 = v.a * v.k1, d1 = v.b * v.k2, n2 = v.c * v.k2, d2 = v.d * v.k1;
         const prod = (x, k) => x === 1 ? String(k) : x + '×' + k;
-        return { consigne: 'Calcule en <b>simplifiant avant de multiplier</b>. Donne une fraction irréductible.', depart: fr(n1, d1) + ' × ' + fr(n2, d2), prefixe: 'A =',
+        return { consigne: 'Calcule en <b>simplifiant avant de multiplier</b> : touche « Simplifier », puis un nombre du numérateur et un nombre du dénominateur qui ont un diviseur commun, pour les barrer (« Décomposer » peut aider). Écris ensuite le résultat sous forme d’une fraction irréductible.', exige: true, depart: fr(n1, d1) + ' × ' + fr(n2, d2), prefixe: 'A =',
           valeur: Q.red(n1 * n2, d1 * d2), but: 'irr',
           solution: ['[' + n1 + '×' + n2 + '|' + d1 + '×' + d2 + ']', '[' + prod(v.a, v.k1) + '×' + prod(v.c, v.k2) + '|' + prod(v.b, v.k2) + '×' + prod(v.d, v.k1) + ']',
             '[' + [v.a, v.c].filter(x => x > 1).concat(v.a * v.c === 1 ? [1] : []).join('×') + '|' + [v.b, v.d].filter(x => x > 1).join('×') + ']', propre(v.a * v.c, v.b * v.d)].filter((x, i, t) => t.indexOf(x) === i),
-          indices: ['Écris le produit sur une seule fraction, sans effectuer les multiplications : ' + m('[' + n1 + '×' + n2 + '|' + d1 + '×' + d2 + ']') + '.',
-            'Décompose : ' + n1 + ' = ' + prod(v.a, v.k1).replace('×', ' × ') + ', ' + d2 + ' = ' + prod(v.d, v.k1).replace('×', ' × ') + '…',
-            'Simplifie par ' + v.k1 + ' et par ' + v.k2 + ', puis calcule.'] };
+          indices: [n1 + ' (en haut) et ' + d2 + ' (en bas) ont un diviseur commun : ' + v.k1 + '. Touche « Simplifier », puis ces deux nombres.',
+            'Il reste ' + v.a + ' à la place de ' + n1 + ' et ' + v.d + ' à la place de ' + d2 + '. Fais de même avec ' + d1 + ' et ' + n2 + ' (diviseur commun : ' + v.k2 + ').',
+            'Quand plus rien ne se simplifie, multiplie ce qui reste en haut, puis ce qui reste en bas.'] };
       } },
     { id: 'MD3', famille: 'MD', niveau: 1, prerequis: [], titre: 'Inverse d’une fraction',
       regle: 'L’<b>inverse</b> d’un nombre x (non nul) est le nombre qui, multiplié par x, donne 1. L’inverse de {[a|b]} est {[b|a]} : on échange le numérateur et le dénominateur.',

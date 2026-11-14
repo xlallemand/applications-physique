@@ -27,7 +27,7 @@
      FRA.X.litteral(nœud)            { n, d, frac } d'une fraction écrite (ou d'un entier), sinon null
      FRA.X.Q : outils de calcul (pgcd, ppcm, red, add, sous, mul, div, egal, texte(q), ecrire(q))
      new FRA.X.Editeur(zone, { surChange, surValider })   éditeur d'une ligne
-     FRA.X.pave(editeur, { surValider })                   pavé à l'écran (élément)
+     FRA.X.pave(editeur, { modes: { dec, sim } })         pavé à l'écran (élément), touches Décomposer et Simplifier
    ============================================================ */
 (function () {
   'use strict';
@@ -450,31 +450,40 @@
   };
 
   /* =====================================================================
-     Pavé à l'écran : chiffres, fraction, opérations, parenthèses, flèches
+     Pavé à l'écran : chiffres à gauche (0 en large), opérations et fraction en haut à droite,
+     flèches en T inversé en bas à droite ; dernière ligne : Décomposer, Simplifier, Vérifier
      ===================================================================== */
   const PAVE = [
-    ['7'], ['8'], ['9'], ['÷', 'Diviser'], ['(', 'Parenthèse ouvrante'], [')', 'Parenthèse fermante'],
-    ['4'], ['5'], ['6'], ['×', 'Multiplier'], ['frac', 'Fraction', '<span class="fra-tfrac" aria-hidden="true"><i></i><i></i></span>'], ['effacer', 'Effacer', '⌫'],
-    ['1'], ['2'], ['3'], ['−', 'Moins'], ['haut', 'Monter au numérateur', '▲'], ['bas', 'Descendre au dénominateur', '▼'],
-    ['0'], ['gauche', 'Reculer le curseur', '◀'], ['droite', 'Avancer le curseur', '▶'], ['+', 'Plus'], ['valider', 'Vérifier la ligne', 'Vérifier ↵']
+    ['7'], ['8'], ['9'], ['+', 'Plus'], ['−', 'Moins'], ['effacer', 'Effacer', '⌫'],
+    ['4'], ['5'], ['6'], ['×', 'Multiplier'], ['÷', 'Diviser'], ['frac', 'Fraction', '<span class="fra-tfrac" aria-hidden="true"><i></i><i></i></span>'],
+    ['1'], ['2'], ['3'], ['(', 'Parenthèse ouvrante'], ['haut', 'Monter au numérateur', '▲'], [')', 'Parenthèse fermante'],
+    ['0'], ['gauche', 'Reculer le curseur', '◀'], ['bas', 'Descendre au dénominateur', '▼'], ['droite', 'Avancer le curseur', '▶'],
+    ['dec', 'Décomposer un nombre', 'Décomposer'], ['sim', 'Simplifier : barrer un facteur en haut et un en bas', 'Simplifier'], ['valider', 'Vérifier la ligne', 'Vérifier ↵']
   ];
-  function pave(ed) {
+  // opts.modes : { dec(), sim() } appelés par les touches Décomposer et Simplifier (sans opts, ces touches sont absentes)
+  function pave(ed, opts) {
+    opts = opts || {};
     const p = document.createElement('div');
     p.className = 'fra-pave';
     p.setAttribute('role', 'group');
     p.setAttribute('aria-label', 'Pavé de calcul');
     PAVE.forEach(t => {
+      const k = t[0], mode = k === 'dec' || k === 'sim';
+      if (mode && !opts.modes) return;
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'fra-t' + (t[0] === 'valider' ? ' fra-t-ok' : t[0] === 'frac' ? ' fra-t-frac' : '+−×÷'.indexOf(t[0]) >= 0 ? ' fra-t-op' : /^\d$/.test(t[0]) ? '' : ' fra-t-nav');
-      b.innerHTML = t[2] || t[0];
-      if (t[1]) b.setAttribute('aria-label', t[1]);
-      if (t[1]) b.title = t[1];
+      b.className = 'fra-t' + (k === 'valider' ? ' fra-t-ok' + (opts.modes ? '' : ' fra-t-seul') : mode ? ' fra-t-mode' : k === '0' ? ' fra-t-zero'
+        : k === 'frac' ? ' fra-t-frac' : '+−×÷()'.indexOf(k) >= 0 ? ' fra-t-op' : /^\d$/.test(k) ? '' : ' fra-t-nav');
+      b.innerHTML = t[2] || k;
+      b.dataset.k = k;
+      if (t[1]) { b.setAttribute('aria-label', t[1]); b.title = t[1]; }
+      if (mode) b.setAttribute('aria-pressed', 'false');
       // le pavé ne prend pas le focus : la ligne garde son curseur (et le clavier de l'ordinateur reste actif)
       b.addEventListener('mousedown', e => e.preventDefault());
       b.addEventListener('click', () => {
-        ed.touche(t[0]);
-        if (t[0] !== 'valider' && matchMedia('(hover: hover)').matches && ed.actif) ed.zone.focus({ preventScroll: true });
+        if (mode) { opts.modes[k](); return; }
+        ed.touche(k);
+        if (k !== 'valider' && matchMedia('(hover: hover)').matches && ed.actif) ed.zone.focus({ preventScroll: true });
       });
       p.appendChild(b);
     });

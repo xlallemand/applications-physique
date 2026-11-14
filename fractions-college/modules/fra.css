@@ -67,13 +67,63 @@
 .fra-t-op { background: var(--cle-bg); color: var(--accent-ink); }
 .fra-t-nav { background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3); font-size: 1rem; }
 .fra-t-frac { background: var(--cle-bg); }
-.fra-t-ok { grid-column: span 2; background: var(--ink); color: var(--sheet); font-size: 1rem; }
+.fra-t-ok { grid-column: span 2; background: var(--ink); color: var(--sheet); font-size: 1rem; padding: 0 4px; }
+.fra-t-ok.fra-t-seul { grid-column: span 6; }
+.fra-t-zero { grid-column: span 3; }
+/* touches Décomposer et Simplifier : enfoncées quand le mode est choisi */
+.fra-t-mode { grid-column: span 2; background: var(--paper-2); font-size: .95rem; padding: 0 4px; }
+.fra-t-mode.actif, .fra-modes .actif { background: var(--accent); color: var(--sheet); }
+@media (hover: hover) { .fra-t-mode.actif:hover { background: var(--accent-ink); } }
 @media (hover: hover) { .fra-t-ok:hover { background: var(--ink-2); } }
 .fra-tfrac { display: inline-flex; flex-direction: column; gap: 4px; align-items: center; vertical-align: middle; }
 .fra-tfrac i { display: block; width: 14px; height: 11px; border: 1.8px solid var(--accent-ink); border-radius: 3px; }
 .fra-tfrac i:first-child { position: relative; }
 .fra-tfrac i:first-child::after { content: ''; position: absolute; left: -5px; right: -5px; bottom: -4.5px; border-bottom: 2px solid var(--accent-ink); }
-@media (max-width: 400px) { .fra-pave { gap: 5px; } .fra-t { min-height: 46px; font-size: 1.1rem; border-radius: 12px; } .fra-t-ok, .fra-t-nav { font-size: .9rem; } }
+@media (max-width: 400px) { .fra-pave { gap: 5px; } .fra-t { min-height: 46px; font-size: 1.1rem; border-radius: 12px; } .fra-t-nav { font-size: .9rem; } .fra-t-ok, .fra-t-mode { font-size: .8rem; letter-spacing: -.01em; } }
+
+/* ---------- décomposer et simplifier sur la ligne (modules/simplifier.js) ---------- */
+.sim-ligne .fra-n { align-items: flex-end; }
+.sim-ligne .fra-d { align-items: flex-start; }
+/* signes dans un numérateur ou un dénominateur : à la hauteur des nombres de départ */
+.sim-ligne .fra-n > .fra-c, .sim-ligne .fra-d > .fra-c { height: 1.4em; display: inline-flex; align-items: center; }
+.sim-fac { display: inline-flex; align-items: center; }
+.sim-fac.haut { flex-direction: column-reverse; }
+.sim-fac.bas { flex-direction: column; }
+.sim-v { position: relative; display: inline-flex; align-items: center; justify-content: center; border: none; background: none; margin: 0; padding: 0 .12em;
+  border-radius: 8px; font: inherit; color: inherit; line-height: 1.15; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+button.sim-v { cursor: pointer; }
+.sim-v0 { height: 1.4em; min-width: .9em; }
+.sim-vq { font-size: .68em; font-weight: 800; color: var(--c); padding: 0 .1em; }
+button.sim-v:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.sim-on .sim-vivant { background: var(--paper-2); }
+@media (hover: hover) { .sim-on .sim-vivant:hover { background: var(--paper-3); } }
+.sim-v.sim-choisi { background: var(--cle-bg); box-shadow: inset 0 0 0 2px var(--accent); }
+/* nombre barré : trait oblique de la couleur de sa paire (dans l'autre sens quand la paire contient un 7) */
+.sim-barre { color: var(--c); }
+.sim-barre::after { content: ''; position: absolute; left: 10%; right: 10%; top: 50%; height: 2.5px; border-radius: 2px; background: var(--c); transform: rotate(-58deg); }
+.sim-barre.sim-inv::after { transform: rotate(58deg); }
+.sim-vq.sim-barre::after { height: 2px; }
+.sim-non { animation: sim-non .35s; }
+@keyframes sim-non { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.sim-nouveau { animation: sim-app .35s ease-out; }
+@keyframes sim-app { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+/* zone de saisie sous la ligne : décomposition, ou ce qu'il reste en haut et en bas */
+.sim-saisie { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 2px 0 8px; padding: 8px 10px; border-radius: 14px;
+  background: var(--cle-bg); box-shadow: inset 0 0 0 1.5px var(--cle-line); font-size: 1.15rem; font-weight: 700; }
+.sim-saisie small { font-size: .82rem; font-weight: 600; color: var(--ink-2); }
+.sim-case { min-width: 44px; min-height: 38px; padding: 2px 8px; border: none; border-radius: 9px; background: var(--sheet); display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 0 0 1.5px var(--line-strong); font: 700 1.15rem var(--font-sans); color: var(--ink); cursor: pointer; }
+.sim-case.actif { box-shadow: inset 0 0 0 2px var(--accent); }
+.sim-case.actif::after { content: ''; width: 2px; height: 1.1em; background: var(--accent); margin-left: 2px; animation: fra-clignote 1s steps(1) infinite; }
+.sim-mini { display: inline-flex; flex-direction: column; align-items: stretch; gap: 3px; }
+.sim-mini > span { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
+.sim-mini > i { height: 2px; background: var(--ink); border-radius: 2px; }
+.sim-ok { flex: none; width: 40px; height: 40px; border: none; border-radius: 999px; background: var(--ink); color: var(--sheet); font-size: 1.05rem; font-weight: 800; cursor: pointer; }
+.sim-lien { border: none; background: none; padding: 4px 0; color: var(--accent-ink); font: 700 .84rem var(--font-sans); text-decoration: underline; cursor: pointer; }
+.sim-note { flex-basis: 100%; }
+/* touches Décomposer / Simplifier quand le pavé est masqué (ordinateur avec clavier) */
+.fra-modes { display: flex; gap: 8px; margin-top: 8px; }
+.fra-modes:empty, .fra-modes[hidden] { display: none; }
 
 /* ---------- question : aides, retours ---------- */
 .fra-entete-q .fra-score { margin: 8px 0 !important; }
@@ -291,5 +341,5 @@ html.fra-tiroir-ouvert { overflow: hidden; }
 
 
 
-@media (prefers-reduced-motion: reduce) { .fra-curseur { animation: none; } .fra-t, .fra-chev, .fra-zone-chev { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .fra-curseur, .sim-case.actif::after, .sim-non, .sim-nouveau { animation: none; } .fra-t, .fra-chev, .fra-zone-chev { transition: none; } }
 .fra-suite { scroll-margin-bottom: 20px; }

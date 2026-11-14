@@ -136,8 +136,8 @@
         ul.appendChild(el('li', '', '<b>' + esc(C.R[p.comp].titre) + '</b> <span class="fra-petit">· ' + FRA.pluriel(n, 'question') + (r ? ' · ' + r : '') + '</span>'));
       });
       c.appendChild(ul);
-      c.appendChild(el('div', 'cle', '<b class="cle-titre">Barème.</b> 2 points pour une question juste sans erreur, 1 point après une erreur, 0 si tu affiches la solution. Le rappel, les indices et l’exemple sont gratuits. Note sur 20.'));
-      c.appendChild(el('p', 'fra-petit', 'Écris ton calcul ligne par ligne, comme sur ta feuille : chaque ligne commence par « = ». ' + X.AIDE_CLAVIER));
+      c.appendChild(el('div', 'cle', '<b class="cle-titre">Barème.</b> 2 points pour une question juste sans erreur, 1 point après une erreur, 0 si tu affiches la solution ou si tu fais montrer une décomposition. Le rappel, les indices et l’exemple sont gratuits. Note sur 20.'));
+      c.appendChild(el('p', 'fra-petit', 'Écris ton calcul ligne par ligne, comme sur ta feuille : chaque ligne commence par « = ». Avec « Décomposer » et « Simplifier » (pavé), tu peux décomposer des nombres et barrer des facteurs communs sur la dernière ligne. ' + X.AIDE_CLAVIER));
       const r = el('div', 'er-actions');
       const go = bouton('btn-primary', 'Commencer →', () => question());
       r.appendChild(go);
@@ -218,7 +218,8 @@
       c.appendChild(zRap); c.appendChild(zInd); c.appendChild(zEx);
       // la feuille : ligne de départ, lignes écrites, ligne en cours
       const feuille = el('div', 'fra-feuille');
-      feuille.appendChild(el('div', 'fra-l fra-l0', q.affiche ? '<span class="fra-pre"></span>' + q.affiche : '<span class="fra-pre">' + esc(q.prefixe) + '</span>' + X.m(q.depart)));
+      const l0 = el('div', 'fra-l fra-l0', q.affiche ? '<span class="fra-pre"></span>' + q.affiche : '<span class="fra-pre">' + esc(q.prefixe) + '</span>' + X.m(q.depart));
+      feuille.appendChild(l0);
       const cour = el('div', 'fra-l fra-cour');
       cour.appendChild(el('span', 'fra-pre', '='));
       const zEd = el('div');
@@ -229,21 +230,52 @@
       cour.appendChild(bVide);
       feuille.appendChild(cour);
       c.appendChild(feuille);
+      // Décomposer / Simplifier quand le pavé est masqué (ordinateur avec clavier)
+      const zModes = el('div', 'fra-modes');
+      c.appendChild(zModes);
       const retour = el('div', 'fra-retour');
       retour.setAttribute('aria-live', 'polite');
       c.appendChild(retour);
       c.appendChild(zSol);
       const ed = new X.Editeur(zEd, { surValider: valider, surChange: () => { cour.classList.remove('fra-ko'); garderVisible(); } });
+      // décomposer et simplifier sur la dernière ligne de la feuille (modules/simplifier.js)
+      let aideDec = false;
+      const sim = FRA.S.creer({
+        message(t, type) {
+          retour.innerHTML = t ? '<div class="callout-' + (type || 'accent') + ' fra-msg">' + t + '</div>' : '';
+          if (t && type === 'danger') montrer(retour);
+        },
+        surMode(m) {
+          c.querySelectorAll('[data-k="dec"], [data-k="sim"]').forEach(b => {
+            b.classList.toggle('actif', b.dataset.k === m);
+            b.setAttribute('aria-pressed', String(b.dataset.k === m));
+          });
+        },
+        surAide() { aideDec = true; },
+        montrer(n) { montrer(n); }
+      });
+      // touches du pavé : à la saisie de la décomposition (ou des restes) quand elle est ouverte, sinon à la ligne
+      const routeur = { touche: k => { if (!sim.touche(k)) ed.touche(k); }, get zone() { return ed.zone; }, get actif() { return ed.actif; } };
+      const modes = { dec: () => sim.basculer('dec'), sim: () => sim.basculer('sim') };
       const zPave = el('div', 'fra-pave-z');
-      zPave.appendChild(X.pave(ed));
+      zPave.appendChild(X.pave(routeur, { modes }));
       zPave.hidden = !pave();
       c.appendChild(zPave);
+      [['dec', 'Décomposer'], ['sim', 'Simplifier']].forEach(([k, lib]) => {
+        const b = bouton('btn-small', lib, modes[k]);
+        b.dataset.k = k;
+        b.setAttribute('aria-pressed', 'false');
+        b.addEventListener('mousedown', e => e.preventDefault());   // la ligne garde le focus (clavier)
+        zModes.appendChild(b);
+      });
+      zModes.hidden = !zPave.hidden;
+      if (!q.affiche) sim.attacher(l0, X.lire(q.depart));
       const act = el('div', 'er-actions fra-suite');
       c.appendChild(act);
       zone.appendChild(c);
       majInd();
       if (matchMedia('(hover: hover)').matches) zEd.focus({ preventScroll: true });
-      FRA.surReglages(cle => { if (cle === 'pave' && !fini) zPave.hidden = !pave(); });
+      FRA.surReglages(cle => { if (cle === 'pave' && !fini) { zPave.hidden = !pave(); zModes.hidden = !zPave.hidden; } });
       // début de la question : en-tête en haut de l'écran, puis la ligne à écrire au-dessus du pavé
       zone.firstChild.scrollIntoView({ block: 'start' });
       setTimeout(garderVisible, 30);
@@ -277,28 +309,38 @@
           montrer(retour);
           return;
         }
+        // consigne qui exige de simplifier avant de calculer : résultat refusé (sans erreur comptée) tant que ce n'est pas fait
+        if (v.fini && q.exige && !sim.simplifie()) {
+          retour.innerHTML = '<div class="callout-accent fra-msg"><b>Ton résultat est juste, mais simplifie d’abord.</b> Cette question demande de simplifier avant de multiplier : touche « Simplifier », puis un nombre du numérateur et un nombre du dénominateur qui ont un diviseur commun, pour les barrer (« Décomposer » peut aider). Quand plus rien ne se simplifie, écris le résultat.</div>';
+          montrer(retour);
+          return;
+        }
         // ligne juste : elle s'écrit sur la feuille
         const l = el('div', 'fra-l fra-juste', '<span class="fra-pre">=</span>' + X.html(modele) + '<span class="fra-coche" aria-label="ligne juste">✓</span>');
         feuille.insertBefore(l, cour);
         precedent = modele;
         if (!v.fini) {
+          sim.attacher(l, modele);
           ed.vider();
           retour.innerHTML = '<div class="callout-accent fra-msg">' + v.msg + '</div>';
           montrer(zPave.hidden ? cour : retour);
           return;
         }
         cour.remove();
-        retour.innerHTML = '<div class="callout-success fra-msg"><b>' + (erreurs ? 'C’est juste.' : 'Juste !') + '</b> ' + (erreurs ? '1 point.' : '2 points.') + '</div>';
+        const pts = aideDec ? 0 : erreurs ? 1 : 2;
+        retour.innerHTML = '<div class="callout-success fra-msg"><b>' + (erreurs || aideDec ? 'C’est juste.' : 'Juste !') + '</b> ' + (aideDec ? '0 point (décomposition montrée).' : erreurs ? '1 point.' : '2 points.') + '</div>';
         const voir = bouton('btn-small', 'Voir une solution détaillée', () => { voir.replaceWith(el('div', '', solutionHTML(q))); });
         retour.firstChild.appendChild(el('br'));
         retour.firstChild.appendChild(voir);
-        terminer(erreurs ? 1 : 2);
+        terminer(pts);
       }
       // fin de la question : points, suivi, bouton suivant
       function terminer(pts) {
         fini = true;
         ed.activer(false);
+        sim.fin();
         zPave.hidden = true;
+        zModes.hidden = true;
         if (cour.parentNode) cour.remove();
         bSol.disabled = true;
         points += pts;
