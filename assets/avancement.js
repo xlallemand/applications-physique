@@ -146,6 +146,7 @@
       'module_1', 'module_2', 'module_3', 'module_4', 'module_5', 'module_6', 'module_7', 'module_8',
       'module_9'] },
     'lecture-graphique': { pages: ['module_1', 'module_2', 'module_3'] },
+    'equations-physique-mobile': { pages: ['decouverte', 'seance', 'suivi', 'fiches'] },
     'equations-college': { pages: ['seance', 'suivi', 'fiches'] },
     'fractions-college': { pages: ['seance', 'suivi', 'fiches'] }
   };

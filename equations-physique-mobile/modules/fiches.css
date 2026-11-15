@@ -1,0 +1,110 @@
+/* ============================================================
+   Équations en physique : calculs illustrés des fiches récapitulatives
+   (même présentation que les fiches de « Équations du 1er degré »).
+     .fi-bloc > .fi-calc > .fi-l   calcul aligné sur le signe =
+     data-op sur une ligne           flèches « même opération des deux côtés »
+     .fi-zero                        ce qui s'annule (encadré)
+     .fi-dep[data-de] / [data-vers]  terme déplacé et flèche de déplacement
+   Mise en forme par fiches.js. Couleurs : variables de assets/theme.css.
+   ============================================================ */
+
+/* étapes de la méthode */
+.fi-etape { font-weight: 800; color: var(--accent-ink); margin: 14px 0 2px !important; }
+
+/* cadre blanc d'un calcul */
+.fi-bloc { display: flex; justify-content: center; margin: 8px 0; padding: 10px 12px; border-radius: 12px; background: var(--sheet); box-shadow: inset 0 0 0 1px var(--line); overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.fi-calc { position: relative; display: inline-grid; grid-template-columns: max-content max-content max-content; column-gap: .4em; row-gap: 4px; align-items: center; font-size: 1.15rem; line-height: 1.2; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.fi-calc.fi-avec { padding: 0 var(--fi-pad); }
+.fi-calc.fi-avec-dep { column-gap: .9em; padding: 0 .6em; }   /* de la place pour les flèches de déplacement autour du signe = */
+.fi-g { justify-self: end; position: relative; }
+.fi-e { justify-self: center; }
+.fi-d { justify-self: start; position: relative; }
+.fi-l0 { font-weight: 700; }
+.fi-esp { grid-column: 1 / -1; height: .7em; }
+.fi-arc-esp { grid-column: 1 / -1; }
+.fi-note { grid-column: 1 / -1; justify-self: start; margin: 0 0 4px calc(-1 * var(--fi-pad, 2.5em)) !important; font-size: .7em; font-weight: 600; color: var(--accent-ink); white-space: normal; text-align: center; width: 0; min-width: calc(100% + 2 * var(--fi-pad, 2.5em)); }  /* la remarque n'élargit pas le calcul, mais occupe aussi la place des flèches */
+
+/* fraction */
+.fi-fr { display: inline-flex; flex-direction: column; align-items: stretch; vertical-align: middle; margin: 0 .12em; text-align: center; }
+.fi-fr > span { display: block; padding: 0 .2em; min-height: 1.25em; }
+.fi-fr > span:first-child { border-bottom: 2px solid currentColor; padding-bottom: .08em; }
+.fi-fr > span + span { padding-top: .1em; }
+.fi-op { margin: 0 .22em; }
+.fi-calc i, .fi-m i { margin-right: .04em; }
+
+/* flèches « même opération » : de part et d'autre de l'équation, centrées sur la hauteur du signe =
+   (chaque case est centrée sur sa ligne : les deux flèches sont à la même hauteur, fraction ou non),
+   un peu écartées du texte, avec l'opération écrite à l'extérieur */
+.fi-fl { position: absolute; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 2px; pointer-events: none; color: var(--accent); }
+.fi-fl.g { right: 100%; margin-right: .3em; }
+.fi-fl.d { left: 100%; margin-left: .3em; }
+.fi-fl svg { width: 1.5em; height: 1.15em; flex-shrink: 0; }
+.fi-fl.d svg { transform: scaleX(-1); }
+.fi-lab { font-size: .82em; font-weight: 800; white-space: nowrap; }
+
+/* ce qui s'annule ; terme déplacé */
+.fi-zero { display: inline-block; vertical-align: middle; margin: 0 .1em; padding: .15em .25em .05em; border-radius: 8px; background: var(--cle-bg); box-shadow: inset 0 0 0 1.5px var(--accent); }
+/* terme déplacé : en couleur et entouré, avec un peu d'espace pour que le contour ne touche ni ses voisins
+   ni la barre de fraction */
+.fi-dep { display: inline-block; line-height: 1.1; padding: .02em .12em; margin: 0 .16em; color: var(--accent); font-weight: 800; border-radius: 6px; outline: 2px solid var(--accent); outline-offset: 1px; }
+.fi-fr > span > .fi-dep { margin-top: .16em; margin-bottom: .16em; }
+.fi-arc { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; color: var(--accent); }
+.fi-arc-lab { position: absolute; transform: translate(-50%, -115%); padding: 0 .2em; border-radius: 4px; background: var(--sheet); color: var(--accent); font-size: .72em; font-weight: 800; line-height: 1.1; pointer-events: none; }
+.fi-arc-lab.dessous { transform: translate(-50%, 15%); }
+
+/* écriture mathématique dans le texte */
+.fi-m { white-space: nowrap; }
+
+/* ── racine carrée : crochet relié au trait qui couvre tout ce qui est dessous ──
+   Le crochet (SVG) prend la hauteur du contenu ; son sommet est au milieu du trait.
+   Repère retourné (scaleY(-1)) : y = 0 en bas, 100 % au niveau du trait.
+   Utilisée dans le texte (.fi-racine, créée par EPF.rac) et dans les éditeurs (.sqrt-wrap). */
+.sqrt-wrap { --rac-ep: 3px; --rac-l: 15px; position: relative; display: inline-flex; align-items: stretch; vertical-align: middle; margin: 0 4px; padding-left: var(--rac-l); flex-shrink: 0; color: var(--ink); }
+.sqrt-hook { position: absolute; left: 0; top: calc(var(--rac-ep) / 2); bottom: 0; width: var(--rac-l); height: calc(100% - var(--rac-ep) / 2); overflow: visible; transform: scaleY(-1); }
+.sqrt-hook line { stroke: currentColor; stroke-width: var(--rac-ep); stroke-linecap: round; }
+.sqrt-inner { display: inline-flex; align-items: center; border-top: var(--rac-ep) solid currentColor; padding: 4px 5px 0 3px; color: var(--ink); }
+.fi-racine { --rac-ep: .09em; --rac-l: .62em; margin: 0 .06em; color: inherit; }
+.fi-racine .sqrt-inner { padding: .1em .08em 0 .04em; color: inherit; }
+.fi-calc .fi-racine .sqrt-inner, .fi-m .fi-racine .sqrt-inner { display: inline-block; }
+/* racine dont le signe se déplace (flèche du raccourci) : le signe en couleur, le contenu non */
+.fi-racine.fi-rac-dep { color: var(--accent); }
+.fi-racine.fi-rac-dep .sqrt-inner { color: var(--ink); }
+.fi-l0 .fi-racine.fi-rac-dep .sqrt-inner, .fi-l0 .fi-racine .sqrt-inner { font-weight: 700; }
+
+/* ── deux méthodes côte à côte : même opération des deux côtés | raccourci (déplacement) ── */
+.fi-duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 10px; margin: 10px 0; }
+.fi-pan { display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; padding: 10px 10px 12px; border-radius: 12px; background: var(--sheet); box-shadow: inset 0 0 0 1px var(--line); overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.fi-pan-t { align-self: stretch; display: flex; align-items: center; gap: 6px; margin: 0 !important; font-size: .74rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent-ink); }
+.fi-pan-t svg { width: 1.9em; height: 1.3em; flex-shrink: 0; color: var(--accent); }
+.fi-pan-r { margin: 0 !important; font-weight: 700; font-size: 1.05rem; }   /* résultat sous un calcul */
+.fi-pan > .fi-calc + .fi-calc { padding-top: 8px; border-top: 1px dashed var(--line-strong); }
+.fi-duo > .fi-pan:only-child { justify-self: center; min-width: min(100%, 320px); }
+
+/* ── mémo : formules courtes en vignettes ── */
+.fi-memo { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 8px; margin: 10px 0; }
+.fi-memo > div { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px 8px; border-radius: 12px; background: var(--sheet); box-shadow: inset 0 0 0 1px var(--line); text-align: center; }
+.fi-memo .fi-m { font-size: 1.12rem; font-weight: 700; }
+.fi-memo small { font-size: .8rem; font-weight: 600; color: var(--accent-ink); line-height: 1.3; }
+
+/* ── méthode en étapes : pastilles numérotées reliées par des flèches ── */
+.fi-flux { display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; counter-reset: flux; }
+.fi-flux li { counter-increment: flux; flex: 1 1 140px; position: relative; padding: 10px 10px 10px 40px; border-radius: 12px; background: var(--sheet); box-shadow: inset 0 0 0 1px var(--line); line-height: 1.35; font-size: .95rem; }
+.fi-flux li::before { content: counter(flux); position: absolute; left: 10px; top: 10px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--sheet); font-weight: 800; font-size: .8rem; display: flex; align-items: center; justify-content: center; }
+
+/* « Attention » : l'erreur fréquente */
+.fi-piege { margin: 12px 0; padding: 10px 14px; border-radius: 10px; background: var(--danger-bg); line-height: 1.55; }
+.fi-piege .cle-titre { color: var(--danger); }
+
+/* méthode en étapes numérotées */
+.fi-etapes { margin: 6px 0 0; padding-left: 1.4em; line-height: 1.55; }
+.fi-etapes li + li { margin-top: 4px; }
+
+@media (max-width: 480px) {
+    .fi-calc { font-size: 1.02rem; }
+    .fi-calc.fi-avec { --fi-pad: 1.75em !important; }
+    .fi-fl svg { width: 1.3em; height: 1em; }
+    /* libellé de l'opération sous la flèche, pour gagner de la largeur */
+    .fi-fl .fi-lab { position: absolute; top: 1.05em; }
+    .fi-fl .fi-lab { left: 50%; transform: translateX(-50%); }
+    .fi-bloc { padding: 8px 6px; }
+}

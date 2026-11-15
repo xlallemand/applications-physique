@@ -22,10 +22,12 @@
    Clés enregistrées : celles qui commencent par « <dossier>- » pour un
    dossier de la liste APPS du portail (préfixe le plus long), plus
    equamath_v2 (Équations du 1er degré) et revisions-reglages (réglage des
-   flashcards, rattaché à aucune application). fractions-college-suivi et
-   equations-college-suivi (suivi des compétences des applications Fractions
-   et Équations) ont leur propre fusion (type « suivi-competences ») ;
-   fractions-college-sauvegarde et equations-college-sauvegarde (état de la
+   flashcards, rattaché à aucune application). fractions-college-suivi,
+   equations-college-suivi et equations-physique-mobile-suivi (suivi des
+   compétences des applications Fractions, Équations et Équations en physique
+   (smartphone)) ont leur propre fusion (type « suivi-competences ») ;
+   fractions-college-sauvegarde, equations-college-sauvegarde et
+   equations-physique-mobile-sauvegarde (état de la
    copie de secours propre à l'appareil) ne sont jamais enregistrées. Les autres clés du navigateur
    (autres sites de la même adresse) ne sont ni enregistrées ni reprises.
    Tout ce qui arrive est non fiable : taille plafonnée, forme de chaque
@@ -103,8 +105,8 @@
     if (reste === 'flashcards') return { dossier, type: 'flashcards' };
     if (cle === 'combustions-exercices-faits') return { dossier, type: 'liste' };
     if (cle === 'principe-dynamique-atelier') return { dossier, type: 'atelier' };
-    if (cle === 'fractions-college-suivi' || cle === 'equations-college-suivi') return { dossier, type: 'suivi-competences' };
-    if (cle === 'fractions-college-sauvegarde' || cle === 'equations-college-sauvegarde') return null;      // état de la sauvegarde propre à l'appareil : jamais copié
+    if (cle === 'fractions-college-suivi' || cle === 'equations-college-suivi' || cle === 'equations-physique-mobile-suivi') return { dossier, type: 'suivi-competences' };
+    if (cle === 'fractions-college-sauvegarde' || cle === 'equations-college-sauvegarde' || cle === 'equations-physique-mobile-sauvegarde') return null;      // état de la sauvegarde propre à l'appareil : jamais copié
     return { dossier, type: 'inconnue' };
   }
 
