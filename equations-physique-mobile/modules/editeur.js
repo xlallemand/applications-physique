@@ -1169,7 +1169,7 @@ function solveEditorHTML() {
     <div class="ed-hist ep-fige"></div>
     <div class="ed-travail">
         <p class="ed-aide-t">Déplace les éléments et utilise les outils pour écrire la grandeur cherchée <b>seule, à gauche</b>, puis vérifie l'étape.</p>
-        <div class="eq-row ed-zone"></div>
+        <div class="ed-cadre"><span class="ed-isoler"></span><div class="eq-row ed-zone"></div></div>
         <p class="ed-pal-t">Réserve : glisse un élément ou un outil dans l'équation</p>
         <div class="ed-palette ep-palette"></div>
         <div class="ed-verif"><button type="button" class="btn-primary ed-verifier">✓ Vérifier l'étape</button></div>
@@ -1191,9 +1191,17 @@ function monter(zone, cfg, r) {
     startSolveExercise(cfg);
     return racine;
 }
+// étiquette de la grandeur à isoler (celle de sa tuile)
+function etiquetteCible(cfg) {
+    const t = (cfg.tiles || []).find(x => x.id === cfg.targetId);
+    return t ? t.label : cfg.targetId;
+}
 function startSolveExercise(cfg) {
     currentExercise = cfg;
     state = { left: cfg.initialLeft(), right: cfg.initialRight() };
+    // grandeur à isoler, rappelée en haut à gauche du cadre de résolution
+    const iso = part('ed-isoler');
+    if (iso) iso.innerHTML = 'À isoler\u00a0: <b>' + etiquetteCible(cfg) + '</b>';
     annul.vider();
     history = [JSON.parse(JSON.stringify(state))];
     stepOneValidated = true;
