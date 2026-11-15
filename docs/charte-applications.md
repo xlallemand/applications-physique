@@ -321,7 +321,7 @@ Code : `assets/progression.js` et `assets/progression.css`, chargés **par le po
 | `combustions-exercices-faits`, `principe-dynamique-atelier` | réunion, sans doublon |
 | `equamath_v2` | `results` : l'entrée au meilleur `bestScore`, `attempts` le plus grand ; `xp` le plus grand ; `showKb` du navigateur |
 | `<dossier>-flashcards` | `ajouts` : réunion (date la plus ancienne) ; chaque carte : l'état **revu le plus récemment** (`v` le plus grand ; à égalité, `n` le plus grand ; une carte jamais revue perd contre une carte revue) ; une carte présente d'un seul côté est copiée |
-| `fractions-college-suivi`, `equations-college-suivi` (suivi des compétences) | réunion des questions de chaque compétence et des notes, sans doublon (même date) ; les 30 dernières questions par compétence, les 100 dernières notes |
+| `fractions-college-suivi`, `equations-college-suivi`, `equations-physique-mobile-suivi` (suivi des compétences) | réunion des questions de chaque compétence et des notes, sans doublon (même date) ; les 30 dernières questions par compétence, les 100 dernières notes |
 | `revisions-reglages` | celui du navigateur (copié s'il est absent) |
 | autre clé `<dossier>-…` | copiée si absente du navigateur, sinon celle du navigateur est gardée |
 
@@ -460,7 +460,7 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 | Index de recherche du portail (modules et pages de toutes les applications, type de chaque page) | `assets/recherche-index.js`, généré par `docs/outils/index-recherche.py` (règles de type et `EXCEPTIONS`) |
 | Maquette validée de la recherche et des pastilles de type | `docs/maquettes/recherche-et-types.html` |
 | Avancement x/y de chaque application sur le portail | `assets/avancement.js` : `AVANCEMENT` |
-| Application installable sur téléphone et hors ligne (PWA, deux applications : Fractions et Équations du 1er degré, sur le modèle du dépôt `orthographe`) ; copie de secours de la progression dans l'application | `fractions-college/manifest.webmanifest`, `fractions-college/sw.js` (cache d'abord, mise à jour pour le lancement suivant), `fractions-college/modules/sauvegarde.js`, `fractions-college/icones/` (de même dans `equations-college/`) ; options `coches` et `liensDirects` de `SOM.init` (`assets/sommaire.js`) |
+| Application installable sur téléphone et hors ligne (PWA, trois applications : Fractions, Équations du 1er degré et Équations en physique (smartphone), sur le modèle du dépôt `orthographe`) ; copie de secours de la progression dans l'application | `fractions-college/manifest.webmanifest`, `fractions-college/sw.js` (cache d'abord, mise à jour pour le lancement suivant), `fractions-college/modules/sauvegarde.js`, `fractions-college/icones/` (de même dans `equations-college/`) ; options `coches` et `liensDirects` de `SOM.init` (`assets/sommaire.js`) |
 | Flashcards : moteur, planning, séances, page Révisions, page Flashcards, intégrations (objet `REV`) | `assets/revisions.js`, `assets/revisions.css`, `revisions.html` |
 | Flashcards d'une application (exemple) | `changements-etat/modules/flashcards.js`, `changements-etat/modules/flashcards.html` |
 | Écrire les flashcards d'une application ; outil de relecture de l'enseignant | `docs/flashcards/prompt-generation.md` ; `docs/flashcards/relecture/` |
