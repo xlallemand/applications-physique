@@ -473,7 +473,7 @@ function solveEditorHTML() {
     <div id="stepsHistory" class="mb-2"></div>
     <div id="workZone">
         <div id="stepHint" class="text-center text-sm text-indigo-700 font-semibold mb-3"></div>
-        <div id="currentStepZone" class="eq-row py-8 border-2 border-dashed border-indigo-300 rounded-lg bg-indigo-50" style="min-height:110px;"></div>
+        <div class="ep-cadre"><span id="epIsoler" class="ep-isoler"></span><div id="currentStepZone" class="eq-row py-8 border-2 border-dashed border-indigo-300 rounded-lg bg-indigo-50" style="min-height:110px;"></div></div>
         <div class="mt-6">
             <div class="text-xs font-bold text-gray-500 uppercase mb-2">Glisse les éléments dans l'équation</div>
             <div id="palette" class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200"></div>
@@ -493,6 +493,9 @@ function startingState(cfg) {
 function startSolveExercise(cfg) {
     if (window.DragDrop) DragDrop.cleanupGhosts();
     currentExercise = cfg;
+    // grandeur à isoler, rappelée en haut à gauche du cadre de résolution
+    const iso = document.getElementById('epIsoler');
+    if (iso) { const t = (cfg.tiles || []).find(x => x.id === cfg.targetId); iso.innerHTML = 'À isoler\u00a0: <b>' + (t ? t.label : cfg.targetId) + '</b>'; }
     viewMode = 'solve';
     state = startingState(cfg);
     annul.vider();
