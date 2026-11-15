@@ -20,7 +20,7 @@
    changer VERSION pour que l'ancien cache soit remplacé.
    ============================================================ */
 'use strict';
-const VERSION = 'equations-v4';
+const VERSION = 'equations-v1';
 const FICHIERS = [
   './', './index.html', './manifest.webmanifest',
   './modules/seance.html', './modules/suivi.html', './modules/fiches.html',
