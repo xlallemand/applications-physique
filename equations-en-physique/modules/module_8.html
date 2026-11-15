@@ -48,21 +48,27 @@
     .palette-tile.dragging { opacity:.4; }
 
     /* ── Schéma « on applique la même opération aux deux côtés » ── */
-    .op-diagram { text-align:center; margin-bottom:8px; }
+    /* schéma « même opération des deux côtés » : une flèche de chaque côté de l'équation,
+       qui part de la hauteur du signe = (le départ du tracé est à 4/46 de la hauteur du dessin :
+       la flèche, centrée sur le signe =, descend de 50 % − 8,7 % = 41,3 % de sa hauteur) ;
+       l'opération est écrite à l'extérieur, centrée sur le signe = */
+    .op-diagram { display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:8px; padding-bottom:16px; }   /* place pour le bout des flèches, plus bas que l'équation */
+    .op-diagram > .eq-line-static { flex:0 1 auto; min-width:0; }
     .op-diagram .eq-line-static { font-size:1.125rem; }
     @media (min-width:768px) { .op-diagram .eq-line-static { font-size:1.25rem; } }
-    .op-diagram-arrows { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:0 2%; margin:2px 0 6px; }
-    .op-arrow-row { display:flex; align-items:center; gap:8px; }
-    .op-arrow-row-right { text-align:right; }
-    .op-arrow-svg { width:56px; height:44px; display:block; flex-shrink:0; color:var(--accent); }
-    .op-arrow-svg.miroir { transform:scaleX(-1); }
+    .op-arrow-row { display:flex; align-items:center; gap:4px; flex:0 0 auto; }   /* seule l'équation se réduit (ajusterSchemas) */
+    .op-arrow-row-left { text-align:right; }
+    .op-arrow-row-right { text-align:left; }
+    .op-arrow-svg { width:56px; height:44px; display:block; flex-shrink:0; color:var(--accent); transform:translateY(41.3%); }
+    .op-arrow-svg.miroir { transform:translateY(41.3%) scaleX(-1); }
     .op-arrow-label { font-weight:800; color:var(--accent); font-size:1.1rem; line-height:1.25; }
-    .op-arrow-note { display:block; font-weight:600; font-size:.72rem; color:var(--accent); white-space:nowrap; }
+    .op-arrow-note { display:block; font-weight:600; font-size:.72rem; color:var(--accent); max-width:11em; }
     @media (max-width:480px) {
-        .op-diagram-arrows { padding:0; }
-        .op-arrow-row { min-width:0; gap:4px; }
-        .op-arrow-svg { width:40px; height:32px; }
-        .op-arrow-note { white-space:normal; }
+        .op-diagram { gap:2px; padding-bottom:10px; }
+        .op-arrow-row { gap:2px; }
+        .op-arrow-svg { width:26px; height:20px; }
+        .op-arrow-label { font-size:1rem; }
+        .op-arrow-note { font-size:.64rem; max-width:5.4em; }
     }
 
     /* ── Une manipulation (instance de l'éditeur) ── */
@@ -182,17 +188,40 @@ const eqStat = (g, d) => `<div class="eq-line-static">${renderStatic(g)}<span cl
 function schemaOperation(gauche, droite, od) {
     const fleche = miroir => `<svg viewBox="0 0 60 46" class="op-arrow-svg${miroir ? ' miroir' : ''}" aria-hidden="true"><path d="M46,4 Q12,10 16,38" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/><path d="M16,38 L7,26 M16,38 L25,29" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     return `<div class="op-diagram">
+        <div class="op-arrow-row op-arrow-row-left">
+            <span class="op-arrow-label">${od.label}${od.noteLeft ? `<span class="op-arrow-note">${od.noteLeft}</span>` : ''}</span>${fleche(false)}
+        </div>
         ${eqStat(gauche, droite)}
-        <div class="op-diagram-arrows">
-            <div class="op-arrow-row op-arrow-row-left">
-                <span class="op-arrow-label">${od.label}${od.noteLeft ? `<span class="op-arrow-note">${od.noteLeft}</span>` : ''}</span>${fleche(false)}
-            </div>
-            <div class="op-arrow-row op-arrow-row-right">
-                ${fleche(true)}<span class="op-arrow-label">${od.label}${od.noteRight ? `<span class="op-arrow-note">${od.noteRight}</span>` : ''}</span>
-            </div>
+        <div class="op-arrow-row op-arrow-row-right">
+            ${fleche(true)}<span class="op-arrow-label">${od.label}${od.noteRight ? `<span class="op-arrow-note">${od.noteRight}</span>` : ''}</span>
         </div>
     </div>`;
 }
+
+// téléphone : si l'équation d'un schéma ne tient pas entre les deux flèches, on la réduit
+// (zoom) au lieu de la faire défiler ; recalculé à chaque affichage et quand la largeur change
+function ajusterSchemas() {
+    document.querySelectorAll('.op-diagram > .eq-line-static').forEach(e => {
+        const o = e.parentElement;
+        e.style.zoom = '';
+        const nat = e.scrollWidth;                      // largeur de l'équation sans réduction
+        // place laissée par les deux flèches et leurs libellés (mesurés sans l'équation)
+        e.style.display = 'none';
+        const g = parseFloat(getComputedStyle(o).columnGap) || 0;
+        let place = o.clientWidth - 2 * g;
+        [...o.children].forEach(c => { if (c !== e) place -= c.getBoundingClientRect().width; });
+        e.style.display = '';
+        if (nat > place + 1) e.style.zoom = Math.max(.3, .96 * place / nat).toFixed(3);
+    });
+}
+let schemasAttente = false;
+function ajusterSchemasBientot() {
+    if (schemasAttente) return;
+    schemasAttente = true;
+    requestAnimationFrame(() => { schemasAttente = false; ajusterSchemas(); });
+}
+new MutationObserver(ajusterSchemasBientot).observe(document.documentElement, { childList: true, subtree: true });
+addEventListener('resize', ajusterSchemasBientot);
 
 // ═══════════════════════════════════════════════════════════════
 // ÉDITEUR D'ÉQUATION : une instance par manipulation

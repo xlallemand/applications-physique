@@ -48,7 +48,7 @@
       parties: [{ nom: 'Fiches des compétences', cours: 'fiches', noms: { cours: 'Fiches des compétences' } }] }
   ];
   // sommaire sans coches (le suivi des compétences suffit), modules d'une seule page en liens directs
-  SOM.init({ nom: 'Équations du 1er degré', id: 'equations-college', coches: false, liensDirects: true, plan: PLAN });
+  SOM.init({ nom: 'Équations du 1er degré', id: 'equations-college', coches: false, liensDirects: true, mobile: true, plan: PLAN });
 
   /* ---------- Petits outils ---------- */
   function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
