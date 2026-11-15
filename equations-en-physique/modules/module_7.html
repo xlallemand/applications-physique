@@ -11,6 +11,7 @@
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
 <script src="../tuiles.js"></script>
+<script src="../fiches.js"></script>
 <script src="../aide-rules.js"></script>
 <style>
     :root {
@@ -178,6 +179,7 @@
     .eq-side.sumterm-source { outline:none !important; background:none !important; }
 </style>
 <link rel="stylesheet" href="../tuiles.css">
+<link rel="stylesheet" href="../fiches.css">
 </head>
 <body class="bg-white min-h-screen">
 <div id="app-nav"></div>
@@ -415,17 +417,8 @@ function renderEquationZone() {
     }
 }
 function sizeSqrtHooks(container) {
-    container.querySelectorAll('.sqrt-hook').forEach(svg => {
-        const inner = svg.nextElementSibling;
-        if (!inner) return;
-        const h = Math.max(inner.offsetHeight, 24);
-        const hookH = Math.min(16, h - 6);
-        const d = `M0,${(h - hookH * 0.55).toFixed(1)} L${(hookH * 0.4).toFixed(1)},${(h - 2).toFixed(1)} L13,2`;
-        svg.setAttribute('viewBox', `0 0 14 ${h}`);
-        svg.setAttribute('width', '14');
-        svg.setAttribute('height', String(h));
-        svg.innerHTML = `<path d="${d}" fill="none" stroke="#1e293b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
-    });
+    // crochet commun (../fiches.js) : sa hauteur suit celle du contenu (../fiches.css), même affiché plus tard
+    EPF.crochets(container);
 }
 function attachEqTileHandlers(zone) {
     zone.querySelectorAll('.eq-tile').forEach(el => {

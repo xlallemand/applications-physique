@@ -11,6 +11,7 @@
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
 <script src="../tuiles.js"></script>
+<script src="../fiches.js"></script>
 <script src="../aide-rules.js"></script>
 <style>
     :root {
@@ -131,9 +132,6 @@
     body.dnd-active .insert-zone { opacity:.55; }
 
     /* ── Racine carrée ─────────── */
-    .sqrt-wrap { display:inline-flex; align-items:stretch; margin:0 6px; flex-shrink:0; }
-    .sqrt-hook { flex-shrink:0; display:block; }
-    .sqrt-inner { display:inline-flex; align-items:center; padding:4px 6px 2px 6px; border-top:3px solid var(--ink); }
 
     /* pendant le glisser de l'outil racine carrée, les deux membres de
        l'équation (gauche et droite) se signalent comme zones de dépose */
@@ -144,6 +142,7 @@
     body.sqrt-dragging .eq-side.drag-over { background: rgba(139,92,246,.16); border-radius: 10px; }
 </style>
 <link rel="stylesheet" href="../tuiles.css">
+<link rel="stylesheet" href="../fiches.css">
 </head>
 <body class="bg-white min-h-screen">
 <div id="app-nav"></div>
@@ -332,17 +331,8 @@ function renderEquationZone() {
 // barre du haut, sans discontinuité ni déformation, quelle que soit la
 // hauteur enveloppée
 function sizeSqrtHooks(container) {
-    container.querySelectorAll('.sqrt-hook').forEach(svg => {
-        const inner = svg.nextElementSibling;
-        if (!inner) return;
-        const h = Math.max(inner.offsetHeight, 24);
-        const hookH = Math.min(16, h - 6);
-        const d = `M0,${(h - hookH * 0.55).toFixed(1)} L${(hookH * 0.4).toFixed(1)},${(h - 2).toFixed(1)} L13,2`;
-        svg.setAttribute('viewBox', `0 0 14 ${h}`);
-        svg.setAttribute('width', '14');
-        svg.setAttribute('height', String(h));
-        svg.innerHTML = `<path d="${d}" fill="none" stroke="#1e293b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
-    });
+    // crochet commun (../fiches.js) : sa hauteur suit celle du contenu (../fiches.css), même affiché plus tard
+    EPF.crochets(container);
 }
 
 // associe le glisser-déposer tactile commun (assets/dragdrop.js) à chaque

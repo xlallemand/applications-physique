@@ -11,6 +11,7 @@
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
 <script src="../tuiles.js"></script>
+<script src="../fiches.js"></script>
 <script src="../aide-rules.js"></script>
 <style>
     :root {
@@ -202,18 +203,17 @@
         background:var(--paper-2); border:2px solid var(--line-strong); border-radius:8px;
         padding:9px 13px; min-height:40px; font-weight:700; color:var(--ink); margin:0 3px;
     }
-    .sqrt-wrap { display:inline-flex; align-items:flex-end; margin:0 6px; }
-    .sqrt-hook { display:block; flex-shrink:0; }
     /* padding-top : un exposant (^2, ^3) a l'interieur, aligne en haut de son
        propre bloc, ne doit pas finir colle contre le toit de la racine */
-    .sqrt-inner { border-top:3px solid var(--ink); padding:9px 6px 0; display:inline-flex; align-items:center; }
+    .sqrt-inner { padding-top:9px; }
     /* racine cubique : meme dessin que la racine carree (crochet + trait),
        avec un petit "3" en indice au-dessus du crochet */
-    .cbrt-index { font-size:.65em; font-weight:800; color:var(--ink); align-self:flex-start; margin:0 -3px 0 2px; line-height:1.4; }
+    .cbrt-index { position:absolute; left:-6px; top:0; font-size:.65em; font-weight:800; color:var(--ink); line-height:1.4; }
     .inline-frac { display:inline-flex; align-items:center; gap:3px; }
     .inline-frac-slash { font-weight:800; color:var(--ink); margin:0 1px; }
 </style>
 <link rel="stylesheet" href="../tuiles.css">
+<link rel="stylesheet" href="../fiches.css">
 </head>
 <body class="bg-white min-h-screen">
 <div id="app-nav"></div>
@@ -542,17 +542,8 @@ function renderEquationZone() {
     }
 }
 function sizeSqrtHooks(container) {
-    container.querySelectorAll('.sqrt-hook').forEach(svg => {
-        const inner = svg.nextElementSibling;
-        if (!inner) return;
-        const h = Math.max(inner.offsetHeight, 24);
-        const hookH = Math.min(16, h - 6);
-        const d = `M0,${(h - hookH * 0.55).toFixed(1)} L${(hookH * 0.4).toFixed(1)},${(h - 2).toFixed(1)} L13,2`;
-        svg.setAttribute('viewBox', `0 0 14 ${h}`);
-        svg.setAttribute('width', '14');
-        svg.setAttribute('height', String(h));
-        svg.innerHTML = `<path d="${d}" fill="none" stroke="#1e293b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
-    });
+    // crochet commun (../fiches.js) : sa hauteur suit celle du contenu (../fiches.css), même affiché plus tard
+    EPF.crochets(container);
 }
 function attachEqTileHandlers(zone) {
     zone.querySelectorAll('.eq-tile').forEach(el => {
