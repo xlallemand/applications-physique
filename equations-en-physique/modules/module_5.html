@@ -721,7 +721,7 @@ function solveEditorHTML() {
             <div id="palette" class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200"></div>
         </div>
         <div class="text-center mt-6">
-            <button onclick="verifyStep()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">✓ Vérifier l'étape</button>
+            <button onclick="verifyStep()" type="button" class="btn-primary">✓ Vérifier l'étape</button>
         </div>
     </div>
     <div id="doneMsg" class="hidden text-center text-xl font-bold text-green-600 py-6"></div>
@@ -849,8 +849,8 @@ function mountDrill(container, drillCfg, explainHtml) {
         ${drillCfg.showPalette ? `<div class="mt-4"><div class="text-xs font-bold text-gray-500 uppercase mb-2">Glisse les éléments nécessaires</div><div id="palette" class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200"></div></div>` : ''}
         ${explainHtml || ''}
         <div class="text-center mt-2">
-            <button id="verifyDrillBtn" onclick="checkDrill()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow">✓ Valider</button>
-            <button id="nextDrillBtn" onclick="currentDrillOnSuccess()" class="hidden bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">Suivant →</button>
+            <button id="verifyDrillBtn" onclick="checkDrill()" type="button" class="btn-primary">✓ Valider</button>
+            <button id="nextDrillBtn" onclick="currentDrillOnSuccess()" type="button" class="hidden btn-primary">Suivant →</button>
         </div>
         <div id="feedback" class="text-center mt-4 font-semibold text-lg"></div>`;
     refreshView();
@@ -1041,7 +1041,7 @@ function renderModule4Intro() {
         <p class="text-gray-700 mb-2">Tu vas maintenant résoudre des équations plus complexes, comportant parfois plus de deux zones (un terme multiplié par une fraction entière). Elles sont déjà écrites : il ne reste qu'à déplacer les éléments pour isoler la grandeur demandée.</p>
         <p class="text-gray-700 mb-2"><b>Notation :</b> 2 points si l'équation est résolue en plusieurs étapes sans aucune erreur, 1 point s'il y a eu au moins une erreur avant d'y arriver, 0 point en cas d'abandon. La note finale est donnée en pourcentage.</p>
         <p class="text-gray-700 mb-2"><b>Bonus ultime :</b> si l'équation est résolue en une seule étape, de tête (interdiction d'utiliser un crayon et du papier), vous remportez 3 points. La note finale peut alors dépasser 100% !</p>
-        <button onclick="startModule4Graded()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-bold shadow mt-2">Commencer →</button>
+        <button onclick="startModule4Graded()" type="button" class="btn-primary mt-2">Commencer →</button>
       </div>`;
 }
 function startModule4Graded(){ m4Idx = 0; m4Score = 0; m4Answers = []; renderModule4Question(); }
@@ -1077,7 +1077,7 @@ function renderModule4Question() {
             const pts = hadError ? 1 : (history.length === 1 ? 3 : 2);
             m4Score += pts;
             m4Answers.push({ num: displayNum, pts, max: 2 });
-            dm.innerHTML = `🎉 Équation résolue ! (+${pts} pt${pts>1?'s':''})<div class="mt-4"><button onclick="nextModule4Question()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold shadow">Suivant →</button></div>`;
+            dm.innerHTML = `🎉 Équation résolue ! (+${pts} pt${pts>1?'s':''})<div class="mt-4"><button onclick="nextModule4Question()" type="button" class="btn-primary">Suivant →</button></div>`;
         }
     });
 }
