@@ -22,8 +22,21 @@
 .eq-tile.tile-highlight { background:var(--cle-bg); border-color:var(--accent); color:var(--accent-ink); box-shadow:none; }
 /* tuile survolée quand elle sert de zone de dépôt */
 .eq-tile.drag-over { border-color:var(--accent); background:var(--cle-bg); box-shadow:none; }
+/* tuile figée (équation affichée, historique) ou dans une fonction : même étiquette blanche
+   que les autres, jamais grisée */
+.eq-tile-frozen, .eq-tile-locked {
+    display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box;
+    min-width:46px; min-height:46px; padding:4px 13px; margin:0 3px;
+    background:var(--sheet); border:1.5px solid var(--line-strong); border-bottom-width:4px; border-radius:12px;
+    font-size:1.15em; font-weight:700; line-height:1; color:var(--ink); white-space:nowrap;
+    user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent;
+}
+/* terme qu'on ne peut pas déplacer : on peut l'attraper, il tremble et le message s'affiche */
+[data-ept-bloque] { cursor:grab; }
+.ept-refus { animation:ept-refus .35s ease-in-out; border-color:var(--danger) !important; }
+@keyframes ept-refus { 20%, 60% { transform:translateX(-4px); } 40%, 80% { transform:translateX(4px); } }
 /* tuile dans un exposant : plus petite */
-.func-exp-inner .eq-tile { min-width:30px; min-height:30px; border-bottom-width:3px; }
+.func-exp-inner .eq-tile, .func-exp-inner .eq-tile-locked { min-width:28px; min-height:28px; padding:2px 7px; border-bottom-width:3px; border-radius:9px; font-size:1em; }
 
 /* les anciennes croix rouges : remplacées par la sélection (tuiles.js) */
 .tile-del, .frac-del { display:none !important; }
@@ -53,6 +66,25 @@ body.dnd-active .slot-simple { border-color:var(--accent); }
     -webkit-tap-highlight-color:transparent;
 }
 .palette-tile.dragging { opacity:.3; }
+/* outils (opérations appliquées à l'équation : fraction, parenthèses, ×(−1), fonctions)
+   distincts des grandeurs : pastille teintée, bord en pointillés, sans relief, séparés des grandeurs */
+.palette-tile.func-tool, .palette-tile.palette-frac {
+    border-radius:999px; border:1.5px dashed var(--accent); border-bottom-width:1.5px;
+    background:var(--cle-bg); color:var(--accent-ink); font-weight:800; padding-left:16px; padding-right:16px;
+}
+.palette-tile.palette-frac .dots { color:var(--accent-ink); }
+.palette-tile.palette-frac .frac-line { background:var(--accent-ink); }
+.palette-tile:not(.func-tool):not(.palette-frac) + .func-tool,
+.palette-tile:not(.func-tool):not(.palette-frac) + .palette-frac,
+:is(.func-tool, .palette-frac) + .palette-tile:not(.func-tool):not(.palette-frac) { position:relative; margin-left:14px; }
+.palette-tile:not(.func-tool):not(.palette-frac) + .func-tool::before,
+.palette-tile:not(.func-tool):not(.palette-frac) + .palette-frac::before,
+:is(.func-tool, .palette-frac) + .palette-tile:not(.func-tool):not(.palette-frac)::before {
+    content:''; position:absolute; left:-15px; top:4px; bottom:4px; border-left:1.5px solid var(--line-strong);
+}
+/* outil fonction réciproque : ce qu'il annule, écrit dessous */
+.palette-tile.func-tool.avec-note { flex-direction:column; gap:3px; border-radius:16px; padding-top:6px; padding-bottom:6px; }
+.outil-note { display:block; font-size:.62rem; font-weight:700; line-height:1.15; color:var(--accent-ink); white-space:nowrap; }
 /* pendant le glisser d'une tuile de l'équation : la réserve accepte de la reprendre */
 .ept-reserve-active { outline:2px dashed var(--ink-3); outline-offset:3px; }
 .ept-reserve-survol { outline:2px solid var(--ink); background:var(--paper-2) !important; }

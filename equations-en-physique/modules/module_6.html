@@ -522,6 +522,9 @@ function monterEditeur(hote, cfg, api) {
             x.addEventListener('click', e => { e.stopPropagation(); deleteItem(el.dataset.path, parseInt(el.dataset.idx, 10)); });
         });
         zoneEq.querySelectorAll('.eq-tile').forEach(el => {
+            // terme dans une parenthèse : on peut l'attraper, mais il ne bouge pas,
+            // et le message s'affiche (../tuiles.js)
+            if (el.closest('.paren-wrap') && !el.closest('.term-draggable')) { EPT.bloquer(el, EPT.MSG_PAREN, m => api.erreur(m)); return; }
             // une tuile à l'intérieur d'un terme additif d'une somme à plusieurs
             // termes (.sum-term) ne se glisse jamais seule : ce genre de terme ne se
             // déplace qu'en bloc (via .sum-term.term-draggable une fois isolé)
@@ -1160,30 +1163,24 @@ const manip = m => ({ titre: m.titre, enonce: `<p>${m.instruction}</p>`,
 // LE COURS PAR ÉTAPES
 // ═══════════════════════════════════════════════════════════════
 const { exemple } = COURS;
-const T = (id, label) => tile(id, label || id);
-const fr = (a, b) => `<span class="som-fr"><span>${a}</span><span>${b}</span></span>`;
-const V = T('v'), V0 = T('v0', 'v<sub>0</sub>'), A = T('a'), TT = T('t'), F = T('F'), K = T('k'), L = T('L'), L0 = T('L0', 'L<sub>0</sub>');
-const S = (...termes) => sumNode(termes.map(([signe, ...tuiles]) => term1(signe, [simple(tuiles)])));
-// exemple traité : l'équation avant et après la manipulation
-const avantApres = (avant, op, apres) => `<div class="ep-avap">
-    <div class="ep-av"><p class="ep-av-t">Avant</p>${avant}</div>
-    <p class="ep-op">${op}</p>
-    <div class="ep-av"><p class="ep-av-t">Après</p>${apres}</div></div>`;
-const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Un terme précédé d'un + ou d'un − se glisse (à la souris ou au doigt) sur l'autre membre de l'équation ; les outils de la palette se glissent sur l'équation. Pour effacer une tuile, touche-la puis touche sa croix ✕, ou remets-la dans la réserve. ↶ Annuler défait la dernière action ; ↺ Recommencer remet l'équation de départ. Clique sur <b>Valider</b> quand c'est fait.</p></div>`;
-// les parenthèses des exemples s'ajustent à la hauteur de leur contenu
-const ajouter = (c, carte, html) => { const d = c.ajouter(carte, html); sizeParens(d); return d; };
+const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Glisse un terme précédé de + ou de − sur l'autre membre ; glisse les outils de la palette sur l'équation. Pour effacer une tuile : touche-la puis sa croix ✕, ou remets-la dans la réserve. Puis <b>Valider</b>.</p></div>`;
+// schémas des exemples (même opération des deux côtés | raccourci), comme dans les fiches : ../fiches.js
+const { ligne: LI, calc: CA, pan: PA, duo: DUO } = EPF;
+// les parenthèses des exemples s'ajustent à la hauteur de leur contenu ; schémas mis en forme par ../fiches.js
+const ajouter = (c, carte, html) => { const d = c.ajouter(carte, html); sizeParens(d); EPF.monter(d); return d; };
 
 /* ---------- 1. Déplacer un terme additif ---------- */
 function etape1(c) {
     const carte = c.carte('1. Déplacer un terme additif');
     ajouter(c, carte, `<div class="cours-bloc">
-        <p>Dans une équation, un terme additif (relié aux autres par un + ou un −) peut lui aussi passer de l'autre côté du signe =. Contrairement à un terme multiplicatif, il ne change pas de position (haut/bas) : il change de <b>signe</b>.</p>
-        <div class="cle"><p><b class="cle-titre">Règle.</b> Un terme précédé de + ou de − passe de l'autre côté du signe = en changeant de signe : + devient −, et − devient + (on ajoute ou on retire ce terme aux deux membres).</p></div>
+        <div class="cle"><p><b class="cle-titre">Règle.</b> Un terme relié par <b>+</b> ou <b>−</b> passe de l'autre côté en <b>changeant de signe</b> : + devient −, − devient +. Il ne passe ni en haut ni en bas.</p></div>
       </div>
-      ${exemple(`<p>Dans v = v<sub>0</sub> + a × t, on fait passer v<sub>0</sub> à gauche :</p>
-        ${avantApres(eqStat(seq([simple([V])]), seq([S([1, V0], [1, A, TT])])), '−v<sub>0</sub> des deux côtés',
-                     eqStat(seq([S([1, V], [-1, V0])]), seq([simple([A, TT])])))}
-        <p>+v<sub>0</sub> disparaît à droite et arrive à gauche avec le signe − : v − v<sub>0</sub> = a × t.</p>`)}
+      ${exemple(DUO(
+          PA('op', CA(LI('v', 'v<sub>0</sub> + a × t', { op: '− v<sub>0</sub>' }),
+                      LI('v − v<sub>0</sub>', '<span class="fi-zero">v<sub>0</sub> − v<sub>0</sub></span> + a × t', { note: 'v<sub>0</sub> − v<sub>0</sub> = 0' }),
+                      LI('v − v<sub>0</sub>', 'a × t'))),
+          PA('dep', CA(LI(VERS('a', 'v'), FDEP('a', 'v<sub>0</sub>', '− v<sub>0</sub>') + ' + a × t'),
+                       LI('v − v<sub>0</sub>', 'a × t')))))}
       ${MODE_EMPLOI}`);
     c.aToi(carte, M_TERME.map(manip));
     return carte;
@@ -1193,16 +1190,15 @@ function etape1(c) {
 function etape2(c) {
     const carte = c.carte('2. Une somme multipliée');
     ajouter(c, carte, `<div class="cours-bloc">
-        <p>Quand une somme est multipliée par d'autres termes, comme ρ × g × (z<sub>1</sub> − z<sub>2</sub>), on ne peut pas en déplacer un terme directement : il faut d'abord la libérer de ce qui la multiplie.</p>
-        <div class="cle"><p><b class="cle-titre">Règle.</b> Une somme multipliée ne se sépare pas : on divise d'abord les deux membres par ce qui la multiplie, puis on déplace ses termes.</p></div>
+        <div class="cle"><p><b class="cle-titre">Règle.</b> Une somme multipliée reste <b>en bloc</b> : on enlève d'abord ce qui la multiplie, puis on déplace ses termes.</p></div>
       </div>
-      ${exemple(`<div class="ep-exemples"><p>Dans F = k × (L − L<sub>0</sub>), on veut isoler L :</p>
-        ${avantApres(eqStat(seq([simple([F])]), seq([simple([K]), S([1, L], [-1, L0])])), '÷k des deux côtés',
-                     eqStat(seq([frac([F], [K])]), seq([S([1, L], [-1, L0])])))}
-        <p>La somme L − L<sub>0</sub> est maintenant seule : on peut déplacer −L<sub>0</sub>.</p>
-        ${avantApres(eqStat(seq([frac([F], [K])]), seq([S([1, L], [-1, L0])])), '+L<sub>0</sub> des deux côtés',
-                     eqStat(seq([sumNode([{ sign: 1, node: seq([frac([F], [K])]) }, term1(1, [simple([L0])])])]), seq([simple([L])])))}
-        <p>On obtient ${fr('F', 'k')} + L<sub>0</sub> = L.</p></div>`)}`);
+      ${exemple(DUO(
+          PA('op', CA(LI('F', 'k × (L − L<sub>0</sub>)', { op: '÷ k' }),
+                      LI(FFR('F', 'k'), 'L − L<sub>0</sub>', { op: '+ L<sub>0</sub>' }),
+                      LI(FFR('F', 'k') + ' + L<sub>0</sub>', 'L'))),
+          PA('dep', CA(LI(VERS('a', 'F', 'bas'), FDEP('a', 'k') + ' × (L − L<sub>0</sub>)'),
+                       LI(VERS('b', FFR('F', 'k')), 'L ' + FDEP('b', '− L<sub>0</sub>', '+ L<sub>0</sub>')),
+                       LI(FFR('F', 'k') + ' + L<sub>0</sub>', 'L')))))}`);
     c.aToi(carte, M_SOMME.map(manip));
     return carte;
 }
@@ -1211,13 +1207,12 @@ function etape2(c) {
 function etape3(c) {
     const carte = c.carte('3. Une grandeur isolée négative');
     ajouter(c, carte, `<div class="cours-bloc">
-        <p>Il arrive que la grandeur isolée soit précédée d'un signe − : −x = … . Pour obtenir +x, on multiplie les <b>deux membres</b> par −1 : chaque terme change de signe, des deux côtés.</p>
-        <div class="cle"><p><b class="cle-titre">Règle.</b> Grandeur isolée négative : on multiplie les <b>deux membres</b> par −1.</p></div>
+        <div class="cle"><p><b class="cle-titre">Règle.</b> Grandeur isolée précédée d'un signe − : on multiplie les <b>deux membres</b> par −1. Chaque terme change de signe.</p></div>
       </div>
-      ${exemple(`<p>En faisant passer v à droite dans v − v<sub>0</sub> = a × t, on obtient −v<sub>0</sub> = a × t − v :</p>
-        ${avantApres(eqStat(seq([S([-1, V0])]), seq([S([1, A, TT], [-1, V])])), '×(−1) des deux côtés',
-                     eqStat(seq([simple([V0])]), seq([S([-1, A, TT], [1, V])])))}
-        <p>v<sub>0</sub> = −a × t + v, c'est-à-dire v<sub>0</sub> = v − a × t.</p>`)}`);
+      ${exemple(DUO(PA('op', CA(
+          LI('− v<sub>0</sub>', 'a × t − v', { op: '× (−1)' }),
+          LI('v<sub>0</sub>', '− a × t + v', { note: 'On peut changer l\'ordre des termes' }),
+          LI('v<sub>0</sub>', 'v − a × t')))))}`);
     c.aToi(carte, M_NEG.map(manip));
     return carte;
 }
@@ -1226,13 +1221,14 @@ function etape3(c) {
 function etape4(c) {
     const carte = c.carte('4. Diviser une somme');
     ajouter(c, carte, `<div class="cours-bloc">
-        <p>Une somme n'est pas une seule grandeur : pour la diviser, il faut d'abord la regrouper en un seul bloc, entre parenthèses, puis la mettre au numérateur d'une fraction.</p>
-        <div class="cle"><p><b class="cle-titre">Règle.</b> Pour diviser une somme, on l'entoure d'abord de parenthèses pour en faire un seul bloc, puis on la met dans une fraction.</p></div>
+        <div class="cle"><p><b class="cle-titre">Règle.</b> Pour diviser une somme, on l'entoure de <b>parenthèses</b> : c'est le bloc entier qui passe au numérateur.</p></div>
       </div>
-      ${exemple(`<p>Dans v − v<sub>0</sub> = a × t, on veut isoler a : il faut diviser par t.</p>
-        ${avantApres(eqStat(seq([S([1, V], [-1, V0])]), seq([simple([A, TT])])), '( ), fraction, puis t en bas',
-                     eqStat(seq([{ kind: 'frac', num: S([1, V], [-1, V0]), den: simple([TT]) }]), seq([simple([A])])))}
-        <p>La somme v − v<sub>0</sub> passe entière au numérateur : a = ${fr('v − v<sub>0</sub>', 't')}.</p>`)}`);
+      ${exemple(DUO(
+          PA('op', CA(LI('(v − v<sub>0</sub>)', 'a × t', { op: '÷ t' }),
+                      LI(FFR('(v − v<sub>0</sub>)', 't'), '<span class="fi-zero">' + FFR('a × t', 't') + '</span>', { note: 't ÷ t = 1' }),
+                      LI(FFR('(v − v<sub>0</sub>)', 't'), 'a'))),
+          PA('dep', CA(LI(VERS('c', '(v − v<sub>0</sub>)', 'bas'), 'a × ' + FDEP('c', 't')),
+                       LI(FFR('(v − v<sub>0</sub>)', 't'), 'a')))))}`);
     c.aToi(carte, M_DIV.map(manip));
     return carte;
 }
@@ -1240,18 +1236,18 @@ function etape4(c) {
 /* ---------- À retenir ---------- */
 // calculs illustrés (flèche du terme déplacé) : ../fiches.js, mis en forme par EPF.monter
 const FFR = (a, b) => `<span class="fi-fr"><span>${a}</span><span>${b}</span></span>`;
-const FDEP = (cle, t, sens) => `<span class="fi-dep" data-${sens}="${cle}">${t}</span>`;
+const FDEP = EPF.de, VERS = EPF.vers;   // terme déplacé ; endroit où il arrive (même ligne)
 function aRetenir(c) {
     const carte = c.carte('À retenir');
     c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Terme additif.</b> Un terme relié aux autres par un + ou un − passe de l'autre côté du signe = en <b>changeant de signe</b> : + devient −, − devient +. Il ne passe ni en haut ni en bas.</p>
         <div class="fi-bloc"><div class="fi-calc">
-          <div class="fi-l" data-esp="0.8"><span>v</span><span>${FDEP('a', 'v<sub>0</sub>', 'de')} + a × t</span></div>
-          <div class="fi-l"><span>v ${FDEP('a', '− v<sub>0</sub>', 'vers')}</span><span>a × t</span></div>
+          <div class="fi-l"><span>${VERS('a', 'v')}</span><span>${FDEP('a', 'v<sub>0</sub>', '− v<sub>0</sub>')} + a × t</span></div>
+          <div class="fi-l"><span>v − v<sub>0</sub></span><span>a × t</span></div>
         </div></div></div>
       <div class="cle"><p><b class="cle-titre">Une somme multipliée</b> ne se sépare pas : on divise d'abord les deux membres par ce qui la multiplie, puis on déplace ses termes.</p>
         <div class="fi-bloc"><div class="fi-calc">
-          <div class="fi-l" data-esp="1.6"><span>F</span><span>${FDEP('a', 'k', 'de')} × (L − L<sub>0</sub>)</span></div>
-          <div class="fi-l" data-esp="1.6"><span>${FFR('F', FDEP('a', 'k', 'vers'))}</span><span>L − L<sub>0</sub></span></div>
+          <div class="fi-l"><span>${VERS('a', 'F', 'bas')}</span><span>${FDEP('a', 'k')} × (L − L<sub>0</sub>)</span></div>
+          <div class="fi-l"><span>${FFR('F', 'k')}</span><span>L − L<sub>0</sub></span></div>
         </div></div></div>
       <div class="cle"><p><b class="cle-titre">Grandeur isolée négative</b> : on multiplie les <b>deux membres</b> par −1 ; chaque terme change de signe, des deux côtés.</p>
         <div class="fi-bloc"><div class="fi-calc">
@@ -1260,8 +1256,8 @@ function aRetenir(c) {
         </div></div></div>
       <div class="cle"><p><b class="cle-titre">Diviser une somme</b> : on l'entoure d'abord de parenthèses pour en faire un seul bloc ; c'est la somme entière qui passe au numérateur.</p>
         <div class="fi-bloc"><div class="fi-calc">
-          <div class="fi-l" data-esp="1.6"><span>(v − v<sub>0</sub>)</span><span>a × ${FDEP('b', 't', 'de')}</span></div>
-          <div class="fi-l" data-esp="1.6"><span>${FFR('(v − v<sub>0</sub>)', FDEP('b', 't', 'vers'))}</span><span>a</span></div>
+          <div class="fi-l"><span>${VERS('b', '(v − v<sub>0</sub>)', 'bas')}</span><span>a × ${FDEP('b', 't')}</span></div>
+          <div class="fi-l"><span>${FFR('(v − v<sub>0</sub>)', 't')}</span><span>a</span></div>
         </div></div></div>
       <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_7.html">Entraînement →</a>
         <a class="btn-secondary" style="text-decoration:none" href="module_8.html">Module 4 : les fonctions réciproques</a>

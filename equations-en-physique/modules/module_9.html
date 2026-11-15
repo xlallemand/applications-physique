@@ -11,6 +11,7 @@
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
 <script src="../tuiles.js"></script>
+<script src="../fiches.js"></script>
 <script src="../aide-rules.js"></script>
 <style>
     :root {
@@ -184,10 +185,19 @@
     .func-name { font-weight:800; color:var(--ink); margin-right:2px; }
     .func-exp { font-weight:800; color:var(--ink); font-size:.75em; margin-left:1px; align-self:flex-start; }
     .pow-base { font-weight:800; color:var(--ink); font-size:1.15em; }
-    .func-wrap.pow-wrap { align-items:flex-start; }
-    .func-exp-inner { font-size:.72em; display:inline-flex; align-items:center; margin-top:-6px; }
-    .func-exp-inner .slot-simple { min-height:36px; padding:5px 8px; }
-    .func-exp-inner .eq-tile, .func-exp-inner .eq-tile-frozen, .func-exp-inner .eq-tile-locked { padding:6px 9px; min-height:32px; }
+    /* exposant de 10 et de e : en petit, en haut à droite (son bas au niveau du haut de la base) */
+    .func-wrap.pow-wrap { align-items:flex-end; }
+    .pow-base { line-height:1; padding-bottom:.1em; }
+    .func-exp-inner { font-size:.72em; display:inline-flex; align-items:center; margin:0 0 1.15em 1px; }
+    .func-exp-inner .slot-simple { min-height:30px; padding:3px 6px; }
+    .eq-line-static .func-exp-inner, .step-row .func-exp-inner { margin-bottom:.95em; }
+    /* fraction dans une fonction (log, ln, racine…) */
+    .frac-wrap.frac-fonction { gap:6px; margin:0 4px; }
+    .func-name { margin-right:1px; }
+    /* dans l'éditeur (tuiles) : nom de fonction et base des puissances à la taille des tuiles */
+    #currentStepZone .func-name { font-size:1.3em; }
+    #currentStepZone .pow-base { font-size:1.9em; }
+    #currentStepZone .func-exp-inner { margin-bottom:2em; }
     /* le signe d'une somme (ex. le "-" de e^(-λt)) est en temps normal a une
        taille fixe en rem, adaptee au contexte habituel des equations ; place
        ici dans un exposant deja reduit a .72em, cette taille absolue le fait
@@ -202,18 +212,17 @@
         background:var(--paper-2); border:2px solid var(--line-strong); border-radius:8px;
         padding:9px 13px; min-height:40px; font-weight:700; color:var(--ink); margin:0 3px;
     }
-    .sqrt-wrap { display:inline-flex; align-items:flex-end; margin:0 6px; }
-    .sqrt-hook { display:block; flex-shrink:0; }
     /* padding-top : un exposant (^2, ^3) a l'interieur, aligne en haut de son
        propre bloc, ne doit pas finir colle contre le toit de la racine */
-    .sqrt-inner { border-top:3px solid var(--ink); padding:9px 6px 0; display:inline-flex; align-items:center; }
+    .sqrt-inner { padding-top:9px; }
     /* racine cubique : meme dessin que la racine carree (crochet + trait),
        avec un petit "3" en indice au-dessus du crochet */
-    .cbrt-index { font-size:.65em; font-weight:800; color:var(--ink); align-self:flex-start; margin:0 -3px 0 2px; line-height:1.4; }
+    .cbrt-index { position:absolute; left:-6px; top:0; font-size:.65em; font-weight:800; color:var(--ink); line-height:1.4; }
     .inline-frac { display:inline-flex; align-items:center; gap:3px; }
     .inline-frac-slash { font-weight:800; color:var(--ink); margin:0 1px; }
 </style>
 <link rel="stylesheet" href="../tuiles.css">
+<link rel="stylesheet" href="../fiches.css">
 </head>
 <body class="bg-white min-h-screen">
 <div id="app-nav"></div>
@@ -246,7 +255,14 @@ function func(fn, inner){ return { kind:'func', fn, inner }; }
 function idsOf(items){ return items.map(i => i.id); }
 
 const RECIPROCAL = { sqrt:'sq', sq:'sqrt', cube:'cbrt', cbrt:'cube', sin:'asin', asin:'sin', log:'pow10', pow10:'log', ln:'exp', exp:'ln' };
-const FUNC_TOOL_LABEL = { sqrt:'√', sq:'x²', cube:'x³', cbrt:'∛', sin:'sin', asin:'sin⁻¹', log:'log', pow10:'10ˣ', ln:'ln', exp:'eˣ' };
+const FUNC_TOOL_LABEL = { sqrt:'√', sq:'x²', cube:'x³', cbrt:'∛', sin:'sin', asin:'Arcsin', log:'log', pow10:'10ˣ', ln:'ln', exp:'eˣ' };
+// dans la réserve, sous l'outil : la fonction qu'il annule (sauf carré et racine carrée, bien connus)
+const FUNC_TOOL_NOTE = { cube:'réciproque de ∛', cbrt:'réciproque de x³', sin:'réciproque de Arcsin', asin:'réciproque de sin',
+    log:'réciproque de 10ˣ', pow10:'réciproque de log', ln:'réciproque de eˣ', exp:'réciproque de ln' };
+// nom écrit devant les parenthèses d'une fonction
+const FUNC_NAME = { log:'log', ln:'ln', sin:'sin', asin:'Arcsin' };
+// message affiché quand on essaie de déplacer un terme qui ne peut pas bouger (../tuiles.js)
+const afficherRefus = msg => { hadError = true; showFeedback(msg, false); };
 
 function staticFracHtml(num, den) {
     return `<span class="frac-wrap-static"><span class="frac-num-static">${num}</span><span class="frac-line-static"></span><span class="frac-den-static">${den}</span></span>`;
@@ -332,23 +348,26 @@ function denHasRealContent(node) {
 }
 // contenu d'une fonction (racine, carré, log...) : toujours figé (une seule
 // entité, non démontable tant que la fonction n'est pas retirée) ; une
-// fraction s'y affiche en ligne (num/den, à n'importe quelle profondeur) pour
-// tenir sur une seule ligne, et une somme à plusieurs termes reçoit des
-// parenthèses quand demandé
-function renderInlineNode(node, staticMode) {
+// fraction s'y écrit en fraction (numérateur au-dessus du dénominateur), sauf
+// dans un exposant (enLigne) où elle reste en ligne (num/den) pour rester petite ;
+// une somme à plusieurs termes reçoit des parenthèses quand demandé
+function renderInlineNode(node, staticMode, enLigne) {
     if (node.kind === 'frac') {
-        return `<span class="inline-frac">${renderInlineNode(node.num, staticMode)}<span class="inline-frac-slash">/</span>${renderInlineNode(node.den, staticMode)}</span>`;
+        const num = renderInlineNode(node.num, staticMode, enLigne), den = renderInlineNode(node.den, staticMode, enLigne);
+        if (enLigne) return `<span class="inline-frac">${num}<span class="inline-frac-slash">/</span>${den}</span>`;
+        if (staticMode) return staticFracHtml(num, den);
+        return `<span class="frac-wrap frac-fonction"><span class="frac-num-wrap">${num}</span><span class="frac-line"></span><span class="frac-den-wrap">${den}</span></span>`;
     }
     if (node.kind === 'sum') {
         const inner = node.terms.map((t, i) => {
             const showSign = i > 0 || t.sign === -1;
             const signChar = t.sign === -1 ? '−' : '+';
-            return (showSign ? `<span class="sum-sign">${signChar}</span>` : '') + renderInlineNode(t.node, staticMode);
+            return (showSign ? `<span class="sum-sign">${signChar}</span>` : '') + renderInlineNode(t.node, staticMode, enLigne);
         }).join('');
         return `<span class="sum-wrap">${inner}</span>`;
     }
     if (node.kind === 'seq') {
-        return node.slots.map((s, i) => (i === 0 ? '' : '<span class="mult-sign">×</span>') + renderInlineNode(s, staticMode)).join('');
+        return node.slots.map((s, i) => (i === 0 ? '' : '<span class="mult-sign">×</span>') + renderInlineNode(s, staticMode, enLigne)).join('');
     }
     if (node.kind === 'simple') {
         // dans l'editeur actif : meme apparence qu'une tuile normale (pas de
@@ -363,22 +382,29 @@ function renderInlineNode(node, staticMode) {
             return sep + `<span class="${tileClass}">${it.label}</span>`;
         }).join('');
     }
-    if (node.kind === 'func') {
-        if (node.fn === 'sqrt') return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false, staticMode)}</div></div>`;
-        if (node.fn === 'sq')   return `<span class="func-wrap">${renderFuncInner(node.inner, true, staticMode)}<span class="func-exp">2</span></span>`;
-        if (node.fn === 'cube') return `<span class="func-wrap">${renderFuncInner(node.inner, true, staticMode)}<span class="func-exp">3</span></span>`;
-        if (node.fn === 'cbrt') return `<div class="sqrt-wrap"><span class="cbrt-index">3</span><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false, staticMode)}</div></div>`;
-        if (node.fn === 'pow10') return `<span class="func-wrap pow-wrap"><span class="pow-base">10</span><span class="func-exp-inner">${renderFuncInner(node.inner, true, staticMode)}</span></span>`;
-        if (node.fn === 'exp')   return `<span class="func-wrap pow-wrap"><span class="pow-base">e</span><span class="func-exp-inner">${renderFuncInner(node.inner, true, staticMode)}</span></span>`;
-        const label = { log:'log', ln:'ln', sin:'sin', asin:'sin<sup>−1</sup>' }[node.fn];
-        return `<span class="func-wrap"><span class="func-name">${label}</span>(${renderFuncInner(node.inner, false, staticMode)})</span>`;
-    }
+    if (node.kind === 'func') return renderFunc(node, staticMode, enLigne);
     return renderStatic(node);
 }
-function renderFuncInner(inner, parensIfSum, staticMode) {
+// une fonction et son contenu (racine, carré, cube, racine cubique, puissance de 10,
+// exponentielle, log, ln, sin, Arcsin) : les parenthèses d'une fonction nommée
+// prennent la hauteur de tout son contenu (sizeParens) ; l'exposant de 10 et de e
+// est écrit en haut, en petit
+function renderFunc(node, staticMode, enLigne) {
+    const inner = (parens, ligne) => renderFuncInner(node.inner, parens, staticMode, ligne || enLigne);
+    switch (node.fn) {
+        case 'sqrt': return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${inner(false)}</div></div>`;
+        case 'cbrt': return `<div class="sqrt-wrap"><span class="cbrt-index">3</span><svg class="sqrt-hook"></svg><div class="sqrt-inner">${inner(false)}</div></div>`;
+        case 'sq':   return `<span class="func-wrap">${inner(true)}<span class="func-exp">2</span></span>`;
+        case 'cube': return `<span class="func-wrap">${inner(true)}<span class="func-exp">3</span></span>`;
+        case 'pow10': return `<span class="func-wrap pow-wrap"><span class="pow-base">10</span><span class="func-exp-inner">${inner(true, true)}</span></span>`;
+        case 'exp':   return `<span class="func-wrap pow-wrap"><span class="pow-base">e</span><span class="func-exp-inner">${inner(true, true)}</span></span>`;
+    }
+    return `<span class="func-wrap"><span class="func-name">${FUNC_NAME[node.fn]}</span>${wrapParens(inner(false))}</span>`;
+}
+function renderFuncInner(inner, parensIfSum, staticMode, enLigne) {
     let n = inner;
     while (n.kind === 'seq' && n.slots.length === 1) n = n.slots[0];
-    const html = renderInlineNode(n, staticMode);
+    const html = renderInlineNode(n, staticMode, enLigne);
     if (parensIfSum && n.kind === 'sum' && n.terms.length > 1) {
         return wrapParens(html);
     }
@@ -450,16 +476,7 @@ function renderNode(node, path) {
         }).join('');
         return `<span class="sum-wrap" data-path="${path}">${inner}</span>`;
     }
-    if (node.kind === 'func') {
-        if (node.fn === 'sqrt') return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false)}</div></div>`;
-        if (node.fn === 'sq')   return `<span class="func-wrap">${renderFuncInner(node.inner, true)}<span class="func-exp">2</span></span>`;
-        if (node.fn === 'cube') return `<span class="func-wrap">${renderFuncInner(node.inner, true)}<span class="func-exp">3</span></span>`;
-        if (node.fn === 'cbrt') return `<div class="sqrt-wrap"><span class="cbrt-index">3</span><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false)}</div></div>`;
-        if (node.fn === 'pow10') return `<span class="func-wrap pow-wrap"><span class="pow-base">10</span><span class="func-exp-inner">${renderFuncInner(node.inner, true)}</span></span>`;
-        if (node.fn === 'exp')   return `<span class="func-wrap pow-wrap"><span class="pow-base">e</span><span class="func-exp-inner">${renderFuncInner(node.inner, true)}</span></span>`;
-        const label = { log:'log', ln:'ln', sin:'sin', asin:'sin<sup>−1</sup>' }[node.fn];
-        return `<span class="func-wrap"><span class="func-name">${label}</span>(${renderFuncInner(node.inner, false)})</span>`;
-    }
+    if (node.kind === 'func') return renderFunc(node, false);
     // seq
     let html = '';
     const n = node.slots.length;
@@ -500,16 +517,7 @@ function renderStatic(node) {
         }).join('');
         return `<span class="sum-wrap">${inner}</span>`;
     }
-    if (node.kind === 'func') {
-        if (node.fn === 'sqrt') return `<div class="sqrt-wrap"><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false, true)}</div></div>`;
-        if (node.fn === 'sq')   return `<span class="func-wrap">${renderFuncInner(node.inner, true, true)}<span class="func-exp">2</span></span>`;
-        if (node.fn === 'cube') return `<span class="func-wrap">${renderFuncInner(node.inner, true, true)}<span class="func-exp">3</span></span>`;
-        if (node.fn === 'cbrt') return `<div class="sqrt-wrap"><span class="cbrt-index">3</span><svg class="sqrt-hook"></svg><div class="sqrt-inner">${renderFuncInner(node.inner, false, true)}</div></div>`;
-        if (node.fn === 'pow10') return `<span class="func-wrap pow-wrap"><span class="pow-base">10</span><span class="func-exp-inner">${renderFuncInner(node.inner, true, true)}</span></span>`;
-        if (node.fn === 'exp')   return `<span class="func-wrap pow-wrap"><span class="pow-base">e</span><span class="func-exp-inner">${renderFuncInner(node.inner, true, true)}</span></span>`;
-        const label = { log:'log', ln:'ln', sin:'sin', asin:'sin<sup>−1</sup>' }[node.fn];
-        return `<span class="func-wrap"><span class="func-name">${label}</span>(${renderFuncInner(node.inner, false, true)})</span>`;
-    }
+    if (node.kind === 'func') return renderFunc(node, true);
     return `<div class="eq-side">${node.slots.map((s,i) => (i===0?'':'<span class="mult-sign">×</span>') + renderStatic(s)).join('')}</div>`;
 }
 function renderEquationZone() {
@@ -542,20 +550,18 @@ function renderEquationZone() {
     }
 }
 function sizeSqrtHooks(container) {
-    container.querySelectorAll('.sqrt-hook').forEach(svg => {
-        const inner = svg.nextElementSibling;
-        if (!inner) return;
-        const h = Math.max(inner.offsetHeight, 24);
-        const hookH = Math.min(16, h - 6);
-        const d = `M0,${(h - hookH * 0.55).toFixed(1)} L${(hookH * 0.4).toFixed(1)},${(h - 2).toFixed(1)} L13,2`;
-        svg.setAttribute('viewBox', `0 0 14 ${h}`);
-        svg.setAttribute('width', '14');
-        svg.setAttribute('height', String(h));
-        svg.innerHTML = `<path d="${d}" fill="none" stroke="#1e293b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
-    });
+    // crochet commun (../fiches.js) : sa hauteur suit celle du contenu (../fiches.css), même affiché plus tard
+    EPF.crochets(container);
 }
 function attachEqTileHandlers(zone) {
+    // terme dans une fonction : on peut l'attraper, mais il ne bouge pas (message tout de suite),
+    // sauf s'il fait partie d'un bloc qui, lui, se déplace (dénominateur, terme additif)
+    zone.querySelectorAll('.eq-tile-locked').forEach(el => {
+        if (!el.closest('.den-draggable, .term-draggable, .sum-term-single')) EPT.bloquer(el, EPT.MSG_FONCTION, afficherRefus);
+    });
     zone.querySelectorAll('.eq-tile').forEach(el => {
+        // terme dans une parenthèse : même chose
+        if (el.closest('.paren-wrap') && !el.closest('.den-draggable, .term-draggable')) { EPT.bloquer(el, EPT.MSG_PAREN, afficherRefus); return; }
         // une tuile a l'interieur d'un terme additif d'une somme a plusieurs
         // termes (.sum-term, isolee ou non) ne doit jamais etre glissable
         // individuellement : ce genre de terme ne se deplace qu'en bloc (via
@@ -619,6 +625,7 @@ function renderHistory() {
             <span class="text-green-600 font-bold ml-2">✓</span>
         </div>`).join('');
     sizeSqrtHooks(el);
+    sizeParens(el);
 }
 function updateHint() {
     const h = document.getElementById('stepHint');
@@ -1111,8 +1118,8 @@ function addFuncToolTile(fn) {
     const pal = document.getElementById('palette');
     if (!pal) return;
     const el = document.createElement('div');
-    el.className = 'palette-tile func-tool';
-    el.innerHTML = FUNC_TOOL_LABEL[fn];
+    el.className = 'palette-tile func-tool' + (FUNC_TOOL_NOTE[fn] ? ' avec-note' : '');
+    el.innerHTML = `<span>${FUNC_TOOL_LABEL[fn]}</span>` + (FUNC_TOOL_NOTE[fn] ? `<span class="outil-note">${FUNC_TOOL_NOTE[fn]}</span>` : '');
     DragDrop.enable(el, {
         zoneSelector: '.eq-side',
         dragOverClass: 'drag-over',

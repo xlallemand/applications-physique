@@ -698,26 +698,21 @@ const manip = m => ({ titre: m.titre, enonce: `<p>${m.instruction}</p>`,
 // LE COURS PAR ÉTAPES
 // ═══════════════════════════════════════════════════════════════
 const { exemple } = COURS;
-const T = (id, label) => tile(id, label || id);
-const fr = (a, b) => `<span class="som-fr"><span>${a}</span><span>${b}</span></span>`;
-// exemple traité : l'équation avant et après la manipulation
-const avantApres = (avant, op, apres) => `<div class="ep-avap">
-    <div class="ep-av"><p class="ep-av-t">Avant</p>${avant}</div>
-    <p class="ep-op">${op}</p>
-    <div class="ep-av"><p class="ep-av-t">Après</p>${apres}</div></div>`;
-const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Fais glisser une tuile (à la souris ou au doigt) pour la déplacer. Pour l'effacer, touche-la puis touche sa croix ✕, ou remets-la dans la réserve. ↶ Annuler défait la dernière action ; ↺ Recommencer remet l'équation de départ. Clique sur <b>Valider</b> quand c'est fait.</p></div>`;
+const MODE_EMPLOI = `<div class="callout"><p><b>Dans l'éditeur.</b> Glisse une tuile pour la déplacer. Pour l'effacer : touche-la puis sa croix ✕, ou remets-la dans la réserve. Puis <b>Valider</b>.</p></div>`;
+// schémas des exemples (même opération des deux côtés | raccourci), comme dans les fiches : ../fiches.js
+const { ligne: LI, calc: CA, pan: PA, duo: DUO } = EPF;
+const aj = (c, carte, html) => { const d = c.ajouter(carte, html); EPF.monter(d); return d; };
 
 /* ---------- 1. Entrer dans une fraction ---------- */
 function etape1(c) {
     const carte = c.carte('1. Faire entrer un terme dans une fraction');
-    c.ajouter(carte, `<div class="cours-bloc">
-        <p>Dans ce module, une équation peut comporter plus de deux zones : un terme peut être multiplié par une fraction. Or, placer un terme au numérateur d'une fraction (au-dessus de la barre) ou le placer juste à côté d'elle (avant ou après) revient exactement au même, puisque tout est multiplié.</p>
-        <div class="cle"><p><b class="cle-titre">Règle.</b> Un terme qui multiplie une fraction peut entrer dans son numérateur : ${fr('1', '2')} × m × v² = ${fr('1 × m × v²', '2')} = ${fr('m × v²', '2')}.</p></div>
+    aj(c, carte, `<div class="cours-bloc">
+        <div class="cle"><p><b class="cle-titre">Règle.</b> Un terme qui multiplie une fraction peut <b>entrer</b> dans son numérateur : tout est multiplié.</p></div>
       </div>
-      ${exemple(`<p>Dans x = ½ × a × t², on fait entrer a et t² dans la fraction :</p>
-        ${avantApres(eqStat(seq([simple([T('x')])]), seq([frac([ONE], [DEUX]), simple([T('a'), T('t2', 't²')])])), 'a et t² au numérateur',
-                     eqStat(seq([simple([T('x')])]), seq([frac([T('a'), T('t2', 't²')], [DEUX])])))}
-        <p>Le 1 du numérateur, devenu inutile (1 × a × t² = a × t²), se retire : x = ${fr('a × t²', '2')}.</p>`)}
+      ${exemple(DUO(PA('dep', CA(
+          LI('x', FFR(VERS('a', '1'), '2') + ' × ' + FDEP('a', 'a × t²')),
+          LI('x', FFR('<span class="fi-zero">1</span> × a × t²', '2'), { note: '1 × a × t² = a × t² : le 1 s\'efface' }),
+          LI('x', FFR('a × t²', '2'))), 'Entrer dans la fraction')))}
       ${MODE_EMPLOI}`);
     c.aToi(carte, M_ENTRER.map(manip));
     return carte;
@@ -726,14 +721,13 @@ function etape1(c) {
 /* ---------- 2. Sortir d'une fraction ---------- */
 function etape2(c) {
     const carte = c.carte('2. Faire sortir un terme d\'une fraction');
-    c.ajouter(carte, `<div class="cours-bloc">
-        <p>Dans l'autre sens, un terme du numérateur peut sortir de la fraction et se placer juste avant ou juste après elle. Dès que tu commences à glisser un élément, une petite zone de dépose apparaît à côté de la fraction pour t'y déposer un terme.</p>
-        <div class="cle"><p><b class="cle-titre">Règle.</b> Un terme du numérateur peut sortir à côté de la fraction (avant ou après). Si le numérateur se vide, on y écrit <b>1</b> : ${fr('m × v²', '2')} = ${fr('1', '2')} × m × v².</p></div>
+    aj(c, carte, `<div class="cours-bloc">
+        <div class="cle"><p><b class="cle-titre">Règle.</b> Un terme du numérateur peut <b>sortir</b> juste avant ou juste après la fraction. Numérateur vidé → <b>1</b>.</p></div>
+        <p>Dans l'éditeur, une zone de dépose apparaît à côté de la fraction dès que tu glisses un terme.</p>
       </div>
-      ${exemple(`<p>Dans P = ${fr('U²', 'R')}, on fait sortir U² de la fraction, à droite :</p>
-        ${avantApres(eqStat(seq([simple([T('P')])]), seq([frac([T('U2', 'U²')], [T('R')])])), 'U² sort à droite',
-                     eqStat(seq([simple([T('P')])]), seq([frac([ONE], [T('R')]), simple([T('U2', 'U²')])])))}
-        <p>Le numérateur vidé reçoit un 1 : P = ${fr('1', 'R')} × U².</p>`)}`);
+      ${exemple(DUO(PA('dep', CA(
+          LI('P', VERS('b', FFR(FDEP('b', 'U²'), 'R'), 'droite')),
+          LI('P', FFR('<span class="fi-zero">1</span>', 'R') + ' × U²', { note: 'Numérateur vidé → 1' })), 'Sortir de la fraction')))}`);
     c.aToi(carte, M_SORTIR.map(manip));
     return carte;
 }
@@ -741,19 +735,19 @@ function etape2(c) {
 /* ---------- À retenir ---------- */
 // calculs illustrés (flèche du terme déplacé) : ../fiches.js, mis en forme par EPF.monter
 const FFR = (a, b) => `<span class="fi-fr"><span>${a}</span><span>${b}</span></span>`;
-const FDEP = (cle, t, sens) => `<span class="fi-dep" data-${sens}="${cle}">${t}</span>`;
+const FDEP = EPF.de, VERS = EPF.vers;   // terme déplacé ; endroit où il arrive (même ligne)
 function aRetenir(c) {
     const carte = c.carte('À retenir');
     c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Entrer, sortir.</b> Un terme qui multiplie une fraction peut entrer dans son numérateur, ou en sortir (juste avant ou juste après elle) : tout est multiplié. Un numérateur vidé reçoit un 1.</p>
         <div class="fi-bloc"><div class="fi-calc">
-          <div class="fi-l" data-esp="0.9"><span>E<sub>c</sub></span><span>${FFR('1', '2')} × ${FDEP('a', 'm × v²', 'de')}</span></div>
-          <div class="fi-l"><span>E<sub>c</sub></span><span>${FFR(FDEP('a', 'm × v²', 'vers'), '2')}</span></div>
+          <div class="fi-l"><span>E<sub>c</sub></span><span>${FFR(VERS('a', '1'), '2')} × ${FDEP('a', 'm × v²')}</span></div>
+          <div class="fi-l"><span>E<sub>c</sub></span><span>${FFR('m × v²', '2')}</span></div>
         </div></div></div>
       <div class="cle"><p><b class="cle-titre">Isoler une grandeur.</b> On écrit tout dans une seule fraction, puis on applique les règles du module 1. Pour isoler m : le 2 passe en haut, puis v² passe en bas, de l'autre côté.</p>
         <div class="fi-bloc"><div class="fi-calc">
-          <div class="fi-l" data-esp="1"><span>E<sub>c</sub></span><span>${FFR('m × v²', FDEP('a', '2', 'de'))}</span></div>
-          <div class="fi-l" data-esp="1.6"><span>${FDEP('a', '2', 'vers')} × E<sub>c</sub></span><span>m × ${FDEP('b', 'v²', 'de')}</span></div>
-          <div class="fi-l" data-esp="2.2"><span>${FFR('2 × E<sub>c</sub>', FDEP('b', 'v²', 'vers'))}</span><span>m</span></div>
+          <div class="fi-l"><span>${VERS('a', 'E<sub>c</sub>')}</span><span>${FFR('m × v²', FDEP('a', '2'))}</span></div>
+          <div class="fi-l"><span>${VERS('b', '2 × E<sub>c</sub>', 'bas')}</span><span>m × ${FDEP('b', 'v²')}</span></div>
+          <div class="fi-l"><span>${FFR('2 × E<sub>c</sub>', 'v²')}</span><span>m</span></div>
           <div class="fi-l"><span>m</span><span>${FFR('2 × E<sub>c</sub>', 'v²')}</span></div>
         </div></div></div>
       <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_5.html">Entraînement →</a>
