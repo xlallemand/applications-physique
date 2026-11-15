@@ -8,6 +8,8 @@ Applications pédagogiques en HTML / CSS / JavaScript, ouvertes directement dans
 
 Elle décrit le style, la présentation des pages, la navigation (sommaire de toute l'application : toujours ouvert à gauche sur ordinateur, déroulé depuis un bandeau « où suis-je » sur téléphone ; accueil en lignes dépliables), la pédagogie (notion → exemple → « À toi », « Afficher tout le cours », séries notées sur 20, fiches, exercices) et la liste des vérifications avant livraison. L'application de référence est `cinematique/`.
 
+**Application mobile** (installable sur téléphone, séances guidées par les compétences, comme `fractions-college/`, `equations-college/` et `equations-physique-mobile/`) : lis aussi en entier [docs/applications-mobiles.md](docs/applications-mobiles.md).
+
 ## Règles permanentes
 
 - Réponses et textes de l'interface en français, tutoiement, ton direct.

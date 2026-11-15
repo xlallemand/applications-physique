@@ -13,11 +13,14 @@
        coches: true,                 (facultatif) false : le sommaire n'affiche pas l'avancement (coches, compteurs, notes des pages)
        liensDirects: false,          (facultatif) true : un module d'une seule page (ni fiche ni exercices) est un lien direct
                                      vers sa page dans le sommaire, sans sous-menu (application Fractions)
+       mobile: false,                (facultatif) true : application mobile (installable, docs/applications-mobiles.md) :
+                                     pas de lien vers le portail ; le bouton « Accueil » du sommaire mène à l'accueil
+                                     de l'application, et l'accueil n'a pas de lien « Toutes les applications »
        flashcards: false,            true : l'application a des flashcards (modules/flashcards.js, voir assets/revisions.js) :
                                      entrée « Flashcards » du sommaire ; sur l'accueil, le bloc, les boutons des modules et la ligne
        plan: PLAN,
      });
-     SOM.menu(cle)        cle = 'accueil' (bandeau avec le lien vers le portail)
+     SOM.menu(cle)        cle = 'accueil' (bandeau avec le lien vers le portail ; application mobile : sans ce lien)
                           ou la clé d'une page du plan (sommaire)
      SOM.accueil(zone)    liste des modules en lignes dépliables, carte « Reprendre » ;
                           adresse index.html#module-N (résultat de recherche du portail) : module N déplié
@@ -110,7 +113,8 @@
   }
   const accueilApp = () => (C.spa ? 'index.html' : '../index.html');
   // portail des applications (index.html à la racine du dépôt) : bouton « Accueil » du sommaire
-  const portail = () => (C.spa ? '../index.html' : '../../index.html');
+  // (application mobile : ce bouton mène à l'accueil de l'application)
+  const portail = () => (C.mobile ? accueilApp() : C.spa ? '../index.html' : '../../index.html');
   function libelle(cle) {
     const s = situer(cle);
     if (!s) return '';
@@ -223,9 +227,9 @@
     }
     html.classList.remove('som-nav', 'som-ouvert');
     pageEnCours = C.spa ? cle : null;
-    // accueil de l'application : bandeau avec le lien vers le portail des applications
+    // accueil de l'application : bandeau avec le lien vers le portail des applications (application mobile : sans ce lien)
     if (cle === 'accueil' || !situer(cle)) {
-      racine.innerHTML = '<div class="app-topbar"><a class="som-pilule" href="../index.html"><span aria-hidden="true">←</span><span class="som-court">Applications</span><span class="som-long">Toutes les applications</span></a>' +
+      racine.innerHTML = '<div class="app-topbar">' + (C.mobile ? '' : '<a class="som-pilule" href="../index.html"><span aria-hidden="true">←</span><span class="som-court">Applications</span><span class="som-long">Toutes les applications</span></a>') +
         `<div class="app-topbar-title"><span class="app-name">${C.nom}</span></div></div><div class="app-topbar-spacer"></div>`;
       return;
     }
