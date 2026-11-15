@@ -136,7 +136,7 @@
     const s0 = el('div', 'pm-sect');
     s0.appendChild(el('h4', '', 'Ma classe'));
     s0.appendChild(segment(C.CLASSES, S.classe, v => { changer('classe', v); contenuReglages(z); }, 'Ma classe'));
-    s0.appendChild(el('p', 'pm-petit', S.classe === '2de' ? 'Sans log, ln ni 1/x : ces compétences sont vues en 1re et en Terminale.'
+    s0.appendChild(el('p', 'pm-petit', S.classe === '2de' ? 'Sans puissance n, log, ln ni 1/x : ces compétences sont vues en 1re et en Terminale.'
       : S.classe === '1re' ? 'Toutes les compétences sauf ln et e<sup>x</sup>, vues en Terminale.' : 'Toutes les compétences.'));
     z.appendChild(s0);
     // ce que l'élève travaille

@@ -108,7 +108,7 @@
       illus: duo(op(calc(lg(fr('T²', 'k'), 'a³', '∛'), lg(rac(fr('T²', 'k'), 3), '<span class="fi-zero">' + rac('a³', 3) + '</span>', '', '∛ annule le cube'), lg(rac(fr('T²', 'k'), 3), 'a')))),
       methode: 'Isole d’abord le cube, puis applique la racine cubique aux deux membres (outil ∛). À la calculatrice : ∛, ou la puissance 1/3.',
       piege: 'La racine cubique n’est pas la racine carrée : ' + m(rac('8', 3) + ' = 2') + ' car 2 × 2 × 2 = 8.' },
-    { id: 'FO5', famille: 'FO', niveau: 5, prerequis: ['FO4'], classe: '2de', titre: 'Puissance n et puissance 1/n',
+    { id: 'FO5', famille: 'FO', niveau: 5, prerequis: ['FO4'], classe: '1re', titre: 'Puissance n et puissance 1/n',
       regle: 'La puissance <b>1/n</b> annule la puissance <b>n</b> (et inversement) : ' + m('(T<sup>4</sup>)<sup>1/4</sup> = T') + '. Quand la puissance est seule d’un côté, on l’applique aux <b>deux membres</b>.',
       illus: duo(op(calc(lg(fr('P', 'σ × S'), 'T<sup>4</sup>', '( )<sup>1/4</sup>'), lg('(' + fr('P', 'σ × S') + ')<sup>1/4</sup>', '<span class="fi-zero">(T<sup>4</sup>)<sup>1/4</sup></span>', '', '1/4 × 4 = 1'), lg('(' + fr('P', 'σ × S') + ')<sup>1/4</sup>', 'T')))),
       methode: 'Isole d’abord la puissance, puis élève les deux membres à la puissance inverse : 1/n pour supprimer une puissance n, n pour supprimer une puissance 1/n (outils x<sup>1/n</sup> et x<sup>n</sup>).',
@@ -132,7 +132,7 @@
 
   const R = {};
   liste.forEach(c => { R[c.id] = c; });
-  // compétence disponible dans la classe choisie (2de : sans log, ln, 1/x ; 1re : sans ln)
+  // compétence disponible dans la classe choisie (2de : sans puissance n, log, ln, 1/x ; 1re : sans ln)
   const permise = (id, classe) => RANG[R[id].classe] <= RANG[classe || 'tle'];
   // les questions (équation + grandeur à isoler) d'une compétence
   const cibles = id => EPM.B.cibles.filter(x => x.cible.comp === id);
