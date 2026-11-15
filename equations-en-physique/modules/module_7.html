@@ -422,6 +422,11 @@ function sizeSqrtHooks(container) {
 }
 function attachEqTileHandlers(zone) {
     zone.querySelectorAll('.eq-tile').forEach(el => {
+        // terme sous une racine (fonction) ou dans une parenthèse : on peut l'attraper,
+        // mais il ne bouge pas, et le message s'affiche (../tuiles.js)
+        const refus = m => { hadError = true; showFeedback(m, false); };
+        if (el.closest('.sqrt-wrap')) { EPT.bloquer(el, EPT.MSG_FONCTION, refus); return; }
+        if (el.closest('.paren-wrap') && !el.closest('.term-draggable')) { EPT.bloquer(el, EPT.MSG_PAREN, refus); return; }
         // une tuile a l'interieur d'un terme additif d'une somme a plusieurs
         // termes (.sum-term, isolee ou non) ne doit jamais etre glissable
         // individuellement : ce genre de terme ne se deplace qu'en bloc (via

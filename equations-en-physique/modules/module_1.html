@@ -775,8 +775,8 @@ function etape2(c) {
           PA('op', CA(LI(FFR('ρ', '1'), FFR('m', 'V'), { op: '÷ ρ' }),
                     LI(`<span class="fi-zero">${FFR('ρ', 'ρ')}</span>`, FFR('m', 'V × ρ'), { note: 'ρ ÷ ρ = 1' }),
                     LI('1', FFR('m', 'V × ρ')))),
-          PA('dep', CA(LI(FFR(FDEP('a', 'ρ', 'de'), '1'), FFR('m', 'V'), { esp: 0.6 }),
-                     LI('1', FFR('m', 'V × ' + FDEP('a', 'ρ', 'vers')), { esp: 1.6 })))))}
+          PA('dep', CA(LI(FFR(FDEP('a', 'ρ'), '1'), FFR('m', VERS('a', 'V', 'droite'))),
+                     LI('1', FFR('m', 'V × ρ'))))))}
       ${MODE_EMPLOI}`);
     c.aToi(carte, M_NUM.map(manip));
     return carte;
@@ -792,8 +792,8 @@ function etape3(c) {
           PA('op', CA(LI(FFR('ρ', '1'), FFR('m', 'V'), { op: '× V' }),
                     LI('ρ × V', `<span class="fi-zero">${FFR('m', 'V')} × V</span>`, { note: '÷ V puis × V : V disparaît' }),
                     LI('ρ × V', 'm'))),
-          PA('dep', CA(LI(FFR('ρ', '1'), FFR('m', FDEP('b', 'V', 'de')), { esp: 1 }),
-                     LI('ρ × ' + FDEP('b', 'V', 'vers'), 'm')))))}`);
+          PA('dep', CA(LI(FFR(VERS('b', 'ρ', 'droite'), '1'), FFR('m', FDEP('b', 'V'))),
+                     LI('ρ × V', 'm')))))}`);
     c.aToi(carte, M_DEN.map(manip));
     return carte;
 }
@@ -805,10 +805,10 @@ function etape4(c) {
         <div class="cle"><p><b class="cle-titre">Règle 4.</b> Numérateur vidé → on écrit <b>1</b>. Dénominateur vidé → la fraction <b>disparaît</b>. L'icône « ··· / ··· » met un terme en fraction.</p></div>
       </div>
       ${exemple(`${DUO(
-          PA('dep', CA(LI(FFR(FDEP('c', 'R', 'de'), '1'), FFR('U', 'I'), { esp: 0.6 }),
-                     LI(FFR('<span class="fi-zero">1</span>', '1'), FFR('U', 'I × ' + FDEP('c', 'R', 'vers')), { esp: 1.6 })), 'Numérateur vidé → 1'),
-          PA('dep', CA(LI(FFR('R', '1'), FFR('U', FDEP('d', 'I', 'de')), { esp: 1 }),
-                     LI('R × ' + FDEP('d', 'I', 'vers'), '<span class="fi-zero">U</span>')), 'Dénominateur vidé → plus de fraction'))}
+          PA('dep', CA(LI(FFR(FDEP('c', 'R'), '1'), FFR('U', VERS('c', 'I', 'droite'))),
+                     LI(FFR('<span class="fi-zero">1</span>', '1'), FFR('U', 'I × R'))), 'Numérateur vidé → 1'),
+          PA('dep', CA(LI(FFR(VERS('d', 'R', 'droite'), '1'), FFR('U', FDEP('d', 'I'))),
+                     LI('R × I', '<span class="fi-zero">U</span>')), 'Dénominateur vidé → plus de fraction'))}
         <div class="fi-memo"><div><span class="fi-m">U = ${fr('U', '1')}</span><small>Icône « ··· / ··· » : un 1 au dénominateur ne change rien</small></div></div>`)}`);
     c.aToi(carte, M_UN.map(manip));
     return carte;
@@ -828,20 +828,20 @@ function etape5(c) {
 /* ---------- À retenir ---------- */
 // calculs illustrés (flèche du terme déplacé) : ../fiches.js, mis en forme par EPF.monter
 const FFR = (a, b) => `<span class="fi-fr"><span>${a}</span><span>${b}</span></span>`;
-const FDEP = (cle, t, sens) => `<span class="fi-dep" data-${sens}="${cle}">${t}</span>`;
+const FDEP = EPF.de, VERS = EPF.vers;   // terme déplacé ; endroit où il arrive (même ligne)
 function aRetenir(c) {
     const carte = c.carte('À retenir');
     c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Le principe.</b> Une équation reste vraie si on fait <b>la même opération des deux côtés</b> du signe =. Isoler une grandeur, c'est l'écrire seule, en haut, à gauche : <span class="fi-m">t = ${fr('d', 'v')}</span>.</p></div>
       <div class="cle"><p><b class="cle-titre">Règle 1.</b> Le signe × peut ne pas être écrit : <span class="fi-m">d = <i>v</i><i>t</i></span> signifie <span class="fi-m">d = v × t</span>.</p></div>
       <div class="cle"><p><b class="cle-titre">Règle 2.</b> Un terme qui multiplie, <b>en haut</b>, passe <b>en bas</b> de l'autre côté (on divise les deux membres par ce terme).</p>
         <div class="fi-bloc"><div class="fi-calc">
-          <div class="fi-l" data-esp="0.4"><span>v × ${FDEP('a', 't', 'de')}</span><span>d</span></div>
-          <div class="fi-l" data-esp="1.6"><span>v</span><span>${FFR('d', FDEP('a', 't', 'vers'))}</span></div>
+          <div class="fi-l"><span>v × ${FDEP('a', 't')}</span><span>${VERS('a', 'd', 'bas')}</span></div>
+          <div class="fi-l"><span>v</span><span>${FFR('d', 't')}</span></div>
         </div></div></div>
       <div class="cle"><p><b class="cle-titre">Règle 3.</b> Un terme <b>en bas</b> passe <b>en haut</b> de l'autre côté (on multiplie les deux membres par ce terme).</p>
         <div class="fi-bloc"><div class="fi-calc">
-          <div class="fi-l" data-esp="1"><span>v</span><span>${FFR('d', FDEP('b', 't', 'de'))}</span></div>
-          <div class="fi-l"><span>v × ${FDEP('b', 't', 'vers')}</span><span>d</span></div>
+          <div class="fi-l"><span>${VERS('b', 'v')}</span><span>${FFR('d', FDEP('b', 't'))}</span></div>
+          <div class="fi-l"><span>v × t</span><span>d</span></div>
         </div></div>
         <p>Un terme qui multiplie ou divise ne change pas de signe : il change de place (haut ↔ bas).</p></div>
       <div class="cle"><p><b class="cle-titre">Règle 4.</b> Numérateur vidé → on y écrit <b>1</b>. Dénominateur vidé, ou égal à 1 → la fraction disparaît. Un 1 qui multiplie s'efface : <span class="fi-m">1 × t = t</span>.</p></div>

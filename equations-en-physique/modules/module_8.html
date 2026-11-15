@@ -29,8 +29,11 @@
 
 
     .func-wrap { display:inline-flex; align-items:center; margin:0 6px; }
+    .paren-wrap { display:inline-flex; align-items:center; }
+    .paren-bracket { display:inline-block; font-size:1.3em; font-weight:700; line-height:1; color:var(--ink-3); }
+    .paren-content { display:inline-flex; align-items:center; }
     .func-name { font-weight:800; color:var(--ink); margin-right:2px; }
-    .func-exp { font-weight:800; color:var(--ink); font-size:.75em; margin-left:1px; }
+    .func-exp { font-weight:800; color:var(--ink); font-size:.75em; margin-left:2px; align-self:flex-start; }
 
     .eq-side-static { display:inline-flex; align-items:center; }
     .func-target { transition: all .15s; border-radius:10px; padding:6px 14px; flex-shrink:0; }
@@ -129,7 +132,9 @@ function simple(items) { return { kind:'simple', items: items.map(t => ({...t}))
 function func(fn, inner) { return { kind:'func', fn, inner }; }
 
 const RECIPROCAL = { sqrt:'sq', sq:'sqrt', sin:'asin', asin:'sin' };
-const FUNC_TOOL_LABEL = { sqrt:'√', sq:'x²', sin:'sin', asin:'sin<sup>−1</sup>' };
+const FUNC_TOOL_LABEL = { sqrt:'√', sq:'x²', sin:'sin', asin:'Arcsin' };
+// dans la réserve, sous l'outil : la fonction qu'il annule (sauf carré et racine carrée)
+const FUNC_TOOL_NOTE = { sin:'réciproque de Arcsin', asin:'réciproque de sin' };
 
 function nodeEq(a, b) {
     if (!a || !b || a.kind !== b.kind) return false;
@@ -154,10 +159,17 @@ function renderStatic(node) {
         if (node.fn === 'sq') {
             return `<span class="func-wrap">${renderStatic(node.inner)}<sup class="func-exp">2</sup></span>`;
         }
-        const label = node.fn === 'sin' ? 'sin' : 'sin<sup>−1</sup>';
-        return `<span class="func-wrap"><span class="func-name">${label}</span>(${renderStatic(node.inner)})</span>`;
+        const label = node.fn === 'sin' ? 'sin' : 'Arcsin';
+        return `<span class="func-wrap"><span class="func-name">${label}</span><span class="paren-wrap"><span class="paren-bracket">(</span><span class="paren-content">${renderStatic(node.inner)}</span><span class="paren-bracket">)</span></span></span>`;
     }
     return '';
+}
+// parenthèses d'une fonction : aussi hautes que tout son contenu
+function sizeParens(container) {
+    container.querySelectorAll('.paren-wrap').forEach(wrap => {
+        const h = wrap.querySelector('.paren-content').offsetHeight || 24;
+        wrap.querySelectorAll('.paren-bracket').forEach(b => { b.style.transform = `scaleY(${Math.max(1, h / 24).toFixed(2)})`; });
+    });
 }
 // crochet de chaque racine carrée, dessiné à la hauteur réelle de son contenu
 function sizeSqrtHooks(container) {
@@ -228,6 +240,11 @@ function monterEditeur(hote, cfg, api) {
             `<div class="eq-sign">=</div>` +
             `<div class="eq-side-static func-target" data-path="right">${renderStatic(state.right)}</div>`;
         sizeSqrtHooks(zoneEq);
+        sizeParens(zoneEq);
+        // les termes ne se déplacent pas ici : on peut les attraper, ils tremblent et le message s'affiche (../tuiles.js)
+        zoneEq.querySelectorAll('.eq-tile-frozen').forEach(el => EPT.bloquer(el,
+            el.closest('.sqrt-wrap, .func-wrap') ? EPT.MSG_FONCTION : "✕ Ici, on ne déplace pas les termes : glisse l'outil de la réserve sur chaque membre de l'équation.",
+            m => { if (!fige) api.message(m); }));
     }
     function refreshView() {
         annul.noter(state);
@@ -250,8 +267,8 @@ function monterEditeur(hote, cfg, api) {
     function buildToolPalette(toolFn) {
         pal.innerHTML = '';
         const el = document.createElement('div');
-        el.className = 'palette-tile';
-        el.innerHTML = `<span>${FUNC_TOOL_LABEL[toolFn]}</span>`;
+        el.className = 'palette-tile func-tool' + (FUNC_TOOL_NOTE[toolFn] ? ' avec-note' : '');
+        el.innerHTML = `<span>${FUNC_TOOL_LABEL[toolFn]}</span>` + (FUNC_TOOL_NOTE[toolFn] ? `<span class="outil-note">${FUNC_TOOL_NOTE[toolFn]}</span>` : '');
         DragDrop.enable(el, {
             zoneSelector: `[data-ep="${num}"] .func-target`,
             dragOverClass: 'drag-over',
@@ -333,24 +350,24 @@ const M_RACINE = [
 ];
 const M_SINUS = [
     {   titre: 'Supprimer un sinus',
-        instruction: "sin(θ) = y : glisse l'outil <b>sin<sup>−1</sup></b> sur le côté gauche, PUIS sur le côté droit.",
+        instruction: "sin(θ) = y : glisse l'outil <b>Arcsin</b> sur le côté gauche, PUIS sur le côté droit.",
         left: () => func('sin', simple([TH])),
         right: () => simple([Y]),
         toolFn: 'asin',
-        opDiagram: { label: 'sin<sup>−1</sup>', noteLeft:'(applique sin<sup>−1</sup>)', noteRight:'(applique sin<sup>−1</sup>)' },
+        opDiagram: { label: 'Arcsin', noteLeft:'(applique Arcsin)', noteRight:'(applique Arcsin)' },
         check: (st) => nodeEq(st.left, simple([TH])) && nodeEq(st.right, func('asin', simple([Y]))),
         solution: () => ({ left: simple([TH]), right: func('asin', simple([Y])) }),
-        explication: '<p>sin<sup>−1</sup>(sin(θ)) = θ : θ = sin<sup>−1</sup>(y).</p>',
+        explication: '<p>Arcsin(sin(θ)) = θ : θ = Arcsin(y).</p>',
     },
-    {   titre: 'Supprimer un sin⁻¹',
-        instruction: "sin<sup>−1</sup>(x) = θ : quelle fonction enlève sin<sup>−1</sup> ? Glisse l'outil <b>sin</b> sur le côté gauche, PUIS sur le côté droit.",
+    {   titre: 'Supprimer un Arcsin',
+        instruction: "Arcsin(x) = θ : quelle fonction enlève Arcsin ? Glisse l'outil <b>sin</b> sur le côté gauche, PUIS sur le côté droit.",
         left: () => func('asin', simple([X])),
         right: () => simple([TH]),
         toolFn: 'sin',
         opDiagram: { label: 'sin', noteLeft:'(applique sin)', noteRight:'(applique sin)' },
         check: (st) => nodeEq(st.left, simple([X])) && nodeEq(st.right, func('sin', simple([TH]))),
         solution: () => ({ left: simple([X]), right: func('sin', simple([TH])) }),
-        explication: '<p>sin(sin<sup>−1</sup>(x)) = x : x = sin(θ).</p>',
+        explication: '<p>sin(Arcsin(x)) = x : x = sin(θ).</p>',
     },
 ];
 [...M_RACINE, ...M_SINUS].forEach(m => { m.diag = st => diagFonction(st, m); });
@@ -373,65 +390,62 @@ const RAC = EPF.rac;
 const ajouter = (c, carte, html) => { const d = c.ajouter(carte, html); sizeSqrtHooks(d); EPF.monter(d); return d; };
 
 /* ---------- 1. Racine carrée et carré ---------- */
+// une seule méthode pour les fonctions : la même opération des deux côtés (pas de raccourci)
 function etape1(c) {
     const carte = c.carte('1. Racine carrée et carré');
     ajouter(c, carte, `<div class="cours-bloc">
         <div class="cle"><p><b class="cle-titre">Règle.</b> Pour supprimer une fonction, on applique sa <b>fonction réciproque</b> aux <b>deux membres</b>. Réciproque de la racine carrée : le <b>carré</b>, et inversement.</p></div>
       </div>
-      ${exemple(`${DUO(
-          PA('op', CA(LI('v', RAC('2<i>g</i><i>h</i>'), { op: '( )²' }),
-                      LI('v²', '<span class="fi-zero">(' + RAC('2<i>g</i><i>h</i>') + ')²</span>', { note: '( )² annule √' }),
-                      LI('v²', '2<i>g</i><i>h</i>'))),
-          PA('dep', CA(LI('v', RAC('2<i>g</i><i>h</i>', 'a'), { esp: 1.3 }),
-                       LI('v' + FDEP('a', '²', 'vers'), '2<i>g</i><i>h</i>'))))}
+      ${exemple(`${DUO(PA('op', CA(
+          LI('v', RAC('2<i>g</i><i>h</i>'), { op: '( )²' }),
+          LI('v²', '<span class="fi-zero">(' + RAC('2<i>g</i><i>h</i>') + ')²</span>', { note: '( )² annule √' }),
+          LI('v²', '2<i>g</i><i>h</i>'))))}
         <div class="fi-memo"><div><span class="fi-m">h = ${fr('v²', '2g')}</span><small>Puis les règles du module 1</small></div></div>`)}
       ${MODE_EMPLOI}`);
     c.aToi(carte, M_RACINE.map(manip));
     return carte;
 }
 
-/* ---------- 2. Sinus et sin⁻¹ ---------- */
+/* ---------- 2. Sinus et Arcsin ---------- */
 function etape2(c) {
-    const carte = c.carte('2. Sinus et sin<sup>−1</sup>');
+    const carte = c.carte('2. Sinus et Arcsin');
     ajouter(c, carte, `<div class="cours-bloc">
-        <div class="cle"><p><b class="cle-titre">Règle.</b> La réciproque de sin est <b>sin<sup>−1</sup></b> (arcsinus, touche sin<sup>−1</sup> ou asin de la calculatrice), et inversement.</p></div>
+        <div class="cle"><p><b class="cle-titre">Règle.</b> La réciproque de sin est <b>Arcsin</b>, et inversement : sin(θ) = y &nbsp;⇔&nbsp; θ = Arcsin(y).</p></div>
+        <p><b>Calculatrice</b> (réglée en degrés) : Arcsin s'obtient avec <b>shift + sin</b>. Arcsin se note aussi sin<sup>−1</sup>.</p>
       </div>
-      ${exemple(DUO(
-          PA('op', CA(LI('sin(i)', '0,5', { op: 'sin<sup>−1</sup>' }),
-                      LI('<span class="fi-zero">sin<sup>−1</sup>(sin(i))</span>', 'sin<sup>−1</sup>(0,5)', { note: 'sin<sup>−1</sup> annule sin' }),
-                      LI('i', '30°'))),
-          PA('dep', CA(LI(FDEP('b', 'sin', 'de') + '(i)', '0,5', { esp: 0.8 }),
-                       LI('i', FDEP('b', 'sin<sup>−1</sup>', 'vers') + '(0,5) = 30°')))))}`);
+      ${exemple(DUO(PA('op', CA(
+          LI('sin(i)', '0,5', { op: 'Arcsin' }),
+          LI('<span class="fi-zero">Arcsin(sin(i))</span>', 'Arcsin(0,5)', { note: 'Arcsin annule sin' }),
+          LI('i', '30°')))))}`);
     c.aToi(carte, M_SINUS.map(manip));
     return carte;
 }
 
 /* ---------- À retenir ---------- */
-// calculs illustrés (flèche du terme déplacé) : ../fiches.js, mis en forme par EPF.monter
+// calculs illustrés (même opération des deux côtés) : ../fiches.js, mis en forme par EPF.monter
 const FFR = (a, b) => `<span class="fi-fr"><span>${a}</span><span>${b}</span></span>`;
-const FDEP = (cle, t, sens) => `<span class="fi-dep" data-${sens}="${cle}">${t}</span>`;
 function aRetenir(c) {
     const carte = c.carte('À retenir');
-    c.ajouter(carte, `<div class="cle"><p>Pour supprimer une fonction (racine carrée, carré, sinus…), on isole d'abord la fonction seule d'un côté, puis on applique sa <b>fonction réciproque</b> aux <b>deux membres</b> : elle annule la fonction d'un côté et apparaît de l'autre.</p>
+    c.ajouter(carte, `<div class="cle"><p>Pour supprimer une fonction (racine carrée, carré, sinus…), on isole d'abord la fonction seule d'un côté, puis on applique sa <b>fonction réciproque</b> aux <b>deux membres</b>.</p>
         <div class="crs-defile"><table class="crs-tab">
           <tr><th>Fonction</th><th>Fonction réciproque</th><th>Exemple</th></tr>
           <tr><td>√ (racine carrée)</td><td>( )² (carré)</td><td><span class="fi-m">x = ${RAC('y')} &nbsp;⇔&nbsp; x² = y</span></td></tr>
           <tr><td>( )² (carré)</td><td>√ (racine carrée)</td><td><span class="fi-m">x² = y &nbsp;⇔&nbsp; x = ${RAC('y')}</span></td></tr>
-          <tr><td>sin</td><td>sin<sup>−1</sup> (arcsinus)</td><td><span class="fi-m">sin(θ) = y &nbsp;⇔&nbsp; θ = sin<sup>−1</sup>(y)</span></td></tr>
-          <tr><td>sin<sup>−1</sup></td><td>sin</td><td><span class="fi-m">θ = sin<sup>−1</sup>(x) &nbsp;⇔&nbsp; sin(θ) = x</span></td></tr>
+          <tr><td>sin</td><td>Arcsin</td><td><span class="fi-m">sin(θ) = y &nbsp;⇔&nbsp; θ = Arcsin(y)</span></td></tr>
+          <tr><td>Arcsin</td><td>sin</td><td><span class="fi-m">θ = Arcsin(x) &nbsp;⇔&nbsp; sin(θ) = x</span></td></tr>
         </table></div></div>
-      <div class="cle"><p><b class="cle-titre">Racine carrée.</b> La racine disparaît d'un côté, le carré apparaît de l'autre ; on isole ensuite h avec les règles du module 1.</p>
+      <div class="cle"><p><b class="cle-titre">Racine carrée.</b> On applique le carré aux deux membres, puis on isole h avec les règles du module 1.</p>
         <div class="fi-bloc"><div class="fi-calc">
-          <div class="fi-l" data-esp="1.3"><span>v</span><span>${RAC('2<i>g</i><i>h</i>', 'a')}</span></div>
-          <div class="fi-l" data-esp="1.6"><span>v${FDEP('a', '²', 'vers')}</span><span>${FDEP('b', '2<i>g</i>', 'de')}<i>h</i></span></div>
-          <div class="fi-l" data-esp="2.2"><span>${FFR('v²', FDEP('b', '2<i>g</i>', 'vers'))}</span><span>h</span></div>
-          <div class="fi-l"><span>h</span><span>${FFR('v²', '2<i>g</i>')}</span></div>
-        </div></div></div>
-      <div class="cle"><p><b class="cle-titre">Sinus.</b> Le sinus disparaît d'un côté, sin<sup>−1</sup> apparaît de l'autre (calculatrice en degrés). sin<sup>−1</sup> n'est pas <span class="fi-m">${fr('1', 'sin')}</span>.</p>
+          <div class="fi-l" data-op="( )²"><span>v</span><span>${RAC('2<i>g</i><i>h</i>')}</span></div>
+          <div class="fi-l"><span>v²</span><span>2<i>g</i><i>h</i></span></div>
+        </div></div>
+        <p class="crs-formule fi-m">h = ${FFR('v²', '2<i>g</i>')}</p></div>
+      <div class="cle"><p><b class="cle-titre">Sinus.</b> On applique Arcsin aux deux membres.</p>
         <div class="fi-bloc"><div class="fi-calc">
-          <div class="fi-l" data-esp="0.8"><span>${FDEP('c', 'sin', 'de')}(i)</span><span>0,5</span></div>
-          <div class="fi-l"><span>i</span><span>${FDEP('c', 'sin<sup>−1</sup>', 'vers')}(0,5) = 30°</span></div>
-        </div></div></div>
+          <div class="fi-l" data-op="Arcsin"><span>sin(i)</span><span>0,5</span></div>
+          <div class="fi-l"><span>i</span><span>Arcsin(0,5) = 30°</span></div>
+        </div></div>
+        <p><b>Calculatrice</b> (en degrés) : Arcsin = <b>shift + sin</b>. Arcsin se note aussi sin<sup>−1</sup>.</p></div>
       <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_9.html">Entraînement →</a>
         <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a></div>`);
     EPF.monter(carte);

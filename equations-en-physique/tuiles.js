@@ -22,6 +22,11 @@
    API (objet global EPT) :
      EPT.appui              à passer comme `onTap` à enableTileDrag : un appui
                             n'est pas un dépôt (la sélection est gérée ici)
+     EPT.bloquer(el, message, afficher)
+                            élément qui ne se déplace pas (terme dans une fonction,
+                            dans une parenthèse) : dès qu'on essaie de le faire
+                            glisser, il tremble et afficher(message) est appelé
+     EPT.MSG_FONCTION, EPT.MSG_PAREN   messages communs de ces deux cas
      EPT.historique(f)      historique d'un éditeur ; f() renvoie les boutons
                             « ↶ Annuler » à activer ou désactiver.
                             Renvoie { noter(etat), vider(), annuler() } :
@@ -42,6 +47,7 @@
   // élément activé par assets/dragdrop.js (il reçoit touch-action: none en style)
   function glissable(cible) {
     for (let n = cible; n && n !== document.body; n = n.parentElement) {
+      if (n.dataset && n.dataset.eptBloque) return null;      // ne se déplace pas (EPT.bloquer)
       if (n.style && n.style.touchAction === 'none') return n;
     }
     return null;
@@ -74,7 +80,7 @@
   // tuile de l'équation qu'on peut effacer
   function tuileEffacable(cible) {
     const t = cible && cible.closest('.eq-tile');
-    if (!t || t.closest('.ep-fige, .drag-ghost') || !t.querySelector('.tile-del')) return null;
+    if (!t || t.closest('.ep-fige, .drag-ghost') || !t.querySelector('.tile-del') || t.dataset.eptBloque) return null;
     return t;
   }
   // réserve (palette) de l'éditeur d'une tuile
@@ -157,6 +163,7 @@
     const item = glissable(e.target);
     geste = {
       id: e.pointerId, x: e.clientX, y: e.clientY, bouge: false,
+      bloque: e.target.closest ? e.target.closest('[data-ept-bloque]') : null,
       appui: t || d || null, item,
       zone: e.target.closest ? e.target.closest('.eq-row') : null,
       reserve: item && item.classList.contains('eq-tile') && tuileEffacable(item) ? reserveDe(item) : null,
@@ -169,6 +176,13 @@
     if (!g || e.pointerId !== g.id) return;
     if (!g.bouge && Math.hypot(e.clientX - g.x, e.clientY - g.y) > SEUIL) {
       g.bouge = true;
+      // élément qui ne se déplace pas : il tremble, le message s'affiche tout de suite
+      if (g.bloque && g.bloque.isConnected && g.bloque._eptBloque) {
+        g.bloque.classList.remove('ept-refus');
+        void g.bloque.offsetWidth;
+        g.bloque.classList.add('ept-refus');
+        g.bloque._eptBloque();
+      }
       if (g.reserve) g.reserve.classList.add('ept-reserve-active');
     }
     if (!g.bouge || !g.reserve) return;
@@ -325,5 +339,14 @@
     };
   }
 
-  window.EPT = { appui: () => {}, historique };
+  // ── élément qui ne se déplace pas (dans une fonction, dans une parenthèse) ──
+  function bloquer(el, message, afficher) {
+    el.dataset.eptBloque = '1';
+    el.style.touchAction = 'none';
+    el._eptBloque = () => afficher(message);
+  }
+  const MSG_FONCTION = "✕ On ne peut pas déplacer un terme qui est dans une fonction : supprime d'abord la fonction en appliquant sa fonction réciproque aux deux membres.";
+  const MSG_PAREN = "✕ On ne peut pas déplacer un terme qui est dans une parenthèse : la parenthèse forme un seul bloc.";
+
+  window.EPT = { appui: () => {}, historique, bloquer, MSG_FONCTION, MSG_PAREN };
 })();

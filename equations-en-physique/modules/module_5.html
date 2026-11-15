@@ -340,6 +340,8 @@ function sizeSqrtHooks(container) {
 // à chaque changement d'état, il faut donc réattacher les gestionnaires)
 function attachEqTileHandlers(zone) {
     zone.querySelectorAll('.eq-tile').forEach(el => {
+        // terme sous une racine (fonction) : on peut l'attraper, mais il ne bouge pas (../tuiles.js)
+        if (el.closest('.sqrt-wrap')) { EPT.bloquer(el, EPT.MSG_FONCTION, m => { hadError = true; showFeedback(m, false); }); return; }
         const path = el.dataset.path;
         const idx = parseInt(el.dataset.idx, 10);
         const node = getNode(path);
@@ -627,7 +629,7 @@ function addSqrtPaletteTile() {
     const pal = document.getElementById('palette');
     if (!pal) return;
     const el = document.createElement('div');
-    el.className = 'palette-tile';
+    el.className = 'palette-tile func-tool';   // outil (opération), pas une grandeur
     el.innerHTML = '√';
     enableTileDrag(el, { type:'sqrt' });
     pal.appendChild(el);

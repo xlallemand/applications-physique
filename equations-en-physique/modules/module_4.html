@@ -710,8 +710,8 @@ function etape1(c) {
         <div class="cle"><p><b class="cle-titre">Règle.</b> Un terme qui multiplie une fraction peut <b>entrer</b> dans son numérateur : tout est multiplié.</p></div>
       </div>
       ${exemple(DUO(PA('dep', CA(
-          LI('x', FFR('1', '2') + ' × ' + FDEP('a', 'a × t²', 'de'), { esp: 1.3 }),
-          LI('x', FFR('<span class="fi-zero">1</span> × ' + FDEP('a', 'a × t²', 'vers'), '2'), { note: '1 × a × t² = a × t² : le 1 s\'efface' }),
+          LI('x', FFR(VERS('a', '1'), '2') + ' × ' + FDEP('a', 'a × t²')),
+          LI('x', FFR('<span class="fi-zero">1</span> × a × t²', '2'), { note: '1 × a × t² = a × t² : le 1 s\'efface' }),
           LI('x', FFR('a × t²', '2'))), 'Entrer dans la fraction')))}
       ${MODE_EMPLOI}`);
     c.aToi(carte, M_ENTRER.map(manip));
@@ -726,8 +726,8 @@ function etape2(c) {
         <p>Dans l'éditeur, une zone de dépose apparaît à côté de la fraction dès que tu glisses un terme.</p>
       </div>
       ${exemple(DUO(PA('dep', CA(
-          LI('P', FFR(FDEP('b', 'U²', 'de'), 'R'), { esp: 0.6 }),
-          LI('P', FFR('<span class="fi-zero">1</span>', 'R') + ' × ' + FDEP('b', 'U²', 'vers'), { note: 'Numérateur vidé → 1' })), 'Sortir de la fraction')))}`);
+          LI('P', VERS('b', FFR(FDEP('b', 'U²'), 'R'), 'droite')),
+          LI('P', FFR('<span class="fi-zero">1</span>', 'R') + ' × U²', { note: 'Numérateur vidé → 1' })), 'Sortir de la fraction')))}`);
     c.aToi(carte, M_SORTIR.map(manip));
     return carte;
 }
@@ -735,19 +735,19 @@ function etape2(c) {
 /* ---------- À retenir ---------- */
 // calculs illustrés (flèche du terme déplacé) : ../fiches.js, mis en forme par EPF.monter
 const FFR = (a, b) => `<span class="fi-fr"><span>${a}</span><span>${b}</span></span>`;
-const FDEP = (cle, t, sens) => `<span class="fi-dep" data-${sens}="${cle}">${t}</span>`;
+const FDEP = EPF.de, VERS = EPF.vers;   // terme déplacé ; endroit où il arrive (même ligne)
 function aRetenir(c) {
     const carte = c.carte('À retenir');
     c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Entrer, sortir.</b> Un terme qui multiplie une fraction peut entrer dans son numérateur, ou en sortir (juste avant ou juste après elle) : tout est multiplié. Un numérateur vidé reçoit un 1.</p>
         <div class="fi-bloc"><div class="fi-calc">
-          <div class="fi-l" data-esp="0.9"><span>E<sub>c</sub></span><span>${FFR('1', '2')} × ${FDEP('a', 'm × v²', 'de')}</span></div>
-          <div class="fi-l"><span>E<sub>c</sub></span><span>${FFR(FDEP('a', 'm × v²', 'vers'), '2')}</span></div>
+          <div class="fi-l"><span>E<sub>c</sub></span><span>${FFR(VERS('a', '1'), '2')} × ${FDEP('a', 'm × v²')}</span></div>
+          <div class="fi-l"><span>E<sub>c</sub></span><span>${FFR('m × v²', '2')}</span></div>
         </div></div></div>
       <div class="cle"><p><b class="cle-titre">Isoler une grandeur.</b> On écrit tout dans une seule fraction, puis on applique les règles du module 1. Pour isoler m : le 2 passe en haut, puis v² passe en bas, de l'autre côté.</p>
         <div class="fi-bloc"><div class="fi-calc">
-          <div class="fi-l" data-esp="1"><span>E<sub>c</sub></span><span>${FFR('m × v²', FDEP('a', '2', 'de'))}</span></div>
-          <div class="fi-l" data-esp="1.6"><span>${FDEP('a', '2', 'vers')} × E<sub>c</sub></span><span>m × ${FDEP('b', 'v²', 'de')}</span></div>
-          <div class="fi-l" data-esp="2.2"><span>${FFR('2 × E<sub>c</sub>', FDEP('b', 'v²', 'vers'))}</span><span>m</span></div>
+          <div class="fi-l"><span>${VERS('a', 'E<sub>c</sub>')}</span><span>${FFR('m × v²', FDEP('a', '2'))}</span></div>
+          <div class="fi-l"><span>${VERS('b', '2 × E<sub>c</sub>', 'bas')}</span><span>m × ${FDEP('b', 'v²')}</span></div>
+          <div class="fi-l"><span>${FFR('2 × E<sub>c</sub>', 'v²')}</span><span>m</span></div>
           <div class="fi-l"><span>m</span><span>${FFR('2 × E<sub>c</sub>', 'v²')}</span></div>
         </div></div></div>
       <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_5.html">Entraînement →</a>

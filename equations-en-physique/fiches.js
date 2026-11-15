@@ -8,12 +8,13 @@
    Attributs d'une ligne .fi-l :
      data-op    opération faite des deux côtés pour passer à la ligne suivante (deux flèches)
      data-note  remarque écrite sous la ligne
-     data-esp   place laissée sous la ligne pour une flèche de déplacement (en em)
+     data-esp   place laissée pour une flèche de déplacement (en em, 1,3 par défaut)
    Dans un membre :
      <span class="fi-fr"><span>numérateur</span><span>dénominateur</span></span>   fraction
      <span class="fi-zero">…</span>                                             ce qui s'annule
-     <span class="fi-dep" data-de="a">…</span> … <span class="fi-dep" data-vers="a">…</span>
-                                                     terme déplacé : flèche courbe de l'un à l'autre
+     <span class="fi-dep" data-de="a">…</span> … <span data-vers="a" data-pos="bas">…</span>
+                                                     terme déplacé : flèche courbe vers sa nouvelle place,
+                                                     dans la même ligne (voir tracerArcs)
      <span class="fi-rac">contenu</span>          racine carrée (data-de="a" : son signe se déplace)
    Deux méthodes côte à côte (titres ajoutés ici, les mêmes partout) :
      <div class="fi-duo"><div class="fi-pan" data-t="op">calcul</div><div class="fi-pan" data-t="dep">calcul</div></div>
@@ -86,6 +87,8 @@
     lignes.forEach((l, k) => {
       const [g, d] = l.children;
       const op = l.dataset.op;
+      // flèche de déplacement partant de cette ligne (repérée avant de vider la ligne)
+      const fa = l.querySelector('[data-de]'), fb = fa && calc.querySelector('[data-vers="' + fa.dataset.de + '"]');
       const cg = document.createElement('span'), ce = document.createElement('span'), cd = document.createElement('span');
       cg.className = 'fi-g'; ce.className = 'fi-e'; cd.className = 'fi-d';
       if (k === 0) [cg, ce, cd].forEach(c => c.classList.add('fi-l0'));
@@ -100,12 +103,13 @@
         cd.insertAdjacentHTML('beforeend', '<span class="fi-fl d" aria-hidden="true">' + FLECHE + lab + '</span>');
         plusLong = Math.max(plusLong, op.replace(/<[^>]*>/g, '').length);
       }
-      // place pour une flèche de déplacement, puis la remarque, puis la place des flèches « même opération »
-      if (l.dataset.esp) {
+      // place pour une flèche de déplacement : au-dessus de la ligne (arrivée en haut) ou au-dessous (arrivée en bas)
+      if (fb) {
+        calc.classList.add('fi-avec-dep');
         const e = document.createElement('div');
         e.className = 'fi-arc-esp';
-        e.style.height = l.dataset.esp + 'em';
-        apres.push(e);
+        e.style.height = (l.dataset.esp || 1.6) + 'em';
+        if (enBas(fb)) apres.push(e); else apres.unshift(e);
       }
       if (l.dataset.note) {
         const n = document.createElement('p');
@@ -119,63 +123,87 @@
     // place pour les flèches et leurs libellés, de chaque côté
     if (plusLong) {
       calc.classList.add('fi-avec');
-      calc.style.setProperty('--fi-pad', (1.6 + 0.5 * plusLong).toFixed(2) + 'em');
+      calc.style.setProperty('--fi-pad', (2.1 + 0.5 * plusLong).toFixed(2) + 'em');
     }
   }
 
-  // ── flèches courbes de déplacement : tracées après l'affichage et à chaque changement de taille ──
+  // ── flèches de déplacement : dans l'équation de départ, du terme déplacé vers sa nouvelle place ──
+  // Le terme déplacé porte data-de="a" (data-lab : texte écrit sur la flèche, par exemple « − v₀ ») ;
+  // l'endroit d'arrivée porte data-vers="a" et data-pos :
+  //   bas      : en dessous de cet élément (nouveau dénominateur, barre de fraction en pointillés)
+  //   cote     : à côté de cet élément, du côté du terme déplacé (valeur par défaut)
+  //   droite, gauche : à côté, de ce côté-là
+  // Arrivée en bas (pos bas, ou élément dans un dénominateur) : la flèche passe sous l'équation et
+  // remonte vers l'arrivée. Sinon (numérateur, ou même ligne) : elle passe au-dessus et redescend.
+  const enBas = b => b.dataset.pos === 'bas' || !!b.closest('.fi-fr > span + span');
+  const fraction = (e, partie) => { const f = e.closest('.fi-fr > span' + partie); return f ? f.parentElement : null; };
   function tracerArcs() {
     document.querySelectorAll('.fi-calc').forEach(c => {
-      c.querySelectorAll(':scope > .fi-arc').forEach(s => s.remove());
+      c.querySelectorAll('.fi-arc, .fi-arc-lab').forEach(s => { if (s.parentElement === c) s.remove(); });
       if (!c.getClientRects().length) return;
+      const em = parseFloat(getComputedStyle(c).fontSize);
       c.querySelectorAll('[data-de]').forEach(a => {
         const b = c.querySelector('[data-vers="' + a.dataset.de + '"]');
         if (!b) return;
         const r = c.getBoundingClientRect(), ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
-        let x1 = ra.left + ra.width / 2 - r.left, y1 = ra.bottom - r.top + 2;
-        const x2 = rb.left + rb.width / 2 - r.left;
-        const depuisNum = !!a.closest('.fi-fr > span:first-child');
-        const versDen = b.parentElement.matches('.fi-fr > span + span') || !!b.closest('.fi-fr > span + span');
-        let y2, d, cx, cy;
-        if (versDen) {
-          // vers un dénominateur : la flèche contourne la ligne d'arrivée par le côté et par-dessous
-          y2 = rb.bottom - r.top + 2;
-          const s = x2 >= x1 ? -1 : 1, bas = y2 + 22;
-          // ligne d'arrivée : ses trois cases (gauche, =, droite) ; la flèche passe au-delà de son bord
-          const cg = b.closest('.fi-g') || b.closest('.fi-d').previousElementSibling.previousElementSibling;
-          const cd = cg.nextElementSibling.nextElementSibling;
-          const bord = s > 0 ? Math.max(cd.getBoundingClientRect().right - r.left + 14, x1 + 30)
-                             : Math.min(cg.getBoundingClientRect().left - r.left - 14, x1 - 30);
-          const ym = (cg.getBoundingClientRect().top + cg.getBoundingClientRect().bottom) / 2 - r.top;
-          cx = x2 + s * 25; cy = bas + 16;
-          // depuis un numérateur : la flèche part du côté du terme, sans traverser sa fraction
-          let c1 = (x1 + s * 8) + ',' + (y1 + 30);
-          if (depuisNum) {
-            x1 = (s < 0 ? ra.left - 3 : ra.right + 3) - r.left; y1 = ra.top + ra.height / 2 - r.top;
-            c1 = (x1 + s * 30) + ',' + y1;
+        const X = v => v - r.left, Y = v => v - r.top;
+        // ligne de l'équation : ses trois cases (gauche, =, droite)
+        const cg = a.closest('.fi-g') || a.closest('.fi-d').previousElementSibling.previousElementSibling;
+        const cases = [cg, cg.nextElementSibling, cg.nextElementSibling.nextElementSibling].map(e => e.getBoundingClientRect());
+        const haut = Y(Math.min(...cases.map(q => q.top))), bas = Y(Math.max(...cases.map(q => q.bottom)));
+        const xa = X(ra.left + ra.width / 2), xb = X(rb.left + rb.width / 2);
+        const dir = xb < xa ? -1 : 1;                                   // sens du déplacement
+        let pos = b.dataset.pos || 'cote';
+        if (pos === 'cote') pos = dir < 0 ? 'droite' : 'gauche';         // côté tourné vers le terme déplacé
+        const dessous = enBas(b);
+        const k = 1.05 * em;
+        let x1, y1, x2, y2, c1, c2, extra = '';
+        // départ : au-dessus (ou au-dessous) du terme ; s'il est dans l'autre étage d'une fraction,
+        // du côté extérieur de la fraction (opposé à l'arrivée) : la flèche contourne la fraction
+        // sans la traverser ni croiser le signe =
+        const frAutre = dessous ? fraction(a, ':first-child') : fraction(a, ' + span');
+        if (frAutre) {
+          const rf = frAutre.getBoundingClientRect();
+          x1 = X(dir < 0 ? rf.right + 3 : rf.left - 3); y1 = Y(ra.top + ra.height / 2);
+        } else { x1 = xa; y1 = dessous ? Y(ra.bottom) + 3 : Y(ra.top) - 3; }
+        if (dessous) {
+          const bas2 = Math.max(bas, Y(rb.bottom) + 8) + k;
+          if (pos === 'bas') {
+            // nouveau dénominateur : barre en pointillés sous l'élément, la flèche arrive dessous
+            const yb = Y(rb.bottom) + 3;
+            extra = '<path d="M' + (X(rb.left) - 3) + ',' + yb + ' H' + (X(rb.right) + 3) + '" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3"/>';
+            x2 = xb; y2 = yb + 5; c2 = [x2, bas2];
+          } else {
+            x2 = pos === 'droite' ? X(rb.right) + 2 : X(rb.left) - 2; y2 = Y(rb.bottom) - 2;
+            c2 = [x2 + (pos === 'droite' ? 8 : -8), bas2];
           }
-          d = 'M' + x1 + ',' + y1 + ' C' + c1 + ' ' + bord + ',' + (ym - 30) + ' ' + bord + ',' + ym +
-            ' C' + bord + ',' + (bas + 6) + ' ' + cx + ',' + cy + ' ' + x2 + ',' + y2;
-        } else if (depuisNum && x2 > ra.right - r.left) {
-          // depuis un numérateur vers la droite : la flèche part du côté du terme, sans traverser la fraction
-          x1 = ra.right - r.left + 3; y1 = ra.top + ra.height / 2 - r.top;
-          y2 = rb.top - r.top - 2;
-          cx = x2; cy = y1;
-          d = 'M' + x1 + ',' + y1 + ' Q' + cx + ',' + cy + ' ' + x2 + ',' + y2;
+          c1 = [x1 - (frAutre ? dir * 14 : 0), bas2];
         } else {
-          y2 = rb.top - r.top - 2;
-          cx = (x1 + x2) / 2; cy = Math.max(y1, y2) + 4;
-          d = 'M' + x1 + ',' + y1 + ' Q' + cx + ',' + cy + ' ' + x2 + ',' + y2;
+          const haut2 = Math.min(haut, Y(rb.top) - 8) - k;
+          x2 = pos === 'droite' ? X(rb.right) + 2 : X(rb.left) - 2; y2 = Y(rb.top) + 2;
+          c2 = [x2 + (pos === 'droite' ? 8 : -8), haut2];
+          c1 = [x1 - (frAutre ? dir * 14 : 0), haut2];
         }
+        const d = 'M' + x1 + ',' + y1 + ' C' + c1 + ' ' + c2 + ' ' + x2 + ',' + y2;
         // pointe orientée selon la tangente en fin de courbe
-        const ang = Math.atan2(y2 - cy, x2 - cx), P = 8;
+        const ang = Math.atan2(y2 - c2[1], x2 - c2[0]), P = 8;
         const p1 = [x2 - P * Math.cos(ang - 0.5), y2 - P * Math.sin(ang - 0.5)], p2 = [x2 - P * Math.cos(ang + 0.5), y2 - P * Math.sin(ang + 0.5)];
         const sv = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         sv.setAttribute('class', 'fi-arc');
         sv.setAttribute('width', r.width); sv.setAttribute('height', r.height); sv.setAttribute('aria-hidden', 'true');
-        sv.innerHTML = '<path d="' + d + '" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>' +
+        sv.innerHTML = extra + '<path d="' + d + '" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>' +
           '<path d="M' + p1 + ' L' + x2 + ',' + y2 + ' L' + p2 + '" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
         c.appendChild(sv);
+        // texte écrit sur la flèche (changement de signe) : au sommet de la courbe
+        if (a.dataset.lab) {
+          const l = document.createElement('span');
+          l.className = 'fi-arc-lab' + (dessous ? ' dessous' : '');
+          l.innerHTML = a.dataset.lab;
+          // milieu de la courbe de Bézier
+          l.style.left = ((x1 + 3 * c1[0] + 3 * c2[0] + x2) / 8) + 'px';
+          l.style.top = ((y1 + 3 * c1[1] + 3 * c2[1] + y2) / 8) + 'px';
+          c.appendChild(l);
+        }
       });
     });
   }
@@ -204,7 +232,10 @@
   const calc = (...l) => '<div class="fi-calc">' + l.join('') + '</div>';
   const pan = (t, contenu, titre) => '<div class="fi-pan" data-t="' + t + '"' + (titre ? ' data-titre="' + titre + '"' : '') + '>' + contenu + '</div>';
   const duo = (...p) => '<div class="fi-duo">' + p.join('') + '</div>';
-  window.EPF = { monter: monterTout, rac, crochets, ligne, calc, pan, duo };
+  //   de(clé, terme, texte sur la flèche) : terme déplacé ; vers(clé, élément, place) : où il arrive (bas, cote, droite, gauche)
+  const de = (cle, t, lab) => '<span class="fi-dep" data-de="' + cle + '"' + (lab ? ' data-lab="' + lab + '"' : '') + '>' + t + '</span>';
+  const vers = (cle, t, pos) => '<span data-vers="' + cle + '" data-pos="' + (pos || 'cote') + '">' + t + '</span>';
+  window.EPF = { monter: monterTout, rac, crochets, ligne, calc, pan, duo, de, vers };
 
   function init() {
     monterTout(document);

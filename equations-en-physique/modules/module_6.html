@@ -522,6 +522,9 @@ function monterEditeur(hote, cfg, api) {
             x.addEventListener('click', e => { e.stopPropagation(); deleteItem(el.dataset.path, parseInt(el.dataset.idx, 10)); });
         });
         zoneEq.querySelectorAll('.eq-tile').forEach(el => {
+            // terme dans une parenthèse : on peut l'attraper, mais il ne bouge pas,
+            // et le message s'affiche (../tuiles.js)
+            if (el.closest('.paren-wrap') && !el.closest('.term-draggable')) { EPT.bloquer(el, EPT.MSG_PAREN, m => api.erreur(m)); return; }
             // une tuile à l'intérieur d'un terme additif d'une somme à plusieurs
             // termes (.sum-term) ne se glisse jamais seule : ce genre de terme ne se
             // déplace qu'en bloc (via .sum-term.term-draggable une fois isolé)
@@ -1176,8 +1179,8 @@ function etape1(c) {
           PA('op', CA(LI('v', 'v<sub>0</sub> + a × t', { op: '− v<sub>0</sub>' }),
                       LI('v − v<sub>0</sub>', '<span class="fi-zero">v<sub>0</sub> − v<sub>0</sub></span> + a × t', { note: 'v<sub>0</sub> − v<sub>0</sub> = 0' }),
                       LI('v − v<sub>0</sub>', 'a × t'))),
-          PA('dep', CA(LI('v', FDEP('a', 'v<sub>0</sub>', 'de') + ' + a × t', { esp: 0.8 }),
-                       LI('v ' + FDEP('a', '− v<sub>0</sub>', 'vers'), 'a × t')))))}
+          PA('dep', CA(LI(VERS('a', 'v'), FDEP('a', 'v<sub>0</sub>', '− v<sub>0</sub>') + ' + a × t'),
+                       LI('v − v<sub>0</sub>', 'a × t')))))}
       ${MODE_EMPLOI}`);
     c.aToi(carte, M_TERME.map(manip));
     return carte;
@@ -1193,10 +1196,9 @@ function etape2(c) {
           PA('op', CA(LI('F', 'k × (L − L<sub>0</sub>)', { op: '÷ k' }),
                       LI(FFR('F', 'k'), 'L − L<sub>0</sub>', { op: '+ L<sub>0</sub>' }),
                       LI(FFR('F', 'k') + ' + L<sub>0</sub>', 'L'))),
-          PA('dep', CA(LI('F', FDEP('a', 'k', 'de') + ' × (L − L<sub>0</sub>)', { esp: 1.6 }),
-                       LI(FFR('F', FDEP('a', 'k', 'vers')), 'L − L<sub>0</sub>', { esp: 1.6 })) +
-                    CA(LI(FFR('F', 'k'), 'L ' + FDEP('b', '− L<sub>0</sub>', 'de'), { esp: 0.8 }),
-                       LI(FFR('F', 'k') + ' ' + FDEP('b', '+ L<sub>0</sub>', 'vers'), 'L')))))}`);
+          PA('dep', CA(LI(VERS('a', 'F', 'bas'), FDEP('a', 'k') + ' × (L − L<sub>0</sub>)'),
+                       LI(VERS('b', FFR('F', 'k')), 'L ' + FDEP('b', '− L<sub>0</sub>', '+ L<sub>0</sub>')),
+                       LI(FFR('F', 'k') + ' + L<sub>0</sub>', 'L')))))}`);
     c.aToi(carte, M_SOMME.map(manip));
     return carte;
 }
@@ -1225,8 +1227,8 @@ function etape4(c) {
           PA('op', CA(LI('(v − v<sub>0</sub>)', 'a × t', { op: '÷ t' }),
                       LI(FFR('(v − v<sub>0</sub>)', 't'), '<span class="fi-zero">' + FFR('a × t', 't') + '</span>', { note: 't ÷ t = 1' }),
                       LI(FFR('(v − v<sub>0</sub>)', 't'), 'a'))),
-          PA('dep', CA(LI('(v − v<sub>0</sub>)', 'a × ' + FDEP('c', 't', 'de'), { esp: 1.6 }),
-                       LI(FFR('(v − v<sub>0</sub>)', FDEP('c', 't', 'vers')), 'a', { esp: 1.6 })))))}`);
+          PA('dep', CA(LI(VERS('c', '(v − v<sub>0</sub>)', 'bas'), 'a × ' + FDEP('c', 't')),
+                       LI(FFR('(v − v<sub>0</sub>)', 't'), 'a')))))}`);
     c.aToi(carte, M_DIV.map(manip));
     return carte;
 }
@@ -1234,18 +1236,18 @@ function etape4(c) {
 /* ---------- À retenir ---------- */
 // calculs illustrés (flèche du terme déplacé) : ../fiches.js, mis en forme par EPF.monter
 const FFR = (a, b) => `<span class="fi-fr"><span>${a}</span><span>${b}</span></span>`;
-const FDEP = (cle, t, sens) => `<span class="fi-dep" data-${sens}="${cle}">${t}</span>`;
+const FDEP = EPF.de, VERS = EPF.vers;   // terme déplacé ; endroit où il arrive (même ligne)
 function aRetenir(c) {
     const carte = c.carte('À retenir');
     c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Terme additif.</b> Un terme relié aux autres par un + ou un − passe de l'autre côté du signe = en <b>changeant de signe</b> : + devient −, − devient +. Il ne passe ni en haut ni en bas.</p>
         <div class="fi-bloc"><div class="fi-calc">
-          <div class="fi-l" data-esp="0.8"><span>v</span><span>${FDEP('a', 'v<sub>0</sub>', 'de')} + a × t</span></div>
-          <div class="fi-l"><span>v ${FDEP('a', '− v<sub>0</sub>', 'vers')}</span><span>a × t</span></div>
+          <div class="fi-l"><span>${VERS('a', 'v')}</span><span>${FDEP('a', 'v<sub>0</sub>', '− v<sub>0</sub>')} + a × t</span></div>
+          <div class="fi-l"><span>v − v<sub>0</sub></span><span>a × t</span></div>
         </div></div></div>
       <div class="cle"><p><b class="cle-titre">Une somme multipliée</b> ne se sépare pas : on divise d'abord les deux membres par ce qui la multiplie, puis on déplace ses termes.</p>
         <div class="fi-bloc"><div class="fi-calc">
-          <div class="fi-l" data-esp="1.6"><span>F</span><span>${FDEP('a', 'k', 'de')} × (L − L<sub>0</sub>)</span></div>
-          <div class="fi-l" data-esp="1.6"><span>${FFR('F', FDEP('a', 'k', 'vers'))}</span><span>L − L<sub>0</sub></span></div>
+          <div class="fi-l"><span>${VERS('a', 'F', 'bas')}</span><span>${FDEP('a', 'k')} × (L − L<sub>0</sub>)</span></div>
+          <div class="fi-l"><span>${FFR('F', 'k')}</span><span>L − L<sub>0</sub></span></div>
         </div></div></div>
       <div class="cle"><p><b class="cle-titre">Grandeur isolée négative</b> : on multiplie les <b>deux membres</b> par −1 ; chaque terme change de signe, des deux côtés.</p>
         <div class="fi-bloc"><div class="fi-calc">
@@ -1254,8 +1256,8 @@ function aRetenir(c) {
         </div></div></div>
       <div class="cle"><p><b class="cle-titre">Diviser une somme</b> : on l'entoure d'abord de parenthèses pour en faire un seul bloc ; c'est la somme entière qui passe au numérateur.</p>
         <div class="fi-bloc"><div class="fi-calc">
-          <div class="fi-l" data-esp="1.6"><span>(v − v<sub>0</sub>)</span><span>a × ${FDEP('b', 't', 'de')}</span></div>
-          <div class="fi-l" data-esp="1.6"><span>${FFR('(v − v<sub>0</sub>)', FDEP('b', 't', 'vers'))}</span><span>a</span></div>
+          <div class="fi-l"><span>${VERS('b', '(v − v<sub>0</sub>)', 'bas')}</span><span>a × ${FDEP('b', 't')}</span></div>
+          <div class="fi-l"><span>${FFR('(v − v<sub>0</sub>)', 't')}</span><span>a</span></div>
         </div></div></div>
       <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_7.html">Entraînement →</a>
         <a class="btn-secondary" style="text-decoration:none" href="module_8.html">Module 4 : les fonctions réciproques</a>
