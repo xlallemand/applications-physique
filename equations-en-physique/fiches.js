@@ -15,6 +15,7 @@
      <span class="fi-dep" data-de="a">…</span> … <span class="fi-dep" data-vers="a">…</span>
                                                      terme déplacé : flèche courbe de l'un à l'autre
    Les grandeurs (une lettre seule) passent en italique, comme dans l'éditeur.
+   Contenu ajouté après le chargement (carte « À retenir » d'un cours) : EPF.monter(élément).
    ============================================================ */
 (function () {
   'use strict';
@@ -143,13 +144,27 @@
     });
   }
 
+  // ── mise en forme des calculs d'une partie de la page (fiche, ou carte « À retenir » d'un cours) ──
+  // les flèches de déplacement sont retracées dès que la taille d'un calcul change (affichage, polices, écran)
+  let attente = 0;
+  const retracer = () => { cancelAnimationFrame(attente); attente = requestAnimationFrame(tracerArcs); };
+  const surveille = typeof ResizeObserver === 'function' ? new ResizeObserver(retracer) : null;
+  function monterTout(racine) {
+    racine = racine || document;
+    racine.querySelectorAll('.fi-calc:not(.fi-pret)').forEach(c => {
+      monter(c);
+      c.classList.add('fi-pret');
+      if (surveille) surveille.observe(c);
+    });
+    racine.querySelectorAll('.fi-calc, .fi-m, .som-fiche .som-formule').forEach(italiques);
+    retracer();
+  }
+  window.EPF = { monter: monterTout };
+
   function init() {
-    document.querySelectorAll('.fi-calc').forEach(monter);
-    document.querySelectorAll('.fi-calc, .fi-m, .som-fiche .som-formule').forEach(italiques);
-    tracerArcs();
-    let att = 0;
-    addEventListener('resize', () => { clearTimeout(att); att = setTimeout(tracerArcs, 100); });
-    if (document.fonts) document.fonts.ready.then(tracerArcs);
+    monterTout(document);
+    addEventListener('resize', retracer);
+    if (document.fonts) document.fonts.ready.then(retracer);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

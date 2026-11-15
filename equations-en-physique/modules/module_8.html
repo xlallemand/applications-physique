@@ -83,12 +83,14 @@
     @media (max-width:560px) { .ep-op::after { content:' ↓'; } }
 </style>
 <link rel="stylesheet" href="../tuiles.css">
+<link rel="stylesheet" href="../fiches.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
 <link rel="stylesheet" href="../../assets/cours.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
 <script src="../tuiles.js"></script>
+<script src="../fiches.js"></script>
 <script src="../aide-rules.js"></script>
 <script src="../../assets/cours.js"></script>
 </head>
@@ -416,19 +418,34 @@ function etape2(c) {
 }
 
 /* ---------- À retenir ---------- */
+// calculs illustrés (flèche du terme déplacé) : ../fiches.js, mis en forme par EPF.monter
+const FFR = (a, b) => `<span class="fi-fr"><span>${a}</span><span>${b}</span></span>`;
+const FDEP = (cle, t, sens) => `<span class="fi-dep" data-${sens}="${cle}">${t}</span>`;
 function aRetenir(c) {
     const carte = c.carte('À retenir');
-    c.ajouter(carte, `<div class="cle"><p>Pour supprimer une fonction (racine carrée, carré, sinus…), on applique sa <b>fonction réciproque</b> aux <b>deux membres</b> : elle annule la fonction d'un côté et apparaît de l'autre.</p>
+    c.ajouter(carte, `<div class="cle"><p>Pour supprimer une fonction (racine carrée, carré, sinus…), on isole d'abord la fonction seule d'un côté, puis on applique sa <b>fonction réciproque</b> aux <b>deux membres</b> : elle annule la fonction d'un côté et apparaît de l'autre.</p>
         <div class="crs-defile"><table class="crs-tab">
           <tr><th>Fonction</th><th>Fonction réciproque</th><th>Exemple</th></tr>
-          <tr><td>√ (racine carrée)</td><td>x² (carré)</td><td>x = √y &nbsp;⇔&nbsp; x² = y</td></tr>
-          <tr><td>x² (carré)</td><td>√ (racine carrée)</td><td>x² = y &nbsp;⇔&nbsp; x = √y</td></tr>
-          <tr><td>sin</td><td>sin<sup>−1</sup> (arcsinus)</td><td>sin(θ) = y &nbsp;⇔&nbsp; θ = sin<sup>−1</sup>(y)</td></tr>
-          <tr><td>sin<sup>−1</sup></td><td>sin</td><td>θ = sin<sup>−1</sup>(x) &nbsp;⇔&nbsp; sin(θ) = x</td></tr>
+          <tr><td>√ (racine carrée)</td><td>( )² (carré)</td><td><span class="fi-m">x = √y &nbsp;⇔&nbsp; x² = y</span></td></tr>
+          <tr><td>( )² (carré)</td><td>√ (racine carrée)</td><td><span class="fi-m">x² = y &nbsp;⇔&nbsp; x = √y</span></td></tr>
+          <tr><td>sin</td><td>sin<sup>−1</sup> (arcsinus)</td><td><span class="fi-m">sin(θ) = y &nbsp;⇔&nbsp; θ = sin<sup>−1</sup>(y)</span></td></tr>
+          <tr><td>sin<sup>−1</sup></td><td>sin</td><td><span class="fi-m">θ = sin<sup>−1</sup>(x) &nbsp;⇔&nbsp; sin(θ) = x</span></td></tr>
         </table></div></div>
-      <div class="cle"><p>Exemple : v = √(2gh) donne v² = 2gh, puis h = ${fr('v²', '2g')}.</p></div>
+      <div class="cle"><p><b class="cle-titre">Racine carrée.</b> La racine disparaît d'un côté, le carré apparaît de l'autre ; on isole ensuite h avec les règles du module 1.</p>
+        <div class="fi-bloc"><div class="fi-calc">
+          <div class="fi-l" data-esp="0.8"><span>v</span><span>${FDEP('a', '√', 'de')}(2<i>g</i><i>h</i>)</span></div>
+          <div class="fi-l" data-esp="1.6"><span>v${FDEP('a', '²', 'vers')}</span><span>${FDEP('b', '2<i>g</i>', 'de')}<i>h</i></span></div>
+          <div class="fi-l" data-esp="2.2"><span>${FFR('v²', FDEP('b', '2<i>g</i>', 'vers'))}</span><span>h</span></div>
+          <div class="fi-l"><span>h</span><span>${FFR('v²', '2<i>g</i>')}</span></div>
+        </div></div></div>
+      <div class="cle"><p><b class="cle-titre">Sinus.</b> Le sinus disparaît d'un côté, sin<sup>−1</sup> apparaît de l'autre (calculatrice en degrés). sin<sup>−1</sup> n'est pas <span class="fi-m">${fr('1', 'sin')}</span>.</p>
+        <div class="fi-bloc"><div class="fi-calc">
+          <div class="fi-l" data-esp="0.8"><span>${FDEP('c', 'sin', 'de')}(i)</span><span>0,5</span></div>
+          <div class="fi-l"><span>i</span><span>${FDEP('c', 'sin<sup>−1</sup>', 'vers')}(0,5) = 30°</span></div>
+        </div></div></div>
       <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_9.html">Entraînement →</a>
         <a class="btn-secondary" style="text-decoration:none" href="fiche_4.html">Fiche récapitulative</a></div>`);
+    EPF.monter(carte);
     return carte;
 }
 

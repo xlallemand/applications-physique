@@ -113,12 +113,14 @@
     @media (max-width:560px) { .ep-op::after { content:' ↓'; } }
 </style>
 <link rel="stylesheet" href="../tuiles.css">
+<link rel="stylesheet" href="../fiches.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
 <link rel="stylesheet" href="../../assets/cours.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
 <script src="../tuiles.js"></script>
+<script src="../fiches.js"></script>
 <script src="../aide-rules.js"></script>
 <script src="../../assets/cours.js"></script>
 </head>
@@ -737,15 +739,27 @@ function etape2(c) {
 }
 
 /* ---------- À retenir ---------- */
+// calculs illustrés (flèche du terme déplacé) : ../fiches.js, mis en forme par EPF.monter
+const FFR = (a, b) => `<span class="fi-fr"><span>${a}</span><span>${b}</span></span>`;
+const FDEP = (cle, t, sens) => `<span class="fi-dep" data-${sens}="${cle}">${t}</span>`;
 function aRetenir(c) {
     const carte = c.carte('À retenir');
-    c.ajouter(carte, `<div class="cle"><p>Placer un terme au numérateur d'une fraction ou juste à côté d'elle (avant ou après) revient au même : tout est multiplié. Un numérateur vidé reçoit un 1.</p>
-        <p class="crs-formule">E<sub>c</sub> = ${fr('1', '2')} × m × v² = ${fr('m × v²', '2')}</p></div>
-      <div class="cle"><p>On applique ensuite les règles du module 1 : par exemple, pour isoler m, v² et 2 changent de côté.</p>
-        <p class="crs-formule">m = ${fr('2 × E<sub>c</sub>', 'v²')}</p></div>
+    c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Entrer, sortir.</b> Un terme qui multiplie une fraction peut entrer dans son numérateur, ou en sortir (juste avant ou juste après elle) : tout est multiplié. Un numérateur vidé reçoit un 1.</p>
+        <div class="fi-bloc"><div class="fi-calc">
+          <div class="fi-l" data-esp="0.9"><span>E<sub>c</sub></span><span>${FFR('1', '2')} × ${FDEP('a', 'm × v²', 'de')}</span></div>
+          <div class="fi-l"><span>E<sub>c</sub></span><span>${FFR(FDEP('a', 'm × v²', 'vers'), '2')}</span></div>
+        </div></div></div>
+      <div class="cle"><p><b class="cle-titre">Isoler une grandeur.</b> On écrit tout dans une seule fraction, puis on applique les règles du module 1. Pour isoler m : le 2 passe en haut, puis v² passe en bas, de l'autre côté.</p>
+        <div class="fi-bloc"><div class="fi-calc">
+          <div class="fi-l" data-esp="1"><span>E<sub>c</sub></span><span>${FFR('m × v²', FDEP('a', '2', 'de'))}</span></div>
+          <div class="fi-l" data-esp="1.6"><span>${FDEP('a', '2', 'vers')} × E<sub>c</sub></span><span>m × ${FDEP('b', 'v²', 'de')}</span></div>
+          <div class="fi-l" data-esp="2.2"><span>${FFR('2 × E<sub>c</sub>', FDEP('b', 'v²', 'vers'))}</span><span>m</span></div>
+          <div class="fi-l"><span>m</span><span>${FFR('2 × E<sub>c</sub>', 'v²')}</span></div>
+        </div></div></div>
       <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_5.html">Entraînement →</a>
         <a class="btn-secondary" style="text-decoration:none" href="module_6.html">Module 3 : les + et les −</a>
         <a class="btn-secondary" style="text-decoration:none" href="fiche_2.html">Fiche récapitulative</a></div>`);
+    EPF.monter(carte);
     return carte;
 }
 
