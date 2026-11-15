@@ -157,15 +157,23 @@
         if (pos === 'cote') pos = dir < 0 ? 'droite' : 'gauche';         // côté tourné vers le terme déplacé
         const dessous = enBas(b);
         const k = 1.05 * em;
-        let x1, y1, x2, y2, c1, c2, extra = '';
-        // départ : au-dessus (ou au-dessous) du terme ; s'il est dans l'autre étage d'une fraction,
-        // du côté extérieur de la fraction (opposé à l'arrivée) : la flèche contourne la fraction
-        // sans la traverser ni croiser le signe =
+        let x1, y1, x2, y2, c1, c2, extra = '', debut = '';
+        // départ : sur le contour du terme (le contour déborde de 3 px de sa boîte), au-dessus ou au-dessous.
+        // S'il est dans l'autre étage d'une fraction, la flèche part du côté du terme opposé à l'arrivée,
+        // sort de la fraction par un petit virage, puis la contourne sans la traverser ni croiser le signe =
         const frAutre = dessous ? fraction(a, ':first-child') : fraction(a, ' + span');
         if (frAutre) {
           const rf = frAutre.getBoundingClientRect();
-          x1 = X(dir < 0 ? rf.right + 3 : rf.left - 3); y1 = Y(ra.top + ra.height / 2);
-        } else { x1 = xa; y1 = dessous ? Y(ra.bottom) + 3 : Y(ra.top) - 3; }
+          const x0 = X(dir < 0 ? ra.right + 2 : ra.left - 2), y0 = Y(ra.top + ra.height / 2);
+          x1 = X(dir < 0 ? rf.right : rf.left) - dir * 14; y1 = y0 + (dessous ? 12 : -12);
+          debut = 'M' + x0 + ',' + y0 + ' Q' + x1 + ',' + y0 + ' ' + x1 + ',' + y1 + ' ';
+        } else { x1 = xa; y1 = dessous ? Y(ra.bottom) + 2 : Y(ra.top) - 2; }
+        // arrivée à côté : jamais trop près du départ, sinon la flèche n'est qu'une petite boucle
+        // (terme qui sort d'une fraction par le côté) ; elle arrive alors plus loin, à mi-hauteur
+        const loin = (xc, yc) => {
+          if (pos === 'bas' || Math.abs(xc - x1) >= 2.2 * em) return [xc, yc];
+          return [x1 + (pos === 'droite' ? 1 : -1) * 2.2 * em, Y(rb.top + rb.height / 2) + (dessous ? .3 : -.3) * em];
+        };
         if (dessous) {
           const bas2 = Math.max(bas, Y(rb.bottom) + 8) + k;
           if (pos === 'bas') {
@@ -174,19 +182,24 @@
             extra = '<path d="M' + (X(rb.left) - 3) + ',' + yb + ' H' + (X(rb.right) + 3) + '" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3"/>';
             x2 = xb; y2 = yb + 5; c2 = [x2, bas2];
           } else {
-            x2 = pos === 'droite' ? X(rb.right) + 2 : X(rb.left) - 2; y2 = Y(rb.bottom) - 2;
+            [x2, y2] = loin(pos === 'droite' ? X(rb.right) + 2 : X(rb.left) - 2, Y(rb.bottom) - 2);
             c2 = [x2 + (pos === 'droite' ? 8 : -8), bas2];
           }
-          c1 = [x1 - (frAutre ? dir * 14 : 0), bas2];
+          c1 = [x1, bas2];
         } else {
           const haut2 = Math.min(haut, Y(rb.top) - 8) - k;
-          x2 = pos === 'droite' ? X(rb.right) + 2 : X(rb.left) - 2; y2 = Y(rb.top) + 2;
+          [x2, y2] = loin(pos === 'droite' ? X(rb.right) + 2 : X(rb.left) - 2, Y(rb.top) + 2);
           c2 = [x2 + (pos === 'droite' ? 8 : -8), haut2];
-          c1 = [x1 - (frAutre ? dir * 14 : 0), haut2];
+          c1 = [x1, haut2];
         }
-        const d = 'M' + x1 + ',' + y1 + ' C' + c1 + ' ' + c2 + ' ' + x2 + ',' + y2;
-        // pointe orientée selon la tangente en fin de courbe
-        const ang = Math.atan2(y2 - c2[1], x2 - c2[0]), P = 8;
+        const d = (debut || 'M' + x1 + ',' + y1 + ' ') + 'C' + c1 + ' ' + c2 + ' ' + x2 + ',' + y2;
+        // pointe alignée sur la fin visible de la courbe : direction prise entre la pointe et le point
+        // de la courbe situé à une longueur de pointe en arrière (la courbe tourne encore sur ce bout)
+        const P = 9;
+        const B = t => { const u = 1 - t; return [u*u*u*x1 + 3*u*u*t*c1[0] + 3*u*t*t*c2[0] + t*t*t*x2, u*u*u*y1 + 3*u*u*t*c1[1] + 3*u*t*t*c2[1] + t*t*t*y2]; };
+        let q = B(0.99);
+        for (let t = 0.99; t > 0; t -= 0.01) { q = B(t); if (Math.hypot(x2 - q[0], y2 - q[1]) >= P) break; }
+        const ang = Math.atan2(y2 - q[1], x2 - q[0]);
         const p1 = [x2 - P * Math.cos(ang - 0.5), y2 - P * Math.sin(ang - 0.5)], p2 = [x2 - P * Math.cos(ang + 0.5), y2 - P * Math.sin(ang + 0.5)];
         const sv = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         sv.setAttribute('class', 'fi-arc');
