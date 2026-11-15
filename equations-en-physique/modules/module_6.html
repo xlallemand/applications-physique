@@ -184,12 +184,14 @@
     @media (max-width:560px) { .ep-op::after { content:' ↓'; } }
 </style>
 <link rel="stylesheet" href="../tuiles.css">
+<link rel="stylesheet" href="../fiches.css">
 <link rel="stylesheet" href="../../assets/sommaire.css">
 <link rel="stylesheet" href="../../assets/cours.css">
 <script src="../../assets/sommaire.js"></script>
 <script src="plan.js"></script>
 <script src="../../assets/dragdrop.js"></script>
 <script src="../tuiles.js"></script>
+<script src="../fiches.js"></script>
 <script src="../aide-rules.js"></script>
 <script src="../../assets/cours.js"></script>
 </head>
@@ -1236,17 +1238,35 @@ function etape4(c) {
 }
 
 /* ---------- À retenir ---------- */
+// calculs illustrés (flèche du terme déplacé) : ../fiches.js, mis en forme par EPF.monter
+const FFR = (a, b) => `<span class="fi-fr"><span>${a}</span><span>${b}</span></span>`;
+const FDEP = (cle, t, sens) => `<span class="fi-dep" data-${sens}="${cle}">${t}</span>`;
 function aRetenir(c) {
     const carte = c.carte('À retenir');
-    c.ajouter(carte, `<div class="cle"><p>Un terme relié aux autres par un <b>+</b> ou un <b>−</b> peut passer de l'autre côté du signe = : il ne change pas de position (haut / bas), il change de <b>signe</b>.</p>
-        <p class="crs-formule">P<sub>2</sub> − P<sub>1</sub> = ρ × g × (z<sub>1</sub> − z<sub>2</sub>) &nbsp;⇔&nbsp; −P<sub>1</sub> = ρ × g × (z<sub>1</sub> − z<sub>2</sub>) − P<sub>2</sub></p></div>
+    c.ajouter(carte, `<div class="cle"><p><b class="cle-titre">Terme additif.</b> Un terme relié aux autres par un + ou un − passe de l'autre côté du signe = en <b>changeant de signe</b> : + devient −, − devient +. Il ne passe ni en haut ni en bas.</p>
+        <div class="fi-bloc"><div class="fi-calc">
+          <div class="fi-l" data-esp="0.8"><span>v</span><span>${FDEP('a', 'v<sub>0</sub>', 'de')} + a × t</span></div>
+          <div class="fi-l"><span>v ${FDEP('a', '− v<sub>0</sub>', 'vers')}</span><span>a × t</span></div>
+        </div></div></div>
       <div class="cle"><p><b class="cle-titre">Une somme multipliée</b> ne se sépare pas : on divise d'abord les deux membres par ce qui la multiplie, puis on déplace ses termes.</p>
-        <p class="crs-formule">${fr('P<sub>2</sub> − P<sub>1</sub>', 'ρ × g')} = z<sub>1</sub> − z<sub>2</sub></p></div>
-      <div class="cle"><p><b class="cle-titre">Grandeur isolée négative</b> : on multiplie les <b>deux membres</b> par −1.</p></div>
-      <div class="cle"><p><b class="cle-titre">Diviser une somme</b> : on l'entoure d'abord de parenthèses pour en faire un seul bloc, puis on la met dans une fraction.</p></div>
+        <div class="fi-bloc"><div class="fi-calc">
+          <div class="fi-l" data-esp="1.6"><span>F</span><span>${FDEP('a', 'k', 'de')} × (L − L<sub>0</sub>)</span></div>
+          <div class="fi-l" data-esp="1.6"><span>${FFR('F', FDEP('a', 'k', 'vers'))}</span><span>L − L<sub>0</sub></span></div>
+        </div></div></div>
+      <div class="cle"><p><b class="cle-titre">Grandeur isolée négative</b> : on multiplie les <b>deux membres</b> par −1 ; chaque terme change de signe, des deux côtés.</p>
+        <div class="fi-bloc"><div class="fi-calc">
+          <div class="fi-l" data-op="× (−1)"><span>− v<sub>0</sub></span><span>a × t − v</span></div>
+          <div class="fi-l"><span>v<sub>0</sub></span><span>v − a × t</span></div>
+        </div></div></div>
+      <div class="cle"><p><b class="cle-titre">Diviser une somme</b> : on l'entoure d'abord de parenthèses pour en faire un seul bloc ; c'est la somme entière qui passe au numérateur.</p>
+        <div class="fi-bloc"><div class="fi-calc">
+          <div class="fi-l" data-esp="1.6"><span>(v − v<sub>0</sub>)</span><span>a × ${FDEP('b', 't', 'de')}</span></div>
+          <div class="fi-l" data-esp="1.6"><span>${FFR('(v − v<sub>0</sub>)', FDEP('b', 't', 'vers'))}</span><span>a</span></div>
+        </div></div></div>
       <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="module_7.html">Entraînement →</a>
         <a class="btn-secondary" style="text-decoration:none" href="module_8.html">Module 4 : les fonctions réciproques</a>
         <a class="btn-secondary" style="text-decoration:none" href="fiche_3.html">Fiche récapitulative</a></div>`);
+    EPF.monter(carte);
     return carte;
 }
 
