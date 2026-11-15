@@ -272,8 +272,10 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
    ------------------------------------------------------------
    ACC.DOMAINES  liste des domaines (Physique, Chimie, Outils mathématiques ; pastille : false = pas de pastille de tri)
    ACC.NIVEAUX   liste des niveaux (Collège, 2de, 1re spé, Tle spé, Tle STI2D)
-   ACC.APPS      liste des applications avec leurs étiquettes et leurs mots-clés de recherche (mots)
-   ACC.TYPES     pastilles de type : Manipuler (simulateurs, animations, ateliers), Fiches
+   ACC.APPS      liste des applications avec leurs étiquettes et leurs mots-clés de recherche (mots) ;
+                 mobile: true = application conçue pour le téléphone (type Application mobile)
+   ACC.TYPES     pastilles de type : Manipuler (simulateurs, animations, ateliers), Fiches,
+                 Application mobile (applications entières marquées mobile: true dans APPS)
    ACC.CATS      libellé de chaque type de page (simulateur, animation, atelier, activite, cours, exercices, fiche)
    ACC.IDEES     idées de recherche proposées quand le champ est vide
    ACC.filtre    état du tri : { dom: Set, niv: Set, typ: Set } (ensemble vide = tout afficher)
@@ -444,7 +446,7 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
     { titre: 'Équations en physique', dom: 'maths', niv: LYCEE, dossier: 'equations-en-physique',
       desc: 'Exprimer une grandeur en fonction des autres, avec explication de la règle en cas d’erreur.',
       mots: ['isoler', 'exprimer', 'formule', 'calcul littéral', 'transformer une formule'] },
-    { titre: 'Équations en physique (smartphone)', dom: 'maths', niv: LYCEE, dossier: 'equations-physique-mobile',
+    { titre: 'Équations en physique (smartphone)', dom: 'maths', niv: LYCEE, dossier: 'equations-physique-mobile', mobile: true,
       desc: 'Isoler une grandeur du bout du doigt, en séances guidées selon tes compétences.',
       mots: ['isoler', 'exprimer', 'formule', 'calcul littéral', 'téléphone', 'application', 'compétences', 'fonction réciproque', 'racine carrée', 'logarithme', 'exponentielle', 'Arcsin'] },
     { titre: 'Proportionnalité', dom: 'maths', niv: LYCEE, dossier: 'proportionnalite',
@@ -453,10 +455,10 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
     { titre: 'Lecture graphique', dom: 'maths', niv: LYCEE, dossier: 'lecture-graphique',
       desc: 'Lire précisément une valeur sur un graphique.',
       mots: ['graphique', 'courbe', 'abscisse', 'ordonnée', 'échelle', 'lire une valeur'] },
-    { titre: 'Équations du 1er degré', dom: 'maths', niv: ['col'], dossier: 'equations-college',
+    { titre: 'Équations du 1er degré', dom: 'maths', niv: ['col'], dossier: 'equations-college', mobile: true,
       desc: 'Résoudre des équations comme sur une feuille, en séances guidées selon tes compétences.',
       mots: ['équation', 'inconnue', 'résoudre', 'isoler x', 'membre', 'développer', 'parenthèses', 'compétences', 'nombres relatifs', 'fraction irréductible'] },
-    { titre: 'Fractions', dom: 'maths', niv: ['col'], dossier: 'fractions-college',
+    { titre: 'Fractions', dom: 'maths', niv: ['col'], dossier: 'fractions-college', mobile: true,
       desc: 'Calculer avec des fractions comme sur une feuille, en séances guidées selon tes compétences.',
       mots: ['fraction', 'numérateur', 'dénominateur', 'simplifier', 'irréductible', 'inverse', 'dénominateur commun', 'priorités opératoires', 'compétences', 'nombres relatifs'] }
   ];
@@ -468,7 +470,9 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
   };
   const TYPES = [
     { id: 'manipuler', nom: 'Manipuler', ic: '▸', cats: ['simulateur', 'animation', 'atelier'] },
-    { id: 'fiche', nom: 'Fiches', ic: '≡', cats: ['fiche'] }
+    { id: 'fiche', nom: 'Fiches', ic: '≡', cats: ['fiche'] },
+    // type d'application (et non de page) : garde les applications mobile: true en entier
+    { id: 'mobile', nom: 'Application mobile', ic: '▯', cats: [], apps: true, titre: 'Applications conçues pour le téléphone' }
   ];
   // Idées de recherche (champ vide)
   const IDEES = ['simulateur', 'demi-vie', 'oscilloscope', 'tableau d\'avancement', 'conversions', 'pH'];
@@ -524,7 +528,7 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
       p.rTitre = p.mod ? norm(p.l) : '';
       p.rDesc = norm(p.d);
       // le type est cherché aussi : « simulateur », « atelier », « fiche », « manipuler »…
-      p.rType = norm(CATS[p.c] + (TYPES[0].cats.includes(p.c) ? ' manipuler' : ''));
+      p.rType = norm(CATS[p.c] + (TYPES[0].cats.includes(p.c) ? ' manipuler' : '') + (a.mobile ? ' application mobile' : ''));
     });
   });
 
@@ -587,9 +591,11 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
     APPS.forEach(a => {
       if (!visible(a)) return;
       const cand = a.pages.filter(p => p.c !== 'fiche' || avecFiche);
+      // type d'application choisi (Application mobile) que porte l'application : toutes ses pages passent
+      const entiere = a.mobile && TYPES.some(t => t.apps && filtre.typ.has(t.id));
       const garde = new Map();
       cand.forEach(p => {
-        if (cats.size && !cats.has(p.c)) return;
+        if (filtre.typ.size && !entiere && !cats.has(p.c)) return;
         const s = ms.length ? scorePage(p, ms) : 1;
         if (s) garde.set(p, s);
       });
@@ -791,7 +797,7 @@ body { margin: 0; background: var(--sheet); line-height: 1.5; }
       '<span class="groupe-lab">Type</span>' +
       `<button type="button" class="puce" data-g="typ" data-id="" aria-pressed="${!ACC.filtre.typ.size}">Tous</button>` +
       TYPES.map((t, i) => (i ? '<span class="sep" aria-hidden="true"></span>' : '') +
-        `<button type="button" class="puce" data-g="typ" data-id="${t.id}" aria-pressed="${ACC.choisi('typ', t.id)}" title="${t.cats.map(c => CATS[c]).join(', ')}"><span class="ic" aria-hidden="true">${t.ic}</span>${t.nom}</button>`).join('');
+        `<button type="button" class="puce" data-g="typ" data-id="${t.id}" aria-pressed="${ACC.choisi('typ', t.id)}" title="${t.titre || t.cats.map(c => CATS[c]).join(', ')}"><span class="ic" aria-hidden="true">${t.ic}</span>${t.nom}</button>`).join('');
   }
   document.getElementById('tri').addEventListener('click', e => {
     const b = e.target.closest('button[data-g], button[data-tout]');
