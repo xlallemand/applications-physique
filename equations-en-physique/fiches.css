@@ -32,10 +32,12 @@
 .fi-op { margin: 0 .22em; }
 .fi-calc i, .fi-m i { margin-right: .04em; }
 
-/* flèches « même opération » : de part et d'autre de l'équation, centrées sur la hauteur du signe =
-   (chaque case est centrée sur sa ligne : les deux flèches sont à la même hauteur, fraction ou non),
-   un peu écartées du texte, avec l'opération écrite à l'extérieur */
-.fi-fl { position: absolute; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 2px; pointer-events: none; color: var(--accent); }
+/* flèches « même opération » : de part et d'autre de l'équation, elles partent de la hauteur du signe =
+   (chaque case est centrée sur sa ligne : les deux flèches sont à la même hauteur, fraction ou non) ;
+   le départ du tracé est à 4/46 de la hauteur du dessin (1,15em), d'où le décalage de 0,1em ;
+   un peu écartées du texte, avec l'opération écrite à l'extérieur, centrée sur le signe = */
+.fi-fl { position: absolute; top: 50%; transform: translateY(-.1em); display: flex; align-items: center; gap: 2px; pointer-events: none; color: var(--accent); }
+.fi-fl > .fi-lab { position: relative; top: -.58em; }   /* remonte de la demi-hauteur de la flèche moins 0,1em (0,475em, en em du libellé) */
 .fi-fl.g { right: 100%; margin-right: .3em; }
 .fi-fl.d { left: 100%; margin-left: .3em; }
 .fi-fl svg { width: 1.5em; height: 1.15em; flex-shrink: 0; }
@@ -103,6 +105,7 @@
     .fi-calc { font-size: 1.02rem; }
     .fi-calc.fi-avec { --fi-pad: 1.75em !important; }
     .fi-fl svg { width: 1.3em; height: 1em; }
+    .fi-fl { transform: translateY(-.087em); }   /* départ du tracé : 4/46 de 1em */
     /* libellé de l'opération sous la flèche, pour gagner de la largeur */
     .fi-fl .fi-lab { position: absolute; top: 1.05em; }
     .fi-fl .fi-lab { left: 50%; transform: translateX(-50%); }
