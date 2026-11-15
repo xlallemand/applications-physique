@@ -164,8 +164,8 @@
         const frAutre = dessous ? fraction(a, ':first-child') : fraction(a, ' + span');
         if (frAutre) {
           const rf = frAutre.getBoundingClientRect();
-          x1 = X(dir < 0 ? rf.right + 3 : rf.left - 3); y1 = Y(ra.top + ra.height / 2);
-        } else { x1 = xa; y1 = dessous ? Y(ra.bottom) + 3 : Y(ra.top) - 3; }
+          x1 = X(dir < 0 ? rf.right + 7 : rf.left - 7); y1 = Y(ra.top + ra.height / 2);
+        } else { x1 = xa; y1 = dessous ? Y(ra.bottom) + 6 : Y(ra.top) - 6; }   // hors du contour du terme
         if (dessous) {
           const bas2 = Math.max(bas, Y(rb.bottom) + 8) + k;
           if (pos === 'bas') {
@@ -177,16 +177,21 @@
             x2 = pos === 'droite' ? X(rb.right) + 2 : X(rb.left) - 2; y2 = Y(rb.bottom) - 2;
             c2 = [x2 + (pos === 'droite' ? 8 : -8), bas2];
           }
-          c1 = [x1 - (frAutre ? dir * 14 : 0), bas2];
+          c1 = [x1 - (frAutre ? dir * 32 : 0), bas2];
         } else {
           const haut2 = Math.min(haut, Y(rb.top) - 8) - k;
           x2 = pos === 'droite' ? X(rb.right) + 2 : X(rb.left) - 2; y2 = Y(rb.top) + 2;
           c2 = [x2 + (pos === 'droite' ? 8 : -8), haut2];
-          c1 = [x1 - (frAutre ? dir * 14 : 0), haut2];
+          c1 = [x1 - (frAutre ? dir * 32 : 0), haut2];
         }
         const d = 'M' + x1 + ',' + y1 + ' C' + c1 + ' ' + c2 + ' ' + x2 + ',' + y2;
-        // pointe orientée selon la tangente en fin de courbe
-        const ang = Math.atan2(y2 - c2[1], x2 - c2[0]), P = 8;
+        // pointe alignée sur la fin visible de la courbe : direction prise entre la pointe et le point
+        // de la courbe situé à une longueur de pointe en arrière (la courbe tourne encore sur ce bout)
+        const P = 9;
+        const B = t => { const u = 1 - t; return [u*u*u*x1 + 3*u*u*t*c1[0] + 3*u*t*t*c2[0] + t*t*t*x2, u*u*u*y1 + 3*u*u*t*c1[1] + 3*u*t*t*c2[1] + t*t*t*y2]; };
+        let q = B(0.99);
+        for (let t = 0.99; t > 0; t -= 0.01) { q = B(t); if (Math.hypot(x2 - q[0], y2 - q[1]) >= P) break; }
+        const ang = Math.atan2(y2 - q[1], x2 - q[0]);
         const p1 = [x2 - P * Math.cos(ang - 0.5), y2 - P * Math.sin(ang - 0.5)], p2 = [x2 - P * Math.cos(ang + 0.5), y2 - P * Math.sin(ang + 0.5)];
         const sv = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         sv.setAttribute('class', 'fi-arc');
