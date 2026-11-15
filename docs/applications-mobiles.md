@@ -215,7 +215,7 @@ Icônes : un dessin simple, lisible en petit (exemple : « t = d/v » en blanc s
 - La clé de cache est `origin + pathname`, sans l'ancre : `seance.html#comp=…` est la même page.
 - Hors ligne, une page jamais vue renvoie l'accueil.
 - Les polices Google Fonts sont gardées en cache. La progression (localStorage) n'est jamais touchée.
-- **À chaque modification d'un fichier de l'application ou d'un fichier commun qu'elle met en cache, change `VERSION`** (`equations-v1` → `equations-v2`). Sinon les téléphones gardent l'ancienne version.
+- **À chaque modification d'un fichier de l'application ou d'un fichier commun qu'elle met en cache, change `VERSION`** (`equations-v1.0` → `equations-v1.1`). Sinon les téléphones gardent l'ancienne version.
 - **Un préfixe de cache unique par application.** Le service worker d'Équations du 1er degré efface tous les caches qui commencent par `equations-`. C'est pourquoi Équations en physique utilise `eqphys-`. Vérifie les préfixes déjà pris : `grep -n "startsWith" */sw.js`.
 
 ### Inscription (`sauvegarde.js`)
