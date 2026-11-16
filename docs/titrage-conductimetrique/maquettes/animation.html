@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animation : conductivité pendant un titrage — Titrage conductimétrique (maquette)</title>
+<link rel="stylesheet" href="../../../assets/theme.css">
+<link rel="stylesheet" href="../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../../assets/titrage.css">
+<link rel="stylesheet" href="tc.css">
+<link rel="stylesheet" href="../../../assets/sommaire.css">
+<script src="../../../assets/sommaire.js"></script>
+<script src="../../../assets/titrage.js"></script>
+<script src="tc.js"></script>
+</head>
+<body>
+<!-- Maquette fonctionnelle : la page unique de l'application (un seul module, type « Manipuler ») -->
+<div id="app-nav"></div>
+<div class="er-page tc-page">
+  <div class="er-card tc-tete">
+    <div class="tc-tete-l"><span class="er-badge">ANIMATION</span><h2 class="er-titre">Conductivité pendant un titrage</h2></div>
+    <div class="tc-tete-b">
+      <div class="tc-mode" role="group" aria-label="Mode">
+        <button type="button" data-mode="demo" aria-pressed="true">Démonstration</button>
+        <button type="button" data-mode="toi" aria-pressed="false">À toi</button>
+      </div>
+      <button type="button" class="btn-small" id="plein" aria-pressed="false">⤢ Page entière</button>
+    </div>
+    <div class="tc-titrages" id="titrages" role="group" aria-label="Choix du titrage"></div>
+  </div>
+  <div class="er-card tc-zone"><div id="zone" style="flex:1;display:flex;min-width:0"></div></div>
+</div>
+<script>
+// sommaire : l'application n'a qu'un module, une seule page (maquette : liens neutralisés)
+SOM.init({ nom: 'Titrage conductimétrique', id: 'maquette-tc', plan: [
+  { n: 1, titre: 'Conductivité pendant un titrage', desc: 'Animation des ions, tableau, loi de Kohlrausch',
+    parties: [{ nom: 'Animation', simulation: 'animation', noms: { simulation: 'Animation : conductivité pendant un titrage' } }] }] });
+SOM.menu('animation');
+
+const zone = document.getElementById('zone');
+zone.className = 'tc-zone-in';
+const anim = TC.creer(zone, { titrage: 'cours', mode: 'demo', surChangement: majBoutons });
+
+// ligne de boutons des titrages
+const barre = document.getElementById('titrages');
+barre.innerHTML = TC.TITRAGES.map(t => `<button type="button" data-t="${t.id}" aria-pressed="false">${t.bouton}</button>`).join('');
+function majBoutons() {
+  const id = anim.titrage().id;
+  barre.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.t === id ? 'true' : 'false'));
+}
+barre.addEventListener('click', e => { const b = e.target.closest('button'); if (b) { anim.choisir(b.dataset.t); majBoutons(); } });
+majBoutons();
+
+// Démonstration / À toi
+document.querySelectorAll('.tc-mode button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tc-mode button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+  anim.mode(b.dataset.mode);
+}));
+
+// page entière : sans le sommaire, et en plein écran quand le navigateur le permet
+const plein = document.getElementById('plein');
+function pagEntiere(on) {
+  document.documentElement.classList.toggle('tc-plein', on);
+  plein.setAttribute('aria-pressed', on ? 'true' : 'false');
+  plein.textContent = on ? '⤡ Quitter la page entière' : '⤢ Page entière';
+}
+plein.addEventListener('click', () => {
+  const on = !document.documentElement.classList.contains('tc-plein');
+  pagEntiere(on);
+  try {
+    if (on && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+    if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  } catch (e) { /* plein écran indisponible : la page entière suffit */ }
+});
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) pagEntiere(false); });
+</script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="chimie">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maquette — Titrage conductimétrique</title>
+<link rel="stylesheet" href="../../../assets/theme.css">
+<link rel="stylesheet" href="../../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="tc.css">
+<style>
+/* styles de la présentation de la maquette (cette page ne sera pas dans l'application) */
+body { margin: 0; }
+.mq-h { font-size: 1.15rem; font-weight: 800; letter-spacing: -.02em; margin: 0 0 10px; color: var(--accent-ink); }
+.mq-h small { display: block; font-size: .88rem; font-weight: 500; color: var(--ink-2); letter-spacing: 0; margin-top: 2px; }
+.mq-liste { margin: 6px 0 0; padding-left: 20px; line-height: 1.55; }
+.mq-liste li + li { margin-top: 5px; }
+.mq-texte { line-height: 1.55; }
+.mq-texte + .mq-texte { margin-top: 8px !important; }
+.mq-tab { border-collapse: collapse; width: 100%; font-size: .9rem; line-height: 1.4; }
+.mq-tab th, .mq-tab td { border: 1px solid var(--paper-3); padding: 6px 8px; vertical-align: top; text-align: left; }
+.mq-tab thead th { background: var(--paper); font-weight: 800; }
+.mq-tab tbody th { white-space: nowrap; font-weight: 800; }
+.mq-defile { overflow-x: auto; }
+.mq-couleurs { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.mq-couleurs > div { display: flex; align-items: center; gap: 8px; background: var(--paper); border-radius: 12px; padding: 8px 10px; font-size: .86rem; }
+.mq-couleurs .tc-p { font-size: 14px; }
+.mq-etape { display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding: 10px 0; border-top: 1px dashed var(--paper-3); }
+.mq-etape:first-of-type { border-top: none; }
+.mq-num { width: 30px; height: 30px; border-radius: 999px; background: var(--accent); color: var(--sheet); display: grid; place-items: center; font-weight: 800; }
+.mq-etape h4 { margin: 3px 0 6px; font-size: 1rem; }
+.mq-deux { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mq-deux > div { background: var(--paper); border-radius: 12px; padding: 8px 10px; font-size: .9rem; line-height: 1.45; }
+.mq-deux b.t { display: block; font-size: .74rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-2); margin-bottom: 2px; }
+@media (max-width: 640px) { .mq-deux { grid-template-columns: 1fr; } }
+.mq-temps { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.mq-temps li { display: grid; grid-template-columns: 92px 1fr; gap: 8px; font-size: .9rem; line-height: 1.45; }
+.mq-temps li b:first-child { color: var(--accent-ink); font-variant-numeric: tabular-nums; }
+.mq-schema { display: grid; grid-template-columns: 1.08fr 1fr; gap: 6px; font-size: .8rem; font-weight: 700; color: var(--ink-2); text-align: center; }
+.mq-schema div { background: var(--paper); border-radius: 10px; padding: 10px 6px; }
+.mq-schema .g { display: grid; gap: 6px; }
+.mq-schema .acc { background: var(--cle-bg); color: var(--accent-ink); }
+.mq-q { background: var(--cle-bg); border-radius: 12px; padding: 8px 12px; }
+</style>
+</head>
+<body>
+<!-- Présentation de la maquette de l'application « Titrage conductimétrique » : à valider avant de développer -->
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">CHIMIE · TERMINALE SPÉCIALITÉ · MAQUETTE À VALIDER</span>
+    <h2 class="er-titre">Titrage conductimétrique : la conductivité pendant le titrage</h2>
+    <p class="er-contexte">Une application d'un seul module, rangée dans <b>« Manipuler »</b> : une page <b>« Animation : conductivité pendant un titrage »</b>. Le montage de l'application <i>titrage-pH</i> (moteur partagé <code>assets/titrage.js</code>, conductimètre à la place du pH-mètre) sert de support à une <b>loupe</b> sur la solution du bécher, où l'on voit les ions tomber, réagir et s'accumuler. Un <b>tableau</b> se complète au fil des étapes, et la courbe σ = f(V) se trace en direct.</p>
+    <p class="er-contexte" style="margin-top:10px">La maquette ci-dessous est <b>fonctionnelle</b> : les quatre titrages, les deux modes, l'animation, le tableau et la courbe marchent déjà. Essaie-la à la souris et au doigt, sur ordinateur et sur téléphone.</p>
+    <div class="tc-actions" style="margin-top:14px"><a class="btn-primary" href="animation.html" style="text-decoration:none">Ouvrir la maquette fonctionnelle →</a></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="mq-h">Ce qui a été décidé <small>D'après tes réponses aux questions</small></h3>
+    <ul class="mq-liste">
+      <li><b>Quatre titrages</b> dans la ligne de boutons du haut : exemple du cours (CH<sub>3</sub>COOH par la soude), exercice 10 (HNO<sub>3</sub> par la soude), exercice 11 (NH<sub>3</sub> par HCl), exercice 12 (Cl<sup>−</sup> par AgNO<sub>3</sub>, précipitation).</li>
+      <li><b>Ions représentés par des pastilles</b> colorées avec la formule écrite dedans. Molécules : pastille blanche cerclée (elles ne conduisent pas). Solide AgCl : petit rectangle gris clair qui tombe au fond. L'eau formée n'est pas dessinée.</li>
+      <li><b>Deux modes</b> (interrupteur en haut) : <b>Démonstration</b> (le tableau se remplit tout seul, avec l'explication de chaque case, pour la projection en classe) et <b>À toi</b> (l'élève complète le tableau par boutons, avec diagnostic de chaque erreur et « Afficher la réponse » après deux erreurs).</li>
+      <li><b>Pilotage</b> : bouton « Verser 1 mL » et « ▶ Lecture » (ajouts automatiques, pause automatique à l'équivalence) ; « ↺ Recommencer ».</li>
+      <li><b>Loupe agrandie</b> reliée au bécher du schéma par deux traits en pointillés.</li>
+      <li><b>Courbe σ = f(V)</b> tracée point par point ; la droite de chaque phase apparaît quand son coefficient directeur est trouvé dans le tableau.</li>
+      <li>λ(Cl<sup>−</sup>) = <b>7,6</b> mS·m<sup>2</sup>·mol<sup>−1</sup> partout (exercices 11 et 12).</li>
+      <li><b>Page entière</b> : le bouton « ⤢ Page entière » cache le sommaire et passe le navigateur en plein écran (Échap ou « ⤡ Quitter la page entière » pour revenir).</li>
+    </ul>
+  </div>
+
+  <div class="er-card">
+    <h3 class="mq-h">Couleurs des espèces <small>Les mêmes dans tous les titrages ; jamais de vert ni de rouge (réservés au juste / faux)</small></h3>
+    <div class="mq-couleurs">
+      <div><span class="tc-p tc-c-na">Na<sup>+</sup></span> bleu</div>
+      <div><span class="tc-p tc-c-ho">HO<sup>−</sup></span> fuchsia</div>
+      <div><span class="tc-p tc-c-h3o">H<sub>3</sub>O<sup>+</sup></span> orange</div>
+      <div><span class="tc-p tc-c-cl">Cl<sup>−</sup></span> bleu pétrole</div>
+      <div><span class="tc-p tc-c-no3">NO<sub>3</sub><sup>−</sup></span> ocre</div>
+      <div><span class="tc-p tc-c-ag">Ag<sup>+</sup></span> gris argent</div>
+      <div><span class="tc-p tc-c-ac">CH<sub>3</sub>COO<sup>−</sup></span> <span class="tc-p tc-mol tc-c-ac">CH<sub>3</sub>COOH</span> brun</div>
+      <div><span class="tc-p tc-c-nh4">NH<sub>4</sub><sup>+</sup></span> <span class="tc-p tc-mol tc-c-nh4">NH<sub>3</sub></span> violet</div>
+      <div><span class="tc-p tc-sol">AgCl</span> solide</div>
+    </div>
+    <p class="mq-texte" style="margin-top:10px">Chaque ion a sa couleur. La molécule prend la couleur de l'ion qu'elle donne (CH<sub>3</sub>COOH → CH<sub>3</sub>COO<sup>−</sup>, NH<sub>3</sub> → NH<sub>4</sub><sup>+</sup>), en pastille blanche cerclée : on voit la molécule « devenir » l'ion. Les mêmes couleurs servent pour les crochets du tableau et de la loi de Kohlrausch. Dans l'application, elles iront dans <code>assets/theme.css</code> (variables <code>--ion-*</code>, exception de la charte comme <code>--orga-*</code>).</p>
+  </div>
+
+  <div class="er-card">
+    <h3 class="mq-h">Mise en page <small>Ordinateur : tout tient dans l'écran (essayé à 1280 × 720, sommaire compris)</small></h3>
+    <div class="mq-schema">
+      <div class="g"><div class="acc">Montage (titrage-pH) + loupe sur le bécher<br>bandeau de phase : « Avant l'équivalence · V = 3,0 mL »</div><div>Légende : chaque espèce et son nombre de pastilles</div><div>Verser 1 mL · ▶ Lecture · ↺ Recommencer</div><div class="acc">Guide : 5 étapes, consigne, question (À toi) ou explication (Démonstration)</div></div>
+      <div class="g"><div class="acc">Courbe σ = f(V), V<sub>E</sub>, droites et « pente ∝ … »</div><div>Réaction de titrage</div><div>Loi de Kohlrausch</div><div class="acc">Tableau : avant / après l'équivalence, évolution, λ, coefficient directeur</div></div>
+    </div>
+    <ul class="mq-liste">
+      <li><b>Téléphone</b> : tout s'empile (montage et loupe côte à côte, puis légende, commandes collées en bas de l'écran, guide, courbe, tableau).</li>
+      <li><b>Page entière</b> : sans sommaire, la loupe et le tableau s'agrandissent.</li>
+    </ul>
+  </div>
+
+  <div class="er-card">
+    <h3 class="mq-h">Les cinq étapes <small>Affichées en haut du guide ; l'étape en cours est en couleur, les étapes faites cochées</small></h3>
+
+    <div class="mq-etape"><span class="mq-num">1</span><div>
+      <h4>Loi de Kohlrausch (V = 0)</h4>
+      <p class="mq-texte">La loupe montre le contenu initial du bécher (V<sub>E</sub> pastilles de l'espèce titrée, plus NO<sub>3</sub><sup>−</sup> pour l'exercice 10). La réaction de titrage est écrite au-dessus du tableau.</p>
+      <div class="mq-deux"><div><b class="t">Démonstration</b>La loi est écrite d'emblée, avec l'explication : seuls les ions conduisent (CH<sub>3</sub>COOH est une molécule).</div>
+        <div><b class="t">À toi</b>L'élève touche les espèces qui apparaissent dans la loi (ions de la burette, du bécher, produits ; H<sub>2</sub>O et les molécules en pièges). Diagnostic : « CH<sub>3</sub>COOH est une molécule… », « Il manque un ion qui se forme… ». « Verser » est bloqué tant que la loi n'est pas trouvée.</div></div>
+    </div></div>
+
+    <div class="mq-etape"><span class="mq-num">2</span><div>
+      <h4>Avant l'équivalence</h4>
+      <p class="mq-texte">On verse mL par mL (animation détaillée plus bas). À partir de 2 mL versés, la colonne « avant l'équivalence » du tableau s'ouvre ; la case en cours est encadrée et les pastilles de l'ion concerné sont entourées dans la loupe.</p>
+      <div class="mq-deux"><div><b class="t">Démonstration</b>Une case toutes les 2,6 s : évolution (↗ augmente, ↘ diminue, = constante, 0 reste nulle) et sa raison (« chaque HO<sup>−</sup> versé réagit aussitôt avec CH<sub>3</sub>COOH… »), puis λ (barré si la concentration est nulle ou constante), puis le coefficient directeur (5,0 + 4,1 = 9,1) et la droite sur la courbe.</div>
+        <div><b class="t">À toi</b>Pour chaque ion, 4 boutons : ↗ / ↘ / = / 0. Le λ s'écrit tout seul (barré ou non). Puis le coefficient directeur parmi 3 ou 4 sommes (pièges : tous les λ, oubli du signe −, seulement les ions de la burette). À l'équivalence, « Verser » reste bloqué tant que la colonne n'est pas finie.</div></div>
+    </div></div>
+
+    <div class="mq-etape"><span class="mq-num">3</span><div>
+      <h4>Équivalence (V = V<sub>E</sub>)</h4>
+      <p class="mq-texte">Le dernier HO<sup>−</sup> versé réagit avec le dernier CH<sub>3</sub>COOH : il n'y a plus de pastille blanche dans la loupe. <b>Pour bien voir ce moment</b> : la lecture automatique s'arrête, le bandeau de phase devient « Équivalence · V = V<sub>E</sub> = 10,0 mL » (fond vert de la matière), le cercle de la loupe clignote puis s'épaissit, la verticale V<sub>E</sub> en pointillés apparaît sur la courbe, et le guide explique ce qu'est l'équivalence.</p>
+    </div></div>
+
+    <div class="mq-etape"><span class="mq-num">4</span><div>
+      <h4>Après l'équivalence</h4>
+      <p class="mq-texte">Le bandeau passe en noir « Après l'équivalence ». À partir de V<sub>E</sub> + 2 mL, la colonne « après l'équivalence » s'ouvre, comme à l'étape 2 (Démonstration : remplissage case par case ; À toi : boutons). La seconde droite et sa pente apparaissent sur la courbe.</p>
+    </div></div>
+
+    <div class="mq-etape"><span class="mq-num">5</span><div>
+      <h4>Justification de l'allure de la courbe</h4>
+      <div class="mq-deux"><div><b class="t">Démonstration</b>La justification complète s'écrit dans le guide, comme sur ta feuille : « Avant l'équivalence, σ est croissante… Après l'équivalence, σ est croissante avec une pente plus élevée car λ(HO<sup>−</sup>) > λ(CH<sub>3</sub>COO<sup>−</sup>). »</div>
+        <div><b class="t">À toi</b>Une question à choix (« Pourquoi la pente est-elle plus forte après l'équivalence ? ») avec deux pièges diagnostiqués (« les Na<sup>+</sup> s'accumulent plus vite », « la réaction forme plus de CH<sub>3</sub>COO<sup>−</sup> »), puis la même justification écrite et des boutons vers les autres titrages.</div></div>
+    </div></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="mq-h">L'animation d'un ajout de 1 mL <small>Environ 2 s ; « Lecture » enchaîne les ajouts. Avec « réduire les animations » du système, tout est instantané.</small></h3>
+    <ul class="mq-temps">
+      <li><b>0 s</b><span>Une goutte tombe de la burette du schéma ; le volume versé et l'afficheur du conductimètre changent.</span></li>
+      <li><b>0 → 0,5 s</b><span>Dans la loupe, une goutte entre par le haut avec une pastille de chaque ion de la burette (Na<sup>+</sup> et HO<sup>−</sup>) et plonge dans la solution.</span></li>
+      <li><b>0,5 → 1,4 s</b><span><b>Avant l'équivalence</b> : l'ion qui réagit (HO<sup>−</sup>) file vers la molécule CH<sub>3</sub>COOH la plus proche ; un éclair marque la réaction ; CH<sub>3</sub>COOH devient CH<sub>3</sub>COO<sup>−</sup> (la pastille blanche se remplit de brun) et HO<sup>−</sup> s'efface. Na<sup>+</sup> va se placer dans la solution et y reste.<br>
+        <b>Après l'équivalence</b> : plus de CH<sub>3</sub>COOH, Na<sup>+</sup> et HO<sup>−</sup> vont tous les deux se placer dans la solution et s'accumulent ; les CH<sub>3</sub>COO<sup>−</sup> ne bougent plus en nombre.</span></li>
+      <li><b>1,4 s</b><span>Le point (V ; σ) s'ajoute à la courbe ; la légende met à jour le nombre de pastilles de chaque espèce.</span></li>
+    </ul>
+    <p class="mq-texte" style="margin-top:10px">Entre deux ajouts, les pastilles s'agitent doucement (sans se chevaucher), comme les ions en solution sous agitation.</p>
+    <div class="mq-defile" style="margin-top:10px"><table class="mq-tab">
+      <thead><tr><th>Titrage</th><th>Dans la goutte</th><th>Avant l'équivalence</th><th>Après l'équivalence</th></tr></thead>
+      <tbody>
+        <tr><th>Cours</th><td>Na<sup>+</sup> + HO<sup>−</sup></td><td>HO<sup>−</sup> + CH<sub>3</sub>COOH → CH<sub>3</sub>COO<sup>−</sup> : la molécule devient l'ion, HO<sup>−</sup> s'efface. Na<sup>+</sup> s'accumule.</td><td>Na<sup>+</sup> et HO<sup>−</sup> s'accumulent ; CH<sub>3</sub>COO<sup>−</sup> constant.</td></tr>
+        <tr><th>Ex 10</th><td>Na<sup>+</sup> + HO<sup>−</sup></td><td>HO<sup>−</sup> + H<sub>3</sub>O<sup>+</sup> : les deux pastilles s'effacent (eau). Na<sup>+</sup> s'accumule, NO<sub>3</sub><sup>−</sup> ne bouge pas.</td><td>Na<sup>+</sup> et HO<sup>−</sup> s'accumulent ; plus de H<sub>3</sub>O<sup>+</sup> ; NO<sub>3</sub><sup>−</sup> constant.</td></tr>
+        <tr><th>Ex 11</th><td>H<sub>3</sub>O<sup>+</sup> + Cl<sup>−</sup></td><td>H<sub>3</sub>O<sup>+</sup> + NH<sub>3</sub> → NH<sub>4</sub><sup>+</sup> : la molécule devient l'ion, H<sub>3</sub>O<sup>+</sup> s'efface. Cl<sup>−</sup> s'accumule.</td><td>Cl<sup>−</sup> et H<sub>3</sub>O<sup>+</sup> s'accumulent ; NH<sub>4</sub><sup>+</sup> constant.</td></tr>
+        <tr><th>Ex 12</th><td>Ag<sup>+</sup> + NO<sub>3</sub><sup>−</sup></td><td>Ag<sup>+</sup> + Cl<sup>−</sup> → AgCl : les deux pastilles s'unissent en un grain AgCl qui tombe au fond (tas de précipité). NO<sub>3</sub><sup>−</sup> s'accumule.</td><td>Ag<sup>+</sup> et NO<sub>3</sub><sup>−</sup> s'accumulent ; plus de Cl<sup>−</sup>.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="er-card">
+    <h3 class="mq-h">Modèle et simplifications <small>Comme dans le raisonnement du tableau</small></h3>
+    <ul class="mq-liste">
+      <li><b>1 pastille = la quantité de chaque ion apportée par 1 mL versé</b> (écrit en haut de la loupe). Le bécher contient au départ V<sub>E</sub> pastilles de l'espèce titrée : V<sub>E</sub> = 10 mL (cours, ex 10, ex 11), 11 mL (ex 12). On verse jusqu'à 20 mL (16 mL pour l'ex 12) : 40 pastilles au plus dans la loupe.</li>
+      <li><b>Dilution négligée</b> : σ = Σ λ·[X] avec [X] proportionnelle au nombre de pastilles ; la courbe est faite de deux droites dont les pentes sont celles du tableau. Valeurs prises dans les énoncés : ex 10 (0,42 → 0,12 → 0,37 S·m<sup>−1</sup>) et ex 11 (0 → 0,15 → 0,58 S·m<sup>−1</sup>) retrouvent l'allure des courbes de la feuille. Cours : c = 0,10 mol·L<sup>−1</sup> et 200 mL dans le bécher (valeurs choisies).</li>
+      <li>Acide éthanoïque et ammoniac : leur faible dissociation est négligée (σ = 0 au départ).</li>
+      <li><b>Exercice 12</b> : les autres ions de l'eau minérale (spectateurs) ne sont pas dessinés ni comptés ; σ part donc de 7,6 mS·m<sup>−1</sup> (et non de 860 comme sur la courbe de l'énoncé). Sans dilution, la baisse avant l'équivalence est très faible (pente ∝ 7,1 − 7,6 = −0,5) : c'est bien ce que dit le tableau. Sur la courbe de l'énoncé, la baisse est plus marquée car la dilution des autres ions s'y ajoute.</li>
+      <li>Le coefficient directeur est donné « à un facteur près » (∝), comme dans ton tableau : 5,0 + 4,1 = 9,1.</li>
+    </ul>
+  </div>
+
+  <div class="er-card">
+    <h3 class="mq-h">Points à valider</h3>
+    <ol class="mq-liste">
+      <li class="mq-q">Les <b>couleurs</b> des espèces (bien distinctes ? une autre pour un ion ?) et l'idée de la molécule en pastille blanche cerclée de la couleur de son ion.</li>
+      <li class="mq-q">La <b>taille de la loupe</b> et le nombre de pastilles (40 au plus à 20 mL) : lisible en projection ? Sinon, 1 pastille pour 2 mL (20 au plus).</li>
+      <li class="mq-q">Le <b>rythme de la démonstration</b> (2,6 s par case) et la <b>pause automatique</b> à l'équivalence.</li>
+      <li class="mq-q">En « À toi », l'ouverture des colonnes à <b>2 mL</b> puis <b>V<sub>E</sub> + 2 mL</b>, et le blocage de « Verser » à l'équivalence tant que la colonne « avant » n'est pas complète.</li>
+      <li class="mq-q"><b>Exercice 12</b> : garder ce choix (ions de l'eau minérale non représentés, dilution négligée) ou ajouter une valeur constante pour les autres ions ?</li>
+      <li class="mq-q">Les textes des <b>justifications</b> (étape 5) de chaque titrage.</li>
+    </ol>
+    <p class="mq-texte" style="margin-top:10px">Après validation : dossier <code>titrage-conductimetrique/</code>, accueil de l'application, page « Animation : conductivité pendant un titrage », déclaration dans le portail (Chimie, Tle spé, pastille « Manipuler »), variables de couleur dans <code>assets/theme.css</code>, vérifications de la charte (1280 px et 390 px, typographie, index de recherche).</p>
+  </div>
+</div>
+</body>
+</html>

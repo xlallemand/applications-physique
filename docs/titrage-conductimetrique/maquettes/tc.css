@@ -1,0 +1,232 @@
+/* ============================================================
+   Titrage conductimétrique : styles de l'animation (classes tc-)
+   Couleurs des espèces : variables --ion-* (exception de la charte,
+   comme --orga-* et --osc-* : une couleur par ion, la même dans tous
+   les titrages ; la formule est toujours écrite dans la pastille).
+   Dans l'application, ces variables iront dans assets/theme.css.
+   ============================================================ */
+:root {
+  --ion-na:  #2563eb;   /* Na⁺ : bleu */
+  --ion-ho:  #c026d3;   /* HO⁻ : fuchsia */
+  --ion-h3o: #ea580c;   /* H₃O⁺ : orange */
+  --ion-cl:  #0e7490;   /* Cl⁻ : bleu pétrole */
+  --ion-no3: #a16207;   /* NO₃⁻ : ocre */
+  --ion-ag:  #64748b;   /* Ag⁺ : gris argent */
+  --ion-ac:  #7c2d12;   /* CH₃COO⁻ (et la molécule CH₃COOH) : brun */
+  --ion-nh4: #6d28d9;   /* NH₄⁺ (et la molécule NH₃) : violet */
+}
+
+/* ---------- page : tout tient dans l'écran de l'ordinateur ---------- */
+body { margin: 0; }
+.tc-page { max-width: 80rem; }
+.tc-tete { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; padding: 10px 16px; margin-bottom: 10px; }
+.tc-tete-l { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-right: auto; }
+.tc-tete .er-titre { margin: 0; font-size: 1.25rem; }
+.tc-tete-b { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tc-titrages { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; }
+.tc-titrages button {
+  min-height: 38px; padding: 0 16px; border: none; border-radius: 999px; background: var(--sheet); color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 700 .9rem var(--font-sans); cursor: pointer;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.tc-titrages button:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.tc-titrages button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.tc-titrages button small { font-weight: 500; opacity: .8; }
+/* interrupteur Démonstration / À toi */
+.tc-mode { display: inline-flex; background: var(--paper); border-radius: 999px; padding: 3px; gap: 2px; }
+.tc-mode button {
+  min-height: 36px; padding: 0 14px; border: none; border-radius: 999px; background: transparent; color: var(--ink-2);
+  font: 700 .86rem var(--font-sans); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.tc-mode button[aria-pressed="true"] { background: var(--sheet); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--paper-3); }
+.tc-titrages button:focus-visible, .tc-mode button:focus-visible, .tc-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.tc-zone { padding: 12px 14px; margin-bottom: 0; }
+.tc-grille { display: grid; gap: 10px 16px; }
+.tc-gauche, .tc-droite { display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0; }
+
+/* ---------- montage + loupe ---------- */
+.tc-fig { position: relative; display: flex; align-items: center; gap: 2%; }
+.tc-montage { flex: 0 0 44%; min-width: 0; }
+.tc-montage .ttr-montage { width: 100%; }
+.tc-loupe-cercle { fill: none; stroke: var(--accent-ink); stroke-width: 2; }
+.tc-liens { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.tc-liens line { stroke: var(--accent-ink); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.tc-loupe-boite { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; z-index: 1; }
+.tc-loupe {
+  position: relative; width: 100%; aspect-ratio: 1; border-radius: 50%; overflow: hidden;
+  background: var(--sheet); box-shadow: 0 0 0 3px var(--accent-ink); transition: box-shadow .3s;
+}
+.tc-loupe-air { position: absolute; left: 0; right: 0; top: 0; height: 20%; background: var(--sheet); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 3px; }
+.tc-loupe-air span { font-size: .68rem; line-height: 1.15; color: var(--ink-2); text-align: center; }
+.tc-loupe-sol { position: absolute; left: 0; right: 0; top: 20%; bottom: 0; background: var(--cle-bg); border-top: 2px solid var(--accent); }
+.tc-loupe-parts { position: absolute; inset: 0; }
+.tc-loupe.tc-eq { box-shadow: 0 0 0 5px var(--accent); }
+.tc-loupe.tc-eq-flash { animation: tc-flash 1.5s ease-out 1; }
+@keyframes tc-flash { 0%, 40% { box-shadow: 0 0 0 10px var(--accent); } 100% { box-shadow: 0 0 0 5px var(--accent); } }
+
+/* bandeau de la phase (au-dessus de la loupe) */
+.tc-phase {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 10px; align-items: baseline; min-height: 30px;
+  padding: 4px 14px; border-radius: 999px; background: var(--paper); font-size: .86rem; text-align: center; line-height: 1.3;
+}
+.tc-phase b { font-variant-numeric: tabular-nums; }
+.tc-phase-equi { background: var(--accent); color: var(--sheet); font-weight: 700; }
+.tc-phase-apres { background: var(--ink); color: var(--sheet); }
+
+/* pastilles : ion = fond coloré, formule en blanc ; molécule = fond blanc cerclé ; solide = gris clair */
+.tc-p {
+  display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; border-radius: 999px;
+  padding: 2px 7px; font: 800 12px/1.25 var(--font-sans); color: var(--sheet); background: var(--ink-2);
+}
+.tc-p sub, .tc-p sup { font-size: .78em; line-height: 0; }
+.tc-p sup { vertical-align: .45em; }
+.tc-p sub { vertical-align: -.2em; }
+.tc-loupe-parts .tc-p { position: absolute; left: 0; top: 0; will-change: transform; transition: opacity .4s; }
+.tc-c-na { background: var(--ion-na); } .tc-c-ho { background: var(--ion-ho); } .tc-c-h3o { background: var(--ion-h3o); }
+.tc-c-cl { background: var(--ion-cl); } .tc-c-no3 { background: var(--ion-no3); } .tc-c-ag { background: var(--ion-ag); }
+.tc-c-ac { background: var(--ion-ac); } .tc-c-nh4 { background: var(--ion-nh4); }
+.tc-p.tc-mol { background: var(--sheet); box-shadow: inset 0 0 0 2px currentColor; }
+.tc-p.tc-mol.tc-c-ac { color: var(--ion-ac); } .tc-p.tc-mol.tc-c-nh4 { color: var(--ion-nh4); } .tc-p.tc-mol.tc-c-eau { color: var(--ink-2); }
+.tc-p.tc-sol { background: var(--paper); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink-2); border-radius: 4px; }
+/* texte coloré (tableau, loi) */
+.tc-c-t-na { color: var(--ion-na); } .tc-c-t-ho { color: var(--ion-ho); } .tc-c-t-h3o { color: var(--ion-h3o); }
+.tc-c-t-cl { color: var(--ion-cl); } .tc-c-t-no3 { color: var(--ion-no3); } .tc-c-t-ag { color: var(--ion-ag); }
+.tc-c-t-ac { color: var(--ion-ac); } .tc-c-t-nh4 { color: var(--ion-nh4); }
+
+.tc-pop { animation: tc-pop .5s ease-out 1; }
+@keyframes tc-pop { 0% { filter: brightness(1.8); } 100% { filter: none; } }
+.tc-loupe-parts .tc-p.tc-disparait { opacity: 0; }
+.tc-loupe-parts .tc-p.tc-surligne { outline: 3px solid var(--ink); outline-offset: 2px; z-index: 2; }
+.tc-eclair {
+  position: absolute; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%;
+  border: 3px solid var(--accent); animation: tc-eclair .65s ease-out 1 forwards; pointer-events: none;
+}
+@keyframes tc-eclair { from { transform: scale(.3); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
+.tc-goutte {
+  position: absolute; top: 0; width: 64px; height: 30px; margin-left: -32px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: var(--cle-bg); border: 1.5px solid var(--accent); animation: tc-goutte .52s ease-in 1 forwards; pointer-events: none;
+}
+@keyframes tc-goutte { from { transform: translateY(-10px); opacity: .9; } to { transform: translateY(calc(var(--l, 300px) * .22)); opacity: 0; } }
+
+/* légende : espèces et nombre de pastilles */
+.tc-legende { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; font-size: .85rem; }
+.tc-leg { display: inline-flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; }
+.tc-leg b { min-width: 2.6em; }
+.tc-leg-note { color: var(--ink-2); font-size: .76rem; }
+
+/* commandes */
+.tc-cmd { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.tc-cmd .btn-primary, .tc-cmd .btn-secondary { min-height: 44px; padding: 8px 20px; touch-action: manipulation; }
+.tc-cmd .btn-primary:disabled { opacity: .4; cursor: default; }
+.tc-cmd .btn-secondary:disabled { opacity: .4; cursor: default; }
+.tc-cmd .btn-small { min-height: 40px; }
+.tc-cmd-msg { font-size: .84rem; color: var(--ink-2); flex-basis: 100%; min-height: 0; }
+.tc-cmd-msg:empty { display: none; }
+
+/* guide : étapes et consigne / question */
+.tc-guide { background: var(--paper); border-radius: 16px; padding: 8px 12px; display: flex; flex-direction: column; gap: 8px; }
+.tc-etapes { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; counter-reset: e; }
+.tc-etapes li {
+  counter-increment: e; display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px 3px 4px; border-radius: 999px;
+  background: var(--sheet); font-size: .76rem; font-weight: 700; color: var(--ink-2);
+}
+.tc-etapes li::before { content: counter(e); display: grid; place-items: center; width: 18px; height: 18px; border-radius: 999px; background: var(--paper); font-size: .7rem; }
+.tc-etapes li.ici { background: var(--accent); color: var(--sheet); }
+.tc-etapes li.ici::before { background: var(--sheet); color: var(--accent-ink); }
+.tc-etapes li.fait::before { content: '✓'; background: var(--success-bg); color: var(--success-text); }
+.tc-guide-corps { display: flex; flex-direction: column; gap: 8px; font-size: .92rem; line-height: 1.45; }
+.tc-consigne, .tc-expl, .tc-q { margin: 0; }
+.tc-expl b:first-child { color: var(--accent-ink); }
+.tc-petit { color: var(--ink-2); font-size: .85rem; }
+.tc-choix { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.tc-choix-coef { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.tc-choix-long { grid-template-columns: 1fr; }
+.tc-choix-b { min-height: 46px; padding: 8px 10px !important; border-radius: 16px !important; font-size: .9rem; line-height: 1.3; text-align: center; font-variant-numeric: tabular-nums; }
+.tc-choix-long .tc-choix-b { text-align: left; }
+.tc-choix-b .tc-evo-s { font-size: 1.15rem; margin-right: 2px; }
+.tc-choix-b.tc-bon { background: var(--success-bg) !important; color: var(--success-text) !important; box-shadow: inset 0 0 0 2px var(--success) !important; opacity: 1 !important; }
+.tc-choix-b.tc-faux { box-shadow: inset 0 0 0 2px var(--danger) !important; color: var(--danger-text) !important; }
+.tc-choix-b:disabled { opacity: .55; cursor: default; }
+.tc-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.tc-chip {
+  min-height: 44px; padding: 0 12px; border: none; border-radius: 999px; background: var(--sheet); cursor: pointer;
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.tc-chip .tc-p { font-size: 14px; }
+.tc-chip[aria-pressed="true"] { box-shadow: inset 0 0 0 3px var(--ink); background: var(--cle-bg); }
+.tc-chip[aria-pressed="true"]::after { content: ' ✓'; font-weight: 800; }
+.tc-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.tc-actions:empty { display: none; }
+.tc-retour { padding: 8px 12px !important; border-radius: 14px !important; font-size: .9rem; line-height: 1.45; margin: 0; }
+.callout-danger.tc-retour { color: var(--danger-text); }
+
+/* ---------- colonne de droite : courbe, réaction, loi, tableau ---------- */
+.tc-courbe-z { min-height: 0; display: flex; }
+.tc-courbe-z .ttr-courbe { flex: 1; }
+.tc-courbe .ttr-lisse { display: none; }
+.tc-dr { stroke: var(--accent-ink); stroke-width: 2; }
+.tc-pente { font: 800 12px var(--font-sans); fill: var(--accent-ink); paint-order: stroke; stroke: var(--sheet); stroke-width: 4px; }
+.tc-ve { stroke: var(--accent); stroke-width: 1.6; stroke-dasharray: 5 4; }
+.tc-ve-txt { font: 800 13px var(--font-sans); fill: var(--accent-ink); }
+.tc-reaction, .tc-loi { font-size: .9rem; line-height: 1.5; }
+.tc-reac-t, .tc-loi-t { display: inline-block; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-2); margin-right: 4px; }
+.tc-loi { background: var(--paper); border-radius: 12px; padding: 5px 10px; }
+.tc-loi-ok { background: var(--cle-bg); }
+.tc-loi sub { font-size: .7em; }
+.tc-a-faire { color: var(--ink-2); font-style: italic; }
+.tc-defile { overflow-x: auto; }
+.tc-tab { border-collapse: collapse; width: 100%; font-size: .86rem; font-variant-numeric: tabular-nums; }
+.tc-tab th, .tc-tab td { border: 1px solid var(--paper-3); padding: 2px 6px; text-align: center; height: 30px; white-space: nowrap; }
+.tc-tab thead th { white-space: normal; }
+.tc-tab thead th { background: var(--paper); font-weight: 800; line-height: 1.2; font-size: .8rem; }
+.tc-tab thead th.tc-ph-ici { background: var(--cle-bg); color: var(--accent-ink); }
+.tc-tab .tc-coin { background: var(--sheet); border-top-color: transparent; border-left-color: transparent; }
+.tc-tab tbody th { font-weight: 800; font-size: .95rem; white-space: nowrap; }
+.tc-tab .tc-coef-l th { font-size: .8rem; font-weight: 700; white-space: normal; line-height: 1.2; color: var(--ink); }
+.tc-tab .tc-coef-l td { font-size: .95rem; }
+.tc-tab td.tc-actif { box-shadow: inset 0 0 0 3px var(--accent); background: var(--cle-bg); }
+.tc-evo-s { font-size: 1.1rem; font-weight: 800; line-height: 1; }
+.tc-evo-n { font-size: .74rem; color: var(--ink-2); }
+.tc-barre { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--ink-2); }
+.tc-conclusion { background: var(--cle-bg); border-radius: 14px; padding: 8px 12px; font-size: .88rem; line-height: 1.5; }
+
+/* ---------- ordinateur : deux colonnes, hauteur de l'écran ---------- */
+@media (min-width: 900px) {
+  .tc-grille { grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); }
+  .tc-courbe-z { flex: 1; min-height: 190px; }
+  .tc-guide { flex: 1; min-height: 0; overflow: auto; }
+  .tc-page { padding-top: 12px; padding-bottom: 12px; }
+}
+/* page entière : sans le sommaire, toute la largeur */
+html.tc-plein #app-nav { display: none; }
+html.tc-plein.som-nav body { padding-left: 0; }
+html.tc-plein .tc-page { max-width: none; }
+html.tc-plein .tc-montage { flex-basis: 40%; }
+
+/* ---------- téléphone : tout s'empile ---------- */
+@media (max-width: 899px) {
+  .tc-grille { grid-template-columns: minmax(0, 1fr); }
+  .tc-fig { gap: 0; }
+  .tc-montage { flex-basis: 36%; }
+  .tc-p { font-size: 10px; padding: 1px 4px; }
+  .tc-choix { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tc-courbe-z .ttr-courbe { aspect-ratio: 4 / 3; }
+  .tc-cmd { position: sticky; bottom: 0; z-index: 4; background: var(--sheet); padding: 6px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tc-pop, .tc-eclair, .tc-goutte, .tc-loupe.tc-eq-flash { animation: none; }
+  .tc-loupe-parts .tc-p { transition: none; }
+}
+@media (min-width: 900px) {
+  .tc-page { box-sizing: border-box; height: 100vh; height: 100dvh; min-height: 600px; display: flex; flex-direction: column; }
+  .tc-zone { flex: 1; display: flex; min-height: 0; }
+  .tc-grille { flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr); }
+  .tc-courbe-z { min-height: 140px; }
+  /* la figure suit la hauteur de l'écran : le guide garde sa place */
+  .tc-fig { --hfig: max(240px, calc(100vh - 455px)); justify-content: center; }
+  .tc-montage { flex: 0 0 auto; width: min(44%, calc(var(--hfig) * .78)); }
+  .tc-loupe-boite { flex: 0 1 auto; width: min(54%, calc(var(--hfig) - 30px)); }
+  html.tc-plein .tc-montage { flex-basis: auto; }
+  .tc-p { font-size: 13px; }
+}
