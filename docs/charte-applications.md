@@ -85,6 +85,8 @@ Tout vient de `assets/theme.css`. N'écris **aucune couleur en dur** dans les CS
 
 **Exception : oscilloscope** (moteur `MONTAGE`). Les voies ont leur couleur, comme sur l'appareil : `--osc-ch1` `#e8b400` (jaune) pour CH1, `--osc-ch2` `#2f6fe0` (bleu) pour CH2 (écran, boutons, pastilles). Le nom de la voie est toujours écrit.
 
+**Exception : titrage conductimétrique** (moteur `TC`, `titrage-conductimetrique/`). Une couleur par ion, la même dans tous les titrages (pastilles de l'animation, tableau, loi de Kohlrausch, équation de la réaction) : `--ion-na` bleu, `--ion-ho` fuchsia, `--ion-h3o` orange, `--ion-cl` bleu pétrole, `--ion-no3` ocre, `--ion-ag` gris argent, `--ion-ac` brun (CH₃COO⁻), `--ion-nh4` violet (NH₄⁺). La molécule prend la couleur de l'ion qu'elle donne (pastille blanche cerclée). La formule est toujours écrite.
+
 ### Forme et typographie
 
 - Police : `var(--font-sans)` (Hanken Grotesk, poids 400 à 800). Titres : `letter-spacing: -.02em`. Les nombres des tableaux et calculs : `font-variant-numeric: tabular-nums`.
