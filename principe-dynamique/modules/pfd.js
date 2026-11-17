@@ -511,7 +511,7 @@
         finie = true;
         aide.remove();
         etat.details.push({ vue, erreurs: erreursIci });
-        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
+        const titre = vue ? (mode === 'exercice' ? 'Correction' : 'Réponse') : (erreursIci ? 'C\'est juste.' : 'Juste !');
         const sol = p.solution || p.correction;
         if (sol || vue || note) {
           ret.innerHTML = `<div class="${vue ? 'callout' : 'callout-success'} er-retour ph-solution"><p><b class="${vue ? '' : 'er-ok'}">${titre}</b>${note ? ' ' + note : ''}</p>${sol ? `<div>${sol}</div>` : ''}</div>`;
@@ -550,8 +550,8 @@
 
     function intro() {
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
-        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
-          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
+        <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
+          <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
       window.scrollTo(0, 0);
@@ -563,7 +563,7 @@
       const q = qs[idx];
       window.PFD.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
       app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
-          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
+          <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">
           ${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}
@@ -583,7 +583,7 @@
         fin(p) {
           score += p; recap.push({ n: idx + 1, p });
           app.querySelector('[data-a="score"]').textContent = pts(score);
-          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
+          const titre = p === 2 ? 'Bravo, juste du premier coup !' : p === 1 ? 'C\'est juste, après au moins une erreur.' : 'La réponse a été affichée.';
           app.querySelector('[data-a="retour"]').innerHTML = `<div class="${p ? 'callout-success' : 'callout'} er-retour ph-bilan"><p><b class="${p ? 'er-ok' : ''}">${titre}</b> +${pts(p)}</p>${q.bilan ? `<p>${q.bilan}</p>` : ''}</div>`;
           const s = app.querySelector('[data-a="suite"]'), der = idx === qs.length - 1;
           s.innerHTML = `<button type="button" class="btn-primary" disabled>${der ? 'Voir mon score →' : 'Question suivante →'}</button>`;
@@ -598,10 +598,10 @@
     function fin() {
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       window.SOM.marquer({ note });                                 // meilleure note sur 20 (sommaire, accueil)
-      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
-        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
+      const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : relis le cours, puis recommence.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
         <div class="er-actions" style="justify-content:center"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer avec d'autres questions</button>
@@ -704,7 +704,7 @@
   const nomV = k => V(...NOMS[k]);
   // ce que désigne chaque nom (diagnostic d'un nom mal choisi)
   const SENS_NOM = {
-    P: `${nomV('P')} est le <b>poids</b> : la force exercée par la Terre.`,
+    P: `${nomV('P')} est le <b>poids</b> : la force exercée par la Terre.`,
     RN: `${nomV('RN')} est la <b>réaction normale</b> du support, perpendiculaire au support (N comme normale).`,
     R: `${nomV('R')} est la <b>réaction</b> du support (<span class="vec-nom">R</span> = <span class="vec-nom">R</span><sub>N</sub> + <span class="vec-nom">f</span>).`,
     f: `${nomV('f')} désigne les <b>frottements</b>.`,
@@ -927,7 +927,7 @@
       });
       if (ob.note) noms += `<text x="${f1(x + 6)}" y="${f1(yb)}" class="pfd-do-neg">${ob.note}</text>`;
     });
-    const aria = o.aria || `Diagramme objet-action du système ${sys} : ` + objets.map(ob => `${ob.nom}, ${ob.type === 'distance' ? 'action à distance' : ob.type === 'contact' ? 'action de contact' : 'type à choisir'}${ob.neglige ? ', force négligeable' : ''}`).join(' ; ');
+    const aria = o.aria || `Diagramme objet-action du système ${sys} : ` + objets.map(ob => `${ob.nom}, ${ob.type === 'distance' ? 'action à distance' : ob.type === 'contact' ? 'action de contact' : 'type à choisir'}${ob.neglige ? ', force négligeable' : ''}`).join(' ; ');
     // o.cadre = [x0, x1] : cadre imposé (diagrammes côte à côte, à la même échelle)
     const x0 = o.cadre ? o.cadre[0] : Math.max(0, Math.floor(xmin - 8)), x1 = o.cadre ? o.cadre[1] : Math.min(360, Math.ceil(xmax + 8));
     return `<svg viewBox="${x0} 0 ${x1 - x0} ${HD}" class="pfd-do" style="max-width:${Math.round(440 * (x1 - x0) / 360)}px" role="img" aria-label="${aria}">${traits}${bulles}${noms}</svg>`;
@@ -936,9 +936,9 @@
   const typeDe = (s, a) => a.type || (s.forces.find(f => f.acteur === a.id) || {}).type || 'contact';
   // les trois actions à distance possibles (la Terre toujours, plus rarement un aimant ou un objet électrisé)
   const DIST = [
-    { id: 'terre', label: 'la Terre (le poids)', court: 'Terre', manque: 'La Terre attire <b>toujours</b> le système : n\'oublie pas le poids.' },
-    { id: 'aimant', label: 'un aimant (force magnétique)', court: 'aimant', intrus: 'Aucun aimant n\'agit ici : pas de force magnétique.' },
-    { id: 'charge', label: 'un objet électrisé (force électrique)', court: 'objet électrisé', intrus: 'Aucun objet électrisé (frotté) ici : pas de force électrique.' },
+    { id: 'terre', label: 'la Terre (le poids)', court: 'Terre', manque: 'La Terre attire <b>toujours</b> le système : n\'oublie pas le poids.' },
+    { id: 'aimant', label: 'un aimant (force magnétique)', court: 'aimant', intrus: 'Aucun aimant n\'agit ici : pas de force magnétique.' },
+    { id: 'charge', label: 'un objet électrisé (force électrique)', court: 'objet électrisé', intrus: 'Aucun objet électrisé (frotté) ici : pas de force électrique.' },
   ];
   // sorte d'une action à distance, d'après le nom de sa force
   function sorteDist(s, a) {
@@ -990,7 +990,7 @@
      quand la suivante apparaît).
      Format d'une situation : voir modules/situations.js.
      ============================================================ */
-  const MANQUE = 'Il manque un objet : cherche <b>chaque objet qui touche</b> le système (l\'air aussi).';
+  const MANQUE = 'Il manque un objet : cherche <b>chaque objet qui touche</b> le système (l\'air aussi).';
   // diagramme objet-action d'une étape : il remplace celui des étapes déjà finies
   function figDo(zone, st) {
     const fig = el('div', 'pfd-do-cadre');
@@ -1026,8 +1026,8 @@
   // 1. les actions à distance : il n'y en a que trois possibles
   function partieDistance(s, st, distants) {
     const presentes = distants.map(a => sorteDist(s, a));
-    return { type: 'perso', q: `Dessine le <b>diagramme objet-action</b>. D'abord les actions <b>à distance</b> : il n'y en a que trois possibles. Lesquelles s'exercent sur ${s.systeme} ? Sélectionne-les, puis valide.`,
-      solution: `<p>${distants.map(a => `${cap(a.nom)} : ${a.pourquoi}`).join(' ; ')}. Dans le diagramme : trait en <b>pointillés</b>.</p>`,
+    return { type: 'perso', q: `Dessine le <b>diagramme objet-action</b>. D'abord les actions <b>à distance</b> : il n'y en a que trois possibles. Lesquelles s'exercent sur ${s.systeme} ? Sélectionne-les, puis valide.`,
+      solution: `<p>${distants.map(a => `${cap(a.nom)} : ${a.pourquoi}`).join(' ; ')}. Dans le diagramme : trait en <b>pointillés</b>.</p>`,
       monter(zone, api) {
         const fig = figDo(zone, st);
         const d = boutonsActs(zone, DIST, st.dist, api, st.maj);
@@ -1052,8 +1052,8 @@
   }
   // 2. une bulle pour chaque objet qui touche le système : chacun donne une force
   function partieContact(s, st, contacts) {
-    return { type: 'perso', q: `Puis les actions <b>de contact</b> : une bulle pour <b>chaque objet qui touche</b> ${s.systeme}. Chacun donne une force. Sélectionne-les, puis valide.`,
-      solution: `<p>${contacts.length ? contacts.map(a => `${cap(a.nom)} : ${a.pourquoi}`).join(' ; ') + '. Dans le diagramme : trait <b>plein</b>.' : 'Aucun objet ne touche le système.'}</p>`,
+    return { type: 'perso', q: `Puis les actions <b>de contact</b> : une bulle pour <b>chaque objet qui touche</b> ${s.systeme}. Chacun donne une force. Sélectionne-les, puis valide.`,
+      solution: `<p>${contacts.length ? contacts.map(a => `${cap(a.nom)} : ${a.pourquoi}`).join(' ; ') + '. Dans le diagramme : trait <b>plein</b>.' : 'Aucun objet ne touche le système.'}</p>`,
       monter(zone, api) {
         const fig = figDo(zone, st);
         const cands = melanger(contacts.concat(s.distracteurs || []));
@@ -1078,13 +1078,13 @@
   }
   // L'air touche le système : peut-on négliger sa force ?
   // s.air = { neglige, cause ('frottements' | 'archi', si elle n'est pas négligeable), raison, indice }
-  const REGLE_AIR = 'On néglige la force de l\'air, sauf si ses <b>frottements</b> ne sont pas négligeables (grande vitesse, grande surface : parachute…) ou si sa <b>poussée d\'Archimède</b> ne l\'est pas (objet très léger pour son volume : montgolfière, ballon d\'hélium).';
-  const OPTS_AIR = [{ id: 'oui', label: 'oui : on la néglige' }, { id: 'frottements', label: 'non : les frottements de l\'air ne sont pas négligeables' },
-    { id: 'archi', label: 'non : la poussée d\'Archimède de l\'air n\'est pas négligeable' }];
+  const REGLE_AIR = 'On néglige la force de l\'air, sauf si ses <b>frottements</b> ne sont pas négligeables (grande vitesse, grande surface : parachute…) ou si sa <b>poussée d\'Archimède</b> ne l\'est pas (objet très léger pour son volume : montgolfière, ballon d\'hélium).';
+  const OPTS_AIR = [{ id: 'oui', label: 'oui : on la néglige' }, { id: 'frottements', label: 'non : les frottements de l\'air ne sont pas négligeables' },
+    { id: 'archi', label: 'non : la poussée d\'Archimède de l\'air n\'est pas négligeable' }];
   const bonneAir = a => (a.neglige ? 'oui' : a.cause);
   function partieAir(s, st) {
     const bonne = bonneAir(s.air);
-    return { type: 'perso', q: 'L\'air touche le système : peut-on <b>négliger</b> sa force ? (Si oui, son trait est barré.)', solution: `<p>${s.air.raison}</p>`,
+    return { type: 'perso', q: 'L\'air touche le système : peut-on <b>négliger</b> sa force ? (Si oui, son trait est barré.)', solution: `<p>${s.air.raison}</p>`,
       monter(zone, api) {
         const fig = figDo(zone, st);
         const box = el('div', 'ph-choix ph-choix-col');
@@ -1123,8 +1123,8 @@
   function partieTrace(s, st) {
     const lieu = p => (p === 'G' ? 'le centre G' : 'le point ' + p);
     const cols = couleursForces(s.forces);
-    return { type: 'perso', q: `Dessine maintenant sur le schéma les forces du diagramme : pour chacune, choisis son <b>point de départ</b>, puis sa <b>direction</b> et son <b>sens</b> (sans souci d'échelle).${s.air && s.air.neglige ? ' La force de l\'air est négligée : on ne la dessine pas.' : ''}`,
-      solution: `<p>${s.forces.map((f, i) => `${i + 1}. ${cap(f.lib)} : depuis ${lieu(f.pts[0])}${f.pts.length > 1 ? ` (ou ${f.pts.slice(1).map(lieu).join(', ')})` : ''}, ${texteDir(s, f.angs[0])}`).join(' ;<br>')}.</p>`,
+    return { type: 'perso', q: `Dessine maintenant sur le schéma les forces du diagramme : pour chacune, choisis son <b>point de départ</b>, puis sa <b>direction</b> et son <b>sens</b> (sans souci d'échelle).${s.air && s.air.neglige ? ' La force de l\'air est négligée : on ne la dessine pas.' : ''}`,
+      solution: `<p>${s.forces.map((f, i) => `${i + 1}. ${cap(f.lib)} : depuis ${lieu(f.pts[0])}${f.pts.length > 1 ? ` (ou ${f.pts.slice(1).map(lieu).join(', ')})` : ''}, ${texteDir(s, f.angs[0])}`).join(' ;<br>')}.</p>`,
       monter(zone, api) {
         const pos = st.pos;
         let sel = 0, fige = false, drag = null;
@@ -1142,7 +1142,7 @@
         const verrou = i => fige || pos[i].ok;
         function dessiner() {
           figZ.innerHTML = scene(s, { forces: pos.map((p, i) => ({ pt: p.pt, ang: p.ang, num: i + 1, coul: cols[i], cote: s.forces[i].cote, L: s.forces[i].L, etat: p.etat || (i === sel && !fige ? 'actif' : '') })),
-            points: !fige, actif: pos[sel] && pos[sel].pt, aria: `${s.titre} : forces tracées` });
+            points: !fige, actif: pos[sel] && pos[sel].pt, aria: `${s.titre} : forces tracées` });
           d.querySelectorAll('.pfd-tr-chips .vec-chip').forEach(c => {
             const i = +c.dataset.i, p = pos[i];
             c.classList.toggle('actif', i === sel && !fige); c.classList.toggle('place', p.pt != null && p.ang != null);
@@ -1151,8 +1151,8 @@
           d.querySelectorAll('.pfd-pt').forEach(b => { b.setAttribute('aria-pressed', pos[sel].pt === b.dataset.pt ? 'true' : 'false'); b.disabled = verrou(sel); });
           d.querySelectorAll('.pfd-tr-dirs button').forEach(b => { b.disabled = verrou(sel); b.classList.toggle('choisi', pos[sel].ang != null && ecartAngle(+b.dataset.a, pos[sel].ang) < 1); });
           etape.innerHTML = fige ? '' : pos[sel].ok ? `La force ${sel + 1} est juste. Choisis une autre force au-dessus du dessin.`
-            : pos[sel].pt == null ? `<b>Force ${sel + 1}</b> : touche son point de départ, sur le dessin ou ci-dessous.`
-            : `<b>Force ${sel + 1}</b> : choisis sa direction et son sens avec les flèches (ou fais glisser depuis le point).`;
+            : pos[sel].pt == null ? `<b>Force ${sel + 1}</b> : touche son point de départ, sur le dessin ou ci-dessous.`
+            : `<b>Force ${sel + 1}</b> : choisis sa direction et son sens avec les flèches (ou fais glisser depuis le point).`;
         }
         const suivante = () => { const k = pos.findIndex((p, i) => i > sel && (p.pt == null || p.ang == null)); if (k >= 0) sel = k; };
         d.querySelectorAll('.pfd-tr-chips .vec-chip').forEach(c => { c.onclick = () => { if (fige) return; sel = +c.dataset.i; dessiner(); }; });
@@ -1201,7 +1201,7 @@
         bVal.onclick = () => {
           if (fige || api.fini()) return;
           const manque = pos.findIndex(p => p.pt == null || p.ang == null);
-          if (manque >= 0) { sel = manque; dessiner(); secouer(figZ); api.message(`Trace d'abord la force ${manque + 1} : ${s.forces[manque].lib}.`); return; }
+          if (manque >= 0) { sel = manque; dessiner(); secouer(figZ); api.message(`Trace d'abord la force ${manque + 1} : ${s.forces[manque].lib}.`); return; }
           const msgs = [];
           s.forces.forEach((f, i) => {
             const p = pos[i];
@@ -1209,7 +1209,7 @@
             const okPt = f.pts.indexOf(p.pt) !== -1, okAng = f.angs.some(a => ecartAngle(a, p.ang) < 3);
             if (okPt && okAng) { p.ok = true; p.etat = 'ok'; return; }
             p.etat = 'ko';
-            msgs.push(`☛ <b>Force ${i + 1}</b> (${f.lib}) : ${!okPt ? diagPt(f) : diagDir(f, p.ang)}`);
+            msgs.push(`☛ <b>Force ${i + 1}</b> (${f.lib}) : ${!okPt ? diagPt(f) : diagDir(f, p.ang)}`);
           });
           if (!msgs.length) { fige = true; doFig.dataset.fini = '1'; dessiner(); bVal.fermer(); st.maj(); api.reussi(); return; }
           sel = pos.findIndex(p => !p.ok);
@@ -1224,7 +1224,7 @@
   function partieNoms(s, st) {
     const cands = s.nomsProposes, cols = couleursForces(s.forces);
     return { type: 'perso', q: 'Donne le <b>nom</b> de chaque vecteur force (il s\'écrit aussi sur le diagramme objet-action).',
-      solution: `<p>${s.forces.map((f, i) => `${i + 1}. ${cap(f.lib)} : ${nomV(f.noms[0])}`).join(' ; ')}.</p>`,
+      solution: `<p>${s.forces.map((f, i) => `${i + 1}. ${cap(f.lib)} : ${nomV(f.noms[0])}`).join(' ; ')}.</p>`,
       monter(zone, api) {
         const d = el('div', 'pfd-noms');
         d.innerHTML = `<div class="pfd-noms-figs"><div class="pfd-do-cadre pfd-noms-do"></div><div class="pfd-sc-cadre pfd-noms-fig"></div></div>` + s.forces.map((f, i) => `<div class="pfd-nom-l" data-i="${i}"><span class="pfd-nom-lib"><span class="pfd-tr-pastille" style="background:${cols[i]}" aria-hidden="true"></span>${i + 1}. ${cap(f.lib)}</span>
@@ -1239,7 +1239,7 @@
         const dessiner = () => {
           doZ.innerHTML = diagrammeDe(s, st);
           figZ.innerHTML = scene(s, { forces: s.forces.map((f, i) => ({ pt: st.pos[i].pt || f.pts[0], ang: st.pos[i].ang == null ? f.angs[0] : st.pos[i].ang, num: i + 1, nom: st.noms[i], coul: cols[i], cote: f.cote, L: f.L })),
-            marques: Object.keys(s.points), aria: `${s.titre} : forces à nommer` });
+            marques: Object.keys(s.points), aria: `${s.titre} : forces à nommer` });
         };
         st.ecoute.push(dessiner);
         d.querySelectorAll('.pfd-nom-ch button').forEach(b => {
@@ -1277,7 +1277,7 @@
           faux.forEach(r => r.classList.add('ko'));
           api.erreur('<br>' + faux.map(r => {
             const f = s.forces[+r.dataset.i], k = r.querySelector('[aria-pressed="true"]').dataset.k;
-            return `☛ <b>Force ${+r.dataset.i + 1}</b> : ${SENS_NOM[k]} ${f.indNom || ''}`;
+            return `☛ <b>Force ${+r.dataset.i + 1}</b> : ${SENS_NOM[k]} ${f.indNom || ''}`;
           }).join('<br>'));
           secouer(d);
         };
@@ -1287,8 +1287,8 @@
   }
   function partieComp(s) {
     const autre = s.comp.bonne === 'oui' ? 'non' : 'oui';
-    return { type: 'choix', q: s.comp.q || 'Ces forces se compensent-elles ?', melanger: false, colonne: true,
-      options: [{ id: 'oui', label: 'oui : leur somme est nulle' }, { id: 'non', label: 'non : leur somme n\'est pas nulle' }], bonne: s.comp.bonne,
+    return { type: 'choix', q: s.comp.q || 'Ces forces se compensent-elles ?', melanger: false, colonne: true,
+      options: [{ id: 'oui', label: 'oui : leur somme est nulle' }, { id: 'non', label: 'non : leur somme n\'est pas nulle' }], bonne: s.comp.bonne,
       indices: { [autre]: s.comp.indice }, solution: `<p>${s.comp.expl}</p>` };
   }
   function bilan(s, opts) {
@@ -1316,7 +1316,7 @@
   // scène avec toutes ses forces tracées et nommées (exemples, fiches, corrections)
   const sceneRemplie = (s, o) => {
     const cols = couleursForces(s.forces);
-    return scene(s, Object.assign({ forces: s.forces.map((f, i) => ({ pt: f.pts[0], ang: f.angs[0], nom: f.noms[0], coul: cols[i], cote: f.cote, L: f.L })), marques: Object.keys(s.points), aria: `${s.titre} : bilan des forces` }, o));
+    return scene(s, Object.assign({ forces: s.forces.map((f, i) => ({ pt: f.pts[0], ang: f.angs[0], nom: f.noms[0], coul: cols[i], cote: f.cote, L: f.L })), marques: Object.keys(s.points), aria: `${s.titre} : bilan des forces` }, o));
   };
 
   /* ============================================================
@@ -1329,13 +1329,13 @@
      ============================================================ */
   function infoForces() {
     // petit dessin : un bloc posé sur un support, une force depuis le centre G ou depuis le point de contact A
-    const bloc = dist => `<svg viewBox="0 0 150 104" class="pfd-info-sc" role="img" aria-label="${dist ? 'Force à distance : la flèche part du centre G' : 'Force de contact : la flèche part du point de contact A'}">
+    const bloc = dist => `<svg viewBox="0 0 150 104" class="pfd-info-sc" role="img" aria-label="${dist ? 'Force à distance : la flèche part du centre G' : 'Force de contact : la flèche part du point de contact A'}">
         <line x1="12" y1="66" x2="138" y2="66" class="pfd-sc-sol"/>${[24, 40, 56, 72, 88, 104, 120, 136].map(x => `<line x1="${x}" y1="67" x2="${x - 7}" y2="74" class="pfd-sc-hach"/>`).join('')}
         <rect x="48" y="36" width="54" height="30" class="pfd-sc-sys"/>
         ${dist ? fleche(75, 51, 270, '', 0, 46, COUL.P).svg + '<circle cx="75" cy="51" r="3.5" class="pfd-pt-m"/><text x="81" y="47" class="pfd-pt-t">G</text>'
     : fleche(75, 66, 90, '', 0, 52, COUL.RN).svg + '<circle cx="75" cy="66" r="3.5" class="pfd-pt-m"/><text x="81" y="82" class="pfd-pt-t">A</text>'}</svg>`;
     // petit diagramme objet-action : un objet relié au système
-    const mini = (obj, dist) => `<svg viewBox="0 0 170 38" class="pfd-info-do" role="img" aria-label="Diagramme objet-action : ${obj} relié au système par un trait ${dist ? 'en pointillés' : 'plein'}">
+    const mini = (obj, dist) => `<svg viewBox="0 0 170 38" class="pfd-info-do" role="img" aria-label="Diagramme objet-action : ${obj} relié au système par un trait ${dist ? 'en pointillés' : 'plein'}">
         <line x1="58" y1="19" x2="104" y2="19" class="pfd-do-l${dist ? ' dist' : ''}"/>
         <ellipse cx="32" cy="19" rx="28" ry="14" class="pfd-do-obj"/><text x="32" y="23" text-anchor="middle" class="pfd-do-t">${obj}</text>
         <ellipse cx="134" cy="19" rx="32" ry="15" class="pfd-do-sys"/><text x="134" y="23" text-anchor="middle" class="pfd-do-t">système</text></svg>`;
@@ -1347,21 +1347,21 @@
     };
     return `<div class="pfd-info">
       <section class="pfd-info-c" aria-label="D'abord les forces à distance">
-        <p class="pfd-info-t"><span class="pfd-info-n">1</span><span>D'abord : les forces <b>à distance</b></span></p>
-        <p class="pfd-info-s">Il n'y en a que <b>trois</b> possibles :</p>
+        <p class="pfd-info-t"><span class="pfd-info-n">1</span><span>D'abord : les forces <b>à distance</b></span></p>
+        <p class="pfd-info-s">Il n'y en a que <b>trois</b> possibles :</p>
         <ul class="pfd-info-l">
           <li>${ic.terre}<span><b>le poids</b> ${nomV('P')}<small>exercé par la Terre (toujours)</small></span></li>
           <li>${ic.aimant}<span><b>la force magnétique</b> ${nomV('Fmag')}<small>s'il y a des aimants</small></span></li>
           <li>${ic.charges}<span><b>la force électrique</b> ${nomV('Felec')}<small>s'il y a des charges + ou −</small></span></li></ul>
         <div class="pfd-info-fig">${bloc(true)}<p>La flèche part du <b>centre</b> G du système.</p></div>
-        <div class="pfd-info-fig">${mini('Terre', true)}<p>Diagramme objet-action : trait en <b>pointillés</b>.</p></div>
+        <div class="pfd-info-fig">${mini('Terre', true)}<p>Diagramme objet-action : trait en <b>pointillés</b>.</p></div>
       </section>
       <section class="pfd-info-c" aria-label="Puis les forces de contact">
-        <p class="pfd-info-t"><span class="pfd-info-n">2</span><span>Puis : les forces <b>de contact</b></span></p>
-        <p class="pfd-info-s"><b>Chaque objet qui touche</b> le système exerce une force :</p>
+        <p class="pfd-info-t"><span class="pfd-info-n">2</span><span>Puis : les forces <b>de contact</b></span></p>
+        <p class="pfd-info-s"><b>Chaque objet qui touche</b> le système exerce une force :</p>
         <ul class="pfd-info-chips"><li>le support (sol, table…)</li><li>un fil, une corde, un ressort</li><li>une main, un pied</li><li>un liquide (eau, huile…)</li><li><b>l'air</b>, toujours</li></ul>
         <div class="pfd-info-fig">${bloc(false)}<p>La flèche part du <b>point de contact</b> A.</p></div>
-        <div class="pfd-info-fig">${mini('sol', false)}<p>Diagramme objet-action : trait <b>plein</b>.</p></div>
+        <div class="pfd-info-fig">${mini('sol', false)}<p>Diagramme objet-action : trait <b>plein</b>.</p></div>
       </section>
     </div>`;
   }
@@ -1410,7 +1410,7 @@
         : `<polyline points="${Array.from({ length: 81 }, (_, k) => T.pt(k / 80).map(v => v.toFixed(1)).join(',')).join(' ')}" class="pfd-chrono-axe trajet"/>`;
       const dep = T.dep ? `<text x="${(ps[0][0] + T.dep[0]).toFixed(1)}" y="${(ps[0][1] + T.dep[1]).toFixed(1)}" text-anchor="${T.dep[2]}" class="pfd-chrono-dep">départ</text>` : '';
       div.classList.add('pfd-chrono');
-      div.innerHTML = `${o.titre ? `<p class="pfd-chrono-t">${o.titre}</p>` : ''}<div class="pfd-chrono-l${traj === 'rectiligne' ? '' : ' haut'}"><svg viewBox="0 0 360 ${T.h}" role="img" aria-label="Chronophotographie : positions successives à intervalles de temps égaux"></svg>
+      div.innerHTML = `${o.titre ? `<p class="pfd-chrono-t">${o.titre}</p>` : ''}<div class="pfd-chrono-l${traj === 'rectiligne' ? '' : ' haut'}"><svg viewBox="0 0 360 ${T.h}" role="img" aria-label="Chronophotographie : positions successives à intervalles de temps égaux"></svg>
         ${o.anim === false ? '' : '<button type="button" class="btn-small pfd-rejouer" aria-label="Rejouer l\'animation">↺</button>'}</div>`;
       const svg = div.querySelector('svg'), bt = div.querySelector('.pfd-rejouer');
       let minuteur = null;
@@ -1444,27 +1444,27 @@
   const SENS_VIT = { uniforme: 'la vitesse est <b>constante</b> (positions régulièrement espacées)', accelere: 'la vitesse <b>augmente</b> (positions de plus en plus espacées)', decelere: 'la vitesse <b>diminue</b> (positions de moins en moins espacées)' };
   // diagnostic ciblé d'un mot mal choisi, d'après une chronophotographie
   function diagTraj(choisi, bon) {
-    if (bon === 'rectiligne') return 'Les positions sont <b>alignées</b> : la trajectoire est une droite.';
+    if (bon === 'rectiligne') return 'Les positions sont <b>alignées</b> : la trajectoire est une droite.';
     if (choisi === 'rectiligne') return 'Les positions ne sont pas alignées sur une droite.';
-    return bon === 'circulaire' ? 'Les positions sont sur un <b>cercle</b> : on dit circulaire (curviligne, c\'est pour une courbe quelconque).'
-      : 'La courbe n\'est pas un cercle : sa courbure change. On dit curviligne.';
+    return bon === 'circulaire' ? 'Les positions sont sur un <b>cercle</b> : on dit circulaire (curviligne, c\'est pour une courbe quelconque).'
+      : 'La courbe n\'est pas un cercle : sa courbure change. On dit curviligne.';
   }
   function diagVit(choisi, bon) {
-    if (bon === 'uniforme') return 'Les écarts entre deux positions successives sont <b>égaux</b> : la vitesse ne change pas.';
-    if (choisi === 'uniforme') return 'Les écarts entre deux positions successives ne sont pas égaux : la vitesse change.';
-    return bon === 'accelere' ? 'Les écarts entre deux positions successives <b>augmentent</b> : le mobile va de plus en plus vite.'
-      : 'Les écarts entre deux positions successives <b>diminuent</b> : le mobile va de moins en moins vite.';
+    if (bon === 'uniforme') return 'Les écarts entre deux positions successives sont <b>égaux</b> : la vitesse ne change pas.';
+    if (choisi === 'uniforme') return 'Les écarts entre deux positions successives ne sont pas égaux : la vitesse change.';
+    return bon === 'accelere' ? 'Les écarts entre deux positions successives <b>augmentent</b> : le mobile va de plus en plus vite.'
+      : 'Les écarts entre deux positions successives <b>diminuent</b> : le mobile va de moins en moins vite.';
   }
   function partieMouvement(o) {
     const ind = o.ind || {};
     const okVit = v => v === o.vit || (o.vit === 'decelere' && v === 'ralenti');
-    return { type: 'perso', q: o.q || 'Décris le mouvement avec <b>deux mots</b> : la trajectoire, puis la vitesse.',
-      solution: o.solution || `<p>Mouvement <b>${o.traj} ${motVit(o.vit)}</b> : ${SENS_TRAJ[o.traj]} et ${SENS_VIT[o.vit]}.</p>`,
+    return { type: 'perso', q: o.q || 'Décris le mouvement avec <b>deux mots</b> : la trajectoire, puis la vitesse.',
+      solution: o.solution || `<p>Mouvement <b>${o.traj} ${motVit(o.vit)}</b> : ${SENS_TRAJ[o.traj]} et ${SENS_VIT[o.vit]}.</p>`,
       monter(zone, api) {
         const d = el('div', 'pfd-mvt');
         const ligne = (k, titre, mots) => `<div class="pfd-type pfd-mvt-l" data-k="${k}"><span class="pfd-type-nom">${titre}</span>
           <span class="pfd-type-b pfd-mvt-b" role="group" aria-label="${titre.replace(/<[^>]+>/g, '')}">${mots.map(([id, t]) => `<button type="button" data-v="${id}" aria-pressed="false">${t}</button>`).join('')}</span></div>`;
-        d.innerHTML = ligne('traj', '1<sup>er</sup> mot : la trajectoire', MOTS_TRAJ) + ligne('vit', '2<sup>e</sup> mot : la vitesse', MOTS_VIT) + '<p class="pfd-mvt-res" aria-live="polite"></p>';
+        d.innerHTML = ligne('traj', '1<sup>er</sup> mot : la trajectoire', MOTS_TRAJ) + ligne('vit', '2<sup>e</sup> mot : la vitesse', MOTS_VIT) + '<p class="pfd-mvt-res" aria-live="polite"></p>';
         zone.appendChild(d);
         const bVal = boutonValider(zone);
         const choix = { traj: null, vit: null }, res = d.querySelector('.pfd-mvt-res');
@@ -1496,8 +1496,8 @@
           const okT = choix.traj === o.traj, okV = okVit(choix.vit);
           if (okT && okV) { figer(false); api.reussi(); return; }
           const msgs = [];
-          if (!okT) { d.querySelector('[data-k="traj"]').classList.add('ko'); msgs.push('☛ <b>Trajectoire</b> : ' + (ind.traj || diagTraj(choix.traj, o.traj))); }
-          if (!okV) { d.querySelector('[data-k="vit"]').classList.add('ko'); msgs.push('☛ <b>Vitesse</b> : ' + (ind.vit || diagVit(choix.vit === 'ralenti' ? 'decelere' : choix.vit, o.vit))); }
+          if (!okT) { d.querySelector('[data-k="traj"]').classList.add('ko'); msgs.push('☛ <b>Trajectoire</b> : ' + (ind.traj || diagTraj(choix.traj, o.traj))); }
+          if (!okV) { d.querySelector('[data-k="vit"]').classList.add('ko'); msgs.push('☛ <b>Vitesse</b> : ' + (ind.vit || diagVit(choix.vit === 'ralenti' ? 'decelere' : choix.vit, o.vit))); }
           api.erreur('<br>' + msgs.join('<br>'));
           secouer(d);
         };
@@ -1519,7 +1519,7 @@
   function repere(zone, o, aTracer) {
     const E = o.etendue || 5;
     return new window.VEC.Repere(zone, { xmin: -E, xmax: E, ymin: -E, ymax: E, axes: false, unitaires: false, mode: 'mixte',
-      points: [{ nom: 'G', x: 0, y: 0, dx: -10, dy: 16 }], aria: o.aria || 'Quadrillage : forces appliquées au point G',
+      points: [{ nom: 'G', x: 0, y: 0, dx: -10, dy: 16 }], aria: o.aria || 'Quadrillage : forces appliquées au point G',
       // une couleur par force (Σ F⃗, déjà tracée, en noir)
       vecteurs: o.forces.map((f, i) => ({ nom: f.nom, dep: [0, 0], coord: f.coord, fixe: true, coul: f.nom === 'ΣF' ? window.VEC.C.encre : COUL_QUAD[i % COUL_QUAD.length], nomPos: f.nomPos })).concat([aTracer]) });
   }
@@ -1538,8 +1538,8 @@
           const d = [v.fin[0], v.fin[1]];
           const partielle = o.forces.length > 1 && o.forces.some((f, i) => { const sans = somme(o.forces.filter((_, k) => k !== i)); return sans[0] === d[0] && sans[1] === d[1]; });
           api.erreur(d[0] === -S[0] && d[1] === -S[1] ? 'Le sens est inversé.'
-            : partielle ? 'Il manque une force : additionne <b>toutes</b> les forces.'
-            : 'Mets les flèches bout à bout : la résultante va de G à l\'extrémité de la dernière flèche. Deux forces opposées se soustraient ; deux forces perpendiculaires donnent la diagonale du rectangle.');
+            : partielle ? 'Il manque une force : additionne <b>toutes</b> les forces.'
+            : 'Mets les flèches bout à bout : la résultante va de G à l\'extrémité de la dernière flèche. Deux forces opposées se soustraient ; deux forces perpendiculaires donnent la diagonale du rectangle.');
         };
         return { montrer() { rep.montrer(); bVal.fermer(); } };
       } };
@@ -1558,7 +1558,7 @@
           const d = v.fin, croix = d[0] * S[1] - d[1] * S[0], scal = d[0] * S[0] + d[1] * S[1];
           if (croix === 0 && scal > 0) { v.etat = 'ok'; v.bloque = true; rep.verrou = true; rep.dessiner(); bVal.fermer(); api.reussi(); return; }
           v.etat = 'ko'; rep.dessiner();
-          api.erreur(croix === 0 ? 'La direction est bonne, mais le <b>sens</b> est inversé : <span class="vec-nom">a</span> a le même sens que Σ <span class="vec-nom">F</span>.' : '<span class="vec-nom">a</span> a la <b>même direction</b> et le <b>même sens</b> que Σ <span class="vec-nom">F</span> (sa longueur n\'a pas d\'importance ici).');
+          api.erreur(croix === 0 ? 'La direction est bonne, mais le <b>sens</b> est inversé : <span class="vec-nom">a</span> a le même sens que Σ <span class="vec-nom">F</span>.' : '<span class="vec-nom">a</span> a la <b>même direction</b> et le <b>même sens</b> que Σ <span class="vec-nom">F</span> (sa longueur n\'a pas d\'importance ici).');
         };
         return { montrer() { rep.montrer(); bVal.fermer(); } };
       } };
@@ -1574,35 +1574,35 @@
       // six sous-modules de cours, puis l'atelier (page « exemple » : entre les cours et les questions), les questions et la fiche
       sousModules: true,
       parties: [
-        { nom: 'Forces à distance, forces de contact', slug: 'distance', cours: 'module_2a_cours', noms: { cours: 'Cours : forces à distance, forces de contact' } },
-        { nom: 'Méthode du diagramme objet-action', slug: 'diagramme', cours: 'module_2b_cours', noms: { cours: 'Cours : méthode du diagramme objet-action' } },
-        { nom: 'Force de l\'air', slug: 'air', cours: 'module_2c_cours', noms: { cours: 'Cours : force de l\'air' } },
-        { nom: 'Poids', slug: 'poids', cours: 'module_2d_cours', noms: { cours: 'Cours : poids' } },
-        { nom: 'Réaction du support', slug: 'reaction', cours: 'module_2e_cours', noms: { cours: 'Cours : réaction du support' } },
-        { nom: 'Forces qui se compensent', slug: 'compensation', cours: 'module_2f_cours', noms: { cours: 'Cours : forces qui se compensent' } },
-        { nom: 'Bilan des forces', exemple: 'module_2_simulation', questions: 'module_2_questions', noms: { exemple: 'Atelier : bilan des forces' } }] },
-    { n: 3, titre: 'Accélération', desc: 'a = dv/dt ; a = Δv / Δt en m·s<sup>−2</sup>', fiche: 'fiche_3',
+        { nom: 'Forces à distance, forces de contact', slug: 'distance', cours: 'module_2a_cours', noms: { cours: 'Cours : forces à distance, forces de contact' } },
+        { nom: 'Méthode du diagramme objet-action', slug: 'diagramme', cours: 'module_2b_cours', noms: { cours: 'Cours : méthode du diagramme objet-action' } },
+        { nom: 'Force de l\'air', slug: 'air', cours: 'module_2c_cours', noms: { cours: 'Cours : force de l\'air' } },
+        { nom: 'Poids', slug: 'poids', cours: 'module_2d_cours', noms: { cours: 'Cours : poids' } },
+        { nom: 'Réaction du support', slug: 'reaction', cours: 'module_2e_cours', noms: { cours: 'Cours : réaction du support' } },
+        { nom: 'Forces qui se compensent', slug: 'compensation', cours: 'module_2f_cours', noms: { cours: 'Cours : forces qui se compensent' } },
+        { nom: 'Bilan des forces', exemple: 'module_2_simulation', questions: 'module_2_questions', noms: { exemple: 'Atelier : bilan des forces' } }] },
+    { n: 3, titre: 'Accélération', desc: 'a = dv/dt ; a = Δv / Δt en m·s<sup>−2</sup>', fiche: 'fiche_3',
       // cinq sous-modules de cours, puis les questions et la fiche
       sousModules: true,
       parties: [
-        { nom: 'Définition de l\'accélération', slug: 'definition', cours: 'module_3a_cours', noms: { cours: 'Cours : définition de l\'accélération' } },
-        { nom: 'Dériver la vitesse', slug: 'derivee', cours: 'module_3b_cours', noms: { cours: 'Cours : dériver la vitesse' } },
-        { nom: 'Vitesse constante', slug: 'constante', cours: 'module_3c_cours', noms: { cours: 'Cours : vitesse constante' } },
-        { nom: 'Accélération constante', slug: 'delta', cours: 'module_3d_cours', noms: { cours: 'Cours : accélération constante' } },
-        { nom: 'Accélération et forces', slug: 'forces', cours: 'module_3e_cours', noms: { cours: 'Cours : accélération et forces' } },
+        { nom: 'Définition de l\'accélération', slug: 'definition', cours: 'module_3a_cours', noms: { cours: 'Cours : définition de l\'accélération' } },
+        { nom: 'Dériver la vitesse', slug: 'derivee', cours: 'module_3b_cours', noms: { cours: 'Cours : dériver la vitesse' } },
+        { nom: 'Vitesse constante', slug: 'constante', cours: 'module_3c_cours', noms: { cours: 'Cours : vitesse constante' } },
+        { nom: 'Accélération constante', slug: 'delta', cours: 'module_3d_cours', noms: { cours: 'Cours : accélération constante' } },
+        { nom: 'Accélération et forces', slug: 'forces', cours: 'module_3e_cours', noms: { cours: 'Cours : accélération et forces' } },
         { nom: 'Accélération', questions: 'module_3_questions' }] },
     { n: 4, titre: 'Principe fondamental de la dynamique', desc: 'Σ <span class="vec-nom">F</span> = m <span class="vec-nom">a</span>, principe d\'inertie, résultante des forces', fiche: 'fiche_4',
       // quatre sous-modules de cours, puis les questions et la fiche
       sousModules: true,
       parties: [
-        { nom: 'Principe fondamental de la dynamique', slug: 'pfd', cours: 'module_4a_cours', noms: { cours: 'Cours : principe fondamental de la dynamique' } },
-        { nom: 'Principe d\'inertie', slug: 'inertie', cours: 'module_4b_cours', noms: { cours: 'Cours : principe d\'inertie' } },
-        { nom: 'Résultante des forces et accélération', slug: 'direction', cours: 'module_4c_cours', noms: { cours: 'Cours : résultante des forces et accélération' } },
-        { nom: 'Méthode type', slug: 'methode', cours: 'module_4d_cours', noms: { cours: 'Cours : méthode type' } },
+        { nom: 'Principe fondamental de la dynamique', slug: 'pfd', cours: 'module_4a_cours', noms: { cours: 'Cours : principe fondamental de la dynamique' } },
+        { nom: 'Principe d\'inertie', slug: 'inertie', cours: 'module_4b_cours', noms: { cours: 'Cours : principe d\'inertie' } },
+        { nom: 'Résultante des forces et accélération', slug: 'direction', cours: 'module_4c_cours', noms: { cours: 'Cours : résultante des forces et accélération' } },
+        { nom: 'Méthode type', slug: 'methode', cours: 'module_4d_cours', noms: { cours: 'Cours : méthode type' } },
         { nom: 'Principe fondamental de la dynamique', questions: 'module_4_questions' }] },
     { n: 5, titre: 'Exercices', desc: 'Exercices 1, 2, 3 et 5 à 19 de la feuille (p. 84-87), guidés pas à pas', exercices: 'module_5', exNom: 'Exercices 1 à 19', nbEx: 11 },
   ];
-  window.SOM.init({ nom: 'Chapitre 6 : Principe fondamental de la dynamique', id: 'principe-dynamique', cleEx: 'principe-dynamique-exercices', plan: PLAN, flashcards: true });
+  window.SOM.init({ nom: 'Chapitre 6 : Principe fondamental de la dynamique', id: 'principe-dynamique', cleEx: 'principe-dynamique-exercices', plan: PLAN, flashcards: true });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);
