@@ -2,27 +2,31 @@
    Double périodicité d'une onde — moteur du simulateur (objet DP)
 
    Un émetteur E (x = 0) émet, à partir de t = 0, une onde périodique
-   de fréquence f qui se propage à la célérité c vers un récepteur R
-   placé à la distance D.
+   de fréquence f qui se propage à la célérité c. Le récepteur R est
+   placé à la distance D ; le milieu représenté s'étend une longueur
+   d'onde au-delà de R (de 0 à D + λ).
      y(x, t) = g(f × (t − x / c))  si t ≥ x / c,  0 sinon
    g : motif de période 1 (sinusoïde ou somme de trois harmoniques),
    normalisé pour que sa crête vaille 1.
 
    Deux graphes, tracés en direct :
-     - périodicité spatiale : y(x) entre E et R à l'instant t ;
+     - périodicité spatiale : y(x) de E jusqu'à λ après R, à l'instant t ;
      - périodicité temporelle : signal reçu par R en fonction de t.
    Repères continus : à t = T, 2T, 3T… le front de l'onde est à
-   λ, 2λ, 3λ… (repères sur les deux graphes, jusqu'à R).
-   Démonstration « Suivre l'onde pendant T » : une crête, à une
-   longueur d'onde de R, est suivie pendant une période ; elle
-   arrive en R : distance parcourue pendant T = λ, donc c = λ / T.
+   λ, 2λ, 3λ… (repères sur les deux graphes, jusqu'au bout du milieu).
+   Démonstration « Suivre l'onde pendant T » : une crête est suivie
+   pendant une période à partir de R ; elle s'éloigne de R d'une
+   longueur d'onde : distance parcourue pendant T = λ, donc c = λ / T.
+   Illustrations de mise en situation : on filme l'onde (graphe du
+   haut), un stylo suit le signal sur un papier qui défile (bas).
 
    API : DP.etat (lecture seule, pour les tests).
    ============================================================ */
 const DP = (function () {
   'use strict';
 
-  const D = 6;                         // distance émetteur – récepteur (m)
+  const D = 4;                         // distance émetteur – récepteur (m)
+  const BASE = 0.5;                    // vitesse de base de l'animation (« × 1 » : 0,5 s simulée par seconde)
   const NB = ' ';                 // espace insécable
   const UC = 'm·s<sup>−1</sup>';       // unité de la célérité
 
@@ -53,8 +57,9 @@ const DP = (function () {
   };
   const T = () => 1 / etat.f;
   const lam = () => etat.c / etat.f;
+  const L = () => D + lam();            // longueur du milieu représenté : jusqu'à λ après R
   const t0 = () => D / etat.c;          // arrivée du front en R
-  const nMax = () => Math.floor(D / lam() + 1e-9);   // repères λ entre E et R
+  const nMax = () => Math.floor(L() / lam() + 1e-9); // repères λ dans le milieu représenté
 
   // élongation au point x à l'instant t
   function y(x, t) {
@@ -92,7 +97,7 @@ const DP = (function () {
   function image(ms) {
     const dt = Math.min(0.1, (ms - avant) / 1000);     // onglet en arrière-plan : pas de saut
     avant = ms;
-    if (etat.lecture) avancer(dt * etat.vitesse);
+    if (etat.lecture) avancer(dt * etat.vitesse * BASE);
     rendre();
     boucle = etat.lecture ? requestAnimationFrame(image) : 0;
   }
@@ -134,29 +139,29 @@ const DP = (function () {
   const svg = (W, H, label, corps) =>
     `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${label}">${corps}</svg>`;
 
-  // --- périodicité spatiale : y(x) entre E (x = 0) et R (x = D) ---
+  // --- périodicité spatiale : y(x) de E (x = 0) à λ après R (x = D + λ) ---
   function dessinerEspace() {
     const W = zEsp.clientWidth, H = zEsp.clientHeight;
     if (!W || !H) return;
-    const m = { g: 64, d: 64, h: 30, b: 26 };
-    const pw = W - m.g - m.d, ph = H - m.h - m.b;
-    const X = x => m.g + x / D * pw, yc = m.h + ph / 2, A = ph * 0.4, Y = v => yc - v * A;
+    const m = { g: 64, d: 52, h: 30, b: 44 };   // en bas : étiquette R puis graduations
+    const pw = W - m.g - m.d, ph = H - m.h - m.b, Lm = L();
+    const X = x => m.g + x / Lm * pw, yc = m.h + ph / 2, A = ph * 0.36, Y = v => yc - v * A;
     const t = etat.t, l = lam(), neuf = performance.now() - etat.neuf < 900;
     let s = '';
-    // grille et graduations en mètres
-    const p = pasGrad(D, pw), dec = decimales(p);
-    for (let k = 0; k * p <= D + 1e-9; k++) {
+    // grille et graduations en mètres (sous l'étiquette du récepteur)
+    const p = pasGrad(Lm, pw), dec = decimales(p);
+    for (let k = 0; k * p <= Lm + 1e-9; k++) {
       const x = X(k * p);
       s += `<line class="dp-grille" x1="${n2(x)}" y1="${m.h}" x2="${n2(x)}" y2="${n2(m.h + ph)}"/>` +
-        `<text class="dp-grad" x="${n2(x)}" y="${n2(m.h + ph + 17)}">${fixe(k * p, dec)}</text>`;
+        `<text class="dp-grad" x="${n2(x)}" y="${n2(m.h + ph + 37)}">${fixe(k * p, dec)}</text>`;
     }
     [-1, 1].forEach(v => { s += `<line class="dp-grille" x1="${m.g}" y1="${n2(Y(v))}" x2="${n2(m.g + pw)}" y2="${n2(Y(v))}"/>`; });
-    s += `<text class="dp-nom-axe" x="${n2(m.g + pw + 20)}" y="${n2(m.h + ph + 17)}">x (m)</text>`;
+    s += `<text class="dp-nom-axe" x="${n2(m.g + pw + 20)}" y="${n2(m.h + ph + 37)}">x (m)</text>`;
     // démonstration : bande parcourue par la crête suivie
     const d = etat.demo;
     let demoDessus = '';
     if (d && d.phase !== 'attente') {
-      const x1 = D - l, xc = Math.min(D, x1 + etat.c * (t - d.t1));
+      const x1 = D, xc = Math.min(Lm, x1 + etat.c * (t - d.t1));     // la crête part de R
       s += `<rect class="dp-bande" x="${n2(X(x1))}" y="${m.h}" width="${n2(X(xc) - X(x1))}" height="${n2(ph)}"/>`;
       const hF = m.h + ph - 12;
       const txt = d.phase === 'fin' ? (etat.masque ? 'λ' : 'λ = ' + fmt(l) + NB + 'm') : 'distance parcourue';
@@ -166,36 +171,37 @@ const DP = (function () {
         `<circle class="dp-marque" cx="${n2(X(xc))}" cy="${n2(Y(y(xc, t)))}" r="7"/>`;
     }
     // repères λ, 2λ… atteints par le front (étiquettes espacées d'au moins 26 px)
-    const saut = Math.max(1, Math.ceil(26 / (l / D * pw)));
+    const saut = Math.max(1, Math.ceil(26 / (l / Lm * pw)));
     for (let n = 1; n <= etat.nRep; n++)
       s += repere(X(n * l), m.h, m.h + ph, n % saut === 0 || n === 1 ? nom(n, 'λ') : '', neuf && n === etat.nRep);
     // axe et onde
     s += `<line class="dp-axe" x1="${m.g}" y1="${n2(yc)}" x2="${n2(m.g + pw)}" y2="${n2(yc)}"/>`;
     let chemin = '';
     for (let i = 0; i <= pw; i++) {
-      const x = i / pw * D;
+      const x = i / pw * Lm;
       chemin += (i ? 'L' : 'M') + n2(m.g + i) + ' ' + n2(Y(y(x, t)));
     }
     s += `<path class="dp-courbe" d="${chemin}"/>`;
-    // front de l'onde, tant qu'il n'a pas atteint R
+    // front de l'onde, tant qu'il n'a pas atteint le bout du milieu représenté
     const xf = etat.c * t;
-    if (t > 0 && xf < D) {
+    if (t > 0 && xf < Lm) {
       const gauche = X(xf) > m.g + pw - 50;
       s += `<line class="dp-front" x1="${n2(X(xf))}" y1="${m.h}" x2="${n2(X(xf))}" y2="${n2(m.h + ph)}"/>` +
         `<text class="dp-front-t" x="${n2(X(xf) + (gauche ? -5 : 5))}" y="${n2(m.h + 13)}" text-anchor="${gauche ? 'end' : 'start'}">front</text>`;
     }
+    // récepteur R, dans le milieu à x = D : trait vertical et étiquette sous le graphe
+    s += `<line class="dp-recepteur" x1="${n2(X(D))}" y1="${m.h}" x2="${n2(X(D))}" y2="${n2(m.h + ph + 2)}"/>` +
+      `<rect class="dp-boite" x="${n2(X(D) - 14)}" y="${n2(m.h + ph + 2)}" width="28" height="20" rx="6"/>` +
+      `<text class="dp-boite-t dp-boite-pt" x="${n2(X(D))}" y="${n2(m.h + ph + 17)}">R</text>`;
     s += demoDessus;
     // point du milieu au niveau de R
     s += `<circle class="dp-point" cx="${n2(X(D))}" cy="${n2(Y(y(D, t)))}" r="5"/>`;
-    // émetteur et récepteur
+    // émetteur
     const hb = Math.min(46, ph * 0.5);
     s += `<rect class="dp-boite" x="${m.g - 46}" y="${n2(yc - hb / 2)}" width="40" height="${n2(hb)}" rx="8"/>` +
       `<text class="dp-boite-t" x="${m.g - 26}" y="${n2(yc + 6)}">E</text>` +
-      `<text class="dp-legende" x="${m.g - 26}" y="${n2(yc + hb / 2 + 14)}">émetteur</text>` +
-      `<rect class="dp-boite" x="${n2(m.g + pw + 6)}" y="${n2(yc - hb / 2)}" width="40" height="${n2(hb)}" rx="8"/>` +
-      `<text class="dp-boite-t" x="${n2(m.g + pw + 26)}" y="${n2(yc + 6)}">R</text>` +
-      `<text class="dp-legende" x="${n2(m.g + pw + 26)}" y="${n2(yc + hb / 2 + 14)}">récepteur</text>`;
-    zEsp.innerHTML = svg(W, H, `Onde entre l'émetteur et le récepteur, distants de ${D}${NB}m, à l'instant t`, s);
+      `<text class="dp-legende" x="${m.g - 26}" y="${n2(yc + hb / 2 + 14)}">émetteur</text>`;
+    zEsp.innerHTML = svg(W, H, `Onde à l'instant t, de l'émetteur jusqu'à une longueur d'onde après le récepteur, placé à ${D}${NB}m`, s);
   }
 
   // --- périodicité temporelle : signal reçu par R en fonction de t ---
@@ -276,16 +282,16 @@ const DP = (function () {
     } else if (d.phase === 'attente') {
       h = etat.t < t0()
         ? `<p>On attend que l'onde arrive au récepteur R…</p>`
-        : `<p>On attend qu'une crête soit à une longueur d'onde de R…</p>`;
+        : `<p>On attend qu'une crête arrive en R…</p>`;
     } else if (d.phase === 'suivi') {
       const dt = etat.t - d.t1;
       h = etat.masque
-        ? `<p>La crête marquée avance vers R pendant une période T…</p>`
-        : `<p>La crête marquée avance vers R…</p><p class="dp-calc">Durée écoulée : ${fixe(dt, 2)}${NB}s · distance parcourue : ${fixe(etat.c * dt, 2)}${NB}m</p>`;
+        ? `<p>La crête marquée part de R et avance pendant une période T…</p>`
+        : `<p>La crête marquée part de R et avance…</p><p class="dp-calc">Durée écoulée : ${fixe(dt, 2)}${NB}s · distance parcourue : ${fixe(etat.c * dt, 2)}${NB}m</p>`;
     } else {
       classe = 'dp-fin';
       h = etat.masque
-        ? `<p>Pendant une période <b>T</b>, la crête marquée a parcouru une longueur d'onde <b>λ</b> : elle est arrivée en R.</p>` +
+        ? `<p>Pendant une période <b>T</b>, la crête marquée a parcouru une longueur d'onde <b>λ</b>.</p>` +
           `<p>Vitesse = distance / durée : <span class="dp-calc">c = λ / T</span>, donc <span class="dp-calc">λ = c × T = c / f</span>.</p>`
         : `<p>Pendant une période T = ${fmt(T())}${NB}s, la crête marquée a parcouru ${fmt(lam())}${NB}m : c'est une longueur d'onde <b>λ</b>.</p>` +
           `<p>Vitesse = distance / durée :<br><span class="dp-calc">c = λ / T = ${fmt(lam())} / ${fmt(T())} = ${fmt(lam() / T())}${NB}${UC}</span></p>` +
@@ -302,8 +308,8 @@ const DP = (function () {
   function rendre() { dessinerEspace(); dessinerTemps(); panneau(); }
 
   // ---------- Démonstration « Suivre l'onde pendant T » ----------
-  // t1 : prochain instant (onde arrivée en R) où une crête est en R,
-  // donc aussi une crête à une longueur d'onde de R, en x = D − λ
+  // t1 : prochain instant (onde arrivée en R) où une crête est en R ;
+  // cette crête est suivie de x = D à x = D + λ
   function suivre() {
     const uC = MOTIF[etat.forme].uCrete, f = etat.f;
     const tb = Math.max(etat.t, t0());
@@ -379,10 +385,44 @@ const DP = (function () {
     if (barre) barre.appendChild(b);
   }
 
+  // ---------- Illustrations de mise en situation ----------
+  // chemin d'une sinusoïde de x0 à x1 : centre yc, amplitude a, période p, plate avant xd
+  function sinus(x0, x1, yc, a, p, xd) {
+    let c = '';
+    for (let x = x0; x <= x1 + 1e-9; x += 1) {
+      const v = x < xd ? 0 : Math.sin(2 * Math.PI * (x - xd) / p);
+      c += (c ? 'L' : 'M') + n2(x) + ' ' + n2(yc - a * v);
+    }
+    return c;
+  }
+  function illustrations() {
+    // en haut : une caméra filme l'onde, l'image montre tout le milieu à un instant
+    $('dp-situ-film').innerHTML = '<svg viewBox="0 0 140 104" role="img" aria-label="Une caméra filme l\'onde : une image montre tout le milieu à un instant">' +
+      '<line class="dp-s-champ" x1="60" y1="31" x2="7" y2="53"/><line class="dp-s-champ" x1="72" y1="31" x2="133" y2="53"/>' +
+      '<rect class="dp-s-corps" x="46" y="7" width="40" height="25" rx="5"/><rect class="dp-s-corps" x="51" y="2" width="13" height="7" rx="2"/>' +
+      '<circle class="dp-s-objectif" cx="66" cy="19.5" r="8"/><circle class="dp-s-lentille" cx="66" cy="19.5" r="3"/><circle class="dp-s-lentille" cx="80" cy="12" r="2"/>' +
+      '<rect class="dp-s-cadre" x="6" y="53" width="128" height="46" rx="4"/>' +
+      '<rect class="dp-s-boite" x="10" y="68" width="10" height="16" rx="2"/>' +
+      `<path class="dp-s-onde" d="${sinus(20, 130, 76, 12, 30, 20)}"/>` +
+      '<line class="dp-s-r" x1="100" y1="62" x2="100" y2="95"/><text class="dp-s-txt" x="15" y="64">E</text><text class="dp-s-txt" x="107" y="63">R</text></svg>';
+    // en bas : un stylo relié à R suit le signal sur un papier qui défile (sismographe)
+    const yp = 65 - 14 * Math.sin(2 * Math.PI * 56 / 26);   // position de la pointe sur la courbe (x = 96)
+    $('dp-situ-papier').innerHTML = '<svg viewBox="0 0 140 112" role="img" aria-label="Un stylo relié au récepteur trace le signal sur un papier qui défile">' +
+      '<rect class="dp-s-papier" x="6" y="42" width="114" height="46"/><line class="dp-s-champ" x1="6" y1="65" x2="120" y2="65"/>' +
+      `<path class="dp-s-onde" d="${sinus(8, 96, 65, 14, 26, 40)}"/>` +
+      '<rect class="dp-s-rouleau" x="0" y="38" width="9" height="54" rx="4.5"/><rect class="dp-s-rouleau" x="117" y="38" width="9" height="54" rx="4.5"/>' +
+      `<line class="dp-s-stylo" x1="114" y1="25" x2="99" y2="${n2(yp - 5)}"/>` +
+      `<path class="dp-s-pointe" d="M96 ${n2(yp)}l0.5 -7l5 3.5z"/>` +
+      '<rect class="dp-s-boite" x="104" y="4" width="32" height="22" rx="5"/><text class="dp-s-txt dp-s-gros" x="120" y="19.5">R</text>' +
+      '<line class="dp-s-fl" x1="104" y1="98" x2="34" y2="98"/><path class="dp-s-fl-p" d="M28 98l8 -4v8z"/>' +
+      '<text class="dp-s-leg" x="66" y="110">le papier défile</text></svg>';
+  }
+
   // ---------- Démarrage ----------
   // redessin à chaque changement de taille (fenêtre, plein écran, rotation)
   if (window.ResizeObserver) new ResizeObserver(() => { if (!etat.lecture) rendre(); }).observe(zEsp);
   else window.addEventListener('resize', () => { if (!etat.lecture) rendre(); });
+  illustrations();
   rendre();
 
   return { etat };
