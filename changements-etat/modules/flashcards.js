@@ -1,4 +1,4 @@
-/* Flashcards de l'application « Chapitre 11 : Changements d'état et transferts thermiques »
+/* Flashcards de l'application « Chapitre 11 : Changements d'état et transferts thermiques »
    Cartes d'essai : à remplacer avec docs/flashcards/prompt-generation.md
    (format : voir assets/revisions.js, REV.paquets ; figures : SVG autonomes, recopiés des dessins de CE) */
 (function () {
@@ -37,7 +37,7 @@
   const fig = k => `<div class="rev-fig">${F[k]}</div>`;
   const UC = 'J·kg<sup>−1</sup>·K<sup>−1</sup>', UL = 'J·kg<sup>−1</sup>';
 
-  REV.paquets({ dossier: 'changements-etat', titre: 'Chapitre 11 : Changements d\'état et transferts thermiques',
+  REV.paquets({ dossier: 'changements-etat', titre: 'Chapitre 11 : Changements d\'état et transferts thermiques',
                 court: 'Chapitre 11', matiere: 'physique' }, [
     { id: 'm1', module: 1, titre: 'États de la matière et liaison hydrogène', apres: ['module_1_cours'], cartes: [
       { id: 'ce-1-etats', type: 'savoir', competence: 'Décrire les trois états à l\'échelle microscopique', faces: [{
