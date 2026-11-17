@@ -124,7 +124,7 @@
     if (!sansStockage) return;
     const ici = document.querySelector('.er-page');
     if (!ici || ici.querySelector('.rev-stockage')) return;
-    ici.insertAdjacentHTML('afterbegin', '<p class="rev-stockage" role="status">Ton navigateur ne garde pas tes révisions (navigation privée ou réglage) : elles seront perdues en quittant la page.</p>');
+    ici.insertAdjacentHTML('afterbegin', '<p class="rev-stockage" role="status">Ton navigateur ne garde pas tes révisions (navigation privée ou réglage) : elles seront perdues en quittant la page.</p>');
   }
 
   // réglage : nombre de cartes par séance
@@ -234,7 +234,7 @@
   const datePlus = j => (j > 1 ? ' (' + jourCourt(plus(aujourdhui(), j)) + ')' : '');
   // adresses depuis la racine du dépôt (page Révisions)
   const pageFc = app => (app.spa ? app.dossier + '/index.html#flashcards' : app.dossier + '/modules/flashcards.html');
-  const titreFc = app => { const m = /^Chapitre (\d+)/.exec(app.court); return m ? 'Flashcards du chapitre ' + m[1] : 'Flashcards : ' + app.court; };
+  const titreFc = app => { const m = /^Chapitre (\d+)/.exec(app.court); return m ? 'Flashcards du chapitre ' + m[1] : 'Flashcards : ' + app.court; };
 
   /* ============================================================
      PLANNING
@@ -311,7 +311,7 @@
     f.querySelectorAll('.rev-formule').forEach(x => {
       const s = document.createElement('span');
       while (x.firstChild) s.appendChild(x.firstChild);
-      x.replaceWith(s, document.createTextNode(' : '));
+      x.replaceWith(s, document.createTextNode(' : '));
     });
     f.querySelectorAll('p, div, li, ol, ul, br').forEach(x => x.replaceWith(...Array.from(x.childNodes), document.createTextNode(' ')));
     return t.innerHTML.replace(/\s+/g, ' ').trim();
@@ -348,8 +348,8 @@
     const tas = col => col.liste.slice().sort((a, b) => b.du - a.du).slice(0, 15).map(x => `<i class="${col.cls || (x.du ? 'du' : '')}"></i>`).join('');
     const aria = cols.map(c => {
       const du = c.k ? c.liste.filter(x => x.du).length : 0;
-      return `${c.titre} : ${pluriel(c.liste.length, 'carte')}${du ? ` dont ${du} à réviser aujourd'hui` : ''}`;
-    }).join(' ; ');
+      return `${c.titre} : ${pluriel(c.liste.length, 'carte')}${du ? ` dont ${du} à réviser aujourd'hui` : ''}`;
+    }).join(' ; ');
     return `<div class="rev-boite" style="--n:${cols.length}" role="img" aria-label="Boîte de révision. ${aria}">` +
       cols.map(col => {
         const n = col.liste.length, du = col.k ? col.liste.filter(x => x.du).length : 0;
@@ -363,7 +363,7 @@
     const n = [0, 1, 2, 3, 4, 5, 6].map(j => l.filter(x => x.j !== null && (j === 0 ? x.j <= 0 : x.j === j)).length);
     const m = Math.max.apply(null, n.concat(1));
     const nom = j => (j === 0 ? 'auj.' : j === 1 ? 'dem.' : jourCourt(plus(auj, j)).slice(0, 7));
-    return `<div class="rev-jours" role="img" aria-label="Cartes à réviser : ${n.map((v, j) => (j === 0 ? 'aujourd\'hui' : j === 1 ? 'demain' : jourCourt(plus(auj, j))) + ' ' + v).join(', ')}">` +
+    return `<div class="rev-jours" role="img" aria-label="Cartes à réviser : ${n.map((v, j) => (j === 0 ? 'aujourd\'hui' : j === 1 ? 'demain' : jourCourt(plus(auj, j))) + ' ' + v).join(', ')}">` +
       n.map((v, j) => `<div class="rev-jour${j === 0 ? ' auj' : ''}"><b>${v}</b><div class="b" style="height:${Math.max(4, Math.round(v / m * 64))}px"></div><span>${nom(j)}</span></div>`).join('') + '</div>';
   }
   // mini-boîte : une barre par case, puis les sues
@@ -447,7 +447,7 @@
       zone.querySelector('.rev-compte').textContent = `Carte ${Math.max(1, Math.min(faites + 1, lot.length))} / ${lot.length}`;
       const sc = zone.querySelector('.rev-score');
       sc.textContent = `✓ ${nOk} · ✗ ${nKo}`;
-      sc.setAttribute('aria-label', `Je savais : ${nOk}, je ne savais pas : ${nKo}`);
+      sc.setAttribute('aria-label', `Je savais : ${nOk}, je ne savais pas : ${nKo}`);
       zone.querySelector('.rev-barre i').style.width = (lot.length ? faites / lot.length * 100 : 0) + '%';
     }
     // la carte en tête de file, côté question
@@ -461,12 +461,12 @@
       const scene = zone.querySelector('.rev-scene');
       scene.dataset.geste = '';
       scene.dataset.carte = c.id;
-      scene.setAttribute('aria-label', 'Carte : touche-la pour voir la réponse');
+      scene.setAttribute('aria-label', 'Carte : touche-la pour voir la réponse');
       scene.innerHTML = `<div class="rev-carte">${face(c, s, 'recto', { chapitre: true, etat: st })}${face(c, s, 'verso', { chapitre: true, etat: st, cache: true })}</div>`;
       const j = st && st.c <= MAX ? ecart(aujourdhui(), st.d) : 0;
-      zone.querySelector('.rev-place').innerHTML = revue ? '<b>Ratée tout à l\'heure</b> : on la revoit avant la fin de la séance'
-        : o.libre ? 'Révision libre : ta boîte ne change pas'
-        : j < 0 ? `<b>En retard de ${-j} j</b> : elle passe en priorité` : '&nbsp;';
+      zone.querySelector('.rev-place').innerHTML = revue ? '<b>Ratée tout à l\'heure</b> : on la revoit avant la fin de la séance'
+        : o.libre ? 'Révision libre : ta boîte ne change pas'
+        : j < 0 ? `<b>En retard de ${-j} j</b> : elle passe en priorité` : '&nbsp;';
       const act = zone.querySelector('.rev-actions');
       act.classList.add('une');
       act.innerHTML = '<button type="button" class="rev-bt rev-bt-voir" data-a="voir">Voir la réponse</button>';
@@ -477,11 +477,11 @@
     // ce que la réponse va changer (écrit sous le bouton)
     function consequence(c, ok) {
       if (ratees.has(c.id)) return ok ? 'c\'est bon pour aujourd\'hui' : 'on la revoit encore';
-      if (o.libre) return 'révision libre : ta boîte ne change pas';
+      if (o.libre) return 'révision libre : ta boîte ne change pas';
       const st = etatDe(c);
       if (!st) return '';
       const k = ok ? st.c + 1 : Math.max(1, st.c - 1);
-      return '→ ' + (k > MAX ? 'sortie : sue ✓' : `case ${k} · ${dans(INTERVALLES[k - 1])}`);
+      return '→ ' + (k > MAX ? 'sortie : sue ✓' : `case ${k} · ${dans(INTERVALLES[k - 1])}`);
     }
     function voir() {
       if (retournee || verrou || !file.length) return;
@@ -490,7 +490,7 @@
       carte.classList.add('retournee');
       carte.children[0].setAttribute('aria-hidden', 'true');
       carte.children[1].removeAttribute('aria-hidden');
-      zone.querySelector('.rev-scene').setAttribute('aria-label', 'Carte retournée : la réponse');
+      zone.querySelector('.rev-scene').setAttribute('aria-label', 'Carte retournée : la réponse');
       const act = zone.querySelector('.rev-actions');
       act.classList.remove('une');
       act.innerHTML = `<button type="button" class="rev-bt rev-bt-ko" data-a="ko">✗ Je ne savais pas<small>${consequence(c, false)}</small></button>` +
@@ -578,11 +578,11 @@
     function fin() {
       const restent = o.libre ? 0 : choisir().length;
       const pr = prochaine(portee());
-      const suite = pr ? `Prochaine séance : <b>${dans(pr.j)}${datePlus(pr.j)}, ${pluriel(pr.n, 'carte')}</b>.` : portee().some(x => x.k === SUE) ? 'Toutes tes cartes sont sues ✓' : '';
+      const suite = pr ? `Prochaine séance : <b>${dans(pr.j)}${datePlus(pr.j)}, ${pluriel(pr.n, 'carte')}</b>.` : portee().some(x => x.k === SUE) ? 'Toutes tes cartes sont sues ✓' : '';
       const app = o.dossier && DONNEES[o.dossier];
       let note, boutons;
       if (o.libre) {
-        note = 'Ta boîte n\'a pas changé : ces cartes restent à réviser à leur date.';
+        note = 'Ta boîte n\'a pas changé : ces cartes restent à réviser à leur date.';
         boutons = `<button type="button" class="btn-primary" data-a="boite">Voir ma boîte →</button>${o.cartesApp ? `<a class="btn-secondary" href="${o.cartesApp}">Retour aux cartes</a>` : ''}`;
       } else if (restent) {
         const k = limite ? Math.min(restent, limite) : restent;
@@ -625,7 +625,7 @@
     });
     if (o.pilule) {
       o.pilule.innerHTML = 'Révisions' + (total ? ` <i>${total}</i>` : '');
-      o.pilule.setAttribute('aria-label', total ? `Révisions : ${pluriel(total, 'carte')} à réviser aujourd'hui` : 'Révisions');
+      o.pilule.setAttribute('aria-label', total ? `Révisions : ${pluriel(total, 'carte')} à réviser aujourd'hui` : 'Révisions');
     }
     if (o.carte) {
       o.carte.hidden = !total;
@@ -697,7 +697,7 @@
         <div class="er-card">
           <span class="er-badge">RÉVISIONS</span>
           <h2 class="er-titre">Mes flashcards</h2>
-          <p class="er-contexte">Les cartes de tous tes chapitres, revues au bon moment : une carte sue revient de plus en plus tard, une carte ratée revient plus vite.</p>
+          <p class="er-contexte">Les cartes de tous tes chapitres, revues au bon moment : une carte sue revient de plus en plus tard, une carte ratée revient plus vite.</p>
         </div>
         <div data-z="auj" style="margin-bottom:16px"></div>
         <div class="rev-reglage" role="group" aria-label="Cartes par séance"><span>Cartes par séance</span>${LIMITES.map(n => `<button type="button" class="btn-small" data-n="${n}" aria-pressed="false">${n || 'Sans limite'}</button>`).join('')}</div>
@@ -732,14 +732,14 @@
           '<a class="rev-go" href="#reviser" data-ecran="reviser">Réviser maintenant →</a></div>';
       } else if (boiteN) {
         const pr = prochaine(l);
-        h = `<div class="rev-auj ajour"><span class="rev-auj-t"><small>Aujourd'hui</small><b>À jour ✓</b><span class="rev-auj-d">${pr ? `Prochaine révision : ${dans(pr.j)}${datePlus(pr.j)}, ${pluriel(pr.n, 'carte')}` : 'Toutes tes cartes sont sues : bravo !'}</span></span></div>`;
+        h = `<div class="rev-auj ajour"><span class="rev-auj-t"><small>Aujourd'hui</small><b>À jour ✓</b><span class="rev-auj-d">${pr ? `Prochaine révision : ${dans(pr.j)}${datePlus(pr.j)}, ${pluriel(pr.n, 'carte')}` : 'Toutes tes cartes sont sues : bravo !'}</span></span></div>`;
       } else {
-        h = '<div class="rev-auj vide"><span class="rev-auj-t"><small>Aujourd\'hui</small><b>Pas encore de flashcards</b><span class="rev-auj-d">Termine un cours, puis ajoute ses cartes. Les applications qui ont des cartes :</span></span>' +
-          `<ul>${apps.map(a => `<li><a href="${pageFc(a)}">${a.titre}</a> : ${pluriel(a.cartes.length, 'carte')}</li>`).join('')}</ul></div>`;
+        h = '<div class="rev-auj vide"><span class="rev-auj-t"><small>Aujourd\'hui</small><b>Pas encore de flashcards</b><span class="rev-auj-d">Termine un cours, puis ajoute ses cartes. Les applications qui ont des cartes :</span></span>' +
+          `<ul>${apps.map(a => `<li><a href="${pageFc(a)}">${a.titre}</a> : ${pluriel(a.cartes.length, 'carte')}</li>`).join('')}</ul></div>`;
       }
       zone.querySelector('[data-z="auj"]').innerHTML = h;
       zone.querySelectorAll('.rev-reglage button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.n === lim));
-      zone.querySelector('[data-z="retard"]').textContent = 'Un jour sans réviser ? Les cartes t\'attendent : elles passent en premier la fois suivante' + (lim ? `, par séances de ${lim} cartes au plus.` : '.');
+      zone.querySelector('[data-z="retard"]').textContent = 'Un jour sans réviser ? Les cartes t\'attendent : elles passent en premier la fois suivante' + (lim ? `, par séances de ${lim} cartes au plus.` : '.');
     }
     // une ligne par application qui a des cartes dans la boîte ; puis les cartes prêtes à ajouter
     function sectionApps(avec) {
@@ -752,7 +752,7 @@
       const ligneP = x => {
         const m = []; x.ps.forEach(p => { if (m.indexOf(p.module) < 0) m.push(p.module); });
         const n = x.ps.reduce((t, p) => t + p.cartes.length, 0);
-        return `<p class="rev-note"><span>Prêtes à ajouter, tu as fini le cours : <b>${x.a.court}</b>, ${m.length > 1 ? 'modules' : 'module'} ${enumerer(m.map(String))} (${pluriel(n, 'carte')})</span> ` +
+        return `<p class="rev-note"><span>Prêtes à ajouter, tu as fini le cours : <b>${x.a.court}</b>, ${m.length > 1 ? 'modules' : 'module'} ${enumerer(m.map(String))} (${pluriel(n, 'carte')})</span> ` +
           `<a class="btn-small" href="${pageFc(x.a)}${x.a.spa ? '' : '#' + x.ps[0].id}">Voir</a></p>`;
       };
       const listePrets = prets.length ? `<div class="rev-prets">${prets.map(ligneP).join('')}</div>` : '';
@@ -774,17 +774,17 @@
       <div class="rev-methode">
         <h4>La feuille blanche</h4>
         <p>Relire donne l'impression de savoir. Ce qui fait retenir, c'est d'aller <b>chercher</b> l'information dans sa mémoire.</p>
-        <ol><li>Cours fermé, prends une feuille blanche.</li><li>Écris tout ce dont tu te souviens : définitions, formules, schémas, méthodes.</li><li>Ouvre la fiche et complète d'une autre couleur ce qui manquait.</li><li>Ce qui est en couleur : à revoir en priorité.</li></ol>
+        <ol><li>Cours fermé, prends une feuille blanche.</li><li>Écris tout ce dont tu te souviens : définitions, formules, schémas, méthodes.</li><li>Ouvre la fiche et complète d'une autre couleur ce qui manquait.</li><li>Ce qui est en couleur : à revoir en priorité.</li></ol>
       </div>
       <div class="rev-methode">
         <h4>Les révisions espacées</h4>
-        <p>On oublie vite ce qu'on vient d'apprendre. Chaque fois qu'on s'en souvient à nouveau, on oublie <b>moins vite</b> : on peut attendre plus longtemps avant de revoir.</p>
+        <p>On oublie vite ce qu'on vient d'apprendre. Chaque fois qu'on s'en souvient à nouveau, on oublie <b>moins vite</b> : on peut attendre plus longtemps avant de revoir.</p>
         <div data-z="oubli"></div>
-        <p>C'est le principe des flashcards : 1 jour, 2 jours, 4 jours, 1 semaine…</p>
+        <p>C'est le principe des flashcards : 1 jour, 2 jours, 4 jours, 1 semaine…</p>
       </div>
       <div class="rev-methode">
         <h4>La méthode Pomodoro</h4>
-        <ol><li>Une seule tâche, téléphone dans une autre pièce.</li><li><b>25 min</b> de travail sans interruption.</li><li><b>5 min</b> de vraie pause : bouge, bois.</li><li>Après 4 pomodoros : pause de 15 à 30 min.</li></ol>
+        <ol><li>Une seule tâche, téléphone dans une autre pièce.</li><li><b>25 min</b> de travail sans interruption.</li><li><b>5 min</b> de vraie pause : bouge, bois.</li><li>Après 4 pomodoros : pause de 15 à 30 min.</li></ol>
         <p>Une séance de flashcards tient dans un pomodoro.</p>
         <div class="rev-pomo">
           <div class="rev-pomo-modes" role="group" aria-label="Durée"><button type="button" class="btn-small" data-m="25" aria-pressed="true">Travail 25 min</button><button type="button" class="btn-small" data-m="5" aria-pressed="false">Pause 5 min</button></div>
@@ -811,8 +811,8 @@
         `<text x="${xt + 24}" y="${y + 14}" font-size="10" font-weight="600" fill="#55585f">${tabs[k][1]}</text>`;
       for (let j = 0; j < nb[k]; j++) s += `<rect x="${22 + j * 2}" y="${y + 25 + j * 3}" width="292" height="60" rx="2" fill="#ffffff" stroke="#c9c4b9"/>`;
     }
-    s += `<rect x="4" y="262" width="332" height="${BAS - 262 + 2}" rx="8" fill="#f3f1ec" stroke="#c9c4b9" stroke-width="1.5"/><text x="170" y="286" font-size="11" font-weight="700" text-anchor="middle" fill="#55585f">la boîte : on avance d'une case quand on sait</text>`;
-    const dessin = `<svg class="rev-papier-fig" viewBox="0 0 340 304" role="img" aria-label="Boîte de fiches vue de dessus, avec 8 intercalaires : case 1 chaque jour, case 2 lundi, mercredi, vendredi, case 3 mardi, samedi, case 4 dimanche, case 5 2e et 4e dimanches, case 6 1er dimanche du mois, case 7 vacances scolaires, cartes sues">${s}</svg>`;
+    s += `<rect x="4" y="262" width="332" height="${BAS - 262 + 2}" rx="8" fill="#f3f1ec" stroke="#c9c4b9" stroke-width="1.5"/><text x="170" y="286" font-size="11" font-weight="700" text-anchor="middle" fill="#55585f">la boîte : on avance d'une case quand on sait</text>`;
+    const dessin = `<svg class="rev-papier-fig" viewBox="0 0 340 304" role="img" aria-label="Boîte de fiches vue de dessus, avec 8 intercalaires : case 1 chaque jour, case 2 lundi, mercredi, vendredi, case 3 mardi, samedi, case 4 dimanche, case 5 2e et 4e dimanches, case 6 1er dimanche du mois, case 7 vacances scolaires, cartes sues">${s}</svg>`;
     // les cases à réviser chaque jour, de la plus grande à la plus petite
     const semaine = [['Lundi', '2 puis 1'], ['Mardi', '3 puis 1'], ['Mercredi', '2 puis 1'], ['Jeudi', '1'], ['Vendredi', '2 puis 1'], ['Samedi', '3 puis 1'],
       ['1<sup>er</sup> dimanche du mois', '6, 4 puis 1'], ['2<sup>e</sup> et 4<sup>e</sup> dimanches', '5, 4 puis 1'], ['Autres dimanches', '4 puis 1'],
@@ -821,11 +821,11 @@
     <h3 class="rev-h">Fabrique ta boîte en papier</h3>
     <div class="rev-deux">
       <div><ol class="rev-papier">
-        <li><b>Des fiches bristol</b> : une question au recto, la réponse au verso. Une seule idée par carte, avec tes mots et un schéma si besoin.</li>
-        <li><b>Une boîte avec 7 intercalaires</b>, chacun marqué de ses <b>jours de révision</b> (voir « Ma semaine de révision »), et une case « sues ».</li>
-        <li>Une nouvelle carte va dans la case <b>1</b>. Rien à écrire dessus : c'est sa case qui dit quand la revoir.</li>
-        <li>Chaque jour, révise les cases du jour, <b>en commençant par la plus grande</b>. <b>Sue</b> : case suivante. <b>Ratée</b> : case précédente. Ainsi, une carte qui vient de monter n'est pas revue le même jour.</li>
-        <li>Carte dans les deux sens (formule, définition) : une fois sur deux, lis le <b>verso</b> et retrouve le recto.</li>
+        <li><b>Des fiches bristol</b> : une question au recto, la réponse au verso. Une seule idée par carte, avec tes mots et un schéma si besoin.</li>
+        <li><b>Une boîte avec 7 intercalaires</b>, chacun marqué de ses <b>jours de révision</b> (voir « Ma semaine de révision »), et une case « sues ».</li>
+        <li>Une nouvelle carte va dans la case <b>1</b>. Rien à écrire dessus : c'est sa case qui dit quand la revoir.</li>
+        <li>Chaque jour, révise les cases du jour, <b>en commençant par la plus grande</b>. <b>Sue</b> : case suivante. <b>Ratée</b> : case précédente. Ainsi, une carte qui vient de monter n'est pas revue le même jour.</li>
+        <li>Carte dans les deux sens (formule, définition) : une fois sur deux, lis le <b>verso</b> et retrouve le recto.</li>
       </ol>${dessin}</div>
       <div>
         <h4 class="rev-semaine-t">Ma semaine de révision <small>à recopier sur ta boîte</small></h4>
@@ -833,7 +833,7 @@
           <thead><tr><th>Jour</th><th>Cases à réviser</th></tr></thead>
           <tbody>${semaine.map(l => `<tr><td>${l[0]}</td><td>${l[1]}</td></tr>`).join('')}</tbody>
         </table></div>
-        <p class="rev-note" style="margin-top:8px">Ce site suit le même principe avec tes cartes de physique-chimie, avec une date exacte pour chaque carte. Pour passer au papier : « Imprimer les cartes » sur la page Flashcards de chaque chapitre. Si tu veux plus de précisions sur ce système et optimiser les dates de révision de ta boîte, intéresse-toi au système Leitner.</p>
+        <p class="rev-note" style="margin-top:8px">Ce site suit le même principe avec tes cartes de physique-chimie, avec une date exacte pour chaque carte. Pour passer au papier : « Imprimer les cartes » sur la page Flashcards de chaque chapitre. Si tu veux plus de précisions sur ce système et optimiser les dates de révision de ta boîte, intéresse-toi au système Leitner.</p>
       </div>
     </div>
   </section>`;
@@ -850,7 +850,7 @@
       if (rev.length && t >= rev[0]) { avec += 'L' + x(rev[0]).toFixed(1) + ',' + y(1); t0 = rev.shift(); S *= 2.6; }
       avec += (t ? 'L' : 'M') + x(t).toFixed(1) + ',' + y(Math.exp(-(t - t0) / S)).toFixed(1);
     }
-    z.innerHTML = `<svg viewBox="0 0 300 130" role="img" aria-label="Courbe de l'oubli : sans révision, le souvenir s'effondre en quelques jours ; avec des révisions à J1, J3, J7 et J14, il reste haut">
+    z.innerHTML = `<svg viewBox="0 0 300 130" role="img" aria-label="Courbe de l'oubli : sans révision, le souvenir s'effondre en quelques jours ; avec des révisions à J1, J3, J7 et J14, il reste haut">
       <line x1="40" y1="104" x2="294" y2="104" stroke="#16181d"/><line x1="40" y1="104" x2="40" y2="8" stroke="#16181d"/>
       <text x="36" y="16" font-size="11" text-anchor="end" fill="#55585f">100 %</text><text x="292" y="118" font-size="11" text-anchor="end" fill="#55585f">jours</text>
       ${[1, 3, 7, 14].map(t => `<text x="${x(t)}" y="118" font-size="11" text-anchor="middle" fill="#55585f">J${t}</text>`).join('')}
@@ -953,19 +953,19 @@
       z.innerHTML = ps.map(p => {
         const n = p.cartes.length, st = statut(p, e, fait), t = '<small>Flashcards</small>';
         if (st === 'ajoute' && ajoutes[p.id]) {
-          return `<div class="rev-fin"><p>${t}<b>✓ ${pluriel(n, 'carte')} ${n > 1 ? 'ajoutées' : 'ajoutée'}.</b> Première révision demain. Tu peux déjà les revoir maintenant : ta boîte ne changera pas.</p>` +
+          return `<div class="rev-fin"><p>${t}<b>✓ ${pluriel(n, 'carte')} ${n > 1 ? 'ajoutées' : 'ajoutée'}.</b> Première révision demain. Tu peux déjà les revoir maintenant : ta boîte ne changera pas.</p>` +
             `<a class="btn-primary" href="${revisionsHref(ctx)}#libre-${app.dossier}-${p.id}">Les réviser maintenant</a></div>`;
         }
         if (st === 'ajoute') {
           const lp = L.filter(x => x.c.paquet === p), pr = prochaine(lp);
           const quand = lp.some(x => x.du) ? 'aujourd\'hui' : pr ? dans(pr.j) + datePlus(pr.j) : 'toutes sues ✓';
-          return `<div class="rev-fin"><p>${t}✓ Ces ${pluriel(n, 'carte')} sont dans tes révisions · prochaine révision : ${quand}.</p><a class="rev-lien" href="${fc}${ctx.spa ? '' : '#' + p.id}">Voir les cartes</a></div>`;
+          return `<div class="rev-fin"><p>${t}✓ Ces ${pluriel(n, 'carte')} sont dans tes révisions · prochaine révision : ${quand}.</p><a class="rev-lien" href="${fc}${ctx.spa ? '' : '#' + p.id}">Voir les cartes</a></div>`;
         }
         if (st === 'pret') {
-          return `<div class="rev-fin"><p>${t}Range les ${pluriel(n, 'carte')} de ce cours dans ta boîte de révision : première révision demain.</p>` +
+          return `<div class="rev-fin"><p>${t}Range les ${pluriel(n, 'carte')} de ce cours dans ta boîte de révision : première révision demain.</p>` +
             `<button type="button" class="btn-primary" data-ajout="${p.id}">Ajouter les ${pluriel(n, 'carte')} à mes révisions</button></div>`;
         }
-        return `<div class="rev-fin attente"><p>${t}Ces ${pluriel(n, 'carte')} seront disponibles après : <b>${nomsAttente(p, fait, ctx)}</b>.</p><button type="button" class="rev-lien" data-ajout="${p.id}">Ajouter quand même</button></div>`;
+        return `<div class="rev-fin attente"><p>${t}Ces ${pluriel(n, 'carte')} seront disponibles après : <b>${nomsAttente(p, fait, ctx)}</b>.</p><button type="button" class="rev-lien" data-ajout="${p.id}">Ajouter quand même</button></div>`;
       }).join('');
       z.querySelectorAll('[data-ajout]').forEach(b => b.addEventListener('click', () => {
         ajouter(app.dossier, [b.dataset.ajout]);
@@ -1005,7 +1005,7 @@
       act = `<a class="btn-small" href="${fc}">Toutes les cartes</a>`;
     } else if (nPrets) {
       b = `${pluriel(nPrets, 'carte')} ${nPrets > 1 ? 'prêtes' : 'prête'} à ajouter (${modulesDe(prets)})`;
-      s = 'Range-les dans ta boîte de révision : première révision demain.';
+      s = 'Range-les dans ta boîte de révision : première révision demain.';
       act = `<button type="button" class="btn-primary" data-ajout="${prets.map(p => p.id).join(',')}" data-ou="bloc">Ajouter</button><a class="btn-small" href="${fc}">Toutes les cartes</a>`;
     } else {
       b = `${pluriel(L.length, 'carte')} ${L.length > 1 ? 't\'attendent' : 't\'attend'}`;
@@ -1043,7 +1043,7 @@
     // ajout sans changer de page, puis « Les réviser maintenant »
     zone.querySelectorAll('.rev-int[data-ajout], .rev-int [data-ajout]').forEach(x => x.addEventListener('click', () => {
       const ids = x.dataset.ajout.split(','), n = ajouter(d, ids);
-      messages[x.dataset.ou] = `✓ ${pluriel(n, 'carte')} ${n > 1 ? 'ajoutées' : 'ajoutée'} : première révision demain. <a href="${libre(ids)}">Les réviser maintenant →</a>`;
+      messages[x.dataset.ou] = `✓ ${pluriel(n, 'carte')} ${n > 1 ? 'ajoutées' : 'ajoutée'} : première révision demain. <a href="${libre(ids)}">Les réviser maintenant →</a>`;
       accueil(zone, app);
       const m = zone.querySelector(x.dataset.ou === 'bloc' ? '.rev-bloc + .rev-msg a' : `#som-m${x.dataset.ou} .rev-msg a`);
       if (m) m.focus();
@@ -1079,7 +1079,7 @@
         <div class="er-card">
           <span class="er-badge">FLASHCARDS</span>
           <h2 class="er-titre">${titreFc(app)}</h2>
-          <p class="er-contexte">${pluriel(app.cartes.length, 'carte')} pour retenir l'essentiel. Quand tu as fini un cours, <b>ajoute ses cartes à tes révisions</b> : elles reviendront au bon moment.</p>
+          <p class="er-contexte">${pluriel(app.cartes.length, 'carte')} pour retenir l'essentiel. Quand tu as fini un cours, <b>ajoute ses cartes à tes révisions</b> : elles reviendront au bon moment.</p>
         </div>
         <div class="rev-deux">
           <section class="er-card"><h3 class="rev-h">Ma boîte <small>ce chapitre</small></h3><div data-z="boite"></div></section>
@@ -1100,14 +1100,14 @@
       zone.querySelector('[data-z="boite"]').innerHTML = boite(L, { nouvelles: true });
       let txt;
       if (du) txt = `<b>${pluriel(du, 'carte')}</b> à réviser · ${pluriel(dansB, 'carte')} dans tes révisions.`;
-      else if (dansB) { const pr = prochaine(L); txt = `<b>À jour ✓</b> · ${pluriel(dansB, 'carte')} dans tes révisions.${pr ? ` Prochaine révision : ${dans(pr.j)}${datePlus(pr.j)} (${pluriel(pr.n, 'carte')}).` : ''}`; }
-      else txt = 'Aucune carte dans tes révisions pour l\'instant : ajoute celles des cours que tu as finis.';
+      else if (dansB) { const pr = prochaine(L); txt = `<b>À jour ✓</b> · ${pluriel(dansB, 'carte')} dans tes révisions.${pr ? ` Prochaine révision : ${dans(pr.j)}${datePlus(pr.j)} (${pluriel(pr.n, 'carte')}).` : ''}`; }
+      else txt = 'Aucune carte dans tes révisions pour l\'instant : ajoute celles des cours que tu as finis.';
       const choix = app.paquets.map(p => `<label><input type="checkbox" value="${p.id}" checked> Module ${p.module} · ${p.titre} (${p.cartes.length})</label>`).join('');
       zone.querySelector('[data-z="auj"]').innerHTML = `<p style="font-size:1.05rem;margin-bottom:12px">${txt}</p>
         <div class="rev-boutons">
           ${du ? `<a class="btn-primary" href="${rev}#reviser-${d}">Réviser les ${pluriel(du, 'carte')} →</a>` : ''}
           <button type="button" class="btn-secondary" data-a="tout" aria-expanded="false" aria-controls="rev-choix">Tout réviser (sans changer mon planning)</button>
-          <div class="rev-choix" id="rev-choix" hidden><p>Les cours à réviser :</p>${choix}<a class="btn-primary" data-a="libre" href="${rev}#libre-${d}">Commencer →</a></div>
+          <div class="rev-choix" id="rev-choix" hidden><p>Les cours à réviser :</p>${choix}<a class="btn-primary" data-a="libre" href="${rev}#libre-${d}">Commencer →</a></div>
           <a class="btn-secondary" href="#imprimer" data-a="imprimer">Imprimer les cartes</a>
           <button type="button" class="btn-secondary" data-a="anki">Exporter les cartes sous Anki</button>
           <p class="rev-note" data-z="anki" role="status" hidden></p>
@@ -1132,18 +1132,18 @@
       zone.querySelector('[data-z="paquets"]').innerHTML = app.paquets.map(p => {
         const st = statut(p, e, fait), lp = L.filter(x => x.c.paquet === p), n = p.cartes.length, du = lp.filter(x => x.du).length;
         let resume = '';
-        if (st === 'ajoute') { const pr = prochaine(lp); resume = du ? `<b class="rev-du">${du} à réviser aujourd'hui</b>` : pr ? 'prochaine : ' + dans(pr.j) : 'toutes sues ✓'; }
+        if (st === 'ajoute') { const pr = prochaine(lp); resume = du ? `<b class="rev-du">${du} à réviser aujourd'hui</b>` : pr ? 'prochaine : ' + dans(pr.j) : 'toutes sues ✓'; }
         else if (st === 'pret') resume = '<b class="rev-du">prêt à ajouter</b>';
         const etiquette = st === 'ajoute' ? `<span class="rev-etat ok">✓ Dans tes révisions depuis le ${jourMois(e.ajouts[p.id])}</span>` : st === 'attente' ? '<span class="rev-etat">Pas encore dans tes révisions</span>' : '';
         let ajout = '';
         if (st === 'ajoute' && ajoutes[p.id]) {
-          ajout = `<div class="rev-ajout"><p><b>✓ ${pluriel(n, 'carte')} ${n > 1 ? 'ajoutées' : 'ajoutée'}.</b> Première révision demain. Tu peux déjà les revoir maintenant : ta boîte ne changera pas.</p><a class="btn-primary" href="${rev}#libre-${d}-${p.id}">Les réviser maintenant</a></div>`;
+          ajout = `<div class="rev-ajout"><p><b>✓ ${pluriel(n, 'carte')} ${n > 1 ? 'ajoutées' : 'ajoutée'}.</b> Première révision demain. Tu peux déjà les revoir maintenant : ta boîte ne changera pas.</p><a class="btn-primary" href="${rev}#libre-${d}-${p.id}">Les réviser maintenant</a></div>`;
         } else if (st === 'pret') {
           const tete = (p.apres || []).length ? `<b>${p.apres.length > 1 ? 'Cours terminés' : 'Cours terminé'} ✓</b> ` : '';
-          ajout = `<div class="rev-ajout"><p>${tete}Range ces ${pluriel(n, 'carte')} dans ta boîte : première révision demain.</p><button type="button" class="btn-primary" data-ajout="${p.id}">Ajouter les ${pluriel(n, 'carte')} à mes révisions</button></div>`;
+          ajout = `<div class="rev-ajout"><p>${tete}Range ces ${pluriel(n, 'carte')} dans ta boîte : première révision demain.</p><button type="button" class="btn-primary" data-ajout="${p.id}">Ajouter les ${pluriel(n, 'carte')} à mes révisions</button></div>`;
         } else if (st === 'attente') {
           const manque = (p.apres || []).filter(k => !fait(k));
-          ajout = `<div class="rev-ajout attente"><p>Disponible après : <b>${nomsAttente(p, fait, ctx)}</b>.</p><a class="btn-small" href="${ctx.adresse(manque[0])}">Aller au cours</a><button type="button" class="rev-lien" data-ajout="${p.id}">Ajouter quand même</button></div>`;
+          ajout = `<div class="rev-ajout attente"><p>Disponible après : <b>${nomsAttente(p, fait, ctx)}</b>.</p><a class="btn-small" href="${ctx.adresse(manque[0])}">Aller au cours</a><button type="button" class="rev-lien" data-ajout="${p.id}">Ajouter quand même</button></div>`;
         }
         const lignesH = lp.map(x => {
           const c = x.c;
@@ -1161,7 +1161,7 @@
       z.querySelectorAll('.rev-ligne').forEach(b => b.addEventListener('click', () => {
         const c = app.cartes.find(x => x.id === b.dataset.carte), ap = document.getElementById('ap-' + c.id), ouvre = ap.hidden;
         if (ouvre && !ap.innerHTML) {
-          ap.innerHTML = c.faces.map((f, s) => (c.faces.length > 1 ? `<p class="rev-sens-lab">Sens ${s + 1}${s ? ' : la révision suivante' : ''}</p>` : '') +
+          ap.innerHTML = c.faces.map((f, s) => (c.faces.length > 1 ? `<p class="rev-sens-lab">Sens ${s + 1}${s ? ' : la révision suivante' : ''}</p>` : '') +
             face(c, s, 'recto', { pied: false }) + face(c, s, 'verso', { pied: false })).join('');
         }
         ap.hidden = !ouvre;
@@ -1200,8 +1200,8 @@
       zone.innerHTML = `
         <div class="er-card">
           <span class="er-badge">IMPRIMER LES CARTES</span>
-          <h2 class="er-titre">${app.court} : cartes à imprimer</h2>
-          <p class="er-contexte">Imprime en <b>recto verso</b> (retournement sur le <b>bord long</b>), sur papier épais si possible. Découpe en suivant les pointillés : <b>8 cartes</b> de 99 × 70 mm par feuille. Les versos sont placés en miroir pour tomber derrière leur recto.</p>
+          <h2 class="er-titre">${app.court} : cartes à imprimer</h2>
+          <p class="er-contexte">Imprime en <b>recto verso</b> (retournement sur le <b>bord long</b>), sur papier épais si possible. Découpe en suivant les pointillés : <b>8 cartes</b> de 99 × 70 mm par feuille. Les versos sont placés en miroir pour tomber derrière leur recto.</p>
           <div class="rev-imp-choix" role="group" aria-label="Cours à imprimer" style="margin-top:12px">${choix}</div>
           <div class="er-actions"><button type="button" class="btn-primary" data-a="imprimer">Imprimer</button><button type="button" class="btn-secondary" data-a="retour">← Retour aux cartes</button></div>
         </div>
@@ -1251,7 +1251,7 @@
   /* ---------- Export vers Anki : fichier .apkg de toutes les cartes de l'application
      (assets/anki.js, chargé au premier export) ---------- */
   function exporterAnki(app, ctx, bouton, info) {
-    const echec = () => { info.textContent = 'L\'export n\'a pas pu se faire : recharge la page et réessaie.'; bouton.disabled = false; };
+    const echec = () => { info.textContent = 'L\'export n\'a pas pu se faire : recharge la page et réessaie.'; bouton.disabled = false; };
     bouton.disabled = true;
     info.hidden = false;
     info.textContent = 'Préparation du fichier…';
@@ -1268,7 +1268,7 @@
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 60000);
-      info.innerHTML = `<b>✓ ${nom}</b> téléchargé. Ouvre-le avec Anki (ou, dans Anki : Fichier › Importer).`;
+      info.innerHTML = `<b>✓ ${nom}</b> téléchargé. Ouvre-le avec Anki (ou, dans Anki : Fichier › Importer).`;
       bouton.disabled = false;
     }
     if (window.ANKI) { telecharger(); return; }
