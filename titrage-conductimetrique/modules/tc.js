@@ -106,7 +106,7 @@
       burette: { texte: ['Ag⁺ + NO_{3}⁻', 'c = 20 mmol·L⁻¹'], nom: 'nitrate d’argent (Ag<sup>+</sup> + NO<sub>3</sub><sup>−</sup>)' },
       becher: { texte: ['Na⁺ + Cl⁻ (sérum)', '+ 200 mL d’eau'], nom: 'sérum physiologique (Na<sup>+</sup> + Cl<sup>−</sup>)' },
       roles: { specT: 'NO3-', reacT: 'Ag+', reacB: 'Cl-', specB: 'Na+', prod: 'AgCl' },
-      equation: ['Ag+', '+', 'Na+', '+', 'Cl-', '→', 'AgCl', '+', 'Na+'],
+      equation: ['Ag+', '+', 'Cl-', '→', 'AgCl'],
       ve: 10, vMax: 20, k: 1 / 11, unite: 'mS·m⁻¹', y: { min: 0, max: 24, pas: 2 }, dec: 2,
       justif: {
         q: 'Pourquoi σ diminue-t-elle légèrement avant l’équivalence, puis augmente-t-elle nettement ?',
