@@ -1,5 +1,5 @@
 /* ============================================================
-   Exercices du module 5 (application « Chapitre 5 : Flux et
+   Exercices du module 5 (application « Chapitre 5 : Flux et
    transferts thermiques ») : les exercices 6, 7, 8 et 13 à 19 du
    manuel (p. 74-77), avec la même numérotation.
 
