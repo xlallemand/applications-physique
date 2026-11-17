@@ -6,7 +6,8 @@
    placé à la distance D ; le milieu représenté s'étend une longueur
    d'onde au-delà de R (de 0 à D + λ).
      y(x, t) = g(f × (t − x / c))  si t ≥ x / c,  0 sinon
-   g : motif de période 1 (sinusoïde ou somme de trois harmoniques),
+   g : motif de période 1 (sinusoïde, ou montée lente, descente rapide
+   et palier : motif dissymétrique, qu'on voit retourné dans l'espace),
    normalisé pour que sa crête vaille 1.
 
    Deux graphes, tracés en direct :
@@ -33,7 +34,10 @@ const DP = (function () {
   // ---------- Motifs de période 1 ----------
   const BRUT = {
     sin: u => Math.sin(2 * Math.PI * u),
-    cplx: u => Math.sin(2 * Math.PI * u) + 0.6 * Math.sin(4 * Math.PI * u) + 0.3 * Math.sin(6 * Math.PI * u)
+    // non sinusoïdal : montée lente (60 % de la période), descente rapide (10 %), palier au repos (30 %).
+    // Le signal temporel monte lentement puis chute ; le profil spatial, parcouru de E vers R,
+    // montre le même motif retourné de gauche à droite (montée brusque, descente lente).
+    cplx: u => { u -= Math.floor(u); return u < 0.6 ? u / 0.6 : u < 0.7 ? (0.7 - u) / 0.1 : 0; }
   };
   // crête de chaque motif (valeur maximale et phase où elle est atteinte), calculée une fois
   const MOTIF = {};
@@ -143,20 +147,20 @@ const DP = (function () {
   function dessinerEspace() {
     const W = zEsp.clientWidth, H = zEsp.clientHeight;
     if (!W || !H) return;
-    const m = { g: 64, d: 52, h: 30, b: 44 };   // en bas : étiquette R puis graduations
+    const m = { g: 64, d: 52, h: 30, b: 26 };
     const pw = W - m.g - m.d, ph = H - m.h - m.b, Lm = L();
     const X = x => m.g + x / Lm * pw, yc = m.h + ph / 2, A = ph * 0.36, Y = v => yc - v * A;
     const t = etat.t, l = lam(), neuf = performance.now() - etat.neuf < 900;
     let s = '';
-    // grille et graduations en mètres (sous l'étiquette du récepteur)
+    // grille et graduations en mètres
     const p = pasGrad(Lm, pw), dec = decimales(p);
     for (let k = 0; k * p <= Lm + 1e-9; k++) {
       const x = X(k * p);
       s += `<line class="dp-grille" x1="${n2(x)}" y1="${m.h}" x2="${n2(x)}" y2="${n2(m.h + ph)}"/>` +
-        `<text class="dp-grad" x="${n2(x)}" y="${n2(m.h + ph + 37)}">${fixe(k * p, dec)}</text>`;
+        `<text class="dp-grad" x="${n2(x)}" y="${n2(m.h + ph + 17)}">${fixe(k * p, dec)}</text>`;
     }
     [-1, 1].forEach(v => { s += `<line class="dp-grille" x1="${m.g}" y1="${n2(Y(v))}" x2="${n2(m.g + pw)}" y2="${n2(Y(v))}"/>`; });
-    s += `<text class="dp-nom-axe" x="${n2(m.g + pw + 20)}" y="${n2(m.h + ph + 37)}">x (m)</text>`;
+    s += `<text class="dp-nom-axe" x="${n2(m.g + pw + 20)}" y="${n2(m.h + ph + 17)}">x (m)</text>`;
     // démonstration : bande parcourue par la crête suivie
     const d = etat.demo;
     let demoDessus = '';
@@ -176,6 +180,10 @@ const DP = (function () {
       s += repere(X(n * l), m.h, m.h + ph, n % saut === 0 || n === 1 ? nom(n, 'λ') : '', neuf && n === etat.nRep);
     // axe et onde
     s += `<line class="dp-axe" x1="${m.g}" y1="${n2(yc)}" x2="${n2(m.g + pw)}" y2="${n2(yc)}"/>`;
+    // récepteur R, dans le milieu à x = D, sur l'axe comme E : trait vertical et étiquette (l'onde passe devant)
+    s += `<line class="dp-recepteur" x1="${n2(X(D))}" y1="${m.h}" x2="${n2(X(D))}" y2="${n2(m.h + ph)}"/>` +
+      `<rect class="dp-boite" x="${n2(X(D) - 14)}" y="${n2(yc - 12)}" width="28" height="24" rx="6"/>` +
+      `<text class="dp-boite-t dp-boite-pt" x="${n2(X(D))}" y="${n2(yc + 5)}">R</text>`;
     let chemin = '';
     for (let i = 0; i <= pw; i++) {
       const x = i / pw * Lm;
@@ -189,10 +197,6 @@ const DP = (function () {
       s += `<line class="dp-front" x1="${n2(X(xf))}" y1="${m.h}" x2="${n2(X(xf))}" y2="${n2(m.h + ph)}"/>` +
         `<text class="dp-front-t" x="${n2(X(xf) + (gauche ? -5 : 5))}" y="${n2(m.h + 13)}" text-anchor="${gauche ? 'end' : 'start'}">front</text>`;
     }
-    // récepteur R, dans le milieu à x = D : trait vertical et étiquette sous le graphe
-    s += `<line class="dp-recepteur" x1="${n2(X(D))}" y1="${m.h}" x2="${n2(X(D))}" y2="${n2(m.h + ph + 2)}"/>` +
-      `<rect class="dp-boite" x="${n2(X(D) - 14)}" y="${n2(m.h + ph + 2)}" width="28" height="20" rx="6"/>` +
-      `<text class="dp-boite-t dp-boite-pt" x="${n2(X(D))}" y="${n2(m.h + ph + 17)}">R</text>`;
     s += demoDessus;
     // point du milieu au niveau de R
     s += `<circle class="dp-point" cx="${n2(X(D))}" cy="${n2(Y(y(D, t)))}" r="5"/>`;
