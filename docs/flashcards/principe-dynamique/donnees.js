@@ -9,6 +9,8 @@
    pfd-2e-reaction, pfd-2e-sansfrottement, pfd-2f-resultante, pfd-2f-voiture, pfd-2f-livre).
    Tour 4 : 34 cartes validées ; modifiées pfd-2f-livre (réponse : R⃗ = R⃗N + f⃗ compense P⃗, R⃗ + P⃗ = 0⃗, car le livre
    est immobile) et pfd-4d-projection (« quelle est la relation… »).
+   Tour 5 : 35 cartes validées ; pfd-4d-projection modifiée (réponse : car m a⃗ = Σ F⃗ext ; P⃗ et R⃗N se compensent ;
+   F⃗m dans le sens de a⃗, f⃗ dans le sens opposé).
    Préfixe des identifiants de cartes : pfd- (voir docs/flashcards/prompt-generation.md). */
 (function () {
   /* ---------- Écriture (charte §7) ---------- */
@@ -76,7 +78,7 @@
 
   RELECTURE({
     dossier: 'principe-dynamique', titre: 'Chapitre 6 : Principe fondamental de la dynamique', court: 'Chapitre 6', matiere: 'physique',
-    tour: 4, etape: 'cartes',
+    tour: 5, etape: 'cartes',
     // pages de cours de l'application (prérequis possibles), plus l'atelier du module 2
     cours: [
       { cle: 'module_1_cours', nom: 'Cours (module 1)' },
@@ -230,7 +232,7 @@
           { id: 'pfd-2f-voiture', type: 'schema', competence: 'c5', statut: 'validee', outils: ['crayon'], faces: [
             { q: '<p>Une voiture démarre vers la droite. Dessine les forces qui s\'exercent sur elle.</p>' + fig(VOITURE_Q),
               r: fig(VOITURE_R) + `<p>Poids ${V('P')} depuis G ; réaction normale ${V('R', 'N')} et force motrice ${V('F', 'm')} au contact roue-route ; frottements ${V('f')} vers l'arrière.</p>` }] },
-          { id: 'pfd-2f-livre', type: 'schema', competence: 'c6', statut: 'modifiee', outils: ['crayon'], faces: [
+          { id: 'pfd-2f-livre', type: 'schema', competence: 'c6', statut: 'validee', outils: ['crayon'], faces: [
             { q: '<p>Un livre est immobile sur un sol en pente. Dessine les forces qui s\'exercent sur lui.</p>' + fig(LIVRE_Q),
               r: fig(LIVRE_R) + `<p>${V('P')} depuis G ; ${V('R', 'N')} et ${V('f')} depuis le point de contact A.</p><p>La réaction du sol est ${V('R')} = ${V('R', 'N')} + ${V('f')}.</p><p>Elle <b>compense</b> ${V('P')} (${V('R')} + ${V('P')} = ${NUL}) car le livre est immobile.</p>` }] },
         ] },
@@ -370,7 +372,7 @@
         cartes: [
           { id: 'pfd-4d-projection', type: 'formule', competence: 'c1', statut: 'modifiee', faces: [
             { q: '<p>Une voiture démarre en ligne droite. D\'après le schéma, quelle est la relation qui donne m a sur la direction du mouvement ?</p>' + fig(VOITURE_R) + UNITES,
-              r: formule('m a = F<sub>m</sub> − f') + unites(`m en kg · a en ${MS2} · F<sub>m</sub> et f en N`) + `<p>${V('P')} et ${V('R', 'N')} se compensent. Donc F<sub>m</sub> = m a + f et f = F<sub>m</sub> − m a.</p>` }] },
+              r: formule('m a = F<sub>m</sub> − f') + unites(`m en kg · a en ${MS2} · F<sub>m</sub> et f en N`) + `<p>Car m ${V('a')} = ${SFext} :</p><ul><li>${V('P')} et ${V('R', 'N')} se compensent ;</li><li>${V('F', 'm')} est dans le sens de ${V('a')}, ${V('f')} dans le sens opposé à ${V('a')}.</li></ul>` }] },
           { id: 'pfd-4d-type', type: 'methode', competence: 'c2', statut: 'validee', outils: ['crayon', 'calculatrice'], faces: [
             { q: `<p>Une voiture de 850 kg démarre avec a = 2,50 ${MS2}, frottements f = 250 N. Comment trouver la force motrice F<sub>m</sub> ?</p><small>Démarche</small>`,
               r: `<ol><li>Bilan des forces : ${V('P')}, ${V('R', 'N')}, ${V('F', 'm')}, ${V('f')}.</li><li>${V('P')} et ${V('R', 'N')} se compensent.</li><li>Il reste ${V('F', 'm')} et ${V('f')} : c'est ${SFext}.</li><li>Projection : m a = F<sub>m</sub> − f.</li><li>F<sub>m</sub> = m a + f ≈ 2,4 × 10<sup>3</sup> N.</li></ol>` }] },
