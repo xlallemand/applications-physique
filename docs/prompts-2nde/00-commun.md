@@ -104,7 +104,9 @@ Avec Playwright / Chromium (déjà installé, ne lance pas `playwright install`)
 7. Outils partagés créés ou modifiés : chaque application qui les charge est retestée.
 8. **Chaque valeur numérique** (données, réponses, tolérances) vérifiée par un petit script dans le scratchpad, pas de tête.
 
-Puis : commits en français, clairs ; push sur `2nde`. Compte rendu court :
+Puis :
+- ajoute la ligne de l'application dans la liste « Applications codées » de `docs/prompts-2nde/README.md` (numéro, nom, fichier du prompt, dossier, date), dans l'ordre des numéros ;
+- commits en français, clairs ; push sur `2nde`. Compte rendu court :
 - ce qui est fait ;
 - les écarts avec le prompt et pourquoi ;
 - ce qui n'est pas testable (Safari iOS).
