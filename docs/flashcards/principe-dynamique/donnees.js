@@ -7,6 +7,8 @@
    pfd-2f-deux, pfd-2f-bilan, pfd-3b-derivee, pfd-4a-resultante (leurs compétences sont retirées de la liste ;
    le paquet m2b n'a plus de carte) ; 12 cartes modifiées ; 6 cartes demandées par l'enseignant (pfd-1-deuxmots,
    pfd-2e-reaction, pfd-2e-sansfrottement, pfd-2f-resultante, pfd-2f-voiture, pfd-2f-livre).
+   Tour 4 : 34 cartes validées ; modifiées pfd-2f-livre (réponse : R⃗ = R⃗N + f⃗ compense P⃗, R⃗ + P⃗ = 0⃗, car le livre
+   est immobile) et pfd-4d-projection (« quelle est la relation… »).
    Préfixe des identifiants de cartes : pfd- (voir docs/flashcards/prompt-generation.md). */
 (function () {
   /* ---------- Écriture (charte §7) ---------- */
@@ -74,7 +76,7 @@
 
   RELECTURE({
     dossier: 'principe-dynamique', titre: 'Chapitre 6 : Principe fondamental de la dynamique', court: 'Chapitre 6', matiere: 'physique',
-    tour: 3, etape: 'cartes',
+    tour: 4, etape: 'cartes',
     // pages de cours de l'application (prérequis possibles), plus l'atelier du module 2
     cours: [
       { cle: 'module_1_cours', nom: 'Cours (module 1)' },
@@ -105,7 +107,7 @@
           { id: 'c8', texte: 'Savoir qu\'un mouvement se décrit avec deux mots : la trajectoire (rectiligne, circulaire, curviligne), puis la vitesse (uniforme, accéléré, décéléré)', types: ['savoir'], source: 'demande de l\'enseignant (tour 2) ; fiche_1 · Décrire un mouvement en deux mots' },
         ],
         cartes: [
-          { id: 'pfd-1-referentiel', type: 'definition', competence: 'c1', statut: 'modifiee', faces: [
+          { id: 'pfd-1-referentiel', type: 'definition', competence: 'c1', statut: 'validee', faces: [
             { q: '<p>Qu\'est-ce que le référentiel ?</p>',
               r: '<p>Le <b>solide de référence</b> par rapport auquel on étudie le mouvement du système.</p>' },
             { q: '<p>Comment s\'appelle le solide de référence par rapport auquel on étudie le mouvement du système ?</p>',
@@ -113,10 +115,10 @@
           { id: 'pfd-1-choix', type: 'savoir', competence: 'c2', statut: 'validee', faces: [
             { q: '<p>Quel référentiel choisir pour étudier une voiture, un satellite, une planète ?</p>',
               r: '<ul><li>Voiture : <b>terrestre</b> (le sol ; le plus souvent).</li><li>Satellite, Lune : <b>géocentrique</b> (centre de la Terre).</li><li>Planète : <b>héliocentrique</b> (centre du Soleil).</li></ul>' }] },
-          { id: 'pfd-1-deuxmots', type: 'savoir', competence: 'c8', statut: 'nouvelle', faces: [
+          { id: 'pfd-1-deuxmots', type: 'savoir', competence: 'c8', statut: 'validee', faces: [
             { q: '<p>Quels mots utilise-t-on pour décrire un mouvement ?</p>',
               r: '<p><b>Deux mots</b> : d\'abord la trajectoire, puis la vitesse.</p><ul><li>Trajectoire : <b>rectiligne</b>, <b>circulaire</b> ou <b>curviligne</b>.</li><li>Vitesse : <b>uniforme</b>, <b>accéléré</b> ou <b>décéléré</b> (ralenti).</li></ul><p>Exemple : rectiligne uniforme.</p>' }] },
-          { id: 'pfd-1-chrono', type: 'graphique', competence: 'c7', statut: 'modifiee', faces: [
+          { id: 'pfd-1-chrono', type: 'graphique', competence: 'c7', statut: 'validee', faces: [
             { q: '<p>Décris ce mouvement.</p>' + fig(chrono(false)) + '<small>Positions à intervalles de temps égaux</small>',
               r: '<p>Mouvement <b>curviligne décéléré</b> (ou ralenti).</p><p>Trajectoire : une courbe quelconque. Positions de moins en moins espacées : la vitesse diminue.</p>' + fig(chrono(true)) }] },
         ] },
@@ -129,10 +131,10 @@
           { id: 'c3', texte: 'Citer les trois seules forces à distance : poids P⃗ (toujours), force magnétique F⃗mag, force électrique F⃗élec', types: ['savoir'], source: 'cours 2a · Règle ; À retenir' },
         ],
         cartes: [
-          { id: 'pfd-2a-distance', type: 'definition', competence: 'c1', statut: 'modifiee', faces: [
+          { id: 'pfd-2a-distance', type: 'definition', competence: 'c1', statut: 'validee', faces: [
             { q: '<p>Qu\'est-ce qu\'une force à distance ? D\'où part sa flèche ?</p>',
               r: '<p>Une force exercée par un objet qui <b>ne touche pas</b> le système.</p><p>Sa flèche part du <b>centre G</b> du système. Diagramme objet-action : trait en pointillés.</p>' }] },
-          { id: 'pfd-2a-contact', type: 'definition', competence: 'c2', statut: 'modifiee', faces: [
+          { id: 'pfd-2a-contact', type: 'definition', competence: 'c2', statut: 'validee', faces: [
             { q: '<p>Qu\'est-ce qu\'une force de contact ? D\'où part sa flèche ?</p>',
               r: '<p>Une force exercée par un objet qui <b>touche</b> le système : support, fil, main, liquide… et <b>l\'air</b>, toujours.</p><p>Sa flèche part du <b>point de contact</b>. Diagramme objet-action : trait plein.</p>' }] },
           { id: 'pfd-2a-trois', type: 'savoir', competence: 'c3', statut: 'validee', faces: [
@@ -171,18 +173,18 @@
           { id: 'c5', texte: 'Réflexe : masse en g, la convertir en kg avant de calculer P', types: ['reflexe'], source: 'série 2 · diagnostic « Convertis la masse en kg » ; cours 2d · « Une masse en grammes »' },
         ],
         cartes: [
-          { id: 'pfd-2d-poids', type: 'formule', competence: 'c1', statut: 'modifiee', faces: [
+          { id: 'pfd-2d-poids', type: 'formule', competence: 'c1', statut: 'validee', faces: [
             { q: '<p>La formule qui donne le poids P ?</p>' + UNITES,
               r: formule('P = m × g') + unites('P en N · m en kg · g en N/kg') + '<p>g = 9,81 N/kg (10 N/kg si g n\'est pas donné).</p>' },
             { q: quoi('la masse m, en kg, d\'un système et l\'intensité de la pesanteur g, en N/kg'),
               r: '<p>Son <b>poids</b> P, en N :</p>' + formule('P = m × g') }] },
-          { id: 'pfd-2d-def', type: 'definition', competence: 'c3', statut: 'modifiee', faces: [
+          { id: 'pfd-2d-def', type: 'definition', competence: 'c3', statut: 'validee', faces: [
             { q: `<p>Qu'est-ce que le poids ${V('P')} ? Sa direction, son sens, son point de départ ?</p>`,
               r: '<p>La force exercée <b>par la Terre</b> sur le système, à distance.</p><p><b>Vertical, vers le bas</b>, depuis le centre G. Il est dans tous les bilans.</p>' }] },
-          { id: 'pfd-2d-g', type: 'definition', competence: 'c4', statut: 'modifiee', faces: [
+          { id: 'pfd-2d-g', type: 'definition', competence: 'c4', statut: 'validee', faces: [
             { q: '<p>Qu\'est-ce que g ? Sa valeur, son unité ?</p>',
               r: '<p>L\'<b>intensité de la pesanteur</b> : <b>g = 9,81 N/kg</b>.</p><p>Si g n\'est pas donné, on peut prendre 10 N/kg.</p>' }] },
-          { id: 'pfd-2d-kg', type: 'reflexe', competence: 'c5', statut: 'modifiee', faces: [
+          { id: 'pfd-2d-kg', type: 'reflexe', competence: 'c5', statut: 'validee', faces: [
             { q: '<p>La masse est en grammes et tu dois calculer P = m × g : que fais-tu avant de calculer ?</p>',
               r: '<p>Je <b>convertis la masse en kg</b> : je divise par 1 000.</p><p>Exemple : 400 g = 0,400 kg.</p>' }] },
         ] },
@@ -195,10 +197,10 @@
           { id: 'c3', texte: 'Définir les frottements f⃗ : parallèles au support, opposés au glissement qu\'il y aurait sans eux', types: ['definition'], source: 'cours 2e · étape 2 ; fiche_2' },
         ],
         cartes: [
-          { id: 'pfd-2e-reaction', type: 'savoir', competence: 'c1', statut: 'nouvelle', faces: [
+          { id: 'pfd-2e-reaction', type: 'savoir', competence: 'c1', statut: 'validee', faces: [
             { q: '<p>Quelle est la force exercée par un support sur le système ? Donne toutes ses caractéristiques.</p>',
               r: fig(REACTION) + formule(`${V('R')} = ${V('R', 'N')} + ${V('f')}`) + `<ul><li>${V('R', 'N')} : <b>perpendiculaire</b> au support, depuis le point de contact.</li><li>${V('f')} : frottements, <b>parallèles</b> au support, opposés au glissement.</li></ul>` }] },
-          { id: 'pfd-2e-sansfrottement', type: 'savoir', competence: 'c2', statut: 'nouvelle', faces: [
+          { id: 'pfd-2e-sansfrottement', type: 'savoir', competence: 'c2', statut: 'validee', faces: [
             { q: '<p>Comment est la réaction d\'un support quand il n\'y a pas de frottements ?</p>',
               r: `<p><b>Normale au support</b> (perpendiculaire) : ${V('R')} = ${V('R', 'N')}.</p><p>Elle part du point de contact.</p>` },
             { q: '<p>La réaction d\'un support est normale (perpendiculaire) au support. Que peux-tu dire des frottements ?</p>',
@@ -219,18 +221,18 @@
           { id: 'c6', texte: 'Dessiner les forces qui s\'exercent sur un livre immobile sur un sol en pente : P⃗, R⃗N, f⃗ ; R⃗ = R⃗N + f⃗ compense P⃗ · crayon', types: ['schema'], source: 'demande de l\'enseignant (tour 2) ; situation « brique immobile sur une planche inclinée »' },
         ],
         cartes: [
-          { id: 'pfd-2f-compensent', type: 'definition', competence: 'c1', statut: 'modifiee', faces: [
+          { id: 'pfd-2f-compensent', type: 'definition', competence: 'c1', statut: 'validee', faces: [
             { q: '<p>Que veut dire « des forces se compensent » ?</p>',
               r: '<p>Leur <b>somme vectorielle est nulle</b> :</p>' + formule(`${SF} = ${NUL}`) + `<p>Exemple : palet d'air-hockey, ${V('R', 'N')} et ${V('P')}.</p>` }] },
-          { id: 'pfd-2f-resultante', type: 'definition', competence: 'c4', statut: 'nouvelle', faces: [
+          { id: 'pfd-2f-resultante', type: 'definition', competence: 'c4', statut: 'validee', faces: [
             { q: '<p>Qu\'est-ce que la résultante des forces ?</p>',
               r: `<p>La <b>somme des forces</b> qui s'exercent sur le système : ${SF}.</p><p>Quand elle est nulle, les forces se compensent.</p>` }] },
-          { id: 'pfd-2f-voiture', type: 'schema', competence: 'c5', statut: 'nouvelle', outils: ['crayon'], faces: [
+          { id: 'pfd-2f-voiture', type: 'schema', competence: 'c5', statut: 'validee', outils: ['crayon'], faces: [
             { q: '<p>Une voiture démarre vers la droite. Dessine les forces qui s\'exercent sur elle.</p>' + fig(VOITURE_Q),
               r: fig(VOITURE_R) + `<p>Poids ${V('P')} depuis G ; réaction normale ${V('R', 'N')} et force motrice ${V('F', 'm')} au contact roue-route ; frottements ${V('f')} vers l'arrière.</p>` }] },
-          { id: 'pfd-2f-livre', type: 'schema', competence: 'c6', statut: 'nouvelle', outils: ['crayon'], faces: [
+          { id: 'pfd-2f-livre', type: 'schema', competence: 'c6', statut: 'modifiee', outils: ['crayon'], faces: [
             { q: '<p>Un livre est immobile sur un sol en pente. Dessine les forces qui s\'exercent sur lui.</p>' + fig(LIVRE_Q),
-              r: fig(LIVRE_R) + `<p>${V('P')} depuis G ; ${V('R', 'N')} et ${V('f')} depuis le point de contact A.</p><p>La réaction du sol ${V('R')} = ${V('R', 'N')} + ${V('f')} <b>compense</b> ${V('P')} : le livre reste immobile.</p>` }] },
+              r: fig(LIVRE_R) + `<p>${V('P')} depuis G ; ${V('R', 'N')} et ${V('f')} depuis le point de contact A.</p><p>La réaction du sol est ${V('R')} = ${V('R', 'N')} + ${V('f')}.</p><p>Elle <b>compense</b> ${V('P')} (${V('R')} + ${V('P')} = ${NUL}) car le livre est immobile.</p>` }] },
         ] },
 
       /* ---------- Module 3 · Définition de l'accélération ---------- */
@@ -240,7 +242,7 @@
           { id: 'c2', texte: 'Choisir comment calculer a selon ce que l\'on connaît : v(t) → a = v′ ; vitesse constante → a = 0 ; vitesses de départ et d\'arrivée → a = Δv / Δt ; forces → a = Σ F / m', types: ['methode'], source: 'fiche_3 · Quatre façons ; cours 3a · À toi' },
         ],
         cartes: [
-          { id: 'pfd-3a-acceleration', type: 'definition', competence: 'c1', statut: 'modifiee', faces: [
+          { id: 'pfd-3a-acceleration', type: 'definition', competence: 'c1', statut: 'validee', faces: [
             { q: '<p>Qu\'est-ce que l\'accélération a ? Sa formule, son unité ?</p>',
               r: formule('a = ' + fr('dv', 'dt') + ' = v′') + `<p>La <b>dérivée de la vitesse</b> par rapport au temps : la variation de la vitesse au cours du temps, en <b>${MS2}</b>.</p>` }] },
           { id: 'pfd-3a-facons', type: 'methode', competence: 'c2', statut: 'validee', faces: [
@@ -285,7 +287,7 @@
               r: formule('a = ' + fr('Δv', 'Δt') + ' = ' + fr('v<sub>fin</sub> − v<sub>début</sub>', 'durée')) + unites(`a en ${MS2} · v en m/s · Δt en s`) + '<p>L\'accélération est considérée constante.</p>' },
             { q: quoi('une vitesse de départ et une vitesse d\'arrivée, en m/s, et la durée Δt, en s, entre les deux'),
               r: `<p>L'<b>accélération</b> a (considérée constante), en ${MS2} :</p>` + formule('a = ' + fr('Δv', 'Δt')) }] },
-          { id: 'pfd-3d-kmh', type: 'formule', competence: 'c3', statut: 'modifiee', faces: [
+          { id: 'pfd-3d-kmh', type: 'formule', competence: 'c3', statut: 'validee', faces: [
             { q: '<p>Comment convertir une vitesse des km/h aux m/s ?</p>',
               r: formule('v (m/s) = ' + fr('v (km/h)', '3,6')) + '<p>On <b>divise par 3,6</b>. Exemple : 100 km/h ≈ 27,8 m/s.</p>' },
             { q: '<p>Comment convertir une vitesse des m/s aux km/h ?</p>',
@@ -367,7 +369,7 @@
         ],
         cartes: [
           { id: 'pfd-4d-projection', type: 'formule', competence: 'c1', statut: 'modifiee', faces: [
-            { q: '<p>Une voiture démarre en ligne droite. D\'après le schéma, la relation qui donne m a sur la direction du mouvement ?</p>' + fig(VOITURE_R) + UNITES,
+            { q: '<p>Une voiture démarre en ligne droite. D\'après le schéma, quelle est la relation qui donne m a sur la direction du mouvement ?</p>' + fig(VOITURE_R) + UNITES,
               r: formule('m a = F<sub>m</sub> − f') + unites(`m en kg · a en ${MS2} · F<sub>m</sub> et f en N`) + `<p>${V('P')} et ${V('R', 'N')} se compensent. Donc F<sub>m</sub> = m a + f et f = F<sub>m</sub> − m a.</p>` }] },
           { id: 'pfd-4d-type', type: 'methode', competence: 'c2', statut: 'validee', outils: ['crayon', 'calculatrice'], faces: [
             { q: `<p>Une voiture de 850 kg démarre avec a = 2,50 ${MS2}, frottements f = 250 N. Comment trouver la force motrice F<sub>m</sub> ?</p><small>Démarche</small>`,
