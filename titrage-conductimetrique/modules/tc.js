@@ -15,7 +15,7 @@
      specT  ion spectateur de la burette     (Na⁺, Cl⁻, NO₃⁻)
      reacT  ion de la burette qui réagit      (HO⁻, H₃O⁺, Ag⁺)
      reacB  espèce titrée, dans le bécher     (CH₃COOH, H₃O⁺, NH₃, Cl⁻)
-     specB  ion spectateur du bécher          (NO₃⁻ de l'acide nitrique)
+     specB  ion spectateur du bécher          (NO₃⁻ de l'acide nitrique, Na⁺ du sérum physiologique)
      prod   produit                           (CH₃COO⁻, NH₄⁺, AgCl solide ; aucun pour H₃O⁺ + HO⁻)
    Couleurs : classes tc-c-* (variables --ion-* du thème), jamais de couleur dans ce fichier.
    ============================================================ */
@@ -102,12 +102,12 @@
           Après l’équivalence, σ est croissante avec une pente plus élevée (∝ 7,6 + 35 = 42,6) car λ(H<sub>3</sub>O<sup>+</sup>) > λ(NH<sub>4</sub><sup>+</sup>).`,
       } },
     { id: 'chlorure', bouton: 'Ions chlorure · nitrate d’argent',
-      titre: 'Titrage des ions chlorure par le nitrate d’argent',
+      titre: 'Titrage des ions chlorures d’un sérum physiologique (Na<sup>+</sup>, Cl<sup>−</sup>) par le nitrate d’argent',
       burette: { texte: ['Ag⁺ + NO_{3}⁻', 'c = 20 mmol·L⁻¹'], nom: 'nitrate d’argent (Ag<sup>+</sup> + NO<sub>3</sub><sup>−</sup>)' },
-      becher: { texte: ['Cl⁻ (eau minérale)', '+ 200 mL d’eau'], nom: 'eau minérale (ions Cl<sup>−</sup>)' },
-      roles: { specT: 'NO3-', reacT: 'Ag+', reacB: 'Cl-', prod: 'AgCl' },
+      becher: { texte: ['Na⁺ + Cl⁻ (sérum)', '+ 200 mL d’eau'], nom: 'sérum physiologique (Na<sup>+</sup> + Cl<sup>−</sup>)' },
+      roles: { specT: 'NO3-', reacT: 'Ag+', reacB: 'Cl-', specB: 'Na+', prod: 'AgCl' },
       equation: ['Ag+', '+', 'Cl-', '→', 'AgCl'],
-      ve: 10, vMax: 20, k: 1 / 11, unite: 'mS·m⁻¹', y: { min: 0, max: 20, pas: 2 }, dec: 2,
+      ve: 10, vMax: 20, k: 1 / 11, unite: 'mS·m⁻¹', y: { min: 0, max: 24, pas: 2 }, dec: 2,
       justif: {
         q: 'Pourquoi σ diminue-t-elle légèrement avant l’équivalence, puis augmente-t-elle nettement ?',
         choix: [
