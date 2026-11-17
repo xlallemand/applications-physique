@@ -11,6 +11,7 @@
    est immobile) et pfd-4d-projection (« quelle est la relation… »).
    Tour 5 : 35 cartes validées ; pfd-4d-projection modifiée (réponse : car m a⃗ = Σ F⃗ext ; P⃗ et R⃗N se compensent ;
    F⃗m dans le sens de a⃗, f⃗ dans le sens opposé).
+   Toutes les cartes validées par l'enseignant le 2026-11-17, mises en place dans principe-dynamique/modules/flashcards.js.
    Préfixe des identifiants de cartes : pfd- (voir docs/flashcards/prompt-generation.md). */
 (function () {
   /* ---------- Écriture (charte §7) ---------- */
@@ -370,7 +371,7 @@
           { id: 'c2', texte: 'Exercice-type : voiture de masse m, accélération a, frottements f : trouver la force motrice Fm (démarche : bilan, forces qui se compensent, Σ F, projection) · crayon et calculatrice', types: ['methode'], source: 'fiche_4 · exemple ; cours 4d · À toi ; exercices 1, 2, 5' },
         ],
         cartes: [
-          { id: 'pfd-4d-projection', type: 'formule', competence: 'c1', statut: 'modifiee', faces: [
+          { id: 'pfd-4d-projection', type: 'formule', competence: 'c1', statut: 'validee', faces: [
             { q: '<p>Une voiture démarre en ligne droite. D\'après le schéma, quelle est la relation qui donne m a sur la direction du mouvement ?</p>' + fig(VOITURE_R) + UNITES,
               r: formule('m a = F<sub>m</sub> − f') + unites(`m en kg · a en ${MS2} · F<sub>m</sub> et f en N`) + `<p>Car m ${V('a')} = ${SFext} :</p><ul><li>${V('P')} et ${V('R', 'N')} se compensent ;</li><li>${V('F', 'm')} est dans le sens de ${V('a')}, ${V('f')} dans le sens opposé à ${V('a')}.</li></ul>` }] },
           { id: 'pfd-4d-type', type: 'methode', competence: 'c2', statut: 'validee', outils: ['crayon', 'calculatrice'], faces: [

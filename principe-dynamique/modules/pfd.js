@@ -1602,7 +1602,7 @@
         { nom: 'Principe fondamental de la dynamique', questions: 'module_4_questions' }] },
     { n: 5, titre: 'Exercices', desc: 'Exercices 1, 2, 3 et 5 à 19 de la feuille (p. 84-87), guidés pas à pas', exercices: 'module_5', exNom: 'Exercices 1 à 19', nbEx: 11 },
   ];
-  window.SOM.init({ nom: 'Chapitre 6 : Principe fondamental de la dynamique', id: 'principe-dynamique', cleEx: 'principe-dynamique-exercices', plan: PLAN });
+  window.SOM.init({ nom: 'Chapitre 6 : Principe fondamental de la dynamique', id: 'principe-dynamique', cleEx: 'principe-dynamique-exercices', plan: PLAN, flashcards: true });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);
