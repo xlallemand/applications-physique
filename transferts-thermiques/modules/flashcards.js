@@ -1,4 +1,4 @@
-/* Flashcards de l'application « Chapitre 5 : Flux et transferts thermiques » (transferts-thermiques)
+/* Flashcards de l'application « Chapitre 5 : Flux et transferts thermiques » (transferts-thermiques)
    Cartes validées par l'enseignant le 2026-10-29 (docs/flashcards/transferts-thermiques/ : relecture et données)
    Format : voir assets/revisions.js, REV.paquets ; figures : SVG autonomes (la page Révisions ne charge pas tt.js).
    Le module 5 (exercices du manuel) n'a pas de cours : pas de paquet. */
@@ -84,7 +84,7 @@
     return `<svg viewBox="0 0 360 196" width="360" height="196" role="img" aria-label="${aria}">${s}</svg>`;
   }
 
-  REV.paquets({ dossier: 'transferts-thermiques', titre: 'Chapitre 5 : Flux et transferts thermiques', court: 'Chapitre 5', matiere: 'physique' }, [
+  REV.paquets({ dossier: 'transferts-thermiques', titre: 'Chapitre 5 : Flux et transferts thermiques', court: 'Chapitre 5', matiere: 'physique' }, [
     /* ---------- Module 1 · Température et modes de transfert ---------- */
     { id: 'm1', module: 1, titre: 'Température et modes de transfert', apres: ['module_1_cours'], cartes: [
         { id: 'tt-1-kelvin', type: 'formule', competence: 'Passer des °C aux kelvins : T (K) = θ (°C) + 273', faces: [

@@ -1,5 +1,5 @@
 /* ============================================================
-   Exercices du module 6 (application « Chapitre 11 : Changements
+   Exercices du module 6 (application « Chapitre 11 : Changements
    d'état et transferts thermiques ») : les exercices de la feuille,
    dans l'ordre de la correction et avec leur numérotation : 13 et 14
    p. 146, 10 p. 145, 15 p. 146, 7 et 8 p. 145, 17 p. 147, puis

@@ -1,5 +1,5 @@
 /* ============================================================
-   Moteur de l'application « Chapitre 5 : Flux et transferts thermiques »
+   Moteur de l'application « Chapitre 5 : Flux et transferts thermiques »
    (Terminale STI2D ; même moteur de questions que « Cinématique » et
    « Chapitre 2 : Piles et accumulateurs » ; navigation commune
    assets/sommaire.js, cours avec assets/cours.js)
@@ -998,7 +998,7 @@
       parties: [{ nom: 'Parois composées', cours: 'module_4_cours', questions: 'module_4_questions' }] },
     { n: 5, titre: 'Exercices du manuel', desc: 'Exercices 6 à 8 et 13 à 19 (p. 74-77), guidés pas à pas', exercices: 'module_5', exNom: 'Exercices 6 à 19', nbEx: 10 },
   ];
-  window.SOM.init({ nom: 'Chapitre 5 : Flux et transferts thermiques', id: 'transferts-thermiques', cleEx: 'transferts-thermiques-exercices', plan: PLAN, flashcards: true });
+  window.SOM.init({ nom: 'Chapitre 5 : Flux et transferts thermiques', id: 'transferts-thermiques', cleEx: 'transferts-thermiques-exercices', plan: PLAN, flashcards: true });
   const menu = cle => window.SOM.menu(cle);
   const accueil = zone => window.SOM.accueil(zone);
   const marquer = info => window.SOM.marquer(info);

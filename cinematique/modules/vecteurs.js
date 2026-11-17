@@ -137,12 +137,12 @@
     return {
       vide: 'pas encore tracé.',
       inverse: `tu as inversé les coordonnées. La 1<sup>re</sup> donne le déplacement horizontal (selon ${ui}), la 2<sup>de</sup> le déplacement vertical (selon ${uj}).`,
-      signeX: 'le déplacement horizontal est dans le mauvais sens : coordonnée positive vers la droite, négative vers la gauche.',
-      signeY: 'le déplacement vertical est dans le mauvais sens : coordonnée positive vers le haut, négative vers le bas.',
-      signes: 'les deux déplacements sont dans le mauvais sens (positif : vers la droite et vers le haut).',
-      y: 'le déplacement horizontal est juste, pas le déplacement vertical : compte les carreaux verticalement.',
-      x: 'le déplacement vertical est juste, pas le déplacement horizontal : compte les carreaux horizontalement.',
-      autre: 'compte les carreaux depuis le point de départ : d\'abord horizontalement (1<sup>re</sup> coordonnée), puis verticalement (2<sup>de</sup>).',
+      signeX: 'le déplacement horizontal est dans le mauvais sens : coordonnée positive vers la droite, négative vers la gauche.',
+      signeY: 'le déplacement vertical est dans le mauvais sens : coordonnée positive vers le haut, négative vers le bas.',
+      signes: 'les deux déplacements sont dans le mauvais sens (positif : vers la droite et vers le haut).',
+      y: 'le déplacement horizontal est juste, pas le déplacement vertical : compte les carreaux verticalement.',
+      x: 'le déplacement vertical est juste, pas le déplacement horizontal : compte les carreaux horizontalement.',
+      autre: 'compte les carreaux depuis le point de départ : d\'abord horizontalement (1<sup>re</sup> coordonnée), puis verticalement (2<sup>de</sup>).',
     }[code] || '';
   }
 
@@ -158,7 +158,7 @@
     this.vs.forEach(v => {
       if (v.fixe) return;
       const f = [v.dep[0] + v.coord[0], v.dep[1] + v.coord[1]], o = this.o;
-      if ([v.dep, f].some(p => p[0] < o.xmin || p[0] > o.xmax || p[1] < o.ymin || p[1] > o.ymax)) console.error('VEC : vecteur ' + v.nom + ' hors du quadrillage');
+      if ([v.dep, f].some(p => p[0] < o.xmin || p[0] > o.xmax || p[1] < o.ymin || p[1] > o.ymax)) console.error('VEC : vecteur ' + v.nom + ' hors du quadrillage');
     });
     this.drag = null;
     this.verrou = this.o.mode === 'aucun';
@@ -397,7 +397,7 @@
     const [p, s] = String(v.nom).split('_');
     // nombre à « dec » décimales, écrit à la française
     const txt = val.toFixed(dec).replace('.', ',');
-    this.valeurEl.innerHTML = `Valeur représentée : <b>${p}${s ? `<sub>${s}</sub>` : ''} = ${txt}${v.valeur.unite ? ' ' + v.valeur.unite : ''}</b>`;
+    this.valeurEl.innerHTML = `Valeur représentée : <b>${p}${s ? `<sub>${s}</sub>` : ''} = ${txt}${v.valeur.unite ? ' ' + v.valeur.unite : ''}</b>`;
   };
 
   Repere.prototype.dire = function (h) { if (this.astuce) this.astuce.innerHTML = h || ''; };
