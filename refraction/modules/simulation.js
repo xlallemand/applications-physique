@@ -1,354 +1,459 @@
 /* ============================================================
-   Module 3 : simulateur de réfraction (simulation)
+   Module 2 : simulateur, le lien entre i₁ et i₂ (refaire le TP)
    RF.simulateur(zone)
-   - deux milieux au choix (air, eau, verre, plexiglas, milieu inconnu), surface horizontale ;
-   - source glissée sur un cercle autour de I, ou boutons − 1° / + 1° ; rapporteur gradué autour de I ;
-   - rayons incident, réfracté, réfléchi (case à cocher), angles et valeurs affichés ;
-   - réflexion totale (hors programme) : au-delà de l'angle limite, plus de rayon réfracté,
-     rayon réfléchi intense et bulle ⓘ « Hors programme » à côté de la figure.
-   Déroulé guidé : i₁ = 0°, i₁ qui augmente, air → eau puis eau → air, rayon réfléchi,
-   mesures air → plexiglas (tableau), graphique sin(i₁) en fonction de sin(i₂), défi « milieu inconnu ».
+   Montage du TP : la lampe, à gauche, envoie un rayon horizontal vers le centre I d'un disque gradué ;
+   un demi-cylindre (plexiglas, eau dans une cuve, verre ou matériau inconnu) est posé sur le disque,
+   sa face plane passe par I. On fait tourner le disque (poignée ou ◀ ▶) : i₁ change ; i₂ se lit sur
+   les graduations du disque (le rayon réfracté sort du demi-cylindre sans être dévié).
+   Milieu 1 : toujours l'air (l'extérieur).
+   Déroulé guidé (une étape à la fois, les réponses précédentes ne restent pas affichées) :
+     1. découvrir le montage (i₁ augmente → i₂ augmente ; i₁ = 0° : pas de déviation) ;
+     2. mesures avec le plexiglas (tableau i₁ / i₂, i₂ lu sur le disque) ;
+     3. graphique i₁ en fonction de i₂ : pas proportionnel ;
+     4. graphique aux axes choisis (i, i², cos i, sin i) : sin(i₁) proportionnel à sin(i₂) ;
+     5. droite qui passe par l'origine, relation sin(i₁) = k × sin(i₂), k appelé indice n ;
+     6. milieu inconnu : mesurer, calculer son indice ;
+     7. généraliser : choisir la relation n₁ × sin(i₁) = n₂ × sin(i₂).
    ============================================================ */
 (function () {
   'use strict';
 
-  const V = OPT.V, fmt = RF.fmt, nH = RF.nHTML, iH = RF.iHTML, sinD = RF.sinD;
-  const RS = 175;                                  // rayon du cercle de la source et longueur des rayons
-  const TP = [0, 10, 20, 30, 40, 50, 60, 80];      // valeurs de i₁ du tableau de mesures
-  const BULLE_TOTALE = '<b>Hors programme.</b> Au-delà de cet angle, il n\'y a plus de rayon réfracté : toute la lumière est réfléchie (réflexion totale).';
+  const V = OPT.V, fmt = RF.fmt, nH = RF.nHTML, iH = RF.iHTML, sinD = RF.sinD, ecart = OPT.ecart;
+  const RAD = Math.PI / 180;
+  const LW = 480, LH = 400;                         // figure rectangulaire (unités)
+  const RD = 172;                                   // rayon du disque gradué
+  const RC = 116;                                   // rayon du demi-cylindre
+  const XL = -204;                                  // sortie de la lampe
+  const TP = [0, 10, 20, 30, 40, 50, 60, 80];       // valeurs de i₁ du tableau de mesures
+  const MIL2 = { plexi: 'plexiglas', eau: 'eau (cuve)', verre: 'verre', inconnu: 'milieu inconnu' };
+  // grandeurs proposées pour les axes du graphique (étape 4)
+  const GRANDEURS = {
+    i: { nom: s => iH(s), f: a => a, unite: ' (°)' },
+    carre: { nom: s => `${iH(s)}<sup>2</sup>`, f: a => a * a, unite: ' (°²)' },
+    cos: { nom: s => `cos(${iH(s)})`, f: a => Math.cos(a * RAD), unite: '' },
+    sin: { nom: s => `sin(${iH(s)})`, f: a => Math.sin(a * RAD), unite: '' },
+  };
+
+  // pas « rond » d'un axe (1, 2, 2,5 ou 5 × 10ⁿ) pour environ 5 graduations
+  function pasRond(max) {
+    const brut = max / 5, p = Math.pow(10, Math.floor(Math.log10(brut)));
+    return [1, 2, 2.5, 5, 10].map(k => k * p).find(x => x >= brut - 1e-12);
+  }
+
+  /* ---------- Graphique simple : points « + » non reliés, axes depuis l'origine ----------
+     o = { pts: [[x, y]], xNom, yNom (HTML), aria } → { svg, px(x, y), xMax, yMax, kx, ky, x0, y0 } */
+  function graphe(z, o) {
+    const W = 360, H = 300, x0 = 54, y0 = 256, lx = 284, ly = 226;
+    const mx = Math.max(1e-9, ...o.pts.map(p => p[0])), my = Math.max(1e-9, ...o.pts.map(p => p[1]));
+    const sx = pasRond(mx), sy = pasRond(my);
+    const xMax = Math.ceil(mx / sx - 1e-9) * sx, yMax = Math.ceil(my / sy - 1e-9) * sy;
+    const kx = lx / xMax, ky = ly / yMax;
+    const px = (x, y) => [x0 + x * kx, y0 - y * ky];
+    z.innerHTML = `<div class="rf-graphe"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.aria || 'Graphique'}"></svg></div>`;
+    const svg = z.querySelector('svg');
+    const el = (t, a) => OPT.svgEl(t, a, svg);
+    const txt = v => fmt(+v.toPrecision(6));
+    for (let x = 0; x <= xMax + 1e-9; x += sx) { const [a] = px(x, 0); el('line', { x1: a, y1: y0, x2: a, y2: y0 - ly, class: 'rf-g-grille' }); el('text', { x: a, y: y0 + 16, 'text-anchor': 'middle', class: 'rf-g-txt' }).textContent = txt(x); }
+    for (let y = 0; y <= yMax + 1e-9; y += sy) { const [, b] = px(0, y); el('line', { x1: x0, y1: b, x2: x0 + lx, y2: b, class: 'rf-g-grille' }); el('text', { x: x0 - 6, y: b + 4, 'text-anchor': 'end', class: 'rf-g-txt' }).textContent = txt(y); }
+    el('line', { x1: x0, y1: y0, x2: x0 + lx + 4, y2: y0, class: 'rf-g-axe' });
+    el('line', { x1: x0, y1: y0, x2: x0, y2: y0 - ly - 4, class: 'rf-g-axe' });
+    OPT.svgTexte(el('text', { x: x0 + lx, y: y0 + 34, 'text-anchor': 'end', class: 'rf-g-nom' }), o.xNom);
+    OPT.svgTexte(el('text', { x: x0 - 40, y: 14, 'text-anchor': 'start', class: 'rf-g-nom' }), o.yNom);
+    o.pts.forEach(p => {
+      const [a, b] = px(p[0], p[1]);
+      el('line', { x1: a - 5, y1: b, x2: a + 5, y2: b, class: 'rf-g-plus' });
+      el('line', { x1: a, y1: b - 5, x2: a, y2: b + 5, class: 'rf-g-plus' });
+    });
+    return { svg, el, px, xMax, yMax, kx, ky, x0, y0 };
+  }
 
   function simulateur(zone) {
     // indice du milieu inconnu : tiré entre 1,30 et 1,70
     const nInconnu = Math.round((1.3 + Math.random() * 0.4) * 100) / 100;
     const milieu = id => (id === 'inconnu' ? Object.assign({}, RF.MILIEUX.inconnu, { n: nInconnu }) : RF.MILIEUX[id]);
-    const etat = { m1: 'air', m2: 'eau', i1: 40, refl: false, masquerI2: false };
-    const opts = ['air', 'eau', 'verre', 'plexi', 'inconnu'].map(id => `<option value="${id}">${RF.MILIEUX[id].nom}</option>`).join('');
+    // th : rotation du disque (degrés) ; i₁ = |th|
+    const etat = { m2: 'plexi', th: 25, masquerI2: false };
+    const opts = Object.keys(MIL2).map(id => `<option value="${id}">${MIL2[id]}</option>`).join('');
 
     zone.innerHTML = `<div class="er-card">
-      <div class="rf-manip">
+      <div class="rf-manip rf-manip-sim">
         <div class="rf-manip-fig">
           <div class="rf-sim-reglages">
-            <label>Milieu 1 (en haut)<select class="rf-select" data-a="m1">${opts}</select></label>
-            <label>Milieu 2 (en bas)<select class="rf-select" data-a="m2">${opts}</select></label>
+            <p class="rf-sim-m1"><span>Milieu 1 (l'extérieur)</span><b>air</b></p>
+            <label>Milieu 2 (le demi-cylindre)<select class="rf-select" data-a="m2">${opts}</select></label>
           </div>
-          <div class="rf-fig" style="margin-top:10px"></div>
-          <div class="rf-ligne-cmd" style="margin-top:10px"><span data-a="fl"></span>
-            <label class="rf-coche"><input type="checkbox" data-a="refl"> Rayon réfléchi</label></div>
+          <div class="rf-fig rf-fig-disque" style="margin-top:10px"></div>
+          <div class="rf-ligne-cmd" style="margin-top:10px"><span class="rf-cmd-t">Tourner le disque</span><span data-a="fl"></span></div>
           <div class="rf-mesures" aria-live="polite" data-a="mes"></div>
-          <div data-a="bulle"></div>
         </div>
-        <div class="rf-manip-panneau"><ol class="rf-deroule" data-a="deroule"></ol><div data-a="fin"></div></div>
+        <div class="rf-manip-panneau"><ol class="rf-deroule rf-deroule-court" data-a="deroule"></ol><div class="rf-etape" data-a="etape"></div></div>
       </div></div>`;
     const $ = a => zone.querySelector(`[data-a="${a}"]`);
-    $('m1').value = etat.m1; $('m2').value = etat.m2;
-    const S = OPT.scene(zone.querySelector('.rf-fig'), { aria: 'Simulateur : rayon lumineux qui passe du milieu 1 au milieu 2' });
+    $('m2').value = etat.m2;
+    const S = OPT.scene(zone.querySelector('.rf-fig'), { largeur: LW, hauteur: LH, aria: 'Simulateur : lampe, disque gradué et demi-cylindre ; le rayon passe de l\'air au demi-cylindre' });
 
     /* ----- Calcul et dessin ----- */
     function calcul() {
-      const m1 = milieu(etat.m1), m2 = milieu(etat.m2);
-      const r = OPT.refracter(m1.n, m2.n, etat.i1);
-      return { m1, m2, totale: !!r.totale, i2: r.totale ? null : r.i2 };
+      const m2 = milieu(etat.m2), i1 = Math.abs(etat.th);
+      const r = OPT.devier([1, 0], V.dir(etat.th), 1, m2.n);
+      return { m2, i1, i2: r.i2, t: r.refracte };
     }
     function dessiner() {
-      const c = calcul();
+      const c = calcul(), th = etat.th;
       ['fond', 'milieux', 'deco', 'rayons', 'arcs', 'textes'].forEach(n => S.vider(n));
-      S.poly('milieux', [[-200, 0], [200, 0], [200, 200], [-200, 200]], 'opt-milieu opt-fond-' + c.m1.fond);
-      S.poly('milieux', [[-200, 0], [200, 0], [200, -200], [-200, -200]], 'opt-milieu opt-fond-' + c.m2.fond);
-      S.rapporteur('deco', [0, 0], 150, { zero: 90 });
-      S.ligne('deco', [-200, 0], [200, 0], 'opt-surface');
-      S.ligne('deco', [0, 196], [0, -196], 'opt-normale');
-      const nTxt = m => (m.id === 'inconnu' ? `${nH('inconnu')} = ?` : `${nH(m.sym)} = ${fmt(m.n, 2)}`);
-      S.texte('textes', [-192, 186], `<b>${c.m1.nom}</b>`, { ancre: 'start', taille: 13 });
-      S.texte('textes', [-192, 169], nTxt(c.m1), { ancre: 'start', taille: 12 });
-      S.texte('textes', [-192, -169], `<b>${c.m2.nom}</b>`, { ancre: 'start', taille: 13 });
-      S.texte('textes', [-192, -186], nTxt(c.m2), { ancre: 'start', taille: 12 });
-      const src = V.mul(V.dir(90 + etat.i1), RS);
-      // source (lampe) et rayon incident
-      S.rayon('rayons', src, [0, 0], { fleche: 1 });
-      if (c.totale) S.rayon('rayons', [0, 0], V.mul(V.dir(90 - etat.i1), RS), { fleche: 1, cls: 'opt-intense' });
-      else {
-        S.rayon('rayons', [0, 0], V.mul(V.dir(-90 + c.i2), RS), { fleche: 1 });
-        if (etat.refl) S.rayon('rayons', [0, 0], V.mul(V.dir(90 - etat.i1), RS), { fleche: 1, cls: 'opt-faible' });
-      }
+      // lampe sur son banc, à gauche
+      S.poly('fond', [[-236, -24], [XL, -24], [XL, 24], [-236, 24]], 'rf-lampe-boite');
+      S.texte('textes', [-220, -40], 'lampe', { taille: 12, cls: 'rf-g-txt' });
+      S.texte('textes', [-224, 186], 'air', { cls: 'opt-milieu-nom' });
+      // disque gradué (il tourne avec le demi-cylindre)
+      S.cercle('milieux', [0, 0], RD, 'rf-disque');
+      const demi = OPT.demiDisque([0, 0], RC, th, 48);
+      S.poly('milieux', demi, 'opt-milieu ' + (c.m2.id === 'eau' ? 'opt-fond-papier' : 'opt-fond-papier2'));
+      S.rapporteur('deco', [0, 0], RD, { zero: th, taille: 10 });
+      S.ligne('deco', V.mul(V.dir(th + 90), RD), V.mul(V.dir(th - 90), RD), 'rf-axe');
+      S.ligne('deco', V.mul(V.dir(th), RD), V.mul(V.dir(th + 180), RD), 'opt-normale');
+      S.poly('deco', demi, 'opt-bord', { fill: 'none' });
+      S.ligne('deco', V.mul(V.dir(th + 90), RC), V.mul(V.dir(th - 90), RC), 'opt-surface');
+      // nom du milieu 2, du côté du demi-cylindre sans rayon
+      S.texte('milieux', V.mul(V.dir(th + (th >= 0 ? 50 : -50)), 70), MIL2[c.m2.id].replace(' (cuve)', ''), { cls: 'opt-milieu-nom', taille: 12 });
+      // rayons : incident (fixe), réfracté dans le demi-cylindre, puis dans l'air sans déviation (il sort suivant un rayon du disque)
+      S.rayon('rayons', [XL, 0], [0, 0], { fleche: 1 });
+      S.rayon('rayons', [0, 0], V.mul(c.t, RC), { fleche: 1 });
+      S.rayon('rayons', V.mul(c.t, RC), V.mul(c.t, RD + 16), {});
       // arcs d'angle
-      if (etat.i1 > 0) {
-        S.arc('arcs', [0, 0], 90, 90 + etat.i1, 46, 'opt-arc-pose');
-        S.texte('textes', V.mul(V.dir(90 + etat.i1 / 2), 60), iH(1), { taille: 13 });
-        if (!c.totale && c.i2 > 0.5) {
-          S.arc('arcs', [0, 0], -90, -90 + c.i2, 46, 'opt-arc-pose');
-          S.texte('textes', V.mul(V.dir(-90 + c.i2 / 2), 60), iH(2), { taille: 13 });
+      if (c.i1 > 0) {
+        S.arc('arcs', [0, 0], 180, 180 + th, 44, 'opt-arc-pose');
+        S.etiquette('textes', V.mul(V.dir(180 + th / 2), 60), iH(1), { taille: 13 });
+        if (c.i2 > 0.5) {
+          const aT = V.angle(c.t);
+          S.arc('arcs', [0, 0], th, aT, 44, 'opt-arc-pose');
+          S.etiquette('textes', V.mul(V.dir(th + ecart(aT, th) / 2), 60), iH(2), { taille: 13 });
         }
-        if (etat.refl || c.totale) S.arc('arcs', [0, 0], 90, 90 - etat.i1, 34, 'opt-arc');
       }
       S.cercle('textes', [0, 0], 3.5, 'opt-point');
-      // lampe sur la poignée
-      S.cercle('deco', src, 8, 'opt-lampe');
-      // valeurs
-      const i2T = c.totale ? 'pas de rayon réfracté' : etat.masquerI2 ? 'lis-le sur le rapporteur' : `${fmt(c.i2, 1)}°`;
-      $('mes').innerHTML = `<span>${iH(1)} = <b>${etat.i1}°</b></span><span>${iH(2)} : <b>${i2T}</b></span>${etat.refl || c.totale ? `<span>angle de réflexion = <b>${etat.i1}°</b></span>` : ''}`;
-      $('bulle').innerHTML = c.totale ? `<p class="rf-fig-bulle">Plus de rayon réfracté : réflexion totale ${BULLE.info(BULLE_TOTALE, 'Réflexion totale (hors programme)')}</p>` : '';
+      S.texte('textes', [-12, 14], '<b>I</b>', { taille: 14 });
+      const i2T = etat.masquerI2 ? 'lis-le sur le disque' : `${fmt(c.i2, 1)}°`;
+      $('mes').innerHTML = `<span>${iH(1)} (angle d'incidence) = <b>${c.i1}°</b></span><span>${iH(2)} (angle de réfraction) : <b>${i2T}</b></span>`;
       verifier();
     }
 
-    /* ----- Commandes ----- */
+    /* ----- Commandes : tourner le disque ----- */
     const pv = OPT.pivot(S, {
-      centre: [0, 0], angle: 90 + etat.i1, rayon: RS, pas: 1, aria: 'Source de lumière : faire varier l\'angle d\'incidence',
-      contraindre: a => 90 + Math.max(0, Math.min(89, Math.round(OPT.ecart(a, 90)))),
-      surChange: a => { etat.i1 = Math.round(a - 90); dessiner(); },
+      centre: [0, 0], angle: 90 + etat.th, rayon: RD, pas: 1, aria: 'Poignée du disque gradué : le faire tourner pour changer l\'angle d\'incidence',
+      contraindre: a => 90 + Math.max(-85, Math.min(85, Math.round(ecart(a, 90)))),
+      surChange: a => { etat.th = Math.round(a - 90); dessiner(); },
     });
-    OPT.fleches($('fl'), { moins: () => pv.regler(pv.angle() - 1), plus: () => pv.regler(pv.angle() + 1), symboles: ['− 1°', '+ 1°'], aria: ['Diminuer i₁ de 1°', 'Augmenter i₁ de 1°'] });
-    $('m1').onchange = () => { etat.m1 = $('m1').value; dessiner(); };
+    OPT.fleches($('fl'), { moins: () => pv.regler(pv.angle() - 1), plus: () => pv.regler(pv.angle() + 1), symboles: ['↻ 1°', '↺ 1°'], aria: ['Tourner le disque de 1° dans le sens des aiguilles d\'une montre', 'Tourner le disque de 1° dans l\'autre sens'] });
     $('m2').onchange = () => { etat.m2 = $('m2').value; dessiner(); };
-    $('refl').onchange = () => { etat.refl = $('refl').checked; dessiner(); };
 
-    /* ----- Déroulé guidé ----- */
+    /* ----- Déroulé guidé : une étape à la fois ----- */
     const ETAPES = [
-      { t: `Règle ${iH(1)} = 0° : observe le rayon réfracté.` },
-      { t: `Augmente ${iH(1)} : que fait ${iH(2)} ?` },
-      { t: `Choisis air (milieu 1) et eau (milieu 2), puis eau et air : compare ${iH(1)} et ${iH(2)}.` },
-      { t: 'Coche « rayon réfléchi » : compare l\'angle de réflexion et ' + iH(1) + '.' },
-      { t: `Mesures : choisis air et plexiglas, règle ${iH(1)} et lis ${iH(2)} sur le rapporteur, au degré près.` },
-      { t: `Trace la droite sin(${iH(1)}) en fonction de sin(${iH(2)}).` },
-      { t: 'Défi : choisis air et milieu inconnu ; mesure, puis calcule l\'indice du milieu inconnu.' },
+      { t: 'Découvre le montage', entrer: decouvrir },
+      { t: 'Mesures avec le plexiglas', entrer: tableau },
+      { t: `Graphique : ${iH(1)} en fonction de ${iH(2)}`, entrer: grapheAngles },
+      { t: 'Chercher une relation de proportionnalité', entrer: grapheChoix },
+      { t: 'Le coefficient de proportionnalité', entrer: coefficient },
+      { t: 'Le milieu inconnu', entrer: defi },
+      { t: 'Généraliser : deux milieux quelconques', entrer: generaliser },
     ];
     const ol = $('deroule');
-    ol.innerHTML = ETAPES.map(e => `<li><span>${e.t}</span><div class="rf-li-zone"></div></li>`).join('');
+    ol.innerHTML = ETAPES.map(e => `<li><span>${e.t}</span></li>`).join('');
     const lis = Array.from(ol.children);
-    let k = 0, sous = 0, depart = null, mesures = [], ligneTP = 0;
-    const zoneK = () => lis[k].querySelector('.rf-li-zone');
+    let k = 0, sous = 0, depart = null, mesures = [], kOpt = 1.51, pente = 1;
+    let verif = null;                              // vérification propre à l'étape en cours (après chaque réglage)
+    const $e = $('etape');
     function marquer() { lis.forEach((li, i) => { li.classList.toggle('fait', i < k); li.classList.toggle('ici', i === k); li.classList.toggle('avenir', i > k); }); }
-    function passer(texte) {
-      if (texte) zoneK().insertAdjacentHTML('beforeend', `<p class="rf-li-aide">✓ ${texte}</p>`);
-      k++; sous = 0; depart = null;
+    function entrer() {
+      sous = 0; depart = null; verif = null;
+      etat.masquerI2 = false;
       marquer();
-      if (k < ETAPES.length) { entrer(); RF.amener(lis[k], 0.7); }
-      else fin();
+      $e.innerHTML = `<h4 class="rf-etape-titre">${k + 1}. ${ETAPES[k].t}</h4><div class="rf-etape-corps"></div>`;
+      ETAPES[k].entrer($e.querySelector('.rf-etape-corps'));
+      dessiner();
+      if (k > 0) RF.amener(RF.surOrdi() ? zone.querySelector('.rf-manip') : $e, 0.4);
     }
-    // question à choix dans l'étape en cours
-    function choix(q, options, bonne, diags, ok) {
-      const z = zoneK(), d = RF.el('div');
-      z.appendChild(d);
-      RF.question(d, { parties: [{ type: 'choix', q, options, bonne, indices: diags, melanger: false }] }, { fin: () => ok() }, 'manip');
+    // conclusion de l'étape, puis « Suite → » (l'étape suivante remplace celle-ci)
+    function conclure(texte) {
+      verif = null;
+      const d = RF.el('div', 'rf-conclusion', `<div class="callout-success er-retour"><p><b class="er-ok">Bilan de l'étape.</b> ${texte}</p></div>
+        <div class="er-actions"><button type="button" class="btn-primary">${k < ETAPES.length - 1 ? 'Suite →' : 'Voir le bilan →'}</button></div>`);
+      $e.appendChild(d);
+      d.querySelector('button').onclick = () => { k++; if (k < ETAPES.length) entrer(); else fin(); };
       RF.defiler(d);
     }
-    function entrer() {
-      etat.masquerI2 = k === 4 || k === 6;
-      if (k === 4) tableau();
-      if (k === 5) graphique();
-      if (k === 6) defi();
-      dessiner();
+    // question à choix dans l'étape en cours
+    function choix(z, q, options, bonne, diags, ok, sol) {
+      const d = RF.el('div');
+      z.appendChild(d);
+      RF.question(d, { parties: [{ type: 'choix', q, options, bonne, indices: diags, melanger: false, colonne: true, solution: sol }] }, { fin: () => ok() }, 'manip');
+      RF.defiler(d);
     }
-    // vérifie l'état de la manipulation pour l'étape en cours
-    function verifier() {
-      const c = calcul();
-      if (k === 0 && etat.i1 === 0) passer(`${iH(1)} = 0° donne ${iH(2)} = 0° : le rayon n'est pas dévié.`);
-      else if (k === 1) {
-        if (depart === null) depart = etat.i1;
-        if (sous === 0 && Math.abs(etat.i1 - depart) >= 20) {
+    function verifier() { if (verif) verif(calcul()); }
+
+    /* ----- 1. Découvrir le montage ----- */
+    function decouvrir(z) {
+      z.innerHTML = `<p class="rf-li-aide">La lampe envoie un rayon horizontal vers le centre I du disque gradué. La face plane du demi-cylindre passe par I ; la normale est la ligne pointillée qui passe par les graduations 0.</p>
+        <p class="rf-li-aide" data-a="d-msg">Fais tourner le disque (glisse la poignée, ou ↻ ↺) : observe l'angle d'incidence ${iH(1)} et l'angle de réfraction ${iH(2)}.</p><div data-a="d-q"></div>`;
+      verif = c => {
+        if (depart === null) depart = c.i1;
+        if (sous === 0 && Math.abs(c.i1 - depart) >= 20) {
           sous = 1;
-          choix(`Quand ${iH(1)} augmente, ${iH(2)} :`, [{ id: 'aug', label: 'augmente' }, { id: 'dim', label: 'diminue' }, { id: 'cst', label: 'ne change pas' }], 'aug',
-            { dim: `Regarde le rayon réfracté quand tu augmentes ${iH(1)} : il s'écarte de la normale.`, cst: `Fais varier ${iH(1)} et regarde la valeur de ${iH(2)} : elle change.` },
-            () => passer(`Quand ${iH(1)} augmente, ${iH(2)} augmente aussi.`));
-        }
-      } else if (k === 2) {
-        if (sous === 0 && etat.m1 === 'air' && etat.m2 === 'eau' && etat.i1 > 0) {
-          sous = 1;
-          choix(`De l'air vers l'eau, ${iH(2)} est :`, [{ id: 'pp', label: `plus petit que ${iH(1)}` }, { id: 'pg', label: `plus grand que ${iH(1)}` }, { id: 'eg', label: `égal à ${iH(1)}` }], 'pp',
-            { pg: `Compare les valeurs : ${nH('eau')} > ${nH('air')}, le rayon réfracté se rapproche de la normale.`, eg: 'Compare les valeurs affichées : le rayon change de direction.' },
-            () => { sous = 2; zoneK().insertAdjacentHTML('beforeend', `<p class="rf-li-aide">Maintenant, choisis eau (milieu 1) et air (milieu 2).</p>`); dessiner(); });
-        } else if (sous === 2 && etat.m1 === 'eau' && etat.m2 === 'air' && etat.i1 > 0 && !c.totale) {
+          choix(z.querySelector('[data-a="d-q"]'), `Quand ${iH(1)} augmente, ${iH(2)} :`, [{ id: 'aug', label: 'augmente' }, { id: 'dim', label: 'diminue' }, { id: 'cst', label: 'ne change pas' }], 'aug',
+            { dim: `Augmente ${iH(1)} et regarde le rayon réfracté : il s'écarte de la normale.`, cst: `Fais varier ${iH(1)} et regarde la valeur de ${iH(2)} : elle change.` },
+            () => { sous = 2; z.querySelector('[data-a="d-msg"]').innerHTML = `Règle maintenant ${iH(1)} = 0°.`; verifier(); });
+        } else if (sous === 2 && c.i1 === 0) {
           sous = 3;
-          choix(`De l'eau vers l'air, ${iH(2)} est :`, [{ id: 'pp', label: `plus petit que ${iH(1)}` }, { id: 'pg', label: `plus grand que ${iH(1)}` }, { id: 'eg', label: `égal à ${iH(1)}` }], 'pg',
-            { pp: `Compare les valeurs : ${nH('eau')} > ${nH('air')}, le rayon réfracté s'éloigne de la normale.`, eg: 'Compare les valeurs affichées : le rayon change de direction.' },
-            () => passer(`Air → eau : ${iH(2)} < ${iH(1)} (le rayon se rapproche de la normale) ; eau → air : ${iH(2)} > ${iH(1)} (il s'en éloigne).`));
+          conclure(`Quand ${iH(1)} augmente, ${iH(2)} augmente aussi. Pour ${iH(1)} = 0°, ${iH(2)} = 0° : le rayon qui arrive perpendiculairement à la surface n'est pas dévié.`);
         }
-      } else if (k === 3 && sous === 0 && etat.refl && etat.i1 > 0) {
-        sous = 1;
-        choix(`L'angle de réflexion est :`, [{ id: 'eg', label: `égal à ${iH(1)}` }, { id: 'pg', label: `plus grand que ${iH(1)}` }, { id: 'pp', label: `plus petit que ${iH(1)}` }], 'eg',
-          { pg: 'Compare les valeurs affichées : l\'angle de réflexion et l\'angle d\'incidence sont égaux.', pp: 'Compare les valeurs affichées : l\'angle de réflexion et l\'angle d\'incidence sont égaux.' },
-          () => passer(`Loi de Descartes pour la réflexion : l'angle de réflexion est égal à l'angle d'incidence (on l'écrit ${iH(1)} = ${iH(2)}).`));
-      } else if (k === 4) majTableau();
-      else if (k === 6) majDefi();
+      };
     }
 
-    /* ----- Étape 5 : tableau de mesures ----- */
-    let tab = null;
-    function tableau() {
-      const z = zoneK();
-      z.innerHTML = `<p class="rf-li-aide" data-a="tp-msg"></p><div class="ph-defile"><table class="ph-tableau"><thead><tr><th>${iH(1)} (°)</th><th>${iH(2)} (°)</th><th>sin(${iH(1)})</th><th>sin(${iH(2)})</th></tr></thead>
-        <tbody>${TP.map((a, j) => `<tr data-j="${j}"><td>${a}</td><td><input type="text" class="ph-champ" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="${'i2 pour i1 = ' + a + '°'}" disabled></td><td data-c="s1"></td><td data-c="s2"></td></tr>`).join('')}</tbody></table></div>
+    /* ----- 2. Tableau de mesures (plexiglas) ----- */
+    function tableau(z) {
+      etat.masquerI2 = true;
+      let ligne = 0, err = 0;
+      mesures = [];
+      z.innerHTML = `<p class="rf-li-aide" data-a="tp-msg"></p><div class="ph-defile"><table class="ph-tableau"><thead><tr><th>${iH(1)} (°)</th><th>${iH(2)} (°)</th></tr></thead>
+        <tbody>${TP.map((a, j) => `<tr data-j="${j}"><td>${a}</td><td><input type="text" class="ph-champ" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="i2 pour i1 = ${a}°" disabled></td></tr>`).join('')}</tbody></table></div>
         <div class="er-actions"><button type="button" class="btn-primary" data-a="tp-ok">Valider la mesure</button></div><div data-a="tp-ret" aria-live="polite"></div>`;
-      tab = z;
-      z.querySelector('[data-a="tp-ok"]').onclick = validerMesure;
-      z.querySelectorAll('input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); validerMesure(); } }));
-      majTableau();
-    }
-    function majTableau() {
-      if (!tab) return;
-      const msg = tab.querySelector('[data-a="tp-msg"]');
-      const bonMilieu = etat.m1 === 'air' && etat.m2 === 'plexi';
-      const a = TP[ligneTP];
-      tab.querySelectorAll('tr[data-j]').forEach(tr => tr.classList.toggle('rf-ligne-ici', +tr.dataset.j === ligneTP));
-      const inp = tab.querySelector(`tr[data-j="${ligneTP}"] input`);
-      const pret = bonMilieu && etat.i1 === a;
-      if (inp) inp.disabled = !pret;
-      msg.innerHTML = !bonMilieu ? 'Choisis air (milieu 1) et plexiglas (milieu 2).' : etat.i1 !== a ? `Règle ${iH(1)} = ${a}° (glisse la source, ou − 1° / + 1°).` : `Lis ${iH(2)} sur le rapporteur et écris-le dans le tableau.`;
-    }
-    let errMesure = 0;
-    function validerMesure() {
-      const ret = tab.querySelector('[data-a="tp-ret"]');
-      const a = TP[ligneTP], inp = tab.querySelector(`tr[data-j="${ligneTP}"] input`);
-      if (!(etat.m1 === 'air' && etat.m2 === 'plexi') || etat.i1 !== a) { majTableau(); ret.innerHTML = `<p class="ph-msg">${tab.querySelector('[data-a="tp-msg"]').innerHTML}</p>`; return; }
-      const v = RF.lire(inp.value);
-      if (isNaN(v)) { ret.innerHTML = '<p class="ph-msg">Écris un nombre entier de degrés.</p>'; return; }
-      const i2 = calcul().i2;
-      let diag = null;
-      if (Math.abs(v - i2) <= 1) diag = null;
-      else if (a > 0 && Math.abs(v - (90 - i2)) <= 1.5) diag = 'Les angles se mesurent depuis la normale, pas depuis la surface : la graduation 0 est sur la normale.';
-      else if (a > 0 && Math.abs(v - a) <= 1) diag = `Tu as recopié ${iH(1)} : lis l'angle du rayon réfracté, sous la surface.`;
-      else diag = `Lis ${iH(2)} entre la normale (graduation 0) et le rayon réfracté, sous la surface, au degré près.`;
-      if (diag) {
-        errMesure++;
-        ret.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">Ce n'est pas ça.</b> ${diag}</p>${errMesure >= 2 ? `<p class="er-petit">Le rayon réfracté passe à ${Math.round(i2)}° de la normale.</p>` : ''}</div>`;
-        return;
+      const msg = z.querySelector('[data-a="tp-msg"]'), ret = z.querySelector('[data-a="tp-ret"]');
+      function maj(c) {
+        const a = TP[ligne], bon = etat.m2 === 'plexi';
+        z.querySelectorAll('tr[data-j]').forEach(tr => tr.classList.toggle('rf-ligne-ici', +tr.dataset.j === ligne));
+        const inp = z.querySelector(`tr[data-j="${ligne}"] input`);
+        if (inp) inp.disabled = !(bon && c.i1 === a);
+        msg.innerHTML = !bon ? 'Choisis le plexiglas (milieu 2).' : c.i1 !== a ? `Tourne le disque pour avoir ${iH(1)} = ${a}°.` : `Lis ${iH(2)} sur les graduations du disque (au degré près) et écris-le dans le tableau.`;
       }
-      errMesure = 0;
-      ret.innerHTML = '';
-      mesures.push({ i1: a, i2: v });
-      inp.disabled = true;
-      const tr = tab.querySelector(`tr[data-j="${ligneTP}"]`);
-      tr.querySelector('[data-c="s1"]').textContent = fmt(sinD(a), 3);
-      tr.querySelector('[data-c="s2"]').textContent = fmt(sinD(v), 3);
-      ligneTP++;
-      if (ligneTP >= TP.length) {
-        tab.querySelector('[data-a="tp-ok"]').parentNode.remove();
-        tab.querySelector('[data-a="tp-msg"]').innerHTML = 'Toutes les mesures sont faites.';
-        passer(`Tableau rempli : quand ${iH(1)} augmente, ${iH(2)} augmente aussi.`);
-      } else majTableau();
-      // la ligne suivante reste à l'écran
-      RF.defiler(tab.querySelector(`tr[data-j="${Math.min(ligneTP, TP.length - 1)}"]`) || tab);
+      verif = maj;
+      function valider() {
+        const c = calcul(), a = TP[ligne], inp = z.querySelector(`tr[data-j="${ligne}"] input`);
+        if (etat.m2 !== 'plexi' || c.i1 !== a) { maj(c); ret.innerHTML = `<p class="ph-msg">${msg.innerHTML}</p>`; return; }
+        const v = RF.lire(inp.value);
+        if (isNaN(v)) { ret.innerHTML = '<p class="ph-msg">Écris un nombre entier de degrés.</p>'; return; }
+        let diag = null;
+        if (Math.abs(v - c.i2) <= 1) diag = null;
+        else if (a > 0 && Math.abs(v - (90 - c.i2)) <= 1.5) diag = 'Les angles se mesurent depuis la normale (graduation 0), pas depuis la surface.';
+        else if (a > 0 && Math.abs(v - a) <= 1) diag = `Tu as recopié ${iH(1)} : lis l'angle du rayon réfracté, dans le demi-cylindre.`;
+        else diag = `Lis ${iH(2)} entre la normale (graduation 0) et le rayon réfracté, au degré près.`;
+        if (diag) {
+          err++;
+          ret.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">Ce n'est pas ça.</b> ${diag}</p>${err >= 2 ? `<p class="er-petit">Le rayon réfracté passe à ${Math.round(c.i2)}° de la normale.</p>` : ''}</div>`;
+          return;
+        }
+        err = 0; ret.innerHTML = '';
+        mesures.push({ i1: a, i2: v });
+        inp.disabled = true;
+        ligne++;
+        if (ligne >= TP.length) {
+          z.querySelector('[data-a="tp-ok"]').parentNode.remove();
+          msg.innerHTML = 'Toutes les mesures sont faites.';
+          etat.masquerI2 = false; dessiner();
+          conclure(`Quand ${iH(1)} augmente, ${iH(2)} augmente aussi ; ${iH(2)} est toujours plus petit que ${iH(1)}.`);
+        } else { maj(c); RF.defiler(z.querySelector(`tr[data-j="${ligne}"]`)); }
+      }
+      z.querySelector('[data-a="tp-ok"]').onclick = valider;
+      z.querySelectorAll('input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); valider(); } }));
+    }
+    // mesures de secours (étape atteinte sans tableau : vérification de l'application)
+    const lesMesures = () => (mesures.length ? mesures : TP.map(a => ({ i1: a, i2: Math.round(OPT.refracter(1, RF.MILIEUX.plexi.n, a).i2) })));
+
+    /* ----- 3. Graphique i₁ en fonction de i₂ ----- */
+    function grapheAngles(z) {
+      const m = lesMesures();
+      z.innerHTML = '<div data-a="g"></div><p class="rf-li-aide">La droite en pointillés passe par l\'origine et par le point mesuré pour i<sub>1</sub> = 10°.</p><div data-a="g-q"></div>';
+      const G = graphe(z.querySelector('[data-a="g"]'), { pts: m.map(p => [p.i2, p.i1]), xNom: `${iH(2)} (°)`, yNom: `${iH(1)} (°)`, aria: 'Graphique de i1 en fonction de i2' });
+      const p10 = m.find(p => p.i1 === 10) || m[1];
+      const kp = p10.i1 / p10.i2, xf = Math.min(G.xMax, G.yMax / kp), [a, b] = G.px(xf, kp * xf);
+      G.el('line', { x1: G.x0, y1: G.y0, x2: a, y2: b, class: 'rf-g-guide' });
+      choix(z.querySelector('[data-a="g-q"]'), `${iH(1)} est-il proportionnel à ${iH(2)} ?`,
+        [{ id: 'non', label: 'Non : les points ne sont pas sur une droite qui passe par l\'origine.' }, { id: 'oui', label: `Oui : quand ${iH(2)} augmente, ${iH(1)} augmente aussi.` }], 'non',
+        { oui: 'Les deux augmentent ensemble, mais cela ne suffit pas : pour qu\'il y ait proportionnalité, les points doivent être sur une droite qui passe par l\'origine. Regarde les derniers points : ils s\'écartent de la droite.' },
+        () => conclure(`Les points ne sont pas alignés sur une droite qui passe par l'origine : ${iH(1)} n'est pas proportionnel à ${iH(2)}.`));
     }
 
-    /* ----- Étape 6 : graphique sin(i₁) en fonction de sin(i₂), droite qui passe par l'origine ----- */
-    function graphique() {
-      const z = zoneK();
-      const W = 360, H = 300, x0 = 46, y0 = 262, kx = 290 / 0.8, ky = 240 / 1;     // 0 à 0,8 en abscisse, 0 à 1 en ordonnée
-      const px = (x, y) => [x0 + x * kx, y0 - y * ky];
-      let pente = 1.0;
-      z.innerHTML = `<div class="rf-graphe"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Graphique de sin(i1) en fonction de sin(i2)"></svg></div>
+    /* ----- 4. Graphique avec les grandeurs choisies ----- */
+    function grapheChoix(z) {
+      const m = lesMesures();
+      const sel = (cote, s) => `<select class="rf-select" data-a="${cote}">${Object.keys(GRANDEURS).map(g => `<option value="${g}">${GRANDEURS[g].nom(s).replace(/<sub>(\d)<\/sub>/g, (x, d) => '₀₁₂'[+d]).replace('<sup>2</sup>', '²')}</option>`).join('')}</select>`;
+      z.innerHTML = `<p class="rf-li-aide">Choisis la grandeur de chaque axe : cherche celles qui donnent une <b>droite qui passe par l'origine</b> (proportionnalité).</p>
+        <div class="rf-sim-reglages rf-axes"><label>Axe des abscisses${sel('gx', '2')}</label><label>Axe des ordonnées${sel('gy', '1')}</label></div>
+        <div data-a="g"></div><div class="er-actions"><button type="button" class="btn-primary" data-a="g-ok">C'est une droite qui passe par l'origine</button></div><div data-a="g-ret" aria-live="polite"></div>`;
+      const gx = z.querySelector('[data-a="gx"]'), gy = z.querySelector('[data-a="gy"]'), ret = z.querySelector('[data-a="g-ret"]');
+      let err = 0, fini = false;
+      function tracer() {
+        const X = GRANDEURS[gx.value], Y = GRANDEURS[gy.value];
+        graphe(z.querySelector('[data-a="g"]'), { pts: m.map(p => [X.f(p.i2), Y.f(p.i1)]), xNom: X.nom('2') + X.unite, yNom: Y.nom('1') + Y.unite, aria: 'Graphique des grandeurs choisies' });
+        if (!fini) ret.innerHTML = '';
+      }
+      gx.onchange = tracer; gy.onchange = tracer;
+      tracer();
+      z.querySelector('[data-a="g-ok"]').onclick = () => {
+        if (fini) return;
+        const x = gx.value, y = gy.value;
+        if (x === 'sin' && y === 'sin') {
+          fini = true; gx.disabled = true; gy.disabled = true;
+          z.querySelector('[data-a="g-ok"]').disabled = true; ret.innerHTML = '';
+          conclure(`sin(${iH(1)}) en fonction de sin(${iH(2)}) donne une droite qui passe par l'origine : <b>sin(${iH(1)}) est proportionnel à sin(${iH(2)})</b>.`);
+          return;
+        }
+        err++;
+        let diag;
+        if (x === 'i' && y === 'i') diag = 'C\'est le graphique précédent : les points ne sont pas sur une droite qui passe par l\'origine.';
+        else if (x === 'cos' || y === 'cos') diag = 'Avec un cosinus, les points ne passent pas par l\'origine : cos(0°) = 1.';
+        else if (x === y) diag = 'Les points sont sur une courbe, pas sur une droite.';
+        else diag = 'Les points ne sont pas alignés sur une droite qui passe par l\'origine. Essaie la même fonction pour les deux angles.';
+        ret.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">Ce n'est pas ça.</b> ${diag}</p>${err >= 3 ? '<p class="er-petit">Essaie sin(i<sub>2</sub>) en abscisse et sin(i<sub>1</sub>) en ordonnée.</p>' : ''}</div>`;
+        RF.defiler(ret);
+      };
+    }
+
+    /* ----- 5. Coefficient directeur et relation sin(i₁) = n × sin(i₂) ----- */
+    function coefficient(z) {
+      const m = lesMesures();
+      const pts = m.map(p => [sinD(p.i2), sinD(p.i1)]);
+      // droite de meilleur ajustement passant par l'origine (moindres carrés)
+      const sxy = pts.reduce((s, p) => s + p[0] * p[1], 0), sxx = pts.reduce((s, p) => s + p[0] * p[0], 0);
+      kOpt = sxx ? sxy / sxx : 1.51;
+      pente = 1;
+      z.innerHTML = `<div data-a="g"></div>
         <div class="rf-ligne-cmd"><span data-a="g-fl"></span><span class="rf-val">Coefficient directeur : <b data-a="g-k"></b></span></div>
         <p class="rf-li-aide">Fais tourner la droite (glisse sa poignée, ou ± 0,01) pour qu'elle passe au plus près de tous les points : autant au-dessus qu'au-dessous.</p>
-        <div class="er-actions"><button type="button" class="btn-primary" data-a="g-ok">Valider la droite</button></div><div data-a="g-ret" aria-live="polite"></div>`;
-      const svg = z.querySelector('svg');
-      const el = (t, a) => { const e = OPT.svgEl(t, a, svg); return e; };
-      for (let x = 0; x <= 0.8 + 1e-9; x += 0.1) { const [a] = px(x, 0); el('line', { x1: a, y1: y0, x2: a, y2: y0 - ky, class: 'rf-g-grille' }); el('text', { x: a, y: y0 + 16, 'text-anchor': 'middle', class: 'rf-g-txt' }).textContent = fmt(+x.toFixed(1)); }
-      for (let y = 0; y <= 1 + 1e-9; y += 0.1) { const [, b] = px(0, y); el('line', { x1: x0, y1: b, x2: x0 + 0.8 * kx, y2: b, class: 'rf-g-grille' }); el('text', { x: x0 - 6, y: b + 4, 'text-anchor': 'end', class: 'rf-g-txt' }).textContent = fmt(+y.toFixed(1)); }
-      el('line', { x1: x0, y1: y0, x2: x0 + 0.8 * kx + 4, y2: y0, class: 'rf-g-axe' });
-      el('line', { x1: x0, y1: y0, x2: x0, y2: y0 - ky - 4, class: 'rf-g-axe' });
-      OPT.svgTexte(el('text', { x: x0 + 0.8 * kx, y: y0 + 32, 'text-anchor': 'end', class: 'rf-g-nom' }), `sin(i<sub>2</sub>)`);
-      OPT.svgTexte(el('text', { x: x0 + 4, y: 14, 'text-anchor': 'start', class: 'rf-g-nom' }), `sin(i<sub>1</sub>)`);
-      // points de mesure en « + », non reliés
-      mesures.forEach(m => {
-        const [a, b] = px(sinD(m.i2), sinD(m.i1));
-        el('line', { x1: a - 5, y1: b, x2: a + 5, y2: b, class: 'rf-g-plus' });
-        el('line', { x1: a, y1: b - 5, x2: a, y2: b + 5, class: 'rf-g-plus' });
-      });
-      const droite = el('line', { x1: x0, y1: y0, class: 'rf-g-droite' });
+        <div class="er-actions"><button type="button" class="btn-primary" data-a="g-ok">Valider la droite</button></div><div data-a="g-ret" aria-live="polite"></div><div data-a="rel"></div>`;
+      const G = graphe(z.querySelector('[data-a="g"]'), { pts, xNom: `sin(${iH(2)})`, yNom: `sin(${iH(1)})`, aria: 'Graphique de sin(i1) en fonction de sin(i2)' });
+      const { svg, el, px } = G;
+      const droite = el('line', { x1: G.x0, y1: G.y0, class: 'rf-g-droite' });
       const g = el('g', { class: 'opt-poignee', tabindex: '0', role: 'slider', 'aria-label': 'Poignée de la droite' });
       const zt = OPT.svgEl('circle', { r: 22, class: 'opt-poignee-zone' }, g), pt = OPT.svgEl('circle', { r: 7, class: 'opt-poignee-point' }, g);
       function placer() {
-        // extrémité : bord du cadre (x = 0,8 ou y = 1)
-        const xf = Math.min(0.8, 1 / pente), [a, b] = px(xf, pente * xf);
+        const xf = Math.min(G.xMax, G.yMax / pente), [a, b] = px(xf, pente * xf);
         droite.setAttribute('x2', a); droite.setAttribute('y2', b);
         const xh = xf * 0.92, [ha, hb] = px(xh, pente * xh);
         [zt, pt].forEach(c => { c.setAttribute('cx', ha); c.setAttribute('cy', hb); });
         z.querySelector('[data-a="g-k"]').textContent = fmt(pente, 2);
       }
-      const regler = v => { pente = Math.max(0.5, Math.min(3, Math.round(v * 100) / 100)); placer(); z.querySelector('[data-a="g-ret"]').innerHTML = ''; };
+      let fige = false, err = 0;
+      const regler = v => { if (fige) return; pente = Math.max(0.5, Math.min(3, Math.round(v * 100) / 100)); placer(); z.querySelector('[data-a="g-ret"]').innerHTML = ''; };
       // glisser la poignée (souris ou doigt)
-      const point = e => { const m = svg.getScreenCTM(), q = svg.createSVGPoint(); q.x = e.clientX; q.y = e.clientY; const r = q.matrixTransform(m.inverse()); return [(r.x - x0) / kx, (y0 - r.y) / ky]; };
-      let id = null, fige = false;
+      const point = e => { const mm = svg.getScreenCTM(), q = svg.createSVGPoint(); q.x = e.clientX; q.y = e.clientY; const r = q.matrixTransform(mm.inverse()); return [(r.x - G.x0) / G.kx, (G.y0 - r.y) / G.ky]; };
+      let id = null;
       g.addEventListener('touchstart', e => { if (!fige && e.cancelable) e.preventDefault(); }, { passive: false });
       g.addEventListener('pointerdown', e => { if (fige) return; id = e.pointerId; try { g.setPointerCapture(id); } catch (er) { /* ignoré */ } e.preventDefault(); });
       const suivre = e => { const [x, y] = point(e); if (x > 0.02) regler(y / x); };
       g.addEventListener('pointermove', e => { if (e.pointerId === id) suivre(e); });
       g.addEventListener('pointerup', e => { if (e.pointerId === id) { suivre(e); id = null; } });
       g.addEventListener('pointercancel', () => { id = null; });
-      g.addEventListener('keydown', e => { const d = { ArrowUp: 0.01, ArrowRight: 0.01, ArrowDown: -0.01, ArrowLeft: -0.01 }[e.key]; if (d && !fige) { e.preventDefault(); regler(pente + d); } });
-      OPT.fleches(z.querySelector('[data-a="g-fl"]'), { moins: () => { if (!fige) regler(pente - 0.01); }, plus: () => { if (!fige) regler(pente + 0.01); }, symboles: ['− 0,01', '+ 0,01'], aria: ['Diminuer le coefficient directeur de 0,01', 'Augmenter le coefficient directeur de 0,01'] });
+      g.addEventListener('keydown', e => { const d = { ArrowUp: 0.01, ArrowRight: 0.01, ArrowDown: -0.01, ArrowLeft: -0.01 }[e.key]; if (d) { e.preventDefault(); regler(pente + d); } });
+      OPT.fleches(z.querySelector('[data-a="g-fl"]'), { moins: () => regler(pente - 0.01), plus: () => regler(pente + 0.01), symboles: ['− 0,01', '+ 0,01'], aria: ['Diminuer le coefficient directeur de 0,01', 'Augmenter le coefficient directeur de 0,01'] });
       placer();
-      // droite de meilleur ajustement passant par l'origine (moindres carrés)
-      const sxy = mesures.reduce((s, m) => s + sinD(m.i2) * sinD(m.i1), 0), sxx = mesures.reduce((s, m) => s + sinD(m.i2) ** 2, 0);
-      const kOpt = sxx ? sxy / sxx : 1.51;
-      let err = 0;
       z.querySelector('[data-a="g-ok"]').onclick = () => {
         if (fige) return;
         const ret = z.querySelector('[data-a="g-ret"]');
         if (Math.abs(pente - kOpt) <= 0.03) {
           fige = true; g.style.display = 'none';
           z.querySelectorAll('[data-a="g-fl"] button, [data-a="g-ok"]').forEach(b => { b.disabled = true; });
-          ret.innerHTML = '';
-          passer(`La droite passe par l'origine : sin(${iH(1)}) est proportionnel à sin(${iH(2)}). Son coefficient directeur vaut environ ${fmt(pente, 2)} : c'est l'indice du plexiglas, ${nH('plexi')} ≈ 1,5, car ${nH('air')} × sin(${iH(1)}) = ${nH('plexi')} × sin(${iH(2)}) avec ${nH('air')} = 1,00.`);
+          ret.innerHTML = `<p class="ph-ok">✓ La droite passe par l'origine, son coefficient directeur vaut ${fmt(pente, 2)}.</p>`;
+          relation(z.querySelector('[data-a="rel"]'));
           return;
         }
         err++;
         ret.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">Ce n'est pas ça.</b> ${pente > kOpt ? 'La droite est trop raide : la plupart des points sont en dessous.' : 'La droite n\'est pas assez raide : la plupart des points sont au-dessus.'}</p>${err >= 2 ? `<p class="er-petit">Un coefficient directeur proche de ${fmt(kOpt, 2)} convient.</p>` : ''}</div>`;
       };
     }
-
-    /* ----- Étape 7 : défi, milieu inconnu ----- */
-    let defiZ = null;
-    function defi() {
-      const z = zoneK();
-      defiZ = z;
-      z.innerHTML = `<p class="rf-li-aide" data-a="d-msg"></p><div data-a="d-q"></div>`;
-      majDefi();
+    // relation de proportionnalité sin(i₁) = k × sin(i₂)
+    function relation(z) {
+      const q = { parties: [{
+        type: 'nombre', q: 'Écris la relation de proportionnalité entre sin(i<sub>1</sub>) et sin(i<sub>2</sub>), avec le coefficient directeur de ta droite.',
+        label: `sin(${iH(1)}) =`, unite: `× sin(${iH(2)})`, focus: false,
+        verifier(v) {
+          if (Math.abs(v - pente) <= 0.011 || Math.abs(v - kOpt) <= 0.03) return { ok: true };
+          if (Math.abs(v - 1 / pente) <= 0.02) return { diag: `C'est l'inverse : sin(${iH(1)}) est sur l'axe des ordonnées, sin(${iH(1)}) = coefficient directeur × sin(${iH(2)}).` };
+          return { diag: `Le coefficient directeur de ta droite vaut ${fmt(pente, 2)} : sin(${iH(1)}) = ${fmt(pente, 2)} × sin(${iH(2)}).` };
+        },
+        remplir(i) { i.value = fmt(pente, 2); },
+        solution: () => `sin(${iH(1)}) = ${fmt(pente, 2)} × sin(${iH(2)})`,
+      }] };
+      RF.question(z, q, { fin: () => conclure(`sin(${iH(1)}) = ${fmt(pente, 2)} × sin(${iH(2)}). On choisit d'appeler ce coefficient de proportionnalité <b>n</b>, l'<b>indice de réfraction</b> du milieu : sin(${iH(1)}) = n × sin(${iH(2)}), avec ${nH('plexi')} ≈ ${fmt(RF.MILIEUX.plexi.n, 2)} pour le plexiglas.`) }, 'manip');
+      RF.defiler(z);
     }
-    function majDefi() {
-      if (!defiZ || defiZ.dataset.pret) { if (defiZ) defiZ.querySelector('[data-a="d-msg"]').innerHTML = etat.m1 === 'air' && etat.m2 === 'inconnu' ? '' : 'Garde air (milieu 1) et milieu inconnu (milieu 2).'; return; }
-      const ok = etat.m1 === 'air' && etat.m2 === 'inconnu';
-      defiZ.querySelector('[data-a="d-msg"]').innerHTML = ok ? '' : 'Choisis air (milieu 1) et milieu inconnu (milieu 2).';
-      if (!ok) return;
-      defiZ.dataset.pret = '1';
-      const q = {
-        parties: [{
-          type: 'nombre', q: `Règle un angle ${iH(1)} (au moins 30°), lis ${iH(2)} sur le rapporteur, puis calcule l'indice du milieu inconnu (3 chiffres significatifs).`,
-          label: `${nH('inconnu')} = ${RF.fr(`${nH('air')} × sin(${iH(1)})`, `sin(${iH(2)})`)} =`, calc: true, focus: false,
+
+    /* ----- 6. Le milieu inconnu ----- */
+    function defi(z) {
+      etat.masquerI2 = true;
+      z.innerHTML = `<p class="rf-li-aide" data-a="d-msg"></p><div data-a="d-q"></div>`;
+      const msg = z.querySelector('[data-a="d-msg"]');
+      let pose = false;
+      verif = () => {
+        const ok = etat.m2 === 'inconnu';
+        msg.innerHTML = ok ? '' : 'Choisis le milieu inconnu (milieu 2).';
+        if (!ok || pose) return;
+        pose = true;
+        const q = { parties: [{
+          type: 'nombre', q: `Règle un angle ${iH(1)} d'au moins 30°, lis ${iH(2)} sur le disque, puis calcule l'indice du milieu inconnu (3 chiffres significatifs).`,
+          label: `${nH('inconnu')} = ${RF.fr(`sin(${iH(1)})`, `sin(${iH(2)})`)} =`, calc: true, focus: false,
+          aide: `Avec l'air, sin(${iH(1)}) = n × sin(${iH(2)}) : on divise sin(${iH(1)}) par sin(${iH(2)}). Calculatrice en degrés.`,
+          avant: zz => RF.aideDegres(zz),
           verifier(v) {
             const c = calcul();
-            if (!(etat.m1 === 'air' && etat.m2 === 'inconnu')) return { format: 'Choisis air (milieu 1) et milieu inconnu (milieu 2).' };
-            if (etat.i1 < 30) return { format: `Règle ${iH(1)} sur au moins 30° : la mesure sera plus précise.` };
+            if (etat.m2 !== 'inconnu') return { format: 'Choisis le milieu inconnu (milieu 2).' };
+            if (c.i1 < 30) return { format: `Règle ${iH(1)} sur au moins 30° : la mesure sera plus précise.` };
             // lecture de i₂ au degré près : intervalle des indices possibles
-            const nA = sinD(etat.i1) / sinD(c.i2 + 1), nB = sinD(etat.i1) / sinD(Math.max(1, c.i2 - 1));
+            const nA = sinD(c.i1) / sinD(c.i2 + 1), nB = sinD(c.i1) / sinD(Math.max(1, c.i2 - 1));
             if (v >= nA - 0.01 && v <= nB + 0.01) return { ok: true };
             if (v < 1) return { diag: 'Un indice de réfraction est toujours supérieur ou égal à 1 : tu as peut-être renversé la fraction.' };
-            if (Math.abs(v - etat.i1 / c.i2) <= 0.05) return { diag: `Il manque le sinus : divise sin(${iH(1)}) par sin(${iH(2)}), pas les angles.` };
-            return { diag: `Calcule ${nH('air')} × sin(${iH(1)}) ÷ sin(${iH(2)}), avec ${iH(1)} = ${etat.i1}° et ${iH(2)} lu sur le rapporteur, calculatrice en degrés.` };
+            if (Math.abs(v - c.i1 / c.i2) <= 0.05) return { diag: `Il manque le sinus : divise sin(${iH(1)}) par sin(${iH(2)}), pas les angles.` };
+            return { diag: `Calcule sin(${iH(1)}) ÷ sin(${iH(2)}), avec ${iH(1)} = ${c.i1}° et ${iH(2)} lu sur le disque, calculatrice en degrés.` };
           },
           remplir(i) { i.value = fmt(nInconnu, 2); },
           solution: () => `Le milieu inconnu a pour indice <b>${nH('inconnu')} = ${fmt(nInconnu, 2)}</b>.`,
-        }],
+        }] };
+        RF.question(z.querySelector('[data-a="d-q"]'), q, { fin: () => { etat.masquerI2 = false; dessiner(); conclure(`En mesurant ${iH(1)} et ${iH(2)}, on trouve l'indice d'un milieu : ${nH('inconnu')} = sin(${iH(1)}) / sin(${iH(2)}) ≈ ${fmt(nInconnu, 2)}.`); } }, 'manip');
       };
-      RF.question(defiZ.querySelector('[data-a="d-q"]'), q, { fin: () => passer() }, 'manip');
+    }
+
+    /* ----- 7. Généraliser : deux milieux quelconques ----- */
+    function generaliser(z) {
+      z.innerHTML = `<p class="rf-li-aide">On donne aussi un indice à l'air : ${nH('air')} = 1,00. Quand la lumière passe d'un milieu 1 d'indice ${nH(1)} à un milieu 2 d'indice ${nH(2)}, quelle relation est juste ?</p><div data-a="g-q"></div>`;
+      const sym = 'Si on échange les milieux 1 et 2 (la lumière peut faire le chemin inverse), la relation doit rester la même : n<sub>1</sub> va donc avec sin(i<sub>1</sub>), comme n<sub>2</sub> avec sin(i<sub>2</sub>).';
+      const d = RF.el('div');
+      z.querySelector('[data-a="g-q"]').appendChild(d);
+      RF.question(d, { parties: [{
+        type: 'choix', q: 'La relation entre les deux milieux :', colonne: true,
+        options: [
+          { id: 'ok', label: `${nH(1)} × sin(${iH(1)}) = ${nH(2)} × sin(${iH(2)})` },
+          { id: 'inv', label: `${nH(2)} × sin(${iH(1)}) = ${nH(1)} × sin(${iH(2)})` },
+          { id: 'prod', label: `sin(${iH(1)}) = ${nH(1)} × ${nH(2)} × sin(${iH(2)})` },
+          { id: 'sans', label: `sin(${iH(1)}) = ${nH(2)} × sin(${iH(2)})` },
+        ],
+        bonne: 'ok',
+        indices: {
+          inv: `Avec l'air, on a trouvé sin(${iH(1)}) = n × sin(${iH(2)}) : l'indice du milieu 2 est du même côté que sin(${iH(2)}), comme vu précédemment. Ici, ${nH(2)} est du côté de sin(${iH(1)}).`,
+          prod: `${nH(2)} est bien du même côté que sin(${iH(2)}), comme vu précédemment. ${sym}`,
+          sans: `C'est la relation trouvée quand le milieu 1 est l'air (${nH('air')} = 1,00). Si le milieu 1 n'est pas de l'air, son indice compte aussi. ${sym}`,
+        },
+      }] }, { fin: () => conclure(`C'est la <b>loi de Snell-Descartes</b> pour la réfraction : <b>${nH(1)} × sin(${iH(1)}) = ${nH(2)} × sin(${iH(2)})</b>. Avec l'air comme milieu 1 (${nH('air')} = 1,00), on retrouve sin(${iH(1)}) = ${nH(2)} × sin(${iH(2)}).`) }, 'manip');
     }
 
     /* ----- Bilan ----- */
     function fin() {
+      k = ETAPES.length; marquer();
       SOM.marquer({ fait: true });
-      $('fin').innerHTML = `<div class="cle rf-bilan"><p><b class="cle-titre">Bilan.</b> Un rayon perpendiculaire à la surface n'est pas dévié. Quand ${iH(1)} augmente, ${iH(2)} augmente.</p>
-          <p>Vers un milieu plus réfringent (indice plus grand), le rayon se rapproche de la normale ; vers un milieu moins réfringent, il s'en éloigne.</p>
-          <p>sin(${iH(1)}) et sin(${iH(2)}) sont proportionnels : ${nH(1)} × sin(${iH(1)}) = ${nH(2)} × sin(${iH(2)}). Pour la réflexion, l'angle de réflexion est égal à ${iH(1)}.</p></div>
-        ${RF.revois(['proportionnalite', 'lecture'])}
+      $e.innerHTML = `<div class="cle rf-bilan"><p><b class="cle-titre">Bilan.</b> Un rayon perpendiculaire à la surface n'est pas dévié. Quand ${iH(1)} augmente, ${iH(2)} augmente, mais ${iH(1)} n'est pas proportionnel à ${iH(2)}.</p>
+          <p>De l'air vers un milieu transparent : sin(${iH(1)}) = n × sin(${iH(2)}) ; n est l'<b>indice de réfraction</b> du milieu (${nH('air')} = 1,00).</p>
+          <p>Entre deux milieux quelconques : <b>${nH(1)} × sin(${iH(1)}) = ${nH(2)} × sin(${iH(2)})</b> (loi de Snell-Descartes).</p></div>
+        ${RF.revois(['proportionnalite'])}
         <div class="er-actions"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
-          <a class="btn-primary" style="text-decoration:none" href="module_4_questions.html">Module 4 : calculer un angle ou un indice →</a></div>`;
-      $('fin').querySelector('[data-a="re"]').onclick = () => simulateur(zone);
-      RF.defiler($('fin'));
+          <a class="btn-primary" style="text-decoration:none" href="module_3a_cours.html">Module 3 : la loi de Descartes →</a></div>`;
+      $e.querySelector('[data-a="re"]').onclick = () => simulateur(zone);
+      RF.defiler($e);
     }
 
-    marquer();
     entrer();
     // pour vérifier l'application
-    RF.simEnCours = { etat, regler: a => pv.regler(90 + a), calcul, nInconnu, choisir(m1, m2) { $('m1').value = m1; $('m2').value = m2; etat.m1 = m1; etat.m2 = m2; dessiner(); }, etape: () => k };
+    RF.simEnCours = {
+      etat, calcul, nInconnu, etape: () => k, mesures: () => mesures, kOpt: () => kOpt,
+      regler: a => pv.regler(90 + a),
+      choisir(m2) { $('m2').value = m2; etat.m2 = m2; dessiner(); },
+    };
   }
 
   RF.simulateur = simulateur;

@@ -217,3 +217,98 @@ sub, sup { font-size: .7em; line-height: 0; }
 .rf-prisme-cmd { gap: 10px 22px; }
 .rf-cmd-g { display: inline-flex; align-items: center; gap: 8px; }
 .rf-cmd-t { font-size: .85rem; font-weight: 800; color: var(--ink-2); }
+
+/* ---------- En-tête des pages de manipulation, bouton « Plein écran » ---------- */
+.rf-entete { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 14px; }
+.rf-entete-l { min-width: 0; }
+.rf-entete-l .er-titre { margin-bottom: 0; }
+.rf-entete > .er-contexte { flex-basis: 100%; margin-top: 4px; }
+/* plein écran : sans le sommaire, toute la largeur */
+html.rf-plein #app-nav { display: none; }
+html.rf-plein.som-nav body { padding-left: 0; }
+html.rf-plein .er-page { max-width: none; }
+
+/* ---------- Fenêtre d'aide (schéma de référence, loi, calculatrice) ---------- */
+.rf-voile {
+  position: fixed; inset: 0; z-index: 1200; display: flex; align-items: center; justify-content: center; padding: 16px;
+  background: color-mix(in srgb, var(--ink) 40%, transparent);
+}
+.rf-fenetre {
+  width: min(760px, 100%); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow: auto; padding: 0 18px 18px;
+  border-radius: 20px; background: var(--sheet); box-shadow: 0 10px 40px color-mix(in srgb, var(--ink) 25%, transparent);
+}
+.rf-fenetre-tete { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 0 8px; background: var(--sheet); }
+.rf-fenetre-tete h3 { margin: 0; font-size: 1.1rem; font-weight: 800; }
+.rf-fermer { min-width: 44px; min-height: 44px; justify-content: center; }
+.rf-fenetre-corps { line-height: 1.5; }
+.rf-fenetre-corps p + p { margin-top: 6px; }
+.rf-b-aide { margin-top: 10px; }
+.rf-marques { margin: 8px 0 12px; }
+.rf-marques button[aria-pressed="true"] { background: var(--cle-bg); box-shadow: inset 0 0 0 2px var(--accent); }
+
+/* ---------- Module 1 : récapitulatif, schéma de référence ---------- */
+.rf-intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 360px); gap: 16px; align-items: center; margin: 10px 0 14px; line-height: 1.55; }
+.rf-intro-t p + p { margin-top: 8px; }
+.rf-but { margin-bottom: 14px; }
+.rf-baton { stroke: var(--ink-2); stroke-width: 7; stroke-linecap: round; }
+.rf-baton-reel { stroke: var(--ink-3); stroke-width: 3; stroke-dasharray: 6 5; stroke-linecap: round; }
+.rf-ref { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.rf-legende { margin: 0; padding-left: 18px; font-size: .95rem; line-height: 1.5; }
+.rf-legende li + li { margin-top: 5px; }
+.rf-deroule-court li { padding: 6px 10px; font-size: .9rem; }
+.rf-deroule-court li::before { width: 24px; height: 24px; }
+.rf-manip-1 .rf-cmd-zone .rf-consigne { margin-top: 10px; }
+.rf-aide-ref { margin-top: 4px; }
+@media (max-width: 899px) {
+  .rf-intro, .rf-ref { grid-template-columns: minmax(0, 1fr); }
+  .rf-intro-fig, .rf-ref-fig { max-width: 420px; }
+  /* téléphone : la consigne de l'étape en cours suffit, la question juste sous la figure */
+  .rf-manip-1 .rf-deroule { display: none; }
+}
+
+/* ---------- Valeurs numériques dans la loi (niveau seconde) ---------- */
+.rf-valeurs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 1.05rem; font-weight: 800; }
+.rf-v-m { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.ph-champ.rf-champ-v { width: 74px; padding: 8px 4px; font-size: 1.05rem; }
+.rf-saisie .rf-valeurs + .er-actions { margin-top: 10px; }
+
+/* ---------- Module 2 : simulateur (lampe, disque gradué, demi-cylindre) ---------- */
+@media (max-width: 899px) {
+  /* téléphone : le titre de l'étape en cours suffit */
+  .rf-manip-sim .rf-deroule { display: none; }
+}
+.rf-fig-disque { max-width: 480px; }
+.rf-lampe-boite { fill: var(--ink); }
+.rf-disque { fill: var(--sheet); stroke: var(--ink-3); stroke-width: 1.2; }
+.rf-axe { stroke: var(--ink-3); stroke-width: 1; }
+.rf-g-guide { stroke: var(--ink-3); stroke-width: 1.6; stroke-dasharray: 6 5; }
+.rf-sim-m1 { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; font-weight: 800; color: var(--ink-2); }
+.rf-sim-m1 b { display: flex; align-items: center; min-height: 46px; padding: 0 12px; border-radius: 14px; background: var(--paper); color: var(--ink); font-size: 1rem; }
+.rf-etape-titre { margin: 12px 0 8px; font-size: 1.02rem; font-weight: 800; }
+.rf-etape-corps > * + * { margin-top: 8px; }
+.rf-etape .rf-li-aide { font-size: .93rem; line-height: 1.45; color: var(--ink-2); }
+.rf-conclusion { margin-top: 10px; }
+.rf-axes { margin-bottom: 4px; }
+.rf-axes .rf-select { min-width: 130px; }
+
+/* ---------- Module 3 : cours, aide « La loi de Descartes », parcours ---------- */
+.rf-cours-fig { max-width: 380px; margin: 10px auto; }
+.rf-cours-figs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 10px 0; }
+.rf-cours-figs p { margin-top: 8px !important; font-size: .95rem; }
+.rf-loi { text-align: center; font-size: 1.2rem; font-weight: 800; }
+.rf-ref .cle + .rf-legende { margin-top: 10px; }
+.rf-parcours { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 12px 0 4px; }
+.rf-parcours-b {
+  display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border: none; border-radius: 16px; cursor: pointer; text-align: left;
+  background: var(--paper); color: var(--ink); font: inherit; line-height: 1.45; box-shadow: inset 0 0 0 1.5px var(--paper-3);
+}
+.rf-parcours-b:hover, .rf-parcours-b:focus-visible { background: var(--cle-bg); box-shadow: inset 0 0 0 2px var(--accent); outline: none; }
+.rf-parcours-b b { font-size: 1.02rem; color: var(--accent-ink); }
+.rf-parcours-b span { font-size: .92rem; color: var(--ink-2); }
+.rf-parcours-nom { margin: -6px 0 10px !important; font-size: .85rem; font-weight: 800; color: var(--accent-ink); }
+.rf-liens-spe { margin-top: 10px; font-size: .92rem; }
+.rf-liens-spe .rf-revois { margin-top: 6px !important; }
+.rf-manip-panneau [data-a="donnees"]:empty, .rf-manip-panneau [data-a="suite"]:empty { display: none; }
+@media (max-width: 640px) {
+  .rf-cours-figs, .rf-parcours { grid-template-columns: minmax(0, 1fr); }
+}

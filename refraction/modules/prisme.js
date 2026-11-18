@@ -3,10 +3,11 @@
    RF.nPrisme(λ)            indice du prisme (loi de Cauchy n = A + B / λ², ajustée sur
                             n = 1,609 à 700 nm et n = 1,673 à 450 nm ; calcul interne, jamais montré)
    RF.simPrisme(zone)       simulation : prisme sur une table, source blanche ou monochromatique
-                            (rouge 650 nm, vert 530 nm, bleu 450 nm), écran ; prisme à tourner,
+                            (rouge 650 nm, vert 530 nm, bleu 450 nm), ou les trois ensemble, écran ; prisme à tourner,
                             source à déplacer, normales et angles aux deux faces
-   RF.manipPrisme(zone)     manipulation guidée : le prisme ABC rectangle en C (A = 30,0°),
-                            normale en J, i₁, loi de Descartes pour le bleu puis pour le rouge
+   RF.manipPrisme(zone)     manipulation guidée : le prisme ABC rectangle en C (A = 30,0°, écrit sur le schéma),
+                            normale en J, i₁ (aide : angle en J dans le triangle AIJ, puis i₁ = 90° − angle en J),
+                            loi de Descartes pour le bleu puis pour le rouge
    ============================================================ */
 (function () {
   'use strict';
@@ -25,7 +26,9 @@
   const LW = 560, LH = 400;                    // figure rectangulaire (unités)
   const XS = -250, XE = 250;                   // abscisses de la source et de l'écran
   const BETA = 25;                              // direction du pinceau (degrés)
-  const SOURCES = { blanche: { nom: 'lumière blanche' }, rouge: { nom: 'rouge (650 nm)', l: 650 }, verte: { nom: 'verte (530 nm)', l: 530 }, bleue: { nom: 'bleue (450 nm)', l: 450 } };
+  const SOURCES = { blanche: { nom: 'lumière blanche' }, rouge: { nom: 'rouge (650 nm)', l: 650 }, verte: { nom: 'verte (530 nm)', l: 530 }, bleue: { nom: 'bleue (450 nm)', l: 450 },
+    rvb: { nom: 'rouge, verte et bleue ensemble', ls: [650, 530, 450] } };
+  const mono = s => s === 'rouge' || s === 'verte' || s === 'bleue';
 
   function simPrisme(zone) {
     const etat = { source: 'blanche', ys: -49, rot: 0, normales: false };
@@ -50,7 +53,7 @@
 
     function tracer() {
       const P0 = [XS, etat.ys], d = V.dir(BETA), tri = sommets();
-      const ls = etat.source === 'blanche' ? Array.from({ length: 81 }, (_, i) => 400 + 5 * i) : [SOURCES[etat.source].l];
+      const ls = etat.source === 'blanche' ? Array.from({ length: 81 }, (_, i) => 400 + 5 * i) : SOURCES[etat.source].ls || [SOURCES[etat.source].l];
       traces = ls.map(l => {
         const t = OPT.tracer(P0, d, [{ sommets: tri, n: nPrisme(l) }], { longueur: 900 });
         // impact sur l'écran (x = XE) du dernier segment
@@ -81,7 +84,8 @@
       const blanc = etat.source === 'blanche';
       const t0 = traces[0], s0 = t0.segments[0];
       const inc = couper(s0.a, s0.b);
-      S.rayon('rayons', inc[0], inc[1], blanc ? { fleche: 1, cls: 'rf-blanc' } : { fleche: 1, couleur: couleur(t0.l), largeur: 3 });
+      // pinceau incident : blanc (lumière blanche ou trois radiations mêlées) ou de la couleur de la source
+      S.rayon('rayons', inc[0], inc[1], mono(etat.source) ? { fleche: 1, couleur: couleur(t0.l), largeur: 3 } : { fleche: 1, cls: 'rf-blanc' });
       traces.forEach(t => t.segments.slice(1).forEach((sg, j) => {
         const [a, b] = couper(sg.a, sg.b);
         S.rayon('rayons', a, b, { couleur: couleur(t.l), largeur: blanc ? 1.3 : 3, opacite: blanc ? 0.85 : 1, fleche: !blanc && j === t.segments.length - 2 ? 1 : 0 });
@@ -94,9 +98,9 @@
           if (Math.abs(a.impact[1] - b.impact[1]) > 30) continue;
           S.ligne('deco', [XE + 6, a.impact[1]], [XE + 6, b.impact[1]], '', { stroke: couleur((a.l + b.l) / 2), 'stroke-width': 9 });
         }
-      } else if (imp[0]) S.cercle('deco', [XE + 6, imp[0].impact[1]], 6, '', { fill: couleur(imp[0].l) });
+      } else imp.forEach(t => S.cercle('deco', [XE + 6, t.impact[1]], 6, '', { fill: couleur(t.l) }));
       // normales et angles aux deux faces (radiation verte, ou celle de la source)
-      const ref = blanc ? traces[26] : traces[0];
+      const ref = blanc ? traces[26] : traces.length === 3 ? traces[1] : traces[0];
       let txt = '';
       if (etat.normales && ref) {
         ref.interfaces.slice(0, 2).forEach((it, k) => {
@@ -186,7 +190,9 @@
           () => passer('La lumière blanche est décomposée par le prisme : on obtient son spectre, continu de 400 nm à 800 nm. C\'est la dispersion.'));
       } else if (k === 0 && sous === 0) {
         zoneK().innerHTML = `<p class="rf-li-aide">${etat.source !== 'blanche' ? 'Choisis la lumière blanche.' : 'Tourne le prisme ou déplace la source pour que la lumière arrive sur l\'écran.'}</p>`;
-      } else if (k === 2 && sous === 0 && etat.source !== 'blanche') {
+      } else if (k === 2 && sous === 0 && etat.source === 'rvb') {
+        zoneK().innerHTML = '<p class="rf-li-aide">Les trois radiations ensemble ne forment pas une lumière monochromatique : choisis une seule couleur.</p>';
+      } else if (k === 2 && sous === 0 && mono(etat.source)) {
         sous = 1;
         choix('La lumière monochromatique est-elle décomposée par le prisme ?', [{ id: 'n', label: 'Non : une seule tache, de la couleur de la source' }, { id: 'o', label: 'Oui : un spectre se forme sur l\'écran' }], 'n',
           { o: 'Regarde l\'écran : il n\'y a qu\'une tache, de la couleur de la source.' },
@@ -229,7 +235,7 @@
     const ETAPES = [
       'Trace la <b>normale</b> en J, sur la face AB.',
       'Place l\'angle d\'incidence <b>i<sub>1</sub></b> en J.',
-      'Trouve la valeur de <b>i<sub>1</sub></b>.',
+      'Calcule l\'angle d\'incidence <b>i<sub>1</sub></b> en J.',
       `Pour le <b>bleu</b> : écris la loi de Descartes, puis calcule ${iH('2b')}.`,
       `Pour le <b>rouge</b> : écris la loi de Descartes, puis calcule ${iH('2r')}.`,
       'Compare les deux rayons.',
@@ -251,6 +257,22 @@
       surEtape(n) { k = n; marquer(); },
       surFin() { k = 2; marquer(); suite(); },
     });
+    // sur le schéma : angle A = 30,0°, angle droit en I ; angle en J (AĴI) quand l'aide est ouverte
+    const [PA, , PC] = SIT_PRISME.triangle, PI = SIT_PRISME.entree;
+    let angleJ = null;                       // null : pas affiché ; '?' puis '60°'
+    const base = (S, g) => {
+      const aB = V.angle(V.sub(SIT_PRISME.triangle[1], PA)), aC = V.angle(V.sub(PC, PA));
+      S.arc('arcs', PA, aC, aB, 40, 'opt-arc-pose');
+      S.etiquette('textes', V.add(PA, V.mul(V.dir((aB + aC) / 2), 60)), '30,0°', { taille: 13 });
+      S.angleDroit('deco', PI, 0, 90, 10);
+      if (angleJ) {
+        const aA = V.angle(V.sub(PA, g.I)), aI = V.angle(V.sub(PI, g.I));
+        S.arc('arcs', g.I, aA, aI, 30, 'opt-arc');
+        S.etiquette('textes', V.add(g.I, V.mul(V.dir((aA + aI) / 2), 50)), angleJ, { taille: 13, cls: 'opt-neutre' });
+      }
+    };
+    sc.e.extra = base;
+    sc.redessiner();
     const zoneK = () => lis[k].querySelector('.rf-li-zone');
     function suivant() { k++; marquer(); RF.amener(lis[Math.min(k, lis.length - 1)], 0.7); }
     // questions dans l'étape en cours, en parties successives
@@ -261,12 +283,52 @@
       RF.defiler(d);
     }
     function suite() {
-      // 3. valeur de i₁
+      // 3. valeur de i₁ (aide : l'angle en J dans le triangle AIJ, puis i₁ = 90° − angle en J)
       poser([{
-        type: 'choix', q: `Que vaut l'angle d'incidence ${iH(1)} en J ?`, melanger: false,
-        options: [{ id: '30', label: '30,0°' }, { id: '60', label: '60,0°' }, { id: '90', label: '90,0°' }], bonne: '30',
-        indices: { 60: 'L\'angle se mesure depuis la normale : 60° est l\'angle entre le rayon et la face AB.', 90: '90° est l\'angle entre la normale et la face AB ; ' + iH(1) + ' est entre la normale et le rayon incident.' },
-        solution: `La normale en J fait avec le rayon le même angle que la face AB avec la face AC : ${iH(1)} = 30,0°.`,
+        type: 'perso', q: `Calcule l'angle d'incidence ${iH(1)} en J.`,
+        monter(z, api) {
+          const box = RF.el('div', 'rf-saisie', `<div class="rf-saisie-l"><span class="rf-saisie-t">${iH(1)} =</span><input type="text" class="ph-champ" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="i1"><span class="rf-unite">°</span></div>
+            <div class="er-actions"><button type="button" class="btn-primary" data-a="ok">Valider</button><button type="button" class="btn-small" data-a="aide">Aide : passer par l'angle en J</button></div>
+            <div data-a="aideZ"></div>`);
+          z.appendChild(box);
+          const inp = box.querySelector('input');
+          const valider = () => {
+            if (api.fini()) return;
+            const v = RF.lire(inp.value);
+            if (isNaN(v)) { api.message('Écris un nombre.'); return; }
+            if (Math.abs(v - 30) <= 0.05) { inp.disabled = true; box.querySelectorAll('button').forEach(b => { b.disabled = true; }); api.reussi(); return; }
+            if (Math.abs(v - 60) <= 0.05) api.erreur(`60° est l'angle en J entre la face AB et le rayon. ${iH(1)} se mesure depuis la normale : ${iH(1)} = 90° − 60°.`);
+            else if (Math.abs(v - 90) <= 0.05) api.erreur(`90° est l'angle entre la normale et la face AB ; ${iH(1)} est entre la normale et le rayon incident.`);
+            else api.erreur('Utilise l\'aide : calcule d\'abord l\'angle en J dans le triangle AIJ.');
+          };
+          box.querySelector('[data-a="ok"]').onclick = valider;
+          inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); valider(); } });
+          // aide : angle en J dans le triangle AIJ
+          box.querySelector('[data-a="aide"]').onclick = () => {
+            const b = box.querySelector('[data-a="aide"]');
+            if (b.disabled) return;
+            b.disabled = true;
+            angleJ = '?'; sc.redessiner();
+            const az = box.querySelector('[data-a="aideZ"]');
+            az.innerHTML = `<div class="callout-accent rf-aide-j"><p>Dans le triangle AIJ : l'angle en I vaut <b>90°</b> (le rayon arrive perpendiculairement à la face AC) et l'angle en A vaut <b>30,0°</b>. La somme des angles d'un triangle vaut <b>180°</b>.</p></div><div data-a="jq"></div>`;
+            const d = RF.el('div');
+            az.querySelector('[data-a="jq"]').appendChild(d);
+            RF.question(d, { parties: [{
+              type: 'nombre', q: 'Calcule l\'angle en J du triangle AIJ (entre la face AB et le rayon).', label: 'angle en J =', unite: '°', focus: false,
+              verifier(v) {
+                if (Math.abs(v - 60) <= 0.05) return { ok: true };
+                if (Math.abs(v - 150) <= 0.05) return { diag: 'Il faut retirer les deux autres angles : 180° − 90° − 30,0°.' };
+                if (Math.abs(v - 120) <= 0.05 || Math.abs(v - 90) <= 0.05) return { diag: 'Retire les deux autres angles du triangle : 180° − 90° − 30,0°.' };
+                return { diag: 'Angle en J = 180° − (angle en I) − (angle en A) = 180° − 90° − 30,0°.' };
+              },
+              remplir(i) { i.value = '60'; },
+              solution: `Angle en J = 180° − 90° − 30,0° = 60,0°. La normale est perpendiculaire à la face AB : ${iH(1)} = 90° − 60,0°.`,
+            }] }, { fin: () => { angleJ = '60,0°'; sc.redessiner(); } }, 'manip');
+            RF.defiler(az);
+          };
+          return { montrer() { inp.value = '30,0'; inp.disabled = true; box.querySelectorAll('button').forEach(b => { b.disabled = true; }); } };
+        },
+        solution: `Dans le triangle AIJ, l'angle en J vaut 180° − 90° − 30,0° = 60,0°. La normale en J est perpendiculaire à la face AB : ${iH(1)} = 90° − 60,0° = <b>30,0°</b>.`,
       }], () => { suivant(); bleu(); });
     }
     const commun = { m1: 'verre', m2: 'air', i1: 30, dec: 1, inconnue: 's2', csAngle: 3, sansExpression: true, jetons: JETONS, le1: 'le verre', le2: 'l\'air',
@@ -280,6 +342,7 @@
     function comparer() {
       // les deux rayons se tracent à la sortie, en J
       sc.e.extra = (S, g) => {
+        base(S, g);
         [[N_B, 450, '2b'], [N_R, 700, '2r']].forEach(([n, l, s]) => {
           const r = OPT.devier(g.d, g.N2, n, 1), fin = V.mul(r.refracte, 170);
           S.rayon('rayons', g.I, fin, { fleche: 1, couleur: couleur(l), largeur: 3 });

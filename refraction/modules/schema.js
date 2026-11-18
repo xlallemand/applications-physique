@@ -12,7 +12,9 @@
    RF.figure(zone, sit, orient, o)     figure statique (schéma complet ou variante fausse) → scène
    RF.schema(fig, cmd, sit, o)         manipulation pas à pas ; o = { orient, pas (liste), surEtape(k), surFin(),
                                        anglesAPlacer: ['i1', 'i2'] } → { etapes, montrerTout() }
-   RF.manipSchema(zone)                page du module 1 : 7 situations, puis bilan
+   RF.schemaReference(zone)            schéma de référence du module 1 (figure complète et légende)
+   RF.manipSchema(zone)                page du module 1 : récapitulatif (schéma de référence), 7 situations
+                                       (le prisme toujours en dernier), puis fin
    ============================================================ */
 (function () {
   'use strict';
@@ -25,7 +27,8 @@
   /* ---------- Les 7 situations (repère local) ----------
      alpha : direction de la surface ; n2 : direction de la normale vers le milieu 2 ;
      direction de propagation incidente = n2 + sens × i1 */
-  const S35 = Math.sin(35 * Math.PI / 180), C35 = Math.cos(35 * Math.PI / 180);
+  // prisme rectangle en C, d'angle A = 30° : la normale en I ne passe par aucun sommet
+  const S30 = 0.5, C30 = Math.sqrt(3) / 2;
   const SITUATIONS = [
     { id: 'aquarium', titre: 'La lumière entre dans l\'eau', texte: 'Un rayon de lumière arrive sur la surface de l\'eau d\'un aquarium.',
       m1: 'air', m2: 'eau', type: 'plan', alpha: 0, n2: -90, sens: 1, i1: 30, refracte: true, reflechi: true, source: 'lampe', eau: true },
@@ -37,11 +40,11 @@
       m1: 'verre', m2: 'air', type: 'plan', alpha: 90, n2: 180, sens: 1, i1: 25, refracte: false, reflechi: false, source: 'lampe' },
     { id: 'demi', titre: 'Le demi-cylindre de plexiglas', texte: 'Un rayon de lumière arrive au centre de la face plane d\'un demi-cylindre de plexiglas.',
       m1: 'air', m2: 'plexi', type: 'demi', alpha: 90, n2: 0, sens: 1, i1: 40, refracte: true, reflechi: false, source: 'lampe' },
-    { id: 'normale', titre: 'Incidence normale', texte: 'Un rayon de lumière arrive perpendiculairement à la surface de l\'eau.',
+    { id: 'normale', titre: 'Incidence normale', texte: 'Un rayon de lumière arrive perpendiculairement à la surface de l\'eau. <b>Quand un rayon arrive perpendiculairement à la surface, il n\'est pas dévié.</b>',
       m1: 'air', m2: 'eau', type: 'plan', alpha: 0, n2: -90, sens: 1, i1: 0, refracte: false, reflechi: false, source: 'lampe', eau: true },
-    { id: 'prisme', titre: 'La face d\'un prisme', texte: 'Un rayon de lumière traverse un prisme de verre et arrive sur sa face inclinée.',
-      m1: 'verre', m2: 'air', type: 'prisme', alpha: -55, n2: 35, sens: -1, i1: 35, refracte: false, reflechi: false, source: 'lampe',
-      triangle: [[-120, 120 * C35 / S35], [100 * S35, -100 * C35], [-120, -100 * C35]], entree: [-120, 0], externe: [-174, 0] },
+    { id: 'prisme', titre: 'La face d\'un prisme', texte: 'Un rayon de lumière entre dans un prisme de verre, puis arrive sur sa face inclinée.',
+      m1: 'verre', m2: 'air', type: 'prisme', alpha: -60, n2: 30, sens: -1, i1: 30, refracte: false, reflechi: false, source: 'lampe',
+      triangle: [[-100, 100 * C30 / S30], [110 * S30, -110 * C30], [-100, -110 * C30]], entree: [-100, 0], externe: [-174, 0] },
   ];
   // orientations : rotations d'un quart de tour (et miroir) ; l'eau reste en bas (gauche ou droite seulement)
   function ORIENTATIONS(sit) {
@@ -179,7 +182,9 @@
       if (pose) {
         const mm = pose === 1 ? g.m1 : g.m2;
         const val = pose === 2 && g.sit.cacheN2 ? '?' : RF.fmt(mm.n, 2);
-        S.etiquette('textes', p, `milieu ${pose} : ${mm.court || mm.nom}<br>${nH(mm.sym)} =\u00a0${val}`);
+        // sit.etiq1, sit.etiq2 : texte propre (schéma générique du cours)
+        const propre = pose === 1 ? g.sit.etiq1 : g.sit.etiq2;
+        S.etiquette('textes', p, propre || `milieu ${pose} : ${mm.court || mm.nom}<br>${nH(mm.sym)} =\u00a0${val}`);
       } else S.texte('milieux', p, mi.nom, { cls: 'opt-milieu-nom' });
     });
     // normale
@@ -220,7 +225,17 @@
       S.arc('arcs', I, a.a1, a.a2, a.r, 'opt-arc-pose');
       S.etiquette('textes', a.ancre, iH(k[1]) + (e.valeurs && e.valeurs[k] ? ' =\u00a0' + e.valeurs[k] : ''), { taille: 14 });
     });
-    if (e.angle0) S.etiquette('textes', V.add(V.mul(g.N1, 60), V.mul(g.u, 42)), `${iH(1)} = ${iH(2)} = 0°`);
+    if (e.angle0) S.etiquette('textes', V.add(V.mul(g.N1, 60), V.mul(g.u, 42)), e.angle0 === 'i1' ? `${iH(1)} = 0°` : `${iH(1)} = ${iH(2)} = 0°`);
+    // prisme : le rayon arrive perpendiculairement à la face d'entrée (angle droit)
+    if (e.entreeDroit && g.externe) {
+      const dE = V.norm(V.sub(g.externe[1], g.externe[0]));
+      S.angleDroit('deco', g.externe[1], V.angle(dE), V.angle(V.perp(dE)), 12);
+    }
+    // schéma de référence : noms de la normale et de la surface
+    if (e.legendes) {
+      S.etiquette('textes', V.mul(g.N2, 178), 'normale', { cls: 'opt-neutre' });
+      S.etiquette('textes', V.add(V.mul(g.u, -128), V.mul(g.N2, 14)), 'surface de séparation', { cls: 'opt-neutre', taille: 12 });
+    }
     // point d'incidence
     if (e.pointI) {
       S.cercle('textes', I, 4, 'opt-point');
@@ -243,6 +258,7 @@
     else e.angle0 = true;
     if (o.milieuxInverses) e.milieux = { m1: 2, m2: 1 };
     if (o.sansEtiquettes) { e.etiqRayons = {}; }
+    if (o.legendes) e.legendes = true;
     return e;
   }
   function figure(zone, sit, orient, o) {
@@ -260,6 +276,7 @@
      fig : conteneur de la figure ; cmd : conteneur des consignes, commandes et retours
      ============================================================ */
   const TEXTES_PAS = {
+    entree: 'Pourquoi le rayon n\'est-il pas dévié en <b>entrant</b> dans le prisme ?',
     I: 'Touche le <b>point d\'incidence I</b>.',
     normale: 'Trace la <b>normale</b> en I.',
     normaleJ: 'Trace la <b>normale</b> en J, sur la face AB.',
@@ -267,15 +284,19 @@
     tracer: 'Trace l\'<b>allure du rayon réfracté</b>.',
     rayons: 'Nomme les <b>rayons</b>.',
     fleches: 'Place la <b>flèche</b> de chaque rayon, dans le sens de la lumière.',
-    angles: 'Place les angles <b>i<sub>1</sub></b> et <b>i<sub>2</sub></b>.',
+    angles: 'Place l\'angle d\'incidence <b>i<sub>1</sub></b> et l\'angle de réfraction <b>i<sub>2</sub></b>.',
     angle0: 'Donne l\'angle d\'incidence <b>i<sub>1</sub></b>.',
+    angle0i2: 'Donne l\'angle de réfraction <b>i<sub>2</sub></b>.',
     milieux: 'Place le <b>milieu 1</b> et le <b>milieu 2</b>.',
   };
   function listePas(sit, pas) {
-    const l = ['I', 'normale'];
+    // prisme : d'abord, pourquoi le rayon n'est pas dévié à l'entrée
+    const l = sit.type === 'prisme' && !pas ? ['entree', 'I', 'normale'] : ['I', 'normale'];
     if (!sit.refracte) l.push('tracer');
-    l.push('rayons', 'fleches', sit.i1 > 0 ? 'angles' : 'angle0', 'milieux');
-    return pas ? l.filter(p => pas.includes(p) || (p === 'angle0' && pas.includes('angles'))) : l;
+    l.push('rayons', 'fleches');
+    if (sit.i1 > 0) l.push('angles'); else l.push('angle0', 'angle0i2');
+    l.push('milieux');
+    return pas ? l.filter(p => pas.includes(p) || ((p === 'angle0' || p === 'angle0i2') && pas.includes('angles'))) : l;
   }
 
   // texte d'un pas (le prisme du module 5 : point J, un seul angle)
@@ -338,6 +359,23 @@
       redessiner();
     }
 
+    // incidence normale : i₁ = 0° (k = '1'), puis i₂ = 0° (k = '2')
+    function choixAngle(k) {
+      $cmd.innerHTML = `<div class="ph-choix"><button type="button" class="btn-secondary" data-r="0">${iH(k)} = 0°</button><button type="button" class="btn-secondary" data-r="90">${iH(k)} = 90°</button></div>`;
+      const fin = k === '1' ? `Le rayon incident est confondu avec la normale : ${iH(1)} = 0°.`
+        : `Le rayon n'est pas dévié : le rayon réfracté est aussi confondu avec la normale, ${iH(2)} = 0°.`;
+      const diag = k === '1' ? 'Les angles se mesurent depuis la normale, pas depuis la surface : ici, le rayon incident est confondu avec la normale.'
+        : 'Les angles se mesurent depuis la normale, pas depuis la surface : le rayon n\'est pas dévié, le rayon réfracté est confondu avec la normale.';
+      const reussir = vue => { e.angle0 = k === '1' ? 'i1' : 'i1i2'; suivant(fin, vue); };
+      $cmd.querySelectorAll('button').forEach(b => {
+        b.onclick = () => {
+          if (b.dataset.r === '0') reussir();
+          else { b.classList.add('faux'); b.disabled = true; erreur(diag); }
+        };
+      });
+      return { montrer: () => reussir(true) };
+    }
+
     /* ----- Les pas ----- */
     const PAS = {
       // 1. toucher le point d'incidence
@@ -373,12 +411,13 @@
         };
         return { montrer: () => reussir(true), quitter() { pv.el.remove(); } };
       },
-      // 3. tracer l'allure du rayon réfracté (situations où il n'est pas dessiné)
+      // 3. tracer l'allure du rayon réfracté (situations où il n'est pas dessiné) : on vérifie seulement
+      //    qu'il est du bon côté de la normale ; sa direction exacte est ensuite tracée
       tracer() {
         e.refr = 'essai';
         const signe = sit.i1 > 0 ? Math.sign(ecart(g.aT, g.n2a)) : 1;
         e.angleRefr = sit.i1 > 0 ? g.n2a : g.n2a + (Math.random() < 0.5 ? 30 : -30);
-        $cmd.innerHTML = `<p class="rf-aide-t">Glisse l'extrémité du rayon pointillé, ou utilise ◀ ▶. C'est une allure : la valeur exacte s'affichera ensuite.</p>
+        $cmd.innerHTML = `<p class="rf-aide-t">Glisse l'extrémité du rayon pointillé, ou utilise ◀ ▶. ${sit.i1 > 0 ? 'Place-le du bon côté de la normale : sa direction exacte sera tracée ensuite.' : ''}</p>
           <div class="rf-ligne-cmd"></div><div class="er-actions"><button type="button" class="btn-primary" data-a="ok">Valider le rayon</button></div>`;
         const pv = OPT.pivot(S, {
           centre: g.I, angle: e.angleRefr, rayon: L, pas: 1,
@@ -386,19 +425,15 @@
           surChange: a => { e.angleRefr = a; redessiner(); }, aria: 'Extrémité du rayon réfracté',
         });
         OPT.fleches($cmd.querySelector('.rf-ligne-cmd'), { moins: () => pv.regler(pv.angle() - 1), plus: () => pv.regler(pv.angle() + 1), aria: ['Tourner de 1° dans un sens', 'Tourner de 1° dans l\'autre sens'] });
-        const n1 = g.m1.n, n2 = g.m2.n, i1 = sit.i1;
         const texteFin = () => sit.i1 > 0
-          ? `Le rayon réfracté ${n1 < n2 ? 'se rapproche' : 's\'éloigne'} de la normale. Avec la loi de Descartes : ${iH(2)} = ${RF.fmt(g.i2, 1)}°.`
-          : `${iH(1)} = 0°, donc sin(${iH(2)}) = 0 et ${iH(2)} = 0° : le rayon n'est pas dévié.`;
+          ? 'Le rayon réfracté traverse la surface : il est dans l\'autre milieu, de l\'autre côté de la normale. Sa direction exacte est maintenant tracée.'
+          : 'Le rayon arrive perpendiculairement à la surface : il n\'est pas dévié, il continue tout droit.';
         const reussir = vue => { pv.el.remove(); e.refr = 'oui'; suivant(texteFin(), vue); };
         $cmd.querySelector('[data-a="ok"]').onclick = () => {
           const th = ecart(pv.angle(), g.n2a), a = Math.abs(th);
-          if (i1 === 0) { if (a <= 2) reussir(); else erreur(`${iH(1)} = 0°, donc sin(${iH(2)}) = 0 et ${iH(2)} = 0° : le rayon n'est pas dévié.`); return; }
-          if (a < 2) { erreur(`Ton rayon suit la normale : seul un rayon qui arrive perpendiculairement à la surface (${iH(1)} = 0°) n'est pas dévié.`); return; }
+          if (sit.i1 === 0) { if (a <= 3) reussir(); else erreur('Le rayon arrive perpendiculairement à la surface : il n\'est pas dévié, il continue tout droit, le long de la normale.'); return; }
+          if (a < 2) { erreur('Ton rayon suit la normale : seul un rayon qui arrive perpendiculairement à la surface n\'est pas dévié.'); return; }
           if (Math.sign(th) !== signe) { erreur('Le rayon réfracté traverse la surface et passe de l\'autre côté de la normale.'); return; }
-          const a1 = nH(g.m1.sym), a2 = nH(g.m2.sym);
-          if (n1 < n2 && a >= i1 - 1.5) { erreur(`${a2} > ${a1} : dans ${a1} × sin(${iH(1)}) = ${a2} × sin(${iH(2)}), sin(${iH(2)}) est plus petit que sin(${iH(1)}), donc ${iH(2)} < ${iH(1)} : le rayon réfracté se rapproche de la normale.`); return; }
-          if (n1 > n2 && a <= i1 + 1.5) { erreur(`${a1} > ${a2} : dans ${a1} × sin(${iH(1)}) = ${a2} × sin(${iH(2)}), sin(${iH(2)}) est plus grand que sin(${iH(1)}), donc ${iH(2)} > ${iH(1)} : le rayon réfracté s'éloigne de la normale.`); return; }
           reussir();
         };
         return { montrer: () => reussir(true), quitter() { pv.el.remove(); } };
@@ -433,7 +468,7 @@
       // 5. placer les flèches (toucher un rayon : la flèche apparaît, un nouvel appui la retourne)
       fleches() {
         const ids = ['inc', 'refr'].concat(g.avecRefl ? ['refl'] : []);
-        $cmd.innerHTML = `<p class="rf-aide-t">Touche un rayon : sa flèche apparaît ; touche-le encore pour la retourner. La lumière va de la ${sit.source === 'piece' ? 'pièce' : 'lampe'} vers l'œil.</p>
+        $cmd.innerHTML = `<p class="rf-aide-t">Touche un rayon : sa flèche apparaît ; touche-le encore pour la retourner.</p>
           <div class="er-actions"><button type="button" class="btn-primary" data-a="ok">Valider les flèches</button></div>`;
         let actif = true;
         function toucher(ev) {
@@ -464,13 +499,14 @@
         let restants = ids.length;
         const fin = () => `${iH(1)} (angle d'incidence) est entre la normale et le rayon incident${ids.includes('i2') ? `, ${iH(2)} (angle de réfraction) entre la normale et le rayon réfracté` : ''}.`;
         const et = OPT.etiquettes(S, $cmd.querySelector('.rf-bac'), {
-          items: ids.map(id => ({ id, html: iH(id[1]) })),
+          items: ids.map(id => ({ id, html: `${iH(id[1])} : angle ${id === 'i1' ? 'd\'incidence' : 'de réfraction'}` })),
           cibles: () => g.arcs.filter(a => !Object.values(e.angles).includes(a.id) && (a.rayon !== 'refr' || e.refr === 'oui')).map(a => ({ id: a.id, p: a.ancre })),
           seuilPx: 30,
           surDepot(id, c) {
             const a = g.arcs.find(x => x.id === c.id);
             if (c.id === BON[id]) {
               e.angles[id] = c.id; redessiner();
+              $ret.innerHTML = '';                 // la dernière manipulation est juste : on efface l'erreur
               if (--restants === 0) { e.arcsCibles = false; suivant(fin()); }
               return true;
             }
@@ -486,15 +522,25 @@
           quitter() { et.vider(); e.arcsCibles = false; },
         };
       },
-      // 6 bis. incidence normale : l'angle d'incidence vaut 0°
-      angle0() {
-        $cmd.innerHTML = '<div class="ph-choix"><button type="button" class="btn-secondary" data-r="0">i<sub>1</sub> = 0°</button><button type="button" class="btn-secondary" data-r="90">i<sub>1</sub> = 90°</button></div>';
-        const fin = `Le rayon incident est confondu avec la normale : ${iH(1)} = 0°, donc sin(${iH(2)}) = 0 et ${iH(2)} = 0° : le rayon n'est pas dévié.`;
-        const reussir = vue => { e.angle0 = true; suivant(fin, vue); };
+      // 6 bis. incidence normale : l'angle d'incidence vaut 0°, puis l'angle de réfraction aussi
+      angle0() { return choixAngle('1'); },
+      angle0i2() { return choixAngle('2'); },
+      // 0. prisme : pourquoi le rayon n'est pas dévié à l'entrée
+      entree() {
+        $cmd.innerHTML = `<div class="ph-choix ph-choix-col">
+          <button type="button" class="btn-secondary" data-r="perp">Il arrive perpendiculairement à la face d'entrée.</button>
+          <button type="button" class="btn-secondary" data-r="verre">Le verre ne dévie jamais la lumière.</button>
+          <button type="button" class="btn-secondary" data-r="milieu">Il arrive au milieu de la face d'entrée.</button></div>`;
+        const DIAG = {
+          verre: 'Sur la face inclinée, à la sortie, le rayon est dévié : le verre peut dévier la lumière. Regarde l\'angle entre le rayon et la face d\'entrée.',
+          milieu: 'L\'endroit où il arrive ne compte pas : regarde l\'angle entre le rayon et la face d\'entrée.',
+        };
+        const fin = 'Le rayon arrive perpendiculairement à la face d\'entrée : il n\'est pas dévié. Il est dévié en sortant, sur la face inclinée.';
+        const reussir = vue => { e.entreeDroit = true; suivant(fin, vue); };
         $cmd.querySelectorAll('button').forEach(b => {
           b.onclick = () => {
-            if (b.dataset.r === '0') reussir();
-            else { b.classList.add('faux'); b.disabled = true; erreur('Les angles se mesurent depuis la normale, pas depuis la surface : ici, le rayon incident est confondu avec la normale.'); }
+            if (b.dataset.r === 'perp') reussir();
+            else { b.classList.add('faux'); b.disabled = true; erreur(DIAG[b.dataset.r]); }
           };
         });
         return { montrer: () => reussir(true) };
@@ -512,6 +558,7 @@
             const k = id === 'm1' ? 1 : 2;
             if (c.id !== k) { erreur(k === 1 ? 'Le milieu 1 est celui qui contient le rayon incident.' : 'Le milieu 2 est celui qui contient le rayon réfracté.'); return false; }
             e.milieux[id] = k; redessiner();
+            $ret.innerHTML = '';
             if (--restants === 0) suivant(fin);
             return true;
           },
@@ -531,65 +578,120 @@
   }
 
   /* ============================================================
-     PAGE DU MODULE 1 : 7 situations, puis bilan
+     SCHÉMA DE RÉFÉRENCE (récapitulatif du module 1, bouton d'aide)
+     ============================================================ */
+  function schemaReference(zone) {
+    zone.innerHTML = `<div class="rf-ref"><div class="rf-ref-fig"></div>
+      <ul class="rf-legende">
+        <li><b>I</b> : point d'incidence, là où le rayon incident rencontre la surface de séparation.</li>
+        <li><b>Normale</b> : droite perpendiculaire à la surface de séparation en I.</li>
+        <li><b>${iH(1)} : angle d'incidence</b>, entre la normale et le rayon incident.</li>
+        <li><b>${iH(2)} : angle de réfraction</b>, entre la normale et le rayon réfracté.</li>
+        <li><b>Milieu 1</b> : celui du rayon incident ; <b>milieu 2</b> : celui du rayon réfracté.</li>
+        <li><b>Flèches</b> : sens de propagation de la lumière.</li>
+        <li>Un rayon qui arrive <b>perpendiculairement</b> à la surface n'est pas dévié.</li>
+      </ul></div>`;
+    return figure(zone.querySelector('.rf-ref-fig'), SITUATIONS[0], null, { legendes: true, aria: 'Schéma de référence : réfraction de l\'air vers l\'eau, avec tous ses éléments' });
+  }
+  // bâton plongé dans l'eau : il paraît brisé à la surface
+  function figBaton(zone) {
+    const S = OPT.scene(zone, { largeur: 400, hauteur: 230, aria: 'Bâton plongé dans l\'eau : il paraît brisé à la surface' });
+    S.poly('milieux', [[-200, 10], [200, 10], [200, -115], [-200, -115]], 'opt-milieu opt-fond-papier');
+    S.ligne('deco', [-200, 10], [200, 10], 'opt-surface');
+    S.texte('milieux', [150, 90], 'air', { cls: 'opt-milieu-nom' });
+    S.texte('milieux', [-150, -90], 'eau', { cls: 'opt-milieu-nom' });
+    // partie hors de l'eau, partie dans l'eau telle qu'on la voit (relevée), position réelle (pointillés)
+    S.ligne('deco', [-150, 100], [-20, 10], 'rf-baton');
+    S.ligne('deco', [-20, 10], [110, -80], 'rf-baton-reel');
+    S.ligne('deco', [-20, 10], [115, -42], 'rf-baton');
+    S.texte('textes', [120, -36], 'ce qu\'on voit', { ancre: 'start', taille: 12 });
+    S.texte('textes', [96, -98], 'position réelle', { ancre: 'end', taille: 12, cls: 'rf-g-txt' });
+    return S;
+  }
+
+  /* ============================================================
+     PAGE DU MODULE 1 : récapitulatif (schéma de référence), 7 situations
+     (le prisme toujours en dernier), puis fin
      ============================================================ */
   function manipSchema(zone) {
-    let ordre = SITUATIONS.map((s, i) => ({ sit: s, orient: { rot: 0, miroir: false } })), num = 0, passage = 1;
+    let ordre = SITUATIONS.map(s => ({ sit: s, orient: { rot: 0, miroir: false } })), num = 0;
+    // fenêtre « Schéma de référence » (toujours disponible pendant les situations)
+    const aideRef = z => RF.boutonAide(z, '📖 Schéma de référence', 'Schéma de référence', corps => schemaReference(corps));
+    function intro() {
+      zone.innerHTML = '';
+      const carte = RF.el('div', 'er-card');
+      carte.innerHTML = `<span class="er-badge">RÉCAPITULATIF</span>
+        <div class="rf-intro">
+          <div class="rf-intro-t">
+            <p>Dans un milieu transparent, la lumière se propage en ligne droite. Quand elle passe d'un milieu transparent à un autre (de l'air à l'eau, de l'air au verre…), elle <b>change de direction</b> à la surface de séparation : c'est la <b>réfraction</b>.</p>
+            <p>Exemple : un bâton plongé dans l'eau paraît <b>brisé</b> à la surface de l'eau.</p>
+          </div>
+          <div class="rf-intro-fig"></div>
+        </div>
+        <div class="callout-accent rf-but"><p><b>Le but du module :</b> reproduire ce schéma de référence dans <b>7 situations</b> différentes. Pendant les situations, le bouton « 📖 Schéma de référence » le réaffiche.</p></div>
+        <div data-a="ref"></div>
+        <div class="er-actions"><button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
+      zone.appendChild(carte);
+      figBaton(carte.querySelector('.rf-intro-fig'));
+      schemaReference(carte.querySelector('[data-a="ref"]'));
+      carte.querySelector('[data-a="go"]').onclick = () => { num = 0; afficher(); };
+      window.scrollTo(0, 0);
+    }
     function afficher() {
       zone.innerHTML = '';
       window.scrollTo(0, 0);
       if (num < ordre.length) situation(ordre[num], num + 1);
-      else bilan();
+      else fin();
     }
+    // la figure à gauche ; à droite, la liste des étapes puis la question en cours (pas besoin de défiler sur ordinateur)
     function situation(item, n) {
       const sit = item.sit, pas = listePas(sit);
       const carte = RF.el('div', 'er-card');
       carte.innerHTML = `<div class="rf-sit-tete"><h3 class="rf-sit-titre">${sit.titre}</h3><span class="rf-sit-num">Situation ${n} / ${ordre.length}</span></div>
-        <div class="rf-manip">
-          <div class="rf-manip-fig"><p class="rf-fig-t">${sit.texte}</p><div class="rf-fig"></div><div class="rf-cmd-zone"></div><div data-a="suite"></div></div>
-          <div class="rf-manip-panneau"><ol class="rf-deroule">${pas.map(p => `<li><span>${textePas(p, sit)}</span></li>`).join('')}</ol></div>
+        <div class="rf-manip rf-manip-1">
+          <div class="rf-manip-fig"><p class="rf-fig-t">${sit.texte}</p><div class="rf-fig"></div></div>
+          <div class="rf-manip-panneau"><ol class="rf-deroule rf-deroule-court">${pas.map(p => `<li><span>${textePas(p, sit)}</span></li>`).join('')}</ol>
+            <div class="rf-cmd-zone"></div><div data-a="suite"></div><div class="rf-aide-ref"></div></div>
         </div>`;
       zone.appendChild(carte);
+      aideRef(carte.querySelector('.rf-aide-ref'));
       const lis = carte.querySelectorAll('.rf-deroule li');
-      const figZ = carte.querySelector('.rf-fig');
-      schema(figZ, carte.querySelector('.rf-cmd-zone'), sit, {
+      schema(carte.querySelector('.rf-fig'), carte.querySelector('.rf-cmd-zone'), sit, {
         orient: item.orient,
         surEtape(k) {
           lis.forEach((li, i) => { li.classList.toggle('fait', i < k); li.classList.toggle('ici', i === k); li.classList.toggle('avenir', i > k); });
-          if (k > 0) RF.amener(carte.querySelector('.rf-manip-fig'), 0.35);
+          if (k > 0) RF.amener(carte.querySelector(RF.surOrdi() ? '.rf-manip' : '.rf-manip-fig'), 0.35);
         },
         surFin() {
           const s = carte.querySelector('[data-a="suite"]');
-          s.innerHTML = `<div class="callout-accent rf-complet"><p><b>Schéma complet.</b> Normale, rayons et leurs flèches, angles ${iH(1)} et ${iH(2)}, milieux 1 et 2.</p></div>
-            <div class="er-actions"><button type="button" class="btn-primary">${n < ordre.length ? 'Situation suivante →' : 'Voir le bilan →'}</button></div>`;
+          s.innerHTML = `<div class="callout-accent rf-complet"><p><b>Schéma complet.</b> Normale, rayons et leurs flèches, angle d'incidence ${iH(1)} et angle de réfraction ${iH(2)}, milieux 1 et 2.</p></div>
+            <div class="er-actions"><button type="button" class="btn-primary">${n < ordre.length ? 'Situation suivante →' : 'Terminer →'}</button></div>`;
           s.querySelector('button').onclick = () => { num++; afficher(); };
           RF.defiler(s);
         },
       });
     }
-    function bilan() {
+    function fin() {
       SOM.marquer({ fait: true });
       const carte = RF.el('div', 'er-card');
-      carte.innerHTML = `<span class="er-badge">BILAN</span>
-        <div class="rf-manip"><div class="rf-manip-fig"><div class="rf-fig"></div></div>
-        <div class="rf-manip-panneau"><div class="cle"><p><b class="cle-titre">À retenir.</b> La <b>normale</b> est la droite perpendiculaire en I à la surface de séparation.</p>
-          <p>L'angle d'<b>incidence ${iH(1)}</b> est entre la normale et le rayon incident ; l'angle de <b>réfraction ${iH(2)}</b> est entre la normale et le rayon réfracté.</p>
-          <p>Le <b>milieu 1</b> contient le rayon incident, le <b>milieu 2</b> le rayon réfracté. Un rayon perpendiculaire à la surface n'est pas dévié.</p></div></div></div>
+      carte.innerHTML = `<span class="er-badge">TERMINÉ</span>
+        <p class="er-contexte">Tu as reproduit le schéma de référence dans les 7 situations. Recommence : les situations seront dans un autre ordre et tournées.</p>
         <div class="er-actions">
           <button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
-          <a class="btn-primary" style="text-decoration:none" href="module_2_manip.html">Module 2 : écrire la loi de Descartes →</a>
+          <button type="button" class="btn-secondary" data-a="ref">Revoir le récapitulatif</button>
+          <a class="btn-primary" style="text-decoration:none" href="module_2_simulation.html">Module 2 : le simulateur →</a>
         </div>`;
       zone.appendChild(carte);
-      figure(carte.querySelector('.rf-fig'), SITUATIONS[0], null, { aria: 'Schéma complet de la réfraction de l\'air vers l\'eau' });
       carte.querySelector('[data-a="re"]').onclick = () => {
-        // deuxième passage (et suivants) : ordre tiré au hasard, orientations au hasard
-        passage++;
-        ordre = RF.melanger(SITUATIONS).map(s => ({ sit: s, orient: RF.hasard(ORIENTATIONS(s)) }));
+        // passages suivants : ordre et orientations au hasard, le prisme toujours en dernier
+        const prisme = SITUATIONS.find(s => s.type === 'prisme');
+        ordre = RF.melanger(SITUATIONS.filter(s => s !== prisme)).concat([prisme]).map(s => ({ sit: s, orient: RF.hasard(ORIENTATIONS(s)) }));
         num = 0; afficher();
       };
+      carte.querySelector('[data-a="ref"]').onclick = intro;
     }
-    afficher();
+    intro();
   }
 
-  Object.assign(RF, { SITUATIONS, ORIENTATIONS, geo, dessiner, etatComplet, figure, schema, listePas, textePas, manipSchema });
+  Object.assign(RF, { SITUATIONS, ORIENTATIONS, geo, dessiner, etatComplet, figure, schema, listePas, textePas, schemaReference, manipSchema });
 })();

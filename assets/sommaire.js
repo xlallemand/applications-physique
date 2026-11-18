@@ -32,6 +32,8 @@
              parties: [{ nom, slug, simulation, cours, exemple, questions, entrainement, noms }],
              sousModules,                    true : cours découpé en sous-modules (une partie par cours, nommé
                                              « Cours : … » dans noms.cours) : une seule liste de pages, puis la fiche
+             ficheApres,                     (facultatif, module en une seule liste) la fiche juste après la partie
+                                             d'indice ficheApres (0 : après la première) au lieu de la fin de la liste
              exercices, exNom, nbEx }]       page d'exercices du module (nbEx : nombre d'exercices comptés)
      Chaque type de page d'une partie vaut la clé de la page (nom du fichier sans .html,
      ou nom de l'ancre en mode page unique). noms : libellés propres, ex. { questions: 'Vérification' }.
@@ -191,7 +193,7 @@
       }
       let enfants;
       // une seule liste : les pages de chaque partie (sous-modules compris), puis la fiche
-      if (plat(m)) enfants = `<div class="som-spages">${parties(m).map(p => feuillesPages(m, p, s, pages)).join('')}${feuilleFiche(m, null, s)}${m.exercices ? feuilleEx(m, s, pages) : ''}</div>`;
+      if (plat(m)) enfants = `<div class="som-spages">${parties(m).map((p, i) => feuillesPages(m, p, s, pages) + (i === m.ficheApres ? feuilleFiche(m, null, s) : '')).join('')}${m.ficheApres == null ? feuilleFiche(m, null, s) : ''}${m.exercices ? feuilleEx(m, s, pages) : ''}</div>`;
       else enfants = m.parties.map((p, i) => {
         const pici = ici && s.p === p, id = `som-s${m.n}-${i}`;
         return `<button type="button" class="som-spt${pici ? ' ici' : ''}" aria-expanded="${pici}" aria-controls="${id}">${C.coches && partieFaite(p, pages) ? '<span class="som-v" aria-label="terminé">✓</span>' : ''}${p.nom}${chev}</button>` +
@@ -304,7 +306,7 @@
       // les pages en liste puis la fiche ; sinon une carte par partie, puis la fiche
       const groupes = m.sousModules ? [parties(m)] : parties(m).map(pt => [pt]);
       const corps = (parties(m).length ? `<div class="som-grille${multi ? ' deux' : ''}">` + groupes.map(g =>
-        `<div class="som-partie">${multi || m.exercices ? `<span class="som-partie-nom${partieFaite(g[0], pages) ? ' ok' : ''}">${g[0].nom}</span>` : ''}<div class="som-actions${m.sousModules ? ' som-liste' : ''}">${g.map(pt => pagesPartie(pt).map(o => btPage(pt, o)).join('')).join('')}${multi ? '' : btFiche}</div></div>`).join('') +
+        `<div class="som-partie">${multi || m.exercices ? `<span class="som-partie-nom${partieFaite(g[0], pages) ? ' ok' : ''}">${g[0].nom}</span>` : ''}<div class="som-actions${m.sousModules ? ' som-liste' : ''}">${g.map((pt, i) => pagesPartie(pt).map(o => btPage(pt, o)).join('') + (!multi && i === m.ficheApres ? btFiche : '')).join('')}${multi || m.ficheApres != null ? '' : btFiche}</div></div>`).join('') +
         `</div>` : '') + `${multi && btFiche ? `<div class="som-actions">${btFiche}</div>` : ''}${btEx ? `<div class="som-actions">${btEx}</div>` : ''}`;
       return `<div class="som-module"><button class="som-ligne" type="button" id="som-b${m.n}" aria-expanded="${ouv}" aria-controls="som-m${m.n}">` +
         `<span class="som-badge${termine ? ' fait' : ''}">${termine ? '✓' : m.n}</span>` +
