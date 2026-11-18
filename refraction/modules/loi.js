@@ -128,7 +128,9 @@
       const loi = RF.partiesCalcul({ m1: s.m1, m2: s.m2, i1: s.i1, inconnue: 's2', valeurs: true })[0];
       const q = { parties: [loi] };
       window.RF.questionEnCours = q;
-      RF.question(carte.querySelector('[data-a="parties"]'), q, { fin: () => boutonSuite(carte, n === ordre.length, () => { num++; afficher(); }) }, 'manip');
+      const suite = () => { num++; afficher(); };
+      boutonPasser(carte, n === ordre.length, suite);
+      RF.question(carte.querySelector('[data-a="parties"]'), q, { fin: () => boutonSuite(carte, n === ordre.length, suite) }, 'manip');
     }
     function fin() {
       SOM.marquer({ fait: true });

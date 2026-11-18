@@ -88,7 +88,10 @@
           <div class="rf-ligne-cmd" style="margin-top:10px"><span class="rf-cmd-t">Tourner le disque</span><span data-a="fl"></span></div>
           <div class="rf-mesures" aria-live="polite" data-a="mes"></div>
         </div>
-        <div class="rf-manip-panneau"><ol class="rf-deroule rf-deroule-court" data-a="deroule"></ol><div class="rf-etape" data-a="etape"></div></div>
+        <div class="rf-manip-panneau"><ol class="rf-deroule rf-deroule-court" data-a="deroule"></ol>
+          <div class="rf-fac-acces"><p>Mesurer aussi l'indice de l'eau ou du verre (facultatif). <b>Conseil :</b> fais d'abord le plexiglas (étapes 1 à 5).</p>
+            <div class="rf-fac-b"><button type="button" class="btn-small" data-fac="eau">Mesures sur l'eau</button><button type="button" class="btn-small" data-fac="verre">Mesures sur le verre</button></div></div>
+          <div class="rf-etape" data-a="etape"></div></div>
       </div></div>`;
     const $ = a => zone.querySelector(`[data-a="${a}"]`);
     $('m2').value = etat.m2;
@@ -147,6 +150,8 @@
     });
     OPT.fleches($('fl'), { moins: () => pv.regler(pv.angle() - 1), plus: () => pv.regler(pv.angle() + 1), symboles: ['↻ 1°', '↺ 1°'], aria: ['Tourner le disque de 1° dans le sens des aiguilles d\'une montre', 'Tourner le disque de 1° dans l\'autre sens'] });
     $('m2').onchange = () => { etat.m2 = $('m2').value; dessiner(); };
+    // mesures facultatives sur l'eau ou le verre, accessibles à tout moment
+    zone.querySelectorAll('[data-fac]').forEach(b => { b.onclick = () => facultatif(b.dataset.fac); });
 
     /* ----- Déroulé guidé : une étape à la fois ----- */
     const ETAPES = [
@@ -165,8 +170,9 @@
     let verif = null;                              // vérification propre à l'étape en cours (après chaque réglage)
     const $e = $('etape');
     function marquer() { lis.forEach((li, i) => { li.classList.toggle('fait', i < k); li.classList.toggle('ici', i === k); li.classList.toggle('avenir', i > k); }); }
+    let etapeFinie = false;                        // la conclusion de l'étape en cours est affichée
     function entrer() {
-      sous = 0; depart = null; verif = null;
+      sous = 0; depart = null; verif = null; etapeFinie = false;
       etat.masquerI2 = false;
       marquer();
       $e.innerHTML = `<h4 class="rf-etape-titre">${k + 1}. ${ETAPES[k].t}</h4><div class="rf-etape-corps"></div>`;
@@ -175,14 +181,15 @@
       if (k > 0) RF.amener(RF.surOrdi() ? zone.querySelector('.rf-manip') : $e, 0.4);
     }
     // conclusion de l'étape, puis « Suite → » (l'étape suivante remplace celle-ci)
-    // extra : boutons facultatifs [{ label, f }] placés avant « Suite → »
-    function conclure(texte, extra) {
-      verif = null;
+    // extra : boutons facultatifs [{ label, f }] placés avant « Suite → » ;
+    // reprendre : le bouton principal reprend l'étape en cours (mesure facultative faite avant de la finir)
+    function conclure(texte, extra, reprendre) {
+      verif = null; etapeFinie = true;
       const d = RF.el('div', 'rf-conclusion', `<div class="callout-success er-retour"><p><b class="er-ok">Bilan de l'étape.</b> ${texte}</p></div>
         <div class="er-actions">${(extra || []).map((x, j) => `<button type="button" class="btn-secondary" data-x="${j}">${x.label}</button>`).join('')}
-          <button type="button" class="btn-primary" data-a="suite">${k < ETAPES.length - 1 ? 'Suite →' : 'Voir le bilan →'}</button></div>`);
+          <button type="button" class="btn-primary" data-a="suite">${reprendre ? `Reprendre l'étape ${k + 1} →` : k < ETAPES.length - 1 ? 'Suite →' : 'Voir le bilan →'}</button></div>`);
       $e.appendChild(d);
-      d.querySelector('[data-a="suite"]').onclick = () => { k++; if (k < ETAPES.length) entrer(); else fin(); };
+      d.querySelector('[data-a="suite"]').onclick = () => { if (reprendre) { entrer(); return; } k++; if (k < ETAPES.length) entrer(); else fin(); };
       d.querySelectorAll('[data-x]').forEach(b => { b.onclick = () => extra[+b.dataset.x].f(); });
       RF.defiler(d);
     }
@@ -401,8 +408,11 @@
       .map(id => ({ label: `Facultatif : mesurer l'indice ${FAC[id]}`, f: () => facultatif(id) }));
     function facultatif(id) {
       const n = RF.MILIEUX[id].n, vrai = a => OPT.refracter(1, n, a).i2;
+      // commencée avant la fin de l'étape en cours : on la reprendra ensuite (depuis son début)
+      const reprendre = k < ETAPES.length && !etapeFinie;
       etat.m2 = id; $('m2').value = id; etat.masquerI2 = true;
       $e.innerHTML = `<h4 class="rf-etape-titre">Facultatif : l'indice ${FAC[id]}</h4><div class="rf-etape-corps">
+        ${k < 4 ? `<p class="callout-accent rf-fac-conseil">Conseil : fais d'abord le plexiglas (étapes 1 à 5) ; tu comprendras pourquoi on trace sin(${iH(1)}) en fonction de sin(${iH(2)}).${reprendre ? ` Ensuite, tu reprendras l'étape ${k + 1}.` : ''}</p>` : ''}
         <p class="rf-consigne" data-a="f-msg"></p>
         <p class="rf-li-aide">Remplis tout le tableau, dans l'ordre que tu veux : pour chaque ligne, tourne le disque et lis ${iH(2)} au degré près. Puis trace le graphique.</p>
         <div class="ph-defile"><table class="ph-tableau"><thead><tr><th>${iH(1)} (°)</th><th>${iH(2)} (°)</th></tr></thead>
@@ -455,7 +465,7 @@
             remplir(i) { i.value = fmt(p, 2); },
           }] }, { fin: () => {
             facFaits.push(id);
-            conclure(`D'après tes mesures, ${nH(id === 'eau' ? 'eau' : 'verre')} ≈ ${fmt(p, 2)} (valeur des tables : ${fmt(n, 2)}).`, autresMesures());
+            conclure(`D'après tes mesures, ${nH(id === 'eau' ? 'eau' : 'verre')} ≈ ${fmt(p, 2)} (valeur des tables : ${fmt(n, 2)}).`, autresMesures(), reprendre);
           } }, 'manip');
           RF.defiler(z.querySelector('[data-a="rel"]'));
         });
