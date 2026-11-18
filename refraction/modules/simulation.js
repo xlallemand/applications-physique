@@ -12,6 +12,8 @@
      3. graphique i₁ en fonction de i₂ : pas proportionnel ;
      4. graphique aux axes choisis (i, i², cos i, sin i) : sin(i₁) proportionnel à sin(i₂) ;
      5. droite qui passe par l'origine, relation sin(i₁) = k × sin(i₂), k appelé indice n ;
+        facultatif (bouton) : indice de l'eau ou du verre, toutes les mesures d'un coup, graphique des sinus,
+        valeurs fausses entourées et modifiables, puis droite ;
      6. milieu inconnu : mesurer, calculer son indice ;
      7. généraliser : choisir la relation n₁ × sin(i₁) = n₂ × sin(i₂).
    ============================================================ */
@@ -173,12 +175,15 @@
       if (k > 0) RF.amener(RF.surOrdi() ? zone.querySelector('.rf-manip') : $e, 0.4);
     }
     // conclusion de l'étape, puis « Suite → » (l'étape suivante remplace celle-ci)
-    function conclure(texte) {
+    // extra : boutons facultatifs [{ label, f }] placés avant « Suite → »
+    function conclure(texte, extra) {
       verif = null;
       const d = RF.el('div', 'rf-conclusion', `<div class="callout-success er-retour"><p><b class="er-ok">Bilan de l'étape.</b> ${texte}</p></div>
-        <div class="er-actions"><button type="button" class="btn-primary">${k < ETAPES.length - 1 ? 'Suite →' : 'Voir le bilan →'}</button></div>`);
+        <div class="er-actions">${(extra || []).map((x, j) => `<button type="button" class="btn-secondary" data-x="${j}">${x.label}</button>`).join('')}
+          <button type="button" class="btn-primary" data-a="suite">${k < ETAPES.length - 1 ? 'Suite →' : 'Voir le bilan →'}</button></div>`);
       $e.appendChild(d);
-      d.querySelector('button').onclick = () => { k++; if (k < ETAPES.length) entrer(); else fin(); };
+      d.querySelector('[data-a="suite"]').onclick = () => { k++; if (k < ETAPES.length) entrer(); else fin(); };
+      d.querySelectorAll('[data-x]').forEach(b => { b.onclick = () => extra[+b.dataset.x].f(); });
       RF.defiler(d);
     }
     // question à choix dans l'étape en cours
@@ -193,7 +198,7 @@
     /* ----- 1. Découvrir le montage ----- */
     function decouvrir(z) {
       z.innerHTML = `<p class="rf-li-aide">La lampe envoie un rayon horizontal vers le centre I du disque gradué. La face plane du demi-cylindre passe par I ; la normale est la ligne pointillée qui passe par les graduations 0.</p>
-        <p class="rf-li-aide" data-a="d-msg">Fais tourner le disque (glisse la poignée, ou ↻ ↺) : observe l'angle d'incidence ${iH(1)} et l'angle de réfraction ${iH(2)}.</p><div data-a="d-q"></div>`;
+        <p class="rf-consigne" data-a="d-msg">Fais tourner le disque (glisse la poignée, ou ↻ ↺) : observe l'angle d'incidence ${iH(1)} et l'angle de réfraction ${iH(2)}.</p><div data-a="d-q"></div>`;
       verif = c => {
         if (depart === null) depart = c.i1;
         if (sous === 0 && Math.abs(c.i1 - depart) >= 20) {
@@ -213,7 +218,7 @@
       etat.masquerI2 = true;
       let ligne = 0, err = 0;
       mesures = [];
-      z.innerHTML = `<p class="rf-li-aide" data-a="tp-msg"></p><div class="ph-defile"><table class="ph-tableau"><thead><tr><th>${iH(1)} (°)</th><th>${iH(2)} (°)</th></tr></thead>
+      z.innerHTML = `<p class="rf-consigne" data-a="tp-msg"></p><div class="ph-defile"><table class="ph-tableau"><thead><tr><th>${iH(1)} (°)</th><th>${iH(2)} (°)</th></tr></thead>
         <tbody>${TP.map((a, j) => `<tr data-j="${j}"><td>${a}</td><td><input type="text" class="ph-champ" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="i2 pour i1 = ${a}°" disabled></td></tr>`).join('')}</tbody></table></div>
         <div class="er-actions"><button type="button" class="btn-primary" data-a="tp-ok">Valider la mesure</button></div><div data-a="tp-ret" aria-live="polite"></div>`;
       const msg = z.querySelector('[data-a="tp-msg"]'), ret = z.querySelector('[data-a="tp-ret"]');
@@ -275,7 +280,7 @@
     function grapheChoix(z) {
       const m = lesMesures();
       const sel = (cote, s) => `<select class="rf-select" data-a="${cote}">${Object.keys(GRANDEURS).map(g => `<option value="${g}">${GRANDEURS[g].nom(s).replace(/<sub>(\d)<\/sub>/g, (x, d) => '₀₁₂'[+d]).replace('<sup>2</sup>', '²')}</option>`).join('')}</select>`;
-      z.innerHTML = `<p class="rf-li-aide">Choisis la grandeur de chaque axe : cherche celles qui donnent une <b>droite qui passe par l'origine</b> (proportionnalité).</p>
+      z.innerHTML = `<p class="rf-consigne">Choisis la grandeur de chaque axe : cherche celles qui donnent une <b>droite qui passe par l'origine</b> (proportionnalité).</p>
         <div class="rf-sim-reglages rf-axes"><label>Axe des abscisses${sel('gx', '2')}</label><label>Axe des ordonnées${sel('gy', '1')}</label></div>
         <div data-a="g"></div><div class="er-actions"><button type="button" class="btn-primary" data-a="g-ok">C'est une droite qui passe par l'origine</button></div><div data-a="g-ret" aria-live="polite"></div>`;
       const gx = z.querySelector('[data-a="gx"]'), gy = z.querySelector('[data-a="gy"]'), ret = z.querySelector('[data-a="g-ret"]');
@@ -307,19 +312,30 @@
       };
     }
 
+    // pente de la droite de meilleur ajustement passant par l'origine (moindres carrés)
+    function penteOpt(pts) {
+      const sxy = pts.reduce((s, p) => s + p[0] * p[1], 0), sxx = pts.reduce((s, p) => s + p[0] * p[0], 0);
+      return sxx ? sxy / sxx : 1.5;
+    }
+
     /* ----- 5. Coefficient directeur et relation sin(i₁) = n × sin(i₂) ----- */
     function coefficient(z) {
       const m = lesMesures();
       const pts = m.map(p => [sinD(p.i2), sinD(p.i1)]);
-      // droite de meilleur ajustement passant par l'origine (moindres carrés)
-      const sxy = pts.reduce((s, p) => s + p[0] * p[1], 0), sxx = pts.reduce((s, p) => s + p[0] * p[0], 0);
-      kOpt = sxx ? sxy / sxx : 1.51;
+      kOpt = penteOpt(pts);
       pente = 1;
-      z.innerHTML = `<div data-a="g"></div>
-        <div class="rf-ligne-cmd"><span data-a="g-fl"></span><span class="rf-val">Coefficient directeur : <b data-a="g-k"></b></span></div>
-        <p class="rf-li-aide">Fais tourner la droite (glisse sa poignée, ou ± 0,01) pour qu'elle passe au plus près de tous les points : autant au-dessus qu'au-dessous.</p>
-        <div class="er-actions"><button type="button" class="btn-primary" data-a="g-ok">Valider la droite</button></div><div data-a="g-ret" aria-live="polite"></div><div data-a="rel"></div>`;
+      z.innerHTML = '<div data-a="g"></div><div data-a="dr"></div><div data-a="rel"></div>';
       const G = graphe(z.querySelector('[data-a="g"]'), { pts, xNom: `sin(${iH(2)})`, yNom: `sin(${iH(1)})`, aria: 'Graphique de sin(i1) en fonction de sin(i2)' });
+      droiteReglable(z.querySelector('[data-a="dr"]'), G, kOpt, p => { pente = p; relation(z.querySelector('[data-a="rel"]')); });
+    }
+    /* ----- Droite qui passe par l'origine, à faire tourner sur le graphique G ----- 
+       zc : conteneur des commandes ; ok(pente) quand la droite passe au plus près des points */
+    function droiteReglable(zc, G, kBon, ok) {
+      let pente = 1;
+      zc.innerHTML = `<div class="rf-ligne-cmd"><span data-a="g-fl"></span><span class="rf-val">Coefficient directeur : <b data-a="g-k"></b></span></div>
+        <p class="rf-consigne">Fais tourner la droite (glisse sa poignée, ou ± 0,01) pour qu'elle passe au plus près de tous les points : autant au-dessus qu'au-dessous.</p>
+        <div class="er-actions"><button type="button" class="btn-primary" data-a="g-ok">Valider la droite</button></div><div data-a="g-ret" aria-live="polite"></div>`;
+      const z = zc;
       const { svg, el, px } = G;
       const droite = el('line', { x1: G.x0, y1: G.y0, class: 'rf-g-droite' });
       const g = el('g', { class: 'opt-poignee', tabindex: '0', role: 'slider', 'aria-label': 'Poignée de la droite' });
@@ -348,15 +364,15 @@
       z.querySelector('[data-a="g-ok"]').onclick = () => {
         if (fige) return;
         const ret = z.querySelector('[data-a="g-ret"]');
-        if (Math.abs(pente - kOpt) <= 0.03) {
+        if (Math.abs(pente - kBon) <= 0.03) {
           fige = true; g.style.display = 'none';
           z.querySelectorAll('[data-a="g-fl"] button, [data-a="g-ok"]').forEach(b => { b.disabled = true; });
           ret.innerHTML = `<p class="ph-ok">✓ La droite passe par l'origine, son coefficient directeur vaut ${fmt(pente, 2)}.</p>`;
-          relation(z.querySelector('[data-a="rel"]'));
+          ok(pente);
           return;
         }
         err++;
-        ret.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">Ce n'est pas ça.</b> ${pente > kOpt ? 'La droite est trop raide : la plupart des points sont en dessous.' : 'La droite n\'est pas assez raide : la plupart des points sont au-dessus.'}</p>${err >= 2 ? `<p class="er-petit">Un coefficient directeur proche de ${fmt(kOpt, 2)} convient.</p>` : ''}</div>`;
+        ret.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">Ce n'est pas ça.</b> ${pente > kBon ? 'La droite est trop raide : la plupart des points sont en dessous.' : 'La droite n\'est pas assez raide : la plupart des points sont au-dessus.'}</p>${err >= 2 ? `<p class="er-petit">Un coefficient directeur proche de ${fmt(kBon, 2)} convient.</p>` : ''}</div>`;
       };
     }
     // relation de proportionnalité sin(i₁) = k × sin(i₂)
@@ -372,14 +388,89 @@
         remplir(i) { i.value = fmt(pente, 2); },
         solution: () => `sin(${iH(1)}) = ${fmt(pente, 2)} × sin(${iH(2)})`,
       }] };
-      RF.question(z, q, { fin: () => conclure(`sin(${iH(1)}) = ${fmt(pente, 2)} × sin(${iH(2)}). On choisit d'appeler ce coefficient de proportionnalité <b>n</b>, l'<b>indice de réfraction</b> du milieu : sin(${iH(1)}) = n × sin(${iH(2)}), avec ${nH('plexi')} ≈ ${fmt(RF.MILIEUX.plexi.n, 2)} pour le plexiglas.`) }, 'manip');
+      RF.question(z, q, { fin: () => conclure(`sin(${iH(1)}) = ${fmt(pente, 2)} × sin(${iH(2)}). On choisit d'appeler ce coefficient de proportionnalité <b>n</b>, l'<b>indice de réfraction</b> du milieu : sin(${iH(1)}) = n × sin(${iH(2)}), avec ${nH('plexi')} ≈ ${fmt(RF.MILIEUX.plexi.n, 2)} pour le plexiglas.`, autresMesures()) }, 'manip');
       RF.defiler(z);
+    }
+
+    /* ----- Facultatif : l'indice de l'eau ou du verre ----- 
+       toutes les mesures d'un coup (pas besoin d'avoir réglé l'angle pour valider), graphique de sin(i₁) en fonction
+       de sin(i₂) ; les valeurs fausses sont entourées sur le graphique et restent modifiables ; puis la droite */
+    const FAC = { eau: 'de l\'eau', verre: 'du verre' };
+    const facFaits = [];
+    const autresMesures = () => Object.keys(FAC).filter(id => !facFaits.includes(id))
+      .map(id => ({ label: `Facultatif : mesurer l'indice ${FAC[id]}`, f: () => facultatif(id) }));
+    function facultatif(id) {
+      const n = RF.MILIEUX[id].n, vrai = a => OPT.refracter(1, n, a).i2;
+      etat.m2 = id; $('m2').value = id; etat.masquerI2 = true;
+      $e.innerHTML = `<h4 class="rf-etape-titre">Facultatif : l'indice ${FAC[id]}</h4><div class="rf-etape-corps">
+        <p class="rf-consigne" data-a="f-msg"></p>
+        <p class="rf-li-aide">Remplis tout le tableau, dans l'ordre que tu veux : pour chaque ligne, tourne le disque et lis ${iH(2)} au degré près. Puis trace le graphique.</p>
+        <div class="ph-defile"><table class="ph-tableau"><thead><tr><th>${iH(1)} (°)</th><th>${iH(2)} (°)</th></tr></thead>
+          <tbody>${TP.map((a, j) => `<tr data-j="${j}"><td>${a}</td><td><input type="text" class="ph-champ" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="i2 pour i1 = ${a}°"></td></tr>`).join('')}</tbody></table></div>
+        <div class="er-actions"><button type="button" class="btn-primary" data-a="f-ok">Tracer sin(${iH(1)}) en fonction de sin(${iH(2)})</button></div>
+        <div data-a="f-ret" aria-live="polite"></div><div data-a="g"></div><div data-a="dr"></div><div data-a="rel"></div></div>`;
+      const z = $e.querySelector('.rf-etape-corps'), msg = z.querySelector('[data-a="f-msg"]'), ret = z.querySelector('[data-a="f-ret"]');
+      const champs = Array.from(z.querySelectorAll('input'));
+      let fige = false;
+      // consigne et ligne du tableau qui correspond à l'angle réglé
+      verif = c => {
+        msg.innerHTML = etat.m2 !== id ? `Choisis ${RF.MILIEUX[id].le} comme milieu 2.` : `Mesure ${iH(2)} pour chaque valeur de ${iH(1)} du tableau.`;
+        z.querySelectorAll('tr[data-j]').forEach(tr => tr.classList.toggle('rf-ligne-ici', TP[+tr.dataset.j] === c.i1));
+      };
+      champs.forEach(i => i.addEventListener('input', () => i.classList.remove('rf-faux')));
+      function tracer() {
+        if (fige) return;
+        const v = champs.map(i => RF.lire(i.value));
+        if (v.some(x => isNaN(x))) { ret.innerHTML = `<p class="ph-msg">Remplis toutes les cases du tableau (${iH(2)} en degrés).</p>`; RF.defiler(ret); return; }
+        const faux = TP.map((a, j) => j).filter(j => Math.abs(v[j] - vrai(TP[j])) > 1);
+        const G = graphe(z.querySelector('[data-a="g"]'), { pts: TP.map((a, j) => [sinD(v[j]), sinD(a)]), xNom: `sin(${iH(2)})`, yNom: `sin(${iH(1)})`, aria: `Graphique de sin(i1) en fonction de sin(i2) pour ${RF.MILIEUX[id].le}` });
+        champs.forEach((i, j) => i.classList.toggle('rf-faux', faux.includes(j)));
+        if (faux.length) {
+          // les points faux sont entourés
+          faux.forEach(j => { const [a, b] = G.px(sinD(v[j]), sinD(TP[j])); G.el('circle', { cx: a, cy: b, r: 11, class: 'rf-g-faux' }); });
+          const j0 = faux[0], a0 = TP[j0], i20 = vrai(a0);
+          let diag = `Lis ${iH(2)} entre la normale (graduation 0) et le rayon réfracté.`;
+          if (a0 > 0 && Math.abs(v[j0] - (90 - i20)) <= 1.5) diag = `Pour ${iH(1)} = ${a0}° : les angles se mesurent depuis la normale (graduation 0), pas depuis la surface.`;
+          else if (a0 > 0 && Math.abs(v[j0] - a0) <= 1) diag = `Pour ${iH(1)} = ${a0}°, tu as recopié ${iH(1)} : lis l'angle du rayon réfracté, dans le demi-cylindre.`;
+          ret.innerHTML = `<div class="callout-danger er-retour"><p><b class="er-ko">${faux.length === 1 ? '1 valeur est fausse' : `${faux.length} valeurs sont fausses`}.</b> ${faux.length === 1 ? 'Elle est entourée' : 'Elles sont entourées'} sur le graphique et en rouge dans le tableau (${iH(1)} = ${faux.map(j => TP[j] + '°').join(', ')}). ${diag} Corrige, puis trace à nouveau.</p></div>`;
+          RF.defiler(ret);
+          return;
+        }
+        // toutes les mesures sont justes : la droite
+        fige = true; verif = null;
+        champs.forEach(i => { i.disabled = true; });
+        z.querySelector('[data-a="f-ok"]').disabled = true;
+        ret.innerHTML = '<p class="ph-ok">✓ Toutes tes mesures sont justes.</p>';
+        etat.masquerI2 = false; dessiner();
+        const kBon = penteOpt(TP.map((a, j) => [sinD(v[j]), sinD(a)]));
+        droiteReglable(z.querySelector('[data-a="dr"]'), G, kBon, p => {
+          RF.question(z.querySelector('[data-a="rel"]'), { parties: [{
+            type: 'nombre', q: `Écris l'indice de réfraction ${FAC[id]}.`,
+            label: `${nH(id === 'eau' ? 'eau' : 'verre')} =`, focus: false,
+            verifier(x) {
+              if (Math.abs(x - p) <= 0.011 || Math.abs(x - kBon) <= 0.03) return { ok: true };
+              if (Math.abs(x - 1 / p) <= 0.02) return { diag: 'C\'est l\'inverse : l\'indice est le coefficient directeur de la droite de sin(i<sub>1</sub>) en fonction de sin(i<sub>2</sub>).' };
+              return { diag: `L'indice est le coefficient directeur de ta droite : ${fmt(p, 2)}.` };
+            },
+            remplir(i) { i.value = fmt(p, 2); },
+          }] }, { fin: () => {
+            facFaits.push(id);
+            conclure(`D'après tes mesures, ${nH(id === 'eau' ? 'eau' : 'verre')} ≈ ${fmt(p, 2)} (valeur des tables : ${fmt(n, 2)}).`, autresMesures());
+          } }, 'manip');
+          RF.defiler(z.querySelector('[data-a="rel"]'));
+        });
+        RF.defiler(z.querySelector('[data-a="dr"]'));
+      }
+      z.querySelector('[data-a="f-ok"]').onclick = tracer;
+      champs.forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); tracer(); } }));
+      dessiner();
+      RF.amener(RF.surOrdi() ? zone.querySelector('.rf-manip') : $e, 0.4);
     }
 
     /* ----- 6. Le milieu inconnu ----- */
     function defi(z) {
       etat.masquerI2 = true;
-      z.innerHTML = `<p class="rf-li-aide" data-a="d-msg"></p><div data-a="d-q"></div>`;
+      z.innerHTML = `<p class="rf-consigne" data-a="d-msg"></p><div data-a="d-q"></div>`;
       const msg = z.querySelector('[data-a="d-msg"]');
       let pose = false;
       verif = () => {
@@ -452,6 +543,7 @@
     RF.simEnCours = {
       etat, calcul, nInconnu, etape: () => k, mesures: () => mesures, kOpt: () => kOpt,
       regler: a => pv.regler(90 + a),
+      facultatif,
       choisir(m2) { $('m2').value = m2; etat.m2 = m2; dessiner(); },
     };
   }

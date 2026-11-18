@@ -90,6 +90,30 @@
     const n = cs(t);
     return exact !== 0 && n < csDemande && Math.abs(v - +exact.toPrecision(n)) <= 1e-9 * Math.max(1, Math.abs(v));
   }
+  // nombre de décimales d'une saisie (« 22,0 » → 1)
+  function decimales(t) {
+    const m = String(t).replace(/[\s  ]/g, '').replace('.', ',').split(',');
+    return m[1] ? m[1].length : 0;
+  }
+  // la saisie v (texte t) est-elle l'arrondi d'une des valeurs exactes, avec les décimales écrites ?
+  function arrondiJuste(v, t, exacts) {
+    const d = decimales(t), u = Math.pow(10, -d);
+    return exacts.some(y => y != null && Math.abs(v - +(y * (1 + 1e-12)).toFixed(d)) < u / 10);
+  }
+  // saisie v (texte t) mal arrondie : à moins d'une unité du dernier chiffre écrit d'une des valeurs exactes,
+  // sans en être l'arrondi → message d'erreur qui l'explique (null sinon) ; csDemande : chiffres significatifs demandés
+  function malArrondi(v, t, exacts, csDemande) {
+    const d = decimales(t), u = Math.pow(10, -d);
+    const x = exacts.find(y => y != null && Math.abs(v - y) < u);
+    if (x == null) return null;
+    // bien arrondi pour l'une des valeurs exactes : ce n'est pas un problème d'arrondi
+    if (exacts.some(y => y != null && Math.abs(v - +(y * (1 + 1e-12)).toFixed(d)) < u / 10)) return null;
+    const bon = fmt(x * (1 + 1e-12), d);
+    const p = Math.pow(10, d + 3), long = fmt(Math.trunc(x * p) / p, d + 3);
+    const s = Math.floor(Math.abs(x) * Math.pow(10, d + 1) + 1e-9) % 10;
+    const n = cs(t);
+    return `Ta valeur est mal arrondie : la calculatrice donne ${long}… ; avec ${n} chiffre${n > 1 ? 's' : ''} significatif${n > 1 ? 's' : ''}, on écrit ${bon} (le chiffre suivant, ${s}, est ${s >= 5 ? 'supérieur ou égal à 5 : on arrondit au-dessus' : 'inférieur à 5 : on garde le dernier chiffre'}).${csDemande && n !== csDemande ? ` On demande ${csDemande} chiffres significatifs.` : ''}`;
+  }
   const fr = (h, b) => `<span class="fr"><span>${h}</span><span>${b}</span></span>`;
   const RAD = Math.PI / 180;
   const sinD = a => Math.sin(a * RAD);
@@ -715,19 +739,58 @@
       const sinRad = nA * Math.sin(aC) / nB;                     // calculatrice réglée en radians
       const sinEch = nB * sinD(aC) / nA;                          // indices échangés
       const fracNum = fr(`${f2(nA)} × sin(${angTxt(aC, c.dec)}°)`, f2(nB));
-      let sinEleve = null;
+      let sinEleve = null, prodEleve = null;
+      // c.detail : on calcule d'abord le produit connu nA × sin(angle connu), puis on le divise par nB
+      const P = nA * sinD(aC), prodTxt = `${f2(nA)} × sin(${angTxt(aC, c.dec)}°)`;
+      if (c.detail) {
+        parties.push({
+          type: 'nombre', etape: 'produit',
+          q: `Calcule d'abord ${nAh} × sin(${iHTML(symC)}) (3 chiffres significatifs).`,
+          label: c.valeurs ? `${prodTxt} =` : `${nAh} × sin(${iHTML(symC)}) = ${prodTxt} =`, calc: true,
+          aide: 'Calculatrice en degrés.',
+          avant: degres,
+          verifier(v, t) {
+            if (Math.abs(v - P) <= 0.0011 + 1e-9) {
+              if (P !== 0 && cs(t) !== 3) return { format: `Ta valeur est juste : écris-la avec 3 chiffres significatifs (${sig(P, 3)}).` };
+              if (arrondiJuste(v, t, [P])) { prodEleve = v; return { ok: true }; }
+            }
+            if (tropCourt(v, t, P, 3)) return { format: `Écris ce produit avec 3 chiffres significatifs.` };
+            const ma = malArrondi(v, t, [P], 3);
+            if (ma) return { diag: ma };
+            if (aC && Math.abs(v - nA * Math.sin(aC)) <= 0.002) return { diag: 'Ta calculatrice est en radians : mets-la en degrés (bouton « Régler ma calculatrice en degrés »).' };
+            if (Math.abs(v - sinX) <= 0.002) return { diag: `Tu as déjà divisé par ${f2(nB)} : calcule seulement ${prodTxt} ; la division vient juste après.` };
+            if (aC && Math.abs(v - nA * aC) <= 0.06) return { diag: `Il manque le sinus : calcule sin(${angTxt(aC, c.dec)}°), pas ${angTxt(aC, c.dec)}.` };
+            return { diag: `Calcule ${prodTxt}, calculatrice en degrés.` };
+          },
+          remplir(i) { i.value = sig(P, 3).replace(/\s/g, ''); prodEleve = +P.toPrecision(3); },
+          solution: () => `${prodTxt} ${P === 0 ? '=' : '≈'} <b>${sig(P, 3)}</b>`,
+        });
+      }
+      const prodVu = () => sig(prodEleve != null ? prodEleve : P, 3);
       parties.push({
         type: 'nombre', etape: 'sin',
         q: `Calcule sin(${iHTML(symX)}) (3 chiffres significatifs).`,
-        label: c.valeurs ? `sin(${iHTML(symX)}) =` : `sin(${iHTML(symX)}) = ${fr(`${nAh} × sin(${iHTML(symC)})`, nBh)} = ${fracNum} =`, calc: true,
-        aide: c.valeurs ? `Pars de ${egaliteNum()} : divise les deux côtés par ${f2(nB)}. Calculatrice en degrés.` : '',
+        // étiquette lue à l'affichage de la partie (calcul détaillé : avec le produit trouvé juste avant)
+        get label() {
+          if (c.detail) return c.valeurs ? `sin(${iHTML(symX)}) = ${fr(prodVu(), f2(nB))} =` : `sin(${iHTML(symX)}) = ${fr(`${nAh} × sin(${iHTML(symC)})`, nBh)} = ${fr(prodVu(), f2(nB))} =`;
+          return c.valeurs ? `sin(${iHTML(symX)}) =` : `sin(${iHTML(symX)}) = ${fr(`${nAh} × sin(${iHTML(symC)})`, nBh)} = ${fracNum} =`;
+        },
+        get aide() {
+          if (c.detail) return `${egaliteNum()} : ${f2(nB)} × sin(${iHTML(symX)}) = ${prodVu()}. Divise ${prodVu()} par ${f2(nB)}.`;
+          return c.valeurs ? `Pars de ${egaliteNum()} : divise les deux côtés par ${f2(nB)}. Calculatrice en degrés.` : '';
+        },
+        calc: true,
         avant: degres,
         verifier(v, t) {
-          if (Math.abs(v - sinX) <= 0.0011 + 1e-9) {
-            if (sinX !== 0 && cs(t) !== 3) return { format: `Ta valeur est juste : écris-la avec 3 chiffres significatifs (${sig(sinX, 3)}).` };
-            sinEleve = v; return { ok: true };
+          const sinP = prodEleve != null ? prodEleve / nB : null;     // à partir du produit arrondi
+          if (Math.abs(v - sinX) <= 0.0011 + 1e-9 || (sinP != null && Math.abs(v - sinP) <= 0.0011 + 1e-9)) {
+            if (sinX !== 0 && cs(t) !== 3) return { format: `Ta valeur est juste : écris-la avec 3 chiffres significatifs (${sig(sinP != null ? sinP : sinX, 3)}).` };
+            if (arrondiJuste(v, t, [sinX, sinP])) { sinEleve = v; return { ok: true }; }
           }
-          if (tropCourt(v, t, sinX, 3)) return { format: `Écris sin(${iHTML(symX)}) avec 3 chiffres significatifs.` };
+          if (tropCourt(v, t, sinX, 3) || (sinP != null && tropCourt(v, t, sinP, 3))) return { format: `Écris sin(${iHTML(symX)}) avec 3 chiffres significatifs.` };
+          const ma = malArrondi(v, t, [sinX, sinP], 3);
+          if (ma) return { diag: ma };
+          if (sinP != null && Math.abs(v - prodEleve * nB) <= 0.002) return { diag: `On divise par ${f2(nB)} (on ne multiplie pas) : sin(${iHTML(symX)}) = ${prodVu()} ÷ ${f2(nB)}.` };
           if (v > 1) return { diag: 'Un sinus ne dépasse jamais 1 : vérifie ton calcul.' };
           if (aC && Math.abs(v - sinRad) <= 0.002 && Math.abs(sinRad - sinX) > 0.01) return { diag: 'Ta calculatrice est en radians : mets-la en degrés (bouton « Régler ma calculatrice en degrés »).' };
           if (aC && Math.abs(v - sinEch) <= 0.002) return { diag: `Les indices sont échangés : sin(${iHTML(symX)}) = ${nAh} × sin(${iHTML(symC)}) / ${nBh}.` };
@@ -751,9 +814,11 @@
           const juste = Math.abs(v - X) <= tol + 1e-9 || Math.abs(v - ref) <= tol + 1e-9;
           if (juste) {
             if (X !== 0 && cs(t) !== csA) return { format: `Ta valeur est juste : écris-la avec ${csA} chiffres significatifs (${ang(X, csA)}°).` };
-            return { ok: true };
+            if (arrondiJuste(v, t, [X, ref])) return { ok: true };
           }
           if (tropCourt(v, t, X, csA)) return { format: `Écris ${iHTML(symX)} avec ${csA} chiffres significatifs.` };
+          const ma = malArrondi(v, t, [X, ref], csA);
+          if (ma) return { diag: ma };
           if (sinEleve != null && Math.abs(v - sinEleve) <= 0.002 && X > 1) return { diag: `C'est sin(${iHTML(symX)}) ; il faut maintenant l'angle : Arcsin (touche sin<sup>−1</sup>).` };
           if (Math.abs(v - Math.asin(Math.min(1, sinX))) <= 0.006 && X > 1) return { diag: 'Ta calculatrice est en radians : mets-la en degrés.' };
           if (v > 90) return { diag: 'Un angle d\'incidence ou de réfraction est compris entre 0° et 90°.' };
@@ -778,9 +843,11 @@
       verifier(v, t) {
         if (Math.abs(v - nX) <= 0.006 + 1e-9) {
           if (cs(t) !== csN) return { format: `Ta valeur est juste : écris-la avec ${csN} chiffres significatifs (${sig(nX, csN)}).` };
-          return { ok: true };
+          if (arrondiJuste(v, t, [nX])) return { ok: true };
         }
         if (tropCourt(v, t, nX, csN)) return { format: `Écris ${nHTML(m2.sym)} avec ${csN} chiffres significatifs.` };
+        const ma = malArrondi(v, t, [nX], csN);
+        if (ma) return { diag: ma };
         if (Math.abs(v - nRad) <= 0.01) return { diag: 'Ta calculatrice est en radians : mets-la en degrés (bouton « Régler ma calculatrice en degrés »).' };
         if (Math.abs(v - nInv) <= 0.01) return { diag: `Tu as renversé la fraction : ${nHTML(m2.sym)} = ${nHTML(m1.sym)} × sin(${i1T}) / sin(${i2T}).` };
         if (Math.abs(v - c.i1 / c.i2) <= 0.01) return { diag: `Il manque le sinus : divise sin(${angTxt(c.i1, c.dec)}°) par sin(${angTxt(c.i2, c.dec)}°), pas les angles.` };
@@ -845,6 +912,6 @@
   window.RF = {
     PLAN, CALC, MILIEUX, fmt, sig, court, lire, cs, fr, sinD, asinD, el, melanger, hasard, defiler, amener, surOrdi, revois,
     jeton, ecrire, nHTML, iHTML, PARTIES, question, serie, ecriture, analyserLoi, analyserFraction, contexte, partiesCalcul,
-    calculatrice, confettis, pleinEcran, fenetre, boutonAide, aideDegres, loiHTML,
+    calculatrice, confettis, malArrondi, pleinEcran, fenetre, boutonAide, aideDegres, loiHTML,
   };
 })();

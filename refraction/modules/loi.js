@@ -96,6 +96,12 @@
     zone.appendChild(carte);
     return carte;
   }
+  // « Situation suivante » à tout moment (remplacé par le bouton de fin de situation)
+  function boutonPasser(carte, dernier, suite) {
+    const sv = carte.querySelector('[data-a="suite"]');
+    sv.innerHTML = `<div class="er-actions"><button type="button" class="btn-small rf-b-passer">${dernier ? 'Terminer →' : 'Situation suivante →'}</button></div>`;
+    sv.querySelector('button').onclick = suite;
+  }
   function boutonSuite(carte, dernier, suite) {
     const sv = carte.querySelector('[data-a="suite"]');
     sv.innerHTML = `<div class="er-actions"><button type="button" class="btn-primary">${dernier ? 'Terminer →' : 'Situation suivante →'}</button></div>`;
@@ -179,9 +185,12 @@
         carte.querySelector('[data-a="donnees"]').insertAdjacentHTML('beforeend', `<div class="callout-accent rf-liens-spe"><p>Pour t'entraîner à isoler une grandeur et à utiliser la fonction réciproque du sinus (Arcsin) :</p>${RF.revois(['reciproque', 'mobile'])}</div>`);
       }
       aideLoi(carte.querySelector('[data-a="aide"]'));
-      const q = { parties: RF.partiesCalcul(Object.assign({}, c, parcours === 'seconde' ? { valeurs: true } : {})) };
+      // situations 1 et 2 : calcul détaillé (produit connu, puis division)
+      const q = { parties: RF.partiesCalcul(Object.assign({}, c, parcours === 'seconde' ? { valeurs: true } : {}, n <= 2 ? { detail: true } : {})) };
       window.RF.questionEnCours = q;
-      RF.question(carte.querySelector('[data-a="parties"]'), q, { fin: () => boutonSuite(carte, n === ordre.length, () => { num++; afficher(); }) }, 'manip');
+      const suite = () => { num++; afficher(); };
+      boutonPasser(carte, n === ordre.length, suite);
+      RF.question(carte.querySelector('[data-a="parties"]'), q, { fin: () => boutonSuite(carte, n === ordre.length, suite) }, 'manip');
     }
     function fin() {
       SOM.marquer({ fait: true });

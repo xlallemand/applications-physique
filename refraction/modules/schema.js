@@ -591,7 +591,9 @@
         <li><b>Flèches</b> : sens de propagation de la lumière.</li>
         <li>Un rayon qui arrive <b>perpendiculairement</b> à la surface n'est pas dévié.</li>
       </ul></div>`;
-    return figure(zone.querySelector('.rf-ref-fig'), SITUATIONS[0], null, { legendes: true, aria: 'Schéma de référence : réfraction de l\'air vers l\'eau, avec tous ses éléments' });
+    // angle d'incidence plus grand que dans la situation (50° au lieu de 30°) : i₂ (35°) se distingue bien de i₁
+    const sit = Object.assign({}, SITUATIONS[0], { i1: 50 });
+    return figure(zone.querySelector('.rf-ref-fig'), sit, null, { legendes: true, aria: 'Schéma de référence : réfraction de l\'air vers l\'eau, avec tous ses éléments' });
   }
   // bâton plongé dans l'eau : il paraît brisé à la surface
   function figBaton(zone) {
@@ -614,7 +616,7 @@
      (le prisme toujours en dernier), puis fin
      ============================================================ */
   function manipSchema(zone) {
-    let ordre = SITUATIONS.map(s => ({ sit: s, orient: { rot: 0, miroir: false } })), num = 0;
+    let ordre = SITUATIONS.map(s => ({ sit: s, orient: { rot: 0, miroir: false } })), num = 0, faites = 0;
     // fenêtre « Schéma de référence » (toujours disponible pendant les situations)
     const aideRef = z => RF.boutonAide(z, '📖 Schéma de référence', 'Schéma de référence', corps => schemaReference(corps));
     function intro() {
@@ -634,7 +636,7 @@
       zone.appendChild(carte);
       figBaton(carte.querySelector('.rf-intro-fig'));
       schemaReference(carte.querySelector('[data-a="ref"]'));
-      carte.querySelector('[data-a="go"]').onclick = () => { num = 0; afficher(); };
+      carte.querySelector('[data-a="go"]').onclick = () => { num = 0; faites = 0; afficher(); };
       window.scrollTo(0, 0);
     }
     function afficher() {
@@ -651,10 +653,14 @@
         <div class="rf-manip rf-manip-1">
           <div class="rf-manip-fig"><p class="rf-fig-t">${sit.texte}</p><div class="rf-fig"></div></div>
           <div class="rf-manip-panneau"><ol class="rf-deroule rf-deroule-court">${pas.map(p => `<li><span>${textePas(p, sit)}</span></li>`).join('')}</ol>
-            <div class="rf-cmd-zone"></div><div data-a="suite"></div><div class="rf-aide-ref"></div></div>
+            <div class="rf-cmd-zone"></div><div data-a="suite"></div>
+            <div class="rf-aide-ligne"><div class="rf-aide-ref"></div><button type="button" class="btn-small rf-b-passer" data-a="passer">${n < ordre.length ? 'Situation suivante →' : 'Terminer →'}</button></div></div>
         </div>`;
       zone.appendChild(carte);
       aideRef(carte.querySelector('.rf-aide-ref'));
+      // passer à la situation suivante sans finir celle-ci
+      const passer = carte.querySelector('[data-a="passer"]');
+      passer.onclick = () => { num++; afficher(); };
       const lis = carte.querySelectorAll('.rf-deroule li');
       schema(carte.querySelector('.rf-fig'), carte.querySelector('.rf-cmd-zone'), sit, {
         orient: item.orient,
@@ -663,6 +669,8 @@
           if (k > 0) RF.amener(carte.querySelector(RF.surOrdi() ? '.rf-manip' : '.rf-manip-fig'), 0.35);
         },
         surFin() {
+          faites++;
+          passer.remove();
           const s = carte.querySelector('[data-a="suite"]');
           s.innerHTML = `<div class="callout-accent rf-complet"><p><b>Schéma complet.</b> Normale, rayons et leurs flèches, angle d'incidence ${iH(1)} et angle de réfraction ${iH(2)}, milieux 1 et 2.</p></div>
             <div class="er-actions"><button type="button" class="btn-primary">${n < ordre.length ? 'Situation suivante →' : 'Terminer →'}</button></div>`;
@@ -675,7 +683,7 @@
       SOM.marquer({ fait: true });
       const carte = RF.el('div', 'er-card');
       carte.innerHTML = `<span class="er-badge">TERMINÉ</span>
-        <p class="er-contexte">Tu as reproduit le schéma de référence dans les 7 situations. Recommence : les situations seront dans un autre ordre et tournées.</p>
+        <p class="er-contexte">Tu as reproduit le schéma de référence dans ${faites === ordre.length ? `les ${ordre.length} situations` : `${faites} situation${faites > 1 ? 's' : ''} sur ${ordre.length}`}. Recommence : les situations seront dans un autre ordre et tournées.</p>
         <div class="er-actions">
           <button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
           <button type="button" class="btn-secondary" data-a="ref">Revoir le récapitulatif</button>
@@ -686,7 +694,7 @@
         // passages suivants : ordre et orientations au hasard, le prisme toujours en dernier
         const prisme = SITUATIONS.find(s => s.type === 'prisme');
         ordre = RF.melanger(SITUATIONS.filter(s => s !== prisme)).concat([prisme]).map(s => ({ sit: s, orient: RF.hasard(ORIENTATIONS(s)) }));
-        num = 0; afficher();
+        num = 0; faites = 0; afficher();
       };
       carte.querySelector('[data-a="ref"]').onclick = intro;
     }
