@@ -13,8 +13,9 @@
    Deux graphes, tracés en direct :
      - périodicité spatiale : y(x) de E jusqu'à λ après R, à l'instant t ;
      - périodicité temporelle : signal reçu par R en fonction de t.
-   Repères continus : à t = T, 2T, 3T… le front de l'onde est à
-   λ, 2λ, 3λ… (repères sur les deux graphes, jusqu'au bout du milieu).
+   Bouton « Afficher les périodes » : double flèche λ entre deux crêtes
+   voisines du profil spatial (elle suit l'onde) et double flèche T entre
+   deux crêtes voisines du signal reçu (elle suit le papier qui défile).
    Démonstration « Suivre l'onde pendant T » : une crête est suivie
    pendant une période à partir de R ; elle s'éloigne de R d'une
    longueur d'onde : distance parcourue pendant T = λ, donc c = λ / T.
@@ -57,13 +58,12 @@ const DP = (function () {
     lecture: false, vitesse: 1,         // animation
     masque: false,                      // valeurs T et λ masquées
     demo: null,                         // { phase: 'attente' | 'suivi' | 'fin', t1 }
-    nRep: 0, neuf: 0                    // repères atteints, date du dernier (ms)
+    periodes: false                     // doubles flèches λ et T affichées
   };
   const T = () => 1 / etat.f;
   const lam = () => etat.c / etat.f;
   const L = () => D + lam();            // longueur du milieu représenté : jusqu'à λ après R
   const t0 = () => D / etat.c;          // arrivée du front en R
-  const nMax = () => Math.floor(L() / lam() + 1e-9); // repères λ dans le milieu représenté
 
   // élongation au point x à l'instant t
   function y(x, t) {
@@ -83,6 +83,7 @@ const DP = (function () {
   const $ = id => document.getElementById(id);
   const zEsp = $('dp-espace'), zTps = $('dp-temps');
   const bLecture = $('dp-lecture'), bSuivre = $('dp-suivre'), bMasquer = $('dp-masquer'), msg = $('dp-msg');
+  const bPeriodes = $('dp-periodes');
 
   // ---------- Avancer le temps ----------
   // dt : durée simulée ; la démonstration s'arrête exactement aux instants t1 et t1 + T
@@ -92,8 +93,6 @@ const DP = (function () {
     if (d && d.phase === 'attente' && tn >= d.t1) { tn = d.t1; d.phase = 'suivi'; }
     else if (d && d.phase === 'suivi' && tn >= d.t1 + T()) { tn = d.t1 + T(); d.phase = 'fin'; lecture(false); }
     etat.t = tn;
-    const n = Math.min(nMax(), Math.floor(tn / T() + 1e-9));
-    if (n > etat.nRep) { etat.nRep = n; etat.neuf = performance.now(); }
   }
 
   // ---------- Boucle d'animation ----------
@@ -113,7 +112,7 @@ const DP = (function () {
 
   // tout recommence à t = 0 (changement de réglage, Recommencer)
   function zero() {
-    etat.t = 0; etat.demo = null; etat.nRep = 0; etat.neuf = 0;
+    etat.t = 0; etat.demo = null;
     rendre();
   }
 
@@ -133,13 +132,15 @@ const DP = (function () {
       `<path class="dp-fleche-p" d="M${n2(x1)} ${n2(h)}l${n2(p)} -4v8z"/>` +
       `<path class="dp-fleche-p" d="M${n2(x2)} ${n2(h)}l${n2(-p)} -4v8z"/>`;
   }
-  // repère n × λ (ou n × T) : pointillé vertical, petit triangle et étiquette en haut
-  function repere(x, haut, bas, texte, neuf) {
-    return `<g class="${neuf ? 'dp-neuf' : ''}"><line class="dp-repere" x1="${n2(x)}" y1="${n2(haut)}" x2="${n2(x)}" y2="${n2(bas)}"/>` +
-      `<path class="dp-repere-p" d="M${n2(x)} ${n2(haut)}l-4 -6h8z"/>` +
-      (texte ? `<text class="dp-repere-t" x="${n2(x)}" y="${n2(haut - 9)}">${texte}</text>` : '') + '</g>';
+  // période (λ ou T) entre deux crêtes d'abscisses x1 et x2 (yCrete : hauteur des crêtes) :
+  // traits de rappel au-dessus des crêtes, double flèche et étiquette au-dessus
+  function periode(x1, x2, yCrete, texte) {
+    const h = yCrete - 9;
+    return `<line class="dp-per-rappel" x1="${n2(x1)}" y1="${n2(yCrete - 3)}" x2="${n2(x1)}" y2="${n2(h - 5)}"/>` +
+      `<line class="dp-per-rappel" x1="${n2(x2)}" y1="${n2(yCrete - 3)}" x2="${n2(x2)}" y2="${n2(h - 5)}"/>` +
+      fleche(x1, x2, h) +
+      `<text class="dp-per-t" x="${n2((x1 + x2) / 2)}" y="${n2(h - 5)}">${texte}</text>`;
   }
-  const nom = (n, s) => (n === 1 ? '' : n) + s;        // λ, 2λ, 3λ…
   const svg = (W, H, label, corps) =>
     `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${label}">${corps}</svg>`;
 
@@ -150,7 +151,7 @@ const DP = (function () {
     const m = { g: 64, d: 52, h: 30, b: 26 };
     const pw = W - m.g - m.d, ph = H - m.h - m.b, Lm = L();
     const X = x => m.g + x / Lm * pw, yc = m.h + ph / 2, A = ph * 0.36, Y = v => yc - v * A;
-    const t = etat.t, l = lam(), neuf = performance.now() - etat.neuf < 900;
+    const t = etat.t, l = lam();
     let s = '';
     // grille et graduations en mètres
     const p = pasGrad(Lm, pw), dec = decimales(p);
@@ -171,13 +172,11 @@ const DP = (function () {
       const txt = d.phase === 'fin' ? (etat.masque ? 'λ' : 'λ = ' + fmt(l) + NB + 'm') : 'distance parcourue';
       demoDessus = fleche(X(x1), X(xc), hF) +
         (X(xc) - X(x1) > txt.length * 7.5 + 10 || d.phase === 'fin' ? `<text class="dp-fleche-t" x="${n2((X(x1) + X(xc)) / 2)}" y="${n2(hF - 7)}">${txt}</text>` : '') +
+        // animation finie : « distance parcourue » reste affiché au-dessus de λ
+        (d.phase === 'fin' ? `<text class="dp-fleche-t" x="${n2((X(x1) + X(xc)) / 2)}" y="${n2(hF - 24)}">distance parcourue</text>` : '') +
         `<circle class="dp-depart" cx="${n2(X(x1))}" cy="${n2(Y(1))}" r="6"/>` +
         `<circle class="dp-marque" cx="${n2(X(xc))}" cy="${n2(Y(y(xc, t)))}" r="7"/>`;
     }
-    // repères λ, 2λ… atteints par le front (étiquettes espacées d'au moins 26 px)
-    const saut = Math.max(1, Math.ceil(26 / (l / Lm * pw)));
-    for (let n = 1; n <= etat.nRep; n++)
-      s += repere(X(n * l), m.h, m.h + ph, n % saut === 0 || n === 1 ? nom(n, 'λ') : '', neuf && n === etat.nRep);
     // axe et onde
     s += `<line class="dp-axe" x1="${m.g}" y1="${n2(yc)}" x2="${n2(m.g + pw)}" y2="${n2(yc)}"/>`;
     // récepteur R, dans le milieu à x = D, sur l'axe comme E : trait vertical et étiquette (l'onde passe devant)
@@ -198,6 +197,14 @@ const DP = (function () {
         `<text class="dp-front-t" x="${n2(X(xf) + (gauche ? -5 : 5))}" y="${n2(m.h + 13)}" text-anchor="${gauche ? 'end' : 'start'}">front</text>`;
     }
     s += demoDessus;
+    // période spatiale : crêtes à x = c·t − λ(uC + k), k ≥ 0 (k = 0 : crête la plus proche du front) ;
+    // on prend les deux crêtes voisines les plus à droite entièrement dans le milieu représenté
+    if (etat.periodes) {
+      const uC = MOTIF[etat.forme].uCrete, xf = etat.c * t;
+      const k = Math.max(1, Math.ceil((xf - Lm) / l - uC - 1e-9) + 1);
+      const xa = xf - l * (uC + k), xb = xa + l;
+      if (xa >= -1e-9) s += periode(X(xa), X(xb), Y(1), 'λ');
+    }
     // point du milieu au niveau de R
     s += `<circle class="dp-point" cx="${n2(X(D))}" cy="${n2(Y(y(D, t)))}" r="5"/>`;
     // émetteur
@@ -218,7 +225,6 @@ const DP = (function () {
     const Lt = t0() + 4 * per;                          // durée affichée : arrivée de l'onde + 4 périodes
     const deb = Math.max(0, t - Lt);                     // au-delà, la fenêtre défile
     const X = u => m.g + (u - deb) / Lt * pw, yc = m.h + ph / 2, A = ph * 0.4, Y = v => yc - v * A;
-    const neuf = performance.now() - etat.neuf < 900;
     let s = '';
     // grille et graduations en secondes
     const p = pasGrad(Lt, pw), dec = decimales(p);
@@ -239,14 +245,10 @@ const DP = (function () {
       const txt = d.phase === 'fin' ? (etat.masque ? 'T' : 'T = ' + fmt(per) + NB + 's') : 'durée écoulée';
       demoDessus = fleche(X(ta), X(tb), hF) +
         (X(tb) - X(ta) > txt.length * 7.5 + 10 || d.phase === 'fin' ? `<text class="dp-fleche-t" x="${n2((X(ta) + X(tb)) / 2)}" y="${n2(hF - 7)}">${txt}</text>` : '') +
+        // animation finie : « durée écoulée » reste affiché au-dessus de T
+        (d.phase === 'fin' ? `<text class="dp-fleche-t" x="${n2((X(ta) + X(tb)) / 2)}" y="${n2(hF - 24)}">durée écoulée</text>` : '') +
         (d.t1 >= deb ? `<circle class="dp-depart" cx="${n2(X(d.t1))}" cy="${n2(Y(1))}" r="6"/>` : '') +
         (d.phase === 'fin' ? `<circle class="dp-marque" cx="${n2(X(d.t1 + per))}" cy="${n2(Y(1))}" r="7"/>` : '');
-    }
-    // repères T, 2T… : instants où le front est à λ, 2λ…
-    const saut = Math.max(1, Math.ceil(26 / (per / Lt * pw)));
-    for (let n = 1; n <= etat.nRep; n++) {
-      if (n * per < deb) continue;
-      s += repere(X(n * per), m.h, m.h + ph, n % saut === 0 || n === 1 ? nom(n, 'T') : '', neuf && n === etat.nRep);
     }
     // axe et signal reçu, de deb à t
     s += `<line class="dp-axe" x1="${m.g}" y1="${n2(yc)}" x2="${n2(m.g + pw)}" y2="${n2(yc)}"/>`;
@@ -261,6 +263,14 @@ const DP = (function () {
       s += `<path class="dp-courbe" d="${chemin}"/>`;
     }
     s += demoDessus;
+    // période temporelle : crêtes reçues aux instants t0 + (uC + k) / f, k ≥ 0 ;
+    // on prend les deux crêtes voisines les plus à gauche encore sur le papier : la flèche part avec lui vers la gauche
+    if (etat.periodes) {
+      const uC = MOTIF[etat.forme].uCrete;
+      const k = Math.max(0, Math.ceil((deb - t0()) / per - uC - 1e-9));
+      const ta = t0() + (uC + k) * per, tb = ta + per;
+      if (tb <= t + 1e-9) s += periode(X(ta), X(tb), Y(1), 'T');
+    }
     s += `<circle class="dp-point" cx="${n2(X(t))}" cy="${n2(Y(y(D, t)))}" r="5"/>`;
     // récepteur, à gauche de l'axe
     const hb = Math.min(46, ph * 0.5);
@@ -282,7 +292,7 @@ const DP = (function () {
     bSuivre.disabled = !!d && d.phase !== 'fin';
     let h, classe = '';
     if (!d) {
-      h = `<p>Le front de l'onde avance à la célérité c. À chaque période écoulée (repères <b>T, 2T…</b> en bas), il a parcouru une longueur d'onde de plus (repères <b>λ, 2λ…</b> en haut).</p>`;
+      h = `<p>Le front de l'onde avance à la célérité c. L'onde se répète dans l'espace (période spatiale <b>λ</b>, en haut) et dans le temps (période temporelle <b>T</b>, en bas).</p>`;
     } else if (d.phase === 'attente') {
       h = etat.t < t0()
         ? `<p>On attend que l'onde arrive au récepteur R…</p>`
@@ -351,6 +361,12 @@ const DP = (function () {
   bSuivre.addEventListener('click', () => {
     if (etat.demo && etat.demo.phase === 'fin') etat.demo = null;
     suivre();
+  });
+  bPeriodes.addEventListener('click', () => {
+    etat.periodes = !etat.periodes;
+    bPeriodes.setAttribute('aria-pressed', etat.periodes);
+    bPeriodes.textContent = etat.periodes ? 'Masquer les périodes' : 'Afficher les périodes';
+    rendre();
   });
   bMasquer.addEventListener('click', () => {
     etat.masque = !etat.masque;
