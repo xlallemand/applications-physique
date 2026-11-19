@@ -172,6 +172,8 @@ const DP = (function () {
       const txt = d.phase === 'fin' ? (etat.masque ? 'λ' : 'λ = ' + fmt(l) + NB + 'm') : 'distance parcourue';
       demoDessus = fleche(X(x1), X(xc), hF) +
         (X(xc) - X(x1) > txt.length * 7.5 + 10 || d.phase === 'fin' ? `<text class="dp-fleche-t" x="${n2((X(x1) + X(xc)) / 2)}" y="${n2(hF - 7)}">${txt}</text>` : '') +
+        // animation finie : « distance parcourue » reste affiché au-dessus de λ
+        (d.phase === 'fin' ? `<text class="dp-fleche-t" x="${n2((X(x1) + X(xc)) / 2)}" y="${n2(hF - 24)}">distance parcourue</text>` : '') +
         `<circle class="dp-depart" cx="${n2(X(x1))}" cy="${n2(Y(1))}" r="6"/>` +
         `<circle class="dp-marque" cx="${n2(X(xc))}" cy="${n2(Y(y(xc, t)))}" r="7"/>`;
     }
@@ -243,6 +245,8 @@ const DP = (function () {
       const txt = d.phase === 'fin' ? (etat.masque ? 'T' : 'T = ' + fmt(per) + NB + 's') : 'durée écoulée';
       demoDessus = fleche(X(ta), X(tb), hF) +
         (X(tb) - X(ta) > txt.length * 7.5 + 10 || d.phase === 'fin' ? `<text class="dp-fleche-t" x="${n2((X(ta) + X(tb)) / 2)}" y="${n2(hF - 7)}">${txt}</text>` : '') +
+        // animation finie : « durée écoulée » reste affiché au-dessus de T
+        (d.phase === 'fin' ? `<text class="dp-fleche-t" x="${n2((X(ta) + X(tb)) / 2)}" y="${n2(hF - 24)}">durée écoulée</text>` : '') +
         (d.t1 >= deb ? `<circle class="dp-depart" cx="${n2(X(d.t1))}" cy="${n2(Y(1))}" r="6"/>` : '') +
         (d.phase === 'fin' ? `<circle class="dp-marque" cx="${n2(X(d.t1 + per))}" cy="${n2(Y(1))}" r="7"/>` : '');
     }
