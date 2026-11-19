@@ -1,16 +1,21 @@
 /* ============================================================
-   Module 2 : construire l'image A′B′ (série notée sur 20)
+   Module 1 : construire l'image A′B′ (série notée sur 20)
    LT.questionsSerie() → 10 questions (fabriques : nouvelles valeurs à chaque appel)
 
-   Construction (objet réel au-delà de 2f′, images réelles seulement) :
-     [v] distance focale à partir de la vergence (lentille en δ) ;
+   Construction (objet réel au-delà de f′, images réelles seulement) :
+     [F] placer les foyers F′ et F sur l'axe optique (distance focale donnée) ;
      (a) tracer au moins deux rayons issus de B (un troisième est accepté) ;
      (b) placer B′ à l'intersection des rayons émergents (tolérance ½ carreau) ;
      (c) placer A′ sur l'axe, à la verticale de B′ ; la flèche A′B′ se dessine ;
      (d) lire OA′ et A′B′ (avec l'échelle), donner le sens de l'image ;
      (e) calculer γ = A′B′ / AB ou γ = OA′ / OA.
-   À rebours : l'image A′B′ est donnée, retrouver l'objet AB.
-   Calcul : grandissement à partir des tailles ou des distances (sans figure).
+   Composition de la série :
+     2 constructions à partir de AB (la première question en est une),
+     1 construction où l'élève place d'abord F et F′,
+     2 constructions à rebours (l'image A′B′ est donnée, retrouver AB),
+     3 calculs de grandissement sans figure,
+     1 construction suivie d'un calcul : γ, puis A′B′ = γ × AB ou OA′ = γ × OA,
+     1 question finale : AB dessiné et γ donné ; rayon par O, A′B′ = γ × AB, placer B′ sur le rayon.
    Les valeurs sont choisies pour que B′ tombe sur un nœud ou un demi-nœud du quadrillage.
    ============================================================ */
 (function () {
@@ -24,13 +29,13 @@
     { f: 3, OA: 6, AB: [1.5, 2, 2.5, 3] }, { f: 3, OA: 7.5, AB: [1.5, 3] }, { f: 3, OA: 9, AB: [2, 3, 4] }, { f: 3, OA: 12, AB: [3] },
     { f: 4, OA: 8, AB: [1.5, 2, 2.5] }, { f: 4, OA: 12, AB: [2, 3, 4] },
   ];
-  const VERGENCES = { 2: 50, 4: 25, 5: 20 };
-  const CONFIGS_V = [
-    { f: 2, OA: 6, AB: [2, 3, 4] }, { f: 2, OA: 4, AB: [1.5, 2, 2.5] },
-    { f: 4, OA: 8, AB: [1.5, 2, 2.5] }, { f: 4, OA: 12, AB: [2, 3, 4] }, { f: 5, OA: 10, AB: [1.5, 2, 2.5] },
-  ];
   // 1 carreau ↔ 2 cm : f′ = 4 cm ou 6 cm
   const CONFIGS_E = [{ f: 2, OA: 6, AB: [2, 4] }, { f: 3, OA: 9, AB: [2, 4] }, { f: 3, OA: 6, AB: [1.5, 2, 2.5] }, { f: 2, OA: 4, AB: [1.5, 2] }];
+  // question finale (γ donné) : grandissement simple (0,5 ; 1 ; 2)
+  const CONFIGS_G = [
+    { f: 2, OA: 6, AB: [2, 3, 4] }, { f: 3, OA: 9, AB: [2, 3, 4] }, { f: 4, OA: 12, AB: [2, 4] },
+    { f: 2, OA: 4, AB: [2, 3] }, { f: 3, OA: 6, AB: [2, 3] }, { f: 2, OA: 3, AB: [1.5, 2] },
+  ];
 
   const cm = v => fmt(v) + ' cm';
   const egal = (a, b, t) => Math.abs(a - b) <= (t || 1e-9);
@@ -55,7 +60,7 @@
   /* ---------- Figure de la question ---------- */
   function figure(ctx, zone, o) {
     const d = ctx.d;
-    const F = LT.figure(zone, Object.assign({ f: d.f, foyers: !o.vergence, aria: o.aria }, d.cadre));
+    const F = LT.figure(zone, Object.assign({ f: d.f, foyers: !o.sansFoyers, aria: o.aria }, d.cadre));
     ctx.F = F;
     LT.sensLumiere(F);
     if (o.rebours) {
@@ -72,30 +77,39 @@
     return F;
   }
   function nommer(F, p, nom, dy, dx) { F.S.texte('textes', F.c([p[0] + (dx || 0), p[1] + dy]), nom, { cls: 'opt-nom-pt' }); }
-  // foyers dessinés après le calcul de f′ (lentille donnée par sa vergence)
-  function dessinerFoyers(F) {
-    [-1, 1].forEach(s => {
-      F.S.ligne('deco', F.c([s * F.f, -0.25]), F.c([s * F.f, 0.25]), 'opt-foyer');
-      F.S.texte('deco', F.c([s * F.f, -0.67]), s > 0 ? 'F′' : 'F', { cls: 'opt-nom-pt' });
-    });
+  // un foyer dessiné sur l'axe (s = 1 : F′, s = −1 : F)
+  function dessinerFoyer(F, s) {
+    F.S.ligne('deco', F.c([s * F.f, -0.25]), F.c([s * F.f, 0.25]), 'opt-foyer');
+    F.S.texte('deco', F.c([s * F.f, -0.67]), s > 0 ? 'F′' : 'F', { cls: 'opt-nom-pt' });
   }
 
   /* ============================================================
      Parties de la construction
      ============================================================ */
-  // [v] distance focale à partir de la vergence
-  function partieVergence(ctx, v) {
-    const fcm = 100 / v;
+  // [F] placer un foyer sur l'axe optique (s = 1 : foyer image F′, s = −1 : foyer objet F)
+  function partieFoyer(ctx, s) {
+    const nom = s > 0 ? 'F′' : 'F';
     return {
-      type: 'nombre', q: `La lentille a une vergence v = ${fmt(v)} δ. Calcule sa distance focale f′ en centimètres (f′ = 1 / v, en mètres).`,
-      label: 'f′ =', unite: 'cm', calc: true, aria: 'Distance focale en centimètres',
-      verifier: x => egal(x, fcm, 1e-6) ? { ok: true }
-        : egal(x, fcm / 100, 1e-9) ? { diag: `f′ = 1 / v est en <b>mètres</b> : ${fmt(fcm / 100)} m = ${fmt(fcm)} cm.` }
-        : egal(x, v, 1e-9) ? { diag: 'f′ = 1 / v : divise 1 par la vergence.' }
-        : egal(x, fcm * 10, 1e-6) || egal(x, fcm / 10, 1e-6) ? { diag: '1 m = 100 cm : pour passer des mètres aux centimètres, multiplie par 100.' }
-        : { diag: 'f′ = 1 / v donne f′ en mètres ; convertis ensuite en centimètres (× 100).' },
-      remplir: i => { i.value = fmt(fcm); },
-      solution: () => { dessinerFoyers(ctx.F); return `${LT.vergence(v)}. Les foyers F et F′ sont maintenant placés.`; },
+      type: 'perso', q: `Touche l'axe optique à l'endroit du <b>foyer ${s > 0 ? 'image F′' : 'objet F'}</b>.`,
+      monter(zone, api) {
+        const F = ctx.F, d = ctx.d, x = s * d.f, fcm = d.f * d.ech;
+        let actif = true;
+        zone.innerHTML = `<p class="lt-aide-t">OF = OF′ = f′ = ${cm(fcm)}${d.ech !== 1 ? `, soit ${fmt(d.f)} carreaux (1 carreau ↔ ${d.ech} cm)` : ' (1 carreau = 1 cm)'}.</p>`;
+        const poser = () => { actif = false; dessinerFoyer(F, s); if (s < 0) ctx.foyersVus = true; };
+        OPT.surAppui(F.S.svg, evt => {
+          if (!actif) return;
+          const p = F.toucher(evt);
+          if (Math.abs(p[1]) > 0.6) { api.erreur('Les foyers F et F′ sont sur l\'axe optique.'); return; }
+          if (Math.abs(p[0] - x) <= 0.4) { poser(); api.reussi(); return; }
+          if (Math.abs(p[0] + x) <= 0.4) {
+            api.erreur(s > 0 ? 'F′, le foyer image, est après la lentille, du côté où sort la lumière (à droite de O).'
+              : 'F, le foyer objet, est avant la lentille, du côté d\'où vient la lumière (à gauche de O).');
+            return;
+          }
+          api.erreur(`${nom} est à la distance f′ = ${cm(fcm)} du centre optique O : compte ${fmt(d.f)} carreaux depuis O, ${s > 0 ? 'vers la droite' : 'vers la gauche'}.`);
+        });
+        return { montrer() { if (actif) poser(); } };
+      },
     };
   }
 
@@ -306,26 +320,134 @@
     };
   }
 
+  // (f) déduire du grandissement une taille ou une distance de l'image
+  function partieDeduire(ctx, quoi) {
+    const d = ctx.d, ech = d.ech, g = d.g;
+    const exact = Math.abs(g * 100 - Math.round(g * 100)) < 1e-9;
+    const gT = exact ? fmt(g) : LT.sig(g, 2);
+    const AB = Math.abs(d.h) * ech, OA = d.OA * ech;
+    const L = quoi === 'AiBi'
+      ? { nom: 'A′B′', base: 'AB', baseV: AB, val: Math.abs(d.hi) * ech, txt: 'la taille de l\'image', def: 'γ = A′B′ / AB' }
+      : { nom: 'OA′', base: 'OA', baseV: OA, val: d.xi * ech, txt: 'la distance de la lentille à l\'image', def: 'γ = OA′ / OA' };
+    return {
+      type: 'nombre', q: `Utilise le grandissement pour calculer ${L.txt} : <b>${L.nom} = γ × ${L.base}</b>.`,
+      label: `${L.nom} =`, unite: 'cm', calc: true, aria: `${L.nom} en centimètres`,
+      verifier: v => egal(v, L.val, 0.06 * ech) ? { ok: true }
+        : egal(v, L.baseV / g, 0.06 * ech) ? { diag: `${L.def}, donc ${L.nom} = γ × ${L.base} : multiplie ${L.base} par γ.` }
+        : { diag: `${L.def}, donc ${L.nom} = γ × ${L.base} = ${gT} × ${fmt(L.baseV)} cm.` },
+      remplir: i => { i.value = fmt(L.val); },
+      solution: `${L.def}, donc ${L.nom} = γ × ${L.base} = ${gT} × ${cm(L.baseV)} ${exact ? '=' : '≈'} ${cm(L.val)}. C'est bien la valeur qu'on lit sur la figure.`,
+    };
+  }
+
+  // question finale, (a) : seul le rayon qui passe par O est tracé
+  function partieRayonO(ctx) {
+    return {
+      type: 'perso', q: 'Trace le rayon issu de B qui passe par le <b>centre optique O</b>.',
+      monter(zone, api) {
+        const F = ctx.F, d = ctx.d, r = LT.particulier(d.f, d.B, 'centre');
+        const g = OPT.svgEl('g', null, F.S.calque('rayons'));
+        F.rayon(g, d.B, r.I);
+        zone.innerHTML = '<p class="lt-consigne">Le rayon issu de B est dessiné jusqu\'au centre optique O. Trace le rayon <b>qui sort de la lentille</b>.</p><div data-a="tr"></div>';
+        let fait = false;
+        const fini = () => {
+          if (fait) return;
+          fait = true; g.remove();
+          F.rayon('rayons', d.B, r.I); F.rayon('rayons', r.I, F.bord(r.I, r.e));
+          ctx.rayons = ['centre'];
+        };
+        const tr = LT.tracer(F, zone.querySelector('[data-a="tr"]'), {
+          I: r.I, sens: 'aval', juste: r.e, diag: () => T.centre.diag,
+          surJuste() { fini(); api.reussi(false, T.centre.regle); },
+          surErreur(diag) { api.erreur(diag); },
+        });
+        return { montrer() { tr.quitter(); fini(); } };
+      },
+    };
+  }
+  // question finale, (c) : placer B′ sur le rayon, à la distance A′B′ de l'axe, de l'autre côté
+  function partiePlacerImage(ctx) {
+    return {
+      type: 'perso', q: 'Touche la figure à l\'endroit du point <b>B′</b> : il est sur le rayon tracé, à la distance A′B′ de l\'axe optique.',
+      monter(zone, api) {
+        const F = ctx.F, d = ctx.d, ech = d.ech, hT = cm(Math.abs(d.hi) * ech);
+        let actif = true;
+        zone.innerHTML = `<p class="lt-aide-t">Tout rayon issu de B passe par B′, et l'image A′B′ mesure ${hT}.</p>`;
+        const poser = () => {
+          actif = false;
+          F.S.cercle('textes', F.c(d.Bi), 4.5, 'opt-pose');
+          nommer(F, d.Bi, 'B′', decalPointe(d.hi), 0.45);
+          F.S.ligne('arcs', F.c(d.Bi), F.c(d.Ai), 'lt-projection');
+          F.fleche('textes', d.Ai, d.Bi, 'opt-image');
+          nommer(F, d.Ai, 'A′', decalPied(d.hi), 0.45);
+        };
+        // distance d'un point au rayon émergent (droite passant par O et B′)
+        const auRayon = p => Math.abs(p[0] * d.Bi[1] - p[1] * d.Bi[0]) / V.len(d.Bi);
+        OPT.surAppui(F.S.svg, evt => {
+          if (!actif) return;
+          const p = F.toucher(evt);
+          if (V.len(V.sub(p, d.Bi)) <= 0.5) { poser(); api.reussi(false, 'A′ est sur l\'axe optique, à la verticale de B′ : la flèche A′B′ est dessinée.'); return; }
+          if (p[0] <= 0.2) { api.erreur('L\'image est donnée par la lentille : B′ est après la lentille, sur le rayon qui en sort.'); return; }
+          if (p[1] * d.h > 0) { api.erreur('L\'image donnée par la lentille est renversée : B′ est de l\'autre côté de l\'axe optique que B.'); return; }
+          if (auRayon(p) <= 0.5) { api.erreur(`B′ est bien sur ce rayon, mais à la distance A′B′ = ${hT} de l'axe optique${ech !== 1 ? ` (1 carreau ↔ ${ech} cm)` : ''} : compte les carreaux.`); return; }
+          api.erreur('B′ est sur le rayon issu de B qui passe par O : tout rayon issu de B passe par B′.');
+        });
+        return { montrer() { if (actif) poser(); } };
+      },
+    };
+  }
+
   /* ============================================================
      Fabriques de questions
      ============================================================ */
-  // construction de l'image (o = { configs, ech, vergence, sous, gamma })
+  // construction de l'image (o = { configs, ech, sous, gamma, foyers: true (l'élève place F et F′),
+  //   deduire: 'AiBi' | 'OAi' (une seule lecture, puis γ et calcul de l'autre grandeur) })
   function construire(o) {
     const c = hasard(o.configs), ab = hasard(c.AB), h = o.sous ? -ab : ab, ech = o.ech || 1;
     const ctx = { d: donnees(c, h, ech) };
-    const d = ctx.d, v = o.vergence ? VERGENCES[c.f * ech] : null;
-    ctx.foyersVus = !v;
-    const lentille = v ? `Lentille convergente de <b>vergence v = ${fmt(v)} δ</b>.` : `Lentille convergente de distance focale <b>f′ = ${cm(c.f * ech)}</b>.`;
+    const d = ctx.d;
+    ctx.foyersVus = !o.foyers;
     const parties = [];
-    if (v) { const pv = partieVergence(ctx, v); const sol = pv.solution; pv.solution = () => { ctx.foyersVus = true; return sol(); }; parties.push(pv); }
-    parties.push(partieRayons(ctx, false), partiePoint(ctx, false), partiePied(ctx, false),
-      partieLecture(ctx, 'OAi'), partieLecture(ctx, 'AiBi'), partieSens(ctx, false), partieGamma(ctx, o.gamma || 'tailles'));
+    if (o.foyers) parties.push(partieFoyer(ctx, 1), partieFoyer(ctx, -1));
+    parties.push(partieRayons(ctx, false), partiePoint(ctx, false), partiePied(ctx, false));
+    let consigne = 'Construis l\'image A′B′ de l\'objet AB, puis détermine sa position, sa taille, son sens et le grandissement.';
+    if (o.deduire) {
+      // on lit une grandeur, on calcule γ avec elle, puis on calcule l'autre grandeur avec γ
+      const lue = o.deduire === 'AiBi' ? 'OAi' : 'AiBi';
+      parties.push(partieLecture(ctx, lue), partieGamma(ctx, lue === 'OAi' ? 'distances' : 'tailles'), partieDeduire(ctx, o.deduire));
+      consigne = `Construis l'image A′B′ de l'objet AB, lis ${lue === 'OAi' ? 'sa position OA′' : 'sa taille A′B′'}, puis utilise le grandissement pour calculer ${o.deduire === 'AiBi' ? 'sa taille A′B′' : 'sa position OA′'}.`;
+    } else {
+      parties.push(partieLecture(ctx, 'OAi'), partieLecture(ctx, 'AiBi'), partieSens(ctx, false), partieGamma(ctx, o.gamma || 'tailles'));
+    }
+    if (o.foyers) consigne = 'Place les foyers F et F′, puis ' + consigne.charAt(0).toLowerCase() + consigne.slice(1);
     return {
-      ctx, theme: o.theme, consigne: 'Construis l\'image A′B′ de l\'objet AB, puis détermine sa position, sa taille, son sens et le grandissement.',
-      enonce: `<div class="lt-donnee"><span>${lentille}</span><span>Objet AB perpendiculaire à l'axe optique : AB = <b>${cm(ab * ech)}</b>, OA = <b>${cm(c.OA * ech)}</b>.</span></div>`,
-      figure: z => figure(ctx, z, { vergence: !!v, aria: 'Lentille convergente sur un quadrillage et objet AB : construire son image A′B′' }),
+      ctx, theme: o.theme, consigne,
+      enonce: `<div class="lt-donnee"><span>Lentille convergente de distance focale <b>f′ = ${cm(c.f * ech)}</b>.</span><span>Objet AB perpendiculaire à l'axe optique : AB = <b>${cm(ab * ech)}</b>, OA = <b>${cm(c.OA * ech)}</b>.</span></div>`,
+      figure: z => figure(ctx, z, { sansFoyers: !!o.foyers, aria: o.foyers ? 'Lentille convergente sur un quadrillage et objet AB : placer les foyers, puis construire l\'image A′B′' : 'Lentille convergente sur un quadrillage et objet AB : construire son image A′B′' }),
       parties,
       bilan: `A′B′ est ${d.g < 1 - 1e-9 ? 'plus petite que' : d.g > 1 + 1e-9 ? 'plus grande que' : 'de même taille que'} l'objet et renversée ; OA′ = ${cm(d.xi * ech)}, A′B′ = ${cm(Math.abs(d.hi) * ech)}.`,
+    };
+  }
+  // question finale : AB dessiné et γ donné (foyers inconnus)
+  function avecGamma() {
+    const c = hasard(CONFIGS_G), ab = hasard(c.AB), h = Math.random() < 0.5 ? ab : -ab;
+    const ctx = { d: donnees(c, h, 1) };
+    const d = ctx.d, ABi = Math.abs(d.hi);
+    ctx.foyersVus = false;
+    return {
+      ctx, theme: 'Construire l\'image avec le grandissement',
+      consigne: 'Les foyers de la lentille ne sont pas connus, mais on connaît le grandissement γ. Trace le rayon qui passe par O, calcule la taille de l\'image, puis place l\'image A′B′.',
+      enonce: `<div class="lt-donnee"><span>Lentille convergente, foyers inconnus.</span><span>Objet AB : AB = <b>${cm(ab)}</b>, OA = <b>${cm(c.OA)}</b>. Grandissement : <b>γ = ${fmt(d.g)}</b>.</span></div>`,
+      figure: z => figure(ctx, z, { sansFoyers: true, aria: 'Lentille convergente sans ses foyers et objet AB : placer l\'image A′B′ à l\'aide du grandissement' }),
+      parties: [
+        partieRayonO(ctx),
+        { type: 'nombre', q: 'Calcule la taille de l\'image : <b>A′B′ = γ × AB</b>.', label: 'A′B′ =', unite: 'cm', calc: true, aria: 'Taille de l\'image en centimètres',
+          verifier: v => egal(v, ABi, 0.011) ? { ok: true } : egal(v, ab / d.g, 0.011) ? { diag: 'γ = A′B′ / AB, donc A′B′ = γ × AB : multiplie AB par γ.' } : { diag: `γ = A′B′ / AB, donc A′B′ = γ × AB = ${fmt(d.g)} × ${fmt(ab)} cm.` },
+          remplir: i => { i.value = fmt(ABi); }, solution: `A′B′ = γ × AB = ${fmt(d.g)} × ${cm(ab)} = ${cm(ABi)}.` },
+        partiePlacerImage(ctx),
+        partieLecture(ctx, 'OAi'),
+      ],
+      bilan: `B′ est sur le rayon qui passe par O, à ${cm(ABi)} de l'axe optique, de l'autre côté que B (image renversée) ; OA′ = ${cm(d.xi)}.`,
     };
   }
   // à rebours : l'image est donnée, retrouver l'objet
@@ -384,21 +506,24 @@
   ];
 
   /* ---------- Les 10 questions ---------- */
+  // la première est une construction à partir de AB, la dernière celle où γ est donné ; les autres sont mélangées
   function questionsSerie() {
-    const calc = LT.melanger(CALCULS);
-    return [
-      construire({ configs: CONFIGS, theme: 'Construire l\'image', gamma: 'tailles' }),
-      construire({ configs: CONFIGS, theme: 'Construire l\'image', gamma: 'distances' }),
-      construire({ configs: CONFIGS, theme: 'Objet sous l\'axe optique', sous: true, gamma: hasard(['tailles', 'distances']) }),
-      construire({ configs: CONFIGS_V, theme: 'Lentille donnée par sa vergence', vergence: true, gamma: 'tailles' }),
-      construire({ configs: CONFIGS_V, theme: 'Lentille donnée par sa vergence', vergence: true, sous: Math.random() < 0.5, gamma: 'distances' }),
-      construire({ configs: CONFIGS_E, theme: 'Figure à l\'échelle', ech: 2, sous: Math.random() < 0.5, gamma: hasard(['tailles', 'distances']) }),
+    const ab = LT.melanger([
+      construire({ configs: CONFIGS, theme: 'Construire l\'image', gamma: hasard(['tailles', 'distances']) }),
+      Math.random() < 0.5
+        ? construire({ configs: CONFIGS, theme: 'Objet sous l\'axe optique', sous: true, gamma: hasard(['tailles', 'distances']) })
+        : construire({ configs: CONFIGS_E, theme: 'Figure à l\'échelle', ech: 2, sous: Math.random() < 0.5, gamma: hasard(['tailles', 'distances']) }),
+    ]);
+    const autres = LT.melanger([
+      ab[1],
+      construire({ configs: CONFIGS, theme: 'Placer les foyers', foyers: true, sous: Math.random() < 0.5, gamma: hasard(['tailles', 'distances']) }),
       rebours(),
       rebours(),
-      calc[0](),
-      calc[1](),
-    ];
+      ...CALCULS.map(q => q()),
+      construire({ configs: CONFIGS, theme: 'Construire et calculer', deduire: hasard(['AiBi', 'OAi']), sous: Math.random() < 0.5 }),
+    ]);
+    return [ab[0], ...autres, avecGamma()];
   }
 
-  Object.assign(LT, { questionsSerie, CONFIGS, CONFIGS_V, CONFIGS_E, VERGENCES, donnees });
+  Object.assign(LT, { questionsSerie, CONFIGS, CONFIGS_E, CONFIGS_G, donnees });
 })();

@@ -137,7 +137,7 @@ Contenu dans `.er-page` (largeur max 60 rem, centré, marges réduites sur tél�
 
 ### Page de manipulation (simulateur, animation, manipulation guidée)
 
-Toute page où l'élève manipule a un bouton **« ⤢ Plein écran »** (`btn-small`) dans sa première carte, à droite du titre. Il cache le sommaire, donne toute la largeur à la page et passe le navigateur en plein écran quand il le permet ; le bouton devient « ⤡ Quitter le plein écran » (Échap ramène aussi le sommaire). Modèles : `titrage-conductimetrique/modules/module_1_animation.html` et `refraction/` (`RF.pleinEcran`, classe `rf-plein`).
+Toute page de simulation ou de manipulation (et toute nouvelle page de ce type) a **le bouton plein écran commun** `assets/plein-ecran.js` (objet `PLEIN`, styles `assets/plein-ecran.css`, modèle `double-periodicite/`) : icône quatre coins et « Plein écran » (icône seule sur téléphone), devenant « Quitter le plein écran ». Page de module : un `<span data-plein></span>` dans la première carte, à droite du titre, remplacé par `PLEIN.bouton()` appelé après `SOM.menu(...)` ; page unique sans sommaire : `PLEIN.bouton()` l'ajoute au bandeau du haut ; ailleurs `PLEIN.bouton({ ou: element })`. Pendant le plein écran, le sommaire est caché et la page prend toute la largeur ; sans plein écran du navigateur (iPhone), le bouton cache seulement le sommaire. Ne plus écrire de bouton plein écran propre à une application.
 
 ### Cours
 

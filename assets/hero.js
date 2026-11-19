@@ -832,7 +832,10 @@
         const A = [px, py - L * .55], B = [px - L * .55, py + L * .4], C2 = [px + L * .55, py + L * .4];
         ctx.globalAlpha = .1; ctx.beginPath(); ctx.moveTo(...A); ctx.lineTo(...B); ctx.lineTo(...C2); ctx.closePath(); ctx.fill();
         ctx.globalAlpha = .5; ctx.lineWidth = 1.6; ctx.stroke();
-        const e = [px - L * .28, py - L * .08], s2 = [px + L * .22, py];
+        // point d'entrée au milieu de la face gauche, point de sortie sur la face droite
+        // (les rayons émergents partent bien de la surface du prisme)
+        const sur = (P, Q, t) => [P[0] + t * (Q[0] - P[0]), P[1] + t * (Q[1] - P[1])];
+        const e = sur(A, B, .5), s2 = sur(A, C2, .58);
         ctx.globalAlpha = .55; ctx.lineWidth = 2.4; trait(ctx, px - L * 1.5, py - L * .45, e[0], e[1]);
         ctx.globalAlpha = .4; ctx.lineWidth = 1.2; trait(ctx, e[0], e[1], s2[0], s2[1]);
         for (let k = 0; k < 7; k++) {

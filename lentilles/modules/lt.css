@@ -173,9 +173,9 @@ sub, sup { font-size: .7em; line-height: 0; }
 .lt-entete-l .er-titre { margin-bottom: 0; }
 .lt-entete > .er-contexte { flex-basis: 100%; margin-top: 4px; }
 /* plein écran : sans le sommaire, toute la largeur */
-html.lt-plein #app-nav { display: none; }
-html.lt-plein.som-nav body { padding-left: 0; }
-html.lt-plein .er-page { max-width: none; }
+/* bouton plein écran commun (assets/plein-ecran.js) en haut à droite de la carte d'en-tête d'une série */
+.lt-pe { float: right; margin: 0 0 6px 10px; }
+.lt-pe:empty { display: none; }
 
 /* ---------- Fenêtre d'aide (schéma de référence, loi, calculatrice) ---------- */
 .lt-voile {
@@ -261,10 +261,9 @@ html.lt-plein .er-page { max-width: none; }
 
 /* ---------- Banc d'optique ---------- */
 .lt-sim-reglages { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
-.lt-lentilles { display: flex; flex-wrap: wrap; gap: 8px; }
+.lt-lentilles { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .lt-lentilles button { min-height: 46px; }
 .lt-lentilles button[aria-pressed="true"], .lt-lentilles button[aria-pressed="true"]:hover { background: var(--ink); color: var(--sheet); box-shadow: none; }
-.lt-vergence { font-size: .95rem; font-weight: 700; color: var(--accent-ink); font-variant-numeric: tabular-nums; }
 .lt-rail { fill: var(--paper-2); stroke: var(--ink-3); stroke-width: 1; }
 .lt-rail-g { stroke: var(--ink-2); stroke-width: 1; }
 .lt-lanterne { fill: var(--ink); }
@@ -277,7 +276,15 @@ html.lt-plein .er-page { max-width: none; }
 .lt-ecran-trait { stroke: var(--ink); stroke-width: 3; }
 .lt-banc-cmd { display: flex; flex-wrap: wrap; gap: 10px 22px; }
 .lt-manip-banc { margin-top: 14px; }
-.lt-fig-banc, .lt-fig-constr { max-width: 900px; }
+.lt-fig-banc, .lt-fig-constr, .lt-banc-cadre { max-width: 900px; }
+/* vues de l'objet et de l'écran placées au-dessus de leur position sur le banc (left réglé par banc.js) */
+.lt-banc-cadre { margin-top: 6px; }
+.lt-banc-int { position: relative; }
+.lt-banc-vues { position: relative; height: 240px; }
+.lt-vue-banc { position: absolute; top: 0; width: 160px; }
+.lt-vue-banc figcaption { min-height: 0; font-size: .8rem; line-height: 1.25; }
+.lt-vue-banc .opt-svg { max-width: none; width: 100%; border: 1.5px solid var(--line-strong); border-radius: 8px; }
+.lt-vue-pointe { position: absolute; bottom: 0; width: 0; height: 0; margin-left: -8px; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 12px solid var(--line-strong); }
 .lt-cmd-g { display: flex; flex-direction: column; gap: 6px; }
 .lt-cmd-t { font-size: .92rem; font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .lt-cmd-t b { color: var(--accent-ink); }
@@ -328,10 +335,120 @@ html.lt-plein .er-page { max-width: none; }
 .lt-entete > .callout { flex-basis: 100%; margin-top: 4px; }
 /* téléphone : le banc et son schéma gardent une taille lisible et défilent de côté dans leur cadre */
 @media (max-width: 640px) {
-  .lt-fig-banc, .lt-fig-constr { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .lt-fig-banc .opt-svg, .lt-fig-constr .opt-svg { min-width: 640px; touch-action: pan-x pan-y; }
+  .lt-banc-cadre, .lt-fig-constr { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .lt-banc-int { min-width: 640px; }
+  .lt-fig-banc .opt-svg, .lt-fig-constr .opt-svg { touch-action: pan-x pan-y; }
+  .lt-fig-constr .opt-svg { min-width: 640px; }
 }
 /* téléphone : dans la série, la figure reste visible en haut pendant qu'on répond dessous */
 @media (max-width: 899px) {
   .lt-q-fig { position: sticky; top: 58px; z-index: 5; background: var(--sheet); padding-bottom: 4px; }
+}
+
+/* ============================================================
+   MODULE 3 B : simulateur de la vision (une seule page, sans défilement)
+   ============================================================ */
+.er-page.lt-vis-page { max-width: none; padding: 10px; }
+.lt-vis { display: flex; flex-direction: column; gap: 10px; height: calc(100vh - 36px); height: calc(100dvh - 36px); min-height: 420px; }   /* 36 px : marges de la page (2 × 10) et du corps (2 × 8) */
+.lt-vis-tete { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 10px 16px; }
+.lt-vis-tete .er-titre { margin: 2px 0 0; font-size: 1.15rem; }
+.lt-vis-corps { flex: 1 1 0; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 10px; }
+.lt-vis-scene { position: relative; margin: 0; padding: 8px 10px; min-height: 0; min-width: 0;
+  display: grid; grid-template-columns: 112px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto auto; gap: 6px 12px; }
+.lt-vis-svg { grid-column: 1 / -1; min-height: 0; position: relative; }
+.lt-vis-defis-pc { grid-column: 1 / -1; }
+.lt-vis-3d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; font-family: var(--font-sans); }
+.lt-vis-medaillon { grid-row: 2; margin: 0; padding: 4px; background: var(--sheet); border: 1.5px solid var(--line-strong); border-radius: 12px; text-align: center; }
+.lt-vis-medaillon figcaption { font-size: .7rem; line-height: 1.2; font-weight: 800; color: var(--ink-2); margin-bottom: 3px; }
+.lt-vis-medaillon p { font-size: .85rem; margin-top: 2px; }
+.lt-vis-ret-fond { fill: var(--danger-bg); }
+.lt-vis-etat { grid-row: 2; align-self: center; margin: 0; font-size: .95rem; line-height: 1.45; }
+.lt-vis-defis-pc .lt-vis-bloc { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 8px; }
+.lt-vis-defis-pc .lt-vis-defis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px; }
+.lt-vis-ok { color: var(--success-text); font-weight: 800; }
+.lt-vis-ko { color: var(--danger-text); font-weight: 800; }
+.lt-vis-panneau { margin: 0; padding: 12px 14px; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.lt-vis-onglets { display: none; }
+.lt-vis-bloc { display: flex; flex-direction: column; gap: 6px; }
+.lt-vis-bloc + .lt-vis-bloc { border-top: 1px solid var(--line); padding-top: 8px; margin-top: 6px; }
+.lt-vis-lab { font-size: .85rem; font-weight: 800; color: var(--ink-2); margin-top: 2px; }
+.lt-vis-lab small { font-weight: 600; }
+.lt-vis-lab b { color: var(--accent-ink); }
+.lt-vis-info { font-size: .88rem; line-height: 1.4; color: var(--ink-2); }
+.lt-vis-info b { color: var(--ink); }
+.lt-vis-seg { display: flex; gap: 4px; padding: 4px; background: var(--paper-2); border-radius: 999px; }
+.lt-vis-seg button { flex: 1 1 0; min-width: 0; min-height: 40px; padding: 4px 6px; border: none; border-radius: 999px; background: transparent; font: inherit; font-size: .85rem; font-weight: 700; color: var(--ink-2); cursor: pointer; }
+.lt-vis-seg button[aria-pressed="true"] { background: var(--sheet); color: var(--accent-ink); box-shadow: inset 0 0 0 2px var(--accent); }
+.lt-vis-seg button:focus-visible, .lt-vis-onglets button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lt-vis-seg[hidden] { display: none; }
+.lt-vis-ligne { display: flex; align-items: center; gap: 8px; }
+.lt-vis-ligne input { flex: 1 1 0; min-width: 0; }
+.lt-vis-panneau input[type="range"] { width: 100%; height: 36px; margin: 0; accent-color: var(--accent); touch-action: pan-y; cursor: pointer; }
+.lt-vis-panneau input[type="range"]:disabled { opacity: .4; cursor: default; }
+.lt-vis-panneau input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lt-vis-panneau .btn-small { min-height: 40px; flex-shrink: 0; }
+.lt-vis-lun { min-height: 44px; }
+.lt-vis-lun[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
+.lt-vis-graduation { display: flex; justify-content: space-between; font-size: .72rem; font-weight: 700; color: var(--ink-3); margin-top: -4px; }
+.lt-vis-defis { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; counter-reset: defi; }
+.lt-vis-defis li { display: flex; gap: 8px; align-items: flex-start; font-size: .88rem; line-height: 1.35; color: var(--ink-2); }
+.lt-vis-coche { flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px; border-radius: 50%; border: 2px solid var(--line-strong); display: grid; place-items: center; font-size: .75rem; font-weight: 900; }
+.lt-vis-defis li.lt-vis-fait { color: var(--ink); }
+.lt-vis-defis li.lt-vis-fait .lt-vis-coche { background: var(--success); border-color: var(--success); color: var(--sheet); }
+.lt-vis-defis li.lt-vis-fait .lt-vis-coche::before { content: "✓"; }
+/* dessin de l'œil (unités : dixièmes de millimètre) */
+.lt-vis-fantome { fill: none; stroke: var(--ink-3); stroke-width: 2; stroke-dasharray: 8 8; stroke-opacity: .5; }
+.lt-vis-axe { fill: none; stroke: var(--ink-3); stroke-width: 2; stroke-dasharray: 14 8; }
+.lt-vis-nerf { fill: var(--paper-3); stroke: var(--line-strong); stroke-width: 2; }
+.lt-vis-globe { stroke: var(--line-strong); stroke-width: 3; }
+.lt-vis-coupe { stroke: none; }
+.lt-vis-paroi { fill: var(--paper-3); stroke: var(--ink-3); stroke-width: 1.5; }
+.lt-vis-iris-coupe { fill: var(--accent-ink); stroke: none; }
+.lt-vis-cornee-coupe { fill: none; stroke: var(--cle-line); stroke-width: 5; stroke-linecap: round; }
+.lt-vis-retine { fill: none; stroke: var(--danger); stroke-opacity: .5; stroke-width: 9; stroke-linecap: round; }
+.lt-vis-crist { stroke: var(--accent); stroke-width: 2.5; }
+.lt-vis-crist-coupe { fill: var(--cle-bg); fill-opacity: .6; stroke: var(--accent); stroke-width: 3.5; }
+.lt-vis-muscle { fill: var(--ink-3); }
+.lt-vis-muscle-on { fill: var(--danger); }
+.lt-vis-muscle-anim { animation: lt-vis-clignote .35s infinite alternate; }
+@keyframes lt-vis-clignote { from { opacity: 1; } to { opacity: .25; } }
+.lt-vis-iris { stroke: var(--accent-ink); stroke-width: 2; }
+.lt-vis-cornee { fill: var(--cle-bg); fill-opacity: .45; stroke: var(--cle-line); stroke-width: 2; }
+.lt-vis-faisceau { fill: var(--ion-h3o); fill-opacity: .16; stroke: none; }
+.lt-vis-rayon { fill: none; stroke: var(--ion-h3o); stroke-width: 2.5; }
+.lt-vis-rayon-c { stroke-dasharray: 10 6; stroke-width: 1.8; }
+.lt-vis-tache { stroke: var(--ion-h3o); stroke-width: 10; stroke-linecap: round; stroke-opacity: .5; }
+.lt-vis-tache-nette { stroke-opacity: 1; }
+.lt-vis-pt { fill: var(--ion-h3o); }
+.lt-vis-verre { stroke: none; }
+.lt-vis-verre-bord { fill: none; stroke: var(--cle-line); stroke-width: 12; stroke-opacity: .9; }
+.lt-vis-verre-centre { fill: var(--sheet); fill-opacity: .7; stroke: none; }
+.lt-vis-monture { fill: none; stroke: var(--ink); stroke-width: 6; stroke-linejoin: round; stroke-linecap: round; }
+.lt-vis-objet { stroke: var(--accent); stroke-width: 6; }
+.lt-vis-objet-p { fill: var(--accent); }
+.lt-vis-nom { font-size: 26px; font-weight: 800; fill: var(--ink); }
+.lt-vis-txt { font-size: 22px; font-weight: 600; fill: var(--ink-2); }
+.lt-vis-lien { stroke: var(--ink-3); stroke-width: 1.5; }
+/* téléphone et tablette : l'œil en haut, les réglages dessous, un onglet à la fois */
+@media (max-width: 899px) {
+  .lt-vis { height: calc(100vh - 54px - 36px); height: calc(100dvh - 54px - 36px); gap: 8px; }   /* 54 px : bandeau du sommaire */
+  .lt-vis-tete { padding: 8px 12px; }
+  .lt-vis-tete .er-badge { display: none; }
+  .lt-vis-tete .er-titre { font-size: 1rem; margin: 0; }
+  .lt-vis-corps { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1.15fr) minmax(0, 1fr); gap: 8px; }
+  .lt-vis-scene { padding: 6px; grid-template-columns: 84px minmax(0, 1fr); gap: 4px 10px; }
+  .lt-vis-medaillon { padding: 3px; }
+  .lt-vis-medaillon figcaption { font-size: .62rem; line-height: 1.15; margin-bottom: 2px; }
+  .lt-vis-medaillon p { font-size: .75rem; margin: 0; }
+  .lt-vis-etat { font-size: .82rem; }
+  .lt-vis-panneau { padding: 8px 10px; }
+  .lt-vis-onglets { display: flex; gap: 4px; padding: 3px; background: var(--paper-2); border-radius: 999px; flex-shrink: 0; }
+  .lt-vis-onglets button { flex: 1 1 0; min-width: 0; min-height: 40px; border: none; border-radius: 999px; background: transparent; font: inherit; font-size: .8rem; font-weight: 800; color: var(--ink-2); cursor: pointer; padding: 2px 4px; }
+  .lt-vis-onglets button[aria-selected="true"] { background: var(--sheet); color: var(--accent-ink); box-shadow: inset 0 0 0 2px var(--accent); }
+  .lt-vis-bloc { display: none; }
+  .lt-vis-bloc.lt-vis-actif { display: flex; }
+  .lt-vis-bloc + .lt-vis-bloc { border-top: none; margin-top: 4px; padding-top: 0; }
+  .lt-vis-titre { display: none; }
+  .lt-vis-nom { font-size: 34px; }
+  .lt-vis-txt { font-size: 30px; }
 }

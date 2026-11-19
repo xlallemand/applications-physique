@@ -1,8 +1,9 @@
 /* ============================================================
-   Module 3 : banc d'optique (simulation)
+   Module 2 : banc d'optique (simulation)
    LT.simulateurBanc(zone)
    Banc gradué de 0 à 100 cm : lanterne et objet (lettre « d », AB = 3,0 cm) au zéro, fixes ;
-   lentille (10 δ, 5 δ ou 20 δ) et écran à glisser, ou ± 1 cm et ± 1 mm.
+   lentille (distance focale 5 cm, 10 cm ou 20 cm) et écran à glisser, ou ± 1 cm et ± 1 mm.
+   Vues rapprochées de l'objet et de l'écran au-dessus de leur position sur le banc (la vue de l'écran suit l'écran).
    L'image sur l'écran est floue sauf quand l'écran est en A′ (± 3 mm) : elle est alors nette,
    renversée (la lettre tournée d'un demi-tour) et à la bonne taille ; l'écran est gradué.
    Case « Afficher la construction » : schéma du banc (deux rayons issus de B) qui suit les déplacements.
@@ -16,7 +17,7 @@
 
   const V = OPT.V, fmt = LT.fmt;
   const AB = 3;                                    // taille de l'objet (cm)
-  const LENTILLES = [10, 5, 20];                   // vergences proposées (δ)
+  const LENTILLES = [5, 10, 20];                   // distances focales proposées (cm)
   const NET = 0.3;                                 // tolérance de netteté (cm)
   const DIAM = 4;                                  // diamètre de la lentille (cm), pour le flou
   // banc : abscisse dans la scène pour une position en cm
@@ -47,8 +48,8 @@
 
   function simulateurBanc(zone) {
     const id = ++compteur;
-    const etat = { v: 10, xL: 25, xE: 70, construction: false };
-    const f = () => 100 / etat.v;
+    const etat = { f: 10, xL: 25, xE: 70, construction: false };
+    const f = () => etat.f;
     // image (calcul interne) : OA′ en cm, γ, réelle ou non
     function image() {
       const OA = etat.xL, fc = f();
@@ -58,13 +59,20 @@
     }
     const nette = () => { const im = image(); return im.reelle && Math.abs(etat.xE - im.xi) <= NET + 1e-9; };
 
-    // banc et construction sur toute la largeur ; dessous, commandes et vues à gauche, étapes à droite
+    // vues de l'objet et de l'écran au-dessus du banc, banc et construction sur toute la largeur ;
+    // dessous, commandes à gauche, étapes à droite
     zone.innerHTML = `<div class="er-card">
       <div class="lt-sim-reglages">
-        <div class="lt-lentilles" role="group" aria-label="Choix de la lentille">${LENTILLES.map(v => `<button type="button" class="btn-secondary" data-v="${v}" aria-pressed="false">Lentille de ${v} δ</button>`).join('')}</div>
-        <p class="lt-vergence" data-a="verg"></p>
+        <div class="lt-lentilles" role="group" aria-label="Choix de la lentille"><span class="lt-cmd-t">Lentille :</span>${LENTILLES.map(v => `<button type="button" class="btn-secondary" data-v="${v}" aria-pressed="false" aria-label="Lentille de distance focale ${v} cm">f′ = ${v} cm</button>`).join('')}</div>
       </div>
-      <div class="lt-fig lt-fig-banc"></div>
+      <div class="lt-banc-cadre"><div class="lt-banc-int">
+        <div class="lt-banc-vues" data-a="vues">
+          <figure class="lt-vue lt-vue-banc" data-a="fObj"><figcaption>Objet (sur la lanterne)</figcaption><div data-a="vObj"></div></figure>
+          <figure class="lt-vue lt-vue-banc" data-a="fEcr"><figcaption>Écran <span data-a="etatEcran"></span></figcaption><div data-a="vEcr"></div></figure>
+          <span class="lt-vue-pointe" data-a="ptObj" aria-hidden="true"></span><span class="lt-vue-pointe" data-a="ptEcr" aria-hidden="true"></span>
+        </div>
+        <div class="lt-fig lt-fig-banc"></div>
+      </div></div>
       <label class="lt-coche"><input type="checkbox" data-a="constr"> Afficher la construction</label>
       <div data-a="constrZ" hidden><p class="lt-echelle">Schéma du banc : longueurs à l'échelle, hauteurs agrandies 3 fois.</p><div class="lt-fig lt-fig-constr"></div></div>
       <div class="lt-manip lt-manip-banc">
@@ -72,10 +80,6 @@
           <div class="lt-banc-cmd">
             <div class="lt-cmd-g"><span class="lt-cmd-t">Lentille : <b data-a="pL"></b></span><span data-a="bL"></span></div>
             <div class="lt-cmd-g"><span class="lt-cmd-t">Écran : <b data-a="pE"></b></span><span data-a="bE"></span></div>
-          </div>
-          <div class="lt-vues">
-            <figure class="lt-vue"><figcaption>Objet (sur la lanterne)</figcaption><div data-a="vObj"></div></figure>
-            <figure class="lt-vue"><figcaption>Écran <span data-a="etatEcran"></span></figcaption><div data-a="vEcr"></div></figure>
           </div>
         </div>
         <div class="lt-manip-panneau"><ol class="lt-deroule lt-deroule-court" data-a="deroule"></ol><div class="lt-etape" data-a="etape"></div></div>
@@ -107,7 +111,7 @@
       S.poly(gL, [[xl - 9, -62], [xl + 9, -62], [xl + 9, -54], [xl - 9, -54]], 'lt-cavalier');
       const pts = []; for (let a = 0; a <= 360; a += 15) pts.push([xl + 6 * Math.cos(a * Math.PI / 180), Y_AXE + 34 * Math.sin(a * Math.PI / 180)]);
       S.poly(gL, pts, 'lt-lentille-verre');
-      S.texte(gL, [xl, 98], `${etat.v} δ`, { taille: 14, cls: 'lt-g-nom' });
+      S.texte(gL, [xl, 98], `f′ = ${etat.f} cm`, { taille: 14, cls: 'lt-g-nom' });
       // écran sur son support
       const xe = X(etat.xE);
       S.ligne(gE, [xe, -62], [xe, 0], 'lt-tige');
@@ -147,7 +151,7 @@
     boutons($('bL'), 'L'); boutons($('bE'), 'E');
 
     /* ----- Choix de la lentille ----- */
-    zone.querySelectorAll('[data-v]').forEach(b => { b.onclick = () => { etat.v = +b.dataset.v; tout(); }; });
+    zone.querySelectorAll('[data-v]').forEach(b => { b.onclick = () => { etat.f = +b.dataset.v; tout(); }; });
 
     /* ----- Vues rapprochées : objet et écran ----- */
     const vObj = vue($('vObj'), 'Objet : la lettre d éclairée par la lanterne, avec une règle graduée');
@@ -227,22 +231,37 @@
     /* ----- Mise à jour générale ----- */
     function tout(depuisPoignee) {
       if (!depuisPoignee) { pgL.regler([X(etat.xL), yP]); pgE.regler([X(etat.xE), yP]); }
-      zone.querySelectorAll('[data-v]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.v === etat.v ? 'true' : 'false'));
-      $('verg').textContent = LT.vergence(etat.v) + '.';
+      zone.querySelectorAll('[data-v]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.v === etat.f ? 'true' : 'false'));
       $('pL').textContent = fmt(etat.xL, 1) + ' cm';
       $('pE').textContent = fmt(etat.xE, 1) + ' cm';
-      dessinerBanc(); dessinerEcran(); dessinerConstruction();
+      dessinerBanc(); dessinerEcran(); dessinerConstruction(); placerVues();
       if (verif) verif();
     }
+
+    /* ----- Vues placées au-dessus de l'objet et de l'écran ----- */
+    const $int = zone.querySelector('.lt-banc-int'), $vues = $('vues');
+    function placerVues() {
+      const r = S.svg.getBoundingClientRect(), ri = $int.getBoundingClientRect(), vb = S.svg.viewBox.baseVal;
+      if (!r.width) return;
+      const px = x => (x - vb.x) / vb.width * r.width + (r.left - ri.left);
+      const W = ri.width, w = Math.round(Math.max(118, Math.min(190, W * 0.2)));
+      const xo = px(X(0)), xe = px(X(etat.xE));
+      const gO = Math.max(0, Math.min(W - 2 * w - 10, xo - w / 2));
+      const gE = Math.max(gO + w + 10, Math.min(W - w, xe - w / 2));
+      [['fObj', gO], ['fEcr', gE]].forEach(([a, g]) => { const e = $(a); e.style.left = g + 'px'; e.style.width = w + 'px'; });
+      $('ptObj').style.left = xo + 'px'; $('ptEcr').style.left = xe + 'px';
+      $vues.style.height = Math.max($('fObj').offsetHeight, $('fEcr').offsetHeight) + 16 + 'px';
+    }
+    if (window.ResizeObserver) new ResizeObserver(placerVues).observe($int); else addEventListener('resize', placerVues);
 
     /* ============================================================
        Déroulé guidé
        ============================================================ */
     const ETAPES = [
       { t: 'Mesurer la taille AB de l\'objet', entrer: mesurerAB },
-      { t: 'Lentille de 10 δ à 40 cm de l\'objet', entrer: z => chercher(z, 40, false) },
+      { t: 'Lentille f′ = 10 cm à 40 cm de l\'objet', entrer: z => chercher(z, 40, false) },
       { t: 'Taille de l\'image et grandissement', entrer: z => grandissement(z, 40) },
-      { t: 'Lentille de 10 δ à 20 cm de l\'objet', entrer: z => chercher(z, 20, true) },
+      { t: 'Lentille f′ = 10 cm à 20 cm de l\'objet', entrer: z => chercher(z, 20, true) },
     ];
     const ol = $('deroule');
     ol.innerHTML = ETAPES.map(e => `<li><span>${e.t}</span></li>`).join('') + '<li><span>Bilan</span></li>';
@@ -292,14 +311,14 @@
     function chercher(z, OA, deuxieme) {
       z.innerHTML = '<div data-a="c1"></div><div data-a="c2"></div><div data-a="c3"></div>';
       const c1 = z.querySelector('[data-a="c1"]'), c2 = z.querySelector('[data-a="c2"]'), c3 = z.querySelector('[data-a="c3"]');
-      const bonne = () => etat.v === 10 && Math.abs(etat.xL - OA) < 0.05;
-      consigne(c1, `Choisis la lentille de 10 δ et place-la à ${OA} cm de l'objet.`, bonne, () => {
+      const bonne = () => etat.f === 10 && Math.abs(etat.xL - OA) < 0.05;
+      consigne(c1, `Choisis la lentille de distance focale f′ = 10 cm et place-la à ${OA} cm de l'objet.`, bonne, () => {
         c2.innerHTML = `<p class="lt-consigne">Déplace l'écran jusqu'à ce que l'image soit <b>nette</b> (± 1 mm pour finir), puis valide.</p>
           <div class="er-actions"><button type="button" class="btn-primary" data-a="nette">L'image est nette</button></div><div data-a="ret" aria-live="polite"></div>`;
         const ret = c2.querySelector('[data-a="ret"]');
         let err = 0;
         c2.querySelector('[data-a="nette"]').onclick = () => {
-          if (!bonne()) { ret.innerHTML = `<p class="ph-msg">Remets la lentille de 10 δ à ${OA} cm de l'objet.</p>`; return; }
+          if (!bonne()) { ret.innerHTML = `<p class="ph-msg">Remets la lentille f′ = 10 cm à ${OA} cm de l'objet.</p>`; return; }
           if (!nette()) {
             err++;
             const im = image();
@@ -342,7 +361,7 @@
 
     /* ----- 3. Taille de l'image et grandissement (lentille à 40 cm) ----- */
     function grandissement(z, OA) {
-      z.innerHTML = '<p class="lt-li-aide">Garde l\'image nette sur l\'écran (lentille de 10 δ à 40 cm).</p>';
+      z.innerHTML = '<p class="lt-li-aide">Garde l\'image nette sur l\'écran (lentille f′ = 10 cm à 40 cm).</p>';
       const OAi = mesures['OAi' + OA] || 13.3;
       questions(z, [
         { type: 'nombre', q: 'Mesure la taille A′B′ de l\'image avec la règle de la vue « Écran ».', label: 'A′B′ =', unite: 'cm', aria: 'Taille de l\'image en centimètres',
@@ -375,10 +394,10 @@
       $e.innerHTML = `<h4 class="lt-etape-titre">${k + 1}. Bilan</h4>
         <div class="cle lt-bilan"><p><b class="cle-titre">Grandissement.</b> γ = A′B′ / AB = OA′ / OA.</p>
           <p>Pour une position de la lentille, une seule position de l'écran donne une image nette : l'écran est en A′. L'image réelle est renversée ; γ > 1 : elle est plus grande que l'objet, γ < 1 : plus petite.</p></div>
-        <p class="lt-li-aide">Essaie librement : les autres lentilles, d'autres positions, et la lentille de 10 δ à moins de 10 cm de l'objet.</p>
+        <p class="lt-li-aide">Essaie librement : les autres lentilles, d'autres positions, et la lentille f′ = 10 cm à moins de 10 cm de l'objet.</p>
         <div class="er-actions"><button type="button" class="btn-secondary" data-a="re">↺ Recommencer</button>
-          <a class="btn-primary" style="text-decoration:none" href="module_4_simulation.html">Module 4 : l'œil →</a></div>`;
-      $e.querySelector('[data-a="re"]').onclick = () => { k = 0; Object.keys(mesures).forEach(x => delete mesures[x]); etat.v = 10; etat.xL = 25; etat.xE = 70; tout(); entrer(); };
+          <a class="btn-primary" style="text-decoration:none" href="module_3a_manip.html">Module 3 : l'œil →</a></div>`;
+      $e.querySelector('[data-a="re"]').onclick = () => { k = 0; Object.keys(mesures).forEach(x => delete mesures[x]); etat.f = 10; etat.xL = 25; etat.xE = 70; tout(); entrer(); };
       LT.amener($e, 0.4);
     }
 

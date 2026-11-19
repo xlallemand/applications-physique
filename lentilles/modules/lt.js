@@ -14,9 +14,7 @@
    LT.question(zone, q, cb, mode)   question en parties successives ; mode 'serie' ou 'manip'
    LT.serie(opts)                   série de 10 questions notée sur 20
    LT.revois(liste)                 liens « Revois… » vers d'autres applications (nouvelle fenêtre)
-   LT.pleinEcran()                  bouton [data-plein] « ⤢ Plein écran » des pages de manipulation
    LT.fenetre(titre, remplir), LT.boutonAide(zone, texte, titre, remplir)   fenêtre d'aide par-dessus la page
-   LT.vergence(v)                   écriture du passage de la vergence à la distance focale
    LT.lettre(parent, x, y, taille, renversee, cls)   lettre « d » (objet du banc d'optique, image sur l'écran ou la rétine)
    LT.confettis()
    ============================================================ */
@@ -25,14 +23,13 @@
 
   /* ---------- Plan de l'application (sommaire, accueil, progression) ---------- */
   const PLAN = [
-    { n: 1, titre: 'Les rayons particuliers', desc: 'Placer les foyers F et F′, tracer le rayon qui sort de la lentille',
-      parties: [{ nom: 'Les rayons particuliers', entrainement: 'module_1_manip', noms: { entrainement: 'Manipulation : les rayons particuliers' } }] },
-    { n: 2, titre: 'Construire l\'image A′B′', desc: 'Série notée sur 20 : rayons issus de B, position, taille et sens de l\'image, grandissement',
-      parties: [{ nom: 'Construire l\'image A′B′', questions: 'module_2_questions', noms: { questions: 'Entraînement : construire l\'image' } }] },
-    { n: 3, titre: 'Le banc d\'optique', desc: 'Chercher l\'image nette sur l\'écran, mesurer, calculer le grandissement',
-      parties: [{ nom: 'Le banc d\'optique', simulation: 'module_3_simulation', noms: { simulation: 'Simulateur : le banc d\'optique' } }] },
-    { n: 4, titre: 'Le modèle de l\'œil', desc: 'Œil réduit : diaphragme, lentille, écran ; accommodation du cristallin',
-      parties: [{ nom: 'Le modèle de l\'œil', simulation: 'module_4_simulation', noms: { simulation: 'Simulateur : l\'œil et l\'accommodation' } }] },
+    { n: 1, titre: 'Construire l\'image A′B′', desc: 'Série notée sur 20 : foyers, rayons particuliers, position, taille et sens de l\'image, grandissement',
+      parties: [{ nom: 'Construire l\'image A′B′', questions: 'module_1_questions', noms: { questions: 'Entraînement : construire l\'image' } }] },
+    { n: 2, titre: 'Le banc d\'optique', desc: 'Chercher l\'image nette sur l\'écran, mesurer, calculer le grandissement',
+      parties: [{ nom: 'Le banc d\'optique', simulation: 'module_2_simulation', noms: { simulation: 'Simulateur : le banc d\'optique' } }] },
+    { n: 3, titre: 'L\'œil', desc: 'Modèle de l\'œil réduit ; accommodation, défauts de la vision et leur correction par des lunettes', sousModules: true,
+      parties: [{ nom: 'Le modèle de l\'œil réduit', entrainement: 'module_3a_manip', noms: { entrainement: 'Manipulation : le modèle de l\'œil réduit' } },
+                { nom: 'Voir net : accommoder, corriger', simulation: 'module_3b_simulation', noms: { simulation: 'Simulateur : accommodation et correction de la vision' } }] },
   ];
   SOM.init({ nom: 'Image par une lentille convergente', id: 'lentilles', plan: PLAN });
 
@@ -137,34 +134,6 @@
       const doux = !matchMedia('(prefers-reduced-motion: reduce)').matches;
       window.scrollBy({ top: r.top - 72, behavior: doux ? 'smooth' : 'auto' });
     }, 120);
-  }
-
-  /* ============================================================
-     PLEIN ÉCRAN (pages de manipulation) : bouton [data-plein] de la première carte.
-     Cache le sommaire, donne toute la largeur à la page et passe le navigateur
-     en plein écran quand il le permet (comme titrage-conductimetrique).
-     ============================================================ */
-  function pleinEcran() {
-    const b = document.querySelector('[data-plein]');
-    if (!b) return;
-    const html = document.documentElement;
-    function regler(on) {
-      html.classList.toggle('lt-plein', on);
-      b.setAttribute('aria-pressed', on ? 'true' : 'false');
-      b.textContent = on ? '⤡ Quitter le plein écran' : '⤢ Plein écran';
-      // les figures gardent leurs poignées de 44 px (largeur affichée qui change)
-      setTimeout(() => dispatchEvent(new Event('resize')), 60);
-    }
-    b.addEventListener('click', () => {
-      const on = !html.classList.contains('lt-plein');
-      regler(on);
-      try {
-        if (on && html.requestFullscreen) html.requestFullscreen().catch(() => {});
-        if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
-      } catch (e) { /* plein écran indisponible (iPhone…) : la page sans sommaire suffit */ }
-    });
-    // Échap sort du plein écran du navigateur : on remet aussi le sommaire
-    document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) regler(false); });
   }
 
   /* ============================================================
@@ -337,20 +306,24 @@
 
   /* ============================================================
      SÉRIE DE QUESTIONS NOTÉE SUR 20
-     opts = { app, badge, titre, intro, questions: () => [q], revoir, suite }
+     opts = { app, badge, titre, intro, questions: () => [q], revoir, suite, plein (bouton plein écran) }
      q = { theme, consigne, enonce, figure(zone), parties, bilan }
      ============================================================ */
   function serie(opts) {
     const app = opts.app;
     let qs = [], idx = 0, score = 0, recap = [];
     const pts = v => `${v} pt${v > 1 ? 's' : ''}`;
+    // bouton plein écran commun (assets/plein-ecran.js), remis en haut à droite de chaque carte d'en-tête
+    const pe = opts.plein && window.PLEIN ? PLEIN.bouton({ ou: document.createElement('div') }) : null;
+    const placerPE = () => { const z = app.querySelector('[data-a="pe"]'); if (pe && z) z.appendChild(pe); };
 
     function intro() {
-      app.innerHTML = `<div class="er-card"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
+      app.innerHTML = `<div class="er-card"><span class="lt-pe" data-a="pe"></span><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>${opts.intro || ''}
         <div class="cle" style="margin:14px 0"><p><b class="cle-titre">Barème</b> · ${opts.nombre || 10} questions, notées sur 20 :</p>
           <ul class="er-liste"><li><b>2 points</b> si tout est juste du premier coup ;</li><li><b>1 point</b> si tu y arrives après au moins une erreur ;</li><li><b>0 point</b> si tu affiches la réponse.</li></ul></div>
         <button type="button" class="btn-primary" data-a="go">Commencer →</button></div>`;
       app.querySelector('[data-a="go"]').onclick = demarrer;
+      placerPE();
       window.scrollTo(0, 0);
     }
     function demarrer() { qs = opts.questions(); idx = 0; score = 0; recap = []; afficher(); }
@@ -359,12 +332,13 @@
       if (idx >= qs.length) return fin();
       const q = qs[idx];
       window.LT.questionEnCours = q;          // question en cours (utile pour vérifier l'application)
-      app.innerHTML = `<div class="er-card ph-tete"><div class="lt-tete"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
+      app.innerHTML = `<div class="er-card ph-tete"><span class="lt-pe" data-a="pe"></span><div class="lt-tete"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">${opts.titre}</h2>
             <p class="er-meta">Question ${idx + 1}/${qs.length} · Score : <b data-a="score">${pts(score)}</b></p></div>
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(idx / qs.length * 100)}%"></div></div></div>
         <div class="er-card ph-question">${q.theme ? `<p class="er-q-nom">${q.theme}</p>` : ''}${q.consigne ? `<div class="er-consigne">${q.consigne}</div>` : ''}
           <div class="lt-q-corps">${q.figure ? '<div class="lt-q-fig"></div>' : ''}<div class="lt-q-texte">${q.enonce ? `<div class="ph-enonce">${q.enonce}</div>` : ''}<div data-a="parties"></div></div></div>
           <div data-a="retour"></div><div class="er-actions" data-a="suite"></div></div>`;
+      placerPE();
       if (q.figure) q.figure(app.querySelector('.lt-q-fig'));
       window.scrollTo(0, 0);
       // évite qu'un double appui sur « Question suivante » réponde à la nouvelle question
@@ -390,8 +364,8 @@
       const max = qs.length * 2, note = Math.round(score / max * 20 * 2) / 2, pct = Math.round(score / max * 100);
       SOM.marquer({ note });
       const msg = score === max ? 'Tout est juste : bravo !' : pct >= 70 ? 'Très bien ! Encore un peu d\'entraînement pour le sans-faute.'
-        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : refais les manipulations des modules 1 et 3, puis recommence.';
-      app.innerHTML = `<div class="er-card er-fin"><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
+        : pct >= 50 ? 'Pas mal ! Recommence pour progresser : les questions changent à chaque fois.' : 'Continue à t\'entraîner : recommence, les questions changent à chaque fois.';
+      app.innerHTML = `<div class="er-card er-fin"><span class="lt-pe" data-a="pe"></span><span class="er-badge">${opts.badge}</span><h2 class="er-titre">Série terminée !</h2>
         ${score === max ? '<p class="er-trophee">🏆 Sans-faute !</p>' : ''}
         <div class="er-score">${fmt(note)} / 20</div><p class="er-score-pct">${pct} %</p><p class="er-contexte">${msg}</p>
         <div class="er-recap">${recap.map(r => `<div class="${r.p === 2 ? 'ok' : r.p === 1 ? 'moyen' : 'ko'}">Q${r.n}<b>${r.p}/2</b></div>`).join('')}</div>
@@ -399,6 +373,7 @@
         ${opts.revoir ? `<a class="btn-secondary" style="text-decoration:none" href="${opts.revoir.href}">${opts.revoir.label}</a>` : ''}
         ${opts.suite ? `<a class="btn-primary" style="text-decoration:none" href="${opts.suite.href}">${opts.suite.label}</a>` : ''}</div></div>`;
       app.querySelector('[data-a="re"]').onclick = demarrer;
+      placerPE();
       window.scrollTo(0, 0);
       if (score === max) confettis();
     }
@@ -431,12 +406,6 @@
     return `<p class="lt-revois">${liste.map(k => `<a href="${APPLIS[k].href}" target="_blank" rel="noopener">${APPLIS[k].texte} ↗</a>`).join('')}</p>`;
   }
 
-  /* ---------- Vergence → distance focale : « v = 10 δ, f′ = 1 / v = 1 / 10 = 0,10 m = 10 cm » ---------- */
-  function vergence(v) {
-    const fm = 1 / v, fcm = fm * 100;
-    return `v = ${fmt(v)} δ, f′ = 1 / v = 1 / ${fmt(v)} = ${fmt(fm, fm < 0.1 - 1e-9 ? 3 : 2).replace(/0$/, fm < 0.1 - 1e-9 ? '' : '0')} m = ${fmt(fcm)} cm`;
-  }
-
   /* ---------- La lettre « d » : hauteur 1, pied (A) en (0, 0), repère SVG (y vers le bas) ---------- */
   function lettre(parent, x, y, taille, renversee, cls) {
     const g = OPT.svgEl('g', { class: cls || 'lt-lettre', transform: `translate(${x} ${y}) scale(${taille})${renversee ? ' rotate(180)' : ''}` }, parent);
@@ -446,7 +415,7 @@
   }
 
   window.LT = {
-    PLAN, CALC, fmt, sig, court, lire, cs, fr, el, melanger, hasard, defiler, amener, surOrdi, revois, vergence,
-    PARTIES, question, serie, confettis, malArrondi, pleinEcran, fenetre, boutonAide, lettre,
+    PLAN, CALC, fmt, sig, court, lire, cs, fr, el, melanger, hasard, defiler, amener, surOrdi, revois,
+    PARTIES, question, serie, confettis, malArrondi, fenetre, boutonAide, lettre,
   };
 })();

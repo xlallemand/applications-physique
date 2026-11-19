@@ -1,6 +1,6 @@
 /* ============================================================
    Figure d'une lentille sur quadrillage et tracé des rayons
-   (modules 1 et 2 ; outil OPT de assets/optique.js)
+   (série d'entraînement ; outil OPT de assets/optique.js)
 
    Les coordonnées sont en CARREAUX : centre optique O en (0, 0), axe optique
    horizontal, la lumière va de gauche à droite ; f : distance focale en carreaux.
@@ -13,6 +13,7 @@
    LT.particulier(f, B, type)       rayon particulier issu de B → { I, d (incident), e (émergent) }
    LT.rebours(f, Bi, type)          rayon qui arrive en B′ (construction à rebours) : type 'parallele' (ressort
                                     parallèle à l'axe), 'centre', 'foyer' (ressort en passant par F′) → { I, d, e }
+   LT.sensLumiere(F)                flèche « sens de la lumière » en haut à gauche
    LT.tracer(F, cmd, o)             tracé d'un rayon au doigt : on glisse un point par où il passe
                                     (aimanté aux nœuds et demi-nœuds, à F, F′ et O), ou ◀ ▶ ▲ ▼ ;
                                     o = { I, sens: 'aval' (rayon émergent) | 'amont' (rayon incident), juste (direction attendue, de I vers le point),
@@ -178,5 +179,12 @@
     return P => (Math.abs(P[0] - Fx) < 0.3 && Math.abs(P[1]) < 0.3 ? types[type].diag : null);
   }
 
-  Object.assign(LT, { TYPES, TYPES_REBOURS, DIAG_LENTILLE, particulier, rebours, figure, tracer, diagFoyer });
+  // flèche « sens de la lumière » en haut à gauche de la figure
+  function sensLumiere(F) {
+    const y = F.ymax - 0.6, x = F.xmin + 0.4;
+    F.S.fleche('textes', F.c([x, y]), F.c([x + 2.2, y]), 'opt-objet lt-sens');
+    F.S.texte('textes', F.c([x + 2.5, y]), 'sens de la lumière', { ancre: 'start', taille: 12, cls: 'lt-g-txt' });
+  }
+
+  Object.assign(LT, { TYPES, TYPES_REBOURS, DIAG_LENTILLE, particulier, rebours, figure, tracer, diagFoyer, sensLumiere });
 })();
