@@ -84,13 +84,13 @@
             <p class="rf-sim-m1"><span>Milieu 1 (l'extérieur)</span><b>air</b></p>
             <label>Milieu 2 (le demi-cylindre)<select class="rf-select" data-a="m2">${opts}</select></label>
           </div>
+          <div class="rf-fac-acces"><p>Mesurer aussi l'indice de l'eau ou du verre (facultatif). <b>Conseil :</b> fais d'abord le plexiglas (étapes 1 à 5).</p>
+            <div class="rf-fac-b"><button type="button" class="btn-small" data-fac="eau">Mesures sur l'eau</button><button type="button" class="btn-small" data-fac="verre">Mesures sur le verre</button></div></div>
           <div class="rf-fig rf-fig-disque" style="margin-top:10px"></div>
           <div class="rf-ligne-cmd" style="margin-top:10px"><span class="rf-cmd-t">Tourner le disque</span><span data-a="fl"></span></div>
           <div class="rf-mesures" aria-live="polite" data-a="mes"></div>
         </div>
         <div class="rf-manip-panneau"><ol class="rf-deroule rf-deroule-court" data-a="deroule"></ol>
-          <div class="rf-fac-acces"><p>Mesurer aussi l'indice de l'eau ou du verre (facultatif). <b>Conseil :</b> fais d'abord le plexiglas (étapes 1 à 5).</p>
-            <div class="rf-fac-b"><button type="button" class="btn-small" data-fac="eau">Mesures sur l'eau</button><button type="button" class="btn-small" data-fac="verre">Mesures sur le verre</button></div></div>
           <div class="rf-etape" data-a="etape"></div></div>
       </div></div>`;
     const $ = a => zone.querySelector(`[data-a="${a}"]`);
