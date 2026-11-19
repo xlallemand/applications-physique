@@ -386,9 +386,27 @@ sub, sup { font-size: .7em; line-height: 0; }
 .lt-vis-panneau input[type="range"]:disabled { opacity: .4; cursor: default; }
 .lt-vis-panneau input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .lt-vis-panneau .btn-small { min-height: 40px; flex-shrink: 0; }
+/* barre d'accommodation : échelle fixe (0 à maximum à 20 ans), partie hachurée inaccessible à l'âge choisi.
+   --v : valeur, --m : limite (fractions), --fin : début de la partie hachurée ; centre du curseur : 11 px + (100 % − 22 px) × fraction */
+.lt-vis-acc-zone { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+.lt-vis-panneau input.lt-vis-acc { -webkit-appearance: none; appearance: none; background: transparent; --v: 0; }
+.lt-vis-acc::-webkit-slider-runnable-track { height: 10px; border-radius: 999px;
+  background: linear-gradient(to right, var(--accent) 0 calc(11px + (100% - 22px) * var(--v)), var(--paper-3) 0 var(--fin, 100%), transparent 0),
+    repeating-linear-gradient(-45deg, var(--line-strong) 0 3px, var(--paper-2) 0 7px); }
+.lt-vis-acc::-moz-range-track { height: 10px; border-radius: 999px;
+  background: linear-gradient(to right, var(--accent) 0 calc(11px + (100% - 22px) * var(--v)), var(--paper-3) 0 var(--fin, 100%), transparent 0),
+    repeating-linear-gradient(-45deg, var(--line-strong) 0 3px, var(--paper-2) 0 7px); }
+.lt-vis-acc::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; margin-top: -6px; border-radius: 50%; background: var(--accent); border: 3px solid var(--sheet); box-shadow: 0 0 0 1.5px var(--accent); }
+.lt-vis-acc::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 3px solid var(--sheet); box-shadow: 0 0 0 1.5px var(--accent); }
+.lt-vis-acc-grad { position: relative; height: 15px; font-size: .72rem; font-weight: 700; color: var(--ink-3); margin-top: 4px; }
+.lt-vis-acc-grad span { position: absolute; top: 0; white-space: nowrap; }
+.lt-vis-acc-grad [data-a="aLim"] { right: calc(100% - 11px - (100% - 22px) * var(--m, 1) - 8px); }
+.lt-vis-acc-grad [data-a="aLim"].lt-vis-acc-g { right: auto; left: calc(11px + (100% - 22px) * var(--m, 1) - 8px); }
+.lt-vis-acc-grad [data-a="aLim"].lt-vis-acc-g::before { content: "▲ "; }
+.lt-vis-acc-grad [data-a="aLim"]:not(.lt-vis-acc-g)::after { content: " ▲"; }
 .lt-vis-lun { min-height: 44px; }
 .lt-vis-lun[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
-.lt-vis-graduation { display: flex; justify-content: space-between; font-size: .72rem; font-weight: 700; color: var(--ink-3); margin-top: -4px; }
+.lt-vis-graduation { display: flex; justify-content: space-between; font-size: .72rem; font-weight: 700; color: var(--ink-3); margin-top: 4px; }
 .lt-vis-defis { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; counter-reset: defi; }
 .lt-vis-defis li { display: flex; gap: 8px; align-items: flex-start; font-size: .88rem; line-height: 1.35; color: var(--ink-2); }
 .lt-vis-coche { flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px; border-radius: 50%; border: 2px solid var(--line-strong); display: grid; place-items: center; font-size: .75rem; font-weight: 900; }
@@ -421,6 +439,10 @@ sub, sup { font-size: .7em; line-height: 0; }
 .lt-vis-cercle { fill: var(--ink); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
 .lt-vis-monture { fill: none; stroke: var(--ink); stroke-width: 6; stroke-linejoin: round; stroke-linecap: round; }
 .lt-vis-objet { stroke: var(--accent); stroke-width: 6; }
+.lt-vis-poignee { fill: var(--accent); fill-opacity: .1; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 6 5; pointer-events: none; }
+.lt-vis-prise { fill: transparent; cursor: grab; }
+.lt-vis-3d { touch-action: none; }   /* le doigt déplace l'objet A (la page ne défile pas) */
+.lt-vis-prise.lt-vis-prise-on { cursor: grabbing; }
 .lt-vis-objet-p { fill: var(--accent); }
 .lt-vis-nom { font-size: 26px; font-weight: 800; fill: var(--ink); }
 .lt-vis-txt { font-size: 22px; font-weight: 600; fill: var(--ink-2); }

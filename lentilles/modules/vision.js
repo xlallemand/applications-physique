@@ -29,7 +29,11 @@
   const NET = 0.25;                                // écart de vergence toléré pour une image nette (δ)
   const LONGUEUR = { normal: { moyen: 1, fort: 1 }, myope: { moyen: 1.05, fort: 1.10 }, hyper: { moyen: 0.95, fort: 0.90 } };
   const AGES = { 20: 10, 40: 4, 60: 1, 80: 0.5 };  // âge → amplitude d'accommodation (δ)
+  const AMAX = AGES[20];                           // échelle de la barre d'accommodation (la même à tout âge)
   const DIST = [0.10, 0.15, 0.20, 0.25, 0.33, 0.5, 0.75, 1, 1.5, 2, 3, 5, 10, Infinity];   // m
+  // position affichée de l'objet (mm, les distances ne sont pas à l'échelle) et réciproque
+  const xObjet = D => -(21 + 6 * Math.log10(D / 0.1));
+  const distObjet = x => 0.1 * Math.pow(10, (-x - 21) / 6);
   const texteDist = D => (D === Infinity ? 'à l\'infini' : D < 1 ? `à ${Math.round(D * 100)} cm` : `à ${fmt(D)} m`);
 
   /* ---------- Vue de côté (coupe dans le plan vertical qui contient l'axe optique) ----------
@@ -122,11 +126,13 @@
             <p class="lt-vis-info" data-a="zone"></p>
           </section>
           <section class="lt-vis-bloc" data-s="voir">
-            <p class="lt-vis-lab">Objet A : <b data-a="dT"></b></p>
+            <p class="lt-vis-lab">Objet A : <b data-a="dT"></b> <small>(à déplacer aussi sur le dessin)</small></p>
             <div class="lt-vis-ligne"><input type="range" min="0" max="${DIST.length - 1}" step="1" data-a="d" aria-label="Distance de l'objet">
               <button type="button" class="btn-small" data-a="inf">À l'infini</button></div>
             <p class="lt-vis-lab">Accommodation : <b data-a="aT"></b></p>
-            <div class="lt-vis-ligne"><input type="range" min="0" max="100" step="1" data-a="a" aria-label="Accommodation du cristallin">
+            <div class="lt-vis-ligne"><div class="lt-vis-acc-zone">
+                <input type="range" min="0" max="100" step="1" data-a="a" class="lt-vis-acc" aria-label="Accommodation du cristallin">
+                <div class="lt-vis-acc-grad" aria-hidden="true"><span data-a="aLim"></span></div></div>
               <button type="button" class="btn-small" data-a="acc">Accommoder</button></div>
             <p class="lt-vis-info" data-a="foc"></p>
           </section>
@@ -165,6 +171,7 @@
       <clipPath id="lt-med-clip-${id}"><rect x="${mx}" y="${my}" width="${ml}" height="${mh}" rx="10"/></clipPath>
       <filter id="lt-flou-vis-${id}" filterUnits="userSpaceOnUse" x="${mx}" y="${my}" width="${ml}" height="${mh}"><feGaussianBlur stdDeviation="0"/></filter>
     </defs><g data-a="g3d"></g>
+    <rect data-a="prise" class="lt-vis-prise" x="${-38.5 * U}" y="${-12.5 * U}" width="${20 * U}" height="${17 * U}"/>
     <g class="lt-vis-med">
       <rect x="${mx}" y="${my}" width="${ml}" height="${mh}" rx="10" class="lt-vis-ret-fond"/>
       <g clip-path="url(#lt-med-clip-${id})"><g data-a="lettre" filter="url(#lt-flou-vis-${id})"></g></g>
@@ -186,8 +193,7 @@
       const texte = (p, t, cls, ancre) => { const q = P(p); out.push(`<text x="${n1(q[0])}" y="${n1(q[1])}" class="${cls}" text-anchor="${ancre || 'middle'}">${t}</text>`); };
       const paroi = y => xc - (rx - EP) * Math.sqrt(Math.max(0, 1 - y * y / ((R - EP) * (R - EP))));   // face interne, côté avant
       const yParoi = x => (R - EP) * Math.sqrt(Math.max(0, 1 - (x - xc) * (x - xc) / ((rx - EP) * (rx - EP))));
-      // position affichée de l'objet (les distances ne sont pas à l'échelle)
-      const D = o.D, xo = D === Infinity ? null : -(21 + 6 * Math.log10(D / 0.1));
+      const D = o.D, xo = D === Infinity ? null : xObjet(D);
       const xg = -E_LUN, xGauche = -37.5, rv = 8.5, Vg = o.Vg;
 
       // verre de lunettes en profil (ménisque) : plus épais au centre s'il est convergent, au bord s'il est divergent
@@ -199,7 +205,12 @@
       // axe optique, hors de l'œil
       ligne([[xGauche, 0], [-7.5, 0]], 'lt-vis-axe');
       // branche des lunettes : passe derrière l'œil jusqu'à l'oreille
-      if (etat.lun) ligne([[xAr(rv) - 0.2, rv - 0.4], [-6, 7.2], [Lr + 11, 7.2], [Lr + 13.5, 5.6], [Lr + 14, 3]], 'lt-vis-monture lt-vis-branche');
+      if (etat.lun) {
+        const q = (x, y) => P([x, y]).map(n1).join(' ');
+        // de la charnière à l'oreille, puis le crochet qui épouse l'arrière de l'oreille
+        out.push(`<path d="M${q(xAr(rv) - 0.2, rv - 0.4)}C${q(xAr(rv) + 3, rv - 0.6)} ${q(-9, 7.2)} ${q(-6, 7.2)}L${q(Lr + 9, 7.2)}`
+          + `C${q(Lr + 12.5, 7.2)} ${q(Lr + 14.6, 6.2)} ${q(Lr + 14.6, 4.2)}C${q(Lr + 14.6, 2.4)} ${q(Lr + 13.6, 1.2)} ${q(Lr + 12.4, 0.8)}" class="lt-vis-monture lt-vis-branche"/>`);
+      }
       // nerf optique
       path([[Lr - 1, -1], [Lr + 9, -1.4], [Lr + 9, -4.6], [Lr - 1, -4.4]], 'lt-vis-nerf');
       // globe : sclérotique (contour complet), intérieur (humeurs), cornée transparente
@@ -253,7 +264,8 @@
       // dans l'œil : cristallin → rétine ; l'image A′ derrière la rétine est éloignée davantage (×3, au plus 13 mm) pour la voir ;
       // image nette : A′ dessiné sur la rétine
       const xFin = Lr - EP - 0.3;
-      const xA = o.nette ? xFin : o.xi <= xFin ? o.xi : xFin + 13 * Math.tanh(3 * (Math.min(o.xi, 1e4) - xFin) / 13);
+      const ecart = Math.min(o.xi, 1e4) - Lr;   // position de l'image par rapport à la rétine du modèle (mm)
+      const xA = o.nette ? xFin : ecart < 0 ? xFin + ecart : xFin + 13 * Math.tanh(3 * ecart / 13);
       const yr = y => y * (1 - xFin / xA);     // hauteur sur la rétine du rayon parti de la hauteur y sur le cristallin
       if (xA < xFin) {
         path([[0, -PUP], [xA, 0], [0, PUP]], 'lt-vis-faisceau');
@@ -281,6 +293,8 @@
 
       // objet A (flèche verticale) ou objet à l'infini
       if (xo !== null) {
+        const h = P([xo, 3]);
+        out.push(`<circle cx="${n1(h[0])}" cy="${n1(h[1])}" r="${3.4 * U}" class="lt-vis-poignee"/>`);   // poignée : A se déplace sur le dessin
         ligne([[xo, 0], [xo, 6]], 'lt-vis-objet');
         const b = P([xo, 6]);
         out.push(`<path d="M${n1(b[0])} ${n1(b[1] - 14)}l-10 22h20z" class="lt-vis-objet-p"/>`);
@@ -310,12 +324,36 @@
     $d.value = etat.i; $g.value = 0;
     $d.oninput = () => { etat.i = +$d.value; maj(); };
     $('inf').onclick = () => { etat.i = DIST.length - 1; $d.value = etat.i; maj(); };
-    $a.oninput = () => { arreter(); etat.a = +$a.value / 100 * A(); maj(); };
+    // la barre va de 0 à AMAX (maximum à 20 ans) ; au-delà de l'amplitude de l'âge, partie grisée inaccessible
+    const aLimite = () => Math.round(A() / AMAX * 100);
+    $a.oninput = () => { arreter(); if (+$a.value > aLimite()) $a.value = aLimite(); etat.a = +$a.value / 100 * AMAX; maj(); };
+    // objet A déplacé sur le dessin (souris ou doigt) : position la plus proche de la liste ; tout à gauche, à l'infini
+    const prise = svg.querySelector('[data-a="prise"]');
+    let doigt = null;
+    function placerObjet(ev) {
+      const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+      const x = pt.matrixTransform(svg.getScreenCTM().inverse()).x / U;
+      let i = DIST.length - 1;
+      if (x > xObjet(DIST[DIST.length - 2]) - 2.5) {
+        const D = distObjet(x);
+        let mieux = Infinity;
+        DIST.forEach((d, k) => { const e = Math.abs(Math.log(d / D)); if (d !== Infinity && e < mieux) { mieux = e; i = k; } });
+      }
+      if (i !== etat.i) { etat.i = i; maj(); }
+    }
+    prise.addEventListener('pointerdown', ev => {
+      ev.preventDefault(); doigt = ev.pointerId;
+      try { prise.setPointerCapture(ev.pointerId); } catch (e) { /* capture indisponible */ }
+      prise.classList.add('lt-vis-prise-on'); placerObjet(ev);
+    });
+    prise.addEventListener('pointermove', ev => { if (ev.pointerId === doigt) placerObjet(ev); });
+    const lacher = ev => { if (ev.pointerId === doigt) { doigt = null; prise.classList.remove('lt-vis-prise-on'); } };
+    prise.addEventListener('pointerup', lacher); prise.addEventListener('pointercancel', lacher);
     $g.oninput = () => { etat.Vg = +$g.value / 4; maj(); };
     $('lun').onclick = () => { etat.lun = !etat.lun; maj(); };
     zone.querySelectorAll('[data-d]').forEach(b => { b.onclick = () => { etat.defaut = b.dataset.d; maj(); }; });
     zone.querySelectorAll('[data-n]').forEach(b => { b.onclick = () => { etat.niveau = b.dataset.n; maj(); }; });
-    zone.querySelectorAll('[data-g]').forEach(b => { b.onclick = () => { etat.age = +b.dataset.g; etat.a = Math.min(etat.a, A()); maj(); }; });
+    zone.querySelectorAll('[data-g]').forEach(b => { b.onclick = () => { arreter(); etat.age = +b.dataset.g; etat.a = Math.min(etat.a, A()); maj(); }; });
     // accommodation réflexe : le cristallin se déforme en une seconde vers le meilleur réglage possible
     function arreter() { if (anim) { cancelAnimationFrame(anim.r); anim = null; } }
     $('acc').onclick = () => {
@@ -364,8 +402,16 @@
       $('niveau').hidden = etat.defaut === 'normal';
       $d.value = etat.i; $g.value = Math.round(etat.Vg * 4);
       $('dT').textContent = texteDist(o.D);
-      $a.value = Math.round(etat.a / A() * 100);
-      $('aT').textContent = etat.a < 0.05 ? 'cristallin au repos' : etat.a > A() - 0.05 ? 'au maximum' : `${Math.round(etat.a / A() * 100)} %`;
+      const lim = aLimite();
+      $a.value = Math.round(etat.a / AMAX * 100);
+      $a.style.setProperty('--v', $a.value / 100);
+      $a.style.setProperty('--fin', lim >= 100 ? '100%' : `calc(11px + (100% - 22px) * ${lim / 100})`);
+      $a.setAttribute('aria-valuetext', etat.a < 0.05 ? 'au repos' : `${$a.value} %, limite à ${lim} % à ${etat.age} ans`);
+      $('aT').textContent = etat.a < 0.05 ? 'cristallin au repos' : etat.a > A() - 0.05 ? `au maximum à ${etat.age} ans` : `${$a.value} %`;
+      const $lim = $('aLim');
+      $lim.textContent = etat.age === 20 ? 'maximum à 20 ans' : `limite à ${etat.age} ans`;
+      $lim.style.setProperty('--m', lim / 100);
+      $lim.classList.toggle('lt-vis-acc-g', lim < 50);
       $('foc').innerHTML = `Distance focale de l'œil : <b>${fmt(1000 / o.Voeil, 1)} mm</b>${etat.a < 0.05 ? ' (au repos)' : ''} ; rétine à ${fmt(L(), 1)} mm du cristallin.`;
       $('lun').textContent = etat.lun ? 'Enlever les lunettes' : 'Mettre les lunettes';
       $('lun').setAttribute('aria-pressed', etat.lun ? 'true' : 'false');
