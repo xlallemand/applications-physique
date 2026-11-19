@@ -293,8 +293,6 @@
 
       // objet A (flèche verticale) ou objet à l'infini
       if (xo !== null) {
-        const h = P([xo, 3]);
-        out.push(`<circle cx="${n1(h[0])}" cy="${n1(h[1])}" r="${3.4 * U}" class="lt-vis-poignee"/>`);   // poignée : A se déplace sur le dessin
         ligne([[xo, 0], [xo, 6]], 'lt-vis-objet');
         const b = P([xo, 6]);
         out.push(`<path d="M${n1(b[0])} ${n1(b[1] - 14)}l-10 22h20z" class="lt-vis-objet-p"/>`);
