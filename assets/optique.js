@@ -65,6 +65,31 @@
        → { retirer(id), remettre(id), selection(), vider() }
    OPT.svgTexte(el, html)        remplit un <text> SVG avec des <tspan> (indices, exposants, gras)
 
+   ---------- Lentille mince convergente (ajouté pour lentilles/) ----------
+   Lentille verticale de centre optique O, axe optique horizontal, la lumière va de gauche à droite.
+   Distances algébriques comptées depuis O (OA < 0 pour un objet réel, à gauche).
+   OPT.conjuguer(OA, f)          → OA′ (relation de conjugaison 1/OA′ − 1/OA = 1/f′ ; usage interne seulement :
+                                    elle n'est jamais affichée) ; Infinity si l'objet est au foyer objet
+   OPT.emergent(O, f, I, d)      direction (unitaire) du rayon émergent en I pour un rayon incident de direction d :
+                                    il passe par le foyer secondaire image (point du plan focal image où passe
+                                    le rayon parallèle à d mené par O) ; rayons particuliers compris
+   OPT.incident(O, f, I, e)      direction du rayon incident qui ressort en I avec la direction e (construction à rebours)
+   OPT.intersection(a, d, b, e)  point commun des droites (a, d) et (b, e), ou null si elles sont parallèles
+   OPT.aimanter(p, o)            point aimanté : o = { pas, origine: [0, 0], points: [[x, y]…], rayon }
+                                    → le point de o.points le plus proche (à moins de o.rayon), sinon le nœud
+                                    du quadrillage de pas o.pas le plus proche
+   Scène : options.dioptre = { type: 'lentille', f, O: [0, 0], h (demi-hauteur), noms: true }
+                                    dessine la lentille, l'axe optique et les foyers (S.O, S.f)
+     S.quadrillage({ pas, origine, cls })                         quadrillage de pas donné (calque 'fond')
+     S.lentille({ O, f, h, noms, foyers, calque })                symbole de la lentille (segment, flèche à chaque bout),
+                                                                    axe optique, centre O, foyers F et F′ (petits traits nommés)
+     S.fleche(calque, a, b, cls)                                  flèche d'un objet ou d'une image (pointe en b)
+     S.rayon(calque, a, b, { virtuel: true })                     prolongement virtuel en pointillés
+   OPT.poignee(S, { p, aimant(p), surChange(p), surFin(p), aria, pas })
+       point à glisser (souris, doigt) ; flèches du clavier : pas unités
+       → { p(), regler(p), el, verrouiller(), deverrouiller(), retirer() }
+   OPT.pave(conteneur, { gauche, droite, haut, bas, aria: [4 textes] })   boutons ◀ ▶ ▲ ▼ de 58 × 50 px
+
    Styles : assets/optique.css (classes opt-). Couleurs : variables de assets/theme.css
    par les classes ; couleurs calculées (spectre) en attributs de présentation.
 
@@ -197,6 +222,51 @@
   }
 
   /* ============================================================
+     LENTILLE MINCE CONVERGENTE (lentilles/)
+     ============================================================ */
+  // relation de conjugaison (distances algébriques depuis O) : usage interne, jamais affichée
+  function conjuguer(OA, f) {
+    const inv = 1 / f + 1 / OA;
+    return Math.abs(inv) < 1e-12 ? Infinity : 1 / inv;
+  }
+  // rayon émergent : il passe par le foyer secondaire image, point du plan focal image (x = xO + f)
+  // où passe aussi le rayon parallèle au rayon incident mené par O (non dévié)
+  function emergent(O, f, I, d) {
+    d = V.norm(d);
+    if (Math.abs(d[0]) < 1e-9) return d;
+    const sens = Math.sign(d[0]);
+    const Fs = [O[0] + sens * f, O[1] + sens * f * d[1] / d[0]];
+    const e = V.sub(Fs, I);
+    return V.len(e) < 1e-9 ? d : V.mul(V.norm(e), Math.sign(e[0]) === sens ? 1 : -1);
+  }
+  // à rebours : direction du rayon incident qui ressort en I avec la direction e
+  function incident(O, f, I, e) {
+    e = V.norm(e);
+    if (Math.abs(e[0]) < 1e-9) return e;
+    const sens = Math.sign(e[0]);
+    // foyer secondaire objet : point du plan focal objet d'où partent les rayons qui ressortent parallèles à e
+    const Fs = [O[0] - sens * f, O[1] - sens * f * e[1] / e[0]];
+    const d = V.sub(I, Fs);
+    return V.len(d) < 1e-9 ? e : V.mul(V.norm(d), Math.sign(d[0]) === sens ? 1 : -1);
+  }
+  // intersection de deux droites (point a, direction d) et (point b, direction e)
+  function intersection(a, d, b, e) {
+    const den = V.cross(d, e);
+    if (Math.abs(den) < 1e-12) return null;
+    const t = V.cross(V.sub(b, a), e) / den;
+    return V.add(a, V.mul(d, t));
+  }
+  // point aimanté : point remarquable le plus proche, sinon nœud du quadrillage
+  function aimanter(p, o) {
+    o = o || {};
+    const org = o.origine || [0, 0], pas = o.pas || 1, r = o.rayon != null ? o.rayon : pas * 0.3;
+    let best = null;
+    (o.points || []).forEach(q => { const d = V.len(V.sub(p, q)); if (d <= r && (!best || d < best.d)) best = { d, q }; });
+    if (best) return best.q.slice();
+    return [org[0] + Math.round((p[0] - org[0]) / pas) * pas, org[1] + Math.round((p[1] - org[1]) / pas) * pas];
+  }
+
+  /* ============================================================
      RENDU SVG
      ============================================================ */
   function svgEl(tag, attrs, parent) {
@@ -272,7 +342,7 @@
       // rayon : trait + flèche au milieu (fleche 1 : de a vers b ; −1 : de b vers a ; 0 : sans flèche)
       rayon(c, a, b, o) {
         o = o || {};
-        const g = svgEl('g', { class: 'opt-rayon ' + (o.cls || '') }, cal(c));
+        const g = svgEl('g', { class: 'opt-rayon ' + (o.virtuel ? 'opt-virtuel ' : '') + (o.cls || '') }, cal(c));
         const att = {};
         if (o.couleur) att.stroke = o.couleur;
         if (o.largeur) att['stroke-width'] = o.largeur;
@@ -366,6 +436,42 @@
         });
         return best ? best.c : null;
       },
+      // quadrillage de pas o.pas (unités), aligné sur o.origine
+      quadrillage(o) {
+        o = o || {};
+        const pas = o.pas || 20, org = o.origine || [0, 0], g = svgEl('g', { class: o.cls || 'opt-quad' }, cal(o.calque || 'fond'));
+        for (let x = org[0] + Math.ceil((-hw - org[0]) / pas) * pas; x <= hw + 1e-6; x += pas) S.ligne(g, [x, -hh], [x, hh]);
+        for (let y = org[1] + Math.ceil((-hh - org[1]) / pas) * pas; y <= hh + 1e-6; y += pas) S.ligne(g, [-hw, y], [hw, y]);
+        return g;
+      },
+      // lentille mince convergente : segment vertical avec une flèche à chaque bout, axe optique,
+      // centre optique O, foyers F et F′ (petits traits sur l'axe, symétriques par rapport à O)
+      lentille(o) {
+        o = o || {};
+        const O = o.O || [0, 0], h = o.h || hh * 0.8, g = svgEl('g', { class: 'opt-lentille-g' }, cal(o.calque || 'deco'));
+        if (o.axe !== false) S.ligne(g, [-hw, O[1]], [hw, O[1]], 'opt-axe');
+        S.ligne(g, [O[0], O[1] - h], [O[0], O[1] + h], 'opt-lentille');
+        const k = o.pointe || 9;
+        [1, -1].forEach(sg => S.poly(g, [[O[0], O[1] + sg * (h + 2)], [O[0] - k * 0.75, O[1] + sg * (h - k)], [O[0] + k * 0.75, O[1] + sg * (h - k)]], 'opt-lentille-pointe'));
+        if (o.foyers !== false && o.f) {
+          [-1, 1].forEach(sg => S.ligne(g, [O[0] + sg * o.f, O[1] - 6], [O[0] + sg * o.f, O[1] + 6], 'opt-foyer'));
+          if (o.noms !== false) {
+            S.texte(g, [O[0] - o.f, O[1] + 16], 'F', { cls: 'opt-nom-pt' });
+            S.texte(g, [O[0] + o.f, O[1] + 16], 'F′', { cls: 'opt-nom-pt' });
+          }
+        }
+        if (o.noms !== false) S.texte(g, [O[0] + 11, O[1] + 14], 'O', { cls: 'opt-nom-pt' });
+        S.O = O; S.f = o.f;
+        return g;
+      },
+      // flèche d'un objet ou d'une image : segment de a vers b, pointe en b
+      fleche(c, a, b, cls) {
+        const g = svgEl('g', { class: 'opt-fl-g ' + (cls || 'opt-objet') }, cal(c));
+        const d = V.norm(V.sub(b, a)), q = V.perp(d), k = 8;
+        S.ligne(g, a, V.sub(b, V.mul(d, k * 0.6)), 'opt-fl-trait');
+        if (V.len(V.sub(b, a)) > 1) S.poly(g, [b, V.add(V.sub(b, V.mul(d, k * 1.3)), V.mul(q, k * 0.6)), V.sub(V.sub(b, V.mul(d, k * 1.3)), V.mul(q, k * 0.6))], 'opt-fl-pointe');
+        return g;
+      },
       surRedim(fn) { redims.push(fn); },
       maj(etat) {
         S.vider('rayons');
@@ -380,7 +486,8 @@
 
     // milieux et dioptre décrits dans les options
     (opts.milieux || []).forEach(m => S.milieu(m));
-    if (opts.dioptre && opts.dioptre.I) {
+    if (opts.dioptre && opts.dioptre.type === 'lentille') S.lentille(opts.dioptre);
+    else if (opts.dioptre && opts.dioptre.I) {
       S.I = opts.dioptre.I;
       S.normale = (opts.dioptre.angle || 0) + 90;
     }
@@ -457,6 +564,78 @@
       deverrouiller() { verrou = false; g.classList.remove('opt-verrou'); },
       masquer(oui) { g.style.display = oui ? 'none' : ''; },
     };
+  }
+
+  // Point à glisser librement (souris, doigt) ; o.aimant(p) le ramène sur un point permis
+  function poignee(S, o) {
+    let p = (o.p || [0, 0]).slice(), verrou = false;
+    const aimant = o.aimant || (q => q);
+    const g = svgEl('g', { class: 'opt-poignee opt-poignee-libre', tabindex: '0', role: 'application', 'aria-label': o.aria || 'Point à déplacer' }, S.calque('poignees'));
+    const zoneT = svgEl('circle', { class: 'opt-poignee-zone' }, g);
+    const point = svgEl('circle', { class: 'opt-poignee-point' }, g);
+    function placer() {
+      [zoneT, point].forEach(c => { c.setAttribute('cx', p[0]); c.setAttribute('cy', -p[1]); });
+      zoneT.setAttribute('r', S.u(24));
+      point.setAttribute('r', Math.max(S.u(9), 5));
+    }
+    function regler(q, fin) {
+      p = aimant(q).slice();
+      placer();
+      if (o.surChange) o.surChange(p);
+      if (fin && o.surFin) o.surFin(p);
+    }
+    let id = null, ecartP = [0, 0];
+    g.addEventListener('touchstart', e => { if (!verrou && e.cancelable) e.preventDefault(); }, { passive: false });
+    g.addEventListener('pointerdown', e => {
+      if (verrou) return;
+      id = e.pointerId;
+      try { g.setPointerCapture(id); } catch (er) { /* ignoré */ }
+      // on garde l'écart entre le doigt et le point : le point ne saute pas sous le doigt
+      ecartP = V.sub(p, S.point(e));
+      g.classList.add('opt-saisie');
+      e.preventDefault(); e.stopPropagation();
+    });
+    const suivre = e => regler(V.add(S.point(e), ecartP));
+    g.addEventListener('pointermove', e => { if (e.pointerId === id) suivre(e); });
+    const finir = e => {
+      if (e.pointerId !== id) return;
+      if (e.type === 'pointerup') suivre(e);
+      id = null; g.classList.remove('opt-saisie');
+      if (o.surFin) o.surFin(p);
+    };
+    g.addEventListener('pointerup', finir);
+    g.addEventListener('pointercancel', finir);
+    g.addEventListener('click', e => e.stopPropagation());
+    g.addEventListener('keydown', e => {
+      if (verrou) return;
+      const k = o.pas || 1, m = { ArrowLeft: [-k, 0], ArrowRight: [k, 0], ArrowUp: [0, k], ArrowDown: [0, -k] }[e.key];
+      if (m) { e.preventDefault(); regler(V.add(p, m), true); }
+    });
+    S.surRedim(placer);
+    placer();
+    return {
+      el: g,
+      p: () => p.slice(),
+      regler: q => regler(q, true),
+      verrouiller() { verrou = true; g.classList.add('opt-verrou'); },
+      deverrouiller() { verrou = false; g.classList.remove('opt-verrou'); },
+      retirer() { g.remove(); },
+    };
+  }
+
+  // Quatre boutons fléchés ◀ ▶ ▲ ▼ (58 × 50 px) : déplacer un point d'un pas
+  function pave(conteneur, o) {
+    const aria = o.aria || ['Vers la gauche', 'Vers la droite', 'Vers le haut', 'Vers le bas'];
+    const box = document.createElement('div');
+    box.className = 'opt-pave';
+    [['◀', aria[0], o.gauche], ['▲', aria[2], o.haut], ['▼', aria[3], o.bas], ['▶', aria[1], o.droite]].forEach(([s, a, f]) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn-secondary opt-fl'; b.textContent = s; b.setAttribute('aria-label', a);
+      b.onclick = () => { if (!b.disabled && f) f(); };
+      box.appendChild(b);
+    });
+    conteneur.appendChild(box);
+    return { el: box, activer(oui) { box.querySelectorAll('button').forEach(b => { b.disabled = !oui; }); } };
   }
 
   // Boutons fléchés (58 × 50 px) : complément du glisser au doigt fin
@@ -551,5 +730,6 @@
   window.OPT = {
     V, ecart, refracter, reflechir, limite, devier, tracer, dansPolygone, demiPlan, demiDisque, distSegment,
     scene, pivot, fleches, cible, etiquettes, surAppui, svgTexte, svgEl,
+    conjuguer, emergent, incident, intersection, aimanter, poignee, pave,
   };
 })();
