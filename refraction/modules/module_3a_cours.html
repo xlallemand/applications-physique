@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 : cours, la loi de Descartes — Réfraction et loi de Snell-Descartes</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="../../assets/optique.css">
+<link rel="stylesheet" href="rf.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<link rel="stylesheet" href="../../assets/cours.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/optique.js"></script>
+<script src="rf.js"></script>
+<script src="schema.js"></script>
+<script src="loi.js"></script>
+<script src="../../assets/cours.js"></script>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card">
+    <span class="er-badge">MODULE 3 · COURS</span>
+    <h2 class="er-titre">La loi de Descartes</h2>
+    <p class="er-contexte">La <b>loi de Snell-Descartes</b> relie l'angle d'incidence i<sub>1</sub>, l'angle de réfraction i<sub>2</sub> et les <b>indices de réfraction</b> n<sub>1</sub> et n<sub>2</sub> des deux milieux. Elle permet de <b>prévoir</b> si le rayon réfracté se rapproche ou s'éloigne de la normale.</p>
+  </div>
+  <div id="etapes"></div>
+</div>
+
+<script>
+/* ============================================================
+   Cours par étapes (assets/cours.js) : notion → exemple → « À toi ».
+   1. La loi n₁ × sin(i₁) = n₂ × sin(i₂) sur le schéma générique ;
+      adapter les notations (n_air, n_eau…).
+   2. Prévoir la déviation : n × sin(i) a la même valeur des deux côtés ;
+      si n₂ > n₁, sin(i₂) < sin(i₁) donc i₂ < i₁ (le rayon se rapproche
+      de la normale) ; si n₂ < n₁, i₂ > i₁ (il s'en éloigne).
+   Valeurs (vérifiées par un script) : air → eau, i₁ = 50° :
+   1,00 × sin(50°) ≈ 0,766, sin(i₂) ≈ 0,576, i₂ ≈ 35,2° ;
+   eau → air, i₁ = 30° : 1,33 × sin(30°) = 0,665, i₂ ≈ 41,7°.
+   ============================================================ */
+const { exemple } = COURS;
+const nH = RF.nHTML, iH = RF.iHTML;
+const loi = (a, b) => `${nH(a)} × sin(${iH(1)}) = ${nH(b)} × sin(${iH(2)})`;
+
+/* ---------- 1. La loi ---------- */
+function etape1(c) {
+  const carte = c.carte('1. La loi de Descartes pour la réfraction');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>Un rayon de lumière passe d'un <b>milieu 1</b>, d'indice de réfraction ${nH(1)}, à un <b>milieu 2</b>, d'indice ${nH(2)}. Le milieu 1 est celui du rayon incident.</p>
+      <div class="rf-cours-fig" data-f="gen"></div>
+      <div class="cle"><p><b class="cle-titre">Loi de Snell-Descartes.</b> L'angle d'incidence ${iH(1)} et l'angle de réfraction ${iH(2)} vérifient :</p>
+        <p class="crs-formule">${nH(1)} × sin(${iH(1)}) = ${nH(2)} × sin(${iH(2)})</p>
+        <p>Un indice de réfraction n'a pas d'unité ; il vaut au moins 1. ${nH('air')} = 1,00 ; ${nH('eau')} = 1,33 ; ${nH('verre')} = 1,50.</p></div>
+    </div>
+    ${exemple(`<p>Un rayon passe de l'air dans l'eau. On adapte les notations : le milieu 1 est l'air, le milieu 2 est l'eau.</p><p class="crs-formule">${loi('air', 'eau')}</p>`)}`);
+  RF.figureGenerique(carte.querySelector('[data-f="gen"]'));
+  c.aToi(carte, [
+    { titre: 'Du verre vers l\'air', enonce: '<p>Un rayon de lumière sort d\'un bloc de verre et passe dans l\'air.</p>',
+      parties: [{ type: 'choix', q: 'Quelle est la loi de Descartes, avec les notations de la situation ?', colonne: true,
+        options: [{ id: 'ok', label: loi('verre', 'air') }, { id: 'inv', label: loi('air', 'verre') }, { id: 'ang', label: `${nH('verre')} × ${iH(1)} = ${nH('air')} × ${iH(2)}` }], bonne: 'ok',
+        indices: { inv: 'Le milieu 1 est celui du rayon incident : ici, le verre. n<sub>verre</sub> va donc avec sin(i<sub>1</sub>).', ang: 'La loi utilise le <b>sinus</b> des angles, pas les angles eux-mêmes.' },
+        solution: `<p class="crs-formule">${loi('verre', 'air')}</p>` }] },
+    { titre: 'De l\'eau vers le verre', enonce: '<p>Un rayon de lumière passe de l\'eau d\'un aquarium dans sa paroi en verre.</p>',
+      parties: [{ type: 'choix', q: 'Quelle est la loi de Descartes, avec les notations de la situation ?', colonne: true,
+        options: [{ id: 'inv', label: loi('verre', 'eau') }, { id: 'ok', label: loi('eau', 'verre') }, { id: 'gen', label: loi(1, 2).replace(/sin\(([^)]*)\)/g, '$1') }], bonne: 'ok',
+        indices: { inv: 'Le milieu 1 est celui du rayon incident : ici, l\'eau. n<sub>eau</sub> va donc avec sin(i<sub>1</sub>).', gen: 'Il manque le sinus, et il faut adapter les notations : n<sub>eau</sub> et n<sub>verre</sub>.' },
+        solution: `<p class="crs-formule">${loi('eau', 'verre')}</p>` }] },
+  ]);
+  return carte;
+}
+
+/* ---------- 2. Prévoir la déviation ---------- */
+function etape2(c) {
+  const carte = c.carte('2. Prévoir la déviation du rayon réfracté');
+  c.ajouter(carte, `<div class="cours-bloc">
+      <p>D'après la loi, le produit <b>n × sin(i)</b> a la <b>même valeur</b> des deux côtés de la surface de séparation.</p>
+      <div class="rf-cours-figs">
+        <div><div data-f="ae"></div><p>De l'air (${nH(1)} = 1,00) vers l'eau (${nH(2)} = 1,33) : ${nH(2)} > ${nH(1)}, donc pour garder la même valeur 0,766, sin(${iH(2)}) est plus petit que sin(${iH(1)}) : <b>${iH(2)} < ${iH(1)}</b>. Le rayon réfracté <b>se rapproche</b> de la normale.</p></div>
+        <div><div data-f="ea"></div><p>De l'eau (${nH(1)} = 1,33) vers l'air (${nH(2)} = 1,00) : ${nH(2)} < ${nH(1)}, donc pour garder la même valeur 0,665, sin(${iH(2)}) est plus grand que sin(${iH(1)}) : <b>${iH(2)} > ${iH(1)}</b>. Le rayon réfracté <b>s'éloigne</b> de la normale.</p></div>
+      </div>
+      <div class="cle"><p><b class="cle-titre">Règle.</b> Plus l'angle est grand (entre 0° et 90°), plus son sinus est grand. Donc :</p>
+        <p>si <b>${nH(2)} > ${nH(1)}</b>, alors <b>${iH(2)} < ${iH(1)}</b> : le rayon réfracté se rapproche de la normale ;</p>
+        <p>si <b>${nH(2)} < ${nH(1)}</b>, alors <b>${iH(2)} > ${iH(1)}</b> : le rayon réfracté s'éloigne de la normale.</p></div>
+    </div>
+    ${exemple(`<p>Un rayon passe de l'air (${nH('air')} = 1,00) dans le verre (${nH('verre')} = 1,50) : ${nH('verre')} > ${nH('air')}, donc ${iH(2)} < ${iH(1)}, le rayon réfracté se rapproche de la normale.</p>`)}`);
+  RF.figureValeurs(carte.querySelector('[data-f="ae"]'), 'air-eau');
+  RF.figureValeurs(carte.querySelector('[data-f="ea"]'), 'eau-air');
+  const choix = (n1, v1, n2, v2, rapproche) => {
+    const p = rapproche
+      ? `${nH(n2)} = ${v2} > ${nH(n1)} = ${v1} : sin(${iH(2)}) est plus petit que sin(${iH(1)}), donc ${iH(2)} < ${iH(1)} : le rayon se rapproche de la normale.`
+      : `${nH(n2)} = ${v2} < ${nH(n1)} = ${v1} : sin(${iH(2)}) est plus grand que sin(${iH(1)}), donc ${iH(2)} > ${iH(1)} : le rayon s'éloigne de la normale.`;
+    return { type: 'choix', q: 'Que fait le rayon réfracté ?', colonne: true, melanger: false,
+      options: [{ id: 'r', label: `Il se rapproche de la normale : ${iH(2)} < ${iH(1)}.` }, { id: 'e', label: `Il s'éloigne de la normale : ${iH(2)} > ${iH(1)}.` }],
+      bonne: rapproche ? 'r' : 'e', indice: `Compare ${nH(2)} et ${nH(1)} : ${p}`, solution: p };
+  };
+  c.aToi(carte, [
+    { titre: 'Du verre vers l\'air', enonce: `<p>Un rayon passe du verre (${nH('verre')} = 1,50) dans l'air (${nH('air')} = 1,00).</p>`, parties: [choix('verre', '1,50', 'air', '1,00', false)] },
+    { titre: 'De l\'eau vers le verre', enonce: `<p>Un rayon passe de l'eau (${nH('eau')} = 1,33) dans le verre (${nH('verre')} = 1,50).</p>`, parties: [choix('eau', '1,33', 'verre', '1,50', true)] },
+    { titre: 'Du verre vers l\'eau', enonce: `<p>Un rayon passe du verre (${nH('verre')} = 1,50) dans l'eau (${nH('eau')} = 1,33).</p>`, parties: [choix('verre', '1,50', 'eau', '1,33', false)] },
+  ]);
+  return carte;
+}
+
+/* ---------- À retenir ---------- */
+function aRetenir(c) {
+  const carte = c.carte('À retenir');
+  c.ajouter(carte, `<div class="cle"><p>Loi de Snell-Descartes : <b>${nH(1)} × sin(${iH(1)}) = ${nH(2)} × sin(${iH(2)})</b>. Le milieu 1 est celui du rayon incident ; on adapte les notations (${nH('air')}, ${nH('eau')}…).</p></div>
+    <div class="cle"><p>Si ${nH(2)} > ${nH(1)} : ${iH(2)} < ${iH(1)}, le rayon réfracté se rapproche de la normale. Si ${nH(2)} < ${nH(1)} : ${iH(2)} > ${iH(1)}, il s'en éloigne.</p></div>
+    <div class="er-actions"><a class="btn-primary" style="text-decoration:none" href="fiche_3.html">Fiche récapitulative →</a>
+      <a class="btn-secondary" style="text-decoration:none" href="module_3b_manip.html">Écrire la loi de Descartes</a></div>`);
+  return carte;
+}
+
+SOM.menu('module_3a_cours');
+new COURS.Cours(document.getElementById('etapes'), [etape1, etape2, aRetenir]);
+</script>
+</body>
+</html>

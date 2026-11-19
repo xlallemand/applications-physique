@@ -31,6 +31,8 @@
      molecules  modèles moléculaires en boules
      topologique  formules topologiques en zigzag, avec quelques OH, =O, NH₂, Cl, comme écrites au tableau (nomenclature)
      semidev    formules semi-développées CH₃–CH₂–CH(OH)…, avec quelques OH, =O, COOH, comme écrites au tableau (nomenclature de 1re)
+     rayons     surface de séparation horizontale, normale en pointillés, rayons incidents et réfractés fins
+                avec un arc d'angle, et un petit prisme qui étale un pinceau en éventail (réfraction, lentilles)
      titrage    burette graduée au-dessus d'un bécher, courbe de titrage pH = f(V) en S décroissante avec ses deux
                 tangentes parallèles, la parallèle du milieu et le volume équivalent (titrage pH-métrique)
      formules:physique | formules:redox | formules:pile | formules:combustion | formules:ph | formules:algebre
@@ -785,6 +787,63 @@
       ctx.font = `500 16px ${police()}`; ctx.globalAlpha = .15;
       ctx.fillText('s(t) = a₀ + Σ aₙ sin(n ω t)', w * .36, h * .4);
       ctx.fillText('f = 1 / T', w * .86, h * .05);
+    },
+
+    // Réfraction : surface de séparation, normale en pointillés, rayons incidents et réfractés,
+    // arc d'angle ; petit prisme qui étale un pinceau en éventail (réfraction et lentilles)
+    rayons(ctx, w, h, c) {
+      const hb = h / (1 + (reduit ? 0 : F));          // hauteur visible de l'en-tête
+      const p = 24;
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineWidth = 1;
+      for (let x = 0, i = 0; x <= w; x += p, i++) { ctx.globalAlpha = i % 5 ? .04 : .09; trait(ctx, x, 0, x, h); }
+      for (let y = 0, i = 0; y <= h; y += p, i++) { ctx.globalAlpha = i % 5 ? .04 : .09; trait(ctx, 0, y, w, y); }
+      // milieu 2 (en bas) légèrement teinté, surface de séparation
+      const ys = hb * .56, xI = w * (w < 700 ? .66 : .56);
+      ctx.globalAlpha = .06; ctx.fillRect(0, ys, w, h - ys);
+      ctx.globalAlpha = .45; ctx.lineWidth = 2.2; trait(ctx, 0, ys, w, ys);
+      // normale en pointillés et angle droit
+      ctx.globalAlpha = .4; ctx.lineWidth = 1.3; ctx.setLineDash([6, 5]); trait(ctx, xI, hb * .06, xI, hb * .98); ctx.setLineDash([]);
+      ctx.globalAlpha = .35; ctx.lineWidth = 1.1; ctx.strokeRect(xI, ys, 9, 9);
+      // rayons incidents et réfractés (n₁ = 1,00, n₂ = 1,33), flèche au milieu
+      const R = Math.min(hb * .5, 240), rad = Math.PI / 180;
+      const fleche = (x1, y1, x2, y2) => {
+        const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, a = Math.atan2(y2 - y1, x2 - x1), k = 7;
+        ctx.beginPath(); ctx.moveTo(mx + k * Math.cos(a), my + k * Math.sin(a));
+        ctx.lineTo(mx - k * Math.cos(a) + k * .7 * Math.sin(a), my - k * Math.sin(a) - k * .7 * Math.cos(a));
+        ctx.lineTo(mx - k * Math.cos(a) - k * .7 * Math.sin(a), my - k * Math.sin(a) + k * .7 * Math.cos(a)); ctx.closePath(); ctx.fill();
+      };
+      [[28, .65], [45, .4], [62, .3]].forEach(([i1, al]) => {
+        const i2 = Math.asin(Math.sin(i1 * rad) / 1.33);
+        const xa = xI - R * Math.sin(i1 * rad), ya = ys - R * Math.cos(i1 * rad);
+        const xb = xI + R * Math.sin(i2), yb = ys + R * Math.cos(i2);
+        ctx.globalAlpha = al; ctx.lineWidth = 1.5; trait(ctx, xa, ya, xI, ys); trait(ctx, xI, ys, xb, yb);
+        fleche(xa, ya, xI, ys); fleche(xI, ys, xb, yb);
+      });
+      // arcs d'angle du premier rayon et noms des angles
+      const i2a = Math.asin(Math.sin(28 * rad) / 1.33);
+      ctx.globalAlpha = .55; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(xI, ys, 46, -Math.PI / 2 - 28 * rad, -Math.PI / 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(xI, ys, 46, Math.PI / 2 - i2a, Math.PI / 2); ctx.stroke();
+      ctx.font = `600 14px ${police()}`; ctx.globalAlpha = .5;
+      ctx.fillText('i₁', xI - 26, ys - 56); ctx.fillText('i₂', xI + 8, ys + 66);
+      // petit prisme : pinceau de lumière blanche étalé en éventail
+      if (w > 520) {
+        const px = w * .84, py = hb * .3, L = Math.min(120, w * .1);
+        const A = [px, py - L * .55], B = [px - L * .55, py + L * .4], C2 = [px + L * .55, py + L * .4];
+        ctx.globalAlpha = .1; ctx.beginPath(); ctx.moveTo(...A); ctx.lineTo(...B); ctx.lineTo(...C2); ctx.closePath(); ctx.fill();
+        ctx.globalAlpha = .5; ctx.lineWidth = 1.6; ctx.stroke();
+        const e = [px - L * .28, py - L * .08], s2 = [px + L * .22, py];
+        ctx.globalAlpha = .55; ctx.lineWidth = 2.4; trait(ctx, px - L * 1.5, py - L * .45, e[0], e[1]);
+        ctx.globalAlpha = .4; ctx.lineWidth = 1.2; trait(ctx, e[0], e[1], s2[0], s2[1]);
+        for (let k = 0; k < 7; k++) {
+          const a = (18 + k * 3.2) * rad;
+          ctx.globalAlpha = .2 + k * .06; ctx.lineWidth = 1.2;
+          trait(ctx, s2[0], s2[1], s2[0] + L * 1.6 * Math.cos(a), s2[1] + L * 1.6 * Math.sin(a));
+        }
+      }
+      // loi de Descartes en filigrane
+      ctx.font = `600 18px ${police()}`; ctx.globalAlpha = .18;
+      ctx.fillText('n₁ sin(i₁) = n₂ sin(i₂)', w * .06, hb * .9);
     },
 
     // Pylône d'antenne relais qui émet des ondes (arcs), onde modulée en amplitude qui traverse l'en-tête

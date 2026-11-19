@@ -135,6 +135,10 @@ Pas d'en-tête illustré. Première carte :
 
 Contenu dans `.er-page` (largeur max 60 rem, centré, marges réduites sur téléphone). Une idée = une `.er-card`.
 
+### Page de manipulation (simulateur, animation, manipulation guidée)
+
+Toute page où l'élève manipule a un bouton **« ⤢ Plein écran »** (`btn-small`) dans sa première carte, à droite du titre. Il cache le sommaire, donne toute la largeur à la page et passe le navigateur en plein écran quand il le permet ; le bouton devient « ⤡ Quitter le plein écran » (Échap ramène aussi le sommaire). Modèles : `titrage-conductimetrique/modules/module_1_animation.html` et `refraction/` (`RF.pleinEcran`, classe `rf-plein`).
+
 ### Cours
 
 Cours **par étapes**, écrit avec le **moteur de cours commun** `assets/cours.js` (objet `COURS`, styles `assets/cours.css`, classes préfixées `crs-`) ; seules `cinematique/` (moteur `CIN`), `transport-electricite/` (`TE`), `ph/` et `puissance-active/` (`PH`) gardent leur propre moteur, de même présentation.

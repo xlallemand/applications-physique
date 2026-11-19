@@ -27,7 +27,20 @@ Un fichier par application, numéroté dans l'ordre de développement conseillé
 | A07 | Synthèse et montage à reflux | `12-synthese.md` | `synthese/` | acétate d'isoamyle, ampoule à décanter, CCM | `PAILLASSE`, `ETAPES`, `CCM` |
 | A10 | Décrire un mouvement | `13-mouvement.md` | `mouvement/` | référentiels animés, pointage simplifié, vecteur vitesse | `VEC` ; règle de `LG` |
 
-Déjà faites pour la 2nde (ne pas refaire) : `spectres-etoiles/`, `equilibrer-reactions/`, `avancement-reaction/` (modules 1 à 4), et les outils mathématiques `lecture-graphique/`, `conversions/`, `puissances-10/`, `proportionnalite/`, `equations-en-physique/`, `equations-en-physique-avec-aide/`.
+## Applications codées
+
+Liste **tenue à jour par chaque session** qui code une application de 2nde (`00-commun.md` §9) : ajoute la ligne de l'application, dans l'ordre des numéros, dans le même commit que l'application.
+
+| N° | Nom de l'application | Fichier | Dossier | Codée le |
+|---|---|---|---|---|
+| A11 | Période et fréquence d'un signal | `01-periode-frequence.md` | `periode-frequence/` | 08/11/2026 |
+| A12 + A17 | Réfraction et loi de Snell-Descartes | `02-refraction.md` | `refraction/` | 17/11/2026 |
+| A01 | Chromatographie sur couche mince | `07-chromatographie.md` | `chromatographie/` | 07/11/2026 |
+| A14 | Réaliser un montage électrique | `08-montage-electrique.md` | `montage-electrique/` | 06/11/2026 |
+
+Les prompts absents de cette liste restent à exécuter.
+
+Déjà faites pour la 2nde avant ces prompts (ne pas refaire) : `spectres-etoiles/`, `equilibrer-reactions/`, `avancement-reaction/` (modules 1 à 4), et les outils mathématiques `lecture-graphique/`, `conversions/`, `puissances-10/`, `proportionnalite/`, `equations-en-physique/`, `equations-en-physique-avec-aide/`.
 
 ## Ordre conseillé
 

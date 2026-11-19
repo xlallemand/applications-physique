@@ -50,6 +50,7 @@ Ce fichier est lu au début de chaque session qui fabrique une application de 2n
   
   Pas de clé `fiche` dans le `PLAN` (il n'y a pas de cours). Nom des fichiers : `module_N_simulation.html`, `module_N_manip.html`, `module_N_questions.html` (ou une seule page par module si le prompt le dit).
 - **Pages de simulation et de manipulation** : première carte de la charte §4 (badge `MODULE N · SIMULATION` / `· MANIPULATION` / `· ENTRAÎNEMENT`, titre, contexte en une ou deux phrases avec les mots-clés en gras). Puis la zone de manipulation, puis le **déroulé guidé** sous la zone : une consigne à la fois (« 1. Trace la normale en I. »), vérifiée sur l'état de la manipulation, qui se coche quand elle est réussie ; un bilan court à la fin. Bouton « ↺ Recommencer » (`btn-secondary`). Une manipulation guidée enchaîne ses situations avec « Situation suivante → » et un compteur « Situation 2 / 6 ».
+- **Bouton « ⤢ Plein écran »** sur toute page de manipulation ou de simulation (charte §4, « Page de manipulation ») : dans la première carte, à droite du titre.
 - **Séries notées** : 10 questions tirées au hasard dans des groupes, chaque question est une fabrique (nouvelles valeurs, nouveaux distracteurs) ; parties successives ; 2 / 1 / 0 point ; écran de fin de la charte. Une question peut contenir une manipulation (partie `'perso'` : `monter(zone, api)`, `api.reussi()` / `api.erreur(diag)`), montable en **plusieurs exemplaires** (pas d'`id` fixe, pas d'état global).
 - **Accueil** : en-tête illustré (`app-hero`, kicker « Physique · Seconde » ou « Chimie · Seconde », `h1`, phrase d'accroche), puis `SOM.accueil(zone)`.
 - **Portail** : entrée dans `APPS` de `index.html` (racine) : `{ titre, dom, niv: ['2de'], dossier, desc, mots }`, `desc` donnée par le prompt, `mots` : mots-clés de recherche (charte §2) ; place-la dans le groupe de son domaine, après les applications de 2nde déjà présentes (dans l'ordre des numéros des prompts). Déclare aussi ses pages dans `AVANCEMENT` de `assets/avancement.js` (toutes les pages du `PLAN`, dans l'ordre), puis relance `python3 docs/outils/index-recherche.py` (index de recherche du portail).
@@ -104,7 +105,9 @@ Avec Playwright / Chromium (déjà installé, ne lance pas `playwright install`)
 7. Outils partagés créés ou modifiés : chaque application qui les charge est retestée.
 8. **Chaque valeur numérique** (données, réponses, tolérances) vérifiée par un petit script dans le scratchpad, pas de tête.
 
-Puis : commits en français, clairs ; push sur `2nde`. Compte rendu court :
+Puis :
+- ajoute la ligne de l'application dans la liste « Applications codées » de `docs/prompts-2nde/README.md` (numéro, nom, fichier du prompt, dossier, date), dans l'ordre des numéros ;
+- commits en français, clairs ; push sur `2nde`. Compte rendu court :
 - ce qui est fait ;
 - les écarts avec le prompt et pourquoi ;
 - ce qui n'est pas testable (Safari iOS).
