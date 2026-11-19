@@ -1,0 +1,124 @@
+/* ============================================================
+   ATOME : styles de l'outil partagé (assets/atome.js, classes atm-)
+   Dessins (cercles des couches, cases des sous-couches), configuration
+   écrite, écriture conventionnelle du noyau, paires de charges,
+   réserve d'électrons, composeur de configuration.
+   Couleurs : variables de assets/theme.css seulement. Les charges ne sont
+   jamais en rouge ou en vert (réservés au juste / faux) : les signes sont écrits.
+   ============================================================ */
+
+/* ---------- Dessins ---------- */
+.atm-svg { display: block; font-family: var(--font-sans); -webkit-user-select: none; user-select: none; }
+.atm-couches { position: relative; min-width: 0; min-height: 0; }
+.atm-svg-couches { width: 100%; height: 100%; }
+.atm-cases { min-width: 0; }
+.atm-cases-in { position: relative; }
+.atm-svg-cases { width: 100%; height: auto; touch-action: manipulation; }
+.atm-inerte, .atm-inerte * { pointer-events: none; }
+
+/* couches : cercles en pointillés épaissis, nommés n = 1, 2, 3 */
+.atm-couche { fill: none; stroke: var(--paper-3); stroke-width: 4; stroke-dasharray: 9 7; }
+.atm-couche-nom { fill: var(--ink-2); font-size: 17px; font-weight: 700; pointer-events: none; paint-order: stroke; stroke: var(--sheet); stroke-width: 7px; stroke-linejoin: round; }
+.atm-cible-c { fill: none; stroke: transparent; stroke-width: 40; pointer-events: stroke; cursor: pointer; }
+.atm-cible-k { fill: transparent; pointer-events: all; cursor: pointer; }
+.atm-cible-c.atm-survol { stroke: var(--cle-bg); }
+.atm-cible-k.atm-survol { fill: var(--cle-bg); }
+
+/* noyau : protons (disques encre avec +) et neutrons (disques clairs) ; noyau simple : disque encre */
+.atm-noyau-fond { fill: var(--paper); }
+.atm-proton circle { fill: var(--ink); }
+.atm-p-signe { stroke: var(--sheet); stroke-width: 2.6; stroke-linecap: round; }
+.atm-neutron circle { fill: var(--paper-2); stroke: var(--line-strong); stroke-width: 1.5; }
+.atm-noyau-simple { fill: var(--ink); }
+.atm-noyau-sym { fill: var(--sheet); font-size: 22px; font-weight: 800; }
+
+/* électrons : petits disques d'accent avec le signe − */
+.atm-e circle { fill: var(--accent); }
+.atm-e-signe { stroke: var(--sheet); stroke-linecap: round; }
+.atm-e { cursor: pointer; }
+.atm-e-mobile { cursor: grab; touch-action: none; }
+.atm-e-pris { opacity: .25; }
+.atm-e-nouveau circle { animation: atm-arrive .25s ease-out; transform-box: fill-box; transform-origin: center; }
+@keyframes atm-arrive { from { transform: scale(.2); } to { transform: scale(1); } }
+
+/* couche externe entourée (comme le trait du tableau) */
+.atm-anneau { fill: none; stroke: var(--accent); stroke-width: 3; }
+.atm-anneau-fond { fill: var(--accent); fill-opacity: .08; stroke: none; }
+
+/* cases des sous-couches */
+.atm-case { fill: var(--sheet); stroke: var(--line-strong); stroke-width: 1.8; }
+.atm-case-d { fill: var(--paper-2); stroke: var(--paper-3); }
+.atm-case-nom { fill: var(--ink-2); font-size: 15px; font-weight: 700; pointer-events: none; }
+.atm-case-d + .atm-case-nom { fill: var(--ink-3); }
+.atm-case-nb { fill: var(--ink); font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.atm-case-nb0 { fill: var(--ink-3); font-weight: 600; }
+.atm-k-couche { fill: var(--ink-2); font-size: 14px; font-weight: 700; pointer-events: none; }
+.atm-fleche { stroke: var(--ink-2); stroke-width: 1.6; }
+.atm-fleche-pointe { fill: var(--ink-2); }
+/* bulle ⓘ posée sur la case 3d (grisée) */
+.atm-info3d { position: absolute; transform: translate(-50%, -50%); display: flex; }
+.atm-info3d.atm-survol .bul-info span { background: var(--cle-bg); }
+
+/* électron glissé hors de l'atome */
+.atm-fantome {
+  position: fixed; z-index: 1200; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 999px; pointer-events: none;
+  background: var(--accent); color: var(--sheet); display: grid; place-items: center; font: 800 1.2rem/1 var(--font-sans);
+}
+
+/* ---------- Écritures ---------- */
+.atm-val { display: inline-block; border: 2.5px solid var(--accent); border-radius: 999px; padding: 0 .35em; margin: -2px 0; }
+.atm-t { white-space: nowrap; }
+.atm-vide { color: var(--ink-3); font-weight: 600; }
+/* écriture conventionnelle : A en haut, Z en bas, à gauche du symbole */
+.atm-nota { display: inline-flex; align-items: center; white-space: nowrap; font-variant-numeric: tabular-nums; line-height: 1; vertical-align: middle; }
+.atm-nota-az { display: inline-flex; flex-direction: column; align-items: flex-end; font-size: .55em; font-weight: 700; line-height: 1.05; margin-right: .08em; }
+.atm-nota-x { font-weight: 800; }
+.atm-nota-q { align-self: flex-start; font-size: .55em; font-weight: 800; margin-left: .05em; margin-top: -.15em; }
+
+/* paires de charges : ⊕ du noyau en haut, ⊖ des électrons en bas */
+.atm-paires { display: inline-flex; flex-wrap: wrap; gap: 3px; vertical-align: middle; }
+.atm-paire { display: inline-flex; flex-direction: column; gap: 2px; padding: 2px; border-radius: 999px; background: var(--paper); }
+.atm-paire.atm-seul { background: var(--cle-bg); box-shadow: inset 0 0 0 2px var(--accent); }
+.atm-pp, .atm-pe, .atm-trou { width: 17px; height: 17px; border-radius: 999px; display: grid; place-items: center; font: 800 .8rem/1 var(--font-sans); }
+.atm-pp { background: var(--ink); color: var(--sheet); }
+.atm-pe { background: var(--accent); color: var(--sheet); }
+.atm-trou { border: 1.5px dashed var(--line-strong); }
+
+/* ---------- Réserve d'électrons ---------- */
+.atm-reserve {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 46px; min-width: 46px; padding: 5px; border: none; border-radius: 999px;
+  background: var(--paper); box-shadow: inset 0 0 0 1.5px var(--paper-3); color: var(--ink); font: 700 .95rem var(--font-sans); cursor: grab;
+  touch-action: none; -webkit-tap-highlight-color: transparent;
+}
+.atm-reserve-t { padding-right: 8px; }
+.atm-reserve-e { width: 36px; height: 36px; border-radius: 999px; background: var(--accent); color: var(--sheet); display: grid; place-items: center; font-weight: 800; font-size: 1.3rem; }
+.atm-reserve.dragging { opacity: .5; }
+.atm-reserve:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.drag-ghost.atm-reserve { opacity: .9; }
+
+/* ---------- Composeur de configuration ---------- */
+.atm-comp { display: flex; flex-direction: column; gap: 10px; }
+.atm-comp-ligne {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 60px; padding: 6px 10px; border-radius: 14px;
+  background: var(--paper); box-shadow: inset 0 0 0 1.5px var(--paper-3); font-size: 1.5rem; font-weight: 700;
+}
+.atm-comp-ligne.atm-survol { box-shadow: inset 0 0 0 2px var(--accent); background: var(--cle-bg); }
+.atm-comp-vide { font-size: .95rem; font-weight: 600; color: var(--ink-2); }
+.atm-comp-t {
+  min-height: 46px; padding: 2px 10px; border: none; border-radius: 12px; background: var(--sheet); color: var(--ink);
+  font: inherit; font-variant-numeric: tabular-nums; cursor: pointer; touch-action: manipulation; box-shadow: inset 0 0 0 1.5px var(--paper-3);
+}
+.atm-comp-t.atm-choisi { box-shadow: inset 0 0 0 2.5px var(--accent); color: var(--accent-ink); }
+.atm-comp-t:disabled { cursor: default; box-shadow: none; background: transparent; color: var(--ink); }
+.atm-comp-t:focus-visible, .atm-comp-et:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.atm-comp-reglage { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.atm-comp-sel { font-size: 1.25rem; font-weight: 800; min-width: 52px; color: var(--accent-ink); }
+.atm-comp-pm { min-width: 58px; min-height: 50px; font-size: 1.3rem; font-weight: 800; padding: 0; }
+.atm-comp-palette { display: flex; flex-wrap: wrap; gap: 8px; }
+.atm-comp-et { min-width: 58px; min-height: 46px; font-weight: 800; font-size: 1.05rem; touch-action: none; }
+.atm-comp-et:disabled { opacity: .35; }
+.atm-comp sup, .atm-val sup, .atm-t sup { font-size: .62em; line-height: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .atm-e-nouveau circle { animation: none; }
+}
