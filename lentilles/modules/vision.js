@@ -5,9 +5,10 @@
    œil normal, myope ou hypermétrope (moyen ou fort : œil trop long ou trop court), âge
    (presbytie : l'amplitude d'accommodation diminue), accommodation à la main ou réflexe
    (bouton « Accommoder »), lunettes dont on règle la vergence.
-   Vue : œil en 3D coupé dans le plan horizontal qui contient l'axe optique (on voit l'intérieur),
-   cornée, iris, cristallin (plus épais quand il accommode), rétine, nerf optique, lunettes
-   stylisées ; faisceau issu de A ; en médaillon, l'image reçue par la rétine, nette ou floue.
+   Vue : œil vu de côté, coupé dans le plan vertical qui contient l'axe optique : cornée, iris,
+   cristallin (bombé quand il accommode, contour au repos en pointillé), muscles ciliaires et fibres,
+   rétine, nerf optique ; lunettes en profil ; faisceau issu de A, prolongé en pointillé jusqu'à A′
+   quand l'image se forme derrière la rétine (écart exagéré) ; sous la rétine, l'image qu'elle reçoit.
 
    Modèle (œil réduit, vergences en δ, longueurs en mm) :
      cristallin en x = 0, rétine en x = L (17 mm × 1,05 ou 1,10 pour un œil myope, × 0,95 ou 0,90
@@ -31,49 +32,30 @@
   const DIST = [0.10, 0.15, 0.20, 0.25, 0.33, 0.5, 0.75, 1, 1.5, 2, 3, 5, 10, Infinity];   // m
   const texteDist = D => (D === Infinity ? 'à l\'infini' : D < 1 ? `à ${Math.round(D * 100)} cm` : `à ${fmt(D)} m`);
 
-  /* ---------- Projection 3D (orthographique) : x axe optique, y vers le haut, z vers l'observateur ----------
-     L'œil est coupé par le plan vertical z = 0 qui contient l'axe optique ; la moitié z > 0 est enlevée.
-     Lacet et tangage légers (on voit un peu l'avant et le dessus), puis roulis pour que l'axe reste horizontal. */
-  const PSI = 24 * RAD, PHI = 14 * RAD, U = 10;   // lacet, tangage, unités SVG par mm
-  const cps = Math.cos(PSI), sps = Math.sin(PSI), cph = Math.cos(PHI), sph = Math.sin(PHI);
-  function P0(p) {
-    const x1 = p[0] * cps + p[2] * sps, z1 = -p[0] * sps + p[2] * cps;
-    return [x1, -(p[1] * cph - z1 * sph)];
-  }
-  const AX = P0([1, 0, 0]), ROL = -Math.atan2(AX[1], AX[0]), cr = Math.cos(ROL), sr = Math.sin(ROL);
-  function P(p) { const q = P0(p); return [(q[0] * cr - q[1] * sr) * U, (q[0] * sr + q[1] * cr) * U]; }
+  /* ---------- Vue de côté (coupe dans le plan vertical qui contient l'axe optique) ----------
+     x : axe optique (mm, cristallin en x = 0), y : vers le haut ; U unités SVG par mm. */
+  const U = 10;
+  const P = p => [p[0] * U, -p[1] * U];
   const n1 = v => Math.round(v * 10) / 10;
   const chemin = (pts, ferme) => pts.map((q, i) => (i ? 'L' : 'M') + n1(q[0]) + ' ' + n1(q[1])).join('') + (ferme ? 'Z' : '');
-  // enveloppe convexe (chaîne monotone) des points projetés
-  function enveloppe(pts) {
-    const p = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-    const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
-    const bas = [], haut = [];
-    p.forEach(q => { while (bas.length > 1 && cr(bas[bas.length - 2], bas[bas.length - 1], q) <= 0) bas.pop(); bas.push(q); });
-    for (let i = p.length - 1; i >= 0; i--) { const q = p[i]; while (haut.length > 1 && cr(haut[haut.length - 2], haut[haut.length - 1], q) <= 0) haut.pop(); haut.push(q); }
-    return bas.slice(0, -1).concat(haut.slice(0, -1));
-  }
-  // points d'un ellipsoïde (centre c, demi-axes r) ; moitie : seulement z ≤ 0 (la moitié avant est enlevée)
-  function ellipsoide(c, r, moitie) {
-    const pts = [];
-    for (let t = 0; t <= 180; t += 10) for (let f = 0; f < 360; f += 10) {
-      const z = r[2] * Math.cos(t * RAD);
-      if (moitie && z > 1e-9) continue;
-      pts.push(P([c[0] + r[0] * Math.sin(t * RAD) * Math.cos(f * RAD), c[1] + r[1] * Math.sin(t * RAD) * Math.sin(f * RAD), c[2] + z]));
-    }
+  // arc d'ellipse de centre (cx, cy), demi-axes (rx, ry), angles en degrés (points en mm)
+  function arc(cx, cy, rx, ry, a0, a1, pas) {
+    const pts = [], n = Math.max(2, Math.ceil(Math.abs(a1 - a0) / (pas || 4)));
+    for (let k = 0; k <= n; k++) { const a = (a0 + (a1 - a0) * k / n) * RAD; pts.push([cx + rx * Math.cos(a), cy + ry * Math.sin(a)]); }
     return pts;
   }
-  // courbe dans le plan de coupe z = 0 : ellipse de centre (cx, cy), demi-axes (rx, ry), angles en degrés
-  function coupe(cx, cy, rx, ry, a0, a1, pas) {
-    const pts = [];
-    for (let a = a0; a <= a1 + 1e-9; a += pas || 5) pts.push(P([cx + rx * Math.cos(a * RAD), cy + ry * Math.sin(a * RAD), 0]));
-    return pts;
+  // hauteur où la cornée (cercle de centre (c0, 0), rayon rc) rejoint la sclérotique (ellipse (xc, 0), rx, ry)
+  function limbe(c0, rc, xc, rx, ry) {
+    const ec = y => (c0 - Math.sqrt(rc * rc - y * y)) - (xc - rx * Math.sqrt(1 - y * y / (ry * ry)));
+    let lo = 0.5, hi = Math.min(rc, ry) - 0.01;
+    for (let k = 0; k < 40; k++) { const m = (lo + hi) / 2; if (ec(lo) * ec(m) <= 0) hi = m; else lo = m; }
+    return (lo + hi) / 2;
   }
-  // cercle dans un plan x = constante (iris, verre de lunettes), angles θ : y = r cos θ, z = r sin θ
-  function cercleX(x, r, a0, a1, pas) {
-    const pts = [];
-    for (let a = a0; a <= a1 + 1e-9; a += pas || 6) pts.push(P([x, r * Math.cos(a * RAD), r * Math.sin(a * RAD)]));
-    return pts;
+  // contour de l'œil : arc de cornée (à l'avant) puis arc de sclérotique (le reste), en mm
+  function contourOeil(c0, rc, xc, rx, ry) {
+    const yl = limbe(c0, rc, xc, rx, ry), al = Math.asin(yl / rc) / RAD;
+    const as = Math.atan2(yl / ry, (c0 - Math.sqrt(rc * rc - yl * yl) - xc) / rx) / RAD;   // angle du limbe sur l'ellipse (≈ 120°)
+    return arc(c0, 0, rc, rc, 180 + al, 180 - al, 3).concat(arc(xc, 0, rx, ry, as, -as, 4));
   }
 
   let compteur = 0;
@@ -117,7 +99,6 @@
       <div class="lt-vis-corps">
         <div class="er-card lt-vis-scene">
           <div class="lt-vis-svg" data-a="scene"></div>
-          <figure class="lt-vis-medaillon"><figcaption>Image sur la rétine (renversée)</figcaption><div data-a="ret"></div><p data-a="retT"></p></figure>
           <p class="lt-vis-etat" data-a="etat" aria-live="polite"></p>
           <div class="lt-vis-defis-pc" data-a="defisPC"></div>
         </div>
@@ -164,76 +145,98 @@
       </div></div>`;
     const $ = a => zone.querySelector(`[data-a="${a}"]`);
 
-    /* ---------- Scène 3D ---------- */
+    /* ---------- Scène : œil vu de côté, coupé dans le plan de l'axe optique ---------- */
     const NS = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(NS, 'svg');
     svg.setAttribute('class', 'lt-vis-3d'); svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', 'Œil en trois dimensions coupé dans le plan de l\'axe optique : cornée, iris, cristallin, rétine ; faisceau de lumière issu de l\'objet A ; lunettes');
+    svg.setAttribute('aria-label', 'Œil vu de côté, coupé dans le plan de l\'axe optique : cornée, iris, cristallin, muscles ciliaires, rétine ; faisceau de lumière issu de l\'objet A ; lunettes ; sous la rétine, l\'image qu\'elle reçoit');
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    // médaillon « image sur la rétine » (mm) : sous le fond de l'œil
+    const MED = { x: L0 - 5, y: -13, l: 10, h: 8.5 };
+    const mx = MED.x * U, my = -MED.y * U, ml = MED.l * U, mh = MED.h * U;
     // dégradés (couleurs du thème)
     const grad = (type, gid, attrs, stops) => `<${type} id="${gid}-${id}" ${attrs}>${stops.map(([o, c, op]) => `<stop offset="${o}" style="stop-color:var(${c});stop-opacity:${op == null ? 1 : op}"/>`).join('')}</${type}>`;
     svg.innerHTML = `<defs>
       ${grad('radialGradient', 'lt-sclere', 'cx="35%" cy="30%" r="80%"', [[0, '--sheet'], [0.6, '--paper'], [1, '--paper-3']])}
       ${grad('linearGradient', 'lt-vitre', 'x1="0" y1="0" x2="1" y2="0"', [[0, '--cle-bg', 0.55], [0.55, '--paper-2', 0.9], [1, '--danger-bg']])}
       ${grad('radialGradient', 'lt-crist', 'cx="40%" cy="35%" r="75%"', [[0, '--sheet', 0.9], [1, '--cle-line', 0.85]])}
-      ${grad('radialGradient', 'lt-iris', 'cx="50%" cy="50%" r="60%"', [[0, '--orga-ram-3'], [1, '--accent-ink']])}
-      ${grad('radialGradient', 'lt-verre', 'cx="40%" cy="35%" r="70%"', [[0, '--sheet', 0.35], [1, '--cle-line', 0.55]])}
-      ${grad('radialGradient', 'lt-ombre', 'cx="50%" cy="50%" r="50%"', [[0, '--ink', 0.18], [1, '--ink', 0]])}
-    </defs><g data-a="g3d"></g>`;
+      ${grad('linearGradient', 'lt-iris', 'x1="0" y1="0" x2="0" y2="1"', [[0, '--orga-ram-3'], [1, '--accent-ink']])}
+      ${grad('linearGradient', 'lt-verre', 'x1="0" y1="0" x2="0" y2="1"', [[0, '--cle-line', 0.55], [0.45, '--sheet', 0.9], [1, '--cle-line', 0.55]])}
+      <clipPath id="lt-med-clip-${id}"><rect x="${mx}" y="${my}" width="${ml}" height="${mh}" rx="10"/></clipPath>
+      <filter id="lt-flou-vis-${id}" filterUnits="userSpaceOnUse" x="${mx}" y="${my}" width="${ml}" height="${mh}"><feGaussianBlur stdDeviation="0"/></filter>
+    </defs><g data-a="g3d"></g>
+    <g class="lt-vis-med">
+      <rect x="${mx}" y="${my}" width="${ml}" height="${mh}" rx="10" class="lt-vis-ret-fond"/>
+      <g clip-path="url(#lt-med-clip-${id})"><g data-a="lettre" filter="url(#lt-flou-vis-${id})"></g></g>
+      <rect x="${mx}" y="${my}" width="${ml}" height="${mh}" rx="10" class="lt-vis-med-cadre"/>
+      <text x="${mx + ml / 2}" y="${my + mh + 26}" class="lt-vis-txt" text-anchor="middle">Sur la rétine : <tspan data-a="retT"></tspan></text>
+    </g>`;
     $('scene').appendChild(svg);
     const g3d = svg.querySelector('[data-a="g3d"]');
+    const flou = svg.querySelector('feGaussianBlur');
+    LT.lettre(svg.querySelector('[data-a="lettre"]'), mx + ml / 2 - 2, my + mh / 2 - 31, 62, true, 'lt-lettre');
     const url = n => `url(#${n}-${id})`;
 
     function dessiner(o) {
       const Lr = L(), rx = (Lr + 5.6) / 2 + 0.3, xc = Lr + 0.3 - rx, R = 11.6, EP = 0.7;   // globe (mm), épaisseur de la paroi
+      const C0 = 0.4, RC = 7.8, EC = 0.55;                                                // cornée : centre, rayon, épaisseur (mm)
       const out = [];
-      const path = (d, cls, extra) => out.push(`<path d="${d}" class="${cls}"${extra || ''}/>`);
-      const texte = (p, t, cls, ancre) => out.push(`<text x="${n1(p[0])}" y="${n1(p[1])}" class="${cls}" text-anchor="${ancre || 'middle'}">${t}</text>`);
+      const path = (pts, cls, extra, ferme) => out.push(`<path d="${chemin(pts.map(P), ferme !== false)}" class="${cls}"${extra || ''}/>`);
+      const ligne = (pts, cls) => path(pts, cls, '', false);
+      const texte = (p, t, cls, ancre) => { const q = P(p); out.push(`<text x="${n1(q[0])}" y="${n1(q[1])}" class="${cls}" text-anchor="${ancre || 'middle'}">${t}</text>`); };
+      const paroi = y => xc - (rx - EP) * Math.sqrt(Math.max(0, 1 - y * y / ((R - EP) * (R - EP))));   // face interne, côté avant
+      const yParoi = x => (R - EP) * Math.sqrt(Math.max(0, 1 - (x - xc) * (x - xc) / ((rx - EP) * (rx - EP))));
       // position affichée de l'objet (les distances ne sont pas à l'échelle)
-      const D = o.D, xo = D === Infinity ? null : -(21 + 7.5 * Math.log10(D / 0.1));
-      const xg = -E_LUN, xGauche = -42, rv = 8.5;
+      const D = o.D, xo = D === Infinity ? null : -(21 + 6 * Math.log10(D / 0.1));
+      const xg = -E_LUN, xGauche = -37.5, rv = 8.5, Vg = o.Vg;
 
-      // ombre portée sous l'œil
-      const ombre = P([xc, -R - 1.5, 0]);
-      out.push(`<ellipse cx="${n1(ombre[0])}" cy="${n1(ombre[1] + 10)}" rx="${n1(rx * U * 1.05)}" ry="${n1(R * U * 0.22)}" fill="${url('lt-ombre')}"/>`);
+      // verre de lunettes en profil (ménisque) : plus épais au centre s'il est convergent, au bord s'il est divergent
+      const t = Math.min(1, Math.abs(Vg) / 8);
+      const ec = Vg >= 0 ? 0.5 + 2.8 * t : 0.45, eb = Vg >= 0 ? 0.45 : 0.5 + 2.8 * t;   // épaisseurs au centre et au bord (exagérées)
+      const SF = 1.6, SB = SF + eb - ec;                                                // flèches des faces avant et arrière
+      const xAv = y => xg - ec / 2 + SF * (y / rv) * (y / rv), xAr = y => xg + ec / 2 + SB * (y / rv) * (y / rv);
+
       // axe optique, hors de l'œil
-      path(chemin([P([xGauche, 0, 0]), P([-6.3, 0, 0])]), 'lt-vis-axe');
-      // branche des lunettes, côté éloigné (cachée en partie par l'œil)
-      if (etat.lun) path(chemin([P([xg, 2.5, -rv]), P([xg + 2, 3, -rv - 1.5]), P([Lr + 12, 3, -rv - 2.5]), P([Lr + 15, -2, -rv - 2.5])]), 'lt-vis-monture lt-vis-branche');
-      // nerf optique (moitié arrière d'un cylindre derrière l'œil)
-      const nerf = [];
-      for (let x = Lr - 0.5; x <= Lr + 9; x += 1.5) for (let a = 180; a <= 360; a += 15) nerf.push(P([x, 1.8 * Math.cos(a * RAD), 1.8 * Math.sin(a * RAD)]));
-      path(chemin(enveloppe(nerf), true), 'lt-vis-nerf');
-      // globe : moitié arrière (sclérotique) vue de l'extérieur, puis l'intérieur, puis la paroi coupée
-      path(chemin(enveloppe(ellipsoide([xc, 0, 0], [rx, R, R], true)), true), 'lt-vis-globe', ` fill="${url('lt-sclere')}"`);
-      path(chemin(coupe(xc, 0, rx - EP, R - EP, 0, 360), true), 'lt-vis-coupe', ` fill="${url('lt-vitre')}"`);
-      path(chemin(coupe(xc, 0, rx, R, 0, 360), true) + chemin(coupe(xc, 0, rx - EP, R - EP, 0, 360).reverse(), true), 'lt-vis-paroi', ' fill-rule="evenodd"');
-      // rétine : fond de l'œil (le long de la paroi, côté arrière)
-      path(chemin(coupe(xc, 0, rx - EP - 0.25, R - EP - 0.25, -64, 64, 3)), 'lt-vis-retine');
-      // iris (moitié arrière d'un anneau, plan x = −2,6) et sa coupe
-      const xi = -2.6;
-      path(chemin(cercleX(xi, 6, 180, 360).concat(cercleX(xi, PUP + 0.1, 180, 360).reverse()), true), 'lt-vis-iris', ` fill="${url('lt-iris')}"`);
-      [1, -1].forEach(s => path(chemin([P([xi - 0.25, s * (PUP + 0.1), 0]), P([xi - 0.25, s * 6, 0]), P([xi + 0.25, s * 6, 0]), P([xi + 0.25, s * (PUP + 0.1), 0])], true), 'lt-vis-iris-coupe'));
-      // cristallin : moitié arrière en relief, et sa coupe (plus épais quand il accommode)
-      const ep = 1.75 + 0.07 * etat.a;
-      path(chemin(enveloppe(ellipsoide([0, 0, 0], [ep, 4.4, 4.4], true)), true), 'lt-vis-crist', ` fill="${url('lt-crist')}"`);
-      path(chemin(coupe(0, 0, ep, 4.4, 0, 360), true), 'lt-vis-crist-coupe');
-      // muscles ciliaires (au-dessus et au-dessous du cristallin) : contractés quand l'œil accommode
-      [-1, 1].forEach(s => path(chemin(coupe(0, s * 5.4, 0.9, 0.75, 0, 360, 30), true), 'lt-vis-muscle' + (etat.a > 0.05 ? ' lt-vis-muscle-on' : '') + (anim ? ' lt-vis-muscle-anim' : '')));
-      // cornée : calotte sphérique en avant (rayon 7,6 mm, sommet en x = −6,2), moitié arrière et coupe
-      const cornee = [], profil = [];
-      for (let u = 0; u <= 1.0001; u += 0.1) for (let f = 180; f <= 360; f += 15) {
-        const r = 5.8 * u, x = -6.2 + (7.6 - Math.sqrt(7.6 * 7.6 - r * r));
-        cornee.push(P([x, r * Math.cos(f * RAD), r * Math.sin(f * RAD)]));
-      }
-      for (let r = -5.8; r <= 5.8001; r += 0.4) profil.push(P([-6.2 + (7.6 - Math.sqrt(7.6 * 7.6 - r * r)), r, 0]));
-      path(chemin(enveloppe(cornee), true), 'lt-vis-cornee');
-      path(chemin(profil), 'lt-vis-cornee-coupe');
-      // axe optique, dans l'œil
-      path(chemin([P([-6.3, 0, 0]), P([Lr - EP, 0, 0])]), 'lt-vis-axe');
+      ligne([[xGauche, 0], [-7.5, 0]], 'lt-vis-axe');
+      // branche des lunettes : passe derrière l'œil jusqu'à l'oreille
+      if (etat.lun) ligne([[xAr(rv) - 0.2, rv - 0.4], [-6, 7.2], [Lr + 11, 7.2], [Lr + 13.5, 5.6], [Lr + 14, 3]], 'lt-vis-monture lt-vis-branche');
+      // nerf optique
+      path([[Lr - 1, -1], [Lr + 9, -1.4], [Lr + 9, -4.6], [Lr - 1, -4.4]], 'lt-vis-nerf');
+      // globe : sclérotique (contour complet), intérieur (humeurs), cornée transparente
+      path(contourOeil(C0, RC, xc, rx, R), 'lt-vis-globe', ` fill="${url('lt-sclere')}"`);
+      path(contourOeil(C0, RC - EC, xc, rx - EP, R - EP), 'lt-vis-coupe', ` fill="${url('lt-vitre')}"`);
+      const yl = limbe(C0, RC, xc, rx, R), yli = limbe(C0, RC - EC, xc, rx - EP, R - EP);
+      const al = Math.asin(yl / RC) / RAD, ali = Math.asin(yli / (RC - EC)) / RAD;
+      path(arc(C0, 0, RC, RC, 180 + al, 180 - al, 3).concat(arc(C0, 0, RC - EC, RC - EC, 180 - ali, 180 + ali, 3)), 'lt-vis-cornee');
+      // rétine : fond de l'œil
+      ligne(arc(xc, 0, rx - EP - 0.25, R - EP - 0.25, -64, 64, 3), 'lt-vis-retine');
 
-      // faisceau issu de A, dans le plan de coupe : bords (± pupille) et rayon central
-      const Vg = o.Vg, bords = [-PUP, PUP];
+      // cristallin : plus bombé quand il accommode (déformation exagérée pour la voir) ; contour au repos en pointillé
+      const k = Math.pow(Math.max(0, etat.a) / 10, 0.75);
+      const lentille = (av, ar, h) => arc(0, 0, ar, h, -90, 90, 6).concat(arc(0, 0, av, h, 90, 270, 6));
+      const hC = 4.6 - 0.7 * k, eAv = 1.1 + 1.3 * k, eAr = 1.6 + 1.6 * k;
+      path(lentille(eAv, eAr, hC), 'lt-vis-crist-coupe', ` fill="${url('lt-crist')}"`);
+      if (k > 0.03) path(lentille(1.1, 1.6, 4.6), 'lt-vis-fantome');
+      // muscles ciliaires (anneau autour du cristallin, en haut et en bas de la coupe) et fibres qui tiennent le cristallin :
+      // au repos le muscle est relâché et les fibres sont tendues ; en accommodant, il se contracte et les fibres se relâchent
+      const xi = -2.9;
+      [1, -1].forEach(s => {
+        const pointe = [0.1, s * (7.1 - 1.1 * k)], ep = 1.3 + 0.8 * k;
+        const m = [[xi + 0.5, s * yParoi(xi + 0.5)], [pointe[0] - ep, s * (Math.abs(pointe[1]) + 0.5)], pointe, [pointe[0] + ep, s * (Math.abs(pointe[1]) + 0.9)], [2.3, s * yParoi(2.3)]];
+        path(m, 'lt-vis-muscle' + (etat.a > 0.05 ? ' lt-vis-muscle-on' : '') + (anim ? ' lt-vis-muscle-anim' : ''));
+        [-0.9, -0.3, 0.3, 0.9].forEach(dx => {
+          const de = [pointe[0] + dx * 0.6, pointe[1] - s * 0.1], vers = [dx * 1.1, s * (hC - 0.15)];
+          const mi = [(de[0] + vers[0]) / 2 + 0.7 * k * (dx < 0 ? -1 : 1), (de[1] + vers[1]) / 2 - s * 0.5 * k];
+          out.push(`<path d="M${P(de).map(n1).join(' ')}Q${P(mi).map(n1).join(' ')} ${P(vers).map(n1).join(' ')}" class="lt-vis-zonule"/>`);
+        });
+        // iris : coupe d'un anneau, de la pupille à la paroi
+        path([[xi - 0.3, s * (PUP + 0.1)], [xi - 0.3, s * yParoi(xi - 0.3)], [xi + 0.3, s * yParoi(xi + 0.3)], [xi + 0.3, s * (PUP + 0.1)]], 'lt-vis-iris', ` fill="${url('lt-iris')}"`);
+      });
+      // axe optique, dans l'œil
+      ligne([[-7.5, 0], [Lr - EP, 0]], 'lt-vis-axe');
+
+      // faisceau issu de A, jusqu'au cristallin : bords (± pupille) et rayon central
+      const bords = [-PUP, PUP];
       // hauteur sur le verre du rayon qui arrive à la hauteur y sur le cristallin
       const yVerre = y => {
         if (!etat.lun) return null;
@@ -241,70 +244,65 @@
         return y / fac;
       };
       const avant = bords.map(y => {
-        const g = yVerre(y), dep = xo === null ? [xGauche, g === null ? y : g, 0] : [xo, 0, 0];
-        return (g === null ? [dep, [0, y, 0]] : [dep, [xg, g, 0], [0, y, 0]]).map(P);
+        const g = yVerre(y), dep = xo === null ? [xGauche, g === null ? y : g] : [xo, 0];
+        return g === null ? [dep, [0, y]] : [dep, [xAv(g), g], [xAr(g), g], [0, y]];
       });
-      path(chemin(avant[0].concat(avant[1].slice().reverse()), true), 'lt-vis-faisceau');
-      avant.forEach(r => path(chemin(r), 'lt-vis-rayon'));
-      path(chemin([P([xo === null ? xGauche : xo, 0, 0]), P([0, 0, 0])]), 'lt-vis-rayon lt-vis-rayon-c');
-      // dans l'œil : cristallin → (image A′) → rétine
-      const xFin = Lr - EP - 0.3, yr = y => y - y * o.Vimg / 1000 * xFin;
-      if (o.xi < xFin) {
-        const I = P([o.xi, 0, 0]);
-        path(chemin([P([0, -PUP, 0]), I, P([0, PUP, 0])], true), 'lt-vis-faisceau');
-        path(chemin([I, P([xFin, yr(-PUP), 0]), P([xFin, yr(PUP), 0])], true), 'lt-vis-faisceau');
-      } else path(chemin([P([0, -PUP, 0]), P([xFin, yr(-PUP), 0]), P([xFin, yr(PUP), 0]), P([0, PUP, 0])], true), 'lt-vis-faisceau');
-      bords.forEach(y => path(chemin([P([0, y, 0]), P([xFin, yr(y), 0])]), 'lt-vis-rayon'));
-      path(chemin([P([0, 0, 0]), P([xFin, 0, 0])]), 'lt-vis-rayon lt-vis-rayon-c');
-      // tache de lumière sur la rétine, et point image A′ s'il est dans l'œil
+      path(avant[0].concat(avant[1].slice().reverse()), 'lt-vis-faisceau');
+      avant.forEach(r => ligne(r, 'lt-vis-rayon'));
+      ligne([[xo === null ? xGauche : xo, 0], [0, 0]], 'lt-vis-rayon lt-vis-rayon-c');
+      // dans l'œil : cristallin → rétine ; l'image A′ derrière la rétine est éloignée davantage (×3, au plus 13 mm) pour la voir ;
+      // image nette : A′ dessiné sur la rétine
+      const xFin = Lr - EP - 0.3;
+      const xA = o.nette ? xFin : o.xi <= xFin ? o.xi : xFin + 13 * Math.tanh(3 * (Math.min(o.xi, 1e4) - xFin) / 13);
+      const yr = y => y * (1 - xFin / xA);     // hauteur sur la rétine du rayon parti de la hauteur y sur le cristallin
+      if (xA < xFin) {
+        path([[0, -PUP], [xA, 0], [0, PUP]], 'lt-vis-faisceau');
+        path([[xA, 0], [xFin, yr(-PUP)], [xFin, yr(PUP)]], 'lt-vis-faisceau');
+      } else path([[0, -PUP], [xFin, yr(-PUP)], [xFin, yr(PUP)], [0, PUP]], 'lt-vis-faisceau');
+      bords.forEach(y => ligne([[0, y], [xFin, yr(y)]], 'lt-vis-rayon'));
+      ligne([[0, 0], [xFin, 0]], 'lt-vis-rayon lt-vis-rayon-c');
+      // au-delà de la rétine : prolongement en pointillé jusqu'à A′
+      if (xA > xFin + 0.05) bords.forEach(y => ligne([[xFin, yr(y)], [xA, 0]], 'lt-vis-rayon lt-vis-rayon-p'));
+      // tache de lumière sur la rétine, et point image A′
       const h1 = Math.min(yr(-PUP), yr(PUP)) - 0.15, h2 = Math.max(yr(-PUP), yr(PUP)) + 0.15;
-      path(chemin([P([xFin + 0.1, h1, 0]), P([xFin + 0.1, h2, 0])]), 'lt-vis-tache' + (o.nette ? ' lt-vis-tache-nette' : ''));
-      if (o.xi < xFin - 0.4) { const I = P([o.xi, 0, 0]); out.push(`<circle cx="${n1(I[0])}" cy="${n1(I[1])}" r="5" class="lt-vis-pt"/>`); texte([I[0], I[1] - 12], 'A′', 'lt-vis-nom'); }
+      ligne([[xFin + 0.1, h1], [xFin + 0.1, h2]], 'lt-vis-tache' + (o.nette ? ' lt-vis-tache-nette' : ''));
+      const I = P([xA, 0]);
+      out.push(`<circle cx="${n1(I[0])}" cy="${n1(I[1])}" r="5" class="lt-vis-pt"/>`);
+      if (!o.nette) texte([xA < xFin ? xA - 0.4 : xA, 0.9], 'A′', 'lt-vis-nom', xA < xFin ? 'end' : 'middle');
 
-      // lunettes stylisées : verre (plus épais au bord s'il est divergent, au centre s'il est convergent), monture, pont
+      // lunettes : verre en profil (ménisque), monture en haut et en bas, vergence
       if (etat.lun) {
-        path(chemin(cercleX(xg, rv, 0, 360), true), 'lt-vis-verre', ` fill="${url('lt-verre')}"`);
-        if (Vg < -0.01) path(chemin(cercleX(xg, rv - 1.2, 0, 360), true), 'lt-vis-verre-bord');
-        if (Vg > 0.01) path(chemin(cercleX(xg, 3, 0, 360), true), 'lt-vis-verre-centre');
-        path(chemin(cercleX(xg, rv, 0, 360), true), 'lt-vis-monture');
-        path(chemin([P([xg, 2.5, rv]), P([xg - 1, 3.6, rv + 3]), P([xg, 3, rv + 6])]), 'lt-vis-monture');
-        texte(P([xg, -rv - 3.6, 0]), `${Vg > 0 ? '+' : Vg < 0 ? '−' : ''}${fmt(Math.abs(Vg), 2)} δ`, 'lt-vis-nom');
+        const ys = arc(0, 0, 1, rv, -90, 90, 10).map(q => q[1]);
+        path(ys.map(y => [xAv(y), y]).concat(ys.slice().reverse().map(y => [xAr(y), y])), 'lt-vis-verre', ` fill="${url('lt-verre')}"`);
+        [1, -1].forEach(s => path([[xAv(rv) - 0.4, s * (rv - 0.5)], [xAv(rv) - 0.4, s * (rv + 0.6)], [xAr(rv) + 0.4, s * (rv + 0.6)], [xAr(rv) + 0.4, s * (rv - 0.5)]], 'lt-vis-cercle'));
+        texte([xg, -rv - 3.2], `${Vg > 0 ? '+' : Vg < 0 ? '−' : ''}${fmt(Math.abs(Vg), 2)} δ`, 'lt-vis-nom');
+        texte([xg, -rv - 5.6], Vg > 0.01 ? 'convergent' : Vg < -0.01 ? 'divergent' : 'sans effet', 'lt-vis-txt');
       }
 
       // objet A (flèche verticale) ou objet à l'infini
       if (xo !== null) {
-        const a = P([xo, 0, 0]), b = P([xo, 6, 0]);
-        path(chemin([a, b]), 'lt-vis-objet');
-        path(`M${n1(b[0])} ${n1(b[1] - 14)}l-10 22h20z`, 'lt-vis-objet-p');
-        texte([a[0], a[1] + 30], 'A', 'lt-vis-nom');
-        texte([b[0], b[1] - 24], `objet ${texteDist(D)}`, 'lt-vis-txt');
+        ligne([[xo, 0], [xo, 6]], 'lt-vis-objet');
+        const b = P([xo, 6]);
+        out.push(`<path d="M${n1(b[0])} ${n1(b[1] - 14)}l-10 22h20z" class="lt-vis-objet-p"/>`);
+        texte([xo, -3], 'A', 'lt-vis-nom');
+        texte([xo, 8.6], `objet ${texteDist(D)}`, 'lt-vis-txt');
       } else {
-        texte(P([xGauche, 4.6, 0]), 'objet A à l\'infini :', 'lt-vis-txt', 'start');
-        texte(P([xGauche, 3.2, 0]), 'rayons parallèles', 'lt-vis-txt', 'start');
+        texte([xGauche, 13.2], 'objet A à l\'infini :', 'lt-vis-txt', 'start');
+        texte([xGauche, 11.4], 'rayons parallèles', 'lt-vis-txt', 'start');
       }
 
       // noms des parties de l'œil
-      const lien = (p, q, t, ancre) => { path(chemin([p, q]), 'lt-vis-lien'); texte([q[0], q[1] + (q[1] > p[1] ? 24 : -8)], t, 'lt-vis-txt', ancre); };
-      lien(P([0.5, -3.6, 0]), P([3, -15, 0]), 'cristallin');
-      lien(P([xc + rx - EP - 0.6, -6, 0]), P([xc + rx + 2, -15, 0]), 'rétine');
-      lien(P([xi, -5, 0]), P([-6, -15, 0]), 'iris', 'end');
-      lien(P([-6, 3.5, 0]), P([-9, 12, 0]), 'cornée', 'end');
-      lien(P([0, 5.6, 0]), P([2, 14, 0]), 'muscles ciliaires', 'start');
+      const lien = (p, q, nom, ancre) => { ligne([p, q], 'lt-vis-lien'); texte([q[0], q[1] + (q[1] > p[1] ? 0.6 : -2.4)], nom, 'lt-vis-txt', ancre); };
+      lien([0.6, -3.4], [3, -14.6], 'cristallin');
+      lien([xc + (rx - EP) * Math.cos(-38 * RAD), (R - EP) * Math.sin(-38 * RAD)], [Lr + 3.2, -9], 'rétine', 'start');
+      lien([xi, -5.4], [-6, -14.6], 'iris', 'end');
+      lien([-7.2, 3.5], [-9.5, 11.6], 'cornée', 'end');
+      lien([0.1, 7.6], [1.5, 12.6], 'muscles ciliaires', 'start');
       g3d.innerHTML = out.join('');
       // cadre fixe (le dessin ne saute pas quand on règle)
-      const c1 = P([xGauche - 1.5, 0, 0]), c2 = P([L0 * 1.1 + 12.5, 0, 0]);
-      const haut = P([0, 17, 0])[1], bas = P([0, -18.5, 0])[1];
-      svg.setAttribute('viewBox', `${n1(c1[0])} ${n1(haut)} ${n1(c2[0] - c1[0])} ${n1(bas - haut)}`);
+      const x1 = (xGauche - 1.5) * U, x2 = (L0 * 1.1 + 15.5) * U, y1 = -15.2 * U, y2 = 25.2 * U;
+      svg.setAttribute('viewBox', `${n1(x1)} ${n1(y1)} ${n1(x2 - x1)} ${n1(y2 - y1)}`);
     }
-
-    /* ---------- Médaillon : image reçue par la rétine (renversée), nette ou floue ---------- */
-    const rs = OPT.scene($('ret'), { largeur: 120, hauteur: 110, aria: 'Image de l\'objet sur la rétine, nette ou floue' });
-    rs.poly('fond', [[-60, -55], [60, -55], [60, 55], [-60, 55]], 'lt-vis-ret-fond');
-    const defs = OPT.svgEl('defs', null, rs.svg);
-    const filtre = OPT.svgEl('filter', { id: 'lt-flou-vis-' + id, filterUnits: 'userSpaceOnUse', x: -60, y: -55, width: 120, height: 110 }, defs);
-    const flou = OPT.svgEl('feGaussianBlur', { stdDeviation: 0 }, filtre);
-    const gImg = OPT.svgEl('g', { filter: `url(#lt-flou-vis-${id})` }, rs.calque('rayons'));
-    LT.lettre(gImg, 0, -34, 68, true, 'lt-lettre');
 
     /* ---------- Commandes ---------- */
     let anim = null;
@@ -387,8 +385,9 @@
         : o.dV > 0 ? '<b class="lt-vis-ko">Image floue</b> : elle se forme <b>en avant</b> de la rétine.'
         : '<b class="lt-vis-ko">Image floue</b> : elle se formerait <b>en arrière</b> de la rétine.';
       $('etat').innerHTML = `${nom}, ${etat.age} ans${etat.lun ? ', avec lunettes' : ''} · objet ${texteDist(o.D)} · ${ou}`;
-      $('retT').textContent = o.nette ? 'nette' : 'floue';
-      $('retT').className = o.nette ? 'lt-vis-ok' : 'lt-vis-ko';
+      const retT = svg.querySelector('[data-a="retT"]');
+      retT.textContent = o.nette ? 'nette' : 'floue';
+      retT.setAttribute('class', o.nette ? 'lt-vis-ok' : 'lt-vis-ko');
       const s = o.nette ? 0 : Math.min(12, 1.4 + 2.2 * Math.abs(o.dV));
       flou.setAttribute('stdDeviation', String(Math.round(s * 100) / 100));
       dessiner(o);
@@ -402,7 +401,6 @@
     if (mq.addEventListener) mq.addEventListener('change', placerDefis); else mq.addListener(placerDefis);
     placerDefis();
     maj();
-    if (window.ResizeObserver) new ResizeObserver(() => dessiner(optique())).observe($('scene'));
     LT.visionEnCours = { etat, optique, zoneNette, maj, faits, L, A, DIST };   // utile pour vérifier l'application
     return LT.visionEnCours;
   }

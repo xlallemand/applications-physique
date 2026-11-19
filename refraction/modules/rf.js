@@ -20,7 +20,6 @@
    RF.partiesCalcul(c)              parties « loi », « expression littérale », « valeur du sinus », « angle ou indice »
      c = { m1, m2, i1, i2, inconnue: 's2' | 's1' | 'n2', n1, n2, sym1, sym2 (angles), etapes }
    RF.revois(liste)                 liens « Revois… » vers d'autres applications (nouvelle fenêtre)
-   RF.pleinEcran()                  bouton [data-plein] « ⤢ Plein écran » des pages de manipulation
    RF.fenetre(titre, remplir), RF.boutonAide(zone, texte, titre, remplir)   fenêtre d'aide par-dessus la page
    RF.aideDegres(zone)              bouton « Régler ma calculatrice en degrés » (Casio, Texas Instruments, NumWorks)
    RF.confettis()
@@ -158,34 +157,6 @@
   };
   function revois(liste) {
     return `<p class="rf-revois">${liste.map(k => `<a href="${APPLIS[k].href}" target="_blank" rel="noopener">${APPLIS[k].texte} ↗</a>`).join('')}</p>`;
-  }
-
-  /* ============================================================
-     PLEIN ÉCRAN (pages de manipulation) : bouton [data-plein] de la première carte.
-     Cache le sommaire, donne toute la largeur à la page et passe le navigateur
-     en plein écran quand il le permet (comme titrage-conductimetrique).
-     ============================================================ */
-  function pleinEcran() {
-    const b = document.querySelector('[data-plein]');
-    if (!b) return;
-    const html = document.documentElement;
-    function regler(on) {
-      html.classList.toggle('rf-plein', on);
-      b.setAttribute('aria-pressed', on ? 'true' : 'false');
-      b.textContent = on ? '⤡ Quitter le plein écran' : '⤢ Plein écran';
-      // les figures gardent leurs poignées de 44 px (largeur affichée qui change)
-      setTimeout(() => dispatchEvent(new Event('resize')), 60);
-    }
-    b.addEventListener('click', () => {
-      const on = !html.classList.contains('rf-plein');
-      regler(on);
-      try {
-        if (on && html.requestFullscreen) html.requestFullscreen().catch(() => {});
-        if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
-      } catch (e) { /* plein écran indisponible (iPhone…) : la page sans sommaire suffit */ }
-    });
-    // Échap sort du plein écran du navigateur : on remet aussi le sommaire
-    document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) regler(false); });
   }
 
   /* ============================================================
@@ -912,6 +883,6 @@
   window.RF = {
     PLAN, CALC, MILIEUX, fmt, sig, court, lire, cs, fr, sinD, asinD, el, melanger, hasard, defiler, amener, surOrdi, revois,
     jeton, ecrire, nHTML, iHTML, PARTIES, question, serie, ecriture, analyserLoi, analyserFraction, contexte, partiesCalcul,
-    calculatrice, confettis, malArrondi, pleinEcran, fenetre, boutonAide, aideDegres, loiHTML,
+    calculatrice, confettis, malArrondi, fenetre, boutonAide, aideDegres, loiHTML,
   };
 })();
