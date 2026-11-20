@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="maths">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2952c8">
+<!-- application sur l'écran d'accueil (manifeste ajouté par modules/sauvegarde.js sur le site) -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Équations physique">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="../icones/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="../icones/favicon-32.png">
+<title>Maquette : succès</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<link rel="stylesheet" href="editeur.css">
+<link rel="stylesheet" href="tuiles.css">
+<link rel="stylesheet" href="fiches.css">
+<link rel="stylesheet" href="epm.css">
+<link rel="stylesheet" href="../../assets/sommaire.css">
+<script src="../../assets/sommaire.js"></script>
+<script src="../../assets/dragdrop.js"></script>
+<script src="tuiles.js"></script>
+<script src="fiches.js"></script>
+<script src="aide-rules.js"></script>
+<script src="sauvegarde.js"></script>
+<script src="editeur.js"></script>
+<script src="ecriture.js"></script>
+<script src="equations.js"></script>
+<script src="competences.js"></script>
+<script src="epm.js"></script>
+<script src="question.js"></script>
+</head>
+<style>
+/* MAQUETTE : variables à ajouter dans assets/theme.css */
+:root { --med-bronze: #b4703f; --med-argent: #9ea6b0; --med-or: #d9a21b; --med-platine: #4fb6c9; }
+/* médaille : disque coloré par le niveau atteint, pictogramme au centre */
+.ps-med { width: 44px; height: 44px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 1.3rem; position: relative;
+  background: var(--paper-2); box-shadow: inset 0 0 0 2px var(--paper-3); }
+.ps-med.sans > span { filter: grayscale(1); opacity: .45; }
+.ps-med.b { background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--med-bronze) 45%, var(--sheet)), var(--med-bronze)); box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--med-bronze) 70%, var(--ink)); }
+.ps-med.a { background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--med-argent) 35%, var(--sheet)), var(--med-argent)); box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--med-argent) 70%, var(--ink)); }
+.ps-med.o { background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--med-or) 40%, var(--sheet)), var(--med-or)); box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--med-or) 70%, var(--ink)); }
+.ps-med.p { background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--med-platine) 30%, var(--sheet)), var(--med-platine)); box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--med-platine) 65%, var(--ink)), 0 0 0 3px color-mix(in srgb, var(--med-platine) 30%, transparent); }
+.ps-med.petit { width: 30px; height: 30px; font-size: .95rem; }
+/* compteur des médailles */
+.ps-tableau { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 6px 0 12px; }
+.ps-tableau > div { background: var(--paper); border-radius: 14px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: .78rem; color: var(--ink-2); font-weight: 600; }
+.ps-tableau b { font-size: 1.15rem; color: var(--ink); }
+.ps-tableau .ps-med { width: 26px; height: 26px; }
+/* une ligne de succès */
+.ps-s { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 4px 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.ps-s:first-child { border-top: none; }
+.ps-nom { font-weight: 800; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.ps-niv { font-size: .74rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: var(--paper-2); color: var(--ink-2); }
+.ps-niv.b { background: color-mix(in srgb, var(--med-bronze) 22%, var(--sheet)); color: color-mix(in srgb, var(--med-bronze) 60%, var(--ink)); }
+.ps-niv.a { background: color-mix(in srgb, var(--med-argent) 25%, var(--sheet)); color: color-mix(in srgb, var(--med-argent) 45%, var(--ink)); }
+.ps-niv.o { background: color-mix(in srgb, var(--med-or) 22%, var(--sheet)); color: color-mix(in srgb, var(--med-or) 50%, var(--ink)); }
+.ps-niv.p { background: color-mix(in srgb, var(--med-platine) 22%, var(--sheet)); color: color-mix(in srgb, var(--med-platine) 45%, var(--ink)); }
+.ps-cond { font-size: .86rem; color: var(--ink-2); line-height: 1.4; }
+.ps-prog { display: flex; align-items: center; gap: 8px; font-size: .82rem; color: var(--ink-2); font-variant-numeric: tabular-nums; margin-top: 2px; }
+.ps-prog .progress-bar { flex: 1; height: 8px; background: var(--paper-2); }
+.ps-prog b { color: var(--ink); }
+.ps-echelle { grid-column: 2; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 4px; }
+.ps-echelle span { border-radius: 10px; padding: 4px 2px; text-align: center; font-size: .72rem; line-height: 1.25; color: var(--ink-3); box-shadow: inset 0 0 0 1.5px var(--paper-3); }
+.ps-echelle span b { display: block; font-size: .7rem; text-transform: uppercase; letter-spacing: .03em; }
+.ps-echelle span.ok { color: var(--ink); box-shadow: none; }
+.ps-echelle span.ok.b { background: color-mix(in srgb, var(--med-bronze) 22%, var(--sheet)); }
+.ps-echelle span.ok.a { background: color-mix(in srgb, var(--med-argent) 25%, var(--sheet)); }
+.ps-echelle span.ok.o { background: color-mix(in srgb, var(--med-or) 22%, var(--sheet)); }
+.ps-echelle span.ok.p { background: color-mix(in srgb, var(--med-platine) 22%, var(--sheet)); }
+.ps-echelle span.vise { box-shadow: inset 0 0 0 2px var(--accent); color: var(--accent-ink); }
+.ps-astuce { grid-column: 2; font-size: .8rem; color: var(--accent-ink); background: var(--cle-bg); border-radius: 10px; padding: 5px 9px; margin-top: 4px; }
+/* prochains paliers */
+.ps-proch { list-style: none; margin: 0 0 6px; padding: 0; }
+.ps-proch li { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 0; font-size: .9rem; }
+.ps-proch .progress-bar { height: 6px; background: var(--paper-2); margin-top: 3px; }
+.ps-groupe-meds { display: flex; gap: 3px; }
+.ps-groupe-meds .ps-med { width: 14px; height: 14px; box-shadow: none; }
+.pm-grp-t.ps-t { grid-template-columns: minmax(0, 1fr) auto 1rem; }
+/* fin de séance : nouveaux succès */
+.ps-nouveaux { margin-top: 16px; text-align: left; border-radius: 16px; padding: 12px 14px; background: color-mix(in srgb, var(--med-or) 12%, var(--sheet)); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--med-or) 55%, var(--sheet)); }
+.ps-nouveaux h4 { margin: 0 0 6px; font-size: 1rem; font-weight: 800; }
+.ps-nouveaux li { display: flex; align-items: center; gap: 12px; padding: 6px 0; list-style: none; }
+.ps-nouveaux ul { margin: 0; padding: 0; }
+.maq-titre { font: 800 .8rem var(--font-sans); letter-spacing: .08em; color: var(--danger-text); background: var(--danger-bg); border-radius: 999px; display: inline-block; padding: 4px 12px; margin: 18px 0 6px; }
+</style>
+</head>
+<body>
+<div id="app-nav"></div>
+<div class="er-page">
+  <div class="er-card" id="entete">
+    <span class="er-badge">MODULE 3 · MON SUIVI</span>
+    <h2 class="er-titre">Où en es-tu ?</h2>
+    <p class="er-contexte">Chaque question est rangée avec sa compétence : tu vois ce que tu <b>maîtrises</b> et ce qu’il faut <b>travailler en priorité</b>.</p>
+  </div>
+  <main id="zone"></main>
+  <div id="maq-fin"></div>
+</div>
+<script>
+EPM.menu('suivi');
+const zone = document.getElementById('zone');
+EPM.pageSuivi(zone);
+
+/* ---------- MAQUETTE : données d'exemple (élève de 2de, deux semaines d'utilisation) ---------- */
+const NIV = [['b', 'Bronze'], ['a', 'Argent'], ['o', 'Or'], ['p', 'Platine']];
+const CATS = [
+  { nom: 'Régularité', ouvert: true, s: [
+    { ic: '🔥', nom: 'Régulier', cond: 'Jours d’affilée avec au moins une séance terminée', seuils: [3, 7, 14, 30], u: 'j', val: 5, unite: 'jours', astuce: 'Série en cours : 5 jours. Fais une séance aujourd’hui pour la prolonger.' },
+    { ic: '📅', nom: 'Assidu', cond: 'Jours différents avec au moins une séance terminée', seuils: [5, 15, 30, 60], u: 'j', val: 9, unite: 'jours' },
+    { ic: '🎯', nom: 'Infatigable', cond: 'Séances terminées', seuils: [10, 25, 50, 100], u: '', val: 14, unite: 'séances' } ] },
+  { nom: 'Réussite', s: [
+    { ic: '⭐', nom: 'Sans faute', cond: 'Séances terminées avec 20/20', seuils: [1, 5, 15, 40], u: '', val: 6 },
+    { ic: '⚡', nom: 'Inarrêtable', cond: 'Équations résolues sans erreur d’affilée (record)', seuils: [10, 20, 40, 75], u: '', val: 13 },
+    { ic: '🧠', nom: 'Autonome', cond: 'Équations résolues sans erreur et sans aucune aide', seuils: [20, 60, 150, 300], u: '', val: 34 },
+    { ic: '💪', nom: 'Tenace', cond: 'Équations réussies après une erreur, sans afficher la solution', seuils: [5, 15, 40, 100], u: '', val: 17 },
+    { ic: '🏔️', nom: 'Haut niveau', cond: 'Équations de difficulté 3 résolues sans erreur', seuils: [5, 20, 50, 100], u: '', val: 3 } ] },
+  { nom: 'Compétences', ouvert: true, s: [
+    { ic: '🏅', nom: 'Maîtrise', cond: 'Compétences maîtrisées au moins une fois (Platine : toutes celles de ta classe)', seuils: [3, 6, 9, 12], u: '', val: 7, unite: 'compétences' },
+    { ic: '✖️', nom: 'Produits et quotients', cond: 'Compétences de la famille maîtrisées', seuils: [1, 2, 3, 4], u: '', val: 3 },
+    { ic: '➕', nom: 'Termes additifs', cond: 'Compétences de la famille maîtrisées', seuils: [1, 2, 3, 4], u: '', val: 1 },
+    { ic: '√', nom: 'Fonctions réciproques', cond: 'Compétences de la famille maîtrisées', seuils: [1, 2, 3, 4], u: '', val: 2 } ] },
+  { nom: 'Découverte', s: [
+    { ic: '🧭', nom: 'Explorateur', cond: 'Équations de la Découverte résolues', seuils: [4, 8, 12, 17], u: '', val: 17 } ] }
+];
+const niveau = s => s.seuils.filter(x => s.val >= x).length;   // 0 : aucun, 1 bronze … 4 platine
+const med = (s, cls) => { const n = niveau(s); return '<span class="ps-med ' + (n ? NIV[n - 1][0] : 'sans') + (cls ? ' ' + cls : '') + '"><span>' + s.ic + '</span></span>'; };
+function ligne(s) {
+  const n = niveau(s);
+  let h = '<div class="ps-s">' + med(s) + '<div><div class="ps-nom">' + s.nom + (n ? ' <span class="ps-niv ' + NIV[n - 1][0] + '">' + NIV[n - 1][1] + '</span>' : ' <span class="ps-niv">À débloquer</span>') + '</div>' +
+    '<div class="ps-cond">' + s.cond + '</div>';
+  if (n < 4) {
+    const cible = s.seuils[n], bas = n ? s.seuils[n - 1] : 0;
+    h += '<div class="ps-prog"><div class="progress-bar"><div class="progress-fill" style="width:' + (100 * s.val / cible) + '%"></div></div><span><b>' + s.val + '/' + cible + '</b> → ' + NIV[n][1] + '</span></div>';
+  } else h += '<div class="ps-prog"><b>' + s.val + '/' + s.seuils[3] + '</b> · niveau maximal atteint ✓</div>';
+  h += '</div><div class="ps-echelle">' + s.seuils.map((x, i) => '<span class="' + NIV[i][0] + (i < n ? ' ok' : i === n ? ' vise' : '') + '"><b>' + NIV[i][1] + (i < n ? ' ✓' : '') + '</b>' + x + (s.u ? ' ' + s.u : '') + '</span>').join('') + '</div>';
+  if (s.astuce) h += '<div class="ps-astuce">' + s.astuce + '</div>';
+  return h + '</div>';
+}
+const tous = CATS.flatMap(c => c.s);
+const cpt = [0, 0, 0, 0]; tous.forEach(s => { const n = niveau(s); if (n) cpt[n - 1]++; });
+const paliers = tous.reduce((a, s) => a + niveau(s), 0);
+// prochains paliers : les 3 succès les plus proches du niveau suivant
+const proches = tous.filter(s => niveau(s) < 4).map(s => ({ s, r: s.val / s.seuils[niveau(s)] })).sort((a, b) => b.r - a.r).slice(0, 3);
+const carte = document.createElement('div');
+carte.className = 'er-card';
+carte.innerHTML = '<div class="pm-rangee pm-entre"><h3 class="pm-h3">Mes succès</h3><span class="pm-tag">' + paliers + ' paliers sur ' + tous.length * 4 + '</span></div>' +
+  '<p class="pm-petit">Chaque succès a 4 niveaux : bronze, argent, or, platine. Un niveau obtenu est gardé pour toujours.</p>' +
+  '<div class="ps-tableau">' + NIV.map((x, i) => '<div><span class="ps-med ' + x[0] + '"></span><b>' + cpt[i] + '</b>' + x[1] + '</div>').join('') + '</div>' +
+  '<p class="pm-petit" style="margin:0 0 4px"><b style="color:var(--ink)">Tout près du niveau suivant</b></p><ul class="ps-proch">' +
+  proches.map(p => '<li>' + med(p.s, 'petit') + '<span><b>' + p.s.nom + '</b> <span class="pm-petit">· ' + p.s.val + '/' + p.s.seuils[niveau(p.s)] + ' → ' + NIV[niveau(p.s)][1] + '</span><div class="progress-bar"><div class="progress-fill" style="width:' + 100 * p.r + '%"></div></div></span></li>').join('') + '</ul>' +
+  CATS.map(c => '<div class="pm-grp' + (c.ouvert ? ' ouvert' : '') + '"><button type="button" class="pm-grp-t ps-t"><span><b>' + c.nom + '</b> <span class="pm-petit">· ' + c.s.reduce((a, s) => a + niveau(s), 0) + '/' + c.s.length * 4 + '</span></span><span class="ps-groupe-meds">' +
+    c.s.map(s => { const n = niveau(s); return '<span class="ps-med ' + (n ? NIV[n - 1][0] : 'sans') + '"></span>'; }).join('') + '</span><span class="pm-chev" aria-hidden="true">▾</span></button><div class="pm-grp-c">' + c.s.map(ligne).join('') + '</div></div>').join('');
+carte.querySelectorAll('.pm-grp-t').forEach(b => b.addEventListener('click', () => b.parentNode.classList.toggle('ouvert')));
+zone.insertBefore(carte, zone.children[1]);
+
+/* ---------- MAQUETTE : fin de séance avec nouveaux succès ---------- */
+document.getElementById('maq-fin').innerHTML = '<span class="maq-titre">MAQUETTE · FIN DE SÉANCE</span><div class="er-card er-fin"><span class="er-badge">SÉANCE TERMINÉE</span><p class="er-trophee">Sans faute ! Bravo.</p><div class="er-score">20<small>/20</small></div><p class="er-score-pct">100 % des points</p>' +
+  '<div class="ps-nouveaux"><h4>🏆 Nouveaux succès</h4><ul>' +
+  '<li><span class="ps-med a"><span>⭐</span></span><span><b>Sans faute · Argent</b><br><span class="pm-petit">5 séances à 20/20. Prochain niveau : 15 séances (Or).</span></span></li>' +
+  '<li><span class="ps-med b"><span>🔥</span></span><span><b>Régulier · Bronze</b><br><span class="pm-petit">3 jours d’affilée. Prochain niveau : 7 jours (Argent).</span></span></li>' +
+  '</ul><div class="er-actions" style="margin-top:8px"><a class="btn-secondary" href="#">Voir mes succès →</a></div></div>' +
+  '<div class="er-actions" style="justify-content:center"><button class="btn-primary">Nouvelle séance →</button><a class="btn-secondary">Mon suivi</a></div></div>';
+</script>
+</body>
+</html>
