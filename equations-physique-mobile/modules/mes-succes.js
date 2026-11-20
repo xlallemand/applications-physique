@@ -16,7 +16,7 @@
    Ensemble « maitrisees » : compétences maîtrisées au moins une fois.
 
    API :
-     EPM.succesApres(occasions, note)  appelé par EPM.enregistrer ; occasion : { r, ok, diff, aide } ;
+     EPM.succesApres(occasions, note)  appelé par EPM.enregistrer (séances) et par la Découverte ; occasion : { r, ok, diff, aide } ;
                                        renvoie les nouveaux succès et les ajoute à EPM.nouveauxSucces
      EPM.nouveauxSucces                nouveaux succès depuis le chargement de la page
      EPM.carteSucces()                 carte « Mes succès » (page Mon suivi)
