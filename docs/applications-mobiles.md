@@ -276,7 +276,7 @@ Copier `equations-college/modules/sauvegarde.js` et l'adapter : objet, clés, no
 
 ## 12. Succès (comme dans les jeux vidéo)
 
-Modèle : `equations-physique-mobile/modules/mes-succes.js`. Moteur commun : `assets/succes.js` (objet `SUC`, format complet en tête du fichier) et `assets/succes.css` (classes `suc-`).
+Modèles : `modules/mes-succes.js` de `equations-college/` et `fractions-college/` (succès communs, un succès par famille), et de `equations-physique-mobile/` (succès de famille en % des compétences de la classe, succès de la Découverte). Moteur commun : `assets/succes.js` (objet `SUC`, format complet en tête du fichier) et `assets/succes.css` (classes `suc-`).
 
 - **Chaque succès a 4 niveaux** : bronze, argent, or, platine, chacun avec son seuil. Un niveau obtenu est **gardé pour toujours**.
 - **Carte « Mes succès »** sur la page Mon suivi, **après les compétences** (`SUC.carte()`, ancre `suivi.html#succes`) :
@@ -291,7 +291,7 @@ Modèle : `equations-physique-mobile/modules/mes-succes.js`. Moteur commun : `as
 1. `modules/mes-succes.js`, chargé **après le moteur** de l'application : `SUC.init({ app, categories, depart })`.
    - `categories` : `[{ nom, succes: [{ id, ic, nom, cond, seuils, u, val, avance, astuce }] }]` ; `seuils` : 4 nombres croissants, ou une fonction (seuils qui dépendent d'un réglage, comme la classe) ; `val(E)` fixe le niveau ; `avance(E)` (facultatif) remplit la barre, par exemple la série en cours quand `val` est le record.
    - `depart()` : état de départ calculé d'après le suivi déjà enregistré, la première fois (clé `<id>-succes` absente). L'enregistrer tout de suite au chargement (`SUC.verifier()`), sans annonce.
-2. Compter à chaque question et à chaque séance : `SUC.ajouter`, `SUC.record`, `SUC.fixer`, `SUC.jour` (jours d'activité, jours civils locaux), `SUC.reunir` (ensembles : compétences maîtrisées au moins une fois…), puis `SUC.verifier()`, qui renvoie les nouveaux niveaux. Dans Équations en physique, `EPM.enregistrer` appelle `EPM.succesApres(occasions, note)` ; une occasion porte aussi `diff` (difficulté) et `aide` (rappel, indice ou exemple ouvert).
+2. Compter à chaque question et à chaque séance : `SUC.ajouter`, `SUC.record`, `SUC.fixer`, `SUC.jour` (jours d'activité, jours civils locaux), `SUC.reunir` (ensembles : compétences maîtrisées au moins une fois…), puis `SUC.verifier()`, qui renvoie les nouveaux niveaux. Dans les trois applications, `enregistrer` du moteur (`EQ`, `FRA`, `EPM`) appelle `succesApres(occasions, note)` ; une occasion porte aussi `diff` (difficulté) et `aide` (une aide ouverte pendant la question : rappel, indice, exemple…).
 3. Pages : `../../assets/succes.css` après le CSS de l'application, `../../assets/succes.js` après `sommaire.js`, `mes-succes.js` après le moteur.
 4. `sw.js` : ajouter `../assets/succes.js`, `../assets/succes.css` et `./modules/mes-succes.js` à `FICHIERS`, changer `VERSION`.
 5. `sauvegarde.js` : la clé `<id>-succes` prend le type `succes` (même nettoyage et même fusion que `assets/progression.js`, qui la reconnaît déjà pour toutes les applications).

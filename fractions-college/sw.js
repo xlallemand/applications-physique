@@ -19,13 +19,14 @@
    changer VERSION pour que l'ancien cache soit remplacé.
    ============================================================ */
 'use strict';
-const VERSION = 'fractions-v1.0';
+const VERSION = 'fractions-v1.1';
 const FICHIERS = [
   './', './index.html', './manifest.webmanifest',
   './modules/seance.html', './modules/suivi.html', './modules/fiches.html',
-  './modules/sauvegarde.js', './modules/expr.js', './modules/simplifier.js', './modules/competences.js', './modules/fra.js', './modules/seance.js', './modules/fra.css',
+  './modules/sauvegarde.js', './modules/expr.js', './modules/simplifier.js', './modules/competences.js', './modules/fra.js', './modules/seance.js', './modules/mes-succes.js', './modules/fra.css',
   './icones/apple-touch-icon.png', './icones/favicon-32.png', './icones/icone-192.png', './icones/icone-512.png', './icones/icone-maskable-512.png',
   '../assets/theme.css', '../assets/sommaire.css', '../assets/sommaire.js', '../assets/hero.js',
+  '../assets/succes.js', '../assets/succes.css',
   '../equilibrer-reactions/modules/er.css'
 ];
 const POLICES = /^https:\/\/fonts\.(googleapis|gstatic)\.com\//;

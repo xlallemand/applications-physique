@@ -12,7 +12,8 @@
      - aides toujours disponibles : rappel de la compétence, indices
        successifs, exemple avec d'autres nombres, solution (0 point) ;
      - points : 2 juste sans erreur, 1 juste après erreur, 0 solution affichée ;
-       note sur 20 ; suivi enregistré à chaque question (FRA.enregistrer).
+       note sur 20 ; suivi enregistré à chaque question (FRA.enregistrer) ;
+       nouveaux succès affichés à la fin (modules/mes-succes.js).
    Dépend de : expr.js (FRA.X), competences.js (FRA.C), fra.js (FRA).
    API : FRA.seance(zone) ; FRA.verifier(q, precedent, modele) (vérification d'une ligne, aussi pour les tests)
    ============================================================ */
@@ -161,6 +162,7 @@
       const p = plan[k], q = C.question(p.comp, niveau(p.comp)), comp = C.R[p.comp];
       FRA.questionEnCours = q;                     // question affichée (tests automatiques)
       let erreurs = 0, fini = false, precedent = q.ref ? X.lire(q.ref) : null, nInd = 0;
+      let aide = false;                           // rappel, indice ou exemple ouvert (succès « Autonome »)
       zone.innerHTML = '';
       // en-tête : numéro, score, barre de progression
       const t = el('div', 'er-card fra-entete-q');
@@ -177,6 +179,7 @@
       const zRap = el('div', 'fra-aide'), zInd = el('div', 'fra-aide'), zEx = el('div', 'fra-aide'), zSol = el('div', 'fra-aide');
       const bRap = bouton('btn-small', '📖 Rappel', () => {
         const oui = !zRap.firstChild;
+        if (oui) aide = true;
         zRap.innerHTML = '';
         if (oui) { zRap.appendChild(FRA.blocRappel(q.comp)); FRA.versVue(zRap); }
         bRap.setAttribute('aria-expanded', oui);
@@ -184,6 +187,7 @@
       bRap.setAttribute('aria-expanded', 'false');
       const bInd = bouton('btn-small', '💡 Indice', () => {
         if (nInd >= q.indices.length) return;
+        aide = true;
         const d = el('div', 'fra-indice', '<b>Indice ' + (nInd + 1) + '.</b> ' + q.indices[nInd]);
         zInd.appendChild(d);
         nInd++;
@@ -196,6 +200,7 @@
       };
       const bEx = bouton('btn-small', '✎ Exemple', () => montrerExemple());
       function montrerExemple() {
+        aide = true;
         const e = C.question(q.comp, q.niv);
         zEx.innerHTML = '';
         const b = el('div', 'fra-rappel');
@@ -347,7 +352,7 @@
         bSol.disabled = true;
         points += pts;
         res.push({ comp: q.comp, niv: q.niv, pts });
-        FRA.enregistrer([{ r: q.comp, ok: pts / 2 }], null);
+        FRA.enregistrer([{ r: q.comp, ok: pts / 2, diff: q.niv, aide }], null);
         t.querySelector('.fra-score').textContent = 'Question ' + (k + 1) + '/' + NB + ' · Score : ' + points + ' pts';
         t.querySelector('.progress-fill').style.width = (100 * (k + 1) / NB) + '%';
         const dernier = k === NB - 1;
@@ -387,6 +392,9 @@
         ul.appendChild(el('li', '', '<span class="fra-puce fra-s-' + st + '" aria-hidden="true"></span><span><b>' + esc(C.R[x.comp].titre) + '</b> · ' + p + '/' + (2 * l.length) + ' pts</span><span class="fra-pct">' + FRA.LIBS[st].toLowerCase() + '</span>'));
       });
       c.appendChild(ul);
+      // nouveaux succès de la séance (modules/mes-succes.js)
+      const ns = FRA.blocSucces ? FRA.blocSucces(FRA.nouveauxSucces) : null;
+      if (ns) c.appendChild(ns);
       const a = el('div', 'er-actions');
       a.appendChild(bouton('btn-primary', 'Nouvelle séance →', () => { if (demande) history.replaceState(null, '', location.pathname); location.reload(); }));
       const s = el('a', 'btn-secondary', 'Mon suivi'); s.href = 'suivi.html'; a.appendChild(s);
