@@ -58,7 +58,7 @@
     menu: 'TP : relation de conjugaison', titre: 'Relation de conjugaison', banc: 100,
     montage() {
       CJ.mesures = []; CJ.premiere = null; CJ.modele = null;
-      return [{ type: 'lampe', x: 0, AB: 2, verrou: { suppr: true } }, { type: 'cv', x: 20, f: 10, D: 4, verrou: { f: true } }, { type: 'ecran', x: 60 }];
+      return [{ type: 'lampe', x: 0, AB: 2, verrou: { suppr: true } }, { type: 'cv', x: 25, f: 10, D: 4, verrou: { f: true } }, { type: 'ecran', x: 60 }];
     },
     etapes: [
       {
@@ -68,13 +68,13 @@
             <div class="cle"><p><b>Mesures algébriques.</b> L'axe optique est orienté dans le sens de la lumière, de la lanterne vers l'écran. A est avant O : ${A('OA')} &lt; 0 ; une image réelle A′ est après O : ${A('OA′')} &gt; 0.</p></div>
             <div class="cle"><p><b>Relation de conjugaison.</b> 1/${A('OA′')} − 1/${A('OA')} = 1/f′</p></div>`);
           api.question(api.d, { parties: [
-            { type: 'choix', q: `La lentille est à 25,0 cm de l'objet. Que vaut ${A('OA')} ?`, melanger: false,
+            { type: 'choix', q: `Sur le banc, la lentille est à 25,0 cm de l'objet. Que vaut ${A('OA')} ?`, melanger: false,
               options: [{ id: 'a', label: '−25,0 cm' }, { id: 'b', label: '25,0 cm' }, { id: 'c', label: '−0,25 cm' }], bonne: 'a',
               indices: { b: `A est avant O dans le sens de la lumière : ${A('OA')} est négative.`, c: `La distance est 25,0 cm : ${A('OA')} s'exprime ici en centimètres.` } },
-            { type: 'choix', q: `L'image nette se forme sur l'écran, à 37,5 cm de l'objet. Que vaut ${A('OA′')} ?`, melanger: false,
-              options: [{ id: 'a', label: '12,5 cm' }, { id: 'b', label: '37,5 cm' }, { id: 'c', label: '−12,5 cm' }], bonne: 'a',
-              indices: { b: `37,5 cm est la distance de l'objet à l'écran. ${A('OA′')} va de O (la lentille) à A′ (l'écran) : 37,5 − 25,0.`, c: `A′ est après O dans le sens de la lumière : ${A('OA′')} est positive.` },
-              solution: `<p>${A('OA′')} = 37,5 − 25,0 = 12,5 cm.</p>` },
+            { type: 'choix', q: `Avec cette lentille (f′ = 10 cm), l'image est nette quand l'écran est à 41,7 cm de l'objet. Que vaut ${A('OA′')} ?`, melanger: false,
+              options: [{ id: 'a', label: '16,7 cm' }, { id: 'b', label: '41,7 cm' }, { id: 'c', label: '−16,7 cm' }], bonne: 'a',
+              indices: { b: `41,7 cm est la distance de l'objet à l'écran. ${A('OA′')} va de O (la lentille) à A′ (l'écran) : 41,7 − 25,0.`, c: `A′ est après O dans le sens de la lumière : ${A('OA′')} est positive.` },
+              solution: `<p>${A('OA′')} = 41,7 − 25,0 = 16,7 cm. Tu peux le vérifier : déplace l'écran à 41,7 cm, l'image devient nette.</p>` },
           ] }, () => api.continuer(api.d));
         },
       },
@@ -233,31 +233,33 @@
       {
         titre: 'Principe',
         rendre(api) {
-          api.bloc(api.g, `<p>La lentille L₁ est une <b>lentille mystère</b> : sa distance focale est cachée. Le <b>miroir plan</b>, placé derrière la lentille, renvoie la lumière vers la lanterne.</p>
-            <p>La vue au-dessus de la lanterne montre la plaque : on y cherche une <b>image nette</b> de la lettre F, renvoyée par le miroir.</p>`);
+          const L = () => api.trouver(c => c.type === 'cv'), M = () => api.trouver(c => c.type === 'plan');
+          api.bloc(api.g, `<p>La lentille L₁ est une <b>lentille mystère</b> : sa distance focale est cachée. Le <b>miroir plan</b>, placé juste derrière la lentille, renvoie la lumière vers la lanterne.</p>
+            <p><b>Déplace la lentille</b> (et le miroir avec elle, juste derrière) jusqu'à obtenir une <b>image nette sur la plaque de la lanterne</b> : regarde la vue au-dessus de la lanterne, clique dessus pour l'agrandir.</p>`);
           api.question(api.d, { parties: [
-            { type: 'choix', q: 'L\'objet est dans le plan focal objet de la lentille. Comment sont les rayons issus d\'un même point de l\'objet, après la lentille ?', melanger: false, colonne: true,
+            api.manip({
+              q: 'Place la lentille de façon à avoir une image nette sur la plaque de la lanterne.',
+              test() { const t = api.cible(lampe(api)); return t && t.nette && t.lumiere; },
+              ok() { AC.xL = L().x - lampe(api).x; },
+              montrer() { const l = lampe(api); api.placer(L(), l.x + L().f); if (M()) api.placer(M(), L().x + 6); },
+              solution: '<p>L\'image renvoyée par le miroir est nette sur la plaque de la lanterne, à côté de la lettre F.</p>',
+            }),
+            { type: 'choix', q: 'L\'image se forme sur l\'objet lui-même. Comment sont les rayons issus d\'un même point de l\'objet, entre la lentille et le miroir ?', melanger: false, colonne: true,
               options: [{ id: 'a', label: 'Parallèles entre eux' }, { id: 'b', label: 'Ils convergent en un point' }, { id: 'c', label: 'Ils divergent' }], bonne: 'a',
-              indices: { b: 'C\'est le cas quand l\'objet est plus loin que le foyer objet F : l\'image est alors réelle.', c: 'C\'est le cas quand l\'objet est entre F et la lentille.' },
-              solution: '<p>Le faisceau parallèle revient parallèle après le miroir plan ; la lentille le fait alors converger dans son plan focal objet, c\'est-à-dire sur l\'objet lui-même.</p>' },
+              indices: { b: 'Coche « Faisceau » si besoin : entre la lentille et le miroir, le faisceau garde la même largeur.', c: 'Regarde le faisceau entre la lentille et le miroir : il garde la même largeur.' },
+              solution: '<p>Parallèles entre eux : le faisceau parallèle revient parallèle après le miroir plan, et la lentille le fait converger dans son plan focal objet, c\'est-à-dire sur l\'objet lui-même.</p>' },
           ] }, () => api.continuer(api.d));
         },
       },
       {
         titre: 'Image sur la plaque',
         rendre(api) {
-          api.bloc(api.g, '<p>Déplace la <b>lentille</b> (garde le miroir juste derrière) jusqu\'à voir sur la plaque une image <b>nette</b> de la lettre F. Clique sur la vue de la plaque pour l\'agrandir.</p>');
-          const L = () => api.trouver(c => c.type === 'cv'), M = () => api.trouver(c => c.type === 'plan');
+          api.bloc(api.g, '<p>Compare, dans la vue de la plaque, la lettre F (l\'objet) et son image renvoyée par le miroir. Utilise la règle de la vue (boutons − et + pour changer d\'échelle).</p>');
           api.question(api.d, { parties: [
-            api.manip({
-              q: 'Image renvoyée nette sur la plaque de la lanterne.',
-              test() { const t = api.cible(lampe(api)); return t && t.nette && t.lumiere; },
-              ok() { AC.xL = L().x - lampe(api).x; },
-              montrer() { const l = lampe(api); api.placer(L(), l.x + L().f); if (M()) api.placer(M(), L().x + 6); },
-            }),
             { type: 'choix', q: 'Par rapport à l\'objet, l\'image renvoyée est :', melanger: false, colonne: true,
               options: [{ id: 'a', label: 'de même taille et renversée' }, { id: 'b', label: 'de même taille et droite' }, { id: 'c', label: 'plus grande et renversée' }], bonne: 'a',
-              indices: { b: 'Compare dans la vue : la lettre de l\'image a tourné d\'un demi-tour autour de l\'axe.', c: 'Mesure-la avec la règle de la vue : elle a la même hauteur que l\'objet.' } },
+              indices: { b: 'Compare dans la vue : la lettre de l\'image a tourné d\'un demi-tour autour de l\'axe.', c: 'Mesure-la avec la règle de la vue : elle a la même hauteur que l\'objet.' },
+              solution: '<p>De même taille et renversée : grandissement γ = −1.</p>' },
           ] }, () => api.continuer(api.d));
         },
       },
@@ -442,7 +444,21 @@
      TP 4 : LUNETTE ASTRONOMIQUE
      ============================================================ */
   const LU = { hp: null, h: null };
-  const F0 = 20, F1 = 50, F2 = 10;                       // collimateur, objectif, oculaire (cm)
+  const F0 = 20, F1 = 50, F2 = 10, FO = 5;               // collimateur, objectif, oculaire, cristallin de l'œil (cm)
+  // modèle de l'œil : lentille L₃ (f′ = 5 cm) et écran (rétine) dans son plan focal image
+  const cristallin = api => api.trouver(c => c.type === 'cv' && c.f === FO && c.nom !== 'L₁' && c.nom !== 'L₂');
+  const retine = api => { const c = cristallin(api); return c ? ecrans(api).find(e => Math.abs(e.x - c.x - FO) <= 0.3) || null : null; };
+  // place l'œil (lentille L₃ puis écran 5 cm derrière), en les ajoutant s'il le faut
+  function placerOeil(api, x) {
+    let c = cristallin(api);
+    if (!c) c = api.ajouter({ type: 'cv', f: FO, D: 3, nom: 'L₃', verrou: { f: true } }, x);
+    let e = retine(api) || ecrans(api).find(o => o.x > c.x) || api.comps().find(o => o.type === 'ecran');
+    if (!e) e = api.ajouter({ type: 'ecran' }, x + FO);
+    e.retire = false;
+    api.placer(e, BO.etat.L);                   // écarte l'écran le temps de placer la lentille
+    api.placer(c, x);
+    api.placer(e, c.x + FO);
+  }
   BO.TP.lunette = {
     menu: 'TP : lunette astronomique', titre: 'Lunette astronomique', banc: 150,
     montage() {
@@ -561,48 +577,55 @@
       {
         titre: 'L\'œil',
         rendre(api) {
-          const ocu = () => api.trouver(c => c.nom === 'L₂'), oeil = () => api.trouver(c => c.type === 'oeil');
+          const ocu = () => api.trouver(c => c.nom === 'L₂');
           if (!ocu()) { api.bloc(api.g, '<p>Place d\'abord l\'objectif et l\'oculaire (étape 2).</p>'); return; }
-          api.bloc(api.g, `<p>Un œil normal au repos est modélisé par une lentille (le cristallin, f′ = 5 cm) et un écran (la rétine) 5 cm derrière : il voit net les objets à l'infini.</p>`);
-          const bt = api.bloc(api.g, '<button type="button" class="btn-small">+ Ajouter l\'œil</button>', 'bo-btns');
+          api.bloc(api.g, `<p>On modélise l'œil comme sur un vrai montage : une <b>lentille convergente f′ = ${FO} cm</b> (le cristallin) et un <b>écran</b> (la rétine) placé dans son plan focal image, ${FO} cm derrière. Cet « œil » voit net les objets à l'infini.</p>
+            <p>Ajoute la lentille avec le bouton ci-dessous, et l'écran avec la barre d'outils.</p>`);
+          const bt = api.bloc(api.g, `<button type="button" class="btn-small">+ Lentille L₃, f′ = ${FO} cm (cristallin)</button>`, 'bo-btns');
           const b = bt.querySelector('button');
-          const maj = () => { b.disabled = !!oeil(); };
-          b.addEventListener('click', () => { const c = api.ajouter({ type: 'oeil', verrou: {} }, ocu().x + 12); if (c) api.choisir(c); });
+          const maj = () => { b.disabled = !!cristallin(api); };
+          b.addEventListener('click', () => { const c = api.ajouter({ type: 'cv', f: FO, D: 3, nom: 'L₃', verrou: { f: true } }, ocu().x + 12); if (c) api.choisir(c); });
           api.surChange(maj); maj();
           api.question(api.d, { parties: [
             api.manip({
-              q: 'Place l\'œil derrière l\'oculaire : l\'image sur la rétine doit être nette.',
-              test() { const o = oeil(); const t = o && api.cible(o); return o && o.x > ocu().x && t && t.nette; },
-              ok() { LU.hp = Math.abs(api.cible(oeil()).m) * lampe(api).AB; },
-              montrer() { let o = oeil(); if (!o) o = api.ajouter({ type: 'oeil' }, ocu().x + 12); api.placer(o, ocu().x + 12); },
+              q: `Place la lentille L₃ derrière l'oculaire et l'écran à ${FO} cm derrière L₃ : l'image sur cet écran (la rétine) doit être nette.`,
+              test() { const c = cristallin(api), r = retine(api); const t = r && api.cible(r); return c && c.x > ocu().x && t && t.nette; },
+              ok() { LU.hp = Math.abs(api.cible(retine(api)).m) * lampe(api).AB; },
+              montrer() { placerOeil(api, ocu().x + 12); },
               solution: '<p>L\'image sur la rétine est nette : l\'image définitive donnée par la lunette est bien à l\'infini.</p>',
             }),
-            { type: 'nombre', q: 'Mesure la taille h′ de l\'image sur la rétine (vue « Rétine »).', label: 'h′ =', unite: 'cm', tol: 0.05, signe: false,
+            { type: 'nombre', q: 'Mesure la taille h′ de l\'image sur la rétine (vue de l\'écran, boutons − et + pour l\'échelle).', label: 'h′ =', unite: 'cm', tol: 0.05, signe: false,
               get valeur() { return LU.hp || 0.75; },
-              diag: () => 'Sur la règle de la vue « Rétine », lis la hauteur de la lettre (clique sur la vue pour l\'agrandir).' },
+              diag: () => 'Sur la règle de la vue de la rétine, lis la hauteur de la lettre : de l\'axe (0) jusqu\'au bout de la lettre.' },
           ] }, () => api.continuer(api.d));
         },
       },
       {
         titre: 'Grossissement',
         rendre(api) {
-          const L0 = () => api.trouver(c => c.nom === 'L₀'), obj = () => api.trouver(c => c.nom === 'L₁'), oeil = () => api.trouver(c => c.type === 'oeil');
-          if (!obj() || !oeil()) { api.bloc(api.g, '<p>Fais d\'abord les étapes 2 et 4 (objectif, oculaire et œil).</p>'); return; }
+          const L0 = () => api.trouver(c => c.nom === 'L₀'), obj = () => api.trouver(c => c.nom === 'L₁');
+          if (!obj() || !cristallin(api)) { api.bloc(api.g, '<p>Fais d\'abord les étapes 2 et 4 (objectif, oculaire, puis lentille L₃ et écran pour l\'œil).</p>'); return; }
           api.bloc(api.g, `<div class="cle"><p><b>Grossissement.</b> G = α′ / α : α est l'angle sous lequel on voit l'objet à l'œil nu, α′ celui sous lequel on voit son image à travers la lunette.</p></div>
-            <p>Sur la rétine, la taille de l'image est proportionnelle à l'angle (h = f′<sub>œil</sub> × α) : G = h′ / h.</p>`);
+            <p>Sur la rétine, la taille de l'image est proportionnelle à l'angle (h = f′<sub>œil</sub> × α) : G = h′ / h.</p>
+            <p class="bo-mes" data-mes></p>`);
+          const mesures = api.g.querySelector('[data-mes]');
+          const majMes = () => { mesures.innerHTML = `Avec la lunette : h′ = ${fmt(LU.hp || 0.75, 2)} cm${LU.h ? ` · sans la lunette : h = ${fmt(LU.h, 2)} cm` : ''}`; };
+          majMes();
           api.question(api.d, { parties: [
             api.manip({
-              q: 'Pour voir l\'objet à l\'œil nu (sans la lunette), place l\'œil entre L₀ et l\'objectif.',
-              test() { const o = oeil(), t = o && api.cible(o); return o && o.x > L0().x && o.x + 5 < obj().x && t && t.nette; },
-              ok() { LU.h = Math.abs(api.cible(oeil()).m) * lampe(api).AB; },
-              montrer() { api.placer(oeil(), L0().x + 1.5); },
+              q: 'Pour voir l\'objet à l\'œil nu (sans la lunette), place la lentille L₃ et son écran entre L₀ et l\'objectif.',
+              test() { const c = cristallin(api), r = retine(api), t = r && api.cible(r); return c && c.x > L0().x && r.x < obj().x && t && t.nette; },
+              ok() { LU.h = Math.abs(api.cible(retine(api)).m) * lampe(api).AB; majMes(); },
+              montrer() { placerOeil(api, L0().x + 1.5); },
             }),
             { type: 'nombre', q: 'Mesure la taille h de l\'image sur la rétine, sans la lunette.', label: 'h =', unite: 'cm', tol: 0.03, signe: false,
               get valeur() { return LU.h || 0.15; },
-              diag: () => 'Lis la hauteur de la lettre sur la règle de la vue « Rétine » (agrandis-la : la règle est graduée en millimètres).' },
-            { type: 'nombre', q: 'Calcule le grossissement de la lunette.', label: 'G = h′ / h =', unite: CALC, tol: 0.3, signe: false,
+              diag: () => 'Lis la hauteur de la lettre sur la règle de la vue de la rétine (bouton + pour agrandir l\'échelle : la règle est graduée en millimètres).' },
+            { type: 'nombre',
+              get q() { return `Calcule le grossissement G = h′ / h, avec h′ = ${fmt(LU.hp || 0.75, 2)} cm (avec la lunette) et h = ${fmt(LU.h || 0.15, 2)} cm (à l'œil nu).`; },
+              label: 'G = h′ / h =', unite: CALC, tol: 0.3, signe: false,
               get valeur() { return (LU.hp || 0.75) / (LU.h || 0.15); },
-              diag: v => Math.abs(v - 1 / ((LU.hp || 0.75) / (LU.h || 0.15))) < 0.05 ? 'Tu as calculé h / h′ : G = h′ / h (avec la lunette / sans la lunette).' : `G = h′ / h = ${fmt(LU.hp || 0.75, 2)} / ${fmt(LU.h || 0.15, 2)}.` },
+              diag: v => Math.abs(v - 1 / ((LU.hp || 0.75) / (LU.h || 0.15))) < 0.05 ? 'Tu as calculé h / h′ : G = h′ / h (avec la lunette / à l\'œil nu).' : `G = h′ / h = ${fmt(LU.hp || 0.75, 2)} / ${fmt(LU.h || 0.15, 2)}.` },
             { type: 'nombre', q: 'Calcule f′₁ / f′₂ (objectif / oculaire).', label: 'f′₁ / f′₂ =', unite: '', tol: 0.01, signe: false,
               valeur: F1 / F2,
               diag: () => `f′₁ = ${F1} cm (objectif), f′₂ = ${F2} cm (oculaire).`,
@@ -613,35 +636,55 @@
       {
         titre: 'Cercle oculaire',
         rendre(api) {
-          const L0 = () => api.trouver(c => c.nom === 'L₀'), obj = () => api.trouver(c => c.nom === 'L₁'), ocu = () => api.trouver(c => c.nom === 'L₂'), oeil = () => api.trouver(c => c.type === 'oeil');
+          const obj = () => api.trouver(c => c.nom === 'L₁'), ocu = () => api.trouver(c => c.nom === 'L₂');
           if (!obj() || !ocu()) { api.bloc(api.g, '<p>Place d\'abord l\'objectif et l\'oculaire (étape 2).</p>'); return; }
           // cercle oculaire : image de la monture de l'objectif par l'oculaire
           const co = () => { const d = ocu().x - obj().x; return ocu().x + F2 * d / (d - F2); };
           api.bloc(api.g, `<div class="cle"><p><b>Cercle oculaire.</b> C'est l'image de la monture de l'objectif donnée par l'oculaire. Toute la lumière qui traverse la lunette passe par ce petit disque : c'est là qu'on place l'œil.</p></div>
-            <p>Enlève l'œil du faisceau (supprime-le ou mets-le au bout du banc), ajoute un écran derrière l'oculaire et cherche la position où la tache lumineuse est la plus petite.</p>`);
-          const ecranCO = () => ecrans(api).find(e => e.x > ocu().x && Math.abs(e.x - co()) <= 0.3 && api.cible(e) && api.cible(e).lumiere) || null;
+            <p>Enlève l'œil du trajet de la lumière : supprime la lentille L₃ (ou mets-la au bout du banc) et déplace son écran <b>derrière l'oculaire</b>. Cherche la position où la tache lumineuse est la plus petite.</p>`);
+          // construction : deux rayons issus de chaque bord de la monture de l'objectif
+          const construction = () => {
+            const xo = obj().x, xc = ocu().x, R = obj().D / 2, xF = xc + F2, xe = co() + 12;
+            const t = [];
+            for (const s of [1, -1]) {
+              const y = s * R;
+              t.push({ pts: [[xo, y], [xe, y + (-y / (xc - xo)) * (xe - xo)]], cls: 's-trace' });          // par le centre de l'oculaire
+              t.push({ pts: [[xo, y], [xc, y], [xe, y - y / F2 * (xe - xc)]], cls: 's-trace' });             // parallèle à l'axe, puis par F′₂
+            }
+            const yc = obj().D / 2 * F2 / (ocu().x - obj().x - F2);
+            t.push({ pts: [[co(), -yc], [co(), yc]], cls: 's-trace-co' });
+            return t;
+          };
+          const bt = api.bloc(api.g, '<button type="button" class="btn-small" aria-pressed="false">Afficher la construction du cercle oculaire</button>', 'bo-btns');
+          const b = bt.querySelector('button');
+          let vu = false;
+          const montrerConstr = on => { vu = on; api.traces(on ? construction : null); b.setAttribute('aria-pressed', on); b.textContent = on ? 'Masquer la construction' : 'Afficher la construction du cercle oculaire'; };
+          b.addEventListener('click', () => montrerConstr(!vu));
+          const ecranCO = () => ecrans(api).find(e => e.x > ocu().x && Math.abs(e.x - co()) <= 0.3 && api.cible(e) && api.cible(e).lumiere
+            && !api.comps().some(c => c.type === 'cv' && c.x > ocu().x && c.x < e.x)) || null;
           let mes = null;
           api.question(api.d, { parties: [
             api.manip({
               q: 'Écran au cercle oculaire : tache lumineuse la plus petite.',
               test: () => !!ecranCO(),
-              ok() { const e = ecranCO(); mes = { x: e.x, w: api.cible(e).w }; },
+              ok() { const e = ecranCO(); mes = { x: e ? e.x : co() }; montrerConstr(true); },
               montrer() {
-                const o = oeil();
-                if (o && o.x < co() + 1) api.supprimer(o);
-                let e = ecrans(api).find(c => c.x > ocu().x) || api.ajouter({ type: 'ecran' }, co());
+                // l'œil (lentille L₃ et son écran) ne doit plus couper la lumière : on garde son écran pour le cercle oculaire
+                const r = retine(api), c = cristallin(api);
+                if (c) api.supprimer(c);
+                const e = r || ecrans(api).find(x => x.x > ocu().x) || api.ajouter({ type: 'ecran' }, co());
+                ecrans(api).filter(x => x !== e && x.x < ocu().x && x.x > lampe(api).x).forEach(x => { x.retire = true; });
                 api.placer(e, co());
               },
+              solution: '<p>Construction tracée sur le banc : les rayons issus des bords de l\'objectif se croisent, après l\'oculaire, au cercle oculaire.</p>',
             }),
             { type: 'nombre', q: 'À quelle distance de l\'oculaire se trouve le cercle oculaire ?', label: 'distance =', unite: 'cm', tol: 0.3, signe: false,
               get valeur() { return (mes ? mes.x : co()) - ocu().x; },
               diag: () => 'Différence entre la position de l\'écran et celle de l\'oculaire.' },
             { type: 'nombre', q: 'Mesure le diamètre du cercle oculaire (vue de l\'écran).', label: 'diamètre =', unite: 'cm', tol: 0.1, signe: false,
               get valeur() { return obj().D * F2 / F1; },
-              diag: v => Math.abs(v - obj().D * F2 / F1 / 2) < 0.06 ? 'C\'est le rayon : lis d\'un bord à l\'autre du disque.' : 'Agrandis la vue : lis la règle d\'un bord à l\'autre du disque lumineux.' },
-            { type: 'nombre', q: `Calcule D × f′₂ / f′₁ (D = ${fmtF(obj().D)} cm, diamètre de l'objectif).`, label: 'D × f′₂ / f′₁ =', unite: 'cm' + CALC, rel: 0.02, signe: false,
-              get valeur() { return obj().D * F2 / F1; },
-              solution: '<p>Le diamètre du cercle oculaire vaut D × f′₂ / f′₁ = D / G : plus la lunette grossit, plus le cercle oculaire est petit.</p>' },
+              diag: v => Math.abs(v - obj().D * F2 / F1 / 2) < 0.06 ? 'C\'est le rayon : lis d\'un bord à l\'autre du disque.' : 'Bouton + de la vue pour agrandir l\'échelle, puis lis la règle d\'un bord à l\'autre du disque lumineux.',
+              solution: `<p>Le cercle oculaire est beaucoup plus petit que l'objectif (Ø ${fmtF(obj().D)} cm) : toute la lumière entrée dans l'objectif y est concentrée.</p>` },
             { type: 'choix', q: 'Pourquoi place-t-on l\'œil au cercle oculaire ?', melanger: false, colonne: true,
               options: [{ id: 'a', label: 'Toute la lumière qui sort de la lunette y passe : l\'œil en reçoit le plus' }, { id: 'b', label: 'C\'est le seul endroit où l\'image est nette' }, { id: 'c', label: 'C\'est le foyer image de l\'oculaire' }], bonne: 'a',
               indices: { b: 'L\'image définitive est à l\'infini : l\'œil la voit nette à toute distance derrière l\'oculaire. Le cercle oculaire concerne la lumière reçue.', c: `Le cercle oculaire est un peu plus loin que F′₂ (${fmtF(F2)} cm) : c'est l'image de la monture de l'objectif.` } },

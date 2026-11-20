@@ -10,12 +10,13 @@
      mystere (focale cachée), revele, verrou: { f, D, suppr } (réglages imposés par un TP).
 
    API pour les TP (tp.js) :
-     BO.TP[id] = { titre, menu, banc, montage() → [composants], etapes: [{ titre, rendre(api) }] }
+     BO.TP[id] = { titre, menu, banc, faisceau (case « Faisceau » cochée au départ),
+                   montage() → [composants], etapes: [{ titre, rendre(api) }] }
      BO.demarrer(racine)                 construit la page
      BO.composants()                     composants du banc
      BO.ajouter(c, x) / BO.supprimer(c) / BO.placer(c, x) / BO.changer()
      BO.analyse()                        dernière analyse (BO_OPT.analyser)
-     BO.cible(c)                         image reçue par un écran, la rétine (c : l'œil) ou la plaque (c : la lampe)
+     BO.cible(c)                         image reçue par un écran ou par la plaque (c : la lampe)
      BO.nom(c)                           nom affiché (L₁, E₂…)
      BO.boite                            focales et diamètres de la boîte de TP
      BO.fmt(v, d)                        nombre à la française
@@ -27,7 +28,7 @@
   /* ---------- Boîte de TP ---------- */
   const BOITE = {
     cv: [5, 10, 12.5, 15, 20, 25, 30, 50, 100],      // distances focales des lentilles (cm)
-    concave: [5, 10, 15, 20, 25],                    // miroirs concaves (cm)
+    miroir: [5, 10, 15, 20, 25],                     // miroirs concaves et convexes (cm)
     D: [2, 3, 4, 6, 8],                              // diamètres (cm)
     AB: [0.5, 1, 1.5, 2, 3],                         // tailles de la lettre F (cm)
   };
@@ -35,21 +36,23 @@
   const ZOOMS = [1, 1.5, 2, 3, 4];
   const TYPES = {
     lampe: { nom: 'Lampe et objet', court: 'Lampe' },
-    cv: { nom: 'Lentille convergente', court: 'Conv.' },
-    dv: { nom: 'Lentille divergente', court: 'Div.' },
+    cv: { nom: 'Lentille convergente', court: 'Converg.' },
+    dv: { nom: 'Lentille divergente', court: 'Diverg.' },
     plan: { nom: 'Miroir plan', court: 'Plan' },
     concave: { nom: 'Miroir concave', court: 'Concave' },
+    convexe: { nom: 'Miroir convexe', court: 'Convexe' },
     ecran: { nom: 'Écran', court: 'Écran' },
-    oeil: { nom: 'Œil', court: 'Œil' },
   };
-  const PALETTE = ['lampe', 'cv', 'dv', 'plan', 'concave', 'ecran'];
+  const PALETTE = ['lampe', 'cv', 'dv', 'plan', 'concave', 'convexe', 'ecran'];
+  const MIROIRS = ['plan', 'concave', 'convexe'], COURBES = ['concave', 'convexe'];
   // icônes de la palette (SVG 24 × 24)
   const ICONES = {
     lampe: '<rect x="2" y="6" width="12" height="12" rx="2" class="bo-i-encre"/><rect x="15" y="7" width="3" height="10" class="bo-i-plein"/>',
     cv: '<path d="M12 3 Q18 12 12 21 Q6 12 12 3 Z" class="bo-i-plein"/>',
     dv: '<path d="M7 3 L17 3 Q12 12 17 21 L7 21 Q12 12 7 3 Z" class="bo-i-plein"/>',
     plan: '<line x1="10" y1="3" x2="10" y2="21" class="bo-i-trait" stroke-width="3"/><path d="M12 7l4-3M12 12l4-3M12 17l4-3M12 22l4-3" class="bo-i-trait" stroke-width="1"/>',
-    concave: '<path d="M15 3 Q7 12 15 21" class="bo-i-trait" stroke-width="3"/>',
+    concave: '<path d="M9 3 Q17 12 9 21" class="bo-i-trait" stroke-width="3"/>',      // bords tournés vers la lumière (à gauche)
+    convexe: '<path d="M15 3 Q7 12 15 21" class="bo-i-trait" stroke-width="3"/>',
     ecran: '<rect x="9" y="3" width="6" height="18" class="bo-i-trait bo-i-blanc"/>',
   };
 
@@ -84,7 +87,8 @@
   }
 
   /* ---------- État ---------- */
-  const etat = { L: 100, comps: [], sel: null, rayons: false, zoom: 1, mode: 'libre', prochainId: 1 };
+  // traces : rayons de construction imposés par un TP (fonction → [{ pts, cls }]), ou null
+  const etat = { L: 100, comps: [], sel: null, rayons: false, faisceau: false, traces: null, zoom: 1, mode: 'libre', prochainId: 1 };
   let ana = null;                         // dernière analyse optique
   const ecouteurs = new Set();            // rappels après chaque changement (vérifications des TP)
   let D = {};                             // éléments de la page
@@ -94,16 +98,17 @@
   function nom(c) {
     if (c.nom) return c.nom;
     if (c.type === 'lampe') return 'Objet';
-    if (c.type === 'oeil') return 'Œil';
-    const fam = { cv: 'L', dv: 'L', plan: 'M', concave: 'M', ecran: 'E' }[c.type];
-    const memes = etat.comps.filter(o => !o.nom && { cv: 'L', dv: 'L', plan: 'M', concave: 'M', ecran: 'E' }[o.type] === fam).sort((a, b) => a.id - b.id);
+    const FAM = { cv: 'L', dv: 'L', plan: 'M', concave: 'M', convexe: 'M', ecran: 'E' };
+    const fam = FAM[c.type];
+    const memes = etat.comps.filter(o => !o.nom && FAM[o.type] === fam).sort((a, b) => a.id - b.id);
     return fam + indice(memes.indexOf(c) + 1);
   }
   // nom et réglage écrits au-dessus du composant
   function etiquette(c) {
     const n = nom(c);
     if (c.type === 'cv' || c.type === 'dv') return `${n} · f′ =${c.mystere && !c.revele ? ' ?' : ' ' + fmtF(c.f) + ' cm'}`;
-    if (c.type === 'concave') return `${n} · f = ${fmtF(c.f)} cm`;
+    if (c.type === 'concave') return `${n} · concave, f = ${fmtF(c.f)} cm`;
+    if (c.type === 'convexe') return `${n} · convexe, f = ${fmtF(c.f)} cm`;
     if (c.type === 'plan') return `${n} · plan`;
     if (c.type === 'ecran') {
       const e = ana && ana.els.find(x => x.c === c);
@@ -114,11 +119,10 @@
 
   /* ---------- Encombrement : deux composants ne se chevauchent pas ---------- */
   function etendue(c, x) {
-    if (c.type === 'oeil') return [x - 0.5, x + O.OEIL.f + 0.5];
     if (c.type === 'lampe') return [x - 1, x + 0.5];
     return [x - 0.5, x + 0.5];
   }
-  const xMax = c => etat.L - (c.type === 'oeil' ? O.OEIL.f : 0);
+  const xMax = () => etat.L;
   function libre(c, x) {
     const [a, b] = etendue(c, x);
     return etat.comps.every(o => {
@@ -149,8 +153,8 @@
     if (type === 'lampe' && c.AB == null) c.AB = 2;
     if (type === 'cv' && c.f == null) c.f = 10;
     if (type === 'dv' && c.f == null) c.f = -10;
-    if (type === 'concave' && c.f == null) c.f = 10;
-    if ((type === 'cv' || type === 'dv' || type === 'plan' || type === 'concave') && c.D == null) c.D = 4;
+    if (COURBES.includes(type) && c.f == null) c.f = 10;
+    if ((type === 'cv' || type === 'dv' || MIROIRS.includes(type)) && c.D == null) c.D = 4;
     if (c.mystere && c.f == null) c.f = focaleMystere(type);
     return c;
   }
@@ -229,6 +233,7 @@
         <div class="bo-reglages" data-a="reglages">
           <label class="bo-lab">Banc <span class="bo-sel"><select class="bo-select" data-a="banc-l" aria-label="Longueur du banc">${BANCS.map(l => `<option value="${l}">${fmt(l / 100, l % 100 ? 1 : 0)} m</option>`).join('')}</select></span></label>
           <span class="bo-lab">Zoom <button type="button" class="bo-mini" data-a="zMoins" aria-label="Réduire le zoom">−</button><span class="bo-zoom-v" data-a="zoomV">× 1</span><button type="button" class="bo-mini" data-a="zPlus" aria-label="Agrandir le zoom">+</button></span>
+          <label class="bo-coche"><input type="checkbox" data-a="faisceau"> Faisceau</label>
           <label class="bo-coche"><input type="checkbox" data-a="rayons"> Rayons</label>
         </div>
       </div>
@@ -248,12 +253,14 @@
     D.zMoins.addEventListener('click', () => zoomer(-1));
     D.zPlus.addEventListener('click', () => zoomer(1));
     D.rayons.addEventListener('change', () => { etat.rayons = D.rayons.checked; changer(); });
+    D.faisceau.addEventListener('change', () => { etat.faisceau = D.faisceau.checked; changer(); });
     // palette : clic pour ajouter, ou glisser-déposer sur le banc
     racine.querySelectorAll('.bo-ajout').forEach(b => paletteGlisser(b));
     // banc : sélection et glissement des composants
     bancGlisser();
     // loupe
     D.loupeX.addEventListener('click', fermerLoupe);
+    D.loupeCap.addEventListener('click', ev => { const b = ev.target.closest('[data-z]'); if (b && loupeCle != null) zoomVue(loupeCle, +b.dataset.z); });
     D.loupeFond.addEventListener('click', fermerLoupe);
     // clavier : flèches pour déplacer le composant choisi, Suppr pour l'enlever
     document.addEventListener('keydown', clavier);
@@ -296,7 +303,7 @@
     const sc = D.scene;
     const pad = court ? 16 : 32;                                 // marges intérieures de la scène
     const H = sc.clientHeight, W0 = sc.clientWidth - pad;
-    const cap = court ? 30 : 38;
+    const cap = court ? 34 : 44;
     // hauteur du banc entre HbMin et HbMax ; les vues prennent le reste (taille T entre Tmin et Tmax)
     const HbMax = court ? 150 : 300, HbMin = court ? 112 : 170, Tmin = court ? 60 : 96, Tmax = court ? 150 : 240;
     const T = Math.round(Math.max(Tmin, Math.min(Tmax, H - HbMin - cap - 14)));
@@ -318,19 +325,27 @@
   /* ============================================================
      DESSIN DU BANC (SVG)
      ============================================================ */
+  // demi-hauteur (cm) à dessiner : la plus grande lentille ou le plus grand miroir, la lettre F ;
+  // les écrans ont cette hauteur. Les hauteurs sont agrandies autant que la place le permet.
   function geometrie() {
     const yRail = G.Hb - 44;
-    // échelle des hauteurs : un écran mesure 9 cm, place pour les noms au-dessus
+    let E = 2.5;
+    for (const c of etat.comps) {
+      if (c.D) E = Math.max(E, c.D / 2 + 0.3);
+      if (c.type === 'lampe') E = Math.max(E, c.AB + 0.6);
+    }
     // place des noms au-dessus (une ligne sur téléphone, deux sinon) et pied sous les composants
     const haut = court ? 24 : 46, pied = court ? 10 : 18;
-    const KY = Math.max(2.5, Math.min(13, (yRail - haut - pied) / 9.3));
-    const YA = yRail - pied - 4.6 * KY;
-    return { yRail, KY, YA };
+    const KY = Math.max(2.5, Math.min(30, (yRail - haut - pied) / (2 * E + 0.2)));
+    const YA = yRail - pied - E * KY;
+    return { yRail, KY, YA, E };
   }
   function dessinerBanc() {
-    const { yRail, KY, YA } = geometrie();
+    const { yRail, KY, YA, E } = geometrie();
     const k = K(), X = xPx, L = etat.L;
     const Y = y => YA - y * KY;
+    const lim = E + 0.6, clip = v => Math.max(-lim, Math.min(lim, v));
+    const pts = t => t.map(p => `${X(p[0]).toFixed(1)},${Y(clip(p[1])).toFixed(1)}`).join(' ');
     const s = [];
     // rail gradué
     s.push(`<rect x="${X(0) - 12}" y="${yRail}" width="${L * k + 24}" height="10" rx="2" class="s-rail"/>`);
@@ -343,27 +358,30 @@
     }
     s.push(`<text x="${X(L) + 24}" y="${yRail + 33}" class="s-grad-t">cm</text>`);
     s.push(`<line x1="${X(0) - 12}" y1="${YA}" x2="${X(L) + 12}" y2="${YA}" class="s-axe"/>`);
-    // faisceau lumineux
-    const clip = v => Math.max(-5.2, Math.min(5.2, v));
-    for (const f of O.faisceau(ana.els, ana.lampe, L)) {
+    // faisceau lumineux (case « Faisceau »)
+    if (etat.faisceau) for (const f of O.faisceau(ana.els, ana.lampe, L)) {
       const haut = f.tr.map(t => `${X(t[0]).toFixed(1)},${Y(clip(t[2])).toFixed(1)}`);
       const bas = f.tr.slice().reverse().map(t => `${X(t[0]).toFixed(1)},${Y(clip(t[1])).toFixed(1)}`);
       s.push(`<polygon points="${haut.concat(bas).join(' ')}" class="s-faisceau"/>`);
     }
-    // rayons (cachés par défaut) et foyers des lentilles
+    // rayons particuliers issus de B et foyers (case « Rayons »)
     if (etat.rayons) {
-      for (const r of O.rayons(ana.els, ana.lampe, L)) {
-        s.push(`<polyline points="${r.pts.map(p => `${X(p[0]).toFixed(1)},${Y(Math.max(-12, Math.min(12, p[1]))).toFixed(1)}`).join(' ')}" class="${r.h ? 's-rayon' : 's-rayon-a'}"/>`);
-      }
+      for (const r of O.rayons(ana.els, ana.lampe, L)) s.push(`<polyline points="${pts(r.pts)}" class="s-rayon"/>`);
       for (const c of etat.comps) {
-        if (!(c.type === 'cv' || c.type === 'dv' || c.type === 'concave') || (c.mystere && !c.revele)) continue;
-        const n = nom(c), ind = n.slice(1);
-        const pts = c.type === 'concave' ? [[c.x - c.f, 'F' + ind]] : [[c.x - c.f, 'F' + ind], [c.x + c.f, 'F′' + ind]];
-        for (const [xf, t] of pts) {
+        if (!(c.type === 'cv' || c.type === 'dv' || COURBES.includes(c.type)) || (c.mystere && !c.revele)) continue;
+        const ind = nom(c).slice(1);
+        // miroir concave : foyer devant le miroir ; convexe : foyer (virtuel) derrière
+        const fs = c.type === 'concave' ? [[c.x - c.f, 'F' + ind]] : c.type === 'convexe' ? [[c.x + c.f, 'F' + ind]]
+          : [[c.x - c.f, 'F' + ind], [c.x + c.f, 'F′' + ind]];
+        for (const [xf, t] of fs) {
           if (xf < 0 || xf > L) continue;
-          s.push(`<circle cx="${X(xf)}" cy="${YA}" r="2.8" class="s-foyer"/><text x="${X(xf)}" y="${YA + 15}" class="s-foyer-t">${t}</text>`);
+          s.push(`<circle cx="${X(xf)}" cy="${YA}" r="3" class="s-foyer"/><text x="${X(xf)}" y="${YA + 17}" class="s-foyer-t">${t}</text>`);
         }
       }
+    }
+    // rayons de construction imposés par le TP (cercle oculaire…)
+    if (etat.traces) for (const t of etat.traces()) s.push(`<polyline points="${pts(t.pts)}" class="${t.cls || 's-rayon'}"/>`);
+    if (etat.rayons || etat.traces) {
       const kh = KY / k;
       if (Math.abs(kh - 1) > 0.05) s.push(`<text x="${G.W - 8}" y="14" class="s-note">Hauteurs × ${fmt(kh, 1)}</text>`);
     }
@@ -372,19 +390,24 @@
     const tries = etat.comps.slice().sort((a, b) => a.x - b.x);
     for (const c of tries) {
       const x = X(c.x), sel = c.id === etat.sel;
-      const hD = (c.D || 4) / 2 * KY, HE = 4.5 * KY;
+      const hD = (c.D || 4) / 2 * KY, HE = E * KY;
       let haut = YA - hD, bas = YA + hD, forme = '';
       if (c.type === 'lampe') {
-        haut = YA - 30; bas = YA + 30;
-        forme = `<rect x="${x - 46}" y="${YA - 30}" width="40" height="60" rx="5" class="s-lampe"/><rect x="${x - 6}" y="${YA - 26}" width="6" height="52" class="s-plaque"/>
-          <line x1="${x + 1.5}" y1="${YA}" x2="${x + 1.5}" y2="${Y(c.AB)}" class="s-objet"/><line x1="${x + 1.5}" y1="${Y(c.AB)}" x2="${x + 6}" y2="${Y(c.AB)}" class="s-objet"/>`;
+        const hp = Math.max(26, (c.AB + 0.4) * KY);           // plaque de la lanterne
+        haut = YA - hp - 4; bas = YA + hp + 4;
+        const yb = Y(c.AB);
+        forme = `<rect x="${x - 46}" y="${YA - hp - 4}" width="40" height="${2 * hp + 8}" rx="5" class="s-lampe"/><rect x="${x - 6}" y="${YA - hp}" width="6" height="${2 * hp}" class="s-plaque"/>
+          <line x1="${x + 2}" y1="${YA}" x2="${x + 2}" y2="${yb + 7}" class="s-objet"/><path d="M ${x + 2} ${yb} L ${x - 3} ${yb + 9} L ${x + 7} ${yb + 9} Z" class="s-objet-p"/>`;
+        if (etat.rayons) forme += `<text x="${x + 9}" y="${YA + 13}" class="s-lettre">A</text><text x="${x + 9}" y="${yb + 4}" class="s-lettre">B</text>`;
       } else if (c.type === 'cv' || c.type === 'dv') {
-        const e = Math.min(9, 3.5 + hD * 0.13);
+        const e = Math.min(11, 3.5 + hD * 0.12);
         forme = c.type === 'cv'
           ? `<path d="M ${x} ${YA - hD} Q ${x + 2 * e} ${YA} ${x} ${YA + hD} Q ${x - 2 * e} ${YA} ${x} ${YA - hD} Z" class="s-lentille"/>`
           : `<path d="M ${x - e} ${YA - hD} L ${x + e} ${YA - hD} Q ${x - e + 3} ${YA} ${x + e} ${YA + hD} L ${x - e} ${YA + hD} Q ${x + e - 3} ${YA} ${x - e} ${YA - hD} Z" class="s-lentille"/>`;
-      } else if (c.type === 'plan' || c.type === 'concave') {
-        const cb = c.type === 'concave' ? 7 : 0;
+      } else if (MIROIRS.includes(c.type)) {
+        // face réfléchissante à gauche (vers la lumière), hachures derrière ;
+        // concave : bords tournés vers la lumière ; convexe : centre tourné vers la lumière
+        const cb = c.type === 'concave' ? -7 : c.type === 'convexe' ? 7 : 0;
         forme = `<path d="M ${x + cb} ${YA - hD} Q ${x - cb} ${YA} ${x + cb} ${YA + hD}" class="s-miroir"/>`;
         for (let yy = -hD + 3; yy < hD; yy += 6) {
           const dx = cb * Math.pow(yy / hD, 2);
@@ -393,19 +416,11 @@
       } else if (c.type === 'ecran') {
         haut = YA - HE; bas = YA + HE;
         forme = `<rect x="${x - 3}" y="${YA - HE}" width="6" height="${2 * HE}" class="s-ecran${c.retire ? ' retire' : ''}"/>`;
-      } else if (c.type === 'oeil') {
-        const xr = X(c.x + O.OEIL.f), rx = (xr - x) / 2 + 5, ry = Math.max(14, 1.9 * KY);
-        haut = YA - ry; bas = YA + ry;
-        const hc = O.OEIL.D / 2 * KY;
-        forme = `<ellipse cx="${(x + xr) / 2}" cy="${YA}" rx="${rx}" ry="${ry}" class="s-oeil"/>
-          <path d="M ${x} ${YA - hc} Q ${x + 6} ${YA} ${x} ${YA + hc} Q ${x - 6} ${YA} ${x} ${YA - hc} Z" class="s-lentille"/>
-          <path d="M ${xr - 3} ${YA - ry * 0.8} Q ${xr + 4} ${YA} ${xr - 3} ${YA + ry * 0.8}" class="s-retine"/>`;
       }
-      const xt = c.type === 'oeil' ? (x + X(c.x + O.OEIL.f)) / 2 : x;
-      s.push(`<g class="s-comp">${c.type === 'lampe' ? '' : `<line x1="${xt}" y1="${bas}" x2="${xt}" y2="${yRail}" class="s-tige"/>`}
-        ${c.type === 'lampe' ? `<line x1="${x - 26}" y1="${bas}" x2="${x - 26}" y2="${yRail}" class="s-tige"/>` : ''}${forme}</g>`);
+      s.push(`<g class="s-comp">${c.type === 'lampe' ? `<line x1="${x - 26}" y1="${bas}" x2="${x - 26}" y2="${yRail}" class="s-tige"/>`
+        : `<line x1="${x}" y1="${bas}" x2="${x}" y2="${yRail}" class="s-tige"/>`}${forme}</g>`);
       // nom et position au-dessus
-      const xn = c.type === 'lampe' ? x - 26 : xt, t1 = etiquette(c), t2 = fmt(c.x) + ' cm';
+      const xn = c.type === 'lampe' ? x - 26 : x, t1 = etiquette(c), t2 = fmt(c.x) + ' cm';
       const larg = (court ? nom(c).length + t2.length + 3 : Math.max(t1.length, t2.length)) * 6.6 + 10;
       let rang = 0;
       while (rangs[rang] != null && rangs[rang] > xn - larg / 2) rang++;
@@ -415,8 +430,7 @@
       noms.push(court ? `<text x="${xn}" y="${yh}" class="s-nom${sel ? ' sel' : ''}">${echapper(nom(c))} · <tspan class="s-pos">${t2}</tspan></text>`
         : `<text x="${xn}" y="${yh - 14}" class="s-nom${sel ? ' sel' : ''}">${echapper(t1)}</text><text x="${xn}" y="${yh}" class="s-pos">${t2}</text>`);
       // zone à saisir pour glisser (large, pour le doigt) et poignée sur le rail
-      const xp = c.type === 'lampe' ? x - 26 : xt;
-      const lz = Math.max(30, c.type === 'oeil' ? X(c.x + O.OEIL.f) - x + 20 : 30);
+      const xp = xn, lz = 30;
       noms.push(`<g class="s-prise${sel ? ' sel' : ''}" data-id="${c.id}" tabindex="0" role="slider" aria-label="${echapper(nom(c))} : ${TYPES[c.type].nom.toLowerCase()}, position" aria-valuemin="0" aria-valuemax="${L}" aria-valuenow="${c.x}" aria-valuetext="${fmt(c.x)} cm">
         ${sel ? `<rect x="${xp - lz / 2}" y="${yh - 30}" width="${lz}" height="${yRail - yh + 48}" rx="10" class="s-sel"/>` : ''}
         <rect x="${xp - lz / 2}" y="${yh - 30}" width="${lz}" height="${yRail - yh + 48}" class="s-zone"/>
@@ -546,16 +560,14 @@
       if (v.f) h += `<span class="bo-lab">f′ = ${fmtF(c.f)} cm <span class="bo-discret">(imposée)</span></span>`;
       else if (c.mystere && !c.revele) h += `<span class="bo-lab">f′ = ?</span><button type="button" class="bo-mini" data-a2="reveler">Révéler</button>`;
       else h += `<label class="bo-lab">f′ <span class="bo-sel"><select class="bo-select" data-a2="f" aria-label="Distance focale">${opt(BOITE.cv.map(x => sg * x), c.f, x => fmtF(x) + ' cm')}<option value="mystere">? (mystère)</option></select></span></label>${c.mystere ? '<span class="bo-discret">révélée</span>' : ''}`;
-    } else if (c.type === 'concave') {
-      h += `<label class="bo-lab">f <span class="bo-sel"><select class="bo-select" data-a2="f" aria-label="Distance focale du miroir">${opt(BOITE.concave, c.f, x => fmtF(x) + ' cm')}</select></span></label>`;
+    } else if (COURBES.includes(c.type)) {
+      h += `<label class="bo-lab">f <span class="bo-sel"><select class="bo-select" data-a2="f" aria-label="Distance focale du miroir">${opt(BOITE.miroir, c.f, x => fmtF(x) + ' cm')}</select></span></label>`;
     } else if (c.type === 'lampe') {
       h += `<label class="bo-lab">AB <span class="bo-sel"><select class="bo-select" data-a2="AB" aria-label="Taille de la lettre F">${opt(BOITE.AB, c.AB, x => fmt(x) + ' cm')}</select></span></label>`;
     } else if (c.type === 'ecran') {
       h += `<button type="button" class="bo-mini${c.retire ? ' on' : ''}" data-a2="retire" aria-pressed="${!!c.retire}">${c.retire ? 'Remettre dans le faisceau' : 'Retirer du faisceau'}</button>`;
-    } else if (c.type === 'oeil') {
-      h += `<span class="bo-lab bo-discret">cristallin f′ = ${O.OEIL.f} cm, rétine ${O.OEIL.f} cm derrière</span>`;
     }
-    if ((c.type === 'cv' || c.type === 'dv' || c.type === 'plan' || c.type === 'concave') && !v.D) {
+    if ((c.type === 'cv' || c.type === 'dv' || MIROIRS.includes(c.type)) && !v.D) {
       h += `<label class="bo-lab">Ø <span class="bo-sel"><select class="bo-select" data-a2="D" aria-label="Diamètre">${opt(BOITE.D, c.D, x => x + ' cm')}</select></span></label>`;
     }
     if (!v.suppr) h += `<button type="button" class="bo-mini" data-a2="suppr">Supprimer</button>`;
@@ -577,44 +589,52 @@
   }
 
   /* ============================================================
-     VUES RAPPROCHÉES (canvas) : plaque de la lanterne, écrans, rétine
+     VUES RAPPROCHÉES (canvas) : plaque de la lanterne, écrans
      ============================================================ */
   const vues = new Map();                 // clé → { div, cv, cap }
   let loupeCle = null;
+  // échelle de chaque vue : demi-largeur visible (cm), réglée à la main (boutons − et +)
+  const CHAMPS = [0.5, 1, 2, 3, 5, 8, 12];
+  const echelles = new Map();             // clé → indice dans CHAMPS (3 cm par défaut)
+  const champDe = cle => CHAMPS[echelles.has(cle) ? echelles.get(cle) : 3];
+  function zoomVue(cle, s) {
+    const i = echelles.has(cle) ? echelles.get(cle) : 3;
+    echelles.set(cle, Math.max(0, Math.min(CHAMPS.length - 1, i + s)));
+    changer();
+  }
 
   // contenu d'une vue : sources de lumière (lettre F et ses images) et textes
-  function contenuVue(t) {
+  function contenuVue(t, cle) {
     const c = t.comp, lampe = ana.lampe;
     const AB = lampe ? lampe.AB : 2;
     const sources = [];
     const image = { m: t.m, c0: t.c0, w: t.w, I: Math.pow(t.T / 0.3, 2), AB };
-    let titre, etatT, ok = false, ext = 0;
+    let titre, etatT, ok = false;
     if (t.el.k === 'plaque') {
       sources.push({ m: 1, c0: 0, w: 0, I: 1, AB });
-      ext = AB;
-      if (t.lumiere) { sources.push(image); ext = Math.max(ext, Math.abs(t.m) * AB + Math.abs(t.c0)); }
+      if (t.lumiere) sources.push(image);
       titre = (t.lumiere ? 'Plaque de la lanterne' : 'Objet') + ` · ${fmt(c.x)} cm`;
       etatT = t.lumiere ? (t.nette ? '✓ image renvoyée nette' : 'image renvoyée floue') : `lettre F, AB = ${fmt(AB)} cm`;
       ok = t.lumiere && t.nette;
     } else {
-      if (t.lumiere) { sources.push(image); ext = Math.abs(t.m) * AB + Math.abs(t.c0); }
-      titre = t.retine ? `Rétine (œil) · ${fmt(c.x + O.OEIL.f)} cm` : `Écran ${nom(c)} · ${fmt(c.x)} cm`;
+      if (t.lumiere) sources.push(image);
+      titre = `Écran ${nom(c)} · ${fmt(c.x)} cm`;
       etatT = t.lumiere ? (t.nette ? '✓ image nette' : 'image floue') : 'pas de lumière';
       ok = t.lumiere && t.nette;
     }
-    // champ de la vue : demi-largeur adaptée à la taille de l'image
-    const champs = [1, 2, 3, 5, 8, 12];
-    const champ = champs.find(v => v >= ext * 1.2 + 0.25) || 12;
-    return { sources, titre, etatT, ok, champ };
+    return { sources, titre, etatT, ok, champ: champDe(cle), cle };
   }
-  function contenuRetire(c) {
-    return { sources: [], titre: `Écran ${nom(c)} · ${fmt(c.x)} cm`, etatT: 'retiré du faisceau', ok: false, champ: 3 };
+  function contenuRetire(c, cle) {
+    return { sources: [], titre: `Écran ${nom(c)} · ${fmt(c.x)} cm`, etatT: 'retiré du faisceau', ok: false, champ: champDe(cle), cle };
   }
+  // titre de la vue (nom, position, état de l'image) et boutons de l'échelle
+  const legende = ct => `<b>${echapper(ct.titre)}</b><span class="bo-vue-l2"><span class="bo-vue-etat${ct.ok ? ' ok' : ''}">${ct.etatT}</span>
+    <span class="bo-vue-z"><button type="button" data-z="1" aria-label="Voir une plus grande partie de l'écran"${ct.champ === CHAMPS[CHAMPS.length - 1] ? ' disabled' : ''}>−</button><button type="button" data-z="-1" aria-label="Agrandir l'image dans la vue"${ct.champ === CHAMPS[0] ? ' disabled' : ''}>+</button></span></span>`;
 
   function dessinerVues() {
     const liste = [];
-    for (const t of ana.cibles) liste.push({ cle: t.comp.id + (t.retine ? 'r' : ''), x: t.retine ? t.comp.x + O.OEIL.f : t.comp.x, contenu: contenuVue(t) });
-    for (const c of etat.comps) if (c.type === 'ecran' && c.retire) liste.push({ cle: c.id + '', x: c.x, contenu: contenuRetire(c) });
+    for (const t of ana.cibles) liste.push({ cle: t.comp.id + '', x: t.comp.x, contenu: contenuVue(t, t.comp.id + '') });
+    for (const c of etat.comps) if (c.type === 'ecran' && c.retire) liste.push({ cle: c.id + '', x: c.x, contenu: contenuRetire(c, c.id + '') });
     liste.sort((a, b) => a.x - b.x);
     // retirer les vues des composants disparus
     for (const [k, v] of vues) if (!liste.some(l => l.cle === k)) { v.div.remove(); vues.delete(k); }
@@ -633,7 +653,9 @@
         div.innerHTML = `<div class="bo-vue-cap"></div><button type="button" class="bo-vue-bt" aria-label="Agrandir la vue"><canvas></canvas></button><span class="bo-vue-pointe" aria-hidden="true"></span>`;
         D.vues.appendChild(div);
         o = { div, cv: div.querySelector('canvas'), cap: div.querySelector('.bo-vue-cap'), pointe: div.querySelector('.bo-vue-pointe') };
-        div.querySelector('button').addEventListener('click', () => ouvrirLoupe(v.cle));
+        div.querySelector('.bo-vue-bt').addEventListener('click', () => ouvrirLoupe(v.cle));
+        // boutons − et + de l'échelle (la légende est réécrite à chaque dessin)
+        div.querySelector('.bo-vue-cap').addEventListener('click', ev => { const b = ev.target.closest('[data-z]'); if (b) zoomVue(v.cle, +b.dataset.z); });
         vues.set(v.cle, o);
       }
       o.contenu = v.contenu;
@@ -641,8 +663,9 @@
       o.div.style.top = Math.max(0, G.vuesH - T - G.cap - 12) + 'px';
       o.div.style.width = T + 'px';
       o.cap.style.height = G.cap + 'px';
-      o.cap.innerHTML = `<b>${echapper(v.contenu.titre)}</b><span class="bo-vue-etat${v.contenu.ok ? ' ok' : ''}">${v.contenu.etatT}</span>`;
-      o.div.querySelector('button').setAttribute('aria-label', `Agrandir la vue : ${v.contenu.titre}, ${v.contenu.etatT}`);
+      const lg = legende(v.contenu);
+      if (o.lg !== lg) { o.cap.innerHTML = lg; o.lg = lg; }
+      o.div.querySelector('.bo-vue-bt').setAttribute('aria-label', `Agrandir la vue : ${v.contenu.titre}, ${v.contenu.etatT}`);
       o.pointe.style.left = Math.max(4, Math.min(T - 18, xPx(v.x) - pos[i] - 7)) + 'px';
       dessinerVue(o.cv, T, v.contenu);
     });
@@ -737,23 +760,25 @@
       ctx.drawImage(tampon, 0, 0, T, T);
     }
     // axe optique et règle graduée (0 sur l'axe)
-    const champ = contenu.champ, S = T / (2 * champ), xr = Math.max(18, T * 0.13);
+    const champ = contenu.champ, S = T / (2 * champ), xr = Math.max(24, T * 0.15);
     ctx.strokeStyle = C.ink3; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
     ctx.beginPath(); ctx.moveTo(xr, T / 2); ctx.lineTo(T, T / 2); ctx.stroke();
     ctx.setLineDash([]); ctx.strokeStyle = C.ink2;
     ctx.beginPath(); ctx.moveTo(xr, 0); ctx.lineTo(xr, T); ctx.stroke();
-    // graduations lisibles : au moins 2,5 px entre deux traits, 12 px entre deux nombres
-    const pas = [0.1, 0.2, 0.5, 1].find(v => v * S >= 2.5) || 1, pasN = [1, 2, 5, 10].find(v => v * S >= 12) || 10;
-    ctx.fillStyle = C.ink2; ctx.font = `${Math.max(9, Math.min(14, Math.round(T / 18)))}px ${C.font}`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    // graduations lisibles : au moins 3 px entre deux traits, 16 px entre deux nombres (nombres décimaux si besoin)
+    const pas = [0.1, 0.2, 0.5, 1].find(v => v * S >= 3) || 1;
+    const pasN = [0.1, 0.2, 0.5, 1, 2, 5].find(v => v * S >= 16) || 10;
+    const decN = pasN < 1 ? 1 : 0, multiple = (v, q) => Math.abs(v / q - Math.round(v / q)) < 1e-6;
+    ctx.fillStyle = C.ink2; ctx.font = `${Math.max(9, Math.min(13, Math.round(T / 18)))}px ${C.font}`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
     const n = Math.round(champ / pas);
     for (let k = -n; k <= n; k++) {
       const v = k * pas, y = T / 2 - v * S;
-      const entier = Math.abs(v - Math.round(v)) < 1e-6, demi = Math.abs(v * 2 - Math.round(v * 2)) < 1e-6;
-      const lg = entier ? 8 : demi ? 5 : 2.5;
+      const nombre = multiple(v, pasN), demi = multiple(v, pasN / 2);
+      const lg = nombre ? 8 : demi ? 5 : 2.5;
       ctx.beginPath(); ctx.moveTo(xr, y); ctx.lineTo(xr + lg, y); ctx.stroke();
-      if (entier && Math.round(v) % pasN === 0 && Math.abs(v) < champ - 0.01 && y > 16) ctx.fillText(String(Math.abs(Math.round(v))), xr - 3, y);
+      if (nombre && Math.abs(v) < champ - 0.01 && y > 16) ctx.fillText(fmt(Math.abs(v), decN), xr - 3, y);
     }
-    ctx.textBaseline = 'top'; ctx.fillText('cm', xr - 2, 2);
+    ctx.textBaseline = 'top'; ctx.textAlign = 'left'; ctx.fillText('cm', xr + 10, 3);
   }
 
   /* ---------- Loupe : une vue agrandie, mise à jour en direct ---------- */
@@ -804,6 +829,10 @@
   function montage(def) {
     etat.comps = [];
     etat.prochainId = 1;
+    etat.traces = null;
+    // case « Faisceau » : cochée au départ seulement si le TP le demande
+    etat.faisceau = !!def.faisceau;
+    D.faisceau.checked = etat.faisceau;
     regleBanc(def.banc || 100);
     for (const c of def.montage()) {
       const cc = creer(c.type, c);
@@ -816,6 +845,7 @@
     const def = BO.TP[etat.mode];
     ecouteursEtape.forEach(f => ecouteurs.delete(f));
     ecouteursEtape = [];
+    etat.traces = null;                   // les tracés de construction appartiennent à une étape
     D.tpZone.innerHTML = `<div class="bo-tp-tete" data-a3="tete"></div>
       <div class="bo-tp-corps" data-a3="corps"><div class="bo-tp-col" data-a3="g"></div><div class="bo-tp-col" data-a3="d"></div></div>`;
     D.tpZone.classList.toggle('replie', tpReplie);
@@ -868,6 +898,7 @@
       surChange,
       // une question (moteur commun assets/cours.js) ; fin() quand toutes ses parties sont faites
       question(zone, q, fin) {
+        q.parties.forEach(reponseDefaut);
         const z = el('div', 'bo-q');
         zone.appendChild(z);
         COURS.question(z, q, { fin() { if (fin) fin(); } });
@@ -911,10 +942,34 @@
         zone.appendChild(a);
         defiler(a);
       },
+      // rayons de construction dessinés sur le banc pendant l'étape : f() → [{ pts: [[x, y]…], cls }], ou null
+      traces(f) { etat.traces = f; changer(); },
       bloc(zone, html, cls) { const b = el('div', cls || 'bo-bloc', html); zone.appendChild(b); defiler(b); return b; },
     };
     return api;
   }
+  // réponse écrite dans l'encadré « Réponse » quand la partie n'a pas de solution rédigée
+  // (« Afficher la réponse » ne laisse jamais un encadré vide)
+  function reponseDefaut(p) {
+    if (Object.getOwnPropertyDescriptor(p, 'solution') || p.type === 'perso') return;
+    const sans = h => String(h || '').replace(/<span class="calc-icone"[^>]*><\/span>/g, '').trim();
+    Object.defineProperty(p, 'solution', {
+      enumerable: true,
+      get() {
+        if (p.type === 'choix') {
+          const bonnes = [].concat(p.bonne);
+          return `<p>${p.options.filter(o => bonnes.includes(o.id)).map(o => o.label).join(' ; ')}</p>`;
+        }
+        if (p.type === 'nombre') {
+          const dec = p.tol != null ? Math.max(0, Math.ceil(-Math.log10(2 * p.tol) - 1e-9)) : null;
+          const v = dec == null ? COURS.fmt(+p.valeur.toPrecision(3)) : fmt(p.valeur, dec);
+          return `<p>${p.label ? sans(p.label) + ' ' : ''}${v}${sans(p.unite) ? ' ' + sans(p.unite) : ''}</p>`;
+        }
+        return '';
+      },
+    });
+  }
+
   // amener à l'écran ce qui vient d'apparaître dans le panneau (sans faire défiler la page)
   function defiler(e) {
     setTimeout(() => {
