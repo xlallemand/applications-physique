@@ -28,7 +28,7 @@
    avant que eq.js ne lise le stockage.
 
    Stockage :
-     equations-college-progression, equations-college-reglages, equations-college-suivi : enregistrés dans la copie
+     equations-college-progression, -reglages, -suivi, -succes : enregistrés dans la copie
      equations-college-sauvegarde  { n, seuil, derniere } : séances depuis la dernière copie,
                                    prochain rappel, date de la dernière copie (jamais copié,
                                    ni par la sauvegarde du portail)
@@ -51,8 +51,8 @@
   const MAX_ENTREES = 1000;
   const APP = 'equations-college';
   const CLE_PROG = APP + '-progression', CLE_REG = APP + '-reglages',
-    CLE_SUIVI = APP + '-suivi', CLE_SAUV = APP + '-sauvegarde', CLE_MSG = APP + '-message';
-  const TYPES = { [CLE_PROG]: 'progression', [CLE_REG]: 'reglages', [CLE_SUIVI]: 'suivi' };
+    CLE_SUIVI = APP + '-suivi', CLE_SUC = APP + '-succes', CLE_SAUV = APP + '-sauvegarde', CLE_MSG = APP + '-message';
+  const TYPES = { [CLE_PROG]: 'progression', [CLE_REG]: 'reglages', [CLE_SUIVI]: 'suivi', [CLE_SUC]: 'succes' };
 
   // pages des modules dans modules/, accueil à la racine
   const RACINE = /\/modules\/[^/]*$/.test(location.pathname) ? '../' : '';
@@ -151,6 +151,26 @@
         }
         return r;
       }
+      // succès (assets/succes.js) : { v: 1, c: { <compteur>: entier }, j: ['AAAA-MM-JJ', …], e: { <ensemble>: [id, …] }, o: { <succès>: [t1, t2, t3, t4] } }
+      case 'succes': {
+        if (!ok(estObjet(v))) return undefined;
+        const r = { v: 1, c: {}, j: [], e: {}, o: {} };
+        const ent = (x, min, max) => typeof x === 'number' && Math.floor(x) === x && x >= min && x <= max;
+        cles(v).forEach(k => ok(['v', 'c', 'j', 'e', 'o'].indexOf(k) >= 0));
+        if (propre(v, 'c') && ok(estObjet(v.c) && cles(v.c).length <= 200)) cles(v.c).forEach(k => { if (ok(nomOk(k) && ent(v.c[k], 0, 1e9))) r.c[k] = v.c[k]; });
+        if (propre(v, 'j') && ok(Array.isArray(v.j) && v.j.length <= MAX_ENTREES)) v.j.forEach(x => { if (ok(typeof x === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x)) && r.j.indexOf(x) < 0) r.j.push(x); });
+        if (propre(v, 'e') && ok(estObjet(v.e) && cles(v.e).length <= 50)) {
+          cles(v.e).forEach(k => {
+            if (!ok(nomOk(k) && Array.isArray(v.e[k]) && v.e[k].length <= MAX_ENTREES)) return;
+            r.e[k] = v.e[k].filter(x => ok(nomOk(x))).filter((x, i, l) => l.indexOf(x) === i);
+          });
+        }
+        if (propre(v, 'o') && ok(estObjet(v.o) && cles(v.o).length <= 200)) {
+          cles(v.o).forEach(k => { if (ok(nomOk(k) && Array.isArray(v.o[k]) && v.o[k].length === 4 && v.o[k].every(t => ent(t, 0, 1e14)))) r.o[k] = v.o[k].slice(); });
+        }
+        r.j.sort();
+        return r;
+      }
       // réglages de l'élève (modules/eq.js) : on ne garde que les champs connus, eq.js revérifie les valeurs
       case 'reglages': {
         if (!ok(estObjet(v))) return undefined;
@@ -170,6 +190,7 @@
     if (!v) return false;
     if (type === 'progression') return !!v.pages && cles(v.pages).length > 0;
     if (type === 'suivi') return cles(v.r).length > 0 || v.notes.length > 0;
+    if (type === 'succes') return cles(v.c).length > 0 || v.j.length > 0 || cles(v.o).length > 0;
     return cles(v).length > 0;
   }
 
@@ -209,6 +230,26 @@
         };
         cles(b.r).forEach(id => { r.r[id] = reunir(r.r[id], b.r[id], 30); });
         r.notes = reunir(r.notes, b.notes, 100);
+        return r;
+      }
+      case 'succes': {
+        // compteurs : le plus grand ; jours et ensembles : réunion ; niveaux : obtenus d'un côté ou de l'autre (date la plus ancienne)
+        const r = estObjet(a) ? copie(a) : {};
+        r.v = 1;
+        ['c', 'e', 'o'].forEach(k => { if (!estObjet(r[k])) r[k] = {}; });
+        if (!Array.isArray(r.j)) r.j = [];
+        cles(b.c).forEach(k => { if (!(typeof r.c[k] === 'number' && r.c[k] >= b.c[k])) r.c[k] = b.c[k]; });
+        b.j.forEach(x => { if (r.j.indexOf(x) < 0) r.j.push(x); });
+        r.j.sort();
+        if (r.j.length > 1000) r.j.splice(0, r.j.length - 1000);
+        cles(b.e).forEach(k => {
+          const l = r.e[k] = Array.isArray(r.e[k]) ? r.e[k] : [];
+          b.e[k].forEach(x => { if (l.indexOf(x) < 0) l.push(x); });
+        });
+        cles(b.o).forEach(k => {
+          const x = Array.isArray(r.o[k]) && r.o[k].length === 4 ? r.o[k] : [0, 0, 0, 0];
+          r.o[k] = x.map((t, i) => { const u = b.o[k][i]; return t > 0 && u > 0 ? Math.min(t, u) : (t > 0 ? t : u); });
+        });
         return r;
       }
       default: return a;          // réglages : on garde ceux de cet appareil

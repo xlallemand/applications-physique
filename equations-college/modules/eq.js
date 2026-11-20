@@ -9,7 +9,8 @@
      - suivi : chaque question enregistrée avec sa compétence, historique
        des notes, statut de chaque compétence, priorités et choix
        automatique et progressif des compétences d'une séance ;
-     - rappel d'une compétence ; accueil ; pages « Mon suivi » et « Fiches ».
+     - rappel d'une compétence ; accueil ; pages « Mon suivi » (et ses succès,
+       modules/mes-succes.js) et « Fiches ».
    Dépend de : assets/sommaire.js (SOM), expr.js (EQ.X), competences.js (EQ.C),
    sauvegarde.js (facultatif : carte « Sauvegarde », rappel après chaque séance notée, installation).
 
@@ -23,7 +24,8 @@
    API :
      EQ.menu(cle)                   sommaire (SOM.menu) + pastilles Réglages et Sauvegarde
      EQ.reglages() ; EQ.regler(cle, val) ; EQ.ouvrirReglages() ; EQ.surReglages(fn) ; EQ.resumeReglages()
-     EQ.enregistrer(occ, note)      occasions [{ r, ok }] et note sur 20 (ou null)
+     EQ.enregistrer(occ, note)      occasions [{ r, ok, diff, aide }] et note sur 20 (ou null) ; diff et aide servent aux succès ;
+                                    renvoie les nouveaux succès [{ s, niv }]
      EQ.statut(id) 'm' maîtrisée | 'e' en bonne voie (réussie, pas encore assez de questions) | 'f' fragile | 't' à travailler
                     | 'n' pas encore vue | 'v' prérequis à acquérir
      EQ.taux(id) ; EQ.stats(id) ; EQ.priorites() ; EQ.planSeance(ids) ; EQ.niveauDe(id) ; EQ.notes()
@@ -42,7 +44,7 @@
   const PLAN = [
     { n: 1, titre: 'Séance de résolution', desc: '5 équations à résoudre ligne par ligne, comme sur une feuille, avec des aides.',
       parties: [{ nom: 'Séance de résolution', questions: 'seance', noms: { questions: 'Séance de 5 questions' } }] },
-    { n: 2, titre: 'Mon suivi', desc: 'Les compétences que tu maîtrises et celles à travailler en priorité.',
+    { n: 2, titre: 'Mon suivi', desc: 'Les compétences que tu maîtrises, celles à travailler en priorité, et tes succès.',
       parties: [{ nom: 'Mon suivi', entrainement: 'suivi', noms: { entrainement: 'Mon suivi' } }] },
     { n: 3, titre: 'Fiches des compétences', desc: 'Chaque compétence expliquée : règle, méthode, exemple, piège.',
       parties: [{ nom: 'Fiches des compétences', cours: 'fiches', noms: { cours: 'Fiches des compétences' } }] }
@@ -291,6 +293,8 @@
     ecrire(CLE_SUIVI, suivi);
     // séance notée : compteur du rappel de sauvegarde (modules/sauvegarde.js)
     if (note != null && typeof EQ.apresSeance === 'function') EQ.apresSeance();
+    // succès (modules/mes-succes.js, s'il est chargé) : renvoie les nouveaux succès
+    return typeof EQ.succesApres === 'function' ? EQ.succesApres(occasions, note) : [];
   }
   // les dernières questions d'une compétence
   function stats(id) {
@@ -512,6 +516,11 @@
     c.appendChild(el('div', 'eq-legende', ordre.map(s => '<span><span class="eq-puce eq-s-' + s + '" aria-hidden="true"></span>' + LIBS[s] + '</span>').join('')));
     c.appendChild(el('p', 'eq-petit', 'Maîtrisée : au moins 80 % de réussite sur les 10 dernières questions (4 questions au moins ; avant, elle est « en bonne voie »). Une question compte 1 si elle est juste du premier coup, 0,5 après une erreur, 0 si tu as affiché la solution. Une compétence n’est proposée en mode automatique que si ses prérequis sont maîtrisés.'));
     zone.appendChild(c);
+    // succès, après les compétences (modules/mes-succes.js) ; adresse suivi.html#succes : amenés à l'écran
+    if (typeof EQ.carteSucces === 'function') {
+      zone.appendChild(EQ.carteSucces());
+      if (location.hash === '#succes' && !pageSuivi.vu) { pageSuivi.vu = true; setTimeout(() => versVue(document.getElementById('succes'), 'start'), 60); }
+    }
     SOM.marquer({ fait: true });
     // Firefox, page ouverte depuis l'ordinateur (file://) : chaque page garde ses données pour elle seule
     if (!nb && location.protocol === 'file:' && /Firefox\//.test(navigator.userAgent)) {

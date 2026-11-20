@@ -8,7 +8,8 @@
      - suivi : chaque question enregistrée avec sa compétence, historique
        des notes, statut de chaque compétence, priorités et choix
        automatique et progressif des compétences d'une séance ;
-     - rappel d'une compétence ; accueil ; pages « Mon suivi » et « Fiches ».
+     - rappel d'une compétence ; accueil ; pages « Mon suivi » (et ses succès,
+       modules/mes-succes.js) et « Fiches ».
    Dépend de : assets/sommaire.js (SOM), expr.js (FRA.X), competences.js (FRA.C),
    sauvegarde.js (facultatif : carte « Sauvegarde », rappel après chaque séance notée, installation).
 
@@ -22,7 +23,8 @@
    API :
      FRA.menu(cle)                   sommaire (SOM.menu) + pastilles Réglages et Sauvegarde
      FRA.reglages() ; FRA.regler(cle, val) ; FRA.ouvrirReglages() ; FRA.surReglages(fn) ; FRA.resumeReglages()
-     FRA.enregistrer(occ, note)      occasions [{ r, ok }] et note sur 20 (ou null)
+     FRA.enregistrer(occ, note)      occasions [{ r, ok, diff, aide }] et note sur 20 (ou null) ; diff et aide servent aux succès ;
+                                     renvoie les nouveaux succès [{ s, niv }]
      FRA.statut(id) 'm' maîtrisée | 'e' en bonne voie (réussie, pas encore assez de questions) | 'f' fragile | 't' à travailler
                     | 'n' pas encore vue | 'v' prérequis à acquérir
      FRA.taux(id) ; FRA.stats(id) ; FRA.priorites() ; FRA.planSeance(ids) ; FRA.niveauDe(id) ; FRA.notes()
@@ -41,7 +43,7 @@
   const PLAN = [
     { n: 1, titre: 'Séance de calcul', desc: '5 questions à calculer comme sur une feuille, avec des aides.',
       parties: [{ nom: 'Séance de calcul', questions: 'seance', noms: { questions: 'Séance de 5 questions' } }] },
-    { n: 2, titre: 'Mon suivi', desc: 'Les compétences que tu maîtrises et celles à travailler en priorité.',
+    { n: 2, titre: 'Mon suivi', desc: 'Les compétences que tu maîtrises, celles à travailler en priorité, et tes succès.',
       parties: [{ nom: 'Mon suivi', entrainement: 'suivi', noms: { entrainement: 'Mon suivi' } }] },
     { n: 3, titre: 'Fiches des compétences', desc: 'Chaque compétence expliquée : règle, méthode, exemple, piège.',
       parties: [{ nom: 'Fiches des compétences', cours: 'fiches', noms: { cours: 'Fiches des compétences' } }] }
@@ -290,6 +292,8 @@
     ecrire(CLE_SUIVI, suivi);
     // séance notée : compteur du rappel de sauvegarde (modules/sauvegarde.js)
     if (note != null && typeof FRA.apresSeance === 'function') FRA.apresSeance();
+    // succès (modules/mes-succes.js, s'il est chargé) : renvoie les nouveaux succès
+    return typeof FRA.succesApres === 'function' ? FRA.succesApres(occasions, note) : [];
   }
   // les dernières questions d'une compétence
   function stats(id) {
@@ -487,6 +491,11 @@
     c.appendChild(el('div', 'fra-legende', ordre.map(s => '<span><span class="fra-puce fra-s-' + s + '" aria-hidden="true"></span>' + LIBS[s] + '</span>').join('')));
     c.appendChild(el('p', 'fra-petit', 'Maîtrisée : au moins 80 % de réussite sur les 10 dernières questions (4 questions au moins ; avant, elle est « en bonne voie »). Une question compte 1 si elle est juste du premier coup, 0,5 après une erreur, 0 si tu as affiché la solution. Une compétence n’est proposée en mode automatique que si ses prérequis sont maîtrisés.'));
     zone.appendChild(c);
+    // succès, après les compétences (modules/mes-succes.js) ; adresse suivi.html#succes : amenés à l'écran
+    if (typeof FRA.carteSucces === 'function') {
+      zone.appendChild(FRA.carteSucces());
+      if (location.hash === '#succes' && !pageSuivi.vu) { pageSuivi.vu = true; setTimeout(() => versVue(document.getElementById('succes'), 'start'), 60); }
+    }
     SOM.marquer({ fait: true });
     // Firefox, page ouverte depuis l'ordinateur (file://) : chaque page garde ses données pour elle seule
     if (!nb && location.protocol === 'file:' && /Firefox\//.test(navigator.userAgent)) {

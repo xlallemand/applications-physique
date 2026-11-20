@@ -17,7 +17,8 @@
        l'opération à faire des deux côtés : + 7, ÷ 4…), exemple avec
        d'autres nombres, solution (0 point) ;
      - points : 2 juste sans erreur, 1 juste après erreur, 0 solution affichée ;
-       note sur 20 ; suivi enregistré à chaque question (EQ.enregistrer).
+       note sur 20 ; suivi enregistré à chaque question (EQ.enregistrer) ;
+       nouveaux succès affichés à la fin (modules/mes-succes.js).
    Dépend de : expr.js (EQ.X), competences.js (EQ.C), eq.js (EQ).
    API : EQ.seance(zone) ; EQ.verifier(q, precedent, modele) (vérification d'une ligne, aussi pour les tests)
    ============================================================ */
@@ -291,6 +292,7 @@
       const p = plan[k], q = C.question(p.comp, niveau(p.comp)), comp = C.R[p.comp];
       EQ.questionEnCours = q;                     // question affichée (tests automatiques)
       let erreurs = 0, fini = false, precedent = X.lire(q.depart), nInd = 0;
+      let aide = false;                           // rappel, indice, opération des deux côtés ou exemple ouvert (succès « Autonome »)
       // lignes écrites (la première : l'équation de départ) et celles écrites par l'aide ; aide « opération des deux côtés » active ?
       const ecrites = [precedent], auto = [false];
       let mo = false;
@@ -310,6 +312,7 @@
       const zRap = el('div', 'eq-aide'), zInd = el('div', 'eq-aide'), zMo = el('div', 'eq-aide'), zEx = el('div', 'eq-aide'), zSol = el('div', 'eq-aide');
       const bRap = bouton('btn-small', '📖 Rappel', () => {
         const oui = !zRap.firstChild;
+        if (oui) aide = true;
         zRap.innerHTML = '';
         if (oui) { zRap.appendChild(EQ.blocRappel(q.comp)); EQ.versVue(zRap); }
         bRap.setAttribute('aria-expanded', oui);
@@ -317,6 +320,7 @@
       bRap.setAttribute('aria-expanded', 'false');
       const bInd = bouton('btn-small', '💡 Indice', () => {
         if (nInd >= q.indices.length) return;
+        aide = true;
         const d = el('div', 'eq-indice', '<b>Indice ' + (nInd + 1) + '.</b> ' + q.indices[nInd]);
         zInd.appendChild(d);
         nInd++;
@@ -331,6 +335,7 @@
       // à droite de la flèche de droite ; elle se fait des deux côtés et le terme visé disparaît
       const bMo = bouton('btn-small eq-mo-bt', '↙↘ Opération des deux côtés', () => {
         mo = !mo;
+        if (mo) aide = true;
         bMo.setAttribute('aria-pressed', mo);
         edOp.vider();
         dessinerFeuille();
@@ -340,6 +345,7 @@
       bMo.setAttribute('aria-pressed', 'false');
       const bEx = bouton('btn-small', '✎ Exemple', () => montrerExemple());
       function montrerExemple() {
+        aide = true;
         const e = C.question(q.comp, q.niv);
         zEx.innerHTML = '';
         const b = el('div', 'eq-rappel');
@@ -513,7 +519,7 @@
         bSol.disabled = true;
         points += pts;
         res.push({ comp: q.comp, niv: q.niv, pts });
-        EQ.enregistrer([{ r: q.comp, ok: pts / 2 }], null);
+        EQ.enregistrer([{ r: q.comp, ok: pts / 2, diff: q.niv, aide }], null);
         t.querySelector('.eq-score').textContent = 'Question ' + (k + 1) + '/' + NB + ' · Score : ' + points + ' pts';
         t.querySelector('.progress-fill').style.width = (100 * (k + 1) / NB) + '%';
         const dernier = k === NB - 1;
@@ -553,6 +559,9 @@
         ul.appendChild(el('li', '', '<span class="eq-puce eq-s-' + st + '" aria-hidden="true"></span><span><b>' + esc(C.R[x.comp].titre) + '</b> · ' + p + '/' + (2 * l.length) + ' pts</span><span class="eq-pct">' + EQ.LIBS[st].toLowerCase() + '</span>'));
       });
       c.appendChild(ul);
+      // nouveaux succès de la séance (modules/mes-succes.js)
+      const ns = EQ.blocSucces ? EQ.blocSucces(EQ.nouveauxSucces) : null;
+      if (ns) c.appendChild(ns);
       const a = el('div', 'er-actions');
       a.appendChild(bouton('btn-primary', 'Nouvelle séance →', () => { if (demande) history.replaceState(null, '', location.pathname); location.reload(); }));
       const s = el('a', 'btn-secondary', 'Mon suivi'); s.href = 'suivi.html'; a.appendChild(s);
