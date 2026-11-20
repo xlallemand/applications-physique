@@ -45,7 +45,8 @@ Source : `13- Synthese/TP - synthese ethanoate de linalyle.pdf` (2 p.) ; pour la
 ### Module 1 : Assembler le montage (manipulation guidée, `module_1_manip.html`)
 
 - Paillasse sous la hotte : potence, pinces, support élévateur, chauffe-ballon, ballons (un sec, un mouillé), éprouvettes, flacons d'alcool isoamylique et d'anhydride éthanoïque (avec leurs pictogrammes), billes de verre, bouchon, réfrigérant à boules, deux tuyaux, robinet d'eau.
-- **Ordre imposé** (`ETAPES`) : 1. support élévateur sur la paillasse ; 2. chauffe-ballon sur le support élévateur ; 3. ballon **sec** ; 4. alcool isoamylique (5 mL, mesuré à l'éprouvette) puis anhydride éthanoïque (10 mL), sous la hotte ; 5. billes de verre ; 6. ballon fixé à la potence (pince) dans le chauffe-ballon ; 7. réfrigérant à boules adapté au ballon (pince) ; 8. tuyau d'arrivée d'eau **en bas** du réfrigérant, tuyau de sortie **en haut** ; 9. circulation d'eau ouverte ; 10. chauffage allumé.
+- Un seul écran (`00-commun.md` §6 bis) : montage à gauche, liste des gestes (cochés au fur et à mesure) dans le panneau à droite.
+- **Ordre imposé** (c'est le protocole, `ETAPES`) : 1. support élévateur sur la paillasse ; 2. chauffe-ballon sur le support élévateur ; 3. ballon **sec** ; 4. alcool isoamylique (5 mL, mesuré à l'éprouvette) puis anhydride éthanoïque (10 mL), sous la hotte ; 5. billes de verre ; 6. ballon fixé à la potence (pince) dans le chauffe-ballon ; 7. réfrigérant à boules adapté au ballon (pince) ; 8. tuyau d'arrivée d'eau **en bas** du réfrigérant, tuyau de sortie **en haut** ; 9. circulation d'eau ouverte ; 10. chauffage allumé.
 - **Refus expliqués** (le geste ne se fait pas) :
   - eau qui entre par le haut : « L'eau entre par le bas du réfrigérant : il se remplit entièrement et refroidit bien les vapeurs. » ;
   - montage bouché (bouchon en haut du réfrigérant) : « Le haut du réfrigérant reste ouvert : sinon la pression monterait dans le ballon. » ;
@@ -59,11 +60,13 @@ Source : `13- Synthese/TP - synthese ethanoate de linalyle.pdf` (2 p.) ; pour la
 
 - Libellé : « Animation : chauffage à reflux ». Le montage du module 1, prêt. Lecture / Pause / vitesse / Recommencer ; une horloge accélérée compte les 20 minutes.
 - On voit : l'ébullition douce (bulles régulières grâce aux billes), les **vapeurs qui montent** dans le réfrigérant, se **condensent** en gouttes sur les boules et **retombent** dans le ballon ; l'eau qui circule de bas en haut ; une jauge « avancement de la transformation » qui monte plus vite quand on chauffe (comparaison « sans chauffage » au bouton).
-- Questions du TP au fil de l'animation : pourquoi chauffe-t-on ? principe du reflux ? pourquoi un support élévateur ? (QCM, mauvais choix classiques : « pour faire évaporer le produit », « pour stériliser »…).
-- Puis **légender le schéma** du montage avec les étiquettes à glisser : réfrigérant à boules, entrée d'eau, sortie d'eau, ballon, mélange réactionnel, billes de verre, chauffe-ballon, support élévateur, potence.
+- Chauffage (avec ou sans), eau, vitesse et horloge se règlent à tout moment ; l'animation ne s'arrête pas pour poser des questions.
+- **À essayer** (onglet du panneau, défis et questions dans n'importe quel ordre, `00-commun.md` §6 bis) : pourquoi chauffe-t-on ? principe du reflux ? pourquoi un support élévateur ? (QCM, mauvais choix classiques : « pour faire évaporer le produit », « pour stériliser »…) ; comparer avec et sans chauffage.
+- **Légender le schéma** (onglet du panneau, à tout moment) du montage avec les étiquettes à glisser : réfrigérant à boules, entrée d'eau, sortie d'eau, ballon, mélange réactionnel, billes de verre, chauffe-ballon, support élévateur, potence.
 
 ### Module 3 : Séparer et identifier (manipulation guidée, `module_3_manip.html`)
 
+- Quatre étapes en pastilles (relargage, espèces dans l'ampoule, ampoule à décanter, CCM), accessibles dans n'importe quel ordre : chacune part de l'état préparé, sur un seul écran (`00-commun.md` §6 bis) ; les gestes à l'intérieur d'une étape restent dans l'ordre du protocole.
 - **Relargage**, gestes dans l'ordre : arrêter le chauffage **sans arrêter l'eau** ; abaisser le support élévateur ; retirer le chauffe-ballon ; verser 30 mL d'eau salée **par le haut du réfrigérant** ; boucher le ballon et le refroidir dans un bain d'eau froide. Refus : couper l'eau en premier.
 - **Espèces dans l'ampoule** : l'élève coche la liste (acétate d'isoamyle, acide éthanoïque, eau, sel, alcool isoamylique, anhydride éthanoïque) ; diagnostics : « L'alcool isoamylique a été entièrement consommé : l'anhydride était en excès. » ; « L'anhydride restant a été transformé en acide éthanoïque par l'eau. »
 - **Ampoule à décanter** : verser, boucher, agiter (en ouvrant le robinet pour dégazer), laisser décanter : deux phases ; l'élève **place les phases** (phase organique, phase aqueuse) et **les espèces** dans le schéma de l'ampoule d'après le tableau (densité, solubilité). Diagnostics : produit placé en bas (« densité 0,87, plus petite que celle de l'eau salée : la phase qui contient l'acétate d'isoamyle est au-dessus ») ; acide éthanoïque dans la phase organique (« il est très soluble dans l'eau salée ») ; puis éliminer la phase aqueuse (ouvrir le robinet, bouchon ôté) et récupérer la phase supérieure.
@@ -73,7 +76,7 @@ Source : `13- Synthese/TP - synthese ethanoate de linalyle.pdf` (2 p.) ; pour la
 
 - `PAILLASSE` étendue : potence et pinces, support élévateur (qu'on monte et descend), chauffe-ballon (voyant), ballon, réfrigérant à boules (eau qui circule, gouttes de condensation), tuyaux, ampoule à décanter avec robinet, bain d'eau froide. Contours `--ink-2`, liquides `--paper-2`, phase organique légèrement teintée (`--cle-bg`) avec son nom écrit.
 - Animation du reflux en SVG (`requestAnimationFrame`), coupée avec `prefers-reduced-motion` (étapes au bouton).
-- 1280 px : montage à gauche (vertical, hauteur environ 520 px), étapes à droite ; 390 px : montage centré à l'échelle, étapes dessous.
+- Un seul écran sans défilement (`00-commun.md` §6 bis) : 1280 px, montage à gauche (vertical, à la hauteur disponible), gestes, questions et étiquettes dans un panneau à droite ; 390 px, montage centré à l'échelle en haut, panneau en onglets dessous.
 
 ## 6. Outils
 

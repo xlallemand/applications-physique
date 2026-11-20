@@ -100,7 +100,7 @@ Il n'y a pas d'autre fiche d'exercices : les exemples 1 à 5 du cours en tiennen
 
 Il remplace l'animation en ligne de l'activité (phyanim) : même déroulé, tout dans l'application.
 
-**Cheminement**, en quatre étapes (parties de la page, chacune débloquée par la précédente) :
+**Cheminement**, en quatre parties (onglets de la page, **accessibles à tout moment et dans n'importe quel ordre**, sur un seul écran, `00-commun.md` §3 ; les questions de chaque partie sont des défis « À essayer » cochés tout seuls) :
 
 1. **Le wagon** (partie I de l'activité). Scène SVG : wagon sur rails de A vers B, cinq personnages tirant avec des cordes à des angles différents.
 

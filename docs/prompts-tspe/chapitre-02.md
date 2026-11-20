@@ -245,7 +245,7 @@ Reprends la maquette validée et les remarques du professeur (données dans le m
 
 **Cours 1c : passer d'une écriture à l'autre** : une étape par phrase (les trois phrases ci-dessus, en `.cle`), chacune avec l'outil de conversion en exemple et en « À toi ». « À retenir » : les trois phrases.
 
-**Atelier « Prise en main de l'outil de dessin des molécules »** (sous-module 1, page `simulation`) : toujours la même suite de six molécules, dans l'ordre, une par outil de l'éditeur (tirer un trait, appui court pour une ramification, un autre atome, double liaison, triple liaison, topologique). Pas de bilan.
+**Atelier « Prise en main de l'outil de dessin des molécules »** (sous-module 1, page `simulation`) : toujours la même suite de six molécules, rangées dans cet ordre mais chacune accessible directement (pastilles, `00-commun.md` §3), une par outil de l'éditeur (tirer un trait, appui court pour une ramification, un autre atome, double liaison, triple liaison, topologique). Pas de bilan.
 
 **Atelier « Dessin libre de molécules »** (sous-module 1, page `simulation`) : l'éditeur, toutes les écritures, « Vérifier les H ».
 

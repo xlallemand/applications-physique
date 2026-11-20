@@ -99,7 +99,7 @@ L'habillage et le vocabulaire sont **musicaux** :
   Chaque instrument est un préréglage des a<sub>n</sub> ; l'élève peut ensuite modifier les raies et écouter.
 - **Mots affichés** : « hauteur (note) », « timbre », « son pur », « son complexe ». Une étiquette dynamique dit « son pur » s'il n'y a qu'une raie, « son complexe » sinon. La note (hauteur) est rappelée au-dessus du spectre.
 
-**Cheminement pédagogique** (étapes guidées, « ✍ Complète ton cours » à la fin) :
+**Cheminement pédagogique** (défis « À essayer » dans le panneau à droite du simulateur, sur un seul écran, cochés tout seuls, **dans n'importe quel ordre**, `00-commun.md` §3 ; « ✍ Complète ton cours » s'ouvre à tout moment) :
 
 1. **Le diapason** : la<sub>3</sub>, son pur.
    - Signal sinusoïdal et une seule raie à 440 Hz ; on écoute.

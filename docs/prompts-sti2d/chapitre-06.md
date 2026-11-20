@@ -110,7 +110,7 @@ Diagnostic ciblé à chaque erreur. Exemples :
 - « sans frottement, la réaction est perpendiculaire au support » ;
 - « les frottements s'opposent au glissement ».
 
-**Cheminement**, du plus simple au plus difficile :
+**Cheminement**, du plus simple au plus difficile (situations rangées dans cet ordre, chacune accessible directement, dans n'importe quel ordre, `00-commun.md` §3) :
 1. exemple traité : le ballon (avant, pendant, après la frappe) ;
 2. brique sur une planche horizontale ;
 3. masse suspendue au ressort ;

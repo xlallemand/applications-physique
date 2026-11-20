@@ -42,7 +42,7 @@ La lecture directe n'est acceptée que si la valeur mesurée est assez précise 
 
 ### Module 1 : Le motif élémentaire (manipulation guidée, `module_1_manip.html`)
 
-- Affichage : un signal « papier » (graphique LG en millimètres, axe des temps en ms) et la consigne.
+- Affichage (un seul écran, `00-commun.md` §6 bis) : un signal « papier » (graphique LG en millimètres, axe des temps en ms) et, dans le panneau, la consigne en une ligne et les pastilles des situations.
 - Situation 0 (deux questions d'abord) : trois signaux dont un non périodique (bruit, battements irréguliers) ; l'élève touche « périodique » ou « non périodique » sous chacun ; diagnostic : « Ce signal ne se répète pas à l'identique : cherche une portion qui revient exactement pareille. »
 - Situations 1 à 6 : sinusoïde (diapason), clarinette (forme complexe), électrocardiogramme, créneau, triangle, trompette. L'élève **touche le début d'un motif** (n'importe quel point du signal), puis **la fin du motif** ; le motif se surligne (accent, trait épais) et la double flèche T s'affiche.
 - Vérification : la fin est au point équivalent une période plus loin (même valeur **et** même sens de variation), tolérance 2 % de T.
@@ -53,7 +53,7 @@ La lecture directe n'est acceptée que si la valeur mesurée est assez précise 
 - Bilan : « La période T est la durée du motif élémentaire. On peut la mesurer entre deux sommets, deux creux, ou deux points qui se correspondent. »
 
 ### Module 2 : Mesurer T et calculer f (manipulation guidée, `module_2_manip.html`)
-Progressivité en **trois étapes successives** (une seule fois dans le module, pas pour chaque signal ; 6 situations au total, compteur « Situation 2 / 6 ») ; chaque situation se termine par le calcul de f :
+Progressivité en **trois étapes successives** (une seule fois dans le module, pas pour chaque signal ; 6 situations au total, compteur « Situation 2 / 6 » ; pastilles dans cet ordre, toutes accessibles) ; chaque situation se termine par le calcul de f :
 1. **Une période, lecture directe** (situations 1 et 2) : axe des temps gradué, la période tombe sur des valeurs écrites (exemples : T = 4 ms, T = 5 ms). L'élève touche le début et la fin d'une période (comme au module 1), lit les deux dates sur l'axe et écrit T = t<sub>2</sub> − t<sub>1</sub>.
 2. **Plusieurs périodes, lecture directe** (situations 3 et 4) : une période ne tombe pas sur une valeur écrite, mais n périodes oui (exemples : T = 2,5 ms avec 4T = 10 ms ; électrocardiogramme T = 0,8 s avec 5T = 4,0 s, puis « battements par minute » en bilan). L'élève lit n périodes, écrit Δt puis T = Δt / n. Comparaison affichée : « Une période : entre deux graduations, difficile à lire ; 4 périodes : 4T = 10 ms, donc T = 2,5 ms. L'erreur de lecture est partagée entre les 4 périodes : la mesure est plus précise. »
 3. **Règle et tableau de proportionnalité** (situations 5 et 6) : signal « papier » dont les périodes ne tombent pas sur des valeurs simples (clarinette T = 2,9 ms, diapason la<sub>3</sub> T = 2,27 ms). Déroulé de `LG.poserQuestion` : la règle virtuelle mesure n périodes (le plus grand nombre lisible) ; tableau `Distance (cm)` / `t (ms)` : ligne de l'échelle (mesurée sur l'axe), ligne de la mesure, case « nT » mise en valeur ; produit en croix ; T = Δt / n avec son unité. La lecture directe n'y est pas acceptée (règle ci-dessus).
@@ -70,13 +70,14 @@ Progressivité en **trois étapes successives** (une seule fois dans le module, 
 
 - Écran de 10 × 8 carreaux, un signal (sinusoïde ou forme de son), bouton de **base de temps** (0,1 ; 0,2 ; 0,5 ; 1 ; 2 ; 5 ms/carreau, boutons − / + et sélecteur), réglage de la fréquence du signal masqué en mode défi.
 - Option à cocher (voir début du §4) : comptage direct des carreaux, ou règle sur l'écran et tableau de proportionnalité (ligne de l'échelle : nombre de carreaux ↔ durée).
-- Déroulé guidé :
-  1. compte les carreaux de n périodes (deux curseurs verticaux glissables, aimantés au dixième de carreau, ou boutons ◀ ▶), méthode du module 2 : le plus grand nombre de périodes lisible ;
+- Tout se règle à tout moment : forme du signal, fréquence (montrée ou masquée : option « À trouver »), base de temps, curseurs. Les deux curseurs verticaux (glissables, aimantés au dixième de carreau, ou boutons ◀ ▶) affichent en continu le nombre de carreaux entre eux et la durée correspondante.
+- **À essayer** (défis cochés tout seuls, dans n'importe quel ordre, `00-commun.md` §6 bis) :
+  1. encadre n périodes avec les curseurs (méthode du module 2 : le plus grand nombre de périodes lisible) ;
   2. T = (nombre de carreaux × base de temps) / n (champ) ;
   3. change la base de temps : le signal se dilate ou se resserre, **la période ne change pas** (question « T a-t-elle changé ? ») ;
-  4. f = 1 / T.
+  4. f = 1 / T (fréquence « À trouver »).
 - Erreurs : base de temps oubliée (« tu as donné des carreaux, pas une durée ») ; multiplication par la sensibilité verticale (V/carreau) au lieu de la base de temps ; division par n oubliée.
-- Bilan à cocher : « T = nombre de carreaux × base de temps ».
+- Phrase à retenir, affichée quand le défi 2 est réussi : « T = nombre de carreaux × base de temps ».
 
 ### Module 4 : Entraînement (série notée sur 20, `module_4_questions.html`)
 
@@ -93,7 +94,7 @@ Chaque question a 2 ou 3 parties ; diagnostics ci-dessus.
 
 - Graphiques LG (SVG en mm « papier », identiques à tous les écrans) : courbe en `--accent`, quadrillage `--paper-3`, motif surligné en accent épais semi-transparent.
 - Écran d'oscilloscope dessiné en SVG : fond `--paper`, cadre `--ink`, quadrillage pointillé `--paper-3`, axes centraux gradués en cinquièmes de carreau, trace `--accent`, curseurs verticaux `--ink-2` avec poignées de 44 px.
-- 1280 px : figure à gauche, déroulé guidé à droite ou dessous selon la place ; 390 px : figure pleine largeur, commandes dessous.
+- Un seul écran sans défilement (`00-commun.md` §6 bis) : 1280 px, figure à gauche, réglages et défis (ou consigne et pastilles des situations) dans un panneau à droite ; 390 px, figure pleine largeur en haut, réglages en onglets dessous.
 - Pas de son (choix de l'enseignant).
 
 ## 6. Outils

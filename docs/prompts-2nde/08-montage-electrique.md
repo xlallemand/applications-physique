@@ -42,7 +42,7 @@ Sources : `10- Electricite/TP circuit electrique complete.pdf` (2 p.) et `Fiche 
 
 ### Module 1 : Lire le schéma (manipulation guidée, `module_1_manip.html`)
 
-- 6 schémas de difficulté croissante (série simple ; série avec interrupteur et ampèremètre ; une dérivation ; deux dérivations ; schémas du TP série et dérivation).
+- 6 schémas de difficulté croissante, pastilles accessibles dans n'importe quel ordre (`00-commun.md` §6 bis) (série simple ; série avec interrupteur et ampèremètre ; une dérivation ; deux dérivations ; schémas du TP série et dérivation).
 - L'élève **surligne la boucle principale** en touchant ses fils et ses dipôles (chaque élément touché s'épaissit en `--accent` ; toucher à nouveau l'enlève), puis « Vérifier ». Toute boucle fermée qui contient le générateur est acceptée ; s'il y en a plusieurs, l'application garde celle qu'il a choisie pour la suite.
 - Puis il **touche les nœuds** (points où le courant se partage) et les **dérivations** (branches hors de la boucle principale).
 - Erreurs à diagnostiquer :
@@ -53,14 +53,14 @@ Sources : `10- Electricite/TP circuit electrique complete.pdf` (2 p.) et `Fiche 
 
 ### Module 2 : Montage en série (manipulation guidée, `module_2_manip.html`)
 
-- Écran : **table de montage** réaliste et **schéma normalisé** côte à côte (≥ 900 px), l'un sous l'autre sur téléphone (schéma au-dessus, réduit et toujours visible en haut pendant le montage : bandeau collant de la hauteur du schéma).
-- Situations (progression de l'enseignant) :
+- Écran unique sans défilement (`00-commun.md` §6 bis) : **table de montage** réaliste et **schéma normalisé** côte à côte (≥ 900 px), consigne du pas en cours en une ligne et pastilles des situations dans un bandeau ; l'un sous l'autre sur téléphone (schéma au-dessus, réduit, table dessous, les deux dans l'écran).
+- Situations (progression de l'enseignant, pastilles dans cet ordre, toutes accessibles dans n'importe quel ordre) :
   1. générateur et une lampe ;
   2. générateur, interrupteur et deux lampes ;
   3. générateur, interrupteur, lampe, moteur et **ampèremètre** (COM et 10 A, puis passage en mA) ;
   4. générateur, **DEL** et résistance de protection (sens de la DEL) ;
   5. montage série du TP (8 V ; 390 Ω ; 100 Ω ; un ampèremètre placé en I<sub>1</sub>, puis déplacé en I<sub>2</sub> et en I<sub>3</sub>).
-- Déroulé de chaque situation : 1. surligner la boucle principale sur le schéma (comme au module 1) ; 2. tirer les fils **à partir de la borne + du générateur**, d'une borne à l'autre, dans l'ordre de la boucle ; chaque fil accepté et chaque dipôle branché **se colorent sur le schéma** ; 3. fermer la boucle sur la borne − ; 4. fermer l'interrupteur, régler le générateur, lire les mesures.
+- Méthode de chaque situation (ordre imposé : c'est la méthode de la boucle principale, chaque pas fait trop tôt est refusé avec son explication) : 1. surligner la boucle principale sur le schéma (comme au module 1) ; 2. tirer les fils **à partir de la borne + du générateur**, d'une borne à l'autre, dans l'ordre de la boucle ; chaque fil accepté et chaque dipôle branché **se colorent sur le schéma** ; 3. fermer la boucle sur la borne − ; 4. fermer l'interrupteur, régler le générateur, lire les mesures.
 - **Ampèremètre** : le multimètre a un sélecteur (fonctions et calibres) et ses quatre bornes ; l'élève choisit « A ⎓ », calibre 10 A, branche **10A** et **COM** ; lecture peu précise (« 0,02 ») ; puis il passe le fil de 10A à mA et le calibre à 200 mA : lecture « 16,3 ». Si le courant entre par COM : indication négative et la phrase de la fiche TP.
 - Refus expliqués (le fil n'est pas posé) :
   - départ ailleurs que de la borne + : « On part toujours de la borne + du générateur. » ;
@@ -72,8 +72,8 @@ Sources : `10- Electricite/TP circuit electrique complete.pdf` (2 p.) et `Fiche 
 
 ### Module 3 : Ajouter des dérivations (manipulation guidée, `module_3_manip.html`)
 
-- Situations : 1. deux lampes en dérivation ; 2. lampe et moteur en dérivation avec interrupteur dans la branche principale ; 3. dérivation du TP (390 Ω et 100 Ω) avec les trois ampèremètres I<sub>1</sub>, I<sub>2</sub>, I<sub>3</sub> ; 4. **voltmètres** : U<sub>G</sub>, U<sub>390</sub> et U<sub>100</sub> sur le montage série du TP (chaque voltmètre est une dérivation, ajoutée après la boucle) ; 5. montage de la loi d'Ohm (470 Ω, ampèremètre en série, voltmètre en dérivation).
-- Même déroulé : boucle principale d'abord (fermée), puis chaque dérivation, une par une, **dans l'ordre du schéma** (de la plus proche du générateur à la plus éloignée, en partant du nœud le plus proche de la borne +).
+- Situations (pastilles accessibles dans n'importe quel ordre) : 1. deux lampes en dérivation ; 2. lampe et moteur en dérivation avec interrupteur dans la branche principale ; 3. dérivation du TP (390 Ω et 100 Ω) avec les trois ampèremètres I<sub>1</sub>, I<sub>2</sub>, I<sub>3</sub> ; 4. **voltmètres** : U<sub>G</sub>, U<sub>390</sub> et U<sub>100</sub> sur le montage série du TP (chaque voltmètre est une dérivation, ajoutée après la boucle) ; 5. montage de la loi d'Ohm (470 Ω, ampèremètre en série, voltmètre en dérivation).
+- Même méthode : boucle principale d'abord (fermée), puis chaque dérivation, une par une, **dans l'ordre du schéma** (de la plus proche du générateur à la plus éloignée, en partant du nœud le plus proche de la borne +).
 - **Voltmètre** : fonction « V ⎓ », bornes **V** et **COM**, COM du côté de la borne − du générateur pour une indication positive (sinon : indication négative et la phrase de la fiche).
 - Refus expliqués :
   - dérivation commencée avant la fermeture de la boucle : « Ferme d'abord la boucle principale ; on ajoute les dérivations ensuite. » ;
@@ -93,7 +93,7 @@ Sources : `10- Electricite/TP circuit electrique complete.pdf` (2 p.) et `Fiche 
 - Couleurs : **pas de rouge pour la borne +** (le rouge est réservé au faux) : bornes avec le signe écrit, + cerclée `--accent`, − cerclée `--ink`. Fils en `--ink-2`, fil en cours de tracé en `--accent`. Lampe allumée : halo `--cle-bg`.
 - **Schéma normalisé** synchronisé : symboles normalisés (générateur cercle et + / −, résistance rectangle, lampe cercle avec croix, interrupteur, DEL triangle et barre avec flèches, moteur cercle M, ampèremètre cercle A, voltmètre cercle V), nœuds en points noirs, intensités et tensions nommées ; élément branché coloré `--accent`, boucle surlignée en accent épais semi-transparent.
 - Bornes : cibles de 44 px ; le fil se tire au doigt depuis une borne (poignée) jusqu'à une autre, ou par deux appuis (borne de départ, puis borne d'arrivée) ; un fil posé se retire en le touchant puis « Retirer ce fil ».
-- 1280 px : table à gauche (≈ 60 %), schéma à droite ; 390 px : schéma en haut (collant), table dessous, à l'échelle de la largeur.
+- Un seul écran sans défilement (`00-commun.md` §6 bis) : 1280 px, table à gauche (≈ 60 %), schéma à droite, à la hauteur disponible ; 390 px, schéma réduit en haut, table dessous à l'échelle de la place restante.
 
 ## 6. Outils
 

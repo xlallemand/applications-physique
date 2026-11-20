@@ -42,18 +42,19 @@ Sources : `04- Entites plus stables/Chap04-Cours-fiche-exos complete.pdf` p. 2 �
 ### Module 1 : Explorer le tableau (simulation, `module_1_simulation.html`)
 
 - Tableau des éléments Z = 1 à 20 : lignes 1 à 4 (ligne 4 : K et Ca seulement, les autres cases de la ligne en pointillés vides), colonnes 1, 2, 13 à 18, avec l'écart marqué « 10 colonnes cachées ». Chaque case : Z, symbole, et, pour Z ⩽ 18, les électrons de la couche externe (« …3s<sup>2</sup> 3p<sup>4</sup> »).
-- **Toucher un élément** ouvre son panneau :
+- **Toucher un élément** ouvre son panneau (à côté du tableau, sur le même écran ; ses rubriques en onglets si elles ne tiennent pas) :
   - nom, Z, configuration (Z ⩽ 18, dessin en cases d'`ATOME` avec la couche externe entourée) ;
   - **ligne ↔ couche externe** : « ligne 3 : la couche externe est n = 3 » ;
   - **colonne ↔ électrons de valence** : colonnes 1 et 2 → 1 et 2 ; colonnes 13 à 18 → 3 à 8 (« 13 − 10 = 3 : on saute les 10 colonnes cachées ») ; He : 2 ;
   - **ion** : les flèches de case en case jusqu'à la dernière colonne s'animent (vers la droite : électrons gagnés ; vers la gauche : électrons perdus), puis la formule et le nom de l'ion ; pour les gaz nobles : « déjà stable, ne forme pas d'ion » ; pour H : « H forme l'ion H<sup>+</sup> » ;
   - **liaisons** (H, C, N, O, F, Si, P, S, Cl) : « électrons à gagner pour avoir la configuration d'un gaz noble : 2 → 2 liaisons ; il reste 4 électrons de valence → 2 doublets non liants », et l'atome avec ses traits (comme le TP2 : –Ō– ) ; pour les métaux (Li, Be, Na, Mg, Al, K, Ca) : « forme plutôt un ion » ; pour B : pas de liaison proposée.
 - Boutons de familles (surlignage des cases, avec le nom écrit) : alcalins, halogènes, gaz nobles.
-- Déroulé guidé : 1. touche les éléments de la ligne 2 dans l'ordre : Z augmente de 1 à chaque case ; 2. touche Na puis Cl : même ligne, même couche externe ; 3. touche Li, Na, K : même colonne, même nombre d'électrons de valence, même famille ; 4. trouve l'ion de O en comptant les cases ; 5. trouve le nombre de liaisons de N ; 6. touche la famille des gaz nobles : pourquoi ils ne forment ni ion ni liaison.
+- On touche n'importe quel élément, n'importe quelle famille, à tout moment : le tableau sert de support à n'importe quel cours.
+- **À essayer** (défis cochés tout seuls, dans n'importe quel ordre, `00-commun.md` §6 bis) : 1. touche les éléments de la ligne 2 dans l'ordre : Z augmente de 1 à chaque case ; 2. touche Na puis Cl : même ligne, même couche externe ; 3. touche Li, Na, K : même colonne, même nombre d'électrons de valence, même famille ; 4. trouve l'ion de O en comptant les cases ; 5. trouve le nombre de liaisons de N ; 6. touche la famille des gaz nobles : pourquoi ils ne forment ni ion ni liaison.
 
 ### Module 2 : Retrouver les liens (manipulation guidée, `module_2_manip.html`)
 
-Situations successives (10, dans un ordre fixe au premier passage) :
+Situations (10, pastilles dans un ordre fixe, toutes accessibles dans n'importe quel ordre, `00-commun.md` §6 bis ; tableau et consigne sur un seul écran) :
 - **Placer d'après la configuration** : une carte (« 1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>6</sup> 3s<sup>2</sup> 3p<sup>3</sup> ») est à glisser dans la bonne case d'un tableau vide (ou toucher la carte puis la case) ; l'élève donne ensuite le symbole.
 - **Configuration d'après la case** : une case est surlignée ; l'élève compose la configuration (étiquettes de sous-couches et exposants − / +, comme dans `04`) ou seulement le nombre d'électrons de valence.
 - **Ion d'après la position** : l'élève trace les sauts de case (toucher les cases jusqu'à la dernière colonne), puis écrit la formule de l'ion.
@@ -78,7 +79,7 @@ Chaque défi a 1 à 3 parties ; diagnostics du module 2.
 - Tableau en grille CSS ou SVG ; cases de 46 px au moins (le tableau défile dans son conteneur à 390 px si besoin, la page jamais) ; numéros de colonnes au-dessus, numéros de lignes à gauche avec « n = 1, 2, 3, 4 ».
 - Familles surlignées par un cadre épais `--accent` et le nom écrit (jamais par une couleur seule) ; case touchée en `--cle-bg`.
 - Flèches des ions : arcs courbes de case en case, comme la figure du cours p. 3, animées (sans animation avec `prefers-reduced-motion`).
-- 1280 px : tableau à gauche, panneau de l'élément à droite ; 390 px : tableau en haut, panneau dessous.
+- Un seul écran sans défilement de la page (`00-commun.md` §6 bis) : 1280 px, tableau à gauche, panneau de l'élément (et défis ou consigne) à droite ; 390 px, tableau en haut, panneau en onglets dessous.
 
 ## 6. Outils
 

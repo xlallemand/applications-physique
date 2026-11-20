@@ -114,7 +114,7 @@ Les échelles sont pédagogiques (fréquences « affichées » en unités relati
 
 **Spectre du signal modulé (AM)** sous les graphiques, en raies : porteuse F et deux raies à F ± f<sub>m</sub>. Avec le modulant à plusieurs harmoniques, les deux **bandes latérales** sont symétriques. L'étiquette « bande occupée = 2 f<sub>h</sub> » se met à jour.
 
-**Cheminement** (étapes guidées, « ✍ Complète ton cours » à la fin) :
+**Cheminement** (défis « À essayer » dans le panneau à droite des graphiques, sur un seul écran, cochés tout seuls, **dans n'importe quel ordre**, `00-commun.md` §3 ; « ✍ Complète ton cours » s'ouvre à tout moment) :
 
 1. **Le problème** : un signal sonore de 1 kHz a une longueur d'onde de 300 km. Il faudrait une antenne de 150 km (λ/2) et il porterait mal ; deux radios sur la même bande se brouilleraient.
    - Petit calcul guidé ;

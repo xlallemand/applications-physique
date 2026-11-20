@@ -41,14 +41,14 @@ Sources : `06- Description des mouvements/Chap6-Cours-Exercices complete.pdf` (p
 
 ### Module 1 : Changer de référentiel (simulation, `module_1_simulation.html`)
 
-- Animations (Lecture / Pause / vitesse / Recommencer, case « laisser la trace ») avec des boutons de **caméra** : « caméra posée sur le trottoir » (référentiel terrestre), « caméra dans le bus », « caméra sur le vélo », « caméra au centre de la Terre » (géocentrique), « caméra au centre du Soleil » (héliocentrique). La trajectoire se trace dans le référentiel choisi.
+- Animations (Lecture / Pause / vitesse / Recommencer, case « laisser la trace ») avec des boutons de **caméra** : « caméra posée sur le trottoir » (référentiel terrestre), « caméra dans le bus », « caméra sur le vélo », « caméra au centre de la Terre » (géocentrique), « caméra au centre du Soleil » (héliocentrique). La trajectoire se trace dans le référentiel choisi. Les cinq scènes se choisissent à tout moment (bande de choix), comme la caméra :
   1. **Le bus** de l'activité 1 (Alain, Brigitte, Claude) : l'élève remplit le tableau « X est-il en mouvement par rapport à Y ? » (oui / non dans chaque case, en regardant chaque caméra) ;
   2. **la valve d'une roue de vélo** : un cercle dans le référentiel du vélo, une courbe en arceaux dans le référentiel terrestre ;
   3. **une balle lâchée dans un train** (translation) : chute verticale pour la caméra du train, courbe pour la caméra du quai ;
   4. **la Lune** : un cercle dans le référentiel géocentrique, une courbe ondulée autour du Soleil dans le référentiel héliocentrique ;
   5. **le parachutiste** à l'ouverture du parachute : vu du sol il descend moins vite ; vu par un parachutiste resté en chute libre, il monte.
-- Déroulé guidé : pour chaque animation, « Décris le mouvement de … dans ce référentiel » (deux mots) ; puis **choisir le référentiel adapté** (planète autour du Soleil, satellite autour de la Terre, objet sur Terre).
-- Bilan : « Le référentiel, c'est l'endroit où on pose la caméra. Un même mouvement apparaît différemment selon le référentiel. »
+- **À essayer** (défis cochés tout seuls, dans n'importe quel ordre, `00-commun.md` §6 bis ; « Essayer » choisit la scène) : pour chaque scène, « Décris le mouvement de … dans ce référentiel » (deux mots) ; puis **choisir le référentiel adapté** (planète autour du Soleil, satellite autour de la Terre, objet sur Terre).
+- Phrase à retenir, affichée quand tous les défis sont réussis : « Le référentiel, c'est l'endroit où on pose la caméra. Un même mouvement apparaît différemment selon le référentiel. »
 
 ### Module 2 : Décrire un mouvement (série notée sur 20, `module_2_questions.html`)
 
@@ -63,17 +63,18 @@ Sources : `06- Description des mouvements/Chap6-Cours-Exercices complete.pdf` (p
 
 **Simulation « Pointer une animation » (`module_3_simulation.html`)** : pointage simplifié, comme le TP1.
 - Une animation (balle lancée, trottinette, palet sur la glace) se lit **image par image** (◀ ▶, Δt affiché : 40 ms entre deux images) ; une règle de 1 m est visible dans la scène.
-- Étapes : 1. placer l'origine du repère ; 2. **étalonner** : toucher les deux traits de la règle (1 m) ; 3. **pointer le centre de l'objet** sur chaque image, à partir de la première où la balle a quitté la main (zone de 44 px, tolérance de 3 px sur l'image, loupe interdite au doigt : boutons ◀ ▲ ▼ ▶ pour ajuster le pointé) ; 4. la chronophotographie se construit (points M<sub>1</sub>, M<sub>2</sub>…, temps t<sub>1</sub>, t<sub>2</sub>…) et s'affiche avec son échelle.
+- Animation au choix à tout moment ; sur un seul écran (`00-commun.md` §6 bis), image à gauche, tableau des pointés à droite.
+- Étapes (c'est la méthode du pointage : un pointé avant l'étalonnage est refusé avec son explication) : 1. placer l'origine du repère ; 2. **étalonner** : toucher les deux traits de la règle (1 m) ; 3. **pointer le centre de l'objet** sur chaque image, à partir de la première où la balle a quitté la main (zone de 44 px, tolérance de 3 px sur l'image, loupe interdite au doigt : boutons ◀ ▲ ▼ ▶ pour ajuster le pointé) ; 4. la chronophotographie se construit (points M<sub>1</sub>, M<sub>2</sub>…, temps t<sub>1</sub>, t<sub>2</sub>…) et s'affiche avec son échelle.
 - Erreurs : objet pointé sur un bord au lieu de son centre (écart > tolérance : « pointe le centre de la balle ») ; image sautée.
 - La chronophotographie obtenue est reprise par la page suivante.
 
-**Manipulation guidée « Calculer v<sub>2</sub> » (`module_3_manip.html`)** : chronophotographies du cours (échelle 1:1, Δt = 50 ms ; trottinette : 1,0 cm ↔ 2,0 m, Δt = 0,40 s) et celle du pointage.
+**Manipulation guidée « Calculer v<sub>2</sub> » (`module_3_manip.html`)** : sur un seul écran, chronophotographies (pastilles, accessibles dans n'importe quel ordre) du cours (échelle 1:1, Δt = 50 ms ; trottinette : 1,0 cm ↔ 2,0 m, Δt = 0,40 s) et celle du pointage.
 - Pas à pas : 1. **mesurer M<sub>2</sub>M<sub>3</sub>** à la règle virtuelle (en cm) ; 2. **convertir avec l'échelle** (tableau de proportionnalité de la charte §4 : `Distance (cm)` / `d (m)`) ; 3. **t<sub>3</sub> − t<sub>2</sub> = Δt** en s ; 4. **v<sub>2</sub> = M<sub>2</sub>M<sub>3</sub> / (t<sub>3</sub> − t<sub>2</sub>)** (champ, unité m/s, 2 chiffres significatifs) ; 5. conversion en km/h (× 3,6).
 - Erreurs à diagnostiquer : **M<sub>1</sub>M<sub>3</sub> ou M<sub>1</sub>M<sub>2</sub> mesuré** (« Pour v<sub>2</sub>, on prend M<sub>2</sub>M<sub>3</sub> : de M<sub>2</sub> au point suivant. ») ; t<sub>3</sub> − t<sub>1</sub> (« entre M<sub>2</sub> et M<sub>3</sub>, il s'écoule un seul Δt ») ; cm non convertis en m ; ms non convertis en s ; échelle oubliée ; ÷ 3,6 au lieu de × 3,6.
 
 ### Module 4 : Vecteur vitesse (manipulation guidée, `module_4_manip.html`)
 
-- Chronophotographie dans un repère quadrillé (`VEC.Repere`, mode **mixte** : on glisse la pointe depuis M<sub>2</sub>, les boutons ↑ ← ↓ → l'ajustent d'un carreau ; la **valeur représentée** s'affiche en direct, `valeur: { k, unite: 'm/s', dec }`).
+- Sur un seul écran (`00-commun.md` §6 bis), situations en pastilles accessibles dans n'importe quel ordre. Chronophotographie dans un repère quadrillé (`VEC.Repere`, mode **mixte** : on glisse la pointe depuis M<sub>2</sub>, les boutons ↑ ← ↓ → l'ajustent d'un carreau ; la **valeur représentée** s'affiche en direct, `valeur: { k, unite: 'm/s', dec }`).
 - Pas à pas pour v⃗<sub>2</sub> : valeur v<sub>2</sub> (du module 3, ou donnée) ; échelle des vitesses (« 1 carreau ↔ 1 m/s » ou « 1 cm ↔ 2 m/s ») ; longueur du vecteur ; **tracé** : direction celle de [M<sub>2</sub>M<sub>3</sub>], sens du mouvement, longueur à l'échelle. Vérification séparée de la direction, du sens et de la longueur.
 - Puis v⃗<sub>5</sub> (trottinette : 5,0 et 8,0 m/s), et des chronophotographies où l'élève trace deux ou trois vecteurs et **décrit leur variation** avec le tableau du cours (direction change ? valeur change ?) : rectiligne uniforme (vecteurs identiques), rectiligne accéléré (même direction, plus longs), curviligne uniforme (même longueur, direction qui tourne).
 - Erreurs : **vecteur tracé de M<sub>2</sub> à M<sub>3</sub>** (« Le vecteur vitesse ne relie pas deux positions : sa longueur se calcule avec l'échelle des vitesses. ») ; sens inversé ; longueur sans l'échelle (« 5,0 m/s avec 1 cm ↔ 2 m/s : 2,5 cm ») ; vecteur qui ne part pas de M<sub>2</sub>.
@@ -84,7 +85,7 @@ Sources : `06- Description des mouvements/Chap6-Cours-Exercices complete.pdf` (p
 - Chronophotographies en SVG : points de position (petites croix ou disques `--ink`), noms M<sub>i</sub>, flèche du sens du mouvement, échelle dessinée (« 1,0 cm ↔ 2,0 m ») ; l'objet dessiné en clair à chaque position dans l'animation du pointage.
 - Animations du module 1 : décor simple (route, bus, quai, Terre, Lune, Soleil) en traits fins, trace de la trajectoire `--accent` ; aucune rotation rapide (confort visuel), `prefers-reduced-motion` respecté.
 - Vecteurs : rendu `VEC` (couleur d'accent de la physique), nom avec sa flèche (`VEC.nomHTML('v_2')`).
-- 1280 px : figure à gauche, déroulé à droite ; 390 px : figure pleine largeur (repère recalculé pour garder les carreaux lisibles), flèches de tracé de 58 × 50 px dessous.
+- Un seul écran sans défilement (`00-commun.md` §6 bis) : 1280 px, figure à gauche, réglages, défis ou pas en cours dans un panneau à droite ; 390 px, figure pleine largeur en haut (repère recalculé pour garder les carreaux lisibles), flèches de tracé de 58 × 50 px et onglets dessous.
 
 ## 6. Outils
 

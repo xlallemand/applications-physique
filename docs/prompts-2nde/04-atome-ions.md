@@ -45,15 +45,15 @@ Sources : `03- Atomes et ions/Chap04-Cours complete.pdf` (chapitre 3, 4 p.), `Ch
 
 ### Module 1 : Construire un atome (simulation, `module_1_simulation.html`)
 
-- Choix de l'élément (Z = 1 à 18 : boutons − / + sur Z, ou grille des symboles) : le noyau s'affiche avec Z protons (⊕) et A − Z neutrons (A usuel, voir `ATOME`), et son écriture <sup>A</sup><sub>Z</sub>X.
+- Choix de l'élément à tout moment (Z = 1 à 18 : bande des 18 symboles au-dessus des dessins sur ordinateur, boutons − / + sur Z) : le noyau s'affiche avec Z protons (⊕) et A − Z neutrons (A usuel, voir `ATOME`), et son écriture <sup>A</sup><sub>Z</sub>X.
 - **Deux dessins côte à côte qui se remplissent ensemble** : à gauche les cercles n = 1, 2, 3 autour du noyau ; à droite les cases 1s | 2s 2p | 3s 3p | 3d (3d grisée, avec une bulle ⓘ : « Pour les 18 premiers éléments, la sous-couche 3d reste vide. ») sous une flèche « Énergie ».
 - L'élève ajoute les électrons **un à un** : bouton « + électron », ou glisser un électron depuis la réserve vers une case (ou vers un cercle). Chaque électron apparaît en même temps sur son cercle et dans sa case ; la configuration s'écrit en direct (1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>6</sup> 3s<sup>1</sup>), le compteur « électrons : 11 / protons : 11 » se met à jour.
-- Une fois l'atome complet : la dernière couche qui a des électrons est **entourée** sur les deux dessins et dans la configuration, et « électrons de valence : 1 » s'affiche.
+- Une fois l'atome complet : la dernière couche qui a des électrons est **entourée** sur les deux dessins et dans la configuration, et « électrons de valence : 1 » s'affiche. Option « Électrons de valence : Montrés / À trouver » : en mode « À trouver », l'élève touche la couche externe, puis donne leur nombre.
 - Refus expliqués (rien ne change) :
   - case pleine : « La sous-couche 2s est pleine : une sous-couche s contient au plus 2 électrons (p : 6). » ;
   - case sautée : « Les sous-couches se remplissent dans l'ordre : 1s, 2s, 2p, 3s, 3p. Remplis d'abord 2s. » ;
   - plus d'électrons que de protons : « L'atome a autant d'électrons que de protons. Avec un électron de plus, ce serait un ion : voir le module 3. »
-- Déroulé guidé : 1. construis l'hydrogène, puis l'hélium ; 2. le lithium : la couche n = 1 est pleine ; 3. le néon : couche n = 2 pleine ; 4. le sodium : entoure les électrons de valence (l'élève touche la couche externe avant que l'application l'entoure) ; 5. défi : construis le soufre <sup>32</sup><sub>16</sub>S et donne son nombre d'électrons de valence.
+- **À essayer** (défis cochés tout seuls, dans n'importe quel ordre, `00-commun.md` §6 bis ; « Essayer » choisit l'élément) : 1. construis l'hydrogène, puis l'hélium ; 2. le lithium : la couche n = 1 est pleine ; 3. le néon : couche n = 2 pleine ; 4. le sodium : entoure les électrons de valence (mode « À trouver » : l'élève touche la couche externe avant que l'application l'entoure) ; 5. construis le soufre <sup>32</sup><sub>16</sub>S et donne son nombre d'électrons de valence.
 
 ### Module 2 : Configuration électronique (série notée sur 20, `module_2_questions.html`)
 
@@ -77,7 +77,8 @@ Groupes (10 questions) :
 - Refus : retirer un électron d'une couche interne (« On retire les électrons de la couche externe. »).
 - Rappel visible pendant la manipulation : « On **enlève** un électron → charge **+** ; on **ajoute** un électron → charge **−** (à l'envers !). »
 - Indicateur « gaz noble le plus proche » : les configurations de He, Ne et Ar sont affichées ; quand la configuration de l'ion finit en 1s<sup>2</sup> ou en ns<sup>2</sup> np<sup>6</sup>, un badge « stable : même configuration que Ne (règle de l'octet) » ou « … que He (règle du duet) » apparaît ; sinon « cet ion n'est pas stable ».
-- Déroulé guidé : 1. lithium : enlève 1 électron → Li<sup>+</sup>, cation, configuration de He ; 2. fluor : ajoute 1 électron → F<sup>−</sup>, anion ; 3. sodium : **deux chemins** affichés (perdre 1 électron pour avoir la configuration de Ne, ou en gagner 7 pour celle de Ar) : l'élève choisit et explique « le gaz noble le plus proche » ; 4. magnésium et oxygène ; 5. Li<sup>−</sup>, Li<sup>2+</sup> (fiche 1) : ces ions ne sont pas stables ; 6. noms des ions à connaître (H<sup>+</sup>, Na<sup>+</sup>, Mg<sup>2+</sup>, F<sup>−</sup>, Cl<sup>−</sup>).
+- Élément, électrons et affichages (case « Montrer les chemins vers un gaz noble », pour tout élément) se règlent à tout moment.
+- **À essayer** (défis cochés tout seuls, dans n'importe quel ordre, `00-commun.md` §6 bis) : 1. lithium : enlève 1 électron → Li<sup>+</sup>, cation, configuration de He ; 2. fluor : ajoute 1 électron → F<sup>−</sup>, anion ; 3. sodium : **deux chemins** affichés (perdre 1 électron pour avoir la configuration de Ne, ou en gagner 7 pour celle de Ar) : l'élève choisit et explique « le gaz noble le plus proche » ; 4. magnésium et oxygène ; 5. Li<sup>−</sup>, Li<sup>2+</sup> (fiche 1) : ces ions ne sont pas stables ; 6. noms des ions à connaître (H<sup>+</sup>, Na<sup>+</sup>, Mg<sup>2+</sup>, F<sup>−</sup>, Cl<sup>−</sup>).
 
 ### Module 4 : Ions : entraînement (série notée sur 20, `module_4_questions.html`)
 
@@ -95,7 +96,7 @@ Groupes :
 - SVG. Noyau : disque `--ink` (agrandi dans les modules 1 et 3 pour montrer les ⊕ et les neutrons) ; couches : cercles pointillés `--paper-3` épaissis et nommés (n = 1, 2, 3) ; électrons : petits disques `--accent` avec « − » ; protons : disques avec « + » ; neutrons : disques clairs `--paper-2`. Pas de rouge ni de vert pour les charges (réservés au juste / faux) : les signes sont écrits.
 - Cases : rectangles arrondis `--line` avec le nom de la sous-couche, électrons en points dedans et nombre dessous ; couche externe entourée en `--accent` (comme le trait du cours).
 - Configuration écrite en grand (`font-variant-numeric: tabular-nums`, exposants `<sup>`).
-- 1280 px : les deux dessins côte à côte, commandes dessous ; 390 px : cercles au-dessus, cases dessous (toujours visibles ensemble sans défiler, quitte à réduire), commandes en bas.
+- Un seul écran sans défilement (`00-commun.md` §6 bis) : 1280 px, bande des éléments en haut, les deux dessins côte à côte, réglages et défis dans un panneau à droite ; 390 px : cercles au-dessus, cases dessous (toujours visibles ensemble sans défiler, quitte à réduire), réglages en onglets en bas.
 
 ## 6. Outils
 

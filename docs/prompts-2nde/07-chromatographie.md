@@ -45,7 +45,7 @@ Sources : `2- Corps purs et melanges/Chap02-Cours complete.pdf` p. 2, `TP2 - CCM
 
 Libellé : « Animation : réaliser une CCM ». Espèces **fictives** : références A, B, C, D (corps purs ; A et C colorées, B et D incolores) et mélanges M (A + C) et N (B + D + une espèce inconnue X).
 
-Gestes, dans l'ordre du TP (un geste hors de l'ordre est refusé avec son explication) :
+Gestes, dans l'ordre du TP (c'est le protocole : un geste hors de l'ordre est refusé avec son explication) ; la liste des gestes se coche dans le panneau à droite de la cuve, sur un seul écran (`00-commun.md` §6 bis). Les dépôts se choisissent librement (n'importe quels flacons), le légendage (7) se fait à tout moment, et une case « Élution rapide » donne directement une plaque éluée avec les dépôts choisis, pour s'en servir en classe :
 1. **Tracer le trait de dépôt** au crayon, doucement, à 1 cm du bas de la plaque (glisser le crayon d'un bord à l'autre, ou bouton « Tracer ») ; refus si trop bas : « Le trait de dépôt doit rester au-dessus de l'éluant. »
 2. **Choisir et placer les dépôts** sur le trait (toucher un flacon puis un emplacement ; 2 à 5 dépôts, espacés) ; nommer chaque dépôt sous le trait.
 3. **Verser l'éluant** dans la cuve, sous la hotte (curseur du niveau) ; **poser la plaque**, **fermer le couvercle**. Si l'éluant dépasse le trait de dépôt : l'animation montre les dépôts qui se dissolvent dans l'éluant, message « Les dépôts se sont dissous dans l'éluant : le niveau de l'éluant doit rester sous le trait de dépôt. », « ↺ Recommencer ». Couvercle oublié : refus « L'éluant est toxique et s'évapore : on ferme la cuve. »
@@ -57,7 +57,7 @@ Gestes, dans l'ordre du TP (un geste hors de l'ordre est refusé avec son explic
 
 ### Module 2 : Lire un chromatogramme (manipulation guidée, `module_2_manip.html`)
 
-Espèces fictives (1, 2, 3 ou A, B, M, comme dans le cours) ; 6 situations, dont celle du cours (1 et 2 purs, 3 mélange de 1, de 2 et d'une espèce inconnue).
+Espèces fictives (1, 2, 3 ou A, B, M, comme dans le cours) ; 6 situations (pastilles, accessibles dans n'importe quel ordre), dont celle du cours (1 et 2 purs, 3 mélange de 1, de 2 et d'une espèce inconnue).
 - Questions types : « Ce dépôt est-il un corps pur ? », « Quels sont ses constituants ? », « Telle espèce est-elle présente ? ».
 - L'élève **touche une ou plusieurs taches** : quand deux taches sont à la même hauteur, un trait en **pointillés** les relie, comme dans le cours.
 - Il **construit sa conclusion** en touchant des expressions à piocher, dans l'ordre : « M est un corps pur » / « M est un mélange » / « M contient l'espèce A » / « M ne contient pas l'espèce B » / « M contient une espèce non identifiée » / « M contient au moins 3 espèces », puis « car », puis « il ne donne qu'une seule tache » / « il donne plusieurs taches » / « il donne une tache à la même hauteur que A » / « il ne donne pas de tache à la même hauteur que B » / « aucune référence ne donne de tache à cette hauteur ». La phrase se compose dans une zone dédiée ; « Effacer » et « Vérifier ».
@@ -67,7 +67,7 @@ Espèces fictives (1, 2, 3 ou A, B, M, comme dans le cours) ; 6 situations, dont
   - corps pur conclu pour un dépôt à plusieurs taches (et l'inverse) ;
   - « contient A » alors que la tache n'est pas à la même hauteur (les pointillés ne relient rien) ;
   - nombre exact d'espèces affirmé : « Deux espèces peuvent monter à la même hauteur : on écrit **au moins** 3 espèces. »
-- **Pour aller plus loin : le rapport frontal** (section facultative en fin de page, ne compte pas pour marquer la page) : l'élève mesure, avec une règle glissable, la hauteur h d'une tache et la hauteur H du front, **toutes deux depuis le trait de dépôt**, puis R<sub>f</sub> = h / H ; deux plaques d'élution différente donnent le même R<sub>f</sub> pour la même espèce. Erreur à diagnostiquer : **hauteurs mesurées depuis le bas de la plaque** au lieu du trait de dépôt : « Les hauteurs se mesurent à partir du trait de dépôt, d'où partent les espèces. »
+- **Pour aller plus loin : le rapport frontal** (onglet facultatif du panneau, sur le même écran, ne compte pas pour marquer la page) : l'élève mesure, avec une règle glissable, la hauteur h d'une tache et la hauteur H du front, **toutes deux depuis le trait de dépôt**, puis R<sub>f</sub> = h / H ; deux plaques d'élution différente donnent le même R<sub>f</sub> pour la même espèce. Erreur à diagnostiquer : **hauteurs mesurées depuis le bas de la plaque** au lieu du trait de dépôt : « Les hauteurs se mesurent à partir du trait de dépôt, d'où partent les espèces. »
 
 ### Module 3 : Entraînement (série notée sur 20, `module_3_questions.html`)
 
@@ -83,7 +83,7 @@ Après une erreur : l'explication, puis la bonne réponse. Pas de R<sub>f</sub> 
 - Cuve : verre (contour `--ink-2`), éluant `--paper-2`, couvercle ; front de l'éluant animé (bord légèrement ondulé).
 - Pointillés entre taches de même hauteur : `--ink-2`, tirets.
 - Expressions à piocher : pilules `btn-secondary` de 46 px, phrase construite dans un encadré `callout`.
-- 1280 px : plaque et cuve à gauche, déroulé à droite ; 390 px : plaque pleine largeur, expressions dessous (sur plusieurs lignes).
+- Un seul écran sans défilement (`00-commun.md` §6 bis) : 1280 px, plaque et cuve à gauche, gestes, expressions et phrase construite dans un panneau à droite ; 390 px, plaque en haut, expressions en onglets dessous (sur plusieurs lignes).
 - Animation : `requestAnimationFrame`, interrompue avec `prefers-reduced-motion` (étapes au bouton, état final de chaque étape).
 
 ## 6. Outils

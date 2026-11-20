@@ -24,6 +24,7 @@ Ce fichier est lu au début de chaque session qui fabrique une application de 2n
 2. Les applications de référence, seulement les fichiers utiles :
    - `cinematique/` : référence de la charte (moteur de questions `modules/cin.js`, `CIN.serie`, styles `cin.css`, accueil `index.html`) ;
    - `spectres-etoiles/` : application de 2nde sans cours (une page par module, `PLAN` sans fiche) ;
+   - **`atome-ions/`** (pages `module_1_simulation` et `module_3_simulation`, fonctions `cadreSim` et `defis` de `modules/at.js`, styles `.at-sim*` et `.at-defis*` de `at.css`) : **modèle des pages de simulation et de manipulation** (un seul écran, panneau à droite, onglets sur téléphone, défis « À essayer », §6 bis) ; copie ce qui sert et renomme-le avec le préfixe de l'application ;
    - `pile/` (page `entrainement`), `ondes-sonores/` et `energie-cinetique/` (pages `simulation` en tête d'une partie) : manipulations et simulateurs existants ;
    - les outils que le prompt de l'application nomme (section 6 du prompt).
 3. Pour l'en-tête des outils partagés, lis seulement le bloc de commentaires du début (rôle, API).
@@ -44,13 +45,13 @@ Ce fichier est lu au début de chaque session qui fabrique une application de 2n
 - **Types de pages** (`PLAN`, charte §5), une partie par module sauf indication contraire :
   | Type demandé dans le prompt | Clé du `PLAN` | Libellé (`noms`) | Marquée faite quand… |
   |---|---|---|---|
-  | simulation, animation | `simulation` (▸) | « Simulateur : … », « Animation : … » | l'élève a atteint l'état final ou le bilan du déroulé guidé |
-  | manipulation guidée (situations successives, sans note) | `entrainement` (E) | « Manipulation : … » | toutes les situations sont réussies (ou leur réponse affichée) |
+  | simulation, animation | `simulation` (▸) | « Simulateur : … », « Animation : … » | tous les défis « À essayer » sont réussis, dans n'importe quel ordre |
+  | manipulation guidée (situations au choix, sans note) | `entrainement` (E) | « Manipulation : … » | toutes les situations sont réussies (ou leur réponse affichée), dans n'importe quel ordre |
   | entraînement noté sur 20 | `questions` (Q) | « Entraînement » ou titre court | la série est finie : `SOM.marquer({ note })`, la meilleure est gardée |
   
   Pas de clé `fiche` dans le `PLAN` (il n'y a pas de cours). Nom des fichiers : `module_N_simulation.html`, `module_N_manip.html`, `module_N_questions.html` (ou une seule page par module si le prompt le dit).
-- **Pages de simulation et de manipulation** : première carte de la charte §4 (badge `MODULE N · SIMULATION` / `· MANIPULATION` / `· ENTRAÎNEMENT`, titre, contexte en une ou deux phrases avec les mots-clés en gras). Puis la zone de manipulation, puis le **déroulé guidé** sous la zone : une consigne à la fois (« 1. Trace la normale en I. »), vérifiée sur l'état de la manipulation, qui se coche quand elle est réussie ; un bilan court à la fin. Bouton « ↺ Recommencer » (`btn-secondary`). Une manipulation guidée enchaîne ses situations avec « Situation suivante → » et un compteur « Situation 2 / 6 ».
-- **Bouton plein écran commun** (`assets/plein-ecran.js`, objet `PLEIN`, modèle `double-periodicite/`) sur toute page de manipulation ou de simulation (charte §4, « Page de manipulation ») : dans la première carte, à droite du titre.
+- **Pages de simulation et de manipulation : un seul écran, utilisables librement** (section 6 bis, modèle `atome-ions/`, pages `module_1_simulation` et `module_3_simulation`). Ce sont des **outils** que l'enseignant projette ou que l'élève ouvre pour **n'importe quel cours**, sans suivre de consignes dans l'ordre. En-tête compact (badge `MODULE N · SIMULATION` / `· MANIPULATION`, titre, contexte en une phrase avec les mots-clés en gras, ou dans une bulle ⓘ), puis la zone de manipulation et son panneau de réglages. Bouton « ↺ Recommencer » (`btn-secondary`).
+- **Bouton plein écran commun** (`assets/plein-ecran.js`, objet `PLEIN`, modèle `double-periodicite/`) sur toute page de manipulation ou de simulation (charte §4, « Page de manipulation ») : dans l'en-tête, à droite du titre, sur ordinateur ; au bout des onglets sur téléphone.
 - **Séries notées** : 10 questions tirées au hasard dans des groupes, chaque question est une fabrique (nouvelles valeurs, nouveaux distracteurs) ; parties successives ; 2 / 1 / 0 point ; écran de fin de la charte. Une question peut contenir une manipulation (partie `'perso'` : `monter(zone, api)`, `api.reussi()` / `api.erreur(diag)`), montable en **plusieurs exemplaires** (pas d'`id` fixe, pas d'état global).
 - **Accueil** : en-tête illustré (`app-hero`, kicker « Physique · Seconde » ou « Chimie · Seconde », `h1`, phrase d'accroche), puis `SOM.accueil(zone)`.
 - **Portail** : entrée dans `APPS` de `index.html` (racine) : `{ titre, dom, niv: ['2de'], dossier, desc, mots }`, `desc` donnée par le prompt, `mots` : mots-clés de recherche (charte §2) ; place-la dans le groupe de son domaine, après les applications de 2nde déjà présentes (dans l'ordre des numéros des prompts). Déclare aussi ses pages dans `AVANCEMENT` de `assets/avancement.js` (toutes les pages du `PLAN`, dans l'ordre), puis relance `python3 docs/outils/index-recherche.py` (index de recherche du portail).
@@ -66,6 +67,18 @@ Ce fichier est lu au début de chaque session qui fabrique une application de 2n
 - Figures en **SVG** (sauf mention contraire), recalculées à la largeur disponible ; à 390 px la figure prend toute la largeur de la carte et les commandes passent dessous. Aucun défilement horizontal de la page.
 - **Animations** : boutons Lecture / Pause, vitesse (× 0,5, × 1, × 2), « ↺ Recommencer », et, quand c'est utile, « Pas à pas ». Avec `prefers-reduced-motion: reduce` : pas d'animation automatique ; l'animation avance par étapes au bouton « Étape suivante » et chaque étape s'affiche dans son état final.
 - Couleurs : uniquement les variables de `assets/theme.css` (constantes SVG seulement en attributs de présentation, comme `VEC.C`). Vert et rouge réservés au juste / faux.
+
+## 6 bis. Simulations et manipulations : un écran, sans déroulé imposé
+
+Règle de l'enseignant pour **toute page de simulation, d'animation ou de manipulation** ; elle prime sur ce que les prompts d'application disent de la mise en page et des étapes.
+
+- **Tout tient sur un écran d'ordinateur, sans défilement de la page** : à 1280 × 720 et encore à 1280 × 650, figure, commandes, valeurs affichées et défis sont visibles ensemble. La page occupe `calc(100dvh − marges)` (avec `100vh` avant, pour les anciens navigateurs) ; la figure (SVG recalculé) prend la place qui reste ; le panneau de réglages est **à droite** (environ 300 px) ; une règle `@media (max-height: 760px)` compresse les marges et les textes. Ce qui ne tient pas se compresse, passe en bulle ⓘ ou dans un onglet du panneau : **jamais sous la figure**. Aucun contenu coupé dans une colonne (rien ne déborde de son panneau).
+- **Téléphone et tablette (< 900 px)** : la page tient aussi dans l'écran, sous le bandeau du sommaire : figure en haut, réglages en bas en **onglets** (un bloc à la fois, « À essayer » compris), bouton plein écran au bout des onglets ; l'en-tête de la page est caché (le bandeau du sommaire nomme la page). En plein écran, la page reprend toute la hauteur.
+- **Tout se règle à tout moment** : chaque paramètre de la situation (élément, milieu, angle, source, valeur, objet…) se choisit directement (bande de choix, − / +, curseur, glisser), dans n'importe quel ordre, sans passer par une étape. Rien n'est verrouillé par un déroulé : les seuls refus sont ceux de la physique, de la chimie ou du protocole (case pleine, électron de trop, geste de laboratoire hors de l'ordre), toujours expliqués par une phrase.
+- **Les grandeurs utiles au cours s'affichent en continu** (valeurs, mesures, configuration, formule, nom), mises à jour à chaque geste ; ce qui est à faire trouver à l'élève se masque par une option (« Montrées » / « À trouver »), jamais par une étape.
+- **Pas de déroulé guidé linéaire.** Les étapes numérotées que décrit un prompt (« Déroulé guidé : 1. … 2. … ») deviennent des **défis « À essayer »** : une rangée de pastilles numérotées, le texte du défi choisi et un bouton « Essayer » qui prépare la situation de départ (élément, milieu, réglage) sans faire le défi. Chaque défi se **coche tout seul** dès que l'état de la simulation le réalise, **dans n'importe quel ordre**, même si l'élève l'atteint sans l'avoir choisi, avec une phrase courte qui dit ce qu'il faut retenir. Tous cochés : page marquée faite.
+- **Manipulations guidées** (situations successives) : même écran unique ; les situations sont des pastilles numérotées accessibles **dans n'importe quel ordre** (rangées dans l'ordre de progression du prompt ; « Situation suivante → » enchaîne aussi, compteur « Situation 2 / 6 ») ; la consigne du pas en cours tient en une ligne dans le panneau. Seuls les pas qui forment la méthode du cours (normale avant les angles, boucle principale avant les dérivations, gestes du protocole) restent dans l'ordre, avec un refus expliqué.
+- Vérification (§9) : `document.documentElement.scrollHeight <= innerHeight` à 1280 × 720, 1280 × 650 et 390 × 844, dans chaque état (début, défis en cours, tous réussis, messages de refus affichés), et aucun bloc dont le contenu dépasse (`scrollHeight > clientHeight`).
 
 ## 7. Retours à l'élève
 
@@ -96,8 +109,8 @@ Ce fichier est lu au début de chaque session qui fabrique une application de 2n
 
 Avec Playwright / Chromium (déjà installé, ne lance pas `playwright install`), à **1280 px** et à **390 px** avec émulation tactile (`hasTouch: true, isMobile: true`) :
 
-1. Chaque simulation : chaque commande (glisser, flèches, boutons, curseurs), chaque état (début, en cours, réussi), le déroulé guidé jusqu'au bilan, « Recommencer ».
-2. Chaque manipulation guidée : toutes les situations, juste puis avec les **erreurs volontaires que liste le prompt** (le bon diagnostic s'affiche), gestes hors de l'ordre refusés avec leur explication, état de fin.
+1. Chaque simulation : chaque commande (glisser, flèches, boutons, curseurs), chaque état (début, en cours, réussi), chaque défi « À essayer » (« Essayer », défi réussi sans l'avoir choisi, défis dans le désordre, tous cochés → page faite), « Recommencer » ; **aucun défilement de la page** à 1280 × 720, 1280 × 650 et 390 × 844, aucun contenu coupé (§6 bis).
+2. Chaque manipulation guidée : toutes les situations, dans le désordre, sur un seul écran, juste puis avec les **erreurs volontaires que liste le prompt** (le bon diagnostic s'affiche), gestes hors de l'ordre refusés avec leur explication, état de fin.
 3. Chaque série : 10 questions, note sur 20, écran de fin ; deux tirages différents.
 4. Glisser **à la souris et au doigt** (événements tactiles CDP : `Input.dispatchTouchEvent`), flèches, deux appuis ; aucun survol nécessaire.
 5. Animations : lecture, pause, vitesse, recommencer ; `prefers-reduced-motion: reduce` émulé (`page.emulateMedia({ reducedMotion: 'reduce' })`).
