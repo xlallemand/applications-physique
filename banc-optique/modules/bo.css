@@ -1,0 +1,254 @@
+/* ============================================================
+   Banc d'optique — styles propres (préfixe bo-, dessin du banc s-)
+   Une seule page à la hauteur de l'écran (pas de défilement sur ordinateur) :
+   barre d'outils, vues + banc (défilement de côté quand on zoome),
+   barre du composant sélectionné, panneau du TP.
+   Couleurs : uniquement les variables de assets/theme.css.
+   ============================================================ */
+
+body.bo-corps { margin: 0; background: var(--sheet); font-family: var(--font-sans); color: var(--ink); overflow: hidden; }
+.bo-app {
+  height: calc(100vh - 60px); height: calc(100dvh - 60px);     /* 60 px : bandeau du haut */
+  display: flex; flex-direction: column; position: relative; background: var(--sheet);
+}
+.bo-app button, .bo-app select { touch-action: manipulation; -webkit-tap-highlight-color: transparent; font-family: var(--font-sans); }
+.bo-app button:focus-visible, .bo-app select:focus-visible, .bo-app input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bo-cache-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- Barre d'outils ---------- */
+.bo-outils {
+  flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+  border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: thin; white-space: nowrap;
+}
+.bo-sel { position: relative; display: inline-block; flex-shrink: 0; }
+.bo-sel::after { content: '▾'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: .75rem; color: var(--ink-2); pointer-events: none; }
+.bo-select {
+  appearance: none; -webkit-appearance: none; font: inherit; font-weight: 700; font-size: .86rem; color: var(--ink);
+  background: var(--paper); border: none; border-radius: 999px; padding: 8px 30px 8px 13px; cursor: pointer;
+}
+.bo-select:hover { background: var(--paper-2); }
+.bo-sep { width: 1px; height: 28px; background: var(--paper-3); margin: 0 2px; flex-shrink: 0; }
+.bo-ajout-t { font-size: .8rem; color: var(--ink-2); font-weight: 600; flex-shrink: 0; }
+.bo-palette { display: flex; gap: 6px; flex-shrink: 0; }
+.bo-ajout {
+  display: inline-flex; align-items: center; gap: 6px; background: var(--sheet); color: var(--ink); border: none;
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); border-radius: 999px; padding: 6px 12px 6px 8px;
+  font-weight: 700; font-size: .82rem; cursor: grab; white-space: nowrap; touch-action: none; min-height: 36px;
+}
+.bo-ajout:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.bo-ajout:disabled { opacity: .4; cursor: default; box-shadow: inset 0 0 0 1.5px var(--paper-3); }
+.bo-ajout svg { width: 22px; height: 22px; flex-shrink: 0; }
+.bo-court { display: none; }
+@media (max-width: 1330px) { .bo-ajout .bo-long { display: none; } .bo-ajout .bo-court { display: inline; } }
+.bo-i-trait { fill: none; stroke: var(--ink); stroke-width: 1.6; }
+.bo-i-blanc { fill: var(--sheet); }
+.bo-i-plein { fill: var(--cle-bg); stroke: var(--accent-ink); stroke-width: 1.4; }
+.bo-i-encre { fill: var(--ink); }
+.bo-place-reglages { display: flex; flex-shrink: 0; }
+.bo-fantome {
+  position: fixed; z-index: 3000; pointer-events: none; transform: translate(-50%, -130%);
+  display: inline-flex; align-items: center; gap: 6px; background: var(--sheet); border-radius: 999px; padding: 6px 12px 6px 8px;
+  font-weight: 700; font-size: .82rem; box-shadow: 0 6px 20px rgba(22, 24, 29, .18), inset 0 0 0 1.5px var(--accent);
+}
+.bo-fantome[hidden] { display: none; }
+.bo-fantome svg { width: 22px; height: 22px; }
+
+/* ---------- Scène : vues et banc ---------- */
+.bo-scene { flex: 1 1 0; min-height: 0; overflow-x: auto; overflow-y: hidden; padding: 0 16px; scrollbar-width: thin; }
+.bo-plateau { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; touch-action: pan-x; }
+.bo-vues { position: relative; flex: none; }
+.bo-vue { position: absolute; top: 0; }
+.bo-vue-cap { font-size: .78rem; line-height: 1.25; color: var(--ink-2); overflow: hidden; padding-bottom: 2px; }
+.bo-vue-cap b { color: var(--ink); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bo-vue-l2 { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-top: 1px; }
+.bo-vue-etat { display: block; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bo-vue-z { display: inline-flex; gap: 3px; flex-shrink: 0; }
+.bo-vue-z button {
+  width: 28px; height: 22px; padding: 0; border: none; border-radius: 999px; background: var(--sheet); color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: inherit; font-weight: 800; font-size: .9rem; line-height: 1; cursor: pointer;
+}
+.bo-vue-z button:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.bo-vue-z button:disabled { opacity: .35; cursor: default; box-shadow: inset 0 0 0 1.5px var(--paper-3); }
+.bo-vue-etat.ok { color: var(--accent-ink); font-weight: 700; }
+.bo-vue-bt { display: block; padding: 0; border: 1px solid var(--paper-3); border-radius: 10px; overflow: hidden; background: var(--paper); cursor: zoom-in; }
+.bo-vue-bt:hover { border-color: var(--ink-3); }
+.bo-vue-bt canvas { display: block; }
+.bo-vue-pointe { position: absolute; bottom: -8px; width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 8px solid var(--line-strong); }
+.bo-banc { display: block; flex: none; overflow: visible; font-family: var(--font-sans); user-select: none; -webkit-user-select: none; }
+
+/* ---------- Dessin SVG du banc ---------- */
+.s-rail { fill: var(--paper-2); stroke: var(--line-strong); }
+.s-grad { stroke: var(--ink-3); stroke-width: 1; }
+.s-grad-t { fill: var(--ink-2); font-size: 12px; text-anchor: middle; font-variant-numeric: tabular-nums; }
+.s-axe { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 6 5; }
+.s-tige { stroke: var(--ink-2); stroke-width: 3; }
+.s-cavalier { fill: var(--ink-2); }
+.s-poignee { fill: var(--sheet); stroke: var(--accent); stroke-width: 2.5; }
+.s-prise { cursor: grab; touch-action: none; outline: none; }
+.s-prise:active { cursor: grabbing; }
+.s-prise.sel .s-poignee { fill: var(--accent); }
+.s-prise:focus-visible .s-poignee { stroke: var(--ink); stroke-width: 3; }
+.s-zone { fill: transparent; }
+.s-sel { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.s-lentille { fill: var(--cle-bg); stroke: var(--accent-ink); stroke-width: 1.6; }
+.s-miroir { stroke: var(--ink); stroke-width: 3; fill: none; }
+.s-hachure { stroke: var(--ink-2); stroke-width: 1; }
+.s-ecran { fill: var(--sheet); stroke: var(--ink); stroke-width: 1.6; }
+.s-ecran.retire { stroke-dasharray: 4 3; opacity: .5; }
+.s-lampe { fill: var(--ink); }
+.s-plaque { fill: var(--paper-3); stroke: var(--ink-2); }
+.s-objet { stroke: var(--accent); stroke-width: 3; }
+.s-objet-p { fill: var(--accent); }
+.s-lettre { fill: var(--accent-ink); font-size: 12px; font-weight: 800; }
+.s-faisceau { fill: var(--accent); opacity: .13; }
+.s-rayon { stroke: var(--accent); stroke-width: 1.8; fill: none; stroke-linejoin: round; }
+/* rayons de construction d'un TP (cercle oculaire) */
+.s-trace { stroke: var(--ink); stroke-width: 1.6; fill: none; stroke-linejoin: round; }
+/* construction du cercle oculaire : rayons issus du haut et du bas de l'objectif */
+.s-trace-h { stroke: var(--orga-ram-1); stroke-width: 1.8; fill: none; stroke-linejoin: round; }
+.s-trace-b { stroke: var(--orga-ram-3); stroke-width: 1.8; fill: none; stroke-linejoin: round; }
+.s-trace-p { stroke: var(--ink-2); stroke-width: 1.2; fill: none; stroke-dasharray: 5 4; }
+.s-trace-co { stroke: var(--accent-ink); stroke-width: 4; fill: none; stroke-linecap: round; }
+.s-foyer { fill: var(--ink); }
+.s-foyer-t { fill: var(--ink-2); font-size: 11px; text-anchor: middle; font-style: italic; }
+.s-nom { fill: var(--ink); font-size: 13px; font-weight: 800; text-anchor: middle; }
+.s-nom.sel { fill: var(--accent-ink); }
+.s-pos { fill: var(--accent-ink); font-size: 12px; font-weight: 700; text-anchor: middle; font-variant-numeric: tabular-nums; }
+.s-note { fill: var(--ink-2); font-size: 11px; text-anchor: end; }
+
+/* ---------- Barre du composant sélectionné et réglages du banc ---------- */
+.bo-selbar {
+  flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-top: 1px solid var(--line);
+  min-height: 54px; box-sizing: border-box; overflow-x: auto; scrollbar-width: thin; white-space: nowrap;
+}
+.bo-sel-info { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.bo-aide-t { color: var(--ink-2); font-size: .88rem; }
+.bo-pastille {
+  min-width: 26px; height: 26px; padding: 0 4px; box-sizing: border-box; border-radius: 999px; background: var(--accent); color: var(--sheet);
+  display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: .76rem;
+}
+.bo-sel-nom { font-weight: 800; }
+.bo-sel-pos { font-weight: 800; color: var(--accent-ink); font-variant-numeric: tabular-nums; min-width: 70px; }
+.bo-pas { display: inline-flex; gap: 4px; }
+.bo-mini {
+  background: var(--sheet); color: var(--ink); border: none; box-shadow: inset 0 0 0 1.5px var(--paper-3); border-radius: 999px;
+  padding: 7px 11px; font-weight: 700; font-size: .8rem; white-space: nowrap; cursor: pointer; min-height: 34px;
+}
+.bo-mini:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.bo-mini:disabled { opacity: .4; cursor: default; box-shadow: inset 0 0 0 1.5px var(--paper-3); }
+.bo-mini.on { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.bo-lab { display: inline-flex; align-items: center; gap: 6px; font-size: .82rem; color: var(--ink-2); font-weight: 600; flex-shrink: 0; }
+.bo-discret { color: var(--ink-2); font-weight: 500; font-size: .8rem; }
+.bo-reglages { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding-left: 12px; }
+.bo-zoom-v { min-width: 34px; text-align: center; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.bo-coche { display: inline-flex; align-items: center; gap: 6px; font-size: .85rem; font-weight: 700; cursor: pointer; }
+.bo-coche input { width: 18px; height: 18px; accent-color: var(--ink); margin: 0; }
+
+/* ---------- Panneau du TP ---------- */
+.bo-tp { flex: none; height: clamp(200px, 30vh, 260px); border-top: 1px solid var(--line); background: var(--paper); display: flex; flex-direction: column; }
+.bo-tp[hidden] { display: none; }
+.bo-tp.replie { height: auto; }
+.bo-tp.replie .bo-tp-corps { display: none; }
+.bo-tp-tete { display: flex; align-items: center; gap: 8px; padding: 8px 16px 6px; overflow-x: auto; white-space: nowrap; scrollbar-width: thin; flex: none; }
+.bo-tp-titre { font-weight: 800; letter-spacing: -.02em; margin-right: 4px; flex-shrink: 0; }
+.bo-tp-court { display: none; font-weight: 700; font-size: .86rem; }
+.bo-etapes { display: inline-flex; gap: 6px; }
+.bo-etape {
+  display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 600; color: var(--ink-2); background: var(--sheet);
+  border: none; border-radius: 999px; padding: 4px 10px 4px 4px; cursor: pointer; min-height: 30px;
+}
+.bo-etape:hover { box-shadow: inset 0 0 0 1.5px var(--ink-3); }
+.bo-etape > span { width: 20px; height: 20px; border-radius: 50%; background: var(--paper-2); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: .72rem; }
+.bo-etape.fait > span { background: var(--accent); color: var(--sheet); }
+.bo-etape.cours { background: var(--cle-bg); color: var(--accent-ink); }
+.bo-etape.cours > span { background: var(--accent); color: var(--sheet); }
+.bo-tp-bt { margin-left: auto; display: inline-flex; gap: 6px; padding-left: 8px; }
+.bo-tp-corps { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; padding: 2px 16px 12px; }
+.bo-tp-col { background: var(--sheet); border-radius: 16px; padding: 12px 16px 16px; overflow-y: auto; font-size: .92rem; line-height: 1.5; scrollbar-width: thin; }
+.bo-tp-h { margin: 0 0 6px; font-size: 1rem; font-weight: 800; letter-spacing: -.02em; }
+.bo-tp-col p { margin: 0 0 8px; color: var(--ink-2); }
+.bo-tp-col p b, .bo-tp-col li b { color: var(--ink); }
+.bo-tp-col .cle { margin: 6px 0 10px; padding: 10px 14px; border-radius: 14px; background: var(--cle-bg); color: var(--ink); line-height: 1.5; }
+.bo-tp-col .cle p { color: var(--ink); margin: 0; }
+.bo-tp-col ul { margin: 0 0 8px; padding-left: 20px; color: var(--ink-2); }
+.bo-q + .bo-q, .bo-bloc + .bo-q, .bo-q + .bo-bloc { margin-top: 14px; padding-top: 12px; border-top: 1.5px dashed var(--paper-3); }
+.bo-tp-col .crs-partie-q { margin-bottom: 8px !important; }
+.bo-tp-col .crs-lab { font-size: 1rem; }
+.bo-tp-col .crs-unite { font-size: .98rem; }
+.bo-tp-col .crs-choix button { min-height: 42px; padding: 8px 14px; font-size: .88rem; }
+.bo-tp-col .er-retour { font-size: .9rem; }
+.bo-tp-col .crs-solution p { color: var(--ink); }
+.bo-attente { display: flex; align-items: center; gap: 8px; color: var(--ink-2) !important; font-weight: 600; }
+.bo-pt { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex-shrink: 0; animation: bo-pulse 1.4s ease-in-out infinite; }
+@keyframes bo-pulse { 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .bo-pt { animation: none; } }
+.bo-suite { justify-content: flex-end; }
+.bo-tab-defile { overflow-x: auto; margin: 6px 0 4px; }
+.bo-tab { border-collapse: collapse; font-size: .86rem; font-variant-numeric: tabular-nums; margin: 0 auto; }
+.bo-tab th { background: var(--paper); font-weight: 700; color: var(--ink); }
+.bo-tab th, .bo-tab td { border: 1px solid var(--paper-3); padding: 4px 10px; text-align: center; white-space: nowrap; }
+.bo-tab td.vide { color: var(--ink-3); }
+.bo-tab tr.cours td { background: var(--cle-bg); }
+.bo-btns { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 8px; }
+.bo-mes { font-weight: 700; color: var(--ink) !important; }
+.bo-alg { text-decoration: overline; text-decoration-thickness: 1px; }   /* mesure algébrique */
+/* graphique 1/OA′ en fonction de 1/OA */
+.bo-graphe-zone { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; }
+.bo-graphe-cote { flex: 1 1 160px; min-width: 0; }
+.bo-graphe-cote .bo-mes { margin-top: 8px; white-space: normal; }
+.bo-graphe { display: block; height: 170px; width: auto; max-width: 100%; touch-action: pan-y; font-family: var(--font-sans); }
+.g-grille { stroke: var(--paper-3); stroke-width: 1; stroke-dasharray: 3 4; }
+.g-axe { stroke: var(--ink); stroke-width: 1.2; }
+.g-grad { fill: var(--ink-2); font-size: 11px; font-variant-numeric: tabular-nums; }
+.g-nom { fill: var(--ink-2); font-size: 12px; font-weight: 700; }
+.g-point { fill: var(--accent); stroke: var(--sheet); stroke-width: 1.5; }
+.g-droite { stroke: var(--accent-ink); stroke-width: 2; }
+
+/* ---------- Loupe (vue agrandie) ---------- */
+.bo-loupe { position: fixed; inset: 0; z-index: 2500; display: flex; align-items: center; justify-content: center; }
+.bo-loupe[hidden] { display: none; }
+.bo-loupe-fond { position: absolute; inset: 0; background: rgba(22, 24, 29, .45); }
+.bo-loupe-boite { position: relative; background: var(--sheet); border-radius: 18px; padding: 12px 14px 14px; }
+.bo-loupe-tete { display: flex; align-items: flex-start; gap: 12px; justify-content: space-between; margin-bottom: 8px; }
+.bo-loupe-tete .bo-vue-cap { font-size: .92rem; }
+.bo-loupe canvas { display: block; border-radius: 10px; border: 1px solid var(--paper-3); }
+
+/* ---------- Téléphone en paysage (petite hauteur) ---------- */
+@media (max-height: 520px) {
+  .bo-corps .app-topbar { height: 44px; }
+  .bo-corps .app-topbar-spacer { height: 44px; }
+  .bo-app { height: calc(100vh - 44px); height: calc(100dvh - 44px); }
+  .bo-outils { padding: 4px 10px; gap: 6px; }
+  .bo-ajout-t { display: none; }
+  .bo-ajout { padding: 4px 9px 4px 5px; font-size: .74rem; min-height: 32px; }
+  .bo-ajout svg { width: 18px; height: 18px; }
+  .bo-select { padding: 6px 26px 6px 11px; font-size: .78rem; }
+  .bo-scene { padding: 0 8px; }
+  .bo-vue-cap { font-size: .68rem; line-height: 1.2; }
+  /* une seule rangée de commandes : la barre du composant remplace la barre d'outils */
+  .bo-app.bo-a-sel .bo-outils { display: none; }
+  .bo-app:not(.bo-a-sel) .bo-selbar { display: none; }
+  .bo-selbar { min-height: 0; padding: 4px 10px; border-top: none; border-bottom: 1px solid var(--line); order: -1; }
+  .bo-reglages { margin-left: 4px; padding-left: 6px; gap: 6px; }
+  .bo-mini { min-height: 30px; padding: 5px 9px; font-size: .74rem; }
+  /* panneau du TP : une ligne en bas, ouvert par-dessus le banc */
+  .bo-tp { position: absolute; left: 0; right: 0; bottom: 0; height: 78%; z-index: 20; border-top: 1.5px solid var(--line-strong); }
+  .bo-tp.replie { position: static; height: auto; border-top: 1px solid var(--line); }
+  .bo-tp.replie .bo-tp-titre, .bo-tp.replie .bo-etapes { display: none; }
+  .bo-tp.replie .bo-tp-court { display: inline; }
+  .bo-tp-tete { padding: 5px 10px; }
+  .bo-tp-corps { padding: 2px 10px 8px; gap: 8px; }
+  .bo-tp-col { padding: 10px 12px; font-size: .86rem; }
+}
+
+/* ---------- Téléphone en portrait : « Tourne ton téléphone » ---------- */
+.bo-tourne { display: none; }
+@media (orientation: portrait) and (max-width: 640px) {
+  .bo-tourne {
+    display: flex; position: fixed; left: 0; right: 0; top: 60px; bottom: 0; z-index: 900; background: var(--sheet);
+    flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; gap: 14px;
+  }
+  .bo-tourne svg { width: 110px; height: 110px; }
+  .bo-tourne p { margin: 0; color: var(--ink-2); line-height: 1.5; }
+  .bo-tourne .bo-tourne-t { font-size: 1.3rem; font-weight: 800; color: var(--ink); letter-spacing: -.02em; }
+}

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="fr" data-matiere="physique">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maquette : Banc d'optique</title>
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../equilibrer-reactions/modules/er.css">
+<style>
+/* ============================================================
+   Maquette de l'application « Banc d'optique » (banc-optique/)
+   Écrans statiques dessinés par le même petit moteur que la future
+   application : tracé paraxial des rayons à travers les composants,
+   images floues ou nettes sur les écrans, faisceau lumineux.
+   Couleurs : uniquement les variables de assets/theme.css.
+   ============================================================ */
+body { font-family: var(--font-sans); background: var(--paper); color: var(--ink); margin: 0; padding: 24px; }
+.mq-titre { font-size: 1.6rem; font-weight: 800; letter-spacing: -.02em; margin: 0 0 6px; }
+.mq-note { max-width: 1280px; color: var(--ink-2); line-height: 1.55; margin: 8px 0 34px; }
+.mq-note b { color: var(--ink); }
+.mq-note ul { margin: 6px 0 0; padding-left: 20px; }
+.mq-ecran-t { font-weight: 800; font-size: 1.05rem; margin: 0 0 8px; }
+
+/* ── Cadre d'un écran d'ordinateur (1280 × 800) ── */
+.bo-cadre { width: 1280px; height: 800px; background: var(--sheet); border: 1px solid var(--line-strong); border-radius: 10px;
+  overflow: hidden; display: flex; flex-direction: column; position: relative; }
+
+/* bandeau commun (SOM.menu('accueil') + PLEIN.bouton()) */
+.bo-bandeau { height: 60px; flex: none; display: flex; align-items: center; gap: 12px; padding: 0 12px; border-bottom: 1px solid var(--line); }
+.bo-pilule { background: var(--paper); border-radius: 999px; padding: 8px 14px; font-weight: 700; font-size: .88rem; }
+.bo-nom { font-weight: 800; font-size: 1.02rem; letter-spacing: -.02em; flex: 1; }
+.bo-plein { display: inline-flex; align-items: center; gap: 6px; }
+.bo-plein svg { width: 16px; height: 16px; fill: none; stroke: var(--ink); stroke-width: 2; }
+
+/* barre d'outils : choix du TP, composants à ajouter */
+.bo-outils { flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--line); }
+.bo-select { appearance: none; font: inherit; font-weight: 700; font-size: .88rem; color: var(--ink); background: var(--paper);
+  border: none; border-radius: 999px; padding: 8px 34px 8px 14px; position: relative; }
+.bo-select-l { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; color: var(--ink-2); font-weight: 600; }
+.bo-sel { position: relative; display: inline-block; }
+.bo-sel::after { content: '▾'; position: absolute; right: 13px; top: 50%; transform: translateY(-50%); font-size: .8rem; color: var(--ink-2); pointer-events: none; }
+.bo-sep { width: 1px; height: 28px; background: var(--paper-3); margin: 0 4px; }
+.bo-ajout-t { font-size: .8rem; color: var(--ink-2); font-weight: 600; }
+.bo-ajout { display: inline-flex; align-items: center; gap: 6px; background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3);
+  border-radius: 999px; padding: 6px 12px 6px 8px; font-weight: 700; font-size: .82rem; cursor: grab; white-space: nowrap; }
+.bo-ajout svg { width: 22px; height: 22px; }
+.bo-ico-trait { fill: none; stroke: var(--ink); stroke-width: 1.6; }
+.bo-ico-plein { fill: var(--cle-bg); stroke: var(--accent-ink); stroke-width: 1.4; }
+.bo-ico-encre { fill: var(--ink); }
+
+/* scène : vues rapprochées au-dessus du banc */
+.bo-scene { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 16px; }
+.bo-vues { position: relative; height: 212px; flex: none; }
+.bo-vue { position: absolute; top: 4px; width: 176px; }
+.bo-vue-cap { height: 36px; font-size: .78rem; line-height: 1.25; color: var(--ink-2); overflow: hidden; }
+.bo-vue-cap b { color: var(--ink); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bo-vue-etat { display: block; white-space: nowrap; }
+.bo-vue-etat.ok { color: var(--accent-ink); font-weight: 700; }
+.bo-vue svg { display: block; width: 176px; height: 176px; border-radius: 10px; background: var(--paper); border: 1px solid var(--paper-3); }
+.bo-vue-pointe { position: absolute; bottom: -9px; width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 8px solid var(--line-strong); }
+.bo-banc svg { display: block; width: 100%; }
+
+/* barre du composant sélectionné et réglages du banc */
+.bo-selbar { flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-top: 1px solid var(--line); min-height: 54px; box-sizing: border-box; }
+.bo-selbar .bo-pastille { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--sheet); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: .78rem; }
+.bo-sel-nom { font-weight: 800; }
+.bo-sel-pos { font-weight: 800; color: var(--accent-ink); font-variant-numeric: tabular-nums; min-width: 74px; }
+.bo-mini { background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3); border-radius: 999px; padding: 6px 11px; font-weight: 700; font-size: .8rem; white-space: nowrap; }
+.bo-mini.on { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.bo-droite { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.bo-coche { display: inline-flex; align-items: center; gap: 6px; font-size: .85rem; font-weight: 600; }
+.bo-coche i { width: 18px; height: 18px; border-radius: 5px; box-shadow: inset 0 0 0 1.5px var(--ink-3); display: inline-flex; align-items: center; justify-content: center; font-style: normal; font-size: .75rem; }
+.bo-coche i.on { background: var(--ink); color: var(--sheet); box-shadow: none; }
+
+/* panneau du TP, repliable */
+.bo-tp { flex: none; height: 232px; border-top: 1px solid var(--line); background: var(--paper); display: flex; flex-direction: column; }
+.bo-tp-tete { display: flex; align-items: center; gap: 8px; padding: 10px 16px 6px; }
+.bo-tp-titre { font-weight: 800; letter-spacing: -.02em; margin-right: 8px; }
+.bo-etape { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 600; color: var(--ink-2); background: var(--sheet); border-radius: 999px; padding: 4px 10px 4px 4px; }
+.bo-etape span { width: 20px; height: 20px; border-radius: 50%; background: var(--paper-2); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: .72rem; }
+.bo-etape.fait span { background: var(--accent); color: var(--sheet); }
+.bo-etape.cours { background: var(--cle-bg); color: var(--accent-ink); }
+.bo-etape.cours span { background: var(--accent); color: var(--sheet); }
+.bo-replier { margin-left: auto; }
+.bo-tp-corps { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 4px 16px 12px; }
+.bo-tp-col { background: var(--sheet); border-radius: 16px; padding: 12px 16px; overflow: hidden; font-size: .9rem; line-height: 1.45; }
+.bo-tp-col h4 { margin: 0 0 6px; font-size: .95rem; }
+.bo-tp-col p { margin: 0 0 8px; color: var(--ink-2); }
+.bo-tp-col p b { color: var(--ink); }
+.bo-ok { color: var(--success-text); font-weight: 700; }
+.bo-champ { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+.bo-champ i { font-style: normal; display: inline-block; width: 84px; height: 34px; border-radius: 10px; box-shadow: inset 0 0 0 1.5px var(--line-strong); background: var(--sheet); }
+.bo-btn { display: inline-block; background: var(--ink); color: var(--sheet); border-radius: 999px; padding: 8px 16px; font-weight: 700; font-size: .85rem; }
+.bo-tab { border-collapse: collapse; font-size: .85rem; font-variant-numeric: tabular-nums; }
+.bo-tab th { background: var(--paper); font-weight: 700; }
+.bo-tab th, .bo-tab td { border: 1px solid var(--paper-3); padding: 4px 10px; text-align: center; white-space: nowrap; }
+.bo-tab td.vide { color: var(--ink-3); }
+.bo-cle { background: var(--cle-bg); border-radius: 12px; padding: 8px 12px; margin: 0 0 8px; color: var(--ink); }
+.bo-choix { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── Dessin SVG du banc (classes, couleurs du thème) ── */
+.s-rail { fill: var(--paper-2); stroke: var(--line-strong); }
+.s-grad { stroke: var(--ink-3); stroke-width: 1; }
+.s-grad-t { fill: var(--ink-2); font-size: 12px; font-family: var(--font-sans); text-anchor: middle; font-variant-numeric: tabular-nums; }
+.s-axe { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 6 5; }
+.s-tige { stroke: var(--ink-2); stroke-width: 3; }
+.s-cavalier { fill: var(--ink-2); }
+.s-poignee { fill: var(--sheet); stroke: var(--accent); stroke-width: 2.5; }
+.s-poignee.sel { fill: var(--accent); }
+.s-lentille { fill: var(--cle-bg); stroke: var(--accent-ink); stroke-width: 1.6; }
+.s-miroir { stroke: var(--ink); stroke-width: 3; fill: none; }
+.s-hachure { stroke: var(--ink-2); stroke-width: 1; }
+.s-ecran { fill: var(--sheet); stroke: var(--ink); stroke-width: 1.6; }
+.s-ecran.retire { stroke-dasharray: 4 3; opacity: .55; }
+.s-lampe { fill: var(--ink); }
+.s-plaque { fill: var(--paper-3); stroke: var(--ink-2); }
+.s-faisceau { fill: var(--accent); opacity: .13; }
+.s-rayon { stroke: var(--accent); stroke-width: 1.4; fill: none; }
+.s-rayon-b { stroke: var(--ink); stroke-width: 1.2; fill: none; }
+.s-nom { fill: var(--ink); font-size: 13px; font-weight: 800; font-family: var(--font-sans); text-anchor: middle; }
+.s-pos { fill: var(--accent-ink); font-size: 12px; font-weight: 700; font-family: var(--font-sans); text-anchor: middle; font-variant-numeric: tabular-nums; }
+.s-petit { fill: var(--ink-2); font-size: 11px; font-family: var(--font-sans); text-anchor: middle; }
+.s-sel { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.s-co { fill: none; stroke: var(--accent-ink); stroke-width: 1.5; }
+.s-foyer { fill: var(--ink); }
+.s-foyer-t { fill: var(--ink-2); font-size: 11px; font-family: var(--font-sans); text-anchor: middle; font-style: italic; }
+/* vues rapprochées */
+.v-regle { stroke: var(--ink-2); stroke-width: 1; }
+.v-regle-t { fill: var(--ink-2); font-size: 9px; font-family: var(--font-sans); text-anchor: end; }
+.v-axe { stroke: var(--ink-3); stroke-width: .8; stroke-dasharray: 3 3; }
+.v-lettre { fill: var(--accent-ink); }
+.v-objet { fill: var(--accent); }
+.v-lumiere { fill: var(--sheet); }
+.v-noir { fill: var(--ink-2); opacity: .12; }
+
+/* ── Téléphone ── */
+.bo-tels { display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; }
+.bo-tel { border: 10px solid var(--ink); border-radius: 34px; background: var(--sheet); overflow: hidden; position: relative; }
+.bo-tel-p { width: 390px; height: 760px; }
+.bo-tel-l { width: 844px; height: 390px; display: flex; flex-direction: column; }
+.bo-tourne { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; box-sizing: border-box; gap: 14px; }
+.bo-tourne svg { width: 110px; height: 110px; }
+.bo-tourne p { margin: 0; color: var(--ink-2); line-height: 1.5; }
+.bo-tourne .t { font-size: 1.3rem; font-weight: 800; color: var(--ink); letter-spacing: -.02em; }
+.bo-tel-l .bo-bandeau { height: 44px; }
+.bo-tel-l .bo-outils { padding: 5px 10px; gap: 6px; }
+.bo-tel-l .bo-ajout { padding: 4px 9px 4px 5px; font-size: .74rem; }
+.bo-tel-l .bo-ajout svg { width: 18px; height: 18px; }
+.bo-tel-l .bo-select { padding: 6px 28px 6px 12px; font-size: .78rem; }
+.bo-defile { flex: 1; min-height: 0; overflow: hidden; position: relative; }
+.bo-defile-barre { position: absolute; left: 12px; right: 12px; bottom: 4px; height: 4px; border-radius: 4px; background: var(--paper-2); }
+.bo-defile-barre i { position: absolute; left: 18%; width: 46%; top: 0; bottom: 0; border-radius: 4px; background: var(--ink-3); }
+.bo-tel-tp { flex: none; height: 40px; background: var(--paper); border-top: 1px solid var(--line); display: flex; align-items: center; gap: 8px; padding: 0 12px; font-size: .8rem; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<h1 class="mq-titre">Maquette : Banc d'optique</h1>
+<div class="mq-note">
+  <p>Application d'une seule page (1re spé et Tle spé), dossier <code>banc-optique/</code>. Sur ordinateur, la page tient dans l'écran sans défilement : <b>bandeau</b> (lien vers le portail, plein écran), <b>barre d'outils</b> (choix du TP, composants à ajouter par clic ou glisser-déposer), <b>vues rapprochées</b> au-dessus de la lampe et de chaque écran, <b>banc</b> sur toute la largeur, <b>barre du composant sélectionné</b> (position, focale, diamètre, réglages fins, supprimer) avec à droite la longueur du banc, le zoom et « Rayons », puis le <b>panneau du TP</b> (repliable ; absent en « Banc libre », le banc prend alors la place).</p>
+  <ul>
+    <li><b>Boîte de TP</b> (en cm) : convergentes f′ = 5 ; 10 ; 12,5 ; 15 ; 20 ; 25 ; 30 ; 50 ; 100 cm, divergentes les mêmes valeurs négatives ; miroir concave f = 5 ; 10 ; 15 ; 20 ; 25 cm ; diamètres 2, 3, 4, 6, 8 cm. Lentille « mystère » : notée L? , focale tirée au hasard dans la boîte, bouton « Révéler ».</li>
+    <li><b>Vues</b> : titre sur deux lignes de hauteur fixe (nom et position, puis « image nette » / « image floue »), la vue ne bouge donc jamais quand le texte change. Si deux vues se chevauchent, elles s'écartent et la pointe reste sous le composant.</li>
+    <li><b>Images</b> calculées par tracé de rayons à travers tous les composants (lentilles, miroirs, écrans opaques, montures qui arrêtent la lumière) : flou réel selon la position de l'écran, taille et sens réels, luminosité, cercle oculaire.</li>
+  </ul>
+</div>
+
+<!-- ======================= Écran 1 ======================= -->
+<p class="mq-ecran-t">1. TP « Relation de conjugaison », étape 3 : série de mesures (banc de 1 m)</p>
+<div class="bo-cadre" id="e1"></div>
+<div class="mq-note">Lentille L₁ sélectionnée (pastille pleine, cadre pointillé). Le simulateur vérifie que l'image est nette avant d'accepter la mesure. Étape suivante : graphique 1/OA′ en fonction de 1/OA, droite modélisée, lecture de 1/f′.</div>
+
+<!-- ======================= Écran 2 ======================= -->
+<p class="mq-ecran-t">2. TP « Lunette astronomique », étape 3 : image intermédiaire (banc de 1,5 m)</p>
+<div class="bo-cadre" id="e2"></div>
+<div class="mq-note">L'élève a d'abord fabriqué l'objet à l'infini (lampe au foyer de L₀, f′ = 20 cm imposée), puis placé lui-même les deux lentilles de la boîte (f′ = 50 cm et f′ = 10 cm) : il doit savoir laquelle sert d'objectif. L'écran E₁, opaque, arrête la lumière : l'oculaire n'est pas éclairé. Étapes suivantes : retirer E₁ du faisceau, placer l'œil (lentille f′ = 5 cm imposée + écran-rétine à 5 cm), grossissement G = α′/α, cercle oculaire.</div>
+
+<!-- ======================= Écran 3 ======================= -->
+<p class="mq-ecran-t">3. TP « Lunette astronomique », étape 6 : cercle oculaire (rayons affichés)</p>
+<div class="bo-cadre" id="e3"></div>
+<div class="mq-note">E₁ est retiré du faisceau (dessiné en pointillés, ne bloque plus la lumière). Rayons issus de A (encre) et de B (accent) : tous passent par le cercle oculaire, où l'écran E₂ montre un disque lumineux de diamètre minimal.</div>
+
+<!-- ======================= Écran 4 ======================= -->
+<p class="mq-ecran-t">4. TP « Autocollimation », étape 2 : image nette sur la plaque de la lanterne (lentille mystère)</p>
+<div class="bo-cadre" id="e4"></div>
+<div class="mq-note">L'image renvoyée par le miroir plan se voit dans la vue de la plaque, renversée, à côté de la lettre F. Le TP Bessel suit la même présentation (vue de l'écran, tableau D, d, f′ et condition D ≥ 4f′).</div>
+
+<!-- ======================= Téléphone ======================= -->
+<p class="mq-ecran-t">5. Téléphone : en portrait, puis en paysage (banc zoomé, défilement de côté, panneau du TP replié en bas)</p>
+<div class="bo-tels">
+  <div class="bo-tel bo-tel-p">
+    <div class="bo-tourne">
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <rect x="38" y="18" width="44" height="78" rx="8" class="bo-ico-trait"/>
+        <path d="M24 62 a38 38 0 0 1 20 -42" class="bo-ico-trait"/><path d="M40 16 l5 4 -6 4" class="bo-ico-trait"/>
+        <rect x="18" y="76" width="78" height="40" rx="8" class="bo-ico-plein"/>
+      </svg>
+      <p class="t">Tourne ton téléphone</p>
+      <p>Le banc d'optique s'utilise en mode paysage.</p>
+    </div>
+  </div>
+  <div class="bo-tel bo-tel-l" id="tel"></div>
+</div>
+
+<script>
+/* ============================================================
+   Petit moteur de la maquette (sera repris dans l'application)
+   Unités : cm. Abscisse x le long du banc, hauteur y au-dessus de l'axe.
+   Composant : { type: 'lampe' | 'cv' | 'dv' | 'plan' | 'concave' | 'ecran', x, f, D, nom, retire }
+   ============================================================ */
+'use strict';
+const NS = 'http://www.w3.org/2000/svg';
+const fmt = (v, d = 1) => v.toFixed(d).replace('.', ',').replace('-', '−');
+
+// élément SVG
+function el(nom, attrs, parent) {
+  const e = document.createElementNS(NS, nom);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+/* ---------- Tracé d'un rayon (optique paraxiale) ----------
+   Le rayon part de l'objet (x de la lampe) avec une hauteur y et une pente u,
+   vers la droite. Lentille : u ← u − y/f ; miroir : demi-tour (u ← −u − 2y/R… écrit
+   en « déplié » : on garde y, la pente change de signe et le miroir concave
+   agit comme une lentille de focale f). Monture (diamètre D) et écran (non retiré) arrêtent le rayon.
+   Renvoie la liste des points [x, y] du rayon et le composant où il s'arrête. */
+function tracer(comps, y0, u0, xFin) {
+  const lampe = comps.find(c => c.type === 'lampe');
+  let x = lampe.x, y = y0, u = u0, sens = 1, pts = [[x, y]], dernier = lampe;
+  for (let n = 0; n < 12; n++) {
+    // prochain composant dans le sens de propagation (la plaque de la lanterne arrête le retour)
+    let suiv = null;
+    for (const c of comps) {
+      if (c === dernier || (c.type === 'ecran' && c.retire)) continue;
+      if (c.type === 'lampe' && sens > 0) continue;
+      const d = (c.x - x) * sens;
+      if (d > 1e-6 && (!suiv || d < (suiv.x - x) * sens)) suiv = c;
+    }
+    if (!suiv) { const xf = sens > 0 ? xFin : 0; y += u * (xf - x) * sens; pts.push([xf, y]); return { pts, fin: null, y, u }; }
+    y += u * (suiv.x - x) * sens; x = suiv.x; pts.push([x, y]); dernier = suiv;
+    if (suiv.type === 'ecran' || suiv.type === 'lampe') return { pts, fin: suiv, y, u };
+    if (Math.abs(y) > suiv.D / 2) return { pts, fin: 'monture', y, u };
+    if (suiv.type === 'cv' || suiv.type === 'dv') u -= y / suiv.f;
+    else if (suiv.type === 'plan') sens = -sens;
+    else if (suiv.type === 'concave') { u -= y / suiv.f; sens = -sens; }
+  }
+  return { pts, fin: null, y, u };
+}
+
+// pentes des rayons émis par l'objet (cône d'éclairage du condenseur)
+const PENTES = Array.from({ length: 241 }, (_, i) => -0.3 + i * 0.0025);
+
+/* Tache sur un écran (ou sur la plaque) pour un point de l'objet de hauteur h :
+   intervalle des hauteurs d'arrivée et nombre de rayons arrivés */
+function tache(comps, h, cible, xFin) {
+  let min = Infinity, max = -Infinity, n = 0;
+  for (const u of PENTES) {
+    const r = tracer(comps, h, u, xFin);
+    if (r.fin === cible) { min = Math.min(min, r.y); max = Math.max(max, r.y); n++; }
+  }
+  return n ? { min, max, c: (min + max) / 2, l: max - min, n } : null;
+}
+
+/* ---------- Vue rapprochée (objet, écran, plaque) ----------
+   champ : demi-largeur visible (cm) ; règle verticale graduée en mm */
+let idFiltre = 0;
+function lettreF(g, h, cls, k, ox, oy) {
+  // lettre F d'une hauteur h (cm), pied A sur l'axe, coefficient k = grandissement (signe : renversement)
+  const t = 0.17 * Math.abs(h), w = 0.62 * Math.abs(h);
+  const rects = [[0, 0, t, h], [0, h - t, w, t], [0, h * 0.45, w * 0.78, t]];
+  for (const [x, y, lw, lh] of rects) {
+    const xa = ox + k * x, xb = ox + k * (x + lw), ya = oy + k * y, yb = oy + k * (y + lh);
+    el('rect', { x: Math.min(xa, xb), y: Math.min(ya, yb), width: Math.abs(xb - xa), height: Math.abs(yb - ya), class: cls }, g);
+  }
+}
+function vue(parent, o) {
+  const T = 176, champ = o.champ || 3, S = T / (2 * champ);   // pixels par cm
+  const svg = el('svg', { viewBox: `${-T / 2} ${-T / 2} ${T} ${T}`, role: 'img', 'aria-label': o.aria || '' }, parent);
+  const defs = el('defs', {}, svg);
+  // fond sombre (écran peu éclairé), tache de lumière, image
+  el('rect', { x: -T / 2, y: -T / 2, width: T, height: T, class: 'v-noir' }, svg);
+  const g = el('g', { transform: `scale(${S},${-S})` }, svg);
+  if (o.disque) {
+    const id = 'f' + (++idFiltre);
+    const f = el('filter', { id, x: '-50%', y: '-50%', width: '200%', height: '200%' }, defs);
+    el('feGaussianBlur', { stdDeviation: o.disque.flou || 0.03 }, f);
+    el('circle', { cx: 0, cy: o.disque.c || 0, r: o.disque.r, class: 'v-lumiere', filter: `url(#${id})` }, g);
+  }
+  for (const l of (o.lettres || [])) {
+    const id = 'f' + (++idFiltre);
+    const f = el('filter', { id, x: '-80%', y: '-80%', width: '260%', height: '260%' }, defs);
+    el('feGaussianBlur', { stdDeviation: Math.max(0.001, l.flou || 0) }, f);
+    const gl = el('g', { filter: `url(#${id})`, opacity: l.opacite ?? 1 }, g);
+    lettreF(gl, l.h, l.cls, l.k, 0, 0);
+  }
+  // axe et règle (graduée en mm, nombres tous les cm)
+  el('line', { x1: -T / 2 + 22, y1: 0, x2: T / 2, y2: 0, class: 'v-axe' }, svg);
+  const xr = -T / 2 + 22;
+  el('line', { x1: xr, y1: -T / 2, x2: xr, y2: T / 2, class: 'v-regle' }, svg);
+  for (let mm = -champ * 10; mm <= champ * 10; mm++) {
+    const y = -mm * S / 10, k = mm % 10 === 0 ? 8 : mm % 5 === 0 ? 5 : 2.5;
+    el('line', { x1: xr, y1: y, x2: xr + k, y2: y, class: 'v-regle' }, svg);
+    if (mm % 10 === 0 && Math.abs(mm) < champ * 10) el('text', { x: xr - 3, y: y + 3, class: 'v-regle-t' }, svg).textContent = Math.abs(mm / 10);
+  }
+  el('text', { x: xr - 3, y: -T / 2 + 10, class: 'v-regle-t' }, svg).textContent = 'cm';
+  return svg;
+}
+
+/* ---------- Écran complet de l'application ---------- */
+function ecran(cadre, cfg) {
+  const L = cfg.banc, W = cfg.largeur || 1248, M = 64, K = (W - 2 * M) / L;   // pixels par cm (horizontal)
+  const H = cfg.hauteurBanc || 188, YA = cfg.yAxe || 84, KY = cfg.ky || 9, HE = 40;   // HE : demi-hauteur d'un écran (px)   // axe optique, pixels par cm (vertical)
+  const X = x => M + x * K, Y = y => YA - y * KY;
+  const tel = !!cfg.tel;
+  cadre.innerHTML = `
+    <div class="bo-bandeau"><span class="bo-pilule">← ${tel ? 'Applications' : 'Toutes les applications'}</span><span class="bo-nom">Banc d'optique</span>
+      <span class="bo-mini bo-plein"><svg viewBox="0 0 24 24"><path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6"/></svg>${tel ? '' : 'Plein écran'}</span></div>
+    <div class="bo-outils">
+      <span class="bo-sel"><span class="bo-select">${cfg.tp}</span></span>
+      <span class="bo-sep"></span>
+      ${tel ? '' : '<span class="bo-ajout-t">Ajouter :</span>'}
+      ${ajouts(tel)}
+    </div>
+    <div class="${tel ? 'bo-defile' : 'bo-scene'}"><div class="bo-vues"></div><div class="bo-banc"></div>${tel ? '<div class="bo-defile-barre"><i></i></div>' : ''}</div>
+    ${tel ? '' : `<div class="bo-selbar">${cfg.selbar}<div class="bo-droite">
+      <span class="bo-select-l">Banc <span class="bo-sel"><span class="bo-select">${fmt(L / 100, L % 100 ? 1 : 0)} m</span></span></span>
+      <span class="bo-select-l">Zoom <span class="bo-mini">−</span><span class="bo-mini">+</span></span>
+      <span class="bo-coche"><i class="${cfg.rayons ? 'on' : ''}">${cfg.rayons ? '✓' : ''}</i>Rayons</span></div></div>`}
+    ${cfg.tpPanneau ? `<div class="bo-tp">${cfg.tpPanneau}</div>` : ''}
+    ${tel ? `<div class="bo-tel-tp">Étape 3 / 5 · Série de mesures <span style="margin-left:auto">▴ Ouvrir le TP</span></div>` : ''}`;
+
+  // ---- banc ----
+  const comps = cfg.comps;
+  const zb = cadre.querySelector('.bo-banc');
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Banc d\'optique' }, zb);
+  if (tel) { svg.style.width = (W * (cfg.zoom || 1)) + 'px'; svg.style.marginLeft = (cfg.decale || 0) + 'px'; }
+  const gF = el('g', {}, svg), gR = el('g', {}, svg), gC = el('g', {}, svg), gT = el('g', {}, svg);
+  const yRail = H - 46;
+  el('rect', { x: M - 10, y: yRail, width: L * K + 20, height: 10, rx: 2, class: 's-rail' }, gF);
+  for (let c = 0; c <= L; c++) {
+    const k = c % 10 === 0 ? 9 : c % 5 === 0 ? 6 : 3;
+    if (K < 4 && c % 5 && c % 10) continue;
+    el('line', { x1: X(c), y1: yRail + 10, x2: X(c), y2: yRail + 10 + k, class: 's-grad' }, gF);
+    if (c % 10 === 0) el('text', { x: X(c), y: yRail + 34, class: 's-grad-t' }, gF).textContent = c;
+  }
+  el('text', { x: X(L) + 22, y: yRail + 34, class: 's-grad-t' }, gF).textContent = 'cm';
+  el('line', { x1: M - 10, y1: YA, x2: X(L) + 10, y2: YA, class: 's-axe' }, gF);
+
+  // faisceau : enveloppe des rayons issus de A et de B, découpée en tranches de 0,5 cm
+  const lampe = comps.find(c => c.type === 'lampe');
+  const ab = lampe.AB;
+  const tranches = new Map();
+  for (const h of [0, ab * 0.5, ab]) for (const u of PENTES) {
+    const r = tracer(comps, h, u, cfg.xFin || L);
+    if (r.fin === 'monture' && r.pts.length <= 2) continue;   // arrêté par la première monture : hors faisceau utile
+    for (let i = 0; i + 1 < r.pts.length; i++) {
+      const [xa, ya] = r.pts[i], [xb, yb] = r.pts[i + 1];
+      const n = Math.max(1, Math.round(Math.abs(xb - xa) / 0.5));
+      for (let j = 0; j <= n; j++) {
+        const xx = xa + (xb - xa) * j / n, yy = ya + (yb - ya) * j / n, cle = Math.round(xx * 2) / 2 + '|' + (xb > xa ? 1 : -1);
+        const t = tranches.get(cle) || { x: Math.round(xx * 2) / 2, min: Infinity, max: -Infinity };
+        t.min = Math.min(t.min, yy); t.max = Math.max(t.max, yy); tranches.set(cle, t);
+      }
+    }
+  }
+  for (const s of [1, -1]) {
+    const ts = [...tranches.entries()].filter(([k]) => k.endsWith('|' + s)).map(([, t]) => t).sort((a, b) => a.x - b.x);
+    if (!ts.length) continue;
+    // une tranche par segment continu
+    const pts = ts.map(t => `${X(t.x)},${Y(Math.min(t.max, 6))}`).concat(ts.slice().reverse().map(t => `${X(t.x)},${Y(Math.max(t.min, -6))}`));
+    el('polygon', { points: pts.join(' '), class: 's-faisceau' }, gR);
+  }
+
+  // rayons affichés (quelques rayons issus de A et de B)
+  if (cfg.rayons) for (const [h, cls] of [[0, 's-rayon-b'], [ab, 's-rayon']]) {
+    for (const u of cfg.rayons(h)) {
+      const r = tracer(comps, h, u, cfg.xFin || L);
+      el('polyline', { points: r.pts.map(([x, y]) => `${X(x)},${Y(y)}`).join(' '), class: cls }, gR);
+    }
+  }
+
+  // composants
+  for (const c of comps) {
+    const x = X(c.x), g = el('g', {}, gC), hD = (c.D || 4) / 2 * KY;
+    const yBas = c.type === 'lampe' ? YA + 30 : c.type === 'ecran' ? YA + HE : YA + hD;
+    el('line', { x1: x, y1: yBas, x2: x, y2: yRail, class: 's-tige' }, g);
+    el('rect', { x: x - 9, y: yRail - 7, width: 18, height: 7, rx: 2, class: 's-cavalier' }, g);
+    if (c.type === 'lampe') {
+      el('rect', { x: x - 46, y: YA - 30, width: 40, height: 60, rx: 4, class: 's-lampe' }, g);
+      el('rect', { x: x - 6, y: YA - 26, width: 6, height: 52, class: 's-plaque' }, g);
+      el('line', { x1: x, y1: Y(0), x2: x, y2: Y(ab), class: 's-miroir', style: 'stroke:var(--accent);stroke-width:2.5' }, g);
+    } else if (c.type === 'cv' || c.type === 'dv') {
+      const e = Math.min(10, 4 + hD * 0.12);
+      // lentille mince : deux arcs bombés (convergente) ou creusés (divergente)
+      const d = c.type === 'cv'
+        ? `M ${x} ${YA - hD} Q ${x + 2 * e} ${YA} ${x} ${YA + hD} Q ${x - 2 * e} ${YA} ${x} ${YA - hD} Z`
+        : `M ${x - e} ${YA - hD} L ${x + e} ${YA - hD} Q ${x - e + 2} ${YA} ${x + e} ${YA + hD} L ${x - e} ${YA + hD} Q ${x + e - 2} ${YA} ${x - e} ${YA - hD} Z`;
+      el('path', { d, class: 's-lentille' }, g);
+      if (cfg.foyers && c.f) for (const s of [-1, 1]) {
+        el('circle', { cx: x + s * c.f * K, cy: YA, r: 2.6, class: 's-foyer' }, g);
+      }
+    } else if (c.type === 'plan' || c.type === 'concave') {
+      const cour = c.type === 'concave' ? 8 : 0;
+      el('path', { d: `M ${x + cour} ${YA - hD} Q ${x - cour} ${YA} ${x + cour} ${YA + hD}`, class: 's-miroir' }, g);
+      for (let yy = -hD + 3; yy < hD; yy += 6) el('line', { x1: x + 2 + cour * (1 - Math.abs(yy) / hD) * 0 + (c.type === 'concave' ? cour * Math.pow(yy / hD, 2) : 0), y1: YA + yy, x2: x + 8 + (c.type === 'concave' ? cour * Math.pow(yy / hD, 2) : 0), y2: YA + yy - 5, class: 's-hachure' }, g);
+    } else if (c.type === 'ecran') {
+      el('rect', { x: x - 3, y: YA - HE, width: 6, height: 2 * HE, class: 's-ecran' + (c.retire ? ' retire' : '') }, g);
+    }
+    // nom et position au-dessus
+    const yh = c.type === 'ecran' ? YA - HE : c.type === 'lampe' ? YA - 30 : YA - hD;
+    el('text', { x: c.type === 'lampe' ? x - 26 : x, y: yh - 22, class: 's-nom' }, gT).textContent = c.nom;
+    el('text', { x: c.type === 'lampe' ? x - 26 : x, y: yh - 8, class: 's-pos' }, gT).textContent = fmt(c.x) + ' cm';
+    // poignée sur le rail
+    el('circle', { cx: x, cy: yRail + 5, r: 8, class: 's-poignee' + (c.sel ? ' sel' : '') }, gT);
+    if (c.sel) el('rect', { x: x - 30, y: yh - 36, width: 60, height: yRail - yh + 52, rx: 10, class: 's-sel' }, gT);
+  }
+  if (cfg.co) {   // cercle oculaire repéré sur le banc
+    el('line', { x1: X(cfg.co.x), y1: Y(cfg.co.r) - 6, x2: X(cfg.co.x), y2: Y(-cfg.co.r) + 6, class: 's-co' }, gT);
+  }
+
+  // ---- vues au-dessus des composants ----
+  const zv = cadre.querySelector('.bo-vues');
+  const places = [];
+  for (const v of cfg.vues) {
+    const xc = X(v.x) * (tel ? (cfg.zoom || 1) : 1) + (tel ? (cfg.decale || 0) : 0);
+    const kv = tel ? 0.62 : 1, lv = 176 * kv;                      // vues réduites sur téléphone
+    const largeur = tel ? cadre.clientWidth : W;
+    let left = Math.max(0, Math.min(largeur - lv, xc - lv / 2));   // la vue reste dans la page
+    for (const p of places) if (left < p + lv + 8) left = p + lv + 8;   // écarter deux vues qui se chevauchent
+    places.push(left);
+    const d = document.createElement('div');
+    d.className = 'bo-vue'; d.style.left = left + 'px';
+    if (tel) { d.style.transform = `scale(${kv})`; d.style.transformOrigin = '0 0'; }
+    d.innerHTML = `<div class="bo-vue-cap"><b>${v.titre}</b><span class="bo-vue-etat ${v.ok ? 'ok' : ''}">${v.etat}</span></div>`;
+    zv.appendChild(d);
+    vue(d, v);
+    const p = document.createElement('span');
+    p.className = 'bo-vue-pointe'; p.style.left = ((xc - left) / kv - 7) + 'px';
+    d.appendChild(p);
+  }
+}
+
+// boutons « Ajouter » avec leur icône
+function ajouts(tel) {
+  const I = {
+    lampe: '<rect x="2" y="6" width="12" height="12" rx="2" class="bo-ico-encre"/><rect x="15" y="7" width="3" height="10" class="bo-ico-plein"/>',
+    cv: '<path d="M9 3 Q4 12 9 21 L15 21 Q20 12 15 3 Z" class="bo-ico-plein"/>',
+    dv: '<path d="M7 3 Q12 12 7 21 L17 21 Q12 12 17 3 Z" class="bo-ico-plein"/>',
+    plan: '<line x1="10" y1="3" x2="10" y2="21" class="bo-ico-trait" style="stroke-width:3"/><path d="M12 6l4-3M12 11l4-3M12 16l4-3M12 21l4-3" class="bo-ico-trait" style="stroke-width:1"/>',
+    concave: '<path d="M14 3 Q6 12 14 21" class="bo-ico-trait" style="stroke-width:3"/>',
+    ecran: '<rect x="9" y="3" width="6" height="18" class="bo-ico-trait" style="fill:var(--sheet)"/>',
+  };
+  const N = tel ? { lampe: 'Lampe', cv: 'Conv.', dv: 'Div.', plan: 'Plan', concave: 'Concave', ecran: 'Écran' }
+    : { lampe: 'Lampe et objet', cv: 'Lentille convergente', dv: 'Lentille divergente', plan: 'Miroir plan', concave: 'Miroir concave', ecran: 'Écran' };
+  return Object.keys(I).map(k => `<span class="bo-ajout"><svg viewBox="0 0 24 24" aria-hidden="true">${I[k]}</svg>${N[k]}</span>`).join('');
+}
+
+// en-tête du panneau du TP : titre, étapes, replier
+function teteTP(titre, etapes, enCours) {
+  return `<div class="bo-tp-tete"><span class="bo-tp-titre">${titre}</span>` +
+    etapes.map((e, i) => `<span class="bo-etape ${i < enCours ? 'fait' : i === enCours ? 'cours' : ''}"><span>${i < enCours ? '✓' : i + 1}</span>${e}</span>`).join('') +
+    '<span class="bo-mini bo-replier">▾ Replier</span></div>';
+}
+
+/* ---------- Données des écrans ---------- */
+
+// image d'un point sur un écran → paramètres de la lettre dans la vue
+function imageSur(comps, cible, xFin) {
+  const lampe = comps.find(c => c.type === 'lampe');
+  const tA = tache(comps, 0, cible, xFin), tB = tache(comps, lampe.AB, cible, xFin);
+  if (!tA || !tB) return null;
+  const g = (tB.c - tA.c) / lampe.AB, flou = Math.max(tA.l, tB.l) / 2;
+  return { g, flou, tA, tB };
+}
+
+// 1. Conjugaison : lampe à 0, F de 2 cm, lentille 10 cm à 30 cm, écran net à 45 cm
+(function () {
+  const comps = [
+    { type: 'lampe', x: 0, AB: 2, nom: 'Objet', D: 6 },
+    { type: 'cv', x: 30, f: 10, D: 4, nom: 'L₁ · f′ = 10 cm', sel: true },
+    { type: 'ecran', x: 45, nom: 'E₁', D: 9 },
+  ];
+  const im = imageSur(comps, comps[2], 100);
+  ecran(document.getElementById('e1'), {
+    tp: 'TP : relation de conjugaison', banc: 100, comps, foyers: false,
+    vues: [
+      { x: 0, titre: 'Objet · 0,0 cm', etat: 'lettre F, AB = 2,0 cm', champ: 3, lettres: [{ h: 2, k: 1, cls: 'v-objet' }], disque: { r: 2.8, flou: 0.2 } },
+      { x: 45, titre: 'Écran E₁ · 45,0 cm', etat: '✓ image nette', ok: true, champ: 3,
+        lettres: [{ h: 2, k: im.g, flou: im.flou / 2.5, cls: 'v-lettre' }], disque: { r: 2.9, flou: 0.25 } },
+    ],
+    selbar: `<span class="bo-pastille">L₁</span><span class="bo-sel-nom">Lentille convergente</span><span class="bo-sel-pos">30,0 cm</span>
+      <span class="bo-mini">−1 cm</span><span class="bo-mini">−1 mm</span><span class="bo-mini">+1 mm</span><span class="bo-mini">+1 cm</span>
+      <span class="bo-select-l">f′ <span class="bo-sel"><span class="bo-select">10 cm</span></span></span>
+      <span class="bo-select-l">Ø <span class="bo-sel"><span class="bo-select">4 cm</span></span></span>
+      <span class="bo-mini">Supprimer</span>`,
+    tpPanneau: teteTP('Relation de conjugaison', ['Montage', 'Première image', 'Série de mesures', 'Graphique', 'Bilan'], 2) + `
+      <div class="bo-tp-corps">
+        <div class="bo-tp-col"><h4>3. Série de mesures</h4>
+          <p>Pour chaque distance objet-lentille, déplace l'<b>écran</b> jusqu'à obtenir une image <b>nette</b>, puis note OA et OA′ (valeurs algébriques).</p>
+          <p class="bo-ok">✓ Image nette sur l'écran E₁</p>
+          <p><span class="bo-champ">OA = <i></i> cm</span> &nbsp; <span class="bo-champ">OA′ = <i></i> cm</span> &nbsp; <span class="bo-btn">Ajouter la mesure</span></p>
+        </div>
+        <div class="bo-tp-col"><h4>Tableau de mesures (3 / 5)</h4>
+          <table class="bo-tab"><thead><tr><th>OA (cm)</th><th>OA′ (cm)</th><th>1/OA (cm⁻¹)</th><th>1/OA′ (cm⁻¹)</th></tr></thead>
+          <tbody><tr><td>−15,0</td><td>30,0</td><td>−0,0667</td><td>0,0333</td></tr>
+          <tr><td>−20,0</td><td>20,0</td><td>−0,0500</td><td>0,0500</td></tr>
+          <tr><td>−25,0</td><td>16,7</td><td>−0,0400</td><td>0,0599</td></tr>
+          <tr><td class="vide">…</td><td class="vide">…</td><td class="vide">…</td><td class="vide">…</td></tr></tbody></table>
+        </div>
+      </div>`,
+  });
+})();
+
+// 2 et 3. Lunette : lampe à 0, L₀ (20 cm) à 20 cm, objectif (50 cm) à 30 cm, oculaire (10 cm) à 90 cm
+const lunette = (ecranRetire, rayons) => [
+  { type: 'lampe', x: 0, AB: 0.6, nom: 'Objet', D: 6 },
+  { type: 'cv', x: 20, f: 20, D: 4, nom: 'L₀ · 20 cm' },
+  { type: 'cv', x: 30, f: 50, D: 4, nom: 'L₁ · 50 cm' },
+  { type: 'ecran', x: 80, nom: ecranRetire ? 'E₁ (retiré)' : 'E₁', D: 9, retire: ecranRetire, sel: !ecranRetire },
+  { type: 'cv', x: 90, f: 10, D: 4, nom: 'L₂ · 10 cm' },
+].concat(rayons ? [{ type: 'ecran', x: 102, nom: 'E₂', D: 9, sel: true }] : []);
+
+(function () {
+  const comps = lunette(false, false);
+  const im = imageSur(comps, comps[3], 150);
+  ecran(document.getElementById('e2'), {
+    tp: 'TP : lunette astronomique', banc: 150, comps,
+    vues: [
+      { x: 0, titre: 'Objet · 0,0 cm', etat: 'lettre F, AB = 0,6 cm', champ: 2, lettres: [{ h: 0.6, k: 1, cls: 'v-objet' }], disque: { r: 1.9, flou: 0.15 } },
+      { x: 80, titre: 'Écran E₁ · 80,0 cm', etat: '✓ image nette', ok: true, champ: 2,
+        lettres: [{ h: 0.6, k: im.g, flou: im.flou / 2.5, cls: 'v-lettre' }], disque: { r: 1.9, flou: 0.1 } },
+    ],
+    selbar: `<span class="bo-pastille">E₁</span><span class="bo-sel-nom">Écran</span><span class="bo-sel-pos">80,0 cm</span>
+      <span class="bo-mini">−1 cm</span><span class="bo-mini">−1 mm</span><span class="bo-mini">+1 mm</span><span class="bo-mini">+1 cm</span>
+      <span class="bo-mini">Retirer du faisceau</span><span class="bo-mini">Supprimer</span>`,
+    tpPanneau: teteTP('Lunette astronomique', ['Objet à l\'infini', 'Objectif et oculaire', 'Image intermédiaire', 'L\'œil', 'Grossissement', 'Cercle oculaire'], 2) + `
+      <div class="bo-tp-corps">
+        <div class="bo-tp-col"><h4>3. Image intermédiaire</h4>
+          <p>Place l'écran E₁ <b>entre l'objectif et l'oculaire</b>, là où l'image A₁B₁ de l'objet à l'infini est <b>nette</b>.</p>
+          <p class="bo-ok">✓ Image nette sur l'écran E₁, à 80,0 cm</p>
+          <p><b>Où se trouve l'image intermédiaire A₁B₁ ?</b></p>
+          <div class="bo-choix"><span class="bo-mini">au foyer image F′₁ de l'objectif</span><span class="bo-mini">au foyer image F′₂ de l'oculaire</span><span class="bo-mini">au centre de l'objectif</span></div>
+        </div>
+        <div class="bo-tp-col"><h4>Pour la suite</h4>
+          <p>Pour que l'image finale soit à l'infini (œil au repos), A₁B₁ doit aussi être au <b>foyer objet F₂ de l'oculaire</b> : déplace l'oculaire, puis retire l'écran du faisceau.</p>
+          <p><span class="bo-champ">Taille de A₁B₁ = <i></i> cm</span></p>
+        </div>
+      </div>`,
+  });
+})();
+
+(function () {
+  const comps = lunette(true, true);
+  const xCO = 90 + 10 * (1 + 10 / 50);          // cercle oculaire : image de la monture de l'objectif
+  const tA = tache(comps, 0, comps[5], 150), tB = tache(comps, 0.6, comps[5], 150);
+  const r = (Math.max(tA.max, tB.max) - Math.min(tA.min, tB.min)) / 2;
+  // rayons issus de A et de B qui passent par le bord et le centre de l'objectif
+  const rayonsPour = h => [-0.095, 0, 0.095].map(u => u - h / 20);
+  ecran(document.getElementById('e3'), {
+    tp: 'TP : lunette astronomique', banc: 150, comps, rayons: rayonsPour, ky: 10, xFin: 125,
+    co: { x: xCO, r: 0.4 },
+    vues: [
+      { x: 0, titre: 'Objet · 0,0 cm', etat: 'lettre F, AB = 0,6 cm', champ: 2, lettres: [{ h: 0.6, k: 1, cls: 'v-objet' }], disque: { r: 1.9, flou: 0.15 } },
+      { x: 102, titre: 'Écran E₂ · 102,0 cm', etat: 'disque lumineux le plus petit', ok: true, champ: 2,
+        lettres: [], disque: { r, c: (tA.c + tB.c) / 2, flou: 0.02 } },
+    ],
+    selbar: `<span class="bo-pastille">E₂</span><span class="bo-sel-nom">Écran</span><span class="bo-sel-pos">102,0 cm</span>
+      <span class="bo-mini">−1 cm</span><span class="bo-mini">−1 mm</span><span class="bo-mini">+1 mm</span><span class="bo-mini">+1 cm</span>
+      <span class="bo-mini">Retirer du faisceau</span><span class="bo-mini">Supprimer</span>`,
+    tpPanneau: teteTP('Lunette astronomique', ['Objet à l\'infini', 'Objectif et oculaire', 'Image intermédiaire', 'L\'œil', 'Grossissement', 'Cercle oculaire'], 5) + `
+      <div class="bo-tp-corps">
+        <div class="bo-tp-col"><h4>6. Cercle oculaire</h4>
+          <p class="bo-cle"><b>Cercle oculaire.</b> C'est l'image de la monture de l'objectif par l'oculaire. Toute la lumière qui traverse la lunette passe par ce petit disque : c'est là qu'on place l'œil.</p>
+          <p>Déplace l'écran E₂ derrière l'oculaire jusqu'à ce que le disque lumineux soit <b>le plus petit possible</b>.</p>
+        </div>
+        <div class="bo-tp-col"><h4>Mesures</h4>
+          <p><span class="bo-champ">Position du cercle oculaire : <i></i> cm</span></p>
+          <p><span class="bo-champ">Diamètre du disque : <i></i> cm</span></p>
+          <p>Compare avec D × f′₂ / f′₁ (D : diamètre de l'objectif).</p>
+        </div>
+      </div>`,
+  });
+})();
+
+// 4. Autocollimation : lentille mystère f′ = 12,5 cm à 12,5 cm, miroir plan à 22 cm
+(function () {
+  const comps = [
+    { type: 'lampe', x: 0, AB: 1.5, nom: 'Objet', D: 6 },
+    { type: 'cv', x: 12.5, f: 12.5, D: 4, nom: 'L? · f′ = ?', sel: true },
+    { type: 'plan', x: 22, D: 6, nom: 'Miroir' },
+  ];
+  const im = imageSur(comps, comps[0], 100);
+  ecran(document.getElementById('e4'), {
+    tp: 'TP : autocollimation', banc: 100, comps,
+    vues: [
+      { x: 0, titre: 'Plaque de la lanterne · 0,0 cm', etat: '✓ image renvoyée nette', ok: true, champ: 3,
+        lettres: [{ h: 1.5, k: 1, cls: 'v-objet' }, { h: 1.5, k: im.g, flou: im.flou / 2.5, cls: 'v-lettre', opacite: 0.85 }], disque: { r: 2.8, flou: 0.2 } },
+    ],
+    selbar: `<span class="bo-pastille">L?</span><span class="bo-sel-nom">Lentille mystère</span><span class="bo-sel-pos">12,5 cm</span>
+      <span class="bo-mini">−1 cm</span><span class="bo-mini">−1 mm</span><span class="bo-mini">+1 mm</span><span class="bo-mini">+1 cm</span>
+      <span class="bo-select-l">f′ = ? <span class="bo-mini">Révéler</span></span>
+      <span class="bo-mini">Supprimer</span>`,
+    tpPanneau: teteTP('Autocollimation', ['Montage', 'Image sur la plaque', 'Distance focale', 'Bilan'], 1) + `
+      <div class="bo-tp-corps">
+        <div class="bo-tp-col"><h4>2. Image sur la plaque</h4>
+          <p>Le miroir plan renvoie la lumière vers la lanterne. Déplace la <b>lentille</b> jusqu'à voir, sur la plaque, une image <b>nette</b> de la lettre F, de même taille et renversée.</p>
+          <p class="bo-ok">✓ Image nette sur la plaque de la lanterne</p>
+        </div>
+        <div class="bo-tp-col"><h4>Pourquoi ?</h4>
+          <p>L'image se forme sur l'objet lui-même : les rayons sortent de la lentille <b>parallèles</b>, l'objet est donc dans le <b>plan focal objet</b>.</p>
+          <p><span class="bo-champ">f′ = <i></i> cm</span> &nbsp; <span class="bo-btn">Valider</span></p>
+        </div>
+      </div>`,
+  });
+})();
+
+// 5. Téléphone en paysage : écran 1, banc zoomé
+(function () {
+  const comps = [
+    { type: 'lampe', x: 0, AB: 2, nom: 'Objet', D: 6 },
+    { type: 'cv', x: 30, f: 10, D: 4, nom: 'L₁ · 10 cm' },
+    { type: 'ecran', x: 45, nom: 'E₁', D: 9 },
+  ];
+  const im = imageSur(comps, comps[2], 100);
+  ecran(document.getElementById('tel'), {
+    tel: true, tp: 'Conjugaison', banc: 100, comps, largeur: 1100, hauteurBanc: 150, yAxe: 62, ky: 7, zoom: 0.75, decale: 30,
+    vues: [
+      { x: 0, titre: 'Objet · 0,0 cm', etat: 'AB = 2,0 cm', champ: 3, lettres: [{ h: 2, k: 1, cls: 'v-objet' }], disque: { r: 2.8, flou: 0.2 } },
+      { x: 45, titre: 'Écran E₁ · 45,0 cm', etat: '✓ image nette', ok: true, champ: 3,
+        lettres: [{ h: 2, k: im.g, flou: im.flou / 2.5, cls: 'v-lettre' }], disque: { r: 2.9, flou: 0.25 } },
+    ],
+  });
+  document.querySelector('#tel .bo-vues').style.height = '138px';
+})();
+</script>
+</body>
+</html>
