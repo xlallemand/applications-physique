@@ -8,6 +8,7 @@
    Électrons posés un à un, à la main et au bon endroit : électron de la réserve à glisser vers une case
    ou un cercle, ou toucher une case / un cercle. Pas de pose automatique d'un électron (toucher la
    réserve explique comment faire) ; « Compléter l'atome » et « Recommencer » seulement (pas de « − électron »).
+   Retirer un électron : le toucher sur le schéma, ou le glisser hors de l'atome (couche externe seulement).
    Refus expliqués (case pleine, case sautée, plus d'électrons que de protons, 3d).
    Configuration écrite en direct, compteur « électrons / protons ».
    Électrons de valence : « À trouver » par défaut (l'élève touche la couche externe, puis donne leur
@@ -32,7 +33,7 @@
         { id: 'element', nom: 'Élément', html: '<div data-a="choix" data-bande></div>', tel: true },
         { id: 'electrons', nom: 'Électrons', html: `
           <div class="at-ligne at-ligne-res"><div class="at-reserve-gros" data-a="reserve"></div>
-            <p class="at-aide-t">Glisse un électron vers sa case ou son cercle, ou touche directement la case ou le cercle où il va.</p></div>
+            <p class="at-aide-t">Glisse un électron vers sa case ou son cercle, ou touche directement la case ou le cercle où il va. Pour en retirer un, touche-le ou glisse-le hors de l'atome.</p></div>
           <div class="at-ligne">
             <button type="button" class="btn-secondary at-b" data-a="remplir">Compléter l'atome</button>
             <button type="button" class="btn-secondary at-b" data-a="vider">↺ Recommencer</button></div>
@@ -46,7 +47,7 @@
 
     /* ----- Dessins de l'atome (outil ATOME) ----- */
     const d = ATOME.dessin({ couches: $('couches'), cases: $('cases') }, {
-      Z: 1, electrons: 0, ajout: true, entourer: 'toucher', alignement: 'xMaxYMax meet',
+      Z: 1, electrons: 0, ajout: true, retrait: true, entourer: 'toucher', alignement: 'xMaxYMax meet',
       textes: { trop: () => 'L\'atome a autant d\'électrons que de protons. Avec un électron de plus, ce serait un ion : voir le module 3.' },
       onMessage: (h, type) => cadre.message(h, type),
       onChange: (e, action) => maj(e, action),
@@ -110,6 +111,7 @@
     /* ----- Mise à jour : écriture du noyau, configuration, compteur, informations, défis ----- */
     function maj(e, action) {
       const el = ATOME.element(e.Z);
+      if (action === 'retrait') arreterRemplir();          // un électron retiré à la main arrête « Compléter l'atome »
       if (action === 'regler' || action === 'retrait' || action === 'ajout') etat.valenceDonnee = false;
       $('nota').innerHTML = `<span class="at-nota-x">${ATOME.notation(e.A, e.Z, el.sym)}</span><span class="at-nota-nom">${el.nom}</span>
         <span class="at-nota-c">${AT.LEGENDE.p}${e.Z} proton${e.Z > 1 ? 's' : ''}</span><span class="at-nota-c">${AT.LEGENDE.n}${e.A - e.Z} neutron${e.A - e.Z > 1 ? 's' : ''}</span>`;
@@ -120,13 +122,13 @@
       // informations au moment où elles servent
       if (action === 'ajout') {
         const c = e.config, der = c[c.length - 1];
-        if (e.complet && etat.mode === 'toucher') cadre.message('<b>L\'atome est complet.</b> Touche sa couche externe (un cercle ou ses cases) pour entourer les électrons de valence.', 'info');
+        if (e.complet && etat.mode === 'toucher') cadre.message('<b>L\'atome est complet.</b> Touche sa couche externe (le cercle, à côté des électrons, ou ses cases) pour entourer les électrons de valence.', 'info');
         else if (e.complet) cadre.message(`<b>Atome complet :</b> ${e.electrons} électron${e.electrons > 1 ? 's' : ''} pour ${e.Z} proton${e.Z > 1 ? 's' : ''}. La dernière couche qui a des électrons (n = ${e.couche}) est entourée : ${e.valence} électron${e.valence > 1 ? 's' : ''} de valence.`, 'ok');
         else if (der[1] === 1 && der[0][1] === 's' && e.electrons > 1) cadre.message(`La couche n = ${e.couche - 1} est pleine : cet électron commence la couche n = ${e.couche}.`, 'info');
         else if (der[0] === '1s' && der[1] === 2) cadre.message('La sous-couche 1s est pleine : elle contient au plus 2 électrons.', 'info');
         else if (der[0][1] === 'p' && der[1] === 6) cadre.message(`La couche n = ${e.couche} est pleine : ${e.couche}s<sup>2</sup> ${e.couche}p<sup>6</sup>, soit 8 électrons.`, 'info');
       } else if ((action === 'regler' || action === 'mode') && e.complet && etat.mode === 'toucher') {
-        cadre.message('<b>L\'atome est complet.</b> Touche sa couche externe (un cercle ou ses cases) pour entourer les électrons de valence.', 'info');
+        cadre.message('<b>L\'atome est complet.</b> Touche sa couche externe (le cercle, à côté des électrons, ou ses cases) pour entourer les électrons de valence.', 'info');
       }
       if (e.complet) etat.vus[e.Z] = true;
       choix.montrer(e.Z);

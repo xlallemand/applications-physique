@@ -54,7 +54,7 @@
        entourer    'auto' (la dernière couche est entourée quand l'atome est complet), 'toujours' (dès qu'il y a
                    des électrons), 'toucher' (atome complet : l'élève touche la couche externe pour l'entourer), false
        ajout       true : toucher une case ou un cercle y ajoute un électron (refus expliqués)
-       retrait     true : glisser un électron hors de l'atome le retire (seulement depuis la couche externe) ;
+       retrait     true : glisser un électron hors de l'atome, ou le toucher, le retire (seulement depuis la couche externe) ;
                    les dessins ne font alors pas défiler la page au doigt (touch-action: none)
        etiquettes  true (défaut) : « n = 1 »… sur les cercles
        alignement  preserveAspectRatio du dessin des cercles (défaut 'xMidYMid meet')
@@ -616,6 +616,12 @@
               const sous = e.type === 'pointerup' ? document.elementFromPoint(e.clientX, e.clientY) : null;
               const dedans = sous && sous.closest('.atm-zone') && (sous.closest('.atm-zone') === zC || sous.closest('.atm-zone') === zK);
               if (e.type === 'pointerup' && !dedans) retirer(n);
+              setTimeout(() => { glisse = false; }, 0);
+            } else if (e.type === 'pointerup') {
+              // simple appui sur un électron : il est retiré (s'il est sur la couche externe) ;
+              // le clic qui suit (renvoyé au dessin entier à cause de la capture) est ignoré
+              glisse = true;
+              retirer(n);
               setTimeout(() => { glisse = false; }, 0);
             }
           }
