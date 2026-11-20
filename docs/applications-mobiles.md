@@ -37,6 +37,7 @@ mon-app/
     expr.js                  écriture compacte des expressions, analyse et calcul (si saisie au clavier)
     sauvegarde.js            PWA (manifeste, inscription du service worker, installation) et copies de secours
     seance.js                la séance de 5 questions
+    mes-succes.js            les succès de l'application (moteur commun assets/succes.js), facultatif (§12)
     seance.html, suivi.html, fiches.html   une page par module (pages courtes : en-tête + <main id="zone">)
 ```
 
@@ -146,7 +147,8 @@ Ils s'appliquent à la séance suivante. `XX.resumeReglages()` donne les étique
 - **Mon suivi** :
   - les notes des dernières séances, avec une petite courbe ;
   - les priorités, avec un lien vers une séance sur ces compétences (`seance.html#comp=ID1,ID2`) ;
-  - toutes les compétences, groupées par famille, avec leur pastille de statut et leur taux de réussite.
+  - toutes les compétences, groupées par famille, avec leur pastille de statut et leur taux de réussite ;
+  - les succès, après les compétences (§12).
 - **Fiches** :
   - une fiche par compétence (règle, méthode, exemple, piège) ;
   - adresse `fiches.html#ID` pour une compétence, ou `fiches.html#FA` pour une famille ;
@@ -271,3 +273,25 @@ Copier `equations-college/modules/sauvegarde.js` et l'adapter : objet, clés, no
 - Portail : la recherche trouve l'application, et le type « Application mobile » la montre.
 - Navigation : aucun lien vers le portail (`../index.html` depuis l'accueil, `../../index.html` depuis une page), et le bouton « Accueil » mène à l'accueil de l'application.
 - Safari sur iPhone ne se teste pas ici : le signaler.
+
+## 12. Succès (comme dans les jeux vidéo)
+
+Modèle : `equations-physique-mobile/modules/mes-succes.js`. Moteur commun : `assets/succes.js` (objet `SUC`, format complet en tête du fichier) et `assets/succes.css` (classes `suc-`).
+
+- **Chaque succès a 4 niveaux** : bronze, argent, or, platine, chacun avec son seuil. Un niveau obtenu est **gardé pour toujours**.
+- **Carte « Mes succès »** sur la page Mon suivi, **après les compétences** (`SUC.carte()`, ancre `suivi.html#succes`) :
+  - nombre de paliers obtenus et compteur des médailles ;
+  - les 3 succès les plus près de leur niveau suivant ;
+  - une ligne dépliable par catégorie ; pour chaque succès : condition, barre « 5/7 → Argent », échelle des 4 niveaux avec leurs seuils (obtenus cochés, prochain entouré), conseil éventuel (série en cours…).
+- **Bloc « Nouveaux succès »** (`SUC.blocNouveaux(liste, 'suivi.html#succes')`) à la fin de la séance, et sous la question quand un succès est obtenu ailleurs (Découverte).
+- Couleurs des médailles : `--med-bronze`, `--med-argent`, `--med-or`, `--med-platine` (`assets/theme.css`, charte §3).
+
+### Ajouter des succès à une application
+
+1. `modules/mes-succes.js`, chargé **après le moteur** de l'application : `SUC.init({ app, categories, depart })`.
+   - `categories` : `[{ nom, succes: [{ id, ic, nom, cond, seuils, u, val, avance, astuce }] }]` ; `seuils` : 4 nombres croissants, ou une fonction (seuils qui dépendent d'un réglage, comme la classe) ; `val(E)` fixe le niveau ; `avance(E)` (facultatif) remplit la barre, par exemple la série en cours quand `val` est le record.
+   - `depart()` : état de départ calculé d'après le suivi déjà enregistré, la première fois (clé `<id>-succes` absente). L'enregistrer tout de suite au chargement (`SUC.verifier()`), sans annonce.
+2. Compter à chaque question et à chaque séance : `SUC.ajouter`, `SUC.record`, `SUC.fixer`, `SUC.jour` (jours d'activité, jours civils locaux), `SUC.reunir` (ensembles : compétences maîtrisées au moins une fois…), puis `SUC.verifier()`, qui renvoie les nouveaux niveaux. Dans Équations en physique, `EPM.enregistrer` appelle `EPM.succesApres(occasions, note)` ; une occasion porte aussi `diff` (difficulté) et `aide` (rappel, indice ou exemple ouvert).
+3. Pages : `../../assets/succes.css` après le CSS de l'application, `../../assets/succes.js` après `sommaire.js`, `mes-succes.js` après le moteur.
+4. `sw.js` : ajouter `../assets/succes.js`, `../assets/succes.css` et `./modules/mes-succes.js` à `FICHIERS`, changer `VERSION`.
+5. `sauvegarde.js` : la clé `<id>-succes` prend le type `succes` (même nettoyage et même fusion que `assets/progression.js`, qui la reconnaît déjà pour toutes les applications).

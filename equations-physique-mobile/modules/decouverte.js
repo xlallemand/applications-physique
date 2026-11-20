@@ -74,9 +74,12 @@
       zone.appendChild(c);
       EPM.Q.monter(c, q, {
         rappel: false,
-        surFin: (pts, act) => {
+        surFin: (pts, act, info) => {
           const f = EPM.marquerDecouverte(k);
-          EPM.enregistrer([{ r: p.comp, ok: pts / 2 }], null);
+          const nouveaux = EPM.enregistrer([{ r: p.comp, ok: pts / 2, diff: info.diff, aide: info.aide }], null);
+          // nouveaux succès obtenus avec cette équation (modules/mes-succes.js), au-dessus des boutons
+          const ns = EPM.blocSucces ? EPM.blocSucces(nouveaux) : null;
+          if (ns) act.parentNode.insertBefore(ns, act);
           if (f.length >= N) SOM.marquer({ fait: true });
           if (k < N - 1) {
             const b = bouton('btn-primary', 'Équation suivante →', () => {

@@ -11,7 +11,8 @@
        des notes, statut de chaque compétence, priorités et choix
        automatique et progressif des compétences d'une séance ;
      - progression du module Découverte (équations résolues) ;
-     - rappel d'une compétence ; accueil ; pages « Mon suivi » et « Fiches ».
+     - rappel d'une compétence ; accueil ; pages « Mon suivi » (et ses succès,
+       modules/mes-succes.js) et « Fiches ».
    Dépend de : assets/sommaire.js (SOM), fiches.js (EPF), competences.js (EPM.C),
    equations.js (EPM.B), sauvegarde.js (facultatif : carte « Sauvegarde », rappel, installation).
 
@@ -25,7 +26,8 @@
    API :
      EPM.menu(cle)                  sommaire (SOM.menu) + pastilles Réglages et Sauvegarde
      EPM.reglages() ; EPM.regler(cle, val) ; EPM.ouvrirReglages() ; EPM.surReglages(fn) ; EPM.resumeReglages()
-     EPM.enregistrer(occ, note)     occasions [{ r, ok }] et note sur 20 (ou null)
+     EPM.enregistrer(occ, note)     occasions [{ r, ok, diff, aide }] et note sur 20 (ou null) ; diff et aide servent aux succès ;
+                                    renvoie les nouveaux succès [{ s, niv }]
      EPM.statut(id) 'm' maîtrisée | 'e' en bonne voie | 'f' fragile | 't' à travailler | 'n' pas encore vue | 'v' prérequis à acquérir
      EPM.taux(id) ; EPM.stats(id) ; EPM.priorites() ; EPM.planSeance(ids) ; EPM.niveauDe(id) ; EPM.notes()
      EPM.blocRappel(id)             rappel de la compétence (élément), lien vers la fiche ; EPM.monterCalc(el) : calculs illustrés
@@ -45,7 +47,7 @@
       parties: [{ nom: 'Découverte des méthodes', cours: 'decouverte', noms: { cours: 'Découverte des méthodes' } }] },
     { n: 2, titre: 'Séance de résolution', desc: '5 équations choisies d’après ton suivi, à résoudre en déplaçant les grandeurs, avec des aides.',
       parties: [{ nom: 'Séance de résolution', questions: 'seance', noms: { questions: 'Séance de 5 questions' } }] },
-    { n: 3, titre: 'Mon suivi', desc: 'Les compétences que tu maîtrises et celles à travailler en priorité.',
+    { n: 3, titre: 'Mon suivi', desc: 'Les compétences que tu maîtrises, celles à travailler en priorité, et tes succès.',
       parties: [{ nom: 'Mon suivi', entrainement: 'suivi', noms: { entrainement: 'Mon suivi' } }] },
     { n: 4, titre: 'Fiches des compétences', desc: 'Chaque compétence expliquée : règle, exemple, méthode, piège.',
       parties: [{ nom: 'Fiches des compétences', cours: 'fiches', noms: { cours: 'Fiches des compétences' } }] }
@@ -289,6 +291,8 @@
     ecrire(CLE_SUIVI, suivi);
     // séance notée : compteur du rappel de sauvegarde (modules/sauvegarde.js)
     if (note != null && typeof EPM.apresSeance === 'function') EPM.apresSeance();
+    // succès (modules/mes-succes.js, s'il est chargé) : renvoie les nouveaux succès
+    return typeof EPM.succesApres === 'function' ? EPM.succesApres(occasions, note) : [];
   }
   // les dernières questions d'une compétence
   function stats(id) {
@@ -503,6 +507,11 @@
     c.appendChild(el('p', 'pm-petit', 'Maîtrisée : au moins 80 % de réussite sur les 10 dernières questions (4 questions au moins ; avant, elle est « en bonne voie »). Une question compte 1 si elle est résolue sans erreur, 0,5 après une erreur, 0 si tu as affiché la solution. Une compétence n’est proposée en mode automatique que si ses prérequis sont maîtrisés.'
       + (S.classe !== 'tle' ? ' Les compétences de ' + (S.classe === '2de' ? '1re et de Terminale' : 'Terminale') + ' apparaissent si tu changes ta classe dans les réglages.' : '')));
     zone.appendChild(c);
+    // succès, après les compétences (modules/mes-succes.js) ; adresse suivi.html#succes : amenés à l'écran
+    if (typeof EPM.carteSucces === 'function') {
+      zone.appendChild(EPM.carteSucces());
+      if (location.hash === '#succes' && !pageSuivi.vu) { pageSuivi.vu = true; setTimeout(() => versVue(document.getElementById('succes'), 'start'), 60); }
+    }
     SOM.marquer({ fait: true });
     // Firefox, page ouverte depuis l'ordinateur (file://) : chaque page garde ses données pour elle seule
     if (!nb && location.protocol === 'file:' && /Firefox\//.test(navigator.userAgent)) {

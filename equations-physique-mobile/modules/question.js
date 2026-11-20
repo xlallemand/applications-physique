@@ -12,7 +12,8 @@
    API :
      EPM.Q.monter(carte, q, opts) → { terminer(pts) }
         q    : question de EPM.B.question(cle)
-        opts : { rappel: true|false, surFin(pts), apres(zoneActions) }
+        opts : { rappel: true|false, surFin(pts, zoneActions, { aide, diff }), apres(zoneActions) }
+                                    aide : rappel, indice ou exemple ouvert ; diff : difficulté de l'équation
      EPM.Q.solutionHTML(q)       résolution détaillée (calcul aligné, flèches « même opération »)
      EPM.Q.choisir(comp, niv, deja)   une question de la compétence, difficulté niv (1 à 3)
    ============================================================ */
@@ -52,7 +53,7 @@
 
   function monter(carte, q, opts) {
     opts = opts || {};
-    let erreurs = 0, fini = false, nInd = 0;
+    let erreurs = 0, fini = false, nInd = 0, aide = false;    // aide : rappel, indice ou exemple ouvert (succès « Autonome »)
     const E = q.cible.etapes;
     EPM.questionEnCours = q;                     // question affichée (tests automatiques)
     // contexte et équation
@@ -66,6 +67,7 @@
     const zRap = el('div', 'pm-aide'), zInd = el('div', 'pm-aide'), zEx = el('div', 'pm-aide'), zSol = el('div', 'pm-aide');
     const bRap = bouton('btn-small', '📖 Rappel', () => {
       const oui = !zRap.firstChild;
+      if (oui) aide = true;
       zRap.innerHTML = '';
       if (oui) { zRap.appendChild(EPM.blocRappel(q.comp)); EPM.monterCalc(zRap); EPM.versVue(zRap); }
       bRap.setAttribute('aria-expanded', oui);
@@ -73,6 +75,7 @@
     bRap.setAttribute('aria-expanded', 'false');
     const bInd = bouton('btn-small', '💡 Indice', () => {
       if (nInd >= E.length) return;
+      aide = true;
       const d = el('div', 'pm-indice', '<b>Indice ' + (nInd + 1) + '.</b> ' + E[nInd][1]);
       zInd.appendChild(d);
       nInd++;
@@ -86,6 +89,7 @@
     // exemple : une autre équation de la même compétence, résolue
     const bEx = bouton('btn-small', '✎ Exemple', () => montrerExemple());
     function montrerExemple() {
+      aide = true;
       const L = EPM.C.cibles(q.comp).filter(x => x.cle !== q.cle);
       if (!L.length) { zEx.innerHTML = '<div class="pm-rappel"><p>Pas d’autre exemple pour cette compétence : affiche le rappel.</p></div>'; return; }
       const e = EPM.B.question(L[Math.floor(Math.random() * L.length)].cle);
@@ -142,7 +146,7 @@
       fini = true;
       EPM.ED.fin();
       bSol.disabled = true;
-      if (opts.surFin) opts.surFin(pts, act);
+      if (opts.surFin) opts.surFin(pts, act, { aide, diff: q.diff });
       setTimeout(() => EPM.versVue(act.firstChild ? act : bilan), 40);
     }
     return { terminer, erreurs: () => erreurs };

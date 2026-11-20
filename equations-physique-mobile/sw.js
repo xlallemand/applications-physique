@@ -20,16 +20,17 @@
    changer VERSION pour que l'ancien cache soit remplacé.
    ============================================================ */
 'use strict';
-const VERSION = 'eqphys-v1.0';      // pas « equations-… » : le service worker d'Équations du 1er degré efface ces caches-là
+const VERSION = 'eqphys-v1.1';      // pas « equations-… » : le service worker d'Équations du 1er degré efface ces caches-là
 const FICHIERS = [
   './', './index.html', './manifest.webmanifest',
   './modules/decouverte.html', './modules/seance.html', './modules/suivi.html', './modules/fiches.html',
   './modules/sauvegarde.js', './modules/tuiles.js', './modules/fiches.js', './modules/aide-rules.js', './modules/editeur.js',
   './modules/ecriture.js', './modules/equations.js', './modules/competences.js', './modules/epm.js', './modules/question.js',
-  './modules/decouverte.js', './modules/seance.js',
+  './modules/decouverte.js', './modules/seance.js', './modules/mes-succes.js',
   './modules/editeur.css', './modules/tuiles.css', './modules/fiches.css', './modules/epm.css',
   './icones/apple-touch-icon.png', './icones/favicon-32.png', './icones/icone-192.png', './icones/icone-512.png', './icones/icone-maskable-512.png',
   '../assets/theme.css', '../assets/sommaire.css', '../assets/sommaire.js', '../assets/hero.js', '../assets/dragdrop.js',
+  '../assets/succes.js', '../assets/succes.css',
   '../equilibrer-reactions/modules/er.css'
 ];
 const POLICES = /^https:\/\/fonts\.(googleapis|gstatic)\.com\//;
