@@ -44,7 +44,7 @@ Sources : `02- Lumiere/Chap2-Cours complete.pdf` (3 p.), `Chap2-Fiche methode.pd
 
 ### Module 1 : Placer les éléments du schéma (manipulation guidée, `module_1_manip.html`)
 
-Situations (dans cet ordre, puis tirées au hasard au deuxième passage) :
+Situations (pastilles dans cet ordre, toutes accessibles dans n'importe quel ordre, `00-commun.md` §6 bis ; « Situation suivante → » les enchaîne) :
 1. air → eau, surface horizontale, lumière venant d'en haut à gauche (exercice 2, i<sub>1</sub> = 30°) ;
 2. eau → air, la pièce du TP1 (lumière venant du fond) ;
 3. air → verre, surface **verticale**, lumière venant de gauche (fiche méthode) ;
@@ -53,7 +53,7 @@ Situations (dans cet ordre, puis tirées au hasard au deuxième passage) :
 6. incidence normale (air → eau) ;
 7. verre → air, surface inclinée (face d'un prisme).
 
-Pas à pas, chaque pas vérifié avant le suivant :
+Pas à pas (c'est la méthode du cours : un pas fait trop tôt est refusé avec une phrase qui dit ce qu'il faut faire d'abord), consigne du pas en cours en une ligne dans le panneau :
 1. **Toucher le point d'incidence I** (cible de 44 px) ; erreur : « I est le point où le rayon rencontre la surface de séparation. »
 2. **Tracer la normale** : un trait pointillé pivote autour de I (glisser son extrémité, ou ◀ ▶ par pas de 1°) ; validé à ± 3° de la perpendiculaire, l'angle droit se dessine ; erreur si le trait est le long de la surface : « Ce trait suit la surface ; la normale est perpendiculaire à la surface en I. »
 3. **Nommer les rayons** : glisser les étiquettes « rayon incident », « rayon réfracté » (et « rayon réfléchi » quand il est dessiné) sur les rayons, puis toucher chaque rayon pour placer sa flèche dans le sens de la lumière.
@@ -80,13 +80,14 @@ Bilan : le schéma complet avec ses étiquettes, comme la figure du cours.
 ### Module 3 : Simulateur (simulation, `module_3_simulation.html`)
 
 - Deux milieux au choix (air, eau, verre, plexiglas, « milieu inconnu »), surface horizontale ; source glissée sur un cercle autour de I, ou boutons − 1° / + 1° ; **rapporteur gradué** autour de I (comme le disque du TP1) ; rayon incident, rayon réfracté, rayon réfléchi (case à cocher), angles et valeurs affichés.
-- Déroulé guidé :
+- Milieux, angle, rayon réfléchi et affichage des valeurs (« Montrées » / « À trouver ») se règlent à tout moment ; i<sub>1</sub> et i<sub>2</sub> s'affichent en continu.
+- **À essayer** (défis cochés tout seuls, dans n'importe quel ordre, `00-commun.md` §6 bis) :
   1. i<sub>1</sub> = 0° : le rayon n'est pas dévié ;
   2. augmente i<sub>1</sub> : i<sub>2</sub> augmente aussi ;
   3. air → eau : i<sub>2</sub> < i<sub>1</sub> ; eau → air : i<sub>2</sub> > i<sub>1</sub> ;
   4. coche le rayon réfléchi : l'angle de réflexion est égal à i<sub>1</sub> ;
-  5. **mesures du TP1** (air → plexiglas) : l'élève règle i<sub>1</sub> = 0, 10, 20…, 80°, lit i<sub>2</sub> au rapporteur et remplit le tableau (colonnes i<sub>1</sub> (°), i<sub>2</sub> (°), sin(i<sub>1</sub>), sin(i<sub>2</sub>), une ligne par mesure, charte §4) ; la lecture du rapporteur est au degré près ;
-  6. **graphique** sin(i<sub>1</sub>) en fonction de sin(i<sub>2</sub>) : les points se placent en « + » ; l'élève fait pivoter une droite passant par l'origine (glisser, ou ± 0,01 sur la pente) jusqu'à ce qu'elle passe au plus près des points ; la pente lue est n<sub>plexi</sub> ≈ 1,5 ;
+  5. **mesures du TP1** (onglet « Mesures » du panneau, à côté de la figure) (air → plexiglas) : l'élève règle i<sub>1</sub> = 0, 10, 20…, 80°, lit i<sub>2</sub> au rapporteur et remplit le tableau (colonnes i<sub>1</sub> (°), i<sub>2</sub> (°), sin(i<sub>1</sub>), sin(i<sub>2</sub>), une ligne par mesure, charte §4) ; la lecture du rapporteur est au degré près ;
+  6. **graphique** sin(i<sub>1</sub>) en fonction de sin(i<sub>2</sub>) (onglet « Graphique » du panneau, ou à la place de la figure le temps du tracé) : les points se placent en « + » ; l'élève fait pivoter une droite passant par l'origine (glisser, ou ± 0,01 sur la pente) jusqu'à ce qu'elle passe au plus près des points ; la pente lue est n<sub>plexi</sub> ≈ 1,5 ;
   7. défi : « milieu inconnu » (indice tiré entre 1,30 et 1,70) : mesurer i<sub>1</sub> et i<sub>2</sub>, calculer n.
 - **Réflexion totale** (choix de l'enseignant : montrée, hors programme) : du milieu d'indice le plus grand vers le plus petit, au-delà de l'angle limite (eau → air : 48,8° ; verre → air : 41,8°), le rayon réfracté disparaît et le rayon réfléchi devient intense ; une bulle ⓘ « **Hors programme.** Au-delà de cet angle, il n'y a plus de rayon réfracté : toute la lumière est réfléchie (réflexion totale). » apparaît à côté de la figure.
 
@@ -100,11 +101,11 @@ Groupes : calculer i<sub>2</sub> (air → eau, air → verre, eau → verre) ; c
 **Simulation (`module_5_simulation.html`)** : un prisme (triangle) sur une table, une source de lumière **blanche** ou **monochromatique** (rouge 650 nm, vert 530 nm, bleu 450 nm), un écran.
 - Le pinceau est réfracté à l'entrée puis à la sortie du prisme ; en lumière blanche, il s'étale en éventail et le spectre continu (400 à 800 nm) se forme sur l'écran ; en lumière monochromatique, une seule tache de la couleur de la source.
 - L'élève tourne le prisme (glisser, ou ± 1°) et déplace la source ; il peut afficher les normales et les angles aux deux faces.
-- Déroulé guidé : 1. lumière blanche : spectre continu ; 2. touche le rayon le plus dévié : le bleu ; 3. lumière monochromatique : pas de décomposition ; 4. « réfractée deux fois » : affiche les deux normales.
+- **À essayer** (défis cochés tout seuls, dans n'importe quel ordre, `00-commun.md` §6 bis) : 1. lumière blanche : spectre continu ; 2. touche le rayon le plus dévié : le bleu ; 3. lumière monochromatique : pas de décomposition ; 4. « réfractée deux fois » : affiche les deux normales. Source, couleur, position et rotation du prisme se règlent à tout moment.
 - Indice du prisme selon λ, entre n<sub>r</sub> = 1,609 (700 nm) et n<sub>b</sub> = 1,673 (450 nm) (loi de Cauchy n = A + B / λ² ajustée sur ces deux valeurs, calcul interne, jamais montré).
 - Lien « Revois les spectres » → `spectres-etoiles/`.
 
-**Manipulation guidée (`module_5_manip.html`)** : l'exercice du prisme du cours (A = 30,0°, rayon perpendiculaire à AC en I) :
+**Manipulation guidée (`module_5_manip.html`)** : l'exercice du prisme du cours (A = 30,0°, rayon perpendiculaire à AC en I), sur un seul écran (figure à gauche, pas en cours à droite) :
 1. placer la normale en J et l'angle d'incidence i<sub>1</sub> sur la face AB (outil du module 1) ; trouver i<sub>1</sub> = 30,0° (choix : 30°, 60°, 90°, avec le diagnostic « l'angle se mesure depuis la normale ») ;
 2. écrire la loi pour le bleu : n<sub>b</sub> × sin(i<sub>1</sub>) = n<sub>air</sub> × sin(i<sub>2b</sub>), puis i<sub>2b</sub> = 56,8° ;
 3. même chose pour le rouge : i<sub>2r</sub> = 53,6° ;
@@ -116,7 +117,7 @@ Groupes : calculer i<sub>2</sub> (air → eau, air → verre, eau → verre) ; c
 
 - SVG. Milieux : air sur fond `--sheet`, eau, verre et plexiglas sur fonds `--paper` / `--paper-2` avec un nom écrit (jamais seulement une couleur). Surface `--ink` épaisse, normale pointillée `--ink-2`, rayons `--accent` avec flèche au milieu, arcs d'angle fins, rapporteur gradué `--ink-3`.
 - Couleurs du spectre et des radiations : calculées à partir de λ avec `SP.rgb(λ)` de `spectres-etoiles/modules/sp.js` (chargé depuis son dossier), en attributs de présentation SVG, comme dans `spectres-etoiles/`.
-- 1280 px : figure carrée à gauche (environ 480 px), étapes à droite ; 390 px : figure pleine largeur, étiquettes et boutons dessous.
+- Un seul écran sans défilement (`00-commun.md` §6 bis) : 1280 px, figure carrée à gauche (hauteur disponible), réglages, défis ou pas en cours dans un panneau à droite (tableau et graphique du TP1 en onglets) ; 390 px, figure pleine largeur en haut, étiquettes, boutons et onglets dessous.
 
 ## 6. Outils
 

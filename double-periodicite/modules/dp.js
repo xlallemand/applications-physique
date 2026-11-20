@@ -378,32 +378,7 @@ const DP = (function () {
   // ---------- Navigation et plein écran ----------
   SOM.init({ nom: 'Double périodicité d\'une onde', id: 'double-periodicite', plan: [] });
   SOM.menu('accueil');
-  const racine = document.documentElement;
-  const demander = racine.requestFullscreen || racine.webkitRequestFullscreen;
-  const enPlein = () => document.fullscreenElement || document.webkitFullscreenElement;
-  if (demander && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) {
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'btn-small dp-plein';
-    const maj = () => {
-      const oui = !!enPlein();
-      b.innerHTML = (oui
-        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v6H3M15 3v6h6M9 21v-6H3M15 21v-6h6"/></svg>'
-        : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6"/></svg>') +
-        `<span class="dp-plein-t">${oui ? 'Quitter le plein écran' : 'Plein écran'}</span>`;
-      b.setAttribute('aria-label', oui ? 'Quitter le plein écran' : 'Plein écran');
-    };
-    b.addEventListener('click', () => {
-      try {
-        const r = enPlein() ? (document.exitFullscreen || document.webkitExitFullscreen).call(document) : demander.call(racine);
-        if (r && r.catch) r.catch(() => {});
-      } catch (e) { /* plein écran refusé : rien à faire */ }
-    });
-    document.addEventListener('fullscreenchange', maj);
-    document.addEventListener('webkitfullscreenchange', maj);
-    maj();
-    const barre = document.querySelector('.app-topbar');
-    if (barre) barre.appendChild(b);
-  }
+  PLEIN.bouton();   // bouton plein écran commun (assets/plein-ecran.js), dans le bandeau du haut
 
   // ---------- Illustrations de mise en situation ----------
   // chemin d'une sinusoïde de x0 à x1 : centre yc, amplitude a, période p, plate avant xd

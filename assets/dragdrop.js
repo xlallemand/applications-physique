@@ -12,7 +12,8 @@
        zoneSelector: '.drop-zone',       // sélecteur des zones de dépôt valides
        dragOverClass: 'drag-over',       // classe ajoutée à la zone survolée (optionnel)
        onDrop: (item, zone, evt) => { ... },  // zone est null si déposé hors zone valide
-       onCancel: (item) => { ... }        // geste interrompu (pointercancel), sans dépôt
+       onCancel: (item) => { ... },       // geste interrompu (pointercancel), sans dépôt
+       fantome: (item) => el              // facultatif : élément à copier pour le fantôme (par défaut, item)
      });
 
    Pendant le glisser, un "fantôme" (clone de l'élément) suit le
@@ -45,6 +46,7 @@
     const onDrop = options.onDrop;
     const onStart = options.onStart;
     const onCancel = options.onCancel;
+    const fantome = options.fantome;
 
     let ghost = null;
     let currentZone = null;
@@ -86,8 +88,10 @@
 
     function createGhost(x, y) {
       if (ghost) { ghost.remove(); ghost = null; }
-      const rect = item.getBoundingClientRect();
-      ghost = item.cloneNode(true);
+      // fantôme : copie de l'élément glissé, ou d'une partie de lui (options.fantome)
+      const modele = (fantome && fantome(item)) || item;
+      const rect = modele.getBoundingClientRect();
+      ghost = modele.cloneNode(true);
       ghost.classList.add('drag-ghost');
       ghost.style.position = 'fixed';
       ghost.style.left = (x - rect.width / 2) + 'px';

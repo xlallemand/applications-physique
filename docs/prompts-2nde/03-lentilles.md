@@ -43,6 +43,7 @@ Sources : `05- Lentilles minces convergentes/Chap05-Cours-exercices complete.pdf
 ### Module 1 : Les rayons particuliers (manipulation guidée, `module_1_manip.html`)
 
 - Quadrillage (1 carreau = 1 cm sauf indication), lentille, axe optique.
+- Un seul écran (`00-commun.md` §6 bis) : quadrillage à gauche, consigne et pastilles des situations (accessibles dans n'importe quel ordre) à droite.
 - Situation 1 : **placer les foyers** : f′ donnée (« f′ = 3 cm »), puis vergence donnée (« lentille de 25 δ » : l'élève écrit f′ = 1 / 25 = 0,04 m = 4 cm avant de placer F′) ; toucher la position de F′ puis de F. Erreurs : F′ du côté de l'objet (« F′, foyer image, est du côté où sort la lumière ») ; F non symétrique ; f′ prise en m sur un quadrillage en cm (« f′ = 0,04 m = 4 cm : 4 carreaux »).
 - Situations 2 à 7 : un rayon incident est dessiné (parallèle à l'axe, passant par O, passant par F, à différentes hauteurs, au-dessus ou au-dessous de l'axe) ; l'élève **trace le rayon émergent** : il glisse un point par lequel le rayon émergent passe (aimanté aux nœuds du quadrillage et aux points F, F′, O), ou ◀ ▶ ▲ ▼ ; le rayon part toujours du point où le rayon incident touche la lentille.
 - Erreurs à diagnostiquer :
@@ -69,25 +70,26 @@ Sources : `05- Lentilles minces convergentes/Chap05-Cours-exercices complete.pdf
 - Banc gradué en cm (0 à 100 cm) : lanterne et objet « d » au zéro (fixe), lentille, écran. Lentilles au choix : **10 δ** (celle du TP2), 5 δ, 20 δ ; à chaque choix, une ligne écrit le passage : « v = 10 δ, f′ = 1 / v = 1 / 10 = 0,10 m = 10 cm ».
 - La lentille et l'écran se **glissent** sur le banc, avec boutons ± 1 cm et ± 1 mm. L'image sur l'écran est **floue** sauf quand l'écran est en A′ (tolérance ± 3 mm) : elle devient nette, renversée (la lettre tournée d'un demi-tour) et à la bonne taille ; l'écran est gradué pour mesurer A′B′.
 - Case « afficher la construction » : la vue de dessus du banc (schéma de la fiche 1 à l'échelle) se dessine avec deux rayons issus de B et suit les déplacements.
-- Déroulé guidé (TP2) :
+- Lentille, positions, construction et affichage des distances (« Montrées » / « À trouver ») se règlent à tout moment ; OA, OA′ et A′B′ mesurés s'affichent en continu quand ils sont montrés.
+- **À essayer** (TP2, défis cochés tout seuls, dans n'importe quel ordre, `00-commun.md` §6 bis ; « Essayer » place la lentille) :
   1. mesure AB sur l'objet ;
   2. lentille à 40 cm de l'objet : cherche l'image nette (OA′ = 13,3 cm), « Y a-t-il plusieurs positions de l'écran qui donnent une image nette ? » (non) ; image droite ou renversée ;
   3. mesure A′B′ et calcule γ = A′B′ / AB, puis OA′ / OA : même valeur (0,33) ;
   4. lentille à 20 cm de l'objet : OA′ = 20 cm, γ = 1 ;
-  5. bilan : γ = A′B′ / AB = OA′ / OA.
+  5. relation à retenir, affichée quand les défis 3 et 4 sont réussis : γ = A′B′ / AB = OA′ / OA.
 - **Objet entre F et O** (lentille à moins de f′ de l'objet) : aucune image nette sur l'écran, quelle que soit sa position ; une bulle ⓘ apparaît : « **Hors programme.** L'objet est entre F et O : l'image est virtuelle. On ne peut pas la recueillir sur un écran ; on la voit en regardant à travers la lentille, comme avec une loupe. » ; la construction (si elle est affichée) montre les rayons émergents qui divergent et leurs prolongements en pointillés.
 
 ### Module 4 : L'œil (simulation, `module_4_simulation.html`)
 
 - Partie 1 : coupe de l'œil (pupille et iris, cristallin, rétine) à côté du modèle de l'œil réduit (diaphragme, lentille convergente, écran) ; l'élève **relie** chaque partie de l'œil à son modèle (glisser une étiquette ou deux appuis) ; erreur : « Le cristallin dévie la lumière comme une lentille : c'est la lentille convergente. »
 - Partie 2 : **accommodation** : un objet s'éloigne ou se rapproche (curseur de distance, de 25 cm à « l'infini ») ; la rétine est à distance fixe du cristallin (17 mm) ; l'élève règle la distance focale du cristallin (curseur, ± 0,1 mm) pour que l'image se forme sur la rétine (nette) ; la vergence correspondante s'affiche (v = 1 / f′ en δ).
-- Déroulé : objet à l'infini, cristallin au repos (f′ = 17 mm) ; objet à 1 m, puis à 25 cm : f′ diminue, v augmente, « le cristallin est plus convergent » ; bilan avec la phrase du cours.
+- **À essayer** (défis cochés tout seuls, dans n'importe quel ordre ; distance de l'objet et f′ réglables à tout moment) : objet à l'infini, cristallin au repos (f′ = 17 mm) ; objet à 1 m ; objet à 25 cm : f′ diminue, v augmente, « le cristallin est plus convergent » ; la phrase du cours s'affiche quand les trois sont réussis.
 
 ## 5. Rendu
 
 - SVG à l'échelle : 1 carreau = 1 cm (ou échelle indiquée « 1 carreau ↔ 2 cm ») ; quadrillage `--paper-3`, axe `--ink`, lentille `--ink` épaisse avec flèches, F et F′ petits traits nommés, objet AB flèche `--ink`, image A′B′ flèche `--accent-ink`, rayons `--accent` fins avec flèche au milieu, prolongements virtuels en pointillés.
 - Banc d'optique : banc gradué, lanterne, lentille sur son support, écran ; image floue rendue par un flou SVG (`feGaussianBlur`) qui diminue près de A′.
-- 1280 px : construction à gauche, étapes à droite ; 390 px : figure pleine largeur (zoom adapté pour que le quadrillage reste lisible), boutons dessous.
+- Un seul écran sans défilement (`00-commun.md` §6 bis) : 1280 px, construction ou banc à gauche, réglages, défis ou consigne dans un panneau à droite ; 390 px, figure pleine largeur en haut (zoom adapté pour que le quadrillage reste lisible), boutons et onglets dessous.
 
 ## 6. Outils
 

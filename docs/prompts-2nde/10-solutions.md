@@ -44,7 +44,7 @@ Sources : `08- Solutions aqueuses/Chap08-Cours-Exercices complete.pdf` (p. 1-2 c
 ### Module 1 : Dissolution (manipulation guidée, `module_1_manip.html`)
 
 - Paillasse : balance (bouton Tare), coupelle, spatule, flacon de chlorure de fer (III) solide, entonnoir, pissette d'eau distillée, bouchon, et la verrerie à choisir : **fiole jaugée de 250 mL**, bécher de 250 mL, éprouvette graduée de 250 mL, erlenmeyer.
-- Objectif affiché : « Prépare 250,0 mL de solution mère de chlorure de fer (III) à 2,0 g/L. » L'élève calcule d'abord la masse à peser (m = c<sub>m</sub> × V = 2,0 × 0,250 = 0,50 g ; champ, avec la conversion mL → L).
+- Objectif affiché : « Prépare 250,0 mL de solution mère de chlorure de fer (III) à 2,0 g/L. » (réglage : concentration et fiole au choix, pour s'en servir avec d'autres valeurs). L'élève calcule d'abord la masse à peser (m = c<sub>m</sub> × V = 2,0 × 0,250 = 0,50 g ; champ, avec la conversion mL → L).
 - Gestes dans l'ordre de la fiche (chaque geste : toucher l'objet puis la cible, ou glisser) ; **un geste hors de l'ordre est refusé tout de suite, avec son explication** (`ETAPES`). Détails :
   - choix du récipient : bécher ou éprouvette refusés : « Le bécher n'est pas précis : pour un volume précis de solution, on utilise une fiole jaugée. » ;
   - pesée : coupelle sur la balance, Tare, prises de spatule (grosse ou petite) jusqu'à 0,50 g ± 0,01 g ; oubli de la tare refusé ;
@@ -56,6 +56,7 @@ Sources : `08- Solutions aqueuses/Chap08-Cours-Exercices complete.pdf` (p. 1-2 c
 ### Module 2 : Dilution (manipulation guidée, `module_2_manip.html`)
 
 - Paillasse : flacon de solution mère (2,0 g/L), béchers, pipettes jaugées à deux traits (5, 10, 20, 25 mL), propipette, fioles jaugées (50, 100, 250 mL), éprouvettes graduées, pissette, bouchons.
+- Situations accessibles dans n'importe quel ordre (pastilles), chacune avec ses gestes dans l'ordre de la fiche (`00-commun.md` §6 bis).
 - **Première dilution par 10** (TP) : choisir la pipette et la fiole pour f = 10 (pipette de 10 mL, fiole de 100 mL ; d'autres couples justes acceptés : 5 mL et 50 mL, 25 mL et 250 mL) ; puis les gestes de la fiche dans l'ordre ; puis **f = V<sub>fiole</sub> / V<sub>pipette</sub> = 10** et **c<sub>fiole</sub> = c<sub>pipette</sub> / f = 0,20 g/L** (ou c<sub>pipette</sub> × V<sub>pipette</sub> = c<sub>fiole</sub> × V<sub>fiole</sub>).
 - **Deuxième dilution par 10** : à partir de la première solution fille : 0,020 g/L = 20 mg/L.
 - Refus et diagnostics :
@@ -69,6 +70,7 @@ Sources : `08- Solutions aqueuses/Chap08-Cours-Exercices complete.pdf` (p. 1-2 c
 ### Module 3 : Échelle de teinte (simulation, `module_3_simulation.html`)
 
 - À partir de la solution à 20 mg/L (deuxième fille), la gamme est préparée dans des fioles de 50,0 mL avec les pipettes de 5,0 ; 10,0 ; 20,0 ; 25,0 mL : **2,0 ; 4,0 ; 8,0 ; 10 ; 20 mg/L** ; l'élève calcule la concentration de chaque tube (f = 50,0 / 5,0 = 10, c = 20 / 10 = 2,0 mg/L…) avant de l'étiqueter.
+- Concentrations « Montrées / À trouver » (option) ; tubes, gouttes de thiocyanate, portoir et tube inconnu se manipulent à tout moment ; **À essayer** (défis cochés tout seuls, dans n'importe quel ordre, `00-commun.md` §6 bis) : étiqueter la gamme, la ranger, encadrer c<sub>S</sub>, affiner.
 - Il verse quelques gouttes de thiocyanate de potassium dans chaque tube : la teinte rouge-orangé apparaît, d'autant plus foncée que la concentration est grande.
 - Il **range les tubes** sur le portoir dans l'ordre des concentrations (glisser, ou deux appuis) ; refus si l'ordre est faux : « Plus la solution est concentrée, plus sa teinte est foncée. »
 - Il **place le tube inconnu S** (traité au thiocyanate) entre les deux tubes de teinte la plus proche (comparaison côte à côte, vue de dessus sur fond blanc en option), puis **encadre** sa concentration : « 4,0 mg/L < c<sub>S</sub> < 8,0 mg/L ».
@@ -90,8 +92,8 @@ Erreurs diagnostiquées : V en mL dans c<sub>m</sub> = m / V ; fraction renvers�
 
 - **Verrerie dessinée** en SVG, vue de face, réaliste et sobre : contours `--ink-2`, verre `--sheet`, liquides `--paper-2` ou teinte de la solution ; trait de jauge et graduations ; ménisque visible en vue agrandie (cercle de zoom) ; pissette, balance avec son afficheur, propipette.
 - Couleur des solutions (ions thiocyanatofer) : rouge-orangé réaliste, en attributs de présentation SVG comme les couleurs des spectres de `spectres-etoiles/`, intensité proportionnelle à la concentration ; elle n'est **jamais** utilisée pour un message (juste / faux restent écrits, avec leurs couleurs de thème).
-- Gestes : glisser l'objet sur sa cible, ou toucher l'objet puis la cible ; cibles de 44 px ; la consigne en cours s'affiche au-dessus de la paillasse (« 3. Rince la coupelle avec de l'eau distillée. »), les gestes faits se cochent dans la liste de la fiche méthode, sur le côté (ordinateur) ou repliée sous la paillasse (téléphone).
-- 1280 px : paillasse à gauche, fiche méthode et calculs à droite ; 390 px : paillasse pleine largeur (objets plus petits, cibles toujours de 44 px), fiche dessous.
+- Gestes : glisser l'objet sur sa cible, ou toucher l'objet puis la cible ; cibles de 44 px ; la consigne en cours s'affiche en une ligne au-dessus de la paillasse (« 3. Rince la coupelle avec de l'eau distillée. »), les gestes faits se cochent dans la liste de la fiche méthode, dans le panneau à droite (ordinateur) ou dans un onglet sous la paillasse (téléphone).
+- Un seul écran sans défilement (`00-commun.md` §6 bis) : 1280 px, paillasse à gauche, fiche méthode et calculs dans un panneau à droite ; 390 px, paillasse pleine largeur en haut (objets plus petits, cibles toujours de 44 px), fiche et calculs en onglets dessous.
 
 ## 6. Outils
 

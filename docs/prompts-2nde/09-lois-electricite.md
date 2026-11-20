@@ -39,21 +39,21 @@ Sources : `10- Electricite/TP circuit electrique complete.pdf` et `Fiche TP.pdf`
 
 ### Module 1 : Loi des nœuds (manipulation guidée, `module_1_manip.html`)
 
-- Montage en dérivation du TP (8 V ; 390 Ω et 100 Ω), déjà monté (`MONTAGE`, table et schéma côte à côte).
-- Déroulé :
+- Montage en dérivation du TP (8 V ; 390 Ω et 100 Ω), déjà monté (`MONTAGE`, table et schéma côte à côte), sur un seul écran avec le tableau des mesures (`00-commun.md` §6 bis). Les ampèremètres se placent, se retirent et se déplacent à tout moment ; le montage en série se choisit aussi à tout moment (bouton « Série / Dérivation »).
+- Pas (consigne du pas en cours en une ligne dans le panneau ; seuls les pas qui ont besoin des mesures attendent qu'elles soient faites) :
   1. **placer les trois ampèremètres** : toucher un fil du schéma pour y insérer un ampèremètre (il s'insère aussi sur la table) ; les intensités I<sub>1</sub>, I<sub>2</sub>, I<sub>3</sub> se nomment sur le schéma avec leur flèche ;
   2. **relever** les mesures dans un tableau (une colonne par intensité, valeurs en mA puis en A) ;
   3. **trouver la relation** parmi « I<sub>1</sub> = I<sub>2</sub> = I<sub>3</sub> », « I<sub>1</sub> = I<sub>2</sub> + I<sub>3</sub> », « I<sub>3</sub> = I<sub>1</sub> + I<sub>2</sub> », vérifiée sur les valeurs ;
   4. comparer avec le montage en série (I<sub>1</sub> = I<sub>2</sub> = I<sub>3</sub>) ;
   5. énoncé de la loi des nœuds, à compléter avec des étiquettes (« arrivent », « partent », « somme »).
-- Puis 6 **calculs** dans des circuits à deux mailles au plus (schémas avec flèches d'intensité, une valeur cherchée) : I<sub>3</sub> à partir de I<sub>1</sub> et I<sub>2</sub>, I<sub>1</sub> à partir des deux branches, nœud à trois branches.
+- Puis 6 **calculs** (pastilles, accessibles dans n'importe quel ordre) dans des circuits à deux mailles au plus (schémas avec flèches d'intensité, une valeur cherchée) : I<sub>3</sub> à partir de I<sub>1</sub> et I<sub>2</sub>, I<sub>1</sub> à partir des deux branches, nœud à trois branches.
 - Erreurs : somme au lieu de différence (« I<sub>1</sub> arrive au nœud, I<sub>2</sub> et I<sub>3</sub> en partent : I<sub>1</sub> = I<sub>2</sub> + I<sub>3</sub>, donc I<sub>3</sub> = I<sub>1</sub> − I<sub>2</sub>. ») ; unités mélangées (mA et A) ; ampèremètre placé dans la mauvaise branche (« I<sub>2</sub> est l'intensité dans la branche de la résistance de 390 Ω »).
 
 ### Module 2 : Loi des mailles (manipulation guidée, `module_2_manip.html`)
 
-- Montage en série du TP (8 V ; 390 Ω ; 100 Ω). L'élève **place trois voltmètres** en touchant les deux bornes d'un dipôle sur le schéma (V du côté de la flèche, COM de l'autre) ; les **flèches de tension avec leur nom** U<sub>G</sub>, U<sub>390</sub>, U<sub>100</sub> se dessinent.
+- Montage en série du TP (8 V ; 390 Ω ; 100 Ω), sur un seul écran avec le tableau des mesures ; série ou dérivation au choix à tout moment. L'élève **place trois voltmètres** en touchant les deux bornes d'un dipôle sur le schéma (V du côté de la flèche, COM de l'autre) ; les **flèches de tension avec leur nom** U<sub>G</sub>, U<sub>390</sub>, U<sub>100</sub> se dessinent.
 - Relevé, relation (« U<sub>G</sub> = U<sub>390</sub> + U<sub>100</sub> », « U<sub>G</sub> = U<sub>390</sub> = U<sub>100</sub> », « U<sub>390</sub> = U<sub>G</sub> + U<sub>100</sub> »), puis la même chose en dérivation (U<sub>G</sub> = U<sub>390</sub> = U<sub>100</sub>).
-- Puis 6 **calculs** : tension manquante dans une maille (série de deux ou trois dipôles), circuit à deux mailles (dipôle en série puis deux dipôles en dérivation : U<sub>G</sub> = U<sub>1</sub> + U<sub>2</sub> et U<sub>2</sub> = U<sub>3</sub>).
+- Puis 6 **calculs** (pastilles, accessibles dans n'importe quel ordre) : tension manquante dans une maille (série de deux ou trois dipôles), circuit à deux mailles (dipôle en série puis deux dipôles en dérivation : U<sub>G</sub> = U<sub>1</sub> + U<sub>2</sub> et U<sub>2</sub> = U<sub>3</sub>).
 - Erreurs : voltmètre branché en série (refusé, phrase de `08`) ; tension de dérivation additionnée (« les dipôles en dérivation ont la même tension ») ; signe négatif lu (COM du mauvais côté) : la phrase de la fiche TP.
 
 ### Module 3 : Caractéristique et loi d'Ohm (simulation, `module_3_simulation.html`)
@@ -61,8 +61,9 @@ Sources : `10- Electricite/TP circuit electrique complete.pdf` et `Fiche TP.pdf`
 - Montage de la loi d'Ohm du TP (générateur réglable, ampèremètre en série, 470 Ω, voltmètre en dérivation), dipôle au choix : **conducteur ohmique 470 Ω** (TP), 100 Ω, **lampe** (caractéristique non linéaire), résistance inconnue.
 - Le générateur se règle de **−8 V à +8 V** (bouton glissé ou ± 0,5 V) ; l'élève **relève** chaque couple (U ; I) : bouton « Relever » qui ajoute une ligne au tableau (colonnes U (V), I (A), U / I (Ω) ; une ligne par mesure, charte §4) ; l'ampèremètre passe de 10 A à mA comme dans `08`.
 - Les points se placent sur le graphique **U en fonction de I** (points « + », non reliés, comme au TP1 de lumière) ; l'élève fait pivoter une droite passant par l'origine jusqu'à ce qu'elle passe au plus près des points ; la pente lue est R.
-- Déroulé guidé : 1. au moins 8 mesures de −8 V à +8 V ; 2. « U / I est constant : U et I sont proportionnels » ; 3. **U = R × I** avec R = 470 Ω ; 4. la lampe : la caractéristique n'est pas une droite (ce n'est pas un conducteur ohmique) ; 5. **point de fonctionnement** : le dipôle branché sur le générateur réglé à 6 V : on lit I sur la caractéristique (lecture graphique) ; 6. résistance inconnue : la trouver avec la pente.
-- Puis 5 calculs avec U = R × I (U, R ou I cherché ; mA → A ; kΩ → Ω) ; erreurs : I en mA dans la formule ; R = I / U ; kΩ non converti. Lien « Revois… » → `equations-en-physique/`.
+- Tableau et graphique dans le panneau à droite du montage (onglets « Tableau » / « Graphique » si la place manque) ; dipôle et tension se changent à tout moment.
+- **À essayer** (défis cochés tout seuls, dans n'importe quel ordre, `00-commun.md` §6 bis) : 1. au moins 8 mesures de −8 V à +8 V ; 2. « U / I est constant : U et I sont proportionnels » ; 3. **U = R × I** avec R = 470 Ω ; 4. la lampe : la caractéristique n'est pas une droite (ce n'est pas un conducteur ohmique) ; 5. **point de fonctionnement** : le dipôle branché sur le générateur réglé à 6 V : on lit I sur la caractéristique (lecture graphique) ; 6. résistance inconnue : la trouver avec la pente.
+- Onglet « Calculs » du panneau : 5 calculs avec U = R × I (U, R ou I cherché ; mA → A ; kΩ → Ω), dans n'importe quel ordre ; erreurs : I en mA dans la formule ; R = I / U ; kΩ non converti. Lien « Revois… » → `equations-en-physique/`.
 
 ### Module 4 : Capteur résistif (simulation, `module_4_simulation.html`)
 
@@ -70,7 +71,9 @@ Deux capteurs, au choix par onglets :
 - **Thermistance** plongée dans un bain d'eau avec un thermomètre (température réglable de 0 à 100 °C, chauffage et glaçons) ;
 - **Photorésistance** sous une lampe, avec un luxmètre (éclairement réglable de 10 à 1 000 lux).
 
-Déroulé guidé :
+Grandeur (température, éclairement), ohmmètre et mesures se règlent à tout moment ; tableau et courbe dans le panneau à droite.
+
+**À essayer** (défis cochés tout seuls, dans n'importe quel ordre, `00-commun.md` §6 bis ; les défis 2 et 3 attendent assez de mesures, et le disent) :
 1. mesurer la résistance du capteur à **l'ohmmètre** (multimètre sur Ω, capteur hors du circuit, comme le dit la fiche TP), pour au moins 6 valeurs de la grandeur ;
 2. **produire la courbe d'étalonnage** : tableau (T (°C), R (kΩ)) puis points sur le graphique R en fonction de T ; quand les points suffisent, la courbe lissée se trace (ce n'est pas une droite) ;
 3. **utiliser** la courbe : une valeur de R est mesurée « ailleurs » (four, frigo, salle de classe ; pièce sombre, lumière du jour) : l'élève lit la grandeur sur la courbe (lecture graphique) ;
@@ -82,7 +85,7 @@ Déroulé guidé :
 - Schémas et tables de `MONTAGE` ; flèches de tension avec leur nom, flèches d'intensité sur les fils ; dipôle mesuré surligné.
 - Graphiques (caractéristique, courbe d'étalonnage) : quadrillage pointillé `--paper-3`, axes `--ink` gradués avec leur grandeur et unité, points « + » `--ink`, droite ou courbe `--accent`.
 - Bain d'eau, thermomètre, lampe, luxmètre : dessins simples en SVG, couleurs du thème (eau `--paper-2`, lumière `--cle-bg`).
-- 1280 px : montage à gauche, tableau et graphique à droite ; 390 px : montage, puis tableau, puis graphique, les uns sous les autres.
+- Un seul écran sans défilement (`00-commun.md` §6 bis) : 1280 px, montage à gauche, tableau, graphique et défis dans un panneau à droite (onglets si besoin) ; 390 px, montage en haut, tableau, graphique et défis en onglets dessous.
 
 ## 6. Outils
 

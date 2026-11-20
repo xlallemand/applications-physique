@@ -1,0 +1,316 @@
+/* ============================================================
+   Styles de l'application « Atome et ions »
+   Complète assets/theme.css, equilibrer-reactions/modules/er.css
+   (cartes, boutons, écran de fin) et assets/atome.css (dessins de l'atome).
+   ph-…   questions (repris de cinematique/modules/cin.css)
+   at-…   pages de l'application
+   ============================================================ */
+
+.er-page button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.er-page p { margin: 0; }
+.er-page [hidden] { display: none !important; }
+sub, sup { font-size: .7em; line-height: 0; }
+.at-revois { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 12px !important; font-size: .92rem; }
+.at-revois a { color: var(--accent-ink); font-weight: 700; }
+
+/* ============================================================
+   SIMULATIONS (modules 1 et 3) : un seul écran, sans défilement
+   ============================================================ */
+.er-page.at-sim-page { max-width: none; padding: 10px; }
+.at-sim { display: flex; flex-direction: column; gap: 10px; height: calc(100vh - 36px); height: calc(100dvh - 36px); min-height: 540px; }   /* 36 px : marges de la page (2 × 10) et du corps (2 × 8) */
+.at-sim-tete { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 8px 16px; }
+.at-sim-titre { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 14px; min-width: 0; }
+.at-sim-titre .er-badge { margin: 0; }
+.at-sim-titre .er-titre { margin: 0; font-size: 1.15rem; }
+.at-sim-corps { flex: 1 1 0; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 10px; }
+/* scène : bande des éléments, bandeau, dessins (prennent la place qui reste), message */
+.at-sim-scene { margin: 0; padding: 10px 12px; min-height: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.at-sim-bande:empty { display: none; }
+.at-sim-dessins { flex: 1 1 0; min-height: 280px; min-width: 0; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(300px, 1fr); gap: 14px; }
+.at-sim-gauche { position: relative; min-height: 0; min-width: 0; }
+.at-sim-couches { position: absolute; inset: 0; }
+.at-sim-droite { min-height: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+/* centré verticalement quand il y a de la place, en haut sinon (rien n'est coupé) */
+.at-sim-droite > :first-child { margin-top: auto; }
+.at-sim-droite > :last-child { margin-bottom: auto; }
+/* écriture du noyau : toujours en haut à gauche des cercles (même place dans les deux simulateurs), en grand */
+.at-sim-nota { position: absolute; top: 0; left: 0; z-index: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; pointer-events: none; }
+.at-nota-x { font-size: 3.4rem; line-height: 1.05; }
+.at-nota-nom { font-weight: 800; font-size: 1.15rem; margin-bottom: 2px; }
+.at-nota-c { font-size: .85rem; color: var(--ink-2); font-weight: 600; font-variant-numeric: tabular-nums; }
+.at-nota-txt { font-size: 1.15em; }
+.at-lg { display: inline-grid; place-items: center; width: 15px; height: 15px; margin-right: 5px; border-radius: 999px; vertical-align: -2px; font: normal 800 .72rem/1 var(--font-sans); color: var(--sheet); }
+.at-lg-p { background: var(--ink); }
+.at-lg-n { background: var(--paper-2); box-shadow: inset 0 0 0 1.5px var(--line-strong); }
+.at-lg-e { background: var(--accent); }
+
+.at-sim-lab { font-size: .85rem; font-weight: 800; color: var(--ink-2); }
+.at-sim-lab b { color: var(--accent-ink); }
+.at-sim-bloc-config { display: flex; flex-direction: column; gap: 2px; }
+.at-config { font-size: 1.55rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.5; min-height: 1.5em; }
+.at-config .atm-vide { font-size: .95rem; }
+.at-compte { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 1.02rem; font-variant-numeric: tabular-nums; }
+.at-compte b { color: var(--accent-ink); }
+.at-compte-val { padding: 0 10px; border-radius: 999px; box-shadow: inset 0 0 0 2px var(--accent); }
+
+/* message sous les dessins (refus expliqué, information, question) */
+.at-sim-msg:empty { display: none; }
+.at-sim-msg-in { padding: 8px 14px; border-radius: 14px; font-size: .95rem; line-height: 1.45; }
+.at-sim-msg-in p + * { margin-top: 6px; }
+.at-sim-diag { margin-top: 6px !important; color: var(--danger-text); }
+.at-nb { display: flex; flex-wrap: wrap; gap: 6px; }
+.at-nb button { min-width: 44px; min-height: 44px; padding: 0; font-weight: 800; font-size: 1.05rem; }
+.at-nb button.faux { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); color: var(--danger-text); opacity: 1; }
+
+/* panneau de réglages */
+.at-sim-panneau { margin: 0; padding: 12px 14px; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.at-sim-onglets { display: none; }
+.at-sim-bloc { display: flex; flex-direction: column; gap: 8px; }
+.at-sim-bloc + .at-sim-bloc { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 8px; }
+@media (min-width: 900px) {
+  .at-sim-bloc.at-sim-tel { display: none; }
+  .at-sim-bloc.at-sim-tel + .at-sim-bloc { border-top: none; padding-top: 0; margin-top: 0; }
+}
+.at-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.at-ligne .at-b { flex: 1 1 0; min-width: 0; min-height: 46px; padding-left: 8px; padding-right: 8px; font-size: .9rem; white-space: nowrap; }
+.at-aide-t { font-size: .82rem; line-height: 1.35; color: var(--ink-2); }
+/* module 1 : réserve d'électrons bien visible (une pile d'électrons à glisser vers leur place) ;
+   ordinateur : réserve, aide et « − électron » l'un sous l'autre ; téléphone : réserve et « − électron » côte à côte */
+.at-ligne-res > * { flex: 1 1 100%; }
+.at-reserve-gros .atm-reserve {
+  width: 100%; justify-content: flex-start; gap: 14px; min-height: 64px; padding: 8px 12px 8px 10px; border-radius: 16px;
+  background: var(--cle-bg); box-shadow: inset 0 0 0 2px var(--accent);
+}
+.at-reserve-gros .atm-reserve-e {
+  position: relative; flex: 0 0 auto; width: 44px; height: 44px; font-size: 1.6rem; margin: 6px 12px 0 0;
+  box-shadow: 0 0 0 2px var(--cle-bg), 6px -3px 0 0 var(--cle-bg), 7px -4px 0 0 var(--accent), 12px -7px 0 0 var(--cle-bg), 13px -8px 0 0 var(--accent);
+}
+.at-reserve-gros .atm-reserve-t { display: flex; flex-direction: column; align-items: flex-start; text-align: left; font-size: 1rem; font-weight: 800; color: var(--accent-ink); }
+.at-reserve-gros .atm-reserve-t small { font-size: .8rem; font-weight: 600; color: var(--ink-2); }
+.at-reserve-gros .atm-reserve:hover { background: var(--sheet); }
+.at-rappel { font-size: .86rem; line-height: 1.4; padding: 6px 12px; border-radius: 12px; background: var(--cle-bg); }
+.at-rappel b { color: var(--accent-ink); }
+.at-coche-l { display: flex; align-items: center; gap: 8px; min-height: 40px; font-weight: 700; font-size: .92rem; cursor: pointer; }
+.at-coche-l input { width: 22px; height: 22px; accent-color: var(--accent); flex-shrink: 0; }
+.at-coche-l input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* choix de l'élément : − / + et grille (téléphone) ; une bande de 18 symboles entre − et + (ordinateur) */
+.at-choix { display: flex; flex-direction: column; gap: 6px; }
+.at-z { display: flex; align-items: center; gap: 8px; }
+.at-z-pm { width: 52px; min-height: 46px; padding: 0; font-size: 1.3rem; font-weight: 800; flex-shrink: 0; }
+.at-z-val { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.at-z-val b { font-size: 1.15rem; }
+.at-z-nom { font-size: .85rem; font-weight: 700; color: var(--accent-ink); }
+.at-grille { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 3px; }
+.at-g-b {
+  position: relative; min-height: 44px; padding: 0; border: none; border-radius: 10px; background: var(--paper); color: var(--ink);
+  font: 800 .98rem var(--font-sans); cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--paper-3);
+}
+.at-g-b small { position: absolute; top: 2px; left: 4px; font-size: .58rem; font-weight: 700; color: var(--ink-2); }
+.at-g-b[aria-pressed="true"] { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.at-g-b[aria-pressed="true"] small { color: var(--paper-3); }
+.at-g-b:focus-visible, .at-seg button:focus-visible, .at-sim-onglets button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.at-sim-bande .at-choix { flex-direction: row; align-items: stretch; gap: 4px; }
+.at-sim-bande .at-z { display: contents; }
+.at-sim-bande .at-z-val { display: none; }
+.at-sim-bande .at-z-pm { width: 40px; min-height: 44px; font-size: 1.15rem; }
+.at-sim-bande .at-z-pm[data-d="1"] { order: 2; }
+.at-sim-bande .at-grille { order: 1; flex: 1 1 0; min-width: 0; grid-template-columns: repeat(18, minmax(0, 1fr)); }
+.at-sim-bande .at-g-b { padding-top: 6px; font-size: .95rem; }
+
+/* bouton à deux positions */
+.at-seg { display: flex; gap: 4px; padding: 4px; background: var(--paper-2); border-radius: 999px; }
+.at-seg button { flex: 1 1 0; min-width: 0; min-height: 40px; padding: 4px 6px; border: none; border-radius: 999px; background: transparent; font: inherit; font-size: .85rem; font-weight: 700; color: var(--ink-2); cursor: pointer; }
+.at-seg button[aria-pressed="true"] { background: var(--sheet); color: var(--accent-ink); box-shadow: inset 0 0 0 2px var(--accent); }
+
+/* « À essayer » : pastilles numérotées et texte du défi choisi */
+.at-defis-c { display: flex; flex-direction: column; gap: 8px; }
+.at-defi-go { min-height: 34px; padding: 2px 12px; flex-shrink: 0; font-size: .82rem; }
+.at-defis-bilan:empty { display: none; }
+.at-bilan { margin-top: 8px; padding: 8px 14px; border-radius: 14px; font-size: .9rem; line-height: 1.45; }
+.at-defis-puces { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.at-puce {
+  width: 38px; height: 38px; border: none; border-radius: 999px; background: var(--paper); color: var(--ink-2); font: 800 .95rem var(--font-sans);
+  cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--paper-3);
+}
+.at-puce[aria-selected="true"] { box-shadow: inset 0 0 0 2.5px var(--accent); color: var(--accent-ink); background: var(--sheet); }
+.at-puce.at-fait { background: var(--success); color: var(--sheet); box-shadow: none; }
+.at-puce.at-fait[aria-selected="true"] { box-shadow: 0 0 0 2.5px var(--sheet), 0 0 0 4.5px var(--success); }
+.at-puce:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.at-defi-c-t { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; font-size: .9rem; line-height: 1.4; }
+.at-defi-c-t .atm-nota { font-size: 1.1em; }
+
+/* module 3 : ion, charges, gaz nobles */
+.at-ion-tete { font-size: .95rem; line-height: 1.4; color: var(--ink-2); }
+.at-ion-tete b { color: var(--accent-ink); font-weight: 800; }
+.at-ion-tete .at-ion-nom { color: var(--ink); font-weight: 700; }
+.at-ion-noyau { font-size: .88rem; line-height: 1.35; color: var(--ink-2); }
+.at-charges { display: flex; flex-direction: column; gap: 3px; }
+.at-charges .atm-pp, .at-charges .atm-pe, .at-charges .atm-trou { width: 15px; height: 15px; font-size: .72rem; }
+.at-charges-t { font-size: .9rem; font-variant-numeric: tabular-nums; }
+.at-charges-t b { color: var(--accent-ink); }
+.at-gaz { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.at-gaz > span { padding: 1px 8px; border-radius: 999px; background: var(--sheet); font-size: .8rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.at-gaz > span.at-gaz-ici { background: var(--cle-bg); box-shadow: inset 0 0 0 2px var(--accent); font-weight: 700; }
+.at-stab { padding: 6px 10px; border-radius: 12px; font-size: .9rem; line-height: 1.35; background: var(--paper); }
+.at-stab.at-stab-ok { background: var(--cle-bg); box-shadow: inset 0 0 0 2px var(--accent); }
+.at-stab b { color: var(--accent-ink); }
+.at-chemins { font-size: .84rem; line-height: 1.4; color: var(--ink-2); }
+.at-chemins b { color: var(--ink); }
+
+/* ordinateur peu haut : en-tête et commandes resserrés */
+@media (min-width: 900px) and (max-height: 760px) {
+  .at-sim { gap: 8px; }
+  .at-sim-tete { padding: 6px 14px; }
+  .at-sim-corps { gap: 8px; }
+  .at-sim-scene { padding: 8px 10px; gap: 6px; }
+  .at-sim-panneau { padding: 10px 12px; }
+  .at-sim-bloc { gap: 6px; }
+  .at-sim-bloc + .at-sim-bloc { padding-top: 8px; margin-top: 6px; }
+  .at-nota-x { font-size: 2.9rem; }
+  .at-sim-msg-in { padding: 6px 12px; font-size: .9rem; }
+}
+
+/* téléphone et tablette : dessins en haut, réglages dessous, un onglet à la fois */
+@media (max-width: 899px) {
+  .at-sim { height: calc(100vh - 54px - 36px); height: calc(100dvh - 54px - 36px); min-height: 520px; gap: 8px; }   /* 54 px : bandeau du sommaire */
+  .at-sim-tete { display: none; }          /* le bandeau du sommaire dit déjà où l'on est */
+  .at-sim-corps { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) 262px; gap: 8px; }
+  .at-sim-onglets .pe-bouton { flex: 0 0 auto; min-height: 40px; padding: 0 10px; }
+  .at-sim-scene { padding: 6px 8px; gap: 4px; }
+  .at-sim-dessins { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 4px; min-height: 260px; }
+  .at-sim-droite { overflow: visible; gap: 4px; }
+  .at-sim-nota { gap: 1px; }
+  .at-nota-x { font-size: 2.2rem; }
+  .at-nota-nom { font-size: .88rem; }
+  .at-nota-c { font-size: .74rem; }
+  .at-lg { width: 13px; height: 13px; font-size: .62rem; margin-right: 3px; }
+  .at-config { font-size: 1.12rem; line-height: 1.35; }
+  .at-compte { font-size: .86rem; gap: 2px 10px; }
+  .at-compte-val { padding: 0 8px; }
+  .at-sim-bloc-config .at-sim-lab { display: none; }
+  .at-sim-msg-in { padding: 5px 10px; font-size: .82rem; line-height: 1.32; border-radius: 12px; }
+  .at-nb button { min-width: 40px; min-height: 42px; }
+  .at-sim-panneau { padding: 8px 10px; overflow-y: auto; }
+  .at-sim-onglets { display: flex; gap: 4px; padding: 3px; background: var(--paper-2); border-radius: 999px; flex-shrink: 0; margin-bottom: 4px; }
+  .at-sim-onglets button { flex: 1 1 0; min-width: 0; min-height: 40px; border: none; border-radius: 999px; background: transparent; font: inherit; font-size: .8rem; font-weight: 800; color: var(--ink-2); cursor: pointer; padding: 2px 4px; }
+  .at-sim-onglets button[aria-selected="true"] { background: var(--sheet); color: var(--accent-ink); box-shadow: inset 0 0 0 2px var(--accent); }
+  .at-sim-bloc { display: none; gap: 6px; }
+  .at-sim-bloc.at-sim-actif { display: flex; }
+  .at-sim-bloc + .at-sim-bloc { border-top: none; margin-top: 0; padding-top: 0; }
+  .at-sim-bloc-t { display: none; }
+  .at-aide-t { display: none; }
+  .at-ligne-res { flex-wrap: nowrap; }
+  .at-ligne-res .at-reserve-gros { flex: 1 1 auto; }
+  .at-ligne-res .at-b { flex: 0 0 auto; padding-left: 14px; padding-right: 14px; }
+  .at-reserve-gros .atm-reserve { min-height: 52px; padding: 4px 10px 4px 8px; }
+  .at-reserve-gros .atm-reserve-e { width: 38px; height: 38px; font-size: 1.4rem; }
+  .at-reserve-gros .atm-reserve-t { font-size: .92rem; }
+  .at-reserve-gros .atm-reserve-t small { display: none; }
+  .at-ion-tete, .at-ion-noyau { font-size: .8rem; line-height: 1.3; }
+  .at-stab { padding: 4px 10px; font-size: .82rem; }
+  .at-sim-bloc .at-gaz > span { background: var(--paper); font-size: .78rem; padding: 2px 8px; }
+  .at-charges .atm-paires { gap: 2px; }
+  .at-charges .atm-pp, .at-charges .atm-pe, .at-charges .atm-trou { width: 13px; height: 13px; font-size: .62rem; }
+  .at-charges .atm-paire { padding: 1px; }
+  .at-defi-c-t { font-size: .84rem; line-height: 1.35; }
+  .at-puce { width: 36px; height: 36px; }
+}
+
+/* ============================================================
+   SÉRIES DE QUESTIONS (repris de cinematique/modules/cin.css)
+   ============================================================ */
+.at-tete { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 14px; margin-bottom: 8px; }
+.at-tete .er-badge { margin-bottom: 0; }
+.at-tete .er-titre { margin: 0; }
+.ph-tete { padding-top: 14px; padding-bottom: 14px; }
+.ph-tete .er-meta { margin: 0 0 0 auto !important; }
+@media (max-width: 899px) { .ph-tete .er-meta { margin: 0 !important; width: 100%; } }
+.ph-enonce { margin-bottom: 12px; line-height: 1.6; font-size: 1.05rem; }
+.ph-enonce p + p { margin-top: 6px; }
+.ph-enonce .atm-nota { font-size: 1.35em; }
+.at-donnee { display: inline-block; padding: 6px 14px; border-radius: 12px; background: var(--paper); font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.6; }
+.at-donnee .atm-nota { font-size: 1.2em; }
+.ph-partie + .ph-partie { margin-top: 16px; padding-top: 14px; border-top: 1.5px dashed var(--paper-3); }
+.ph-partie { animation: at-apparait .35s ease-out; }
+@keyframes at-apparait { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .ph-partie { animation: none; } }
+.ph-partie-num { font-size: .78rem !important; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--accent-ink); margin-bottom: 4px !important; }
+.ph-partie-suite { margin-top: 10px; }
+.ph-partie-q { font-weight: 800; font-size: 1.08rem; color: var(--ink); margin-bottom: 10px !important; line-height: 1.45; }
+.ph-partie-q .atm-nota { font-size: 1.25em; }
+.ph-partie-aide { margin-top: 10px; }
+.ph-partie-aide .btn-small { color: var(--ink-2); }
+.ph-partie-fig:empty { display: none; }
+.ph-partie-retour:empty { display: none; }
+.ph-partie-retour { margin-top: 10px; }
+.ph-msg { margin-top: 10px !important; font-size: .92rem; color: var(--ink-2); font-weight: 600; }
+.ph-ok { margin-top: 8px !important; color: var(--success-text); font-weight: 800; }
+.ph-bilan { margin-top: 16px; }
+.ph-solution { line-height: 1.7; }
+.ph-solution .atm-nota { font-size: 1.2em; }
+.ph-question .er-consigne { margin-bottom: 8px !important; }
+.ph-choix { display: flex; flex-wrap: wrap; gap: 8px; }
+.ph-choix-col { flex-direction: column; align-items: stretch; }
+.ph-choix button { min-height: 46px; text-align: left; line-height: 1.4; border-radius: 16px; padding: 10px 18px; }
+.ph-choix.at-choix-grand button { font-size: 1.2rem; font-weight: 700; min-width: 76px; text-align: center; font-variant-numeric: tabular-nums; }
+.ph-choix.at-choix-grand .atm-nota { font-size: 1.15em; }
+.ph-choix button:disabled { cursor: default; opacity: 1; }
+.ph-choix button.juste { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); color: var(--success-text); }
+.ph-choix button.faux { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+.ph-champ-box { display: inline-flex; align-items: center; gap: 4px; }
+.ph-champ {
+  width: 120px; font: inherit; font-size: 1.15rem; font-weight: 800; text-align: center; padding: 9px 8px;
+  border: none; border-radius: 12px; box-shadow: inset 0 0 0 1.5px var(--paper-3); background: var(--sheet); color: var(--ink);
+  -webkit-appearance: none; appearance: none;
+}
+.ph-champ:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.ph-champ:disabled { background: var(--paper); color: var(--ink); -webkit-text-fill-color: var(--ink); opacity: 1; }
+.ph-champ-box.petit .ph-champ { width: 78px; font-size: 1.05rem; padding: 8px 6px; }
+.ph-champ-box.ko .ph-champ { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); }
+.ph-pm {
+  width: 38px; height: 42px; flex-shrink: 0; border: none; border-radius: 12px; cursor: pointer;
+  background: var(--paper); color: var(--ink); font: inherit; font-size: 1.1rem; font-weight: 800;
+}
+.ph-pm:disabled { opacity: .35; cursor: default; }
+.ph-champ-box.petit .ph-pm { width: 32px; height: 38px; font-size: 1rem; }
+.ph-sci { display: inline-flex; align-items: flex-start; flex-wrap: nowrap; gap: 3px; max-width: 100%; }
+.ph-sci .ph-champ-box.petit .ph-champ { width: 74px; }
+.ph-x10 { font-size: 1.15rem; font-weight: 800; align-self: center; white-space: nowrap; }
+.ph-exposant { margin-top: -16px; }
+.ph-exposant .ph-champ { width: 58px; font-size: 16px; padding: 6px 4px; }
+.ph-exposant .ph-pm { width: 30px; height: 34px; font-size: .95rem; }
+@media (max-width: 420px) {
+  .ph-champ-box.petit .ph-champ, .ph-sci .ph-champ-box.petit .ph-champ { width: 64px; }
+  .ph-exposant .ph-champ { width: 48px; }
+  .ph-champ-box.petit .ph-pm { width: 28px; }
+  .ph-exposant .ph-pm { width: 26px; }
+  .ph-x10 { font-size: 1.05rem; }
+}
+.at-saisie-l { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-weight: 800; }
+.at-saisie-t { font-size: 1.05rem; line-height: 1.6; }
+.at-unite { font-weight: 800; color: var(--ink-2); }
+.at-saisie .er-actions, .ph-partie-zone > .er-actions { margin-top: 10px; }
+.at-champs { display: flex; flex-wrap: wrap; gap: 10px 22px; }
+.at-champ-l { display: flex; flex-direction: column; gap: 4px; font-weight: 800; font-size: .95rem; }
+.at-champ-t { color: var(--ink-2); }
+
+/* écriture conventionnelle à compléter : A et Z à gauche du symbole */
+.at-nota-saisie { display: inline-flex; align-items: center; gap: 6px; }
+.at-nota-saisie-az { display: flex; flex-direction: column; gap: 6px; }
+.at-nota-saisie-az .ph-champ { width: 70px; font-size: 1.05rem; padding: 6px 4px; }
+.at-nota-saisie-x { font-size: 2.6rem; font-weight: 800; }
+.at-nota-saisie-l { font-size: .78rem; font-weight: 800; color: var(--ink-2); width: 18px; text-align: right; }
+.at-nota-saisie-ligne { display: flex; align-items: center; gap: 4px; }
+
+/* formules de composés ioniques et d'entités */
+.at-formule { font-size: 1.3em; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* plein écran sans l'API du navigateur (iPhone) : le bandeau du sommaire est caché, la simulation prend sa place */
+@media (max-width: 899px) {
+  html.pe-actif .at-sim { height: calc(100vh - 36px); height: calc(100dvh - 36px); }
+}
+.at-nota-saisie .ph-champ.at-ko { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); }
+.ph-choix button small { font-size: .78em; font-weight: 600; color: var(--ink-2); }
+.ph-choix button.juste small, .ph-choix button.faux small { color: inherit; }
+.ph-partie-zone .atm-comp { max-width: 560px; }

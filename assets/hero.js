@@ -35,6 +35,9 @@
                 avec un arc d'angle, et un petit prisme qui étale un pinceau en éventail (réfraction, lentilles)
      titrage    burette graduée au-dessus d'un bécher, courbe de titrage pH = f(V) en S décroissante avec ses deux
                 tangentes parallèles, la parallèle du milieu et le volume équivalent (titrage pH-métrique)
+     atome      noyau au centre (protons et neutrons), trois couches en pointillés avec leurs électrons (la couche
+                externe entourée) et, à droite, les cases 1s 2s 2p 3s 3p remplies le long d'une flèche « Énergie »
+                (atome et ions, classification périodique)
      formules:physique | formules:redox | formules:pile | formules:combustion | formules:ph | formules:algebre
    ============================================================ */
 (function () {
@@ -832,7 +835,10 @@
         const A = [px, py - L * .55], B = [px - L * .55, py + L * .4], C2 = [px + L * .55, py + L * .4];
         ctx.globalAlpha = .1; ctx.beginPath(); ctx.moveTo(...A); ctx.lineTo(...B); ctx.lineTo(...C2); ctx.closePath(); ctx.fill();
         ctx.globalAlpha = .5; ctx.lineWidth = 1.6; ctx.stroke();
-        const e = [px - L * .28, py - L * .08], s2 = [px + L * .22, py];
+        // point d'entrée au milieu de la face gauche, point de sortie sur la face droite
+        // (les rayons émergents partent bien de la surface du prisme)
+        const sur = (P, Q, t) => [P[0] + t * (Q[0] - P[0]), P[1] + t * (Q[1] - P[1])];
+        const e = sur(A, B, .5), s2 = sur(A, C2, .58);
         ctx.globalAlpha = .55; ctx.lineWidth = 2.4; trait(ctx, px - L * 1.5, py - L * .45, e[0], e[1]);
         ctx.globalAlpha = .4; ctx.lineWidth = 1.2; trait(ctx, e[0], e[1], s2[0], s2[1]);
         for (let k = 0; k < 7; k++) {
@@ -997,6 +1003,78 @@
       ctx.fillText('H₃O⁺ + HO⁻ → 2 H₂O', w * .06, h * .46);
       ctx.font = `500 15px ${police()}`; ctx.globalAlpha = .14;
       ctx.fillText('pH = − log [H₃O⁺]', w * .3, h * .52);
+    },
+
+    // Atome : noyau, couches n = 1, 2, 3 en pointillés avec leurs électrons (sodium : 2, 8, 1), couche externe
+    // entourée ; à droite, les cases 1s 2s 2p 3s 3p remplies ensemble, le long d'une flèche « Énergie »
+    atome(ctx, w, h, c, rnd) {
+      const hb = h / (1 + (reduit ? 0 : F));          // hauteur visible de l'en-tête
+      const p = 24;
+      ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineWidth = 1;
+      for (let x = 0, i = 0; x <= w; x += p, i++) { ctx.globalAlpha = i % 5 ? .04 : .09; trait(ctx, x, 0, x, h); }
+      for (let y = 0, i = 0; y <= h; y += p, i++) { ctx.globalAlpha = i % 5 ? .04 : .09; trait(ctx, 0, y, w, y); }
+      const etroit = w < 700;
+      const R3 = Math.min(hb * .4, etroit ? w * .2 : 150), R = [0, R3 * .42, R3 * .71, R3];
+      const xc = etroit ? w * .8 : Math.max(w * .5, w - 310 - R3), yc = hb * .5;   // à droite du texte, les cases encore plus à droite
+      // couches en pointillés et leurs noms
+      ctx.lineWidth = 1.6; ctx.setLineDash([5, 5]);
+      for (let n = 1; n <= 3; n++) { ctx.globalAlpha = .35; ctx.beginPath(); ctx.arc(xc, yc, R[n], 0, 7); ctx.stroke(); }
+      ctx.setLineDash([]);
+      // couche externe entourée (comme au tableau)
+      ctx.globalAlpha = .25; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(xc, yc, R[3] - 9, 0, 7); ctx.stroke();
+      ctx.beginPath(); ctx.arc(xc, yc, R[3] + 9, 0, 7); ctx.stroke();
+      // noyau : protons (pleins) et neutrons (cerclés)
+      const rn = Math.max(3, R3 * .035), pas = rn * 1.15;
+      for (let k = 0; k < 23; k++) {
+        const r = pas * Math.sqrt(k + .5), a = k * 2.39996;
+        const x = xc + r * Math.cos(a), y = yc + r * Math.sin(a);
+        ctx.beginPath(); ctx.arc(x, y, rn, 0, 7);
+        if (Math.floor((k + 1) * 11 / 23) > Math.floor(k * 11 / 23)) { ctx.globalAlpha = .55; ctx.fill(); }
+        else { ctx.globalAlpha = .45; ctx.lineWidth = 1; ctx.stroke(); }
+      }
+      // électrons sur les couches (2, 8, 1)
+      const re = Math.max(3.5, R3 * .045);
+      const places = { 1: [180, 0], 2: [-90, 90, 0, 180, -45, 135, 45, -135], 3: [-67.5] };
+      [[1, 2], [2, 8], [3, 1]].forEach(([n, k]) => {
+        for (let i = 0; i < k; i++) {
+          const a = places[n][i] * Math.PI / 180, x = xc + R[n] * Math.cos(a), y = yc + R[n] * Math.sin(a);
+          ctx.globalAlpha = .7; ctx.beginPath(); ctx.arc(x, y, re, 0, 7); ctx.fill();
+        }
+      });
+      // cases 1s | 2s 2p | 3s 3p le long de la flèche « Énergie »
+      if (!etroit) {
+        const x0 = xc + R3 + 50, yb = hb * .42, bh = 26, s = 28, pp = 46;
+        const cases = [['1s', s, 2], ['2s', s, 2], ['2p', pp, 6], ['3s', s, 1], ['3p', pp, 0]];
+        const ecart = [0, 14, 4, 14, 4];
+        let x = x0;
+        ctx.font = `600 11px ${police()}`; ctx.textAlign = 'center';
+        cases.forEach(([nom, l, k], i) => {
+          x += ecart[i];
+          ctx.globalAlpha = .45; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, yb, l, bh, 5) : ctx.rect(x, yb, l, bh); ctx.stroke();
+          ctx.globalAlpha = .5; ctx.fillText(nom, x + l / 2, yb - 6);
+          for (let j = 0; j < k; j++) {
+            const cx = l === s ? x + l / 2 + (j ? 6 : -6) : x + l / 2 + ((j % 3) - 1) * 13, cy = l === s ? yb + bh / 2 : yb + (j < 3 ? 9 : 18);
+            ctx.globalAlpha = .7; ctx.beginPath(); ctx.arc(cx, cy, 3.4, 0, 7); ctx.fill();
+          }
+          x += l;
+        });
+        // couche externe entourée dans les cases aussi
+        ctx.globalAlpha = .3; ctx.lineWidth = 1.4;
+        const xe = x0 + 2 * s + pp + 14 + 4 + 14 - 4;
+        ctx.beginPath(); ctx.roundRect ? ctx.roundRect(xe, yb - 4, s + pp + 4 + 8, bh + 8, 9) : ctx.rect(xe, yb - 4, s + pp + 12, bh + 8); ctx.stroke();
+        const ya = yb + bh + 22;
+        ctx.globalAlpha = .45; ctx.lineWidth = 1.4; trait(ctx, x0, ya, x + 8, ya);
+        ctx.beginPath(); ctx.moveTo(x + 14, ya); ctx.lineTo(x + 5, ya - 4); ctx.lineTo(x + 5, ya + 4); ctx.closePath(); ctx.fill();
+        ctx.globalAlpha = .5; ctx.textAlign = 'right'; ctx.fillText('Énergie', x + 14, ya + 16);
+        ctx.textAlign = 'left';
+      }
+      // configuration en filigrane
+      ctx.font = `600 18px ${police()}`; ctx.globalAlpha = .18; ctx.textAlign = 'left';
+      ctx.fillText('1s² 2s² 2p⁶ 3s¹', w * .06, hb * .9);
+      ctx.font = `500 15px ${police()}`; ctx.globalAlpha = .14;
+      if (!etroit) ctx.fillText('Na → Na⁺ + e⁻', w * .3, hb * .96);
     },
 
     // Formules écrites en quinconce, plus ou moins marquées

@@ -43,6 +43,8 @@ Sources : `2- Corps purs et melanges/Chap02-Cours complete.pdf` (4 p.), `Chap02-
 
 ### Module 1 : Masse volumique (simulation, `module_1_simulation.html`)
 
+Un seul écran (`00-commun.md` §6 bis) : les parties A et B sont deux onglets du panneau, accessibles à tout moment ; verrerie, liquide ou métal se choisissent librement ; **À essayer** (défis cochés tout seuls, dans n'importe quel ordre) : classer la verrerie, ρ<sub>eau</sub> = 1,00 g/mL, identifier chaque liquide et chaque métal.
+
 Partie A : **précision de la verrerie** (TP1).
 - Paillasse : balance, bécher, éprouvette graduée de 50 mL, fiole jaugée de 25,0 mL, pissette d'eau ; gestes dans l'ordre du TP (peser le récipient vide, le retirer, le remplir à 25 mL — vue agrandie du ménisque —, le peser plein) ; refus : « Pèse d'abord le récipient vide. »
 - Les masses d'eau obtenues varient selon la verrerie (tirées : bécher 25 ± 2 g, éprouvette 25 ± 0,3 g, fiole 25,00 ± 0,03 g) ; l'élève répète trois fois chaque mesure, puis **classe** la verrerie du moins précis au plus précis (glisser) ; bilan : ρ<sub>eau</sub> = 1,00 g/mL.
@@ -56,10 +58,13 @@ Partie B : **à la recherche des espèces perdues** (TP1) : trois liquides (eau,
 
 - Un tube contenant l'échantillon, un thermomètre (ou une sonde), un bain froid (glace et sel) ou un chauffage ; un chronomètre ; **la courbe T en fonction de t se trace en direct** (lecture, pause, vitesse).
 - Échantillons : eau, cyclohexane, huile de palme, eau salée, « liquide inconnu » (une espèce du tableau du devoir), mélange de deux liquides.
-- Déroulé guidé : 1. solidification de l'eau : **palier horizontal** à 0 °C ; l'élève place les étiquettes « liquide », « liquide + solide », « solide » sur les zones (comme le devoir) ; 2. eau salée : pas de palier : mélange ; 3. liquide inconnu : **lire la température du palier** (lecture graphique) et l'identifier avec le tableau ; 4. huile de palme chauffée de −10 °C à 80 °C (fusion à 36 °C) ; 5. nommer les changements d'état : glisser fusion, solidification, vaporisation, liquéfaction, sublimation, condensation sur les flèches du triangle du cours.
+- Échantillon, refroidissement ou chauffage et vitesse se règlent à tout moment.
+- **À essayer** (défis cochés tout seuls, dans n'importe quel ordre, `00-commun.md` §6 bis) : 1. solidification de l'eau : **palier horizontal** à 0 °C ; l'élève place les étiquettes « liquide », « liquide + solide », « solide » sur les zones (comme le devoir) ; 2. eau salée : pas de palier : mélange ; 3. liquide inconnu : **lire la température du palier** (lecture graphique) et l'identifier avec le tableau ; 4. huile de palme chauffée de −10 °C à 80 °C (fusion à 36 °C) ; 5. nommer les changements d'état : glisser fusion, solidification, vaporisation, liquéfaction, sublimation, condensation sur les flèches du triangle du cours.
 - Erreurs : palier lu sur l'axe des temps ; « corps pur » conclu sans palier ; noms des changements d'état inversés (fusion / solidification).
 
 ### Module 3 : Tests chimiques (manipulation guidée, `module_3_manip.html`)
+
+Parties A et B en onglets, situations accessibles dans n'importe quel ordre, sur un seul écran (`00-commun.md` §6 bis).
 
 Partie A : **eau et gaz** (4 situations) : un tube contient un gaz inconnu ou un liquide ; l'élève choisit le test (sulfate de cuivre anhydre, flamme, bûchette incandescente, eau de chaux), voit le résultat animé, conclut (« le gaz est du dioxygène car la bûchette incandescente se rallume ») avec des expressions à piocher.
 
@@ -82,7 +87,7 @@ Erreurs diagnostiquées : pourcentage non multiplié par 100 ; mélange de mL et
 
 - `PAILLASSE` pour la verrerie, la balance, les tubes, le portoir, le thermomètre ; précipités dessinés en nuage de grains (couleurs réalistes en attributs de présentation SVG : blanc cassé, bleu, vert, rouille, jamais utilisées pour un message) ; flamme et bûchette animées (coupées avec `prefers-reduced-motion`).
 - Graphique T(t) : quadrillage pointillé `--paper-3`, axes gradués T (°C) et t (min), courbe `--accent`, palier mis en évidence par une double flèche quand il est trouvé.
-- 1280 px : paillasse à gauche, tableau de résultats ou graphique à droite ; 390 px : l'un sous l'autre.
+- Un seul écran sans défilement (`00-commun.md` §6 bis) : 1280 px, paillasse à gauche, tableau de résultats ou graphique et défis dans un panneau à droite ; 390 px, paillasse en haut, panneau en onglets dessous.
 
 ## 6. Outils
 

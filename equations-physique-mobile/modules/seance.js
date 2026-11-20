@@ -81,10 +81,10 @@
       c.appendChild(el('p', 'er-q-nom', C.R[p.comp].titre + (r ? ' <span class="pm-tag">' + r + '</span>' : '')));
       zone.appendChild(c);
       EPM.Q.monter(c, q, {
-        surFin: (pts, act) => {
+        surFin: (pts, act, info) => {
           points += pts;
           res.push({ comp: p.comp, niv: q.diff, pts, cle: q.cle });
-          EPM.enregistrer([{ r: p.comp, ok: pts / 2 }], null);
+          EPM.enregistrer([{ r: p.comp, ok: pts / 2, diff: info.diff, aide: info.aide }], null);
           t.querySelector('.pm-score').textContent = 'Question ' + (k + 1) + '/' + NB + ' · Score : ' + points + ' pts';
           t.querySelector('.progress-fill').style.width = (100 * (k + 1) / NB) + '%';
           const dernier = k === NB - 1;
@@ -125,6 +125,9 @@
         ul.appendChild(el('li', '', '<span class="pm-puce pm-s-' + st + '" aria-hidden="true"></span><span><b>' + C.R[x.comp].titre + '</b> · ' + p + '/' + (2 * l.length) + ' pts</span><span class="pm-pct">' + EPM.LIBS[st].toLowerCase() + '</span>'));
       });
       c.appendChild(ul);
+      // nouveaux succès de la séance (modules/mes-succes.js)
+      const ns = EPM.blocSucces ? EPM.blocSucces(EPM.nouveauxSucces) : null;
+      if (ns) c.appendChild(ns);
       const a = el('div', 'er-actions');
       a.appendChild(bouton('btn-primary', 'Nouvelle séance →', () => { if (demande) history.replaceState(null, '', location.pathname); location.reload(); }));
       const s = el('a', 'btn-secondary', 'Mon suivi'); s.href = 'suivi.html'; a.appendChild(s);

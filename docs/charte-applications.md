@@ -87,6 +87,8 @@ Tout vient de `assets/theme.css`. N'écris **aucune couleur en dur** dans les CS
 
 **Exception : titrage conductimétrique** (moteur `TC`, `titrage-conductimetrique/`). Une couleur par ion, la même dans tous les titrages (pastilles de l'animation, tableau, loi de Kohlrausch, équation de la réaction) : `--ion-na` bleu, `--ion-ho` fuchsia, `--ion-h3o` orange, `--ion-cl` bleu pétrole, `--ion-no3` ocre, `--ion-ag` gris argent, `--ion-ac` brun (CH₃COO⁻), `--ion-nh4` violet (NH₄⁺). La molécule prend la couleur de l'ion qu'elle donne (pastille blanche cerclée). La formule est toujours écrite.
 
+**Exception : médailles des succès** (moteur commun `SUC`, `assets/succes.js`). Une couleur par niveau : `--med-bronze` `#b4703f`, `--med-argent` `#9ea6b0`, `--med-or` `#d9a21b`, `--med-platine` `#4fb6c9` (médailles, étiquettes de niveau, échelle des niveaux, encadré « Nouveaux succès »). Le nom du niveau est toujours écrit.
+
 ### Forme et typographie
 
 - Police : `var(--font-sans)` (Hanken Grotesk, poids 400 à 800). Titres : `letter-spacing: -.02em`. Les nombres des tableaux et calculs : `font-variant-numeric: tabular-nums`.
@@ -137,7 +139,7 @@ Contenu dans `.er-page` (largeur max 60 rem, centré, marges réduites sur tél�
 
 ### Page de manipulation (simulateur, animation, manipulation guidée)
 
-Toute page où l'élève manipule a un bouton **« ⤢ Plein écran »** (`btn-small`) dans sa première carte, à droite du titre. Il cache le sommaire, donne toute la largeur à la page et passe le navigateur en plein écran quand il le permet ; le bouton devient « ⤡ Quitter le plein écran » (Échap ramène aussi le sommaire). Modèles : `titrage-conductimetrique/modules/module_1_animation.html` et `refraction/` (`RF.pleinEcran`, classe `rf-plein`).
+Toute page de simulation ou de manipulation (et toute nouvelle page de ce type) a **le bouton plein écran commun** `assets/plein-ecran.js` (objet `PLEIN`, styles `assets/plein-ecran.css`, modèle `double-periodicite/`) : icône quatre coins et « Plein écran » (icône seule sur téléphone), devenant « Quitter le plein écran ». Page de module : un `<span data-plein></span>` dans la première carte, à droite du titre, remplacé par `PLEIN.bouton()` appelé après `SOM.menu(...)` ; page unique sans sommaire : `PLEIN.bouton()` l'ajoute au bandeau du haut ; ailleurs `PLEIN.bouton({ ou: element })`. Pendant le plein écran, le sommaire est caché et la page prend toute la largeur ; sans plein écran du navigateur (iPhone), le bouton cache seulement le sommaire. Ne plus écrire de bouton plein écran propre à une application.
 
 ### Cours
 
@@ -328,10 +330,11 @@ Code : `assets/progression.js` et `assets/progression.css`, chargés **par le po
 | `equamath_v2` | `results` : l'entrée au meilleur `bestScore`, `attempts` le plus grand ; `xp` le plus grand ; `showKb` du navigateur |
 | `<dossier>-flashcards` | `ajouts` : réunion (date la plus ancienne) ; chaque carte : l'état **revu le plus récemment** (`v` le plus grand ; à égalité, `n` le plus grand ; une carte jamais revue perd contre une carte revue) ; une carte présente d'un seul côté est copiée |
 | `fractions-college-suivi`, `equations-college-suivi`, `equations-physique-mobile-suivi` (suivi des compétences) | réunion des questions de chaque compétence et des notes, sans doublon (même date) ; les 30 dernières questions par compétence, les 100 dernières notes |
+| `<dossier>-succes` (succès, `assets/succes.js`) | compteurs : le plus grand ; jours et ensembles : réunion ; niveaux obtenus : d'un côté ou de l'autre (date la plus ancienne) |
 | `revisions-reglages` | celui du navigateur (copié s'il est absent) |
 | autre clé `<dossier>-…` | copiée si absente du navigateur, sinon celle du navigateur est gardée |
 
-- Une nouvelle forme de donnée (autre que `-progression`, `-exercices` et `-flashcards`) est donc copiée telle quelle seulement si le navigateur ne l'a pas encore : pour la fusionner finement, ajoute son type dans `nettoyer`, `significatif` et `fusionner` de `assets/progression.js`.
+- Une nouvelle forme de donnée (autre que `-progression`, `-exercices`, `-flashcards` et `-succes`) est donc copiée telle quelle seulement si le navigateur ne l'a pas encore : pour la fusionner finement, ajoute son type dans `nettoyer`, `significatif` et `fusionner` de `assets/progression.js`.
 
 ## 6. Pédagogie
 
@@ -467,6 +470,7 @@ Limite connue : Safari iOS n'est pas testable dans cet environnement ; le dire e
 | Maquette validée de la recherche et des pastilles de type | `docs/maquettes/recherche-et-types.html` |
 | Avancement x/y de chaque application sur le portail | `assets/avancement.js` : `AVANCEMENT` |
 | Application installable sur téléphone et hors ligne (PWA, trois applications : Fractions, Équations du 1er degré et Équations en physique (smartphone), sur le modèle du dépôt `orthographe`) ; copie de secours de la progression dans l'application | `fractions-college/manifest.webmanifest`, `fractions-college/sw.js` (cache d'abord, mise à jour pour le lancement suivant), `fractions-college/modules/sauvegarde.js`, `fractions-college/icones/` (de même dans `equations-college/`) ; options `coches`, `liensDirects` et `mobile` de `SOM.init` (`assets/sommaire.js`) ; tout le savoir-faire : `docs/applications-mobiles.md` |
+| Succès (bronze, argent, or, platine) : moteur commun (objet `SUC`), carte « Mes succès », bloc « Nouveaux succès » ; exemple de déclaration | `assets/succes.js`, `assets/succes.css` ; `equations-physique-mobile/modules/mes-succes.js` ; `docs/applications-mobiles.md` §12 |
 | Flashcards : moteur, planning, séances, page Révisions, page Flashcards, intégrations (objet `REV`) | `assets/revisions.js`, `assets/revisions.css`, `revisions.html` |
 | Flashcards d'une application (exemple) | `changements-etat/modules/flashcards.js`, `changements-etat/modules/flashcards.html` |
 | Écrire les flashcards d'une application ; outil de relecture de l'enseignant | `docs/flashcards/prompt-generation.md` ; `docs/flashcards/relecture/` |

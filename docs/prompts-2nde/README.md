@@ -35,6 +35,8 @@ Liste **tenue à jour par chaque session** qui code une application de 2nde (`00
 |---|---|---|---|---|
 | A11 | Période et fréquence d'un signal | `01-periode-frequence.md` | `periode-frequence/` | 08/11/2026 |
 | A12 + A17 | Réfraction et loi de Snell-Descartes | `02-refraction.md` | `refraction/` | 17/11/2026 |
+| A13 | Image par une lentille convergente | `03-lentilles.md` | `lentilles/` | 19/11/2026 |
+| A02 | Atome et ions | `04-atome-ions.md` | `atome-ions/` | 19/11/2026 |
 | A01 | Chromatographie sur couche mince | `07-chromatographie.md` | `chromatographie/` | 07/11/2026 |
 | A14 | Réaliser un montage électrique | `08-montage-electrique.md` | `montage-electrique/` | 06/11/2026 |
 

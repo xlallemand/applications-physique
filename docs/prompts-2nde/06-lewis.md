@@ -46,7 +46,7 @@ Sources : `04- Entites plus stables/Chap04-Cours-fiche-exos complete.pdf` p. 3-4
 - L'élève **relie les traits libres deux à deux** : glisser d'un trait libre vers un trait libre d'un autre atome, ou toucher les deux ; deux ou trois traits entre les mêmes atomes font une liaison double ou triple. Les atomes se déplacent au doigt pour faire de la place.
 - Refus expliqués : relier deux traits d'un même atome ; relier un trait à un doublet non liant (« un doublet non liant ne forme pas de liaison »).
 - Molécule terminée quand il ne reste aucun trait libre : chaque atome affiche « 8 e<sup>−</sup> » (ou « 2 e<sup>−</sup> » pour H), comme dans le cours, et la phrase « chaque atome a la configuration d'un gaz noble : la molécule est plus stable que les atomes isolés ».
-- Molécules, dans l'ordre : H<sub>2</sub>, Cl<sub>2</sub>, HCl, H<sub>2</sub>O, NH<sub>3</sub>, CH<sub>4</sub>, H<sub>2</sub>S, CO<sub>2</sub>, N<sub>2</sub>, O<sub>2</sub>, puis C<sub>2</sub>H<sub>6</sub>, CH<sub>4</sub>O, CH<sub>5</sub>N, C<sub>2</sub>H<sub>3</sub>Cl, C<sub>3</sub>H<sub>3</sub>N, puis le défi C<sub>3</sub>H<sub>8</sub>O : « trouve les 3 molécules » (comparaison avec `ORGA.meme` : la même molécule redessinée est reconnue).
+- Molécules (rangées dans cet ordre, chacune accessible directement par sa formule, dans n'importe quel ordre, `00-commun.md` §6 bis) : H<sub>2</sub>, Cl<sub>2</sub>, HCl, H<sub>2</sub>O, NH<sub>3</sub>, CH<sub>4</sub>, H<sub>2</sub>S, CO<sub>2</sub>, N<sub>2</sub>, O<sub>2</sub>, puis C<sub>2</sub>H<sub>6</sub>, CH<sub>4</sub>O, CH<sub>5</sub>N, C<sub>2</sub>H<sub>3</sub>Cl, C<sub>3</sub>H<sub>3</sub>N, puis le défi C<sub>3</sub>H<sub>8</sub>O : « trouve les 3 molécules » (comparaison avec `ORGA.meme` : la même molécule redessinée est reconnue).
 - Erreur de fin : molécule assemblée mais trait libre restant (« Il reste une liaison libre sur C : chaque trait doit être relié. »).
 - **Pour aller plus loin (hors programme)** : après une molécule qui contient du carbone, bouton « Voir la formule semi-développée » : la formule semi-développée s'affiche à côté (rendu `semi` d'ORGA) avec la phrase du TP2 ; ne compte pas dans le module.
 
@@ -54,12 +54,12 @@ Sources : `04- Entites plus stables/Chap04-Cours-fiche-exos complete.pdf` p. 3-4
 
 - Un schéma est affiché (juste ou faux). Pour chaque atome, l'élève **touche l'atome** et donne le nombre de doublets liants et non liants (deux compteurs − / +) ; le nombre d'électrons autour (2 par doublet) s'écrit, avec la règle (« 2 : duet » pour H, « 8 : octet » pour les autres).
 - Il conclut avec des **expressions à piocher** : « le schéma est juste », « le schéma est faux », « car », « l'atome … est entouré de … électrons au lieu de 8 », « H est entouré de 4 électrons au lieu de 2 », « il manque un doublet non liant sur … », « il y a une liaison en trop sur … », « il manque des atomes H », « respecte la règle du duet », « respecte la règle de l'octet ».
-- Situations : HOCl (juste, exercice 13 : tableau du devoir « nombre de doublets liants / non liants / pourquoi les règles sont respectées ») ; le schéma d'élève de C<sub>4</sub>H<sub>10</sub>O (application 1) ; HCN (deux propositions du devoir) ; puis des variantes fausses fabriquées à partir de molécules justes : doublet non liant retiré sur O ou N, liaison en trop sur C, H avec deux liaisons, doublet en trop sur Cl, liaison double au lieu de simple.
+- Situations (accessibles dans n'importe quel ordre) : HOCl (juste, exercice 13 : tableau du devoir « nombre de doublets liants / non liants / pourquoi les règles sont respectées ») ; le schéma d'élève de C<sub>4</sub>H<sub>10</sub>O (application 1) ; HCN (deux propositions du devoir) ; puis des variantes fausses fabriquées à partir de molécules justes : doublet non liant retiré sur O ou N, liaison en trop sur C, H avec deux liaisons, doublet en trop sur Cl, liaison double au lieu de simple.
 - Erreurs à diagnostiquer : doublet non liant compté pour 1 électron (« un doublet, c'est 2 électrons ») ; liaison comptée pour un seul atome (« une liaison compte pour les deux atomes qu'elle relie ») ; conclusion « faux » sans dire quel atome ; conclusion « juste » alors qu'un atome n'a pas 8 électrons.
 
 ### Module 3 : Compléter un schéma (manipulation guidée, `module_3_manip.html`)
 
-- Schémas incomplets (exercice 14 : éthanamine, éthane-1,2-diol, méthanal ; devoir ; glucose de l'activité 4 en défi final) : il manque des doublets non liants, ou une liaison (double ou triple : CO<sub>2</sub>, N<sub>2</sub>, acrylonitrile).
+- Schémas incomplets (accessibles dans n'importe quel ordre ; exercice 14 : éthanamine, éthane-1,2-diol, méthanal ; devoir ; glucose de l'activité 4 en défi final) : il manque des doublets non liants, ou une liaison (double ou triple : CO<sub>2</sub>, N<sub>2</sub>, acrylonitrile).
 - Gestes : toucher un atome puis + / − doublet non liant (le trait apparaît à une place libre autour du symbole) ; toucher deux atomes liés pour changer l'ordre de la liaison (simple → double → triple → simple).
 - « Vérifier » : contrôle atome par atome ; l'atome fautif est entouré et le diagnostic le nomme (« O est entouré de 6 électrons : il lui manque un doublet non liant », « C est entouré de 10 électrons : une liaison en trop »).
 
@@ -74,7 +74,7 @@ Une question sur deux commence par la méthode de l'application 2 : électrons d
 ## 5. Rendu
 
 - Écriture **développée d'ORGA** (`'developpee'`) : symboles des atomes, liaisons par des traits, **doublets non liants par des traits** (déjà le cas dans ORGA). Pas de couleurs de marquage de nomenclature : atomes en `--ink`, trait libre en `--accent` pointillé avec une poignée ronde de 44 px, atome sélectionné entouré `--accent`, compteur « 8 e<sup>−</sup> » en petit sous l'atome.
-- 1280 px : zone de travail à gauche (environ 560 px), tableau du TP2 et expressions à piocher à droite ; 390 px : zone pleine largeur, panneau dessous ; les molécules longues (C<sub>4</sub>H<sub>10</sub>O, glucose) défilent dans leur conteneur.
+- Un seul écran sans défilement de la page (`00-commun.md` §6 bis) : 1280 px, zone de travail à gauche (hauteur disponible), tableau du TP2, expressions à piocher et choix de la molécule dans un panneau à droite (onglets si besoin) ; 390 px, zone pleine largeur en haut, panneau en onglets dessous ; les molécules longues (C<sub>4</sub>H<sub>10</sub>O, glucose) se réduisent pour tenir dans la zone.
 
 ## 6. Outils
 

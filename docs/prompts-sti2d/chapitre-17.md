@@ -103,7 +103,7 @@ Voir plus bas.
 - **Interaction croisée** : toucher une raie du spectre met en valeur l'harmonique correspondant sur le graphique du signal, et inversement depuis la légende.
 - **Lecture** : au toucher ou au survol d'une raie, une étiquette affiche f<sub>n</sub> = n × f<sub>1</sub> et a<sub>n</sub>. Les curseurs de mesure de T du module 3 sont disponibles sur le signal.
 
-**Cheminement pédagogique** (étapes guidées sous le simulateur ; chacune donne une consigne et vérifie l'état du simulateur, avec « ✍ Complète ton cours » à la fin) :
+**Cheminement pédagogique** (défis « À essayer » dans le panneau à droite du simulateur, sur un seul écran, `00-commun.md` §3 : chacun donne une consigne et se coche tout seul quand l'état du simulateur la réalise, **dans n'importe quel ordre** ; « ✍ Complète ton cours » s'ouvre à tout moment) :
 
 1. **Une seule sinusoïde** : a<sub>1</sub> seul.
    - Le spectre n'a qu'une raie.

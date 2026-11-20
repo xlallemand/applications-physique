@@ -95,9 +95,11 @@
     'spectres-etoiles': { pages: ['module_1', 'module_2', 'module_3', 'module_4'] },
     'periode-frequence': { pages: ['module_1_manip', 'module_2_manip', 'module_3a_carreaux', 'module_3b_curseurs', 'module_4_questions'] },
     'refraction': { pages: ['module_1_manip', 'module_2_simulation', 'module_3a_cours', 'module_3b_manip', 'module_3c_manip', 'module_4_questions', 'module_5_simulation', 'module_5_manip'] },
+    'lentilles': { pages: ['module_1_questions', 'module_2_simulation', 'module_3a_manip', 'module_3b_simulation'] },
     'montage-electrique': { pages: ['module_1a_manip', 'module_1b_simulateur', 'module_2_manip', 'module_3_manip', 'module_3b_oscilloscope'] },
     'oscilloscope': { pages: ['module_1a_carreaux', 'module_1b_curseurs', 'module_2a_carreaux', 'module_2b_curseurs',
       'module_3a_carreaux', 'module_3b_curseurs', 'module_4_intensite'] },
+    'atome-ions': { pages: ['module_1_simulation', 'module_2_questions', 'module_3_simulation', 'module_4_questions'] },
     'chromatographie': { pages: ['module_1_simulation', 'module_2_manip', 'module_2_rf', 'module_3_questions'] },
     'cinematique': { ex: 16, strict: true, pages: [
       'module_1_cours', 'module_1_questions', 'module_2_cours', 'module_2_questions', 'module_2b_cours',

@@ -1,0 +1,1004 @@
+	var cjs=createjs
+	var stage;
+	var foc,foc1,foc2,inf=false;
+	var Max=150
+	var ob,im,ob1,im1,sto,ord2;
+	var Fim,Fob,Fim1,Fob1,Fim2,Fob2,F1,F2;
+	var cou='#0FF';
+	var couL1='#639AFF'
+	var couL2='#FF9966'
+	var coef=0.25;
+	var sens;
+	var filtre;
+	var faisc=true;
+	var tabCou=new Array(0xFF0000,0x00FF00,0x0000FF,0xFF00CC,0x00CC99,0xFFFF00,0xFFCCFF,0x33FFFF,0xFFCC00,0xFFEFEF,0x000066);
+	var couleurs=new Array('#F00','#0F0','#00F','#F0C','#0C9','#FF0','#FCF','#3FF','#FC0','#F9F','#006');
+	
+	function init() {
+		var canv = document.getElementById("testCanvas");
+		canv.width=900;canv.height=560;
+		var w=canv.width,h=canv.height;
+		canv.style.backgroundColor='#006'
+		canv.parentNode.style.backgroundColor=canv.style.backgroundColor;
+		var centre=new createjs.Point(w/2,h/2);
+		centre.x=440
+		centre.y=228
+		stage = new createjs.Stage("testCanvas");
+		stage.enableMouseOver();
+		
+		createjs.Ticker.timingMode = createjs.Ticker.RAF;
+		createjs.Ticker.addEventListener("tick", stage);
+		
+		var txtEmploi='- cliquer-glisser horizontalement sur l\'objet A pour le déplacer. Un bouton permet de le placer "à l\'infini". A\' est son image à travers le système-oeil ou oeil+verre correcteur\n- des menus permettent de choisir entre différents défauts de vision : myopie; hypermétropie ou/et presbytie\n- le curseur rouge et un bouton  permettent de réaliser l\'accommodation (manuellement ou automatiquement)\n- le bouton "lunette" permet d\'ajouter une lentille correctrice ; on peut choisir la vergence grâce à un curseur, et on peut la déplacer tout près de l\'oeil (lentille de contact) ;\n- la palette située à gauche permet de changer la couleur des rayons ou la couleur de fond'
+
+		var aide=new Aide(65,60,txtEmploi).set({x:30,y:30});
+
+		//systeme
+		var systeme = new createjs.Container();
+		positionne(systeme, centre)
+		
+		
+		//bouton Plein écran
+		var btPE=new BoutonPleinEcran(canv).set({x:-390,y:270})
+		
+		//axe optique
+		var axe=new createjs.Shape()
+		axe.graphics.beginStroke('#639AFF').moveTo(-w/2,0).lineTo(w/2,0)
+		
+		//bouton du fond
+		var ssb = new createjs.SpriteSheetBuilder();
+		var frame0 = new createjs.Container()
+		var f0=new createjs.Shape(new createjs.Graphics().f('white').r(0,0,20,20));
+		var tx0=new createjs.Text('fond', "bold 14px Arial", 'white');
+		tx0.x=-7
+		tx0.y=26
+		frame0.addChild(tx0,f0)
+		var f1 = new createjs.Shape(new createjs.Graphics().f('#006').r(0,0,20,20));
+		var tx1=new createjs.Text('fond', "bold 14px Arial", '#006');
+		tx1.x=-7
+		tx1.y=26
+		var frame1=new createjs.Container()
+		frame1.addChild(tx1,f1)
+		var bounds = new createjs.Rectangle(-20,0,50,50);
+		ssb.addFrame(frame0, bounds);
+		ssb.addFrame(frame1, bounds);
+		var sS = ssb.build();
+		var btfond = new createjs.Sprite(sS);
+		btfond.gotoAndStop(0)
+		btfond.cursor = "pointer";
+		
+		btfond.on("click",function(evt){
+			evt.target.gotoAndStop((evt.target.currentFrame+1)%2);
+			canv.style.backgroundColor=evt.target.currentFrame==0?'#006':'#FFF'
+			stage.update();
+		})
+
+		//lentille
+		var L1=new Lentille('#09F',50)
+		L1.x=100
+		L1.tF1.text='F1'
+		L1.tF2.text='F\'1'
+		L1.on("mousedown",function(evt) {
+			depart = evt.currentTarget.globalToLocal(evt.stageX,evt.stageY);
+		})
+		dragAndDrop(L1,80,120,0,0)
+		L1.on("pressmove",function(evt) {
+			curFoc1.x=L1.x-80
+			calcule();   
+		});
+
+		//curseur de distance focale
+		var curFoc1 = new Curseur(-0.004,0.004,160,0.001,couL1);
+		curFoc1.x=L1.x-80;
+		curFoc1.y = L1.y-100;
+		curFoc1.visible=false;
+		ver1 = curFoc1.value;
+		foc1=1/ver1
+		L1.ajuste(foc1);
+		curFoc1.txt.y=8
+		curFoc1.txt.font="14px Arial"
+		curFoc1.txt.text='vergence : '+(1000*ver1).toFixed(1)+(Math.abs(ver1)<0.001?' dioptrie':' dioptries')
+		L1.ajuste(foc1)
+		curFoc1.on("pressmove",function(evt) {
+			ver1=curFoc1.value
+			foc1=1/ver1
+			L1.ajuste(foc1);
+			curFoc1.txt.text='vergence : '+(1000*ver1).toFixed(1)+(Math.abs(ver1)<0.001?' dioptrie':' dioptries')
+			stage.update();
+			calcule()
+		})
+		
+		
+		//oeil
+		var L2=new Lentille('#09F',30)
+		L2.x=142
+		L2.tF1.text='F2'
+		L2.tF2.text='F\'2'
+		
+		//globe oculaire
+		var globe=L2.addChildAt(new cjs.Shape(),0)
+		globe.graphics.ss(4).s('#999').f('rgba(201,143,223,0.2)').arc(65,0,75,2.7,-2.7,true).ss(1).arc(19,0,40,2.0,-2.0,false)
+		
+		//muscles
+		var muscle=L2.addChild(new cjs.Shape())
+		muscle.dessine=function(co){
+			muscle.graphics.clear()
+			muscle.graphics.ss(6,"round").s(co).mt(0,-30).lt(0,-25).mt(0,25).lt(0,30)
+		}
+		muscle.dessine('red')
+		cjs.Tween.get(muscle, {loop: true})
+	  .to({alpha: 0}, 200)
+	  .to({alpha: 1}, 200)
+		muscle.visible=false
+
+		//curseur de l'accomodation
+		var curver = new Curseur(0,100,150,0,'red');
+		curver.txt.y=-50
+		stage.update()
+		var V0=1/140
+		Object.defineProperty(curver, "Vergence", {
+  get: function() { return curver.circle.x/20000+V0},
+  set: function(y) {curver.circle.x = 20000*(y-V0);}
+})
+		curver.x=L2.x-30
+		curver.y = L2.y+110
+		curver.txt.y=20
+		curver.txt.font="bold 14px Arial"
+		//foc2 = curver.value;
+		curver.txt.text='distance focale : '+(coef*foc2).toFixed(1)+' cm'
+		L2.ajuste(foc2)
+		curver.txt.text='accomodation'
+		curver.on("pressmove",function(evt) {
+			if(curver.circle.x>Max){
+				curver.circle.x=Max
+			}
+			foc2=1/curver.Vergence;
+			L2.foc=foc2
+			L2.ajuste(foc2)
+			stage.update();
+			calcule()
+		})
+		
+		
+		//boutons
+		var contBoutons=new createjs.Container().set({x:-320,y:160})
+		
+		//bouton "objet à l'infini"
+		var btinf = new Bouton("objet à l'infini", "#50A",110);
+		btinf.x=-30
+		btinf.y =-60;
+		btinf.on("click", function(){
+			inf=! inf;
+			if (inf) {
+				sto=new createjs.Point(obj.x,obj.y);
+				obj.x=-1000000;
+			}
+			else {
+				obj.x=sto.x;
+			}
+			calcule()})
+				
+		
+		//boutons "myopie"
+		var myopie=new cjs.Container()
+		myopie.developpe=false
+		var btm0 = new Bouton("myopie", "#50A",110);
+		var btm1 = new Bouton("moyenne", "#50A",110);
+		var btm2 = new Bouton("forte", "#50A",110);
+		btm0.on("click", function(){
+			myopie.developpe=!myopie.developpe
+			if(hyper.developpe){
+				hyper.developpe=!hyper.developpe
+				plieDeplie(hyper)
+			}
+			plieDeplie(myopie)
+			ret.x = L2.x+140;
+			globe.scaleX = 1;
+			texte1="oeil normal"
+			calcule()
+			
+		})
+		btm1.on("click", function(){
+			texte1="oeil moyennement myope"
+			ret.x = L2.x+140*1.05;
+			globe.scaleX = 1.05;
+			calcule()
+		})
+		btm2.on("click", function(){
+			texte1="oeil fortement myope"
+			ret.x = L2.x+140*1.1;
+			globe.scaleX = 1.10;
+			calcule()
+		})
+		myopie.addChild(btm2,btm1,btm0)
+		
+		//boutons "hypermétropie"
+		var hyper=new cjs.Container().set({x:130})
+		hyper.developpe=false
+		var bth0 = new Bouton("hypermétropie", "#50A",110);
+		var bth1 = new Bouton("moyenne", "#50A",110);
+		var bth2 = new Bouton("forte", "#50A",110);
+		
+		
+		bth0.on("click", function(){
+			hyper.developpe=!hyper.developpe
+			if(myopie.developpe){
+				myopie.developpe=false
+				plieDeplie(myopie)
+			}
+			plieDeplie(hyper)
+			ret.x = L2.x+140;
+			globe.scaleX = 1;
+			texte1="oeil normal"
+			calcule()
+		})
+
+		bth1.on("click", function(){
+			texte1="oeil moyennement hypermétrope"
+			ret.x = L2.x+140*0.95;
+			globe.scaleX = 0.95;
+			calcule()
+		})
+		bth2.on("click", function(){
+			texte1="oeil fortement hypermétrope"
+			ret.x = L2.x+140*0.9;
+			globe.scaleX = 0.90;
+			calcule()
+		})
+		hyper.addChild(bth2,bth1,bth0)
+		
+		var presbytie=new cjs.Container().set({x:260})
+		presbytie.developpe=false
+		var btp0 = new Bouton("prebytie", "#50A",110);
+		var btp1 = new Bouton("à 40 ans", "#50A",110);
+		var btp2 = new Bouton("à 60 ans", "#50A",110);
+		var btp3 = new Bouton("à 80 ans", "#50A",110);
+		btp0.on("click", function(){
+			presbytie.developpe=!presbytie.developpe
+			plieDeplie(presbytie)
+			Max=150
+			if(curver.circle.x>Max){
+				curver.circle.x=Max
+			}
+			curver.ligne.scaleX=Max/150
+			Vmax = Max/20000+V0;
+			calcule()
+		})
+		btp1.on("click", function(){
+			texte2 = "à 40 ans";
+			Max=100
+			if(curver.circle.x>Max){
+				curver.circle.x=Max
+			}
+			curver.value=curver.value<Max?curver.value:Max
+			curver.ligne.scaleX=Max/150
+			Vmax = Max/20000+V0;
+			calcule()
+		})
+		btp2.on("click", function(){
+			texte2 = "à 60 ans";
+			Max=50
+			if(curver.circle.x>Max){
+				curver.circle.x=Max
+			}
+			curver.value=curver.value<Max?curver.value:Max
+			curver.ligne.scaleX=Max/150
+			Vmax = Max/20000+V0;
+			calcule()
+		})
+		btp3.on("click", function(){
+			texte2 = "à 80 ans";
+			Max=20
+			curver.value=curver.value<Max?curver.value:Max
+			curver.ligne.scaleX=Max/150
+			Vmax = Max/20000+V0;
+			calcule()
+		})
+		presbytie.addChild(btp3,btp2,btp1,btp0)
+		
+		function plieDeplie(bloc){
+			var n=bloc.numChildren,dy=40,dt=200;
+			var bt0=bloc.getChildAt(n-1)
+			if(bloc.developpe){
+				for (var i=0;i<n-1;i++){
+					var bt=bloc.getChildAt(i)
+					cjs.Tween.get(bt, {loop: false})
+					  .to({y: dy*(n-i-1)}, dt*(n-i-1))
+				}
+			}
+			else{
+				for (var i=0;i<n-1;i++){
+					var bt=bloc.getChildAt(i)
+					cjs.Tween.get(bt, {loop: false})
+					  .to({y: 0}, dt*(n-i-1))
+				}
+				
+			}
+				
+		}
+
+		//bouton "valider"
+		var btacc = new Bouton('accomoder', "#50A",110).set({x:470})
+		btacc.on('click',function(){
+			calcule()
+			muscle.visible=true
+			var tw=cjs.Tween.get(curver, {loop: false})
+			.to({Vergence:V},2000)
+			.call(handleComplete)
+			.addEventListener("change", accomode)
+			
+		})
+		function handleComplete(){
+			muscle.visible=false
+		}
+		var btlun = new Bouton('lunette', "#50A",110).set({x:470,y:50})
+		btlun.on('click',function(){correct = !correct;L1.visible=curFoc1.visible=correct;calcule()})
+		
+		contBoutons.addChild(btinf,myopie,hyper,presbytie,btacc,btlun)
+		
+		//message
+		var msg=new cjs.Text('oeil normal','bold 16px Arial','#09C').set({x:-180,y:90})
+		
+		//rayons
+		var rayons=new createjs.Shape();
+//			
+		//Points A1,B1,A2,B2
+		var rond=new createjs.Shape();
+		rond.graphics.beginFill('red').drawCircle(0,0,7)
+		var rond1=new createjs.Shape();
+		rond1.graphics.beginFill('red').drawCircle(0,0,3)
+
+		var obj=new createjs.Container()
+		//var pB1=new createjs.Container()
+		obj.x=-260;
+		obj.cursor="pointer";
+		obj.y=0;
+		obj.hitArea=rond;
+		
+		var txA1=new createjs.Text('A', "bold 16px Arial", '#F00')
+		var txA2=new createjs.Text('A\'', "bold 16px Arial", '#F00')
+		
+		var showA=new createjs.Shape()
+		showA.graphics.setStrokeStyle(2).beginStroke('#F00').drawCircle(0,0,7)
+		showA.visible=false;
+		obj.on("rollover",function(evt) {
+			showA.visible=true;
+		})
+		obj.on("rollout",function(evt) {
+			showA.visible=false;
+		})
+		
+	  createjs.Tween.get(showA, {loop: true})
+	  .to({alpha: 0}, 200)
+	  .to({alpha: 1}, 200)
+	  
+		txA1.x=-10;
+		txA1.y=-25;
+		txA2.x=-10;
+		txA2.y=-25;
+		
+		obj.addChild(rond1,txA1,showA);
+		dragAndDrop(obj,-400,50,0,0)
+		obj.on('pressmove',function(){calcule()})
+		
+		var img=new createjs.Container()
+		//var pB1=new createjs.Container()
+		var rond2=rond1.clone(true)
+		img.x=260;
+		img.y=0;
+		
+		img.addChild(rond2,txA2)
+		img.txt=txA2
+		//var txA1=new createjs.Text('A', "bold 16px Arial", '#F00')
+//			var txA2=new createjs.Text('A\'', "bold 16px Arial", '#00DD00')
+		
+		var sto=new createjs.Point(obj.x,obj.y);
+
+		//palette de couleurs
+		var palette=new createjs.Container().set({x:-420,y:0})
+		btfond.y=-10;
+		palette.addChild(btfond)
+		
+		for (var k=0;k<=8;k++){
+			var carre=new createjs.Shape()
+			carre.graphics.beginFill(couleurs[k]).drawRect(0,0,20,20)
+			carre.y=k*20+40
+			carre.cursor = "pointer"
+			palette.addChild(carre)
+			
+		}
+		palette.on("click", function(event){
+			var icou=event.target.y/20-2;
+			if(icou>=0){
+				cou=couleurs[icou]
+			//cou='#'+tabCou[icou].toString(16)+'\''
+			ajusteCouleur(tabCou[icou])
+			sens.updateCache();
+			}
+			
+			calcule()
+		})
+		
+		//sens
+		sens=dessineSens('red')
+		sens.set({x:-centre.x+69,y:-centre.y+119});
+		filtre = new createjs.ColorFilter(0,0,0,1,0,255,0,0); // red, green, blue, alpha
+		sens.filters = [filtre];
+		sens.cache(-80, 0, 150, 100);
+		stage.update();
+
+		filtre = new createjs.ColorFilter(0,0,0,1,0,255,0,0); // red, green, blue, alpha
+		ajusteCouleur(tabCou[7])
+		sens.filters = [filtre];
+		sens.cache(-80, 0, 150, 100);
+		stage.update();
+
+		
+		//texte de distance focale
+		var txtFoc = new createjs.Text('', "bold 14px Arial", 'red');
+		txtFoc.x=-90
+		txtFoc.y=220
+		
+
+		
+		//signature
+		var signature=signer('01/2020',couL1).set({x:400,y:280})
+
+		
+
+	stage.addChild(systeme,aide)
+	systeme.addChild(btPE,sens,axe,L1,curFoc1,L2,curver,contBoutons,msg,rayons,obj,img,palette,txtFoc,signature)
+	raz()			
+	calcule()
+		
+function raz(){
+obj.x = -310;
+obj.y = 0;
+L2.foc = 140;
+A1 = {x:obj.x, y:obj.y};
+A2=A1
+ret = {x:140+L2.x, y:0};
+correct = false;
+inf = false;
+//accomod = false;
+var signe=1
+V0 = 1/140;
+//Vm1 = 0.009;
+//Vm2 = 0.015;
+texte1 = "oeil normal";
+texte2 = "";
+curver.txt.y=-20
+}
+function accomode(){
+	var dV = V-curver.Vergence;
+		var adV = Math.abs(dV);
+		signe = (dV/adV);
+		if (dV>0) {
+			muscle.dessine('#F00');
+		} else {
+			muscle.dessine('#0F0');
+		}
+		L2.foc=1/curver.Vergence
+		calcule()
+}
+			
+function calcule(){
+	
+	obj.visible=!inf
+	msg.text = texte1+" "+texte2;
+	Vmax = Max/20000+V0;
+	V = vergence(A2, ret, L2);
+	if (V>Vmax) {
+		V = Vmax;
+	}
+	if (V<V0) {
+		V = V0;
+	}
+	L1.visible = correct;
+	if (inf) {
+		A1 = {x:Infinity, y:0};
+	} else {
+		A1 = {x:obj.x, y:obj.y};
+	}
+	if (correct) {
+		A2 = image(A1, L1);
+	} else {
+		A2 = A1;
+	}
+	A3 = image(A2, L2);
+	with (img) {
+		x = A3.x;
+		y = A3.y;
+	}
+	rayons.graphics.clear()
+		for (var j = -5; j<=5; j++) {
+			var ord1 = j*5;
+			if (correct) {
+				incident(rayons,A1, L1, ord1,-500,  L1.x, 1);
+				emergent(rayons,A2, L1, ord1, -500, L2.x, 1);
+				emergent(rayons,A3, L2, ord2, -500, ret.x, 1);
+			} else {
+				incident(rayons,A1, L2, ord1,-500, L2.x, 1);
+				emergent(rayons,A3, L2, ord1,-500, ret.x, 1);
+			}
+		}
+	//}
+function incident(mc,obj, lentille, ordo, xmin, xmax, ep) {
+	with (mc.graphics) {
+		var pente = (obj.y-ordo)/(obj.x-lentille.x);
+		var yfin = ordo+(xmax-lentille.x)*pente;
+		var ydeb = ordo+(xmin-lentille.x)*pente;
+		var depart = {x:xmin, y:ydeb};
+		var inci = {x:lentille.x, y:ordo};
+		ss(ep).s(cou);
+		if (obj.x<lentille.x) {
+			moveTo(obj.x,obj.y);
+			lineTo(inci.x,inci.y);
+		} else if (obj.x>lentille.x) {
+			moveTo(depart.x,depart.y);
+			lineTo(lentille.x, ordo);
+			ss(1).s('rgba(136,136,136, 0.8)');
+			if (!inf) {
+				lineTo(obj.x, obj.y);
+			}
+		}
+	}
+};	
+function emergent(mc,img, lentille, ordo, xmin, xmax, ep, f) {
+	with (mc.graphics) {
+		ss(ep).s(cou);
+		var pente = (img.y-ordo)/(img.x-lentille.x);
+		
+		var yfin = ordo+(xmax-lentille.x)*pente;
+		var ydeb = ordo+(xmin-lentille.x)*pente;
+		var inci = {x:lentille.x, y:ordo};
+		var depart = {x:xmin, y:ydeb};
+		var arriv = {x:xmax, y:yfin};
+		var toto = ordo+(xmax-lentille.x)*(img.y-ordo)/(img.x-lentille.x);
+		if (img.reel) {
+			//image réelle
+			mt(inci.x,inci.y).lt(arriv.x,arriv.y);
+			//rayon(inci, arriv, f);
+		} else {
+			//image virtuelle
+			ss(ep).s('rgba(136,136,136, 0)')
+			if (img.x>xmin) {
+				mt(img.x,img.y).lt(inci.x,inci.y);
+				//pointille(img.x, img.y, lentille._x, ordo, 10);
+			} else {
+				mt(depart.x,depart.y).lt(inci.x,inci.y);
+				//pointille(xmin, ydeb, lentille._x, ordo, 10);
+			}
+			ss(ep).s(cou).mt(inci.x,inci.y).lt(arriv.x,arriv.y);
+			//rayon(inci, arriv, f);
+		}
+		ord2 = toto;
+	}
+};
+		
+		stage.update();
+	}
+//
+//fonctions
+//function dessineFleche(lon,co){
+//	var cont=new createjs.Container()
+//	var trait=new createjs.Shape()
+//	trait.graphics.s(co).ss(2).moveTo(-lon/2,0).lineTo(lon/2,0);
+//	var fl=new createjs.Shape().set({x:lon/2})
+//	fl.graphics.f(co).s(co).ss(2).p("AgEAFIAEgFIgxgxIBjAxIhjAyg");
+//	cont.addChild(trait,fl)
+//	return cont
+//}
+//function dessineEchelle(co){
+//	function dessinePointe(co){
+//		var p=new createjs.Shape()
+//		p.graphics.f(co).s(co).ss(2).p("AgEAFIAEgFIgxgxIBjAxIhjAyg");
+//		return p
+//	}
+//	var cont=new createjs.Container()
+//	var f1=dessinePointe(co)
+//	f1.setTransform(36,0,0.7,0.7)
+//	var f2=dessinePointe(co)
+//	f2.setTransform(0,-36,0.7,0.7,-90)
+//	var traits=new createjs.Shape()
+//	traits.graphics.s(co).ss(3).mt(40,00).lt(0,0).lt(0,-40)
+//	var tx1=new createjs.Text('10cm',"12px Arial",co).set({x:26,y:8})
+//	var tx2=new createjs.Text('10cm',"12px Arial",co).set({x:-10,y:-55})
+//	cont.addChild(f1,f2,traits,tx1,tx2)
+//	return cont
+//}
+function dessineSens(co){
+	var cont=new createjs.Container()
+	var txt=new createjs.Text('sens de la lumière',"bold 13px Arial", co).set({'textAlign':'center'});
+	var txt1=new createjs.Text('+',"bold 16px Arial", co).set({'textAlign':'center',y:20});
+	//var fl=dessinePointe(co)
+	var fl=new createjs.Shape()
+	fl.graphics.f(co).s(co).ss(2).p("AgEAFIAEgFIgxgxIBjAxIhjAyg").mt(-100,0).lt(0,0)
+	fl.setTransform(34,17,0.7,0.7)
+	cont.addChild(txt,txt1,fl)
+	
+	return cont
+}
+function ajusteCouleur(col){
+	var st=(createjs.Graphics.getRGB(col));
+	var i1=st.indexOf('(')
+	var i2=st.indexOf(')')
+	var st1=(st.slice(i1+1,i2))
+	var ar=st1.split(',')
+	filtre.redOffset=ar[0]
+	filtre.greenOffset=ar[1]
+	filtre.blueOffset=ar[2]
+}
+
+function affiche(){
+	txA1.y=ob.Y<0?10:-25;
+	txB1.y=ob.Y<0?-22:17;
+	txA2.x=im.X-10;
+	txA2.y=im.Y<0?10:-25;
+	txB2.x=txA2.x;
+	txB2.y=im.Y<0?im.Y-22:im.Y+17;
+	txA3.x=im1.X-10;
+	txA3.y=im1.Y<0?10:-25;
+	txB3.x=txA3.x;
+	txB3.y=im1.Y<0?im1.Y-22:im1.Y+17;
+	}
+	
+function image (objet, lentille) {
+	var SA = objet.x-lentille.x;
+	if (SA == -lentille.foc) {
+		return {x:-100000000+lentille.x, y:objet.y/lentille.foc*100000000, reel:true};
+	}
+	if (SA == Infinity) {
+		return {x:lentille.x+lentille.foc, y:0};
+	} else {
+		var SA1 = SA*lentille.foc/(SA+lentille.foc);
+		var gamma = SA1/SA;
+		var y1 = gamma*objet.y;
+		var reel = (SA1>0);
+		return {x:SA1+lentille.x, y:y1, reel:reel};
+	}
+};
+function vergence(objet, image, lentille) {
+	var SA = objet.x-lentille.x;
+	var SA1 = image.x-lentille.x;
+	return (1/SA1-1/SA);
+};
+	
+function incident(obj, lentille, ordo, xmin, xmax, ep) {
+	with (rayons) {
+		var pente = (obj.y-ordo)/(obj.x-lentille.x);
+		var yfin = ordo+(xmax-lentille.x)*pente;
+		var ydeb = ordo+(xmin-lentille.x)*pente;
+		var depart = {x:xmin, y:ydeb};
+		var inci = {x:lentille.x, y:ordo};
+		graphics.ss(ep).s(co);
+		if (obj.x<lentille.x) {
+			graphics.mt(obj.x,obj.y).lt(inci.x,inci.y);
+		} else if (obj.x>lentille.x) {
+			graphics.mt(depart.x,depart.y).lt(lentille.x, ordo)
+			graphics.ss(1).s('rgba(136,136,136,0.8)');
+			if (!inf) {
+				graphics.lt(obj.x, obj.y);
+			}
+		}
+	}
+};
+function emergent(img, lentille, ordo,xmin, xmax, ep, f) {
+	with (rayons) {
+		graphics.ss(ep).s(co);
+		var pente = (img.y-ordo)/(img.x-lentille.x);
+		var yfin = ordo+(xmax-lentille.x)*pente;
+		var ydeb = ordo+(xmin-lentille.x)*pente;
+		var inci = {x:lentille.x, y:ordo};
+		var depart = {x:xmin, y:ydeb};
+		var arriv = {x:xmax, y:yfin};
+		var toto = ordo+(xmax-lentille.x)*(img.y-ordo)/(img.x-lentille.x);
+		if (img.reel) {
+			//image réelle
+			graphics.mt(inci.x,inci.y).lt(arriv.x,arriv.y);
+			//rayon(inci, arriv, f);
+		} else {
+			//image virtuelle
+			graphics.ss(ep).s('rgba(136,136,136,0)');
+			if (img.x>xmin) {
+				graphics.mt(img.x,img.y).lt(inci.x,inci.y);
+				//pointille(img.x, img.y, lentille._x, ordo, 10);
+			} else {
+				graphics.mt(depart.x,depart.y).lt(inci.x,inci.y);
+				//pointille(xmin, ydeb, lentille._x, ordo, 10);
+			}
+			graphics.ss(ep).s(co).mt(inci.x,inci.y).lt(arriv.x,arriv.y);
+			//rayon(inci, arriv, f);
+		}
+		ord2 = toto;
+	}
+};	
+
+}
+////////fonctions/////////////
+function signer(date,cou){
+			var sig = new createjs.Text('GT '+date, "bold 16px Arial",cou )
+			sig.lineWidth=50
+			sig.textAlign = "center";
+			return sig
+}
+
+
+function positionne(ob,pt){
+	ob.x=pt.x
+	ob.y=pt.y
+}
+	//dragAndDrop avec limites
+function dragAndDrop(obj,minx,maxx,miny,maxy){
+	var pos0
+	obj.on('mousedown',function(evt){pos0=new cjs.Point(evt.localX,evt.localY)})
+	obj.on("pressmove", function(evt){
+		var pos=(obj.parent.globalToLocal(evt.stageX-pos0.x,evt.stageY-pos0.y))
+		if(minx+miny+maxx+maxy!==undefined){
+			pos.x=pos.x<=minx?minx:pos.x
+			pos.x=pos.x>=maxx?maxx:pos.x
+			pos.y=pos.y<=miny?miny:pos.y
+			pos.y=pos.y>=maxy?maxy:pos.y
+		}
+		obj.x=pos.x
+		obj.y=pos.y
+	});
+}
+//////////Objets///////////
+(function() {
+
+function Lentille(co,h) {
+	this.Container_constructor();
+	var co,focale;
+	this.co=co;
+	this.h=h;
+	this.focale=focale;
+	
+	this.setup();
+}
+
+	var p = createjs.extend(Lentille, createjs.Container);
+	p.setup = function() {
+	foc=100;	
+	//verre
+	var verre=new createjs.Shape(new createjs.Graphics().setStrokeStyle(3).beginStroke(this.co).moveTo(0,-this.h).lineTo(0,this.h))
+	//this.verre=verre;
+	
+	//pointes
+	
+			var sb = new createjs.SpriteSheetBuilder();
+			var f0=new createjs.Shape(new createjs.Graphics().f(this.co).drawPolyStar(0, -this.h, 8, 3,0,30).drawPolyStar(0, this.h, 8, 3,0,-30));
+			var f1=new createjs.Shape(new createjs.Graphics().f(this.co).drawPolyStar(0, -this.h, 8, 3,0,-30).drawPolyStar(0, this.h, 8, 3,0,30));
+			var bounds = new createjs.Rectangle(-25,-this.h-20,50,2*(this.h+20));
+			sb.addFrame(f0, bounds);
+			sb.addFrame(f1, bounds);
+			var sS = sb.build();
+			pointes = new createjs.Sprite(sS);
+			this.pointes=pointes;
+			pointes.gotoAndStop(0);
+			
+			var hit=new createjs.Shape();
+			this.hit=hit
+			hit.graphics.beginFill('red').drawRect(-10,-this.h,20,2*this.h);
+			this.hitArea=hit;
+			
+			
+			//foyers
+			var F1=new createjs.Container()
+			var tF1=new createjs.Text('F', "bold 16px Arial", this.co);
+			this.tF1=tF1;
+			tF1.y=8;
+			var lF1=new createjs.Shape()
+			lF1.graphics.beginStroke(this.co).moveTo(-0,-8).lineTo(0,8);
+			F1.addChild(tF1,lF1);
+			
+			var F2=new createjs.Container()
+			var tF2=new createjs.Text('F\'', "bold 16px Arial",this.co);
+			this.tF2=tF2;
+			tF2.y=8;
+			var lF2=new createjs.Shape()
+			lF2.graphics.beginStroke(this.co).moveTo(0,-8).lineTo(0,8);
+			F2.addChild(tF2,lF2);
+//
+			var fleches=new createjs.Shape(new createjs.Graphics().setStrokeStyle(2).beginStroke('red').moveTo(10,-this.h).lineTo(30,-this.h).lineTo(25,-this.h+5).moveTo(30,-this.h).lineTo(25,-this.h-5).moveTo(-10,-this.h).lineTo(-30,-this.h).lineTo(-25,-this.h+5).moveTo(-30,-this.h).lineTo(-25,-this.h-5))
+			fleches.visible=false;
+			createjs.Tween.get(fleches, {loop: true})
+          .to({alpha: 0}, 200)
+          .to({alpha: 1}, 200)
+		  this.on("rollover",function(evt) {
+				fleches.visible=true;
+			})
+			this.on("rollout",function(evt) {
+				fleches.visible=false;
+			})
+			this.ajuste=function(f){
+				this.focale=f
+				F1.x=-f;
+				F2.x=f;
+				this.pointes.gotoAndStop(f<0)
+			}
+			this.cursor="pointer"
+	this.addChild(verre,pointes,F1,F2,fleches)
+	stage.update()
+	
+	Object.defineProperty(this, "foc", {
+  get: function() { return this.focale},
+  set: function(y) { this.ajuste(y)}
+})
+	
+} ;
+window.Lentille = createjs.promote(Lentille, "Container");
+}());
+
+(function() {
+
+function Curseur(min,max,lon,valeur,cou) {
+	this.Container_constructor();
+	
+	this.min=min;
+	this.max=max;
+	this.lon=lon;
+	this.valeur=valeur;
+	this.cou=cou;
+	
+	this.coef=this.lon/(this.max-this.min)
+	
+	this.setup();
+}
+	var p = createjs.extend(Curseur, createjs.Container);
+	p.setup = function() {
+	var r=5,cx
+	var txt = new createjs.Text('', "bold 14px Arial", this.cou);
+	txt.textAlign = "center";
+	txt.y = -25;
+	txt.x=this.lon/2;
+	this.txt=txt
+	
+	var ligne = new createjs.Shape();
+	this.ligne=ligne
+	ligne.graphics.ss(2).s(this.cou).moveTo(0, 0).lineTo(this.lon, 0);
+	
+	var circle = new createjs.Shape();
+	this.circle=circle
+	circle.name='circle'
+	circle.x=(this.valeur-this.min)*this.coef;
+	circle.graphics.beginRadialGradientFill(["#FFF",this.cou], [0, 1], 3, 2, 0, 0, 0, r).drawCircle(0, 0, r);
+	
+	this.addChild(ligne,txt, circle);
+	this.on("pressmove",function(evt) {
+		if(evt.target.name=='circle'){
+			cx=evt.localX
+			cx=cx<0?0:cx
+			cx=cx>this.lon?this.lon:cx
+			evt.target.x = cx
+			this.valeur=cx/this.coef+this.min;
+		}
+	})
+	Object.defineProperty(this, "value", {
+  get: function() { return this.circle.x/this.coef+this.min},
+  set: function(y) { this.circle.x=this.coef*(y-this.min)}
+})
+	circle.cursor = "pointer";
+	
+} ;
+window.Curseur = createjs.promote(Curseur, "Container");
+//stage.update(); 
+}());
+//bouton de 20 pixels de haut, et de largeur par défaut 100 pixels, que l'on peut modifier
+
+(function() {
+
+function Button(label, color,width) {
+	this.Container_constructor();
+	this.color = color;
+	this.label = label;
+	this.width=width;
+	this.setup();
+}
+var p = createjs.extend(Button, createjs.Container);
+
+
+p.setup = function() {
+	var text = new createjs.Text(this.label, "bold 14px Arial", "#FFF");
+	this.text=text
+	text.textBaseline = "top";
+	text.textAlign = "center";
+	width=(this.width==undefined?100:this.width)
+	
+	var height=20;
+	
+	text.x = width/2;
+	text.y = -height*0.3;
+	var w=text.getMeasuredWidth();
+	text.scaleX=w>width?width/w:1;
+	
+	var background = new createjs.Shape();
+	this.background=background;
+	//background.graphics.beginFill(this.color).drawRoundRect(0,0,width,height,10);
+	background.graphics.setStrokeStyle(2).beginStroke(this.color).beginLinearGradientFill(["#FFF",this.color], [0, 1], 0, -height*0.7, 0, height*0.5).drawRoundRect(0,-height*0.5,width,height,5);
+	this.addChild(background, text); 
+	this.on("click", this.handleClick);
+	this.on("rollover", this.handleRollOver);
+	this.on("rollout", this.handleRollOver);
+	this.cursor = "pointer";
+
+	this.mouseChildren = false;
+	
+	//this.offset = Math.random()*10;
+//	this.count = 0;
+} ;
+
+p.handleClick = function (event) {
+	//alert("You clicked on a button: "+this.label);
+} ;
+
+p.handleRollOver = function(event) {   
+	this.background.scaleY=event.type == "rollover" ? -1 : 1;
+	stage.update()
+};
+
+window.Bouton = createjs.promote(Button, "Container");
+}());
+
+(function() {
+
+function Aide(posx,posy,txt,largeur) {
+	this.Container_constructor();
+	this.posx=posx;
+	this.posy=posy;
+	this.txt=txt
+	this.largeur=largeur;
+	this.setup();
+	
+}
+
+var p = createjs.extend(Aide, createjs.Container);
+
+p.setup = function() {
+	if(this.largeur==undefined){
+		this.largeur=500
+	}
+	//dessin de la main
+	var rond = new createjs.Shape();
+	rond.graphics.ss(3).s("#06F").rf(["#FFF", "#99F"], [0, 1], 0, 0, 0, 0, 0, 20)
+	.drawCircle(0, 0, 20).f("#0000CC").s().p("Ag7CFIAAgTIgOgRQgOgZgEgnIABgVIggg3QgIgOAAgIQAAgJAFgGQAGgFAIAAQAMAAAKARIAYAwIgShCQgFgOAAgFQABgLAFgGQAGgGAKAAQARAAAGAZIAOBFIAAhOQAAgPAGgIQAFgIAMAAQAKAAAGAJQAGAJAAAQIgCBPIAOg+QAKgeARAAQAJAAAGAEQAEAGAAAJQAAAJgDALIgUBSIACAOQABgCAIgEQAIgKAJgHQAJgGALAAQAMAAAPANIAFAEIgmAmIgfAqQgUATgOAIIAAAaQgYAKgUAAQgUAAgXgLgAhyhEQAAAAAAAAQgBAAAAABQAAAAAAAAQAAABAAABQAAADAHAQIAjA2IgDAYQAGAjALAXIAQATIAAAPQANAEAQAAQAOAAANgEIAAgXQAZgTAOgNIAcgnIAfgcQgFgCgHgBQgGABgHADQgGAFgHAMQgMADgNAHIgKgGQgBgOgDgLIAVhSQAEgLAAgGIgBgFQAAAAgBgBQAAAAAAAAQgBAAAAAAQAAgBgBAAQgFAAgFAQIgaBNIgUAAIABhXIAAgHQABgLgCgEQgCgEgDgBQgDABgCACQgCADgBAGIAAAMIAABZIgTADIgWhSQgFgSgGAAQgBAAgBAAQAAAAgBAAQAAAAgBAAQAAABgBAAIgBAGIACAMIAZBZIgSAGIgng9QgGgLgDAAQgBAAAAABQgBAAAAAAQAAAAgBAAQAAAAAAABg")
+	rond.x=20;
+	rond.y=20;
+
+//texte d'aide, avec son fond
+	var contTexte=new createjs.Container()
+	contTexte.visible=false
+	
+	var txtAide=new createjs.Text(this.txt, "11px Arial", '#006')
+		txtAide.lineWidth = this.largeur;
+		txtAide.lineHeight = 18;
+		txtAide.textBaseline = "top";
+		txtAide.textAlign = "left";
+		txtAide.x=this.posx
+		txtAide.y=this.posy
+		//this.txtAide=txtAide;
+		var bounds = txtAide.getBounds();
+		this.bounds=bounds
+		var pad = 10;
+		var fondTexte=new createjs.Shape()
+		fondTexte.graphics.setStrokeStyle(2).beginStroke('#039').beginFill('#D1E2F5').drawRoundRect(this.posx - pad + bounds.x, this.posy - pad + bounds.y, bounds.width + pad * 2, bounds.height + pad * 2,5)
+	
+	contTexte.addChild(fondTexte,txtAide)
+	this.addChild(rond,contTexte)
+	
+	//this.on("click", this.handleClick);
+	this.on("rollover", function(event) {  
+		contTexte.visible=true;
+	});
+	
+	this.on("rollout", function(event) {  
+		contTexte.visible=false; 
+	});
+	this.cursor = "pointer";
+//
+	
+};
+
+window.Aide = createjs.promote(Aide, "Container");
+}());
+

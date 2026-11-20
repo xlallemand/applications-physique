@@ -8,8 +8,10 @@
      - l'équation dans son contexte physique, résolue dans l'éditeur à
        tuiles, avec les aides (indices, exemple, solution : EPM.Q) ;
      - « Équation suivante → » ; à la fin, le lien vers les séances.
-   Rien n'est noté : chaque équation résolue est cochée (✓) et compte dans
-   le suivi de sa compétence. La page est marquée faite quand tout est résolu.
+   Rien n'est noté : chaque équation résolue est cochée (✓). Elle ne compte
+   pas dans le suivi des compétences (aucune influence sur le choix des
+   équations des séances ni sur Mon suivi), seulement dans les succès.
+   La page est marquée faite quand tout est résolu.
    API : EPM.decouverte(zone)
    ============================================================ */
 (function () {
@@ -74,9 +76,13 @@
       zone.appendChild(c);
       EPM.Q.monter(c, q, {
         rappel: false,
-        surFin: (pts, act) => {
+        surFin: (pts, act, info) => {
           const f = EPM.marquerDecouverte(k);
-          EPM.enregistrer([{ r: p.comp, ok: pts / 2 }], null);
+          // succès seulement (modules/mes-succes.js) : rien dans le suivi des compétences
+          const nouveaux = EPM.succesApres ? EPM.succesApres([{ r: p.comp, ok: pts / 2, diff: info.diff, aide: info.aide }], null) : [];
+          // nouveaux succès obtenus avec cette équation (modules/mes-succes.js), au-dessus des boutons
+          const ns = EPM.blocSucces ? EPM.blocSucces(nouveaux) : null;
+          if (ns) act.parentNode.insertBefore(ns, act);
           if (f.length >= N) SOM.marquer({ fait: true });
           if (k < N - 1) {
             const b = bouton('btn-primary', 'Équation suivante →', () => {
