@@ -24,14 +24,15 @@
    API :
      BO_OPT.elements(comps)               éléments optiques
      BO_OPT.tracer(els, x0, y, u, o)      → { pts: [[x, y]…], fin: élément | 'monture' | null, y, u, sens }
-                                             o = { xMin, xMax, sansMonture }
+                                             o = { xMin, xMax, sansMonture, hEcran }
      BO_OPT.analyser(comps, L)            → { els, lampe, cibles: [cible] }
         cible = { el, comp, lumiere, m, c0, w, T, nette, delta }
           m : grandissement (lettre vue sur l'écran), c0 : décalage de l'image de A,
           w : diamètre de la tache d'un point (flou), T : part de la lumière reçue,
           nette : image nette, delta : déplacement de l'écran (en x) qui la rendrait nette
      BO_OPT.faisceau(els, lampe, L)       enveloppes du faisceau : [{ sens, tr: [[x, ymin, ymax]…] }]
-     BO_OPT.rayons(els, lampe, L)         rayons particuliers issus de B : [{ h, pts }]
+     BO_OPT.rayons(els, lampe, L, hE)     rayons particuliers issus de B : [{ h, pts }]
+                                             (hE : demi-hauteur des écrans, les rayons passent au-delà)
    ============================================================ */
 (function () {
   'use strict';
@@ -84,6 +85,8 @@
         return { pts, fin: null, y, u, sens };
       }
       y += u * dmin; x = suiv.x; pts.push([x, y]);
+      // écran de hauteur finie (o.hEcran) : le rayon passe au-dessus ou au-dessous
+      if (suiv.k === 'ecran' && o.hEcran != null && Math.abs(y) > o.hEcran) continue;
       if (suiv.k === 'ecran' || suiv.k === 'plaque') return { pts, fin: suiv, y, u, sens };
       if (!o.sansMonture && Math.abs(y) > suiv.D / 2) return { pts, fin: 'monture', el: suiv, y, u, sens };
       if (suiv.k === 'lentille') u -= y / suiv.f;
@@ -175,7 +178,7 @@
   /* ---------- Rayons particuliers issus de B, par rapport au premier élément rencontré :
      parallèle à l'axe, passant par son centre, passant par son foyer objet (lentille).
      Ce sont des rayons de construction : les montures ne les arrêtent pas. ---------- */
-  function rayons(els, lampe, L) {
+  function rayons(els, lampe, L, hE) {
     if (!lampe) return [];
     const devant = els.filter(e => e.k !== 'plaque' && e.x > lampe.x + 1e-9 && !(e.k === 'ecran' && e.decale)).sort((a, b) => a.x - b.x);
     const p = devant[0], d = p ? p.x - lampe.x : 20;
@@ -184,7 +187,7 @@
       const xF = p.x - p.f;                                    // foyer objet du premier élément
       if (Math.abs(xF - lampe.x) > 0.5) pentes.push(AB / (lampe.x - xF));
     }
-    return pentes.map(u => ({ h: AB, pts: tracer(els, lampe.x, AB, u, { xMin: 0, xMax: L, sansMonture: true }).pts }));
+    return pentes.map(u => ({ h: AB, pts: tracer(els, lampe.x, AB, u, { xMin: 0, xMax: L, sansMonture: true, hEcran: hE }).pts }));
   }
 
   window.BO_OPT = { CONE, elements, tracer, tache, analyser, faisceau, rayons };

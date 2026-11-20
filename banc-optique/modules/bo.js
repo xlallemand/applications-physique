@@ -346,6 +346,28 @@
     const Y = y => YA - y * KY;
     const lim = E + 0.6, clip = v => Math.max(-lim, Math.min(lim, v));
     const pts = t => t.map(p => `${X(p[0]).toFixed(1)},${Y(clip(p[1])).toFixed(1)}`).join(' ');
+    // ligne brisée coupée au bord du dessin (|y| ≤ lim) : morceaux visibles seulement
+    const morceaux = t => {
+      const res = []; let m = [];
+      const fin = () => { if (m.length > 1) res.push(m); m = []; };
+      for (let i = 0; i + 1 < t.length; i++) {
+        const [x1, y1] = t[i], [x2, y2] = t[i + 1];
+        // parties du segment entre y = −lim et y = +lim (paramètre a de 0 à 1)
+        let a0 = 0, a1 = 1;
+        if (y1 !== y2) {
+          const aH = (lim - y1) / (y2 - y1), aB = (-lim - y1) / (y2 - y1);
+          a0 = Math.max(a0, Math.min(aH, aB)); a1 = Math.min(a1, Math.max(aH, aB));
+        } else if (Math.abs(y1) > lim) a1 = -1;
+        if (a0 > a1) { fin(); continue; }
+        const p = a => [x1 + (x2 - x1) * a, y1 + (y2 - y1) * a];
+        if (a0 > 0 || !m.length) { fin(); m.push(p(a0)); }
+        m.push(p(a1));
+        if (a1 < 1) fin();
+      }
+      fin();
+      return res;
+    };
+    const ligne = (t, cls) => { for (const m of morceaux(t)) s.push(`<polyline points="${pts(m)}" class="${cls}"/>`); };
     const s = [];
     // rail gradué
     s.push(`<rect x="${X(0) - 12}" y="${yRail}" width="${L * k + 24}" height="10" rx="2" class="s-rail"/>`);
@@ -366,7 +388,7 @@
     }
     // rayons particuliers issus de B et foyers (case « Rayons »)
     if (etat.rayons) {
-      for (const r of O.rayons(ana.els, ana.lampe, L)) s.push(`<polyline points="${pts(r.pts)}" class="s-rayon"/>`);
+      for (const r of O.rayons(ana.els, ana.lampe, L, E)) ligne(r.pts, 's-rayon');
       for (const c of etat.comps) {
         if (!(c.type === 'cv' || c.type === 'dv' || COURBES.includes(c.type)) || (c.mystere && !c.revele)) continue;
         const ind = nom(c).slice(1);
@@ -380,7 +402,7 @@
       }
     }
     // rayons de construction imposés par le TP (cercle oculaire…)
-    if (etat.traces) for (const t of etat.traces()) s.push(`<polyline points="${pts(t.pts)}" class="${t.cls || 's-rayon'}"/>`);
+    if (etat.traces) for (const t of etat.traces()) ligne(t.pts, t.cls || 's-rayon');
     if (etat.rayons || etat.traces) {
       const kh = KY / k;
       if (Math.abs(kh - 1) > 0.05) s.push(`<text x="${G.W - 8}" y="14" class="s-note">Hauteurs × ${fmt(kh, 1)}</text>`);

@@ -642,14 +642,14 @@
           const co = () => { const d = ocu().x - obj().x; return ocu().x + F2 * d / (d - F2); };
           api.bloc(api.g, `<div class="cle"><p><b>Cercle oculaire.</b> C'est l'image de la monture de l'objectif donnée par l'oculaire. Toute la lumière qui traverse la lunette passe par ce petit disque : c'est là qu'on place l'œil.</p></div>
             <p>Enlève l'œil du trajet de la lumière : supprime la lentille L₃ (ou mets-la au bout du banc) et déplace son écran <b>derrière l'oculaire</b>. Cherche la position où la tache lumineuse est la plus petite.</p>`);
-          // construction : deux rayons issus de chaque bord de la monture de l'objectif
+          // construction : deux rayons issus de chaque bord de la monture de l'objectif (une couleur par bord)
           const construction = () => {
             const xo = obj().x, xc = ocu().x, R = obj().D / 2, xF = xc + F2, xe = co() + 12;
             const t = [];
             for (const s of [1, -1]) {
-              const y = s * R;
-              t.push({ pts: [[xo, y], [xe, y + (-y / (xc - xo)) * (xe - xo)]], cls: 's-trace' });          // par le centre de l'oculaire
-              t.push({ pts: [[xo, y], [xc, y], [xe, y - y / F2 * (xe - xc)]], cls: 's-trace' });             // parallèle à l'axe, puis par F′₂
+              const y = s * R, cls = s > 0 ? 's-trace-h' : 's-trace-b';
+              t.push({ pts: [[xo, y], [xe, y + (-y / (xc - xo)) * (xe - xo)]], cls });          // par le centre de l'oculaire
+              t.push({ pts: [[xo, y], [xc, y], [xe, y - y / F2 * (xe - xc)]], cls });             // parallèle à l'axe, puis par F′₂
             }
             const yc = obj().D / 2 * F2 / (ocu().x - obj().x - F2);
             t.push({ pts: [[co(), -yc], [co(), yc]], cls: 's-trace-co' });
