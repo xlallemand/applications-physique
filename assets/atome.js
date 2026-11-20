@@ -649,6 +649,7 @@
       DragDrop.enable(b, {
         zoneSelector: '.atm-cible',
         dragOverClass: 'atm-survol',
+        fantome: () => b.querySelector('.atm-reserve-e'),          // on déplace un électron, pas toute la réserve
         onDrop(item, z, ev) {
           if (z) { d.ajouter(z.dataset.sc ? z.dataset.sc : { couche: +z.dataset.couche }); return; }
           // simple appui (relâché sur la réserve) : un électron à la place suivante

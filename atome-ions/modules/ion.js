@@ -3,8 +3,9 @@
    AT.simulateurIon(zone)
    L'atome (Z = 1 à 18) est dessiné avec ses charges (outil ATOME) : cercles et cases ensemble,
    protons ⊕ du noyau et électrons ⊖ rangés par paires (ils se compensent deux à deux).
-   L'élève retire un électron de la couche externe (le glisser hors de l'atome, ou « − électron »)
-   ou en ajoute un (« + électron », ou la réserve à glisser) : la charge restante (+e, −2e…) et la
+   L'élève retire un électron de la couche externe (le glisser hors de l'atome) ou en ajoute un
+   (électron de la réserve à glisser à sa place, ou toucher la case / le cercle ; toucher la réserve
+   explique comment faire, comme au module 1 : pas de bouton + / − électron) : la charge restante (+e, −2e…) et la
    formule (Na⁺, O²⁻…) s'écrivent ; le noyau ne change pas. Refus : retirer un électron d'une couche
    interne. Rappel visible : on enlève → charge + ; on ajoute → charge − (à l'envers !).
    Gaz nobles : configurations de He, Ne et Ar affichées ; badge « stable : même configuration que… »
@@ -38,10 +39,8 @@
         { id: 'element', nom: 'Élément', html: '<div data-a="choix" data-bande></div>', tel: true },
         { id: 'electrons', nom: 'Électrons', html: `
           <p class="at-rappel">On <b>enlève</b> un électron → charge <b>+</b> ; on <b>ajoute</b> un électron → charge <b>${MOINS}</b> (à l'envers !).</p>
-          <div class="at-ligne"><span data-a="reserve"></span>
-            <button type="button" class="btn-secondary at-b" data-a="moins">${MOINS} électron</button>
-            <button type="button" class="btn-secondary at-b" data-a="plus">+ électron</button></div>
-          <p class="at-aide-t">Glisse un électron hors de l'atome pour le retirer.</p>
+          <div class="at-ligne at-ligne-res"><div class="at-reserve-gros" data-a="reserve"></div>
+            <p class="at-aide-t">Glisse un électron de la réserve à sa place pour en ajouter un ; glisse un électron hors de l'atome pour le retirer.</p></div>
           <div class="at-ligne"><button type="button" class="btn-secondary at-b" data-a="neutre">↺ Recommencer : atome neutre</button></div>
           <div class="at-chemins-bloc" data-tel="charges"><label class="at-coche-l"><input type="checkbox" data-a="voirChemins"> Montrer les chemins vers un gaz noble</label>
             <p class="at-chemins" data-a="chemins" aria-live="polite" hidden></p></div>` },
@@ -59,10 +58,13 @@
     });
     const choix = AT.choixElement($('choix'), z => d.regler({ Z: z, electrons: z }));
     choix.montrer(3);
-    ATOME.reserve($('reserve'), d, { aria: 'Réserve d\'électrons : glisser un électron vers l\'atome, ou toucher pour en ajouter un' });
+    // même réserve qu'au module 1 : bien visible, la toucher ne pose pas d'électron
+    ATOME.reserve($('reserve'), d, {
+      texte: 'Réserve d\'électrons<small>glisse-les à leur place</small>',
+      aria: 'Réserve d\'électrons : glisser un électron vers une case ou un cercle',
+      surToucher: () => cadre.message('<b>Pose l\'électron toi-même :</b> glisse-le jusqu\'à sa case ou son cercle, ou touche directement la case ou le cercle où il va. Pour en retirer un, glisse-le hors de l\'atome.', 'info'),
+    });
 
-    $('moins').onclick = () => d.retirer();
-    $('plus').onclick = () => d.ajouter();
     $('neutre').onclick = () => d.regler({ electrons: d.etat().Z });
     $('voirChemins').onchange = () => { etat.chemins = $('voirChemins').checked; maj(d.etat(), 'chemins'); };
 
@@ -119,7 +121,6 @@
         }
       }
       choix.montrer(e.Z);
-      $('moins').disabled = !e.electrons;
       etat.vus[`${e.Z}:${q}`] = true;
       if (defis) defis.verifier(e);
     }

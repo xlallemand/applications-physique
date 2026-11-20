@@ -7,7 +7,7 @@
    et cases 1s | 2s 2p | 3s 3p 3d le long de la flèche « Énergie ».
    Électrons posés un à un, à la main et au bon endroit : électron de la réserve à glisser vers une case
    ou un cercle, ou toucher une case / un cercle. Pas de pose automatique d'un électron (toucher la
-   réserve explique comment faire) ; « Compléter l'atome » reste possible.
+   réserve explique comment faire) ; « Compléter l'atome » et « Recommencer » seulement (pas de « − électron »).
    Refus expliqués (case pleine, case sautée, plus d'électrons que de protons, 3d).
    Configuration écrite en direct, compteur « électrons / protons ».
    Électrons de valence : « À trouver » par défaut (l'élève touche la couche externe, puis donne leur
@@ -17,7 +17,6 @@
 (function () {
   'use strict';
 
-  const MOINS = '−';
 
   function simulateurAtome(zone) {
     const etat = { mode: 'toucher', vus: {}, naEntoure: false, sTrouve: false, valenceDonnee: false, remplir: null };
@@ -33,8 +32,7 @@
         { id: 'element', nom: 'Élément', html: '<div data-a="choix" data-bande></div>', tel: true },
         { id: 'electrons', nom: 'Électrons', html: `
           <div class="at-ligne at-ligne-res"><div class="at-reserve-gros" data-a="reserve"></div>
-            <p class="at-aide-t">Glisse un électron vers sa case ou son cercle, ou touche directement la case ou le cercle où il va.</p>
-            <button type="button" class="btn-secondary at-b" data-a="moins">${MOINS} électron</button></div>
+            <p class="at-aide-t">Glisse un électron vers sa case ou son cercle, ou touche directement la case ou le cercle où il va.</p></div>
           <div class="at-ligne">
             <button type="button" class="btn-secondary at-b" data-a="remplir">Compléter l'atome</button>
             <button type="button" class="btn-secondary at-b" data-a="vider">↺ Recommencer</button></div>
@@ -67,7 +65,6 @@
     });
 
     /* ----- Boutons ----- */
-    $('moins').onclick = () => { arreterRemplir(); d.retirer(); };
     $('vider').onclick = () => { arreterRemplir(); d.regler({ electrons: 0 }); };
     // compléter : les électrons manquants arrivent un à un (d'un coup si l'on demande moins d'animations)
     $('remplir').onclick = () => {
@@ -133,7 +130,6 @@
       }
       if (e.complet) etat.vus[e.Z] = true;
       choix.montrer(e.Z);
-      $('moins').disabled = !e.electrons;
       $('remplir').disabled = e.complet;
       if (defis) defis.verifier(e);
     }
