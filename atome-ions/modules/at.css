@@ -25,8 +25,7 @@ sub, sup { font-size: .7em; line-height: 0; }
 .at-sim-corps { flex: 1 1 0; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 10px; }
 /* scène : bande des éléments, bandeau, dessins (prennent la place qui reste), message */
 .at-sim-scene { margin: 0; padding: 10px 12px; min-height: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
-.at-sim-bande:empty, .at-sim-haut:empty { display: none; }
-.at-sim-haut { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 18px; }
+.at-sim-bande:empty { display: none; }
 .at-sim-dessins { flex: 1 1 0; min-height: 280px; min-width: 0; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(300px, 1fr); gap: 14px; }
 .at-sim-gauche { position: relative; min-height: 0; min-width: 0; }
 .at-sim-couches { position: absolute; inset: 0; }
@@ -34,10 +33,10 @@ sub, sup { font-size: .7em; line-height: 0; }
 /* centré verticalement quand il y a de la place, en haut sinon (rien n'est coupé) */
 .at-sim-droite > :first-child { margin-top: auto; }
 .at-sim-droite > :last-child { margin-bottom: auto; }
-/* écriture du noyau : en tête de la colonne de droite ou dans le bandeau (ordinateur), sur les cercles (téléphone) */
-.at-sim-nota { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; }
-.at-nota-x { font-size: 2.1rem; line-height: 1.1; }
-.at-nota-nom { font-weight: 800; font-size: 1.05rem; }
+/* écriture du noyau : toujours en haut à gauche des cercles (même place dans les deux simulateurs), en grand */
+.at-sim-nota { position: absolute; top: 0; left: 0; z-index: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; pointer-events: none; }
+.at-nota-x { font-size: 3.4rem; line-height: 1.05; }
+.at-nota-nom { font-weight: 800; font-size: 1.15rem; margin-bottom: 2px; }
 .at-nota-c { font-size: .85rem; color: var(--ink-2); font-weight: 600; font-variant-numeric: tabular-nums; }
 .at-nota-txt { font-size: 1.15em; }
 .at-lg { display: inline-grid; place-items: center; width: 15px; height: 15px; margin-right: 5px; border-radius: 999px; vertical-align: -2px; font: normal 800 .72rem/1 var(--font-sans); color: var(--sheet); }
@@ -75,6 +74,20 @@ sub, sup { font-size: .7em; line-height: 0; }
 .at-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .at-ligne .at-b { flex: 1 1 0; min-width: 0; min-height: 46px; padding-left: 8px; padding-right: 8px; font-size: .9rem; white-space: nowrap; }
 .at-aide-t { font-size: .82rem; line-height: 1.35; color: var(--ink-2); }
+/* module 1 : réserve d'électrons bien visible (une pile d'électrons à glisser vers leur place) ;
+   ordinateur : réserve, aide et « − électron » l'un sous l'autre ; téléphone : réserve et « − électron » côte à côte */
+.at-ligne-res > * { flex: 1 1 100%; }
+.at-reserve-gros .atm-reserve {
+  width: 100%; justify-content: flex-start; gap: 14px; min-height: 64px; padding: 8px 12px 8px 10px; border-radius: 16px;
+  background: var(--cle-bg); box-shadow: inset 0 0 0 2px var(--accent);
+}
+.at-reserve-gros .atm-reserve-e {
+  position: relative; flex: 0 0 auto; width: 44px; height: 44px; font-size: 1.6rem; margin: 6px 12px 0 0;
+  box-shadow: 0 0 0 2px var(--cle-bg), 6px -3px 0 0 var(--cle-bg), 7px -4px 0 0 var(--accent), 12px -7px 0 0 var(--cle-bg), 13px -8px 0 0 var(--accent);
+}
+.at-reserve-gros .atm-reserve-t { display: flex; flex-direction: column; align-items: flex-start; text-align: left; font-size: 1rem; font-weight: 800; color: var(--accent-ink); }
+.at-reserve-gros .atm-reserve-t small { font-size: .8rem; font-weight: 600; color: var(--ink-2); }
+.at-reserve-gros .atm-reserve:hover { background: var(--sheet); }
 .at-rappel { font-size: .86rem; line-height: 1.4; padding: 6px 12px; border-radius: 12px; background: var(--cle-bg); }
 .at-rappel b { color: var(--accent-ink); }
 .at-coche-l { display: flex; align-items: center; gap: 8px; min-height: 40px; font-weight: 700; font-size: .92rem; cursor: pointer; }
@@ -132,8 +145,6 @@ sub, sup { font-size: .7em; line-height: 0; }
 .at-ion-tete b { color: var(--accent-ink); font-weight: 800; }
 .at-ion-tete .at-ion-nom { color: var(--ink); font-weight: 700; }
 .at-ion-noyau { font-size: .88rem; line-height: 1.35; color: var(--ink-2); }
-.at-sim-haut .at-ion-noyau { flex-basis: 100%; }
-.at-sim-haut .at-ion-tete { font-size: 1rem; }
 .at-charges { display: flex; flex-direction: column; gap: 3px; }
 .at-charges .atm-pp, .at-charges .atm-pe, .at-charges .atm-trou { width: 15px; height: 15px; font-size: .72rem; }
 .at-charges-t { font-size: .9rem; font-variant-numeric: tabular-nums; }
@@ -156,7 +167,7 @@ sub, sup { font-size: .7em; line-height: 0; }
   .at-sim-panneau { padding: 10px 12px; }
   .at-sim-bloc { gap: 6px; }
   .at-sim-bloc + .at-sim-bloc { padding-top: 8px; margin-top: 6px; }
-  .at-nota-x { font-size: 1.8rem; }
+  .at-nota-x { font-size: 2.9rem; }
   .at-sim-msg-in { padding: 6px 12px; font-size: .9rem; }
 }
 
@@ -169,8 +180,8 @@ sub, sup { font-size: .7em; line-height: 0; }
   .at-sim-scene { padding: 6px 8px; gap: 4px; }
   .at-sim-dessins { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 4px; min-height: 260px; }
   .at-sim-droite { overflow: visible; gap: 4px; }
-  .at-sim-nota { position: absolute; top: 0; left: 0; z-index: 1; flex-direction: column; flex-wrap: nowrap; gap: 1px; pointer-events: none; }
-  .at-nota-x { font-size: 1.55rem; }
+  .at-sim-nota { gap: 1px; }
+  .at-nota-x { font-size: 2.2rem; }
   .at-nota-nom { font-size: .88rem; }
   .at-nota-c { font-size: .74rem; }
   .at-lg { width: 13px; height: 13px; font-size: .62rem; margin-right: 3px; }
@@ -189,6 +200,13 @@ sub, sup { font-size: .7em; line-height: 0; }
   .at-sim-bloc + .at-sim-bloc { border-top: none; margin-top: 0; padding-top: 0; }
   .at-sim-bloc-t { display: none; }
   .at-aide-t { display: none; }
+  .at-ligne-res { flex-wrap: nowrap; }
+  .at-ligne-res .at-reserve-gros { flex: 1 1 auto; }
+  .at-ligne-res .at-b { flex: 0 0 auto; padding-left: 14px; padding-right: 14px; }
+  .at-reserve-gros .atm-reserve { min-height: 52px; padding: 4px 10px 4px 8px; }
+  .at-reserve-gros .atm-reserve-e { width: 38px; height: 38px; font-size: 1.4rem; }
+  .at-reserve-gros .atm-reserve-t { font-size: .92rem; }
+  .at-reserve-gros .atm-reserve-t small { display: none; }
   .at-ion-tete, .at-ion-noyau { font-size: .8rem; line-height: 1.3; }
   .at-stab { padding: 4px 10px; font-size: .82rem; }
   .at-sim-bloc .at-gaz > span { background: var(--paper); font-size: .78rem; padding: 2px 8px; }

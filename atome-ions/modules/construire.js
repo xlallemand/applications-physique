@@ -5,11 +5,13 @@
    et A − Z neutrons, écriture conventionnelle ᴬ_Z X.
    Deux dessins côte à côte qui se remplissent ensemble (outil ATOME) : cercles des couches n = 1, 2, 3
    et cases 1s | 2s 2p | 3s 3p 3d le long de la flèche « Énergie ».
-   Électrons ajoutés un à un : « + électron », réserve à glisser vers une case ou un cercle, ou toucher
-   une case / un cercle. Refus expliqués (case pleine, case sautée, plus d'électrons que de protons, 3d).
+   Électrons posés un à un, à la main et au bon endroit : électron de la réserve à glisser vers une case
+   ou un cercle, ou toucher une case / un cercle. Pas de pose automatique d'un électron (toucher la
+   réserve explique comment faire) ; « Compléter l'atome » reste possible.
+   Refus expliqués (case pleine, case sautée, plus d'électrons que de protons, 3d).
    Configuration écrite en direct, compteur « électrons / protons ».
-   Électrons de valence : entourés dès que l'atome est complet, ou « À trouver » (l'élève touche la couche
-   externe, puis donne leur nombre).
+   Électrons de valence : « À trouver » par défaut (l'élève touche la couche externe, puis donne leur
+   nombre), ou « Montrés » (entourés dès que l'atome est complet).
    « À essayer » : cinq défis cochés automatiquement, dans n'importe quel ordre ; tous réussis → page faite.
    ============================================================ */
 (function () {
@@ -18,7 +20,7 @@
   const MOINS = '−';
 
   function simulateurAtome(zone) {
-    const etat = { mode: 'auto', vus: {}, naEntoure: false, sTrouve: false, valenceDonnee: false, remplir: null };
+    const etat = { mode: 'toucher', vus: {}, naEntoure: false, sTrouve: false, valenceDonnee: false, remplir: null };
     let defis = null;
 
     const cadre = AT.cadreSim(zone, {
@@ -30,16 +32,15 @@
       onglets: [
         { id: 'element', nom: 'Élément', html: '<div data-a="choix" data-bande></div>', tel: true },
         { id: 'electrons', nom: 'Électrons', html: `
-          <div class="at-ligne"><span data-a="reserve"></span>
-            <button type="button" class="btn-primary at-b" data-a="plus">+ électron</button>
+          <div class="at-ligne at-ligne-res"><div class="at-reserve-gros" data-a="reserve"></div>
+            <p class="at-aide-t">Glisse un électron vers sa case ou son cercle, ou touche directement la case ou le cercle où il va.</p>
             <button type="button" class="btn-secondary at-b" data-a="moins">${MOINS} électron</button></div>
-          <p class="at-aide-t">Glisse l'électron de la réserve vers une case ou un cercle, ou touche une case.</p>
           <div class="at-ligne">
             <button type="button" class="btn-secondary at-b" data-a="remplir">Compléter l'atome</button>
             <button type="button" class="btn-secondary at-b" data-a="vider">↺ Recommencer</button></div>
           <p class="at-sim-lab">Électrons de valence</p>
           <div class="at-seg" role="group" aria-label="Électrons de valence">
-            <button type="button" data-v="auto" aria-pressed="true">Montrés</button><button type="button" data-v="toucher" aria-pressed="false">À trouver</button></div>` },
+            <button type="button" data-v="toucher" aria-pressed="true">À trouver</button><button type="button" data-v="auto" aria-pressed="false">Montrés</button></div>` },
         { id: 'defis', nom: 'À essayer', html: '<div data-a="defis"></div>' },
       ],
     });
@@ -47,7 +48,7 @@
 
     /* ----- Dessins de l'atome (outil ATOME) ----- */
     const d = ATOME.dessin({ couches: $('couches'), cases: $('cases') }, {
-      Z: 1, electrons: 0, ajout: true, entourer: 'auto', alignement: 'xMaxYMax meet',
+      Z: 1, electrons: 0, ajout: true, entourer: 'toucher', alignement: 'xMaxYMax meet',
       textes: { trop: () => 'L\'atome a autant d\'électrons que de protons. Avec un électron de plus, ce serait un ion : voir le module 3.' },
       onMessage: (h, type) => cadre.message(h, type),
       onChange: (e, action) => maj(e, action),
@@ -58,10 +59,14 @@
       d.regler({ Z: z, electrons: Math.min(d.etat().electrons, z) });
     });
     choix.montrer(1);
-    ATOME.reserve($('reserve'), d);
+    // réserve bien visible ; la toucher ne pose pas d'électron : il se pose à la main, au bon endroit
+    ATOME.reserve($('reserve'), d, {
+      texte: 'Réserve d\'électrons<small>glisse-les à leur place</small>',
+      aria: 'Réserve d\'électrons : glisser un électron vers une case ou un cercle',
+      surToucher: () => cadre.message('<b>Pose l\'électron toi-même :</b> glisse-le jusqu\'à sa case ou son cercle, ou touche directement la case ou le cercle où il va.', 'info'),
+    });
 
     /* ----- Boutons ----- */
-    $('plus').onclick = () => { arreterRemplir(); d.ajouter(); };
     $('moins').onclick = () => { arreterRemplir(); d.retirer(); };
     $('vider').onclick = () => { arreterRemplir(); d.regler({ electrons: 0 }); };
     // compléter : les électrons manquants arrivent un à un (d'un coup si l'on demande moins d'animations)
@@ -152,7 +157,7 @@
       bilan: '<b>Bravo !</b> Les électrons se placent dans l\'ordre 1s, 2s, 2p, 3s, 3p (s : 2 au plus, p : 6). Les <b>électrons de valence</b> sont ceux de la dernière couche qui a des électrons.',
     });
     maj(d.etat(), 'debut');
-    cadre.message('Choisis un élément, puis ajoute ses électrons un à un : ils apparaissent en même temps sur les cercles et dans les cases.', 'info');
+    cadre.message('Choisis un élément, puis glisse ses électrons un à un depuis la réserve, à leur place : ils apparaissent en même temps sur les cercles et dans les cases.', 'info');
     AT.atomeEnCours = { d, etat, defis, cadre, mode };          // utile pour vérifier l'application
     return AT.atomeEnCours;
   }

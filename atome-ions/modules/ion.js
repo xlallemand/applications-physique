@@ -27,9 +27,8 @@
     const cadre = AT.cadreSim(zone, {
       badge: 'MODULE 3 · SIMULATION',
       titre: 'Former un ion',
-      haut: true,
-      infos: `<p class="at-ion-tete" data-a="ion" data-haut aria-live="polite"></p>
-        <p class="at-ion-noyau" data-a="noyau" data-haut></p>
+      infos: `<p class="at-ion-tete" data-a="ion" aria-live="polite"></p>
+        <p class="at-ion-noyau" data-a="noyau"></p>
         <div class="at-sim-cases" data-a="cases"></div>
         <div class="at-sim-bloc-config"><p class="at-config" data-a="config"></p></div>
         <div class="at-charges" data-a="charges" data-tel="charges"></div>

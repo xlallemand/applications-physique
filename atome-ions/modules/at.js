@@ -420,15 +420,14 @@
 
   /* ============================================================
      PAGE DE SIMULATION SUR UN SEUL ÉCRAN
-     cadreSim(zone, cfg) : en-tête (badge, titre, plein écran) ; scène : bande des éléments (ordinateur),
-     bandeau facultatif, cercles à gauche, colonne d'informations à droite, message ; panneau de
+     cadreSim(zone, cfg) : en-tête (badge, titre, plein écran) ; scène : bande des éléments (ordinateur),
+     cercles à gauche, colonne d'informations à droite, message ; panneau de
      réglages à droite (« À essayer » compris). Téléphone : scène en haut, réglages dessous, un onglet à la fois.
-     cfg = { badge, titre, infos (HTML de la colonne de droite), onglets: [{ id, nom, titre, html, tel }], haut }
+     cfg = { badge, titre, infos (HTML de la colonne de droite), onglets: [{ id, nom, titre, html, tel }] }
        onglet { tel: true } : seulement sur téléphone (sur ordinateur, son contenu est ailleurs)
        un élément marqué data-tel="<id d'onglet>" passe dans cet onglet sur téléphone ;
        data-bande : sur ordinateur, dans la bande en haut de la scène (choix de l'élément) ;
-       cfg.haut : sur ordinateur, l'écriture du noyau (et les éléments data-haut) dans un bandeau au-dessus des dessins ;
-       sinon l'écriture du noyau est en tête de la colonne de droite (ordinateur) ou sur les cercles (téléphone)
+       l'écriture du noyau (symbole, nom, protons, neutrons) est toujours en haut à gauche des cercles, en grand
      Légende des dessins : AT.LEGENDE.p, .n, .e (pastilles proton, neutron, électron) dans les textes.
      → { $(a), zone, couches, onglet(id), message(html, type) }
      ============================================================ */
@@ -441,7 +440,6 @@
       <div class="at-sim-corps">
         <div class="er-card at-sim-scene">
           <div class="at-sim-bande" data-a="bande"></div>
-          <div class="at-sim-haut" data-a="haut"></div>
           <div class="at-sim-dessins">
             <div class="at-sim-gauche">
               <div class="at-sim-couches" data-a="couches"></div>
@@ -473,19 +471,15 @@
     };
     const remettre = t => t.parent.insertBefore(t.el, t.place);
     const tels = Array.from(zone.querySelectorAll('[data-tel]')).map(garder);
-    const hauts = Array.from(zone.querySelectorAll('[data-haut]')).map(garder);
     const bandes = Array.from(zone.querySelectorAll('[data-bande]')).map(garder);
     const mq = matchMedia('(max-width: 899px)');
     function placer() {
       const tel = mq.matches;
-      [hauts, bandes, tels].forEach(l => l.forEach(remettre));
+      [bandes, tels].forEach(l => l.forEach(remettre));
       if (tel) {
-        zone.querySelector('.at-sim-gauche').appendChild($('nota'));
         tels.forEach(t => zone.querySelector(`[data-s="${t.el.dataset.tel}"]`).appendChild(t.el));
       } else {
         bandes.forEach(t => $('bande').appendChild(t.el));
-        if (cfg.haut) { $('haut').appendChild($('nota')); hauts.forEach(t => $('haut').appendChild(t.el)); }
-        else zone.querySelector('.at-sim-droite').insertBefore($('nota'), zone.querySelector('.at-sim-droite').firstChild);
       }
       // bouton plein écran : dans l'en-tête sur ordinateur, au bout des onglets sur téléphone (l'en-tête y est caché)
       const pe = zone.querySelector('.pe-bouton');

@@ -67,7 +67,8 @@
      etat() → { Z, A, sym, nom, electrons, config, valence, couche (dernière couche), complet, entoure, charge }
    ATOME.reserve(zone, dessin, opts) → élément : réserve d'électrons à glisser vers une case ou un cercle
                                 (toucher la réserve ajoute un électron à la place suivante) ; opts.aria, opts.texte (écrit
-                                à côté de l'électron ; sans texte : l'électron seul)
+                                à côté de l'électron ; sans texte : l'électron seul) ; opts.surToucher() : toucher la
+                                réserve n'ajoute rien, cette fonction est appelée à la place (l'électron se pose à la main)
    ATOME.composeur(zone, opts) → { valeur(), fixer(config), bloquer(b), vider(), el }
                                 ligne de configuration à composer sans clavier : toucher (ou glisser) les étiquettes
                                 1s, 2s… dans l'ordre, puis régler l'exposant de la sous-couche choisie avec − / +
@@ -270,7 +271,7 @@
 
   // géométrie des cercles (unités du dessin, centre en 0)
   const R = [0, 100, 145, 190];       // rayons des couches n = 1, 2, 3
-  const ER = 13;                      // rayon d'un électron sur un cercle
+  const ER = 11;                      // rayon d'un électron sur un cercle (petit : les couches restent bien visibles)
   const RN = 10, PAS_N = 11.2;        // rayon d'un nucléon, pas de la spirale du noyau
   // places des électrons sur chaque couche (angles en degrés, 0 à droite, −90 en haut)
   const PLACES = {
@@ -445,7 +446,7 @@
         }
         if (montrer && ext) {
           // la couche externe entourée : un anneau autour de ses électrons
-          const ri = R[ext] - ER - 6, re = R[ext] + ER + 6;
+          const ri = R[ext] - ER - 3, re = R[ext] + ER + 3;          // anneau fin, juste autour des électrons
           svgEl('path', { d: `M${re} 0 A${re} ${re} 0 1 0 ${-re} 0 A${re} ${re} 0 1 0 ${re} 0 Z M${ri} 0 A${ri} ${ri} 0 1 1 ${-ri} 0 A${ri} ${ri} 0 1 1 ${ri} 0 Z`, class: 'atm-anneau-fond', 'fill-rule': 'evenodd' }, gAnneau);
           svgEl('circle', { r: ri, class: 'atm-anneau' }, gAnneau);
           svgEl('circle', { r: re, class: 'atm-anneau' }, gAnneau);
@@ -652,10 +653,12 @@
           if (z) { d.ajouter(z.dataset.sc ? z.dataset.sc : { couche: +z.dataset.couche }); return; }
           // simple appui (relâché sur la réserve) : un électron à la place suivante
           const r = b.getBoundingClientRect();
-          if (ev && ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom) d.ajouter();
+          if (ev && ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom) toucher();
         },
       });
-    } else b.addEventListener('click', () => d.ajouter());
+    } else b.addEventListener('click', toucher);
+    // simple appui : un électron à la place suivante, ou la fonction donnée (l'électron se pose alors à la main)
+    function toucher() { if (opts.surToucher) opts.surToucher(); else d.ajouter(); }
     return b;
   }
 
