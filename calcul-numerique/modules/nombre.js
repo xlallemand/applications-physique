@@ -7,7 +7,7 @@
      - calculs sûrs sur les décimaux (arrondi à n chiffres significatifs,
        décomposition a × 10ⁿ, comparaison avec tolérance relative) ;
      - champ de saisie d'un nombre « a × 10ⁿ » sans clavier du téléphone :
-       un pavé à l'écran (chiffres, virgule, −, ×10ⁿ, effacer, valider) ;
+       un pavé à l'écran (chiffres, virgule, −, ×10ⁿ, flèches ← →, effacer, valider) ;
        sur ordinateur, le clavier marche aussi (4,5e-3, 4,5*10^-3, 10^3).
    API :
      CN.N.hasard(liste), CN.N.entre(a, b), CN.N.melanger(liste)
@@ -119,75 +119,96 @@
   /* =====================================================================
      Champ de saisie « a × 10ⁿ »
      Le nombre est fait de deux zones : la mantisse (m) et l'exposant (e, null sans × 10ⁿ).
-     On écrit toujours à la fin de la zone en cours ; ⌫ efface dans l'ordre inverse.
-     Une mantisse vide avec un exposant vaut 1 : « 10ⁿ ».
+     Un curseur (zone + position pos) dit où l'on écrit : les flèches ← → le déplacent,
+     ⌫ efface le caractère à sa gauche. Une mantisse vide avec un exposant vaut 1 : « 10ⁿ ».
      ===================================================================== */
+  const CURSEUR = '<span class="cn-curseur" aria-hidden="true"></span>';
+  const moins = t => t.replace('-', MOINS);
   function Champ(opts) {
     opts = opts || {};
     this.entier = !!opts.entier;           // exposant ou nombre entier seul : ni virgule ni × 10ⁿ
-    this.m = ''; this.e = null; this.zone = 'm'; this.actif = true;
+    this.m = ''; this.e = null; this.zone = 'm'; this.pos = 0; this.actif = true;
     this.surValider = opts.surValider || function () {};
     this.surChange = opts.surChange || function () {};
     const el = this.el = document.createElement('span');
     el.className = 'cn-champ' + (this.entier ? ' cn-champ-ent' : '');
     el.tabIndex = 0;
     el.setAttribute('role', 'textbox');
-    el.setAttribute('aria-label', opts.label || 'Ta réponse');
+    this.label = opts.label || 'Ta réponse';
     // sur un écran tactile, le champ n'ouvre jamais le clavier du téléphone : on écrit avec le pavé
     el.setAttribute('inputmode', 'none');
     el.addEventListener('keydown', ev => this.clavier(ev));
     this.dessiner();
   }
+  // texte de la zone en cours, et son remplacement
+  Champ.prototype.txt = function () { return this.zone === 'm' ? this.m : (this.e || ''); };
+  Champ.prototype.ecrire = function (t, pos) { if (this.zone === 'm') this.m = t; else this.e = t; this.pos = pos; };
+  // une zone écrite, avec le curseur à sa place si c'est la zone en cours
+  Champ.prototype.morceau = function (z, t) {
+    if (!this.actif || this.zone !== z) return moins(t);
+    return moins(t.slice(0, this.pos)) + CURSEUR + moins(t.slice(this.pos));
+  };
   Champ.prototype.dessiner = function () {
     const vide = !this.m && this.e === null;
     let h;
-    const m = this.m.replace('-', MOINS);
-    if (vide) h = '<span class="cn-c-m cn-vide' + (this.zone === 'm' ? ' cn-ici' : '') + '">?</span>';
+    if (vide) h = '<span class="cn-c-m cn-vide">' + (this.actif ? CURSEUR : '') + '?</span>';
     else {
-      h = this.e === null || this.m ? '<span class="cn-c-m' + (this.zone === 'm' ? ' cn-ici' : '') + '">' + m + '</span>' : '';
+      // mantisse : affichée si elle est écrite, ou si le curseur y est
+      const voirM = this.m || this.e === null || (this.zone === 'm' && this.actif);
+      h = voirM ? '<span class="cn-c-m">' + this.morceau('m', this.m) + '</span>' : '';
       if (this.e !== null) {
-        h += (this.m ? '<span class="cn-c-x"> × </span>' : '') + '<span class="cn-c-10">10</span><sup class="cn-c-e' + (this.zone === 'e' ? ' cn-ici' : '') + (this.e === '' ? ' cn-vide' : '') + '">' +
-          (this.e === '' ? '□' : this.e.replace('-', MOINS)) + '</sup>';
+        const ex = this.e === '' ? (this.actif && this.zone === 'e' ? CURSEUR : '') + '<span class="cn-vide">□</span>' : this.morceau('e', this.e);
+        h += (this.m ? '<span class="cn-c-x"> × </span>' : '') + '<span class="cn-c-10">10</span><sup class="cn-c-e">' + ex + '</sup>';
       }
     }
-    this.el.innerHTML = h;
-    this.el.setAttribute('aria-label', 'Ta réponse : ' + (vide ? 'vide' : this.texte()));
+    this.el.innerHTML = '<span class="cn-c">' + h + '</span>';
+    this.el.setAttribute('aria-label', this.label + ' : ' + (vide ? 'vide' : this.texte()));
   };
   // texte lisible de la saisie (aria-label, diagnostics)
   Champ.prototype.texte = function () {
-    const m = this.m.replace('-', MOINS);
+    const m = moins(this.m);
     if (this.e === null) return m;
-    return (this.m ? m + ' × ' : '') + '10 puissance ' + (this.e ? this.e.replace('-', MOINS) : '(exposant à écrire)');
+    return (this.m ? m + ' × ' : '') + '10 puissance ' + (this.e ? moins(this.e) : '(exposant à écrire)');
   };
   Champ.prototype.touche = function (k) {
     if (!this.actif) return;
-    const z = this.zone;
-    let t = z === 'm' ? this.m : this.e;
+    const z = this.zone, t = this.txt(), p = this.pos;
+    const inserer = s => this.ecrire(t.slice(0, p) + s + t.slice(p), p + s.length);
     if (/^\d$/.test(k)) {
       if (z === 'e' && t.replace('-', '').length >= 3) return;
       if (z === 'm' && t.replace(/[-,]/g, '').length >= 14) return;
-      t += k;
+      if (t.charAt(0) === '-' && p === 0) return;       // rien avant le signe −
+      inserer(k);
     } else if (k === ',') {
       if (this.entier || z === 'e' || t.indexOf(',') >= 0) return;
-      t = (t === '' || t === '-' ? t + '0' : t) + ',';
+      if (t.charAt(0) === '-' && p === 0) return;
+      inserer(p === 0 || (p === 1 && t.charAt(0) === '-') ? '0,' : ',');
     } else if (k === '-') {
-      t = t.charAt(0) === '-' ? t.slice(1) : '-' + t;
+      if (t.charAt(0) === '-') this.ecrire(t.slice(1), Math.max(0, p - 1));
+      else this.ecrire('-' + t, p + 1);
     } else if (k === 'p10') {
       if (this.entier) return;
-      if (this.e === null) { this.e = ''; }
-      this.zone = 'e';
-      this.dessiner(); this.surChange();
-      return;
+      if (this.e === null) this.e = '';
+      this.zone = 'e'; this.pos = this.e.length;
+    } else if (k === 'gauche') {
+      if (p > 0) this.pos = p - 1;
+      else if (z === 'e') { this.zone = 'm'; this.pos = this.m.length; }
+      else return;
+    } else if (k === 'droite') {
+      if (p < t.length) this.pos = p + 1;
+      else if (z === 'm' && this.e !== null) { this.zone = 'e'; this.pos = 0; }
+      else return;
     } else if (k === 'eff') {
-      if (z === 'e') {
-        if (t === '') { this.e = null; this.zone = 'm'; this.dessiner(); this.surChange(); return; }
-        t = t.slice(0, -1);
-      } else t = t.slice(0, -1);
+      if (p > 0) this.ecrire(t.slice(0, p - 1) + t.slice(p), p - 1);
+      else if (z === 'e') {
+        // au début de l'exposant : un exposant vide disparaît (avec × 10), sinon on revient à la mantisse
+        if (t === '') this.e = null;
+        this.zone = 'm'; this.pos = this.m.length;
+      } else return;
     } else if (k === 'vider') {
-      this.m = ''; this.e = null; this.zone = 'm'; this.dessiner(); this.surChange(); return;
+      this.m = ''; this.e = null; this.zone = 'm'; this.pos = 0;
     } else if (k === 'valider') { this.surValider(); return; }
     else return;
-    if (z === 'm') this.m = t; else this.e = t;
     this.dessiner(); this.surChange();
   };
   // clavier de l'ordinateur
@@ -201,14 +222,23 @@
     else if (k === 'e' || k === 'E' || k === '*' || k === 'x' || k === '×') t = 'p10';
     else if (k === '^') {
       // « 10^3 » : le 10 tapé est la base de la puissance, pas une mantisse
-      if (this.e === null && (this.m === '10' || this.m === '-10')) this.m = this.m === '10' ? '' : '-';
+      if (this.e === null && this.zone === 'm' && this.pos === this.m.length && (this.m === '10' || this.m === '-10')) { this.m = this.m === '10' ? '' : '-'; this.pos = this.m.length; }
       t = 'p10';
     }
     else if (k === 'Backspace') t = 'eff';
     else if (k === 'Delete' || k === 'Escape') t = 'vider';
     else if (k === 'Enter') t = 'valider';
-    else if (k === 'ArrowLeft') { if (this.zone === 'e') { this.zone = 'm'; this.dessiner(); } ev.preventDefault(); return; }
-    else if (k === 'ArrowRight' || k === 'ArrowUp') { if (this.e !== null) { this.zone = 'e'; this.dessiner(); } ev.preventDefault(); return; }
+    else if (k === 'ArrowLeft') t = 'gauche';
+    else if (k === 'ArrowRight') t = 'droite';
+    else if (k === 'ArrowUp' || k === 'End') {
+      ev.preventDefault();
+      if (this.e !== null) { this.zone = 'e'; this.pos = this.e.length; } else this.pos = this.m.length;
+      this.dessiner(); return;
+    } else if (k === 'ArrowDown' || k === 'Home') {
+      ev.preventDefault();
+      this.zone = 'm'; this.pos = k === 'Home' ? 0 : this.m.length;
+      this.dessiner(); return;
+    }
     if (t === null) return;
     ev.preventDefault();
     this.touche(t);
@@ -225,6 +255,7 @@
     let neg = false;
     if (m.charAt(0) === '-') { neg = true; m = m.slice(1); }
     if (m.slice(-1) === ',') m = m.slice(0, -1);
+    if (m.charAt(0) === ',') m = '0' + m;
     const a = m === '' ? 1 : parseFloat(m.replace(',', '.'));
     if (isNaN(a)) return { erreur: 'Écris un nombre (avec une virgule si besoin).' };
     const e = this.e === null ? null : parseInt(this.e, 10);
@@ -237,15 +268,15 @@
     return { v, m: (neg ? '-' : '') + m, mant: sa, e, cs, csMin, sci: sciOk, dec: e === null };
   };
   Champ.prototype.vider = function () { this.touche('vider'); };
-  Champ.prototype.fin = function () { this.actif = false; this.el.classList.add('cn-fige'); this.el.tabIndex = -1; };
+  Champ.prototype.fin = function () { this.actif = false; this.dessiner(); this.el.classList.add('cn-fige'); this.el.tabIndex = -1; };
 
-  /* ---------- Pavé à l'écran ---------- */
+  /* ---------- Pavé à l'écran (5 colonnes) ---------- */
   // [clé, libellé accessible, contenu]
   const TOUCHES = [
-    ['7'], ['8'], ['9'], ['eff', 'Effacer', '⌫'],
-    ['4'], ['5'], ['6'], ['p10', 'Fois 10 puissance', '×10<sup>n</sup>'],
-    ['1'], ['2'], ['3'], ['-', 'Signe moins', MOINS],
-    ['0'], [',', 'Virgule', ','], ['vider', 'Tout effacer', 'C'], ['valider', 'Valider', 'Valider']
+    ['7'], ['8'], ['9'], ['p10', 'Fois 10 puissance', '×10<sup>n</sup>'], ['eff', 'Effacer', '⌫'],
+    ['4'], ['5'], ['6'], ['-', 'Signe moins', MOINS], ['vider', 'Tout effacer', 'C'],
+    ['1'], ['2'], ['3'], ['gauche', 'Déplacer le curseur vers la gauche', '←'], ['droite', 'Déplacer le curseur vers la droite', '→'],
+    ['0'], [',', 'Virgule', ','], ['valider', 'Valider', 'Valider']
   ];
   function pave(cible) {
     const p = document.createElement('div');

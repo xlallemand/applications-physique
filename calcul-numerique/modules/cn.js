@@ -459,8 +459,10 @@
   }
 
   /* ---------- Rappel d'une compétence (aide pendant une question) ---------- */
-  function contenuHTML(c) {
-    return '<p>' + c.regle + '</p><div class="cle"><b class="cle-titre">Méthode.</b> ' + c.methode + '</div><div class="cn-exemple"><p class="cn-exemple-t">Exemple</p>' + c.exemple + '</div>';
+  // notion d'une compétence : règle, infographie, méthode (en étapes), exemples (rappel, fiche, Découverte)
+  function contenuHTML(c, plus) {
+    const nEx = (c.exemple.match(/class="cn-ex"|<li /g) || []).length;
+    return '<p>' + c.regle + '</p>' + (c.schema || '') + (plus || '') + '<div class="cle"><b class="cle-titre">Méthode.</b> ' + c.methode + '</div><div class="cn-exemple"><p class="cn-exemple-t">' + (nEx > 1 ? 'Exemples' : 'Exemple') + '</p>' + c.exemple + '</div>';
   }
   function blocRappel(id) {
     const c = R[id], b = el('div', 'cn-rappel');

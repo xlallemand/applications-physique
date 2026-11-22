@@ -259,27 +259,33 @@ html.cn-tiroir-ouvert { overflow: hidden; }
 
 /* ---------- champ de saisie « a × 10ⁿ » (écrit avec le pavé ou le clavier) ---------- */
 .cn-champ {
-  display: inline-flex; align-items: baseline; min-width: 4.2rem; min-height: 44px; padding: 6px 12px; box-sizing: border-box;
+  display: inline-flex; align-items: center; min-width: 4.2rem; min-height: 44px; padding: 6px 12px; box-sizing: border-box;
   border-radius: 12px; background: var(--sheet); box-shadow: inset 0 0 0 2px var(--accent); color: var(--ink);
   font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; cursor: text; white-space: nowrap;
   touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none;
 }
+/* le contenu est dans un seul élément en ligne : l'exposant (sup) reste bien en exposant */
+.cn-c { display: inline; line-height: 1.5; }
 .cn-champ:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .cn-champ-ent { min-width: 3.4rem; justify-content: center; }
-.cn-champ-sup { vertical-align: super; min-height: 38px; padding: 4px 10px; font-size: 1rem; }
 .cn-vide { color: var(--ink-3); font-weight: 600; }
 .cn-c-x, .cn-c-10 { color: var(--ink-2); }
-.cn-c-e { font-size: .75em; }
-/* curseur : à la fin de la zone en cours (mantisse ou exposant) */
-.cn-ici::after { content: ''; display: inline-block; width: 2px; height: 1.05em; margin-left: 1px; vertical-align: -.12em; background: var(--accent); animation: cn-clignote 1s steps(1) infinite; }
+sup.cn-c-e { font-size: .72em; vertical-align: super; line-height: 0; margin-left: 1px; }
+/* curseur : là où le prochain caractère s'écrit (déplacé avec les flèches) */
+.cn-curseur { display: inline-block; width: 2px; height: 1.05em; margin: 0 -1px; vertical-align: -.12em; background: var(--accent); animation: cn-clignote 1s steps(1) infinite; }
 .cn-champ.cn-fige { box-shadow: inset 0 0 0 1.5px var(--paper-3); cursor: default; }
-.cn-champ.cn-fige .cn-ici::after { display: none; }
 @keyframes cn-clignote { 50% { opacity: 0; } }
+/* puissance de 10 dont on écrit l'exposant : « 10 » puis une petite case en haut à droite */
+.cn-puiss { display: inline-flex; align-items: flex-start; white-space: nowrap; }
+.cn-puiss-10 { font-size: 1.35rem; font-weight: 700; padding-top: .95em; line-height: 1.2; }
+.cn-puiss .cn-champ-sup { min-width: 2.4rem; min-height: 30px; padding: 1px 8px; margin-left: 1px; font-size: .9rem; border-radius: 9px; }
+.cn-puiss-aide { display: block; font-size: .78rem; font-weight: 600; color: var(--ink-2); }
 
 /* ---------- pavé, collé en bas de l'écran ---------- */
 .cn-pave-z { position: sticky; bottom: 0; z-index: 20; margin: 12px -6px 0; padding: 8px 6px calc(8px + env(safe-area-inset-bottom)); background: var(--sheet); border-top: 1px solid var(--line); }
 .cn-pave-z[hidden] { display: none; }
-.cn-pave { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; max-width: 24rem; margin: 0 auto; }
+.cn-pave { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; max-width: 26rem; margin: 0 auto; }
+.cn-t-ok { grid-column: span 3; }
 .cn-t {
   min-height: 48px; border: none; border-radius: 14px; background: var(--paper); color: var(--ink); font-size: 1.25rem; font-weight: 700;
   cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; font-variant-numeric: tabular-nums; transition: background .15s;
@@ -334,4 +340,126 @@ html.cn-tiroir-ouvert { overflow: hidden; }
 .cn-defi-ligne { font-size: 1.2rem; justify-content: center; margin: 10px 0; }
 .cn-defi-q .cn-enonce { text-align: center; }
 
-@media (prefers-reduced-motion: reduce) { .cn-ici::after { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .cn-curseur { animation: none; } }
+
+/* =====================================================================
+   Notions : méthodes en étapes, exemples séparés, infographies (infographies.js)
+   ===================================================================== */
+.cn-etapes { margin: 8px 0 2px; padding: 0; list-style: none; counter-reset: cn-et; display: grid; gap: 8px; }
+.cn-etapes li { counter-increment: cn-et; position: relative; padding: 2px 0 2px 2.2rem; line-height: 1.55; }
+.cn-etapes li::before { content: counter(cn-et); position: absolute; left: 0; top: 1px; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--accent); color: var(--sheet); font-weight: 800; font-size: .85rem; display: flex; align-items: center; justify-content: center; }
+.cn-exs { display: grid; gap: 8px; margin-top: 4px; }
+.cn-ex { padding: 8px 12px; border-radius: 10px; background: var(--paper); line-height: 1.6; }
+.cn-ex .cn-calc, .cn-ex p { margin: 0 !important; }
+.cn-ex .cn-calc + .cn-calc { margin-top: 4px !important; }
+.cn-verdicts { list-style: none; margin: 4px 0; padding: 0; display: grid; gap: 6px; }
+.cn-verdicts li { display: flex; gap: 10px; align-items: baseline; padding: 6px 12px; border-radius: 10px; background: var(--paper); }
+.cn-verdicts small { color: var(--ink-2); }
+.cn-v-ic { font-weight: 800; }
+.cn-verdicts .ok .cn-v-ic { color: var(--success); }
+.cn-verdicts .ko .cn-v-ic { color: var(--danger); }
+
+.cn-fig { margin: 12px 0; padding: 12px; border-radius: 14px; background: var(--sheet); border: 1px solid var(--line); overflow-x: auto; }
+.cn-fig figcaption { margin-top: 8px; font-size: .88rem; color: var(--ink-2); line-height: 1.5; }
+.cn-fig-r { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+.cn-fig-t { margin: 0 !important; line-height: 1.7; font-variant-numeric: tabular-nums; }
+.cn-svg { display: block; max-width: 100%; height: auto; }
+.cn-svg text { font-family: inherit; text-anchor: middle; }
+.cn-sv-ch { font-size: 20px; font-weight: 700; fill: var(--ink); }
+.cn-sv-aj { fill: var(--accent); }
+.cn-sv-v0 { font-size: 24px; font-weight: 800; fill: var(--ink-2); opacity: .55; }
+.cn-sv-v1 { font-size: 24px; font-weight: 800; fill: var(--accent); }
+.cn-sv-arc { fill: none; stroke: var(--accent); stroke-width: 1.6; }
+.cn-sv-pt { fill: var(--accent); }
+.cn-sv-n { font-size: 11px; font-weight: 700; fill: var(--accent-ink); }
+.cn-sv-l { font-size: 11px; font-weight: 700; fill: var(--ink-2); }
+.cn-sv-gr { stroke: var(--cle-line); stroke-width: 1; }
+.cn-sv-fond { fill: var(--cle-bg); }
+.cn-sv-fond2 { fill: var(--cle-line); }
+.cn-sv-fond3 { fill: var(--paper-3); }
+.cn-sv-petit { fill: var(--accent); }
+.cn-sv-bord { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; }
+.cn-aj { color: var(--accent); font-weight: 800; }
+
+/* cases de chiffres (zéros comptés, chiffres significatifs, arrondi) */
+.cn-cases { display: flex; gap: 3px; flex-wrap: nowrap; font-variant-numeric: tabular-nums; }
+.cn-case { display: flex; flex-direction: column; align-items: center; min-width: 1.7rem; }
+.cn-case b { display: flex; align-items: center; justify-content: center; width: 1.7rem; height: 2.1rem; border-radius: 8px; background: var(--paper); font-size: 1.2rem; }
+.cn-case small { font-size: .72rem; font-weight: 700; color: var(--accent-ink); line-height: 1.5; }
+.cn-case-v { min-width: .7rem; }
+.cn-case-v b { width: .7rem; background: none; }
+.cn-case.z b { background: var(--cle-bg); color: var(--accent-ink); }
+.cn-case.un b { background: var(--accent); color: var(--sheet); }
+.cn-case.cs b { background: var(--cle-bg); color: var(--accent-ink); }
+.cn-case.barre b, .cn-barre { color: var(--ink-3); text-decoration: line-through; }
+.cn-case.gris b { color: var(--ink-3); }
+.cn-case.suiv b, .cn-suiv { box-shadow: inset 0 0 0 2px var(--warning-text); color: var(--warning-text); border-radius: 8px; }
+.cn-suiv { padding: 0 4px; font-weight: 700; }
+
+/* deux unités et les facteurs dans les deux sens */
+.cn-fl2 { display: flex; align-items: center; gap: 8px; width: fit-content; }
+.cn-fl2-u { padding: 10px 14px; border-radius: 12px; background: var(--cle-bg); color: var(--accent-ink); font-weight: 800; font-size: 1.15rem; white-space: nowrap; }
+.cn-fl2-m { display: flex; flex-direction: column; gap: 10px; min-width: 7.5rem; }
+.cn-fl2-h, .cn-fl2-b { position: relative; display: block; text-align: center; font-weight: 700; font-size: .95rem; white-space: nowrap; padding-bottom: 5px; }
+.cn-fl2-h::after, .cn-fl2-b::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--accent); }
+.cn-fl2-h::before, .cn-fl2-b::before { content: ''; position: absolute; bottom: -4px; border: 5px solid transparent; }
+.cn-fl2-h::before { right: -2px; border-left: 8px solid var(--accent); border-right: 0; }
+.cn-fl2-b::before { left: -2px; border-right: 8px solid var(--accent); border-left: 0; }
+.cn-fl2-b { color: var(--ink-2); }
+.cn-fl2-b::after { background: var(--ink-3); }
+.cn-fl2-b::before { border-right-color: var(--ink-3); }
+
+/* échelle des préfixes et cartes pour les retenir */
+.cn-echelle { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 620px) { .cn-echelle { grid-template-columns: 1fr auto 1fr; align-items: center; } }
+.cn-ech-t { margin: 0 0 6px !important; font-weight: 800; color: var(--accent-ink); }
+.cn-ech-t small { font-weight: 600; color: var(--ink-2); margin-left: 4px; }
+.cn-ech-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.cn-ech-col li { display: grid; grid-template-columns: 2.4rem 1fr auto; align-items: center; gap: 8px; padding: 5px 10px; border-radius: 10px; background: var(--paper); }
+.cn-ech-col li.cn-p3 { background: var(--cle-bg); }
+.cn-ech-col li.cn-p3 .cn-p-s { color: var(--accent-ink); }
+.cn-p-s { font-size: 1.2rem; }
+.cn-p-n { color: var(--ink-2); }
+.cn-p-e { font-weight: 700; font-variant-numeric: tabular-nums; }
+.cn-p1 .cn-p-s, .cn-p1 .cn-p-e { font-weight: 600; }
+.cn-ech-u { justify-self: center; text-align: center; padding: 10px 16px; border-radius: 12px; border: 2px dashed var(--cle-line); }
+.cn-ech-u small { display: block; color: var(--ink-2); font-size: .8rem; }
+.cn-tab tr.cn-p3 td { background: var(--cle-bg); }
+.cn-memos { display: grid; gap: 10px; margin: 12px 0; }
+@media (min-width: 620px) { .cn-memos { grid-template-columns: 1fr 1fr; } }
+.cn-memo { padding: 12px 14px; border-radius: 14px; background: var(--sheet); border: 1px solid var(--line); }
+.cn-memo-t { margin: 0 0 8px !important; font-weight: 800; }
+.cn-memo-l { margin: 4px 0 !important; line-height: 1.7; }
+.cn-nw { white-space: nowrap; }
+.cn-memo-li { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.cn-memo-li li span { font-weight: 700; color: var(--accent-ink); white-space: nowrap; }
+.cn-mots { display: flex; flex-wrap: wrap; gap: 6px; }
+.cn-mot { display: flex; flex-direction: column; align-items: center; padding: 6px 10px; border-radius: 10px; background: var(--paper); min-width: 3.6rem; }
+.cn-mot b { font-size: 1.05rem; }
+.cn-mot small { font-size: .76rem; color: var(--ink-2); }
+.cn-ini { color: var(--accent); font-size: 1.25rem; }
+
+/* volumes : les trois égalités */
+.cn-rel { display: grid; gap: 8px; margin: 10px 0; }
+@media (min-width: 620px) { .cn-rel { grid-template-columns: 1.3fr 1fr 1fr; } }
+.cn-rel-c { padding: 10px 14px; border-radius: 12px; background: var(--paper); }
+.cn-rel-c b { display: block; font-size: 1.1rem; }
+.cn-rel-c small { color: var(--ink-2); }
+.cn-rel-1 { background: var(--cle-bg); box-shadow: inset 0 0 0 2px var(--accent); }
+.cn-rel-1 b { font-size: 1.3rem; color: var(--accent-ink); }
+
+/* unité composée */
+.cn-frac-r { display: flex; align-items: stretch; gap: 12px; width: fit-content; }
+.cn-frac { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; }
+.cn-frac-n { padding: 0 8px 4px; border-bottom: 2px solid var(--ink); }
+.cn-frac-d { padding: 4px 8px 0; }
+.cn-frac-notes { display: flex; flex-direction: column; justify-content: space-between; gap: 6px; font-size: .92rem; }
+.cn-frac-nn, .cn-frac-nd { padding: 4px 10px; border-radius: 8px; background: var(--paper); }
+.cn-frac-nd { background: var(--warning-bg); color: var(--warning-text); }
+
+/* repère de la marche */
+.cn-marche { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.cn-marche-ic { font-size: 2rem; }
+.cn-marche-c { padding: 8px 12px; border-radius: 12px; background: var(--cle-bg); text-align: center; }
+.cn-marche-c small { display: block; color: var(--ink-2); }
+.cn-marche-eg { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
