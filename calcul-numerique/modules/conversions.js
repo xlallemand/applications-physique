@@ -37,20 +37,20 @@
   /* -------------------- CV1 : la compétence clé -------------------- */
   ajouter({ id: 'CV1', famille: 'CV', niveau: 3, prerequis: ['PR1', 'PU2'], cle: true, titre: 'Vers ou depuis l’unité sans préfixe',
     regle: 'C’est la conversion la plus utile en physique : on passe d’une unité avec préfixe à l’unité du Système international (km → m, mA → A, kW → W) ou l’inverse. On <b>recopie le nombre</b> et on le multiplie par 10 puissance <b>(préfixe de départ) − (préfixe d’arrivée)</b> ; une unité sans préfixe a la puissance 0.',
-    schema: I.fleches('km', 'm', '× 10<sup>3</sup>', '× 10<sup>−3</sup>', 'Vers l’unité sans préfixe : on multiplie par la puissance du préfixe (k = 10<sup>3</sup>). Depuis l’unité sans préfixe : par la puissance de signe opposé.') +
-      I.fleches('mA', 'A', '× 10<sup>−3</sup>', '× 10<sup>3</sup>', 'Même chose avec un petit préfixe (m = 10<sup>−3</sup>).'),
-    methode: I.etapes(['Écris la puissance de 10 du préfixe : k = 10<sup>3</sup>, m = 10<sup>−3</sup>…', 'Vers l’unité sans préfixe : multiplie par cette puissance. Depuis l’unité sans préfixe : multiplie par la puissance de signe opposé.', 'Recopie le nombre et écris le résultat avec la puissance de 10.', 'Vérifie le sens : une unité d’arrivée plus petite demande un nombre plus grand.']),
-    exemple: I.exemples([calc('3,2&nbsp;km = ' + c('3,2 × 10<sup>3</sup>&nbsp;m')), calc('450&nbsp;mA = ' + c('450 × 10<sup>−3</sup>&nbsp;A')), calc('2&nbsp;m = ' + c('2 × 10<sup>2</sup>&nbsp;cm') + ' (car 0 − (−2) = 2)')]),
+    schema: I.fleches('km', 'm', ['3 − 0 = 3', 'donc × 10<sup>3</sup>'], ['0 − 3 = −3', 'donc × 10<sup>−3</sup>'], 'km = 10<sup>3</sup>, m (sans préfixe) = 10<sup>0</sup> : exposant = (départ) − (arrivée).') +
+      I.fleches('mA', 'A', ['−3 − 0 = −3', 'donc × 10<sup>−3</sup>'], ['0 − (−3) = 3', 'donc × 10<sup>3</sup>'], 'mA = 10<sup>−3</sup>, A (sans préfixe) = 10<sup>0</sup>.'),
+    methode: I.etapes(['Écris la puissance de 10 des deux unités : km → 10<sup>3</sup>, m (sans préfixe) → 10<sup>0</sup>.', 'Exposant de conversion = (départ) − (arrivée), avec des parenthèses autour d’un exposant négatif : 3 − 0 = 3.', 'Recopie le nombre et multiplie-le par 10 puissance cet exposant.', 'Vérifie le sens : une unité d’arrivée plus petite demande un nombre plus grand.']),
+    exemple: I.exemples([calc('3,2&nbsp;km → m : 3 − 0 = 3') + calc('3,2&nbsp;km = ' + c('3,2 × 10<sup>3</sup>&nbsp;m')), calc('450&nbsp;mA → A : −3 − 0 = −3') + calc('450&nbsp;mA = ' + c('450 × 10<sup>−3</sup>&nbsp;A')), calc('2&nbsp;m → cm : 0 − (−2) = 2') + calc('2&nbsp;m = ' + c('2 × 10<sup>2</sup>&nbsp;cm'))]),
     piege: '2 m = 2 × 10<sup>2</sup> cm, pas 2 × 10<sup>−2</sup> cm : le centimètre est plus petit que le mètre, il en faut plus.',
     gen(niv) {
       const s = hasard(PREF_NIV[niv]), q = PR(s), u = hasard(UNITES[s]), x = hasard(COEF[niv]);
       const avec = U(q, u), sans = U(PR(''), u);
       const versBase = Math.random() < 0.55;
       const o = versBase ? prep(x, 0, avec, sans) : prep(x, 0, sans, avec);
-      o.aide = '1&nbsp;' + q.s + u + ' = ' + p10(q.e) + '&nbsp;' + u + (versBase ? ' : on multiplie par ' + p10(q.e) + '.' : ' : donc 1&nbsp;' + u + ' = ' + p10(-q.e) + '&nbsp;' + q.s + u + '.');
+      o.aide = 'Exposant = (puissance de départ) − (puissance d’arrivée), avec ' + q.s + u + ' → ' + p10(q.e) + ' et ' + u + ' (sans préfixe) → 10<sup>0</sup>.';
       const parts = niv === 1 ? [partiePref(q), partieConv(o)] : [partieConv(o)];
       return question('CV1', niv, 'CV1:' + x + o.de.h + o.vers.h, 'Convertis ' + nb(x) + '&nbsp;' + o.de.h + ' en ' + o.vers.h + '. Toute écriture juste est acceptée.', parts,
-        '<p>1&nbsp;' + q.s + u + ' = ' + p10(q.e) + '&nbsp;' + u + (versBase ? '' : ', donc 1&nbsp;' + u + ' = ' + p10(-q.e) + '&nbsp;' + q.s + u) + '. ' + sens(o) + '</p>' + solConv(o), indicesConv(o));
+        solConv(o) + '<p>' + sens(o) + '</p>', indicesConv(o));
     } });
 
   /* -------------------- CV2 : entre deux préfixes -------------------- */
@@ -60,7 +60,7 @@
     ['n', 'µ', 'm', 3], ['µ', 'n', 'm', 3], ['M', 'G', 'Hz', 3], ['c', 'µ', 'm', 3], ['n', 'm', 's', 3], ['G', 'k', 'W', 3], ['h', 'M', 'Pa', 3], ['µ', 'c', 'm', 3]];
   ajouter({ id: 'CV2', famille: 'CV', niveau: 4, prerequis: ['CV1'], titre: 'Entre deux préfixes',
     regle: 'La méthode est la même quand les deux unités ont un préfixe : exposant = (préfixe de départ) − (préfixe d’arrivée). On retranche souvent un nombre négatif : <b>attention aux signes</b>.',
-    schema: I.fleches('µA', 'mA', '× 10<sup>−3</sup>', '× 10<sup>3</sup>', 'De µA à mA : exposant (−6) − (−3) = −3. Dans l’autre sens : (−3) − (−6) = 3.'),
+    schema: I.fleches('µA', 'mA', ['−6 − (−3) = −3', 'donc × 10<sup>−3</sup>'], ['−3 − (−6) = 3', 'donc × 10<sup>3</sup>'], 'µA = 10<sup>−6</sup>, mA = 10<sup>−3</sup> : exposant = (départ) − (arrivée).'),
     methode: I.etapes(['Écris les puissances de 10 des deux préfixes.', 'Exposant de conversion = (départ) − (arrivée), avec des parenthèses autour d’un exposant négatif.', 'Recopie le nombre et multiplie-le par cette puissance de 10.']),
     exemple: I.exemples([calc('450&nbsp;µA → mA : −6 − (−3) = −3') + calc('450&nbsp;µA = ' + c('450 × 10<sup>−3</sup>&nbsp;mA')), calc('2,5&nbsp;km → cm : 3 − (−2) = 5') + calc('2,5&nbsp;km = ' + c('2,5 × 10<sup>5</sup>&nbsp;cm'))]),
     piege: '−6 − (−3) = −6 + 3 = −3, pas −9.',

@@ -244,7 +244,8 @@ html.cn-tiroir-ouvert { overflow: hidden; }
 .cn-partie { padding: 12px 14px; border-radius: 16px; background: var(--paper); }
 .cn-partie-ok { background: var(--success-bg); }
 .cn-partie-ko { background: var(--danger-bg); }
-.cn-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 1.08rem; line-height: 1.6; font-variant-numeric: tabular-nums; }
+.cn-ligne { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 8px; font-size: 1.08rem; line-height: 1.6; font-variant-numeric: tabular-nums; }
+/* le champ, le « 10 » d'un exposant à écrire et le texte sont sur la même ligne de base : l'exposant est plus haut */
 .cn-texte { min-width: 0; }
 .cn-lettre { font-weight: 800; color: var(--accent-ink); }
 .cn-apres { font-weight: 600; }
@@ -400,14 +401,16 @@ sup.cn-c-e { font-size: .72em; vertical-align: super; line-height: 0; margin-lef
 .cn-fl2 { display: flex; align-items: center; gap: 8px; width: fit-content; }
 .cn-fl2-u { padding: 10px 14px; border-radius: 12px; background: var(--cle-bg); color: var(--accent-ink); font-weight: 800; font-size: 1.15rem; white-space: nowrap; }
 .cn-fl2-m { display: flex; flex-direction: column; gap: 10px; min-width: 7.5rem; }
-.cn-fl2-h, .cn-fl2-b { position: relative; display: block; text-align: center; font-weight: 700; font-size: .95rem; white-space: nowrap; padding-bottom: 5px; }
-.cn-fl2-h::after, .cn-fl2-b::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--accent); }
-.cn-fl2-h::before, .cn-fl2-b::before { content: ''; position: absolute; bottom: -4px; border: 5px solid transparent; }
-.cn-fl2-h::before { right: -2px; border-left: 8px solid var(--accent); border-right: 0; }
-.cn-fl2-b::before { left: -2px; border-right: 8px solid var(--accent); border-left: 0; }
+.cn-fl2-h, .cn-fl2-b { display: block; text-align: center; font-weight: 700; font-size: .95rem; white-space: nowrap; color: var(--accent-ink); }
+.cn-fl2-t { display: block; padding: 0 4px 3px; }
+.cn-fl2-t small { display: block; font-weight: 600; font-size: .82rem; color: var(--ink-2); }
+/* trait + pointe dans une rangée centrée : la pointe est toujours dans l'axe du trait */
+.cn-fl2-trait { display: flex; align-items: center; color: var(--accent); }
+.cn-fl2-trait i { flex: 1; height: 2px; background: currentColor; }
+.cn-fl2-pt { flex: none; display: block; margin-left: -1px; fill: currentColor; }
 .cn-fl2-b { color: var(--ink-2); }
-.cn-fl2-b::after { background: var(--ink-3); }
-.cn-fl2-b::before { border-right-color: var(--ink-3); }
+.cn-fl2-b .cn-fl2-trait { flex-direction: row-reverse; color: var(--ink-3); }
+.cn-fl2-b .cn-fl2-pt { transform: rotate(180deg); margin: 0 -1px 0 0; }
 
 /* échelle des préfixes et cartes pour les retenir */
 .cn-echelle { display: grid; grid-template-columns: 1fr; gap: 10px; }
@@ -463,3 +466,7 @@ sup.cn-c-e { font-size: .72em; vertical-align: super; line-height: 0; margin-lef
 .cn-marche-c { padding: 8px 12px; border-radius: 12px; background: var(--cle-bg); text-align: center; }
 .cn-marche-c small { display: block; color: var(--ink-2); }
 .cn-marche-eg { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+.cn-ligne .calc-icone { align-self: center; }
+/* flèche retour : le trait d'abord, le libellé dessous (les deux traits encadrent l'axe des unités) */
+.cn-fl2-b { display: flex; flex-direction: column-reverse; }
+.cn-fl2-b .cn-fl2-t { padding: 3px 4px 0; }
