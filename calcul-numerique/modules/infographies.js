@@ -10,6 +10,7 @@
      CN.I.chiffresCS(t)            chiffres significatifs comptés, zéros de gauche barrés
      CN.I.arrondi(t, n)            chiffres gardés, chiffre suivant entouré
      CN.I.fleches(a, b, aller, retour, legende)  deux unités et les facteurs dans les deux sens
+                                   (aller, retour : facteur, ou [calcul, facteur])
      CN.I.echellePref()            les préfixes : les grands et les petits
      CN.I.memoPref()               cartes pour retenir les préfixes
      CN.I.carre() / CN.I.cube()    1 m² = 10⁴ cm², 1 m³ = 10⁶ cm³
@@ -67,7 +68,12 @@
       const a = x(c0 + sg * j), b = x(c0 + sg * (j + 1)), m = (a + b) / 2;
       s += '<path d="M' + a + ' 42 Q' + m + ' 20 ' + b + ' 42" class="cn-sv-arc"/>';
       s += '<text x="' + m + '" y="17" class="cn-sv-n">' + (j + 1) + '</text>';
-      if (j === Math.abs(n) - 1) s += '<path d="M' + b + ' 42 l' + (-sg * 7) + ' -6 l' + (sg * 1) + ' 8 z" class="cn-sv-pt"/>';
+      if (j === Math.abs(n) - 1) {
+        // pointe dans le prolongement de l'arc : direction de la tangente en bout de courbe (point de contrôle → extrémité)
+        const dx = b - m, dy = 42 - 20, l = Math.hypot(dx, dy), ux = dx / l, uy = dy / l, L0 = 8, l0 = 4;
+        const bx = b - L0 * ux, by = 42 - L0 * uy;
+        s += '<path d="M' + b + ' 42 L' + (bx - l0 * uy).toFixed(2) + ' ' + (by + l0 * ux).toFixed(2) + ' L' + (bx + l0 * uy).toFixed(2) + ' ' + (by - l0 * ux).toFixed(2) + ' Z" class="cn-sv-pt"/>';
+      }
     }
     const dit = 'La virgule se déplace de ' + Math.abs(n) + ' rang' + (Math.abs(n) > 1 ? 's' : '') + ' vers la ' + (n > 0 ? 'droite' : 'gauche');
     return '<figure class="cn-fig"><svg class="cn-svg" viewBox="0 0 ' + L + ' ' + H + '" width="' + L + '" height="' + H + '" role="img" aria-label="' + dit + '">' + s + '</svg>' +
@@ -103,9 +109,14 @@
   }
 
   /* ---------- Deux unités, un facteur dans chaque sens ---------- */
+  // une flèche : libellé au-dessus, trait et pointe sur la même ligne (pointe centrée sur le trait)
+  const POINTE = '<svg class="cn-fl2-pt" viewBox="0 0 10 10" width="10" height="10" aria-hidden="true"><path d="M0 0 L10 5 L0 10 Z"/></svg>';
+  const fleche = (cls, txt) => '<span class="' + cls + '"><span class="cn-fl2-t">' + txt + '</span><span class="cn-fl2-trait"><i></i>' + POINTE + '</span></span>';
+  // aller, retour : texte du facteur, ou [calcul, facteur] (le calcul s'écrit au-dessus du facteur)
+  const libelle = x => Array.isArray(x) ? '<small>' + x[0] + '</small>' + x[1] : x;
   function fleches(a, b, aller, retour, legende) {
-    return '<figure class="cn-fig"><div class="cn-fl2" role="img" aria-label="De ' + CN_txt(a) + ' à ' + CN_txt(b) + ' : ' + CN_txt(aller) + ' ; de ' + CN_txt(b) + ' à ' + CN_txt(a) + ' : ' + CN_txt(retour) + '">' +
-      '<span class="cn-fl2-u">' + a + '</span><span class="cn-fl2-m"><span class="cn-fl2-h">' + aller + '</span><span class="cn-fl2-b">' + retour + '</span></span><span class="cn-fl2-u">' + b + '</span></div>' +
+    return '<figure class="cn-fig"><div class="cn-fl2" role="img" aria-label="De ' + CN_txt(a) + ' à ' + CN_txt(b) + ' : ' + CN_txt(libelle(aller)) + ' ; de ' + CN_txt(b) + ' à ' + CN_txt(a) + ' : ' + CN_txt(libelle(retour)) + '">' +
+      '<span class="cn-fl2-u">' + a + '</span><span class="cn-fl2-m">' + fleche('cn-fl2-h', libelle(aller)) + fleche('cn-fl2-b', libelle(retour)) + '</span><span class="cn-fl2-u">' + b + '</span></div>' +
       (legende ? '<figcaption>' + legende + '</figcaption>' : '') + '</figure>';
   }
   const CN_txt = h => String(h).replace(/<sup>/g, ' puissance ').replace(/<[^>]+>/g, '').replace(/"/g, '');
