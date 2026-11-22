@@ -6,7 +6,7 @@
      R  Écrire un résultat   : ES (écriture scientifique), CS (chiffres significatifs)
      C  Conversions          : PR (préfixes), CV (conversions)
    Chaque compétence : identifiant, famille, niveau (ordre de progression),
-   prérequis, titre, fiche (regle, methode, exemple, piege : HTML),
+   prérequis, titre, fiche (regle, schema : infographie, methode, exemple, piege : HTML),
    et gen(niv) : une question différente à chaque appel, niv = difficulté 1 à 3
    (1 : guidée en 2 ou 3 parties ; 2 : une étape intermédiaire ; 3 : réponse directe).
    CV1 (vers ou depuis l'unité sans préfixe) est la compétence clé : cle: true
@@ -15,11 +15,12 @@
    Question produite :
      { comp, diff, cle, enonce, parties: [partie], solution, indices: [html] }
    Partie :
-     { type: 'nb', q, apres, v, rel, forme: 'sci' | 'dec', cs, brut, entier, sup, calc, diag(r) }
+     { type: 'nb', q, apres, v, rel, forme: 'sci' | 'dec', cs, brut, entier, sup, calc, aff, diag(r) }
         q : texte avant le champ ; apres : unité après le champ ; v : valeur attendue ;
         rel : tolérance relative ; forme : écriture imposée ; cs : chiffres significatifs
         attendus (brut : valeur avant arrondi) ; entier : exposant ou entier seul ;
         sup : champ en exposant (« 10^□ ») ; calc : icône calculatrice ;
+        aff : réponse attendue écrite (conversions : avec la puissance de 10) ;
         diag(r) : diagnostic d'une valeur fausse (r : lecture du champ, CN.N.Champ.lire)
      { type: 'choix', q, options: [{ id, label }], bonne, indices: { id: diagnostic } }
    Ce fichier : thèmes, familles, outils communs des fabriques et compétences
@@ -32,6 +33,7 @@
   const CN = window.CN = window.CN || {};
   const N = CN.N;
   const { hasard, entre, melanger, nb, ent, p10, ecr } = N;
+  const I = CN.I;                                               // infographies et mise en forme des notions
   const P10 = n => Math.pow(10, n);
   const fix = x => +(+x).toPrecision(12);                      // efface les restes du calcul en virgule flottante
   const par = n => (n < 0 ? '(' + ent(n) + ')' : ent(n));       // (−3) après un signe
@@ -55,7 +57,7 @@
     { id: 'C', nom: 'Conversions', fam: ['PR', 'CV'] }
   ];
   const familles = [
-    { id: 'PU', theme: 'P', nom: 'Puissances de 10', desc: '10ⁿ est un 1 suivi de n zéros, 10⁻ⁿ un 1 au n-ième rang après la virgule. Multiplier par 10ⁿ déplace la virgule.' },
+    { id: 'PU', theme: 'P', nom: 'Puissances de 10', desc: '10ⁿ est un 1 suivi de n zéros ; 10⁻ⁿ s’écrit avec n zéros (en comptant celui avant la virgule) puis un 1. Multiplier par 10ⁿ déplace la virgule.' },
     { id: 'ES', theme: 'R', nom: 'Écriture scientifique', desc: 'Un nombre s’écrit a × 10ⁿ avec 1 ≤ a < 10 : un seul chiffre non nul avant la virgule.' },
     { id: 'CS', theme: 'R', nom: 'Chiffres significatifs', desc: 'Les chiffres significatifs disent la précision d’une valeur : on les compte, on arrondit, et un résultat n’est pas plus précis que ses données.' },
     { id: 'PR', theme: 'C', nom: 'Préfixes', desc: 'Chaque préfixe (k, m, µ…) est une puissance de 10 : les connaître par cœur, c’est la moitié d’une conversion.' },
@@ -94,12 +96,8 @@
     return { h, e: qn.e - kd * qd.e, qn, un, qd, ud, kd };
   }
   const valConv = (x, p, E) => fix(x * P10(p + E));
-  // résultat écrit : décimal quand il reste lisible, sinon a × 10ⁿ
-  function resultat(x, p, E) {
-    const v = valConv(x, p, E);
-    const lisible = Math.abs(v) >= 1e-4 && Math.abs(v) < 1e7;
-    return (p + E ? ecr(x, p + E) + (lisible ? ' = ' + nb(v) : '') : nb(x));
-  }
+  // résultat écrit d'une conversion : toujours avec la puissance de 10 (jamais l'écriture décimale), sauf 10⁰
+  const resultat = (x, p, E) => ecr(x, p + E, true);
   // diagnostic d'une conversion : exposant obtenu par l'élève, comparé aux erreurs typiques
   function diagConv(o) {
     return r => {
@@ -119,7 +117,7 @@
   }
   // la partie « résultat » d'une conversion
   function partieConv(o, q) {
-    return nbP(q || ecr(o.x, o.p || 0, true) + '&nbsp;' + o.de.h + ' =', valConv(o.x, o.p || 0, o.E), { apres: o.vers.h, diag: diagConv(o) });
+    return nbP(q || ecr(o.x, o.p || 0, true) + '&nbsp;' + o.de.h + ' =', valConv(o.x, o.p || 0, o.E), { apres: o.vers.h, aff: resultat(o.x, o.p || 0, o.E), diag: diagConv(o) });
   }
   // une puissance de 10 à écrire (exposant), avec des erreurs typiques
   function partieExp(q, v, erreurs, defaut) {
@@ -161,45 +159,47 @@
 
   /* -------------------- PUISSANCES DE 10 -------------------- */
   ajouter({ id: 'PU1', famille: 'PU', niveau: 1, prerequis: [], titre: '10<sup>n</sup> et l’écriture décimale',
-    regle: '10<sup>n</sup> (n positif) s’écrit avec un 1 suivi de <b>n zéros</b> : 10<sup>3</sup> = 1&nbsp;000. 10<sup>−n</sup> s’écrit avec le chiffre 1 au <b>n-ième rang après la virgule</b> : 10<sup>−3</sup> = 0,001. Et 10<sup>0</sup> = 1.',
-    methode: 'Pour 10<sup>n</sup> : écris 1 puis n zéros. Pour 10<sup>−n</sup> : écris 0, puis la virgule, puis place le 1 au rang n (n − 1 zéros après la virgule).',
-    exemple: calc('10<sup>4</sup> = ' + c('10&nbsp;000')) + calc('10<sup>−2</sup> = ' + c('0,01')) + calc('0,000&nbsp;1 = ' + c('10<sup>−4</sup>')),
+    regle: '10<sup>n</sup> (n positif) s’écrit avec un 1 suivi de <b>n zéros</b> : 10<sup>3</sup> = 1&nbsp;000. 10<sup>−n</sup> s’écrit avec <b>n zéros, en comptant celui avant la virgule</b>, puis le chiffre 1 : 10<sup>−3</sup> = 0,001. Et 10<sup>0</sup> = 1.',
+    schema: I.zeros(3) + I.zeros(-3),
+    methode: I.etapes(['Pour 10<sup>n</sup> : écris 1, puis n zéros.', 'Pour 10<sup>−n</sup> : écris n zéros en comptant celui avant la virgule (0,00…), puis le 1.', 'Dans l’autre sens, compte les zéros de la même façon : c’est l’exposant, avec un signe − si le nombre est plus petit que 1.']),
+    exemple: I.exemples([calc('10<sup>4</sup> = ' + c('10&nbsp;000') + ' (4 zéros)'), calc('10<sup>−2</sup> = ' + c('0,01') + ' (2 zéros, dont celui avant la virgule)'), calc('0,000&nbsp;1 = ' + c('10<sup>−4</sup>') + ' (4 zéros)')]),
     piege: 'Un exposant négatif ne donne pas un nombre négatif : 10<sup>−3</sup> = 0,001 (un millième), pas −1&nbsp;000.',
     gen(niv) {
       const n = niv === 1 ? entre(1, 6) : niv === 2 ? -entre(1, 6) : hasard([0, -5, -6, -4, 7, 8, 9, 5, -1]);
       const v = P10(n), dir = Math.random() < 0.5;
-      const sol = n >= 0 ? '<p>10<sup>' + n + '</sup> : un 1 suivi de ' + n + ' zéro' + (n > 1 ? 's' : '') + '.</p>' : '<p>10<sup>' + ent(n) + '</sup> : le chiffre 1 au ' + (-n) + '<sup>e</sup> rang après la virgule.</p>';
+      const sol = n >= 0 ? '<p>10<sup>' + n + '</sup> : un 1 suivi de ' + n + ' zéro' + (n > 1 ? 's' : '') + '.</p>' : '<p>10<sup>' + ent(n) + '</sup> : ' + (-n) + ' zéro' + (-n > 1 ? 's' : '') + ' en comptant celui avant la virgule, puis le 1.</p>';
       if (dir) {
-        return question('PU1', niv, 'PU1:d' + n, 'Écris ce nombre en écriture décimale.', [
+        return question('PU1', niv, 'PU1:d' + n, 'Écris ' + p10(n) + ' en écriture décimale.', [
           nbP(p10(n) + ' =', v, { forme: 'dec', diag: r => {
             if (r.v < 0) return 'Un exposant négatif ne donne pas un nombre négatif : ' + p10(n) + ' est positif, ' + (n < 0 ? 'plus petit que 1.' : '.');
             const R = Math.round(Math.log10(Math.abs(r.v)));
             if (r.v === 10 * n) return p10(n) + ' n’est pas 10 × ' + n + ' : c’est 10 multiplié ' + n + ' fois par lui-même.';
             if (R === -n && n) return 'Attention au signe de l’exposant : ' + (n > 0 ? 'positif, le nombre est grand.' : 'négatif, le nombre est plus petit que 1.');
-            if (n < 0 && R !== n) return 'Pour 10<sup>−n</sup>, le 1 est au n-ième rang après la virgule : 10<sup>−3</sup> = 0,001 (trois chiffres après la virgule).';
+            if (n < 0 && R !== n) return 'Pour 10<sup>−n</sup>, écris n zéros en comptant celui avant la virgule, puis le 1 : 10<sup>−3</sup> = 0,001 (trois zéros).';
             if (n >= 0 && R !== n) return 'Compte les zéros : 10<sup>n</sup> s’écrit 1 suivi de n zéros.';
             return null;
           } })], sol + calc(p10(n) + ' = ' + c(nb(v))),
-          [n >= 0 ? 'L’exposant ' + n + ' donne le nombre de zéros après le 1.' : 'L’exposant est négatif : le nombre est plus petit que 1.', n < 0 ? 'Le chiffre 1 est au rang ' + (-n) + ' après la virgule.' : 'Écris 1 puis ' + n + ' zéros.']);
+          [n >= 0 ? 'L’exposant ' + n + ' donne le nombre de zéros après le 1.' : 'L’exposant est négatif : le nombre est plus petit que 1.', n < 0 ? 'Écris ' + (-n) + ' zéro' + (-n > 1 ? 's' : '') + ' en comptant celui avant la virgule, puis le 1.' : 'Écris 1 puis ' + n + ' zéros.']);
       }
-      return question('PU1', niv, 'PU1:r' + n, 'Écris ce nombre comme une puissance de 10.', [
-        partieExp(nb(v) + ' = 10', n, [[-n, 'Attention au signe : ' + (n < 0 ? 'un nombre plus petit que 1 a un exposant négatif.' : 'un nombre plus grand que 1 a un exposant positif.')], [n + 1, 'Compte encore : ' + (n >= 0 ? 'le nombre de zéros après le 1.' : 'le rang du 1 après la virgule.')], [n - 1, 'Compte encore : ' + (n >= 0 ? 'le nombre de zéros après le 1.' : 'le rang du 1 après la virgule.')]],
-          n >= 0 ? 'Compte les zéros après le 1.' : 'Compte le rang du chiffre 1 après la virgule : c’est l’exposant, avec un signe −.')],
+      return question('PU1', niv, 'PU1:r' + n, 'Écris ' + nb(v) + ' comme une puissance de 10.', [
+        partieExp(nb(v) + ' = 10', n, [[-n, 'Attention au signe : ' + (n < 0 ? 'un nombre plus petit que 1 a un exposant négatif.' : 'un nombre plus grand que 1 a un exposant positif.')], [n + 1, 'Compte encore : ' + (n >= 0 ? 'le nombre de zéros après le 1.' : 'tous les zéros, y compris celui avant la virgule.')], [n - 1, 'Compte encore : ' + (n >= 0 ? 'le nombre de zéros après le 1.' : 'tous les zéros, y compris celui avant la virgule.')]],
+          n >= 0 ? 'Compte les zéros après le 1.' : 'Compte tous les zéros, y compris celui avant la virgule : c’est l’exposant, avec un signe −.')],
         sol + calc(nb(v) + ' = ' + c(p10(n))),
-        [n >= 0 ? 'Compte les zéros après le 1.' : 'Le nombre est plus petit que 1 : l’exposant est négatif.', n < 0 ? 'Compte le rang du 1 après la virgule.' : 'Il y a ' + n + ' zéro' + (n > 1 ? 's' : '') + '.']);
+        [n >= 0 ? 'Compte les zéros après le 1.' : 'Le nombre est plus petit que 1 : l’exposant est négatif.', n < 0 ? 'Compte tous les zéros, y compris celui avant la virgule.' : 'Il y a ' + n + ' zéro' + (n > 1 ? 's' : '') + '.']);
     } });
 
   ajouter({ id: 'PU2', famille: 'PU', niveau: 2, prerequis: ['PU1'], titre: 'Multiplier par 10<sup>n</sup> : la virgule se déplace',
     regle: 'Multiplier par 10<sup>n</sup> déplace la virgule de <b>n rangs vers la droite</b> (le nombre grandit). Multiplier par 10<sup>−n</sup> la déplace de <b>n rangs vers la gauche</b> (le nombre rapetisse). Les chiffres ne changent pas : on ajoute des zéros si besoin.',
-    methode: 'Repère le signe de l’exposant (droite si positif, gauche si négatif), puis déplace la virgule d’autant de rangs que l’exposant, en complétant par des zéros.',
-    exemple: calc('3,45 × 10<sup>2</sup> = ' + c('345')) + calc('3,45 × 10<sup>−2</sup> = ' + c('0,0345')) + calc('2,7 × 10<sup>3</sup> = ' + c('2&nbsp;700')),
+    schema: I.sauts('3,45', 2, '3,45 × 10<sup>2</sup> = 345 : exposant +2, la virgule va de 2 rangs vers la droite.') + I.sauts('3,45', -2, '3,45 × 10<sup>−2</sup> = 0,034&nbsp;5 : exposant −2, la virgule va de 2 rangs vers la gauche.'),
+    methode: I.etapes(['Repère le signe de l’exposant : positif → la virgule va vers la droite (le nombre grandit) ; négatif → vers la gauche (il rapetisse).', 'Déplace la virgule d’autant de rangs que l’exposant.', 'Complète par des zéros si besoin.']),
+    exemple: I.exemples([calc('3,45 × 10<sup>2</sup> = ' + c('345')), calc('3,45 × 10<sup>−2</sup> = ' + c('0,034&nbsp;5')), calc('2,7 × 10<sup>3</sup> = ' + c('2&nbsp;700') + ' (deux zéros ajoutés)')]),
     piege: 'On ne colle pas des zéros à la fin d’un décimal : 3,45 × 10<sup>2</sup> = 345, pas 3,4500.',
     gen(niv) {
       const x = niv === 1 ? hasard([3.45, 2.7, 12.5, 1.08, 0.6, 4.2, 7.35, 5.1]) : niv === 2 ? hasard([3.45, 27, 125, 4.2, 0.8, 56, 9.1, 1.6]) : hasard([0.052, 45.6, 3080, 0.7, 1.25, 607, 0.0039]);
       const n = niv === 1 ? entre(1, 3) : niv === 2 ? -entre(1, 3) : hasard([4, 5, -4, -5, 6, -3]);
       const v = fix(x * P10(n));
       const parts = [];
-      if (niv === 1) parts.push(choixP('Dans quel sens la virgule se déplace-t-elle ?', [{ id: 'd', label: 'Vers la droite' }, { id: 'g', label: 'Vers la gauche' }], n > 0 ? 'd' : 'g',
+      if (niv === 1) parts.push(choixP('Pour calculer <b>' + ecr(x, n) + '</b>, dans quel sens la virgule se déplace-t-elle ?', [{ id: 'd', label: 'Vers la droite' }, { id: 'g', label: 'Vers la gauche' }], n > 0 ? 'd' : 'g',
         { [n > 0 ? 'g' : 'd']: n > 0 ? 'L’exposant est positif : le nombre grandit, la virgule va vers la droite.' : 'L’exposant est négatif : le nombre rapetisse, la virgule va vers la gauche.' }));
       parts.push(nbP(ecr(x, n) + ' =', v, { forme: 'dec', diag: r => {
         if (r.v <= 0) return 'Le résultat est positif : un exposant négatif rend le nombre plus petit, pas négatif.';
@@ -208,16 +208,17 @@
         if (R === -n) return 'Tu as déplacé la virgule dans le mauvais sens : ' + (n > 0 ? 'exposant positif → vers la droite (le nombre grandit).' : 'exposant négatif → vers la gauche (le nombre rapetisse).');
         return 'Tu as déplacé la virgule de ' + Math.abs(R) + ' rang' + (Math.abs(R) > 1 ? 's' : '') + ' : il faut ' + Math.abs(n) + ' rang' + (Math.abs(n) > 1 ? 's' : '') + '.';
       } }));
-      return question('PU2', niv, 'PU2:' + x + ':' + n, 'Écris le résultat en écriture décimale.', parts,
+      return question('PU2', niv, 'PU2:' + x + ':' + n, 'Calcule ' + ecr(x, n) + ' et écris le résultat en écriture décimale.', parts,
         '<p>Exposant ' + ent(n) + ' : la virgule se déplace de ' + Math.abs(n) + ' rang' + (Math.abs(n) > 1 ? 's' : '') + ' vers la ' + (n > 0 ? 'droite' : 'gauche') + '.</p>' + calc(ecr(x, n) + ' = ' + c(nb(v))),
         [n > 0 ? 'Exposant positif : la virgule va vers la droite.' : 'Exposant négatif : la virgule va vers la gauche.', 'Elle se déplace de ' + Math.abs(n) + ' rang' + (Math.abs(n) > 1 ? 's' : '') + ' ; complète par des zéros si besoin.']);
     } });
 
   ajouter({ id: 'PU3', famille: 'PU', niveau: 3, prerequis: ['PU1'], titre: 'Produit et quotient de puissances de 10',
     regle: 'Pour un <b>produit</b>, on <b>additionne</b> les exposants : 10<sup>a</sup> × 10<sup>b</sup> = 10<sup>a + b</sup>. Pour un <b>quotient</b>, on <b>soustrait</b> : 10<sup>a</sup> / 10<sup>b</sup> = 10<sup>a − b</sup>. Avec des nombres devant : on calcule les nombres entre eux, les puissances de 10 entre elles.',
-    methode: 'Écris l’opération sur les exposants, avec des parenthèses autour des exposants négatifs : 10<sup>3</sup> / 10<sup>−2</sup> = 10<sup>3 − (−2)</sup> = 10<sup>5</sup>.',
-    exemple: calc('10<sup>5</sup> × 10<sup>−2</sup> = 10<sup>5 + (−2)</sup> = ' + c('10<sup>3</sup>')) + calc('10<sup>3</sup> / 10<sup>−2</sup> = 10<sup>3 − (−2)</sup> = ' + c('10<sup>5</sup>')) +
-      calc('(2 × 10<sup>3</sup>) × (4 × 10<sup>−5</sup>) = 8 × 10<sup>−2</sup>'),
+    schema: '<figure class="cn-fig"><p class="cn-fig-t">10<sup>2</sup> × 10<sup>3</sup> = (10 × 10) × (10 × 10 × 10) = <b>10<sup>5</sup></b></p><figcaption>2 facteurs 10, puis 3 facteurs 10 : 2 + 3 = 5 facteurs 10 en tout.</figcaption></figure>',
+    methode: I.etapes(['Produit : additionne les exposants. Quotient : exposant du haut − exposant du bas.', 'Mets des parenthèses autour des exposants négatifs : 10<sup>3</sup> / 10<sup>−2</sup> = 10<sup>3 − (−2)</sup> = 10<sup>5</sup>.', 'Avec des nombres devant : calcule les nombres entre eux, puis les puissances de 10 entre elles.']),
+    exemple: I.exemples([calc('10<sup>5</sup> × 10<sup>−2</sup> = 10<sup>5 + (−2)</sup> = ' + c('10<sup>3</sup>')), calc('10<sup>3</sup> / 10<sup>−2</sup> = 10<sup>3 − (−2)</sup> = ' + c('10<sup>5</sup>')),
+      calc('(2 × 10<sup>3</sup>) × (4 × 10<sup>−5</sup>) = (2 × 4) × 10<sup>3 + (−5)</sup> = ' + c('8 × 10<sup>−2</sup>'))]),
     piege: 'On ne multiplie pas les exposants d’un produit : 10<sup>2</sup> × 10<sup>3</sup> = 10<sup>5</sup>, pas 10<sup>6</sup>.',
     gen(niv) {
       const prod = Math.random() < 0.5;
@@ -229,7 +230,7 @@
         const err = prod ? [[a - b, 'Pour un produit, on <b>additionne</b> les exposants.'], [a * b, 'On additionne les exposants d’un produit, on ne les multiplie pas.'], [-(a + b), 'Attention aux signes des exposants.']]
           : [[a + b, 'Pour un quotient, on <b>soustrait</b> : exposant du haut − exposant du bas.' + (b < 0 ? ' Ici ' + ent(a) + ' − ' + par(b) + '.' : '')], [b - a, 'Dans l’ordre : exposant du haut − exposant du bas.'], [-(a - b), 'Attention aux signes : ' + ent(a) + ' − ' + par(b) + '.']];
         const h = prod ? p10(a) + ' × ' + p10(b) : p10(a) + ' / ' + p10(b);
-        return question('PU3', niv, 'PU3:' + prod + a + ':' + b, 'Écris le résultat comme une seule puissance de 10.', [
+        return question('PU3', niv, 'PU3:' + prod + a + ':' + b, 'Écris ' + h + ' comme une seule puissance de 10.', [
           partieExp(h + ' = 10', v, err, prod ? 'Produit : on additionne les exposants.' : 'Quotient : exposant du haut − exposant du bas.')],
           calc(h + ' = 10<sup>' + ent(a) + (prod ? ' + ' : ' − ') + par(b) + '</sup> = ' + c(p10(v))),
           [prod ? 'Pour un produit, on additionne les exposants.' : 'Pour un quotient, on soustrait : haut − bas.', 'Calcule ' + ent(a) + (prod ? ' + ' : ' − ') + par(b) + '.']);
@@ -252,20 +253,21 @@
 
   ajouter({ id: 'PU4', famille: 'PU', niveau: 4, prerequis: ['PU3'], titre: 'Inverse et puissance d’une puissance',
     regle: 'L’<b>inverse</b> change le signe de l’exposant : 1 / 10<sup>n</sup> = 10<sup>−n</sup>. La <b>puissance d’une puissance</b> multiplie les exposants : (10<sup>a</sup>)<sup>b</sup> = 10<sup>a × b</sup>.',
-    methode: 'Inverse : garde la valeur de l’exposant, change son signe. Puissance d’une puissance : multiplie les deux exposants (attention aux signes). Termine par les règles du produit et du quotient.',
-    exemple: calc('1 / 10<sup>4</sup> = ' + c('10<sup>−4</sup>')) + calc('1 / 10<sup>−3</sup> = ' + c('10<sup>3</sup>')) + calc('(10<sup>−2</sup>)<sup>3</sup> = 10<sup>−2 × 3</sup> = ' + c('10<sup>−6</sup>')),
+    schema: '<figure class="cn-fig"><p class="cn-fig-t">(10<sup>2</sup>)<sup>3</sup> = 10<sup>2</sup> × 10<sup>2</sup> × 10<sup>2</sup> = 10<sup>2 + 2 + 2</sup> = <b>10<sup>2 × 3</sup> = 10<sup>6</sup></b></p><figcaption>Trois fois 10<sup>2</sup> : on ajoute trois fois l’exposant 2, c’est-à-dire qu’on le multiplie par 3.</figcaption></figure>',
+    methode: I.etapes(['Inverse : garde la valeur de l’exposant et change son signe.', 'Puissance d’une puissance : multiplie les deux exposants (attention aux signes).', 'Termine avec les règles du produit et du quotient.']),
+    exemple: I.exemples([calc('1 / 10<sup>4</sup> = ' + c('10<sup>−4</sup>')), calc('1 / 10<sup>−3</sup> = ' + c('10<sup>3</sup>')), calc('(10<sup>−2</sup>)<sup>3</sup> = 10<sup>−2 × 3</sup> = ' + c('10<sup>−6</sup>'))]),
     piege: '(10<sup>2</sup>)<sup>3</sup> = 10<sup>6</sup> (on multiplie), alors que 10<sup>2</sup> × 10<sup>3</sup> = 10<sup>5</sup> (on additionne).',
     gen(niv) {
       const t = niv === 1 ? 'inv' : niv === 2 ? 'pp' : hasard(['inv-pp', 'pp-prod', 'pp-quot']);
       if (t === 'inv') {
         const n = hasard([-6, -4, -3, -2, -1, 1, 2, 3, 5, 6]);
-        return question('PU4', niv, 'PU4:i' + n, 'Écris l’inverse comme une puissance de 10.', [
+        return question('PU4', niv, 'PU4:i' + n, 'Écris l’inverse de ' + p10(n) + ' comme une puissance de 10.', [
           partieExp('1 / ' + p10(n) + ' = 10', -n, [[n, 'L’inverse <b>change le signe</b> de l’exposant.']], 'L’inverse garde la valeur de l’exposant et change son signe.')],
           calc('1 / ' + p10(n) + ' = ' + c(p10(-n))), ['L’inverse change le signe de l’exposant.']);
       }
       if (t === 'pp') {
         const a = hasard([-5, -3, -2, -1, 2, 3, 4]), b = hasard([2, 3, 4]);
-        return question('PU4', niv, 'PU4:p' + a + b, 'Écris le résultat comme une seule puissance de 10.', [
+        return question('PU4', niv, 'PU4:p' + a + b, 'Écris (' + p10(a) + ')<sup>' + b + '</sup> comme une seule puissance de 10.', [
           partieExp('(' + p10(a) + ')<sup>' + b + '</sup> = 10', a * b, [[a + b, 'Puissance d’une puissance : on <b>multiplie</b> les exposants (on additionne pour un produit).'], [-a * b, 'Attention au signe : ' + par(a) + ' × ' + b + '.']], 'On multiplie les exposants : ' + par(a) + ' × ' + b + '.')],
           calc('(' + p10(a) + ')<sup>' + b + '</sup> = 10<sup>' + par(a) + ' × ' + b + '</sup> = ' + c(p10(a * b))), ['Puissance d’une puissance : on multiplie les exposants.']);
       }
@@ -274,7 +276,7 @@
       if (t === 'inv-pp') { h = '1 / (' + p10(a) + ')<sup>' + b + '</sup>'; v = -a * b; s = '1 / 10<sup>' + ent(a * b) + '</sup> = ' + c(p10(v)); }
       else if (t === 'pp-prod') { h = '(' + p10(a) + ')<sup>' + b + '</sup> × ' + p10(d); v = a * b + d; s = '10<sup>' + ent(a * b) + '</sup> × ' + p10(d) + ' = 10<sup>' + ent(a * b) + ' + ' + par(d) + '</sup> = ' + c(p10(v)); }
       else { h = '(' + p10(a) + ')<sup>' + b + '</sup> / ' + p10(d); v = a * b - d; s = '10<sup>' + ent(a * b) + '</sup> / ' + p10(d) + ' = 10<sup>' + ent(a * b) + ' − ' + par(d) + '</sup> = ' + c(p10(v)); }
-      return question('PU4', niv, 'PU4:' + h, 'Écris le résultat comme une seule puissance de 10.', [
+      return question('PU4', niv, 'PU4:' + h, 'Écris ' + h + ' comme une seule puissance de 10.', [
         partieExp(h + ' = 10', v, [], 'D’abord la puissance d’une puissance : (' + p10(a) + ')<sup>' + b + '</sup> = 10<sup>' + ent(a * b) + '</sup>. Puis ' + (t === 'inv-pp' ? 'l’inverse change le signe.' : t === 'pp-prod' ? 'le produit : on additionne.' : 'le quotient : haut − bas.'))],
         calc('(' + p10(a) + ')<sup>' + b + '</sup> = 10<sup>' + ent(a * b) + '</sup>') + calc(s),
         ['Commence par (' + p10(a) + ')<sup>' + b + '</sup> : on multiplie les exposants.', t === 'inv-pp' ? 'Puis l’inverse change le signe de l’exposant.' : t === 'pp-prod' ? 'Puis le produit : on additionne les exposants.' : 'Puis le quotient : exposant du haut − exposant du bas.']);
@@ -286,7 +288,8 @@
   ajouter({ id: 'ES1', famille: 'ES', niveau: 2, prerequis: ['PU1'], titre: 'Reconnaître l’écriture scientifique',
     regle: 'L’<b>écriture scientifique</b> d’un nombre est a × 10<sup>n</sup>, avec <b>1 ≤ a &lt; 10</b> (un seul chiffre, non nul, avant la virgule) et n entier.',
     methode: 'Regarde seulement le nombre a devant la puissance de 10 : il doit être au moins égal à 1 et plus petit que 10.',
-    exemple: '<p>4,5 × 10<sup>3</sup> ✓ · 1 × 10<sup>−6</sup> ✓ · 45 × 10<sup>2</sup> ✗ (45 ≥ 10) · 0,45 × 10<sup>4</sup> ✗ (0,45 &lt; 1)</p>',
+    schema: '<figure class="cn-fig"><p class="cn-fig-t cn-grand"><b class="cn-aj">a</b> × 10<sup><b class="cn-aj">n</b></sup></p><figcaption><b>a</b> : un seul chiffre, non nul, avant la virgule (1 ≤ a &lt; 10) · <b>n</b> : un entier, positif ou négatif.</figcaption></figure>',
+    exemple: I.verdicts([['4,5 × 10<sup>3</sup>', true, '1 ≤ 4,5 &lt; 10'], ['1 × 10<sup>−6</sup>', true, 'a = 1 est permis'], ['45 × 10<sup>2</sup>', false, '45 ≥ 10'], ['0,45 × 10<sup>4</sup>', false, '0,45 &lt; 1']]),
     piege: '10 × 10<sup>3</sup> n’est pas une écriture scientifique : a doit être <b>strictement</b> plus petit que 10. On écrit 1 × 10<sup>4</sup>.',
     gen(niv) {
       if (niv === 2) {
@@ -311,8 +314,9 @@
 
   ajouter({ id: 'ES2', famille: 'ES', niveau: 4, prerequis: ['ES1', 'PU2'], titre: 'Mettre un nombre en écriture scientifique',
     regle: 'On place la virgule juste après le <b>premier chiffre non nul</b> : c’est a. L’exposant n est le nombre de rangs dont la virgule s’est déplacée : <b>positif</b> pour un nombre plus grand que 10, <b>négatif</b> pour un nombre plus petit que 1. On garde <b>tous les chiffres significatifs</b>.',
-    methode: '1. Écris a avec les chiffres du nombre (sans les zéros de gauche). 2. Compte les rangs entre l’ancienne et la nouvelle place de la virgule. 3. Vérifie : a × 10<sup>n</sup> redonne bien le nombre.',
-    exemple: calc('45&nbsp;000 = ' + c('4,5 × 10<sup>4</sup>')) + calc('0,003&nbsp;2 = ' + c('3,2 × 10<sup>−3</sup>')) + calc('0,000&nbsp;405&nbsp;0 = ' + c('4,050 × 10<sup>−4</sup>') + ' (le zéro final compte)'),
+    schema: I.sauts('45000', -4, '45&nbsp;000 = 4,5 × 10<sup>4</sup> : la virgule recule de 4 rangs, l’exposant est <b>+4</b> (nombre plus grand que 10).') + I.sauts('0,0032', 3, '0,003&nbsp;2 = 3,2 × 10<sup>−3</sup> : la virgule avance de 3 rangs, l’exposant est <b>−3</b> (nombre plus petit que 1).'),
+    methode: I.etapes(['Écris a avec les chiffres du nombre (sans les zéros de gauche), la virgule après le premier chiffre non nul.', 'Compte les rangs entre l’ancienne et la nouvelle place de la virgule : c’est la valeur de n.', 'Le signe de n : positif pour un nombre plus grand que 10, négatif pour un nombre plus petit que 1.', 'Vérifie : a × 10<sup>n</sup> redonne bien le nombre.']),
+    exemple: I.exemples([calc('45&nbsp;000 = ' + c('4,5 × 10<sup>4</sup>')), calc('0,003&nbsp;2 = ' + c('3,2 × 10<sup>−3</sup>')), calc('0,000&nbsp;405&nbsp;0 = ' + c('4,050 × 10<sup>−4</sup>') + ' (le zéro final compte)')]),
     piege: 'Pour un nombre plus petit que 1, l’exposant est négatif : 0,003&nbsp;2 = 3,2 × 10<sup>−3</sup>, pas 3,2 × 10<sup>3</sup>.',
     gen(niv) {
       let ta, n;
@@ -332,24 +336,25 @@
       };
       const parts = [];
       if (niv === 1) {
-        parts.push(nbP('Le nombre a (1 ≤ a &lt; 10) :', a, { diag: () => 'a s’écrit avec les chiffres de ' + tx + ' et la virgule juste après le premier chiffre : un seul chiffre avant la virgule.' }));
+        parts.push(nbP(tx + ' = a × 10<sup>n</sup>. Le nombre a (1 ≤ a &lt; 10) :', a, { diag: () => 'a s’écrit avec les chiffres de ' + tx + ' et la virgule juste après le premier chiffre : un seul chiffre avant la virgule.' }));
         parts.push(partieExp(tx + ' = ' + ta + ' × 10', n, [[-n, 'Le nombre est plus grand que 10 : l’exposant est positif.'], [n + 1, 'Recompte les rangs : de la place de la virgule (après le dernier chiffre) jusqu’après le premier chiffre.'], [n - 1, 'Recompte les rangs : de la place de la virgule (après le dernier chiffre) jusqu’après le premier chiffre.']], 'Compte les rangs dont la virgule s’est déplacée.'));
       } else parts.push(nbP(tx + ' =', x, { forme: 'sci', cs: niv === 3 ? cs : null, csLibre: niv !== 3, diag: diagSci }));
-      return question('ES2', niv, 'ES2:' + ta + n, 'Écris ce nombre en écriture scientifique' + (niv === 3 ? ', en gardant tous ses chiffres significatifs.' : '.'), parts,
+      return question('ES2', niv, 'ES2:' + ta + n, 'Écris <b>' + tx + '</b> en écriture scientifique' + (niv === 3 ? ', en gardant tous ses chiffres significatifs.' : '.'), parts,
         '<p>Virgule après le premier chiffre non nul : a = ' + ta + ' ; elle s’est déplacée de ' + Math.abs(n) + ' rang' + (Math.abs(n) > 1 ? 's' : '') + ' vers la ' + (n > 0 ? 'gauche (nombre plus grand que 10 : exposant positif).' : 'droite (nombre plus petit que 1 : exposant négatif).') + '</p>' + calc(tx + ' = ' + c(ecrT(ta, n))),
         ['La virgule va juste après le premier chiffre non nul : a = ' + ta + '.', n > 0 ? 'Le nombre est plus grand que 10 : l’exposant est positif.' : 'Le nombre est plus petit que 1 : l’exposant est négatif.', 'Compte les rangs : ' + Math.abs(n) + '.']);
     } });
 
   ajouter({ id: 'ES3', famille: 'ES', niveau: 3, prerequis: ['PU2'], titre: 'Revenir à l’écriture décimale',
     regle: 'Pour passer de a × 10<sup>n</sup> à l’écriture décimale, on déplace la virgule de a de <b>n rangs</b> : vers la droite si n est positif, vers la gauche si n est négatif.',
-    methode: 'Pars des chiffres de a, déplace la virgule, complète par des zéros. Vérifie l’ordre de grandeur : 10<sup>4</sup>, c’est des dizaines de milliers.',
-    exemple: calc('3,2 × 10<sup>4</sup> = ' + c('32&nbsp;000')) + calc('4,5 × 10<sup>−3</sup> = ' + c('0,004&nbsp;5')),
+    schema: I.sauts('4,5', -3, '4,5 × 10<sup>−3</sup> = 0,004&nbsp;5 : la virgule va de 3 rangs vers la gauche.'),
+    methode: I.etapes(['Pars des chiffres de a.', 'Déplace la virgule de n rangs : vers la droite si n est positif, vers la gauche si n est négatif.', 'Complète par des zéros, puis vérifie l’ordre de grandeur : 10<sup>4</sup>, ce sont des dizaines de milliers.']),
+    exemple: I.exemples([calc('3,2 × 10<sup>4</sup> = ' + c('32&nbsp;000')), calc('4,5 × 10<sup>−3</sup> = ' + c('0,004&nbsp;5'))]),
     piege: '4,5 × 10<sup>−3</sup> = 0,004&nbsp;5 : le 4 est au 3<sup>e</sup> rang après la virgule, pas au 4<sup>e</sup>.',
     gen(niv) {
       const a = niv === 3 ? hasard([7.05, 1.234, 9.6, 3.08, 2.5]) : hasard([3.2, 4.5, 1.25, 6, 7.8, 2.04]);
       const n = niv === 1 ? entre(1, 4) : niv === 2 ? -entre(1, 4) : hasard([-6, -5, -4, 4, 5, 6, 7]);
       const v = fix(a * P10(n));
-      return question('ES3', niv, 'ES3:' + a + n, 'Écris ce nombre en écriture décimale.', [
+      return question('ES3', niv, 'ES3:' + a + n, 'Écris ' + ecr(a, n) + ' en écriture décimale.', [
         nbP(ecr(a, n) + ' =', v, { forme: 'dec', diag: r => {
           if (r.v <= 0) return 'Le nombre est positif : un exposant négatif le rend plus petit que 1, pas négatif.';
           const rr = lg(r.v, a), R = Math.round(rr);
@@ -363,8 +368,9 @@
 
   ajouter({ id: 'ES4', famille: 'ES', niveau: 5, prerequis: ['ES2', 'PU3'], titre: 'Corriger une écriture a × 10<sup>n</sup>',
     regle: 'Si a n’est pas entre 1 et 10, on le corrige sans changer la valeur : quand a est <b>divisé par 10</b>, l’exposant <b>augmente de 1</b> ; quand a est <b>multiplié par 10</b>, l’exposant <b>diminue de 1</b>.',
-    methode: 'Écris a lui-même en écriture scientifique, puis multiplie les puissances de 10 : 45 × 10<sup>3</sup> = 4,5 × 10<sup>1</sup> × 10<sup>3</sup> = 4,5 × 10<sup>4</sup>.',
-    exemple: calc('45 × 10<sup>3</sup> = 4,5 × 10<sup>1</sup> × 10<sup>3</sup> = ' + c('4,5 × 10<sup>4</sup>')) + calc('0,32 × 10<sup>−4</sup> = 3,2 × 10<sup>−1</sup> × 10<sup>−4</sup> = ' + c('3,2 × 10<sup>−5</sup>')),
+    schema: I.fleches('45 × 10<sup>3</sup>', '4,5 × 10<sup>4</sup>', 'a ÷ 10 · exposant + 1', 'a × 10 · exposant − 1', 'Les deux changements se compensent : la valeur ne change pas.'),
+    methode: I.etapes(['Écris a lui-même en écriture scientifique : 45 = 4,5 × 10<sup>1</sup>.', 'Multiplie les puissances de 10 (on additionne les exposants) : 10<sup>1</sup> × 10<sup>3</sup> = 10<sup>4</sup>.', 'Vérifie : a a été divisé par 10, l’exposant a augmenté de 1.']),
+    exemple: I.exemples([calc('45 × 10<sup>3</sup> = 4,5 × 10<sup>1</sup> × 10<sup>3</sup> = ' + c('4,5 × 10<sup>4</sup>')), calc('0,32 × 10<sup>−4</sup> = 3,2 × 10<sup>−1</sup> × 10<sup>−4</sup> = ' + c('3,2 × 10<sup>−5</sup>'))]),
     piege: 'Les deux changements se compensent : 45 × 10<sup>3</sup> = 4,5 × 10<sup>4</sup>, pas 4,5 × 10<sup>2</sup> (qui est 100 fois plus petit).',
     gen(niv) {
       const m = niv === 1 ? hasard([45, 32, 12, 68, 25, 73]) : niv === 2 ? hasard([0.32, 0.045, 450, 0.7, 1200, 36.5]) : hasard([450, 0.32, 68, 0.0071, 23.5, 0.6]);
@@ -378,10 +384,10 @@
       };
       const parts = [];
       if (niv === 1) {
-        parts.push(nbP(nb(m) + ' = ', d.a, { apres: '× 10<sup>' + d.n + '</sup>', diag: () => 'Un seul chiffre avant la virgule : ' + nb(m) + ' = ? × 10.' }));
+        parts.push(nbP(nb(m) + ' =', d.a, { apres: '× 10<sup>' + d.n + '</sup>', diag: () => 'Un seul chiffre avant la virgule : ' + nb(m) + ' = ? × 10.' }));
         parts.push(partieExp(ecr(m, n) + ' = ' + nb(d.a) + ' × 10<sup>' + d.n + '</sup> × ' + p10(n) + ' = ' + nb(d.a) + ' × 10', na, [[n - d.n, 'a a été divisé par 10 : l’exposant doit <b>augmenter</b> de 1, pas diminuer.'], [n, 'Il faut compenser : ' + p10(d.n) + ' × ' + p10(n) + ' = 10<sup>' + d.n + ' + ' + par(n) + '</sup>.']], 'On additionne les exposants : ' + d.n + ' + ' + par(n) + '.'));
       } else parts.push(nbP(ecr(m, n) + ' =', x, { forme: 'sci', diag }));
-      return question('ES4', niv, 'ES4:' + m + n, 'Écris ce nombre en écriture scientifique.', parts,
+      return question('ES4', niv, 'ES4:' + m + n, 'Écris ' + ecr(m, n) + ' en écriture scientifique.', parts,
         calc(ecr(m, n) + ' = ' + ecr(d.a, d.n) + ' × ' + p10(n) + ' = ' + c(ecr(d.a, na))),
         ['Écris d’abord ' + nb(m) + ' en écriture scientifique : ' + nb(m) + ' = ' + ecr(d.a, d.n) + '.', 'Puis additionne les exposants : ' + d.n + ' + ' + par(n) + '.']);
     } });
@@ -393,8 +399,9 @@
   const CS_N3 = [['2,50', 3, 'd'], ['0,040&nbsp;0', 3, 'gd'], ['3,0 × 10<sup>4</sup>', 2, 'p'], ['1,200 × 10<sup>−3</sup>', 4, 'p'], ['10,0', 3, 'd'], ['0,010', 2, 'gd'], ['6,00', 3, 'd'], ['5,0 × 10<sup>−6</sup>', 2, 'p']];
   ajouter({ id: 'CS1', famille: 'CS', niveau: 1, prerequis: [], titre: 'Compter les chiffres significatifs',
     regle: 'On compte les chiffres <b>à partir du premier chiffre non nul</b>. Les zéros <b>à gauche</b> ne comptent pas (ils placent la virgule) ; les zéros <b>au milieu et à droite</b> comptent (ils disent la précision). La puissance de 10 ne compte pas.',
-    methode: 'Cache les zéros de gauche et la puissance de 10, puis compte tous les chiffres qui restent, zéros finaux compris.',
-    exemple: '<p>3,45 → <b>3</b> · 0,045 → <b>2</b> · 1,08 → <b>3</b> · 2,50 → <b>3</b> · 3,0 × 10<sup>4</sup> → <b>2</b></p>',
+    schema: I.chiffresCS('0,004 50'),
+    methode: I.etapes(['Cache les zéros de gauche (ils placent seulement la virgule) et la puissance de 10.', 'Compte tous les chiffres qui restent, zéros du milieu et de droite compris.']),
+    exemple: I.exemples(['3,45 → <b>3</b> chiffres significatifs', '0,045 → <b>2</b> (les zéros de gauche ne comptent pas)', '1,08 → <b>3</b> (le zéro du milieu compte)', '2,50 → <b>3</b> (le zéro de droite compte)', '3,0 × 10<sup>4</sup> → <b>2</b> (la puissance de 10 ne compte pas)']),
     piege: '2,5 et 2,50 ont la même valeur mais pas la même précision : 2 chiffres significatifs pour 2,5, 3 pour 2,50.',
     gen(niv) {
       const [t, n, pi] = hasard(niv === 1 ? CS_N1 : niv === 2 ? CS_N2 : CS_N3);
@@ -423,8 +430,9 @@
   const tronque = (x, n) => { const d = N.decompose(x); return fix(Math.trunc(fix(d.a * P10(n - 1))) * P10(d.n - n + 1)); };
   ajouter({ id: 'CS2', famille: 'CS', niveau: 3, prerequis: ['CS1'], titre: 'Arrondir à n chiffres significatifs',
     regle: 'On garde les n premiers chiffres significatifs et on regarde le <b>chiffre suivant</b> : s’il vaut <b>5 ou plus</b>, on augmente de 1 le dernier chiffre gardé ; sinon on le laisse. On garde les zéros utiles (10,0) et on passe à l’écriture scientifique quand il le faut.',
-    methode: 'Souligne les n premiers chiffres significatifs, regarde le suivant, arrondis, puis vérifie que ton résultat a bien n chiffres significatifs.',
-    exemple: calc('3,141&nbsp;59 à 3 c.s. → ' + c('3,14')) + calc('0,004&nbsp;567 à 2 c.s. → ' + c('0,004&nbsp;6')) + calc('9,996 à 3 c.s. → ' + c('10,0')) + calc('123&nbsp;456 à 3 c.s. → ' + c('1,23 × 10<sup>5</sup>')),
+    schema: I.arrondi('3,141 59', 3, '3,14') + I.arrondi('12,46', 3, '12,5'),
+    methode: I.etapes(['Repère les n premiers chiffres significatifs.', 'Regarde le chiffre suivant : 5 ou plus, augmente de 1 le dernier chiffre gardé ; sinon, laisse-le.', 'Vérifie que ton résultat a bien n chiffres significatifs (garde les zéros utiles : 10,0).']),
+    exemple: I.exemples([calc('3,141&nbsp;59 à 3 c.s. → ' + c('3,14')), calc('0,004&nbsp;567 à 2 c.s. → ' + c('0,004&nbsp;6')), calc('9,996 à 3 c.s. → ' + c('10,0')), calc('123&nbsp;456 à 3 c.s. → ' + c('1,23 × 10<sup>5</sup>'))]),
     piege: 'Arrondir n’est pas couper : 12,46 à 3 chiffres significatifs donne 12,5 (le 6 qui suit fait monter le 4), pas 12,4.',
     gen(niv) {
       let x, n;
@@ -435,7 +443,7 @@
         if (fix(N.arrondi(x, n)) === tronque(x, n) && Math.random() < 0.6) x = fix(x + 6 * P10(N.decompose(x).n - n));   // le plus souvent, l'arrondi fait monter un chiffre
       }
       const v = N.arrondi(x, n), tv = Math.abs(N.decompose(v).n) > 5 ? N.sci(v, n) : N.txtCS(v, n);
-      return question('CS2', niv, 'CS2:' + x + ':' + n, 'Arrondis ce nombre.' + (Math.abs(N.decompose(x).n) > 4 ? ' Tu peux utiliser l’écriture scientifique.' : ''), [
+      return question('CS2', niv, 'CS2:' + x + ':' + n, 'Arrondis ' + nb(x) + ' à ' + n + ' chiffres significatifs.' + (Math.abs(N.decompose(x).n) > 4 ? ' Tu peux utiliser l’écriture scientifique.' : ''), [
         nbP('<b>' + nb(x) + '</b> arrondi à <b>' + n + '</b> chiffres significatifs :', v, { cs: n, brut: x, diag: r => {
           if (N.egal(r.v, tronque(x, n))) return 'Arrondir n’est pas couper : regarde le chiffre qui suit le ' + n + '<sup>e</sup> chiffre significatif. S’il vaut 5 ou plus, on augmente le dernier chiffre gardé.';
           for (const k of [n - 1, n + 1]) if (k > 0 && N.egal(r.v, N.arrondi(x, k))) return 'Tu as gardé ' + k + ' chiffres significatifs, il en faut ' + n + '. Compte à partir du premier chiffre non nul.';
@@ -480,8 +488,9 @@
   const phraseDonnees = D => D.ds.map(d => d.nom + ' = ' + d.t + '&nbsp;' + d.u).join(' ; ');
   ajouter({ id: 'CS3', famille: 'CS', niveau: 4, prerequis: ['CS1'], titre: 'Le nombre de chiffres significatifs d’un résultat',
     regle: 'Le résultat d’un <b>produit</b> ou d’un <b>quotient</b> s’écrit avec autant de chiffres significatifs que la donnée qui en a <b>le moins</b> : un résultat n’est pas plus précis que la donnée la moins précise.',
-    methode: 'Compte les chiffres significatifs de chaque donnée, prends le plus petit nombre.',
-    exemple: '<p>v = d / Δt avec d = 12,5 m (3 c.s.) et Δt = 4,2 s (2 c.s.) : on écrit v avec <b>2</b> chiffres significatifs.</p>',
+    schema: '<div class="cn-rel"><div class="cn-rel-c"><b>d = 12,5 m</b><small>3 chiffres significatifs</small></div><div class="cn-rel-c cn-rel-1"><b>Δt = 4,2 s</b><small>2 chiffres significatifs : le moins précis</small></div><div class="cn-rel-c"><b>v = d / Δt</b><small>s’écrit avec 2 chiffres significatifs</small></div></div>',
+    methode: I.etapes(['Compte les chiffres significatifs de chaque donnée.', 'Prends le plus petit de ces nombres : c’est celui du résultat.']),
+    exemple: I.exemples(['v = d / Δt avec d = 12,5 m (3 c.s.) et Δt = 4,2 s (2 c.s.) : on écrit v avec <b>2</b> chiffres significatifs.']),
     piege: 'Ce n’est ni le plus grand nombre de chiffres significatifs, ni la somme : c’est le plus petit.',
     gen(niv) {
       const D = donnees(niv);
@@ -502,8 +511,8 @@
   }
   ajouter({ id: 'CS4', famille: 'CS', niveau: 6, prerequis: ['CS2', 'CS3', 'ES2'], titre: 'Écrire le résultat de la calculatrice',
     regle: 'La calculatrice donne trop de chiffres. On écrit le résultat avec le <b>bon nombre de chiffres significatifs</b> (celui de la donnée la moins précise), souvent en <b>écriture scientifique</b>, avec son <b>unité</b>. Sur l’écran, « E−05 » veut dire × 10<sup>−5</sup>.',
-    methode: '1. Compte les chiffres significatifs des données, garde le plus petit nombre. 2. Arrondis l’affichage à ce nombre de chiffres. 3. Écris le résultat (écriture scientifique si le nombre est très grand ou très petit) suivi de l’unité.',
-    exemple: '<p>v = d / Δt avec d = 12,5 m et Δt = 4,2 s ; la calculatrice affiche 2.976190476.</p>' + calc('v = ' + c('3,0&nbsp;m/s') + ' (2 chiffres significatifs)'),
+    methode: I.etapes(['Compte les chiffres significatifs des données, garde le plus petit nombre.', 'Arrondis l’affichage de la calculatrice à ce nombre de chiffres.', 'Écris le résultat (écriture scientifique si le nombre est très grand ou très petit), suivi de l’unité.']),
+    exemple: I.exemples(['<p>v = d / Δt avec d = 12,5 m et Δt = 4,2 s ; la calculatrice affiche :</p><span class="cn-ecran">2.976190476</span>' + calc('v = ' + c('3,0&nbsp;m/s') + ' (2 chiffres significatifs)')]),
     piege: 'On garde les zéros utiles : 2,976 arrondi à 2 chiffres significatifs s’écrit 3,0 (pas 3).',
     gen(niv) {
       let D = donnees(niv === 1 ? 1 : 2);
@@ -534,23 +543,25 @@
   /* -------------------- PRÉFIXES -------------------- */
   const PR_N = { 1: ['k', 'm', 'c'], 2: ['M', 'µ', 'd', 'h', 'G'], 3: ['n', 'T', 'da', 'p', 'µ', 'G'] };
   ajouter({ id: 'PR1', famille: 'PR', niveau: 1, prerequis: [], titre: 'Du préfixe à la puissance de 10',
-    regle: 'Chaque préfixe est une puissance de 10 : T = 10<sup>12</sup>, G = 10<sup>9</sup>, M = 10<sup>6</sup>, k = 10<sup>3</sup>, h = 10<sup>2</sup>, da = 10<sup>1</sup>, d = 10<sup>−1</sup>, c = 10<sup>−2</sup>, m = 10<sup>−3</sup>, µ = 10<sup>−6</sup>, n = 10<sup>−9</sup>, p = 10<sup>−12</sup>.',
-    methode: 'Les principaux vont <b>de 3 en 3</b> : T G M k (12, 9, 6, 3) puis m µ n p (−3, −6, −9, −12). Les grands : pense aux fichiers (ko, Mo, Go, To). Les petits : « <b>M</b>on <b>M</b>icro <b>N</b>’a <b>P</b>as froid » (milli, micro, nano, pico). Centi : le centime (1/100 d’euro). Déci : les décimales (1/10). Déca : le décathlon (10 épreuves). Hecto : 10<sup>2</sup> (h comme <b>h</b>ecto = cent).',
-    exemple: calc('1&nbsp;km = 10<sup>3</sup>&nbsp;m = 1&nbsp;000&nbsp;m') + calc('1&nbsp;µs = 10<sup>−6</sup>&nbsp;s') + calc('1&nbsp;GHz = 10<sup>9</sup>&nbsp;Hz'),
+    regle: 'Chaque préfixe est une <b>puissance de 10</b> : 1&nbsp;km = 10<sup>3</sup>&nbsp;m, 1&nbsp;mA = 10<sup>−3</sup>&nbsp;A. Les grands préfixes ont un exposant positif, les petits un exposant négatif.',
+    schema: I.echellePref() + '<p class="cn-lab">Pour les retenir</p>' + I.memoPref(),
+    methode: I.etapes(['Apprends d’abord ceux qui vont de 3 en 3 : k, M, G, T (10<sup>3</sup> à 10<sup>12</sup>) et m, µ, n, p, f (10<sup>−3</sup> à 10<sup>−15</sup>).', 'Le signe de l’exposant : positif pour les grands, négatif pour les petits.', 'Pour les autres (h, da, d, c), pense à la vie courante : hectare, décathlon, dixième, centime.']),
+    exemple: I.exemples([calc('1&nbsp;km = ' + c('10<sup>3</sup>&nbsp;m')), calc('1&nbsp;µs = ' + c('10<sup>−6</sup>&nbsp;s')), calc('1&nbsp;GHz = ' + c('10<sup>9</sup>&nbsp;Hz'))]),
     piege: 'M (méga, 10<sup>6</sup>) et m (milli, 10<sup>−3</sup>) : la majuscule compte !',
     gen(niv) {
       const q = PR(hasard(PR_N[niv]));
       const u = hasard(['m', 's', 'g', 'W', 'Hz', 'A', 'J']);
       const parts = [partiePref(q)];
-      return question('PR1', niv, 'PR1:' + q.s, 'Donne la puissance de 10 du préfixe' + (niv > 1 ? ' (par exemple 1&nbsp;' + q.s + u + ' = ? ' + u + ')' : '') + '.', parts,
+      return question('PR1', niv, 'PR1:' + q.s, 'Donne la puissance de 10 du préfixe <b>' + q.s + '</b>' + (niv > 1 ? ' (par exemple 1&nbsp;' + q.s + u + ' = 10<sup>?</sup>&nbsp;' + u + ')' : '') + '.', parts,
         calc(q.nom + ' : ' + q.s + ' = ' + c(p10(q.e))) + calc('1&nbsp;' + q.s + u + ' = ' + p10(q.e) + '&nbsp;' + u),
         [q.e > 0 ? 'C’est un préfixe des grandes valeurs : exposant positif.' : 'C’est un préfixe des petites valeurs : exposant négatif.', Math.abs(q.e) % 3 === 0 ? 'Les principaux préfixes vont de 3 en 3.' : 'Pense à la vie courante : centime, décimale, décathlon, hectare.']);
     } });
 
   ajouter({ id: 'PR2', famille: 'PR', niveau: 2, prerequis: ['PR1'], titre: 'De la puissance de 10 au préfixe',
     regle: 'À chaque puissance de 10 du tableau correspond un préfixe : 10<sup>3</sup> → k (kilo), 10<sup>−6</sup> → µ (micro)… Attention à la casse : M (méga) n’est pas m (milli).',
-    methode: 'Le signe de l’exposant dit si c’est un grand (positif) ou un petit (négatif) préfixe ; sa valeur te place dans la chaîne de 3 en 3 : k M G T ou m µ n p.',
-    exemple: '<p>10<sup>6</sup> → <b>M</b> (méga) · 10<sup>−9</sup> → <b>n</b> (nano) · 10<sup>−2</sup> → <b>c</b> (centi)</p>',
+    schema: I.tablePref(),
+    methode: I.etapes(['Le signe de l’exposant : positif → un grand préfixe ; négatif → un petit.', 'Sa valeur te place dans la chaîne de 3 en 3 : k, M, G, T ou m, µ, n, p, f.']),
+    exemple: I.exemples(['10<sup>6</sup> → <b>M</b> (méga)', '10<sup>−9</sup> → <b>n</b> (nano)', '10<sup>−2</sup> → <b>c</b> (centi)']),
     piege: '10<sup>−3</sup>, c’est m (milli), pas µ (micro, 10<sup>−6</sup>).',
     gen(niv) {
       const q = PR(hasard(PR_N[niv].concat(niv === 1 ? ['k'] : [])));

@@ -4,8 +4,9 @@
    Trois parcours (puissances de 10, écrire un résultat, conversions) :
    une étape par compétence (CN.ETAPES), dans l'ordre de progression.
    Une étape par écran (adresse decouverte.html#3), avec :
-     - la notion : règle, méthode, compléments (moyens mnémotechniques des
-       préfixes, deux méthodes pour m/s ↔ km/h…), exemple, piège ;
+     - la notion : règle, infographie (moyens mnémotechniques des préfixes,
+       virgule qui se déplace, deux méthodes pour m/s ↔ km/h…), méthode en
+       étapes, exemples séparés, piège ;
      - « À toi » : 2 ou 3 questions de la compétence (niveau 1 guidé, puis
        niveau 2), avec les aides (CN.Q) ;
      - « Étape suivante → ».
@@ -21,20 +22,9 @@
   const el = CN.el, bouton = CN.bouton;
   const E = CN.ETAPES, NE = E.length;
 
-  /* ---------- Compléments de certaines notions ---------- */
-  const chaine = (l) => '<div class="cn-chaine">' + l.map(([s, n, e]) => '<span class="cn-maillon"><b>' + s + '</b><small>' + n + '</small><small>10<sup>' + e + '</sup></small></span>').join('<span class="cn-fl" aria-hidden="true">→</span>') + '</div>';
+  /* ---------- Compléments propres à la Découverte (les infographies sont dans les compétences : champ schema) ---------- */
   const PLUS = {
-    PR1: '<p class="cn-lab">Pour les retenir</p>' +
-      '<p><b>1. Les principaux vont de 3 en 3.</b></p>' +
-      chaine([['T', 'téra', '12'], ['G', 'giga', '9'], ['M', 'méga', '6'], ['k', 'kilo', '3'], ['—', 'unité', '0'], ['m', 'milli', '−3'], ['µ', 'micro', '−6'], ['n', 'nano', '−9'], ['p', 'pico', '−12']]) +
-      '<p><b>2. Les grands : pense aux fichiers informatiques.</b> Un texte fait quelques ko (kilooctets, 10<sup>3</sup>), une photo quelques Mo (10<sup>6</sup>), un film quelques Go (10<sup>9</sup>), un disque dur quelques To (10<sup>12</sup>).</p>' +
-      '<p><b>3. Les petits : « <b>M</b>on <b>M</b>icro <b>N</b>’a <b>P</b>as froid ».</b> milli, micro, nano, pico : 10<sup>−3</sup>, 10<sup>−6</sup>, 10<sup>−9</sup>, 10<sup>−12</sup>.</p>' +
-      '<p><b>4. Centi et déci : la vie de tous les jours.</b> Un centime, c’est 1/100 d’euro : c = 10<sup>−2</sup>. Les décimales sont les dixièmes : d = 10<sup>−1</sup>.</p>' +
-      '<p><b>5. Déca et hecto : 1 et 2.</b> Un décathlon compte 10 épreuves : da = 10<sup>1</sup>. Un hectare fait 100 ares : h = 10<sup>2</sup>.</p>',
-    PR2: '<div class="crs-defile"><table class="cn-tab"><thead><tr><th>Préfixe</th><th>Symbole</th><th>Puissance</th></tr></thead><tbody>' +
-      C.PREF.filter(p => p.s).map(p => '<tr><td>' + p.nom + '</td><td><b>' + p.s + '</b></td><td>10<sup>' + CN.N.ent(p.e) + '</sup></td></tr>').join('') + '</tbody></table></div>',
-    CV1: '<div class="callout callout-accent"><b>Compétence clé.</b> C’est la conversion dont tu auras besoin dans presque tous les exercices de physique : les formules s’utilisent avec les unités du Système international (m, s, kg, A, W, J…). Elle revient dans chaque séance, et le <a href="defi.html">défi chrono</a> te fait gagner en vitesse.</div>',
-    CV10: '<div class="callout callout-accent"><b>Pour ne jamais te tromper de sens.</b> Quand tu marches, tu avances d’environ <b>1 m en 1 s</b>, et d’environ <b>4 km en 1 h</b>. Pour la même vitesse, la valeur en km/h est donc <b>plus grande</b> que la valeur en m/s : de m/s à km/h on <b>multiplie</b> par 3,6, de km/h à m/s on <b>divise</b> par 3,6.</div>'
+    CV1: '<div class="callout callout-accent"><b>Compétence clé.</b> C’est la conversion dont tu auras besoin dans presque tous les exercices de physique : les formules s’utilisent avec les unités du Système international (m, s, kg, A, W, J…). Elle revient dans chaque séance, et le <a href="defi.html">défi chrono</a> te fait gagner en vitesse.</div>'
   };
   // questions de l'étape : niveau 1 (guidé) puis niveau 2 ; la compétence clé en a trois
   const QUESTIONS = id => id === 'CV1' ? [1, 1, 2] : [1, 2];
@@ -94,9 +84,7 @@
 
       // la notion
       const n = el('div', 'er-card cn-regle');
-      n.innerHTML = '<h3 class="cours-titre">La notion</h3><p>' + comp.regle + '</p>' + (PLUS[id] || '') +
-        '<div class="cle"><b class="cle-titre">Méthode.</b> ' + comp.methode + '</div>' +
-        '<div class="cn-exemple"><p class="cn-exemple-t">Exemple</p>' + comp.exemple + '</div>' +
+      n.innerHTML = '<h3 class="cours-titre">La notion</h3>' + CN.contenuHTML(comp, PLUS[id]) +
         '<div class="cn-piege"><b class="cle-titre">Attention.</b> ' + comp.piege + '</div>';
       zone.appendChild(n);
 
@@ -114,7 +102,8 @@
         const c = el('div', 'cn-dec-q');
         c.appendChild(el('p', 'er-q-nom', 'Question ' + (i + 1) + '/' + L.length + (L[i] === 1 ? ' <span class="cn-tag">guidée</span>' : '')));
         a.appendChild(c);
-        CN.Q.monter(c, q, { rappel: false, surFin: (pts, act) => {
+        // la première question ne fait pas défiler : l'étape s'ouvre sur son en-tête
+        CN.Q.monter(c, q, { rappel: false, sansDefiler: i === 0, surFin: (pts, act) => {
           i++;
           if (i < L.length) { const b = bouton('btn-primary', 'Question suivante →', () => { b.remove(); suivanteQ(); }); act.appendChild(b); return; }
           // étape faite

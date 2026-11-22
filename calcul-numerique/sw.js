@@ -20,11 +20,11 @@
    changer VERSION pour que l'ancien cache soit remplacé.
    ============================================================ */
 'use strict';
-const VERSION = 'calcnum-v1.0';     // préfixe propre à l'application : le service worker n'efface que ses anciens caches
+const VERSION = 'calcnum-v1.1';     // préfixe propre à l'application : le service worker n'efface que ses anciens caches
 const FICHIERS = [
   './', './index.html', './manifest.webmanifest',
   './modules/decouverte.html', './modules/seance.html', './modules/defi.html', './modules/suivi.html', './modules/fiches.html',
-  './modules/sauvegarde.js', './modules/nombre.js', './modules/competences.js', './modules/conversions.js', './modules/cn.js',
+  './modules/sauvegarde.js', './modules/nombre.js', './modules/infographies.js', './modules/competences.js', './modules/conversions.js', './modules/cn.js',
   './modules/question.js', './modules/defi.js', './modules/mes-succes.js', './modules/decouverte.js', './modules/seance.js',
   './modules/cn.css',
   './icones/apple-touch-icon.png', './icones/favicon-32.png', './icones/icone-192.png', './icones/icone-512.png', './icones/icone-maskable-512.png',

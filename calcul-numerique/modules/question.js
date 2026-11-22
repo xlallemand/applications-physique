@@ -14,7 +14,8 @@
      CN.Q.monter(carte, q, opts) → { terminer(pts) }
         q    : question de CN.C.question(id, niv)
         opts : { aides: true | false, rappel: true | false, unEssai: false,
-                 surFin(pts, zoneActions, { aide, diff, justes }) }
+                 sansDefiler: false, surFin(pts, zoneActions, { aide, diff, justes }) }
+                 sansDefiler : la première partie n'amène pas la page jusqu'à elle (haut de page gardé)
                  aides : false → ni aides ni solution (test) ; unEssai : une réponse fausse termine (0 point)
      CN.Q.verifier(partie, lecture) → { ok } | { format: message } | { faux: message }
      CN.Q.solutionHTML(q)
@@ -47,6 +48,7 @@
   // réponse attendue d'une partie, écrite (solution d'un exemple, réponse affichée au test)
   function attendue(p) {
     if (p.type === 'choix') return p.options.find(o => o.id === p.bonne).label;
+    if (p.aff) return p.aff + (p.apres ? '&nbsp;' + p.apres : '');
     if (p.entier && p.sup) return '10<sup>' + N.ent(p.v) + '</sup>';
     if (p.entier) return N.ent(p.v);
     const d = N.decompose(p.v);
@@ -55,6 +57,8 @@
     return t + (p.apres ? '&nbsp;' + p.apres : '');
   }
   const solutionHTML = q => '<div class="cn-sol-q">' + q.solution + '</div>';
+  // texte d'une partie avant la réponse (sans le « 10 » d'un exposant à écrire, déjà dans la réponse)
+  const texteQ = p => (p.sup ? p.q.replace(/\s*10$/, '') : p.q);
 
   /* ---------- Une question ---------- */
   function monter(carte, q, opts) {
@@ -97,7 +101,7 @@
       zEx.innerHTML = '';
       const b = el('div', 'cn-rappel');
       b.innerHTML = '<p class="cn-rappel-t">Exemple avec d’autres nombres</p><p>' + e.enonce + '</p>' +
-        e.parties.map((p, i) => '<p>' + (e.parties.length > 1 ? '<b>' + LETTRES[i] + '.</b> ' : '') + p.q + ' <b>' + attendue(p) + '</b></p>').join('') + solutionHTML(e);
+        e.parties.map((p, i) => '<p>' + (e.parties.length > 1 ? '<b>' + LETTRES[i] + '.</b> ' : '') + texteQ(p) + ' <b>' + attendue(p) + '</b>' + (p.apres && p.sup ? '&nbsp;' + p.apres : '') + '</p>').join('') + solutionHTML(e);
       const r2 = el('div', 'cn-rangee');
       r2.appendChild(bouton('btn-small', '↻ Un autre exemple', montrerExemple));
       r2.appendChild(bouton('btn-small', 'Fermer', () => { zEx.innerHTML = ''; }));
@@ -172,15 +176,20 @@
       };
       let champ = null;
       if (p.type === 'nb') {
-        const ligne = el('div', 'cn-ligne', lettre + '<span class="cn-texte">' + p.q + '</span>');
-        champ = new N.Champ({ entier: p.entier, label: 'Ta réponse', surValider: () => {
+        // exposant seul (« 1 km = 10^□ m ») : le « 10 » de la question et une petite case en haut à droite
+        const ligne = el('div', 'cn-ligne', lettre + (p.sup ? '<span class="cn-texte">' + texteQ(p) + '</span>' : '<span class="cn-texte">' + p.q + '</span>'));
+        champ = new N.Champ({ entier: p.entier, label: p.sup ? 'Exposant de la puissance de 10' : 'Ta réponse', surValider: () => {
           const r = champ.lire(), v = verifier(p, r);
           if (v.format) { ret.innerHTML = '<div class="callout cn-msg">' + v.format + '</div>'; montrer(ret); return; }
           if (v.faux) { faux(v.faux, champ.el); return; }
           finir(true);
         }, surChange: () => { garderVisible(); } });
-        if (p.sup) champ.el.classList.add('cn-champ-sup');
-        ligne.appendChild(champ.el);
+        if (p.sup) {
+          champ.el.classList.add('cn-champ-sup');
+          const pu = el('span', 'cn-puiss', '<span class="cn-puiss-10">10</span>');
+          pu.appendChild(champ.el);
+          ligne.appendChild(pu);
+        } else ligne.appendChild(champ.el);
         if (p.apres) ligne.appendChild(el('span', 'cn-apres', p.apres));
         if (p.calc) ligne.insertAdjacentHTML('beforeend', CALC);
         // sans le pavé (ordinateur), un bouton Valider à côté du champ
@@ -215,7 +224,8 @@
       d.appendChild(ret);
       zParts.appendChild(d);
       if (champ && matchMedia('(hover: hover)').matches) champ.el.focus({ preventScroll: true });
-      setTimeout(() => montrer(d), 30);
+      // première partie d'une question qui ouvre la page (Découverte) : on reste en haut de la page
+      if (k > 0 || !opts.sansDefiler) setTimeout(() => montrer(d), 30);
     }
     // le champ en cours ne doit jamais être caché par le pavé
     function garderVisible() {
@@ -247,5 +257,5 @@
     return { terminer, erreurs: () => erreurs };
   }
 
-  CN.Q = { monter, verifier, solutionHTML, attendue };
+  CN.Q = { monter, verifier, solutionHTML, attendue, texteQ };
 })();

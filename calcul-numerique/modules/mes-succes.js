@@ -14,7 +14,7 @@
      tenace       questions réussies après une erreur (1 point)
      difficiles   questions de difficulté 3 réussies sans erreur
      defis        défis chrono terminés ; defisReussis : 10/10 en moins de 2 minutes
-     defiRapide   meilleur niveau de vitesse d'un défi à 10/10 (1 : < 2 min, 2 : < 1 min 30, 3 : < 1 min, 4 : < 45 s)
+     defiRapide   meilleur niveau de vitesse d'un défi à 10/10 (1 : < 2 min, 2 : < 1 min 30, 3 : < 1 min 15, 4 : < 1 min)
    Jours : jours avec au moins une séance ou un défi terminé.
    Ensemble « maitrisees » : compétences maîtrisées au moins une fois.
 
@@ -40,7 +40,7 @@
   // seuils d'une famille : 25 %, 50 %, 75 % et toutes ses compétences
   const seuilsFamille = fam => () => { const n = ids(fam).length; return [0.25, 0.5, 0.75, 1].map(x => Math.max(1, Math.ceil(x * n))); };
   // niveau de vitesse d'un défi à 10/10 (temps en dixièmes de seconde)
-  const niveauVitesse = t => t < 450 ? 4 : t < 600 ? 3 : t < 900 ? 2 : t < 1200 ? 1 : 0;
+  const niveauVitesse = t => t < 600 ? 4 : t < 750 ? 3 : t < 900 ? 2 : t < 1200 ? 1 : 0;
   const famille = (id, ic) => { const f = C.familles.find(x => x.id === id); return { id: 'famille-' + id, ic, nom: f.nom, cond: 'Compétences de la famille maîtrisées au moins une fois', seuils: seuilsFamille(id), val: E => maitrisees(E, id) }; };
 
   const categories = [
@@ -74,7 +74,7 @@
     { nom: 'Défi chrono', succes: [
       { id: 'defis', ic: '⏱️', nom: 'Compétiteur', cond: 'Défis chrono terminés', seuils: [1, 5, 15, 40], val: E => E.c.defis || 0 },
       { id: 'eclair', ic: '🏁', nom: 'Défi réussi', cond: 'Défis à 10/10 en moins de 2 minutes', seuils: [1, 3, 10, 25], val: E => E.c.defisReussis || 0 },
-      { id: 'fusee', ic: '🚀', nom: 'Fusée', cond: 'Un défi à 10/10 en moins de 2 min (bronze), 1 min 30 s (argent), 1 min (or), 45 s (platine)', seuils: [1, 2, 3, 4],
+      { id: 'fusee', ic: '🚀', nom: 'Fusée', cond: 'Un défi à 10/10 en moins de 2 min (bronze), 1 min 30 s (argent), 1 min 15 s (or), 1 min (platine)', seuils: [1, 2, 3, 4],
         val: E => E.c.defiRapide || 0,
         astuce: () => (CN.recordDefi && CN.recordDefi() ? 'Ton record : ' + CN.recordDefi() + '.' : '') }
     ] },
