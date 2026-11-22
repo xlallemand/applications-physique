@@ -151,6 +151,7 @@
       'module_9'] },
     'lecture-graphique': { pages: ['module_1', 'module_2', 'module_3'] },
     'equations-physique-mobile': { pages: ['decouverte', 'seance', 'suivi', 'fiches'] },
+    'calcul-numerique': { pages: ['decouverte', 'seance', 'defi', 'suivi', 'fiches'] },
     'equations-college': { pages: ['seance', 'suivi', 'fiches'] },
     'fractions-college': { pages: ['seance', 'suivi', 'fiches'] }
   };
