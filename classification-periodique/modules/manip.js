@@ -2,8 +2,8 @@
    Module 2 : retrouver les liens (manipulation guidée sur un seul écran)
    CP.manipLiens(zone)
    Dix situations (pastilles dans un ordre fixe, accessibles dans n'importe quel ordre) :
-     1 à 4  placer d'après la configuration : la carte se glisse dans sa case d'un tableau vide
-            (ou toucher la carte, puis la case) ; puis le symbole ;
+     1 à 4  élément d'après la configuration, la classification (symboles) étant fournie :
+            la carte se glisse dans sa case (ou toucher la carte, puis la case) ;
      5      configuration d'après la case : composer la configuration (étiquettes et − / +) ;
      6, 7   électrons de valence d'après la case ;
      8 à 10 ion d'après la position : toucher les cases une à une jusqu'à la dernière colonne
@@ -18,12 +18,14 @@
 
   const MOINS = '−';
   const pl = (k, mot) => `${k} ${mot}${k > 1 ? 's' : ''}`;
+  // « le phosphore », « l'oxygène »
+  const le = Z => { const n = ATOME.element(Z).nom; return /^[aeéèêiouyh]/i.test(n) ? 'l\'' + n : 'le ' + n; };
   const SITUATIONS = [
     { type: 'placer', Z: 15 }, { type: 'placer', Z: 11 }, { type: 'placer', Z: 13 }, { type: 'placer', Z: 8 },
     { type: 'config', Z: 16 }, { type: 'valence', Z: 14 }, { type: 'valence', Z: 7 },
     { type: 'ion', Z: 8 }, { type: 'ion', Z: 13 }, { type: 'ion', Z: 19 },
   ];
-  const TITRES = { placer: 'Placer d\'après la configuration', config: 'Configuration d\'après la case', valence: 'Électrons de valence d\'après la case', ion: 'Ion d\'après la position' };
+  const TITRES = { placer: 'Élément d\'après la configuration', config: 'Configuration d\'après la case', valence: 'Électrons de valence d\'après la case', ion: 'Ion d\'après la position' };
 
   /* ---------- Diagnostics communs (aussi utilisés par la série du module 3) ---------- */
   // électrons de la dernière sous-couche seulement
@@ -159,11 +161,11 @@
     }
     function nouveauPas(o) { pas = Object.assign({ erreurs: 0, vue: false }, o); $('aide').hidden = true; }
 
-    /* ----- 1 à 4 : placer d'après la configuration, puis le symbole ----- */
+    /* ----- 1 à 4 : élément d'après la configuration (classification fournie) ----- */
     function sitPlacer(Z) {
-      T.contenu('vide');
+      T.contenu('symboles');
       const e = ATOME.element(Z), p = CP.position(Z);
-      $('consigne').innerHTML = 'Glisse la carte dans sa case (ou touche la carte, puis la case).';
+      $('consigne').innerHTML = 'Quel est l\'élément qui a cette configuration électronique ? Glisse la carte sur sa case de la classification (ou touche la carte, puis la case).';
       $('zone').innerHTML = `<button type="button" class="cp-carte" aria-label="Carte : ${ATOME.configTexte(Z, ' ')}">${ATOME.configHTML(Z)}</button>`;
       const carte = $('zone').querySelector('.cp-carte');
       let prise = false;
@@ -173,9 +175,9 @@
         prendre(false);
         const q = CP.position(z);
         if (z === Z) {
-          T.ecrire(Z, `<span class="cp-val cp-val-seul">${CP.valHTML(Z)}</span>`);
+          T.ecrire(Z, `<b class="cp-sym">${e.sym}</b><span class="cp-val">${CP.valHTML(Z)}</span>`);
           T.choisir(Z);
-          reussi(`Case : ligne ${p.ligne}, colonne ${p.col}`, `Couche externe n = ${p.ligne} → <b>ligne ${p.ligne}</b> ; ${pl(CP.valenceCase(Z), 'électron')} de valence → <b>colonne ${p.col}</b>.`);
+          reussi(`${e.sym} : ligne ${p.ligne}, colonne ${p.col}`, `Couche externe n = ${p.ligne} → <b>ligne ${p.ligne}</b> ; ${pl(CP.valenceCase(Z), 'électron')} de valence → <b>colonne ${p.col}</b> : c'est ${le(Z)}, <b>${e.sym}</b>.`);
           return;
         }
         erreur(q.ligne !== p.ligne ? diagLigne(Z, q.ligne) : diagColonne(Z, q.col));
@@ -184,7 +186,6 @@
         type: 'placer',
         surCase: z => poser(z),
         montrer: () => poser(Z),
-        suite: () => pasSymbole(Z),
       });
       if (window.DragDrop) {
         DragDrop.enable(carte, {
@@ -202,38 +203,6 @@
         });
       } else carte.onclick = () => prendre(!prise);
     }
-    // symbole de l'élément placé : quatre symboles voisins
-    function pasSymbole(Z) {
-      const e = ATOME.element(Z), p = CP.position(Z);
-      const voisins = [Z - 1, Z + 1, Z - 8, Z + 8, Z + 2, Z - 2].filter(z => z >= 1 && z <= 18 && z !== Z);
-      const choix = CP.melanger([Z].concat(CP.melanger(voisins).slice(0, 3)));
-      $('consigne').innerHTML = `Quel est le symbole de cet élément ?`;
-      $('zone').innerHTML = `<div class="ph-choix cp-choix-sym">${choix.map(z => `<button type="button" class="btn-secondary" data-z="${z}">${ATOME.element(z).sym}</button>`).join('')}</div>`;
-      const fini = () => {
-        T.ecrire(Z, `<small class="cp-z">${Z}</small><b class="cp-sym">${e.sym}</b><span class="cp-val">${CP.valHTML(Z)}</span>`);
-        T.choisir(Z);
-      };
-      nouveauPas({
-        type: 'symbole',
-        montrer: () => { fini(); reussi(`Symbole : ${e.sym}`, `La configuration compte ${pl(Z, 'électron')} : Z = ${Z}, c'est ${e.sym} (${e.nom}).`); },
-      });
-      $('zone').querySelectorAll('[data-z]').forEach(b => {
-        b.onclick = () => {
-          if (!pas) return;
-          const z = +b.dataset.z;
-          if (z === Z) {
-            b.classList.add('juste');
-            fini();
-            reussi(`Symbole : ${e.sym}`, `La configuration compte ${pl(Z, 'électron')} : Z = ${Z}, c'est ${e.sym} (${e.nom}).`);
-            return;
-          }
-          b.classList.add('faux'); b.disabled = true;
-          const f = ATOME.element(z), q = CP.position(z);
-          erreur(`La configuration compte ${pl(Z, 'électron')} : Z = ${Z}. ${f.sym} a Z = ${z}${q.ligne !== p.ligne ? ` (ligne ${q.ligne})` : ''}.`);
-        };
-      });
-    }
-
     /* ----- 5 : configuration d'après la case ----- */
     function sitConfig(Z) {
       T.contenu('symboles');

@@ -1,7 +1,7 @@
 /* ============================================================
    Module 3 : défis (série notée sur 20)
    CP.questionsDefis() → 10 questions tirées au hasard, mélange des quatre sortes :
-     placer un élément d'après sa configuration (ligne et colonne, puis symbole) ;
+     placer un élément d'après sa configuration (ligne et colonne, puis l'élément, classification fournie) ;
      prévoir l'ion d'un élément d'une colonne donnée (formule, puis nom des ions à connaître) ;
      prévoir le nombre de liaisons et de doublets non liants ;
      reconnaître une famille (liste de configurations, propriétés communes, gaz nobles).
@@ -20,13 +20,23 @@
   /* ============================================================
      1. PLACER UN ÉLÉMENT D'APRÈS SA CONFIGURATION
      ============================================================ */
+  // classification fournie (Z = 1 à 20, symboles seuls), avec les numéros de lignes et de colonnes
+  function classifHTML() {
+    let h = '<div class="cp-classif" role="img" aria-label="Classification périodique des éléments de Z = 1 à 20">';
+    h += '<span></span>' + CP.COLS.map(c => `<span class="cp-classif-num">${c}</span>`).join('');
+    for (let l = 1; l <= 4; l++) {
+      h += `<span class="cp-classif-num">${l}</span>`;
+      CP.COLS.forEach(c => { const z = CP.aLaPlace(l, c); h += z ? `<span class="cp-classif-c">${sym(z)}</span>` : '<span></span>'; });
+    }
+    return h + '</div>';
+  }
   function qPlacer(Z) {
     const p = CP.position(Z), v = CP.valenceCase(Z), e = ATOME.element(Z);
     const voisins = CP.melanger([Z - 1, Z + 1, Z - 8, Z + 8, Z + 2].filter(z => z >= 1 && z <= 18 && z !== Z && z !== 2)).slice(0, 3);
     return {
       theme: 'Placer un élément',
-      consigne: 'Trouve la place de cet élément dans le tableau, puis son symbole.',
-      enonce: `<p>Configuration électronique d'un atome : ${conf(Z)}</p>`,
+      consigne: 'Trouve la place de cet élément dans le tableau, puis, avec la classification, de quel élément il s\'agit.',
+      enonce: `<p>Configuration électronique d'un atome : ${conf(Z)}</p>${classifHTML()}`,
       parties: [
         { type: 'champs', q: 'Dans quelle ligne et dans quelle colonne du tableau est-il ?', ligne: true,
           champs: [{ id: 'l', label: 'Ligne', bonne: p.ligne }, { id: 'c', label: 'Colonne', bonne: p.col }],
@@ -39,10 +49,13 @@
             return { diag: CP.diagColonne(Z, vals.c), faux };
           },
           solution: `Couche externe n = ${p.ligne} → <b>ligne ${p.ligne}</b> ; ${pl(v, 'électron')} de valence (${ATOME.configHTML(Z, { entourer: true })}) → <b>colonne ${p.col}</b>${p.col > 2 ? ` (${v} + 10)` : ''}.` },
-        { type: 'choix', q: 'Quel est son symbole ?', grand: true,
+        { type: 'choix', q: 'Quel est l\'élément qui a cette configuration électronique ?', grand: true,
           options: [Z].concat(voisins).map(z => ({ id: z, label: sym(z) })), bonne: Z,
-          indices: Object.fromEntries(voisins.map(z => [z, `La configuration compte ${pl(Z, 'électron')} : Z = ${Z}. ${sym(z)} a Z = ${z}.`])),
-          solution: `${pl(Z, 'électron')} → Z = ${Z} : c'est ${le(Z)}, <b>${e.sym}</b>.` },
+          indices: Object.fromEntries(voisins.map(z => {
+            const q = CP.position(z);
+            return [z, `${sym(z)} est dans la ligne ${q.ligne}, colonne ${q.col}. Cet atome est dans la ligne ${p.ligne}, colonne ${p.col} : lis la case à cette place dans la classification.`];
+          })),
+          solution: `Ligne ${p.ligne}, colonne ${p.col} de la classification : c'est ${le(Z)}, <b>${e.sym}</b>.` },
       ],
       bilan: `${e.sym} : ligne ${p.ligne}, colonne ${p.col}.`,
     };
