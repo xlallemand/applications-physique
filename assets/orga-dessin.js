@@ -541,10 +541,10 @@
           occ.push(best.a); pris.push(best.q);
           H.push({ x: best.q.x, y: best.q.y, de: i, a: best.a, classe: classeAt(i) });
         }
-        // doublets non liants : N 1, O 2, halogènes 3
+        // doublets non liants : N 1, O et S 2, halogènes 3
         const el = mol.atomes[i].el;
-        if (o.doublets !== false && (el === 'N' || el === 'O' || O.HALOGENES.includes(el))) {
-          const nl = 4 - O.valence(el);          // N 1, O 2, halogènes 3 (même si les H ne sont pas encore écrits)
+        if (o.doublets !== false && (el === 'N' || el === 'O' || el === 'S' || O.HALOGENES.includes(el))) {
+          const nl = 4 - O.valence(el);          // N 1, O et S 2, halogènes 3 (même si les H ne sont pas encore écrits)
           const bt = etiq[i] ? etiq[i].boite : boite(el, 0, 'd', f);
           const unSeul = occ.length === 1 && nl === 2 && occ[0] % 90 === 0;
           for (let d = 0; d < nl; d++) {

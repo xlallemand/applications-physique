@@ -1,0 +1,341 @@
+/* ============================================================
+   Styles de l'application « Schémas de Lewis »
+   Complète assets/theme.css, equilibrer-reactions/modules/er.css
+   (cartes, boutons, écran de fin) et assets/atome.css (configurations).
+   lw-sim…  pages sur un seul écran (modules 1 à 3)
+   lw-svg, lw-li, lw-dl, lw-tl…  schémas de Lewis (modules/lw-schema.js)
+   ph-…     questions (repris de cinematique/modules/cin.css)
+   ============================================================ */
+
+.er-page button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.er-page p { margin: 0; }
+.er-page [hidden] { display: none !important; }
+sub, sup { font-size: .7em; line-height: 0; }
+.lw-revois { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px !important; font-size: .88rem; }
+.lw-revois a { color: var(--accent-ink); font-weight: 700; }
+
+/* ============================================================
+   PAGES SUR UN SEUL ÉCRAN (modules 1 à 3) : sans défilement
+   ============================================================ */
+.er-page.lw-sim-page { max-width: none; padding: 10px; }
+.lw-sim { display: flex; flex-direction: column; gap: 10px; height: calc(100vh - 36px); height: calc(100dvh - 36px); min-height: 540px; }   /* 36 px : marges de la page (2 × 10) et du corps (2 × 8) */
+.lw-sim-tete { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 8px 16px; }
+.lw-sim-titre { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 12px; min-width: 0; }
+.lw-sim-titre .er-badge { margin: 0; }
+.lw-sim-titre .er-titre { margin: 0; font-size: 1.15rem; }
+.lw-sim-corps { flex: 1 1 0; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 10px; }
+.lw-sim-scene { margin: 0; padding: 10px 12px; min-height: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.lw-sim-bande:empty { display: none; }
+.lw-sim-msg { min-height: 54px; flex-shrink: 0; }   /* place réservée : le schéma ne bouge pas quand un message apparaît */
+.lw-sim-msg-in { padding: 8px 14px; border-radius: 14px; font-size: .95rem; line-height: 1.45; }
+.lw-sim-lab { font-size: .85rem; font-weight: 800; color: var(--ink-2); }
+.lw-aide-t { font-size: .88rem; line-height: 1.4; color: var(--ink-2); }
+
+/* panneau : en-tête fixe, rubriques en onglets, « À essayer » toujours visible sur ordinateur */
+.lw-sim-panneau { margin: 0; padding: 12px 14px; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.lw-sim-onglets { display: flex; gap: 4px; padding: 3px; background: var(--paper-2); border-radius: 999px; flex-shrink: 0; }
+.lw-sim-onglets.lw-cache { display: none; }
+.lw-sim-onglets button { flex: 1 1 0; min-width: 0; min-height: 40px; border: none; border-radius: 999px; background: transparent; font: inherit; font-size: .85rem; font-weight: 800; color: var(--ink-2); cursor: pointer; padding: 2px 4px; }
+.lw-sim-onglets button[aria-selected="true"] { background: var(--sheet); color: var(--accent-ink); box-shadow: inset 0 0 0 2px var(--accent); }
+.lw-sim-onglets button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lw-sim-bloc { display: none; flex-direction: column; gap: 8px; }
+.lw-sim-bloc.lw-sim-actif { display: flex; }
+@media (min-width: 900px) {
+  .lw-sim-onglets .lw-o-tel { display: none; }
+  .lw-sim-bloc.lw-sim-tel { display: none; }
+  .lw-sim-bloc.lw-sim-toujours { display: flex; margin-top: auto; border-top: 1px solid var(--line); padding-top: 10px; }
+}
+
+/* pastilles des situations */
+.lw-defis-puces { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.lw-puce {
+  width: 38px; height: 38px; border: none; border-radius: 999px; background: var(--paper); color: var(--ink-2); font: 800 .95rem var(--font-sans);
+  cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--paper-3); flex-shrink: 0;
+}
+.lw-puce[aria-selected="true"] { box-shadow: inset 0 0 0 2.5px var(--accent); color: var(--accent-ink); background: var(--sheet); }
+.lw-puce.lw-fait { background: var(--success); color: var(--sheet); box-shadow: none; }
+.lw-puce.lw-fait[aria-selected="true"] { box-shadow: 0 0 0 2.5px var(--sheet), 0 0 0 4.5px var(--success); }
+.lw-puce:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ============================================================
+   SITUATIONS (modules 1 à 3)
+   ============================================================ */
+.lw-sit-tete { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.lw-sit-puces .lw-puce { width: 32px; height: 32px; font-size: .86rem; }
+.lw-sit-puces { gap: 4px; }
+.lw-sit-num { font-size: .85rem; color: var(--ink-2); font-weight: 700; }
+.lw-sit-num b { color: var(--accent-ink); }
+.lw-sit-acquis:empty { display: none; }
+.lw-sit-acquis { display: flex; flex-direction: column; gap: 2px; font-size: .86rem; font-weight: 700; color: var(--ink-2); }
+.lw-sit-consigne { font-size: 1rem; font-weight: 800; line-height: 1.4; }
+.lw-sit-consigne:empty, .lw-sit-zone:empty, .lw-sit-retour:empty { display: none; }
+.lw-sit-zone { display: flex; flex-direction: column; gap: 8px; }
+.lw-sit-msg { padding: 8px 12px; border-radius: 14px; font-size: .9rem; line-height: 1.42; }
+.lw-sit-suite { margin-top: 0; flex-wrap: wrap; gap: 8px; }
+.lw-sit-suite > span { display: inline-flex; }
+.lw-sit-suite .btn-small { padding-left: 12px; padding-right: 12px; }
+/* ordinateur peu haut : en-tête et panneau resserrés */
+@media (min-width: 900px) and (max-height: 760px) {
+  .lw-sim { gap: 8px; }
+  .lw-sim-tete { padding: 6px 14px; }
+  .lw-sim-corps { gap: 8px; }
+  .lw-sim-scene { padding: 8px 10px; gap: 6px; }
+  .lw-sim-panneau { padding: 10px 12px; gap: 6px; }
+  .lw-sim-bloc { gap: 6px; }
+  .lw-sim-msg-in { padding: 6px 12px; font-size: .9rem; }
+  .lw-puce { width: 34px; height: 34px; }
+}
+
+/* téléphone et tablette : zone de travail en haut, panneau dessous, un onglet à la fois */
+@media (max-width: 899px) {
+  .lw-sim { height: calc(100vh - 54px - 36px); height: calc(100dvh - 54px - 36px); min-height: 560px; gap: 8px; }   /* 54 px : bandeau du sommaire */
+  .lw-sim-tete { display: none; }          /* le bandeau du sommaire dit déjà où l'on est */
+  .lw-sim-corps { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 48fr) minmax(0, 52fr); gap: 8px; }   /* zone de travail en haut, panneau dessous */
+  .lw-sim-scene { padding: 6px; gap: 4px; }
+  .lw-sim-msg-in { padding: 5px 10px; font-size: .82rem; line-height: 1.32; border-radius: 12px; }
+  .lw-sim-msg { min-height: 44px; }
+  .lw-sim-panneau { padding: 8px 10px; gap: 6px; }
+  .lw-sim-onglets .pe-bouton { flex: 0 0 auto; min-height: 40px; padding: 0 10px; }
+  .lw-sim-onglets button { flex: 1 1 auto; font-size: .76rem; white-space: nowrap; padding: 2px 6px; }
+  .lw-sim-bloc-t { display: none; }
+  .lw-puce { width: 36px; height: 36px; }
+  .lw-sit-tete .pe-bouton { min-height: 34px; padding: 0 10px; }
+  .lw-sit-puces { gap: 3px; }
+  .lw-sit-puces .lw-puce:not(.lw-puce-l) { width: 30px; height: 32px; }
+  .lw-sit-consigne { font-size: .92rem; }
+  .lw-sit-msg { padding: 6px 10px; font-size: .84rem; line-height: 1.35; }
+}
+/* plein écran sans l'API du navigateur (iPhone) : le bandeau du sommaire est caché, la page prend sa place */
+@media (max-width: 899px) {
+  html.pe-actif .lw-sim { height: calc(100vh - 36px); height: calc(100dvh - 36px); }
+}
+/* ============================================================
+   SÉRIES DE QUESTIONS (repris de cinematique/modules/cin.css)
+   ============================================================ */
+.lw-tete { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 14px; margin-bottom: 8px; }
+.lw-tete .er-badge { margin-bottom: 0; }
+.lw-tete .er-titre { margin: 0; }
+.ph-tete { padding-top: 14px; padding-bottom: 14px; }
+.ph-tete .er-meta { margin: 0 0 0 auto !important; }
+@media (max-width: 899px) { .ph-tete .er-meta { margin: 0 !important; width: 100%; } }
+.ph-enonce { margin-bottom: 12px; line-height: 1.6; font-size: 1.05rem; }
+.ph-enonce p + p { margin-top: 6px; }
+.ph-partie + .ph-partie { margin-top: 16px; padding-top: 14px; border-top: 1.5px dashed var(--paper-3); }
+.ph-partie { animation: lw-apparait .35s ease-out; }
+@keyframes lw-apparait { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .ph-partie { animation: none; } }
+.ph-partie-num { font-size: .78rem !important; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--accent-ink); margin-bottom: 4px !important; }
+.ph-partie-suite { margin-top: 10px; }
+.ph-partie-q { font-weight: 800; font-size: 1.08rem; color: var(--ink); margin-bottom: 10px !important; line-height: 1.45; }
+.ph-partie-q .atm-nota { font-size: 1.25em; }
+.ph-partie-aide { margin-top: 10px; }
+.ph-partie-aide .btn-small { color: var(--ink-2); }
+.ph-partie-fig:empty { display: none; }
+.ph-partie-retour:empty { display: none; }
+.ph-partie-retour { margin-top: 10px; }
+.ph-msg { margin-top: 10px !important; font-size: .92rem; color: var(--ink-2); font-weight: 600; }
+.ph-ok { margin-top: 8px !important; color: var(--success-text); font-weight: 800; }
+.ph-bilan { margin-top: 16px; }
+.ph-solution { line-height: 1.7; }
+.ph-solution .atm-nota { font-size: 1.2em; }
+.ph-question .er-consigne { margin-bottom: 8px !important; }
+.ph-choix { display: flex; flex-wrap: wrap; gap: 8px; }
+.ph-choix-col { flex-direction: column; align-items: stretch; }
+.ph-choix button { min-height: 46px; text-align: left; line-height: 1.4; border-radius: 16px; padding: 10px 18px; }
+.ph-choix.lw-choix-grand button { font-size: 1.2rem; font-weight: 700; min-width: 76px; text-align: center; font-variant-numeric: tabular-nums; }
+.ph-choix.lw-choix-grand .atm-nota { font-size: 1.15em; }
+.ph-choix button:disabled { cursor: default; opacity: 1; }
+.ph-choix button.juste { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); color: var(--success-text); }
+.ph-choix button.faux { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+.ph-champ-box { display: inline-flex; align-items: center; gap: 4px; }
+.ph-champ {
+  width: 120px; font: inherit; font-size: 1.15rem; font-weight: 800; text-align: center; padding: 9px 8px;
+  border: none; border-radius: 12px; box-shadow: inset 0 0 0 1.5px var(--paper-3); background: var(--sheet); color: var(--ink);
+  -webkit-appearance: none; appearance: none;
+}
+.ph-champ:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.ph-champ:disabled { background: var(--paper); color: var(--ink); -webkit-text-fill-color: var(--ink); opacity: 1; }
+.ph-champ-box.petit .ph-champ { width: 78px; font-size: 1.05rem; padding: 8px 6px; }
+.ph-champ-box.ko .ph-champ { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); }
+.ph-pm {
+  width: 38px; height: 42px; flex-shrink: 0; border: none; border-radius: 12px; cursor: pointer;
+  background: var(--paper); color: var(--ink); font: inherit; font-size: 1.1rem; font-weight: 800;
+}
+.ph-pm:disabled { opacity: .35; cursor: default; }
+.ph-champ-box.petit .ph-pm { width: 32px; height: 38px; font-size: 1rem; }
+.ph-sci { display: inline-flex; align-items: flex-start; flex-wrap: nowrap; gap: 3px; max-width: 100%; }
+.ph-sci .ph-champ-box.petit .ph-champ { width: 74px; }
+.ph-x10 { font-size: 1.15rem; font-weight: 800; align-self: center; white-space: nowrap; }
+.ph-exposant { margin-top: -16px; }
+.ph-exposant .ph-champ { width: 58px; font-size: 16px; padding: 6px 4px; }
+.ph-exposant .ph-pm { width: 30px; height: 34px; font-size: .95rem; }
+@media (max-width: 420px) {
+  .ph-champ-box.petit .ph-champ, .ph-sci .ph-champ-box.petit .ph-champ { width: 64px; }
+  .ph-exposant .ph-champ { width: 48px; }
+  .ph-champ-box.petit .ph-pm { width: 28px; }
+  .ph-exposant .ph-pm { width: 26px; }
+  .ph-x10 { font-size: 1.05rem; }
+}
+.lw-saisie-l { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-weight: 800; }
+.lw-saisie-t { font-size: 1.05rem; line-height: 1.6; }
+.lw-unite { font-weight: 800; color: var(--ink-2); }
+.lw-saisie .er-actions, .ph-partie-zone > .er-actions { margin-top: 10px; }
+.lw-champs { display: flex; flex-wrap: wrap; gap: 10px 22px; }
+.lw-champ-l { display: flex; flex-direction: column; gap: 4px; font-weight: 800; font-size: .95rem; }
+.lw-champ-t { color: var(--ink-2); }
+
+
+/* ============================================================
+   ZONE DE TRAVAIL ET SCHÉMAS
+   ============================================================ */
+.lw-sim-travail { flex: 1 1 0; min-height: 0; min-width: 0; position: relative; border-radius: 14px; background: var(--paper); overflow: hidden; }
+.lw-svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; overflow: visible; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+.lw-svg-actif { touch-action: none; cursor: pointer; }
+.lw-li, .lw-dl { stroke: var(--ink); stroke-linecap: round; }
+.lw-tl { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 3 4; }
+.lw-po { fill: var(--sheet); stroke: var(--accent); stroke-width: 2.5; }
+.lw-po-choisi { fill: var(--accent); }
+.lw-prov { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 3 4; }
+.lw-at { fill: var(--ink); font-family: var(--font-sans); font-weight: 700; text-anchor: middle; }
+.lw-at-inc { fill: var(--ink-2); }
+.lw-inc { fill: var(--sheet); stroke: var(--line-strong); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.lw-sel { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+.lw-faux { fill: none; stroke: var(--danger); stroke-width: 2.5; }
+.lw-ne { fill: var(--ink-2); font-family: var(--font-sans); font-weight: 700; text-anchor: middle; }
+.lw-ne-faux { fill: var(--danger-text); }
+.lw-mini { display: block; margin: 0 auto; }
+.lw-petit { font-size: .82rem; color: var(--ink-2); line-height: 1.38; }
+
+/* bande au-dessus de la zone : molécule, boutons */
+.lw-sim-bande { display: flex; align-items: center; justify-content: space-between; gap: 6px 10px; flex-wrap: wrap; }
+.lw-bande-t { font-size: 1.05rem; font-weight: 800; }
+.lw-bande-b { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.lw-bande-b .btn-small { min-height: 40px; }
+
+/* pastilles nommées par la formule */
+.lw-puce.lw-puce-l { width: auto; min-width: 46px; padding: 0 10px; border-radius: 999px; font-size: .86rem; font-weight: 700; }
+.lw-puces-f { gap: 5px; }
+.lw-puce sub { font-size: .7em; }
+
+/* ============================================================
+   MODULE 1 : tableau des atomes, défi, formule semi-développée
+   ============================================================ */
+.lw-tab-defile { overflow-x: auto; }
+.lw-tab-at { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; text-align: center; }
+.lw-tab-at th, .lw-tab-at td { border: 1px solid var(--paper-3); padding: 3px 2px; font-size: .9rem; }
+.lw-tab-at thead th { background: var(--paper); font-size: .7rem; font-weight: 800; color: var(--ink-2); line-height: 1.15; }
+.lw-tab-at tbody th { font-size: 1.05rem; font-weight: 800; }
+.lw-tab-at td { font-weight: 700; }
+.lw-tab-att td, .lw-tab-att th { color: var(--ink-3); }
+.lw-tab-ed td { padding: 2px; }
+.lw-tab-dessin { width: 50px; padding: 0 !important; }
+.lw-case {
+  width: 100%; min-height: 46px; border: none; border-radius: 10px; background: var(--sheet); cursor: pointer; padding: 0;
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 800 1.15rem var(--font-sans); color: var(--ink); font-variant-numeric: tabular-nums;
+}
+.lw-case-sel { box-shadow: inset 0 0 0 2.5px var(--accent); background: var(--cle-bg); color: var(--accent-ink); }
+.lw-case.ko { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); }
+.lw-case:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lw-ed { display: flex; flex-direction: column; gap: 6px; }
+.lw-ed-conf { font-size: .95rem; font-variant-numeric: tabular-nums; }
+.lw-ed-t { font-size: .88rem; font-weight: 800; color: var(--accent-ink); }
+.lw-pave { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 3px; }
+.lw-pave button { min-height: 46px; padding: 0; font-weight: 800; font-size: 1.05rem; justify-content: center; }
+.lw-ed-a { margin-top: 0; gap: 8px; }
+.lw-trouvees:empty { display: none; }
+.lw-trouvees-l { margin: 4px 0 0; padding-left: 22px; font-size: .95rem; font-weight: 700; line-height: 1.5; }
+.lw-semi { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border-radius: 14px; background: var(--paper); }
+.lw-semi-t { display: flex; align-items: center; gap: 6px; font-size: .9rem; }
+.lw-semi-f .orga-defile { overflow-x: auto; }
+.lw-semi-f svg { max-height: 90px; }
+
+/* ============================================================
+   MODULES 2 ET 3 : compter, conclure, compléter
+   ============================================================ */
+.lw-cpt-zone { display: flex; flex-direction: column; gap: 6px; }
+.lw-cpt-t { font-size: .92rem; line-height: 1.4; }
+.lw-cpts { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.lw-cpt { display: flex; flex-direction: column; gap: 2px; }
+.lw-cpt-l { font-size: .78rem; font-weight: 800; color: var(--ink-2); }
+.lw-cpt-c { display: inline-flex; align-items: center; gap: 4px; }
+.lw-cpt-c button { width: 42px; min-height: 46px; padding: 0; justify-content: center; font-size: 1.2rem; font-weight: 800; }
+.lw-cpt-v { min-width: 30px; text-align: center; font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.lw-cpt.ko .lw-cpt-v { color: var(--danger-text); }
+.lw-cpt-a { margin-top: 0; gap: 8px; }
+.lw-compte { font-size: .85rem; font-weight: 700; color: var(--ink-2); }
+.lw-phrase {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-height: 54px; padding: 5px; border-radius: 14px;
+  background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--line-strong);
+}
+.lw-phrase.lw-survol { box-shadow: inset 0 0 0 2.5px var(--accent); background: var(--cle-bg); }
+.lw-phrase-vide { font-size: .85rem; color: var(--ink-2); padding: 0 6px; }
+.lw-pioche { display: flex; flex-direction: column; gap: 4px; }
+.lw-pioche-f, .lw-pioche-r { display: flex; flex-wrap: wrap; gap: 4px; }
+/* raisons sur deux colonnes (deux lignes de texte chacune) : la pioche tient dans le panneau */
+.lw-pioche-r { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.lw-pioche-r .lw-exp { border-radius: 14px; text-align: center; padding: 3px 8px; line-height: 1.2; }
+.lw-exp {
+  min-height: 46px; padding: 4px 12px; border: none; border-radius: 999px; cursor: grab; background: var(--sheet); color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 600 .86rem var(--font-sans); line-height: 1.2; text-align: left;
+}
+.lw-exp-v { font-weight: 800; }
+.lw-exp-l { font-weight: 800; color: var(--accent-ink); }
+.lw-exp:disabled { opacity: .38; cursor: default; }
+.lw-exp-pris { background: var(--cle-bg); box-shadow: inset 0 0 0 1.5px var(--cle-line); cursor: pointer; }
+.lw-exp:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.drag-ghost.lw-exp { opacity: .92; }
+.lw-concl-a { margin-top: 0; gap: 8px; }
+.lw-cmp-t { font-size: .92rem; line-height: 1.4; }
+.lw-cmp-b { display: flex; flex-wrap: wrap; gap: 6px; }
+.lw-cmp-b button { min-height: 46px; }
+.lw-cmp-v { margin-top: 0; }
+
+/* module 2 : panneau plus large (expressions à piocher) ; sur téléphone, la conclusion prend plus de place */
+@media (min-width: 900px) { .lw-m2 .lw-sim-corps { grid-template-columns: minmax(0, 1fr) 400px; } }
+@media (max-width: 899px) {
+  .lw-m2.lw-mode-concl .lw-sim-corps { grid-template-rows: minmax(0, 38fr) minmax(0, 62fr); }
+  .lw-m2.lw-mode-concl .lw-sim-panneau, .lw-m2.lw-mode-concl .lw-sim-bloc { gap: 5px; }
+  .lw-m2.lw-mode-concl .lw-sim-panneau { padding: 6px 10px; }
+  .lw-m2.lw-mode-concl .lw-pioche, .lw-m2.lw-mode-concl .lw-pioche-r, .lw-m2.lw-mode-concl .lw-pioche-f { gap: 3px; }
+  .lw-concl-a { flex-wrap: nowrap; gap: 6px; }
+  .lw-concl-a .btn-primary { padding-left: 18px; padding-right: 18px; }
+  .lw-concl-a .btn-small { padding-left: 10px; padding-right: 10px; white-space: nowrap; }
+  .lw-pioche-r .lw-exp { font-size: .76rem; line-height: 1.15; }
+  .lw-pioche-f { flex-wrap: nowrap; }
+  .lw-pioche-f .lw-exp { flex: 1 1 auto; padding: 3px 8px; font-size: .78rem; text-align: center; }
+  .lw-phrase .lw-exp { min-height: 36px; font-size: .76rem; padding: 2px 9px; }
+  .lw-phrase { min-height: 46px; padding: 4px; }
+}
+
+/* séries : zone de travail dans la question */
+.lw-q-zone { position: relative; height: 330px; border-radius: 14px; background: var(--paper); overflow: hidden; }
+.lw-q-zone.lw-q-petit { height: 230px; }
+.lw-q-outils { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.lw-q-msg:empty { display: none; }
+.lw-q-msg { margin-top: 8px; }
+.lw-q-msg > div { padding: 8px 12px; border-radius: 14px; font-size: .92rem; line-height: 1.42; }
+
+@media (min-width: 900px) and (max-height: 760px) {
+  .lw-case { min-height: 42px; }
+  .lw-pave button { min-height: 42px; }
+  .lw-cpt-c button { min-height: 42px; }
+  .lw-exp { min-height: 42px; }
+}
+@media (max-width: 899px) {
+  .lw-sim-bande { gap: 4px; }
+  .lw-bande-t { font-size: .92rem; }
+  .lw-bande-b .btn-small { min-height: 38px; padding: 0 10px; font-size: .8rem; }
+  .lw-tab-at th, .lw-tab-at td { padding: 2px 1px; font-size: .84rem; }
+  .lw-tab-at thead th { font-size: .64rem; }
+  .lw-ed { gap: 4px; }
+  .lw-ed-conf, .lw-ed-t { font-size: .84rem; }
+  .lw-puce.lw-puce-l { min-width: 40px; padding: 0 8px; font-size: .8rem; }
+  .lw-exp { font-size: .8rem; padding: 3px 10px; }
+  .lw-phrase { min-height: 50px; }
+  .lw-cpt-t, .lw-cmp-t { font-size: .85rem; }
+  .lw-q-zone { height: 300px; }
+  .lw-trouvees-l { font-size: .84rem; line-height: 1.35; margin-top: 2px; }
+  .lw-semi { padding: 6px 8px; gap: 2px; }
+  .lw-semi-p { display: none; }          /* la phrase est dans la bulle ⓘ */
+  .lw-semi-f svg { max-height: 70px; }
+}
