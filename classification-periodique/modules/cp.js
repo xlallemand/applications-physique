@@ -465,21 +465,34 @@
 
   /* ---------- « À essayer » : défis cochés automatiquement, dans n'importe quel ordre ----------
      liste : [{ t (texte), ok(etat) → bool, preparer() (facultatif : bouton « Essayer »), bravo }]
-     → { verifier(etat), faits, tousFaits() } ; tous faits → page marquée faite (SOM.marquer) */
+     → { verifier(etat), faits, tousFaits() } ; tous faits → page marquée faite (SOM.marquer)
+     Tous faits : le bilan prend la place du texte du défi (une pastille remontre son défi,
+     le bouton « Bilan » remontre le bilan) ; le panneau ne déborde pas sur un petit écran. */
   function defis(zone, liste, opts) {
     opts = opts || {};
     const go = i => (liste[i].preparer ? `<button type="button" class="btn-small cp-defi-go" data-go="${i}" aria-label="Préparer le défi ${i + 1}">Essayer</button>` : '');
-    zone.innerHTML = `<div class="cp-defis-c"><div class="cp-defis-puces" role="tablist" aria-label="Défis">${liste.map((d, i) => `<button type="button" role="tab" class="cp-puce" data-p="${i}" aria-selected="false" aria-label="Défi ${i + 1}">${i + 1}</button>`).join('')}</div>
+    zone.innerHTML = `<div class="cp-defis-c"><div class="cp-defis-puces" role="tablist" aria-label="Défis">${liste.map((d, i) => `<button type="button" role="tab" class="cp-puce" data-p="${i}" aria-selected="false" aria-label="Défi ${i + 1}">${i + 1}</button>`).join('')}<button type="button" class="btn-small cp-voir-bilan" data-a="voirBilan" hidden>Bilan</button></div>
         <p class="cp-defi-c-t" data-a="defiTexte"></p></div>
       <div class="cp-defis-bilan" data-a="bilan" aria-live="polite"></div>`;
     const faits = liste.map(() => false);
     const puces = Array.from(zone.querySelectorAll('.cp-puce'));
+    const texte = zone.querySelector('[data-a="defiTexte"]'), bilan = zone.querySelector('[data-a="bilan"]'), voirBilan = zone.querySelector('[data-a="voirBilan"]');
     let marque = false;
+    // bilan à la place du texte du défi
+    function montrerBilan() {
+      puces.forEach(p => p.setAttribute('aria-selected', 'false'));
+      texte.hidden = true; bilan.hidden = false; voirBilan.hidden = true;
+    }
+    voirBilan.onclick = montrerBilan;
     zone.addEventListener('click', ev => { const b = ev.target.closest('[data-go]'); if (b) liste[+b.dataset.go].preparer(); });
     // défi montré en entier
     function choisir(i) {
       puces.forEach((p, k) => p.setAttribute('aria-selected', k === i ? 'true' : 'false'));
-      zone.querySelector('[data-a="defiTexte"]').innerHTML = `<span>${faits[i] ? '✓ ' : ''}${liste[i].t}</span>${faits[i] ? '' : go(i)}`;
+      texte.innerHTML = `<span>${faits[i] ? '✓ ' : ''}${liste[i].t}</span>${faits[i] ? '' : go(i)}`;
+      texte.hidden = false;
+      // tous faits : le bilan est caché, le bouton « Bilan » le remontre
+      const fini = faits.every(Boolean) && !!opts.bilan;
+      bilan.hidden = fini; voirBilan.hidden = !fini;
     }
     puces.forEach((p, i) => { p.onclick = () => choisir(i); });
     choisir(0);
@@ -497,7 +510,8 @@
       }
       if (nouveau >= 0 && opts.surReussite) opts.surReussite(liste[nouveau], nouveau);
       if (faits.every(Boolean)) {
-        zone.querySelector('[data-a="bilan"]').innerHTML = opts.bilan ? `<div class="callout-success cp-bilan">${opts.bilan}</div>` : '';
+        // dernier défi réussi : le bilan prend la place du texte du défi
+        if (nouveau >= 0 && opts.bilan) { bilan.innerHTML = `<div class="callout-success cp-bilan">${opts.bilan}</div>`; montrerBilan(); }
         if (!marque) { marque = true; SOM.marquer({ fait: true }); }
       }
     }
