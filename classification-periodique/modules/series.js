@@ -168,7 +168,7 @@
             if (vals.d * 2 === v && v !== reste) return { diag: `Les électrons des liaisons ne comptent pas : il reste ${v} ${MOINS} ${g} = ${pl(reste, 'électron')} → ${l.doublets} doublet${l.doublets > 1 ? 's' : ''} non liant${l.doublets > 1 ? 's' : ''}.`, faux };
             return { diag: `Il reste ${v} ${MOINS} ${g} = ${pl(reste, 'électron')} de valence, regroupés par deux.`, faux };
           },
-          solution: `<span class="cp-sol-at">${CP.atomeLiaisons(e.sym, l.liaisons, l.doublets)}<span><b>${pl(l.liaisons, 'liaison')}</b> ; il reste ${v} ${MOINS} ${g} = ${pl(reste, 'électron')} → <b>${CP.doublets(l.doublets)}</b>.</span></span>` },
+          solution: `<span class="cp-sol-at">${CP.atomeLiaisons(e.sym, l.liaisons, l.doublets)}<span><b>${pl(l.liaisons, 'liaison')}</b> ; il reste ${v} ${MOINS} ${g} = ${pl(reste, 'électron')} → <b>${CP.doublets(l.doublets)}</b>.</span></span>${CP.revois(['lewis'])}` },
       ],
       bilan: `${e.sym} : ${pl(l.liaisons, 'liaison')}, ${CP.doublets(l.doublets)}.`,
     };

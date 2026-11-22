@@ -168,7 +168,8 @@
           <p class="cp-rub-p">Électrons à gagner pour avoir la configuration d'un gaz noble (${gaz.sym}, règle ${l.regle === 'duet' ? 'du duet' : 'de l\'octet'}) : <b>${l.gagner}</b> → <b>${pl(l.liaisons, 'liaison')}</b>.</p>
           <p class="cp-rub-p">${reste ? `Il reste ${l.valence} ${MOINS} ${l.gagner} = ${pl(reste, 'électron')} de valence → <b>${CP.doublets(l.doublets)}</b>.` : 'Il ne reste aucun électron de valence : <b>aucun doublet non liant</b>.'}</p>
         </div></div>
-        <p class="cp-rub-p cp-petit">Dans une liaison covalente, chacun des deux atomes gagne un électron.</p>`;
+        <p class="cp-rub-p cp-petit">Dans une liaison covalente, chacun des deux atomes gagne un électron.</p>
+        ${CP.revois(['lewis'])}`;
     }
 
     /* ----- « À essayer » ----- */

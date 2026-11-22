@@ -373,6 +373,7 @@
   /* ---------- Liens « Revois… » vers d'autres applications (nouvelle fenêtre) ---------- */
   const APPLIS = {
     atome: { href: '../../atome-ions/index.html', texte: 'Revois la configuration électronique et les ions' },
+    lewis: { href: '../../lewis/index.html', texte: 'Revois les schémas de Lewis' },
   };
   function revois(liste) {
     return `<p class="cp-revois">${liste.map(k => `<a href="${APPLIS[k].href}" target="_blank" rel="noopener">${APPLIS[k].texte} ↗</a>`).join('')}</p>`;
