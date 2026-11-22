@@ -245,13 +245,19 @@ function renderNode(node, path) {
                     onclick="event.stopPropagation();EPM.ED._sup('${path}',${idx})">✕</span>
             </span>`;
         }).join('');
+        // case vide qu'on peut supprimer (facteur vide d'un produit, terme vide
+        // d'une somme) : une commande d'effacement, sélectionnée par un appui (tuiles.js)
+        const croixCase = !node.items.length && emptySlotOwner(path)
+            ? `<span class="frac-del" onclick="EPM.ED._supCase('${path}')" title="Supprimer la case vide">✕</span>` : '';
         return `<div class="slot-simple" data-path="${path}">
-                    ${items || '<span class="slot-placeholder">…</span>'}
+                    ${items || '<span class="slot-placeholder">…</span>'}${croixCase}
                 </div>`;
     }
     if (node.kind === 'frac') {
+        // dénominateur réduit à 1, ou dénominateur vide (même sans forceDenCross,
+        // ex. après l'outil 1/x sur un numérateur vide) : on peut le supprimer
         const showDenCross = (node.den.kind === 'simple' && node.den.items.length === 1 && node.den.items[0].id === 'one')
-            || (isSlotEmpty(node.den) && node.forceDenCross);
+            || (isSlotEmpty(node.den) && (node.forceDenCross || node.den.kind === 'simple'));
         const draggableDen = denHasRealContent(node);
         return `<div class="frac-wrap">
             <div class="frac-num-wrap">${renderNode(node.num, path + '.num')}</div>
@@ -503,6 +509,35 @@ function deleteDen(fracPath) {
     if (!fracNode || fracNode.kind !== 'frac') return;
     if (!isSlotEmpty(fracNode.den) && !fracNode.forceDenCross) return;
     setNode(fracPath, fracNode.num);
+    refreshView();
+}
+// case vide (…) qu'on peut supprimer : facteur vide d'un produit qui a d'autres
+// facteurs → { seq, idx } ; seule case d'un terme de somme → { sum, idx } (le terme
+// disparaît) ; sinon null (membre vide, numérateur vide : on y dépose une tuile)
+function emptySlotOwner(path) {
+    const node = getNode(path);
+    if (!node || node.kind !== 'simple' || node.items.length) return null;
+    const parts = path.split('.');
+    let last = parts.pop(), parentPath = parts.join('.');
+    if (/^\d+$/.test(last) && parentPath) {
+        const par = getNode(parentPath);
+        if (!par || par.kind !== 'seq') return null;
+        if (par.slots.length > 1) return { seq: parentPath, idx: +last };
+        // seule case de son produit : on remonte au terme qui la contient
+        const pp = parentPath.split('.');
+        last = pp.pop(); parentPath = pp.join('.');
+    }
+    if (/^term\d+$/.test(last)) {
+        const sum = getNode(parentPath);
+        if (sum && sum.kind === 'sum') return { sum: parentPath, idx: +last.slice(4) };
+    }
+    return null;
+}
+function deleteEmptySlot(path) {
+    const o = emptySlotOwner(path);
+    if (!o) return;
+    if (o.seq) getNode(o.seq).slots.splice(o.idx, 1);
+    else removeSumTerm(o.sum, o.idx);
     refreshView();
 }
 function handleEmptied(path, removedId) {
@@ -1309,13 +1344,13 @@ EPM.ED = {
     monter, fin, statique, ligne, finir, evaluer: evaluateNode, compterUns: countOnesIn,
     noeuds: { tile, simple, frac, seq, sumNode, term1, func },
     libelleOutil, noteOutil,
-    _sup: (p, i) => deleteItem(p, i), _supDen: p => deleteDen(p), _inverser: () => flipEquation(),
+    _sup: (p, i) => deleteItem(p, i), _supDen: p => deleteDen(p), _supCase: p => deleteEmptySlot(p), _inverser: () => flipEquation(),
     // opérations de l'élève (tests automatiques) et état
     ops: {
         etat: () => state, historique: () => history, resolu: () => resolved, erreurs: () => hadError,
         deposer: (path, data) => processDrop(path, data), inserer: handleInsertDropAt,
         terme: processSumTermDrop, den: processFracDenDrop, bloc: processBlocDrop, paren: processParenDrop, neg: negateSide,
-        outil: applyFuncTool, effacer: deleteItem, effacerDen: deleteDen, inverser: flipEquation, verifier: verifyStep,
+        outil: applyFuncTool, effacer: deleteItem, effacerDen: deleteDen, effacerCase: deleteEmptySlot, inverser: flipEquation, verifier: verifyStep,
         annuler: annulerAction,
         // remplace l'équation affichée (tests automatiques)
         charger: st => { state = JSON.parse(JSON.stringify(st)); resolved = false; refreshView(); },
