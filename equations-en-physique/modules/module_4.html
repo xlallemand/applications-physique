@@ -290,7 +290,11 @@ function monterEditeur(hote, cfg, api) {
                 const sep = (idx > 0 && !isOperatorTile(node.items[idx-1]) && !isOperatorTile(it)) ? '<span class="mult-sign">×</span>' : '';
                 return sep + `<span class="eq-tile${hl}" data-path="${path}" data-idx="${idx}"><span class="eq-tile-lab">${it.label}</span><span class="tile-del">✕</span></span>`;
             }).join('');
-            return `<div class="slot-simple" data-path="${path}">${items || '<span class="slot-placeholder">…</span>'}</div>`;
+            // facteur vide d'un produit (ex. numérateur vide resté seul) : une commande
+            // d'effacement, sélectionnée par un appui (../tuiles.js)
+            const croixCase = !node.items.length && emptySlotOwner(path)
+                ? `<span class="frac-del" data-case="${path}" title="Supprimer la case vide">✕</span>` : '';
+            return `<div class="slot-simple" data-path="${path}">${items || '<span class="slot-placeholder">…</span>'}${croixCase}</div>`;
         }
         if (node.kind === 'frac') {
             const denIsLoneOne = node.den.items.length === 1 && node.den.items[0].id === 'one';
@@ -340,11 +344,15 @@ function monterEditeur(hote, cfg, api) {
             x.addEventListener('click', e => { e.stopPropagation(); deleteItem(path, idx); });
         });
         // croix d'un dénominateur qui vaut 1 : retire ce 1 (la fraction disparaît)
-        zoneEq.querySelectorAll('.frac-del').forEach(x => {
+        zoneEq.querySelectorAll('.frac-del[data-frac]').forEach(x => {
             const p = x.dataset.frac + '.den';
             x.addEventListener('click', () => deleteItem(p, 0));
             x.addEventListener('touchstart', e => e.stopPropagation());
             x.addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); deleteItem(p, 0); });
+        });
+        // croix d'une case vide : la supprime
+        zoneEq.querySelectorAll('.frac-del[data-case]').forEach(x => {
+            x.addEventListener('click', () => deleteEmptySlot(x.dataset.case));
         });
         zoneEq.querySelector('.flip-btn').addEventListener('click', flipEquation);
     }
@@ -380,6 +388,27 @@ function monterEditeur(hote, cfg, api) {
                 setNode(path, simple([{ id:'one', label:'1' }]));
             }
         }
+    }
+    // case vide (…) qu'on peut supprimer : facteur vide d'un produit qui a d'autres
+    // facteurs → { seq, idx } ; sinon null (membre vide, numérateur vide : on y dépose une tuile)
+    function emptySlotOwner(path) {
+        const node = getNode(path);
+        if (!node || node.kind !== 'simple' || node.items.length) return null;
+        const parts = path.split('.');
+        let last = parts.pop(), parentPath = parts.join('.');
+        if (/^\d+$/.test(last) && parentPath) {
+            const par = getNode(parentPath);
+            if (!par || par.kind !== 'seq') return null;
+            if (par.slots.length > 1) return { seq: parentPath, idx: +last };
+        }
+        return null;
+    }
+    function deleteEmptySlot(path) {
+        if (fige) return;
+        const o = emptySlotOwner(path);
+        if (!o) return;
+        getNode(o.seq).slots.splice(o.idx, 1);
+        refreshView();
     }
     function handleEmptied(path, removedId) {
         const parts = path.split('.');

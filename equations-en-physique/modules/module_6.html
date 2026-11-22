@@ -456,7 +456,11 @@ function monterEditeur(hote, cfg, api) {
                 const sep = (idx > 0 && !isOperatorTile(node.items[idx-1]) && !isOperatorTile(it)) ? '<span class="mult-sign">×</span>' : '';
                 return sep + `<span class="eq-tile${hl}" data-path="${path}" data-idx="${idx}"><span class="eq-tile-lab">${it.label}</span><span class="tile-del">✕</span></span>`;
             }).join('');
-            return `<div class="slot-simple" data-path="${path}">${items || '<span class="slot-placeholder">…</span>'}</div>`;
+            // case vide qu'on peut supprimer (facteur vide d'un produit, terme vide
+            // d'une somme) : une commande d'effacement, sélectionnée par un appui (../tuiles.js)
+            const croixCase = !node.items.length && emptySlotOwner(path)
+                ? `<span class="frac-del" data-case="${path}" title="Supprimer la case vide">✕</span>` : '';
+            return `<div class="slot-simple" data-path="${path}">${items || '<span class="slot-placeholder">…</span>'}${croixCase}</div>`;
         }
         if (node.kind === 'frac') {
             const showDenCross = (node.den.items.length === 1 && node.den.items[0].id === 'one')
@@ -596,11 +600,15 @@ function monterEditeur(hote, cfg, api) {
             if (!t) return;
             enableTileDrag(el, { type:'sumterm', from:sumPath, termIdx, sign:t.sign });
         });
-        zoneEq.querySelectorAll('.frac-del').forEach(x => {
+        zoneEq.querySelectorAll('.frac-del[data-frac]').forEach(x => {
             const p = x.dataset.frac;
             x.addEventListener('click', () => deleteDen(p));
             x.addEventListener('touchstart', e => e.stopPropagation());
             x.addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); deleteDen(p); });
+        });
+        // croix d'une case vide : la supprime
+        zoneEq.querySelectorAll('.frac-del[data-case]').forEach(x => {
+            x.addEventListener('click', () => deleteEmptySlot(x.dataset.case));
         });
         zoneEq.querySelector('.flip-btn').addEventListener('click', flipEquation);
     }
@@ -638,6 +646,36 @@ function monterEditeur(hote, cfg, api) {
         if (!fracNode || fracNode.kind !== 'frac') return;
         if (fracNode.den.items.length !== 0 && !fracNode.forceDenCross) return;
         setNode(fracPath, fracNode.num);
+        refreshView();
+    }
+    // case vide (…) qu'on peut supprimer : facteur vide d'un produit qui a d'autres
+    // facteurs → { seq, idx } ; seule case d'un terme de somme → { sum, idx } (le terme
+    // disparaît) ; sinon null (membre vide, numérateur vide : on y dépose une tuile)
+    function emptySlotOwner(path) {
+        const node = getNode(path);
+        if (!node || node.kind !== 'simple' || node.items.length) return null;
+        const parts = path.split('.');
+        let last = parts.pop(), parentPath = parts.join('.');
+        if (/^\d+$/.test(last) && parentPath) {
+            const par = getNode(parentPath);
+            if (!par || par.kind !== 'seq') return null;
+            if (par.slots.length > 1) return { seq: parentPath, idx: +last };
+            // seule case de son produit : on remonte au terme qui la contient
+            const pp = parentPath.split('.');
+            last = pp.pop(); parentPath = pp.join('.');
+        }
+        if (/^term\d+$/.test(last)) {
+            const sum = getNode(parentPath);
+            if (sum && sum.kind === 'sum') return { sum: parentPath, idx: +last.slice(4) };
+        }
+        return null;
+    }
+    function deleteEmptySlot(path) {
+        if (fige) return;
+        const o = emptySlotOwner(path);
+        if (!o) return;
+        if (o.seq) getNode(o.seq).slots.splice(o.idx, 1);
+        else removeSumTerm(o.sum, o.idx);
         refreshView();
     }
     function handleEmptied(path, removedId) {

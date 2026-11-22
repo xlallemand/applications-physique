@@ -9,8 +9,9 @@
        Échap annule la sélection) ;
      - une tuile de l'équation déposée dans la réserve (palette) est effacée ;
      - le 1 seul au dénominateur s'efface et la fraction disparaît ;
-     - un dénominateur vide qu'on peut supprimer (la page affiche pour lui
-       une commande d'effacement) se sélectionne aussi par un appui.
+     - une case vide qu'on peut supprimer (dénominateur vide, facteur vide
+       d'un produit, terme vide d'une somme : la page affiche pour elle une
+       commande d'effacement) se sélectionne aussi par un appui.
    L'effacement passe toujours par les commandes de chaque page (.tile-del,
    .frac-del, masquées par tuiles.css) : les règles propres à chaque
    module (numérateur vidé, fraction qui disparaît…) restent les siennes.
@@ -69,12 +70,16 @@
   // case d'un dénominateur et commande de suppression de sa fraction
   const caseDen = wrap => wrap && wrap.querySelector(':scope > .slot-simple');
   const croixDen = wrap => wrap && wrap.querySelector(':scope > .frac-del');
-  // dénominateur vide qu'on peut supprimer
-  function denVide(cible) {
+  // la case est-elle tout le dénominateur d'une fraction ?
+  const estDen = c => !!(c.parentElement && c.parentElement.classList.contains('frac-den-wrap'));
+  // commande de suppression d'une case vide : celle de sa fraction (dénominateur)
+  // ou la sienne (facteur vide d'un produit, terme vide d'une somme)
+  const croixCase = c => (estDen(c) && croixDen(c.parentElement)) || c.querySelector(':scope > .frac-del');
+  // case vide qu'on peut supprimer
+  function caseVide(cible) {
     if (!cible || cible.closest('.eq-tile, .ep-fige')) return null;
-    const wrap = cible.closest('.frac-den-wrap');
-    const c = caseDen(wrap);
-    if (!c || !croixDen(wrap) || c.querySelector('.eq-tile')) return null;
+    const c = cible.closest('.slot-simple') || caseDen(cible.closest('.frac-den-wrap'));
+    if (!c || c.querySelector('.eq-tile') || !croixCase(c)) return null;
     return c;
   }
   // tuile de l'équation qu'on peut effacer
@@ -93,7 +98,7 @@
   function effacerMaintenant(el) {
     const zone = el.closest('.eq-row');
     if (el.classList.contains('slot-simple')) {
-      const x = croixDen(el.closest('.frac-den-wrap'));
+      const x = croixCase(el);
       if (x) x.click();
       return;
     }
@@ -136,8 +141,8 @@
     croix.type = 'button';
     croix.className = 'ept-croix';
     croix.textContent = '✕';
-    const den = el.classList.contains('slot-simple');
-    croix.setAttribute('aria-label', den ? 'Supprimer le dénominateur' : 'Effacer ' + texte(el));
+    const vide = el.classList.contains('slot-simple');
+    croix.setAttribute('aria-label', vide ? (estDen(el) ? 'Supprimer le dénominateur' : 'Supprimer la case vide') : 'Effacer ' + texte(el));
     croix.title = croix.getAttribute('aria-label');
     // la croix ne commence pas de glisser la tuile qui la porte
     croix.addEventListener('pointerdown', e => e.stopPropagation());
@@ -157,7 +162,7 @@
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     if (e.target.closest && e.target.closest('.ept-croix')) return;
     const t = tuileEffacable(e.target);
-    const d = !t && denVide(e.target);
+    const d = !t && caseVide(e.target);
     // un appui ailleurs que sur l'élément sélectionné annule la sélection
     if (selection && selection.el !== t && selection.el !== d) deselectionner();
     const item = glissable(e.target);
@@ -208,7 +213,7 @@
       if (!bouge) {
         if (!g.appui) return;
         const el = retrouver(g.appui, g.zone);
-        if (el && (el.classList.contains('slot-simple') ? denVide(el) : tuileEffacable(el))) basculer(el);
+        if (el && (el.classList.contains('slot-simple') ? caseVide(el) : tuileEffacable(el))) basculer(el);
         return;
       }
       if (!g.item) return;
@@ -252,7 +257,7 @@
   // ── clavier ──
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && selection) { deselectionner(); return; }
-    const el = tuileEffacable(e.target) || (e.target.classList && e.target.classList.contains('slot-simple') && denVide(e.target));
+    const el = tuileEffacable(e.target) || (e.target.classList && e.target.classList.contains('slot-simple') && caseVide(e.target));
     if (!el || (el !== e.target)) return;
     if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); effacer(el); }
     else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); basculer(el); }
@@ -298,11 +303,12 @@
       italiques(el);
       if (el.classList.contains('eq-tile') && !el.hasAttribute('tabindex') && tuileEffacable(el)) el.tabIndex = 0;
     });
-    racine.querySelectorAll('.frac-den-wrap').forEach(w => {
-      const c = caseDen(w);
-      if (c && denVide(c) && !c.hasAttribute('tabindex')) {
+    const cases = [...racine.querySelectorAll('.slot-simple')];
+    if (racine.matches && racine.matches('.slot-simple')) cases.push(racine);
+    cases.forEach(c => {
+      if (caseVide(c) && !c.hasAttribute('tabindex')) {
         c.tabIndex = 0;
-        c.setAttribute('aria-label', 'Dénominateur vide');
+        c.setAttribute('aria-label', estDen(c) ? 'Dénominateur vide' : 'Case vide');
       }
     });
   }
