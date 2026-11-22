@@ -1,0 +1,337 @@
+/* ============================================================
+   Styles de l'application « Calcul numérique » (préfixe cn-)
+   (repris de modules/epm.css de l'application Équations en physique :
+   aides, réglages, suivi, fiches, sauvegarde, module Découverte ;
+   puis les éléments propres : champ « a × 10ⁿ » et pavé, parties d'une
+   question, choix, exemple, défi chrono)
+   Complète assets/theme.css, equilibrer-reactions/modules/er.css et
+   assets/sommaire.css. Couleurs : variables du thème uniquement.
+   ============================================================ */
+
+/* ---------- question : aides, retours ---------- */
+.cn-entete-q .cn-score { margin: 8px 0 !important; }
+.cn-aides { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; }
+.cn-aides .btn-small[disabled] { opacity: .55; cursor: default; }
+.cn-aide:empty { display: none; }
+.cn-indice { background: var(--cle-bg); border-radius: 12px; padding: 9px 12px; margin-top: 8px; line-height: 1.6; }
+.cn-retour:empty { display: none; }
+.cn-retour .cn-msg { margin-top: 8px; }
+.cn-suite:empty { display: none; }
+.cn-plan { margin: 6px 0 12px; padding-left: 20px; line-height: 1.7; }
+.cn-bilan { list-style: none; margin: 14px 0 0; padding: 0; text-align: left; }
+.cn-bilan li { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-top: 1px solid var(--line); font-size: .95rem; }
+.cn-piege { background: var(--danger-bg); border-radius: 14px; padding: 10px 14px; margin: 10px 0 6px; line-height: 1.55; }
+.er-score small { font-size: 1.4rem; color: var(--ink-3); }
+
+/* ---------- petits éléments communs ---------- */
+.cn-petit { font-size: .86rem; color: var(--ink-2); line-height: 1.45; }
+.cn-h3 { margin: 0 0 8px; font-size: 1.08rem; font-weight: 800; letter-spacing: -.01em; }
+.cn-lab { display: block; margin: 14px 0 6px; font-size: .78rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+.cn-rangee { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+.cn-entre { justify-content: space-between; }
+.cn-esp { flex: 1; }
+.cn-ok { color: var(--success-text); }
+.cn-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.cn-chev { display: inline-block; transition: transform .15s; color: var(--ink-3); font-weight: 800; }
+[aria-expanded="true"] > .cn-chev, .ouvert > button > .cn-chev { transform: rotate(180deg); }
+.cn-msg { margin-top: 10px; padding: 12px 16px; line-height: 1.5; }
+.cn-msg:empty { display: none; }
+.er-page button, .cn-tiroir button, .cn-reg-rond { touch-action: manipulation; -webkit-tap-highlight-color: transparent; font-family: var(--font-sans); }
+.er-page button:focus-visible, .er-page a:focus-visible, .er-page input:focus-visible, .er-page select:focus-visible, .er-page textarea:focus-visible,
+.cn-tiroir button:focus-visible, .cn-tiroir input:focus-visible, .cn-reg-rond:focus-visible, .cn-reg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn-primary, .btn-secondary, .btn-small { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.btn-primary.cn-pt, .btn-secondary.cn-pt { padding: 10px 18px; font-size: .92rem; }
+
+/* ---------- étiquettes du résumé des réglages ---------- */
+.cn-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 12px; }
+.cn-tag { background: var(--paper); border-radius: 999px; padding: 4px 11px; font-size: .82rem; font-weight: 600; color: var(--ink-2); }
+.cn-notions { margin-top: 8px !important; }
+.cn-notions:empty { display: none; }
+
+/* ---------- accueil : zones dépliables « Sauvegarde » et « Réglages » ---------- */
+/* même allure que les lignes des modules, plus petites, teintées de la couleur d'accent, séparées des modules */
+.cn-annexes { display: flex; flex-direction: column; gap: 8px; margin-top: 22px; }
+.cn-zone { background: var(--cle-bg); border-radius: 18px; }
+/* cadres de texte des zones : accent très pâle, entre le blanc et le fond de la zone (blanc si le navigateur ne connaît pas color-mix) */
+.cn-zone-t {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 46px; padding: 8px 16px; border: none; background: none;
+  border-radius: 18px; cursor: pointer; font: inherit; color: var(--ink); text-align: left; transition: background .15s;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) { .cn-zone-t:hover { background: var(--cle-line); } }
+.cn-zone-t:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cn-zone-nom { flex: 1 0 auto; white-space: nowrap; font-weight: 800; font-size: .95rem; letter-spacing: -.01em; color: var(--accent-ink); }
+.cn-zone-alertes { flex: 0 1 auto; min-width: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
+.cn-zone-alerte { border-radius: 999px; padding: 3px 10px; font-size: .74rem; font-weight: 800; background: var(--accent); color: var(--sheet); white-space: nowrap; }
+.cn-zone-chev { flex: none; color: var(--accent-ink); font-weight: 800; font-size: 1.1rem; transition: transform .15s; }
+.cn-zone-t[aria-expanded="true"] .cn-zone-chev { transform: rotate(90deg); }
+.cn-zone-c { padding: 0 16px 14px; }
+.cn-zone-c[hidden] { display: none; }
+.cn-zone .cn-tag { background: var(--sheet); background: color-mix(in srgb, var(--sheet) 55%, var(--cle-bg)); color: var(--accent-ink); }
+.cn-reglages-ligne .cn-tags { margin-top: 10px; }
+
+/* ---------- sauvegarde de la progression (modules/sauvegarde.js) ---------- */
+.sauv-etat { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: .9rem; line-height: 1.45; }
+/* chaque information dans un cadre discret, accent très pâle (boutons en blanc) */
+.sauv-etat li, .sauv-ou { background: var(--sheet); background: color-mix(in srgb, var(--sheet) 55%, var(--cle-bg)); border-radius: 12px; padding: 8px 12px; }
+.sauv-etat li.alerte { color: var(--accent-ink); font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--cle-line); }
+.sauv-boutons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.btn-primary.sauv-pt, .btn-secondary.sauv-pt { padding: 10px 16px; font-size: .9rem; }
+.sauv-aide { margin-top: 10px; padding: 10px 14px; border-radius: 14px; background: var(--sheet); background: color-mix(in srgb, var(--sheet) 55%, var(--cle-bg)); font-size: .9rem; line-height: 1.45; }
+.sauv-aide p { margin: 0; }
+.sauv-aide p + p { margin-top: 6px; }
+.sauv-ou { margin: 10px 0 0 !important; }
+.sauv-carte button, .sauv-toast button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; font-family: var(--font-sans); }
+.sauv-carte button:focus-visible, .sauv-toast button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* bandeau en bas de l'écran : message, rappel de sauvegarde */
+.sauv-toast { position: fixed; z-index: 1200; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  max-width: 520px; margin: 0 auto; box-sizing: border-box; background: var(--sheet); color: var(--ink);
+  border: 1px solid var(--line-strong); border-radius: 18px; padding: 14px 16px; box-shadow: 0 10px 30px color-mix(in srgb, var(--ink) 18%, transparent); font-family: var(--font-sans); }
+.sauv-toast.ok { border-color: var(--success); }
+.sauv-toast.rappel { border-color: var(--accent); }
+.sauv-toast p { margin: 0; font-size: .92rem; line-height: 1.45; }
+.sauv-toast-b { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+
+
+/* ---------- bouton Réglages : sommaire (ordinateur) et bandeau (téléphone) ---------- */
+.cn-nav-pil { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 4px; }
+.cn-reg { border: none; cursor: pointer; }
+.cn-reg-rond {
+  flex-shrink: 0; width: 42px; height: 42px; margin-left: 8px; border: none; border-radius: 999px; background: var(--paper-2);
+  color: var(--ink); font-size: 1.15rem; cursor: pointer;
+}
+
+/* ---------- panneau des réglages ---------- */
+html.cn-tiroir-ouvert { overflow: hidden; }
+.cn-voile { position: fixed; inset: 0; z-index: 1100; background: color-mix(in srgb, var(--ink) 38%, transparent); }
+.cn-tiroir {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 1101; width: 420px; max-width: 100%; overflow-y: auto; overscroll-behavior: contain;
+  background: var(--sheet); border-left: 1px solid var(--line); font-family: var(--font-sans); color: var(--ink);
+}
+@media (max-width: 599px) {
+  .cn-tiroir { top: auto; left: 0; width: auto; max-height: 88vh; max-height: 88dvh; border-left: 0; border-radius: 22px 22px 0 0; }
+}
+.cn-tiroir *, .cn-tiroir *::before, .cn-tiroir *::after { box-sizing: border-box; }
+.cn-tiroir-t { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 18px; background: var(--sheet); border-bottom: 1px solid var(--line); }
+.cn-tiroir-t b { font-size: 1.1rem; }
+.cn-tiroir-c { padding: 4px 18px 22px; }
+.cn-sect { padding: 14px 0; border-bottom: 1px solid var(--line); }
+.cn-sect h4 { margin: 0 0 10px; font-size: .75rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-2); }
+.cn-sect .cn-petit { margin: 8px 0 0; }
+.cn-lig { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; margin: 8px 0; }
+.cn-lig > span { font-size: .9rem; color: var(--ink-2); min-width: 8rem; }
+.cn-seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 16px; background: var(--paper-2); }
+.cn-seg button { border: none; background: transparent; border-radius: 13px; padding: 8px 13px; min-height: 40px; font-size: .88rem; font-weight: 600; color: var(--ink-2); cursor: pointer; }
+.cn-seg button[aria-pressed="true"] { background: var(--sheet); color: var(--ink); font-weight: 800; box-shadow: inset 0 0 0 1.5px var(--ink); }
+.cn-seg.off { opacity: .45; }
+.cn-seg.off button { cursor: default; }
+/* panneau des réglages : nom du réglage au-dessus, choix sur toute la largeur en parts égales
+   (jamais de retour à la ligne entre les choix : un long libellé passe sur deux lignes dans son bouton) */
+.cn-tiroir .cn-lig { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 6px; margin: 12px 0; }
+.cn-tiroir .cn-lig > span { min-width: 0; font-size: .86rem; font-weight: 700; color: var(--accent-ink); }
+.cn-tiroir .cn-seg { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 3px; background: var(--cle-bg); }
+.cn-tiroir .cn-seg button { padding: 7px 6px; line-height: 1.2; text-align: center; color: var(--accent-ink); transition: background .15s; }
+@media (hover: hover) { .cn-tiroir .cn-seg:not(.off) button:hover:not([aria-pressed="true"]) { background: var(--cle-line); } }
+.cn-tiroir .cn-seg button[aria-pressed="true"] { background: var(--accent); color: var(--sheet); box-shadow: none; }
+.cn-fam { border: 1px solid var(--line); border-radius: 14px; margin: 6px 0; }
+.cn-fam-t { display: flex; align-items: center; gap: 10px; padding: 6px 12px; }
+.cn-fam-o { flex: 1; display: flex; align-items: center; gap: 8px; min-height: 40px; border: none; background: none; padding: 0; text-align: left; cursor: pointer; font-size: .95rem; color: var(--ink); }
+.cn-fam-o b { flex: 1; font-weight: 700; }
+.cn-fam-c { padding: 0 12px 8px 42px; }
+.cn-cb { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; cursor: pointer; font-size: .92rem; line-height: 1.35; }
+.cn-tiroir input[type="checkbox"] { width: 20px; height: 20px; flex: none; margin: 1px 0 0; accent-color: var(--accent); }
+.cn-niv { display: inline-block; font-size: .7rem; font-weight: 700; border-radius: 6px; padding: 1px 6px; background: var(--paper-2); color: var(--ink-2); white-space: nowrap; }
+
+/* ---------- rappel de la règle ---------- */
+.cn-rappel { background: var(--paper); border-radius: 14px; padding: 12px 14px; margin-top: 8px; font-size: .93rem; line-height: 1.5; }
+.cn-rappel p { margin: 0 0 6px !important; }
+.cn-rappel-t { font-weight: 800; color: var(--accent-ink); }
+.cn-ex { color: var(--ink-2); }
+.cn-lien-fiche { font-weight: 700; color: var(--accent-ink); text-decoration: none; }
+.cn-lien-fiche:hover { text-decoration: underline; }
+.er-page mark, .cn-tiroir mark { background: var(--cle-bg); color: var(--accent-ink); font-weight: 800; padding: 0 2px; border-radius: 4px; }
+
+/* ---------- Mon suivi ---------- */
+.cn-prio { border: 2px solid var(--accent); }
+.cn-prio-l { margin: 4px 0 8px; padding-left: 22px; line-height: 1.7; }
+.cn-prio-b { justify-content: space-between; }
+.cn-notes { display: inline-flex; align-items: center; gap: 8px; }
+.cn-courbe { vertical-align: middle; }
+.cn-courbe polyline { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.cn-grp { border-top: 1px solid var(--line); }
+.cn-grp-t {
+  width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 9rem 3rem 1rem; gap: 10px; align-items: center; padding: 11px 2px;
+  border: none; background: none; text-align: left; cursor: pointer; font: inherit; color: var(--ink); min-height: 46px;
+}
+@media (max-width: 560px) { .cn-grp-t { grid-template-columns: minmax(0, 1fr) 5rem 2.6rem 1rem; gap: 8px; } }
+.cn-grp-t b { font-weight: 700; }
+.cn-adroite { text-align: right; }
+.cn-alerte { font-size: .84rem; color: var(--danger-text); }
+.cn-pile { display: flex; height: 10px; border-radius: 999px; overflow: hidden; background: var(--paper-2); }
+.cn-pile i { display: block; height: 100%; }
+.cn-s-m { background: var(--success); }
+.cn-s-e { background: var(--success-bg); box-shadow: inset 0 0 0 2px var(--success); }
+.cn-s-f { background: var(--accent); }
+.cn-s-t { background: var(--danger); }
+.cn-s-n { background: var(--paper-3); }
+.cn-s-v { background: var(--paper-2); box-shadow: inset 0 0 0 1.5px var(--paper-3); }
+.cn-grp-c { display: none; padding: 0 2px 10px; }
+.cn-grp.ouvert .cn-grp-c { display: block; }
+.cn-grp.ouvert .cn-grp-t .cn-chev { transform: rotate(180deg); }
+.cn-ligne-r { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: .92rem; }
+.cn-ligne-r.cn-plus-tard { color: var(--ink-2); }
+.cn-pct { margin-left: auto; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cn-pct small { font-size: .78rem; }
+.cn-puce { width: 11px; height: 11px; border-radius: 50%; flex: none; display: inline-block; }
+.cn-legende { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 10px; font-size: .82rem; color: var(--ink-2); }
+.cn-legende > span { display: inline-flex; gap: 6px; align-items: center; }
+
+/* ---------- Fiches de règles ---------- */
+.cn-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
+.cn-chips button {
+  border: none; border-radius: 999px; padding: 8px 14px; min-height: 40px; background: var(--sheet); color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--paper-3); font-size: .88rem; font-weight: 700; cursor: pointer;
+}
+.cn-chips button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.cn-intro { color: var(--ink-2); font-size: .92rem; margin: 0 0 10px !important; line-height: 1.5; }
+.cn-fr { border-radius: 14px; }
+.cn-fr-t {
+  width: 100%; display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 9px 10px; border: none; border-radius: 14px;
+  background: none; text-align: left; cursor: pointer; font: inherit; font-size: .98rem; color: var(--ink);
+}
+.cn-fr-t span:first-child { flex: 1; }
+@media (hover: hover) { .cn-fr-t:hover { background: var(--paper); } }
+.cn-fr.ouvert { background: var(--paper); }
+.cn-fr.ouvert > .cn-fr-t { font-weight: 800; color: var(--accent-ink); }
+.cn-fr-c { padding: 0 12px 12px; line-height: 1.55; }
+.cn-fr-c p { margin: 4px 0 8px !important; }
+.cn-fr-c .cle { padding: 10px 14px; border-radius: 14px; margin: 8px 0; }
+
+
+
+.cn-suite { scroll-margin-bottom: 20px; }
+
+/* ---------- accueil : conseil (la Découverte d'abord) et compteur ---------- */
+.cn-conseil { margin: 0 0 14px; line-height: 1.5; }
+.cn-conseil a { color: var(--accent-ink); font-weight: 700; }
+.som-compte { flex: none; font-size: .82rem; font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+/* ---------- module Découverte ---------- */
+.cn-dec-tete .er-titre { margin: 8px 0 4px; }
+.cn-dec-tete .progress-bar { margin-top: 8px; }
+.cn-dec-nav { display: flex; gap: 6px; margin-top: 12px; overflow-x: auto; padding: 2px 2px 6px; -webkit-overflow-scrolling: touch; }
+.cn-dec-pt {
+  flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 999px; text-decoration: none;
+  background: var(--sheet); box-shadow: inset 0 0 0 1.5px var(--paper-3); color: var(--ink-2); font-weight: 800; font-size: .9rem;
+  font-variant-numeric: tabular-nums; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.cn-dec-pt.fait { background: var(--cle-bg); box-shadow: none; color: var(--accent-ink); }
+.cn-dec-pt.ici { background: var(--ink); color: var(--sheet); box-shadow: none; }
+.cn-dec-pt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cn-dec-fl { margin-top: 6px; }
+.cn-regle > p { line-height: 1.55; }
+.cn-fin-dec { flex-basis: 100%; margin: 6px 0 0 !important; }
+
+@media (prefers-reduced-motion: reduce) { .cn-chev, .cn-zone-chev { transition: none; } }
+.cn-regle .cours-titre { margin-top: 0; }
+
+/* =====================================================================
+   Éléments propres à Calcul numérique
+   ===================================================================== */
+/* ---------- énoncé et parties d'une question ---------- */
+.cn-enonce { margin: 4px 0 8px !important; line-height: 1.55; }
+.cn-parties { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.cn-partie { padding: 12px 14px; border-radius: 16px; background: var(--paper); }
+.cn-partie-ok { background: var(--success-bg); }
+.cn-partie-ko { background: var(--danger-bg); }
+.cn-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 1.08rem; line-height: 1.6; font-variant-numeric: tabular-nums; }
+.cn-texte { min-width: 0; }
+.cn-lettre { font-weight: 800; color: var(--accent-ink); }
+.cn-apres { font-weight: 600; }
+.cn-valider { margin-top: 10px; padding: 9px 18px; font-size: .92rem; }
+.cn-valider[hidden] { display: none; }
+.cn-reponse:empty { display: none; }
+.cn-juste { margin: 8px 0 0 !important; font-weight: 800; color: var(--success-text); }
+.cn-ecran {
+  display: block; width: fit-content; max-width: 100%; margin: 8px 0; padding: 6px 14px; border-radius: 10px; overflow-x: auto;
+  background: var(--ink); color: var(--sheet); font-variant-numeric: tabular-nums; font-size: 1.1rem; letter-spacing: .04em; text-align: right;
+}
+
+/* ---------- champ de saisie « a × 10ⁿ » (écrit avec le pavé ou le clavier) ---------- */
+.cn-champ {
+  display: inline-flex; align-items: baseline; min-width: 4.2rem; min-height: 44px; padding: 6px 12px; box-sizing: border-box;
+  border-radius: 12px; background: var(--sheet); box-shadow: inset 0 0 0 2px var(--accent); color: var(--ink);
+  font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; cursor: text; white-space: nowrap;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none;
+}
+.cn-champ:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cn-champ-ent { min-width: 3.4rem; justify-content: center; }
+.cn-champ-sup { vertical-align: super; min-height: 38px; padding: 4px 10px; font-size: 1rem; }
+.cn-vide { color: var(--ink-3); font-weight: 600; }
+.cn-c-x, .cn-c-10 { color: var(--ink-2); }
+.cn-c-e { font-size: .75em; }
+/* curseur : à la fin de la zone en cours (mantisse ou exposant) */
+.cn-ici::after { content: ''; display: inline-block; width: 2px; height: 1.05em; margin-left: 1px; vertical-align: -.12em; background: var(--accent); animation: cn-clignote 1s steps(1) infinite; }
+.cn-champ.cn-fige { box-shadow: inset 0 0 0 1.5px var(--paper-3); cursor: default; }
+.cn-champ.cn-fige .cn-ici::after { display: none; }
+@keyframes cn-clignote { 50% { opacity: 0; } }
+
+/* ---------- pavé, collé en bas de l'écran ---------- */
+.cn-pave-z { position: sticky; bottom: 0; z-index: 20; margin: 12px -6px 0; padding: 8px 6px calc(8px + env(safe-area-inset-bottom)); background: var(--sheet); border-top: 1px solid var(--line); }
+.cn-pave-z[hidden] { display: none; }
+.cn-pave { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; max-width: 24rem; margin: 0 auto; }
+.cn-t {
+  min-height: 48px; border: none; border-radius: 14px; background: var(--paper); color: var(--ink); font-size: 1.25rem; font-weight: 700;
+  cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; font-variant-numeric: tabular-nums; transition: background .15s;
+}
+@media (hover: hover) { .cn-t:hover { background: var(--paper-2); } }
+.cn-t:active { background: var(--paper-3); }
+.cn-t:disabled { opacity: .35; cursor: default; }
+.cn-t-nav { background: var(--paper-2); font-size: 1.05rem; }
+.cn-t-p10 { background: var(--cle-bg); color: var(--accent-ink); font-size: 1rem; }
+.cn-t-ok { background: var(--ink); color: var(--sheet); font-size: .95rem; }
+@media (hover: hover) { .cn-t-ok:hover { background: var(--ink-2); } .cn-t-p10:hover { background: var(--cle-line); } }
+.cn-t:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 400px) { .cn-pave { gap: 5px; } .cn-t { min-height: 46px; font-size: 1.15rem; border-radius: 12px; } }
+
+/* ---------- choix (QCM) ---------- */
+.cn-choix { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.cn-choix .btn-secondary { min-height: 46px; padding: 10px 18px; border-radius: 16px; font-size: 1rem; font-variant-numeric: tabular-nums; }
+.cn-choix .btn-secondary.cn-bon { background: var(--success-bg); box-shadow: inset 0 0 0 2px var(--success); color: var(--success-text); opacity: 1; }
+.cn-choix .btn-secondary.cn-mauvais { background: var(--danger-bg); box-shadow: inset 0 0 0 2px var(--danger); color: var(--danger-text); opacity: 1; }
+.cn-choix .btn-secondary:disabled { cursor: default; }
+
+/* ---------- calculs, exemple, solution ---------- */
+.cn-calc { margin: 6px 0 !important; font-variant-numeric: tabular-nums; line-height: 1.6; overflow-x: auto; }
+.cn-calc .c { font-weight: 800; color: var(--accent-ink); }
+.cn-exemple { margin: 10px 0; padding: 10px 14px; border-radius: 12px; background: var(--sheet); border: 1px solid var(--line); }
+.cn-exemple-t { margin: 0 0 4px !important; font-size: .78rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+.cn-sol-q { margin-top: 6px; }
+.cn-sol-q p { margin: 4px 0 !important; }
+.callout-success .cn-sol-q, .callout .cn-sol-q { font-size: .95rem; }
+.cn-cle { display: inline-block; font-size: .7rem; font-weight: 800; border-radius: 6px; padding: 1px 6px; background: var(--accent); color: var(--sheet); letter-spacing: .03em; text-transform: uppercase; vertical-align: middle; }
+.cn-carte-cle { border: 2px solid var(--cle-line); background: var(--cle-bg); }
+.cn-carte-cle .cn-h3 { margin: 0; }
+.cn-test-prop .cn-rangee { margin-bottom: 0; }
+
+/* ---------- Découverte : chaîne des préfixes, tableau ---------- */
+.cn-chaine { display: flex; align-items: center; gap: 4px; overflow-x: auto; padding: 4px 0 8px; -webkit-overflow-scrolling: touch; }
+.cn-maillon { flex: none; display: flex; flex-direction: column; align-items: center; min-width: 3.2rem; padding: 6px 4px; border-radius: 12px; background: var(--cle-bg); }
+.cn-maillon b { font-size: 1.2rem; color: var(--accent-ink); }
+.cn-maillon small { font-size: .74rem; color: var(--ink-2); }
+.cn-fl { flex: none; color: var(--ink-3); font-weight: 800; }
+.cn-tab { border-collapse: collapse; margin: 8px 0; font-variant-numeric: tabular-nums; }
+.cn-tab th, .cn-tab td { padding: 6px 12px; border: 1px solid var(--paper-3); text-align: center; white-space: nowrap; }
+.cn-tab th { background: var(--paper); font-weight: 800; }
+.cn-parcours small { font-weight: 600; opacity: .75; }
+.cn-dec-q { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.cn-dec-q:first-of-type { border-top: 0; }
+
+/* ---------- défi chrono ---------- */
+.cn-defi-tete { text-align: center; }
+.cn-chrono { margin: 6px 0 0; font-size: 2.4rem; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.cn-chrono-depasse { color: var(--ink-3); }
+.cn-defi-ligne { font-size: 1.2rem; justify-content: center; margin: 10px 0; }
+.cn-defi-q .cn-enonce { text-align: center; }
+
+@media (prefers-reduced-motion: reduce) { .cn-ici::after { animation: none; } }

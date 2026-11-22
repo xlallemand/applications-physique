@@ -1,12 +1,13 @@
 # Applications mobiles : comment les coder
 
-Tout ce qu'il faut pour créer une application « mobile » du portail, sur le modèle des trois qui existent :
+Tout ce qu'il faut pour créer une application « mobile » du portail, sur le modèle des quatre qui existent :
 
 | Application | Dossier | Objet JS | Saisie de l'élève |
 |---|---|---|---|
 | Fractions (collège) | `fractions-college/` | `FRA` | feuille ligne par ligne, pavé ou clavier |
 | Équations du 1er degré (collège) | `equations-college/` | `EQ` | feuille ligne par ligne, pavé ou clavier |
 | Équations en physique (smartphone) | `equations-physique-mobile/` | `EPM` | éditeur à tuiles (glisser-déposer) |
+| Calcul numérique | `calcul-numerique/` | `CN` | champ « a × 10ⁿ » et pavé (touche ×10ⁿ), choix ; thèmes de séance, test de positionnement, défi chrono |
 
 Avant de commencer : `CLAUDE.md`, puis **en entier** `docs/charte-applications.md`. Ce document ne remplace pas la charte : il décrit ce qui est propre aux applications mobiles. L'application de référence est `equations-college/` (la plus simple) ; `equations-physique-mobile/` montre un module de plus (Découverte) et un réglage de classe.
 

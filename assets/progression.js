@@ -23,11 +23,11 @@
    dossier de la liste APPS du portail (préfixe le plus long), plus
    equamath_v2 (Équations du 1er degré) et revisions-reglages (réglage des
    flashcards, rattaché à aucune application). fractions-college-suivi,
-   equations-college-suivi et equations-physique-mobile-suivi (suivi des
-   compétences des applications Fractions, Équations et Équations en physique
-   (smartphone)) ont leur propre fusion (type « suivi-competences ») ;
-   fractions-college-sauvegarde, equations-college-sauvegarde et
-   equations-physique-mobile-sauvegarde (état de la
+   equations-college-suivi, equations-physique-mobile-suivi et calcul-numerique-suivi
+   (suivi des compétences des applications Fractions, Équations, Équations en physique
+   (smartphone) et Calcul numérique) ont leur propre fusion (type « suivi-competences ») ;
+   fractions-college-sauvegarde, equations-college-sauvegarde,
+   equations-physique-mobile-sauvegarde et calcul-numerique-sauvegarde (état de la
    copie de secours propre à l'appareil) ne sont jamais enregistrées.
    <dossier>-succes (succès, assets/succes.js) a sa propre fusion (type « succes »). Les autres clés du navigateur
    (autres sites de la même adresse) ne sont ni enregistrées ni reprises.
@@ -107,8 +107,8 @@
     if (reste === 'succes') return { dossier, type: 'succes' };
     if (cle === 'combustions-exercices-faits') return { dossier, type: 'liste' };
     if (cle === 'principe-dynamique-atelier') return { dossier, type: 'atelier' };
-    if (cle === 'fractions-college-suivi' || cle === 'equations-college-suivi' || cle === 'equations-physique-mobile-suivi') return { dossier, type: 'suivi-competences' };
-    if (cle === 'fractions-college-sauvegarde' || cle === 'equations-college-sauvegarde' || cle === 'equations-physique-mobile-sauvegarde') return null;      // état de la sauvegarde propre à l'appareil : jamais copié
+    if (cle === 'fractions-college-suivi' || cle === 'equations-college-suivi' || cle === 'equations-physique-mobile-suivi' || cle === 'calcul-numerique-suivi') return { dossier, type: 'suivi-competences' };
+    if (cle === 'fractions-college-sauvegarde' || cle === 'equations-college-sauvegarde' || cle === 'equations-physique-mobile-sauvegarde' || cle === 'calcul-numerique-sauvegarde') return null;      // état de la sauvegarde propre à l'appareil : jamais copié
     return { dossier, type: 'inconnue' };
   }
 
