@@ -13,7 +13,9 @@
      tenace       équations réussies après une erreur (1 point)
      difficiles   équations de difficulté 3 résolues sans erreur
    Jours : jours avec au moins une séance terminée.
-   Ensemble « maitrisees » : compétences maîtrisées au moins une fois.
+   Ensembles : « maitrisees » : compétences maîtrisées au moins une fois ;
+     « toutMaitrise » : jours ('AAAA-MM-JJ') où, après une question, toutes les
+     compétences de la classe étaient maîtrisées en même temps (succès « Le défi d'Isaac »).
 
    API :
      EPM.succesApres(occasions, note)  appelé par EPM.enregistrer (séances) et par la Découverte ; occasion : { r, ok, diff, aide } ;
@@ -34,6 +36,8 @@
   const maitrisees = (E, fam) => permises(fam).filter(id => (E.e.maitrisees || []).indexOf(id) >= 0).length;
   // seuils d'une famille : 25 %, 50 %, 75 % et toutes ses compétences
   const seuilsFamille = fam => () => { const n = permises(fam).length; return [0.25, 0.5, 0.75, 1].map(x => Math.max(1, Math.ceil(x * n))); };
+  // compétences de la classe pas maîtrisées en ce moment (statut actuel, pas « au moins une fois »)
+  const pasMaitrisees = () => permises().filter(id => EPM.statut(id) !== 'm');
   const nbDecouverte = () => (EPM.DECOUVERTE ? EPM.DECOUVERTE.length : 17);
 
   const categories = [
@@ -62,6 +66,15 @@
     { nom: 'Compétences', succes: [
       { id: 'maitrise', ic: '🏅', nom: 'Maîtrise', cond: 'Compétences maîtrisées au moins une fois (Platine : toutes celles de ta classe)',
         seuils: () => { const n = permises().length; return [3, 6, 9, n]; }, val: E => maitrisees(E) },
+      { id: 'isaac', ic: '🍎', nom: 'Le défi d’Isaac', cond: 'Jours où toutes les compétences de ta classe sont maîtrisées en même temps',
+        seuils: [1, 3, 7, 15], u: 'j', val: E => (E.e.toutMaitrise || []).length,
+        astuce: E => {
+          const n = pasMaitrisees().length;
+          if (!n) return (E.e.toutMaitrise || []).indexOf(SUC.jourDe(Date.now())) >= 0
+            ? 'Tout est maîtrisé en ce moment ✓ : reviens un autre jour et garde ce niveau.'
+            : 'Tout est maîtrisé en ce moment : réponds à une question aujourd’hui pour compter ce jour.';
+          return 'En ce moment : ' + pl(n, 'compétence') + ' de ta classe pas encore maîtrisée' + (n > 1 ? 's' : '') + '.';
+        } },
       { id: 'famille-MU', ic: '✖️', nom: 'Produits et quotients', cond: 'Compétences de la famille maîtrisées au moins une fois', seuils: seuilsFamille('MU'), val: E => maitrisees(E, 'MU') },
       { id: 'famille-AD', ic: '➕', nom: 'Termes additifs', cond: 'Compétences de la famille maîtrisées au moins une fois', seuils: seuilsFamille('AD'), val: E => maitrisees(E, 'AD') },
       { id: 'famille-FO', ic: '√', nom: 'Fonctions réciproques', cond: 'Compétences de la famille maîtrisées au moins une fois', seuils: seuilsFamille('FO'), val: E => maitrisees(E, 'FO') }
@@ -124,6 +137,8 @@
       SUC.jour();
     }
     noterMaitrisees();
+    // toutes les compétences de la classe maîtrisées en même temps : le jour compte (défi d'Isaac)
+    if (occasions.length && permises().length && !pasMaitrisees().length) SUC.reunir('toutMaitrise', [SUC.jourDe(Date.now())]);
     const n = SUC.verifier();
     n.forEach(x => {
       const i = nouveauxSucces.findIndex(y => y.s === x.s);
