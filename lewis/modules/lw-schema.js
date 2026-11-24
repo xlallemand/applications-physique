@@ -21,6 +21,8 @@
    LW.diagLigne(el, x, mode)      diagnostic d'une ligne fausse (mode 'position' : élément donné par sa place)
    LW.bilanJuste(mol)             phrase de bilan d'un schéma juste
    LW.ajuster(mol, W, H, o)       positions en px pour un dessin de W × H : { pos, f }
+   LW.apparier(etat, cible)       correspondance atome à atome entre deux dessins de la même molécule (ou null)
+   LW.atomeSeul(el, l, d, taille) petit dessin d'un atome : liaisons en traits pleins, doublets non liants
    LW.rendu(etat, o)              code SVG d'un état (positions en px) et géométrie des cibles :
                                   { html, geo: { stubs, doublets, liaisons, atomes } }
      etat : { atomes: [{ el, x, y, d, libres, inconnu }], liaisons } ; o : { f, choisi, marques (Set),
@@ -434,11 +436,47 @@
     return { pos: mol.atomes.map(a => ({ x: ox + a.x * s, y: oy + a.y * s })), f, s };
   }
 
-  // petit dessin d'un atome seul avec ses traits et ses doublets (tableau des atomes)
+  // petit dessin d'un atome seul avec ses liaisons (traits pleins) et ses doublets (tableau des atomes)
   function atomeSeul(el, libres, d, taille) {
     const f = 15, W = 62, t = taille || 46;
     const r = rendu({ atomes: [{ el, x: W / 2, y: W / 2, libres, d }], liaisons: [] }, { f });
-    return `<svg class="lw-mini" viewBox="0 0 ${W} ${W}" width="${t}" height="${t}" role="img" aria-label="${el} : ${pl(libres, 'liaison')}, ${doublets(d)}">${r.html.replace(/<circle class="lw-po[^>]*>/g, '')}</svg>`;
+    const html = r.html.replace(/<circle class="lw-po[^>]*>/g, '').replace(/class="lw-tl"/g, 'class="lw-tl lw-tl-plein"');
+    return `<svg class="lw-mini" viewBox="0 0 ${W} ${W}" width="${t}" height="${t}" role="img" aria-label="${el} : ${pl(libres, 'liaison')}, ${doublets(d)}">${html}</svg>`;
+  }
+
+  /* ---------- Correspondance atome à atome entre deux dessins de la même molécule ----------
+     apparier(etat, cible) → p (p[i] : atome de la cible qui correspond à l'atome i de etat) ou null.
+     Recherche pas à pas (mêmes éléments, mêmes ordres de liaison avec les voisins déjà placés). */
+  function apparier(etat, cible) {
+    const n = etat.atomes.length;
+    if (n !== cible.atomes.length || etat.liaisons.length !== cible.liaisons.length) return null;
+    const ordre = (m, i, j) => { const l = m.liaisons.find(x => (x.a === i && x.b === j) || (x.a === j && x.b === i)); return l ? l.o : 0; };
+    const signature = (m, i) => m.atomes[i].el + ':' + voisins(m, i).map(j => m.atomes[j].el + ordre(m, i, j)).sort().join(',');
+    const sE = etat.atomes.map((a, i) => signature(etat, i)), sC = cible.atomes.map((a, i) => signature(cible, i));
+    // parcours en largeur depuis un atome autre que H : chaque atome a un voisin déjà placé
+    const vu = new Array(n).fill(false), suite = [];
+    const depart = etat.atomes.findIndex(a => a.el !== 'H');
+    [depart >= 0 ? depart : 0].concat(etat.atomes.map((a, i) => i)).forEach(r => {
+      if (vu[r]) return;
+      vu[r] = true;
+      const file = [r];
+      while (file.length) { const x = file.shift(); suite.push(x); voisins(etat, x).forEach(y => { if (!vu[y]) { vu[y] = true; file.push(y); } }); }
+    });
+    const p = new Array(n).fill(-1), pris = new Array(n).fill(false);
+    function essai(k) {
+      if (k === n) return true;
+      const i = suite[k];
+      for (let j = 0; j < n; j++) {
+        if (pris[j] || sE[i] !== sC[j]) continue;
+        // liaisons avec les atomes déjà placés : les mêmes des deux côtés
+        if (suite.slice(0, k).some(x => ordre(etat, i, x) !== ordre(cible, j, p[x]))) continue;
+        p[i] = j; pris[j] = true;
+        if (essai(k + 1)) return true;
+        p[i] = -1; pris[j] = false;
+      }
+      return false;
+    }
+    return essai(0) ? p : null;
   }
 
   // valeurs justes d'une ligne du tableau des atomes
@@ -484,5 +522,5 @@
   }
 
   Object.assign(LW, { ligneAtome, diagLigne, bilanJuste, MOL, molecule, copier, info, doublets, pl, analyse, diagAtome, raisons, fausser, versOrga, meme, connexe, composantes,
-    somme, voisins, rendu, ajuster, atomeSeul, bord, ecart, n360 });
+    somme, voisins, rendu, ajuster, atomeSeul, apparier, bord, ecart, n360, boite });
 })();

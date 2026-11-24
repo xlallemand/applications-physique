@@ -2,7 +2,8 @@
    Construire une molécule en reliant les traits libres des atomes
    (modules 1 et 4 de « Schémas de Lewis » ; à charger après lw-schema.js)
 
-   LW.constructeur(boite, mol, o) → { etat, activer(), recommencer(), montrer(), fini(), redessiner(), detruire() }
+   LW.constructeur(boite, mol, o) → { etat, activer(), recommencer(), montrer(), fini(), redessiner(), miseEnForme(cible), detruire() }
+     miseEnForme(cible) : molécule finie redessinée sous la forme régulière de la cible (atomes appariés)
      boite : conteneur ; le dessin prend toute sa taille (recalculé si elle change)
      mol   : molécule cible (LW.molecule) : ses atomes arrivent séparés, chacun avec ses traits
              libres (liaisons à former) et ses doublets non liants
@@ -18,6 +19,8 @@
      glisser un trait libre vers un trait libre (ou un atome) d'un autre atome, ou toucher les deux : liaison ;
      deux ou trois traits entre les mêmes atomes : liaison double ou triple ;
      glisser un atome : il se déplace ; toucher une liaison : elle se défait (un trait).
+   Deux morceaux qui se lient : le plus petit vient se coller à l'autre, tourné vers l'extérieur, et les
+   atomes trop proches s'écartent (aucun atome caché par un autre).
    Refus expliqués : relier deux traits d'un même atome, relier un trait à un doublet non liant,
    atome sans trait libre, plus de trois liaisons entre deux atomes.
    ============================================================ */
@@ -63,6 +66,7 @@
     /* ----- Taille du dessin ----- */
     function mesurer() {
       const r = boite.getBoundingClientRect();
+      if (etat.atomes.length && (!r.width || !r.height)) return;     // zone cachée
       const w = Math.max(120, r.width), h = Math.max(120, r.height);
       // grand changement de taille (écran tourné, plein écran) : les positions suivent ;
       // petit changement (un message apparaît sous la zone) : les atomes ne bougent pas
@@ -154,7 +158,7 @@
     function lier(i, j, angI) {
       const A = etat.atomes[i], B = etat.atomes[j];
       if (i === j) return msg('Relie deux traits de deux atomes <b>différents</b> : un atome ne se lie pas à lui-même.', 'refus');
-      if (B.inconnu) return msg(`Complète d'abord la ligne de <b>${B.el}</b> dans le tableau des atomes : il se dessinera avec ses liaisons.`, 'refus');
+      if (B.inconnu) return msg(`Complète d'abord l'atome <b>${B.el}</b> dans le tableau des atomes : il se dessinera avec ses liaisons.`, 'refus');
       if (!libres(j)) return msg(`<b>${B.el}</b> n'a plus de trait libre : il a déjà toutes ses liaisons.`, 'refus');
       const ex = etat.liaisons.find(l => (l.a === i && l.b === j) || (l.a === j && l.b === i));
       if (ex && ex.o >= 3) return msg('Entre deux atomes, il y a au plus <b>trois</b> liaisons (liaison triple).', 'refus');
@@ -178,6 +182,16 @@
       const dx = A.x + Math.cos(ang * Math.PI / 180) * L - B.x, dy = A.y + Math.sin(ang * Math.PI / 180) * L - B.y;
       const km = comp.c[mobile];
       etat.atomes.forEach((a, k) => { if (comp.c[k] === km) { a.x += dx; a.y += dy; } });
+      // morceau mobile de plusieurs atomes : tourné autour de B pour s'étendre loin de A
+      const autres = etat.atomes.filter((a, k) => comp.c[k] === km && k !== mobile);
+      if (autres.length) {
+        const gx = autres.reduce((t, a) => t + a.x, 0) / autres.length - B.x, gy = autres.reduce((t, a) => t + a.y, 0) / autres.length - B.y;
+        if (Math.hypot(gx, gy) > 1) {
+          const rot = Math.atan2(B.y - A.y, B.x - A.x) - Math.atan2(gy, gx), c = Math.cos(rot), s = Math.sin(rot);
+          autres.forEach(a => { const x = a.x - B.x, y = a.y - B.y; a.x = B.x + x * c - y * s; a.y = B.y + x * s + y * c; });
+        }
+      }
+      ecarter(etat.atomes.map((a, k) => k).filter(k => comp.c[k] === km || comp.c[k] === comp.c[fixe]));
       garderDedans();
       // les autres morceaux s'écartent s'ils sont dessous
       const c2 = LW.composantes(etat), kc = c2.c[fixe];
@@ -193,6 +207,26 @@
           bouge = true;
         });
         garderDedans();
+        if (!bouge) break;
+      }
+    }
+    // atomes d'une même molécule trop proches (l'un cache l'autre) : ils s'écartent,
+    // les liaisons gardent à peu près leur longueur
+    function ecarter(ids) {
+      const L = f * 3, dmin = f * 2.5;
+      const lie = (i, j) => etat.liaisons.some(l => (l.a === i && l.b === j) || (l.a === j && l.b === i));
+      for (let t = 0; t < 80; t++) {
+        let bouge = false;
+        for (let p = 0; p < ids.length; p++) for (let q = p + 1; q < ids.length; q++) {
+          const A = etat.atomes[ids[p]], B = etat.atomes[ids[q]];
+          let dx = B.x - A.x, dy = B.y - A.y, d = Math.hypot(dx, dy);
+          if (d < .01) { dx = Math.cos(p + q); dy = Math.sin(p + q); d = 1; }
+          const voulu = lie(ids[p], ids[q]) ? (d < L * .8 || d > L * 1.25 ? L : d) : Math.max(d, dmin);
+          if (Math.abs(voulu - d) < .5) continue;
+          const k = (voulu - d) / d / 2;
+          A.x -= dx * k; A.y -= dy * k; B.x += dx * k; B.y += dy * k;
+          bouge = true;
+        }
         if (!bouge) break;
       }
     }
@@ -296,7 +330,7 @@
       if (c.type === 'atome' && !g.bouge) {
         const a = etat.atomes[c.i];
         if (stubChoisi) { const s0 = stubChoisi; stubChoisi = null; return lier(s0.i, c.i, s0.a); }
-        if (a.inconnu) return msg(`Complète la ligne de <b>${a.el}</b> dans le tableau des atomes : il se dessinera avec ses liaisons.`, 'info');
+        if (a.inconnu) return msg(`Complète d'abord l'atome <b>${a.el}</b> dans le tableau des atomes : il se dessinera avec ses liaisons.`, 'info');
         return;
       }
       if (c.type === 'doublet' && !g.bouge) {
@@ -311,7 +345,8 @@
     /* ----- Redimensionnement ----- */
     let ro = null;
     if (window.ResizeObserver) {
-      ro = new ResizeObserver(() => { const r = boite.getBoundingClientRect(); if (Math.abs(r.width - W) > 1 || Math.abs(r.height - H) > 1) { mesurer(); redessiner(); } });
+      // zone cachée (autre onglet) : taille nulle, les atomes restent où ils sont
+      ro = new ResizeObserver(() => { const r = boite.getBoundingClientRect(); if (r.width && r.height && (Math.abs(r.width - W) > 1 || Math.abs(r.height - H) > 1)) { mesurer(); redessiner(); } });
       ro.observe(boite);
     }
     mesurer();
@@ -338,6 +373,24 @@
         etat.liaisons = cible.liaisons.map(l => Object.assign({}, l));
         cache.length = 0; termine = true; stubChoisi = null;
         redessiner();
+      },
+      // molécule finie : redessinée sous une forme régulière (celle de la cible, atome par atome), en glissant
+      miseEnForme(cible) {
+        const p = LW.apparier(etat, cible);
+        if (!p) return false;
+        const a = LW.ajuster(cible, W, H, { fmax: f });
+        const de = etat.atomes.map(x => ({ x: x.x, y: x.y })), vers = etat.atomes.map((x, i) => a.pos[p[i]]);
+        const fin = () => { etat.atomes.forEach((x, i) => { x.x = vers[i].x; x.y = vers[i].y; }); cache.length = 0; redessiner(); };
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches || !window.requestAnimationFrame) { fin(); return true; }
+        const t0 = performance.now(), duree = 450;
+        (function pas(t) {
+          const u = Math.min(1, (t - t0) / duree), e = u * u * (3 - 2 * u);
+          etat.atomes.forEach((x, i) => { x.x = de[i].x + (vers[i].x - de[i].x) * e; x.y = de[i].y + (vers[i].y - de[i].y) * e; });
+          cache.length = 0;
+          redessiner();
+          if (u < 1) requestAnimationFrame(pas); else fin();
+        })(t0);
+        return true;
       },
       detruire() { if (ro) ro.disconnect(); svg.remove(); },
     };

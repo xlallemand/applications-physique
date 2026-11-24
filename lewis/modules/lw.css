@@ -76,6 +76,7 @@ sub, sup { font-size: .7em; line-height: 0; }
 .lw-sit-suite .btn-small { padding-left: 12px; padding-right: 12px; }
 /* ordinateur peu haut : en-tête et panneau resserrés */
 @media (min-width: 900px) and (max-height: 760px) {
+  .lw-methode { font-size: .88rem; line-height: 1.36; }
   .lw-sim { gap: 8px; }
   .lw-sim-tete { padding: 6px 14px; }
   .lw-sim-corps { gap: 8px; }
@@ -218,30 +219,90 @@ sub, sup { font-size: .7em; line-height: 0; }
 .lw-puce sub { font-size: .7em; }
 
 /* ============================================================
-   MODULE 1 : tableau des atomes, défi, formule semi-développée
+   MODULE 1 : tableau des atomes (classification, dessin pas à pas, récapitulatif), défi,
+   formule semi-développée
    ============================================================ */
-.lw-tab-defile { overflow-x: auto; }
-.lw-tab-at { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; text-align: center; }
-.lw-tab-at th, .lw-tab-at td { border: 1px solid var(--paper-3); padding: 3px 2px; font-size: .9rem; }
-.lw-tab-at thead th { background: var(--paper); font-size: .7rem; font-weight: 800; color: var(--ink-2); line-height: 1.15; }
-.lw-tab-at tbody th { font-size: 1.05rem; font-weight: 800; }
-.lw-tab-at td { font-weight: 700; }
-.lw-tab-att td, .lw-tab-att th { color: var(--ink-3); }
-.lw-tab-ed td { padding: 2px; }
-.lw-tab-dessin { width: 50px; padding: 0 !important; }
-.lw-case {
-  width: 100%; min-height: 46px; border: none; border-radius: 10px; background: var(--sheet); cursor: pointer; padding: 0;
-  box-shadow: inset 0 0 0 1.5px var(--paper-3); font: 800 1.15rem var(--font-sans); color: var(--ink); font-variant-numeric: tabular-nums;
+.lw-vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* deux vues dans la zone de travail : une seule à la fois */
+.lw-vue-mol { position: absolute; inset: 0; }
+.lw-vue-tab {
+  position: absolute; inset: 0; display: grid; gap: 8px; padding: 8px;
+  grid-template-columns: auto minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas: "classif classif" "cote methode";
 }
-.lw-case-sel { box-shadow: inset 0 0 0 2.5px var(--accent); background: var(--cle-bg); color: var(--accent-ink); }
-.lw-case.ko { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); }
-.lw-case:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.lw-ed { display: flex; flex-direction: column; gap: 6px; }
-.lw-ed-conf { font-size: .95rem; font-variant-numeric: tabular-nums; }
-.lw-ed-t { font-size: .88rem; font-weight: 800; color: var(--accent-ink); }
+.lw-mode-tab .lw-vue-mol, .lw-mode-mol .lw-vue-tab { display: none; }
+.lw-mode-tab .lw-sim-bande { display: none; }           /* le panneau dit déjà quel atome on traite */
+.lw-classif .cp-tab { padding-bottom: 6px; }            /* pas de nom de famille sous le tableau */
+.lw-classif { grid-area: classif; position: relative; min-height: 0; min-width: 0; }
+/* dessin de l'atome, à côté de la méthode */
+.lw-cote { grid-area: cote; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 12px; background: var(--sheet); }
+.lw-dessin-at { flex: none; width: 116px; display: flex; justify-content: center; }
+.lw-dessin-at svg { display: block; width: 100%; height: auto; }
+/* ce qui est trouvé pour l'atome en cours (panneau) */
+.lw-chem { margin: 0; padding: 4px 10px 4px 30px; border-radius: 12px; background: var(--paper); font-size: .88rem; line-height: 1.4; font-weight: 700; }
+.lw-chem:empty { display: none; }
+.lw-methode { grid-area: methode; padding: 8px 12px; border-radius: 12px; background: var(--sheet); font-size: .93rem; line-height: 1.42; }
+.lw-methode p + p { margin-top: 3px; }
+.lw-methode ul { margin: 3px 0 0; padding-left: 20px; }
+.lw-methode .atm-val { padding: 0 3px; }
+/* dessin de l'atome */
+.lw-e { fill: var(--ink); }
+.lw-e-reste { fill: var(--accent); }
+.lw-e-vide { fill: var(--sheet); stroke: var(--accent); stroke-width: 1.8; stroke-dasharray: 2.4 1.8; }
+.lw-tl-plein { stroke: var(--ink); stroke-dasharray: none; }
+.lw-nouv { animation: lw-nouv .5s ease-out; }
+@keyframes lw-nouv { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .lw-nouv { animation: none; } }
+/* étape en cours (panneau) */
+.lw-et { display: flex; flex-direction: column; gap: 6px; }
+.lw-et-t { font-size: .9rem; color: var(--ink-2); font-weight: 700; }
+.lw-et-t b { color: var(--accent-ink); font-size: 1.05rem; }
+.lw-et-q { font-size: 1rem; font-weight: 800; line-height: 1.35; }
+.lw-et-n { display: inline-block; margin-right: 4px; padding: 0 7px; border-radius: 999px; background: var(--cle-bg); color: var(--accent-ink); font-size: .8em; }
+@media (min-width: 900px) { .lw-et-n { display: none; } }   /* sur ordinateur, l'étape est écrite au-dessus */
+.lw-et-tel:empty { display: none; }
+.lw-pave button.faux { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+.lw-ed-a:empty { display: none; }
 .lw-pave { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 3px; }
 .lw-pave button { min-height: 46px; padding: 0; font-weight: 800; font-size: 1.05rem; justify-content: center; }
 .lw-ed-a { margin-top: 0; gap: 8px; }
+/* tableau récapitulatif : une colonne par atome */
+.lw-tab-defile { overflow-x: auto; }
+.lw-tab-at { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; text-align: center; }
+.lw-tab-at th, .lw-tab-at td { border: 1px solid var(--paper-3); font-weight: 700; }
+.lw-recap { display: flex; flex-direction: column; gap: 4px; }
+.lw-recap-place:empty { display: none; }
+.lw-m1 [data-place="molecules"] { margin-top: auto; }
+.lw-mode-tab .lw-sim-scene > .lw-semi { display: none; }
+.lw-m1 .lw-sit-num { display: none; }            /* la pastille choisie dit déjà où l'on est */
+.lw-semi-place:empty { display: none; }
+@media (min-width: 900px) {
+  .lw-sim-scene > .lw-semi { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 4px 14px; }
+}
+.lw-tab-r { table-layout: fixed; }
+.lw-tab-r th, .lw-tab-r td { padding: 2px 1px; }
+.lw-tab-r thead th.lw-r-coin { width: 74px; font-size: .72rem; color: var(--ink-2); text-align: left; padding-left: 5px; }
+.lw-tab-r tbody th { font-size: .72rem; font-weight: 800; color: var(--ink-2); text-align: left; padding-left: 5px; line-height: 1.15; width: 74px; }
+.lw-tab-r thead th { font-size: 1rem; color: var(--ink); }
+.lw-tab-r td { font-size: .95rem; }
+.lw-tab-r .lw-r-cur { background: var(--cle-bg); }
+.lw-tab-r thead th.lw-r-cur { color: var(--accent-ink); }
+.lw-r-sch td { padding: 0; }
+.lw-r-sch .lw-mini { width: 36px; height: 36px; }
+.lw-r-re td { padding: 2px 0; }
+.lw-r-btn {
+  width: 34px; height: 34px; border: none; border-radius: 999px; background: var(--paper); color: var(--ink-2); cursor: pointer;
+  font: 800 1rem var(--font-sans); padding: 0;
+}
+.lw-r-btn:hover { background: var(--paper-2); color: var(--accent-ink); }
+.lw-r-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lw-r-tout {
+  width: 100%; min-height: 34px; border: none; border-radius: 10px; background: var(--paper); color: var(--ink-2); cursor: pointer;
+  font: 800 .68rem/1.1 var(--font-sans); padding: 2px 4px; text-align: left;
+}
+.lw-r-tout:hover { background: var(--paper-2); color: var(--accent-ink); }
+.lw-r-tout:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lw-r-re th { padding: 2px !important; }
 .lw-trouvees:empty { display: none; }
 .lw-trouvees-l { margin: 4px 0 0; padding-left: 22px; font-size: .95rem; font-weight: 700; line-height: 1.5; }
 .lw-semi { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border-radius: 14px; background: var(--paper); }
@@ -316,7 +377,6 @@ sub, sup { font-size: .7em; line-height: 0; }
 .lw-q-msg > div { padding: 8px 12px; border-radius: 14px; font-size: .92rem; line-height: 1.42; }
 
 @media (min-width: 900px) and (max-height: 760px) {
-  .lw-case { min-height: 42px; }
   .lw-pave button { min-height: 42px; }
   .lw-cpt-c button { min-height: 42px; }
   .lw-exp { min-height: 42px; }
@@ -325,10 +385,6 @@ sub, sup { font-size: .7em; line-height: 0; }
   .lw-sim-bande { gap: 4px; }
   .lw-bande-t { font-size: .92rem; }
   .lw-bande-b .btn-small { min-height: 38px; padding: 0 10px; font-size: .8rem; }
-  .lw-tab-at th, .lw-tab-at td { padding: 2px 1px; font-size: .84rem; }
-  .lw-tab-at thead th { font-size: .64rem; }
-  .lw-ed { gap: 4px; }
-  .lw-ed-conf, .lw-ed-t { font-size: .84rem; }
   .lw-puce.lw-puce-l { min-width: 40px; padding: 0 8px; font-size: .8rem; }
   .lw-exp { font-size: .8rem; padding: 3px 10px; }
   .lw-phrase { min-height: 50px; }
@@ -338,4 +394,37 @@ sub, sup { font-size: .7em; line-height: 0; }
   .lw-semi { padding: 6px 8px; gap: 2px; }
   .lw-semi-p { display: none; }          /* la phrase est dans la bulle ⓘ */
   .lw-semi-f svg { max-height: 70px; }
+}
+
+/* module 1 sur téléphone : la classification seule dans la zone de travail (hauteur fixe) ; méthode et
+   dessin de l'atome sous les onglets */
+@media (max-width: 899px) {
+  .lw-m1.lw-mode-tab .lw-sim-corps { grid-template-rows: auto minmax(0, 1fr); }
+  .lw-m1.lw-mode-tab .lw-sim-travail { flex: none; height: 182px; }
+  .lw-vue-tab { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); grid-template-areas: "classif"; padding: 2px; }
+  .lw-et { gap: 4px; }
+  .lw-et-t { display: none; }                       /* l'étape est écrite devant la question */
+  .lw-et-tel { display: flex; align-items: flex-start; gap: 8px; }
+  .lw-et-tel .lw-methode { flex: 1 1 auto; min-width: 0; padding: 0; font-size: .78rem; line-height: 1.32; background: none; border-radius: 0; }
+  .lw-et-tel .lw-methode ul { padding-left: 15px; }
+  .lw-et-tel .lw-cote { flex: none; width: 74px; padding: 0; background: var(--paper); }
+  .lw-et-tel .lw-dessin-at { width: 74px; }
+  .lw-chem { display: none; }                          /* les valeurs sont dans le récapitulatif */
+  .lw-et-q { font-size: .9rem; }
+  .lw-pave button { min-height: 42px; }
+  .lw-tab-r tbody th { font-size: .7rem; }
+  /* la ligne 4 (K, Ca) n'est pas utile ici : la classification tient en hauteur */
+  .lw-classif .cp-tab { grid-template-rows: 20px repeat(3, var(--cp-c)); }
+  .lw-classif .cp-c[data-ligne="4"], .lw-classif .cp-tab-lig[data-ligne="4"], .lw-classif .cp-c-vide { display: none; }
+  /* molécules : bande sur une ligne (formule seule), pastilles resserrées, molécules du défi à la suite */
+  .lw-m1 .lw-nom { display: none; }
+  .lw-m1 .lw-sim-bande { flex-wrap: nowrap; }
+  .lw-m1 .lw-bande-b { flex-wrap: nowrap; }
+  .lw-m1 .lw-sit-puces .lw-puce.lw-puce-l { height: 30px; }
+  .lw-m1 .lw-trouvees-l { display: flex; flex-wrap: wrap; gap: 0 14px; padding-left: 0; list-style-position: inside; }
+  .lw-m1 .lw-semi { padding: 4px 8px; flex-direction: row; flex-wrap: wrap; align-items: center; column-gap: 10px; }
+  .lw-m1 .lw-semi-t { font-size: .82rem; }
+  .lw-m1 .lw-semi-t .bul-info { margin: -7px 0; }     /* zone à toucher gardée, ligne moins haute */
+  .lw-m1 .lw-semi-f svg { max-height: 44px; }
+  .lw-semi-place .btn-small { min-height: 38px; }
 }
