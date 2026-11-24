@@ -37,6 +37,8 @@ Liste **tenue à jour par chaque session** qui code une application de 2nde (`00
 | A12 + A17 | Réfraction et loi de Snell-Descartes | `02-refraction.md` | `refraction/` | 17/11/2026 |
 | A13 | Image par une lentille convergente | `03-lentilles.md` | `lentilles/` | 19/11/2026 |
 | A02 | Atome et ions | `04-atome-ions.md` | `atome-ions/` | 19/11/2026 |
+| A03 | Classification périodique | `05-classification-periodique.md` | `classification-periodique/` | 22/11/2026 |
+| A04 | Schémas de Lewis | `06-lewis.md` | `lewis/` | 22/11/2026 |
 | A01 | Chromatographie sur couche mince | `07-chromatographie.md` | `chromatographie/` | 07/11/2026 |
 | A14 | Réaliser un montage électrique | `08-montage-electrique.md` | `montage-electrique/` | 06/11/2026 |
 

@@ -6,6 +6,8 @@
 
    Molécule : { atomes: [{ el }], liaisons: [{ a, b, o }] }
      el : 'C', 'N', 'O', 'F', 'Cl', 'Br', 'I' ; H implicites
+          'S' (valence 2, deux doublets non liants : schémas de Lewis de 2nde) ;
+          'H' écrit comme un atome (valence 1) : H2, ou molécule dont tous les H sont écrits
      a, b : indices des atomes liés ; o : ordre (1, 2 ou 3)
    Nombre de H d'un atome = valence − somme des ordres de ses liaisons.
 
@@ -15,7 +17,7 @@
                                     =, #, cycles par chiffres, benzène en Kékulé)
      ORGA.ecrire(mol)               molécule → SMILES simplifié
      ORGA.copier(mol)
-     ORGA.valence(el)               C 4, N 3, O 2, halogènes 1, H 1
+     ORGA.valence(el)               C 4, N 3, O 2, S 2, halogènes 1, H 1
      ORGA.adjacence(mol)            [[{ j, o, k }]] : voisins de chaque atome (k : n° de liaison)
      ORGA.somme(mol, i)             somme des ordres des liaisons de l'atome i
      ORGA.nbH(mol, i)               H implicites de l'atome i
@@ -62,7 +64,7 @@
 (function (racine) {
   'use strict';
 
-  const VALENCE = { C: 4, N: 3, O: 2, F: 1, Cl: 1, Br: 1, I: 1, H: 1 };
+  const VALENCE = { C: 4, N: 3, O: 2, S: 2, F: 1, Cl: 1, Br: 1, I: 1, H: 1 };
   const valence = el => VALENCE[el] || 0;
   const HALOGENES = ['F', 'Cl', 'Br', 'I'];
 
@@ -94,7 +96,7 @@
       let el;
       const deux = s.substr(i, 2);
       if (deux === 'Cl' || deux === 'Br') { el = deux; i += 2; }
-      else if ('CNOFI'.includes(c)) { el = c; i++; }
+      else if ('CNOFIS'.includes(c)) { el = c; i++; }
       else throw new Error('ORGA.lire : caractère inattendu « ' + c + ' » dans ' + s);
       const k = mol.atomes.push({ el }) - 1;
       if (prec >= 0) lier(mol, prec, k, ordre);

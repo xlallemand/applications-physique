@@ -1,0 +1,351 @@
+/* ============================================================
+   Styles de l'application « Classification périodique »
+   Complète assets/theme.css, equilibrer-reactions/modules/er.css
+   (cartes, boutons, écran de fin) et assets/atome.css (configurations).
+   cp-tab…  tableau périodique simplifié (modules/tableau.js)
+   cp-sim…  pages sur un seul écran (modules 1 et 2)
+   ph-…     questions (repris de cinematique/modules/cin.css)
+   ============================================================ */
+
+.er-page button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.er-page p { margin: 0; }
+.er-page [hidden] { display: none !important; }
+sub, sup { font-size: .7em; line-height: 0; }
+.cp-revois { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px !important; font-size: .88rem; }
+.cp-revois a { color: var(--accent-ink); font-weight: 700; }
+
+/* ============================================================
+   PAGES SUR UN SEUL ÉCRAN (modules 1 et 2) : sans défilement
+   ============================================================ */
+.er-page.cp-sim-page { max-width: none; padding: 10px; }
+.cp-sim { display: flex; flex-direction: column; gap: 10px; height: calc(100vh - 36px); height: calc(100dvh - 36px); min-height: 540px; }   /* 36 px : marges de la page (2 × 10) et du corps (2 × 8) */
+.cp-sim-tete { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 8px 16px; }
+.cp-sim-titre { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 12px; min-width: 0; }
+.cp-sim-titre .er-badge { margin: 0; }
+.cp-sim-titre .er-titre { margin: 0; font-size: 1.15rem; }
+.cp-sim-corps { flex: 1 1 0; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 10px; }
+.cp-sim-scene { margin: 0; padding: 10px 12px; min-height: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.cp-sim-bande:empty { display: none; }
+.cp-sim-tab { flex: 1 1 0; min-height: 0; min-width: 0; position: relative; }
+.cp-sim-msg:empty { display: none; }
+.cp-sim-msg-in { padding: 8px 14px; border-radius: 14px; font-size: .95rem; line-height: 1.45; }
+.cp-sim-lab { font-size: .85rem; font-weight: 800; color: var(--ink-2); }
+.cp-aide-t { font-size: .88rem; line-height: 1.4; color: var(--ink-2); }
+
+/* panneau : en-tête fixe, rubriques en onglets, « À essayer » toujours visible sur ordinateur */
+.cp-sim-panneau { margin: 0; padding: 12px 14px; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.cp-sim-onglets { display: flex; gap: 4px; padding: 3px; background: var(--paper-2); border-radius: 999px; flex-shrink: 0; }
+.cp-sim-onglets.cp-cache { display: none; }
+.cp-sim-onglets button { flex: 1 1 0; min-width: 0; min-height: 40px; border: none; border-radius: 999px; background: transparent; font: inherit; font-size: .85rem; font-weight: 800; color: var(--ink-2); cursor: pointer; padding: 2px 4px; }
+.cp-sim-onglets button[aria-selected="true"] { background: var(--sheet); color: var(--accent-ink); box-shadow: inset 0 0 0 2px var(--accent); }
+.cp-sim-onglets button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cp-sim-bloc { display: none; flex-direction: column; gap: 8px; }
+.cp-sim-bloc.cp-sim-actif { display: flex; }
+@media (min-width: 900px) {
+  .cp-sim-onglets .cp-o-tel { display: none; }
+  .cp-sim-bloc.cp-sim-tel { display: none; }
+  .cp-sim-bloc.cp-sim-toujours { display: flex; margin-top: auto; border-top: 1px solid var(--line); padding-top: 10px; }
+}
+
+/* ============================================================
+   TABLEAU PÉRIODIQUE SIMPLIFIÉ
+   --cp-c : taille d'une case (calculée par tableau.js), --cp-l : colonne des lignes,
+   --cp-g : écart des 10 colonnes cachées, --cp-gap : espace entre les cases
+   ============================================================ */
+.cp-tab-defile { position: absolute; inset: 0; overflow: auto; display: flex; touch-action: pan-x pan-y; }
+.cp-tab {
+  --cp-c: 56px; --cp-l: 48px; --cp-g: 30px; --cp-gap: 4px;
+  position: relative; margin: auto; padding: 4px 4px 26px; flex-shrink: 0;
+  display: grid; grid-template-columns: var(--cp-l) var(--cp-c) var(--cp-c) var(--cp-g) repeat(6, var(--cp-c));
+  grid-template-rows: 20px repeat(4, var(--cp-c)); gap: var(--cp-gap);
+}
+.cp-tab-num { align-self: end; text-align: center; font-size: .78rem; font-weight: 800; color: var(--ink-2); font-variant-numeric: tabular-nums; border-radius: 999px; }
+.cp-tab-lig { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; color: var(--ink-2); border-radius: 12px; }
+.cp-tab-lig b { font-size: 1.05rem; color: var(--ink); }
+.cp-tab-lig small { font-size: .7rem; font-weight: 700; white-space: nowrap; }
+.cp-tab-num.cp-repere, .cp-tab-lig.cp-repere { background: var(--cle-bg); color: var(--accent-ink); }
+.cp-tab-lig.cp-repere b { color: var(--accent-ink); }
+.cp-tab-gap {
+  display: flex; align-items: center; justify-content: center; border-radius: 10px;
+  background: repeating-linear-gradient(90deg, var(--paper-2) 0 2px, transparent 2px 6px); background-color: var(--paper);
+}
+.cp-tab-gap span {
+  writing-mode: vertical-rl; transform: rotate(180deg); font-size: .72rem; font-weight: 800; color: var(--ink-2); white-space: nowrap;
+  background: var(--paper); padding: 6px 2px; border-radius: 8px;
+}
+/* cases des éléments */
+.cp-c {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+  padding: 0; border: none; border-radius: 10px; background: var(--sheet); color: var(--ink); cursor: pointer;
+  box-shadow: inset 0 0 0 1.5px var(--line-strong); font-family: var(--font-sans); line-height: 1.05; overflow: hidden;
+}
+.cp-c:hover { background: var(--paper); }
+.cp-c:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cp-c.cp-choisi { background: var(--cle-bg); box-shadow: inset 0 0 0 2.5px var(--accent); }
+.cp-c.cp-cible { background: var(--cle-bg); box-shadow: inset 0 0 0 3px var(--accent-ink); }
+.cp-c.cp-survol { background: var(--cle-bg); box-shadow: inset 0 0 0 2.5px var(--accent); }
+.cp-z { position: absolute; top: 3px; left: 5px; font-size: max(.62rem, calc(var(--cp-c) * .17)); font-weight: 700; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.cp-sym { font-size: calc(var(--cp-c) * .36); font-weight: 800; letter-spacing: -.02em; }
+.cp-val { font-size: max(9px, calc(var(--cp-c) * .17)); font-weight: 600; color: var(--ink-2); white-space: nowrap; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.cp-val sup { font-size: .72em; }
+.cp-val-seul { font-size: max(9.5px, calc(var(--cp-c) * .19)); color: var(--ink); font-weight: 700; }
+.cp-c-vide { border-radius: 10px; border: 1.5px dashed var(--line-strong); }
+/* calque : familles, flèches, gaz noble de la ligne précédente */
+.cp-tab-svg { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+.cp-tab-calque { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.cp-fam-cadre { fill: none; stroke: var(--accent); stroke-width: 4; }
+.cp-fam-nom {
+  position: absolute; transform: translate(-50%, -50%); padding: 1px 9px; border-radius: 999px; white-space: nowrap; pointer-events: none;
+  background: var(--accent); color: var(--sheet); font-size: .76rem; font-weight: 800; z-index: 2;
+}
+.cp-arc-t { fill: none; stroke: var(--accent-ink); stroke-width: 2.6; stroke-linecap: round; }
+.cp-arc-p { fill: var(--accent-ink); }
+.cp-arc-n circle { fill: var(--sheet); stroke: var(--accent-ink); stroke-width: 1.6; }
+.cp-arc-n text { fill: var(--accent-ink); font: 800 11px var(--font-sans); }
+.cp-fant {
+  position: absolute; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 10px; z-index: 1;
+  background: var(--sheet); border: 2px dashed var(--accent); color: var(--accent-ink); font: 800 1rem var(--font-sans);
+}
+button.cp-fant { cursor: pointer; }
+button.cp-fant:hover { background: var(--cle-bg); }
+button.cp-fant:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ============================================================
+   MODULE 1 : panneau de l'élément, familles
+   ============================================================ */
+.cp-fam { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.cp-fam-t { font-size: .85rem; font-weight: 800; color: var(--ink-2); }
+.cp-fam-l { display: inline-flex; align-items: center; gap: 4px; }
+.cp-fam-b { min-height: 42px; padding: 4px 16px; font-size: .9rem; }
+.cp-fam-b[aria-pressed="true"] { background: var(--cle-bg); color: var(--accent-ink); box-shadow: inset 0 0 0 3px var(--accent); }
+.cp-fiche { display: flex; align-items: center; gap: 12px; min-height: 52px; }
+.cp-fiche-vide { font-weight: 700; color: var(--ink-2); }
+.cp-fiche-sym { display: grid; place-items: center; min-width: 52px; height: 52px; padding: 0 6px; border-radius: 12px; background: var(--cle-bg); box-shadow: inset 0 0 0 2px var(--accent); font-size: 1.7rem; font-weight: 800; color: var(--accent-ink); }
+.cp-fiche-t { display: flex; flex-direction: column; gap: 2px; line-height: 1.25; }
+.cp-fiche-t b { font-size: 1.15rem; }
+.cp-fiche-t span { font-size: .9rem; color: var(--ink-2); font-weight: 600; font-variant-numeric: tabular-nums; }
+.cp-rub { display: flex; flex-direction: column; gap: 7px; }
+.cp-rub-p { font-size: .93rem; line-height: 1.42; }
+.cp-rub-p b { color: var(--accent-ink); }
+.cp-petit { font-size: .82rem; color: var(--ink-2); }
+.cp-config { font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.5; }
+.cp-cases { max-width: 330px; }
+.cp-ion-f { font-size: 1.9rem; font-weight: 800; line-height: 1.2; transition: opacity .2s; }
+.cp-ion-f span { font-size: 1rem; font-weight: 700; color: var(--accent-ink); }
+.cp-ion-f.cp-attente { opacity: 0; }
+.cp-rub .er-actions { margin-top: 0; }
+.cp-liai { display: flex; align-items: center; gap: 12px; }
+.cp-at { width: 104px; height: 104px; flex-shrink: 0; }
+.cp-at-s { font: 800 30px var(--font-sans); fill: var(--ink); }
+.cp-at-l { stroke: var(--ink); stroke-width: 3.2; stroke-linecap: round; }
+.cp-at-d { stroke: var(--accent-ink); stroke-width: 3.2; stroke-linecap: round; }
+.cp-liai-t { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+
+/* « À essayer » : pastilles numérotées et texte du défi choisi */
+.cp-defis-c { display: flex; flex-direction: column; gap: 8px; }
+.cp-defi-go { min-height: 34px; padding: 2px 12px; flex-shrink: 0; font-size: .82rem; }
+.cp-defis-bilan:empty { display: none; }
+.cp-bilan { margin-top: 8px; padding: 8px 14px; border-radius: 14px; font-size: .88rem; line-height: 1.42; }
+.cp-defis-puces { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.cp-puce {
+  width: 38px; height: 38px; border: none; border-radius: 999px; background: var(--paper); color: var(--ink-2); font: 800 .95rem var(--font-sans);
+  cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--paper-3); flex-shrink: 0;
+}
+.cp-puce[aria-selected="true"] { box-shadow: inset 0 0 0 2.5px var(--accent); color: var(--accent-ink); background: var(--sheet); }
+.cp-puce.cp-fait { background: var(--success); color: var(--sheet); box-shadow: none; }
+.cp-puce.cp-fait[aria-selected="true"] { box-shadow: 0 0 0 2.5px var(--sheet), 0 0 0 4.5px var(--success); }
+.cp-puce:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cp-defi-c-t { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; font-size: .9rem; line-height: 1.4; }
+.cp-defi-c-t[hidden], .cp-defis-bilan[hidden], .cp-voir-bilan[hidden] { display: none; }
+.cp-voir-bilan { margin-left: 4px; }
+
+/* ============================================================
+   MODULE 2 : situations
+   ============================================================ */
+.cp-sit-tete { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.cp-sit-puces .cp-puce { width: 32px; height: 32px; font-size: .86rem; }
+.cp-sit-puces { gap: 4px; }
+.cp-sit-num { font-size: .85rem; color: var(--ink-2); font-weight: 700; }
+.cp-sit-num b { color: var(--accent-ink); }
+.cp-sit-acquis:empty { display: none; }
+.cp-sit-acquis { display: flex; flex-direction: column; gap: 2px; font-size: .86rem; font-weight: 700; color: var(--ink-2); }
+.cp-sit-consigne { font-size: 1rem; font-weight: 800; line-height: 1.4; }
+.cp-sit-consigne:empty, .cp-sit-zone:empty, .cp-sit-retour:empty { display: none; }
+.cp-sit-zone { display: flex; flex-direction: column; gap: 8px; }
+.cp-sit-msg { padding: 8px 12px; border-radius: 14px; font-size: .9rem; line-height: 1.42; }
+.cp-sit-suite { margin-top: 0; flex-wrap: wrap; gap: 8px; }
+.cp-sit-suite > span { display: inline-flex; }
+.cp-sit-suite .btn-small { padding-left: 12px; padding-right: 12px; }
+.cp-sit-revois { margin-top: auto; }
+.cp-sit-revois .cp-revois { margin-top: 0 !important; }
+.cp-carte {
+  align-self: flex-start; min-height: 54px; padding: 8px 16px; border: none; border-radius: 14px; cursor: grab;
+  background: var(--sheet); color: var(--ink); box-shadow: inset 0 0 0 2px var(--accent); font: 700 1.2rem var(--font-sans);
+  font-variant-numeric: tabular-nums; touch-action: none;
+}
+.cp-carte.cp-carte-prise { background: var(--cle-bg); box-shadow: inset 0 0 0 3px var(--accent-ink); }
+.cp-carte:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.drag-ghost.cp-carte { opacity: .92; }
+.cp-choix-sym button { min-width: 64px; justify-content: center; text-align: center; font-size: 1.2rem; font-weight: 800; }
+.cp-nb { display: flex; flex-wrap: wrap; gap: 6px; }
+.cp-nb button { min-width: 46px; min-height: 46px; padding: 0; font-weight: 800; font-size: 1.05rem; }
+.cp-nb button.juste { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); color: var(--success-text); opacity: 1; }
+.cp-nb button.faux { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); color: var(--danger-text); opacity: 1; }
+.cp-sauts { font-size: .92rem; font-weight: 700; color: var(--ink-2); }
+.cp-sit-zone .atm-comp { gap: 6px; }
+.cp-sit-zone .atm-comp-ligne { min-height: 50px; padding: 2px 8px; font-size: 1.25rem; }
+.cp-sit-zone .atm-comp-palette { gap: 6px; }
+.cp-sit-zone .atm-comp-et { min-width: 50px; padding-left: 8px; padding-right: 8px; }
+.cp-sit-zone .er-actions { margin-top: 0; }
+
+/* ordinateur peu haut : en-tête et panneau resserrés */
+@media (min-width: 900px) and (max-height: 760px) {
+  .cp-sim { gap: 8px; }
+  .cp-sim-tete { padding: 6px 14px; }
+  .cp-sim-corps { gap: 8px; }
+  .cp-sim-scene { padding: 8px 10px; gap: 6px; }
+  .cp-sim-panneau { padding: 10px 12px; gap: 6px; }
+  .cp-sim-bloc { gap: 6px; }
+  .cp-sim-msg-in { padding: 6px 12px; font-size: .9rem; }
+  .cp-rub-p { font-size: .88rem; line-height: 1.36; }
+  .cp-config { font-size: 1.1rem; }
+  .cp-cases { max-width: 280px; }
+  .cp-fiche-sym { min-width: 46px; height: 46px; font-size: 1.5rem; }
+  .cp-fiche { min-height: 46px; }
+  .cp-defi-c-t { font-size: .85rem; }
+  .cp-puce { width: 34px; height: 34px; }
+  .cp-at { width: 88px; height: 88px; }
+  .cp-ion-f { font-size: 1.6rem; }
+}
+
+/* téléphone et tablette : tableau en haut, panneau dessous, un onglet à la fois */
+@media (max-width: 899px) {
+  .cp-sim { height: calc(100vh - 54px - 36px); height: calc(100dvh - 54px - 36px); min-height: 560px; gap: 8px; }   /* 54 px : bandeau du sommaire */
+  .cp-sim-tete { display: none; }          /* le bandeau du sommaire dit déjà où l'on est */
+  .cp-sim-corps { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 8px; }
+  .cp-sim-tab { flex: none; height: 246px; }          /* le tableau entier (cases de 46 px), le message dessous */
+  .cp-sim-scene { padding: 6px; gap: 4px; }
+  .cp-sim-bande { display: none; }
+  .cp-sim-msg-in { padding: 5px 10px; font-size: .82rem; line-height: 1.32; border-radius: 12px; }
+  .cp-sim-panneau { padding: 8px 10px; gap: 6px; }
+  .cp-sim-onglets .pe-bouton { flex: 0 0 auto; min-height: 40px; padding: 0 10px; }
+  .cp-sim-onglets button { flex: 1 1 auto; font-size: .76rem; white-space: nowrap; padding: 2px 6px; }
+  .cp-sim-bloc-t { display: none; }
+  .cp-tab { padding: 2px 2px 24px; }
+  .cp-tab-lig small { font-size: .62rem; }
+  .cp-tab-gap span { font-size: .62rem; }
+  .cp-fiche { min-height: 40px; gap: 10px; }
+  .cp-fiche-sym { min-width: 42px; height: 42px; font-size: 1.35rem; }
+  .cp-fiche-t b { font-size: 1rem; }
+  .cp-fiche-t span { font-size: .82rem; }
+  .cp-rub-p { font-size: .86rem; line-height: 1.35; }
+  .cp-config { font-size: 1.05rem; }
+  .cp-cases { max-width: 290px; }
+  .cp-at { width: 84px; height: 84px; }
+  .cp-ion-f { font-size: 1.5rem; }
+  .cp-defi-c-t { font-size: .84rem; line-height: 1.35; }
+  .cp-bilan { margin-top: 4px; padding: 6px 12px; }   /* bilan des défis : tient dans le panneau à 390 × 700 */
+  .cp-puce { width: 36px; height: 36px; }
+  .cp-sit-tete .pe-bouton { min-height: 34px; padding: 0 10px; }
+  .cp-sit-consigne { font-size: .92rem; }
+  .cp-sit-msg { padding: 6px 10px; font-size: .84rem; line-height: 1.35; }
+  .cp-sit-zone .atm-comp { gap: 3px; }   /* composeur plus serré : le diagnostic tient dans le panneau (situation 5) */
+  .cp-sit-zone .atm-comp-pm { min-height: 46px; }
+  .cp-revois { font-size: .8rem; margin-top: 4px !important; }
+  .cp-sit-num, .cp-sit-revois { display: none; }
+}
+/* plein écran sans l'API du navigateur (iPhone) : le bandeau du sommaire est caché, la page prend sa place */
+@media (max-width: 899px) {
+  html.pe-actif .cp-sim { height: calc(100vh - 36px); height: calc(100dvh - 36px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cp-ion-f { transition: none; }
+}
+
+   SÉRIES DE QUESTIONS (repris de cinematique/modules/cin.css)
+   ============================================================ */
+.cp-tete { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 14px; margin-bottom: 8px; }
+.cp-tete .er-badge { margin-bottom: 0; }
+.cp-tete .er-titre { margin: 0; }
+.ph-tete { padding-top: 14px; padding-bottom: 14px; }
+.ph-tete .er-meta { margin: 0 0 0 auto !important; }
+@media (max-width: 899px) { .ph-tete .er-meta { margin: 0 !important; width: 100%; } }
+.ph-enonce { margin-bottom: 12px; line-height: 1.6; font-size: 1.05rem; }
+.ph-enonce p + p { margin-top: 6px; }
+.ph-partie + .ph-partie { margin-top: 16px; padding-top: 14px; border-top: 1.5px dashed var(--paper-3); }
+.ph-partie { animation: cp-apparait .35s ease-out; }
+@keyframes cp-apparait { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .ph-partie { animation: none; } }
+.ph-partie-num { font-size: .78rem !important; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--accent-ink); margin-bottom: 4px !important; }
+.ph-partie-suite { margin-top: 10px; }
+.ph-partie-q { font-weight: 800; font-size: 1.08rem; color: var(--ink); margin-bottom: 10px !important; line-height: 1.45; }
+.ph-partie-q .atm-nota { font-size: 1.25em; }
+.ph-partie-aide { margin-top: 10px; }
+.ph-partie-aide .btn-small { color: var(--ink-2); }
+.ph-partie-fig:empty { display: none; }
+.ph-partie-retour:empty { display: none; }
+.ph-partie-retour { margin-top: 10px; }
+.ph-msg { margin-top: 10px !important; font-size: .92rem; color: var(--ink-2); font-weight: 600; }
+.ph-ok { margin-top: 8px !important; color: var(--success-text); font-weight: 800; }
+.ph-bilan { margin-top: 16px; }
+.ph-solution { line-height: 1.7; }
+.ph-solution .atm-nota { font-size: 1.2em; }
+.ph-question .er-consigne { margin-bottom: 8px !important; }
+.ph-choix { display: flex; flex-wrap: wrap; gap: 8px; }
+.ph-choix-col { flex-direction: column; align-items: stretch; }
+.ph-choix button { min-height: 46px; text-align: left; line-height: 1.4; border-radius: 16px; padding: 10px 18px; }
+.ph-choix.cp-choix-grand button { font-size: 1.2rem; font-weight: 700; min-width: 76px; text-align: center; font-variant-numeric: tabular-nums; }
+.ph-choix.cp-choix-grand .atm-nota { font-size: 1.15em; }
+.ph-choix button:disabled { cursor: default; opacity: 1; }
+.ph-choix button.juste { box-shadow: inset 0 0 0 2px var(--success); background: var(--success-bg); color: var(--success-text); }
+.ph-choix button.faux { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); color: var(--danger-text); }
+.ph-champ-box { display: inline-flex; align-items: center; gap: 4px; }
+.ph-champ {
+  width: 120px; font: inherit; font-size: 1.15rem; font-weight: 800; text-align: center; padding: 9px 8px;
+  border: none; border-radius: 12px; box-shadow: inset 0 0 0 1.5px var(--paper-3); background: var(--sheet); color: var(--ink);
+  -webkit-appearance: none; appearance: none;
+}
+.ph-champ:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.ph-champ:disabled { background: var(--paper); color: var(--ink); -webkit-text-fill-color: var(--ink); opacity: 1; }
+.ph-champ-box.petit .ph-champ { width: 78px; font-size: 1.05rem; padding: 8px 6px; }
+.ph-champ-box.ko .ph-champ { box-shadow: inset 0 0 0 2px var(--danger); background: var(--danger-bg); }
+.ph-pm {
+  width: 38px; height: 42px; flex-shrink: 0; border: none; border-radius: 12px; cursor: pointer;
+  background: var(--paper); color: var(--ink); font: inherit; font-size: 1.1rem; font-weight: 800;
+}
+.ph-pm:disabled { opacity: .35; cursor: default; }
+.ph-champ-box.petit .ph-pm { width: 32px; height: 38px; font-size: 1rem; }
+.ph-sci { display: inline-flex; align-items: flex-start; flex-wrap: nowrap; gap: 3px; max-width: 100%; }
+.ph-sci .ph-champ-box.petit .ph-champ { width: 74px; }
+.ph-x10 { font-size: 1.15rem; font-weight: 800; align-self: center; white-space: nowrap; }
+.ph-exposant { margin-top: -16px; }
+.ph-exposant .ph-champ { width: 58px; font-size: 16px; padding: 6px 4px; }
+.ph-exposant .ph-pm { width: 30px; height: 34px; font-size: .95rem; }
+@media (max-width: 420px) {
+  .ph-champ-box.petit .ph-champ, .ph-sci .ph-champ-box.petit .ph-champ { width: 64px; }
+  .ph-exposant .ph-champ { width: 48px; }
+  .ph-champ-box.petit .ph-pm { width: 28px; }
+  .ph-exposant .ph-pm { width: 26px; }
+  .ph-x10 { font-size: 1.05rem; }
+}
+.cp-saisie-l { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-weight: 800; }
+.cp-saisie-t { font-size: 1.05rem; line-height: 1.6; }
+.cp-unite { font-weight: 800; color: var(--ink-2); }
+.cp-saisie .er-actions, .ph-partie-zone > .er-actions { margin-top: 10px; }
+.cp-champs { display: flex; flex-wrap: wrap; gap: 10px 22px; }
+.cp-champ-l { display: flex; flex-direction: column; gap: 4px; font-weight: 800; font-size: .95rem; }
+.cp-champ-t { color: var(--ink-2); }
+
+/* module 3 : données des questions */
+.cp-donnee { display: inline-block; padding: 4px 12px; border-radius: 12px; background: var(--paper); font-size: 1.2rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.6; }
+.cp-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px 18px; padding: 10px 14px; border-radius: 14px; background: var(--paper); font-size: 1.08rem; font-variant-numeric: tabular-nums; }
+.cp-liste b { color: var(--accent-ink); }
+.cp-champs-ligne { flex-direction: row; }
+.cp-sol-at { display: flex; align-items: center; gap: 12px; }
+.cp-sol-at .cp-at { width: 80px; height: 80px; }
+.ph-choix button .atm-t sup { font-size: .62em; }
+
+/* ---------- Module 3 : classification fournie dans l'énoncé (symboles seuls) ---------- */
+.cp-classif { display: grid; grid-template-columns: 22px repeat(8, minmax(0, 40px)); gap: 3px; justify-content: start; margin-top: 10px; font-variant-numeric: tabular-nums; }
+.cp-classif-num { display: flex; align-items: center; justify-content: center; font-size: .78rem; font-weight: 700; color: var(--ink-2); }
+.cp-classif-c { display: flex; align-items: center; justify-content: center; height: 34px; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--sheet); font-weight: 800; font-size: 1rem; }
