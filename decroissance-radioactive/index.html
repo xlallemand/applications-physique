@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Désintégration Radioactive — Simulation</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link rel="stylesheet" href="../assets/theme.css">
 <link rel="stylesheet" href="../assets/sommaire.css">
 <script src="../assets/sommaire.js"></script>
@@ -215,6 +214,15 @@
 
   .panel-body { padding: 18px 22px; }
   #chart-wrap { position: relative; width: 100%; height: 230px; }
+  #decay-chart { display: block; width: 100%; height: 100%; touch-action: pan-y; }
+  /* Bulle d'information au survol d'un point du graphique */
+  .chart-bulle {
+    position: absolute; pointer-events: none; white-space: nowrap;
+    background: #ffffff; border: 1px solid rgba(0,0,0,0.12); border-radius: 6px;
+    padding: 6px 9px; font-size: 12px; line-height: 1.4; color: var(--text-muted);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .chart-bulle b { color: var(--text); }
 
   /* ─── Légende graphique ─── */
   .chart-legend {
@@ -640,77 +648,137 @@ function updateStats() {
 /* ═══════════════════════════════════════════════════
    Graphique
 ═══════════════════════════════════════════════════ */
+/* Graphique tracé à la main sur le canvas (aucune bibliothèque externe, fonctionne hors ligne).
+   L'objet « chart » garde la même forme que précédemment :
+   chart.data.labels, chart.data.datasets[0|1].data, chart.options.scales.y.max, chart.update(). */
 function initChart() {
-  const ctx = document.getElementById('decay-chart').getContext('2d');
+  const canvas = document.getElementById('decay-chart');
+  const wrap   = document.getElementById('chart-wrap');
   if (chart) chart.destroy();
-  // Police du thème pour les textes du graphique
-  Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
-  chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: [0],
-      datasets: [
-        {
-          label: 'Simulation',
-          data: [currentN0],
-          borderColor: '#c0392b',
-          backgroundColor: 'rgba(192,57,43,0.06)',
-          borderWidth: 2,
-          pointRadius: 2,         /* points simulation réduits */
-          pointBackgroundColor: '#c0392b',
-          fill: true,
-          tension: 0.3
-        },
-        {
-          label: 'Théorique',
-          data: [currentN0],
-          borderColor: '#16a34a',
-          borderWidth: 3,
-          borderDash: [8, 5],     /* pointillés */
-          pointRadius: 0,
-          fill: false,
-          tension: 0
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 180 },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#ffffff',
-          borderColor: 'rgba(0,0,0,0.12)',
-          borderWidth: 1,
-          titleColor: '#1a1a18',
-          bodyColor: '#4e4b47',
-          titleFont: { family: 'Space Mono', size: 12 },
-          bodyFont:  { family: 'Space Mono', size: 12 },
-          callbacks: {
-            title: items => 't = ' + items[0].label + ' s',
-            label: c => (c.datasetIndex === 0 ? 'N mesuré : ' : 'N théorique : ') + Math.round(c.raw)
-          }
-        }
-      },
-      scales: {
-        x: {
-          title: { display: true, text: 'Temps t (secondes)', color: '#4e4b47',
-                   font: { family: 'DM Sans', size: 14 } },
-          ticks: { color: '#4e4b47', font: { family: 'Space Mono', size: 11 },
-                   maxTicksLimit: 14, autoSkip: true },
-          grid: { color: 'rgba(0,0,0,0.06)' }
-        },
-        y: {
-          min: 0,
-          title: { display: true, text: 'N (noyaux)', color: '#4e4b47',
-                   font: { family: 'DM Sans', size: 14 } },
-          ticks: { color: '#4e4b47', font: { family: 'Space Mono', size: 11 } },
-          grid: { color: 'rgba(0,0,0,0.06)' }
-        }
-      }
+
+  // Bulle d'information au survol (souris ou doigt)
+  const bulle = document.createElement('div');
+  bulle.className = 'chart-bulle';
+  bulle.hidden = true;
+  wrap.appendChild(bulle);
+
+  const COUL_SIM = '#c0392b', COUL_TH = '#16a34a';
+  const COUL_TXT = '#4e4b47', COUL_GRILLE = 'rgba(0,0,0,0.06)';
+  let survol = -1;        // indice du point survolé (-1 : aucun)
+  let zone = null;        // zone de tracé : { g, d, h, b } en pixels CSS
+
+  // Pas « rond » (1, 2, 5 × 10^n) pour obtenir au plus n graduations
+  function pasRond(etendue, n) {
+    const brut = etendue / n, p = Math.pow(10, Math.floor(Math.log10(brut)));
+    const r = brut / p;
+    return (r <= 1 ? 1 : r <= 2 ? 2 : r <= 5 ? 5 : 10) * p;
+  }
+
+  function dessiner() {
+    const L = wrap.clientWidth, H = wrap.clientHeight;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(L * dpr); canvas.height = Math.round(H * dpr);
+    const c = canvas.getContext('2d');
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.clearRect(0, 0, L, H);
+
+    const police = getComputedStyle(document.body).fontFamily;
+    const labels = obj.data.labels, sim = obj.data.datasets[0].data, th = obj.data.datasets[1].data;
+    const xMax = Math.max(1, labels[labels.length - 1]);
+    const yMax = obj.options.scales.y.max || Math.max(...sim, 1);
+    const pasY = pasRond(yMax, 10), pasX = Math.max(1, Math.ceil(pasRond(xMax, 13)));
+
+    // Largeur des nombres de l'axe vertical pour placer la zone de tracé
+    c.font = '11px ' + police;
+    const largY = c.measureText(String(Math.floor(yMax / pasY) * pasY)).width;
+    zone = { g: 28 + largY + 8, d: L - 8, h: 8, b: H - 46 };
+    const X = x => zone.g + (x / xMax) * (zone.d - zone.g);
+    const Y = y => zone.b - (y / yMax) * (zone.b - zone.h);
+
+    // Grille et graduations
+    c.lineWidth = 1; c.strokeStyle = COUL_GRILLE; c.fillStyle = COUL_TXT;
+    c.textAlign = 'right'; c.textBaseline = 'middle';
+    for (let y = 0; y <= yMax + 1e-9; y += pasY) {
+      c.beginPath(); c.moveTo(zone.g, Y(y)); c.lineTo(zone.d, Y(y)); c.stroke();
+      c.fillText(String(Math.round(y)), zone.g - 6, Y(y));
     }
-  });
+    c.textAlign = 'center'; c.textBaseline = 'top';
+    for (let x = 0; x <= xMax + 1e-9; x += pasX) {
+      c.beginPath(); c.moveTo(X(x), zone.h); c.lineTo(X(x), zone.b); c.stroke();
+      c.fillText(String(x), X(x), zone.b + 6);
+    }
+
+    // Titres des axes
+    c.font = '14px ' + police;
+    c.fillText('Temps t (secondes)', (zone.g + zone.d) / 2, H - 20);
+    c.save(); c.translate(12, (zone.h + zone.b) / 2); c.rotate(-Math.PI / 2);
+    c.textBaseline = 'middle'; c.fillText('N (noyaux)', 0, 0); c.restore();
+
+    // Courbe de simulation : aire légèrement teintée, trait plein et points
+    c.beginPath();
+    labels.forEach((x, i) => i ? c.lineTo(X(x), Y(sim[i])) : c.moveTo(X(x), Y(sim[i])));
+    c.lineTo(X(labels[labels.length - 1]), Y(0)); c.lineTo(X(labels[0]), Y(0)); c.closePath();
+    c.fillStyle = 'rgba(192,57,43,0.06)'; c.fill();
+    c.beginPath();
+    labels.forEach((x, i) => i ? c.lineTo(X(x), Y(sim[i])) : c.moveTo(X(x), Y(sim[i])));
+    c.strokeStyle = COUL_SIM; c.lineWidth = 2; c.lineJoin = 'round'; c.stroke();
+    c.fillStyle = COUL_SIM;
+    labels.forEach((x, i) => { c.beginPath(); c.arc(X(x), Y(sim[i]), i === survol ? 4 : 2, 0, 2 * Math.PI); c.fill(); });
+
+    // Courbe théorique en pointillés
+    c.beginPath();
+    labels.forEach((x, i) => i ? c.lineTo(X(x), Y(th[i])) : c.moveTo(X(x), Y(th[i])));
+    c.strokeStyle = COUL_TH; c.lineWidth = 3; c.setLineDash([8, 5]); c.stroke(); c.setLineDash([]);
+
+    // Bulle du point survolé
+    if (survol >= 0 && survol < labels.length) {
+      bulle.innerHTML = '<b>t = ' + labels[survol] + ' s</b><br>N mesuré : ' + Math.round(sim[survol])
+        + '<br>N théorique : ' + Math.round(th[survol]);
+      bulle.hidden = false;
+      const px = X(labels[survol]), py = Y(sim[survol]);
+      const bl = bulle.offsetWidth, bh = bulle.offsetHeight;
+      bulle.style.left = Math.min(Math.max(px + 10 + bl > L ? px - 10 - bl : px + 10, 0), L - bl) + 'px';
+      bulle.style.top  = Math.min(Math.max(py - bh / 2, 0), H - bh) + 'px';
+    } else bulle.hidden = true;
+  }
+
+  // Point le plus proche horizontalement du pointeur
+  function surPointeur(e) {
+    if (!zone) return;
+    const r = canvas.getBoundingClientRect(), x = e.clientX - r.left;
+    const labels = obj.data.labels, xMax = Math.max(1, labels[labels.length - 1]);
+    let i = -1;
+    if (x >= zone.g - 10 && x <= zone.d + 10) {
+      const t = (x - zone.g) / (zone.d - zone.g) * xMax;
+      let ecart = Infinity;
+      labels.forEach((v, k) => { if (Math.abs(v - t) < ecart) { ecart = Math.abs(v - t); i = k; } });
+    }
+    if (i !== survol) { survol = i; dessiner(); }
+  }
+  // Au doigt, la bulle reste affichée après le toucher (le relâchement déclenche aussi pointerleave)
+  function sortie(e) { if (e.pointerType !== 'touch' && survol !== -1) { survol = -1; dessiner(); } }
+  canvas.addEventListener('pointermove', surPointeur);
+  canvas.addEventListener('pointerdown', surPointeur);
+  canvas.addEventListener('pointerleave', sortie);
+
+  // Redessin quand la place disponible change
+  const obs = new ResizeObserver(() => dessiner());
+  obs.observe(wrap);
+
+  const obj = {
+    data: { labels: [0], datasets: [{ data: [currentN0] }, { data: [currentN0] }] },
+    options: { scales: { y: { max: currentN0 } } },
+    update() { survol = -1; dessiner(); },
+    destroy() {
+      obs.disconnect();
+      canvas.removeEventListener('pointermove', surPointeur);
+      canvas.removeEventListener('pointerdown', surPointeur);
+      canvas.removeEventListener('pointerleave', sortie);
+      bulle.remove();
+    }
+  };
+  chart = obj;
+  dessiner();
 }
 
 function addChartPoint(t) {
