@@ -58,7 +58,7 @@ Règle du professeur pour **toute page de simulation, d'animation ou de manipula
 - **Bouton plein écran commun** (`assets/plein-ecran.js`, `PLEIN`, charte §4 « Page de manipulation »).
 - **Manipulation libre** : chaque paramètre se règle à tout moment, rien n'est verrouillé par une étape ; les grandeurs utiles s'affichent en continu ; ce que l'élève doit trouver se masque par une option (« Montrées / À trouver »).
 - **Situations avec questions** : les étapes que décrit un prompt deviennent des **défis « À essayer »** (pastilles numérotées, bouton « Essayer » qui prépare la situation sans la résoudre), cochés tout seuls dès que l'état du simulateur les réalise, **dans n'importe quel ordre** ; les questions d'une situation (QCM, valeur à lire, phrase à compléter) s'affichent dans le panneau. Les parties d'une activité sont des onglets accessibles à tout moment.
-- Bilan « ✍ Complète ton cours » ouvrable à tout moment depuis le panneau ; page marquée faite quand tous les défis sont réussis ou à l'affichage du bilan.
+- **Bilan** (ce qu'il faut retenir) ouvrable à tout moment depuis le panneau, intitulé « Bilan », **jamais « ✍ Complète ton cours »** (décision du professeur, même si `atome-ions/` ou `docs/prompts-2nde/` l'écrivent ainsi) ; page marquée faite quand tous les défis sont réussis ou à l'affichage du bilan.
 - Animations : Lecture / Pause, vitesse (× 0,5, × 1, × 2), « ↺ Recommencer », « Pas à pas » quand c'est utile ; `prefers-reduced-motion: reduce` : pas d'animation automatique, avance par étapes.
 - Tout glisser a son complément au doigt fin (boutons fléchés 58 × 50 px, ou « toucher l'objet puis la cible ») ; rien ne dépend du survol ; cibles de 44 px au moins.
 - Vérification : `document.documentElement.scrollHeight <= innerHeight` à 1280 × 720, 1280 × 650 et 390 × 844, dans chaque état (début, défis en cours, tous réussis, messages affichés), et aucun bloc dont le contenu dépasse.
@@ -152,6 +152,7 @@ Ordre conseillé : `outils-communs.md` d'abord ; puis les chapitres dans l'ordre
 
 - Les prompts résument les cours ; les sessions lisent elles-mêmes énoncés et corrections des exercices.
 - Modules situés dans une autre application : pages ↗ du sommaire, comptées dans l'avancement (§6).
+- Simulations : le bilan s'intitule « Bilan », jamais « ✍ Complète ton cours ».
 - TP : non intégrés. Flashcards : plus tard, à part.
 - Simulateurs : pages du chapitre, sauf les applications à part demandées : bilan des forces, travail d'une force (remplace le simulateur de `energie-cinetique/`), gaz parfait, modèle de l'œil, et `decroissance-radioactive/` mise à jour sur place.
 - `ph/` : recopiée dans « Transformations acide-base », retirée du portail puis **supprimée** (chapitre 4). Avant, `outils-communs.md` retire toute dépendance : `acides-bases/` et `radioactivite/` passent de `ph/modules/eq.js` à `EQ`, `puissance-active/` reçoit sa propre copie du moteur `ph/modules/ph.js`.
